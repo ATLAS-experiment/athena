@@ -15,10 +15,9 @@ def MuonTrackingGeometryTestCfg(flags, name = "ActsMuonTrackingGeometryTest", **
     result.getEventAlgo("MuonTruthSegmentMaker").useOnlyMuonHits = False
     result.getEventAlgo("TruthMuonMakerAlg").pdgIds=[13,998,999]
 
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+    result.merge(ActsTrackingGeometrySvcCfg(flags))
    
-    kwargs.setdefault("TrackingGeometryTool", result.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
-
     the_alg = CompFactory.ActsTrk.ActsMuonTrackingGeometryTest(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
 

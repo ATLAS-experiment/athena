@@ -202,5 +202,18 @@
         "plotVertexParameters" : false,
         "OfflineVtxKey" : "",
         "TruthVtxKey" : ""
+    },
+    "TrackSeeds" : {
+        "enabled" : true,
+        "TestType"  : "Offline",
+        "RefType"   : "Truth",
+        "OfflineTrkKey" : "_TRKSEEDCOLLNAME_",
+        "MatchingType"  : "TruthMatch",
+        "plotTechnicalEfficiencies" : true,
+        "useActsSiMeasurements" : true,
+        "plotDuplicateRates"  : true,
+        "plotVertexParameters" : false,
+        "OfflineVtxKey" : "",
+        "TruthVtxKey" : ""
     }
 }

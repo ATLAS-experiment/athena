@@ -20,7 +20,7 @@
 #include "xAODEgamma/ElectronContainer.h"
 #include "xAODEgamma/PhotonContainer.h"
 #include "MCTruthClassifier/MCTruthClassifier.h"
-#include "MCTruthClassifier/MCTruthClassifierDefs.h"
+#include "TruthUtils/TruthClasses.h"
 
 #define CHECK( ARG )                                  \
 do {                                                  \

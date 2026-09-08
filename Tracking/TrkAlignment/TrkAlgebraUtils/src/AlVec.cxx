@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/StatusCode.h"
@@ -10,8 +10,6 @@
 
 #include <cmath>
 #include <cstdint>
-#include <exception>
-#include <fstream>
 #include <iomanip>
 
 namespace{
@@ -319,15 +317,17 @@ void AlVec::SetPathTxt(const std::string &path)
 }
 
 //______________________________________________________________________________
-StatusCode AlVec::Write(const std::string &filename, bool binary, double scale,
-                        std::map<int,unsigned long long> moduleIndexMap, float version)
+StatusCode AlVec::Write(std::string_view filename, bool binary, double scale,
+                        const std::map<int,unsigned long long> & moduleIndexMap, float version)
 {
   std::ofstream outvec;
   int32_t  io_size=m_size;
 //  int32_t  io_scale=scale;
 
   if(binary) {
-    outvec.open((m_pathbin+filename).c_str(), std::ios::binary);
+    std::string fullName{m_pathbin};
+    fullName.append(filename);
+    outvec.open(fullName, std::ios::binary);
     if(outvec.fail())
       return StatusCode::FAILURE;
     outvec.write(charAddress(io_size), sizeof (io_size));
@@ -335,7 +335,9 @@ StatusCode AlVec::Write(const std::string &filename, bool binary, double scale,
     outvec.write(charAddress(version), sizeof (version));
   }
   else {
-    outvec.open((m_pathtxt+filename).c_str());
+    std::string fullName{m_pathtxt};
+    fullName.append(filename);
+    outvec.open(fullName);
     if(outvec.fail())
       return StatusCode::FAILURE;
     outvec.setf(std::ios::fixed);
@@ -348,10 +350,9 @@ StatusCode AlVec::Write(const std::string &filename, bool binary, double scale,
 
   int64_t ielem=0;
   double  velem=0;
-  std::map<int,unsigned long long>::iterator itcod;
 
   for( int i=0; i<m_size; i++) {
-    itcod=moduleIndexMap.find(i/6);
+    auto itcod=moduleIndexMap.find(i/6);
     if (itcod != moduleIndexMap.end()) {
       ielem = (itcod->second);
     }
@@ -370,46 +371,19 @@ StatusCode AlVec::Write(const std::string &filename, bool binary, double scale,
 }
 
 //______________________________________________________________________________
-StatusCode AlVec::WritePartial(const std::string &filename, bool binary, double scale,
-			       std::map<int,unsigned long long> moduleIndexMap, float version)
+StatusCode AlVec::WritePartial(const std::string_view filename, bool binary, double scale,
+			       const std::map<int,unsigned long long> & moduleIndexMap, float version)
 {
   std::ofstream outvec;
-
-  /*
-    int32_t  io_size=m_size;
-    //  int32_t  io_scale=scale;
-    
-    if(binary) {
-    outvec.open((m_pathbin+filename).c_str(), std::ios::binary);
-    if(outvec.fail())
-    return StatusCode::FAILURE;
-    outvec.write(charAddress(io_size), sizeof (io_size));
-    outvec.write(charAddress(scale), sizeof (scale));
-    outvec.write(charAddress(version), sizeof (version));
-    
-    }
-    else {
-    outvec.open((m_pathtxt+filename).c_str());
-    if(outvec.fail())
-    return StatusCode::FAILURE;
-    outvec.setf(std::ios::fixed);
-    outvec.setf(std::ios::showpoint);
-    outvec.precision(6);
-    outvec << "DoF: " << std::setw(6) << m_size << std::endl;
-    outvec << "scale: " << std::setw(18) << scale << std::endl;
-    outvec << "AlVec version: " << std::setw(6) << version << std::endl;
-    }
-  */
   
   StatusCode sc=InitializeOutputVector(filename,binary,scale,version,outvec);
   if (sc!=StatusCode::SUCCESS) return StatusCode::FAILURE;
 
   int64_t ielem=0;
   double velem=0;
-  std::map<int,unsigned long long>::iterator itcod;
 
   for( int i=0; i<m_size; i++) {
-    itcod=moduleIndexMap.find(i);
+    auto itcod=moduleIndexMap.find(i);
     if (itcod != moduleIndexMap.end())
       ielem = (itcod->second);
 
@@ -427,8 +401,8 @@ StatusCode AlVec::WritePartial(const std::string &filename, bool binary, double 
 }
 
 //______________________________________________________________________________
-StatusCode AlVec::WritePartial(const std::string &filename, bool binary, double scale,
-			       std::map<int,std::string> moduleNameMap, float version)
+StatusCode AlVec::WritePartial(std::string_view filename, bool binary, double scale,
+			       const std::map<int,std::string> & moduleNameMap, float version)
 {
   std::ofstream outvec;
   
@@ -437,10 +411,9 @@ StatusCode AlVec::WritePartial(const std::string &filename, bool binary, double 
   
   std::string elem="";
   double velem=0;
-  std::map<int,std::string>::iterator itcod;
   
   for( int i=0; i<m_size; i++) {
-    itcod=moduleNameMap.find(i);
+    auto itcod=moduleNameMap.find(i);
     if (itcod != moduleNameMap.end()) {
       elem = (itcod->second);
     }
@@ -459,13 +432,13 @@ StatusCode AlVec::WritePartial(const std::string &filename, bool binary, double 
 }
 
 //________________________________________________________________________
-StatusCode AlVec::InitializeOutputVector(const std::string& filename, bool binary, double scale, 
+StatusCode AlVec::InitializeOutputVector(std::string_view filename, bool binary, double scale, 
 					 float version, std::ofstream& outvec)
 {
   int32_t  io_size=m_size;
   
   if(binary) {
-    outvec.open((m_pathbin+filename).c_str(), std::ios::binary);
+    outvec.open(m_pathbin.append(filename), std::ios::binary);
     if(outvec.fail()) 
       return StatusCode::FAILURE;
     outvec.write(charAddress(io_size), sizeof (io_size));
@@ -474,7 +447,7 @@ StatusCode AlVec::InitializeOutputVector(const std::string& filename, bool binar
     
   }
   else {
-    outvec.open((m_pathtxt+filename).c_str());
+    outvec.open(m_pathtxt.append(filename));
     if(outvec.fail()) 
       return StatusCode::FAILURE;
     outvec.setf(std::ios::fixed);
@@ -497,7 +470,7 @@ StatusCode AlVec::ReadPartial(const std::string &filename, double &scale,
     return StatusCode::FAILURE;
   }
 
-  std::ifstream invec((m_pathbin+filename).c_str(), std::ios::binary);
+  std::ifstream invec((m_pathbin+filename), std::ios::binary);
   if(invec.fail()) {
     //std::cout<<"ifstream failed"<<std::endl;
     return StatusCode::FAILURE;
@@ -537,7 +510,7 @@ StatusCode AlVec::ReadPartial(const std::string &filename, double &scale,
 
 //______________________________________________________________________________
 StatusCode AlVec::CheckVecVersion(const std::string& filename, bool &StdUnits){
-  std::ifstream invec((filename).c_str(), std::ios::binary);
+  std::ifstream invec((filename), std::ios::binary);
   if(invec.fail())
     return StatusCode::FAILURE;
 
@@ -574,7 +547,7 @@ StatusCode AlVec::Read(const std::string &filename, double &scale,
     return StatusCode::FAILURE;
   }
 
-  std::ifstream invec((m_pathbin+filename).c_str(), std::ios::binary);
+  std::ifstream invec(m_pathbin+filename, std::ios::binary);
   if(invec.fail())
     return StatusCode::FAILURE;
 
@@ -616,7 +589,7 @@ StatusCode AlVec::Read(const std::string &filename, double &scale,
 StatusCode AlVec::ReadProjected(const std::string &filename, double &scale,
                                 std::map<int,unsigned long long> &modmap, float &version)
 {
-  std::ifstream invec((m_pathbin+filename).c_str(), std::ios::binary);
+  std::ifstream invec(m_pathbin+filename, std::ios::binary);
   if(invec.fail())
     return StatusCode::FAILURE;
 
@@ -652,7 +625,7 @@ StatusCode AlVec::ReadProjected(const std::string &filename, double &scale,
 
 //______________________________________________________________________________
 StatusCode AlVec::ReadScalaPack(const std::string &filename){
-  std::ifstream eigenvec(filename.c_str(), std::ios::binary);
+  std::ifstream eigenvec(filename, std::ios::binary);
   if(eigenvec.fail())
     return StatusCode::FAILURE;
 
@@ -678,7 +651,7 @@ StatusCode AlVec::WriteEigenvalueVec(const std::string &filename, bool binary){
   int32_t  io_size=m_size;
 
   if(binary) {
-    outvec.open((m_pathbin+filename).c_str(), std::ios::binary);
+    outvec.open(m_pathbin+filename, std::ios::binary);
 
     if(outvec.fail())
       return StatusCode::FAILURE;
@@ -686,7 +659,7 @@ StatusCode AlVec::WriteEigenvalueVec(const std::string &filename, bool binary){
     outvec.write(charAddress(io_size), sizeof (io_size));
   }
   else{
-    outvec.open((m_pathtxt+filename).c_str());
+    outvec.open(m_pathtxt+filename);
 
     if(outvec.fail())
       return StatusCode::FAILURE;

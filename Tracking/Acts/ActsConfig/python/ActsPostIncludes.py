@@ -1,31 +1,28 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 def PersistifyActsEDMCfg(flags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    if flags.Acts.EDM.PersistifyClusters or flags.Acts.EDM.PersistifySpacePoints:
-        from ActsConfig.ActsPersistificationConfig import PersistifyClusters
-        acc.merge(PersistifyClusters(flags,
-                                     pixelClusterCollections=['ITkPixelClusters'],
-                                     stripClusterCollections=['ITkStripClusters'],
-                                     hgtdClusterCollections=None if not flags.Reco.EnableHGTDExtension else ['HGTD_Clusters']))
+    from ActsConfig.ActsPersistificationConfig import PersistifyClusters
+    acc.merge(PersistifyClusters(flags,
+                                 pixelClusterCollections=['ITkPixelClusters'],
+                                 stripClusterCollections=['ITkStripClusters'],
+                                 hgtdClusterCollections=None if not flags.Reco.EnableHGTDExtension else ['HGTD_Clusters']))
 
-    if flags.Acts.EDM.PersistifySpacePoints:
-        from ActsConfig.ActsPersistificationConfig import PersistifySpacePoints
-        acc.merge(PersistifySpacePoints(flags,
-                                        pixelSpacePointCollections=['ITkPixelSpacePoints'],
-                                        stripSpacePointCollections=['ITkStripSpacePoints', 'ITkStripOverlapSpacePoints']))
+    from ActsConfig.ActsPersistificationConfig import PersistifySpacePoints
+    acc.merge(PersistifySpacePoints(flags,
+                                    pixelSpacePointCollections=['ITkPixelSpacePoints'],
+                                    stripSpacePointCollections=['ITkStripSpacePoints', 'ITkStripOverlapSpacePoints']))
 
-    if flags.Acts.EDM.PersistifyTracks:
-        trackPrefixes = ['Acts', 'ActsResolved',
-                         'LargeD0', 'LargeD0Resolved',
-                         'ActsConversion', 'ActsConversionResolved',
-                         'ActsHeavyIon', 'ActsHeavyIonResolved']
-        from ActsConfig.ActsPersistificationConfig import PersistifyTracks
-        acc.merge(PersistifyTracks(flags,
-                                   extensions=trackPrefixes))
+    trackPrefixes = ['Acts', 'ActsResolved',
+                     'ActsLargeRadius', 'ActsLargeRadiusResolved',
+                     'ActsConversion', 'ActsConversionResolved',
+                     'ActsHeavyIon', 'ActsHeavyIonResolved']
+    from ActsConfig.ActsPersistificationConfig import PersistifyTracks
+    acc.merge(PersistifyTracks(flags,
+                               extensions=trackPrefixes))
 
     from ActsConfig.ActsPersistificationConfig import PersistifyTrackParticles
     acc.merge(PersistifyTrackParticles(flags,

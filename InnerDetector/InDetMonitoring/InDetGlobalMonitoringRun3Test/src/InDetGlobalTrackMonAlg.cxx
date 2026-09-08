@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -57,7 +57,7 @@ StatusCode InDetGlobalTrackMonAlg::fillHistograms( const EventContext& ctx ) con
   ATH_MSG_DEBUG("Filling InDetGlobalTrackMonAlg");
   
   // For histogram naming
-  auto trackGroup = getGroup("Track");
+  const auto & trackGroup = getGroup("Track");
   
   // m_manager->lumiBlockNumber() // not used anymore, now use
   int lb       = GetEventInfo(ctx)->lumiBlock();

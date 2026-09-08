@@ -19,4 +19,4 @@ atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 # Test(s) in the package:
 atlas_add_test( SCT_GMConfig_test
                 SCRIPT test/SCT_GMConfig_test.py
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )

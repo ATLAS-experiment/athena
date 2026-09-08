@@ -11,6 +11,7 @@
 #include "xAODMuon/MuonSegment.h"
 #include "xAODBase/IParticle.h"
 
+#include <span>
 
 namespace Trk {
     class Track;
@@ -58,7 +59,7 @@ namespace MuonR4{
              *              associated to dead modules are ignored
              *  @param segments: List of segments from which the summary shall be created*/
             virtual HitSummary makeSummary(const EventContext& ctx,
-                                           const std::vector<const xAOD::MuonSegment*>& segments) const = 0;
+                                           std::span<const xAOD::MuonSegment* const> segments) const = 0;
             /** @brief Creates a summary from a Trk::Track object produced by the legacy reconstruction software.
              *         The associated hits are categorized the same way as for the ActsTrk::Tracks 
              *         (Serves purely validation purposes)

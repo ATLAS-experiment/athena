@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -45,7 +45,7 @@ class SCT_PrepDataToxAOD : public AthReentrantAlgorithm {
 
  public:
   // Constructor with parameters:
-  SCT_PrepDataToxAOD(const std::string& name, ISvcLocator* pSvcLocator);
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
   // Basic algorithm methods:
   virtual StatusCode initialize() override;
@@ -56,17 +56,21 @@ class SCT_PrepDataToxAOD : public AthReentrantAlgorithm {
 
  private:
 
-  void addSDOInformation(xAOD::TrackMeasurementValidation* xprd,
-                         const InDet::SCT_Cluster* prd,
-                         const InDetSimDataCollection* sdoCollection) const;
+  /// Decorate the cluster with SDO truth information and return, per RDO,
+  /// the uniqueIDs of the truth particles that deposited charge in it.
+  std::vector<std::vector<int>> addSDOInformation(xAOD::TrackMeasurementValidation* xprd,
+                                                  const InDet::SCT_Cluster* prd,
+                                                  const InDetSimDataCollection* sdoCollection) const;
 
 
   void addSiHitInformation(xAOD::TrackMeasurementValidation* xprd,
                            const InDet::SCT_Cluster* prd,
-                           const std::vector<const SiHit*>* siHits) const;
+                           const std::vector<const SiHit*>* siHits,
+                           const std::vector<std::vector<int>>& sdoTruthUIDs) const;
 
   void findAllHitsCompatibleWithCluster(const InDet::SCT_Cluster* prd,
                                         const std::vector<const SiHit*>* siHits,
+                                        const std::vector<std::vector<int>>& sdoTruthUIDs,
                                         std::vector<SiHit>& matchingHits) const;
 
   void addRDOInformation(xAOD::TrackMeasurementValidation*,
@@ -93,6 +97,9 @@ class SCT_PrepDataToxAOD : public AthReentrantAlgorithm {
   BooleanProperty m_writeRDOinformation{this, "WriteRDOinformation", true};
   BooleanProperty m_writeSDOs{this, "WriteSDOs", false};
   BooleanProperty m_writeSiHits{this, "WriteSiHits", false};
+  BooleanProperty m_useSiHitsGeometryMatching{this, "UseSiHitsGeometryMatching", true,
+    "match SiHits to clusters by geometry (+/-1 strip) in union with the SDO "
+    "truth-uniqueID intersection; false = SDO intersection only"};
 
   // --- private members
   mutable std::atomic<unsigned int> m_haveTruthLink {};

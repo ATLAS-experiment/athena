@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "DefectsEmulatorBase.h"
 #include "TH2.h"
@@ -23,7 +23,7 @@ namespace InDet{
   {}
 
   StatusCode DefectsEmulatorBase::initializeBase(unsigned int wafer_hash_max){
-     ATH_CHECK( m_trackingGeometryTool.retrieve( DisableTool{m_noiseProbability.empty()} ));
+     ATH_CHECK(m_trackingGeometrySvc.retrieve());
      if (!m_noiseProbability.value().empty()) {
         if (m_modulePattern.value().size() != m_noiseProbability.value().size()) {
            ATH_MSG_FATAL("Number of module patterns and noise probabilities  differs: "
@@ -47,7 +47,7 @@ namespace InDet{
         }
         m_noiseParamIdx.resize(wafer_hash_max, static_cast<unsigned short>(m_noiseProbability.size()));
         m_maxNShape=0;
-        std::shared_ptr<const Acts::TrackingGeometry> tracking_geometry = m_trackingGeometryTool->trackingGeometry();
+        const auto& tracking_geometry = m_trackingGeometrySvc->trackingGeometry();
 
         ModuleIdentifierMatchUtil::ModuleData_t module_data;
         std::vector<unsigned int> module_pattern_idx;
@@ -61,31 +61,19 @@ namespace InDet{
                                  n_no_matching_pattern, n_detector_elements_of_correct_type; };
         Counter counter {0u,0u,0u,0u,0u};
         tracking_geometry->visitSurfaces([&counter, &module_data, &module_pattern_idx, this](const Acts::Surface *surface_ptr) {
-           if (!surface_ptr) return;
-           const Acts::Surface &surface = *surface_ptr;
-           const Acts::SurfacePlacementBase*detector_element = surface.surfacePlacement();
-           if (detector_element) {
-              const ActsDetectorElement *acts_detector_element = dynamic_cast<const ActsDetectorElement*>(detector_element);
-              if (acts_detector_element) {
-                 if (setModuleData(*acts_detector_element, module_data)) {
-                    ModuleIdentifierMatchUtil::moduleMatches(m_modulePattern.value(), module_data, module_pattern_idx);
-                    if (module_pattern_idx.empty()) {
-                       ++counter.n_no_matching_pattern;
-                    }
-                    else {
-                       m_noiseParamIdx.at(acts_detector_element->identifyHash()) = module_pattern_idx.front();
-                    }
-                    ++counter.n_detector_elements_of_correct_type;
-                 }
-              }
-              else {
-                 ++counter.n_wrong_type;
-              }
-              ++counter.n_detector_elements;
-           }
-           else {
-              ++counter.n_missing_detector_elements;
-           }
+           
+         const auto *acts_detector_element = getActsDetectorElement(surface_ptr);
+              
+         if (!acts_detector_element) return;
+         if (setModuleData(*acts_detector_element, module_data)) {
+               ModuleIdentifierMatchUtil::moduleMatches(m_modulePattern.value(), module_data, module_pattern_idx);
+               if (module_pattern_idx.empty()) {
+                  ++counter.n_no_matching_pattern;
+               } else {
+                  m_noiseParamIdx.at(acts_detector_element->identifyHash()) = module_pattern_idx.front();
+               }
+            ++counter.n_detector_elements_of_correct_type;
+         }
         }, true /*sensitive surfaces*/);
         ATH_MSG_DEBUG("Visited surfaces with " << counter.n_detector_elements << " / "
                       << (counter.n_missing_detector_elements + counter.n_detector_elements)
@@ -107,6 +95,7 @@ namespace InDet{
               ATH_MSG_FATAL("Noise shape integral for pattern " << pattern_i << " not 1. but " << scale);
               return StatusCode::FAILURE;
            }
+           //coverity[DIVIDE_BY_ZERO:FALSE]
            scale = 1./scale;
            double sum =0.;
            for (double value : shape) {

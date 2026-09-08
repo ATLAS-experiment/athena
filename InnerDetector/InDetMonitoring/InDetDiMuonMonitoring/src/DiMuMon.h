@@ -1,19 +1,19 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DiMuMon_H
 #define DiMuMon_H
 
-#include <vector>
-#include <map>
+
 
 #include "AthenaMonitoring/AthenaMonManager.h"
 #include "AthenaMonitoring/ManagedMonitorToolBase.h"
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODMuon/MuonContainer.h"
-
+#include <vector>
+#include <map>
 
 class TH1F;
 class TH2F;
@@ -80,7 +80,7 @@ class DiMuMon : public ManagedMonitorToolBase
 
   TH1F* m_chi2{};
   TH1F* m_stat{};
-  std::map< std::string, TH1F* > m_invmass;
+  std::map< std::string, TH1F*, std::less<> > m_invmass;
   std::map< std::string, std::map< std::string, TH2F*> > m_2DinvmassVSx;
   std::map< std::string, std::map< std::string, TH1F*> > m_invmassVSx;
   std::map< std::string, std::map< std::string, TH1F*> > m_widthVSx;

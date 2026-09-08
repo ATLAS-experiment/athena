@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -8,7 +8,6 @@
 
 // Trk include
 #include "TrkDetDescrTestTools/MaterialMapper.h"
-#include "TrkDetDescrUtils/MaterialAssociationType.h"
 #include "TrkGeometry/AssociatedMaterial.h"
 #include "TrkGeometry/TrackingVolume.h"
 #include "TrkGeometry/CylinderLayer.h"
@@ -20,48 +19,9 @@
 Trk::MaterialMapper::MaterialMapper(const std::string& t, const std::string& n, const IInterface* p)
 : AthAlgTool(t,n,p),
   m_incidentSvc("IncidentSvc", n),
-  m_histSvc("THistSvc", n),
-  m_materialAssociationType(1),
-  m_maxMappingEvents(100000),
-  m_processedEvents(0),
-  m_totalMaterialTree("TotalMaterial"),
-  m_validationTree(nullptr),
-  m_validationTreeName("MaterialMapper"),
-  m_validationTreeDescription("Material Effects Updator information"),
-  m_validationTreeFolder("/val/MaterialMapper"),
-  m_materialSteps(0),
-  m_averageEta{}, m_averagePhi{}, m_mappedPath{}, m_mappedPathInX0{},
-  m_mappedPathInL0{}, m_mappedPathRho{}, m_mappedPathZARho{},
-  m_unmappedPathInX0{},
-  m_volumeValidation(true),
-  m_volumeTreePrefix("VolumeMaterial"),
-  m_layerValidation(true),
-  m_layerTreePrefix("LayerMaterial_"),
-  m_surfaceValidation(true),
-  m_surfaceTreePrefix("SurfaceMaterial_")
+  m_histSvc("THistSvc", n)
 {
     declareInterface<IMaterialMapper>(this);
-
-    // The maximum mapping events to control the output file size
-    declareProperty("MaximumMappingEvents",       m_maxMappingEvents);
-    // specification for the Validation Tree
-    declareProperty("ValidationTreeName",         m_validationTreeName);
-    declareProperty("ValidationTreeDescription",  m_validationTreeDescription);
-    declareProperty("ValidationTreeFolder",       m_validationTreeFolder);
-    // the total material statistics              
-    declareProperty("TotalMaterialTreeName",      m_totalMaterialTree);
-    // declare the association type               
-    declareProperty("MaterialAssociationType",    m_materialAssociationType);
-    // the volume validation                      
-    declareProperty("TrackingVolumeValidation",   m_volumeValidation);
-    declareProperty("TrackingVolumeTreePrefix",   m_volumeTreePrefix);
-    // the layer Validation                       
-    declareProperty("DetailedLayerValidation",    m_layerValidation);
-    declareProperty("DetailedLayerTreePrefix",    m_layerTreePrefix);
-    // the surface Validation
-    declareProperty("DetailedSurfaceValidation",  m_surfaceValidation);
-    declareProperty("DetailedSurfaceTreePrefix",  m_surfaceTreePrefix);
-
 }
 
 // destructor
@@ -439,7 +399,7 @@ Trk::VolumeTreeObject* Trk::MaterialMapper::volumeTreeObject(const Trk::Layer* l
 
         TString   treeName   = tvolName;
                   treeName  += "_";
-                  treeName  += m_volumeTreePrefix;
+                  treeName  += m_volumeTreePrefix.value();
         if (!lay) treeName  += "_UNMAPPED";
 
         TString   treeTitle  = "TrackingVolume : ";
@@ -504,7 +464,7 @@ Trk::LayerTreeObject* Trk::MaterialMapper::layerTreeObject(const Trk::Layer& lay
 
         TString treeName   = tvolName;
                 treeName  += "_";
-                treeName  += m_layerTreePrefix;
+                treeName  += m_layerTreePrefix.value();
 
         TString layerType = (lay.surfaceRepresentation().type() == Trk::SurfaceType::Cylinder) ? 
                 "CylinderLayer_" : "DiscLayer_";
@@ -552,7 +512,7 @@ Trk::SurfaceTreeObject* Trk::MaterialMapper::surfaceTreeObject(const Trk::Layer&
         const Trk::TrackingVolume* enclosingVolume = lay.enclosingTrackingVolume();
         TString volumeName = (enclosingVolume) ?  enclosingVolume->volumeName() : "Unknown";
 
-        TString treeName   = m_surfaceTreePrefix;
+        TString treeName   = m_surfaceTreePrefix.value();
                 treeName  += lay.layerIndex().value();
 
         TString treeTitle  = "TrackingVolume :";
@@ -620,7 +580,7 @@ void Trk::MaterialMapper::bookValidationTree()
 
     // (1) Main MaterialMapper TTree
     // ------------- validation section ------------------------------------------
-    m_validationTree = new TTree(m_validationTreeName.c_str(), m_validationTreeDescription.c_str());
+    m_validationTree = new TTree(m_validationTreeName.value().c_str(), m_validationTreeDescription.value().c_str());
     
     // position coordinates of the update
     m_validationTree->Branch("Eta",                    &m_averageEta,            "averageEta/F");
@@ -652,7 +612,7 @@ void Trk::MaterialMapper::bookValidationTree()
     m_validationTree->Branch("MaterialProjDistance",   m_materialProjDistance  , "materialProjD[steps]/F");
     
     // now register the Tree
-    if (m_histSvc->regTree(m_validationTreeFolder.c_str(), m_validationTree).isFailure()) {
+    if (m_histSvc->regTree(m_validationTreeFolder.value().c_str(), m_validationTree).isFailure()) {
         ATH_MSG_ERROR("initialize() Could not register the validation Tree -> Switching ValidationMode Off !" );
         delete m_validationTree; m_validationTree = nullptr;
         return;

@@ -57,6 +57,12 @@ atlas_add_executable(
 )
 
 atlas_add_executable(
+  BTaggingSelectionJsonInstantiationTester
+  util/BTaggingSelectionJsonInstantiationTester.cxx
+  LINK_LIBRARIES xAODRootAccess AsgTools FTagAnalysisInterfacesLib PathResolver
+)
+
+atlas_add_executable(
   BTaggingSystematicStrategyComparison
   util/BTaggingSystematicStrategyComparison.cxx
   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
@@ -102,6 +108,8 @@ target_link_libraries( BTaggingEfficiencyToolTester
   PRIVATE ${XAOD_ACCESS_LIB} )
 target_link_libraries( BTaggingJsonToolsTester
   PRIVATE ${XAOD_ACCESS_LIB} )
+target_link_libraries( BTaggingSelectionJsonInstantiationTester
+  PRIVATE ${XAOD_ACCESS_LIB} )
 target_link_libraries( BTaggingEigenVectorRecompositionToolTester
   PRIVATE ${XAOD_ACCESS_LIB} )
 target_link_libraries( BTaggingSystematicStrategyComparison
@@ -126,6 +134,11 @@ atlas_add_test(
 atlas_add_test(
   ut_BTaggingJsonToolsTest
   SCRIPT BTaggingJsonToolsTester ${FTAG_INPUT_RUN3_DAOD} ${FTAG_XBB_LATEST_JSON} GN2Xv01 FlatMassQCDEff_0p25
+  POST_EXEC_SCRIPT noerror.sh
+)
+atlas_add_test(
+  ut_BTaggingSelectionJsonInstantiation
+  SCRIPT BTaggingSelectionJsonInstantiationTester ${FTAG_XBB_LATEST_JSON}
   POST_EXEC_SCRIPT noerror.sh
 )
 atlas_add_test(

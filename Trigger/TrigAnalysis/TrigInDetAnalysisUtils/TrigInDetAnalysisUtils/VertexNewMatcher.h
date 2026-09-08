@@ -29,7 +29,6 @@ public:
 
   ~VertexNewMatcher() { }
 
-  BestMatcher<TIDA::Vertex>* clone() override { return new VertexNewMatcher(*this); }
 
   virtual std::unique_ptr<VertexAssociator> uclone() const override { return std::make_unique<VertexNewMatcher>(*this); }
   

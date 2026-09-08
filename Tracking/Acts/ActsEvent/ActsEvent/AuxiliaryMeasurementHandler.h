@@ -43,13 +43,20 @@ namespace ActsTrk{
                     /** @brief Default move constructor */
                     MeasurementProvider(MeasurementProvider&& other) = default;
                     /** @brief Default move assignment operator */
-                    MeasurementProvider& operator=(MeasurementProvider&& other) = delete;
-                    /** @brief Delete the copy constructor */
+                    MeasurementProvider& operator=(MeasurementProvider&& other) = default;
+                    /** @brief Default copy constructor */
                     MeasurementProvider(const MeasurementProvider& other) = delete;
-                    /** @brief Delete the copy assignment */
+                    /** @brief Default copy assignment operator */
                     MeasurementProvider& operator=(const MeasurementProvider& other) = delete;
 
                     using ProjectorType = xAOD::AuxiliaryMeasurement::ProjectorType;
+                    /** @brief Create a new auxiliary measurement
+                     *  @param surface: Pointer to the Acts surface with which the measurment
+                     *                  is associated
+                     *  @param projector: Projector enum to indicate which local coordinates
+                     *                     (d0,z0,t0) are constrained by the measurement
+                     * @param locCov: The covariance on the auxiliary measurement
+                     * @param locPos: Local displacement of the measurement w.r.t. surface */
                     template<size_t N>
                         xAOD::AuxiliaryMeasurement* newMeasurement(const SurfacePtr_t&  surface,
                                                                    const ProjectorType projector,
@@ -75,14 +82,21 @@ namespace ActsTrk{
                         StatusCode recordContainer(SG::WriteHandle<Cont_t>& handle);
 
 
-                    const EventContext& m_ctx;
-                    const Acts::GeometryContext m_gctx;
+                    std::reference_wrapper<const EventContext> m_ctx;
+                    std::reference_wrapper<const Acts::GeometryContext> m_gctx;
                     const AuxiliaryMeasurementHandler* m_parent{};
                     /** @brief Abrivation of the WriteHandle */
                     using WriteHandle_t = SG::WriteHandle<xAOD::AuxiliaryMeasurementContainer>;
                     using SurfaceHandle_t = SG::WriteHandle<xAOD::TrackSurfaceContainer>;
+                    
+                    /** @brief Write handle to the VIEW_Elements container containing all
+                     *         created measurements*/
+                    WriteHandle_t m_viewHandle{m_parent->m_viewKey, m_ctx};
+                    /** @brief Dedicated write handle to store 1D measurements */
                     WriteHandle_t m_handle1D{m_parent->m_writeKey1D, m_ctx};
+                    /** @brief Dedicated write handle to store 2D measurements */
                     WriteHandle_t m_handle2D{m_parent->m_writeKey2D, m_ctx};
+                    /** @brief Dedicated write handle to store 2D + time measurements */
                     WriteHandle_t m_handle3D{m_parent->m_writeKey3D, m_ctx};
                     SurfaceHandle_t m_surfaceContainer{m_parent->m_surfaceKey, m_ctx};
                     /** @brief List of precached surfaces */
@@ -114,6 +128,8 @@ namespace ActsTrk{
             std::function<MsgStream&(const MSG::Level)> m_msgPrinter{};
             /// @brief Lambda to return the msg level from the parent's msg stream
             std::function<bool(const MSG::Level)> m_msgLevel{};
+            /// @brief Key to write the view container
+            Key_t m_viewKey;
             /// @brief Key to write the 1D measurements
             Key_t m_writeKey1D;
             /// @brief Key to write the 2D measurements

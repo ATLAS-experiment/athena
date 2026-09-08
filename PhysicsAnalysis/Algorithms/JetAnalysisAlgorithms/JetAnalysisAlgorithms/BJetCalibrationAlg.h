@@ -61,6 +61,8 @@ namespace CP
     SysWriteDecorHandle<int> m_nmuons {
       this, "NMuonsDecorName", "n_muons_%SYS%", "Name of output decorator for n_muons"};
 
+    Gaudi::Property<bool> m_onlyDecorate{
+      this, "onlyDecorate", false, "Only decorate jets with an additional 4-vector"};
   };
 
 }

@@ -21,26 +21,33 @@ class JetCalibAlgConfig(ConfigBlock):
 
         self.addOption('inputJets', '', type=str)
         self.addOption('calibratedJets', '', type=str)
-
-        
-        self.addOption('CalibFile', '', type=str)
+        self.addOption('context', 'AnalysisLatest', type=str)
+        self.addOption('CalibFile', '', type=str)  # expert override: skips YAML index lookup
 
     def makeAlgs(self, config):
 
         config.setSourceName (self.calibratedJets, self.inputJets, originalName = self.inputJets)
 
-        # Perform a shallow copy of the input : 
         if config.wantCopy (self.calibratedJets) :
             alg = config.createAlgorithm( 'CP::AsgShallowCopyAlg', 'JetShallowCopyAlg' )
             alg.input = config.readName (self.calibratedJets)
             alg.output = config.copyName (self.calibratedJets)
-            
+
         alg = config.createAlgorithm('CP::JetCalibAlg', 'JetCalibAlg')
-        alg.jets = config.readName(self.calibratedJets )
+        alg.jets = config.readName(self.calibratedJets)
         alg.OutputLevel = 3
 
-        # Call calibToolFromConfigFile
-        calibtool = calibToolFromConfigFile(config.flags, self.CalibFile, name=self.inputJets+"Calib")
+        if self.CalibFile:
+            calibFile = self.CalibFile
+        else:
+            from JetCalibTools.JetCalibToolsCfg import get_calib_cfg_path, get_jet_collection_name
+            jetcollection = self.inputJets
+            if jetcollection.endswith('Jets'):
+                jetcollection = jetcollection[:-4]
+            jetcollection = get_jet_collection_name(jetcollection)
+            calibFile = get_calib_cfg_path(self.context, jetcollection)
+
+        calibtool = calibToolFromConfigFile(config.flags, calibFile, name=self.inputJets+"Calib")
         calibtool.OutputLevel=3
         
         if isAthena:

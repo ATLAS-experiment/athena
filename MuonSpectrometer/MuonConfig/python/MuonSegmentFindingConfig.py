@@ -529,11 +529,18 @@ def MuonSegmentFinderAlgCfg(flags, name="MuonSegmentMaker", **kwargs):
     kwargs.setdefault("doStgcSegments", flags.Detector.EnablesTGC)
     kwargs.setdefault("doMMSegments", flags.Detector.EnableMM)
 
-    kwargs.setdefault("SegmentCollectionName",  "TrackMuonSegments" if flags.Muon.segmentOrigin != "TruthTracking" else "ThirdChainSegments")
+    kwargs.setdefault("SegmentCollectionName",  "TrackMuonSegments")
 
     the_alg = CompFactory.MuonSegmentFinderAlg( name, **kwargs)                                               
     result.addEventAlgo(the_alg)
     return result    
+
+def TrackMuonSegmentMergerCfg(flags, name="MuonTrackSegmentMerger", **kwargs):
+    result = ComponentAccumulator()
+    the_alg = CompFactory.MuonSegmentMergingAlg(name=name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
+
 
 def MuonSegmentCnvAlgCfg(flags, name="MuonSegmentCnvAlg", **kwargs):
     result = ComponentAccumulator()
@@ -569,21 +576,18 @@ def MuonSegmentFindingCfg(flags, setup_bytestream = True):
             from MuonConfig.MuonRdoDecodeConfig import MuonRDOtoPRDConvertorsCfg
             result.merge( MuonRDOtoPRDConvertorsCfg(flags) )
   
-    ###
-    #### Check the 
-    ###
-    if flags.Muon.scheduleActsReco:
-        if not flags.Muon.usePhaseIIGeoSetup:
-            raise RuntimeError("The phase II reconstruction flag cannot be set to true without also running the job from a proper SQLite input")
-        from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonPatternRecognitionCfg
-        ### Schedule the standard R4 pattern recognition chain
-        result.merge(MuonPatternRecognitionCfg(flags))
-
-        return result
     # We need to add two algorithms - one for normal collisions, one for NCB
     result.merge(MuonLayerHoughAlgCfg(flags))
-    result.merge(MuonSegmentFinderAlgCfg(flags, name="MuonSegmentMaker"))
- 
+   
+    if not flags.Muon.splitNswSegmentFinder:
+        result.merge(MuonSegmentFinderAlgCfg(flags, name="MuonSegmentMaker"))
+    else:
+        result.merge(MuonSegmentFinderAlgCfg(flags, name="MuonSegmentMakerMdt", doStgcSegments=False, doMMSegments = False,
+                                             SegmentCollectionName="TrackMuonSegmentsMdt" ))
+        result.merge(MuonSegmentFinderAlgCfg(flags, name="MuonSegmentMakerNsw", doMdtSegments=False,
+                                             SegmentCollectionName="TrackMuonSegmentsNsw" ))
+        result.merge(TrackMuonSegmentMergerCfg(flags, ReadKeys=["TrackMuonSegmentsMdt", "TrackMuonSegmentsNsw"] ))
+
     if flags.Beam.Type is BeamType.Collisions:
         result.merge(MuonSegmentFinderNCBAlgCfg(flags))
         result.merge(MuonSegmentCnvAlgCfg(flags, "MuonSegmentCnvAlg_NCB",

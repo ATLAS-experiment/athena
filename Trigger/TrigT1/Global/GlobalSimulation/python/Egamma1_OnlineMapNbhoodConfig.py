@@ -18,7 +18,7 @@ def Egamma1_OnlineMapNbhoodCfg(
     
     cfg = ComponentAccumulator()
 
-    alg = CompFactory.GlobalSim.Egamma1_OnlineMapNbhood(name,**kwargs)
+    alg = CompFactory.GlobalSim.Egamma1_OnlineMapNbhoodAlg(name, **kwargs)
 
     
     alg.roiAlgTool.etMin = 5000.

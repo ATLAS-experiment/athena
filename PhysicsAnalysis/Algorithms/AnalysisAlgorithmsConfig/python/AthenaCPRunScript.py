@@ -39,7 +39,7 @@ class AthenaCPRunScript(CPBaseRunner):
         configSeq =  self.config.configure()
         self.logger.info("Configuring common services")
         from AnalysisAlgorithmsConfig.ConfigAccumulator import ConfigAccumulator
-        configAccumulator = ConfigAccumulator(autoconfigFromFlags=self.flags,
+        configAccumulator = ConfigAccumulator(flags=self.flags,
                                               algSeq=algSeq,
                                               noSystematics=self.args.no_systematics)
         if not self.args.merge_output_files:

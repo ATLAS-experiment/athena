@@ -13,9 +13,6 @@
 
 #include "ISF_Event/ISFParticleContainer.h"
 
-// forward declarations
-class AtlasG4EventUserInfo;
-
 #include "AtlasHepMC/GenParticle_fwd.h"
 
 namespace ISF {
@@ -45,8 +42,6 @@ public:
   ISF::ISFParticleContainer ReturnSecondaries(ISF::ISFParticle const* parent);
 
 protected:
-  AtlasG4EventUserInfo *m_atlasG4EvtUserInfo{};   //!< event-global G4 UserInformation
-
   ISF::ISFParticleContainer m_storedSecondaries;
 
   /** This method is called by TrackProcessorUserActionBase after the
@@ -60,10 +55,8 @@ private:
   /// Setup the given G4Track as the current secondary particle which we'll process
   void setupSecondary(const G4Track&);
 
-  /// Set the following information as the currently traced particle
-  void updateCachedParticleInfo(ISF::ISFParticle* baseISFParticle,
-                          HepMC::ConstGenParticlePtr primaryGenParticle,
-                          HepMC::GenParticlePtr currentGenParticle);
+  /// Set the base ISFParticle for the currently traced particle
+  void updateCurrentBaseISFParticle(ISF::ISFParticle* baseISFParticle);
 
   /// Classify the particle represented by the given set of truth links
   VTrackInformation::TrackClassification classify(HepMC::ConstGenParticlePtr primaryGenParticle,

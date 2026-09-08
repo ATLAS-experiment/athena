@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  CaloSwEtamod_v2.cxx
@@ -35,6 +35,7 @@
 #include "CaloClusterCorrection/interpolate.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include <cmath>
+#include <stdexcept>
 
 
 using xAOD::CaloCluster;
@@ -94,7 +95,7 @@ void CaloSwEtamod_v2::makeTheCorrection (const Context& myctx,
   //     the correction was derived.  This should be cleaned up in
   //     a subsequent version.
   if (adj_aeta >= 1.4 && adj_aeta <= 1.475)
-    etamod = fmod (adj_aeta, 0.025);
+    etamod = std::fmod (adj_aeta, 0.025);
 
   // Before doing the energy interpolation, make a crude total correction
   // of the energy.  This is needed since the corrections are tabulated
@@ -108,7 +109,9 @@ void CaloSwEtamod_v2::makeTheCorrection (const Context& myctx,
                                      Builder (m_correction(myctx), etamod),
                                      m_energies(myctx),
                                      m_energy_degree(myctx));
-
+  if (corr == 0.)[[unlikely]]{
+    throw std::runtime_error("CaloSwEtamod_v2::makeTheCorrection: denominator 'corr' is zero");
+  }
   // set energy, and rescale each sampling
   setenergy (cluster, cluster->e() / corr);
 }

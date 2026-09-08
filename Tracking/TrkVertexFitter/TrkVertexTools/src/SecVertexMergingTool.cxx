@@ -211,10 +211,10 @@ namespace Trk{
              vx->setVertexType(typ2);
 
            if (moreDeco) {
-             mAcc_trkdoe(*vx) = doe2;
+             mAcc_trkdoe(*vx) = std::move(doe2);
              mAcc_momdir(*vx) = wght1 * md1 + wght2 * md2;
              mAcc_radpat(*vx) = wght1 * hf1 + wght2 * hf2;
-             mAcc_trkwt(*vx) = trkW2;
+             mAcc_trkwt(*vx) = std::move(trkW2);
              mAcc_numtav(*vx) = ntrks;
            }
 
@@ -228,10 +228,10 @@ namespace Trk{
        }   // if vx found partner in compatibility
 
        // whether we merged or not, can add vx to the container
-       if (vx != nullptr){
-         ATH_MSG_DEBUG("Merged sumPt2 " << mAcc_sumPt2(*vx));
-         NewContainer->push_back(std::move(vx));
-       }
+       //vx cannot be null here, it has already been dereferenced multiple times
+       ATH_MSG_DEBUG("Merged sumPt2 " << mAcc_sumPt2(*vx));
+       NewContainer->push_back(std::move(vx));
+       
      }
 
      return std::make_pair(NewContainer, auxNewContainer);

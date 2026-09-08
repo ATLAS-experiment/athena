@@ -1,23 +1,22 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DiMuonTaggingAlg.h"
-#include "DerivationFrameworkMuons/Utils.h"
+
 #include "AthenaKernel/errorcheck.h"
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/TrackingPrimitives.h"
 #include "TruthUtils/HepMCHelpers.h"
+
 namespace {
-    using MuonPassDecor = SG::WriteDecorHandle<xAOD::MuonContainer, bool>;
+    using MuonPassDecor = xAOD::ContainerDecorator<xAOD::MuonContainer, std::uint8_t>;
     constexpr double MeVtoGeV = 1./ Gaudi::Units::GeV;
 
 }
 namespace DerivationFramework {
-    DiMuonTaggingAlg::DiMuonTaggingAlg(const std::string& name, ISvcLocator* pSvcLocator) : 
-        AthReentrantAlgorithm(name, pSvcLocator) {}
 
     // Athena initialize and finalize
     StatusCode DiMuonTaggingAlg::initialize() {
@@ -55,28 +54,22 @@ namespace DerivationFramework {
         int& keepEvent = *keepEventHandle;
 
         /// muon selection
-        SG::ReadHandle<xAOD::MuonContainer> muons{m_muonSGKey, ctx};
-        if (!muons.isValid()) {
-            ATH_MSG_FATAL("Failed to retrieve " << m_muonSGKey.fullKey());
-            return StatusCode::FAILURE;
-        }
-        MuonPassDecor muo_decor{makeHandle<bool>(ctx, m_muonKeepKey)};
+        const xAOD::MuonContainer* muons{};
+        ATH_CHECK(SG::get(muons, m_muonSGKey, ctx));
+
+
+        MuonPassDecor muo_decor{m_muonKeepKey, ctx};
         ATH_MSG_VERBOSE("Event "<<ctx.eventID().event_number()<<" - Retrieved muon Container from "<<m_muonSGKey.fullKey()<<" which contains "
-                        <<muons->size()<<" muons. Created "<<muo_decor.decorKey()
-                        <<" "<<SG::AuxTypeRegistry::instance().getName(muo_decor.auxid()));
+                        <<muons->size()<<" muons. ");
 
        
         /// Retrieve the truth particle container if it's available
         std::vector<const xAOD::TruthParticle*> truth{};
-        if (!m_truthSGKey.empty()) {
-            
-            SG::ReadHandle<xAOD::TruthParticleContainer> handle{m_truthSGKey, ctx};
-            if (!handle.isValid()) {
-                ATH_MSG_FATAL("Failed to retrieve truth container " << m_truthSGKey.fullKey());
-                return StatusCode::FAILURE;
-            }
-            truth.reserve(handle->size());
-            std::copy_if(handle->begin(), handle->end(), std::back_inserter(truth), 
+        const xAOD::TruthParticleContainer* truthParticles{};
+        ATH_CHECK(SG::get(truthParticles, m_truthSGKey, ctx));
+        if (truthParticles) {
+            truth.reserve(truthParticles->size());
+            std::copy_if(truthParticles->begin(), truthParticles->end(), std::back_inserter(truth), 
                         [](const xAOD::TruthParticle* tpart) {
                             return MC::isStable(tpart) &&
                                     !HepMC::is_simulation_particle(tpart) &&
@@ -122,15 +115,11 @@ namespace DerivationFramework {
         if (!m_useTrackProbe) {
             return StatusCode::SUCCESS;
         }
-
-        SG::ReadHandle<xAOD::TrackParticleContainer> tracks{m_trackSGKey, ctx};
-        if (!tracks.isValid()) {
-            ATH_MSG_FATAL("Failed to retrieve " << m_trackSGKey.fullKey());
-            return StatusCode::FAILURE;
-        }
+        const xAOD::TrackParticleContainer* tracks{};
+        ATH_CHECK(SG::get(tracks, m_trackSGKey, ctx));
         ATH_MSG_VERBOSE("Event "<<ctx.eventID().event_number()<<" - Retrieved track Container from "<<m_trackSGKey.fullKey()<<" which contains "
                         <<tracks->size()<<" tracks.");
-        TrackPassDecor trk_decor{makeHandle<bool>(ctx, m_trkKeepKey)};      
+        TrackPassDecor trk_decor{m_trkKeepKey, ctx};      
         for (const xAOD::Muon* mu_itr1 : *muons) {           
             if (!passMuonCuts(mu_itr1, m_mu1PtMin, m_mu1AbsEtaMax, m_applyQualityMu1)) {
                 ATH_MSG_VERBOSE("Muon does not pass the trigger selection");
@@ -164,7 +153,7 @@ namespace DerivationFramework {
         return StatusCode::SUCCESS;
     }
     void DiMuonTaggingAlg::maskNearbyIDtracks(const xAOD::IParticle* ref_part, TrackPassDecor& decor) const {
-        for (const xAOD::TrackParticle* trk : *decor) {
+        for (const xAOD::TrackParticle* trk : *decor.container()) {
             if (xAOD::P4Helpers::deltaR2(ref_part, trk) < m_thinningConeSize2) decor(*trk) = true;
         }
     }

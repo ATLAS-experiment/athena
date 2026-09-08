@@ -14,21 +14,6 @@ def FPGAPrototrackFitAlgCfg(flags,
     from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
     acc.merge(ITkStripReadoutGeometryCfg(flags))
 
-    
-    if "TrackingGeometryTool" not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault(
-            "TrackingGeometryTool",
-            acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)),
-        )  # PrivateToolHandle
-        
-    if 'ExtrapolationTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
-        kwargs.setdefault(
-            "ExtrapolationTool",
-            acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)),
-        )  # PrivateToolHandle
-
     if 'ActsFitter' not in kwargs:
         from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg
         kwargs.setdefault("ActsFitter", acc.popToolsAndMerge(ActsFitterCfg(flags,
@@ -101,7 +86,7 @@ def FPGATruthDecorationCfg(flags, FinalProtoTrackChainxAODTracksKey="xAODFPGAPro
     ################################################################################
     # Convert ActsTrk::TrackContainer to xAOD::TrackParticleContainer
     prefix = flags.Tracking.ActiveConfig.extension
-    from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
+    from ActsConfig.ActsEventCnvConfig import ActsTrackToTrackParticleCnvAlgCfg
     acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, f"{prefix}ResolvedProtoTrackToAltTrackParticleCnvAlg",
                                                 ACTSTracksLocation=[ACTSProtoTrackChainTrackKey,],
                                                 TrackParticlesOutKey=f"{FinalProtoTrackChainxAODTracksKey}TrackParticles"))

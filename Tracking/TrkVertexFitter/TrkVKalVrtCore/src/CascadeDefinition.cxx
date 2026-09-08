@@ -140,7 +140,7 @@ int makeCascade(VKalVrtControl &FitCONTROL, long int NTRK, const long int *ich,
     VRT->setRefIterV(xyz);  // iteration ref. point
     VRT->setIniV(xyz);
     VRT->setCnstV(xyz);  // initial guess. 0 of course.
-    auto arr = std::make_unique<double[]>(vertexDefinition[iv].size() * 5);
+    auto arr = std::make_unique_for_overwrite<double[]>(vertexDefinition[iv].size() * 5);
     int NTv = vertexDefinition[iv].size();
     for (it = 0; it < NTv; it++) {
       tk = vertexDefinition[iv][it];

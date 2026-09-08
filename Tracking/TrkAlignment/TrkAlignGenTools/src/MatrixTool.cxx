@@ -43,12 +43,8 @@
 #include <cmath>
 #include <ctime>
 #include <algorithm>
+#include <format>
 #include <iterator>
-
-//restore ostream 
-#include <boost/io/ios_state.hpp>
-
-
 
 #include <sys/resource.h>
 
@@ -64,11 +60,8 @@ namespace Trk {
   }
 
   //_______________________________________________________________________
-  MatrixTool::~MatrixTool()
-  {
-    delete m_bigmatrix;
-    delete m_bigvector;
-  }
+  MatrixTool::~MatrixTool() = default;
+ 
 
   //_______________________________________________________________________
   StatusCode MatrixTool::initialize()
@@ -110,11 +103,11 @@ namespace Trk {
 
     // Decide upon the big matrix representation:
     if( m_useSparse )
-      m_bigmatrix = new AlSpaMat(nDoF);
+      m_bigmatrix = std::make_unique<AlSpaMat>(nDoF);
     else
-      m_bigmatrix = new AlSymMat(nDoF);
+      m_bigmatrix = std::make_unique<AlSymMat>(nDoF);
 
-    m_bigvector       = new AlVec(nDoF);
+    m_bigvector       = std::make_unique<AlVec>(nDoF);
 
     ATH_MSG_INFO(" After Matrix and Vector allocation");
 
@@ -138,10 +131,10 @@ namespace Trk {
   {
     ATH_MSG_INFO("solving Global using ROOT");
     if(m_logStream) {
-      *m_logStream<<"*************************************************************"<<std::endl;
-      *m_logStream<<"**************  solving using Global method  ****************"<<std::endl;
-      *m_logStream<<"**************          using ROOT           ****************"<<std::endl;
-      *m_logStream<<"*************************************************************"<<std::endl;
+      *m_logStream<<"*************************************************************\n";
+      *m_logStream<<"**************  solving using Global method  ****************\n";
+      *m_logStream<<"**************          using ROOT           ****************\n";
+      *m_logStream<<"*************************************************************\n";
     }
 
     // start measuring time
@@ -157,7 +150,6 @@ namespace Trk {
       msg(MSG::VERBOSE)<<"dumping matrix and vector to screen"<<endmsg;
       for (int i=0;i<nDoF;i++)
         for (int j=0;j<nDoF;j++)
-        //if (std::fabs((*m_bigmatrix)[i][j])>.0001)
           msg(MSG::VERBOSE)<<i<<", "<<j<<" : "<<(*m_bigmatrix)[i][j] <<endmsg;
 
       for (int i=0;i<nDoF;i++)
@@ -206,8 +198,8 @@ namespace Trk {
     if(!status) {
       msg(MSG::ERROR)<<"ROOT inversion failed"<<endmsg;
       if(m_logStream) {
-        *m_logStream<<"ROOT inversion failed"<<std::endl;
-        *m_logStream<<std::endl;
+        *m_logStream<<"ROOT inversion failed\n";
+        *m_logStream<<"\n";
       }
     }
     else {
@@ -233,23 +225,23 @@ namespace Trk {
 
       if(m_logStream)
       {
-        *m_logStream<<"ROOT inversion ok"<<std::endl;
+        *m_logStream<<"ROOT inversion ok\n";
 
         printGlobalSolution(*m_logStream,&ainv);
 
         // norm of first derivative
-        *m_logStream<<"norm of first derivative :            "<<sqrt(b.Norm2Sqr())<<std::endl;
+        *m_logStream<<"norm of first derivative :            "<<sqrt(b.Norm2Sqr())<<"\n";
 
         // distance to solution
         double dist = sqrt( ( b - (a * r) ).Norm2Sqr() );
-        *m_logStream<<"distance to solution :                "<<dist<<std::endl;
+        *m_logStream<<"distance to solution :                "<<dist<<"\n";
 
         // calculate chi2 of the alignment change
         double chi2 = a.Similarity(r) * .5;
-        *m_logStream<<"delta(chi2) of the alignment change : "<<chi2<<" / "<<m_aNDoF<<std::endl;
+        *m_logStream<<"delta(chi2) of the alignment change : "<<chi2<<" / "<<m_aNDoF<<"\n";
 
         // time spent here
-        *m_logStream<<"time spent in solve :                 "<<totaltime<<" s"<<std::endl;
+        *m_logStream<<"time spent in solve :                 "<<totaltime<<" s\n";
       }
     }
 
@@ -264,10 +256,10 @@ namespace Trk {
   {
     ATH_MSG_INFO("solving Global using CLHEP");
     if(m_logStream) {
-      *m_logStream<<"*************************************************************"<<std::endl;
-      *m_logStream<<"**************  solving using Global method  ****************"<<std::endl;
-      *m_logStream<<"**************          using CLHEP          ****************"<<std::endl;
-      *m_logStream<<"*************************************************************"<<std::endl;
+      *m_logStream<<"*************************************************************\n";
+      *m_logStream<<"**************  solving using Global method  ****************\n";
+      *m_logStream<<"**************          using CLHEP          ****************\n";
+      *m_logStream<<"*************************************************************\n";
     }
 
     // start measuring time
@@ -285,7 +277,6 @@ namespace Trk {
       msg(MSG::DEBUG)<<"dumping matrix and vector to screen"<<endmsg;
       for (int i=0;i<nDoF;i++)
         for (int j=0;j<nDoF;j++)
-        //if (std::fabs((*m_bigmatrix)[i][j])>.0001)
           msg(MSG::DEBUG)<<i<<", "<<j<<" : "<<(*m_bigmatrix)[i][j] <<endmsg;
 
       for (int i=0;i<nDoF;i++)
@@ -318,7 +309,7 @@ namespace Trk {
       //  Run Matrix Inversion
       ATH_MSG_INFO("Running matrix inversion");
       if(m_logStream)
-        *m_logStream<<"Running matrix inversion"<<std::endl;
+        *m_logStream<<"Running matrix inversion\n";
 
       cov = *d2Chi2;
       cov.invert(ierr);
@@ -327,7 +318,7 @@ namespace Trk {
       else
         ATH_MSG_INFO("CLHEP inversion OK");
       if(m_logStream)
-        *m_logStream<<"CLHEP inversion status flag = "<<ierr<<std::endl;
+        *m_logStream<<"CLHEP inversion status flag = "<<ierr<<"\n";
 
       // calculate corrections
       delta = cov * (*dChi2);
@@ -356,9 +347,9 @@ namespace Trk {
         }
 
       if(m_logStream && (ierr2>0 || !status)) {
-        *m_logStream<<"CLHEP inversion status flag for halfed matrix = "<<ierr2<<std::endl;
-        *m_logStream<<"Matrix inversion check failed"<<std::endl;
-        *m_logStream<<std::endl;
+        *m_logStream<<"CLHEP inversion status flag for halfed matrix = "<<ierr2<<"\n";
+        *m_logStream<<"Matrix inversion check failed\n";
+        *m_logStream<<"\n";
       }
       // -- end of check of matrix inversion
     }
@@ -367,7 +358,7 @@ namespace Trk {
       // Run Diagonalization
       ATH_MSG_INFO("Running diagonalization");
       if(m_logStream)
-        *m_logStream<<"Running diagonalization"<<std::endl;
+        *m_logStream<<"Running diagonalization\n";
 
       CLHEP::HepSymMatrix D = *d2Chi2;
       CLHEP::HepMatrix U = CLHEP::diagonalize( &D );
@@ -398,7 +389,7 @@ namespace Trk {
       CLHEP::HepVector eigenvector(m_aNDoF);
 
       if(m_logStream)
-        *m_logStream<<"/------ The Eigenvalue Spectrum -------"<<std::endl;
+        *m_logStream<<"/------ The Eigenvalue Spectrum -------\n";
 
       ATH_MSG_DEBUG("Calculating eigenvalues");
       for(int imode=0; imode<m_aNDoF; ++imode) {
@@ -419,16 +410,16 @@ namespace Trk {
         if(imode<m_modcut) {
           ATH_MSG_INFO("skipping eigenvalue "<<imode<<" : "<<eigenvalue<<" , modcut is "<<m_modcut);
           if(m_logStream)
-             *m_logStream<<"| skipping eigenvalue "<<eigenvalue<<std::endl;
+             *m_logStream<<"| skipping eigenvalue "<<eigenvalue<<"\n";
         }
         else if( eigenvalue < m_eigenvaluethreshold ) {
           ATH_MSG_INFO("skipping eigenvalue "<<eigenvalue<<" , cut is "<<m_eigenvaluethreshold);
           if(m_logStream)
-             *m_logStream<<"| skipping eigenvalue "<<eigenvalue<<std::endl;
+             *m_logStream<<"| skipping eigenvalue "<<eigenvalue<<"\n";
         }
         else {
           if(m_logStream)
-            *m_logStream<<"| "<<eigenvalue<<std::endl;
+            *m_logStream<<"| "<<eigenvalue<<"\n";
 
           delta += thisdelta;
 
@@ -445,7 +436,7 @@ namespace Trk {
       ATH_MSG_DEBUG("cov: "<<cov);
 
       if(m_logStream)
-        *m_logStream<<"\\----- End of Eigenvalue Spectrum -----"<<std::endl;
+        *m_logStream<<"\\----- End of Eigenvalue Spectrum -----\n";
 
       // end of diagonalization
       // ==========================================================
@@ -480,18 +471,18 @@ namespace Trk {
         printGlobalSolution(*m_logStream,&cov);
 
         // norm of first derivative
-        *m_logStream<<"norm of first derivative :            "<<dChi2->norm()<<std::endl;
+        *m_logStream<<"norm of first derivative :            "<<dChi2->norm()<<"\n";
 
         // distance to solution
         double dist = ( - (*d2Chi2) * deltafull + (*dChi2) ).norm();
-        *m_logStream<<"distance to solution :                "<<dist<<std::endl;
+        *m_logStream<<"distance to solution :                "<<dist<<"\n";
 
         // calculate chi2 of the alignment change
         double chi2 = d2Chi2->similarity(delta) * .5;
-        *m_logStream<<"delta(chi2) of the alignment change : "<<chi2<<" / "<<m_aNDoF<<std::endl;
+        *m_logStream<<"delta(chi2) of the alignment change : "<<chi2<<" / "<<m_aNDoF<<"\n";
 
         // time spent here
-        *m_logStream<<"time spent in solve :                 "<<totaltime<<" s"<<std::endl;
+        *m_logStream<<"time spent in solve :                 "<<totaltime<<" s\n";
       }
     }
 
@@ -506,9 +497,9 @@ namespace Trk {
   {
     ATH_MSG_INFO("solving using Local method");
     if(m_logStream) {
-      *m_logStream<<"*************************************************************"<<std::endl;
-      *m_logStream<<"**************  solving using Local method  *****************"<<std::endl;
-      *m_logStream<<"*************************************************************"<<std::endl;
+      *m_logStream<<"*************************************************************\n";
+      *m_logStream<<"**************  solving using Local method  *****************\n";
+      *m_logStream<<"*************************************************************\n";
     }
 
     int    totalNDoF(0);
@@ -600,19 +591,19 @@ namespace Trk {
       if(m_logStream) {
         printModuleSolution(*m_logStream,module,&cov);
 
-        *m_logStream<<"CLHEP inversion status flag = "<<ierr<<std::endl;
+        *m_logStream<<"CLHEP inversion status flag = "<<ierr<<"\n";
 
         // calculate chi2 of the alignment change
         double chi2 = d2Chi2.similarity(delta) * .5;
         totalChi2 += chi2;
-        *m_logStream<<"delta(chi2) of the alignment change : "<<chi2<<" / "<<thisNDoF<<std::endl;
+        *m_logStream<<"delta(chi2) of the alignment change : "<<chi2<<" / "<<thisNDoF<<"\n";
       }
     }
 
     if(m_logStream) {
-      *m_logStream<<"--------------------------------------------------------------------------------"<<std::endl;
-      *m_logStream<<"Total delta(chi2) of the alignment change from the local method : "<<totalChi2<<" / "<<totalNDoF<<std::endl;
-      *m_logStream<<std::endl;
+      *m_logStream<<"--------------------------------------------------------------------------------\n";
+      *m_logStream<<"Total delta(chi2) of the alignment change from the local method : "<<totalChi2<<" / "<<totalNDoF<<"\n";
+      *m_logStream<<"\n";
     }
 
     return 1;
@@ -665,7 +656,7 @@ namespace Trk {
 
       // check modIndexMaps to make sure they are the same
       if (ivec==0)
-        modIndexMap = newModIndexMap;
+        modIndexMap = std::move(newModIndexMap);
       else if (modIndexMap!=newModIndexMap) {
         msg(MSG::FATAL)<<"module index maps don't agree!"<<endmsg;
         return false;
@@ -673,13 +664,13 @@ namespace Trk {
       if (ivec>0)
         *m_bigvector += newVector;
       else
-        *m_bigvector  = newVector;
+        *m_bigvector  = std::move(newVector);
     }
 
     m_scale = totalscale;
 
-    AlSymMat * symBigMatrix=dynamic_cast<AlSymMat*>(m_bigmatrix);
-    AlSpaMat * spaBigMatrix=dynamic_cast<AlSpaMat*>(m_bigmatrix);
+    auto symBigMatrix=dynamic_cast<AlSymMat*>(m_bigmatrix.get());
+    auto spaBigMatrix=dynamic_cast<AlSpaMat*>(m_bigmatrix.get());
 
 
     for (int imat=0;imat<(int)m_inputMatrixFiles.size();imat++) {
@@ -745,40 +736,25 @@ namespace Trk {
 
     ATH_MSG_DEBUG( "Created TMatrixDSparse" );
 
-  
-    double *val = new double[nDoF];
-    for (int i=0;i<nDoF;i++) {
-      val[i] = (*m_bigvector)[i];
-    }
-  
-    TVectorD myTVector(nDoF, val);
-    delete [] val;
+    TVectorD myTVector(nDoF, m_bigvector->ptrData());
   
     ATH_MSG_DEBUG( "Created TVectorD" );
 
   
     const AlignModuleList * moduleList = m_alignModuleTool->alignModules1D();
     int nModules = moduleList->size();
-  
-    double *hitmapA = new double[nModules];
-    double *hitmapB = new double[nModules];
-    AlignModuleList::const_iterator imod     = moduleList->begin();
-    AlignModuleList::const_iterator imod_end = moduleList->end();
-    int index(0);
-    for(; imod != imod_end; ++imod) {
-      AlignModule * module = *imod;
-      hitmapA[index] = (double)module->nHits();
-      hitmapB[index] = (double)module->nTracks();
+    std::vector<double> hitmapA(nModules);
+    std::vector<double> hitmapB(nModules);
+
+    
+    for(std::size_t index{};const auto * module : *moduleList) {
+      hitmapA[index] = static_cast<double>(module->nHits());
+      hitmapB[index] = static_cast<double>(module->nTracks());
       index++;
     }
   
-    TVectorD hitmapHits(nModules, hitmapA); 
-    TVectorD hitmapTracks(nModules, hitmapB);
-    
-    delete [] hitmapA;
-    delete [] hitmapB;
-    
-
+    TVectorD hitmapHits(nModules, hitmapA.data()); 
+    TVectorD hitmapTracks(nModules, hitmapB.data());
 
     TFile myFile(filename,"recreate");
     hitmapHits.Write("Hits");
@@ -804,7 +780,6 @@ namespace Trk {
         uint64_t  id = (*alignPars)[i]->alignModule()->identify().get_compact();
         memcpy(&target, &id, sizeof(target));
         moduleInfoA[i]=target;
-        //moduleInfoB[i]=(*alignPars)[i]->alignModule()->name();
         uint64_t dof = (*alignPars)[i]->paramType();
         memcpy(&target, &dof, sizeof(target));
         dofInfoA[i]=target;
@@ -836,10 +811,10 @@ namespace Trk {
     std::map<int,unsigned long long> DoFMap;
     double totalscale=0.;
 
-    AlSymMat * symBigMatrix=dynamic_cast<AlSymMat*>(m_bigmatrix);
-    AlSpaMat * spaBigMatrix=dynamic_cast<AlSpaMat*>(m_bigmatrix);
-    //TMatrixDSparse *accumMatrix(0);
-    AlSpaMat *accumMatrix = nullptr;
+    auto symBigMatrix=dynamic_cast<AlSymMat*>(m_bigmatrix.get());
+    auto spaBigMatrix=dynamic_cast<AlSpaMat*>(m_bigmatrix.get());
+    
+    std::unique_ptr<AlSpaMat> accumMatrix;
     
     const AlignModuleList * moduleList = m_alignModuleTool->alignModules1D();
     int nModules = moduleList->size();
@@ -851,7 +826,7 @@ namespace Trk {
    
     struct rusage myusage{};
     int itworked =  getrusage(RUSAGE_SELF,&myusage);
-    if(itworked)//note: rusage returns zero if it succeeds!
+    if(itworked == 0)//note: rusage returns zero if it succeeds!
 		  ATH_MSG_DEBUG("ItWorked");
 
     long intialMemUse = myusage.ru_maxrss;
@@ -865,8 +840,9 @@ namespace Trk {
       ATH_MSG_DEBUG("Reading File number " << ifile << ",  " << m_inputTFiles[ifile]);
       
       itworked =  getrusage(RUSAGE_SELF,&myusage);
-      ATH_MSG_DEBUG("Memory usage [MB], total " << myusage.ru_maxrss/1024 << ", increase  " << (myusage.ru_maxrss-intialMemUse)/1024);
-       
+      if (itworked ==0){
+        ATH_MSG_DEBUG("Memory usage [MB], total " << myusage.ru_maxrss/1024 << ", increase  " << (myusage.ru_maxrss-intialMemUse)/1024);
+      }
       TFile* myFile = TFile::Open(m_inputTFiles[ifile].c_str()); 
       
       if ( myFile->IsZombie() || !(myFile->IsOpen()) ) {
@@ -891,7 +867,7 @@ namespace Trk {
         uint64_t target;
         memcpy(&target, &source, sizeof(target));
         newModIndexMap[i]=target;
-        //std::cout << i<< " " <<target <<std::endl; 
+        //std::cout << i<< " " <<target <<"\n"; 
       }
       
       delete myModuleIDs;
@@ -937,14 +913,13 @@ namespace Trk {
         continue;
       }
       
-      AlVec* newVector = new AlVec(nDoF);
+      auto newVector = std::make_unique<AlVec>(nDoF);
       newVector->SetPathBin(m_pathbin.value()+m_prefixName.value());
       newVector->SetPathTxt(m_pathtxt.value()+m_prefixName.value());
       
       if (newVector->size()  != m_bigvector->size() ) {
          msg(MSG::FATAL) << "vector wrong size!  newVector size " << newVector->size()
                          << ", bigvector size " << m_bigvector->size()<<endmsg;
-         delete newVector;
          delete vector;
          return false;
       }
@@ -952,7 +927,6 @@ namespace Trk {
       if (m_bigvector->size() != vector->GetNrows() ) {
          msg(MSG::FATAL) << "File vector wrong size!  File Vector size " << vector->GetNrows()
                          << ", bigvector size " << m_bigvector->size()<<endmsg;
-         delete newVector;
          delete vector;
          return false;
       }
@@ -965,25 +939,25 @@ namespace Trk {
       
       // check modIndexMaps to make sure they are the same
       if (ifile == 0){
-        DoFMap = newDoFMap;
+        DoFMap = std::move(newDoFMap);
       } else if (DoFMap!=newDoFMap) {
+        delete vector;
         msg(MSG::FATAL) << "module dofs don't agree!" << endmsg;
         return false;
       }
       
       if (ifile == 0){
-         modIndexMap = newModIndexMap;
+         modIndexMap = std::move(newModIndexMap);
       } else if (modIndexMap!=newModIndexMap) {
+         delete vector;
          msg(MSG::FATAL) << "module index maps don't agree!" << endmsg;
          return false;
       }
       
       if (ifile>0){
         *m_bigvector += *newVector;
-        delete newVector;  
       } else {
-        delete m_bigvector;
-        m_bigvector  = newVector;
+        m_bigvector  = std::move(newVector);
       }
       
       
@@ -999,7 +973,7 @@ namespace Trk {
       
       if (ifile == 0 ){ 
       
-        accumMatrix = new AlSpaMat(nDoF);
+        accumMatrix = std::make_unique<AlSpaMat>(nDoF);
         ATH_MSG_DEBUG("Matrix size b4 "<< accumMatrix->ptrMap()->size()  );
         
         //This method is ok for large matrix files... really only access the non zero elements
@@ -1082,8 +1056,9 @@ namespace Trk {
       
       myFile->Close("R");
       delete myFile;
-
-      itworked =  getrusage(RUSAGE_SELF,&myusage);
+      //
+      //setting 'itworked' here would be overwritten before use
+      //
       ATH_MSG_DEBUG("Memory usage [MB], total " << myusage.ru_maxrss/1024 << ", increase  " << (myusage.ru_maxrss-intialMemUse)/1024);
 
     }
@@ -1102,12 +1077,10 @@ namespace Trk {
         }       
 
         *symBigMatrix += newMatrix;
-        delete accumMatrix;
       } else if (spaBigMatrix) { 
         ATH_MSG_DEBUG( "should reassign matrix "<< spaBigMatrix->ptrMap()->size() );        
         *spaBigMatrix  += *accumMatrix;     
         ATH_MSG_DEBUG( "??????  "<< spaBigMatrix->ptrMap()->size() );
-        delete accumMatrix;
       }
     }
 
@@ -1214,7 +1187,7 @@ namespace Trk {
     int nDoF = alignParList->size();
 
 
-    const AlSymMat * chkMatrix = dynamic_cast<const AlSymMat*>(m_bigmatrix);
+    const AlSymMat * chkMatrix = dynamic_cast<const AlSymMat*>(m_bigmatrix.get());
     if(chkMatrix){
       // Method when using the dense matrix
       for (int i=0;i<nDoF;i++) {
@@ -1503,9 +1476,9 @@ namespace Trk {
       int thisNDoF = alignPars->size();
 
       // fill local covariance matrix
-      CLHEP::HepSymMatrix * covsub = nullptr;
+      std::unique_ptr<CLHEP::HepSymMatrix> covsub;;
       if(cov && module->nHits() >= m_minNumHits && module->nTracks() >= m_minNumTrks) {
-        covsub = new CLHEP::HepSymMatrix(thisNDoF,0);
+        covsub = std::make_unique<CLHEP::HepSymMatrix>(thisNDoF,0);
         for (int i=0;i<thisNDoF;++i) {
           int ipar = alignPars->at(i)->index();
           double sigma_i = alignPars->at(i)->sigma();
@@ -1529,9 +1502,8 @@ namespace Trk {
         }
       }
 
-      printModuleSolution(os,module,covsub);
+      printModuleSolution(os,module,covsub.get());
 
-      delete covsub;
     }
     os << "--------------------------------------------------------------------------------" << std::endl;
   }
@@ -1539,55 +1511,32 @@ namespace Trk {
   //________________________________________________________________________
   void MatrixTool::printGlobalSolution(std::ostream & os, const TMatrixDSym * cov0)
   {
-    CLHEP::HepSymMatrix * cov = nullptr;
+    std::unique_ptr<CLHEP::HepSymMatrix> cov;
     if(cov0) {
       int nsize = cov0->GetNrows();
-      cov = new CLHEP::HepSymMatrix(nsize,0);
+      cov = std::make_unique<CLHEP::HepSymMatrix>(nsize,0);
 
       for(int i=0; i<nsize; i++)
         for(int j=0; j<=i; j++)
           (*cov)[i][j] = (*cov0)[i][j];
     }
 
-    printGlobalSolution(os,cov);
+    printGlobalSolution(os,cov.get());
 
-    delete cov;
   }
-/**
-  namespace {
-    class RestoreIOSFlags 
-    {
-    public:
-      RestoreIOSFlags (std::ostream &os) 
-        : m_os(&os), 
-          m_flags(m_os->flags()),
-          m_precision(m_os->precision())
-      {}
-      ~RestoreIOSFlags() {
-        m_os->flags(m_flags);
-        m_os->precision(m_precision);
-      }
-    private:
-      std::ostream *m_os;
-      std::ios_base::fmtflags m_flags;
-      std::streamsize  m_precision;
-    };
-  }
-**/
+
   //________________________________________________________________________
   void MatrixTool::printModuleSolution(std::ostream & os, const AlignModule * module, const CLHEP::HepSymMatrix * cov) const
   {
-    boost::io::ios_all_saver  ias( os ); //save the stream state    
-
     os << "--------------------------------------------------------------------------------" << std::endl;
     os << "Alignment parameters for module: " << module->name() << std::endl;
     os << "Number of tracks passing: " << module->nTracks() << std::endl;
     if(m_minNumHits>0 && module->nHits()<m_minNumHits) {
-      os << "Number of hits too small: "<<module->nHits()<<" < "<<m_minNumHits<<"  Skipping the module"<<std::endl;
+      os << "Number of hits too small: "<<module->nHits()<<" < "<<m_minNumHits<<"  Skipping the module\n";
       return;
     }
     if(m_minNumTrks>0 && module->nTracks()<m_minNumTrks) {
-      os << "Number of tracks too small: "<<module->nTracks()<<" < "<<m_minNumTrks<<"  Skipping the module"<<std::endl;
+      os << "Number of tracks too small: "<<module->nTracks()<<" < "<<m_minNumTrks<<"  Skipping the module\n";
       return;
     }
     os << "Number of hits seen:      " << module->nHits() << std::endl;
@@ -1600,19 +1549,15 @@ namespace Trk {
       os << "No active parameters" << std::endl;
     else
     {
-      //RestoreIOSFlags restore_flags(os);
-
-      os.unsetf(std::ios_base::floatfield);
-      os << std::setiosflags(std::ios_base::left) << std::setprecision(5);
-
       // output alignment parameters and errors
       DataVector<AlignPar>::const_iterator ipar     = alignPars->begin();
       DataVector<AlignPar>::const_iterator ipar_end = alignPars->end();
       for ( ; ipar != ipar_end; ++ipar) {
         const AlignPar * par = *ipar;
-        os << std::setw(10) << par->dumpType()
-           << std::setw(12) << par->par() << " +/- " << std::setw(12) << par->err()
-           << std::endl;
+        os << std::format("{:<10}{:<12.5g} +/- {:<12.5g}\n",
+                          par->dumpType(),
+                          par->par(),
+                          par->err());
       }
 
       if(cov) {
@@ -1624,7 +1569,6 @@ namespace Trk {
         os << "Local correlation matrix: " << corrsub << std::flush;
       }
     }
-    ias.restore(); //restore the stream state
   }
 
   //________________________________________________________________________
@@ -1638,10 +1582,10 @@ namespace Trk {
   {
     ATH_MSG_INFO("solving Global using Lapack");
     if(m_logStream) {
-      *m_logStream<<"*************************************************************"<<std::endl;
-      *m_logStream<<"**************  solving using Global method  ****************"<<std::endl;
-      *m_logStream<<"**************         using LAPACK          ****************"<<std::endl;
-      *m_logStream<<"*************************************************************"<<std::endl;
+      *m_logStream<<"*************************************************************\n";
+      *m_logStream<<"**************  solving using Global method  ****************\n";
+      *m_logStream<<"**************         using LAPACK          ****************\n";
+      *m_logStream<<"*************************************************************\n";
     }
 
     // get rescaled first and second derivatives
@@ -1678,9 +1622,9 @@ namespace Trk {
     }
 
     // store the original matrix for checks
-    AlSymMat * d2Chi2 = nullptr;
+    std::unique_ptr<AlSymMat> d2Chi2 ;
     if (m_calculateFullCovariance)
-      d2Chi2 = new AlSymMat(*aBetterMat);
+      d2Chi2 = std::make_unique<AlSymMat>(*aBetterMat);
 
     clock_t starttime = clock();
 
@@ -1702,27 +1646,26 @@ namespace Trk {
     double time_solve = 0.;
     if (info==0) {
       starttime = clock();
-      postSolvingLapack(aBetterVec,d2Chi2,w,z,m_aNDoF);
+      postSolvingLapack(aBetterVec,d2Chi2.get(),w,z,m_aNDoF);
       stoptime = clock();
       time_solve = (stoptime-starttime)/double(CLOCKS_PER_SEC);
       ATH_MSG_INFO(" - time spent solving the system: "<<time_solve<<" s");
       if(m_logStream) {
-        *m_logStream<<"time spent for diagonalization: "<<time_diag<<" s"<<std::endl;
-        *m_logStream<<"time spent for post-solving: "<<time_solve<<" s"<<std::endl;
+        *m_logStream<<"time spent for diagonalization: "<<time_diag<<" s\n";
+        *m_logStream<<"time spent for post-solving: "<<time_solve<<" s\n";
       }
     }
     else {
       ATH_MSG_ERROR("Problem in diagonalization. Solving skipped.");
       if(m_logStream)
-        *m_logStream<<"time spent for diagonalization: "<<time_diag<<" s"<<std::endl;
+        *m_logStream<<"time spent for diagonalization: "<<time_diag<<" s\n";
     }
 
     if(m_logStream) {
-      *m_logStream<<"total time spent in solve: "<<time_diag+time_solve<<" s"<<std::endl;
-      *m_logStream<<std::endl;
+      *m_logStream<<"total time spent in solve: "<<time_diag+time_solve<<" s\n";
+      *m_logStream<<"\n";
     }
 
-    delete d2Chi2;
     delete aBetterMat;
     delete aBetterVec;
 
@@ -1909,8 +1852,12 @@ namespace Trk {
       for(int i=0; i<size; i++) {
 
         (*Align_db)[i] = (-D[i]/w[i]);
-        (*Align_error_db)[i] = sqrt(1.0/w[i]/m_scale);
-
+        if(m_scale<=0.)[[unlikely]]{
+          ATH_MSG_WARNING("postSolvingLapack: Scaling requested but scale not set. Not scaling matrix and vector.");
+        } else {
+          (*Align_error_db)[i] = sqrt(1.0/w[i]/m_scale);
+        }
+        
         if (w[i]<eigenvalue_threshold) {
           ATH_MSG_INFO("  + EigenMode " << i
                          << " removed as eigenvalue lower than the threshold " << eigenvalue_threshold
@@ -2050,14 +1997,14 @@ namespace Trk {
     AlVec errSq(size);
 
     // full covariance matrix
-    CLHEP::HepSymMatrix * cov = nullptr;
+    std::unique_ptr<CLHEP::HepSymMatrix> cov;
     if(m_calculateFullCovariance)
       // Warning ! The matrix can be huge!
       // This can lead to memory problems
-      cov = new CLHEP::HepSymMatrix(size,0);
+      cov = std::make_unique<CLHEP::HepSymMatrix>(size,0);
 
     if(m_logStream)
-      *m_logStream<<"/------ The Eigenvalue Spectrum -------"<<std::endl;
+      *m_logStream<<"/------ The Eigenvalue Spectrum -------\n";
 
     for (int i=0;i<size;i++) {
       AlVec thisdelta(size);
@@ -2069,16 +2016,16 @@ namespace Trk {
       if( i<m_modcut ) {
         ATH_MSG_INFO("skipping eigenvalue "<<w[i]<<" , modcut is "<<m_modcut);
         if(m_logStream)
-           *m_logStream<<"| skipping eigenvalue "<<w[i]<<std::endl;
+           *m_logStream<<"| skipping eigenvalue "<<w[i]<<"\n";
       }
       else if( w[i] < m_eigenvaluethreshold ) {
         ATH_MSG_INFO("skipping eigenvalue "<<w[i]<<" , cut is "<<m_eigenvaluethreshold);
         if(m_logStream)
-           *m_logStream<<"| skipping eigenvalue "<<w[i]<<std::endl;
+           *m_logStream<<"| skipping eigenvalue "<<w[i]<<"\n";
       }
       else {
         if(m_logStream)
-          *m_logStream<<"| "<<w[i]<<std::endl;
+          *m_logStream<<"| "<<w[i]<<"\n";
 
         delta += thisdelta;
         for(int j=0;j<size;j++) {
@@ -2092,7 +2039,7 @@ namespace Trk {
     }
 
     if(m_logStream)
-      *m_logStream<<"\\----- End of Eigenvalue Spectrum -----"<<std::endl;
+      *m_logStream<<"\\----- End of Eigenvalue Spectrum -----\n";
 
     ATH_MSG_DEBUG("Alignment constants:");
 
@@ -2126,30 +2073,29 @@ namespace Trk {
     }
 
     if(m_logStream) {
-      printGlobalSolution(*m_logStream, cov);
+      printGlobalSolution(*m_logStream, cov.get());
 
       // norm of first derivative
       double norm1st = dChi2->norm();
       if(m_scaleMatrix && m_scale>0.) // undo normalization scaling
         norm1st *= m_scale;
-      *m_logStream<<"norm of first derivative :            "<<norm1st<<std::endl;
+      *m_logStream<<"norm of first derivative :            "<<norm1st<<"\n";
 
       if(d2Chi2) {
         // distance to solution
         double dist = ( (*d2Chi2) * deltafull + (*dChi2) ).norm();
         if(m_scaleMatrix && m_scale>0.) // undo normalization scaling
           dist *= m_scale;
-        *m_logStream<<"distance to solution :                "<<dist<<std::endl;
+        *m_logStream<<"distance to solution :                "<<dist<<"\n";
 
         // calculate chi2 of the alignment change
         double chi2 = delta * (*d2Chi2) * delta * .5;
         if(m_scaleMatrix && m_scale>0.) // undo normalization scaling
           chi2 *= m_scale;
-        *m_logStream<<"delta(chi2) of the alignment change : "<<chi2<<" / "<<size<<std::endl;
+        *m_logStream<<"delta(chi2) of the alignment change : "<<chi2<<" / "<<size<<"\n";
       }
     }
 
-    delete cov;
   }
 
   //________________________________________________________________________
@@ -2157,10 +2103,10 @@ namespace Trk {
   {
     ATH_MSG_INFO("solving Global using SparseEigen");
     if(m_logStream) {
-      *m_logStream<<"*************************************************************"<<std::endl;
-      *m_logStream<<"**************  solving using Global method  ****************"<<std::endl;
-      *m_logStream<<"**************      using SparseEigen        ****************"<<std::endl;
-      *m_logStream<<"*************************************************************"<<std::endl;
+      *m_logStream<<"*************************************************************\n";
+      *m_logStream<<"**************  solving using Global method  ****************\n";
+      *m_logStream<<"**************      using SparseEigen        ****************\n";
+      *m_logStream<<"*************************************************************\n";
     }
 
     // start measuring time
@@ -2170,14 +2116,14 @@ namespace Trk {
 
     AlSpaMat * ABetterMat = nullptr;
     bool isCopy = false;
-    if ( dynamic_cast<AlSymMat*>(m_bigmatrix) ) {
+    if ( dynamic_cast<AlSymMat*>(m_bigmatrix.get()) ) {
       ATH_MSG_INFO("Converting Matrix Format for fast solving");
-      ABetterMat = new AlSpaMat(*(dynamic_cast<AlSymMat*>(m_bigmatrix)));
+      ABetterMat = new AlSpaMat(*(dynamic_cast<AlSymMat*>(m_bigmatrix.get())));
       isCopy = true;
     }
-    else if ( dynamic_cast<AlSpaMat*>(m_bigmatrix) ) {
+    else if ( dynamic_cast<AlSpaMat*>(m_bigmatrix.get()) ) {
       ATH_MSG_INFO("Matrix format native to the fast solving");
-      ABetterMat = (dynamic_cast<AlSpaMat*>(m_bigmatrix));
+      ABetterMat = (dynamic_cast<AlSpaMat*>(m_bigmatrix.get()));
     }
     else {
       ATH_MSG_ERROR("Cannot cast to neither AlSymMat nor AlSpaMat");
@@ -2216,12 +2162,12 @@ namespace Trk {
     if(info == 0) {
       ATH_MSG_INFO("SolveWithEigen solving OK");
       if(m_logStream)
-        *m_logStream<<"SolveWithEigen solving OK."<<std::endl;
+        *m_logStream<<"SolveWithEigen solving OK.\n";
     }
     else {
       ATH_MSG_ERROR( "SolveWithEigen error code (0 if OK) = "<<info );
       if(m_logStream)
-        *m_logStream<<"SolveWithEigen error code (0 if OK) = "<<info<<std::endl;
+        *m_logStream<<"SolveWithEigen error code (0 if OK) = "<<info<<"\n";
     }
 
     if( isCopy )
@@ -2257,22 +2203,22 @@ namespace Trk {
     }
 
     if(m_logStream) {
-      CLHEP::HepSymMatrix * cov = nullptr;
-      printGlobalSolution(*m_logStream, cov);
+      std::unique_ptr<CLHEP::HepSymMatrix> cov;
+      printGlobalSolution(*m_logStream, cov.get());
 
       // norm of first derivative
-      *m_logStream<<"norm of first derivative :            "<<origVec.norm()<<std::endl;
+      *m_logStream<<"norm of first derivative :            "<<origVec.norm()<<"\n";
 
       // distance to solution
       double dist = ( (*aBetterMat) * (*aBetterVec) - origVec ).norm();
-      *m_logStream<<"distance to solution :                "<<dist<<std::endl;
+      *m_logStream<<"distance to solution :                "<<dist<<"\n";
 
       // calculate chi2 of the alignment change
       double chi2 = (*aBetterVec) * (*aBetterMat) * (*aBetterVec) * .5;
-      *m_logStream<<"delta(chi2) of the alignment change : "<<chi2<<" / "<<m_aNDoF<<std::endl;
+      *m_logStream<<"delta(chi2) of the alignment change : "<<chi2<<" / "<<m_aNDoF<<"\n";
 
       // time spent here
-      *m_logStream<<"time spent in solve :                 "<<totaltime<<" s"<<std::endl;
+      *m_logStream<<"time spent in solve :                 "<<totaltime<<" s\n";
     }
 
     delete aBetterMat;

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # art-description: FTAG Validation plots run on mc16 AOD file
 # art-type: grid
@@ -24,8 +24,10 @@ rdo2aod.input = 'ttbar'
 rdo2aod.max_events = 800
 rdo2aod.threads = 4
 rdo2aod.concurrent_events = 4
-rdo2aod.args = '--outputAODFile=AOD.pool.root --steering="doRDO_TRIG" --conditionsTag OFLCOND-MC23-SDR-RUN3-07'
+rdo2aod.args = '--outputAODFile=AOD.pool.root --steering="doRDO_TRIG"'
 rdo2aod.args += ' --CA "default:True"'
+from AthenaConfiguration.TestDefaults import defaultConditionsTags
+rdo2aod.args += ' --conditionsTag {:s}'.format(defaultConditionsTags.RUN3_MC)
 rdo2aod.args += ' --preExec="all:{:s};"'.format(preExec)
 
 

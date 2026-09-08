@@ -9,16 +9,10 @@
 
 namespace ActsTrk {
 
-  SeedsToTrackParamsAlg::SeedsToTrackParamsAlg(const std::string& name, 
-								   ISvcLocator* pSvcLocator)
-    : AthReentrantAlgorithm(name, pSvcLocator) 
-  {}
-
   StatusCode SeedsToTrackParamsAlg::initialize() {
     ATH_MSG_INFO("Initializing " << name() << " ...");
 
-    ATH_CHECK(m_trackingGeometryTool.retrieve());
-    ATH_CHECK(m_extrapolationTool.retrieve());
+    ATH_CHECK(m_ctxProvider.initialize());
     ATH_CHECK(m_geometryConvTool.retrieve());
     ATH_CHECK(m_paramEstimationTool.retrieve());
 
@@ -26,14 +20,15 @@ namespace ActsTrk {
     ATH_CHECK(m_inputSeedContainerKey.initialize());
     ATH_CHECK(m_outputTrackParamsCollectionKey.initialize());
 
-    return AthReentrantAlgorithm::initialize();
+    return StatusCode::SUCCESS;
   }
 
   StatusCode SeedsToTrackParamsAlg::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("Executing " << name() << " ... ");
 
-    Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
-    Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
+    const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
+    const Acts::MagneticFieldContext mfContext = m_ctxProvider.getMagneticFieldContext(ctx);
+    const Acts::CalibrationContext calContext = m_ctxProvider.getCalibrationContext(ctx);
 
     SG::ReadHandle<ActsTrk::SeedContainer> seedContainerHandle = SG::makeHandle(m_inputSeedContainerKey, ctx);
     SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> detEleHandle = SG::makeHandle(m_detEleCollKey, ctx);
@@ -63,12 +58,13 @@ namespace ActsTrk {
           return *m_geometryConvTool->convertSurfaceToActs(atlas_surface);
         };
 
-      std::optional<Acts::BoundTrackParameters> optTrackParams =
+      const auto& [optTrackParams, estimationStatus] =
         m_paramEstimationTool->estimateTrackParameters(
 						       seed,
 						       useTopSp,
 						       tgContext,
 						       mfContext,
+						       calContext,
 						       retrieveSurfaceFunction);
 
       if (!optTrackParams.has_value()) {
@@ -94,6 +90,5 @@ namespace ActsTrk {
 
     return r > rBoundary || z > zBoundary;
   }
-
 
 }

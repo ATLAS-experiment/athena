@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGINFOTPCNV_IPTRACKINFO_P1
@@ -16,17 +16,17 @@ namespace Analysis {
     friend class IPTrackInfoCnv_p1;
     private:
       ElementLinkInt_p1 m_track;
-      int m_trackGrade_int;
+      int m_trackGrade_int = 0;
       std::string m_trackGrade_string;
-      bool m_isFromV0;
-      float m_valD0wrtPV;
-      float m_sigD0wrtPV;
-      float m_valZ0wrtPV;
-      float m_sigZ0wrtPV;
-      float m_trackWeight2D;
-      float m_trackWeight3D;
-      float m_trackProbJP;
-      float m_trackProbJPneg;
+      bool m_isFromV0 = false;
+      float m_valD0wrtPV = 0;
+      float m_sigD0wrtPV = 0;
+      float m_valZ0wrtPV = 0;
+      float m_sigZ0wrtPV = 0;
+      float m_trackWeight2D = 0;
+      float m_trackWeight3D = 0;
+      float m_trackProbJP = 0;
+      float m_trackProbJPneg = 0;
   };
 
 }

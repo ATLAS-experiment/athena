@@ -25,6 +25,8 @@ namespace
 
   dqm_algorithms::BasicHistoCheck Empty( "Histogram_Empty" );
   dqm_algorithms::BasicHistoCheck EffectiveEmpty( "Histogram_Effective_Empty" );
+  dqm_algorithms::BasicHistoCheck EmptyDisabled( "Histogram_Not_Empty_Disabled" );
+  dqm_algorithms::BasicHistoCheck DummyAlg( "Dummy_Algorithm" );
 }
 
 
@@ -58,6 +60,11 @@ dqm_algorithms::BasicHistoCheck::execute(	const std::string & name ,
     throw dqm_core::BadConfig( ERS_HERE, name, "does not inherit from TH1" );
   }
   
+  if (m_name == "Dummy_Algorithm") {
+    ERS_DEBUG(1, "Dummy_Algorithm: Always returning Disabled for " << histogram->GetName());
+    return new dqm_core::Result(dqm_core::Result::Disabled);
+  }
+
   const double minstat = dqm_algorithms::tools::GetFirstFromMap( "MinStat", config.getParameters(), -1);
   
   if (histogram->GetEntries() < minstat ) {
@@ -205,14 +212,18 @@ dqm_algorithms::BasicHistoCheck::execute(	const std::string & name ,
     }else {
       ERS_DEBUG(1, "Histogram " <<histogram->GetName()<<" is Not Empty");
       return new dqm_core::Result(dqm_core::Result::Red);
+    } 
+  } else if (m_name == "Histogram_Not_Empty_Disabled") {
+    if (histogram->GetEntries() != 0) {
+      ERS_DEBUG(1, "Histogram " <<histogram->GetName()<<" is Not Empty -> Green");
+      return new dqm_core::Result(dqm_core::Result::Green);
+    }else {
+      ERS_DEBUG(1, "Histogram " <<histogram->GetName()<<" is Empty -> Disabled");
+      return new dqm_core::Result(dqm_core::Result::Disabled);
     }
-
-    
   } else {
-    return new dqm_core::Result();
-  }
-  
-  
+      return new dqm_core::Result();
+    }
 }
 
 void
@@ -226,12 +237,14 @@ dqm_algorithms::BasicHistoCheck::printDescription(std::ostream& out)
     out<<"No_UnderFlows: Checks that histogram has no Underflows"<<std::endl;
   }else if ( m_name == "No_OverFlows"){
     out<<"No_OverFlows: Checks that histogram has no Overflows"<<std::endl;
-
-
   } else if ( m_name == "Histogram_Empty"){
     out<<"Histogram_Empty: Checks that histogram is empty\n"<<std::endl;
   } else if ( m_name == "Histogram_Effective_Empty"){
     out<<"Histogram_Not_Empty:\tChecks that histogram has no effective entries\n\t\t\t(see ROOT doc -> TH1 -> GetEffectiveEntries())\n"<<std::endl;
+  } else if ( m_name == "Histogram_Not_Empty_Disabled"){
+    out<<"Histogram_Not_Empty_Disabled: Checks that histogram is not empty (Green if filled, Disabled if empty)\n"<<std::endl;
+  } else if ( m_name == "Dummy_Algorithm"){
+    out<<"Dummy_Algorithm: Always returns Result::Disabled regardless of histogram content or entries.\n"<<std::endl;
   }
   
   out<<"Optional Parameter: MinStat: Minimum histogram statistics needed to perform Algorithm\n"<<std::endl;

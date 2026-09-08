@@ -31,6 +31,7 @@ inputRDO=""
 outputAOD=""
 nEvents="-1"
 skipCheck=0
+storeTrackSeeds=True
 
 ## parsing flags
 while [ $# -ge 1 ];do
@@ -40,6 +41,7 @@ while [ $# -ge 1 ];do
         -o  | --outputAOD )     if [ $# -lt 2 ] ; then usage ; fi ; outputAOD="$2" ; shift ;;
         -n  | --nEvents )       if [ $# -lt 2 ] ; then usage ; fi ; nEvents="$2"   ; shift ;;
         -s  | --skipCheck )     if [ $# -lt 1 ] ; then usage ; fi ; skipCheck=1    ;;
+        -t  | --noStoreSeeds )  if [ $# -lt 1 ] ; then usage ; fi ; storeTrackSeeds=False ;;
         -h  | --help )          usage 0 ;;
         *) shift ;;
     esac
@@ -55,22 +57,22 @@ if [ ! -f $inputRDO ]; then
     exit 1
 fi
 
-source "$(dirname "$0")/setup_G200_ART.sh"
-
 ## running reconstruction
-run Reco_tf.py --CA \
+ignore_pattern='ERROR Locating dev file .+ Do not let this propagate to a release'
+run Reco_tf.py \
     --maxEvents ${nEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
-    --postInclude 'EFTracking.TrackingAlgConfig.g0xxAlgCfg,ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
-    --preExec 'from EFTracking.GpuEFTrackingConfigFlags import createGpuEFTrackingConfigFlags; \
-               flags.addFlagsCategory("Trigger.EFTracking.GPU", createGpuEFTrackingConfigFlags, prefix=True); \
-               flags.Trigger.EFTracking.GPU.inputDirectory="'"$PWD"'/ITk_data/"; \
-               flags.Trigger.EFTracking.GPU.pipeline="g080"; \
+    --postInclude 'ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
+    --preExec "flags.Detector.EnableHGTD=False; \
+               flags.Acts.doLargeRadius=False; \
+               flags.Acts.Device.doClusterization=True; \
+               flags.Tracking.doPixelDigitalClustering=True; \
+               flags.Tracking.ITkActsPass.storeTrackSeeds=${storeTrackSeeds}; \
                from ActsConfig.ActsConfigFlags import SeedingStrategy; \
-               flags.Acts.SeedingStrategy=SeedingStrategy.Gbts;' \
-    --steering 'doRAWtoALL' \
+               flags.Tracking.ITkActsPass.SeedingStrategy=SeedingStrategy.Gbts;" \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD} \
+    --ignorePatterns "${ignore_pattern}" \
     --perfmon fullmonmt
 
 rc=$?

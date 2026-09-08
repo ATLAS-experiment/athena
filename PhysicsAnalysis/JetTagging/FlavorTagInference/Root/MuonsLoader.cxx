@@ -121,6 +121,14 @@ namespace FlavorTagInference {
       };
       m_used_remap = m_seqGetter.getUsedRemap();
       m_deps.bTagInputs.insert(options.muon_link_name);
+      // when the muons don't follow the tracks nothing else declares these
+      if (!options.muon_ip_prefix.empty()
+          && options.muon_ip_prefix != options.track_prefix) {
+        for (const InputVariableConfig& input: cfg.inputs) {
+          m_deps.trackInputs.merge(getter_utils::ipDataDependencies(
+            input.name, options.muon_ip_prefix));
+        }
+      }
       m_name = cfg.name;
     }
 

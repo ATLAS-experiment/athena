@@ -241,7 +241,7 @@ class AlgConfig(ABC):
                     else [
                         functools.partial(make_MET_menu_sequenceGenCfg, flags, sel_acc, hypo_tool)                                                
                     ],
-                    isEmpty=True if sel_acc is None else False
+                    isEmpty=sel_acc is None
                 )
             )
 

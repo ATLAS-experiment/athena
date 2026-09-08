@@ -14,8 +14,6 @@
   Clustering of LVL1 muon RoIs, access to LVL2 jets and SITRACK tracks.
 */
 
-
-#include "GaudiKernel/Algorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
@@ -80,11 +78,11 @@ private:
 
 protected:
 
-  typedef struct  {
-    float eta;
-    float phi;
-    int nroi;
-  } lvl1_muclu_roi;
+  struct lvl1_muclu_roi {
+    float eta{};
+    float phi{};
+    int nroi{};
+  };
 
   // JobOption properties
   /** A property which specifies the radius of the cluster */
@@ -92,7 +90,7 @@ protected:
   Gaudi::Property<std::string> m_featureLabel{"MuonCluLabel", "MuonClusterInput", "label for the MuonCluster feature in the HLT Navigation, for the xAOD::TrigCompositeContainer"};
 
   /** calculcate the deltaR between two Rois */
-  float DeltaR(lvl1_muclu_roi , lvl1_muclu_roi ) const;
+  float DeltaR(const lvl1_muclu_roi& , const lvl1_muclu_roi& ) const;
 
 };
 

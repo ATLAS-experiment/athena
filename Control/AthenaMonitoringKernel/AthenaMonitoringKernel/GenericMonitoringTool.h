@@ -68,8 +68,8 @@ public:
   const std::string& getPath() const         { return m_histoPath; }
 
   virtual ServiceHandle<ITHistSvc>& histogramService() { return m_histSvc; }
-  virtual uint32_t runNumber();
-  virtual uint32_t lumiBlock();
+  virtual uint32_t runNumber() const;
+  virtual uint32_t lumiBlock() const;
 
 private:
   /// THistSvc (do NOT fix the service type (only the name) to allow for a different implementation online

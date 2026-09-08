@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -13,6 +13,7 @@ using Gaudi::Units::GeV;
 #endif
 
 #include <numbers>
+#include <limits>
 
 /**
  * These functions are for building the maps of functions
@@ -108,7 +109,9 @@ namespace egammaMVAFunctions
         if (xAOD::EgammaHelpers::numberOfSiTracks(ph) == 2) {
           auto pt1 = compute_pt1conv(ph);
           auto pt2 = compute_pt2conv(ph);
-          return std::max(pt1, pt2)/(pt1+pt2);
+          auto denom = pt1+pt2;
+          if (denom == 0.)[[unlikely]] return std::numeric_limits<float>::max();
+          return std::max(pt1, pt2)/denom;
         }
           return 1.0f;
       };
@@ -120,7 +123,9 @@ namespace egammaMVAFunctions
 
           float rv = 0.0;
           if (xAOD::EgammaHelpers::numberOfSiTracks(ph) == 2) {
-            rv = std::max(0.0f, compute_correctedcl_Eacc(*cl)/(std::cosh(compute_cl_eta(*cl))*compute_ptconv(ph)));
+            auto denom = std::cosh(compute_cl_eta(*cl))*compute_ptconv(ph);
+            if (denom == 0.f)[[unlikely]] rv = std::numeric_limits<float>::max();
+            else rv = std::max(0.0f, compute_correctedcl_Eacc(*cl)/denom);
           }
           return std::min(rv, 2.0f);
         };
@@ -131,7 +136,9 @@ namespace egammaMVAFunctions
 
           float rv = 0.0;
           if (xAOD::EgammaHelpers::numberOfSiTracks(ph) == 2) {
-            rv = std::max(0.0f, compute_rawcl_Eacc(*cl)/(std::cosh(compute_cl_eta(*cl))*compute_ptconv(ph)));
+            auto denom = (std::cosh(compute_cl_eta(*cl))*compute_ptconv(ph));
+            if (denom == 0.f)[[unlikely]] rv = std::numeric_limits<float>::max();
+            else rv = std::max(0.0f, compute_rawcl_Eacc(*cl)/denom);
           }
           return std::min(rv, 2.0f);
         };

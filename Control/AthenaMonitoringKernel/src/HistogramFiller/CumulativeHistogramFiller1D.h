@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */  
   
 #ifndef AthenaMonitoringKernel_HistogramFiller_CumulativeHistogramFiller1D_h
@@ -29,7 +29,7 @@ namespace Monitored {
         const size_t maskSize = vars.cut->size();
         // Abort if no cut entries or first (and only) entry is false
         if (maskSize == 0 || (maskSize == 1 && !vars.cut->get(0))) { return 0; }
-        if (ATH_UNLIKELY(maskSize > 1 && maskSize != varVecSize)) {
+        if (maskSize > 1 && maskSize != varVecSize) [[unlikely]] {
           MsgStream log(Athena::getMessageSvc(), "CumulativeHistogramFiller1D");
           log << MSG::ERROR << "CutMask does not match the size of plotted variable: "
               << maskSize << " " << varVecSize << endmsg;

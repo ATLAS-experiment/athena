@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACKCALOEVENT_H
@@ -11,8 +11,6 @@
 #include "TrigCaloEvent/TrigTauClusterDetails.h"
 #include "TrigCaloEvent/Trig3Momentum.h"
 #include "TrigCaloEvent/TrigT2Jet.h"
-//#include "TrigCaloEvent/TrigMissingET.h"
-//#include "TrigCaloEvent/TrigMissingETContainer.h"
 #include "TrigCaloEvent/TrigCaloClusterContainer.h"
 #include "TrigCaloEvent/TrigEMClusterContainer.h"
 #include "TrigCaloEvent/TrigTauClusterContainer.h"
@@ -33,9 +31,7 @@
 #include "xAODTrigMinBias/TrigT2MbtsBitsContainer.h"
 
 
-void dummy_function_for_TrigCaloEvent_which_forces_dictionaries_generation ( /*
-									     DataVector<TrigMissingET> a,
-									     DataVector<TrigMissingETContainer> b,*/	     
+void dummy_function_for_TrigCaloEvent_which_forces_dictionaries_generation (
 									     DataVector<TrigCaloClusterContainer> c1,
 									     DataVector<TrigEMClusterContainer> c,
 									     DataVector<TrigTauClusterContainer> d,
@@ -48,8 +44,6 @@ void dummy_function_for_TrigCaloEvent_which_forces_dictionaries_generation ( /*
                                                                              DataVector<TrigRNNOutput> i,
                                                                              DataVector<TrigRNNOutputContainer> j
 									     ) {
-  /*  DataVector<TrigMissingET> aa = a;  
-      DataVector<TrigMissingETContainer> bb = b;*/
   DataVector<TrigEMClusterContainer> cc = c;
   DataVector<TrigCaloClusterContainer> cc1 = c1;
   DataVector<TrigTauClusterContainer> dd = d;

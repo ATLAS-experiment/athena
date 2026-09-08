@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -25,13 +25,9 @@
 
 
 // constructor
-Trk::LayerArrayCreator::LayerArrayCreator(const std::string& t, const std::string& n, const IInterface* p)
-: AthAlgTool(t,n,p),
-  m_emptyLayerMode(0)
+Trk::LayerArrayCreator::LayerArrayCreator(const std::string& t, const std::string& n, const IInterface* p) : AthAlgTool(t,n,p)
 {
     declareInterface<ILayerArrayCreator>(this);
-
-    declareProperty("EmptyLayerMode", m_emptyLayerMode);
 }
 
 

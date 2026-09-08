@@ -12,8 +12,7 @@
 
 #include "TFile.h"
 
-#include "HepPDT/ParticleData.hh"
-#include "HepPDT/ParticleDataTable.hh"
+#include "TruthUtils/HepMCHelpers.h"
 
 #include "CLHEP/Random/RandGauss.h"
 #include "CLHEP/Random/RandFlat.h"
@@ -239,7 +238,7 @@ bool TFCSEnergyAndHitGAN::fillEnergy(TFCSSimulationState &simulstate,
                                      const TFCSExtrapolationState *extrapol,
                                      NetworkInputs inputs) const {
   const int pdgId = truth->pdgid();
-  const float charge = HepPDT::ParticleID(pdgId).charge();
+  const float charge = MC::charge(pdgId);
 
   float Einit;
   const float Ekin = truth->Ekin();

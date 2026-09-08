@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// Implementations of concrete input-to-PseudoJet conversions
@@ -40,8 +40,8 @@ namespace PseudoJetGetter {
     }
 
     bool operator()(const xAOD::IParticle* ip) {
-      null = (ip == 0);
-      negativeE = skipNegativeEnergy && ip->e() <= 0.0;
+      null = (ip == nullptr);
+      if (not null) negativeE = skipNegativeEnergy && ip->e() <= 0.0;
       return (null || negativeE);
     }
   };
@@ -76,11 +76,11 @@ namespace PseudoJetGetter {
 #ifndef GENERATIONBASE
 
   struct EMTopoRejecter{
-    const xAOD::CaloCluster* cluster{0};
+    const xAOD::CaloCluster* cluster{};
 
     bool operator()(const xAOD::IParticle* ip){
       cluster = dynamic_cast<const xAOD::CaloCluster*>(ip);
-      return cluster == 0;  // reject if not a cluster
+      return cluster == nullptr;  // reject if not a cluster
     }
   };
 
@@ -141,10 +141,10 @@ namespace PseudoJetGetter {
       if (std::isinf(e) || std::isnan(e)) return true;
 
       if(ip->type() == xAOD::Type::FlowElement){
-        const xAOD::FlowElement* pfo = dynamic_cast<const xAOD::FlowElement*>(ip);
+        const xAOD::FlowElement* pfo = static_cast<const xAOD::FlowElement*>(ip);
 
 	reject = (skipNegativeEnergy && e<FLT_MIN);
-
+  
 	if(!inputIsUFO){
 	  if( pfo->isCharged() ){
 	    if(!useChargedPFOs) reject = true;
@@ -164,7 +164,7 @@ namespace PseudoJetGetter {
         return reject;
       }
     
-      const xAOD::PFO* pfo = dynamic_cast<const xAOD::PFO*>(ip);
+      const xAOD::PFO* pfo = static_cast<const xAOD::PFO*>(ip);
     
       // keep charged PFOs with energy==0 because for MET TST with PFlow, 
       // there may be high pt 
@@ -226,7 +226,7 @@ namespace PseudoJetGetter {
     // loop over the input iparticles, select and  convert to pseudojets
     for(const xAOD::IParticle* ip: ips) {
 
-      const xAOD::FlowElement* pfo = dynamic_cast<const xAOD::FlowElement*>(ip);
+      const xAOD::FlowElement* pfo = static_cast<const xAOD::FlowElement*>(ip);
       ++index;
       if(rejecter(ip)){
         continue;

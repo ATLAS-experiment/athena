@@ -547,17 +547,13 @@ protected:
       else {
 
          // apply final calibration to n-best measurements
-         using post_calib_meas_cov_pair_t
-            = PairWithFlags<typename MeasurementSelectorTraits<derived_t>::template CalibratedMeasurement<DIM>,
-                            typename MeasurementSelectorTraits<derived_t>::template CalibratedMeasurementCovariance<DIM> >;
-
          // First Create states without setting information about the calibrated measurement for the selected measurements
          // @TODO first create state then copy measurements, or crete state by state and set measurements ?
          //       the lastter has the "advantage" that the outlier flag can be set individually
          //       the former has the advantage that part of the state creation code is independent of the
          //       the measurement.
 
-         Acts::BoundSubspaceIndices boundSubspaceIndices;
+         Acts::BoundSubspaceIndices boundSubspaceIndices{};
          std::copy(parameter_map.begin(), parameter_map.end(), boundSubspaceIndices.begin());
          createStates( selected_measurements.size(),
                        boundState,

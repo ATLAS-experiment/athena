@@ -16,7 +16,6 @@ namespace MuonR4{
     
     StatusCode TrkSegmentCnvAlg::initialize() {
         ATH_CHECK(m_idHelperSvc.retrieve());
-
         ATH_CHECK(m_keyTgc.initialize(!m_keyTgc.empty()));
         ATH_CHECK(m_keyRpc.initialize(!m_keyRpc.empty()));
         ATH_CHECK(m_keyMdt.initialize(!m_keyMdt.empty()));
@@ -40,7 +39,6 @@ namespace MuonR4{
             for (const Segment* segment : *translateMe) {
                 ATH_CHECK(convert(ctx, *segment, *translatedSegments));
             }
-
         }
         ATH_MSG_VERBOSE("Translated in total "<<translatedSegments->size()<<" segments.");
         
@@ -50,7 +48,7 @@ namespace MuonR4{
     }
     template <class PrdType> 
         const PrdType* TrkSegmentCnvAlg::fetchPrd(const Identifier& prdId,
-                                               const Muon::MuonPrepDataContainerT<PrdType>* prdContainer) const {
+                                                  const Muon::MuonPrepDataContainerT<PrdType>* prdContainer) const {
         if (!prdContainer) {
             ATH_MSG_ERROR("Cannot fetch a prep data object as the container given for "<<
                           m_idHelperSvc->toString(prdId)<<" is a nullptr");
@@ -71,18 +69,39 @@ namespace MuonR4{
         return nullptr;    
     }
     template <class PrdType>
+        const PrdType* TrkSegmentCnvAlg::fetchPrd(const xAOD::MuonMeasurement& meas,
+                                                  const std::string& accName) const {
+        using Link_t = ElementLink<typename Muon::MuonPrepDataCollection<PrdType>>;
+        SG::ConstAccessor<Link_t> acc{accName};
+        if (!acc.isAvailable(meas) || !acc(meas).isValid()) {
+            ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - No link decoration "<<accName<<" for measurement "
+                            <<m_idHelperSvc->toString(meas.identify()));
+            return nullptr;
+        }
+        return *acc(meas);
+    }
+    template <class PrdType>
         StatusCode TrkSegmentCnvAlg::convertMeasurement(const MuonR4::Segment& segment,
                                                         const CalibratedSpacePoint& spacePoint,
                                                         const Muon::MuonPrepDataContainerT<PrdType>* prdContainer,
-                                                        std::vector<std::unique_ptr<Trk::RIO_OnTrack>>& convMeasVec) const {
+                                                        std::vector<std::unique_ptr<Trk::RIO_OnTrack>>& convMeasVec,
+                                                        const std::string& accName) const {
         bool added{false};
 
         for (const xAOD::MuonMeasurement* uncalib: {spacePoint.spacePoint()->primaryMeasurement(), 
                                                     spacePoint.spacePoint()->secondaryMeasurement()}){
-            if (!uncalib) continue;
+            if (!uncalib) {
+                continue;
+            }
             added = true;
 
-            const PrdType* prd = fetchPrd(uncalib->identify(), prdContainer);
+            const PrdType* prd{nullptr};
+            if (!accName.empty()) {
+                prd = fetchPrd<PrdType>(*uncalib, accName);
+            }
+            if (!prd) {
+                prd = fetchPrd(uncalib->identify(), prdContainer);
+            }
             if (!prd) {
                 ATH_MSG_FATAL("Failed to retrieve segment from "<<m_idHelperSvc->toString(uncalib->identify()));
                 return StatusCode::FAILURE;
@@ -125,12 +144,11 @@ namespace MuonR4{
             convMeasVec.push_back(std::move(rot));
         }
         if (!added) {
-            ATH_MSG_ERROR("Could not translate space point "<<m_idHelperSvc->toString(spacePoint.spacePoint()->identify()));
+            ATH_MSG_ERROR("Could not translate space point "<<spacePoint);
             return StatusCode::FAILURE;
         }
         return StatusCode::SUCCESS;
     }
-
     StatusCode TrkSegmentCnvAlg::convert(const EventContext& ctx,
                                          const MuonR4::Segment& segment,
                                          Trk::SegmentCollection& outContainer) const {
@@ -159,16 +177,16 @@ namespace MuonR4{
             }
             switch (spacePoint->type()) {
                 case xAOD::UncalibMeasType::MdtDriftCircleType: {
-                    ATH_CHECK(convertMeasurement(segment, *spacePoint, mdtPrds, rots));
+                    ATH_CHECK(convertMeasurement(segment, *spacePoint, mdtPrds, rots, "mdtTrkPrdLink"));
                     ++nPrec;
                     break;
                 }
                 case xAOD::UncalibMeasType::RpcStripType: {
-                    ATH_CHECK(convertMeasurement(segment,*spacePoint, rpcPrds, rots));
+                    ATH_CHECK(convertMeasurement(segment,*spacePoint, rpcPrds, rots, "rpcTrkPrdLink"));
                     break;
                 }
                 case xAOD::UncalibMeasType::TgcStripType: {
-                    ATH_CHECK(convertMeasurement(segment,*spacePoint, tgcPrds, rots));
+                    ATH_CHECK(convertMeasurement(segment,*spacePoint, tgcPrds, rots, "tgcTrkPrdLink"));
                     break;
                 }
                 case xAOD::UncalibMeasType::MMClusterType:{

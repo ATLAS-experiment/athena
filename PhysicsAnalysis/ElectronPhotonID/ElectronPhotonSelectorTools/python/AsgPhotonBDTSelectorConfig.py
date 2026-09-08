@@ -6,156 +6,70 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod
 
 
-# Default configurations
-# separate defaults for Run 2 and Run 3, and for using NFs or using fudge factors
-def getPhotonBDTConfig(flags, useNFs):
-
-    from AthenaConfiguration.Enums import LHCPeriod
-
-    isRun3 = (flags.GeoModel.Run == LHCPeriod.Run3)
-
-    if isRun3:
-        if useNFs:
-            return dict(
-                workingPoint="TightBDTPhoton_Run3_NFs",
-                modelConv="ElectronPhotonSelectorTools/offline/mc23_20260310/NFs/LightGBM_model_mc23ade_v23NF_converted.root",
-                modelUnconv="ElectronPhotonSelectorTools/offline/mc23_20260310/NFs/LightGBM_model_mc23ade_v23NF_unconverted.root",
-                scoreDecoration="BDTScore_NFs",
-                isEMDecoration="BDTIsEM_NFs",
-            )
-        else:
-            return dict(
-                workingPoint="TightBDTPhoton_Run3",
-                modelConv="ElectronPhotonSelectorTools/offline/mc23_20260310/FudgeFactors/LightGBM_model_mc23ade_v23_converted.root",
-                modelUnconv="ElectronPhotonSelectorTools/offline/mc23_20260310/FudgeFactors/LightGBM_model_mc23ade_v23_unconverted.root",
-                scoreDecoration="BDTScore",
-                isEMDecoration="BDTIsEM",
-            )
-
-    else:
-        if useNFs:
-            return dict(
-                workingPoint="TightBDTPhoton_Run2_NFs",
-                modelConv="ElectronPhotonSelectorTools/offline/mc20_20260310/NFs/LightGBM_model_mc20ade_v15NF_converted.root",
-                modelUnconv="ElectronPhotonSelectorTools/offline/mc20_20260310/NFs/LightGBM_model_mc20ade_v15NF_unconverted.root",
-                scoreDecoration="BDTScore_NFs",
-                isEMDecoration="BDTIsEM_NFs",
-            )
-        else:
-            return dict(
-                workingPoint="TightBDTPhoton_Run2",
-                modelConv="ElectronPhotonSelectorTools/offline/mc20_20260310/FudgeFactors/LightGBM_model_mc20ade_v15_converted.root",
-                modelUnconv="ElectronPhotonSelectorTools/offline/mc20_20260310/FudgeFactors/LightGBM_model_mc20ade_v15_unconverted.root",
-                scoreDecoration="BDTScore",
-                isEMDecoration="BDTIsEM",
-            )
-        
-def AsgPhotonBDTSelectorCfg(flags,
-                           name="AsgPhotonBDTSelector",
-                           workingPoint=None,
-                           useNFs=False,
-                           computeIfMissing=True,
-                           forceRecompute=False,
-                           reapplyWPIfNoShowerShapes=False,
-                           reserveVarsConv=12,
-                           reserveVarsUnconv=12,
-                           modelConv=None,
-                           modelUnconv=None,
-                           scoreDecoration=None,
-                           isEMDecoration=None):
-
+def PhotonSingleBDTCalculator_Cfg(
+        flags, name="PhotonSingleBDTCalculator", isConv=True, useNFs=False, **kwargs):
     acc = ComponentAccumulator()
 
-    isRun3 = (flags.GeoModel.Run == LHCPeriod.Run3)
-    excludeTRT = isRun3
+    modelFile = "ElectronPhotonSelectorTools/offline/"
+    if flags.GeoModel.Run >= LHCPeriod.Run3:
+        modelFile += "mc23_20260824/" + (
+            "NFs/LightGBM_model_mc23ade_v23NF_DeltaE_fix" if useNFs else
+            "FudgeFactors/LightGBM_model_mc23ade_v23FF_DeltaE_fix")
+    else:
+        modelFile += "mc20_20260824/" + (
+            "NFs/LightGBM_model_mc20ade_v15NF_DeltaE_fix" if useNFs else
+            "FudgeFactors/LightGBM_model_mc20ade_v15FF_DeltaE_fix")
+    modelFile += ("_converted" if isConv else "_unconverted") + ".root"
 
-    # Get default configurations
-    defaultCfg = getPhotonBDTConfig(flags, useNFs)
+    kwargs.setdefault("ModelFile", modelFile)
+    kwargs.setdefault("BDTTreeName", "lgbm")
 
-    # allow override of default configurations
-    workingPoint = workingPoint or defaultCfg["workingPoint"]
-    modelConv = modelConv or defaultCfg["modelConv"]
-    modelUnconv = modelUnconv or defaultCfg["modelUnconv"]
-    scoreDecoration = scoreDecoration or defaultCfg["scoreDecoration"]
-    isEMDecoration = isEMDecoration or defaultCfg["isEMDecoration"]
-
-    Single = CompFactory.PhotonIDBDT.PhotonSingleBDTCalculator
-    Calc   = CompFactory.PhotonIDBDT.PhotonBDTCalculator
-    Sel    = CompFactory.PhotonIDBDT.AsgPhotonBDTSelector
-
-    singleConv = Single(f"{name}_SingleConv",
-                        ModelFile=modelConv,
-                        BDTTreeName="lgbm")
-    acc.addPublicTool(singleConv)
-
-    singleUnconv = Single(f"{name}_SingleUnconv",
-                          ModelFile=modelUnconv,
-                          BDTTreeName="lgbm")
-    acc.addPublicTool(singleUnconv)
-
-    bdtCalc = Calc(f"{name}_BDTCalc",
-                   ToolConv=singleConv,
-                   ToolUnconv=singleUnconv,
-                   DecorationName=scoreDecoration,
-                   ExcludeTRT=excludeTRT,
-                   ForceRecompute=forceRecompute,
-                   ReserveVarsConv=reserveVarsConv,
-                   ReserveVarsUnconv=reserveVarsUnconv)
-    acc.addPublicTool(bdtCalc)
-
-    selector = Sel(name,
-                   WorkingPoint=workingPoint,
-                   ScoreDecoration=scoreDecoration,
-                   ComputeIfMissing=computeIfMissing,
-                   ReapplyWPIfNoShowerShapes=reapplyWPIfNoShowerShapes,
-                   IsEMDecoration=isEMDecoration,
-                   ExcludeTRT=excludeTRT,
-                   BDTTool=bdtCalc)
-    acc.setPrivateTools(selector)
-
+    acc.setPrivateTools(CompFactory.PhotonIDBDT.PhotonSingleBDTCalculator(
+        name + ("Conv" if isConv else "Unconv") + ("_NFs" if useNFs else ""), **kwargs))
     return acc
 
-def PhotonBDTCalculatorCfg(flags,
-                           name="PhotonBDTCalculator",
-                           useNFs=False,
-                           forceRecompute=False,
-                           modelConv=None,
-                           modelUnconv=None,
-                           scoreDecoration=None,
-                           reserveVarsConv=12,
-                           reserveVarsUnconv=12):
 
+def AsgPhotonBDTSelectorCfg(
+        flags, name="AsgPhotonBDTSelector", useNFs=False, **kwargs):
     acc = ComponentAccumulator()
 
-    # get default configurations
-    defaultCfg = getPhotonBDTConfig(flags, useNFs)
+    kwargs.setdefault("ReapplyWPIfNoShowerShapes", False)
 
-    # allow override of default configurations
-    modelConv = modelConv or defaultCfg["modelConv"]
-    modelUnconv = modelUnconv or defaultCfg["modelUnconv"]
-    scoreDecoration = scoreDecoration or defaultCfg["scoreDecoration"]
+    suffix = "_NFs" if useNFs else ""
+    kwargs.setdefault("WorkingPoint", "TightBDTPhoton_" +
+                      ("Run3" if flags.GeoModel.Run >= LHCPeriod.Run3 else "Run2") +
+                      suffix)
+    kwargs.setdefault("IsEMDecoration", "BDTIsEM" + suffix)
+    kwargs.setdefault("ContainerName", "Photons")
+    kwargs.setdefault("ScoreDecoration", "BDTScore" + suffix)
 
-    Single = CompFactory.PhotonIDBDT.PhotonSingleBDTCalculator
-    Calc   = CompFactory.PhotonIDBDT.PhotonBDTCalculator
+    acc.setPrivateTools(
+        CompFactory.PhotonIDBDT.AsgPhotonBDTSelector(name + suffix, **kwargs))
+    return acc
 
-    singleConv = Single(f"{name}_SingleConv",
-                        ModelFile=modelConv,
-                        BDTTreeName="lgbm")
-    acc.addPublicTool(singleConv)
 
-    singleUnconv = Single(f"{name}_SingleUnconv",
-                          ModelFile=modelUnconv,
-                          BDTTreeName="lgbm")
-    acc.addPublicTool(singleUnconv)
+def PhotonBDTCalculatorCfg(
+        flags, name="PhotonBDTCalculator", useNFs=False, **kwargs):
+    acc = ComponentAccumulator()
 
-    bdtCalc = Calc(name,
-                   ToolConv=singleConv,
-                   ToolUnconv=singleUnconv,
-                   DecorationName=scoreDecoration,
-                   ExcludeTRT=(flags.GeoModel.Run == LHCPeriod.Run3),
-                   ForceRecompute=forceRecompute,
-                   ReserveVarsConv=reserveVarsConv,
-                   ReserveVarsUnconv=reserveVarsUnconv)
-    acc.setPrivateTools(bdtCalc)
+    if "ToolConv" not in kwargs:
+        singleConv = acc.popToolsAndMerge(
+            PhotonSingleBDTCalculator_Cfg(flags, isConv=True, useNFs=useNFs))
+        acc.addPublicTool(singleConv)
+        kwargs.setdefault("ToolConv", singleConv)
 
+    if "ToolUnconv" not in kwargs:
+        singleUnconv = acc.popToolsAndMerge(
+            PhotonSingleBDTCalculator_Cfg(flags, isConv=False, useNFs=useNFs))
+        acc.addPublicTool(singleUnconv)
+        kwargs.setdefault("ToolUnconv", singleUnconv)
+
+    suffix = ("_NFs" if useNFs else "")
+    kwargs.setdefault("DecorationName", "BDTScore" + suffix)
+    kwargs.setdefault("ExcludeTRT", flags.GeoModel.Run >= LHCPeriod.Run3)
+    kwargs.setdefault("ReserveVarsConv", 12)
+    kwargs.setdefault("ReserveVarsUnconv", 12)
+
+    acc.setPrivateTools(CompFactory.PhotonIDBDT.PhotonBDTCalculator(
+        name + suffix, **kwargs))
     return acc

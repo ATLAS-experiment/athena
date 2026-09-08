@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VertexDecoratorAlg.h"
@@ -464,7 +464,7 @@ namespace InDetGNNHardScatterSelection
       {
         mpLinks.push_back(mpLink);
       }
-      dec_multiPhotonLinks(*vertex) = mpLinks;
+      dec_multiPhotonLinks(*vertex) = std::move(mpLinks);
 
       // for jets, use prefilled map
       dec_jetLinks(*vertex) = jetsInVertex[vertex];

@@ -8,6 +8,7 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
+#include "StoreGate/WriteDecorHandleKey.h"
 
 #include "xAODMuonPrepData/MdtDriftCircleContainer.h"
 
@@ -33,6 +34,8 @@ namespace MuonR4{
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
             SG::ReadHandleKey<xAOD::MdtDriftCircleContainer> m_readKey{this, "xAODKey", "xMdtMeasurements"};
+
+            SG::WriteDecorHandleKey<xAOD::MdtDriftCircleContainer> m_linkKey{this, "PrdLinkKey", m_readKey, "mdtTrkPrdLink"};
 
             SG::WriteHandleKey<Muon::MdtPrepDataContainer>  m_writeKey{this, "WriteKey", "MDT_DriftCircles"};
 

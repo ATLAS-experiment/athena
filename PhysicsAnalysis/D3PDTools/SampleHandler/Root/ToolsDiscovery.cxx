@@ -12,9 +12,9 @@
 
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/StringUtil.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <SampleHandler/DiskListLocal.h>
 #include <SampleHandler/GridTools.h>
+#include <SampleHandler/MessageCheck.h>
 #include <SampleHandler/MetaFields.h>
 #include <SampleHandler/MetaObject.h>
 #include <SampleHandler/SampleGrid.h>
@@ -27,6 +27,7 @@
 #include <TTree.h>
 #include <fstream>
 #include <memory>
+#include <stdexcept>
 
 //
 // method implementations
@@ -87,16 +88,23 @@ namespace SH
 
 
 
-  Sample *makeFromTChain (const std::string& name, const TChain& chain)
+  std::unique_ptr<Sample> makeFromTChainUnique (const std::string& name, const TChain& chain)
   {
-    std::unique_ptr<SampleLocal> result (new SampleLocal (name));
+    auto result = std::make_unique<SampleLocal> (name);
     result->meta()->setString (MetaFields::treeName, chain.GetName());
 
     TIter chainIter (chain.GetListOfFiles());
-    TChainElement *chainElement = 0;
-    while ((chainElement = dynamic_cast<TChainElement*>(chainIter.Next())) != 0)
+    TChainElement *chainElement = nullptr;
+    while ((chainElement = dynamic_cast<TChainElement*>(chainIter.Next())) != nullptr)
       result->add (chainElement->GetTitle());
-    return result.release();
+    return result;
+  }
+
+
+
+  Sample *makeFromTChain (const std::string& name, const TChain& chain)
+  {
+    return makeFromTChainUnique (name, chain).release();
   }
 
 
@@ -121,7 +129,7 @@ namespace SH
     } else
     {
       std::set<std::string> types = {"DATASET", "DIDType.DATASET"};
-      if (pattern.back() == '/')
+      if (!pattern.empty() && pattern.back() == '/')
 	types = {"CONTAINER", "DIDType.CONTAINER"};
 
       auto subresult = rucioListDids (pattern);
@@ -158,7 +166,7 @@ namespace SH
 	if (added)
 	  return;
       }
-      RCU_THROW_MSG ("failed to find any datasets matching pattern: " + pattern);
+      throw std::runtime_error ("failed to find any datasets matching pattern: " + pattern);
     }
   }
 
@@ -169,7 +177,7 @@ namespace SH
     RCU_ASSERT_SOFT (ds.find ("*") == std::string::npos);
 
     std::string name;
-    if (ds[ds.size()-1] == '/')
+    if (!ds.empty() && ds.back() == '/')
       name = ds.substr (0, ds.size()-1);
     else
       name = ds;
@@ -229,7 +237,7 @@ namespace SH
         name.append(ds);
     }
     if (!file.eof())
-      RCU_THROW_MSG ("failed to read file: " + dsFile);
+      throw std::runtime_error ("failed to read file: " + dsFile);
 
     auto sample = std::make_unique<SampleGrid> (dsName);
     sample->meta()->setString (MetaFields::gridName, name);
@@ -242,20 +250,22 @@ namespace SH
 		       const std::string& from, const std::string& to,
 		       bool allow_partial)
   {
+    using namespace msgDiscovery;
+
     SampleHandler mysh;
 
     for (auto sample : sh.samples())
     {
       SampleGrid *grid = dynamic_cast<SampleGrid*>(sample.get());
 
-      if (grid == 0)
+      if (grid == nullptr)
       {
         mysh.add (sample);
       } else
       {
         const std::string ds = grid->meta()->castString (MetaFields::gridName);
         if (ds.empty())
-          RCU_THROW_MSG ("no dataset configured for grid dataset " + ds);
+          throw std::runtime_error ("no dataset configured for grid sample " + grid->name());
 
         std::regex pattern (RCU::glob_to_regexp (grid->meta()->castString (MetaFields::gridFilter, MetaFields::gridFilter_default)));
 
@@ -270,8 +280,9 @@ namespace SH
             {
               std::string url = entry.replica;
               const auto split = url.find (from);
-              if (split != std::string::npos)
-                url.replace(split, from.size(), to);
+              if (split == std::string::npos)
+                throw std::runtime_error ("prefix \"" + from + "\" not part of replica URL: " + url);
+              url.replace(split, from.size(), to);
               usedFiles[entry.name] = url;
             }
           }
@@ -280,12 +291,12 @@ namespace SH
         if (usedFiles.empty())
         {
           if (allow_partial)
-            RCU_WARN_MSG ("dataset " + ds + " not at " + disk + ", skipped");
+            ANA_MSG_WARNING ("dataset " << ds << " not at " << disk << ", skipped");
         } else if (knownFiles.size() != usedFiles.size())
         {
           if (allow_partial)
           {
-            RCU_WARN_MSG ("only incomplete version of dataset " + ds + " at " + disk);
+            ANA_MSG_WARNING ("only incomplete version of dataset " << ds << " at " << disk);
           } else
           {
             usedFiles.clear ();
@@ -294,7 +305,7 @@ namespace SH
 
         if (usedFiles.size() == 0)
         {
-          sh.add (sample);
+          mysh.add (sample);
         } else
         {
           auto mysample = std::make_unique<SampleLocal> (grid->name());
@@ -313,7 +324,7 @@ namespace SH
 
 
 
-  void scanForTrees (SampleHandler& sh, std::shared_ptr<Sample>& sample,
+  void scanForTrees (SampleHandler& sh, const std::shared_ptr<Sample>& sample,
 		     const std::string& pattern)
   {
     auto mysample = sample->makeLocal();
@@ -324,12 +335,18 @@ namespace SH
     }
     std::unique_ptr<TFile> file (TFile::Open (mysample->fileName(0).c_str()));
     if (!file.get())
-      RCU_THROW_MSG ("could not open file: " + mysample->fileName(0));
-    TObject *object = 0;
+      throw std::runtime_error ("could not open file: " + mysample->fileName(0));
+    TObject *object = nullptr;
     std::regex mypattern (pattern);
+    // rationale: GetListOfKeys() contains one key per tree cycle
+    //   (e.g. "physics;1", "physics;2"), all with the same name.  we
+    //   process each name only once, so that repeated cycles do not
+    //   make sh.add throw on a duplicate sample name.
+    std::set<std::string> seenTrees;
     for (TIter iter (file->GetListOfKeys()); (object = iter.Next()); )
     {
       if (RCU::match_expr (mypattern, object->GetName()) &&
+	  seenTrees.insert (object->GetName()).second &&
 	  dynamic_cast<TTree*>(file->Get(object->GetName())))
       {
 	std::string newName = sample->name() + "_" + object->GetName();
@@ -374,7 +391,7 @@ namespace SH
       }
     }
     if (!myfile.eof())
-      RCU_THROW_MSG ("failed to read file: " + file);
+      throw std::runtime_error ("failed to read file: " + file);
     sh.add (std::move (sample));
   }
 }

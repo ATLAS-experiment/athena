@@ -4,7 +4,6 @@
 atlas_subdir( Geo2G4 )
 
 # External dependencies:
-find_package( Boost )
 find_package( CLHEP )
 find_package( Geant4 )
 find_package( ROOT COMPONENTS MathCore RIO Core Tree Hist pthread )
@@ -16,10 +15,10 @@ atlas_add_library( Geo2G4Lib
                    OBJECT
                    NO_PUBLIC_HEADERS
                    INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${GEANT4_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-                   PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
+                   PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
                    LINK_LIBRARIES ${GEANT4_LIBRARIES} ${GEOMODEL_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps GaudiKernel G4AtlasInterfaces G4AtlasToolsLib GeoModelUtilities GeoPrimitives
-                   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} CxxUtils GeoSpecialShapes SimHelpers GeoMaterial2G4 AthenaKernel GeoModelInterfaces StoreGateLib )
+                   PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} CxxUtils GeoSpecialShapes SimHelpers GeoMaterial2G4 AthenaKernel GeoModelInterfaces StoreGateLib )
 set_target_properties( Geo2G4Lib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 atlas_add_library( Geo2G4

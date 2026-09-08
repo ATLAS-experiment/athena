@@ -23,7 +23,7 @@ function( _add_test name )
    if( ARG_DICTHEADER )
       atlas_add_dictionary( test_${name}Dict
          ${ARG_DICTHEADER} ${name}/classes.xml
-         LINK_LIBRARIES PersistencySvc
+         LINK_LIBRARIES PoolSvcLib
          StorageSvc AthContainers
          NO_ROOTMAP_MERGE )
    endif()
@@ -31,7 +31,7 @@ function( _add_test name )
    atlas_add_test( "${name}_test"
       SOURCES ${name}/*.cpp
       INCLUDE_DIRS ${CPPUNIT_INCLUDE_DIRS}
-      LINK_LIBRARIES ${CPPUNIT_LIBRARIES} PersistencySvc TestTools StorageSvc AthContainers
+      LINK_LIBRARIES ${CPPUNIT_LIBRARIES} PoolSvcLib TestTools StorageSvc AthContainers
       PersistentDataModel TestTools AthenaKernel
       # Need to explicitly link against ROOT libraries to suppress
       # spurious ubsan warnings.

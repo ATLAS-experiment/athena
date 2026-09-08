@@ -15,7 +15,6 @@
 #include <EventLoop/OutputStream.h>
 #include <EventLoop/Worker.h>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <AsgMessaging/MessageCheck.h>
 #include <TFile.h>
 #include <TH1.h>
@@ -24,6 +23,8 @@
 #include <AsgMessaging/MsgStream.h>
 #include <AsgMessaging/MsgStreamMacros.h>
 #include <xAODEventInfo/EventInfo.h>
+
+#include <stdexcept>
 
 //
 // method implementations
@@ -35,9 +36,7 @@ namespace EL
 {
   void UnitTestAlgXAOD ::
   testInvariant () const
-  {
-    RCU_INVARIANT (this != 0);
-  }
+  {}
 
 
 
@@ -57,7 +56,7 @@ namespace EL
     if (m_state != State::START && m_state != State::HIST_FINALIZED)
     {
       ANA_MSG_FATAL ("never got completely finalized");
-      RCU_THROW_MSG ("never got completely finalized");
+      std::abort ();
     }
   }
 

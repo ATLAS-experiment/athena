@@ -40,7 +40,7 @@ public:
                   const InDetDD::TRT_DetectorManager*,
                   const TRT_ID*,
                   int UseGasMix,
-                  ToolHandle<ITRT_StrawStatusSummaryTool> sumTool
+                  const ToolHandle<ITRT_StrawStatusSummaryTool> & sumTool
                   );
 
   /** Destructor */
@@ -240,8 +240,12 @@ inline void TRTDigCondBase::setRefinedStrawParameters( int hitID,
       noiseamplitude;
   } else {
     m_all_it_hitid_to_StrawState_previous = m_hitid_to_StrawState.find(hitID);
-    m_hitid_to_StrawState.find(hitID)->second.lowthreshold = lowthreshold;
-    m_hitid_to_StrawState.find(hitID)->second.noiseamplitude = noiseamplitude;
+    auto pPair = m_hitid_to_StrawState.find(hitID);
+    if (pPair == m_hitid_to_StrawState.end())[[unlikely]]{
+      return;
+    }
+    pPair->second.lowthreshold = lowthreshold;
+    pPair->second.noiseamplitude = noiseamplitude;
   };
 }
 

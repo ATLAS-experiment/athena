@@ -11,7 +11,6 @@
 #include <exception>
 #include <functional>
 #include <vector>
-#include <boost/iterator_adaptors.hpp>
 
 
 

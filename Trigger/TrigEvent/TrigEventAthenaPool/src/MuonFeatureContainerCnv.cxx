@@ -26,10 +26,10 @@ MuonFeatureContainer * MuonFeatureContainerCnv::createTransient(const Token* tok
   
   mlog << MSG::DEBUG << "MuonFeatureContainerCnv::createTransient called" << endmsg;
   
-  static const pool::Guid p3_guid( "5B571BCD-FE49-4C56-A357-1B535FE65829" );
-  static const pool::Guid tlp2_guid( "2F4ABBC8-EA77-487B-820F-76179BB3828C" );
-  static const pool::Guid tlp1_guid( "039BE61C-DE27-48B3-A2AE-7172BB755CEE" );
-  static const pool::Guid p0_guid( "45225F26-A517-4E8B-BA93-DDFD1217B9A8" );
+  static const Guid p3_guid( "5B571BCD-FE49-4C56-A357-1B535FE65829" );
+  static const Guid tlp2_guid( "2F4ABBC8-EA77-487B-820F-76179BB3828C" );
+  static const Guid tlp1_guid( "039BE61C-DE27-48B3-A2AE-7172BB755CEE" );
+  static const Guid p0_guid( "45225F26-A517-4E8B-BA93-DDFD1217B9A8" );
   
   if( compareClassGuid(token,  tlp1_guid ) )     
   {

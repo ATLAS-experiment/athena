@@ -26,6 +26,18 @@ def CPAlgorithmsCfg(flags):
         logPLCPAlgCfg.warning("Forcing full simulation configuration for EGamma algorithms. This is not recommended for fast simulation but no recommendations available yet.")
         forceEGammaFullSimConfig = True
 
+    FixedElDict = {}
+    FixedPhDict = {}
+    from egammaAlgs.egammaAODFixesConfig import runAODFix
+    doneFix, fixes = runAODFix(flags)
+    logPLCPAlgCfg.info(f'Existing egamma AOD fixes for timing cut issue : {fixes}')
+    if 'egammatopoIsoFix' in fixes:
+        FixedElDict.update({"ElectronIsolationCorrectionAlg.isolationCorrectionTool.FixTimingIssueInCore": False})
+        FixedPhDict.update({"PhotonIsolationCorrectionAlg.isolationCorrectionTool.FixTimingIssueInCore": False})
+    if 'egClusterL2_3Fix' in fixes:
+        FixedElDict.update({"ElectronCalibrationAndSmearingAlg.calibrationAndSmearingTool.FixForMissingCells": False})
+        FixedPhDict.update({"PhotonCalibrationAndSmearingAlg.calibrationAndSmearingTool.FixForMissingCells": False})
+
     from AnalysisAlgorithmsConfig.ConfigFactory import ConfigFactory
     from AnalysisAlgorithmsConfig.ConfigSequence import ConfigSequence
     configSeq = ConfigSequence ()
@@ -90,6 +102,8 @@ def CPAlgorithmsCfg(flags):
     subConfig.setOptionValue ('.decorateSamplingPattern', True)
     subConfig.setOptionValue ('.decorateEmva', True)
     subConfig.setOptionValue ('.addGlobalFELinksDep', True)
+    if len(FixedElDict) > 0:
+        subConfig.setOptionValue ('.propertyOverrides', FixedElDict)
     configSeq += subConfig
     subConfig = factory.makeConfig ('Electrons.WorkingPoint')
     subConfig.setOptionValue ('.containerName', 'AnalysisElectrons')
@@ -129,6 +143,8 @@ def CPAlgorithmsCfg(flags):
     subConfig.setOptionValue ('.postfix', 'SiHit')
     subConfig.setOptionValue ('.decorateEmva', True)
     subConfig.setOptionValue ('.addGlobalFELinksDep', True)
+    if len(FixedElDict) > 0:
+        subConfig.setOptionValue ('.propertyOverrides', FixedElDict)
     configSeq += subConfig
     subConfig = factory.makeConfig ('Electrons.WorkingPoint')
     subConfig.setOptionValue ('.containerName', 'AnalysisSiHitElectrons')
@@ -160,6 +176,8 @@ def CPAlgorithmsCfg(flags):
     subConfig.setOptionValue ('.minPt', 0.)
     subConfig.setOptionValue ('.decorateEmva', True)
     subConfig.setOptionValue ('.addGlobalFELinksDep', True)
+    if len(FixedPhDict) > 0:
+        subConfig.setOptionValue ('.propertyOverrides', FixedPhDict)
     configSeq += subConfig
     subConfig = factory.makeConfig ('Photons.WorkingPoint')
     subConfig.setOptionValue ('.containerName', 'AnalysisPhotons')
@@ -187,6 +205,7 @@ def CPAlgorithmsCfg(flags):
     subConfig = factory.makeConfig ('TauJets')
     subConfig.setOptionValue ('.containerName', 'AnalysisTauJets')
     subConfig.setOptionValue ('.addGlobalFELinksDep', True)
+    subConfig.setOptionValue ('.rerunTruthMatching', False)
     configSeq += subConfig
     subConfig = factory.makeConfig ('TauJets.WorkingPoint')
     subConfig.setOptionValue ('.containerName', 'AnalysisTauJets')

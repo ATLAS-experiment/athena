@@ -102,9 +102,19 @@ def getCACfg(jopath):
    return getattr(module, fnc_name)
 
 
-def reload_from_json(filename, suppress_args=[]):
+## Command line arguments not parsed by athenaEF, i.e. Athena flags.
+unparsedArguments = []
+def fillFromUnparsedArgs(flags):
+   """Re-apply the flags given on the athenaEF command line."""
+
+   for flag_arg in unparsedArguments:
+      flags.fillFromString(flag_arg)
+
+
+def reload_from_json(filename, suppress_args=[], jobOptions=None):
    """Re-launch athenaHLT from the given json file. Optionally suppress
-   the list of command line args (e.g. flags)."""
+   the list of command line args (e.g. flags).
+   jobOptions: the positional argument to be replaced by `filename`."""
 
    # Remove all command line args that are not compatible with running from JSON:
    argv = []
@@ -121,8 +131,11 @@ def reload_from_json(filename, suppress_args=[]):
          continue
       argv.append(arg)
 
-   argv[-1] = filename
-   log.info('Restarting %s from %s ...', argv[0], argv[-1])
+   if jobOptions is not None and jobOptions in argv:
+      argv[argv.index(jobOptions)] = filename
+   else:
+      argv[-1] = filename
+   log.info('Restarting %s from %s ...', argv[0], filename)
    sys.stdout.flush()
    sys.stderr.flush()
    os.execvp(argv[0], argv)

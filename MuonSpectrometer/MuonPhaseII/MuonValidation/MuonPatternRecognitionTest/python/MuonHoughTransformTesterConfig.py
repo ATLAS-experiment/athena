@@ -23,6 +23,11 @@ if __name__=="__main__":
     flags = initConfigFlags()
     flags.PerfMon.doFullMonMT = not args.noPerfMon
     flags.PerfMon.OutputJSON="perfmonmt_MuonR4Reco.json"
+    ### If no detector technology is disabled we can safely enable
+    ### the hole search 
+    if not args.noMdt and not args.noRpc and not args.noRpc and \
+       not args.noMM and not args.noSTGC:
+       flags.Muon.scheduleActsReco = True
 
     flags, cfg = setupGeoR4TestCfg(args,flags)
   

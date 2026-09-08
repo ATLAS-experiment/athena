@@ -35,7 +35,7 @@ namespace SH
   public:
     void addSample (const MetaDataSample& sample);
 
-    ClassDef (MetaDataQuery, 1);
+    ClassDefOverride (MetaDataQuery, 1);
   };
 }
 

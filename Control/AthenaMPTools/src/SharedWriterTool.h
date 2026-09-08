@@ -48,7 +48,7 @@ class SharedWriterTool final : public AthenaMPToolBase
 
   int  m_rankId;          // Each worker has its own unique RankID from the range (0,...,m_nprocs-1)
 
-  AthenaInterprocess::SharedQueue*  m_sharedRankQueue;
+  std::unique_ptr<AthenaInterprocess::SharedQueue>  m_sharedRankQueue;
   SmartIF<IConversionSvc>           m_cnvSvc;
 
 };

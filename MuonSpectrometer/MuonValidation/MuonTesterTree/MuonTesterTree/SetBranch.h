@@ -37,6 +37,13 @@ public:
     /// Assignment operator
     void operator=(const std::set<T>& other);
 
+    inline friend std::ostream& operator<<(std::ostream& ostr, const SetBranch& br) {
+        ostr<<br.name()<<": ";
+        if (br.isUpdated()){
+            ostr<<br.m_variable;
+        } else ostr<<"{}";
+        return ostr;
+    };
 
     inline bool isUpdated() const;
 

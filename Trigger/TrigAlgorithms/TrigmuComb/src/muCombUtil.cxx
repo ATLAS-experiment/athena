@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // *********************************************************************
@@ -16,8 +16,6 @@
 #include <utility>
 
 #include "muCombUtil.h"
-#include "TrigMuonEvent/MuonFeature.h"
-#include "TrigInDetEvent/TrigInDetTrack.h"
 
 namespace muCombUtil {
 
@@ -39,153 +37,33 @@ namespace muCombUtil {
   }
 
 
-  double getMuFastRes(const std::vector<double>& vec, const MuonFeature* feature) {
+  int whichECRegion( const float eta, const float phi ) {
+    // 0: bulk
+    // 1: WeakBfield A
+    // 2: WeakBfield B
 
-   double  ptGev = feature->pt();
-   double  pt = ptGev*1000.;     //muFast Pt(MeV)
+    float absEta = fabs(eta);
 
-   if (pt == 0) return 1.0e33;
+    if(      ( 1.3 <= absEta && absEta < 1.45) &&
+             ( (0            <= fabs(phi) && fabs(phi) < M_PI/48. )     ||
+               (M_PI*11./48. <= fabs(phi) && fabs(phi) < M_PI*13./48. ) ||
+               (M_PI*23./48. <= fabs(phi) && fabs(phi) < M_PI*25./48. ) ||
+               (M_PI*35./48. <= fabs(phi) && fabs(phi) < M_PI*37./48. ) ||
+               (M_PI*47./48. <= fabs(phi) && fabs(phi) < M_PI )
+               )
+             ) return 1;
    
-   double AbsPtInv = fabs(1./pt);  //muFast 1/Pt  (1/MeV)
-   int    add      = feature->saddress();
-   double AbsEta   = fabs(feature->eta());
-   double phi      = feature->phi();
-
-   if ( add != -1) {
-      if (AbsPtInv < 0.000186) {
-	 return vec[0]*AbsPtInv + vec[1]/1000.;
-      } 
-      else {
-	 double AbsPtInv3 = AbsPtInv*AbsPtInv*AbsPtInv;
-	 double AbsPtInv2 = AbsPtInv*AbsPtInv;
-	 return vec[2]*AbsPtInv3/(1000.*1000.) +
-	    vec[3]*AbsPtInv2/(1000.)       +
-	    vec[4]*AbsPtInv                +
-	    vec[5]/1000.;
-      }
-   } 
-   else {//Takuya/Kunihiro updated numbers 
-
-      const int N_PARAMS = 5;
-      const double vparEC1[N_PARAMS] = {0.291483, -6.11348,  65.1099, -285.664,  440.041};
-      const double vparEC2[N_PARAMS] = {0.286307, -4.6759,   43.2815, -163.185,  210.786};
-      const double vparEC3[N_PARAMS] = {0.330699, -6.70755,  70.4725, -291.85,   408.739};
-      const double vparEC4[N_PARAMS] = {0.261738, -4.69971,  47.4762, -183.98,   236.813};
-      const double vparEC5[N_PARAMS] = {0.196301, -3.57276,  38.3744, -159.808,  228.256};
-      const double vparEC6[N_PARAMS] = {0.172939, -3.10788,  33.3823, -142.996,  212.957};
-      const double vparEC7[N_PARAMS] = {0.233017, -4.377,    42.5691, -171.752,  245.702};
-      const double vparEC8[N_PARAMS] = {0.22389,  -4.16259,  40.1369, -162.824,  236.39};
-      const double vparEC9[N_PARAMS] = {0.197992, -3.52117,  33.5997, -136.014,  197.474};
-      const double vparECA[N_PARAMS] = {0.417289, -0.852254,-31.9257,  308.873, -719.591};
-      const double vparECB[N_PARAMS] = {0.526612, -8.04087,  82.1906, -336.87,   462.973};
-
-      double AbsPtInvGeV = AbsPtInv * 1000;
-
-      const double AbsPtInvGeVMin = 5e-3;   // 200 GeV
-      const double AbsPtInvGeVMax = 0.25;   //   4 GeV
-      if( AbsPtInvGeV < AbsPtInvGeVMin ) AbsPtInvGeV = AbsPtInvGeVMin;
-      if( AbsPtInvGeV > AbsPtInvGeVMax ) AbsPtInvGeV = AbsPtInvGeVMax;
-      
-      //cout << "...AbsPtInvGeV=" << AbsPtInv << endl;
-
-      const double* vpar;
-      int spReg = whichECRegion(AbsEta,phi);
-      //cout << "...spReg=" << spReg << endl;
-      if     ( spReg==1 ) { vpar = vparECA; }
-      else if( spReg==2 ) { vpar = vparECB; }
-      else {
-	 if     ( AbsEta < 1.20) { vpar = vparEC1; }
-	 else if( AbsEta < 1.35) { vpar = vparEC2; }
-	 else if( AbsEta < 1.50) { vpar = vparEC3; }
-	 else if( AbsEta < 1.65) { vpar = vparEC4; }
-	 else if( AbsEta < 1.80) { vpar = vparEC5; }
-	 else if( AbsEta < 1.95) { vpar = vparEC6; }
-	 else if( AbsEta < 2.10) { vpar = vparEC7; }
-	 else if( AbsEta < 2.35) { vpar = vparEC8; }
-	 else                    { vpar = vparEC9; }
-      }
-
-      double fracRes = vpar[0] + vpar[1]*AbsPtInvGeV
-	 + vpar[2]*AbsPtInvGeV*AbsPtInvGeV 
-	 + vpar[3]*AbsPtInvGeV*AbsPtInvGeV*AbsPtInvGeV
-	 + vpar[4]*AbsPtInvGeV*AbsPtInvGeV*AbsPtInvGeV*AbsPtInvGeV;
-
-      return fabs(fracRes * AbsPtInv);
-   }
-}
-
-int whichECRegion( const float eta, const float phi ) {
-   // 0: bulk
-   // 1: WeakBfield A
-   // 2: WeakBfield B
-
-   float absEta = fabs(eta);
-
-   if(      ( 1.3 <= absEta && absEta < 1.45) &&
-            ( (0            <= fabs(phi) && fabs(phi) < M_PI/48. )     ||
-	      (M_PI*11./48. <= fabs(phi) && fabs(phi) < M_PI*13./48. ) ||
-	      (M_PI*23./48. <= fabs(phi) && fabs(phi) < M_PI*25./48. ) ||
-	      (M_PI*35./48. <= fabs(phi) && fabs(phi) < M_PI*37./48. ) ||
-	      (M_PI*47./48. <= fabs(phi) && fabs(phi) < M_PI )
-	  )
-      ) return 1;
+    else if( ( 1.5 <= absEta && absEta < 1.65 ) &&
+             ( (M_PI*3./32.  <= fabs(phi) && fabs(phi) < M_PI*5./32. ) ||
+               (M_PI*11./32. <= fabs(phi) && fabs(phi) < M_PI*13./32.) ||
+               (M_PI*19./32. <= fabs(phi) && fabs(phi) < M_PI*21./32.) ||
+               (M_PI*27./32. <= fabs(phi) && fabs(phi) < M_PI*29./32.)
+               )
+             ) return 2;
    
-   else if( ( 1.5 <= absEta && absEta < 1.65 ) &&
-	    ( (M_PI*3./32.  <= fabs(phi) && fabs(phi) < M_PI*5./32. ) ||
-	      (M_PI*11./32. <= fabs(phi) && fabs(phi) < M_PI*13./32.) ||
-	      (M_PI*19./32. <= fabs(phi) && fabs(phi) < M_PI*21./32.) ||
-	      (M_PI*27./32. <= fabs(phi) && fabs(phi) < M_PI*29./32.)
-	       )
-      ) return 2;
-   
-   else return 0;
-}
-
-/*
-  double getMuFastRes(std::vector<double> barrelvec, std::vector<double> ec1vec, 
-		      std::vector<double> ec2vec, std::vector<double> ec3vec, std::vector<double> ec4vec,
-		      const MuonFeature* feature) {
-
-    double pt = feature->pt()*1000.; //muFast 1/Pt  (1/MeV)
-    if (pt == 0) return 1.0e33;
-  
-    double AbsPtInv = fabs(1./pt);  //muFast 1/Pt  (1/MeV)
-    int    add      = feature->saddress();
-    double AbsEta   = fabs(feature->eta());
-
-    std::vector<double> vec;
-    if ( add != -1) {
-      vec = barrelvec;
-      if (AbsPtInv < 0.000186) {
-	return vec[0]*AbsPtInv + vec[1]/1000.;
-      } else {
-	double AbsPtInv3 = AbsPtInv*AbsPtInv*AbsPtInv;
-	double AbsPtInv2 = AbsPtInv*AbsPtInv;
-	return vec[2]*AbsPtInv3/(1000.*1000.) +
-	  vec[3]*AbsPtInv2/(1000.)       +
-	  vec[4]*AbsPtInv                +
-	  vec[5]/1000.;
-      }
-    } else {
-      if (AbsEta < 1.35) vec = ec1vec;
-      else if (AbsEta>=1.35 && AbsEta<1.65) vec = ec2vec;
-      else if (AbsEta>=1.65 && AbsEta<2.0)  vec = ec3vec;
-      else vec = ec4vec;
-
-      if (AbsPtInv < 0.000191) {
-	return vec[0]*AbsPtInv + vec[1]/1000.;
-      } else {
-	double AbsPtInv3 = AbsPtInv*AbsPtInv*AbsPtInv;
-	double AbsPtInv2 = AbsPtInv*AbsPtInv;
-	return vec[2]*AbsPtInv3/(1000.*1000.) +
-	  vec[3]*AbsPtInv2/(1000.)       +
-	  vec[4]*AbsPtInv                +
-	  vec[5]/1000.;
-      }
-    }
-    return 9999.;
+    else return 0;
   }
-*/
+
 
   double getIDSCANRes(std::vector<double> barrelvec, std::vector<double> ec1vec, 
 		      std::vector<double> ec2vec, std::vector<double> ec3vec, std::vector<double> ec4vec,
@@ -207,83 +85,6 @@ int whichECRegion( const float eta, const float phi ) {
     return vec[0]*AbsPtInv+vec[1]/1000.;
   }
 
-
-  double getMuFastEtaRes(const MuonFeature* feature) {
-
-    double pt  = feature->pt();
-    double eta = feature->eta();
-    if (pt < 4. ) pt = 4.;
-    if (pt > 40.) pt = 40.;
-    bool ts = false;
-    if (feature->radius() <= 10.) ts = true;
-
-    if (fabs(eta) < 1.) {//barrel
-      return 7.75e-2/pt + 8.1e-3;
-    }
-    else {
-      if (ts) {//trigger station
-	if (fabs(eta) >= 1.  && fabs(eta) < 1.2) {//ec0
-	  return 2.0e-1/pt + 1.5e-3;
-	}
-	else if (fabs(eta) >= 1.2 && fabs(eta) < 1.5) {//ec1
-	  return 2.5e-1/pt + 0.1e-3;
-	}
-	else if (fabs(eta) >= 1.5 && fabs(eta) < 2.0) {//ec2
-	  return 1.3e-1/pt + 6.0e-3;
-	}
-	else {//ec3
-	  return 1.3e-1/pt + 8.0e-3;
-	}
-      }
-      else {
-	if (fabs(eta) >= 1.  && fabs(eta) < 1.6) {//ec0/1
-	  return 0.071/pt + 0.0055;
-	}
-	else {//ec2/3
-	  return 0.055/pt + 0.0063;
-	}
-      }
-    }
-  }
-
-
-  double getMuFastPhiRes(const MuonFeature* feature) {
-
-    double pt  = feature->pt();
-    double eta = feature->eta();
-    if (pt < 4. ) pt = 4.;
-    if (pt > 40.) pt = 40.;
-    bool ts = false;
-    if (feature->radius() <= 10.) ts = true;
-
-    if (fabs(eta) < 1.) {//barrel
-      return 1.9e-1/pt - 3.4e-4;
-    }
-    else {
-      if (ts) {//trigger station
-	if (fabs(eta) >= 1.  && fabs(eta) < 1.2) {//ec0
-	  return 2.0e-1/pt + 2.0e-3;
-	}
-	else if (fabs(eta) >= 1.2 && fabs(eta) < 1.5) {//ec1
-	  return 1.8e-1/pt + 3.0e-3;
-	}
-	else if (fabs(eta) >= 1.5 && fabs(eta) < 2.0) {//ec2
-	  return 1.5e-1/pt + 8.0e-3;
-	}
-	else {//ec3
-	  return 1.0e-1/pt + 1.8e-2;
-	}
-      }
-      else {
-	//if (fabs(eta) >= 1.  && fabs(eta) < 1.6) {//ec0/1
-	  return 0.08/pt + 0.0025;
-	//}
-	//else {//ec2/3
-	//  return 0.08/pt + 0.0025;
-	//}
-      }
-    }
-  }
 
   double getG4ExtEtaRes(double pt, double eta) {
 
@@ -419,8 +220,6 @@ int whichECRegion( const float eta, const float phi ) {
         if (ndof == 0) return 1.0e30;
         else           return chi2;
   }
-
-
 
   
 }//muCombUtil

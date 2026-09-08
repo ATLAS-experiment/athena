@@ -73,7 +73,7 @@ def test_properties_passed_through():
     result = tool(events)
     sf_values = result["Muons.sfOut"].to_list()
     assert len(sf_values) == 1
-    assert sf_values[0][0] == approx(0.99509060382843018)
+    assert sf_values[0][0] == approx(0.99569094181060791)
 
 
 def test_keyword_only_enforcement():

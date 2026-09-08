@@ -24,13 +24,13 @@ using namespace pool;
 namespace {
   template <class T, class Q> struct Marshal {
     static StatusCode get(const void* from, void* to)   {
-      *(Q*)to = *(T*)from;  
+      *static_cast<Q*>(to) = *static_cast<const T*>(from);
       return StatusCode::SUCCESS;
     }
   };
   template <>
     inline StatusCode Marshal<double, float>::get(const void* from, void* to)  {
-    *(float*)to = float(*(double*)from);  
+    *static_cast<float*>(to) = static_cast<float>(*static_cast<const double*>(from));
     return StatusCode::SUCCESS;
   }
 }
@@ -40,7 +40,7 @@ namespace {
 StatusCode DbOption::i_setValue(const std::type_info& typ, const void* value)  {
   if( typ == typeid(bool) ) {
     m_type = DbColumn::BOOL;
-    m_value.val_int = *(bool*)value ? 1 : 0;
+    m_value.val_int = *static_cast<const bool*>(value) ? 1 : 0;
     return StatusCode::SUCCESS;
   }
   else if( typ == typeid(char) ) {
@@ -97,12 +97,12 @@ StatusCode DbOption::i_setValue(const std::type_info& typ, const void* value)  {
   }
   else if( typ == typeid(void*) or typ == typeid(const void*) ) {
     m_type = DbColumn::ANY;
-    m_value.val_pvoid = *(void**)value;
+    m_value.val_pvoid = *static_cast<void* const*>(value);
     return StatusCode::SUCCESS;
   }
   else if( typ == typeid(char*) or typ == typeid(const char*) ) {
     m_type = DbColumn::NTCHAR;
-    m_value.val_pchar = *(char**)value;
+    m_value.val_pchar = *static_cast<char* const*>(value);
     return StatusCode::SUCCESS;
   }
   else
@@ -114,7 +114,7 @@ StatusCode DbOption::i_setValue(const std::type_info& typ, const void* value)  {
 /// Read the option value
 StatusCode DbOption::i_getValue(const std::type_info& typ, void* value) const {
   if( typ == typeid(bool) ) {
-    *(bool*)value = (bool)m_value.val_int;
+    *static_cast<bool*>(value) = static_cast<bool>(m_value.val_int);
     return StatusCode::SUCCESS;
   }
   else if( typ == typeid(char) ) {
@@ -175,13 +175,13 @@ StatusCode DbOption::i_getValue(const std::type_info& typ, void* value) const {
   }
   else if( typ == typeid(void*) or typ == typeid(const void*) ) {
     if( m_type == DbColumn::ANY ) {
-      *(void**)value = m_value.val_pvoid;
+      *static_cast<void**>(value) = m_value.val_pvoid;
       return StatusCode::SUCCESS;
     }
   }
   else if( typ == typeid(char*) or typ == typeid(const char*) ) {
     if( m_type == DbColumn::NTCHAR ) {
-      *(void**)value = m_value.val_pchar;
+      *static_cast<void**>(value) = m_value.val_pchar;
       return StatusCode::SUCCESS;
     }
   }

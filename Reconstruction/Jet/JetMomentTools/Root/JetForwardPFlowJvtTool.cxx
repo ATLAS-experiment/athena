@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetForwardPFlowJvtTool.cxx
@@ -213,7 +213,7 @@
           if (!orHandle(*fe)) continue;
         }
         if (fe->isCharged()) {
-          const xAOD::TrackParticle* track = dynamic_cast<const xAOD::TrackParticle*>(fe->chargedObject(0));
+          const xAOD::TrackParticle* track = static_cast<const xAOD::TrackParticle*>(fe->chargedObject(0));
 
           if (vx.index()==pv_index && std::abs((vx.z()-track->z0())*sin(track->theta()))>m_dzCut)
             continue;
@@ -291,10 +291,17 @@
                                  inclusive_jets[i].area_4vector().m());
       vertjets->push_back(jet);
       jet->setJetP4(tempjetp4);
-      jet->setJetP4("JetConstitScaleMomentum",tempjetp4);
-      jet->setJetP4("JetPileupScaleMomentum",tempjetp4);
-      jet->setAttribute("ActiveArea4vec",newArea);
-      jet->setAttribute("DetectorEta",jet->eta());
+      //
+      static const std::string p4Str1{"JetConstitScaleMomentum"};
+      static const std::string p4Str2{"JetPileupScaleMomentum"};
+      static const std::string activeAreaStr{"ActiveArea4vec"};
+      static const std::string detectorEtaStr{"DetectorEta"};
+      //
+      jet->setJetP4(p4Str1,tempjetp4);
+      jet->setJetP4(p4Str2,tempjetp4);
+      jet->setAttribute(activeAreaStr,newArea);
+      jet->setAttribute(detectorEtaStr,jet->eta());
+      //
       std::vector<fastjet::PseudoJet> constituents = inclusive_jets[i].constituents();
       float chargedpart = 0;
       for (size_t j = 0; j < constituents.size(); j++) {
@@ -311,8 +318,8 @@
       return pu_jets;
     }
 
-    pu_jets.jetCont = vertjets;
-    pu_jets.jetAuxCont = vertjetsAux;
+    pu_jets.jetCont = std::move(vertjets);
+    pu_jets.jetAuxCont = std::move(vertjetsAux);
     return pu_jets;
   }
 

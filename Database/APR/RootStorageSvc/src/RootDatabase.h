@@ -12,11 +12,16 @@
 #define POOL_ROOTSTORAGESVC_ROOTDBASE_H 1
 
 // Framework include files
+#include "AthenaKernel/SlotSpecificObj.h"
 #include "GaudiKernel/SmartIF.h"
 #include "StorageSvc/IDbDatabase.h"
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbPrint.h"
 
+// ROOT include files
+#include "ROOT/RNTupleReader.hxx"
+
+#include <optional>
 #include <set>
 #include <map>
 #include <mutex>
@@ -24,7 +29,6 @@
 
 // Forward declarations
 class StatusCode;
-namespace ROOT { class RNTupleReader; }
 
 class TFile;
 class TTree;
@@ -62,8 +66,6 @@ namespace pool  {
     DbDatabase    m_dbH;
     /// Reference to the actual implemented file 
     TFile*        m_file;
-    /// Persistency format version
-    std::string   m_version;
     /// Counter statistics
     long long int m_counters[3];
     /// Default compression level
@@ -129,6 +131,9 @@ namespace pool  {
     using indexLookup_t = std::unordered_map<uint64_t, uint64_t>;
     std::map<void*, indexLookup_t>                                         m_ntupleIndexMap;
 
+    // RootDatabase currently holds an optional slot-specific active entry token for the main event data container
+    std::optional<SG::SlotSpecificObj<std::unique_ptr<ROOT::RNTupleReader::RActiveEntryToken>>> m_activeEntryTokenPtr;
+
   public:
     /// Standard Constructor
     RootDatabase();
@@ -143,9 +148,6 @@ namespace pool  {
 
     /// Get TTree by name from the TFile
     TTree* getTree(const std::string& name);
-
-    /// Access to the version string
-    const std::string& fmtVersion() const     { return m_version; }
 
     /// Check for file-existence
     /** @param nam      [IN]  Name of the database to be checked.
@@ -203,24 +205,15 @@ namespace pool  {
     virtual StatusCode   setAutoFlush(const DbOption& opt);
 
     /// Open Database object
-    /** @param domH     [IN]  Handle to valid domain object
-      *                       (validity ensured by upper levels).
+    /** @param dbH      [IN]  StorageSvc handle to the database being opened.
       * @param nam      [IN]  Name of the database to be opened.
       * @param mode     [IN]  Desired session access mode.
       *
       * @return StatusCode code indicating success or failure.  
       */
-    virtual StatusCode   open(const DbDomain&     domH,
+    virtual StatusCode   open(const DbDatabase&   dbH,
                               const std::string&  nam,
-                              Io::IoFlag        mode);
-
-    /// Callback after successful open of a database object
-    /** @param dbH      [IN]  Handle to valid database object
-      * @param mode     [IN]  Desired session access mode.
-      *
-      * @return StatusCode code indicating success or failure.  
-      */
-    virtual StatusCode   onOpen(DbDatabase& dbH, Io::IoFlag      mode);
+                              Io::IoFlag          mode);
 
     /// Close database access
     /** @param mode     [IN]  Desired session access mode.

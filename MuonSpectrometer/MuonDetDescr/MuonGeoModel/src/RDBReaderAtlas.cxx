@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/RDBReaderAtlas.h"
@@ -24,7 +24,7 @@ namespace MuonGM {
     using StripArray = TgcReadoutParams::StripArray;
         
     RDBReaderAtlas::RDBReaderAtlas(StoreGateSvc *pDetStore, IRDBAccessSvc *pRDBAccess, const std::string& geoTag, const std::string& geoNode,
-                                    const std::map<std::string, std::string>& asciiFileDBMap):
+                                    const std::map<std::string, std::string, std::less<>>& asciiFileDBMap):
          DBReader(pDetStore), AthMessaging{"MuGM:RDBReadAtlas"},
             m_geoTag(geoTag), m_geoNode(geoNode), m_pRDBAccess(pRDBAccess) {
         m_SCdbaccess = StatusCode::FAILURE;
@@ -223,7 +223,7 @@ namespace MuonGM {
         // here loop over station-components to init technologies at each new entry
         std::vector<std::string> slist;
         slist.emplace_back("*");
-        StationSelector sel(mysql, slist);
+        StationSelector sel(mysql, std::move(slist));
         StationSelector::StationIterator it;
         ATH_MSG_DEBUG( " from RDBReaderAtlas --- start " );
 
@@ -341,7 +341,7 @@ namespace MuonGM {
                                                       std::move(slarge), 
                                                       std::move(sshort), 
                                                       std::move(nsps));
-            mysql.StoreTgcRPars(rpar);
+            mysql.StoreTgcRPars(std::move(rpar));
             // parameters for TGC inactive inner structure
 
             std::ostringstream Astr;
@@ -351,7 +351,7 @@ namespace MuonGM {
                 Astr << ich + 1;
             }
             std::string A = Astr.str();
-            TGC *tgc = dynamic_cast<TGC*>(mysql.GetTechnology("TGC" + A));
+            TGC *tgc = static_cast<TGC*>(mysql.GetTechnology("TGC" + A));
             tgc->widthWireSupport = (*ggln)[ich]->getFloat("S1PP");
             tgc->widthGasChannel = (*ggln)[ich]->getFloat("S2PP");
             tgc->distanceWireSupport = (*ggln)[ich]->getFloat("WSEP");

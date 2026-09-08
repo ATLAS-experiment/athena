@@ -42,9 +42,9 @@ LVL1CTP::Lvl1Result* Lvl1ResultCnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "Lvl1ResultConverter" );
 
-  static const pool::Guid p2_guid("F4208CCF-9FAA-4F01-9C0B-26E9E59CE49F");
-  static const pool::Guid p1_guid("226FF990-4D6A-4957-AAAD-42172D174773");
-  static const pool::Guid p0_guid("18DE165E-3DB5-4EAC-867D-807DA3E217C0");
+  static const Guid p2_guid("F4208CCF-9FAA-4F01-9C0B-26E9E59CE49F");
+  static const Guid p1_guid("226FF990-4D6A-4957-AAAD-42172D174773");
+  static const Guid p0_guid("18DE165E-3DB5-4EAC-867D-807DA3E217C0");
 
   if ( compareClassGuid(token, p1_guid) ) {
     // using unique_ptr ensures deletion of the persistent object

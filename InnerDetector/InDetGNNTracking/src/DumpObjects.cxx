@@ -1,17 +1,22 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
 #include "DumpObjects.h"
+
 #include "AtlasHepMC/GenEvent.h"
-#include "AtlasHepMC/GenParticle.h"
 #include "GeneratorObjects/xAODTruthParticleLink.h"
 #include "InDetPrepRawData/SiCluster.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "PixelReadoutGeometry/PixelDetectorManager.h"
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "ReadoutGeometryBase/SiLocalPosition.h"
+
+#include "InDetIdentifier/PixelID.h"
+#include "InDetIdentifier/SCT_ID.h"
+
+#include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
 #include "SCT_ReadoutGeometry/SCT_ModuleSideDesign.h"
+
 #include "TruthUtils/HepMCHelpers.h"
 #include "xAODTruth/TruthVertex.h"
 
@@ -466,8 +471,8 @@ StatusCode InDet::DumpObjects::execute(const EventContext& ctx) {
         m_Part_vProdNout[m_nPartEVT] = vProdNout;
         m_Part_vProdStatus[m_nPartEVT] = vProdStatus;
         m_Part_vProdBarcode[m_nPartEVT] = vProdBarcode;
-        (*m_Part_vParentID).push_back(vParentID);
-        (*m_Part_vParentBarcode).push_back(vParentBarcode);
+        (*m_Part_vParentID).push_back(std::move(vParentID));
+        (*m_Part_vParentBarcode).push_back(std::move(vParentBarcode));
       }
 
       m_nPartEVT++;
@@ -603,7 +608,7 @@ StatusCode InDet::DumpObjects::execute(const EventContext& ctx) {
 
           auto pos = sdoCollection->find(rdoID);
           if (pos != sdoCollection->end()) {
-            for (auto deposit : pos->second.getdeposits()) {
+            for (const auto & deposit : pos->second.getdeposits()) {
               const HepMcParticleLink &particleLink = deposit.first;
               std::pair<int, int> barcode(particleLink.eventIndex(), particleLink.barcode());
               // if (particleLink.isValid()) allTruthParticles.at(barcode).second++; // JB comment this out
@@ -672,13 +677,13 @@ StatusCode InDet::DumpObjects::execute(const EventContext& ctx) {
           m_CLphi_module[m_nCL] = phi_module;
           m_CLside[m_nCL] = 0;
           m_CLmoduleID[m_nCL] = clusterCollection->identify().get_compact();
-          (*m_CLparticleLink_eventIndex).push_back(particleLink_eventIndex);
-          (*m_CLparticleLink_barcode).push_back(particleLink_barcode);
-          (*m_CLbarcodesLinked).push_back(barcodesLinked);
-          (*m_CLparticle_charge).push_back(charge);
-          (*m_CLetas).push_back(etas);
-          (*m_CLphis).push_back(phis);
-          (*m_CLtots).push_back(tots);
+          (*m_CLparticleLink_eventIndex).push_back(std::move(particleLink_eventIndex));
+          (*m_CLparticleLink_barcode).push_back(std::move(particleLink_barcode));
+          (*m_CLbarcodesLinked).push_back(std::move(barcodesLinked));
+          (*m_CLparticle_charge).push_back(std::move(charge));
+          (*m_CLetas).push_back(std::move(etas));
+          (*m_CLphis).push_back(std::move(phis));
+          (*m_CLtots).push_back(std::move(tots));
           m_CLloc_direction1[m_nCL] = localDirection[0];
           m_CLloc_direction2[m_nCL] = localDirection[1];
           m_CLloc_direction3[m_nCL] = localDirection[2];
@@ -696,7 +701,7 @@ StatusCode InDet::DumpObjects::execute(const EventContext& ctx) {
           m_CLnorm_x[m_nCL] = norm_x;
           m_CLnorm_y[m_nCL] = norm_y;
           m_CLnorm_z[m_nCL] = norm_z;
-          (*m_CLlocal_cov).push_back(v_local_cov);
+          (*m_CLlocal_cov).push_back(std::move(v_local_cov));
         }
         m_nCL++;
         m_selected++;
@@ -778,7 +783,7 @@ StatusCode InDet::DumpObjects::execute(const EventContext& ctx) {
           // find barcodes of the truth particles
           auto pos = sdoCollection->find(rdoID);
           if (pos != sdoCollection->end()) {
-            for (auto deposit : pos->second.getdeposits()) {
+            for (const auto & deposit : pos->second.getdeposits()) {
               const HepMcParticleLink &particleLink = deposit.first;
               std::pair<int, int> barcode(particleLink.eventIndex(), particleLink.barcode());
               // note that we are not filling the map allTruthParticles here - OK, we are not using this map for
@@ -864,13 +869,13 @@ StatusCode InDet::DumpObjects::execute(const EventContext& ctx) {
           m_CLphi_module[m_nCL] = phi_module;
           m_CLside[m_nCL] = side;
           m_CLmoduleID[m_nCL] = clusterCollection->identify().get_compact();
-          (*m_CLparticleLink_eventIndex).push_back(particleLink_eventIndex);
-          (*m_CLparticleLink_barcode).push_back(particleLink_barcode);
-          (*m_CLbarcodesLinked).push_back(barcodesLinked);
-          (*m_CLparticle_charge).push_back(charge);
-          (*m_CLetas).push_back(strip_ids);
-          (*m_CLphis).push_back(cst);
-          (*m_CLtots).push_back(tots);
+          (*m_CLparticleLink_eventIndex).push_back(std::move(particleLink_eventIndex));
+          (*m_CLparticleLink_barcode).push_back(std::move(particleLink_barcode));
+          (*m_CLbarcodesLinked).push_back(std::move(barcodesLinked));
+          (*m_CLparticle_charge).push_back(std::move(charge));
+          (*m_CLetas).push_back(std::move(strip_ids));
+          (*m_CLphis).push_back(std::move(cst));
+          (*m_CLtots).push_back(std::move(tots));
           m_CLloc_direction1[m_nCL] = localDirection[0];
           m_CLloc_direction2[m_nCL] = localDirection[1];
           m_CLloc_direction3[m_nCL] = localDirection[2];
@@ -888,7 +893,7 @@ StatusCode InDet::DumpObjects::execute(const EventContext& ctx) {
           m_CLnorm_x[m_nCL] = norm_x;
           m_CLnorm_y[m_nCL] = norm_y;
           m_CLnorm_z[m_nCL] = norm_z;
-          (*m_CLlocal_cov).push_back(v_local_cov);
+          (*m_CLlocal_cov).push_back(std::move(v_local_cov));
         }
 
         m_nCL++;
@@ -1018,10 +1023,10 @@ StatusCode InDet::DumpObjects::execute(const EventContext& ctx) {
 				       sp->topStripCenter().data() +
 				     sp->topStripCenter().size());
 
-	(*m_SPtopStripDirection).push_back(topstripDir);
-	(*m_SPbottomStripDirection).push_back(botstripDir);
-	(*m_SPstripCenterDistance).push_back(DstripCnt);
-	(*m_SPtopStripCenterPosition).push_back(topstripCnt);
+	(*m_SPtopStripDirection).push_back(std::move(topstripDir));
+	(*m_SPbottomStripDirection).push_back(std::move(botstripDir));
+	(*m_SPstripCenterDistance).push_back(std::move(DstripCnt));
+	(*m_SPtopStripCenterPosition).push_back(std::move(topstripCnt));
 
       }
 
@@ -1089,10 +1094,10 @@ StatusCode InDet::DumpObjects::execute(const EventContext& ctx) {
 				       sp->topStripCenter().data() +
 				       sp->topStripCenter().size());
 
-	(*m_SPtopStripDirection).push_back(topstripDir);
-	(*m_SPbottomStripDirection).push_back(botstripDir);
-	(*m_SPstripCenterDistance).push_back(DstripCnt);
-	(*m_SPtopStripCenterPosition).push_back(topstripCnt);
+	(*m_SPtopStripDirection).push_back(std:: move(topstripDir));
+	(*m_SPbottomStripDirection).push_back(std::move(botstripDir));
+	(*m_SPstripCenterDistance).push_back(std::move(DstripCnt));
+	(*m_SPtopStripCenterPosition).push_back(std::move(topstripCnt));
 
       }
 
@@ -1250,15 +1255,15 @@ StatusCode InDet::DumpObjects::execute(const EventContext& ctx) {
       m_TRKtrack_fitter[m_nTRK] = info.trackFitter();
       m_TRKndof[m_nTRK] = info.trackFitter();
       m_TRKparticle_hypothesis[m_nTRK] = info.particleHypothesis();
-      (*m_TRKproperties).push_back(v_properties);
-      (*m_TRKpattern).push_back(v_pattern);
+      (*m_TRKproperties).push_back(std::move(v_properties));
+      (*m_TRKpattern).push_back(std::move(v_pattern));
       m_TRKndof[m_nTRK] = ndof;
       m_TRKchiSq[m_nTRK] = chiSq;
-      (*m_TRKmeasurementsOnTrack_pixcl_sctcl_index).push_back(measurementsOnTrack_pixcl_sctcl_index);
-      (*m_TRKoutliersOnTrack_pixcl_sctcl_index).push_back(outliersOnTrack_pixcl_sctcl_index);
+      (*m_TRKmeasurementsOnTrack_pixcl_sctcl_index).push_back(std::move(measurementsOnTrack_pixcl_sctcl_index));
+      (*m_TRKoutliersOnTrack_pixcl_sctcl_index).push_back(std::move(outliersOnTrack_pixcl_sctcl_index));
       m_TRKcharge[m_nTRK] = charge;
-      (*m_TRKperigee_position).push_back(position);
-      (*m_TRKperigee_momentum).push_back(momentum);
+      (*m_TRKperigee_position).push_back(std::move(position));
+      (*m_TRKperigee_momentum).push_back(std::move(momentum));
       m_TRKmot[m_nTRK] = mot;
       m_TRKoot[m_nTRK] = oot;
       m_TTCindex[m_nTRK] = TTCindex;
@@ -1319,11 +1324,11 @@ StatusCode InDet::DumpObjects::execute(const EventContext& ctx) {
     if (m_rootFile) {
       m_DTTindex[m_nDTT] = detailedTrackTruthIterator->first.index();
       m_DTTsize[m_nDTT] = traj.size();
-      (*m_DTTtrajectory_eventindex).push_back(DTTtrajectory_eventindex);
-      (*m_DTTtrajectory_barcode).push_back(DTTtrajectory_barcode);
-      (*m_DTTstTruth_subDetType).push_back(DTTstTruth_subDetType);
-      (*m_DTTstTrack_subDetType).push_back(DTTstTrack_subDetType);
-      (*m_DTTstCommon_subDetType).push_back(DTTstCommon_subDetType);
+      (*m_DTTtrajectory_eventindex).push_back(std::move(DTTtrajectory_eventindex));
+      (*m_DTTtrajectory_barcode).push_back(std::move(DTTtrajectory_barcode));
+      (*m_DTTstTruth_subDetType).push_back(std::move(DTTstTruth_subDetType));
+      (*m_DTTstTrack_subDetType).push_back(std::move(DTTstTrack_subDetType));
+      (*m_DTTstCommon_subDetType).push_back(std::move(DTTstCommon_subDetType));
     }
 
     m_nDTT++;

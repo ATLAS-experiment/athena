@@ -1,15 +1,9 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "FrontEndSimTool.h"
 
-
-FrontEndSimTool::FrontEndSimTool(const std::string& type, const std::string& name, const IInterface* parent) :
-  AthAlgTool(type, name, parent) {
-  declareInterface<FrontEndSimTool>(this);
-}
-
-StatusCode 
+StatusCode
 FrontEndSimTool::initialize() {
   ATH_CHECK(m_pixelConditionsTool.retrieve());
   ATH_CHECK(m_pixelReadout.retrieve());
@@ -22,13 +16,3 @@ FrontEndSimTool::initialize() {
   
   return StatusCode::SUCCESS;
 }
-
-StatusCode 
-FrontEndSimTool::finalize() {return StatusCode::FAILURE;}
-
-
-
-
-
-
-

@@ -38,6 +38,7 @@ StatusCode TopoAutomatonSplitting::initialize_non_CUDA()
   auto get_option_from_string = [](const std::string & str, bool & failed)
   {
     failed = false;
+    //cppcheck-suppress syntaxError
     CRGPU_RECURSIVE_MACRO(
             CRGPU_CHEAP_STRING_TO_ENUM( str, CaloCell_ID,
                                         PreSamplerB,

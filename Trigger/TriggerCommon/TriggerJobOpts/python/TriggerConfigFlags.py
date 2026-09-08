@@ -3,18 +3,11 @@
 import os
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
-from AthenaConfiguration.Enums import FlagEnum, Format, LHCPeriod
+from AthenaConfiguration.Enums import Format, LHCPeriod
+from Campaigns.Utils import getDataYear
 from AthenaCommon.Logging import logging
 
 log=logging.getLogger('TriggerConfigFlags')
-
-class ROBPrefetching(FlagEnum):
-    # Enable mapping step InputMaker outputs as ROBPrefetchingAlg inputs
-    StepRoI = 'StepRoI'
-    # Enable mapping chains' first step to pre-HLT prefetching rules based on initial RoIs
-    InitialRoI = 'InitialRoI'
-    # Enable using larger RoI in TauCore step to speculatively prefetch ROBs for the subsequent TauIso step (ATR-26419)
-    TauCoreLargeRoI = 'TauCoreLargeRoI'
 
 
 def trigGlobalTag(flags):
@@ -64,9 +57,10 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.enableL1TopoBWSimulation', True,
                   help='enable bitwise L1Topo simulation')
 
+    # by default, enable Legacy L1Calo decoding only for offline data reconstruction until 2024
     flags.addFlag('Trigger.enableL1CaloLegacy', lambda prevFlags:
-                  not (not prevFlags.Input.isMC and prevFlags.Trigger.doHLT), #Disable when we're running the trigger on data, keep when doing offline simulation
-                  help='enable Run-2 L1Calo simulation and/or decoding')
+                  len(prevFlags.Input.Files) > 0 and prevFlags.Input.Format is Format.BS and prevFlags.Reco.EnableTrigger and getDataYear(prevFlags)<2024,
+                  help='enable Legacy L1Calo simulation and/or decoding')
 
     # L0MuonSim category (for Run-4+) : needs Trigger.enableL0Muon=True
     flags.addFlag('Trigger.L0MuonSim.doEmulation',
@@ -148,9 +142,8 @@ def createTriggerFlags(doTriggerRecoFlags):
                   help=('Check validity of each Decision objects in the entire decision tree (CPU expensive). '
                         'Also enable per-step decision printouts.'))
 
-    flags.addFlag('Trigger.ROBPrefetchingOptions',
-                  [ROBPrefetching.InitialRoI, ROBPrefetching.StepRoI, ROBPrefetching.TauCoreLargeRoI],
-                  help='select ROB prefetching types, empty list disables prefetching')
+    # Enables logging of per-leg feature counts
+    flags.addFlag('Trigger.doPerLegFeatureCounts', True)
 
     def EDMVersion(flags):
         """Determine Trigger EDM version based on the input file."""
@@ -303,8 +296,6 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.Online.isPartition', lambda prevFlags: len(prevFlags.Trigger.Online.partitionName)>0,
                   help='check if job is running in a partition (i.e. partition name is not empty)')
 
-    flags.addFlag("Trigger.Online.useEFByteStreamSvc", False,
-                  help='use online EF ByteStream services')
     flags.addFlag('Trigger.Online.EFInterface.Files', [])
     flags.addFlag('Trigger.Online.EFInterface.OutputFileName', '')
     flags.addFlag('Trigger.Online.EFInterface.LoopFiles', False)
@@ -321,9 +312,6 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.Online.EFInterface.LibraryName', 'TrigDFEmulator',
                   help='Name of the EFDF interface shared library to load')
     
-    flags.addFlag('Trigger.Online.useOnlineTHistSvc', False,
-                  help='use online THistSvc')
-
     flags.addFlag('Trigger.Online.useOnlineWebdaqHistSvc', False,
                       help='use online Webdaq HistSvc')
 
@@ -334,7 +322,7 @@ def createTriggerFlags(doTriggerRecoFlags):
                   help='enable bytestream writing of trigger information')
 
     flags.addFlag('Trigger.doTransientByteStream', lambda prevFlags:
-                  True if prevFlags.Input.Format is Format.POOL and prevFlags.Trigger.doCalo else False,
+                  bool(prevFlags.Input.Format is Format.POOL and prevFlags.Trigger.doCalo),
                   help='create transient BS (for running on MC RDO with clients that require BS inputs)')
 
     flags.addFlag('Trigger.AODEDMSet', lambda flags: 'AODSLIM' if flags.Input.isMC else 'AODFULL',
@@ -387,7 +375,7 @@ def createTriggerFlags(doTriggerRecoFlags):
             return 'DB'
         elif flags.Input.Format is Format.BS:
             from glob import glob
-            hasLocal = True if (glob("HLTMenu*.json") and glob("L1Menu*.json") and glob("HLTPrescales*.json") and glob("L1Prescales*.json") and glob("HLTMonitoring*.json") and glob("BunchGroupSet*.json")) else False
+            hasLocal = bool(glob('HLTMenu*.json') and glob('L1Menu*.json') and glob('HLTPrescales*.json') and glob('L1Prescales*.json') and glob('HLTMonitoring*.json') and glob('BunchGroupSet*.json'))
             if flags.Trigger.doHLT:
                 # When running the Run 3 trigger on data, data the default config source is from the JSON created by compiling the menu in the job config phase
                 _log.debug("Autoconfigured default value for running the trigger on data: 'FILE'")
@@ -411,7 +399,7 @@ def createTriggerFlags(doTriggerRecoFlags):
             md = GetFileMD(flags.Input.Files)
             # Note: the following comprehension will detect both Run 2 and Run 3 in-file metadata formats.
             # As of 2023, the Run 2 metadata format is still in production use for Run 2 MC AODs, DAODs produced with the Release 21 Run 2 trigger.
-            hasTrigMeta = ("metadata_items" in md and any(('TriggerMenu' in key) for key in md["metadata_items"].keys()))
+            hasTrigMeta = ("metadata_items" in md and any(('TriggerMenu' in key) for key in md["metadata_items"]))
             if hasTrigMeta:
                 # When running over a file which already has metadata content (RDO_TRIG, ESD, AOD, DAOD), then read this from within the file's meta store
                 _log.debug("Autoconfigured default value to read trigger configuration data from the input file: 'INFILE'")
@@ -427,7 +415,7 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.useCrest', lambda prevFlags: prevFlags.IOVDb.UseCREST, # only effective if Trigger.triggerConfig is set to 'DB'
                   help='Flag enables trigger configuration database access through CREST')
 
-    flags.addFlag('Trigger.crestServer', lambda prevFlags: prevFlags.IOVDb.CrestServer,
+    flags.addFlag('Trigger.crestServer', lambda prevFlags: prevFlags.IOVDb.DBConnection,
                   help='CREST server to access trigger configuration')
 
     flags.addFlag('Trigger.triggerMenuSetup', lambda flags: 'MC_pp_run3_v1_BulkMCProd_prescale' if flags.GeoModel.Run is LHCPeriod.Run3 else 'MC_pp_run4_v1_BulkMCProd_prescale',

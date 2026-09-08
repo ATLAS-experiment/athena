@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef TAUDQA_TAUVALIDATIONPLOTSNOCUTS_H
 #define TAUDQA_TAUVALIDATIONPLOTSNOCUTS_H
@@ -15,7 +15,7 @@
 #include "TauParticleFlowPlots.h"
 #include "CorePlots.h"
 #include "DecayModeMigration.h"
-#include "EfficiencyPlots.h"
+#include "IDEfficiencyPlots.h"
 
 
 class TauValidationPlotsNoCuts:public PlotBase {
@@ -61,17 +61,17 @@ class TauValidationPlotsNoCuts:public PlotBase {
       Tau::TauParticleFlowPlots m_oFakeTauAllProngsPlots;
 
       //Efficiency plots
-      Tau::EfficiencyPlots m_oMatchedTauEffPlots;
-      Tau::EfficiencyPlots m_oMatchedTauEff1PPlots;
-      Tau::EfficiencyPlots m_oMatchedTauEff3PPlots;
+      Tau::IDEfficiencyPlots m_oMatchedTauEffPlots;
+      Tau::IDEfficiencyPlots m_oMatchedTauEff1PPlots;
+      Tau::IDEfficiencyPlots m_oMatchedTauEff3PPlots;
 
-      Tau::EfficiencyPlots m_oRecTauEffPlots;
-      Tau::EfficiencyPlots m_oRecTauEff1PPlots;
-      Tau::EfficiencyPlots m_oRecTauEff3PPlots;
+      Tau::IDEfficiencyPlots m_oRecTauEffPlots;
+      Tau::IDEfficiencyPlots m_oRecTauEff1PPlots;
+      Tau::IDEfficiencyPlots m_oRecTauEff3PPlots;
 
-      Tau::EfficiencyPlots m_oFakeTauEffPlots;
-      Tau::EfficiencyPlots m_oFakeTauEff1PPlots;
-      Tau::EfficiencyPlots m_oFakeTauEff3PPlots;
+      Tau::IDEfficiencyPlots m_oFakeTauEffPlots;
+      Tau::IDEfficiencyPlots m_oFakeTauEff1PPlots;
+      Tau::IDEfficiencyPlots m_oFakeTauEff3PPlots;
 
       // All tau Reco with Backwards compatability, for comparison with 17.X.Y
       Tau::CorePlots m_oNewCorePlots;		

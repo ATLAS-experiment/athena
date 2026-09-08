@@ -15,7 +15,6 @@
 // Framework include files
 #include "PersistentDataModel/Token.h"
 #include "DbStorageSvc.h"
-#include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbContainer.h"
 #include "StorageSvc/DbDatabase.h"
@@ -27,9 +26,7 @@
 
 #include "Gaudi/PluginService.h"
 
-#include <vector>
 #include <memory>
-#include <map>
 
 using namespace std;
 
@@ -44,8 +41,6 @@ namespace pool  {
   typedef const DbTypeInfo    *DbTypeInfoH;
   typedef const DbDatabaseObj *DbDatabaseH;
   typedef       DbDatabaseObj *DbDatabaseHNC;
-
-  class DbClassMap : public map<TypeH, Guid> {};
 
 
    
@@ -183,7 +178,7 @@ StatusCode DbStorageSvc::allocate( FileDescriptor&       fDesc,
 
    if( shape && object ) {
       void* handle = fDesc.dbc()->handle();
-      DbDatabase dbH((DbDatabaseHNC)handle);
+      DbDatabase dbH(static_cast<DbDatabaseHNC>(handle));
       DbContainer cntH(dbH.type());
       sc = cntH.open( dbH, 
                       refCont,
@@ -205,7 +200,7 @@ StatusCode DbStorageSvc::allocate( FileDescriptor&       fDesc,
       }
    }
    ATH_MSG_ERROR( "Cannot allocate persistent object." << endmsg
-       << " Shape Handle :" << (const void*)shape  << endmsg
+       << " Shape Handle :" << static_cast<const void*>(shape)  << endmsg
        << " FID=" << fDesc.FID() << endmsg
        << " Cnt=" << refCont );
    return sc;

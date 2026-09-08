@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -152,7 +152,7 @@ const R* IDTPM::DeltaRMatchingToolBase<T, R>::getMatchedRef(
   }
 
   /// Initialise base set
-  std::vector< const R* > set( vec_pt );
+  std::vector< const R* > set( std::move(vec_pt) );
 
   /// Sort, pointer-based; necessary for set_intersection
   std::sort( set.begin(), set.end() );
@@ -175,11 +175,11 @@ const R* IDTPM::DeltaRMatchingToolBase<T, R>::getMatchedRef(
   /// Add subsets according to specified cut values
   std::vector< std::vector< const R* > > subsets;
   if( m_pTResMax > 0 ) {
-    subsets.push_back( subset_pt );
+    subsets.push_back( std::move(subset_pt) );
   }
   if( m_dRmax > 0 ) {
-    subsets.push_back( subset_eta );
-    subsets.push_back( subset_phi );
+    subsets.push_back( std::move(subset_eta) );
+    subsets.push_back( std::move(subset_phi) );
   }
 
   /// Compute successive intersections between base set and subset
@@ -200,7 +200,7 @@ const R* IDTPM::DeltaRMatchingToolBase<T, R>::getMatchedRef(
       ATH_MSG_DEBUG( "Break early: empty intersection" );
       return nullptr;
     }
-    set = intersection;
+    set = std::move(intersection);
   }
 
   /// vector "set" now contains all matched reference tracks

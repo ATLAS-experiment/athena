@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from dataclasses import dataclass
 from enum import Enum
@@ -7,7 +7,7 @@ from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
 from ..Base.ThresholdType import ThrType
-from .FexThresholdParameters import eta_dependent_cuts
+from .FexThresholdParameters import getEtaDependentCuts
 
 class ValueWithEtaDependence(object):
     """
@@ -98,14 +98,14 @@ def cTAUfwToFlowConversion(fw):
     decimal = fw/1024
     return float("{:.2f}".format(decimal))
 
-def getTypeWideThresholdConfig(ttype, do_HI_tob_thresholds=False, do_eFex_BDT_Tau=True):
+def getTypeWideThresholdConfig(ttype, do_HI_tob_thresholds=False, do_eFex_BDT_Tau=True, collisions=60):
     if isinstance(ttype, str):
         ttype = ThrType[ttype]
 
     if ttype == ThrType.MU:
         return getConfig_MU()
     if ttype == ThrType.eEM:
-        return getConfig_eEM(do_HI_tob_thresholds)
+        return getConfig_eEM(do_HI_tob_thresholds, collisions)
     if ttype == ThrType.jEM:
         return getConfig_jEM()
     if ttype == ThrType.eTAU:
@@ -184,7 +184,7 @@ def getConfig_MU():
     return confObj
 
 
-def getConfig_eEM(do_HI_tob_thresholds):
+def getConfig_eEM(do_HI_tob_thresholds, collisions):
     confObj = {"workingPoints": {}}
     bitshift_reta = 3
     bitshift_rhad = 3
@@ -261,7 +261,7 @@ def getConfig_eEM(do_HI_tob_thresholds):
 
     # Add any eta-dependent cuts that are defined for specific working points
     # with higher priority than the low-granularity values above
-    eEM_eta_cuts = eta_dependent_cuts["eEM"]
+    eEM_eta_cuts = getEtaDependentCuts(collisions)["eEM"] # Options for mu=60, 140, 200
     for wp in confObj["workingPoints"]:
         if wp in eEM_eta_cuts:
             # Check that all cut vector lengths are matching

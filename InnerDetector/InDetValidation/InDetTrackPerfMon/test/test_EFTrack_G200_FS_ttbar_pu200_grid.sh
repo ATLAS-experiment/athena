@@ -1,8 +1,8 @@
 #!/bin/bash
-# art-description: Nightly test to compare G-200 vs C-000 (Full-scan) for EFTrack studies using ttbar pu200 sample
+# art-description: Nightly test to compare G-200 vs C-100 (Full-scan) for EFTrack studies using ttbar pu200 sample
 # art-type: grid
-# art-include: main/Athena/x86_64-el9-gcc14-opt
-# art-pathena-flags-add: --site=UKI-LT2-QMUL_GPU,UKI-NORTHGRID-MAN-HEP_GPU,FZK-LCG2_GPU
+# art-include: main/Athena/x86_64-el9-gcc15-opt
+# art-pathena-flags-add: --site=UKI-LT2-QMUL_GPU,UKI-NORTHGRID-MAN-HEP_GPU
 # art-architecture: '#&nvidia'
 # art-memory: 4095
 # art-output: IDTPM.*.root
@@ -19,10 +19,11 @@ pipelineName='G200'
 SampleName='ttbar_pu200'  # as defined in samplesDict of InDetTrackPerfMon/scripts/getEFTrackSample.py
 OutSampleName="${pipelineName}_FS.${SampleName}"
 TrkCollName='TracccTrackParticles'
+TrkSeedCollName='TracccSeedTrackParticles'
 referencePath='/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetTrackPerfMon/EFTrackRefereceHistograms/'
-referenceName="C000_FS.${SampleName}"
+referenceName="C100_FS.${SampleName}"
 referenceName_absPath="${referencePath}/IDTPM.${referenceName}.HIST.root"
-refLabel="C-000"
+refLabel="C-100"
 testLabel="G-200"
 
 ## search in $DATAPATH for matching files
@@ -68,12 +69,12 @@ if [ ! -f "${InputRDOfiles}" ]; then
     exit 1
 fi
 
-## Track reconstruction step
+## Track reconstruction step. See runReco_G200_FS.sh --help for list of supported options.
 run "${pipelineName}" \
   runReco_G200_FS.sh \
     -i ${InputRDOfiles} \
-    -o "${OutSampleName}.AOD.pool.root"
-    #-n 10
+    -o "${OutSampleName}.AOD.pool.root" \
+    "$@"
 
 ## Don't run if IDTPM json config is not found
 if [ ! -f "$IDTPMjsonConfig_absPath" ]; then
@@ -84,7 +85,7 @@ fi
 ## Copying json config in the output directory
 echo "Running IDTPM with the following json config:"
 ## change the name of the track collection to monitor and copy json config in work dir
-cat $IDTPMjsonConfig_absPath | sed "s|_TRKCOLLNAME_|${TrkCollName}|g" | tee ${cwd}/IDTPMconfig.json
+cat $IDTPMjsonConfig_absPath | sed -e "s|_TRKCOLLNAME_|${TrkCollName}|g" -e "s|_TRKSEEDCOLLNAME_|${TrkSeedCollName}|g" | tee ${cwd}/IDTPMconfig.json
 
 ## IDTPM step
 run "IDTPM" \

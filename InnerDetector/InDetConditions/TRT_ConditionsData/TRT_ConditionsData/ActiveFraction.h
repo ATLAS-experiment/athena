@@ -4,9 +4,12 @@
 
 #ifndef ACTIVEFRACTION_H
 #define ACTIVEFRACTION_H
-#include <vector>
+
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/CondCont.h"
+#include <cmath>
+#include <vector>
+
 #ifndef M_PI
 #define M_PI  3.141592653589793238462643383279502884197
 #endif
@@ -31,18 +34,18 @@ namespace TRTCond{
   };
   inline ActiveFraction::ActiveFraction() {
      m_nBinsPhi=96;
-     m_etaBins.push_back( std::make_pair(-2.1,-1.75) );
-     m_etaBins.push_back( std::make_pair(-1.75,-1.3) );
-     m_etaBins.push_back( std::make_pair(-1.3,-1.07) );
-     m_etaBins.push_back( std::make_pair(-1.07,-0.65) );
-     m_etaBins.push_back( std::make_pair(-0.65,-0.1) );
-     m_etaBins.push_back( std::make_pair(-0.1,0.) );
-     m_etaBins.push_back( std::make_pair(0.,0.1) );
-     m_etaBins.push_back( std::make_pair(0.1,0.65) );
-     m_etaBins.push_back( std::make_pair(0.65,1.07) );
-     m_etaBins.push_back( std::make_pair(1.07,1.3) );
-     m_etaBins.push_back( std::make_pair(1.3,1.75) );
-     m_etaBins.push_back( std::make_pair(1.75,2.1) );
+     m_etaBins.emplace_back( -2.1,-1.75);
+     m_etaBins.emplace_back( -1.75,-1.3 );
+     m_etaBins.emplace_back( -1.3,-1.07 );
+     m_etaBins.emplace_back( -1.07,-0.65 );
+     m_etaBins.emplace_back( -0.65,-0.1 );
+     m_etaBins.emplace_back( -0.1,0. );
+     m_etaBins.emplace_back( 0.,0.1 );
+     m_etaBins.emplace_back( 0.1,0.65 );
+     m_etaBins.emplace_back( 0.65,1.07 );
+     m_etaBins.emplace_back( 1.07,1.3 );
+     m_etaBins.emplace_back( 1.3,1.75 );
+     m_etaBins.emplace_back( 1.75,2.1 );
      float phiEdgeLow = -1. * M_PI;
      float deltaPhi = 2. * M_PI / (1. * m_nBinsPhi) ;
      for ( int i = 0; i < m_nBinsPhi; ++i ) {
@@ -51,7 +54,7 @@ namespace TRTCond{
      // Initialize the table with 1.'s
      std::vector<float> dummyPhiVec( m_phiBins.size(), 1. );
      std::vector<std::vector<float> > dummyTable( m_etaBins.size(), dummyPhiVec );
-     m_activeFracTable = dummyTable;
+     m_activeFracTable = std::move(dummyTable);
   }
 
   inline int ActiveFraction::findEtaBin( float eta) const {

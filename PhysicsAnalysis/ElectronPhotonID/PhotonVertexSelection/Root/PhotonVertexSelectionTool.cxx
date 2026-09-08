@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local includes
@@ -95,7 +95,7 @@ namespace CP {
     //*************************************************************************
     // score the model using sample data, and inspect values
     // loading input data
-    std::vector<std::vector<float>> input_tensor_values_ = input_data;
+    const std::vector<std::vector<float>>& input_tensor_values_ = input_data;
 
      //preparing container to hold input data
      size_t input_tensor_size = nVars;

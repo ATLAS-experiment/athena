@@ -219,33 +219,33 @@ public:
 
   struct GeometryArr
   {
-    float x[NCaloCells];
-    float y[NCaloCells];
-    float z[NCaloCells];
-    float r[NCaloCells];
-    float eta[NCaloCells];
-    float phi[NCaloCells];
+    float x[NCaloCells]{};
+    float y[NCaloCells]{};
+    float z[NCaloCells]{};
+    float r[NCaloCells]{};
+    float eta[NCaloCells]{};
+    float phi[NCaloCells]{};
 
-    float dx[NCaloCells];
-    float dy[NCaloCells];
-    float dz[NCaloCells];
-    float dr[NCaloCells];
-    float deta[NCaloCells];
-    float dphi[NCaloCells];
+    float dx[NCaloCells]{};
+    float dy[NCaloCells]{};
+    float dz[NCaloCells]{};
+    float dr[NCaloCells]{};
+    float deta[NCaloCells]{};
+    float dphi[NCaloCells]{};
 
-    float volume[NCaloCells];
+    float volume[NCaloCells]{};
     
-    int   nCellsPerSampling[NumSamplings];
+    int   nCellsPerSampling[NumSamplings]{};
 
-    NeighArr neighbours;
+    NeighArr neighbours{};
     
 #if CALORECGPU_ADD_FULL_PAIRS_LIST_TO_CONSTANT_INFORMATION
-    NeighPairsArr neighPairs;
+    NeighPairsArr neighPairs{};
 #endif
 
     EtaPhiToCellMap etaPhiToCell;
 
-    OtherCellInfo::carrier otherCellInfo[NCaloCells];
+    OtherCellInfo::carrier otherCellInfo[NCaloCells]{};
 
     constexpr static bool is_tile (const int cell)
     {

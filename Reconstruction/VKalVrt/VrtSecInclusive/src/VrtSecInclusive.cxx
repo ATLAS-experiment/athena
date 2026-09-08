@@ -391,7 +391,7 @@ namespace VKalVrtAthena {
 
     if( sc.isFailure() or !m_thePV ) {
 
-      ATH_MSG_WARNING("processPrimaryVertices() failed");
+      ATH_MSG_DEBUG("processPrimaryVertices() failed");
       vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
       ATH_CHECK(defineDummyCollections(ctx));
       return StatusCode::SUCCESS;

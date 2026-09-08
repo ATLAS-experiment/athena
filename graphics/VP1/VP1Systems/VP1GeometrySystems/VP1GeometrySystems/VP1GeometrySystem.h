@@ -83,7 +83,7 @@ protected Q_SLOTS:
 
   void autoAdaptPixelsOrSCT(bool,bool,bool,bool,bool,bool);//pixel,brl,ecA,ecC,bcmA,bcmC
   void autoAdaptMuonNSW(bool reset, bool stgc, bool mm, bool passiveSpacer, bool passiveStructure,bool  passiveAPlate); // select NSW geo: sTGC, MicroMegas, Spacer, Structure, APlate
-  void autoAdaptHGTD(bool reset, bool flex, bool hybrid, bool glue, bool sensors, bool inactive, bool asic, bool supportPlate, bool frontCover, bool backCover, bool moderatorIn, bool moderatorOut, bool outerRCover, bool coolingLines); // select HGTD geo
+  void autoAdaptHGTD(bool reset, bool modules, bool supportStructure, bool coolingLines, bool covers, bool moderator, bool servicesElectronics); // select HGTD geo
   void resetSubSystems(VP1GeoFlags::SubSystemFlags);
   void autoExpandByVolumeOrMaterialName(bool,const QString&);//volname: (false,namestr), matname: (true,namestr)
   void autoIconifyByVolumeOrMaterialName(bool,const QString&);//volname: (false,namestr), matname: (true,namestr)

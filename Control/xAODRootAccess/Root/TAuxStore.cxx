@@ -15,6 +15,7 @@
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthContainers/exceptions.h"
 #include "AthContainers/tools/AuxVectorInterface.h"
+#include "AthContainers/CurrentContext.h"
 #include "CxxUtils/as_const_ptr.h"
 #include "CxxUtils/checker_macros.h"
 #include "xAODCore/tools/IOStats.h"
@@ -393,6 +394,10 @@ class TBranchHandle {
   /// operation.
   ///
   void reset() { m_needsRead = true; }
+
+  /// Return the auxid for this variable.
+  SG::auxid_t auxid() const { return m_auxid; }
+
 
  private:
   /// The branch that this object is handling
@@ -787,6 +792,13 @@ struct TAuxStore::impl {
     return StatusCode::SUCCESS;
   }
 
+  impl(const EventContext& ctx, Members& data, int basketSize, int splitLevel)
+    : m_ctx(ctx), m_data(data), m_basketSize(basketSize), m_splitLevel(splitLevel)
+  {}
+
+  /// The context for this event.
+  const EventContext& m_ctx;
+
   /// Variables coming from @c AuxStoreBase
   // cppcheck-suppress uninitMemberVarNoCtor
   Members& m_data;
@@ -816,10 +828,11 @@ struct TAuxStore::impl {
   mutable mutex_t m_mutex;
 };
 
-TAuxStore::TAuxStore(std::string_view prefix, bool topStore, EStructMode mode,
+TAuxStore::TAuxStore(const EventContext& ctx,
+                     std::string_view prefix, bool topStore, EStructMode mode,
                      int basketSize, int splitLevel)
     : details::AuxStoreBase(topStore, mode),
-      m_impl{std::make_unique<impl>(m_data, basketSize, splitLevel)} {
+      m_impl{std::make_unique<impl>(ctx, m_data, basketSize, splitLevel)} {
 
   setPrefix(prefix);
 }
@@ -970,6 +983,9 @@ int TAuxStore::getEntry(int getall) {
   for (auto& branchHandle : m_impl->m_branches) {
     if (branchHandle) {
       bytesRead += branchHandle->getEntry();
+#ifndef XAOD_STANDALONE
+      m_data.m_vecs[branchHandle->auxid()]->toTransient( m_impl->m_ctx );
+#endif
     }
   }
   return bytesRead;
@@ -1005,6 +1021,9 @@ StatusCode TAuxStore::getEntryFor(SG::auxid_t auxid) {
             SG::AuxTypeRegistry::instance().getName(auxid).c_str());
     return StatusCode::FAILURE;
   }
+#ifndef XAOD_STANDALONE
+  m_data.m_vecs[auxid]->toTransient( m_impl->m_ctx );
+#endif
   return StatusCode::SUCCESS;
 }
 
@@ -1229,6 +1248,9 @@ StatusCode TAuxStore::setupInputData(SG::auxid_t auxid) {
 
   // Get the current entry:
   m_impl->m_branches[auxid]->getEntry();
+#ifndef XAOD_STANDALONE
+  m_data.m_vecs[auxid]->toTransient( m_impl->m_ctx );
+#endif
 
   // Remember which variable got created:
   m_data.m_auxIDs.insert(auxid);

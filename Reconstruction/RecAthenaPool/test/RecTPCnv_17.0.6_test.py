@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaPoolUtilities.TPCnvTestConfig import TPCnvTest
@@ -10,8 +10,8 @@ if __name__ == "__main__":
 
     keys = [
         #MissingETComposition_p1
-        'MET_RefComposition',
-        'MET_RefComposition_em',
+        #'MET_RefComposition',
+        #'MET_RefComposition_em',
 
         #MissingET_p3
         'MET_RefGamma',

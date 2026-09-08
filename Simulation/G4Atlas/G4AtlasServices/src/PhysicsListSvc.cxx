@@ -57,6 +57,7 @@ void PhysicsListSvc::CreatePhysicsList()
       Atlasfactory.SetVerbose(0); // HACK
       G4HadronicProcessStore::Instance()->SetVerbose(0);
     }
+    Atlasfactory.SetMultipleStepsInMSCTransport(m_multipleStepsInMSCTransport);
     if (factory.IsReferencePhysList(m_physicsListName.value()))
     {
       ATH_MSG_INFO("Creating Geant4 PhysicsList: " << m_physicsListName.value());
@@ -165,20 +166,84 @@ void PhysicsListSvc::SetPhysicsOptions()
       return;
     }
 
-  if(m_generalCut.value() > 0. && std::abs(m_generalCut.value())>std::numeric_limits<double>::epsilon())
+  // Preserve the ordering used by the legacy run managers.
+  SetDefaultCut();
+  SetNeutronKillerOptions();
+  SetEMParameters();
+  SetAntiNeutronOptions();
+}
+
+
+void PhysicsListSvc::SetPhysicsListOptions()
+{
+  if (!m_physicsList)
+    {
+      ATH_MSG_WARNING("Physics list not initialized before setting physics-list options");
+      return;
+    }
+
+  SetDefaultCut();
+  SetEMParameters();
+  SetAntiNeutronOptions();
+}
+
+
+void PhysicsListSvc::SetPhysicsProcessOptions()
+{
+  if (!m_physicsList)
+    {
+      ATH_MSG_WARNING("Physics list not initialized before setting physics-process options");
+      return;
+    }
+
+  SetNeutronKillerOptions();
+}
+
+
+void PhysicsListSvc::SetDefaultCut()
+{
+  if(m_generalCut.value() > 0. &&
+     std::abs(m_generalCut.value())>std::numeric_limits<double>::epsilon())
     {
       m_physicsList->SetDefaultCutValue(m_generalCut.value());
     }
+}
 
+
+void PhysicsListSvc::SetEMParameters()
+{
+  G4EmParameters* emp = G4EmParameters::Instance();
+  if (m_emMaxEnergy.value()>=0) emp->SetMaxEnergy(m_emMaxEnergy.value());
+  if (m_emNumberOfBinsPerDecade.value()>=0) emp->SetNumberOfBinsPerDecade(m_emNumberOfBinsPerDecade.value());
+  if (m_emMinEnergy.value()>=0) emp->SetMinEnergy(m_emMinEnergy.value());
+  if (m_applyEMCuts.value())
+    {
+      emp->SetApplyCuts(true);
+    }
+}
+
+
+void PhysicsListSvc::SetAntiNeutronOptions()
+{
+  if (m_unstableAntiNeutrons) {
+    G4AntiNeutron::Definition()->SetPDGStable(false);
+  }
+}
+
+
+void PhysicsListSvc::SetNeutronKillerOptions()
+{
   std::vector<std::string> g4commands;
-  if (m_neutronTimeCut.value() > 0. && std::abs(m_neutronTimeCut.value())>std::numeric_limits<double>::epsilon())
+  if (m_neutronTimeCut.value() > 0. &&
+      std::abs(m_neutronTimeCut.value())>std::numeric_limits<double>::epsilon())
     {
       std::ostringstream oss;
       oss<<"/physics_engine/neutron/timeLimit "<<m_neutronTimeCut.value()<<" ns";
       g4commands.push_back(oss.str());
     }
 
-  if (m_neutronEnergyCut.value() > 0. && std::abs(m_neutronEnergyCut.value())>std::numeric_limits<double>::epsilon())
+  if (m_neutronEnergyCut.value() > 0. &&
+      std::abs(m_neutronEnergyCut.value())>std::numeric_limits<double>::epsilon())
     {
       std::ostringstream oss;
       oss<<"/physics_engine/neutron/energyLimit "<<m_neutronEnergyCut.value()<<" MeV";
@@ -194,21 +259,6 @@ void PhysicsListSvc::SetPhysicsOptions()
       CommandLog(returnCode, g4command);
     }
   }
-
-  G4EmParameters* emp = G4EmParameters::Instance();
-  if (m_emMaxEnergy.value()>=0) emp->SetMaxEnergy(m_emMaxEnergy.value());
-  if (m_emNumberOfBinsPerDecade.value()>=0) emp->SetNumberOfBinsPerDecade(m_emNumberOfBinsPerDecade.value());
-  if (m_emMinEnergy.value()>=0) emp->SetMinEnergy(m_emMinEnergy.value());
-  if (m_applyEMCuts.value())
-    {
-      emp->SetApplyCuts(true);
-    }
-
-  if (m_unstableAntiNeutrons) {
-    G4AntiNeutron::Definition()->SetPDGStable(false);
-  }
-
-  return;
 }
 
 

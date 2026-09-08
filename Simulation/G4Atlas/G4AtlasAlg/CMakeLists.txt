@@ -16,7 +16,7 @@ atlas_add_library( G4AtlasAlgLib
                      PUBLIC_HEADERS G4AtlasAlg
                      INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
 
-                     LINK_LIBRARIES ${GEANT4_LIBRARIES} ${EIGEN_LIBRARIES} ${CLHEP_LIBRARIES} AtlasHepMCLib AthenaBaseComps AthenaKernel CxxUtils GaudiKernel G4AtlasInterfaces G4RunManagement SGTools StoreGateLib EventInfo GeneratorObjects GeoModelInterfaces HepMC_InterfacesLib ISF_InterfacesLib MCTruthBaseLib MCTruth PathResolver)
+                     LINK_LIBRARIES ${GEANT4_LIBRARIES} ${EIGEN_LIBRARIES} ${CLHEP_LIBRARIES} AtlasHepMCLib AthenaBaseComps AthenaKernel CxxUtils GaudiKernel G4AtlasInterfaces G4RunManagement SGTools StoreGateLib EventInfo GeneratorObjects GeoModelInterfaces HepMC_InterfacesLib ISF_InterfacesLib MCTruth PathResolver)
 set_target_properties( G4AtlasAlgLib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 # Component(s) in the package:
@@ -25,7 +25,7 @@ atlas_add_library( G4AtlasAlg
                    OBJECT
                    NO_PUBLIC_HEADERS
                    INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
-                   PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} ${EIGEN_LIBRARIES} ${CLHEP_LIBRARIES} AtlasHepMCLib AthenaBaseComps AthenaKernel CxxUtils GaudiKernel G4AtlasInterfaces G4RunManagement G4AtlasAlgLib SGTools StoreGateLib EventInfo GeneratorObjects MCTruthBaseLib MCTruth )
+                   PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} ${EIGEN_LIBRARIES} ${CLHEP_LIBRARIES} AtlasHepMCLib AthenaBaseComps AthenaKernel CxxUtils GaudiKernel G4AtlasInterfaces G4RunManagement G4AtlasAlgLib SGTools StoreGateLib EventInfo GeneratorObjects MCTruth )
 set_target_properties( G4AtlasAlg PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 # Install files from the package:

@@ -783,6 +783,9 @@ std::vector<typename IDScanZFinderInternal<SpacePoint>::vertex>* IDScanZFinderIn
   
     if ( dist2closestVtx < m_nvrtxSeparation * ZBinSize ||
   	 dist2closestVtx < fabs(weightedMax) * m_vrtxDistCut ) {
+  	  if (closestVtx < 0)[[unlikely]]{
+  	    throw std::runtime_error("findZInternal: the closestVtx (used as index) is negative.");
+  	  }
       zoutput[closestVtx] = m_vrtxMixing * weightedMax + (1.0 - m_vrtxMixing) * zoutput[closestVtx] ;
       woutput[closestVtx] = m_vrtxMixing * maxh        + (1.0 - m_vrtxMixing) * woutput[closestVtx] ;
     }  else  {

@@ -15,7 +15,7 @@
 
 #ifndef LARREADPARAMSFROMFILE_H
 #define LARREADPARAMSFROMFILE_H
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 #include "CaloIdentifier/CaloCell_ID.h"
 
@@ -35,32 +35,36 @@
 #include "LArCalibTools/LArParamsProperties.h"
 
 template <class DATA>
-class LArReadParamsFromFile : public AthAlgorithm
+class LArReadParamsFromFile : public AthReentrantAlgorithm
 {
  public:
-  LArReadParamsFromFile(const std::string & name, ISvcLocator * pSvcLocator);
-  ~LArReadParamsFromFile();
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
+  virtual ~LArReadParamsFromFile();
 
   //standard algorithm methods
   virtual StatusCode initialize() override;
-  virtual StatusCode execute(const EventContext&) override {return StatusCode::SUCCESS;}
+  virtual StatusCode execute(const EventContext&) const override {return StatusCode::SUCCESS;}
   virtual StatusCode stop ATLAS_NOT_THREAD_SAFE () override;
 
  private:
-  const LArOnlineID* m_onlineHelper;
-  const LArEM_ID*   m_emId;
-  const LArHEC_ID*  m_hecId;
-  const LArFCAL_ID* m_fcalId;
+  const LArOnlineID* m_onlineHelper = nullptr;
+  const LArEM_ID*   m_emId = nullptr;
+  const LArHEC_ID*  m_hecId = nullptr;
+  const LArFCAL_ID* m_fcalId = nullptr;
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};
-  int m_groupingType ;
-  std::string m_groupingName ;
+  int m_groupingType = LArConditionsContainerBase::SingleGroup;
 
-  std::string m_file ;
-  bool m_useOfflineIdentifier , m_useCalibLines ;
-  std::string m_chIdType ;
-  std::string m_customKey;
+  // assign grouping type (only for LArConditionsContainer-based classes)
+  StringProperty m_groupingName { this, "GroupingType", "Unknown" };
+  // file name to be read
+  StringProperty m_file { this, "File", "" };
+  // choose whether use offline ID (default is online)
+  BooleanProperty m_useOfflineIdentifier { this, "UseOfflineIdentifier", false };
+  StringProperty m_chIdType { this, "ChannelIdType", "UNKNOWN" };
+  StringProperty m_customKey { this, "CustomKey", "" };
 
-  DATA * m_dataclass ;
+  bool m_useCalibLines = false;
+  DATA * m_dataclass = nullptr;
 
   StatusCode readFile() ;
 
@@ -115,28 +119,6 @@ class LArReadParamsFromFile : public AthAlgorithm
     complete->set(chid, data[0]) ;
     return StatusCode::SUCCESS ;
   } ;
-  
-  //StatusCode set(LArCaliPulseParamsVsCalib* calib, HWIdentifier chid, int /*gain*/, std::vector<float> data) {
-  //  calib->set(chid, data[0], data[1], data[2], data[3], (short)data[4]) ;
-  //  return StatusCode::SUCCESS ;
-  //`} ;
-
-  // define symLink for all classes
-  //--------------------------------
-
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArCaliPulseParamsComplete* data) { return detStore()->symLink(data,static_cast<const ILArCaliPulseParams*>(data)); } ;
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArDetCellParamsComplete* data)   { return detStore()->symLink(data,static_cast<const ILArDetCellParams*>(data)); } ;
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArPhysCaliTdiffComplete* data)   { return detStore()->symLink(data,static_cast<const ILArPhysCaliTdiff*>(data)); } ;
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArTdriftComplete* data)          { return detStore()->symLink(data,static_cast<const ILArTdrift*>(data)); } ;
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArMphysOverMcalComplete* data)   { return detStore()->symLink(data,static_cast<const ILArMphysOverMcal*>(data)); } ;
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArRinjComplete* data)            { return detStore()->symLink(data,static_cast<const ILArRinj*>(data)); } ;
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArTshaperComplete* data)         { return detStore()->symLink(data,static_cast<const ILArTshaper*>(data)); } ;
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArEMEC_CphiComplete* data)       { return detStore()->symLink(data,static_cast<const ILArEMEC_Cphi*>(data)); } ;
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArEMEC_HValphaComplete* data)    { return detStore()->symLink(data,static_cast<const ILArEMEC_HValpha*>(data)); } ;
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArEMEC_HVbetaComplete* data)     { return detStore()->symLink(data,static_cast<const ILArEMEC_HVbeta*>(data)); } ;
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArCableLengthComplete* data)     { return detStore()->symLink(data,static_cast<const ILArCableLength*>(data)); } ;
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArCableAttenuationComplete* data){ return detStore()->symLink(data,static_cast<const ILArCableAttenuation*>(data)); } ;
-
 };
 
 #include "LArCalibTools/LArReadParamsFromFile.icc"

@@ -35,6 +35,7 @@
 StatusCode xAODBSignalFilter::filterInitialize()
 {
     CHECK(m_truthPartContKey.initialize());
+    m_gendata = std::make_shared<GenData>();
     return StatusCode::SUCCESS;
 }
 
@@ -185,14 +186,9 @@ if (LVL1Passed && (m_localLVL2MuonCutOn || m_localLVL2ElectronCutOn))
                 // ** New B-signal found, output message and find whole decay tree **
                 if (newBChain)
                 {
-                    const HepPDT::ParticleData *HadronData = particleData(particleID);
+                    const auto HadronData = m_gendata->particleName(std::abs(particleID));
                     std::string HadronName = "unknown particle";
-                    if (HadronData)
-                    {
-                        HadronName = HadronData->name();
-                        if (particleID < 0)
-                            HadronName = "anti - " + HadronName;
-                    }
+                    if (HadronData) HadronName = ((particleID < 0) ? std::string("anti - ") : std::string("")) + *HadronData;
                     ATH_MSG_DEBUG("");
                     ATH_MSG_DEBUG(" ------------------------------------------ ");
                     ATH_MSG_DEBUG(" *** xAODBSignalFilter.cxx: B-signal found ***  ");
@@ -617,14 +613,9 @@ void xAODBSignalFilter::PrintChild(const xAOD::TruthParticle* child,
 {
     int pID = child->pdgId();
     // ** Find name **
-    const HepPDT::ParticleData *pData = particleData(std::abs(pID));
+    const auto pData = m_gendata->particleName(std::abs(pID));
     std::string pName = "unknown particle";
-    if (pData)
-    {
-        pName = pData->name();
-        if (pID < 0)
-            pName = "anti - " + pName;
-    }
+    if (pData) pName = ((pID < 0) ? std::string("anti - ") : std::string("")) + *pData;
     ATH_MSG_DEBUG("    " << treeIDStr << "   "
                          << "Child (" << pName
                          << ") " << child << " , from final B = " << fromFinalB);

@@ -892,6 +892,13 @@ int AthenaEventLoopMgr::curEvent() const
 }
 
 //=========================================================================
+void AthenaEventLoopMgr::setNextEventModifierIndex(long idx)
+{
+  m_evtModIdxBase  = idx;
+  m_evtModBaseNevt = m_nevt;
+}
+
+//=========================================================================
 // Return the collection size
 //=========================================================================
 int AthenaEventLoopMgr::size()
@@ -1021,7 +1028,14 @@ StatusCode AthenaEventLoopMgr::installEventContext(EventContext& ctx) {
   EventID eventID;
   unsigned int conditionsRun = EventIDBase::UNDEFNUM;
   bool consume_modifier_stream = false;  // FIXME/CHECK: was true inside TP converter and checks for active storegate
-  
+
+  // Event index for run-dependent EventID modification: m_nevt-1 in serial,
+  // or the absolute index supplied by the AthenaMP consumer (chunk base +
+  // in-chunk offset derived from m_nevt without mutating state).
+  m_curEvtModIdx = (m_evtModIdxBase < 0)
+                     ? static_cast<long>(m_nevt - 1)
+                     : (m_evtModIdxBase + (m_nevt - m_evtModBaseNevt - 1));
+
   if (m_evtSelCtxt) {  // Deal with the case when an EventSelector is provided
     // First try to build a legacy EventInfo object from the TAG information
     // Read the attribute list
@@ -1106,8 +1120,7 @@ StatusCode AthenaEventLoopMgr::installEventContext(EventContext& ctx) {
     // In the case that there is no TAG information
     if( !eventInfo ) {
       // Secondly try to retrieve a legacy EventInfo object from the input file
-      // m_nevt - 1 because it's incremented early
-      EventInfoCnvParams::eventIndex = m_nevt - 1;
+      EventInfoCnvParams::eventIndex = m_curEvtModIdx;
       const EventInfo* pei = m_eventStore->tryConstRetrieve<EventInfo>();
       if( pei ) {
         eventID = *(pei->event_ID());
@@ -1170,8 +1183,7 @@ StatusCode AthenaEventLoopMgr::installEventContext(EventContext& ctx) {
 void AthenaEventLoopMgr::modifyEventContext(EventContext& ctx, const EventID& eID, bool consume_modifier_stream) {
   if (m_evtIdModSvc.isSet()) {
     EventID new_eID(eID);
-    // m_nevt - 1 because it's incremented early
-    m_evtIdModSvc->modify_evtid(new_eID, m_nevt - 1, consume_modifier_stream);
+    m_evtIdModSvc->modify_evtid(new_eID, m_curEvtModIdx, consume_modifier_stream);
     if (msgLevel(MSG::DEBUG)) {
       unsigned int oldrunnr=eID.run_number();
       unsigned int oldLB=eID.lumi_block();

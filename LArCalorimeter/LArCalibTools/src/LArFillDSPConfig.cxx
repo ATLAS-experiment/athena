@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArFillDSPConfig.h"
@@ -12,29 +12,12 @@
 // Public methods: 
 /////////////////////////////////////////////////////////////////// 
 
-// Constructors
-////////////////
-LArFillDSPConfig::LArFillDSPConfig( const std::string& name, 
-			  ISvcLocator* pSvcLocator ) : 
-  ::AthAlgorithm( name, pSvcLocator ),
-  m_onlineID(nullptr)
-{
-  declareProperty("Foldername",m_folderName="/LAR/Configuraton/DSPConfiguration");
-  declareProperty("Dump",m_dump=true);
-  declareProperty("isLowMu",m_lowmu=false);
-}
-
 // Destructor
 ///////////////
 LArFillDSPConfig::~LArFillDSPConfig() = default;
 
 // Athena Algorithm's Hooks
 ////////////////////////////
-StatusCode LArFillDSPConfig::initialize()
-{
-  return StatusCode::SUCCESS;
-}
-
 StatusCode LArFillDSPConfig::stop() {  
 
 

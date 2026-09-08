@@ -20,8 +20,8 @@ InDetBSErrContainerCnv::createPersistent(InDetBSErrContainer* transCont) {
 InDetBSErrContainer* 
 InDetBSErrContainerCnv::createTransient(const Token* token) {
   MsgStream log{msgSvc(), "InDetBSErrContainerCnv"};
-  static const pool::Guid p1_guid{"FA64DC17-D07E-4305-9B21-18C64F1B4C47"};
-  static const pool::Guid p2_guid{"ECBBC13B-0A44-4694-AD24-574A7598C627"};
+  static const Guid p1_guid{"FA64DC17-D07E-4305-9B21-18C64F1B4C47"};
+  static const Guid p2_guid{"ECBBC13B-0A44-4694-AD24-574A7598C627"};
   if (compareClassGuid(token, p1_guid)) {
     return m_TPConverter_p1.createTransient(poolReadObject<InDetBSErrContainer_p1>(token), log);
   } else if (compareClassGuid(token, p2_guid)) {

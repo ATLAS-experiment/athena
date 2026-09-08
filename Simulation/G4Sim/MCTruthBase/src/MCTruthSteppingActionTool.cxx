@@ -15,10 +15,7 @@ namespace G4UA
   MCTruthSteppingActionTool(const std::string& type, const std::string& name,
                             const IInterface* parent)
     : UserActionToolBase<MCTruthSteppingAction>(type, name, parent)
-  {
-    declareProperty("VolumeCollectionMap", m_volumeCollectionMap,
-                    "Map of volume name to output collection name");
-  }
+  {}
 
   //---------------------------------------------------------------------------
   // Initialize the tool
@@ -26,6 +23,8 @@ namespace G4UA
   StatusCode MCTruthSteppingActionTool::initialize()
   {
     ATH_MSG_DEBUG( "Initializing " << name() );
+    ATH_CHECK(m_truthRecordSvc.retrieve());
+    ATH_CHECK(m_geoIDSvc.retrieve());
     return StatusCode::SUCCESS;
   }
 
@@ -37,7 +36,10 @@ namespace G4UA
   {
     ATH_MSG_DEBUG("Constructing an MCTruthSteppingAction");
     auto action = std::make_unique<MCTruthSteppingAction> (
-        m_volumeCollectionMap, msgSvc(), msg().level() );
+        m_volumeCollectionMap.value(), m_secondarySavingLevel.value(),
+        m_subDetVolLevel.value(),
+        *m_truthRecordSvc, *m_geoIDSvc,
+        msgSvc(), msg().level() );
     actionLists.eventActions.push_back( action.get() );
     actionLists.steppingActions.push_back( action.get() );
     return action;
@@ -46,7 +48,7 @@ namespace G4UA
   /// Calls BeginOfAthenaEvent
   StatusCode MCTruthSteppingActionTool::BeginOfAthenaEvent(HitCollectionMap& hitCollections)
   {
-    for(const auto& volCollPair : m_volumeCollectionMap) {
+    for(const auto& volCollPair : m_volumeCollectionMap.value()) {
       hitCollections.Emplace<TrackRecordCollection>(volCollPair.second, volCollPair.second);
     }
     return StatusCode::SUCCESS;
@@ -54,7 +56,7 @@ namespace G4UA
   /// Calls EndOfAthenaEvent
   StatusCode MCTruthSteppingActionTool::EndOfAthenaEvent(HitCollectionMap& hitCollections)
   {
-    for(const auto& volCollPair : m_volumeCollectionMap) {
+    for(const auto& volCollPair : m_volumeCollectionMap.value()) {
       CHECK(hitCollections.Record<TrackRecordCollection>(volCollPair.second));
     }
     return StatusCode::SUCCESS;

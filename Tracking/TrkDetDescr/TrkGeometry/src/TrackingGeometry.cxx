@@ -321,7 +321,7 @@ Trk::TrackingGeometry::dump(MsgStream& out, const std::string& head) const
 }
 void
 Trk::TrackingGeometry::dumpLayer(MsgStream& out,
-                                 const std::string& head,
+                                 std::string_view head,
                                  const Layer* layer)
 {
   if (!layer) {

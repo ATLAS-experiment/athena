@@ -14,11 +14,15 @@ def LArCellPreparationAlgCfg(
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
     cfg.merge(CaloNoiseCondAlgCfg(flags,"totalNoise"))
 
+    kwargs.setdefault("CaloCellsKey", "AllCalo" if flags.Input.isMC else "SeedLessFS")
     alg = CompFactory.GlobalSim.LArCellPreparationAlg(name,**kwargs)
-    if flags.Input.isMC:
-        alg.caloCells = "AllCalo"
+    if alg.CaloCellsKey ==  "AllCalo":
+        from AthenaConfiguration.Enums import Format
+        if flags.Input.Format==Format.POOL and 'AllCalo' not in flags.Input.Collections:
+            from CaloRec.CaloCellMakerConfig import CaloCellMakerCfg
+            cfg.merge(CaloCellMakerCfg(flags,addToOutputStream=False))
+
     else:
-        alg.caloCells = "SeedLessFS"
         # ensure we are producing this cell collection ...
         from TrigCaloRec.TrigCaloRecConfig import hltCaloCellSeedlessMakerCfg
         cfg.merge(hltCaloCellSeedlessMakerCfg(flags, roisKey=''))

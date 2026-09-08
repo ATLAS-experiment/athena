@@ -31,7 +31,6 @@
  *  https://twiki.cern.ch/twiki/bin/viewauth/Atlas/PileupDigitization#Arrangement_of_Truth_Information 
  */
 
-#include "HepPDT/ParticleDataTable.hh"
 
 // Framework includes
 #include "GaudiKernel/ToolHandle.h"
@@ -119,10 +118,6 @@ class TruthParticleCnvTool : public extends<AthAlgTool, ITruthParticleCnvTool>
   /** Output TruthParticle WriteHandleKey (built from the McEventCollection)
    */
   SG::WriteHandleKey<TruthParticleContainer>  m_mcPartsOutputWriteHandleKey{this,"TruthParticlesOutput","SpclMC","WriteHandleKey for the output truth particles (built from the McEventCollection)"};
-
-  /** Particle Property service
-   */
-  const HepPDT::ParticleDataTable * m_pdt;
 
   /** Type of truth particle we want to create
    */

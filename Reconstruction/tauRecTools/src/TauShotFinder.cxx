@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -227,7 +227,7 @@ StatusCode TauShotFinder::selectSeedCells(const xAOD::TauJet& tau,
     std::vector<IdentifierHash> prevEtaHashes;
     m_calo_id->get_neighbours(cellHash, LArNeighbours::prevInEta, prevEtaHashes);
    
-    std::vector<IdentifierHash> neighHashes = nextEtaHashes; 
+    std::vector<IdentifierHash> neighHashes = std::move(nextEtaHashes); 
     neighHashes.insert(neighHashes.end(),prevEtaHashes.begin(),prevEtaHashes.end()); 
    
     // Check whether it is a seed cell
@@ -382,8 +382,8 @@ xAOD::CaloCluster* TauShotFinder::createShotCluster(const CaloCell* cell,
   const IdentifierHash seedHash = cell->caloDDE()->calo_hash();
   shotCluster->addCell(cellContainer.findIndex(seedHash), 1.);
   
-  for (const CaloCell* cell : windowNeighbours) {
-    shotCluster->addCell(cellContainer.findIndex(cell->caloDDE()->calo_hash()), 1.0);
+  for (const CaloCell* thisCell : windowNeighbours) {
+    shotCluster->addCell(cellContainer.findIndex(thisCell->caloDDE()->calo_hash()), 1.0);
   }
 
   CaloClusterKineHelper::calculateKine(shotCluster,true,true);

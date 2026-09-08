@@ -39,9 +39,7 @@ namespace MuonR4{
             MsTrackSeed(const Location loc,
                         const ExpandedSector sector);
             /** @brief Returns the vector of associated segments */
-            const std::vector<const xAOD::MuonSegment*>& segments() const;
-            /** @brief Returns the list of detailed segments */
-            std::vector<const Segment*> detailedSegments() const;
+            std::span<const xAOD::MuonSegment* const> segments() const;
             /** @brief Returns the list of associated buckets */
             std::vector<const SpacePointBucket*> buckets() const;
             /** @brief Append a segment to the seed */

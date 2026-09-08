@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -7,7 +7,6 @@
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include "TrigSteeringEvent/TrigRoiDescriptor.h"
 #include "DecisionHandling/HLTIdentifier.h"
-#include "boost/algorithm/string.hpp"
 #include <typeinfo>
 #include <string>
 
@@ -71,19 +70,19 @@ std::string TrigEgammaMatchingToolMT::key( const std::string& key) const
 
 //!=======================================================================
 
-bool TrigEgammaMatchingToolMT::isPassed(const xAOD::Egamma *eg,const std::string &trigger, unsigned int condition ) const
+bool TrigEgammaMatchingToolMT::isPassed(const EventContext& ctx, const xAOD::Egamma *eg,const std::string &trigger, unsigned int condition ) const
 {
     const TrigCompositeUtils::Decision *dec=nullptr;
     if( match( eg, trigger, dec ) ){
       if( dec ){
         if(xAOD::EgammaHelpers::isElectron(eg)){
           std::string key = this->key("Electrons_GSF");
-          if(boost::contains(trigger,"nogsf")) key=this->key("Electrons");
-          if(boost::contains(trigger,"lrt")) key=this->key("Electrons_LRT");
-          return ancestorPassed<xAOD::ElectronContainer>(dec, trigger,key, condition);
+          if(trigger.contains("nogsf")) key=this->key("Electrons");
+          if(trigger.contains("lrt")) key=this->key("Electrons_LRT");
+          return ancestorPassed<xAOD::ElectronContainer>(ctx, dec, trigger,key, condition);
         }
         if(xAOD::EgammaHelpers::isPhoton(eg)){
-          return ancestorPassed<xAOD::PhotonContainer>(dec, trigger, key("Photons"), condition);
+          return ancestorPassed<xAOD::PhotonContainer>(ctx, dec, trigger, key("Photons"), condition);
         }
       }
     }
@@ -138,10 +137,10 @@ bool TrigEgammaMatchingToolMT::matchHLTPhoton(const xAOD::Photon *eg,const std::
 
 bool TrigEgammaMatchingToolMT::matchHLTElectron(const xAOD::Electron *eg,const std::string &trigger, const TrigCompositeUtils::Decision *&dec, unsigned int condition ) const
 { 
-  if (boost::contains(trigger,"nogsf")){
+  if (trigger.contains("nogsf")){
       ATH_MSG_DEBUG("Matched HLT Electron noGSF");
       return closestObject<xAOD::ElectronContainer>( eg, dec , trigger, key("Electrons"), m_dR, condition );
-    }else if(boost::contains(trigger,"lrt")){
+    }else if(trigger.contains("lrt")){
       ATH_MSG_DEBUG("Matched HLT Electron LRT");
       return closestObject<xAOD::ElectronContainer>( eg, dec , trigger, key("Electrons_LRT"), m_dR, condition );
     }else {
@@ -155,10 +154,10 @@ bool TrigEgammaMatchingToolMT::matchHLTElectron(const xAOD::Electron *eg,const s
 bool TrigEgammaMatchingToolMT::matchHLTCalo(const xAOD::Egamma *eg,const std::string &trigger, const TrigCompositeUtils::Decision *&dec, unsigned int condition ) const
 { 
   ATH_MSG_DEBUG("Match HLT PrecisionCalo");
-  if(boost::contains(trigger,"lrt")){
+  if(trigger.contains("lrt")){
     ATH_MSG_DEBUG("Matched HLT PrecisionCalo LRT");
     return closestObject<xAOD::CaloClusterContainer>( eg, dec, trigger, key("PrecisionCalo_LRT"), m_dR, condition );
-  }else if(boost::contains(trigger,"ion")){
+  }else if(trigger.contains("ion")){
     ATH_MSG_DEBUG("Matched HLT PrecisionCalo Heavy Ion");
     return closestObject<xAOD::CaloClusterContainer>( eg, dec, trigger, key("PrecisionCalo_HI"), m_dR, condition );
   }else if(xAOD::EgammaHelpers::isElectron(eg)){
@@ -186,7 +185,7 @@ bool TrigEgammaMatchingToolMT::matchL2Photon(const xAOD::Photon *eg,const std::s
 bool TrigEgammaMatchingToolMT::matchL2Electron(const xAOD::Electron *eg,const std::string &trigger, const TrigCompositeUtils::Decision *&dec, unsigned int condition ) const
 {
   ATH_MSG_DEBUG("Match L2 Electron");
-  if(boost::contains(trigger,"lrt")){
+  if(trigger.contains("lrt")){
     return closestObject<xAOD::TrigElectronContainer>( eg, dec, trigger, key("FastElectrons_LRT"), m_dR, condition );
   }else{
     return closestObject<xAOD::TrigElectronContainer>( eg, dec, trigger, key("FastElectrons"), m_dR, condition );
@@ -224,13 +223,13 @@ bool TrigEgammaMatchingToolMT::matchL1( const xAOD::Egamma* eg, const std::strin
 
 //!=======================================================================
  
-const xAOD::EmTauRoI* TrigEgammaMatchingToolMT::getL1Feature( const TrigCompositeUtils::Decision *dec ) const
+const xAOD::EmTauRoI* TrigEgammaMatchingToolMT::getL1Feature( const EventContext& ctx, const TrigCompositeUtils::Decision *dec ) const
 {
   if( !dec )  return nullptr;
-  auto initRoi = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(dec, "initialRoI"); 
+  auto initRoi = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(ctx, dec, "initialRoI");
   if( !initRoi.isValid() ) return nullptr;
 
-  SG::ReadHandle<xAOD::EmTauRoIContainer> l1_cont( m_emTauRoIKey, Gaudi::Hive::currentContext());
+  SG::ReadHandle<xAOD::EmTauRoIContainer> l1_cont( m_emTauRoIKey, ctx );
   if( !l1_cont.isValid() ) return nullptr;
 
   for( const auto *l1 : *l1_cont ){
@@ -244,23 +243,23 @@ const xAOD::EmTauRoI* TrigEgammaMatchingToolMT::getL1Feature( const TrigComposit
 
 //!=======================================================================
 
-const xAOD::eFexEMRoI* TrigEgammaMatchingToolMT::getL1eEMFeature( const TrigCompositeUtils::Decision *dec ) const
+const xAOD::eFexEMRoI* TrigEgammaMatchingToolMT::getL1eEMFeature( const EventContext& ctx, const TrigCompositeUtils::Decision *dec ) const
 {
   if( !dec )  return nullptr;
-  auto initRoi = TrigCompositeUtils::findLink<xAOD::eFexEMRoIContainer>(dec, "initialRecRoI"); 
+  auto initRoi = TrigCompositeUtils::findLink<xAOD::eFexEMRoIContainer>(ctx, dec, "initialRecRoI");
   if( !initRoi.isValid() ) return nullptr;
   return *(initRoi.link);
 } 
 
 //!=======================================================================
 
-const xAOD::TrigRingerRings* TrigEgammaMatchingToolMT::getRingsFeature( const TrigCompositeUtils::Decision *dec ) const
+const xAOD::TrigRingerRings* TrigEgammaMatchingToolMT::getRingsFeature( const EventContext& ctx, const TrigCompositeUtils::Decision *dec ) const
 {
   if( !dec )  return nullptr;
-  auto initRoi = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(dec, "initialRoI"); 
+  auto initRoi = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(ctx, dec, "initialRoI");
   if( !initRoi.isValid() ) return nullptr;
   
-  SG::ReadHandle<xAOD::TrigRingerRingsContainer> rg_cont( m_ringerKey, Gaudi::Hive::currentContext() );
+  SG::ReadHandle<xAOD::TrigRingerRingsContainer> rg_cont( m_ringerKey, ctx );
 
   if( !rg_cont.isValid() ) return nullptr;
 

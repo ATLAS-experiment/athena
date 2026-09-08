@@ -28,10 +28,15 @@ atlas_add_library( ActsEventLib
    xAODMeasurementBase
    xAODTracking
    xAODTruth
+   xAODCaloEvent
    xAODAuxiliaryMeasurement
    PRIVATE_LINK_LIBRARIES
       ActsGeoUtils
-)
+    )
+
+# Suppress spurious warning seen in LTO build.
+set_target_properties( ActsEventLib
+                       PROPERTIES LINK_FLAGS " -Wno-maybe-uninitialized " )
 
 atlas_add_dictionary( ActsEventDict
 		      ActsEvent/ActsEventDict.h

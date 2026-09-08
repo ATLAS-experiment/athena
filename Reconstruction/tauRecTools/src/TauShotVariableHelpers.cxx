@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -29,13 +29,13 @@ const CaloCell* getNeighbour(const CaloCell* cell,
   calo_id->get_neighbours(cell->caloDDE()->calo_hash(), option, neighHashes);
   
   // Loop all the cells, and find the required neighbour cell
-  for (const auto cell : links) {
-    const IdentifierHash& cellHash = cell->caloDDE()->calo_hash();
+  for (const auto thisCell : links) {
+    const IdentifierHash& cellHash = thisCell->caloDDE()->calo_hash();
 
     // Check whether the cell is a neighbour cell 
     for (const IdentifierHash& neighHash : neighHashes) {
       if (cellHash == neighHash) {
-        neigCell = cell;
+        neigCell = thisCell;
         return neigCell;
       }
     }

@@ -57,10 +57,10 @@
 + Control/SGTools
 + Control/StoreGate
 + Control/StoreGateBindings
++ Control/Valkyrie
 + Control/xAODRootAccess
 + Control/xAODRootAccessInterfaces
 + Database/APR/CollectionSvc
-+ Database/APR/PersistencySvc
 + Database/APR/RootStorageSvc
 + Database/APR/StorageSvc
 + Database/AthenaPOOL/AthenaPoolCnvSvc
@@ -154,6 +154,7 @@
 + Generators/AtlasHepMC
 + Generators/GenInterfaces
 + Generators/GeneratorConfig
++ Generators/GeneratorModules
 + Generators/GeneratorObjects
 + Generators/GeneratorObjectsAthenaPool
 + Generators/GeneratorObjectsTPCnv

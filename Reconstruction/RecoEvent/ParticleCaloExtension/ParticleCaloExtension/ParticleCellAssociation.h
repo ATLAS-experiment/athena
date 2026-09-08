@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef REC_PARTICLECELLASSOCIATION_H
@@ -7,11 +7,12 @@
 
 #include "ParticleCaloExtension/ParticleCaloAssociation.h"
 #include "ParticleCaloExtension/ParticleCellIntersection.h"
-#include <vector>
-#include <algorithm>
 
 #include "CaloEvent/CaloCell.h"
 #include "CaloEvent/CaloCellContainer.h"
+
+#include <vector>
+#include <algorithm>
 
 namespace Rec {
   
@@ -29,7 +30,7 @@ namespace Rec {
     virtual ~ParticleCellAssociation();
 
     /** access to all intersected cells */
-    const CellIntersections& cellIntersections() const { return m_cellInteresections; }
+    const CellIntersections& cellIntersections() const { return m_cellIntersections; }
 
     /** access to cell intersection of a give cell, returns zero if the cell was not intersected */
     const ParticleCellIntersection* cellIntersection( const CaloCell& cell ) const;
@@ -43,7 +44,7 @@ namespace Rec {
     const ParticleCellAssociation& operator=(const ParticleCellAssociation& ) = delete;
 
     /** list of intersected cells */
-    CellIntersections m_cellInteresections;
+    CellIntersections m_cellIntersections;
 
     /** pointer to the container */
     const CaloCellContainer* m_container;
@@ -51,11 +52,11 @@ namespace Rec {
   };
   
   inline const ParticleCellIntersection* ParticleCellAssociation::cellIntersection( const CaloCell& cell ) const {
-    auto pos = std::find_if( m_cellInteresections.begin(), m_cellInteresections.end(), 
+    auto pos = std::find_if( m_cellIntersections.begin(), m_cellIntersections.end(), 
                              [&]( const std::pair<const CaloCell*,ParticleCellIntersection*>& entry ){
                                return entry.first == &cell;
                              });
-    if( pos != m_cellInteresections.end() ) return pos->second;
+    if( pos != m_cellIntersections.end() ) return pos->second;
     return 0;
   }
 

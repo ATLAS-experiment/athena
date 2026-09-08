@@ -12,7 +12,7 @@
 #include "D3PDMakerUtils/SGKeyResolver.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "AthenaKernel/errorcheck.h"
-#include "boost/tokenizer.hpp"
+#include "CxxUtils/StringUtils.h"
 
 
 namespace D3PD {
@@ -58,10 +58,7 @@ std::string SGKeyResolver::key()
     return m_usedKey;
 
   // Split the requested string into individual keys.
-  typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-  boost::char_separator<char> sep(" ,");
-  tokenizer tokens(m_sgkey, sep);
-  std::vector<std::string> keys (tokens.begin(), tokens.end());
+  std::vector<std::string> keys = CxxUtils::tokenize(m_sgkey, " ,");
 
   // First see if any existing proxies match the keys.
   std::vector<const SG::DataProxy*> proxies = m_sg->proxies();

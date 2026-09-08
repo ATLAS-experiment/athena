@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETRECTOOLS_CHARGEDHADRONSUBTRACTIONTOOL_H
@@ -13,7 +13,7 @@
 /// \author John Stupak, Jennifer Roloff, and Steven Schramm
 //////////////////////////////////////////////////
 
-#include <string>
+
 #include "JetRecTools/JetConstituentModifierBase.h"
 #include "xAODBase/IParticleContainer.h"
 
@@ -25,6 +25,7 @@
 #include "xAODPFlow/FlowElementContainer.h"
 
 #include "AsgDataHandles/ReadHandleKey.h"
+#include <string>
 
 
 class ChargedHadronSubtractionTool : public JetConstituentModifierBase{
@@ -156,8 +157,7 @@ template <class T, class U> StatusCode ChargedHadronSubtractionTool::matchToPrim
           }
         }
       }
-      else
-      { // Use Primary Vertex
+      else if (vtx) { // Use Primary Vertex
         if (vtx->vertexType() == xAOD::VxType::NoVtx)
         {                                // No reconstructed vertices
           matchedToPrimaryVertex = true; // simply match all cPFOs in this case
@@ -298,8 +298,8 @@ template <class T, class U> StatusCode ChargedHadronSubtractionTool::matchByPrim
       }
     }
 
-    matchingPVs(*ppfo) = matchingVertexList;
-    matchingPUSBs(*ppfo) = matchingPUSBList;
+    matchingPVs(*ppfo) = std::move(matchingVertexList);
+    matchingPUSBs(*ppfo) = std::move(matchingPUSBList);
   }
 
   return StatusCode::SUCCESS;

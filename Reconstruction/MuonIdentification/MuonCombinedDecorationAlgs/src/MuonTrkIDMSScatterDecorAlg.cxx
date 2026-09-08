@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTrkIDMSScatterDecorAlg.h"
@@ -62,7 +62,7 @@ MuonTrkIDMSScatterDecorAlg::MuonTrkIDMSScatterDecorAlg(const std::string& name, 
         for (const Trk::TrackStateOnSurface* tsos : *tp->track()->trackStateOnSurfaces()) {
             if (tsos->materialEffectsOnTrack()) {
                 const Trk::MaterialEffectsOnTrack* meot = dynamic_cast<const Trk::MaterialEffectsOnTrack*>(tsos->materialEffectsOnTrack());
-                if (!meot->energyLoss() || !meot->scatteringAngles()) continue;
+                if (!meot || !meot->energyLoss() || !meot->scatteringAngles()) continue;
                 if (meot->energyLoss()->deltaE() == 0) {  // artificial scatterer found
                     if (nscatter == 0) {
                         dec_deltaphi_0(*tp) = meot->scatteringAngles()->deltaPhi();

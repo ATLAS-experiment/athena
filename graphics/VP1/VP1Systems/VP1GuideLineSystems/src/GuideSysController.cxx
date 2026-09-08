@@ -30,6 +30,7 @@
 #include "ui_guides_settings_idprojsurfs_form.h"
 #include "ui_guides_settings_trkvolumes_form.h"
 #include "ui_guides_settings_lines_form.h"
+#include "ui_guides_settings_hgtdguides_form.h"
 #include "VP1Base/VP1Serialise.h"
 #include "VP1Base/VP1Deserialise.h"
 
@@ -57,6 +58,7 @@ public:
   Ui::VP1GuidesSysSettingsIDProjSurfsForm ui_idprojsurfs{};
   Ui::VP1TrackingVolumesForm ui_trkvolumes{};
   Ui::VP1LinesForm ui_lines{};
+  Ui::VP1GuidesSysSettingsHGTDGuidesForm ui_hgtdguides{};
 
   static SbColor4f color4f(const QColor& col, int transp_int) {
     return SbColor4f(std::max<float>(0.0f,std::min<float>(1.0f,col.redF())),
@@ -98,6 +100,13 @@ public:
   bool last_showLines = false;
   SbVec3f last_lineDirection;
   double last_line_eta = 0.0; // This is needed to update the display in possibleChange_lineDirection
+  bool last_showHGTDGuideLines = false;
+  bool last_showHGTDGuideHits = false;
+  bool last_showHGTDTruthTracks = false;
+  bool last_showHGTDParticleNames = false;
+  bool last_showHGTDPrimaryParticles = false;
+  bool last_showHGTDSecondaryParticles = false;
+  bool last_showHGTDUnlinkedParticles = false;
   bool last_showPeople = false;
   SbColor4f last_peopleColourAndTransp;
   double last_peopleVerticalPos = 0.0;
@@ -133,6 +142,7 @@ GuideSysController::GuideSysController(IVP1System * sys)
   initDialog(m_d->ui_idprojsurfs, m_d->ui.pushButton_settings_inDetProjSurfs,m_d->ui.checkBox_inDetProjSurfs);
   initDialog(m_d->ui_trkvolumes, m_d->ui.pushButton_settings_trkVolumes,m_d->ui.checkBox_trkVolumes);
   initDialog(m_d->ui_lines, m_d->ui.pushButton_settings_lines,m_d->ui.checkBox_lines);
+  initDialog(m_d->ui_hgtdguides, m_d->ui.pushButton_settings_hgtdGuideLines,m_d->ui.checkBox_hgtdGuideLines);
 
   //Hide SCT/Pixel projection surface controls for now:
   m_d->ui_idprojsurfs.groupBox_pixelproj->setVisible(false);
@@ -378,6 +388,33 @@ GuideSysController::GuideSysController(IVP1System * sys)
   connectToLastUpdateSlot(m_d->ui_lines.doubleSpinBox_theta);
   connectToLastUpdateSlot(m_d->ui_lines.doubleSpinBox_eta);
   connectToLastUpdateSlot(m_d->ui_lines.doubleSpinBox_length);
+
+  addUpdateSlot(SLOT(possibleChange_showHGTDGuideLines()));
+  connectToLastUpdateSlot(m_d->ui.checkBox_hgtdGuideLines);
+
+  addUpdateSlot(SLOT(possibleChange_showHGTDGuideHits()));
+  connectToLastUpdateSlot(m_d->ui.checkBox_hgtdGuideLines);
+  connectToLastUpdateSlot(m_d->ui_hgtdguides.checkBox_hgtd_hits);
+
+  addUpdateSlot(SLOT(possibleChange_showHGTDTruthTracks()));
+  connectToLastUpdateSlot(m_d->ui.checkBox_hgtdGuideLines);
+  connectToLastUpdateSlot(m_d->ui_hgtdguides.checkBox_hgtd_truthTracks);
+
+  addUpdateSlot(SLOT(possibleChange_showHGTDParticleNames()));
+  connectToLastUpdateSlot(m_d->ui.checkBox_hgtdGuideLines);
+  connectToLastUpdateSlot(m_d->ui_hgtdguides.checkBox_hgtd_particleNames);
+
+  addUpdateSlot(SLOT(possibleChange_showHGTDPrimaryParticles()));
+  connectToLastUpdateSlot(m_d->ui.checkBox_hgtdGuideLines);
+  connectToLastUpdateSlot(m_d->ui_hgtdguides.checkBox_hgtd_primaryParticles);
+
+  addUpdateSlot(SLOT(possibleChange_showHGTDSecondaryParticles()));
+  connectToLastUpdateSlot(m_d->ui.checkBox_hgtdGuideLines);
+  connectToLastUpdateSlot(m_d->ui_hgtdguides.checkBox_hgtd_secondaryParticles);
+
+  addUpdateSlot(SLOT(possibleChange_showHGTDUnlinkedParticles()));
+  connectToLastUpdateSlot(m_d->ui.checkBox_hgtdGuideLines);
+  connectToLastUpdateSlot(m_d->ui_hgtdguides.checkBox_hgtd_unlinkedParticles);
   
 
   initLastVars();
@@ -624,6 +661,48 @@ double GuideSysController::lineLength() const
   return m_d->ui_lines.doubleSpinBox_length->value() * SYSTEM_OF_UNITS::m;
 }
 
+//____________________________________________________________________
+bool GuideSysController::showHGTDGuideLines() const
+{
+  return m_d->ui.checkBox_hgtdGuideLines->isChecked();
+}
+
+//____________________________________________________________________
+bool GuideSysController::showHGTDGuideHits() const
+{
+  return showHGTDGuideLines() && m_d->ui_hgtdguides.checkBox_hgtd_hits->isChecked();
+}
+
+//____________________________________________________________________
+bool GuideSysController::showHGTDTruthTracks() const
+{
+  return showHGTDGuideLines() && m_d->ui_hgtdguides.checkBox_hgtd_truthTracks->isChecked();
+}
+
+//____________________________________________________________________
+bool GuideSysController::showHGTDParticleNames() const
+{
+  return showHGTDGuideLines() && m_d->ui_hgtdguides.checkBox_hgtd_particleNames->isChecked();
+}
+
+//____________________________________________________________________
+bool GuideSysController::showHGTDPrimaryParticles() const
+{
+  return showHGTDGuideLines() && m_d->ui_hgtdguides.checkBox_hgtd_primaryParticles->isChecked();
+}
+
+//____________________________________________________________________
+bool GuideSysController::showHGTDSecondaryParticles() const
+{
+  return showHGTDGuideLines() && m_d->ui_hgtdguides.checkBox_hgtd_secondaryParticles->isChecked();
+}
+
+//____________________________________________________________________
+bool GuideSysController::showHGTDUnlinkedParticles() const
+{
+  return showHGTDGuideLines() && m_d->ui_hgtdguides.checkBox_hgtd_unlinkedParticles->isChecked();
+}
+
 //_____________________________________________________________________________________
 InDetProjFlags::InDetProjPartsFlags GuideSysController::Imp::projPartsFlag( bool barrelinner, bool barrelouter,
 									    bool endcapinner, bool endcapouter,
@@ -848,7 +927,7 @@ bool GuideSysController::showMuonSpectrometer() const
 //____________________________________________________________________
 int GuideSysController::currentSettingsVersion() const
 {
-  return 3;
+  return 4;
 }
 
 //____________________________________________________________________
@@ -966,12 +1045,21 @@ void GuideSysController::actualSaveSettings(VP1Serialise&s) const
   // People
   s.save(m_d->ui.checkBox_people);
   s.save(m_d->ui_people.matButton_people);
+
+  // HGTD guides
+  s.save(m_d->ui.checkBox_hgtdGuideLines);
+  s.save(m_d->ui_hgtdguides.checkBox_hgtd_hits);
+  s.save(m_d->ui_hgtdguides.checkBox_hgtd_truthTracks);
+  s.save(m_d->ui_hgtdguides.checkBox_hgtd_particleNames);
+  s.save(m_d->ui_hgtdguides.checkBox_hgtd_primaryParticles);
+  s.save(m_d->ui_hgtdguides.checkBox_hgtd_secondaryParticles);
+  s.save(m_d->ui_hgtdguides.checkBox_hgtd_unlinkedParticles);
 }
 
 //____________________________________________________________________
 void GuideSysController::actualRestoreSettings(VP1Deserialise& s)
 {
-  if (s.version()<0||s.version()>2) {
+  if (s.version()<0||s.version()>4) {
     message("Warning: State data in .vp1 file has unsupported version ("+str(s.version())+")");
     return;
   }
@@ -1092,6 +1180,16 @@ void GuideSysController::actualRestoreSettings(VP1Deserialise& s)
     s.restore(m_d->ui.checkBox_people);
     s.restore(m_d->ui_people.matButton_people);
   }
+
+  if (s.version()>=4) {
+    s.restore(m_d->ui.checkBox_hgtdGuideLines);
+    s.restore(m_d->ui_hgtdguides.checkBox_hgtd_hits);
+    s.restore(m_d->ui_hgtdguides.checkBox_hgtd_truthTracks);
+    s.restore(m_d->ui_hgtdguides.checkBox_hgtd_particleNames);
+    s.restore(m_d->ui_hgtdguides.checkBox_hgtd_primaryParticles);
+    s.restore(m_d->ui_hgtdguides.checkBox_hgtd_secondaryParticles);
+    s.restore(m_d->ui_hgtdguides.checkBox_hgtd_unlinkedParticles);
+  }
 }
 
 void GuideSysController::possibleChange_lineDirection() {	
@@ -1156,8 +1254,13 @@ POSSIBLECHANGE_IMP(showCalorimeters)
 POSSIBLECHANGE_IMP(showMuonSpectrometer)
 POSSIBLECHANGE_IMP(showLines)  
 //POSSIBLECHANGE_IMP(lineDirection) Implemented this manually so we can update eta/theta
+POSSIBLECHANGE_IMP(showHGTDGuideLines)
+POSSIBLECHANGE_IMP(showHGTDGuideHits)
+POSSIBLECHANGE_IMP(showHGTDTruthTracks)
+POSSIBLECHANGE_IMP(showHGTDParticleNames)
+POSSIBLECHANGE_IMP(showHGTDPrimaryParticles)
+POSSIBLECHANGE_IMP(showHGTDSecondaryParticles)
+POSSIBLECHANGE_IMP(showHGTDUnlinkedParticles)
 POSSIBLECHANGE_IMP(showPeople)
 POSSIBLECHANGE_IMP(peopleColourAndTransp)
 POSSIBLECHANGE_IMP(peopleVerticalPos)
-
-

@@ -87,8 +87,8 @@ namespace xAOD
      */
     uint16_t phi() const;
     /**
-     * @brief Retrieve the pt 
-     * @return Pt
+     * @brief Retrieve the encoded candidate pT
+     * @return Eight-bit pT code in 0.5 GeV steps; zero denotes an invalid pT estimate
      */
     uint8_t pt() const;
     /**
@@ -125,8 +125,8 @@ namespace xAOD
      */
     void setPhi(float phi);
     /**
-     * @brief Set the pt 
-     * @param pt Pt
+     * @brief Set the candidate pT
+     * @param pt Candidate pT in GeV, encoded in 0.5 GeV steps
      */
     void setPt(float pt);
     /**
@@ -170,6 +170,7 @@ namespace xAOD
     static constexpr uint16_t etaBitRange() { return s_etaBitRange; }
     static constexpr float phiRange() { return s_phiRange; }
     static constexpr uint16_t phiBitRange() { return s_phiBitRange; }
+    static constexpr float ptResolution() { return s_ptResolution; }
     static constexpr float ptRange() { return s_ptRange; }
     static constexpr uint8_t ptBitRange() { return s_ptBitRange; }
     static constexpr uint8_t coinTypeBitMask() { return COINTYPE_BIT_MASK; }
@@ -178,13 +179,15 @@ namespace xAOD
     /// Variables range
     static constexpr float s_etaRange = 2.7;
     static constexpr float s_phiRange = 2.0 * M_PI;
-    static constexpr float s_ptRange = 1000.0;
+    static constexpr float s_ptResolution = 0.5F;  ///< GeV per pT code
 
     /// Variables bit size
     /// 14 bits for eta, 9 bits for phi, 8 bits for pt
     static constexpr uint16_t s_etaBitRange = 0x3fff;
     static constexpr uint16_t s_phiBitRange = 0x1ff;
     static constexpr uint8_t s_ptBitRange = 0xff;
+    static constexpr float s_ptRange =
+        s_ptResolution * static_cast<float>(s_ptBitRange);
 
     /// Bit mask for Coincidence Types
     static constexpr uint8_t COINTYPE_BIT_MASK = 0x7;

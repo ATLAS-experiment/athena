@@ -14,10 +14,8 @@
 
 #include <EventLoop/Global.h>
 
-#include <vector>
 #include <TObject.h>
 #include <SampleHandler/MetaObject.h>
-#include <SampleHandler/SampleHandler.h>
 
 namespace EL
 {

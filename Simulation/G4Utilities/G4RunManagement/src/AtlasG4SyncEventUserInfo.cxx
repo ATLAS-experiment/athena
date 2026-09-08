@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "G4RunManagement/AtlasG4SyncEventUserInfo.h"
@@ -31,13 +31,26 @@ auto G4EventSynchronizationInterface::Status() const -> EventStatus
   return m_status;
 }
 
-void G4EventSynchronizationInterface::SetStatus(const EventStatus& status)
+auto G4EventSynchronizationInterface::Outcome() const -> EventOutcome
 {
+  std::scoped_lock lk(m_mutex);
+  return m_outcome;
+}
+
+void G4EventSynchronizationInterface::Complete(EventOutcome outcome) noexcept
+{
+  bool completed = false;
   {
     std::scoped_lock lk(m_mutex);
-    m_status=status;
+    if (m_status == EventStatus::Ready) {
+      m_outcome = outcome;
+      m_status = EventStatus::Done;
+      completed = true;
+    }
   }
-  m_cv.notify_all();
+  if (completed) {
+    m_cv.notify_all();
+  }
 }
 
 void G4EventSynchronizationInterface::WaitStatus(const EventStatus& status) 

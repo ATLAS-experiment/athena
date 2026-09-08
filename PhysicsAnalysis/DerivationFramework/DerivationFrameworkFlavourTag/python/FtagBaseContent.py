@@ -18,9 +18,9 @@ from DerivationFrameworkEGamma.ElectronsCPDetailedContent import GSFTracksCPDeta
 from DerivationFrameworkFlavourTag.FlowEnergyDecoratorConfig import FlowEnergyDecoratorCfg
 from DerivationFrameworkFlavourTag.FtagDerivationConfig import (
     ParentDecoratorCfg,
-    trackTruthDecorator,
-    truthVertexDecorator,
+    TrackTruthDecoratorCfg,
 )
+from ParticleJetTools.TruthVertexDecoratorConfig import TruthVertexDecoratorsCfg
 from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
 from DerivationFrameworkPhys.TriggerMatchingCommonConfig import (
     AddRun2TriggerMatchingToSlimmingHelper,
@@ -255,7 +255,7 @@ def trigger_matching(
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(slimming_helper)
 
 
-def _get_truth_label_names(flags: AthConfigFlags) -> list[str]:
+def get_truth_label_names(flags: AthConfigFlags) -> list[str]:
     """Return internal truth-label names to copy for jet matching."""
     if not flags.Input.isMC:
         return []
@@ -265,9 +265,9 @@ def _get_truth_label_names(flags: AthConfigFlags) -> list[str]:
     return [f"{algorithm}{suffix}TruthLabelID" for algorithm in algorithms for suffix in suffixes]
 
 
-def _get_matching_variable_names(flags: AthConfigFlags, source: str) -> list[str]:
+def get_matching_variable_names(flags: AthConfigFlags, source: str) -> list[str]:
     """Return jet-matching extra variable names for a given source."""
-    labels = _get_truth_label_names(flags)
+    labels = get_truth_label_names(flags)
     variables = [f"{label}From{source}" for label in labels]
     variables += [f"delta{var}To{source}" for var in ["R", "Pt"]]
     return variables
@@ -279,20 +279,26 @@ def add_truth_vertex_decorations(
     slimming_helper: SlimmingHelper,
     target: str = "AntiKt4EMPFlowJets",
     large_r_jet_collection: str | None = None,
+    extra_jet_collections: list[tuple[str, float]] | None = None,
 ) -> None:
     """Schedule truth-vertex decorators and add their slimming variables.
 
     Opt-in per derivation (e.g. FTAG1) rather than common, because not every
-    derivation wants the truth-vertex content.
+    derivation wants the truth-vertex content. ``extra_jet_collections`` takes
+    additional ``(jetContainer, drThreshold)`` pairs to summarise.
     """
     if not flags.Input.isMC:
         return
 
+    if extra_jet_collections is None:
+        extra_jet_collections = []
+
     jet_collections = [(target, 0.4)]
     if large_r_jet_collection is not None:
         jet_collections.append((large_r_jet_collection, 1.0))
+    jet_collections += extra_jet_collections
 
-    acc.merge(truthVertexDecorator(flags, jet_collections=jet_collections))
+    acc.merge(TruthVertexDecoratorsCfg(flags, jetCollections=jet_collections))
 
     # TruthParticles is in AllVariables so its decorations are saved automatically
     slimming_helper.ExtraVariables += [
@@ -328,18 +334,18 @@ def add_common_augmentation(
         JetMatchingCfg(
             flags,
             target=target,
-            ints_to_copy=_get_truth_label_names(flags),
+            ints_to_copy=get_truth_label_names(flags),
         )
     )
 
     slimming_helper.ExtraVariables += [
-        ".".join([target] + _get_matching_variable_names(flags, target))
+        ".".join([target] + get_matching_variable_names(flags, target))
     ]
 
     if not flags.Input.isMC:
         return
 
-    acc.merge(trackTruthDecorator(flags))
+    acc.merge(TrackTruthDecoratorCfg(flags))
     if not flags.HeavyIon.isDerivation:
         acc.merge(
             ParentDecoratorCfg(

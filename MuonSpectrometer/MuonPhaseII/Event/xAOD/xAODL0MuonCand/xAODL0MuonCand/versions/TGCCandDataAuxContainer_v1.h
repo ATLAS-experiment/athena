@@ -29,10 +29,11 @@ namespace xAOD {
         std::vector<uint16_t> sectorId {};
         std::vector<uint16_t> bcTag {};
         std::vector<uint8_t> coinType {};
-        std::vector<float> deltaPhi {};
-        std::vector<float> deltaTheta {};
+        std::vector<uint8_t> deltaPhi {};
+        std::vector<uint8_t> deltaTheta {};
         std::vector<uint32_t> nswSegment {};
         std::vector<xAOD::ICandData_v1::Quality> candQuality {};
+        std::vector<uint8_t> tcId {};
 
     };
 }

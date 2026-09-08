@@ -13,11 +13,9 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "MagFieldConditions/AtlasFieldCacheCondObj.h"
 #include "MuidInterfaces/ICombinedMuonTrackBuilder.h"
-#include "MuidInterfaces/IMuidMuonRecovery.h"
 #include "MuidInterfaces/IMuonMatchQuality.h"
 #include "MuidInterfaces/IMuonTrackQuery.h"
 #include "MuonCombinedToolInterfaces/IMuonCombinedTagTool.h"
-#include "MuonCombinedToolInterfaces/IMuonCombinedTool.h"
 #include "MuonCombinedToolInterfaces/IMuonMomentumBalanceSignificance.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonRecHelperTools/MuonEDMPrinterTool.h"
@@ -33,9 +31,9 @@ namespace MuonCombined {
     class CombinedFitTag;
     class InDetCandidateToTagMap;
 
-    class MuonCombinedFitTagTool : public AthAlgTool, virtual public IMuonCombinedTagTool {
+    class MuonCombinedFitTagTool : public extends<AthAlgTool, IMuonCombinedTagTool> {
     public:
-        MuonCombinedFitTagTool(const std::string& type, const std::string& name, const IInterface* parent);
+        using base_class::base_class;
         virtual ~MuonCombinedFitTagTool() = default;
 
         virtual StatusCode initialize() override;
@@ -70,7 +68,6 @@ namespace MuonCombined {
         ToolHandle<Rec::IMuonTrackQuery> m_trackQuery{this, "TrackQuery", "Rec::MuonTrackQuery/MuonTrackQuery"};
         ToolHandle<Rec::IMuonMomentumBalanceSignificance> m_momentumBalanceTool{
             this, "MomentumBalanceTool", "Rec::MuonMomentumBalanceSignificanceTool/MuonMomentumBalanceSignifTool"};
-        ToolHandle<Rec::IMuidMuonRecovery> m_muonRecovery{this, "MuonRecovery", ""};
         ToolHandle<Rec::IMuonMatchQuality> m_matchQuality{this, "MatchQuality", "Rec::MuonMatchQuality/MuonMatchQuality"};
         ToolHandle<Trk::ITrackScoringTool> m_trackScoringTool{this, "TrackScoringTool", "Muon::MuonTrackScoringTool/MuonTrackScoringTool"};
 

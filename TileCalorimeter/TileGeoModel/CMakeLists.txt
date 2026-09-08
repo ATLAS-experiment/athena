@@ -5,15 +5,14 @@ atlas_subdir( TileGeoModel )
 
 # External dependencies:
 find_package( GeoModel COMPONENTS GeoModelKernel GeoModelRead GeoModelDBManager )
-find_package( Boost )
 
 # Component(s) in the package:
 atlas_add_library( TileGeoModelLib
                    src/*.cxx
                    PUBLIC_HEADERS TileGeoModel
-                   PRIVATE_INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
+                   PRIVATE_INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
                    LINK_LIBRARIES ${GEOMODEL_LIBRARIES} GeoModelUtilities TileDetDescr StoreGateLib CaloDetDescrLib TileConditionsLib
-                   PRIVATE_LINK_LIBRARIES CaloIdentifier CxxUtils SGTools GaudiKernel TileIdentifier ${Boost_LIBRARIES} )
+                   PRIVATE_LINK_LIBRARIES CaloIdentifier CxxUtils SGTools GaudiKernel TileIdentifier)
 
 atlas_add_component( TileGeoModel
                      src/components/*.cxx

@@ -11,7 +11,6 @@
 #include <SampleHandler/Sample.h>
 
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/PrintMsg.h>
 #include <RootCoreUtils/RootUtils.h>
 #include <SampleHandler/MetaFields.h>
 #include <SampleHandler/MetaNames.h>
@@ -50,10 +49,19 @@ namespace SH
 	result += ",tags=" + dbg (obj.tags(), verbosity / 10);
       if (verbosity % 10 > 1)
       {
-	result += "\n";
-	for (std::size_t iter = 0, end = obj.numFiles();
-	     iter != end; ++ iter)
-	  result += obj.fileName (iter) + "\n";
+	// rationale: some samples (e.g. SampleComposite) do not support
+	//   file listing and throw from numFiles(); handle that
+	//   gracefully so that printing never throws.
+	try
+	{
+	  result += "\n";
+	  for (std::size_t iter = 0, end = obj.numFiles();
+	       iter != end; ++ iter)
+	    result += obj.fileName (iter) + "\n";
+	} catch (std::exception& e)
+	{
+	  result += "\n <file listing not available: " + std::string (e.what()) + ">\n";
+	}
       };
     };
     return result;
@@ -64,7 +72,7 @@ namespace SH
   void Sample ::
   testInvariant () const
   {
-    RCU_INVARIANT (m_meta != 0);
+    RCU_INVARIANT (m_meta != nullptr);
  }
 
 
@@ -217,11 +225,10 @@ namespace SH
 
     const std::string treeName (meta()->castString (MetaFields::treeName, MetaFields::treeName_default));
     if (treeName.empty())
-      RCU_THROW_MSG ("sample " + name() + " does not have a tree name associated");
+      throw std::runtime_error ("sample " + name() + " does not have a tree name associated");
     std::unique_ptr<TChain> result (new TChain (treeName.c_str()));
-    for (std::vector<std::string>::const_iterator file = files.begin(),
-	   end = files.end(); file != end; ++ file)
-      result->AddFile (file->c_str());
+    for (const auto& file : files)
+      result->AddFile (file.c_str());
     return result.release();
   }
 
@@ -248,9 +255,9 @@ namespace SH
   contains (const std::string& name) const
   {
     RCU_READ_INVARIANT (this);
-    if (m_name == name)
-      return true;
-    return false;
+    // rationale: also consult the virtual getContains(), so that
+    //   composite samples can detect nested containment / rings.
+    return m_name == name || getContains (name);
   }
 
 
@@ -292,12 +299,11 @@ namespace SH
       = meta()->castString (MetaFields::treeName, MetaFields::treeName_default);
     Long64_t result = 0;
     std::vector<std::string> fileList = makeFileList();
-    for (std::vector<std::string>::const_iterator fileName = fileList.begin(),
-	   end = fileList.end(); fileName != end; ++ fileName)
+    for (const auto& fileName : fileList)
     {
-      std::unique_ptr<TFile> file (TFile::Open (fileName->c_str(), "READ"));
-      if (file.get() == 0)
-	RCU_THROW_MSG ("failed to open file: " + *fileName);
+      std::unique_ptr<TFile> file (TFile::Open (fileName.c_str(), "READ"));
+      if (file.get() == nullptr)
+        throw std::runtime_error ("failed to open file: " + fileName);
       TTree *tree = dynamic_cast<TTree*>(file->Get (treeName.c_str()));
       if (tree)
 	result += tree->GetEntries();
@@ -340,7 +346,7 @@ namespace SH
     std::unique_ptr<TNamed> mymeta (meta_swallow);
 
     // no invariant used
-    RCU_REQUIRE_SOFT (meta_swallow != 0);
+    RCU_REQUIRE_SOFT (meta_swallow != nullptr);
 
     meta()->addReplace (mymeta.release());
   }
@@ -437,12 +443,12 @@ namespace SH
     RCU_READ_INVARIANT (this);
     std::vector<std::string> fileList (makeFileList());
     if (fileList.size() > 1)
-      RCU_THROW_MSG ("reading histgrams from samples with multiple files is not (yet) implemented");
+      throw std::runtime_error ("reading histgrams from samples with multiple files is not (yet) implemented");
     if (fileList.size() == 0)
       return nullptr;
     std::unique_ptr<TFile> file (TFile::Open (fileList[0].c_str(), "READ"));
     if (file == nullptr)
-      RCU_THROW_MSG ("could not open file " + fileList[0]);
+      throw std::runtime_error ("could not open file " + fileList[0]);
     //cppcheck-suppress nullPointerRedundantCheck 
     TObject *object = file->Get (name.c_str());
     if (object != nullptr)

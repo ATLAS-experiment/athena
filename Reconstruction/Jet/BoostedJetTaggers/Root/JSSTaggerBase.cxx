@@ -584,34 +584,50 @@ void JSSTaggerBase::decorateJSSRatios( const xAOD::JetContainer& jets ) const {
       float ECF2 = (*readECF2)(*jet);
       float ECF3 = (*readECF3)(*jet);
 
-      if ( ECF2 > 1e-8 ) {
-	C2 = ECF3 * ECF1 / std::pow( ECF2, 2.0 );
-	D2 = ECF3 * std::pow( ECF1, 3.0 ) / std::pow( ECF2, 3.0 );
+      if(!decC2.isAvailable()){
+	if ( ECF2 > 1e-8 )
+	  C2 = ECF3 * ECF1 / std::pow( ECF2, 2.0 );
       }
 
-      e3 = ECF3 / std::pow( ECF1, 3.0 );
+      if(!decD2.isAvailable()){
+	if ( ECF2 > 1e-8 )
+	  D2 = ECF3 * std::pow( ECF1, 3.0 ) / std::pow( ECF2, 3.0 );
+      }
+
+      if(!decE3.isAvailable())
+	e3 = ECF3 / std::pow( ECF1, 3.0 );
 
       // L-series for UFO top taggers
-      if((*readECFG331).isAvailable() && (*readECFG212).isAvailable()){
-        if((*readECFG212)(*jet) > 1e-8){
-          L2 = (*readECFG331)(*jet) / std::pow((*readECFG212)(*jet), 1.5);
-        }
+      if(!decL2.isAvailable()){
+	if((*readECFG331).isAvailable() && (*readECFG212).isAvailable()){
+	  if((*readECFG212)(*jet) > 1e-8){
+	    L2 = (*readECFG331)(*jet) / std::pow((*readECFG212)(*jet), 1.5);
+	  }
+	}
       }
 
-      if((*readECFG331).isAvailable() && (*readECFG311).isAvailable()){
-        if((*readECFG331)(*jet) > 1e-8){
-          L3 = (*readECFG311)(*jet) / std::pow((*readECFG331)(*jet), 1./3.);
-        }
+      if(!decL3.isAvailable()){
+	if((*readECFG331).isAvailable() && (*readECFG311).isAvailable()){
+	  if((*readECFG331)(*jet) > 1e-8){
+	    L3 = (*readECFG311)(*jet) / std::pow((*readECFG331)(*jet), 1./3.);
+	  }
+	}
       }
+
     }
 
     decTau21WTA(*jet) = tau21_wta;
     decTau32WTA(*jet) = tau32_wta;
     decTau42WTA(*jet) = tau42_wta;
 
-    decC2(*jet) = C2;
-    decD2(*jet) = D2;
-    decE3(*jet) = e3;
+    if(!decC2.isAvailable())
+      decC2(*jet) = C2;
+
+    if(!decD2.isAvailable())
+      decD2(*jet) = D2;
+
+    if(!decE3.isAvailable())
+      decE3(*jet) = e3;
 
     static const SG::AuxElement::ConstAccessor<float> accL2("L2");
     if(!accL2.isAvailable(*jet)) decL2(*jet) = L2;
@@ -782,15 +798,12 @@ std::pair<double, double> JSSTaggerBase::getSF( const xAOD::Jet& jet, const std:
   double SF = 1.0;
   double eff = 1.0;
 
-  if ( m_weightHistograms.count(truthLabelStr.c_str()) ) {
-
-    int pt_mPt_bin = (m_weightHistograms.find(truthLabelStr.c_str())->second)->FindBin(jet.pt()*0.001, logmOverPt);
-    SF = (m_weightHistograms.find(truthLabelStr.c_str())->second)->GetBinContent(pt_mPt_bin);
-
-    if ( !m_efficiencyHistogramName.empty() ) {
-      eff = (m_efficiencyHistograms.find(truthLabelStr.c_str())->second)->GetBinContent(pt_mPt_bin);
+  if ( auto it1 = m_weightHistograms.find(truthLabelStr.c_str()); it1 != m_weightHistograms.end()  ) {
+    int pt_mPt_bin = (it1->second)->FindBin(jet.pt()*0.001, logmOverPt);
+    SF = (it1->second)->GetBinContent(pt_mPt_bin);
+    if ( auto it2 = m_efficiencyHistograms.find(truthLabelStr.c_str()); it2 != m_efficiencyHistograms.end()) {
+      eff = (it2->second)->GetBinContent(pt_mPt_bin);
     }
-
   }
   else {
     // set the efficiency for "Other" category to be the signal efficiency
@@ -803,8 +816,12 @@ std::pair<double, double> JSSTaggerBase::getSF( const xAOD::Jet& jet, const std:
       signal_truthLabel="t";
     }
     if ( !signal_truthLabel.empty() && !m_efficiencyHistogramName.empty() ){
-      int pt_mPt_bin = (m_weightHistograms.find(signal_truthLabel.c_str())->second)->FindBin(jet.pt()*0.001, logmOverPt);
-      eff = (m_efficiencyHistograms.find(signal_truthLabel.c_str())->second)->GetBinContent(pt_mPt_bin);
+      if (auto pw = m_weightHistograms.find(signal_truthLabel.c_str());pw != m_weightHistograms.end()){
+        int pt_mPt_bin = (pw->second)->FindBin(jet.pt()*0.001, logmOverPt);
+        if (auto pe = m_efficiencyHistograms.find(signal_truthLabel.c_str());pe != m_efficiencyHistograms.end()){
+          eff = (pe->second)->GetBinContent(pt_mPt_bin);
+        }
+      }
     }
 
     return std::make_pair( 1.0, eff );

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration  
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration  
 */
 //***************************************************************************  
 //		jFEXmetAlgo - Algorithm for MET Algorithm in jFEX
@@ -7,23 +7,14 @@
 //     begin                : 14 05 2021
 //     email                : Sergi.Rodriguez@cern.ch
 //***************************************************************************
-#include <vector>
-#include <stdio.h>
-#include <math.h>
+
 #include "jFEXmetAlgo.h"
-#include "L1CaloFEXSim/jTower.h"
-#include "L1CaloFEXSim/jTowerContainer.h"
-#include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
 
 namespace LVL1{
 
 //Default Constructor
 LVL1::jFEXmetAlgo::jFEXmetAlgo(const std::string& type, const std::string& name, const IInterface* parent): AthAlgTool(type, name, parent) {
     declareInterface<IjFEXmetAlgo>(this);
-}
-
-/** Destructor */
-LVL1::jFEXmetAlgo::~jFEXmetAlgo() {
 }
 
 StatusCode LVL1::jFEXmetAlgo::initialize() {
@@ -199,7 +190,7 @@ void LVL1::jFEXmetAlgo::buildMetXComponent()
 }
 
 //return the X component of the Met
-int LVL1::jFEXmetAlgo::GetMetXComponent()
+int LVL1::jFEXmetAlgo::GetMetXComponent() const
 {
     return m_Totalmet_Xcoord >> m_firmware_bit_offset;
 }
@@ -223,7 +214,7 @@ void LVL1::jFEXmetAlgo::buildMetYComponent()
 }
 
 //return the Y component of the Met
-int LVL1::jFEXmetAlgo::GetMetYComponent()
+int LVL1::jFEXmetAlgo::GetMetYComponent() const
 {
     return m_Totalmet_Ycoord >> m_firmware_bit_offset;
 }

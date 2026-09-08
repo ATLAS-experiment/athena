@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Includes from this package
@@ -27,7 +27,7 @@
 // STL includes
 #include <fstream>
 #include <iterator>
-#include <memory>
+#include <utility>
 
 #include <stdexcept>
 
@@ -168,7 +168,7 @@ xAOD::TrackVertexAssociationMap MVATrackVertexAssociationTool::getMatchMapIntern
         trktovxlist.push_back(track);
       }
     }
-    trktovxmap[vertex] = trktovxlist;
+    trktovxmap[vertex] = std::move(trktovxlist);
   }
 
   return trktovxmap;
@@ -208,7 +208,7 @@ xAOD::TrackVertexAssociationMap MVATrackVertexAssociationTool::getUniqueMatchMap
     xAOD::TrackVertexAssociationList trktovxlist;
     trktovxlist.clear();
     trktovxlist.reserve(trk_list.size());
-    trktovxmap[vertex] = trktovxlist;
+    trktovxmap[vertex] = std::move(trktovxlist);
   }
 
   // Perform matching
@@ -288,7 +288,7 @@ float MVATrackVertexAssociationTool::evaluateNetwork(const xAOD::TrackParticle& 
   // For functional:
   else {
     std::map<std::string, std::map<std::string, double>> wrappedInput;
-    wrappedInput[m_inputNodeName] = input;
+    wrappedInput[m_inputNodeName] = std::move(input);
     output = m_graph->compute(wrappedInput);
   }
 

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 /**
  * @file PixelAthHitMonAlg.cxx
@@ -33,7 +33,7 @@ StatusCode PixelAthHitMonAlg::fillHistograms(const EventContext& ctx) const {
 
   int lb = GetEventInfo(ctx)->lumiBlock();
   auto lbval = Monitored::Scalar<int>("pixhitsmontool_lb", lb);
-  auto hitGroup = getGroup("Hit");
+  const auto & hitGroup = getGroup("Hit");
 
   unsigned int bcid = GetEventInfo(ctx)->bcid();
   auto bcidval = Monitored::Scalar<unsigned int>("pixhitsmontool_bcid", bcid);

@@ -25,7 +25,7 @@ ALFA_CLinkEvent* ALFA_CLinkEventCnv::createTransient(const Token* token)
 	ALFA_CLinkEventCnv_p1 TPConverter_p1;
 
 	ALFA_CLinkEvent *trans_cont(nullptr); // probably inicialization
-	static const pool::Guid p1_guid ("D8FCB0A1-3B3E-4536-B590-1A48347B6E1A");
+	static const Guid p1_guid ("D8FCB0A1-3B3E-4536-B590-1A48347B6E1A");
 
 	if( this->compareClassGuid(token, p1_guid)){
 		std::unique_ptr< ALFA_CLinkEvent_p1 >   col_vect( this->poolReadObject< ALFA_CLinkEvent_p1 >(token) );

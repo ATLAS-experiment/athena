@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTER_MUONVECTORBRANCH_H
 #define MUONTESTER_MUONVECTORBRANCH_H
@@ -49,6 +49,14 @@ public:
 
     inline bool isUpdated() const;
     inline bool hasDefault() const;
+
+    inline friend std::ostream& operator<<(std::ostream& ostr, const VectorBranch& br) {
+        ostr<<br.name()<<": ";
+        if (br.isUpdated()){
+            ostr<<br.m_variable;
+        } else ostr<<"[]";
+        return ostr;
+    };
 
 private:
     std::vector<T> m_variable{};

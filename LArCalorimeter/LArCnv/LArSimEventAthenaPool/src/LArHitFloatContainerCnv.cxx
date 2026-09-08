@@ -22,9 +22,9 @@ LArHitFloatContainer* LArHitFloatContainerCnv::createTransient(const Token* toke
 
     LArHitFloatContainer       *trans_cont(0);
 
-    static const pool::Guid   p2_guid("1F1DE705-E0CE-4F0E-941A-C405CB2CD137");
-    static const pool::Guid   p1_guid("ED1ECB80-B38C-46DE-94BF-22F9379796DB");
-    static const pool::Guid   p0_guid("32703AED-CAA5-45ED-B804-8556900CA6B5");
+    static const Guid   p2_guid("1F1DE705-E0CE-4F0E-941A-C405CB2CD137");
+    static const Guid   p1_guid("ED1ECB80-B38C-46DE-94BF-22F9379796DB");
+    static const Guid   p0_guid("32703AED-CAA5-45ED-B804-8556900CA6B5");
 
     if( this->compareClassGuid(token, p2_guid)) {
         std::unique_ptr< LArHitContainer_p2 >   col_vect( this->poolReadObject< LArHitContainer_p2 >(token) );

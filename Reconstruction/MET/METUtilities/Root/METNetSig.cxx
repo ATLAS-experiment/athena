@@ -249,8 +249,8 @@ namespace met {
         if ( it != metCont->end() ) metCont->erase(it);
       }
       ATH_CHECK( fillMET( net_inpts, metCont, "NetInputDummy", static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Type::UnknownType) ) );
-    dec_inputnames( *(*metCont)["NetInputDummy"] ) = input_names;
-    dec_inputvalues( *(*metCont)["NetInputDummy"] ) = input_values;
+    dec_inputnames( *(*metCont)["NetInputDummy"] ) = std::move(input_names);
+    dec_inputvalues( *(*metCont)["NetInputDummy"] ) = std::move(input_values);
     return StatusCode::SUCCESS;
   }
 
@@ -278,7 +278,7 @@ namespace met {
       }
 
       // Passing the inputs through the network
-      std::vector<float> net_met = m_metnetsighandler->predict( tmp_inputs );
+      std::vector<float> net_met = m_metnetsighandler->predict( std::move(tmp_inputs) );
 
       // // Adding the network output to the Final Met container
       // xAOD::MissingET* metFinal = nullptr;

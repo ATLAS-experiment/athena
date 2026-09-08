@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTERTREE_MUONTESTERTREE_H
 #define MUONTESTERTREE_MUONTESTERTREE_H
@@ -8,12 +8,14 @@
 #include <GaudiKernel/ServiceHandle.h>
 #include <MuonTesterTree/IMuonTesterBranch.h> //for IMuonTesterBranch::DataDependency
 #include <AthenaBaseComps/AthMessaging.h> //parent class
+#include <AthenaBaseComps/AthHistogramAlgorithm.h>
 //
 #include <set>
 #include <string>
 #include <vector>
 #include <memory>
-#include <type_traits> //for std::enable_if
+#include <concepts> 
+#include <format>
 //
 //need the full class declarations, function templates cannot return incomplete types
 #include <MuonTesterTree/MatrixBranch.h>
@@ -24,6 +26,12 @@
 class TTree;
 
 namespace MuonVal {
+    namespace detail {
+        /** @brief Concept to specify whether the class returns a ServiceHandle to the THistSvc */
+        template <typename HistSvcHolder_t> concept hasHistSvc = requires(const HistSvcHolder_t& holder) {
+            { holder.histSvc() }-> std::same_as<const ServiceHandle<ITHistSvc>&>;
+        };
+    }
 
 class EventHashBranch;
 
@@ -55,10 +63,12 @@ public:
   
     /// Save the TTree in a subfolder of the TFile
     void setPath(const std::string& new_path);
+    /// Set the file stream post creation
+    void setFileStream(const std::string& new_stream);
+
     
     /// Initialize method
-   template <class OWNER,
-            typename = typename std::enable_if<std::is_base_of<IProperty, OWNER>::value>::type>
+   template <detail::hasHistSvc OWNER>
    StatusCode init(OWNER* instance);
 
     /// Finally write the TTree objects

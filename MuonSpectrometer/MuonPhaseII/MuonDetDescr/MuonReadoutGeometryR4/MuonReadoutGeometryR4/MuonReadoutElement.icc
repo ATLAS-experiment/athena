@@ -8,7 +8,7 @@
 
 namespace ActsTrk{
     template <> inline Amg::Transform3D 
-        TransformCacheDetEle<MuonGMR4::MuonReadoutElement>::fetchTransform(const DetectorAlignStore* store) const {
+        ReadoutSurfacePositioning<MuonGMR4::MuonReadoutElement>::fetchTransform(const DetectorAlignStore* store) const {
         return m_parent->toStation(store) * MuonGMR4::detail::rotationToAMDB(detectorType());
     }
 }
@@ -57,7 +57,7 @@ inline const Chamber* MuonReadoutElement::chamber() const { return m_chambLink; 
 
 inline const Amg::Transform3D& MuonReadoutElement::localToGlobalTransform(const ActsTrk::GeometryContext& ctx, 
                                                                           const IdentifierHash& hash) const {
-    const ActsTrk::TransformCache* cache = transformCache(hash);
+    const ActsTrk::IReadoutSurfacePositioning* cache = transformCache(hash);
     if (cache) {
         return cache->getTransform(ctx.getStore(detectorType()).get());
     }
@@ -70,7 +70,14 @@ inline const Amg::Transform3D& MuonReadoutElement::localToGlobalTransform(const 
     ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Return central transform for "<<idHelperSvc()->toStringDetEl(identify()));
     return m_centralTrfCache->getTransform(store);
 }
-inline const ActsTrk::TransformCache* MuonReadoutElement::transformCache(const IdentifierHash& measHash) const {
+inline const ActsTrk::IReadoutSurfacePositioning* MuonReadoutElement::transformCache(const IdentifierHash& measHash) const {
+    if (measHash == geoTransformHash()) {
+        return m_centralTrfCache.get();
+    }
+    return m_localToGlobalCaches.size() > static_cast<unsigned>(measHash) ? 
+           m_localToGlobalCaches[measHash].get() : nullptr;
+}
+inline ActsTrk::IReadoutSurfacePositioning* MuonReadoutElement::transformCache(const IdentifierHash& measHash) {
     if (measHash == geoTransformHash()) {
         return m_centralTrfCache.get();
     }
@@ -91,7 +98,7 @@ StatusCode MuonReadoutElement::insertTransform(const IdentifierHash& hash) {
                    <<" has already a transformation cached for hash "<<hash);
         return StatusCode::FAILURE;
     }
-    m_localToGlobalCaches[idx] = std::make_unique<ActsTrk::TransformCacheDetEle<MuonImpl>>(hash, static_cast<MuonImpl*>(this));
+    m_localToGlobalCaches[idx] = std::make_unique<ActsTrk::ReadoutSurfacePositioning<MuonImpl>>(hash, static_cast<MuonImpl*>(this));
     return StatusCode::SUCCESS;
 }
 

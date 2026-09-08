@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 #include "FEI3SimTool.h"
 #include "PixelDigitizationUtilities.h"
@@ -24,8 +24,6 @@ FEI3SimTool::FEI3SimTool(const std::string& type, const std::string& name, const
   FrontEndSimTool(type, name, parent) {
 }
 
-FEI3SimTool::~FEI3SimTool() = default;
-
 StatusCode FEI3SimTool::initialize() {
   ATH_CHECK(FrontEndSimTool::initialize());
   ATH_MSG_DEBUG("FEI3SimTool::initialize()");
@@ -33,12 +31,8 @@ StatusCode FEI3SimTool::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode FEI3SimTool::finalize() {
-  ATH_MSG_DEBUG("FEI3SimTool::finalize()");
-  return StatusCode::SUCCESS;
-}
-
-void FEI3SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Collection& rdoCollection,
+void FEI3SimTool::process(const EventContext& ctx,
+                          SiChargedDiodeCollection& chargedDiodes, PixelRDO_Collection& rdoCollection,
                           CLHEP::HepRandomEngine* rndmEngine) const {
   const InDetDD::PixelModuleDesign* p_design =
     static_cast<const InDetDD::PixelModuleDesign*>(&(chargedDiodes.element())->design());
@@ -59,7 +53,6 @@ void FEI3SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
     return;
   }
 
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
   SG::ReadCondHandle<PixelModuleData> moduleDataHandle(m_moduleDataKey, ctx);
   const PixelModuleData *moduleData = *moduleDataHandle;
   SG::ReadCondHandle<PixelChargeCalibCondData> calibDataHandle(m_chargeDataKey, ctx);

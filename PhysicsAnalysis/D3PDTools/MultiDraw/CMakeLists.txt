@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Set the name of the package:
 atlas_subdir( MultiDraw )
@@ -26,7 +26,7 @@ macro( _add_test name )
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
       LINK_LIBRARIES ${ROOT_LIBRARIES} EventLoop RootCoreUtils SampleHandler
       MultiDraw
-      POST_EXEC_SCRIPT nopost.sh )
+      POST_EXEC_SCRIPT noerror.sh )
 endmacro( _add_test )
 
 _add_test( ut_alg_cflow )

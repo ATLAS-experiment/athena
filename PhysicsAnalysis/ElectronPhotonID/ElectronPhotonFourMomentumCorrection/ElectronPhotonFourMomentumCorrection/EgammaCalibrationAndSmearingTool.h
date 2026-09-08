@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EGAMMA_CALIB_TOOL_H_
@@ -425,7 +425,7 @@ class EgammaCalibrationAndSmearingTool
 
   struct SysInfo {
     EgammaPredicate predicate;
-    egEnergyCorr::Scale::Variation effect;
+    egEnergyCorr::Scale::Variation effect {};
   };
 
   std::map<CP::SystematicVariation, SysInfo> m_syst_description;

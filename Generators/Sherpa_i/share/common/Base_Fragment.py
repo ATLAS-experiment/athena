@@ -2,6 +2,8 @@
 from Sherpa_i.Sherpa_iConf import Sherpa_i
 genSeq += Sherpa_i()
 evgenConfig.generators = ["Sherpa"]
+evgenConfig.partonShowerModel = "SherpaCSShower"
+evgenConfig.hadronizationModel = "SherpaAhadic"
 genSeq.Sherpa_i.PluginCode = ""
 
 import os

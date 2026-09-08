@@ -31,6 +31,8 @@ atlas_add_component( ActsGPUEventCnv
     ActsGeometryInterfacesLib
     ActsGPUInterfacesLib
     ActsGPUEventLib
+    ActsEventLib
+    ActsCalibratorsLib
     InDetRawData
     InDetPrepRawData
     InDetIdentifier
@@ -42,8 +44,9 @@ atlas_add_component( ActsGPUEventCnv
 
 atlas_install_python_modules(python/*.py)
 
-# test to be addded after ActsDeviceDetectorDescriptionProviderSvc is available
-# atlas_add_test(RDOtoTracccTest
-#     SCRIPT athena.py --threads=1 ${CMAKE_CURRENT_SOURCE_DIR}/test/RDOtoTracccTest.py
-#     POST_EXEC_SCRIPT nopost.sh
-#     PROPERTIES SKIP_RETURN_CODE 2)
+# We need a GPU to run this (and a Nvidia one at the moment): enable when
+# such hardware resources are available to Jenkins.
+#atlas_add_test(RDOtoTracccTest
+#    SCRIPT athena.py --threads=1 ${CMAKE_CURRENT_SOURCE_DIR}/test/RDOtoTracccTest.py
+#    POST_EXEC_SCRIPT nopost.sh
+#    PROPERTIES SKIP_RETURN_CODE 2)

@@ -7,7 +7,6 @@
  ----------------------------------------------------------
  ***************************************************************************/
 
-//<<<<<< INCLUDES                                                       >>>>>>
 
 #include <algorithm>
 #include <iomanip>
@@ -423,7 +422,11 @@ SolenoidParametrization::printResidualForEtaLine (double eta, double zOrigin, Ms
 	r	+= dr;
 	z 	+= dr*cotTheta;
     } 
-
+    if ((nIn == 0) or (nOut == 0)){
+      msg <<__func__<<"nIn = "<<nIn<<"; nOut = "<<nOut<<".\n";
+      return;
+    }
+    
     msg <<__func__<<"\n"
         << std::setiosflags(std::ios::fixed)
 	      << "SolenoidParametrization:  line with eta "  	<< std::setw(6) << std::setprecision(2) << eta

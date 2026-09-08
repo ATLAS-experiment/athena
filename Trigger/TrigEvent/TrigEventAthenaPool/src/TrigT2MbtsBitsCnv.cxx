@@ -25,8 +25,8 @@ TrigT2MbtsBits* TrigT2MbtsBitsCnv::createTransient(const Token* token) {
   MsgStream mlog(msgSvc(), "TrigT2MbtsBitsConverter" );
   mlog << MSG::DEBUG << "TrigT2MbtsBitsCnv::createTransient " << endmsg;
   
-  static const pool::Guid p2_guid("6D130C0D-20A2-4304-8E70-6775892217A6");
-  static const pool::Guid p1_guid("32E86328-15EB-42F5-A93F-6F891220A626");
+  static const Guid p2_guid("6D130C0D-20A2-4304-8E70-6775892217A6");
+  static const Guid p1_guid("32E86328-15EB-42F5-A93F-6F891220A626");
   
   
   TrigT2MbtsBits *transObj = 0;

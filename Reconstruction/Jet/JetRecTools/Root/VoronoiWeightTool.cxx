@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetRecTools/VoronoiWeightTool.h"
@@ -143,7 +143,7 @@ StatusCode VoronoiWeightTool::process_impl(xAOD::IParticleContainer* particlesin
   std::sort(ptvec.begin(), ptvec.end(), SortHelper::PJcomp());
 
   if(m_doSpread && m_nSigma > 0) ATH_MSG_ERROR("Can't combine spreading with nSigma yet");
-  int alg;
+  int alg{};
   if(m_doSpread && m_nSigma == 0) alg = 3;
   if(!m_doSpread && m_nSigma == 0) alg = 1;
   if(!m_doSpread && m_nSigma > 0) alg = 2;
@@ -243,7 +243,7 @@ StatusCode VoronoiWeightTool::makeVoronoiParticles(std::vector<fastjet::PseudoJe
       algopts.push_back(voro1pt);
       algopts.push_back(0);
       std::pair <fastjet::PseudoJet,std::vector<float> > pjcptpair (cons,algopts);
-      correctedptvec.push_back(pjcptpair);
+      correctedptvec.push_back(std::move(pjcptpair));
     } // end loop over cons
   } // end loop over jets
 
@@ -278,7 +278,7 @@ void VoronoiWeightTool::spreadPt(std::vector< std::pair< fastjet::PseudoJet,std:
       std::pair<size_t,float> jdrpair (jPart,dr2);
       this_particle_drs.push_back(jdrpair);
     }
-    particle_drs.push_back(this_particle_drs);
+    particle_drs.push_back(std::move(this_particle_drs));
   }
 
   for(size_t i = 0; i < Nparticles; i++){

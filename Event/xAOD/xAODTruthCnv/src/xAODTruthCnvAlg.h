@@ -66,6 +66,8 @@ namespace xAODMaker {
       std::string  generators;
       std::string  evgenProcess;
       std::string  evgenTune;
+      std::string  hadronizationModel;
+      std::string  partonShowerModel;
       std::string  hardPDF;
       std::string  softPDF;
     };

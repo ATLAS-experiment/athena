@@ -21,7 +21,10 @@ namespace GlobalSim {
   }
 
   StatusCode
-  eFexCvtrAlgTool::run(const EventContext& ctx) const {
+  eFexCvtrAlgTool::run(const std::unique_ptr<IDataCollector>& dc,
+		       const EventContext& ctx) const {
+
+    if (dc){dc->collect(*this, "start");}
 
     SG::ReadHandle<xAOD::eFexEMRoIContainer> inContainer(m_eEmRoIKey, ctx);
     CHECK(inContainer.isValid());
@@ -45,6 +48,8 @@ namespace GlobalSim {
     auto h_write =  SG::WriteHandle<OutContainer>(m_eEmTOBContainerKey,
 						  ctx);
     CHECK(h_write.record(std::move(outContainer)));
+
+    if (dc){dc->collect(*this, "end");}
 
     return StatusCode::SUCCESS;
   }

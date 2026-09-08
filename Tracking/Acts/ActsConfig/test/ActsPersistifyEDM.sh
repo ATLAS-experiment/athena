@@ -10,10 +10,10 @@ n_events=2
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py \
   --preExec "flags.Exec.FPE=-1; \
-  	     flags.Tracking.ITkActsLegacyPass.storeSeparateContainer=True; \
+  	     flags.Tracking.ITkActsPass.storeSeparateContainer=True; \
   	     flags.Acts.EDM.PersistifySpacePoints=True; \
 	     flags.Acts.EDM.PersistifyTracks=True;" \
-  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsLegacyWorkflowFlags" \
+  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
   --conditionsTag ${conditions_tag} \
   --postExec "cfg.printConfig(withDetails=True, summariseProps=True);" \
   --inputRDOFile ${input_rdo} \
@@ -34,10 +34,10 @@ ActsReadEDM.py \
    readClusters=True \
    readSpacePoints=True \
    readTracks=True \
-   tracks="ActsLegacyTracks" \
+   tracks="ActsTracks" \
    readTrackParticles=True \
    redoAmbiguity=True \
-   trackParticles="InDetActsLegacyTrackParticles"
+   trackParticles="InDetActsTrackParticles"
 
 rc=$?
 if [ $rc != 0 ]; then
@@ -49,5 +49,5 @@ runIDPVM.py \
    --filesInput AOD.pool.root \
    --outputFile idpvm.root \
    --doActs \
-   --validateExtraTrackCollections "InDetActsLegacy"
+   --validateExtraTrackCollections "InDetActs"
 

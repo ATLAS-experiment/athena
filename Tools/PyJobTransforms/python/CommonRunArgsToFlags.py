@@ -82,3 +82,6 @@ def commonRunArgsToFlags(runArgs,configFlags):
 
     if hasattr(runArgs,"stopOnSignal"):
         configFlags.Exec.StopOnSignal = runArgs.stopOnSignal
+
+    if hasattr(runArgs,"randomSeed"):
+        configFlags.Random.SeedOffset = runArgs.randomSeed

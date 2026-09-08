@@ -15,6 +15,7 @@
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandomEngine.h"
 #include <CLHEP/Random/Randomize.h>
+#include <GaudiKernel/StatusCode.h>
 
 #include "StoreGate/WriteHandle.h"
 
@@ -43,7 +44,7 @@ StatusCode LArHitEMapToDigitAlg::initialize()
   ATH_CHECK(m_caloMgrKey.initialize());
 
   ATH_CHECK(m_cablingKey.initialize());
-
+  
   // helpers
   //retrieve ID helpers
   ATH_CHECK(detStore()->retrieve(m_calocell_id,"CaloCell_ID"));
@@ -82,16 +83,16 @@ StatusCode LArHitEMapToDigitAlg::initialize()
       ATH_MSG_INFO("jobO consistency check: " << iCaloToStr[iCalo] << " has " << ((m_gainRange[iCalo].value().first == CaloGain::LARHIGHGAIN) ? "" : "no ")
                                               << " HIGH gain and high Gain threshold=" << m_HighGainThresh[iCalo]);
     else {
-      ATH_MSG_ERROR("jobO inconsistency! " << iCaloToStr[iCalo] << " has" << ((m_gainRange[iCalo].value().first == CaloGain::LARHIGHGAIN) ? "" : "no ")
+      ATH_MSG_ERROR("jobO inconsistency! " << iCaloToStr[iCalo] << " has " << ((m_gainRange[iCalo].value().first == CaloGain::LARHIGHGAIN) ? "" : "no ")
                                            << " HIGH gain but high Gain threshold=" << m_HighGainThresh[iCalo]);
       return StatusCode::FAILURE;
     }
     if ((m_gainRange[iCalo].value().second == CaloGain::LARLOWGAIN) == (m_LowGainThresh[iCalo] <= m_maxADC))
-      ATH_MSG_INFO("jobO consistency check: Calo " << iCaloToStr[iCalo] << " has" << ((m_gainRange[iCalo].value().first == CaloGain::LARHIGHGAIN) ? "" : "no ")
-                                                   << " LOW gain and high Gain threshold=" << m_LowGainThresh[iCalo] << " (maxADC=" << m_maxADC << ")");
+      ATH_MSG_INFO("jobO consistency check: Calo " << iCaloToStr[iCalo] << " has " << ((m_gainRange[iCalo].value().first == CaloGain::LARHIGHGAIN) ? "" : "no ")
+                                                   << "LOW gain and high Gain threshold=" << m_LowGainThresh[iCalo] << " (maxADC=" << m_maxADC << ")");
     else {
-      ATH_MSG_ERROR("jobO inconsistency! Calo " << iCaloToStr[iCalo] << " has" << ((m_gainRange[iCalo].value().first == CaloGain::LARHIGHGAIN) ? "" : "no ")
-                                                << " LOW gain but high Gain threshold=" << m_LowGainThresh[iCalo] << " (maxADC=" << m_maxADC << ")");
+      ATH_MSG_ERROR("jobO inconsistency! Calo " << iCaloToStr[iCalo] << " has " << ((m_gainRange[iCalo].value().first == CaloGain::LARHIGHGAIN) ? "" : "no ")
+                                                << "LOW gain but high Gain threshold=" << m_LowGainThresh[iCalo] << " (maxADC=" << m_maxADC << ")");
       return StatusCode::FAILURE;
     }
 
@@ -387,7 +388,11 @@ StatusCode LArHitEMapToDigitAlg::MakeDigit(
      }
   }
   else {
-    ATH_MSG_WARNING(" No ramp found for this random cell " << m_larem_id->show_to_string(cellId) << " for gain " << rndmEvtDigit->gain());
+    ATH_MSG_ERROR(" No ramp found for this random cell " << m_larem_id->show_to_string(cellId) << " for gain " << rndmEvtDigit->gain());
+    if (adc2MeVs->nGains()<=(int)rndmEvtDigit->gain()) {
+      ATH_MSG_ERROR("Found ramp for only " << adc2MeVs->nGains() << " gains. Are you trying to overlay of Run 3 random with run 4 signal?");
+    }
+    return  StatusCode::FAILURE;
   }
  }
 
@@ -584,9 +589,17 @@ StatusCode LArHitEMapToDigitAlg::MakeDigit(
 // ........ truncate at maximum value + 1
 //          add possibility to saturate at 0 for negative signals
 //
-    if (xAdc <0)  Adc=0;
-    else if (xAdc >= m_maxADC) Adc=m_maxADC;
-    else Adc = (short) xAdc;
+    if (xAdc <0) {
+        ATH_MSG_WARNING("Found below-zero digit " << xAdc);
+        Adc=0;
+    }
+    else if (xAdc >= m_maxADC) {
+      ATH_MSG_WARNING("Found saturating digit " << i << ": " << xAdc << " chid="<< ch_id.get_identifier32().get_compact() << ", gain=" << igain << 
+                      ", energy2adc=" << energy2adc << ", E[0]= " << (TimeE->size()>0 ? std::format("{}",TimeE->at(0).first) : "No value"));
+        Adc=m_maxADC;
+        }
+    else 
+       Adc = (short) xAdc;
 
     AdcSample[i]=Adc;
 
@@ -656,8 +669,9 @@ StatusCode LArHitEMapToDigitAlg::ConvertHits2Samples(const Identifier & cellId, 
   ATH_MSG_DEBUG(" Cellid " << m_larem_id->show_to_string(cellId));
   for (i=0;i<nsamples;i++)
   {
-       ATH_MSG_DEBUG(Shape[i] << " ");
+    msg() << MSG::DEBUG << Shape[i] << " ";
   }
+  msg() << endmsg;
   ATH_MSG_DEBUG("m_NSamples, m_usePhase " << m_NSamples << " " << m_usePhase);
 #endif
 
@@ -681,7 +695,7 @@ for (const auto& [energy, time] : *TimeE) {
       {
        j = i - ishift + m_firstSample + ihecshift;
 #ifndef NDEBUG
-       ATH_MSG_DEBUG(" time/i/j " << time << " "<< i << " " << j);
+       msg() << MSG::DEBUG << " time/i/j " << time << " "<< i << " " << j;
 #endif
        if (j >=0 && j < nsamples ) {
          if (j<nsamples_der && std::abs(ShapeDer[j])<10. )
@@ -689,6 +703,7 @@ for (const auto& [energy, time] : *TimeE) {
          else sampleList[i] += Shape[j]*energy ;
        }
       }
+      msg() << MSG::DEBUG << endmsg;
    }
 // Mode to use phase (tbin) to get pulse shape ( pulse shape with fine time binning should be available)
 
@@ -748,6 +763,8 @@ for (const auto& [energy, time] : *TimeE) {
 CaloGain::CaloGain LArHitEMapToDigitAlg::chooseGain(const staticVecDouble_t& samples, const HWIdentifier ch_id, const CaloNum iCalo,
                                                     const ILArPedestal* pedestal, const LArADC2MeV* adc2MeVs, const float SF) const {
 
+
+  const CaloGain::CaloGain gainChoosingGain=CaloGain::LARMEDIUMGAIN;                                                       
   int sampleGainChoice{2};
   if (m_firstSample < 0)
     sampleGainChoice -= m_firstSample;
@@ -756,7 +773,6 @@ CaloGain::CaloGain LArHitEMapToDigitAlg::chooseGain(const staticVecDouble_t& sam
   if (iCalo == HEC && m_NSamples.value() == 4 && m_firstSample.value() == 0)
     sampleGainChoice -= 1;  // ihecshift
 
-  CaloGain::CaloGain gainChoosingGain = static_cast<CaloGain::CaloGain>(m_gainRange[iCalo].value().second - 1);
   // We choose the gain in applying thresholds on the 3rd Sample (index "2")
   // converted in ADC counts in the second-lowest gain (eg MEDIUM gain for run 1,2,3, HIGH gain for run 4)
   // Indeed, thresholds in ADC counts are defined with respect to the MediumGain.
@@ -772,7 +788,7 @@ CaloGain::CaloGain LArHitEMapToDigitAlg::chooseGain(const staticVecDouble_t& sam
   }
   const auto& polynom_adc2mev = adc2MeVs->ADC2MEV(ch_id, gainChoosingGain);
   if (polynom_adc2mev.size() < 2) {
-    ATH_MSG_WARNING(" No ramp found for channel  " << m_laronline_id->channel_name(ch_id) << ", gain " << gainChoosingGain << ",  no digit produced...");
+    ATH_MSG_WARNING(" No ramp found for channel  " << m_laronline_id->channel_name(ch_id) << ", gain " << gainChoosingGain << ",  gain choice failed...");
     return CaloGain::INVALIDGAIN;
   }
   const float pseudoADC3 = samples[sampleGainChoice] / (polynom_adc2mev[1]) / SF + Pedestal;
@@ -780,7 +796,7 @@ CaloGain::CaloGain LArHitEMapToDigitAlg::chooseGain(const staticVecDouble_t& sam
   CaloGain::CaloGain igain = gainChoosingGain;
   // if we are not yet already in the highest gain and we are below high-gain theshold, switch to high gain
   if (gainChoosingGain > m_gainRange[iCalo].value().first && pseudoADC3 < m_HighGainThresh[iCalo]) {
-    igain = CaloGain::LARHIGHGAIN;
+    igain=CaloGain::LARHIGHGAIN;
   }
 
   else if (gainChoosingGain < m_gainRange[iCalo].value().second && pseudoADC3 > m_LowGainThresh[iCalo]) {

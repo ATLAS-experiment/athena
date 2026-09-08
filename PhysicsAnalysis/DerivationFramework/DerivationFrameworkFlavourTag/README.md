@@ -15,6 +15,7 @@ questions. Contact details can be found in the main FTAG docs: https://ftag.docs
 | `FTAG4` | PHYS-like derivation with a one-lepton skim | Uses `PHYS` content and applies a single-lepton calibration-style event selection. |
 | `FTAG5` | PHYS-like derivation with a dilepton skim | Uses `PHYS` content and applies a two-lepton calibration-style event selection. |
 | `FTAGPU` | FTAG derivation focused on by-vertex jet content and pile-up related studies | Includes `AntiKt4EMPFlowByVertexJets`, related thinning, and FTAG augmentations for this jet view. |
+| `FTAGSSV` | PHYS-like derivation for the soft b-tagging calibration | Uses `PHYS` content plus the NVSI_SecVrt_Tight* secondary-vertex containers rebuilt under each tracking systematic variation. |
 | `FTAGXBB` | Skimmed derivation for Xbb calibration | Requires at least one large-`R` UFO soft-drop jet and adds Xbb-oriented large-`R` discriminant content. |
 
 ## Shared modules
@@ -34,6 +35,9 @@ questions. Contact details can be found in the main FTAG docs: https://ftag.docs
 - `FtagDerivationConfig.py`
   Small, reusable configuration helpers for truth decorators and trigger-jet
   flavour-label decoration.
+- `FtagVRJetConfig.py`
+  The variable-R EMPFlow jet collection used for soft flavour-tagging studies:
+  jet definition, reconstruction, soft-lepton association and truth augmentation.
 
 ## Coding guidelines
 
@@ -55,8 +59,8 @@ follow those when making changes to/adding code.
 
 - Use `UpperCamelCase` for functions that return instances of the `ComponentAccumulator`.
   for example `FTAG1KernelCfg` and `ParentDecoratorCfg`.
-- Use `snake_case` for internal helpers, functions and variables, for example
-  `_get_matching_variable_names`.
+- Use `snake_case` for helpers, functions and variables. Prefix with an underscore when the helper is
+  private to its module, for example `_get_track_collection`.
 - Use descriptive local names such as `slimming_helper`, `trigger_lists_helper`,
   `item_list`, and `extra_static_content`.
 - Keep a consistent naming scheme for certain must-have parts of derivations. This

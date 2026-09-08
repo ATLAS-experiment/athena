@@ -28,7 +28,6 @@ namespace ActsTrk::detail {
         double m_calibratedCovarianceLowerBound;
         int m_errorStrategy;
         bool m_correctCovariance;
-        bool m_useWeightedPos;
    };
 
    /// @brief the Analogue clustering calibrator
@@ -48,7 +47,6 @@ namespace ActsTrk::detail {
           m_options(std::move(options))
      {}
 
-  protected:
      const error_data_t* getErrorData() const {
         return m_options.m_errorData;
      }
@@ -63,6 +61,7 @@ namespace ActsTrk::detail {
                const InDetDD::SiDetectorElement& detElement,
                const std::pair<float, float>& angles) const;
 
+   protected:
      std::pair<float, float> getCentroid(const EventContext& ctx,
                                          const xAOD::PixelCluster& cluster,
                                          const InDetDD::SiDetectorElement& element) const;
@@ -111,8 +110,7 @@ namespace ActsTrk::detail {
           .m_errorData=getErrorData(ctx),
           .m_calibratedCovarianceLowerBound=m_calibratedCovarianceLowerBound,
           .m_errorStrategy=m_errorStrategy,
-          .m_correctCovariance=m_correctCovariance,
-          .m_useWeightedPos=m_useWeightedPos};
+          .m_correctCovariance=m_correctCovariance};
        return options;
     }
 
@@ -123,7 +121,6 @@ namespace ActsTrk::detail {
     // in micrometers
     Gaudi::Property<bool> m_correctCovariance{this, "PerformCovarianceCalibration", true};
     Gaudi::Property<double> m_calibratedCovarianceLowerBound {this, "CalibratedCovarianceLowerBound", 0.};
-    Gaudi::Property<bool> m_useWeightedPos {this, "UseWeightedPosition", false}; // if pixel cluster use weighted local position
 
     Gaudi::Property<int> m_errorStrategy {this, "errorStrategy", 1, "Which error strategy to use for clusters on track: 0 - calibrated, 1 - cluster pitch, to be used only if broadClusters is used during clustering"}; 
   };

@@ -17,8 +17,7 @@
 from PyJobTransforms.TransformUtils import executeFromFragment
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType, MetadataCategory
-from SimulationConfig.SimEnums import CavernBackground
-
+from SimulationConfig.SimEnums import CavernBackground, LArParameterization
 
 def specialConfigPreInclude(flags):
     fragment = flags.Input.SpecialConfiguration.get("preInclude", None)
@@ -84,14 +83,17 @@ def CommonSimulationCfg(flags, log):
             cfg.addSequence(CompFactory.AthSequencer('SimSequence'), parentName='AthAlgSeq')
             cfg.addSequence(CompFactory.AthSequencer('CopyHitSequence'), parentName='AthAlgSeq')
 
+    # force CollectionType to be RootCollection to ensure Event Tag reading
+    if flags.Input.Files:
+        evSel = cfg.getService("EventSelector")
+        evSel.CollectionType = "RootCollection"
+
     if flags.Sim.ISF.ReSimulation:
         # Case 4
         from ISF_Algorithms.ISF_AlgorithmsConfig import SimEventFilterCfg, InvertedSimEventFilterCfg, RenameHitCollectionsCfg
         cfg.merge(SimEventFilterCfg(flags, sequenceName='SimSequence'))
         cfg.merge(InvertedSimEventFilterCfg(flags, sequenceName='CopyHitSequence'))
         cfg.merge(RenameHitCollectionsCfg(flags, sequenceName='CopyHitSequence'))
-        evSel = cfg.getService("EventSelector")
-        evSel.CollectionType = "RootCollection"
     else:
         #Cases 1, 2, 3
         # add BeamEffectsAlg
@@ -131,7 +133,7 @@ def CommonSimulationCfg(flags, log):
             #add the G4AtlasAlg
             from G4AtlasAlg.G4RunAlgConfig import G4RunAlgCfg
             cfg.merge(G4RunAlgCfg(flags))
-        from SimulationConfig.SimEnums import LArParameterization
+        
         if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
             cfg.getEventAlgo("ISF_CollectionMerger").InputLArEMBHits.data.sort() # temporary workaround
             cfg.getEventAlgo("ISF_CollectionMerger").InputLArEMECHits.data.sort() # temporary workaround

@@ -38,10 +38,9 @@ def IsoCloseByCorrSkimmingAlgCfg(flags, suff = "", name="IsoCloseByCorrSkimmingA
                                                                            quality = LikeEnum.VeryLoose,
                                                                            menu=electronLHmenu.offlineMC21 if flags.GeoModel.Run >= LHCPeriod.Run3 else electronLHmenu.offlineMC20)))
 
-    from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
-    kwargs.setdefault("MuonSelectionTool", result.popToolsAndMerge(MuonSelectionToolCfg(flags, 
+    from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
+    kwargs.setdefault("MuonSelectionTool", result.popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(flags, 
                                                                 MaxEta=2.7,
-                                                                DisablePtCuts=True,
                                                                 MuQuality=2, ### Select the loose working point
                                                                 )))
     kwargs.setdefault("IsoCloseByCorrectionTool", result.popToolsAndMerge(IsoCloseByCorrectionToolCfg(flags)))
@@ -53,9 +52,15 @@ def IsoCloseByCorrSkimmingAlgCfg(flags, suff = "", name="IsoCloseByCorrSkimmingA
     result.addEventAlgo(the_alg, primary = True)
     return result
 
-def IsoCloseByCorrAlgCfg(flags, name="IsoCloseByCorrAlg", suff = "", isPhysLite = False, containerNames = [ "Muons", "Electrons", "Photons"], useSelTools = False, isoDecSuffix = "CloseByCorr", caloDecSuffix = "", hasLRT = False, **kwargs):
+def IsoCloseByCorrAlgCfg(flags, name="IsoCloseByCorrAlg", suff = "", isPhysLite = False, containerNames = [ "Muons", "Electrons", "Photons"], depContainerNames = None, useSelTools = False, isoDecSuffix = "CloseByCorr", caloDecSuffix = "", hasLRT = False, **kwargs):
 
     result = ComponentAccumulator()
+
+    # When the client passes *view* container names (e.g. StdWithLRTMuons in DAOD_LLP1), 
+    # the dependencies get declared on the view name, which has no
+    # producer visible to the scheduler and leads to crashes in MT when run on a view container
+    # we can declare the dependencies on the underlying container names instead then if needed
+    depNames = depContainerNames if depContainerNames is not None else containerNames
 
     # Configure the CloseBy isolation correction alg - only need two WPs each for all iso variables
     elIsoWPs   = [ "Loose_VarRad", "TightTrackOnly_FixedRad" ]
@@ -74,15 +79,14 @@ def IsoCloseByCorrAlgCfg(flags, name="IsoCloseByCorrAlg", suff = "", isPhysLite 
                                                                            SelectionDecorator     = selectionDecorator,
                                                                            IsoDecSuffix           = isoDecSuffix,
                                                                            CaloDecSuffix = caloDecSuffix,
-                                                                           EleContainers = [ x for x in containerNames if x.find("Ele") != -1],
-                                                                           MuoContainers = [ x for x in containerNames if x.find("Muo") != -1],
-                                                                           PhoContainers = [ x for x in containerNames if x.find("Pho") != -1])))  
+                                                                           EleContainers = [ x for x in depNames if x.find("Ele") != -1],
+                                                                           MuoContainers = [ x for x in depNames if x.find("Muo") != -1],
+                                                                           PhoContainers = [ x for x in depNames if x.find("Pho") != -1])))  
     
     # Need muon selection tool to apply Loose - no pt cuts
-    from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
-    kwargs.setdefault("MuonSelectionTool", result.popToolsAndMerge(MuonSelectionToolCfg(flags, 
+    from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
+    kwargs.setdefault("MuonSelectionTool", result.popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(flags, 
                                                                 MaxEta        = 2.7,
-                                                                DisablePtCuts = True,
                                                                 MuQuality     = 2, ### Select the loose working point
                                                                 UseLRT        = hasLRT,
                                                                 )))  
@@ -134,17 +138,16 @@ def TestIsoCloseByCorrectionCfg(flags, name="TestIsoCloseByAlg", suff = "", **kw
                                                                            quality = LikeEnum.VeryLoose,
                                                                            menu=electronLHmenu.offlineMC21 if flags.GeoModel.Run >= LHCPeriod.Run3 else electronLHmenu.offlineMC20)))
 
-    from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
-    kwargs.setdefault("MuonSelectionTool", result.popToolsAndMerge(MuonSelectionToolCfg(flags, 
+    from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
+    kwargs.setdefault("MuonSelectionTool", result.popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(flags, 
                                                                 MaxEta=2.7,
-                                                                DisablePtCuts=True,
                                                                 MuQuality=2, ### Select the loose working point
                                                                 )))  
     the_alg = CompFactory.CP.TestIsolationCloseByCorrAlg(name + suff, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
 
-def IsoCloseByAlgsCfg(flags, suff = "", isPhysLite = False, containerNames = [ "Muons", "Electrons", "Photons"], stream_name="", ttva_wp = "Nonprompt_All_MaxWeight", useSelTools = False, isoDecSuffix = "CloseByCorr", caloDecSuffix = "", hasLRT = False):
+def IsoCloseByAlgsCfg(flags, suff = "", isPhysLite = False, containerNames = [ "Muons", "Electrons", "Photons"], depContainerNames = None, stream_name="", ttva_wp = "Nonprompt_All_MaxWeight", useSelTools = False, isoDecSuffix = "CloseByCorr", caloDecSuffix = "", hasLRT = False):
 
     # Add in two ways to do IsoCloseBy correction:
     #   - use IsoCloseByCorrAlg to modify the <iso_value>s for close by lepton/photon. 
@@ -171,7 +174,7 @@ def IsoCloseByAlgsCfg(flags, suff = "", isPhysLite = False, containerNames = [ "
 
     # Setup the isolation close-by correction algorithm sequence to correct the isolation of near-by el, mu, ph
     from IsolationSelection.IsolationSelectionConfig import IsoCloseByCorrAlgCfg
-    acc.merge(IsoCloseByCorrAlgCfg(flags, suff = suff, isPhysLite = isPhysLite, containerNames = containerNames, useSelTools = useSelTools, isoDecSuffix = isoDecSuffix, caloDecSuffix = caloDecSuffix, hasLRT = hasLRT))
+    acc.merge(IsoCloseByCorrAlgCfg(flags, suff = suff, isPhysLite = isPhysLite, containerNames = containerNames, depContainerNames = depContainerNames, useSelTools = useSelTools, isoDecSuffix = isoDecSuffix, caloDecSuffix = caloDecSuffix, hasLRT = hasLRT))
     return acc
 
 def setupIsoCloseBySlimmingVariables(slimmingHelper, isLLP1 = False):

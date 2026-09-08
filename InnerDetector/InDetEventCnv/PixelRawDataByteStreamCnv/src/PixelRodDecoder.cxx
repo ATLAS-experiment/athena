@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelRodDecoder.h"
-#include "CxxUtils/AthUnlikelyMacros.h"
 #include "InDetIdentifier/PixelID.h"
 #include "PixelReadoutGeometry/PixelDetectorManager.h"
 #include "ExtractCondensedIBLhits.h"
@@ -155,14 +154,15 @@ StatusCode PixelRodDecoder::fillCollection( const ROBFragment *robFrag, IPixelRD
 
   // @TODO find better solution for the error counter to avoid complex index computations and hard coded maximum size.
   // The index array is defined in PixelRawDataProviderTool::SizeOfIDCInDetBSErrContainer()
+  // Local variable bsErrWord uses 452048 bytes of stack space
+  //coverity[STACK_USE]
   std::array<uint64_t, PixelRodDecoder::ERROR_CONTAINER_MAX> bsErrWord{};
-  std::fill(bsErrWord.begin(),bsErrWord.end(),0);
   // Check ROD status
   if (robFrag->nstatus()!=0) {
     const uint32_t* rob_status;
     robFrag->status(rob_status);
     // check the ROD status for truncation
-    if (ATH_UNLIKELY((*rob_status)!=0)) {
+    if (*rob_status != 0) [[unlikely]] {
       ATH_MSG_DEBUG( "ROB status word for robid 0x"<< std::hex << robId << " is non-zero 0x" << (*rob_status) << std::dec);
       /*
         Definition of the status words in a ROB fragment header is found in
@@ -664,7 +664,7 @@ StatusCode PixelRodDecoder::fillCollection( const ROBFragment *robFrag, IPixelRD
                   if (hitDiscCnfg == 2 && IBLtot[1] == 2) IBLtot[1] = 16;
                   if (not m_checkDuplicatedPixel or thisRdoIsUnique(pixelId, foundPixels)) {
                     // Insert the first part of the ToT info in the collection
-                    coll->push_back(new RDO(pixelId, IBLtot[0], mBCID, mLVL1ID, mLVL1A));
+                    if (coll) coll->push_back(new RDO(pixelId, IBLtot[0], mBCID, mLVL1ID, mLVL1A));
                   } 
                   else {
                     m_numDuplicatedPixels++;
@@ -706,7 +706,7 @@ StatusCode PixelRodDecoder::fillCollection( const ROBFragment *robFrag, IPixelRD
                         continue;
                       }
                       if (not m_checkDuplicatedPixel or thisRdoIsUnique(pixelId, foundPixels)) {
-                        coll->push_back(new RDO(pixelId, IBLtot[1], mBCID, mLVL1ID, mLVL1A));
+                        if (coll) coll->push_back(new RDO(pixelId, IBLtot[1], mBCID, mLVL1ID, mLVL1A));
                       } 
                       else {
                         m_numDuplicatedPixels++;
@@ -1267,15 +1267,15 @@ uint32_t PixelRodDecoder::getDataType(unsigned int rawDataWord, bool link_start)
 
 
 bool PixelRodDecoder::checkDataWordsCorruption( uint32_t rawDataWord) const {
-    if ( ATH_UNLIKELY( rawDataWord==0xaa1234aa )) {
+    if ( rawDataWord==0xaa1234aa ) [[unlikely]] {
       generalwarning("Evt marker encountered during loop on ROD datawords");
       return true;
     } 
-    else if ( ATH_UNLIKELY( rawDataWord==0xdd1234dd ) ){
+    else if ( rawDataWord==0xdd1234dd ) [[unlikely]] {
       generalwarning("ROB marker encountered during loop on ROD datawords");
       return true;
     } 
-    else if ( ATH_UNLIKELY( rawDataWord==0xee1234ee) ){
+    else if ( rawDataWord==0xee1234ee) [[unlikely]] {
       generalwarning("ROD marker encountered during loop on ROD datawords");
       return true;
     }

@@ -73,7 +73,7 @@ IOVDbFolder::IOVDbFolder(IOVDbConn* conn,
                          const IOVDbParser& folderprop, MsgStream& msg,
                          IClassIDSvc* clidsvc, IIOVDbMetaDataTool* metadatatool,
                          const bool checklock, const bool outputToFile,
-                         const std::string & source,
+                         source_t source,
                          const std::string & crestServer,
                          const std::string & crestTag,
 			                   const bool crestCoolToFile):
@@ -109,24 +109,28 @@ IOVDbFolder::IOVDbFolder(IOVDbConn* conn,
   // check for <noover> - disables using tag override read from input file
   m_notagoverride=folderprop.noTagOverride();
 
+
+  //Override of CREST reading location for this folder
   std::string dbconn;
   folderprop.getKey("db", "",dbconn);
   if (dbconn.find("crest")!=std::string::npos) {
     //CREST override for this folder
-    m_source="CREST";
+    m_source=source_t::CRESTDB;
     //strip crest_fs prefix ... 
     const std::string fsPrefix("crest_fs:");
     if (dbconn.starts_with(fsPrefix)) dbconn=dbconn.substr(fsPrefix.size());
     ATH_MSG_INFO("Crest server for folder " << m_foldername << " overridden to " << dbconn);
-    m_crestServer=dbconn;  
-    if (!m_jotag.empty()) {
-      ATH_MSG_INFO("Crest Tag " << m_crestTag << " overridden by job options to " << m_jotag);
-      m_crestTag=m_jotag;
-    }
+    m_crestServer=dbconn;
   }
 
-
-  if (m_source == "CREST"){
+  //Override of the crest-tag for this folder
+  std::string crestFldrTag;
+  if (folderprop.getKey("ctag","",crestFldrTag)) {
+      ATH_MSG_INFO("Crest Tag " << m_crestTag << " overridden by job options to " << crestFldrTag <<  " for folder " << m_foldername);
+      m_crestTag=crestFldrTag;
+  }
+  
+  if (m_source == source_t::CRESTDB){
     m_crest_mng.emplace(CoralCrestManager(m_crestServer,m_crestTag));
   }
   if (m_notagoverride) ATH_MSG_INFO( "Inputfile tag override disabled for " << m_foldername );
@@ -255,7 +259,7 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
   const auto & [cachestart, cachestop] = m_iovs.getCacheBounds();
 
   bool vectorPayload{};
-  if (m_source == "CREST"){
+  if (m_source == source_t::CRESTDB){
     ATH_MSG_INFO("Download tag would be: "<<m_crestTag);
     m_crest_mng.value().loadTagInfo();
     vectorPayload = m_crest_mng.value().isVectorPayload();
@@ -322,7 +326,7 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
   }
   bool retrievedone=false;
   unsigned int nChannelsExpected = (m_chanrange.empty())? (m_nchan) : (IOVDbNamespace::countSelectedChannels(m_channums, m_chansel));
-  if (m_source == "COOL_DATABASE"){
+  if (m_source == source_t::COOLDB){
     // query to fill cache - request for database activates connection
     if (not m_conn->open()) {
       ATH_MSG_FATAL( "Conditions database connection " <<m_conn->name() << " cannot be opened - STOP" );
@@ -908,7 +912,7 @@ IOVDbFolder::preLoadFolder(ITagInfoMgr *tagInfoMgr , const unsigned int cacheRun
   // returns null pointer in case of problem
   p_tagInfoMgr = tagInfoMgr;
   if( not m_useFileMetaData ) {
-    if(m_source=="CREST"){
+    if(m_source==source_t::CRESTDB){
       m_folderDescription = m_crest_mng.value().getFolderDescription();	    
     } else {
       //folder desc from db
@@ -931,7 +935,7 @@ IOVDbFolder::preLoadFolder(ITagInfoMgr *tagInfoMgr , const unsigned int cacheRun
   if (not overrideOptionsFromParsedDescription(folderpar)) return nullptr;
   // setup channel list and folder type
   if( not m_useFileMetaData ) {
-    if(m_source=="CREST"){
+    if(m_source==source_t::CRESTDB){
 	std::tie(m_channums, m_channames) = m_crest_mng.value().getChannelList();
 	
         //determine foldertype from the description, the spec and the number of channels
@@ -1014,7 +1018,7 @@ IOVDbFolder::resolveTag(const cool::IFolderPtr& fptr,const std::string& globalTa
     ATH_MSG_ERROR( "No IOVDbSvc.GlobalTag specified on job options or input file" );
     return false;
   }
-  if(m_source=="CREST"){
+  if(m_source==source_t::CRESTDB){
 
     m_tag = m_crestTag;
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <algorithm>
@@ -146,7 +146,8 @@ TrigJetHypoAlg::decide(const xAOD::JetContainer* jets,
 
       // Create a decoration. This is used to comminicate to the following ComboHypo that the
       // DecisionObject should be excluded from downstream multiplicity checks.
-      newDecision->setDetail<int32_t>("noCombo", 1);
+      static const std::string noComboStr{"noCombo"};
+      newDecision->setDetail<int32_t>(noComboStr, 1);
 
       newDecision->setObjectLink<xAOD::JetContainer>(TrigCompositeUtils::featureString(), jetLink);
       jetHypoInputs.push_back( std::make_pair(jet, newDecision) );

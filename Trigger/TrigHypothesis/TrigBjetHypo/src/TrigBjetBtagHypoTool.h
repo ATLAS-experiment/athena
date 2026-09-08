@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ************************************************
@@ -36,8 +36,8 @@ class TrigBjetBtagHypoTool : virtual public ::AthAlgTool {
     TrigCompositeUtils::DecisionIDContainer previousDecisionIDs;
     ElementLink< xAOD::JetContainer > jetEL;
     ElementLink< xAOD::VertexContainer > vertexEL;
-    TrigCompositeUtils::Decision* decision;
-    const InDet::BeamSpotData* beamSpot;
+    TrigCompositeUtils::Decision* decision = nullptr;
+    const InDet::BeamSpotData* beamSpot = nullptr;
   };
 
 

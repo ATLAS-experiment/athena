@@ -29,7 +29,7 @@ if (log.level()<=MSG::DEBUG) log << MSG::DEBUG << "In ALFA_RawDataContainerCnv::
  ALFA_RawDataContainerCnv_p1 TPConverter_p1;
  ALFA_RawDataContainer* transCont(nullptr);
 
-static const pool::Guid p1_guid("0C023583-E3D4-4C7D-9B20-B6B2A1018D2F");
+static const Guid p1_guid("0C023583-E3D4-4C7D-9B20-B6B2A1018D2F");
 
 if (this->compareClassGuid(token, p1_guid)) {
 

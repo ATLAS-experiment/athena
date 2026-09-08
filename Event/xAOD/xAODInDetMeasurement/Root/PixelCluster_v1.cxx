@@ -6,8 +6,9 @@
 #include "xAODCore/AuxStoreAccessorMacros.h"
 // Local include(s):
 #include "xAODInDetMeasurement/versions/PixelCluster_v1.h"
+#include "xAODInDetMeasurement/ArrayFloat3.h"
 
-static const SG::AuxElement::Accessor<std::array<float, 3> > globalPosAcc(
+static const SG::AuxElement::Accessor<xAOD::ArrayFloat3> globalPosAcc(
     "globalPosition");
 const SG::AuxElement::Accessor<SG::JaggedVecElt<Identifier::value_type> >
     xAOD::PixelCluster_v1::s_rdoListAcc("rdoList");
@@ -59,6 +60,9 @@ void xAOD::PixelCluster_v1::setChargelist(const std::vector<float>& charges) {
 void xAOD::PixelCluster_v1::setChargelist(std::span<float> charges) {
    s_chargeListAcc.set(*this,charges);
 }
+
+AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(xAOD::PixelCluster_v1, float, totalCharge,
+				     setTotalCharge)
 
 AUXSTORE_PRIMITIVE_GETTER(xAOD::PixelCluster_v1, int, channelsInPhi)
 

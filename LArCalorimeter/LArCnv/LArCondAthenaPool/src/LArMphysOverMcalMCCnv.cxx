@@ -18,8 +18,8 @@ static const LArMphysOverMcalSubsetCnv_p1 TPconverter;
 LArConditionsSubset<LArSingleFloatP>*
 LArMphysOverMcalMCCnv::createTransient(const Token* token)
 {
-  static const pool::Guid   p0_guid("9C53AC43-3FD6-470F-A6FF-1DF80E85ACBF");
-  static const pool::Guid   p1_guid("60FB956A-0B7F-450E-BF6A-2A0B8ED55204");
+  static const Guid   p0_guid("9C53AC43-3FD6-470F-A6FF-1DF80E85ACBF");
+  static const Guid   p1_guid("60FB956A-0B7F-450E-BF6A-2A0B8ED55204");
   // first try the single-float converter
   LArConditionsSubset<LArSingleFloatP>* p=createTransientSingleFloat(token);
   if (p) 

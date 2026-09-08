@@ -5,7 +5,6 @@ atlas_subdir( EvtGen_i )
 
 # External dependencies:
 find_package( CLHEP )
-find_package( HepPDT )
 find_package( Photospp COMPONENTS Photospp PhotosppHepMC3 )
 find_package( Tauolapp COMPONENTS TauolaHepMC3 )
 #The earlier releases used EvtGen 1.7 and a lot of custom code
@@ -59,10 +58,10 @@ set(EvtGen_iLib_SOURCES
                    ${EvtGen_iLib_SOURCES}
                    PUBLIC_HEADERS EvtGen_i
                    DEFINITIONS -DEVTGEN_HEPMC3 -DEVTGEN_PYTHIA -DEVTGEN_PHOTOS -DEVTGEN_TAUOLA
-                   INCLUDE_DIRS ${HEPPDT_INCLUDE_DIRS} ${PYTHIA8_INCLUDE_DIRS} ${PHOTOSPP_INCLUDE_DIRS} ${TAUOLAPP_INCLUDE_DIRS}  ${EVTGEN_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+                   INCLUDE_DIRS  ${PYTHIA8_INCLUDE_DIRS} ${PHOTOSPP_INCLUDE_DIRS} ${TAUOLAPP_INCLUDE_DIRS}  ${EVTGEN_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                    PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES ${HEPPDT_LIBRARIES} ${PYTHIA8_LIBRARIES} ${PHOTOSPP_LIBRARIES} ${TAUOLAPP_LIBRARIES} AtlasHepMCLib AtlasHepMCsearchLib CxxUtils ${EVTGEN_LIBRARIES} GaudiKernel GeneratorObjects ${ROOT_LIBRARIES} StoreGateLib GeneratorModulesLib
+                   LINK_LIBRARIES  ${PYTHIA8_LIBRARIES} ${PHOTOSPP_LIBRARIES} ${TAUOLAPP_LIBRARIES} AtlasHepMCLib AtlasHepMCsearchLib CxxUtils ${EVTGEN_LIBRARIES} GaudiKernel GeneratorObjects ${ROOT_LIBRARIES} StoreGateLib GeneratorModulesLib
                    PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} AthenaKernel PathResolver )
 
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // InDet
@@ -94,7 +94,7 @@ InDet::StagedTrackingGeometryBuilder::trackingGeometry
        takeBigger(maximumLayerRadius, lSetup.rMax);
        takeBigger(maximumLayerExtendZ, lSetup.zMax);
        //layer setups for the second run
-       layerSetups.push_back(lSetup);
+       layerSetups.push_back(std::move(lSetup));
        // increase counter
        ++ilS;
    }

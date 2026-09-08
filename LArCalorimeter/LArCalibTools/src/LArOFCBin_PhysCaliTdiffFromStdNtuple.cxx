@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArOFCBin_PhysCaliTdiffFromStdNtuple.h"
@@ -20,19 +20,7 @@
 #include <string>
 
 
-LArOFCBin_PhysCaliTdiffFromStdNtuple::LArOFCBin_PhysCaliTdiffFromStdNtuple (const std::string& name, ISvcLocator* pSvcLocator) : AthAlgorithm(name, pSvcLocator)
-{  
-  declareProperty("FileNames", m_root_file_names);
-  declareProperty("NtupleName", m_ntuple_name="PARAMS");
-  declareProperty("Store_OFC", m_fillofc=false);
-  declareProperty("StoreKey_OFC", m_store_key_ofcbin="LArOFC");
-  declareProperty("Store_Tdiff", m_filltdiff=false);
-  declareProperty("StoreKey_Tdiff", m_store_key_tdiff="LArPhysCaliTdiff");
-  declareProperty("GroupingType", m_groupingType="FeedThrough");
-}
-
-LArOFCBin_PhysCaliTdiffFromStdNtuple::~LArOFCBin_PhysCaliTdiffFromStdNtuple() 
-= default;
+LArOFCBin_PhysCaliTdiffFromStdNtuple::~LArOFCBin_PhysCaliTdiffFromStdNtuple() = default;
 
 StatusCode LArOFCBin_PhysCaliTdiffFromStdNtuple::initialize() 
 {
@@ -47,7 +35,7 @@ StatusCode LArOFCBin_PhysCaliTdiffFromStdNtuple::stop()
   const LArOnlineID* onlineHelper = nullptr;
   ATH_CHECK( detStore()->retrieve(onlineHelper, "LArOnlineID") );
 
-  TChain* outfit = new TChain(m_ntuple_name.c_str());
+  TChain* outfit = new TChain(m_ntuple_name.value().c_str());
   for (const std::string& s : m_root_file_names) {
     outfit->Add(s.c_str());
   }
@@ -114,9 +102,6 @@ StatusCode LArOFCBin_PhysCaliTdiffFromStdNtuple::stop()
 
   if(m_filltdiff) {
     ATH_CHECK( detStore()->record(larTdiffParams.get(),m_store_key_tdiff) );
-    // and symlink
-    ILArPhysCaliTdiff *ilarTdiff = nullptr;
-    ATH_CHECK( detStore()->symLink(larTdiffParams.release(),ilarTdiff) );
   }
 
 

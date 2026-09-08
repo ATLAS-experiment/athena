@@ -9,9 +9,6 @@
 #include <sstream>
 #include <fstream>
 
-// FrameWork includes
-#include "GaudiKernel/IPartPropSvc.h"
-
 // CLHEP/HepMC includes
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
@@ -41,8 +38,7 @@ using GenParticles_t = std::list<HepMC::ConstGenParticlePtr>;
 TruthIsolationTool::TruthIsolationTool( const std::string& type, 
 					const std::string& name, 
 					const IInterface* parent ) : 
-  AthAlgTool ( type, name,   parent ),
-  m_pdt      ( nullptr )
+  AthAlgTool ( type, name,   parent )
 {
   //
   // Property declaration
@@ -87,20 +83,6 @@ StatusCode TruthIsolationTool::initialize()
   }
 
   ATH_MSG_INFO(" McEventsOutput: [" << m_mcEventsOutputName.value() << "]");
-
-  // Get the Particle Properties Service
-  ServiceHandle<IPartPropSvc> partPropSvc("PartPropSvc", name());
-  if ( !partPropSvc.retrieve().isSuccess() ) {
-    ATH_MSG_ERROR(" Could not initialize Particle Properties Service");
-    return StatusCode::FAILURE;
-  }      
-
-  m_pdt = partPropSvc->PDT();
-  if ( nullptr == m_pdt ) {
-    ATH_MSG_ERROR("Could not retrieve HepPDT::ParticleDataTable from "\
-		  "ParticleProperties Service !!");
-    return StatusCode::FAILURE;
-  }
 
   return StatusCode::SUCCESS;
 }

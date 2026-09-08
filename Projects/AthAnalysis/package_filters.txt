@@ -60,7 +60,6 @@
 - PhysicsAnalysis/Algorithms/StandaloneAnalysisAlgorithms
 + PhysicsAnalysis/Algorithms/.*
 + PhysicsAnalysis/AnalysisCommon/AssociationUtils
-+ PhysicsAnalysis/AnalysisCommon/EventUtils
 + PhysicsAnalysis/AnalysisCommon/FakeBkgTools
 + PhysicsAnalysis/AnalysisCommon/FsrUtils
 + PhysicsAnalysis/AnalysisCommon/IsolationSelection
@@ -95,6 +94,7 @@
 + PhysicsAnalysis/JetTagging/FlavourTaggingTests
 + PhysicsAnalysis/JetTagging/JetH5Writer
 + PhysicsAnalysis/JetTagging/JetTagDerivationUtils
++ PhysicsAnalysis/JetTagging/LZ4Plugin
 + PhysicsAnalysis/MCTruthClassifier
 + PhysicsAnalysis/MuonID/MuonIDAnalysis/.*
 + PhysicsAnalysis/MuonID/MuonSelectorTools

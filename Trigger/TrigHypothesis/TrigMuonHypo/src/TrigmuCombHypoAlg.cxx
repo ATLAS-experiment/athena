@@ -48,7 +48,7 @@ StatusCode TrigmuCombHypoAlg::execute(const EventContext& context) const
   std::vector<TrigmuCombHypoTool::CombinedMuonInfo> toolInput;
   // loop over previous decisions
   size_t counter = 0; 
-
+  const std::string roiStr{"roi"};
   for ( const auto previousDecision: *previousDecisionsHandle )  {
     // get View
     ATH_CHECK( previousDecision->hasObjectLink(viewString()) );
@@ -77,7 +77,7 @@ StatusCode TrigmuCombHypoAlg::execute(const EventContext& context) const
       TrigCompositeUtils::linkToPrevious( newd, previousDecision, context);
 
       //set roi link (to use same roi in EF CB step)
-      auto roiLink = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(context, newd, "roi");
+      auto roiLink = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(context, newd, roiStr);
       newd->setObjectLink(m_roiLinkName.value(), roiLink.link);
 
       // DEBUG

@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_wrap, T, test_types)
   // Needed for boost to apply the correct tolerance in the comparison.
   // Also note the use of floats for all literals (0.0f) when used
   // in a comparison to ensure the lowest common type is float.
-  constexpr auto PI = static_cast<T>(M_PI);
+  constexpr T PI = std::numbers::pi_v<T>;
 
   // No wrapping for values within |pi|
   BOOST_TEST(wrapToPi<T>(3.0) == 3.0f);
@@ -48,8 +48,12 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_wrap, T, test_types)
   BOOST_TEST(wrapToPi<T>(-PI) == -PI);
   BOOST_TEST(wrapToPi<T>(2 * PI) == 0.0f);
   BOOST_TEST(wrapToPi<T>(-2 * PI) == 0.0f);
-  BOOST_TEST(wrapToPi<T>(3 * PI) == PI);
-  BOOST_TEST(wrapToPi<T>(-3 * PI) == -PI);
+  if constexpr (sizeof(T) <= sizeof(double)) {
+    // With long double rounding, we have PI+PI+PI-PI-PI > PI, so this
+    // test doesn't work out in that case.
+    BOOST_TEST(wrapToPi<T>(3 * PI) == PI);
+    BOOST_TEST(wrapToPi<T>(-3 * PI) == -PI);
+  }
   // Wrap once
   BOOST_TEST(wrapToPi<T>(4.0) == 4.0f - 2 * PI);
   BOOST_TEST(wrapToPi<T>(-4.0) == -4.0f + 2 * PI);
@@ -65,7 +69,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_wrap, T, test_types)
 BOOST_TEST_DECORATOR(TOLERANCE)
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_delta, T, test_types)
 {
-  constexpr auto PI = static_cast<T>(M_PI);
+  constexpr T PI = std::numbers::pi_v<T>;
   BOOST_TEST(deltaPhi<T>(3.0, 2.0) == 1.0f);
   BOOST_TEST(deltaPhi<T>(3 * M_PI, 2 * PI) == PI);
   BOOST_TEST(deltaPhi<T>(30 * M_PI, 25 * PI) == PI);
@@ -74,7 +78,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_delta, T, test_types)
 BOOST_TEST_DECORATOR(TOLERANCE)
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_mean, T, test_types)
 {
-  constexpr auto PI = static_cast<T>(M_PI);
+  constexpr T PI = std::numbers::pi_v<T>;
   // Check values against unit vector addition
   std::vector<std::pair<T, T>> v = {{0, 0},
                                     {-1, 1},
@@ -87,8 +91,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_mean, T, test_types)
                                     {9 * PI / 4, 11 * PI / 4}};
   for (const auto& [a, b] : v) {
     // Check symmetry
-    const auto r1 = phiMean<T>(a, b);
-    const auto r2 = phiMean<T>(b, a);
+    const T r1 = phiMean<T>(a, b);
+    const T r2 = phiMean<T>(b, a);
     BOOST_TEST(r1 == r2, "phiMean(" << a << "," << b << ") not symmetric: " << r1 << " != " << r2);
 
     // Compare to trigonometric result
@@ -117,7 +121,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(test_mean, T, test_types)
 BOOST_TEST_DECORATOR(TOLERANCE)
 BOOST_AUTO_TEST_CASE_TEMPLATE(test_bisect, T, test_types)
 {
-  constexpr auto PI = static_cast<T>(M_PI);
+  constexpr T PI = std::numbers::pi_v<T>;
   BOOST_TEST(phiBisect<T>(-1.0, 1.0) == 0.0f);
   BOOST_TEST(phiBisect<T>(1.0, -1.0) == PI);
   BOOST_TEST(phiBisect<T>(-1.0, -1.0) == -1.0f);

@@ -14,10 +14,6 @@
 
 #include "TrigInDetAnalysisUtils/TIDA_newtracking.h"
 
-/// L2 tracks
-#include "TrigInDetEvent/TrigInDetTrackCollection.h"
-///TruthMap
-#include "TrigInDetTruthEvent/TrigInDetTrackTruthMap.h"
 
 /// offline and EF
 #include "Particle/TrackParticle.h"
@@ -33,7 +29,6 @@
 
 ///// FrameWork includes
 /// #include "GaudiKernel/ServiceHandle.h"
-/// #include "GaudiKernel/IPartPropSvc.h"
 /// absolutely pathetic!! write my own class
 
 #include "TrigInDetAnalysisUtils/particleType.h"
@@ -89,7 +84,6 @@ public:
 
   ~TrigTrackSelector() { clear(); }
 
-  virtual TrackSelector* clone() override { return new TrigTrackSelector(*this); }
 
   void setBeamline( double x, double y, double z=0) { m_xBeam = x; m_yBeam = y; m_zBeam=z; }
 
@@ -101,12 +95,6 @@ public:
 
   virtual void clear() override { for ( size_t i=m_tracks.size() ; i-- ; ) delete m_tracks[i]; m_tracks.clear(); }   
 
-
-  bool selectTrack( const TrigInDetTrack* track, const TrigInDetTrackTruthMap* truthMap=0 );
-
-
-  // extract all the tracks from a TrigInDetTrack collection and associated TruthMap and convert them
-  void selectTracks( const TrigInDetTrackCollection* trigtracks, const TrigInDetTrackTruthMap* truthMap=0 );
 
   // add a TrackParticle 
   bool selectTrack( const Rec::TrackParticle* track );

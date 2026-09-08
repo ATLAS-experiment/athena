@@ -20,7 +20,6 @@ mglog = Logging.logging.getLogger('MadGraphUtils')
 my_MGC_instance = None
 
 # Import that allows transparent migration for current users
-from MadGraphControl.MadGraphUtilsHelpers import modify_param_card # noqa: F401
 
 # Name of python executable
 python='python'
@@ -36,9 +35,9 @@ MADGRAPH_COMMAND_STACK = []
 import shutil
 
 
-from MadGraphControl.MadGraphUtilsHelpers import error_check,get_mg5_version
+from MadGraphControl.MadGraphUtilsHelpers import error_check,get_mg5_version  # noqa: F401
 from MadGraphControl.MadGraphSystematicsUtils import systematics_run_card_options,get_pdf_and_systematic_settings
-from MadGraphControl.MadGraphParamHelpers import check_PMG_updates
+from MadGraphControl.MGClassParamHelpers import check_PMG_updates
 
 def stack_subprocess(command,**kwargs):
     global MADGRAPH_COMMAND_STACK
@@ -243,19 +242,9 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
     # Check the run card
     my_MGC_instance.run_card_consistency_check()
     
-
-    # For grid packs we also need to move the systematics program aside
-    if grid_pack:
-        original_systematics_program = None if 'systematics_program' not in my_MGC_instance.runCardDict else my_MGC_instance.runCardDict['systematics_program']
-        my_MGC_instance.runCardDict['systematics_program'] = 'None'
-        mglog.info('systematics set to NONE')
-
-
-    
-    
-    
+        
     # Check the param card
-    code = check_PMG_updates(process_dir=os.getcwd())
+    code = check_PMG_updates(my_MGC_instance.paramCard)
     if requirePMGSettings and code!=0:
         raise RuntimeError('Settings are not compliant with PMG defaults! Please use do_PMG_updates function to get PMG default params.')
 
@@ -288,6 +277,8 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
     
     # Writing cards to disk
     my_MGC_instance.write_configCard()
+
+    my_MGC_instance.paramCard.write_paramCard()
     _write_run_card(runArgs=runArgs, flags=flags)
 
     print_cards_from_dir(process_dir=my_MGC_instance.process_dir)
@@ -309,11 +300,6 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
         energy = energy.replace('.0','').replace('.','p')
         gridpack_name='mc_'+energy+'TeV.'+get_physics_short()+'.MG'+get_mg5_version().replace('.','')+'.GRID.tar.gz'
         mglog.info('Tidying up gridpack '+gridpack_name)
-
-        # Return the setting for the systematics_program
-        my_MGC_instance.runCardDict.update({'systematics_program':original_systematics_program})
-        # Write out run Card Dictionary
-        _write_run_card(runArgs=runArgs, flags=flags)
         
         if not isNLO:
             # At LO, no events are generated. That means we need to move the MS card aside and back.
@@ -406,7 +392,7 @@ def generate_from_gridpack(runArgs=None, flags=None, extlhapath=None, gridpack_c
         check_reweight_card(MADGRAPH_GRIDPACK_LOCATION)
 
     # Check the param card
-    code = check_PMG_updates(process_dir=MADGRAPH_GRIDPACK_LOCATION)
+    code = check_PMG_updates(my_MGC_instance.paramCard)
     if requirePMGSettings and code!=0:
         raise RuntimeError('Settings are not compliant with PMG defaults! Please use do_PMG_updates function to get PMG default params.')
 
@@ -457,11 +443,11 @@ def generate_from_gridpack(runArgs=None, flags=None, extlhapath=None, gridpack_c
             else:
                 systematics_settings={}
             mglog.info('Turning off systematics for now, running standalone later')
-            
-            my_MGC_instance.runCardDict['systematics_program'] = 'none'
-
+    
     # Writing run card to disk
     _write_run_card(runArgs=runArgs, flags=flags)
+    my_MGC_instance.write_configCard()
+    my_MGC_instance.paramCard.write_paramCard()
     
     global MADGRAPH_COMMAND_STACK
     if not isNLO:
@@ -540,11 +526,11 @@ def generate_from_gridpack(runArgs=None, flags=None, extlhapath=None, gridpack_c
         mglog.info('Running systematics standalone')
         systematics_path=MADGRAPH_GRIDPACK_LOCATION+'/bin/internal/systematics.py'
         events_location=MADGRAPH_GRIDPACK_LOCATION+'/Events/'+gridpack_run_name+'/events.lhe.gz'
+        
         syst_cmd=[python,systematics_path]+[events_location]*2+["--"+k+"="+systematics_settings[k] for k in systematics_settings]
         mglog.info('running: '+' '.join(syst_cmd))
         systematics = stack_subprocess(syst_cmd)
         systematics.wait()
-
 
     # See if MG5 did the job for us already
     if not os.access('events.lhe.gz',os.R_OK):
@@ -577,7 +563,7 @@ def generate_from_gridpack(runArgs=None, flags=None, extlhapath=None, gridpack_c
         # Move card back
         os.rename(MADGRAPH_GRIDPACK_LOCATION+'/Cards/backup_madspin_card.dat',MADGRAPH_GRIDPACK_LOCATION+'/Cards/madspin_card.dat')
         mglog.info('Decaying with MadSpin.')
-        add_madspin(process_dir=MADGRAPH_GRIDPACK_LOCATION)
+        add_madspin()
 
     mglog.info('Finished at '+str(time.asctime()))
 
@@ -858,15 +844,16 @@ add_time_of_flight '''+run+((' --threshold='+str(threshold)) if threshold is not
     return True
 
 
-def add_madspin(madspin_card=None,process_dir=MADGRAPH_GRIDPACK_LOCATION):
+def add_madspin(madspin_card=None):
     """ Run madspin on the generated LHE file.  Should be
     run when you have inputGeneratorFile set.
     Only requires a simplified process with the same model that you are
     interested in (needed to set up a process directory for MG5_aMC)
     """
-
+    global my_MGC_instance  # noqa: F824
     me_exec=get_mg5_executable()
-
+    process_dir = my_MGC_instance.process_dir
+    
     if madspin_card is not None:
         shutil.copyfile(madspin_card,process_dir+'/Cards/madspin_card.dat')
 
@@ -1245,9 +1232,9 @@ def arrange_output(process_dir=MADGRAPH_GRIDPACK_LOCATION,lhe_version=None,saveP
     if outputDS is None:
         outputDS = 'tmp_LHE_events.tar.gz'
         if flags is not None and hasattr(flags, 'Generator') and hasattr(flags.Generator, 'avoidExtracting') and flags.Generator.avoidExtracting:
-            outputDS = 'tmp_LHE_events.gz'
+            outputDS = 'tmp_LHE_events.events.gz'
         elif runArgs is not None and hasattr(runArgs, 'avoidExtracting') and runArgs.avoidExtracting:
-            outputDS = 'tmp_LHE_events.gz'
+            outputDS = 'tmp_LHE_events.events.gz'
 
     outputStem = outputDS
     if '.tar.gz' in outputDS:
@@ -1259,7 +1246,8 @@ def arrange_output(process_dir=MADGRAPH_GRIDPACK_LOCATION,lhe_version=None,saveP
     else:
         mglog.warning(f'Could not figure out what output file type {outputDS} refers to')
         outputStem = outputDS.split('.')[0]
-    outputStem += '.events'
+    if not outputStem.endswith('.events'):
+        outputStem += '.events'
 
     mglog.info('Moving file over to '+outputStem)
     shutil.move(os.getcwd()+'/events.lhe',outputStem)
@@ -1272,7 +1260,9 @@ def arrange_output(process_dir=MADGRAPH_GRIDPACK_LOCATION,lhe_version=None,saveP
         mglog.info('Re-zipping into dataset name '+outputDS)
         rezip = stack_subprocess(['gzip',outputStem])
         rezip.wait()
-        shutil.move(outputStem+'.gz',outputDS)
+        compressedOutput = outputStem+'.gz'
+        if compressedOutput != outputDS:
+            shutil.move(compressedOutput,outputDS)
     else:
         mglog.info(f'Could not understand output type for {outputDS} - will leave uncompressed')
 
@@ -1592,198 +1582,44 @@ def is_gen_from_gridpack():
 
 
 def modify_run_card(run_card_input=None,run_card_backup=None,process_dir=MADGRAPH_GRIDPACK_LOCATION,runArgs=None,flags=None,settings={},skipBaseFragment=False,pdf_setting=None):
-    """Build a new run_card.dat from an existing one.
+    """This is a legacy function, rather use the functions outlined in MGC.py
+    Build a new run_card.dat from an existing one.
     This function can get a fresh runcard from DATAPATH or start from the process directory.
     Settings is a dictionary of keys (no spaces needed) and values to replace.
     """
 
     global my_MGC_instance # noqa: F824
-    # my_MGC_instance.getRunCardDict(card_loc=process_dir+'/Cards/run_card.dat')
+    if my_MGC_instance is None:
+        my_MGC_instance = MGControl()
+
+    #update the run card dictionary
     my_MGC_instance.runCardDict.update(settings)
-    # my_MGC_instance.write_runCard()
     
-    # Operate on lower case settings, and choose the capitalization MG5 has as the default (or all lower case)
-    settings_lower = {}
-    for s in list(settings.keys()):
-        settings_lower[s.lower()] = settings[s]
-
-    # Check for the default run card location
-    if run_card_input is None:
-        run_card_input=get_default_runcard(process_dir)
-    elif run_card_input is not None and not os.access(run_card_input,os.R_OK):
-        runcard = subprocess.Popen(['get_files','-data',run_card_input])
-        runcard.wait()
-        if not os.access(run_card_input,os.R_OK):
-            raise RuntimeError('Could not get run card '+run_card_input)
-
-    # guess NLO
-    isNLO = my_MGC_instance.isNLO 
-    # add gobal PDF and scale uncertainty config to extras, except PDF or weights for syscal config are explictly set
-    if not skipBaseFragment:
-        setup_pdf_and_systematic_weights(get_pdf_setting(pdf_setting),settings_lower,isNLO)
-
-    # Get some info out of runArgs or flags
-    if runArgs is not None or flags is not None:
-        beamEnergy,rand_seed = get_runArgs_info(runArgs=runArgs, flags=flags)
-        if 'iseed' not in settings_lower:
-            settings_lower['iseed']=rand_seed
-        if not isNLO and 'python_seed' not in settings_lower:
-            settings_lower['python_seed']=rand_seed
-        if 'beamenergy' in settings_lower:
-            mglog.warning('Do not set beam energy in MG settings. The variables are ebeam1 and ebeam2. Will use your setting of '+str(settings_lower['beamenergy']))
-            beamEnergy=settings_lower['beamenergy']
-            settings_lower.pop('beamenergy')
-        if 'ebeam1' not in settings_lower:
-            settings_lower['ebeam1']=beamEnergy
-        if 'ebeam2' not in settings_lower:
-            settings_lower['ebeam2']=beamEnergy
-    # Make sure nevents is an integer
-    if 'nevents' in settings_lower:
-        settings_lower['nevents'] = int(settings_lower['nevents'])
-        
-    # Normalise custom_fcts early so the rewritten run_card uses the full path
-    if 'custom_fcts' in settings_lower and settings_lower['custom_fcts']:
-        raw_name = str(settings_lower['custom_fcts']).split()[0]
-        # Determine jobConfig directory
-        cfgdir = None
-        if flags is not None and hasattr(flags, 'Generator') and hasattr(flags.Generator, 'jobConfig') and flags.Generator.jobConfig:
-            cfgdir = flags.Generator.jobConfig[0] if isinstance(flags.Generator.jobConfig, (list, tuple)) else flags.Generator.jobConfig
-        elif runArgs is not None and hasattr(runArgs, 'jobConfig'):
-            cfgdir = runArgs.jobConfig[0] if isinstance(runArgs.jobConfig, (list, tuple)) else runArgs.jobConfig
-        elif flags is not None and 'JOBOPTSEARCHPATH' in os.environ:
-            cfgdir = os.environ['JOBOPTSEARCHPATH'].split(':')[0]
-
-        if cfgdir:
-            # Build full path and make absolute
-            full_path = os.path.join(cfgdir, raw_name)
-            settings_lower['custom_fcts'] = os.path.abspath(full_path)
-            mglog.info(f"Using custom function(s), specified in custom_fcts with path: {settings_lower['custom_fcts']}")
-        else:
-            # For internal tests, where jobConfig is not set
-            settings_lower['custom_fcts'] = os.path.abspath(raw_name)
-
-    mglog.info('Modifying run card located at '+run_card_input)
-    if run_card_backup is not None:
-        mglog.info('Keeping backup of original run card at '+run_card_backup)
-        run_card_old = run_card_backup
-    else:
-        run_card_old = run_card_input+'.old_to_be_deleted'
-    mglog.debug('Modifying runcard settings: '+str(settings_lower))
-    if os.path.isfile(run_card_old):
-        os.unlink(run_card_old) # delete old backup
-    os.rename(run_card_input, run_card_old) # change name of original card
-
-    oldCard = open(run_card_old, 'r')
-    newCard = open(process_dir+'/Cards/run_card.dat', 'w')
-    used_settings = []
-    for line in iter(oldCard):
-        if not line.strip().startswith('#'): # line commented out
-            command = line.split('!', 1)[0]
-            comment = line.split('!', 1)[1] if '!' in line else ''
-            if '=' in command:
-                setting = command.split('=')[-1] #.strip()
-                stripped_setting = setting.strip()
-                oldValue = '='.join(command.split('=')[:-1])
-                if stripped_setting.lower() in settings_lower:
-                    # if setting set to 'None' it will be removed from run_card
-                    if settings_lower[stripped_setting.lower()] is None:
-                        line=''
-                        mglog.info('Removing '+stripped_setting+'.')
-                        used_settings += [ stripped_setting.lower() ]
-                    else:
-                        if stripped_setting.lower() == 'custom_fcts':
-                            # Overwrite completely to avoid duplicating in custom_fcts, else MadGraph will crash
-                            line = ' '+str(settings_lower[stripped_setting.lower()])+' = '+setting
-                            if comment != '':
-                                line += '  !'+comment
-                        else:
-                            line = oldValue.replace(oldValue.strip(), str(settings_lower[stripped_setting.lower()]))+'='+setting
-                            if comment != '':
-                                line += '  !' + comment
-                        mglog.info('Setting '+stripped_setting+' = '+str(settings_lower[stripped_setting.lower()]))
-                        used_settings += [ stripped_setting.lower() ]
-        newCard.write(line.strip()+'\n')
     
-    # Check whether mcatnlo_delta is applied to setup pythia8 path
-    if 'mcatnlo_delta' in settings_lower:	    
-        if settings_lower['mcatnlo_delta'] == 'True':
-            modify_config_card(process_dir=process_dir,settings={'pythia8_path':os.getenv("PY8PATH")})
-
-        
-    # Clean up unused options
-    for asetting in settings_lower:
-        if asetting in used_settings:
-            continue
-        if settings_lower[asetting] is None:
-            continue
-        mglog.info('Option '+asetting+' was not in the default run_card (normal for hidden options).  Adding by hand a setting to '+str(settings_lower[asetting]) )
-        newCard.write( ' '+str(settings_lower[asetting])+'   = '+str(asetting)+'\n')
-    # close files
-    oldCard.close()
-    newCard.close()
-    mglog.info('Finished modification of run card.')
-    if run_card_backup is None:
-        os.unlink(run_card_old)
 
 
 def modify_config_card(config_card_backup=None,process_dir=MADGRAPH_GRIDPACK_LOCATION,settings={},set_commented=True):
-    """Build a new configuration from an existing one.
+    """This is a legacy function, rather use the functions outlined in MGC.py
+    Build a new configuration from an existing one.
     This function can get a fresh runcard from DATAPATH or start from the process directory.
     Settings is a dictionary of keys (no spaces needed) and values to replace.
     """
     global my_MGC_instance # noqa: F824
     
     my_MGC_instance.configCardDict.update(settings)
-    # Check for the default config card location
-    config_card = my_MGC_instance.config_path 
 
-    # The format is similar to the run card, but backwards
-    mglog.info('Modifying config card located at '+config_card)
-    if config_card_backup is not None:
-        mglog.info('Keeping backup of original config card at '+config_card_backup)
-        config_card_old = config_card_backup
-    else:
-        config_card_old = config_card+'.old_to_be_deleted'
-    mglog.debug('Modifying config card settings: '+str(settings))
-    if os.path.isfile(config_card_old):
-        os.unlink(config_card_old) # delete old backup
-    os.rename(config_card, config_card_old) # change name of original card
+def modify_param_card(param_card_input=None,param_card_backup=None,process_dir=MADGRAPH_GRIDPACK_LOCATION,params={},output_location=None):
+    """This is a legacy function, rather use the functions outlined in MGC.py
+    Build a new param_card.dat from an existing one.
+    Params should be a dictionary of dictionaries. The first key is the block name, and the second in the param name.
+    Keys can include MASS (for masses) and DECAY X (for decays of particle X)"""
 
-    oldCard = open(config_card_old, 'r')
-    newCard = open(config_card, 'w')
-    used_settings = []
-    for line in iter(oldCard):
-        lmod = line if set_commented else line.split('#')[0]
-        if '=' in lmod:
-            modified = False
-            for setting in settings:
-                if setting not in lmod:
-                    continue
-                # Assume we hit
-                mglog.info('Setting '+setting.strip()+' to '+str(settings[setting]))
-                newCard.write(' '+str(setting.strip())+' = '+str(settings[setting])+'\n')
-                used_settings += [ setting.strip() ]
-                modified = True
-                break
-            if modified:
-                continue
-        newCard.write(line)
-
-    # Clean up unused options
-    for asetting in settings:
-        if asetting in used_settings:
-            continue
-        if settings[asetting] is None:
-            continue
-        mglog.warning('Option '+asetting+' was not in the default config card.  Adding by hand a setting to '+str(settings[asetting]) )
-        newCard.write(' '+str(asetting)+' = '+str(settings[asetting])+'\n')
-    # close files
-    oldCard.close()
-    newCard.close()
-    mglog.info('Finished modification of config card.')
-    if config_card_backup is None:
-        os.unlink(config_card_old)
-
+    global my_MGC_instance # noqa: F824
+    #update the paramCardDict that is a part of the MGC class
+    my_MGC_instance.paramCard.modify_paramCardDict(params = params)
+    # If they asked for a copy, give them a copy
+    if output_location is not None:
+        my_MGC_instance.paramCard.write_paramCard(output_location)
 
 
 def get_cluster_type():

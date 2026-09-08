@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -18,6 +18,7 @@
 #include "InDetIdentifier/PixelID.h"
 #include "InDetPrepRawData/PixelClusterSplitProb.h"
 #include "VxVertex/RecVertex.h"
+#include <numeric>
 
 
 namespace InDet
@@ -99,18 +100,13 @@ InDet::PixelClusterSplitProb TruthPixelClusterSplitProbTool::splitProbability(co
 
   InDet::PixelClusterSplitProb TruthPixelClusterSplitProbTool::compileSplitProbability(std::vector<double>& vectorOfProbs ) const
   {
-
-
-    double sum=0;
-
-    std::vector<double>::iterator begin=vectorOfProbs.begin();
-    std::vector<double>::iterator end=vectorOfProbs.end();
-
-    for (std::vector<double>::iterator iter=begin;iter!=end;++iter)
-    {
-      sum+=*iter;
+    const std::vector<double>::iterator begin=vectorOfProbs.begin();
+    const std::vector<double>::iterator end=vectorOfProbs.end();
+    double sum = std::accumulate(begin, end, 0.);
+    if (sum == 0.)[[unlikely]]{
+      ATH_MSG_ERROR("Sum of probabilities is zero.");
+      return InDet::PixelClusterSplitProb(std::vector<double>());
     }
-
     
     ATH_MSG_VERBOSE(" Sum of cluster probabilities is: "<<sum);
 
@@ -132,6 +128,10 @@ InDet::PixelClusterSplitProb TruthPixelClusterSplitProbTool::splitProbability(co
     for (std::vector<double>::iterator iter=begin;iter!=end;++iter,++count)
     {
       psum+=(*iter)/m_priorMultiplicityContent[count];
+    }
+    if (psum == 0.)[[unlikely]]{
+      ATH_MSG_ERROR("Sum of probabilities (psum) is zero.");
+      return InDet::PixelClusterSplitProb(std::vector<double>());
     }
 
     count=0;

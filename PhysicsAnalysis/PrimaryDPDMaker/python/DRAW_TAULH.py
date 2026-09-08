@@ -52,8 +52,8 @@ def DRAW_TAULHKernelCfg(flags, name='DRAW_TAULHKernel', **kwargs):
     acc.addPublicTool(TauMediumWrapper)
 
     # muon selection tool
-    from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
-    MuonSelectorMedium = acc.popToolsAndMerge(MuonSelectionToolCfg(flags, name="MuonSelectorMedium_TAULH",
+    from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
+    MuonSelectorMedium = acc.popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(flags, name="MuonSelectorMedium_TAULH",
                                                                    MaxEta=3, MuQuality=2))
 
     acc.addPublicTool(MuonSelectorMedium)

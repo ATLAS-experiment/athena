@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARRAWCONDITIONS_LARCABLEATTENUATIONCOMPLETE_H
 #define LARRAWCONDITIONS_LARCABLEATTENUATIONCOMPLETE_H
 
 #include "AthenaKernel/CLASS_DEF.h"
+#include "AthenaKernel/BaseInfo.h"
 #include "LArElecCalib/ILArCableAttenuation.h" 
 #include "LArRawConditions/LArCableAttenuationP.h"
 #include "LArRawConditions/LArConditionsContainer.h"
@@ -47,4 +48,5 @@ class LArCableAttenuationComplete: public ILArCableAttenuation,
 };
 
 CLASS_DEF( LArCableAttenuationComplete,227617954,1)
+SG_BASES( LArCableAttenuationComplete, ILArCableAttenuation );
 #endif 

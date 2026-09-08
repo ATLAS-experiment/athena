@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef TRK_CALOEXTENSIONBUILDERALG_H
@@ -79,6 +79,7 @@ private:
     "InDetTrackParticles",
     "Container of tracks"
   };
+  SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_trkLinkKey{this, "trackLinkKey", m_TrkPartContainerKey, "trackLink" };
 };
 } // namespace Trk
 

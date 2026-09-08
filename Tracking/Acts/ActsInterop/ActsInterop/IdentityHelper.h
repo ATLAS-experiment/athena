@@ -1,21 +1,21 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #pragma once
 #include <variant>
 namespace InDetDD {
-  class SiDetectorElement;
+  class SolidStateDetectorElementBase;
 }
 
 class PixelID;
 class SCT_ID;
+class HGTD_ID;
 
 class IdentityHelper {
 
 public:
-  IdentityHelper(const InDetDD::SiDetectorElement* detElem);
-  
+  IdentityHelper(const InDetDD::SolidStateDetectorElementBase * detElement);
   int bec() const;
   int layer_disk() const;
   int phi_module() const;
@@ -26,10 +26,11 @@ public:
   int eta_module_max() const;
 
 private:
-  const InDetDD::SiDetectorElement* m_elem;
-  std::variant<const PixelID*, const SCT_ID*> m_helper;
+  const InDetDD::SolidStateDetectorElementBase* m_elem;
+  std::variant<const PixelID*, const SCT_ID*, const HGTD_ID*> m_helper;
+  bool m_isInDet;
   const PixelID* getPixelIDHelper() const;
   const SCT_ID* getSCTIDHelper() const;
-
+  const HGTD_ID* getHgtdIdHelper() const;
   
 };

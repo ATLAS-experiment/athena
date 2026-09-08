@@ -89,10 +89,25 @@ namespace {
       return 0;
     }
   }
-  //This function used to avoid FPE divide by zero or overflow by limiting the q/p values to a
-  //more limited range
-  double
-  limitInversePValue(double qOverP){
+
+  bool correctAngles(double& phi, double& theta) {
+    if (theta > M_PI) {
+      theta = M_PI - theta;
+      phi += M_PI;
+    }
+    if (theta < 0) {
+      theta = -theta;
+      phi += M_PI;
+    }
+
+    phi = -std::remainder(-phi, 2 * M_PI);
+
+    return theta >= 0 && theta <= M_PI && phi >= -M_PI && phi <= M_PI;
+  }
+
+  // This function used to avoid FPE divide by zero or overflow by limiting the
+  // q/p values to a more limited range
+  double limitInversePValue(double qOverP) {
     const double magnitude = std::abs(qOverP);
     //limits found empirically to leave the 25-event q431 digest unchanged
     constexpr double maxP{100.*10e6*MeV};
@@ -102,7 +117,6 @@ namespace {
     const double limited = std::clamp(magnitude, lo, hi);
     return std::copysign(limited, qOverP);
   }
-
 
   std::pair<const Trk::TrackParameters *, const Trk::TrackParameters *> getFirstLastIdPar(const Trk::Track & track) {
     const Trk::TrackParameters *firstidpar = nullptr;
@@ -495,7 +509,7 @@ namespace Trk {
       GXFTrajectory trajectory2;
       trajectory2.m_straightline = trajectory.m_straightline;
       trajectory2.m_fieldprop = trajectory.m_fieldprop;
-      trajectory = trajectory2;
+      trajectory = std::move(trajectory2);
       track.reset(backupCombinationStrategy(ctx,cache, intrk1, intrk2, trajectory, calomeots));
     }
 
@@ -808,11 +822,11 @@ namespace Trk {
 
     std::unique_ptr<const TrackParameters> firstscatpar;
     std::unique_ptr<const TrackParameters> lastscatpar;
-    const TrackParameters *origlastidpar = unique_clone(lastidpar).release();
+    const std::unique_ptr<const TrackParameters> origlastidpar = unique_clone(lastidpar);
 
     double newqoverpid = 0;
 
-    if (!firstismuon) {
+    if (tp_closestmuon and !firstismuon) {
       const double de = std::abs(calomeots[1].energyLoss()->deltaE());
       const double sigmade = std::abs(calomeots[1].energyLoss()->sigmaDeltaE());
 
@@ -842,7 +856,7 @@ namespace Trk {
     }
 
     if (lastidpar == nullptr) {
-      lastidpar = unique_clone(origlastidpar);
+      lastidpar = unique_clone(origlastidpar.get());
     }
 
     firstscatpar= m_propagator->propagateParameters(
@@ -5018,7 +5032,7 @@ namespace Trk {
 
       finaltrajectory->setReferenceParameters(std::move(measper));
       if (m_fillderivmatrix) {
-        cache.m_fullcovmat = a_inv;
+        cache.m_fullcovmat = std::move(a_inv);
       }
     }
 
@@ -5139,6 +5153,7 @@ namespace Trk {
       const TrackParameters *currenttrackpar = state->trackParameters();
       TrackState::MeasurementType const hittype = state->measurementType();
       const MeasurementBase *measbase = state->measurement();
+      auto *pMattEff = state->materialEffects();
 
       /*
        * Measurements and outliers.
@@ -5222,13 +5237,13 @@ namespace Trk {
        */
       if (
         state->getStateType(TrackStateOnSurface::Scatterer) &&
-        ((trajectory.prefit() == 0) || state->materialEffects()->deltaE() == 0)
+        ((trajectory.prefit() == 0) || pMattEff->deltaE() == 0)
       ) {
-        const double deltaPhi = state->materialEffects()->deltaPhi();
-        const double measDeltaPhi = state->materialEffects()->measuredDeltaPhi();
-        const double sigma2deltaPhi = std::pow(state->materialEffects()->sigmaDeltaPhi(), 2);
-        const double deltaTheta = state->materialEffects()->deltaTheta();
-        const double sigma2deltaTheta = std::pow(state->materialEffects()->sigmaDeltaTheta(), 2);
+        const double deltaPhi = pMattEff->deltaPhi();
+        const double measDeltaPhi = pMattEff->measuredDeltaPhi();
+        const double sigma2deltaPhi = std::pow(pMattEff->sigmaDeltaPhi(), 2);
+        const double deltaTheta = pMattEff->deltaTheta();
+        const double sigma2deltaTheta = std::pow(pMattEff->sigmaDeltaTheta(), 2);
 
         if (trajectory.prefit() != 1) {
           b[nperpars + 2 * scatno] -= (deltaPhi - measDeltaPhi) / sigma2deltaPhi;
@@ -5248,10 +5263,10 @@ namespace Trk {
       /*
        * Energy loss will be considered in the form of a kink.
        */
-      if ((state->materialEffects() != nullptr) && state->materialEffects()->sigmaDeltaE() > 0) {
-        double averagenergyloss = std::abs(state->materialEffects()->deltaE());
+      if ((pMattEff != nullptr) && pMattEff->sigmaDeltaE() > 0) {
+        double averagenergyloss = std::abs(pMattEff->deltaE());
         const double qoverpbrem = limitInversePValue(1000 * states[hitno]->trackParameters()->parameters()[Trk::qOverP]);
-        const double qoverp = limitInversePValue(qoverpbrem - state->materialEffects()->delta_p());
+        const double qoverp = limitInversePValue(qoverpbrem - pMattEff->delta_p());
         const double pbrem = 1. / std::abs(qoverpbrem);
         const double p = 1. / std::abs(qoverp);
         const double mass = .001 * trajectory.mass();
@@ -5261,11 +5276,11 @@ namespace Trk {
         const double resMaterial = .001 * averagenergyloss - energy + bremEnergy;
         res[nmeas - nbrem + bremno] = resMaterial;
 
-        const double sigde = state->materialEffects()->sigmaDeltaE();
-        const double sigdepos = state->materialEffects()->sigmaDeltaEPos();
-        const double sigdeneg = state->materialEffects()->sigmaDeltaENeg();
+        const double sigde = pMattEff->sigmaDeltaE();
+        const double sigdepos = pMattEff->sigmaDeltaEPos();
+        const double sigdeneg = pMattEff->sigmaDeltaENeg();
 
-        double errorMaterial = .001 * state->materialEffects()->sigmaDeltaE();
+        double errorMaterial = .001 * pMattEff->sigmaDeltaE();
         error[nmeas - nbrem + bremno] = errorMaterial;
 
         /*
@@ -5277,7 +5292,7 @@ namespace Trk {
          * NOTE: I think, the new value of maxbrempull should be -inf since it
          *       allows for some edge case pulls. Not sure if bug or feature.
          */
-        if (state->materialEffects()->isKink()) {
+        if (pMattEff->isKink()) {
           maxbrempull = -999999999;
           state_maxbrempull = nullptr;
         }
@@ -5299,12 +5314,12 @@ namespace Trk {
              */
             if (std::abs(elosspull) > 1) {
               if (elosspull < -1) {
-                state->materialEffects()->setSigmaDeltaE(sigdepos);
+                pMattEff->setSigmaDeltaE(sigdepos);
               } else {
-                state->materialEffects()->setSigmaDeltaE(sigdeneg);
+                pMattEff->setSigmaDeltaE(sigdeneg);
               }
 
-              errorMaterial = .001 * state->materialEffects()->sigmaDeltaE();
+              errorMaterial = .001 * pMattEff->sigmaDeltaE();
               error[nmeas - nbrem + bremno] = errorMaterial;
             }
           } else if ((trajectory.numberOfTRTHits() == 0) || it >= 3) {
@@ -5317,7 +5332,7 @@ namespace Trk {
              * - an external kink is given with Gaudi and we are on it now.
              */
             if (
-              !state->materialEffects()->isKink() && (
+              !pMattEff->isKink() && (
                 (m_fixbrem == -1 && elosspull < maxbrempull) ||
                 (m_fixbrem >= 0 && bremno == m_fixbrem)
               )
@@ -5328,15 +5343,15 @@ namespace Trk {
             }
           }
         }
-
+        
         if (
           it > 0 &&
           hitno >= 2 &&
           !m_calotoolparam.empty() &&
           trajectory.prefit() == 0 &&
-          state->materialEffects()->sigmaDeltaPhi() == 0 &&
-          state->materialEffects()->isMeasuredEloss() &&
-          resMaterial / (.001 * state->materialEffects()->sigmaDeltaEAve()) > 2.5
+          pMattEff->sigmaDeltaPhi() == 0 &&
+          pMattEff->isMeasuredEloss() &&
+          resMaterial / (.001 * pMattEff->sigmaDeltaEAve()) > 2.5
         ) {
           const TrackParameters* parforcalo = states[hitno - 2]->trackParameters();
           const IPropagator* prop = &*m_propagator;
@@ -5365,14 +5380,14 @@ namespace Trk {
             if (std::abs(newPull) < std::abs(oldPull)) {
               ATH_MSG_DEBUG("Changing from measured to parametrized energy loss");
 
-              state->materialEffects()->setEloss(std::unique_ptr<EnergyLoss>(calomeots[1].energyLoss()->clone()));
-              state->materialEffects()->setSigmaDeltaE(calomeots[1].energyLoss()->sigmaDeltaE());
+              pMattEff->setEloss(std::unique_ptr<EnergyLoss>(calomeots[1].energyLoss()->clone()));
+              pMattEff->setSigmaDeltaE(calomeots[1].energyLoss()->sigmaDeltaE());
               res[nmeas - nbrem + bremno] = newres;
               error[nmeas - nbrem + bremno] = newerr;
             }
           }
 
-          state->materialEffects()->setMeasuredEloss(false);
+          pMattEff->setMeasuredEloss(false);
         }
 
         bremno++;
@@ -6595,7 +6610,6 @@ namespace Trk {
             if (sipull1 > maxsipull) {
               maxsipull = sipull1;
               measno_maxsipull = measno;
-              state_maxsipull = state.get();
               stateno_maxsipull = stateno;
               hitno_maxsipull = hitno;
             }
@@ -6939,8 +6953,8 @@ namespace Trk {
             if (oldtrajectory != newtrajectory) {
               cleanup_oldtrajectory = std::move(cleanup_newtrajectory);
               oldtrajectory = newtrajectory;
-              a = newa;
-              b = newb;
+              a = std::move(newa);
+              b = std::move(newb);
             }
 
             // Solve assuming the matrix is SPD.
@@ -6978,7 +6992,13 @@ namespace Trk {
       cache.incrementFitStatus(S_NOT_ENOUGH_MEAS);
       return nullptr;
     }
-
+    /*
+    * When an outlier is accepted, oldtrajectory may point to a heap copy owned by 
+    * cleanup_oldtrajectory. Releasing it before returning transfers that ownership to 
+    * the caller. The caller stores it in finaltrajectory and deletes it whenever it 
+    * differs from the original stack-owned trajectory.
+    */
+    //coverity[RESOURCE_LEAK]
     (void)cleanup_oldtrajectory.release();
     return oldtrajectory;
   }
@@ -7277,7 +7297,7 @@ namespace Trk {
            * side of the current SCT. Thankfully, the detector description
            * makes this very easy.
            */
-          const InDetDD::SiDetectorElement* e = dynamic_cast<const InDetDD::SiDetectorElement *>(de);
+          const InDetDD::SiDetectorElement* e = static_cast<const InDetDD::SiDetectorElement *>(de);
           const Identifier os = e->otherSide()->identify();
 
           /*
@@ -7457,7 +7477,7 @@ namespace Trk {
          * earlier on in the fitting process.
          */
         std::optional<std::vector<std::unique_ptr<TrackParameters>>> & hc = beg.getHoles();
-        std::vector<std::unique_ptr<TrackParameters>> states;
+        std::vector<std::unique_ptr<TrackParameters>> theseStates;
 
         /*
          * Gather the track states between the start and end of the
@@ -7466,9 +7486,9 @@ namespace Trk {
          * do a fresh extrapolation. This can be a CPU hog!
          */
         if (hc.has_value()) {
-          states = std::move(*hc);
+          theseStates = std::move(*hc);
         } else {
-          states = holesearchExtrapolation(ctx, *beg.trackParameters(), end, alongMomentum);
+          theseStates = holesearchExtrapolation(ctx, *beg.trackParameters(), end, alongMomentum);
         }
 
         /*
@@ -7476,7 +7496,7 @@ namespace Trk {
          * them for liveness and other properties. This helper function will
          * increment the values in rv accordingly.
          */
-        holeSearchHelper(states, id_set, sct_set, rv, true, true);
+        holeSearchHelper(theseStates, id_set, sct_set, rv, true, true);
       }
     }
 
@@ -8433,31 +8453,6 @@ namespace Trk {
 
     }
     return jac;
-  }
-
-  int
-    GlobalChi2Fitter::iterationsOfLastFit() const {
-    return 0;
-  } void
-    GlobalChi2Fitter::setMinIterations(int) {
-    ATH_MSG_WARNING
-      ("Configure the minimum number of Iterations via jobOptions");
-  }
-
-  bool
-    GlobalChi2Fitter::correctAngles(double &phi, double &theta) {
-    if (theta > M_PI) {
-      theta = M_PI - theta;
-      phi += M_PI;
-    }
-    if (theta < 0) {
-      theta = -theta;
-      phi += M_PI;
-    }
-
-    phi = -std::remainder(-phi, 2 * M_PI);
-
-    return theta >= 0 && theta <= M_PI && phi >= -M_PI && phi <= M_PI;
   }
 
   bool

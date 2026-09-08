@@ -161,7 +161,7 @@ def print_failed_ref_comp(all_test_results, failed_tests):
         refcomp_failed = False
         test_results = all_test_results[test_name]
         for step in test_results['result']:
-            if step['name'] in ['athena', 'athenaHLT', 'Reco_tf', 'CheckLog'] and step['result'] != 0:
+            if step['name'] in ['athena', 'athenaEF', 'Reco_tf', 'CheckLog'] and step['result'] != 0:
                 athena_failed = True
             if step['name'] == step_name and step['result'] != 0:
                 refcomp_failed = True

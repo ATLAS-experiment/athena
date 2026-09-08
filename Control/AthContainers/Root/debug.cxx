@@ -17,14 +17,16 @@
 #include "AthContainers/tools/error.h"
 #include "AthContainersInterfaces/IConstAuxStore.h"
 #include "AthLinks/DataLinkBase.h"
+#include "AthLinks/ElementLinkBase.h"
 #ifndef XAOD_STANDALONE
 # include "SGTools/DataProxy.h"
 #endif
 #include "CxxUtils/StrFormat.h"
-#include <format>
+#include <print>
 #include <vector>
 #include <sstream>
 #include <iostream>
+#include <cstring>
 
 
 namespace SGdebug {
@@ -47,7 +49,7 @@ std::string aux_var_name (SG::auxid_t id)
  */
 void print_aux_var_name (SG::auxid_t id)
 {
-  std::cout << aux_var_name(id) << "\n";
+  std::println ("{}", aux_var_name(id));
 }
 
 
@@ -71,22 +73,21 @@ void print_aux_vars (const SG::auxid_set_t& auxids,
   std::sort (ids.begin(), ids.end());
 
   for (SG::auxid_t id : ids) {
-    os << id << " "
-       << reg.getClassName(id) << "::" << reg.getName(id) << " "
-       << "[" << reg.getTypeName(id);
+    std::print (os , "{} {}::{} [{}",
+                id, reg.getClassName(id), reg.getName(id), reg.getTypeName(id));
 
     SG::AuxVarFlags flags = reg.getFlags(id);
     if (flags & SG::AuxVarFlags::Atomic) {
-      os << " (atomic)";
+      std::print (os, " (atomic)");
     }
     if (flags & SG::AuxVarFlags::Linked) {
-      os << " (linked)";
+      std::print (os, " (linked)");
     }
     if (decors.test (id)) {
-      os << " (decor)";
+      std::print (os, " (decor)");
     }
 
-    os << "]\n";
+    std::println (os, "]");
   }
 }
 
@@ -194,60 +195,70 @@ namespace {
 template <class T>
 void convert (std::ostream& os, const T& x)
 {
-  os << x;
+  std::print (os, "{}", x);
 }
 
 
 void convert (std::ostream& os, const char x)
 {
-  os << static_cast<int > (x);
+  std::print (os, "{}", static_cast<int>(x));
 }
 
 
 void convert (std::ostream& os, const unsigned char x)
 {
-  os << static_cast<unsigned > (x);
+  std::print (os, "{}", static_cast<unsigned>(x));
 }
 
 
 void convert (std::ostream& os, const float x)
 {
-  os << CxxUtils::strformat ("%.3f", x);
+  std::print (os, "{:.3f}", x);
 }
 
 
 void convert (std::ostream& os, const double x)
 {
-  os << CxxUtils::strformat ("%.3f", x);
+  std::print (os, "{:.3f}", x);
 }
 
 
 void convert (std::ostream& os, const SG::JaggedVecEltBase& x, size_t i)
 {
-  os << std::format ("[{},{}]", x.begin(i), x.end());
+  std::print (os, "[{},{}]", x.begin(i), x.end());
 }
 
 
 void convert (std::ostream& os, const DataLinkBase& x)
 {
 #ifdef XAOD_STANDALONE
-  os << std::format ("DataLink[{}]", x.persKey());
+  std::print (os, "DataLink[{}]", x.persKey());
 #else
-  os << std::format ("DataLink[{}/{}]", x.proxy() ? x.proxy()->clID() : CLID_NULL, x.dataID());
+  std::print (os, "DataLink[{}/{}]", x.proxy() ? x.proxy()->clID() : CLID_NULL, x.dataID());
+#endif
+}
+
+
+void convert (std::ostream& os, const ElementLinkBase& x)
+{
+#ifdef XAOD_STANDALONE
+  std::print (os, "ElementLink[{}:{}]", x.persKey(), x.persIndex());
+#else
+  std::print (os, "ElementLink[{}/{}:{}]", x.proxy() ? x.proxy()->clID() : CLID_NULL, x.dataID(), x.index());
 #endif
 }
 
 
 void convert (std::ostream& os, const SG::PackedLinkBase& x)
 {
-  os << std::format ("PackedLink[{}/{}]", x.collection(), x.index());
+  std::print (os, "PackedLink[{}/{}]", x.collection(), x.index());
 }
 
 
 template <class T>
 void convert (std::ostream& os, const std::vector<T>& x)
 {
-  os << "[";
+  std::print (os, "[");
   bool first = true;
   // using `decltype(auto)` in case T=bool
   // cppcheck-suppress internalAstError
@@ -255,10 +266,10 @@ void convert (std::ostream& os, const std::vector<T>& x)
     if (first)
       first = false;
     else
-      os << ", ";
+      std::print (os, ", ");
     convert (os, elt);
   }
-  os << "]";
+  std::print (os, "]");
 }
 
 
@@ -299,7 +310,7 @@ std::string aux_var_as_string (SG::auxid_t auxid, const void* p, size_t i)
 
   const SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   const std::type_info* ti = r.getType(auxid);
-#define CONVERT(T) if (ti == &typeid(T)) convert (os, *reinterpret_cast<const T*>(p)); else
+#define CONVERT(T) if (ti == &typeid(T) || strcmp(ti->name(), typeid(T).name())==0) convert (os, *reinterpret_cast<const T*>(p)); else
 #define CONVERT1(T) CONVERT(T) CONVERT(std::vector<T>)
   CONVERT1 (int)
   CONVERT1 (unsigned int)
@@ -324,6 +335,9 @@ std::string aux_var_as_string (SG::auxid_t auxid, const void* p, size_t i)
     else if (tiname.starts_with ("DataLink<")) {
       convert (os, *reinterpret_cast<const DataLinkBase*>(p));
     }
+    else if (tiname.starts_with ("ElementLink<")) {
+      convert (os, *reinterpret_cast<const ElementLinkBase*>(p));
+    }
     else if (tiname.starts_with ("SG::PackedLink<")) {
       convert (os, *reinterpret_cast<const SG::PackedLinkBase*>(p));
     }
@@ -331,7 +345,7 @@ std::string aux_var_as_string (SG::auxid_t auxid, const void* p, size_t i)
       convert (os, *reinterpret_cast<const std::vector<SG::PackedLinkBase>*>(p));
     }
     else {
-      os << "<??? " << tiname << ">";
+      std::print (os, "<??? {}>", tiname);
     }
   }
   return os.str();
@@ -356,29 +370,30 @@ void dump_aux_vars (std::ostream& os, const SG::IConstAuxStore& store, size_t i)
     const void* pbeg = store.getData (v.id);
     size_t eltsz = reg.getEltSize (v.id);
     const char* p = reinterpret_cast<const char*>(pbeg) + eltsz*i;
-    os << v.name << " " << aux_var_as_string (v.id, p, i) << "\n";
+    std::println (os, "{} {}",
+                v.name, aux_var_as_string (v.id, p, i));
     SG::auxid_t linked_id = reg.linkedVariable (v.id);
     if (linked_id != SG::null_auxid) {
-      os << "  linked: " << aux_var_name (linked_id) << " ";
+      std::print (os, "  linked: {} ", aux_var_name (linked_id));
       const SG::IAuxTypeVector* lv = store.linkedVector (v.id);
       if (!lv) {
-        os << "(missing linkedVector)\n";
+        std::println (os, "(missing linkedVector)");
         continue;
       }
       size_t sz = lv->size();
       const char* lbeg = reinterpret_cast<const char*>(lv->toPtr());
       size_t leltsz = reg.getEltSize (linked_id);
-      os << "[";
+      std::print (os, "[");
       bool first = true;
       for (size_t j = 0; j < sz; j++) {
         if (first)
           first = false;
         else
-          os << ", ";
+          std::print (os, ", ");
         const char* p = reinterpret_cast<const char*>(lbeg) + leltsz*j;
-        os << aux_var_as_string (linked_id, p, i);
+        std::print (os, "{}", aux_var_as_string (linked_id, p, i));
       }
-      os << "]\n";
+      std::println (os, "]");
     }
   }
 }
@@ -414,7 +429,7 @@ void dump_aux_vars (const SG::IConstAuxStore& store)
 {
   size_t sz = store.size();
   for (size_t i = 0; i < sz; i++) {
-    std::cout << "=== Element " << i << "\n";
+    std::println ("=== Element {}", i);
     dump_aux_vars (store, i);
   }
 }

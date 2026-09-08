@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RecoSegToTruthAssocAlg.h"
@@ -8,12 +8,12 @@
 #include "xAODTruth/TruthParticleContainer.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
-#include "DerivationFrameworkMuons/Utils.h"
+#include "xAODMuonViews/ContainerDecorator.h"
+
 
 namespace {
     using TruthLink_t = ElementLink<xAOD::TruthParticleContainer>;
     using SegLink_t = ElementLink<xAOD::MuonSegmentContainer>;
-    using namespace DerivationFramework;
     
     unsigned countMatches(const std::unordered_set<const xAOD::MuonSimHit*>& recoHits,
                           const std::unordered_set<const xAOD::MuonSimHit*>& truthHits){
@@ -52,10 +52,8 @@ namespace MuonR4 {
 
         const SegWithTruthVec_t truthSegMatches = matchSimHits(*truthSegments);
         const SegWithTruthVec_t recoSegMatches = matchSimHits(*recoSegments);
-        
-        auto dec_truthLink = makeHandle(ctx, m_segTruthLinkKey, TruthLink_t{});
-        auto dec_truthSegLink = makeHandle(ctx, m_segTruthSegLinkKey, SegLink_t{});
-
+        xAOD::ContainerDecorator dec_truthLink{m_segTruthLinkKey, ctx, TruthLink_t{}};
+        xAOD::ContainerDecorator dec_truthSegLink{m_segTruthSegLinkKey, ctx, SegLink_t{}};
         for (const SegmentWithTruth& matchMe : recoSegMatches) {
             const xAOD::MuonSegment* bestMatch{nullptr};
             unsigned int bestCount{0};

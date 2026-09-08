@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # art-description: PhysicsP1_pp_run3_v1 menu test only dumping options for SMK generation and running RuleBook to create prescales
 # art-type: build
@@ -12,7 +12,7 @@ from TrigValTools.TrigValSteering import Step, Test, ExecStep, CheckSteps
 # Run Physics menu and produce files to create SMK
 
 menu = ExecStep.ExecStep('RunPhysMenu')
-menu.type = 'athenaHLT'
+menu.type = 'athenaEF'
 menu.job_options = 'TriggerJobOpts.runHLT'
 menu.input = 'data'
 menu.flags = ['Trigger.triggerMenuSetup="PhysicsP1_pp_run3_v1"']

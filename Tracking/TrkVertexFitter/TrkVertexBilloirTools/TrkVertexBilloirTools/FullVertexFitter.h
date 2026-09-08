@@ -11,7 +11,8 @@
 #include "TrkParameters/TrackParameters.h"
 #include "xAODTracking/VertexFwd.h" 
 #include "xAODTracking/TrackParticleFwd.h" 
-
+#include <memory>
+#include <vector>
 
 namespace Trk
 {
@@ -172,8 +173,8 @@ namespace Trk
     };
 
   private:
-    unsigned int m_maxIterations;
-    double m_maxDchi2PerNdf;
+    unsigned int m_maxIterations{};
+    double m_maxDchi2PerNdf{};
 
     /** Data members to store the results */
 

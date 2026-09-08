@@ -112,13 +112,13 @@ class TrigCaloDataAccessSvc : public extends<AthService, ITrigCaloDataAccessSvc>
   struct HLTCaloEventCache {
     std::mutex mutex;    
     std::unique_ptr<LArCellCont> larContainer;
-    LArRodBlockStructure* larRodBlockStructure_per_slot; // LAr Rod Block to ease decoding
-    uint16_t rodMinorVersion;
-    uint32_t robBlockType;
+    LArRodBlockStructure* larRodBlockStructure_per_slot = nullptr; // LAr Rod Block to ease decoding
+    uint16_t rodMinorVersion = 0;
+    uint32_t robBlockType = 0;
     std::unique_ptr<TileCellCont> tileContainer;
     std::unique_ptr<CaloCellContainer> fullcont;
     std::unique_ptr<TileROD_Decoder::D0CellsHLT> d0cells;
-    unsigned int lastFSEvent;
+    unsigned int lastFSEvent = 0;
   };
 
   // cells created in lateInit which must be deleted in finalize
@@ -173,7 +173,6 @@ class TrigCaloDataAccessSvc : public extends<AthService, ITrigCaloDataAccessSvc>
 
   std::vector<uint32_t> m_vrodid32fullDet;
   std::vector<uint32_t> m_vrodid32tile;
-  std::vector<unsigned int> m_mbts_add_rods;
   std::vector<IdentifierHash> m_rIdstile;
   std::vector<std::vector<uint32_t> > m_vrodid32fullDetHG;
 };

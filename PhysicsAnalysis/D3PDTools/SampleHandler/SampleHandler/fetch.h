@@ -2,8 +2,8 @@
   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef META_FETCHER__FETCH_H
-#define META_FETCHER__FETCH_H
+#ifndef SAMPLE_HANDLER__FETCH_H
+#define SAMPLE_HANDLER__FETCH_H
 
 #include <SampleHandler/Global.h>
 

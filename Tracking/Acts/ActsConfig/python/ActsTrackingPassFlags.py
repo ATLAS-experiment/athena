@@ -1,6 +1,7 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration 
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration 
 
 from TrkConfig.TrackingPassFlags import createTrackingPassFlags, createITkTrackingPassFlags, createITkFastTrackingPassFlags, createITkConversionTrackingPassFlags, createITkHeavyIonTrackingPassFlags, createITkLargeD0TrackingPassFlags, createITkLowPtTrackingPassFlags
+from ActsConfig.ActsConfigFlags import SeedingStrategy
 import AthenaCommon.SystemOfUnits as Units
 
 def deactivateAthenaComponents(icf):
@@ -30,6 +31,11 @@ def setActsDefaultTunings(icf):
     icf.addFlag("isSecondaryPass", False)
     icf.addFlag("isLargeD0", False)
     icf.addFlag("autoReverseSearch", False)
+    icf.addFlag("SeedingStrategy", SeedingStrategy.GridTriplet, type=SeedingStrategy)
+    # Extension used to name the persistified track particle container
+    # (InDet{extension}TrackParticles) when storeSeparateContainer is
+    # requested. If empty, the pass extension is used.
+    icf.addFlag("storedTrackParticlesExtension", "")
     
     # Custom values for config flags
     icf.Xi2max = [25]
@@ -56,6 +62,7 @@ def createActsTrackingPassFlags():
     # Override acts default values
     icf.Xi2max = [50]
     icf.Xi2maxNoAdd = [100]
+    icf.useITkStripSeeding = False
     return icf
 
 # Main ACTS Tracking pass with Heavy Ion configuration
@@ -88,14 +95,19 @@ def createActsHeavyIonTrackingPassFlags():
 # Secondary ACTS Tracking pass for Large Radius Tracking
 def createActsLargeRadiusTrackingPassFlags():
     icf = createITkLargeD0TrackingPassFlags()
-    icf.extension = "LargeD0"
+    icf.extension = "ActsLargeRadius"
     deactivateAthenaComponents(icf)
     activateActsComponents(icf)
     setActsDefaultTunings(icf)
+    icf.useITkPixelSeeding = False
+    # Store the output track particles in InDetLargeD0TrackParticles
+    # (instead of InDetActsLargeRadiusTrackParticles) so that downstream
+    # LRT clients can rely on the same container name as in Run 3
+    icf.storedTrackParticlesExtension = "LargeD0"
 
     # Override acts default values
-    icf.Xi2max = [75]
-    icf.Xi2maxNoAdd = [100]
+    icf.Xi2max = [25]
+    icf.Xi2maxNoAdd = [50]
 
     # Mark as secondary pass
     icf.isSecondaryPass = True
@@ -113,6 +125,7 @@ def createActsConversionTrackingPassFlags():
     deactivateAthenaComponents(icf)
     activateActsComponents(icf)
     setActsDefaultTunings(icf)
+    icf.useITkPixelSeeding = False
     # Mark as secondary pass
     icf.isSecondaryPass = True
     # Conversion pass is usually merged with main pass
@@ -136,71 +149,6 @@ def createActsLowPtTrackingPassFlags():
 
 # Validation chains
 
-def createActsValidateClustersTrackingPassFlags():
-    icf = createITkTrackingPassFlags()
-    icf.extension = "ActsValidateClusters"
-    deactivateAthenaComponents(icf)
-    icf.doActsCluster = True
-    icf.doActsToAthenaCluster = True
-    icf.doAthenaSpacePoint = True
-    icf.doAthenaSeed = True
-    icf.doAthenaTrack = True
-    icf.doAthenaAmbiguityResolution = True
-    setActsDefaultTunings(icf)
-    return icf
-
-def createActsValidateLargeRadiusStandaloneTrackingPassFlags():
-    icf = createActsLargeRadiusTrackingPassFlags()
-    icf.extension = "ActsValidateLargeRadiusStandalone"
-    icf.isSecondaryPass = False
-    icf.isLargeD0 = True
-    return icf
-
-def createActsValidateTracksTrackingPassFlags():
-    icf = createITkTrackingPassFlags()
-    icf.extension = lambda pcf : "ActsValidateTracks" if not pcf.Acts.doAmbiguityResolution else "ActsValidateResolvedTracks"
-    deactivateAthenaComponents(icf)
-    # sequence is still a work in progress
-    # Requires Athena cluster and cluster EDM converter 
-    # for adding decoration to cluster objects
-    # It produces Athena TrackCollection EDM
-    icf.doAthenaCluster = True
-    icf.doAthenaToActsCluster = True
-    icf.doActsSpacePoint = True
-    icf.doActsSeed = True
-    icf.doActsTrack = True
-    # If we do not want acts ambi resolution, first do the track convertion
-    # and then the Athena ambi
-    icf.doActsToAthenaTrack = lambda pcf : not pcf.Acts.doAmbiguityResolution
-    icf.doAthenaAmbiguityResolution = lambda pcf : not pcf.Acts.doAmbiguityResolution
-    # If we want acts ambi, first do the ambi and then convert the tracks
-    # without Athena ambi
-    icf.doActsAmbiguityResolution = lambda pcf : pcf.Acts.doAmbiguityResolution
-    icf.doActsToAthenaResolvedTrack = lambda pcf : pcf.Acts.doAmbiguityResolution
-
-    # Deactivate CTIDE processor fit
-    icf.doAmbiguityProcessorTrackFit = False
-    setActsDefaultTunings(icf)
-    return icf
-
-def createActsValidateAmbiguityResolutionTrackingPassFlags():
-    icf = createITkTrackingPassFlags()
-    icf.extension = "ActsValidateAmbiguityResolution"
-    deactivateAthenaComponents(icf)
-    # The sequence will schedule Athena algorithms from clustering to 
-    # track reconstruction, but not the ambi. resolution
-    # We convert tracks, run the acts ambi. resolution and convert 
-    # resolved tracks back to Athena EDM
-    icf.doAthenaCluster = True
-    icf.doAthenaSpacePoint = True
-    icf.doAthenaSeed = True
-    icf.doAthenaTrack = True
-    icf.doAthenaToActsTrack = True
-    icf.doActsAmbiguityResolution = True
-    icf.doActsToAthenaResolvedTrack = True
-    setActsDefaultTunings(icf)
-    return icf
-
 def createEFValidateF100TrackingPassFlags():
     icf = createActsTrackingPassFlags()
     icf.extension = "ActsValidateF100"
@@ -214,6 +162,7 @@ def createEFValidateF100TrackingPassFlags():
     # Override acts default values
     icf.Xi2max = [50]
     icf.Xi2maxNoAdd = [100]
+    icf.useITkStripSeeding = False
     return icf
 
 def createEFValidateF150TrackingPassFlags():
@@ -230,6 +179,8 @@ def createEFValidateF150TrackingPassFlags():
     # Override acts default values
     icf.Xi2max = [50]
     icf.Xi2maxNoAdd = [100]
+    icf.SeedingStrategy = SeedingStrategy.F150
+    icf.useITkStripSeeding = False
     return icf
 
 # Main Inner Detector ACTS Tracking pass

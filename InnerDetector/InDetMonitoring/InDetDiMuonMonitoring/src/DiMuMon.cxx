@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <sstream>
+
 #include "GaudiKernel/PhysicalConstants.h"
 #include "AthContainers/ConstDataVector.h"
 #include "TruthUtils/ParticleConstants.h"
@@ -10,8 +10,6 @@
 #include "DiMuMon.h"
 
 #include "CxxUtils/checker_macros.h"
-
-#include <cmath>
 
 #include "TF1.h"
 #include "TCanvas.h"
@@ -26,10 +24,9 @@
 #include "RooGlobalFunc.h"
 #include "RooArgList.h"
 #include "RooFitResult.h"
+#include <cmath>
+#include <sstream>
 
-
-//using namespace Analysis;
-//using namespace Rec;
 
 DiMuMon::DiMuMon( const std::string & type, const std::string & name, const IInterface* parent )
   : ManagedMonitorToolBase( type, name, parent )
@@ -340,7 +337,7 @@ StatusCode DiMuMon::fillHistograms(const EventContext& ctx)
 	m_varValues["phiSumm"] = phiPos + phiNeg;
 
 	//determine which region muons are in
-	std::string region = "";
+	std::string region{};
 	if ((std::abs(etaPos)<1.05 || std::abs(etaPos)==1.05) && (std::abs(etaNeg)<1.05 || std::abs(etaNeg)==1.05)) region="BB";
 	else if ((etaPos>1.05 && etaPos<2.5) && (etaNeg>1.05 && etaNeg<2.5)) region="EAEA";
 	else if ((etaPos<-1.05 && etaPos>-2.5) && (etaNeg<-1.05 && etaNeg>-2.5)) region="ECEC";
@@ -348,7 +345,7 @@ StatusCode DiMuMon::fillHistograms(const EventContext& ctx)
 	//do we care about hese muons?
 	bool fillAll = m_invmass.find("All")!=m_invmass.end();
 	bool fillReg = false;
-	if (region!=""){
+	if (!region.empty()){
 	  if (m_invmass.find(region)!=m_invmass.end()) fillReg=true;
 	}
 	if (!fillAll && !fillReg) continue;
@@ -536,7 +533,7 @@ void DiMuMon::iterativeGausFit (TH2F* hin, const std::vector<TH1F*>& hout, int m
 
 	m.setBins(5000);
 	RooFFTConvPdf bxc("bxc", "BW (X) CB", m, bw, cb) ;
-	bxc.fitTo(*data, RooFit::PrintLevel(-1), RooFit::PrintEvalErrors(-1));
+	[[maybe_unused]] auto owningPtr = bxc.fitTo(*data, RooFit::PrintLevel(-1), RooFit::PrintEvalErrors(-1));
 	RooPlot* frame = m.frame();
 	data->plotOn(frame, RooFit::MarkerSize(0.9));
 	bxc.paramOn(frame,  RooFit::Format("NELU", RooFit::AutoPrecision(2)), RooFit::Layout(0.1,0.4,0.9));
@@ -551,6 +548,9 @@ void DiMuMon::iterativeGausFit (TH2F* hin, const std::vector<TH1F*>& hout, int m
 	sigmaErr = cbsg.getError();
 	chi2 = frame->chiSquare();
 	delete data;
+	delete frame;
+	//maybe I misunderstand the Root OwningPointer; coverity still thinks it leaks here?
+	//coverity[[RESOURCE_LEAK]]
       }
       //fill results
       m_chi2->Fill(chi2);

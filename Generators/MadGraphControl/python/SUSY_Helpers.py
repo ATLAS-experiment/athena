@@ -4,9 +4,9 @@
 #    written by Zach Marshall <zach.marshall@cern.ch>
 
 # Helper functions we need in MadGraphControl
-from MadGraphControl.MadGraphUtils import (generate, generate_from_gridpack, modify_run_card,
-                                           add_lifetimes, arrange_output, MADGRAPH_GRIDPACK_LOCATION,
-                                           is_gen_from_gridpack, new_process, modify_param_card)
+import MadGraphControl.MadGraphUtils as MadGraphUtils
+from MadGraphControl.MadGraphUtils import ( generate, generate_from_gridpack, add_lifetimes, arrange_output, MADGRAPH_GRIDPACK_LOCATION, is_gen_from_gridpack )
+from MadGraphControl.MGC import MGControl
 
 # For moving files around
 import shutil
@@ -143,8 +143,9 @@ def SUSY_process(process: str = '') -> str:
             full_proc+=helpful_SUSY_definitions()
         for l in process.split('\n'):
             if 'import model' not in l:
-                full_proc += l+'\n'
-        full_proc+="""
+                full_proc += l.strip()+'\n'
+        if '\noutput ' not in full_proc:
+            full_proc+="""
 # Output processes to MadEvent directory
 output -f
 """
@@ -152,7 +153,9 @@ output -f
         full_proc = "import model MSSM_SLHA2\n"+helpful_SUSY_definitions()+"""
 # Specify process(es) to run
 
-"""+process+"""
+"""+'\n'.join([x.strip() for x in process.split('\n')])
+        if '\noutput ' not in full_proc:
+            full_proc += """
 # Output processes to MadEvent directory
 output -f
 """
@@ -187,37 +190,44 @@ def SUSY_Generation(runArgs: RunArguments | None = None, process: str | None = N
     returns:
         the setting of the matching scale to be provided to Pythia8
     """
+
     ktdurham = run_settings['ktdurham'] if 'ktdurham' in run_settings else None
     ktdurham = get_SUSY_variations( process, params['MASS'] , syst_mod , ktdurham=ktdurham )
 
     process_dir = MADGRAPH_GRIDPACK_LOCATION
     if not is_gen_from_gridpack():
         full_proc = SUSY_process(process)
-        process_dir = new_process(full_proc, plugin=plugin, usePMGSettings=usePMGSettings)
+        MadGraphUtils.my_MGC_instance = MGControl(
+            full_proc,
+            plugin=plugin,
+            usePMGSettings=usePMGSettings)
+    elif MadGraphUtils.my_MGC_instance is None:
+        MadGraphUtils.my_MGC_instance = MGControl()
+
     susylog.info('Using process directory '+str(process_dir))
 
     # Grab the param card and move the new masses into place
-    modify_param_card(param_card_input=param_card,process_dir=process_dir,params=params)
+    MadGraphUtils.my_MGC_instance.paramCard.modify_paramCardDict(params=params)
 
     # Set up the extras dictionary
     settings = {'ktdurham':ktdurham}
     settings.update(run_settings) # This allows explicit settings in the input to override these settings
 
     # Set up the run card
-    modify_run_card(process_dir=process_dir,runArgs=runArgs,settings=settings)
+    MadGraphUtils.my_MGC_instance.runCardDict.update(settings)
 
     # Set up madspin if needed
     if madspin_card is not None:
         if not os.access(madspin_card,os.R_OK):
             raise RuntimeError('Could not locate madspin card at '+str(madspin_card))
         shutil.copy(madspin_card,process_dir+'/Cards/madspin_card.dat')
-    
+        
     # Generate events!
     if is_gen_from_gridpack():
         generate_from_gridpack(runArgs=runArgs)
     else:
         # Grab the run card and move it into place
-        generate(runArgs=runArgs,process_dir=process_dir,grid_pack=writeGridpack)
+        generate(runArgs=runArgs,process_dir=MadGraphUtils.my_MGC_instance.process_dir,grid_pack=writeGridpack)
 
     # Add lifetimes to LHE before arranging output if requested
     if add_lifetimes_lhe :
@@ -225,10 +235,10 @@ def SUSY_Generation(runArgs: RunArguments | None = None, process: str | None = N
         if is_gen_from_gridpack():
             add_lifetimes()
         else:
-            add_lifetimes(process_dir=process_dir)
+            add_lifetimes(process_dir=MadGraphUtils.my_MGC_instance.process_dir)
 
     # Move output files into the appropriate place, with the appropriate name
-    arrange_output(process_dir=process_dir,saveProcDir=keepOutput,runArgs=runArgs,fixEventWeightsForBridgeMode=fixEventWeightsForBridgeMode)
+    arrange_output(process_dir=MadGraphUtils.my_MGC_instance.process_dir,saveProcDir=keepOutput,runArgs=runArgs,fixEventWeightsForBridgeMode=fixEventWeightsForBridgeMode)
 
     susylog.info('All done generating events!!')
     return settings['ktdurham']

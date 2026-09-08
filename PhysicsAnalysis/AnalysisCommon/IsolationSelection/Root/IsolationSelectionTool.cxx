@@ -667,7 +667,11 @@ StatusCode IsolationSelectionTool::addElectronWP(const std::string& elWPname) {
              elWPname == "isolPLITVeryLooseRun3" ||
 	     elWPname == "isolPLITVeryTightRun2" ||
              elWPname == "isolPLITTightRun2" ||
-             elWPname == "isolPLITVeryLooseRun2"
+             elWPname == "isolPLITVeryLooseRun2" ||
+	     elWPname == "isolPLITVeryTightRejRun3" ||
+	     elWPname == "isolPLITTightRejRun3" ||
+	     elWPname == "isolPLITVeryTightRejRun2" ||
+	     elWPname == "isolPLITTightRejRun2"
 	     ) {
     // open the file path to read out WP definition file
     // if (!m_filePathName.empty()) { should never be empty --> default value
@@ -719,7 +723,11 @@ StatusCode IsolationSelectionTool::addElectronWP(const std::string& elWPname) {
         elWPname == "isolPLITVeryLooseRun3" || 
         elWPname == "isolPLITVeryTightRun2" || 
         elWPname == "isolPLITTightRun2" ||
-        elWPname == "isolPLITVeryLooseRun2") {
+        elWPname == "isolPLITVeryLooseRun2" ||
+	elWPname == "isolPLITVeryTightRejRun3" ||
+	elWPname == "isolPLITTightRejRun3" ||
+	elWPname == "isolPLITVeryTightRejRun2" ||
+	elWPname == "isolPLITTightRejRun2") {
       wp->addCut(std::make_unique<IsolationConditionGraph>(
           elWPname, isoTypes,
           std::make_unique<TF2>("elePLIT", "TMath::Log(x / y)"), std::move(cutGraphUPtr),

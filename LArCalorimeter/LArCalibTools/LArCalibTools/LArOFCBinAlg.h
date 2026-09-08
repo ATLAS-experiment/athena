@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Dear emacs, this is -*-c++-*-
 #ifndef LAROFCBINALG_H
 #define LAROFCBINALG_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
 #include "LArCalibTools/LArCond2NtupleBase.h"
 #include "LArCabling/LArOnOffIdMapping.h"
 

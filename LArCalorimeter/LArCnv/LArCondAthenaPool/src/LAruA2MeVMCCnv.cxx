@@ -14,7 +14,7 @@
 LArConditionsSubset<LArSingleFloatP>*
 LAruA2MeVMCCnv::createTransient(const Token* token)
 {
-  static const pool::Guid   p0_guid("CBF815A2-F18C-4C18-9E93-A8EE67CEE59F");
+  static const Guid   p0_guid("CBF815A2-F18C-4C18-9E93-A8EE67CEE59F");
   // first try the single-float converter
   LArConditionsSubset<LArSingleFloatP>* p=createTransientSingleFloat(token);
   if (p) 

@@ -4,26 +4,26 @@
 atlas_subdir( TileRecUtils )
 
 # External dependencies:
-find_package( Boost )
 find_package( CLHEP )
+find_package( nlohmann_json )
 
 # Component(s) in the package:
 atlas_add_library( TileRecUtilsLib
                    src/Tile*.cxx
                    PUBLIC_HEADERS TileRecUtils
                    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
-                   PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
                    DEFINITIONS ${CLHEP_DEFINITIONS}
                    LINK_LIBRARIES ${CLHEP_LIBRARIES} CaloConditions CaloIdentifier AthenaBaseComps AthenaKernel Identifier GaudiKernel TileEvent TileIdentifier TileConditionsLib CaloInterfaceLib CaloUtilsLib StoreGateLib xAODEventInfo LumiBlockData
-                   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} AthAllocators CaloDetDescrLib CaloEvent CxxUtils EventContainers GeoModelInterfaces PathResolver TileCalibBlobObjs TileDetDescr TileSimEvent )
+                   PRIVATE_LINK_LIBRARIES AthAllocators CaloDetDescrLib CaloEvent CxxUtils EventContainers GeoModelInterfaces PathResolver TileCalibBlobObjs TileDetDescr TileSimEvent nlohmann_json::nlohmann_json )
 
 atlas_add_component( TileRecUtils
                      src/components/*.cxx
-                     INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
+                     INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                      LINK_LIBRARIES TileRecUtilsLib )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+atlas_install_data( data/*.json )
 
 atlas_add_dictionary( TileRecUtilsDict
                       TileRecUtils/TileRecUtilsDict.h
@@ -119,5 +119,17 @@ atlas_add_test( TileRawChannelMakerConfig_test
 atlas_add_test( TileCellMakerConfig_test
                  SCRIPT python -m TileRecUtils.TileCellMakerConfig
                  PROPERTIES TIMEOUT 300
+                 PRIVATE_WORKING_DIRECTORY
+                 POST_EXEC_SCRIPT noerror.sh)
+
+atlas_add_test( TileRawChannelNNMaker_test
+                SOURCES test/TileRawChannelNNMaker_test.cxx
+                LINK_LIBRARIES TileEvent TileIdentifier TileConditionsLib TileCalibBlobObjs
+                               AthenaBaseComps StoreGateLib IdDictParser TestTools GaudiKernel
+                               PathResolver nlohmann_json::nlohmann_json )
+
+atlas_add_test( TileRawChannelNNMakerConfig_test
+                 SCRIPT python -m TileRecUtils.TileRawChannelNNMakerConfig
+                 PROPERTIES TIMEOUT 600
                  PRIVATE_WORKING_DIRECTORY
                  POST_EXEC_SCRIPT noerror.sh)

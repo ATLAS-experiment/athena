@@ -255,7 +255,7 @@ def NnClusterizationFactoryCfg(flags, name="NnClusterizationFactory", **kwargs):
             PixelLorentzAngleToolCfg)
         kwargs.setdefault("PixelLorentzAngleTool", acc.popToolsAndMerge(
             PixelLorentzAngleToolCfg(flags)))
-
+    kwargs.setdefault("useXPitches", True if flags.GeoModel.Run >= LHCPeriod.Run4 else False)
     kwargs.setdefault("doRunI", flags.GeoModel.Run is LHCPeriod.Run1)
     kwargs.setdefault("useToT", False)
     kwargs.setdefault("useRecenteringNNWithoutTracks", (

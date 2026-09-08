@@ -9,26 +9,34 @@ def SegmentSelectorCfg(flags, name="SegmentSelectionTool", **kwargs):
     result.setPrivateTools(the_tool)
     return result
 
+
+def MSExtrapolatorCfg(flags, name="MsExtrapolationTool", **kwargs):
+    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
+    return ActsExtrapolationToolCfg(flags, 
+            MaxSteps=10000,
+            InteractionEloss = flags.Muon.trackGeometryPassiveMaterial,
+            InteractionMultiScatering = flags.Muon.trackGeometryPassiveMaterial)
+
 def MSTrackFitterCfg(flags, name="MSTrackFitTool", **kwargs):
     result = ComponentAccumulator()
-    from ActsConfig.ActsConfigFlags import TrackFitterType
     from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg
     from MuonSpacePointCalibrator.CalibrationConfig import MuonSpacePointCalibratorCfg
-    from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
-    kwargs.setdefault("ATLASConverterTool", result.popToolsAndMerge(ActsToTrkConverterToolCfg(flags, setupMuon = True)))
-    kwargs.setdefault("fitterKind", TrackFitterType.GlobalChiSquareFitter)
+    from ActsConfig.ActsConfigFlags import TrackFitterType
+    kwargs.setdefault("fitterKind", flags.Muon.TrackFitterType)
     kwargs.setdefault("OutlierChi2Cut", 200000)
-    kwargs.setdefault("DoReFitFromPRD", False)
-    kwargs.setdefault("IncludeScattering", flags.Muon.trackGeometryPassiveMaterial)
-    kwargs.setdefault("IncludeELoss",  flags.Muon.trackGeometryPassiveMaterial)
-    
-    kwargs.setdefault("MaxPropagationStep", 1000000)
-    kwargs.setdefault("MaxSurfacesPerNavStep", 10000000)
-    kwargs.setdefault("DoFreeToBoundCorrection", True)
-    kwargs.setdefault("MaxIterations", 100)
-    
+    kwargs.setdefault("MuonCalibrationTool", result.popToolsAndMerge(MuonSpacePointCalibratorCfg(flags)))
+   
+    if kwargs["fitterKind"] == TrackFitterType.GlobalChiSquareFitter:
+        kwargs.setdefault("IncludeScattering", flags.Muon.trackGeometryPassiveMaterial)
+        kwargs.setdefault("IncludeELoss",  flags.Muon.trackGeometryPassiveMaterial)
+        kwargs.setdefault("MaxPropagationStep", 1000000)
+        kwargs.setdefault("MaxSurfacesPerNavStep", 10000000)
+        kwargs.setdefault("DoFreeToBoundCorrection", True)
+        kwargs.setdefault("MaxIterations", 30)
+    elif kwargs["fitterKind"] == TrackFitterType.KalmanFitter:
+        kwargs.setdefault("UseDirectNavigation", False)
+   
 
-    kwargs.setdefault("MuonCalibrationTool",result.popToolsAndMerge(MuonSpacePointCalibratorCfg(flags)))
     fitTool = result.popToolsAndMerge(ActsFitterCfg(flags, name=name, **kwargs))
     result.setPrivateTools(fitTool)
     return result
@@ -39,31 +47,65 @@ def TrackSummaryToolCfg(flags, name="MuonTrackSummaryTool", **kwargs) :
     result.setPrivateTools(theTool)
     return result
 
+def TrackSummaryLockCfg(flags,inContainer="", fillHoles = True, fillOutliers = True, **kwargs):
+    
+    summaryDecors = [ "innerSmallHits", "innerLargeHits", 
+                     "middleSmallHits", "middleLargeHits", 
+                     "outerSmallHits", "outerLargeHits", 
+                     "extendedSmallHits", "extendedLargeHits",  
+                     "innerTriggerEtaHits", "innerTriggerPhiHits", 
+                     "middleTriggerEtaHits", "middleTriggerPhiHits", 
+                     "outerTriggerEtaHits", "outerTriggerPhiHits"]
+    if fillHoles: 
+        summaryDecors +=["innerSmallHoles", "innerLargeHoles", 
+                         "middleSmallHoles", "middleLargeHoles", 
+                         "outerSmallHoles", "outerLargeHoles",
+                         "extendedSmallHoles", "extendedLargeHoles",
+                         "innerTriggerEtaHoles", "innerTriggerPhiHoles", 
+                         "middleTriggerEtaHoles", "middleTriggerPhiHoles", 
+                         "outerTriggerEtaHoles", "outerTriggerPhiHoles" ]
+    if fillOutliers: 
+        summaryDecors += ["innerClosePrecisionHits", "middleClosePrecisionHits", 
+                           "outerClosePrecisionHits", "extendedClosePrecisionHits"]
+
+    
+    result = ComponentAccumulator()
+    kwargs.setdefault("Decorations", [f"{inContainer}.{decor}" for decor in summaryDecors])                
+    the_alg= CompFactory.DerivationFramework.LockDecorations(name=f"MuonTrackSummaryLockAlg_{inContainer}", **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
+
+def MsTrackSeedingToolCfg(flags, name="MsTrackSeedingTool", **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault("SegmentSelectionTool", result.popToolsAndMerge(SegmentSelectorCfg(flags)))
+
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+    result.merge(ActsTrackingGeometrySvcCfg(flags))
+    the_tool = CompFactory.MuonR4.MsTrackSeederTool(name, **kwargs)
+    result.setPrivateTools(the_tool)
+    return result
+
 def MSTrackFinderAlgCfg(flags, name="MSTrackFinderAlg", **kwargs):
     result = ComponentAccumulator()
+    if not flags.Acts.TrackingGeometry.UseBlueprint:
+        raise RuntimeError("Cannot setup the track finding alg with Gen 1 geometry")
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
     result.merge(AtlasFieldCacheCondAlgCfg(flags))
  
-    kwargs.setdefault("SegmentSelectionTool", result.popToolsAndMerge(SegmentSelectorCfg(flags)))
+    kwargs.setdefault("SeedingTool", result.popToolsAndMerge(MsTrackSeedingToolCfg(flags)))
     kwargs.setdefault("FittingTool", result.popToolsAndMerge(MSTrackFitterCfg(flags)))       
-    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
-    kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(ActsExtrapolationToolCfg(flags, 
-                                                                                            MaxSteps=10000,
-                                                                                            InteractionEloss = flags.Muon.trackGeometryPassiveMaterial,
-                                                                                            InteractionMultiScatering = flags.Muon.trackGeometryPassiveMaterial  )))
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-    kwargs.setdefault("TrackingGeometryTool", result.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
     from MuonSpacePointCalibrator.CalibrationConfig import MuonSpacePointCalibratorCfg
     kwargs.setdefault("Calibrator", result.popToolsAndMerge(MuonSpacePointCalibratorCfg(flags)))
     kwargs.setdefault("SummaryTool", result.popToolsAndMerge(TrackSummaryToolCfg(flags)))
-
+    kwargs.setdefault("expressAtMsEntrance",  flags.Muon.expressMsTrackAtEntrance)
+    kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(MSExtrapolatorCfg(flags)))
     the_alg = CompFactory.MuonR4.MsTrackFindingAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
 
 
 def StandaloneTrackPartCnvCfg(flags, name="MuonMsTrackParticleCnvR4", **kwargs):
-    from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
+    from ActsConfig.ActsEventCnvConfig import ActsTrackToTrackParticleCnvAlgCfg
     kwargs.setdefault("BeamSpotKey", "")
     kwargs.setdefault("VertexContainerKey", "")
     kwargs.setdefault("ACTSTracksLocation" ,["MsTracks"])
@@ -73,49 +115,77 @@ def StandaloneTrackPartCnvCfg(flags, name="MuonMsTrackParticleCnvR4", **kwargs):
 
 def MuonActsToTrkConvCfg(flags, name="MuonActsToTrkConverterAlg", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault('ACTSTracksLocation', "MsTracks")
-    kwargs.setdefault('TracksLocation', 'MsTracksTrkCnv')
-    from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
-    kwargs.setdefault("ATLASConverterTool", result.popToolsAndMerge(ActsToTrkConverterToolCfg(flags, setupMuon = True)))
-    from ActsConfig.ActsEventCnvConfig import ActsToTrkConvertorAlgCfg
-    result.merge(ActsToTrkConvertorAlgCfg(flags, name=name, **kwargs))
+    kwargs.setdefault('TrackParticles', "MsTrackParticlesR4")
+    kwargs.setdefault('OutTrackContainer', 'MsTracksTrkCnv')
+    from ActsConfig.ActsEventCnvConfig import xAODtoTrkConverterAlgCfg
+    result.merge(xAODtoTrkConverterAlgCfg(flags, name=name, 
+                                          setupMuon = True, setupITk=False, **kwargs))
     return result 
+
+
+def BeamSpotPreparatorAlgCfg(flags, name="MuonBeamSpotPreparator", **kwargs):
+    result = ComponentAccumulator()
+    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+    result.merge(BeamSpotCondAlgCfg(flags))
+    from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
+    result.merge(AtlasFieldCacheCondAlgCfg(flags))
+    the_alg = CompFactory.MuonCombinedR4.BeamSpotPreparatorAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
 
 def MuidSaTagMakerAlgCfg(flags, name="MuonMuidTagSaAlg", **kwargs):
     result = ComponentAccumulator()
-    from MuonTrackFindingAlgs.TrackFindingConfig import TrackSummaryToolCfg
+    kwargs.setdefault("ExtrapolateToIP", flags.Muon.buildMETrack )
+    kwargs.setdefault("RefitWithBeamSpot", flags.Muon.buildMETrack )
     kwargs.setdefault("TrackSummaryTool", result.popToolsAndMerge(TrackSummaryToolCfg(flags)))
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+    result.merge(ActsTrackingGeometrySvcCfg(flags))
+    if kwargs["ExtrapolateToIP"]:
+        kwargs.setdefault("FittingTool", result.popToolsAndMerge(MSTrackFitterCfg(flags)))
+        kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(MSExtrapolatorCfg(flags)))
+        from ActsConfig.ActsEventCnvConfig import ActsTrackToTrackParticleCnvToolCfg
+        kwargs.setdefault("TrackToTrackParticleCnvTool", 
+            result.popToolsAndMerge(ActsTrackToTrackParticleCnvToolCfg(flags)))
+
     the_alg = CompFactory.MuonCombinedR4.StandaloneMuonTagAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
 
+def MuonCombinedStacoAlgCfg(flags, name="MuonCombinedStacoAlgR4", **kwargs ):
+    result = ComponentAccumulator()
+    the_alg = CompFactory.MuonCombinedR4.CombinedStacoAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
+
+def MuonCombinedFitAlgCfg(flags, name="MuonCombinedFitAlg", **kwargs):
+    result = ComponentAccumulator()
+    the_alg = CompFactory.MuonCombinedR4.CombinedFitAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
 
 def MuonInDetTrackSelectionAlgCfg(flags, name="MuonCombinedInDetCandidateAlgR4", **kwargs):
     result = ComponentAccumulator()
-    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
-    kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000, 
-                                                                                             InteractionEloss = True,
-                                                                                             InteractionMultiScatering = True)))
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-    kwargs.setdefault("TrackingGeometryTool", result.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    if not flags.Acts.TrackingGeometry.UseBlueprint:
+        raise RuntimeError("Cannot setup the InDet Candidate selection with Gen 1 geometry")
+    kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(MSExtrapolatorCfg(flags)))
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+    result.merge(ActsTrackingGeometrySvcCfg(flags))
+    kwargs.setdefault("matchTracksOnSameSurface",  flags.Muon.expressMsTrackAtEntrance)
     the_alg = CompFactory.MuonCombinedR4.InDetTrackSelectionAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
 
 def MuonSegmentTaggingAlgCfg(flags, name="MuonCombinedSegmentTaggingAlgR4", **kwargs):
     result = ComponentAccumulator()
-    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
-    kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)))
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-    kwargs.setdefault("TrackingGeometryTool", result.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(MSExtrapolatorCfg(flags, MaxSteps=10000)))
     the_alg = CompFactory.MuonCombinedR4.SegmentTaggingAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
 
 def MuonCreatorAlgCfg(flags, name="MuonCreatorAlgR4", **kwargs):
     result = ComponentAccumulator()
-    from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
-    kwargs.setdefault("SelectionTool", result.popToolsAndMerge(MuonSelectionToolCfg(flags)))
+    from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
+    kwargs.setdefault("SelectionTool", result.popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(flags)))
     from MuonTrackFindingAlgs.TrackFindingConfig import TrackSummaryToolCfg
     kwargs.setdefault("TrackSummaryTool", result.popToolsAndMerge(TrackSummaryToolCfg(flags)))
     the_alg = CompFactory.MuonCombinedR4.MuonCreatorAlg(name, **kwargs)

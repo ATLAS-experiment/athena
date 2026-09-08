@@ -316,20 +316,20 @@ def getHIJetRecAlg( jetdef, jetsName, monTool = None):
 # Same as AddIteration in Reconstruction/HeavyIonRec/HIJetRec/HIJetRecUtils.py but without jtm
 def HLTAddIteration(configFlags, seed_container,shape_name,clustersKey, **kwargs) :
     out_shape_name=shape_name
-    if 'suffix' in kwargs.keys() : out_shape_name+='_' + kwargs['suffix']
+    if 'suffix' in kwargs : out_shape_name+='_' + kwargs['suffix']
     mod_shape_key=out_shape_name+'_Modulate'
     remodulate=True
     if remodulate :
-        if 'modulator' in kwargs.keys() : mod_tool=kwargs['modulator']
+        if 'modulator' in kwargs : mod_tool=kwargs['modulator']
         else :
             log.info( "In HLTAddIteration function, HIUEModulatorTool is created using HLTMakeModulatorTool with mod_shape_key = {}".format(mod_shape_key) )
             mod_tool=HLTMakeModulatorTool(mod_shape_key,**kwargs)
 
-    if 'map_tool' in kwargs.keys() : map_tool=kwargs['map_tool']
+    if 'map_tool' in kwargs : map_tool=kwargs['map_tool']
     else :
         map_tool=CompFactory.HIEventShapeMapTool()
 
-    if 'sub_tool' in kwargs.keys() : sub_tool=kwargs['sub_tool']
+    if 'sub_tool' in kwargs : sub_tool=kwargs['sub_tool']
     else :
         from HIJetRec.HIJetRecUtilsCA import getHIClusterGeoWeightFile
         weightInputFile=getHIClusterGeoWeightFile(configFlags)
@@ -338,7 +338,7 @@ def HLTAddIteration(configFlags, seed_container,shape_name,clustersKey, **kwargs
         sub_tool=HIJetClusterSubtractorTool("HLTHIJetClusterSubtractor", ConfigDir='HIJetCorrection/', InputFile=weightInputFile)
         sub_tool.UseSamplings=False
 
-    if 'assoc_name' in kwargs.keys() : assoc_name=kwargs['assoc_name']
+    if 'assoc_name' in kwargs : assoc_name=kwargs['assoc_name']
     else :
         log.info( "In HLTAddIteration function, HIJetDRAssociationTool is created with clustersKey= {}".format(clustersKey) )
         assoc=CompFactory.HIJetDRAssociationTool("HIJetDRAssociation")
@@ -366,7 +366,7 @@ def HLTAddIteration(configFlags, seed_container,shape_name,clustersKey, **kwargs
 
 def HLTBuildHarmonicName(shape_key, **kwargs) :
     tname=shape_key
-    if 'harmonics' in kwargs.keys() :
+    if 'harmonics' in kwargs :
         for n in kwargs['harmonics'] :
             tname = str(tname) + str('_V%d' % n)
     return tname
@@ -383,7 +383,7 @@ def HLTMakeModulatorTool(mod_key, **kwargs):
     harmonics = kwargs.pop('harmonics', [2, 3, 4])
     tname = kwargs.pop('mod_name', 'Modulator_{}'.format(HLTBuildHarmonicName(mod_key, harmonics=harmonics)))
 
-    if 'suffix' in kwargs.keys():
+    if 'suffix' in kwargs:
         tname += '_' + kwargs['suffix']
 
     if len(harmonics) == 0:
@@ -398,7 +398,7 @@ def HLTMakeModulatorTool(mod_key, **kwargs):
         attr_name='DoV%d' % n
         setattr(mod,attr_name,val)  
     
-    if 'label' in kwargs.keys():
+    if 'label' in kwargs:
         label = kwargs['label']
         stdJetModifiers[label] = JetModifier(
             "HIUEModulatorTool",

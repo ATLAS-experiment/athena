@@ -3,6 +3,7 @@
 */
 #include "SegmentTaggingAlg.h"
 
+#include "ActsInterop/Logger.h"
 #include "Acts/Utilities/Helpers.hpp"
 #include "Acts/Surfaces/PlaneSurface.hpp"
 #include "Acts/Utilities/StringHelpers.hpp"
@@ -11,6 +12,9 @@
 #include "MuonTrackEvent/TrackingHelpers.h"
 #include "MuonPatternEvent/SegmentFitterEventData.h"
 #include "xAODMuonViews/FillContainer.h"
+#include "FourMomUtils/P4Helpers.h"
+
+#include "MuonTrackEvent/TrackMatchingUtils.h"
 
 namespace{
     constexpr Acts::HashedString caloExitParKey = Acts::hashString("@CaloExit");
@@ -26,8 +30,9 @@ namespace MuonCombinedR4  {
         ATH_CHECK(m_segmentKey.initialize());
         ATH_CHECK(m_writeKey.initialize());
         ATH_CHECK(detStore()->retrieve(m_detMgr));
-        ATH_CHECK(m_trackingGeometryTool.retrieve());
+        ATH_CHECK(m_ctxProvider.initialize());
         ATH_CHECK(m_extrapolationTool.retrieve());
+        m_logger = makeActsAthenaLogger(this, name());
         return StatusCode::SUCCESS;
     }
     std::vector<const xAOD::MuonSegment*> SegmentTaggingAlg::prepareSegments(const EventContext& ctx) const {
@@ -70,9 +75,6 @@ namespace MuonCombinedR4  {
             if (!caloSector.isNeighbour(MuonR4::ExpandedSector{matchMe->position().phi()})){
                 continue;
             }
-            if (matchMe->position().z() * globExit.z() < 0.) {
-                continue;
-            }
             /// Check that the surface is indeed in front of the exit parameters
             if ((getSurface(*matchMe).center(tgContext) - globExit).dot(globDir) < 0.){
                 continue;
@@ -101,27 +103,30 @@ namespace MuonCombinedR4  {
     double SegmentTaggingAlg::matchingScore(const Acts::GeometryContext& tgContext,
                                             const xAOD::MuonSegment& segment,
                                             const Acts::BoundTrackParameters& extpIdPars) const  {
+        const Acts::BoundTrackParameters segPars =  MuonR4::SegmentFit::boundSegmentPars(tgContext, *m_detMgr, segment);
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Match segment "<<MuonR4::printID(segment)<<"@\n"<<segPars<<"\n\n & ID parameters: \n"
+                    <<extpIdPars<<", "<<Amg::toString(extpIdPars.referenceSurface().localToGlobalTransform(tgContext)));
         
-        Acts::BoundTrackParameters segmentPars{MuonR4::SegmentFit::boundSegmentPars(tgContext, *m_detMgr, segment)};
-        Acts::BoundVector dPars = segmentPars.parameters() - extpIdPars.parameters();
+        std::optional<Acts::BoundTrackParameters> diffPars = makeDiffParameters(tgContext, extpIdPars, segPars, logger(), 0.);
+        
+        if (!diffPars) {
+            return m_matchChi2 + Acts::s_epsilon;
+        }
+        Acts::Vector4 dPars = diffPars->parameters().block<4,1>(0,0);
         /** The segment does not measure phi. Reset anything in loc0 and non-precision direction */
         if (!segment.nPhiLayers()) {
             dPars[Acts::eBoundPhi] = dPars[Acts::eBoundLoc0] = 0.;
-        }
-        dPars[Acts::eBoundQOverP] = dPars[Acts::eBoundTime] = 0.;
-        Acts::BoundMatrix covariance{Acts::BoundMatrix::Identity()};
+        } 
+        Acts::SquareMatrix4 covariance{Acts::SquareMatrix4::Identity()};
         covariance(Acts::eBoundLoc0, Acts::eBoundLoc0) = Acts::square(m_toleranceX0.value());
         covariance(Acts::eBoundLoc1, Acts::eBoundLoc1) = Acts::square(m_toleranceY0.value());
         covariance(Acts::eBoundTheta, Acts::eBoundTheta) = Acts::square(m_toleranceTheta.value());
         covariance(Acts::eBoundPhi, Acts::eBoundPhi) = Acts::square(m_tolerancePhi.value());
-        if (extpIdPars.covariance()) {
-            covariance += (*extpIdPars.covariance());
-        }
-        if (segmentPars.covariance()) {
-            covariance += (*segmentPars.covariance());
+        if (diffPars->covariance()) {
+            covariance += (*diffPars->covariance()).block<4,4>(0,0);
         }
         const double chi2 = dPars.dot(covariance.inverse()*dPars);
-        ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Difference: "<<Acts::toString(dPars)
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Difference: "<<Acts::toString(dPars)
                         <<", covariance: \n"<<Acts::toString(covariance)<<",\nchi2: "
                         <<chi2);
         return chi2;
@@ -132,13 +137,14 @@ namespace MuonCombinedR4  {
                                            std::unique_ptr<MuonR4::MuonTag>&& idTag) const {
 
         std::optional<Acts::BoundTrackParameters> currentPars = idTag->extrapolatedParsID(caloExitParKey);
-        
         const Acts::Surface* currentSurface{nullptr};
-        const Acts::GeometryContext tgContext{m_trackingGeometryTool->getGeometryContext(ctx).context()};
+
+        const Acts::GeometryContext tgContext{m_ctxProvider.getGeometryContext(ctx)};
 
         const xAOD::MuonSegment* bestMatch{nullptr};
-        double bestChi2{std::numeric_limits<double>::max()};
+        double bestChi2{m_matchChi2 + Acts::s_epsilon};
 
+        float taggingScore{0.f};
         /** Loop over the segments and attempt to match them with the ID track */
         for (auto segIter = selectedCandidates.begin(); segIter!= selectedCandidates.end(); ) {
             const xAOD::MuonSegment* matchMe{*segIter};
@@ -146,15 +152,22 @@ namespace MuonCombinedR4  {
             ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" Try to match the segment "<<MuonR4::printID(*matchMe));
 
             const Acts::Surface& target = getSurface(*matchMe);
-            /// Attempt to extrapolate onto the target
+            /* Target surface changed try to extrapolate to the target surface */
             if (&target != currentSurface) {
-                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Atempt to extrapolate to associated surface "
-                    <<target.toString(tgContext));
+                /** First check whether the previous surface gave a best match */
+                if (bestChi2 < m_matchChi2) {
+                    idTag->setSegments(std::array{bestMatch});
+                    taggingScore+= bestChi2;
+                }
+                bestChi2 = m_matchChi2 + Acts::s_epsilon;
+                bestMatch = nullptr;
+                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Attempt to extrapolate to associated surface "
+                                <<target.toString(tgContext));
                 auto surfPars = m_extrapolationTool->propagate(ctx, *currentPars, target);
-                /** Extrapolation failed */
+                /** Extrapolation failed. */
                 if (!surfPars.ok()) {
-                    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__
-                        <<" - Extrapolation failed. Skipp all other segments on the surface.");
+                    ATH_MSG_DEBUG(__func__<<"() "<<__LINE__
+                        <<" - Extrapolation failed. Skip all other segments on the surface.");
                     segIter = std::find_if(segIter, selectedCandidates.end(),
                         [&](const xAOD::MuonSegment* failedSeg) {
                             const Acts::Surface& skipSurface = getSurface(*failedSeg);
@@ -164,10 +177,7 @@ namespace MuonCombinedR4  {
                 }
                 currentSurface = &target;
                 currentPars = (*surfPars);
-                if (bestChi2 < m_matchChi2) {
-                    idTag->setSegments(std::array{bestMatch});
-                }
-                bestChi2 = std::numeric_limits<double>::max();
+
                 ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Extrapolation succeeded: "<<(*currentPars));
                 idTag->setExtrapolatedParsID(Acts::toUnderlying(matchMe->chamberIndex()), std::move(*surfPars));          
             }
@@ -179,16 +189,16 @@ namespace MuonCombinedR4  {
                 bestMatch = matchMe;
             }
         }
-        if (bestChi2 < m_matchChi2) {
+       if (bestChi2 < m_matchChi2) {
             idTag->setSegments(std::array{bestMatch});
+            taggingScore+= bestChi2;
         }
         if (idTag->segments().empty()) {
             return nullptr;
         }
 
         /** Calculate the max dEta and dPhi variables */
-        float maxDeta{0.};
-        float maxDPhi{0.};
+        float maxDeta{0.}, maxDPhi{0.};
         for (const xAOD::MuonSegment* matched : idTag->segments()) {
             const Amg::Vector3D segDir = matched->direction();
             const Amg::Vector3D parDir = idTag->extrapolatedParsID(Acts::toUnderlying(matched->chamberIndex()))->direction();
@@ -200,6 +210,7 @@ namespace MuonCombinedR4  {
         }
         idTag->setParameter(xAOD::Muon::ParamDef::segmentDeltaEta, maxDeta);
         idTag->setParameter(xAOD::Muon::ParamDef::segmentDeltaPhi, maxDPhi);
+        idTag->setParameter(xAOD::Muon::ParamDef::segmentChi2OverDoF, taggingScore / idTag->segments().size());
         return idTag;
     }
     StatusCode SegmentTaggingAlg::execute(const EventContext& ctx) const {
@@ -211,7 +222,7 @@ namespace MuonCombinedR4  {
         const std::vector<const xAOD::MuonSegment*> candidateSegs = prepareSegments(ctx);
         ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Try to match "<<idTracks->size()
             <<" ID tracks to "<<candidateSegs.size()<<" segments.");
-        const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+        const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
 
         
         MuTagCont_t outContainer{};

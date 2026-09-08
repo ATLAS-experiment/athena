@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCelldeadOTXTool.h"
@@ -75,7 +75,7 @@ StatusCode LArCelldeadOTXTool::process(CaloCellContainer* cellCollection, const 
     for (i = 0; i < nBCIDs && bcids[i] != bcid; i++)
       ;
 
-    if (ATH_LIKELY(!satur[i]))
+    if (!satur[i]) [[likely]]
       scEne = energies[i];
     if (scEne < m_scCut) {
       ATH_MSG_VERBOSE("SuperCell value " << scEne << " below threshold, ignoring");

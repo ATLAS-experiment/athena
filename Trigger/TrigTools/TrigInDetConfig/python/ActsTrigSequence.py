@@ -48,11 +48,15 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
 
     if self.flags.Acts.useCache:
         ViewDataVerifier.DataObjects |= {( 'ActsTrk::Cache::Handles<xAOD::SpacePoint>::IDCBackend' , 'StoreGateSvc+ActsPixelSpacePointCache_Back' ),
-                                         ( 'ActsTrk::Cache::Handles<xAOD::PixelCluster>::IDCBackend' , 'StoreGateSvc+ActsPixelClusterCache_Back' ),
-                                         ( 'ActsTrk::Cache::Handles<xAOD::StripCluster>::IDCBackend' , 'StoreGateSvc+ActsStripClusterCache_Back' ),
-                                         ( 'ActsTrk::Cache::Handles<xAOD::PixelCluster>::IDC' , 'StoreGateSvc+ActsPixelClustersCache' ),
-                                         ( 'ActsTrk::Cache::Handles<xAOD::StripCluster>::IDC' , 'StoreGateSvc+ActsStripClustersCache' ),
-                                         ( 'ActsTrk::Cache::Handles<xAOD::SpacePoint>::IDC' , 'StoreGateSvc+ActsPixelSpacePointCache' )}
+                                        ( 'ActsTrk::Cache::Handles<xAOD::PixelCluster>::IDCBackend' , 'StoreGateSvc+ActsPixelClusterCache_Back' ),
+                                        ( 'ActsTrk::Cache::Handles<xAOD::StripCluster>::IDCBackend' , 'StoreGateSvc+ActsStripClusterCache_Back' ),
+                                        }
+
+        if self.flags.Tracking.ActiveConfig.isLRT:
+          ViewDataVerifier.DataObjects |= {
+            ( 'ActsTrk::Cache::Handles<xAOD::SpacePoint>::IDCBackend' , 'StoreGateSvc+ActsStripSpacePointCache_Back' ),
+            ( 'ActsTrk::Cache::Handles<xAOD::SpacePoint>::IDCBackend' , 'StoreGateSvc+ActsStripOverlapSpacePointCache_Back' ),
+          }
 
     ViewDataVerifier.DataObjects |= {
       ('InDet::SiDetectorElementStatus' ,   'StoreGateSvc+ITkPixelDetectorElementStatus' ),
@@ -126,21 +130,45 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
 
   def spacePointFormation(self) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-
-    from ActsConfig.ActsSpacePointFormationConfig import ActsPixelSpacePointFormationAlgCfg,ActsPixelSpacePointPreparationAlgCfg
+    isLRT = self.flags.Tracking.ActiveConfig.isLRT
+    from ActsConfig.ActsSpacePointFormationConfig import (
+       ActsPixelSpacePointFormationAlgCfg,ActsPixelSpacePointPreparationAlgCfg,
+       ActsStripSpacePointFormationAlgCfg,ActsStripSpacePointPreparationAlgCfg,
+       ActsStripOverlapSpacePointPreparationAlgCfg
+    )
     acc.merge(ActsPixelSpacePointFormationAlgCfg(self.flags,
-                                                 name="ActsPixelSPFormation_"+self.signature,
+                                                 name="PixelSPFormation_"+self.signature,
                                                  useCache=self.flags.Acts.useCache, 
                                                  PixelClusters = "ITkPixelClusters_Cached" if self.flags.Acts.useCache else "ITkPixelClusters_"+self.signature, 
                                                  PixelSpacePoints = "ITkPixelSpacepoints_"+self.signature))
-    
+    if isLRT:
+      acc.merge(ActsStripSpacePointFormationAlgCfg(self.flags,
+                                                  name="StripSPFormation_"+self.signature,
+                                                  useCache=self.flags.Acts.useCache,
+                                                  StripClusters = "ITkStripClusters_Cached" if self.flags.Acts.useCache else "ITkStripClusters_"+self.signature,
+                                                  StripSpacePoints = "ITkStripSpacepoints_"+self.signature,
+                                                  StripOverlapSpacePoints="ITkStripOverlapSpacepoints_"+self.signature))
+
     if self.flags.Acts.useCache:
       acc.merge(ActsPixelSpacePointPreparationAlgCfg(self.flags,
-                                                     name="ActsPixelSPViewFiller_"+self.signature,
+                                                     name="PixelSPVF_"+self.signature,
                                                      useCache=True, 
                                                      RoIs=self.rois, 
                                                      OutputCollection="ITkPixelSpacePoints_Cached", 
                                                      InputIDC="ActsPixelSpacePointCache"))
+      if isLRT:
+        acc.merge(ActsStripSpacePointPreparationAlgCfg(self.flags,
+                                                      name="StripSPVF_"+self.signature,
+                                                      useCache=True,
+                                                      RoIs=self.rois,
+                                                      OutputCollection="ITkStripSpacePoints_Cached",
+                                                      InputIDC="ActsStripSpacePointCache"))
+        acc.merge(ActsStripOverlapSpacePointPreparationAlgCfg(self.flags,
+                                                              name="StripOverlapSPVF_"+self.signature,
+                                                              useCache=True,
+                                                              RoIs=self.rois,
+                                                              OutputCollection="ITkStripOverlapSpacePoints_Cached",
+                                                              InputIDC="ActsStripOverlapSpacePointCache"))
 
     return acc
 
@@ -149,25 +177,58 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
                       inputTracksName : str = None) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    from ActsConfig.ActsSeedingConfig import ActsPixelSeedingAlgCfg
+    from ActsConfig.ActsSeedingConfig import (
+      ActsLargeRadiusStripSeedingToolCfg,
+      ActsPixelSeedingAlgCfg,
+      ActsStripSeedingAlgCfg,
+    )
 
-    acc.merge(ActsPixelSeedingAlgCfg(self.flags, 
-                                     name="ActsPixelSeedingAlg_"+self.signature, 
-                                     InputSpacePoints=['ITkPixelSpacePoints_Cached'] if self.flags.Acts.useCache else ['ITkPixelSpacepoints_'+self.signature], 
-                                     useFastTracking=True))
+    isLRT = self.flags.Tracking.ActiveConfig.isLRT
 
-    from ActsConfig.ActsTrackFindingConfig import ActsMainTrackFindingAlgCfg, ActsTrackToTrackParticleCnvAlgCfg
+    seed_labels = []
+    seed_keys = []
+
+    if isLRT:
+      stripSpacePoints = ['ITkStripSpacePoints_Cached',
+                          'ITkStripOverlapSpacePoints_Cached'] if self.flags.Acts.useCache else ['ITkStripSpacepoints_'+self.signature, 'ITkStripOverlapSpacepoints_'+self.signature]
+      seeding_args = {
+        "name": "ActsStripSeedingAlg_"+self.signature,
+        "InputSpacePoints": stripSpacePoints,
+        "SeedTool": acc.popToolsAndMerge(ActsLargeRadiusStripSeedingToolCfg(
+          self.flags,
+          name="ActsLargeRadiusStripSeedingTool_"+self.signature)),
+        "useFastTracking": True,
+      }
+      acc.merge(ActsStripSeedingAlgCfg(self.flags, **seeding_args))
+      seed_labels.append("SSS")
+      seed_keys.append("ActsStripSeeds")
+
+    else:
+      acc.merge(ActsPixelSeedingAlgCfg(self.flags,
+                                      name="ActsPixelSeedingAlg_"+self.signature,
+                                      InputSpacePoints=['ITkPixelSpacePoints_Cached'] if self.flags.Acts.useCache else ['ITkPixelSpacepoints_'+self.signature],
+                                      useFastTracking=True))
+      seed_labels.append("PPP")
+      seed_keys.append("ActsPixelSeeds")
+
+    from ActsConfig.ActsTrackFindingConfig import ActsMainTrackFindingAlgCfg
+    from ActsConfig.ActsEventCnvConfig import ActsTrackToTrackParticleCnvAlgCfg
     measurements = ["ITkPixelClusters_Cached" if self.flags.Acts.useCache else "ITkPixelClusters_"+self.signature,
                     "ITkStripClusters_Cached" if self.flags.Acts.useCache else "ITkStripClusters_"+self.signature]
 
-    trackfinding = ActsMainTrackFindingAlgCfg(self.flags, 
-                                              name="ActsTrackFindingAlg_"+self.signature, 
+    # LRT uses seed refit (for now)
+    extra_tf_kwargs = {}
+    if isLRT:
+      extra_tf_kwargs["refitSeeds"] = True
+
+    from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
+    trackfinding = ActsMainTrackFindingAlgCfg(self.flags,
+                                              name="ActsTrackFindingAlg_"+self.signature,
                                               ACTSTracksLocation=self.flags.Tracking.ActiveConfig.trkTracks_FTF,
-                                              SeedLabels=["PPP"],
-                                              SeedContainerKeys=["ActsPixelSeeds"],
-                                              DetectorElementsKeys=['ITkPixelDetectorElementCollection'],
-                                              UncalibratedMeasurementContainerKeys=measurements)
-     
+                                              SeedLabels=seed_labels,
+                                              SeedContainerKeys=seed_keys,
+                                              UncalibratedMeasurementContainerKeys=measurements,
+                                              TrackParamsEstimationTool=[acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(self.flags, **extra_tf_kwargs))])
     acc.merge(trackfinding)
     acc.merge(ActsTrackToTrackParticleCnvAlgCfg(self.flags,
                                                 name="ActsTrackParticleCreator_"+self.signature, 
@@ -193,7 +254,7 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
   def xAODParticleCreation(self) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
+    from ActsConfig.ActsEventCnvConfig import ActsTrackToTrackParticleCnvAlgCfg
     acc.merge(ActsTrackToTrackParticleCnvAlgCfg(self.flags,
                                                 "ActsTrackParticleCreator_Ambi_"+self.signature, 
                                                 ACTSTracksLocation=[self.flags.Tracking.ActiveConfig.trkTracks_IDTrig], 

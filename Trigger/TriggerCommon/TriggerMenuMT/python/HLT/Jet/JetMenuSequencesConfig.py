@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 from enum import Enum
@@ -313,10 +313,6 @@ def jetRoITrackJetTagSelCfg(flags, preselJetDef, isPresel=True):
         f"jetRoITrackJetTagHypo_{jetDefStr}_RecoSequence",
         inputMaker=getTrackingInputMaker(flags,trkopt)
     )
-
-    # Add to top-level serial sequence after IM
-    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
-    reco.mergeReco(ROBPrefetchingAlgCfg_Si(flags, nameSuffix=reco.inputMaker().name))
 
     # Decorate EventInfo with online beamspot info in global context -- avoid multiple executes
     from ..Bjet.BjetFlavourTaggingConfig import OnlineBeamspotAugmenterCfg

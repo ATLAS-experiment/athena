@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -17,26 +17,14 @@
 
 // constructor
 Trk::CompressedLayerMaterialCreator::CompressedLayerMaterialCreator(const std::string& t, const std::string& n, const IInterface* p)
-: AthAlgTool(t,n,p),
-  m_compressedMaterialThickness(1.),
-  m_compressedMaterialX0Bins(256),
-  m_compressedMaterialZARhoBins(256)
+: AthAlgTool(t,n,p)
 {
     declareInterface<Trk::ILayerMaterialCreator>(this);
     
     // give the map a name
     declareProperty("LayerMaterialName"                 , m_layerMaterialName);
     declareProperty("LayerMaterialDirectory"            , m_layerMaterialDirectory);
-    // setup for compressed layer creation
-    declareProperty("MaterialThickness"                 , m_compressedMaterialThickness);
-    declareProperty("MaterialBinsX0"                    , m_compressedMaterialX0Bins);
-    declareProperty("MaterialBinsZARho"                 , m_compressedMaterialZARhoBins);
-    
 }
-
-// destructor
-Trk::CompressedLayerMaterialCreator::~CompressedLayerMaterialCreator()
-= default;
 
 Trk::LayerMaterialProperties* Trk::CompressedLayerMaterialCreator::createLayerMaterial(const Trk::LayerMaterialRecord& lmr) const
 {
@@ -80,7 +68,7 @@ Trk::LayerMaterialProperties* Trk::CompressedLayerMaterialCreator::convertLayerM
                 materialVector.push_back(mProperties);
             }
             // now pus the vector into the matrix
-            materialMatrix.push_back(materialVector);
+            materialMatrix.push_back(std::move(materialVector));
         }
         
         // create the material
@@ -115,7 +103,7 @@ Trk::LayerMaterialProperties* Trk::CompressedLayerMaterialCreator::createCompres
     materialBins.reserve(nSecondBins);
     for (size_t isec = 0; isec < nSecondBins; ++isec) {
         std::vector<unsigned short int> firstbins(nFirstBins,0);
-        materialBins.push_back(firstbins);
+        materialBins.push_back(std::move(firstbins));
         // loop over the bins
         for (size_t ifir = 0; ifir < nFirstBins; ++ifir) {
             // get the current material properties
@@ -142,9 +130,9 @@ Trk::LayerMaterialProperties* Trk::CompressedLayerMaterialCreator::createCompres
         x0materialbins.reserve(m_compressedMaterialX0Bins);
         for (size_t ix0 = 0; ix0 < m_compressedMaterialX0Bins; ++ix0) {
             std::vector < Trk::IndexedMaterial > materialBin;
-            x0materialbins.push_back( materialBin );
+            x0materialbins.push_back( std::move(materialBin) );
         }
-        materialHistogram.push_back(x0materialbins);
+        materialHistogram.push_back(std::move(x0materialbins));
     }
     // fill the histogram
     for (size_t isec = 0; isec < nSecondBins; ++isec) {
@@ -204,6 +192,9 @@ Trk::LayerMaterialProperties* Trk::CompressedLayerMaterialCreator::createCompres
                 avRho *= measure;
                 avT   *= measure;
                 // compress to a model thickness [ rho affected ]
+                if ((tinX0 == 0) or (tinL0 == 0)) [[unlikely]]{
+                  throw std::runtime_error("createCompressedLayerMaterial: divisor is zero.");
+                }
                 avRho *= avT/m_compressedMaterialThickness;
                 materialVector.push_back(new Trk::MaterialProperties(m_compressedMaterialThickness,
                                                                      m_compressedMaterialThickness/tinX0,

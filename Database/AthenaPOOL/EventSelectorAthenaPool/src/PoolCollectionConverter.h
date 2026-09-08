@@ -18,6 +18,7 @@ class IPoolSvc;
 namespace pool {
    class ICollection;
    class ICollectionCursor;
+   class DbType;
 }
 class StatusCode;
 
@@ -43,6 +44,16 @@ public:
    /// Required by all Gaudi Services
    StatusCode initialize();
 
+   /// @return a pointer to a Pool Collection.
+   /// @param collectionType [IN] string containing the collection type.
+   /// @param connection [IN] string containing the connection.
+   /// @param collectionName [IN] string containing the persistent name of the collection.
+   /// @param contextId [IN] id for PoolSvc persistency service to use for input.
+   pool::ICollection* createCollection(const std::string& connection,
+           const std::string& collectionName,
+           const pool::DbType& collectionType,
+           unsigned int contextId) const;
+
    /// Disconnect Database
    StatusCode disconnectDb();
 
@@ -50,7 +61,7 @@ public:
    StatusCode isValid() const;
 
    /// @return ICollectionCursor over all entries
-   pool::ICollectionCursor& selectAll();
+   std::unique_ptr<pool::ICollectionCursor> selectAll();
 
 private: // data
    std::string m_collectionType;
@@ -58,7 +69,6 @@ private: // data
    unsigned int m_contextId;
    const IPoolSvc* m_poolSvc;
    pool::ICollection* m_poolCollection;
-   std::unique_ptr<pool::ICollectionCursor> m_collectionCursor;
 
 private: // hide copy and assignment
    PoolCollectionConverter(const PoolCollectionConverter& rhs);

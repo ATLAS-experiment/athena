@@ -22,23 +22,17 @@ INPUT_EVNT_FILE="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/
 
 
 # Create HITS_SIM.pool.root file for latest release
-mkdir -p athena_latest
-(
-    cd athena_latest
-
-    export ATHENA_CORE_NUMBER=8
-    geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
-    conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
-
-
-    # calibration hits single pion test
-    Sim_tf.py \
+export ATHENA_CORE_NUMBER=8
+geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+# calibration hits single pion test
+Sim_tf.py \
     --CA \
     --multithreaded \
     --simulator 'FullG4MT_QS'  \
     --inputEVNTFile ${INPUT_EVNT_FILE} \
     --outputHITSFile 'test.CA.HITS.pool.root' \
-    --maxEvents '1000' \
+    --maxEvents '10000' \
     --skipEvents '0' \
     --conditionsTag "default:${conditions}" \
     --geometryVersion "default:${geometry}" \
@@ -46,14 +40,12 @@ mkdir -p athena_latest
     --postInclude 'PyJobTransforms.TransformUtils.UseFrontier' \
     --postExec 'EVNTtoHITS:with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
     --imf False
-
-    SimValid_tf.py --inputHITSFile test.CA.HITS.pool.root --outputHIST_SIMFile test.CA.HITS_SIM.pool.root
-)
+SimValid_tf.py --inputHITSFile test.CA.HITS.pool.root --outputHIST_SIMFile test.CA.HITS_SIM.pool.root
 
 
 
-R_FILE="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/athena_25.0.47_newGeant4_Validation_calhits.root"
-X_FILE="athena_latest/test.CA.HITS_SIM.pool.root"
+R_FILE="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/athena_25.0.70_newGeant4_Validation_calhits.root"
+X_FILE="test.CA.HITS_SIM.pool.root"
 
 
 # Don't run if dcube config for nightly cmp is not found

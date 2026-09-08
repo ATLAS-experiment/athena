@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Implementation of TileROD_Decoder class
@@ -3413,6 +3413,7 @@ uint32_t TileROD_Decoder::fillCollectionHLT(const ROBData * rob,
                                             TileCellCollection * MBTS,
                                             const TileHid2RESrcID* hid2reHLT) const
 {
+  const EventContext& ctx = Gaudi::Hive::currentContext();
   uint32_t version = rob->rod_version() & 0xFFFF;
   // Resets error flag
   uint32_t error = 0x0;
@@ -3528,9 +3529,6 @@ uint32_t TileROD_Decoder::fillCollectionHLT(const ROBData * rob,
               DQfragMissing = false;
               correctAmplitude = false;
               rChUnit = (TileRawChannelUnit::UNIT) (unit); // Offline units in simulated data
-              if (!m_demoFragIDs.empty()) {
-                ATH_MSG_WARNING("DemoFragIDs is not supported in MC"); // No demonstator cabling in MC
-              }
             }
             
             unpack_frag4HLT(version, sizeOverhead, unit, p, pChannel, frag_id, drawer_type);
@@ -3564,7 +3562,7 @@ uint32_t TileROD_Decoder::fillCollectionHLT(const ROBData * rob,
     wc += count;
   }
 
-  bool masked_drawer = m_checkMaskedDrawers ? m_tileBadChanTool->isDrawerMasked(frag_id) : false;
+  bool masked_drawer = m_checkMaskedDrawers ? m_tileBadChanTool->isDrawerMasked(frag_id, ctx) : false;
 
   if (DQfragMissing && !masked_drawer) error |= 0x40000;
   

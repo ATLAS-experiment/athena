@@ -16,6 +16,8 @@
 #include <MuonReadoutGeometryR4/RpcReadoutElement.h>
 #include <MuonReadoutGeometryR4/MmReadoutElement.h>
 #include <MuonReadoutGeometryR4/sTgcReadoutElement.h>
+
+#include  <ActsGeometryInterfaces/ISurfacePlacement.h>
 #include <GaudiKernel/SystemOfUnits.h>
 
 #include "Acts/Geometry/TrapezoidVolumeBounds.hpp"
@@ -83,7 +85,7 @@ namespace{
     }
 
     Identifier identify(const Acts::Surface& surface) {
-        const auto* detEl = dynamic_cast<const ActsTrk::IDetectorElementBase*>(surface.surfacePlacement());
+        const auto* detEl = dynamic_cast<const ActsTrk::ISurfacePlacement*>(surface.surfacePlacement());
         return detEl ? detEl->identify(): Identifier{};
     }
 
@@ -470,7 +472,7 @@ namespace MuonGMR4 {
                 saveEnvelope(gctx, std::format("Chamber_{:}{:}{:}{:}{:}", 
                                                 chamber.detectorType(),
                                                 chName(chamber.chamberIndex()),
-                                                Acts::abs(chamber.stationEta()),
+                                                std::abs(chamber.stationEta()),
                                                 chamber.stationEta() > 0 ? 'A' : 'C',
                                                 chamber.stationPhi()), 
                             chamberBounds, extractSurfaces(chamber.readoutEles()));
@@ -717,7 +719,7 @@ namespace MuonGMR4 {
                 const int eta = m_idHelperSvc->stationEta(volId);
                 saveEnvelope(gctx, std::format("TrackingVolume_{:}{:}{:}{:}_{:}", 
                                                  chName(m_idHelperSvc->chamberIndex(volId)),
-                                                 Acts::abs(eta), eta > 0 ? 'A' : 'C',
+                                                 std::abs(eta), eta > 0 ? 'A' : 'C',
                                                  m_idHelperSvc->stationPhi(volId), vIdx), 
                             *testVol, surfaces , chamberVolumes(*testVol));
 

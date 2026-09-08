@@ -93,6 +93,8 @@ StatusCode SCTHitsNoiseMonAlg::fillHistograms(const EventContext& ctx) const {
   ++m_numberOfEventsRecent;
 
   // If track hits are selected, make the vector of track rdo identifiers
+  //Total stack use for this function is 473316 bytes.
+  //coverity[STACK_USE]
   std::array<std::unordered_set<Identifier>, N_WAFERS> rdosOnTracks;
   if (m_doTrackHits) {
     if (makeVectorOfTrackRDOIdentifiers(rdosOnTracks, ctx).isFailure()) {

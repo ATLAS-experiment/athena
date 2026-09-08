@@ -26,6 +26,7 @@ events where two particles decay into states with missing ET.
 #include <vector>
 #include <TObject.h>
 #include <TDirectory.h>
+#include "TMatrixD.h"
 
 #include <memory>
 #include <string>
@@ -334,7 +335,13 @@ public:
   MissingMassProb* Prob;
 
   int RunMissingMassCalculator( const xAOD::IParticle* part1, const xAOD::IParticle* part2, const xAOD::MissingET* met, const int& njets );
+  
+  bool MassCollinear(const xAOD::IParticle *p0, const xAOD::IParticle *p1,
+                     const xAOD::MissingET *met,  // met
+                     const bool kMMCsynchronize,  // mmc sychronization
+                     double &mass, double &xp1, double &xp2);
 
+     
   //-------- Set Input Parameters
   void FinalizeSettings(const xAOD::IParticle* part1, const xAOD::IParticle* part2, const xAOD::MissingET* met, const int& njets );
   void SetNiterFit1(const int val) { m_niter_fit1=val; } // number of iterations per loop in dPhi loop

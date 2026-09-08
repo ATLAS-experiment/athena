@@ -1,5 +1,5 @@
 /**
-* Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+* Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
 *
 * @file HGTD_RecAlgs/TimeCompatibilityCheckAlg.h
 * @author Valentina Raskina <valentina.raskina@cern.ch>
@@ -75,7 +75,7 @@ private:
 //TODO: the resolution is fixed to 0.035 ps, should add the resolution calculation after the irradiation
 
 struct Hit {
-    float m_time;
+    float m_time = 0;
     float m_resolution = 35 * Gaudi::Units::picosecond;
 };
 

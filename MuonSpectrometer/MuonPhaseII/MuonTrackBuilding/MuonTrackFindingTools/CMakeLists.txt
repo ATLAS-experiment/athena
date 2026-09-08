@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ################################################################################
 # Package: MuonTrackFindingTools
@@ -8,22 +8,11 @@
 atlas_subdir( MuonTrackFindingTools )
 
 find_package( Acts COMPONENTS Core )
-find_package( TBB )
-atlas_add_library(MuonTrackFindingToolsLib
-                   Root/*.cxx
-                   PUBLIC_HEADERS MuonTrackFindingTools
-                   LINK_LIBRARIES Acts::Core Identifier MuonReadoutGeometryR4 MuonPatternHelpers
-                                 xAODMuon MuonSpacePoint MuonStationIndexLib MuonTrackEvent TBB::tbb
-                   PRIVATE_LINK_LIBRARIES MuonTruthHelpers Identifier MuonPatternEvent MuonDetDescrUtils)
-
 
 atlas_add_component( MuonTrackFindingTools
                      src/components/*.cxx src/*.cxx
                      LINK_LIBRARIES AthenaKernel StoreGateLib AthenaBaseComps GaudiKernel MuonReadoutGeometryR4
-                                    xAODTracking CxxUtils MuonSpacePoint ActsGeometryInterfacesLib MuonDetDescrUtils
-                                    MuonPatternEvent ActsGeometryLib MuonRecToolInterfacesR4 MuonTrackFindingToolsLib
-                                    ActsCalibratorsLib)
+                                    Acts::Core xAODTracking CxxUtils MuonSpacePoint ActsGeometryInterfacesLib MuonDetDescrUtils
+                                    MuonPatternEvent ActsGeometryLib MuonRecToolInterfacesR4 
+                                    ActsCalibratorsLib MuonTruthHelpers FourMomUtils)
 
-
-# Install files from the package:
-#atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

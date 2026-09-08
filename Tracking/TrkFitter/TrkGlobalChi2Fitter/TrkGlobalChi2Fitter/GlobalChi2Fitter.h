@@ -1061,12 +1061,6 @@ namespace Trk {
       const MagneticFieldProperties&
     ) const;
 
-    virtual int iterationsOfLastFit() const;
-
-    virtual void setMinIterations(int);
-
-    static bool correctAngles(double &, double &) ;
-
     bool isMuonTrack(const Track &) const;
 
     /**

@@ -35,11 +35,11 @@ MDTSimHitCollection_PERS*    MDTSimHitCollectionCnv::createPersistent (MDTSimHit
 
 MDTSimHitCollection* MDTSimHitCollectionCnv::createTransient(const Token* token) {
     MsgStream log(msgSvc(), "MDTSimHitCollectionCnv" );
-    static const pool::Guid   p0_guid("D76D06CC-C15F-43E6-BBC3-480DE5DA065D"); // before t/p split
-    static const pool::Guid   p1_guid("EA781971-65C5-4B30-9D22-EEFB764BA0B3");
-    static const pool::Guid   p2_guid("92880B97-75BB-4C5D-8183-577338059FCC");
-    static const pool::Guid   p3_guid("0E9EEEE2-304F-44B8-B1DF-E75297183A02");
-    static const pool::Guid   p4_guid("018E2DAC-18EB-7BBC-92AF-EFE3F0E400C2");
+    static const Guid   p0_guid("D76D06CC-C15F-43E6-BBC3-480DE5DA065D"); // before t/p split
+    static const Guid   p1_guid("EA781971-65C5-4B30-9D22-EEFB764BA0B3");
+    static const Guid   p2_guid("92880B97-75BB-4C5D-8183-577338059FCC");
+    static const Guid   p3_guid("0E9EEEE2-304F-44B8-B1DF-E75297183A02");
+    static const Guid   p4_guid("018E2DAC-18EB-7BBC-92AF-EFE3F0E400C2");
     ATH_MSG_DEBUG("createTransient(const Token* token): main converter");
     MDTSimHitCollection* p_collection(nullptr);
     if( compareClassGuid(token, p4_guid) ) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -30,21 +30,14 @@ Interface definition for gFEXFPGA
   public:
     static const InterfaceID& interfaceID( ) ;
 
-    virtual StatusCode init(int id) = 0;
-
-    virtual void reset() = 0;
-
-    virtual int getID() const = 0;
-
-
     // virtual void SetTowersAndCells_SG(gTowersCentral) = 0;
     // virtual void SetTowersAndCells_SG(gTowersForward) = 0;
 
     // virtual void GetEnergyMatrix(gTowersCentral &) const = 0;
     // virtual void GetEnergyMatrix(gTowersForward &) const = 0;
 
-    virtual void FillgTowerEDMCentral(SG::WriteHandle<xAOD::gFexTowerContainer> &, gTowersCentral &, gTowersType &, gTowersType &, gTowersType &) = 0;
-    virtual void FillgTowerEDMForward(SG::WriteHandle<xAOD::gFexTowerContainer> &, gTowersForward &, gTowersForward &, gTowersType &, gTowersType &, gTowersType &) = 0;
+    virtual void FillgTowerEDMCentral(const EventContext& , SG::WriteHandle<xAOD::gFexTowerContainer> &, int, const gTowersCentral &, gTowersType &, gTowersType &, gTowersType &) const = 0;
+    virtual void FillgTowerEDMForward(const EventContext& , SG::WriteHandle<xAOD::gFexTowerContainer> &, int, const gTowersForward &, const gTowersForward &, gTowersType &, gTowersType &, gTowersType &) const = 0;
 
 
   private:

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -47,8 +47,8 @@ StatusCode IDTPM::PlotMgr::initialize()
 /// --------------------------
 IDTPM::SinglePlotDefinition IDTPM::PlotMgr::retrieveDefinition(
     const std::string& identifier, 
-    const std::string& folderOverride, 
-    const std::string& nameOverride ) const
+    std::string_view folderOverride, 
+    std::string_view nameOverride ) const
 {
   /// Loading PlotsDefinitionSvc
   ISvcLocator* svcLoc = Gaudi::svcLocator();

@@ -62,7 +62,7 @@ namespace SH
     // private interface
     //
 
-    ClassDef(MetaVector, 1);
+    ClassDefOverride(MetaVector, 1);
   };
 }
 

@@ -40,7 +40,7 @@ bool ByteStreamRDP_OutputSvc::putEvent(const RawEvent* re, const EventContext& c
    cache->releaseEvent();
    const uint32_t reSize = re->fragment_size_word();
    const uint32_t* reStart = re->start();
-   cache->dataBuffer = std::make_unique<uint32_t[]>(reSize);
+   cache->dataBuffer = std::make_unique_for_overwrite<uint32_t[]>(reSize);
    std::copy(reStart, reStart+reSize, cache->dataBuffer.get());
 
    // Create a cached RawEvent object from the cached data buffer

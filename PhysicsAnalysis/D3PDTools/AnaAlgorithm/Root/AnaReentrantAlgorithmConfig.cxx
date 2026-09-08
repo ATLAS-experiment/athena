@@ -24,9 +24,7 @@
 namespace EL
 {
   AnaReentrantAlgorithmConfig ::
-  AnaReentrantAlgorithmConfig ()
-  {
-  }
+  AnaReentrantAlgorithmConfig () = default;
 
 
 

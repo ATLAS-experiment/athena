@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "RD53SimTool.h"
@@ -23,20 +23,14 @@ RD53SimTool::RD53SimTool(const std::string& type, const std::string& name, const
   FrontEndSimTool(type, name, parent) {
 }
 
-RD53SimTool::~RD53SimTool() = default;
-
 StatusCode RD53SimTool::initialize() {
   ATH_CHECK(FrontEndSimTool::initialize());
   ATH_MSG_DEBUG("RD53SimTool::initialize()");
   return StatusCode::SUCCESS;
 }
 
-StatusCode RD53SimTool::finalize() {
-  ATH_MSG_DEBUG("RD53SimTool::finalize()");
-  return StatusCode::SUCCESS;
-}
-
-void RD53SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Collection& rdoCollection,
+void RD53SimTool::process(const EventContext& ctx,
+                          SiChargedDiodeCollection& chargedDiodes, PixelRDO_Collection& rdoCollection,
                           CLHEP::HepRandomEngine* rndmEngine) const {
   const PixelID* pixelId = static_cast<const PixelID*>(chargedDiodes.element()->getIdHelper());
   const IdentifierHash moduleHash = pixelId->wafer_hash(chargedDiodes.identify()); // wafer hash
@@ -47,7 +41,6 @@ void RD53SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
     return;
   }
 
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
   SG::ReadCondHandle<PixelChargeCalibCondData> calibDataHandle(m_chargeDataKey, ctx);
   const PixelChargeCalibCondData *calibData = *calibDataHandle;
 

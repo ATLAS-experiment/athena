@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 """Tool to check for error messages in a log file.
 
@@ -21,9 +21,7 @@ regexMap['error/fatal'] = [
     r'^Caught signal',
     r'^Core dump',
     r'tcmalloc\: allocation failed',
-    r'athenaHLT.py\: error',
-    r'HLTMPPU.*Child Issue',
-    r'HLTMPPU.*Configuration Issue',
+    r'athenaEF.py\: error',
     r'There was a crash',
     r'illegal instruction',
     r'failure loading library',
@@ -162,31 +160,34 @@ def scanLogfile(args, logfile, ignorePattern=[]):
         tracing = False
         fpeTracing = False
 
-        for line in f:
-            # First check if we need to start or continue following a trace
-            # Tracing only makes sense for errors
-            if args.errors:
-                if tPattern.search(line) and not igLevels.search(line):
-                    tracing = True
-                elif fpeStartPattern.search(line) and not igLevels.search(line):
-                    fpeTracing = True
-                elif line =='\n':
-                    tracing = False
-                    fpeTracing = False
+        try:
+            for line in f:
+                # First check if we need to start or continue following a trace
+                # Tracing only makes sense for errors
+                if args.errors:
+                    if tPattern.search(line) and not igLevels.search(line):
+                        tracing = True
+                    elif fpeStartPattern.search(line) and not igLevels.search(line):
+                        fpeTracing = True
+                    elif line =='\n':
+                        tracing = False
+                        fpeTracing = False
 
-            if tracing:
-                # Save all lines after a backtrace even if they don't belong to backtrace
-                resultsA['backtrace'].append(line)
-            elif fpeTracing:
-                # Continue following FPE so long as recognised
-                if fpeStartPattern.search(line) or fpeContPattern.search(line):
-                    resultsA['fpe'].append(line)
+                if tracing:
+                    # Save all lines after a backtrace even if they don't belong to backtrace
+                    resultsA['backtrace'].append(line)
+                elif fpeTracing:
+                    # Continue following FPE so long as recognised
+                    if fpeStartPattern.search(line) or fpeContPattern.search(line):
+                        resultsA['fpe'].append(line)
+                    else:
+                        fpeTracing = False
                 else:
-                    fpeTracing = False
-            else:
-                for cat in categories:
-                    if patterns[cat].search(line):
-                        resultsA[cat].append(line)
+                    for cat in categories:
+                        if patterns[cat].search(line):
+                            resultsA[cat].append(line)
+        except UnicodeDecodeError as e:
+            print(f'ERROR: Exception raised processing log file: {e}\n')
 
     ignoreDict = {}
     results = {cat:[] for cat in categories}

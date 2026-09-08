@@ -13,6 +13,7 @@
 #include <TCollectionProxyInfo.h>
 #include <TSystem.h>
 #include <TList.h>
+#include <ESTLType.h>
 
 // EDM include(s):
 #include "AthContainers/DataVector.h"
@@ -484,7 +485,7 @@ namespace xAOD {
       TGenCollectionProxy::InitializeEx( silent );
       // xAODRootAccess/THolder relies on the setting below
       // to be able to skip some inheritance tests.
-      fSTL_type = TClassEdit::kList;
+      fSTL_type = ROOT::kSTLlist;
 
       // Need to override what that set up for fValue and fVal.
       if( fValue ) {

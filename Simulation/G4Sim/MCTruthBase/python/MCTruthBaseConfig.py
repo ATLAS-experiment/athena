@@ -37,7 +37,17 @@ def getEnvelopeMap(flags):
 def MCTruthSteppingActionToolCfg(flags, name='G4UA::MCTruthSteppingActionTool', **kwargs):
     """Retrieve the MCTruthSteppingActionTool"""
     result = ComponentAccumulator()
+    from ISF_Services.ISF_ServicesConfig import TruthServiceCfg
+    from ISF_Services.ISF_ServicesCoreConfig import GeoIDSvcCfg
+    kwargs.setdefault("TruthRecordSvc", result.getPrimaryAndMerge(TruthServiceCfg(flags)))
+    kwargs.setdefault("GeoIDSvc", result.getPrimaryAndMerge(GeoIDSvcCfg(flags)))
     kwargs.setdefault("VolumeCollectionMap", getEnvelopeMap(flags))
+    kwargs.setdefault("SecondarySavingLevel", 2)
+
+    subDetLevel = 1
+    if "ATLAS" in flags.GeoModel.AtlasVersion and flags.Detector.GeometryCavern:
+        subDetLevel = 2
+    kwargs.setdefault("SubDetVolumeLevel", subDetLevel)
 
     result.setPrivateTools( CompFactory.G4UA.MCTruthSteppingActionTool(name, **kwargs) )
     return result

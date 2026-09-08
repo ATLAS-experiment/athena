@@ -1513,8 +1513,6 @@ StatusCode FixLArElecCalib::addMphysOverMcal(const LArOnOffIdMapping *cabling) {
      }
 
    ATH_CHECK( detStore()->record(std::move(mphys),"LArMphysOverMcal") );
-   ILArMphysOverMcal* imphys=nullptr;
-   ATH_CHECK (detStore()->symLink(mphys.get(),imphys) );
 
    ATH_MSG_ERROR(" Number of HEC channel added "<<n <<" per gain ");
    return StatusCode::SUCCESS ;
@@ -2060,12 +2058,8 @@ StatusCode FixLArElecCalib::fix12(const LArOnOffIdMapping *cabling) {
 
      ATH_MSG_INFO ( "Stored container " << minbias->totalNumberOfConditions() << " conditions, key LArMinBias " );
      ATH_CHECK( detStore()->record(std::move(minbias),"LArMinBias") );
-     //ATH_CHECK( detStore()->symLink(minbias.get(), dynamic_cast<ILArMinBias*>(minbias.get())) );
-     ATH_CHECK( detStore()->symLink(ClassID_traits<LArMinBiasMC>::ID(),"LArMinBias",ClassID_traits<ILArMinBias>::ID()));
      ATH_MSG_INFO ( "Stored container " << minbias_av->totalNumberOfConditions() << " conditions, key LArMinBiasAverage " );
      ATH_CHECK( detStore()->record(std::move(minbias_av),"LArMinBiasAverage") );
-     //ATH_CHECK( detStore()->symLink(minbias_av.get(), dynamic_cast<ILArMinBiasAverage*>(minbias_av.get())) );
-     ATH_CHECK( detStore()->symLink(ClassID_traits<LArMinBiasAverageMC>::ID(),"LArMinBiasAverage",ClassID_traits<ILArMinBiasAverage>::ID()));
 
      return StatusCode::SUCCESS;
 }
@@ -2132,7 +2126,6 @@ StatusCode FixLArElecCalib::fix14(const LArOnOffIdMapping *cabling) {
 
      ATH_MSG_INFO ( "Stored container " << minbias_av->totalNumberOfConditions() << " conditions, key LArPileupAverage " );
      ATH_CHECK( detStore()->record(std::move(minbias_av),"LArPileupAverage") );
-     ATH_CHECK( detStore()->symLink(minbias_av.get(), dynamic_cast<ILArMinBiasAverage*>(minbias_av.get())) );
 
      return StatusCode::SUCCESS;
 }

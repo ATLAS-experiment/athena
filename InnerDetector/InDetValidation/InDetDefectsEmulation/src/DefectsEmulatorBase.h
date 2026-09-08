@@ -9,7 +9,7 @@
 #include "GaudiKernel/ITHistSvc.h"
 #include "AthenaKernel/IAthRNGSvc.h"
 #include "ModuleIdentifierMatchUtil.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometryInterfaces/GeometryDefs.h"
 #include "ActsGeometry/ActsDetectorElement.h"
 
@@ -89,8 +89,7 @@ protected:
    mutable std::atomic<std::size_t>   m_splitRDOs {};
    mutable std::atomic<std::size_t>   m_totalNoise {};
 
-   PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool
-      {this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+     ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
 
    ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc", ""};
    std::string m_rngName;

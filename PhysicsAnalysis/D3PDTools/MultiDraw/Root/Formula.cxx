@@ -19,7 +19,8 @@
 #include <EventLoop/StatusCode.h>
 #include <EventLoop/IWorker.h>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
+
+#include <stdexcept>
 
 //
 // method implementations
@@ -30,7 +31,6 @@ namespace MD
   void Formula ::
   testInvariant () const
   {
-    RCU_INVARIANT (this != 0);
     if (!m_formula.empty())
     {
       RCU_INVARIANT (!m_name.empty());
@@ -165,7 +165,7 @@ namespace MD
     RCU_REQUIRE_SOFT (valid ());
 
     if (m_ndim < 0)
-      RCU_THROW_MSG ("invalid formula: " + m_formula);
+      throw std::runtime_error ("invalid formula: " + m_formula);
     if (m_tree->GetReadEntry() != m_entry)
     {
       m_entry = -1;
@@ -185,7 +185,7 @@ namespace MD
       }
     }
     if (m_ndata < 0)
-      RCU_THROW_MSG ("failed to read formula: " + m_formula);
+      throw std::runtime_error ("failed to read formula: " + m_formula);
     return m_ndata;
   }
 

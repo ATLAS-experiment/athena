@@ -26,9 +26,6 @@ run () {
     echo "Running ${name}..."
     time "${cmd[@]}"
     rc=$?
-    # Only report hard failures for comparison Acts-Trk since we know
-    # they are different. We do not expect this test to succeed
-    [ "${name}" = "dcube-trk" ] && [ $rc -ne 255 ] && rc=0
     echo "art-result: $rc ${name}"
     return $rc
 }
@@ -46,9 +43,8 @@ run "Reconstruction" \
     --inputRDOFile ${input_rdo} \
     --outputAODFile AOD.pool.root \
     --conditionsTag "default:${conditionsTag}" \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
-    --preExec "flags.Tracking.doTruth=False; \
-               flags.DQ.useTrigger=False; \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
+    --preExec "flags.DQ.useTrigger=False; \
 	       flags.Acts.doAnalysis=True; \
                flags.Output.HISTFileName=\"ActsMonitoringOutput.root\";" \
     --perfmon fullmonmt \

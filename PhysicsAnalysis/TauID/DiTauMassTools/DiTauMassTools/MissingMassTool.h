@@ -52,6 +52,12 @@ class MissingMassTool : virtual public IMissingMassTool, virtual public asg::Asg
 				    const xAOD::MissingET* met,
 				    const int & njets);
 
+  virtual CP::CorrectionCode doCollinearApprox( const xAOD::IParticle* part1,
+                                                const xAOD::IParticle* part2,
+                                                const xAOD::MissingET* met,
+                                                const bool kMMCsynchronize,
+                                                double &mass, double &xp1, double &xp2);
+
   virtual MissingMassCalculator* get() {return m_MMC;}
   virtual double GetFitStatus(int method) {(void) method; return m_MMC->OutputInfo.GetFitStatus();}
   virtual double GetFittedMass(int method) {return m_MMC->OutputInfo.GetFittedMass(method);}

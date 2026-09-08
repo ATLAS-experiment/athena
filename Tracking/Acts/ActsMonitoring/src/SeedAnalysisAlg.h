@@ -25,8 +25,9 @@
 
 #include "GaudiKernel/ToolHandle.h"
 #include "ActsToolInterfaces/ITrackParamsEstimationTool.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometryInterfaces/IGeometryRealmConvTool.h"
+#include "ActsEvent/ContextUtility.h"
 
 #include "xAODEventInfo/EventInfo.h"
 
@@ -61,10 +62,11 @@ namespace ActsTrk {
       
   private:
     ToolHandle< ActsTrk::ITrackParamsEstimationTool > m_paramEstimationTool {this, "TrackParamsEstimationTool", "", "Track Param Estimation from Seeds"};
-    PublicToolHandle< ActsTrk::ITrackingGeometryTool > m_trackingGeometryTool {this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+
     PublicToolHandle<IGeometryRealmConvTool> m_geometryConvTool{this, "GeometryRealmConvTool", ""};
 
     SG::ReadHandleKey< ActsTrk::SeedContainer > m_inputSeedColletionKey {this,  "InputSeedCollection", "", ""}; 
+    ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
 
     SG::ReadHandleKey< PRD_MultiTruthCollection > m_prdTruth {this, "ITkClustersTruth", "", ""};
     SG::ReadCondHandleKey< InDetDD::SiDetectorElementCollection > m_detEleCollKey {this, "DetectorElements", "", "Key of input SiDetectorElementCollection"};
@@ -78,6 +80,10 @@ namespace ActsTrk {
 
     Gaudi::Property< bool > m_useTopSp {this, "useTopSp", false, "Use top SP. By default, use bottom SP."};
     Gaudi::Property< bool > m_usePixel {this, "UsePixel", true, ""};
+
+    /** @brief Auxiliary class to access the calibration context.
+        TODO: Could also be used for magnetic field and geometry? */
+    ContextUtility m_ctxProvider{this};
   };
 
 }

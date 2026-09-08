@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_DigitizationTool.h"
@@ -33,6 +33,7 @@
 #include <cmath>
 #include <memory>
 #include <sstream>
+#include <algorithm>
 
 using InDetDD::SiCellId;
 
@@ -791,19 +792,13 @@ void SCT_DigitizationTool::addSDO(SiChargedDiodeCollection* collection, SG::Writ
           real_particle_hit = true;
         }
       }
-      // check if this track number has been already used.
-      std::vector<InDetSimData::Deposit>::reverse_iterator theDeposit{deposits.rend()};  // dummy value
-      std::vector<InDetSimData::Deposit>::reverse_iterator depositsR_end{deposits.rend()};
-      std::vector<InDetSimData::Deposit>::reverse_iterator i_Deposit{deposits.rbegin()};
-      for (; i_Deposit != depositsR_end; ++i_Deposit) {
-        if ((*i_Deposit).first == trkLink) {
-          theDeposit = i_Deposit;
-          break;
-        }
-      }
+      
+      auto theDeposit = std::ranges::find_if(deposits|std::views::reverse,
+        [&](const InDetSimData::Deposit& deposit){ return deposit.first == trkLink;
+      });
 
       // if the charge has already hit the Diode add it to the deposit
-      if (theDeposit != depositsR_end) {
+      if (theDeposit != deposits.rend()) {
         (*theDeposit).second += i_ListOfCharges->charge();
       } else { // create a new deposit
         deposits.emplace_back(trkLink, i_ListOfCharges->charge());

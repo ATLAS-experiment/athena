@@ -116,7 +116,7 @@ namespace SG {
                                                const VarHandleKey& contKey,
                                                const std::string& decorKey,
                                                const std::string& doc)
-    : Base (makeContDecorKey (contKey, decorKey)),
+    : Base (owner, name, makeContDecorKey (contKey, decorKey), doc),
       m_contHandleKey (contKey.key()/*, StoreID::storeName(StoreID::EVENT_STORE)*/),
       m_contBaseKey (&contKey)
   {
@@ -136,8 +136,8 @@ namespace SG {
   WriteDecorHandleKey<T>&
   WriteDecorHandleKey<T>::operator= (const std::string& sgkey)
   {
+    const std::string key = m_contBaseKey ? makeContDecorKey(*m_contBaseKey, sgkey) : sgkey;
     m_contHandleKey = contKeyFromKey (sgkey);
-    m_contBaseKey = nullptr;
     Base::operator= (sgkey);
     return *this;
   }
@@ -178,7 +178,7 @@ namespace SG {
       std::string decor = this->key();
       if (auto split = decor.rfind ('.'); split != std::string::npos)
         decor = decor.substr (split+1);
-      operator = (makeContDecorKey (*m_contBaseKey, decor));
+      VarHandleKey::operator = (makeContDecorKey (*m_contBaseKey, decor));
     }
 
     // detail::registerWriteDecorHandleKey (this->owner(), m_contHandleKey.fullKey());

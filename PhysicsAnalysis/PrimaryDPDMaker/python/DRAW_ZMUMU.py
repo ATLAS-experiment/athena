@@ -28,8 +28,8 @@ def DRAW_ZmumuKernelCfg(flags, name="DRAW_ZMUMUKernel", **kwargs):
                                                                InputDecorNames=["Muons.ptcone40"]))
 
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import AsgSelectionToolWrapperCfg
-    from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
-    muon_sel_tool = result.popToolsAndMerge(MuonSelectionToolCfg(flags, name="DRAW_ZMUMU_MuonsSelector",
+    from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
+    muon_sel_tool = result.popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(flags, name="DRAW_ZMUMU_MuonsSelector",
                                                                  MaxEta=3, MuQuality=2  # Use Medium muons
                                                                  ))
     result.addPublicTool(muon_sel_tool)

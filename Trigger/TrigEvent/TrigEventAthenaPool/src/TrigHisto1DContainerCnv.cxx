@@ -39,9 +39,9 @@ TrigHisto1DContainer* TrigHisto1DContainerCnv::createTransient(const Token* toke
   
   mlog << MSG::DEBUG << "TrigHisto1DContainerCnv::createTransient" << endmsg;
 
-  static const pool::Guid tlp1_guid( "CDC70E22-85DF-45B4-B69E-FC7FD70987A9" );
-  static const pool::Guid p1_guid( "B6240954-1842-45F5-AB5B-50934C633B1E" );
-  static const pool::Guid trans_guid( "B5752F0C-EF7A-4330-8413-1CCF0FC58AC8" );
+  static const Guid tlp1_guid( "CDC70E22-85DF-45B4-B69E-FC7FD70987A9" );
+  static const Guid p1_guid( "B6240954-1842-45F5-AB5B-50934C633B1E" );
+  static const Guid trans_guid( "B5752F0C-EF7A-4330-8413-1CCF0FC58AC8" );
 
   TrigHisto1DContainer *p_container = 0;
 

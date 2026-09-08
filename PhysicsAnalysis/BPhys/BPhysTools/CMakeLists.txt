@@ -44,6 +44,7 @@ atlas_add_library( BPhysToolsLib
 		   xAODTracking
 		   xAODBPhysLib
 		   AsgTools
+                   CxxUtils
        ${extra_libs}
 		   xAODEventInfo
 		   )
@@ -56,6 +57,7 @@ atlas_add_component( BPhysTools
 		                 xAODTracking
 		                 xAODBPhysLib
 		                 AsgTools
+                     CxxUtils
                      ${extra_libs}
                      BPhysToolsLib
 		                 xAODEventInfo
@@ -73,7 +75,7 @@ atlas_add_test( SimpleEncrypter_test
   SOURCES test/SimpleEncrypter_test.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES BPhysToolsLib ${Boost_LIBRARIES}
-  POST_EXEC_SCRIPT nopost.sh 
+  POST_EXEC_SCRIPT noerror.sh
 )
 
 

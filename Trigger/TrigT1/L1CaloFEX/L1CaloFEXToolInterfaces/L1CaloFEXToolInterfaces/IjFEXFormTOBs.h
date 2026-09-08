@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -27,11 +27,11 @@ Interface definition for eFEXFormTOBs
   public:
     static const InterfaceID& interfaceID( ) ;
 
-    virtual uint32_t formTauTOB  (int, int, int, int, int, bool, int, int) = 0;
-    virtual uint32_t formSRJetTOB(int, int, int, int, bool, int, int, const std::pair<unsigned int, const std::vector<int>&>&) = 0;
-    virtual uint32_t formLRJetTOB(int, int, int, int, bool, int, int) = 0;
-    virtual uint32_t formSumETTOB(std::tuple<int,bool>&, std::tuple<int,bool>&, int ) = 0;
-    virtual uint32_t formMetTOB  (int, int, bool, int ) = 0;
+    virtual uint32_t formTauTOB  (int, int, int, int, int, bool, int, int) const = 0;
+    virtual uint32_t formSRJetTOB(int, int, int, int, bool, int, int, const std::pair<unsigned int, const std::vector<int>&>&) const = 0;
+    virtual uint32_t formLRJetTOB(int, int, int, int, bool, int, int) const = 0;
+    virtual uint32_t formSumETTOB(std::tuple<int,bool>&, std::tuple<int,bool>&, int ) const = 0;
+    virtual uint32_t formMetTOB  (int, int, bool, int ) const = 0;
 
   private:
 

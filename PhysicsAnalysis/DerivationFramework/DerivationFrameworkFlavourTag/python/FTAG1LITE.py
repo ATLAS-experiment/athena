@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_FTAG1LITE.py
 # Minimal derivation for producing GN3/GN3X training samples via TDD.
@@ -30,8 +30,10 @@ from AthenaConfiguration.Enums import LHCPeriod
 # To test a local copy without rebuilding, override via --preExec, e.g.
 #   --preExec "from DerivationFrameworkFlavourTag import FTAG1LITE as m; \
 #              m.PASSTHROUGH_JSON_SMALL='/abs/path/to/local.json'"
-PASSTHROUGH_JSON_SMALL = "DerivationFrameworkFlavourTag/passthrough_ftag1lite.json"
-PASSTHROUGH_JSON_LARGE = "DerivationFrameworkFlavourTag/passthrough_ftag1lite_largeR.json"
+PASSTHROUGH_JSON_SMALL = "DerivationFrameworkFlavourTag/passthrough_ftag1lite_data.json"
+PASSTHROUGH_JSON_SMALL_MC_EXTRA = "DerivationFrameworkFlavourTag/passthrough_ftag1lite_mc_extra.json"
+PASSTHROUGH_JSON_LARGE = "DerivationFrameworkFlavourTag/passthrough_ftag1lite_largeR_data.json"
+PASSTHROUGH_JSON_LARGE_MC_EXTRA = "DerivationFrameworkFlavourTag/passthrough_ftag1lite_largeR_mc_extra.json"
 
 # Calorimeter sampling layer names in enum order (CaloSampling::CaloSample).
 # Used to build the OutputNamesMap for VectorExploderAlg when exploding
@@ -88,6 +90,7 @@ JET_COLLECTIONS = {
         "overlap_lepton": True,
         "matching": True,
         "passthrough_json": PASSTHROUGH_JSON_SMALL,
+        "passthrough_json_mc_extra": PASSTHROUGH_JSON_SMALL_MC_EXTRA,
         "ghost_muons": True,
         "soft_electron_selection": True,
     },
@@ -98,6 +101,7 @@ JET_COLLECTIONS = {
         "overlap_lepton": False,
         "matching": False,
         "passthrough_json": PASSTHROUGH_JSON_LARGE,
+        "passthrough_json_mc_extra": PASSTHROUGH_JSON_LARGE_MC_EXTRA,
         "ghost_muons": True,
         "soft_electron_selection": True,
     },
@@ -160,28 +164,29 @@ def FTAG1LITEKernelCfg(flags, name='FTAG1LITEKernel', **kwargs):
         DFCommonTruthCharmToolCfg,
     )
 
-    acc.merge(TruthClassificationAugmentationsCfg(flags))
+    if flags.Input.isMC:
+        acc.merge(TruthClassificationAugmentationsCfg(flags))
 
-    CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-    charmTool = acc.getPrimaryAndMerge(
-        DFCommonTruthCharmToolCfg(flags, name="PhysCommonTruthCharmTool")
-    )
-    acc.addEventAlgo(CommonAugmentation(
-        "PhysCommonTruthCharmKernel", AugmentationTools=[charmTool]
-    ))
+        CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
+        charmTool = acc.getPrimaryAndMerge(
+            DFCommonTruthCharmToolCfg(flags, name="PhysCommonTruthCharmTool")
+        )
+        acc.addEventAlgo(CommonAugmentation(
+            "PhysCommonTruthCharmKernel", AugmentationTools=[charmTool]
+        ))
 
-    acc.merge(AddHFAndDownstreamParticlesCfg(flags))
-    acc.merge(AddStandardTruthContentsCfg(
-        flags,
-        navInputCollections=[
-            "TruthElectrons", "TruthMuons", "TruthPhotons",
-            "TruthTaus", "TruthNeutrinos", "TruthBSM",
-            "TruthBottom", "TruthTop", "TruthBoson",
-            "TruthCharm", "TruthHFWithDecayParticles",
-        ],
-    ))
-    acc.merge(AddMiniTruthCollectionLinksCfg(flags))
-    acc.merge(AddPVCollectionCfg(flags))
+        acc.merge(AddHFAndDownstreamParticlesCfg(flags))
+        acc.merge(AddStandardTruthContentsCfg(
+            flags,
+            navInputCollections=[
+                "TruthElectrons", "TruthMuons", "TruthPhotons",
+                "TruthTaus", "TruthNeutrinos", "TruthBSM",
+                "TruthBottom", "TruthTop", "TruthBoson",
+                "TruthCharm", "TruthHFWithDecayParticles",
+            ],
+        ))
+        acc.merge(AddMiniTruthCollectionLinksCfg(flags))
+        acc.merge(AddPVCollectionCfg(flags))
 
     # ── Inner detector ──
     from DerivationFrameworkInDet.InDetCommonConfig import InDetCommonCfg
@@ -221,7 +226,7 @@ def FTAG1LITEKernelCfg(flags, name='FTAG1LITEKernel', **kwargs):
     from JetTagDerivationUtils.JetMatchingConfig import JetMatchingCfg
     from DerivationFrameworkFlavourTag.FtagDerivationConfig import (
         ParentDecoratorCfg,
-        trackTruthDecorator,
+        TrackTruthDecoratorCfg,
     )
 
     # ── NearestJet matching (reco-to-reco) ──
@@ -232,7 +237,7 @@ def FTAG1LITEKernelCfg(flags, name='FTAG1LITEKernel', **kwargs):
         flags, target=JETS,
         source_name="NearestJet",
         floats_to_copy=["pt", "eta", "phi"],
-        ints_to_copy=["HadronGhostTruthLabelID"],
+        ints_to_copy=["HadronGhostTruthLabelID"] if flags.Input.isMC else [],
     ))
 
     # ── Tau jet matching ──
@@ -256,38 +261,39 @@ def FTAG1LITEKernelCfg(flags, name='FTAG1LITEKernel', **kwargs):
     # This replaces TDD's AntiKt4TruthJets and AntiKt4TruthDressedWZJets
     # JetMatcher ca_blocks, allowing those containers to be excluded from
     # the DAOD output.
-    acc.merge(JetMatchingCfg(
-        flags, target=JETS,
-        sources=["AntiKt4TruthJets"],
-        source_name="TruthJet",
-        floats_to_copy=["pt"],
-        pt_priority_with_delta_r=0.3,
-    ))
-    acc.merge(JetMatchingCfg(
-        flags, target=JETS,
-        sources=["AntiKt4TruthDressedWZJets"],
-        source_name="TruthDressedWZJet",
-        floats_to_copy=["pt"],
-        pt_priority_with_delta_r=0.3,
-    ))
+    if flags.Input.isMC:
+        acc.merge(JetMatchingCfg(
+            flags, target=JETS,
+            sources=["AntiKt4TruthJets"],
+            source_name="TruthJet",
+            floats_to_copy=["pt"],
+            pt_priority_with_delta_r=0.3,
+        ))
+        acc.merge(JetMatchingCfg(
+            flags, target=JETS,
+            sources=["AntiKt4TruthDressedWZJets"],
+            source_name="TruthDressedWZJet",
+            floats_to_copy=["pt"],
+            pt_priority_with_delta_r=0.3,
+        ))
 
-    acc.merge(trackTruthDecorator(flags))
-    acc.merge(ParentDecoratorCfg(
-        flags, targetContainer=JETS, prefix="PFlow", matchDeltaR=0.3,
-    ))
+        acc.merge(TrackTruthDecoratorCfg(flags))
+        acc.merge(ParentDecoratorCfg(
+            flags, targetContainer=JETS, prefix="PFlow", matchDeltaR=0.3,
+        ))
 
-    acc.addEventAlgo(
-        CompFactory.FlavorTagDiscriminants.JetLeptonDecayLabelAlg(
-            f"JetLeptonDecayLabelAlg_{JETS}",
-            jetContainer=JETS,
+        acc.addEventAlgo(
+            CompFactory.FlavorTagDiscriminants.JetLeptonDecayLabelAlg(
+                f"JetLeptonDecayLabelAlg_{JETS}",
+                jetContainer=JETS,
+            )
         )
-    )
 
-    acc.addEventAlgo(
-        CompFactory.FlavorTagDiscriminants.SoftElectronTruthDecoratorAlg(
-            "SoftElectronTruthDecoratorAlg",
+        acc.addEventAlgo(
+            CompFactory.FlavorTagDiscriminants.SoftElectronTruthDecoratorAlg(
+                "SoftElectronTruthDecoratorAlg",
+            )
         )
-    )
 
     acc.addEventAlgo(
         CompFactory.FlavorTagDiscriminants.SoftElectronDecoratorAlg(
@@ -356,17 +362,17 @@ def FTAG1LITEKernelCfg(flags, name='FTAG1LITEKernel', **kwargs):
         "JetCalibTool_AntiKt4EMPFlow",
         JetCollection="AntiKt4EMPFlow",
         ConfigFile=calibConfigFile,
-        CalibSequence="JetArea_Residual_EtaJES_GSC",
+        CalibSequence=("JetArea_Residual_EtaJES_GSC" if flags.Input.isMC
+                       else "JetArea_Residual_EtaJES_GSC_Insitu"),
         CalibArea=calibArea,
-        IsData=False,
+        IsData=not flags.Input.isMC,
     )
     acc.addPublicTool(calibTool)
     acc.addEventAlgo(
-        CompFactory.FlavorTagDiscriminants.JetCalibrationDecoratorAlg(
+        CompFactory.JetCalibrationDecoratorAlg(
             "JetCalibrationDecoratorAlg",
-            JetCalibrationTool="JetCalibrationTool/JetCalibTool_AntiKt4EMPFlow",
-            JetContainer=JETS,
-            ptCalibratedKey=f"{JETS}.pt_calibrated",
+            JetCalibrationTool=calibTool,
+            JetContainer=JETS
         )
     )
 
@@ -388,21 +394,30 @@ def FTAG1LITEKernelCfg(flags, name='FTAG1LITEKernel', **kwargs):
     # flow, towers) via GNN loaders and outputs per-constituent
     # vectors as jet decorations.  bfloat16 compression is inline
     # via "cast": {"exp":8, "man":7} in the JSON config.
-    # One PassThroughModel instance per jet collection; each reads its
-    # own JSON from the module-level PASSTHROUGH_JSON_* constants.
+    # One PassThroughModel instance per jet collection reads the data
+    # (reco-only) JSON; on MC a second instance adds the truth-only
+    # variables from the mc_extra JSON.
     from FlavorTagInference.FlavorTagNNConfig import PassThroughModelCfg
+    ptRemap = {
+        'BTagTrackToJetAssociator': 'GhostTrack',
+        'FTagElectrons': 'GhostFTagSelectedElectrons',
+        'FTagMuons': 'GhostFTagMuons',
+    }
     for cfg in JET_COLLECTIONS.values():
-        json_path = cfg["passthrough_json"]
-        if json_path:
+        if cfg["passthrough_json"]:
             acc.merge(PassThroughModelCfg(
                 flags, cfg["name"],
-                jsonPath=json_path,
-                variableRemapping={
-                    'BTagTrackToJetAssociator': 'GhostTrack',
-                    'FTagElectrons': 'GhostFTagSelectedElectrons',
-                    'FTagMuons': 'GhostFTagMuons',
-                },
+                jsonPath=cfg["passthrough_json"],
+                variableRemapping=ptRemap,
                 muons='Muons',
+            ))
+        if flags.Input.isMC and cfg["passthrough_json_mc_extra"]:
+            acc.merge(PassThroughModelCfg(
+                flags, cfg["name"],
+                jsonPath=cfg["passthrough_json_mc_extra"],
+                variableRemapping=ptRemap,
+                muons='Muons',
+                nameSuffix='MCExtra',
             ))
 
     # ── bfloat16 compression of constituent vector decorations ──
@@ -455,14 +470,15 @@ def FTAG1LITEKernelCfg(flags, name='FTAG1LITEKernel', **kwargs):
     # decayMode, classifierParticleOutCome, pt_vis, deltaPt, matched).
     # This replaces TDD's TruthTauMatcher ca_block, allowing TruthTaus
     # to be excluded from the DAOD output.
-    acc.addEventAlgo(
-        CompFactory.FlavorTagDiscriminants.TruthTauDecoratorAlg(
-            f"TruthTauDecoratorAlg_{JETS}",
-            JetContainer=JETS,
-            TruthTauContainer="TruthTaus",
-            MaxDeltaR=0.3,
+    if flags.Input.isMC:
+        acc.addEventAlgo(
+            CompFactory.FlavorTagDiscriminants.TruthTauDecoratorAlg(
+                f"TruthTauDecoratorAlg_{JETS}",
+                JetContainer=JETS,
+                TruthTauContainer="TruthTaus",
+                MaxDeltaR=0.3,
+            )
         )
-    )
 
     # ── Overlap lepton flag ──
     # For each jet, check if any truth electron/muon from W/Z/top
@@ -472,16 +488,17 @@ def FTAG1LITEKernelCfg(flags, name='FTAG1LITEKernel', **kwargs):
     # the truth association that required TruthElectrons/TruthMuons
     # containers in the DAOD.
     # Only applied to small-R jets (large-R has no overlap-lepton cut).
-    for cfg in JET_COLLECTIONS.values():
-        if cfg["overlap_lepton"]:
-            acc.addEventAlgo(
-                CompFactory.FlavorTagJetDecorators.JetOverlapLeptonDecoratorAlg(
-                    f"JetOverlapLeptonDecoratorAlg_{cfg['name']}",
-                    JetContainer=cfg["name"],
-                    TruthElectronContainer="TruthElectrons",
-                    TruthMuonContainer="TruthMuons",
+    if flags.Input.isMC:
+        for cfg in JET_COLLECTIONS.values():
+            if cfg["overlap_lepton"]:
+                acc.addEventAlgo(
+                    CompFactory.FlavorTagJetDecorators.JetOverlapLeptonDecoratorAlg(
+                        f"JetOverlapLeptonDecoratorAlg_{cfg['name']}",
+                        JetContainer=cfg["name"],
+                        TruthElectronContainer="TruthElectrons",
+                        TruthMuonContainer="TruthMuons",
+                    )
                 )
-            )
 
     # ── Thinning ──
     # Only jet thinning remains.  All constituent variables (tracks,
@@ -502,6 +519,9 @@ def FTAG1LITEKernelCfg(flags, name='FTAG1LITEKernel', **kwargs):
         jet_name = cfg["name"]
         pt_cfg = _load_passthrough_json(cfg["passthrough_json"])
         thinning_tmpl = pt_cfg.get("thinning")
+        if flags.Input.isMC and cfg["passthrough_json_mc_extra"]:
+            extra_cfg = _load_passthrough_json(cfg["passthrough_json_mc_extra"])
+            thinning_tmpl = extra_cfg.get("thinning", thinning_tmpl)
         if not thinning_tmpl:
             raise RuntimeError(
                 f"PassThrough JSON {cfg['passthrough_json']} is missing a "
@@ -563,12 +583,17 @@ def FTAG1LITECoreCfg(flags, name_tag='FTAG1LITE'):
 
     helper.ExtraVariables = []
     for cfg in JET_COLLECTIONS.values():
-        pt_config = _load_passthrough_json(cfg["passthrough_json"])
-        extras = list(pt_config.get("copy_vars", []))
-        # jet_variables: GNN-computed scalar outputs (C++ PassThrough reads this key)
-        extras.extend(_output_name(v) for v in pt_config.get("jet_variables", []))
-        for cnode in pt_config.get("constituents", []):
-            extras.extend(_output_name(v) for v in cnode.get("variables", []))
+        json_paths = [cfg["passthrough_json"]]
+        if flags.Input.isMC and cfg["passthrough_json_mc_extra"]:
+            json_paths.append(cfg["passthrough_json_mc_extra"])
+        extras = []
+        for path in json_paths:
+            pt_config = _load_passthrough_json(path)
+            extras.extend(pt_config.get("copy_vars", []))
+            # jet_variables: GNN-computed scalar outputs (C++ PassThrough reads this key)
+            extras.extend(_output_name(v) for v in pt_config.get("jet_variables", []))
+            for cnode in pt_config.get("constituents", []):
+                extras.extend(_output_name(v) for v in cnode.get("variables", []))
         helper.ExtraVariables.append(
             '.'.join([cfg["name"]] + extras)
         )
@@ -676,8 +701,10 @@ def FTAG1LITECoreCfg(flags, name_tag='FTAG1LITE'):
         mdLists += lists
         acc.merge(ca)
 
-    for create_fn in (createCutFlowMetaData, createTruthMetaData,
-                      createEventStreamInfo):
+    create_fns = [createCutFlowMetaData, createEventStreamInfo]
+    if flags.Input.isMC:
+        create_fns.append(createTruthMetaData)
+    for create_fn in create_fns:
         lists, ca = create_fn(flags, streamName=streamName)
         mdLists += lists
         acc.merge(ca)
@@ -699,10 +726,6 @@ def FTAG1LITECoreCfg(flags, name_tag='FTAG1LITE'):
 
 def FTAG1LITECfg(flags, name_tag='FTAG1LITE'):
     """Top-level configuration for FTAG1LITE derivation."""
-    if not flags.Input.isMC:
-        raise RuntimeError(
-            "FTAG1LITE is MC-only. Cannot run on data."
-        )
     acc = ComponentAccumulator()
 
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper

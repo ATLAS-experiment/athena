@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -13,28 +13,26 @@
 #include "InDetIdentifier/SCT_ID.h"
 #include "InDetRawData/SCT_RDO_Collection.h"
 #include "InDetSimEvent/SiHit.h"
+#include "InDetReadoutGeometry/SiDetectorElement.h"
+#include "ReadoutGeometryBase/SiCellId.h"
+#include "ReadoutGeometryBase/SiLocalPosition.h"
+#include "SCT_ReadoutGeometry/SCT_ModuleSideDesign.h"
+#include "StoreGate/ReadCondHandle.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 #include "xAODTracking/TrackMeasurementValidationAuxContainer.h"
+#include "TruthUtils/MagicNumbers.h"
 
 #include "AtlasHepMC/GenParticle.h"
 
 #include "CLHEP/Geometry/Point3D.h"
 
+#include <algorithm>
 #include <cmath>
 
 #define AUXDATA(OBJ, TYP, NAME)                                         \
   static const SG::AuxElement::Accessor<TYP> acc_##NAME (#NAME);  acc_##NAME(*(OBJ))
 
-/////////////////////////////////////////////////////////////////////
-//
-//         Constructor with parameters:
-//
-/////////////////////////////////////////////////////////////////////
-SCT_PrepDataToxAOD::SCT_PrepDataToxAOD(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthReentrantAlgorithm(name, pSvcLocator)
-{ 
-}
 
 /////////////////////////////////////////////////////////////////////
 //
@@ -121,6 +119,14 @@ StatusCode SCT_PrepDataToxAOD::execute(const EventContext& ctx) const
   std::vector<std::vector<const SiHit*>> siHits(m_SCTHelper->wafer_hash_max());
   if (m_writeSiHits) {
     SG::ReadHandle<SiHitCollection> sihitCollection{m_sihitContainer, ctx};
+    // ITk split sensors: a SiHit carries the mother sensor's eta_module while
+    // the cluster lives on a child-row wafer (eta_module = mother + row), so
+    // route each hit to its child wafer hash as StripDigitizationTool does.
+    // Unsplit sensors have no mother and are unaffected. Without the element
+    // collection the hits stay on the mother wafer.
+    SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> sctDetEleHandle{m_SCTDetEleCollKey, ctx};
+    const InDetDD::SiDetectorElementCollection* sctElements =
+        sctDetEleHandle.isValid() ? sctDetEleHandle.cptr() : nullptr;
     if (sihitCollection.isValid()) {
       for (const SiHit& siHit: *sihitCollection) {
         // Check if it is an SCT hit
@@ -132,7 +138,41 @@ StatusCode SCT_PrepDataToxAOD::execute(const EventContext& ctx) const
                                                   siHit.getEtaModule(),
                                                   siHit.getSide())};
         IdentifierHash wafer_hash{m_SCTHelper->wafer_hash(wafer_id)};
-        siHits[wafer_hash].push_back(&siHit);
+
+        if (sctElements) {
+          const InDetDD::SiDetectorElement* baseEl = sctElements->getDetectorElement(wafer_hash);
+          if (baseEl) {
+            const auto* design =
+                dynamic_cast<const InDetDD::SCT_ModuleSideDesign*>(&baseEl->design());
+            const InDetDD::SCT_ModuleSideDesign* mother = design ? design->getMother() : nullptr;
+            if (mother) {
+              HepGeom::Point3D<double> avg{siHit.localStartPosition() + siHit.localEndPosition()};
+              avg *= 0.5;
+              // {xPhi, xEta, xDepth}; the mother-design row is the child eta offset.
+              const HepGeom::Point3D<double> p3{baseEl->hitLocalToLocal3D(avg)};
+              const InDetDD::SiLocalPosition slp(p3.y(), p3.x()); // (xEta along, xPhi across)
+              const InDetDD::SiCellId mDiode = mother->cellIdOfPosition(slp);
+              if (mDiode.isValid()) {
+                const int rowOffset = mother->getStripRow(mDiode).second;
+                if (rowOffset != 0) {
+                  const Identifier child_id{m_SCTHelper->wafer_id(siHit.getBarrelEndcap(),
+                                                                  siHit.getLayerDisk(),
+                                                                  siHit.getPhiModule(),
+                                                                  siHit.getEtaModule() + rowOffset,
+                                                                  siHit.getSide())};
+                  wafer_hash = m_SCTHelper->wafer_hash(child_id);
+                }
+              }
+            }
+          }
+        }
+
+        if (wafer_hash < siHits.size()) {
+          siHits[wafer_hash].push_back(&siHit);
+        } else {
+          ATH_MSG_WARNING("SiHit routed to an unknown SCT wafer (eta_module "
+                          << siHit.getEtaModule() << ", hash " << wafer_hash << "), dropped");
+        }
       }
     }
   }
@@ -227,6 +267,7 @@ StatusCode SCT_PrepDataToxAOD::execute(const EventContext& ctx) const
    
       // Add the Detector element ID  --  not sure if needed as we have the informations above
       const InDetDD::SiDetectorElement* de{prd->detectorElement()};
+
       uint64_t detElementId{0};
       if (de) {
         Identifier detId{de->identify()};
@@ -264,30 +305,29 @@ StatusCode SCT_PrepDataToxAOD::execute(const EventContext& ctx) const
                    ++missing_truth_particle;
                 }
              }
-             // @TODO provide possibility to move tp_indices to its final destination
-             AUXDATA(xprd, std::vector<unsigned int>, truth_index) = tp_indices;
+             AUXDATA(xprd, std::vector<unsigned int>, truth_index) = std::move(tp_indices);
           }
           std::vector<int> uniqueIDs;
           for (auto& i{range.first}; i!=range.second; ++i) {
             uniqueIDs.push_back(HepMC::uniqueID(i->second));
           }
-          // @TODO move vector
-          AUXDATA(xprd, std::vector<int>, truth_barcode) = uniqueIDs; // TODO rename variable to be consistent?
+          AUXDATA(xprd, std::vector<int>, truth_barcode) = std::move(uniqueIDs); // TODO rename variable to be consistent?
         }
       }
 
       // Use the SDO Collection to get a list of all true particle contributing to the cluster per readout element
       //  Also get the energy deposited by each true particle per readout element   
+      std::vector<std::vector<int>> sdoTruthUIDs;
       if (m_writeSDOs) {
         if (sdoCollection) {
-          addSDOInformation(xprd, prd, sdoCollection);
+          sdoTruthUIDs = addSDOInformation(xprd, prd, sdoCollection);
         }
       }
     
       // Now Get the most detailed truth from the SiHits
       // Note that this could get really slow if there are a lot of hits and clusters
       if (m_writeSiHits) {
-        addSiHitInformation(xprd, prd, &siHits[prd->detectorElement()->identifyHash()]);
+        addSiHitInformation(xprd, prd, &siHits[prd->detectorElement()->identifyHash()], sdoTruthUIDs);
       }
     }
   }
@@ -301,9 +341,9 @@ StatusCode SCT_PrepDataToxAOD::execute(const EventContext& ctx) const
   return StatusCode::SUCCESS;
 }
 
-void SCT_PrepDataToxAOD::addSDOInformation(xAOD::TrackMeasurementValidation* xprd,
-                                           const InDet::SCT_Cluster* prd,
-                                           const InDetSimDataCollection* sdoCollection) const
+std::vector<std::vector<int>> SCT_PrepDataToxAOD::addSDOInformation(xAOD::TrackMeasurementValidation* xprd,
+                                                                    const InDet::SCT_Cluster* prd,
+                                                                    const InDetSimDataCollection* sdoCollection) const
 {
   std::vector<int> sdo_word;
   std::vector<std::vector<int>> sdo_depositsUniqueID;
@@ -322,21 +362,23 @@ void SCT_PrepDataToxAOD::addSDOInformation(xAOD::TrackMeasurementValidation* xpr
       sdoDepEnergy[nDepos] = deposit.second;
       nDepos++;
     }
-    sdo_depositsUniqueID.push_back(sdoDepUniqueID);
-    sdo_depositsEnergy.push_back(sdoDepEnergy);
+    sdo_depositsUniqueID.push_back(std::move(sdoDepUniqueID));
+    sdo_depositsEnergy.push_back(std::move(sdoDepEnergy));
   }
-  AUXDATA(xprd, std::vector<int>, sdo_words) = sdo_word;
+  AUXDATA(xprd, std::vector<int>, sdo_words) = std::move(sdo_word);
   AUXDATA(xprd, std::vector<std::vector<int>>, sdo_depositsBarcode) = sdo_depositsUniqueID; // TODO rename variable to be consistent?
-  AUXDATA(xprd, std::vector<std::vector<float>>, sdo_depositsEnergy) = sdo_depositsEnergy;
+  AUXDATA(xprd, std::vector<std::vector<float>>, sdo_depositsEnergy) = std::move(sdo_depositsEnergy);
+  return sdo_depositsUniqueID;
 }
 
 
 void SCT_PrepDataToxAOD::addSiHitInformation(xAOD::TrackMeasurementValidation* xprd, 
                                              const InDet::SCT_Cluster* prd,
-                                             const std::vector<const SiHit*>* siHits) const
+                                             const std::vector<const SiHit*>* siHits,
+                                             const std::vector<std::vector<int>>& sdoTruthUIDs) const
 {
   std::vector<SiHit> matchingHits;
-  findAllHitsCompatibleWithCluster(prd, siHits, matchingHits);
+  findAllHitsCompatibleWithCluster(prd, siHits, sdoTruthUIDs, matchingHits);
 
   long unsigned int numHits{matchingHits.size()};
 
@@ -355,43 +397,58 @@ void SCT_PrepDataToxAOD::addSiHitInformation(xAOD::TrackMeasurementValidation* x
   int hitNumber{0};
   const InDetDD::SiDetectorElement* de{prd->detectorElement()};
   if (de) {
+    // ITk split sensors: hitLocalToLocal3D is an axis permutation without
+    // translation, so the along-strip coordinate comes out in the mother frame.
+    // Subtract the child's row shift to land in the child (cluster) frame.
+    // StripBoxDesign keeps that shift as a translation along the design's
+    // local x, which is the strip direction (it calls it zShift because the
+    // strips run along global z in the barrel); in the {xPhi, xEta, xDepth}
+    // frame returned by hitLocalToLocal3D it acts on xEta. StripGmxInterface
+    // signs the shift per side, but the mother eta direction is the same on
+    // both sides, so undo the sign on side 1.
+    double alongStripShift = 0.;
+    if (const auto* d = dynamic_cast<const InDetDD::SCT_ModuleSideDesign*>(&de->design())) {
+      if (d->getMother()) {
+        alongStripShift = d->moduleShift().translation().x();
+        if (m_SCTHelper->side(prd->identify()) != 0) alongStripShift = -alongStripShift;
+      }
+    }
     for (const SiHit& sihit : matchingHits) {
       sihit_energyDeposit[hitNumber] = sihit.energyLoss();
       sihit_meanTime[hitNumber] = sihit.meanTime();
       sihit_uniqueID[hitNumber] = HepMC::uniqueID(sihit.particleLink());
-    
-      // Convert Simulation frame into reco frame
-      const HepGeom::Point3D<double>& startPos{sihit.localStartPosition()};
 
-      Amg::Vector2D pos{de->hitLocalToLocal(startPos.z(), startPos.y())};
-      sihit_startPosX[hitNumber] = pos[0];
-      sihit_startPosY[hitNumber] = pos[1];
-      sihit_startPosZ[hitNumber] = startPos.x();
+      // hitLocalToLocal3D respects each design's axes (Run-3 SCT and ITk strips
+      // order the SiHit components differently) and returns {xPhi, xEta, xDepth}.
+      const HepGeom::Point3D<double> s{de->hitLocalToLocal3D(sihit.localStartPosition())};
+      sihit_startPosX[hitNumber] = s.x();
+      sihit_startPosY[hitNumber] = s.y() - alongStripShift;  // xEta, along the strip
+      sihit_startPosZ[hitNumber] = s.z();
 
-      const HepGeom::Point3D<double>& endPos{sihit.localEndPosition()};
-      pos= de->hitLocalToLocal(endPos.z(), endPos.y());
-      sihit_endPosX[hitNumber] = pos[0];
-      sihit_endPosY[hitNumber] = pos[1];
-      sihit_endPosZ[hitNumber] = endPos.x();
+      const HepGeom::Point3D<double> e{de->hitLocalToLocal3D(sihit.localEndPosition())};
+      sihit_endPosX[hitNumber] = e.x();
+      sihit_endPosY[hitNumber] = e.y() - alongStripShift;
+      sihit_endPosZ[hitNumber] = e.z();
       ++hitNumber;
     }
   }
 
-  AUXDATA(xprd, std::vector<float>, sihit_energyDeposit) = sihit_energyDeposit;
-  AUXDATA(xprd, std::vector<float>, sihit_meanTime) = sihit_meanTime;
-  AUXDATA(xprd, std::vector<int>, sihit_barcode) = sihit_uniqueID; // TODO rename variable to be consistent?
+  AUXDATA(xprd, std::vector<float>, sihit_energyDeposit) = std::move(sihit_energyDeposit);
+  AUXDATA(xprd, std::vector<float>, sihit_meanTime) = std::move(sihit_meanTime);
+  AUXDATA(xprd, std::vector<int>, sihit_barcode) = std::move(sihit_uniqueID); // TODO rename variable to be consistent?
   
-  AUXDATA(xprd, std::vector<float>, sihit_startPosX) = sihit_startPosX;
-  AUXDATA(xprd, std::vector<float>, sihit_startPosY) = sihit_startPosY;
-  AUXDATA(xprd, std::vector<float>, sihit_startPosZ) = sihit_startPosZ;
+  AUXDATA(xprd, std::vector<float>, sihit_startPosX) = std::move(sihit_startPosX);
+  AUXDATA(xprd, std::vector<float>, sihit_startPosY) = std::move(sihit_startPosY);
+  AUXDATA(xprd, std::vector<float>, sihit_startPosZ) = std::move(sihit_startPosZ);
 
-  AUXDATA(xprd, std::vector<float>, sihit_endPosX) = sihit_endPosX;
-  AUXDATA(xprd, std::vector<float>, sihit_endPosY) = sihit_endPosY;
-  AUXDATA(xprd, std::vector<float>, sihit_endPosZ) = sihit_endPosZ;
+  AUXDATA(xprd, std::vector<float>, sihit_endPosX) = std::move(sihit_endPosX);
+  AUXDATA(xprd, std::vector<float>, sihit_endPosY) = std::move(sihit_endPosY);
+  AUXDATA(xprd, std::vector<float>, sihit_endPosZ) = std::move(sihit_endPosZ);
 }
 
 void SCT_PrepDataToxAOD::findAllHitsCompatibleWithCluster(const InDet::SCT_Cluster* prd, 
                                                           const std::vector<const SiHit*>* siHits,
+                                                          const std::vector<std::vector<int>>& sdoTruthUIDs,
                                                           std::vector<SiHit>& matchingHits) const
 {
   ATH_MSG_VERBOSE("Got " << siHits->size() << " SiHits to look through");
@@ -403,18 +460,32 @@ void SCT_PrepDataToxAOD::findAllHitsCompatibleWithCluster(const InDet::SCT_Clust
   std::vector<const SiHit*> multiMatchingHits;
 
   for (const SiHit* siHit: *siHits) {
-    // Now we have all hits in the module that match lets check to see if they match the cluster
-    // Must be within +/- 1 hits of any hit in the cluster to be included
-    
-    HepGeom::Point3D<double> averagePosition{siHit->localStartPosition() + siHit->localEndPosition()};
-    averagePosition *= 0.5;
-    Amg::Vector2D pos{de->hitLocalToLocal(averagePosition.z(), averagePosition.y())};
-    InDetDD::SiCellId diode{de->cellIdOfPosition(pos)};
- 
-    for (const auto& hitIdentifier: prd->rdoList()) {
-      ATH_MSG_DEBUG("Truth Strip " <<  diode.phiIndex() << " Cluster Strip " << m_SCTHelper->strip(hitIdentifier));
+    // Match by geometry (SiHit centroid within +/-1 strip of a cluster RDO) or,
+    // failing that, by the SiHit's truth particle having deposited charge in one
+    // of the cluster's RDOs. Charge sharing and steep angles on ITk strips push
+    // the centroid several strips away from the fired strips.
+    bool matched = false;
+    if (m_useSiHitsGeometryMatching) {
+      HepGeom::Point3D<double> averagePosition{siHit->localStartPosition() + siHit->localEndPosition()};
+      averagePosition *= 0.5;
+      const HepGeom::Point3D<double> p3{de->hitLocalToLocal3D(averagePosition)};
+      const Amg::Vector2D pos{p3.x(), p3.y()}; // (xPhi across, xEta along)
+      InDetDD::SiCellId diode{de->cellIdOfPosition(pos)};
 
-      if (std::abs(static_cast<int>(diode.phiIndex()) - m_SCTHelper->strip(hitIdentifier))<=1) {
+      for (const auto& hitIdentifier: prd->rdoList()) {
+        ATH_MSG_DEBUG("Truth Strip " <<  diode.phiIndex() << " Cluster Strip " << m_SCTHelper->strip(hitIdentifier));
+
+        if (std::abs(static_cast<int>(diode.phiIndex()) - m_SCTHelper->strip(hitIdentifier))<=1) {
+          multiMatchingHits.push_back(siHit);
+          matched = true;
+          break;
+        }
+      }
+    }
+    if (!matched) {
+      const auto uid = HepMC::uniqueID(siHit->particleLink());
+      for (const auto& uniqueIDSDOColl: sdoTruthUIDs) {
+        if (std::find(uniqueIDSDOColl.begin(), uniqueIDSDOColl.end(), uid) == uniqueIDSDOColl.end()) continue;
         multiMatchingHits.push_back(siHit);
         break;
       }
@@ -508,19 +579,21 @@ void SCT_PrepDataToxAOD::addRDOInformation(xAOD::TrackMeasurementValidation* xpr
     auto result{idToRAWDataMap.find(hitIdentifier)};
     if (result != idToRAWDataMap.end()) {
       const SCT_RDORawData* sctRdo{result->second};
-      strip[nRDOs] = m_SCTHelper->strip(sctRdo->identify());
-      const SCT3_RawData* rdo3{dynamic_cast<const SCT3_RawData*>(sctRdo)};
-      if (rdo3) {
-        timebin[nRDOs] = rdo3->getTimeBin();
-        groupsize[nRDOs] = rdo3->getGroupSize();
+      if (sctRdo){
+        strip[nRDOs] = m_SCTHelper->strip(sctRdo->identify());
+        const SCT3_RawData* rdo3{dynamic_cast<const SCT3_RawData*>(sctRdo)};
+        if (rdo3) {
+          timebin[nRDOs] = rdo3->getTimeBin();
+          groupsize[nRDOs] = rdo3->getGroupSize();
+        }
       }
     }
     nRDOs++;
   }
   
-  AUXDATA(xprd, std::vector<int>, rdo_strip) = strip;
-  AUXDATA(xprd, std::vector<int>, rdo_timebin) = timebin;
-  AUXDATA(xprd, std::vector<int>, rdo_groupsize) = groupsize;
+  AUXDATA(xprd, std::vector<int>, rdo_strip) = std::move(strip);
+  AUXDATA(xprd, std::vector<int>, rdo_timebin) = std::move(timebin);
+  AUXDATA(xprd, std::vector<int>, rdo_groupsize) = std::move(groupsize);
 }
 
 /////////////////////////////////////////////////////////////////////

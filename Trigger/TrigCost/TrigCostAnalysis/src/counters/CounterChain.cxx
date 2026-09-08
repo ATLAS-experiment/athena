@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODTrigger/TrigCompositeContainer.h"
 #include "TrigDataAccessMonitoring/ROBDataMonitor.h"
 
 #include "CounterChain.h"
+#include <cstdint>
 
 
 CounterChain::CounterChain(const std::string& name, const MonitorBase* parent) 
@@ -70,29 +71,34 @@ StatusCode CounterChain::newEvent(const CostData& data, size_t index, const floa
   std::map<std::string, int> nRosPerEvent; // Accumulate how many times ROS was requested in a request per this event
   std::map<std::string, int> nNetworkRosPerEvent; // Accumulate how many times ROS was requested in a request per this event
   std::map<std::string, int> nRobsPerRosPerEvent; // Accumulate how many ROBs ROS requested per this event
+  const std::string slotStr{"slot"};
+  const std::string startStr{"start"};
+  const std::string stopStr{"stop"};
   for (const size_t algIndex : data.chainToAlgMap().at(getName())){
     const xAOD::TrigComposite* alg = data.costCollection().at(algIndex);
-    const uint32_t slot = alg->getDetail<uint32_t>("slot");
+    const uint32_t slot = alg->getDetail<uint32_t>(slotStr);
     if (slot != data.onlineSlot()) {
       continue; // When monitoring the master slot, this Monitor ignores algs running in different slots 
     }
 
     ATH_CHECK( increment("AlgCalls_perEvent", weight) );
 
-    const uint64_t start = alg->getDetail<uint64_t>("start"); // in mus
-    const uint64_t stop  = alg->getDetail<uint64_t>("stop"); // in mus
+    const uint64_t start = alg->getDetail<uint64_t>(startStr); // in mus
+    const uint64_t stop  = alg->getDetail<uint64_t>(stopStr); // in mus
     const float cpuTime = timeToMilliSec(start, stop);
     ATH_CHECK( fill("Time_perEvent", cpuTime, weight) );
     ATH_CHECK( fill("Time_perCall", cpuTime, weight) );
 
     // Monitor data requests
     if (!data.algToRequestMap().count(algIndex)) continue;
-
+    static const std::string idStr{"robs_id"};
+    static const std::string historyStr{"robs_history"};
+    static const std::string sizeStr{"robs_size"};
     for (size_t requestIdx : data.algToRequestMap().at(algIndex)) {
       const xAOD::TrigComposite* request = data.rosCollection().at(requestIdx);
-      const std::vector<uint32_t> robIdsPerRequest = request->getDetail<std::vector<uint32_t>>("robs_id");
-      const std::vector<unsigned> robs_history = request->getDetail<std::vector<unsigned>>("robs_history");
-      const std::vector<uint32_t> robs_size = request->getDetail<std::vector<uint32_t>>("robs_size");
+      const std::vector<uint32_t> robIdsPerRequest = request->getDetail<std::vector<uint32_t>>(idStr);
+      const std::vector<unsigned> robs_history = request->getDetail<std::vector<unsigned>>(historyStr);
+      const std::vector<uint32_t> robs_size = request->getDetail<std::vector<uint32_t>>(sizeStr);
 
       std::map<std::string, int> nRobsPerRosPerRequest; // Accumulate how many ROBs ROS requested per request
 
@@ -170,12 +176,12 @@ StatusCode CounterChain::newEvent(const CostData& data, size_t index, const floa
 
   for (const size_t algIndex : data.chainToUniqAlgMap().at(getName())){
     const xAOD::TrigComposite* alg = data.costCollection().at(algIndex);
-    const uint32_t slot = alg->getDetail<uint32_t>("slot");
+    const uint32_t slot = alg->getDetail<uint32_t>(slotStr);
     if (slot != data.onlineSlot()) {
       continue;
     }
-    const uint64_t start = alg->getDetail<uint64_t>("start"); // in mus
-    const uint64_t stop  = alg->getDetail<uint64_t>("stop"); // in mus
+    const uint64_t start = alg->getDetail<uint64_t>(startStr); // in mus
+    const uint64_t stop  = alg->getDetail<uint64_t>(stopStr); // in mus
     const float cpuTime = timeToMilliSec(start, stop);
 
     ATH_CHECK( fill("UniqueTime_perCall", cpuTime, weight) );

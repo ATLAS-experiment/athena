@@ -50,6 +50,10 @@ def Pythia8BaseCfg(flags, name="Pythia8_i", **kwargs):
     if "CollisionEnergy" not in kwargs:
         kwargs["CollisionEnergy"] = flags.Beam.Energy * 2 / GeV
 
+    # Random Seed and DSID
+    kwargs.setdefault("RandomSeed", flags.Random.SeedOffset)
+    kwargs.setdefault("Dsid", flags.Generator.DSID)
+
     # Load basic parameters
     base_cmds.extend([
         "6:m0 = 172.5",
@@ -250,8 +254,14 @@ def Pythia8_MadGraph_Cfg(flags, ShowerCfg=Pythia8BaseCfg, **kwargs):
     Pythia8BaseCfg) so tune/EvtGen fragments can be injected without
     instantiating Pythia8_i twice.
     """
-    # Set LHE file name (override with LHEFile="myfile.lhe" if needed).
-    kwargs.setdefault("LHEFile", "events.lhe")
+    # Match Pythia8's input name to the file prepared by EvgenHelpers.
+    # This can still be overridden by setting in the config LHEFile="myfile.lhe[.gz]".
+    lhe_file = (
+        "events.lhe.gz"
+        if flags.Generator.avoidExtracting
+        else "events.lhe"
+    )
+    kwargs.setdefault("LHEFile", lhe_file)
 
     # Configure Pythia8 through the selected shower fragment.
     ca = ShowerCfg(flags, **kwargs)
@@ -259,5 +269,94 @@ def Pythia8_MadGraph_Cfg(flags, ShowerCfg=Pythia8BaseCfg, **kwargs):
     # Announce MadGraph to service
     from GeneratorConfig.GeneratorInfoSvcConfig import GeneratorInfoSvcCfg
     ca.merge(GeneratorInfoSvcCfg(flags, Generators=["MadGraph"]), sequenceName=EvgenSequence.Generator.value)
+
+    return ca
+
+
+def Pythia8_Powheg_Cfg(flags, *, ShowerCfg, **kwargs):
+    """
+    Configure Pythia8 to shower POWHEG-BOX LHE input without veto matching.
+    CA translation of share/common/Pythia8_Powheg.py (+ Pythia8_LHEF.py).
+    The Pythia8_i algorithm is configured through ShowerCfg so tune/EvtGen
+    fragments can be injected without instantiating Pythia8_i twice.
+    """
+    lhe_file = (
+        "events.lhe.gz"
+        if flags.Generator.avoidExtracting
+        else "events.lhe"
+    )
+    kwargs.setdefault("LHEFile", lhe_file)
+
+    ca = ShowerCfg(flags, **kwargs)
+
+    from GeneratorConfig.GeneratorInfoSvcConfig import GeneratorInfoSvcCfg
+
+    ca.merge(GeneratorInfoSvcCfg(flags, Generators=["Powheg"]), sequenceName=EvgenSequence.Generator.value)
+
+    return ca
+
+
+def Pythia8_Powheg_Main31_Cfg(
+    flags,
+    ShowerCfg=Pythia8BaseCfg,
+    NFinal=None,
+    name="Pythia8_i",
+    enable_shower_weights=True,
+    include_pdf_variations=False,
+    **kwargs,
+):
+    """
+    Configure POWHEG LHE showering with the PowhegMain31 veto hook.
+    CA translation of share/common/Pythia8_Powheg_Main31.py.
+    NFinal is the number of outgoing particles in the Born-level POWHEG
+    process, excluding additional POWHEG radiation.
+
+    By default this fragment also enables the legacy Pythia8 shower
+    uncertainty weights. Set enable_shower_weights=False to disable, or
+    include_pdf_variations=True to add the PDF-variation weights.
+    """
+    if NFinal is None:
+        raise ValueError("Pythia8_Powheg_Main31_Cfg: NFinal is process-specific "
+                         "and must be set explicitly (Born final-state multiplicity)")
+
+    # Delay user commands until after the matching layer so that USER
+    # precedence can override matching settings when explicitly requested.
+    user_commands = kwargs.pop("Commands", None)
+
+    user_hooks = list(kwargs.pop("UserHooks", ()) or ())
+    if "PowhegMain31" not in user_hooks:
+        user_hooks.append("PowhegMain31")
+
+    ca = Pythia8_Powheg_Cfg(flags, ShowerCfg=ShowerCfg, name=name, UserHooks=user_hooks, **kwargs)
+
+    ca.merge(Pythia8CommandsCfg(
+        flags,
+        source="powheg_main31_matching",
+        commands=[
+            "SpaceShower:pTmaxMatch = 2",
+            "TimeShower:pTmaxMatch = 2",
+            "Powheg:veto = 1",
+            f"Powheg:NFinal = {NFinal}",
+        ],
+        precedence=GeneratorSettingsPrecedence.MATCHING,
+        name=name,
+    ))
+
+    if enable_shower_weights:
+        from Pythia8_i.Pythia8ShowerWeights import Pythia8ShowerWeightsCfg
+        ca.merge(Pythia8ShowerWeightsCfg(
+            flags,
+            name=name,
+            include_pdf_variations=include_pdf_variations,
+        ))
+
+    if user_commands:
+        ca.merge(Pythia8CommandsCfg(
+            flags, 
+            source="job_options",
+            commands=user_commands, 
+            precedence=GeneratorSettingsPrecedence.USER, 
+            name=name,
+        ))
 
     return ca

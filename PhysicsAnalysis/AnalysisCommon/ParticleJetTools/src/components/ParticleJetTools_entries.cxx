@@ -10,6 +10,7 @@
 #include "ParticleJetTools/JetParticleOriginVertexAssociation.h"
 #include "ParticleJetTools/JetTruthLabelingTool.h"
 #include "ParticleJetTools/JetPileupLabelingTool.h"
+#include "ParticleJetTools/JetIRCSafeLabelTool.h"
 #include "ParticleJetTools/JetQuarkChargeLabelingTool.h"
 #include "ParticleJetTools/FatVertex.h"
 #include "ParticleJetTools/FtagLargeRJetTruthLabelTool.h"
@@ -39,6 +40,7 @@ DECLARE_COMPONENT( JetParticleCenterOfMassAssociation )
 DECLARE_COMPONENT( JetParticleOriginVertexAssociation )
 DECLARE_COMPONENT( JetTruthLabelingTool )
 DECLARE_COMPONENT( JetPileupLabelingTool )
+DECLARE_COMPONENT( JetIRCSafeLabelTool )
 DECLARE_COMPONENT( JetQuarkChargeLabelingTool )
 
 DECLARE_COMPONENT( TruthParentDecoratorAlg )

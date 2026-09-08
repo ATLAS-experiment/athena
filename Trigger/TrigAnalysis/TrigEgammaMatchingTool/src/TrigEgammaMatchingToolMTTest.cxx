@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -42,7 +42,7 @@ StatusCode TrigEgammaMatchingToolMTTest::initialize() {
 
 //**********************************************************************
 
-void TrigEgammaMatchingToolMTTest::inspect(const std::string& trigger,const xAOD::Egamma *eg) const {
+void TrigEgammaMatchingToolMTTest::inspect(const EventContext& ctx, const std::string& trigger,const xAOD::Egamma *eg) const {
 
   if (eg) {
     
@@ -57,16 +57,16 @@ void TrigEgammaMatchingToolMTTest::inspect(const std::string& trigger,const xAOD
       ATH_MSG_INFO( "Matched!");
 
 
-      auto l1_link = m_matchTool->getFeature<TrigRoiDescriptorCollection>(dec, trigger);
-      auto emCluster_link = m_matchTool->getFeature<xAOD::TrigEMClusterContainer>( dec , trigger);
-      auto trig_el_links = m_matchTool->getFeatures<xAOD::TrigElectronContainer>( dec, trigger );
-      auto cl_links = m_matchTool->getFeatures<xAOD::CaloClusterContainer>( dec , trigger);
-      auto el_links = m_matchTool->getFeatures<xAOD::ElectronContainer>( dec , trigger);
+      auto l1_link = m_matchTool->getFeature<TrigRoiDescriptorCollection>(ctx, dec, trigger);
+      auto emCluster_link = m_matchTool->getFeature<xAOD::TrigEMClusterContainer>(ctx, dec , trigger);
+      auto trig_el_links = m_matchTool->getFeatures<xAOD::TrigElectronContainer>(ctx, dec, trigger);
+      auto cl_links = m_matchTool->getFeatures<xAOD::CaloClusterContainer>(ctx, dec, trigger);
+      auto el_links = m_matchTool->getFeatures<xAOD::ElectronContainer>(ctx, dec, trigger);
 
       if( l1_link.isValid() ){
         ATH_MSG_INFO( "We found the Roi object link" );
         // Let's get the EMTau
-        auto l1 = m_matchTool->getL1Feature( l1_link.source );
+        auto l1 = m_matchTool->getL1Feature( ctx, l1_link.source );
         if(l1)
           ATH_MSG_INFO( "We found the EmTau object" );
         ATH_MSG_INFO( "L1 object state is assigned as " << (l1_link.state==ActiveState::ACTIVE ? "Active" : "Not active") );
@@ -99,11 +99,11 @@ void TrigEgammaMatchingToolMTTest::inspect(const std::string& trigger,const xAOD
       }
       
 
-      bool passedHLT    =  m_matchTool->ancestorPassed<xAOD::ElectronContainer> (dec, trigger , "HLT_egamma_Electrons");
-      bool passedEFCalo =  m_matchTool->ancestorPassed<xAOD::CaloClusterContainer> (dec, trigger , "HLT_CaloEMClusters");
-      bool passedL2     =  m_matchTool->ancestorPassed<xAOD::TrigElectronContainer> (dec, trigger , "HLT_FastElectrons");
-      bool passedL2Calo =  m_matchTool->ancestorPassed<xAOD::TrigEMClusterContainer> (dec, trigger , "HLT_FastCaloEMClusters");
-      bool passedL1Calo =  m_matchTool->ancestorPassed<TrigRoiDescriptorCollection> (dec, trigger , "initialRois");
+      bool passedHLT    =  m_matchTool->ancestorPassed<xAOD::ElectronContainer> (ctx, dec, trigger , "HLT_egamma_Electrons");
+      bool passedEFCalo =  m_matchTool->ancestorPassed<xAOD::CaloClusterContainer> (ctx, dec, trigger , "HLT_CaloEMClusters");
+      bool passedL2     =  m_matchTool->ancestorPassed<xAOD::TrigElectronContainer> (ctx, dec, trigger , "HLT_FastElectrons");
+      bool passedL2Calo =  m_matchTool->ancestorPassed<xAOD::TrigEMClusterContainer> (ctx, dec, trigger , "HLT_FastCaloEMClusters");
+      bool passedL1Calo =  m_matchTool->ancestorPassed<TrigRoiDescriptorCollection> (ctx, dec, trigger , "initialRois");
       
       ATH_MSG_INFO( "L1Calo passed : "<< passedL1Calo   );
       ATH_MSG_INFO( "L2Calo passed : "<< passedL2Calo   );
@@ -140,7 +140,7 @@ StatusCode TrigEgammaMatchingToolMTTest::fillHistograms( const EventContext& ctx
     for(const auto &trigger : m_triggerList){
         for(const auto eg : *el_cont){
             ATH_MSG_INFO("REGTEST:: Electron offline (eta="<<eg->eta()<<",phi="<<eg->phi()<<")");
-            inspect(trigger,eg);
+            inspect(ctx,trigger,eg);
 
         } //End loop of offline electrons
     } // End loop over trigger list

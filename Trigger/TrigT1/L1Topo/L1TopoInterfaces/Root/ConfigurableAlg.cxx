@@ -349,8 +349,12 @@ void ConfigurableAlg::bookHistMult(std::vector<std::string> &regName, const std:
 
 void ConfigurableAlg::bookHist(std::vector<std::string> &regName, std::string_view name, std::string_view title, const int binx, const int xmin, const int xmax, const int biny, const int ymin, const int ymax) {
   auto usPos = title.find(" vs ");
-  std::string xName{title.substr(0,usPos)};
-  std::string yName{title.substr(usPos+4)};
+  std::string xName;
+  std::string yName;
+  if (usPos != std::string_view::npos)[[likely]]{
+    xName.assign(title.substr(0,usPos));
+    yName.assign(title.substr(usPos+4));
+  }
   std::string xmin_str = ToString(xmin);
   std::string xmax_str = ToString(xmax);
   std::string ymin_str = ToString(ymin);

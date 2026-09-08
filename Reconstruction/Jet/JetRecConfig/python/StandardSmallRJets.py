@@ -55,11 +55,11 @@ standardmods_ufo = (
 
 clustermods      = ("ECPSFrac","ClusterMoments",) 
 truthmods        = ("PartonTruthLabel","JetDeltaRLabel:5000", "JetGhostLabel")
-pflowmods        = ()
+pflowmods        = ("JetIRCSafeLabel",)
 
 substrmods = ("nsubjettiness","ecorr")
 
-truthlabels = ("JetTaggingTruthLabel:R4TruthLabel",)
+truthlabels = ("JetTaggingTruthLabel:R4TruthDressedWZLabel",) #R4TruthLabel
 
 # ********************************************************
 # Standard track jet definition
@@ -87,14 +87,14 @@ AntiKt4PV0Track = JetDefinition("AntiKt", 0.4, cst.PV0Track,
 
 AntiKt4EMPFlow = JetDefinition("AntiKt",0.4,cst.GPFlow,
                                ghostdefs = standardghosts+flavourghosts,
-                               modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:10000","JetGhostLabel","JetDeltaRInitialLabel:5000","JetGhostInitialLabel","JetQuarkChargeLabel","LArHVCorr","jetiso")+truthlabels,
+                               modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:10000","JetGhostLabel","JetDeltaRInitialLabel:5000","JetGhostInitialLabel","JetQuarkChargeLabel","LArHVCorr","jetiso"),
                                lock = True
 )
 
 # The following jet collection will be scheduled in derivation production (instead of AntiKt4EMPFlow which is used e.g. at Tier-0)
 AntiKt4EMPFlow_deriv = AntiKt4EMPFlow.clone(
     ghostdefs = AntiKt4EMPFlow.ghostdefs+["UnAssocMuonSegment"],
-    modifiers = AntiKt4EMPFlow.modifiers+("JetPtAssociation","fJVT","NNJVT","CaloEnergiesClus","JetPileupLabel","qgtransformer")
+    modifiers = AntiKt4EMPFlow.modifiers+("JetPtAssociation","fJVT","NNJVT","CaloEnergiesClus","JetPileupLabel","qgtransformer")+truthlabels
 )
 
 AntiKt4EMPFlowML = JetDefinition("AntiKt",0.4,cst.GPFlowML,
@@ -118,6 +118,13 @@ AntiKt4EMPFlow_noMuons = JetDefinition("AntiKt",0.4,cst.GPFlow_noMuons,
 )
 
 AntiKt4EMPFlow_noLeptons = JetDefinition("AntiKt",0.4,cst.GPFlow_noLeptons,
+                                    ghostdefs = standardghosts+flavourghosts,
+                                    modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:10000","JetGhostLabel","LArHVCorr","jetiso"),
+                                    lock = True
+)
+
+#Same as AntiKt4EMPFlow but with charged and neutrals linked to muons included.
+AntiKt4EMPFlow_inclMuons = JetDefinition("AntiKt",0.4,cst.GPFlow_inclMuons,
                                     ghostdefs = standardghosts+flavourghosts,
                                     modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:10000","JetGhostLabel","LArHVCorr","jetiso"),
                                     lock = True
@@ -303,8 +310,12 @@ AntiKt6TruthGENWZ = AntiKt4TruthGENWZ.clone(radius=0.6)
 
 InTimeAntiKt4Truth = AntiKt4Truth.clone(prefix="InTime")
 
+OutOfTimeAntiKt4Truth = AntiKt4Truth.clone(prefix="OutOfTime")
+
 # These jets may be used as input for the JetTruthLabelling, so they also need to be defined as constituents:
 registerAsInputConstit(InTimeAntiKt4Truth)
+
+registerAsInputConstit(OutOfTimeAntiKt4Truth)
 
 
 def StandardSmallRJetCfg(flags):

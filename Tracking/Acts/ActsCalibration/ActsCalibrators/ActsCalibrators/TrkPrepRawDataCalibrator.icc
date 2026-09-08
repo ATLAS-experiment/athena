@@ -3,6 +3,7 @@
 */
 
 #include "Acts/EventData/ParticleHypothesis.hpp"
+#include "Acts/EventData/BoundTrackParameters.hpp"
 namespace ActsTrk::detail {
     template <Acts::TrackStateProxyConcept proxy_t>
     std::unique_ptr<Trk::RIO_OnTrack> 

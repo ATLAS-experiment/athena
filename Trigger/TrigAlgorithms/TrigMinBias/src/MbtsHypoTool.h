@@ -1,5 +1,5 @@
 /*
-Copyright! (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+Copyright! (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGMINBIAS_MbtsHypoTool_H
 #define TRIGMINBIAS_MbtsHypoTool_H
@@ -23,8 +23,8 @@ public:
   struct MbtsHypoInfo
   {
     const TrigCompositeUtils::DecisionIDContainer previousDecisionIDs;
-    const xAOD::TrigT2MbtsBits *mbtsBits;
-    TrigCompositeUtils::Decision *decision;
+    const xAOD::TrigT2MbtsBits *mbtsBits = nullptr;
+    TrigCompositeUtils::Decision *decision = nullptr;
   };
 
   StatusCode decide(MbtsHypoInfo &decisions) const;

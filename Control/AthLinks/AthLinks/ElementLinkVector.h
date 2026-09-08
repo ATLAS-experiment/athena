@@ -12,7 +12,6 @@
 #include <functional>
 #include <vector>
 #include <boost/iterator/transform_iterator.hpp>
-#include <boost/iterator_adaptors.hpp> 
 #include <RootMetaSelection.h>
 
 #include "AthLinks/ElementLinkVectorBase.h"

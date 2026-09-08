@@ -24,7 +24,7 @@ TrigCaloClusterContainer * TrigCaloClusterContainerCnv::createTransient(const To
   
   mlog << MSG::DEBUG << "TrigCaloClusterContainerCnv::createTransient called" << endmsg;
 
-  static const pool::Guid p3_guid( "98A28943-662A-4141-82C3-537447264DA3" );
+  static const Guid p3_guid( "98A28943-662A-4141-82C3-537447264DA3" );
 
  if( compareClassGuid(token,  p3_guid ) ){
          std::unique_ptr< TrigCaloClusterContainer_p3 > col_vect( poolReadObject< TrigCaloClusterContainer_p3 >(token) );

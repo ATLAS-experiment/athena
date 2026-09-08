@@ -1,6 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+
+// Tell clang not to allow spurious FPEs.
+#include "CxxUtils/trapping_fp.h"
+CXXUTILS_TRAPPING_FP;
 
 #include "TrkDetDescrGeoModelCnv/VolumeConverter.h"
 
@@ -245,9 +249,9 @@ double VolumeConverter::resolveBooleanVolume(const Volume& trVol,
             if (comb) {
                 (*sIter).parts[ii].reset(comb->first()->clone());
                 VolumePart vp(*sIter); //copy here
-                constituents.push_back(vp); //inser copy the iter can be invalidated
+                constituents.push_back(vp); //insert copy the iter can be invalidated
                 constituents.back().parts[ii].reset(comb->second()->clone()); //modify
-                constituents.push_back(vp); //push copy
+                constituents.push_back(std::move(vp)); //push copy
                 constituents.back().parts.emplace_back(comb->second()->clone());//modify
                 constituents.back().sign = -1. * constituents.back().sign;
                 update = true;
@@ -376,13 +380,16 @@ VolumeConverter::VolumePairVec VolumeConverter::splitComposedVolume(
                       std::unique_ptr<Trk::Volume>(subVol->clone()), std::move(newSubVol), false);
                     std::shared_ptr<Volume> newCSubVol =
                         std::make_unique<Volume>(nullptr, std::move(newBounds));
+                    //insert invalidates iterators
                     constituents.insert(sIter,
                                         std::make_pair(combFirst, newCSubVol));
                 } else {
+                    //insert invalidates iterators
                     constituents.insert(
                         sIter, std::make_pair(combFirst, std::move(newSubVol)));
                 }
             } else {
+                //insert invalidates iterators
                 constituents.insert(sIter, std::make_pair(combFirst, subVol));
                 if (subVol) {
                     newBounds = std::make_shared<CombinedVolumeBounds>(
@@ -394,6 +401,7 @@ VolumeConverter::VolumePairVec VolumeConverter::splitComposedVolume(
                         sIter,
                         std::make_pair(combSecond, std::move(newSubVol)));
                 } else {
+                    //insert invalidates iterators
                     constituents.insert(sIter,
                                         std::make_pair(combSecond, combFirst));
                 }
@@ -410,9 +418,11 @@ VolumeConverter::VolumePairVec VolumeConverter::splitComposedVolume(
                     std::unique_ptr<Trk::Volume>(innerVol->clone()), false);
                 std::unique_ptr<Volume> newSubVol =
                     std::make_unique<Trk::Volume>(nullptr, newBounds);
+                //insert invalidates iterators
                 constituents.insert(
                     sIter, std::make_pair(outerVol, std::move(newSubVol)));
             } else {
+                //insert invalidates iterators
                 constituents.insert(sIter, std::make_pair(outerVol, innerVol));
             }
             sIter = constituents.begin();

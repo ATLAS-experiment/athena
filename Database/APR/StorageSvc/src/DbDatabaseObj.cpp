@@ -19,12 +19,13 @@
 #include "DbContainerObj.h"
 
 // Public POOL include files
-#include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbColumn.h"
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbOption.h"
 #include "StorageSvc/IDbDatabase.h"
 #include "StorageSvc/IDbContainer.h"
+
+#include "CxxUtils/MD5.h"
 
 #include <memory>
 #include <cstdio>
@@ -40,11 +41,10 @@ std::ostream& operator << (std::ostream& os, const Token::OID_t oid ) {
 
 static const Guid s_localDb("00000000-0000-0000-0000-000000000000");
 
-void genMD5(const std::string& s, void* code);
-
 /// Produce the token keys only on demand for export
 void makeKey(const Token* tok, Guid& guid)  {
-    genMD5(tok->key(), &guid);
+   MD5 checkSum(tok->key());
+   checkSum.raw_digest(reinterpret_cast<unsigned char*>(&guid));
 }
 
 // Standard Constructor
@@ -184,8 +184,8 @@ const DbTypeInfo* DbDatabaseObj::objectShape(const Guid& id) const {
 }
 
 // Retrieve shape information for a specified object by reflection handle
-const DbTypeInfo* DbDatabaseObj::objectShape(const TypeH& id) const {
-  std::map<TypeH, const DbTypeInfo*>::const_iterator i = m_classMap.find(id);
+const DbTypeInfo* DbDatabaseObj::objectShape(const RootType& id) const {
+  std::map<RootType, const DbTypeInfo*>::const_iterator i = m_classMap.find(id);
   if( i != m_classMap.end() ) return i->second;
   if( id == m_string_t->clazz() or id.Name() == "string" ) {
      // hack to enable reading DbStrings from KeyContainer::fetch()
@@ -234,7 +234,7 @@ StatusCode DbDatabaseObj::addShape(const DbTypeInfo* pShape) {
         ATH_MSG_DEBUG("--->Adding Shape[" << m_shapeMap.size() << " , "
                        << pShape->shapeID().toString() << "]: "
                        << " [" << cols.size() << " Column(s)]" );
-        ATH_MSG_DEBUG("---->Class:" << (pShape->clazz() ? DbReflex::fullTypeName(pShape->clazz()) : "<not available>"));
+        ATH_MSG_DEBUG("---->Class:" << (pShape->clazz() ? pShape->clazz().Name() : "<not available>"));
         for (size_t ic=0; ic < cols.size();++ic)  {
           const DbColumn* c = cols[ic];
           ATH_MSG_DEBUG("---->[" << ic << "]:" << c->name()
@@ -268,7 +268,7 @@ StatusCode DbDatabaseObj::addShape(const DbTypeInfo* pShape) {
 StatusCode DbDatabaseObj::open()   {
   if ( !m_info && m_dom.isValid() && db() )    {
     m_info = db()->createDatabase();
-    if ( m_info->open(m_dom, m_logon, mode()).isSuccess() )    {
+    if ( m_info->open( DbDatabase(this), m_logon, mode() ).isSuccess() )    {
       // Age open databases. Aging is only effective
       // for read-only databases. Otherwise no aging
       // is applied, because it is assumed, that objects
@@ -475,8 +475,7 @@ StatusCode DbDatabaseObj::open()   {
             }
           }
         }
-        DbDatabase dbd (this);
-        return m_info->onOpen(dbd, mode());
+        return StatusCode::SUCCESS;
       }
     }
     deletePtr(m_info);

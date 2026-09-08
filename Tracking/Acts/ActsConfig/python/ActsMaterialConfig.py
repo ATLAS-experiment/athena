@@ -47,10 +47,6 @@ def MaterialTrackWriterCfg(configFlags,
   from MuonConfig.MuonConfigUtils import setupHistSvcCfg
   acc.merge(setupHistSvcCfg(configFlags, outFile = FileName, outStream=kwargs["OutStream"]))
 
-  # Need geometry
-  if kwargs["useTrackingGeometry"]:
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(configFlags)))
   acc.addEventAlgo(CompFactory.ActsTrk.MaterialTrackWriter(name, **kwargs), primary = True)
 
   return acc
@@ -78,7 +74,7 @@ def MaterialMappingCfg(configFlags,
                        OutputMappedMaterialTracks="OuputMappedMaterialTracks",
                        OutputUnmappedMaterialTracks="OutputUnmappedMaterialTracks",
                        **kwargs) :
-  
+
   from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
   from AthenaConfiguration.ComponentFactory import CompFactory
   acc = ComponentAccumulator()
@@ -86,6 +82,10 @@ def MaterialMappingCfg(configFlags,
   # Need geometry
   from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
   acc.merge( ActsTrackingGeometrySvcCfg(configFlags))
+  from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
+  acc.merge(AtlasFieldCacheCondAlgCfg(configFlags))
+  from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+  acc.merge(ActsGeometryContextAlgCfg(configFlags))
 
   mapwriters = [acc.popToolsAndMerge(RootMaterialWriterToolCfg(configFlags))]
   kwargs.setdefault("MaterialMapWriters", mapwriters)
@@ -126,6 +126,10 @@ def MaterialValidationCfg(configFlags,
   # Need geometry
   from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
   acc.merge( ActsTrackingGeometrySvcCfg(configFlags))
+  from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
+  acc.merge(AtlasFieldCacheCondAlgCfg(configFlags))
+  from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+  acc.merge(ActsGeometryContextAlgCfg(configFlags))
 
   kwargs.setdefault("MaterialTrackCollectionKey", OutputMaterialTracks)
 

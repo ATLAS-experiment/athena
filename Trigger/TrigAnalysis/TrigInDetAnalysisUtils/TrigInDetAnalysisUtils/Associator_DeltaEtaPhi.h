@@ -40,7 +40,6 @@ public:
   
   ~Associator_DeltaEtaPhi() { } 
 
-  virtual TrackAssociator* clone() override { return new Associator_DeltaEtaPhi(*this); }
   
   virtual void match(const std::vector<TIDA::Track*>& referenceTracks, 
 		     const std::vector<TIDA::Track*>& testTracks) {

@@ -1,12 +1,13 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ROOTAUXDYNSTORE_H
 #define ROOTAUXDYNSTORE_H
 
 #include "AthContainers/AuxStoreInternal.h" 
-#include "RootAuxDynReader.h" 
+#include "RootAuxDynReader.h"
+#include "GaudiKernel/EventContext.h"
 
 #include <string>
 #include <mutex>
@@ -63,7 +64,7 @@ protected:
   long long          m_entry;
 
   /// Event context associated with the event store.
-  const EventContext& m_ctx;
+  EventContext m_ctx;
 
   /// Mutex used to synchronize modifications to the cache vector.
   typedef AthContainers_detail::mutex mutex_t;

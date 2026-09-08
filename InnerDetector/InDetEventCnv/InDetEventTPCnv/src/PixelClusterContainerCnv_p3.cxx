@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetEventTPCnv/PixelClusterContainerCnv_p3.h"
@@ -70,27 +70,18 @@ void PixelClusterContainerCnv_p3::transToPers(const InDet::PixelClusterContainer
         chanEnd   += collection.size();
         InDet::InDetPRD_Collection_p2& pcollection = persCont->m_collections[collIndex];
 	unsigned int deltaId = (collection.identifyHash()-idLast);
-	//        unsigned int deltaId = (collection.identify().get_compact()-idLast)/IDJUMP;
-        // if(deltaId*IDJUMP != collection.identify().get_compact()-idLast ) 
-        //   log << MSG::FATAL << "THere is a mistake in Identifiers of the collection" << endmsg;
-        // if(deltaId > 0xFFFF) {
-        //   log << MSG::FATAL << "Fixme!!! This is too big, something needs to be done " << endmsg;
-        // }
-        // pcollection.m_idDelta = (unsigned short) deltaId;
-        // idLast = collection.identify().get_compact(); // then update the last identifier 
+
         pcollection.m_hashId = deltaId;
 	idLast=collection.identifyHash();
         pcollection.m_size = collection.size();
         // Add in channels
         persCont->m_rawdata.resize(chanEnd);
-	//        if (log.level() <= MSG::VERBOSE) log << MSG::VERBOSE << "Reading collections with " <<  collection.size() << "PRDs " << endmsg;
         for (unsigned int i = 0; i < collection.size(); ++i) {
             InDet::PixelCluster_p3* pchan = &(persCont->m_rawdata[i + chanBegin]);
-            const InDet::PixelCluster* chan = dynamic_cast<const InDet::PixelCluster*>(collection[i]);
+            const InDet::PixelCluster* chan = static_cast<const InDet::PixelCluster*>(collection[i]);
             chanCnv.transToPers(chan, pchan, log);
         }
     }
-    //    if (log.level() <= MSG::DEBUG) log << MSG::DEBUG  << " ***  Writing InDet::PixelClusterContainer" << endmsg;
 }
 
 void  PixelClusterContainerCnv_p3::persToTrans(const InDet::PixelClusterContainer_p3* persCont, InDet::PixelClusterContainer* transCont, MsgStream &log) 

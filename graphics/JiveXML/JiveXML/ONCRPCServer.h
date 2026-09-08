@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML__ONCRPCSERVER_H
@@ -67,11 +67,11 @@ namespace JiveXML{
     bool_t isAvailable;    //This flag is set false if no event is available for the requested stream
     bool_t isIdentical;    //This flag is set true if the event is the same as the one the user had asked for
     bool_t isCompressed;   //This flag is set true if the event is compressed
-    const char* StreamName;        //Then name of the stream of this event
-    int64_t EventNumber;     //The event number of the event that is send back
-    int64_t RunNumber;       //The run number of the event that is send back
-    unsigned int NBytes;       //Number of bytes in the event data
-    const char* EventData;     //Address of event data - if there is any
+    const char* StreamName = nullptr;  //Then name of the stream of this event
+    int64_t EventNumber = 0;   //The event number of the event that is send back
+    int64_t RunNumber = 0;     //The run number of the event that is send back
+    unsigned int NBytes = 0;   //Number of bytes in the event data
+    const char* EventData = nullptr;     //Address of event data - if there is any
   };
 
 }//namespace

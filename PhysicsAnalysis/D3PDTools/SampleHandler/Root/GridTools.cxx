@@ -15,13 +15,13 @@
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/ShellExec.h>
 #include <RootCoreUtils/StringUtil.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <SampleHandler/MetaObject.h>
 #include <CxxUtils/checker_macros.h>
 #include <TSystem.h>
 #include <chrono>
 #include <fstream>
 #include <mutex>
+#include <stdexcept>
 
 namespace sh = RCU::Shell;
 
@@ -39,7 +39,7 @@ namespace SH
     struct ProxyData
     {
       // the clock we use
-      typedef std::chrono::steady_clock clock;
+      using clock = std::chrono::steady_clock;
 
       // don't really need a mutex as the code unlikely to be
       // multi-threaded, but may just as well put one to protect the
@@ -50,7 +50,7 @@ namespace SH
       bool haveProxy = false;
 
       // the expiration time of the proxy (if we have one)
-      decltype(clock::now()) proxyExpiration;
+      clock::time_point proxyExpiration;
 
       bool checkVomsProxy ()
       {
@@ -95,12 +95,18 @@ namespace SH
 	  proxyExpiration > clock::now() + std::chrono::minutes (20);
       }
 
-      void ensureVomsProxy ()
+      void ensureVomsProxy (unsigned tries = 0)
       {
 	std::lock_guard<std::recursive_mutex> lock (mutex);
 
 	if (checkVomsProxy())
 	  return;
+
+	// rationale: cap the number of retries so that we do not loop
+	//   forever if voms-proxy-init keeps succeeding but the
+	//   resulting proxy stays too short-lived or unparseable.
+	if (tries >= 3)
+	  throw std::runtime_error ("failed to obtain a valid grid proxy after several attempts");
 
 	if (haveProxy)
 	{
@@ -112,7 +118,7 @@ namespace SH
 	ANA_MSG_INFO ("trying to set up a new proxy");
 	haveProxy = false;
 	RCU::Shell::exec ("voms-proxy-init -voms atlas");
-	ensureVomsProxy ();
+	ensureVomsProxy (tries + 1);
       }
     };
 
@@ -144,10 +150,19 @@ namespace SH
           if (split2 == std::string::npos)
             split2 = text.size();
           std::string subresult = text.substr (split, split2 - split);
-          while (isspace (subresult.front()))
-            subresult = subresult.substr (1);
-          while (isspace (subresult.back()))
-            subresult.pop_back();
+          // rationale: strip surrounding whitespace in O(n).  guard
+          //   against an empty/all-whitespace value (front()/back() on
+          //   an empty string is UB) and use find_first/last_not_of
+          //   rather than isspace on a possibly-negative char.
+          const char *const whitespace = " \t\n\r\f\v";
+          const auto first = subresult.find_first_not_of (whitespace);
+          if (first == std::string::npos)
+            subresult.clear ();
+          else
+          {
+            const auto last = subresult.find_last_not_of (whitespace);
+            subresult = subresult.substr (first, last - first + 1);
+          }
           result.push_back (std::move (subresult));
         }
       }
@@ -163,9 +178,9 @@ namespace SH
     {
       auto lines = readLineList (text, begin);
       if (lines.empty())
-        RCU_THROW_MSG ("failed to find line starting with: " + begin);
+        throw std::runtime_error ("failed to find line starting with: " + begin);
       if (lines.size() > 1)
-        RCU_THROW_MSG ("multiple lines starting with: " + begin);
+        throw std::runtime_error ("multiple lines starting with: " + begin);
       return lines.at(0);
     }
 
@@ -180,7 +195,7 @@ namespace SH
       std::istringstream str (line);
       unsigned result = 0;
       if (!(str >> result) || !str.eof())
-        RCU_THROW_MSG ("failed to convert " + line + " into an unsigned");
+        throw std::runtime_error ("failed to convert " + line + " into an unsigned");
       return result;
     }
 
@@ -246,7 +261,7 @@ namespace SH
     std::string output = sh::exec_read ("source $ATLAS_LOCAL_ROOT_BASE/user/atlasLocalSetup.sh -q && lsetup --force fax && echo " + separator + " && fax-get-gLFNs " + sh::quote (name));
     auto split = output.rfind (separator + "\n");
     if (split == std::string::npos)
-      RCU_THROW_MSG ("couldn't find separator in: " + output);
+      throw std::runtime_error ("couldn't find separator in: " + output);
 
     std::istringstream str (output.substr (split + separator.size() + 1));
     std::regex pattern (filter);
@@ -256,7 +271,7 @@ namespace SH
       if (!line.empty())
       {
 	if (!line.starts_with ("root:"))
-	  RCU_THROW_MSG ("couldn't parse line: " + line);
+	  throw std::runtime_error ("faxListFilesRegex: couldn't parse line: " + line);
 
 	std::string::size_type split1 = line.rfind (":");
 	std::string::size_type split2 = line.rfind ("/");
@@ -267,11 +282,11 @@ namespace SH
 	  if (RCU::match_expr (pattern, line.substr (split1+1)))
 	    result.push_back (line);
 	} else
-	  RCU_THROW_MSG ("couldn't parse line: " + line);
+	  throw std::runtime_error ("faxListFilesRegex: couldn't parse line: " + line);
       }
     }
     if (result.size() == 0)
-      RCU_WARN_MSG ("dataset " + name + " did not contain any files.  this is likely not right");
+      ANA_MSG_WARNING ("dataset " << name << " did not contain any files.  this is likely not right");
     return result;
   }
 
@@ -303,7 +318,7 @@ namespace SH
     std::string output = sh::exec_read (rucioSetupCommand() + " && echo " + separator + " && rucio list-file-replicas --pfns --protocols root " + selectOptions + " " + sh::quote (name));
     auto split = output.rfind (separator + "\n");
     if (split == std::string::npos)
-      RCU_THROW_MSG ("couldn't find separator in: " + output);
+      throw std::runtime_error ("couldn't find separator in: " + output);
     std::istringstream str (output.substr (split + separator.size() + 1));
 
     // this is used to avoid getting two copies of the same file.  we
@@ -331,7 +346,7 @@ namespace SH
 	  if (RCU::match_expr (pattern, filename))
 	    resultMap[filename] = line;
 	} else
-	  RCU_THROW_MSG ("couldn't parse line: " + line);
+	  throw std::runtime_error ("rucioDirectAccessRegex: couldn't parse line: " + line);
       }
     }
 
@@ -358,7 +373,7 @@ namespace SH
     std::string output = sh::exec_read (rucioSetupCommand() + " && echo " + separator + " && rucio list-dids " + sh::quote (dataset));
     auto split = output.rfind (separator + "\n");
     if (split == std::string::npos)
-      RCU_THROW_MSG ("couldn't find separator in: " + output);
+      throw std::runtime_error ("couldn't find separator in: " + output);
 
     std::istringstream str (output.substr (split + separator.size() + 1));
     std::regex pattern ("^\\| ([a-zA-Z0-9_.-]+):([a-zA-Z0-9_.-]+) +\\| ([a-zA-Z0-9_.-]+) +\\| *$");
@@ -396,7 +411,7 @@ namespace SH
     std::string output = sh::exec_read ( command );
     auto split = output.rfind (separator + "\n");
     if (split == std::string::npos)
-      RCU_THROW_MSG ("couldn't find separator in: " + output);
+      throw std::runtime_error ("couldn't find separator in: " + output);
 
     std::istringstream str (output.substr (split + separator.size() + 1));
     std::regex pattern ("^\\| +([^ ]+) +\\| +([^ ]+) +\\| +([^ ]+ [^ ]+) +\\| +([^ ]+) +\\| +([^: ]+): ([^ ]+) +\\| *$");
@@ -443,18 +458,18 @@ namespace SH
     std::string output = sh::exec_read (command);
     auto split = output.rfind (separator + "\n");
     if (split == std::string::npos)
-      RCU_THROW_MSG ("couldn't find separator in: " + output);
+      throw std::runtime_error ("couldn't find separator in: " + output);
 
     std::istringstream str (output.substr (split + separator.size() + 1));
     std::regex pattern ("^([^:]+): *(.+)$");
     std::string line;
-    std::unique_ptr<MetaObject> meta (new MetaObject);
+    auto meta = std::make_unique<MetaObject>();
 
     auto addMeta = [&] ()
     {
       std::string name = meta->castString ("scope") + ":" + meta->castString ("name");
       if (result.find (name) != result.end())
-	RCU_THROW_MSG ("read " + name + " twice");
+        throw std::runtime_error ("rucioGetMetadata: read " + name + " twice");
       result[name] = std::move (meta);
     };
 
@@ -464,7 +479,7 @@ namespace SH
       if (line == "------")
       {
         addMeta ();
-        meta.reset (new MetaObject);
+        meta = std::make_unique<MetaObject>();
       } else  if (std::regex_match (line, what, pattern))
       {
 	if (meta->get (what[1]))
@@ -480,12 +495,12 @@ namespace SH
     for (auto& subresult : result)
     {
       if (datasets.find (subresult.first) == datasets.end())
-	RCU_THROW_MSG ("received result for dataset not requested: " + subresult.first);
+        throw std::runtime_error ("received result for dataset not requested: " + subresult.first);
     }
     for (auto& dataset : datasets)
     {
       if (result.find (dataset) == result.end())
-	RCU_THROW_MSG ("received no result for dataset: " + dataset);
+        throw std::runtime_error ("received no result for dataset: " + dataset);
     }
 
     return result;
@@ -505,7 +520,7 @@ namespace SH
     std::string output = sh::exec_read (command);
     auto split = output.rfind (separator + "\n");
     if (split == std::string::npos)
-      RCU_THROW_MSG ("couldn't find separator in: " + output);
+      throw std::runtime_error ("couldn't find separator in: " + output);
     output = output.substr (split + separator.size() + 1);
 
     RucioDownloadResult result;
@@ -539,7 +554,7 @@ namespace SH
     std::vector<std::string> result;
 
     std::string path = location;
-    if (path.back() != '/')
+    if (path.empty() || path.back() != '/')
       path += "/";
     if (dataset.find (':') != std::string::npos)
       path += dataset.substr (dataset.find (':')+1);
@@ -550,13 +565,23 @@ namespace SH
 
     // check if the finished file does not exist
     // note that AccessPathName has the weirdest calling convention
+    //
+    // rationale: this check-then-download is not safe against two jobs
+    //   caching the same dataset into the same directory concurrently
+    //   (they can both see the marker missing and download at the same
+    //   time); guarding that properly would need an exclusive lock on
+    //   the directory.  we do at least check that the marker file was
+    //   created, so an unwritable directory fails loudly instead of
+    //   silently re-downloading on every call.
     if (gSystem->AccessPathName (finished.c_str()) != 0)
     {
       RucioDownloadResult status = rucioDownload (location, dataset);
       if (status.downloadedFiles + status.alreadyLocal < status.totalFiles)
         throw std::runtime_error ("failed to download all files of " + dataset);
       //  this just creates an empty file
-      std::ofstream (finished.c_str());
+      std::ofstream finishedFile (finished.c_str());
+      if (!finishedFile)
+        throw std::runtime_error ("failed to create marker file: " + finished);
     }
 
     std::string output = sh::exec_read ("find " + sh::quote (path) + " -type f -name " + sh::quote (fileGlob));

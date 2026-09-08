@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -118,9 +118,9 @@ public:
   float last_propMaxRadius = 0.0F;
   Trk::ITrackFitter * last_trackFitter = nullptr;
   Muon::MuonEDMPrinterTool * muonedmprintertool = nullptr;
-  TrackCommonFlags::SELECTIONMODE last_selectionMode;
+  TrackCommonFlags::SELECTIONMODE last_selectionMode{};
   bool last_showTruthAscObjs = false;
-  TrackCommonFlags::DETAILLEVEL last_assocObjDetailLevel;
+  TrackCommonFlags::DETAILLEVEL last_assocObjDetailLevel{};
   TrackCommonFlags::TSOSPartsFlags last_shownTSOSParts;
   TrackCommonFlags::TSOSPartsFlags last_customColouredTSOSParts;
   bool last_useShortTRTMeasurements = false;
@@ -199,10 +199,11 @@ void TrackSystemController::Imp::ensureExtrapolatorsCreated(IVP1System * sys) {
   extrapolatorsCreated = true;
 
   //Get available extrapolators:
-  QString tooltype("Trk::Extrapolator");
+  QString tooltype("Trk::IExtrapolator");
   VP1AvailableToolsHelper * availTools = new VP1AvailableToolsHelper(sys);
   availTools->addMonitoredType(tooltype);
   QStringList existingExtrapolators =  availTools->availableTools();
+  VP1Msg::message("availTools: " + existingExtrapolators.join(", "));
   delete availTools;
 
   VP1ToolAccessHelper toolaccess(sys);
@@ -212,9 +213,10 @@ void TrackSystemController::Imp::ensureExtrapolatorsCreated(IVP1System * sys) {
   for (const QString& key : VP1QtUtils::environmentVariableValue("VP1_JOBCFG_EXTRA_VP1_EXTRAPOLATORS").split(';',QString::SkipEmptyParts))
 #endif
   {
+    VP1Msg::message("EXTRAPOLATORS - key: " + key);
     if (existingExtrapolators.contains(key))
       continue;
-    sys->messageDebug("Attempting creation of fitter with tooltype/key "+key);
+    sys->messageDebug("Attempting creation of extrapolator with tooltype/key "+key);
     Trk::IExtrapolator * tool = toolaccess.getToolPointer<Trk::IExtrapolator>(key,false/*silent*/,true/*create if not exists*/);
     if (!tool) {
       sys->message("WARNING: Could not create tool type/key "+key);
@@ -1638,8 +1640,10 @@ Trk::IExtrapolator * TrackSystemController::propagator() const
     return nullptr;
 
   QString key = m_d->ui_extrap.comboBox_propagator->currentText();
-  if (key==Imp::noneAvailString)
+  if (key==Imp::noneAvailString) {
+    messageDebug("No extrapolator available, returning a nullptr...");
     return nullptr;
+  }
   return key.isEmpty() ? nullptr : m_d->toolaccesshelper->getToolPointer<Trk::IExtrapolator>(key);
 }
 
@@ -1898,12 +1902,15 @@ bool TrackSystemController::Imp::updateComboBoxContents(QComboBox*cb,const QStri
     if (i>=0) {
       cb->setCurrentIndex(i);
     } else {
-      //Let's try to pick the default to be VP1Extrapolater over
+      //Let's try to pick the default to be VP1Extrapolator over
       //AtlasExtrapolater over... whatever (same for fitters):
       int i_vp1(-1), i_atlas(-1);
       for (int j = 0; j <cb->count();++j) {
+
+          VP1Msg::message("combobox itemText: " + cb->itemText(j)); 
       	if (i_vp1==-1&&cb->itemText(j).contains("vp1",Qt::CaseInsensitive))
       	  i_vp1 = j;
+
       	if (i_atlas==-1&&cb->itemText(j).contains("atlas",Qt::CaseInsensitive))
       	  i_atlas = j;
       }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArPhysWaveFromStdNtuple.h"
@@ -19,9 +19,7 @@
 #include <iostream>
 #include <string>
 
-LArPhysWaveFromStdNtuple::LArPhysWaveFromStdNtuple(const std::string & name, ISvcLocator * pSvcLocator):AthAlgorithm(name, pSvcLocator) {};
-
-LArPhysWaveFromStdNtuple::~LArPhysWaveFromStdNtuple()= default;
+LArPhysWaveFromStdNtuple::~LArPhysWaveFromStdNtuple() = default;
 
 StatusCode LArPhysWaveFromStdNtuple::stop()
 {

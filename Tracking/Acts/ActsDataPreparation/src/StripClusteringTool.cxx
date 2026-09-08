@@ -53,7 +53,7 @@ StripClusteringTool::countCells(const RDOContainer& rdoContainer,
                                 const std::vector<IdentifierHash> &listOfIds,
                                 const InDetDD::SiDetectorElementCollection &detector_elements) const {
    auto getNHits =[](const InDetRawDataCollection<SCT_RDORawData> &RDOs,
-                     [[maybe_unused]] const InDetDD::SiDetectorElementCollection &detector_elements )
+                     [[maybe_unused]] const InDetDD::SiDetectorElementCollection &elements )
       -> unsigned int
    {
       unsigned int n_hits = 0u;

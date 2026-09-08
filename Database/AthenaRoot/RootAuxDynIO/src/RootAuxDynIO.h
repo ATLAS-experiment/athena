@@ -59,6 +59,8 @@ namespace RootAuxDynIO
       getNTupleAuxDynReader(const std::string& field_name, const std::string& field_type,
                             ROOT::RNTupleReader* reader) const override final;
 
+      virtual std::unique_ptr<IAuxDynShare> getAuxDynShare(const IAthenaSerializeSvc* serSvc, IAthenaIPCTool* ipcTool) const override final;
+
       /// check if a field/branch with fieldname and type tc has IAuxStore interface
       virtual bool hasAuxStore(std::string_view fieldname, TClass *tc) const override final;
 

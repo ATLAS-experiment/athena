@@ -50,6 +50,17 @@ public:
     return "";
   }
 
+  /// as above - should really return a const std::string&
+  /// but we don't want to have to throw an exception for
+  /// an out of range, or force clients to check the vector
+  /// size unless they really need to
+  std::string value(size_t i) const {
+    if ( i<m_values.size() ) return m_values[i];
+    return "";
+  }
+
+  size_t vsize() const { return m_values.size(); }
+  
   /// same here regarding returning a reference 
   std::string postvalue( const std::string& key ) const { 
     if ( postcount() ) return value( key+"-post" ); 
@@ -64,7 +75,7 @@ public:
 
   size_t postcount() const { return m_postcount; }
 
- std::string subs( std::string s ) const; 
+  std::string subs( std::string s ) const; 
 
 public:   
 

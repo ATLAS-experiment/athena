@@ -52,25 +52,22 @@ namespace MuonValR4{
       /** @brief Truth segment for reference */
       const xAOD::MuonSegment* truthSegment{nullptr};
       /// @brief All segments matched to this object
-      std::vector<const MuonR4::Segment*> matchedSegments;
+      std::vector<const xAOD::MuonSegment*> matchedSegments;
       /// @brief All seeds matched to this object
       std::vector<const MuonR4::SegmentSeed*> matchedSeeds; 
       std::vector<char> matchedSeedFoundSegment;
     };
 
   private:
-    std::vector<ObjectMatching> matchWithTruth(const ActsTrk::GeometryContext& gctx,
-                                               const MuonR4::SegmentSeedContainer& seedContainer,
+    std::vector<ObjectMatching> matchWithTruth(const MuonR4::SegmentSeedContainer& seedContainer,
                                                const xAOD::MuonSegmentContainer& segmentContainer,
                                                const xAOD::MuonSegmentContainer* truthSegments) const;
     /** @brief Calculates how many measurements from the segment fit have the same drift sign
      *          as when evaluated with the truth parameters
-     *  @param gctx: Geometry context to fetch the alignment constants
      *  @param truthSeg: Reference to the truth segment
      *  @param recoSeg: Reference to the reco segment. */
-    unsigned int countOnSameSide(const ActsTrk::GeometryContext& gctx,
-                                 const xAOD::MuonSegment& truthSeg,
-                                 const MuonR4::Segment& recoSeg) const;
+    unsigned int countOnSameSide(const xAOD::MuonSegment& truthSeg,
+                                 const xAOD::MuonSegment& recoSeg) const;
     
    /** @brief Fill the current chamber info into the output
     *  @param chamber: Pointer to the reference sector to which the view belongs to */ 
@@ -88,9 +85,11 @@ namespace MuonValR4{
     void fillSeedInfo(const ObjectMatching& obj);
     /** @brief Fill the info assciated to the segment 
       * @param obj: Pointer to the matching object connecting the seeds & segment & truth */
-    void fillSegmentInfo(const ActsTrk::GeometryContext& gctx, const ObjectMatching& obj);  
+    void fillSegmentInfo(const ObjectMatching& obj);  
                          
 
+    void fillRecoSummary(const xAOD::MuonSegment& recoSegment);
+    void fillTruthSummary(const xAOD::MuonSegment& recoSegment);
       
     // // output tree - allows to compare the sim and fast-digitised hits
     MuonVal::MuonTesterTree m_tree{"MuonEtaHoughTest","MuonEtaHoughTransformTest"}; 
@@ -129,65 +128,65 @@ namespace MuonValR4{
     /// phi index of the station
     MuonVal::ScalarBranch<int>& m_out_stationPhi{m_tree.newScalar<int>("stationPhi")};
 
-    MuonVal::ScalarBranch<float>& m_out_bucketStart{m_tree.newScalar<float>("bucketStart", 1)};
-    MuonVal::ScalarBranch<float>& m_out_bucketEnd{m_tree.newScalar<float>("bucketEnd", -1)};
-    MuonVal::ScalarBranch<float>& m_out_bucketEtaHitGap{m_tree.newScalar<float>("bucketEtaHitGap", 0.)};
+    MuonVal::ScalarBranch<float>& m_out_bucketStart{m_tree.newScalar<float>("bucket_start", 1)};
+    MuonVal::ScalarBranch<float>& m_out_bucketEnd{m_tree.newScalar<float>("bucket_end", -1)};
+    MuonVal::ScalarBranch<float>& m_out_bucketEtaHitGap{m_tree.newScalar<float>("bucket_etaHitGap", 0.)};
 
     /// @brief Branch dumping all the space points from the difference buckets
     std::shared_ptr<SpacePointTesterModule> m_spTester{};
     /// @brief Branch indicating which space points in the tree are associated to the i-th pattern
-    MuonVal::MatrixBranch<unsigned char>& m_spMatchedToPattern{m_tree.newMatrix<unsigned char>("seedMatchedSp")};
+    MuonVal::MatrixBranch<unsigned char>& m_spMatchedToPattern{m_tree.newMatrix<unsigned char>("seed_matchedSpacPoins")};
     /// @brief Branch indicating which space points in the tree are associated to the i-th segment
-    MuonVal::MatrixBranch<unsigned char>& m_spMatchedToSegment{m_tree.newMatrix<unsigned char>("segmentMatchedSp")};
+    MuonVal::MatrixBranch<unsigned char>& m_spMatchedToSegment{m_tree.newMatrix<unsigned char>("segment_matchedSpacePoints")};
 
     /// @brief Number of all space points in the bucket
-    MuonVal::ScalarBranch<unsigned char>& m_out_nSpacePoints{m_tree.newScalar<unsigned char>("bucketNHits",0)};
+    MuonVal::ScalarBranch<unsigned char>& m_out_nSpacePoints{m_tree.newScalar<unsigned char>("bucket_nHits",0)};
     /// @brief Number of precision hits in the bucket
-    MuonVal::ScalarBranch<unsigned char>& m_out_nPrecSpacePoints{m_tree.newScalar<unsigned char>("bucketNPrecMeas",0)};
+    MuonVal::ScalarBranch<unsigned char>& m_out_nPrecSpacePoints{m_tree.newScalar<unsigned char>("bucket_nPrecMeas",0)};
     /// @brief Number of phi hits in the bucket
-    MuonVal::ScalarBranch<unsigned char>& m_out_nPhiSpacePoints{m_tree.newScalar<unsigned char>("bucketNPhiMeass",0)};
+    MuonVal::ScalarBranch<unsigned char>& m_out_nPhiSpacePoints{m_tree.newScalar<unsigned char>("bucket_nPhiMeass",0)};
     
     /// @brief Number of all space points in the bucket
-    MuonVal::ScalarBranch<unsigned char>& m_out_nTrueSpacePoints{m_tree.newScalar<unsigned char>("bucketNTrueMeas",0)};
+    MuonVal::ScalarBranch<unsigned char>& m_out_nTrueSpacePoints{m_tree.newScalar<unsigned char>("bucket_nTrueMeas",0)};
     /// @brief Number of precision hits in the bucket
-    MuonVal::ScalarBranch<unsigned char>& m_out_nTruePrecSpacePoints{m_tree.newScalar<unsigned char>("bucketNTruePrecMeas",0)};
+    MuonVal::ScalarBranch<unsigned char>& m_out_nTruePrecSpacePoints{m_tree.newScalar<unsigned char>("bucket_nTruePrecMeas",0)};
     /// @brief Number of phi hits in the bucket
-    MuonVal::ScalarBranch<unsigned char>& m_out_nTruePhiSpacePoints{m_tree.newScalar<unsigned char>("bucketNTruePhiMeass",0)};
+    MuonVal::ScalarBranch<unsigned char>& m_out_nTruePhiSpacePoints{m_tree.newScalar<unsigned char>("bucket_nTruePhiMeass",0)};
     
     /// ======= Truth block: Filled if we have a truth match. ============ 
 
     /// existence of a truth match 
-    MuonVal::ScalarBranch<bool> & m_out_hasTruth{m_tree.newScalar<bool>("hasTruth",false)};
+    MuonVal::ScalarBranch<char> & m_out_hasTruth{m_tree.newScalar<char>("gen_exists",false)};
       
     /** @brief global particle properties */
-    MuonVal::ScalarBranch<float>& m_out_gen_Eta{m_tree.newScalar<float>("genEta",-10.)};
-    MuonVal::ScalarBranch<float>& m_out_gen_Phi{m_tree.newScalar<float>("genPhi",-10.)};
-    MuonVal::ScalarBranch<float>& m_out_gen_Pt{m_tree.newScalar<float>("genPt",-10.)};    
-    MuonVal::ScalarBranch<short>& m_out_gen_Q{m_tree.newScalar<short>("genQ", 0)};
+    MuonVal::ScalarBranch<float>& m_out_gen_Eta{m_tree.newScalar<float>("gen_eta",-10.)};
+    MuonVal::ScalarBranch<float>& m_out_gen_Phi{m_tree.newScalar<float>("gen_phi",-10.)};
+    MuonVal::ScalarBranch<float>& m_out_gen_Pt{m_tree.newScalar<float>("gen_pt",-10.)};    
+    MuonVal::ScalarBranch<short>& m_out_gen_Q{m_tree.newScalar<short>("gen_q", 0)};
     /** @brief Truth - segment parameters  */
-    MuonVal::ScalarBranch<float>& m_out_gen_y0{m_tree.newScalar<float>("genY0", 0.0)}; 
-    MuonVal::ScalarBranch<float>& m_out_gen_tantheta{m_tree.newScalar<float>("genTanTheta", 0.0)}; 
-    MuonVal::ScalarBranch<float>& m_out_gen_tanphi{m_tree.newScalar<float>("genTanPhi", 0.0)}; 
-    MuonVal::ScalarBranch<float>& m_out_gen_x0{m_tree.newScalar<float>("genX0", 0.0)}; 
-    MuonVal::ScalarBranch<float>& m_out_gen_time{m_tree.newScalar<float>("genTime", 0.0)};
+    MuonVal::ScalarBranch<float>& m_out_gen_y0{m_tree.newScalar<float>("gen_y0", 0.0)}; 
+    MuonVal::ScalarBranch<float>& m_out_gen_tanbeta{m_tree.newScalar<float>("gen_tanBeta", 0.0)}; 
+    MuonVal::ScalarBranch<float>& m_out_gen_tanalpha{m_tree.newScalar<float>("gen_tanAlpha", 0.0)}; 
+    MuonVal::ScalarBranch<float>& m_out_gen_x0{m_tree.newScalar<float>("gen_x0", 0.0)}; 
+    MuonVal::ScalarBranch<float>& m_out_gen_time{m_tree.newScalar<float>("gen_time", 0.0)};
 
-    MuonVal::ScalarBranch<int>& m_out_gen_truthOrigin{m_tree.newScalar<int>("genTruthOrigin", -1)};
-    MuonVal::ScalarBranch<int>& m_out_gen_truthType{m_tree.newScalar<int>("genTruthType", -1)};
-    MuonVal::ScalarBranch<float>& m_out_gen_truthBeta{m_tree.newScalar<float>("genTruthBeta", -1)};
-    MuonVal::ScalarBranch<int>& m_out_gen_truthPdgId{m_tree.newScalar<int>("genTruthPdgId", 0)};
+    MuonVal::ScalarBranch<int>& m_out_gen_truthOrigin{m_tree.newScalar<int>("gen_origin", -1)};
+    MuonVal::ScalarBranch<int>& m_out_gen_truthType{m_tree.newScalar<int>("gen_type", -1)};
+    MuonVal::ScalarBranch<float>& m_out_gen_truthBeta{m_tree.newScalar<float>("gen_beta", -1)};
+    MuonVal::ScalarBranch<int>& m_out_gen_truthPdgId{m_tree.newScalar<int>("gen_pdgId", 0)};
     
     /** @brief Truth - hit count summary */
-    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nHits{m_tree.newScalar<unsigned short>("genNHits",0)};
-    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nRPCHits{m_tree.newScalar<unsigned short>("genNRpcHits",0)};
-    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nMDTHits{m_tree.newScalar<unsigned short>("genNMdtHits",0)};
-    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nTGCHits{m_tree.newScalar<unsigned short>("genNTgcHits",0)};
-    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nNswHits{m_tree.newScalar<unsigned short>("genNNswHits",0)};
-    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nMmHits{m_tree.newScalar<unsigned short>("genNMmHits",0)};
-    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nSTGCHits{m_tree.newScalar<unsigned short>("genNsTgcHits",0)};
+    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nPrecHits{m_tree.newScalar<unsigned short>("gen_nPrecHits",0)};
+    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nTrigEtaHits{m_tree.newScalar<unsigned short>("gen_nTrigEtaHits",0)};
+    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nTrigPhiHits{m_tree.newScalar<unsigned short>("gen_nTrigPhiHits",0)};
+    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nMmEtaHits{m_tree.newScalar<unsigned short>("gen_nMmEtaHits",0)};
+    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nMmStereoHits{m_tree.newScalar<unsigned short>("gen_nMmStereoHits",0)};
+    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nStgcHits{m_tree.newScalar<unsigned short>("gen_nStgcHits",0)};
+    
     
     // truth segment size in the y direction
-    MuonVal::ScalarBranch<float>& m_out_gen_minYhit{m_tree.newScalar<float>("genMinYhit", 1.0)}; 
-    MuonVal::ScalarBranch<float>& m_out_gen_maxYhit{m_tree.newScalar<float>("genMaxYhit", -1.0)};
+    MuonVal::ScalarBranch<float>& m_out_gen_minYhit{m_tree.newScalar<float>("gen_hitMinY0", 1.0)}; 
+    MuonVal::ScalarBranch<float>& m_out_gen_maxYhit{m_tree.newScalar<float>("gen_hitMaxY0", -1.0)};
 
     /// ========== Seed block: Filled when we have one or multiple seeds ============= 
     /// seed count
@@ -195,43 +194,40 @@ namespace MuonValR4{
     // the following are filled with one entry per seed 
 
     // does the seed have a phi-extension? 
-    MuonVal::VectorBranch<unsigned short>&  m_out_seed_hasPhiExtension{m_tree.newVector<unsigned short>("seedHasPhiExtension", false)}; 
-    // fraction of the hits on the seed matched to truth 
-    MuonVal::VectorBranch<unsigned short>& m_out_seed_nMatchedHits{m_tree.newVector<unsigned short>("seedTruthMatchedHits", false)}; 
-
+    MuonVal::VectorBranch<unsigned short>&  m_out_seed_hasPhiExtension{m_tree.newVector<unsigned short>("seed_hasPhiExtension", false)}; 
     // parameters of the seed 
-    MuonVal::VectorBranch<float>& m_out_seed_y0{m_tree.newVector<float>("seedY0", 0.0)}; 
-    MuonVal::VectorBranch<float>& m_out_seed_x0{m_tree.newVector<float>("seedX0", 0.0)}; 
-    MuonVal::VectorBranch<float>& m_out_seed_tantheta{m_tree.newVector<float>("seedTanTheta", 0.0)}; 
-    MuonVal::VectorBranch<float>& m_out_seed_tanphi{m_tree.newVector<float>("seedTanPhi", 0.0)};
+    MuonVal::VectorBranch<float>& m_out_seed_y0{m_tree.newVector<float>("seed_y0", 0.0)}; 
+    MuonVal::VectorBranch<float>& m_out_seed_x0{m_tree.newVector<float>("seed_x0", 0.0)}; 
+    MuonVal::VectorBranch<float>& m_out_seed_tanbeta{m_tree.newVector<float>("seed_tanBeta", 0.0)}; 
+    MuonVal::VectorBranch<float>& m_out_seed_tanalpha{m_tree.newVector<float>("seed_tanAlpha", 0.0)};
 
       // seed size in the y direction
-    MuonVal::VectorBranch<float>& m_out_seed_minYhit{m_tree.newVector<float>("seedMinYhit", 1.0)}; 
-    MuonVal::VectorBranch<float>& m_out_seed_maxYhit{m_tree.newVector<float>("seedMaxYhit", -1.0)}; 
+    MuonVal::VectorBranch<float>& m_out_seed_minYhit{m_tree.newVector<float>("seed_hitMinY0", 1.0)}; 
+    MuonVal::VectorBranch<float>& m_out_seed_maxYhit{m_tree.newVector<float>("seed_hitMaxY0", -1.0)}; 
     // hit counts on the seed
-    MuonVal::VectorBranch<unsigned short>& m_out_seed_nHits{m_tree.newVector<unsigned short>("seedNHits", 0)}; 
-    MuonVal::VectorBranch<unsigned short>& m_out_seed_nPrecHits{m_tree.newVector<unsigned short>("seedNPrecHits", 0)};
-    MuonVal::VectorBranch<unsigned short>& m_out_seed_nEtaHits{m_tree.newVector<unsigned short>("seedNEtaHits", 0)}; 
-    MuonVal::VectorBranch<unsigned short>& m_out_seed_nPhiHits{m_tree.newVector<unsigned short>("seedNPhiHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_nPrecHits{m_tree.newVector<unsigned short>("seed_nPrecHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_nEtaHits{m_tree.newVector<unsigned short>("seed_nTrigEtaHits", 0)}; 
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_nPhiHits{m_tree.newVector<unsigned short>("seed_nTrigPhiHits", 0)};
 
-    MuonVal::VectorBranch<unsigned short>& m_out_seed_nMdt{m_tree.newVector<unsigned short>("seedNMdtHits", 0)}; 
-    MuonVal::VectorBranch<unsigned short>& m_out_seed_nRpc{m_tree.newVector<unsigned short>("seedNRpcHits", 0)}; 
-    MuonVal::VectorBranch<unsigned short>& m_out_seed_nTgc{m_tree.newVector<unsigned short>("seedNTgcHits", 0)}; 
-    MuonVal::VectorBranch<unsigned short>& m_out_seed_nsTgcStrip{m_tree.newVector<unsigned short>("seedNsTgcStripHits", 0)};
-    MuonVal::VectorBranch<unsigned short>& m_out_seed_nsTgcWire{m_tree.newVector<unsigned short>("seedNsTgcWireHits", 0)};
-    MuonVal::VectorBranch<unsigned short>& m_out_seed_nsTgcPad{m_tree.newVector<unsigned short>("seedNsTgcPadHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_nTruePrecHits{m_tree.newVector<unsigned short>("seed_nTruePrecHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_nTrueEtaHits{m_tree.newVector<unsigned short>("seed_nTrueTrigEtaHits", 0)}; 
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_nTruePhiHits{m_tree.newVector<unsigned short>("seed_nTrueTrigPhiHits", 0)};
     
-    MuonVal::VectorBranch<unsigned short>& m_out_seed_nMmEta{m_tree.newVector<unsigned short>("seedNMmHitsEta", 0)};
-    MuonVal::VectorBranch<unsigned short>& m_out_seed_nMmStereo{m_tree.newVector<unsigned short>("seedNMmHitsStereo", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_nMmEtaHits{m_tree.newVector<unsigned short>("seed_nMmEtaHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_nMmStereoHits{m_tree.newVector<unsigned short>("seed_nMmStereoHits", 0)};
+
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_nTrueMmEtaHits{m_tree.newVector<unsigned short>("seed_nMmTrueEtaHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_nTrueMmStereoHits{m_tree.newVector<unsigned short>("seed_nMmTrueStereoHits", 0)};
     
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_nsTgcStripHits{m_tree.newVector<unsigned short>("seed_nStgcStripHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_nsTgcWireHits{m_tree.newVector<unsigned short>("seed_nStgcWireHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_nsTgcPadHits{m_tree.newVector<unsigned short>("seed_nStgcPadHits", 0)};
 
-    /// @brief Labelled hits from the pattern visualization tool
-    MuonVal::VectorBranch<unsigned short>& m_out_seed_nTrueHits{m_tree.newVector<unsigned short>("seedNTrueHits", 0)};
-    MuonVal::VectorBranch<unsigned short>& m_out_seed_nTruePrecHits{m_tree.newVector<unsigned short>("seedNTruePrecHits", 0)};
-    MuonVal::VectorBranch<unsigned short>& m_out_seed_nTruePhiHits{m_tree.newVector<unsigned short>("seedNTruePhiHits", 0)};
-    MuonVal::VectorBranch<unsigned short>& m_out_seed_nTrueEtaHits{m_tree.newVector<unsigned short>("seedNTrueEtaHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_nTruesTgcStripHits{m_tree.newVector<unsigned short>("seed_nStgcTrueStripHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_nTruesTgcWireHits{m_tree.newVector<unsigned short>("seed_nStgcTrueWireHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_nTruesTgcPadHits{m_tree.newVector<unsigned short>("seed_nStgcTruePadHits", 0)};
 
-    MuonVal::VectorBranch<unsigned char> & m_out_seed_ledToSegment{m_tree.newVector<unsigned char>("seedConvertedToSegment",false)}; 
+    MuonVal::VectorBranch<unsigned char> & m_out_seed_ledToSegment{m_tree.newVector<unsigned char>("seed_becameSegment",false)}; 
       
     /// ========== Segment block: Filled when we have one or multiple segments ============= 
 
@@ -240,50 +236,72 @@ namespace MuonValR4{
     // the following are filled with one entry per segment
 
     // fit metrics 
-    MuonVal::VectorBranch<float>& m_out_segment_chi2{m_tree.newVector<float>("segmentChi2", -1.)};
-    MuonVal::VectorBranch<uint16_t>& m_out_segment_nDoF{m_tree.newVector<uint16_t>("segmentNdoF", 0)};
-    MuonVal::VectorBranch<bool>&  m_out_segment_hasTimeFit {m_tree.newVector<bool>("segmentHasTimeFit", false)}; 
-    MuonVal::VectorBranch<uint16_t>&  m_out_segment_fitIter {m_tree.newVector<uint16_t>("segmentFitIterations", 0)};
+    MuonVal::VectorBranch<float>& m_out_segment_chi2{m_tree.newVector<float>("segment_chi2", -1.)};
+    MuonVal::VectorBranch<uint16_t>& m_out_segment_nDoF{m_tree.newVector<uint16_t>("segment_nDoF", 0)};
+    MuonVal::VectorBranch<char>&  m_out_segment_hasTimeFit {m_tree.newVector<char>("segment_hasTimeFit", false)}; 
+    MuonVal::VectorBranch<uint16_t>&  m_out_segment_fitIter {m_tree.newVector<uint16_t>("segment_nIter", 0)};
 
-    // presence of a phi extension
-    MuonVal::VectorBranch<bool>&  m_out_segment_hasPhi {m_tree.newVector<bool>("segmentHasPhiHits", false)}; 
-      
     // segment parameters
-    MuonVal::VectorBranch<float>& m_out_segment_y0{m_tree.newVector<float>("segmentY0", 0.0)}; 
-    MuonVal::VectorBranch<float>& m_out_segment_x0{m_tree.newVector<float>("segmentX0", 0.0)}; 
-    MuonVal::VectorBranch<float>& m_out_segment_tantheta{m_tree.newVector<float>("segmentTanTheta", 0.0)}; 
-    MuonVal::VectorBranch<float>& m_out_segment_tanphi{m_tree.newVector<float>("segmentTanPhi", 0.0)};
-    MuonVal::VectorBranch<float>& m_out_segment_time{m_tree.newVector<float>("segmentTime", 0.)};
-      
-    // segment uncertainties
-    MuonVal::VectorBranch<float>& m_out_segment_err_y0{m_tree.newVector<float>("segmentErrY0", -1.0)}; 
-    MuonVal::VectorBranch<float>& m_out_segment_err_x0{m_tree.newVector<float>("segmentErrX0", -1.0)}; 
-    MuonVal::VectorBranch<float>& m_out_segment_err_tantheta{m_tree.newVector<float>("segmentErrTanTheta", -1.0)}; 
-    MuonVal::VectorBranch<float>& m_out_segment_err_tanphi{m_tree.newVector<float>("segmentErrTanPhi", -1.0)}; 
-    MuonVal::VectorBranch<float>& m_out_segment_err_time{m_tree.newVector<float>("segmentErrTime", -1.0)};
-
-    // hit counts on segment 
-    MuonVal::VectorBranch<unsigned short>& m_out_segment_truthMatchedHits{m_tree.newVector<unsigned short>("segmentTruthMatchedHits", 0)};
-    MuonVal::VectorBranch<unsigned short>& m_out_segment_nMdtHits{m_tree.newVector<unsigned short>("segmentNMdtHits", 0)};
-    MuonVal::VectorBranch<unsigned short>& m_out_segment_nRpcEtaHits{m_tree.newVector<unsigned short>("segmentNRpcEtaHits", 0)};
-    MuonVal::VectorBranch<unsigned short>& m_out_segment_nRpcPhiHits{m_tree.newVector<unsigned short>("segmentNRpcPhiHits", 0)};
-    MuonVal::VectorBranch<unsigned short>& m_out_segment_nTgcEtaHits{m_tree.newVector<unsigned short>("segmentNTgcEtaHits", 0)};
-    MuonVal::VectorBranch<unsigned short>& m_out_segment_nTgcPhiHits{m_tree.newVector<unsigned short>("segmentNTgcPhiHits", 0)};
-    // hit coutns on segment NSW
-    MuonVal::VectorBranch<unsigned short>& m_out_segment_nMmEtaHits{m_tree.newVector<unsigned short>("segmentNMmEtaHits", 0)};
-    MuonVal::VectorBranch<unsigned short>& m_out_segment_nMmStereoHits{m_tree.newVector<unsigned short>("segmentNMmStereoHits", 0)};
-    MuonVal::VectorBranch<unsigned short>& m_out_segment_nsTgcStripHits{m_tree.newVector<unsigned short>("segmentNsTgcStripHits", 0)};
-    MuonVal::VectorBranch<unsigned short>& m_out_segment_nsTgcWireHits{m_tree.newVector<unsigned short>("segmentNsTgcWireHits", 0)};
-    MuonVal::VectorBranch<unsigned short>& m_out_segment_nsTgcPadpHits{m_tree.newVector<unsigned short>("segmentNsTgcPadHits", 0)};
-   /// @brief Labelled hits from the pattern visualization tool
-    MuonVal::VectorBranch<unsigned short>& m_out_segment_nTrueHits{m_tree.newVector<unsigned short>("segmentNTrueHits", 0)};
-    MuonVal::VectorBranch<unsigned short>& m_out_segment_nTruePrecHits{m_tree.newVector<unsigned short>("segmentNTruePrecHits", 0)};
-    MuonVal::VectorBranch<unsigned short>& m_out_segment_nTruePhiHits{m_tree.newVector<unsigned short>("segmentNTruePhiHits", 0)};
-    MuonVal::VectorBranch<unsigned short>& m_out_segment_nTrueEtaHits{m_tree.newVector<unsigned short>("segmentNTrueEtaHits", 0)};
+    MuonVal::VectorBranch<float>& m_out_segment_y0{m_tree.newVector<float>("segment_y0", 0.)}; 
+    MuonVal::VectorBranch<float>& m_out_segment_x0{m_tree.newVector<float>("segment_x0", 0.)}; 
+    MuonVal::VectorBranch<float>& m_out_segment_theta{m_tree.newVector<float>("segment_theta", 0.)}; 
+    MuonVal::VectorBranch<float>& m_out_segment_phi{m_tree.newVector<float>("segment_phi", 0.)};
+    MuonVal::VectorBranch<float>& m_out_segment_time{m_tree.newVector<float>("segment_t0", 0.)};
+    // segment covariance    
+    using FloatVecBrPtr_t = std::shared_ptr<MuonVal::VectorBranch<float>>; 
+    std::array<FloatVecBrPtr_t, Acts::sumUpToN(Acts::toUnderlying(MuonR4::SegmentFit::ParamDefs::nPars))> m_segmentCov{};
     
+    /** Hit counts on segment */
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nPrecHits{m_tree.newVector<unsigned short>("segment_nPrecHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nTrigEtaHits{m_tree.newVector<unsigned short>("segment_nTrigEtaHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nTrigPhiHits{m_tree.newVector<unsigned short>("segment_nTrigPhiHits", 0)};
+   
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nPrecOutliers{m_tree.newVector<unsigned short>("segment_nPrecOutliers", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nTrigEtaOutliers{m_tree.newVector<unsigned short>("segment_nTrigEtaOutliers", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nTrigPhiOutliers{m_tree.newVector<unsigned short>("segment_nTrigPhiOutliers", 0)};
+
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nPrecHoles{m_tree.newVector<unsigned short>("segment_nPrecHoles", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nTrigEtaHoles{m_tree.newVector<unsigned short>("segment_nTrigEtaHoles", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nTrigPhiHoles{m_tree.newVector<unsigned short>("segment_nTrigPhiHoles", 0)};
+    /** True matched hit counters */
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nTruePrecHits{m_tree.newVector<unsigned short>("segment_nTruePrecHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nTrueTrigEtaHits{m_tree.newVector<unsigned short>("segment_nTrueTrigEtaHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nTrueTrigPhiHits{m_tree.newVector<unsigned short>("segment_nTrueTrigPhiHits", 0)};
+   
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nTruePrecOutliers{m_tree.newVector<unsigned short>("segment_nTruePrecOutliers", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nTrueTrigEtaOutliers{m_tree.newVector<unsigned short>("segment_nTrueTrigEtaOutliers", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nTrueTrigPhiOutliers{m_tree.newVector<unsigned short>("segment_nTrueTrigPhiOutliers", 0)};
+    
+    /** NSW hit counters */
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nMmEtaHits{m_tree.newVector<unsigned short>("segment_nMmEtaHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nMmStereoHits{m_tree.newVector<unsigned short>("segment_nMmStereoHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nSTgcStripHits{m_tree.newVector<unsigned short>("segment_nStgcStripHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nSTgcWireHits{m_tree.newVector<unsigned short>("segment_nStgcWireHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nSTgcPadHits{m_tree.newVector<unsigned short>("segment_nStgcPadHits", 0)};
+  
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nMmTrueEtaHits{m_tree.newVector<unsigned short>("segment_nMmTrueEtaHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nMmTrueStereoHits{m_tree.newVector<unsigned short>("segment_nMmTrueStereoHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nSTgcTrueStripHits{m_tree.newVector<unsigned short>("segment_nStgcTrueStripHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nSTgcTrueWireHits{m_tree.newVector<unsigned short>("segment_nStgcTrueWireHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nSTgcTruePadHits{m_tree.newVector<unsigned short>("segment_nStgcTruePadHits", 0)};
+  
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nMmEtaOutliers{m_tree.newVector<unsigned short>("segment_nMmEtaOutliers", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nMmStereoOutliers{m_tree.newVector<unsigned short>("segment_nMmStereoOutliers", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nSTgcStripOutliers{m_tree.newVector<unsigned short>("segment_nStgcStripOutliers", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nSTgcWireOutliers{m_tree.newVector<unsigned short>("segment_nStgcWireOutliers", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nSTgcPadOutliers{m_tree.newVector<unsigned short>("segment_nStgcPadOutliers", 0)};
+  
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nMmTrueEtaOutliers{m_tree.newVector<unsigned short>("segment_nMmTrueEtaOutliers", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nMmTrueStereoOutliers{m_tree.newVector<unsigned short>("segment_nMmTrueStereoOutliers", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nSTgcTrueStripOutliers{m_tree.newVector<unsigned short>("segment_nStgcTrueStripOutliers", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nSTgcTrueWireOutliers{m_tree.newVector<unsigned short>("segment_nStgcTrueWireOutliers", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_segment_nSTgcTruePadOutliers{m_tree.newVector<unsigned short>("segment_nStgcTruePadOutliers", 0)};
+
     // segment size in the y direction
-    MuonVal::VectorBranch<float>& m_out_segment_minYhit{m_tree.newVector<float>("segmentMinYhit", 1.0)}; 
-    MuonVal::VectorBranch<float>& m_out_segment_maxYhit{m_tree.newVector<float>("segmentMaxYhit", -1.0)}; 
+    MuonVal::VectorBranch<float>& m_out_segment_minYhit{m_tree.newVector<float>("segment_hitMinY0", 1.0)}; 
+    MuonVal::VectorBranch<float>& m_out_segment_maxYhit{m_tree.newVector<float>("segment_hitMinY0", -1.0)}; 
+    MuonVal::VectorBranch<float>& m_out_segment_minTrueYhit{m_tree.newVector<float>("segment_trueHitMinY0", 1.0)}; 
+    MuonVal::VectorBranch<float>& m_out_segment_maxTrueYhit{m_tree.newVector<float>("segment_trueHitMaxY0", -1.0)}; 
 
     /// Pattern visualization tool
     ToolHandle<MuonValR4::IPatternVisualizationTool> m_visionTool{this, "VisualizationTool", ""};

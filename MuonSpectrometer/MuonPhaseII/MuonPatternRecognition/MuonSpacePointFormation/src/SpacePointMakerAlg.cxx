@@ -11,6 +11,8 @@
 #include <GaudiKernel/IMessageSvc.h>
 #include <memory>
 #include <sstream>
+#include <algorithm>
+#include <ranges>
 #include <optional>
 #include <type_traits>
 #include "MuonSpacePoint/SpacePointPerLayerSorter.h"
@@ -87,6 +89,44 @@ namespace {
         }
         return m.localCovariance<1>()[0];
     }
+
+/** @brief Matches a string against a pattern with wildcards
+ *  @param pattern: The pattern to match against, may contain '*' as a wildcard
+ *  @param value: The string to be matched
+ *  @return true if the string matches the pattern, false otherwise */
+bool wildcardMatch(const std::string_view pattern,
+                   const std::string_view value) {
+    std::size_t patternPos = 0;
+    std::size_t valuePos = 0;
+    std::size_t wildcardPos = std::string_view::npos;
+    std::size_t wildcardValuePos = 0;
+
+    while (valuePos < value.size()) {
+        if (patternPos < pattern.size() &&
+            pattern[patternPos] == value[valuePos]) {
+            ++patternPos;
+            ++valuePos;
+        } else if (patternPos < pattern.size() &&
+                   pattern[patternPos] == '*') {
+            wildcardPos = patternPos++;
+            wildcardValuePos = valuePos;
+        } else if (wildcardPos != std::string_view::npos) {
+            patternPos = wildcardPos + 1;
+            valuePos = ++wildcardValuePos;
+        } else {
+            return false;
+        }
+    }
+
+    while (patternPos < pattern.size() &&
+           pattern[patternPos] == '*') {
+        ++patternPos;
+    }
+    return patternPos == pattern.size();
+}
+
+
+
 }
 
 namespace MuonR4 {
@@ -178,6 +218,7 @@ StatusCode SpacePointMakerAlg::initialize() {
             .spacePointOverlap= m_spacePointOverlap.value()
     };
 
+
     ATH_CHECK(detStore()->retrieve(m_detMgr));
     const auto chambers = m_detMgr->getAllChambers();
 
@@ -193,8 +234,10 @@ StatusCode SpacePointMakerAlg::initialize() {
         m_bucketParameters.emplace( chamber, *parameters);
     }
 
-    ATH_MSG_DEBUG( "Configured chamber-dependent bucket parameters for " << m_bucketParameters.size() << " chambers out of " << chambers.size());
-
+    ATH_MSG_DEBUG( "Configured chamber-dependent bucket parameters for " << m_bucketParameters.size() << " chambers out of " << chambers.size() << " the rest has the following default bucket parameters: "
+                   << " maxBucketLength=" << m_defaultBucketParameters.maxBucketLength
+                   << " spacePointWindow=" << m_defaultBucketParameters.spacePointWindow
+                   << " spacePointOverlap=" << m_defaultBucketParameters.spacePointOverlap);
 
     return StatusCode::SUCCESS;
 }
@@ -361,7 +404,7 @@ template <typename ContType>
                 std::array<double, 3> cov{Acts::filledArray<double,3>(0.)};
                 cov[Acts::toUnderlying(CovIdx::etaCov)] = prd->driftRadiusCov();
                 cov[Acts::toUnderlying(CovIdx::phiCov)] = Acts::square(sensorHalfLength(*prd));
-                if  (ATH_UNLIKELY(prd->numDimensions() == 2)){
+                if  (prd->numDimensions() == 2) [[unlikely]] {
                     cov[Acts::toUnderlying(CovIdx::phiCov)] = static_cast<const xAOD::MdtTwinDriftCircle*>(prd)->posAlongWireCov();
                 }
                 sp.setCovariance(std::move(cov));
@@ -623,12 +666,16 @@ StatusCode SpacePointMakerAlg::execute(const EventContext& ctx) const {
     ATH_CHECK(loadContainerAndSort(ctx, m_mmKey, preSortedContainer));
     ATH_CHECK(loadContainerAndSort(ctx, m_stgcKey, preSortedContainer));
     std::unique_ptr<SpacePointContainer> outContainer = std::make_unique<SpacePointContainer>();
-    
+
     for (auto &[chamber, hitsPerChamber] : preSortedContainer){
         ATH_MSG_DEBUG("Fill space points for chamber "<<chamber->identString() << " with "<<hitsPerChamber.etaHits.size()
                         <<" primary and "<<hitsPerChamber.phiHits.size()<<" phi space points.");
+
         distributePointsAndStore(std::move(hitsPerChamber), *outContainer);
     }
+
+    ATH_MSG_DEBUG("Created a total of "<<outContainer->size()<<" space points in "<<preSortedContainer.size()<<" chambers");
+
     SG::WriteHandle writeHandle{m_writeKey, ctx};
     ATH_CHECK(writeHandle.record(std::move(outContainer)));
     return StatusCode::SUCCESS;
@@ -650,6 +697,9 @@ void SpacePointMakerAlg::distributePointsAndStore(SpacePointsPerChamber&& hitsPe
                        }), splittedHits.end());
     distributePhiPoints(std::move(hitsPerChamber.phiHits), splittedHits);
     
+    std::size_t nBuckets{0};
+    std::size_t nSpacePointsInBuckets{0};
+    std::size_t maxBucketSize{0};
     for (SpacePointBucket& bucket : splittedHits) {
 
         std::ranges::sort(bucket, MuonR4::SpacePointPerLayerSorter{});
@@ -662,8 +712,15 @@ void SpacePointMakerAlg::distributePointsAndStore(SpacePointsPerChamber&& hitsPe
             ATH_MSG_VERBOSE("Created a bucket, printing all spacepoints..."<<std::endl<<spStr.str());
         }
         bucket.populateChamberLocations();
+
+        ++nBuckets;
+        nSpacePointsInBuckets += bucket.size();
+        maxBucketSize = std::max(maxBucketSize, bucket.size());
         finalContainer.push_back(std::make_unique<SpacePointBucket>(std::move(bucket)));
     }
+
+    ATH_MSG_DEBUG("Created "<<nBuckets<<" buckets with a total of "<<nSpacePointsInBuckets
+                 <<" space points. Max bucket size: "<<maxBucketSize);
 
 }
 void SpacePointMakerAlg::distributePhiPoints(std::vector<SpacePoint>&& spacePoints,
@@ -777,7 +834,6 @@ void SpacePointMakerAlg::distributePrimaryPoints(std::vector<SpacePoint>&& space
 }
 
 
-
 std::string SpacePointMakerAlg::chamberConfigKey( const MuonGMR4::Chamber& chamber) const {
     return std::format("{:}_eta{:}_phi{:}", Muon::MuonStationIndex::chName(chamber.chamberIndex()), chamber.stationEta(), chamber.stationPhi());
 }
@@ -811,23 +867,28 @@ SpacePointMakerAlg::ResolvedParameter SpacePointMakerAlg::resolveParameter(
     }
 
     double resolvedValue = defaultValue;
-    std::size_t bestPrefixLength = 0;
+    std::size_t bestSpecificity = 0;
     bool matched = false;
 
-    // Otherwise select the most-specific matching prefix wildcard (e.g. BIL_eta-3* or BIL*).
+    // Otherwise select the most-specific matching wildcard (e.g. BIL_eta-3* or BIL* or BIL_eta*_phi3).
+    // If there are multiple patterns matching, the one with the most non-wildcard characters is selected.
     for (const auto& [pattern, value] : patterns) {
-        if (pattern.empty() || pattern.back() != '*') {
+        if (pattern.find('*') == std::string::npos) {
             continue;
         }
 
-        const std::string_view prefix{
-            pattern.data(),
-            pattern.size() - 1
-        };
+        if (!wildcardMatch(pattern, chamberKey)) {
+            continue;
+        }
 
-        if (chamberKey.starts_with(prefix) &&
-            prefix.size() > bestPrefixLength) {
-            bestPrefixLength = prefix.size();
+        // More non-wildcard characters means a more specific pattern.
+        const std::size_t specificity =
+            std::ranges::count_if(pattern, [](const char c) {
+                return c != '*';
+            });
+
+        if (!matched || specificity > bestSpecificity) {
+            bestSpecificity = specificity;
             resolvedValue = value;
             matched = true;
         }
@@ -838,6 +899,8 @@ SpacePointMakerAlg::ResolvedParameter SpacePointMakerAlg::resolveParameter(
         .matched = matched
     };
 }
+
+
 
 std::optional<SpacePointMakerAlg::BucketParameters> SpacePointMakerAlg::resolveBucketParameters(
     const MuonGMR4::Chamber& chamber) const {
@@ -871,6 +934,7 @@ std::optional<SpacePointMakerAlg::BucketParameters> SpacePointMakerAlg::resolveB
         .maxBucketLength   = maxLength.value,
         .spacePointOverlap = overlap.value
     };
+
 
     ATH_MSG_DEBUG(
         "Resolved bucket override for " << chamberKey

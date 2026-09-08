@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -116,7 +116,7 @@ public:
     return (*this);
   }
 
-  /** Implizit Constructor */
+  /** Implicit Constructor */
   BinUtility* clone() const { return new BinUtility(*this); }
 
   /** return the binning data */
@@ -129,7 +129,11 @@ public:
       throw GaudiException("BinUtility", "dimension out of bounds", StatusCode::FAILURE);
     }
     size_t bEval = m_binningData[ba].searchGlobal(position);
-    return (bEval > bins(ba) - 1 ? bins(ba) - 1 : bEval); // ST additional protection : DEBUG source
+    const std::size_t b = bins(ba); //can be zero, and is unsigned
+    if (b == 0){ //avoid integer overflow with b - 1
+      throw GaudiException("BinUtility", "integer overflow", StatusCode::FAILURE);
+    }
+    return (bEval > b - 1 ? b - 1 : bEval); // ST additional protection : DEBUG source
   }
 
   /** Bin from a 3D vector (already in binning frame) */
@@ -194,14 +198,8 @@ public:
   }
 
   /** Check if bin is inside from Vector3D */
-  bool inside(const Amg::Vector2D& lposition) const
+  bool inside(const Amg::Vector2D& /*lposition*/) const
   {
-    return true;
-    std::vector<BinningData>::const_iterator bdIter = m_binningData.begin();
-    for (; bdIter != m_binningData.end(); ++bdIter)
-      if (!(*bdIter).inside(lposition)){
-        return false;
-      }
     return true;
   }
 

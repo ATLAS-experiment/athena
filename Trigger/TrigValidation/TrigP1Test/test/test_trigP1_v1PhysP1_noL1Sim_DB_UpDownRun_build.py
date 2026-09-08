@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
-# art-description: Trigger athenaHLT test of DB upload (inlcuding duplicate), download and running.
+# art-description: Trigger athenaEF test of DB upload (inlcuding duplicate), download and running.
 # art-type: build
 # art-include: main/Athena/x86_64-el9-gcc15-opt
 # art-include: 24.0/Athena
@@ -11,7 +11,7 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 # Step 1 - create json files
 genJSON = ExecStep.ExecStep("GenJSON")
-genJSON.type = 'athenaHLT'
+genJSON.type = 'athenaEF'
 genJSON.job_options = 'TriggerJobOpts.runHLT'
 genJSON.input = 'data'
 genJSON.flags = ['Trigger.triggerMenuSetup="PhysicsP1_pp_run3_v1_HLTReprocessing_prescale"','Trigger.L1.errorOnMissingTOB=False']
@@ -40,7 +40,7 @@ moveJSON.prmon = False
 # - copy authentication files as can't be read on afs/eos, set TRIGGER_DB_ART to use these files
 # - copy TNS lookup file as not in ART container
 # - export missing ART username into env
-trigDBsetup =  '&& source /cvmfs/atlas.cern.ch/repo/sw/tdaq/tdaq/prod/installed/setup.sh \
+trigDBsetup =  '&& source ${TDAQ_INST_PATH}/setup.sh \
   && export TRIGGER_DB_ART=1 \
   && export EOS_MGM_URL=root://eosuser.cern.ch \
   && xrdcp root://eosuser.cern.ch//eos/user/t/trigcomm/.dbauth/run3/write/dblookup.xml . \

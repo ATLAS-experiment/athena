@@ -477,6 +477,8 @@ svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"lhefGenerator": '+'.join( filter( 
 svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"generators": '+'.join(gennamesvers)})
 svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"evgenProcess": evgenConfig.process})
 svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"evgenTune": evgenConfig.tune})
+svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"hadronizationModel": evgenConfig.hadronizationModel})
+svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"partonShowerModel": evgenConfig.partonShowerModel})
 if hasattr( evgenConfig, "hardPDF" ) : svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"hardPDF": evgenConfig.hardPDF})
 if hasattr( evgenConfig, "softPDF" ) : svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"softPDF": evgenConfig.softPDF})
 if hasattr( runArgs, "randomSeed") :  svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"randomSeed": str(runArgs.randomSeed)})
@@ -662,7 +664,15 @@ elif "HepMCAscii" in evgenConfig.generators:
 elif "ReadMcAscii" in evgenConfig.generators:
     eventsFile = "events.hepmc"
 elif gens_lhef(evgenConfig.generators):
-    eventsFile = "events.lhe"
+    inputGeneratorFile = getattr(runArgs, "inputGeneratorFile", "")
+    # Determine whether to use compressed LHE file based on the 
+    # inputGeneratorFile extension and avoidExtracting flag
+    # avoidExtracting is False by default, but can be set to True 
+    # in the transform to instruct the shower to use the 
+    # compressed LHE file.
+    useCompressedLHE = (getattr(runArgs, "avoidExtracting", False)
+                        and inputGeneratorFile.endswith(".events.gz"))
+    eventsFile = "events.lhe.gz" if useCompressedLHE else "events.lhe"
 
 
 ## Helper functions for input file handling
@@ -768,13 +778,20 @@ if eventsFile or datFile:
            elif ".tgz" in os.path.basename(runArgs.inputGeneratorFile):
              inputroot = os.path.basename(runArgs.inputGeneratorFile).split(".tgz")[0]
            elif ".gz" in os.path.basename(runArgs.inputGeneratorFile):
-             inputroot = os.path.basename(runArgs.inputGeneratorFile).split(".gz")[0]
-           else:  
+             if eventsFile.endswith(".gz"):
+               inputroot = os.path.basename(runArgs.inputGeneratorFile)
+             else:
+               inputroot = os.path.basename(runArgs.inputGeneratorFile).split(".gz")[0]
+           else:
              inputroot = os.path.basename(runArgs.inputGeneratorFile).split("._")[0]
 
            if "events" in inputroot :
                inputroot = inputroot.replace(".events","")
-           realEventsFile = find_unique_file('*%s.*ev*ts' % inputroot)
+           if eventsFile.endswith(".gz"):
+               inputroot = inputroot.replace(".gz","")
+               realEventsFile = find_unique_file('*%s.*ev*ts.gz' % inputroot)
+           else:
+               realEventsFile = find_unique_file('*%s.*ev*ts' % inputroot)
            mk_symlink(realEventsFile, eventsFile)
         else:
            allFiles = []
@@ -838,9 +855,15 @@ if hasattr(runArgs, "outputTXTFile"):
 elif hasattr(runArgs, "inputGeneratorFile"):
     # counting the number of events in LHE input
     count_ev = 0
-    with open(eventsFile) as f:
-        for line in f:
-           count_ev += line.count('/event')
+    if eventsFile.endswith("gz"):
+       import gzip
+       with gzip.open(eventsFile, 'rt') as f:
+           for line in f:
+              count_ev += line.count('/event')
+    else:
+       with open(eventsFile) as f:
+           for line in f:
+              count_ev += line.count('/event')
 
     print("MetaData: %s = %s" % ("Number of input LHE events ", count_ev))
 
@@ -857,6 +880,10 @@ if _checkattr("process"):
     print ("MetaData: %s = %s" % ("physicsProcess", evgenConfig.process))
 if _checkattr("tune"):
     print ("MetaData: %s = %s" % ("generatorTune", evgenConfig.tune))
+if _checkattr("hadronizationModel"):
+    print ("MetaData: %s = %s" % ("hadronizationModel", evgenConfig.hadronizationModel))
+if _checkattr("partonShowerModel"):
+    print ("MetaData: %s = %s" % ("partonShowerModel", evgenConfig.partonShowerModel))
 if _checkattr("hardPDF"):
     print ("MetaData: %s = %s" % ("hardPDF", evgenConfig.hardPDF))
 if _checkattr("softPDF"):

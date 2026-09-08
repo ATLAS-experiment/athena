@@ -2,17 +2,25 @@
 
 import ROOT
 
-def L2OverlapRemoverMonConfig(helper):
+def L2OverlapRemoverMonConfig(helper, isPhaseII=False, **kwargs):
     
     from AthenaConfiguration.ComponentFactory import CompFactory
 
     GroupName = 'OR'
 
-    from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
+    from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
     from .MuonMatchingToolConfig import MuonMatchingToolConfig
+
+    # Set the offline muon container
+    kwargs.setdefault("MuonContainerName", "Muons")
+
     monAlg = helper.addAlgorithm(CompFactory.L2OverlapRemoverMon,'L2OverlapRemoverMon',
-                                 MuonSelectionTool = helper.result().popToolsAndMerge(MuonSelectionToolCfg(helper.flags, MuQuality=1)),
-                                 MuonMatchingTool = helper.result().popToolsAndMerge(MuonMatchingToolConfig(helper.flags)))
+                                 MuonSelectionTool = helper.result().popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(helper.flags, 
+                                                                                                                                MuQuality=1)),
+                                 MuonMatchingTool = helper.result().popToolsAndMerge(MuonMatchingToolConfig(helper.flags, 
+                                                                                                            isPhaseII=isPhaseII, 
+                                                                                                            MuonContainerName=kwargs["MuonContainerName"])),
+                                 **kwargs)
 
     ### monitorig groups
     from TrigConfigSvc.TriggerConfigAccess import getHLTMonitoringAccess

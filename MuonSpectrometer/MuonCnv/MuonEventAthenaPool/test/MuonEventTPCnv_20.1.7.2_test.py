@@ -41,4 +41,4 @@ if __name__ == "__main__":
         'MDT_SDO',
     ]
 
-    TPCnvTest(infile, keys, useGeoModelSvc=True, doMuon=True)
+    TPCnvTest(infile, keys, useGeoModelSvc=True, doMuon=True, doTracks=True)

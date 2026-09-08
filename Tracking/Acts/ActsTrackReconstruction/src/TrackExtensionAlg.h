@@ -6,12 +6,9 @@
 // Base Class
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
-// Gaudi includes
-#include "GaudiKernel/ToolHandle.h"
-
 // Tools
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 
 // ACTS
 #include "Acts/EventData/TrackContainer.hpp"
@@ -31,12 +28,11 @@
 #include "xAODTruth/TruthParticleContainer.h"
 #include "BeamSpotConditionsData/BeamSpotData.h"
 
-// STL
-#include <memory>
-#include <string>
 
 // Handle Keys
 #include "ActsEvent/TrackContainerHandlesHelper.h"
+#include "ActsEvent/ContextUtility.h"
+
 #include "StoreGate/WriteHandleKey.h"
 #include "src/detail/Definitions.h"
 #include "src/detail/DuplicateSeedDetector.h"
@@ -74,10 +70,9 @@ class TrackExtensionAlg : public AthReentrantAlgorithm {
     this, "BeamSpotKey", "BeamSpotData",
     "SG key for beam spot"};
   
-  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{
-      this, "TrackingGeometryTool", ""};
-  ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{
-      this, "ExtrapolationTool", ""};
+  ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
+  /** @brief Utility to fetch the geometry, magnetic field and calibration context in the event */
+  ContextUtility m_ctxProvider{this};
   ToolHandle<ActsTrk::IPixelOnTrackCalibratorTool<detail::RecoTrackStateContainer>>
       m_pixelCalibTool{this, "PixelCalibrator", "",
                        "Opt. pixel measurement calibrator"};

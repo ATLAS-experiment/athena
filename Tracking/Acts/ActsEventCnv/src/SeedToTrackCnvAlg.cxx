@@ -26,8 +26,8 @@ StatusCode SeedToTrackCnvAlg::initialize()
   ATH_CHECK(m_trackContainerKey.initialize());
   ATH_CHECK(m_tracksBackendHandlesHelper.initialize(ActsTrk::prefixFromTrackContainerName(m_trackContainerKey.key())));
   ATH_CHECK(m_actsTrackParamsKey.initialize());
-  ATH_CHECK(m_trackingGeometryTool.retrieve());
-  m_surfAcc = detail::xAODUncalibMeasSurfAcc{m_trackingGeometryTool.get()};
+  ATH_CHECK(m_trackingGeometrySvc.retrieve());
+  m_surfAcc = detail::xAODUncalibMeasSurfAcc{m_trackingGeometrySvc.get()};
   if (m_seedContainerKey.size() != m_actsTrackParamsKey.size()) {
     ATH_MSG_ERROR("Seed and Parameter containers have different sizes: "
       << m_seedContainerKey.size() << " for seeds and "
@@ -45,9 +45,6 @@ StatusCode SeedToTrackCnvAlg::execute(const EventContext& context) const {
   Acts::VectorMultiTrajectory trackStateBackend;
   ActsTrk::MutableTrackContainer tracksContainer( std::move(trackBackend),
                                                   std::move(trackStateBackend) );
-
-  Acts::GeometryContext gctx = m_trackingGeometryTool->getGeometryContext(context).context();
-  std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry = m_trackingGeometryTool->trackingGeometry();
 
   for (std::size_t i(0); i<m_seedContainerKey.size(); ++i) {
     ATH_MSG_DEBUG("Retrieving Seed Collection with key: " << m_seedContainerKey.at(i).key());
@@ -81,6 +78,7 @@ StatusCode SeedToTrackCnvAlg::execute(const EventContext& context) const {
             auto actsTSOS = trackStateContainer.getTrackState(trackStateContainer.addTrackState(Acts::TrackStatePropMask::None, tsosPreviousIndex));
             actsTSOS.setReferenceSurface(surf->getSharedPtr());
             actsTSOS.setUncalibratedSourceLink(detail::MeasurementCalibratorBase::pack(umeas));
+            actsTSOS.typeFlags().setIsMeasurement();
             actsTrack.tipIndex() = actsTSOS.index();
             tsosPreviousIndex = actsTrack.tipIndex();
           }

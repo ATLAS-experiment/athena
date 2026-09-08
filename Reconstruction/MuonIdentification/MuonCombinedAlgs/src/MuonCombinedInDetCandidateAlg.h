@@ -1,42 +1,39 @@
 /*
-  Copyright (C) 2002-202 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCOMBINEDALGS_MUONCOMBINEDINDETCANDIDATEALG_H
 #define MUONCOMBINEDALGS_MUONCOMBINEDINDETCANDIDATEALG_H
 
-#include <map>
-#include <string>
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "GaudiKernel/ToolHandle.h"
 #include "MuonCombinedEvent/InDetCandidateCollection.h"
 #include "MuonRecToolInterfaces/IMuonSystemExtensionTool.h"
 #include "MuonStationIndex/MuonStationIndex.h"
+
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
+#include "StoreGate/ReadDecorHandleKeyArray.h"
+
 #include "TrkToolInterfaces/ITrackSelectorTool.h"
 #include "xAODTracking/TrackParticleContainer.h"
 
 class MuonCombinedInDetCandidateAlg : public AthReentrantAlgorithm {
 public:
-    MuonCombinedInDetCandidateAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
     ~MuonCombinedInDetCandidateAlg() = default;
 
-    StatusCode initialize() override;
-    StatusCode execute(const EventContext& ctx) const override;
+    virtual StatusCode initialize() override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
 
 private:
     SG::ReadHandleKeyArray<xAOD::TrackParticleContainer> m_indetTrackParticleLocation{
         this, "TrackParticleLocation", {"InDetTrackParticles"}};
-    SG::ReadHandleKeyArray<CaloExtensionCollection> m_caloExtensionLocation{
-        this,
-        "CaloExtensionLocation",
-        {},
-    };
+    SG::ReadHandleKeyArray<CaloExtensionCollection> m_caloExtensionLocation{this, "CaloExtensionLocation", {} };
     SG::ReadHandleKey<xAOD::TrackParticleContainer> m_indetForwardTrackParticleLocation{this, "ForwardParticleLocation",
                                                                                         "InDetForwardTrackParticles"};
 
+    SG::ReadDecorHandleKeyArray<xAOD::TrackParticleContainer> m_trkLinkKey{this, "TrackLinkKeys", {}};
     SG::ReadHandleKey<CaloExtensionCollection> m_caloFwdExtensionLocation{this, "CaloFwdExtensionLocation", ""};
 
     SG::WriteHandleKey<InDetCandidateCollection> m_candidateCollectionName{this, "InDetCandidateLocation", "InDetCandidates"};
@@ -64,9 +61,9 @@ private:
     StatusCode create(const EventContext& ctx, InDetCandidateCache& output_cache) const;
 
     bool isValidTrackParticle(const Trk::ITrackSelectorTool* currentTrackSelector, const xAOD::TrackParticle* const tp) const;
-    void printTrackParticleInfo(const xAOD::TrackParticle* const tp, const std::string& what) const;
+    void printTrackParticleInfo(const xAOD::TrackParticle* const tp, std::string_view what) const;
 
-    int getCount(const xAOD::TrackParticle& tp, xAOD::SummaryType type) const;
+    static int getCount(const xAOD::TrackParticle& tp, const xAOD::SummaryType type);
 
     Gaudi::Property<bool> m_doSiliconForwardMuons{this, "DoSiliconAssocForwardMuons", false};
     /// Minimum pt threshold of the IdCandidate to be extrapolated through the spectrometer
@@ -77,6 +74,8 @@ private:
     Gaudi::Property<bool> m_extendBulk{this, "ExtendBulk", true};
     /// Reject muon candidates without a muon system extension -- only effective if the candidate shall actually be extended
     Gaudi::Property<bool> m_requireExtension{this, "RequireExtension", true};
+    /// Schedule the data dependency on the trackLink decoration
+    Gaudi::Property<bool> m_waitForTrackLink{this, "WaitForTrackLink", true};
 };
 
 #endif

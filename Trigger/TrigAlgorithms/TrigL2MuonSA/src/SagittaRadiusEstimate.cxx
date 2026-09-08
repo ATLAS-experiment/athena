@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cmath>
@@ -54,7 +54,7 @@ StatusCode TrigL2MuonSA::SagittaRadiusEstimate::setSagittaRadius(const TrigRoiDe
     double xn = 0.;
     const double eps = 0.005;
 
-    TrigL2MuonSA::SuperPoint* superPoints[4];
+    TrigL2MuonSA::SuperPoint* superPoints[4] = {};
 
     for (int i_station=0; i_station<MAX_STATION; i_station++) {
 

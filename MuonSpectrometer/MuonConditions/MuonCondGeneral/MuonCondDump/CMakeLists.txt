@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MuonCondDump )
@@ -23,10 +23,10 @@ atlas_install_python_modules( python/*.py )
 atlas_add_test( TestABLineDump
                   SCRIPT  python -m MuonCondDump.DumpABLines && python -m MuonCondDump.DumpABLines --alignJsonFile ForkLiftTruckDrivingIsFun.json
                   PROPERTIES TIMEOUT 600
-                  POST_EXEC_SCRIPT nopost.sh)
+                  POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( TestMdtCablingDump
                 SCRIPT python -m MuonCondDump.MdtMezzExtraction && python -m MuonCondTest.MdtCablingTester --output Cabling_json.log --mezzMap MezzMapping.json --cablingMap MdtCabling.json  && 
                        python -m MuonCondTest.MdtCablingTester --output Cabling_cool.log  && diff -q Cabling_cool.log Cabling_json.log 
                 PROPERTIES TIMEOUT 1200
-                POST_EXEC_SCRIPT nopost.sh) 
+                POST_EXEC_SCRIPT noerror.sh)

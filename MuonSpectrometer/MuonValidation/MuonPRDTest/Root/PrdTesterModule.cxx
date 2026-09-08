@@ -14,12 +14,12 @@ namespace MuonPRDTest {
     }
     const Muon::IMuonIdHelperSvc* PrdTesterModule::idHelperSvc() const { return m_idHelperSvc.get(); }
     const MuonGM::MuonDetectorManager* PrdTesterModule::getDetMgr(const EventContext& ctx) const {
-        SG::ReadCondHandle handle{m_detMgrKey, ctx};
-        if (!handle.isValid()) {
-            ATH_MSG_ERROR("Failed to retrieve MuonDetectorManager " << m_detMgrKey.fullKey());
+        const MuonGM::MuonDetectorManager* detMgr{nullptr};
+        if (!SG::get(detMgr, m_detMgrKey, ctx).isSuccess()) {
+            ATH_MSG_ERROR("Failed to retrieve MuonDetectorManager ");
             return nullptr;
         }
-        return handle.cptr();
+        return detMgr;
     }
     bool PrdTesterModule::init() {
         return declare_dependency(m_detMgrKey) && 

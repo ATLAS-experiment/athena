@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GLOBLSIM_BDT_H_
@@ -49,12 +49,12 @@ namespace GlobalSim {
     struct Tree {
     private:
     public:
-      int feature[n_nodes];
-      threshold_t threshold[n_nodes];
-      score_t value[n_nodes];
-      int children_left[n_nodes];
-      int children_right[n_nodes];
-      int parent[n_nodes];
+      int feature[n_nodes] = {};
+      threshold_t threshold[n_nodes] = {};
+      score_t value[n_nodes] = {};
+      int children_left[n_nodes] = {};
+      int children_right[n_nodes] = {};
+      int parent[n_nodes] = {};
 
       score_t decision_function(input_t x) const{
 

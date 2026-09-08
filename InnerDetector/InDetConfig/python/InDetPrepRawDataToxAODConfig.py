@@ -130,6 +130,7 @@ def ITkPixelPrepDataToxAODCfg(flags, name='ITkPixelPrepDataToxAOD', **kwargs):
     kwargs.setdefault("PRD_MultiTruth", "PRD_MultiTruthITkPixel")
     kwargs.setdefault("InputTruthParticleLinks", "xAODTruthLinks")
     kwargs.setdefault("OutputClusterContainer", "ITkPixelMeasurements")
+    kwargs.setdefault("PixelxAodOffset", "ITkPixelClustersOffsets")
 
     acc.addEventAlgo(CompFactory.PixelPrepDataToxAOD(name, **kwargs))
     return acc

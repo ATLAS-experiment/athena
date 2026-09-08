@@ -1,11 +1,13 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCOSTANALYSIS_MONITORALGORITHMCLASS_H
 #define TRIGCOSTANALYSIS_MONITORALGORITHMCLASS_H 1
 
 #include "../MonitorBase.h"
+#include <memory>
+#include <string>
 
 /**
  * @class MonitorAlgorithmClass

@@ -50,8 +50,6 @@
 #include "ROOT/RNTupleReader.hxx"
 #include <ROOT/RNTupleView.hxx>
 
-#include <boost/core/demangle.hpp>
-
 #include <algorithm>
 #include <chrono>
 #include <cstdint>

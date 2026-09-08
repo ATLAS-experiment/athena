@@ -21,8 +21,8 @@ LVL1_ROI_PERS* LVL1_ROICnv::createPersistent( LVL1_ROI* transObj ) {
 
 LVL1_ROI* LVL1_ROICnv::createTransient(const Token* token) {
 
-  static const pool::Guid p1_guid( "5FBA83E0-77DC-43DD-A511-E4F0A49882E0" );
-  static const pool::Guid p0_guid( "3E1829DE-9AA7-489C-AB81-406DF6CC544F" );
+  static const Guid p1_guid( "5FBA83E0-77DC-43DD-A511-E4F0A49882E0" );
+  static const Guid p0_guid( "3E1829DE-9AA7-489C-AB81-406DF6CC544F" );
 
   if( this->compareClassGuid(token,  p1_guid ) ) {
 

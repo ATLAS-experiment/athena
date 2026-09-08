@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EVENTCONTAINERS_IDENTIFIABLECONTAINERMT_H
@@ -22,7 +22,6 @@
 #include "GaudiKernel/DataObject.h"
 #include "EventContainers/IdentifiableContainerBase.h"
 #include "EventContainers/IDC_WriteHandleBase.h"
-#include "CxxUtils/AthUnlikelyMacros.h"
 #include "EventContainers/IdentifiableCache.h"
 #include <bit>
 #include <span>
@@ -54,7 +53,7 @@ public:
         }
 
         [[nodiscard]] StatusCode addOrDelete(std::unique_ptr<T> ptr){
-           if(ATH_UNLIKELY(m_hashId >= m_IDC_ptr->m_link->fullSize())) return StatusCode::FAILURE;
+           if (m_hashId >= m_IDC_ptr->m_link->fullSize()) [[unlikely]] return StatusCode::FAILURE;
            StatusCode sc = m_IDC_ptr->addLock(std::move(ptr), m_hashId);
            IDC_WriteHandleBase::ReleaseLock();
            return sc;
@@ -306,7 +305,7 @@ StatusCode
 IdentifiableContainerMT<T>::addCollection(const T* coll, IdentifierHash hashId)
 {
     // update m_hashids
-    if (ATH_UNLIKELY(! IdentifiableContainerBase::insert(hashId, coll))) return StatusCode::FAILURE;
+    if (! IdentifiableContainerBase::insert(hashId, coll)) [[unlikely]] return StatusCode::FAILURE;
     return StatusCode::SUCCESS;
 
 }
@@ -346,7 +345,7 @@ template < class T >
 StatusCode 
 IdentifiableContainerMT<T>::naughtyRetrieve(IdentifierHash hashId, T* &collToRetrieve) const
 {
-   if(ATH_UNLIKELY(m_OnlineMode)) return StatusCode::FAILURE;//NEVER ALLOW FOR EXTERNAL CACHE
+   if (m_OnlineMode) [[unlikely]] return StatusCode::FAILURE;//NEVER ALLOW FOR EXTERNAL CACHE
    else {
       auto p = std::bit_cast<const T* > (m_link->findIndexPtr(hashId));//collToRetrieve can be null on success
       collToRetrieve = const_cast<T*>(p);
@@ -358,7 +357,7 @@ template < class T>
 StatusCode
 IdentifiableContainerMT<T>::addOrDelete(std::unique_ptr<T> uptr, IdentifierHash hashId)
 {
-    if(ATH_UNLIKELY(hashId >= m_link->fullSize())) return StatusCode::FAILURE;
+    if (hashId >= m_link->fullSize()) [[unlikely]] return StatusCode::FAILURE;
     auto ptr = uptr.release();
     bool b = IdentifiableContainerBase::insert(hashId, ptr);
     if(!b) delete ptr;
@@ -369,7 +368,7 @@ template < class T>
 StatusCode
 IdentifiableContainerMT<T>::addOrDelete(std::unique_ptr<const T> uptr, IdentifierHash hashId)
 {
-    if(ATH_UNLIKELY(hashId >= m_link->fullSize())) return StatusCode::FAILURE;
+    if (hashId >= m_link->fullSize()) [[unlikely]] return StatusCode::FAILURE;
     auto ptr = uptr.release();
     bool b = IdentifiableContainerBase::insert(hashId, ptr);
     if(!b) delete ptr;
@@ -387,7 +386,7 @@ template < class T>
 StatusCode
 IdentifiableContainerMT<T>::addOrDelete(std::unique_ptr<T> uptr, IdentifierHash hashId, bool &deleted)
 {
-    if(ATH_UNLIKELY(hashId >= m_link->fullSize())) return StatusCode::FAILURE;
+    if (hashId >= m_link->fullSize()) [[unlikely]] return StatusCode::FAILURE;
     auto ptr = uptr.release();
     bool b = IdentifiableContainerBase::insert(hashId, ptr);
     if(!b) delete ptr;

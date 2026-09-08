@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCOSTANALYSIS_COUNTERSEQUENCE_H
 #define TRIGCOSTANALYSIS_COUNTERSEQUENCE_H 1
 
 #include "../CounterBase.h"
+#include <string>
 
 /**
  * @class CounterSequence

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -68,14 +68,14 @@ void testit (const TrackTruthCollection& trans1)
 void test1(const std::vector<HepMC::GenParticlePtr> & genPartVector)
 {
   std::cout << "test1\n";
-
-  TrackTruthCollection trans1 (DataLink<TrackCollection>("tpc"));
+  const std::string tpcStr{"tpc"};
+  TrackTruthCollection trans1 {DataLink<TrackCollection>(tpcStr)};
   for (int i=0; i<10; i++) {
     auto pGenParticle = genPartVector.at(i);
     HepMcParticleLink trkLink(HepMC::uniqueID(pGenParticle), pGenParticle->parent_event()->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
-    Trk::TrackTruthKey key (ElementLink<TrackCollection> ("tpc", i));
+    Trk::TrackTruthKey key (ElementLink<TrackCollection> (tpcStr, i));
     TrackTruth val (trkLink, (float)i/10);
-    trans1[key] = val;
+    trans1[key] = std::move(val);
   }
 
   testit (trans1);

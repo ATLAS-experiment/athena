@@ -35,6 +35,11 @@ StatusCode TrigBtagEmulationTool::initialize() {
   }
   else if (m_LHCPeriod == 2) {
     ATH_CHECK( m_manager_a4tcemsubjesJet_cnt.retrieve() );
+#ifdef XAOD_STANDALONE
+    if(!m_manager_GSCJet_cnt.empty()) ATH_CHECK(m_manager_GSCJet_cnt.retrieve());
+#else
+    ATH_CHECK( m_manager_GSCJet_cnt.retrieve( DisableTool{m_manager_GSCJet_cnt.empty()} ));
+#endif
   } else {
     ATH_MSG_ERROR("EDM Version not supported: " << m_LHCPeriod);
     return StatusCode::FAILURE;
@@ -166,7 +171,7 @@ bool TrigBtagEmulationTool::evaluate_HLT(const TrigBtagEmulationChain& chain,
       if (!m_manager_SplitJet_cnt->jetContainerName().empty()) {
         split_jets = emulCtx.get<std::vector<TrigBtagEmulationJet>>("SplitJets_Indexed");
       }
-      if (!m_manager_GSCJet_cnt->jetContainerName().empty()) {
+      if (!m_manager_GSCJet_cnt.empty()) {
         gsc_jets = emulCtx.get<std::vector<TrigBtagEmulationJet>>("GSCJets_Indexed");
       }
       std::vector<std::vector<bool>> chainPart_passedjets = evaluate_HLT_chainParts(chain, a4_jets, 0, nChainParts, split_jets, gsc_jets);
@@ -586,8 +591,12 @@ const EmulContext& TrigBtagEmulationTool::populateJetManagersTriggerObjects() co
     if ( retrieveTriggerObjects( *m_manager_SplitJet_cnt, *emulCtx ).isFailure() ) {
       ATH_MSG_DEBUG("Could not retrieve trigger objects from " << m_manager_SplitJet_cnt->name());
     }
-    if ( retrieveTriggerObjects( *m_manager_GSCJet_cnt, *emulCtx ).isFailure() ) {
-      ATH_MSG_DEBUG("Could not retrieve trigger objects from " << m_manager_GSCJet_cnt->name());
+    if( !m_manager_GSCJet_cnt.empty()){
+      if ( retrieveTriggerObjects( *m_manager_GSCJet_cnt, *emulCtx ).isFailure() ) {
+        ATH_MSG_DEBUG("Could not retrieve trigger objects from " << m_manager_GSCJet_cnt->name());
+      }
+    } else {
+      ATH_MSG_DEBUG("Empty JetManagerTool for GSC jet");
     }
     if ( indexRun2TriggerObjects(*emulCtx).isFailure() ) {
       ATH_MSG_DEBUG("Could not index Run2 trigger objects. Emulation results may be incorrect.");
@@ -629,7 +638,7 @@ StatusCode TrigBtagEmulationTool::indexRun2TriggerObjects(EmulContext& emulCtx) 
   if (!m_manager_SplitJet_cnt->jetContainerName().empty()) {
     jets_split = &m_manager_SplitJet_cnt->getJets(emulCtx);
   }
-  if (!m_manager_GSCJet_cnt->jetContainerName().empty()) {
+  if (!m_manager_GSCJet_cnt.empty()) {
     jets_gsc = &m_manager_GSCJet_cnt->getJets(emulCtx);
   }
   auto gscJets_indexed = std::make_unique<std::vector<TrigBtagEmulationJet>>();

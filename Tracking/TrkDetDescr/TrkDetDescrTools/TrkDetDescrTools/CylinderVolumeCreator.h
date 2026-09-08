@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -12,12 +12,16 @@
 
 // Trk
 #include "TrkDetDescrInterfaces/ITrackingVolumeCreator.h"
+#include "TrkDetDescrInterfaces/ILayerArrayCreator.h"
+#include "TrkDetDescrInterfaces/ITrackingVolumeArrayCreator.h"
+#include "TrkDetDescrInterfaces/ITrackingVolumeHelper.h"
 #include "TrkVolumes/BoundarySurfaceFace.h"
 // Amg
 #include "GeoPrimitives/GeoPrimitives.h"
 // Gaudi & Athena
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "GaudiKernel/SystemOfUnits.h"
 // STL
 #include <string>
 #include <vector>
@@ -25,9 +29,6 @@
 #include "CxxUtils/checker_macros.h"
 namespace Trk {
 
-class ILayerArrayCreator;
-class ITrackingVolumeArrayCreator;
-class ITrackingVolumeHelper;
 class Layer;
 class CylinderLayer;
 class DiscLayer;
@@ -54,8 +55,6 @@ public:
   CylinderVolumeCreator(const std::string&,
                         const std::string&,
                         const IInterface*);
-  /** Destructor */
-  ~CylinderVolumeCreator();
 
   /** AlgTool initialize method */
   virtual StatusCode initialize() override;
@@ -183,15 +182,24 @@ private:
 
   // helper tools
   //!< A Tool for coherent LayerArray creation
-  ToolHandle<ILayerArrayCreator> m_layerArrayCreator;
+  ToolHandle<ILayerArrayCreator> m_layerArrayCreator
+    {this, "LayerArrayCreator", "Trk::LayerArrayCreator/LayerArrayCreator"};
   //!< Helper Tool to create TrackingVolume Arrays
-  ToolHandle<ITrackingVolumeArrayCreator> m_trackingVolumeArrayCreator;
+  ToolHandle<ITrackingVolumeArrayCreator> m_trackingVolumeArrayCreator
+    {this, "TrackingVolumeArrayCreator",
+     "Trk::TrackingVolumeArrayCreator/TrackingVolumeArrayCreator"};
   //!< TrackingVolume helper
-  ToolHandle<ITrackingVolumeHelper> m_trackingVolumeHelper;
+  ToolHandle<ITrackingVolumeHelper> m_trackingVolumeHelper
+    {this, "TrackingVolumeHelper",
+     "Trk::TrackingVolumeHelper/TrackingVolumeHelper"};
 
-  double m_passiveLayerThickness; //!< thickness of passive layers
-  int m_passiveLayerPhiBins;      //!< bins in phi for the passive layer
-  int m_passiveLayerRzBins;       //!< bins in r/z for the passive layer
+  Gaudi::Property<double> m_passiveLayerThickness
+    {this, "PassiveLayerThickness", 1*Gaudi::Units::mm,
+     "thickness of passive layers"};
+  Gaudi::Property<int> m_passiveLayerPhiBins
+    {this, "PassiveLayerBinsPhi", 1, "bins in phi for the passive layer"};
+  Gaudi::Property<int> m_passiveLayerRzBins
+    {this, "PassiveLayerBinsRZ", 100, "bins in r/z for the passive layer"};
 };
 }
 

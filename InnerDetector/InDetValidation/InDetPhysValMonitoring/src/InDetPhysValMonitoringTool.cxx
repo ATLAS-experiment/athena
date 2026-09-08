@@ -121,10 +121,11 @@ InDetPhysValMonitoringTool::initialize() {
   ATH_CHECK(m_truthSelectionTool.retrieve(EnableTool {not m_truthParticleName.key().empty()} ));
   ATH_CHECK(m_vtxValidTool.retrieve(EnableTool {m_useVertexTruthMatchTool}));
   ATH_CHECK(m_trackTruthOriginTool.retrieve( EnableTool {m_doTruthOriginPlots} ));
-  if (not m_vertexContainerName.key().empty()) 
-  {
-  ATH_CHECK(m_hardScatterSelectionTool.retrieve());    
-  }
+
+  ATH_CHECK(m_hardScatterSelectionTool.retrieve(EnableTool
+						{not m_vertexContainerName.key().empty() &&
+						    not m_hardScatterSelectionTool.empty()}));
+
   ATH_CHECK(m_grlTool.retrieve(EnableTool{m_useGRL}));
 
   ATH_MSG_DEBUG("m_useVertexTruthMatchTool ====== " <<m_useVertexTruthMatchTool);
@@ -382,7 +383,17 @@ InDetPhysValMonitoringTool::fillHistograms(const EventContext& ctx) {
     if (vertices.isValid() and not vertices->empty()) {
       ATH_MSG_DEBUG("Number of vertices retrieved for this event " << vertices->size());
       //Find the HS vertex following the user-configured strategy
-      primaryvertex = m_hardScatterSelectionTool->getHardScatter(vertices.get());
+      if (m_hardScatterSelectionTool.empty()) {
+        for (const auto& vertex : *vertices){
+          if(vertex->vertexType()==xAOD::VxType::PriVtx){
+            primaryvertex = vertex;
+            break;
+          }
+        }
+      } else {
+        primaryvertex = m_hardScatterSelectionTool->getHardScatter(vertices.get());
+      }
+
       if (!primaryvertex){
 	/// In case of no HS, print a debug message - no warning since this is expected
 	/// in single particle MC. The downstream code is able to handle the absence of a HS vertex.
@@ -632,7 +643,7 @@ InDetPhysValMonitoringTool::fillHistograms(const EventContext& ctx) {
       }
     }
     
-    if (m_fillTruthToRecoNtuple) {
+    if (m_fillTruthToRecoNtuple && thisTruth) {
       // Skip if already filled in track loop
       if (hasTruthFilled(*thisTruth)) continue;
 
@@ -819,7 +830,7 @@ InDetPhysValMonitoringTool::getTruthParticles(const EventContext& ctx) const {
   return tempVec;
 }
 
-std::pair<const std::vector<const xAOD::TruthVertex*>, const std::vector<const xAOD::TruthVertex*>>
+std::pair<std::vector<const xAOD::TruthVertex*>, std::vector<const xAOD::TruthVertex*>>
 InDetPhysValMonitoringTool::getTruthVertices(const EventContext& ctx) const {
 
   std::vector<const xAOD::TruthVertex*> truthHSVertices = {};
@@ -889,8 +900,7 @@ InDetPhysValMonitoringTool::getTruthVertices(const EventContext& ctx) const {
     }
   }
 
-  return std::make_pair<const std::vector<const xAOD::TruthVertex*>, const std::vector<const xAOD::TruthVertex*>>((const std::vector<const xAOD::TruthVertex*>)truthHSVertices, (const std::vector<const xAOD::TruthVertex*>)truthPUVertices);
-
+  return {std::move(truthHSVertices), std::move(truthPUVertices)};
 }
 
 void

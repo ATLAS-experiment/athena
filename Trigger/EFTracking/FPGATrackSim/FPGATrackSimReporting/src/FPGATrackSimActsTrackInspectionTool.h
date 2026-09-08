@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATRACKSIMACTSTRACKINSPECTIONTOOL_H
 #define FPGATRACKSIMACTSTRACKINSPECTIONTOOL_H
@@ -24,7 +24,7 @@ namespace FPGATrackSim {
 
     struct FpgaActsTrack {
       struct Measurement {
-        unsigned long identifier;
+        unsigned long identifier = 0;
         std::string type;  // "Pixel" or "Strip"
         struct globalCoordinates {
           double x = 0;

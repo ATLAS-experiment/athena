@@ -6,6 +6,7 @@
 #define GENERATORMODULES_PARTICLEDECAYER_H
 
 #include "GeneratorModules/GenModule.h" //inheritance
+#include "GeneratorModules/GenData.h" //inheritance
 #include "CLHEP/Vector/LorentzVector.h" //member
 #include "AtlasHepMC/GenEvent.h" //typedef
 #include "AtlasHepMC/GenVertex.h" //typedef for GenVertexPtr
@@ -13,9 +14,6 @@
 #include "AtlasHepMC/GenParticle.h" //typedef for GenParticlePtr
 #include <vector>
 
-namespace HepPDT{
-  class ParticleDataTable;
-}
 
 namespace CLHEP{
   class HepRandomEngine;
@@ -75,9 +73,8 @@ class ParticleDecayer: public GenModule {
   double m_endCapDistance;
   double m_thetaEndCapBarrel;
 
-  HepPDT::ParticleDataTable* m_particleTable{};
+  std::unique_ptr<GenData> m_gendata{nullptr};
 
-  double     getParticleMass(int pdgID); //retrieve tha particle mass given the PDG ID 
   void       addParticle   (HepMC::GenVertexPtr, int pdg, HepMC::FourVector, int statusCode); //add particles to the evgen file
 
   double rnd_ExpLifetime(CLHEP::HepRandomEngine* engine, double ct);

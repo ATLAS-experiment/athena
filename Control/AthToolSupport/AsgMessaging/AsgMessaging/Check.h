@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ASGMESSAGING_CHECK_H
@@ -9,7 +9,6 @@
 #include "AsgMessaging/MsgStreamMacros.h"
 
 #include "boost/preprocessor/facilities/overload.hpp"
-#include "CxxUtils/AthUnlikelyMacros.h"
 
 /// Helper macro for checking the status code returned by a function call
 ///
@@ -46,7 +45,7 @@
 #define ASG_CHECK_1( EXP )                                     \
    do {                                                        \
       const StatusCode sc__(EXP);                              \
-      if( ATH_UNLIKELY ( ! sc__.isSuccess() ) ) {              \
+      if ( ! sc__.isSuccess() ) [[unlikely]] {                 \
          ATH_MSG_ERROR( "Failed to call \"" << #EXP << "\"" ); \
          return sc__;                                          \
       }                                                        \
@@ -55,7 +54,7 @@
 #define ASG_CHECK_2( EXP, RET )                                \
    do {                                                        \
       const StatusCode sc__(EXP);                              \
-      if( ATH_UNLIKELY ( ! sc__.isSuccess() ) ) {              \
+      if( ! sc__.isSuccess() ) [[unlikely]] {                  \
          ATH_MSG_ERROR( "Failed to call \"" << #EXP << "\"" ); \
          return RET;                                           \
       }                                                        \
@@ -76,7 +75,7 @@
 #define ASG_CHECK_SA( SOURCE, EXP )                                     \
    do {                                                                 \
       const StatusCode sc__(EXP);                                       \
-      if( ATH_UNLIKELY ( ! sc__.isSuccess() ) ) {                       \
+      if(  ! sc__.isSuccess() ) [[unlikely]] {                          \
          static MsgStream msg( SOURCE );                                \
          msg << MSGSTREAM_REPORT_PREFIX << MSG::ERROR                   \
              << "Failed to call \"" << #EXP << "\"" << endmsg;          \

@@ -119,9 +119,6 @@ namespace pool {
      */
     const CollectionColumn& attributeColumn( int columnId ) const;
 
-    // set column ID, return the ID
-    int		setColumnId( const std::string& columnName, int id );
-
  protected:
     // some helper methods for internal use:
 
@@ -130,10 +127,6 @@ namespace pool {
 
     // clear all internal structures
     void	clearAll();
-
-    // set or assign new column ID
-    // return the ID
-    int 	setColumnId( pool::CollectionColumn *column, int id = -1 );
 
     // rise an exception if the column aleready exists
     void 	checkNewColumnName( const std::string& name ) const;
@@ -153,10 +146,6 @@ namespace pool {
 
     /// Attribute column description objects
     std::vector< pool::CollectionColumn* >	m_attributeColumns;
-
-    /// Map of column ID numbers for column names
-    /// IDs are unique in the collection
-    std::map< std::string, int > m_columnIdForColumnName;
 
     typedef     std::map< std::string, CollectionColumn* >      ColumnByName;
     /// Map of Attribute CollectionColumn objects using column names as keys.

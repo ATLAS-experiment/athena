@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -12,13 +12,13 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "LArCabling/LArOnOffIdMapping.h"
-#include "LArIdentifier/LArOnlineID.h"
           
 #include <vector>
 #include <string>
 #include <array>
-#include <map>
 #include <limits>
+
+class LArOnlineID;
 
 class CaloClusterCellMonAlg : public CaloMonAlgBase {
  

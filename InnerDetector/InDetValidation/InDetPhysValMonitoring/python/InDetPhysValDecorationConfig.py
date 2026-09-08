@@ -58,6 +58,8 @@ def InDetPhysHitDecoratorAlgCfg(
         kwargs.setdefault("ResidualPullCalculator", acc.addPublicTool(
             acc.popToolsAndMerge(ResidualPullCalculatorCfg(flags))))
 
+    kwargs.setdefault("useTRT", flags.Detector.EnableTRT)
+
     acc.addEventAlgo(CompFactory.InDetPhysHitDecoratorAlg(name, **kwargs))
     return acc
 
@@ -125,8 +127,11 @@ def InDetPhysValTruthDecoratorAlgCfg(
         kwargs.setdefault("PixelClusterContainerName", "PixelMeasurements")
         kwargs.setdefault("SCTClusterContainerName", "SCT_Measurements")
 
+    kwargs.setdefault("decorateTime", flags.Reco.EnableHGTDExtension)
+
     kwargs.setdefault('TruthParticleIndexDecoration',
                       'origTruthIndex' if flags.PhysVal.IDPVM.doTechnicalEfficiency else '')
+    kwargs.setdefault('UseTruthPVAsPerigee', flags.Tracking.perigeeExpression=="Vertex")
 
     acc.addEventAlgo(CompFactory.InDetPhysValTruthDecoratorAlg(name, **kwargs))
     return acc

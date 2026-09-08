@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -246,11 +246,11 @@ namespace OverlayTesting {
 
     static unsigned int encodeDigit(const std::vector<unsigned int>& bits)
     {
+      assert(bits.size() <= 32);
       unsigned digit(0);
-      const unsigned one(1);
-      for (unsigned int bit=0; bit < bits.size(); ++bit) {
+      for (std::size_t bit=0; bit < bits.size(); ++bit) {
         if (bits[bit]==1) {
-          digit += one << (31-bit);
+          digit |= 1u << (31-bit);
         }
       }
       return digit;
@@ -317,14 +317,14 @@ namespace OverlayTesting {
       HepMC::FourVector fourMomentum3( 0.0, 1.0, 0.0, 1.0*CLHEP::TeV);
       HepMC::GenParticlePtr inParticle3 = HepMC::newGenParticlePtr(fourMomentum3, pdgid1, 1);
       myVertex->add_particle_out(inParticle3);
-      genPartList.push_back(inParticle3);
+      genPartList.push_back(std::move(inParticle3));
       HepMC::FourVector fourMomentum4( 0.0, -1.0, 0.0, 1.0*CLHEP::TeV);
       HepMC::GenParticlePtr inParticle4 = HepMC::newGenParticlePtr(fourMomentum4, pdgid2, 1);
       myVertex->add_particle_out(inParticle4);
-      genPartList.push_back(inParticle4);
+      genPartList.push_back(std::move(inParticle4));
       ge.add_vertex( myVertex );
       HepMC::set_signal_process_vertex( &ge, myVertex );
-      ge.set_beam_particles(inParticle1,inParticle2);
+      ge.set_beam_particles(std::move(inParticle1),std::move(inParticle2));
     }
 
     void setPrivateToolPointers()
@@ -386,6 +386,7 @@ namespace OverlayTesting {
     inputBkgDataHandle = std::make_unique<TRT_RDO_Container>(containerSize);
     std::unique_ptr<TRT_RDO_Collection> bkgCollection = std::make_unique<TRT_RDO_Collection>(bkgElementHash);
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
+    //coverity[RESOURCE_LEAK]
     (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
     SG::WriteHandle<InDetSimDataCollection> inputSigSDODataHandle{"StoreGateSvc+TRT_SDO_Map_SIG"};
     inputSigSDODataHandle = std::make_unique<InDetSimDataCollection>();
@@ -415,6 +416,7 @@ namespace OverlayTesting {
     inputSigDataHandle = std::make_unique<TRT_RDO_Container>(containerSize);
     std::unique_ptr<TRT_RDO_Collection> sigCollection = std::make_unique<TRT_RDO_Collection>(sigElementHash);
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
+    //coverity[RESOURCE_LEAK]
     (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<TRT_RDO_Container> inputBkgDataHandle{"StoreGateSvc+TRT_RDOs_BKG"};
     inputBkgDataHandle = std::make_unique<TRT_RDO_Container>(containerSize);
@@ -478,6 +480,7 @@ namespace OverlayTesting {
     inputBkgDataHandle = std::make_unique<TRT_RDO_Container>(containerSize);
     std::unique_ptr<TRT_RDO_Collection> bkgCollection = std::make_unique<TRT_RDO_Collection>(bkgElementHash);
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
+    //coverity[RESOURCE_LEAK]
     (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
     SG::WriteHandle<InDetSimDataCollection> inputSigSDODataHandle{"StoreGateSvc+TRT_SDO_Map_SIG"};
     inputSigSDODataHandle = std::make_unique<InDetSimDataCollection>();
@@ -498,6 +501,7 @@ namespace OverlayTesting {
     ASSERT_EQ( outputCollection1->size(), 1u );
     const TRT_LoLumRawData* outputDigit1 = dynamic_cast<const TRT_LoLumRawData*>(outputCollection1->at(0));
     ASSERT_NE( outputDigit1, nullptr );
+    //coverity[FORWARD_NULL]
     ASSERT_EQ( outputDigit1->highLevel(), sigHT );
     ASSERT_EQ( outputDigit1->timeOverThreshold(), sigTOT );
     ASSERT_EQ( outputDigit1->driftTimeBin(), sigDriftTimeBin );
@@ -555,6 +559,7 @@ namespace OverlayTesting {
     const auto bkgDriftTimeBin=bkgDigit->driftTimeBin();
     bkgCollection->push_back(bkgDigit.release());
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
+    //coverity[RESOURCE_LEAK]
     (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
     SG::WriteHandle<InDetSimDataCollection> inputSigSDODataHandle{"StoreGateSvc+TRT_SDO_Map_SIG"};
     inputSigSDODataHandle = std::make_unique<InDetSimDataCollection>();
@@ -574,11 +579,13 @@ namespace OverlayTesting {
     ASSERT_EQ( outputCollection1->size(), 1u );
     const TRT_LoLumRawData* outputDigit1 = dynamic_cast<const TRT_LoLumRawData*>(outputCollection1->at(0));
     ASSERT_NE( outputDigit1, nullptr );
+    //coverity[FORWARD_NULL]
     ASSERT_EQ( outputDigit1->highLevel(), sigHT );
     ASSERT_EQ( outputDigit1->timeOverThreshold(), sigTOT );
     ASSERT_EQ( outputDigit1->driftTimeBin(), sigDriftTimeBin );
     const TRT_RDO_Collection *outputCollection2 = outputDataHandle->indexFindPtr(bkgElementHash);
     ASSERT_NE( outputCollection2, nullptr );
+    //coverity[FORWARD_NULL]
     ASSERT_EQ( outputCollection2->size(), 1u );
     const TRT_LoLumRawData* outputDigit2 = dynamic_cast<const TRT_LoLumRawData*>(outputCollection2->at(0));
     ASSERT_NE( outputDigit2, nullptr );
@@ -622,6 +629,7 @@ namespace OverlayTesting {
     std::unique_ptr<TRT_LoLumRawData> bkgDigit = std::make_unique<TRT_LoLumRawData>(sigStrawID,sigWord);
     bkgCollection->push_back(bkgDigit.release());
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),sigElementHash).isSuccess());
+    //coverity[RESOURCE_LEAK]
     (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     std::vector<HepMC::GenParticlePtr> genPartList;
@@ -632,7 +640,7 @@ namespace OverlayTesting {
     HepMcParticleLink trkLink(HepMC::barcode(pGenParticle),pGenParticle->parent_event()->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
     InDetSimData::Deposit deposit( trkLink, 0.0 );
     std::vector<InDetSimData::Deposit> depositVector(1);
-    depositVector.push_back(deposit);
+    depositVector.push_back(std::move(deposit));
     inputSigSDODataHandle->insert(std::make_pair(sigStrawID, InDetSimData(depositVector)));
 
     initTRTStrawStatusHT();
@@ -651,6 +659,7 @@ namespace OverlayTesting {
     ASSERT_EQ( outputCollection1->size(), 1u );
     const TRT_LoLumRawData* outputDigit1 = dynamic_cast<const TRT_LoLumRawData*>(outputCollection1->at(0));
     ASSERT_NE( outputDigit1, nullptr );
+    //coverity[FORWARD_NULL]
     ASSERT_EQ( outputDigit1->highLevel(), sigHT );
     ASSERT_EQ( outputDigit1->timeOverThreshold(), sigTOT );
     ASSERT_EQ( outputDigit1->driftTimeBin(), sigDriftTimeBin );
@@ -701,6 +710,7 @@ namespace OverlayTesting {
     std::unique_ptr<TRT_LoLumRawData> bkgDigit = std::make_unique<TRT_LoLumRawData>(sigStrawID,bkgWord);
     bkgCollection->push_back(bkgDigit.release());
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),sigElementHash).isSuccess());
+    //coverity[RESOURCE_LEAK]
     (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     std::vector<unsigned int> outBits(32,0);
@@ -716,7 +726,7 @@ namespace OverlayTesting {
     HepMcParticleLink trkLink(HepMC::barcode(pGenParticle),pGenParticle->parent_event()->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
     InDetSimData::Deposit deposit( trkLink, 0.0 );
     std::vector<InDetSimData::Deposit> depositVector(1);
-    depositVector.push_back(deposit);
+    depositVector.push_back(std::move(deposit));
     inputSigSDODataHandle->insert(std::make_pair(sigStrawID, InDetSimData(depositVector)));
 
     initTRTStrawStatusHT();
@@ -732,6 +742,7 @@ namespace OverlayTesting {
     ASSERT_TRUE( outputDataHandle.isValid() );
     const TRT_RDO_Collection *outputCollection1 = outputDataHandle->indexFindPtr(sigElementHash);
     ASSERT_NE( outputCollection1, nullptr );
+    //coverity[FORWARD_NULL]
     ASSERT_EQ( outputCollection1->size(), 1u );
     const TRT_LoLumRawData* outputDigit1 = dynamic_cast<const TRT_LoLumRawData*>(outputCollection1->at(0));
     ASSERT_NE( outputDigit1, nullptr );
@@ -793,6 +804,7 @@ namespace OverlayTesting {
     std::unique_ptr<TRT_LoLumRawData> bkgDigit = std::make_unique<TRT_LoLumRawData>(sigStrawID,bkgWord);
     bkgCollection->push_back(bkgDigit.release());
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),sigElementHash).isSuccess());
+    //coverity[RESOURCE_LEAK]
     (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
     initTRTStrawStatusHT();
 
@@ -809,7 +821,7 @@ namespace OverlayTesting {
     ASSERT_EQ(trkLink.cptr()->pdg_id(), -11); // Sanity check to confirm that we are linking to a positron as expected
     InDetSimData::Deposit deposit( trkLink, 0.0 );
     std::vector<InDetSimData::Deposit> depositVector(1);
-    depositVector.push_back(deposit);
+    depositVector.push_back(std::move(deposit));
     inputSigSDODataHandle->insert(std::make_pair(sigStrawID, InDetSimData(depositVector)));
     ASSERT_TRUE( m_alg->initialize().isSuccess() );
     setPrivateToolPointers();
@@ -822,6 +834,7 @@ namespace OverlayTesting {
     ASSERT_TRUE( outputDataHandle.isValid() );
     const TRT_RDO_Collection *outputCollection1 = outputDataHandle->indexFindPtr(sigElementHash);
     ASSERT_NE( outputCollection1, nullptr );
+    //coverity[FORWARD_NULL]
     ASSERT_EQ( outputCollection1->size(), 1u );
     const TRT_LoLumRawData* outputDigit1 = dynamic_cast<const TRT_LoLumRawData*>(outputCollection1->at(0));
     ASSERT_NE( outputDigit1, nullptr );
@@ -881,6 +894,7 @@ namespace OverlayTesting {
     std::unique_ptr<TRT_LoLumRawData> bkgDigit = std::make_unique<TRT_LoLumRawData>(sigStrawID,bkgWord);
     bkgCollection->push_back(bkgDigit.release());
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),sigElementHash).isSuccess());
+    //coverity[RESOURCE_LEAK]
     (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
     initTRTStrawStatusHT();
 
@@ -893,7 +907,7 @@ namespace OverlayTesting {
     ASSERT_EQ(trkLink.cptr()->pdg_id(), -11); // Sanity check to confirm that we are linking to a positron as expected
     InDetSimData::Deposit deposit( trkLink, 0.0 );
     std::vector<InDetSimData::Deposit> depositVector(1);
-    depositVector.push_back(deposit);
+    depositVector.push_back(std::move(deposit));
     inputSigSDODataHandle->insert(std::make_pair(sigStrawID, InDetSimData(depositVector)));
 
     // Override Occupancy correction, so that HT bit will always be set
@@ -914,6 +928,7 @@ namespace OverlayTesting {
     ASSERT_EQ( outputCollection1->size(), 1u );
     const TRT_LoLumRawData* outputDigit1 = dynamic_cast<const TRT_LoLumRawData*>(outputCollection1->at(0));
     ASSERT_NE( outputDigit1, nullptr );
+    //coverity[FORWARD_NULL]
     ASSERT_EQ( outputDigit1->highLevel(), true );
     ASSERT_EQ( outputDigit1->timeOverThreshold(), 46.875 );
     ASSERT_EQ( outputDigit1->driftTimeBin(), 5 );

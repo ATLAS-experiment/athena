@@ -26,10 +26,6 @@
 #include "InDetSimData/InDetSimDataCollection.h"
 #include "TRTDigit.h"
 
-// particle table
-#include "HepPDT/ParticleDataTable.hh"
-#include "GaudiKernel/IPartPropSvc.h"
-
 // For magneticfield
 #include "MagFieldConditions/AtlasFieldCacheCondObj.h"
 
@@ -37,6 +33,7 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/WriteHandle.h"
+#include <memory>
 #include <vector>
 #include <set>
 #include <utility> /* pair */
@@ -166,10 +163,6 @@ private:
   double m_minpileuptruthEkin{0.0};
   // const  ComTime* m_ComTime{};
   double m_cosmicEventPhase{0.0};     // local replacement for the comTime service
-
-  /// Handle on the particle property service
-  ServiceHandle<IPartPropSvc> m_ppSvc{this, "PartPropSvc", "PartPropSvc"};
-  const HepPDT::ParticleDataTable* m_particleTable{};
 
   bool m_first_event{true};
 

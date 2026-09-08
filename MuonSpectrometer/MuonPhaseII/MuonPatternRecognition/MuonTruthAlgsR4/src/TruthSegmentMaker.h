@@ -11,7 +11,7 @@
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "StoreGate/WriteDecorHandleKeyArray.h"
 #include "StoreGate/WriteHandle.h"
-#include "StoreGate/WriteDecorHandle.h"
+#include "xAODMuonViews/ContainerDecorator.h"
 
 
 #include "xAODMuonSimHit/MuonSimHitContainer.h"
@@ -55,11 +55,11 @@ namespace MuonR4{
 
           using EleLink_t = ElementLink<xAOD::MuonSimHitContainer>;
           using HitLinkVec_t = std::vector<EleLink_t>;
-          using LinkDecor_t = SG::WriteDecorHandle<xAOD::MuonSegmentContainer, HitLinkVec_t>;
-          using FloatDecor_t = SG::WriteDecorHandle<xAOD::MuonSegmentContainer, float>;
+          using LinkDecor_t = xAOD::ContainerDecorator<xAOD::MuonSegmentContainer, HitLinkVec_t>;
+          using FloatDecor_t = xAOD::ContainerDecorator<xAOD::MuonSegmentContainer, float>;
 
           using SegPars_t = xAOD::PosAccessor<Acts::toUnderlying(SegmentFit::ParamDefs::nPars)>::element_type;
-          using SegParDecor_t = SG::WriteDecorHandle<xAOD::MuonSegmentContainer, SegPars_t>;
+          using SegParDecor_t = xAOD::ContainerDecorator<xAOD::MuonSegmentContainer, SegPars_t>;
         
           /** @brief Helper struct to ship the write DecorHandles and the reference to the output
            *         segment container through the class methods*/

@@ -16,6 +16,7 @@
  **/
 
 #include <future>
+#include <mutex>
 #include <vector>
 #include <string>
 
@@ -102,7 +103,7 @@ namespace JiveXML {
       EventStreamMap m_eventStreamMap;
 
       //A mutex (mutual exclusive) lock for the data map
-      mutable pthread_mutex_t m_accessLock ATLAS_THREAD_SAFE;
+      mutable std::timed_mutex m_accessLock ATLAS_THREAD_SAFE;
 
       //A handle to the server thread
       pthread_t m_ServerThreadHandle;

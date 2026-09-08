@@ -97,7 +97,7 @@ def getEDMListFromWriteHandles(configurables):
     '''
 
     def getWriteHandles(comp):
-        properties = [getattr(comp,propName) for propName in comp.getDefaultProperties().keys()]
+        properties = [getattr(comp,propName) for propName in comp.getDefaultProperties()]
         return [prop for prop in properties if isinstance(prop,DataHandle) and prop.mode()=='W']
 
     def formatItem(containerType, containerKey):

@@ -24,10 +24,8 @@ StatusCode TauGNNEvaluator::initialize() {
     // We should move to using WriteDecorHandles in the future, but for now
     // we create keys to enforce data-dependencies in the scheduler
 
-    if(m_output_discriminant != Discriminant::Disabled) {
-      m_scoreHandleKey = m_tauContainerName + "." + m_output_varname;
-      ATH_CHECK(m_scoreHandleKey.initialize());
-    }
+    m_scoreHandleKey = m_tauContainerName + "." + m_output_varname;
+    ATH_CHECK(m_scoreHandleKey.initialize());
 
     m_pTauHandleKey = m_tauContainerName + "." + m_output_ptau;
     ATH_CHECK(m_pTauHandleKey.initialize());
@@ -129,7 +127,7 @@ StatusCode TauGNNEvaluator::execute(xAOD::TauJet &tau) const {
   const SG::Accessor<float> out_ptau(m_output_ptau);
   const SG::Accessor<float> out_pjet(m_output_pjet);
   // Set default score and overwrite later
-  if(m_output_discriminant != Discriminant::Disabled) output(tau) = -1111.0f;
+  output(tau) = -1111.0f;
   out_ptau(tau) = -1111.0f;
   out_pjet(tau) = -1111.0f;
 

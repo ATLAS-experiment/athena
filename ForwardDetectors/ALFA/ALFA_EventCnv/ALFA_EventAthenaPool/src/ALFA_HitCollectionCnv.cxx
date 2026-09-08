@@ -21,7 +21,7 @@ ALFA_HitCollection* ALFA_HitCollectionCnv::createTransient(const Token* token) {
     ALFA_HitCollectionCnv_p1   TPConverter_p1;
 
     ALFA_HitCollection       *trans_cont(nullptr); // probably inicialization
-    static const pool::Guid   p1_guid("96320556-17C7-4E8D-9D15-DF955193F002");
+    static const Guid   p1_guid("96320556-17C7-4E8D-9D15-DF955193F002");
 
     if( this->compareClassGuid(token, p1_guid)) {
          std::unique_ptr< ALFA_HitCollection_p1 >   col_vect( this->poolReadObject< ALFA_HitCollection_p1 >(token) );

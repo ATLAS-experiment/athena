@@ -14,6 +14,7 @@
 #include "../IO/eEmNbhoodTOB.h"
 #include "../IO/eEmEg1BDTTOB.h"
 
+#include "../Utilities/IDataCollector.h"
 
 #include "ap_int.h"
 #include "ap_fixed.h"
@@ -42,7 +43,8 @@ namespace GlobalSim {
     
     StatusCode initialize() override;
 
-    virtual StatusCode run(const EventContext& ctx) const override;
+    virtual StatusCode run(const std::unique_ptr<IDataCollector>&,
+			   const EventContext& ctx) const override;
     
     virtual std::string toString() const override;
 
@@ -61,15 +63,15 @@ namespace GlobalSim {
     m_BDTScoreKey {
       this,
       "BDTScoreKey",
-      "eGamma1BDT"};    
+      "L1_eGamma1BDT"};    
         
     // input to the  BDT Algorithm
     SG::ReadHandleKey<eEmNbhoodTOBContainer>
     m_nbhdTOBContainerReadKey {
       this,
-      "LArNeighborhoodTOBContainerReadKey",
+      "LArNeighborhoodTOBContainerKey",
       "stripNeighborhoodTOBContainer",
-      "key to read inLArNeighborhoodTOBsReadKeys"};
+      "key to read inLArNeighborhoodTOBs"};
 
     SG::WriteHandleKey<eEmEg1BDTTOBContainer>
     m_eEmEg1BDTTOBContainerKey {

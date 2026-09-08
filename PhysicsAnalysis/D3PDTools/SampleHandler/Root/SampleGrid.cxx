@@ -10,8 +10,8 @@
 
 #include <SampleHandler/SampleGrid.h>
 
+#include <stdexcept>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <SampleHandler/GridTools.h>
 #include <SampleHandler/MetaFields.h>
 #include <SampleHandler/MetaObject.h>
@@ -55,8 +55,7 @@ namespace SH
   getNumFiles () const
   {
     RCU_READ_INVARIANT (this);
-    RCU_THROW_MSG ("Sample::numFiles not supported for SampleGrid");
-    return 0; // compiler dummy
+    throw std::runtime_error ("Sample::numFiles not supported for SampleGrid");
   }
 
 
@@ -65,8 +64,7 @@ namespace SH
   getFileName (const std::size_t /*index*/) const
   {
     RCU_READ_INVARIANT (this);
-    RCU_THROW_MSG ("Sample::fileName not supported for SampleGrid");
-    return ""; // compiler dummy
+    throw std::runtime_error ("Sample::fileName not supported for SampleGrid");
   }
 
 
@@ -76,9 +74,9 @@ namespace SH
   {
     RCU_READ_INVARIANT (this);
 
-    std::unique_ptr<SampleLocal> result (new SampleLocal (name()));
+    auto result = std::make_unique<SampleLocal> (name());
     for (auto& file : makeFileList ())
-      result->add (file.c_str());
+      result->add (file);
     return result;
   }
 

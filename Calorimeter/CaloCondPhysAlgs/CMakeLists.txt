@@ -8,6 +8,8 @@ find_package( CLHEP )
 find_package( COOL COMPONENTS CoolKernel )
 find_package( CORAL COMPONENTS CoralBase )
 find_package( ROOT COMPONENTS Core Tree )
+find_package(Boost REQUIRED COMPONENTS program_options)
+find_package(chai REQUIRED)
 
 # Component(s) in the package:
 atlas_add_component( CaloCondPhysAlgs
@@ -18,7 +20,12 @@ atlas_add_component( CaloCondPhysAlgs
 		             CaloIdentifier AthenaBaseComps AthenaKernel StoreGateLib GaudiKernel LArCablingLib LArElecCalib LArIdentifier TrigDecisionToolLib LArRawConditions LArRecConditions
 		             CaloConditions TileConditionsLib CaloEvent LArRecEvent TileEvent CaloInterfaceLib CaloUtilsLib AthenaPoolUtilities Identifier xAODEventInfo LArHV LArReadoutGeometry LArSimEvent CxxUtils)
 
+atlas_add_executable( CaloWriteNoise
+                      exe/CaloWriteNoise.cxx
+                      INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CHAI_INCLUDE_DIR}
+                      LINK_LIBRARIES CaloCondBlobObjs chai::chai ${Boost_LIBRARIES} )
+
 # Install files from the package:
-atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+atlas_install_python_modules( python/*.py share/CaloNoise_fillDB.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_joboptions( share/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} --extend-ignore=F401,F821 )
 atlas_install_scripts( share/CaloRescaleNoiseHV.sh share/CaloNoise_fillDB.py share/CaloPedestalShift.sh share/CaloPedestal_fillDB.py share/CaloNoise2Ntuple.py share/CaloCellPos2Ntuple.py )

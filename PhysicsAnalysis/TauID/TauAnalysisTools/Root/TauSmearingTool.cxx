@@ -10,12 +10,13 @@
 #include "TauAnalysisTools/TauSmearingTool.h"
 #include "TauAnalysisTools/SharedFilesVersion.h"
 
+#include <AsgTools/AsgToolConfig.h>
+
 namespace TauAnalysisTools
 {
 
 TauSmearingTool::TauSmearingTool( const std::string& sName )
   : asg::AsgMetadataTool( sName )
-  , m_tCommonSmearingTool(sName+"_CommonSmearingTool", this)
 {}
 
 TauSmearingTool::~TauSmearingTool()
@@ -42,10 +43,19 @@ StatusCode TauSmearingTool::initialize()
         ATH_MSG_WARNING("No fast-sim recommendation for tau smearing is available, using full sim");
       }
 
-      if (m_sCampaign=="mc23") {
-        m_sInputFilePath = sDirectory+"TES_TrueHadTau_RNN_mc23_v3.root";
-      } else {
-        m_sInputFilePath = sDirectory+"TES_TrueHadTau_RNN_mc20_v2.root";
+     
+      if(m_useGNTau){
+        if (m_sCampaign=="mc23") {
+          m_sInputFilePath = sDirectory+"TES_TrueHadTau_GNTau_mc23_v0.root";
+        } else {
+          ATH_MSG_ERROR("Tau Smearing recommendations with GNTau are not available for "<< m_sCampaign); 
+        }  
+      } else { 
+        if (m_sCampaign=="mc23") {
+          m_sInputFilePath = sDirectory+"TES_TrueHadTau_RNN_mc23_v3.root";
+        } else {
+          m_sInputFilePath = sDirectory+"TES_TrueHadTau_RNN_mc20_v2.root";
+        }
       }
 
     } else {
@@ -53,14 +63,19 @@ StatusCode TauSmearingTool::initialize()
       return StatusCode::FAILURE;
     }
   }
-  ATH_CHECK(ASG_MAKE_ANA_TOOL(m_tCommonSmearingTool, TauAnalysisTools::CommonSmearingTool));
-  ATH_CHECK(m_tCommonSmearingTool.setProperty("InputFilePath", m_sInputFilePath));
-  ATH_CHECK(m_tCommonSmearingTool.setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
-  ATH_CHECK(m_tCommonSmearingTool.setProperty("ApplyFading", m_bApplyFading));
-  ATH_CHECK(m_tCommonSmearingTool.setProperty("MVATESQualityCheck", m_bMVATESQualityCheck));
-  ATH_CHECK(m_tCommonSmearingTool.setProperty("ApplyInsituCorrection", m_bApplyInsituCorrection));
-  ATH_CHECK(m_tCommonSmearingTool.setProperty("OutputLevel", this->msg().level()));
-  ATH_CHECK(m_tCommonSmearingTool.initialize());
+ 
+  if (m_tCommonSmearingTool.empty()){ 
+    asg::AsgToolConfig config("TauAnalysisTools::CommonSmearingTool/TauSmearingTool");  
+    ATH_CHECK(config.setProperty("InputFilePath", m_sInputFilePath));
+    ATH_CHECK(config.setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
+    ATH_CHECK(config.setProperty("ApplyFading", m_bApplyFading));
+    ATH_CHECK(config.setProperty("MVATESQualityCheck", m_bMVATESQualityCheck));
+    ATH_CHECK(config.setProperty("ApplyInsituCorrection", m_bApplyInsituCorrection));
+    ATH_CHECK(config.setProperty("OutputLevel", this->msg().level()));
+    ATH_CHECK(config.makePrivateTool(m_tCommonSmearingTool));
+  }
+  ATH_CHECK(m_tCommonSmearingTool.retrieve()); 
+   
 
   // Add the affecting systematics to the global registry
   CP::SystematicRegistry& registry = CP::SystematicRegistry::getInstance();

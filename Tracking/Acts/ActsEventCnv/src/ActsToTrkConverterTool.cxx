@@ -5,77 +5,42 @@
 #include "ActsToTrkConverterTool.h"
 
 // Trk
-#include "TRT_ReadoutGeometry/TRT_BaseElement.h"
 #include "TrkSurfaces/AnnulusBounds.h"
 #include "TrkSurfaces/Surface.h"
 #include "TrkTrack/Track.h"
 
 // ATHENA
-#include "GaudiKernel/IInterface.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
-#include "TrkExUtils/RungeKuttaUtils.h"
 #include "TrkMeasurementBase/MeasurementBase.h"
 #include "TrkSurfaces/PerigeeSurface.h"
 #include "TrkSurfaces/Surface.h"
-#include "xAODMeasurementBase/UncalibratedMeasurement.h"
 
 #include "InDetPrepRawData/PixelClusterCollection.h"
 #include "InDetPrepRawData/SCT_ClusterCollection.h"
 
-#include "MuonReadoutGeometryR4/MuonDetectorManager.h"
-#include "MuonReadoutGeometry/MuonReadoutElement.h"
-#include "xAODMuonPrepData/MuonMeasurement.h"
 #include "xAODMuonPrepData/CombinedMuonStrip.h"
 #include "MuonCompetingRIOsOnTrack/CompetingMuonClustersOnTrack.h"
 // PACKAGE
 #include "ActsCalibBase/CalibrationContext.h"
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometryInterfaces/GeometryContext.h"
-#include "ActsGeometry/ActsTrackingGeometryTool.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
-#include "ActsGeoUtils/SurfaceCache.h"
-#include "ActsInterop/IdentityHelper.h"
+
+#include "ActsGeometryInterfaces/ISurfacePlacement.h"
 #include "ActsEvent/ParticleHypothesisEncoding.h"
 
 // ACTS
-#include "Acts/Surfaces/StrawSurface.hpp"
-#include "Acts/Surfaces/PerigeeSurface.hpp"
-#include "Acts/Surfaces/PlaneSurface.hpp"
-
-#include "Acts/Surfaces/RectangleBounds.hpp"
-#include "Acts/Surfaces/TrapezoidBounds.hpp"
-#include "Acts/Surfaces/CylinderBounds.hpp"
-#include "Acts/Surfaces/DiscBounds.hpp"
-#include "Acts/Surfaces/LineBounds.hpp"
-#include "Acts/Surfaces/RadialBounds.hpp"
-#include "Acts/Surfaces/DiamondBounds.hpp"
-
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/EventData/BoundTrackParameters.hpp"
 #include "Acts/EventData/VectorTrackContainer.hpp"
 #include "Acts/EventData/TransformationHelpers.hpp"
 #include "Acts/Geometry/TrackingGeometry.hpp"
-#include "Acts/Propagator/detail/JacobianEngine.hpp"
 #include "Acts/Surfaces/detail/PlanarHelper.hpp"
 
 #include "ActsEvent/MultiTrajectory.h"
 #include "Acts/EventData/TrackStatePropMask.hpp"
 #include "Acts/EventData/SourceLink.hpp"
 
-#include "TrkSurfaces/DiscBounds.h"
-#include "TrkSurfaces/TrapezoidBounds.h"
-#include "TrkSurfaces/CylinderBounds.h"
-#include "TrkSurfaces/RectangleBounds.h"
 #include "TrkSurfaces/StraightLineSurface.h"
-#include "TrkSurfaces/CylinderSurface.h"
-#include "TrkSurfaces/DiamondBounds.h"
-
-// STL
-#include <cmath>
-#include <iostream>
-#include <memory>
-#include <random>
-#include <format>
 
 namespace ActsTrk {
 
@@ -106,13 +71,16 @@ StatusCode ActsToTrkConverterTool::initialize() {
   ATH_CHECK(m_trkSummaryTool.retrieve());
   ATH_CHECK(m_ROTcreator.retrieve());
   ATH_CHECK(m_geometryConvTool.retrieve());
-  ATH_CHECK(m_trackingGeometryTool.retrieve());
+  ATH_CHECK(m_ctxProvider.initialize());
   m_prdCalib = detail::TrkPrepRawDataCalibrator{m_geometryConvTool.get(), m_ROTcreator.get()};
   ATH_CHECK(m_keyMdt.initialize(SG::AllowEmpty));
   ATH_CHECK(m_keyRpc.initialize(SG::AllowEmpty));
   ATH_CHECK(m_keyTgc.initialize(SG::AllowEmpty));
   ATH_CHECK(m_keyMm.initialize(SG::AllowEmpty));
   ATH_CHECK(m_keyStgc.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_pixelKey.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_sctKey.initialize(SG::AllowEmpty));
+  
   if (!m_keyMdt.empty() || !m_keyRpc.empty() || !m_keyTgc.empty() ||
       !m_keyMm.empty() || !m_keyStgc.empty()) {
     ATH_CHECK(m_idHelperSvc.retrieve());
@@ -133,7 +101,7 @@ ActsToTrkConverterTool::trkTrackToSourceLinks(const Trk::Track &track) const {
 void ActsToTrkConverterTool::convertTrkToActsContainer(const EventContext& ctx,
                                                        const TrackCollection& trackColl,
                                                        ActsTrk::MutableTrackContainer& outTrackcoll) const {
-  const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+  const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
   ATH_MSG_VERBOSE("Calling trkTrackCollectionToActsTrackContainer with "
                   << trackColl.size() << " tracks.");
   unsigned int trkCount = 0;
@@ -198,7 +166,12 @@ void ActsToTrkConverterTool::convertTrkToActsContainer(const EventContext& ctx,
             actsTSOS.setReferenceSurface(parameters.referenceSurface().getSharedPtr());
             // Since we're converting final Trk::Tracks, let's assume they're smoothed
             actsTSOS.smoothed() = parameters.parameters();
-            actsTSOS.smoothedCovariance() = *parameters.covariance();
+            if (parameters.covariance().has_value()) {
+              actsTSOS.smoothedCovariance() = *parameters.covariance();
+            }
+            else {
+              actsTSOS.smoothedCovariance() = Acts::BoundMatrix::Zero();
+            }
             // Not yet implemented in MultiTrajectory.icc
             // actsTSOS.typeFlags().setHasParameters();
             if (!(actsTSOS.hasSmoothed() && actsTSOS.hasReferenceSurface())) {
@@ -273,31 +246,27 @@ bool ActsToTrkConverterTool::actsTrackParameterPositionCheck(
   return true;
 }
 
-std::unique_ptr<Trk::Track> ActsToTrkConverterTool::convertFitResult(const EventContext& ctx,
-                                                                     TrackFitResult_t& fitResult,
+std::unique_ptr<Trk::Track> ActsToTrkConverterTool::convertActsToTrk(const EventContext& ctx,
+                                                                     const ActsTrack_t& actsTrack,
                                                                      const Trk::TrackInfo::TrackFitter fitAuthor) const {
-
-    if (not fitResult.ok()) {
-      ATH_MSG_VERBOSE("Fit did not converge");  
-      return nullptr;    
-    }
-    return convertActsTrack(ctx, fitResult.value(), fitAuthor);
+    return convertActsTrack<ActsTrack_t>(ctx, actsTrack, fitAuthor);
 }
-
+std::unique_ptr<Trk::Track> ActsToTrkConverterTool::convertTrack(const EventContext& ctx, 
+                                                                 const ConstTrack_t& trackProxy) const {
+    return convertActsTrack(ctx, trackProxy, m_fitAuthor);
+}
 template <typename Proxy_t>
   std::unique_ptr<Trk::Track> 
     ActsToTrkConverterTool::convertActsTrack(const EventContext& ctx,
                                              const Proxy_t& acts_track,
                                              const Trk::TrackInfo::TrackFitter fitAuthor) const{
 
-
+    ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Check track "<<acts_track.tipIndex());
     const Acts::CalibrationContext cctx{getCalibrationContext(ctx)};
-    const Acts::GeometryContext tgContext{m_trackingGeometryTool->getGeometryContext(ctx).context()};
+    const Acts::GeometryContext tgContext{m_ctxProvider.getGeometryContext(ctx)};
    
     auto finalTrajectory = std::make_unique<Trk::TrackStates>();
-    int nDoF{0};
 
-    double chi2{0};
 
     // Loop over all the output state to create track state
     acts_track.container().trackStateContainer().visitBackwards(acts_track.tipIndex(), 
@@ -309,22 +278,34 @@ template <typename Proxy_t>
         if (!m_convertMaterial && !state.referenceSurface().isSensitive()) {
           return;
         }
+        int nDoF{0};
+        double chi2{0};
 
-        if (const auto* associatedDetEl = dynamic_cast<const IDetectorElementBase*>(
+        if (!state.hasSmoothed() && !state.hasFiltered() && !state.hasPredicted()) {
+          ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - State has no valid parameters (smoothed/filtered/predicted)");
+          return;
+        }
+
+        if (const auto* associatedDetEl = dynamic_cast<const ISurfacePlacement*>(
                                         state.referenceSurface().surfacePlacement());
             associatedDetEl != nullptr) {
             ATH_MSG_VERBOSE("Associated det: "<<associatedDetEl->detectorType());
         }
 
         auto flag = state.typeFlags();
-        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - "<<", hole: "<<flag.isHole()
-                      <<", outlier: "<<flag.isOutlier()<<", measurement: "<<flag.isMeasurement()<<"/"
-                      <<flag.hasMeasurement()<<", "<<m_convertOutliers<<", "<<m_convertHoles
-                      <<", has SL: "<<state.hasUncalibratedSourceLink());
+
+        auto boundPars = acts_track.createParametersFromState(state);
+
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - "<<" hole: "<<flag.isHole()
+            <<", outlier: "<<flag.isOutlier()<<", measurement: "<<flag.isMeasurement()<<"/"
+            <<flag.hasMeasurement()<<", "<<m_convertOutliers<<", "<<m_convertHoles
+            <<", has SL: "<<state.hasUncalibratedSourceLink()
+            <<", parameters: "<<boundPars);
+
         // We need to determine the type of state 
         TrkTSOSMask typePattern;
-        std::unique_ptr<Trk::TrackParameters> trkPars = m_geometryConvTool->convertTrackParametersToTrk(ctx, 
-                                                                      acts_track.createParametersFromState(state));
+
+        std::unique_ptr<Trk::TrackParameters> trkPars = m_geometryConvTool->convertTrackParametersToTrk(ctx, boundPars);
         std::unique_ptr<Trk::MeasurementBase> trkMeasurement{};
 
 
@@ -365,6 +346,11 @@ template <typename Proxy_t>
         ATH_MSG_VERBOSE("State succesfully created, adding it to the trajectory");
         finalTrajectory->insert(finalTrajectory->begin(), std::move(perState));
       });
+
+      if (finalTrajectory->empty()) {
+          ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" No measurements added to the track");
+          return nullptr;
+      }
       // Convert the perigee state and add it to the trajectory
       std::unique_ptr<Trk::TrackParameters> per = m_geometryConvTool->convertTrackParametersToTrk(ctx, acts_track.createParametersAtReference());
       TrkTSOSMask typePattern;
@@ -373,7 +359,9 @@ template <typename Proxy_t>
                               std::make_unique<Trk::TrackStateOnSurface>(nullptr, std::move(per), nullptr, typePattern));
       // Create the track using the states
       Trk::TrackInfo newInfo{fitAuthor, ParticleHypothesis::convertTrk(acts_track.particleHypothesis())};
-      auto newtrack = std::make_unique<Trk::Track>(newInfo, std::move(finalTrajectory), nullptr);
+      auto newtrack = std::make_unique<Trk::Track>(newInfo, std::move(finalTrajectory), 
+                                                   std::make_unique<Trk::FitQuality>(static_cast<double>(acts_track.chi2()), 
+                                                                                     static_cast<int>(acts_track.nDoF())));
       constexpr bool suppressHoleSearch = false;
       m_trkSummaryTool->updateTrackSummary(ctx, *newtrack, suppressHoleSearch);
       ATH_MSG_VERBOSE("Created new track "<<(*newtrack->trackSummary()));
@@ -384,7 +372,7 @@ template <typename Proxy_t>
     ActsToTrkConverterTool::convertActsToTrkContainer(const EventContext& ctx,
                                                       const ActsTrk::TrackContainer& trackCont) const {
       auto outColl = std::make_unique<TrackCollection>();
-      for (const ActsTrk::TrackContainer::ConstTrackProxy& trk : trackCont) {
+      for (const ActsTrk::TrackContainer::ConstTrackProxy trk : trackCont) {
           outColl->push_back(convertActsTrack(ctx, trk, m_fitAuthor));
       }
       return outColl;
@@ -403,7 +391,7 @@ template <typename Proxy_t>
           if (acc_prdLink.isAvailable(*meas) && acc_prdLink(*meas).isValid()) {
               rot.reset(m_ROTcreator->correct(**acc_prdLink(*meas), *trkPars, ctx));
           } else {
-              ATH_MSG_WARNING(__func__<<" () "<<__LINE__<<" - The pixel xAOD -> prd accessor is invalid");
+              ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - The pixel xAOD -> prd accessor is invalid");
           }
           break;
         } case StripClusterType: {
@@ -411,7 +399,7 @@ template <typename Proxy_t>
           if (acc_prdLink.isAvailable(*meas) && acc_prdLink(*meas).isValid()) {
               rot.reset(m_ROTcreator->correct(**acc_prdLink(*meas), *trkPars, ctx));
           } else {
-              ATH_MSG_WARNING(__func__<<" () "<<__LINE__<<" - The strip xAOD -> prd accessor is invalid");
+              ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - The strip xAOD -> prd accessor is invalid");
           }
           break;
         } case MdtDriftCircleType:
@@ -471,7 +459,7 @@ template <typename Proxy_t>
               assert(prd != nullptr);
               // Track parameter representation needs to change towards a phi surface
               if (m_idHelperSvc->measuresPhi(id)) {
-                  ATH_MSG_VERBOSE("Convert the track parameters "<<m_idHelperSvc->toString(id)
+                  ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Convert the track parameters "<<m_idHelperSvc->toString(id)
                                 <<", "<<m_idHelperSvc->toStringDetEl(prd->detectorElement()->identify()));
                   const Trk::Surface& target = prd->detectorElement()->surface(id);
                   trkPars = rotateParams(*trkPars, target);
@@ -481,8 +469,12 @@ template <typename Proxy_t>
             }
             break;
         } default:
-          ATH_MSG_WARNING("Measurement type "<<meas->type()<<" is not implemented");
+          ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - Measurement type "<<meas->type()<<" is not implemented");
           return;
+    }
+    if (!rot) {
+      ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - ROT creation failed.");
+      return;
     }
     assert(rot != nullptr);
     assert(trkPars != nullptr);

@@ -11,6 +11,7 @@ atlas_add_component( ActsPatternRecognition
                      src/components/*.cxx
                      LINK_LIBRARIES
                Acts::Core
+               ActsCalibratorsLib
                ActsEventLib
                ActsGeometryInterfacesLib
                ActsInteropLib
@@ -26,10 +27,10 @@ atlas_add_component( ActsPatternRecognition
                MagFieldConditions
                MagFieldElements
                PixelReadoutGeometryLib
+               SCT_ReadoutGeometry
                SiSPSeededTrackFinderData
                SiSpacePoint
                StoreGateLib
-               TrigInDetToolInterfacesLib
                TrkEventUtils
                TrkParameters
                TrkSpacePoint

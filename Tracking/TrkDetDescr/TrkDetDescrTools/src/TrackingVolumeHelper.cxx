@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -52,8 +52,6 @@ TrackingVolumeHelper::TrackingVolumeHelper(const std::string& t, const std::stri
   TrackingVolumeManipulator() {
     declareInterface<ITrackingVolumeHelper>(this);
 }
-// destructor
-TrackingVolumeHelper::~TrackingVolumeHelper() = default;
 
 
 // the interface methods
@@ -256,7 +254,7 @@ void TrackingVolumeHelper::glueTrackingVolumes(const std::vector<TrackingVolume*
                 // attach the material layer to the shared boundary if existing
                 if (mLayer) {
                     ATH_MSG_VERBOSE( "Set MaterialLayer to the BoundarySurface of volume from second array." );
-                    boundarySurface->surfaceRepresentation().setMaterialLayer(mLayer);
+                    boundarySurface->surfaceRepresentation().setMaterialLayer(std::move(mLayer));
                 }
                 // set the boundary surface to the volumes of both sides
                 for (const auto & volIter : firstVolumes){
@@ -339,7 +337,7 @@ void TrackingVolumeHelper::glueTrackingVolumes(const std::vector<TrackingVolume*
                 if (mLayer) {
                   ATH_MSG_VERBOSE("Set MaterialLayer to the BoundarySurface of volume from second array.");
                   // assume that now the mlayer onwership goes over to the TrackingVolume
-                  boundarySurface->surfaceRepresentation().setMaterialLayer(mLayer);
+                  boundarySurface->surfaceRepresentation().setMaterialLayer(std::move(mLayer));
                 }
                 // set the boundary surface to the volumes of both sides
                 for (const auto & volIter : firstVolumes){

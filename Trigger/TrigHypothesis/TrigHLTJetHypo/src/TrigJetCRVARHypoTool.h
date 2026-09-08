@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
    */
 
 #ifndef TRIGJETCRVARHYPOTOOL_H
@@ -46,9 +46,9 @@ class TrigJetCRVARHypoTool: public AthAlgTool{
 
   struct JetInfo {
     const TrigCompositeUtils::DecisionIDContainer previousDecisionIDs;
-    const xAOD::Jet* jet;
-    const CaloConstCellContainer* cells;
-    TrigCompositeUtils::Decision* decision;
+    const xAOD::Jet* jet = nullptr;
+    const CaloConstCellContainer* cells = nullptr;
+    TrigCompositeUtils::Decision* decision = nullptr;
   };
   
   bool emf_dis(     const xAOD::Jet* jet  ) const;

@@ -364,6 +364,10 @@ void SCT_SurfaceChargesGenerator::processSiHit(const SiDetectorElement* element,
   if (m_doInducedChargeModel) { // Setting magnetic field for the ICM.
     SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{m_fieldCacheCondObjInputKey, ctx};
     const AtlasFieldCacheCondObj* fieldCondObj{*readHandle};
+    if (!fieldCondObj)[[unlikely]]{
+      ATH_MSG_ERROR("SCT_SurfaceChargesGenerator::process has fieldCondObj=nullptr");
+      return;
+    }
     float vdepl{m_vdepl};
     float vbias{m_vbias};
     if (m_useSiCondDB) {

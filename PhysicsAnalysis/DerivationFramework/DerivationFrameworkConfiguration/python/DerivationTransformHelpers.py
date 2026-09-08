@@ -3,7 +3,7 @@
 Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 """
 
-from PyJobTransforms.trfArgClasses import argFactory, argList, argNTUPFile, argPOOLFile, argSubstepBool, argString
+from PyJobTransforms.trfArgClasses import argFactory, argInt, argList, argNTUPFile, argPOOLFile, argSubstepBool, argString
 from PyJobTransforms.trfExe import athenaExecutor, reductionFrameworkExecutor
 
 def addDerivationArguments(parser):
@@ -56,6 +56,12 @@ def addDerivationArguments(parser):
                         help='List of containers used for skimming in the skimmingExpression, SKIM format only',
                         group='Derivation',
                         )
+    parser.add_argument('--n_folds_NF',
+                        type=argFactory(argInt),
+                        help='Number of folds to use for the photon shower shape correction with Normalizing Flows. '
+                             'Must be >=1 and not exceed the NFolds value in the NF config file. '
+                             'If not given, only 1 (with index 0) fold is used.',
+                        group='Derivation')
 
 def addPhysicsValidationArguments(parser):
     """Add validation command-line parser arguments."""

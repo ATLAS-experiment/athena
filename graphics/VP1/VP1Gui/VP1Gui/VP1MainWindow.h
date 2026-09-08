@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -104,7 +104,7 @@ public Q_SLOTS:
   void request_addEmptyTab();
   void request_channelInformation();
   void request_printChannel();
-  QString request_saveChannelSnapshot(QString xLabel="");
+  QString request_saveChannelSnapshot(const QString& xLabel="");
   void request_cruisemodechange();
   void request_saveasConfig();
   void request_saveConfig();

@@ -20,7 +20,7 @@
 
 #include "StoreGate/WriteDecorHandle.h"
 
-#include "MuonTruthAlgs/DecorUtils.h"
+#include "xAODMuonViews/ContainerDecorator.h"
 
 #include <map>
 
@@ -49,46 +49,46 @@ namespace Muon {
         *          and @param ctx event context. In this way when we build a struct instance we automatically retrieve all 
         *          write-decorators for that event context.
         */
-        using WriteDecor_uint8_t = std::unique_ptr<SG::WriteDecorHandle<xAOD::TruthParticleContainer, uint8_t>>;
+        using WriteDecor_uint8_t = xAOD::ContainerDecorator<xAOD::TruthParticleContainer, std::uint8_t>;
         using llvec = std::vector<unsigned long long>;
-        using WriteDecor_llvec =  std::unique_ptr<SG::WriteDecorHandle<xAOD::TruthParticleContainer, llvec>>;
+        using WriteDecor_llvec =  xAOD::ContainerDecorator<xAOD::TruthParticleContainer, llvec>;
         friend struct summaryDecors;
         struct summaryDecors{
             
             explicit summaryDecors(const TruthHitSummaryAlg* parent,
-                          const EventContext& ctx) :
+                                   const EventContext& ctx) :
                 m_parent{parent},
                 m_ctx{ctx} {}
             
             const TruthHitSummaryAlg* m_parent{};
             const EventContext& m_ctx;
 
-            WriteDecor_uint8_t nprecLayersDecor{makeHandle<uint8_t>(m_ctx, m_parent->m_nprecLayersKey)};
-            WriteDecor_uint8_t nphiLayersDecor{makeHandle<uint8_t>(m_ctx, m_parent->m_nphiLayersKey)};
-            WriteDecor_uint8_t ntrigEtaLayersDecor{makeHandle<uint8_t>(m_ctx, m_parent->m_ntrigEtaLayersKey)};
-            WriteDecor_uint8_t innerSmallHitsDecor{makeHandle<uint8_t>(m_ctx, m_parent->m_innerSmallHitsKey)};
-            WriteDecor_uint8_t innerLargeHitsDecor{makeHandle<uint8_t>(m_ctx, m_parent->m_innerLargeHitsKey)};
-            WriteDecor_uint8_t middleSmallHitsDecor{makeHandle<uint8_t>(m_ctx, m_parent->m_middleSmallHitsKey)};
-            WriteDecor_uint8_t middleLargeHitsDecor{makeHandle<uint8_t>(m_ctx, m_parent->m_middleLargeHitsKey)};
-            WriteDecor_uint8_t outerSmallHitsDecor{makeHandle<uint8_t>(m_ctx, m_parent->m_outerSmallHitsKey)};
-            WriteDecor_uint8_t outerLargeHitsDecor{makeHandle<uint8_t>(m_ctx, m_parent->m_outerLargeHitsKey)};
-            WriteDecor_uint8_t extendedSmallHitsDecor{makeHandle<uint8_t>(m_ctx, m_parent->m_extendedSmallHitsKey)};
-            WriteDecor_uint8_t extendedLargeHitsDecor{makeHandle<uint8_t>(m_ctx, m_parent->m_extendedLargeHitsKey)};
-            WriteDecor_uint8_t phiLayer1HitsDecor{makeHandle<uint8_t>(m_ctx, m_parent->m_phiLayer1HitsKey)};
-            WriteDecor_uint8_t phiLayer2HitsDecor{makeHandle<uint8_t>(m_ctx, m_parent->m_phiLayer2HitsKey)};
-            WriteDecor_uint8_t phiLayer3HitsDecor{makeHandle<uint8_t>(m_ctx, m_parent->m_phiLayer3HitsKey)};
-            WriteDecor_uint8_t phiLayer4HitsDecor{makeHandle<uint8_t>(m_ctx, m_parent->m_phiLayer4HitsKey)};
-            WriteDecor_uint8_t etaLayer1HitsDecor{makeHandle<uint8_t>(m_ctx, m_parent->m_etaLayer1HitsKey)};
-            WriteDecor_uint8_t etaLayer2HitsDecor{makeHandle<uint8_t>(m_ctx, m_parent->m_etaLayer2HitsKey)};
-            WriteDecor_uint8_t etaLayer3HitsDecor{makeHandle<uint8_t>(m_ctx, m_parent->m_etaLayer3HitsKey)};
-            WriteDecor_uint8_t etaLayer4HitsDecor{makeHandle<uint8_t>(m_ctx, m_parent->m_etaLayer4HitsKey)};
+            WriteDecor_uint8_t nprecLayersDecor{m_parent->m_nprecLayersKey, m_ctx};
+            WriteDecor_uint8_t nphiLayersDecor{m_parent->m_nphiLayersKey, m_ctx};
+            WriteDecor_uint8_t ntrigEtaLayersDecor{m_parent->m_ntrigEtaLayersKey, m_ctx};
+            WriteDecor_uint8_t innerSmallHitsDecor{m_parent->m_innerSmallHitsKey, m_ctx};
+            WriteDecor_uint8_t innerLargeHitsDecor{m_parent->m_innerLargeHitsKey, m_ctx};
+            WriteDecor_uint8_t middleSmallHitsDecor{m_parent->m_middleSmallHitsKey, m_ctx};
+            WriteDecor_uint8_t middleLargeHitsDecor{m_parent->m_middleLargeHitsKey, m_ctx};
+            WriteDecor_uint8_t outerSmallHitsDecor{m_parent->m_outerSmallHitsKey, m_ctx};
+            WriteDecor_uint8_t outerLargeHitsDecor{m_parent->m_outerLargeHitsKey, m_ctx};
+            WriteDecor_uint8_t extendedSmallHitsDecor{m_parent->m_extendedSmallHitsKey, m_ctx};
+            WriteDecor_uint8_t extendedLargeHitsDecor{m_parent->m_extendedLargeHitsKey, m_ctx};
+            WriteDecor_uint8_t phiLayer1HitsDecor{m_parent->m_phiLayer1HitsKey, m_ctx};
+            WriteDecor_uint8_t phiLayer2HitsDecor{m_parent->m_phiLayer2HitsKey, m_ctx};
+            WriteDecor_uint8_t phiLayer3HitsDecor{m_parent->m_phiLayer3HitsKey, m_ctx};
+            WriteDecor_uint8_t phiLayer4HitsDecor{m_parent->m_phiLayer4HitsKey, m_ctx};
+            WriteDecor_uint8_t etaLayer1HitsDecor{m_parent->m_etaLayer1HitsKey, m_ctx};
+            WriteDecor_uint8_t etaLayer2HitsDecor{m_parent->m_etaLayer2HitsKey, m_ctx};
+            WriteDecor_uint8_t etaLayer3HitsDecor{m_parent->m_etaLayer3HitsKey, m_ctx};
+            WriteDecor_uint8_t etaLayer4HitsDecor{m_parent->m_etaLayer4HitsKey, m_ctx};
 
-            WriteDecor_llvec truthMdtHitsDecor{makeHandle<llvec>(m_ctx, m_parent->m_truthMdtHitsKey)};
-            WriteDecor_llvec truthTgcHitsDecor{makeHandle<llvec>(m_ctx, m_parent->m_truthTgcHitsKey)};
-            WriteDecor_llvec truthRpcHitsDecor{makeHandle<llvec>(m_ctx, m_parent->m_truthRpcHitsKey)};
-            WriteDecor_llvec truthCscHitsDecor{makeHandle<llvec>(m_ctx, m_parent->m_truthCscHitsKey)};
-            WriteDecor_llvec truthStgcHitsDecor{makeHandle<llvec>(m_ctx,m_parent->m_truthStgcHitsKey)};
-            WriteDecor_llvec truthMMHitsDecor{makeHandle<llvec>(m_ctx,m_parent->m_truthMMHitsKey)};
+            WriteDecor_llvec truthMdtHitsDecor{m_parent->m_truthMdtHitsKey, m_ctx};
+            WriteDecor_llvec truthTgcHitsDecor{m_parent->m_truthTgcHitsKey, m_ctx};
+            WriteDecor_llvec truthRpcHitsDecor{m_parent->m_truthRpcHitsKey, m_ctx};
+            WriteDecor_llvec truthCscHitsDecor{m_parent->m_truthCscHitsKey, m_ctx};
+            WriteDecor_llvec truthStgcHitsDecor{m_parent->m_truthStgcHitsKey, m_ctx};
+            WriteDecor_llvec truthMMHitsDecor{m_parent->m_truthMMHitsKey, m_ctx};
 
         };
 

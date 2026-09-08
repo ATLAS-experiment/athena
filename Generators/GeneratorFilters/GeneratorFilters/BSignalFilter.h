@@ -16,6 +16,8 @@
 #define GENERATORFILTERSBSIGNALFILTER_H
 
 #include "GeneratorModules/GenFilter.h"
+#include "GeneratorModules/GenData.h"
+#include <memory>
 
 
 class TLorentzVector;
@@ -80,6 +82,7 @@ class BSignalFilter : public GenFilter
   
   // Print child (for debug)
   void PrintChild(const HepMC::ConstGenParticlePtr& child, const std::string& treeIDStr, const bool fromFinalB) const; 
+  std::shared_ptr<GenData> m_gendata{nullptr};
   
 };
 

@@ -95,8 +95,8 @@ StatusCode TRT_SimDriftTimeTool::initialize()
           table_of_dist2meanDT_at_maxField[distIndex] = i->DriftTimeAtMaxField(distance);
         }
 
-      m_table_of_dist2meanDT_at_noField.push_back(table_of_dist2meanDT_at_noField);
-      m_table_of_dist2meanDT_at_maxField.push_back(table_of_dist2meanDT_at_maxField);
+      m_table_of_dist2meanDT_at_noField.push_back(std::move(table_of_dist2meanDT_at_noField));
+      m_table_of_dist2meanDT_at_maxField.push_back(std::move(table_of_dist2meanDT_at_maxField));
 
     }
 

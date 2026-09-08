@@ -8,6 +8,9 @@
 // FrameWork includes
 #include "GaudiKernel/ToolHandle.h"
 #include "AsgTools/PropertyWrapper.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadDecorHandle.h"
+#include "xAODTau/DiTauJetContainer.h"
 
 // Local includes
 #include "AthenaMonitoring/ManagedMonitorToolBase.h"
@@ -39,11 +42,16 @@ public:
 
 private: 
   // properties
-  Gaudi::Property<std::string> m_DiTauJetContainerName{this, "DiTauContainerName", "DiTauJets"};
   Gaudi::Property<bool> m_isMC{this, "isMC", false};
 
   ToolHandle<TauAnalysisTools::IDiTauSelectionTool> m_nomiDiTauSel{this, "NominalDiTauSelectionTool", "TauAnalysisTools::DiTauSelectionTool/NominalDiTauSelectionTool"};
   ToolHandle<TauAnalysisTools::IDiTauTruthMatchingTool> m_truthTool{this, "DiTauTruthMatchingTool", "TauAnalysisTools::DiTauTruthMatchingTool/DiTauTruthMatchingTool"};
+
+  //container name
+  SG::ReadHandleKey<xAOD::DiTauJetContainer> m_ditauContainerKey{this, "DiTauContainerName", "DiTauJets", "Input ditau container key" }; 
+
+  // decoration name
+  SG::ReadDecorHandleKey<xAOD::DiTauJetContainer> m_IsTruthHadronicKey{this, "IsTruthHadronicDecorKey", "IsTruthHadronic", "IsTruthHadronic decoration key"};
 
   //Histograms
   std::unique_ptr<DiTauValidationPlots> m_oDiTauValidationPlots;

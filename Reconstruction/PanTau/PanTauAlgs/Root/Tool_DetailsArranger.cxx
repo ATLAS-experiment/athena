@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PanTauAlgs/Tool_DetailsArranger.h"
@@ -188,7 +188,7 @@ StatusCode PanTau::Tool_DetailsArranger::arrangePFOLinks(PanTau::PanTauSeed* inS
     } else {
 
       // assign the same constituents to Pantau:
-      preLinkPi0PFOLinks=pi0PFOLinks;
+      preLinkPi0PFOLinks = std::move(pi0PFOLinks);
 	
       // set all masses correctly:
       SetNeutralConstituentVectorMasses(preLinkPi0PFOLinks, neutralPFOContainer, MASS_PI0);
@@ -218,13 +218,13 @@ StatusCode PanTau::Tool_DetailsArranger::arrangePFOLinks(PanTau::PanTauSeed* inS
 	SetNeutralConstituentVectorMasses(pi0PFOLinks, neutralPFOContainer, 2*MASS_PI0);
 	  
 	// assign the same constituents to Pantau:
-	preLinkPi0PFOLinks=pi0PFOLinks;
+	preLinkPi0PFOLinks = std::move(pi0PFOLinks);
 	  
       } else {
 	  
 	// copy all (really only one) pi0s from the sub-alg and add
 	// the highest BDT-score neutral:
-	preLinkPi0PFOLinks=pi0PFOLinks;
+	preLinkPi0PFOLinks = std::move(pi0PFOLinks);
 	if(!preSelected_neutralPFOLinks.empty()) preLinkPi0PFOLinks.push_back( preSelected_neutralPFOLinks.at(0) );
 	else ATH_MSG_WARNING("No neutral PFO Links although there should be!!");
 	  
@@ -279,7 +279,7 @@ StatusCode PanTau::Tool_DetailsArranger::arrangePFOLinks(PanTau::PanTauSeed* inS
     }
 
     static const SG::Accessor<std::vector< ElementLink< xAOD::PFOContainer > > > accPi0PFOLinks("pi0PFOLinks");
-    accPi0PFOLinks(*p) = pfo_link_vector;
+    accPi0PFOLinks(*p) = std::move(pfo_link_vector);
 
     ElementLink< xAOD::IParticleContainer > linkToPi0;
     linkToPi0.toContainedElement(pi0Container, dynamic_cast<xAOD::IParticle*> (p));
@@ -439,7 +439,7 @@ void PanTau::Tool_DetailsArranger::createPi0Vectors(xAOD::TauJet* tauJet, std::v
     std::vector< ElementLink<xAOD::PFOContainer> > pfovec;
     pfovec.push_back(tauJet->pi0PFOLinks()[0]);
     pfovec.push_back(tauJet->pi0PFOLinks()[1]);
-    vec_pi0pfos.push_back( pfovec );
+    vec_pi0pfos.push_back( std::move(pfovec) );
 
   } else if (iDecayMode == xAOD::TauJetParameters::DecayMode::Mode_1pXn && iNumPi0PFO == 1){
 
@@ -458,7 +458,7 @@ void PanTau::Tool_DetailsArranger::createPi0Vectors(xAOD::TauJet* tauJet, std::v
     std::vector< ElementLink<xAOD::PFOContainer> > pfovec;
     pfovec.push_back(tauJet->pi0PFOLinks()[0]);
     vec_pi0pfos.push_back( pfovec );
-    vec_pi0pfos.push_back( pfovec );//fix rare crash?
+    vec_pi0pfos.push_back( std::move(pfovec) );//fix rare crash?
 
   }  else {
     // if it's not any of the special cases above then just collect the PFOs:
@@ -466,7 +466,7 @@ void PanTau::Tool_DetailsArranger::createPi0Vectors(xAOD::TauJet* tauJet, std::v
       vPi0s.push_back(tauJet->pi0PFO(iPFO)->p4());
       std::vector< ElementLink<xAOD::PFOContainer> > pfovec;
       pfovec.push_back(tauJet->pi0PFOLinks()[iPFO]);
-      vec_pi0pfos.push_back( pfovec );
+      vec_pi0pfos.push_back( std::move(pfovec));
     }
   }
 

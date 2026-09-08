@@ -50,7 +50,8 @@ StatusCode CellFinder::execute(DiTauCandidateData * data,
   }
 
   // get clusters linked to the seed jet. Loop over clusters to get linked cells
-
+  // Local variable cellSeen uses 25000 bytes of stack space,
+  //coverity[STACK_USE]
   std::bitset<200000> cellSeen;
   std::vector<const CaloCell*> subjetCells;
 
@@ -82,10 +83,10 @@ StatusCode CellFinder::execute(DiTauCandidateData * data,
   }
 
   ATH_MSG_DEBUG("subjetCells.size()=" << subjetCells.size());
-  data->subjetCells = subjetCells;
+  data->subjetCells = std::move(subjetCells);
 
   // write f_core
-  float f_core;
+  float f_core{};
   for (unsigned int i = 0; i < vSubjets.size(); i++) {
     const fastjet::PseudoJet& subjet = vSubjets.at(i);
     float ptAll = 0.;

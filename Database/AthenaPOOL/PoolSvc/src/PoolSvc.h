@@ -26,6 +26,7 @@
 namespace pool {
    class IContainer;
    class IDatabase;
+   class IFileCatalog;
    class ISession;
 }
 
@@ -81,23 +82,22 @@ public: // Non-static members
    virtual
    unsigned int getInputContextMapSize() const override;
 
-   /// @return the context.
+   /// @return size of the map of all labelled input contexts.
    virtual
-   const coral::Context* context() const override;
-
-   /// @return void
-   /// @param compName [IN] string name of the component to be loaded.
-   virtual
-   void loadComponent(const std::string& compName) override;
+   pool::ISession* getInputContextSession(unsigned int contextId) const override;
 
    /// @return void
    /// @param shareCat [IN] bool to share the file catalog.
    virtual
    void setShareMode(bool shareCat) override;
 
-   /// @return the file catalog.
+   /// @return void
    virtual
-   const pool::IFileCatalog* catalog() const override;
+   void startCatalog() override;
+
+   /// @return void
+   virtual
+   void commitCatalog() override;
 
    /// @return void
    /// @param token [IN] filename/token string to be translated
@@ -112,16 +112,25 @@ public: // Non-static members
    virtual
    void renamePfn(const std::string& pf, const std::string& newpf) override;
 
-   /// @return a pointer to a Pool Collection.
-   /// @param collectionType [IN] string containing the collection type.
+   /// @return status of connect
    /// @param connection [IN] string containing the connection.
    /// @param collectionName [IN] string containing the persistent name of the collection.
+   /// @param collectionType [IN] string containing the collection type.
    /// @param contextId [IN] id for PoolSvc persistency service to use for input.
    virtual
-   pool::ICollection* createCollection(const std::string& connection,
-	   const std::string& collectionName,
-           const pool::DbType& collectionType = pool::POOL_StorageType.type(),
-	   unsigned int contextId = IPoolSvc::kInputStream) const override;
+   StatusCode connectCollection(const std::string& connection,
+           const std::string& collectionName,
+           const pool::DbType& collectionType,
+           unsigned int contextId = IPoolSvc::kInputStream) const override;
+
+   /// @return status of check
+   /// @param connection [IN] string containing the connection.
+   /// @param contextId [IN] id for PoolSvc persistency service to use for input.
+   /// @param noContainer [IN] if no collection was found check whether file exists or had no events
+   virtual
+   StatusCode checkCollection(const std::string& connection,
+           unsigned int contextId,
+           bool noContainer) const override;
 
    /// @return a token for a container entry.
    /// @param connection [IN] string containing the connection/file name.
@@ -191,10 +200,6 @@ public: // Non-static members
 	   const std::string& contName = "",
 	   unsigned int contextId = IPoolSvc::kOutputStream) const override;
 
-   /// Setup Frontier cache for given logical or physical connection name
-   virtual
-   StatusCode setFrontierCache(const std::string& conn) override;
-
    /// Standard Service Constructor
    using base_class::base_class;
 
@@ -202,7 +207,7 @@ public: // Non-static members
    virtual ~PoolSvc();
 
 private: // data
-   typedef std::recursive_mutex CallMutex;
+   using CallMutex = std::recursive_mutex;
    // Lock Guard class to safely lock a mutex for a given contextId
    class ContextLock {
       std::unique_lock< CallMutex > m_lock;
@@ -217,7 +222,7 @@ private: // data
    };
 
    mutable CallMutex                                 m_pool_mut;
-   coral::Context*                                   m_context{nullptr};
+ 
    bool                                              m_shareCat{false};
    pool::IFileCatalog*                               m_catalog{nullptr};
    std::vector<pool::ISession*>      m_dbSessionVec;
@@ -245,19 +250,7 @@ private: // properties
 
    /// AttemptCatalogPatch, option to create catalog: default = false.
    Gaudi::Property<bool> m_attemptCatalogPatch{this,"AttemptCatalogPatch",true};
-   /// ConnectionRetrialPeriod, retry period for CORAL Connection Service: default = 30 seconds
-   Gaudi::Property<int> m_retrialPeriod{this,"ConnectionRetrialPeriod",300};
-   /// ConnectionRetrialTimeOut, the retrial time out for CORAL Connection Service: default = 300 seconds
-   Gaudi::Property<int> m_retrialTimeOut{this,"ConnectionRetrialTimeOut",3600};
-   /// ConnectionTimeOut, the time out for CORAL Connection Service: default = 5 seconds
-   Gaudi::Property<int> m_timeOut{this,"ConnectionTimeOut",5};
-   /// ConnectionCleanUp - whether to use CORAL connection management thread: default = false.
-   Gaudi::Property<bool> m_connClean{this,"ConnectionCleanUp",false};
-   /// Frontier proprties, compression level and list of schemas to be refreshed: default = 5
-   Gaudi::Property<int> m_frontierComp{this,"FrontierCompression",5};
-   Gaudi::Property<std::vector<std::string>> m_frontierRefresh{this,"FrontierRefreshSchema",{}};
-   /// Use DBReplicaSvc to sort database connections, default = true.
-   Gaudi::Property<bool> m_sortReplicas{this,"SortReplicas",true};
+ 
 
 private: // internal helper functions
    // delete all Persistency Services, Catalog, Mutexes and Indexes

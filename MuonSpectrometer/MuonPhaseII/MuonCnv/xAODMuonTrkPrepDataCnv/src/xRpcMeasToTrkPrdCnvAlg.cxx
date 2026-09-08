@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */  
 
 #include "xRpcMeasToTrkPrdCnvAlg.h"
@@ -10,12 +10,19 @@
 #include "MuonReadoutGeometryR4/RpcReadoutElement.h"
 #include "MuonReadoutGeometry/RpcReadoutElement.h"
 
+
+namespace{
+    using Link_t = ElementLink<Muon::RpcPrepDataCollection>;
+    static const SG::Decorator<Link_t> dec_link{"rpcTrkPrdLink"};
+}
+
 namespace MuonR4{
     StatusCode xRpcMeasToTrkPrdCnvAlg::initialize() {
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_readKey.initialize());
         ATH_CHECK(m_writeKey.initialize());
         ATH_CHECK(m_detMgrKey.initialize());
+        ATH_CHECK(m_linkKey.initialize());
         return StatusCode::SUCCESS;
     }
     StatusCode xRpcMeasToTrkPrdCnvAlg::execute(const EventContext& ctx) const {
@@ -58,12 +65,15 @@ namespace MuonR4{
             
             }
             prd->setHashAndIndex(coll->identifyHash(), coll->size());
+            dec_link(*meas) = Link_t{*coll, coll->size()};
             coll->push_back(std::move(prd));
         }
         /// Write everything to disk in the end
         auto outContainer = std::make_unique<Muon::RpcPrepDataContainer>(idHelper.module_hash_max());
         for (std::unique_ptr<Muon::RpcPrepDataCollection>& coll : prdCollections){
-            if (!coll) continue;
+            if (!coll) {
+                continue;
+            }
             const IdentifierHash hash = coll->identifyHash();
             ATH_CHECK(outContainer->addCollection(coll.release(), hash));
         }

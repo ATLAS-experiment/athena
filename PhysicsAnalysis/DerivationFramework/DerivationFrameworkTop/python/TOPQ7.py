@@ -31,11 +31,6 @@ def TOPQ7KernelCfg(flags, name='TOPQ7Kernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel) for TOPQ7"""
     acc = ComponentAccumulator()
 
-    from TrkConfig.VertexFindingFlags import VertexSortingSetup
-    if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.GNNSorting:
-        from DerivationFrameworkPhys.GNNVertexConfig import GNNVertexCfg
-        acc.merge(GNNVertexCfg(flags))
-
     # Common augmentations
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
     acc.merge(PhysCommonAugmentationsCfg(

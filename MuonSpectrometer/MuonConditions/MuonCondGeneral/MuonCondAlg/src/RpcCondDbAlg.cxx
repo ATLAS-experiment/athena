@@ -66,7 +66,17 @@ StatusCode RpcCondDbAlg::loadMcElementStatus(const EventContext& ctx,  RpcCondDb
     for (itr = readCdo->begin(); itr != readCdo->end(); ++itr) {
         const coral::AttributeList& atr = itr->second;
         CondAttrListCollection::ChanNum channum = itr->first;
-        Identifier chamberId = Identifier(channum);
+        Identifier chamberId{channum};
+        try{
+            if (!m_idHelperSvc->rpcIdHelper().valid(chamberId)){
+                ATH_MSG_WARNING("Database contains non-sense");
+                continue;
+            }
+        } catch (const std::exception& e) {
+            ATH_MSG_WARNING("Just forget about the database. It's doomed.");
+            continue;
+        }
+
 
         std::string eff_panel, striplist, eff;
 

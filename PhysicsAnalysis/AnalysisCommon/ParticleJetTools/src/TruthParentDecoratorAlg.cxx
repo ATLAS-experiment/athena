@@ -14,10 +14,10 @@
 // structure to hold info on a matched parent particle
 struct MatchedParent
 {
-  const xAOD::TruthParticle* parent;
-  const xAOD::TruthParticle* child;
-  float deltaR;
-  unsigned int parent_index;
+  const xAOD::TruthParticle* parent = nullptr;
+  const xAOD::TruthParticle* child = nullptr;
+  float deltaR = 0;
+  unsigned int parent_index = 0;
   std::set<int> cascade_pids;
 };
 

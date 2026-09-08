@@ -9,10 +9,9 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def FourLeptonVertexerCfg(flags, name="FourLeptonVertexAlg", **kwargs):
     result = ComponentAccumulator()
     ### Setup muon selection tool
-    from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
-    kwargs.setdefault("MuonSelectionTool", result.popToolsAndMerge(MuonSelectionToolCfg(flags, 
+    from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
+    kwargs.setdefault("MuonSelectionTool", result.popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(flags, 
                                                                 MaxEta=2.7,
-                                                                DisablePtCuts=True,
                                                                 MuQuality=2, ### Select the loose working point
                                                                 )) )
 

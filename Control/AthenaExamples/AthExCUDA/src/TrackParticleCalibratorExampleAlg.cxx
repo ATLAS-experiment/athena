@@ -23,8 +23,7 @@ StatusCode TrackParticleCalibratorExampleAlg::initialize() {
   ATH_CHECK(m_outputKey.initialize());
 
   // Initialize the tools.
-  ATH_CHECK(m_hostMR.retrieve());
-  ATH_CHECK(m_deviceMR.retrieve());
+  ATH_CHECK(m_mrTool.retrieve());
   ATH_CHECK(m_hostCopyTool.retrieve());
   ATH_CHECK(m_deviceCopyTool.retrieve());
   ATH_CHECK(m_streamTool.retrieve());
@@ -69,13 +68,23 @@ StatusCode TrackParticleCalibratorExampleAlg::execute(
   // The object managing device memory copies.
   auto deviceCopy = m_deviceCopyTool->copy(ctx);
 
+  // Buffer size(s) to create.
+  const std::vector<unsigned int> bufferSize(input->size(), 0u);
+
   // Construct input buffer(s).
-  traccc::edm::track_collection<traccc::default_algebra>::buffer
-      inputHostBuffer(std::vector<unsigned int>(input->size(), 0u),
-                      m_hostMR->mr());
-  traccc::edm::track_collection<traccc::default_algebra>::buffer
-      inputDeviceBuffer(std::vector<unsigned int>(input->size(), 0u),
-                        m_deviceMR->mr(), &(m_hostMR->mr()));
+  auto inputHostBuffer =
+      m_mrTool->hostMR()
+          ? traccc::edm::track_collection<
+                traccc::default_algebra>::buffer{bufferSize,
+                                                 *(m_mrTool->hostMR())}
+          : traccc::edm::track_collection<traccc::default_algebra>::buffer{
+                bufferSize, m_mrTool->mainMR()};
+  auto inputDeviceBuffer =
+      m_mrTool->hostMR()
+          ? traccc::edm::track_collection<
+                traccc::default_algebra>::buffer{bufferSize, m_mrTool->mainMR(),
+                                                 m_mrTool->hostMR()}
+          : traccc::edm::track_collection<traccc::default_algebra>::buffer{};
   hostCopy->setup(inputHostBuffer)->wait();
   deviceCopy->setup(inputDeviceBuffer)->ignore();
 
@@ -89,21 +98,33 @@ StatusCode TrackParticleCalibratorExampleAlg::execute(
   }
 
   // Copy the input buffer to the device.
-  (*deviceCopy)(inputHostBuffer, inputDeviceBuffer)->ignore();
+  if (m_mrTool->hostMR()) {
+    (*deviceCopy)(inputHostBuffer, inputDeviceBuffer)->ignore();
+  }
 
   // Construct output buffer(s).
   traccc::edm::track_collection<traccc::default_algebra>::buffer
-      outputDeviceBuffer(std::vector<unsigned int>(input->size(), 0u),
-                         m_deviceMR->mr(), &(m_hostMR->mr()));
-  deviceCopy->setup(outputDeviceBuffer)->ignore();
+      outputDeviceBuffer(bufferSize, m_mrTool->mainMR(), m_mrTool->hostMR());
+  if (m_mrTool->hostMR()) {
+    deviceCopy->setup(outputDeviceBuffer)->ignore();
+  } else {
+    hostCopy->setup(outputDeviceBuffer)->ignore();
+  }
   traccc::edm::track_collection<traccc::default_algebra>::host
-      outputHostCollection(m_hostMR->mr());
+      outputHostCollection(m_mrTool->hostMR() ? *(m_mrTool->hostMR())
+                                              : m_mrTool->mainMR());
 
   // Run the kernel.
-  ATH_CHECK(calibrateOnGPU(stream, inputDeviceBuffer, outputDeviceBuffer));
+  ATH_CHECK(calibrateOnGPU(
+      stream, m_mrTool->hostMR() ? inputDeviceBuffer : inputHostBuffer,
+      outputDeviceBuffer));
 
   // Get the output back to the host.
-  (*deviceCopy)(outputDeviceBuffer, outputHostCollection)->wait();
+  if (m_mrTool->hostMR()) {
+    (*deviceCopy)(outputDeviceBuffer, outputHostCollection)->wait();
+  } else {
+    (*hostCopy)(outputDeviceBuffer, outputHostCollection)->wait();
+  }
 
   // Construct the output container.
   auto outputAux = std::make_unique<xAOD::AuxContainerBase>();

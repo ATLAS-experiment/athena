@@ -16,7 +16,7 @@ def prepare_acts_rdo2aod(pipeline : str):
 
     if pipeline == "C230":
         _args.append('from ActsConfig.ActsConfigFlags import SeedingStrategy')
-        _args.append('flags.Acts.SeedingStrategy=SeedingStrategy.GbtsFtf')
+        _args.append('flags.Tracking.ITkActsPass.SeedingStrategy=SeedingStrategy.GbtsFtf')
 
     preExec = ';'.join(_args)
 
@@ -26,19 +26,14 @@ def prepare_acts_rdo2aod(pipeline : str):
     rdo2aod.threads = 8
     rdo2aod.max_events = 100
     rdo2aod.args = '--outputAODFile=AOD.pool.root --steering "doRDO_TRIG"'
-    rdo2aod.args += ' --CA "all:True"'
     rdo2aod.args += ' --perfmon fullmonmt'
     rdo2aod.args += f' --preExec "all:{preExec};"'
-    rdo2aod.args += ' --preInclude "all:Campaigns.PhaseIIPileUp200" "RAWtoALL:ActsConfig.ActsCIFlags.actsWorkflowFlags"'
+    rdo2aod.args += ' --preInclude "all:Campaigns.MC23PhaseIIPileUp200"'
     rdo2aod.args += ' --conditionsTag f"default:{defaultConditionsTags.RUN4_MC}"'
     rdo2aod.args += ' --ignorePatterns ""'
     rdo2aod.timeout = 5400 # default = 3600 s
     rdo2aod.flags = ['Trigger.useActsTracking=True',
                      'Acts.useCache=True',
-                     'Acts.doAmbiguityResolution=False',
-                     'Acts.GsfRefitActs=True',
-                     'Acts.GsfDirectNavigation=True',
-                     'Tracking.doITkFastTracking=True',
                      'Trigger.doRuntimeNaviVal=True',
                      'Scheduler.ShowDataDeps = True',
                      'Scheduler.ShowDataFlow = True',

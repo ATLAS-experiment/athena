@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AtlasDetDescr/AtlasDetectorID.h"
@@ -196,6 +196,7 @@ namespace Trk {
                DataVector<AlignPar>* detAPVec,
                AlignModule::DetectorType detType) const
   {
+    using AlignArray = std::array<double, AlignModule::NTransformPar>;
     if (detType==AlignModule::NDetectorTypes)
       detType=getDetectorType(det);
     if (detType==AlignModule::NDetectorTypes || !m_alignModuleMaps[detType]) return;
@@ -209,15 +210,14 @@ namespace Trk {
     const AlignParVec* modAlignPar = getFullAlignPars(alignModule);
     ATH_MSG_DEBUG("modAlignPar size: "<<modAlignPar->size());
     
-    double alignModPar[AlignModule::NTransformPar];
-    double alignModErr[AlignModule::NTransformPar];      
+    AlignArray alignModPar{};
+    AlignArray alignModErr{};      
     for (int i=0;i<AlignModule::NTransformPar;i++) {
       if ((*modAlignPar)[i]) {
         alignModPar[i]=(*modAlignPar)[i]->par();
         alignModErr[i]=(*modAlignPar)[i]->err();
       }
       else {
-        alignModPar[i]=alignModErr[i]=0.;
         ATH_MSG_DEBUG("no alignModPar!");
       }
     }
@@ -251,9 +251,9 @@ namespace Trk {
     // get the alignment parameters for this detector element
     ATH_MSG_WARNING("Check that order is correct: AlignModuleTool:271,284");
     Amg::Transform3D xformPar( (*transform) * alignModXform );
-    double* detpars = new double[AlignModule::NTransformPar];
-    double* deterrs = new double[AlignModule::NTransformPar];
-    decomposeTransform(xformPar,detpars);
+    AlignArray  detpars{};
+    AlignArray  deterrs{};
+    decomposeTransform(xformPar,detpars.data());
     
     ATH_MSG_DEBUG("transx="<<detpars[0]);
     ATH_MSG_DEBUG("transy="<<detpars[1]);
@@ -263,7 +263,7 @@ namespace Trk {
     ATH_MSG_DEBUG("rotz="  <<detpars[5]);
     
     Amg::Transform3D xformErr( (*transform) * alignModXformErr);
-    decomposeTransform(xformErr,deterrs);
+    decomposeTransform(xformErr,deterrs.data());
     
     // set in AlignParList for this detector element
     ATH_MSG_DEBUG("setting AlignPar for detector element ");
@@ -275,7 +275,6 @@ namespace Trk {
     }
 
     ATH_MSG_DEBUG("set");
- 
   }
 
   //________________________________________________________________________

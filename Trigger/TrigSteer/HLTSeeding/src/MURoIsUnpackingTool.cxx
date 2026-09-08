@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "MURoIsUnpackingTool.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
@@ -97,9 +97,9 @@ StatusCode MURoIsUnpackingTool::unpack(const EventContext& ctx,
         addChainsToDecision( HLT::Identifier(thresholdProbeName ), decisionProbe, activeChains );
       }
     }
-
-    decisionMain->setDetail("thresholds", passedThresholdIDs);
-    decisionProbe->setDetail("thresholds", passedThresholdIDs);
+    static const std::string thresholdsStr{"thresholds"};
+    decisionMain->setDetail(thresholdsStr, passedThresholdIDs);
+    decisionProbe->setDetail(thresholdsStr, passedThresholdIDs);
   }
 
   // monitoring

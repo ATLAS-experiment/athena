@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SiDetElementsRoadCondAlg_xk.h"
@@ -188,7 +188,7 @@ StatusCode InDet::SiDetElementsRoadCondAlg_xk::execute(const EventContext& ctx) 
           double z  =(zmax+zmin)*.5;
           double dz =(zmax-zmin)*.5;
           layer.set(r, dr, z, dz, dfm);
-          (writeCdo->at(N)).push_back(layer);
+          (writeCdo->at(N)).push_back(std::move(layer));
         }
         If = i;
       }

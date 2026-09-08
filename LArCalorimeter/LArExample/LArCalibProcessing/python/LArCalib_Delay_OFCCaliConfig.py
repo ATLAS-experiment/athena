@@ -39,7 +39,11 @@ def LArDelay_OFCCaliCfg(flags):
 
     if not flags.LArCalib.isSC:
        if flags.LArCalib.Input.isRawData:
-          result.addEventAlgo(CompFactory.LArRawDataReadingAlg(LArRawChannelKey="", LArDigitKey=digKey, LArFebHeaderKey="LArFebHeader"))
+          result.addEventAlgo(CompFactory.LArRawDataReadingAlg(LArRawChannelKey="", LArDigitKey=digKey, LArFebHeaderKey="LArFebHeader",
+                                                               SubCaloPreselection=flags.LArCalib.Input.SubDet,
+                                                              PosNegPreselection=flags.LArCalib.Preselection.Side,
+                                                              BEPreselection=flags.LArCalib.Preselection.BEC,
+                                                              FTNumPreselection=flags.LArCalib.Preselection.FT))
           from LArCalibProcessing.LArCalib_CalibDigitsMakerConfig import LArCalibDigitsMakerCfg
           result.merge(LArCalibDigitsMakerCfg(flags,digKey))
        else:
@@ -91,6 +95,7 @@ def LArDelay_OFCCaliCfg(flags):
     theLArCaliWaveBuilder.NBaseline        = 0 # to avoid the use of the baseline when Pedestal are missing
     theLArCaliWaveBuilder.UseDacAndIsPulsedIndex = False # should have an impact only for HEC
     theLArCaliWaveBuilder.RecAllCells      = False
+    theLArCaliWaveBuilder.CheckEmptyPhases     = False
     theLArCaliWaveBuilder.isSC             = flags.LArCalib.isSC
     result.addEventAlgo(theLArCaliWaveBuilder)
     

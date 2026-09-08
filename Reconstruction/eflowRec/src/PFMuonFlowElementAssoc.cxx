@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PFMuonFlowElementAssoc.h"
@@ -152,6 +152,7 @@ StatusCode PFMuonFlowElementAssoc::execute(const EventContext& ctx) const {
                 unsigned int counter = 0;
                 for (auto thisCluster : FE->otherObjects()){
                     const xAOD::CaloCluster* thisCaloCluster = dynamic_cast<const xAOD::CaloCluster*>(thisCluster);
+                    if (!thisCaloCluster)[[unlikely]] continue;
                     bool isCellMatched = false;
                     std::pair <double,double> FEAndMuonMatchedCellEnergy = this->doMuonCellMatching(isCellMatched, *thisCaloCluster,*muonCluster);
                     FEMatchedClusterCellEnergies[counter] += FEAndMuonMatchedCellEnergy.first;
@@ -160,10 +161,10 @@ StatusCode PFMuonFlowElementAssoc::execute(const EventContext& ctx) const {
             }
         }// end of muon loop
 
-        chargedFE_energy_match_muonWriteHandle(*FE) = FEMatchedClusterCellEnergies;
+        chargedFE_energy_match_muonWriteHandle(*FE) = std::move(FEMatchedClusterCellEnergies);
 
         // Add vector of muon element links as decoration to FlowElement container
-        ChargedFEmuonWriteDecorHandle(*FE) = FEMuonLinks;
+        ChargedFEmuonWriteDecorHandle(*FE) = std::move(FEMuonLinks);
     }  // end of charged Flow Element loop
 
     //////////////////////////////////////////////////
@@ -199,7 +200,7 @@ StatusCode PFMuonFlowElementAssoc::execute(const EventContext& ctx) const {
 
             // dynamic cast to CaloCluster
             const xAOD::CaloCluster* FE_cluster = dynamic_cast<const xAOD::CaloCluster*>(FE_Iparticle);  // cast to CaloCluster            
-
+            if (!FE_cluster) [[unlikely]] continue;
             // debug for Negative energy cluster
 
             double cluster_E = FE_cluster->p4().E();
@@ -289,8 +290,8 @@ StatusCode PFMuonFlowElementAssoc::execute(const EventContext& ctx) const {
                 // loop over caloclusters
             }  // loop over muons
             NeutralFEmuon_nMatches_WriteDecorHandle(*FE) = nMatchedFE;
-            NeutralFEmuonWriteDecorHandle(*FE) = FEMuonLinks;
-            NeutralFE_efrac_match_muonWriteDecorHandle(*FE) = FE_efrac_clustermatch;
+            NeutralFEmuonWriteDecorHandle(*FE) = std::move(FEMuonLinks);
+            NeutralFE_efrac_match_muonWriteDecorHandle(*FE) = std::move(FE_efrac_clustermatch);
         }  // loop over neutral FE
     }      // end of the Gaudi check block
 

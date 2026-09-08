@@ -354,18 +354,41 @@ def monGroup( analysis_chain ) :
         return mg
 
 
+    
 # wrapper around montool.defineHistogram to simplify the required histogram names
-# eg for a TProfile, automatically add the second variable, and create the histogram
+# eg for a TProfile, etc automatically add the second variable, and create the histogram
 # alias to avoid having to write pages of tedious boiler plate functions
 
-def defineHisto( montool, name, **args ) : 
+def _th1(m,n):   return f"{m};{n}"
+def _tprof(m,n): return f"{m},{m}_weight;{n}"
+def _txy(m,n):   return f"{m}__x,{m}__y;{n}"
+def _tyx(m,n):   return f"{m}__y,{m}__x;{n}"
 
-        if "type" in args and args["type"] == "TProfile" : 
-                name = name + "," + name + "_weight;" + name
+_FORMATTERS = {
+    "TH1F":        _th1,
+    "TProfile":    _tprof,
+    "TH2F":        _txy,
+    "TEfficiency": _tyx
+}
 
-        # make sure that the histogram is created, even it is is never filled
-        args['opt'] = 'kAlwaysCreate'
 
-        montool.defineHistogram( name, **args )
+def defineHisto( montool, name, namespace="", **args ) : 
+
+    # here we auto-generate the x and y variable names, so that we can
+    # also auto-generated them for a fill without needing to parse
+    # anything
+
+    mname = name
+    if namespace : mname = f"{namespace}_{name}"
+    
+    htype = str(args.get("type", "")).strip()
+
+    formatter = _FORMATTERS.get(htype, _th1)
+    pname     =  formatter(mname, name)
+
+    # make sure that the histogram is created, even if it is never filled
+    args["opt"] = "kAlwaysCreate"
+
+    montool.defineHistogram(pname, **args)
 
 

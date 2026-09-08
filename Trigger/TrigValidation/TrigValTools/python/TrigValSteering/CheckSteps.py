@@ -388,26 +388,6 @@ class RootCompStep(RefComparisonStep):
         return retcode, cmd
 
 
-class PerfMonStep(InputDependentStep):
-    '''Execute the PerfMon ntuple post-processing'''
-
-    def __init__(self, name='PerfMon'):
-        super(PerfMonStep, self).__init__(name)
-        self.input_file = None
-        self.executable = 'perfmon.py'
-        self.args = '-f 0.90'
-
-    def configure(self, test):
-        if not self.input_file:
-            num_athenaHLT_steps = sum([1 for step in test.exec_steps if step.type == 'athenaHLT'])
-            if num_athenaHLT_steps > 0:
-                self.input_file = 'athenaHLT_workers/athenaHLT-01/ntuple.pmon.gz'
-            else:
-                self.input_file = 'ntuple.pmon.gz'
-        self.args += ' '+self.input_file
-        super(PerfMonStep, self).configure(test)
-
-
 class TailStep(Step):
     '''Copy the last N lines of a log file into a separate file'''
 
@@ -530,11 +510,10 @@ class CheckFileStep(InputDependentStep):
         self.__input_files__ = None
 
     def configure(self, test):
-        # Skip the check if all test steps are athenaHLT (no POOL files)
+        # Skip the check if all test steps are athenaEF (no POOL files)
         test_types = [step.type for step in test.exec_steps]
-        num_athenaHLT = sum(1 for tt in test_types if tt == 'athenaHLT')
-        if num_athenaHLT == len(test_types):
-            self.log.debug('%s will be skipped because all exec steps use athenaHLT')
+        if all(tt == 'athenaEF' for tt in test_types):
+            self.log.debug('%s will be skipped because all exec steps use athenaEF')
             self.__executables__ = []
             self.__input_files__ = []
             return
@@ -561,7 +540,7 @@ class CheckFileStep(InputDependentStep):
         for cmd in commands:
             if '(internal)' not in cmd:
                 merged_cmd += cmd+'; '
-        if len(merged_cmd) == 0: # can happen if all exec steps are type athenaHLT
+        if len(merged_cmd) == 0: # can happen if all exec steps are type athenaEF
              merged_cmd = '# (internal) {} -> skipped'.format(self.name)
              ret_codes.append(0)
 
@@ -624,7 +603,7 @@ class MessageCountStep(Step):
     def __init__(self, name='MessageCount'):
         super(MessageCountStep, self).__init__(name)
         self.executable = 'messageCounter.py'
-        self.log_regex = r'(athena\.(?!.*tail).*log$|athenaHLT:.*\.out$|athenaEF\..*log$|^log\.(.*to.*|Derivation))'
+        self.log_regex = r'(athena\.(?!.*tail).*log$|athenaEF\..*log$|^log\.(.*to.*|Derivation))'
         self.skip_logs = []
         self.start_pattern = r'(HltEventLoopMgr|AthenaHiveEventLoopMgr).*INFO Starting loop on events'
         self.end_pattern = r'(HltEventLoopMgr.*INFO All events processed|AthenaHiveEventLoopMgr.*INFO.*Loop Finished)'
@@ -714,24 +693,18 @@ def produces_log(step):
 def default_check_steps(test, checkfile_input='AOD.pool.root,ESD.pool.root,RDO_TRIG.pool.root,DAOD_PHYS.DAOD.pool.root'):
     '''
     Create the default list of check steps for a test. The configuration
-    depends on the package name and the type of exec steps (athena or
-    athenaHLT or transforms).
+    depends on the package name and the type of exec steps.
     '''
 
     check_steps = []
+    log_to_check = None
+    log_to_zip = None
 
     # Log merging
     if len(test.exec_steps) == 1:
         exec_step = test.exec_steps[0]
-        if exec_step.type == 'athenaHLT' and produces_log(exec_step):
-            logmerge = LogMergeStep()
-            logmerge.merged_name = 'athena.log'
-            logmerge.log_files = ['athenaHLT.log']
-            nforks = 1 if exec_step.forks is None else exec_step.forks
-            for n in range(1, 1+nforks):
-                logmerge.log_files.append('athenaHLT:{:02d}.out'.format(n))
-                logmerge.log_files.append('athenaHLT:{:02d}.err'.format(n))
-            check_steps.append(logmerge)
+        if exec_step.type == 'athenaEF' and produces_log(exec_step):
+            log_to_check = exec_step.get_log_file_name()
     else:
         logmerge = LogMergeStep()
         logmerge.merged_name = 'athena.log'
@@ -740,11 +713,8 @@ def default_check_steps(test, checkfile_input='AOD.pool.root,ESD.pool.root,RDO_T
             if not produces_log(exec_step):
                 continue
             logmerge.log_files.append(exec_step.get_log_file_name())
-            if exec_step.type == 'athenaHLT':
-                logmerge.extra_log_regex = 'athenaHLT:.*(.out|.err)'
         check_steps.append(logmerge)
-    log_to_check = None
-    log_to_zip = None
+
     if len(check_steps) > 0 and isinstance(check_steps[-1], LogMergeStep):
         log_to_check = check_steps[-1].merged_name
         log_to_zip = check_steps[-1].merged_name
@@ -770,9 +740,8 @@ def default_check_steps(test, checkfile_input='AOD.pool.root,ESD.pool.root,RDO_T
         log_to_check = reco_tf_logmerge.merged_name
         check_steps.append(reco_tf_logmerge)
 
-    # Histogram merging for athenaHLT/athenaEF forks
-    num_athenaHLT_steps = sum([1 for step in test.exec_steps if step.type in ('athenaHLT', 'athenaEF')])
-    if num_athenaHLT_steps > 0:
+    # Histogram merging for athenaEF
+    if any(step.type == 'athenaEF' for step in test.exec_steps):
         histmerge = RootMergeStep('HistMerge')
         histmerge.merged_file = 'expert-monitoring.root'
         histmerge.input_file = 'athenaHLT_workers/*/expert-monitoring.root expert-monitoring-mother.root'

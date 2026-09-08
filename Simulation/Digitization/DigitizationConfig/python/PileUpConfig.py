@@ -1,6 +1,6 @@
 """ComponentAccumulator confguration for pileup digitization
 
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -312,7 +312,10 @@ def PileUpEventLoopMgrCfg(flags, name="PileUpEventLoopMgr", **kwargs):
             "xAOD::EventInfoAuxContainer#PileUpEventInfo*",
         ]))
 
-    acc.addService(CompFactory.PileUpEventLoopMgr(name, **kwargs))
+    elmgr = CompFactory.PileUpEventLoopMgr(name, **kwargs)
+    acc.setAppProperty('EventLoop', elmgr.name)
+    acc.addService(elmgr)
+
     return acc
 
 

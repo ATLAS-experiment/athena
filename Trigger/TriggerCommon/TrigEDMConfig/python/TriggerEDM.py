@@ -8,7 +8,7 @@
 # ***********************************************************************************
 
 from TrigEDMConfig.TriggerEDMRun1 import TriggerL2List,TriggerEFList,TriggerResultsRun1List
-from TrigEDMConfig.TriggerEDMRun2 import TriggerResultsList,TriggerLvl1List,TriggerIDTruth,TriggerHLTList,EDMDetails,EDMLibraries,TriggerL2EvolutionList,TriggerEFEvolutionList
+from TrigEDMConfig.TriggerEDMRun2 import TriggerResultsList,TriggerLvl1List,TriggerHLTList,EDMDetails,EDMLibraries,TriggerL2EvolutionList,TriggerEFEvolutionList
 from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3,varToRemoveFromAODSLIM,EDMDetailsRun3,getSafeEDMInsertPosition,getRun3LowMuEDM
 from TrigEDMConfig.TriggerEDMRun4 import TriggerHLTListRun4
 from TrigEDMConfig.TriggerEDMDefs import allowTruncation
@@ -409,7 +409,7 @@ def getCategory(s):
         s12 = "HLT_"+s12
 
     TriggerListRun1 = TriggerL2List + TriggerEFList + TriggerResultsRun1List
-    TriggerListRun2 = TriggerResultsList + TriggerLvl1List + TriggerIDTruth + TriggerHLTList
+    TriggerListRun2 = TriggerResultsList + TriggerLvl1List + TriggerHLTList
     TriggerListRun3 = getRawTriggerEDMList(flags=None, runVersion=3)
 
     category = ''
@@ -494,12 +494,6 @@ def _getTriggerRun1Run2ObjList(destination, lst):
                 toadd[colltype] = [k]
     return _InsertContainerNameForHLT(toadd)
 
-
-def getTrigIDTruthList(dst):
-    """
-    Gives back the Python dictionary  with the truth trigger content of ESD/AOD (dst) which can be inserted in OKS.
-    """
-    return _getTriggerRun1Run2ObjList(dst,[TriggerIDTruth])
 
 def getLvl1ESDList():
     """
@@ -819,7 +813,7 @@ def testEDMList(edm_list, error_on_edmdetails = True):
 
     #check for duplicates:
     #check that no two EDM entries match after stripping out characters afer '.'
-    if not len(set(serializable_names_no_properties)) == len(serializable_names_no_properties):
+    if len(set(serializable_names_no_properties)) != len(serializable_names_no_properties):
         log.error("Duplicates in EDM list! Duplicates found:")
         import collections.abc
         for item, count in collections.Counter(serializable_names_no_properties).items():
@@ -828,7 +822,7 @@ def testEDMList(edm_list, error_on_edmdetails = True):
         return_code = 1
 
     #check EDMDetails
-    for EDMDetail in EDMDetailsRun3.keys():
+    for EDMDetail in EDMDetailsRun3:
         if EDMDetail not in serializable_names_no_label:
             msg = "EDMDetail for " + EDMDetail + " does not correspond to any name in TriggerList"
             if error_on_edmdetails:
@@ -838,3 +832,9 @@ def testEDMList(edm_list, error_on_edmdetails = True):
                 log.warning(msg)
 
     return return_code
+
+def dumpListToJson(fileName,runVersion):
+  import json
+  edmDict = dict([(fmt, getTriggerEDMList(flags=None, key=fmt, runVersion=runVersion)) for fmt in AllowedOutputFormats])
+  with open(fileName,'w') as f:
+    json.dump(edmDict, f)

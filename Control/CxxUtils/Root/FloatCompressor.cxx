@@ -1,19 +1,21 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: FloatCompressor.cxx 789425 2016-12-13 10:50:12Z krasznaa $
 
-// System include(s):
-#include <cmath>
+
 
 // Local include(s):
 #include "CxxUtils/FloatCompressor.h"
+// System include(s):
+#include <cmath>
+#include <bit>
 
 namespace CxxUtils {
 
    /// Total number of total mantissa bits
-   static const unsigned int NMANTISSA = 23;
+   constexpr unsigned int NMANTISSA = 23;
 
    FloatCompressor::FloatCompressor( unsigned int mantissaBits )
       : m_mantissaBits( mantissaBits ), m_mantissaBitmask( 0 ) {
@@ -107,19 +109,17 @@ namespace CxxUtils {
          return value;
       }
 
-      // Create the helper object:
-      floatint_t fi;
-      fi.fvalue = value;
+      auto ivalue = std::bit_cast<std::uint32_t>( value );
 
       //safety-check if value (omitting the sign-bit) is lower than vmax
       //(avoid overflow)
-      if( ( fi.ivalue & 0x7fffffff ) < m_vmax ) {
-         fi.ivalue += m_rounding;
+      if( ( ivalue & std::uint32_t{0x7fffffff} ) < m_vmax ) {
+         ivalue += m_rounding;
       }
 
       // Do the compression:
-      fi.ivalue &= m_mantissaBitmask;
-      return fi.fvalue;
+      ivalue &= m_mantissaBitmask;
+      return std::bit_cast<float>( ivalue );
    }
 
 } // namespace CxxUtils

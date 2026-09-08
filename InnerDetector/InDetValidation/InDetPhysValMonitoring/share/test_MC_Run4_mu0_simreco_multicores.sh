@@ -154,7 +154,7 @@ case $ArtProcess in
 	--simulator 'FullG4MT' \
 	--preExec "default:flags.Output.HISTFileName='${dcubemon_sim}';" \
 	--postInclude 'default:PyJobTransforms.UseFrontier' 'HitAnalysis.PostIncludes.ITkHitAnalysis'\
-	--preInclude 'EVNTtoHITS:Campaigns.PhaseIISimulation' \
+	--preInclude 'EVNTtoHITS:Campaigns.MC23PhaseIISimulation' \
 	--geometryVersion "default:${geotag}" \
 	--inputEVNTFile $x \
 	--outputHITSFile $hits \
@@ -174,7 +174,7 @@ case $ArtProcess in
 	    --jobNumber 568 \
 	    --maxEvents -1 \
 	    --outputRDOFile $rdo \
-	    --preInclude 'HITtoRDO:Campaigns.PhaseIINoPileUp' \
+	    --preInclude 'HITtoRDO:Campaigns.MC23PhaseIINoPileUp' \
 	    --postInclude 'PyJobTransforms.UseFrontier'
 
         digi_tf_exit_code=$?

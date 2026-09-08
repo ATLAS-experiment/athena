@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( SUSYTools )
@@ -21,7 +21,7 @@ atlas_add_library( SUSYToolsLib
    LINK_LIBRARIES AsgTools PATCoreLib xAODCore xAODEgamma xAODEventInfo
    xAODJet xAODMissingET xAODMuon xAODTau xAODTracking xAODTruth
    AssociationUtilsLib BoostedJetTaggersLib GoodRunsListsLib PATInterfaces TrigDecisionToolLib
-   MCTruthClassifierLib JetJvtEfficiencyLib JetSubStructureUtils
+   JetJvtEfficiencyLib JetSubStructureUtils
    ParticleJetToolsLib PMGAnalysisInterfacesLib AnaAlgorithmLib
    MuonAnalysisInterfacesLib EgammaAnalysisInterfacesLib
    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES}
@@ -36,6 +36,7 @@ atlas_add_library( SUSYToolsLib
    PileupReweightingLib PathResolver TauAnalysisToolsLib
    TriggerAnalysisInterfaces
    TrigGlobalEfficiencyCorrectionLib TriggerMatchingToolLib TrigConfInterfaces TrigConfxAODLib
+   TruthUtils
    xAODTrigMissingET xAODMetaData xAODCutFlow ${extra_libs} )
 
 if( NOT XAOD_STANDALONE )
@@ -100,7 +101,7 @@ endif()
 atlas_add_test( SUSYCrossSection_test
   SOURCES  test/SUSYCrossSection_test.cxx
   LINK_LIBRARIES SUSYToolsLib
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )
 
 # Install files from the package:

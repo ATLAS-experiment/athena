@@ -26,6 +26,7 @@ Py:ComponentAccumulator    INFO      * ReadKey: '/LAR/ElecCalibFlat/HVScaleCorr'
 Py:ComponentAccumulator    INFO      * WriteKey: 'LArHVScaleCorr'
 Py:ComponentAccumulator    INFO  \__ LArADC2MeVCondAlg (cond alg)
 Py:ComponentAccumulator    INFO      * LArADC2MeVKey: 'LArADC2MeV'
+Py:ComponentAccumulator    INFO      * NGains: 3
 --- mc
 Py:ComponentAccumulator    INFO Condition Algorithms
 Py:ComponentAccumulator    INFO  \__ CondInputLoader (cond alg)
@@ -64,4 +65,5 @@ Py:ComponentAccumulator    INFO      * LArHVScaleCorrKey: 'LArHVScaleCorr'
 Py:ComponentAccumulator    INFO      * LArMphysOverMcalKey: 'LArMphysOverMcalSym'
 Py:ComponentAccumulator    INFO      * LArRampKey: 'LArRampSym'
 Py:ComponentAccumulator    INFO      * LAruA2MeVKey: 'LAruA2MeVSym'
+Py:ComponentAccumulator    INFO      * NGains: 3
 Py:ComponentAccumulator    INFO      * UseFEBGainTresholds: False

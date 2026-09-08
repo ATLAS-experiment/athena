@@ -30,10 +30,10 @@ namespace EL
     void testInvariant () const;
 
     /// \brief standard default constructor for serialization
-    AnaAlgorithmWrapper () {};
+    AnaAlgorithmWrapper () = default;
 
     /// \brief standard constructor
-    AnaAlgorithmWrapper (AnaAlgorithmConfig val_config);
+    explicit AnaAlgorithmWrapper (AnaAlgorithmConfig val_config);
 
 
 

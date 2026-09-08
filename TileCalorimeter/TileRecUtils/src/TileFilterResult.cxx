@@ -10,9 +10,9 @@
 //****************************************************************************
 #include "TileRecUtils/TileFilterResult.h"
 #include <algorithm>
+#include <format>
 #include <iostream>
 #include <iomanip>
-#include "boost/io/ios_state.hpp"
 
 // Constructor
 TileFilterResult::TileFilterResult(std::vector<float> &dig, double sig) {
@@ -76,15 +76,12 @@ double& TileFilterResult::getChi2Ref() {
 }
 //============================================================================= 
 void TileFilterResult::printFitParam() {
-  boost::io::ios_base_all_saver coutsave(std::cout);
-  std::cout << " Print fitted param from TileFilterResult:  Nparam=" << m_nParam << ", chisq=" << m_chi2 << std::endl;
+  std::cout << std::format(" Print fitted param from TileFilterResult:  Nparam={}, chisq={}\n", m_nParam, m_chi2);
   for (int ipar = 0; ipar < m_nParam; ipar++) {
     if (ipar == 0) {
-      std::cout << " i=" << ipar << ", kcr=P" << ", A=" << std::setw(5) << std::setprecision(2) << m_fitParam[ipar]
-          << " +-" << m_fitErr[ipar] << std::endl;
+      std::cout << std::format(" i={}, kcr=P, A={:>5.2g} +-{}\n", ipar, m_fitParam[ipar], m_fitErr[ipar]);
     } else {
-      std::cout << " i=" << ipar << ", kcr=" << m_vCross[ipar - 1] << ", A=" << m_fitParam[ipar] << " +-"
-          << m_fitErr[ipar] << std::endl;
+      std::cout << std::format(" i={}, kcr={}, A={} +-{}\n", ipar, m_vCross[ipar - 1], m_fitParam[ipar], m_fitErr[ipar]);
     }
   }
   return;
@@ -101,13 +98,15 @@ double TileFilterResult::getInTime(double &amp, double &err, double &ped, double
 }
 //============================================================================= 
 void TileFilterResult::snapShot(int imode) {
-  boost::io::ios_base_all_saver coutsave(std::cout);
   // This print a short snapshot of the FilterResult state.
-  std::cout << " SnapShot: imode=" << imode << ".  Nparam=" << m_nParam << ", chisq=" << m_chi2 << ", iFitIndex"
-      << m_iFitIndex << ", Vcross=";
+  std::cout << std::format(" SnapShot: imode={}.  Nparam={}, chisq={}, iFitIndex{}, Vcross=",
+                           imode,
+                           m_nParam,
+                           m_chi2,
+                           m_iFitIndex);
   int Namp = m_nParam - 1;
   for (int jamp = 0; jamp < Namp; jamp++) {
-    std::cout << " " << m_vCross[jamp];
+    std::cout << std::format(" {}", m_vCross[jamp]);
   }
   std::cout << std::endl;
   if (m_iFitIndex < 0) return;
@@ -115,7 +114,7 @@ void TileFilterResult::snapShot(int imode) {
   if (imode > 0) {
     std::cout << "   FitParam=";
     for (int ipar = 0; ipar < m_nParam; ipar++) {
-      std::cout << std::setw(5) << std::setprecision(1) << m_fitParam[ipar] << "+-" << m_fitErr[ipar];
+      std::cout << std::format("{:>5.1g}+-{}", m_fitParam[ipar], m_fitErr[ipar]);
       if (ipar < m_nParam - 1) std::cout << ", ";
     }
     std::cout << std::endl;
@@ -124,7 +123,7 @@ void TileFilterResult::snapShot(int imode) {
     int Ndig = m_digits.num_row();
     std::cout << "   Residuals=";
     for (int idig = 0; idig < Ndig; idig++) {
-      std::cout << " " << std::setw(4) << std::setprecision(3) << m_residuals[idig];
+      std::cout << std::format(" {:>4.3g}", m_residuals[idig]);
     }
     std::cout << std::endl;
   }

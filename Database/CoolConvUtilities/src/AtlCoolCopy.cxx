@@ -31,7 +31,11 @@
 #include "CoolApplication/Application.h"
 #include "CoralBase/AttributeListException.h"
 
-#include "PersistencySvc/IFileCatalog.h"
+#include "GaudiUtils/IFileCatalog.h"
+#include "GaudiUtils/IFileCatalogMgr.h"
+#include "GaudiKernel/ISvcLocator.h"
+#include "GaudiKernel/Bootstrap.h"
+
 #include "StorageSvc/SimpleUtilityBase.h"
 #include "RelationalAccess/ConnectionService.h"
 #include "RelationalAccess/IConnectionServiceConfiguration.h"
@@ -162,7 +166,8 @@ class AtlCoolCopy {
   int resolvePoolRefs ATLAS_NOT_THREAD_SAFE ();
   static std::string getCoolHistGUID(const std::string& file);
   void filePoolRefs();
-  static pool::IFileCatalog* setupCatalog(const std::vector<std::string>& catvec);
+  void setupCatalog(const std::vector<std::string>& catvec);
+  SmartIF<Gaudi::IFileCatalog>    m_catalog;
 
   // input parameters
   std::string m_sourcedb;
@@ -3131,8 +3136,8 @@ int AtlCoolCopy::listPoolRefs() {
 int AtlCoolCopy::resolvePoolRefs ATLAS_NOT_THREAD_SAFE () {
   std::cout << "Total of " << m_poolrefs.size() << " POOL Files referenced"
 	    << std::endl;
-  pool::IFileCatalog* catalog=setupCatalog(m_poolcat);
-  if (catalog==nullptr) return 110;
+  setupCatalog(m_poolcat);
+  if( !m_catalog ) return 110;
   pool::SimpleUtilityBase       pool_utility;
   if (m_poolopen) {
      // prepare POOL session
@@ -3149,8 +3154,7 @@ int AtlCoolCopy::resolvePoolRefs ATLAS_NOT_THREAD_SAFE () {
   if (!m_addlfn.empty()) {
     for (std::vector<std::string>::const_iterator itr=m_addlfn.begin();
 	 itr!=m_addlfn.end();++itr) {
-      std::string guid;
-      catalog->lookupFileByLFN(*itr,guid);
+      std::string guid = m_catalog->lookupLFN(*itr);
       std::cout << "Add POOL file GUID: " << guid << " from LFN " << *itr
 		<< std::endl;
       m_poolrefs[guid]=PoolMapElement(1,"ADDLFN");
@@ -3166,75 +3170,70 @@ int AtlCoolCopy::resolvePoolRefs ATLAS_NOT_THREAD_SAFE () {
   int nbad=0;
   for (PoolMap::iterator ipool=m_poolrefs.begin();
        ipool!=m_poolrefs.end();++ipool) {
-    pool::FileCatalog::FileID guid=ipool->first;
-    pool::IFileCatalog::Files  lfns;
-    catalog->getLFNs( guid, lfns );
+    std::string guid=ipool->first;
+    Gaudi::IFileCatalog::Files  lfns;
+    m_catalog->getLFN( guid, lfns );
     if( !lfns.empty() ) {
       // file found in cataloge - print LFN and usage count
       const std::string lfn = lfns[0].first;
       ipool->second.setlfn(lfn);
       std::cout << "LFN: " << lfn << " (" << ipool->second.count() 
 		<< ")" << std::endl;
-      if (dscopy) 
-	dsfound.push_back(std::pair<std::string,std::string>(lfn,guid));
+      if(dscopy)  dsfound.push_back(std::pair<std::string,std::string>(lfn,guid));
     } else {
-      // error bit 0 - no LFN
-      if (!m_listpfn) ipool->second.setErrorBit(0);
+       // error bit 0 - no LFN
+       if(!m_listpfn)  ipool->second.setErrorBit(0);
     }
     if (m_listpfn || m_poolopen) {
-       std::string pfn, tech;
-       catalog->getFirstPFN( guid, pfn, tech );
-       if( !pfn.empty() ) {
-	ipool->second.setpfn(pfn);
-        std::cout << "PFN: " << pfn << " (" << ipool->second.count() 
-		<< ")" << std::endl;
-	if (m_poolopen) {
-	  // first try the file as a CoolHist file
-	  std::string hguid=getCoolHistGUID(pfn);
-	  if (!hguid.empty()) {
-	    // successful get of CoolHist GUID
-	    if (hguid!=ipool->first) {
-	      std::cout << "ERROR File CoolHist GUID " << hguid << 
-		" inconsistent with catalogue " << ipool->first << std::endl;
-	      ipool->second.setErrorBit(3);
-	    }
-	  } else {
-             // try the file as a genuine POOL file
-             try {
-                const std::string fid = pool_utility.readFileGUID( pfn );
-                if( fid != ipool->first ) {
-                   std::cout << "ERROR File GUID " << fid << 
-                      " inconsistent with catalogue " << ipool->first << std::endl;
-                   // file GUID inconsistent with catalogue - error bit 3
-                   ipool->second.setErrorBit(3);
+       Gaudi::IFileCatalog::Files  pfns_techs;
+       m_catalog->getPFN( guid, pfns_techs );
+       if( !pfns_techs.empty() ) {
+          std::string &pfn = pfns_techs[0].first;
+	        ipool->second.setpfn(pfn);
+          std::cout << "PFN: " << pfn << " (" << ipool->second.count() << ")" << std::endl;
+	        if (m_poolopen) {
+	           // first try the file as a CoolHist file
+	           std::string hguid=getCoolHistGUID(pfn);
+	           if(!hguid.empty()) {
+	              // successful get of CoolHist GUID
+	              if (hguid!=ipool->first) {
+	                  std::cout << "ERROR File CoolHist GUID " << hguid << " inconsistent with catalogue " << ipool->first << std::endl;
+	                  ipool->second.setErrorBit(3);
                 }
-             }
-             catch( std::runtime_error& e ) {
-                std::cout << "Cannot open file for reading!" << std::endl;
-                std::cout << e.what() << std::endl;
-                // File cannot be opened: set error bit 2
-                ipool->second.setErrorBit(2);
-             }
-	  }
-	} // end of actions opening POOL file
-      } else {
-	// PFN not found - set bit 1
-	ipool->second.setErrorBit(1);
-      }
+	            } else {
+                 // try the file as a genuine POOL file
+                 try {
+                    const std::string fid = pool_utility.readFileGUID( pfn );
+                    if( fid != ipool->first ) {
+                        std::cout << "ERROR File GUID " << fid << " inconsistent with catalogue " << ipool->first << std::endl;
+                        // file GUID inconsistent with catalogue - error bit 3
+                        ipool->second.setErrorBit(3);
+                    }
+                 } catch( std::runtime_error& e ) {
+                    std::cout << "Cannot open file for reading!" << std::endl;
+                    std::cout << e.what() << std::endl;
+                    // File cannot be opened: set error bit 2
+                    ipool->second.setErrorBit(2);
+                 }
+	            }
+	        } // end of actions opening POOL file
+       } else {
+	        // PFN not found - set bit 1
+	        ipool->second.setErrorBit(1);
+       }
     }
     // check file error code
     if (ipool->second.errcode()>0) ++nbad;
   }
-  catalog->commit();
-  delete catalog;
+  m_catalog->commit();
 
   // produce definition of new dataset if needed
   if (dscopy) {
     // start up a new catalogue instance with the merge catalogues
     // which indicate which files are already available and don't need to 
     // put in the output dataset definition
-    catalog=setupCatalog(m_mergecat);
-    if (catalog==nullptr) return 110;
+    setupCatalog(m_mergecat);
+    if( !m_catalog ) return 110;
     const std::string dssname="register.sh";
     std::cout << "Write DQ2 registerFileInDataset commands to " << dssname
 	      << " for registration in dataset " << m_newdataset << std::endl;
@@ -3243,8 +3242,8 @@ int AtlCoolCopy::resolvePoolRefs ATLAS_NOT_THREAD_SAFE () {
      itr!=dsfound.end();++itr) {
       const std::string& lfn=itr->first;
       const std::string& guid=itr->second;
-      pool::IFileCatalog::Files lfns;
-      catalog->getLFNs( guid, lfns );
+      Gaudi::IFileCatalog::Files lfns;
+      m_catalog->getLFN( guid, lfns );
       if( !lfns.empty() ) {
 	// file is already registered - check logical names are consistent
         const std::string lfn2 = lfns[0].first;
@@ -3257,8 +3256,7 @@ int AtlCoolCopy::resolvePoolRefs ATLAS_NOT_THREAD_SAFE () {
 		    << lfn << " " << guid << std::endl;
       }
     }
-    catalog->commit();
-    delete catalog;
+    m_catalog->commit();
   }
 
   int retcode=0;
@@ -3326,28 +3324,28 @@ void AtlCoolCopy::filePoolRefs() {
   }
 }
 
-pool::IFileCatalog* AtlCoolCopy::setupCatalog(
-		    const std::vector<std::string>& catvec) {
-  pool::IFileCatalog* catalog=new pool::IFileCatalog;
+void AtlCoolCopy::setupCatalog(const std::vector<std::string>& catvec) 
+{
   try {
-    catalog->setWriteCatalog("file:PoolFileCatalog.xml");
-    for (std::vector<std::string>::const_iterator icat=catvec.begin();
-	 icat!=catvec.end();++icat) {
-      std::cout << "Add catalogue: " << *icat << std::endl;
-      // if catalogue contains no ":" specifier, assume plain file
-      if (icat->find(':')==std::string::npos) {
-        catalog->addReadCatalog("file:"+(*icat));
-      } else {
-        catalog->addReadCatalog(*icat);
-      }
-    }
-    catalog->start();
-    return catalog;
+     SmartIF<Gaudi::IFileCatalogMgr> catMgr( Gaudi::svcLocator()->service<Gaudi::IFileCatalogMgr>( "Gaudi::MultiFileCatalog" ) );
+     std::string writeCatName("file:PoolFileCatalog.xml");
+     catMgr->addCatalog( "xmlcatalog_"+writeCatName );
+     catMgr->setWriteCatalog( catMgr->findCatalog( writeCatName, true ) );
+
+     for( const auto& icat : catvec ) {
+        std::cout << "Add catalogue: " << icat << std::endl;
+        // if catalogue contains ":", assume it already has the full format specifier
+        if( icat.contains(':') ) {
+           catMgr->addCatalog(icat);
+        } else {
+           catMgr->addCatalog("xmlcatalog_file:" + icat);
+        }
+     }
+     m_catalog = catMgr;
+     m_catalog->init();
   }
   catch (std::exception& e) {
-    std::cout << "Could not setup POOL catalogues, exception:" << e.what() 
-	      << std::endl;
-    return nullptr;
+    std::cout << "Could not setup POOL catalogues, exception:" << e.what() << std::endl;
   }
 }
 

@@ -13,24 +13,24 @@ atlas_add_component( PixelDigitization
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} AtlasHepMCLib AthenaBaseComps GaudiKernel AthenaKernel PileUpToolsLib StoreGateLib GeneratorObjects PixelConditionsData SiPropertiesToolLib InDetIdentifier ReadoutGeometryBase InDetReadoutGeometry PixelReadoutGeometryLib SiDigitization InDetCondTools InDetRawData InDetSimData InDetSimEvent HitManagement PathResolver InDetConditionsSummaryService )
+                     LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel AtlasHepMCLib GaudiKernel GeneratorObjects HitManagement Identifier InDetCondTools InDetConditionsSummaryService InDetIdentifier InDetRawData InDetReadoutGeometry InDetSimData InDetSimEvent PathResolver PileUpToolsLib PixelConditionsData PixelReadoutDefinitionsLib PixelReadoutGeometryLib ReadoutGeometryBase SiDigitization SiPropertiesToolLib StoreGateLib TruthUtils )
 
 atlas_add_test( BichselData_test
    SOURCES test/BichselData_test.cxx  src/BichselData.cxx src/PixelDigitizationUtilities.cxx
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils PixelConditionsData
+   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
+   LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} CxxUtils PixelConditionsData
    POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( PixelDigitizationUtilities_test
    SOURCES test/PixelDigitizationUtilities_test.cxx src/PixelDigitizationUtilities.cxx src/BichselData.cxx
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} GaudiKernel AthenaKernel CxxUtils TestTools PathResolver PixelConditionsData
+   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
+   LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} CxxUtils PathResolver PixelConditionsData
    POST_EXEC_SCRIPT noerror.sh )
    
 atlas_add_test( PixelNoiseFunctions_test
    SOURCES test/PixelNoiseFunctions_test.cxx src/PixelNoiseFunctions.cxx
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} CxxUtils TestTools PixelConditionsData SiDigitization
+   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
+   LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} CxxUtils InDetIdentifier InDetSimEvent PixelConditionsData PixelReadoutGeometryLib ReadoutGeometryBase SiDigitization
    POST_EXEC_SCRIPT noerror.sh )
 
 

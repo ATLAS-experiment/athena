@@ -20,5 +20,9 @@
 
 namespace SH
 {
-  ANA_MSG_SOURCE (msgScanDir, "ScanDir")
+  ANA_MSG_SOURCE (msgScanDir, "SampleHandler.ScanDir")
+  ANA_MSG_SOURCE (msgFetch, "SampleHandler.Fetch")
+  ANA_MSG_SOURCE (msgDiscovery, "SampleHandler.Discovery")
+  ANA_MSG_SOURCE (msgSplit, "SampleHandler.Split")
+  ANA_MSG_SOURCE (msgDuplicates, "SampleHandler.Duplicates")
 }

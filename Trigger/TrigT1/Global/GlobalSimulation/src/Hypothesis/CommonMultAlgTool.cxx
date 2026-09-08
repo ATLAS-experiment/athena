@@ -19,19 +19,9 @@ namespace GlobalSim {
   // Initialize function running before first event
   StatusCode CommonMultAlgTool::initialize() {
 
+    ATH_CHECK( TIPWriterAlgTool::initialize() );
+
     CHECK(m_CommonTOBContainerKey.initialize());
-
-    if (m_TIP_width < 0) {
-      ATH_MSG_ERROR("number of bits to write to TIP is negative");
-      return StatusCode::FAILURE;
-    }
-    
-    int max_tip_pos = s_nbits_TIP - m_TIP_width;
-
-    if (m_TIP_position < 0 or m_TIP_position > max_tip_pos) {
-      ATH_MSG_ERROR("TIP word out of bounds " << m_TIP_position);
-      return StatusCode::FAILURE;
-    }
 
     // create the necessary selector objects
     m_c_selector = std::make_unique<CommonSelector>(m_et_low_str,
@@ -42,71 +32,56 @@ namespace GlobalSim {
 						    m_phi_high_str
 						    );
 
-    if (m_TIP_width == 0){
-      m_maxtob = 0;
-    } else {
-      ulong maxtob = 1;
-      for (ulong i = m_TIP_width; i != 0; --i) { maxtob *= 2;}
-      m_maxtob = maxtob - 1;
-    }
-
     return StatusCode::SUCCESS;
   }
 
   
-  StatusCode CommonMultAlgTool::updateTIP(std::bitset<s_nbits_TIP>& word,
-					     const EventContext& ctx) const {
+  StatusCode
+  CommonMultAlgTool::countPassingTOBs(const EventContext& ctx,
+				      const std::unique_ptr<IDataCollector>& dc, 
+
+				      unsigned int& N_pass_tobs) const {
     auto tobs =
       SG::ReadHandle<GlobalSim::IOBitwise::CommonTOBContainer>(m_CommonTOBContainerKey,
 								  ctx);
 
     CHECK(tobs.isValid());
 
-    // check if any of the incoming tobs is selected.
+    if(dc){
+      std::stringstream ss;
+      ss << "number of  tobs "<< tobs->size() << '\n';
+      dc->collect(*this, ss.str());
+      for (const GlobalSim::IOBitwise::CommonTOB* t : *tobs){
+	dc->collect(*this, t->to_string());
+      }
+    }
 
-    ulong tob_count{0};
+    // check if any of the incoming tobs is selected.
+    N_pass_tobs = 0;
     std::vector<bool> tob_pass(tobs->size(), false);
     for (int tob_it = 0; const GlobalSim::IOBitwise::CommonTOB* t : *tobs){
       if (m_c_selector->select(*t)) {
-	tob_pass[tob_it] = true;
-	if (++tob_count == m_maxtob){
-	  break;
-	}
+        tob_pass[tob_it] = true;
+        if (++N_pass_tobs == m_maxtob){
+          break;
+        }
       }
       tob_it++;
     }
-
-    ATH_MSG_DEBUG("no of passing TOBS" << tob_count);
-
-    
-    auto count_bits = std::bitset<s_nbits_TIP>(tob_count);
-
-    int p0{0};
-    int p1{m_TIP_position};
-    
-    const int& mxb = m_TIP_width;
-    
-    for (; p0 != mxb; ++p0, ++p1) {
-      if (count_bits.test(p0)) {word.set(p1);}
-    }
-
-    ATH_MSG_DEBUG("TIP word " << word);
-
     
     if (m_enableDump) {
       std::stringstream ss;
-      ss << "\nRun " << ctx <<' ' << "TIP:\n" << word << '\n';
+      ss << "\nRun " << ctx << '\n';
       std::size_t ind{0};
       for (const GlobalSim::IOBitwise::CommonTOB* tob : *tobs) {
-	ss << tob->to_string()  << ' ' << std::boolalpha << " pass " << tob_pass[ind++] << '\n';
+	      ss << tob->to_string()  << ' ' << std::boolalpha << " pass " << tob_pass[ind++] << '\n';
       }
-      ss << "tob count " << tob_count << '\n';
+      ss << "tob count " << N_pass_tobs << '\n';
  
       std::ofstream out(name() + ".log", std::ios_base::app);
       out << ss.str();
       out.close();
     }
-
 
     return StatusCode::SUCCESS;
   }

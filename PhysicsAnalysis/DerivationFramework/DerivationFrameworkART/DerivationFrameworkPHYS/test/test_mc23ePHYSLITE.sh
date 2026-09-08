@@ -11,11 +11,11 @@
 # art-output: checkxAOD*.txt
 # art-output: checkIndexRefs*.txt
 
-set -e
-
 if [[ -z ${ArtInFile} ]]; then
     ArtInFile="root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/data-art/large-input/CampaignInputs/mc23/AOD/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8514_s4369_r16083/AOD.41608496._001231.pool.root.1"
 fi
+
+set -e
 
 Derivation_tf.py \
 --inputAODFile ${ArtInFile} \

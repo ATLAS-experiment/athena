@@ -36,6 +36,7 @@ TrackRecordGenerator::TrackRecordGenerator(const std::string& name, ISvcLocator*
   declareProperty("stopped_tminus", m_stopped_tminus =-25. );
   declareProperty("stopped_tplus", m_stopped_tplus =25. );
   declareProperty("Add_cL", m_add_cL=true, "For stopped particles, shift the time by c times the decay rho");
+  m_gendata = std::make_shared<GenData>();
 }
 
 //--------------------------------------------------------------------------
@@ -64,8 +65,8 @@ StatusCode TrackRecordGenerator::callGenerator() {
 
   for (const auto & iterTTR : *coll) {
 
-    const HepPDT::ParticleData* particle = particleData(std::abs(iterTTR.GetPDGCode()));
-    double mass = particle->mass().value();
+    const auto pmass = m_gendata->particleMass(std::abs(iterTTR.GetPDGCode()));
+    double mass = *pmass;
     double en = std::sqrt(mass*mass+iterTTR.GetMomentum().mag2());
 
     ATH_MSG_VERBOSE("Reading back TTR:\n pos is "<<iterTTR.GetPosition()

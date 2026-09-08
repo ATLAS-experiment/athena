@@ -3,17 +3,14 @@
 # Declare the package name:
 atlas_subdir( DerivationFrameworkMuons )
 
-# Component(s) in the package:
-#the library is used by the MCP software https://gitlab.cern.ch/atlas-mcp/MuonPerformanceAnalysis
-atlas_add_library( DerivationFrameworkMuonsLib
-   DerivationFrameworkMuons/*.h
-   INTERFACE
-   PUBLIC_HEADERS DerivationFrameworkMuons
-   LINK_LIBRARIES StoreGateLib )
 
 atlas_add_component( DerivationFrameworkMuons
    src/*.cxx src/components/*.cxx
-   LINK_LIBRARIES AthContainers AthenaBaseComps AthenaKernel CaloEvent DerivationFrameworkInterfaces DerivationFrameworkMuonsLib FourMomUtils GaudiKernel ICaloTrkMuIdTools MCTruthClassifierLib MuonAnalysisInterfacesLib MuonDetDescrUtils RecoToolInterfaces StoreGateLib TriggerMatchingToolLib TrkExInterfaces TrkSurfaces TruthUtils muonEvent xAODBase xAODEventInfo xAODJet xAODMuon xAODPrimitives xAODTracking xAODTruth )
+   LINK_LIBRARIES AthContainers AthenaBaseComps AthenaKernel CaloEvent DerivationFrameworkInterfaces 
+                  FourMomUtils GaudiKernel ICaloTrkMuIdTools MCTruthClassifierLib 
+                  MuonAnalysisInterfacesLib MuonDetDescrUtils RecoToolInterfaces StoreGateLib 
+                  TriggerMatchingToolLib TrkExInterfaces TrkSurfaces TruthUtils muonEvent xAODBase xAODEventInfo 
+                  xAODJet xAODMuon xAODPrimitives xAODTracking xAODTruth xAODMuonViews)
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

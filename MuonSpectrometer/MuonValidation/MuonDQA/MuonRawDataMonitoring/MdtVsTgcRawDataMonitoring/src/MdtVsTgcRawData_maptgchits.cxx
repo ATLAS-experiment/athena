@@ -15,12 +15,10 @@
 
 #include "TrkEventPrimitives/TrkEventPrimitivesDict.h"
 #include "EventPrimitives/EventPrimitivesHelpers.h"
-#include "EventPrimitives/EventPrimitives.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
-#include "muonEvent/MuonContainer.h"
 #include "xAODMuon/MuonSegmentContainer.h"
 #include "xAODMuon/MuonSegment.h"
 

@@ -50,6 +50,14 @@ class TauThinningAlg : public AthReentrantAlgorithm
   Gaudi::Property<bool> m_saveOnlyGoodTracks
     { this, "SaveOnlyGoodTracks", false, "Option to save only tracks passing quality requirements"};	    
 
+  // the dR between the tau and the clusters
+  Gaudi::Property<float> m_DrTauClusters
+    { this, "maxDrTauClusters", 0.2, "The distance between the tau the clusters. Beyond this, clusters won't be saved"};
+
+  // the dR between the tau and the neutral PFO
+  Gaudi::Property<float> m_DrTauNeutrals
+    { this, "maxDrTauNeutrals", 9999., "The distance between the tau the neutral PFO. Neutral PFO beyond the settled distance be saved"}; 
+
   // Name of the stream being thinned
   StringProperty m_streamName
     { this, "StreamName", "StreamAOD", "Name of the stream being thinned" };

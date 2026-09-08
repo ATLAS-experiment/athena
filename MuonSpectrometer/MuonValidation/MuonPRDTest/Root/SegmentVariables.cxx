@@ -1,8 +1,9 @@
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonPRDTest/SegmentVariables.h>
+#include <MuonTesterTree/AuxElementBranch.h>
 #include <StoreGate/ReadHandle.h>
 
 namespace MuonPRDTest {
@@ -12,7 +13,16 @@ namespace MuonPRDTest {
                                        MSG::Level msglvl) :
         PrdTesterModule(tree, "Segments"+ containerKey+outName, msglvl), 
             m_key{containerKey},
-            m_name{outName}{}
+            m_name{outName}{
+
+        for (const auto & summary : {"nPrecisionOutliers", "nTriggerPhiOutliers", "nTriggerEtaOutliers",
+                                   "nPrecisionHoles", "nTriggerPhiHoles", "nTriggerEtaHoles"}) {
+            const std::string s = std::format("{:}_{:}", outName, summary);  
+            auto br = std::make_unique<AuxElementBranch<std::uint8_t>>(tree, s, summary);
+            br->setDefault(0);
+            addVariable(std::move(br));
+        }
+    }
 
    bool SegmentVariables::fill(const EventContext& ctx) {
         SG::ReadHandle readHandle{m_key, ctx};

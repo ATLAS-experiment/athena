@@ -1,0 +1,138 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+
+#ifndef ACTSGEOMETRY_ACTSEXTRAPOLATIONTOOL_H
+#define ACTSGEOMETRY_ACTSEXTRAPOLATIONTOOL_H
+
+// ATHENA
+#include "GeoPrimitives/GeoPrimitives.h"
+#include "AthenaBaseComps/AthAlgTool.h"
+
+#include "TrkEventPrimitives/ParticleHypothesis.h"
+#include "TrkEventPrimitives/PdgToParticleHypothesis.h"
+
+// Need to include this early; otherwise, we run into errors with
+// ReferenceWrapperAnyCompat in clang builds due the is_constructable
+// specialization defined there getting implicitly instantiated earlier.
+#include "Acts/Propagator/Propagator.hpp"
+
+// PACKAGE
+#include "ActsGeometryInterfaces/IExtrapolationTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
+#include "ActsGeometry/ATLASMagneticFieldWrapper.h"
+
+#include "ActsEvent/ContextUtility.h"
+
+// ACTS
+#include "Acts/MagneticField/ConstantBField.hpp"
+#include "Acts/MagneticField/MagneticFieldContext.hpp"
+#include "Acts/Propagator/detail/SteppingLogger.hpp"
+#include "Acts/Propagator/StandardAborters.hpp"
+#include "Acts/Propagator/SurfaceCollector.hpp"
+#include "Acts/Utilities/Result.hpp"
+#include "Acts/Definitions/Units.hpp"
+#include "Acts/Utilities/Helpers.hpp"
+#include "Acts/Utilities/Logger.hpp"
+#include "Acts/Definitions/Tolerance.hpp"
+
+#include <cmath>
+
+namespace Acts {
+class Surface;
+class BoundaryCheck;
+class Logger;
+}
+
+
+namespace ActsExtrapolationDetail {
+  class VariantPropagator;
+}
+
+namespace ActsTrk {
+class ExtrapolationTool : public extends<AthAlgTool, IExtrapolationTool>
+{
+public:
+  /** @copydoc AthAlgTool::initialize */
+  virtual StatusCode initialize() override;
+
+  /** @brief Explicitly define the constrcutor due to the variant forward declaration */
+  ExtrapolationTool(const std::string& type, const std::string& name, const IInterface* parent);
+  /** @brief Destructor needs to implemented due to the variant */
+  ~ExtrapolationTool();
+  /** @copydoc IExtrapolationTool::propagationSteps */
+  virtual Acts::Result<PropagationOutput> 
+          propagationSteps(const EventContext& ctx,
+                           const Acts::BoundTrackParameters& startParameters,
+                           const Acts::Direction navDir, 
+                           const double pathLimit) const override final;
+
+  /** @copydoc IExtrapolationTool::propagate */
+  virtual Acts::Result<Acts::BoundTrackParameters>
+          propagate(const EventContext& ctx,
+                    const Acts::BoundTrackParameters& startParameters,
+                    const Acts::Direction navDir, 
+                    const double pathLimit) const override final;
+
+  /** @copydoc IExtrapolationTool::propagationSteps */
+  virtual Acts::Result<PropagationOutput>
+          propagationSteps(const EventContext& ctx,
+                           const Acts::BoundTrackParameters& startParameters,
+                           const Acts::Surface& target,
+                           const Acts::Direction navDir, 
+                           const double pathLimit) const override;
+ 
+  /** @copydoc IExtrapolationTool::propagate */
+ virtual Acts::Result<Acts::BoundTrackParameters>
+         propagate(const EventContext& ctx,
+                   const Acts::BoundTrackParameters& startParameters,
+                   const Acts::Surface& target,
+                   const Acts::Direction navDir, 
+                   const double pathLimit) const override;
+         
+  /** @copydoc IExtrapolationTool::propagate */
+  virtual Acts::Result<Acts::BoundTrackParameters> propagate(const EventContext& ctx,
+                                                             const Acts::BoundTrackParameters& startParameters,
+                                                             const Acts::TrackingVolume& target,
+                                                             const VolumeAbort stopVolumeFlag,
+                                                             const Acts::Direction navDir,
+                                                             const double pathLimit) const override;
+  /** @copydoc IExtrapolationTool::propagateAndRecord */
+  virtual Acts::Result<BoundParamVec_t> propagateAndRecord(const EventContext& ctx,
+                                                           const Acts::BoundTrackParameters& startParameters,
+                                                           const SurfaceRecordOptions& recordOpts) const override;
+
+ private:
+  const Acts::Logger& logger() const { return *m_logger; }
+
+  std::unique_ptr<const ActsExtrapolationDetail::VariantPropagator> m_varProp;
+  std::unique_ptr<const Acts::Logger> m_logger{nullptr};
+  /** @brief Utility to fetch the geometry, magnetic field and calibration context in the event */
+  ContextUtility m_ctxProvider{this};
+
+  ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
+
+  Gaudi::Property<std::string> m_fieldMode{this, "FieldMode", "ATLAS", "Either ATLAS or Constant or StraightLine"};
+  Gaudi::Property<std::vector<double>> m_constantFieldVector{this, "ConstantFieldVector", {0, 0, 0}, "Constant field value to use if FieldMode == Constant"};
+
+  Gaudi::Property<double> m_ptLoopers{this, "PtLoopers", 300, "PT loop protection threshold. Will be converted to Acts MeV unit"};
+  Gaudi::Property<double> m_maxStepSize{this, "MaxStepSize", 10, "Max step size in Acts m unit"};
+  Gaudi::Property<unsigned> m_maxStep{this, "MaxSteps", 100000, "Max number of steps"};
+  Gaudi::Property<unsigned> m_maxSurfSkip{this, "MaxSurfaceSkip" ,100, "Maximum number of surfaces to be tried by the navigator"};
+  Gaudi::Property<double> m_surfTolerance{this, "OnSurfaceTolerance", Acts::s_onSurfaceTolerance, 
+                                          "Tolerance to consider track parameters on surface"};
+  // Material inteaction option
+  Gaudi::Property<bool> m_interactionMultiScatering{this, "InteractionMultiScatering", false, "Whether to consider multiple scattering in the interactor"};
+  Gaudi::Property<bool> m_interactionEloss{this, "InteractionEloss", false, "Whether to consider energy loss in the interactor"};
+  Gaudi::Property<bool> m_interactionRecord{this, "InteractionRecord", false, "Whether to record all material interactions"};
+
+  template<typename OptionsType>
+  OptionsType 
+  prepareOptions( const Acts::GeometryContext& gctx,
+                  const Acts::MagneticFieldContext& mctx,
+                  const Acts::BoundTrackParameters& startParameters,
+                  Acts::Direction navDir,
+                  double pathLimit) const;
+};
+}
+#endif

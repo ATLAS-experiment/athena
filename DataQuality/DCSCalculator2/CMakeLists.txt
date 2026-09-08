@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( DCSCalculator2 )
@@ -15,7 +15,8 @@ atlas_install_scripts( share/*.py )
 atlas_add_test( DCSCRun
    SCRIPT dcsc.py -r456685 -d 'sqlite://$<SEMICOLON>schema=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/AthDataQuality/dcscalc_input_456685.db$<SEMICOLON>dbname=CONDBR2'
    POST_EXEC_SCRIPT noerror.sh
-   PROPERTIES TIMEOUT 600 
+   PROPERTIES TIMEOUT 600
+              DISABLED TRUE  # pbeast at P1 not available during shutdown (ATLASDQ-1256)
    LOG_SELECT_PATTERN "DCS Calculator failed"
    ENVIRONMENT "PBEAST_SERVER_HTTPS_PROXY=atlasgw.cern.ch:3128"
    )

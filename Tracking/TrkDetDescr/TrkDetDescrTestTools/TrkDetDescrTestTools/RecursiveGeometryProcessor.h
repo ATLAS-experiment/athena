@@ -41,15 +41,6 @@ namespace Trk {
       public:
         /** Constructor */
         RecursiveGeometryProcessor(const std::string&,const std::string&,const IInterface*);
-
-        /** Destructor */
-        virtual ~RecursiveGeometryProcessor();
-
-        /** AlgTool initialize method */
-        StatusCode initialize();
-       
-        /** AlgTool finalize method */       
-        StatusCode finalize();
        
         /** Processor Action to work on TrackingGeometry& tgeo */
         virtual StatusCode process(TrackingGeometry& tgeo) const;

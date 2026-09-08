@@ -13,7 +13,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <filesystem>
-#include "PersistencySvc/IFileCatalog.h"
+#include "PoolSvc/IFileCatalog.h"
 
 using namespace pool;
 

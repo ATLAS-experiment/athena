@@ -18,8 +18,7 @@
 
 #include "CLHEP/Units/SystemOfUnits.h"
 
-#include <cmath>
-#include <cstdlib> //Always include this when including cmath!
+
 
 #include "InDetSimEvent/TRTHitIdHelper.h"
 #include "TRT_ReadoutGeometry/TRT_DetectorManager.h"
@@ -27,6 +26,8 @@
 #include <algorithm>
 #include <exception>
 #include <utility>
+#include <cmath>
+#include <cstdlib> //Always include this when including cmath!
 
 struct TRTDigitSorter {
   bool operator() (const TRTDigit& digit1, const TRTDigit& digit2) { return (digit1.GetStrawID()<digit2.GetStrawID());}
@@ -44,7 +45,7 @@ TRTNoise::TRTNoise( const TRTDigSettings* digset,
                     TRTElectronicsNoise * electronicsnoise,
                     const TRT_ID* trt_id,
                     int UseGasMix,
-                    ToolHandle<ITRT_StrawStatusSummaryTool> sumTool
+                    const ToolHandle<ITRT_StrawStatusSummaryTool> &sumTool
                     )
 : AthMessaging("TRTNoise"),
   m_settings(digset),
@@ -56,7 +57,7 @@ TRTNoise::TRTNoise( const TRTDigSettings* digset,
   m_digitPoolLength(5000),
   m_digitPoolLength_nextaccessindex(0),
   m_UseGasMix(UseGasMix),
-  m_sumTool(std::move(sumTool))
+  m_sumTool(sumTool)
 {
   InitThresholdsAndNoiseAmplitudes_and_ProduceNoiseDigitPool(noiseRndmEngine,elecNoiseRndmEngine,elecProcRndmEngine);
   if ( m_settings->noiseInSimhits() ) m_pElectronicsNoise->reinitElectronicsNoise( 1000, elecNoiseResetRndmEngine );

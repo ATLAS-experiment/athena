@@ -14,10 +14,7 @@
 #include "MdtVsTgcRawDataValAlg.h"
 
 #include "MuonDQAUtils/MuonChamberNameConverter.h"
-#include "MuonDQAUtils/MuonChambersRange.h"
-#include "MuonDQAUtils/MuonCosmicSetup.h"
 #include "MuonDQAUtils/MuonDQAHistMap.h" 
-#include "MuonCalibIdentifier/MuonFixedId.h"
 
 #include <inttypes.h>
 #include <sstream>

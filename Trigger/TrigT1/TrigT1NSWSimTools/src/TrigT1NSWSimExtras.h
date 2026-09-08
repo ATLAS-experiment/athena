@@ -13,6 +13,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <vector>
 #include "CxxUtils/StringUtils.h"
 
@@ -271,13 +272,12 @@ namespace NSWL1 {
     }
 
     // Helper functions: replacement
-    inline std::string replace(std::string subject, const std::string& search, const std::string& replace) {
-      if (subject.empty() or search.empty()) return subject;
+    inline std::string replace(std::string subject, std::string_view search, std::string_view replacement) {
+      if (search.empty()) return subject;
 
-      size_t pos = 0;
-      while((pos = subject.find(search, pos)) != std::string::npos) {
-        subject.replace(pos, search.length(), replace);
-        pos += replace.length();
+      for (std::size_t pos = 0; (pos = subject.find(search, pos)) != std::string::npos;
+        pos += replacement.size()) {
+        subject.replace(pos, search.size(), replacement);
       }
       return subject;
     }
@@ -285,13 +285,11 @@ namespace NSWL1 {
     /* Helper function: parsing line
      * - take a line like this and return the BandID as an integer, i.e.: "constant bandid_91_small_patterns : pad_trigger_pattern_array := ("
      * - Retrieve first object: bandid_91_small_patterns
-     * - Split the object in its components: bandid, 91, small, patterns
+     * - Split the object in its components by underscore: 'constant bandid', '91', 'small', 'patterns',...
      * - Now save the number: 91
      */
     inline uint32_t parseLineForBandid(const std::string& line) {
-      const auto split = CxxUtils::tokenize(line, SPACE);
-      const auto word = split.at(1);
-      const auto word_split = CxxUtils::tokenize(line, UNDERSCORE);
+      const auto & word_split = CxxUtils::tokenize(line, UNDERSCORE);
       return static_cast<uint32_t>(std::stoul(word_split.at(1)));
     }
   }

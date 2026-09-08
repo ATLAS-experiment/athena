@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( BTagging )
@@ -14,8 +14,8 @@ atlas_add_library( BTaggingLib
                    src/JetTagVertexDecoratorAlg.cxx
                    src/BTagTrackAugmenterByVertexAlg.cxx
                    PUBLIC_HEADERS BTagging
-                   LINK_LIBRARIES AsgTools AthContainers AthenaBaseComps CxxUtils FlavorTagDiscriminants GaudiKernel GeoPrimitives JetInterface JetRecLib JetTagToolsLib MagFieldConditions ParticleJetToolsLib StoreGateLib TrkExInterfaces TrkVertexFitterInterfaces VxSecVertex VxVertex xAODBTagging xAODEventInfo xAODJet xAODMuon xAODTracking
-                   PRIVATE_LINK_LIBRARIES InDetRecToolInterfaces JetTagEvent Particle TrkLinks TrkSurfaces VxJetVertex xAODBase xAODCore )
+                   LINK_LIBRARIES AthContainers AthLinks AthenaBaseComps CxxUtils GaudiKernel GeoPrimitives InDetRecToolInterfaces JetTagToolsLib MagFieldConditions StoreGateLib TrkExInterfaces TrkVertexFitterInterfaces VxSecVertex VxVertex xAODBTagging xAODJet xAODMuon xAODTracking
+                   PRIVATE_LINK_LIBRARIES TrkLinks TrkSurfaces VxJetVertex xAODBase xAODCore )
 
 atlas_add_component( BTagging
                      src/components/*.cxx
@@ -31,7 +31,11 @@ atlas_install_scripts(
 # install test scripts
 atlas_add_test(FlavorTaggingTest
   SCRIPT testFlavorTagging --n-events 20 -o slow.h5
-  POST_EXEC_SCRIPT nopost.sh )
+  # JetH5Writer explicitly creates NANs.
+  LOG_IGNORE_PATTERN "FPE INVALID"
+  POST_EXEC_SCRIPT noerror.sh )
 atlas_add_test(FasterBTaggingTest
   SCRIPT testFlavorTagging --n-events 20 --fast -o fast.h5
-  POST_EXEC_SCRIPT nopost.sh )
+  # JetH5Writer explicitly creates NANs.
+  LOG_IGNORE_PATTERN "FPE INVALID"
+  POST_EXEC_SCRIPT noerror.sh )

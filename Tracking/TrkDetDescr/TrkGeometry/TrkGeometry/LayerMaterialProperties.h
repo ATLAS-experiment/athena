@@ -12,14 +12,16 @@
 // Amg
 #include "GeoPrimitives/GeoPrimitives.h"
 // Trk
-#include <memory>
+
 #include "TrkEventPrimitives/PropDirection.h"
 #include "TrkGeometry/MaterialProperties.h"
-// Gaudi
-#include "GaudiKernel/MsgStream.h"
+
 // STD
 #include <vector>
+#include <iosfwd>
+#include <memory>
 
+class MsgStream;
 class BinnedLayerMaterialCnv_p1;
 
 namespace Trk {
@@ -62,13 +64,19 @@ enum MaterialConcentration { alongPre = 1, split = 0, oppositePre = -1 };
 class LayerMaterialProperties {
  public:
   /**Constructor*/
-  LayerMaterialProperties() : m_splitFactor(1.) {}
+  LayerMaterialProperties() = default;
+  
+  LayerMaterialProperties(const LayerMaterialProperties &) = default;
+  LayerMaterialProperties(LayerMaterialProperties&&) noexcept= default;
+  
+  LayerMaterialProperties& operator=(const LayerMaterialProperties&) = default;
+  LayerMaterialProperties& operator=(LayerMaterialProperties&&) noexcept = default;
 
   /**Constructor*/
   LayerMaterialProperties(double splitFactor) : m_splitFactor(splitFactor) {}
 
   /**Destructor*/
-  virtual ~LayerMaterialProperties() {}
+  virtual ~LayerMaterialProperties() = default;
 
   /**Pseudo-Constructor clone()*/
   virtual LayerMaterialProperties* clone() const = 0;
@@ -123,7 +131,7 @@ class LayerMaterialProperties {
 
  protected:
   friend class ::BinnedLayerMaterialCnv_p1;
-  double m_splitFactor;  //!< the split factor in favour of oppositePre
+  double m_splitFactor{1.};  //!< the split factor in favour of oppositePre
 };
 
 /** inline return methods for the pre/post factors */

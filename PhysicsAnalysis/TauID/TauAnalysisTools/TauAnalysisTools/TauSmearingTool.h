@@ -12,7 +12,7 @@
 
 // Framework include(s):
 #include "AsgTools/AsgTool.h"
-#include "AsgTools/AnaToolHandle.h"
+#include "AsgTools/ToolHandle.h"
 #include "AsgTools/AsgMetadataTool.h"
 #include "AsgTools/PropertyWrapper.h"
 
@@ -61,7 +61,7 @@ public:
   virtual StatusCode applySystematicVariation( const CP::SystematicSet& systConfig );
 
 private:
-  asg::AnaToolHandle<ITauSmearingTool> m_tCommonSmearingTool;
+  ToolHandle<ITauSmearingTool> m_tCommonSmearingTool{this, "Tool", {}};
 
   Gaudi::Property<std::string> m_sInputFilePath{this, "InputFilePath", ""};
   Gaudi::Property<std::string> m_sRecommendationTag{this, "RecommendationTag", "2025-prerec"};
@@ -71,6 +71,7 @@ private:
   Gaudi::Property<bool> m_bMVATESQualityCheck{this, "MVATESQualityCheck", true};
   Gaudi::Property<bool> m_bApplyInsituCorrection{this, "ApplyInsituCorrection", true};
   Gaudi::Property<bool> m_useFastSim{this, "useFastSim", false}; 
+  Gaudi::Property<bool> m_useGNTau{this, "useGNTau",  false};
 
 }; // class TauSmearingTool
 

@@ -16,6 +16,7 @@
 #include <xAODMissingET/MissingETAssociationHelper.h>
 
 #include "AthContainers/ConstDataVector.h"
+#include "AthContainers/Decorator.h"
 
 //
 // method implementations
@@ -108,6 +109,14 @@ namespace CP
              xAOD::Type::ObjectType type,
              const std::string& term) -> StatusCode {
           if (!handle) {
+            // The NN MET input vector needs a term for every hard-object type,
+            // so a missing handle is a configuration error on the NN path.
+            if (m_evaluateNNMET) {
+              ANA_MSG_ERROR ("evaluateNNMET requires a container for every "
+                             "hard-object type, but the handle for term \""
+                             << term << "\" is not configured");
+              return StatusCode::FAILURE;
+            }
             return StatusCode::SUCCESS;
           }
           const xAOD::IParticleContainer* particles = nullptr;
@@ -150,6 +159,24 @@ namespace CP
       } else
       {
         ANA_CHECK (m_makerTool->rebuildJetMET (m_jetsKey, m_softTermKey, met.get(), jets, metcore, metHelper, m_doJetJVT));
+      }
+
+      // Optionally run the NN-based MET (e.g. met::METNet). For NN tools,
+      // rebuildJetMET only assembles the network inputs; evaluateNNMET runs the
+      // inference and adds the total term directly. We then decorate met/phi on
+      // every term exactly as MetBuilderAlg would, so the NN path needs no
+      // builder afterwards (a builder sum would clobber the NN Final term).
+      if (m_evaluateNNMET)
+      {
+        ANA_CHECK (m_makerTool->evaluateNNMET (m_finalKey, met.get()));
+        static const SG::Decorator<float> met_met_dec ("met");
+        static const SG::Decorator<float> met_phi_dec ("phi");
+        for (const xAOD::MissingET *metTerm : *met)
+        {
+          if (!metTerm) continue;
+          met_met_dec (*metTerm) = metTerm->met();
+          met_phi_dec (*metTerm) = metTerm->phi();
+        }
       }
 
       // Systematics

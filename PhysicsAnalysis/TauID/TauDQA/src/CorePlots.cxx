@@ -78,6 +78,7 @@ namespace Tau{
     m_PFOEngRelDiff = Book1D("PFOEngRelDiff", "PFOEngRelDiff;PFOEngRelDiff;Entries",20,-1.,1.);
 
     m_TVz = Book1D("tauVertexZ", "tau vertex z:tau vertex z [mmm]",24,-120.,120.);
+    m_TauJetVtxFraction = Book1D("TauJetVtxFraction", "tau jet vertex fraction", 20, 0, 1); 
  }
 
   void CorePlots::fill(const xAOD::TauJet& tau, float weight) {
@@ -305,6 +306,9 @@ namespace Tau{
     // tau vertex
     if(vertex) {
       m_TVz->Fill(vertex->z(), weight);
+  
+      test = tau.detail(xAOD::TauJetParameters::TauJetVtxFraction, avariable);
+      if(test) m_TauJetVtxFraction->Fill(avariable, weight);
     }
   }
 }

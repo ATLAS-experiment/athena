@@ -16,6 +16,7 @@
   <class name="dqm_algorithms::AFP_SiTEfficiency"/>
   <class name="dqm_algorithms::AFP_Sync_check"/>
   <class name="dqm_algorithms::All_Bins_Filled"/>
+  <class name="dqm_algorithms::AutoencoderExampleAlgorithm"/>
   <class name="dqm_algorithms::AveragePrint"/>
   <class name="dqm_algorithms::BasicGraphCheck"/>
   <class name="dqm_algorithms::BasicHistoCheck"/>

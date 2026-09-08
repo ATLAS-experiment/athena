@@ -20,8 +20,7 @@
 #include "ISF_FastCaloGpu/CaloGpuGeneral.h"
 #include "ISF_FastCaloGpu/GeoLoadGpu.h"
 #include "ISF_FastCaloGpu/Args.h"
-#include "HepPDT/ParticleData.hh"
-// #include "HepPDT/ParticleDataTable.hh"
+#include "TruthUtils/HepMCHelpers.h"
 #endif
 
 //=============================================
@@ -306,7 +305,7 @@ FCSReturnCode TFCSLateralShapeParametrizationHitChain::simulate(
     args.extrapol_z_ent = extrapol->z(cs, SUBPOS_ENT);
     args.extrapol_z_ext = extrapol->z(cs, SUBPOS_EXT);
     args.pdgId = truth->pdgid();
-    args.charge = HepPDT::ParticleID(args.pdgId).charge();
+    args.charge = MC::charge(args.pdgId);
     args.nhits = nhit;
     args.rand = 0;
     args.geo = gld->get_geoPtr();

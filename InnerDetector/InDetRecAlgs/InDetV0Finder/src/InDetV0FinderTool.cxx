@@ -21,12 +21,13 @@
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 
 #include "xAODTracking/TrackingPrimitives.h"
-#include "HepPDT/ParticleDataTable.hh"
+#include "GeneratorModules/GenData.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "StoreGate/ReadDecorHandle.h"
 #include <vector>
 #include <cmath>
+#include <stdexcept>
 
 namespace InDet
 {
@@ -68,9 +69,7 @@ StatusCode InDetV0FinderTool::initialize()
   ATH_CHECK( m_iGammaFitter.retrieve() );
   ATH_MSG_DEBUG("Retrieved tool " << m_iGammaFitter);
 
-  // get the Particle Properties Service
-  ATH_CHECK(m_partPropSvc.retrieve());
-  m_particleDataTable = m_partPropSvc->PDT();
+
 
   // uploading the V0 tools
   ATH_CHECK( m_V0Tools.retrieve() );
@@ -140,17 +139,13 @@ StatusCode InDetV0FinderTool::initialize()
   ATH_CHECK( m_vertexEstimator.retrieve() );
   ATH_MSG_DEBUG("Retrieved tool " << m_vertexEstimator);
 
-  const HepPDT::ParticleData* pd_pi = m_particleDataTable->particle(MC::PIPLUS);
-  const HepPDT::ParticleData* pd_p  = m_particleDataTable->particle(MC::PROTON);
-  const HepPDT::ParticleData* pd_e  = m_particleDataTable->particle(MC::ELECTRON);
-  const HepPDT::ParticleData* pd_K  = m_particleDataTable->particle(MC::K0S);
-  const HepPDT::ParticleData* pd_L  = m_particleDataTable->particle(MC::LAMBDA0);
   if (m_masses == 1) {
-   m_masspi     = pd_pi->mass();
-   m_massp      = pd_p->mass();
-   m_masse      = pd_e->mass();
-   m_massK0S    = pd_K->mass();
-   m_massLambda = pd_L->mass();
+   auto gendata = std::make_shared<GenData>();
+   m_masspi     = gendata->particleMass(MC::PIPLUS).value();
+   m_massp      = gendata->particleMass(MC::PROTON).value();
+   m_masse      = gendata->particleMass(MC::ELECTRON).value();
+   m_massK0S    = gendata->particleMass(MC::K0S).value();
+   m_massLambda = gendata->particleMass(MC::LAMBDA0).value();
   }
 
   m_events_processed = 0;
@@ -744,6 +739,9 @@ bool InDetV0FinderTool::pointAtVertex(const xAOD::Vertex* v0, const xAOD::Vertex
     float prob = m_V0Tools->vertexProbability(v0);
     float nLogProb = 999999;
     if (prob>0) nLogProb = -1*log10f(prob); //bdt model uses the log, not the raw value
+    if (v0lxyError == 0.){
+      throw std::runtime_error("v0lxyError is zero in division.");
+    }
     std::vector<float> bdt_vars = {
                                     nLogProb,
                                     std::abs(v0a0xy),
@@ -759,9 +757,9 @@ bool InDetV0FinderTool::pointAtVertex(const xAOD::Vertex* v0, const xAOD::Vertex
         pass = true;
       }
   }
-  else if (v0lxy/v0lxyError > m_vert_lxy_sig && cos > m_vert_cos_cut &&
-      std::abs(v0a0xy) < m_vert_a0xy_cut && std::abs(v0a0z) < m_vert_a0z_cut &&
-      v0lxy < m_vert_lxy_cut) pass = true;
+  else if ((v0lxyError != 0.) && (v0lxy/v0lxyError > m_vert_lxy_sig) && (cos > m_vert_cos_cut) &&
+      (std::abs(v0a0xy) < m_vert_a0xy_cut) && (std::abs(v0a0z) < m_vert_a0z_cut) &&
+      (v0lxy < m_vert_lxy_cut)) pass = true;
   return pass;
 }
 
@@ -869,7 +867,7 @@ ElementLink<xAOD::TrackParticleContainer> InDetV0FinderTool::makeLink(const xAOD
     Link.setElement(tp);
     bool elementSet = false;
     if(trackcols.empty()){
-       Link.setStorableObject( *dynamic_cast<const xAOD::TrackParticleContainer*>( tp->container()  ) );
+       Link.setStorableObject( *static_cast<const xAOD::TrackParticleContainer*>( tp->container()  ) );
        elementSet = true;
     } else {
       for(const xAOD::TrackParticleContainer* trkcol : trackcols){

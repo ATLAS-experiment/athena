@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -16,7 +16,6 @@
 
 
 #include <boost/test/unit_test.hpp>
-#include <boost/test/tools/output_test_stream.hpp>
 //
 #include "../TrkParametersBase/ParametersBase.h"
 #include "TrkParametersBase/Charged.h"
@@ -58,19 +57,20 @@ namespace Trk{
 class ChargedParametersStub final : public Trk::ParametersBase<DIM,T>{
 public:
   //access base class Constructors
+  //coverity[PASS_BY_VALUE]
   ChargedParametersStub(const AmgVector(DIM)& parameters,
     std::optional<AmgSymMatrix(DIM)> covariance, const T chargeDef):
     Trk::ParametersBase<DIM,T>(parameters, std::move(covariance),chargeDef){
     this->m_position = Amg::Vector3D(1, 1, 1);
     this->m_momentum = Amg::Vector3D(3, 4, 5);
   }
-
+  //coverity[PASS_BY_VALUE]
   explicit ChargedParametersStub(std::optional<AmgSymMatrix(DIM)> covariance):
     ParametersBase(std::move(covariance)){
       this->m_position = Amg::Vector3D(1, 1, 1);
       this->m_momentum = Amg::Vector3D(3, 4, 5);
   }
-
+  //coverity[PASS_BY_VALUE]
   explicit ChargedParametersStub(const AmgVector(DIM) & parameters,
     std::optional<AmgSymMatrix(DIM)> covariance = std::nullopt):
     ParametersBase(parameters,std::move(covariance)){
@@ -97,10 +97,10 @@ public:
   Trk::ParametersBase<DIM,T>* clone() const override{
     return new ChargedParametersStub(*this);
   }
-  Trk::SurfaceType surfaceType() const override{
+  constexpr virtual Trk::SurfaceType surfaceType() const override{
     return Trk::SurfaceType::Other;
   }
-  Trk::ParametersType type() const override{
+  constexpr virtual Trk::ParametersType type() const override{
     return Trk::ParametersType::AtaSurface;
   }
 

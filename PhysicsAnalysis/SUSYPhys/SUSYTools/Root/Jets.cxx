@@ -1185,12 +1185,16 @@ namespace ST {
     if (btagTagger == "GN2v00LegacyWP" || btagTagger == "GN2v00NewAliasWP"){
       actualTagger = "GN2v00";
     }
-    if (input.isAvailable<float>(actualTagger+"_pb") && input.isAvailable<float>(actualTagger+"_pc") 
-        && input.isAvailable<float>(actualTagger+"_pu") && input.isAvailable<float>(actualTagger+"_ptau")) { 
-      btag_pb = input.auxdata<float>(actualTagger+"_pb"); 
-      btag_pc = input.auxdata<float>(actualTagger+"_pc"); 
-      btag_pu = input.auxdata<float>(actualTagger+"_pu"); 
-      btag_ptau = input.auxdata<float>(actualTagger+"_ptau");
+    SG::ConstAccessor<float> pbTaggerAcc (actualTagger+"_pb");
+    SG::ConstAccessor<float> pcTaggerAcc (actualTagger+"_pc");
+    SG::ConstAccessor<float> puTaggerAcc (actualTagger+"_pu");
+    SG::ConstAccessor<float> ptauTaggerAcc (actualTagger+"_ptau");
+    if (pbTaggerAcc.isAvailable(input) && pcTaggerAcc.isAvailable(input)
+        && puTaggerAcc.isAvailable(input) && ptauTaggerAcc.isAvailable(input)) {
+      btag_pb = pbTaggerAcc(input);
+      btag_pc = pcTaggerAcc(input);
+      btag_pu = puTaggerAcc(input);
+      btag_ptau = ptauTaggerAcc(input);
     } else {
       xAOD::BTaggingUtilities::getBTagging(input)->pb(actualTagger, btag_pb);
       xAOD::BTaggingUtilities::getBTagging(input)->pc(actualTagger, btag_pc);

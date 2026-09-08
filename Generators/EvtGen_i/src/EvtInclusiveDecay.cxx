@@ -38,10 +38,8 @@
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/DataSvc.h"
-#include "GaudiKernel/IPartPropSvc.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "GeneratorObjects/McEventCollection.h"
-#include "HepPID/ParticleName.hh"
 
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandFlat.h"
@@ -224,22 +222,24 @@ StatusCode EvtInclusiveDecay::execute(const EventContext& ctx) {
 
   // Load HepMC info
   // FIXME should be using Read/WriteHandles here
-  const McEventCollection* oldmcEvtColl{};
+
+  /// New collection that we made.
+  std::unique_ptr<McEventCollection> mcEvtCollPtr;
+
+  /// Collection on which we're operating.
+  McEventCollection* mcEvtColl = nullptr;
+
   if(m_readExisting) {
+    const McEventCollection* oldmcEvtColl = nullptr;
     CHECK(evtStore()->retrieve(oldmcEvtColl, key));
     // Fill the new McEventCollection with a copy of the initial HepMC::GenEvent
-    m_mcEvtColl = new McEventCollection(*oldmcEvtColl);
+    mcEvtCollPtr = std::make_unique<McEventCollection>(*oldmcEvtColl);
+    mcEvtColl = mcEvtCollPtr.get();
   }
-  else {CHECK(evtStore()->retrieve(m_mcEvtColl, key));}
-
-  if(m_readExisting) {
-    if(m_outputKeyName!=key) {
-     CHECK(evtStore()->record( m_mcEvtColl,m_outputKeyName));
-    }
-  }
+  else {CHECK(evtStore()->retrieve(mcEvtColl, key));}
 
   McEventCollection::iterator mcItr;
-  for( mcItr = m_mcEvtColl->begin(); mcItr != m_mcEvtColl->end(); ++mcItr )   {
+  for( mcItr = mcEvtColl->begin(); mcItr != mcEvtColl->end(); ++mcItr )   {
     HepMC::GenEvent* hepMC = *mcItr;
 
     // Search HepMC record for particles to be decayed by EvtGen
@@ -303,8 +303,13 @@ StatusCode EvtInclusiveDecay::execute(const EventContext& ctx) {
     }
   }
 
-  if(m_readExisting && m_outputKeyName==key) {
-    CHECK(evtStore()->overwrite(m_mcEvtColl, m_outputKeyName));
+  if (mcEvtCollPtr) {
+    if(m_outputKeyName!=key) {
+      ATH_CHECK(evtStore()->record(std::move(mcEvtCollPtr),m_outputKeyName));
+    }
+    else {
+      ATH_CHECK(evtStore()->overwrite(std::move(mcEvtCollPtr), m_outputKeyName, true));
+    }
   }
 
   return StatusCode::SUCCESS;
@@ -317,13 +322,12 @@ StatusCode EvtInclusiveDecay::finalize() {
     ATH_MSG_INFO("The following particles were checked and didn't have any decay channels:");
     if (msgLvl(MSG::INFO)) {
       std::cout << std::endl;
-      std::cout << " Particle code    Name from HepPDT        # Occurences" << std::endl;
-      std::cout << "------------------------------------------------------"  << std::endl;
+      std::cout << " Particle code        # Occurences" << std::endl;
+      std::cout << "----------------------------------"  << std::endl;
       for (std::map<int,long>::iterator p = m_noDecayChannels.begin(); p!=m_noDecayChannels.end(); ++p) {
         int id = p->first;
         int count = p->second;
         std::cout << std::setw(14) << id
-                  << std::setw(20) << HepPID::particleName(id)
                   << std::setw(20) << count
                   << std::endl;
       }
@@ -695,7 +699,6 @@ std::string EvtInclusiveDecay::pdgName(HepMC::ConstGenParticlePtr p, bool status
   }
   if (p){
     buf << p->pdg_id();
-    buf << "/" << HepPID::particleName(p->pdg_id());
     if (statusHighlighting) {
       buf << "\033[0m";   // revert color attributes
     }

@@ -5,11 +5,13 @@
 #include "ElectronPhotonSelectorTools/AsgPhotonBDTSelector.h"
 
 #include "PathResolver/PathResolver.h"
+#include "AsgDataHandles/ReadDecorHandle.h"
 
 #include "TEnv.h"
 
 #include "EGSelectorConfigurationMapping.h"
 #include "EgammaAnalysisHelpers/AsgEGammaConfigHelper.h"
+#include "xAODCaloEvent/CaloCluster.h"
 
 #include <algorithm>
 #include <cmath>
@@ -37,14 +39,6 @@ namespace {
 namespace PhotonIDBDT {
 
 //=============================================================================
-// Standard constructor
-//=============================================================================
-AsgPhotonBDTSelector::AsgPhotonBDTSelector(const std::string& name)
-  : asg::AsgTool(name),
-    m_configFile("")
-{}
-
-//=============================================================================
 // Initialise the tool: load config and retrieve BDT calculator
 //=============================================================================
 StatusCode AsgPhotonBDTSelector::initialize() {
@@ -63,8 +57,17 @@ StatusCode AsgPhotonBDTSelector::initialize() {
     ATH_MSG_ERROR("Failed to register cuts in AcceptInfo");
     return StatusCode::FAILURE;
   }
-  // Retrieve PhotonBDTCalculator tool
-  ATH_CHECK(m_bdtTool.retrieve());
+
+  ATH_CHECK(m_ContainerName.initialize());
+  ATH_CHECK(m_decoratorScore.initialize());
+
+#ifndef XAOD_STANDALONE
+  if(m_suppressInputDeps){
+    // The user has promised that this will be produced by the same alg.
+    // Tell the scheduler to ignore it to avoid circular dependencies.
+    renounce(m_decoratorScore);
+  }
+#endif
 
   return StatusCode::SUCCESS;
 }
@@ -196,11 +199,11 @@ asg::AcceptData AsgPhotonBDTSelector::accept(const EventContext&,
 
 
 StatusCode AsgPhotonBDTSelector::execute(const EventContext& ctx,
-                                         const xAOD::Egamma* eg,
-                                         unsigned int& isEM) const
+					 const xAOD::Egamma* eg,
+					 unsigned int& isEM) const
 {
   isEM = 0u;
-  if (!eg) return StatusCode::SUCCESS;
+  if (!eg) return StatusCode::SUCCESS;;
 
   const auto* ph = dynamic_cast<const xAOD::Photon*>(eg);
   if (!ph) {
@@ -244,7 +247,7 @@ float AsgPhotonBDTSelector::getCut(const bool converted, const size_t iEta, cons
   return cut;
 }
 
-asg::AcceptData AsgPhotonBDTSelector::makeReject(const asg::AcceptInfo& info) const {
+asg::AcceptData AsgPhotonBDTSelector::makeReject(const asg::AcceptInfo& info) {
   asg::AcceptData acc(&info);
   for (unsigned i = 0; i < info.getNCuts(); ++i) acc.setCutResult(i, false);
   return acc;
@@ -263,7 +266,7 @@ float AsgPhotonBDTSelector::getShowerShape(const xAOD::Photon& ph, xAOD::EgammaP
 //=============================================================================
 // Accept method: apply cuts and return accept data
 //=============================================================================
-asg::AcceptData AsgPhotonBDTSelector::acceptBDT(const EventContext& /*ctx*/, const xAOD::Photon& ph, unsigned int* isEM) const {
+asg::AcceptData AsgPhotonBDTSelector::acceptBDT(const EventContext& ctx, const xAOD::Photon& ph, unsigned int* isEM) const {
   // Helper for isEM word
   auto setBit = [&](unsigned int bit) {
     if (isEM) *isEM |= bit;
@@ -274,35 +277,19 @@ asg::AcceptData AsgPhotonBDTSelector::acceptBDT(const EventContext& /*ctx*/, con
   // Start with all cuts failed 
   asg::AcceptData acc = makeReject(m_acceptInfo);
 
-  // Ensure BDT score is available
-  const SG::AuxElement::Accessor<float> accScore(m_scoreDecoration);
-  bool hasScore = accScore.isAvailable(ph);
-  // If the score is not available, we try to compute it on the fly
-  if (!hasScore && m_computeIfMissing) {
-    if (m_bdtTool->decorate(ph).isSuccess()) {
-      hasScore = accScore.isAvailable(ph);
-    }
-  }
-  // if we are not allowed to compute the score and it's not there
-  // reject and set the bit for missing score
-  else if (!hasScore) {
-    setBit(FailMissingScore);
-    return acc;
-  }
-  // now we should have the score available, if we recomputed it
-  // If it is not available even after trying to compute, reject and set the bit for missing score
-  if (!hasScore) {
-    setBit(FailMissingScore);
-    return acc;
-  }
-
   // Ok now we assume that we have the score
-  const float score = accScore(ph);
+  SG::ReadDecorHandle<xAOD::EgammaContainer, float> decoratorScore{m_decoratorScore, ctx};
+  const float score = decoratorScore(ph);
   acc.setCutResult(m_cutPosHasScore, true);
 
-  // Now we check the photon kinematics and the binning
-  const float absEta = std::abs(ph.eta());
-  const float etGeV  = ph.pt() * 1e-3f;
+  // Now we check the photon kinematics from cluster and the binning
+  const xAOD::CaloCluster* cluster = ph.caloCluster();
+  if (!cluster) {
+    setBit(FailOutOfRange);
+    return acc;
+  }
+  const float absEta = std::abs(cluster->eta());
+  const float etGeV  = cluster->pt() * 1e-3f;
 
   size_t iEta=0, iEt=0;
   if (!findBin(absEta, etGeV, iEta, iEt)) {

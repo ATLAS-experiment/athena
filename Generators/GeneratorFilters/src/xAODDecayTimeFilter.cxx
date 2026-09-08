@@ -21,18 +21,14 @@ StatusCode xAODDecayTimeFilter::filterInitialize() {
   return StatusCode::SUCCESS;
 }
 
-static double calcmag(const HepMC::FourVector& vect){
-    return std::sqrt(vect.x() * vect.x() + vect.y() * vect.y() + vect.z() * vect.z());
-}
-
 double xAODDecayTimeFilter::tau(const xAOD::TruthParticle* ptr) const {
     auto startpos = ptr->prodVtx();
     auto endpos = ptr->decayVtx();
     HepMC::FourVector diff(endpos->x() - startpos->x(), endpos->y() - startpos->y(), endpos->z() - startpos->z(), endpos->t() - startpos->t());
-    double mag = calcmag(diff);
+    double mag = diff.length();
     double length = mag;
     HepMC::FourVector p(ptr->px(),ptr->py(),ptr->pz(),ptr->e());// = ptr->momentum ();
-    return (1000./299.792458) * (length * ptr->m() / calcmag(p));
+    return (1000./299.792458) * (length * ptr->m() / p.length());
 }
 
 StatusCode xAODDecayTimeFilter::filterEvent(const EventContext& ctx) {

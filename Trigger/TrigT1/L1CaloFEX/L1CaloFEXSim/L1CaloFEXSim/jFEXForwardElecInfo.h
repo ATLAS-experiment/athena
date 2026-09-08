@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //              jFEXForwardElecInfo - Class to store information about trigger towers
@@ -12,11 +12,8 @@
 #ifndef jFEXForwardElecInfo_H
 #define jFEXForwardElecInfo_H
 
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "AthenaKernel/CLASS_DEF.h"
-#include "L1CaloFEXSim/jTowerContainer.h"
-#include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
 #include "L1CaloFEXSim/jFEXForwardElecTOB.h"
+#include "AthenaKernel/CLASS_DEF.h"
 
 namespace LVL1 {
 
@@ -30,47 +27,47 @@ class jFEXForwardElecInfo {
   void setup(int *cval, uint reso = 200);
 
   // Basic IDs and energies (TT level)
-  uint  getCoreTTID();
-  uint  getCoreIphi();
-  uint  getCoreIeta();             //used
+  uint  getCoreTTID() const;
+  uint  getCoreIphi() const;
+  uint  getCoreIeta() const;             //used
   void  setCoreTTEtEM(int ET_EM );//used
-  int  getCoreTTEtEM();           //used
+  int  getCoreTTEtEM() const;           //used
   void  setCoreTTSatEM(bool sat);
-  bool getCoreTTSatEM(); 
+  bool getCoreTTSatEM() const; 
   void  setNextTTID(uint TTID );   //used  
-  uint  getNextTTID();
+  uint  getNextTTID() const;
   void  setNextTTEtEM(int ET_EM); //used 
-  int  getNextTTEtEM();           //used 
+  int  getNextTTEtEM() const;     //used 
   void  setNextTTSatEM(bool sat);
-  bool getNextTTSatEM();
+  bool getNextTTSatEM() const;
   void  setTTEtEMiso(int iso_ET); //used     
   void  addTTEtEMiso(int iso_ET);  //used 
-  int  getTTEtEMiso();
+  int  getTTEtEMiso() const;
   void  setTTEtHad1(int ET_HAD);  //used, EMfr1 
   void  addTTEtHad1(int ET_HAD);  //used, special SC 
-  int  getTTEtHad1();
+  int  getTTEtHad1() const;
   void  setTTEtHad2(int ET_HAD);  //used, EMfr2 
-  int  getTTEtHad2();
+  int  getTTEtHad2() const;
   void  calcTTClusEtEM();          //used
-  int  getTTClusEtEM();           //used
-  bool getTTClusSatEM();
+  int  getTTClusEtEM() const;      //used
+  bool getTTClusSatEM() const;
   void  includeTTinSearchWindow(uint TT_ID);
-  const std::vector<uint>& getTTinSearchWindow();
+  const std::vector<uint>& getTTinSearchWindow() const;
   // floating point values
   void  setCoreTTfEta(float feta);//used
-  float getCoreTTfEta();          //used
+  float getCoreTTfEta() const;          //used
   void  setCoreTTfPhi(float fphi);//used
-  float getCoreTTfPhi();          //used
-  uint  getCoreTTiEta();          //used  
+  float getCoreTTfPhi() const;          //used
+  uint  getCoreTTiEta() const;          //used  
   // EDM quantities, corrected for resolution  
-  uint  getEtEMiso();
-  uint  getEtHad1();
-  uint  getEtHad2();
-  uint  getEtEM();
-  uint  getEt();
-  int   getGlobalEta();
-  uint  getGlobalPhi();
-  uint32_t getTobWord();          //used
+  uint  getEtEMiso() const;
+  uint  getEtHad1() const;
+  uint  getEtHad2() const;
+  uint  getEtEM() const;
+  uint  getEt() const;
+  int   getGlobalEta() const;
+  uint  getGlobalPhi() const;
+  uint32_t getTobWord() const;          //used
 
   /** Calculate variables for top word **/
   void calcFwdElEDM();            //used

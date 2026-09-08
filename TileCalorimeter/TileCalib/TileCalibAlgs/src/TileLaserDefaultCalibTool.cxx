@@ -425,7 +425,7 @@ StatusCode TileLaserDefaultCalibTool::execute(){
 	    continue;
 	  }
 	  for ( int gain=0; gain<NGAINS; ++gain ) {
-	    short status = m_tileBadChanTool->encodeStatus(m_tileBadChanTool->getAdcStatus(drawerIdx, channel, gain)) ;
+	    short status = m_tileBadChanTool->encodeStatus(m_tileBadChanTool->getAdcStatus(drawerIdx, channel, gain, ctx)) ;
 	    /* --- Status of the channel in DB
 	       
 	       0 = isGood()

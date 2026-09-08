@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/Station.h"
@@ -164,7 +164,7 @@ namespace MuonGM {
             double outerrad = 0.;
 
             for (unsigned int i = 0; i < m_components.size(); i++) {
-                TgcComponent *tg = dynamic_cast<TgcComponent*>(m_components[i].get());
+                TgcComponent *tg = static_cast<TgcComponent*>(m_components[i].get());
 
                 if (tg->posy < innerrad) {
                     innerrad = tg->posy;

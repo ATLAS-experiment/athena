@@ -5,7 +5,7 @@
 #include "FPTracker/readConfigData.h"
 #include "FPTracker/ConfigData.h"
 #include "boost/lexical_cast.hpp"
-#include "boost/tokenizer.hpp"
+#include "CxxUtils/StringUtils.h"
 #include <fstream>
 #include <string>
 #include <sstream>
@@ -60,20 +60,14 @@ namespace FPTracker{
     // ConfigData readConfigData(std::string& dir){
     // Read data cards from Data.txt file 
 
-    
     std::ifstream& in = *p_mydata;
     std::string    line;
     ValueSetter    vs;
-
-    boost::char_separator<char> sep(" \f\t\v");
-    typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;
-
     
     std::ostringstream ost;
     while( std::getline(in, line) )
       {
-	Tokenizer tok(line, sep);
-	std::vector< std::string > tokens(tok.begin(), tok.end());
+        std::vector< std::string > tokens = CxxUtils::tokenize(line, " \f\t\v");
 
 	if ( tokens.size() > 1 )
 	  {
@@ -92,7 +86,6 @@ namespace FPTracker{
 	      float pbeam;
 	      if ( vs.setValue(pbeam, svalue) ){configData.setpbeam(pbeam);}
 	    }
-	    
 
 	  }
 	

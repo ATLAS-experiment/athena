@@ -26,7 +26,7 @@ namespace MuonValR4{
         ATH_CHECK(m_truthLinkKey.initialize());
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(detStore()->retrieve(m_detMgr));
-        ATH_CHECK(m_trackingGeometryTool.retrieve());
+        ATH_CHECK(m_ctxProvider.initialize());
 
         m_truthTrks = std::make_unique<IParticleFourMomBranch>(m_tree, "Muons");
         m_truthTrks->addVariable<int>(-1, "truthOrigin");
@@ -99,7 +99,7 @@ namespace MuonValR4{
         m_eventId = ctx.eventID().event_number();
         const xAOD::MuonSegmentContainer* segments{nullptr};
         ATH_CHECK(SG::get(segments, m_segmentKey, ctx));
-        const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+        const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
         for (const xAOD::MuonSegment* segment: *segments) {
             m_segmentBranches->push_back(*segment);
             m_segmentFrames->push_back(getSurface(*segment).localToGlobalTransform(tgContext));

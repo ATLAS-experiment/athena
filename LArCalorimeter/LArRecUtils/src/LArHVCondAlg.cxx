@@ -74,11 +74,12 @@ StatusCode LArHVCondAlg::initialize(){
   ATH_CHECK(m_BFKey.initialize() );
   ATH_CHECK(m_hvMappingKey.initialize (m_doHV || m_doAffectedHV));
   ATH_CHECK(m_hvRKey.initialize(m_doR && (m_doHV || m_doAffectedHV)));
-  ATH_CHECK(m_onlineHVScaleCorrKey.initialize(m_undoOnlineHVCorr));
+  ATH_CHECK(m_onlineHVScaleCorrKey.initialize(!m_outputHVScaleResidCorrKey.empty()));
   ATH_CHECK(m_caloMgrKey.initialize());
   // Write Handles
 
-  ATH_CHECK(m_outputHVScaleCorrKey.initialize());
+  ATH_CHECK(m_outputHVScaleResidCorrKey.initialize(!m_outputHVScaleResidCorrKey.empty()));
+  ATH_CHECK(m_outputHVScaleFullCorrKey.initialize(!m_outputHVScaleFullCorrKey.empty()));
   ATH_CHECK(m_affectedKey.initialize());
 
   m_scaleTool=std::make_unique<LArHVScaleCorrTool>(m_calocellID,msg(),m_fixHVCorrStrings);
@@ -145,36 +146,59 @@ StatusCode LArHVCondAlg::fixVoltageAndCurrent()
 StatusCode LArHVCondAlg::makeHVScaleCorr (const EventContext& ctx,
                                           voltagePerLine_t& voltagePerLine) const
 {
-  SG::WriteCondHandle<LArHVCorr> writeHandle{m_outputHVScaleCorrKey, ctx};
-  if (writeHandle.isValid()) {
-    ATH_MSG_DEBUG("Found valid write handle for LArHVCorr");
-    return StatusCode::SUCCESS;
+  constexpr int RESIDUAL = 0, FULL = 1; 
+  std::map<int, SG::WriteCondHandle<LArHVCorr>> writeHandle;
+  for (int ct: {RESIDUAL, FULL}) {
+    auto& key = (ct == FULL)? m_outputHVScaleFullCorrKey: m_outputHVScaleResidCorrKey;
+    if (key.empty()) continue;
+    auto itr = writeHandle.try_emplace(ct, key, ctx).first;
+    if (itr->second.isValid()) {
+      ATH_MSG_DEBUG("Found valid write handle for LArHVCorr, key " << key.key());
+      writeHandle.erase(itr);
+    }
   }
+  if (writeHandle.empty()) return StatusCode::SUCCESS;
+  const bool doFull = writeHandle.count(FULL), doResid = writeHandle.count(RESIDUAL);
+  auto addDep = [&](auto& dep, const char* debugDescr=nullptr) {
+    for (auto&[ct, wh]: writeHandle) {
+      wh.addDependency(dep);
+      if (!debugDescr) return;
+      std::string dr;
+      if constexpr(requires{dep.getRange();}) {
+        dr = dep.getRange();
+      } else {
+        dr = dep;
+      }
+      ATH_MSG_DEBUG("Range of " << debugDescr << " " << dr
+                    << ", intersection (corr. type " << ct << "): " << wh.getRange());
+    }
+  };
 
   //Start with infinite range and narrow it down
-  const EventIDRange fullRange=IOVInfiniteRange::infiniteMixed();
-  writeHandle.addDependency (fullRange);
+  {
+    auto iov = IOVInfiniteRange::infiniteMixed();
+    addDep(iov);
+  }
 
   SG::ReadCondHandle<LArOnOffIdMapping> larCablingHdl(m_cablingKey, ctx);
   const LArOnOffIdMapping* cabling=*larCablingHdl;
-  ATH_MSG_DEBUG("Range of cabling" << larCablingHdl.getRange() << ", intersection: " << writeHandle.getRange());
-  writeHandle.addDependency(larCablingHdl);
+  addDep(larCablingHdl, "cabling");
 
   SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey,ctx};
   const CaloDetDescrManager* calodetdescrmgr = *caloMgrHandle;
-  writeHandle.addDependency(caloMgrHandle);
+  addDep(caloMgrHandle);
 
   const ILArHVScaleCorr *onlHVCorr{nullptr};
-  if(m_undoOnlineHVCorr) {
+  if(writeHandle.count(RESIDUAL)) {
     SG::ReadCondHandle<ILArHVScaleCorr> onlHVCorrHdl(m_onlineHVScaleCorrKey, ctx);
     onlHVCorr = *onlHVCorrHdl;
-    writeHandle.addDependency(onlHVCorrHdl);
-    ATH_MSG_DEBUG("Range of online HV correction  " << onlHVCorrHdl.getRange() << ", intersection: " << writeHandle.getRange());
+    writeHandle.at(RESIDUAL).addDependency(onlHVCorrHdl);
+    ATH_MSG_DEBUG("Range of online HV correction  " << onlHVCorrHdl.getRange() << ", intersection: " << writeHandle.at(RESIDUAL).getRange());
   }
 
   SG::ReadCondHandle<LArHVIdMapping> mappingHdl{m_hvMappingKey, ctx};
   const LArHVIdMapping* hvCabling = *mappingHdl;
-  writeHandle.addDependency(mappingHdl);
+  addDep(mappingHdl);
 
   pathVec  hasPathologyEM;
   pathVec  hasPathologyHEC;
@@ -192,8 +216,7 @@ StatusCode LArHVCondAlg::makeHVScaleCorr (const EventContext& ctx,
   }
  
   if(doPathology) {
-    writeHandle.addDependency(pHdl);
-    ATH_MSG_DEBUG("Range of HV-Pathology " << pHdl.getRange() << ", intersection: " << writeHandle.getRange());
+    addDep(pHdl, "HV-Pathology");
     const std::vector<LArHVPathologiesDb::LArHVElectPathologyDb> &pathCont = pathologyContainer->getPathology();
     const size_t nPathologies=pathCont.size();
     if (m_nPathologies != nPathologies) {
@@ -259,7 +282,7 @@ StatusCode LArHVCondAlg::makeHVScaleCorr (const EventContext& ctx,
   if(m_doR) {
     SG::ReadCondHandle<AthenaAttributeList> readAttrHandle{m_hvRKey, ctx};
     const AthenaAttributeList* attr = *readAttrHandle;
-    writeHandle.addDependency(readAttrHandle);
+    addDep(readAttrHandle);
     // store the conditions blob
     const coral::Blob& rBlob = (*attr)["ElectrodeRvalues"].data<coral::Blob>();
     if(rBlob.size()/sizeof(float) != m_electrodeID->electrodeHashMax()) {
@@ -269,53 +292,52 @@ StatusCode LArHVCondAlg::makeHVScaleCorr (const EventContext& ctx,
     rValues = static_cast<const float*>(rBlob.startingAddress());
   }
 
-  auto addDep = [&writeHandle] (SG::ReadCondHandle<CondAttrListCollection>& h) -> const EventIDRange&  {
-                  writeHandle.addDependency (h);
-                  return writeHandle.getRange();
-                };
   ATH_CHECK( getVoltagePerLine (ctx, voltagePerLine, addDep) );
 
   voltagePerCell_t voltageVec(MAX_LAR_CELLS);
   ATH_CHECK(fillPathAndCellHV(calodetdescrmgr,voltageVec, hvCabling, voltagePerLine, 
                               pathologyContainer, hasPathologyEM, hasPathologyHEC, hasPathologyFCAL, rValues));
 
-  std::vector<float> vScale;
-  vScale.resize(MAX_LAR_CELLS,(float)1.0);
+  auto clampCorr = [&](float value, const HWIdentifier hwid) {
+     if (value < 0.9f) {
+      if (value < 0.01f) {
+        ATH_MSG_WARNING("Ignoring suspiciously small correction factor of " << value  
+                        << " for channel " << m_onlineID->channel_name(hwid));
+        value = 1.f;
+      } else if (value < 0.4f) {
+        ATH_MSG_WARNING("HV corr for channel " << m_onlineID->channel_name(hwid)
+                                               << " = " << value);
+      } else {
+        ATH_MSG_DEBUG("HV corr for channel " << m_onlineID->channel_name(hwid)
+                                             << " = " << value);
+      }
+    }
+    return value;
+  };
+  std::vector<float> vScale[2];
+  if (doResid) vScale[RESIDUAL].resize(MAX_LAR_CELLS, 1.f);
+  if (doFull) vScale[FULL].resize(MAX_LAR_CELLS, 1.f);
   for (unsigned i=0;i<MAX_LAR_CELLS;++i) {
     IdentifierHash hash(i);
     const CaloDetDescrElement* dde = calodetdescrmgr->get_element(hash);
     const HWIdentifier hwid=cabling->createSignalChannelIDFromHash(hash);
-    vScale[i]=m_scaleTool->getHVScale(dde,voltageVec[i],msg());
-    if(onlHVCorr) { // undo the online one
-      const float hvonline = onlHVCorr->HVScaleCorr(hwid);
-      if (hvonline>0. && hvonline<100.) vScale[i]=vScale[i]/hvonline;
+    float scale=m_scaleTool->getHVScale(dde,voltageVec[i],msg());
+    if (doResid) { // factor out the online correction
+      float onlineCorr = onlHVCorr->HVScaleCorr(hwid);
+      if (onlineCorr<=0.f || onlineCorr>=100.f) onlineCorr = 1.f;
+      vScale[RESIDUAL][i] = clampCorr(scale/onlineCorr, hwid);
     }
-    //Final sanity check:
-    if (vScale[i]<0.01) {
-      ATH_MSG_WARNING("Ignoring suspicously small correction factor of " << vScale[i]  << " for channel " << m_onlineID->channel_name(hwid));
-      vScale[i]=1.0;
-    }
-
-    if (vScale[i] < 0.9) {
-      if (vScale[i] < 0.4) {
-        ATH_MSG_WARNING("HV corr for channel " << m_onlineID->channel_name(hwid)
-                                               << " = " << vScale[i]);
-      } else {
-        ATH_MSG_DEBUG("HV corr for channel " << m_onlineID->channel_name(hwid)
-                                             << " = " << vScale[i]);
-      }
-    } //end of vScale < 0.9
+    if (doFull) vScale[FULL][i] = clampCorr(scale, hwid);
   } //end loop over all cells
-
-  auto hvCorr = std::make_unique<LArHVCorr>(std::move(vScale), cabling, m_calocellID);
-
-  if (writeHandle.record(std::move(hvCorr)).isFailure()) {
-    ATH_MSG_ERROR("Could not record LArHVCorr object with " << writeHandle.key()
-                  << " with EventRange " << writeHandle.getRange() << " into Conditions Store");
-    return StatusCode::FAILURE;
+  for (auto& [ct, wh]: writeHandle) {
+    auto hvCorr = std::make_unique<LArHVCorr>(std::move(vScale[ct]), cabling, m_calocellID);
+    if (wh.record(std::move(hvCorr)).isFailure()) {
+      ATH_MSG_ERROR("Could not record LArHVCorr object with " << wh.key()
+                    << " with EventRange " << wh.getRange() << " into Conditions Store");
+      return StatusCode::FAILURE;
+    }
+    ATH_MSG_INFO("recorded new " << wh.key() << " with range " << wh.getRange() << " into Conditions Store");
   }
-  ATH_MSG_INFO("recorded new " << writeHandle.key() << " with range " << writeHandle.getRange() << " into Conditions Store");
-
   return StatusCode::SUCCESS;
 }
 
@@ -341,9 +363,10 @@ StatusCode LArHVCondAlg::makeAffectedRegionInfo (const EventContext& ctx,
 
   auto vAffected = std::make_unique<CaloAffectedRegionInfoVec>();
   if (m_doAffectedHV) {
-    auto addDep = [&writeAffectedHandle] (SG::ReadCondHandle<CondAttrListCollection>& h) -> const EventIDRange& {
+    auto addDep = [&] (SG::ReadCondHandle<CondAttrListCollection>& h, const char* debugDescr) {
                     writeAffectedHandle.addDependency (h);
-                    return writeAffectedHandle.getRange();
+                    if (debugDescr) ATH_MSG_DEBUG("Range of " << debugDescr << " " << h.getRange()
+                                                  << ", intersection: " << writeAffectedHandle.getRange());
                   };
     ATH_CHECK( getVoltagePerLine (ctx, voltagePerLine, addDep) );
 
@@ -380,9 +403,7 @@ StatusCode LArHVCondAlg::getVoltagePerLine (const EventContext& ctx,
     if(cattr) {
       ATH_MSG_DEBUG("Folder: "<<dcsHdl.key()<<" has size: "<<std::distance(cattr->begin(),cattr->end()));
       attrvec.push_back(cattr);
-      const EventIDRange& range = addDep (dcsHdl);
-      ATH_MSG_DEBUG("Range of " << dcsHdl.key() << " " << dcsHdl.getRange() << ", intersection: " << range);
-       
+      addDep (dcsHdl, dcsHdl.key().c_str());
     } else {
       ATH_MSG_WARNING("Why do not have DCS folder " << fldkey.fullKey());
     }

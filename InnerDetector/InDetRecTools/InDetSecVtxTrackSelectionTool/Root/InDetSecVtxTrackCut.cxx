@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //Author: Lianyou Shan <lianyou.shan@cern.ch>
 // -*- c++ -*-
@@ -77,6 +77,7 @@ StatusCode InDet::FuncSummaryValueCut<N>::initialize()
     std::string summaryName = "summaryType";
     summaryName += std::to_string(m_summaryTypes[i]);
     std::shared_ptr<SummaryAccessor> accessor;
+    //coverity[FORWARD_NULL:FALSE]
     ATH_CHECK( getAccessor(summaryName, accessor) );
     accessor->setSummaryType( m_summaryTypes[i] );
     m_summaryAccessors[i] = std::move(accessor);

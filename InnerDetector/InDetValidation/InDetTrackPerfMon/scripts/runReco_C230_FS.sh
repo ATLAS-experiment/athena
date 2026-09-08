@@ -49,12 +49,11 @@ if [ ! -f $inputRDO ]; then
 fi
 
 ## running reconstruction
-Reco_tf.py --CA \
+Reco_tf.py \
     --maxEvents ${nEvents} \
-    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags' \
+    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
     --postInclude 'ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
-    --preExec "from ActsConfig.ActsConfigFlags import SeedingStrategy;flags.Acts.SeedingStrategy=SeedingStrategy.GbtsFtf;flags.Tracking.doPixelDigitalClustering=True; " \
-    --steering 'doRAWtoALL' \
+    --preExec "from ActsConfig.ActsConfigFlags import SeedingStrategy;flags.Tracking.ITkActsPass.SeedingStrategy=SeedingStrategy.GbtsFtf;flags.Tracking.doPixelDigitalClustering=True;flags.Tracking.ITkActsPass.storeTrackSeeds=True;" \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD}
     #--preExec 'flags.Tracking.writeExtendedSi_PRDInfo=True' \

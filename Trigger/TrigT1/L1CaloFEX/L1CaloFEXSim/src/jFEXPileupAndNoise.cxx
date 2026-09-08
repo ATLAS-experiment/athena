@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration  
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration  
 */
 //***************************************************************************  
 //		jFEXPileupAndNoise - Algorithm for Pileup and Noise in jFEX
@@ -7,13 +7,8 @@
 //     begin                : 24 05 2021
 //     email                : Sergi.Rodriguez@cern.ch
 //***************************************************************************
-#include <vector>
-#include <stdio.h>
-#include <math.h>
-#include "L1CaloFEXSim/jTower.h"
-#include "L1CaloFEXSim/jTowerContainer.h"
+
 #include "jFEXPileupAndNoise.h"
-#include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
 
 namespace LVL1{
 
@@ -30,7 +25,6 @@ StatusCode LVL1::jFEXPileupAndNoise::initialize() {
     
     ATH_CHECK(m_jTowerContainerKey.initialize());
     ATH_CHECK( m_BDToolKey.initialize() );
-    
     
     return StatusCode::SUCCESS;
 }
@@ -73,7 +67,6 @@ void LVL1::jFEXPileupAndNoise::reset_conters() {
     m_count_rho_HAD2 = 0;
     m_count_rho_HAD3 = 0;
     m_count_rho_FCAL = 0;    
-    
 }
 
 
@@ -210,14 +203,14 @@ std::vector<int> LVL1::jFEXPileupAndNoise::CalculatePileup(){
     return rho_values;
 }
 
-int  LVL1::jFEXPileupAndNoise::rhoDivLUT(int ntowers){
+int  LVL1::jFEXPileupAndNoise::rhoDivLUT(int ntowers) const {
     
     //This is to save one bit in the firmware (19 bit will set be set to 1 instead of the 20th bit and rest are 0) 
     if(ntowers == 1) return ((1<<FEXAlgoSpaceDefs::pu_rhoLUT) - 1);
     return static_cast<int>((1.0/ntowers)*(1<<FEXAlgoSpaceDefs::pu_rhoLUT) );
 }
 
-void LVL1::jFEXPileupAndNoise::SubtractPileup(){
+void LVL1::jFEXPileupAndNoise::SubtractPileup() {
     
     for(int iphi=0; iphi<FEXAlgoSpaceDefs::jFEX_algoSpace_height; iphi++) {
         for(int ieta=0; ieta<m_etaMAX; ieta++) {
@@ -415,12 +408,10 @@ void LVL1::jFEXPileupAndNoise::ApplyNoiseCuts(std::unordered_map<int,std::vector
     
 }
 
-std::unordered_map<int,std::vector<int> > LVL1::jFEXPileupAndNoise::GetEt_values(){
+std::unordered_map<int,std::vector<int> > LVL1::jFEXPileupAndNoise::GetEt_values() const {
     
     // map for energies sent to the FPGA
     std::unordered_map<int,std::vector<int> > map_Etvalues;
-    map_Etvalues.clear();
-    
     
     /* 
      *  The vector Et_energy has size 2
@@ -434,8 +425,8 @@ std::unordered_map<int,std::vector<int> > LVL1::jFEXPileupAndNoise::GetEt_values
         Et_energy.clear();
         Et_energy.resize(2,0);
         
-        Et_energy[0]=m_map_Etvalues_EM[key][0]+m_map_Etvalues_HAD[key][0];
-        Et_energy[1]=m_map_Etvalues_EM[key][1]+m_map_Etvalues_HAD[key][1];
+        Et_energy[0] = m_map_Etvalues_EM.at(key)[0] + m_map_Etvalues_HAD.at(key)[0];
+        Et_energy[1] = m_map_Etvalues_EM.at(key)[1] + m_map_Etvalues_HAD.at(key)[1];
         map_Etvalues[key] = Et_energy;
     }
     return map_Etvalues;
@@ -443,39 +434,39 @@ std::unordered_map<int,std::vector<int> > LVL1::jFEXPileupAndNoise::GetEt_values
 
 
 //Gets Eta of the TT
-int LVL1::jFEXPileupAndNoise::getTTowerEta(const LVL1::jTower *tmpTower) {
+int LVL1::jFEXPileupAndNoise::getTTowerEta(const LVL1::jTower *tmpTower) const {
     return tmpTower->iEta() < 0 ? std::abs(tmpTower->iEta()+1) : tmpTower->iEta() ;
 }
 //Gets ET of the TT
-int LVL1::jFEXPileupAndNoise::getTTowerET(const LVL1::jTower *tmpTower) {
+int LVL1::jFEXPileupAndNoise::getTTowerET(const LVL1::jTower *tmpTower) const {
     return tmpTower->getTotalET();
 }
 //Gets EM ET of the TT
-int LVL1::jFEXPileupAndNoise::getET_EM(const LVL1::jTower *tmpTower) {
+int LVL1::jFEXPileupAndNoise::getET_EM(const LVL1::jTower *tmpTower) const {
     return tmpTower->getET_EM();
 }
 //Gets HAD ET of the TT
-int LVL1::jFEXPileupAndNoise::getET_HAD(const LVL1::jTower *tmpTower) {
+int LVL1::jFEXPileupAndNoise::getET_HAD(const LVL1::jTower *tmpTower) const {
     return tmpTower->getET_HAD();
 }
 
 //Get Area of a EM TT
-int LVL1::jFEXPileupAndNoise::getTTArea_EM(const LVL1::jTower *tmpTower) {
+int LVL1::jFEXPileupAndNoise::getTTArea_EM(const LVL1::jTower *tmpTower) const {
     return tmpTower->getTTowerArea(0);
 }
 
 //Get Area of a HAD TT
-int LVL1::jFEXPileupAndNoise::getTTArea_HAD(const LVL1::jTower *tmpTower) {
+int LVL1::jFEXPileupAndNoise::getTTArea_HAD(const LVL1::jTower *tmpTower) const {
     return tmpTower->getTTowerArea(1);
 }
 
 //Get Area of a EM TT
-int LVL1::jFEXPileupAndNoise::getTTAreaINV_EM(const LVL1::jTower *tmpTower) {
+int LVL1::jFEXPileupAndNoise::getTTAreaINV_EM(const LVL1::jTower *tmpTower) const {
     return tmpTower->getTTowerAreaInv(0);
 }
 
 //Get Area of a HAD TT
-int LVL1::jFEXPileupAndNoise::getTTAreaINV_HAD(const LVL1::jTower *tmpTower) {
+int LVL1::jFEXPileupAndNoise::getTTAreaINV_HAD(const LVL1::jTower *tmpTower) const {
     return tmpTower->getTTowerAreaInv(1);
 }
 

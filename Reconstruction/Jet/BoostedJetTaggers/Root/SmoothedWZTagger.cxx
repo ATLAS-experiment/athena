@@ -60,6 +60,10 @@ StatusCode SmoothedWZTagger::initialize() {
     if (!m_strScoreCut.empty())
       m_useScore = true;
 
+    /// Get the the ML tagger score decoration name
+    if(m_useScore)
+      m_scoreDecorationName = m_configReader.GetValue("ScoreDecorationName", "");
+    
     /// Get the scale factor configuration
     m_calcSF = m_configReader.GetValue("CalcSF", false);
     if ( m_calcSF ) {
@@ -111,8 +115,10 @@ StatusCode SmoothedWZTagger::initialize() {
   ATH_MSG_INFO( "  D2 cut high        : " << m_strD2Cut );
   if ( m_useNtrk )
     ATH_MSG_INFO( "  Ntrk cut high      : " << m_strNtrkCut );
-  if( m_useScore)
+  if( m_useScore){
     ATH_MSG_INFO( "  Score cut low        : " << m_strScoreCut );
+    ATH_MSG_INFO( "  ScoreDecorationName    : " << m_scoreDecorationName );
+  }
   ATH_MSG_INFO( "  DecorationName    : " << m_decorationName );
   if ( m_calcSF ) {
     ATH_MSG_INFO( "weightDecorationName    : " << m_weightDecorationName );
@@ -191,6 +197,9 @@ StatusCode SmoothedWZTagger::initialize() {
     renounce(m_decValidEventContentKey);
     renounce(m_decPassNtrkKey);
     renounce(m_decCutNtrkKey);
+    renounce(m_decValidKinRangeKey);
+    renounce(m_decCutScoreKey);
+    renounce(m_decPassScoreKey);
   }
 #endif
   
@@ -248,11 +257,12 @@ StatusCode SmoothedWZTagger::decorate( const xAOD::JetContainer& jets ) const {
     float jet_mass = jet -> m()/1000.0;
 
     /// Get D2 value
+    //coverity[UNNECESSARY_STRING_COPY:FALSE]
     static const SG::AuxElement::ConstAccessor<float> D2("D2");
     float jet_d2 = D2(*jet);
 
     /// Get Score value
-    static const SG::AuxElement::ConstAccessor<float> Score(m_decorationName + "_ConstScore");
+    static const SG::AuxElement::ConstAccessor<float> Score(m_scoreDecorationName + "_ConstScore");
     float jet_score = m_useScore ? Score(*jet) : -99;
 
     /// Evaluate the values of the upper and lower mass bounds and the d2 cut

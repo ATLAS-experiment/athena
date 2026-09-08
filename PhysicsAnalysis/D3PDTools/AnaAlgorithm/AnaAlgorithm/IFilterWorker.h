@@ -11,7 +11,7 @@
 
 #include <AnaAlgorithm/Global.h>
 
-#ifndef ROOTCORE
+#ifndef XAOD_STANDALONE
 #error only include this header in AnalysisBase
 #endif
 

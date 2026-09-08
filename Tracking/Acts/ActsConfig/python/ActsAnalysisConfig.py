@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -548,9 +548,8 @@ def ActsBaseSeedAnalysisAlgCfg(flags,
     from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
     trackEstimationTool = acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags))
     
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg, ActsGeometryRealmConvTool
-    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
-    kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvTool(flags)))
+    from ActsConfig.ActsGeometryConfig import ActsGeometryRealmConvToolCfg
+    kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvToolCfg(flags)))
 
     kwargs.setdefault('TrackParamsEstimationTool', trackEstimationTool)
 
@@ -745,16 +744,8 @@ def ActsBaseSeedsToTrackParamsAlgCfg(flags,
                                      **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    if 'ExtrapolationTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
-        kwargs.setdefault(
-            'ExtrapolationTool',
-            acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)),
-        )
-
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg, ActsGeometryRealmConvTool
-    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
-    kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvTool(flags)))
+    from ActsConfig.ActsGeometryConfig import ActsGeometryRealmConvToolCfg
+    kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvToolCfg(flags)))
 
     if 'TrackParamsEstimationTool' not in kwargs:
         from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
@@ -767,7 +758,6 @@ def ActsBaseSeedsToTrackParamsAlgCfg(flags,
 
 def ActsPixelSeedsToTrackParamsAlgCfg(flags,
                                       name: str = 'ActsPixelSeedsToTrackParamsAlg',
-                                      extension: str = "Acts",
                                       **kwargs) -> ComponentAccumulator:
     kwargs.setdefault('InputSeedContainerKey', 'ActsPixelSeeds')
     kwargs.setdefault('DetectorElementsKey', 'ITkPixelDetectorElementCollection')
@@ -779,7 +769,6 @@ def ActsPixelSeedsToTrackParamsAlgCfg(flags,
 
 def ActsStripSeedsToTrackParamsAlgCfg(flags,
                                       name: str = 'ActsStripSeedsToTrackParamsAlgCfg',
-                                      extension: str = "Acts",
                                       **kwargs) -> ComponentAccumulator:
     kwargs.setdefault('InputSeedContainerKey', 'ActsStripSeeds')
     kwargs.setdefault('DetectorElementsKey', 'ITkStripDetectorElementCollection')
@@ -930,8 +919,10 @@ def ActsResidualAnalysisAlgCfg(flags,
 def ActsGeoDumpCfg(flags, name="ActsReadoutDump",
                    outFile="ActsGeoDump.root", **kwargs):
     result = ComponentAccumulator()
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-    kwargs.setdefault("TrackingGeometryTool", result.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+    result.merge(ActsTrackingGeometrySvcCfg(flags))
+    result.merge(ActsGeometryContextAlgCfg(flags))
     from ROOT.ActsTrk import DetectorType
     kwargs.setdefault("Detectors", [DetectorType.Pixel, DetectorType.Sct])
     from MuonConfig.MuonConfigUtils import setupHistSvcCfg

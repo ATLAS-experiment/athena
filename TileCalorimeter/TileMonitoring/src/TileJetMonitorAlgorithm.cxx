@@ -128,7 +128,7 @@ StatusCode TileJetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
                       << ", eta " << jet->eta()
                       << ", phi " << jet->phi()
                       << ", constituents " << jet->numConstituents());
-        CHECK(fillTimeHistograms(*jet, lumiBlock, usedCells));
+        CHECK(fillTimeHistograms(*jet, lumiBlock, usedCells, ctx));
       } else {
         ATH_MSG_DEBUG("::fillHistogram, BAD jet " << iJet
                       << ", eta " << jet->eta()
@@ -149,7 +149,7 @@ StatusCode TileJetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
 
 
 /*---------------------------------------------------------*/
-StatusCode TileJetMonitorAlgorithm::fillTimeHistograms(const xAOD::Jet& jet, uint32_t lumiBlock, std::set<Identifier>& usedCells) const {
+StatusCode TileJetMonitorAlgorithm::fillTimeHistograms(const xAOD::Jet& jet, uint32_t lumiBlock, std::set<Identifier>& usedCells, const EventContext& ctx) const {
 /*---------------------------------------------------------*/
 
   ATH_MSG_VERBOSE( "in fillTimeHistograms()" );
@@ -200,7 +200,7 @@ StatusCode TileJetMonitorAlgorithm::fillTimeHistograms(const xAOD::Jet& jet, uin
               HWIdentifier adc_id = m_tileHWID->adc_id(hash1, gain1);
               ros1 = m_tileHWID->ros(adc_id);
               chan1 = m_tileHWID->channel(adc_id);
-              bad1 = m_tileBadChanTool->encodeStatus(m_tileBadChanTool->getAdcStatus(adc_id));
+              bad1 = m_tileBadChanTool->encodeStatus(m_tileBadChanTool->getAdcStatus(adc_id, ctx));
             }
 
             // How is it here with partition? D0 spans two partitions....
@@ -210,7 +210,7 @@ StatusCode TileJetMonitorAlgorithm::fillTimeHistograms(const xAOD::Jet& jet, uin
               HWIdentifier adc_id = m_tileHWID->adc_id(hash2, gain2);
               ros2 = m_tileHWID->ros(adc_id);
               chan2 = m_tileHWID->channel(adc_id);
-              bad2 = m_tileBadChanTool->encodeStatus(m_tileBadChanTool->getAdcStatus(adc_id));
+              bad2 = m_tileBadChanTool->encodeStatus(m_tileBadChanTool->getAdcStatus(adc_id, ctx));
             }
 
             bool is_good1 = isGoodChannel(ros1, module, chan1, bad1, qbit1, id);

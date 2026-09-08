@@ -4,6 +4,7 @@
 
 #include "src/TrackStatePrinterTool.h"
 
+
 // Athena
 #include "TrkParameters/TrackParameters.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
@@ -19,6 +20,7 @@
 #include "Acts/Surfaces/SurfaceBounds.hpp"
 #include "Acts/Surfaces/DiscSurface.hpp"
 #include "Acts/EventData/TransformationHelpers.hpp"
+#include "Acts/Utilities/detail/OstreamStateGuard.hpp"
 
 // PACKAGE
 #include "ActsGeometry/ActsDetectorElement.h"
@@ -31,6 +33,8 @@
 #include <vector>
 #include <iostream>
 #include <sstream>
+
+using Acts::detail::OstreamStateGuard;
 
 namespace ActsTrk
 {
@@ -92,8 +96,7 @@ namespace ActsTrk
   atlasSurfaceName(const Acts::Surface *measurement_surface)
   {
      if (measurement_surface) {
-        const ActsDetectorElement *
-           acts_detector_element = dynamic_cast<const ActsDetectorElement *>(measurement_surface->surfacePlacement());
+        const auto* acts_detector_element = getActsDetectorElement(measurement_surface);
         if (acts_detector_element) {
            const InDetDD::SiDetectorElement *detElem = dynamic_cast< const InDetDD::SiDetectorElement *>(acts_detector_element->upstreamDetectorElement());
            if (detElem) {
@@ -117,6 +120,7 @@ namespace ActsTrk
 
   static void printHeader(int type, bool extra = false)
   {
+    OstreamStateGuard s(std::cout);
     std::cout << std::left
               << std::setw(5) << "Index" << ' '
               << std::setw(4) << "Type" << ' '
@@ -177,12 +181,13 @@ namespace ActsTrk
   static void
   printVec3(const Acts::Vector3 &p)
   {
+    OstreamStateGuard s(std::cout);
     std::cout << std::fixed << ' '
               << std::setw(9) << std::setprecision(3) << p.head<2>().norm() << ' '
 	      << std::setw(9) << std::setprecision(3) << p[2] << ' '
               << std::setw(9) << std::setprecision(3) << std::atan2(p[1], p[0]) / Acts::UnitConstants::degree << ' '
-              << std::setw(9) << std::setprecision(5) << std::atanh(p[2] / p.norm())
-              << std::defaultfloat << std::setprecision(-1);
+              << std::setw(9) << std::setprecision(5) << std::atanh(p[2] / p.norm());
+              
   }
 
   static void
@@ -201,12 +206,13 @@ namespace ActsTrk
   static void
   printVec2(const Acts::Vector2 &p, const char *estimated = nullptr)
   {
+    OstreamStateGuard s(std::cout);
     const char e0 = estimated ? estimated[0] : ' ';
     const char *e1 = estimated ? estimated + 1 : "";
     std::cout << std::fixed << ' '
               << std::setw(10) << std::setprecision(4) << p[0] << e0
-              << std::setw(10) << std::setprecision(4) << p[1] << e1
-              << std::defaultfloat << std::setprecision(-1);
+              << std::setw(10) << std::setprecision(4) << p[1] << e1;
+              
   }
 
   static void
@@ -228,6 +234,7 @@ namespace ActsTrk
                    const std::tuple<Acts::Vector2, Amg::Vector2D, int, int> &locData,
                    bool compareMeasurementTransforms = false)
   {
+    OstreamStateGuard s(std::cout);
     auto &[loc, locTrk, measInd, est] = locData;
     int flag = est < 0 ? est : 2 * est + measInd;
     int flagTrk = est < 0 ? est : 2 * est;
@@ -247,10 +254,8 @@ namespace ActsTrk
       auto glob = surface->localToGlobal(tgContext, loc, Acts::Vector3::Zero());
       printVec3(glob);
 
-      if (compareMeasurementTransforms)
-      {
-        const ActsDetectorElement *
-            acts_detector_element = dynamic_cast<const ActsDetectorElement *>(surface->surfacePlacement());
+      if (compareMeasurementTransforms) {
+        const auto* acts_detector_element = getActsDetectorElement(surface);
         if (acts_detector_element) {
            const InDetDD::SiDetectorElement *detElem = dynamic_cast< const InDetDD::SiDetectorElement *>(acts_detector_element->upstreamDetectorElement());
 
@@ -277,7 +282,6 @@ namespace ActsTrk
       }
 
     }
-    std::cout << std::defaultfloat << std::setprecision(-1);
   }
 
   static std::tuple<Acts::Vector2, Amg::Vector2D, int, int>
@@ -403,6 +407,7 @@ namespace ActsTrk
 					      const Acts::GeometryContext &tgContext,
 					      const Acts::BoundVector &bound)
   {
+    OstreamStateGuard s(std::cout);
     auto p = Acts::transformBoundToFreeParameters(surface, tgContext, bound);
     std::cout << std::fixed
               << std::setw(10) << std::setprecision(4) << bound[Acts::eBoundLoc0] << ' '
@@ -413,8 +418,7 @@ namespace ActsTrk
               << std::setw(9) << std::setprecision(5) << std::atanh(p[Acts::eFreePos2] / p.segment<3>(Acts::eFreePos0).norm()) << ' '
               << std::setw(9) << std::setprecision(3) << p.segment<2>(Acts::eFreeDir0).norm() / p[Acts::eFreeQOverP] << ' '
               << std::setw(9) << std::setprecision(3) << std::atan2(p[Acts::eFreeDir1], p[Acts::eFreeDir0]) / Acts::UnitConstants::degree << ' '
-              << std::setw(9) << std::setprecision(5) << std::atanh(p[Acts::eFreeDir2])
-              << std::defaultfloat << std::setprecision(-1);
+              << std::setw(9) << std::setprecision(5) << std::atanh(p[Acts::eFreeDir2]);
   }
 
   /// =========================================================================
@@ -427,8 +431,9 @@ namespace ActsTrk
     ATH_MSG_DEBUG("   " << m_compareMeasurementTransforms);
     ATH_MSG_DEBUG("   " << m_printFilteredStates);
 
-    ATH_CHECK(m_trackingGeometryTool.retrieve());
-    m_surfAcc = detail::xAODUncalibMeasSurfAcc{m_trackingGeometryTool.get()};
+    ATH_CHECK(m_trackingGeometrySvc.retrieve());
+    ATH_CHECK(m_ctxProvider.initialize());
+    m_surfAcc = detail::xAODUncalibMeasSurfAcc{m_trackingGeometrySvc.get()};
     ATH_CHECK(m_spacePointKey.initialize());
 
     return StatusCode::SUCCESS;
@@ -478,7 +483,7 @@ namespace ActsTrk
                                            const std::vector<const xAOD::UncalibratedMeasurementContainer *> &clusterContainers,					  
                                            const std::vector<size_t> &offsets) const {
 
-    Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+    const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
 
     auto measToSp = addSpacePoints(ctx, clusterContainers, offsets);
 

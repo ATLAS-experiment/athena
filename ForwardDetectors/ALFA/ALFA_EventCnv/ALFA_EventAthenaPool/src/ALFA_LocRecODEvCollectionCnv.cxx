@@ -21,7 +21,7 @@ ALFA_LocRecODEvCollection* ALFA_LocRecODEvCollectionCnv::createTransient(const T
     ALFA_LocRecODEvCollectionCnv_p1   TPConverter_p1;
 
     ALFA_LocRecODEvCollection       *trans_cont(nullptr); // probably inicialization
-    static const pool::Guid p1_guid ("D6688847-9903-4FDE-B709-879B0E470073");
+    static const Guid p1_guid ("D6688847-9903-4FDE-B709-879B0E470073");
     
     if( this->compareClassGuid(token, p1_guid)) {
          std::unique_ptr< ALFA_LocRecODEvCollection_p1 >   col_vect( this->poolReadObject< ALFA_LocRecODEvCollection_p1 >(token) );

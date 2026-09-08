@@ -72,7 +72,9 @@ if (NOT XAOD_STANDALONE)
     POST_EXEC_SCRIPT test-subgroup-svc-output )
   atlas_add_test( test_subgroup_svc_must_new
     SCRIPT test-subgroup-svc-must-new.py
-    POST_EXEC_SCRIPT nopost.sh )
+    # Expected errors.
+    LOG_IGNORE_PATTERN "subgroup .grp. already exists|Service: SvcDup|initialize AppMgr"
+    POST_EXEC_SCRIPT noerror.sh )
 endif()
 
 # unit tests
@@ -106,8 +108,17 @@ atlas_install_scripts( test/test-h5-threads-output )
 
 atlas_add_test( test_hdf5_threads
   SCRIPT test-h5-threads-output
-  POST_EXEC_SCRIPT nopost.sh )
+  POST_EXEC_SCRIPT noerror.sh )
 
+
+# test merging
+atlas_add_executable( test-hdf5-merge
+  util/test-hdf5-merge.cxx
+  LINK_LIBRARIES HDF5Utils )
+
+atlas_add_test( test_hdf5_merge
+  SCRIPT test-hdf5-merge
+  POST_EXEC_SCRIPT noerror.sh )
 
 # half precision tests
 atlas_add_executable( test-half-precision

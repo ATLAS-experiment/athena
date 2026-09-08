@@ -30,11 +30,31 @@ def MuonR4SegmentCnvAlgCfg(flags, name="MuonR4SegmentCnvAlg", **kwargs):
     result.addEventAlgo(the_alg, primary = True)
     return result
 
+def xAODSegmentCnvToolCfg(flags, name="xAODSegmentCnvTool", **kwargs):
+    result = ComponentAccumulator()
+    from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+    result.merge(ActsGeometryContextAlgCfg(flags))
+
+    kwargs.setdefault("estimateHoles", flags.Muon.scheduleActsReco)
+    
+    if kwargs["estimateHoles"]:
+        from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
+        kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(ActsExtrapolationToolCfg(flags, 
+                                                                                                MaxSteps=10000,
+                                                                                                InteractionEloss = False,
+                                                                                                InteractionMultiScatering = False,
+                                                                                                FieldMode="StraightLine")))
+    the_tool = CompFactory.MuonR4.xAODSegmentCnvTool(name, **kwargs)
+    result.setPrivateTools(the_tool)
+    return result
+
 def xAODSegmentCnvAlgCfg(flags, name="MuonR4xAODSegmentCnvAlg", **kwargs):
     result = ComponentAccumulator()
     from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
     result.merge(ActsGeometryContextAlgCfg(flags))
 
+    kwargs.setdefault("SegmentCnvTool", result.popToolsAndMerge(xAODSegmentCnvToolCfg(flags)))
+ 
     the_alg = CompFactory.MuonR4.xAODSegmentCnvAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result

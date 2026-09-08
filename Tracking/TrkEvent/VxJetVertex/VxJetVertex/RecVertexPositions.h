@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -17,23 +17,29 @@
 #define VxJetVertex_RecVertexPositions_H
 
 #include "VxJetVertex/VertexPositions.h" //!< include headers from the base class
-#include "GaudiKernel/MsgStream.h"
 #include "TrkEventPrimitives/FitQuality.h"
+
+#include <iosfwd>
+
+class MsgStream;
+
 
 namespace Trk {
 
   class RecVertexPositions : public VertexPositions {
   public:
     RecVertexPositions(); //!< default constructor, if called initializes a RecVertexPositions with all data members set to 0.
-    RecVertexPositions(const VertexPositions& pos); //!< construct a RecVertexPositions from a Vertex. ErrorMatrix will be 0,0,0.
+    RecVertexPositions(const VertexPositions & pos); //!< construct a RecVertexPositions from a Vertex. ErrorMatrix will be 0,0,0.
+    RecVertexPositions(const RecVertexPositions & pos) = default;
+    RecVertexPositions(RecVertexPositions && pos) = default;
+    RecVertexPositions & operator=(const RecVertexPositions & pos) = default;
+    RecVertexPositions & operator=(RecVertexPositions && pos) = default;
     RecVertexPositions(const Amg::VectorX &pos, const Amg::MatrixX &cov,
 		       const double ndf = 0., 
 		       const double chi2 = 0.,bool isWeightTimesPosition=false); //!< constructs a RecVertexPositions with position, error, ndf, dhi2 and ntrk
     //-> added support for non integer degrees of freedom
     // Additional constructor for truth ?
     RecVertexPositions(const Amg::VectorX &pos, const double ndf = 0., const double chi2 =0.);
-    RecVertexPositions(const RecVertexPositions& );  //!< copy constructor
-    RecVertexPositions &operator= (const RecVertexPositions &);  //!< Assignement operator
 
     /** Output Method for MsgStream, to be overloaded by child classes */
     virtual MsgStream& dump(MsgStream& sl) const;
@@ -70,7 +76,6 @@ namespace Trk {
   private:
     Amg::MatrixX m_positionError; //!< cov matrix on vertex position (primary vtx+jet dir+distance)
     Trk::FitQuality m_fitQuality; //chi2 and number of degrees of freedom of the fit
-    //bool m_positionErrorInverseIsComputed;
   };
 
 

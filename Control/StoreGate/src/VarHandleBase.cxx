@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // VarHandleBase.cxx 
@@ -975,11 +975,10 @@ namespace SG {
         return Atlas::getExtendedEventContext(*ctx).proxy();
       if (m_storeWasSet && m_store) return m_store;
 
-      if ( Atlas::hasExtendedEventContext (Gaudi::Hive::currentContext()) ) {
-        return Atlas::getExtendedEventContext (Gaudi::Hive::currentContext()).proxy();
-      } else {
-        return nullptr;
-      }
+      const Atlas::ExtendedEventContext* ectx =
+        Atlas::tryGetExtendedEventContext (Gaudi::Hive::currentContext());
+
+      return (ectx ? ectx->proxy() : nullptr);
     }
 
     if (m_storeWasSet && m_store) return m_store;

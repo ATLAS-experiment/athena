@@ -9,6 +9,8 @@
 # art-html: dcube_simGPU
 
 conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
+geometryTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN4)")
+
 
 echo "--- modinfo ---"
 modinfo nvidia | grep -i version
@@ -36,8 +38,8 @@ timeout 10800 AtlasG4_tf.py  \
   --multithreaded \
   --simulator 'AtlasG4_QS' \
   --conditionsTag "${conditionsTag}" \
-  --geometryVersion 'default:ATLAS-P2-RUN4-04-00-00' \
-  --preInclude 'AtlasG4Tf:Campaigns.PhaseIISimulation' \
+  --geometryVersion "default:${geometryTag}" \
+  --preInclude 'AtlasG4Tf:Campaigns.MC23PhaseIISimulation' \
   --preExec 'flags.Sim.G4Commands+=["/adept/CallUserTrackingAction true", "/adept/CallUserSteppingAction false","/adept/setCovfieBfieldFile /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/MagneticFieldMaps/bmagatlas_09_fullAsym20400_forGPU_v1.cvf", "/adept/setVerbosity 0", "/adept/addGPURegion EMB", "/adept/addGPURegion EMEC", "/adept/addGPURegion HEC", "/adept/addGPURegion PreSampLAr", "/adept/setTrackInAllRegions false", "/adept/setMillionsOfTrackSlots 4", "/adept/setMillionsOfHitSlots 7", "/adept/setCUDAStackLimit 32192", "/adept/setCUDAHeapLimit 84857600"];flags.GeoModel.EMECStandard=True' \
   --physicsList 'FTFP_BERT_ATL_AdePT' \
   --postInclude 'PyJobTransforms.UseFrontier' \

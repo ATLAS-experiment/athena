@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_DetailedSurfaceChargesGenerator.h"
@@ -972,7 +972,7 @@ double SCT_DetailedSurfaceChargesGenerator::inducedCharge (int& strip, double& x
   
   static const double dt{0.5};
   double fx, fy, ft;
-  int ix, iy, it;//, iy1, it1;
+  int ix, iy, it;
   
   if (strip<-2 or strip>2) return charge;
   if (x<0. or x>=m_strip_pitch*10000.) return charge;
@@ -986,31 +986,25 @@ double SCT_DetailedSurfaceChargesGenerator::inducedCharge (int& strip, double& x
   fy = (y - 0.5*m_stripCharge_dy) / m_stripCharge_dy;
   iy = static_cast<int>(fy);
   fy -= iy;
-  //iy1 = iy + 1;
   if (y <= 0.5*m_stripCharge_dy) {
     fy = 0.;
-    iy = 0;
-    /*iy1 = 0;*/
+    /*iy = 0; subsequently overwritten*/
   }
   if (y >= m_bulk_depth*10000.-0.5*m_stripCharge_dy) {
     fy = 1.;
     iy = m_stripCharge_iymax;
-    /*iy1 = iy;*/
   }
 
   ft = (t - m_transportTimeStep) / dt;
   it = static_cast<int>(ft);
   ft -= it;
-  //it1 = it + 1;
   if (t <= m_transportTimeStep) {
     ft = 0.;
-    it = 0;
-    /*it1= 0;*/
+    /*it = 0; subsequently overwritten*/
   }
   if (t >= m_transportTimeMax-m_transportTimeStep) {
     ft = 1.;
     it = 49;
-    /*it1=49;*/
   }
 
   double p000{0.};//m_stripCharge[strip+2][ix][iy][it];

@@ -55,6 +55,8 @@ if [ ! -f $inputRDO ]; then
     exit 1
 fi
 
+# Use G-200/ART repo to run G200 pipeline.
+# THIS METHOD IS NOW DEPRECIATED AND WILL BE SOON BE REPLACED.
 source "$(dirname "$0")/setup_G200_ART.sh"
 
 ## running reconstruction
@@ -65,7 +67,8 @@ run Reco_tf.py --CA \
     --preExec 'from EFTracking.GpuEFTrackingConfigFlags import createGpuEFTrackingConfigFlags; \
                flags.addFlagsCategory("Trigger.EFTracking.GPU", createGpuEFTrackingConfigFlags, prefix=True); \
                flags.Trigger.EFTracking.GPU.inputDirectory="'"$PWD"'/ITk_data/"; \
-               flags.Trigger.EFTracking.GPU.pipeline="g200";' \
+               flags.Trigger.EFTracking.GPU.pipeline="g200"; \
+               flags.Trigger.EFTracking.GPU.checkSeeds=True;' \
     --steering 'doRAWtoALL' \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD} \

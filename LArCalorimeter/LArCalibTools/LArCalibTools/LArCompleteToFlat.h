@@ -9,7 +9,7 @@
 #define LARCALIBTOOLS_LARCOMPLETETOFLAT_H 1
 
 #include <string>
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "LArRawConditions/LArConditionsContainer.h"
 #include "LArRawConditions/LArSingleFloatP.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -29,7 +29,7 @@ class ILArDAC2uA;
 class ILAruA2MeV;
 class LArDSPThresholdsComplete;
 
-class LArCompleteToFlat: public AthAlgorithm
+class LArCompleteToFlat: public AthReentrantAlgorithm
 { 
 
   /////////////////////////////////////////////////////////////////// 
@@ -43,14 +43,13 @@ class LArCompleteToFlat: public AthAlgorithm
   virtual ~LArCompleteToFlat(); 
 
   // Athena algorithm's Hooks
-  StatusCode  initialize();
-  StatusCode  execute(const EventContext&) {return StatusCode::SUCCESS;}
-  StatusCode  finalize() {return StatusCode::SUCCESS;}
-  virtual StatusCode  stop();
+  virtual StatusCode  initialize() override;
+  virtual StatusCode  execute(const EventContext&) const override {return StatusCode::SUCCESS;}
+  virtual StatusCode  stop() override;
 
  private: 
   /// Default constructor: 
-  LArCompleteToFlat();
+  LArCompleteToFlat() = delete;
 
 
   CondAttrListCollection* singleFloatFlat(const char* blobName, const LArConditionsContainer<LArSingleFloatP>* input, 
@@ -66,20 +65,20 @@ class LArCompleteToFlat: public AthAlgorithm
 
   void errIfConnected(const HWIdentifier chid, const int gain, const char* objName, const char* message=0) const;
 
-  unsigned m_hashMax;
-  const LArOnlineID_Base*  m_onlineID; 
+  unsigned m_hashMax = 0;
+  const LArOnlineID_Base*  m_onlineID = nullptr;
 
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKeySC{this,"CablingSCKey","LArOnOffIdMapSC","SG Key of LArOnOffIdMapping object"};
   SG::ReadCondHandleKey<LArfSamplSC> m_weightsKeySC{this,"WeightsSCKey","","SG Key of weights object"};
 
   ///InputSGKeys
-  std::string m_uA2MeVInput;
-  std::string m_DAC2uAInput;
-  std::string m_HVScaleCorrInput;
-  std::string m_PedestalInput;
-  std::string m_RampInput;
-  std::string m_MphysOverMcalInput;
+  StringProperty m_uA2MeVInput { this, "uA2MeVInput",  "" }; // LAruA2MeV
+  StringProperty m_DAC2uAInput { this, "DAC2uAVInput", "" }; // LArDAC2uA
+  StringProperty m_HVScaleCorrInput { this, "HVScaleCorrInput", "" }; // LArHVScaleCorr
+  StringProperty m_PedestalInput { this, "PedestalInput", "" }; // Pedestal
+  StringProperty m_RampInput { this, "RampInput", "" }; // LArRamp
+  StringProperty m_MphysOverMcalInput { this, "MphysOverMcalInput", "" }; // LArMphysOverMcal
   std::string m_OFCInput;
   std::string m_OFCCaliInput;
   std::string m_ShapeInput;
@@ -88,7 +87,7 @@ class LArCompleteToFlat: public AthAlgorithm
   // DSPThreshold set name
   std::string m_nameOfSet;
 
-  bool m_isSC;
+  BooleanProperty m_isSC = { this, "isSC", false };
   bool m_forceStop;
   bool m_fakeEMBPSLowGain;
 }; 

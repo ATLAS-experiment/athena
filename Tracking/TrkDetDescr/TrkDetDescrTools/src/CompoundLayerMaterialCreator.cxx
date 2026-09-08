@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -21,19 +21,13 @@
 
 // constructor
 Trk::CompoundLayerMaterialCreator::CompoundLayerMaterialCreator(const std::string& t, const std::string& n, const IInterface* p)
-: AthAlgTool(t,n,p),
-  m_fullCompoundCalculation(false)
+: AthAlgTool(t,n,p)
 {
     declareInterface<Trk::ILayerMaterialCreator>(this);
     // give the map a name
     declareProperty("LayerMaterialName"                 , m_layerMaterialName);
     declareProperty("LayerMaterialDirectory"            , m_layerMaterialDirectory);
-    declareProperty("FullCompoundCalculation"           , m_fullCompoundCalculation);
 }
-
-// destructor
-Trk::CompoundLayerMaterialCreator::~CompoundLayerMaterialCreator()
-= default;
 
 
 Trk::LayerMaterialProperties* Trk::CompoundLayerMaterialCreator::createLayerMaterial(const Trk::LayerMaterialRecord& lmr) const
@@ -80,7 +74,7 @@ Trk::LayerMaterialProperties* Trk::CompoundLayerMaterialCreator::convertLayerMat
                 materialVector.push_back(mProperties);
             }
             // now pus the vector into the matrix
-            materialMatrix.push_back(materialVector);
+            materialMatrix.push_back(std::move(materialVector));
         }
 
         // create the material
@@ -171,7 +165,7 @@ Trk::LayerMaterialProperties* Trk::CompoundLayerMaterialCreator::createCompoundL
     lStore.valueBinMatrix = binMatrix;
     aStore.valueBinMatrix = binMatrix;
     zStore.valueBinMatrix = binMatrix;
-    rStore.valueBinMatrix = binMatrix;
+    rStore.valueBinMatrix = std::move(binMatrix);
 
     ATH_MSG_VERBOSE( "Material stores prepared, now preparing composition matrix." );
 

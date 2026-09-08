@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name.
 atlas_subdir( xAODEventFormatCnv )
@@ -74,5 +74,5 @@ atlas_add_test( ReadWriteEventFormat
 
 atlas_add_test( EventFormatContent
   SCRIPT test/TestEventFormatContent.py ReadWriteTest0.pool.root EventFormat
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
   DEPENDS ReadWriteEventFormat )

@@ -17,6 +17,7 @@
 #include "L1CaloFEXSim/jTowerContainer.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
 
+#include <vector>
 
 namespace LVL1 {
 
@@ -31,7 +32,7 @@ namespace LVL1 {
     virtual StatusCode reset() override;
 
     /** Destructor **/
-    virtual ~jFEXmetAlgo();
+    virtual ~jFEXmetAlgo() = default;
 
     virtual StatusCode safetyTest() override;
     virtual void setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width], int hemisphere) override;
@@ -39,8 +40,8 @@ namespace LVL1 {
 
     virtual void buildBarrelmet()  override;
     virtual void buildFWDmet()  override;
-    virtual int GetMetXComponent()  override;
-    virtual int GetMetYComponent()  override;
+    virtual int GetMetXComponent() const override;
+    virtual int GetMetYComponent() const override;
     virtual int getTTowerET(unsigned int TTID ) override; 
     virtual bool getjXESat() const override; 
     virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)  override;

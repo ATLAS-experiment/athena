@@ -25,9 +25,9 @@ class MinBiasChainConfig(ChainConfigurationBase):
         log.debug("Assembling chain for %s", self.chainName)
         steps = []
 
-        if "mbts" == self.chainPart['recoAlg'][0] or "mbts" in self.chainName:
+        if self.chainPart['recoAlg'][0] == "mbts" or "mbts" in self.chainName:
             steps.append(self.getMinBiasMbtsStep(flags))
-        elif "afprec" == self.chainPart['recoAlg'][0]:
+        elif self.chainPart['recoAlg'][0] == "afprec":
             steps.append(self.getAFPTrkStep(flags))
         else:
             steps.append(self.getMinBiasEmptyMbtsStep(flags))

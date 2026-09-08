@@ -53,21 +53,19 @@ fi
 
 ## running reconstruction
 if [ "$doClusters" == "1" ]; then
-  Reco_tf.py --CA \
+  Reco_tf.py \
     --maxEvents ${nEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
     --postInclude "ActsConfig.ActsRegionsOfInterestConfig.ActsMainRegionsOfInterestCreatorAlgCfg,ActsConfig.ActsClusterizationConfig.ActsMainClusterizationCfg,ActsConfig.ActsSpacePointFormationConfig.ActsMainSpacePointFormationStandaloneCfg,ActsConfig.ActsPostIncludes.PersistifyActsEDMCfg" \
-    --preExec "flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True;flags.Tracking.doPixelDigitalClustering=True;" \
-    --steering 'doRAWtoALL' \
+    --preExec "flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True;flags.Tracking.doPixelDigitalClustering=True;flags.Tracking.ITkActsPass.storeTrackSeeds=True;" \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD}
 else
-  Reco_tf.py --CA \
+  Reco_tf.py \
     --maxEvents ${nEvents} \
-    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags' \
+    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
     --postInclude 'ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
-    --preExec "flags.Tracking.doPixelDigitalClustering=True;" \
-    --steering 'doRAWtoALL' \
+    --preExec "flags.Tracking.doPixelDigitalClustering=True;flags.Tracking.ITkActsPass.storeTrackSeeds=True;" \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD}
     #--preExec 'flags.Tracking.writeExtendedSi_PRDInfo=True' \

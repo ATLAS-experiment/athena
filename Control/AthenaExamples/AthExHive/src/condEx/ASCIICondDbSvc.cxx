@@ -5,9 +5,8 @@
 #include "ASCIICondDbSvc.h"
 #include "AthenaKernel/CondCont.h"
 
-#include <boost/tokenizer.hpp>
-#include <boost/algorithm/string.hpp>
 #include <regex>
+#include <ranges>
 
 #include <fstream>
 
@@ -76,9 +75,6 @@ ASCIICondDbSvc::readDbFile(const std::string& fname) {
   std::string line;
   if(ifs.is_open()) {
 
-    typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-    boost::char_separator<char> sep(" ");
-
     IOVEntryT<IASCIICondDbSvc::dbData_t> ie;
 
     while( getline (ifs, line) ) {
@@ -89,7 +85,8 @@ ASCIICondDbSvc::readDbFile(const std::string& fname) {
         line.erase(fh,line.length()-fh);
       if (line.length() == 0) continue;
       
-      tokenizer tokens(line, sep);
+      std::vector<std::string> tokens;
+      for (auto&& token : line | std::views::split(' ')) if (!token.empty()) tokens.emplace_back(token.begin(), token.end());
       auto it = tokens.begin();
       
       std::string dbKey = *it;

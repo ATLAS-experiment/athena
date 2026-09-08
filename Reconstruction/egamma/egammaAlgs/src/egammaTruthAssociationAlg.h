@@ -9,7 +9,7 @@
 #include "GaudiKernel/EventContext.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "MCTruthClassifier/IMCTruthClassifier.h"
-#include "MCTruthClassifier/MCTruthClassifierDefs.h"
+#include "TruthUtils/TruthClasses.h"
 #include "xAODEgamma/EgammaContainer.h"
 
 #include "xAODEgamma/ElectronContainer.h"
@@ -59,8 +59,8 @@ public:
 private:
   struct MCTruthInfo_t
   {
-    MCTruthPartClassifier::ParticleType first;
-    MCTruthPartClassifier::ParticleOrigin second;
+    MCTruthPartClassifier::ParticleType first{};
+    MCTruthPartClassifier::ParticleOrigin second{};
     const xAOD::TruthParticle* genPart{};
   };
 

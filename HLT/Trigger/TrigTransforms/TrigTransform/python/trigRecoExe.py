@@ -14,7 +14,7 @@ import subprocess
 from PyJobTransforms.trfExe import athenaExecutor
 
 # imports for preExecute
-from PyJobTransforms.trfUtils import asetupReport, cvmfsDBReleaseCheck, unpackDBRelease, setupDBRelease, lineByLine, asetupReleaseIsOlderThan
+from PyJobTransforms.trfUtils import asetupReport, cvmfsDBReleaseCheck, unpackDBRelease, setupDBRelease, lineByLine
 import PyJobTransforms.trfEnv as trfEnv
 import PyJobTransforms.trfExceptions as trfExceptions
 from PyJobTransforms.trfExitCodes import trfExit as trfExit
@@ -56,7 +56,7 @@ class trigRecoExecutor(athenaExecutor):
                                                                     'No events to process: {0} (skipEvents) >= {1} (inputEvents of {2}'.format(self.conf.argdict['skipEvents'].returnMyValue(name=self._name, substep=self._substep, first=self.conf.firstExecutor), inputEvents, dataType))
 
         ## Write the skeleton file and prep athena
-        if self._skeleton is not None:
+        if self._skeletonCA is not None:
             inputFiles = dict()
             for dataType in input:
                 inputFiles[dataType] = self.conf.dataDictionary[dataType]
@@ -89,16 +89,8 @@ class trigRecoExecutor(athenaExecutor):
         else:
             msg.info('Asetup report: {0}'.format(asetupReport()))
 
-        # If legacy release, bring up centos7 container
-        OSSetupString = None
-        if asetupString is not None:
-            legacyOSRelease = asetupReleaseIsOlderThan(asetupString, 24)
-            currentOS = os.environ['ALRB_USER_PLATFORM']
-            if legacyOSRelease and "centos7" not in currentOS:
-                OSSetupString = "centos7"
-                msg.info('Legacy release required for the substep {}, will setup a container running {}'.format(self._substep, OSSetupString))
-
         # allow overriding the container OS using a flag
+        OSSetupString = None
         if 'runInContainer' in self.conf.argdict:
             OSSetupString = self.conf.argdict['runInContainer'].returnMyValue(name=self._name, substep=self._substep, first=self.conf.firstExecutor)
             msg.info('The step {} will be performed in a container running {}, as explicitly requested'.format(self._substep, OSSetupString))
@@ -148,7 +140,7 @@ class trigRecoExecutor(athenaExecutor):
                     self._cmd.extend(self.conf.argdict['preExec'].returnMyValue(name=self._name, substep=self._substep, first=self.conf.firstExecutor))
                     msg.info('Command adjusted for CA to %s', self._cmd)
             else:
-                msg.info("Running in legacy mode")
+                msg.error("Trig_reco_tf does not support running in legacy mode")
 
             # Run preRun step debug stream analysis if output histogram are set
             if "outputHIST_DEBUGSTREAMMONFile" in self.conf.argdict:
@@ -159,12 +151,6 @@ class trigRecoExecutor(athenaExecutor):
                 if asetupString is None and dbgAsetupString is not None:
                     asetupString = dbgAsetupString
                     msg.info('Will use asetup string for debug stream analysis %s', dbgAsetupString)
-                    # If legacy release, bring up centos7 container
-                    legacyOSRelease = asetupReleaseIsOlderThan(asetupString, 24)
-                    currentOS = os.environ['ALRB_USER_PLATFORM']
-                    if legacyOSRelease and "centos7" not in currentOS:
-                        OSSetupString = "centos7"
-                        msg.info('Legacy release required for the substep {}, will setup a container running {}'.format(self._substep, OSSetupString))
                     # allow overriding the container OS using a flag
                     if 'runInContainer' in self.conf.argdict:
                         OSSetupString = self.conf.argdict['runInContainer'].returnMyValue(name=self._name, substep=self._substep, first=self.conf.firstExecutor)
@@ -202,37 +188,6 @@ class trigRecoExecutor(athenaExecutor):
         msg.info('Now writing wrapper for substep executor {0}'.format(self._name))
         self._writeAthenaWrapper(asetup=asetupString, dbsetup=dbsetup, ossetup=OSSetupString)
         msg.info('Athena will be executed in a subshell via {0}'.format(self._cmd))
-
-    def _prepAthenaCommandLine(self):
-
-        # When running from the DB, no skeleton file is needed
-        msg.info("Before build command line check if reading from DB")
-
-        # Check if expecting to run from DB
-        removeSkeleton = False
-        if 'useDB' in self.conf.argdict:
-            removeSkeleton = True
-        elif 'athenaopts' in self.conf.argdict:
-            v = self.conf.argdict['athenaopts'].value
-            if '--use-database' in v or '-b' in v:
-                removeSkeleton = True
-
-        if removeSkeleton and self._isCAEnabled():
-            msg.error('Do not specify --CA when reading from the DB, CA config will already be contained in the SMK')
-            raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_ARG_ERROR'),
-                    'Do not specify --CA when reading from the DB, CA config will already be contained in the SMK')
-            return 1
-
-        # Due to athenaExecutor code don't remove skeleton, otherwise lose runargs too
-        # instead remove skeleton from _topOptionsFiles
-        if removeSkeleton and self._skeleton is not None:
-            msg.info('Read from DB: remove skeleton {0} from command'.format(self._skeleton))
-            self._topOptionsFiles.remove(self._skeleton[0])
-        else:
-            msg.info('Not reading from DB: keep skeleton in command')
-
-        # Now build command line as in athenaExecutor
-        super(trigRecoExecutor, self)._prepAthenaCommandLine()
 
     # Loop over current directory and find the output file matching input pattern
     def _findOutputFiles(self, pattern):

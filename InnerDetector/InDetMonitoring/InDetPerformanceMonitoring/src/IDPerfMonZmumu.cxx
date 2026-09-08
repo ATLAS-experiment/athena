@@ -817,16 +817,16 @@ StatusCode IDPerfMonZmumu::bookTrees()
     m_validationMode = false;
   }
   
-  if (m_commonTree) {
-    if ((tHistSvc->regTree(m_commonTreeFolder, m_commonTree)).isSuccess() ) {
-      ATH_MSG_INFO("initialize() commonTree succesfully registered!");
-    }
-    else {
-      ATH_MSG_ERROR("initialize() Could not register the validation commonTree -> Switching ValidationMode Off !");
-      delete m_commonTree; m_commonTree = nullptr;
-      m_validationMode = false;
-    }
+  //m_commonTree cannot be null here
+  if ((tHistSvc->regTree(m_commonTreeFolder, m_commonTree)).isSuccess() ) {
+    ATH_MSG_INFO("initialize() commonTree succesfully registered!");
   }
+  else {
+    ATH_MSG_ERROR("initialize() Could not register the validation commonTree -> Switching ValidationMode Off !");
+    delete m_commonTree; m_commonTree = nullptr;
+    m_validationMode = false;
+  }
+
 
   if (m_IDTree) {
     if ((tHistSvc->regTree(m_IDTreeFolder, m_IDTree)).isSuccess() ) {
@@ -1301,13 +1301,13 @@ StatusCode IDPerfMonZmumu::execute(const EventContext& ctx)
     // changed refitting to combined particles since run II DESDM_ZMUMU did not store InDetTrackParticles
     if( m_doRefit ) {
       ATH_MSG_DEBUG("** IDPerfMonZmumu::execute ** Going to build TrackCollections: muonTrks, muonTrksRefit1 and muonTrksRefit2");
-      TrackCollection* muonTrks        = new TrackCollection(SG::OWN_ELEMENTS);
-      TrackCollection* muonTrksRefit1  = new TrackCollection(SG::OWN_ELEMENTS);
-      TrackCollection* muonTrksRefit2  = new TrackCollection(SG::OWN_ELEMENTS);
+      auto muonTrks        = std::make_unique<TrackCollection>(SG::OWN_ELEMENTS);
+      auto muonTrksRefit1  = std::make_unique<TrackCollection>(SG::OWN_ELEMENTS);
+      auto muonTrksRefit2  = std::make_unique<TrackCollection>(SG::OWN_ELEMENTS);
           
       ATH_MSG_DEBUG("** IDPerfMonZmumu::execute ** Going to refit and store the track parameters "); 
-      Trk::Track* defaultMuonTrk1{};
-      Trk::Track* defaultMuonTrk2{};
+      std::unique_ptr<Trk::Track> defaultMuonTrk1;
+      std::unique_ptr<Trk::Track> defaultMuonTrk2;
       Trk::Track* refit1MuonTrk1{};
       Trk::Track* refit2MuonTrk1{};
       Trk::Track* refit1MuonTrk2{};
@@ -1316,207 +1316,199 @@ StatusCode IDPerfMonZmumu::execute(const EventContext& ctx)
       StatusCode fitStatus;
       //save default and refit track parameters
       if( ppos_comb->track() ) {
-	defaultMuonTrk1 = new Trk::Track(*ppos_comb->track());
-	
-	IegammaTrkRefitterTool::Cache fitResult{};
-	fitStatus = m_TrackRefitter1->refitTrack( ctx, ppos_comb->track(), fitResult );  
-	if (fitStatus.isFailure()) {
-	  ATH_MSG_DEBUG("** IDPerfMonZmumu::execute ** Track Refit1 Failed for ppos_comb->track(). Skipping Event");
-	  return StatusCode::SUCCESS;
-	} else {
-	  refit1MuonTrk1 = fitResult.refittedTrack.release();
-	  muonTrksRefit1->push_back(refit1MuonTrk1);
-	  ATH_MSG_DEBUG("** IDPerfMonZmumu::execute ** Track Refit1 Success of ppos_comb->track()." 
-			<< " Original pt: " << ppos_comb->track()->perigeeParameters()->pT() 
-			<< "  track refit pt: " << refit1MuonTrk1->perigeeParameters()->pT() );
-	}
-	
-	
-	fitStatus = m_TrackRefitter2->refitTrack( ctx, ppos_comb->track(), fitResult );
-	if (fitStatus.isFailure()) {
-	  ATH_MSG_DEBUG("** IDPerfMonZmumu::execute ** Track Refit2 Failed for ppos_comb->track(). Skipping Event");
-	  return StatusCode::SUCCESS;
-	} else {
-	  refit2MuonTrk1 = fitResult.refittedTrack.release();
-	  muonTrksRefit2->push_back(refit2MuonTrk1);
-	  ATH_MSG_DEBUG("** IDPerfMonZmumu::execute ** Track Refit2 Success of ppos_comb->track()." 
-			<< " Original pt: " << ppos_comb->track()->perigeeParameters()->pT() 
-			<< "  track refit pt: " << refit1MuonTrk1->perigeeParameters()->pT() );
-	}
+        defaultMuonTrk1 = std::make_unique<Trk::Track>(*ppos_comb->track());
+        IegammaTrkRefitterTool::Cache fitResult{};
+        fitStatus = m_TrackRefitter1->refitTrack( ctx, ppos_comb->track(), fitResult );  
+        if (fitStatus.isFailure()) {
+          ATH_MSG_DEBUG("** IDPerfMonZmumu::execute ** Track Refit1 Failed for ppos_comb->track(). Skipping Event");
+          return StatusCode::SUCCESS;
+        } else {
+          refit1MuonTrk1 = fitResult.refittedTrack.release();
+          muonTrksRefit1->push_back(refit1MuonTrk1);
+          ATH_MSG_DEBUG("** IDPerfMonZmumu::execute ** Track Refit1 Success of ppos_comb->track()." 
+            << " Original pt: " << ppos_comb->track()->perigeeParameters()->pT() 
+            << "  track refit pt: " << refit1MuonTrk1->perigeeParameters()->pT() );
+        }
+        fitStatus = m_TrackRefitter2->refitTrack( ctx, ppos_comb->track(), fitResult );
+        if (fitStatus.isFailure()) {
+          ATH_MSG_DEBUG("** IDPerfMonZmumu::execute ** Track Refit2 Failed for ppos_comb->track(). Skipping Event");
+          return StatusCode::SUCCESS;
+        } else {
+          refit2MuonTrk1 = fitResult.refittedTrack.release();
+          muonTrksRefit2->push_back(refit2MuonTrk1);
+          ATH_MSG_DEBUG("** IDPerfMonZmumu::execute ** Track Refit2 Success of ppos_comb->track()." 
+            << " Original pt: " << ppos_comb->track()->perigeeParameters()->pT() 
+            << "  track refit pt: " << refit1MuonTrk1->perigeeParameters()->pT() );
+        }
       }
       
       if( pneg_comb->track() ) {
-	defaultMuonTrk2 = new Trk::Track(*pneg_comb->track());
+        defaultMuonTrk2 = std::make_unique<Trk::Track>(*pneg_comb->track());
+        
+        IegammaTrkRefitterTool::Cache fitResult {};
+        fitStatus = m_TrackRefitter1->refitTrack( ctx, pneg_comb->track(), fitResult);
+        if (fitStatus.isFailure()) {
+          ATH_MSG_DEBUG("** IDPerfMonZmumu::execute ** Track Refit1 Failed. Skipping Event");
+          return StatusCode::SUCCESS;
+        } else {
+          refit1MuonTrk2 = fitResult.refittedTrack.release();
+          muonTrksRefit1->push_back(refit1MuonTrk2);
+          ATH_MSG_DEBUG("** IDPerfMonZmumu::execute ** Track Refit1 Success of pneg_comb->track()." 
+            << " Original pt: " << pneg_comb->track()->perigeeParameters()->pT() 
+            << "  track refit pt: " << refit1MuonTrk2->perigeeParameters()->pT() );
+        }
 	
-	IegammaTrkRefitterTool::Cache fitResult {};
-	fitStatus = m_TrackRefitter1->refitTrack( ctx, pneg_comb->track(), fitResult);
-	if (fitStatus.isFailure()) {
-	  ATH_MSG_DEBUG("** IDPerfMonZmumu::execute ** Track Refit1 Failed. Skipping Event");
-	  return StatusCode::SUCCESS;
-	} else {
-	  refit1MuonTrk2 = fitResult.refittedTrack.release();
-	  muonTrksRefit1->push_back(refit1MuonTrk2);
-	  ATH_MSG_DEBUG("** IDPerfMonZmumu::execute ** Track Refit1 Success of pneg_comb->track()." 
-			<< " Original pt: " << pneg_comb->track()->perigeeParameters()->pT() 
-			<< "  track refit pt: " << refit1MuonTrk2->perigeeParameters()->pT() );
-	}
 	
-	
-	fitStatus = m_TrackRefitter2->refitTrack( ctx, pneg_comb->track(), fitResult );
-	if (fitStatus.isFailure()) {
-	  ATH_MSG_DEBUG("Track Refit2 Failed. Skipping Event");
-	  return StatusCode::SUCCESS;
-	} else {
-	  refit2MuonTrk2 = fitResult.refittedTrack.release();
-	  muonTrksRefit2->push_back(refit2MuonTrk2);
-	  ATH_MSG_DEBUG("** IDPerfMonZmumu::execute ** Track Refit2 Success of pneg_comb->track()." 
-			<< " Original pt: " << pneg_comb->track()->perigeeParameters()->pT() 
-			<< "  track refit pt: " << refit2MuonTrk2->perigeeParameters()->pT() );
-	}
-	
-	if (muonTrksRefit1->size() != 2) ATH_MSG_WARNING("** IDPerfMonZmumu::execute ** WARNING ** size of muonTrksRefit1: " << muonTrksRefit1->size());
-	if (muonTrksRefit2->size() != 2) ATH_MSG_WARNING("** IDPerfMonZmumu::execute ** WARNING ** size of muonTrksRefit2: " << muonTrksRefit2->size());
+        fitStatus = m_TrackRefitter2->refitTrack( ctx, pneg_comb->track(), fitResult );
+        if (fitStatus.isFailure()) {
+          ATH_MSG_DEBUG("Track Refit2 Failed. Skipping Event");
+          return StatusCode::SUCCESS;
+        } else {
+          refit2MuonTrk2 = fitResult.refittedTrack.release();
+          muonTrksRefit2->push_back(refit2MuonTrk2);
+          ATH_MSG_DEBUG("** IDPerfMonZmumu::execute ** Track Refit2 Success of pneg_comb->track()." 
+            << " Original pt: " << pneg_comb->track()->perigeeParameters()->pT() 
+            << "  track refit pt: " << refit2MuonTrk2->perigeeParameters()->pT() );
+        }
+        if (muonTrksRefit1->size() != 2) ATH_MSG_WARNING("** IDPerfMonZmumu::execute ** WARNING ** size of muonTrksRefit1: " << muonTrksRefit1->size());
+        if (muonTrksRefit2->size() != 2) ATH_MSG_WARNING("** IDPerfMonZmumu::execute ** WARNING ** size of muonTrksRefit2: " << muonTrksRefit2->size());
       }
       
       //save tracks to storegrate, they can be used by InDetAlignmentMonitoring
-      muonTrks->push_back(defaultMuonTrk1);
-      muonTrks->push_back(defaultMuonTrk2);
-
-      StatusCode sc = evtStore()->record(muonTrks, m_outputTracksName);
+      muonTrks->push_back(defaultMuonTrk1.release());
+      muonTrks->push_back(defaultMuonTrk2.release());
+      auto nMuonTracks = muonTrks->size();
+      StatusCode sc = evtStore()->record(std::move(muonTrks), m_outputTracksName);
       if (sc.isSuccess()) {
-	ATH_MSG_DEBUG ("Stored "<< muonTrks->size() << " " << m_outputTracksName <<" into StoreGate");
+        ATH_MSG_DEBUG ("Stored "<< nMuonTracks << " " << m_outputTracksName <<" into StoreGate");
+      } else{
+       ATH_MSG_WARNING ("Failed storing " << m_outputTracksName);
       }
-      else{
-	ATH_MSG_WARNING ("Failed storing " << m_outputTracksName);
+      auto nMuonTracks1 = muonTrksRefit1->size();
+      if (nMuonTracks1 > 1) { // keep track collection if at least 2 muons were found
+        sc = evtStore()->record(std::move(muonTrksRefit1), m_outputTracksName + "Refit1");
+        if (sc.isSuccess()) {
+          ATH_MSG_DEBUG ("Stored "<< nMuonTracks1 << " " << m_outputTracksName + "Refit1" << " into StoreGate");
+        } else {
+          ATH_MSG_WARNING ("Failed storing " << m_outputTracksName + "Refit1");
+        }
       }
-      
-      if (muonTrksRefit1->size() > 1) { // keep track collection if at least 2 muons were found
-	sc = evtStore()->record(muonTrksRefit1, m_outputTracksName + "Refit1");
-	if (sc.isSuccess()) {
-	  ATH_MSG_DEBUG ("Stored "<< muonTrksRefit1->size() << " " << m_outputTracksName + "Refit1" << " into StoreGate");
-	} else {
-	  ATH_MSG_WARNING ("Failed storing " << m_outputTracksName + "Refit1");
-	}
+      auto nMuonTracks2 = muonTrksRefit2->size();
+      if (nMuonTracks2 > 1) { // keep track collection if at least 2 muons were found
+        sc = evtStore()->record(std::move(muonTrksRefit2), m_outputTracksName + "Refit2");
+        if (sc.isSuccess()) {
+          ATH_MSG_DEBUG ("Stored "<< nMuonTracks2 << " " << m_outputTracksName + "Refit2" << " into StoreGate");
+        } else {
+          ATH_MSG_WARNING ("Failed storing " << m_outputTracksName + "Refit2");
+        }
       }
-      
-      if (muonTrksRefit2->size() > 1) { // keep track collection if at least 2 muons were found
-	sc = evtStore()->record(muonTrksRefit2, m_outputTracksName + "Refit2");
-	if (sc.isSuccess()) {
-	  ATH_MSG_DEBUG ("Stored "<< muonTrksRefit2->size() << " " << m_outputTracksName + "Refit2" << " into StoreGate");
-	} else {
-	  ATH_MSG_WARNING ("Failed storing " << m_outputTracksName + "Refit2");
-	}
-      }
-      
       
       //fill refit1 ID parameters
-      if (muonTrksRefit1->size()<2) {
-	ATH_MSG_WARNING("** IDPerfMonZmumu::execute ** Refit1 muon tracks are missing!");
-      }
-      else {
-	ATH_MSG_DEBUG("** IDPerfMonZmumu::execute **  going to fill refit1tree ");
-	success_pos = FillRecParametersSimple (refit1MuonTrk1, ppos_comb->charge(), ppos_comb_v, ctx);
-	success_neg = FillRecParametersSimple (refit1MuonTrk2, pneg_comb->charge(), pneg_comb_v, ctx);
-	
-	if (m_storeZmumuNtuple) {
-	  if (success_pos && success_neg) {
-	    if (m_refit1Tree) {
-	      ATH_MSG_DEBUG("-- Filling ntuple " << m_refit1Tree->GetName() << " entry " << m_refit1Tree->GetEntries() 
-			    << " for run: " << m_runNumber 
-			    << "  event: " << m_evtNumber 
-			    << "  Lumiblock: " << m_lumi_block 
-			    << "  Invariant mass = " << m_xZmm.GetInvMass() << " GeV ");
-	    }
-	    ATH_MSG_DEBUG("Negative p: (" << m_negative_px << ", "
-			  << m_negative_py << ", "
-			  << m_negative_pz << ") "
-			  << "  d0: " << m_negative_d0
-			  << "  z0: " << m_negative_z0
-			  << "  sigma_pt: " << m_positive_sigma_pt);
-	    ATH_MSG_DEBUG("Positive p: (" << m_positive_px << ","
-			  << m_positive_py << ","
-			  << m_positive_pz << ") "
-			  << "  d0: " << m_positive_d0
-			  << "  z0: " << m_positive_z0	  
-			  << "  sigma_pt: " << m_negative_sigma_pt);
-	    if (m_refit1Tree) {
-	      m_refit1Tree->Fill();
-	    }
-	    // Fill vectors for common ntuple
-	    m_Refit1_pt.push_back(m_positive_pt);
-	    m_Refit1_pt.push_back(m_negative_pt);	    
-	    m_Refit1_eta.push_back(m_positive_eta);
-	    m_Refit1_eta.push_back(m_negative_eta);
-	    m_Refit1_phi.push_back(m_positive_phi);
-	    m_Refit1_phi.push_back(m_negative_phi);
-	    m_Refit1_d0.push_back(m_positive_d0);
-	    m_Refit1_d0.push_back(m_negative_d0);
-	    m_Refit1_z0.push_back(m_positive_z0);
-	    m_Refit1_z0.push_back(m_negative_z0);
-
-	    m_Refit1_sigma_pt.push_back(m_positive_sigma_pt);
-	    m_Refit1_sigma_pt.push_back(m_negative_sigma_pt);
-	    m_Refit1_sigma_d0.push_back(m_positive_d0_err);
-	    m_Refit1_sigma_d0.push_back(m_negative_d0_err);
-	    m_Refit1_sigma_z0.push_back(m_positive_z0_err);
-	    m_Refit1_sigma_z0.push_back(m_negative_z0_err);
-	  } // if (success_pos && success_neg) 
-	} // if (m_storeZmumuNtuple) 
+      if (nMuonTracks1<2) {
+	      ATH_MSG_WARNING("** IDPerfMonZmumu::execute ** Refit1 muon tracks are missing!");
+      } else {
+        ATH_MSG_DEBUG("** IDPerfMonZmumu::execute **  going to fill refit1tree ");
+        success_pos = FillRecParametersSimple (refit1MuonTrk1, ppos_comb->charge(), ppos_comb_v, ctx);
+        success_neg = FillRecParametersSimple (refit1MuonTrk2, pneg_comb->charge(), pneg_comb_v, ctx);
+        
+        if (m_storeZmumuNtuple) {
+          if (success_pos && success_neg) {
+            if (m_refit1Tree) {
+              ATH_MSG_DEBUG("-- Filling ntuple " << m_refit1Tree->GetName() << " entry " << m_refit1Tree->GetEntries() 
+                << " for run: " << m_runNumber 
+                << "  event: " << m_evtNumber 
+                << "  Lumiblock: " << m_lumi_block 
+                << "  Invariant mass = " << m_xZmm.GetInvMass() << " GeV ");
+            }
+            ATH_MSG_DEBUG("Negative p: (" << m_negative_px << ", "
+              << m_negative_py << ", "
+              << m_negative_pz << ") "
+              << "  d0: " << m_negative_d0
+              << "  z0: " << m_negative_z0
+              << "  sigma_pt: " << m_positive_sigma_pt);
+            ATH_MSG_DEBUG("Positive p: (" << m_positive_px << ","
+              << m_positive_py << ","
+              << m_positive_pz << ") "
+              << "  d0: " << m_positive_d0
+              << "  z0: " << m_positive_z0	  
+              << "  sigma_pt: " << m_negative_sigma_pt);
+            if (m_refit1Tree) {
+              m_refit1Tree->Fill();
+            }
+            // Fill vectors for common ntuple
+            m_Refit1_pt.push_back(m_positive_pt);
+            m_Refit1_pt.push_back(m_negative_pt);	    
+            m_Refit1_eta.push_back(m_positive_eta);
+            m_Refit1_eta.push_back(m_negative_eta);
+            m_Refit1_phi.push_back(m_positive_phi);
+            m_Refit1_phi.push_back(m_negative_phi);
+            m_Refit1_d0.push_back(m_positive_d0);
+            m_Refit1_d0.push_back(m_negative_d0);
+            m_Refit1_z0.push_back(m_positive_z0);
+            m_Refit1_z0.push_back(m_negative_z0);
+        
+            m_Refit1_sigma_pt.push_back(m_positive_sigma_pt);
+            m_Refit1_sigma_pt.push_back(m_negative_sigma_pt);
+            m_Refit1_sigma_d0.push_back(m_positive_d0_err);
+            m_Refit1_sigma_d0.push_back(m_negative_d0_err);
+            m_Refit1_sigma_z0.push_back(m_positive_z0_err);
+            m_Refit1_sigma_z0.push_back(m_negative_z0_err);
+          } // if (success_pos && success_neg) 
+        } // if (m_storeZmumuNtuple) 
       } // enough refit1 tracks
       
       //fill refit2 ID parameters
       if (muonTrksRefit2->size()<2) {
-	ATH_MSG_WARNING("** IDPerfMonZmumu::execute ** Refit2 muon tracks are missing!");
-      }
-      else{
-	ATH_MSG_DEBUG("-- >> going to fill refit2params << --");
-	success_pos = FillRecParametersSimple (refit2MuonTrk1, ppos_comb->charge(), ppos_comb_v, ctx);
-	success_neg = FillRecParametersSimple (refit2MuonTrk2, pneg_comb->charge(), pneg_comb_v, ctx);
-	
-	if (m_storeZmumuNtuple) {
-	  if (success_pos && success_neg) {
-	    if (m_refit2Tree) { 
-	      ATH_MSG_DEBUG("-- Filling " << m_refit2Tree->GetName() << " entry " << m_refit2Tree->GetEntries() 
-			    << "  run: " << m_runNumber 
-			    << "  event: " << m_evtNumber 
-			    << "  Lumiblock: " << m_lumi_block 
-			    << "  Invariant mass = " << m_xZmm.GetInvMass() << " GeV ");
-	    }
-	    ATH_MSG_DEBUG("Negative p: (" << m_negative_px << ", "
-			  << m_negative_py << ", "
-			  << m_negative_pz << ") "
-			  << "  d0: " << m_negative_d0
-			  << "  z0: " << m_negative_z0
-			  << "  sigma_pt: " << m_positive_sigma_pt);
-	    ATH_MSG_DEBUG("Positive p: (" << m_positive_px << ","
-			  << m_positive_py << ","
-			  << m_positive_pz << ") "
-			  << "  d0: " << m_positive_d0
-			  << "  z0: " << m_positive_z0	  
-			  << "  sigma_pt: " << m_negative_sigma_pt);
-	    if (m_refit2Tree) {
-	      m_refit2Tree->Fill();
-	    }
-	    // Fill vectors for common ntuple
-	    m_Refit2_pt.push_back(m_positive_pt);
-	    m_Refit2_pt.push_back(m_negative_pt);
-	    m_Refit2_eta.push_back(m_positive_eta);
-	    m_Refit2_eta.push_back(m_negative_eta);
-	    m_Refit2_phi.push_back(m_positive_phi);
-	    m_Refit2_phi.push_back(m_negative_phi);
-	    m_Refit2_d0.push_back(m_positive_d0);
-	    m_Refit2_d0.push_back(m_negative_d0);
-	    m_Refit2_z0.push_back(m_positive_z0);
-	    m_Refit2_z0.push_back(m_negative_z0);
-
-	    m_Refit2_sigma_pt.push_back(m_positive_sigma_pt);
-	    m_Refit2_sigma_pt.push_back(m_negative_sigma_pt);
-	    m_Refit2_sigma_d0.push_back(m_positive_d0_err);
-	    m_Refit2_sigma_d0.push_back(m_negative_d0_err);
-	    m_Refit2_sigma_z0.push_back(m_positive_z0_err);
-	    m_Refit2_sigma_z0.push_back(m_negative_z0_err);
-	  } // if (success_pos && success_neg) 
-	} // if (m_storeZmumuNtuple) 
+	      ATH_MSG_WARNING("** IDPerfMonZmumu::execute ** Refit2 muon tracks are missing!");
+      } else{
+        ATH_MSG_DEBUG("-- >> going to fill refit2params << --");
+        success_pos = FillRecParametersSimple (refit2MuonTrk1, ppos_comb->charge(), ppos_comb_v, ctx);
+        success_neg = FillRecParametersSimple (refit2MuonTrk2, pneg_comb->charge(), pneg_comb_v, ctx);
+        
+        if (m_storeZmumuNtuple) {
+          if (success_pos && success_neg) {
+            if (m_refit2Tree) { 
+              ATH_MSG_DEBUG("-- Filling " << m_refit2Tree->GetName() << " entry " << m_refit2Tree->GetEntries() 
+                << "  run: " << m_runNumber 
+                << "  event: " << m_evtNumber 
+                << "  Lumiblock: " << m_lumi_block 
+                << "  Invariant mass = " << m_xZmm.GetInvMass() << " GeV ");
+            }
+            ATH_MSG_DEBUG("Negative p: (" << m_negative_px << ", "
+              << m_negative_py << ", "
+              << m_negative_pz << ") "
+              << "  d0: " << m_negative_d0
+              << "  z0: " << m_negative_z0
+              << "  sigma_pt: " << m_positive_sigma_pt);
+            ATH_MSG_DEBUG("Positive p: (" << m_positive_px << ","
+              << m_positive_py << ","
+              << m_positive_pz << ") "
+              << "  d0: " << m_positive_d0
+              << "  z0: " << m_positive_z0	  
+              << "  sigma_pt: " << m_negative_sigma_pt);
+            if (m_refit2Tree) {
+              m_refit2Tree->Fill();
+            }
+            // Fill vectors for common ntuple
+            m_Refit2_pt.push_back(m_positive_pt);
+            m_Refit2_pt.push_back(m_negative_pt);
+            m_Refit2_eta.push_back(m_positive_eta);
+            m_Refit2_eta.push_back(m_negative_eta);
+            m_Refit2_phi.push_back(m_positive_phi);
+            m_Refit2_phi.push_back(m_negative_phi);
+            m_Refit2_d0.push_back(m_positive_d0);
+            m_Refit2_d0.push_back(m_negative_d0);
+            m_Refit2_z0.push_back(m_positive_z0);
+            m_Refit2_z0.push_back(m_negative_z0);
+        
+            m_Refit2_sigma_pt.push_back(m_positive_sigma_pt);
+            m_Refit2_sigma_pt.push_back(m_negative_sigma_pt);
+            m_Refit2_sigma_d0.push_back(m_positive_d0_err);
+            m_Refit2_sigma_d0.push_back(m_negative_d0_err);
+            m_Refit2_sigma_z0.push_back(m_positive_z0_err);
+            m_Refit2_sigma_z0.push_back(m_negative_z0_err);
+          } // if (success_pos && success_neg) 
+        } // if (m_storeZmumuNtuple) 
       } // enough refit2 tracks
       
       ATH_MSG_DEBUG("Execute() All NTUPLES filled  Run: " << m_runNumber << "  event: " << m_evtNumber << "  mass: " << m_xZmm.GetInvMass() << " GeV ");
@@ -2356,13 +2348,13 @@ StatusCode IDPerfMonZmumu::CheckTriggerStatusAndPrescale ()
   }
 
   // event prescale
-  thisEventTriggerPrescale = thisHLTTriggerPrescale;
-  thisEventTriggerName = thisHLTTriggerName;
+  thisEventTriggerPrescale = std::move(thisHLTTriggerPrescale);
+  thisEventTriggerName = std::move(thisHLTTriggerName);
   ATH_MSG_DEBUG("CheckTriggerStatusAndPrescale -- Event trigger prescale = " << thisEventTriggerPrescale);
   ATH_MSG_DEBUG("CheckTriggerStatusAndPrescale -- Event trigger name = " << thisEventTriggerName);
   
   m_triggerPrescale = thisEventTriggerPrescale;
-  m_triggerName = thisEventTriggerName;
+  m_triggerName = std::move(thisEventTriggerName);
 
   
   return StatusCode::SUCCESS;

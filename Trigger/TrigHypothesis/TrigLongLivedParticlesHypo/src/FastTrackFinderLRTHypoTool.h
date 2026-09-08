@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGT2FTFLRT_TRACKCOUNTHYPOTOOL_H
 #define TRIGT2FTFLRT_TRACKCOUNTHYPOTOOL_H
@@ -21,8 +21,8 @@ public:
     virtual StatusCode initialize() override;
 
     struct TrkCountsInfo {
-      TrigCompositeUtils::Decision* decision;
-      const xAOD::TrigComposite* counts;
+      TrigCompositeUtils::Decision* decision = nullptr;
+      const xAOD::TrigComposite* counts = nullptr;
       const TrigCompositeUtils::DecisionIDContainer previousDecisionIDs;
     };
 

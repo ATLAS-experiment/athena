@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -11,31 +11,8 @@
 #include <sstream>
 #include <string>
 
-template<class DATA>
-LArReadParamsFromFile<DATA>::LArReadParamsFromFile(const std::string& name, ISvcLocator* pSvcLocator): 
-  AthAlgorithm(name, pSvcLocator),
-  m_onlineHelper(0),
-  m_emId(0),
-  m_hecId(0),
-  m_fcalId(0),
-  m_groupingType(LArConditionsContainerBase::SingleGroup),
-  m_useCalibLines(false),
-  m_dataclass(0)
-  
-{ 
-  // file name to be read
-  declareProperty("File",m_file="") ;
-  // choose whether use offline ID (default is online)
-  declareProperty("UseOfflineIdentifier",m_useOfflineIdentifier=false) ;
-  // assign grouping type (only for LArConditionsContainer-based classes)
-  declareProperty("GroupingType",m_groupingName="Unknown") ;
-  declareProperty("ChannelIdType",m_chIdType="UNKNOWN");
-  declareProperty("CustomKey",m_customKey="");
-}
-
 template <class DATA>
-LArReadParamsFromFile<DATA>::~LArReadParamsFromFile() 
-{}
+LArReadParamsFromFile<DATA>::~LArReadParamsFromFile() = default;
 
 template <class DATA>
 StatusCode LArReadParamsFromFile<DATA>::initialize() {
@@ -138,9 +115,6 @@ StatusCode LArReadParamsFromFile<DATA>::stop ATLAS_NOT_THREAD_SAFE ()
   ATH_CHECK( detStore()->record(m_dataclass,key) );
   ATH_MSG_INFO ( "Object " << classname << " recorded into detStore with key " << key );
 
-  ATH_CHECK ( do_symLink(m_dataclass) );
-  ATH_MSG_INFO ( "Object " << classname << " symLinked to its abstract interface" );
-
   ATH_MSG_INFO ( "finished!" );
   return StatusCode::SUCCESS;
 }// end stop-method.
@@ -162,7 +136,7 @@ StatusCode LArReadParamsFromFile<DATA>::readFile() {
      return StatusCode::FAILURE;
   }
 
-  std::ifstream f(m_file.c_str()) ; // open input file
+  std::ifstream f(m_file) ; // open input file
   if ( ! f.good() ) {
     ATH_MSG_ERROR ( "Could not open file " << m_file << ", are you sure it exists??" );
     return StatusCode::FAILURE ;

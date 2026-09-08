@@ -163,12 +163,12 @@ class MetaDataSvc : public extends<::AthService,
 
   /** Loads file metadata from memory shared between streams in SharedWriter
    * This function clears the input and output metadata stores. Then calls
-   * @c addProxyToInputMetaDataStore using @c filename as argument.
+   * @c addProxyToInputMetaDataStore using @c tokenStr as argument.
    * @see addProxyToInputMetaDataStore()
    * @param filename stream token with "[NUM=n]" appended, n is the stream number
    * @return FAILURE if any step isn't successful, else SUCCESS
    */
-  virtual StatusCode shmProxy(const std::string& filename) override;
+  virtual StatusCode shmProxy(const std::string& tokenStr) override;
   /**@}*/
 
   /**

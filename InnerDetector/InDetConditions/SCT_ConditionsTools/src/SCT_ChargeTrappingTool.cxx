@@ -20,6 +20,7 @@
 
 #include "CLHEP/Random/RandFlat.h"
 
+#include <stdexcept>
 #include <algorithm>
 #include <cmath>
 
@@ -164,12 +165,18 @@ SCT_ChargeTrappingCondData SCT_ChargeTrappingTool::calculate(const IdentifierHas
 
   // -- Calculate Mean Free Path
   const double meanFreePathElectrons{electronDriftVelocity*trappingElectrons};
+  if (meanFreePathElectrons == 0.)[[unlikely]]{
+    throw std::runtime_error("SCT_ChargeTrappingTool::calculate: meanFreePathElectrons is zero.");
+  }
   condData.setMeanFreePathElectrons(meanFreePathElectrons);
 
   double meanFreePathHoles{0.};
   if (m_calcHoles) {
     meanFreePathHoles = holeDriftVelocity*trappingHoles;
     condData.setMeanFreePathHoles(meanFreePathHoles);
+    if (meanFreePathHoles == 0.)[[unlikely]]{
+      throw std::runtime_error("SCT_ChargeTrappingTool::calculate: meanFreePathHoles is zero.");
+    }
   }
   
   // -- Trapping probability
@@ -194,6 +201,9 @@ SCT_ChargeTrappingCondData SCT_ChargeTrappingTool::calculate(const IdentifierHas
   const double drift_time{-std::log(u)*trappingHoles};
   condData.setTrappingTime(drift_time);
   
+  if (holeDriftVelocity == 0.)[[unlikely]]{
+      throw std::runtime_error("SCT_ChargeTrappingTool::calculate: holeDriftVelocity is zero.");
+  }
   // -- Time to arrive to the electrode
   const double t_electrode_hole{pos/holeDriftVelocity};
   condData.setTimeToElectrode(t_electrode_hole);

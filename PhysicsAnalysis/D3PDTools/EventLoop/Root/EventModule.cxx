@@ -16,12 +16,10 @@
 #include <xAODRootAccess/Event.h>
 #include <xAODRootAccess/tools/TFileAccessTracer.h>
 #include <xAODRootAccess/TStore.h>
-// #include <xAODRootAccess/D3PDPerfStats.h>
 #include <EventLoop/Job.h>
 #include <EventLoop/StatusCode.h>
 #include <EventLoop/Worker.h>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <SampleHandler/MetaObject.h>
 #include <xAODCore/tools/ReadStats.h>
 #include <xAODCore/tools/PerfStats.h>
@@ -68,7 +66,7 @@ namespace EL
       // during initialisation. Only the in-file metadata...
       m_event = xAOD::Event::createAndReadFrom(*data.m_inputFile.get());
       if (!m_event) {
-          ATH_MSG_ERROR( "cannot read from file: " << *data.m_inputFile->GetName());
+          ATH_MSG_ERROR( "cannot read from file: " << data.m_inputFile->GetName());
           return StatusCode::FAILURE;
       }
       // Set event in module data
@@ -132,14 +130,20 @@ namespace EL
       // move to next event
       m_store->clear ();
       if (m_event->getEntry (data.m_inputEntry) < 0)
-        RCU_THROW_MSG ("failed to read from xAOD");
+      {
+        ANA_MSG_ERROR ("failed to read from xAOD");
+        return StatusCode::FAILURE;
+      }
       return StatusCode::SUCCESS;
     }
 
 
     StatusCode EventModule::postFinalize (ModuleData& data) {
 
-      if (m_useStats.value())       {
+      // Only stop the stats if we actually started them, which happens in
+      // onFirstInputFile once m_event is created.  With an empty file list
+      // start() is never called, so stop() must be skipped too.
+      if (m_useStats.value() && m_event != nullptr)       {
         xAOD::PerfStats::instance().stop();
         std::unique_ptr<xAOD::ReadStats> stats
           (new xAOD::ReadStats (xAOD::IOStats::instance().stats()));

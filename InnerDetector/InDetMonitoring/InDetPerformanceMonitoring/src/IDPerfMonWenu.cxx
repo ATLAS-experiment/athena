@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -7,13 +7,12 @@
 // AUTHORS: Beate Heinemann, Tobias Golling, Sara Strandberg
 // **********************************************************************
 
-#include <cmath>
+
 #include "TH1.h"
 #include "TH2.h"
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TProfile.h"
-//#include "TMath.h"
 #include "TLorentzVector.h"
 
 #include "StoreGate/StoreGateSvc.h"
@@ -47,7 +46,7 @@
 
 #include "GaudiKernel/SystemOfUnits.h"
 #include "GaudiKernel/PhysicalConstants.h"
-
+#include <cmath>
 #include <stdexcept>
 
 // *********************************************************************
@@ -740,11 +739,15 @@ void IDPerfMonWenu::FillHistosPerCluster(const xAOD::CaloCluster* cluster, const
     m_Wenu_Eop_minus[region]->Fill(eoverp);
   }
   if (region == incl) { // inclusive only
+    auto safeInverseMom = [](float p){
+      if (p == 0.) return 10e10; //arbitrary very large number
+      return 1./(p/Gaudi::Units::GeV);
+    };
     m_Wenu_trackmatched_eta[region]->Fill(cluster->eta());
     m_Wenu_trackmatched_phi[region]->Fill(cluster->phi());
     if (eoverp > m_eoverp_tight_min && eoverp < m_eoverp_tight_max) {
       m_Wenu_meanEop_vs_p[region]->Fill(track_p/Gaudi::Units::GeV,eoverp);
-      m_Wenu_meanEop_vs_invp[region]->Fill(1./(track_p/Gaudi::Units::GeV),eoverp);
+      m_Wenu_meanEop_vs_invp[region]->Fill(safeInverseMom(track_p),eoverp);
       m_Wenu_meanEop_vs_E[region]->Fill(cluster->e()/Gaudi::Units::GeV,eoverp);
       m_Wenu_meanEop_vs_chargedp[region]->Fill(double(track->charge())*track_p/Gaudi::Units::GeV,eoverp);
       m_Wenu_meanEop_vs_chargedE[region]->Fill(double(track->charge())*cluster->e()/Gaudi::Units::GeV,eoverp);
@@ -754,7 +757,7 @@ void IDPerfMonWenu::FillHistosPerCluster(const xAOD::CaloCluster* cluster, const
     if (track->charge() == 1.) {
       if (eoverp > m_eoverp_tight_min && eoverp < m_eoverp_tight_max) {
         m_Wenu_meanEop_vs_p_plus[region]->Fill(track_p/Gaudi::Units::GeV,eoverp);
-        m_Wenu_meanEop_vs_invp_plus[region]->Fill(1./(track_p/Gaudi::Units::GeV),eoverp);
+        m_Wenu_meanEop_vs_invp_plus[region]->Fill(safeInverseMom(track_p),eoverp);
         m_Wenu_meanEop_vs_E_plus[region]->Fill(cluster->e()/Gaudi::Units::GeV,eoverp);
         m_Wenu_meanEop_vs_phi_plus[region]->Fill(track->phi(),eoverp);
         m_Wenu_meanEop_vs_eta_plus[region]->Fill(track->eta(),eoverp);
@@ -763,7 +766,7 @@ void IDPerfMonWenu::FillHistosPerCluster(const xAOD::CaloCluster* cluster, const
     else if (track->charge() == -1.) {
       if (eoverp > m_eoverp_tight_min && eoverp < m_eoverp_tight_max) {
         m_Wenu_meanEop_vs_p_minus[region]->Fill(track_p/Gaudi::Units::GeV,eoverp);
-        m_Wenu_meanEop_vs_invp_minus[region]->Fill(1./(track_p/Gaudi::Units::GeV),eoverp);
+        m_Wenu_meanEop_vs_invp_minus[region]->Fill(safeInverseMom(track_p),eoverp);
         m_Wenu_meanEop_vs_E_minus[region]->Fill(cluster->e()/Gaudi::Units::GeV,eoverp);
         m_Wenu_meanEop_vs_phi_minus[region]->Fill(track->phi(),eoverp);
         m_Wenu_meanEop_vs_eta_minus[region]->Fill(track->eta(),eoverp);

@@ -13,17 +13,15 @@ echo "*** Running ACTS reconstruction with extra args: "${extraArgs}
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py \
     --preExec "flags.Exec.FPE=-1; \
-    	       flags.Tracking.doITkFastTracking=True; \
     	       flags.Acts.doAnalysis=True; \
 	       flags.Acts.doMonitoring=True; \
     	       flags.DQ.useTrigger=False; \
 	       flags.Output.HISTFileName=\"ActsMonitoringOutput.root\"; \
 	       ${extraArgs}" \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
     --ignorePatterns "${ignore_pattern}" \
     --conditionsTag ${conditions_tag} \
     --inputRDOFile ${input_rdo} \
     --outputAODFile AOD.pool.root \
     --maxEvents ${n_events} \
     --multithreaded
-

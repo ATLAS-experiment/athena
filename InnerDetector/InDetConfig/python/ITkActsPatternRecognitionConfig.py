@@ -9,8 +9,8 @@ def ITkActsTrackReconstructionCfg(flags,
 
     # Vertex reconstruction using spacepoints
     if flags.Tracking.ActiveConfig.useHoughVertexFilter:
-        from HIGlobal.HIHoughVtxFinderConfig import HIHoughVtxRecoCfg
-        acc.merge(HIHoughVtxRecoCfg(flags,
+        from InDetPriVxFinder.HoughVtxFinderConfig import HoughVtxFinderCfg
+        acc.merge(HoughVtxFinderCfg(flags,
                                     inputPixelSpacePoints = "ITkPixelSpacePoints_Cached" if flags.Acts.useCache else "ITkPixelSpacePoints"))
 
     # GNN replaces the seeding+CKF+ambiguity chain only for the primary pass.

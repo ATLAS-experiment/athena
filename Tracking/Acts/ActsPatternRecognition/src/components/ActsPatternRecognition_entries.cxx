@@ -6,6 +6,7 @@
 #include "src/GenericSeedingAlg.h"
 
 // Tools
+#include "src/GbtsLayerTool.h"
 #include "src/GbtsSeedingTool.h"
 #include "src/GridTripletSeedingTool.h"
 #include "src/TrackParamsEstimationTool.h"
@@ -14,6 +15,7 @@
 DECLARE_COMPONENT(ActsTrk::GenericSeedingAlg)
 
 // Tools
+DECLARE_COMPONENT(ActsTrk::GbtsLayerTool)
 DECLARE_COMPONENT(ActsTrk::GbtsSeedingTool)
 DECLARE_COMPONENT(ActsTrk::TrackParamsEstimationTool)
 DECLARE_COMPONENT(ActsTrk::GridTripletSeedingTool)

@@ -27,12 +27,12 @@ TRTUncompressedHitCollection* TRTUncompressedHitCollectionCnv::createTransient(c
     TRT_HitCollectionCnv_p3   converter_p3;
     TRT_HitCollectionCnv_p4   converter_p4;
     TRT_HitCollectionCnv_p5  converter_p5;
-    static const pool::Guid   p1_guid("6688E934-157E-421A-B6D1-A35FC8BD651C");
-    static const pool::Guid   p2_guid("473FF621-3466-4D87-9469-4780A6A77023");
-    static const pool::Guid   p3_guid("FB5F5BFC-43E5-44E1-B79C-C330C1480E2E");
-    static const pool::Guid   p4_guid("73BECF03-4C45-491E-A973-A1C4402AD018");
-    static const pool::Guid   p5_guid("018E1E3D-8B69-7BDF-B1E9-D5D09F3CF750");
-    static const pool::Guid   old_guid("35722E01-C4E3-420E-8A7E-E375C5E7989D");
+    static const Guid   p1_guid("6688E934-157E-421A-B6D1-A35FC8BD651C");
+    static const Guid   p2_guid("473FF621-3466-4D87-9469-4780A6A77023");
+    static const Guid   p3_guid("FB5F5BFC-43E5-44E1-B79C-C330C1480E2E");
+    static const Guid   p4_guid("73BECF03-4C45-491E-A973-A1C4402AD018");
+    static const Guid   p5_guid("018E1E3D-8B69-7BDF-B1E9-D5D09F3CF750");
+    static const Guid   old_guid("35722E01-C4E3-420E-8A7E-E375C5E7989D");
 
 
     TRTUncompressedHitCollection       *trans_cont(nullptr);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetBeamSpotVertex.h"
@@ -11,6 +11,7 @@
 #include <cmath>
 #include <algorithm>
 #include <mutex>
+#include <stdexcept>
 
 using namespace InDet;
 
@@ -637,12 +638,14 @@ bool InDetBeamSpotVertex::applyOutlierRemoval() {
     if ( std::abs( medianx - it->x ) > m_sigTr *rmsX) fail += 4;
     if ( std::abs( mediany - it->y ) > m_sigTr *rmsY) fail += 8;
     if ( std::abs( medianz - it->z ) > 10*rmsZ) fail += 16;
-    
+    if ((rmsX == 0.) or (rmsY == 0.))[[unlikely]]{
+      throw std::runtime_error("InDetBeamSpotVertex::solveChi2: rmsX or rmsY is zero!");
+    }
     
     if (  (medianx - it->x)*(medianx-it->x)/rmsX/rmsX + (mediany-it->y)*(mediany-it->y)/rmsY/rmsY > m_sigTr*m_sigTr) {
       ATH_MSG_DEBUG( "Vertex info: extended past radial extent: sig."
-                     << sqrt((medianx - it->x)*(medianx-it->x)/rmsX/rmsX + (mediany-it->y)*(mediany-it->y)/rmsY/rmsY) << " > "
-                     << sqrt( m_sigTr*m_sigTr ) << "." ); 
+                     << std::sqrt((medianx - it->x)*(medianx-it->x)/rmsX/rmsX + (mediany-it->y)*(mediany-it->y)/rmsY/rmsY) << " > "
+                     << std::sqrt( m_sigTr*m_sigTr ) << "." ); 
       fail += 128;
     }
     
@@ -651,8 +654,8 @@ bool InDetBeamSpotVertex::applyOutlierRemoval() {
     if (fail) { // TBD only allow failed vertices here to be removed on every nth iteration (to aid stability)
       ATH_MSG_DEBUG( "Vertex reject from simple mean; reason: " << fail << " : x,y,z: " 
         << it->x << "  " << it->y << "  " << it->z 
-        << " , sigma(x,y,z): " << sqrt(it->vxx) << "  " << sqrt(it->vyy)
-        << "  " << sqrt(it->vzz) 
+        << " , sigma(x,y,z): " << std::sqrt(it->vxx) << "  " << std::sqrt(it->vyy)
+        << "  " << std::sqrt(it->vzz) 
         );
       
       it->valid = false;
@@ -694,6 +697,9 @@ bool InDetBeamSpotVertex::applyOutlierRemoval() {
   int  invFail(0);
   chi2Cov.invert(invFail);
   chi2Pos = chi2Cov*chi2Pos;
+  if (zerr == 0.)[[unlikely]]{
+    throw std::runtime_error("InDetBeamSpotVertex::applyOutlierRemoval: zerr is zero.");
+  }
   zpos    = zpos / zerr;
   zerr    = 1./std::sqrt(zerr);
   
@@ -937,11 +943,11 @@ bool InDetBeamSpotVertex::applyOutlierRemoval() {
     ATH_MSG_WARNING( "FIT HALFVERTX" );
 
     if (goodFit1) {
-      m_vertexData = vertex1;
+      m_vertexData = std::move(vertex1);
     } else if (goodFit2) {
-      m_vertexData = vertex2;
+      m_vertexData = std::move(vertex2);
     } else {
-      m_vertexData = vertexTemp; // give up and go home...
+      m_vertexData = std::move(vertexTemp); // give up and go home...
     }
 
   } // last solution
@@ -972,14 +978,14 @@ bool InDetBeamSpotVertex::successfulFit( TMinuit * minuit,
   //This should be called directly after the fit
   std::string sRes = minuit->fCstatu.Data();
 
-  Double_t fmin, fedm, errdef;
-  Int_t npari,nparx,istat;
+  Double_t fmin{}, fedm{}, errdef{};
+  Int_t npari{},nparx{},istat{};
   minuit->mnstat(fmin, fedm, errdef,npari,nparx,istat);
   
   ATH_MSG_DEBUG( "Fit reports status: " << istat << " and " << sRes );
 
   status.first = istat;
-  status.second = sRes;
+  status.second = std::move(sRes);
 
   bool sanityPassed(true);
   if ( m_doFitSanityCheck) {
@@ -1032,6 +1038,7 @@ void BeamSpot::myFCN_LLsolver( Int_t &, Double_t *, Double_t &f, Double_t *par, 
   f = 0;
   
   using Vertices = std::vector<BeamSpot::VrtHolder>;
+  std::lock_guard<std::mutex> lock(BeamSpot::mutex);
   Vertices::const_iterator vit = BeamSpot::vertexData->begin();
   
   double temp =0;

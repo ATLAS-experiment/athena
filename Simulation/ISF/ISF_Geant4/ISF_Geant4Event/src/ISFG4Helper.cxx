@@ -8,14 +8,11 @@
 // Geant4 includes
 #include "G4Track.hh"
 #include "G4ThreeVector.hh"
-#include "G4EventManager.hh"
-#include "G4Event.hh"
 
 #include "AtlasHepMC/GenParticle.h"
 #include "TruthUtils/MagicNumbers.h"
 
 // G4Atlas includes
-#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackInformation.h"
 
 // ISF includes
@@ -101,17 +98,14 @@ iGeant4::ISFG4Helper::attachTrackInfoToNewG4Track( G4Track& aTrack,
     return nullptr;
   }
 
-  TrackInformation *trackInfo = new TrackInformation( generationZeroGenParticle, &baseIsp );
+  TrackInformation *trackInfo = new TrackInformation( nullptr, &baseIsp );
   trackInfo->SetPrimaryGenParticle( truthBinding->getPrimaryGenParticle() );
+  trackInfo->SetGenerationZeroGenParticle( generationZeroGenParticle );
+  if (classification != VTrackInformation::Secondary) {
+    trackInfo->SetCurrentGenParticle( truthBinding->getCurrentGenParticle() );
+  }
   trackInfo->SetClassification( classification );
   aTrack.SetUserInformation( trackInfo );
 
   return trackInfo;
-}
-
-/** return pointer to current AtlasG4EventUserInfo */
-AtlasG4EventUserInfo*
-iGeant4::ISFG4Helper::getAtlasG4EventUserInfo()
-{
-  return ( static_cast<AtlasG4EventUserInfo*> (G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetUserInformation()) );
 }

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ## @package PyJobTransforms.trfMPITools
 #
@@ -13,6 +13,7 @@ import re
 import logging
 import pprint
 import itertools as it
+from time import sleep
 
 from PyJobTransforms.trfExitCodes import trfExit
 import PyJobTransforms.trfExceptions as trfExceptions
@@ -122,7 +123,7 @@ def mpiOutputs():
 def mergeOutputs():
     """Merge outputs into rank 0"""
     if mpiConfig is None:
-        msg.warn("trfMPITools.mergeOutputs called when we are not in MPI mode")
+        msg.warning("trfMPITools.mergeOutputs called when we are not in MPI mode")
         return
     rank_dir_regex = re.compile("rank-([0-9]+)$")
     rank_dirs = {
@@ -130,7 +131,44 @@ def mergeOutputs():
         for m in (rank_dir_regex.search(d.path) for d in os.scandir("..") if d.is_dir())
         if m and int(m.group(1)) > 0
     }
+    num_ranks = len(rank_dirs) + 1
+    # First wait for all ranks to reach this point so we don't start merging before some outputs are fully closed
+    open("athena_done", "a").close()
+    files_to_check = [
+        (rank, f"../rank-{rank}/athena_done") for rank in range(0, num_ranks)
+    ]
+    count = 0
+    files_to_check = list(
+        it.filterfalse(lambda f: os.path.exists(f[1]), files_to_check)
+    )
+    while files_to_check:
+        if count % 10 == 0 and getMPIRank() == 0:
+            msg.info(
+                f"{count // 10 + 1}: Waiting for all ranks to finish athena: {list(map(lambda x: x[0], files_to_check))}"
+            )
+        count += 1
+        sleep(6)
+        files_to_check = list(
+            it.filterfalse(lambda f: os.path.exists(f[1]), files_to_check)
+        )
+    # Now continue: First the logs
     if getMPIRank() == 0:
+        import sqlite3 as sq3
+        from glob import glob
+
+        # Merge log databases
+        conn = sq3.connect("mpilog.db")
+        cur = conn.cursor()
+        tables = ["ranks", "files", "event_log"]
+        for db in glob("../rank-[1-9]*/mpilog.db"):
+            cur.execute("ATTACH DATABASE ? as db", (db,))
+            for table in tables:
+                upsert = "INSERT OR IGNORE" if table == "files" else "INSERT"
+                cur.execute(f"{upsert} INTO {table} SELECT * from db.{table}")
+            conn.commit()
+            cur.execute("DETACH DATABASE db")
+        conn.close()
+        # Then everything else
         msg.info("Rank output directories are:\n{}".format(pprint.pformat(rank_dirs)))
     all_merge_inputs = list(
         map(
@@ -160,7 +198,6 @@ def mergeOutputs():
                     pass
         merge_lists = []
         for fn in defn.value:
-            msg.info(f"Generating merge list by filtering for {fn} in {all_merge_inputs}")
             merge_inputs = sorted(filter(lambda s: s.endswith(fn), all_merge_inputs))
             # Add to list
             merge_helper.value.extend(merge_inputs)
@@ -170,50 +207,50 @@ def mergeOutputs():
         # Merge each final output in a different rank
         if getMPIRank() >= len(merge_lists):
             msg.info(f"In rank {getMPIRank()}, not merging")
-            break
-        my_merge = merge_lists[getMPIRank()]
-        if len(my_merge[1]) < 1:
-            msg.info(f"In rank {getMPIRank()}, no inputs for ../rank-0/{my_merge[0]}")
-            open("done_merging", "a").close()
-            break
-        msg.info(
-            f"In rank {getMPIRank()}, merging into ../rank-0/{my_merge[0]}. Inputs are \n{pprint.pformat(my_merge[1])}"
-        )
-        merge_helper.selfMerge(f"../rank-0/{my_merge[0]}", my_merge[1])
+            continue
+        for idx in range(getMPIRank(), len(merge_lists), num_ranks):
+            my_merge = merge_lists[idx]
+            if len(my_merge[1]) < 1:
+                msg.info(
+                    f"In rank {getMPIRank()}, no inputs for ../rank-0/{my_merge[0]}"
+                )
+                continue
+            msg.info(
+                f"In rank {getMPIRank()}, merging into ../rank-0/{my_merge[0]}. Inputs are \n{pprint.pformat(my_merge[1])}"
+            )
+            try:
+                merge_helper.selfMerge(f"../rank-0/{my_merge[0]}", my_merge[1])
+            except Exception as e:
+                msg.error(
+                    f"Merge failure in rank {getMPIRank()} merging into {my_merge[0]}: {e}"
+                )
+                with open("../rank-0/merge_failure", "a") as f:
+                    f.write(
+                        f"Merge failure in rank {getMPIRank()} merging into {my_merge[0]}: {e}\n"
+                    )
     # Create a file to indicate we are done
     open("done_merging", "a").close()
     if getMPIRank() == 0:
-        from functools import reduce
-        from operator import and_
-        from time import sleep
-        import sqlite3 as sq3
-        from glob import glob
-
-        # Merge log databases
-        conn = sq3.connect("mpilog.db")
-        cur = conn.cursor()
-        tables = ["ranks", "files", "event_log"]
-        for db in glob("../rank-[1-9]*/mpilog.db"):
-            cur.execute("ATTACH DATABASE ? as db", (db,))
-            for table in tables:
-                upsert = "INSERT OR IGNORE" if table == "files" else "INSERT"
-                cur.execute(f"{upsert} INTO {table} SELECT * from db.{table}")
-            conn.commit()
-            cur.execute("DETACH DATABASE db")
-        conn.close()
-
         # In rank 0, wait until all other ranks have finished merging
         files_to_check = [
-            f"../rank-{rank}/done_merging" for rank in range(0, len(merge_lists))
+            (rank, f"../rank-{rank}/done_merging") for rank in range(0, num_ranks)
         ]
         count = 0
-        check = [os.path.exists(f) for f in files_to_check]
-        while not reduce(and_, check):
+        files_to_check = list(
+            it.filterfalse(lambda f: os.path.exists(f[1]), files_to_check)
+        )
+        while files_to_check:
             if count % 10 == 0:
-                msg.info("Waiting for other ranks to finish merging")
-                msg.debug(f"Looking for {files_to_check}")
-                msg.debug(f"Result: {check}")
-            count = count + 1
+                msg.info(
+                    f"Waiting for all ranks to finish merging: {list(map(lambda x: x[0], files_to_check))}"
+                )
+            count += 1
             sleep(6)
-            check = [os.path.exists(f) for f in files_to_check]
-        msg.info("All ranks done merging")
+            files_to_check = list(
+                it.filterfalse(lambda f: os.path.exists(f[1]), files_to_check)
+            )
+        if not os.path.exists("merge_failure"):
+            msg.info("All ranks done merging")
+        else:
+            msg.error("ERRORS WHILE MERGING")
+            raise RuntimeError("Output merging error")

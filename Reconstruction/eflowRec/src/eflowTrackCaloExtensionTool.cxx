@@ -31,11 +31,9 @@
 
 eflowTrackCaloExtensionTool::eflowTrackCaloExtensionTool(const std::string& type, const std::string& name, const IInterface* parent)  :
     AthAlgTool(type, name, parent),
-    m_theTrackExtrapolatorTool("Trk::ParticleCaloExtensionTool",this),
     m_trackParametersIdHelper(std::make_unique<Trk::TrackParametersIdHelper>())
 {
   declareInterface<eflowTrackExtrapolatorBaseAlgTool>(this);
-  declareProperty("TrackCaloExtensionTool", m_theTrackExtrapolatorTool, "TrackCaloExtension Tool Handle");
 }
 
 eflowTrackCaloExtensionTool::~eflowTrackCaloExtensionTool() = default;

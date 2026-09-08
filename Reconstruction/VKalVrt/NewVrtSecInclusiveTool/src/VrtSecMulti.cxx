@@ -481,7 +481,6 @@ namespace Rec{
              tmpVertex=m_fitSvc->fit(xAODwrk->tmpListTracks,curVrt.vertex,*state);
           } else if(nth==1){                            //-- Special case for 1-track vertex
              tmpVertex=std::make_unique<xAOD::Vertex>();
-             if(!tmpVertex)continue;
              tmpVertex->makePrivateStore();
              tmpVertex->setPosition(curVrt.vertex);
              std::vector<float> floatErrMtx(6);

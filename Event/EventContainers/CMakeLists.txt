@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( EventContainers )
@@ -37,7 +37,7 @@ atlas_add_test( IDCValueTest SOURCES test/IDCValueTest.cxx
 atlas_add_test( IDCMaskTest SOURCES test/maskTest.cxx
                 INCLUDE_DIRS src test EventContainers
                 LINK_LIBRARIES EventContainers
-                POST_EXEC_SCRIPT nopost.sh
+                POST_EXEC_SCRIPT noerror.sh
               )
 atlas_add_test( IDBenchTest SOURCES test/IDC_Benchmark.cxx
                 INCLUDE_DIRS src test EventContainers

@@ -22,16 +22,13 @@ jFEXFormTOBs::jFEXFormTOBs(const std::string& type, const std::string& name, con
     declareInterface<IjFEXFormTOBs>(this);
 }
 
-/** Desctructor */
-jFEXFormTOBs::~jFEXFormTOBs() {}
-
 StatusCode jFEXFormTOBs::initialize()
 {
     return StatusCode::SUCCESS;
 }
 
 
-uint32_t jFEXFormTOBs::formTauTOB(int jFEX, int iPhi, int iEta, int EtClus, int IsoRing, bool satTau, int Resolution, int ptMinToTopo )
+uint32_t jFEXFormTOBs::formTauTOB(int jFEX, int iPhi, int iEta, int EtClus, int IsoRing, bool satTau, int Resolution, int ptMinToTopo ) const
 {
     uint32_t tobWord = 0;
     
@@ -61,7 +58,6 @@ uint32_t jFEXFormTOBs::formTauTOB(int jFEX, int iPhi, int iEta, int EtClus, int 
 
     ATH_MSG_DEBUG("tobword tau with iso, et, eta and phi: " << std::bitset<32>(tobWord) );
 
-
     unsigned int minEtThreshold = ptMinToTopo/Resolution;
 
     if (et <= minEtThreshold) return 0;
@@ -69,7 +65,7 @@ uint32_t jFEXFormTOBs::formTauTOB(int jFEX, int iPhi, int iEta, int EtClus, int 
 
 }    
 
-int jFEXFormTOBs::Get_calibrated_SRj_ET(int Energy, int res, const std::vector<int>& calibFactors){
+int jFEXFormTOBs::Get_calibrated_SRj_ET(int Energy, int res, const std::vector<int>& calibFactors) const {
     // This is for data taken before the end of 2023
     // ET binned calibration factors (in practice all set to the same value)
     int Et_edge[8] = {20,30,40,50,65,80,110,150};
@@ -99,7 +95,7 @@ int jFEXFormTOBs::Get_calibrated_SRj_ET(int Energy, int res, const std::vector<i
     return et;
 }
 
-int jFEXFormTOBs::Get_eta_calibrated_SRj_ET(int Energy, int jfex, unsigned int coreEta, int res, const std::vector<int>& calibFactors){
+int jFEXFormTOBs::Get_eta_calibrated_SRj_ET(int Energy, int jfex, unsigned int coreEta, int res, const std::vector<int>& calibFactors) const {
     // This is for data taken starting from 2024
     // eta binned calibration factors for improved calibration w.r.t. offline jets
     
@@ -122,7 +118,7 @@ int jFEXFormTOBs::Get_eta_calibrated_SRj_ET(int Energy, int jfex, unsigned int c
 }
 
 
-uint32_t jFEXFormTOBs::formSRJetTOB(int jFEX, int iPhi, int iEta, int EtClus, bool sat, int Resolution, int ptMinToTopo, const std::pair<unsigned int, const std::vector<int>&>& calibParameters ) {
+uint32_t jFEXFormTOBs::formSRJetTOB(int jFEX, int iPhi, int iEta, int EtClus, bool sat, int Resolution, int ptMinToTopo, const std::pair<unsigned int, const std::vector<int>&>& calibParameters ) const {
     uint32_t tobWord = 0;
     unsigned int eta = 0;
     unsigned int phi = 0;
@@ -190,7 +186,7 @@ uint32_t jFEXFormTOBs::formSRJetTOB(int jFEX, int iPhi, int iEta, int EtClus, bo
 
 
 
-uint32_t jFEXFormTOBs::formLRJetTOB(int jFEX, int iPhi, int iEta, int EtClus, bool sat, int Resolution, int ptMinToTopo ) {
+uint32_t jFEXFormTOBs::formLRJetTOB(int jFEX, int iPhi, int iEta, int EtClus, bool sat, int Resolution, int ptMinToTopo ) const {
     
     uint32_t tobWord = 0;
     unsigned int eta = 0;
@@ -252,7 +248,7 @@ uint32_t jFEXFormTOBs::formLRJetTOB(int jFEX, int iPhi, int iEta, int EtClus, bo
 }
 
 
-uint32_t jFEXFormTOBs::formSumETTOB(std::tuple<int,bool> & ETlow, std::tuple<int,bool> & EThigh, int Resolution )
+uint32_t jFEXFormTOBs::formSumETTOB(std::tuple<int,bool> & ETlow, std::tuple<int,bool> & EThigh, int Resolution ) const
 {
     uint32_t tobWord = 0;
 
@@ -280,7 +276,7 @@ uint32_t jFEXFormTOBs::formSumETTOB(std::tuple<int,bool> & ETlow, std::tuple<int
 }
     
     
-uint32_t jFEXFormTOBs::formMetTOB(int METX, int METY, bool sat, int Resolution ) {
+uint32_t jFEXFormTOBs::formMetTOB(int METX, int METY, bool sat, int Resolution ) const {
     uint32_t tobWord = 0;
 
     bool Sat = sat;
@@ -315,9 +311,6 @@ uint32_t jFEXFormTOBs::formMetTOB(int METX, int METY, bool sat, int Resolution )
     ATH_MSG_DEBUG("tobword MET with Res, MET_Y, MET_X, Sat: " << std::bitset<32>(tobWord) );
 
     return tobWord;
-
 }
-
-
 
 } // end of namespace bracket

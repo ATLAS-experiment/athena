@@ -15,6 +15,7 @@
 #include "AthenaPoolSharedIOCnvSvc.h"
 
 #include "THashTable.h"
+#include <unordered_map>
 
 class TServerSocket;
 class TMonitor;
@@ -46,6 +47,7 @@ private:
    TServerSocket* m_rootServerSocket;
    TMonitor* m_rootMonitor;
    THashTable m_rootMergers;
+   std::unordered_map<TClass*, void*> m_dummyCache;
    int m_rootClientIndex;
    int m_rootClientCount;
    int m_numberOfStreams;

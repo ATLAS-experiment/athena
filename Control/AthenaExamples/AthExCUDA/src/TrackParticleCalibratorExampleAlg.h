@@ -14,7 +14,7 @@
 // Device include(s).
 #include "AthCUDAInterfaces/IStreamTool.h"
 #include "AthDeviceInterfaces/ICopyTool.h"
-#include "AthDeviceInterfaces/IMemoryResourceTool.h"
+#include "AthDeviceInterfaces/IMemoryResourcesTool.h"
 
 // xAOD include(s).
 #include "xAODTracking/TrackParticleContainer.h"
@@ -64,11 +64,9 @@ class TrackParticleCalibratorExampleAlg : public AthReentrantAlgorithm {
       "The output track particle container"};
 
   /// Host memory resource tool to use
-  ToolHandle<AthDevice::IMemoryResourceTool> m_hostMR{
-      this, "HostMR", "", "The host memory resource tool to use"};
-  /// Device memory resource tool to use
-  ToolHandle<AthDevice::IMemoryResourceTool> m_deviceMR{
-      this, "DeviceMR", "", "The device memory resource tool to use"};
+  ToolHandle<AthDevice::IMemoryResourcesTool> m_mrTool{
+      this, "MemoryResourcesTool", "",
+      "Tool providing the memory resource(s) to use"};
 
   /// Host copy tool to use
   ToolHandle<AthDevice::ICopyTool> m_hostCopyTool{this, "HostCopyTool", "",

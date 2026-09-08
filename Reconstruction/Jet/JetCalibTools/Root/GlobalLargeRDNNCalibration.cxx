@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // System includes
@@ -34,10 +34,10 @@ namespace{
         #ifdef XAOD_STANDALONE
             using namespace asg::msgUserCode;
             ANA_MSG_WARNING("If running DNN calibration in AnalysisBase: necessary to instantiate the ONNX service AthOnnx::OnnxRuntimeSvc with name OnnxRuntimeSvc");
-            ATH_MSG_WARNING("Either in C++ config (see exemple in JetCalibTools_Example.cxx)");
-            ATH_MSG_WARNING("Or in python config with");
-            ATH_MSG_WARNING("   from AnaAlgorithm.DualUseConfig import createService");
-            ATH_MSG_WARNING("   onnxSvc = createService('AthOnnx::OnnxRuntimeSvc', 'OnnxRuntimeSvc', myAlgSequence)");
+            ANA_MSG_WARNING("Either in C++ config (see exemple in JetCalibTools_Example.cxx)");
+            ANA_MSG_WARNING("Or in python config with");
+            ANA_MSG_WARNING("   from AnaAlgorithm.DualUseConfig import createService");
+            ANA_MSG_WARNING("   onnxSvc = createService('AthOnnx::OnnxRuntimeSvc', 'OnnxRuntimeSvc', myAlgSequence)");
             serviceName = "OnnxRuntimeSvc";
         #else
             serviceName = "AthOnnx::OnnxRuntimeSvc";

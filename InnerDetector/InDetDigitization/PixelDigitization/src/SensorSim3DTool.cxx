@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "SensorSim3DTool.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
@@ -769,9 +769,11 @@ double SensorSim3DTool::getProbMapEntry(const InDetDD::PixelReadoutTechnology &r
   double echarge;
   if (readout == InDetDD::PixelReadoutTechnology::FEI4) {
     std::multimap<std::pair<int, int>, double>::const_iterator iter = m_probMapFEI4.find(doublekey);
+    if (iter == m_probMapFEI4.end()) return -1.;
     echarge = iter->second;
   } else if (readout == InDetDD::PixelReadoutTechnology::FEI3) {
     std::multimap<std::pair<int, int>, double>::const_iterator iter = m_probMapFEI3.find(doublekey);
+    if (iter == m_probMapFEI3.end()) return -1.;
     echarge = iter->second;
   } else {
     ATH_MSG_ERROR("No Map Entry available for the requested readout");

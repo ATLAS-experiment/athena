@@ -15,7 +15,12 @@ def MuonPhiHoughTransformAlgCfg(flags, name = "MuonPhiHoughTransformAlg", **kwar
 def MuonNSWSegmentFinderAlgCfg(flags, name = "MuonNswSegmentFinderAlg", **kwargs):
     result = ComponentAccumulator()
     from MuonSpacePointCalibrator.CalibrationConfig import MuonSpacePointCalibratorCfg
-    kwargs.setdefault("Calibrator", result.popToolsAndMerge(MuonSpacePointCalibratorCfg(flags)))
+    calibrator_kwargs = {}
+    if flags.Input.isMC:
+        #See !90511, possibility to adjust precision strips with sTgcPrecCoordErrorScale and both eta and stereo MMG with mmStripErrorScale
+        calibrator_kwargs["sTgcNonPrecCoordErrorScale"] = 4.
+
+    kwargs.setdefault("Calibrator", result.popToolsAndMerge(MuonSpacePointCalibratorCfg(flags, **calibrator_kwargs)))
     theAlg = CompFactory.MuonR4.NswSegmentFinderAlg(name, **kwargs)
     result.addEventAlgo(theAlg, primary=True)
     return result
@@ -60,10 +65,8 @@ def ActsMuonSegmentRefitAlgCfg(flags,name="ActsMuonSegmentRefitAlg", **kwargs):
     kwargs.setdefault("SegmentSelectionTool", result.popToolsAndMerge(SegmentSelectorCfg(flags)))
     from MuonSpacePointCalibrator.CalibrationConfig import MuonSpacePointCalibratorCfg
     kwargs.setdefault("Calibrator", result.popToolsAndMerge(MuonSpacePointCalibratorCfg(flags)))
-    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
-    kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)))
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-    kwargs.setdefault("TrackingGeometryTool", result.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+    result.merge(ActsTrackingGeometrySvcCfg(flags))
     kwargs.setdefault("SegmentContainer", "MuonSegmentsFromR4")
     theAlg = CompFactory.MuonR4.SegmentActsRefitAlg(name, **kwargs)
     result.addEventAlgo(theAlg, primary = True)
@@ -113,10 +116,4 @@ def MuonPatternRecognitionCfg(flags, suffix = ""):
         result.merge(RecoSegmentTruthAssocCfg(flags,
                                               name=f"MuonSegmentsFromR4TruthMatching{suffix}",
                                               SegmentKey="MuonSegmentsFromR4"))
-    if flags.Muon.scheduleActsReco:
-        from MuonSegmentCnv.MuonSegmentCnvConfig import MuonR4SegmentCnvAlgCfg
-        result.merge(MuonR4SegmentCnvAlgCfg(flags,
-                                            name=f"MuonR4SegmentCnvAlg{suffix}",
-                                            ReadSegments = segmentContainers,
-                                            WriteKey="TrackMuonSegments"))
     return result

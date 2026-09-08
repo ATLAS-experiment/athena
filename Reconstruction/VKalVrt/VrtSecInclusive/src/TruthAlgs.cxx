@@ -8,7 +8,6 @@
 #include "AthContainers/ConstAccessor.h"
 #include "AthContainers/Accessor.h"
 
-#include <iostream>
 #include <set>
 #include <tuple>
 
@@ -69,12 +68,14 @@ namespace VKalVrtAthena {
 
     // loop over tracks
     ATH_MSG_VERBOSE( "categorizeVertexTruthTopology(): loop over tracks" );
+    typedef ElementLink<xAOD::TruthParticleContainer> truthLink;
+    static const SG::ConstAccessor< truthLink > truthParticleLinkAcc( "truthParticleLink" );
     for(  size_t itrk=0; itrk<vertex->nTrackParticles(); itrk++ ) {
       const auto *trk = vertex->trackParticle( itrk );
 
       ATH_MSG_VERBOSE( "categorizeVertexTruthTopology(): track loop itrk = " << itrk );
-      typedef ElementLink<xAOD::TruthParticleContainer> truthLink;
-      static const SG::ConstAccessor< truthLink > truthParticleLinkAcc( "truthParticleLink" );
+
+      
       const truthLink& link = truthParticleLinkAcc(*trk);
 
       if (  ! link ) {

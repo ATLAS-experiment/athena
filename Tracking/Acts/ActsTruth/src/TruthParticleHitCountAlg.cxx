@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TruthParticleHitCountAlg.h"
@@ -43,15 +43,9 @@ namespace ActsTrk
      return out;
   }
 
-  TruthParticleHitCountAlg::TruthParticleHitCountAlg(const std::string &name,
-                                                         ISvcLocator *pSvcLocator)
-      : AthReentrantAlgorithm(name, pSvcLocator)
-  {
-  }
-
   StatusCode TruthParticleHitCountAlg::initialize()
   {
-     ATH_CHECK( m_trackingGeometryTool.retrieve() );
+     ATH_CHECK( m_ctxProvider.initialize() );
      ATH_CHECK( m_pixelClustersToTruth.initialize() );
      ATH_CHECK( m_stripClustersToTruth.initialize() );
      ATH_CHECK( m_hgtdClustersToTruth.initialize(not m_hgtdClustersToTruth.empty()) );
@@ -108,7 +102,7 @@ namespace ActsTrk
     ATH_CHECK(SG::get(hgtdClustersToTruthAssociation, m_hgtdClustersToTruth, ctx));
    
 
-    Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+    Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
 
     std::array<const ActsTrk::MeasurementToTruthParticleAssociation *,
                static_cast< std::underlying_type<xAOD::UncalibMeasType>::type >(xAOD::UncalibMeasType::nTypes)>
@@ -138,6 +132,7 @@ namespace ActsTrk
              const xAOD::TruthParticle *mother_particle = m_elasticDecayUtil.getMother(*truth_particle, m_maxEnergyLoss.value());
              if (mother_particle) {
                 assert(measurement_type_i < (*truth_particle_hit_counts)[mother_particle].size());
+                //coverity[INTEGER_OVERFLOW]
                 ++(*truth_particle_hit_counts)[mother_particle][measurement_type_i];
              }
           }

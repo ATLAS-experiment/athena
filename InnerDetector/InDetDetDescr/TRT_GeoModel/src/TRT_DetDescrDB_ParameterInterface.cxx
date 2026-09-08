@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_DetDescrDB_ParameterInterface.h"
@@ -12,6 +12,7 @@
 #include "InDetGeoModelUtils/DistortedMaterialManager.h"
 #include "InDetGeoModelUtils/TopLevelPlacements.h"
 #include "InDetGeoModelUtils/InDetDDAthenaComps.h"
+#include <stdexcept>
 
 //_________________________________________________________________________________________
 TRT_DetDescrDB_ParameterInterface::TRT_DetDescrDB_ParameterInterface(InDetDD::AthenaComps * athenaComps)
@@ -117,10 +118,9 @@ void TRT_DetDescrDB_ParameterInterface::SetValues() {
   if (!oldConfiguration) {
     IRDBRecordset_ptr topLevelTable = iAccessSvc->getRecordsetPtr("TRTTopLevel", detectorKey, detectorNode);
     m_placements = new TopLevelPlacements(topLevelTable);
+  } else {    
+    m_placements = new TopLevelPlacements(nullptr);
   }
-  else
-    m_placements = new TopLevelPlacements(IRDBRecordset_ptr());
-
   /////////////////////////////////////////////////////////////////////////////////////////
   //                                   Extra Scaled Material                             //
   /////////////////////////////////////////////////////////////////////////////////////////

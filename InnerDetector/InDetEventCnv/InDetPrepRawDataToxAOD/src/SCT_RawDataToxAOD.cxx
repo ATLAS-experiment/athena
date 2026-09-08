@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -15,11 +15,6 @@
 // xAOD container type
 #include "xAODTracking/SCTRawHitValidationAuxContainer.h"
 
-SCT_RawDataToxAOD::SCT_RawDataToxAOD(const std::string& name,
-                                     ISvcLocator* pSvcLocator)
-  : AthReentrantAlgorithm(name, pSvcLocator)
-{
-}
 
 StatusCode SCT_RawDataToxAOD::initialize() {
   ATH_CHECK(detStore()->retrieve(m_SCTHelper, "SCT_ID"));

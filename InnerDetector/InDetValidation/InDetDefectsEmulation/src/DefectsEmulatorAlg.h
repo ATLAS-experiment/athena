@@ -9,7 +9,6 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
-#include "TH2.h"
 
 namespace InDet {
 template <class T_RDO_Container>

@@ -292,12 +292,15 @@ namespace DerivationFramework{
       {561982, 561990, GEN_id::Pythia8},
       {600031, GEN_id::Pythia8},
       {600638, 600639, GEN_id::Pythia8},
+      {600642, 600643, GEN_id::Pythia8},
+      {600644, 600645, GEN_id::HerwigPP},
       {600668, GEN_id::HerwigPP},
       {600787, 600790, GEN_id::HerwigPP},
       {600793, 600796, GEN_id::Pythia8},
       {601284, GEN_id::Pythia8},
       {601403, GEN_id::Pythia8},
       {601407, GEN_id::Pythia8},
+      {601412, 601413, GEN_id::Pythia8},
       {601607, GEN_id::HerwigPP},
       {601656, GEN_id::Pythia8},
       {601669, 601670, GEN_id::Pythia8},
@@ -499,7 +502,7 @@ namespace DerivationFramework{
           else if(isDirectlyFromTop(part)){
             partonsOrigin[ part ] = c_from_top;
           }
-          else if((IsHerwigPP()&&IsSherpa())&&isDirectlyFSR(part)){
+          else if((IsHerwigPP()||IsSherpa())&&isDirectlyFSR(part)){
             partonsOrigin[ part ] = c_FSR;
           }
           else if(IsPythia8()&&isDirectlyFSRPythia8(part)){

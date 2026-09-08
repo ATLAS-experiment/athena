@@ -65,7 +65,7 @@ namespace MuonR4::SegmentFit {
                 /** @brief Minimum number of precision hits */
                 unsigned nPrecHitCut{3u};
                 /** @brief Maximum trials to recover outliers */
-                unsigned nRecoveryLoops{10u};
+                unsigned nRecoveryLoops{2u};
             };
             /** @brief Full configuration object */           
             struct Config : public Fitter_t::Config,
@@ -181,6 +181,12 @@ namespace MuonR4::SegmentFit {
             std::unique_ptr<Segment> convertToSegment(const Amg::Transform3D& locToGlobTrf, 
                                                       const SegmentSeed* parentSeed,
                                                       Result_t&& toConvert) const;
+            /** @brief Checks if the candidate has enough precision hits to fit a segment. In case of 
+             *         NSW, we check also the orientation of the strips to ensure they provide 
+             *         indipendent constraints on the segment.
+             *  @param candidateHits: List of hits on the candidate segment 
+             *  @param seed: Segment seed from which the segment was built. Needed for station index */
+            bool checkPrecHitCount(const HitVec_t& candidateHits) const;
 
     };  
 }

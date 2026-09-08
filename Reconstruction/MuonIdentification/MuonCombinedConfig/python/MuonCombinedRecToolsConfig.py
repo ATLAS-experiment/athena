@@ -187,9 +187,9 @@ def MuonCreatorToolCfg(flags, name="MuonCreatorTool", **kwargs):
         kwargs.setdefault("UseCaloCells", False)
         kwargs.setdefault("CopyUInt8SummaryKeys", [])
     else:
-        from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
+        from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
         kwargs.setdefault("MuonSelectionTool", result.popToolsAndMerge(
-            MuonSelectionToolCfg(flags, name='MuonRecoSelTool')))
+            MuonLoosenedNonCalibratedSelectionToolCfg(flags, name='MuonRecoSelTool')))
     kwargs.setdefault("RequireMSOEforSA", flags.Beam.Type is BeamType.Collisions)
     kwargs.setdefault("RequireCaloForSA", flags.Beam.Type is BeamType.Collisions)
  
@@ -216,85 +216,6 @@ def ExtrapolateMuonToIPToolCfg(flags, name="ExtrapolateMuonToIPTool", **kwargs):
     kwargs.setdefault("Printer", result.getPrimaryAndMerge(
         MuonEDMPrinterToolCfg(flags)))
     result.setPrivateTools(CompFactory.ExtrapolateMuonToIPTool(name, **kwargs))
-    return result
-
-
-def MuonCandidateToolCfg(flags, name="MuonCandidateTool", **kwargs):
-    from MuonConfig.MuonRecToolsConfig import MuonAmbiProcessorCfg
-    result = ComponentAccumulator()
-    muon_edm_printer = result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags))
-    kwargs.setdefault("Printer", muon_edm_printer)
-    if "TrackBuilder" not in kwargs:
-        kwargs.setdefault("TrackBuilder", result.popToolsAndMerge(
-            CombinedMuonTrackBuilderCfg(flags, name="CombinedMuonTrackBuilder")))
-    #   Why was this dependent on cosmics? will now always create this
-    #   if flags.Beam.Type is BeamType.Cosmics:
-    if flags.Muon.MuonTrigger and flags.Beam.Type is not BeamType.Cosmics:
-        # trigger definitely only uses the ExtrapolateToIPtool in cosmics mode
-        kwargs.setdefault("TrackExtrapolationTool", "")
-    else:
-        kwargs.setdefault("TrackExtrapolationTool", result.popToolsAndMerge(
-            ExtrapolateMuonToIPToolCfg(flags)))
-        kwargs.setdefault("SegmentContainer", "TrackMuonSegments")
-    kwargs.setdefault("AmbiguityProcessor", result.popToolsAndMerge(
-        MuonAmbiProcessorCfg(flags)))
-
-    from TrkConfig.TrkTrackSummaryToolConfig import MuonTrackSummaryToolCfg
-    kwargs.setdefault("TrackSummaryTool", result.popToolsAndMerge(
-        MuonTrackSummaryToolCfg(flags)))
-
-    # MuonIDHelperSvc already configured
-
-    if flags.Beam.Type is BeamType.Cosmics:
-        kwargs.setdefault("ExtrapolationStrategy", 1)
-
-    track_segment_association_tool = CompFactory.MuonCombined.TrackSegmentAssociationTool(
-        MuonEDMPrinterTool=muon_edm_printer)
-    kwargs.setdefault("TrackSegmentAssociationTool",
-                      track_segment_association_tool)
-    result.addPublicTool(track_segment_association_tool)
-
-    tool = CompFactory.MuonCombined.MuonCandidateTool(name, **kwargs)
-    result.setPrivateTools(tool)
-    return result
-
-
-def MuonCombinedDebuggerToolCfg(flags, name="MuonCombinedDebuggerTool", **kwargs):
-    result = ComponentAccumulator()
-    match_quality = CompFactory.Rec.MuonMatchQuality(
-        TrackQuery=result.popToolsAndMerge(MuonTrackQueryCfg(flags)))
-    kwargs.setdefault("MuonMatchQuality", match_quality)
-    tool = CompFactory.MuonCombined.MuonCombinedDebuggerTool(name, **kwargs)
-    result.setPrivateTools(tool)
-    return result
-
-
-def MuonCombinedToolCfg(flags, name="MuonCombinedTool", **kwargs):
-    tools = []
-    result = ComponentAccumulator()
-    kwargs.setdefault("Printer", result.getPrimaryAndMerge(
-        MuonEDMPrinterToolCfg(flags)))
-
-    if flags.MuonCombined.doCombinedFit:
-        tool = result.popToolsAndMerge(MuonCombinedFitTagToolCfg(flags))
-        tools.append(tool)
-    if flags.MuonCombined.doStatisticalCombination and flags.Beam.Type is not BeamType.Cosmics:
-        tool = result.popToolsAndMerge(MuonCombinedStacoTagToolCfg(flags))
-        tools.append(tool)
-
-    kwargs.setdefault("MuonCombinedTagTools", tools)
-    kwargs.setdefault("MuonCombinedDebuggerTool", result.popToolsAndMerge(
-        MuonCombinedDebuggerToolCfg(flags)))
-
-    acc = MuonAlignmentUncertToolThetaCfg(flags)
-    result.merge(acc)
-    kwargs.setdefault("AlignmentUncertTool", result.getPublicTool(
-        'MuonAlignmentUncertToolTheta'))
-
-    kwargs.setdefault("DeltaEtaPreSelection", 0.2)
-    kwargs.setdefault("DeltaPhiPreSelection", 0.2)
-    tool = CompFactory.MuonCombined.MuonCombinedTool(name, **kwargs)
-    result.setPrivateTools(tool)
     return result
 
 
@@ -474,8 +395,6 @@ def MuidCaloEnergyToolParamCfg(flags, name='MuidCaloEnergyToolParam', **kwargs):
 
 def MuidTrackIsolationCfg(flags, name='MuidTrackIsolation', **kwargs):
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
-    kwargs.setdefault("InDetTracksLocation",
-                      "CombinedInDetTracks" if flags.Detector.GeometryID else "CombinedITkTracks")
     # RungeKuttaIntersector requires the magnetic field conditions
     result = AtlasFieldCacheCondAlgCfg(flags)
     tool = CompFactory.Rec.MuidTrackIsolation(name, **kwargs)
@@ -602,7 +521,7 @@ def MuonAlignmentUncertToolThetaCfg(flags, name="MuonAlignmentUncertToolTheta", 
     kwargs.setdefault(
         "InFile", "MuonCombinedBaseTools/AlignmentUncertainties/201029_initial/ID_MS_Uncertainties.root")
     tool = CompFactory.Muon.MuonAlignmentUncertTool(name, **kwargs)
-    result.addPublicTool(tool)
+    result.addPublicTool(tool, primary = True)
     return result
 
 
@@ -614,7 +533,7 @@ def MuonAlignmentUncertToolPhiCfg(flags, name="MuonAlignmentUncertToolPhi", **kw
     kwargs.setdefault(
         "InFile", "MuonCombinedBaseTools/AlignmentUncertainties/201029_initial/ID_MS_Uncertainties.root")
     tool = CompFactory.Muon.MuonAlignmentUncertTool(name, **kwargs)
-    result.addPublicTool(tool)
+    result.addPublicTool(tool, primary=True)
     return result
 
 

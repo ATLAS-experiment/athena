@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrackHistograms.h"
@@ -60,7 +60,7 @@ TrackHistograms::fill(const xAOD::IParticle& track, float mu)
 {
 
   const xAOD::TrackParticle* tp =
-    dynamic_cast<const xAOD::TrackParticle*>(&track);
+    static_cast<const xAOD::TrackParticle*>(&track);
 
   int nTRTHits = summaryValueInt(*tp, xAOD::numberOfTRTHits);
   int nTRTTubeHits = summaryValueInt(*tp, xAOD::numberOfTRTTubeHits);

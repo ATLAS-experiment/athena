@@ -13,12 +13,9 @@ export ATHENA_CORE_NUMBER=1
 Reco_tf.py \
   --preExec "flags.Exec.FPE=-1; \
        from ActsConfig.ActsConfigFlags import SeedingStrategy; \
-       flags.Acts.SeedingStrategy=SeedingStrategy.Gbts; \
-       flags.Tracking.doTruth=False; \
-       flags.Tracking.doPixelDigitalClustering=True; \
-       from ActsConfig.ActsConfigFlags import PixelCalibrationStrategy; \
-       flags.Acts.PixelCalibrationStrategy=PixelCalibrationStrategy.Uncalibrated;" \
-  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
+       flags.Tracking.ITkActsPass.SeedingStrategy=SeedingStrategy.Gbts; \
+       flags.Tracking.ITkActsLargeRadiusPass.SeedingStrategy=SeedingStrategy.Gbts;" \
+  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
   --ignorePatterns "${ignore_pattern}" \
   --conditionsTag ${conditions_tag} \
   --inputRDOFile ${input_rdo} \

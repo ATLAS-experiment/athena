@@ -8,6 +8,7 @@
 #define EVGENPRODTOOLS_TESTHEPMC_H
 
 #include "GeneratorModules/GenBase.h"
+#include "GeneratorModules/GenData.h"
 #include "GaudiKernel/ITHistSvc.h"
 #include "TFile.h"
 #include "TH1.h"
@@ -129,6 +130,7 @@ public:
 
   MC::Loops<HepMC::GenEvent,HepMC::ConstGenParticlePtr,HepMC::ConstGenVertexPtr> m_looper; //!< member to detect loops
 
+  std::shared_ptr<GenData> m_gendata{nullptr};
 
 };
 

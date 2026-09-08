@@ -439,10 +439,14 @@ namespace MuonCombined {
 
                     const xAOD::TrackParticle &id_track_particle = candidate->indetTrackParticle();
                     for (const std::unique_ptr< SG::Accessor<float> > &accessor  : m_copyFloatSummaryAccessors ) {
-                       (*accessor)( *tp ) = (*accessor)( id_track_particle );
-		    }
+                        if (accessor->isAvailable(id_track_particle)) {
+                            (*accessor)( *tp ) = (*accessor)( id_track_particle );
+                        }
+                    }
                     for (const std::unique_ptr< SG::Accessor<uint8_t> > &accessor  : m_copyCharSummaryAccessors ) {
-                       (*accessor)( *tp ) = (*accessor)( id_track_particle );
+                        if (accessor->isAvailable(id_track_particle)) {
+                            (*accessor)( *tp ) = (*accessor)( id_track_particle );
+                        }
                     }
 
                 }
@@ -548,7 +552,7 @@ namespace MuonCombined {
             std::vector<float>& errorVec = errorAcc(*slowMuon);
             std::vector<float>& shiftVec = shiftAcc(*slowMuon);
             std::vector<float>& propagationTimeVec = propTimeAcc(*slowMuon);
-	    std::vector<uint8_t>& passesMDTBetaCutVec = hitPassesMDTBetaCutAcc(*slowMuon);
+        std::vector<uint8_t>& passesMDTBetaCutVec = hitPassesMDTBetaCutAcc(*slowMuon);
 
             for (const auto& hit : stauExtras->hits) {
                 eTechVec.push_back(hit.eTech);
@@ -1108,10 +1112,10 @@ namespace MuonCombined {
             for (const TagBase* tag : indet_cand.second) {
                 /// In principle we can include here STACO as well but that is lower ranked as MuidSA
                 if (tag->author() == xAOD::Muon::Author::MuidCo) {
-                    const CombinedFitTag* cmb_tag = dynamic_cast<const CombinedFitTag*>(tag);
+                    const CombinedFitTag* cmb_tag = static_cast<const CombinedFitTag*>(tag);
                     used_candidates.insert(&cmb_tag->muonCandidate());
                 } else if (tag->author() == xAOD::Muon::Author::STACO && indet_cand.second[0] == tag) {
-                    const StacoTag* staco_tag = dynamic_cast<const StacoTag*>(tag);
+                    const StacoTag* staco_tag = static_cast<const StacoTag*>(tag);
                     used_candidates.insert(&staco_tag->muonCandidate());
                 }
             }

@@ -34,10 +34,6 @@ mon_singletau = [
   'HLT_tau25_perf_tracktwoMVA_L1eTAU20M',
   'HLT_tau25_mediumRNN_tracktwoMVA_L1eTAU20M',
 
-  'HLT_tau25_idperf_tracktwoMVA_L1jTAU20',
-  'HLT_tau25_perf_tracktwoMVA_L1jTAU20',
-  'HLT_tau25_mediumRNN_tracktwoMVA_L1jTAU20',
-
   'HLT_tau25_idperf_tracktwoMVA_L1cTAU20M',
   'HLT_tau25_perf_tracktwoMVA_L1cTAU20M',
   'HLT_tau25_mediumRNN_tracktwoMVA_L1cTAU20M',
@@ -52,14 +48,6 @@ mon_singletau = [
   'HLT_tau35_idperf_tracktwoMVA_L1eTAU30',
   'HLT_tau35_perf_tracktwoMVA_L1eTAU30',
   'HLT_tau35_mediumRNN_tracktwoMVA_L1eTAU30',
-
-  'HLT_tau35_idperf_tracktwoMVA_L1jTAU30',
-  'HLT_tau35_perf_tracktwoMVA_L1jTAU30',
-  'HLT_tau35_mediumRNN_tracktwoMVA_L1jTAU30',
-
-  'HLT_tau35_idperf_tracktwoMVA_L1jTAU30M',
-  'HLT_tau35_perf_tracktwoMVA_L1jTAU30M',
-  'HLT_tau35_mediumRNN_tracktwoMVA_L1jTAU30M',
 
   'HLT_tau35_idperf_tracktwoMVA_L1cTAU30M',
   'HLT_tau35_perf_tracktwoMVA_L1cTAU30M',

@@ -8,7 +8,7 @@
 #include "MuonRecToolInterfacesR4/IFastRecoVisualizationTool.h"
 #include "MuonSpacePoint/SpacePointContainer.h"
 #include "MuonSpacePoint/SpacePointPerLayerSorter.h"
-#include "MuonSpacePoint/SpacePointHelpers.h"
+#include <MuonSpacePoint/SpacePointHelpers.h>
 #include "MuonTrackEvent/ExpandedSector.h"
 #include "MuonStationIndex/MuonStationIndex.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
@@ -55,8 +55,8 @@ namespace MuonR4::FastReco{
                 /********* Pattern bulding acceptance **********/ 
                 /** @brief Size of theta window in radians to search for comapatible hits with a pattern, tailored to the target pt cutoff */
                 double thetaSearchWindow {0.05};
-                /** @brief Base radial compatibility window (in mm). This is the minimum allowed |R residual| between a test hit and the extrapolated line from the seed. */
-                double baseRWindow {25};
+                /** @brief Effective isotropic position uncertainty [mm], including detector resolution and unmodelled effects */
+                double baseResidualSigma {25};
                 /** @brief Maximum phi difference in radians allowed between two hits */
                 double phiTolerance {0.1};
                 /********* Pile-up & Fake rate suppression *****/
@@ -76,8 +76,8 @@ namespace MuonR4::FastReco{
                 /** @brief Maximum number of missed candidate hits in different measurement layers in a station */
                 unsigned int maxMissLayersInStation {2};
                 /********* Numerical stability *****************/
-                /** @brief Minimum separation (in mm) between the measurement layers of two hits for being used to compute a reliable pattern line. Use the beamspot otherwise. */
-                double minLayerSeparation {40};
+                /** @brief Minimum distance (in mm) between two hits for being used to compute a reliable pattern line. Use the beamspot otherwise. */
+                double minHitDistance4Line {40};
                 /** @brief Pointer to the visualization tool */
                 const MuonValR4::IFastRecoVisualizationTool* visionTool{nullptr};
                 /** @brief Pointer to the idHelperSvc */
@@ -110,12 +110,10 @@ namespace MuonR4::FastReco{
                 const SpacePointBucket* bucket{nullptr};
                 /** @brief Pointer to the parent container */
                 const SpacePointContainer* container{nullptr};
-                /** @brief Global R */
-                float R{0.f};
-                /** @brief Global Z */
-                float Z{0.f};
-                /** @brief Global Phi */
-                float phi{0.};
+                /** @brief Global position */
+                Amg::Vector3D position{Amg::Vector3D::Zero()};
+                /** @brief Sensor direction in global frame */
+                Amg::Vector3D sensorDir{Amg::Vector3D::Zero()};
                 /** @brief Station index */
                 StIndex station{};
                 /** @brief Layer number in the sector frame */
@@ -146,12 +144,12 @@ namespace MuonR4::FastReco{
             };
             /** @brief Small wrapper for candidate hits used to build patterns. This is needed
              *         because the global layer number cannot be defined globally, but it can be
-             *         computed given a set of hits. */
+             *         computed given a set of hits. We store locally most frequently accessed 
+             *         data to avoid frequent pointer indirection */
             struct CandidateHit {
-                /** @brief Store locally most frequently accessed data to avoid frequent pointer indirection */
+                /** @brief Pointer to the underlying hit */
                 const HitPayload* hit{nullptr};
-                float R{0.f};
-                float Z{0.f};
+                /** @brief Station index */
                 StIndex station{};
                 /** @brief Global measurement layer number */
                 uint8_t globLayer{0u};
@@ -166,6 +164,12 @@ namespace MuonR4::FastReco{
                 const SpacePoint* sp() const { return hit->sp(); }
                 bool operator==(const CandidateHit& other) const { return *hit == *other.hit; }
                 bool operator==(const HitPayload& other) const { return *hit == other; }
+                // Print and stream operator
+                friend std::ostream& operator<<(std::ostream& ostr, const CandidateHit& c) {
+                    c.print(ostr);
+                    return ostr;
+                }
+                void print(std::ostream& ostr) const;
             };
             /** @brief: Enum for possible outcomes of pattern line compatibility test */        
             enum class LineTestDecision : std::int8_t{
@@ -191,10 +195,10 @@ namespace MuonR4::FastReco{
                 /** @brief Constructor taking the seed information 
                  *  @param seed: seed hit
                  *  @param expSector: **expanded** sector coordinate
-                 *  @param seedTheta: global theta of the seed */
+                 *  @param cfg: pointer to configuration object
+                 *  @param logger: pointer to messaging object */
                 PatternState(const CandidateHit& seed,
                              const std::int8_t expSector,
-                             const double seedTheta,
                              const Config* cfg,
                              const AthMessaging* logger);
                 /** @brief Delete default destructor - ensure patterns are always constructed from a seed or another pattern */
@@ -238,6 +242,12 @@ namespace MuonR4::FastReco{
                  *  @param testHit: test hit information
                  *  @return: Test result holding the residual and acceptance window. The decision is set later. */
                 LineTestRes computeLineResidual(const CandidateHit& testHit) const;
+                /** @brief Project a certain hit position onto the bending plane where the pattern is defined. 
+                 *         The hit is moved along the sensor direction if it does not measure phi, 
+                 *         or is rotated around the Z axis if it does.
+                 *  @param hit: hit whose position is to be projected
+                 *  @return: projected position */
+                Amg::Vector3D projToPhiPlane(const HitPayload& hit) const;
                 /** @brief Method to check the phi compatibility of a test hit with a given pattern
                  *  @param testPhi: test global phi
                  *  @return: true if the test hit is phi compatible with the pattern, false otherwise */
@@ -246,8 +256,6 @@ namespace MuonR4::FastReco{
                  *  @param hit: hit to be checked
                  *  @return: boolean indicating if the hit is in the pattern */
                 bool isInPattern(const HitPayload& hit) const;
-                /** @brief Finalize the pattern building in eta and update its state */
-                void finalizePatternEta();
                 /** @brief Finalize the pattern building in phi and update its state */
                 void finalizePatternPhi();
                 /** @brief Move the line anchor hit given a reference hit. The anchor is defined
@@ -256,6 +264,8 @@ namespace MuonR4::FastReco{
                 /** @brief Update the line parameters based on the current hits
                  *  @param beamSpot: position of the beam spot, needed when there are not enough hits */
                 void updateLineParameters(const Amg::Vector3D& beamSpot);
+                /** @brief Helper method to update the pattern phi and bending plane normal */
+                void updatePatternPhi(const double newPhi);
                 /** @brief Return the mean normalized residual squared */
                 double getMeanResidual2() const;
                 /** @brief Return the number of hits in bending coordinate */
@@ -266,8 +276,6 @@ namespace MuonR4::FastReco{
                  *  @param onlyGoodStations: flag to indicate if only good stations should be counted,
                  *         i.e. having a minimum number of hits */
                 uint8_t nStations(const bool onlyGoodStations) const;
-                /** @brief Gives the number of MDT hits on the last layer */
-                uint8_t nMDTLastLayer() const;
                 /** @brief Get the buckets associated with the pattern */
                 std::vector<const SpacePointBucket*> getParentBuckets() const;
                 /** @brief Check whether a given hit is in the last layer */
@@ -279,28 +287,29 @@ namespace MuonR4::FastReco{
                 const AthMessaging* logger{nullptr};
                 /** @brief Pointer to Visual Information for pattern visualization */
                 Acts::CloneablePtr<PatternHitVisualInfo> visualInfo{nullptr};
-                /** @brief Pointer to the last inserted hit. Needed to speed-up lookup */
+                /** @brief Last inserted hit. Needed to speed-up lookup */
                 CandidateHit lastInsertedHit{};
-                /** @brief Pointer to the last hit in the second-to-last layer */
+                /** @brief Last hit in the second-to-last layer */
                 CandidateHit prevLayerHit{};
-                /** @brief Pointer to the line anchor hit */
+                /** @brief Line anchor hit */
                 CandidateHit lineAnchorHit{};
-                /** @brief Average theta & average phi of the pattern */
-                double theta{0.};
-                double phi{0.};
+                /** @brief Seed hit */
+                CandidateHit seedHit{};
+                /** @brief Normal vector to the bending plane where the pattern lies */
+                Amg::Vector3D bendPlaneNorm{Amg::Vector3D::Zero()};
+                /** @brief Position and direction of the pattern line. Both are constructed to be
+                 *         within the bending plane of the pattern */
+                Amg::Vector3D linePos{Amg::Vector3D::Zero()};
+                Amg::Vector3D lineDir{Amg::Vector3D::Zero()};
+                /** @brief Distance between the two points defining the pattern line */
+                double leverArm{0.};
                 /** @brief Mean over eta hits of the square of their residual divided by acceptance window */
                 double meanNormResidual2{0.};
                 /** @brief Residual & acceptance window of the last inserted hit (needed when replacing a hit) */
                 double lastResidual{0.};
                 double lastAcceptWindow{0.};
-                /** @brief Simple line model: slope and associated delta Z, i.e. the distance in Z between the two points defining the line */
-                double lineSlope{0.};
-                double dZ_slope{0.};
-                /** @brief Simple line model: factor for LR correction to be applied */
-                double LR_factor{-1.};
-                /** @brief Simple line model: anchor Z and R. Same as lineAnchorHit, except when using beamspot */
-                double anchorZ{0.};
-                double anchorR{0.};
+                /** @brief Pattern phi, which is the phi of the bending plane where the pattern lies */
+                double patPhi{0.};
                 /** @brief **expanded** MS sector */
                 ExpandedSector expSect{static_cast<int8_t>(0)};
                 /** @brief Counts of precision / non-precision / phi layers  */
@@ -416,7 +425,7 @@ namespace MuonR4::FastReco{
 
             struct PatternPrintView {
                 const PatternState& pat;
-                bool detailed;
+                bool detailed = false;
             };
             /** @brief Print the pattern candidate and stream operator */
             static PatternPrintView brief(const PatternState& p);

@@ -56,13 +56,14 @@ namespace ActsTrk{
               ATH_MSG_ERROR("The tool is initialized as a private tool but should be public");
               return StatusCode::FAILURE;
         }
-        ATH_CHECK(m_trackingGeometryTool.retrieve());
-        m_trackingGeometryTool->trackingGeometry()->visitSurfaces([&](const Acts::Surface *surface) {
+        ATH_CHECK(m_ctxProvider.initialize());
+        ATH_CHECK(m_trackingGeometrySvc.retrieve());
+        m_trackingGeometrySvc->trackingGeometry()->visitSurfaces([&](const Acts::Surface *surface) {
              // find acts surface with the same detector element ID
              if (!surface->isSensitive()) {
                 return;
             }
-            const auto *actsElement = dynamic_cast<const IDetectorElementBase*>(surface->surfacePlacement());
+            const auto *actsElement = dynamic_cast<const ISurfacePlacement*>(surface->surfacePlacement());
             if (!actsElement) {
                return;
             }
@@ -132,7 +133,7 @@ namespace ActsTrk{
     }
     SurfacePtr_t GeometryRealmConvTool::translateFreeSurface(const EventContext& ctx,
                                                              const Acts::Surface& surface) const {
-        const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+        const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
         const Amg::Transform3D& trf{surface.localToGlobalTransform(tgContext)};
         switch (surface.type()) {
             using enum Acts::Surface::SurfaceType;
@@ -160,17 +161,17 @@ namespace ActsTrk{
 
     SurfacePtr_t GeometryRealmConvTool::convertSurfaceToTrk(const EventContext& ctx,
                                                                 const Acts::Surface& actsSurface) const{
-        const auto *detEleBase= dynamic_cast<const IDetectorElementBase*>(actsSurface.surfacePlacement());
-        if (!detEleBase) {
+        const auto *placement = dynamic_cast<const ISurfacePlacement*>(actsSurface.surfacePlacement());
+        if (!placement) {
            return translateFreeSurface(ctx, actsSurface);
         }
-        switch (detEleBase->detectorType()) {
+        switch (placement->detectorType()) {
             using enum DetectorType;
             case Pixel:
             case Sct:
             case Hgtd:
             case Trt: {
-                const auto actsElement = dynamic_cast<const ActsDetectorElement*>(detEleBase);
+                const auto* actsElement = getActsDetectorElement(actsSurface);
                 if (actsElement) {
                     return SurfacePtr_t{&actsElement->atlasSurface()};
                 }
@@ -185,7 +186,7 @@ namespace ActsTrk{
                 if (!SG::get(detMgr, m_muonMgrKey, ctx).isSuccess() || !detMgr) {
                     THROW_EXCEPTION("Failed to retrieve the muon detector manager");
                 }
-                return SurfacePtr_t{&detMgr->getReadoutElement(detEleBase->identify())->surface(detEleBase->identify())};
+                return SurfacePtr_t{&detMgr->getReadoutElement(placement->identify())->surface(placement->identify())};
             } default:
                 break;
         }
@@ -224,7 +225,7 @@ namespace ActsTrk{
 
         std::shared_ptr<const Acts::Surface> actsSurface{};
         Acts::BoundVector params{};
-        const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+        const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
 
         // get the associated surface
         try {
@@ -271,7 +272,7 @@ namespace ActsTrk{
                 (*cov)(4, i) = (*cov)(4, i) / 1_MeV;
             }
         }
-        return Acts::BoundTrackParameters{actsSurface, params, std::move(cov), 
+        return Acts::BoundTrackParameters{std::move(actsSurface), params, std::move(cov), 
                                           ParticleHypothesis::convert(hypothesis)};
     }
     std::unique_ptr<Trk::TrackParameters> 
@@ -321,7 +322,7 @@ namespace ActsTrk{
                         actsParameter.get<Acts::eBoundTheta>(),
                         actsParameter.get<Acts::eBoundQOverP>() * 1_MeV, discSurface, cov);
                 } else if (trkSurface->type() == Trk::SurfaceType::Plane) {
-                    const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+                    const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
                     auto& planeSurface{static_cast<const Trk::PlaneSurface&>(*trkSurface)};
                     // need to convert to plane position on plane surface (annulus bounds)
                     auto helperSurface = Acts::Surface::makeShared<Acts::PlaneSurface>(planeSurface.transform());
@@ -386,12 +387,13 @@ namespace ActsTrk{
                     actsParameter.get<Acts::eBoundTheta>(),
                     actsParameter.get<Acts::eBoundQOverP>() * 1_MeV, lineSurface, cov);
             } case Acts::Surface::SurfaceType::Curvilinear: {
-                const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
+                const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
                 return std::make_unique<Trk::CurvilinearParameters>(
                     actsParameter.position(tgContext), actsParameter.get<Acts::eBoundPhi>(),
                     actsParameter.get<Acts::eBoundTheta>(),
                     actsParameter.get<Acts::eBoundQOverP>() * 1_MeV, cov);
-            } case Acts::Surface::SurfaceType::Other: {
+            } case Acts::Surface::SurfaceType::Point:
+              case Acts::Surface::SurfaceType::Other: {
                 break;
             }
         }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGTOOLS_TRIG_VSI_VTXMAP
 #define TRIGTOOLS_TRIG_VSI_VTXMAP
@@ -118,8 +118,8 @@ class VtxMap {
                }
                this->m_vtxLists = std::move(tmp_vtx_cls);
                this->updateLists();
-
-               this->m_posAvrVec = (1. / w) * tmp_vec;
+               
+               this->m_posAvrVec = (w!=0)?(1. / w) * tmp_vec : TVector3(0.,0.,0.);
                this->m_posAvr   = Cord::XYZtoX123(this->m_posAvrVec);
                this->m_posAvr.setWeight(w);
             };
@@ -340,11 +340,11 @@ template<typename WrkVrt, typename Cord>
 void VtxMap<WrkVrt,Cord>::ClusterizeCells(double eps, size_t minN)
 {
    m_locked = true;
-   DBScan<int>::RegionFunc region_query = [this](const int& glob_bin, double eps)
+   DBScan<int>::RegionFunc region_query = [this](const int& glob_bin, double e)
                                           {
-                                             return getNeighborCells_(glob_bin, eps);
+                                             return getNeighborCells_(glob_bin, e);
                                           };
-   m_dbscan = DBScan<int>(m_activeCells, region_query);
+   m_dbscan = DBScan<int>(m_activeCells, std::move(region_query));
    m_dbscan.clusterize(eps, minN);
 }
 

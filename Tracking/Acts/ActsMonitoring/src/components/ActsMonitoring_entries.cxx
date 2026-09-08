@@ -3,6 +3,7 @@
 */
 
 // Algs
+#include "src/ActsClusterComparisonAlg.h"
 #include "src/PixelClusterAnalysisAlg.h"
 #include "src/StripClusterAnalysisAlg.h"
 #include "src/HgtdClusterAnalysisAlg.h"
@@ -16,10 +17,12 @@
 #include "src/ITkAlignMonResidualsAlg.h"
 #include "src/ActsInspectTruthContentAlg.h"
 #include "src/ReadoutGeoDumpAlg.h"
+#include "src/ExtrapolationTestAlg.h"
 // Tools
 #include "src/PhysValTool.h"
 
 // Algs
+DECLARE_COMPONENT( ActsTrk::ActsClusterComparisonAlg )
 DECLARE_COMPONENT( ActsTrk::PixelClusterAnalysisAlg )
 DECLARE_COMPONENT( ActsTrk::StripClusterAnalysisAlg )
 DECLARE_COMPONENT( ActsTrk::HgtdClusterAnalysisAlg )
@@ -33,5 +36,6 @@ DECLARE_COMPONENT( ActsTrk::SeedsToTrackParamsAlg )
 DECLARE_COMPONENT( ActsTrk::ITkAlignMonResidualsAlg )
 DECLARE_COMPONENT( ActsTrk::ActsInspectTruthContentAlg )
 DECLARE_COMPONENT( ActsTrk::ReadoutGeoDumpAlg )
+DECLARE_COMPONENT( ActsTrk::ExtrapolationTestAlg)
 // Tools
 DECLARE_COMPONENT( ActsTrk::PhysValTool )

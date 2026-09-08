@@ -56,7 +56,7 @@ def fromRunArgs(runArgs):
                 if not flags.hasFlag(childStreamFlag):
                     flags.addFlag(childStreamFlag, [f'DAOD_{child}'])
                 else:
-                    flags._set(childStreamFlag, flags._get(childStreamFlag) + [f'DAOD_{child}'])
+                    flags[childStreamFlag] += [f'DAOD_{child}']
                 logDerivation.info('Setting up event augmentation as {0} => {1}'.format(child, parent))
 
     # Output formats
@@ -90,6 +90,12 @@ def fromRunArgs(runArgs):
             flags.addFlag(flagString, outputFileName)
             flags.addFlag(f'Output.doWrite{runArg.removeprefix("output").removesuffix("File")}', True)
             flags.Output.doWriteDAOD = True
+
+    # Number of folds to use for the egamma Normalizing Flow shower shape correction tool ElectronPhotonVariableNFCorrectionTool
+    if hasattr(runArgs, 'n_folds_NF'):
+        logDerivation.info('Will use %d folds for the e/gamma NF shower shape correction tool', runArgs.n_folds_NF)
+        flags.addFlag('Egamma.NFoldsNF', runArgs.n_folds_NF)
+
 
     # Fix campaign metadata
     from Campaigns.Utils import Campaign, campaign_runs

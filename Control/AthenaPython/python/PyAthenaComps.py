@@ -13,7 +13,6 @@ __all__ = [ 'StatusCode',
             'Svc',
             'AlgTool',
             'Aud',
-            'AthFilterAlgorithm',
             'algs',
             'services',
             ]
@@ -342,82 +341,3 @@ class Aud( CfgPyAud ):
         return
     
     pass # PyAthena.Aud
-
-### PyAthena.AthFilterAlgorithm -----------------------------------------------
-class AthFilterAlgorithm(Alg):
-    """base class for a filter algorithm, making use of the cutflow-svc.
-
-    instances of this class (and its derived class) shall have:
-     - a `cutID` attribute of type `CutIdentifier*` from `initialize`
-       (included) and onwards,
-     - a `cutFlowSvc()` method from `initialize` (included) and onwards.
-
-    The `cutID` attribute is the CutIdentifier returned by the `ICutFlowSvc`
-    when `self` registered itself with the `ICutFlowSvc`.
-    """
-    _dflt_FilterDescription='N/A'
-    
-    def __init__(self, name = None, **kw):
-        if name is None:
-            name = kw.get('name', self.__class__.__name__)
-        kw['name'] = name
-        kw.setdefault('OutputLevel', 3) #INFO
-
-        ## init base class
-        super(AthFilterAlgorithm, self).__init__(**kw)
-
-        # properties
-        self._filter_descr = kw.get('FilterDescription',
-                                    AthFilterAlgorithm._dflt_FilterDescription)
-        '''describes to the cutflowsvc what this filter does.'''
-        return
-
-    def _get_filter_descr(self):
-        return self._filter_descr
-    def _set_filter_descr(self, descr):
-        self._filter_descr = descr
-        
-    FilterDescription = property(_get_filter_descr,
-                                 _set_filter_descr,
-                                 doc='describes to the cutflowsvc what this filter does.')
-    
-    def cutFlowSvc(self):
-        if not hasattr(self, '_cutflowsvc'):
-            import AthenaPython.PyAthena as PyAthena
-            self._cutflowsvc = PyAthena.py_svc('CutFlowSvc',
-                                               iface='ICutFlowSvc')
-        return self._cutflowsvc
-
-    def setFilterDescription(self,descr):
-        """This function updates self's CutFlow description if (and only if)
-        it has not been explicitely set during the python-level configuration
-        """
-        if hasattr(self,'cutID'):
-            if self.FilterDescription==AthFilterAlgorithm._dflt_FilterDescription:
-                self.cutFlowSvc().setFilterDescription(self.cutID,descr)
-        else:
-            self.msg.error("AthFilterAlg has no self.cutID: could not set filter description.")
-        return
-
-    def sysInitialize(self):
-        if hasattr(self, 'OutputLevel'):
-            self.msg.setLevel(self.OutputLevel)
-        else:
-            self.msg.setLevel(_get_prop_value(self,'OutputLevel'))
-        myName=self.name() if callable(self.name) else self.name 
-        self.cutID = self.cutFlowSvc().registerFilter(myName, self._filter_descr, True)
-        if not self.cutID:
-            self.msg.error("could not register filter-cut with cutflowsvc")
-            return StatusCode.Failure
-        
-        return super(AthFilterAlgorithm, self).sysInitialize()
-
-    def setFilterPassed(self, state):
-        """Set the filter passed flag to the specified state"""
-        o = super(AthFilterAlgorithm, self).setFilterPassed(state)
-        if state:
-            # TODO: we should read a proper weight
-            self.cutFlowSvc().addEvent(self.cutID, 1)
-        return o
-    
-    pass # PyAthena.AthFilterAlgorithm

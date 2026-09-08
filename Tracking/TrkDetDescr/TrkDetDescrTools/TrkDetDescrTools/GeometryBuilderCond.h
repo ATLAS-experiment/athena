@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -13,6 +13,9 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 // Trk
 #include "TrkDetDescrInterfaces/IGeometryBuilderCond.h"
+#include "TrkDetDescrInterfaces/ITrackingVolumeBuilder.h"
+#include "TrkDetDescrInterfaces/ITrackingVolumeArrayCreator.h"
+#include "TrkDetDescrInterfaces/ITrackingVolumeHelper.h"
 #include "TrkDetDescrUtils/GeometrySignature.h"
 #include "TrkGeometry/Material.h"
 #include "TrkGeometry/TrackingVolumeManipulator.h"
@@ -28,9 +31,6 @@ namespace Trk {
 
 class TrackingGeometry;
 class TrackingVolume;
-class ITrackingVolumeBuilder;
-class ITrackingVolumeHelper;
-class ITrackingVolumeArrayCreator;
 
 /** @class GeometryBuilderCond
 
@@ -53,9 +53,6 @@ public:
   /** Constructor */
   GeometryBuilderCond(const std::string&, const std::string&, const IInterface*);
 
-  /** Destructor */
-  virtual ~GeometryBuilderCond();
-
   /** AlgTool initialize method */
   virtual StatusCode initialize() override;
 
@@ -77,35 +74,50 @@ private:
   (const EventContext& ctx, SG::WriteCondHandle<TrackingGeometry>& whandle) const;
 
 #ifdef TRKDETDESCR_MEMUSAGE
-  MemoryLogger m_memoryLogger; //!< in case the memory is logged
+  MemoryLogger m_memoryLogger{}; //!< in case the memory is logged
 #endif
 
-  bool m_createWorld;    //!< Boolean Switch to create World manually
-  int m_navigationLevel; //!< NavigationLevel
+  Gaudi::Property<bool> m_createWorld{this, "CreateWorldManually", true,
+    "Boolean Switch to create World manually"};
+  Gaudi::Property<int> m_navigationLevel{this, "NavigationLevel", 2};
 
-  std::vector<double> m_worldDimension;          //!< The dimensions of the manually created world
-  std::vector<double> m_worldMaterialProperties; //!< The material properties of the created world
-  Material m_worldMaterial;                      //!< the world material
+  Gaudi::Property<std::vector<double>> m_worldDimension
+    {this, "WorldDimension", {}, "The dimensions of the manually created world"};
+  Gaudi::Property<std::vector<double>> m_worldMaterialProperties
+    {this, "WorldMaterialProperties", {}, "The material properties of the created world"};
+  Material m_worldMaterial{};                      //!< the world material
 
   // -------------------------- Tools for geometry building ------------------------------------------------------ //
 
-  ToolHandle<ITrackingVolumeArrayCreator> m_trackingVolumeArrayCreator; //!< Helper Tool to create TrackingVolume Arrays
+  ToolHandle<ITrackingVolumeArrayCreator> m_trackingVolumeArrayCreator
+    {this, "TrackingVolumeArrayCreator",
+     "Trk::TrackingVolumeArrayCreator/TrackingVolumeArrayCreator",
+     "Helper Tool to create TrackingVolume Arrays"};
 
-  ToolHandle<ITrackingVolumeHelper> m_trackingVolumeHelper; //!< Helper Tool to create TrackingVolumes
+  ToolHandle<ITrackingVolumeHelper> m_trackingVolumeHelper
+    {this, "TrackingVolumeHelper",
+     "Trk::TrackingVolumeHelper/TrackingVolumeHelper",
+     "Helper Tool to create TrackingVolumes"};
 
-  ToolHandle<IGeometryBuilderCond> m_inDetGeometryBuilderCond; //!< GeometryBuilderCond for the InnerDetector
+  ToolHandle<IGeometryBuilderCond> m_inDetGeometryBuilderCond
+    {this, "InDetTrackingGeometryBuilder", "",
+     "GeometryBuilderCond for the InnerDetector"};
 
-  bool m_caloGeometry;                                        //!< switch on TrackingGeometry for the Calorimeters
-  ToolHandle<IGeometryBuilderCond> m_caloGeometryBuilderCond; //!< GeometryBuilderCond for the Calorimeters
+  ToolHandle<IGeometryBuilderCond> m_caloGeometryBuilderCond
+    {this, "CaloTrackingGeometryBuilder", "",
+     "GeometryBuilderCond for the Calorimeters"};
 
-  bool m_hgtdGeometry;                                        //! switch on TrackingGeometry for HGTD
-  ToolHandle<IGeometryBuilderCond> m_hgtdGeometryBuilderCond; //!< GeometryBuilder for the HGTD
+  ToolHandle<IGeometryBuilderCond> m_hgtdGeometryBuilderCond
+    {this, "HGTD_TrackingGeometryBuilder", "", "GeometryBuilder for the HGTD"};
 
-  bool m_muonGeometry;                                        //!< GeometryBuilderCond for the Muon System
-  ToolHandle<IGeometryBuilderCond> m_muonGeometryBuilderCond; //!< GeometryBuilderCond for the Muon System
+  ToolHandle<IGeometryBuilderCond> m_muonGeometryBuilderCond
+    {this, "MuonTrackingGeometryBuilder", "",
+     "GeometryBuilderCond for the Muon System"};
 
-  bool m_compactify;        //!< optimize event memory usage: register all surfaces with TG
-  bool m_synchronizeLayers; //!< synchronize contained layer dimensions to volumes
+  Gaudi::Property<bool> m_compactify{this, "Compactify", true,
+    "optimize event memory usage: register all surfaces with TG"};
+  Gaudi::Property<bool> m_synchronizeLayers{this, "SynchronizeLayers", true,
+    "synchronize contained layer dimensions to volumes"};
 };
 
 } // end of namespace

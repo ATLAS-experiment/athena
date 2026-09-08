@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -36,13 +36,11 @@ namespace LVL1 {
 Interface definition for jFEXSysSim
 */
 
-  static const InterfaceID IID_IjFEXSysSim("LVL1::IjFEXSysSim", 1, 0);
-
   class IjFEXSysSim : virtual public IAlgTool {
   public:
-    static const InterfaceID& interfaceID( ) ;
-    
-    virtual StatusCode execute(jFEXOutputCollection* inputOutputCollection) = 0;
+    DeclareInterfaceID(IjFEXSysSim, 1, 0);
+
+    virtual StatusCode execute(const EventContext& ctx, jFEXOutputCollection* inputOutputCollection) = 0;
 
     virtual void init() const = 0;
 
@@ -54,11 +52,6 @@ Interface definition for jFEXSysSim
 
 
   };
-
-  inline const InterfaceID& LVL1::IjFEXSysSim::interfaceID()
-  {
-    return IID_IjFEXSysSim;
-  }
 
 } // end of namespace
 

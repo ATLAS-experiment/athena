@@ -36,18 +36,7 @@
 	<class name="std::vector<TrigT2Jet*>"/>
 	<class name="std::vector<const TrigT2Jet*>"/>
 
-	<!--class name="TrigMissingETContainer" id="9481B442-D877-44A2-BB21-7A1B5D47710F"/>-->
-
-	<!--class name="TrigMissingET" id="1403772C-7444-4340-930B-ABD51C243A09"/>-->
-	<!--class name="DataVector<TrigMissingET>" id="301D572F-D972-45C8-B3ED-0CC090F15C7A" />-->
-	<!--class name="std::vector<TrigMissingET*>" />-->
-	<!--class name="std::vector<const TrigMissingET*>" />-->
-
-        <!--class name="TrigMissingEtComponent"/>-->
-        <!--class name="std::vector<TrigMissingEtComponent>"/>-->
-        <!--class name="std::vector<const TrigMissingEtComponent>"/>-->
-
-     	<class name="TrigEMClusterContainer" id="8F88F373-63B9-40D5-B787-C6BD67B7F3BC"/>
+    <class name="TrigEMClusterContainer" id="8F88F373-63B9-40D5-B787-C6BD67B7F3BC"/>
 	<class name="DataVector<TrigEMClusterContainer>" id="B09292A3-1DBC-40CA-9174-4B44C4A7FD2D" />
 	<class name="std::vector<TrigEMClusterContainer*>" />
 	<class name="std::vector<const TrigEMClusterContainer*>" />

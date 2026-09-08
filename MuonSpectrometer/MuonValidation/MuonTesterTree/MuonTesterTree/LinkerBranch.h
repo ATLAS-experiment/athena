@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTER_LINKERBRANCH_H
 #define MUONTESTER_LINKERBRANCH_H
@@ -12,7 +12,7 @@ namespace MuonVal{
      *         between dumped particle collections. Once the primary particle is
      *         added to the collection, the linker branch calls the linker function
      *         to find the related particle and to add it into it's forseen collection.
-     *         The position where the related particle is saved in the tree, is then 
+     *         The position where the related particle has been saved in the tree, is then 
      *         saved by the linker branch */
     class LinkerBranch : public VectorBranch<unsigned short>,
                          virtual public IParticleDecorationBranch {
@@ -44,14 +44,22 @@ namespace MuonVal{
         void operator+=(const xAOD::IParticle& p) override;
 
     private:
-        std::weak_ptr<IParticleFourMomBranch> m_linkColl;
+        IParticleFourMomBranch* m_linkColl{nullptr};
         Linker_t m_linkerFunc;
     };
 
+    /** @brief The BilateralLinkerBranch establishes a bi-directional connecion between two particle 
+     *         collections A & B. For each particle a from A and b from B which can be somehow linked
+     *         together, it stores the index of where to find a in collection B and vice versa.
+     * 
+     *          
+     */
     class BilateralLinkerBranch: public VectorBranch<unsigned short>,
                                  virtual public IParticleDecorationBranch {
         public:
             using Linker_t = LinkerBranch::Linker_t;
+            using BiLinker_t = std::function<bool(const xAOD::IParticle* inBilateral,
+                                                  const xAOD::IParticle* inPrimary)>;
             using ParticleBranch_ptr = LinkerBranch::ParticleBranch_ptr;
             /** @brief Use the push back methods of the parent class */
             using VectorBranch<unsigned short>::push_back;
@@ -62,20 +70,30 @@ namespace MuonVal{
             void operator+=(const xAOD::IParticle& p) override;
         
             bool fill(const EventContext& ctx) override;
-
+            /** @brief  */
             static bool connectCollections(ParticleBranch_ptr primColl,
                                            ParticleBranch_ptr secondColl,
                                            Linker_t fromPrimToSec,
                                            const std::string& altPrimName ="",
                                            const std::string& altSecName = "");
+            /** @brief */
+            static bool connectCollections(ParticleBranch_ptr primColl,
+                                           ParticleBranch_ptr secondColl,
+                                           Linker_t fromPrimToSec,
+                                           BiLinker_t fromSecToPrim,
+                                           const std::string& altPrimName ="",
+                                           const std::string& altSecName = "");
         private:
+    
             BilateralLinkerBranch(IParticleFourMomBranch& bilatColl,
                                   ParticleBranch_ptr primColl,
                                   Linker_t linker,
+                                  BiLinker_t fromSecToPrim,
                                   const std::string& altName);
             const IParticleFourMomBranch& m_parent;
-            std::weak_ptr<IParticleFourMomBranch> m_linkColl;
-            Linker_t m_linkerFunc;
+            IParticleFourMomBranch* m_linkColl{nullptr};
+            Linker_t m_linkPrimToSec;
+            BiLinker_t m_linkSecToPrim;
     
 
     };

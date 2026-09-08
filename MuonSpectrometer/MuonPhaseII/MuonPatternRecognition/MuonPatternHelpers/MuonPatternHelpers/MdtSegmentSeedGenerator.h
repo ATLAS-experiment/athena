@@ -17,14 +17,29 @@ namespace MuonR4{
 namespace MuonR4::SegmentFit {
  
     /** @brief Helper struct to delegate the EDM interactions 
-     *         with the space point container during the seeding  */
+     *         with the space point container during the seeding 
+     *         from Acts to the Athena EDM */
     struct SeederStateBase : public SpacePointPerLayerSplitter {
         protected:
+            /** @brief Selector function to sort out seed lines that are incompatible
+             *         with external geometrical constaints e.g. beampot */
+            using SeedSelector_t  = std::function<bool(const Amg::Vector3D& pos,
+                                                       const Amg::Vector3D& dir)>;
             /** @brief Protected constructor to prevent instantiation
-             *         from anything else than the seeder state */
+              *        from anything else than the seeder state
+              * @param parentSeed: Pointer to the HoughSeed from which all the 
+              *                    Mdt segment seeds are constructed
+              * @param calibrator: Pointer to the calibrator to be used to construct
+              *                    the calibrated space points and (optionally)
+              *                    to refine the pull calculation
+              * @param calibratedPull: First calibrate the space point before calculating
+              *                       the pull w.r.t. seed line 
+              * @param seedSelector: Utility function to reject bad drift circle 
+              *                      seeds based on geometrical constaints  */
             explicit SeederStateBase(const SegmentSeed* parentSeed,
                                      const ISpacePointCalibrator* calibrator,
-                                     const bool calibratedPull);
+                                     const bool calibratedPull,
+                                     SeedSelector_t&& seedSelector = nullptr);
         public:
             /** @brief Abrivation of the collection of calibrated space points */
             using CalibCont_t = Segment::MeasVec;
@@ -70,16 +85,24 @@ namespace MuonR4::SegmentFit {
               * @param upperLayer: Index of the upper hit layer from which the seed circles are picked */
             bool stopSeeding(const std::size_t lowerLayer, 
                              const std::size_t upperLayer) const;
+
+            /** @brief Selector function to remove the two line tangent
+             *         seed using external constaints (e.g. beamspot)
+             *  @param tangentPos: Position of the seed line 
+             *  @param tangentDir: Direction of the seed line */
+            bool goodForSeeding(const Amg::Vector3D& tangentPos,
+                                const Amg::Vector3D& tangentDir) const;
         private:    
             const SegmentSeed* m_parent{};
             const ISpacePointCalibrator* m_calibrator{nullptr};
             bool m_calibratePull{false};
+            const SeedSelector_t m_selector{nullptr};
     };
     static_assert(Acts::Experimental::detail::CompSpacePointSeederDelegate<SeederStateBase, 
                                                                             SeederStateBase::HitVec, 
                                                                             SeederStateBase::CalibCont_t>);
 
-
+    static_assert(Acts::Experimental::detail::CompositeSpacePointSeedSelector<SeederStateBase>);
     /** @brief Helper class to generate valid seeds for the segment fit. The generator first returns a seed
      *         directly made from the patten recogntion. Afterwards it builds seeds by lying tangent lines
      *         to a pair of drift circles. The pairing starts from the innermost & outermost layers with tubes.

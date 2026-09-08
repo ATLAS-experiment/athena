@@ -2,8 +2,8 @@
  *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
-#ifndef TRIGL0GEPPERF_CLUSTER_H
-#define TRIGL0GEPPERF_CLUSTER_H
+#ifndef TRIGGEPPERF_CLUSTER_H
+#define TRIGGEPPERF_CLUSTER_H
 
 #include <vector>
 #include "TLorentzVector.h"
@@ -34,8 +34,14 @@ namespace Gep{
     float time {0};
     TLorentzVector vec;
     std::vector<unsigned int> cell_id;
-    
+
+    // Raw eta/phi as delivered by the source, before the TLorentzVector
+    // JetTaggerLRJ digitizes these to match the emulation, which
+    // reads the same values as written (float) to the ntuple.
+    double etaInput {0};
+    double phiInput {0};
+
   };
 }
 
-#endif //TRIGL0GEPPERF_CUSTOMTOPOCLUSTER_H
+#endif //TRIGGEPPERF_CUSTOMTOPOCLUSTER_H

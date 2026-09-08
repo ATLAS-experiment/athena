@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARRAWCONDITIONS_LAREMEC_CPHICOMPLETE_H
@@ -8,6 +8,7 @@
 #include "LArElecCalib/ILArEMEC_Cphi.h" 
 #include "LArRawConditions/LArEMEC_CphiP.h"
 #include "LArRawConditions/LArConditionsContainer.h"
+#include "AthenaKernel/BaseInfo.h"
 
 #include <vector>
 
@@ -48,4 +49,5 @@ class LArEMEC_CphiComplete: public ILArEMEC_Cphi,
 };
 
 CLASS_DEF( LArEMEC_CphiComplete,194446375,1)
+SG_BASES( LArEMEC_CphiComplete, ILArEMEC_Cphi );
 #endif 

@@ -18,11 +18,6 @@ def PHYSKernelCfg(flags, name='PHYSKernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel) for PHYS"""
     acc = ComponentAccumulator()
 
-    from TrkConfig.VertexFindingFlags import VertexSortingSetup
-    if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.GNNSorting:
-        from DerivationFrameworkPhys.GNNVertexConfig import GNNVertexCfg
-        acc.merge(GNNVertexCfg(flags))
-
     # Common augmentations
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
     acc.merge(PhysCommonAugmentationsCfg(
@@ -130,7 +125,7 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
    
     # Extra content
     PHYSSlimmingHelper.ExtraVariables += ["AntiKt4EMTopoJets.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.IsoFixedCone5PtPUsub",
-                                          "AntiKt4EMPFlowJets.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.isJvtHS.isJvtPU.IsoFixedCone5PtPUsub",
+                                          "AntiKt4EMPFlowJets.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.HadronGhostInitialTruthLabelPdgId.isJvtHS.isJvtPU.IsoFixedCone5PtPUsub",
                                           "TruthPrimaryVertices.t.x.y.z",
                                           "InDetTrackParticles.eProbabilityHT.numberOfTRTHits.numberOfTRTOutliers",
                                           "EventInfo.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ.HF_Classification.HF_SimpleClassification.HF_ClassificationC5J20.HF_ClassificationC5J25.HF_ClassificationC15J20.HF_ClassificationC15J25",
@@ -176,30 +171,22 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
                                               "TruthTausWithDecayVertices.incomingParticleLinks.outgoingParticleLinks.uid.status.x.y.z.t"]
         
         #Truth jet matching variables - largeR
-        PHYSSlimmingHelper.ExtraVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_MatchedTruthJetMass",
-                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_MatchedTruthJetPt",
-                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_MatchedTruthJetEta",
-                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_MatchedTruthJetPhi",
-                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_MatchedTruthJetDR",
-                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_MatchedTruthJetGF",
-                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_MatchedTruthGroomedJetMass",
-                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_MatchedTruthGroomedJetPt",
-                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_R22v1_MatchedTruthJetMass",
-                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_R22v1_MatchedTruthJetPt",
-                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_R22v1_MatchedTruthJetEta",
-                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_R22v1_MatchedTruthJetPhi",
-                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_MatchedTruthJetDR",
-                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_MatchedTruthJetGF",
-                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_R22v1_MatchedTruthGroomedJetMass",
-                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_R22v1_MatchedTruthGroomedJetPt"]
-
-        #Truth jet matching variables - smallR
-        PHYSSlimmingHelper.ExtraVariables += ["AntiKt4EMPFlowJets.R4TruthLabel_MatchedTruthJetMass",
-                                              "AntiKt4EMPFlowJets.R4TruthLabel_MatchedTruthJetPt",
-                                              "AntiKt4EMPFlowJets.R4TruthLabel_MatchedTruthJetEta",
-                                              "AntiKt4EMPFlowJets.R4TruthLabel_MatchedTruthJetPhi",
-                                              "AntiKt4EMPFlowJets.R4TruthLabel_MatchedTruthJetDR",
-                                              "AntiKt4EMPFlowJets.R4TruthLabel_MatchedTruthJetGF"]
+        PHYSSlimmingHelper.ExtraVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_TruthMatch_Jet",
+                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_TruthMatch_m",
+                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_TruthMatch_pt",
+                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_TruthMatch_rapidity",
+                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_TruthMatch_phi",
+                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_TruthMatch_dR",
+                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_TruthMatch_GroomedJetMass",
+                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_TruthMatch_GroomedJetPt",
+                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_R22v1_TruthMatch_Jet",
+                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_R22v1_TruthMatch_m",
+                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_R22v1_TruthMatch_pt",
+                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_R22v1_TruthMatch_rapidity",
+                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_R22v1_TruthMatch_phi",
+                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_R22v1_TruthMatch_dR",
+                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_R22v1_TruthMatch_GroomedJetMass",
+                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_R22v1_TruthMatch_GroomedJetPt"]
 
     ## Higgs content - 4l vertex and Higgs STXS truth variables
     from DerivationFrameworkHiggs.HiggsPhysContent import  setupHiggsSlimmingVariables

@@ -156,16 +156,16 @@ namespace JiveXML {
     //Now generate a DataMap for the output
     DataMap dataMap;
     dataMap["x0"] = x0;
-    dataMap["y0"] = y0;
-    dataMap["z0"] = z0;
-    dataMap["x1"] = x1;
-    dataMap["y1"] = y1;
-    dataMap["z1"] = z1;
-    dataMap["width"] = width;
-    dataMap["id"] = ident;
-    dataMap["phiModule"] = phiModule;
-    dataMap["etaModule"] = etaModule;
-    dataMap["side"] = side;
+    dataMap["y0"] = std::move(y0);
+    dataMap["z0"] = std::move(z0);
+    dataMap["x1"] = std::move(x1);
+    dataMap["y1"] = std::move(y1);
+    dataMap["z1"] = std::move(z1);
+    dataMap["width"] = std::move(width);
+    dataMap["id"] = std::move(ident);
+    dataMap["phiModule"] = std::move(phiModule);
+    dataMap["etaModule"] = std::move(etaModule);
+    dataMap["side"] = std::move(side);
 
     //Only store truth association if we processed them
     if ( numBarcodes.size() > 0 ){
@@ -173,7 +173,7 @@ namespace JiveXML {
       dataMap["numBarcodes"] = numBarcodes;
       //Calculate multiplicy for barcodes of truth tracks
       std::string bctag = "barcodes multiple=\""+DataType(barcodes.size()/double(numBarcodes.size())).toString()+"\"";
-      dataMap[bctag] = barcodes;
+      dataMap[bctag] = std::move(barcodes);
     }
 
     //Be verbose

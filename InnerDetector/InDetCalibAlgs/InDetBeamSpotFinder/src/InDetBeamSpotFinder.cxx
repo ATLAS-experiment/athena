@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetBeamSpotFinder.h"
@@ -325,17 +325,15 @@ StatusCode InDet::InDetBeamSpotFinder::setupBeamSpotTree(){
   m_root_bs->Branch("run",           &m_beamSpotNtuple.run,           "run/I");
   m_root_bs->Branch("runEnd",        &m_beamSpotNtuple.runEnd,        "runEnd/I");
   
+  const std::string slashD = "/D";
   for( auto &tool : m_beamSpotToolList ){
     std::map<std::string,double> paramMap = tool->getParamMap();
     std::map<std::string,double> covMap   = tool->getCovMap();
-
-    std::string slashD = "/D";
     std::string keySlashD; 
   
     //Loop over the parameters for a given fit tool, and create a branch for each if it doesn't exist
     for( std::map<std::string,double>::iterator iter = paramMap.begin(); iter != paramMap.end(); ++iter){
-      std::string key =  iter->first;
-      //double val =  iter->second;
+      const std::string & key =  iter->first;
       if( !(m_root_bs->GetBranch(key.c_str())) ){
         m_beamSpotNtuple.paramMap[key] = 0;
         keySlashD = key + slashD;
@@ -345,7 +343,6 @@ StatusCode InDet::InDetBeamSpotFinder::setupBeamSpotTree(){
     //Loop over the covariance matrix for a given fit tool and create a branch for each element, if it doesn't already exist.
     for( std::map<std::string,double>::iterator iter = covMap.begin(); iter != covMap.end(); ++iter){
       const std::string & key =  iter->first;
-      //double val  =  iter->second;
       if( !(m_root_bs->GetBranch(key.c_str())) ){
         m_beamSpotNtuple.covMap[key] = 0;
         keySlashD = key + slashD;

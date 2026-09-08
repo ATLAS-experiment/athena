@@ -272,6 +272,10 @@ namespace MuonR4{
         truthSegment->setT0Error(locPars[Acts::toUnderlying(ParamDefs::t0)], 0.);
                 
         truthSegment->setNHits(nPrecisionHits, nPhiLayers, nTgcEta + nRpcEta);
+        truthSegment->setNOutliers(0, 0, 0);
+        truthSegment->setNHoles(0, 0, 0);
+        
+        
         truthSegment->setIdentifier(m_idHelperSvc->sector(segId), 
                                     m_idHelperSvc->chamberIndex(segId),
                                     m_idHelperSvc->stationEta(segId),
@@ -346,7 +350,7 @@ namespace MuonR4{
     StatusCode TruthSegmentMaker::linkSegmentsToHits(const EventContext& ctx,
                                                      const xAOD::MuonSegmentContainer& segments) const {
         using SegLink_t = ElementLink<xAOD::MuonSegmentContainer>;
-        using DecorHandle_t = SG::WriteDecorHandle<xAOD::MuonSimHitContainer, SegLink_t>;
+        using DecorHandle_t = xAOD::ContainerDecorator<xAOD::MuonSimHitContainer, SegLink_t>;
         std::unordered_map<const SG::AuxVectorData*, DecorHandle_t> handleMap{};
         for (const auto& decorKey : m_segLinkKeys) {
             DecorHandle_t decorHandle{decorKey, ctx};
@@ -354,8 +358,7 @@ namespace MuonR4{
                 ATH_MSG_DEBUG("Don't setup a decoration handle for "<<decorKey.fullKey());
                 continue;
             }
-            decorHandle(*decorHandle->front()) = SegLink_t{};
-            handleMap.insert(std::make_pair(decorHandle.cptr(), std::move(decorHandle)));
+            handleMap.insert(std::make_pair(decorHandle.container(), std::move(decorHandle)));
         }
         for (const xAOD::MuonSegment* segment: segments) {
             SegLink_t segLink{&segments, segment->index()};

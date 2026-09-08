@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -231,8 +231,8 @@ InDet::TRT_TrackExtensionTool_xk::newEvent(const EventContext& ctx) const
   Trk::MagneticFieldProperties     fieldprop =  ( fieldCache.solenoidOn()
                                                   ? m_fieldprop
                                                   : Trk::MagneticFieldProperties(Trk::NoField  ));
-
-  auto event_data = std::make_unique<EventData>(EventData(trtcontainer.cptr(), m_maxslope));
+  //If using a temporary EventData, total stack use for this function is 1 053 952 bytes.
+  auto event_data = std::make_unique<EventData>(trtcontainer.cptr(), m_maxslope);
   event_data->m_trajectory.set(fieldprop, fieldCondObj);
   event_data->m_trajectory.set (m_trtid,
                                 m_proptool.get(),

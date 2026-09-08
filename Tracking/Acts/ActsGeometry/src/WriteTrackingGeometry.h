@@ -9,7 +9,8 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 
 // PACKAGE
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
+#include "ActsEvent/ContextUtility.h"
 
 // STL
 #include <fstream>
@@ -32,7 +33,10 @@ public:
   virtual unsigned int cardinality() const override final { return 1; }
 
 private:
-    PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+    ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
+
+    /** @brief Context provider for geometry, magnetic field and calibration contexts */
+    ActsTrk::ContextUtility m_ctxProvider{this};
 
     Gaudi::Property<std::string> m_outFile{this, "outFile", "ActsTrackingGeometry.json"};
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/StationSelector.h"
@@ -25,7 +25,7 @@ namespace MuonGM {
             std::istringstream line(buffer);
             std::string key;
             line >> key;
-            m_selector.push_back(key);
+            m_selector.push_back(std::move(key));
         }
 
         for (const auto& [name, station] :  mysql.stationMap()) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -45,9 +45,6 @@ class TrackingVolumeArrayCreator final
   /** Constructor */
   TrackingVolumeArrayCreator(const std::string&, const std::string&,
                              const IInterface*);
-
-  /** Destructor */
-  virtual ~TrackingVolumeArrayCreator();
 
   /** Extra interface methods for compatibility*/
   std::unique_ptr<TrackingVolumeArray> cylinderVolumesArrayInR(

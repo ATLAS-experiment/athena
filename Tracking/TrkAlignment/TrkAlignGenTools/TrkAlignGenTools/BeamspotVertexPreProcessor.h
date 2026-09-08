@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef  TRKALIGNGENTOOLS_BEAMSPOTVERTEXPREPROCESSOR_H
@@ -22,6 +22,8 @@
 
 #include "xAODTracking/VertexContainer.h"
 #include "BeamSpotConditionsData/BeamSpotData.h"
+#include <string>
+#include <string_view>
 
 /**
    @brief Tool used to create a collection of AlignTracks from Tracks
@@ -173,17 +175,17 @@ namespace Trk {
   class CompareTwoTracks {
 
     public:
-         CompareTwoTracks(const Track* track, const std::string& compareMethod)
+         CompareTwoTracks(const Track* track, std::string_view compareMethod)
          :m_method(compareMethod)
          ,m_track(track)
-         { //std::cout <<"compareMethod: "<< m_method <<std::endl; 
+         {  
          }
 
     bool operator()(VxTrackAtVertex vtxTrk);
 
     private:
          std::string m_method;
-         const Track* m_track;
+         const Track* m_track{};
   };
 
 

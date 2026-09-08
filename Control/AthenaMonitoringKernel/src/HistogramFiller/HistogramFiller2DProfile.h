@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */  
   
 #ifndef AthenaMonitoringKernel_HistogramFiller_HistogramFiller2DProfile_h
 #define AthenaMonitoringKernel_HistogramFiller_HistogramFiller2DProfile_h
 
 #include "TProfile2D.h"
-#include "boost/range/combine.hpp"
 
 #include "HistogramFiller.h"
 
@@ -41,8 +40,8 @@ namespace Monitored {
         const size_t size1 = vars[1]->size();
         const size_t size2 = vars[2]->size();
         const size_t sizeWeight = vars.weight->size();
-        if (ATH_UNLIKELY(size0 > 1 && size1 > 1 && size2 > 1 &&
-                         sizeWeight > 1 && size0 != sizeWeight)) {
+        if (size0 > 1 && size1 > 1 && size2 > 1 &&
+            sizeWeight > 1 && size0 != sizeWeight) [[unlikely]] {
             MsgStream log(Athena::getMessageSvc(), "HistogramFiller2DProfile");
             log << MSG::ERROR << "Weight does not match the size of plotted variable: "
                 << vars.weight->size() << " " << size0 << endmsg;

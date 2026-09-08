@@ -1330,7 +1330,7 @@ void VP1MainWindow::saveAllCurrentChannels()
  * nsnap is an optional parameter: it's an extra label being added
  * to the output filename.
  */
-QString VP1MainWindow::request_saveChannelSnapshot(QString xLabel)
+QString VP1MainWindow::request_saveChannelSnapshot(const QString& xLabel)
 {
 
 	VP1Msg::messageDebug("VP1MainWindow::request_saveChannelSnapshot()");

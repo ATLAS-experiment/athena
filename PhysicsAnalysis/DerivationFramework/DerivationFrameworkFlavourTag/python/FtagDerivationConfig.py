@@ -11,7 +11,6 @@ from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import (
     InDetTrackTruthOriginToolCfg,
 )
 from ParticleJetTools.ParticleJetToolsConfig import getJetDeltaRFlavorLabelTool
-from ParticleJetTools.TruthVertexDecoratorConfig import TruthVertexDecoratorsCfg
 
 if TYPE_CHECKING:
     from AthenaConfiguration.AthConfigFlags import AthConfigFlags
@@ -31,7 +30,7 @@ def HLTJetFTagDecorationCfg(flags: AthConfigFlags) -> ComponentAccumulator:
     return acc
 
 
-def trackTruthDecorator(flags: AthConfigFlags) -> ComponentAccumulator:
+def TrackTruthDecoratorCfg(flags: AthConfigFlags) -> ComponentAccumulator:
     """Decorate tracks with detailed truth information."""
     acc = ComponentAccumulator()
 
@@ -53,29 +52,6 @@ def trackTruthDecorator(flags: AthConfigFlags) -> ComponentAccumulator:
             trackContainer=_get_track_collection(flags),
             trackTruthOriginTool=track_truth_origin_tool,
             truthLeptonTool=CompFactory.TruthClassificationTool("TruthClassificationTool"),
-        )
-    )
-
-    return acc
-
-
-def truthVertexDecorator(
-    flags: AthConfigFlags,
-    jet_collections: list | None = None,
-) -> ComponentAccumulator:
-    """Decorate tracks, truth particles, and jets with truth vertex labels.
-
-    ``jet_collections`` is a list of ``(jetContainer, drThreshold)`` tuples; one
-    jet-summary alg is scheduled per entry. Default matches small-R EMPFlow.
-    """
-    acc = ComponentAccumulator()
-    if not flags.Input.isMC:
-        return acc
-
-    acc.merge(
-        TruthVertexDecoratorsCfg(
-            flags,
-            jetCollections=jet_collections,
         )
     )
 

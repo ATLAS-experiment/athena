@@ -2,14 +2,14 @@
 
 if [[ $# < 4 ]] || [[ $# > 9 ]];
 then
-    echo "Syntax: $0 [-append] [-mc] [-openiov] [-supercell] <tag> <Run1> <LB1> <File> [Run2] [LB2]"
+    echo "Syntax: $0 [-append] [-openiov] [-supercell] <tag> <Run1> <LB1> <File> [Run2] [LB2]"
     echo "    or: $0 -mc [-append] [-newtag] [-openiov] [-supercell] <tag> <Run1> <Run0> <File> [Run2]"
     echo "optional -mc switches to OFLP200, arguments are then interpreted differently"
     echo "optional -append is adding the content of File to a DB"
     echo "optional -newtag is creating a new tag, named by incrementing the tag suffix, and filling all IOVs (only with -mc)"
     echo "optional -openiov is updating UPD4 with open end IOV, if Run2/LB2 is not given" 
     echo "optional -supercell is working for SC folders/tags"
-    echo "<tag> can be 'UPD1', 'UPD4', 'UPD3' or 'BOTH' or 'All' or 'Bulk'.  'BOTH' means UPD1 and UPD4, UPD4 update is automatically updating also Bulk. All means UPD1,UPD3 and UPD4 with Bulk. Bulk is updating only Bulk. When running with -mc the actual tag must be specified instead of those keywords."
+    echo "<tag> can be 'UPD1', 'UPD4', 'UPD3' or 'BOTH' or 'All' or 'Bulk'.  'BOTH' means UPD1 and UPD4, UPD4 update is automatically updating also Bulk. All means UPD1,UPD3 and UPD4 with Bulk. Bulk is updating only Bulk. When running with -mc use either Bulk, or the actual tag name."
     echo "<Run1> <LB1> are start IOV (for UPD4/Bulk)"
     echo "<Run0> specifies the IOV from which bad channels are read (only with -mc). If set to 0, Run1 is used."
     echo "<File> is text file with changed channels, each line should have: B/E pos_neg FT Slot Channel CalibLine BadBitDescription"
@@ -30,6 +30,7 @@ then
 else
     mc=""
     dbname=CONDBR2
+    Ofl="Ofl"
 fi
 if [ $1 == "-append" ]
 then
@@ -69,14 +70,19 @@ else
     issc=0
 fi
 
+folder="/LAR/BadChannels${Ofl}/BadChannels"
+if [ $issc == 1 ] ; then
+    folder="${folder}SC"
+fi
+# should be simply dbconn="COOLOFL_LAR/CONDBR2
+# but for the moment, the configuration of acron jobs using this script apparently requires explicitly including frontier in the connection string
+dbconn="frontier://ATLF/();schema=ATLAS_COOLOFL_LAR;dbname=$dbname"
 if [[ $mc == "" ]]
 then
     if [ $issc == 0 ]
     then
-        echo "Resolving current folder-level tag suffix for /LAR/BadChannelsOfl/BadChannels...."
-        # should be simply: fulltag=`getCurrentFolderTag.py "COOLOFL_LAR/CONDBR2" /LAR/BadChannelsOfl/BadChannels`
-        # but for the moment, the configuration of acron jobs using this script apparently requires explicitly including frontier in the connection string:
-        fulltag=`getCurrentFolderTag.py "frontier://ATLF/();schema=ATLAS_COOLOFL_LAR;dbname=CONDBR2" /LAR/BadChannelsOfl/BadChannels` 
+        echo "Resolving current folder-level tag suffix for $folder...."
+        fulltag=`getCurrentFolderTag.py "$dbconn" $folder` 
         if [ $? -ne 0 ]
         then
             exit 1
@@ -87,10 +93,8 @@ then
         BulkTagName="RUN2-Bulk-00"
         upd3TagName="RUN2-UPD3-00"
     else   
-        echo "Resolving current folder-level tag suffix for /LAR/BadChannelsOfl/BadChannelsSC...."
-        #fulltag=`getCurrentFolderTag.py "COOLOFL_LAR/CONDBR2" /LAR/BadChannelsOfl/BadChannelsSC` 
-        # same as above
-	fulltag=`getCurrentFolderTag.py "frontier://ATLF/();schema=ATLAS_COOLOFL_LAR;dbname=CONDBR2" /LAR/BadChannelsOfl/BadChannelsSC` 
+        echo "Resolving current folder-level tag suffix for $folder...."
+        fulltag=`getCurrentFolderTag.py "$dbconn" $folder` 
         if [ $? -ne 0 ]
         then
             exit 1
@@ -103,8 +107,9 @@ then
     fi
 else
         upd1TagName=""
-        BulkTagName=""
         upd3TagName=""
+        gtag=`python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)"`
+        BulkTagName=`python -c "from LArConditionsCommon.getCurrentFolderTag import getFolderTag; print(getFolderTag('$dbconn', '$folder', '$gtag'))"`
 fi
 
 tag=$1
@@ -112,7 +117,12 @@ shift
 if [[ $mc != "" ]]
 then
    echo "Working on OFLP200"
-   tags="${tag}"
+   if [ $tag == "Bulk" ]
+   then
+     tags="${BulkTagName}"
+   else
+     tags="${tag}"
+   fi
 elif [ $tag == "UPD1" ]
     then
     echo "Working on UPD1 list"
@@ -155,12 +165,14 @@ fi
 
 if echo $1 | grep -q "^[0-9]*$";
 then
+    runnumber0=$runnumber
     if [[ $mc == "" ]]; then
         lbnumber=$1
-        runnumber0=$runnumber
     else
-        runnumber0=$1
-	lbnumber=0
+        if [[ $1> 0 ]]; then
+            runnumber0=$1
+        fi
+        lbnumber=0
     fi
     shift
 else

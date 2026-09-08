@@ -64,7 +64,7 @@ class SiDetElementLink_xk {
   bool intersectITk(const float*, const float*, float&) const;
 
  private:
-  const InDetDD::SiDetectorElement* m_detelement = nullptr;  // note owning ptr
+  const InDetDD::SiDetectorElement* m_detelement = nullptr;  // non owning ptr
   float m_phi = 0;
   float m_z = 0;
   float m_dz = 0;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //==================================================================================
 //
@@ -15,12 +15,13 @@
 #include "InDetPerformanceMonitoring/ElectronSelector.h"
 // Package Headers
 #include "InDetPerformanceMonitoring/PerfMonServices.h"
-#include <sstream>
+
 // ATLAS headers
 #include "AthenaKernel/getMessageSvc.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "CLHEP/Random/RandFlat.h"
 
+#include <sstream>
 // Static declarations
 std::atomic<unsigned int> ElectronSelector::s_uNumInstances;
 
@@ -216,83 +217,91 @@ void ElectronSelector::Clear()
 bool ElectronSelector::OrderElectronList()
 {
   (*m_msgStream) << MSG::DEBUG << " -- ElectronSelector::OrderElectronList -- START  -- list size: " << m_pxElTrackList.size( ) << endmsg;
-  
-  bool goodlist = true;
-
-  if (m_pxElTrackList.size() >= 2) { // we need at least 2 electrons
-    double ptMinus1 = 0.;
-    double ptMinus2 = 0.;
-    double ptPlus1  = 0.;
-    double ptPlus2  = 0.;
-
-    int elecnegcount = 0;
-    int elecposcount = 0;
-
-    for (int ielec=0; ielec < (int) m_pxElTrackList.size(); ielec++) {
-      // negative electrons
-      if (m_pxElTrackList.at(ielec)->charge()== -1) { // positive electron
-	elecnegcount++;
-	if (m_pxElTrackList.at(ielec)->pt()> ptMinus1) {
-	  // store 1st in 2nd
-	  ptMinus2   =  ptMinus1;
-	  m_elecneg2 = m_elecneg1;
-	  // now store the new one in 1st place
-	  ptMinus1   = m_pxElTrackList.at(ielec)->pt();
-	  m_elecneg1 = ielec;	
-	} 
-	else if (m_pxElTrackList.at(ielec)->pt()> ptMinus2) {
-	  // store the new one in 2nd place
-	  ptMinus2   = m_pxElTrackList.at(ielec)->pt();
-	  m_elecneg2 = ielec;
-	}
-      }
-      // positive electrons
-      if (m_pxElTrackList.at(ielec)->charge()==  1) { // positive electron
-	elecposcount++;
-	if (m_pxElTrackList.at(ielec)->pt()> ptPlus1) {
-	  // store 1st in 2nd
-	  ptPlus2   =  ptPlus1;
-	  m_elecpos2 = m_elecpos1;
-	  // now store the new one in 1st place
-	  ptPlus1   = m_pxElTrackList.at(ielec)->pt();
-	  m_elecpos1 = ielec;	
-	} 
-	else if (m_pxElTrackList.at(ielec)->pt()> ptPlus2) {
-	  // store the new one in 2nd place
-	  ptPlus2   = m_pxElTrackList.at(ielec)->pt();
-	  m_elecpos2 = ielec;
-	}
-      }
+  if (m_pxElTrackList.size() < 2) {
+    return false;
+  }
+  struct LeadingElectrons {
+    double leadingPt{};
+    double subleadingPt{};
+    int leadingIndex{-1};
+    int subleadingIndex{-1};
+    std::size_t count{};
+  };
+  //
+  LeadingElectrons negative;
+  LeadingElectrons positive;
+  const auto updateLeading = [](LeadingElectrons& electrons, double pt, int index) {
+    ++electrons.count;
+    if (pt > electrons.leadingPt) {
+      electrons.subleadingPt = electrons.leadingPt;
+      electrons.subleadingIndex = electrons.leadingIndex;
+      electrons.leadingPt = pt;
+      electrons.leadingIndex = index;
+    } else if (pt > electrons.subleadingPt) {
+      electrons.subleadingPt = pt;
+      electrons.subleadingIndex = index;
     }
+  };
 
-    if (elecposcount == 0 || elecnegcount == 0) {
-      // We need at least one e- and one e+
-      if (m_doDebug) std::cout << " -- ElectronSelector::OrderElectronList -- No opposite charge electrons --> DISCARD ALL ELECTRONS -- " << std::endl;
-      elecposcount = 0;
-      elecnegcount = 0;
-      this->Clear();
-      goodlist = false;
-    }
-
-    if (m_doDebug && elecposcount + elecnegcount >= 2 ){ 
-      std::cout << " -- ElectronSelector::OrderElectronList -- electron summary list taking " << elecposcount + elecnegcount 
-		<< "  electrons from the input list of " << m_pxElTrackList.size() << " electrons: " << std::endl;
-      if (m_elecneg1 >= 0) std::cout << "                                leading e-: " << m_elecneg1 << "   Pt = " << ptMinus1 << std::endl;
-      if (m_elecneg2 >= 0) std::cout << "                                second  e-: " << m_elecneg2 << "   Pt = " << ptMinus2 << std::endl;
-      if (m_elecpos1 >= 0) std::cout << "                                leading e+: " << m_elecpos1 << "   Pt = " << ptPlus1 << std::endl;
-      if (m_elecpos2 >= 0) std::cout << "                                second  e+: " << m_elecpos2 << "   Pt = " << ptPlus2 << std::endl;
-    }
-
-    if (elecposcount + elecnegcount >= 2){ // fill the final list of electrons
-      if (m_elecneg1 >= 0) m_goodElecNegTrackParticleList.push_back(m_pxElTrackList.at(m_elecneg1));
-      if (m_elecneg2 >= 0) m_goodElecNegTrackParticleList.push_back(m_pxElTrackList.at(m_elecneg2));
-      if (m_elecpos1 >= 0) m_goodElecPosTrackParticleList.push_back(m_pxElTrackList.at(m_elecpos1));
-      if (m_elecpos2 >= 0) m_goodElecPosTrackParticleList.push_back(m_pxElTrackList.at(m_elecpos2));
+  for (std::size_t index = 0; index < m_pxElTrackList.size(); ++index){
+    const xAOD::TrackParticle* electron = m_pxElTrackList[index];
+    if (electron->charge() < 0.) { // negative electrons
+      updateLeading(negative, electron->pt(), static_cast<int>(index));
+    } else if (electron->charge() > 0.) { // positive electrons
+      updateLeading(positive, electron->pt(), static_cast<int>(index));
     }
   }
 
-  (*m_msgStream) << MSG::DEBUG << " -- ElectronSelector::OrderElectronList -- COMPLETED  -- status: "<< goodlist << std::endl;
-  return goodlist;
+  if (negative.count == 0 || positive.count == 0) {
+    if (m_doDebug) {
+      std::cout << " -- ElectronSelector::OrderElectronList -- "
+        "No opposite-charge electrons --> DISCARD ALL ELECTRONS --\n";
+    }
+    Clear();
+    return false;
+  }
+  m_elecneg1 = negative.leadingIndex;
+  m_elecneg2 = negative.subleadingIndex;
+  m_elecpos1 = positive.leadingIndex;
+  m_elecpos2 = positive.subleadingIndex;
+  //
+  if (m_doDebug) {
+    std::cout << " -- ElectronSelector::OrderElectronList -- electron summary list taking "
+      << negative.count + positive.count << " electrons from the input list of "
+      << m_pxElTrackList.size() << " electrons:\n";
+    //
+    if (m_elecneg1 >= 0) {
+      std::cout << "                                leading e-: " << m_elecneg1
+       << "   Pt = " << negative.leadingPt << '\n';
+    }
+    //
+    if (m_elecneg2 >= 0) {
+      std::cout << "                                second  e-: "<< m_elecneg2 
+      << "   Pt = " << negative.subleadingPt << '\n';
+    }
+    //
+    if (m_elecpos1 >= 0) {
+      std::cout << "                                leading e+: " << m_elecpos1
+      << "   Pt = " << positive.leadingPt << '\n';
+    }
+    //
+    if (m_elecpos2 >= 0) {
+      std::cout << "                                second  e+: " << m_elecpos2
+      << "   Pt = " << positive.subleadingPt << '\n';
+    }
+  }
+  const auto addElectron = [this](auto& output, int index) {
+    if (index >= 0) {
+      output.push_back(m_pxElTrackList[static_cast<std::size_t>(index)]);
+    }
+  };
+  addElectron(m_goodElecNegTrackParticleList, m_elecneg1);
+  addElectron(m_goodElecNegTrackParticleList, m_elecneg2);
+  addElectron(m_goodElecPosTrackParticleList, m_elecpos1);
+  addElectron(m_goodElecPosTrackParticleList, m_elecpos2);
+  //
+  (*m_msgStream) << MSG::DEBUG << " -- ElectronSelector::OrderElectronList -- COMPLETED  -- status: true\n";
+  return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////                                                                      
@@ -300,47 +309,10 @@ bool ElectronSelector::RetrieveVertices ()
 {
   if (m_doDebug) std::cout << " -- ElectronSelector::RetrieveVertices -- START  -- list size: " 
 			   << m_goodElecNegTrackParticleList.size() + m_goodElecPosTrackParticleList.size() 
-			   << std::endl;
+			   << "\n";
   bool goodvertices = false; 
-  int nverticesfound = 1; // WARNING default must be 0 --> set to 1 for R22 --> needs to be fixed
-
-  if (m_goodElecNegTrackParticleList.size() >= 1 && m_goodElecPosTrackParticleList.size() >= 1) { // we need at least 1 e- and 1 e+
-    // then, check the distances between the e- and e+ vertices, and make sure at least 1 pair comes from same vertex
-    for (size_t ielec = 0; ielec < m_goodElecNegTrackParticleList.size(); ielec++) {
-      // loop on e-
-      // R21 -> R22 SALVA // TrkParticles have no vertex in R22 --> THIS NEEDS A FIX
-      /*
-      if (m_goodElecNegTrackParticleList.at(ielec)->vertex()) {
-	if (m_doDebug) std::cout << "     e-(" << ielec <<")->vertex()->v= (" << m_goodElecNegTrackParticleList.at(ielec)->vertex()->x()
-				 << ", " << m_goodElecNegTrackParticleList.at(ielec)->vertex()->y()
-				 << ", " << m_goodElecNegTrackParticleList.at(ielec)->vertex()->z()
-				 << ") " << std::endl;
-
-	// for (unsigned int iposi = 0; iposi < m_goodElecPosTrackParticleList.size(); iposi++) {
-	for (size_t iposi = 0; iposi < m_goodElecPosTrackParticleList.size(); iposi++) {
-	  if (m_goodElecPosTrackParticleList.at(iposi)->vertex()) {
-	    if (m_doDebug) std::cout << "     e+(" << iposi <<")->vertex()->v= (" << m_goodElecPosTrackParticleList.at(iposi)->vertex()->x()
-				     << ", " << m_goodElecPosTrackParticleList.at(iposi)->vertex()->y()
-				     << ", " << m_goodElecPosTrackParticleList.at(iposi)->vertex()->z()
-				     << ") " << std::endl;
-	    float delta_x = std::abs( m_goodElecNegTrackParticleList.at(ielec)->vertex()->x()-m_goodElecPosTrackParticleList.at(iposi)->vertex()->x() );
-	    float delta_y = std::abs( m_goodElecNegTrackParticleList.at(ielec)->vertex()->y()-m_goodElecPosTrackParticleList.at(iposi)->vertex()->y() );
-	    float delta_z = std::abs( m_goodElecNegTrackParticleList.at(ielec)->vertex()->z()-m_goodElecPosTrackParticleList.at(iposi)->vertex()->z() );
-
-	    if (delta_x < m_deltaXYcut && delta_y < m_deltaXYcut && delta_z < m_deltaZcut) {
-	      nverticesfound++;
-	      if (m_doDebug) std::cout << "     ELEC-BINGO !!! e+e- pair in same vertex !!! e-[" << ielec 
-				       << "]  e+[" << iposi<< "]   count: " << nverticesfound << std::endl;
-	    } // vertex is the same
-	  } // positron has vertex
-	} // loop on positrons
-      } // electron has vertex
-      */
-    } // loop on electrons (e-) 
-  } // at least one e+e- pair
-
+  const int nverticesfound = 1; // WARNING default must be 0 --> set to 1 for R22 --> needs to be fixed
   if (nverticesfound >= 1) goodvertices = true;
-
   if (m_doDebug) std::cout << " -- ElectronSelector::RetrieveVertices -- COMPLETED -- status: " << goodvertices << std::endl; 
   return goodvertices;
 }

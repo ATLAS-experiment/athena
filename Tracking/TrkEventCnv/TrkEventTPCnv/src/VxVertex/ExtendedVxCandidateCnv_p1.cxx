@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------------
@@ -28,9 +28,10 @@ void  ExtendedVxCandidateCnv_p1::persToTrans(const Trk::ExtendedVxCandidate_p1 *
 void  ExtendedVxCandidateCnv_p1::transToPers(const Trk::ExtendedVxCandidate * transObj, Trk::ExtendedVxCandidate_p1 * persObj, MsgStream &log)
 {
  persObj->m_vxCandidate  = baseToPersistent(&m_vxCandidateConverter,  transObj, log );
- // persObj->m_fullCovariance = toPersistent( &m_errorMatrixConverter, transObj->m_fullCovariance, log );
  Trk::ErrorMatrix pMat;
- EigenHelpers::eigenMatrixToVector(pMat.values, *transObj->m_fullCovariance, "ExtendedVxCandidateCnv_p1");
- persObj->m_fullCovariance = toPersistent( &m_errorMatrixConverter, &pMat, log );
+ if (auto p = transObj->m_fullCovariance; p!= nullptr)[[likely]]{
+   EigenHelpers::eigenMatrixToVector(pMat.values, *p, "ExtendedVxCandidateCnv_p1");
+   persObj->m_fullCovariance = toPersistent( &m_errorMatrixConverter, &pMat, log );
+  }
  
 }

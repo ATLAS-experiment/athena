@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/ISvcLocator.h"
@@ -85,7 +85,7 @@ AtRndmGenSvc::initialize()
 	std::string buffer;
 	while (std::getline(infile, buffer)) {
 	  string stream; 
-	  uint32_t seed1, seed2;
+	  uint32_t seed1{}, seed2{};
 	  if (interpretSeeds(buffer, stream, seed1, seed2)) {
 	    ATH_MSG_DEBUG 
 	      (" INITIALISING " << stream << " stream with seeds "

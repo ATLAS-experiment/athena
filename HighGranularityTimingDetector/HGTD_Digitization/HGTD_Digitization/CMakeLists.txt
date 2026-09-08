@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( HGTD_Digitization )
@@ -14,6 +14,6 @@ atlas_add_component( HGTD_Digitization
                   LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} PileUpToolsLib HGTD_RawData
                   HitManagement AthenaBaseComps ReadoutGeometryBase SiDigitization
                   HGTD_CalibrationLib HGTD_Identifier HGTD_ReadoutGeometry GeneratorObjects GaudiKernel
-                  InDetSimData InDetSimEvent AthenaKernel AtlasCLHEP_RandomGenerators)
+                  InDetSimData InDetSimEvent AthenaKernel AtlasCLHEP_RandomGenerators CxxUtils)
 
 atlas_install_python_modules( python/*.py )

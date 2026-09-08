@@ -10,8 +10,11 @@ conditions_tag=$(python -c "from AthenaConfiguration.TestDefaults import default
 n_events=5
 
 Reco_tf.py \
-  --preExec "flags.Exec.FPE=-1;" \
-  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsScoreBasedAmbiguityWorkflowFlags" \
+  --preExec "flags.Exec.FPE=-1; \
+  	     flags.Acts.doAmbiguityResolution = True; \
+  	     from ActsConfig.ActsConfigFlags import AmbiguitySolverStrategy; \
+	     flags.Acts.AmbiguitySolverStrategy = AmbiguitySolverStrategy.ScoreBased;" \
+  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
   --conditionsTag ${conditions_tag} \
   --inputRDOFile ${input_rdo} \
   --outputAODFile AOD.pool.root \

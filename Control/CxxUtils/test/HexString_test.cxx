@@ -59,23 +59,39 @@ void test_integer_type() {
 
 // Tests the operator overloads (+ string concatenation)
 void test_operators() {
-    CxxUtils::HexString<"0x{}"> op_test(static_cast<uint16_t>(0x1337));
-    
-    // Test: std::string + HexString
-    std::string concat1 = std::string("Value is ") + op_test;
-    assert(concat1 == "Value is 0x1337");
+// Test Uppercase Operator Overloads
+    {
+        CxxUtils::HexString<"0x{}"> op_test(static_cast<uint16_t>(0xABCD));
+        
+        std::string concat1 = std::string("Value is ") + op_test;
+        assert(concat1 == "Value is 0xABCD");
 
-    // Test: HexString + std::string
-    std::string concat2 = op_test + std::string(" bits");
-    assert(concat2 == "0x1337 bits");
+        std::string concat2 = op_test + std::string(" bits");
+        assert(concat2 == "0xABCD bits");
 
-    // Test: const char* + HexString
-    std::string concat3 = "Result: " + op_test;
-    assert(concat3 == "Result: 0x1337");
+        std::string concat3 = "Result: " + op_test;
+        assert(concat3 == "Result: 0xABCD");
 
-    // Test: HexString + const char*
-    std::string concat4 = op_test + " [OK]";
-    assert(concat4 == "0x1337 [OK]");
+        std::string concat4 = op_test + " [OK]";
+        assert(concat4 == "0xABCD [OK]");
+    }
+
+    // Test Lowercase Operator Overloads
+    {
+        CxxUtils::hexstring<"0x{}"> op_test(static_cast<uint16_t>(0xABCD));
+        
+        std::string concat1 = std::string("Value is ") + op_test;
+        assert(concat1 == "Value is 0xabcd");
+
+        std::string concat2 = op_test + std::string(" bits");
+        assert(concat2 == "0xabcd bits");
+
+        std::string concat3 = "Result: " + op_test;
+        assert(concat3 == "Result: 0xabcd");
+
+        std::string concat4 = op_test + " [OK]";
+        assert(concat4 == "0xabcd [OK]");
+    }
 }
 
 void test_constexpr() {

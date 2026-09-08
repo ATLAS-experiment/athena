@@ -1,10 +1,9 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id$
 /**
  * @file AthenaPoolCnvSvc/TPCnvList.h
  * @author scott snyder <snyder@bnl.gov>
@@ -18,12 +17,7 @@
 
 
 #include "AthenaPoolCnvSvc/TPCnvElt.h"
-#include "boost/mpl/vector.hpp"
-#include "boost/mpl/transform.hpp"
-#include <boost/fusion/mpl.hpp>
-#include "boost/fusion/container/vector.hpp"
-#include "boost/fusion/container/vector/convert.hpp"
-#include "boost/fusion/algorithm/iteration/accumulate.hpp"
+#include <tuple>
 
 
 namespace AthenaPoolCnvSvc {
@@ -35,62 +29,8 @@ namespace AthenaPoolCnvSvc {
 template <class CNV, class TRANS, class ... TPCNVS>
 class TPCnvList
 {
-  /// Metafunction to wrap a TP converter in @c TPCnvElt.
-  template <class TPCNV>
-  struct wrap_tpcnv
-  {
-    typedef TPCnvElt<CNV, TPCNV> type;
-  };
-
-
-  /// Functional to iterate over TP converters and call @c createTransient
-  /// on each.  Stop once one succeeds.
-  struct do_create_transient
-  {
-    do_create_transient (CNV& parent, const Token* token, const std::string& key, MsgStream& msg);
-
-    // FIXME: It would be better to pass a unique_ptr through here.
-    // But that requires the resolution of DR2055, which g++ only implements
-    // with c++20.
-    template <class ELT>
-    typename ELT::Trans_t* operator() (typename ELT::Trans_t* p, ELT& elt);
-
-    CNV& m_parent;
-    const Token* m_token;
-    const std::string& m_key;
-    MsgStream& m_msg;
-  };
-
-
-  /// Functional to iterate over TP converters and call @c persToTrans
-  /// on each.  Stop once one succeeds.
-  struct do_pers_to_trans
-  {
-    do_pers_to_trans (CNV& parent, TRANS* trans, const Token* token, const std::string& key, MsgStream& msg);
-    
-    template <class ELT>
-    bool operator() (bool found, ELT& elt);
-
-    CNV& m_parent;
-    TRANS* m_trans;
-    const Token* m_token;
-    const std::string& m_key;
-    MsgStream& m_msg;
-  };
-
-
 public:
-  // Coverity fails to compile this correctly.
-#ifndef __COVERITY__
-  // Convert the list of TP converters <T1, T2, ...> to a boost fusion vector
-  // of converters wrapped by TPCnvElt:
-  //   boost::fusion::vector<TPCnvElt<T1>, TPCnvElt<T2>, ...>
-  // We can create in instance of this vector to get an object that holds
-  // all the TP converter instances.
-  typedef boost::mpl::vector<TPCNVS...> vec_t;
-  typedef typename boost::mpl::transform<vec_t, wrap_tpcnv<boost::mpl::_1> >::type list_mpl_t;
-  typedef typename boost::fusion::result_of::as_vector<list_mpl_t>::type list_t;
-#endif
+  using list_t = std::tuple<TPCnvElt<CNV, TPCNVS>...>;
 
 
   /**
@@ -124,10 +64,8 @@ public:
   
 
 private:
-#ifndef __COVERITY__
   /// List of TP converter instances, wrapped by @c TPCnvElt.
-  list_t m_list;
-#endif
+  list_t m_list{};
 };
 
 

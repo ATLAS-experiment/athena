@@ -54,7 +54,7 @@ namespace ActsTrk::detail {
     class RefittingSurfaceAccesor {
         public:
             RefittingSurfaceAccesor(const IGeometryRealmConvTool* trkConvTool,
-                                    const ActsTrk::ITrackingGeometryTool* trackGeoTool); 
+                                    const ActsTrk::ITrackingGeometrySvc* trackGeoSvc); 
              /** @brief Operator called by the Acts API to fetch the surface. */
             const Acts::Surface* operator()(const Acts::SourceLink& sourceLink) const;
           

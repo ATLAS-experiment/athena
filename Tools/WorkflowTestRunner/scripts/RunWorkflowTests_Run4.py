@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from sys import exit
 
@@ -23,7 +23,10 @@ def main():
     tests_to_run = []
     if options.generation:
         dsid = "421356" if not options.dsid else options.dsid
-        tests_to_run.append(GenerationTest(f"gen{dsid}", run, WorkflowType.Generation, ["generate"], setup, options.extra_args))
+        if "inputEVNT_PreFile" in options.extra_args:
+            tests_to_run.append(GenerationTest(f"gen{dsid}", run, WorkflowType.Generation, ["afterburn"], setup, options.extra_args))
+        else:
+            tests_to_run.append(GenerationTest(f"gen{dsid}", run, WorkflowType.Generation, ["generate"], setup, options.extra_args))
     elif options.simulation:
         tests_to_run.append(SimulationTest("s3761", run, WorkflowType.FullSim, ["EVNTtoHITS"], setup, f"--geometryVersion {defaultGeometryTags.RUN4} --conditionsTag default:{defaultConditionsTags.RUN4_MC} {options.extra_args}") )
     elif options.overlay:

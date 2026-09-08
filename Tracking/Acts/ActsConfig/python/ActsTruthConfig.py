@@ -103,15 +103,11 @@ def ActsTrackToTruthAssociationAlgCfg(flags,
     kwargs.setdefault('ACTSTracksLocation','ActsTracks')
     kwargs.setdefault('PixelClustersToTruthAssociationMap','ITkPixelClustersToTruthParticles')
     kwargs.setdefault('StripClustersToTruthAssociationMap','ITkStripClustersToTruthParticles')
-    if flags.Detector.EnableHGTD and flags.Acts.useHGTDClusterInTrackFinding:
+    if flags.Reco.EnableHGTDExtension and (flags.Acts.useHGTDClusterInTrackFinding or (flags.HGTD.doActs and flags.Tracking.doTruth)):
         kwargs.setdefault('HgtdClustersToTruthAssociationMap','HgtdClustersToTruthParticles')
     kwargs.setdefault('AssociationMapOut','ActsTracksToTruthParticles')
     kwargs.setdefault('MaxEnergyLoss',1e3*UnitConstants.TeV)
 
-    if 'TrackingGeometryTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
-        
     acc.addEventAlgo( CompFactory.ActsTrk.TrackToTruthAssociationAlg(name=name, **kwargs) )
     return acc
 
@@ -128,10 +124,6 @@ def ActsInDetTrackToTruthAssociationAlgCfg(flags,
     kwargs.setdefault('AssociationMapOut','ActsTracksToTruthParticles')
     kwargs.setdefault('MaxEnergyLoss',1e3*UnitConstants.TeV)
 
-    if 'TrackingGeometryTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
-        
     acc.addEventAlgo( CompFactory.ActsTrk.TrackToTruthAssociationAlg(name=name, **kwargs) )
     return acc
 
@@ -143,16 +135,13 @@ def ActsTruthParticleHitCountAlgCfg(flags,
 
     kwargs.setdefault('PixelClustersToTruthAssociationMap','ITkPixelClustersToTruthParticles')
     kwargs.setdefault('StripClustersToTruthAssociationMap','ITkStripClustersToTruthParticles')
-    if flags.Detector.EnableHGTD and flags.Acts.useHGTDClusterInTrackFinding:
+    if flags.Reco.EnableHGTDExtension and flags.Acts.useHGTDClusterInTrackFinding:
         kwargs.setdefault('HgtdClustersToTruthAssociationMap','HgtdClustersToTruthParticles')
     kwargs.setdefault('TruthParticleHitCountsOut','TruthParticleHitCounts')
     kwargs.setdefault('MaxEnergyLoss',1e3*UnitConstants.TeV) # @TODO introduce flag and synchronise with TrackToTruthAssociationAlg
     kwargs.setdefault('NHitsMin',4)
 
-    if 'TrackingGeometryTool' not in kwargs:    
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
-    
+
     acc.addEventAlgo( CompFactory.ActsTrk.TruthParticleHitCountAlg(name=name, **kwargs) )
     return acc
 
@@ -169,10 +158,6 @@ def ActsInDetTruthParticleHitCountAlgCfg(flags,
     kwargs.setdefault('MaxEnergyLoss',1e3*UnitConstants.TeV) # @TODO introduce flag and synchronise with TrackToTruthAssociationAlg
     kwargs.setdefault('NHitsMin',4)
 
-    if 'TrackingGeometryTool' not in kwargs:    
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
-    
     acc.addEventAlgo( CompFactory.ActsTrk.TruthParticleHitCountAlg(name=name, **kwargs) )
     return acc
 
@@ -192,7 +177,7 @@ def ActsTruthAssociationAlgCfg(flags,
     if flags.Detector.EnableITkStrip:
         acc.merge(ActsStripClusterToTruthAssociationAlgCfg(flags, **extractChildKwargs(prefix="StripClusterToTruthAssociationAlg.", **kwargs) ))
     
-    if flags.Detector.EnableHGTD and flags.Acts.useHGTDClusterInTrackFinding:
+    if flags.Reco.EnableHGTDExtension and flags.Acts.useHGTDClusterInTrackFinding:
         acc.merge(ActsHgtdClusterToTruthAssociationAlgCfg(flags, **extractChildKwargs(prefix="HgtdClusterToTruthAssociationAlg.", **kwargs) ))
     return acc
 

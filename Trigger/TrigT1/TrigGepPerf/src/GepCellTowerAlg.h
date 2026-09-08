@@ -2,8 +2,8 @@
  *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
-#ifndef TRIGL0GEPPERF_GEPCELLTOWERALG_H
-#define TRIGL0GEPPERF_GEPCELLTOWERALG_H 1
+#ifndef TRIGGEPPERF_GEPCELLTOWERALG_H
+#define TRIGGEPPERF_GEPCELLTOWERALG_H 1
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
@@ -34,4 +34,4 @@ class GepCellTowerAlg: public ::AthReentrantAlgorithm {
 
 }; 
 
-#endif //> !TRIGL0GEPPERF_TOPOTOWER_H
+#endif //> !TRIGGEPPERF_TOPOTOWER_H

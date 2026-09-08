@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -59,9 +59,9 @@ Trk::ProjectionMatricesSet::ProjectionMatricesSet(int maxdim) :
       expansion = Amg::MatrixX(reduction.transpose());
     } 
     // store them
-    m_reductions.push_back(reduction);
-    m_expansions.push_back(expansion);
-    m_accessors.push_back(accessorInt);
+    m_reductions.push_back(std::move(reduction));
+    m_expansions.push_back(std::move(expansion));
+    m_accessors.push_back(std::move(accessorInt));
   }
 
 }

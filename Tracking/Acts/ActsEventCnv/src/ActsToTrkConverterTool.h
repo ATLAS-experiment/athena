@@ -10,7 +10,6 @@
 // ATHENA
 #include "AthenaBaseComps/AthAlgTool.h"
 
-
 #include "TrkToolInterfaces/IExtendedTrackSummaryTool.h"
 #include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
 
@@ -25,12 +24,13 @@
 
 // PACKAGE
 #include "ActsToolInterfaces/ITrackConverterTool.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 
 #include "ActsCalibBase/SourceLinkType.h"
 #include "ActsCalibrators/TrkMeasurementCalibrator.h"
 #include "ActsCalibrators/TrkPrepRawDataCalibrator.h"
 #include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
+#include "ActsEvent/ContextUtility.h"
+
 
 #include "Acts/EventData/BoundTrackParameters.hpp"
 
@@ -51,10 +51,13 @@ public:
 
   /** @copydoc ITrackConverterTool::trkTrackToSourceLinks  */
   virtual std::vector<Acts::SourceLink> trkTrackToSourceLinks(const Trk::Track& track) const override;
-  /** @copydoc ITrackConverterTool::convertFitResult  */
-  virtual std::unique_ptr<Trk::Track> convertFitResult(const EventContext& ctx,
-                                                       TrackFitResult_t& fitResult,
+  /** @copydoc ITrackConverterTool::convertActsToTrk  */
+  virtual std::unique_ptr<Trk::Track> convertActsToTrk(const EventContext& ctx,
+                                                       const ActsTrack_t& actsTrack,
                                                        const Trk::TrackInfo::TrackFitter fitAuthor) const override final;
+  /** @copydoc ITrackConverterTool::convertTrack  */
+  virtual std::unique_ptr<Trk::Track> convertTrack(const EventContext& ctx, 
+                                                   const ConstTrack_t& trackProxy) const override final;
   /** @copydoc ITrackConverterTool::convertTrkToActsContainer  */
   virtual void convertTrkToActsContainer(const EventContext& ctx,
                                          const TrackCollection& trackColl,
@@ -107,9 +110,11 @@ private:
      const Acts::BoundTrackParameters& actsParameter,
      const Trk::TrackParameters& tsos, const Acts::GeometryContext& gctx) const;
 
-  PublicToolHandle<ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+  
   PublicToolHandle<IGeometryRealmConvTool> m_geometryConvTool{this, "GeometryRealmConvTool", ""};
   
+  /** @brief Utility to fetch the geometry, magnetic field and calibration context in the event */
+  ContextUtility m_ctxProvider{this};
   /** @brief Tools needed to create Trk::Tracks from the ACts fit result */
   ToolHandle<Trk::IExtendedTrackSummaryTool> m_trkSummaryTool {this, "SummaryTool", "", "ToolHandle for track summary tool"};
   ToolHandle<Trk::IRIO_OnTrackCreator> m_ROTcreator {this, "RotCreatorTool", ""};
@@ -128,8 +133,9 @@ private:
   SG::ReadHandleKey<Muon::TgcPrepDataContainer> m_keyTgc{this, "TgcKey", "TGC_MeasurementsAllBCs"};
   SG::ReadHandleKey<Muon::MMPrepDataContainer> m_keyMm{this, "MmKey", "MM_Measurements"};
   SG::ReadHandleKey<Muon::sTgcPrepDataContainer> m_keyStgc{this, "sTgcKey", "STGC_Measurements"};
-
-
+  SG::ReadHandleKey<InDet::PixelClusterContainer> m_pixelKey{this, "PixelKey", "ITkPixelClusters" };
+  SG::ReadHandleKey<InDet::SCT_ClusterContainer> m_sctKey{this, "SctKey", "ITkStripClusters" };
+  
   ToolHandle<Muon::IMuonCompetingClustersOnTrackCreator> m_compRotCreator{this, "CompetingRotCreator", ""};  //<! competing clusters rio ontrack creator
 
   detail::TrkMeasurementCalibrator m_measCalib{};

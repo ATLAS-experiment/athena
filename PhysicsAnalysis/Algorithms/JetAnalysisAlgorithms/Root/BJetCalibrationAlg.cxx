@@ -40,7 +40,7 @@ namespace CP
 
     ANA_CHECK (m_muonInJetTool.retrieve());
     if(!m_bJetTool.empty()) ANA_CHECK (m_bJetTool.retrieve());
-    
+
     ANA_CHECK (m_systematicsList.initialize());
     return StatusCode::SUCCESS;
   }
@@ -58,29 +58,45 @@ namespace CP
 
       std::vector<const xAOD::Muon*> muons_for_correction;
       muons_for_correction.reserve(muons->size());
-      for(const xAOD::Muon* muon : *muons){
-	if(// For analysis frameworks
-	   (m_muonSelectionTool.empty() && m_muonPreselection.getBool(*muon, sys)) ||
-	   // For other frameworks
-	   (!m_muonSelectionTool.empty() && m_muonSelectionTool->accept(*muon)))
-	  muons_for_correction.emplace_back(muon);
+      for(const xAOD::Muon* muon : *muons)
+      {
+	      if (// For analysis frameworks
+	        (m_muonSelectionTool.empty() && m_muonPreselection.getBool(*muon, sys)) ||
+	         // For other frameworks
+	        (!m_muonSelectionTool.empty() && m_muonSelectionTool->accept(*muon)))
+        {
+	        muons_for_correction.emplace_back(muon);
+        }
       }
 
-      for(xAOD::Jet* jet : *jets) {
-
+      for (xAOD::Jet* jet : *jets)
+      {
         jet->setJetP4("NoBJetCalibMomentum", jet->jetP4());
         jet->setJetP4("MuonCorrMomentum", jet->jetP4());
+        if (!m_bJetTool.empty())
+        {
+          jet->setJetP4("BJetCalibMomentum", jet->jetP4());
+        }
 
         int nmuons = 0;
-        if(m_jetPreselection.getBool(*jet, sys)) {
+        if (m_jetPreselection.getBool(*jet, sys))
+        {
           ANA_CHECK (m_muonInJetTool->applyMuonInJetCorrection(*jet, muons_for_correction, nmuons));
           jet->setJetP4("MuonCorrMomentum", jet->jetP4());
-          if(!m_bJetTool.empty()){
+          if (!m_bJetTool.empty())
+          {
             ANA_CHECK (m_bJetTool->applyBJetCorrection(*jet, nmuons>0));
+            jet->setJetP4("BJetCalibMomentum", jet->jetP4());
+          }
+
+          if (m_onlyDecorate)
+          {
+            // Reset the jet 4-vector to the original one
+            jet->setJetP4(jet->jetP4("NoBJetCalibMomentum"));
           }
         }
-        m_nmuons.set(*jet, nmuons, sys);
 
+        m_nmuons.set(*jet, nmuons, sys);
       }
     }
 

@@ -55,7 +55,7 @@ atlas_add_test( XMLParserUtilities_test
                 SOURCES test/XMLParserUtilities_test.cxx
                 INCLUDE_DIRS ${EXPAT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
                 LINK_LIBRARIES ${EXPAT_LIBRARIES} ${Boost_LIBRARIES} PathResolver XMLCoreParser TestTools
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_executable( texpat
                       src/texpat.cxx

@@ -287,11 +287,11 @@ def getJetTruthLabelToolPrereqs(jetdef, modspec):
             "R4TruthLabel": "input:AntiKt4TruthJets",
             "R4TruthDressedWZLabel": "input:AntiKt4TruthDressedWZJets",
             "R4InTimeTruthLabel": "input:InTimeAntiKt4TruthJets",
+            "R4OutOfTimeTruthLabel": "input:OutOfTimeAntiKt4TruthJets",
             "R10TruthLabel_R21Precision_2022v1": "input:AntiKt10TruthJets",
             "R10TruthLabel_R22v1": "input:AntiKt10TruthSoftDropBeta100Zcut10Jets",
         }[labelconfig])
     return prereqs
-
 
 def getJetPileupLabelTool(jetdef, modspec):
 
@@ -300,3 +300,26 @@ def getJetPileupLabelTool(jetdef, modspec):
                                                            TruthJetContainer= "AntiKt4TruthDressedWZJets")
 
     return jetPileupLabelTool
+
+def getJetIRCSafeLabelTool(jetdef, modspec):
+    """returns the IRCSafe labelling tools, applying four new flavour labelling
+       schemes to truth particle jets and then matching them in terms of deltaR
+       to any type of reconstructed jets (for now the radius of truth jets is
+       set by hand to R = 0.4, so shouldnt really be used for other jets)
+    """
+    tool_kwargs = dict(
+        LabelNameIFN = "IRCSafeLabelIFN",
+        LabelNameCMP = "IRCSafeLabelCMP",
+        LabelNameGHS = "IRCSafeLabelGHS",
+        LabelNameSDF = "IRCSafeLabelSDF",
+        LabelNameAKT = "IRCSafeLabelAKT",
+        BParticleCollection = "TruthLabelBHadronsFinal",
+        CParticleCollection = "TruthLabelCHadronsFinal",
+        TruthParticleCollection = "JetInputTruthParticles",
+        EnabledAlgorithms = ["IFN","CMP","GHS","SDF","AKT"],
+        TruthJetPtMin = 5000.0,
+        JetPtMin = 10000.0,
+        DRMax = 0.3,
+        TruthR = 0.4
+    )
+    return CompFactory.JetIRCSafeLabelTool("jetircsafelabeler", **tool_kwargs)

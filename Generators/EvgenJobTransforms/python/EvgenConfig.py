@@ -1,7 +1,7 @@
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from PyJobTransformsCore.TransformConfig import TransformConfig, String, ListOfStrings, Boolean, Integer, AllowedExpression, TransformConfigError
-from GeneratorConfig.GenConfigHelpers import KnownGenerators
+from GeneratorConfig.GenConfigHelpers import KnownGenerators, KnownPartonShowerModels, KnownHadronizationModels
 
 class EvgenConfig(TransformConfig):
     __slots__ = ()
@@ -15,7 +15,7 @@ class EvgenConfig(TransformConfig):
     inputfilecheck = String("A regex to check that the input file needed for some generators has a valid name")
     inputconfcheck = String("A regex to check that the config file needed for some generators has a valid name")
     specialConfig = String("Special configuration for subsequent prod steps")
-    tune = String("Generator shower/hadronisation/MPI tune name")
+    tune = String("Generator shower/hadronization/MPI tune name")
     saveJets = Boolean("Save truth jet collections in the output file if they are available", False)
     savePileupTruthParticles = Boolean("Save truth particle collections, if available, for pileup-overlay output", False)
     findJets = Boolean("Schedule jet finding algorithms for each defined jet container", False)
@@ -25,6 +25,8 @@ class EvgenConfig(TransformConfig):
     nEventsPerJob = Integer("number of input events per job",0, AllowedExpression("value >= 0"))
     obsolete = Boolean("Are JOs/common fragment obsolete", False)
     PDGparams = Boolean("Do we use the standard PDG values for masses, widths etc. ", False)
+    hadronizationModel = String("Name of the hadronization model used", allowedValues=KnownHadronizationModels)
+    partonShowerModel = String("Name of the parton shower model used", allowedValues=KnownPartonShowerModels)
 
     def __init__(self, name="evgenConfig"):
         TransformConfig.__init__(self, name)

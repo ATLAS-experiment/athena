@@ -24,9 +24,9 @@ AthenaEventLoopMgr   INFO   ===>>>  start of run 0    <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #0 0 events processed so far  <<<===
 MetaDataSvc          INFO Initializing MetaDataSvc
 ROBDataProviderSvc   INFO Initializing
-ROBDataProviderSvc   INFO  ---> Filter out empty ROB fragments                               =  'filterEmptyROB':False
-ROBDataProviderSvc   INFO  ---> Filter out specific ROBs by Status Code: # ROBs = 0
-ROBDataProviderSvc   INFO  ---> Filter out Sub Detector ROBs by Status Code: # Sub Detectors = 0
+ROBDataProviderSvc   INFO ---> Filter out empty ROB fragments = false
+ROBDataProviderSvc   INFO ---> Filter out specific ROBs by Status Code: # ROBs = 0
+ROBDataProviderSvc   INFO ---> Filter out Sub Detector ROBs by Status Code: # Sub Detectors = 0
 ByteSt...OutputSvcWARNING failed to retrieve ByteStreamMetaData
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #0 1 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #2, run #0 1 events processed so far  <<<===

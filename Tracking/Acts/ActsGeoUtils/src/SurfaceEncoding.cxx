@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef SIMULATIONBASE
 
@@ -15,6 +15,26 @@
 #include "Acts/Surfaces/RectangleBounds.hpp"
 #include "Acts/Surfaces/StrawSurface.hpp"
 #include "Acts/Surfaces/SurfaceBounds.hpp"
+
+#include <algorithm>
+#include <cmath>
+#include <limits>
+
+namespace {
+/// Bound values are stored as float, so a half phi sector of pi round-trips off
+/// by up to half a float ulp (~1.2e-7 rad) - either side, and far above the
+/// 1e-9 rad ACTS uses to recognise full azimuth. Snap back onto pi so 2 pi
+/// bounds stay closed, and clamp into the [0, pi] range ACTS requires.
+double decodeHalfPhiSector(float halfPhiSector) {
+  constexpr double fullAzimuthSnap =
+      std::numeric_limits<float>::epsilon() * M_PI;
+  const double value = halfPhiSector;
+  if (std::abs(value - M_PI) < fullAzimuthSnap) {
+    return M_PI;
+  }
+  return std::clamp(value, 0., M_PI);
+}
+}  // namespace
 
 namespace ActsTrk {
 void encodeSurface(xAOD::SurfaceType& surfaceType,
@@ -50,6 +70,7 @@ void encodeSurface(xAOD::SurfaceType& surfaceType,
       case Curvilinear:
         surfaceType = xAOD::SurfaceType::Curvilinear;
         break;
+      case Point:
       case Other:
         surfaceType = xAOD::SurfaceType::Other;
         break;
@@ -104,16 +125,16 @@ std::shared_ptr<const Acts::Surface> decodeSurface(
   switch (surfaceType) {
       using enum xAOD::SurfaceType;
       case Cone:
-        return Acts::Surface::makeShared<Acts::ConeSurface>(std::move(transform), 
-                    boundValues[0], boundValues[1], boundValues[2], boundValues[3]);
-      case Cylinder: {
-        // phi/2 must be slightly < Pi to avoid crashing
-        const float fixedPhi = boundValues[2] > M_PI - 0.001 ? M_PI - 0.001 : boundValues[2];
-        return Acts::Surface::makeShared<Acts::CylinderSurface>(std::move(transform), 
-                boundValues[0], boundValues[1], fixedPhi, boundValues[3], boundValues[4]);
-      } case Disc:
-        return Acts::Surface::makeShared<Acts::DiscSurface>(std::move(transform), 
-                boundValues[0], boundValues[1], boundValues[2]);
+        return Acts::Surface::makeShared<Acts::ConeSurface>(std::move(transform),
+                    boundValues[0], boundValues[1], boundValues[2],
+                    decodeHalfPhiSector(boundValues[3]));
+      case Cylinder:
+        return Acts::Surface::makeShared<Acts::CylinderSurface>(std::move(transform),
+                boundValues[0], boundValues[1], decodeHalfPhiSector(boundValues[2]),
+                boundValues[3], boundValues[4]);
+      case Disc:
+        return Acts::Surface::makeShared<Acts::DiscSurface>(std::move(transform),
+                boundValues[0], boundValues[1], decodeHalfPhiSector(boundValues[2]));
         case Perigee: 
           return Acts::Surface::makeShared<Acts::PerigeeSurface>(std::move(transform));
         case Plane: {

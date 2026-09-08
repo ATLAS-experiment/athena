@@ -4,7 +4,6 @@
 atlas_subdir( GNNVertexFitter )
 
 # External dependencies:
-#find_package( Boost COMPONENTS filesystem )
 find_package( lwtnn )
 find_package( onnxruntime )
 find_package(ROOT COMPONENTS Core MathCore Tree Hist RIO pthread REQUIRED)

@@ -32,7 +32,7 @@ def collectDigitizationMetadata(flags):
     logDigitizationWriteMetadata.info('Filling Digitization MetaData')
     for testKey, testFlag in digitMetaDataKeys.items():
         if flags.hasFlag(testFlag):
-            testValue = flags._get(testFlag)
+            testValue = flags[testFlag]
             if isinstance(testValue, FlagEnum):
                 testValue = testValue.value
             if not isinstance(testValue, str):
@@ -132,7 +132,7 @@ def writeDigitizationParameters(flags):
         return ComponentAccumulator()
 
     from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg, addFolders
-    acc = IOVDbSvcCfg(flags, FoldersToMetaData=[folderName])
+    acc = IOVDbSvcCfg(flags, FoldersToMetaData=(folderName,))
     # Note: addFolders only needed in sqlite mode since direct mode handles it in ParameterMetaDataWriterCfg
     acc.merge(addFolders(flags, folderName, detDb="DigitParams.db", db="DIGPARAM"))
     return acc

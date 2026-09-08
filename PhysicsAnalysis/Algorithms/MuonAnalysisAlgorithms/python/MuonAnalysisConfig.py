@@ -39,6 +39,8 @@ class MuonMomentumCalibrationConfig (ConfigBlock):
             info="only for testing purposes, turn on to ignore NSW hits and "
             "fix a crash with older derivations (p-tag <p5834).")
         self.addOption ('calibMode', 'correctData_CB', type=str, info='calibration mode of the `MuonCalibTool` needed to turn on the sagitta bias corrections and to select the muon track calibration type (CB or ID+MS), see https://atlas-mcp.docs.cern.ch/guidelines/muonmomentumcorrections/index.html#cpmuoncalibtool-tool.')
+        self.addOption ('useZeroPixMuons', False, type=bool, info='if True, a second `MuonCalibTool` instance with calibMode=correctData_MSonly is scheduled and applied only to ZeroPixelHit muons.')
+        self.addOption ('zeroPixMuonType', None, type=int, info='muonType value used for the ZeroPix calibration tool. If left as None, the default xAOD::Muon::MuonType::ZeroPixelHit is used.')
         self.addOption ('decorateTruth', False, type=bool,
             info="decorate truth particle information on the reconstructed one.")
         self.addOption ('writeColumnarToolVariables', False, type=bool,
@@ -124,6 +126,18 @@ class MuonMomentumCalibrationConfig (ConfigBlock):
             alg.calibrationAndSmearingTool.ExcludeNSWFromPrecisionLayers = True
         else:
             alg.calibrationAndSmearingTool.ExcludeNSWFromPrecisionLayers = self.excludeNSWFromPrecisionLayers and (config.geometry() >= LHCPeriod.Run3)
+
+        # Optionally set up a second calibration tool applied only to ZPH muons
+        # The calibMode is set to 'correctData_MSonly'.
+        if self.useZeroPixMuons:
+            config.addPrivateTool( 'calibrationAndSmearingTool_ZeroPix',
+                            'CP::MuonCalibTool' )
+            alg.calibrationAndSmearingTool_ZeroPix.IsRun3Geo = config.geometry() >= LHCPeriod.Run3
+            alg.calibrationAndSmearingTool_ZeroPix.calibMode = 5 # correctData_MSonly
+            alg.calibrationAndSmearingTool_ZeroPix.ExcludeNSWFromPrecisionLayers = alg.calibrationAndSmearingTool.ExcludeNSWFromPrecisionLayers
+            if self.zeroPixMuonType is not None:
+                alg.zeroPixMuonType = self.zeroPixMuonType
+
         alg.muons = config.readName (self.containerName)
         alg.muonsOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
@@ -369,6 +383,11 @@ class MuonWorkingPointEfficiencyConfig (ConfigBlock) :
             info="save all the independent detailed object scale factors.")
         self.addOption ('saveCombinedSF', False, type=bool,
             info="save the combined object scale factor.")
+        self.addOption('useLRT', False, type=bool,
+            info="apply the LRT-specific reco/ID efficiency SF treatment. When "
+              "set (and quality is Medium, the only WP supported for LRT muons), "
+              "the reco SF tool routes per-muon via the isLRT flag and uses the "
+              "LRT-specific CalibrationRelease.")
     
     def instanceName (self) :
         if self.postfix is not None:
@@ -400,10 +419,13 @@ class MuonWorkingPointEfficiencyConfig (ConfigBlock) :
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'muon_reco_bad_eff' + postfix
             alg.efficiencyScaleFactorTool.WorkingPoint = self.quality
+            # LRT muons: MCP supports only Medium WP. Enable per-muon isLRT flag and use dedicated LRT reco-sf release.
+            if self.useLRT and self.quality != 'Medium':
+              raise ValueError ("useLRT is only supported with the Medium quality working point, not '%s'" % self.quality)
             if config.geometry() >= LHCPeriod.Run3:
-                alg.efficiencyScaleFactorTool.CalibrationRelease = '251211_Preliminary_r24run3'
+                alg.efficiencyScaleFactorTool.CalibrationRelease = '250418_Preliminary_r24run3' if self.useLRT else '251211_Preliminary_r24run3'
             else:
-                alg.efficiencyScaleFactorTool.CalibrationRelease = '230213_Preliminary_r22run2_loosefix'
+                alg.efficiencyScaleFactorTool.CalibrationRelease = '240620_LRT_r22run2' if self.useLRT else '230213_Preliminary_r22run2_loosefix'
             alg.efficiencyScaleFactorTool.BreakDownSystematics = self.systematicBreakdown
             alg.muons = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
@@ -551,6 +573,8 @@ class MuonTriggerAnalysisSFBlock (ConfigBlock):
                 2022: 410000,
                 2023: 450000,
                 2024: 470000,
+                2025: 495000,
+                2026: 516000,
             }
 
             triggerConfigs = {}

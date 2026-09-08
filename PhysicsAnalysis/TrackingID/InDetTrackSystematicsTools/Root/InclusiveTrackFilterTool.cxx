@@ -3,10 +3,13 @@
 */
 
 #include "InDetTrackSystematicsTools/InclusiveTrackFilterTool.h"
+#include "InDetTrackSystematicsTools/getEventNumber.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/TrackingPrimitives.h"
 #include "AthContainers/ConstAccessor.h"
 #include "CxxUtils/checker_macros.h"
+#include "CxxUtils/FastReseededPRNG.h"
+#include <random>
 
 namespace InDet {
 
@@ -25,8 +28,6 @@ namespace InDet {
 
   StatusCode InclusiveTrackFilterTool::initialize()
   {
-    m_rnd = std::make_unique<TRandom3>(m_seed);
-
     if (m_calibFileLRTEff.empty()) {
       ATH_MSG_ERROR("No calibration file for requested LRT track efficiency set. You may be running an unsupported datataking period, please contact Tracking CP if you believe this message is in error.");
       return StatusCode::FAILURE;
@@ -64,10 +65,15 @@ namespace InDet {
     }
 
     if ( isActive( TRK_EFF_LARGED0_GLOBAL ) ) {
-      float probDrop = std::abs(m_trkEffSystScale); // default is one; adjust this parameter to increase / decrease the effect
+      float probDrop = std::abs(m_trkEffSystScale);
       probDrop *= std::abs(getTrackUncertainty( track ));
-
-      if ( m_rnd->Uniform(0, 1) < probDrop ) return false;
+      FastReseededPRNG prng(
+          m_seed,
+          static_cast<uint32_t>(std::abs(track->phi()) * 1e6),
+          static_cast<uint32_t>(std::abs(track->eta()) * 1e3),
+          InDet::getEventNumber(evtStore()));
+      if (std::uniform_real_distribution<double>(0, 1)(prng) < probDrop)
+          return false;
     }
 
     return true;
@@ -106,7 +112,7 @@ namespace InDet {
       const xAOD::TrackParticle* track,
       const CP::SystematicSet& syst) const
   {
-    std::lock_guard<std::mutex> lock(m_rndMutex);
+    std::lock_guard<std::mutex> lock(m_sysLock);
     InclusiveTrackFilterTool* nc_this ATLAS_THREAD_SAFE =
         const_cast<InclusiveTrackFilterTool*>(this);
     if (nc_this->applySystematicVariation(syst).isFailure())

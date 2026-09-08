@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDPERFMON_FOURMUONEVENT_H
@@ -23,6 +23,7 @@
 
 //-
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include <array>
 ///==============================================================================
 // Forward class declarations...
 //==============================================================================
@@ -110,7 +111,7 @@ class FourMuonEvent : public EventAnalysis
   inline void                        SetMassWindowLow (double newvalue)                   { m_MassWindowLow = newvalue; }
   inline void                        SetMassWindowHigh (double newvalue)                  { m_MassWindowHigh = newvalue; }
   inline void                        SetMuonPtCut (double newvalue)                       { m_xMuonID.SetPtCut(newvalue); }
-  inline void                        SetMuonSelectionTool ( ToolHandle<CP::IMuonSelectionTool> mst ) { m_xMuonID.SetCustomMuonSelectionTool (mst); };
+  inline void                        SetMuonSelectionTool ( const ToolHandle<CP::IMuonSelectionTool> & mst ) { m_xMuonID.SetCustomMuonSelectionTool (mst); };
   void                               SetSecondMuonPtCut (double newvalue); 
   inline void                        SetOpeningAngleCut (double newvalue)                 { m_OpeningAngleCut = newvalue; }
   inline void                        SetZ0GapCut (double newvalue)                        { m_Z0GapCut = newvalue; }
@@ -133,7 +134,7 @@ class FourMuonEvent : public EventAnalysis
   void     RecordMuon( const xAOD::Muon* pxMuon );
 
   // message stream
-  MsgStream * m_msgStream;
+  MsgStream * m_msgStream{};
 
   // Active mu-cuts for the analysis
   MuonSelector            m_xMuonID;
@@ -152,10 +153,10 @@ class FourMuonEvent : public EventAnalysis
   double m_deltaXYcut{};
   double m_Z0GapCut{};
 
-  bool m_doDebug;
-  bool m_workAsFourMuons;
-  bool m_workAsFourElectrons;
-  bool m_workAsFourLeptons;
+  bool m_doDebug{};
+  bool m_workAsFourMuons{};
+  bool m_workAsFourElectrons{};
+  bool m_workAsFourLeptons{};
 
   // Member variables : Mostly to store relevant muon data for quick access.
   unsigned int     m_numberOfFullPassMuons{};
@@ -174,11 +175,12 @@ class FourMuonEvent : public EventAnalysis
   const            xAOD::TrackParticle*  m_pxMUTrack[NUM_MUONS]{};  // pointer to Track particle of the muons
 
   // Keep kinematic information on the Z
-  float m_fZPt[NUM_TYPES]{};
-  float m_fZEtaDir[NUM_TYPES]{};
-  float m_fZPhiDir[NUM_TYPES]{};
-  float m_fInvariantMass[NUM_TYPES]{};
-  float m_fMuonDispersion[NUM_TYPES]{};
+  using Arrayf = std::array<float, NUM_TYPES>;
+  Arrayf m_fZPt{};
+  Arrayf m_fZEtaDir{};
+  Arrayf m_fZPhiDir{};
+  Arrayf m_fInvariantMass{};
+  Arrayf m_fMuonDispersion{};
 
   // Graphs
   enum HISTOS_1D
@@ -188,12 +190,12 @@ class FourMuonEvent : public EventAnalysis
   };
 
   // muon selector configuration
-  bool m_SelectMuonByIso;
-  bool m_SelectMuonByIP;
+  bool m_SelectMuonByIso{};
+  bool m_SelectMuonByIP{};
 
   // event count
-  int m_eventCount;
-  int m_acceptedEventCount;
+  int m_eventCount{};
+  int m_acceptedEventCount{};
   // lepton count
   int m_acceptedMuonCount{};
   int m_acceptedElecCount{};

@@ -46,7 +46,7 @@ class TrigInDetReco(ExecStep):
             'flags.Reco.EnableMet=False',
             'flags.Reco.EnableBTagging=False',
             'flags.Reco.EnablePFlow=False',
-            'flags.Reco.EnableTau=False',
+            'flags.Reco.EnableTau=True',
             'flags.Reco.EnablePostProcessing=False',
         ])
         self.preexec_all = ';'.join([
@@ -55,7 +55,6 @@ class TrigInDetReco(ExecStep):
         self.postexec_trig = ''
         self.postexec_reco = ''
         self.args = '--outputAODFile=AOD.pool.root --steering "doRDO_TRIG"'
-        self.args += ' --CA'
        
         if ( self.postinclude_trig != '' ) : 
             print( "postinclude_trig: ", self.postinclude_trig )
@@ -149,13 +148,13 @@ class TrigCostStep(Step):
 
 
 ##################################################
-# Exec (athenaHLT) step running runHLT_Standalone.py on data
+# Exec (athenaEF) step running runHLT on data
 ##################################################
 class TrigInDetRecoData(ExecStep):
     def __init__(self, name='TrigInDetRecoData'):
 #        super(TrigInDetRecoData, self).__init__(name)
         ExecStep.__init__(self, name)
-        self.type = 'athenaHLT'
+        self.type = 'athenaEF'
         self.job_options = 'TriggerJobOpts.runHLT'
         self.max_events=-1
         self.required = True
@@ -192,7 +191,6 @@ class TrigTZReco(ExecStep):
         self.args += ' --outputAODFile=AOD.pool.root'
         self.args += f' --conditionsTag="{defaultConditionsTags.RUN3_DATA23}" --geometryVersion=\'ATLAS-R3S-2021-03-02-00\''
         self.args += ' --preExec="{:s}"'.format(tzrecoPreExec)
-        self.args += ' --CA'
 
 
 ##################################################

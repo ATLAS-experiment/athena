@@ -24,8 +24,9 @@
 #include "src/detail/MeasurementIndex.h"
 #include "ActsEvent/SeedContainer.h"
 #include "ActsEvent/TrackContainer.h"
+#include "ActsEvent/ContextUtility.h"
 #include "ActsGeometryInterfaces/GeometryContext.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "xAODInDetMeasurement/SpacePointContainer.h"
 #include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
 // Other
@@ -89,9 +90,12 @@ namespace ActsTrk
     SG::ReadHandleKeyArray<xAOD::SpacePointContainer> m_spacePointKey{this, "InputSpacePoints", {}, "Input Space Points for debugging"};
 
     // Tools
-    PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+   ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
 
     detail::xAODUncalibMeasSurfAcc m_surfAcc{};
+
+    /** @brief Context provider for geometry, magnetic field and calibration contexts */
+    ActsTrk::ContextUtility m_ctxProvider{this};
 
     // Configuration
     Gaudi::Property<bool> m_compareMeasurementTransforms{this, "compareMeasurementTransforms", false, "compare measurement coordinates transformed with Athena or ACTS"};

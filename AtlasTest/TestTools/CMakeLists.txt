@@ -107,4 +107,4 @@ atlas_add_test( noerror_false_positive
 # Unit test for python modules
 atlas_add_test( pymodules
                 SCRIPT python -m unittest discover -v -s ${CMAKE_CURRENT_SOURCE_DIR}/test
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )

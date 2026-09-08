@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //              jFEXSmallRJetAlgo - Algorithm for small R jet Algorithm in jFEX
@@ -13,14 +13,10 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "L1CaloFEXToolInterfaces/IjFEXSmallRJetAlgo.h"
-#include "AthenaKernel/CLASS_DEF.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 
-#include "CaloEvent/CaloCellContainer.h"
 #include "CaloIdentifier/CaloIdManager.h" 
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"
-#include "AthenaBaseComps/AthAlgorithm.h" 
-#include "StoreGate/StoreGateSvc.h" 
 
 
 namespace LVL1 {
@@ -35,7 +31,7 @@ namespace LVL1 {
     virtual StatusCode initialize() override;
 
     /** Destructor */
-    virtual ~jFEXSmallRJetAlgo();
+    virtual ~jFEXSmallRJetAlgo() = default;
 
     virtual StatusCode safetyTest() override;
     virtual void setup(int inputTable[7][7], int inputTableDisplaced[7][7]) override;
@@ -64,7 +60,7 @@ namespace LVL1 {
         
         std::unordered_map<int,std::vector<int> > m_map_Etvalues;
         
-        bool CalculateLM(int mymatrix[5][5]);
+        bool CalculateLM(int mymatrix[5][5]) const;
   };
 
 

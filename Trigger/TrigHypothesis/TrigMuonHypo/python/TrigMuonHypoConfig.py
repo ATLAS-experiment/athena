@@ -683,6 +683,79 @@ class TrigmuCombHypoConfig(object):
 def TrigMuonEFHypoAlgCfg(flags, name="UNSPECIFIED", **kwargs):
     return CompFactory.TrigMuonEFHypoAlg(name, **kwargs)
 
+def TrigMuonEFFastRecoSAHypoToolFromDict( flags, chainDict ) :
+
+    chainPart = chainDict['chainParts'][0]
+
+    thresholds = getThresholdsFromDict( chainDict )
+    if int(chainPart['multiplicity']) == 0:
+        thresholds = [chainPart['threshold']]
+
+    doOverlapRemoval = False
+    # This is taken from Run-3 L2 Hypo Tool Cfg
+    if chainPart['signature'] == 'Bphysics' or 'l2io' in chainPart['l2AlgInfo']:
+        doOverlapRemoval = False
+    elif int(chainPart['multiplicity']) > 1:
+        doOverlapRemoval = True
+    elif len(chainDict['signatures']) > 1 and not chainPart['extra']:
+        doOverlapRemoval = True
+    
+    kwargs={}
+    kwargs["RequireSAMuons"] = True
+    kwargs["IsFastReco"] = True
+    kwargs["RemoveOverlaps"] = doOverlapRemoval
+
+    # Same monitoring settings as Run-3 L2 Hypo Tool Cfg
+    if monitorAll or any(group in muonHypoMonGroups for group in chainDict['monGroups']):
+        if doOverlapRemoval:
+            from TrigMuonHypo.TrigMuonHypoMonitoring import TrigL2MuonOverlapRemoverMonitoringMufast
+            kwargs["MonTool"] = TrigL2MuonOverlapRemoverMonitoringMufast(flags, 'TrigMuonEFFastSAHypoTool/' + chainDict['chainName'])
+        else:
+            from TrigMuonHypo.TrigMuonHypoMonitoring import TrigMufastHypoMonitoring
+            kwargs["MonTool"] = TrigMufastHypoMonitoring(flags, 'TrigMuonEFFastSAHypoTool/' + chainDict['chainName'])
+
+    kwargs["ConeSize"] = 0.0
+    kwargs["NarrowScan"] = False
+
+    name = chainDict['chainName']
+    log = logging.getLogger(name)
+
+    # Implementing the same threshold configuration as in the Run-3 L2 Hypo Tool Cfg
+    # However, special thresholds for EC weak Bfield regions cannot be implemented
+    nt = len(thresholds)
+    log.debug('Set %d thresholds', nt)
+    PtBins = [ [ 0.0, 2.5 ] ] * nt
+    PtThresholds = [ [ 5.49 * GeV ] ] * nt
+
+    for th, thvalue in enumerate(thresholds):
+        thvaluename = '6GeV_v15a'
+
+        useGeV_v15a = any(x in chainPart['addInfo'] for x in ['idperf', 'idtp', '3layersEC'])
+        if useGeV_v15a or int(thvalue) < 5:
+            thvaluename = thvalue + 'GeV_v15a'
+            if int(thvalue) == 3:
+                thvaluename = thvalue + 'GeV_v22a'
+
+        isBarrelOnly = '0eta105' in chainPart['etaRange']
+        if isBarrelOnly:
+            thvaluename = thvalue+ "GeV_barrelOnly_v15a"
+        
+        if int(thvalue) >= 20:
+            thvaluename = thvalue + 'GeV_v15a'
+                
+        log.debug('Number of threshold = %d, Value of threshold = %s', th, thvaluename)
+
+        values = muFastThresholds[thvaluename]
+        
+        PtBins[th] = values[0]
+        PtThresholds[th] = [ x * GeV for x in values[1] ]
+        log.debug('Configration of threshold[%d] %s', th, PtThresholds[th])
+        log.debug('Configration of PtBins[%d] %s', th, PtBins[th])
+
+    kwargs["AcceptAll"] = 'mucombTag' in chainPart['extra']
+    kwargs["PtBins"] = PtBins
+    kwargs["PtThresholds"] = PtThresholds
+    return CompFactory.TrigMuonEFHypoTool(name, **kwargs)
 
 def TrigMuonEFMSonlyHypoToolFromDict( flags, chainDict ) :
     thresholds = getThresholdsFromDict( chainDict )
@@ -725,6 +798,8 @@ def TrigMuonEFMSonlyHypoToolFromDict( flags, chainDict ) :
 
     kwargs.setdefault("ConeSize", conesize)
     kwargs.setdefault("NarrowScan", narrowscan)
+    kwargs.setdefault("IsPhII", flags.Trigger.Offline.SA.Muon.scheduleActsReco and 
+                                flags.Trigger.Offline.SA.Muon.usePhaseIIGeoSetup)
     
     return TrigMuonEFHypoToolCfg( chainDict['chainName'], thresholds, doSA=True, **kwargs )
 

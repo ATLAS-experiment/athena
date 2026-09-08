@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -19,24 +19,6 @@
 // Gaudi
 #include "GaudiKernel/ITHistSvc.h"
 
-Trk::SurfaceIntersectionTest::SurfaceIntersectionTest(const std::string& name, ISvcLocator* pSvcLocator) :
- Trk::TrkDetDescrUnitTestBase(name, pSvcLocator),
- m_surfaceBuilder(),
- m_testsPerSurface(100),
- m_eventCounter(0),
- m_surfaces(6,0),
- m_surfaceAttempts(6,0),
- m_surfaceSuccessful(6,0),
- m_surfaceNames(6,""),
- m_surfaceNamesSet(6,false),
- m_writeTTree(true),
- m_treeFolder("/val/")
-{
-    declareProperty("SurfaceBuilder",           m_surfaceBuilder);
-    declareProperty("NumberOfTestsPerSurface",  m_testsPerSurface);
-    declareProperty("WriteTTree",               m_writeTTree);
-    
-}
 
 StatusCode Trk::SurfaceIntersectionTest::finalize() {
 

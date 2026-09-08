@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // FPEAuditor.h 
@@ -72,12 +72,6 @@ class FPEAuditor : public AthCommonMsg<Gaudi::Auditor>
    */
   void pop_fpe_node();
 
-  typedef std::pair<int,int>   FpeNode_t;
-  typedef std::list<FpeNode_t> FpeStack_t;
-  /** a stack of FPE exceptions which have been raised
-   */
-  static thread_local FpeStack_t s_fpe_stack;
-  
   enum { FPEAUDITOR_OVERFLOW=0, FPEAUDITOR_INVALID=1, FPEAUDITOR_DIVBYZERO=2, FPEAUDITOR_ARRAYSIZE=3 };
   
   std::atomic<unsigned int> m_CountFPEs[FPEAUDITOR_ARRAYSIZE];

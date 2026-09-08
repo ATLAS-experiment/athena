@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -19,18 +19,6 @@
 
 // Gaudi
 #include "GaudiKernel/ITHistSvc.h"
-
-
-// constructor
-Trk::GeometryTTreeDumper::GeometryTTreeDumper(const std::string& t, const std::string& n, const IInterface* p) : 
-  Trk::RecursiveGeometryProcessor(t,n,p),
-  m_currentTree(nullptr),
-  m_treeFolder("/val/")
-{}
-
-// destructor
-Trk::GeometryTTreeDumper::~GeometryTTreeDumper()
-= default;
 
 
 StatusCode Trk::GeometryTTreeDumper::processNode(const Trk::TrackingVolume& tvol, size_t) const

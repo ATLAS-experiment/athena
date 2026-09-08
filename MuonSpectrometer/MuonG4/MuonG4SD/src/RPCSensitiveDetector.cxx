@@ -74,11 +74,8 @@ G4bool RPCSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
   int         stationEta= 0;
   int         stationPhi= 0;
   int         doubletR= 0;
-  // int         doubletZ= 0;
   int         doubletPhi= 0;
   int         gasGap= 0;
-  // int         eta_inversed=0;
-  // int         phi_inversed=0;
   int         station_rotated=0; // tells us if the station was rotated before being positioned.
                                  // if =1 we have to correct some IDs
   int         zNeg_original=0; // tells if the station at z<0 was obtained duplicating a station at z>0

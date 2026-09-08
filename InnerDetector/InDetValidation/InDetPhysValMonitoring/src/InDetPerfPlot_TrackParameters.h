@@ -42,6 +42,10 @@ private:
   TH1* m_reco_chi2Overndof{};
   TH1* m_reco_author{};
   TH1* m_reco_time{};
+  TH1* m_reco_meanTime{};
+  TH1* m_reco_meanTimeResolution{};
+  TH1* m_reco_timeResolution{};
+  TH1* m_reco_HGTDChi2{nullptr};
   TEfficiency* m_reco_hasValidTime_eff_vs_eta{};
 
   TH1* m_truth_d0{};

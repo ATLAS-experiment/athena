@@ -136,8 +136,12 @@ StatusCode FPGATrackSimMergeOutputsAlg::execute(const EventContext& ctx) {
       // Time to load up these tracks! Only bother using ones that already passed OLR
       std::vector<FPGATrackSimTrack> const tracks = m_eventOutputHeaders[ivec][iregion]->getFPGATrackSimTracks_1st();
       m_alltracks += tracks.size();
-      for (const auto &track : tracks) {
-        if (track.passedOR()) FPGATracks->push_back(track);
+      for (auto &track : tracks) {
+        if (track.passedOR()) {
+          auto track_copy = track;
+          track_copy.rebuildHitPtrs();
+          FPGATracks->push_back(track_copy);
+        }
       }
     }
   }

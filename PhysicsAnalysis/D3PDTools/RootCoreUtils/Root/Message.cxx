@@ -14,9 +14,9 @@
 #include <cstring>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ExceptionMsg.h>
-#include <RootCoreUtils/PrintMsg.h>
+#include <RootCoreUtils/MessageCheck.h>
 
 //
 // method implementations
@@ -26,8 +26,8 @@ namespace RCU
 {
   Message ::
   Message ()
-    : package (0), file (0), line (0), type (MESSAGE_UNSPECIFIED),
-      message (0)
+    : file (nullptr), line (0), type (MESSAGE_UNSPECIFIED),
+      message (nullptr)
   {
   }
 
@@ -36,17 +36,15 @@ namespace RCU
   void Message ::
   send () const
   {
+    using namespace msgRootCoreUtils;
+
     MessageType mytype = type;
     if (mytype < 0 || mytype > MESSAGE_UNSPECIFIED)
       mytype = MESSAGE_UNSPECIFIED;
 
     std::ostringstream str;
 
-    if (package != 0)
-    {
-      str << package << ":";
-    }
-    if (file != 0)
+    if (file != nullptr)
     {
       if (strncmp (file, "../", 3) == 0)
 	str << (file+3) << ":";
@@ -65,12 +63,12 @@ namespace RCU
 
     if (!str.str().empty())
       str << " ";
-    if (message != 0)
+    if (message != nullptr)
       str << message;
     else
       str << "(null)";
 
-    const char *envname = 0;
+    const char *envname = nullptr;
     if (mytype == MESSAGE_ABORT)
       envname = "ROOTCOREUTILS_ABORT";
     else if (mytype == MESSAGE_EXCEPTION)
@@ -80,7 +78,7 @@ namespace RCU
       const char *abort_type = getenv (envname);
       const MessageType def_type = MESSAGE_EXCEPTION;
 
-      if (abort_type == 0)
+      if (abort_type == nullptr)
       {
 	mytype = def_type;
       } else if (strcmp (abort_type, "abort") == 0)
@@ -93,13 +91,13 @@ namespace RCU
       {
 	mytype = def_type;
 
-	RCU_WARN_MSG (std::string ("unknown value for ROOTCOREUTILS_ABORT ") + abort_type);
+        ANA_MSG_WARNING (std::string ("unknown value for ") << envname << " " << abort_type);
       }
     }
 
     std::cout << str.str() << std::endl;
     if (mytype == MESSAGE_EXCEPTION)
-      throw ExceptionMsg (file, line, str.str());
+      throw std::runtime_error (str.str());
     if (mytype == MESSAGE_ABORT)
       std::abort ();
   }

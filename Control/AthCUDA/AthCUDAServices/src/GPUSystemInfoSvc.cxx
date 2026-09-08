@@ -65,7 +65,6 @@ namespace AthCUDA {
 
             if (m_deviceInfo.empty()) {
                 ATH_MSG_DEBUG("No CUDA Devices not available");
-                return;
             }
 
             m_wasChecked = true;

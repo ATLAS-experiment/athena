@@ -71,15 +71,14 @@ def createMuonConfigFlags():
 
     mcf.addFlag("Muon.trackGeometryMaterialMap", "")
     # 1. Digitization
-    mcf.addFlag("Muon.doFastMMDigitization", False)  ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
+    mcf.addFlag("Muon.doFastMMDigitization", False) ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
     mcf.addFlag("Muon.doFastsTGCDigitization",True) ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
-
+    mcf.addFlag("Muon.doFastRpcDigitization",False)  ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
     ### Setup the Phase II truth matching algorithms
     mcf.addFlag("Muon.setupTruthAlgorithms", lambda prevFlags: prevFlags.Muon.usePhaseIIGeoSetup and \
                                                                prevFlags.Input.isMC and \
                                                                not prevFlags.Trigger.doHLT)
 
-    mcf.addFlag("Muon.doFastRpcDigitization",True) ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
     
     # 2. Reco MuonRecFlags 
 
@@ -92,16 +91,33 @@ def createMuonConfigFlags():
     except ImportError:
         mcf.addFlag("Muon.scheduleActsReco", False)
 
+    try:
+        from ActsConfig.ActsConfigFlags import TrackFitterType
+        mcf.addFlag("Muon.TrackFitterType", TrackFitterType.GlobalChiSquareFitter)
+    except ImportError:
+        mcf.addFlag("Muon.TrackFitterType", "None")
+
     #### Include pile-up muons from the background as truth muons and 
     #### try to match the segments to them
     mcf.addFlag("Muon.includePileUpTruth", False)
     #### Enable ML bucket filter inference for muon reconstruction
     mcf.addFlag("Muon.enableMLBucketFilter", False)
+    #### Express the MS track parameters at the MS entrance and perform 
+    #### matching with the ID tracks on this surface
+    mcf.addFlag("Muon.expressMsTrackAtEntrance", lambda prevFlags: prevFlags.Reco.EnableTracking )
+    #### Toggle whether the combined reconstruction builds a MuonSpectrometer Extrapolated track
+    #### Uncombned MS tracks are extrapolated back to the beamspot and then refitted with the beam spot
+    #### as an additional measurement. Combined tracks are refitted stripping off the ID measurements but
+    #### the beamspot
+    mcf.addFlag("Muon.buildMETrack", lambda prevFlags: prevFlags.Reco.EnableTracking and\
+                                                        not prevFlags.Muon.MuonTrigger )
 
     mcf.addFlag("Muon.doMSVertex", True) # Run MS vertex (arXiv:1311.7070)
     mcf.addFlag("Muon.doSegmentT0Fit",lambda prevFlags : prevFlags.Beam.Type is not BeamType.Collisions) # Fit MDT segments using a variable t0. Used for cosmics and single beam to compensate for large errors on the trigger time.
     mcf.addFlag("Muon.enableErrorTuning",True) # turn on error tuning to account for misalignments
     mcf.addFlag("Muon.useLooseErrorTuning",False) 
+    ### Schedule the NSw segment finder in a separate instance
+    mcf.addFlag("Muon.splitNswSegmentFinder", lambda prevFlags: prevFlags.Detector.EnableMM or prevFlags.Detector.EnablesTGC)
     mcf.addFlag("Muon.useTGCPriorNextBC",False) # Use TGC measurements from Prior and Next Bunch Crossings. These measurements are available in the real data since somewhere in 2008.
     mcf.addFlag("Muon.useAlignmentCorrections",True) # Apply alignment corrections to MuonGeoModel. The corrections are read from a COOL database
     

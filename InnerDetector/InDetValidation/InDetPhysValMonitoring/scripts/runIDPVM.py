@@ -33,7 +33,7 @@ def GetCustomAthArgs():
     IDPVMparser.add_argument("--doActs", help='run plots for acts collections', action='store_true', default=False)
     IDPVMparser.add_argument("--doHGTD", help='run plots fof HGTD collections', action='store_true', default=False)
     IDPVMparser.add_argument("--disableDecoration", help='disable extra track and truth decoration if possible', action='store_true', default=False)
-    IDPVMparser.add_argument("--hardScatterStrategy", help='Strategy to select the hard scatter. 0 = SumPt² 1 = SumPt , 2 = Sumptw, 3 = GNN, 4 = H->yy', choices=["0","1","2","3","4"], default="0")
+    IDPVMparser.add_argument("--hardScatterStrategy", help='Strategy to select the hard scatter. -1 = Default 0 = SumPt² 1 = SumPt , 2 = Sumptw, 3 = GNN, 4 = H->yy', choices=["-1", "0","1","2","3","4"], default="-1")
     IDPVMparser.add_argument("--truthMinPt", help='minimum truth particle pT', type=float, default=None)
     IDPVMparser.add_argument("--outputFile", help='Name of output file',default="M_output.root")
     IDPVMparser.add_argument("--HSFlag", help='Hard-scatter flag - decides what is used for truth matching', choices=['HardScatter', 'All', 'PileUp'],default="HardScatter")
@@ -59,6 +59,7 @@ def GetCustomAthArgs():
     IDPVMparser.add_argument("--setCSVName", help='Convert AOD to a SCV file for the track overlay ML training dataset', default="")
     IDPVMparser.add_argument("--vetoPdgId", help='Veto a particle based on PDG ID', type=int, default=-1)
     IDPVMparser.add_argument("--pdgId", help='Select a particle based on PDG ID', type=int, default=-1)
+    IDPVMparser.add_argument("--useTruthPVAsPerigee", help='use the truth PV as the perigee for calculating truth IPs', action='store_true', default=False)
     return IDPVMparser.parse_args()
 
 # Parse the arguments
@@ -127,6 +128,8 @@ flags.PhysVal.IDPVM.PrimaryVertexContainer = MyArgs.PrimaryVertexContainer
 flags.PhysVal.IDPVM.jetCollection = MyArgs.jetCollection
 flags.PhysVal.IDPVM.JetPtMin = MyArgs.JetPtMin * Units.GeV
 flags.PhysVal.IDPVM.JetPtMax = MyArgs.JetPtMax * Units.GeV
+if MyArgs.useTruthPVAsPerigee:
+    flags.Tracking.perigeeExpression = "Vertex"
 if MyArgs.JetAbsEtaMax != -1:
     flags.PhysVal.IDPVM.JetAbsEtaMax = MyArgs.JetAbsEtaMax
 

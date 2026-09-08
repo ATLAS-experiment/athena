@@ -1,16 +1,11 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ActsGnnModuleMapFinderTool_H
 #define ActsGnnModuleMapFinderTool_H
 
-#include <array>
-#include <memory>
-#include <mutex>
-#include <optional>
-#include <string>
-#include <vector>
+
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "InDetRecToolInterfaces/IGNNTrackFinder.h"
@@ -18,6 +13,13 @@
 #include "Acts/Utilities/Logger.hpp"
 #include "ActsPlugins/Gnn/GnnPipeline.hpp"
 
+#include <array>
+#include <memory>
+#include <mutex>
+#include <optional>
+#include <string>
+#include <vector>
+#include <cstdint>
 
 class MsgStream;
 
@@ -71,6 +73,8 @@ namespace InDet {
     FloatProperty m_edgeCut{this, "edgeCut", 0.5, "Edge classification cut"};
     UnsignedIntegerProperty m_numTrtContexts{this, "numTrtContexts", 1, "Number of TensorRT execution contexts (controls concurrency)"};
     UnsignedIntegerProperty m_minCandidateMeasurements{this, "minCandidateMeasurements", 7, "Min measurements per candidate"};
+    BooleanProperty m_useEdgeLayerConnector{this, "useEdgeLayerConnector", false, "Use the EdgeLayerConnector instead of CC&JR as graph segmentation algorithm"};
+    IntegerProperty m_elcMaxHitsPerTrack{this, "elcMaxHitsPerTrack", 30, "Max hits per track config for the EdgeLayerConnector"};
 
     // Tool handles
     ToolHandle<ISpacepointFeatureTool> m_spacepointFeatureTool{

@@ -17,7 +17,6 @@
 #include <EventLoopTest/UnitTestAlg1.h>
 #include <EventLoopTest/UnitTestConfig.h>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <SampleHandler/DiskWriter.h>
 #include <SampleHandler/MetaFields.h>
 #include <SampleHandler/SampleHandler.h>
@@ -28,6 +27,7 @@
 #include <TTree.h>
 #include <TSystem.h>
 #include <mutex>
+#include <stdexcept>
 
 //
 // method implementations
@@ -48,7 +48,7 @@ namespace EL
       {
 	std::unique_ptr<TFile> file (TFile::Open (fileName.c_str(), "READ"));
 	if (file == nullptr)
-	  RCU_THROW_MSG ("failed to open file: " + fileName);
+	  throw std::runtime_error ("failed to open file: " + fileName);
 	TTree *tree = dynamic_cast<TTree*>(file->Get (treeName.c_str()));
 	Long64_t nentries = 0;
 	if (tree != nullptr && (nentries = tree->GetEntries()) > 0)
@@ -58,7 +58,7 @@ namespace EL
 	  for (Long64_t entry = 0; entry < nentries; ++ entry)
 	  {
 	    if (branch->GetEntry(entry) <= 0)
-	      RCU_THROW_MSG ("failed to read entry from branch");
+	      throw std::runtime_error ("failed to read entry from branch " + branchName);
 	    result.push_back (var->Data());
 	  }
 	}
@@ -117,7 +117,7 @@ namespace EL
       });
       return result;
     }
-    RCU_THROW_MSG ("unknown sample: " + sampleName);
+    throw std::runtime_error ("unknown sample: " + sampleName);
   }
 
 
@@ -181,10 +181,10 @@ namespace EL
     sh.load (getJob() + "/hist");
     SH::Sample *sample = sh.get (sampleName);
     if (sample == nullptr)
-      RCU_THROW_MSG ("couldn't find sample: " + sampleName);
+      throw std::runtime_error ("couldn't find sample: " + sampleName);
     TObject *object = sample->readHist (objectName);
     if (isMandatory && object == nullptr)
-      RCU_THROW_MSG ("couldn't find object: " + objectName);
+      throw std::runtime_error ("couldn't find object: " + objectName);
     return object;
   }
 
@@ -216,7 +216,7 @@ namespace EL
       sh.load (getJob() + "/hist");
       SH::Sample *sample = sh.get (sampleName);
       if (sample == nullptr)
-	RCU_THROW_MSG ("couldn't find sample: " + sampleName);
+	throw std::runtime_error ("couldn't find sample: " + sampleName);
       auto vec = readVectorFromTree (sample, "EventLoop_FileExecuted", "file");
       filesOut.insert (vec.begin(), vec.end());
     }

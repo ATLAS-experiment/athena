@@ -16,6 +16,7 @@
 #include <JetAnalysisAlgorithms/JetReclusteringAlg.h>
 #include <JetAnalysisAlgorithms/ReclusteredJetCalibrationAlg.h>
 #include <JetAnalysisAlgorithms/JetTriggerDecoratorAlg.h>
+#include <JetAnalysisAlgorithms/L1jFexJetThresholdsDecoratorAlg.h>
 
 
 // Project include(s).
@@ -37,3 +38,4 @@ DECLARE_COMPONENT (CP::JetTruthTagAlg)
 DECLARE_COMPONENT (CP::JetReclusteringAlg)
 DECLARE_COMPONENT (CP::ReclusteredJetCalibrationAlg)
 DECLARE_COMPONENT (CP::JetTriggerDecoratorAlg)
+DECLARE_COMPONENT (CP::L1jFexJetThresholdsDecoratorAlg)

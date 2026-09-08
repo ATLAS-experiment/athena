@@ -177,7 +177,7 @@ PixelClusterOnTrackTool::correctDefault
     return nullptr;
   } else {
     const InDetDD::PixelModuleDesign *design =
-      dynamic_cast<const InDetDD::PixelModuleDesign *>(&element->design());
+      static_cast<const InDetDD::PixelModuleDesign *>(&element->design());
 
     // get candidate track angle in module local frame
     const Amg::Vector3D& my_track = trackPar.momentum();
@@ -426,7 +426,7 @@ PixelClusterOnTrackTool::correctNN
       << " y: " << finalposition[1] << " +/- "
       <<std::sqrt(finalerrormatrix(1, 1)) );
 
-  Amg::MatrixX cov = finalerrormatrix;
+  Amg::MatrixX cov = std::move(finalerrormatrix);
   // create new copy of error matrix
   if (!m_pixelErrorScalingKey.key().empty()) {
     SG::ReadCondHandle<RIO_OnTrackErrorScaling> error_scaling( m_pixelErrorScalingKey, ctx );

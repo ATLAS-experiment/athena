@@ -19,7 +19,7 @@
 #include "BeamSpotConditionsData/BeamSpotData.h"
 
 #include "ActsEvent/TrackContainerHandlesHelper.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsToolInterfaces/IFitterTool.h"
 #include "ActsToolInterfaces/ITrackToTrackParticleCnvTool.h"
 /**
@@ -85,8 +85,7 @@ class ActsEMBremCollectionBuilder : public AthReentrantAlgorithm {
           this, "SelectedTrackParticleContainerName",
           "egammaSelectedTrackParticles", "Input of Selected TrackParticles"};
 
-  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{
-      this, "TrackingGeometryTool", ""};
+  ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
 
   ActsTrk::MutableTrackContainerHandlesHelper m_refittedTracksBackendHandles{this};
 

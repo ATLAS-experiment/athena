@@ -232,6 +232,7 @@ def triggerMonitoringCfg(flags, hypos, filters, hltSeeding):
     acc = ComponentAccumulator()
     TrigSignatureMoni, DecisionCollectorTool=CompFactory.getComps("TrigSignatureMoni","DecisionCollectorTool",)
     mon = TrigSignatureMoni()
+    mon.CountLegFeatures = flags.Trigger.doPerLegFeatureCounts
     mon.L1Decisions = "HLTSeedingSummary"
     mon.FinalDecisionKey = "HLTNav_Summary" # Input
     if len(hypos) == 0:
@@ -246,15 +247,18 @@ def triggerMonitoringCfg(flags, hypos, filters, hltSeeding):
         stepCounter += 1
         stepDecisionKeys = []
         stepFeatureDecisionKeys = []
+        stepLegFeatureDecisionKeys = []
         for hypo in stepHypos:
             hypoChains, hypoOutputKeys  = __decisionsFromHypo( hypo )
             if __isCombo(hypo):                
                 stepDecisionKeys.extend( hypoOutputKeys )
-            else:
                 stepFeatureDecisionKeys.extend( hypoOutputKeys )
 
+        # Event and total feature counts are read from the ComboHypo
         dcEventTool = DecisionCollectorTool( "EventDecisionCollector" + stepName, Decisions=list(dict.fromkeys(stepDecisionKeys)))
         dcFeatureTool = DecisionCollectorTool( "FeatureDecisionCollector" + stepName, Decisions=list(dict.fromkeys(stepFeatureDecisionKeys)))
+        if flags.Trigger.doPerLegFeatureCounts: # Add the hypo decision outputs
+            dcFeatureTool.Decisions = list(dcFeatureTool.Decisions) + list(dict.fromkeys(stepLegFeatureDecisionKeys))
         __log.debug( "The step monitoring decisions in %s %s", dcEventTool.getName(), dcEventTool.Decisions)
         __log.debug( "The step monitoring decisions in %s %s", dcFeatureTool.getName(), dcFeatureTool.Decisions)
         mon.DecisionCollectorTools += [ dcEventTool ]
@@ -684,7 +688,7 @@ def triggerRunCfg( flags, menu=None ):
         from HLTSeeding.HLTSeedingConfig import HLTSeedingCfg
         hltSeedingAcc = HLTSeedingCfg( flags )
         
-        if flags.Input.isMC:
+        if flags.Input.isMC and (flags.Input.Format is not Format.BS):
             from AthenaConfiguration.Enums import LHCPeriod
             if flags.GeoModel.Run > LHCPeriod.Run3:
                 from InDetConfig.TrackRecoConfig import SiDetectorElementStatusCfg

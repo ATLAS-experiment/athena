@@ -106,6 +106,7 @@ StatusCode SCTErrMonAlg::fillHistograms(const EventContext& ctx) const {
     int moduleOut{0};
     SCT_ID::const_id_iterator waferIterator{m_pSCTHelper->wafer_begin()};
     SCT_ID::const_id_iterator waferEnd{m_pSCTHelper->wafer_end()};
+    const std::string errMonName{"SCTErrMonitor"};
     for (; waferIterator not_eq waferEnd; ++waferIterator) {
       Identifier waferId{*waferIterator};
       int layer{m_pSCTHelper->layer_disk(waferId)};
@@ -125,13 +126,13 @@ StatusCode SCTErrMonAlg::fillHistograms(const EventContext& ctx) const {
           auto mEtaAcc{Monitored::Scalar<int>("eta_out", eta)};
           auto mPhiAcc{Monitored::Scalar<int>("phi_out", phi)};
           auto mOutAcc{Monitored::Scalar<int>(std::string("modulemap")+subDetNameShort[reg].Data()+std::to_string(layer)+"_"+std::to_string(side), IN)};
-          fill("SCTErrMonitor", mEtaAcc, mPhiAcc, mOutAcc);
+          fill(errMonName, mEtaAcc, mPhiAcc, mOutAcc);
         }
       }
     }
     auto moduleOutBinAcc{Monitored::Scalar<int>("moduleOutBin", 0)};
     auto moduleOutAcc{Monitored::Scalar<int>("moduleOut", moduleOut)};
-    fill("SCTErrMonitor", moduleOutBinAcc, moduleOutAcc);
+    fill(errMonName, moduleOutBinAcc, moduleOutAcc);
   }
 
   return StatusCode::SUCCESS;
@@ -230,7 +231,7 @@ SCTErrMonAlg::fillByteStreamErrors(const EventContext& ctx) const {
     ATH_MSG_WARNING("Could not retrieve event info!");
     return StatusCode::SUCCESS;
   }
-
+  const std::string histoName{"SCTErrMonitor"};
   //--- Fill 1D histograms (vs LumiBlock) for each BS
   for (int errType{0}; errType < SCT_ByteStreamErrors::NUM_ERROR_TYPES; ++errType) {
     int nBSErrors{0};
@@ -239,9 +240,10 @@ SCTErrMonAlg::fillByteStreamErrors(const EventContext& ctx) const {
     /// Fill /SCT/GENERAL/Conf/SCT_*VsLbs ///
     auto lumiBlockAcc{Monitored::Scalar<int>("lumiBlock", pEvent->lumiBlock())};
     auto nBSErrorsAcc{Monitored::Scalar<int>("n_"+SCT_ByteStreamErrors::ErrorTypeDescription[errType], nBSErrors)};
-    fill("SCTErrMonitor", lumiBlockAcc, nBSErrorsAcc);
+    fill(histoName, lumiBlockAcc, nBSErrorsAcc);
   }
-
+  //Total stack use for this function is 1'623'676 bytes.
+  //coverity[STACK_USE]
   categoryErrorMap_t categoryErrorMap;
   std::array<int, N_REGIONS_INC_GENERAL> nMaskedLinks{};
   nMaskedLinks.fill(0);
@@ -259,7 +261,7 @@ SCTErrMonAlg::fillByteStreamErrors(const EventContext& ctx) const {
     auto lumiBlockAcc{Monitored::Scalar<int>("lumiBlock", pEvent->lumiBlock())};
     auto nCategoryErrorsAcc{Monitored::Scalar<int>("n_"+CategoryErrorsNames[errCate],
                                                    categoryErrorMap.count(errCate))};
-    fill("SCTErrMonitor", lumiBlockAcc, nCategoryErrorsAcc);
+    fill(histoName, lumiBlockAcc, nCategoryErrorsAcc);
 
     for (int iReg{0}; iReg<N_REGIONS; iReg++) {
       const int maxLayer{iReg==BARREL_INDEX ? N_BARRELSx2 : N_ENDCAPSx2};
@@ -286,17 +288,17 @@ SCTErrMonAlg::fillByteStreamErrors(const EventContext& ctx) const {
         auto phiAcc{Monitored::Collection("phi", vPhi)};
         auto hasErrorAcc{Monitored::Collection("hasError_"+CategoryErrorsNames[errCate]+"_"+subDetNameShort[iReg].Data()+"_"+std::to_string(iLay/2)+"_"+std::to_string(iLay%2),
                                                vHasError)};
-        fill("SCTErrMonitor", etaAcc, phiAcc, hasErrorAcc);
+        fill(histoName, etaAcc, phiAcc, hasErrorAcc);
 
         if (m_doOnline and CategoryErrorsNames[errCate] == "Errors"){
             auto hasErrorRecentAcc{Monitored::Collection("hasError_"+CategoryErrorsNames[errCate]+"_recent_"+subDetNameShort[iReg].Data()+"_"+std::to_string(iLay/2)+"_"+std::to_string(iLay%2),vHasError)};
-            fill("SCTErrMonitor", etaAcc, phiAcc, hasErrorRecentAcc);
+            fill(histoName, etaAcc, phiAcc, hasErrorRecentAcc);
         }
       }
     }
   }
   
-
+  //coverity[DEADCODE]
    bool doCoverage = false;
   {
     std::lock_guard<std::mutex> lock(m_mutex);
@@ -370,13 +372,13 @@ SCTErrMonAlg::fillByteStreamErrors(const EventContext& ctx) const {
       /// Fill /SCT/DetectorCoverage/SCT_Coverage*VsLbs ///
       auto lumiBlockAcc{Monitored::Scalar<int>("lumiBlock", pEvent->lumiBlock())};
       auto detectorCoverageAcc{Monitored::Scalar<double>("detectorCoverage"+coverageVarNames[iProblem], detector_coverage)};
-      fill("SCTErrMonitor", lumiBlockAcc, detectorCoverageAcc);
+      fill(histoName, lumiBlockAcc, detectorCoverageAcc);
 
       if (iProblem==summary) {
 	auto detectorCoverageR4PAcc{Monitored::Scalar<double>("detectorCoverage"+coverageVarNames[iProblem]+"InR4P", detector_coverage)};
 	bool atlasReady = m_atlasReadyFilter->accept(ctx);
 	if(atlasReady) {
-	  fill("SCTErrMonitor", lumiBlockAcc, detectorCoverageR4PAcc);
+	  fill(histoName, lumiBlockAcc, detectorCoverageR4PAcc);
 	}
       }
     }
@@ -385,7 +387,7 @@ SCTErrMonAlg::fillByteStreamErrors(const EventContext& ctx) const {
     // Modules affected by PS Tirp
     auto lumiBlockAcc{Monitored::Scalar<int>("lumiBlock", pEvent->lumiBlock())};
     auto psTripModulesAcc{Monitored::Scalar<int>("psTripModules", psTripModules)};
-    fill("SCTErrMonitor", lumiBlockAcc, psTripModulesAcc);
+    fill(histoName, lumiBlockAcc, psTripModulesAcc);
 
   }
 
@@ -473,7 +475,7 @@ SCTErrMonAlg::fillByteStreamErrorsHelper(const std::set<IdentifierHash>& errors,
   b_category[CategoryErrors::ABCDERROR_INVALID] = (err_type == SCT_ByteStreamErrors::ABCDError_Invalid);
   b_category[CategoryErrors::RODSIMULATEDDATA] = (err_type == SCT_ByteStreamErrors::RODSimulatedData);
   
-  std::vector<int> numErrorsPerLumi[N_REGIONS];
+  std::array<std::vector<int>,N_REGIONS>  numErrorsPerLumi;
   if (m_doPerLumiErrors) {
     for (int reg{0}; reg<N_REGIONS; reg++) {
       const int nLayers{n_layers[reg]*2};
@@ -513,7 +515,7 @@ SCTErrMonAlg::fillByteStreamErrorsHelper(const std::set<IdentifierHash>& errors,
       }
     }
 
-    if (m_doPerLumiErrors) numErrorsPerLumi[regionIndex][layer]++;
+    if (m_doPerLumiErrors) numErrorsPerLumi.at(regionIndex)[layer]++;
 
     for (int errCate{0}; errCate < CategoryErrors::N_ERRCATEGORY; ++errCate) {
       if (b_category[errCate] and regionIndex!=GENERAL_INDEX) {

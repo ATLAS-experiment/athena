@@ -31,16 +31,16 @@ from AthenaConfiguration.TestDefaults import defaultConditionsTags
 run = MCGridStep(
     menu='MC_pp_run4_v1',
     global_tag=defaultConditionsTags.RUN4_MC,
-    mc_campaign='Campaigns.PhaseIINoPileUp'
+    mc_campaign='Campaigns.MC23PhaseIINoPileUp'
 )
 
 run.input = 'Single_mu_Run4'
 
-run.flags = ['Trigger.doRuntimeNaviVal=True',
-             'ITk.doTruth=False',
-             'Tracking.doTruth=False',
-             'Trigger.InDetTracking.doGPU=True',
-             'Trigger.enabledSignatures=[\\\"Muon\\\"]']
+run.flags += ['Trigger.doRuntimeNaviVal=True',
+              'ITk.doTruth=False',
+              'Tracking.doTruth=False',
+              'Trigger.InDetTracking.doGPU=True',
+              'Trigger.enabledSignatures=[\\\"Muon\\\"]']
 
 # The full test configuration
 test = Test.Test()

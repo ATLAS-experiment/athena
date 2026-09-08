@@ -34,8 +34,10 @@ namespace GlobalSim {
   }
 
   StatusCode
-  Egamma1BDTAlgTool::run(const EventContext& ctx) const {
+  Egamma1BDTAlgTool::run(const std::unique_ptr<IDataCollector>& dc,
+			 const EventContext& ctx) const {
     ATH_MSG_DEBUG("run()");
+    if (dc){dc->collect(*this, "start");}
 
   
     // read in LArStrip neighborhood TOBs from the event store
@@ -117,6 +119,8 @@ namespace GlobalSim {
     //Setup the write out of the resultant TOBs
     SG::WriteHandle<GlobalSim::IOBitwise::eEmEg1BDTTOBContainer> h_eEmEg1BDTTOBs(m_eEmEg1BDTTOBContainerKey, ctx);
     CHECK(h_eEmEg1BDTTOBs.record(std::move(eEmEg1BDTTOBs)));
+
+    if (dc){dc->collect(*this, "end");}
 
     return StatusCode::SUCCESS;
   }

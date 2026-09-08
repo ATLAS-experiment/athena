@@ -3,7 +3,6 @@
 */
 
 #include "InDetTrackSelectorTool/InDetDetailedTrackSelectorTool.h"
-// forward declares
 #include "TrkToolInterfaces/ITrackSummaryTool.h"
 #include "TrkExInterfaces/IExtrapolator.h"
 #include "VxVertex/Vertex.h"
@@ -13,11 +12,8 @@
 #include "TrkTrackSummary/TrackSummary.h"
 #include "InDetRecToolInterfaces/ITrtDriftCircleCutTool.h"
 
-#include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/Vertex.h"
 
-
-// normal includes
 #include "CLHEP/GenericFunctions/CumulativeChiSquare.hh"
 #include "TrkSurfaces/PerigeeSurface.h"
 #include "GeoPrimitives/GeoPrimitives.h"
@@ -575,7 +571,12 @@ namespace InDet
 
       if ( getCount(tp, xAOD::numberOfTRTHits )>0) {
         double nhe = getCount(tp,xAOD::numberOfTRTHighThresholdHits);
-        nhe /= getCount(tp, xAOD::numberOfTRTHits);
+        double den = getCount(tp, xAOD::numberOfTRTHits);
+        if (den == 0.)[[unlikely]]{
+          ATH_MSG_DEBUG("Track rejected because numberOfTRTHits is zero.");
+          return false;
+        }
+        nhe /= den;
         if(nhe > m_nHitTrtHighEFraction ) {
           ATH_MSG_DEBUG("Track rejected because of nHitTrtHighEFraction "<<nhe<<" < "<<m_nHitTrtHighEFraction);
           return false;

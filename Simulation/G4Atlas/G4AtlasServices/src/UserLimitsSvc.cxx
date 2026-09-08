@@ -11,7 +11,7 @@
 #include "G4UserLimits.hh"
 
 // STL library
-#include <boost/tokenizer.hpp>
+#include "CxxUtils/StringUtils.h"
 #include <limits>
 UserLimitsSvc::UserLimitsSvc( const std::string& name, ISvcLocator* pSvcLocator )
   : base_class(name,pSvcLocator)
@@ -83,17 +83,10 @@ bool UserLimitsSvc::isMatch(const std::string& a,const std::string& b) const
   if (a=="*") return true;
   if (a==b) return true;
   // wildcards
-  boost::char_separator<char> sep{"*"};
-  typedef boost::tokenizer< boost::char_separator<char> > tokenizer;
-  tokenizer tok{a, sep};
   bool returnValue=true;
   std::string temp=b;
   //FIXME This next bit is a bit hacky
-  std::vector<std::string> tokens;
-  for (const auto& token : tok)
-    {
-      tokens.push_back(token);
-    }
+  const std::vector<std::string> tokens = CxxUtils::tokenize(a, '*');
    for (unsigned int i=0;i<tokens.size();i++)
      {
        if (tokens[i].empty()) continue;

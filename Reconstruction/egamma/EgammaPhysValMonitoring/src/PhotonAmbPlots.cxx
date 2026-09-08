@@ -3,7 +3,7 @@
 */
 
 #include "PhotonAmbPlots.h"
-#include "MCTruthClassifier/MCTruthClassifierDefs.h"
+#include "TruthUtils/TruthClasses.h"
 
 namespace Egamma{
 

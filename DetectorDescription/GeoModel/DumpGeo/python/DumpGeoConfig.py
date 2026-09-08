@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #----------------------------------------------------------------
 # Author: Riccardo Maria BIANCHI <riccardo.maria.bianchi@cern.ch>
@@ -15,7 +15,10 @@
 import os, sys
 
 # Set the CA environment
-from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentAccumulator import (
+    ComponentAccumulator,
+    ConfigurationError,
+)
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 # Set the Athena Logger
@@ -61,7 +64,7 @@ def configureGeometry(flags, cfg):
         from TileGeoModel.TileGMConfig import TileGMCfg
         #flags.Tile.forceFullGeometry = True
         cfg.merge(TileGMCfg(flags))
-        # We must set the "FULL" geometry explicitely, otherwise the "RECO" version will be used by default,
+        # We must set the "FULL" geometry explicitly, otherwise the "RECO" version will be used by default,
         # which is almost 'empty' (just the first level of child volumes is created for the "RECO" geo).
         cfg.getService("GeoModelSvc").DetectorTools["TileDetectorTool"].GeometryConfig="FULL"
     # TODO: do we need to set this separately?
@@ -121,11 +124,85 @@ def getATLASVersion():
         return os.environ["AtlasBaseVersion"]
     return "Unknown"
 
-def DumpGeoCfg(flags, name="DumpGeoCA", **kwargs):
-    result = ComponentAccumulator()
 
-    _logger.info("We're using these 'GeoModel.DumpGeo' configuration flags:")
-    flags.dump("GeoModel.DumpGeo")
+def dumpGeoOutputFileName(flags):
+    """Return the configured DumpGeo SQLite output file name."""
+    if flags.GeoModel.DumpGeo.OutputFileName:
+        return flags.GeoModel.DumpGeo.OutputFileName
+
+    output_file = f"geometry-{flags.GeoModel.AtlasVersion}"
+    filter_det_managers = flags.GeoModel.DumpGeo.FilterDetManagers
+    if filter_det_managers:
+        output_file += "-" + "-".join(filter_det_managers)
+
+    return output_file + ".db"
+
+
+def resolveDumpGeoGeometryTag(det_descr, configured_tag, fallback_tag):
+    """Resolve the geometry tag using the DumpGeo command-line precedence."""
+    if det_descr:
+        return det_descr
+    if configured_tag:
+        return configured_tag
+    return fallback_tag
+
+
+def dumpGeoHasInputFiles(input_files):
+    """Return whether standalone DumpGeo was given real input files."""
+    return bool(input_files) and input_files != [
+        "_ATHENA_GENERIC_INPUTFILE_NAME_"
+    ]
+
+
+def configureDumpGeoInputFlags(flags):
+    """Configure deterministic defaults for an input-less standalone job."""
+    if dumpGeoHasInputFiles(flags.Input.Files):
+        return False
+
+    from Campaigns.Utils import Campaign
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags
+
+    flags.Input.Files = []
+
+    # MainServicesCfg and detector configuration require these normally
+    # metadata-derived flags to be initialized for an input-less job.
+    flags.Input.ProjectName = "mc23_13p6TeV"
+    flags.Input.RunNumbers = [330000]
+    flags.Input.TimeStamps = [1]
+    flags.Input.TypedCollections = []
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
+    flags.Input.isMC = True
+    flags.Input.MCCampaign = Campaign.Unknown
+    return True
+
+
+def validateDumpGeoOutputFile(output_file, force_overwrite):
+    """Reject an existing output file unless overwrite is enabled."""
+    if os.path.exists(output_file) and not force_overwrite:
+        raise ConfigurationError(
+            f"DumpGeo output file '{output_file}' already exists. "
+            "Move or remove it, or enable "
+            "'GeoModel.DumpGeo.ForceOverwrite' "
+            "(or use the '-f' option from the command line)."
+        )
+
+
+def logZDCFailureReminder(zdc_enabled, run_succeeded):
+    """Remind standalone users about ZDC diagnostics after a failed run."""
+    if zdc_enabled and not run_succeeded:
+        _logger.error(
+            "DumpGeo failed while ZDC geometry was enabled. Check the "
+            "preceding ZDC_DetTool messages: the selected geometry tag "
+            "may not contain ZDC geometry information."
+        )
+
+
+def DumpGeoCfg(flags, name="DumpGeoAlg", **kwargs):
+    if _logger.isEnabledFor(logging.DEBUG):
+        _logger.debug(
+            "Dumping the 'GeoModel.DumpGeo' configuration flags:"
+        )
+        flags.dump("GeoModel.DumpGeo")
 
     # Debug messages
     _logger.debug("kwargs: %s", kwargs)
@@ -140,64 +217,49 @@ def DumpGeoCfg(flags, name="DumpGeoCA", **kwargs):
     if flags.GeoModel.DumpGeo.ShowTreetopContent:
         kwargs.setdefault("ShowTreetopContent", True)
 
+    # Configure DetectorManager filtering independently of the output file
+    # name. In particular, a user-defined file name must not disable the
+    # filter passed to the C++ algorithm.
+    filterDetManagers = flags.GeoModel.DumpGeo.FilterDetManagers
+    if filterDetManagers:
+        _logger.info(
+            "+++ Filtering on these GeoModel 'Detector Managers': '%s'",
+            filterDetManagers,
+        )
+        kwargs.setdefault("UserFilterDetManager", filterDetManagers)
+
     # Set the name of the output '.db' file.
-    # Pick the custom name if the user set it;
-    # otherwise, build it from the geometry tag
-    # and the filtered Detector Managers (if any).
-    outFileName = ""
-    if flags.GeoModel.DumpGeo.OutputFileName:
-        outFileName = flags.GeoModel.DumpGeo.OutputFileName
-    else:
-        # Handle the user's inputs and create a file name 
-        # for the output SQLite, accordingly
-        outFileName = "geometry"
-        filterDetManagers = []
-        # - Put Geometry TAG into the file name
-        # NOTE: at this point, the user-defined Geo TAG args.detDescr, 
-        #       if set, has already replaced the default TAG in 'flags';
-        #       so, we can use the latter, directy.
-        geoTAG = flags.GeoModel.AtlasVersion
-        _logger.info("+++ Dumping this Detector Description geometry TAG: '%s'", geoTAG)
-        outFileName = outFileName + "-" + geoTAG
-        
-        if flags.GeoModel.DumpGeo.FilterDetManagers:
-            
-            _logger.info("+++ Filtering on these GeoModel 'Detector Managers': '%s'", flags.GeoModel.DumpGeo.FilterDetManagers)
-
-            filterDetManagers = flags.GeoModel.DumpGeo.FilterDetManagers
-            
-            # Set the filter variable that is used in the C++ code
-            kwargs.setdefault("UserFilterDetManager", filterDetManagers)
-            
-            # - Put the filtered Detector Managers' names into the file name, 
-            #   if the user asked to filter on them
-            outFileName = outFileName + "-" + "-".join(filterDetManagers)
-
-        # - Add the final extension to the name of the output SQLite file 
-        outFileName = outFileName + ".db"
+    configuredOutFileName = dumpGeoOutputFileName(flags)
+    if not flags.GeoModel.DumpGeo.OutputFileName:
+        _logger.info(
+            "+++ Dumping this Detector Description geometry TAG: '%s'",
+            flags.GeoModel.AtlasVersion,
+        )
 
     # Set the output file name variable in the C++ code
-    kwargs.setdefault("OutSQLiteFileName", outFileName)
+    kwargs.setdefault("OutSQLiteFileName", configuredOutFileName)
 
-    # Check if the output SQLite file exists already, 
-    # and overwrite it if the user asked to do so; 
-    # otherwise, throw an error.
-    if os.path.exists(outFileName):
-        if flags.GeoModel.DumpGeo.ForceOverwrite:
-            print("+ DumpGeo -- NOTE -- You chose to overwrite an existing geometry dump file with the same name, if present.")
-            # os.environ["DUMPGEOFORCEOVERWRITE"] = "1" # save to an env var, for later use in GeoModelStandalone/GeoExporter
-            # Check if the file exists before attempting to delete it   
-            if os.path.exists(outFileName):
-                os.remove(outFileName)
-                _logger.verbose(f"The file {outFileName} has been deleted.")
-            else:
-                _logger.verbose(f"The file {outFileName} does not exist. So, it was not needed to 'force-delete' it. Continuing...")
-        else:
-            _logger.error(f"+++ DumpGeo -- ERROR!! The ouput file '{outFileName}' exists already!\nPlease move or remove it, or use the 'force' option: '-f' or '--forceOverWrite'.\n\n")
-            sys.exit()
+    # The final algorithm property is authoritative. A caller can override the
+    # flag-derived filename through kwargs, so validation and deletion must use
+    # the same path that the C++ algorithm will write.
+    outFileName = kwargs["OutSQLiteFileName"]
+    kwargs.setdefault(
+        "ForceOverwrite",
+        flags.GeoModel.DumpGeo.ForceOverwrite,
+    )
+    forceOverwrite = kwargs["ForceOverwrite"]
+
+    # Reject an existing file unless overwrite is enabled. Destructive removal
+    # is deliberately deferred to DumpGeo::initialize(), immediately before
+    # the C++ algorithm opens the output database.
+    validateDumpGeoOutputFile(
+        outFileName,
+        forceOverwrite,
+    )
 
     # Schedule the DumpGeo Athena Algorithm
-    the_alg = CompFactory.DumpGeo(name="DumpGeoAlg", **kwargs)
+    result = ComponentAccumulator()
+    the_alg = CompFactory.DumpGeo(name=name, **kwargs)
     result.addEventAlgo(the_alg, primary=True)
     return result
 
@@ -238,10 +300,18 @@ if __name__=="__main__":
     parser = flags.getArgumentParser(description="Dump the detector geometry to a GeoModel-based SQLite '.db' file.")
     parser.prog = 'dump-geo'
     # here we extend the parser with CLI options specific to DumpGeo
-    parser.add_argument("--detDescr", default=defaultGeometryTags.RUN3,
-                        help="The ATLAS geometry tag you want to dump (a convenience alias for the Athena flag 'GeoModel.AtlasVersion=TAG')", metavar="TAG")
+    parser.add_argument(
+        "--detDescr",
+        default=None,
+        help=(
+            "Override the ATLAS geometry tag. This is a convenience alias "
+            "for 'GeoModel.AtlasVersion=TAG'. If omitted, the generic flag "
+            "or input-file metadata is used."
+        ),
+        metavar="TAG",
+    )
     parser.add_argument("--outFilename", default="",
-                        help="Here you can set a custom name for the output '.db' file. It will replace the name that is built with the geometry tag and the list of fileterd Detector Managers, if any.", metavar="FILENAME")
+                        help="Here you can set a custom name for the output '.db' file. It will replace the name that is built with the geometry tag and the list of filtered Detector Managers, if any.", metavar="FILENAME")
     # parser.add_argument("--filterTreeTops", help="Only output the GeoModel Tree Tops specified in the FILTER list; input is a comma-separated list")
     parser.add_argument("--filterDetManagers", help="Only output the GeoModel Detector Managers specified in the FILTER list; input is a comma-separated list")
     parser.add_argument("-f", "--forceOverwrite",
@@ -250,13 +320,7 @@ if __name__=="__main__":
                         help="Show the content of the Treetops --- (by default, only the list of Treetops is shown)", action = 'store_true')
     parser.add_argument("--debugCA", help="Debug the CA configuration: print flags, tools, ... --- mainly, for DumpGeo developers. '1' prints a subset of the CA flags, '2' prints all of them.")
 
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
-    parser.set_defaults(filesInput=f"{defaultTestFiles.EVNT[0]}")
     args = flags.fillFromArgs(parser=parser)
-
-    if args.help:
-        # No point doing more here, since we just want to print the help.
-        sys.exit()
 
     # +++ Get CLI parameters and set the corresponding configuration flags
     # Get the user's custom file name, if set;
@@ -264,25 +328,89 @@ if __name__=="__main__":
     # from the geometry tag and the filtered volumes
     if args.outFilename:
         flags.GeoModel.DumpGeo.OutputFileName = args.outFilename
+    if args.filterDetManagers:
+        flags.GeoModel.DumpGeo.FilterDetManagers = [
+            manager.strip()
+            for manager in args.filterDetManagers.split(",")
+            if manager.strip()
+        ]
     if args.showTreetopContent:
         flags.GeoModel.DumpGeo.ShowTreetopContent = True
     if args.forceOverwrite:
         flags.GeoModel.DumpGeo.ForceOverwrite = True
 
+    # Athena uses a placeholder as the default Input.Files value. Treat that
+    # placeholder, as well as an explicitly empty list, as a genuine
+    # input-less job. In particular, do not replace it with a test EVNT file:
+    # standalone geometry dumping must not depend on CVMFS or on unrelated
+    # event-file metadata.
+    dumpgeo_empty_input = configureDumpGeoInputFlags(flags)
+
+    # A custom filename is already final and can be checked without resolving
+    # the geometry tag, which may otherwise require a metadata lookup.
+    if flags.GeoModel.DumpGeo.OutputFileName:
+        validateDumpGeoOutputFile(
+            flags.GeoModel.DumpGeo.OutputFileName,
+            flags.GeoModel.DumpGeo.ForceOverwrite,
+        )
+
+    # Resolve the geometry tag with this precedence: an explicit --detDescr,
+    # the generic GeoModel.AtlasVersion flag (including its metadata-derived
+    # value), then the standalone Run-3 fallback. Avoid evaluating the generic
+    # flag when --detDescr was supplied, since doing so may trigger an
+    # unnecessary metadata lookup.
+    configured_geometry_tag = None
+    if not args.detDescr:
+        configured_geometry_tag = flags.GeoModel.AtlasVersion
+    geometry_tag = resolveDumpGeoGeometryTag(
+        args.detDescr,
+        configured_geometry_tag,
+        defaultGeometryTags.RUN3,
+    )
+    if args.detDescr:
+        _logger.verbose(
+            "+ About to set this detector description tag: '%s'",
+            args.detDescr,
+        )
+    flags.GeoModel.AtlasVersion = geometry_tag
+    _logger.verbose("+ Using detector description tag: '%s'", geometry_tag)
+
+    # Fail as soon as the final geometry tag is known and before detector or
+    # geometry configuration. Resolving a metadata-derived tag necessarily
+    # performs the metadata lookup first. This check deliberately does not
+    # delete an existing file when force overwrite is enabled; deletion is
+    # deferred to the C++ algorithm's initialize() method.
+    validateDumpGeoOutputFile(
+        dumpGeoOutputFileName(flags),
+        flags.GeoModel.DumpGeo.ForceOverwrite,
+    )
 
     # +++ Set the empty input
     _logger.verbose("+ About to set flags related to the input")
+
     # Empty input is not normal for Athena, so we will need to check 
     # this repeatedly below (the same as with VP1)
-    dumpgeo_empty_input = False  
+    dumpgeo_empty_input = False
+
     # This covers the use case where we launch DumpGeo
     # without input files; e.g., to check the detector description
     from AthenaConfiguration.AutoConfigFlags import GetFileMD
-    if ( len(flags.Input.Files) ==  0 or GetFileMD(flags.Input.Files).get("GeoAtlas", None) is None):
-        from Campaigns.Utils import Campaign
-        from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags
 
-        dumpgeo_empty_input = True
+    input_metadata = GetFileMD(flags.Input.Files)
+    input_geometry_tag = input_metadata.get("GeoAtlas", None)
+
+    # Treat both None and an empty string as a missing geometry tag.
+    dumpgeo_empty_input = (
+        len(flags.Input.Files) == 0 or not input_geometry_tag
+    )
+
+    if dumpgeo_empty_input:
+        from Campaigns.Utils import Campaign
+        from AthenaConfiguration.TestDefaults import (
+            defaultConditionsTags,
+            defaultGeometryTags
+        )
+
         # NB Must set e.g. ConfigFlags.Input.Runparse_args() Number and
         # ConfigFlags.Input.TimeStamp before calling the 
         # MainServicesCfg to avoid it attempting auto-configuration 
@@ -299,25 +427,23 @@ if __name__=="__main__":
         flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
         flags.Input.isMC = True
         flags.Input.MCCampaign = Campaign.Unknown
-        flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
-    _logger.verbose("+ ... Done")
-    _logger.verbose("+ empty input: '%s'" % dumpgeo_empty_input)
 
-    _logger.verbose("+ detDescr flag: '%s'" % args.detDescr)
+    _logger.verbose("+ ... Done")
+    _logger.verbose("+ empty input: '%s'", dumpgeo_empty_input)
 
 
     # +++ Set the detector geometry
     _logger.verbose("+ About to set the detector flags")
     # So we can now set up the geometry flags from the input
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
-    setupDetectorFlags(flags, None, use_metadata=not dumpgeo_empty_input,
-                       toggle_geometry=True, keep_beampipe=True)
+    setupDetectorFlags(
+        flags,
+        None,
+        use_metadata=not dumpgeo_empty_input,
+        toggle_geometry=True,
+        keep_beampipe=True
+    )
     _logger.verbose("+ ... Done")
-
-    if args.detDescr:
-        _logger.verbose("+ About to set this detector description tag: '%s'" % args.detDescr)
-        flags.GeoModel.AtlasVersion = args.detDescr
-        _logger.verbose("+ ... Done")
 
     # finalize setting flags: lock them.
     flags.lock()
@@ -357,5 +483,11 @@ if __name__=="__main__":
     
     # +++ Configure DumpGeo and run
     cfg.merge(DumpGeoCfg(flags))
-    cfg.run()
+    status = cfg.run()
 
+    logZDCFailureReminder(
+        flags.Detector.GeometryZDC,
+        status.isSuccess(),
+    )
+
+    sys.exit(not status.isSuccess())

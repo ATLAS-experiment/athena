@@ -86,7 +86,7 @@ def test_call():
 
     muon_eff_sf_tool_handle.call()
 
-    assert columns["Muons.sfOut"] == approx(0.99509060382843018)
+    assert columns["Muons.sfOut"] == approx(0.99569094181060791)
     assert columns["Muons.validOut"] == 1
 
 

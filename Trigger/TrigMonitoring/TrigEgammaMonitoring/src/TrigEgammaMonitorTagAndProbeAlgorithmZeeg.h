@@ -59,7 +59,7 @@ class TrigEgammaMonitorTagAndProbeAlgorithmZeeg: public TrigEgammaMonitorAnalysi
     bool minimalTriggerRequirement () const;
 
     /*! Tag Electron selection */
-    bool isTagElectron( const ToolHandle<GenericMonitoringTool>& monGroup, const xAOD::Electron *el) const;
+    bool isTagElectron(const EventContext& ctx, const ToolHandle<GenericMonitoringTool>& monGroup, const xAOD::Electron *el) const;
 
     /*! Di-electron selection */
     bool isGoodElectron(const ToolHandle<GenericMonitoringTool>& monGroup,const xAOD::Electron *el) const;

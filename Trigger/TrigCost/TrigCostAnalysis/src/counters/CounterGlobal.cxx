@@ -1,10 +1,12 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODTrigger/TrigCompositeContainer.h"
 
 #include "CounterGlobal.h"
+#include <limits>
+#include <algorithm>
 
 CounterGlobal::CounterGlobal(const std::string& name, const MonitorBase* parent) 
   : CounterBase(name, parent)
@@ -21,14 +23,17 @@ StatusCode CounterGlobal::newEvent(const CostData& data, size_t incrementWalltim
 
   uint64_t lowTimestamp = std::numeric_limits<uint64_t>::max();
   uint64_t highTimestamp = 0;
+  const std::string stopStr{"stop"};
+  const std::string startStr{"start"};
+  const std::string slotStr{"slot"};
   for (const xAOD::TrigComposite* tc : data.costCollection()) {
-    const uint32_t slot = tc->getDetail<uint32_t>("slot");
+    const uint32_t slot = tc->getDetail<uint32_t>(slotStr);
     if (slot != data.onlineSlot()) {
       continue; // When monitoring the master slot, this Counter ignores algs running in different slots 
     }
 
-    const uint64_t start = tc->getDetail<uint64_t>("start"); // in mus
-    const uint64_t stop  = tc->getDetail<uint64_t>("stop"); // in mus
+    const uint64_t start = tc->getDetail<uint64_t>(startStr); // in mus
+    const uint64_t stop  = tc->getDetail<uint64_t>(stopStr); // in mus
     const float cpuTime = timeToMilliSec(start, stop);
     ATH_CHECK( fill("AlgTime_perCall", cpuTime, weight) );
     ATH_CHECK( fill("AlgTime_perEvent", cpuTime, weight) );

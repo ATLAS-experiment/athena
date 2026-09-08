@@ -110,11 +110,11 @@ namespace SH
 
     /// \brief the iterator for \ref m_files
   private:
-    typedef std::vector<std::string>::const_iterator FilesIter;
+    using FilesIter = std::vector<std::string>::const_iterator;
 
     /// \brief the mutable iterator for \ref m_files
   private:
-    typedef std::vector<std::string>::iterator FilesMIter;
+    using FilesMIter = std::vector<std::string>::iterator;
 
     ClassDefOverride (SampleLocal, 1);
   };

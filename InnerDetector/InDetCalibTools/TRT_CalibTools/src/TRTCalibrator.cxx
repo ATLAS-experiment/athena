@@ -519,9 +519,9 @@ bool TRTCalibrator::calibrate ATLAS_NOT_THREAD_SAFE () {
       //dangerous cast reproduces pre-existing c style cast
       myFile.read (reinterpret_cast<char*>(&npop),sizeof(int)); //number of populated bins
       if (myFile.eof()) break;
-      int* chist=new int[2*npop+2]; //the histogram
+      std::vector<int> chist(2 * npop + 2);
       //dangerous cast reproduces pre-existing c style cast
-      if (npop>0) myFile.read (reinterpret_cast<char*>(chist+2), sizeof(int)*2*npop);
+      if (npop>0) myFile.read (reinterpret_cast<char*>(chist.data()+2), sizeof(int)*2*npop);
       //dangerous cast reproduces pre-existing c style cast
       myFile.read (reinterpret_cast<char*>(&isid),sizeof(int)); //the straw id 
       sid = (float)isid;
@@ -650,21 +650,21 @@ bool TRTCalibrator::calibrate ATLAS_NOT_THREAD_SAFE () {
       //add histogram to the Calibrators (A and C side separated)
    if(!m_DoArXenonSep){  
   
-      nTRThist += TRT.AddHit(m_Tkey,hitdata,chist,true);
+      nTRThist += TRT.AddHit(m_Tkey,hitdata,chist.data(),true);
       if (Detector.CheckSelection(hitdata.det)) { //only add the histogram if it is in the selection
-        if (m_SplitBarrel) ndethist += Detector.AddHit(m_Dkey,hitdata,chist,true);
-        else ndethist += Detector.AddHit(m_Dkey_acc,hitdata,chist,true);
+        if (m_SplitBarrel) ndethist += Detector.AddHit(m_Dkey,hitdata,chist.data(),true);
+        else ndethist += Detector.AddHit(m_Dkey_acc,hitdata,chist.data(),true);
         if (Layer.CheckSelection(hitdata.lay)) {
-          if (m_SplitBarrel) nlayhist += Layer.AddHit(m_Lkey,hitdata,chist,true);
-          else { nlayhist += Layer.AddHit(m_Lkey_acc,hitdata,chist,true); continue;}
+          if (m_SplitBarrel) nlayhist += Layer.AddHit(m_Lkey,hitdata,chist.data(),true);
+          else { nlayhist += Layer.AddHit(m_Lkey_acc,hitdata,chist.data(),true); continue;}
           if (Module.CheckSelection(hitdata.mod)) {
-            nmodhist += Module.AddHit(m_Mkey,hitdata,chist,true);
+            nmodhist += Module.AddHit(m_Mkey,hitdata,chist.data(),true);
             if (Board.CheckSelection(hitdata.brd)) {
-              nbrdhist += Board.AddHit(m_Bkey,hitdata,chist,true);
+              nbrdhist += Board.AddHit(m_Bkey,hitdata,chist.data(),true);
               if (Chip.CheckSelection(hitdata.chp)) {
-                nchphist += Chip.AddHit(m_Ckey,hitdata,chist,true);
+                nchphist += Chip.AddHit(m_Ckey,hitdata,chist.data(),true);
                 if (Straw.CheckSelection(hitdata.stw))
-                  nstwhist += Straw.AddHit(m_Skey,hitdata,chist,true);
+                  nstwhist += Straw.AddHit(m_Skey,hitdata,chist.data(),true);
               }
             }
           }
@@ -673,21 +673,21 @@ bool TRTCalibrator::calibrate ATLAS_NOT_THREAD_SAFE () {
       ihist++;
    } else  
    if(isArgonStraw==0){                      // Separate Ar and Xe in endcaps. Here Xe
-      nTRThist += TRT.AddHit(m_Tkey,hitdata,chist,true);
+      nTRThist += TRT.AddHit(m_Tkey,hitdata,chist.data(),true);
       if (Detector.CheckSelection(hitdata.det)) { //only add the histogram if it is in the selection
-        if (m_SplitBarrel) ndethist += Detector.AddHit(m_Dkey,hitdata,chist,true);
-        else ndethist += Detector.AddHit(m_Dkey_acc,hitdata,chist,true);
+        if (m_SplitBarrel) ndethist += Detector.AddHit(m_Dkey,hitdata,chist.data(),true);
+        else ndethist += Detector.AddHit(m_Dkey_acc,hitdata,chist.data(),true);
         if (Layer.CheckSelection(hitdata.lay)) {
-          if (m_SplitBarrel) nlayhist += Layer.AddHit(m_Lkey,hitdata,chist,true);
-          else { nlayhist += Layer.AddHit(m_Lkey_acc,hitdata,chist,true); continue;}
+          if (m_SplitBarrel) nlayhist += Layer.AddHit(m_Lkey,hitdata,chist.data(),true);
+          else { nlayhist += Layer.AddHit(m_Lkey_acc,hitdata,chist.data(),true); continue;}
           if (Module.CheckSelection(hitdata.mod)) {
-            nmodhist += Module.AddHit(m_Mkey,hitdata,chist,true);
+            nmodhist += Module.AddHit(m_Mkey,hitdata,chist.data(),true);
             if (Board.CheckSelection(hitdata.brd)) {
-              nbrdhist += Board.AddHit(m_Bkey,hitdata,chist,true);
+              nbrdhist += Board.AddHit(m_Bkey,hitdata,chist.data(),true);
               if (Chip.CheckSelection(hitdata.chp)) {
-                nchphist += Chip.AddHit(m_Ckey,hitdata,chist,true);
+                nchphist += Chip.AddHit(m_Ckey,hitdata,chist.data(),true);
                 if (Straw.CheckSelection(hitdata.stw)) {
-                  nstwhist += Straw.AddHit(m_Skey,hitdata,chist,true);
+                  nstwhist += Straw.AddHit(m_Skey,hitdata,chist.data(),true);
                 }
               }
             }
@@ -696,21 +696,21 @@ bool TRTCalibrator::calibrate ATLAS_NOT_THREAD_SAFE () {
       }                         // Here it closes
       ihist++;
    } else {               // ARGON HITS
-      nTRThistAr += TRT_Ar.AddHit(m_Tkey,hitdata,chist,true);
+      nTRThistAr += TRT_Ar.AddHit(m_Tkey,hitdata,chist.data(),true);
       if (Detector_Ar.CheckSelection(hitdata.det)) { //only add the histogram if it is in the selection
-        if (m_SplitBarrel) ndethistAr += Detector_Ar.AddHit(m_Dkey,hitdata,chist,true);
-        else ndethistAr += Detector_Ar.AddHit(m_Dkey_acc,hitdata,chist,true);
+        if (m_SplitBarrel) ndethistAr += Detector_Ar.AddHit(m_Dkey,hitdata,chist.data(),true);
+        else ndethistAr += Detector_Ar.AddHit(m_Dkey_acc,hitdata,chist.data(),true);
         if (Layer_Ar.CheckSelection(hitdata.lay)) {
-          if (m_SplitBarrel) nlayhistAr += Layer_Ar.AddHit(m_Lkey,hitdata,chist,true);
-          else { nlayhistAr += Layer_Ar.AddHit(m_Lkey_acc,hitdata,chist,true); continue;}
+          if (m_SplitBarrel) nlayhistAr += Layer_Ar.AddHit(m_Lkey,hitdata,chist.data(),true);
+          else { nlayhistAr += Layer_Ar.AddHit(m_Lkey_acc,hitdata,chist.data(),true); continue;}
           if (Module_Ar.CheckSelection(hitdata.mod)) {
-            nmodhistAr += Module_Ar.AddHit(m_Mkey,hitdata,chist,true);
+            nmodhistAr += Module_Ar.AddHit(m_Mkey,hitdata,chist.data(),true);
             if (Board_Ar.CheckSelection(hitdata.brd)) {
-              nbrdhistAr += Board_Ar.AddHit(m_Bkey,hitdata,chist,true);
+              nbrdhistAr += Board_Ar.AddHit(m_Bkey,hitdata,chist.data(),true);
               if (Chip_Ar.CheckSelection(hitdata.chp)) {
-                nchphistAr += Chip_Ar.AddHit(m_Ckey,hitdata,chist,true);
+                nchphistAr += Chip_Ar.AddHit(m_Ckey,hitdata,chist.data(),true);
                 if (Straw_Ar.CheckSelection(hitdata.stw)) {
-                  nstwhistAr += Straw_Ar.AddHit(m_Skey,hitdata,chist,true);
+                  nstwhistAr += Straw_Ar.AddHit(m_Skey,hitdata,chist.data(),true);
                 }
               }
             }
@@ -727,7 +727,6 @@ bool TRTCalibrator::calibrate ATLAS_NOT_THREAD_SAFE () {
     }
       
       ihist++;
-      delete [] chist;
     } // Finish Straw Loop
    
     ATH_MSG_INFO( Form("%7i HISTOGRAMS READ, UNITS ADDED: %i %i %2i %3i %3i %4i %6i",ihist+1,nTRThist, ndethist, nlayhist, nmodhist, nbrdhist, nchphist, nstwhist) );

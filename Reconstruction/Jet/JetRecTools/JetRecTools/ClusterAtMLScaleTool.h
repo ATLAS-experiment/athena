@@ -44,11 +44,23 @@ class ClusterAtMLScaleTool : public JetConstituentModifierBase{
     "Decoration storing ML-corrected cluster energy"
   };
 
+  // Property to configure the ML energy decoration type
+  Gaudi::Property<std::string> m_clusterMLCorrectedEnergyDecorationType{
+    this,
+    "ClusterMLCorrectedEnergyDecorationType",
+    "double",
+    "Type of the ML-corrected cluster energy decoration"
+  };
+
   // Implement the correction
   virtual StatusCode process_impl(xAOD::IParticleContainer* cont) const override; 
   StatusCode setClustersToMLScale(xAOD::CaloClusterContainer& cont) const;
 
 
+  template <typename T>
+  StatusCode setClustersToMLScaleImpl(
+      xAOD::CaloClusterContainer& cont,
+      const EventContext& ctx) const;
 		
 };
 

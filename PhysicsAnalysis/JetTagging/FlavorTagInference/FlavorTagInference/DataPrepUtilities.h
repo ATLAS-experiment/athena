@@ -37,7 +37,7 @@ namespace FlavorTagInference {
   struct FTagInputConfig
   {
     std::string name;
-    EDMType type;
+    EDMType type {};
     std::string default_flag;
   };
 
@@ -45,6 +45,10 @@ namespace FlavorTagInference {
   struct FTagOptions {
     FTagOptions();
     std::string track_prefix;
+    // some models read the lepton impact parameters from a different set
+    // of decorations than the tracks, empty means follow the tracks
+    std::string electron_ip_prefix;
+    std::string muon_ip_prefix;
     FlipTagConfig flip;
     std::string track_link_name;
     std::string object_link_prefix;

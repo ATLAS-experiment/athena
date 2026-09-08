@@ -13,8 +13,8 @@
 #include "xAODMuon/MuonSegmentContainer.h"
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
+#include "ActsEvent/ContextUtility.h"
 
 namespace MuonCombinedR4 {
     class SegmentTaggingAlg: public AthReentrantAlgorithm {
@@ -52,7 +52,13 @@ namespace MuonCombinedR4 {
             std::vector<const xAOD::MuonSegment*> findPotentialMatches(const Acts::GeometryContext& tgContext,
                                                                        const Acts::BoundTrackParameters& caloExitPars,
                                                                        const std::vector<const xAOD::MuonSegment*>& segmentCont) const;
-                                                                       
+            
+            /** @brief Extrpolates the ID track through the MS and attempts to match the preselected candidates based
+             *         on the chi2 between the segment parameters and the extrapolated ID track parameters. If no
+             *         segment satisfies the chi2 cut, then the tag is destroyed and a nullptr is returned
+             *  @param ctx: EventContext to access the alignment and the conditions
+             *  @param selectedCandidates: List of pre-selected segment candidates to be matched
+             *  @param idTag: The inner detector tag which is going to be extrapolated through the MS */
             std::unique_ptr<MuonR4::MuonTag> tagSegments(const EventContext& ctx,
                                                          std::vector<const xAOD::MuonSegment*>&& selectedCandidates,
                                                          std::unique_ptr<MuonR4::MuonTag>&& idTag) const;
@@ -67,25 +73,30 @@ namespace MuonCombinedR4 {
             SG::WriteHandleKey<MuonR4::MuonTagContainer> m_writeKey{this, "writeKey", "SegmentTags"};
             /** @brief Detector manager to retrieve the sector envelope surfaces */
             const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
-            /** @brief Tracking geometry tool */
-            PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+            /** @brief Context provider for geometry, magnetic field and calibration contexts */
+            ActsTrk::ContextUtility m_ctxProvider{this};
             /** @brief Track extrapolation tool */
             ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool" ,"" };
 
             /** @brief Extra tolerance applied on the non-bending intercept when calculating
              *         the matching score */
-            Gaudi::Property<double> m_toleranceX0{this, "toleranceX0", 15.*Gaudi::Units::cm};
+            Gaudi::Property<double> m_toleranceX0{this, "toleranceX0", 20.*Gaudi::Units::cm};
             /** @brief Extra tolerance applied on the bending intercept when calculating
              *         the matching score */
             Gaudi::Property<double> m_toleranceY0{this, "toleranceY0", 5.*Gaudi::Units::cm};
             /** @brief Extra tolerance applied on the bending direction when calculating the
              *         matching score */
-            Gaudi::Property<double> m_toleranceTheta{this, "toleranceTheta", 0.05*Gaudi::Units::deg};
+            Gaudi::Property<double> m_toleranceTheta{this, "toleranceTheta", 1.*Gaudi::Units::deg};
             /** @brief Extra tolerance applied on the bending direction when calculating the
              *         matching score */
             Gaudi::Property<double> m_tolerancePhi{this, "tolerancePhi", 2.*Gaudi::Units::deg};
             /** @brief Selection cut to match a segment to the ID track */
             Gaudi::Property<double> m_matchChi2{this, "matchChi2", 10.};
+
+            /** @brief Instance to the Acts logger */
+            std::unique_ptr<const Acts::Logger> m_logger{};
+            /** @brief Return the reference to the Acts logger */
+            const Acts::Logger& logger() const { return *m_logger; }
     };
 }
 #endif

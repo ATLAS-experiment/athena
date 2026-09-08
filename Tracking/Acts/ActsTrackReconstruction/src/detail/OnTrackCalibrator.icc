@@ -29,8 +29,8 @@ namespace ActsTrk::detail {
   }
 
   template <typename traj_t>
-  OnTrackCalibrator<traj_t>::OnTrackCalibrator(const ActsTrk::ITrackingGeometryTool* trackGeoTool)
-    : m_surfAcc{trackGeoTool} {
+  OnTrackCalibrator<traj_t>::OnTrackCalibrator(const ActsTrk::ITrackingGeometrySvc* trackGeoSvc)
+    : m_surfAcc{trackGeoSvc} {
     connectPassThrough<ToolHandle<ActsTrk::IPixelOnTrackCalibratorTool<traj_t> > >(pixelCalibrator);
     connectPassThrough<ToolHandle<ActsTrk::IStripOnTrackCalibratorTool<traj_t> > >(stripCalibrator);
     connectPassThrough<ToolHandle<ActsTrk::IHGTDOnTrackCalibratorTool<traj_t> >  >(hgtdCalibrator);
@@ -38,11 +38,11 @@ namespace ActsTrk::detail {
 
   template <typename traj_t>
   OnTrackCalibrator<traj_t>::OnTrackCalibrator(const EventContext &ctx,
-                 const ActsTrk::ITrackingGeometryTool* trackGeoTool,
+                 const ActsTrk::ITrackingGeometrySvc* trackGeoSvc,
                  const ToolHandle<IPixelOnTrackCalibratorTool<traj_t>>& pixelTool,
                  const ToolHandle<IStripOnTrackCalibratorTool<traj_t>>& stripTool,
                  const ToolHandle<IHGTDOnTrackCalibratorTool<traj_t>>& hgtdTool)
-    : m_surfAcc{trackGeoTool} {
+    : m_surfAcc{trackGeoSvc} {
     assert( m_calibrators.capacity() >= 3); // if capacity was constexpr should turn into static_assert
     connect(ctx,pixelTool,pixelCalibrator);
     connect(ctx,stripTool,stripCalibrator);

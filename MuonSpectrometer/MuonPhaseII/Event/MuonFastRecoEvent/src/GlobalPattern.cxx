@@ -12,8 +12,10 @@ namespace {
 }
 namespace MuonR4 {
 
-GlobalPattern::GlobalPattern(HitCollection&& hitPerStation)
-    : m_hitsInStation(std::move(hitPerStation)) {};
+GlobalPattern::GlobalPattern(HitCollection&& hitPerStation,
+                             BucketCollection&& bucketPerStation)
+    : m_hitsInStation(std::move(hitPerStation)),
+      m_parentBuckets(std::move(bucketPerStation)) {};
 
 std::vector<GlobalPattern::StIndex> GlobalPattern::getStations() const {
     std::vector<StIndex> out{};
@@ -29,6 +31,15 @@ const std::vector<GlobalPattern::HitType>& GlobalPattern::hitsInStation(StIndex 
         return it->second;
     }
     static const std::vector<HitType> empty{};
+    return empty;
+}
+
+const std::vector<const SpacePointBucket*>& GlobalPattern::bucketsInStation(StIndex station) const {
+    const auto& it = m_parentBuckets.find(station);
+    if (it != m_parentBuckets.end()) {
+        return it->second;
+    }
+    static const std::vector<const SpacePointBucket*> empty{};
     return empty;
 }
 

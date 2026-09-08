@@ -97,21 +97,46 @@ def MuGirlStauAlgCfg(flags, name="MuGirlStauAlg", **kwargs):
 
 
 def MuonCombinedMuonCandidateAlgCfg(flags, name="MuonCombinedMuonCandidateAlg", **kwargs):
-    from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonCandidateToolCfg
-
     result = ComponentAccumulator()
 
-    # EJWM - not completely sure where this comes from. Perhaps should be retrieved by a sub-tool?
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
+    from MuonConfig.MuonRecToolsConfig import MuonAmbiProcessorCfg
+    from MuonConfig.MuonRecToolsConfig import MuonEDMPrinterToolCfg
+    from MuonCombinedConfig.MuonCombinedRecToolsConfig import CombinedMuonTrackBuilderCfg, ExtrapolateMuonToIPToolCfg
     result.merge(CaloNoiseCondAlgCfg(flags, "totalNoise"))
 
-    tool_kwargs = {}
-    if flags.Beam.Type is BeamType.Cosmics:
-        tool_kwargs.setdefault("ExtrapolationStrategy", 1)
+    kwargs.setdefault("Printer", result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags)))
+    if "TrackBuilder" not in kwargs:
+        kwargs.setdefault("TrackBuilder", result.popToolsAndMerge(
+            CombinedMuonTrackBuilderCfg(flags, name="CombinedMuonTrackBuilder")))
+    #   Why was this dependent on cosmics? will now always create this
+    #   if flags.Beam.Type is BeamType.Cosmics:
+    if flags.Muon.MuonTrigger and flags.Beam.Type is not BeamType.Cosmics:
+        # trigger definitely only uses the ExtrapolateToIPtool in cosmics mode
+        kwargs.setdefault("TrackExtrapolationTool", "")
+    else:
+        kwargs.setdefault("TrackExtrapolationTool", result.popToolsAndMerge(
+            ExtrapolateMuonToIPToolCfg(flags)))
+        kwargs.setdefault("SegmentContainer", "TrackMuonSegments")
+    kwargs.setdefault("AmbiguityProcessor", result.popToolsAndMerge(MuonAmbiProcessorCfg(flags)))
 
-    acc = MuonCandidateToolCfg(flags, **tool_kwargs)
-    kwargs.setdefault("MuonCandidateTool", acc.popPrivateTools())
-    result.merge(acc)
+    from TrkConfig.TrkTrackSummaryToolConfig import MuonTrackSummaryToolCfg
+    kwargs.setdefault("TrackSummaryTool", result.popToolsAndMerge(MuonTrackSummaryToolCfg(flags)))
+
+    # MuonIDHelperSvc already configured
+
+    if flags.Beam.Type is BeamType.Cosmics:
+        kwargs.setdefault("ExtrapolationStrategy", 1)
+
+    track_segment_association_tool = CompFactory.MuonCombined.TrackSegmentAssociationTool(
+        MuonEDMPrinterTool=result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags)))
+
+    kwargs.setdefault("TrackSegmentAssociationTool", track_segment_association_tool)
+    result.addPublicTool(track_segment_association_tool)
+
+
+    if flags.Beam.Type is BeamType.Cosmics:
+        kwargs.setdefault("ExtrapolationStrategy", 1)
 
     alg = CompFactory.MuonCombinedMuonCandidateAlg(name, **kwargs)
     result.addEventAlgo(alg, primary=True)
@@ -120,16 +145,16 @@ def MuonCombinedMuonCandidateAlgCfg(flags, name="MuonCombinedMuonCandidateAlg", 
 def MuonCombinedInDetCandidateAlgCfg(flags, name="MuonCombinedInDetCandidateAlg", **kwargs):
     from InDetConfig.InDetTrackSelectorToolConfig import MuonCombinedInDetDetailedTrackSelectorToolCfg, MuonCombinedInDetDetailedForwardTrackSelectorToolCfg
     from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonSystemExtensionToolCfg
-    result = MuonCombinedInDetDetailedTrackSelectorToolCfg(flags)
-    kwargs.setdefault("TrackSelector", result.popPrivateTools())
+    result = ComponentAccumulator() 
+    kwargs.setdefault("TrackSelector", result.popToolsAndMerge(MuonCombinedInDetDetailedTrackSelectorToolCfg(flags)))
+    kwargs.setdefault("WaitForTrackLink", not flags.Muon.MuonTrigger)
+
     if flags.MuonCombined.doSiAssocForwardMuons and flags.Tracking.doForwardTracks:
         kwargs.setdefault("DoSiliconAssocForwardMuons", True)
         kwargs.setdefault("InDetForwardTrackSelector", result.popToolsAndMerge(
             MuonCombinedInDetDetailedForwardTrackSelectorToolCfg(flags)))
 
-    muon_ext_tool = result.popToolsAndMerge(
-        MuonSystemExtensionToolCfg(flags))
-    kwargs.setdefault("MuonSystemExtensionTool", muon_ext_tool)
+    kwargs.setdefault("MuonSystemExtensionTool", result.popToolsAndMerge(MuonSystemExtensionToolCfg(flags)))
 
     # Switch off the muon system extensions if we fit combined muons
     # The MuonInDetToSystemExtensionAlg will perform the system extensions then
@@ -184,6 +209,7 @@ def LRT_MuonCombinedInDetCandidateAlgCfg(flags, name="MuonCombinedInDetCandidate
     kwargs.setdefault("TrackParticleLocation", ["InDetLargeD0TrackParticles"])
     kwargs.setdefault("InDetCandidateLocation", "TrackParticleCandidateLRT")
     kwargs.setdefault("DoSiliconAssocForwardMuons", False)
+    kwargs.setdefault("WaitForTrackLink", not flags.Muon.MuonTrigger)
 
     kwargs.setdefault("InDetForwardTrackSelector", result.popToolsAndMerge(
         MuonCombinedInDetDetailedForwardTrackSelectorToolCfg(flags)))
@@ -197,18 +223,27 @@ def LRT_MuonCombinedInDetCandidateAlgCfg(flags, name="MuonCombinedInDetCandidate
 
 
 def MuonCombinedAlgCfg(flags, name="MuonCombinedAlg", **kwargs):
-    from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonCombinedToolCfg
     result = ComponentAccumulator()
-    kwargs.setdefault("MuonCombinedTool", result.popToolsAndMerge(
-        MuonCombinedToolCfg(flags)))
+    tools = []
     tagmaps = []
-    # CombinedTagMaps must be in a 1-1 correspondence
-    # with MuonCombinedTagTools.
-    for h in kwargs['MuonCombinedTool'].MuonCombinedTagTools:
-        if str(h).find('FitTagTool') >= 0:
-            tagmaps.append('muidcoTagMap')
-        elif str(h).find('StacoTagTool') >= 0:
-            tagmaps.append('stacoTagMap')
+    from MuonConfig.MuonRecToolsConfig import MuonEDMPrinterToolCfg
+    kwargs.setdefault("Printer", result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags)))
+    from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonCombinedFitTagToolCfg, MuonCombinedStacoTagToolCfg
+
+    if flags.MuonCombined.doCombinedFit:
+        tools.append(result.popToolsAndMerge(MuonCombinedFitTagToolCfg(flags)))
+        tagmaps+=['muidcoTagMap']
+    if flags.MuonCombined.doStatisticalCombination and flags.Beam.Type is not BeamType.Cosmics:
+        tools.append(result.popToolsAndMerge(MuonCombinedStacoTagToolCfg(flags)))
+        tagmaps+=['stacoTagMap']
+
+    kwargs.setdefault("MuonCombinedTagTools", tools)
+    from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonAlignmentUncertToolThetaCfg
+    kwargs.setdefault("AlignmentUncertTool", result.getPrimaryAndMerge(MuonAlignmentUncertToolThetaCfg(flags)))
+
+    kwargs.setdefault("DeltaEtaPreSelection", 0.2)
+    kwargs.setdefault("DeltaPhiPreSelection", 0.2)
+    
     kwargs.setdefault("CombinedTagMaps", tagmaps)
     alg = CompFactory.MuonCombinedAlg(name, **kwargs)
     result.addEventAlgo(alg, primary=True)
@@ -445,7 +480,7 @@ def CombinedMuonTrackTruthAlgsCfg(flags):
     result.merge(MuonDetailedTrackTruthMakerCfg(flags, name="MuonCombinedDetailedTrackTruthMaker",
                                                 TrackCollectionNames=trk_cols))
 
-    if(not flags.Muon.scheduleActsReco):
+    if not flags.Muon.usePhaseIIGeoSetup:
         for i in range(len(trk_cols)):
             from TrkConfig.TrkTruthAlgsConfig import TrackTruthSelectorCfg, TrackParticleTruthAlgCfg
             result.merge(TrackTruthSelectorCfg(flags, tracks=trk_cols[i])) 
@@ -457,6 +492,8 @@ def CombinedMuonTrackTruthAlgsCfg(flags):
 
 def CombinedMuonTruthAssociationAlgsCfg(flags):
     result = ComponentAccumulator()
+    if flags.Muon.usePhaseIIGeoSetup: 
+        return result
     trk_cols = GetCombinedTrkContainers(flags)[0]
 
     from MuonConfig.MuonTruthAlgsConfig import MuonTruthAssociationAlgCfg

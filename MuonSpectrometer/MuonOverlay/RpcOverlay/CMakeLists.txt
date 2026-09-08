@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( RpcOverlay )
@@ -10,7 +10,9 @@ atlas_add_test( RpcOverlay_test
                 SOURCES src/*.cxx test/RpcOverlay_test.cxx
                 INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
                 LINK_LIBRARIES CxxUtils GaudiKernel TestTools MuonDigitContainer MuonOverlayBase StoreGateLib MuonIdHelpersLib ${GTEST_LIBRARIES}
-                POST_EXEC_SCRIPT nopost.sh )
+                # Ignore intentional error
+                LOG_IGNORE_PATTERN "Could not get background"
+                POST_EXEC_SCRIPT noerror.sh )
 
 # Component(s) in the package:
 atlas_add_component( RpcOverlay

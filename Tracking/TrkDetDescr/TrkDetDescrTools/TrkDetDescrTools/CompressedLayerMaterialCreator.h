@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -46,8 +46,6 @@ namespace Trk {
         /** Constructor */
         CompressedLayerMaterialCreator(const std::string&,const std::string&,const IInterface*);
 
-        /** Destructor */
-        ~CompressedLayerMaterialCreator();
 
         /** process the material properties */
         LayerMaterialProperties* createLayerMaterial(const LayerMaterialRecord& lmr) const;
@@ -59,10 +57,12 @@ namespace Trk {
         /** private method that can be called by both create/convertLayerMaterial */
         LayerMaterialProperties* createCompressedLayerMaterial(const MaterialPropertiesMatrix& lmm, const BinUtility& lmbu) const;
         
-        double                  m_compressedMaterialThickness;
-        unsigned int            m_compressedMaterialX0Bins;
-        unsigned int            m_compressedMaterialZARhoBins;
-
+        Gaudi::Property<double> m_compressedMaterialThickness
+	  {this, "MaterialThickness", 1.};
+        Gaudi::Property<unsigned int> m_compressedMaterialX0Bins
+	  {this, "MaterialBinsX0", 256};
+        Gaudi::Property<unsigned int> m_compressedMaterialZARhoBins
+	  {this, "MaterialBinsZARho", 256};
     };
        
 }

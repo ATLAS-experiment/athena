@@ -1,5 +1,5 @@
 
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -44,13 +44,6 @@ def ActsTrackStatePrinterToolCfg(flags,
                                                 pixel=['ITkPixelSpacePoints_Cached'] if flags.Acts.useCache else ['ITkPixelSpacePoints'],
                                                 strip=['ITkStripSpacePoints_Cached', 'ITkStripOverlapSpacePoints_Cached'] if flags.Acts.useCache else ['ITkStripSpacePoints', 'ITkStripOverlapSpacePoints']))
 
-    if 'TrackingGeometryTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault(
-            "TrackingGeometryTool",
-            acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)),
-        )
-
     acc.setPrivateTools(CompFactory.ActsTrk.TrackStatePrinterTool(name, **kwargs))
     return acc
 
@@ -63,6 +56,11 @@ def ActsMainTrackFindingAlgCfg(flags,
         return c if isinstance(c, list) else [c]
 
     acc = ComponentAccumulator()
+
+    from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+    acc.merge(ActsGeometryContextAlgCfg(flags))
+    acc.merge(ActsTrackingGeometrySvcCfg(flags))
 
     from ActsConfig.ActsGeometryConfig import ActsVolumeIdToDetectorCollectionMappingAlgCfg
     # Remove HGTD Volumes from the propagation unless we need it
@@ -88,7 +86,6 @@ def ActsMainTrackFindingAlgCfg(flags,
     # Maybe it is best to start with strips where the occupancy is lower.
     kwargs.setdefault("SeedLabels", seedOrder(flags, pixel=["PPP"], strip=["SSS"]))
     kwargs.setdefault("SeedContainerKeys", seedOrder(flags, pixel=["ActsPixelSeeds"], strip=["ActsStripSeeds"]))
-    kwargs.setdefault('DetectorElementsKeys', seedOrder(flags, pixel=['ITkPixelDetectorElementCollection'], strip=['ITkStripDetectorElementCollection']))
     if flags.Acts.Tracks.doAnalysis:
         kwargs.setdefault("SeedDestiny", [f'{seedkey}Destiny' for seedkey in kwargs["SeedContainerKeys"]])
 
@@ -108,8 +105,9 @@ def ActsMainTrackFindingAlgCfg(flags,
         kwargs.setdefault("MaximumIterations", 10000)
         kwargs.setdefault("NMeasurementsMin", 7)
     
-    kwargs.setdefault("refitSeeds", seedOrder(flags, pixel=[False], strip=[False]))
     kwargs.setdefault("doTwoWay", flags.Acts.doTwoWayCKF)
+    # drop the track states on material-only surfaces: nothing downstream reads them, and the CKF is faster without
+    kwargs.setdefault("recordMaterialStates", False)
     kwargs.setdefault("autoReverseSearch", flags.Tracking.ActiveConfig.autoReverseSearch)
     # forceTrackOnSeed isn't effective with secondary passes, which will have removed most/all of the seed measurements from the measurement containers.
     kwargs.setdefault("forceTrackOnSeed", flags.Acts.forceTrackOnSeed and not flags.Tracking.ActiveConfig.isSecondaryPass)
@@ -126,6 +124,8 @@ def ActsMainTrackFindingAlgCfg(flags,
 
     kwargs.setdefault("branchStopperPtMinFactor", 0.9)
     kwargs.setdefault("branchStopperAbsEtaMaxExtra", 0.1)
+    if not flags.Tracking.ActiveConfig.isLargeD0:   # consider seedRefitPtMinFactor later, with other LRT optimisations
+        kwargs.setdefault("seedRefitPtMinFactor", 0.9)
 
     # Loosen the requirement on the minimum number of measurements on track candidate
     # during track finding for tracks above a certain eta
@@ -155,76 +155,50 @@ def ActsMainTrackFindingAlgCfg(flags,
     ### kwargs.setdefault("maxSharedHits", tolist(flags.Tracking.ActiveConfig.maxShared))
 
     # GBTS produces much purer seeds, so the branch stopper selections aren't needed with GBTS seeds.
-    if flags.Acts.SeedingStrategy not in (SeedingStrategy.GbtsFtf, SeedingStrategy.Gbts):
+    if flags.Tracking.ActiveConfig.SeedingStrategy not in [
+            SeedingStrategy.GbtsFtf, SeedingStrategy.Gbts]:
         kwargs.setdefault("ptMinMeasurements", seedOrder(flags, pixel=[3], strip=[6]))
         kwargs.setdefault("absEtaMaxMeasurements", seedOrder(flags, pixel=[3], strip=[999999]))
-    
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg, ActsGeometryRealmConvTool
-    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
-    kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvTool(flags)))
 
     if 'TrackParamsEstimationTool' not in kwargs:
         from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
 
+        # set TrackParamsEstimationTool in case not defined by caller
         tpe_tool_kwargs = {}
         if flags.Tracking.ActiveConfig.isLargeD0:
             tpe_tool_kwargs["allowPropagatorFailure"] = True
+        tpe_tool_kwargs["stripCalibrationIterations"] = flags.Acts.stripCalibrationIterations
+        tpe = acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags, **tpe_tool_kwargs))
 
-        kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags, **tpe_tool_kwargs)))
-        
-    if 'ExtrapolationTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
-        kwargs.setdefault(
-            "ExtrapolationTool",
-            acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)),
-        )
-        
+        kwargs.setdefault('TrackParamsEstimationTool', seedOrder(flags, pixel=[tpe], strip=[tpe]))
+
     if flags.Acts.doPrintTrackStates and 'TrackStatePrinter' not in kwargs:
         kwargs.setdefault(
             "TrackStatePrinter",
             acc.popToolsAndMerge(ActsTrackStatePrinterToolCfg(flags)),
         )
  
-    if 'FitterTool' not in kwargs:
-        from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg 
-        kwargs.setdefault(
-            'FitterTool',
-            acc.popToolsAndMerge(ActsFitterCfg(flags, 
-                                               ReverseFilteringPt=0,
-                                               OutlierChi2Cut=float('inf')))
-        )
-
     if 'PixelCalibrator' not in kwargs:
         from AthenaConfiguration.Enums import BeamType
 
-        if flags.Beam.Type is not BeamType.Cosmics:
-            from ActsConfig.ActsConfigFlags import PixelCalibrationStrategy
+        if flags.Beam.Type is not BeamType.Cosmics and flags.Acts.PixelCalibrationStrategy.usesCalibration():
             from ActsConfig.ActsMeasurementCalibrationConfig import ActsAnalogueClusteringToolCfg
-            
-            if flags.Acts.PixelCalibrationStrategy in (PixelCalibrationStrategy.AnalogueClustering,
-                                                       PixelCalibrationStrategy.AnalogueClusteringAfterSelection,
-                                                       PixelCalibrationStrategy.NNClustering):
 
-                kwargs.setdefault(
-                    'PixelCalibrator',
-                    acc.popToolsAndMerge(ActsAnalogueClusteringToolCfg(flags,
-                                                                       CalibrateAfterMeasurementSelection = flags.Acts.PixelCalibrationStrategy is PixelCalibrationStrategy.AnalogueClusteringAfterSelection))
-                )
+            kwargs.setdefault(
+                'PixelCalibrator',
+                acc.popToolsAndMerge(ActsAnalogueClusteringToolCfg(flags))
+            )
 
     if 'StripCalibrator' not in kwargs:
         from AthenaConfiguration.Enums import BeamType
-        if flags.Beam.Type is not BeamType.Cosmics:
+
+        if flags.Beam.Type is not BeamType.Cosmics and flags.Acts.StripCalibrationStrategy.usesCalibration():
             from ActsConfig.ActsMeasurementCalibrationConfig import ActsStripCalibrationToolCfg
-            from ActsConfig.ActsConfigFlags import StripCalibrationStrategy
 
-            if flags.Acts.StripCalibrationStrategy in (StripCalibrationStrategy.DigitalCalibration,
-                                                       StripCalibrationStrategy.DigitalCalibrationAfterSelection) :
-
-                kwargs.setdefault(
-                    'StripCalibrator',
-                    acc.popToolsAndMerge(ActsStripCalibrationToolCfg(flags,
-                                                                     CalibrateAfterMeasurementSelection = flags.Acts.StripCalibrationStrategy is StripCalibrationStrategy.DigitalCalibrationAfterSelection))
-                )
+            kwargs.setdefault(
+                'StripCalibrator',
+                acc.popToolsAndMerge(ActsStripCalibrationToolCfg(flags))
+            )
 
         
     if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
@@ -271,26 +245,34 @@ def ActsTrackFindingCfg(flags,
     pixelDetElements = ['ITkPixelDetectorElementCollection']
     stripDetElements = ['ITkStripDetectorElementCollection']
 
-    pixelRefit = [False]
-    stripRefit = [False]
+    tpe_tool_kwargs = {}
     if flags.Tracking.ActiveConfig.isLargeD0:
-        stripRefit = [True]
+        tpe_tool_kwargs["allowPropagatorFailure"] = True
+    tpe_tool_kwargs["stripCalibrationIterations"] = flags.Acts.stripCalibrationIterations
 
     if pixelSeedLabels is None:
         pixelSeedKeys = None
         pixelDetElements = None
-        pixelRefit = None
+        pixelTpe = None
+    elif 'TrackParamsEstimationTool' not in kwargs:
+        from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
+        pixelTpe = [acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags, "PixelTrackParamsEstimationTool", **tpe_tool_kwargs))]
+
     if stripSeedLabels is None:
         stripSeedKeys = None
         stripDetElements = None
-        stripRefit = None
+        stripTpe = None
+    elif 'TrackParamsEstimationTool' not in kwargs:
+        from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
+        if flags.Tracking.ActiveConfig.isLargeD0 and flags.Acts.LrtStripSeedRefit:
+            tpe_tool_kwargs["refitSeeds"] = True
+        stripTpe = [acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags, "StripTrackParamsEstimationTool", **tpe_tool_kwargs))]
 
+    kwargs.setdefault("TrackParamsEstimationTool", seedOrder(flags, pixel=pixelTpe, strip=stripTpe))
     kwargs.setdefault('ACTSTracksLocation', f"{flags.Tracking.ActiveConfig.extension}Tracks")
     kwargs.setdefault('UncalibratedMeasurementContainerKeys', isdet(flags, pixel=[pixelClusters], strip=[stripClusters], hgtd=[hgtdClusters]))
     kwargs.setdefault('SeedLabels', seedOrder(flags, pixel=pixelSeedLabels, strip=stripSeedLabels))
     kwargs.setdefault('SeedContainerKeys', seedOrder(flags, pixel=pixelSeedKeys, strip=stripSeedKeys))
-    kwargs.setdefault('DetectorElementsKeys', seedOrder(flags, pixel=pixelDetElements, strip=stripDetElements))
-    kwargs.setdefault("refitSeeds", seedOrder(flags, pixel=pixelRefit, strip=stripRefit))
 
     acc.merge(ActsMainTrackFindingAlgCfg(flags,
                                          name=f"{flags.Tracking.ActiveConfig.extension}TrackFindingAlg",
@@ -304,12 +286,13 @@ def ActsTrackFindingCfg(flags,
                                           TracksLocation=f"{flags.Tracking.ActiveConfig.extension}Tracks"))
 
         # Seed To Track Monitoring
-        if len(kwargs["SeedContainerKeys"]) != len(kwargs["DetectorElementsKeys"]):
+        DetectorElementsKeys=seedOrder(flags, pixel=pixelDetElements, strip=stripDetElements)
+        if len(kwargs["SeedContainerKeys"]) != len(DetectorElementsKeys):
             raise AttributeError("SeedContainerKeys and DetectorElementsKeys must have same size")
 
         for i in range(0, len(kwargs["SeedContainerKeys"])):
             seedKey = kwargs["SeedContainerKeys"][i]
-            detElKey = kwargs["DetectorElementsKeys"][i]
+            detElKey = DetectorElementsKeys[i]
 
             # make seed params
             from ActsConfig.ActsAnalysisConfig import ActsBaseSeedsToTrackParamsAlgCfg
@@ -327,9 +310,9 @@ def ActsTrackFindingCfg(flags,
                                                     InputDestinyCollection = f'{seedKey}Destiny'))
 
     # Persistification
-    if flags.Acts.EDM.PersistifyTracks:
+    if flags.Acts.EDM.PersistifyTracks or flags.Output.doWriteESD:
         trackColl = kwargs['ACTSTracksLocation']
-        from ActsConfig.ActsTrackFindingConfig import ActsToXAODTrackConverterAlgCfg
+        from ActsConfig.ActsEventCnvConfig import ActsToXAODTrackConverterAlgCfg
         acc.merge(ActsToXAODTrackConverterAlgCfg(flags,
                                                  name = f'{trackColl}ToXAODConverterAlg',
                                                  InputActsTracksLocation = trackColl,
@@ -353,14 +336,20 @@ def ActsTrackFindingGNNCfg(flags, **kwargs) -> ComponentAccumulator:
     # Adopt standard convention
     kwargs.setdefault('ACTSTracksLocation', f"{flags.Tracking.ActiveConfig.extension}Tracks")
 
-    kwargs.setdefault("moduleMapPath", flags.Acts.GNN.ModuleMapPath)
-    kwargs.setdefault("gnnPath", flags.Acts.GNN.ModelPath)
-    kwargs.setdefault("numTrtContexts", flags.Acts.GNN.NumTrtContexts)
-    kwargs.setdefault("maxGpuInstances", flags.Acts.GNN.MaxGpuInstances)
+    # The GNN inference (graph construction, edge classification, track building)
+    if 'GnnPipelineTool' not in kwargs:
+        kwargs.setdefault('GnnPipelineTool', CompFactory.ActsTrk.GnnPipelineTool(
+            "GnnPipeline",
+            moduleMapPath=flags.Acts.GNN.ModuleMapPath,
+            gnnPath=flags.Acts.GNN.ModelPath,
+            numTrtContexts=flags.Acts.GNN.NumTrtContexts,
+            maxGpuInstances=flags.Acts.GNN.MaxGpuInstances,
+            edgeCut=flags.Acts.GNN.EdgeCut,
+            minCandidateMeasurements=flags.Acts.GNN.MinCandidateMeasurements,
+        ))
+
     kwargs.setdefault("varianceInflation", flags.Acts.GNN.VarianceInflation)
     kwargs.setdefault("tightSeeds", flags.Acts.GNN.TightSeeds)
-    kwargs.setdefault("edgeCut", flags.Acts.GNN.EdgeCut)
-    kwargs.setdefault("minCandidateMeasurements", flags.Acts.GNN.MinCandidateMeasurements)
     kwargs.setdefault("minDeltaR", flags.Acts.GNN.MinDeltaR)
     kwargs.setdefault("relaxCentralHoleSel", flags.Acts.GNN.RelaxCentralHoleSel)
     kwargs.setdefault("relaxMeasurementSel", flags.Acts.GNN.RelaxMeasurementSel)
@@ -371,23 +360,17 @@ def ActsTrackFindingGNNCfg(flags, **kwargs) -> ComponentAccumulator:
         from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
         kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags)))
 
+    # The fitter tool is used in the GNN track finding to fit the track candidates after the GNN has selected the measurements.
     if 'FitterTool' not in kwargs:
         from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg
-        kwargs.setdefault('FitterTool', acc.popToolsAndMerge(ActsFitterCfg(flags, ReverseFilteringPt=0, OutlierChi2Cut=float('inf'))))
+        kwargs.setdefault('FitterTool', acc.popToolsAndMerge(ActsFitterCfg(flags, 
+                                                                           ReverseFilteringPt=0, 
+                                                                           OutlierChi2Cut=float('inf'))))
 
-    if 'TrackingGeometryTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault(
-            "TrackingGeometryTool",
-            acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)),
-        )
-
-    if 'ExtrapolationTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
-        kwargs.setdefault(
-            "ExtrapolationTool",
-            acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)),
-        )
+    from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+    acc.merge(ActsGeometryContextAlgCfg(flags))
+    acc.merge(ActsTrackingGeometrySvcCfg(flags))
 
     acc.addEventAlgo(
         CompFactory.ActsTrk.TrackFindingGNNAlg("TrackFindingGNNAlg", **kwargs)
@@ -467,9 +450,9 @@ def ActsAmbiguityResolutionCfg(flags,
                                           TracksLocation=f"{flags.Tracking.ActiveConfig.extension}ResolvedTracks"))
 
     # Persistification
-    if flags.Acts.EDM.PersistifyTracks:
+    if flags.Acts.EDM.PersistifyTracks or flags.Output.doWriteESD:
         trackColl = kwargs['ResolvedTracksLocation']
-        from ActsConfig.ActsTrackFindingConfig import ActsToXAODTrackConverterAlgCfg
+        from ActsConfig.ActsEventCnvConfig import ActsToXAODTrackConverterAlgCfg
         acc.merge(ActsToXAODTrackConverterAlgCfg(flags,
                                                  name = f'{trackColl}ToXAODConverterAlg',
                                                  InputActsTracksLocation = trackColl,
@@ -482,71 +465,4 @@ def ActsAmbiguityResolutionCfg(flags,
 
     return acc
 
-def ActsTrackToTrackParticleCnvToolCfg(flags,
-                                       name: str = "ActsTrackToTrackParticleCnvTool",
-                                       **kwargs) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
 
-    # To produce AtlasFieldCacheCondObj
-    from MagFieldServices.MagFieldServicesConfig import (
-        AtlasFieldCacheCondAlgCfg)
-    acc.merge(AtlasFieldCacheCondAlgCfg(flags))
-
-    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
-    kwargs.setdefault('ExtrapolationTool', acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags)) )
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
-    kwargs.setdefault('FirstAndLastParameterOnly',True)
-    kwargs.setdefault('ComputeExpectedLayerPattern',True)
-
-
-    acc.setPrivateTools(CompFactory.ActsTrk.TrackToTrackParticleCnvTool(name, **kwargs))
-    return acc
-
-
-def ActsTrackToTrackParticleCnvAlgCfg(flags,
-                                      name: str = "ActsTrackToTrackParticleCnvAlg",
-                                      **kwargs) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
-
-    # Beam Spot Cond is a requirement
-    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
-    acc.merge(BeamSpotCondAlgCfg(flags))
-
-    # Configure TrackToTrackParticleConvTool
-    tool_kwargs = {}
-    if "ExtrapolationTool" in kwargs:
-        tool_kwargs["ExtrapolationTool"] = kwargs.pop("ExtrapolationTool")
-    if "FirstAndLastParameterOnly" in kwargs:
-        tool_kwargs["FirstAndLastParameterOnly"] = kwargs.pop("FirstAndLastParameterOnly")
-    if "ComputeExpectedLayerPattern" in kwargs:
-        tool_kwargs["ComputeExpectedLayerPattern"] = kwargs.pop("ComputeExpectedLayerPattern")
-    if "MuonSummaryTool" in kwargs:
-        tool_kwargs["MuonSummaryTool"] = kwargs.pop("MuonSummaryTool")
-    if 'TrackToTrackParticleCnvTool' not in kwargs:
-        kwargs['TrackToTrackParticleCnvTool'] = acc.popToolsAndMerge(
-            ActsTrackToTrackParticleCnvToolCfg(flags, **tool_kwargs))
-
-    kwargs.setdefault('BeamSpotKey', 'BeamSpotData')
-    kwargs.setdefault("PerigeeExpression", flags.Tracking.perigeeExpression)
-    kwargs.setdefault('VertexContainerKey', 'PrimaryVertices')
-
-    acc.addEventAlgo(
-        CompFactory.ActsTrk.TrackToTrackParticleCnvAlg(name, **kwargs))
-
-    return acc
-
-def ActsToXAODTrackConverterAlgCfg(flags,
-                                   name: str = "ActsToXAODTrackConverterAlg",
-                                   **kwargs) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
-
-    kwargs.setdefault('InputActsTracksLocation', '')
-    kwargs.setdefault('OutputActsTracksLocation', '')
-
-    if 'TrackingGeometryTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault('TrackingGeometryTool', acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
-    
-    acc.addEventAlgo(CompFactory.ActsTrk.ActsToXAODTrackConverterAlg(name, **kwargs))    
-    return acc

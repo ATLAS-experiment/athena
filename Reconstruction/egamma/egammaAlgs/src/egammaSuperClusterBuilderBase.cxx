@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "egammaSuperClusterBuilderBase.h"
@@ -391,6 +391,7 @@ egammaSuperClusterBuilderBase::createNewCluster(
   if (m_linkToConstituents) {
     // EDM vector to constituent clusters
     std::vector<ElementLink<xAOD::CaloClusterContainer>> constituentLinks;
+    const std::string linkStr{"constituentClusterLinks"};
     for (const xAOD::CaloCluster* cluster : clusters) {
       ElementLink<xAOD::CaloClusterContainer> sisterCluster = 
         cluster->getSisterClusterLink();
@@ -406,8 +407,8 @@ egammaSuperClusterBuilderBase::createNewCluster(
     // clusters used.
     static const SG::AuxElement::Accessor<
       std::vector<ElementLink<xAOD::CaloClusterContainer>>>
-      caloClusterLinks("constituentClusterLinks");
-    caloClusterLinks(*newCluster) = constituentLinks;
+      caloClusterLinks(linkStr);
+    caloClusterLinks(*newCluster) = std::move(constituentLinks);
   }
   // return the new cluster
   return newCluster;

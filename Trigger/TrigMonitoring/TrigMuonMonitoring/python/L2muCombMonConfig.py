@@ -1,18 +1,26 @@
-#  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import ROOT
 
-def L2muCombMonConfig(helper):
+def L2muCombMonConfig(helper, isPhaseII=False, **kwargs):
     
     from AthenaConfiguration.ComponentFactory import CompFactory
 
     GroupName = 'L2muComb'
 
-    from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
+    from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
     from .MuonMatchingToolConfig import MuonMatchingToolConfig
+
+    # Set the offline muon container
+    kwargs.setdefault("MuonContainerName", "Muons")
+
     monAlg = helper.addAlgorithm(CompFactory.L2muCombMon,'L2muCombMon',
-                                 MuonSelectionTool = helper.result().popToolsAndMerge(MuonSelectionToolCfg(helper.flags, MuQuality=1)),
-                                 MuonMatchingTool = helper.result().popToolsAndMerge(MuonMatchingToolConfig(helper.flags)))
+                                 MuonSelectionTool = helper.result().popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(helper.flags, 
+                                                                                                                                MuQuality=1)),
+                                 MuonMatchingTool = helper.result().popToolsAndMerge(MuonMatchingToolConfig(helper.flags, 
+                                                                                                            isPhaseII=isPhaseII, 
+                                                                                                            MuonContainerName=kwargs["MuonContainerName"])),
+                                 **kwargs)
 
     ### monitorig groups
     from TrigConfigSvc.TriggerConfigAccess import getHLTMonitoringAccess

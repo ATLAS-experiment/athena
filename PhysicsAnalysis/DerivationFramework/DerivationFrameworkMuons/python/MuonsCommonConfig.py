@@ -24,14 +24,13 @@ def MuonsCommonCfg(flags, suff=""):
     DFCommonMuonToolWrapperTools = []
 
     ### IDHits
-    # turn of the momentum correction which is not needed for IDHits cut and Preselection
-    from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
+    # turn of the momentum correction which is not needed for IDHits cut and Preselection -> this is off by default in the noncalib version of the tool, also the disabledCutsPt
+    from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
 
-    DFCommonMuonsSelector = acc.popToolsAndMerge(MuonSelectionToolCfg(flags,
+    DFCommonMuonsSelector = acc.popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(flags,
                                                                       name            = "DFCommonMuonsSelector",
                                                                       MaxEta          = 3.,
-                                                                      MuQuality       = 3,
-                                                                      TurnOffMomCorr  = True))
+                                                                      MuQuality       = 3))
     acc.addPublicTool(DFCommonMuonsSelector)
     DFCommonMuonToolWrapperIDCuts = acc.getPrimaryAndMerge(AsgSelectionToolWrapperCfg(
         flags,
@@ -58,19 +57,20 @@ def MuonsCommonCfg(flags, suff=""):
     acc.addEventAlgo(CommonAugmentation("DFCommonMuonsKernel"+suff,
                                         AugmentationTools = DFCommonMuonToolWrapperTools))
 
-    from IsolationAlgs.DerivationTrackIsoConfig import DerivationTrackIsoCfg
-    # A selection of WP is probably needed, as only a few variables are in CP content !
-    #   maybe MUON derivations can add some other ones for studies
-    #listofTTVAWP = [ 'Loose', 'Nominal', 'Tight',
-    #                 'Prompt_D0Sig', 'Prompt_MaxWeight',
-    #                 'Nonprompt_Hard_D0Sig',
-    #                 'Nonprompt_Medium_D0Sig',
-    #                 'Nonprompt_All_D0Sig',
-    #                 'Nonprompt_Hard_MaxWeight',
-    #                 'Nonprompt_Medium_MaxWeight',
-    #                 'Nonprompt_All_MaxWeight' ]
-    for WP in [ 'Nonprompt_All_MaxWeight' ]:
-        acc.merge(DerivationTrackIsoCfg(flags, WP = WP, object_types = ('Electrons', 'Muons'), postfix=suff))
+    if flags.Tracking.doVertexFinding:
+        from IsolationAlgs.DerivationTrackIsoConfig import DerivationTrackIsoCfg
+        # A selection of WP is probably needed, as only a few variables are in CP content !
+        #   maybe MUON derivations can add some other ones for studies
+        #listofTTVAWP = [ 'Loose', 'Nominal', 'Tight',
+        #                 'Prompt_D0Sig', 'Prompt_MaxWeight',
+        #                 'Nonprompt_Hard_D0Sig',
+        #                 'Nonprompt_Medium_D0Sig',
+        #                 'Nonprompt_All_D0Sig',
+        #                 'Nonprompt_Hard_MaxWeight',
+        #                 'Nonprompt_Medium_MaxWeight',
+        #                 'Nonprompt_All_MaxWeight' ]
+        for WP in [ 'Nonprompt_All_MaxWeight' ]:
+            acc.merge(DerivationTrackIsoCfg(flags, WP = WP, object_types = ('Electrons', 'Muons'), postfix=suff))
 
     if "LRT" in Container and not hasattr(acc, 'LRTMuonCaloIsolationBuilder'):
         from IsolationAlgs.IsolationSteeringDerivConfig import LRTMuonIsolationSteeringDerivCfg

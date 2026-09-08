@@ -29,6 +29,7 @@ from ..Jet.JetRecoSequencesConfig import JetRecoDataDeps, JetRecoCfg
 from ..Jet.JetTrackingConfig import JetFSTrackingCfg
 from .StepOutput import StepOutput
 from TrackVertexAssociationTool.TrackVertexAssociationToolConfig import CVF_TTVAToolCfg
+import contextlib
 
 
 def jetRecoDictForMET(**recoDict) -> dict[str, Any]:
@@ -39,10 +40,8 @@ def jetRecoDictForMET(**recoDict) -> dict[str, Any]:
     
     jrd = {k: recoDict.get(k, JetChainParts_Default[k]) for k in jetRecoKeys}
     # Rename the cluster calibration
-    try:
+    with contextlib.suppress(KeyError):
         jrd["clusterCalib"] = recoDict["calib"]
-    except KeyError:
-        pass
     # Fill constitMod
     jrd["constitMod"] = recoDict.get("constitmod", "")
     # We only use em calibration for PFOs

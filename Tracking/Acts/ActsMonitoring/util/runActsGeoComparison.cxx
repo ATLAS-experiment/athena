@@ -113,7 +113,7 @@ std::set<ActiveSensor> readTreeDump(const std::string& inputFile) {
         Amg::Vector3D geoTrans{(*geoModelTransformX)[0], (*geoModelTransformY)[0], (*geoModelTransformZ)[0]};
         newElement.transform = Amg::getTransformFromRotTransl(std::move(geoRot), std::move(geoTrans));
         
-        to_ret.insert(newElement);
+        to_ret.insert(std::move(newElement));
     }
     std::cout<<"File parsing is finished. Found in total "<<to_ret.size()<<" readout element dumps "<<std::endl;
     return to_ret;

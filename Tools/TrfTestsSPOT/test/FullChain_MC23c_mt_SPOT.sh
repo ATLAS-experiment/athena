@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 NTHREADS=${1}
 NEVENTS=${2}
@@ -10,8 +10,13 @@ GEOTAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometry
 
 
 # Run the job
+source "$(dirname "${BASH_SOURCE[0]}")/spot_numa.sh"
+spot_numa_setup "${NTHREADS}"
+
 export TRF_ECHO=1;
+echo "${SPOT_NUMA_INFO}" > __log.txt
 ATHENA_CORE_NUMBER=${NTHREADS} \
+${SPOT_NUMA_PREFIX} \
       Reco_tf.py \
       --CA 'default:True' \
       --inputHITSFile "${DATADIR}/HITS/mc23_13p6TeV.601237.PhPy8EG_A14_ttbar_hdamp258p75_allhad.merge.HITS.e8514_e8528_s4159_s4114/HITS.34124871._003416.pool.root.1" \
@@ -30,6 +35,6 @@ ATHENA_CORE_NUMBER=${NTHREADS} \
       --digiSeedOffset1 '232' \
       --digiSeedOffset2 '232' \
       --AMITag 'r14799' \
-      --steering 'doOverlay' 'doRDO_TRIG' 'doTRIGtoALL' > __log.txt 2>&1;
+      --steering 'doOverlay' 'doRDO_TRIG' 'doTRIGtoALL' >> __log.txt 2>&1;
       
 echo $? > __exitcode;

@@ -988,8 +988,7 @@ namespace Muon {
         if (!rpcTES.isValid()) ATH_MSG_ERROR("Unable to retrieve the RPC hits");
         int nrpc(0), nrpc_inwards(0), nrpc_I(0), nrpc_E(0), nrpc_M(0), nrpc_O(0);
         for (const Muon::RpcPrepDataCollection* RPC_coll : *rpcTES){
-            Muon::RpcPrepDataCollection::const_iterator rpcItr = RPC_coll->begin();
-            stationRegion = m_idHelperSvc->rpcIdHelper().stationRegion((*rpcItr)->identify());
+            stationRegion = m_idHelperSvc->rpcIdHelper().stationRegion(RPC_coll->identify());
             int nChHits(0), nChHits_inwards(0);
             for (const Muon::RpcPrepData* rpc : *RPC_coll){
                 double rpcEta = rpc->globalPosition().eta();
@@ -1014,8 +1013,7 @@ namespace Muon {
         if (!tgcTES.isValid()) ATH_MSG_ERROR("Unable to retrieve the TGC hits");
         int ntgc(0), ntgc_inwards(0), ntgc_I(0), ntgc_E(0), ntgc_M(0), ntgc_O(0);
         for (const Muon::TgcPrepDataCollection* TGC_coll : *tgcTES){
-            Muon::TgcPrepDataCollection::const_iterator tgcItr = TGC_coll->begin();
-            stationRegion = m_idHelperSvc->tgcIdHelper().stationRegion((*tgcItr)->identify());
+            stationRegion = m_idHelperSvc->tgcIdHelper().stationRegion(TGC_coll->identify());
             int nChHits(0), nChHits_inwards(0);
             for (const Muon::TgcPrepData* tgc : *TGC_coll){
                 double tgcEta = tgc->globalPosition().eta();

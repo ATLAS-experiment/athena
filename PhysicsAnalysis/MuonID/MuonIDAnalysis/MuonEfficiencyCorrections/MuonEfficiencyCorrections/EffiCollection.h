@@ -194,6 +194,7 @@ namespace CP {
            
             std::vector<std::shared_ptr<EfficiencyScaleFactor>> m_SF;
             EfficiencyScaleFactor* m_currentSF;
+            std::unordered_set<unsigned int> m_warnedForRunNumber;
             
             EffiCollection::CollectionType m_FileType;
             /// Offset to translate between the bin-numbers in the bin numbers

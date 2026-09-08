@@ -83,9 +83,6 @@ StatusCode jSuperCellTowerMapper::AssignTriggerTowerMapper(std::unique_ptr<jTowe
     return StatusCode::SUCCESS;
 }
 
-void jSuperCellTowerMapper::reset(){
-  return;
-}
 
   // works for real supercells from MC
  StatusCode jSuperCellTowerMapper::AssignSuperCellsToTowers(std::unique_ptr<jTowerContainer> & my_jTowerContainerRaw) const

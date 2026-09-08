@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
    */
 
 #ifndef TRIGJETEJSHYPOTOOL_H
@@ -52,10 +52,10 @@ class TrigJetEJsHypoTool: public AthAlgTool{
     using JetDecision = std::pair<const xAOD::Jet*,TrigCompositeUtils::Decision*>;
 
     struct JetInfo {
-      TrigCompositeUtils::Decision* decision;
-      const xAOD::Jet_v1* jet;
-      const xAOD::TrackParticleContainer* AllTracks;
-      const xAOD::Vertex_v1 *PV;
+      TrigCompositeUtils::Decision* decision = nullptr;
+      const xAOD::Jet_v1* jet = nullptr;
+      const xAOD::TrackParticleContainer* AllTracks = nullptr;
+      const xAOD::Vertex_v1 *PV = nullptr;
       const TrigCompositeUtils::DecisionIDContainer previousDecisionsIDs;
     };
 

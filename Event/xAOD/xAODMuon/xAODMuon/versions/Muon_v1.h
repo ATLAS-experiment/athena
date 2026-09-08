@@ -124,7 +124,7 @@ namespace xAOD {
     /// Returns 'true' if 'author' is the an author of this muon.
     bool isAuthor ( const Author author ) const;
     /// set author
-    void setAuthor(Author auth);
+    void setAuthor(const Author auth);
     /// Get all the authors of this Muon.
     /// For example during overlap checking, the same Muon may have been reconstructed by many different algorithms. This method returns a 16bit
     /// number, where each bit represents a muon algorithm, defined as follows (the lowest bit is indicates that something has gone wrong):
@@ -133,7 +133,7 @@ namespace xAOD {
     uint16_t allAuthors() const;
     void setAllAuthors(uint16_t authors);
     /// add author to all authors
-    void addAllAuthor( const Author author );
+    void addAllAuthor(const Author author );
 
     /// @}
 
@@ -215,7 +215,7 @@ namespace xAOD {
 
     /// get/set the Quality enum in bits 0-2, preserving higher-bit flags
     Quality quality() const;
-    void setQuality(Quality);
+    void setQuality(const Quality);
 
     /// MCP ID hit cuts - get/set the corresponding status bit in the quality decoration.
     bool passesIDCuts() const;
@@ -304,6 +304,7 @@ namespace xAOD {
     ///  3. ExtrapolatedMuonSpectrometerTrackParticle
     ///  4. MSOnlyExtrapolatedMuonSpectrometerTrackParticle
     ///  5. MuonSpectrometerTrackParticle
+     [[deprecated("primaryTrackParticle() - Please use the trackParticle function to retrieve the primary track particle")]]
     const TrackParticle* primaryTrackParticle() const;
 
     /// @brief Returns an ElementLink to the InnerDetector TrackParticle used in identification of this muon.
@@ -321,7 +322,7 @@ namespace xAOD {
 
     /// @brief Set method for TrackParticle links.
     void setTrackParticleLink(TrackParticleType type, const ElementLink< TrackParticleContainer >& link);
-    /// @brief Returns a pointer (which can be NULL) to the  TrackParticle used in identification of this muon.
+    /// @brief Returns a pointer (which can be a nullptr) to the  TrackParticle used in identification of this muon.
     const TrackParticle* trackParticle( TrackParticleType type) const;
 
     /// @brief Returns an ElementLinkto the cluster associated to this muon.

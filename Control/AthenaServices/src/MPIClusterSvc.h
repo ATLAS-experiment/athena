@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ATHENASERVICES_MPICLUSTERSVC_H_
 #define ATHENASERVICES_MPICLUSTERSVC_H_
@@ -10,9 +10,7 @@
 #include "AthenaBaseComps/AthService.h"
 #include "AthenaKernel/ClusterMessage.h"
 #include "AthenaKernel/IMPIClusterSvc.h"
-
 #include "GaudiKernel/IIncidentListener.h"
-
 #include "SQLiteDBSvc/ISQLiteDBSvc.h"
 #include "SQLiteDBSvc/Statement.h"
 #include "mpi3/environment.hpp"
@@ -23,7 +21,8 @@ namespace mpi3 = boost::mpi3;
  * @brief A service managing communications within a cluster using MPI
  *
  */
-class MPIClusterSvc : public extends<AthService, IMPIClusterSvc, IIncidentListener> {
+class MPIClusterSvc
+    : public extends<AthService, IMPIClusterSvc, IIncidentListener> {
  public:
   /// Constructor
   MPIClusterSvc(const std::string& name, ISvcLocator* svcLoc)
@@ -71,7 +70,7 @@ class MPIClusterSvc : public extends<AthService, IMPIClusterSvc, IIncidentListen
                             std::int64_t request_time_ns,
                             std::size_t slot) override final;
   /// Complete an event in the log
-  virtual void log_completeEvent(std::int64_t run_number,
+  virtual void log_completeEvent(int eventIdx, std::int64_t run_number,
                                  std::int64_t event_number,
                                  std::int64_t status) override final;
 

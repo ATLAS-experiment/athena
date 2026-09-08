@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -22,25 +22,10 @@
 #include "GaudiKernel/ITHistSvc.h"
 
 
-// constructor
-Trk::GeometryAsciiDumper::GeometryAsciiDumper(const std::string& t, const std::string& n, const IInterface* p) : 
-  Trk::RecursiveGeometryProcessor(t,n,p),
-  m_outputFileName("TrackingGeometryAscii.txt"),
-  m_outputPrecision(6)
-{
-    declareProperty("OutputFileName",  m_outputFileName);
-    declareProperty("OutputPrecision", m_outputPrecision);
-}
-
-// destructor
-Trk::GeometryAsciiDumper::~GeometryAsciiDumper()
-= default;
-
-
 StatusCode Trk::GeometryAsciiDumper::initialize()
 {
     // open the file for writing
-    m_outputFile.open(m_outputFileName.c_str());
+    m_outputFile.open(m_outputFileName.value().c_str());
     m_outputFile << " ============================= TrackingGeometry ASCII file (BOF) =============================" << std::endl;
     // return the base::initialize() state
     return Trk::RecursiveGeometryProcessor::initialize();    

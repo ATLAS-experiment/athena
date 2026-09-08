@@ -21,33 +21,29 @@ atlas_add_library(
         ${ROOT_LIBRARIES}
         AthenaBaseComps
         AthenaMonitoringKernelLib
+        AthenaPoolUtilities
         GaudiKernel
         LumiBlockData
-        TrigAnalysisInterfaces
+        PersistentDataModel
+        StoreGateLib
         TrigDecisionInterface
         TrigDecisionToolLib
+        xAODEventInfo
     PRIVATE_LINK_LIBRARIES
         ${CORAL_LIBRARIES}
         AthenaKernel
         CxxUtils
-        StoreGateLib
-        AthenaPoolUtilities
-        MuonAlignmentData
         InDetReadoutGeometry
-        MuonAlignmentData
         TRT_ReadoutGeometry
-        PersistentDataModel
 )
 
 atlas_add_component(
     AthenaMonitoring
     src/components/*.cxx
-    INCLUDE_DIRS
-        ${CORAL_INCLUDE_DIRS}
     LINK_LIBRARIES
         AthenaMonitoringLib
-        AthenaKernel
-        MuonAlignmentData
+        InDetReadoutGeometry
+        TRT_ReadoutGeometry
 )
 
 # Install files from the package:

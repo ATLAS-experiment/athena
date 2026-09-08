@@ -186,7 +186,7 @@ StatusCode JetRecTool::initialize() {
       ATH_MSG_INFO(prefix << "Input label: " << label);
       m_inputtype = xAOD::JetInput::inputType(label);
     } else {
-      m_ghostlabs.push_back(label);
+      m_ghostlabs.push_back(std::move(label));
     }
   }
   ATH_MSG_INFO(prefix << "Input type: " << m_inputtype);

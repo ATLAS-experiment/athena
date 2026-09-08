@@ -70,12 +70,15 @@ class G4EmStandardPhysics_HepEm : public G4VPhysicsConstructor
 {
 public:
 
-  explicit G4EmStandardPhysics_HepEm(G4int ver=1, const G4String& name="");
+  explicit G4EmStandardPhysics_HepEm(G4int ver=1, const G4String& name="G4EmStandard_HepEm", G4bool multipleStepsInMSCTransport=false);
 
   ~G4EmStandardPhysics_HepEm() override;
 
   void ConstructParticle() override;
   void ConstructProcess() override;
+
+private:
+  G4bool fMultipleStepsInMSCTransport;
 
 };
 

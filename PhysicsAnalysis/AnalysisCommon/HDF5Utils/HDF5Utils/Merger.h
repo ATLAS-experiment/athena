@@ -59,28 +59,34 @@ namespace H5Utils {
       void merge(H5::DataSet& target, const H5::DataSet& source);
 
       /**
-       * @brief Make a new group from information in a source group
-       * @param targetLocation Where the new group will be created
-       * @param source The group to use to create the new group
+       * @brief Merge a source file/group into a target file/group
+       * @param target The file or group to merge into
+       * @param source The file or group to merge from
+       *
+       * Accepts any combination of H5::File and H5::Group. Each argument is
+       * converted to the H5::Group to actually operate on via convert() (a
+       * no-op for a Group, the root group for a File) before forwarding to
+       * the merge(Group&, const Group&) overload above.
        */
-      H5::Group createFrom(
-          H5::H5Location& targetLocation,
-          const H5::Group& source);
-
-      /**
-       * @brief Make a new dataset from information in a source dataset
-       * @param targetLocation Where the new dataset will be created
-       * @param source The dataset to use to create the new dataset
-       */
-      H5::DataSet createFrom(
-          H5::H5Location& targetLocation,
-          const H5::DataSet& source);
+      void merge(auto& target, const auto& source)
+      {
+        H5::Group targetGroup = convert(target);
+        H5::Group sourceGroup = convert(source);
+        merge(targetGroup, sourceGroup);
+      }
 
       /**
        * @brief Write all accumulated histogram data to the output.
        * @param dst The root group of the output file.
        */
       void flush(H5::Group& dst);
+
+    private:
+      /// convert() is a no-op for a Group, used by the merge() template
+      static H5::Group convert(const H5::Group& group);
+      /// convert() opens the root group of a File, used by the merge()
+      /// template
+      static H5::Group convert(const H5::H5File& file);
 
     protected:
       /// The axis to merge along

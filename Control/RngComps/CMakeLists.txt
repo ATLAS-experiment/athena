@@ -4,14 +4,13 @@
 atlas_subdir( RngComps )
 
 # External dependencies:
-find_package( Boost )
 find_package( CLHEP )
 find_package( TBB )
 
 # Component(s) in the package:
 atlas_add_component( RngComps src/*.h src/*.cxx src/components/*.cxx
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES}
+   INCLUDE_DIRS  ${CLHEP_INCLUDE_DIRS}
+   LINK_LIBRARIES  ${CLHEP_LIBRARIES}
    AthenaBaseComps AthenaKernel StoreGateLib GaudiKernel
    AtlasCLHEP_RandomGenerators )
 

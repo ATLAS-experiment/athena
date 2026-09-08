@@ -16,12 +16,15 @@
 #include "Acts/Geometry/ILayerBuilder.hpp"
 #include "Acts/Utilities/Logger.hpp"
 #include "Acts/Utilities/BinningType.hpp"
-#include "Acts/Utilities/AxisDefinitions.hpp"
-#include "Acts/Geometry/GeometryContext.hpp"
-#include "Acts/Definitions/Units.hpp"
+
 
 #include <mutex>
 #include <array>
+#include <iosfwd>
+#include <vector>
+#include <memory>
+#include <utility>
+#include <functional>
 
 class ActsTrackingGeomtrySvc;
 
@@ -32,6 +35,7 @@ namespace InDetDD {
 namespace Acts {
 class Surface;
 class LayerCreator;
+class GeometryContext;
 }
 
 /// @class ActsLayerBuilder

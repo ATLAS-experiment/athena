@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -81,11 +81,6 @@ class TrigDecisionChecker : public AthAlgorithm
 
   // write out trigger counts
   Gaudi::Property<std::string>   m_printoutFileName{ this, "WriteOutFilename", "", "when set the stat is saved in this file"};
-
-  
-  
-  
-    
 
   // useful for bookkeeping:
   std::map<std::string,int> m_L1Summary;

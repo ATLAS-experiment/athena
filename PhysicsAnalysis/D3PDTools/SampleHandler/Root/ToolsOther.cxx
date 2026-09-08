@@ -13,7 +13,6 @@
 
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/hadd.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <SampleHandler/MetaNames.h>
 #include <SampleHandler/MetaObject.h>
 #include <SampleHandler/SampleHandler.h>
@@ -24,6 +23,7 @@
 #include <thread>
 #include <chrono>
 #include <random>
+#include <stdexcept>
 
 //
 // method implementations
@@ -41,7 +41,7 @@ namespace SH
       = options.castDouble (MetaNames::openRetriesWait(),
 			    MetaNames::openRetriesWait_default());
     if (wait < 0)
-      RCU_THROW_MSG ("negative values not allowed for: " + MetaNames::openRetriesWait());
+      throw std::runtime_error ("negative values not allowed for: " + MetaNames::openRetriesWait());
 
     std::unique_ptr<TFile> result;
 
@@ -62,9 +62,7 @@ namespace SH
       if (result != nullptr)
 	return result;
     }
-    RCU_THROW_MSG ("failed to open file: " + name);
-    //cppcheck-suppress rethrowNoCurrentException
-    throw; //compiler dummy
+    throw std::runtime_error ("failed to open file: " + name);
   }
 
 
@@ -73,7 +71,7 @@ namespace SH
   mergeFiles (const Sample& sample, const std::string& location,
 	      bool overwrite)
   {
-    std::unique_ptr<SampleLocal> result (new SampleLocal (sample.name()));
+    auto result = std::make_unique<SampleLocal> (sample.name());
     result->add (location);
     *result->meta() = *sample.meta();
     if (overwrite || gSystem->AccessPathName (location.c_str()) != 0)

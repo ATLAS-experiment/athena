@@ -5,9 +5,8 @@
 #ifndef GLOBALSIM_COMMONMULTALGTOOL_H
 #define GLOBALSIM_COMMONMULTALGTOOL_H
 
-#include "AthenaBaseComps/AthAlgTool.h"
-
-#include "../GlobalSimComponents/ITIPwriterAlgTool.h"
+#include "../GlobalSimComponents/ITIPWriterAlgTool.h"
+#include "../GlobalSimComponents/TIPWriterAlgTool.h"
 #include "../IO/CommonTOBContainer.h"
 
 #include "ICommonSelector.h"
@@ -22,7 +21,7 @@ namespace GlobalSim {
    */
 
 
-  class CommonMultAlgTool: public extends<AthAlgTool, ITIPwriterAlgTool> {
+  class CommonMultAlgTool: public extends<TIPWriterAlgTool,ITIPWriterAlgTool> {
 
   public:
     CommonMultAlgTool(const std::string& type,
@@ -34,8 +33,12 @@ namespace GlobalSim {
     /** @brief Initialize function running before first event */
     virtual StatusCode initialize() override;
 
-    virtual StatusCode updateTIP(std::bitset<s_nbits_TIP>&,
-				 const EventContext&) const override;
+    using TIPWriterAlgTool::updateTIP;
+
+    virtual StatusCode
+    countPassingTOBs(const EventContext&,
+		     const std::unique_ptr<IDataCollector>& dc, 
+		     unsigned int& N_pass_tobs) const override;
 
     virtual std::string toString() const override;
 
@@ -85,18 +88,6 @@ namespace GlobalSim {
       "inf",
       "phi high for window selector"};
 
-    Gaudi::Property<int> m_TIP_position {
-      this,
-      "TIPposition",
-      0,
-      "start position to write into the TIP"};
-
-    Gaudi::Property<int> m_TIP_width {
-      this,
-      "TIPwidth",
-      3,
-      "number of bits to write into the TIP"};    
-
     Gaudi::Property<std::string> m_menu_name {
       this,
       "menu_name",
@@ -110,9 +101,6 @@ namespace GlobalSim {
       false,
       "flag to enable debug dumps"
     };
-
-
-    ulong m_maxtob{0};
 
   };
 }

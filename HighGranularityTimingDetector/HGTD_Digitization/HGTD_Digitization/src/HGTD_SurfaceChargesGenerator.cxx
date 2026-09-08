@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_SurfaceChargesGenerator.h
  *
@@ -23,6 +23,7 @@
 #include "ReadoutGeometryBase/SiLocalPosition.h"
 #include "ReadoutGeometryBase/SolidStateDetectorElementBase.h"
 #include "SiDigitization/SiChargedDiodeCollection.h"
+#include "CxxUtils/trapping_fp.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
 HGTD_SurfaceChargesGenerator::HGTD_SurfaceChargesGenerator(
@@ -137,6 +138,9 @@ void HGTD_SurfaceChargesGenerator::createSurfaceChargesFromHit(
   float interpad = 50 * CLHEP::micrometer;
 
   for (int i_step = 0; i_step < n_steps; i_step++) {
+    // Tell clang to optimize assuming that FP operations may trap.
+    CXXUTILS_TRAPPING_FP;
+
     CLHEP::Hep3Vector surface_pos = start_pos + i_step * direction;
     ATH_MSG_DEBUG("surface_pos x=" << surface_pos.x()
                                    << ", y=" << surface_pos.y()

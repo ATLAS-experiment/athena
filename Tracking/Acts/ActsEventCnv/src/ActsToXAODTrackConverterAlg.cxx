@@ -13,10 +13,9 @@ namespace ActsTrk {
 
     ATH_CHECK( m_inputTrackContainerKey.initialize() );
     ATH_CHECK( m_outputTrackContainerKey.initialize() );
+    ATH_CHECK(m_ctxProvider.initialize());
 
     ATH_CHECK(m_tracksBackendHandlesHelper.initialize(ActsTrk::prefixFromTrackContainerName(m_outputTrackContainerKey.key())));
-    ATH_CHECK(m_trackingGeometryTool.retrieve());
-    
     return StatusCode::SUCCESS;
   }
 
@@ -37,7 +36,7 @@ namespace ActsTrk {
 
     // Make const
    auto constTracksContainer = m_tracksBackendHandlesHelper.moveToConst(std::move(tracksContainer), 
-                                                                        m_trackingGeometryTool->getGeometryContext(ctx).context(),
+                                                                        m_ctxProvider.getGeometryContext(ctx),
                                                                         ctx );
 
     // Store into StoreGate

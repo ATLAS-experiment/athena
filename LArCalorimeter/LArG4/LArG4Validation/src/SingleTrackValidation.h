@@ -10,7 +10,6 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "MagFieldConditions/AtlasFieldCacheCondObj.h"
-#include "GaudiKernel/IPartPropSvc.h"
 #include "GaudiKernel/ITHistSvc.h"
 // For MC Truth information:
 #include "GeneratorObjects/McEventCollection.h"
@@ -41,8 +40,6 @@ private:
     , "AtlasFieldCacheCondObj"
     , "fieldCondObj"
     , "Name of the Magnetic Field conditions object key"};
-
- ServiceHandle<IPartPropSvc> m_ppSvc{this, "PartPropSvc", "PartPropSvc"};
   ServiceHandle<ITHistSvc> m_histSvc { this, "THistSvc", "THistSvc", "Histogramming svc" };
   class Clockwork;
   Clockwork *m_c;

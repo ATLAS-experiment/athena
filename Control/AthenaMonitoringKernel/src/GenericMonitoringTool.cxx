@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <algorithm>
@@ -130,13 +130,13 @@ namespace {
                           const std::shared_ptr<Monitored::HistogramFiller>& filler,
                           const std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>>& monitoredVariables) {
     bool reasonFound = false;
-    if (ATH_UNLIKELY(!filler->histogramWeightName().empty() && !vars.weight)) {
+    if (!filler->histogramWeightName().empty() && !vars.weight) [[unlikely]] {
       reasonFound = true;
       log << MSG::DEBUG << "Filler weight not found in monitoredVariables:"
           << "\n  Filler weight               : " << filler->histogramWeightName()
           << "\n  Asked to fill from mon. tl_vars: " << monitoredVariables << endmsg;
     }
-    if (ATH_UNLIKELY(!filler->histogramCutMaskName().empty() && !vars.cut)) {
+    if (!filler->histogramCutMaskName().empty() && !vars.cut) [[unlikely]] {
       reasonFound = true;
       log << MSG::DEBUG << "Filler cut mask not found in monitoredVariables:"
           << "\n  Filler cut mask             : " << filler->histogramCutMaskName()
@@ -227,7 +227,7 @@ void GenericMonitoringTool::invokeFillers(const std::vector<std::reference_wrapp
         if (matchedFillerList) {
           matchedFillerList->push_back(std::move(filler));
         }
-      } else if ( ATH_UNLIKELY( msgLvl(MSG::DEBUG) && matchesCount != 0 ) ) { // something has matched, but not all, worth informing user
+      } else if ( msgLvl(MSG::DEBUG) && matchesCount != 0 ) [[unlikely]] { // something has matched, but not all, worth informing user
         invokeFillersDebug(msg(), vars, filler, monitoredVariables);
       }
     }
@@ -240,10 +240,10 @@ void GenericMonitoringTool::invokeFillers(const std::vector<std::reference_wrapp
   }
 }
 
-uint32_t GenericMonitoringTool::runNumber() {
+uint32_t GenericMonitoringTool::runNumber() const {
   return Gaudi::Hive::currentContext().eventID().run_number();
 }
 
-uint32_t GenericMonitoringTool::lumiBlock() {
+uint32_t GenericMonitoringTool::lumiBlock() const {
   return Gaudi::Hive::currentContext().eventID().lumi_block();
 }

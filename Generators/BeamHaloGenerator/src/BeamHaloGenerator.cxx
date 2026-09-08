@@ -7,16 +7,17 @@
 #include "BeamHaloGenerator/BeamHaloGeneratorAlg.h"
 #include "BeamHaloGenerator/AsciiInput.h"
 #include "BeamHaloGenerator/BeamHaloGeneratorSettings.h"
+#include "GeneratorModules/GenData.h"
 #include "AtlasHepMC/GenEvent.h"
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Units/PhysicalConstants.h"
 #include "TMath.h"
 #include <cmath>
 
-BeamHaloGenerator::BeamHaloGenerator(const HepPDT::ParticleDataTable* particleTable,
+BeamHaloGenerator::BeamHaloGenerator(
 				     const std::string& inputFile,
 				     const std::vector<std::string>& generatorSettings):
-  m_particleTable(particleTable),
+  m_gendata(std::make_shared<GenData>()),
   m_inputFile(inputFile),
   m_interfacePlane(0.),
   m_enableFlip(false),

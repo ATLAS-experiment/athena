@@ -57,15 +57,6 @@ StatusCode TrigTauMonitorL1Algorithm::processEvent(const EventContext& ctx) cons
                 fillL1Efficiencies(ctx, offline_taus_3p, "3P", trigger, rois);
 	    }
 
-        } else if(info.getL1TauType() == "jTAU") {
-            std::vector<const xAOD::jFexTauRoI*> rois = getL1jTAUs(ctx, info.getL1TauItem());
-
-            if(m_do_variable_plots) fillL1jTauVars(trigger, rois);
-	    if(m_do_efficiency_plots) {
-                fillL1Efficiencies(ctx, offline_taus_1p, "1P", trigger, rois);
-                fillL1Efficiencies(ctx, offline_taus_3p, "3P", trigger, rois);
-	    }
-
         } else if(info.getL1TauType() == "cTAU") {
             std::vector<std::pair<const xAOD::eFexTauRoI*, const xAOD::jFexTauRoI*>> rois = getL1cTAUs(ctx, info.getL1TauItem());
 
@@ -90,7 +81,7 @@ void TrigTauMonitorL1Algorithm::fillL1eTauVars(const std::string& trigger, const
 {
     ATH_MSG_DEBUG("Fill L1 variables: " << trigger);
 
-    auto monGroup = getGroup(trigger+"_L1Vars");
+    const auto & monGroup =getGroup(trigger+"_L1Vars");
 
     auto L1RoIEt        = Monitored::Collection("L1RoIEt"       , rois, [](const xAOD::eFexTauRoI* L1roi){ return L1roi->et()/Gaudi::Units::GeV; });
     auto L1RoIEta       = Monitored::Collection("L1RoIEta"      , rois, [](const xAOD::eFexTauRoI* L1roi){ return L1roi->eta(); });
@@ -104,29 +95,11 @@ void TrigTauMonitorL1Algorithm::fillL1eTauVars(const std::string& trigger, const
 }
 
 
-void TrigTauMonitorL1Algorithm::fillL1jTauVars(const std::string& trigger, const std::vector<const xAOD::jFexTauRoI*>& rois)  const
-{
-    ATH_MSG_DEBUG("Fill L1 variables: " << trigger);
-
-    auto monGroup = getGroup(trigger+"_L1Vars");
-
-    auto L1RoIEt      = Monitored::Collection("L1RoIEt"     , rois, [](const xAOD::jFexTauRoI* L1roi){ return L1roi->et()/Gaudi::Units::GeV; });
-    auto L1RoIEta     = Monitored::Collection("L1RoIEta"    , rois, [](const xAOD::jFexTauRoI* L1roi){ return L1roi->eta(); });
-    auto L1RoIPhi     = Monitored::Collection("L1RoIPhi"    , rois, [](const xAOD::jFexTauRoI* L1roi){ return L1roi->phi(); });
-    auto L1jFexRoIIso = Monitored::Collection("L1jFexRoIIso", rois, [](const xAOD::jFexTauRoI* L1roi){ return L1roi->iso()/Gaudi::Units::GeV; });
-
-    fill(monGroup, L1RoIEt, L1RoIEta, L1RoIPhi, L1jFexRoIIso);
-
-    ATH_MSG_DEBUG("After fill L1 variables: " << trigger);
-}
-
-
-
 void TrigTauMonitorL1Algorithm::fillL1cTauVars(const std::string& trigger, const std::vector<std::pair<const xAOD::eFexTauRoI*, const xAOD::jFexTauRoI*>>& rois, const std::vector<const xAOD::eFexTauRoI*>& xtob_rois) const
 {
     ATH_MSG_DEBUG("Fill L1 variables: " << trigger);
 
-    auto monGroup = getGroup(trigger+"_L1Vars");
+    const auto & monGroup =getGroup(trigger+"_L1Vars");
 
     auto L1RoIEt        = Monitored::Collection("L1RoIEt"       , rois, [](const auto L1roi){ return L1roi.first->et()/Gaudi::Units::GeV; });
     auto L1RoIEta       = Monitored::Collection("L1RoIEta"      , rois, [](const auto L1roi){ return L1roi.first->eta(); });

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -392,7 +392,7 @@ StatusCode Trk::TrackValidationNtupleWriter::execute(const EventContext& /*ctx*/
                 // resize the truth to track vectors to the number of input track collections:
                 partData.truthToTrackIndices.resize(m_inputTrackCollection.size());
                 partData.truthToTrackMatchingProbabilities.resize(m_inputTrackCollection.size());
-                truthData.push_back(partData);
+                truthData.push_back(std::move(partData));
                 //partIndex++;
               }
    
@@ -625,7 +625,7 @@ StatusCode Trk::TrackValidationNtupleWriter::writeTrackData(unsigned int trackCo
                     truthIndex = -1;
                     if (msgLvl(MSG::VERBOSE)) msg(MSG::VERBOSE) << "Matched particle " << genParticle << " is not in list of selected particles" << endmsg;
                     if ( genParticle->production_vertex() ) {
-                      newTrackPerigee = m_truthToTrack->makePerigeeParameters( genParticle );
+                      newTrackPerigee = m_truthToTrack->makePerigeeParameters( std::move(genParticle) );
                       generatedTrackPerigee = newTrackPerigee;
                     }
                   } else {

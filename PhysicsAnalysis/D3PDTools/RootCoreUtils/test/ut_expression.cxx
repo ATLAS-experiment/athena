@@ -8,8 +8,6 @@
 // includes
 //
 
-#include <RootCoreUtils/Global.h>
-
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/StringUtil.h>
 

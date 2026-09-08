@@ -23,7 +23,7 @@ AFP_TDLocRecoEvCollection* AFP_TDLocRecoEvCollectionCnv::createTransient(const T
     AFP_TDLocRecoEvCollection       *trans_cont(nullptr); // probably inicialization
     
     //GUID of persistence collection class (see selection.xml in AFP_EventTPCnv, class item AFP_TDLocRecoEvCollection_p1)
-    static const pool::Guid p1_guid ("3149C8A8-DEED-4922-8705-1D727A280B9E");
+    static const Guid p1_guid ("3149C8A8-DEED-4922-8705-1D727A280B9E");
     
     if( this->compareClassGuid(token, p1_guid)) {
          std::unique_ptr< AFP_TDLocRecoEvCollection_p1 >   col_vect( this->poolReadObject< AFP_TDLocRecoEvCollection_p1 >(token) );

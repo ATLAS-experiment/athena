@@ -1,0 +1,4 @@
+<lcgdict>
+    <class name="GlobalSim::topoc_pu_type" />
+    <class name="GlobalSim::Object<GlobalSim::topoc_pu_type>" />
+</lcgdict>

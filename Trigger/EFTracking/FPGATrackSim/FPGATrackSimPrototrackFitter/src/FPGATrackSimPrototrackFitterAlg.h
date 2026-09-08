@@ -6,15 +6,16 @@
 #define ACTSTRACKRECONSTRUCTION_FPGATRACKSIMPROTOTRACKFITTERALG_H 1
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "ActsGeometryInterfaces/IExtrapolationTool.h"
+
 
 #include "ActsToolInterfaces/IFitterTool.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+
 #include "StoreGate/CondHandleKeyArray.h"
 #include "ActsEvent/TrackContainerHandlesHelper.h"
 #include "ActsGeometry/DetectorElementToActsGeometryIdMap.h"
 
 #include "ActsEvent/ProtoTrackCollection.h"
+#include "ActsEvent/ContextUtility.h"
 
 namespace FPGATrackSim{
     class FPGATrackSimPrototrackFitterAlg: public ::AthReentrantAlgorithm { 
@@ -29,12 +30,10 @@ namespace FPGATrackSim{
     virtual StatusCode  execute(const EventContext & ctx) const override final;
     
     private: 
+      /** @brief Utility to fetch the geometry, magnetic field and calibration context in the event */
+      ActsTrk::ContextUtility m_ctxProvider{this};
       // the track fitter to use for the refit 
       ToolHandle<ActsTrk::IFitterTool> m_actsFitter{this, "ActsFitter", "", "Choice of Acts Fitter (Kalman by default)"};
-      // tracking geometry - used to translate ATLAS to ACTS geometry
-      PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
-      // ACTS extrapolation tool - provides the magnetic field 
-      ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
       // output location to write to 
       SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackContainerKey{this, "ACTSTracksLocation", "", "Output track collection (ActsTrk variant)"};
       // acts helper for the output

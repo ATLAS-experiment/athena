@@ -3,7 +3,9 @@
 */
 #ifndef TRUTHUTILS_TRUTHCLASSES_H
 #define TRUTHUTILS_TRUTHCLASSES_H
-
+#include <vector>
+#include <string>
+namespace MCTruthPartClassifier {
   // cppcheck-suppress syntaxError; cppcheck 2.16 bug (https://sourceforge.net/p/cppcheck/discussion/general/thread/44654d46c3)
   enum ParticleType : unsigned int {
     Unknown           =  0,
@@ -230,6 +232,6 @@
       "FiveProng"};
   };
 
-
+}
 
 #endif

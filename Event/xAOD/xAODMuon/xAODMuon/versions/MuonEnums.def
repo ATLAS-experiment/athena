@@ -23,7 +23,8 @@ enum MuonType {
   MuonStandAlone,
   SegmentTagged,
   CaloTagged,
-  SiliconAssociatedForwardMuon
+  SiliconAssociatedForwardMuon,
+  ZeroPixelHit
 };
 
 /// Enum for parameter indexes

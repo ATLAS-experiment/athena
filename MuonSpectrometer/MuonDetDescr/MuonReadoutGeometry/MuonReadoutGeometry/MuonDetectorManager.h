@@ -170,6 +170,9 @@ namespace MuonGM {
         const sTGCAsBuiltData* getMmAsBuilt2() const {
             return m_mmAsBuilt2;
         }
+        const Muon::IMuonIdHelperSvc* idHelperSvc() const {
+            return m_idHelperSvc.get();
+        }
 
         const NswPassivationDbData* getMMPassivation() const {
             return m_mmPassivation;

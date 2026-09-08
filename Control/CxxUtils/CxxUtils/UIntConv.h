@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/UIntConv.h
@@ -23,6 +23,8 @@
 
 #include "CxxUtils/SizedUInt.h"
 #include <cstdint>
+#include <bit>
+#include <type_traits>
 
 
 namespace CxxUtils {
@@ -33,23 +35,21 @@ namespace detail {
  * @brief Helpers for converting between uintptr_t and a pointer or integer.
  */
 template <class T>
-union UIntConv
+struct UIntConv
 {
   // Unsigned type of the same size as T.
   using uint_t = typename SizedUInt<sizeof(T)>::type;
-
-  // Union members to convert between uint_t and T.
-  uint_t ui;
-  T x;
-
-
+  //
+  //sensible convertible types?
+  static_assert(std::is_trivially_copyable_v<T>);
+  static_assert(sizeof(uint_t) == sizeof(T));
+  static_assert(sizeof(T) <= sizeof(uintptr_t));
   /**
    * @brief Convert a T to a uintptr_t.
    */
   static uintptr_t valToUInt (T x) {
-    UIntConv u;
-    u.x = x;
-    return static_cast<uintptr_t> (u.ui);
+    const uint_t ui =  std::bit_cast<uint_t>(x);
+    return static_cast<uintptr_t> (ui);
   };
 
 
@@ -57,16 +57,15 @@ union UIntConv
    * @brief Convert a uintptr_t to a T.
    */
   static T uintToVal (uintptr_t ui) {
-    UIntConv u;
-    u.ui = static_cast<uint_t>(ui);
-    return u.x;
+    const uint_t narrowed = static_cast<uint_t>(ui);
+    return std::bit_cast<T>(narrowed);
   };
 };
 
 
 // Specialization for the case where no conversion is required.
 template <>
-union UIntConv<uintptr_t>
+struct UIntConv<uintptr_t>
 {
   /**
    * @brief Convert a T to a uintptr_t.

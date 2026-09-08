@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina <baptiste.ravina@cern.ch>
@@ -41,7 +41,7 @@ class ParticleLevelIsolationAlg : public EL::AnaReentrantAlgorithm {
   Gaudi::Property<float> m_isolationCut{
       this, "isoCut", -1,
       "threshold to use in isolation cuts of the form 'var/pT < cut'"};
-  MCTruthPartClassifier::ParticleType m_checkType;
+  MCTruthPartClassifier::ParticleType m_checkType {};
   std::unique_ptr<const SG::Decorator<char>> m_dec_isolated{};
   std::unique_ptr<const SG::Decorator<char>> m_dec_notTauOrigin{};
   std::unique_ptr<const SG::ConstAccessor<float>> m_acc_isoVar{};

@@ -11,7 +11,8 @@
 
 #include "InDetPerfPlot_Hits.h"
 
-InDetPerfPlot_Hits::InDetPerfPlot_Hits(InDetPlotBase* pParent, const std::string& sDir, bool isITk) : InDetPlotBase(pParent, sDir), m_isITk{isITk}{
+InDetPerfPlot_Hits::InDetPerfPlot_Hits(InDetPlotBase* pParent, const std::string& sDir, bool isITk) : InDetPlotBase(pParent, sDir), m_isITk{isITk},
+                                                                                                      m_addHGTDHistos{isITk} {
   //Nop
 }
 
@@ -166,6 +167,28 @@ InDetPerfPlot_Hits::initializePlots() {
       book(m_nTRTOutliers_vs_phi, "nTRTOutliers_vs_phi");
       book(m_nTRTHighThresholdOutliers_vs_phi, "nTRTHighThresholdOutliers_vs_phi");
     }
+    else if (m_addHGTDHistos) {
+      book(m_nHGTDHits, "nHGTDHits");
+      book(m_nHGTDHoles, "nHGTDHoles");
+      book(m_nHGTDHits_vs_eta, "nHGTDHits_vs_eta");
+      book(m_nHGTDHoles_vs_eta, "nHGTDHoles_vs_eta");
+      book(m_nHGTDHits_vs_phi, "nHGTDHits_vs_phi");
+      book(m_nHGTDHoles_vs_phi, "nHGTDHoles_vs_phi");
+      book(m_nHGTDSharedHits, "nHGTDSharedHits");
+      book(m_nHGTDSharedHits_vs_eta, "nHGTDSharedHits_vs_eta");
+      book(m_nHGTDSharedHits_vs_phi, "nHGTDSharedHits_vs_phi");
+      book(m_nHGTDHits_vs_etaphi, "nHGTDHits_vs_etaphi");
+      book(m_nHGTDHoles_vs_etaphi, "nHGTDHoles_vs_etaphi");
+      book(m_nHGTDOutliers, "nHGTDOutliers");
+      book(m_nHGTDOutliers_vs_eta, "nHGTDOutliers_vs_eta");
+      book(m_nHGTDOutliers_vs_phi, "nHGTDOutliers_vs_phi");
+      if (m_iDetailLevel >= 100) {
+         book(m_nHGTDHits_vs_mu, "nHGTDHits_vs_mu");
+         book(m_nHGTDHoles_vs_mu, "nHGTDHoles_vs_mu");
+         book(m_nHGTDSharedHits_vs_mu, "nHGTDSharedHits_vs_mu");
+         book(m_nHGTDOutliers_vs_mu, "nHGTDOutliers_vs_mu");
+      }
+    }
     book(m_nPixelDeadSensors_vs_phi, "nPixelDeadSensors_vs_phi");
     book(m_nSCTDeadSensors_vs_phi, "nSCTDeadSensors_vs_phi");
 
@@ -287,6 +310,17 @@ InDetPerfPlot_Hits::fill(const xAOD::TrackParticle& track, float mu, float weigh
     fillHisto(m_nSCTHits_vs_etaphi, eta, phi, iSctHits, weight);
     if (m_iDetailLevel >= 100) fillHisto(m_nSCTHits_vs_mu, mu, iSctHits, weight);
   }
+  if (m_addHGTDHistos) {
+    uint8_t iHgtdHits(0);
+    if (track.summaryValue(iHgtdHits, xAOD::numberOfHGTDHits)) {
+      fillHisto(m_nHGTDHits, iHgtdHits, weight);
+      fillHisto(m_nHGTDHits_vs_eta, eta, iHgtdHits, weight);
+      fillHisto(m_nHGTDHits_vs_phi, phi, iHgtdHits, weight);
+      fillHisto(m_nHGTDHits_vs_etaphi, eta, phi, iHgtdHits, weight);
+      if (m_iDetailLevel >= 100) fillHisto(m_nHGTDHits_vs_mu, mu, iHgtdHits, weight);
+    }
+  }
+
   if (!m_isITk && track.summaryValue(iTrtHits, xAOD::numberOfTRTHits)) {
     fillHisto(m_nTRTHits, iTrtHits, weight);
     fillHisto(m_nTRTHits_vs_eta, eta, iTrtHits, weight);
@@ -331,6 +365,16 @@ InDetPerfPlot_Hits::fill(const xAOD::TrackParticle& track, float mu, float weigh
     fillHisto(m_nSCTHoles_vs_phi, phi, iSCTHoles, weight);
     fillHisto(m_nSCTHoles_vs_etaphi, eta, phi, iSCTHoles, weight);
     if (m_iDetailLevel >= 100) fillHisto(m_nSCTHoles_vs_mu, mu, iSCTHoles, weight);
+  }
+  if (m_addHGTDHistos) {
+     uint8_t iHGTDHoles{};
+     if (track.summaryValue(iHGTDHoles, xAOD::numberOfHGTDHoles)) {
+        fillHisto(m_nHGTDHoles, iHGTDHoles, weight);
+        fillHisto(m_nHGTDHoles_vs_eta, eta, iHGTDHoles, weight);
+        fillHisto(m_nHGTDHoles_vs_phi, phi, iHGTDHoles, weight);
+        fillHisto(m_nHGTDHoles_vs_etaphi, eta, phi, iHGTDHoles, weight);
+        if (m_iDetailLevel >= 100) fillHisto(m_nHGTDHoles_vs_mu, mu, iHGTDHoles, weight);
+     }
   }
   if (!m_isITk && track.summaryValue(iTrtHTHits, xAOD::numberOfTRTHighThresholdHitsTotal)) {
     fillHisto(m_nTRTHighThresholdHits, iTrtHTHits, weight);
@@ -385,6 +429,15 @@ InDetPerfPlot_Hits::fill(const xAOD::TrackParticle& track, float mu, float weigh
     fillHisto(m_nSCTSharedHits_vs_eta, eta, iSCTShared, weight);
     fillHisto(m_nSCTSharedHits_vs_phi, phi, iSCTShared, weight);
     if (m_iDetailLevel >= 100) fillHisto(m_nSCTSharedHits_vs_mu, mu, iSCTShared, weight);
+  }
+  if (m_addHGTDHistos) {
+     std::uint8_t iHGTDShared{};
+     if (track.summaryValue(iHGTDShared, xAOD::numberOfHGTDSharedHits)) {
+        fillHisto(m_nHGTDSharedHits, iHGTDShared, weight);
+        fillHisto(m_nHGTDSharedHits_vs_eta, eta, iHGTDShared, weight);
+        fillHisto(m_nHGTDSharedHits_vs_phi, phi, iHGTDShared, weight);
+        if (m_iDetailLevel >= 100) fillHisto(m_nHGTDSharedHits_vs_mu, mu, iHGTDShared, weight);
+     }
   }
   if (track.summaryValue(pixeldEdx, xAOD::pixeldEdx)) {
     fillHisto(m_pixeldEdx, pixeldEdx, weight);
@@ -472,6 +525,15 @@ InDetPerfPlot_Hits::fill(const xAOD::TrackParticle& track, float mu, float weigh
       fillHisto(m_nSCTOutliers_vs_eta, eta, iSCTOutliers, weight);
       fillHisto(m_nSCTOutliers_vs_phi, phi, iSCTOutliers, weight);
       fillHisto(m_nSCTOutliers_vs_mu, mu, iSCTOutliers, weight);
+    }
+    if (m_addHGTDHistos) {
+      std::uint8_t iHGTDOutliers{};
+      if (track.summaryValue(iHGTDOutliers, xAOD::numberOfHGTDOutliers)) {
+        fillHisto(m_nHGTDOutliers, iHGTDOutliers, weight);
+        fillHisto(m_nHGTDOutliers_vs_eta, eta, iHGTDOutliers, weight);
+        fillHisto(m_nHGTDOutliers_vs_phi, phi, iHGTDOutliers, weight);
+        fillHisto(m_nHGTDOutliers_vs_mu, mu, iHGTDOutliers, weight);
+      }
     }
     if (track.summaryValue(iSCTDoubleHoles, xAOD::numberOfSCTDoubleHoles)) {
       fillHisto(m_nSCTDoubleHoles, iSCTDoubleHoles, weight);

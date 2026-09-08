@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/Spacer.h"
@@ -32,7 +32,7 @@
 namespace MuonGM {
 
     Spacer::Spacer(const MYSQL& mysql, Component *ss) : DetectorElement(ss->name) {
-        SpaComponent *s = dynamic_cast<SpaComponent *>(ss);
+        SpaComponent *s = static_cast<SpaComponent *>(ss);
         width = s->dx1;
         longWidth = s->dx2;
         thickness = mysql.GetTechnology(s->name)->thickness;

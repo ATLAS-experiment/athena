@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDPERFMON_ZMUMUEVENT_H
@@ -16,6 +16,7 @@
 
 #include "AsgTools/ToolHandle.h"
 #include "MuonAnalysisInterfaces/IMuonSelectionTool.h"
+#include <array>
 //==============================================================================
 // Forward class declarations...
 //==============================================================================
@@ -100,7 +101,7 @@ class ZmumuEvent : public EventAnalysis
   inline void                        SetSkipMSCheck (bool value)          {m_skipMScheck = value;}
 
   inline void                        setContainer ( PerfMonServices::CONTAINERS container) { m_container = container; };
-  inline void SetMuonSelectionTool ( ToolHandle<CP::IMuonSelectionTool> mst ) { m_muonSelectionTool = mst;  m_xMuonID.SetCustomMuonSelectionTool (mst); };
+  inline void SetMuonSelectionTool ( const ToolHandle<CP::IMuonSelectionTool> & mst ) { m_muonSelectionTool = mst;  m_xMuonID.SetCustomMuonSelectionTool (mst); };
 
  protected:
   virtual void BookHistograms();
@@ -163,11 +164,12 @@ class ZmumuEvent : public EventAnalysis
   const            xAOD::TrackParticle*  m_pxIDTrack[NUM_MUONS]{};       // Pointer to ID track
 
   // Keep kinematic information on the Z
-  float m_fZPt[NUM_TYPES]{};
-  float m_fZEtaDir[NUM_TYPES]{};
-  float m_fZPhiDir[NUM_TYPES]{};
-  float m_fInvariantMass[NUM_TYPES]{};
-  float m_fMuonDispersion[NUM_TYPES]{};
+  using Arrayf = std::array<float, NUM_TYPES>;
+  Arrayf m_fZPt{};
+  Arrayf m_fZEtaDir{};
+  Arrayf m_fZPhiDir{};
+  Arrayf m_fInvariantMass{};
+  Arrayf m_fMuonDispersion{};
 
   // Graphs
   enum HISTOS_1D
@@ -177,8 +179,8 @@ class ZmumuEvent : public EventAnalysis
   };
 
   // muon selector configuration
-  bool m_SelectMuonByIso;
-  bool m_SelectMuonByIP;
+  bool m_SelectMuonByIso{};
+  bool m_SelectMuonByIP{};
 
   // selected muon identifiers
   int m_muon1 = 0;

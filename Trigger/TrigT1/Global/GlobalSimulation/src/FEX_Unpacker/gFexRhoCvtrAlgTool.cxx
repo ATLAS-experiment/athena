@@ -3,7 +3,7 @@
 */
 
 #include "./gFexRhoCvtrAlgTool.h"
-
+#include <sstream>
 namespace GlobalSim {
   
   gFexRhoCvtrAlgTool::gFexRhoCvtrAlgTool(const std::string& type,
@@ -20,7 +20,10 @@ namespace GlobalSim {
   }
 
   StatusCode
-  gFexRhoCvtrAlgTool::run(const EventContext& ctx) const {
+  gFexRhoCvtrAlgTool::run(const std::unique_ptr<IDataCollector>& dc,
+			  const EventContext& ctx) const {
+
+    if (dc){dc->collect(*this, "start");}
 
     SG::ReadHandle<xAOD::gFexJetRoIContainer> inContainer(m_gFexJetRoIKey, ctx);
     CHECK(inContainer.isValid());
@@ -45,17 +48,25 @@ namespace GlobalSim {
 
     for(auto tob:*outContainer){
       ATH_MSG_DEBUG("tob->gFexTobEt() " << tob->rho_bits());
+      if (dc){dc->collect(*this, tob->to_string());}
     }
     
     auto h_write =  SG::WriteHandle<OutContainer>(m_gFexRhoTOBContainerKey,
 						  ctx);
     CHECK(h_write.record(std::move(outContainer)));
 
+    if (dc){
+      dc->collect(*this, "end");
+    }
     return StatusCode::SUCCESS;
   }
 
   std::string gFexRhoCvtrAlgTool::toString() const {
-    return "gFexRhoRoI to gFexRhoTOB converter";
+    std::stringstream ss;
+    ss << "gFexRhoRoI to gFexRhoTOB converter\n"
+       <<"in: " << m_gFexJetRoIKey << '\n'
+       <<"out: " << m_gFexRhoTOBContainerKey << '\n';
+    return ss.str();
   }
 }
 

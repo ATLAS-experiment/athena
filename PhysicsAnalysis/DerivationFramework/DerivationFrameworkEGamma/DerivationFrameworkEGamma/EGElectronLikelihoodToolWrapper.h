@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Author: Giovanni Marchiori (giovanni.marchiori@cern.ch)
@@ -22,7 +22,6 @@
 #include "AsgTools/IAsgTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "EgammaAnalysisInterfaces/IAsgElectronLikelihoodTool.h"
-#include "EgammaAnalysisInterfaces/IElectronPhotonShowerShapeFudgeTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "xAODEgamma/EgammaContainer.h"
 //
@@ -46,13 +45,14 @@ namespace DerivationFramework {
         "",
         "Electron  Likelihood Selector"
         };
-    ToolHandle<IElectronPhotonShowerShapeFudgeTool>
-    m_fudgeMCTool{ this, "EGammaFudgeMCTool", "", "Fudging tool" };
 
     SG::ReadHandleKey<xAOD::EgammaContainer> m_ContainerName{ this,
       "ContainerName",
       "",
-      "Input" };
+      "Input to decorate" };
+    SG::ReadHandleKey<xAOD::EgammaContainer> m_fudgedContainerName{ this,
+      "FudgedContainerName", "", "Input with fudge factors applied" };
+
 
     // Write decoration handle keys
     SG::WriteDecorHandleKey<xAOD::EgammaContainer>

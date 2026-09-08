@@ -28,9 +28,8 @@ StatusCode MaterialTrackWriter::initialize() {
     m_accessor = ActsPlugins::RootMaterialTrackIo{cfg};
     m_accessor.connectForWrite(*m_outputTree);
     ATH_CHECK(histSvc()->regTree(std::format("/{:}/{:}", m_outStream.value(), m_treeName.value()), m_outputTree));
-
-    ATH_CHECK(m_trackingGeometryTool.retrieve(EnableTool{m_useTrackingGeo}));
-    
+    ATH_CHECK(m_ctxProvider.initialize(m_useTrackingGeo));
+   
     return StatusCode::SUCCESS;
 }
 
@@ -40,7 +39,7 @@ StatusCode MaterialTrackWriter::execute (const EventContext& ctx) {
     ATH_CHECK(SG::get(materialTracks, m_materialTrackCollectionKey, ctx));
     
     const Acts::GeometryContext geoContext = m_useTrackingGeo ?
-                                              m_trackingGeometryTool->getGeometryContext(ctx).context()
+                                              m_ctxProvider.getGeometryContext(ctx)
                                            : Acts::GeometryContext::dangerouslyDefaultConstruct();
     std::unique_lock lock{m_writeMutex};
 

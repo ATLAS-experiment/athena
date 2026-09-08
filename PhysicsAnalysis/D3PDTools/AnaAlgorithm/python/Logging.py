@@ -31,7 +31,7 @@ except Exception:
 
 
     ### specialized logger to allow setting with Gaudi-like message levels =====
-    class AnaLogger( logging.getLoggerClass(), object ):
+    class AnaLogger( logging.getLoggerClass() ):
        __levelmap = { Constants.ALL      : logging.ALL,
                       Constants.VERBOSE  : logging.VERBOSE,
                       Constants.DEBUG    : logging.DEBUG,
@@ -46,7 +46,7 @@ except Exception:
           except KeyError:
              pass
 
-          super( AnaLogger, self ).setLevel( level )
+          super().setLevel( level )
 
        def setFormat( self, fmt = None, datefmt = None ):
           for h in log.handlers :

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CONIFER_CPP_H__
@@ -96,9 +96,9 @@ public:
 template <class T, class U, bool useAddTree = false> class BDT {
 
 private:
-  int m_n_classes;
-  int m_n_trees;
-  int m_n_features;
+  int m_n_classes = 0;
+  int m_n_trees = 0;
+  int m_n_features = 0;
   std::vector<double> m_init_predict;
   std::vector<U> m_init_predict_;
   // vector of decision trees: outer dimension tree, inner dimension class

@@ -18,7 +18,8 @@
 #include "ActsEvent/TrackToTruthParticleAssociation.h"
 #include "ActsEvent/MeasurementToTruthParticleAssociation.h"
 #include "ActsEvent/TrackContainer.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsEvent/ContextUtility.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsTruth/ElasticDecayUtil.h"
 
 #include <mutex>
@@ -44,16 +45,15 @@ namespace ActsTrk
   class TrackToTruthAssociationAlg : public AthReentrantAlgorithm
   {
   public:
-    TrackToTruthAssociationAlg(const std::string &name,
-                               ISvcLocator *pSvcLocator);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override;
     virtual StatusCode finalize() override;
     virtual StatusCode execute(const EventContext &ctx) const override;
 
   private:
-     PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool
-        {this, "TrackingGeometryTool", ""};
+     /** @brief Context provider for geometry, magnetic field and calibration contexts */
+     ContextUtility m_ctxProvider{this};
 
      SG::ReadHandleKey<ActsTrk::TrackContainer> m_tracksContainerKey
         {this, "ACTSTracksLocation", "","Track collection (ActsTrk variant)"};

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -138,11 +138,11 @@ class TileAANtuple : public AthAlgorithm {
 
     StatusCode storeBeamElements(const TileDQstatus& DQstatus);
     StatusCode storeLaser(const EventContext& ctx);
-    StatusCode storeDCS();
+    StatusCode storeDCS(const EventContext& ctx);
 
     StatusCode initNTuple(const EventContext& ctx);
 
-    void fillCellMap(TTree* ntuplePtr);
+    void fillCellMap(TTree* ntuplePtr, const EventContext& ctx);
 
     void TRIGGER_addBranch(void);
     void LASER_addBranch(void);

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # BPHY18.py
 #====================================================================
@@ -15,10 +15,8 @@ def BPHY18Cfg(flags):
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     from DerivationFrameworkEGamma.EGammaCommonConfig import EGammaCommonCfg
-    from AthenaServices.PartPropSvcConfig import PartPropSvcCfg
 
     acc = ComponentAccumulator()
-    PartPropSvcName = acc.getPrimaryAndMerge(PartPropSvcCfg(flags))
     acc.merge(EGammaCommonCfg(flags))
     isSimulation = flags.Input.isMC
     V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, BPHYDerivationName))
@@ -55,7 +53,6 @@ def BPHY18Cfg(flags):
     from DerivationFrameworkEGamma.EGammaToolsConfig import EGElectronLikelihoodToolWrapperCfg
     ElectronPassLHvloosenod0 = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(flags, name = "ElectronPassLHvloosenod0",
                                             EGammaElectronLikelihoodTool = ElectronLHSelectorLHvloose_nod0,
-                                            EGammaFudgeMCTool = "",
                                             CutType = "",
                                             StoreGateEntryName = "DFCommonElectronsLHVeryLoosenod0",
                                             ContainerName = "Electrons",
@@ -80,8 +77,7 @@ def BPHY18Cfg(flags):
                              TrkVertexFitterTool         = vkalvrt,
                              TrackSelectorTool           = trackselect,
                              VertexPointEstimator        = vpest,
-                             ElectronSelection             = "d0_or_nod0",
-                             PartPropSvc = PartPropSvcName
+                             ElectronSelection             = "d0_or_nod0"
                              )
     extraTools = [BPHY18DiElectronFinder]
     BPHY18DiElectronSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(
@@ -250,7 +246,7 @@ def BPHY18Cfg(flags):
                               InDetTrackParticlesKey = "InDetTrackParticles")
 
     BPHY18TruthThinTool = CompFactory.DerivationFramework.GenericTruthThinning(name     = "BPHY18TruthThinTool",
-                                                                ParticleSelectionString = "abs(TruthParticles.pdgId) == 11 || abs(TruthParticles.pdgId) == 13 || abs(TruthParticles.pdgId) == 10311 || abs(TruthParticles.pdgId) == 521 || abs(TruthParticles.pdgId) == 523 || abs(TruthParticles.pdgId) == 511 || abs(TruthParticles.pdgId) == 513",
+                                                                ParticleSelectionString = "TruthParticles.isElectron || TruthParticles.isMuon || abs(TruthParticles.pdgId) == 10311 || abs(TruthParticles.pdgId) == 521 || abs(TruthParticles.pdgId) == 523 || abs(TruthParticles.pdgId) == 511 || abs(TruthParticles.pdgId) == 513",
                                                                 PreserveDescendants     = True,
                                                                 StreamName = streamName,
                                                                 PreserveAncestors       = True)

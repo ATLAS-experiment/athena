@@ -32,12 +32,10 @@ namespace TIDA {
 
 #include "egammaEvent/Electron.h"
 #include "muonEvent/Muon.h"
-#include "tauEvent/TauJet.h"
 
 namespace TIDA {	
   bool isGoodOffline(const Analysis::Electron& elec); 
   bool isGoodOffline(const Analysis::Muon& muon); 	
-  bool isGoodOffline(const Analysis::TauJet& tau, bool doThreeProng=false, double EtCutOffline=0.0);
 }
 #endif
 

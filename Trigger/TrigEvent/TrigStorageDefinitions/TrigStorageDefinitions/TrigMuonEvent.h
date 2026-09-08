@@ -42,7 +42,6 @@ HLT_BEGIN_TYPE_REGISTRATION
   
   HLT_REGISTER_TYPE(Muon::MuonSegmentCombination, MuonSegmentCombinationCollection, MuonSegmentCombinationCollection)
   HLT_REGISTER_TYPE(Muon::MuonPatternCombination, MuonPatternCombinationCollection, MuonPatternCombinationCollection)
-  HLT_REGISTER_TYPE(class MuidTrack, class  MuidTrackContainer,class MuidTrackContainer)
   HLT_REGISTER_TYPE(int, CachingFeatureCollection, CachingFeatureCollection)
   // xAOD
   HLT_REGISTER_TYPE(xAOD::Muon, xAOD::MuonContainer, xAOD::MuonContainer, xAOD::MuonAuxContainer)

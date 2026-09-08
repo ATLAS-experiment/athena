@@ -1,7 +1,7 @@
 /////////////////// -*- C++ -*- //////////////////////////////////// 
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // DecayParser.h 
@@ -21,10 +21,6 @@
 // STL includes
 #include <string>
 #include <vector>
-
-// fwd declare
-struct _object;
-typedef _object PyObject;
 
 namespace McUtils {
   typedef std::vector<std::string> Strings;
@@ -86,11 +82,6 @@ class DecayParser
   // Protected data: 
   /////////////////////////////////////////////////////////////////// 
  protected: 
-
-  /** python function to parse the input string modeling the decay pattern
-   *  to look for.
-   */
-  PyObject *m_parseFct;
 
   /** List of parents : each slot of the vector is a list of candidates
    *  So one could have something like : [ ["22","23"] ] to model a decay

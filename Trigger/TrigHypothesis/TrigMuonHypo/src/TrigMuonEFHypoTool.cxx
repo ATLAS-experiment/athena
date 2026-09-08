@@ -54,109 +54,133 @@ StatusCode TrigMuonEFHypoTool::initialize(){
     ATH_MSG_DEBUG("MonTool name: " << m_monTool);
   }
 
-  if(m_doSA) m_type = xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle;
+  if(m_doSA) {
+    m_type = m_isPhII ? xAOD::Muon::TrackParticleType::Primary
+                      : xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle;
+  }
   else m_type = xAOD::Muon::TrackParticleType::CombinedTrackParticle;
 
   return StatusCode::SUCCESS;
 }
 bool TrigMuonEFHypoTool::decideOnSingleObject(TrigMuonEFHypoTool::MuonEFInfo& input, size_t cutIndex) const{
-  ATH_MSG_DEBUG( "deciding...");
-  //Monitored Variables
-  std::vector<float> fexPt, fexEta, fexPhi, selPt, selEta, selPhi;
-  auto muonPtMon = Monitored::Collection("Pt", fexPt);
-  auto muonEtaMon = Monitored::Collection("Eta", fexEta);
-  auto muonPhiMon = Monitored::Collection("Phi", fexPhi);
-  auto muonPtSelMon = Monitored::Collection("Pt_sel", selPt);
-  auto muonEtaSelMon = Monitored::Collection("Eta_sel", selEta);
-  auto muonPhiSelMon = Monitored::Collection("Phi_sel", selPhi);
-  auto monitorIt	= Monitored::Group(m_monTool, muonPtMon, muonEtaMon, muonPhiMon, muonPtSelMon, muonEtaSelMon, muonPhiSelMon); 
-  bool result = false;
-  //for pass through mode
-  if(m_acceptAll) {
-    result = true;
-    ATH_MSG_DEBUG("Accept property is set: taking all the events");
-    return result;
-  }
-  //  decision making
-  //Get xAOD::MuonContainer from hypotool
-  const xAOD::Muon* muon = input.muon;
-  if( !muon ){
-    ATH_MSG_DEBUG("Retrieval of xAOD::MuonContainer failed");
-    return false;
-  }
+    ATH_MSG_DEBUG( "deciding...");
+    //Monitored Variables
+    std::vector<float> fexPt, fexEta, fexPhi, selPt, selEta, selPhi;
+    auto muonPtMon = Monitored::Collection("Pt", fexPt);
+    auto muonEtaMon = Monitored::Collection("Eta", fexEta);
+    auto muonPhiMon = Monitored::Collection("Phi", fexPhi);
+    auto muonPtSelMon = Monitored::Collection("Pt_sel", selPt);
+    auto muonEtaSelMon = Monitored::Collection("Eta_sel", selEta);
+    auto muonPhiSelMon = Monitored::Collection("Phi_sel", selPhi);
+    auto monitorIt	= Monitored::Group(m_monTool, muonPtMon, muonEtaMon, muonPhiMon, muonPtSelMon, muonEtaSelMon, muonPhiSelMon); 
+    
+    //for pass through mode
+    if(m_acceptAll) {
+        ATH_MSG_DEBUG("Accept property is set: taking all the events");
+        return true;
+    }
+    //  decision making
+    //Get xAOD::MuonContainer from hypotool
+    const xAOD::Muon* muon = input.muon;
+    if( !muon ){
+        ATH_MSG_DEBUG("Retrieval of xAOD::MuonContainer failed");
+        return false;
+    }
+    if (!m_isFastReco && !muon->trackParticle(xAOD::Muon::TrackParticleType::Primary)) {
+        ATH_MSG_DEBUG("No TrackParticle of type Primary found.");
+        return false;
+    }
 
-  if (muon->trackParticle(xAOD::Muon::TrackParticleType::Primary)) { // was there a muon in this RoI ?
-    const xAOD::TrackParticle* tr = muon->trackParticle(m_type);
-    if (!tr) {
-      ATH_MSG_DEBUG("No TrackParticle found.");
+    const xAOD::TrackParticle* tr {nullptr};
+    double pt{0.}, eta{0.}, phi{0.};
+    if (m_isFastReco) {
+        pt = muon->pt();
+        eta = muon->eta();
+        phi = muon->phi();
     } else {
-      ATH_MSG_DEBUG("Retrieved Track track with abs pt "<< (*tr).pt()/Gaudi::Units::GeV << " GeV ");
-      //fill monitored variables
-      fexPt.push_back(tr->pt()/Gaudi::Units::GeV);
-      fexEta.push_back(tr->eta());
-      fexPhi.push_back(tr->phi());
-      //Apply hypo cuts
-      float absEta = std::abs(tr->eta());
-      float threshold = 0;
-      for (std::vector<float>::size_type k=0; k<m_bins[cutIndex]; ++k) {
+        tr = muon->trackParticle(m_type);
+        if (!tr) {
+            ATH_MSG_DEBUG("No TrackParticle found.");
+            return false;
+        }
+        pt = tr->pt();
+        eta = tr->eta();
+        phi = tr->phi();
+    }
+
+    ATH_MSG_DEBUG("Retrieved Track track with abs pt "<< pt/Gaudi::Units::GeV << " GeV ");
+    //fill monitored variables
+    fexPt.push_back(pt/Gaudi::Units::GeV);
+    fexEta.push_back(eta);
+    fexPhi.push_back(phi);
+
+    // Check pt thresholds
+    bool result = false;
+    float absEta = std::abs(eta);
+    float threshold = 0;
+    for (std::vector<float>::size_type k=0; k<m_bins[cutIndex]; ++k) {
         if (absEta > m_ptBins[cutIndex][k] && absEta <= m_ptBins[cutIndex][k+1]) threshold = m_ptThresholds[cutIndex][k];
-      }
-      if (std::abs(tr->pt())/Gaudi::Units::GeV > (threshold/Gaudi::Units::GeV)){
+    }
+    if (std::abs(pt) > threshold){
         result = true;
+    }
+
+    if (result == true && !m_isFastReco) {
         // If trigger path name includes "muonqual", check whether the muon passes those criteria   
         if(m_muonqualityCut == true) result = passedQualityCuts(muon);
-	//cut on Nprecision layers (for 3layerEC msonly triggers)
-	if(m_threeStationCut){
-	  uint8_t nGoodPrcLayers=0;
-	  if (!muon->summaryValue(nGoodPrcLayers, xAOD::numberOfGoodPrecisionLayers)){
-	    ATH_MSG_DEBUG("No numberOfGoodPrecisionLayers variable found; not passing hypo");
-	    result=false;
-	  }
-	  if(std::abs(muon->eta()) > 1.3) {
-	    if (m_runCommissioningChain) {
-	      if(nGoodPrcLayers < 2){
-		ATH_MSG_DEBUG("Muon has less than two GoodPrecisionLayers; not passing hypo (requrement loosend according to absence of NSW)");
-		result=false;
-	      }
-	    } else {
-	      if(nGoodPrcLayers < 3){
-		ATH_MSG_DEBUG("Muon has less than three GoodPrecisionLayers; not passing hypo");
-		result=false;
-	      }
+	    //cut on Nprecision layers (for 3layerEC msonly triggers)
+	    if(m_threeStationCut){
+            uint8_t nGoodPrcLayers=0;
+            if (!muon->summaryValue(nGoodPrcLayers, xAOD::numberOfGoodPrecisionLayers)){
+                ATH_MSG_DEBUG("No numberOfGoodPrecisionLayers variable found; not passing hypo");
+                result=false;
+            }
+            if(std::abs(eta) > 1.3) {
+                if (m_runCommissioningChain) {
+                    if(nGoodPrcLayers < 2){
+                        ATH_MSG_DEBUG("Muon has less than two GoodPrecisionLayers; not passing hypo (requrement loosend according to absence of NSW)");
+                        result=false;
+                    }
+                } else {
+                    if(nGoodPrcLayers < 3){
+                        ATH_MSG_DEBUG("Muon has less than three GoodPrecisionLayers; not passing hypo");
+                        result=false;
+                    }
+                }
+            } else if (std::abs(eta) > 1.05) {
+                if(nGoodPrcLayers < 3){
+                    ATH_MSG_DEBUG("Muon has less than three GoodPrecisionLayers; not passing hypo");
+                    result=false;
+                }
+            }
 	    }
-	  } else if (std::abs(muon->eta()) > 1.05) {
-	    if(nGoodPrcLayers < 3){
-	      ATH_MSG_DEBUG("Muon has less than three GoodPrecisionLayers; not passing hypo");
-	      result=false;
-	    }
-	  }
-	}
-	if (m_d0min>0.) {
-	  ATH_MSG_DEBUG("Muon has d0 less than "<<m_d0min<<"mm; not passing hypo");
-	  if (std::abs(tr->d0())<m_d0min) result = false;
-	}
-      }
-      if(result == true){
-        selPt.push_back(tr->pt()/Gaudi::Units::GeV);
-        selEta.push_back(tr->eta());
-        selPhi.push_back(tr->phi());
-      }
-      if (m_d0min>0.) {
-	ATH_MSG_DEBUG(" REGTEST muon pt is " << tr->pt()/Gaudi::Units::GeV << " GeV "
-		      << " with Charge " << tr->charge()
-		      << " and threshold cut is " << threshold/Gaudi::Units::GeV << " GeV"
-		      << " so hypothesis is " << (result?"true":"false"));
-      } else {
-	ATH_MSG_DEBUG(" REGTEST muon pt is " << tr->pt()/Gaudi::Units::GeV << " GeV "
-		      << " with Charge " << tr->charge()
-		      << " and with d0 " << tr->d0()
-		      << " the threshold cut is " << threshold/Gaudi::Units::GeV << " GeV"
-		      << " and d0min cut is " << m_d0min<<" mm"
-		      << " so hypothesis is " << (result?"true":"false"));
-      }
+        //cut on d0 for displaced muon triggers
+        if (m_d0min > 0. && std::abs(tr->d0()) < m_d0min) {
+            ATH_MSG_DEBUG("Muon has d0 less than "<<m_d0min<<"mm; not passing hypo");
+            result = false;
+        }
     }
-  }
-  return result;	
+
+    if(result == true){
+        selPt.push_back(pt/Gaudi::Units::GeV);
+        selEta.push_back(eta);
+        selPhi.push_back(phi);
+    }
+    const double charge = m_isFastReco ? muon->charge() : tr->charge();
+    if (!m_isFastReco && m_d0min > 0.) {
+        ATH_MSG_DEBUG(" REGTEST muon pt is " << pt/Gaudi::Units::GeV << " GeV "
+                << " with Charge " << charge
+                << " and with d0 " << tr->d0()
+                << " the threshold cut is " << threshold/Gaudi::Units::GeV << " GeV"
+                << " and d0min cut is " << m_d0min<<" mm"
+                << " so hypothesis is " << (result?"true":"false"));
+    } else {
+        ATH_MSG_DEBUG(" REGTEST muon pt is " << pt/Gaudi::Units::GeV << " GeV "
+                << " with Charge " << charge
+                << " and threshold cut is " << threshold/Gaudi::Units::GeV << " GeV"
+                << " so hypothesis is " << (result?"true":"false"));
+    }
+    return result;	
 }
 
 bool TrigMuonEFHypoTool::passedQualityCuts(const xAOD::Muon* muon) const {

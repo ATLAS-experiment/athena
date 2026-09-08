@@ -12,7 +12,6 @@
 #include "GaudiKernel/ToolHandle.h"
 
 // Tools
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsToolInterfaces/ITrackConverterTool.h"
 #include "ActsToolInterfaces/ISeedingTool.h"
 

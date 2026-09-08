@@ -12,11 +12,10 @@ ignore_pattern=""
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py \
   --preExec "flags.Exec.FPE=-1; \
-	     flags.Acts.doLargeRadius=True; \
-	     flags.Acts.doLowPt=True; \
-	     flags.Detector.EnableCalo=True; \
-	     flags.Tracking.doTruth=False;" \
-  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
+       flags.Detector.EnableCalo=True; \
+       flags.Detector.EnableHGTD=True; \
+       flags.Acts.doLowPt=True;" \
+  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
   --ignorePatterns "${ignore_pattern}" \
   --conditionsTag ${conditions_tag} \
   --inputRDOFile ${input_rdo} \

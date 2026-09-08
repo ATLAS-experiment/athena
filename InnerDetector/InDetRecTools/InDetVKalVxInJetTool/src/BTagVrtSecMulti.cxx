@@ -486,7 +486,7 @@ InDetVKalVxInJetTool::getVrtSecMulti(workVectorArrxAOD* xAODwrk,
 	if(xAODwrk) vProb = refitVertex(newV, xAODwrk->listJetTracks, *state, true);
 	if(vProb>probVrtMergeLimit){
 	  onetVrt.Good=false;
-	  ntrVrt=newV;
+	  ntrVrt=std::move(newV);
 	  ntrVrt.detachedTrack=-1;
 	}
 	break;
@@ -508,7 +508,7 @@ InDetVKalVxInJetTool::getVrtSecMulti(workVectorArrxAOD* xAODwrk,
 	if(xAODwrk) vProb = refitVertex(newV, xAODwrk->listJetTracks, *state, true);
 	if(vProb>probVrtMergeLimit){
 	  jVrt.Good = false;
-	  iVrt = newV;
+	  iVrt = std::move(newV);
 	  iVrt.detachedTrack = -1;
 	}
 	break;
@@ -532,7 +532,7 @@ InDetVKalVxInJetTool::getVrtSecMulti(workVectorArrxAOD* xAODwrk,
 	  if(xAODwrk) vProb = refitVertex( newV, xAODwrk->listJetTracks, *state, true);
 	  if(vProb>probVrtMergeLimit){
 	    onetVrt.Good = false;
-	    ntrVrt = newV;
+	    ntrVrt = std::move(newV);
 	  }
 	}
 
@@ -799,7 +799,7 @@ InDetVKalVxInJetTool::getVrtSecMulti(workVectorArrxAOD* xAODwrk,
     if(addedT){
       double vProb = 0.;
       if(xAODwrk) vProb = refitVertex(newV, xAODwrk->listJetTracks, *state, true);
-      if(vProb>0.01) goodVertices[iv] = newV;
+      if(vProb>0.01) goodVertices[iv] = std::move(newV);
       else{
 	std::vector<WrkVrt> TestVertices(1,newV);
 	if(xAODwrk) vProb = improveVertexChi2(&TestVertices, 0, xAODwrk->listJetTracks, *state, true);
@@ -1194,8 +1194,9 @@ InDetVKalVxInJetTool::getVrtSecMulti(workVectorArrxAOD* xAODwrk,
     {   
         int posInVrtFit = 0;                    //Position of selectedTrack in vertex fit track list.
 	std::deque<long int>::iterator it;
-	WrkVrt vrt = (*wrkVrtSet)[selectedVertex];
-	std::deque<long int> trk = (*TrkInVrt).at(selectedTrack);
+	//use references to update the input vectors
+	WrkVrt & vrt = (*wrkVrtSet)[selectedVertex];
+	std::deque<long int> & trk = (*TrkInVrt).at(selectedTrack);
 
 	for(it = vrt.selTrk.begin(); it!=vrt.selTrk.end(); ++it) {
 	    if( (*it) == selectedTrack ) { 
@@ -1214,10 +1215,12 @@ InDetVKalVxInJetTool::getVrtSecMulti(workVectorArrxAOD* xAODwrk,
 
 	//Check if track is removed from 2tr vertex => then sharing of track left should also be decreased
         if( vrt.selTrk.size() == 1){
+          
 	   long int LeftTrack = vrt.selTrk[0];  // track left in 1tr vertex
-	   for(it = (*TrkInVrt).at(LeftTrack).begin(); it!=(*TrkInVrt)[LeftTrack].end(); ++it) {
+	   auto& verticesForLeftTrack = TrkInVrt->at(LeftTrack);
+	   for (it = verticesForLeftTrack.begin();it != verticesForLeftTrack.end(); ++it) {
 	      if( (*it) == selectedVertex ) {
-	       (*TrkInVrt)[LeftTrack].erase(it); break;
+	       verticesForLeftTrack.erase(it); break;
 	      }
 	   }
 
@@ -1439,7 +1442,7 @@ InDetVKalVxInJetTool::getVrtSecMulti(workVectorArrxAOD* xAODwrk,
          foundMerged = true;
       }
 
-      if(foundMerged) vrt1=bestVrt;
+      if(foundMerged) vrt1= std::move(bestVrt);
       vrt2.Good=false;
 
       // Now detached tracks
@@ -1458,7 +1461,7 @@ InDetVKalVxInJetTool::getVrtSecMulti(workVectorArrxAOD* xAODwrk,
 			     nVrt.vertexCharge, nVrt.vertexCov,
 			     nVrt.chi2PerTrk, nVrt.trkAtVrt, nVrt.chi2,
 			     istate, false);
-         if(sc.isSuccess()) (*wrkVrtSet).push_back(nVrt);
+         if(sc.isSuccess()) (*wrkVrtSet).push_back(std::move(nVrt));
 
       } else if( detachedTrk.size()==1 ){
          bool tFound = false;
@@ -1488,7 +1491,7 @@ InDetVKalVxInJetTool::getVrtSecMulti(workVectorArrxAOD* xAODwrk,
 				  istate, false);
               if(sc.isSuccess() && nVrt.chi2<Chi2min) {
 		Chi2min = nVrt.chi2;
-		saveVrt = nVrt;
+		saveVrt = std::move(nVrt);
 		selectedTrk = trk;
 	      }
            }
@@ -1498,7 +1501,7 @@ InDetVKalVxInJetTool::getVrtSecMulti(workVectorArrxAOD* xAODwrk,
 	     saveVrt.selTrk[0] = detachedTrk[0];
              saveVrt.detachedTrack = selectedTrk;
              saveVrt.vertexMom = momAtVrt(saveVrt.trkAtVrt[0]);  //redefine vertex momentum
-             (*wrkVrtSet).push_back(saveVrt);
+             (*wrkVrtSet).push_back(std::move(saveVrt));
            }
          } // end if(!tFound)
 

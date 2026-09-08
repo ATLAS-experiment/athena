@@ -1,21 +1,15 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETRIOMAKER_XAODTOINDETCLUSTERCONVERSION_H
 #define INDETRIOMAKER_XAODTOINDETCLUSTERCONVERSION_H
 
-//STL
-#include <string>
-
-//Gaudi
-#include "GaudiKernel/ToolHandle.h"
-
 // Base class
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
-
+#include "StoreGate/WriteDecorHandleKey.h"
 //InDet
 //can't fwd declare this, needed for typedef to Pixel_RDO_Container
 #include "InDetPrepRawData/PixelClusterContainer.h"
@@ -43,21 +37,12 @@ class XAODToInDetClusterConversion
   : public AthReentrantAlgorithm {
  public:
   
-  /// Constructor with parameters:
-  XAODToInDetClusterConversion(const std::string &name,ISvcLocator *pSvcLocator);
-
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
   //@name Usual algorithm methods
   //@{
   virtual StatusCode initialize() override;
   virtual StatusCode execute(const EventContext& ctx) const override;
-  /**    @name Disallow default instantiation, copy, assignment */
-  //@{
-  //@}
-  XAODToInDetClusterConversion() = delete;
-  XAODToInDetClusterConversion(const XAODToInDetClusterConversion&) = delete;
-  XAODToInDetClusterConversion &operator=(const XAODToInDetClusterConversion&) = delete;
-   //@}
-
+  
  private:
   StatusCode convertPixelClusters(const EventContext& ctx) const;
   StatusCode convertStripClusters(const EventContext& ctx) const;
@@ -75,17 +60,23 @@ class XAODToInDetClusterConversion
 
   SG::WriteHandleKey<InDet::PixelClusterContainer> m_outputPixelClusterContainerKey {this, "OutputPixelClustersName", "ITkPixelClusters", "name of the output InDet pixel cluster container"};
   SG::WriteHandleKey< InDet::SiClusterContainer > m_pixelClusterContainerLinkKey {this, "PixelClustersLinkName", "ITkPixelClusters"};
+  SG::WriteHandleKey<std::vector<unsigned int>> m_pixelClusterOffSetKey{this, "PixelClusterOffSetKey", "ITkPixelClustersOffsets"};
 
+  SG::WriteDecorHandleKey<xAOD::PixelClusterContainer> m_pixelClusterLinkKey{this, "PixelClusterLinkKey", m_inputPixelClusterContainerKey, "pixelClusterLink", "Decoration to link Trk object to xAOD"  };
+ 
   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_stripDetEleCollKey {this, "StripDetEleCollKey", "ITkStripDetectorElementCollection", "Key of SiDetectorElementCollection for Strip"};
   SG::ReadHandleKey<xAOD::StripClusterContainer> m_inputStripClusterContainerKey {this, "InputStripClustersName", "ITkStripClusters", "name of the input xAOD strip cluster container"};
 
   SG::WriteHandleKey<InDet::SCT_ClusterContainer> m_outputStripClusterContainerKey {this, "OutputStripClustersName", "ITkStripClusters", "name of the output InDet pixel cluster container"};
   SG::WriteHandleKey< InDet::SiClusterContainer > m_stripClusterContainerLinkKey {this, "StripClustersLinkName", "ITkStripClusters"};
+  SG::WriteHandleKey<std::vector<unsigned int>> m_stripClusterOffSetKey{this, "StripClusterOffSetKey", "ITkStripClustersOffsets"};
+  SG::WriteDecorHandleKey<xAOD::StripClusterContainer> m_stripClusterLinkKey{this, "StripClusterLinkKey", m_inputStripClusterContainerKey, "sctClusterLink", "Decoration to link Trk object to xAOD"  };
 
   SG::ReadCondHandleKey<InDetDD::HGTD_DetectorElementCollection> m_HGTDDetEleCollKey{this, "HGTDDetEleCollKey", "HGTD_DetectorElementCollection", "Key of HGTD_DetectorElementCollection for HGTD"};
-  
   SG::ReadHandleKey<xAOD::HGTDClusterContainer> m_inputHgtdClusterContainerKey {this, "InputHGTDClustersName", "HGTD_Clusters", "name of the input xAOD hgtd cluster container"};
+
   SG::WriteHandleKey<::HGTD_ClusterContainer> m_outputHgtdClusterContainerKey {this, "OutputHGTDClustersName", "HGTD_Clusters", "name of the output InDet hgtd cluster container"};
+  SG::WriteDecorHandleKey<xAOD::HGTDClusterContainer> m_hgdtClusterLinkKey{this, "HgtdClusterLinkKey", m_inputHgtdClusterContainerKey, "hgtdClusterLink", "Decoration to link Trk object to xAOD"  };
   
   Gaudi::Property<bool> m_processPixel {this, "ProcessPixel", false};
   Gaudi::Property<bool> m_processStrip {this, "ProcessStrip", false};

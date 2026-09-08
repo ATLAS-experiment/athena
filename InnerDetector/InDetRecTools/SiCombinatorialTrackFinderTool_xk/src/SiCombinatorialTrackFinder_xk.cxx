@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -853,7 +853,7 @@ Trk::Track* InDet::SiCombinatorialTrackFinder_xk::convertToTrack(SiCombinatorial
          data.trackinfo(),
          std::make_unique<Trk::TrackStates>(
              data.trajectory().convertToTrackStateOnSurface(
-                 data.cosmicTrack())),
+                 data.cosmicTrack(), ctx)),
          data.trajectory().convertToFitQuality());
   }
 
@@ -893,7 +893,7 @@ Trk::Track* InDet::SiCombinatorialTrackFinder_xk::convertToNextTrack(SiCombinato
   // verify first track parameters
   const Trk::TrackParameters *param = nullptr;
   for (const Trk::TrackStateOnSurface *a_tsos : *tsos) {
-     const Trk::TrackParameters *param = a_tsos->trackParameters();
+     param = a_tsos->trackParameters();
      if (param) {
         break;
      }
@@ -905,7 +905,7 @@ Trk::Track* InDet::SiCombinatorialTrackFinder_xk::convertToNextTrack(SiCombinato
      // reject tracks with small pT
      // The cut should be large enough otherwise eta computation of such tracks may yield NANs.
      if (pt2 < m_minPt2Cut) {
-        ATH_MSG_WARNING( "Reject low pT track (pT = " << sqrt(pt2) << " < " << m_minPtCut.value() << ")");
+        ATH_MSG_WARNING( "Reject low pT track (pT = " << std::sqrt(pt2) << " < " << m_minPtCut.value() << ")");
         return nullptr;
      }
   }

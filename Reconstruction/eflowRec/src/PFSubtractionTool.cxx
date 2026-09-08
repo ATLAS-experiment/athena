@@ -182,9 +182,11 @@ unsigned int PFSubtractionTool::matchAndCreateEflowCaloObj(const EventContext& c
         {
           // Narrower cone is a subset of the selected clusters
           // Distance returned is deltaR^2
-          thisEfRecTrack->addAlternativeClusterMatch(trackClusterLink, "cone_015");
+          static const  std::string cone15Str{"cone_015"};
+          thisEfRecTrack->addAlternativeClusterMatch(trackClusterLink, cone15Str);
         }
-        thisEfRecTrack->addAlternativeClusterMatch(trackClusterLink, "cone_02");
+        static const std::string cone2Str{"cone_02"};
+        thisEfRecTrack->addAlternativeClusterMatch(trackClusterLink, cone2Str);
       }//loop over bestClusters_02
 
       //This matching scheme is used to match the calorimeter cluster(s) to be used in the charged showers subtraction for this track.
@@ -603,7 +605,7 @@ void PFSubtractionTool::printAllClusters(const eflowRecClusterContainer& recClus
 void PFSubtractionTool::addSubtractedCells(eflowCaloObject& thisEflowCaloObject, const std::vector<std::pair<xAOD::CaloCluster *, bool> >& clusterList) const{
 
   unsigned int numTracks = thisEflowCaloObject.nTracks();
-
+  const std::string allCaloStr{"AllCalo"};
   for (unsigned int iTrack = 0; iTrack < numTracks; ++iTrack){
     eflowRecTrack* thisTrack = thisEflowCaloObject.efRecTrack(iTrack);
     for (const auto& thisPair : clusterList){
@@ -611,7 +613,7 @@ void PFSubtractionTool::addSubtractedCells(eflowCaloObject& thisEflowCaloObject,
       const CaloClusterCellLink* theCellLink = thisCluster->getCellLinks();
       CaloClusterCellLink::const_iterator theCell = theCellLink->begin();
       CaloClusterCellLink::const_iterator lastCell = theCellLink->end();
-      for (; theCell != lastCell; ++theCell) thisTrack->addSubtractedCaloCell(ElementLink<CaloCellContainer>("AllCalo",theCell.index()),theCell.weight()/numTracks);
+      for (; theCell != lastCell; ++theCell) thisTrack->addSubtractedCaloCell(ElementLink<CaloCellContainer>(allCaloStr,theCell.index()),theCell.weight()/numTracks);
     }
   }
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -63,6 +63,7 @@
 # include <errno.h>
 
 #include <assert.h>                            // wlav
+#include <bit>
 
 #ifndef HAVE_R_DEBUG
    extern ElfW(Dyn) _DYNAMIC []; // #pragma weak?   // wlav
@@ -684,12 +685,11 @@ SharedLibrary::function (const std::string &name, bool mangle /* = true */) cons
 
 #if HAVE_DLOPEN || HAVE_LOAD
     // See comments in "self()" about crashes in dlerror().
+    static_assert (sizeof (Function) == sizeof (Data));
     const char *error = 0;
-    union { Function func; Data data; } sym;
-    sym.data = ::dlsym (m_handle, mangled.c_str ());
-    if (! sym.data && (error = ::dlerror ()) != 0)
-	throw SharedLibraryError ("dlsym()", error);
-    symbol = sym.func;
+    Data data = ::dlsym (m_handle, mangled.c_str ());
+    if (! data && (error = ::dlerror ()) != 0) throw SharedLibraryError ("dlsym()", error);
+    symbol = std::bit_cast<Function> (data);
 
 #elif HAVE_SHL_LOAD
     shl_t handle = (shl_t) m_handle;

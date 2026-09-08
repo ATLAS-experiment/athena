@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
-from AthenaConfiguration.Enums import FlagEnum
+from AthenaConfiguration.Enums import FlagEnum, LHCPeriod
 
 class SeedingStrategy(FlagEnum):
     GridTriplet = "GridTriplet"
@@ -12,6 +12,13 @@ class SeedingStrategy(FlagEnum):
 class AmbiguitySolverStrategy(FlagEnum):
     Greedy = "GreedySolver"
     ScoreBased = "ScoreBasedAmbiguitySolver"
+
+# Which implementation to use for space point formation
+# ActsTrk  : the Athena implementation
+# ActsCore : the ACTS space point builders, and the only one supporting cosmics
+class SpacePointStrategy(FlagEnum):
+    ActsTrk = "ActsTrk"
+    ActsCore = "ActsCore"
 
 # Define the Ambiguity resolution strategy modes
 # OUTSIDE_TF : run the ambiguity resolution in a separate algorithm
@@ -59,12 +66,28 @@ class TrackFitterType(FlagEnum):
 #   measurements for extending tracks (AnalogueClustering)
 # - or only apply the AnalogueClustering to selected measurements
 #   (AnalogueClusteringAfterSelection)
-# - or perform AnalogueClustering with NN corrections
+# - or add NN corrections, again either on the selected measurements
+#   (NNClustering) or on all candidates (NNClusteringBeforeSelection)
 class PixelCalibrationStrategy(FlagEnum):
     Uncalibrated = "Uncalibrated"
     AnalogueClustering = "AnalogueClustering"
     AnalogueClusteringAfterSelection = "AnalogueClusteringAfterSelection"
     NNClustering = "NNClustering"
+    NNClusteringBeforeSelection = "NNClusteringBeforeSelection"
+
+    def usesCalibration(self):
+        """whether a calibrator is needed at all"""
+        return self is not PixelCalibrationStrategy.Uncalibrated
+
+    def usesNN(self):
+        """whether NN corrections are applied on top"""
+        return self in (PixelCalibrationStrategy.NNClustering,
+                        PixelCalibrationStrategy.NNClusteringBeforeSelection)
+
+    def calibrateAfterSelection(self):
+        """whether only the selected measurements are calibrated"""
+        return self in (PixelCalibrationStrategy.AnalogueClusteringAfterSelection,
+                        PixelCalibrationStrategy.NNClustering)
 
 # Flag for strip calibration strategy during track finding
 # - use cluster as is (Uncalibrated)
@@ -75,17 +98,28 @@ class StripCalibrationStrategy(FlagEnum):
     Uncalibrated = "Uncalibrated"
     DigitalCalibration = "DigitalCalibration"
     DigitalCalibrationAfterSelection = "DigitalCalibrationAfterSelection"
-    
+
+    def usesCalibration(self):
+        """whether a calibrator is needed at all"""
+        return self is not StripCalibrationStrategy.Uncalibrated
+
+    def calibrateAfterSelection(self):
+        """whether only the selected measurements are calibrated"""
+        return self is StripCalibrationStrategy.DigitalCalibrationAfterSelection
+
+
 def createActsConfigFlags():
     actscf = AthConfigFlags()
     
     # General Flags
-    actscf.addFlag('Acts.EDM.PersistifyClusters', lambda pcf: pcf.Acts.EDM.PersistifySpacePoints)
-    actscf.addFlag('Acts.EDM.PersistifySpacePoints', False)
+    actscf.addFlag('Acts.EDM.PersistifyClusters', lambda pcf: pcf.Acts.EDM.PersistifySpacePoints and not pcf.Tracking.StoreSlimmedDataPreparation)
+    actscf.addFlag('Acts.EDM.PersistifySpacePoints', lambda pcf: pcf.Tracking.StoreSlimmedDataPreparation)
     actscf.addFlag('Acts.EDM.PersistifyTracks', False)
     # set to True to use the PhaseII pixel and strip RAW data EDM
     actscf.addFlag('Acts.EDM.PhaseII', False)
     actscf.addFlag('Acts.useCache', False)
+    # special persistifications
+    actscf.addFlag('Acts.EDM.SlimContent', lambda pcf: pcf.Tracking.StoreSlimmedDataPreparation)
     
     # Scheduling
     from InDetConfig.ITkActsHelpers import primaryPassUsesActs
@@ -105,6 +139,7 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.TrackingGeometry.MaterialFileExtension', '')
     actscf.addFlag('Acts.TrackingGeometry.UseBlueprint', False)
     actscf.addFlag('Acts.TrackingGeometry.ObjDebugOutput', False)
+    actscf.addFlag('Acts.TrackingGeometry.KeepGoingOnMaterialMergeFailure', False)
 
     ## Enable Tracking geometry with additional passive layers
     actscf.addFlag('Acts.TrackingGeometry.InsertITkPassiveMaterialLayers', False)
@@ -122,12 +157,13 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.doAnalysis', False)
     actscf.addFlag('Acts.doAnalysisNtuples', lambda pcf: pcf.Acts.doAnalysis)
     actscf.addFlag('Acts.Clusters.doAnalysis', lambda pcf: pcf.Acts.doAnalysis)
-    actscf.addFlag('Acts.SpacePoints.doAnalysis', lambda pcf: pcf.Acts.doAnalysis)
     actscf.addFlag('Acts.Seeds.doAnalysis', lambda pcf: pcf.Acts.doAnalysis)
     actscf.addFlag('Acts.Tracks.doAnalysis', lambda pcf: pcf.Acts.doAnalysis)
     actscf.addFlag('Acts.Particles.doAnalysis', lambda pcf: pcf.Acts.doAnalysis)
     actscf.addFlag('Acts.storeTrackStateInfo', False)
     actscf.addFlag('Acts.doTruthInspection', False)
+    # Save Trk::Track link for combined muon reconstruction, temporary
+    actscf.addFlag('Acts.doxAODToTrkConversion', True)
 
     # Cluster
     actscf.addFlag("Acts.Clusters.UseWeightedPosition", False)
@@ -137,10 +173,23 @@ def createActsConfigFlags():
     
     # SpacePoint
     actscf.addFlag('Acts.SpacePoints.useBeamSpotConstraintStrips', True)
+    actscf.addFlag('Acts.SpacePoints.doPixel', lambda pcf: pcf.Detector.EnableITkPixel)
+    actscf.addFlag('Acts.SpacePoints.doStrip', lambda pcf: (
+        pcf.Detector.EnableITkStrip and (
+            not pcf.Tracking.doITkFastTracking or
+            pcf.Acts.doLargeRadius or pcf.Acts.doLowPt or
+            pcf.Acts.doITkConversion)))
+    actscf.addFlag('Acts.SpacePoints.doAnalysis', lambda pcf: pcf.Acts.doAnalysis)
+
+    # Strip and pixel are chosen separately so that either can be validated on its own
+    actscf.addFlag('Acts.SpacePointStrategy', SpacePointStrategy.ActsTrk, type=SpacePointStrategy)
+    actscf.addFlag('Acts.PixelSpacePointStrategy', SpacePointStrategy.ActsTrk, type=SpacePointStrategy)
 
     # Seeding
-    actscf.addFlag("Acts.SeedingStrategy", SeedingStrategy.GridTriplet, type=SeedingStrategy)  # Define Seeding Strategy
-    
+    actscf.addFlag("Acts.Gbts.connectionTable", 'binTables_ITK_RUN4.txt')
+    actscf.addFlag("Acts.Gbts.connectionTableLrt", 'binTables_ITK_RUN4_LRT.txt')
+    actscf.addFlag("Acts.Gbts.dumpGbtsGeometry", False)
+    actscf.addFlag("Acts.Gbts.geometryDump", 'gbts_layer_geometry.txt') # for gbts training tool
     # Track finding
     actscf.addFlag('Acts.PixelCalibrationStrategy', PixelCalibrationStrategy.Uncalibrated, type=PixelCalibrationStrategy)
     actscf.addFlag('Acts.StripCalibrationStrategy', StripCalibrationStrategy.Uncalibrated, type=StripCalibrationStrategy)
@@ -152,11 +201,17 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.useHGTDClusterInTrackFinding', False) # use HGTD cluster in track finding
     actscf.addFlag('Acts.branchStopperMeasCutReduce', 2)
     actscf.addFlag('Acts.branchStopperAbsEtaMeasCut', 1.2)
-    actscf.addFlag('Acts.forceTrackOnSeed', lambda pcf: not(pcf.Acts.SeedingStrategy is SeedingStrategy.GbtsFtf and
-                                                            pcf.Acts.PixelCalibrationStrategy is PixelCalibrationStrategy.AnalogueClusteringAfterSelection)) # forceTrackOnSeed does not seem to work with GBTS seeds and analogue cluster calibration
+    actscf.addFlag('Acts.SeedRefitOutlierChi2Cut', float('inf'))  # OutlierChi2Cut for the seed refit Kalman fitter, applied whenever a seed refit is scheduled. inf == disabled.
+    actscf.addFlag('Acts.LrtStripSeedRefit', True)  # Toggle the LRT strip-seed refit (KF on strip seeds before CKF). 
+    actscf.addFlag('Acts.stripCalibrationIterations', 1)  # Strip-SP calibration iterations in TrackParamsEstimationTool (all passes). 
+    actscf.addFlag('Acts.forceTrackOnSeed', True) # force track to use the seed measurements; steer from the outside if a setup needs it disabled
+    actscf.addFlag('Acts.PixelNNCalibrationModelsFolder', 'ITkPixelClusterization/nn-01-01-01/') # location of models for pixel ONNX files, extpected content of the foder are: number.onnx, pos1.onnx, pos2.onnx, pos3.onnx
+                                                                       # the files are located in /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/
+                                                                       # this flag is used only if PixelCalibrationStrategy is one of the NN strategies
+    actscf.addFlag('Acts.refitSeeds', False) # refit seeds for CKF initial parameters
         
     # Ambiguity resolution    
-    actscf.addFlag('Acts.doAmbiguityResolution', True)
+    actscf.addFlag('Acts.doAmbiguityResolution', False)
     actscf.addFlag('Acts.AmbiguitySolverStrategy', AmbiguitySolverStrategy.Greedy, type=AmbiguitySolverStrategy)  # Define Ambiguity Solver Strategy
     actscf.addFlag('Acts.AmbiguitySolverMode', lambda pcf: AmbiguitySolverMode.OUTSIDE_TF if pcf.Acts.doAmbiguityResolution else AmbiguitySolverMode.DURING_TF, type=AmbiguitySolverMode)
     
@@ -170,15 +225,26 @@ def createActsConfigFlags():
 
     # GSF specific flags
     actscf.addFlag("Acts.GsfRefitLegacyTrk", False) # Refit Legacy tracks using ACTS GSF
-    actscf.addFlag("Acts.GsfRefitActs", False) # Refit ACTS tracks using ACTS GSF
+    actscf.addFlag("Acts.GsfRefitActs", lambda pcf:
+                   pcf.GeoModel.Run >= LHCPeriod.Run4) # Refit ACTS tracks using ACTS GSF
     actscf.addFlag("Acts.GsfMaxComponents", 12)
     actscf.addFlag("Acts.GsfComponentMergeMethod", 'MaxWeight')
-    actscf.addFlag("Acts.GsfDirectNavigation", False)
+    actscf.addFlag("Acts.GsfDirectNavigation", lambda pcf:
+                   pcf.GeoModel.Run >= LHCPeriod.Run4)
     actscf.addFlag("Acts.GsfOutlierChi2Cut", 1e4) # Effectively no cut. Compatible with legacy
-    actscf.addFlag("Acts.extrapolateElectronsLegacy", False) # Use legacy calo extrapolation with ACTS tracks
+    actscf.addFlag("Acts.extrapolateElectronsLegacy", lambda pcf:
+                   not pcf.Acts.TrackingGeometry.UseBlueprint) # Use legacy calo extrapolation with ACTS tracks
 
     # Decorations
     actscf.addFlag('Acts.decoratePRD.sdoSiHit', lambda pcf: pcf.Tracking.doTIDE_AmbiTrackMonitoring)
+
+    # GPU track reconstruction
+    actscf.addFlag("Acts.Device.doCellSorting", True)
+    actscf.addFlag("Acts.Device.doClusterization", False)
+    actscf.addFlag("Acts.Device.doSpacePointFormation", False)
+    actscf.addFlag("Acts.Device.doSeeding", False)
+    actscf.addFlag("Acts.Device.seedingStrategy", SeedingStrategy.GridTriplet, type=SeedingStrategy)
+    actscf.addFlag("Acts.Device.doTrackReconstruction", False)
 
     # GNN specific flags (scoped)
     actscf.addFlag("Acts.GNN.Enable", False)

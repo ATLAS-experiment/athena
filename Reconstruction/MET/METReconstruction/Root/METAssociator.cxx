@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // METAssociator.cxx
@@ -317,7 +317,7 @@ namespace met {
           else{ // MET part:
             ATH_CHECK( this->extractFE(obj, constlist, constits, momentumOverride, ctx) );
           }
-          MissingETComposition::insert(metMap, obj, constlist, momentumOverride);
+          MissingETComposition::insert(metMap, obj, constlist, std::move(momentumOverride));
         }
         else{
           // Old PFO EDM
@@ -327,7 +327,7 @@ namespace met {
           }else{
             std::map<const IParticle*,MissingETBase::Types::constvec_t> momentumOverride;
             ATH_CHECK( this->extractPFO(obj,constlist,constits,momentumOverride, ctx) );
-            MissingETComposition::insert(metMap,obj,constlist,momentumOverride);
+            MissingETComposition::insert(metMap,obj,constlist,std::move(momentumOverride));
           }
         }
       } else {
@@ -340,7 +340,7 @@ namespace met {
             constlist.push_back((*constits.tcCont)[cl->index()]);
           }
         } else {
-          constlist = tclist;
+          constlist = std::move(tclist);
         }
         if(m_useTracks) ATH_CHECK( this->extractTracks(obj,constlist,constits) );
         MissingETComposition::insert(metMap,obj,constlist);

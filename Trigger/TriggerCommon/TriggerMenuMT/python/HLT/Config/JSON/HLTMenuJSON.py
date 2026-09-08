@@ -1,8 +1,9 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import re
 import json
-from functools import cache
+from collections import defaultdict
+
 from TrigConfigSvc.TrigConfigSvcCfg import getHLTMenuFileName
 from AthenaCommon.CFElements import getSequenceChildren
 from AthenaCommon.Logging import logging
@@ -38,37 +39,39 @@ def __getStepsDataFromAlgSequence(HLTAllSteps):
         __log.warn( "No HLTAllSteps sequencer, will not export per-Step data for chains.")
     return stepsData
 
-@cache  # called frequently
 def __getFilterChains(filterAlg):
-    if hasattr(filterAlg, "Chains"):
+    try:
         # Format: leg000_CHAIN or CHAIN
         return set(ch[7:] if ch.startswith('leg') else ch for ch in filterAlg.Chains)
-    else:
+    except AttributeError:  # no "Chains"
         return set()
 
-def __getChainSequencers(stepsData, chainName):
-    """ Finds the Filter which is responsible for this Chain in each Step.
-        Return a list of the per-Step name() of the Sequencer which is unlocked by the Chain's Filter in the Step.
+def __getChainSequencers(stepsData):
+    """ Finds the Filter which is responsible for each Chain in each Step.
+        Returns a dictionary mapping the chain name to a list of the per-Step name
+        of the Sequencer which is unlocked by the Chain's Filter in the Step.
     """
-    sequencers = []
-    for counter, step in enumerate(stepsData, 1):
-        mySequencer = None        
-        for sequencer in step:     
+    numSteps = len(stepsData)
+    chainSequencers = defaultdict(lambda : [""] * numSteps)
+    for counter, step in enumerate(stepsData):
+        for sequencer in step:
             try:
                 sequencerFilter = sequencer.Members[0] # Always the first child in the step
             except (AttributeError, IndexError):
                 continue  # empty steps
-            if chainName in __getFilterChains(sequencerFilter):
-                if mySequencer is not None:
-                    __log.error( "Multiple Filters found (corresponding Sequencers %s, %s) for %s in Step %i!",
-                        mySequencer.getName(), sequencer.getName(), chainName, counter)
-                mySequencer = sequencer
 
-        sequencers.append(mySequencer.getName() if mySequencer else "")
+            for chainName in __getFilterChains(sequencerFilter):
+                if chainSequencers[chainName][counter] != "":
+                    __log.error( "Multiple Filters found (corresponding Sequencers %s, %s) for %s in Step %i!",
+                                 chainSequencers[chainName][counter], sequencer.getName(), chainName, counter+1)
+                chainSequencers[chainName][counter] = sequencer.getName()
+
     # drop trailing empty names
-    while len(sequencers) != 0 and sequencers[-1] == "":
-        del sequencers[-1]
-    return sequencers
+    for chainName, seqList in chainSequencers.items():
+        while seqList and seqList[-1] == "":
+            del seqList[-1]
+
+    return chainSequencers
 
 def __getSequencerAlgs(stepsData):
     """ For each Sequencer in each Step, return a flat list of the full name of all Algorithms under the Sequencer
@@ -92,6 +95,7 @@ def generateJSON(flags, chainDicts, HLTAllSteps):
 
     # List of steps data for sequencers
     stepsData = __getStepsDataFromAlgSequence(HLTAllSteps)
+    chainSequencers = __getChainSequencers(stepsData)
     from TriggerMenuMT.HLT.Menu import StreamInfo
     for chain in chainDicts:
         # Prepare information for stream list and fill separate dictionary
@@ -128,7 +132,7 @@ def generateJSON(flags, chainDicts, HLTAllSteps):
             "l1thresholds": l1Thresholds,
             "groups": chain["groups"],
             "streams": chainStreamTags,
-            "sequencers": __getChainSequencers(stepsData, chainName)
+            "sequencers": chainSequencers.get(chainName, [])
         }
 
     # All algorithms executed by a given Sequencer

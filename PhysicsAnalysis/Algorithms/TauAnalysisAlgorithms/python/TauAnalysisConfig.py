@@ -37,6 +37,10 @@ class TauCalibrationConfig (ConfigBlock):
         self.addOption ('addGlobalFELinksDep', False, type=bool,
             info="whether to add dependencies for the global FE links (needed for PHYSLITE production)",
             expertMode=True)
+        self.addOption ('useGNTau', False, type=bool,
+            info="use GNTau-based ID instead of RNNTau ID. "
+            "Recommendations: experimental feature and might become default soon.",
+            expertMode=True)
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -118,6 +122,9 @@ class TauCalibrationConfig (ConfigBlock):
         config.addPrivateTool( 'smearingTool', 'TauAnalysisTools::TauSmearingTool' )
         alg.smearingTool.useFastSim = config.dataType() is DataType.FastSim
         alg.smearingTool.Campaign = "mc23" if config.geometry() is LHCPeriod.Run3 else "mc20"
+        if config.geometry() is LHCPeriod.Run2 and self.useGNTau:
+           raise RuntimeError("Tau Smearing recommendations with GNTau are not yet available for Run2") 
+        alg.smearingTool.useGNTau = self.useGNTau
         alg.taus = config.readName (self.containerName)
         alg.tausOut = config.copyName (self.containerName)
         config.setExtraOutputs ({('xAOD::IParticleContainer' , 'StoreGateSvc+' + config.readName(self.containerName, nominal=True) + '.RNNEleScoreSigTrans_v1')})
@@ -428,40 +435,50 @@ class TauWorkingPointEfficiencyConfig (ConfigBlock) :
                                      'Reco_effSF' + postfix)
             sfList += [alg.scaleFactorDecoration]
 
+
+            campaign = "mc23" if config.geometry() is LHCPeriod.Run3 else "mc20" 
+
             # TauEfficiencyCorrectionTool for Identification, use only in case TauID is requested in TauSelectionTool
             if self.quality not in ('VeryLoose','Baseline','BaselineForFakes'):
-                if not self.useGNTau: # current recommendations are for RNN ID, so don't use in case of GNTau
+                alg = config.createAlgorithm( 'CP::TauEfficiencyCorrectionsAlg',
+                               'TauEfficiencyCorrectionsAlgID' )
+                config.addPrivateTool( 'efficiencyCorrectionsTool',
+                            'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
+                alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [4]
 
-                    alg = config.createAlgorithm( 'CP::TauEfficiencyCorrectionsAlg',
-                                   'TauEfficiencyCorrectionsAlgID' )
-                    config.addPrivateTool( 'efficiencyCorrectionsTool',
-                                'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
-                    alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [4]
-                    if self.quality=="Loose" or self.manual_sel_rnnwp == "loose":
-                        JetIDLevel = 7
-                    elif self.quality=="Medium" or self.manual_sel_rnnwp == "medium":
-                        JetIDLevel = 8
-                    elif self.quality=="Tight" or self.manual_sel_rnnwp == "tight":
-                        JetIDLevel = 9
-                    else:
-                        raise ValueError ("invalid tauID: \"" + self.quality + "\". Allowed values are loose, medium, tight")
+                jetIDLevels = (
+                    {"Loose": 11, "Medium": 12, "Tight": 13}
+                    if self.useGNTau
+                    else {"Loose": 7, "Medium": 8, "Tight": 9}
+                )
+                wp = self.quality
+                if not self.useGNTau and self.manual_sel_rnnwp is not None:
+                    wp = self.manual_sel_rnnwp.capitalize()
+                if wp not in jetIDLevels:
+                    raise ValueError(
+                        'Invalid tauID: "'
+                        + str(wp)
+                        + '". Allowed values are Loose, Medium, Tight'
+                    )
 
-                    alg.efficiencyCorrectionsTool.JetIDLevel = JetIDLevel
-                    alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
-                    alg.efficiencyCorrectionsTool.Campaign = "mc23" if config.geometry() is LHCPeriod.Run3 else "mc20"
-                    alg.scaleFactorDecoration = 'tau_ID_effSF' + selectionPostfix + '_%SYS%'
-                    alg.outOfValidity = 2 #silent
-                    alg.outOfValidityDeco = 'bad_ID_eff' + selectionPostfix
-                    alg.taus = config.readName (self.containerName)
-                    alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-                    if self.saveDetailedSF:
-                        config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
-                                             'ID_effSF' + postfix)
-                    sfList += [alg.scaleFactorDecoration]
+                alg.efficiencyCorrectionsTool.JetIDLevel = jetIDLevels[wp]
+                alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
+                alg.efficiencyCorrectionsTool.Campaign = campaign
+                alg.efficiencyCorrectionsTool.useGNTau = self.useGNTau
+                alg.scaleFactorDecoration = 'tau_ID_effSF' + selectionPostfix + '_%SYS%'
+                alg.outOfValidity = 2 #silent
+                alg.outOfValidityDeco = 'bad_ID_eff' + selectionPostfix
+                alg.taus = config.readName (self.containerName)
+                alg.preselection = config.getPreselection (self.containerName, self.selectionName)
+                if self.saveDetailedSF:
+                    config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
+                                         'ID_effSF' + postfix)
+                sfList += [alg.scaleFactorDecoration]
 
             # TauEfficiencyCorrectionTool for eVeto both on true tau and fake tau, use only in case eVeto is requested in TauSelectionTool
             if self.use_eVeto:
-                if not self.useGNTau: # eVeto correction for fake tau are for RNN ID, so don't use them for GNTau
+                # eVeto correction for fake tau are for RNN ID Run2/Run3, or for GNTau for Run3   
+                if (not self.useGNTau or (self.useGNTau and campaign == "mc23")):
                     # correction for fake tau
                     alg = config.createAlgorithm( 'CP::TauEfficiencyCorrectionsAlg',
                                        'TauEfficiencyCorrectionsAlgEvetoFakeTau' )
@@ -475,19 +492,34 @@ class TauWorkingPointEfficiencyConfig (ConfigBlock) :
                         alg.efficiencyCorrectionsTool.EleIDLevel = 2
                     elif self.manual_sel_evetowp == "medium":
                         alg.efficiencyCorrectionsTool.EleIDLevel = 3
-                        
+
                     alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
-                    alg.efficiencyCorrectionsTool.Campaign = "mc23" if config.geometry() is LHCPeriod.Run3 else "mc20"
+                    alg.efficiencyCorrectionsTool.Campaign = campaign
+                    alg.efficiencyCorrectionsTool.useGNTau = self.useGNTau
                     alg.scaleFactorDecoration = 'tau_EvetoFakeTau_effSF' + selectionPostfix + '_%SYS%'
-                    # for 2025-prerec, eVeto recommendations are given separately for Loose and Medium RNN 
-                    if self.quality=="Loose" or self.manual_sel_rnnwp == "loose":
-                        JetIDLevel = 7
-                    elif self.quality=="Medium" or self.manual_sel_rnnwp == "medium":
-                        JetIDLevel = 8
-                    elif self.quality=="Tight" or self.manual_sel_rnnwp == "tight": 
-                        log.warning("eVeto SFs are not available for Tight WP -> fallback to Medium WP")
-                        JetIDLevel = 8
-                    alg.efficiencyCorrectionsTool.JetIDLevel = JetIDLevel 
+
+                    # for 2025-prerec, eVeto recommendations are given separately for Loose and Medium RNN
+                    jetIDLevels = (
+                        {"Loose": 11, "Medium": 12, "Tight": 13}
+                        if self.useGNTau
+                        else {"Loose": 7, "Medium": 8, "Tight": 9}
+                    )
+                    wp = self.quality
+                    if not self.useGNTau and self.manual_sel_rnnwp is not None:
+                        wp = self.manual_sel_rnnwp.capitalize()
+                    if wp not in jetIDLevels:
+                        raise ValueError(
+                            'Invalid tauID: "'
+                            + str(wp)
+                            + '". Allowed values are Loose, Medium, Tight'
+                        )
+                    if wp == "Tight":
+                        log.warning(
+                            "eVeto SFs are not available for Tight WP -> fallback to Medium WP"
+                        )
+                        wp = "Medium"
+
+                    alg.efficiencyCorrectionsTool.JetIDLevel = jetIDLevels[wp]
                     alg.outOfValidity = 2 #silent
                     alg.outOfValidityDeco = 'bad_EvetoFakeTau_eff' + selectionPostfix
                     alg.taus = config.readName (self.containerName)
@@ -599,6 +631,10 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
             # Temporary skip for MC23e until SFs are available
             if config.campaign() is Campaign.MC23e:
                 log.warning("Tau trigger scale factors are not available yet for MC23e")
+                return
+            # Temporary skip for MC23g until SFs are available
+            if config.campaign() is Campaign.MC23g:
+                log.warning("Tau trigger scale factors are not available yet for MC23g")
                 return
 
             triggers = trigger_set(config, self.triggerChainsPerYear,

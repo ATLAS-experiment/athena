@@ -95,7 +95,7 @@ namespace MuonGM {
       // We never alter these in the "Lite" workflow
       std::string oracleTag="";
       std::string oracleNode="";
-      std::map<std::string, std::string> ascii{};
+      std::map<std::string, std::string, std::less<>> ascii{};
       dbr = std::make_unique<RDBReaderAtlas>(m_pDetStore, m_pRDBAccess, oracleTag, oracleNode,  ascii);
 	  
 

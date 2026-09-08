@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //              jFEXForwardJetsAlgo - Algorithm for small R jet Algorithm in jFEX
@@ -17,6 +17,10 @@
 #include "L1CaloFEXSim/jFEXForwardJetsInfo.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
 
+#include <string>
+#include <vector>
+#include <array>
+#include <unordered_map>
 
 namespace LVL1 {
 
@@ -33,7 +37,6 @@ namespace LVL1 {
     virtual ~jFEXForwardJetsAlgo();
 
     virtual StatusCode safetyTest() override;
-    virtual StatusCode reset() override;
 
     virtual void setup(int inputTable[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width], int jfex) override;
     virtual std::unordered_map<int, jFEXForwardJetsInfo> FcalJetsTowerIDLists(int seedThreshold) override;

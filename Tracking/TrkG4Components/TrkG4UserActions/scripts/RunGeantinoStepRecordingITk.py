@@ -71,6 +71,9 @@ detectors = args.detectors if 'detectors' in args and args.detectors else ['ITkP
 detectors.append('Bpipe')  # always run with beam pipe
 setupDetectorFlags(flags, detectors, toggle_geometry=True)
   
+from AthenaConfiguration.Enums import ProductionStep
+flags.Common.ProductionStep = ProductionStep.Simulation
+
 log.debug('Lock config flags now.')
 flags.lock()
 

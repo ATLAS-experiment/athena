@@ -1,25 +1,25 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "TruthMeasMarkerAlg.h"
 
 #include "StoreGate/ReadDecorHandle.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
-#include "DerivationFrameworkMuons/Utils.h"
 #include "MuonTruthHelpers/MuonSimHitHelpers.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
+#include "xAODMuonViews/ChamberViewer.h"
+#include "xAODMuonViews/ContainerDecorator.h"
 
 namespace MuonR4 {
     using PrdCont_t = xAOD::MuonMeasurementContainer;
     using SegLink_t = ElementLink<xAOD::MuonSegmentContainer>;
     using SegLinkVec_t = std::vector<SegLink_t>;
 
-    using MarkerHandle_t = SG::WriteDecorHandle<PrdCont_t, bool>;
-    using LinkHandle_t = SG::WriteDecorHandle<PrdCont_t, SegLinkVec_t>;
+    using MarkerHandle_t = xAOD::ContainerDecorator<PrdCont_t, std::uint8_t>;
+    using LinkHandle_t = xAOD::ContainerDecorator<PrdCont_t, SegLinkVec_t>;
     
     using WriteDecorKey_t = SG::WriteDecorHandleKey<xAOD::MuonMeasurementContainer>;
-    using namespace DerivationFramework;
 
     StatusCode TruthMeasMarkerAlg::initialize() {
         ATH_CHECK(m_segKey.initialize());
@@ -43,18 +43,21 @@ namespace MuonR4 {
         ATH_CHECK(SG::get(segContainer, m_segKey, ctx));
 
         std::unordered_map<const SG::AuxVectorData*, MarkerHandle_t> markers{};
-        std::unordered_map<Muon::MuonStationIndex::TechnologyIndex, std::vector<const PrdCont_t*>> techConts{};
+        using namespace Muon::MuonStationIndex;
+
+        using ChamberView_t = xAOD::ChamberViewer<xAOD::MuonMeasurementContainer>;
+
+        std::array<std::vector<ChamberView_t>, 
+                    Acts::toUnderlying(TechnologyIndex::TechnologyIndexMax)> techConts{};
         for (const WriteDecorKey_t& key : m_writeMarkKeys) {
             const xAOD::MuonMeasurementContainer* measContainer{nullptr};
             ATH_CHECK(SG::get(measContainer, key.contHandleKey(), ctx));
             if (measContainer->empty()) {
                 continue;
             }
-            MarkerHandle_t decor{makeHandle(ctx, key, false)};
-            markers.insert(std::make_pair(measContainer, std::move(decor)));
-            const Muon::MuonStationIndex::TechnologyIndex techIdx = 
-                 m_idHelperSvc->technologyIndex(measContainer->at(0)->identify());
-            techConts[techIdx].push_back(measContainer);
+            markers.insert(std::make_pair(measContainer, MarkerHandle_t{key, ctx}));
+            const TechnologyIndex techIdx = m_idHelperSvc->technologyIndex(measContainer->at(0)->identify());
+            techConts[Acts::toUnderlying(techIdx)].emplace_back(ChamberView_t{*measContainer});
         }
         std::unordered_map<const SG::AuxVectorData*, LinkHandle_t> links{};
         for (const WriteDecorKey_t& key : m_writeSegLinkKeys) {
@@ -63,21 +66,25 @@ namespace MuonR4 {
             if (measContainer->empty()) {
                 continue;
             }
-            LinkHandle_t decor{makeHandle(ctx, key,SegLinkVec_t{})};
-            links.insert(std::make_pair(measContainer, std::move(decor)));
+            links.insert(std::make_pair(measContainer, LinkHandle_t{key, ctx}));
         }
         
-        auto fetchPrd = [&techConts,this](const xAOD::MuonSimHit* hit) -> const xAOD::MuonMeasurement*{
-            for (const PrdCont_t* prdCont : techConts[m_idHelperSvc->technologyIndex(hit->identify())]){
-                for (const xAOD::MuonMeasurement* prd : *prdCont) {
+        auto fetchPrd = [&](const xAOD::MuonSimHit* hit) -> std::vector<const xAOD::MuonMeasurement*> {
+            std::vector<const xAOD::MuonMeasurement*> prds{};
+            const IdentifierHash idHash{m_idHelperSvc->detElementHash(hit->identify())};
+            const TechnologyIndex techIdx = m_idHelperSvc->technologyIndex(hit->identify());
+            for (ChamberView_t& prdCont : techConts[Acts::toUnderlying(techIdx)]){
+                if (!prdCont.loadView(idHash)) {
+                    continue;
+                }
+                for (const xAOD::MuonMeasurement* prd : prdCont) {
                     if (getTruthMatchedHit(*prd) == hit){
                         ATH_MSG_VERBOSE("Found hit matched to "<<m_idHelperSvc->toString(hit->identify()));
-                        return prd;
+                        prds.emplace_back(prd);
                     }
                 }
             }
-            ATH_MSG_VERBOSE("Nothing could be matched to "<<m_idHelperSvc->toString(hit->identify()));
-            return nullptr;
+            return prds;
         };
         
         for (const xAOD::MuonSegment* segment : *segContainer) {
@@ -85,12 +92,10 @@ namespace MuonR4 {
             
             SegLink_t segLink{segContainer, segment->index()};
             for (const xAOD::MuonSimHit* simHit : truthHits) {
-                const xAOD::MuonMeasurement* prd = fetchPrd(simHit);
-                if (!prd) {
-                    continue;
+                for (const xAOD::MuonMeasurement* prd : fetchPrd(simHit)) {
+                    markers.at(prd->container())(*prd) = true;
+                    links.at(prd->container())(*prd).push_back(segLink);
                 }
-                markers.at(prd->container())(*prd) = true;
-                links.at(prd->container())(*prd).push_back(segLink);
             }
         }
         return StatusCode::SUCCESS;

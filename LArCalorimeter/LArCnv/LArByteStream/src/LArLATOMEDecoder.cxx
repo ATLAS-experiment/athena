@@ -8,7 +8,6 @@
 
 #include "LArByteStream/LArLATOMEDecoder.h"
 
-#include <byteswap.h>
 #include "eformat/Issue.h"
 #include "eformat/index.h" // for helper
 #include "AthenaKernel/getMessageSvc.h"
@@ -27,6 +26,7 @@
 #include "LArRawEvent/LArAccumulatedDigitContainer.h"
 #include "LArRawEvent/LArAccumulatedCalibDigitContainer.h"
 #include "LArCabling/LArLATOMEMapping.h"
+#include <bit>
 
 
 
@@ -225,8 +225,8 @@ bool LArLATOMEDecoder::EventProcess::compareOrSet(Word& param, Word value, bool 
 
 unsigned int LArLATOMEDecoder::EventProcess::decodeTrailer(const uint32_t* p, unsigned int offset) {
   /// for now the trailerhas only 2 fixed words, just check them
-  if (bswap_32(p[offset]) != 0xc0ffee00 || bswap_32(p[offset + 1] != 0xaaaaaaaa)) {
-    ATH_MSG_WARNING("Problem in trailer at packet " << m_iPacket << " words " << std::hex << bswap_32(p[offset]) << ", " << bswap_32(p[offset + 1])
+  if (std::byteswap(p[offset]) != 0xc0ffee00 || std::byteswap(p[offset + 1] != 0xaaaaaaaa)) {
+    ATH_MSG_WARNING("Problem in trailer at packet " << m_iPacket << " words " << std::hex << std::byteswap(p[offset]) << ", " << std::byteswap(p[offset + 1])
                                                     << std::dec);
   }
   /// fixed shift for now but in case we get a dynamic trailer (hopefully not)
@@ -238,18 +238,18 @@ unsigned int LArLATOMEDecoder::EventProcess::decodeHeader(const uint32_t* p, uns
   //// lets do it quick and dirty now. Should be handled more properly when we have the LatomeHeaderClass
   int monheadererror = 0;
   int monheadererrorbit = 0;
-  if (!compareOrSet(m_latomeID, bswap_32(p[0 + offset]), m_headerDecoded))
+  if (!compareOrSet(m_latomeID, std::byteswap(p[0 + offset]), m_headerDecoded))
     monheadererror |= (1 << monheadererrorbit++);
   Word l1IDtmp = m_l1ID;
-  if (!compareOrSet(l1IDtmp, bswap_32(p[1 + offset]), m_headerDecoded))
+  if (!compareOrSet(l1IDtmp, std::byteswap(p[1 + offset]), m_headerDecoded))
     monheadererror |= (1 << monheadererrorbit++);
   if (l1IDtmp != m_l1ID) {
     ATH_MSG_DEBUG("Mon header L1ID " << l1IDtmp << " different from rod header L1ID " << m_l1ID);
   }
   ATH_MSG_DEBUG(" latomeID: " << m_latomeID << " l1ID: " << m_l1ID);
 
-  Word monHeaderMarker = bswap_32(p[2 + offset]);
-  Word monCheckPoint = bswap_32(p[4 + offset]);
+  Word monHeaderMarker = std::byteswap(p[2 + offset]);
+  Word monCheckPoint = std::byteswap(p[4 + offset]);
   if (s_monHeaderMarker != monHeaderMarker) {
     monheadererror |= (1 << monheadererrorbit++);
     ATH_MSG_WARNING("Problem in monHeaderMarker: " << monHeaderMarker);
@@ -259,24 +259,24 @@ unsigned int LArLATOMEDecoder::EventProcess::decodeHeader(const uint32_t* p, uns
     ATH_MSG_WARNING("Problem in monCheckPoint: " << monCheckPoint);
   }
 
-  if (!compareOrSet(m_nPackets, bswap_32(p[3 + offset]) >> 24, m_headerDecoded))
+  if (!compareOrSet(m_nPackets, std::byteswap(p[3 + offset]) >> 24, m_headerDecoded))
     monheadererror |= (1 << monheadererrorbit++);
 
   if (m_nPackets == 0xFF) {
     m_nPackets = 1;
     m_iPacket = 0;
-    m_nWordsPerPacket = (bswap_32(p[3 + offset]) & 0xffffff) / 4.;
+    m_nWordsPerPacket = (std::byteswap(p[3 + offset]) & 0xffffff) / 4.;
   } else {
     if (m_headerDecoded)
       ++m_iPacket;
     else
       m_iPacket = 0;
-    if (!compareOrSet(m_iPacket, (bswap_32(p[3 + offset]) >> 16) & 0xf, m_headerDecoded))
+    if (!compareOrSet(m_iPacket, (std::byteswap(p[3 + offset]) >> 16) & 0xf, m_headerDecoded))
       monheadererror |= (1 << monheadererrorbit++);
-    m_nWordsPerPacket = (bswap_32(p[3 + offset]) & 0xffff) / 4.;
+    m_nWordsPerPacket = (std::byteswap(p[3 + offset]) & 0xffff) / 4.;
   }
 
-  if (!compareOrSet(m_monHeaderSize, bswap_32(p[5 + offset]), m_headerDecoded))
+  if (!compareOrSet(m_monHeaderSize, std::byteswap(p[5 + offset]), m_headerDecoded))
     monheadererror |= (1 << monheadererrorbit++);
 
   //// for now we require more that 18
@@ -289,34 +289,34 @@ unsigned int LArLATOMEDecoder::EventProcess::decodeHeader(const uint32_t* p, uns
   ATH_MSG_DEBUG(" nPackets: " << m_nPackets << " iPacket: " << m_iPacket << " nWordsPerPacket: " << m_nWordsPerPacket << " monHeaderSize: " << m_monHeaderSize);
 
   /// now these are taken from the ROD header but the word are still here (maybe we will use them for something else)
-  std::ignore = compareOrSet(m_at0at1Swap, (bswap_32(p[8 + offset])>>30) & 0x1, m_headerDecoded);
-  if (!compareOrSet(m_at0typeRec, bswap_32(p[9 + offset]), m_headerDecoded))
+  std::ignore = compareOrSet(m_at0at1Swap, (std::byteswap(p[8 + offset])>>30) & 0x1, m_headerDecoded);
+  if (!compareOrSet(m_at0typeRec, std::byteswap(p[9 + offset]), m_headerDecoded))
     monheadererror |= (1 << monheadererrorbit++);
-  if (!compareOrSet(m_at1typeRec, bswap_32(p[12 + offset]), m_headerDecoded))
+  if (!compareOrSet(m_at1typeRec, std::byteswap(p[12 + offset]), m_headerDecoded))
     monheadererror |= (1 << monheadererrorbit++);
   monheadererrorbit += 2;
 
-  if (!compareOrSet(m_at0nBC, bswap_32(p[10 + offset]), m_headerDecoded))
+  if (!compareOrSet(m_at0nBC, std::byteswap(p[10 + offset]), m_headerDecoded))
     monheadererror |= (1 << monheadererrorbit++);
-  if (!compareOrSet(m_at1nBC, bswap_32(p[13 + offset]), m_headerDecoded))
+  if (!compareOrSet(m_at1nBC, std::byteswap(p[13 + offset]), m_headerDecoded))
     monheadererror |= (1 << monheadererrorbit++);
-  if (!compareOrSet(m_at0BC, bswap_32(p[11 + offset]), m_headerDecoded))
+  if (!compareOrSet(m_at0BC, std::byteswap(p[11 + offset]), m_headerDecoded))
     monheadererror |= (1 << monheadererrorbit++);
-  if (!compareOrSet(m_at1BC, bswap_32(p[14 + offset]), m_headerDecoded))
+  if (!compareOrSet(m_at1BC, std::byteswap(p[14 + offset]), m_headerDecoded))
     monheadererror |= (1 << monheadererrorbit++);
-  if (!compareOrSet(m_activeSC, bswap_32(p[15 + offset]), m_headerDecoded))
+  if (!compareOrSet(m_activeSC, std::byteswap(p[15 + offset]), m_headerDecoded))
     monheadererror |= (1 << monheadererrorbit++);
-  if (!compareOrSet(m_nsc1, bswap_32(p[16]) >> 24, m_headerDecoded))
+  if (!compareOrSet(m_nsc1, std::byteswap(p[16]) >> 24, m_headerDecoded))
     monheadererror |= (1 << monheadererrorbit++);
-  if (!compareOrSet(m_nsc2, (bswap_32(p[16]) >> 16) & 0xff, m_headerDecoded))
+  if (!compareOrSet(m_nsc2, (std::byteswap(p[16]) >> 16) & 0xff, m_headerDecoded))
     monheadererror |= (1 << monheadererrorbit++);
-  if (!compareOrSet(m_nsc3, (bswap_32(p[16]) >> 8) & 0xff, m_headerDecoded))
+  if (!compareOrSet(m_nsc3, (std::byteswap(p[16]) >> 8) & 0xff, m_headerDecoded))
     monheadererror |= (1 << monheadererrorbit++);
-  if (!compareOrSet(m_nsc4, (bswap_32(p[16])) & 0xff, m_headerDecoded))
+  if (!compareOrSet(m_nsc4, (std::byteswap(p[16])) & 0xff, m_headerDecoded))
     monheadererror |= (1 << monheadererrorbit++);
-  if (!compareOrSet(m_nsc5, bswap_32(p[17]) >> 24, m_headerDecoded))
+  if (!compareOrSet(m_nsc5, std::byteswap(p[17]) >> 24, m_headerDecoded))
     monheadererror |= (1 << monheadererrorbit++);
-  if (!compareOrSet(m_nsc6, (bswap_32(p[17]) >> 16) & 0xff, m_headerDecoded))
+  if (!compareOrSet(m_nsc6, (std::byteswap(p[17]) >> 16) & 0xff, m_headerDecoded))
     monheadererror |= (1 << monheadererrorbit++);
 
   ATH_MSG_DEBUG("m_at0at1Swap: " << m_at0at1Swap << " at0type " << m_at0typeRec << " at1type " << m_at1typeRec << " at0nBC " << m_at0nBC << " at1nBC " << m_at1nBC << " at0BC " << m_at0BC                          
@@ -372,7 +372,7 @@ void LArLATOMEDecoder::EventProcess::increaseByteShift(unsigned int& wordshift, 
 }
 
 void LArLATOMEDecoder::EventProcess::decodeByte(unsigned int& byte, unsigned int wordshift, unsigned int byteshift, const uint32_t* p) {
-  byte = ((bswap_32(p[wordshift])) >> (8 * (4 - 1 - byteshift))) & 0xff;
+  byte = ((std::byteswap(p[wordshift])) >> (8 * (4 - 1 - byteshift))) & 0xff;
 }
 
 void LArLATOMEDecoder::EventProcess::decodeWord(unsigned int& word, unsigned int& wordshift, unsigned int& byteshift, const uint32_t* p) {
@@ -708,7 +708,7 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
     int nsc = 0;
     unsigned int oldipacket = 0;
     for (unsigned int itimeslot = 0; itimeslot < 6; ++itimeslot) {
-      unsigned int l_bcid = (bswap_32(p[s]))>>16;
+      unsigned int l_bcid = (std::byteswap(p[s]))>>16;
       if(itimeslot!=0){
 	if(l_bcid!=bcid){
 	  ATH_MSG_WARNING( "ERROR: inconsistent BCID between time slots" );
@@ -730,7 +730,7 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
       }
       bcid=l_bcid;
 
-      unsigned int mux = ((bswap_32(p[s])) >> 8) & 0xff;
+      unsigned int mux = ((std::byteswap(p[s])) >> 8) & 0xff;
       increaseWordShift(s);
       //// skip trailing 0
       increaseWordShift(s);
@@ -855,9 +855,9 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
             ATH_MSG_ERROR("inconsistant wordshift in decoding everaged data");
             return;
           }
-          unsigned int averageword = bswap_32(p[wordshift]);
+          unsigned int averageword = std::byteswap(p[wordshift]);
           wordshift += 1;
-          unsigned int sumSq = bswap_32(p[wordshift]);
+          unsigned int sumSq = std::byteswap(p[wordshift]);
           wordshift += 1;
           unsigned long long sumsqMSB = averageword >> 28;
           sumsqMSB = sumsqMSB << 32;

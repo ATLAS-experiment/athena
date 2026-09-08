@@ -40,6 +40,16 @@ public:
    * @return The current event number.
    */
   virtual int curEvent () const = 0;
+
+  /**
+   * @brief Supply the absolute (skip-relative) input event index for the
+   *        next event, for run-dependent EventID modification.
+   *
+   * In serial mode AthenaEventLoopMgr derives this from its own counter;
+   * in AthenaMP the per-worker counter does not match the input position,
+   * so the MP event consumer must supply it. Default no-op. ATEAM-1154.
+   */
+  virtual void setNextEventModifierIndex (long /*idx*/) {}
 };
 
 

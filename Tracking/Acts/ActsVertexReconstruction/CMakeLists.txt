@@ -10,7 +10,9 @@ find_package( Acts COMPONENTS Core )
 atlas_add_library( ActsVertexReconstructionLib
                    src/*.cxx
                    PUBLIC_HEADERS ActsVertexReconstruction
-                   LINK_LIBRARIES Acts::Core ActsGeometryLib ActsGeometryInterfacesLib ActsInteropLib AthenaBaseComps GaudiKernel BeamSpotConditionsData InDetRecToolInterfaces InDetTrackSelectionToolLib TrkLinks xAODInDetMeasurement xAODTracking)
+                   LINK_LIBRARIES Acts::Core ActsGeometryLib ActsGeometryInterfacesLib ActsInteropLib 
+				   				  AthenaBaseComps GaudiKernel BeamSpotConditionsData InDetRecToolInterfaces
+								  ActsEventLib InDetTrackSelectionToolLib TrkLinks xAODInDetMeasurement xAODTracking)
 
 atlas_add_component( ActsVertexReconstruction
                      src/*.h src/*.cxx

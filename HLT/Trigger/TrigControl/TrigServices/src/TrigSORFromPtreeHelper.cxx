@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigSORFromPtreeHelper.h"
@@ -98,7 +98,7 @@ StatusCode TrigSORFromPtreeHelper::createSOR ATLAS_NOT_THREAD_SAFE () const
   IOVTime iovTimeStop(attrList["RunNumber"].data<unsigned int>()+1,0);
   IOVRange iovRange(iovTimeStart, iovTimeStop);
 
-  auto sor = new SOR(/*hasRunLumiBlockTime*/true);
+  auto sor = std::make_unique<SOR>(/*hasRunLumiBlockTime*/true);
   sor->add(SOR::ChanNum{0}, attrList);
   sor->add(SOR::ChanNum{0}, iovRange);
   sor->resetMinRange();
@@ -110,18 +110,19 @@ StatusCode TrigSORFromPtreeHelper::createSOR ATLAS_NOT_THREAD_SAFE () const
     const SOR * oldsor = m_detStore->retrieve<const SOR>(m_sorpath);
     ATH_MSG_INFO("Overwriting SOR contents (a dump of the old one follows):");
     oldsor->dump();
-    ATH_CHECK( m_detStore->overwrite(sor, m_sorpath, true) );
+    ATH_CHECK( m_detStore->overwrite(std::move(sor), m_sorpath, true) );
   }
   else {
     ATH_MSG_DEBUG("Recording new SOR");
-    ATH_CHECK( m_detStore->record(sor, m_sorpath, true) );
+    ATH_CHECK( m_detStore->record(std::move(sor), m_sorpath, true) );
   }
+  const SOR * recsor = m_detStore->retrieve<const SOR>(m_sorpath);
 
   ATH_CHECK( setIOVRange(iovRange) );
-  ATH_CHECK( updateProxy(sor) );
+  ATH_CHECK( updateProxy(recsor) );
 
   ATH_MSG_INFO("Successfully setup SOR:");
-  sor->dump();
+  recsor->dump();
 
   return StatusCode::SUCCESS;
 }
@@ -175,7 +176,7 @@ StatusCode TrigSORFromPtreeHelper::setIOVRange(IOVRange & iovRange) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-StatusCode TrigSORFromPtreeHelper::updateProxy(SOR * sor) const
+StatusCode TrigSORFromPtreeHelper::updateProxy(const SOR * sor) const
 {
   // check the SOR_Params proxy and add if necessary an IAddressProvider (typically for MC)
   auto proxy = m_detStore->proxy(sor);

@@ -27,56 +27,17 @@ run () {
     echo "Running ${name}..."
     time "${cmd[@]}"
     rc=$?
-    # Only report hard failures for comparison Acts-Trk since we know
-    # they are different. We do not expect this test to succeed
-    [ "${name}" = "dcube-athena-acts" ] && [ $rc -ne 255 ] && rc=0
     echo "art-result: $rc ${name}"
     return $rc
 }
 
 conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 
-# Run with Athena
-run "Reconstruction-athena" \
-    Reco_tf.py \
-    --conditionsTag "default:${conditionsTag}" \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingRecoPreInclude" \
-    --preExec "flags.Tracking.doITkFastTracking=True; \
-    	       flags.Tracking.writeExtendedSi_PRDInfo=True; \
-	       flags.Tracking.doStoreSiSPSeededTracks=True; \
-	       flags.Tracking.ITkFastPass.storeSiSPSeededTracks=True;" \
-    --inputRDOFile ${ArtInFile} \
-    --outputAODFile AOD.athena.root \
-    --maxEvents ${nEvents}    
-
-reco_rc=$?
-# don't stop right away on an ERROR message ($?=68)
-if [ $reco_rc != 0 -a $reco_rc != 68 ]; then
-    exit $reco_rc
-fi
-
-run "IDPVM-athena" \
-    runIDPVM.py \
-    --filesInput AOD.athena.root \
-    --outputFile idpvm.athena.root \
-    --doTightPrimary \
-    --doHitLevelPlots \
-    --doTechnicalEfficiency \
-    --doExpertPlots \
-    --OnlyTrackingPreInclude \
-    --validateExtraTrackCollections "SiSPSeededTracks" \
-    ${idpvmOpts[@]}
-
-reco_rc=$?
-if [ $reco_rc != 0 ]; then
-    exit $reco_rc
-fi
-
 # Run with ACTS
 run "Reconstruction-acts" \
     Reco_tf.py \
     --conditionsTag "default:${conditionsTag}" \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingRecoPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingRecoPreInclude" \
     --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True; \
     	       flags.Tracking.ITkActsPass.storeSiSPSeededTracks=True;" \
     --inputRDOFile ${ArtInFile} \
@@ -110,26 +71,9 @@ echo "download latest result..."
 art.py download --user=artprod --dst="$lastref_dir" "$ArtPackage" "$ArtJobName"
 ls -la "$lastref_dir"
 
-run "dcube-athena-last" \
-    $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-    -p -x dcube_athena_shifter_last \
-    -c ${dcubeXmlTechEffAbsPath} \
-    -r ${lastref_dir}/idpvm.athena.root \
-    idpvm.athena.root
-
 run "dcube-acts-last" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_acts_shifter_last \
     -c ${dcubeXmlTechEffAbsPath} \
     -r ${lastref_dir}/idpvm.acts.root \
-    idpvm.acts.root
-
-# Compare performance WRT legacy Athena
-run "dcube-athena-acts" \
-    $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-    -p -x dcube_athena_acts \
-    -c ${dcubeXmlTechEffAbsPath} \
-    -R "athena" \
-    -r idpvm.athena.root \
-    -M "acts" \
     idpvm.acts.root

@@ -80,6 +80,11 @@ class MetAnalysisConfig (ConfigBlock):
         self.addOption ('switchTauMuOrder', False, type=bool,
             info="whether to switch order of taus and muons",
             expertMode=True)
+        self.addOption ('useNN', False, type=bool,
+            info="use the METNet neural-network MET tool (met::METNet) instead of "
+            "met::METMaker. Produces the NN MET as the container's Final term.")
+        self.addOption ('networkFile', "", type=str,
+            info="path to the METNet ONNX network file (required when useNN=True).")
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -91,7 +96,7 @@ class MetAnalysisConfig (ConfigBlock):
             metSuffix = 'AnalysisMET'
         else :
             jetContainer = config.originalName (self.jets)
-            metSuffix = jetContainer[:-4]
+            metSuffix = jetContainer.removesuffix('Jets')
         if self.useLRT:
             metSuffix += "_LRT"
 
@@ -102,30 +107,41 @@ class MetAnalysisConfig (ConfigBlock):
 
         # Set up the met maker algorithm:
         alg = config.createAlgorithm( 'CP::MetMakerAlg', 'MetMakerAlg' )
-        config.addPrivateTool( 'makerTool', 'met::METMaker' )
-        alg.makerTool.skipSystematicJetSelection = self.skipSystematicJetSelection
+        if self.useNN:
+            if not self.networkFile:
+                raise ValueError("MissingET: useNN=True requires 'networkFile'.")
+            config.addPrivateTool( 'makerTool', 'met::METNet' )
+            alg.makerTool.NetworkFile  = self.networkFile
+            alg.makerTool.JetContainer = config.readName (self.jets)
+            alg.evaluateNNMET = True
+            alg.doJetJVT = self.useJVT
+            # NOTE: no met::METSystematicsTool for the NN path — soft-term
+            # systematics are not defined for the network output.
+        else:
+            config.addPrivateTool( 'makerTool', 'met::METMaker' )
+            alg.makerTool.skipSystematicJetSelection = self.skipSystematicJetSelection
 
-        alg.doJetJVT = self.useJVT
-        if self.useJVT:
-            config.addPrivateTool( 'makerTool.JvtSelTool', 'CP::NNJvtSelectionTool' )
-            alg.makerTool.JvtSelTool.JetContainer = config.readName (self.jets)
-            alg.makerTool.JvtSelTool.JvtMomentName = "NNJvt"
-        if self.useFJVT:
-            # for backwards compatibility with "old" FJVT handling in JetAnalysisConfig.py
-            if not self.selectionNameFJVT:
-                alg.makerTool.JetRejectionDec = 'fjvt_selection'
-            # otherwise get the decoration from the selection
-            else:
-                fjvt_decoration = config.getFullSelection(self.jets, self.selectionNameFJVT, skipBase=True).replace(",as_char", "")
-                alg.makerTool.JetRejectionDec = fjvt_decoration
+            alg.doJetJVT = self.useJVT
+            if self.useJVT:
+                config.addPrivateTool( 'makerTool.JvtSelTool', 'CP::NNJvtSelectionTool' )
+                alg.makerTool.JvtSelTool.JetContainer = config.readName (self.jets)
+                alg.makerTool.JvtSelTool.JvtMomentName = "NNJvt"
+            if self.useFJVT:
+                # for backwards compatibility with "old" FJVT handling in JetAnalysisConfig.py
+                if not self.selectionNameFJVT:
+                    alg.makerTool.JetRejectionDec = 'fjvt_selection'
+                # otherwise get the decoration from the selection
+                else:
+                    fjvt_decoration = config.getFullSelection(self.jets, self.selectionNameFJVT, skipBase=True).replace(",as_char", "")
+                    alg.makerTool.JetRejectionDec = fjvt_decoration
 
-        alg.makerTool.JetSelection = self.metWP
-        alg.makerTool.DoPFlow = 'PFlow' in metSuffix or metSuffix=="AnalysisMET"
-        alg.makerTool.DoSetMuonJetEMScale = self.setMuonJetEMScale if self.muons else False
-        alg.switchTauMu = self.switchTauMuOrder
+            alg.makerTool.JetSelection = self.metWP
+            alg.makerTool.DoPFlow = 'PFlow' in metSuffix or metSuffix=="AnalysisMET"
+            alg.makerTool.DoSetMuonJetEMScale = self.setMuonJetEMScale if self.muons else False
+            alg.switchTauMu = self.switchTauMuOrder
 
-        if config.dataType() is not DataType.Data :
-            config.addPrivateTool( 'systematicsTool', 'met::METSystematicsTool' )
+            if config.dataType() is not DataType.Data :
+                config.addPrivateTool( 'systematicsTool', 'met::METSystematicsTool' )
 
         alg.metCore = 'MET_Core_' + metSuffix
         alg.metAssociation = 'METAssoc_' + metSuffix
@@ -147,6 +163,19 @@ class MetAnalysisConfig (ConfigBlock):
             alg.invisibleSelection = list(invisibleSelections)
         alg.met = config.writeName (self.containerName, isMet = True)
 
+        # met/phi are decorated on every term by the maker alg (for the NN path
+        # directly via evaluateNNMET), so they are output on both paths.
+        config.addOutputVar (self.containerName, 'met', 'met')
+        config.addOutputVar (self.containerName, 'phi', 'phi')
+        config.addOutputVar (self.containerName, 'name', 'name', noSys=True, enabled=False)
+
+        # The NN path writes the Final term directly (a builder sum would clobber
+        # it) and produces no meaningful sumet/significance, so it needs neither
+        # the met builder nor the significance algorithm.
+        if self.useNN:
+            return
+
+        config.addOutputVar (self.containerName, 'sumet', 'sumet')
 
         # Set up the met builder algorithm:
         alg = config.createAlgorithm( 'CP::MetBuilderAlg', 'MetBuilderAlg' )
@@ -174,12 +203,13 @@ class MetAnalysisConfig (ConfigBlock):
                 self.jetCalibSequence = 'JetArea_Residual_EtaJES_GSC_Smear'
 
             # Standard e/gamma calibration. Must be kept in agreement with ElectronAnalysisConfig.py
-            if self.egammaESModel == "":
-                self.egammaESModel = (
-                    config.getContainerMeta(self.electrons.split(".")[0], 'ESModel', failOnMiss=True))
-            if self.egammaDecorrelationModel == "":
-                self.egammaDecorrelationModel = (
-                    config.getContainerMeta(self.electrons.split(".")[0], 'decorrelationModel', failOnMiss=True))
+            if self.electrons != "" :
+                if self.egammaESModel == "":
+                    self.egammaESModel = (
+                        config.getContainerMeta(self.electrons.split(".")[0], 'ESModel', failOnMiss=True))
+                if self.egammaDecorrelationModel == "":
+                    self.egammaDecorrelationModel = (
+                        config.getContainerMeta(self.electrons.split(".")[0], 'decorrelationModel', failOnMiss=True))
 
             alg.significanceTool.SoftTermParam = 0
             if self.softTermResolution > 0:
@@ -202,8 +232,3 @@ class MetAnalysisConfig (ConfigBlock):
                 config.addOutputVar (self.containerName, 'sigDirectional_%SYS%', 'sigDirectional')
                 config.addOutputVar (self.containerName, 'METOverSqrtSumET_%SYS%', 'METOverSqrtSumET')
                 config.addOutputVar (self.containerName, 'METOverSqrtHT_%SYS%', 'METOverSqrtHT')
-
-        config.addOutputVar (self.containerName, 'met', 'met')
-        config.addOutputVar (self.containerName, 'phi', 'phi')
-        config.addOutputVar (self.containerName, 'sumet', 'sumet')
-        config.addOutputVar (self.containerName, 'name', 'name', noSys=True, enabled=False)

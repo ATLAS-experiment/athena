@@ -61,6 +61,15 @@ def HISTEntries(fileName):
     if not (isinstance(fname, root.TFile) and fname.IsOpen()):
         return None
 
+    # HIST_HLTMON case
+    htrig_path = 'HLTFramework/HltEventLoopMgr/TotalTime'
+    htrig = fname.Get(htrig_path)
+    if isinstance( htrig, root.TH1 ):
+        nev_trig = htrig.GetEntries()
+        fname.Close()
+        msg.debug( 'Retrieved %s in file %s, found %i entries', htrig_path, fileName,  nev_trig)
+        return nev_trig
+
     rundir = None
     keys = fname.GetListOfKeys()
     

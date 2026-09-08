@@ -25,6 +25,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <bitset>
 #include <atomic>
 
 // forward declarations:

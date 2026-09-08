@@ -39,13 +39,10 @@ def TrigEgammaSuperClusterBuilderCfg(flags, name, calibrationType, superClusterC
 
 def TrigCaloClustersInConeToolCfg(flags, ion):
         acc = ComponentAccumulator()
-        TrigEgammaKeys = getTrigEgammaKeys(flags, ion =ion)
-        if ion:
-            name = "TrigCaloClustersInConeToolHI"
-        else:
-            name = "TrigCaloClustersInConeTool"
+        from TriggerMenuMT.HLT.CommonSequences.FullScanDefs import em_clusters
+        name = "TrigCaloClustersInConeToolHI" if ion else "TrigCaloClustersInConeTool"
         tool = CompFactory.xAOD.CaloClustersInConeTool(name = name,
-                                                       CaloClusterLocation = TrigEgammaKeys.precisionTopoClusterContainer)
+                                                       CaloClusterLocation = em_clusters) # FS topo calo clusters
         acc.setPrivateTools(tool)
         return acc
 

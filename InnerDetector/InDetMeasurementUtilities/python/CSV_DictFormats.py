@@ -7,7 +7,7 @@ CSV_DictFormats = {
                     
                     # Variables from the container:
                     #https://gitlab.cern.ch/atlas/athena/-/blob/master/Event/xAOD/xAODInDetMeasurement/xAODInDetMeasurement/versions/PixelClusterAuxContainer_v1.h
-                    "ITkPixelClusters": {"globalPosition":"std::array<float,3>", "channelsInPhi":"int", "channelsInEta":"int", "widthInEta":"float", "omegaX":"float", "omegaY":"float", "energyLoss":"float", "lvl1a":"int"},
+                    "ITkPixelClusters": {"globalPosition":"std::array<float,3>", "channelsInPhi":"int", "channelsInEta":"int", "widthInEta":"float", "omegaX":"float", "omegaY":"float", "totalCharge":"float", "energyLoss":"float", "lvl1a":"int"},
                     # ITkPixelClusters.isSplit is char with all ''? Keeping out for the moment
 
                     # Variables from the container:

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -64,21 +64,22 @@ namespace CaloConstitHelpers {
     virtual double moment(JetConstitIterator & it , xAOD::CaloCluster::MomentType momentType) const override {
       float m=0.;
       const xAOD::PFO* pfo = static_cast<const xAOD::PFO*>(it->rawConstituent()) ;
-      pfo->getClusterMoment(m, momentType );
+      bool ok [[maybe_unused]] = pfo->getClusterMoment(m, momentType );
       return m;      
     }
 
     virtual double time(JetConstitIterator & it) const override {
       float t=0.;
       const xAOD::PFO* pfo = static_cast<const xAOD::PFO*>(it->rawConstituent()) ;
-      pfo->attribute( xAOD::PFODetails::eflowRec_TIMING, t);
+      bool ok[[maybe_unused]] = pfo->attribute( xAOD::PFODetails::eflowRec_TIMING, t);
+      
       return t;
     }        
 
     virtual double energyHEC(JetConstitIterator & it ) const override {
       float m=0.;
       const xAOD::PFO* pfo = static_cast<const xAOD::PFO*>(it->rawConstituent()) ;
-      pfo->attribute( xAOD::PFODetails::eflowRec_LAYERENERGY_HEC, m);
+      bool ok[[maybe_unused]] = pfo->attribute( xAOD::PFODetails::eflowRec_LAYERENERGY_HEC, m);
       return m;
     }
 
@@ -122,7 +123,7 @@ namespace CaloConstitHelpers {
           }
           //If we have a PFO (in case of fe being a UFO), we need to get the associated cluster first
           else {
-            const xAOD::FlowElement* pfo = dynamic_cast<const xAOD::FlowElement*>(neutralObject);
+            const xAOD::FlowElement* pfo = static_cast<const xAOD::FlowElement*>(neutralObject);
             if(!pfo->otherObjects().empty() && pfo->otherObject(0) && pfo->otherObject(0)->type() == xAOD::Type::CaloCluster){
               cluster = dynamic_cast<const xAOD::CaloCluster*> (pfo->otherObject(0));
             }
@@ -164,7 +165,7 @@ namespace CaloConstitHelpers {
 	  }
 	  //If we have a PFO (in case of fe being a UFO), we need to get the associated cluster first
 	  else {
-	    const xAOD::FlowElement* pfo = dynamic_cast<const xAOD::FlowElement*>(neutralObject);
+	    const xAOD::FlowElement* pfo = static_cast<const xAOD::FlowElement*>(neutralObject);
 	    if(!pfo->otherObjects().empty() && pfo->otherObject(0) && pfo->otherObject(0)->type() == xAOD::Type::CaloCluster){
 	      cluster = dynamic_cast<const xAOD::CaloCluster*> (pfo->otherObject(0));
 	    }

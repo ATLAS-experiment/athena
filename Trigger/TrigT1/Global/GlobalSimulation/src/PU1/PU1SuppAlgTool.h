@@ -14,6 +14,7 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "../GlobalSimComponents/IGlobalSimAlgTool.h"
+#include "../Utilities/IDataCollector.h"
 
 #include "PU1SuppPortsIn.h"
 #include "PU1SuppPortsOut.h"
@@ -41,7 +42,8 @@ public:
     virtual StatusCode initialize() override;
   
     /// Run suppression on input TOBs and write output TOBs
-    virtual StatusCode run(const EventContext& ctx) const override;
+    virtual StatusCode run(const std::unique_ptr<IDataCollector>&,
+			   const EventContext& ctx) const override;
   
     /// Returns a string representation for diagnostics
     virtual std::string toString() const override;

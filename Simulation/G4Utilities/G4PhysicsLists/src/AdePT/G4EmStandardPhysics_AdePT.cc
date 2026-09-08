@@ -116,12 +116,12 @@ G4_DECLARE_PHYSCONSTR_FACTORY(G4EmStandardPhysics_AdePT);
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-G4EmStandardPhysics_AdePT::G4EmStandardPhysics_AdePT(G4int ver, const G4String&)
-  : G4VPhysicsConstructor("G4EmStandard_AdePT")
+G4EmStandardPhysics_AdePT::G4EmStandardPhysics_AdePT(G4int ver, const G4String& name, G4bool multipleStepsInMSCTransport)
+  : G4VPhysicsConstructor(name),
+    fTrackingManager(nullptr),
+    fAdePTConfiguration(new AdePTConfiguration()),
+    fMultipleStepsInMSCTransport(multipleStepsInMSCTransport)
 {
-
-  fAdePTConfiguration = new AdePTConfiguration();
-
   SetVerboseLevel(ver);
   G4EmParameters* param = G4EmParameters::Instance();
   param->SetDefaults();
@@ -200,9 +200,9 @@ void G4EmStandardPhysics_AdePT::ConstructProcess()
   // config->SetEnergyLossFluctuation(false);
   // (also possible for a given region: e.g. config->SetEnergyLossFluctuation(false, "EMEC");
 
-  // Don't allow to make multiple steps in the combined MSC+transportation
-  // NOTE: this might lead to some performance loss but keeps the physics validation the same as with Geant4
-  config->SetMultipleStepsInMSCWithTransportation(false);
+  // Configure whether the G4HepEm config used by AdePT may make multiple steps in the combined MSC+transportation.
+  // Keeping this disabled preserves the previous ATLAS physics validation behavior.
+  config->SetMultipleStepsInMSCWithTransportation(fMultipleStepsInMSCTransport);
 
   // Attach the tracking manager to e-/e+ and gamma
   G4Electron::Definition()->SetTrackingManager(fTrackingManager);

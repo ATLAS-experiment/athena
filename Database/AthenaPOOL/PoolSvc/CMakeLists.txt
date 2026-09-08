@@ -3,16 +3,32 @@
 # Declare the package name:
 atlas_subdir( PoolSvc )
 
-# External dependencies:
-find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
 
 atlas_add_library( PoolSvcLib
-                   INTERFACE
+                   src/*.cxx
                    PUBLIC_HEADERS PoolSvc
-                   LINK_LIBRARIES GaudiKernel CollectionSvc PersistencySvc DataModelRoot )
+                   PRIVATE_INCLUDE_DIRS GaudiUtils
+                   LINK_LIBRARIES AthenaBaseComps CxxUtils DataModelRoot GaudiKernel PathResolver PersistentDataModel StorageSvc )
 
 # Component(s) in the package:
 atlas_add_component( PoolSvc
-                     PoolSvc/*.h src/*.cxx src/components/*.cxx
-                     INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaBaseComps CollectionSvc CxxUtils DBReplicaSvcLib DataModelRoot GaudiKernel PathResolver PersistencySvc PersistentDataModel PoolSvcLib StorageSvc )
+                     src/components/*.cxx
+                     LINK_LIBRARIES AthenaBaseComps CxxUtils DataModelRoot GaudiKernel PathResolver PersistentDataModel PoolSvcLib StorageSvc )
+
+atlas_add_executable( pool_extractFileIdentifier
+   utilities/pool_extractFileIdentifier.cxx
+   LINK_LIBRARIES CxxUtils PoolSvcLib StorageSvc )
+
+atlas_add_executable( pool_insertFileToCatalog
+   utilities/pool_insertFileToCatalog.cxx
+   LINK_LIBRARIES CxxUtils PoolSvcLib StorageSvc )
+
+atlas_add_executable( FCcmd
+   utilities/FCcmd.cxx
+   LINK_LIBRARIES PoolSvcLib StorageSvc )
+
+# Install files from the package:
+atlas_install_scripts( scripts/*.py )
+
+atlas_add_test( FCcmd
+   SCRIPT test/FCcmd_test.sh )

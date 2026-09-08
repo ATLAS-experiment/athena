@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGINFOTPCNV_SLTrueInfo_P1_H
@@ -12,12 +12,12 @@ namespace Analysis {
   class SLTrueInfo_p1 {
   public:
 
-    int m_barcode;
-    int m_pdgCode;
-    int m_pdgCodeMother;
-    bool m_isFromBhadron;
-    bool m_isFromDhadron;
-    bool m_isFromGHboson;
+    int m_barcode = 0;
+    int m_pdgCode = 0;
+    int m_pdgCodeMother = 0;
+    bool m_isFromBhadron = false;
+    bool m_isFromDhadron = false;
+    bool m_isFromGHboson = false;
     
     
     Eigen::Vector3d m_Momentum;

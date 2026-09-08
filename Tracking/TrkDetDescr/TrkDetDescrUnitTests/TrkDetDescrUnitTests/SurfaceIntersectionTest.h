@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -30,7 +30,7 @@ namespace Trk {
      public:
 
        /** Standard Athena-Algorithm Constructor */
-       SurfaceIntersectionTest(const std::string& name, ISvcLocator* pSvcLocator);
+       using TrkDetDescrUnitTestBase::TrkDetDescrUnitTestBase;
         
        /* finalize */
        StatusCode finalize();
@@ -43,19 +43,20 @@ namespace Trk {
        
       private:
        
-       ToolHandle<ISurfaceBuilder>     m_surfaceBuilder;
+       ToolHandle<ISurfaceBuilder> m_surfaceBuilder{this, "SurfaceBuilder", ""};
 
-       size_t                          m_testsPerSurface;
-       size_t                          m_eventCounter;
+       Gaudi::Property<size_t> m_testsPerSurface
+	 {this, "NumberOfTestsPerSurface", 100};
+       size_t                          m_eventCounter = 0;
 
-       std::vector<size_t>             m_surfaces;
-       std::vector<size_t>             m_surfaceAttempts;
-       std::vector<size_t>             m_surfaceSuccessful;
-       std::vector<std::string>        m_surfaceNames;
-       std::vector<bool>               m_surfaceNamesSet;
+       std::vector<size_t>             m_surfaces = std::vector<size_t>(6, 0);
+       std::vector<size_t>             m_surfaceAttempts = std::vector<size_t>(6, 0);
+       std::vector<size_t>             m_surfaceSuccessful = std::vector<size_t>(6, 0);
+       std::vector<std::string>        m_surfaceNames = std::vector<std::string>(6, "");
+       std::vector<bool>               m_surfaceNamesSet = std::vector<bool>(6, false);
 
-       bool                            m_writeTTree;
-       std::string                     m_treeFolder;
+       Gaudi::Property<bool> m_writeTTree{this, "WriteTTree", true};
+       std::string m_treeFolder = "/val/";
 
    };
 }

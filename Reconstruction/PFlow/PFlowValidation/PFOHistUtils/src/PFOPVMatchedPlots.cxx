@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PFOHistUtils/PFOPVMatchedPlots.h"
 #include "xAODTracking/TrackParticle.h"
+#include "AthenaKernel/Units.h"
 
 namespace PFO {
 
@@ -36,16 +37,16 @@ namespace PFO {
       float z0 = theTrack->z0() + theTrack->vz();
       z0 = z0 - theVertex.z();
       float theta = theTrack->theta();
-      if ( fabs(z0*sin(theta)) < 2.0 ){
-	    m_FE_pt->Fill(FE.pt()/1000.0,eventInfo.beamSpotWeight());
+      if ( std::abs(z0*sin(theta)) < 2.0 ){
+	    m_FE_pt->Fill(FE.pt()/Athena::Units::GeV,eventInfo.beamSpotWeight());
 	    m_FE_eta->Fill(FE.eta(),eventInfo.beamSpotWeight());
 	    m_FE_phi->Fill(FE.phi(),eventInfo.beamSpotWeight());
-	    m_FE_m->Fill(FE.m()/1000.0,eventInfo.beamSpotWeight());
+	    m_FE_m->Fill(FE.m()/Athena::Units::GeV,eventInfo.beamSpotWeight());
 	    m_FE_charge->Fill(FE.charge(),eventInfo.beamSpotWeight());
 
-    	if (fabs(FE.eta()) < 1)  m_FE_pt_etaBinA->Fill(FE.pt()/1000.0,eventInfo.beamSpotWeight());
-	    else if (fabs(FE.eta()) < 2) m_FE_pt_etaBinB->Fill(FE.pt()/1000.0,eventInfo.beamSpotWeight());
-	    else m_FE_pt_etaBinC->Fill(FE.pt()/1000.0,eventInfo.beamSpotWeight());
+    	if (std::abs(FE.eta()) < 1)  m_FE_pt_etaBinA->Fill(FE.pt()/Athena::Units::GeV,eventInfo.beamSpotWeight());
+	    else if (std::abs(FE.eta()) < 2) m_FE_pt_etaBinB->Fill(FE.pt()/Athena::Units::GeV,eventInfo.beamSpotWeight());
+	    else m_FE_pt_etaBinC->Fill(FE.pt()/Athena::Units::GeV,eventInfo.beamSpotWeight());
       }//fill histograms if track is matched to the PV
     }//if valid pointer to track
   } 

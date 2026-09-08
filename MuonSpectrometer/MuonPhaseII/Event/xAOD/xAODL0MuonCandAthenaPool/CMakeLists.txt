@@ -8,10 +8,12 @@ atlas_add_poolcnv_library( xAODL0MuonCandAthenaPoolCnv
    FILES xAODL0MuonCand/RPCCandDataContainer.h xAODL0MuonCand/RPCCandDataAuxContainer.h 
          xAODL0MuonCand/TGCCandDataContainer.h xAODL0MuonCand/TGCCandDataAuxContainer.h
          xAODL0MuonCand/MDTCandDataContainer.h xAODL0MuonCand/MDTCandDataAuxContainer.h
+         xAODL0MuonCand/NSWCandDataContainer.h xAODL0MuonCand/NSWCandDataAuxContainer.h
 
    TYPES_WITH_NAMESPACE xAOD::RPCCandDataContainer xAOD::RPCCandDataAuxContainer 
                         xAOD::TGCCandDataContainer xAOD::TGCCandDataAuxContainer
                         xAOD::MDTCandDataContainer xAOD::MDTCandDataAuxContainer
+                        xAOD::NSWCandDataContainer xAOD::NSWCandDataAuxContainer
    CNV_PFX xAOD
    LINK_LIBRARIES AthContainers AthenaKernel AthenaPoolCnvSvcLib AthenaPoolUtilities xAODL0MuonCand)
 

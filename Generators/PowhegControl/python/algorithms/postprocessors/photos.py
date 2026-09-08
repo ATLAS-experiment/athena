@@ -2,7 +2,7 @@
 
 import os
 import shutil
-from AthenaCommon import Logging
+from ... import Logging
 from ...decorators import timed
 from ...utility import ProcessManager, SingleProcessThread
 

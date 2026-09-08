@@ -53,7 +53,6 @@ public:
   unsigned long long iovOverrideValue(MsgStream& msg) const;
   bool operator==(const IOVDbParser& other) const; 
   std::string toString() const;
-  void clean();
 
 private:
   bool m_valid{};

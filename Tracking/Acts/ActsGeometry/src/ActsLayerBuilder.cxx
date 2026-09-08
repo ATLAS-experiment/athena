@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 // ATHENA
 #include "InDetReadoutGeometry/SiDetectorElement.h"
@@ -13,6 +13,8 @@
 // ACTS
 #include "Acts/Definitions/Algebra.hpp"
 #include "Acts/Definitions/Units.hpp"
+#include "Acts/Utilities/AxisDefinitions.hpp"
+#include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Geometry/ApproachDescriptor.hpp"
 #include "Acts/Geometry/GenericApproachDescriptor.hpp"
 #include "Acts/Geometry/GeometryContext.hpp"
@@ -32,6 +34,7 @@
 #include <iterator>
 #include <unordered_map>
 #include <fstream>
+#include <iostream>
 
 using Acts::Surface;
 using Acts::Transform3;
@@ -243,14 +246,14 @@ void ActsLayerBuilder::buildBarrel(const Acts::GeometryContext &gctx,
     // count the number of relevant modules in each direction
     auto phiEqual = [this](const Acts::Surface &a,
                            const Acts::Surface &b) {
-      Acts::GeometryContext gctx = Acts::GeometryContext::dangerouslyDefaultConstruct(); // unused in matcher
-      return m_cfg.surfaceMatcher(gctx, AxisPhi, &a, &b);
+      Acts::GeometryContext context = Acts::GeometryContext::dangerouslyDefaultConstruct(); // unused in matcher
+      return m_cfg.surfaceMatcher(context, AxisPhi, &a, &b);
     };
 
     auto zEqual = [this](const Acts::Surface &a,
                          const Acts::Surface &b) {
-      Acts::GeometryContext gctx = Acts::GeometryContext::dangerouslyDefaultConstruct(); // unused in matcher
-      return m_cfg.surfaceMatcher(gctx, AxisZ, &a, &b);
+      Acts::GeometryContext thisContext = Acts::GeometryContext::dangerouslyDefaultConstruct(); // unused in matcher
+      return m_cfg.surfaceMatcher(thisContext, AxisZ, &a, &b);
     };
 
     // Work around issue with clang10 --- it doesn't allow
@@ -443,7 +446,7 @@ void ActsLayerBuilder::buildEndcap(const Acts::GeometryContext &gctx,
                     << (type < 0 ? "NEGATIVE" : "POSITIVE")
                     << " ENDCAP layers remain after merging");
   } else {
-    mergedProtoLayers = protoLayers;
+    mergedProtoLayers = std::move(protoLayers);
   }
 
   if (m_cfg.objDebugOutput) {
@@ -553,8 +556,7 @@ void ActsLayerBuilder::buildEndcap(const Acts::GeometryContext &gctx,
 
     // want to figure out bins in phi
     for (const auto &srf : pl.surfaces()) {
-      auto elm = dynamic_cast<const ActsDetectorElement *>(
-          srf->surfacePlacement());
+      auto* elm = getActsDetectorElement(srf);
       if (elm) {
         auto id = elm->identityHelper();
         int ring_number;

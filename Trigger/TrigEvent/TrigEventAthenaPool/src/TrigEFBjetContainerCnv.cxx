@@ -46,10 +46,10 @@ TrigEFBjetContainer * TrigEFBjetContainerCnv::createTransient(const Token* token
   
   mlog << MSG::DEBUG << "TrigEFBjetContainerCnv::createTransient called" << endmsg;
 
-  static const pool::Guid tlp2_guid( "91EA22B6-9273-4206-AEB5-FE23A269C5AA" );
-  static const pool::Guid tlp1_guid( "F933A067-5788-4AD6-B696-C8B0E988EF2D" );
-  static const pool::Guid p0_guid( "EDAFEE8F-968E-44A4-BEED-7E7F5C86F397" );
-  static const pool::Guid p0_guid2( "D08290EE-4CB3-4570-BF7E-0FA008668A24" );
+  static const Guid tlp2_guid( "91EA22B6-9273-4206-AEB5-FE23A269C5AA" );
+  static const Guid tlp1_guid( "F933A067-5788-4AD6-B696-C8B0E988EF2D" );
+  static const Guid p0_guid( "EDAFEE8F-968E-44A4-BEED-7E7F5C86F397" );
+  static const Guid p0_guid2( "D08290EE-4CB3-4570-BF7E-0FA008668A24" );
  
   TrigEFBjetContainer *p_collection = 0;
 

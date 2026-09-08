@@ -1,5 +1,5 @@
 /* -*- mode:c++ -*-
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -32,7 +32,7 @@ StatusCode TrigMuonMonitorAlgorithm::fillVariablesRatioPlots(const EventContext 
 
 template<class T>
 StatusCode TrigMuonMonitorAlgorithm::fillVariableEtaPhi(const EventContext &ctx,
-                                                        SG::ReadHandleKey<DataVector<T> > ReadHandleKey,
+                                                        const SG::ReadHandleKey<DataVector<T> > & ReadHandleKey,
                                                         std::string &&trigstep,
                                                         std::tuple<bool,double,double> (*PosFunc)(const T*)) const
 {

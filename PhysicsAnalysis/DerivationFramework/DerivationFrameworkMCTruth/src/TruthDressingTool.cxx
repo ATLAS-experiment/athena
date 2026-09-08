@@ -8,7 +8,7 @@
 // Create dressed (i.e. including FSR photons) 4-vectors of truth objects
 
 #include "DerivationFrameworkMCTruth/TruthDressingTool.h"
-#include "MCTruthClassifier/MCTruthClassifier.h"
+#include "MCTruthClassifier/IMCTruthClassifier.h"
 #include "xAODTruth/TruthEventContainer.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "StoreGate/ReadDecorHandle.h"

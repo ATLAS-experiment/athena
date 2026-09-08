@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 
 #include "ActsEvent/TrackParameters.h"
 #include "ActsEvent/TrackContainer.h"
@@ -31,8 +31,6 @@
 #include "src/IMeasurementSelector.h"
 #include "src/detail/CalibratorRegistry.h"
 #include "src/detail/MeasurementCalibrator.h"
-
-#include "boost/container/small_vector.hpp"
 
 #include <tuple>
 #include <type_traits>

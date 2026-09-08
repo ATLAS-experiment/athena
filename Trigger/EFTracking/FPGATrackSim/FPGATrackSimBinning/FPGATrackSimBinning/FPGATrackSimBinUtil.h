@@ -92,9 +92,9 @@ private:
 struct StoredHit {
   StoredHit(const std::shared_ptr<const FPGATrackSimHit>& hit) : hitptr(hit), phiShift(0), etaShift(0), layer(-1) {}
   std::shared_ptr<const FPGATrackSimHit> hitptr;
-  double phiShift; // shift in r-phi plane as quantified by BinDesc
-  double etaShift;  // shift in r-z plane as  quantified by BinDesc
-  unsigned layer;
+  double phiShift = 0; // shift in r-phi plane as quantified by BinDesc
+  double etaShift = 0;  // shift in r-z plane as  quantified by BinDesc
+  unsigned layer = 0;
   double rzrad() const;
   static const unsigned invalidLayer = std::numeric_limits<unsigned>::max();
 };

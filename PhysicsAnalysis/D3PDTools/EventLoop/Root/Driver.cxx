@@ -24,7 +24,6 @@
 #include <EventLoop/SubmitDirManager.h>
 #include <EventLoop/SubmitManager.h>
 #include <RootCoreUtils/RootUtils.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <SampleHandler/DiskListLocal.h>
 #include <SampleHandler/Sample.h>
 #include <SampleHandler/SampleHist.h>
@@ -36,6 +35,7 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <stdexcept>
 #include <signal.h>
 
 using namespace EL::msgEventLoop;
@@ -54,9 +54,7 @@ namespace EL
 
   void Driver ::
   testInvariant () const
-  {
-    RCU_INVARIANT (this != 0);
-  }
+  {}
 
 
 
@@ -133,6 +131,8 @@ namespace EL
     data.submitDir = location;
 
     std::unique_ptr<TFile> file (TFile::Open ((location + "/driver.root").c_str(), "READ"));
+    if (!file || file->IsZombie())
+      throw std::runtime_error ("failed to open driver file");
     std::unique_ptr<Driver> driver (dynamic_cast<Driver*>(file->Get ("driver")));
     RCU_ASSERT2_SOFT (driver.get() != 0, "failed to read driver");
     data.driver = driver.get();
@@ -207,7 +207,7 @@ namespace EL
     {
       std::ifstream file ((location + "/location").c_str());
       if (!std::getline (file, from))
-	RCU_THROW_MSG ("failed to read submit location from " + location + "/location");
+	throw std::runtime_error ("failed to read submit location from " + location + "/location");
     }
     std::string to = location;
     while (!to.empty() && to[to.size()-1] == '/')
@@ -247,12 +247,11 @@ namespace EL
 	= data.submitDir + "/data-" + out->label();
 
       SH::SampleHandler sh;
-      for (SH::SampleHandler::iterator sample = data.job->sampleHandler().begin(),
-	     end = data.job->sampleHandler().end(); sample != end; ++ sample)
+      for (SH::Sample *sample : data.job->sampleHandler())
       {
-	const std::string name2 = name + "/" + (*sample)->name() + ".root";
+	const std::string name2 = name + "/" + sample->name() + ".root";
 	std::unique_ptr<SH::SampleLocal> mysample
-	  (new SH::SampleLocal ((*sample)->name()));
+	  (new SH::SampleLocal (sample->name()));
 	mysample->add (name2);
 	sh.add (std::move (mysample));
       }
@@ -273,13 +272,12 @@ namespace EL
 	   end = data.job->outputEnd(); out != end; ++ out)
     {
       SH::SampleHandler sh;
-      for (SH::SampleHandler::iterator sample = data.job->sampleHandler().begin(),
-	     end = data.job->sampleHandler().end(); sample != end; ++ sample)
+      for (SH::Sample *sample : data.job->sampleHandler())
       {
-	SH::Sample *histSample = sh_hist.get ((*sample)->name());
+	SH::Sample *histSample = sh_hist.get (sample->name());
 	RCU_ASSERT (histSample != 0);
 	std::unique_ptr<SH::SampleLocal> mysample
-	  (new SH::SampleLocal ((*sample)->name()));
+	  (new SH::SampleLocal (sample->name()));
 	TList *list = dynamic_cast<TList*>(histSample->readHist ("EventLoop_OutputStream_" + out->label()));
 	if (list != 0)
 	{

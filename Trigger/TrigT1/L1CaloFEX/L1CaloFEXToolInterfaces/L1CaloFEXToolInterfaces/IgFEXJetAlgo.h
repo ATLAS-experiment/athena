@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -24,7 +24,7 @@ Interface definition for eFEXegAlgo
     static const InterfaceID& interfaceID( ) ;
 
 
-    virtual void pileUpCalculation(gTowersType &twrs, int rhoThreshold_Max, int inputScale,  int &PUCp, int &PUC_JWJ) const = 0;
+    virtual void pileUpCalculation(const gTowersType &twrs, int rhoThreshold_Max, int inputScale,  int &PUCp, int &PUC_JWJ) const = 0;
 
     virtual std::vector<std::unique_ptr<gFEXJetTOB>> largeRfinder(const gTowersType& Atwr, 
                                                                   const gTowersType& Btwr,

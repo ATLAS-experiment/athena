@@ -10,6 +10,8 @@
 
 // EDM includes 
 #include "MuonFastRecoEvent/GlobalPattern.h"
+#include <xAODMuon/Muon.h>
+#include <xAODMuon/MuonContainer.h>
 #include "xAODMuon/MuonSegmentContainer.h"
 #include <xAODTruth/TruthParticle.h>
 #include <xAODMuonSimHit/MuonSimHit.h>
@@ -64,6 +66,11 @@ namespace MuonValR4{
     void fillGlobPatternInfo(const MuonR4::GlobalPatternContainer* patternCont,
                              const TruthParticleMap& truthHits,
                              const std::vector<const MuonR4::SpacePointContainer*>& spContainers);
+    /** @brief Fill the info associated to fast reco muons
+     *  @param muonCont: Pointer to the fast muon container
+     *  @param patternCont: Pointer to the global pattern container, needed to match muons to patterns */
+    void fillFastRecoMuonInfo(const xAOD::MuonContainer* muonCont,
+                              const MuonR4::GlobalPatternContainer* patternCont);
     /** @brief Fill the truth particle information into the tree
     *  @param truthHits: Map of truth particle hits
     *  @param spContainers: Vector of pointers to space point containers, needed for truth hit counts */
@@ -87,11 +94,11 @@ namespace MuonValR4{
      *  @param hitSt: Station index of the hit
      *  @param sp: Pointer to the space point
      *  @param isSecondaryMatched: if the spacepoint has a secondary measurement and it is matched to truth */
-    void updatePatHitInfo (const ePatBranchType type, 
-                           const std::size_t patIdx,
-                           const Muon::MuonStationIndex::StIndex hitSt,
-                           const MuonR4::SpacePoint* sp,
-                           const bool isSecondaryMatched = false);
+    void updatePatHitInfo(const ePatBranchType type, 
+                          const std::size_t patIdx,
+                          const Muon::MuonStationIndex::StIndex hitSt,
+                          const MuonR4::SpacePoint* sp,
+                          const bool isSecondaryMatched = false);
                          
     // // output tree 
     MuonVal::MuonTesterTree m_tree{"MuonFastRecoTest","FastRecoTester"}; 
@@ -102,6 +109,9 @@ namespace MuonValR4{
 
     // Global patterns
     SG::ReadHandleKey<MuonR4::GlobalPatternContainer> m_patternKey{this, "PatternKey", "R4MuonGlobalPatterns", "global pattern container"};
+
+    // Fast reco muons
+    SG::ReadHandleKey<xAOD::MuonContainer> m_fastMuonKey{this, "FastMuonKey", "R4FastRecoSAMuons", "fast reco muon container"};
     
     // Truth segments
     SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_truthSegmentKey {this, "TruthSegmentKey","MuonTruthSegments", "truth segment container"};
@@ -210,6 +220,13 @@ namespace MuonValR4{
     MuonVal::VectorBranch<float>& m_roi_PhiMax{m_tree.newVector<float>("roi_PhiMax",-10.)};
     MuonVal::VectorBranch<float>& m_roi_ZMin{m_tree.newVector<float>("roi_ZMin",-10.)}; 
     MuonVal::VectorBranch<float>& m_roi_ZMax{m_tree.newVector<float>("roi_ZMax",-10.)};
+    
+  /// ====== Fast Reco Muon info  ===========
+    MuonVal::VectorBranch<float>& m_muon_Eta{m_tree.newVector<float>("muon_Eta", -10.)};
+    MuonVal::VectorBranch<float>& m_muon_Phi{m_tree.newVector<float>("muon_Phi", -10.)};
+    MuonVal::VectorBranch<float>& m_muon_Pt{m_tree.newVector<float>("muon_Pt", -10.)};
+    MuonVal::VectorBranch<short>& m_muon_Q{m_tree.newVector<short>("muon_Q", 0)};
+    MuonVal::VectorBranch<unsigned char>& m_muon_MatchedToPattern{m_tree.newVector<unsigned char>("muon_patMatched")};
 
     MuonR4::SpacePointPerLayerSorter m_spSorter{};
 

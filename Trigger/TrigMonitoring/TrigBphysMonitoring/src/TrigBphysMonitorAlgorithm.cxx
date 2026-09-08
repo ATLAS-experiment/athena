@@ -77,7 +77,7 @@ StatusCode TrigBphysMonitorAlgorithm::fillContainerHists(const EventContext& ctx
   else {
     // Fill container-wise histograms
     std::string monGroupName = std::string("Container_")+trigBphysContainerKey.key();
-    auto monGroup = getGroup(monGroupName);
+    const auto & monGroup = getGroup(monGroupName);
     
     auto ncandidates = Monitored::Scalar<int>("ncandidates",-999);
     ncandidates = trigBphysContainer->size();
@@ -144,7 +144,7 @@ StatusCode TrigBphysMonitorAlgorithm::fillDimuonChainHists(const EventContext& c
   ATH_MSG_DEBUG("Filling  " << chainName << " chain histograms");
   
   std::string monGroupName = std::string("Chain_")+chainName;
-  auto monGroup = getGroup(monGroupName);
+  const auto & monGroup = getGroup(monGroupName);
     
   if (fillChainGenericHists(ctx, monGroup, chainName).isFailure()) {
     ATH_MSG_ERROR(Form("Problems filling generic histograms for %s chain",chainName.c_str()));
@@ -169,7 +169,7 @@ StatusCode TrigBphysMonitorAlgorithm::fillBmumuxChainHists(const EventContext& c
   ATH_MSG_DEBUG("Filling  " << chainName << " chain histograms");
   
   std::string monGroupName = std::string("Chain_")+chainName;
-  auto monGroup = getGroup(monGroupName);
+  const auto & monGroup = getGroup(monGroupName);
     
   if (fillChainGenericHists(ctx, monGroup, chainName).isFailure()) {
     ATH_MSG_ERROR(Form("Problems filling generic histograms for %s chain",chainName.c_str()));
@@ -203,7 +203,7 @@ StatusCode TrigBphysMonitorAlgorithm::fillDielectronChainHists(const EventContex
   ATH_MSG_DEBUG("Filling  " << chainName << " chain histograms");
   
   std::string monGroupName = std::string("Chain_")+chainName;
-  auto monGroup = getGroup(monGroupName);
+  const auto & monGroup = getGroup(monGroupName);
     
   if (fillChainGenericHists(ctx, monGroup, chainName).isFailure()) {
     ATH_MSG_ERROR(Form("Problems filling generic histograms for %s chain",chainName.c_str()));
@@ -227,7 +227,7 @@ StatusCode TrigBphysMonitorAlgorithm::fillBhhChainHists(const EventContext& ctx,
   ATH_MSG_DEBUG("Filling  " << chainName << " chain histograms");
   
   std::string monGroupName = std::string("Chain_")+chainName;
-  auto monGroup = getGroup(monGroupName);
+  const auto & monGroup = getGroup(monGroupName);
     
   if (fillChainGenericHists(ctx, monGroup, chainName).isFailure()) {
     ATH_MSG_ERROR(Form("Problems filling generic histograms for %s chain",chainName.c_str()));
@@ -414,7 +414,7 @@ StatusCode TrigBphysMonitorAlgorithm::fillOfflineDimuonHists(const EventContext&
   }
   
   std::string monGroupName = std::string("OfflineDimu_")+dimuonMonGroupName;
-  auto monGroup = getGroup(monGroupName);
+  const auto & monGroup = getGroup(monGroupName);
   
   auto ncandidates = Monitored::Scalar<int>("ncandidates",-999);
   ncandidates = matchedDimuons.size();

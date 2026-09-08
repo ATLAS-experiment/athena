@@ -32,7 +32,7 @@ atlas_add_citest( SimulationRun3FullSimChecks
    DEPENDS_SUCCESS SimulationRun3FullSim )
 
 atlas_add_citest( SimulationRun3FullSimSQLiteGeo
-   SCRIPT RunWorkflowTests_Run3.py --CI -s -w FullSim -a s4454 --threads 4 -e '--maxEvents 50 --geometrySQLite True --geometrySQLiteFullPath /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/Geometry/ATLAS-R3S-2021-03-02-00-DEV06.db' --run-only
+   SCRIPT RunWorkflowTests_Run3.py --CI -s -w FullSim -a s4454 --threads 4 -e '--maxEvents 50 --geometrySQLite True --geometrySQLiteFullPath /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/Geometry/ATLAS-R3S-2021-03-02-00-DEV07.db' --run-only
    LOG_IGNORE_PATTERN "WARNING FPE"  # ignore FPEs from Geant4
    PROPERTIES PROCESSORS 4 )
 
@@ -42,7 +42,7 @@ atlas_add_citest( SimulationRun3FullSimSQLiteGeoChecks
    DEPENDS_SUCCESS SimulationRun3FullSimSQLiteGeo )
 
 atlas_add_citest( SimulationRun4FullSim
-   SCRIPT RunWorkflowTests_Run4.py --CI -s -w FullSim --threads 4 -e '--maxEvents 10' --run-only
+   SCRIPT RunWorkflowTests_Run4.py --CI -s -w FullSim --threads 4 -e '--maxEvents 10 --preInclude="Campaigns.MC23PhaseIISimulation"' --run-only
    LOG_IGNORE_PATTERN "WARNING FPE"  # ignore FPEs from Geant4
    PROPERTIES PROCESSORS 4 )
 

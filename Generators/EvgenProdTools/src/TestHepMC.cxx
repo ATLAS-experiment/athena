@@ -130,6 +130,7 @@ TestHepMC::TestHepMC(const std::string& name, ISvcLocator* pSvcLocator)
 
 StatusCode TestHepMC::initialize() {
   CHECK(GenBase::initialize());
+  m_gendata = std::make_shared<GenData>();
 
   if (m_doHist){
     CHECK(m_thistSvc.retrieve());
@@ -336,29 +337,32 @@ StatusCode TestHepMC::execute(const EventContext& ctx) {
       const double sumP = beams.first->momentum().pz() + beams.second->momentum().pz();
       cmenergy = std::sqrt(sumE*sumE - sumP*sumP);
 
-      if(beams.first->pdg_id() == MC::OXYGEN && beams.second->pdg_id() == MC::OXYGEN){//OO collisions
-        cmenergy /= MC::baryonNumber(MC::OXYGEN); // divided by the total number of nucleons per nucleus
+      const int beam1PdgId = beams.first->pdg_id();
+      const int beam2PdgId = beams.second->pdg_id();
+
+      //Correct the CM energy for nuclear beams, since HepMC3 does not do this automatically
+      //Ion-Ion systems (even)
+      if (MC::isNucleus(beam1PdgId) && MC::isNucleus(beam2PdgId)) {
+        const double a1 = MC::baryonNumber(beam1PdgId);
+        const double a2 = MC::baryonNumber(beam2PdgId);
+        cmenergy /= std::sqrt(a1 * a2);
       }
-      if(beams.first->pdg_id() == MC::LEAD && beams.second->pdg_id() == MC::LEAD){//PbPb collisions
-        cmenergy /= MC::baryonNumber(MC::LEAD); // divided by the total number of nucleons per nucleus
-      }
-      if(beams.first->pdg_id() == MC::OXYGEN && beams.second->pdg_id() == MC::PROTON){//Op collisions
-        cmenergy = -2.0*beams.second->momentum().pz()*std::sqrt(static_cast<double>(MC::numberOfProtons(MC::OXYGEN))/MC::baryonNumber(MC::OXYGEN));
-      }
-      if(beams.first->pdg_id() == MC::PROTON && beams.second->pdg_id() == MC::OXYGEN){//pO collisions
-        cmenergy = 2.0*beams.first->momentum().pz()*std::sqrt(static_cast<double>(MC::numberOfProtons(MC::OXYGEN))/MC::baryonNumber(MC::OXYGEN));
-      }
-      if(beams.first->pdg_id() == MC::LEAD && beams.second->pdg_id() == MC::PROTON){//Pbp collisions
-        cmenergy = -2.0*beams.second->momentum().pz()*std::sqrt(static_cast<double>(MC::numberOfProtons(MC::LEAD))/MC::baryonNumber(MC::LEAD));
-      }
-      if(beams.first->pdg_id() == MC::PROTON && beams.second->pdg_id() == MC::LEAD){//pPb collisions
-        cmenergy = 2.0*beams.first->momentum().pz()*std::sqrt(static_cast<double>(MC::numberOfProtons(MC::LEAD))/MC::baryonNumber(MC::LEAD));
-      }
-      if(beams.first->pdg_id() == MC::OXYGEN && beams.second->pdg_id() == MC::HELIUM){//OHe collisions
-        cmenergy /= std::sqrt(static_cast<double>(MC::baryonNumber(MC::OXYGEN)*MC::baryonNumber(MC::HELIUM)));
-      }
-      if(beams.first->pdg_id() == MC::HELIUM && beams.second->pdg_id() == MC::OXYGEN){//HeO collisions
-        cmenergy /= std::sqrt(static_cast<double>(MC::baryonNumber(MC::OXYGEN)*MC::baryonNumber(MC::HELIUM)));
+      const bool nucleusProton =
+        MC::isNucleus(beam1PdgId) && beam2PdgId == MC::PROTON;
+      const bool protonNucleus =
+        beam1PdgId == MC::PROTON && MC::isNucleus(beam2PdgId);
+
+      if (nucleusProton || protonNucleus) {
+        const int nucleusPdgId = nucleusProton ? beam1PdgId : beam2PdgId;
+        const auto& protonBeam = nucleusProton ? beams.second : beams.first;
+        const double direction = nucleusProton ? -1.0 : 1.0;
+
+        cmenergy =
+          direction * 2.0 * protonBeam->momentum().pz() *
+          std::sqrt(
+            static_cast<double>(MC::numberOfProtons(nucleusPdgId)) /
+            MC::baryonNumber(nucleusPdgId)
+          );
       }
 
       if (m_cm_energy > 0 && std::abs(cmenergy - m_cm_energy) > m_cme_diff) {
@@ -516,11 +520,11 @@ StatusCode TestHepMC::execute(const EventContext& ctx) {
 
       //check stable particle lifetimes
       if (MC::isStable(pstatus)) {
-        const HepPDT::ParticleData* pd = particleData(ppdgid);
-        if (pd != NULL) {
-          double plifetime = pd->lifetime()*1e+12;  // why lifetime doesn't come in common units???
-          if (plifetime != 0 && plifetime < m_min_tau) { // particles with infinite lifetime get a 0 in the PDT
-            ATH_MSG_WARNING("Stable particle found with lifetime = " << plifetime << "~ns!!");
+        const auto plifetime = m_gendata->particleLifetime(ppdgid);
+        if (plifetime) {
+          double lifetime = plifetime.value()*1e+12;  // why lifetime doesn't come in common units???
+          if (lifetime != 0 && lifetime < m_min_tau) { // particles with infinite lifetime get a 0 in the PDT
+            ATH_MSG_WARNING("Stable particle found with lifetime = " << lifetime << "~ns!!");
             if (m_dumpEvent) HepMC::Print::line(std::cout,pitr);
 
             ++m_Status1ShortLifetime;

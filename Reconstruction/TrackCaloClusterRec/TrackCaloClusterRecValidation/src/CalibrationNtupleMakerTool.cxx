@@ -277,6 +277,7 @@ int CalibrationNtupleMakerTool::Matched(const xAOD::Jet* truth, const xAOD::JetC
   }
   
   if (drmin<m_matchingCut) {
+   //coverity[NEGATIVE_RETURNS:FALSE]
     matched.push_back(jets->at(Min_index));
     index   = Min_index;
   }
@@ -308,7 +309,7 @@ float CalibrationNtupleMakerTool::DetectorEta(const xAOD::Jet* jet) {
       return jet->eta();
     }
     
-    const xAOD::TrackCaloCluster* tcc = dynamic_cast<const xAOD::TrackCaloCluster*>(*link);
+    const xAOD::TrackCaloCluster* tcc = static_cast<const xAOD::TrackCaloCluster*>(*link);
     
     static const SG::AuxElement::Accessor< float > acc_detEta( "DetectorEta" );
     float det_eta = tcc->eta();

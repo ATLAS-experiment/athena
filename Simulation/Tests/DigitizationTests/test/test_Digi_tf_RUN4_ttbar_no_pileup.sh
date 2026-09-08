@@ -13,21 +13,19 @@ if [ -z ${ATLAS_REFERENCE_DATA+x} ]; then
 fi
 
 Events=25
-HSHitsFile="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-04-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8481_s4494/HITS.43777451._000083.pool.root.1"
+HSHitsFile="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-05-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8481_s4676/HITS.51318242._004216.pool.root.1"
 DigiOutFileName="RUN4_ttbar.RDO.pool.root"
 
 conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 
 Digi_tf.py \
---CA \
 --conditionsTag default:${conditions} \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
---geometryVersion default:ATLAS-P2-RUN4-04-00-00 \
 --inputHITSFile ${HSHitsFile} \
 --jobNumber 568 \
 --maxEvents ${Events} \
 --outputRDOFile ${DigiOutFileName} \
---preInclude 'HITtoRDO:Campaigns.PhaseIINoPileUp' \
+--preInclude 'HITtoRDO:Campaigns.MC23PhaseIINoPileUp' \
 --postInclude 'PyJobTransforms.UseFrontier' \
 --skipEvents 0
 

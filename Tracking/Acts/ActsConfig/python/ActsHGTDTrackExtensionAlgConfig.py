@@ -10,26 +10,27 @@ def ActsHGTDTrackExtensionAlgCfg(flags,
                                  **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("TrackParticleContainerName", "InDetTrackParticles")
-    kwargs.setdefault("HGTDClusterContainerName", "HGTD_Clusters")
-    kwargs.setdefault("UncalibratedMeasurementContainerKey_HGTD", "HGTD_Clusters")
+    kwargs.setdefault("UncalibratedMeasurementContainerKeys", ["HGTD_Clusters"])
 
     if flags.Acts.doMonitoring and "MonTools" not in kwargs:
         from ActsConfig.ActsMonitoringConfig import ActsHGTDTrackExtensionMonitoringCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsHGTDTrackExtensionMonitoringCfg(flags)))
 
-    if 'ExtrapolationTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
-        kwargs.setdefault("ExtrapolationTool", acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags,
-                                                                                             MaxSteps = 10000)))
-
-    if 'TrackingGeometryTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
-    
     if enableTrackStatePrinter and 'TrackStatePrinter' not in kwargs:
         from ActsConfig.ActsTrackFindingConfig import ActsTrackStatePrinterToolCfg
         kwargs.setdefault("TrackStatePrinter", acc.popToolsAndMerge(ActsTrackStatePrinterToolCfg(flags)))
+
+    kwargs.setdefault('ACTSTracksLocation', 'HgtdTracks')
+    kwargs.setdefault("etaBins", [0])
+
+    #Measurement selector
+    kwargs.setdefault("chi2CutOff", [30])
+    kwargs.setdefault("chi2OutlierCutOff", [15])
+    kwargs.setdefault("numMeasurementsCutOff", [3])
+
+    #Track selector
+    kwargs.setdefault('maxChi2', [30])
+    kwargs.setdefault('maxOutliers', [2])
         
     acc.addEventAlgo(CompFactory.ActsTrk.HGTDTrackExtensionAlg(name, **kwargs))
     return acc
@@ -39,6 +40,7 @@ def HGTDTruthTrackDecorationAlgCfg(flags,
                                    **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     kwargs.setdefault("TrackParticleContainerName", "InDetTrackParticles")
+
     acc.addEventAlgo(CompFactory.ActsTrk.HGTDTruthTrackDecorationAlg(name, **kwargs))
     return acc
 

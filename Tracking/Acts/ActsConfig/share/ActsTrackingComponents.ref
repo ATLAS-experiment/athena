@@ -58,7 +58,7 @@ Tracking.ITkActsPass           points to                        nothing
 
 ************************************************************************
 ******************** Tracking reconstruction Config ********************
-                     Active Config is LargeD0
+                     Active Config is ActsLargeRadius
 Tracking.ActiveConfig.doAthenaAmbiguityResolution : False
 Tracking.ActiveConfig.doAthenaCluster    : False
 Tracking.ActiveConfig.doAthenaSeed       : False
@@ -114,118 +114,6 @@ Tracking.ITkActsHeavyIonPass   points to                        nothing
 
 ************************************************************************
 ******************** Tracking reconstruction Config ********************
-                     Active Config is ActsValidateClusters
-Tracking.ActiveConfig.doAthenaAmbiguityResolution : True
-Tracking.ActiveConfig.doAthenaCluster    : False
-Tracking.ActiveConfig.doAthenaSeed       : True
-Tracking.ActiveConfig.doAthenaSpacePoint : True
-Tracking.ActiveConfig.doAthenaToActsCluster : False
-Tracking.ActiveConfig.doAthenaToActsSpacePoint : False
-Tracking.ActiveConfig.doAthenaToActsTrack : False
-Tracking.ActiveConfig.doAthenaTrack      : True
-Flag categories that are redirected by the cloneAndReplace
-Tracking.ActiveConfig          points to Tracking.ITkActsValidateClustersPass 
-Tracking.ITkActsValidateClustersPass points to                        nothing 
-Tracking.ActiveConfig.doActsAmbiguityResolution : False
-Tracking.ActiveConfig.doActsCluster      : True
-Tracking.ActiveConfig.doActsSeed         : False
-Tracking.ActiveConfig.doActsSpacePoint   : False
-Tracking.ActiveConfig.doActsToAthenaCluster : True
-Tracking.ActiveConfig.doActsToAthenaResolvedTrack : False
-Tracking.ActiveConfig.doActsToAthenaSpacePoint : False
-Tracking.ActiveConfig.doActsToAthenaTrack : False
-Tracking.ActiveConfig.doActsTrack        : False
-Flag categories that are redirected by the cloneAndReplace
-Tracking.ActiveConfig          points to Tracking.ITkActsValidateClustersPass 
-Tracking.ITkActsValidateClustersPass points to                        nothing 
-************************************************************************
-
-************************************************************************
-******************** Tracking reconstruction Config ********************
-                     Active Config is ActsValidateTracks
-Tracking.ActiveConfig.doAthenaAmbiguityResolution : True [function]
-Tracking.ActiveConfig.doAthenaCluster    : True
-Tracking.ActiveConfig.doAthenaSeed       : False
-Tracking.ActiveConfig.doAthenaSpacePoint : False
-Tracking.ActiveConfig.doAthenaToActsCluster : True
-Tracking.ActiveConfig.doAthenaToActsSpacePoint : False
-Tracking.ActiveConfig.doAthenaToActsTrack : False
-Tracking.ActiveConfig.doAthenaTrack      : False
-Flag categories that are redirected by the cloneAndReplace
-Tracking.ActiveConfig          points to Tracking.ITkActsValidateTracksPass 
-Tracking.ITkActsValidateTracksPass points to                        nothing 
-Tracking.ActiveConfig.doActsAmbiguityResolution : False [function]
-Tracking.ActiveConfig.doActsCluster      : False
-Tracking.ActiveConfig.doActsSeed         : True
-Tracking.ActiveConfig.doActsSpacePoint   : True
-Tracking.ActiveConfig.doActsToAthenaCluster : False
-Tracking.ActiveConfig.doActsToAthenaResolvedTrack : False [function]
-Tracking.ActiveConfig.doActsToAthenaSpacePoint : False
-Tracking.ActiveConfig.doActsToAthenaTrack : True [function]
-Tracking.ActiveConfig.doActsTrack        : True
-Flag categories that are redirected by the cloneAndReplace
-Tracking.ActiveConfig          points to Tracking.ITkActsValidateTracksPass 
-Tracking.ITkActsValidateTracksPass points to                        nothing 
-************************************************************************
-
-************************************************************************
-******************** Tracking reconstruction Config ********************
-                     Active Config is ActsValidateAmbiguityResolution
-Tracking.ActiveConfig.doAthenaAmbiguityResolution : False
-Tracking.ActiveConfig.doAthenaCluster    : True
-Tracking.ActiveConfig.doAthenaSeed       : True
-Tracking.ActiveConfig.doAthenaSpacePoint : True
-Tracking.ActiveConfig.doAthenaToActsCluster : False
-Tracking.ActiveConfig.doAthenaToActsSpacePoint : False
-Tracking.ActiveConfig.doAthenaToActsTrack : True
-Tracking.ActiveConfig.doAthenaTrack      : True
-Flag categories that are redirected by the cloneAndReplace
-Tracking.ActiveConfig          points to Tracking.ITkActsValidateAmbiguityResolutionPass 
-Tracking.ITkActsValidateAmbiguityResolutionPass points to                        nothing 
-Tracking.ActiveConfig.doActsAmbiguityResolution : True
-Tracking.ActiveConfig.doActsCluster      : False
-Tracking.ActiveConfig.doActsSeed         : False
-Tracking.ActiveConfig.doActsSpacePoint   : False
-Tracking.ActiveConfig.doActsToAthenaCluster : False
-Tracking.ActiveConfig.doActsToAthenaResolvedTrack : True
-Tracking.ActiveConfig.doActsToAthenaSpacePoint : False
-Tracking.ActiveConfig.doActsToAthenaTrack : False
-Tracking.ActiveConfig.doActsTrack        : False
-Flag categories that are redirected by the cloneAndReplace
-Tracking.ActiveConfig          points to Tracking.ITkActsValidateAmbiguityResolutionPass 
-Tracking.ITkActsValidateAmbiguityResolutionPass points to                        nothing 
-************************************************************************
-
-************************************************************************
-******************** Tracking reconstruction Config ********************
-                     Active Config is ActsValidateResolvedTracks
-Tracking.ActiveConfig.doAthenaAmbiguityResolution : False [function]
-Tracking.ActiveConfig.doAthenaCluster    : True
-Tracking.ActiveConfig.doAthenaSeed       : False
-Tracking.ActiveConfig.doAthenaSpacePoint : False
-Tracking.ActiveConfig.doAthenaToActsCluster : True
-Tracking.ActiveConfig.doAthenaToActsSpacePoint : False
-Tracking.ActiveConfig.doAthenaToActsTrack : False
-Tracking.ActiveConfig.doAthenaTrack      : False
-Flag categories that are redirected by the cloneAndReplace
-Tracking.ActiveConfig          points to Tracking.ITkActsValidateTracksPass 
-Tracking.ITkActsValidateTracksPass points to                        nothing 
-Tracking.ActiveConfig.doActsAmbiguityResolution : True [function]
-Tracking.ActiveConfig.doActsCluster      : False
-Tracking.ActiveConfig.doActsSeed         : True
-Tracking.ActiveConfig.doActsSpacePoint   : True
-Tracking.ActiveConfig.doActsToAthenaCluster : False
-Tracking.ActiveConfig.doActsToAthenaResolvedTrack : True [function]
-Tracking.ActiveConfig.doActsToAthenaSpacePoint : False
-Tracking.ActiveConfig.doActsToAthenaTrack : False [function]
-Tracking.ActiveConfig.doActsTrack        : True
-Flag categories that are redirected by the cloneAndReplace
-Tracking.ActiveConfig          points to Tracking.ITkActsValidateTracksPass 
-Tracking.ITkActsValidateTracksPass points to                        nothing 
-************************************************************************
-
-************************************************************************
-******************** Tracking reconstruction Config ********************
                      Active Config is ActsConversion
 Tracking.ActiveConfig.doAthenaAmbiguityResolution : False
 Tracking.ActiveConfig.doAthenaCluster    : False
@@ -238,7 +126,7 @@ Tracking.ActiveConfig.doAthenaTrack      : False
 Flag categories that are redirected by the cloneAndReplace
 Tracking.ActiveConfig          points to Tracking.ITkActsConversionPass 
 Tracking.ITkActsConversionPass points to                        nothing 
-Tracking.ActiveConfig.doActsAmbiguityResolution : True [function]
+Tracking.ActiveConfig.doActsAmbiguityResolution : False [function]
 Tracking.ActiveConfig.doActsCluster      : True
 Tracking.ActiveConfig.doActsSeed         : True
 Tracking.ActiveConfig.doActsSpacePoint   : True

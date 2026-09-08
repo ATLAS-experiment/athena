@@ -5,12 +5,20 @@
 #include "xTgcMeasToTrkPrdCnvAlg.h"
 
 #include "StoreGate/WriteHandle.h"
+
+
+namespace{
+    using Link_t = ElementLink<Muon::TgcPrepDataCollection>;
+    static const SG::Decorator<Link_t> dec_link{"tgcTrkPrdLink"};
+}
+
 namespace MuonR4 {
     StatusCode xTgcMeasToTrkPrdCnvAlg::initialize() {
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_readKey.initialize());
         ATH_CHECK(m_writeKey.initialize());
         ATH_CHECK(m_detMgrKey.initialize());
+        ATH_CHECK(m_linkKey.initialize());
         return StatusCode::SUCCESS;
     }
 
@@ -42,6 +50,7 @@ namespace MuonR4 {
                                                               outEle,
                                                               meas->bcBitMap());
             outPrd->setHashAndIndex(coll->identifyHash(), coll->size());
+            dec_link(*meas) = Link_t{*coll, coll->size()};
             coll->push_back(std::move(outPrd));
 
         }

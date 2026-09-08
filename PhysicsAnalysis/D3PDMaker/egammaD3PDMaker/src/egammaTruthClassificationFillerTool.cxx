@@ -90,36 +90,31 @@ StatusCode egammaTruthClassificationFillerTool::book()
  */
 StatusCode egammaTruthClassificationFillerTool::fill (const xAOD::Egamma& p)
 {
-  std::pair<MCTruthPartClassifier::ParticleType,
-    MCTruthPartClassifier::ParticleOrigin> res;
+  std::tuple<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin, const xAOD::TruthParticle*,MCTruthPartClassifier::ParticleOutCome> res;
 
-  MCTruthPartClassifier::Info info;
   if (const xAOD::Electron* q =
       dynamic_cast<const xAOD::Electron*>(&p))
   {
-    res = m_classifier->particleTruthClassifier (q, &info);
+    res = m_classifier->particleTruthClassifier_full (q);
   }
   else if (const xAOD::Photon* q =
            dynamic_cast<const xAOD::Photon*>(&p))
   {
-    res = m_classifier->particleTruthClassifier (q, &info);
+    res = m_classifier->particleTruthClassifier_full (q);
   }
   else
     std::abort();
 
-  *m_type   = res.first;
-  *m_origin = res.second;
+  std::tie(*m_type, *m_origin, std::ignore, std::ignore) = res;
 
   if (m_doBkgElecOrigin) {
-    if (res.first == MCTruthPartClassifier::BkgElectron &&
-        res.second == MCTruthPartClassifier::PhotonConv &&
-        info.genPart)
+    if (std::get<0>(res) == MCTruthPartClassifier::BkgElectron &&
+        std::get<1>(res) == MCTruthPartClassifier::PhotonConv &&
+        std::get<2>(res))
     {
-      const xAOD::TruthParticle* last = xAOD::EgammaHelpers::getBkgElectronMother(info.genPart);
+      const xAOD::TruthParticle* last = xAOD::EgammaHelpers::getBkgElectronMother(std::get<2>(res));
       if(last){
-        res = m_classifier->particleTruthClassifier(last, &info);
-        *m_typebkg   = res.first;
-        *m_originbkg = res.second;
+        std::tie(*m_typebkg, *m_originbkg, std::ignore, std::ignore) = m_classifier->particleTruthClassifier_full(last);
       }
     }
   }

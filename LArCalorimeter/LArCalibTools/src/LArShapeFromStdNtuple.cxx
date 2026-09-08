@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArShapeFromStdNtuple.h"
@@ -23,21 +23,7 @@
 #include <vector>
 
 
-LArShapeFromStdNtuple::LArShapeFromStdNtuple (const std::string& name, ISvcLocator* pSvcLocator) : AthAlgorithm(name, pSvcLocator)
-{  
-  declareProperty("SkipPoints", m_skipPoints = 0);
-  declareProperty("PrefixPoints", m_prefixPoints = 0);
-  declareProperty("FileNames", m_root_file_names);
-  declareProperty("NtupleName", m_ntuple_name="SHAPE");
-  declareProperty("StoreKey", m_store_key="FromStdNtuple");
-  declareProperty("GroupingType", m_groupingType="ExtendedSubDetector");
-  declareProperty("isComplete",   m_isComplete=false);
-
-  m_done=false;
-}
-
-LArShapeFromStdNtuple::~LArShapeFromStdNtuple() 
-= default;
+LArShapeFromStdNtuple::~LArShapeFromStdNtuple() = default;
 
 StatusCode LArShapeFromStdNtuple::initialize() 
 {
@@ -59,7 +45,7 @@ StatusCode LArShapeFromStdNtuple::stop()
   const LArOnlineID* onlineHelper = nullptr;
   ATH_CHECK( detStore()->retrieve(onlineHelper, "LArOnlineID") );
 
-  TChain* outfit = new TChain(m_ntuple_name.c_str());
+  TChain* outfit = new TChain(m_ntuple_name.value().c_str());
   for (const std::string& s : m_root_file_names) {
     outfit->Add(s.c_str());
   }

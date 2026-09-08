@@ -34,8 +34,8 @@ HLT::HLTResult* HLTResultCnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "HLTResultConverter" );
 
-  static const pool::Guid p1_guid("9567573D-F35E-4D5E-9A1A-A43B07D3CF3B");
-  static const pool::Guid p0_guid("559D6CB9-9A54-4284-A03D-9C745352281D");
+  static const Guid p1_guid("9567573D-F35E-4D5E-9A1A-A43B07D3CF3B");
+  static const Guid p0_guid("559D6CB9-9A54-4284-A03D-9C745352281D");
   
   if ( compareClassGuid(token, p1_guid) ) {
     // using unique_ptr ensures deletion of the persistent object

@@ -8,17 +8,17 @@
 // includes
 //
 
-//protect
 #include <SampleHandler/MetaObject.h>
 
 #include <cstdlib>
+#include <format>
 #include <memory>
 #include <sstream>
+#include <stdexcept>
 #include <TList.h>
 #include <TNamed.h>
 #include <TBuffer.h>
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
 #include <SampleHandler/MetaData.h>
 
 //
@@ -51,7 +51,7 @@ namespace SH
       {
 	if (field.empty())
 	  return;
-	RCU_THROW_MSG ("no conversion defined from type " + TypeName<From>::name + " to type " + TypeName<To>::name + " for field " + field);
+	throw std::runtime_error ("no conversion defined from type " + TypeName<From>::name() + " to type " + TypeName<To>::name() + " for field " + field);
       }
     };
 
@@ -76,7 +76,7 @@ namespace SH
 	}
 	if (field.empty())
 	  return;
-	RCU_THROW_MSG ("unable to convert string '" + from + "' to type " + TypeName<To>::name() + " for field " + field);
+	throw std::runtime_error ("unable to convert string '" + from + "' to type " + TypeName<To>::name() + " for field " + field);
       }
     };
 
@@ -125,7 +125,7 @@ namespace SH
 	}
 	if (field.empty())
 	  return;
-	RCU_THROW_MSG ("unable to convert string '" + from + "' to type bool for field " + field);
+	throw std::runtime_error ("unable to convert string '" + from + "' to type bool for field " + field);
       }
     };
 
@@ -148,7 +148,7 @@ namespace SH
     {
       const MetaData<From> *myfrom =
 	dynamic_cast<const MetaData<From>* >(from);
-      if (myfrom == 0)
+      if (myfrom == nullptr)
 	return false;
       Convert<From,To>::convert (myfrom->value, to, field);
       return true;
@@ -162,7 +162,7 @@ namespace SH
       if (convertSingle<int> (from, to, field)) return;
       if (convertSingle<bool> (from, to, field)) return;
       if (!field.empty())
-	RCU_THROW_MSG ("unkown input type " + std::string (typeid(*from).name()) + " for field " + field);
+        throw std::runtime_error (std::format ("unknown input type {} for field {}", typeid(*from).name(), field));
     }
 
     /// \brief trim leading/trailing spaces from the given string
@@ -172,12 +172,20 @@ namespace SH
     ///   out of memory II
     std::string trim (const std::string& str)
     {
-      size_t endpos = str.find_last_not_of(" \t");
-      size_t startpos = str.find_first_not_of(" \t");
-      if( std::string::npos == endpos ) return "";
-      if(str[startpos] == '"' || str[startpos] == '\'') startpos++;
-      if(str[endpos]   == '"' || str[endpos]   == '\'') endpos--;
-      return str.substr( startpos, endpos+1-startpos );
+      const char *const whitespace = " \t\n\r\f\v";
+      size_t startpos = str.find_first_not_of (whitespace);
+      if (std::string::npos == startpos) return "";
+      size_t endpos = str.find_last_not_of (whitespace);
+      // rationale: only strip a surrounding pair of *matching* quotes,
+      //   not a mismatched pair like '"abc' or "abc'.
+      if (endpos > startpos &&
+          (str[startpos] == '"' || str[startpos] == '\'') &&
+          str[endpos] == str[startpos])
+      {
+        ++ startpos;
+        -- endpos;
+      }
+      return str.substr (startpos, endpos + 1 - startpos);
     }
 
 
@@ -228,7 +236,7 @@ namespace SH
   void MetaObject ::
   testInvariant () const
   {
-    RCU_INVARIANT (m_dataList != 0);
+    RCU_INVARIANT (m_dataList != nullptr);
  }
 
 
@@ -249,11 +257,11 @@ namespace SH
   {
     m_dataList->SetOwner(true);
     TIter iter (&that);
-    TObject *object = 0;
+    TObject *object = nullptr;
     while ((object = iter.Next()))
     {
       m_dataList->Add (object->Clone());
-    };
+    }
 
     RCU_NEW_INVARIANT (this);
   }
@@ -294,7 +302,7 @@ namespace SH
   {
     RCU_CHANGE_INVARIANT (this);
 
-    TObject *object = 0;
+    TObject *object = nullptr;
     while ((object = m_dataList->FindObject (name.c_str())))
       delete m_dataList->Remove (object);
   }
@@ -306,7 +314,7 @@ namespace SH
   {
     std::unique_ptr<TNamed> meta (meta_swallow);
     RCU_CHANGE_INVARIANT (this);
-    RCU_REQUIRE_SOFT (meta_swallow != 0);
+    RCU_REQUIRE_SOFT (meta_swallow != nullptr);
 
     remove (meta_swallow->GetName());
     m_dataList->Add (meta.release());
@@ -418,7 +426,7 @@ namespace SH
     RCU_CHANGE_INVARIANT (this);
 
     TIter iter (&source);
-    TObject *object = 0;
+    TObject *object = nullptr;
     while ((object = iter.Next()))
     {
       TNamed *const named = dynamic_cast<TNamed*>(object);
@@ -428,8 +436,8 @@ namespace SH
       } else if (strncmp (named->GetName(), "nc_", 3) != 0)
       {
 	addReplace (dynamic_cast<TNamed*>(named->Clone ()));
-      };
-    };
+      }
+    }
   }
 
 
@@ -440,12 +448,12 @@ namespace SH
     RCU_CHANGE_INVARIANT (this);
 
     TIter iter (&source);
-    TObject *object = 0;
+    TObject *object = nullptr;
     while ((object = iter.Next()))
     {
-      if (get (object->GetName ()) == 0)
+      if (get (object->GetName ()) == nullptr)
 	m_dataList->Add (object->Clone());
-    };
+    }
   }
 
 
@@ -455,7 +463,7 @@ namespace SH
   {
     std::unique_ptr<TObject> meta (meta_swallow);
     RCU_CHANGE_INVARIANT (this);
-    RCU_REQUIRE_SOFT (meta_swallow != 0);
+    RCU_REQUIRE_SOFT (meta_swallow != nullptr);
     m_dataList->Add (meta.release());
   }
 
@@ -490,11 +498,11 @@ namespace SH
   GetObjectRef (const TObject *const meta) const
   {
     RCU_READ_INVARIANT (this);
-    RCU_REQUIRE_SOFT (meta != 0);
+    RCU_REQUIRE_SOFT (meta != nullptr);
 
     TObject **const result = m_dataList->GetObjectRef (meta);
 
-    RCU_PROVIDE (result != 0);
+    RCU_PROVIDE (result != nullptr);
     RCU_PROVIDE (*result == meta);
     return result;
   }
@@ -508,7 +516,7 @@ namespace SH
 
     std::unique_ptr<TIterator> result (m_dataList->MakeIterator (dir));
 
-    RCU_PROVIDE2 (result.get() != 0, "result != 0");
+    RCU_PROVIDE2 (result.get() != nullptr, "result != 0");
     return result.release();
   }
 
@@ -518,7 +526,7 @@ namespace SH
   Remove (TObject *meta)
   {
     RCU_CHANGE_INVARIANT (this);
-    RCU_REQUIRE_SOFT (meta != 0);
+    RCU_REQUIRE_SOFT (meta != nullptr);
     return m_dataList->Remove (meta);
   }
 
@@ -533,12 +541,17 @@ namespace SH
       TObject::Streamer (b);
       m_dataList->Clear ();
       m_dataList->Streamer (b);
+      // rationale: re-assert ownership of the list after reading, so
+      //   that objects written by builds predating the SetOwner(true)
+      //   calls do not read back as a non-owning list that leaks every
+      //   Meta on destruction.
+      m_dataList->SetOwner (true);
     } else
     {
       RCU_READ_INVARIANT (this);
       TObject::Streamer (b);
       m_dataList->Streamer (b);
-    };
+    }
   }
 
   
@@ -547,7 +560,7 @@ namespace SH
   {
     RCU_READ_INVARIANT (this);
     const TObject* meta = get (name);
-    if (meta == 0)
+    if (meta == nullptr)
       return def_val;
     const MetaData<T> *const retval = dynamic_cast<const MetaData<T>*>(meta);
     if (retval) 
@@ -567,8 +580,7 @@ namespace SH
 	return result;
       }
     case CAST_NOCAST_THROW:
-      RCU_THROW_MSG ("invalid input value for " + name);
-      return def_val;
+      throw std::runtime_error ("invalid input value for " + name);
     case CAST_NOCAST_DEFAULT:
       return def_val;
     }
@@ -579,27 +591,37 @@ namespace SH
 
   void MetaObject ::
   fetchFromString(const std::string& source){
-    size_t pos=1;
     size_t oldpos = 0;
-    while(pos<source.size() && pos > 0){
-      size_t split = source.find("=",oldpos);
-      pos = source.find(",",split);
-      if(split < pos){
-	std::string key = trim(source.substr(oldpos,split-oldpos));
-	std::string value = trim(source.substr(split+1,pos-split-1));
-	this->setString(key,value);
-      } else {
-	RCU_THROW_MSG ("unable to parse string '"+source+"'");
+    while (oldpos < source.size())
+    {
+      size_t split = source.find ("=", oldpos);
+      size_t pos = source.find (",", oldpos);
+      if (pos == std::string::npos)
+        pos = source.size();
+      // rationale: tolerate empty segments and a trailing separator
+      //   (e.g. "a=b,") by skipping empty segments.
+      if (pos == oldpos)
+      {
+        oldpos = pos + 1;
+        continue;
       }
-      oldpos = pos+1;
+      if (split < pos)
+      {
+	std::string key = trim (source.substr (oldpos, split - oldpos));
+	std::string value = trim (source.substr (split + 1, pos - split - 1));
+	this->setString (key, value);
+      } else {
+        throw std::runtime_error ("unable to parse string '" + source + "'");
+      }
+      oldpos = pos + 1;
     }
   }
-  
-  std::string MetaObject :: 
-  dumpToString(){
+
+  std::string MetaObject ::
+  dumpToString() const {
     std::stringstream ss;
-    TIterator* itr = this->MakeIterator();
-    TObject* obj = NULL;
+    std::unique_ptr<TIterator> itr (this->MakeIterator());
+    TObject* obj = nullptr;
     while( (obj = itr->Next()) ){
       Meta* m = dynamic_cast<Meta*>(obj);
       if(!m) continue;
@@ -616,10 +638,18 @@ namespace SH
     }
     return ss.str();
   }
-  
+
   Int_t MetaObject ::
   GetEntries() const {
     return this->m_dataList->GetEntries();
   }
-  
+
+  Int_t MetaObject ::
+  GetSize() const {
+    // rationale: TCollection::GetSize() is not overridden by
+    //   GetEntries(), and fSize is never maintained, so the default
+    //   returns 0 (e.g. PyROOT's len()); delegate to the backing list.
+    return this->m_dataList->GetSize();
+  }
+
 }

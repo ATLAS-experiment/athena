@@ -1,16 +1,24 @@
 #  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  
-def TrigMuonTruthMonConfig(helper):
+def TrigMuonTruthMonConfig(helper, isPhaseII=False, **kwargs):
 
     from AthenaConfiguration.ComponentFactory import CompFactory
 
     GroupName = 'TruthMon'
     
-    from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
+    from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
     from .MuonMatchingToolConfig import MuonMatchingToolConfig
+
+    # Set the offline muon container
+    kwargs.setdefault("MuonContainerName", "Muons")
+
     monAlg = helper.addAlgorithm(CompFactory.TrigMuonTruthMon,'TrigMuonTruthMon',
-                                 MuonSelectionTool = helper.result().popToolsAndMerge(MuonSelectionToolCfg(helper.flags, MuQuality=1)), 
-                                 MuonMatchingTool = helper.result().popToolsAndMerge(MuonMatchingToolConfig(helper.flags)))
+                                 MuonSelectionTool = helper.result().popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(helper.flags, 
+                                                                                                                                MuQuality=1)), 
+                                 MuonMatchingTool = helper.result().popToolsAndMerge(MuonMatchingToolConfig(helper.flags, 
+                                                                                                            isPhaseII=isPhaseII, 
+                                                                                                            MuonContainerName = kwargs["MuonContainerName"])),
+                                 **kwargs)
 
     ### monitorig groups
     from TrigConfigSvc.TriggerConfigAccess import getHLTMonitoringAccess
@@ -100,5 +108,30 @@ def TrigMuonTruthMonConfig(helper):
 
         histGroupChain.defineHistogram(chain+'_MatchedL1truthIntPerBC', 
                                        title = 'Matched L1 muon average interactions ber bunch crossing ' + chain,
+                                       type = 'TH1F', path='', xbins=60, xmin=30, xmax=90)
+    
+    # Matched L2 to truth variables
+        histGroupChain.defineHistogram(chain+'_MatchedL2CBtruthEta', 
+                                       title = 'Matched L2 CB muon truth eta ' + chain,
+                                       type = 'TH1F', path='', xbins=50, xmin=-2.7, xmax=2.7)
+        
+        histGroupChain.defineHistogram(chain+'_MatchedL2CBtruthPhi', 
+                                       title = 'Matched L2 CB muon truth phi ' + chain,
+                                       type = 'TH1F', path='', xbins=50, xmin=-3.14, xmax=3.14)
+                            
+        histGroupChain.defineHistogram(chain+'_MatchedL2CBtruthPt', 
+                                        title = 'Matched L2 CB muon truth pt ' + chain,
+                                        type = 'TH1F', path='', xbins=[0.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,80.0,90.0,100.0,120.0,200.0], xmin=0.0, xmax=200.0)
+
+        histGroupChain.defineHistogram(chain+'_MatchedL2CBtruthEndcapPt', 
+                                        title = 'Matched L2 CB muon truth pt ' + chain,
+                                        type = 'TH1F', path='', xbins=[0.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,80.0,90.0,100.0,120.0,200.0], xmin=0.0, xmax=200.0)
+
+        histGroupChain.defineHistogram(chain+'_MatchedL2CBtruthBarrelPt', 
+                                        title = 'Matched L2 CB muon truth pt ' + chain,
+                                        type = 'TH1F', path='', xbins=[0.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,80.0,90.0,100.0,120.0,200.0], xmin=0.0, xmax=200.0)
+
+        histGroupChain.defineHistogram(chain+'_MatchedL2CBtruthIntPerBC', 
+                                       title = 'Matched L2 CB muon average interactions ber bunch crossing ' + chain,
                                        type = 'TH1F', path='', xbins=60, xmin=30, xmax=90)
 

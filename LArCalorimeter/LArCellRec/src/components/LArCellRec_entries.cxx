@@ -1,3 +1,4 @@
+#include <Gaudi/PluginServiceV2.h>
 #include "../LArNonLinearity.h"
 #include "../LArCellBuilderFromLArRawChannelTool.h"
 #include "../LArCellEmMiscalib.h"
@@ -16,6 +17,7 @@
 #include "../LArCelldeadOTXTool.h"
 #include "../LArCelldeadOTXAlg.h"
 #include "../LArDeadOTXCondAlg.h"
+#include "../EventInfoClearAlg.h"
 
 DECLARE_COMPONENT( LArNoisyROAlg )
 DECLARE_COMPONENT( LArNonLinearity )
@@ -35,3 +37,4 @@ DECLARE_COMPONENT( LArRAWtoSuperCell )
 DECLARE_COMPONENT( LArCelldeadOTXTool )
 DECLARE_COMPONENT( LArCelldeadOTXAlg )
 DECLARE_COMPONENT( LArDeadOTXCondAlg )
+DECLARE_COMPONENT( EventInfoClearAlg )

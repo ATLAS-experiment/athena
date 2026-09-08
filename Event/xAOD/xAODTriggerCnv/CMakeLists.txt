@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( xAODTriggerCnv )
@@ -59,8 +59,8 @@ else()
    atlas_add_component( xAODTriggerCnv
       xAODTriggerCnv/*.h src/*.cxx Root/*.cxx src/components/*.cxx
       LINK_LIBRARIES xAODTriggerCnvLib AsgTools xAODTrigger GaudiKernel AthenaBaseComps
-      AthenaKernel StoreGateLib EventInfo AnalysisTriggerEvent
-      TrigConfHLTData TrigDecisionEvent TrigSteeringEvent TrigConfInterfaces TrigDecisionInterface TrigAnalysisInterfaces
+      AthenaKernel EventInfo
+      TrigConfHLTData TrigDecisionEvent TrigSteeringEvent TrigConfInterfaces TrigDecisionInterface
       TrigOutputHandlingLib TrigDecisionToolLib )
 
 endif()

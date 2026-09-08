@@ -40,29 +40,33 @@ class TrigEgammaMatchingToolMT : public asg::AsgTool
         StatusCode initialize();
 
         // check if the offline object passed by HLT step for one specific trigger
-        bool isPassed( const xAOD::Egamma *,const std::string&, unsigned int condition=TrigDefs::Physics ) const;
+        bool isPassed( const EventContext& ctx, const xAOD::Egamma *,const std::string&, unsigned int condition=TrigDefs::Physics ) const;
 
         bool match( const xAOD::Egamma *,const std::string&, const TrigCompositeUtils::Decision *&, unsigned int condition=TrigDefs::Physics ) const;
         
         
-        template<class T> bool ancestorPassed( const TrigCompositeUtils::Decision*, const std::string& trigger , const std::string& key,
+        template<class T> bool ancestorPassed( const EventContext& ctx,
+                                               const TrigCompositeUtils::Decision*, const std::string& trigger , const std::string& key,
                                                unsigned int condition=TrigDefs::Physics ) const;
         
 
 
-        template<class T> TrigCompositeUtils::LinkInfo<T> getFeature( const TrigCompositeUtils::Decision *, const std::string& trigger,
+        template<class T> TrigCompositeUtils::LinkInfo<T> getFeature( const EventContext& ctx,
+                                                                      const TrigCompositeUtils::Decision *, const std::string& trigger,
                                                                       unsigned int condition=TrigDefs::Physics ) const;
-        template<class T> std::vector<TrigCompositeUtils::LinkInfo<T>> getFeatures( const TrigCompositeUtils::Decision *, const std::string& trigger , 
+        template<class T> std::vector<TrigCompositeUtils::LinkInfo<T>> getFeatures( const EventContext& ctx,
+                                                                                    const TrigCompositeUtils::Decision *, const std::string& trigger ,
                                                                                     unsigned int condition=TrigDefs::Physics ) const;
-        template<class T> std::vector<TrigCompositeUtils::LinkInfo<T>> getFeatures( const TrigCompositeUtils::Decision *, const std::string& trigger, const std::string& key ,
+        template<class T> std::vector<TrigCompositeUtils::LinkInfo<T>> getFeatures( const EventContext& ctx,
+                                                                                    const TrigCompositeUtils::Decision *, const std::string& trigger, const std::string& key ,
                                                                                     unsigned int condition=TrigDefs::Physics ) const;
         
         // access the feature from the container
-        const xAOD::EmTauRoI*  getL1Feature( const TrigCompositeUtils::Decision * ) const;
-        const xAOD::eFexEMRoI* getL1eEMFeature( const TrigCompositeUtils::Decision * ) const;
+        const xAOD::EmTauRoI*  getL1Feature( const EventContext &, const TrigCompositeUtils::Decision * ) const;
+        const xAOD::eFexEMRoI* getL1eEMFeature( const EventContext &, const TrigCompositeUtils::Decision * ) const;
 
         // access the feature from the container
-        const xAOD::TrigRingerRings* getRingsFeature( const TrigCompositeUtils::Decision * ) const;
+        const xAOD::TrigRingerRings* getRingsFeature( const EventContext &, const TrigCompositeUtils::Decision * ) const;
         // get the container key
         std::string key( const std::string& ) const;
 

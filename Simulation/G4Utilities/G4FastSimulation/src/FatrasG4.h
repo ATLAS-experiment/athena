@@ -10,11 +10,22 @@
 // Geant4 fast simulation base class
 #include "G4VFastSimulationModel.hh"
 
+// Geant4 ACTSFatras G4 Tool
+#include "G4AtlasInterfaces/IActsFatrasG4Tool.h"
+
+// FatrasG4 tool
+#include "FatrasG4Tool.h"
+
+class G4FieldTrack;
+class G4SafetyHelper;
+
 class FatrasG4: public G4VFastSimulationModel
 {
  public:
   FatrasG4(const std::string& name,
-	   G4Region* region);
+                G4Region* region,
+                const PublicToolHandle<IActsFatrasG4Tool>& ActsFatrasG4Tool,
+                FatrasG4Tool * FatrasG4Tool);
   
   virtual ~FatrasG4() = default;
 
@@ -26,6 +37,8 @@ class FatrasG4: public G4VFastSimulationModel
   virtual G4bool ModelTrigger(const G4FastTrack &) override final;
 
  private:
+  // Geant4 ACTSFatras G4 Tool
+  PublicToolHandle<IActsFatrasG4Tool> m_ActsFatrasG4Tool;
 
 };
 

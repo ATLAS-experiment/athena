@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "SegmentMarkerAlg.h"
 
 #include "StoreGate/ReadDecorHandle.h"
 #include "StoreGate/ReadHandle.h"
-#include "StoreGate/WriteDecorHandle.h"
-#include "DerivationFrameworkMuons/Utils.h"
+#include "xAODMuonViews/ContainerDecorator.h"
 
 
 namespace MuonR4{
@@ -22,10 +21,8 @@ namespace MuonR4{
         const xAOD::MuonContainer* muons{nullptr};
         ATH_CHECK(SG::get(muons, m_muonKey, ctx));
         
-        SG::ReadDecorHandle<xAOD::MuonContainer, bool> selHandle{m_readMarkKey, ctx};
-        using namespace DerivationFramework;
-        auto decorHandle{makeHandle(ctx, m_writeMarkKey, false)};
-        ATH_CHECK(decorHandle.isPresent());
+        SG::ReadDecorHandle<xAOD::MuonContainer, std::uint8_t> selHandle{m_readMarkKey, ctx};
+        xAOD::ContainerDecorator decorHandle{m_writeMarkKey, ctx, std::uint8_t{0}};
 
         for (const xAOD::Muon* muon : *muons) {
             if (!selHandle(*muon)) {
@@ -33,7 +30,7 @@ namespace MuonR4{
             }
             for (unsigned int s =0; s < muon->nMuonSegments(); ++s){
                 const xAOD::MuonSegment* seg = muon->muonSegment(s);
-                if (seg->container() != decorHandle.cptr()) {
+                if (seg->container() != decorHandle.container()) {
                     ATH_MSG_FATAL("The segment "<<seg<<" does not live in container "<<m_segKey.fullKey());
                     return StatusCode::FAILURE;
                 }

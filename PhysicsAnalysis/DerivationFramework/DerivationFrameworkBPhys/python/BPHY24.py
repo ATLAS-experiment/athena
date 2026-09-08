@@ -23,14 +23,12 @@ def BPHY24Cfg(flags):
     thinPassFlagsList = [] # List of pass-flags in the reconstructed candidates to se for the thinning
     finalCandidateList = []
 
-    from AthenaServices.PartPropSvcConfig import PartPropSvcCfg
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (
         BPHY_V0ToolCfg, BPHY_InDetDetailedTrackSelectorToolCfg,
         BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg,
         AugOriginalCountsCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     acc = ComponentAccumulator()
-    PartPropSvcName = acc.getPrimaryAndMerge(PartPropSvcCfg(flags))
     isSimulation = flags.Input.isMC
     V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, BPHYDerivationName))
     vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName))        # VKalVrt vertex fitter
@@ -128,7 +126,6 @@ def BPHY24Cfg(flags):
     from DerivationFrameworkEGamma.EGammaToolsConfig import EGElectronLikelihoodToolWrapperCfg
     ElectronPassLHvloose = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(flags, name = "ElectronPassLHvloose",
                                             EGammaElectronLikelihoodTool = ElectronLHSelectorLHvloose,
-                                            EGammaFudgeMCTool = "",
                                             CutType = "",
                                             StoreGateEntryName = "DFCommonElectronsLHVeryLoose",
                                             ContainerName = "Electrons",
@@ -136,7 +133,6 @@ def BPHY24Cfg(flags):
 
     ElectronPassLHvloosenod0 = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(flags, name = "ElectronPassLHvloosenod0",
                                             EGammaElectronLikelihoodTool = ElectronLHSelectorLHvloose_nod0,
-                                            EGammaFudgeMCTool = "",
                                             CutType = "",
                                             StoreGateEntryName = "DFCommonElectronsLHVeryLoosenod0",
                                             ContainerName = "Electrons",
@@ -162,8 +158,7 @@ def BPHY24Cfg(flags):
         TrkVertexFitterTool         = vkalvrt,
         TrackSelectorTool           = trackselect,
         VertexPointEstimator        = vpest,
-        ElectronSelection             = "d0_or_nod0",
-        PartPropSvc = PartPropSvcName
+        ElectronSelection             = "d0_or_nod0"
         )
 
     BPHY24_SelectAndWrite_DiElectron = CompFactory.DerivationFramework.Reco_mumu(
@@ -483,8 +478,8 @@ def BPHY24Cfg(flags):
       acc.merge(InDetPhysValTruthDecoratorAlgCfg(flags, BPHYDerivationName))
     
       # Keep all muons and electrons
-      keepParticles = ('abs(TruthParticles.pdgId) == 11 || ' # mu
-                       'abs(TruthParticles.pdgId) == 13')    # e
+      keepParticles = ('TruthParticles.isElectron || ' # e
+                       'TruthParticles.isMuon')    # mu
       # Keep only the potentially signal b-hadrons
       
       keepParticles += (' || '

@@ -4,7 +4,6 @@
 #include "../EndOfEventFilterAlg.h"
 #include "../TrigEventInfoRecorderAlg.h"
 #include "../L1CorrelationAlg.h"
-#include "../ROBPrefetchingAlg.h"
 
 DECLARE_COMPONENT( TimeBurner )
 DECLARE_COMPONENT( RandomErrorAlg )
@@ -12,4 +11,3 @@ DECLARE_COMPONENT( EndOfEventROIConfirmerAlg )
 DECLARE_COMPONENT( EndOfEventFilterAlg )
 DECLARE_COMPONENT( TrigEventInfoRecorderAlg )
 DECLARE_COMPONENT( L1CorrelationAlg )
-DECLARE_COMPONENT( ROBPrefetchingAlg )

@@ -69,8 +69,8 @@ StatusCode MPIHiveEventLoopMgr::masterEventLoop(int maxEvt) {
       m_clusterSvc->abort();
       return StatusCode::FAILURE;
     }
-    if (maxEvt < 0 || maxEvt > evt) {
-      maxEvt = evt;
+    if (maxEvt < 0 || (skipEvts + maxEvt) > evt) {
+      maxEvt = evt - skipEvts;
     }
     ATH_MSG_INFO("Will be processing " << maxEvt << " events");
   }
@@ -241,7 +241,8 @@ StatusCode MPIHiveEventLoopMgr::workerEventLoop() {
     ClusterMessage msg = m_clusterSvc->waitReceiveMessage();
     auto request_time = Clock::now() - start_time;
     if (msg.messageType == ClusterMessageType::EmergencyStop) {
-      // Emergency stop, return FAILURE after fully draining the scheduler to prevent segfault
+      // Emergency stop, return FAILURE after fully draining the scheduler to
+      // prevent segfault
       std::size_t numSlots = m_whiteboard->getNumberOfStores();
       while (m_schedulerSvc->freeSlots() < numSlots) {
         // Ignore StatusCode, going to return FAILURE anyway
@@ -281,6 +282,13 @@ StatusCode MPIHiveEventLoopMgr::workerEventLoop() {
       ATH_MSG_ERROR("Received unexpected message "
                     << std::format("{}", msg.messageType) << " from "
                     << msg.source);
+      ClusterMessage::WorkerStatus status{};
+      status.status = StatusCode::FAILURE;
+      status.createdEvents = m_nLocalCreatedEvts;
+      status.skippedEvents = m_nLocalSkippedEvts;
+      status.finishedEvents = m_nLocalFinishedEvts;
+      m_clusterSvc->sendMessage(
+          0, ClusterMessage(ClusterMessageType::WorkerError, status));
       return StatusCode::FAILURE;
     }
 
@@ -334,18 +342,32 @@ StatusCode MPIHiveEventLoopMgr::insertEvent(int eventIdx, bool& endOfStream,
   endOfStream = false;
   auto ctx = createEventContext();
   Gaudi::Hive::setCurrentContext(ctx);
-  ctx.setEvt(eventIdx); // Make the event numbers in the log actually make sense
+  ctx.setEvt(
+      eventIdx);  // Make the event numbers in the log actually make sense
   if (!ctx.valid()) {
     endOfStream = true;  // BUG: Doesn't actually mean end of stream. Remove
                          // after making sure!
     return StatusCode::FAILURE;
   }
 
-  const std::size_t slot = ctx.slot(); // Need this for later
-  ATH_CHECK(seek(eventIdx));
+  const std::size_t slot = ctx.slot();  // Need this for later
+  // Codex (GPT 5.6-sol) identified use of seek should be reverted since that
+  // function isn't implemented properly
+  if (m_evtSelector != nullptr) {
+    const int nToJump = (eventIdx - 1) - m_evtSelectorCurrentPos;
+    if (nToJump < 0) {
+      ATH_MSG_ERROR("Cannot jump backwards by " << nToJump << " events");
+      return StatusCode::FAILURE;
+    }
+    if (nToJump > 0) {
+      ATH_CHECK(m_evtSelector->next(*m_evtContext, nToJump));
+    }
+    m_evtSelectorCurrentPos = eventIdx;
+  }
   // execute event
   StatusCode sc = executeEvent(std::move(ctx));
-  const auto evtID = m_lastEventContext.eventID(); // Set in AthenaHiveEventLoopMgr
+  const auto evtID =
+      m_lastEventContext.eventID();  // Set in AthenaHiveEventLoopMgr
   m_clusterSvc->log_addEvent(eventIdx, evtID.run_number(), evtID.event_number(),
                              requestTime_ns, slot);
 
@@ -400,6 +422,7 @@ StatusCode MPIHiveEventLoopMgr::drainLocalScheduler() {
 
     // Update event log
     m_clusterSvc->log_completeEvent(
+        thisFinishedEvtContext->evt(),
         thisFinishedEvtContext->eventID().run_number(),
         thisFinishedEvtContext->eventID().event_number(),
         m_aess->eventStatus(*thisFinishedEvtContext));
@@ -412,12 +435,10 @@ StatusCode MPIHiveEventLoopMgr::drainLocalScheduler() {
       ++m_totalFailedEvts;
       if (m_contiguousFailedEvts >= 3 || m_totalFailedEvts >= 10) {
         // If we have 3 contiguous failed events or 10 total, end the job
-        thisFinishedEvtContext.reset();
         fail = StatusCode::FAILURE;
         continue;
       }
-    }
-    else {
+    } else {
       // Event succeeded, reset contiguous failed events
       m_contiguousFailedEvts = 0;
     }

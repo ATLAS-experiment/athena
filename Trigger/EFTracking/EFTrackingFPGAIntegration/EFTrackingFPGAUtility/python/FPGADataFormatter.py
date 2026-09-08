@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -100,15 +100,11 @@ if __name__=="__main__":
     # set flag for the bulk-copy container creation method
     flags.ClusterMaker.DoBulkCopy = False
 
-    # ensure that the xAOD SP and cluster containers are available
-    flags.Tracking.ITkMainPass.doAthenaToActsSpacePoint=True
-    flags.Tracking.ITkMainPass.doAthenaToActsCluster=True
-
     flags.Acts.doRotCorrection = False
     
     flags.Debug.DumpEvtStore = True
     flags.lock()
-    flags = flags.cloneAndReplace("Tracking.ActiveConfig","Tracking.MainPass")
+    flags = flags.cloneAndReplace("Tracking.ActiveConfig", "Tracking.ITkActsPass")
     
     # Main services
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg

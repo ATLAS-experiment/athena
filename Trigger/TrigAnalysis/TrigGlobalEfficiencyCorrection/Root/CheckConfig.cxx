@@ -8,9 +8,9 @@
 
 #include "TrigGlobalEfficiencyCorrection/Calculator.h"
 #include "TrigGlobalEfficiencyCorrection/ImportData.h"
-#include "CxxUtils/flat_set.h"
+#include <flat_set>
 template <typename Key>
-using flat_set = CxxUtils::flat_set<Key>;
+using flat_set = std::flat_set<Key>;
 
 #include <cctype>
 

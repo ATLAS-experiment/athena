@@ -26,7 +26,7 @@ MuonFeatureDetails* MuonFeatureDetailsCnv::createTransient(const Token* token) {
 
     mlog << MSG::DEBUG << "MuonFeatureDetailsCnv::createTransient " << endmsg;
 
-    static const pool::Guid p1_guid("E841B555-766B-48EF-96F8-F4BE39EE8BCB");
+    static const Guid p1_guid("E841B555-766B-48EF-96F8-F4BE39EE8BCB");
 
     if( compareClassGuid(token, p1_guid) ) {
 

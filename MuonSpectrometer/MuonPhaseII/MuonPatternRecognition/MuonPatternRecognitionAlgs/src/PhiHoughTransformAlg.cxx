@@ -206,16 +206,12 @@ std::unique_ptr<SegmentSeed>
     for (const SpacePoint* sp : etaMax.getHitsInMax()) {
         const double spTanAlpha = houghTanAlpha(bsPos - sp->localPosition());
         const double spX = HoughHelpers::Phi::houghParamStrip(spTanAlpha, sp);
-        if (sp->type() == xAOD::UncalibMeasType::TgcStripType) {
-            iceptX = sp->localPosition().x();
-            tanAlpha = spTanAlpha;
-            iceptX = spX;
-            counts = 1;
-            break;
-        }
         iceptX += spX;
         tanAlpha+=spTanAlpha;
         ++counts;
+    }
+    if (std::abs(tanAlpha) < Acts::s_epsilon) {
+        return std::make_unique<SegmentSeed>(etaMax);
     }
     tanAlpha /= counts;
     iceptX /= counts;

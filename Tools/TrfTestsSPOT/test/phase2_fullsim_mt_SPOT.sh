@@ -10,20 +10,24 @@ conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultCond
 
 
 # Run the job
+source "$(dirname "${BASH_SOURCE[0]}")/spot_numa.sh"
+spot_numa_setup "${NTHREADS}"
+
 export TRF_ECHO=1;
+echo "${SPOT_NUMA_INFO}" > __log.txt
 ATHENA_CORE_NUMBER=${NTHREADS} \
+${SPOT_NUMA_PREFIX} \
 Sim_tf.py \
-      --CA 'True' \
       --multithreaded 'True' \
       --maxEvents ${NEVENTS} \
       --perfmon 'fullmonmt' \
       --geometryVersion "default:${geometry}" \
       --conditionsTag "default:${conditions}" \
       --postInclude 'default:PyJobTransforms.UseFrontier' \
-      --preInclude 'EVNTtoHITS:Campaigns.PhaseIISimulation' \
+      --preInclude 'EVNTtoHITS:Campaigns.MC23PhaseIISimulation' \
       --postExec 'all:cfg.getService("AlgResourcePool").CountAlgorithmInstanceMisses = True' \
       --simulator 'FullG4MT' \
       --inputEVNTFile ${DATAFILE} \
-      --outputHITSFile 'myHITS.pool.root' > __log.txt 2>&1;
+      --outputHITSFile 'myHITS.pool.root' >> __log.txt 2>&1;
 
 echo $? > __exitcode;

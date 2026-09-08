@@ -49,6 +49,10 @@ namespace CP {
     ANA_CHECK(m_maxw_tau1_4vect_decor.initialize(m_systematicsList, m_eventInfoHandle));
     ANA_CHECK(m_maxw_tau2_4vect_decor.initialize(m_systematicsList, m_eventInfoHandle));
 
+    ANA_CHECK(m_coll_approx_mass_decor.initialize(m_systematicsList, m_eventInfoHandle));
+    ANA_CHECK(m_coll_approx_x0_decor.initialize(m_systematicsList, m_eventInfoHandle));
+    ANA_CHECK(m_coll_approx_x1_decor.initialize(m_systematicsList, m_eventInfoHandle));
+     
     ANA_CHECK(m_systematicsList.initialize());
 
     return StatusCode::SUCCESS;
@@ -197,6 +201,20 @@ namespace CP {
 	}
 	m_fitStatus_decor.set(*evtInfo, fitStatus, sys);
 	m_mlm_mass_decor.set(*evtInfo, mlm_mass, sys);
+
+        // retrieve results for collinear approximation
+        if(m_doCollinearApprox){
+          double coll_mass = -1234.;
+	  double coll_x0 = -1234.;
+	  double coll_x1 = -1234.;
+
+          ANA_CHECK(m_mmc->doCollinearApprox(vis1, vis2, (*met)["Final"], true, coll_mass, coll_x0, coll_x1)); 
+      
+          m_coll_approx_mass_decor.set(*evtInfo, coll_mass, sys);
+	  m_coll_approx_x0_decor.set(*evtInfo, coll_x0, sys);
+	  m_coll_approx_x1_decor.set(*evtInfo, coll_x1, sys);
+	}	
+
       }
 
     return StatusCode::SUCCESS;

@@ -33,13 +33,13 @@
 #include "TileConditions/TileCondToolTiming.h"
 #include "TileConditions/TileCondToolEmscale.h"
 
-#include "boost/io/ios_state.hpp"
 #include "boost/date_time/local_time/local_time.hpp"
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 #include <iostream>
 #include <sstream>
 #include <iomanip>
+#include <format>
 #include <bitset>
 #include <string>
 #include <ctime>
@@ -261,21 +261,29 @@ StatusCode TileTBDump::execute(const EventContext& ctx) {
     verbosity = 1;
   }
 
-  boost::io::ios_base_all_saver coutsave(std::cout);
-  std::cout << std::fixed;
-
-  std::cout << "============================" << std::endl;
-  std::cout << "Event time (sec): " << (uint32_t)event->bc_time_seconds() << std::endl;
-  std::cout << "Event time (ns):  " << (uint32_t)event->bc_time_nanoseconds() << std::endl;
-  std::cout << "Global ID:        " << (uint32_t)event->global_id() << std::endl;
-  std::cout << "Run Type:         " << (uint32_t)event->run_type() << std::endl;
-  std::cout << "Run Number:       " << (uint32_t)event->run_no() << std::endl;
-  std::cout << "Lumi Block:       " << (uint32_t)event->lumi_block() << std::endl;
-  std::cout << "Level1 ID:        " << (uint32_t)event->lvl1_id() << std::endl;
-  std::cout << "BCID:             " << (uint32_t)event->bc_id() << std::endl;
-  std::cout << "Level1 trig type: " << (uint32_t)event->lvl1_trigger_type() << std::endl;
-  std::cout << "Level1 Nwords:    " << (uint32_t)event->nlvl1_trigger_info() << std::endl;
-  std::cout << "============================" << std::endl;
+  std::cout << std::format(
+    "============================\n"
+    "Event time (sec): {}\n"
+    "Event time (ns):  {}\n"
+    "Global ID:        {}\n"
+    "Run Type:         {}\n"
+    "Run Number:       {}\n"
+    "Lumi Block:       {}\n"
+    "Level1 ID:        {}\n"
+    "BCID:             {}\n"
+    "Level1 trig type: {}\n"
+    "Level1 Nwords:    {}\n"
+    "============================\n",
+    (uint32_t)event->bc_time_seconds(),
+    (uint32_t)event->bc_time_nanoseconds(),
+    (uint32_t)event->global_id(),
+    (uint32_t)event->run_type(),
+    (uint32_t)event->run_no(),
+    (uint32_t)event->lumi_block(),
+    (uint32_t)event->lvl1_id(),
+    (uint32_t)event->bc_id(),
+    (uint32_t)event->lvl1_trigger_type(),
+    (uint32_t)event->nlvl1_trigger_info());
 
   try {
     event->check_tree();
@@ -312,12 +320,14 @@ StatusCode TileTBDump::execute(const EventContext& ctx) {
       continue;
     }
 
-    std::cout << "  ROB frag ID " << std::hex << "0x" << robf.source_id() << std::dec
-              << " size " << robf.fragment_size_word() << std::endl;
+    std::cout << std::format("  ROB frag ID 0x{:x} size {}\n",
+                 robf.source_id(),
+                 robf.fragment_size_word());
 
     // Here we should unpack the fragment.
-    std::cout << "    ROD frag ID " << std::hex << "0x" << robf.rod_source_id() << std::dec
-              << " size " << robf.rod_fragment_size_word() << std::endl;
+    std::cout << std::format("    ROD frag ID 0x{:x} size {}\n",
+                 robf.rod_source_id(),
+                 robf.rod_fragment_size_word());
 
     if (!known) {
       std::cout << std::endl;
@@ -326,11 +336,11 @@ StatusCode TileTBDump::execute(const EventContext& ctx) {
     
     if ( m_dumpHeader ) {
       
-      std::cout << " Format Vers.  " << std::hex << "0x" << robf.rod_version() << std::dec << std::endl;
-      std::cout << " Source ID     " << std::hex << "0x" << robf.rod_source_id() << std::dec << std::endl;
+      std::cout << std::format(" Format Vers.  0x{:x}\n", robf.rod_version());
+      std::cout << std::format(" Source ID     0x{:x}\n", robf.rod_source_id());
       std::cout << " Source ID str " << eformat::helper::SourceIdentifier(robf.source_id()).human().c_str() << std::endl;
-      std::cout << "  SubDetect ID " << std::hex << "0x" << subdet_id << std::dec << std::endl;
-      std::cout << "  Module ID    " << std::hex << "0x" << module_id << std::dec << std::endl;
+      std::cout << std::format("  SubDetect ID 0x{:x}\n", subdet_id);
+      std::cout << std::format("  Module ID    0x{:x}\n", module_id);
       std::cout << " Run number    " << (int) robf.rod_run_no() << std::endl;
       std::cout << " Level1 ID     " << robf.rod_lvl1_id() << std::endl;
       std::cout << " BCID          " << robf.rod_bc_id() << std::endl;
@@ -368,11 +378,12 @@ StatusCode TileTBDump::execute(const EventContext& ctx) {
       if (size > 0) {
         const uint32_t * stat;
         robf.rod_status(stat);
-        std::cout.unsetf(std::ios::fixed);
         for (unsigned int ind = 0; ind < size; ++ind) {
-          std::cout << " Status[" << ind << "] = " << stat[ind] << "\t\t" << stat[ind] / 1000000. - 1. << std::endl;
+          std::cout << std::format(" Status[{}] = {}\t\t{}\n",
+                                   ind,
+                                   stat[ind],
+                                   stat[ind] / 1000000. - 1.);
         }
-        std::cout << std::fixed;
       } else {
         std::cout << " No status words" << std::endl;
       }
@@ -397,8 +408,9 @@ StatusCode TileTBDump::execute(const EventContext& ctx) {
           size = max_allowed_size;
           std::cout<<" Problem with data size - assuming " << size << " words and no trailer at all"<<std::endl;
         }
-        std::cout << std::endl << "Dump of whole ROB fragment 0x" << std::hex << robf.rod_source_id() << std::dec
-                  << " (" << robf.rod_fragment_size_word()+robf.header_size_word() << " words)" << std::endl;
+        std::cout << std::format("\nDump of whole ROB fragment 0x{:x} ({} words)\n",
+                                 robf.rod_source_id(),
+                                 robf.rod_fragment_size_word()+robf.header_size_word());
         dump_data(fprob, robf.rod_fragment_size_word()+robf.header_size_word(), version, verbosity);
       }
 
@@ -414,8 +426,10 @@ StatusCode TileTBDump::execute(const EventContext& ctx) {
         if (subdet_id == 0) {
           std::cout<<" Problem with ROD frag - SubDetector ID is 0" <<std::endl;
           if (source_id >= 0x5100 && source_id < 0x5500 && robsourceid >= 0x510000 && robsourceid < 0x550000) { // buggy ROD fragment
-            std::cout<<" Looks like ROD frag is in old format, ROD Source ID is 0x" << std::hex << source_id
-                     <<" assuming that ROD Source ID is 0x" << robsourceid << std::dec << std::endl;
+            std::cout << std::format(" Looks like ROD frag is in old format, ROD Source ID is 0x{:x}"
+                                     " assuming that ROD Source ID is 0x{:x}\n",
+                                     source_id,
+                                     robsourceid);
             source_id = robsourceid;
             subdet_id = robsourceid>>16;
             dump_data(data, size, version, verbosity);
@@ -436,7 +450,7 @@ StatusCode TileTBDump::execute(const EventContext& ctx) {
           }
         }
       } else {
-        std::cout << std::endl <<  std::hex << "NO DATA in ROB fragment 0x" << robf.rod_source_id() << std::dec << std::endl << std::endl;
+        std::cout << std::format("\nNO DATA in ROB fragment 0x{:x}\n\n", robf.rod_source_id());
       }
       std::cout << std::endl;
     }
@@ -489,15 +503,14 @@ std::ostream &setupPr4 (std::ostream &stream){
 
 void TileTBDump::dump_data(const uint32_t * data, unsigned int size, unsigned int /* version */, int /* verbosity */) {
 
-  boost::io::ios_base_all_saver coutsave(std::cout);
-  std::cout << std::endl << " Fragment data as 4 byte words:" << std::hex << std::setfill('0') ;
+  std::cout << "\n Fragment data as 4 byte words:";
 
   for (unsigned int cnter = 0; cnter < size; ++cnter) {
     if (!(cnter % 8)) std::cout << std::endl;
-    std::cout << std::setw(8) << (*data++) << " ";
+    std::cout << std::format("{:08x} ", *data++);
   }
 
-  std::cout <<std::setfill(' ') << std::dec << std::endl << std::endl;
+  std::cout << std::endl << std::endl;
 
 }
 
@@ -514,7 +527,6 @@ void TileTBDump::dump_digi(unsigned int subdet_id, const uint32_t* roddata, unsi
   std::string unitName[4] = { "ADC count", "pCb", "Cs pCb", "MeV" };
   std::string shapeName[4] = { "Phys", "Laser", "CIS", "Simul" };
   std::string algName[8] = { "Unknown", "OF1", "OF2", "Fit", "ManyAmps", "Flat", "Alg6", "Alg7" };
-  boost::io::ios_base_all_saver coutsave(std::cout);
 
   std::vector<const T_RodDataFrag*> frag(MAX_ROD_FRAG);
   std::vector<T_TileRawComp> rawcomp(MAX_DIGI_CHAN);

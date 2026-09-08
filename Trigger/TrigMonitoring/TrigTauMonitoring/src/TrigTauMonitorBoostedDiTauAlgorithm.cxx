@@ -1,6 +1,11 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+
+#if __GNUC__ >= 16
+// Suppress false-positive warning seen with gcc16.
+# pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
 
 #include "TrigTauMonitorBoostedDiTauAlgorithm.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
@@ -58,7 +63,7 @@ std::vector<const xAOD::DiTauJet*> TrigTauMonitorBoostedDiTauAlgorithm::getOnlin
 
 void TrigTauMonitorBoostedDiTauAlgorithm::fillBoostedDiTauVars(const std::string& trigger, const std::vector<const xAOD::DiTauJet*>& boosted_ditau_vec) const
 {
-    auto monGroup = getGroup(trigger+"_BoostedDiTauVars");
+    const auto & monGroup =getGroup(trigger+"_BoostedDiTauVars");
 
     static const SG::ConstAccessor<float> OmniScore("omni_score");
     static const SG::ConstAccessor<float> RTracksLead("R_tracks_lead");

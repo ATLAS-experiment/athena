@@ -14,11 +14,9 @@ BPHYDerivationName = "BPHY26"
 streamName = "StreamDAOD_BPHY26"
 
 def BPHY26KernelCfg(flags, **kwargs):
-    from AthenaServices.PartPropSvcConfig import PartPropSvcCfg
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     acc = ComponentAccumulator()
-    acc.getPrimaryAndMerge(PartPropSvcCfg(flags))
 
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
     BPHY26TriggerListsHelper = TriggerListsHelper(flags)

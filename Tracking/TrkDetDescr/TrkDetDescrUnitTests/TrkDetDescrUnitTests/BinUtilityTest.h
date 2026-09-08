@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -18,6 +18,8 @@
 
 #include <vector>
 #include <map>
+#include <algorithm>
+#include <stdexcept>
 
 namespace Trk {
              
@@ -32,52 +34,46 @@ namespace Trk {
      public:
 
        /** Standard Athena-Algorithm Constructor */
-       BinUtilityTest(const std::string& name, ISvcLocator* pSvcLocator);
+       using Trk::TrkDetDescrUnitTestBase::TrkDetDescrUnitTestBase;
        
        /* specify the test here */
        StatusCode runTest();
               
       private:
         /** preparation of std::vector and std::map for comparison */
-        void prepareData(std::vector<float>& vec, std::map<float, size_t>& map, float& low, float& high);
+        void prepareData(std::vector<float>& vec, std::map<float, std::size_t>& map, float& low, float& high);
 
-        /** A binary search with a map - superior in O(10) searches*/
-        size_t searchInVectorWithBoundary(std::vector<float>& array, float value)
-        {
-            if ( value < array[0] ) return 0;
-            if ( value > array[array.size()-1] ) return (array.size()-1);
-            std::vector<float>::iterator vIter = array.begin();
-            size_t bin = 0; 
-            for ( ; vIter !=  array.end() ;  ++vIter, ++bin )
-                if ((*vIter) > value) break; 
-            return (bin-1);            
+        /** A linear search  - superior in O(10) searches*/
+        std::size_t searchInVectorWithBoundary(std::vector<float>& v, float value)
+        {   
+            if (v.empty())[[unlikely]]{
+              throw std::runtime_error("searchInVectorWithBoundary: vector is empty");
+            }
+            std::size_t bin{};
+            while (bin < v.size() && v[bin] < value){
+              ++bin;
+            }
+            return bin == 0 ? 0 : std::min(bin - 1, v.size() - 1);         
         }
 
         /** A binary search with underflow/overflow */
-        size_t binarySearchWithBoundary(std::vector<float>& array, float value)
-        {
-            // Binary search in an array of n values to locate value
-            // underflow
-            if ( value < array[0] ) return 0;
-            if ( value > array[array.size()-1] ) return (array.size()-1);
-            // prepare and run
-            size_t nabove, nbelow, middle;
-            // overflow
-            nabove = array.size()+1;
-            if ( value > array[nabove-2]) return nabove-2;
-            // binary search
-            nbelow = 0;
-            while (nabove-nbelow > 1) {
-              middle = (nabove+nbelow)/2;
-              if (value == array[middle-1]) return middle-1;
-              if (value  < array[middle-1]) nabove = middle;
-              else                          nbelow = middle;
+        std::size_t binarySearchWithBoundary(const std::vector<float>& v, float value)
+        {   
+            if (v.empty())[[unlikely]]{
+              throw std::runtime_error("binarySearchWithBoundary: vector is empty");
             }
-            return nbelow-1;
+            const auto it = std::upper_bound(v.begin(), v.end(), value);
+            if (it == v.begin()){
+              return 0;
+            }
+            return std::min<std::size_t>(std::distance(v.begin(), it) - 1,
+              v.size() - 1);
         }
 
-        size_t     m_numberOfSegments;   
-        size_t     m_numberOfTestsPerSet;
+        Gaudi::Property<std::size_t> m_numberOfSegments
+	  {this, "NumberOfSegments", 10};
+        Gaudi::Property<std::size_t> m_numberOfTestsPerSet
+	  {this, "NumberOfTetsPerSet", 100000};
 
    };
 }

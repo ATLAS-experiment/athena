@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #ifndef BOOSTEDJETTAGGERS_JSSMLTOOL_H
 #define BOOSTEDJETTAGGERS_JSSMLTOOL_H
 
@@ -64,11 +64,11 @@ class JSSMLTool
 
     // basic tool functions
     std::vector<float> ReadJetImagePixels( std::vector<TH2D> Images ) const;
-    std::vector<float> ReadJSSInputs(std::map<std::string, double> JSSVars) const;
+    std::vector<float> ReadJSSInputs(std::map<std::string, double>  JSSVars) const;
     std::vector<int> ReadOutputLabels() const;
 
     // extra methods
-    StatusCode SetScaler(std::map<std::string, std::vector<double>> scaler) override;
+    StatusCode SetScaler(const std::map<std::string, std::vector<double>> & scaler) override;
 
       /// @}
     std::unique_ptr< Ort::Session > m_session;

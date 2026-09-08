@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -91,9 +91,9 @@ namespace Trk {
             template <class T> const DigitizationCell cellT(const T& position) const;  
                                                                                                           
             std::shared_ptr<const RectangleBounds>         m_activeBounds;
-            BinUtility*                                    m_binUtility;
-            size_t                                         m_binsX;
-            size_t                                         m_binsY;
+            BinUtility*                                    m_binUtility{};
+            size_t                                         m_binsX{};
+            size_t                                         m_binsY{};
         
     };
     

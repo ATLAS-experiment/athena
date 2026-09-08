@@ -19,8 +19,6 @@
 #include <EventLoop/Job.h>
 #include <SampleHandler/MetaObject.h>
 
-class TChain;
-
 namespace EL
 {
   struct BatchJob : public TObject
@@ -52,11 +50,6 @@ namespace EL
     ///   where they belong, instead of copying them around
   public:
     std::string location;
-
-
-    /// description: the number of jobs per sample
-  public:
-    std::vector<unsigned> njobs_old;
 
 
     /// description: the list of samples

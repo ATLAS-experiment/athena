@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------------
@@ -143,12 +143,14 @@ TrackCnv_p4::transToPers(const Trk::Track* transObj, Trk::Track_p4* persObj, Msg
       } else {
         // Multi TSOS so we cast the container to the "right" type
         const MultiComponentStateOnSurfaceDV* multiDV =
-            dynamic_cast<MultiComponentStateOnSurfaceDV*>(
+            static_cast<MultiComponentStateOnSurfaceDV*>(
                 transObj->m_trackStateVector.get());
         m_multiStateVectorCnv.transToPers(multiDV, &persObj->m_trackState, log);
       }
     }
   } else { // empty
-    m_trackStateVectorCnv.transToPers(transObj->m_trackStateVector.get(), &persObj->m_trackState, log);
+    if (auto p = transObj->m_trackStateVector.get(); p != nullptr)[[likely]]{
+      m_trackStateVectorCnv.transToPers(p, &persObj->m_trackState, log);
+    }
   }
 }

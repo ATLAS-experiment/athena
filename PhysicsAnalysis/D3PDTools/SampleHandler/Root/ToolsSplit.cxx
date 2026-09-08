@@ -11,7 +11,7 @@
 #include <SampleHandler/ToolsSplit.h>
 
 #include <RootCoreUtils/Assert.h>
-#include <RootCoreUtils/ThrowMsg.h>
+#include <SampleHandler/MessageCheck.h>
 #include <SampleHandler/MetaFields.h>
 #include <SampleHandler/MetaObject.h>
 #include <SampleHandler/MetaVector.h>
@@ -21,6 +21,7 @@
 #include <TTree.h>
 #include <memory>
 #include <sstream>
+#include <stdexcept>
 
 //
 // method implementations
@@ -30,9 +31,8 @@ namespace SH
 {
   void scanNEvents (SampleHandler& sh)
   {
-    for (SampleHandler::iterator sample = sh.begin(),
-	   end = sh.end(); sample != end; ++ sample)
-      scanNEvents (**sample);
+    for (auto *sample : sh)
+      scanNEvents (*sample);
   }
 
 
@@ -41,11 +41,11 @@ namespace SH
   {
     SampleLocal *const mysample = dynamic_cast<SampleLocal*>(&sample);
     if (!mysample)
-      RCU_THROW_MSG ("sample not of type SampleLocal");
+      throw std::runtime_error ("sample not of type SampleLocal");
 
     const std::string tree_name = sample.meta()->castString (MetaFields::treeName, MetaFields::treeName_default);
     if (tree_name.empty())
-      RCU_THROW_MSG ("sample doesn't contain a tree name");
+      throw std::runtime_error ("scanNEvents: sample doesn't contain a tree name");
 
     Long64_t tot_entries = 0;
     std::vector<Long64_t> entries;
@@ -54,7 +54,7 @@ namespace SH
     {
       std::unique_ptr<TFile> file (TFile::Open (file_name.c_str(), "READ"));
       if (!file.get())
-	RCU_THROW_MSG ("failed to open file " + file_name);
+        throw std::runtime_error ("failed to open file " + file_name);
       Long64_t treeEntries = 0;
       TTree *const tree = dynamic_cast<TTree*>(file->Get (tree_name.c_str()));
       if (tree != 0)
@@ -71,13 +71,15 @@ namespace SH
 
   SampleHandler splitSample (Sample& sample, const Long64_t nevt)
   {
+    using namespace msgSplit;
+
     if (!dynamic_cast<SampleLocal*>(&sample))
-      RCU_THROW_MSG ("sample not of type SampleLocal");
+      throw std::runtime_error ("sample not of type SampleLocal");
 
     TObject *meta = sample.meta()->get (MetaFields::numEventsPerFile);
     if (!meta)
     {
-      RCU_WARN_MSG ("sample " + sample.name() + " lacks nc_nevtfile, running scanNEvents, please save sample");
+      ANA_MSG_WARNING ("sample " << sample.name() << " lacks nc_nevtfile, running scanNEvents, please save sample");
       scanNEvents (sample);
       meta = sample.meta()->get (MetaFields::numEventsPerFile);
     }
@@ -85,9 +87,9 @@ namespace SH
     MetaVector<Long64_t> *const nentries
       = dynamic_cast<MetaVector<Long64_t> *>(meta);
     if (nentries == 0)
-      RCU_THROW_MSG ("nc_nevtfile is of the wrong type");
+      throw std::runtime_error ("nc_nevtfile is of the wrong type");
     if (nentries->value.size() != sample.numFiles())
-      RCU_THROW_MSG ("nc_nevtfile has the wrong number of entries");
+      throw std::runtime_error ("nc_nevtfile has the wrong number of entries");
 
     SampleHandler result;
     std::unique_ptr<SampleLocal> res;
@@ -106,7 +108,7 @@ namespace SH
       {
 	std::ostringstream name;
 	name << sample.name() << "_" << result.size();
-	res.reset (new SampleLocal (name.str()));
+	res = std::make_unique<SampleLocal> (name.str());
 	res->tags (sample.tags());
 	res->meta()->fetch (*sample.meta());
 	if (!meta_tree.empty())

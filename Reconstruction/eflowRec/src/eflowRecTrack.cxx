@@ -78,12 +78,10 @@ void eflowRecTrack::setCaloDepthArray(const double* depthArray) {
   m_caloDepthArray.assign(depthArray, depthArray + eflowDepthCalculator::NDepth() + 1);
 }
 
-const std::vector<eflowTrackClusterLink*>* eflowRecTrack::getAlternativeClusterMatches(const std::string& key) const  { 
+const std::vector<eflowTrackClusterLink*>* eflowRecTrack::getAlternativeClusterMatches(std::string_view key) const  { 
 
-  std::map<std::string,std::vector<eflowTrackClusterLink*> >::const_iterator thisIterator = m_alternativeClusterMatches.find(key);
-  if (thisIterator !=  m_alternativeClusterMatches.end()) return  &m_alternativeClusterMatches.at(key);
-  else return nullptr;
-
+  auto thisIterator = m_alternativeClusterMatches.find(key);
+  if (thisIterator !=  m_alternativeClusterMatches.end()) return  &(thisIterator->second);
   return nullptr;
 
 }

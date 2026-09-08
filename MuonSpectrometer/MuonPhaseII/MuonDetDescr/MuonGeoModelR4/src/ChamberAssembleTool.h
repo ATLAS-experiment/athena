@@ -13,7 +13,6 @@
 #include <MuonGeoModelR4/IMuonReaoutGeomTool.h>
 #include <MuonGeoModelR4/IMuonGeoUtilityTool.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
-#include <ActsGeoUtils/Defs.h>
 
 #include "Acts/Surfaces/SurfaceBounds.hpp"
 #include "Acts/Geometry/VolumeBounds.hpp"

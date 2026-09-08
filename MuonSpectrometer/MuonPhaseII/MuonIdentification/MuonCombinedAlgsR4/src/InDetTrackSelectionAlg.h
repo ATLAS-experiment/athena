@@ -7,21 +7,23 @@
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
-#include "StoreGate/ReadHandle.h"
-#include "StoreGate/WriteHandle.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteHandleKey.h"
+#include "StoreGate/ReadDecorHandleKey.h"
 
 #include "xAODTracking/TrackParticleContainer.h"
 #include "ActsEvent/TrackContainer.h"
-
+#include "ActsEvent/ContextUtility.h"
 #include "MuonTrackEvent/MuonTag.h"
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
 
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 
 #include "GaudiKernel/SystemOfUnits.h"
 
+#include "Acts/Utilities/Logger.hpp"
 #include <span>
 
 namespace MuonCombinedR4 {
@@ -49,21 +51,36 @@ namespace MuonCombinedR4 {
                        can be loosely matched with a reconsturcted MS track. The matching is
                        based on the angular cone between the MS & the ID track + separations 
                        on the local parameters on the cylinder
-                @param caloExitPars: The ID track expressed at the  calo exit
-                @param msTrack: List of reconstructed MS track particles  */
-            bool compatibleWithMsTrk(const Acts::BoundTrackParameters& caloExitPars,
-                                     const MuonR4::MuonTagContainer& msTracks) const;
+                @param tgContext: The geometry context to align the surfaces
+                @param caloExitPars: The ID track expressed at the calo exit
+                @param msTrack: List of the reference MS track parameters  */
+            bool compatibleWithMsTrk(const Acts::GeometryContext& tgContext,
+                                     const Acts::BoundTrackParameters& caloExitPars,
+                                     std::span<const Acts::BoundTrackParameters> msTracks) const;
+            /** @brief Evaluates whether the caloExit parameters and the MS track parameters 
+             *         are compatible with each other in terms of an angular cone.
+             *         Optionally, the radial displacement on the endcap discs
+             *         or the longitudinal displacement on the barrel cylinder
+             *         is checked to be within the limits.
+             *  @param tgContext: The geometry context to align the surfaces
+             *  @param caloExitPars: The ID track expressed at the calo exit
+             *  @param msTrackPars: Referene track parameters of the MS track */
+            bool parametersCompatible(const Acts::GeometryContext& tgContext, 
+                                      const Acts::BoundTrackParameters& caloExitPatrs,
+                                      const Acts::BoundTrackParameters& msTrackPars) const;
             /** @brief Checks whether the ID track is compatible with a reconstructed 
                        segment which is not part of a reconstructed MS track. Matching
                        is based on straight line extrapolations and sector correspondence  */
-            bool compatibleWithSegment(const EventContext& ctx,
+            bool compatibleWithSegment(const Acts::GeometryContext& tgContext,
                                        const Acts::BoundTrackParameters& caloExitPars,
                                        const std::span<const xAOD::MuonSegment*> candidateSegs) const;
             /** @brief The input key for the ID / ITk track particles */
             SG::ReadHandleKey<xAOD::TrackParticleContainer> m_idTrkKey{this, "IdTrackKey", "InDetTrackParticles"};
+            /** @brief Optional dependency on the calo extension container. */
+            SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_extensionDecorKey{this, "CaloExtensionDecorKey", m_idTrkKey, "caloExtensionLink"};
             /** @brief Input key for the MS track particles. ID tracks are only considered if they can be
                       roughly matched to a MS track */
-            SG::ReadHandleKey<MuonR4::MuonTagContainer> m_msTrkKey{this, "MsTrackKey", "MuonTagsSA"};
+            SG::ReadHandleKey<xAOD::TrackParticleContainer> m_msTrkKey{this, "MsTrackKey", "MsTrackParticlesR4"};
             /** @brief To pass the selection criteria, ITk tracks can alternatively be matched to  */
             SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "SegmentKey", "MuonSegmentsFromR4"};
             /** @brief The output key for the selected track candidates */           
@@ -73,19 +90,39 @@ namespace MuonCombinedR4 {
             /** @brief Track quality selection tool (optional) */
             ToolHandle<InDet::IInDetTrackSelectionTool> m_selectionTool{this, "TackSelectionTool" , ""};
             /** @brief Tracking geometry tool */
-            PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+            ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
             /** @brief Track extrapolation tool */
             ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool" ,"" };
+            /** @brief Context provider for geometry, magnetic field and calibration contexts */
+            ActsTrk::ContextUtility m_ctxProvider{this};
+            /** @brief Flag toggling whether the last track parameters shall be retrieved 
+             *          from the calo extension linked to the ID tracks */
+            Gaudi::Property<bool> m_useCaloExtension{this, "useCaloExtension", true};
+            /** @brief Use the reconstructed MS tracks to match the InDetCandidates */
+            Gaudi::Property<bool> m_matchWithMsTrk{this, "matchWithMsTracks" , true};
             /** @brief The minimum momentum cut applied on the ID tracks to be considered */
             Gaudi::Property<float> m_trackPt{this, "minPt", 2.5*Gaudi::Units::GeV};
             /** @brief Apply a maximum eta cut to stay within the MS acceptance */
             Gaudi::Property<float> m_trackEta{this, "maxEta", 2.8};
-            /** @brief Selection cuts for the MS tracks */
-            Gaudi::Property <float> m_dEtaCutMsTrk{this, "dEtaMaxMsTrk", 0.2};
+            /** @brief Require that the matching between MS and ID track happens on the same 
+             *         surface */
+            Gaudi::Property <bool>  m_trackSameSurf{this, "matchTracksOnSameSurface", true};
+            /** @brief Selection cuts to test compability with the MS track */
+            Gaudi::Property <float> m_dEtaCutMsTrk{this, "dEtaMaxMsTrk", 0.25};
             Gaudi::Property <float> m_dPhiCutMsTrk{this, "dPhiMsTrk", 5*Gaudi::Units::deg};
+            Gaudi::Property <float> m_dLoc0CutMsTrk{this, "dLoc0MsTrk", 20.*Gaudi::Units::cm};
+            Gaudi::Property <float> m_dLoc1CutMsTrk{this, "dLoc1MsTrk", 5.*Gaudi::Units::deg};
+            
+            /** @brief Use the segments directly to match the ID track with MS activity  */
+            Gaudi::Property <bool> m_matchWithSegs{this, "matchWithSegments", true};
             /** @brief Selection cuts for the Muon segments */
             Gaudi::Property <float> m_dEtaCutMsSeg{this, "dEtaMaxMsSegment",  0.3};
             Gaudi::Property <float> m_dY0CutMsSeg{this, "dY0MaxMsSegment", 40 * Gaudi::Units::cm};
+            /** @brief Instance to the Acts logger */
+            std::unique_ptr<const Acts::Logger> m_logger{};
+            /** @brief Return the reference to the Acts logger */
+            const Acts::Logger& logger() const { return *m_logger; }
+
     };
 }
 

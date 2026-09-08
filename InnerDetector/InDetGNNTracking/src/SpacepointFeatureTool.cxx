@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SpacepointFeatureTool.h"
@@ -75,7 +75,7 @@ std::map<std::string, float> InDet::SpacepointFeatureTool::getFeatures(
     int region = 0; 
 
     if (!isStrip) {
-      const InDet::PixelCluster* cluster = dynamic_cast<const InDet::PixelCluster*>(cluster_1);
+      const InDet::PixelCluster* cluster = static_cast<const InDet::PixelCluster*>(cluster_1);
       const InDetDD::SiDetectorElement *element = cluster->detectorElement();
       int barrel_endcap = m_pixelID->barrel_ec(cluster->identify());
       switch (barrel_endcap) {
@@ -118,7 +118,7 @@ std::map<std::string, float> InDet::SpacepointFeatureTool::getFeatures(
       }
 
       
-      const InDetDD::PixelModuleDesign *design = dynamic_cast<const InDetDD::PixelModuleDesign *>(&element->design());
+      const InDetDD::PixelModuleDesign *design = static_cast<const InDetDD::PixelModuleDesign *>(&element->design());
 
       InDetDD::SiLocalPosition localPos_entry = design->localPositionOfCell(InDetDD::SiCellId(min_phi, min_eta));
       InDetDD::SiLocalPosition localPos_exit = design->localPositionOfCell(InDetDD::SiCellId(max_phi, max_eta));
@@ -163,7 +163,7 @@ std::map<std::string, float> InDet::SpacepointFeatureTool::getFeatures(
       if (status.isFailure()) {
         ATH_MSG_ERROR("Failed at " << __LINE__ << " of getting SCT cluster shape info.");
       }
-      auto cluster = dynamic_cast<const InDet::SCT_Cluster*>(cluster_1);
+      auto cluster = static_cast<const InDet::SCT_Cluster*>(cluster_1);
       int barrel_endcap = m_SCT_ID->barrel_ec(cluster->identify());
       switch (barrel_endcap) {
         case -2:
@@ -281,7 +281,7 @@ StatusCode InDet::SpacepointFeatureTool::getSCTClusterShapeInfo_fn(const InDet::
     float &eta_angle, float &phi_angle
     ) const 
 {
-    const InDet::SCT_Cluster* cluster = dynamic_cast<const InDet::SCT_Cluster*>(si_cluster);
+    const InDet::SCT_Cluster* cluster = static_cast<const InDet::SCT_Cluster*>(si_cluster);
     const InDetDD::SiDetectorElement *element = cluster->detectorElement();
     Amg::Vector2D locpos = cluster->localPosition();
     std::pair<Amg::Vector3D, Amg::Vector3D> ends(

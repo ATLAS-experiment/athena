@@ -1,16 +1,38 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
+#include <utility>
 
 #include "MCTruth/TrackHelper.h"
+#include "AtlasHepMC/GenParticle.h"
 #include "G4Track.hh"
-#include "ISF_Event/ISFParticle.h"
 #include "MCTruth/TrackInformation.h"
+#include "MCTruth/VTrackInformation.h"
+#include "TruthUtils/MagicNumbers.h"
 
+namespace
+{
+  HepMC::ConstGenParticlePtr outputAttributionParticle(const TrackInformation* trackInfo)
+  {
+    if (!trackInfo) {
+      return nullptr;
+    }
+    // Output links should remain anchored to the pre-regeneration particle.
+    // Older TrackInformation instances may only have the current particle.
+    HepMC::ConstGenParticlePtr particle = trackInfo->GetGenerationZeroGenParticle();
+    return particle ? particle : trackInfo->GetCurrentGenParticle();
+  }
+}
 
 TrackHelper::TrackHelper(const G4Track* t)
 {
-  m_trackInfo=static_cast<TrackInformation *>(t->GetUserInformation());
+  G4VUserTrackInformation* userInfo = t ? t->GetUserInformation() : nullptr;
+  m_trackInfo = dynamic_cast<VTrackInformation*>(userInfo);
+}
+
+TrackInformation* TrackHelper::GetTrackInformation()
+{
+  return dynamic_cast<TrackInformation*>(m_trackInfo);
 }
 bool TrackHelper::IsPrimary() const
 {
@@ -34,18 +56,37 @@ bool TrackHelper::IsSecondary() const
 }
 int TrackHelper::GetBarcode() const  // TODO Drop this once UniqueID and Status are used instead
 {
-  if (m_trackInfo==0 || std::as_const(m_trackInfo)->GetCurrentGenParticle()==0) return 0;
-  return m_trackInfo->GetParticleBarcode();
+  if (const TrackInformation* concreteInfo = dynamic_cast<const TrackInformation*>(m_trackInfo)) {
+    HepMC::ConstGenParticlePtr particle = outputAttributionParticle(concreteInfo);
+    return particle ? HepMC::barcode(particle) : 0;
+  }
+  return m_trackInfo ? m_trackInfo->GetParticleBarcode() : 0;
 }
 
 int TrackHelper::GetUniqueID() const
 {
-  if (m_trackInfo==0 || std::as_const(m_trackInfo)->GetCurrentGenParticle()==0) return 0;
-  return m_trackInfo->GetParticleUniqueID();
+  if (const TrackInformation* concreteInfo = dynamic_cast<const TrackInformation*>(m_trackInfo)) {
+    HepMC::ConstGenParticlePtr particle = outputAttributionParticle(concreteInfo);
+    return particle ? HepMC::uniqueID(particle) : 0;
+  }
+  return m_trackInfo ? m_trackInfo->GetParticleUniqueID() : 0;
 }
 
 int TrackHelper::GetStatus() const
 {
-  if (m_trackInfo==0 || std::as_const(m_trackInfo)->GetCurrentGenParticle()==0) return 0;
-  return m_trackInfo->GetParticleStatus();
+  if (const TrackInformation* concreteInfo = dynamic_cast<const TrackInformation*>(m_trackInfo)) {
+    HepMC::ConstGenParticlePtr particle = outputAttributionParticle(concreteInfo);
+    return particle ? particle->status() : 0;
+  }
+  return m_trackInfo ? m_trackInfo->GetParticleStatus() : 0;
+}
+
+HepMC::GenParticlePtr TrackHelper::GetPrimaryGenParticle()
+{
+  return m_trackInfo ? m_trackInfo->GetPrimaryGenParticle() : nullptr;
+}
+
+HepMC::ConstGenParticlePtr TrackHelper::GetPrimaryGenParticle() const
+{
+  return m_trackInfo ? std::as_const(m_trackInfo)->GetPrimaryGenParticle() : nullptr;
 }

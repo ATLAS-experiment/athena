@@ -30,11 +30,6 @@ void eTowerBuilder::init(std::unique_ptr<eTowerContainer> & eTowerContainerRaw) 
 }
 
 
-void eTowerBuilder::reset() const
-{
-}
-
-
 void eTowerBuilder::execute(std::unique_ptr<eTowerContainer> & eTowerContainerRaw) const
 {
   BuildAllTowers(eTowerContainerRaw);

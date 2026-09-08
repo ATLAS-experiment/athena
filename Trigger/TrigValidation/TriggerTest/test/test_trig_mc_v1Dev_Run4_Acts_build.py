@@ -15,21 +15,20 @@ from AthenaConfiguration.TestDefaults import defaultConditionsTags
 run = MCBuildStep(
     menu='MC_pp_run4_v1',
     global_tag=defaultConditionsTags.RUN4_MC,
-    mc_campaign='Campaigns.PhaseIIPileUp200'
+    mc_campaign='Campaigns.MC23PhaseIIPileUp200'
 )
 
 run.input = 'ttbar_pu200_Run4'
 
 actsTracking = True
 
-run.flags = [f'Trigger.useActsTracking={actsTracking}',
+run.flags += [f'Trigger.useActsTracking={actsTracking}',
              f'Acts.GsfRefitActs={actsTracking}',
              f'Acts.useCache={actsTracking}',
              'Tracking.doITkFastTracking=True',
              'Trigger.doRuntimeNaviVal=True',
              'ITk.doTruth=False',
              'Tracking.doTruth=False',
-             f'IOVDb.GlobalTag={defaultConditionsTags.RUN4_MC}',
              ]
 
 # The full test configuration
