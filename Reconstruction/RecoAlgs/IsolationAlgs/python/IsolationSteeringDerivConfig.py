@@ -49,10 +49,7 @@ def IsolationSteeringDerivCfg(flags, name = 'IsolationSteeringDeriv', inType = '
     kwargs['PhIsoTypes'] = isoType
     kwargs['PhCorTypes'] = isoCor
     kwargs['PhCorTypesExtra'] = isoExCor
-    kwargs['FwdElIsoTypes'] = isoType
-    kwargs['FwdElCorTypes'] = isoCor
-    kwargs['FwdElCorTypesExtra'] = isoExCor
-
+        
     kwargs['name'] = suff+'PFlowIsolationBuilder'
     
     acc.addEventAlgo(CompFactory.IsolationBuilder(**kwargs))
@@ -82,6 +79,8 @@ def FwdElectronIsolationSteeringDerivCfg(flags, name = 'FwdElectronIsolationStee
         from IsolationAlgs.IsoToolsConfig import ElectronTrackIsolationToolCfg
         isoType.append([ isoPar.ptcone30, isoPar.ptcone20 ])
         isoCor.append([ isoPar.coreTrackPtr ])
+        isoType.append([ isoPar.neflowisol20, isoPar.neflowisol30, isoPar.neflowisol40 ])
+        isoCor.append([ isoPar.coreCone ])
         isoExCor.append([])
         if flags.Reco.EnableHGTDExtension:
             extraInputs = []
