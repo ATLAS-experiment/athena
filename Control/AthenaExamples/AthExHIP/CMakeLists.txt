@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Set up the package name.
 atlas_subdir( AthExHIP )
@@ -9,10 +9,15 @@ if( NOT CMAKE_HIP_COMPILER )
    return()
 endif()
 
+# External dependencies.
+find_package( traccc )
+
 # Set up the build of the example library.
 atlas_add_component( AthExHIP
    src/*.h src/*.cxx src/*.hip src/components/*.cxx
-   LINK_LIBRARIES AthenaBaseComps AthenaInterprocess GaudiKernel )
+   LINK_LIBRARIES AthenaBaseComps AthenaInterprocess xAODCore xAODTracking
+                  AthDeviceInterfacesLib AthHIPInterfacesLib
+                  StoreGateLib GaudiKernel traccc::core )
 set_target_properties( AthExHIP PROPERTIES
    LINKER_LANGUAGE HIP )
 

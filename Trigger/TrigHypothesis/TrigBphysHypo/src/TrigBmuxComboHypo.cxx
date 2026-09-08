@@ -2,9 +2,6 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <algorithm>
-#include <numeric>
-#include <iterator>
 
 #include "TrigBmuxComboHypo.h"
 
@@ -29,7 +26,9 @@
 #include "Math/GenVector/VectorUtil.h"
 #include "Math/Vector2D.h"
 #include "TrkVKalVrtFitter/VxCascadeInfo.h"
-
+#include <algorithm>
+#include <numeric>
+#include <iterator>
 
 using TrigCompositeUtils::Decision;
 using TrigCompositeUtils::DecisionContainer;
@@ -157,7 +156,7 @@ StatusCode TrigBmuxComboHypo::findBmuxCandidates(TrigBmuxState& state) const {
     DecisionIDContainer decisionIDs;
     TrigCompositeUtils::decisionIDs(decision, decisionIDs);
     size_t muonIndex = muons.size();
-    muons.push_back({muonEL, decisionEL, decisionIDs});
+    muons.push_back({muonEL, decisionEL, std::move(decisionIDs)});
 
     ATH_MSG_DEBUG( "Found muon (CombinedTrackParticle) pt/eta/phi/q: " << muon->pt() << " / " << muon->eta() << " / " << muon->phi() << " / " << muon->charge() );
 

@@ -896,7 +896,7 @@ Amg::Transform3D RpcDigitizationTool::fromSimHitToLayer(const MuonGM::RpcReadout
                       (m_idHelper->gasGap(layerId) == 2) != reEle->rotatedRpcModule();
     const Amg::Transform3D fromHitToGap{reEle->transform(layerId).inverse() *
                                         reEle->absTransform() * Amg::getTranslate3D(lGasGapPos) *
-                                        (flip ? Amg::getRotateY3D(180.*Gaudi::Units::deg) : Amg::Transform3D::Identity())};
+                                        (flip ? Amg::getRotateY3D(180.*Gaudi::Units::deg) : Amg::Isometry3D::Identity())};
     ATH_MSG_VERBOSE("Transformation to go from hit to gap restframe "<<m_idHelper->print_to_string(layerId)
                 <<" "<<Amg::toString(fromHitToGap));
     return fromHitToGap;

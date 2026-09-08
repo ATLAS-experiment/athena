@@ -152,7 +152,7 @@ class FlagAddress(object):
 
         if merged not in self._flags._flagdict:
             raise RuntimeError( "No such flag: {}  The name is likely incomplete.".format(merged) )
-        return self._flags._set( merged, value )
+        return self._flags._AthConfigFlags__set( merged, value )
 
     def __delattr__(self, name):
         del self[name]
@@ -268,7 +268,7 @@ class AthConfigFlags(object):
 
         # First try to get an already loaded flag or category
         if name in _flagdict:
-            return self._get(name)
+            return self.__get(name)
 
         # Check (and load if needed) dynamic flags
         if self.hasCategory(name):
@@ -281,7 +281,7 @@ class AthConfigFlags(object):
             return object.__setattr__(self, name, value)
 
         if name in self._flagdict:
-            return self._set(name, value)
+            return self.__set(name, value)
         raise RuntimeError( "No such flag: "+ name+". The name is likely incomplete." )
 
     def __delattr__(self, name):
@@ -467,7 +467,7 @@ class AthConfigFlags(object):
         except AttributeError:
             return False
 
-    def _set(self,name,value):
+    def __set(self,name,value):
         self._tryModify()
         try:
             self._flagdict[name].set(value)
@@ -476,7 +476,7 @@ class AthConfigFlags(object):
             raise KeyError(f"No flag with name '{name}' found" +
                            (f". Did you mean '{closestMatch[0]}'?" if closestMatch else ""))
 
-    def _get(self,name):
+    def __get(self,name):
         try:
             return self._flagdict[name].get(self)
         except KeyError:

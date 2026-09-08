@@ -14,6 +14,8 @@
 #include "CxxUtils/sincos.h"
 
 #include "cmath"
+#include <sstream>
+#include <stdexcept>
 
 #include <vector>
 #include <optional>
@@ -241,39 +243,60 @@ inline Amg::Rotation3D getRotation3DfromAngleAxis(double angle, Amg::Vector3D& a
 
 /** @brief Rotate the coordinate system by an angle around the x-axis
  *  @param angle: The roation angle around x. */
-inline Amg::Transform3D getRotateX3D(double angle) {
-    return Amg::Transform3D{Amg::AngleAxis3D{angle, Amg::Vector3D::UnitX()}};
+inline Amg::Isometry3D getRotateX3D(double angle) {
+    return Amg::Isometry3D{Amg::AngleAxis3D{angle, Amg::Vector3D::UnitX()}};
 }
 /** @brief Rotate the coordinate system by an angle around the z-axis
  *  @param angle: The roation angle around y. */
-inline Amg::Transform3D getRotateY3D(double angle) {
-    return Amg::Transform3D{Amg::AngleAxis3D{angle, Amg::Vector3D::UnitY()}};
+inline Amg::Isometry3D getRotateY3D(double angle) {
+    return Amg::Isometry3D{Amg::AngleAxis3D{angle, Amg::Vector3D::UnitY()}};
 }
 /** @brief Rotate the coordinate system by an angle around the z-axis
  *  @param angle: The roation angle around z. */
-inline Amg::Transform3D getRotateZ3D(double angle) {
-    return Amg::Transform3D{Amg::AngleAxis3D{angle, Amg::Vector3D::UnitZ()}};
+inline Amg::Isometry3D getRotateZ3D(double angle) {
+    return Amg::Isometry3D{Amg::AngleAxis3D{angle, Amg::Vector3D::UnitZ()}};
 }
 /** @brief: Returns a shift transformation along the x-axis*/
-inline Amg::Transform3D getTranslateX3D(const double X) {
-    return Amg::Transform3D{Amg::Translation3D{X * Amg::Vector3D::UnitX()}};
+inline Amg::Isometry3D getTranslateX3D(const double X) {
+    return Amg::Isometry3D{Amg::Translation3D{X * Amg::Vector3D::UnitX()}};
 }
 /** @brief: Returns a shift transformation along the y-axis*/
-inline Amg::Transform3D getTranslateY3D(const double Y) {
-    return Amg::Transform3D{Amg::Translation3D{Y * Amg::Vector3D::UnitY()}};
+inline Amg::Isometry3D getTranslateY3D(const double Y) {
+    return Amg::Isometry3D{Amg::Translation3D{Y * Amg::Vector3D::UnitY()}};
 }
 /** @brief: Returns a shift transformation along the z-axis*/
-inline Amg::Transform3D getTranslateZ3D(const double Z) {
-    return Amg::Transform3D{Amg::Translation3D{Z * Amg::Vector3D::UnitZ()}};
+inline Amg::Isometry3D getTranslateZ3D(const double Z) {
+    return Amg::Isometry3D{Amg::Translation3D{Z * Amg::Vector3D::UnitZ()}};
 }
 /** @brief: Returns a shift transformation along an arbitrary axis */
-inline Amg::Transform3D getTranslate3D(const double X, const double Y, const double Z) {
+inline Amg::Isometry3D getTranslate3D(const double X, const double Y, const double Z) {
     return getTranslateX3D(X) * getTranslateY3D(Y) * getTranslateZ3D(Z);
 }
 /** @brief: Returns a shift transformation along an arbitrary axis */
-inline Amg::Transform3D getTranslate3D(const Amg::Vector3D& v) {
-    return Amg::Transform3D{Amg::Translation3D{v}};
+inline Amg::Isometry3D getTranslate3D(const Amg::Vector3D& v) {
+    return Amg::Isometry3D{Amg::Translation3D{v}};
 }
+/** @brief Convert a general transform into an isometric one, e.g. a GeoModel placement.
+ *         GeoModel builds its placements from rotations and translations, but the
+ *         type allows scaling and shearing, which the tracking geometry does not.
+ *  @param trf: The transform to convert
+ *  @param tolerance: Tolerance of the orthogonality check */
+inline Amg::Isometry3D toIsometry3D(const Amg::Transform3D& trf,
+                                    const double tolerance = 1.e-9) {
+    const double deviation = (trf.linear() * trf.linear().transpose() -
+                              Amg::RotationMatrix3D::Identity()).cwiseAbs().maxCoeff();
+    if (deviation > tolerance) {
+        std::stringstream msg{};
+        msg<<__FILE__<<":"<<__LINE__<<" --- Transform is not isometric, its linear part "
+           <<"deviates from orthogonal by "<<deviation<<".";
+        throw std::runtime_error(msg.str());
+    }
+    Amg::Isometry3D iso{Amg::Isometry3D::Identity()};
+    iso.linear() = trf.linear();
+    iso.translation() = trf.translation();
+    return iso;
+}
+
 /** @brief Constructs a direction vector from the azimuthal & polar angles
  *  @param phi: Polar angle in the x-y plane
  *  @param theta: Azimuthal angle in the r-z plane */

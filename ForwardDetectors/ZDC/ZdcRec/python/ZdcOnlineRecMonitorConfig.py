@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ## CA-based configuration for Running the ZDC Athena Online Reconstruction and Monitoring
 ## imports detailed configurations from ZdcRecConfig
@@ -104,7 +104,7 @@ def ZdcOnlineConfigFlagsSetting(flags):
     
     for flag in _steeringFlags:
         if flags.hasFlag('DQ.Steering.' + flag):
-            flags._set('DQ.Steering.' + flag, False)
+            flags.DQ.Steering[flag] = False
         else:
             flags.addFlag('DQ.Steering.' + flag, False)
 
@@ -113,7 +113,7 @@ def ZdcOnlineConfigFlagsSetting(flags):
 
     for flag in _triggerFlags:
         if flags.hasFlag('Trigger.' + flag):
-            flags._set('Trigger.' + flag, False)
+            flags.Trigger[flag] = False
         else:
             flags.addFlag('Trigger.' + flag, False)
 
@@ -122,12 +122,12 @@ def ZdcOnlineConfigFlagsSetting(flags):
     _detectorFlags = ['MDT', 'MM', 'Muon', 'RPC', 'TGC', 'sTGC']
     for flag in _detectorFlags:
         if flags.hasFlag('Detector.Enable' + flag):
-            flags._set('Detector.Enable' + flag, False)
+            flags.Detector['Enable' + flag] = False
         else:
             flags.addFlag('Detector.Enable' + flag, False)
 
         if flags.hasFlag('Detector.Geometry' + flag):
-            flags._set('Detector.Geometry' + flag, False)
+            flags.Detector['Geometry' + flag] = False
         else:
             flags.addFlag('Detector.Geometry' + flag, False)
 
@@ -217,7 +217,7 @@ def ZdcStandaloneDataTypeSetting(flags):
             standaloneDataType = "inj"
 
         if flags.hasFlag("runInjForStandaloneData"):
-            flags._set("runInjForStandaloneData", standaloneDataType)
+            flags.runInjForStandaloneData = standaloneDataType
         else:
             flags.addFlag("runInjForStandaloneData", standaloneDataType)
 

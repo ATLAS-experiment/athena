@@ -2,9 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <algorithm>
-#include <numeric>
-#include <iterator>
+
 
 #include "TrigBmumuxComboHypo.h"
 
@@ -28,7 +26,9 @@
 
 #include "Math/GenVector/VectorUtil.h"
 #include "Math/Vector2D.h"
-
+#include <algorithm>
+#include <numeric>
+#include <iterator>
 
 using TrigCompositeUtils::Decision;
 using TrigCompositeUtils::DecisionContainer;
@@ -906,7 +906,7 @@ std::unique_ptr<xAOD::Vertex> TrigBmumuxComboHypo::fit(
   m_vertexFitter->setMassInputParticles(s_trkMass[static_cast<size_t>(decay)], *fitterState);
 
   // the combined momentum of D+/D_s+ candidate is constrained to point to the dimuon vertex
-  if (decay == Decay::kDs || decay == Decay::kDplus || decay == Decay::kD0) {
+  if (dimuon && (decay == Decay::kDs || decay == Decay::kDplus || decay == Decay::kD0)) {
     m_vertexFitter->setVertexForConstraint(*dimuon, *fitterState);
     m_vertexFitter->setCnstType(8, *fitterState);
   }
