@@ -47,7 +47,6 @@
 #include <detray/geometry/tracking_volume.hpp>
 #include <detray/utils/consistency_checker.hpp>
 #include <detray/utils/invalid_values.hpp>
-#include <vecmem/memory/host_memory_resource.hpp>
 #include <algorithm>
 #include <set>
 #include <utility>
@@ -1301,8 +1300,26 @@ const Acts::TrackingVolume*
 }
 
 #ifdef ACTSGEOMETRY_HAVE_DETRAY
+StatusCode TrackingGeometrySvc::finalize() {
+  // Release the Detray geometry while the memory resource tool it allocated
+  // from is still around, which is not guaranteed any more once the service
+  // itself is destroyed.
+  m_detrayGeometry.reset();
+  return AthService::finalize();
+}
+
 StatusCode TrackingGeometrySvc::buildDetrayGeometry() {
   using namespace ActsTrk::detail::GeoVolIds;
+  // The Detray detector allocates through this memory resource and keeps
+  // referring to it for the deallocations, so the tool has to be held for as
+  // long as m_detrayGeometry lives.
+  if (m_hostMR.empty()) {
+    ATH_MSG_ERROR("BuildDetrayGeometry was requested, but no host memory "
+                  "resource tool was configured (HostMR)");
+    return StatusCode::FAILURE;
+  }
+  ATH_CHECK(m_hostMR.retrieve());
+
   // Detray puts the beam pipe volume at detector index 0 and requires it to
   // contain the origin, so resolve it by position instead of by GeometryIdentifier.
   // An id-based lookup would not work anyway: BeamPipeBlueprintNodeBuilder assigns
@@ -1351,11 +1368,10 @@ StatusCode TrackingGeometrySvc::buildDetrayGeometry() {
       converterConfig,
       makeActsAthenaLogger(this, "DetrayGeomCnv", std::string("ActsTGSvc")));
 
-  vecmem::host_memory_resource mr;
   ActsPlugins::DetrayGeometryConverter::DetrayGeometry<DetrayMetadata> detrayGeometry{};
   try {
     detrayGeometry = converter.convert<DetrayMetadata>(
-        mr, getNominalContext().context(), m_trackingGeometry, name());
+        m_hostMR->mr(), getNominalContext().context(), m_trackingGeometry, name());
   } catch (const std::exception& e) {
     ATH_MSG_ERROR("Failed to convert the Acts::TrackingGeometry into a Detray geometry: " << e.what());
     return StatusCode::FAILURE;

@@ -111,6 +111,15 @@ def ActsTrackingGeometrySvcCfg(flags,
         from HGTD_GeoModel.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
     acc.merge(HGTD_ReadoutGeometryCfg(flags))
 
+  if kwargs.get("BuildDetrayGeometry", False):
+    # The Detray geometry is built once, at initialize, and stays on the host,
+    # so a plain host memory resource is all it needs. A workflow that copies
+    # the geometry to a device can override HostMR with the backend specific
+    # tool from AthDeviceComps.AthDeviceCompsConfig.HostMemoryResourceToolCfg,
+    # to get the detector allocated in pinned memory.
+    kwargs.setdefault("HostMR",
+                      CompFactory.AthDevice.HostMemoryResourceTool("ActsDetrayHostMR"))
+
   actsTrackingGeometrySvc = CompFactory.ActsTrk.TrackingGeometrySvc(name,
                                                                 BuildSubDetectors=subDetectors,
                                                                 BlueprintNodeBuilders=blueprintTools,

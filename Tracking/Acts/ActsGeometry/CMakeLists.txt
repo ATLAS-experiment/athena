@@ -17,7 +17,7 @@ set( _actsGeometryDetrayDefinitions )
 set( _actsGeometryDetrayLibraries )
 if( TARGET Acts::PluginDetray )
   list( APPEND _actsGeometryDetrayDefinitions ACTSGEOMETRY_HAVE_DETRAY )
-  list( APPEND _actsGeometryDetrayLibraries Acts::PluginDetray )
+  list( APPEND _actsGeometryDetrayLibraries Acts::PluginDetray AthDeviceInterfacesLib )
 endif()
 
 # Component(s) in the package:

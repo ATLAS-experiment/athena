@@ -21,6 +21,9 @@
 #include "Acts/Geometry/CylinderVolumeBuilder.hpp"
 
 #ifdef ACTSGEOMETRY_HAVE_DETRAY
+#include "AthDeviceInterfaces/IMemoryResourceTool.h"
+#include "GaudiKernel/ToolHandle.h"
+
 #include <ActsPlugins/Detray/DetrayGeometryConverter.hpp>
 #include <detray/core/detector.hpp>
 #include <detray/detectors/itk_metadata.hpp>
@@ -77,6 +80,9 @@ class TrackingGeometrySvc : public extends<AthService, ActsTrk::ITrackingGeometr
 public:
 
   StatusCode initialize() override;
+#ifdef ACTSGEOMETRY_HAVE_DETRAY
+  StatusCode finalize() override;
+#endif
 
   TrackingGeometrySvc( const std::string& name, ISvcLocator* pSvcLocator );
     /** @copydoc ActsTrk::ITrackingGeometrySvc::trackingGeometry */
@@ -213,6 +219,17 @@ private:
   Gaudi::Property<bool> m_checkDetrayGeometry{this, "CheckDetrayGeometry", true,
       "Run the Detray consistency check on the converted geometry. "
       "Only used when BuildDetrayGeometry is enabled."};
+
+#ifdef ACTSGEOMETRY_HAVE_DETRAY
+  /// Tool providing the memory resource that the Detray geometry is allocated
+  /// from. The detector keeps referring to that resource for its deallocations,
+  /// so the tool has to outlive m_detrayGeometry. Only used, and only required
+  /// to be set, when BuildDetrayGeometry is enabled.
+  ToolHandle<AthDevice::IMemoryResourceTool> m_hostMR{this, "HostMR", "",
+      "Host memory resource tool used for the Detray geometry allocations. The "
+      "conversion runs entirely on the host, so the resource has to be host "
+      "accessible: a plain host or a managed/shared one, not a device one."};
+#endif
   
   Gaudi::Property<std::string> m_blueprintGraphviz{this, "BlueprintGraphviz", 
                                                    "", "Write the blueprint graph to a file. No file will be written if empty"};
