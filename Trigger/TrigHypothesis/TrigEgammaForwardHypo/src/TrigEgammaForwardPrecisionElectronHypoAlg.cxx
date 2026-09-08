@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigEgammaForwardPrecisionElectronHypoAlg.h"
@@ -124,7 +124,7 @@ StatusCode TrigEgammaForwardPrecisionElectronHypoAlg::execute( const EventContex
           idx++;
         }
 
-        toolInput.push_back( info );
+        toolInput.push_back( std::move(info) );
         validelectrons++;
       }
     }
