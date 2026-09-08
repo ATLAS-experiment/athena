@@ -1,5 +1,9 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 atlas_subdir( ActsGPUMagField )
+if (NOT (CMAKE_CUDA_COMPILER OR CMAKE_HIP_COMPILER))
+   message( STATUS "Neither CUDA nor HIP are available, not building package" )
+endif()
+
 find_package(Acts)
 # placeholder for what will eventually be Acts::PluginTraccc
 if (NOT TARGET Acts::PluginDetray)
@@ -35,7 +39,7 @@ if( CMAKE_CUDA_COMPILER )
   )
 endif()
 
-# CUDA-only sources and libraries
+# HIP-only sources and libraries
 if( CMAKE_HIP_COMPILER )
   list( APPEND _sources
     src/hip/*.h
@@ -60,16 +64,22 @@ atlas_install_python_modules( python/*.py test/*.py POST_BUILD_CMD ${ATLAS_FLAKE
 atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 
-#Need environment variable to change PathResolver ERROR about using the dev area to a WARNING (Locating dev file dev/ACTS/detray-itk/ITk_bfield.cvf. Do not let this propagate to a release!)
+#Need to set environment to change PathResolver ERROR about using the dev area to a WARNING (Locating dev file dev/ACTS/detray-itk/ITk_bfield.cvf. Do not let this propagate to a release!)
 
-if (CMAKE_CUDA_COMPILER AND ATLAS_HAS_CUDA_DEVICE)
+#need to check for presence of compilers again because the library might not have been built
+if (CMAKE_CUDA_COMPILER)
 atlas_add_test( CUDAGPUMagFieldExample
-   SCRIPT "PATHRESOLVER_DEVAREARESPONSE=WARNING ActsDeviceMagFieldTest.py Device.Backend=DeviceBackend.CUDA"
+   PRE_EXEC_SCRIPT "nvidia-check.sh || exit 2"
+   ENVIRONMENT "PATHRESOLVER_DEVAREARESPONSE=WARNING"
+   SCRIPT ActsDeviceMagFieldTest.py Device.Backend=DeviceBackend.CUDA
    POST_EXEC_SCRIPT noerror.sh)
 endif()
-if (CMAKE_HIP_COMPILER AND ATLAS_HAS_HIPAMD_DEVICE)
+
+if (CMAKE_HIP_COMPILER)
 atlas_add_test( HIPGPUMagFieldExample
-   SCRIPT "PATHRESOLVER_DEVAREARESPONSE=WARNING ActsDeviceMagFieldTest.py Device.Backend=DeviceBackend.HIPAMD"
+   PRE_EXEC_SCRIPT "amd-check.sh || exit 2"
+   ENVIRONMENT "PATHRESOLVER_DEVAREARESPONSE=WARNING"
+   SCRIPT ActsDeviceMagFieldTest.py Device.Backend=DeviceBackend.HIPAMD
    POST_EXEC_SCRIPT noerror.sh)
 endif()
 
