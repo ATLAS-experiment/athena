@@ -31,22 +31,6 @@ StatusCode CounterChain::newEvent(const CostData& data, size_t index, const floa
 
   ATH_CHECK( increment("Chain_perEvent", weight) );
 
-  if (!m_isInitialized && variableExists("ROSRequests_perEvent")) {
-    // Set histograms labels
-    for (const auto& rosToRobPair : data.costROSData().getROStoROBMap()) {
-      int binForROS = data.costROSData().getBinForROS(rosToRobPair.first) + 1;
-
-    // Fill the bins with groups and add the labels
-    int bin = 1;
-    for (const std::string& group : data.seededChains()[index].groups){
-      ATH_CHECK( getVariable("Group_perCall").setBinLabel(bin, group) );
-      ATH_CHECK( getVariable("Group_perCall").fill(group, weight) );
-      ++bin;
-    }
-
-    m_isInitialized = true;
-  }
-
   if (data.seededChains()[index].isPassRaw){
     ATH_CHECK( increment("ChainPassed_perEvent", weight) );
   }
@@ -71,6 +55,7 @@ StatusCode CounterChain::newEvent(const CostData& data, size_t index, const floa
     const float cpuTime = timeToMilliSec(start, stop);
     ATH_CHECK( fill("Time_perEvent", cpuTime, weight) );
     ATH_CHECK( fill("Time_perCall", cpuTime, weight) );
+  }
 
   // Monitor unique algorithms associated with chain name
   if (!data.chainToUniqAlgMap().count(getName())) return StatusCode::SUCCESS;
