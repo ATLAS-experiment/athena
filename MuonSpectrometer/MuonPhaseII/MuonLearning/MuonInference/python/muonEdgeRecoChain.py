@@ -123,21 +123,12 @@ def main(args):
     ms_track_finder = cfg.getEventAlgo("MSTrackFinderAlg")
     ms_track_finder.OutputLevel = output_level
     if run_ml_seeder:
-        # MsTrackFindingAlg has no ML-awareness of its own: ML vs standard
-        # seeding is selected purely by which concrete ITrackSeedingTool is
-        # configured as SeedingTool. MlMsTrackSeeder builds seeds directly
-        # from the ML-nominated components and only defers to BaselineSeeder
-        # for initial-parameter estimation.
         from MuonTrackFindingAlgs.TrackFindingConfig import MsTrackSeedingToolCfg
         from AthenaConfiguration.ComponentFactory import CompFactory
         baseline_seeder = cfg.popToolsAndMerge(MsTrackSeedingToolCfg(flags))
         ms_track_finder.SeedingTool = CompFactory.MuonR4.MlMsTrackSeeder(
             "MlMsTrackSeeder",
             BaselineSeeder=baseline_seeder,
-            # SegmentEdgeInferenceAlg always writes the decoration on the
-            # original container, never on the FilteredSegmentKey view, so
-            # this must stay MuonSegmentsFromR4 even when the view is used
-            # below for the rest of the track-finding chain.
             SegmentContainer="MuonSegmentsFromR4",
             CandidateDecoration="mlTrackComponent",
             MinSegmentsPerCandidate=args.minSegmentsPerComponent,

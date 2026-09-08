@@ -44,10 +44,37 @@ namespace {
     }
    
     bool isNswSegment(const xAOD::MuonSegment& seg) {
-        using namespace Muon::MuonStationIndex;        
-        return seg.technology() == TechnologyIndex::STGC || 
+        using namespace Muon::MuonStationIndex;
+        return seg.technology() == TechnologyIndex::STGC ||
                seg.technology() == TechnologyIndex::MM ||
                toStationIndex(seg.chamberIndex()) == StIndex::EE;
+    }
+
+    /// MsTrackSeederTool::estimateQtimesP(gctx, seed, magField) buckets the
+    /// seed's segments into the inner/middle/outer layer slots (backfilling
+    /// from Extended/BarrelExtended when a base slot is empty) and, whenever
+    /// fewer than 3 slots end up filled, unconditionally dereferences the
+    /// first two. A seed whose segments can't fill at least two slots (e.g.
+    /// all in one layer -- reachable from ML-built seeds that don't share
+    /// MsTrackSeederTool's own layer-diversity guarantees) crashes it --
+    /// check the topology before calling.
+    bool canEstimateQtimesP(const MuonR4::MsTrackSeed& seed) {
+        using namespace Muon::MuonStationIndex;
+        bool hasInner{false}, hasMiddle{false}, hasOuter{false};
+        unsigned int nExtended{0};
+        for (const xAOD::MuonSegment* seg : seed.segments()) {
+            switch (toLayerIndex(seg->chamberIndex())) {
+                case LayerIndex::Inner:  hasInner = true; break;
+                case LayerIndex::Middle: hasMiddle = true; break;
+                case LayerIndex::Outer:  hasOuter = true; break;
+                case LayerIndex::Extended:
+                case LayerIndex::BarrelExtended: ++nExtended; break;
+                default: break;
+            }
+        }
+        const unsigned int nIMO = hasInner + hasMiddle + hasOuter;
+        const unsigned int nFree = 3u - nIMO;
+        return nIMO + (nExtended < nFree ? nExtended : nFree) >= 2u;
     }
 
 }
@@ -249,6 +276,11 @@ namespace MuonR4{
             }
             if (!pIsect.ok()) {
                 ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" Cannot create valid start parameters from seed "<<seed<<".");
+                return Acts::Result<Acts::BoundTrackParameters>::failure(std::make_error_code(std::errc::invalid_argument));
+            }
+            if (!canEstimateQtimesP(seed)) {
+                ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" Cannot estimate q*p from seed "<<seed
+                                <<" - insufficient inner/middle/outer layer coverage.");
                 return Acts::Result<Acts::BoundTrackParameters>::failure(std::make_error_code(std::errc::invalid_argument));
             }
             /** Calculate the initial q / p estimator */
