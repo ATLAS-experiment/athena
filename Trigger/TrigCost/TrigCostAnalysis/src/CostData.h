@@ -182,7 +182,6 @@ class CostData {
     bool m_liveTimeIsPerEvent; //!< If the livetime represents a single event or all of the current LB
     const std::unordered_map<uint32_t, std::string>* m_typeMapPtr; //!< Cached non-owning pointer mapping algorithm instance names to types
     std::map<size_t, std::vector<size_t>> m_algToRos; //!< Mapping of indexes from m_costCollection to corresponding ROS requests made by algorithm
-    const CostROSData* m_costROSData = nullptr; //!< Helper class to store ROS to ROB mapping
     const std::map<std::string, std::set<size_t>>* m_chainToAlgIdx = nullptr; //!<Mapping of chain to algorithms idx
     const std::map<std::string, std::set<size_t>>* m_chainToUniqAlgIdx = nullptr; //!<Mapping of chain name to its unique algorithms
     const std::map<std::string, std::map<int16_t, std::set<size_t>>>* m_sequencers = nullptr; //!<Mapping of sequence to algorithms

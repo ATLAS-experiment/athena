@@ -52,10 +52,6 @@ const xAOD::TrigCompositeContainer& CostData::costCollection() const {
   return *m_costCollection;
 }
 
-const CostROSData& CostData::costROSData() const {
-  return *m_costROSData;
-}
-
 const std::map<size_t, std::vector<size_t>>& CostData::algToRequestMap() const {
   return m_algToRos;
 }
