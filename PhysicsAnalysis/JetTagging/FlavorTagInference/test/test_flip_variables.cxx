@@ -2,13 +2,21 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// Check which constituent input variables the flip taggers invert. The
-// variable lists below are the ones embedded in the deployed ONNX files.
+/**
+ * @file FlavorTagInference/test/test_flip_variables.cxx
+ * @brief Check which constituent inputs the flip taggers invert.
+ *
+ * The variable lists are the ones embedded in the deployed ONNX files.
+ */
+
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MAIN
+#define BOOST_TEST_MODULE TEST_FLIPVARIABLES
+
+#include <boost/test/unit_test.hpp>
 
 #include "FlavorTagInference/ConstituentsLoader.h"
 
-#include <iostream>
-#include <set>
 #include <string>
 #include <vector>
 
@@ -16,12 +24,7 @@ using namespace FlavorTagInference;
 
 namespace {
 
-  struct FlipCase {
-    std::string node;
-    std::vector<std::string> variables;
-    FlipTagConfig flip_config;
-    std::set<std::string> expected;
-  };
+  const std::string track_node {"tracks_r22loose_sd0sort"};
 
   const std::vector<std::string> gn3v00_tracks {
     "d0", "z0SinTheta", "dphi", "deta", "qOverP",
@@ -48,68 +51,57 @@ namespace {
     "muon_momentumBalanceSignificance", "muon_scatteringNeighbourSignificance"
   };
 
-  std::set<std::string> flippedVariables(
+  // the flipped inputs of one node, in the order the model declares them
+  std::string flipped(
     const std::string& node,
     const std::vector<std::string>& variables,
     FlipTagConfig flip_config)
   {
     const ConstituentsInputConfig config = createConstituentsLoaderConfig(
       node, variables, flip_config);
-    std::set<std::string> flipped;
+    std::string names;
     for (const InputVariableConfig& input: config.inputs) {
-      if (input.flip_sign) flipped.insert(input.name);
+      if (input.flip_sign) names += (names.empty() ? "" : ", ") + input.name;
     }
-    return flipped;
-  }
-
-  std::string join(const std::set<std::string>& names) {
-    std::string out;
-    for (const std::string& name: names) out += (out.empty() ? "" : ", ") + name;
-    return "{" + out + "}";
+    return names;
   }
 
 }
 
-int main() {
+BOOST_AUTO_TEST_SUITE(FlipVariables)
 
-  const std::set<std::string> v00_signed {
-    "IP3D_signed_d0_significance", "IP3D_signed_z0_significance"
-  };
-  const std::set<std::string> v01_signed {
-    "lifetimeSignedD0Significance", "lifetimeSignedZ0SinThetaSignificance"
-  };
-  const std::set<std::string> perigee {"d0", "z0SinTheta"};
-
-  auto with_perigee = [&perigee](std::set<std::string> signed_ips) {
-    signed_ips.insert(perigee.begin(), perigee.end());
-    return signed_ips;
-  };
-
-  const std::vector<FlipCase> cases {
-    {"tracks_r22loose_sd0sort", gn3v00_tracks, FlipTagConfig::STANDARD, {}},
-    {"tracks_r22loose_sd0sort", gn3v00_tracks, FlipTagConfig::FLIP_SIGN, v00_signed},
-    {"tracks_r22loose_sd0sort", gn3v00_tracks, FlipTagConfig::NEGATIVE_IP_ONLY, v00_signed},
-    {"tracks_r22loose_sd0sort", gn3v00_tracks, FlipTagConfig::SIMPLE_FLIP, with_perigee(v00_signed)},
-    {"tracks_r22loose_sd0sort", gn3epclv01_tracks, FlipTagConfig::STANDARD, {}},
-    {"tracks_r22loose_sd0sort", gn3epclv01_tracks, FlipTagConfig::FLIP_SIGN, v01_signed},
-    {"tracks_r22loose_sd0sort", gn3epclv01_tracks, FlipTagConfig::NEGATIVE_IP_ONLY, v01_signed},
-    {"tracks_r22loose_sd0sort", gn3epclv01_tracks, FlipTagConfig::SIMPLE_FLIP, with_perigee(v01_signed)},
-  };
-
-  int failures = 0;
-  for (const FlipCase& c: cases) {
-    auto flipped = flippedVariables(c.node, c.variables, c.flip_config);
-    if (flipped != c.expected) {
-      failures++;
-      std::cerr << "FAIL " << c.node << ": expected " << join(c.expected)
-                << ", got " << join(flipped) << std::endl;
-    }
+  BOOST_AUTO_TEST_CASE(standardConfigFlipsNothing) {
+    BOOST_CHECK_EQUAL(
+      flipped(track_node, gn3v00_tracks, FlipTagConfig::STANDARD), "");
+    BOOST_CHECK_EQUAL(
+      flipped(track_node, gn3epclv01_tracks, FlipTagConfig::STANDARD), "");
   }
 
-  if (failures) {
-    std::cerr << failures << " flip configuration(s) wrong" << std::endl;
-    return 1;
+  BOOST_AUTO_TEST_CASE(ip3dSignedNaming) {
+    const std::string signed_ips {
+      "IP3D_signed_d0_significance, IP3D_signed_z0_significance"};
+    BOOST_CHECK_EQUAL(
+      flipped(track_node, gn3v00_tracks, FlipTagConfig::FLIP_SIGN), signed_ips);
+    BOOST_CHECK_EQUAL(
+      flipped(track_node, gn3v00_tracks, FlipTagConfig::NEGATIVE_IP_ONLY),
+      signed_ips);
+    BOOST_CHECK_EQUAL(
+      flipped(track_node, gn3v00_tracks, FlipTagConfig::SIMPLE_FLIP),
+      "d0, z0SinTheta, " + signed_ips);
   }
-  std::cout << "all flip configurations as expected" << std::endl;
-  return 0;
-}
+
+  BOOST_AUTO_TEST_CASE(lifetimeSignedNaming) {
+    const std::string signed_ips {
+      "lifetimeSignedD0Significance, lifetimeSignedZ0SinThetaSignificance"};
+    BOOST_CHECK_EQUAL(
+      flipped(track_node, gn3epclv01_tracks, FlipTagConfig::FLIP_SIGN),
+      signed_ips);
+    BOOST_CHECK_EQUAL(
+      flipped(track_node, gn3epclv01_tracks, FlipTagConfig::NEGATIVE_IP_ONLY),
+      signed_ips);
+    BOOST_CHECK_EQUAL(
+      flipped(track_node, gn3epclv01_tracks, FlipTagConfig::SIMPLE_FLIP),
+      "d0, z0SinTheta, " + signed_ips);
+  }
+
+BOOST_AUTO_TEST_SUITE_END()
