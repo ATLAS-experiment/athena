@@ -16,7 +16,7 @@ StatusCode MonitorChain::newEvent(const CostData& data, const float weight) {
     std::string chainName = seededChains[i].name;
     if (!counterExists(chainName)){
       // Create a new counter using specialized constructor in order to pass number of bins for some of the histograms
-      m_counters.insert( std::make_pair(chainName, newCounter(chainName, data.costROSData().getNROS())) );
+      m_counters.insert( std::make_pair(chainName, newCounter(chainName)) );
     } 
     ATH_CHECK( getCounter(chainName)->newEvent(data, i, weight) );
   }
