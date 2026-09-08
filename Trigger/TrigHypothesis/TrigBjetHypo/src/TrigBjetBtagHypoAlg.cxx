@@ -165,12 +165,12 @@ StatusCode TrigBjetBtagHypoAlg::execute( const EventContext& context ) const {
     CHECK( bTaggedJetEL.size() == 1 );
     // Put everything in place
     TrigBjetBtagHypoTool::TrigBjetBtagHypoToolInfo infoToAdd;
-    infoToAdd.previousDecisionIDs = previousDecisionIDs;
+    infoToAdd.previousDecisionIDs = std::move(previousDecisionIDs);
     infoToAdd.jetEL = bTaggedJetEL.front();
     infoToAdd.vertexEL = vertexEL;
     infoToAdd.decision = newDecisions.at( index );
     infoToAdd.beamSpot = beamSpot;
-    bTagHypoInputs.push_back( infoToAdd );
+    bTagHypoInputs.push_back( std::move(infoToAdd) );
   }
 
   // ==========================================================================================================================
