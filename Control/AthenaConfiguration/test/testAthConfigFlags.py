@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags, isGaudiEnv
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -67,6 +67,16 @@ class BasicTests(FlagsSetup):
         self.assertTrue( "One" in self.flags.A )
         self.assertTrue( "B" in self.flags.A )
         self.assertFalse( "Z" in self.flags )
+
+    def test_closeMatch(self):
+        """Test closest match error message"""
+        with self.assertRaises(KeyError) as cm:
+            self.flags.atest = False
+        self.assertIn("Atest", str(cm.exception))
+
+        with self.assertRaises(KeyError) as cm:
+            self.flags.A.one = 1
+        self.assertIn("A.One", str(cm.exception))
 
     def test_dependentFlag(self):
         """The dependent flags will use another flag value to establish its own value"""
@@ -336,6 +346,12 @@ class TestFlagsSetupDynamic(FlagsSetup):
         self.assertTrue( "Z" in self.flags )
         self.assertTrue( "C" in self.flags.Z )
         self.assertTrue( "A" in self.flags.Z )
+
+    def test_closeMatch(self):
+        """Test closest match error message"""
+        with self.assertRaises(KeyError) as cm:
+            self.flags.Z.C.Setting = 42
+        self.assertIn("Z.C.setting", str(cm.exception))
 
     def test_cloneExists(self):
         """test if flags can be found after cloning"""
