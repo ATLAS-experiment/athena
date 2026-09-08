@@ -24,6 +24,9 @@
 #include "GaudiKernel/IFileMgr.h"
 #include "GaudiKernel/IService.h"
 
+#include "PoolSvc/IDatabase.h"
+#include "PoolSvc/ISession.h"
+
 #include <exception>
 #include <map>
 
@@ -69,7 +72,7 @@ namespace pool {
       if( !m_storageSvc->getShape( m_fileDescr, guid, shape ).isSuccess() ) {
          shape = m_storageSvc->createShape( guid );
       }
-      std::string containerName = std::format("{}({})", m_containerPrefix, columnName );
+      std::string containerName = std::format("{}({})", APRDefaults::WriteConfig::getEventTagName(), columnName );
       Token *tp = nullptr;
       if( m_storageSvc->allocate( m_fileDescr, containerName, m_description.type().type(), data, shape, tp ).isSuccess() ) {
          delete tp; tp = nullptr;
@@ -96,18 +99,20 @@ namespace pool {
       ATH_MSG_INFO( "Closing " << (m_open? "open":"not open") << " collection '" << m_fileName << "'" );
       if(m_open) {
          m_open = false;
-         if( !m_storageSvc->disconnect( m_fileDescr ).isSuccess() ) {
-            throw std::runtime_error( "RootCollection '" + m_fileName + "' could not be properly closed" );
+         if (m_storageSvc) {
+            if( !m_storageSvc->disconnect( m_fileDescr ).isSuccess() ) {
+               throw std::runtime_error( "RootCollection '" + m_fileName + "' could not be properly closed" );
+            }
+            m_storageSvc->endSession().ignore();
          }
-         m_storageSvc->endSession().ignore();
       }
    }
 
 
     // throw all errors as exceptions, because this method is called from the constructor
-   void RootCollection::open( Io::IoFlag mode, ISession* /*session*/ )
+   void RootCollection::open( Io::IoFlag mode, ISession* session )
    {
-      if( m_fileName.starts_with ( "PFN:") ) {
+      if( m_fileName.starts_with("PFN:") ) {
         m_fileName = m_fileName.substr(4);
       }
 
@@ -117,6 +122,9 @@ namespace pool {
          m_description = std::move(desc);
 
          std::vector<const Token*> containerTokens;
+         if( !session ) {
+            ATH_MSG_DEBUG("No session pointer passed");
+         }
          m_storageSvc.reset( pool::createStorageSvc("StorageSvc") );
          // PvG: TODO: On read use m_session
          if( !m_storageSvc->startSession( mode, m_description.type().type()).isSuccess() ) {
@@ -130,9 +138,9 @@ namespace pool {
          if( !db.containers(containerTokens, false).isSuccess() ) {
             throw std::runtime_error( "RootCollection: error reading " + m_fileName );
          }
-         m_containerPrefix = APRDefaults::ReadConfig::getEventTagName( m_fileDescr.FID() );
-         ATH_MSG_DEBUG("Opening RootCollection '" << m_fileName << "' using container prefix: " << m_containerPrefix );
-         std::string tagContName = m_containerPrefix + "(";
+         std::string containerPrefix = APRDefaults::ReadConfig::getEventTagName( m_fileDescr.FID() );
+         ATH_MSG_DEBUG("Opening RootCollection '" << m_fileName << "' using container prefix: " << containerPrefix );
+         std::string tagContName = containerPrefix + "(";
          for( const Token *t : containerTokens ) {
             Token token(t);      // need a non-const Token
             const std::string& contName = db.cntName(token);
@@ -164,7 +172,6 @@ namespace pool {
          if( !m_storageSvc->connect( mode, m_fileDescr ).isSuccess() ) {
             throw std::runtime_error( "RootCollection failed to open: " + m_fileName + " for " + poolOptToRootOpt[mode] );
          }
-         m_containerPrefix = APRDefaults::WriteConfig::getEventTagName();
       }
       m_open = true;
    }

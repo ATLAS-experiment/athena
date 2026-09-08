@@ -4,6 +4,7 @@
 
 #include "CollectionSvc/CollectionService.h"
 #include "CollectionSvc/CollectionDescription.h"
+
 #include "ImplicitCollection.h"
 #include "RootCollection.h"
 
@@ -22,7 +23,7 @@ pool::CollectionService::create( const CollectionDescription& description )
       throw std::runtime_error( errorMsg + " (APR: \" CollectionService::create \" from \" CollectionSvc \")" );
    }
    Io::IoFlag openMode = Io::WRITE;
-   return plugin( description, openMode );
+   return plugin( description, openMode, nullptr );
 }
 
 
