@@ -522,20 +522,32 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
     float truthJetPhi = -9999;
     float deltaR = -2;
 
+    const xAOD::JetContainer* truthJetCont = truthJets.cptr();
+
     //If the best match is PU, reassign the truth jet to take variables from
-    if (pileupTag == SmallRJetPileupLabel::ITPU) {
+    switch(pileupTag) {
+      case SmallRJetPileupLabel::ITPU: {
         matchTruthJet = it_matchTruthJet;
-    }
-    else if (pileupTag == SmallRJetPileupLabel::OOTPU) {
+        truthJetCont = inTimeTruthJets.cptr();
+        break;
+      }
+    case SmallRJetPileupLabel::OOTPU: {
         matchTruthJet = oot_matchTruthJet;
-    }
-    else if (pileupTag == SmallRJetPileupLabel::MixPU) {
+        truthJetCont = outOfTimeTruthJets.cptr();
+        break;
+      }
+    case SmallRJetPileupLabel::MixPU: {
         if (bestITpTRatio >= bestOOTpTRatio) {
-            matchTruthJet = it_matchTruthJet;
+          matchTruthJet = it_matchTruthJet;
+          truthJetCont = inTimeTruthJets.cptr();
         }
         else {
-            matchTruthJet = oot_matchTruthJet;
+          matchTruthJet = oot_matchTruthJet;
+          truthJetCont = outOfTimeTruthJets.cptr();
         }
+      }
+    default:
+      break;
     }
 
     if ( matchTruthJet ) {
@@ -554,7 +566,8 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
             }
             if (nbAcc.isAvailable(*matchTruthJet)) truthJetNB = nbAcc(*matchTruthJet);
         }
-        truthJetEL = ElementLink<xAOD::JetContainer>(*truthJets, matchTruthJet->index(), ctx);
+        ATH_MSG_VERBOSE("For reco jet " << jet->index() << ", matched truth jet index " << matchTruthJet->index());
+        truthJetEL = ElementLink<xAOD::JetContainer>(*truthJetCont, matchTruthJet->index(), ctx);
         truthJetMass = matchTruthJet->m();
         truthJetPt = matchTruthJet->pt();
         truthJetRapidity = matchTruthJet->rapidity();
