@@ -111,6 +111,14 @@ namespace InDet {
         return StatusCode::FAILURE;
       }
 
+      // The readout design is a property of the detector element, so resolve it once
+      // here rather than for every cluster on the element.
+      const InDetDD::PixelModuleDesign* design = TrackingUtilities::pixelModuleDesign(*element);
+      if ( design == nullptr ) {
+        ATH_MSG_FATAL( "Invalid pixel module design for hash " << hashId);
+        return StatusCode::FAILURE;
+      }
+
       std::unique_ptr<InDet::PixelClusterCollection> collection = std::make_unique<InDet::PixelClusterCollection>(hashId);
 
       // Get the detector element and range for the idHash
@@ -119,7 +127,7 @@ namespace InDet {
           const xAOD::PixelCluster* in_cluster = *start;
 
           InDet::PixelCluster* cluster = nullptr;
-          ATH_CHECK( TrackingUtilities::convertXaodToInDetCluster(*in_cluster, *element, *m_pixelID, cluster) );
+          ATH_CHECK( TrackingUtilities::convertXaodToInDetCluster(*in_cluster, *element, *design, *m_pixelID, cluster) );
           //coverity[FORWARD_NULL:FALSE]
           cluster->setHashAndIndex(hashId, collection->size());
 
@@ -182,6 +190,14 @@ namespace InDet {
       bool isBarrel = element->isBarrel();
       double shift = not isBarrel ? m_lorentzAngleTool->getLorentzShift(hashId, ctx) : 0.;
 
+      // The readout design is a property of the detector element, so resolve it once
+      // here rather than for every cluster on the element.
+      const InDetDD::SCT_ModuleSideDesign* design = TrackingUtilities::stripModuleSideDesign(*element);
+      if ( design == nullptr ) {
+        ATH_MSG_FATAL( "Invalid strip module design for hash " << hashId);
+        return StatusCode::FAILURE;
+      }
+
       std::unique_ptr<InDet::SCT_ClusterCollection> collection = std::make_unique<InDet::SCT_ClusterCollection>(hashId);
 
 
@@ -191,7 +207,7 @@ namespace InDet {
           const xAOD::StripCluster* in_cluster = *start;
 
           InDet::SCT_Cluster* cluster = nullptr;
-          ATH_CHECK( TrackingUtilities::convertXaodToInDetCluster(*in_cluster, *element, *m_stripID, cluster, shift) );
+          ATH_CHECK( TrackingUtilities::convertXaodToInDetCluster(*in_cluster, *element, *design, *m_stripID, cluster, shift) );
           //coverity[FORWARD_NULL:FALSE]
           cluster->setHashAndIndex(hashId, collection->size());
 
