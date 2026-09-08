@@ -22,7 +22,7 @@ namespace ActsTrk {
  * This tool constructs the traccc device magnetic field
  * algorithm, configured to run on with HIP backend. 
  *
- * @author Neža Ribarič <neza.ribaric@cern.ch>
+ * @copy of original CUDA version
  */
 class HIPMagFieldProviderTool
     : public extends<AthAlgTool, IDeviceMagFieldProviderTool>
