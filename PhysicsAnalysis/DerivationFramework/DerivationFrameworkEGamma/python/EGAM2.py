@@ -19,6 +19,7 @@ from DerivationFrameworkEGamma.PhotonsCPDetailedContent import (
 from DerivationFrameworkEGamma.TriggerContent import (
     ExtraContainersTrigger,
     ExtraContainersElectronTrigger,
+    ExtraContainersJPsiElectronTrigger,
     JPsiTriggers,
     JPsiDelayedTriggers,
 )
@@ -57,7 +58,7 @@ def EGAM2SkimmingToolCfg(flags):
 
     triggersHLTonly = []
     if MenuType:
-        triggers = JPsiTriggers[MenuType]
+        triggers = list(JPsiTriggers[MenuType])
         print("Input trigger stream is:  ", flags.Input.TriggerStream)
         if flags.Input.TriggerStream in ("physics_BphysDelayed", "BphysLS") or flags.Input.isMC:
             triggers += JPsiDelayedTriggers[MenuType]
@@ -403,6 +404,9 @@ def EGAM2Cfg(flags):
     if MenuType:
         EGAM2SlimmingHelper.AllVariables += ExtraContainersTrigger[MenuType]
         EGAM2SlimmingHelper.AllVariables += ExtraContainersElectronTrigger[MenuType]
+        # online di-electron vertex objects of the J/psi and bBeeM6000 chains,
+        # needed for trigger matching to these chains
+        EGAM2SlimmingHelper.AllVariables += ExtraContainersJPsiElectronTrigger[MenuType]
 
     # and on MC we also add:
     if flags.Input.isMC:

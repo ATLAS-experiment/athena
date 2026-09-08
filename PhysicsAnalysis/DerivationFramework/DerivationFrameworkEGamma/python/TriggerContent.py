@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # ********************************************************************
 # TriggerContent.py
@@ -799,6 +799,22 @@ ExtraContainersElectronTrigger["Run2"] = [
     "HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_EFID",
     "HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_EFIDAux.",
 ]
+
+# Additional containers for the low-mass di-electron J/psi and B->K(*)ee
+# (bBeeM6000) triggers used by EGAM2. The final object of these chains is an
+# xAOD::TrigBphys holding the online di-electron vertex (chi2, m(ee)) and the
+# links to the online electrons/tracks. It is not an xAOD::IParticle, so the
+# Run 3 navigation slimming cannot repack it and the container has to be
+# written out explicitly.
+# Only the GSF, no-muon variant was ever used in data taking, see ATR-25223.
+ExtraContainersJPsiElectronTrigger = {}
+ExtraContainersJPsiElectronTrigger["Run3"] = [
+    "HLT_NoMuonDiElecPrecisionGSF",
+    "HLT_NoMuonDiElecPrecisionGSFAux.",
+]
+
+ExtraContainersJPsiElectronTrigger["Run2"] = []
+
 
 # Containers aimed for Navigation, Trigger Matching  and L1 RoIs
 ExtraContainersTrigger = {}
