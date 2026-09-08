@@ -1,3 +1,5 @@
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+//
 // Copyright 2021, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without

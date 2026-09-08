@@ -19,7 +19,7 @@ TRK_PARAMS / MEASUREMENTS / COVARIANCES / GEOMETRY_IDS
 
 ## Structure of the server
 
-Two Tools are created to initialize the server, and then run once per-event. 
+Two Tools are created to first initialize the server, and then second to run the reco algs once per event. 
 The `traccc` GPU algorithms are taken from existing work in the Acts repo and are ordinary 
 `AthReentrantAlgorithm` components: they read from
 and write to StoreGate and depend on provider tools and DetectorStore services.
@@ -66,6 +66,9 @@ A successful start ends with
 | traccc-gpu | 1       | READY  |
 +------------+---------+--------+
 ```
+
+The [TracccTritonClient](https://gitlab.cern.ch/atlas/athena/-/tree/main/Trigger/EFTracking/TracccTritonClient?ref_type=heads) 
+can then be run as before, using the setup server (instructions in [cleint README](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/EFTracking/TracccTritonClient/README.md?ref_type=heads)).
 
 ## StoreGate key contract
 
