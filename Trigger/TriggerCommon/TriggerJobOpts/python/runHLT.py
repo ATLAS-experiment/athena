@@ -1,5 +1,5 @@
 #!/usr/bin/env athena.py
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 CA module to configure the (standalone) HLT for athena and athenaHLT.
 There is a separate entry point for each application to tailor some
@@ -103,7 +103,7 @@ def runHLTCfg(flags, checkMT=True):
        cfg.merge(TrkEventCnvSuperToolCfg(flags))
 
    if flags.Common.isOnline:
-     from TrigOnlineMonitor.TrigOnlineMonitorConfig import trigOpMonitorCfg
+     from TrigSteerMonitor.TrigSteerMonitorConfig import trigOpMonitorCfg
      cfg.merge( trigOpMonitorCfg(flags) )
 
    # Print config and statistics
