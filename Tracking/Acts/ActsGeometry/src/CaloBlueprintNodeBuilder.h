@@ -64,7 +64,7 @@ namespace ActsTrk {
         ** To do this it calculates the radius and length of the cylinder, then shifts it in Z to the midpoint of the Z values used to build it.
         ** It then creates the Acts::CylinderSurface and returns it via a shared pointer.
         */
-        std::shared_ptr<Acts::CylinderSurface> generateCylinderSurface(const double& maxLArBRadius, const double& minLArBRadius, const double& lowZLarB, const double& highZLarB, bool asymmetricZ) const;
+        std::shared_ptr<Acts::CylinderSurface> generateCylinderSurface(const double& maxLArBRadius, const double& minLArBRadius, const double& lowZLarB, const double& highZLarB) const;
 
         /** addCylindricalTrackingVolumeToCaloNode adds a cylindrical tracking volume to the calo node.
         ** It takes as input the container node, the calo dimensions map, the name of the volume and the vector of surfaces to be added to the volume.

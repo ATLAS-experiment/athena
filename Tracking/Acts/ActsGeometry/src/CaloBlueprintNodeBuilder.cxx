@@ -373,7 +373,7 @@ void ActsTrk::CaloBlueprintNodeBuilder::generateCylinderSurfaces(caloSampleSurfa
             ATH_MSG_DEBUG("CYLINDER: Create Cylinder: Min and Max LAr B radius are " << minLArBRadius << " " << maxLArBRadius);
             ATH_MSG_DEBUG("CYLINDER: Create Cylinder: Min and Max LAr B z are " << lowZLarB << " " << highZLarB);
 
-            caloSampleSurfaceMap[currentSample].push_back(generateCylinderSurface(maxLArBRadius, minLArBRadius, lowZLarB, highZLarB, asymmetricZ));
+            caloSampleSurfaceMap[currentSample].push_back(generateCylinderSurface(maxLArBRadius, minLArBRadius, lowZLarB, highZLarB));
 
             //reset the dimensions of the cylinder to the initial conditions, in 
            //preparation for the next cylinder
@@ -403,25 +403,20 @@ void ActsTrk::CaloBlueprintNodeBuilder::generateCylinderSurfaces(caloSampleSurfa
       ATH_MSG_DEBUG("CYLINDER: Zero size Vector: Create cylinder for layer " << currentSample.first);   
       ATH_MSG_DEBUG("CYLINDER: Create Cylinder: Min and Max LAr B radius are " << minLArBRadius << " " << maxLArBRadius);
       ATH_MSG_DEBUG("CYLINDER: Create Cylinder: Min and Max LAr B z are " << lowZLarB << " " << highZLarB);
-      caloSampleSurfaceMap[currentSample].push_back(generateCylinderSurface(maxLArBRadius, minLArBRadius, lowZLarB, highZLarB, asymmetricZ));
+      caloSampleSurfaceMap[currentSample].push_back(generateCylinderSurface(maxLArBRadius, minLArBRadius, lowZLarB, highZLarB));
     }
   }   
 }
 
-std::shared_ptr<CylinderSurface> ActsTrk::CaloBlueprintNodeBuilder::generateCylinderSurface(const double& maxLArBRadius, const double& minLArBRadius, const double& lowZLarB, const double& highZLarB, bool asymmetricZ) const{
+std::shared_ptr<CylinderSurface> ActsTrk::CaloBlueprintNodeBuilder::generateCylinderSurface(const double& maxLArBRadius, const double& minLArBRadius, const double& lowZLarB, const double& highZLarB) const{
 
   //Characterise the dimensions of the  cylinder
   double LArBRadius = (maxLArBRadius + minLArBRadius) / 2.0;
   double LArBLength = std::abs(highZLarB - lowZLarB);
 
-  ATH_MSG_DEBUG("Cylinder radius and length are " << LArBRadius << " and " << LArBLength);
-
-  if (asymmetricZ) {
-    double zShift = (highZLarB + lowZLarB) / 2.0;
-    ATH_MSG_DEBUG("Cylinder is asymmetric in Z, with shift of " << zShift);
-     return Surface::makeShared<CylinderSurface>(Transform3(Translation3(0.0, 0.0, zShift)), LArBRadius, LArBLength/2);
-  }
-  else return Surface::makeShared<CylinderSurface>(Transform3::Identity(), LArBRadius, LArBLength/2);
+  double zShift = (highZLarB + lowZLarB) / 2.0;
+  ATH_MSG_DEBUG("Cylinder radius and length are " << LArBRadius << " and " << LArBLength << " with shift of " << zShift);
+  return Surface::makeShared<CylinderSurface>(Transform3(Translation3(0.0, 0.0, zShift)), LArBRadius, LArBLength/2);
 
 }
 
