@@ -43,7 +43,7 @@ print_png:            TRUE
 use_log_scale:        TRUE
 do_ratioplot:         TRUE
 x_eff_min:            0.80
-time_acc_tool:        HGTD_TrkTimePerformanceStudies.TrackTimeAccTool3/
+time_acc_tool:        HGTD_TrkTimePerformanceStudies.ExpertTrackTimeFromSummary/
 track_selection_tool: HGTD_TrkTimePerformanceStudies.AllTracksSelection/
 ```
 
@@ -58,12 +58,14 @@ regression check between runs.
 
 ## Two traps worth knowing
 
-- **Use `TrackTimeAccTool3`, not `TrackTimeAccTool`.** `TrackTimeAccTool`'s
-  `UseLastHitCut` reads `track.parameterX/Y/Z()` at `xAOD::LastMeasurement`, but the
-  AOD writer strips `parameterX/Y/Z` and `parameterPosition` from
-  `InDetTrackParticlesAux`. The cut then rejects every track and the efficiency curve
-  is flat zero. `TrackTimeAccTool3` applies the same cut from the persisted
-  `HGTD_summaryinfo` bitfield. Use `TrackTimeAccToolDefault` for no cleaning.
+- **Use `ExpertTrackTimeFromSummary`, not `ExpertTrackTimeFromClusters`.**
+  `ExpertTrackTimeFromClusters`'s `UseLastHitCut` reads
+  `track.parameterX/Y/Z()` at `xAOD::LastMeasurement`, but the AOD writer strips
+  `parameterX/Y/Z` and `parameterPosition` from `InDetTrackParticlesAux`. The cut
+  then rejects every track and the efficiency curve is flat zero.
+  `ExpertTrackTimeFromSummary` applies the same cut from the persisted
+  `HGTD_summaryinfo` bitfield. Use `ExpertTrackTimeFromClustersNoSelection` for no
+  cleaning.
 - **The AOD must be produced with `flags.Tracking.writeExtendedHGTDInfo=True`**
   (it defaults to `False`). Otherwise `HGTD_cluster_time`,
   `HGTD_cluster_truth_class`, `HGTD_primary_expected` and `HGTD_summaryinfo` are

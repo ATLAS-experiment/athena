@@ -39,14 +39,16 @@ void effCurvesVersionsEta(TString config_file_name = "") {
   g_do_zoom = env.GetValue("do_zoom", false);
   g_use_log_scale = env.GetValue("use_log_scale", false);
   g_work_status = env.GetValue("work_status", "default");
-  g_time_acc_tool = env.GetValue("time_acc_tool", "HGTD_TrkTimePerformanceStudies.TrackTimeAccTool/");
-  g_track_selection_tool = env.GetValue("track_selection_tool", "HGTD_TrkTimePerformanceStudies.AllTracksSelection/");
+  g_time_acc_tool = env.GetValue(
+      "time_acc_tool",
+      "HGTD_TrkTimePerformanceStudies.ExpertTrackTimeFromClusters/");
+  g_track_selection_tool = env.GetValue(
+      "track_selection_tool",
+      "HGTD_TrkTimePerformanceStudies.AllTracksSelection/");
 
   g_file = TFile::Open(g_input_file_path, "READ");
 
   SetAtlasStyle();
-
-//   preparePlottingDir(g_config_file_name);
 
   efficiencyAndMistagLinePrimeFractionGT50("|#eta|");
   efficiencyStackPlotAllCases("|#eta|");
@@ -119,14 +121,6 @@ void efficiencyAndMistagLinePrimeFractionGT50(TString xlabel) {
 
   float label_text_size = 0.05;
 
-  // TString dataset_descr = "VBF H #rightarrow invisible, #LT#mu#GT=200 ";
-  // if (g_config_file_name == "muon10_mu0.cfg") {
-  //   dataset_descr = "#mu^{+}, #it{p}_{#it{T}} = 10GeV, #LT#mu#GT=0 ";
-  // } else if (g_config_file_name == "pion0p1to5p0_mu0.cfg") {
-  //   dataset_descr = "#pi^{+}, 0.1 < #it{p}_{#it{T}} < 5 GeV, #LT#mu#GT=0 ";
-  // } else if (g_config_file_name == "ttbar_mu200.cfg") {
-  //   dataset_descr = "t#bar{t}, #LT#mu#GT=200";
-  // }
   atlas::myText(0.19, 0.84, text_color, g_dataset_description.Data(), label_text_size);
 
   atlas::myText(0.19, 0.77, text_color, "Timing scenario \"Initial\"",
@@ -219,16 +213,6 @@ void efficiencyStackPlotAllCases(TString xlabel) {
   Color_t text_color = kBlack;
   atlas::ATLAS_LABEL(0.19, 0.89, text_color);
   atlas::myText(0.31, 0.89, text_color, g_work_status.Data());
-
-  // TString dataset_descr = "VBF H #rightarrow invisible, #LT#mu#GT=200 ";
-  //
-  // if (g_config_file_name == "muon10_mu0.cfg") {
-  //   dataset_descr = "#mu^{+}, #it{p}_{#it{T}} = 10GeV, #LT#mu#GT=0 ";
-  // } else if (g_config_file_name == "pion0p1to5p0_mu0.cfg") {
-  //   dataset_descr = "#pi^{+}, 0.1 < #it{p}_{#it{T}} < 5 GeV, #LT#mu#GT=0 ";
-  // } else if (g_config_file_name == "ttbar_mu200.cfg") {
-  //   dataset_descr = "t#bar{t}, #LT#mu#GT=200";
-  // }
 
   float label_text_size = 0.05;
 

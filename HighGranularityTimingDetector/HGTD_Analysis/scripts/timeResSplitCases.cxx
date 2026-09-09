@@ -39,12 +39,14 @@ void timeResSplitCases(TString config_file_name = "") {
   do_zoom = env.GetValue("do_zoom", false);
   g_use_log_scale = env.GetValue("use_log_scale", false);
   work_status = env.GetValue("work_status", "default");
-  g_time_acc_tool = env.GetValue("time_acc_tool", "HGTD_TrkTimePerformanceStudies.TrackTimeAccTool/");
-  g_track_selection_tool = env.GetValue("track_selection_tool", "HGTD_TrkTimePerformanceStudies.AllTracksSelection/");
+  g_time_acc_tool = env.GetValue(
+      "time_acc_tool",
+      "HGTD_TrkTimePerformanceStudies.ExpertTrackTimeFromClusters/");
+  g_track_selection_tool = env.GetValue(
+      "track_selection_tool",
+      "HGTD_TrkTimePerformanceStudies.AllTracksSelection/");
 
   file = TFile::Open(g_input_file_path, "READ");
-
-//   preparePlottingDir(g_config_file_name);
 
   SetAtlasStyle();
 
@@ -118,7 +120,6 @@ void plot() {
       "axishist", ";t_{reco} - t_{truth} [ns]; Number of Tracks", 10, -0.4, 0.4);
 
   if (g_use_log_scale) {
-    // hist->SetAxisRange(1.e-5, 0.4, "Y");
     hist->SetAxisRange(1, 1.e8, "Y");
   } else {
     hist->SetAxisRange(0, 0.08, "Y");
@@ -127,11 +128,6 @@ void plot() {
   hist->Draw();
 
   stack_hist->Draw("hist same");
-  if (g_use_log_scale) {
-    // stack_hist->SetMaximum(stack_hist->GetMaximum()*4.0);
-    // stack_hist->SetAxisRange(1.e-4, 0.3, "Y"); //for m200
-    // stack_hist->GetYaxis()->SetLimits(1.e-4, 0.3);
-  }
 
   overall_hist->SetMarkerColor(kBlack);
   overall_hist->SetLineWidth(0);
@@ -146,16 +142,6 @@ void plot() {
   Color_t text_color = kBlack;
   atlas::ATLAS_LABEL(0.19, 0.88, text_color);
   atlas::myText(0.31, 0.88, text_color, work_status);
-  // TString dataset_descr = "VBF H #rightarrow invisible, #LT#mu#GT=200 ";
-  // if (g_config_file_name == "muon10_mu0.cfg") {
-  //   dataset_descr = "#mu^{+}, #it{p}_{#it{T}} = 10GeV, #LT#mu#GT=0 ";
-  // } else if (g_config_file_name == "pion0p1to5p0_mu0.cfg") {
-  //   dataset_descr = "#pi^{+}, 0.1 < #it{p}_{#it{T}} < 5 GeV, #LT#mu#GT=0 ";
-  // } else if (g_config_file_name == "VBFinv_mu200.cfg") {
-  //   dataset_descr = "VBF H #rightarrow invisible, #LT#mu#GT=200 ";
-  // } else if (g_config_file_name == "ttbar_mu200.cfg") {
-  //   dataset_descr = "t#bar{t}, #LT#mu#GT=200";
-  // }
 
   float label_text_size = 0.05;
 

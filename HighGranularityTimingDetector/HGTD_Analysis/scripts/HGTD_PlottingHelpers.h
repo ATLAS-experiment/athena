@@ -81,8 +81,6 @@ inline TStyle *AtlasStyle() {
   Double_t tsize = 0.05;
   atlasStyle->SetTextFont(font);
 
-  // atlasStyle->SetLabelOffset(0.015, "X");
-
   atlasStyle->SetTextSize(tsize);
   atlasStyle->SetLabelFont(font, "x");
   atlasStyle->SetTitleFont(font, "x");
@@ -104,16 +102,12 @@ inline TStyle *AtlasStyle() {
   atlasStyle->SetHistLineWidth(2.);
   atlasStyle->SetLineStyleString(2, "[12 12]"); // postscript dashes
 
-  // get rid of X error bars
-  // atlasStyle->SetErrorX(0.001);
   // get rid of error bar caps
   atlasStyle->SetEndErrorSize(0.);
 
   // do not display any of the standard histogram decorations
   atlasStyle->SetOptTitle(0);
-  // atlasStyle->SetOptStat(1111);
   atlasStyle->SetOptStat(0);
-  // atlasStyle->SetOptFit(1111);
   atlasStyle->SetOptFit(0);
 
   // put tick marks on top and RHS of plots
@@ -139,7 +133,7 @@ namespace atlas {
 /// Draw the italic "ATLAS" label at NDC position (x, y).
 inline void ATLAS_LABEL(Double_t x, Double_t y, Color_t color = 1,
                         float fac = 1.) {
-  TLatex l; // l.SetTextAlign(12); l.SetTextSize(tsize);
+  TLatex l;
   l.SetNDC();
   l.SetTextFont(72);
   l.SetTextSize(fac * l.GetTextSize());
@@ -150,8 +144,7 @@ inline void ATLAS_LABEL(Double_t x, Double_t y, Color_t color = 1,
 /// Draw free text at NDC position (x, y), using the current text size.
 inline void myText(Double_t x, Double_t y, Color_t color, const char *text) {
 
-  // Double_t tsize=0.05;
-  TLatex l; // l.SetTextAlign(12); l.SetTextSize(tsize);
+  TLatex l;
   l.SetNDC();
   l.SetTextColor(color);
   l.DrawLatex(x, y, text);
@@ -162,7 +155,6 @@ inline void myText(Double_t x, Double_t y, Color_t color, const char *text,
                    Double_t tsize) {
 
   TLatex l;
-  // l.SetTextAlign(12);
   l.SetTextSize(tsize);
   l.SetNDC();
   l.SetTextColor(color);
