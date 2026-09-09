@@ -109,7 +109,6 @@ def _asdict(iterator):
 
     Used by both FlagAddress and AthConfigFlags. The input must be an
     iterator over flags to be included in the dict.
-
     """
     outdict = {}
     for key, item in iterator:
@@ -120,33 +119,32 @@ def _asdict(iterator):
         x[subkeys[-1]] = item
     return outdict
 
-class FlagAddress(object):
+
+class FlagAddress:
+    """Proxy for a flags category"""
+
+    __slots__ = ('_flags', '_name')
+
     def __init__(self, flag, name):
-        if isinstance(flag, AthConfigFlags):
-            self._flags = flag
-            self._name = name
+        if type(flag) is not AthConfigFlags:
+            raise TypeError(f"cannot create FlagAddress for object {name} of type {type(flag)}")
 
-        elif isinstance(flag, FlagAddress):
-            self._flags = flag._flags
-            self._name  = f"{flag._name}.{name}"
-
-        else:
-            raise TypeError(f"Cannot create FlagAddress for object {name} of type {type(flag)}")
+        self._flags = flag
+        self._name = name
 
         # Handle renames
         self._name = self._flags._renames.get(self._name, self._name)
         if self._name is None:
-            raise AttributeError(f"Accessing category {name} has been blocked by cloneAndReplace")
-
+            raise AttributeError(f"accessing category '{name}' has been blocked by cloneAndReplace")
 
     def __getattr__(self, name):
-        return getattr(self._flags, self._name + "." + name)
+        return getattr(self._flags, f"{self._name}.{name}")
 
     def __setattr__( self, name, value ):
         if name.startswith("_"):
-            return object.__setattr__(self, name, value)
+            return super().__setattr__(name, value)
 
-        merged = self._name + "." + name
+        merged = f"{self._name}.{name}"
         if merged not in self._flags._flagdict: # flag is missing, try loading dynamic ones
             self._flags._loadDynaFlags( merged )
 
@@ -156,7 +154,7 @@ class FlagAddress(object):
         del self[name]
 
     def __cmp__(self, other):
-        raise RuntimeError( "No such flag: "+ self._name+".  The name is likely incomplete." )
+        raise TypeError( f"cannot compare flags category '{self._name}' to a value" )
     __eq__ = __cmp__
     __ne__ = __cmp__
     __lt__ = __cmp__
@@ -165,7 +163,7 @@ class FlagAddress(object):
     __ge__ = __cmp__
 
     def __bool__(self):
-        raise RuntimeError( "No such flag: "+ self._name+".  The name is likely incomplete." )
+        raise TypeError( f"cannot convert flags category '{self._name}' to a boolean" )
 
     def __getitem__(self, name):
         return getattr(self, name)
@@ -174,8 +172,7 @@ class FlagAddress(object):
         setattr(self, name, value)
 
     def __delitem__(self, name):
-        merged = self._name + "." + name
-        del self._flags[merged]
+        del self._flags[f"{self._name}.{name}"]
 
     def __contains__(self, name):
         return hasattr(self, name)
@@ -184,8 +181,9 @@ class FlagAddress(object):
         self._flags.loadAllDynamicFlags()
         rmap = self._flags._renamed_map()
         used = set()
+        prefix = self._name.rstrip('.') + '.'
         for flag in self._flags._flagdict.keys():
-            if flag.startswith(self._name.rstrip('.') + '.'):
+            if flag.startswith(prefix):
                 for newflag in rmap[flag]:
                     ntrim = len(self._name) + 1
                     n_dots_in = flag[:ntrim].count('.')
@@ -195,14 +193,13 @@ class FlagAddress(object):
                         used.add(remaining)
 
     def _subflag_itr(self):
-        """Subflag iterator specialized for this address
-
-        """
+        """Subflag iterator specialized for this address"""
         self._flags.loadAllDynamicFlags()
         address = self._name
+        prefix = address.rstrip('.') + '.'
         rename = self._flags._renamed_map()
         for key in self._flags._flagdict.keys():
-            if key.startswith(address.rstrip('.') + '.'):
+            if key.startswith(prefix):
                 ntrim = len(address) + 1
                 remaining = key[ntrim:]
                 for r in rename[key]:
@@ -217,7 +214,6 @@ class FlagAddress(object):
 
         The resulting data structure should be easy to serialize as
         json or yaml.
-
         """
         d = _asdict(self._subflag_itr())
         for k in self._name.split('.'):

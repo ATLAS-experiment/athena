@@ -30,10 +30,13 @@ class BasicTests(FlagsSetup):
         self.assertFalse( self.flags.A.B.C, "Flag value not chenged")
 
     def test_wrongAccess(self):
-        """Access to the flag that are missnames should give an exception"""
-        with self.assertRaises(RuntimeError):
-            print(".... test printout {}".format( self.flags.A is True ))
-            print(".... test printout {}".format( self.flags.A.B == 6 ))
+        """Access to flag values that are categories should be an error"""
+        with self.assertRaises(TypeError):
+            self.flags.A == 6
+        with self.assertRaises(TypeError):
+            bool(self.flags.A)
+        with self.assertRaises(TypeError):
+            self.flags.A.B == 6
 
     def test_noFlagOrCategory(self):
         """Trying to access something which isn't a flag/attribute should raise an error"""
