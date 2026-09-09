@@ -699,8 +699,10 @@ if __name__ == "__main__":
     # Disable calo for this test
     flags.Detector.EnableCalo = False
 
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultConditionsTags
     flags.Input.Files = defaultTestFiles.RDO_RUN4
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
+
 
     flags.lock()
 
