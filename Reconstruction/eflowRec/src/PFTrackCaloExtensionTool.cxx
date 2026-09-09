@@ -18,7 +18,7 @@ StatusCode PFTrackCaloExtensionTool::initialize() {
   ATH_CHECK(m_extrapolationTool.retrieve());
   ATH_CHECK(m_trackingGeometrySvc.retrieve());
 
-  std::array<std::string,3 > caloNames = {"EMB1_Layer", "EMB2_Layer", "EMB3_Layer"};
+  std::array<std::string,3 > caloNames = {"EMB1_layer", "EMB2_layer", "EMB3_layer"};
 
   m_trackingGeometrySvc->trackingGeometry()->visitVolumes([&](const Acts::TrackingVolume *vol) {
     const auto & name = vol->volumeName();
@@ -51,8 +51,8 @@ std::unique_ptr<eflowTrackCaloPoints> PFTrackCaloExtensionTool::execute(const Ev
     lastMom *= Acts::UnitConstants::MeV;
 
     Acts::BoundVector lastBoundParams = Acts::BoundVector::Zero();
-    lastBoundParams[Acts::eBoundPhi]    = Acts::VectorHelpers::phi(lastMom);
-    lastBoundParams[Acts::eBoundTheta]  = Acts::VectorHelpers::theta(lastMom);
+    lastBoundParams[Acts::eBoundPhi]    = lastMom.phi();
+    lastBoundParams[Acts::eBoundTheta]  = lastMom.theta();
     lastBoundParams[Acts::eBoundQOverP] = track->charge() / lastMom.norm();
 
     std::shared_ptr<const Acts::Surface> lastSurface = Acts::CurvilinearSurface(lastPos, lastMom.normalized()).planeSurface()->getSharedPtr();
