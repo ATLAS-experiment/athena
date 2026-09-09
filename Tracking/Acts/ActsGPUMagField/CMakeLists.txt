@@ -72,7 +72,8 @@ atlas_add_test( CUDAGPUMagFieldExample
    PRE_EXEC_SCRIPT "nvidia-check.sh || exit 2"
    ENVIRONMENT "PATHRESOLVER_DEVAREARESPONSE=WARNING"
    SCRIPT ActsDeviceMagFieldTest.py Device.Backend=DeviceBackend.CUDA
-   POST_EXEC_SCRIPT noerror.sh)
+   POST_EXEC_SCRIPT noerror.sh
+   PROPERTIES SKIP_RETURN_CODE 2 )
 endif()
 
 if (CMAKE_HIP_COMPILER)
@@ -80,6 +81,7 @@ atlas_add_test( HIPGPUMagFieldExample
    PRE_EXEC_SCRIPT "amd-check.sh || exit 2"
    ENVIRONMENT "PATHRESOLVER_DEVAREARESPONSE=WARNING"
    SCRIPT ActsDeviceMagFieldTest.py Device.Backend=DeviceBackend.HIPAMD
-   POST_EXEC_SCRIPT noerror.sh)
+   POST_EXEC_SCRIPT noerror.sh
+   PROPERTIES SKIP_RETURN_CODE 2 )
 endif()
 
