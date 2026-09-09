@@ -10,8 +10,8 @@
 
 namespace Trk {
 
-void cfnewp(const long int ich, double *parold, double *ref, double *s,
-            double *parnew, double *per);
+void cfnewp(const long int ich, const double *parold, const double *ref,
+            double *s, double *parnew, double *per);
 
 }  // namespace Trk
 

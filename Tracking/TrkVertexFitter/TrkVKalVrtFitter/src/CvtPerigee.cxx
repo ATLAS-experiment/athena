@@ -27,7 +27,7 @@ namespace Trk{
 			       State& state) const
   {
 
-    double tmp_refFrameX = 0, tmp_refFrameY = 0, tmp_refFrameZ = 0;
+    Amg::Vector3D tmp_refFrame = Amg::Vector3D::Zero();
 
     //
     // ----- Set reference frame to (0.,0.,0.) == ATLAS frame
@@ -52,14 +52,10 @@ namespace Trk{
 
       // Reference system calculation
       // Use hit position itself to get more precise magnetic field
-      tmp_refFrameX += perGlobalPos.x() ;
-      tmp_refFrameY += perGlobalPos.y() ;
-      tmp_refFrameZ += perGlobalPos.z() ;
+      tmp_refFrame += perGlobalPos;
 
       TrkMatControl tmpMat;
-      tmpMat.trkRefGlobPos = Amg::Vector3D(perGlobalPos.x(),
-					   perGlobalPos.y(),
-					   perGlobalPos.z());
+      tmpMat.trkRefGlobPos = perGlobalPos;
       // Perigee point strategy
       tmpMat.extrapolationType = 2;
       tmpMat.TrkPnt = mPer;
@@ -76,9 +72,7 @@ namespace Trk{
     if(counter == 0) return StatusCode::FAILURE;
 
     // Reference frame for the fit
-    tmp_refFrameX /= counter;
-    tmp_refFrameY /= counter;
-    tmp_refFrameZ /= counter;
+    tmp_refFrame /= counter;
 
     //
     //  Common reference frame is ready. Start extraction of parameters for fit.
@@ -124,19 +118,16 @@ namespace Trk{
       state.m_fitField.setAtlasMagRefFrame(state.m_refFrameX,
 					   state.m_refFrameY,
 					   state.m_refFrameZ);
-      double dX = tmp_refFrameX-perGlobalVrt.x();
-      double dY = tmp_refFrameY-perGlobalVrt.y();
-      double dZ = tmp_refFrameZ-perGlobalVrt.z();
-      if(std::abs(dX)+std::abs(dY)+std::abs(dZ) != 0.) {
+      Amg::Vector3D dref = tmp_refFrame - perGlobalVrt;
+      if(dref != Amg::Vector3D::Zero()) {
 	double pari[5], covi[15];
 	double vrtini[3] = {0.,0.,0.};
-	double vrtend[3] = {dX,dY,dZ};
 	for(int i=0; i<5; i++) pari[i] = state.m_apar[ntrk][i];
 	for(int i=0; i<15;i++) covi[i] = state.m_awgt[ntrk][i];
 	long int Charge = (long int) mPer->charge();
 	long int TrkID = ntrk;
 	Trk::vkalPropagator::Propagate(TrkID, Charge, pari, covi,
-			       vrtini, vrtend, &state.m_apar[ntrk][0],
+			       vrtini, dref.data(), &state.m_apar[ntrk][0],
 			       &state.m_awgt[ntrk][0],
 			       &state.m_vkalFitControl);
       }
@@ -146,9 +137,9 @@ namespace Trk{
     }
 
     //-------------- Finally setting new reference frame common for ALL tracks
-    state.m_refFrameX = tmp_refFrameX;
-    state.m_refFrameY = tmp_refFrameY;
-    state.m_refFrameZ = tmp_refFrameZ;
+    state.m_refFrameX = tmp_refFrame.x();
+    state.m_refFrameY = tmp_refFrame.y();
+    state.m_refFrameZ = tmp_refFrame.z();
     state.m_fitField.setAtlasMagRefFrame(state.m_refFrameX,
 					 state.m_refFrameY,
 					 state.m_refFrameZ);
@@ -157,8 +148,8 @@ namespace Trk{
   }
 
   std::unique_ptr<Perigee>
-  TrkVKalVrtFitter::CreatePerigee(const std::vector<double>& VKPerigee,
-				  const std::vector<double>& VKCov,
+  TrkVKalVrtFitter::CreatePerigee(const std::span<const double, 5> VKPerigee,
+				  const std::span<const double, 15> VKCov,
 				  IVKalState& istate) const
   {
     assert(dynamic_cast<const State*> (&istate)!=nullptr);
@@ -171,11 +162,10 @@ namespace Trk{
   //  vX,vY,vZ are in LOCAL SYSTEM with respect to refGVertex
   std::unique_ptr<Perigee>
   TrkVKalVrtFitter::CreatePerigee(double vX, double vY, double vZ,
-				  const std::vector<double>& VKPerigee,
-				  const std::vector<double>& VKCov,
-				  State& state) const
+                                  const std::span<const double, 5> VKPerigee,
+                                  const std::span<const double, 15> VKCov,
+                                  State& state) const
   {
-
     // ------  Magnetic field access
     double fx = 0., fy = 0., fz = 0.;
     state.m_fitField.getMagFld(vX,vY,vZ,fx,fy,fz);
@@ -184,7 +174,7 @@ namespace Trk{
 
     double TrkP3 = 0., TrkP4 = 0., TrkP5 = 0.;
     VKalToTrkTrack(effectiveBMAG, VKPerigee[2], VKPerigee[3], VKPerigee[4],
-		   TrkP3, TrkP4, TrkP5);
+       TrkP3, TrkP4, TrkP5);
     double TrkP1 = -VKPerigee[0];   /*!!!! Change of sign !!!!*/
     double TrkP2 = VKPerigee[1];
     TrkP5 = -TrkP5;                  /*!!!! Change of sign of charge!!!!*/
@@ -193,8 +183,8 @@ namespace Trk{
     double Deriv[5][5],CovMtxOld[5][5];
     for(int i=0; i<5; i++){
       for(int j=0; j<5; j++){
-	Deriv[i][j]=0.;
-	CovMtxOld[i][j]=0.;
+        Deriv[i][j]=0.;
+        CovMtxOld[i][j]=0.;
       }
     }
     Deriv[0][0] = -1.;
@@ -228,22 +218,20 @@ namespace Trk{
          for(int jk=4; jk>=0; jk--){
            if(Deriv[j][jk]==0.)continue;
            tmp += Deriv[i][ik]*CovMtxOld[ik][jk]*Deriv[j][jk];
-	 }
+   }
        }
        CovMtx(i,j) = CovMtx(j,i)=tmp;
      }
     }
 
     auto surface = PerigeeSurface(Amg::Vector3D(state.m_refFrameX+vX,
-						state.m_refFrameY+vY,
-						state.m_refFrameZ+vZ));
+            state.m_refFrameY+vY,
+            state.m_refFrameZ+vZ));
 
     return  std::make_unique<Perigee>(TrkP1, TrkP2, TrkP3, TrkP4, TrkP5,
-				      surface,
-				      std::move(CovMtx));
+              surface,
+              std::move(CovMtx));
+
   }
 
-} // end of namespace
-
-
-
+}

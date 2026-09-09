@@ -27,8 +27,8 @@ class VKalExtPropagator : public Trk::basePropagator {
   // Propagator from RefStart point  to RefEnd point in local coordinate
   //   system. Global coordinates are encapsulated inside function
   //
-  virtual void Propagate(long int trkID, long int Charge, double *ParOld,
-                         double *CovOld, double *RefStart, double *RefEnd,
+  virtual void Propagate(long int TrkID, long int Charge, const double *ParOld,
+                         const double *CovOld, const double *RefStart, const double *RefEnd,
                          double *ParNew, double *CovNew,
                          IVKalState &istate) const override;
   virtual bool checkTarget(double *, const IVKalState &istate) const override;

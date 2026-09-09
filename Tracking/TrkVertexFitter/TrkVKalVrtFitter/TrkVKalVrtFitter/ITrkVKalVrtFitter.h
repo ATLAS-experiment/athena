@@ -79,8 +79,8 @@ class Track;
                                         const TLorentzVector& Momentum,
                                         const std::vector<double>& CovVrtMom,
                                         const long int& Charge,
-                                        std::vector<double>& Perigee,
-                                        std::vector<double>& CovPerigee,
+                                        std::span<double, 5> Perigee,
+                                        std::span<double, 15> CovPerigee,
                                         IVKalState& istate) const = 0;
       //.........................................................................................
 
@@ -96,8 +96,8 @@ class Track;
       //.........................................................................................
 
       virtual std::unique_ptr<Perigee>
-	CreatePerigee(const std::vector<double>& VKPerigee,
-		      const std::vector<double>& VKCov,
+	CreatePerigee(const std::span<const double, 5> VKPerigee,
+                const std::span<const double, 15> VKCov,
 		      IVKalState& istate) const = 0;
 
       virtual StatusCode VKalGetTrkWeights(std::vector<double>& Weights,
