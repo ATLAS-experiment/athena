@@ -135,7 +135,7 @@ def WZTagAlgCfg(configFlags, **kwargs):
     algo_args = {}
     algo_args.setdefault("tagger", tool)
     algo_args.setdefault("jets", jets_container)
-    acc.addEventAlgo(CompFactory.BJT.BoostedJetTaggerAlg("WTagAlg", **algo_args))
+    acc.addEventAlgo(CompFactory.BJT.BoostedJetTaggerAlg("WTagAlg_" + kwargs['WP'], **algo_args))
 
     return acc
 
