@@ -731,7 +731,7 @@ bool TrigBtagEmulationTool::isPassedBTagger(const TrigBtagEmulationJet& emujet,
   return res;
 }
 
-std::unordered_map<std::string, std::vector<std::pair<const xAOD::Jet*, bool>>> TrigBtagEmulationTool::getEmulatedJets(std::string chainName) const
+std::unordered_map<std::string, std::vector<std::pair<const xAOD::Jet*, bool>>> TrigBtagEmulationTool::getEmulatedJets(const std::string & chainName) const
 {
   // Return emulation results for given trigger
   // Result looks something like this:
