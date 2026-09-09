@@ -19,7 +19,6 @@ def getJetResponseTool(jetdef, modspec=''):
 
     from JetRecConfig.JetDefinition import buildJetAlgName
 
-    label = modspec
     prefix, suffix = {
         'R4TruthLabel': ('',''),
         'R4TruthDressedWZLabel': ('','DressedWZ'),
