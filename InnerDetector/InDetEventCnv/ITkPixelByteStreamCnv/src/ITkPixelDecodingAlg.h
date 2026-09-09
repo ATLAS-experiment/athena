@@ -19,7 +19,12 @@
 #include <chrono>
 
 
-//class PixelID;
+/**
+ * @class ITkPixelDecodingPhaseIIRDOAlg
+ * This algorithm translates the event-formatted
+ * bytestream into InDetRawData RDOs.
+ * This will be phased out.
+ */
 
 class ITkPixelDecodingAlg : public AthReentrantAlgorithm 
 {
@@ -104,7 +109,7 @@ namespace PixelCallbacks{
             inline void add_hit(uint16_t col, uint16_t row, uint16_t tot){
                 //Translate the col, row into module coordinates
                 ITkPixelCabling::chipToModuleTransform(m_transform, m_chipID, col, row);
-                m_rdoCollection->emplace_back(new Pixel1RawData(m_idHelper->pixel_id(m_identifier, row, col), tot, 0, 0, 0));                
+                m_rdoCollection->emplace_back(new Pixel1RawData(m_idHelper->pixel_id(m_identifier, row, col), tot, 0, 0, 0));    
                 ++m_n_rdos;
             };
 
