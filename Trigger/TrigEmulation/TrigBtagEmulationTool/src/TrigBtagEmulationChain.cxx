@@ -96,7 +96,7 @@ void TrigBtagEmulationChain::parseChainDefinition(const std::vector< std::string
     ATH_MSG_DEBUG( " -           is PFlow: " << (is_PFlow ? "YES":"NO"));
     ATH_MSG_DEBUG( " -      GSC threshold: " << gsc_pt);
     
-    m_chainPartName.push_back(chainPartName);
+    m_chainPartName.push_back(std::move(chainPartName));
     m_jet_multiplicity.push_back(jet_multiplicity);
     m_jet_pt.push_back(jet_pt);
     m_jet_eta_min.push_back(jet_eta_min);
