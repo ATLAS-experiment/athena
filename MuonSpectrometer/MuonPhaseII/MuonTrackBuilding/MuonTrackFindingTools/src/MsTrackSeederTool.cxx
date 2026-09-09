@@ -66,8 +66,7 @@ namespace {
             }
         }
         const unsigned int nIMO = hasInner + hasMiddle + hasOuter;
-        const unsigned int nFree = 3u - nIMO;
-        return nIMO + (nExtended < nFree ? nExtended : nFree) >= 2u;
+        return nIMO + nExtended >= 2u;
     }
 
 }
