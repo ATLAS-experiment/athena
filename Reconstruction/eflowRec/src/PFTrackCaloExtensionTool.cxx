@@ -33,7 +33,10 @@ StatusCode PFTrackCaloExtensionTool::initialize() {
   });
 
   for (const auto& caloName : caloNames){
-    if (!m_caloNameGeoIDMap.contains(caloName)) ATH_MSG_ERROR("No volume inserted into map for calo name: " << caloName);
+    if (!m_caloNameGeoIDMap.contains(caloName)) {
+        ATH_MSG_ERROR("No volume inserted into map for calo name: " << caloName);
+        return StatusCode::FAILURE;
+    }
   }
 
   return StatusCode::SUCCESS;
