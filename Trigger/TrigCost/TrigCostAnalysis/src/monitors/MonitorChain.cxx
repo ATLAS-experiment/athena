@@ -28,6 +28,3 @@ std::unique_ptr<CounterBase> MonitorChain::newCounter(const std::string& name) {
   return std::make_unique<CounterChain>(name, this);
 } 
 
-std::unique_ptr<CounterBase> MonitorChain::newCounter(const std::string& name, unsigned nROS) {
-  return std::make_unique<CounterChain>(name, nROS, this);
-} 
