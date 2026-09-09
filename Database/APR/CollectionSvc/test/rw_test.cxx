@@ -102,7 +102,7 @@ TestDriver::read ATLAS_NOT_THREAD_SAFE ()
    unique_ptr<CollectionService> serviceHandle(new CollectionService());
 
   cout << "Getting handle to existing collection ( opened for read-only transactions by default )" << endl;
-  pool::ICollection* collection = serviceHandle->open( m_name, m_type , m_connection, nullptr );
+  pool::ICollection* collection = serviceHandle->open( m_name, m_type , m_connection );
 
   if( ! collection )   {
      throw std::runtime_error( "Could not create a rootCollection object" );

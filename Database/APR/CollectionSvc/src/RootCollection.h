@@ -73,13 +73,15 @@ namespace pool {
         RootCollection(const RootCollection &) = delete;
         RootCollection& operator = (const RootCollection &) = delete;
 
-        void writeColumn( const std::string& columnName, const void* data, const std::type_info& typeInfok );
+        void writeColumn( const std::string& columnName, const void* data,  const std::type_info& typeInfo);
 
 
         CollectionDescription                m_description;
 
         std::string                          m_name;
         std::string                          m_fileName;
+        /// The common prefix for branch container names for attributes
+        std::string                          m_containerPrefix;
         bool                                 m_open;
 
         std::unique_ptr<IStorageSvc>         m_storageSvc;

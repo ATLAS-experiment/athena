@@ -64,7 +64,7 @@ namespace pool {
      */
     static ICollection* open ATLAS_NOT_THREAD_SAFE ( const std::string & name,
                                const DbType& type,
-                               const std::string & connection,
+                               const std::string & connection = "",
                                ISession* session = 0 );
 
     /**
@@ -74,7 +74,7 @@ namespace pool {
 
     static ICollection* plugin ATLAS_NOT_THREAD_SAFE ( const CollectionDescription& description,
                                  Io::IoFlag openMode,
-                                 ISession* session );
+                                 ISession* session = 0 );
 
   };
 }
