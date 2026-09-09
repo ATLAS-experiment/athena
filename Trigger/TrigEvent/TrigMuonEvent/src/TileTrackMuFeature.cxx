@@ -87,7 +87,14 @@ TileTrackMuFeature::TileMuOutput() const { return *m_TileMuOutput; }
 
 const TrigInDetTrack* 
 TileTrackMuFeature::IDScanOutput() const { return *m_IDScanOutput; }
-
+ const ElementLink<TileMuFeatureContainer>&   
+TileTrackMuFeature::TileMuLink() const{ 
+  return m_TileMuOutput;
+}
+  const ElementLink<TrigInDetTrackCollection>& 
+TileTrackMuFeature::IDScanLink() const{ 
+  return m_IDScanOutput;
+}
 MsgStream& operator<< ( MsgStream& m, const TileTrackMuFeature& d )
 {
   return ( m << str( d ) );
