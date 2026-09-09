@@ -8,6 +8,8 @@
 // local include(s)
 #include "TauAnalysisTools/CommonDiTauSmearingTool.h"
 
+#include "xAODEventInfo/EventInfo.h"
+
 // ROOT include(s)
 #include "TROOT.h"
 #include "TClass.h"
@@ -25,6 +27,7 @@ CommonDiTauSmearingTool::CommonDiTauSmearingTool(const std::string& sName)
   , m_fY(&TruthSubleadPt)
   , m_fZ(&TruthDeltaR)
   , m_bIsData(false)
+  , m_bIsConfigured(false)	
   , m_eCheckTruth(TauAnalysisTools::Unknown)	
 {}
 
@@ -354,5 +357,18 @@ CP::CorrectionCode CommonDiTauSmearingTool::getValue(const std::string& sHistNam
   dEfficiencyScaleFactor = hHist->GetBinContent(iBin);
 
   return CP::CorrectionCode::Ok;
+}
+
+StatusCode CommonDiTauSmearingTool::beginEvent()
+{
+  if (m_bIsConfigured)
+    return StatusCode::SUCCESS;
+
+  const xAOD::EventInfo* xEventInfo = nullptr;
+  ATH_CHECK(evtStore()->retrieve(xEventInfo,"EventInfo"));
+  m_bIsData = !(xEventInfo->eventType( xAOD::EventInfo::IS_SIMULATION));
+  m_bIsConfigured = true;
+
+  return StatusCode::SUCCESS;
 }
 
