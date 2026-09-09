@@ -1,3 +1,3 @@
-#include "../TrackTimeAccTool.h"
+#include "../ExpertTrackTimeFromClustersTool.h"
 
-DECLARE_COMPONENT(HGTD::TrackTimeAccTool)
+DECLARE_COMPONENT(HGTD::ExpertTrackTimeFromClustersTool)

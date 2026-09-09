@@ -1,92 +1,60 @@
 /**
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  *
- * @file HGTD_Analysis/src/TrackTimeAccTool.cxx
+ * @file HGTD_Analysis/src/ExpertTrackTimeFromClustersTool.cxx
  * @author Alexander Leopold <alexander.leopold@cern.ch>
  * @date April, 2022
  * @brief
  */
 
-#include "TrackTimeAccTool.h"
+#include "ExpertTrackTimeFromClustersTool.h"
 
 #include <algorithm>
-#include <numeric>
 
 using namespace HGTD;
 
-TrackTimeAccTool::TrackTimeAccTool(const std::string& t, const std::string& n,
-                                   const IInterface* p)
-    // : AthAlgTool(t, n, p),
-    : base_class(t, n, p),
-      // m_do_last_hit(true),
-      // m_do_time_cons(true),
-      // m_deltat_cut(2.0),
-      // m_chi2_threshold(1.5),
-      // m_do_min_nhits(true),
-      // m_min_eta(3.5),
-      // m_max_eta(3.9),
-      // m_do_smearing(false),
-      m_name(n) {
-  // declareProperty("UseLastHitCut", m_do_last_hit);
-  // declareProperty("UseTimeConsistency", m_do_time_cons);
-  // declareProperty("DeltaTCut", m_deltat_cut);
-  // declareProperty("TimeChi2Cut", m_chi2_threshold);
-  // declareProperty("UseMinNHits", m_do_min_nhits);
-  // declareProperty("MinEta", m_min_eta);
-  // declareProperty("MaxEta", m_max_eta);
-  // declareProperty("DoSmearing", m_do_smearing);
-  std::replace(m_name.begin(), m_name.end(), '.', '_');
+ExpertTrackTimeFromClustersTool::ExpertTrackTimeFromClustersTool(
+    const std::string& t, const std::string& n, const IInterface* p)
+    : base_class(t, n, p), m_dec_prefix(n) {
+  // aux variable names may not contain a '.', but the instance name of a
+  // private tool does
+  std::replace(m_dec_prefix.begin(), m_dec_prefix.end(), '.', '_');
 }
 
-StatusCode TrackTimeAccTool::initialize() {
-  StatusCode sc = AthAlgTool::initialize();
+StatusCode ExpertTrackTimeFromClustersTool::initialize() {
+  ATH_CHECK(AthAlgTool::initialize());
 
-  m_dec_perLayer_hasCluster =
-      std::make_unique<SG::AuxElement::Accessor<std::vector<bool>>>(
-          "HGTD_has_extension");
-  m_dec_perLayer_clusterChi2 =
-      std::make_unique<SG::AuxElement::Accessor<std::vector<float>>>(
-          "HGTD_extension_chi2");
-  m_dec_perLayer_clusterDeltaT =
-      std::make_unique<SG::AuxElement::Accessor<std::vector<float>>>(
-          "HGTD_cluster_time");
-  m_dec_perLayer_clusterTruthClassification =
-      std::make_unique<SG::AuxElement::Accessor<std::vector<int>>>(
-          "HGTD_cluster_truth_class");
-  m_dec_perLayer_expectCluster =
-      std::make_unique<SG::AuxElement::Accessor<std::vector<bool>>>(
-          "HGTD_primary_expected");
-
-  m_dec_isset =
-      std::make_unique<SG::AuxElement::Decorator<bool>>(m_name + "_isset");
-  m_dec_hastime =
-      std::make_unique<SG::AuxElement::Decorator<bool>>(m_name + "_hastime");
-  m_dec_time =
-      std::make_unique<SG::AuxElement::Decorator<float>>(m_name + "_time");
-  m_dec_nhits =
-      std::make_unique<SG::AuxElement::Decorator<int>>(m_name + "_nhits");
-  m_dec_nprimehits =
-      std::make_unique<SG::AuxElement::Decorator<int>>(m_name + "_nprimehits");
+  m_dec_isset = std::make_unique<SG::AuxElement::Decorator<bool>>(
+      m_dec_prefix + "_isset");
+  m_dec_hastime = std::make_unique<SG::AuxElement::Decorator<bool>>(
+      m_dec_prefix + "_hastime");
+  m_dec_time = std::make_unique<SG::AuxElement::Decorator<float>>(
+      m_dec_prefix + "_time");
+  m_dec_nhits = std::make_unique<SG::AuxElement::Decorator<int>>(
+      m_dec_prefix + "_nhits");
+  m_dec_nprimehits = std::make_unique<SG::AuxElement::Decorator<int>>(
+      m_dec_prefix + "_nprimehits");
   m_dec_resolution = std::make_unique<SG::AuxElement::Decorator<float>>(
-      m_name + "_resolution");
+      m_dec_prefix + "_resolution");
 
   m_acc_isset =
-      std::make_unique<SG::AuxElement::Accessor<bool>>(m_name + "_isset");
+      std::make_unique<SG::ConstAccessor<bool>>(m_dec_prefix + "_isset");
   m_acc_hastime =
-      std::make_unique<SG::AuxElement::Accessor<bool>>(m_name + "_hastime");
+      std::make_unique<SG::ConstAccessor<bool>>(m_dec_prefix + "_hastime");
   m_acc_time =
-      std::make_unique<SG::AuxElement::Accessor<float>>(m_name + "_time");
+      std::make_unique<SG::ConstAccessor<float>>(m_dec_prefix + "_time");
   m_acc_nhits =
-      std::make_unique<SG::AuxElement::Accessor<int>>(m_name + "_nhits");
+      std::make_unique<SG::ConstAccessor<int>>(m_dec_prefix + "_nhits");
   m_acc_nprimehits =
-      std::make_unique<SG::AuxElement::Accessor<int>>(m_name + "_nprimehits");
+      std::make_unique<SG::ConstAccessor<int>>(m_dec_prefix + "_nprimehits");
   m_acc_resolution =
-      std::make_unique<SG::AuxElement::Accessor<float>>(m_name + "_resolution");
+      std::make_unique<SG::ConstAccessor<float>>(m_dec_prefix + "_resolution");
 
-  return sc;
+  return StatusCode::SUCCESS;
 }
 
-bool TrackTimeAccTool::hasTime(const xAOD::TrackParticle& track_particle) {
+bool ExpertTrackTimeFromClustersTool::expertHasTime(
+    const xAOD::TrackParticle& track_particle) const {
   // if the track has been used before, access the decoration instead of
   // recalculating
   if (m_acc_hastime->isAvailable(track_particle) and
@@ -139,41 +107,48 @@ bool TrackTimeAccTool::hasTime(const xAOD::TrackParticle& track_particle) {
   return used_hits.size() > 0;
 }
 
-float TrackTimeAccTool::time(const xAOD::TrackParticle& track_particle) {
+float ExpertTrackTimeFromClustersTool::expertTime(
+    const xAOD::TrackParticle& track_particle) const {
   if (m_acc_time->isAvailable(track_particle) and
       m_acc_isset->operator()(track_particle)) {
     return m_acc_time->operator()(track_particle);
   } else {
-    throw std::runtime_error("[TrackTimeAccTool::time] ERROR, always call "
-                             "hasTime on a track fist!");
+    throw std::runtime_error(
+        "[ExpertTrackTimeFromClustersTool::expertTime] ERROR, always call "
+        "expertHasTime on a track fist!");
   }
 }
 
-float TrackTimeAccTool::timeRes(const xAOD::TrackParticle& track_particle) {
+float ExpertTrackTimeFromClustersTool::expertTimeRes(
+    const xAOD::TrackParticle& track_particle) const {
   if (m_acc_resolution->isAvailable(track_particle) and
       m_acc_isset->operator()(track_particle)) {
     return m_acc_resolution->operator()(track_particle);
   } else {
-    throw std::runtime_error("[TrackTimeAccTool::timeRes] ERROR, always call "
-                             "hasTime on a track fist!");
+    throw std::runtime_error(
+        "[ExpertTrackTimeFromClustersTool::expertTimeRes] ERROR, always call "
+        "expertHasTime on a track fist!");
   }
 }
 
-int TrackTimeAccTool::nHits(const xAOD::TrackParticle& track_particle) {
+int ExpertTrackTimeFromClustersTool::nHits(
+    const xAOD::TrackParticle& track_particle) const {
   if (m_acc_nhits->isAvailable(track_particle) and
       m_acc_isset->operator()(track_particle)) {
     return m_acc_nhits->operator()(track_particle);
   } else {
-    throw std::runtime_error("[TrackTimeAccTool::nHits] ERROR, always call "
-                             "hasTime on a track fist!");
+    throw std::runtime_error(
+        "[ExpertTrackTimeFromClustersTool::nHits] ERROR, always call "
+        "expertHasTime on a track fist!");
   }
 }
 
-std::vector<TrackTimeAccTool::Hit> TrackTimeAccTool::getTimeCompatibleHits(
-    const xAOD::TrackParticle& track_particle) {
+std::vector<ExpertTrackTimeFromClustersTool::Hit>
+ExpertTrackTimeFromClustersTool::getTimeCompatibleHits(
+    const xAOD::TrackParticle& track_particle) const {
 
   // get all available hits in a first step
-  TrackTimeAccTool::HitVec_t valid_hits = getValidHits(track_particle);
+  HitVec_t valid_hits = getValidHits(track_particle);
 
   size_t vts = valid_hits.size();
 
@@ -254,7 +229,7 @@ std::vector<TrackTimeAccTool::Hit> TrackTimeAccTool::getTimeCompatibleHits(
   return time_candidates_copy;
 }
 
-bool TrackTimeAccTool::passesDeltaT(const HitVec_t& hits) {
+bool ExpertTrackTimeFromClustersTool::passesDeltaT(const HitVec_t& hits) const {
   // WARNING I don't check it here, but the vector has to be of size 2!!!
   // pass if the distance in units of the resolution passes the cut
   if (std::abs(hits.at(0).time - hits.at(1).time) <
@@ -264,7 +239,7 @@ bool TrackTimeAccTool::passesDeltaT(const HitVec_t& hits) {
   return false;
 }
 
-float TrackTimeAccTool::calculateChi2(const TrackTimeAccTool::HitVec_t& hits) {
+float ExpertTrackTimeFromClustersTool::calculateChi2(const HitVec_t& hits) const {
   float mean = calculateMean(hits);
 
   float chi2 = 0.;
@@ -278,32 +253,27 @@ float TrackTimeAccTool::calculateChi2(const TrackTimeAccTool::HitVec_t& hits) {
   return chi2;
 }
 
-float TrackTimeAccTool::calculateMean(const TrackTimeAccTool::HitVec_t& hits) {
+float ExpertTrackTimeFromClustersTool::calculateMean(const HitVec_t& hits) const {
   // FIXME improve this
   if (hits.size() == 0) {
     return -999.;
   }
   float sum = 0.;
-  for (const TrackTimeAccTool::Hit& hit : hits) {
+  for (const Hit& hit : hits) {
     sum += hit.time;
   }
   return sum / (float)hits.size();
 }
 
-float TrackTimeAccTool::calculateMean(const std::vector<float>& vals) {
-  float sum = std::accumulate(vals.begin(), vals.end(), 0.0);
-  return sum / (float)vals.size();
-}
+std::vector<ExpertTrackTimeFromClustersTool::Hit>
+ExpertTrackTimeFromClustersTool::getValidHits(
+    const xAOD::TrackParticle& track_particle) const {
 
-std::vector<TrackTimeAccTool::Hit>
-TrackTimeAccTool::getValidHits(const xAOD::TrackParticle& track_particle) {
-
-  std::vector<float> times =
-      m_dec_perLayer_clusterDeltaT->operator()(track_particle);
-  std::vector<bool> has_clusters =
-      m_dec_perLayer_hasCluster->operator()(track_particle);
-  std::vector<int> hit_classification =
-      m_dec_perLayer_clusterTruthClassification->operator()(track_particle);
+  const std::vector<float>& times = m_acc_perLayer_clusterTime(track_particle);
+  const std::vector<bool>& has_clusters =
+      m_acc_perLayer_hasCluster(track_particle);
+  const std::vector<int>& hit_classification =
+      m_acc_perLayer_clusterTruthClass(track_particle);
 
   HitVec_t valid_hits;
   valid_hits.reserve(4);
@@ -322,19 +292,13 @@ TrackTimeAccTool::getValidHits(const xAOD::TrackParticle& track_particle) {
   return valid_hits;
 }
 
-bool TrackTimeAccTool::lastHitIsOnLastSurface(
-    const xAOD::TrackParticle& track) {
+bool ExpertTrackTimeFromClustersTool::lastHitIsOnLastSurface(
+    const xAOD::TrackParticle& track) const {
 
   TVector3 last_hit = this->getLastMeasurement(track);
   double radius = std::hypot(last_hit.X(), last_hit.Y());
   double abs_z = std::abs(last_hit.Z());
 
-  // 20.20 numbers
-  // bool is_last = abs_z > 2700;
-  // is_last = is_last || (radius < 350 and abs_z > 2400);
-  // is_last = is_last || (radius > 205 and radius < 350 and abs_z > 2100);
-  // is_last = is_last || (radius < 220 and abs_z > 2200);
-  // is_last = is_last || (radius < 150 and abs_z > 2000);
   // 21.9 numbers
   bool is_last = abs_z > 2700;
   is_last = is_last || (radius < 350 and abs_z > 2400);
@@ -344,10 +308,10 @@ bool TrackTimeAccTool::lastHitIsOnLastSurface(
   return is_last;
 }
 
-int TrackTimeAccTool::numberOfPrimaryHits(
-    const TrackTimeAccTool::HitVec_t& hits) {
+int ExpertTrackTimeFromClustersTool::numberOfPrimaryHits(
+    const HitVec_t& hits) const {
   int n = 0;
-  for (const TrackTimeAccTool::Hit& hit : hits) {
+  for (const Hit& hit : hits) {
     if (hit.isprime) {
       n++;
     }
@@ -355,7 +319,8 @@ int TrackTimeAccTool::numberOfPrimaryHits(
   return n;
 }
 
-int TrackTimeAccTool::nPrimaryHits(const xAOD::TrackParticle& track_particle) {
+int ExpertTrackTimeFromClustersTool::nPrimaryHits(
+    const xAOD::TrackParticle& track_particle) const {
   if (m_acc_nprimehits->isAvailable(track_particle) and
       m_acc_isset->operator()(track_particle)) {
     return m_acc_nprimehits->operator()(track_particle);
@@ -364,10 +329,10 @@ int TrackTimeAccTool::nPrimaryHits(const xAOD::TrackParticle& track_particle) {
   }
 }
 
-float TrackTimeAccTool::fracPrimaryHits(
-    const xAOD::TrackParticle& track_particle) {
-  if (not hasTime(track_particle)) {
-    ATH_MSG_WARNING("[TrackTimeAccTool::fracPrimaryHits]"
+float ExpertTrackTimeFromClustersTool::fracPrimaryHits(
+    const xAOD::TrackParticle& track_particle) const {
+  if (not expertHasTime(track_particle)) {
+    ATH_MSG_WARNING("[ExpertTrackTimeFromClustersTool::fracPrimaryHits]"
                     "No available hits, returning -999.");
     return -999.;
   }
@@ -376,21 +341,21 @@ float TrackTimeAccTool::fracPrimaryHits(
   return (float)n_primaries / (float)n_assigned;
 }
 
-float TrackTimeAccTool::calculateTrackResolution(
-    const TrackTimeAccTool::HitVec_t& hits) {
+float ExpertTrackTimeFromClustersTool::calculateTrackResolution(
+    const HitVec_t& hits) const {
   // should never happen
   if (hits.size() == 0) {
     return -999.;
   }
   float sum = 0;
-  for (const TrackTimeAccTool::Hit& hit : hits) {
+  for (const Hit& hit : hits) {
     sum += 1. / (hit.resolution * hit.resolution);
   }
   return std::sqrt(1. / sum);
 }
 
-TVector3
-TrackTimeAccTool::getLastMeasurement(const xAOD::TrackParticle& track) {
+TVector3 ExpertTrackTimeFromClustersTool::getLastMeasurement(
+    const xAOD::TrackParticle& track) const {
 
   unsigned int index = 0;
 
@@ -402,13 +367,9 @@ TrackTimeAccTool::getLastMeasurement(const xAOD::TrackParticle& track) {
                   track.parameterZ(index));
 }
 
-int TrackTimeAccTool::numberPotentialPrimaryHits(
-    const xAOD::TrackParticle& track_particle) {
-  if (not m_dec_perLayer_expectCluster->isAvailable(track_particle)) {
-    ATH_MSG_WARNING("[TrackTimeAccTool::numberPotentialPrimaryHits]"
-                    "Expected clusters not available, returning 0\n");
-    return 0;
-  }
-  auto expected_hits = m_dec_perLayer_expectCluster->operator()(track_particle);
+int ExpertTrackTimeFromClustersTool::numberPotentialPrimaryHits(
+    const xAOD::TrackParticle& track_particle) const {
+  const std::vector<bool>& expected_hits =
+      m_acc_perLayer_expectCluster(track_particle);
   return std::count(expected_hits.begin(), expected_hits.end(), true);
 }
