@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration 
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration 
 */
 
 /**********************************************************************
@@ -804,16 +804,19 @@ std::unordered_map<std::string, std::vector<std::pair<const xAOD::Jet*, bool>>> 
         jets = emulCtx->get<std::vector<TrigBtagEmulationJet>>(m_manager_a4tcemsubjesJet_cnt->jetContainerName());
       }
     }
-
+    if (!jets)[[unlikely]]{
+      ATH_MSG_WARNING("jets pointer is null");
+      return {};
+    }
     std::vector<std::pair<const xAOD::Jet*, bool>> passedJets_per_chain;
     for (size_t i=0; i<jets->size(); ++i) {
       if (emulationMap[chainPartName][i]) {
-        // becasue all collections are index-aligned, and b-tagging link points to Split jets
+        // because all collections are index-aligned, and b-tagging link points to Split jets
         bool is_btagged = jets_split ? isPassedBTagger(jets_split->at(i), tagger) : false;
         passedJets_per_chain.emplace_back(jets->at(i).jet(), is_btagged);
       }
     }
-    passedJets[chainPartName] = passedJets_per_chain;
+    passedJets[chainPartName] = std::move(passedJets_per_chain);
   }
   return passedJets;
 
