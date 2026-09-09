@@ -28,16 +28,9 @@ StatusCode PFTrackCaloExtensionTool::initialize() {
     ATH_MSG_DEBUG(name << " - " << vol->geometryId() << " - surfaces: " << vol->surfaces().size());
     if (std::ranges::contains(caloNames, name)){
         ATH_MSG_DEBUG("About to insert caloName " << name << " into map");
-        m_caloNameGeoIDMap[name] = vol->geometryId();
+        m_caloNameGeoIDMap[vol->geometryId()] = name;
     } 
   });
-
-  for (const auto& caloName : caloNames){
-    if (!m_caloNameGeoIDMap.contains(caloName)) {
-        ATH_MSG_ERROR("No volume inserted into map for calo name: " << caloName);
-        return StatusCode::FAILURE;
-    }
-  }
 
   return StatusCode::SUCCESS;
 }
@@ -94,23 +87,14 @@ std::unique_ptr<eflowTrackCaloPoints> PFTrackCaloExtensionTool::execute(const Ev
 
         Acts::GeometryIdentifier thisGeoID = step.geoID;
         ATH_MSG_DEBUG("Got step with geoID " << thisGeoID);
-        bool exists = std::ranges::any_of(m_caloNameGeoIDMap, [&](const auto& pair) {
-            return pair.second == thisGeoID; 
-        });
-        if (exists){
+
+        if (m_caloNameGeoIDMap.contains(thisGeoID)){
             const auto &p = step.position;
             auto eta = Acts::VectorHelpers::eta(p);
             auto phi = Acts::VectorHelpers::phi(p);
-
-            auto it = std::find_if(m_caloNameGeoIDMap.begin(), m_caloNameGeoIDMap.end(),
-                [&](const auto& pair) { return pair.second == thisGeoID; });
-
-            if (it != m_caloNameGeoIDMap.end()){
-                ATH_MSG_DEBUG("Eta and Phi in caloLayer " << it->first << " are " << eta << " and " << phi);
-            }
-            else ATH_MSG_ERROR("Could not find this GeometryIdentifier");
+            ATH_MSG_DEBUG("Eta and Phi in caloLayer " << m_caloNameGeoIDMap.at(thisGeoID) << " are " << eta << " and " << phi);
         }
-        
+        else ATH_MSG_WARNING("Could not find this GeometryIdentifier " << thisGeoID << " in the map");        
     }
 
     ATH_MSG_DEBUG("Finished steps loop");
