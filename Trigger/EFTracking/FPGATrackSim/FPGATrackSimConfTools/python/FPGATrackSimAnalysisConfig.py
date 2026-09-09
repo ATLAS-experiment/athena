@@ -959,6 +959,9 @@ if __name__ == "__main__":
     flags.Scheduler.CheckDependencies=True
     flags.Debug.DumpEvtStore=False
 
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC    
+    
     # flags.Exec.DebugStage="exec" # useful option to debug the execution of the job - we want it commented out for production
     flags.fillFromArgs()
 

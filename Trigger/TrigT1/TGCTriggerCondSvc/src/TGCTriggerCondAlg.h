@@ -22,7 +22,7 @@
 
   private:
 
-    SG::ReadCondHandleKey<CondAttrListCollection> m_readKey_bw{this, "ReadKeyBw", "/TGC/TRIGGER/CW_BW_RUN3"};
+    SG::ReadCondHandleKey<CondAttrListCollection> m_readKey_bw{this, "ReadKeyBw","/TGC/TRIGGER/CW_BW_RUN3"};
     SG::WriteCondHandleKey<TGCTriggerLUTs> m_writeKey{this, "WriteKey", "TGCTriggerLUTs"};
 
     // LUT Readers 

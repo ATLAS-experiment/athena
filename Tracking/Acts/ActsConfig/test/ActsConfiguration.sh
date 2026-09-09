@@ -100,6 +100,7 @@ else
     checkIdpvmOnFile \
 	${activate_all_collections}
     idpvm_rc=$?
+    cp idpvm.log idpvm1.log
     if [ $idpvm_rc != 0 ]; then
 	echo " - FAILURE (IDPVM)"
 	failed_tests+=("Configuration 1")
@@ -129,6 +130,7 @@ else
 	"SiSPSeedSegmentsActsHeavyIonStrip" \
         "SiSPSeededTracksActsHeavyIon"
     idpvm_rc=$?
+    cp idpvm.log idpvm2.log
     if [ $idpvm_rc != 0 ]; then
         echo " - FAILURE (IDPVM)"
         failed_tests+=("Configuration 2")

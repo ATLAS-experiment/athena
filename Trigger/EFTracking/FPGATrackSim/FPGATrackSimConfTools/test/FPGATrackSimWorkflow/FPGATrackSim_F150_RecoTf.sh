@@ -151,6 +151,7 @@ Reco_tf.py --CA \
     --postInclude "ActsConfig.ActsPostIncludes.ACTSClusterPostInclude" \
     --steering 'doRAWtoALL' \
     --inputRDOFile "${inputRDO_arg}" \
+    --conditionsTag "${CONDITIONS_TAG}" \
     --outputAODFile ${outputAOD}
 
 rc=$?
