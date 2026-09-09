@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -270,9 +270,9 @@ bool TrigEgammaFastElectronHypoTool::decide_ringer ( const ITrigEgammaFastElectr
   ATH_MSG_DEBUG("Ringer executed in FastElectron");
 
   bool pass = false;
-  if( input.pidDecorator.count(m_pidName)){
-    nnOutput = input.valueDecorator.at(m_pidName+"NNOutput");
-    pass = input.pidDecorator.at(m_pidName);
+  if( auto p = input.pidDecorator.find(m_pidName.value()); p != input.pidDecorator.end()){
+    nnOutput = input.valueDecorator.at(m_pidName.value()+"NNOutput");
+    pass = p->second;
     ATH_MSG_DEBUG( "Get the decision for " << m_pidName << ": " << (pass?"Yes":"No") );
   }
 
