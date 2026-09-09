@@ -50,7 +50,7 @@ pool::CollectionService::plugin( const CollectionDescription& description,
                                  ISession* session )
 {
    if( description.type().majorType() == pool::ROOT_StorageType.type() ) {
-      return new RootCollection( &description, openMode, session );
+      return new RootCollection( &description, openMode );
    } else {
       return new ImplicitCollection( &description, openMode, session );
    }

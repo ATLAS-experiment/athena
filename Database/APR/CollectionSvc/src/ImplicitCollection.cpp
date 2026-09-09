@@ -30,14 +30,48 @@ namespace pool {
 
 
    void
-   ImplicitCollection::open( Io::IoFlag/* mode*/, ISession* session )
+   ImplicitCollection::open( Io::IoFlag mode, ISession* session )
    {
+      if ( mode != Io::READ ) {
+         ATH_MSG_ERROR( "An implicit collection can be opened only in READ mode" );
+         throw std::runtime_error( "An implicit collection can be opened only in READ mode (APR: \" ImplicitCollection::ImplicitCollection \" from \" ImplicitCollection \")" );
+      }
+
+      DatabaseSpecification::NameType dbNameType = DatabaseSpecification::UNDEFINED;
+
+      // parse the connection string
+      const std::string& connection = m_description.connection();
+      std::string::size_type pos = connection.find( ":" );
+      if ( pos == std::string::npos ) {
+         ATH_MSG_ERROR( "Badly formed connection string : '" << connection << "'" );
+         throw std::runtime_error( "Badly formed connection string (APR: \" ImplicitCollection::ImplicitCollection \" from \" ImplicitCollection \")" );
+      }
+
+      const std::string dbType = connection.substr( 0, pos );
+
+      if ( dbType == "PFN" ) dbNameType = DatabaseSpecification::PFN;
+      else if ( dbType == "LFN" ) dbNameType = DatabaseSpecification::LFN;
+      else if ( dbType == "FID" ) dbNameType = DatabaseSpecification::FID;
+      else {
+         ATH_MSG_ERROR( "Unrecognizable database name type : '" << dbType << "'" );
+         throw std::runtime_error( "Unrecognizable database name type : " + dbType + " (APR: \"ImplicitCollection::ImplicitCollection (APR: \" ImplicitCollection \")" );
+      }
+
+      std::string dbName = "";
+      std::string technologyName = "";
+      std::istringstream is( connection.substr( pos + 1 ).c_str() );
+      is >> dbName >> technologyName;
+
+      if ( dbName.empty() ) {
+         ATH_MSG_ERROR( "Invalid database name" );
+         throw std::runtime_error( "Invalid database name (APR: \" ImplicitCollection::ImplicitCollection \" from \" ImplicitCollection \")" );
+      }
+  
       if( !session ) {
          throw std::runtime_error( "session object not set (APR: \" ImplicitCollection::ImplicitCollection \" from \" ImplicitCollection \")" );
       }
-      // parse the connection string
-      const std::string& connection = m_description.connection();
-      auto database = session->databaseHandle( connection.substr(4), DatabaseSpecification::PFN );
+  
+      auto database = session->databaseHandle( dbName, dbNameType );
       if( !database ) {
          throw std::runtime_error( "Could not retrieve a database handle (APR: \" ImplicitCollection::ImplicitCollection \" from \" ImplicitCollection \")" );
       }
@@ -51,8 +85,9 @@ namespace pool {
          }
          catch ( std::runtime_error& /* exception */ ) {
 	    // use provided tech name or assume ROOT
+            DbType theDbType = (technologyName != "") ? DbType::getType( technologyName ) : ROOT_StorageType;
 	    // setting tech will make connectForRead work without a catalog
-            database->setTechnology( ROOT_StorageType.type() );
+            database->setTechnology( theDbType.type() );
             database->connectForRead();
          }
       }
@@ -78,6 +113,7 @@ namespace pool {
    }
 
 
+   
    ImplicitCollection::~ImplicitCollection()
    {
       delete m_container;

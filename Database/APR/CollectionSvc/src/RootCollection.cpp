@@ -30,15 +30,15 @@
 namespace pool {
 
    RootCollection::RootCollection( const pool::CollectionDescription* description,
-                                   Io::IoFlag mode,
-                                   ISession* session )
+                                   Io::IoFlag mode )
       : APRMessaging( "RootCollection"),
         m_description( *description ),
         m_name( description->name() ),
         m_fileName( description->connection() ),
+        m_mode( mode ),
         m_open( false )
       {
-         RootCollection::open( mode, session );
+         RootCollection::open();
       }
 
 
@@ -49,6 +49,10 @@ namespace pool {
 
    void RootCollection::insertRow( const pool::CollectionRowBuffer& inputRowBuffer )
    {
+      if( m_mode == Io::READ ) {
+         throw std::runtime_error( "Cannot modify the data of a collection in READ open mode. (APR: \" RootCollection::insertRow \" from \" RootCollection \")" );
+      }
+  
       std::string strToken = inputRowBuffer.token().toString();
       writeColumn( m_description.tokenColumn().name(), &strToken, typeid(std::string) );
 
@@ -105,27 +109,28 @@ namespace pool {
 
 
     // throw all errors as exceptions, because this method is called from the constructor
-   void RootCollection::open( Io::IoFlag mode, ISession* session )
+   void RootCollection::open()
    {
       if( m_fileName.starts_with ( "PFN:") ) {
         m_fileName = m_fileName.substr(4);
       }
 
-      if( mode == Io::READ ) {
+      m_storageSvc.reset( pool::createStorageSvc("StorageSvc") );
+      // MN: TODO: use m_session if provided?
+      if( !m_storageSvc->startSession( m_mode, m_description.type().type()) .isSuccess() ) {
+         throw std::runtime_error( "RootCollection failed to start a session." );
+      }
+      m_fileDescr.initFromFilename( m_fileName );
+      if( !m_storageSvc->connect( m_mode, m_fileDescr ).isSuccess() ) {
+         throw std::runtime_error( "RootCollection failed to open: " + m_fileName + " for " + poolOptToRootOpt[m_mode] );
+      }
+
+      if( m_mode == Io::READ ) {
          CollectionDescription desc( m_description.name(), m_description.type(), m_description.connection() );
          // clear the description
          m_description = std::move(desc);
 
          std::vector<const Token*> containerTokens;
-         m_storageSvc.reset( pool::createStorageSvc("StorageSvc") );
-         // PvG: TODO: On read use m_session
-         if( !m_storageSvc->startSession( mode, m_description.type().type()).isSuccess() ) {
-            throw std::runtime_error( "RootCollection failed to start a session." );
-         }
-         m_fileDescr.initFromFilename( m_fileName );
-         if( !m_storageSvc->connect( mode, m_fileDescr ).isSuccess() ) {
-            throw std::runtime_error( "RootCollection failed to open: " + m_fileName + " for " + poolOptToRootOpt[mode] );
-         }
          DbDatabase db( m_fileDescr.dbc()->handle() );
          if( !db.containers(containerTokens, false).isSuccess() ) {
             throw std::runtime_error( "RootCollection: error reading " + m_fileName );
@@ -154,16 +159,8 @@ namespace pool {
             throw std::runtime_error( "No RootCollection found in " + m_fileName );
          }
       }
-      if( mode == Io::WRITE || mode == Io::APPEND) {
+      if( m_mode == Io::WRITE || m_mode == Io::APPEND) {
          ATH_MSG_DEBUG( "Creating collection in overwrite mode..." );
-         m_storageSvc.reset( pool::createStorageSvc("StorageSvc") );
-         if( !m_storageSvc->startSession( mode, m_description.type().type()).isSuccess() ) {
-            throw std::runtime_error( "RootCollection failed to start a session." );
-         }
-         m_fileDescr.initFromFilename( m_fileName );
-         if( !m_storageSvc->connect( mode, m_fileDescr ).isSuccess() ) {
-            throw std::runtime_error( "RootCollection failed to open: " + m_fileName + " for " + poolOptToRootOpt[mode] );
-         }
          m_containerPrefix = APRDefaults::WriteConfig::getEventTagName();
       }
       m_open = true;
