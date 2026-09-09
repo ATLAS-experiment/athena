@@ -115,6 +115,13 @@ namespace CP
     : AsgNumDecorationSelectionTool<uint8_t>(type, myname, parent)
   {
   }
+  AsgNumDecorationSelectionToolUInt16::AsgNumDecorationSelectionToolUInt16(
+    const std::string& type,
+    const std::string& myname,
+    const IInterface* parent)
+    : AsgNumDecorationSelectionTool<uint16_t>(type, myname, parent)
+  {
+  }
   #else
   AsgNumDecorationSelectionToolInt::AsgNumDecorationSelectionToolInt(const std::string& myname)
     : AsgNumDecorationSelectionTool<int>(myname)
@@ -124,10 +131,15 @@ namespace CP
     : AsgNumDecorationSelectionTool<uint8_t>(myname)
   {
   }
+  AsgNumDecorationSelectionToolUInt16::AsgNumDecorationSelectionToolUInt16(const std::string& myname)
+    : AsgNumDecorationSelectionTool<uint16_t>(myname)
+  {
+  }
   #endif
 
   // Explicit template instantiations
   template class AsgNumDecorationSelectionTool<int>;
   template class AsgNumDecorationSelectionTool<uint8_t>;
+  template class AsgNumDecorationSelectionTool<uint16_t>;
 
 }

@@ -5,6 +5,7 @@
    <class name="CP::AsgMassSelectionTool" />
    <class name="CP::AsgNumDecorationSelectionToolInt" />
    <class name="CP::AsgNumDecorationSelectionToolUInt8" />
+   <class name="CP::AsgNumDecorationSelectionToolUInt16" />
    <class name="CP::BootstrapGenerator" />
    <class name="CP::SysTruthWeightAlg" />
 

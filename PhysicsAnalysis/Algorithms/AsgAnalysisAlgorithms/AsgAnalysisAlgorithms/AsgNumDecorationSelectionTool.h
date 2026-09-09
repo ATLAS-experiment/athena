@@ -18,7 +18,7 @@
 namespace CP
 {
   /// \brief a templated \ref IAsgSelectionTool that performs basic
-  /// cut on numerical decorations (e.g., int, uint8_t)
+  /// cut on numerical decorations (e.g., int, uint8_t, uint16)
 
   template <typename T>
   class AsgNumDecorationSelectionTool
@@ -85,6 +85,18 @@ namespace CP
                                        const IInterface* parent);
     #else
     AsgNumDecorationSelectionToolUInt8(const std::string& myname);
+    #endif
+  };
+  class AsgNumDecorationSelectionToolUInt16 final
+    : public AsgNumDecorationSelectionTool<uint16_t>
+  {
+  public:
+    #ifndef XAOD_STANDALONE
+    AsgNumDecorationSelectionToolUInt16(const std::string& type,
+                                       const std::string& myname,
+                                       const IInterface* parent);
+    #else
+    AsgNumDecorationSelectionToolUInt16(const std::string& myname);
     #endif
   };
 }
