@@ -124,10 +124,9 @@ std::shared_ptr<BlueprintNode> ActsTrk::CaloBlueprintNodeBuilder::buildBlueprint
     });
   }
 
-  auto caloEndCapNode = std::make_shared<CylinderContainerBlueprintNode>("CaloNode", AxisDirection::AxisZ);
-
+  auto caloEndCapNegativeNode = std::make_shared<CylinderContainerBlueprintNode>("CaloNode", AxisDirection::AxisZ);
   
-  CylinderContainerBlueprintNode& caloEndCapDiscNegativeZNode = caloEndCapNode->addCylinderContainer("CaloEndCapDiscNegativeZ", AxisDirection::AxisZ);
+  CylinderContainerBlueprintNode& caloEndCapDiscNegativeZNode = caloEndCapNegativeNode->addCylinderContainer("CaloEndCapDiscNegativeZ", AxisDirection::AxisZ);
   caloEndCapDiscNegativeZNode.setAttachmentStrategy(VolumeAttachmentStrategy::Gap);
   // The -z end of this container defines the calorimeter's global minZ, so the
   // enclosing envelope's -z edge coincides with this container's own -z edge to
@@ -138,7 +137,8 @@ std::shared_ptr<BlueprintNode> ActsTrk::CaloBlueprintNodeBuilder::buildBlueprint
   // (+z) side. NOTE: (inner, outer) map to (minZ, maxZ) for an AxisZ stack.
   caloEndCapDiscNegativeZNode.setResizeStrategies(ResizeStrategy::Expand, ResizeStrategy::Gap);
 
-  CylinderContainerBlueprintNode& caloEndCapDiscPositiveZNode = caloEndCapNode->addCylinderContainer("CaloEndCapDiscPositiveZ", AxisDirection::AxisZ);
+  auto caloEndCapPositiveNode = std::make_shared<CylinderContainerBlueprintNode>("CaloNode", AxisDirection::AxisZ);
+  CylinderContainerBlueprintNode& caloEndCapDiscPositiveZNode = caloEndCapPositiveNode->addCylinderContainer("CaloEndCapDiscPositiveZ", AxisDirection::AxisZ);
   caloEndCapDiscPositiveZNode.setAttachmentStrategy(VolumeAttachmentStrategy::Gap);
   // Mirror of the negative endcap: the +z (maxZ, outer) end is the global maxZ
   // boundary, so Expand there and keep Gap on the interior (-z) side.
@@ -156,7 +156,8 @@ std::shared_ptr<BlueprintNode> ActsTrk::CaloBlueprintNodeBuilder::buildBlueprint
 
   // Add calo barrel node to the top level calo node.
   itkCaloNode->addChild(caloNode);
-  itkCaloNode->addChild(caloEndCapNode);
+  itkCaloNode->addChild(caloEndCapNegativeNode);
+  itkCaloNode->addChild(caloEndCapPositiveNode);
 
   //return the top level calo node
   return itkCaloNode;
