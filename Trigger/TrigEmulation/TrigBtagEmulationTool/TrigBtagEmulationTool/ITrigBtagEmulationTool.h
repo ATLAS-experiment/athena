@@ -16,7 +16,7 @@ namespace Trig {
   class ITrigBtagEmulationTool 
     : virtual public asg::IAsgTool {
   public:
-    virtual const EmulContext& populateJetManagersTriggerObjects() const = 0;
+    virtual StatusCode populateJetManagersTriggerObjects(EmulContext&) const = 0;
     virtual bool isPassed(const std::string& chain) const = 0;
     virtual bool isPassed(const std::string& chain, const EmulContext&) const = 0;
     virtual std::unordered_map<std::string, std::vector<std::pair<const xAOD::Jet*, bool>>> getEmulatedJets(std::string) const = 0;

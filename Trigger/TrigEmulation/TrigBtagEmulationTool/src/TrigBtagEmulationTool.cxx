@@ -60,8 +60,13 @@ StatusCode TrigBtagEmulationTool::initialize() {
 bool TrigBtagEmulationTool::isPassed(const std::string& chain) const 
 {
   // This will re-compute everything - slow version
-  const auto& emulContext = populateJetManagersTriggerObjects();
-  return isPassed(chain, emulContext);
+  std::unique_ptr<EmulContext> emulCtx (new EmulContext());
+  if( populateJetManagersTriggerObjects(*emulCtx).isFailure()){
+    ATH_MSG_WARNING("Failure code in populateJetManagersTriggerObjects. Returning false");
+    return false;
+  }
+
+  return isPassed(chain, *emulCtx);
 }
 
 bool TrigBtagEmulationTool::isPassed(const std::string& chain,
@@ -568,42 +573,42 @@ std::vector<std::vector<bool>> TrigBtagEmulationTool::evaluate_HLT_chainParts(co
 //=================================================
 //		Utility functions
 //=================================================
-const EmulContext& TrigBtagEmulationTool::populateJetManagersTriggerObjects() const {
-  EmulContext *emulCtx = new EmulContext();
+StatusCode TrigBtagEmulationTool::populateJetManagersTriggerObjects(EmulContext &emulCtx) const {
 
   if (m_LHCPeriod == 3) {
 
     // Retrieve input container vectors  
-    if ( retrieveTriggerObjects( *m_manager_PFlow_cnt, *emulCtx ).isFailure() ) {
+    if ( retrieveTriggerObjects( *m_manager_PFlow_cnt, emulCtx ).isFailure() ) {
       ATH_MSG_ERROR("Could not retrieve trigger objects from " << m_manager_PFlow_cnt->name());
-      return *emulCtx;
+      return StatusCode::FAILURE;
     }
 
-    if ( retrieveTriggerObjects( *m_manager_EMTopo_presel, *emulCtx ).isFailure() ) {
+    if ( retrieveTriggerObjects( *m_manager_EMTopo_presel, emulCtx ).isFailure() ) {
       ATH_MSG_ERROR("Could not retrieve trigger objects from " << m_manager_EMTopo_presel->name());
-      return *emulCtx;
+      return StatusCode::FAILURE;
     }
   }
   else if (m_LHCPeriod == 2) {
-    if ( retrieveTriggerObjects( *m_manager_a4tcemsubjesJet_cnt, *emulCtx ).isFailure() ) {
+    if ( retrieveTriggerObjects( *m_manager_a4tcemsubjesJet_cnt, emulCtx ).isFailure() ) {
       ATH_MSG_ERROR("Could not retrieve trigger objects from " << m_manager_a4tcemsubjesJet_cnt->name());
+      return StatusCode::FAILURE;
     }
-    if ( retrieveTriggerObjects( *m_manager_SplitJet_cnt, *emulCtx ).isFailure() ) {
+    if ( retrieveTriggerObjects( *m_manager_SplitJet_cnt, emulCtx ).isFailure() ) {
       ATH_MSG_DEBUG("Could not retrieve trigger objects from " << m_manager_SplitJet_cnt->name());
     }
     if( !m_manager_GSCJet_cnt.empty()){
-      if ( retrieveTriggerObjects( *m_manager_GSCJet_cnt, *emulCtx ).isFailure() ) {
+      if ( retrieveTriggerObjects( *m_manager_GSCJet_cnt, emulCtx ).isFailure() ) {
         ATH_MSG_DEBUG("Could not retrieve trigger objects from " << m_manager_GSCJet_cnt->name());
       }
     } else {
       ATH_MSG_DEBUG("Empty JetManagerTool for GSC jet");
     }
-    if ( indexRun2TriggerObjects(*emulCtx).isFailure() ) {
-      ATH_MSG_DEBUG("Could not index Run2 trigger objects. Emulation results may be incorrect.");
+    if ( indexRun2TriggerObjects(emulCtx).isFailure() ) {
+      ATH_MSG_WARNING("Could not index Run2 trigger objects. Emulation results may be incorrect.");
     }
   }
   
-  return *emulCtx;
+  return StatusCode::SUCCESS;
 }
 
 StatusCode TrigBtagEmulationTool::retrieveTriggerObjects(const Trig::JetManagerTool& manager,
@@ -766,8 +771,13 @@ std::unordered_map<std::string, std::vector<std::pair<const xAOD::Jet*, bool>>> 
   }
 
   std::unordered_map<std::string, std::vector<bool>> emulationMap;
-  const auto& emulCtx = populateJetManagersTriggerObjects();
-  evaluate_HLT(*chain, emulCtx, emulationMap);
+  const std::unique_ptr<EmulContext> emulCtx (new EmulContext());
+  if( populateJetManagersTriggerObjects( *emulCtx).isFailure()){
+    ATH_MSG_WARNING("Failure code in populateJetManagersTriggerObjects, returning null result");
+    return {};
+  }
+
+  evaluate_HLT(*chain, *emulCtx, emulationMap);
 
   const std::vector<std::string> &chainPartNames = chain->chainPartName();
   for (const std::string &chainPartName : chainPartNames) {
@@ -775,23 +785,23 @@ std::unordered_map<std::string, std::vector<std::pair<const xAOD::Jet*, bool>>> 
     const std::vector<TrigBtagEmulationJet> *jets_split = nullptr;
     if (m_LHCPeriod == 3) {
       ATH_MSG_WARNING("getEmulatedJets for Run3 chains is not validated. Use with caution.");
-      jets = emulCtx.get<std::vector<TrigBtagEmulationJet>>(m_manager_PFlow_cnt->jetContainerName());
+      jets = emulCtx->get<std::vector<TrigBtagEmulationJet>>(m_manager_PFlow_cnt->jetContainerName());
     }
     else if (m_LHCPeriod == 2) {
       // prepare Split jets to get b-tagging information
       if (tagger != "" && !m_manager_SplitJet_cnt->jetContainerName().empty()) {
-        jets_split = emulCtx.get<std::vector<TrigBtagEmulationJet>>("SplitJets_Indexed");
+        jets_split = emulCtx->get<std::vector<TrigBtagEmulationJet>>("SplitJets_Indexed");
       }
 
       // prepare jet collection to get kinematics
       if (chainPartName.find("gsc") != std::string::npos && !m_manager_GSCJet_cnt->jetContainerName().empty()) {
-        jets = emulCtx.get<std::vector<TrigBtagEmulationJet>>("GSCJets_Indexed");
+        jets = emulCtx->get<std::vector<TrigBtagEmulationJet>>("GSCJets_Indexed");
       }
       else if (chainPartName.find("split") != std::string::npos && !m_manager_SplitJet_cnt->jetContainerName().empty()) {
         jets = jets_split;
       }
       else {
-        jets = emulCtx.get<std::vector<TrigBtagEmulationJet>>(m_manager_a4tcemsubjesJet_cnt->jetContainerName());
+        jets = emulCtx->get<std::vector<TrigBtagEmulationJet>>(m_manager_a4tcemsubjesJet_cnt->jetContainerName());
       }
     }
 
