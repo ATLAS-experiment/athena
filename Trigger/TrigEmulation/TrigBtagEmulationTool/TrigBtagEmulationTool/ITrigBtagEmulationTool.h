@@ -6,13 +6,17 @@
 #define I_TRIGBTAGEMULATIONTOOL_H
 
 #include "AsgTools/IAsgTool.h"
-#include "TrigBtagEmulationTool/EmulContext.h"
+//#include "TrigBtagEmulationTool/EmulContext.h"
 #include "xAODJet/Jet.h"
+
 #include <string>
-#include <TLorentzVector.h>
+#include <unordered_map>
+#include <vector>
+
 
 namespace Trig {
-
+  class EmulContext;
+  
   class ITrigBtagEmulationTool 
     : virtual public asg::IAsgTool {
   public:
