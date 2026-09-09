@@ -1,17 +1,19 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <sstream>
-#include <iostream>
-#include <algorithm>
-#include <ranges>
-#include <string_view>
+
 
 #include "GaudiKernel/System.h"
 
 #include "TrigNavigation/Navigation.h"
 #include "AthContainers/AuxElement.h"
+#include "GaudiKernel/MsgStream.h"
+#include <sstream>
+#include <iostream>
+#include <algorithm>
+#include <ranges>
+#include <string_view>
 
 using namespace HLT;
 
