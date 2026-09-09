@@ -102,7 +102,7 @@ void TrigBtagEmulationChain::parseChainDefinition(const std::vector< std::string
     m_jet_eta_min.push_back(jet_eta_min);
     m_jet_eta_max.push_back(jet_eta_max);
     m_jvt.push_back(jvt);
-    m_tagger.push_back(tagger);
+    m_tagger.push_back(std::move(tagger));
     m_is_PFlow.push_back(is_PFlow);
     m_gsc_pt.push_back(gsc_pt);
     
