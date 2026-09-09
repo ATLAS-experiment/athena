@@ -141,9 +141,6 @@ class TrigCostAnalysis: public ::AthAlgorithm {
   SG::ReadHandleKey<xAOD::TrigCompositeContainer> m_costDataKey { this, "CostReadHandleKey", "HLT_TrigCostContainer",
       "Trigger cost payload container for algorithms" };
 
-    SG::ReadHandleKey<xAOD::TrigCompositeContainer> m_rosDataKey { this, "CostROSReadHandleKey", "HLT_TrigCostROSContainer",
-      "Trigger ROS cost payload container for algorithms" };
-
     SG::ReadHandleKey<xAOD::TrigCompositeContainer> m_metadataDataKey { this, "CostMetadataWriteHandleKey", "HLT_RuntimeMetadata",
       "TrigComposite collections with additional cost metadata" };
 
