@@ -17,7 +17,7 @@
 
 #include "xAODInDetMeasurement/PixelClusterAuxContainer.h"
 #include "xAODInDetMeasurement/StripClusterAuxContainer.h"
-
+#include "xAODInDetMeasurement/HGTDClusterAuxContainer.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "SCT_ReadoutGeometry/StripStereoAnnulusDesign.h"
 
