@@ -6,6 +6,8 @@ atlas_subdir( ActsTrackReconstruction )
 # External dependencies:
 find_package( Acts COMPONENTS Core PluginJson OPTIONAL_COMPONENTS PluginGnn )
 find_package( Boost )
+find_package( ROOT COMPONENTS Core ROOTNTuple )
+find_package( VDT )
 
 # Component sources: GNN alg is only built when Acts::PluginGnn is available
 # so that no-CUDA configurations still compile (see !88460 / !88525).
@@ -20,8 +22,9 @@ endif()
 
 atlas_add_component( ActsTrackReconstruction
                      ${_sources}
-             INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+             INCLUDE_DIRS ${Boost_INCLUDE_DIRS}  ${VDT_INCLUDE_DIRS}
             LINK_LIBRARIES ${Boost_LIBRARIES}
+               ${ROOT_LIBRARIES}
                Acts::Core
                ${_extraLibs}
                ActsEventLib
@@ -30,6 +33,7 @@ atlas_add_component( ActsTrackReconstruction
                ActsCalibratorsLib
                ActsInteropLib
                ActsToolInterfacesLib
+               ActsTruthLib
                AthenaBaseComps
                AthenaMonitoringKernelLib
                BeamSpotConditionsData
