@@ -18,9 +18,6 @@ def main():
     flags.lock()
     flags.dump()
 
-    jetcontainer_a4tcemsubjes = ''
-    jetcontainer_Split = 'HLT_xAOD__JetContainer_SplitJet'
-    jetcontainer_GSC = 'HLT_xAOD__JetContainer_GSCJet'
     emulatedChains = []
 
     from Campaigns.Utils import Campaign, getMCCampaign
@@ -32,9 +29,6 @@ def main():
                           'HLT_j50_bmv2c2040_split_3j50_L14J15',
                           'HLT_2j35_bmv2c2060_split_2j35_L14J15.0ETA25', 'HLT_j100_2j55_bmv2c2060_split',
                           ]
-        jetcontainer_a4tcemsubjes = 'HLT_xAOD__JetContainer_a4tcemsubjesFS'
-        if jetcontainer_GSC not in flags.Input.Collections:
-            jetcontainer_GSC = '' # GSC collection not saved in 2016 DAOD_PHYS
 
     elif campaign == Campaign.MC20d or flags.Input.DataYear == 2017:
         emulatedChains = ['HLT_5j70_L14J15', 'HLT_5j85_L14J15', 'HLT_7j45_L14J15',
@@ -42,7 +36,6 @@ def main():
                           'HLT_2j15_gsc35_bmv2c1040_split_2j15_gsc35_boffperf_split_L14J15.0ETA25',
                           'HLT_j110_gsc150_boffperf_split_2j35_gsc55_bmv2c1070_split_L1J85_3J30',
                           ]
-        jetcontainer_a4tcemsubjes = 'HLT_xAOD__JetContainer_a4tcemsubjesISFS'
 
     elif campaign == Campaign.MC20e or flags.Input.DataYear == 2018:
         emulatedChains = ['HLT_3j50_gsc65_boffperf_split_L13J35.0ETA23',
@@ -50,7 +43,6 @@ def main():
                           'HLT_2j35_bmv2c1060_split_2j35_L14J15.0ETA25',
                           'HLT_j110_gsc150_boffperf_split_2j45_gsc55_bmv2c1070_split_L1J85_3J30',
         ]
-        jetcontainer_a4tcemsubjes = 'HLT_xAOD__JetContainer_a4tcemsubjesISFS'
 
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -61,14 +53,6 @@ def main():
     from TrigBtagEmulationTool.TrigBtagEmulationToolConfig import TrigBtagValidationTestCfg
     acc.merge(TrigBtagValidationTestCfg(flags,
                                         toBeEmulatedTriggers = emulatedChains,
-                                        InputChain_EMTopo = '',
-                                        InputJetContainer_EMTopo = '',
-                                        InputJetContainer_EMTopoPresel = '',
-                                        InputJetContainer_PFlow = '',
-                                        InputJetContainer_PFlowPresel = '',
-                                        InputJetContainer_a4tcemsubjesJet = jetcontainer_a4tcemsubjes,
-                                        InputJetContainer_SplitJet = jetcontainer_Split,
-                                        InputJetContainer_GSCJet = jetcontainer_GSC,
                                         ))
 
     acc.printConfig(withDetails = True, summariseProps = True)
