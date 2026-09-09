@@ -893,16 +893,29 @@ def FPGATrackSimSeedingCfg(flags):
     
     from FPGATrackSimSeeding.FPGATrackSimSeedingConfig import FPGATrackSimSeedingCfg
     acc.merge(FPGATrackSimSeedingCfg(flags))
-    
-    
+
     if flags.Tracking.ActiveConfig.storeTrackSeeds:
         from ActsConfig.ActsSeedingConfig import ActsStoreTrackSeedsCfg
-        from InDetConfig.ITkActsHelpers import isFastPrimaryPass
-        
+
+        processStrips = flags.Tracking.ActiveConfig.useITkStripSeeding
+        prefix = flags.Tracking.ActiveConfig.extension
+
+        from ActsConfig.ActsAnalysisConfig import ActsPixelSeedsToTrackParamsAlgCfg
+        acc.merge(ActsPixelSeedsToTrackParamsAlgCfg(
+            flags, name = prefix + 'PixelSeedsToTrackParamsAlg',
+            InputSeedContainerKey = prefix + 'PixelSeeds',
+            OutputTrackParamsCollectionKey = prefix + 'PixelEstimatedTrackParams'))
+
+        if processStrips:
+            from ActsConfig.ActsAnalysisConfig import ActsStripSeedsToTrackParamsAlgCfg
+            acc.merge(ActsStripSeedsToTrackParamsAlgCfg(
+                flags, name = prefix + 'StripSeedsToTrackParamsAlg',
+                InputSeedContainerKey = prefix + 'StripSeeds',
+                OutputTrackParamsCollectionKey = prefix + 'StripEstimatedTrackParams'))
+
         acc.merge(ActsStoreTrackSeedsCfg(flags,
                                          processPixels = True,
-                                         processStrips = not isFastPrimaryPass(flags)))
-    
+                                         processStrips = processStrips))
     
     acc.merge(WriteAdditionalFPGATrackSimOutputCfg(flags))
     
