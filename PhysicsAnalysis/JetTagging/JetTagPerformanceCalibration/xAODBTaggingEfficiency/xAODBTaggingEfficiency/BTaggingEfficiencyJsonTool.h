@@ -24,7 +24,7 @@ class BTaggingEfficiencyJsonTool: public asg::AsgTool,
   StatusCode initialize() override;
 
   virtual CP::CorrectionCode getScaleFactor( const xAOD::Jet& jet, float& scalefactor, const CP::SystematicSet& sys) const override;
-  virtual CP::CorrectionCode getMcCorr( const xAOD::Jet& jet, const std::string& mc_gen_ref, const std::string& mc_gen_target, float& corr) const override;
+  virtual CP::CorrectionCode getScaleFactor( const xAOD::Jet& jet, float& scalefactor, const std::string& mc_gen, const CP::SystematicSet& sys) const override;
 
   // systematic stuff
   virtual CP::SystematicSet affectingSystematics() const override;
@@ -41,7 +41,6 @@ class BTaggingEfficiencyJsonTool: public asg::AsgTool,
   Gaudi::Property<float> m_minPt {this, "MinPt", -1 /*MeV*/, "Minimum jet pT cut (in MeV)"};
   Gaudi::Property<float> m_maxEta {this, "MaxEta", 2.5, "Maximum jet eta cut"};
  
-  std::string m_truthlabel;
   json m_json_config;
   std::map<int, std::string> m_labelMap;
   
@@ -56,6 +55,7 @@ class BTaggingEfficiencyJsonTool: public asg::AsgTool,
   std::map<std::string, std::map<std::string, std::vector<float>>> m_corrPtMap;
   std::map<std::string, std::map<std::string, std::vector<float>>> m_corrMassMap;
 
+  std::unique_ptr<SG::AuxElement::ConstAccessor<int>> m_truthLabelAcc;
   std::unique_ptr<SG::AuxElement::ConstAccessor<float>> m_massAcc;
   std::unique_ptr<SG::AuxElement::ConstAccessor<float>> m_ptAcc;
 
@@ -66,7 +66,8 @@ class BTaggingEfficiencyJsonTool: public asg::AsgTool,
   const sysData* m_currentSys{nullptr};
   StatusCode calcSystematicVariation(const CP::SystematicSet& systConfig, sysData& mySys ) const;
   float getSFSys ( const std::string& label, size_t bin_index) const;
-  float getMcBin( const xAOD::Jet& jet, const std::string& labelString, const std::string& mc_gen ) const;
+  virtual CP::CorrectionCode getMCToMCCorr( const xAOD::Jet& jet, float& corr, const std::string& mc_gen) const;
+  float getMCToMCBin( const xAOD::Jet& jet, const std::string& labelString, const std::string& mc_gen ) const;
   float getJetPt( const xAOD::Jet& jet ) const;
   float getJetMass( const xAOD::Jet& jet ) const;
 };

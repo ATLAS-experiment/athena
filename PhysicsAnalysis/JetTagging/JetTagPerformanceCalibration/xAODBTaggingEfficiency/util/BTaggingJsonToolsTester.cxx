@@ -70,8 +70,7 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
   std::string JsonConfigFile = argv[2];
   std::string OutputName = argv[3];
   std::string OperatingPoint = argv[4];
-  std::string mcReference = (argc > 5) ? argv[5] : "PowhegPythia";
-  std::string mcTarget    = (argc > 6) ? argv[6] : "PowhegHerwig";
+  std::string mcGenerator = (argc > 5) ? argv[5] : "";
   std::string JetCollection = "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets";
 
   asg::StandaloneToolHandle<IBTaggingSelectionJsonTool> sel_tool("BTaggingSelectionJsonTool/BTagSelTest");
@@ -143,32 +142,19 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
         for (const auto& var : sysSet) {
           CP::SystematicSet set;
           set.insert(var);
-          if (tool->getScaleFactor(*jet, sf, set) != CP::CorrectionCode::Ok) {
+
+          CP::CorrectionCode code = mcGenerator.empty()
+            ? tool->getScaleFactor(*jet, sf, set)
+            : tool->getScaleFactor(*jet, sf, mcGenerator, set);
+
+          if (code != CP::CorrectionCode::Ok) {
             ANA_MSG_ERROR("Failed to get scale factor for jet");
           } else {
             ANA_MSG_INFO("Applied systematic: " << var.name());
-            ANA_MSG_INFO("                   SF: " << sf);            
+            ANA_MSG_INFO("                   SF: " << sf);
           }
         }
-
-        // MC-to-MC correction
-        float mcCorr = 0.0;
-
-        ANA_MSG_INFO("------------------------------------");
-        ANA_MSG_INFO("Testing getMcCorr()");
-        ANA_MSG_INFO("MC generator reference: " << mcReference);
-        ANA_MSG_INFO("MC generator target:    " << mcTarget);
-
-        CP::CorrectionCode corrCode =
-            tool->getMcCorr(*jet, mcReference, mcTarget, mcCorr);
-
-        if (corrCode != CP::CorrectionCode::Ok) {
-          ANA_MSG_WARNING("getMcCorr() returned OutOfValidityRange");
-          ANA_MSG_INFO("Returned correction: " << mcCorr);
-        } else {
-          ANA_MSG_INFO("MC-to-MC correction: " << mcCorr);
-        } 
-      }   
+      } 
     }
   }
 

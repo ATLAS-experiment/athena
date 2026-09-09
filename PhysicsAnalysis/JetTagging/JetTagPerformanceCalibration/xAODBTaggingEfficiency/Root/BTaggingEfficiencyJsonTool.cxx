@@ -46,7 +46,8 @@ StatusCode BTaggingEfficiencyJsonTool::initialize()
   }
 
   const auto& meta = m_json_config[m_outputName][m_jetAuthor]["meta"];
-  m_truthlabel = meta["TruthLabel"];
+  const std::string truthLabel = meta["TruthLabel"];
+  m_truthLabelAcc = std::make_unique<SG::AuxElement::ConstAccessor<int>>(truthLabel);
 
   // map truth labels to categories
   for (auto& el : meta["labelMapping"].items()) {
@@ -130,7 +131,7 @@ StatusCode BTaggingEfficiencyJsonTool::initialize()
   return StatusCode::SUCCESS;
 }
 
-CP::CorrectionCode BTaggingEfficiencyJsonTool::getScaleFactor( const xAOD::Jet& jet, float& sf, const CP::SystematicSet& sys ) const 
+CP::CorrectionCode BTaggingEfficiencyJsonTool::getScaleFactor( const xAOD::Jet& jet, float& sf, const std::string& mc_gen, const CP::SystematicSet& sys ) const 
 {
   if (! m_initialised) {
     throw std::runtime_error("BTaggingEfficiencyJsonTool has not been initialised.");
@@ -138,8 +139,7 @@ CP::CorrectionCode BTaggingEfficiencyJsonTool::getScaleFactor( const xAOD::Jet& 
 
   sf = 0.0;
 
-  SG::AuxElement::ConstAccessor<int> truthLabelAccessor( m_truthlabel );
-  int truthLabel = truthLabelAccessor( jet );
+  int truthLabel = (*m_truthLabelAcc)(jet);
   std::string labelString;
   auto it = m_labelMap.find(truthLabel);
   if (it != m_labelMap.end()) {
@@ -171,8 +171,15 @@ CP::CorrectionCode BTaggingEfficiencyJsonTool::getScaleFactor( const xAOD::Jet& 
     ATH_MSG_WARNING("No calibration for jet with pt: " << getJetPt(jet)/1000. << ". Returning scale factor of 0.");
     return CP::CorrectionCode::OutOfValidityRange;
   }
-  
+
   sf = SFs[bin_index];
+  
+  if (!mc_gen.empty()) {
+    float corr = 1.f;
+    CP::CorrectionCode cc = getMCToMCCorr(jet, corr, mc_gen);
+    if (cc != CP::CorrectionCode::Ok) return cc;
+    sf *= corr;
+  }
   
   sysData tempSys;
   if (calcSystematicVariation(sys, tempSys) == StatusCode::SUCCESS && tempSys.xbb_syst != 0) {
@@ -182,7 +189,14 @@ CP::CorrectionCode BTaggingEfficiencyJsonTool::getScaleFactor( const xAOD::Jet& 
   return CP::CorrectionCode::Ok;
 }
 
-CP::CorrectionCode BTaggingEfficiencyJsonTool::getMcCorr( const xAOD::Jet& jet, const std::string& mc_gen_ref, const std::string& mc_gen_target, float& corr ) const 
+CP::CorrectionCode BTaggingEfficiencyJsonTool::getScaleFactor( const xAOD::Jet& jet, float& sf, const CP::SystematicSet& sys ) const 
+{
+  ATH_MSG_WARNING("No mc generator of the jet provided. No mc-to-mc corrections will be applied.");
+
+  return getScaleFactor( jet, sf, "", sys);
+}
+
+CP::CorrectionCode BTaggingEfficiencyJsonTool::getMCToMCCorr( const xAOD::Jet& jet, float& corr, const std::string& mc_gen ) const 
 {
   if (! m_initialised) {
     throw std::runtime_error("BTaggingEfficiencyJsonTool has not been initialised.");
@@ -190,13 +204,7 @@ CP::CorrectionCode BTaggingEfficiencyJsonTool::getMcCorr( const xAOD::Jet& jet, 
 
   corr = 0.0;
 
-  if (mc_gen_ref == mc_gen_target) {
-      corr = 1.0;
-      return CP::CorrectionCode::Ok;
-  }  
-
-  SG::AuxElement::ConstAccessor<int> truthLabelAccessor( m_truthlabel );
-  int truthLabel = truthLabelAccessor( jet );
+  int truthLabel = (*m_truthLabelAcc)(jet);
   std::string labelString;
   auto it = m_labelMap.find(truthLabel);
   if (it != m_labelMap.end()) {
@@ -211,29 +219,17 @@ CP::CorrectionCode BTaggingEfficiencyJsonTool::getMcCorr( const xAOD::Jet& jet, 
     return CP::CorrectionCode::OutOfValidityRange;    
   }
 
-  if ( !m_corrMap.at(labelString).contains(mc_gen_ref) && mc_gen_ref != m_mcReference.at(labelString) ) {
-    ATH_MSG_WARNING("No mc-to-mc corrections available for mc generator: " << mc_gen_ref << ". Returning mc-to-mc correction of 0.");
-    return CP::CorrectionCode::OutOfValidityRange;
-  } else if ( !m_corrMap.at(labelString).contains(mc_gen_target) && mc_gen_target != m_mcReference.at(labelString) ) {
-    ATH_MSG_WARNING("No mc-to-mc corrections available for mc generator: " << mc_gen_target << ". Returning mc-to-mc correction of 0.");
+  if ( !m_corrMap.at(labelString).contains(mc_gen) && mc_gen != m_mcReference.at(labelString) ) {
+    ATH_MSG_WARNING("No mc-to-mc corrections available for mc generator: " << mc_gen << ". Returning mc-to-mc correction of 0.");
     return CP::CorrectionCode::OutOfValidityRange;
   }
 
-  float corr_target = getMcBin(jet, labelString, mc_gen_target) ;
-  float corr_ref = getMcBin(jet, labelString, mc_gen_ref) ;
-
-  if (corr_target == 0.0 || corr_ref == 0.0) {
-    ATH_MSG_WARNING("MC correction is zero for generator " << mc_gen_ref << " or " << mc_gen_target << ". Cannot calculate mc-to-mc correction.");
-    corr = 0.0;
-    return CP::CorrectionCode::OutOfValidityRange;
-  }
-
-  corr = corr_target / corr_ref;
+  corr = getMCToMCBin(jet, labelString, mc_gen);
 
   return CP::CorrectionCode::Ok;
 }
 
-float BTaggingEfficiencyJsonTool::getMcBin( const xAOD::Jet& jet, const std::string& labelString, const std::string& mc_gen ) const
+float BTaggingEfficiencyJsonTool::getMCToMCBin( const xAOD::Jet& jet, const std::string& labelString, const std::string& mc_gen ) const
 {
   float corr_gen; 
   if ( mc_gen == m_mcReference.at(labelString) ) {
