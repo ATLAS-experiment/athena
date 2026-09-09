@@ -106,6 +106,5 @@ void diff( const TileTrackMuFeature& a, const TileTrackMuFeature& b, std::map< s
 CLASS_DEF(TileTrackMuFeature,             77762301, 0)
 CLASS_DEF(DataVector<TileTrackMuFeature>, 61923500, 0) 
 
-#include "TrigMuonEvent/TileTrackMuFeatureContainer.h"
  
 #endif  
