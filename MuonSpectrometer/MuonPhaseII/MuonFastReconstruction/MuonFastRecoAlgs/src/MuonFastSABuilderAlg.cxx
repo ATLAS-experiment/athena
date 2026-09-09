@@ -17,7 +17,7 @@ namespace {
     std::string print(const xAOD::Muon& muon) {
         std::ostringstream oss;
         using namespace MuonR4::FastReco;
-        const double P {muon.p4().P()};
+        const double P {muon.pt() * std::cosh(muon.eta())};
         const double momUncertainty {std::sqrt(getQOverPCov(muon)*std::pow(P,4))};
         oss<<"Eta: "<<muon.eta()<<", Phi: "<<inDeg(muon.phi())
            <<", Pt: "<<muon.pt()/Gaudi::Units::GeV<<" GeV, Charge: "<<muon.charge()
@@ -51,22 +51,22 @@ StatusCode MuonFastSABuilderAlg::execute(const EventContext& ctx) const {
 
     /** The segments are already grouped by their associated global patterns */
     auto firstSeg = inSegments->stdcont().begin();
-    while(firstSeg != inSegments->stdcont().end()) {
+    const auto lastSeg = inSegments->stdcont().end();
+    while(firstSeg != lastSeg) {
         const GlobalPattern* pattern {FastReco::getParentPattern(**firstSeg)};
         assert(pattern);
 
-        const auto nextToLastSeg {std::find_if(firstSeg, inSegments->stdcont().end(),
+        const auto nextToLastSeg {std::find_if(firstSeg, lastSeg,
             [pattern](const xAOD::MuonSegment* seg) {
                 return FastReco::getParentPattern(*seg) != pattern;
             })};
-        const std::span<const xAOD::MuonSegment* const> muonSegments {
-            firstSeg, 
-            static_cast<std::size_t>(nextToLastSeg-firstSeg)
-        };
+        const std::span<const xAOD::MuonSegment* const> muonSegments {firstSeg, nextToLastSeg};
+
         xAOD::Muon* newMuon {buildMuonCandidate(ctx, *pattern, muonSegments, dataShip)};
+
+        firstSeg = nextToLastSeg;
         if (!newMuon) {
             ATH_MSG_DEBUG(__func__<<"() No muon candidate could be built from pattern " << *pattern);
-            firstSeg = nextToLastSeg;
             continue;
         }
         /** Link the segments to the new muon */
@@ -76,7 +76,6 @@ StatusCode MuonFastSABuilderAlg::execute(const EventContext& ctx) const {
         }
         newMuon->setMuonSegmentLinks(segLinks);
         ATH_MSG_DEBUG(__func__<<"() Built new muon candidate: " << print(*newMuon));
-        firstSeg = nextToLastSeg;
     }
     ATH_MSG_DEBUG("Written "<<dataShip.muonContainer->size()<<" FastMuonSA into StoreGate.");
     return StatusCode::SUCCESS;
@@ -120,7 +119,7 @@ xAOD::Muon* MuonFastSABuilderAlg::buildMuonCandidate(const EventContext& ctx,
     xAOD::Muon* newMuon = outMuonData.muonContainer->push_back(std::make_unique<xAOD::Muon>());
     newMuon->setAuthor(xAOD::Muon::Author::MuidSA);
     newMuon->setMuonType(xAOD::Muon::MuonType::MuonStandAlone);
-    newMuon->setCharge(seedPars->charge() > 0. ? 1 : -1);
+    newMuon->setCharge(seedPars->charge());
 
     newMuon->setP4(ActsTrk::energyToAthena(seedPars->transverseMomentum()), 
                    Acts::VectorHelpers::eta(*seedPars),seedPars->phi());

@@ -115,7 +115,7 @@ StatusCode MuonFastSegmentFittingAlg::initialize() {
     /** Initialize the L-R segment seeder */
     MdtSegmentSeeder::Config genCfg{};
     genCfg.hitPullCut = m_seedHitChi2;
-    genCfg.busyLayerLimit = 3.;
+    genCfg.busyLayerLimit = 3;
     genCfg.startWithPattern = false;
     m_mdtSeeder = std::make_unique<MdtSegmentSeeder>(std::move(genCfg), 
         makeActsAthenaLogger(this, name()));
@@ -134,11 +134,10 @@ StatusCode MuonFastSegmentFittingAlg::initialize() {
             << " Ignore failed pre-fits: " << m_ignoreFailedPreFit << "\n"
             << " Max iterations: " << m_maxIter);
     
-    m_beamspotCov = 
-        Acts::square(m_beamSpotRadius) * 
-            (Acts::SquareMatrix<3>::Identity() - Amg::Vector3D::UnitZ() * Amg::Vector3D::UnitZ().transpose()) + 
-        Acts::square(m_beamSpotLength) * 
-            Amg::Vector3D::UnitZ() * Amg::Vector3D::UnitZ().transpose();
+    m_beamspotCov(Amg::x, Amg::x) = m_beamspotCov(Amg::y, Amg::y) = 
+        Acts::square(m_beamSpotRadius);
+    m_beamspotCov(Amg::z, Amg::z) = Acts::square(m_beamSpotLength);
+
     return StatusCode::SUCCESS;
 }
 
@@ -420,6 +419,7 @@ MuonFastSegmentFittingAlg::initializePars(const Amg::Transform3D& localToGlobal,
     const Amg::Vector3D beamspotPos {localToGlobal.inverse().translation()};
     const Beamspot beamspot{beamspotPos.x(), beamspotPos.z(), 
         beamspotCov(CoordPlane::phiPlane, localToGlobal)};
+    ATH_MSG_VERBOSE(__func__<<"() Use: "<<beamspot<<" for regression in "<<CoordPlane::phiPlane);
     auto [phiHits, phiPars] = linearRegression(CoordPlane::phiPlane, hits, beamspot);
     
     if (!phiPars) {
@@ -449,9 +449,10 @@ MuonFastSegmentFittingAlg::RegressionRes_t
 MuonFastSegmentFittingAlg::linearRegression(const CoordPlane Plane,
                                             const HitVec_t& hits,
                                             const std::optional<Beamspot>& beamspot) const {
-    ATH_MSG_VERBOSE(__func__<<"() Start linear regression in the "
-        <<(Plane == CoordPlane::etaPlane ? "eta" : "phi")<<" plane with "<<hits.size()<<" hits."
-        <<(beamspot ? std::format(" Using beamspot ({}, {}, {})", beamspot->y, beamspot->z, beamspot->cov_yy) : ""));
+    /** TO DO: The linear regression should be improved to handle the covariance in z, not only in
+     *         the x and y directions. This is needed for both straws measurements and beamspot. */
+    ATH_MSG_VERBOSE(__func__<<"() Start linear regression in the "<<Plane
+        <<" with "<<hits.size()<<" hits"<<(beamspot ? " & beamspot." : "."));
 
     const auto CovIdx {Plane == CoordPlane::etaPlane 
         ? Acts::toUnderlying(SpacePoint::CovIdx::etaCov) 
@@ -476,11 +477,7 @@ MuonFastSegmentFittingAlg::linearRegression(const CoordPlane Plane,
         const double sigma2 {(Plane == CoordPlane::etaPlane && hit->isStraw())
             ? hit->covariance()[CovIdx] + Acts::square(hit->driftRadius())
             : hit->covariance()[CovIdx]};
-        if (sigma2 < 1e-4) {
-            ATH_MSG_WARNING(__func__<<"() Hit"<<*hit<<std::endl
-                <<" with very small covariance: "<< sigma2 << ". Skipping the measurement.");
-            continue;
-        }
+
         validHits.push_back(hit);
         const Amg::Vector3D& locPos {hit->localPosition()};
 
@@ -489,12 +486,12 @@ MuonFastSegmentFittingAlg::linearRegression(const CoordPlane Plane,
                    1./sigma2);
     }
     if (beamspot) {
-        accumulate(beamspot->y, beamspot->z, 1./beamspot->cov_yy);
+        accumulate(beamspot->coord, beamspot->z, 1./beamspot->cov_coordCoord);
     }
     /** Address the case of not enough valid hits */
     if (validHits.size() + beamspot.has_value() < 2u) {
         ATH_MSG_VERBOSE(__func__<<"() Not enough hits to do a linear regression in the "
-            <<(Plane == CoordPlane::etaPlane ? "eta" : "phi")<<" plane. Valid hits: "<<print(validHits));
+            <<Plane<<". Valid hits: "<<print(validHits));
         return std::make_pair(std::move(validHits), std::nullopt);
     }
     /** Handle invalid determinant: require a non-zero total weight
@@ -503,43 +500,68 @@ MuonFastSegmentFittingAlg::linearRegression(const CoordPlane Plane,
     if (S <= Acts::s_epsilon || 
         (det / Acts::square(S)) < minZVariance) {
         ATH_MSG_WARNING(__func__<<"() Degenerate regression in the "
-            <<(Plane == CoordPlane::etaPlane ? "eta" : "phi")<<" plane: total weight: "<<S
-            <<", variance in z: "<<det/Acts::square(S)<<" valid hits: "<<print(validHits));
+            <<Plane<<": total weight: "<<S<<", variance in z: "
+            <<det/Acts::square(S)<<" valid hits: "<<print(validHits));
         return std::make_pair(std::move(validHits), std::nullopt);
     }
     Line2D_t pars{};
-    pars[Acts::toUnderlying(ParamDefs2D::tanTheta)] = (S * Syz - Sz * Sy) / det;
-    pars[Acts::toUnderlying(ParamDefs2D::y0)] = (Szz * Sy - Sz * Syz) / det;
+    pars[Acts::toUnderlying(ParamDefs2D::slope)] = (S * Syz - Sz * Sy) / det;
+    pars[Acts::toUnderlying(ParamDefs2D::intercept)] = (Szz * Sy - Sz * Syz) / det;
     ATH_MSG_VERBOSE(__func__<<"() Linear regression in the "
-        <<(Plane == CoordPlane::etaPlane ? "eta" : "phi")<<" plane: "
-        <<" y0: "<<pars[Acts::toUnderlying(ParamDefs2D::y0)]
-        <<", tanTheta: "<<pars[Acts::toUnderlying(ParamDefs2D::tanTheta)]
-        <<", with "<<validHits.size()<<" valid hits"<<(beamspot ? " and beamspot." : "."));
+        <<Plane<<" -> "<<pars<<", with "<<validHits.size()
+        <<" valid hits"<<(beamspot ? " and beamspot." : "."));
     return std::make_pair(std::move(validHits), std::move(pars));
 }
 const Segment* MuonFastSegmentFittingAlg::findSegmentToAddPhi(std::vector<SegmentSeedPair_t>& segs) const {
     using enum LayerIndex;
 
-    /** Find first the segment in the middle or inner layer */
-    const Segment* toAdd {nullptr};
-    for (const LayerIndex layer : {Middle, Inner, Extended, BarrelExtended}) {
+    /** Find the first segment which is on the most favoured layer to be a seed in the 
+     *  muon bulding process. If there is none, continue to the next. */
+    for (const LayerIndex layer : {Middle, Inner, Outer, Extended, BarrelExtended}) {
 
         auto it = std::ranges::find_if(segs, [&layer](const SegmentSeedPair_t& seg) {
             return toLayerIndex(seg.second->msSector()->chamberIndex()) == layer; });
         if (it != segs.end()) {
-            toAdd = it->second.get();
-            break;
+            return it->second.get();
         }
     }
-    return toAdd;
+    return nullptr;
 }
 double MuonFastSegmentFittingAlg::beamspotCov(const CoordPlane Plane, 
                                               const Amg::Transform3D& localToGlobal) const {
 
-    auto localAxisDir {Plane == CoordPlane::etaPlane ? Amg::Vector3D::UnitY()
-                                                     : Amg::Vector3D::UnitX()};
+    const Amg::Vector3D localAxisDir {Amg::Vector3D::Unit(Plane == CoordPlane::etaPlane)};
     const Amg::Vector3D globalAxisDir {localToGlobal.rotation() * localAxisDir};
+    
     return globalAxisDir.dot(m_beamspotCov * globalAxisDir);
 }
 
+std::ostream& operator<<(std::ostream& os, MuonFastSegmentFittingAlg::CoordPlane plane) {
+    switch (plane) {
+        case MuonFastSegmentFittingAlg::CoordPlane::etaPlane:
+            return os << "etaPlane";
+        case MuonFastSegmentFittingAlg::CoordPlane::phiPlane:
+            return os << "phiPlane";
+    }
+    return os;
+}
+std::ostream& operator<<(std::ostream& os, MuonFastSegmentFittingAlg::ParamDefs2D pars) {
+    switch (pars) {
+        case MuonFastSegmentFittingAlg::ParamDefs2D::intercept:
+            return os << "Intercept";
+        case MuonFastSegmentFittingAlg::ParamDefs2D::slope:
+            return os << "Slope";
+        default:
+            return os;
+    }
+}
+std::ostream& operator<<(std::ostream& os, const MuonFastSegmentFittingAlg::Line2D_t& line) {
+    return os << "Line [slope, intercept]: [" 
+        << line[Acts::toUnderlying(MuonFastSegmentFittingAlg::ParamDefs2D::slope)] << ", " 
+        << line[Acts::toUnderlying(MuonFastSegmentFittingAlg::ParamDefs2D::intercept)] << "]";
+}
+std::ostream& operator<<(std::ostream& os, const MuonFastSegmentFittingAlg::Beamspot& beamspot) {
+    return os << "Beamspot [z, coord, sigmaCoord]: ["
+        << beamspot.z<< ", "<<beamspot.coord<< ", "<< std::sqrt(beamspot.cov_coordCoord) << "]";
+}
 }

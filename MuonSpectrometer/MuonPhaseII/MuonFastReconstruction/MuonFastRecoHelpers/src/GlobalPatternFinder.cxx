@@ -304,7 +304,7 @@ void GlobalPatternFinder::extendPatterns(PatternStateVec& startPatterns,
             continue;
         }
         /** Check angular compatibility of the test hit and the pattern */
-        const auto [result, residual, resSigma] {pat.checkLineComp(testHit, beamSpot)};
+        const auto [residual, resSigma, result] {pat.checkLineComp(testHit, beamSpot)};
         switch (result) {
             case LineTestDecision::eAddHit: {
                 /** TO DO: Study feasibility of loosening the criteria for low-confidence hits with OR */
@@ -522,7 +522,6 @@ void GlobalPatternFinder::addPhiOnlyHits(const ActsTrk::GeometryContext& gctx,
 
             const Amg::Transform3D& localToGlobal {bucket->msSector()->localToGlobalTransform(gctx)};
             const StIndex station {m_cfg.idHelperSvc->stationIndex(bucket->front()->identify())};
-            const uint8_t sector = bucket->msSector()->sector();
             
             for (const auto& hit : *bucket) {
                 // We are looking for phi-only hits
@@ -550,7 +549,7 @@ void GlobalPatternFinder::addPhiOnlyHits(const ActsTrk::GeometryContext& gctx,
                     continue;
                 }
                 /** Build the quantities needed for the phi compatibility test. */
-                HitPayload newHit {hit.get(), bucket, localToGlobal, layNum, sector, station};
+                HitPayload newHit {hit.get(), bucket, localToGlobal, layNum, station};
 
                 if (!pat.isPhiCompatible(newHit)) {
                     ATH_MSG_VERBOSE(__func__<<"() Phi-only hit not compatible");
@@ -668,7 +667,6 @@ GlobalPatternFinder::constructTree(const ActsTrk::GeometryContext& gctx,
             
             const Amg::Transform3D& localToGlobal {bucket->msSector()->localToGlobalTransform(gctx)};
             const StIndex station {m_cfg.idHelperSvc->stationIndex(bucket->front()->identify())};
-            const uint8_t sector = bucket->msSector()->sector();
 
             for (const auto& hit : *bucket) {
                 // Ignore only-phi hits and MDT hits if desired
@@ -677,7 +675,7 @@ GlobalPatternFinder::constructTree(const ActsTrk::GeometryContext& gctx,
                 }
                 const uint8_t layNum = m_spSorter.sectorLayerNum(*hit);
          
-                hitPayloads.emplace_back(hit.get(), bucket, localToGlobal, layNum, sector, station);
+                hitPayloads.emplace_back(hit.get(), bucket, localToGlobal, layNum, station);
   
                 if (msgLvl(MSG::VERBOSE)) {
                     const HitPayload& newHit {hitPayloads.back()};
@@ -708,7 +706,8 @@ GlobalPatternFinder::constructTree(const ActsTrk::GeometryContext& gctx,
          *  This ensures that we can find patterns crossing the sector borders. */ 
         for (const SectorProjector proj : {leftOverlap, center, rightOverlap}) {
             /// Check whether the hit belongs to the left or right sector as well
-            const ExpandedSector expSect {hit.sector, proj};
+            const ExpandedSector expSect {static_cast<uint8_t>(hit->msSector()->sector()), 
+                                          proj};
             if (proj != SectorProjector::center && hit.measuresPhi && expSect != hitExpSector) {
                 ATH_MSG_VERBOSE("addHitToTree() Hit with "<<hitExpSector<<" is not compatible with "<<expSect);
                 continue;

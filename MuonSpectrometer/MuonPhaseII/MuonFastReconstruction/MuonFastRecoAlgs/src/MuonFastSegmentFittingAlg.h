@@ -94,20 +94,21 @@ namespace MuonR4{
             };
             /** Define the line parameters */
             enum class ParamDefs2D : std::uint8_t {
-                /** Tangent of the angle in the plane, defined as dy/dz */
-                tanTheta = 0,
-                /** Intercept in the plane */
-                y0 = 1,
+                /** Tangent of the angle, defined as dy/dz or dx/dz according to the plane */
+                slope = 0,
+                /** Intercept at z=0 (i.e. y0 or x0, according to the plane) */
+                intercept = 1,
                 /** Number of parameters */
                 nParams = 2
             };
-            /** Define simplified beamspot measurement in a defined plane */
+            /** Define simplified beamspot measurement in a selected plane */
             struct Beamspot {
-                /** @brief Coordinates of the beamspot in the plane */
-                double y{0.};
+                /** @brief Coordinate of the beamspot in the selected plane, either y or x depending on the plane */
+                double coord{0.};
+                /** @brief z-coordinate of the beamspot */
                 double z{0.};
-                /** @brief Covariance of the beamspot in the y-direction */
-                double cov_yy{0.};
+                /** @brief Variance of the beamspot coordinate in the selected plane */
+                double cov_coordCoord{0.};
             };
             /** @brief Type alias for the line representation */
             using Line2D_t = std::array<double, Acts::toUnderlying(ParamDefs2D::nParams)>;
@@ -209,6 +210,11 @@ namespace MuonR4{
             std::unique_ptr<MdtSegmentSeeder> m_mdtSeeder{};
             /** @brief Covariance matrix of the beam spot */
             Acts::SquareMatrix<3> m_beamspotCov {Acts::SquareMatrix<3>::Zero()};
+
+            friend std::ostream& operator<<(std::ostream& os, CoordPlane plane);
+            friend std::ostream& operator<<(std::ostream& os, ParamDefs2D param);
+            friend std::ostream& operator<<(std::ostream& os, const Line2D_t& line);
+            friend std::ostream& operator<<(std::ostream& os, const Beamspot& bs);
     };
 
 }

@@ -13,18 +13,19 @@
 
 namespace MuonR4::FastReco{
     using StIndex = GlobalPatternFinder::StIndex;
-    
-    /** @brief Number of stations */
-    static const int s_nStations{Acts::toUnderlying(StIndex::StIndexMax)};
 
     /** @brief Base class for hit struct containing hit information. */
     struct GlobalPatternFinder::HitPayload{
-        /** @brief Constructor with parameters */
+        /** @brief Constructor with parameters
+         *  @param sp The space point
+         *  @param bucket The space point bucket
+         *  @param localToGlobal The transformation from local to global coordinates
+         *  @param locLayer The layer number in the sector frame
+         *  @param station The station index */
         explicit HitPayload(const SpacePoint* sp,
                             const SpacePointBucket* bucket,
                             const Amg::Transform3D& localToGlobal,
                             uint8_t locLayer,
-                            uint8_t sector,
                             StIndex station);
 
         /** @brief Hit contribution contribution to the residual variance 
@@ -56,8 +57,6 @@ namespace MuonR4::FastReco{
         StIndex station{};
         /** @brief Layer number in the sector frame */
         uint8_t locLayer{0u};
-        /** @brief Sector number */
-        uint8_t sector{0u};
         /** @brief Is the hit a straw (otherwise unused padding) */
         bool isStraw{false};
         /** @brief Is precision hit */
@@ -120,9 +119,9 @@ namespace MuonR4::FastReco{
     };
     /** @brief : Small struct to encapsulate the result of the line compatibility test */
     struct LineTestRes  {
-        LineTestDecision result {LineTestDecision::eRejectHit};
         double residual{0.};
         double sigma{0.};
+        LineTestDecision result {LineTestDecision::eRejectHit};
     };
     /** @brief Pattern state object storing pattern information during construction */
     struct GlobalPatternFinder::PatternState {
@@ -131,12 +130,10 @@ namespace MuonR4::FastReco{
             *  @param expSector: **expanded** sector coordinate
             *  @param cfg: pointer to configuration object
             *  @param logger: pointer to messaging object */
-        PatternState(const CandidateHit& seed,
-                        const std::int8_t expSector,
-                        const Config* cfg,
-                        const AthMessaging* logger);
-        /** @brief Delete default destructor - ensure patterns are always constructed from a seed or another pattern */
-        PatternState() = delete; 
+        explicit PatternState(const CandidateHit& seed,
+                              const std::int8_t expSector,
+                              const Config* cfg,
+                              const AthMessaging* logger);
         /** @brief Move constructor
             *  @param other: other pattern state to move from */
         PatternState(PatternState&& other) noexcept = default;

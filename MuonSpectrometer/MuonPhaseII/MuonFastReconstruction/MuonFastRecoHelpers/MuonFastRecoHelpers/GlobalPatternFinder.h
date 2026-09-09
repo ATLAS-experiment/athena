@@ -94,6 +94,8 @@ namespace MuonR4::FastReco{
                                                     std::span<const SpacePointContainer*> spacepoints) const;
 
         private:
+            /** @brief Number of stations */
+            static const int s_nStations{Acts::toUnderlying(StIndex::StIndexMax)};
             /** @brief Base class for hit struct containing hit information. */
             struct HitPayload;
             /** @brief Small wrapper for candidate hits used to build patterns. This is needed

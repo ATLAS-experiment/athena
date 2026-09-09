@@ -23,7 +23,7 @@ namespace {
      *  @param pos The position vector where the gradient is to be computed
      *  @return The gradient of the azimuthal coordinate */
     Amg::Vector3D phiGradient(const Amg::Vector3D& pos) {
-        return Amg::Vector3D{-pos.y(), pos.x(), 0.} / Acts::square(pos.perp());
+        return Amg::Vector3D{-pos.y(), pos.x(), 0.} / pos.perp2();
     }
     /** @brief Helper functon to compute the size of an expanded sector */
     double expandedSectorSize (const MuonR4::ExpandedSector& sect) {
@@ -37,7 +37,7 @@ namespace {
         return sectorMap.sectorWidth(sector1) - sectorMap.sectorSize(sector1);
     };
     /** @brief Convert an angle from radians to degrees */
-    double inDeg(double angle) {
+    constexpr double inDeg(double angle) {
         return angle / Gaudi::Units::deg;
     }
 }
@@ -49,10 +49,9 @@ namespace MuonR4::FastReco {
                                                 const SpacePointBucket* bucket,
                                                 const Amg::Transform3D& localToGlobal,
                                                 uint8_t locLayer,
-                                                uint8_t sector,
                                                 StIndex station)
         : position{localToGlobal * sp->localPosition()}, 
-          sp{sp}, bucket{bucket}, station{station}, locLayer{locLayer}, sector{sector},
+          sp{sp}, bucket{bucket}, station{station}, locLayer{locLayer},
           isStraw{sp->isStraw()}, isPrecision{isPrecisionHit(*sp)}, 
           measuresPhi{sp->measuresPhi()}, measuresEta{sp->measuresEta()} {
 

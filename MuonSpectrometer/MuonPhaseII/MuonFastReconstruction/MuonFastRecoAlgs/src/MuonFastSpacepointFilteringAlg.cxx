@@ -22,10 +22,10 @@ StatusCode MuonFastSpacepointFilteringAlg::execute(const EventContext& ctx) cons
     const GlobalPatternContainer* inPatterns{nullptr};
     ATH_CHECK(SG::get(inPatterns, m_inPatterns, ctx));
 
-    SG::WriteHandle<SpacePointContainer> outSpacePoints{m_outSpacePoints, ctx};
+    SG::WriteHandle outSpacePoints{m_outSpacePoints, ctx};
     ATH_CHECK(outSpacePoints.record(std::make_unique<SpacePointContainer>()));
     
-    SG::WriteHandle<SpacePointContainer> outNswSpacePoints{m_outNswSpacePoints, ctx};
+    SG::WriteHandle outNswSpacePoints{m_outNswSpacePoints, ctx};
     if (!m_outNswSpacePoints.empty()) {
         ATH_CHECK(outNswSpacePoints.record(std::make_unique<SpacePointContainer>()));
     }
