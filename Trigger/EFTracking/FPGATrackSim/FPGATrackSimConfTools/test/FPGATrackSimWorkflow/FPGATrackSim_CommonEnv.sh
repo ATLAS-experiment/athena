@@ -4,6 +4,8 @@ RDO_TTBAR="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/
 WRAPPER="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/Wrappers/v0.11/FPGATrackSimWrapper.root"
 RDO_EVT=50 # used for map/bank generation
 
+CONDITIONS_TAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
+
 # instructions on how to change version of files can be found in https://twiki.cern.ch/twiki/bin/view/Atlas/EFTrackingSoftware
 MAP_9L_VERSION="v0.23"
 MAP_5L_VERSION="v0.34"

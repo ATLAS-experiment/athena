@@ -25,9 +25,9 @@ if __name__=="__main__":
    log.setLevel(DEBUG)
    
    # --- set flags
-   from AthenaConfiguration.TestDefaults import defaultTestFiles
+   from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultConditionsTags
    flags.Input.Files = defaultTestFiles.RDO_RUN4
-
+   flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
    flags.Concurrency.NumThreads = 1
    
    # --- end flag customization

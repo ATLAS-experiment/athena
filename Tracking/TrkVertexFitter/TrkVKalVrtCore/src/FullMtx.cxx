@@ -5,7 +5,7 @@
 #include "TrkVKalVrtCore/CommonPars.h"
 #include "TrkVKalVrtCore/TrkVKalVrtCoreBase.h"
 #include "TrkVKalVrtCore/Derivt.h"
-
+#include "TrkVKalVrtCore/Restrict.h"
 namespace Trk {
 
 /* --------------------------------------------------- */
@@ -16,7 +16,7 @@ namespace Trk {
 
 #define ader_ref(a_1,a_2) ader[(a_2)*(vkalNTrkM*3+3) + (a_1)]
 
-void FullMTXfill(VKVertex * vk, double * ader)
+void FullMTXfill(VKVertex * vk, double * VKAL_RESTRICT ader)
 {
     int i,j,it;
 
@@ -78,7 +78,7 @@ void FullMTXfill(VKVertex * vk, double * ader)
 //
 // Total number of parameters  Vertex(3)+NTRK*3+N_constr
 
-int FullMCNSTfill(VKVertex * vk, double * ader, double * LSide)
+int FullMCNSTfill(VKVertex * vk, double * VKAL_RESTRICT ader, double * VKAL_RESTRICT LSide)
 {
     int i,j,k,l,ii,ic,it,jt;
 

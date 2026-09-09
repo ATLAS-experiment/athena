@@ -4,7 +4,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import LHCPeriod, BeamType
+from AthenaConfiguration.Enums import BeamType
 
 def TileSamplingFractionCondAlgCfg(flags, **kwargs):
     """Return component accumulator with configured Tile sampling fraction conditions algorithm
@@ -36,7 +36,7 @@ def TileSamplingFractionCondAlgCfg(flags, **kwargs):
         if flags.Beam.Type is BeamType.TestBeam:
             # fixed sampling fraction for Geant4 10.6 for all run numbers
             samplingFractionTag = 'TileOfl02CalibSfr-SIM-06'
-        elif flags.GeoModel.Run >= LHCPeriod.Run4 or flags.Sim.ISF.Simulator.usesFastCaloSim() or flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
+        elif flags.Sim.ISF.Simulator.usesFastCaloSim() or flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
             samplingFractionTag = 'TileOfl02CalibSfr-SIM-07'
 
         from IOVDbSvc.IOVDbSvcConfig import addFolders

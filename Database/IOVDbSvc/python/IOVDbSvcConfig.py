@@ -338,7 +338,12 @@ def getCrestDirContent(flags):
 
     missedTags=set(requestedTags) #copy of the tags        
 
-    import chai
+    try:
+        import chai
+    except ImportError as e:
+        msg.error("Cannot import chai, can not inspect local crest directory %s",crestDir)
+        raise e
+    
     try:
         localdb = chai.Database(crestDir)
     except Exception as e:
@@ -450,12 +455,18 @@ def blockFolder(ca,folder):
 
 @cache
 def checkGlobalTag(connStr,currGlobalTag):
+    try:
+        import chai
+    except ImportError:    
+        msg.warning("Cannot import chai, cannot check global tag validity. ")
+        return None
+    
     fail=False
     if connStr.startswith("http"):
        connStr1="crest:"+connStr
     else: #Assume local file
         connStr1="crest_fs:"+connStr 
-    import chai
+    
     try:
         db=chai.Database(connStr1)
         allGlobalTags=set(db.find_global_tags())

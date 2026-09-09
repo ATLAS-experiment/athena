@@ -163,7 +163,7 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms(const EventContext& ctx)
         m_oPhotonValidationPlots.convTruthR->Fill(trueR, weight);
         m_oPhotonValidationPlots.convTruthRvsEta->Fill(trueR, truthEta, weight);
         if (isTrueConv)
-          m_oPhotonValidationPlots.m_oTruthIsoConvPlots.fill(*truthParticle,
+	    m_oPhotonValidationPlots.m_oTruthIsoConvPlots.fill(*truthParticle,
                                                              *eventInfo);
         if (!isTrueConv)
           m_oPhotonValidationPlots.m_oTruthIsoUncPlots.fill(*truthParticle,
@@ -178,6 +178,9 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms(const EventContext& ctx)
 
           m_oPhotonValidationPlots.m_oTruthRecoPlots.fill(*truthParticle,
                                                           *eventInfo);
+	  const float vtxRad = xAOD::EgammaHelpers::conversionRadius(recoPhoton);
+	  m_oPhotonValidationPlots.convTruthRvsRecoR->Fill(trueR,vtxRad,weight);
+
           if (isTrueConv) {
             m_oPhotonValidationPlots.m_oTruthRecoConvPlots.fill(*truthParticle,
                                                                 *eventInfo);

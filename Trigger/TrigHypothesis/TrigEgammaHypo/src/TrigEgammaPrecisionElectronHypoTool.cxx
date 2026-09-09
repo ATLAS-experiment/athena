@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <algorithm>
-#include <cmath>
+
 #include "TrigCompositeUtils/HLTIdentifier.h"
 #include "TrigCompositeUtils/Combinators.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
@@ -11,7 +10,8 @@
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "xAODEgamma/Electron.h"
 #include "TrigEgammaPrecisionElectronHypoTool.h"
-
+#include <algorithm>
+#include <cmath>
 namespace TCU = TrigCompositeUtils;
 
 TrigEgammaPrecisionElectronHypoTool::TrigEgammaPrecisionElectronHypoTool( const std::string& type, 
@@ -188,8 +188,8 @@ bool TrigEgammaPrecisionElectronHypoTool::decide( const ITrigEgammaPrecisionElec
  
      // This is the last step. So pass is going to be the result of LH
      // get average luminosity information to calculate LH
-     if(input.valueDecorator.count("avgmu")){
-        mu = input.valueDecorator.at("avgmu");
+     if(auto p = input.valueDecorator.find("avgmu"); p != input.valueDecorator.end()){
+        mu = p->second;
      }
      mon_mu = mu;
 
@@ -310,14 +310,13 @@ bool TrigEgammaPrecisionElectronHypoTool::decide( const ITrigEgammaPrecisionElec
      ATH_MSG_DEBUG("m_TopoEtConeCut = " << m_TopoEtConeCut);
    
      // Only for LH
-     if( input.valueDecorator.count(m_pidName+"LHValue")){
-        lhval = input.valueDecorator.at(m_pidName+"LHValue");
+     if( auto p = input.valueDecorator.find(m_pidName.value()+"LHValue"); p != input.valueDecorator.end()){
+        lhval = p->second;
      }
      mon_lhval = lhval; 
      // Should works for DNN and LH
-     if( input.pidDecorator.count(m_pidName) )
-     {
-       pass = input.pidDecorator.at(m_pidName);
+     if( auto p = input.pidDecorator.find(m_pidName.value()); p !=  input.pidDecorator.end()){
+       pass = p->second;
      }     
      // Evaluating lh *after* retrieving variables for monitoing and debuging purposes
      ATH_MSG_DEBUG("AthenaLHSelectorTool: TAccept = " << pass);

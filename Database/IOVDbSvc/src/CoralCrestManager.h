@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -24,7 +24,19 @@
 #include "CoolKernel/ChannelSelection.h"
 #include "CoolKernel/ValidityKey.h"
 #include "CoolKernel/IFolder.h"
-#include "CrestContainer.h"
+#include <chai/Container.h>
+#include <chai/VectorContainer.h>
+#include <chai/ContainerMap.h>
+
+namespace Crest {
+  /// Wire format of the tag's payloads, derived from the CREST tag objectType.
+  /// Standard is one payload per IOV; the DCS modes are multi-IOV blocks holding
+  /// many sub-IOVs, either fully expanded (DCS_FULL) or delta encoded
+  /// (DCS_FULL_SPARSE). Each mode selects a different chai deserialisation path.
+  enum class ModeId{
+    Standard, DCS, DCS_FULL, DCS_FULL_SPARSE
+  };
+}
 
 class CoralCrestManager {
 public:
@@ -67,11 +79,13 @@ private:
   std::optional<Crest::TagDto> m_Tag;
   std::optional<bool> m_isVectorPayload;
   std::string parseTypeName(const std::string & description);
-  coral::AttributeList createAttributeList(coral::AttributeListSpecification * pSpec,nlohmann::json& j ,const std::vector<std::pair<std::string, Crest::TypeId>> & tSpec);
+  coral::AttributeList createAttributeList(coral::AttributeListSpecification * pSpec, chai::Values& row);
   std::pair<uint64_t,uint64_t> getIovInterval(const std::string&  tag, const uint64_t since, const uint64_t until);
   std::pair<uint64_t,uint64_t> getSinceUntilPair(std::vector<uint64_t>& v, const uint64_t since, const uint64_t until);
-  void initCrestContainer();
-  std::optional<Crest::CrestContainer> m_crest_cont;
-
+  void initChaiContainer();
+  std::optional<std::map<uint64_t,chai::ContainerBasePtr> > m_chai_cont;
+  //std::unique_ptr<chai::ContainerMap> m_chai_cont;
+  cool::ValidityKey m_since;
+  Crest::ModeId m_id;
 };
 #endif

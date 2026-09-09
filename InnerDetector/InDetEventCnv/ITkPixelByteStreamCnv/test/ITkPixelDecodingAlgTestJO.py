@@ -2,6 +2,8 @@
 
 #  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
+import sys
+
 if __name__=="__main__":
    # test job skeleton reading pool files
 
@@ -11,10 +13,14 @@ if __name__=="__main__":
    # --- set flags
    # the input file
 
-   #flags.Input.Files = ['/afs/cern.ch/work/o/okovanda/ITk/DAQ/encoding_in_athena/run/data_test.00242000.Single_Stream.daq.RAW._lb0001._Athena._0101.data'] #single muon
-   #flags.Input.Files = ['/afs/cern.ch/work/o/okovanda/ITk/DAQ/encoding_in_athena/run/data_test.00350200.Single_Stream.daq.RAW._lb0008._Athena._1001.data'] #ttbar
-   #flags.Input.Files = ['/eos/user/o/okepka/public/itk/forOndra/SR1/data_test.1749797964.calibration_DcmDummyProcessor.daq.RAW._lb0000._SFO-SR1._0001.data']
-   flags.Input.Files = ['/afs/cern.ch/work/f/fballi/private/athena/run_UI_ITk/encode/data_test.00242020.Single_Stream.daq.RAW._lb0002._Athena._0201.data'] #ttbar, Fabrice
+   if len(sys.argv) < 2:
+      print('No input file given')
+      inputRAW = '/afs/cern.ch/work/f/fballi/private/athena/run_UI_ITk/encode/data_test.00242020.Single_Stream.daq.RAW._lb0002._Athena._0201.data'
+   
+   inputRAW = sys.argv[1]
+
+
+   flags.Input.Files = [inputRAW] #ttbar, Fabrice
    flags.Output.RDOFileName = "RDO.pool.root"
 
    from AthenaConfiguration.TestDefaults import defaultGeometryTags
@@ -32,7 +38,7 @@ if __name__=="__main__":
    # We want to keet the commented code for debugging
    from AthenaCommon.Constants import DEBUG
    flags.Exec.OutputLevel=DEBUG
-
+   flags.ITk.Conditions.PixelTestCablingFallback=True
    flags.lock()
 
 
@@ -40,10 +46,6 @@ if __name__=="__main__":
    # minimum stuff to read files:
    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
    cfg = MainServicesCfg(flags)
-
-   #add cabling
-   from ITkPixelCabling.ITkPixelCablingAlgConfig import ITkPixelCablingAlgCfg
-   cfg.merge(ITkPixelCablingAlgCfg(flags, name="ITkPixelCablingAlg", UseTestCabling=True))
 
    from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
    cfg.merge(ByteStreamReadCfg(flags))
@@ -55,8 +57,6 @@ if __name__=="__main__":
    cfg.merge(PerfMonMTSvcCfg(flags))
 
 
-   #from PixelReadoutGeometry.PixelReadoutGeometryConfig import ITkPixelReadoutManagerCfg
-   #cfg.merge(ITkPixelReadoutManagerCfg(flags, name="ITkPixelReadoutManager"))
    itemList = [] # items to store in RDO
    acceptAlgs = [] # skimming algs
    itemList.append('PixelRDO_Container#ITkPixelRDOs')

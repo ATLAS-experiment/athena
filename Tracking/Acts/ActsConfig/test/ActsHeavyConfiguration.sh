@@ -5,7 +5,10 @@ extraArgs=$1
 ignore_pattern=$2
 
 n_events=1
-input_rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-01/RDO_HIJING_ITk_lowstat.pool.root
+#input_rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-01/RDO_HIJING_ITk_lowstat.pool.root
+# temporaily use default RDO (not HI events, but should be sufficient for testing the config) while problems with the older materail maps in CREST are investigated
+# See ATLASRECTS-8424
+input_rdo=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RDO_RUN4[0])")
 conditions_tag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 
 echo "*** Running ACTS reconstruction with extra args: "${extraArgs}

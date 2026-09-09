@@ -363,7 +363,7 @@ def initConfigFlags():
             if flags.Common.Project is Project.AthGeneration:
                 return False
             elif flags.GeoModel.Run > LHCPeriod.Run3:
-                return False #To be set true when we make switch to CREST for Run4
+                return True
             else:
                 return False
 
