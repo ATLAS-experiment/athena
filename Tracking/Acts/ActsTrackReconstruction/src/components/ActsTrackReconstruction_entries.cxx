@@ -25,6 +25,7 @@
 #include "src/GlobalChiSquareFitterTool.h"
 #include "src/RandomProtoTrackCreatorTool.h"
 #include "src/TruthGuidedProtoTrackCreatorTool.h"
+#include "src/TrackMonitorTool.h"
 
 // Algs
 DECLARE_COMPONENT( ActsTrk::TrackFindingAlg )
@@ -51,3 +52,5 @@ DECLARE_COMPONENT( ActsTrk::GaussianSumFitterTool )
 DECLARE_COMPONENT( ActsTrk::GlobalChiSquareFitterTool )
 DECLARE_COMPONENT( ActsTrk::RandomProtoTrackCreatorTool )
 DECLARE_COMPONENT( ActsTrk::TruthGuidedProtoTrackCreatorTool )
+
+DECLARE_COMPONENT( ActsTrk::TrackMonitorTool )
