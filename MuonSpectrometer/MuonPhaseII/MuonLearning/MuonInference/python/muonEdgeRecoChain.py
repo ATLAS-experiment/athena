@@ -108,6 +108,7 @@ def main(args):
             "RequireMutualTopKEdges": not args.allowOneSidedMlEdges,
             "RecoverOrphanNodes": not args.disableOrphanRecovery,
             "SeedAnchorsPerComponent": args.seedAnchorsPerComponent,
+            "AnchorInnermostLayer": args.anchorInnermostLayer,
             "MinSegmentsPerComponent": args.minSegmentsPerComponent,
             "KeepBestSegmentPerChamber": not args.keepAllSegmentsPerChamber,
             "OutputLevel": output_level,
@@ -126,10 +127,13 @@ def main(args):
         from MuonTrackFindingAlgs.TrackFindingConfig import MsTrackSeedingToolCfg
         from AthenaConfiguration.ComponentFactory import CompFactory
         baseline_seeder = cfg.popToolsAndMerge(MsTrackSeedingToolCfg(flags))
+        ml_seeder_segment_container = (
+            filtered_segment_key if filter_segment_container else "MuonSegmentsFromR4"
+        )
         ms_track_finder.SeedingTool = CompFactory.MuonR4.MlMsTrackSeeder(
             "MlMsTrackSeeder",
             BaselineSeeder=baseline_seeder,
-            SegmentContainer="MuonSegmentsFromR4",
+            SegmentContainer=ml_seeder_segment_container,
             CandidateDecoration="mlTrackComponent",
             MinSegmentsPerCandidate=args.minSegmentsPerComponent,
         )
@@ -216,6 +220,8 @@ if __name__ == "__main__":
                         help="Disable bounded one-sided recovery for nodes with no mutual top-K ML edge")
     parser.add_argument("--seedAnchorsPerComponent", type=int, default=0,
                         help="Launch this many ranked ML anchors per component; zero keeps every retained segment (default: 0)")
+    parser.add_argument("--anchorInnermostLayer", action="store_true", default=False,
+                        help="Restrict seed anchors to inner segment(s)")
     parser.add_argument("--minSegmentsPerComponent", type=int, default=2,
                         help="Require this many retained chambers in an ML component before seeding (default: 2)")
     parser.add_argument("--maxSegmentsPerBucket", type=int, default=2,
