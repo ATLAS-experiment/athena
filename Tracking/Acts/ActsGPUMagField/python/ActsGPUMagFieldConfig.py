@@ -35,7 +35,7 @@ def DeviceMagFieldProviderToolCfg(flags,
     if flags.Device.Backend is DeviceBackend.CUDA:
         acc.setPrivateTools(acc.popToolsAndMerge(CUDAMagFieldProviderToolCfg(flags)))
         
-    elif flags.Device.Backend is DeviceBackend.HIPAMD:    
+    elif ((flags.Device.Backend is DeviceBackend.HIPAMD) or (flags.Device.Backend is DeviceBackend.HIPNVIDIA)):    
         acc.setPrivateTools(acc.popToolsAndMerge(HIPMagFieldProviderToolCfg(flags)))
     else:
         raise ValueError(f"Unsupported device backend: {flags.Acts.DeviceBackend}")   
