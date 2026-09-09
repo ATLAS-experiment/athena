@@ -26,10 +26,12 @@ def getJetResponseTool(jetdef, modspec=''):
     }[modspec]
     truthJetAlg = prefix+buildJetAlgName(jetdef.algorithm, jetdef.radius)+'Truth'+suffix+'Jets'
 
-    jetPtAssociation = CompFactory.JetResponseTool(
+    jetResponse = CompFactory.JetResponseTool(
         'jetResponse',
         JetMatchedTruthJetName = 'TruthMatch_Jet',
         TruthJetContainer = truthJetAlg,
         )
 
-    return jetPtAssociation
+    print(jetResponse)
+
+    return jetResponse
