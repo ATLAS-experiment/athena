@@ -34,8 +34,6 @@ StatusCode PFTrackCaloExtensionTool::initialize() {
 
 std::unique_ptr<eflowTrackCaloPoints> PFTrackCaloExtensionTool::execute(const EventContext& ctx, const xAOD::TrackParticle* track) const {
 
-    const Acts::TrackingVolume* caloExit = m_trackingGeometrySvc->getEnvelope(ActsTrk::SystemEnvelope::CaloExit);
-
     unsigned int lastMeasIdx = 0;
     if (!track->indexOfParameterAtPosition(lastMeasIdx, xAOD::LastMeasurement)) {
         ATH_MSG_ERROR("TrackParticle has no last measurement parameters");
