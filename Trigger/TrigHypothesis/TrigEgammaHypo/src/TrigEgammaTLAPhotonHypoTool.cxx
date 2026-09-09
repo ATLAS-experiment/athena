@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "TrigEgammaTLAPhotonHypoTool.h"
 
@@ -43,7 +43,7 @@ StatusCode TrigEgammaTLAPhotonHypoTool::decide(TrigCompositeUtils::DecisionConta
       // if we are sure that there is only one decision added by the parent HypoAlg (it should be), then checking that count > 0
       // is equivalent to checking if the previous decision was positive-NO
       // checks that the decision corresponding to the chain name is positive? uff
-      if (previousDecisionIDs.count( m_decisionId.numeric()) > 0)
+      if (previousDecisionIDs.contains( m_decisionId.numeric()))
       {
         TrigCompositeUtils::addDecisionID(getId().numeric(), decision );
       }

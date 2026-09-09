@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef _TRIGTAU_H_
@@ -21,9 +21,6 @@ Modified:
 */
 
 
-#include <vector>
-#include <iostream>
-#include <string>
 
 #include "FourMom/P4PtEtaPhiM.h"
 #include "Navigation/Navigable.h"
@@ -32,6 +29,10 @@ Modified:
 #include "TrigCaloEvent/TrigTauCluster.h"
 #include "TrigInDetEvent/TrigTauTracksInfo.h"
 #include "TrigInDetEvent/TrigInDetTrackCollection.h"
+
+#include <vector>
+#include <string>
+#include <map>
 
 class TrigTau: public P4PtEtaPhiM,  public NavigableTerminalNode ,
       virtual public INavigable4Momentum   {
@@ -133,6 +134,5 @@ void diff( const TrigTau& left, const TrigTau& right,
 
 CLASS_DEF( TrigTau , 45894787 , 3 )
 
-#include "TrigParticle/TrigTauContainer.h"
 
 #endif // TRIG_TAU

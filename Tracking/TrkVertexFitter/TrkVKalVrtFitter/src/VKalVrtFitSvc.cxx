@@ -386,14 +386,14 @@ int TrkVKalVrtFitter::VKalVrtFit3( int ntrk,
 	                              const TLorentzVector& Momentum,
 	                              const dvect& CovVrtMom,
 				      const long int& Charge,
-				      dvect& Perigee,
-				      dvect& CovPerigee,
+                      std::span<double, 5> Perigee,
+                      std::span<double, 15> CovPerigee,
                                       IVKalState& istate) const
   {
     assert(dynamic_cast<State*> (&istate)!=nullptr);
     State& state = static_cast<State&> (istate);
     int i,j,ij;
-    double Vrt[3],PMom[4],Cov0[21],Per[5],CovPer[15];
+    double Vrt[3],PMom[4],Cov0[21];
 
     for(i=0; i<3;  i++) Vrt[i]=Vertex[i];
     for(i=0; i<3;  i++) PMom[i]=Momentum[i];
@@ -412,13 +412,7 @@ int TrkVKalVrtFitter::VKalVrtFit3( int ntrk,
     state.m_fitField.getMagFld(Vrt[0], Vrt[1], Vrt[2] ,fx,fy,BMAG_CUR);
     if(fabs(BMAG_CUR) < 0.01) BMAG_CUR=0.01;  // Safety
 
-    Trk::xyztrp( vkCharge, Vrt, PMom, Cov0, BMAG_CUR, Per, CovPer );
-
-    Perigee.clear();
-    CovPerigee.clear();
-
-    for(i=0; i<5;  i++) Perigee.push_back((double)Per[i]);
-    for(i=0; i<15; i++) CovPerigee.push_back((double)CovPer[i]);
+    Trk::xyztrp( vkCharge, Vrt, PMom, Cov0, BMAG_CUR, Perigee.data(), CovPerigee.data() );
 
     return StatusCode::SUCCESS;
   }

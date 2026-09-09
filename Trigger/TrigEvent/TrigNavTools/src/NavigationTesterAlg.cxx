@@ -1,14 +1,15 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <GaudiKernel/StatusCode.h>
+#include "NavigationTesterAlg.h"
+
+#include "TrigCompositeUtils/ChainNameParser.h"
+#include "SpecialCases.h"
 #include <set>
 #include <algorithm>
 #include <iterator>
-#include "TrigCompositeUtils/ChainNameParser.h"
-#include "NavigationTesterAlg.h"
-#include "SpecialCases.h"
+#include <iostream>
 
 
 // anonymous namespace for convenience functions
@@ -197,8 +198,8 @@ namespace Trig {
 
         using xAODParticle = const xAOD::IParticle;
 
-        auto isSubsetPresent = [](const std::set<xAODParticle*>& subset, const CombinationsSet& run2) {
-            for (const auto& setInRun2 : run2) {
+        auto isSubsetPresent = [](const std::set<xAODParticle*>& subset, const CombinationsSet& r2) {
+            for (const auto& setInRun2 : r2) {
                 // Manual check for all particles in subset
                 bool allFound = true;
                 for (auto particle : subset) {
@@ -213,9 +214,9 @@ namespace Trig {
         };
 
 
-        auto isAnySubsetPresent = [&isSubsetPresent](const CombinationsSet& run3, const CombinationsSet& run2) {
-            for (const auto& subset : run3) {
-                if (isSubsetPresent(subset, run2)) {
+        auto isAnySubsetPresent = [&isSubsetPresent](const CombinationsSet& r3, const CombinationsSet& r2) {
+            for (const auto& subset : r3) {
+                if (isSubsetPresent(subset, r2)) {
                     return true; // At least one subset from Run3 is found in Run2
                 }
             }

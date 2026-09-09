@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -75,6 +75,7 @@ def SchedulerMonSvcCfg(flags, name='SchedulerMonSvc'):
     acc.addService(monsvc)
     return acc
 
+
 def getTrigErrorMonTool(flags, name='TrigErrorMonTool'):
     errorMonTool = CompFactory.TrigErrorMonTool(name)
     errorMonTool.MonTool = GenericMonitoringTool(flags, 'MonTool', HistPath='HLTFramework/'+name)
@@ -85,3 +86,16 @@ def getTrigErrorMonTool(flags, name='TrigErrorMonTool'):
         xbins=1, xmin=0, xmax=1, ybins=1, ymin=0, ymax=1)
 
     return errorMonTool
+
+
+def trigOpMonitorCfg(flags):
+    cfg = ComponentAccumulator()
+    opmon = CompFactory.TrigOpMonitor(
+        LuminosityCondDataKey = 'LuminosityCondData',
+        AtlasFieldMapCondDataKey = 'fieldMapCondObj' )
+
+    from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
+    cfg.merge( AtlasFieldCacheCondAlgCfg(flags) )
+    cfg.addEventAlgo( opmon )
+
+    return cfg

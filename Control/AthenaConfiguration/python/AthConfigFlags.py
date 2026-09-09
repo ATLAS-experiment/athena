@@ -145,14 +145,12 @@ class FlagAddress(object):
     def __setattr__( self, name, value ):
         if name.startswith("_"):
             return object.__setattr__(self, name, value)
-        merged = self._name + "." + name
 
+        merged = self._name + "." + name
         if merged not in self._flags._flagdict: # flag is missing, try loading dynamic ones
             self._flags._loadDynaFlags( merged )
 
-        if merged not in self._flags._flagdict:
-            raise RuntimeError( "No such flag: {}  The name is likely incomplete.".format(merged) )
-        return self._flags._AthConfigFlags__set( merged, value )
+        return setattr(self._flags, merged, value)
 
     def __delattr__(self, name):
         del self[name]
@@ -266,9 +264,11 @@ class AthConfigFlags(object):
         # Avoid infinite recursion looking up our own attributes
         _flagdict = object.__getattribute__(self, "_flagdict")
 
-        # First try to get an already loaded flag or category
+        # First try to get an already loaded flag or category.
+        # Note: Check and lookup is faster than try/except here. Because for nested
+        #       flags a failure is normal before we descend into the category.
         if name in _flagdict:
-            return self.__get(name)
+            return _flagdict[name].get(self)
 
         # Check (and load if needed) dynamic flags
         if self.hasCategory(name):
@@ -280,9 +280,13 @@ class AthConfigFlags(object):
         if name.startswith("_"):
             return object.__setattr__(self, name, value)
 
-        if name in self._flagdict:
-            return self.__set(name, value)
-        raise RuntimeError( "No such flag: "+ name+". The name is likely incomplete." )
+        self._tryModify()
+        try:
+            self._flagdict[name].set(value)
+        except KeyError:
+            closestMatch = get_close_matches(name,self._flagdict.keys(),1)
+            raise KeyError(f"No flag with name '{name}' found" +
+                           (f". Did you mean '{closestMatch[0]}'?" if closestMatch else ""))
 
     def __delattr__(self, name):
         del self[name]
@@ -466,23 +470,6 @@ class AthConfigFlags(object):
             return any(name in x for x in self._renamed_map().values())
         except AttributeError:
             return False
-
-    def __set(self,name,value):
-        self._tryModify()
-        try:
-            self._flagdict[name].set(value)
-        except KeyError:
-            closestMatch = get_close_matches(name,self._flagdict.keys(),1)
-            raise KeyError(f"No flag with name '{name}' found" +
-                           (f". Did you mean '{closestMatch[0]}'?" if closestMatch else ""))
-
-    def __get(self,name):
-        try:
-            return self._flagdict[name].get(self)
-        except KeyError:
-            closestMatch = get_close_matches(name,self._flagdict.keys(),1)
-            raise KeyError(f"No flag with name '{name}' found" +
-                           (f". Did you mean '{closestMatch[0]}'?" if closestMatch else ""))
 
     def lock(self):
         if not self._locked:

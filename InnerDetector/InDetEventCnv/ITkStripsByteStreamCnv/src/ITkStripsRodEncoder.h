@@ -71,6 +71,18 @@ ITkStripsRodEncoder : public extends<AthAlgTool, IITkStripsRodEncoder>{
   
   mutable std::atomic<uint8_t> m_bcid = 0;
   mutable std::atomic<uint8_t> m_l0tag = 0;
+
+  bool isNear(const int& eta_mod, bool isBarrel = false) const{
+    if (isBarrel){
+      int pos = std::abs(eta_mod) % 4;
+      return (pos == 2 || pos == 3);
+    }else{
+      int pos = std::abs(eta_mod) % 4;
+      if (eta_mod >= 10) pos = (eta_mod + 2) % 4;
+      if (eta_mod >= 16) pos = (eta_mod + 4) % 4;
+      return (pos == 1 || pos == 2);
+    }
+  }
   
   void encodeData(const std::vector<uint16_t>& clusters, const uint16_t ichannel, std::vector<uint8_t>& data_encode,
                   int typ, uint8_t l0tag, uint8_t bc_count, uint32_t hccKey, uint16_t& size) const;

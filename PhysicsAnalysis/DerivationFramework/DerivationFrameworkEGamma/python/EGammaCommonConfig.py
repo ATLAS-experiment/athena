@@ -967,7 +967,10 @@ def EGammaCommonCfg(flags):
     # =======================================
     from IsolationAlgs.DerivationTrackIsoConfig import DerivationTrackIsoCfg
 
-    acc.merge(DerivationTrackIsoCfg(flags, object_types=("Electrons", "Muons", "ForwardElectrons")))
+    if includeFwdElectrons:
+        acc.merge(DerivationTrackIsoCfg(flags, object_types=("Electrons", "Muons", "ForwardElectrons")))
+    else:
+        acc.merge(DerivationTrackIsoCfg(flags, object_types=("Electrons", "Muons")))
 
     hasFlowObject = (
         "JetETMissChargedParticleFlowObjects" in flags.Input.Collections

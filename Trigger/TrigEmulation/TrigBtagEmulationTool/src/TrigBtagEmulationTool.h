@@ -34,7 +34,7 @@ public:
   virtual StatusCode initialize() override;
 
   // Interface
-  virtual const EmulContext& populateJetManagersTriggerObjects() const override;  
+  virtual StatusCode populateJetManagersTriggerObjects(EmulContext&) const override;
   virtual bool isPassed(const std::string& chain) const override;
   virtual bool isPassed(const std::string& chain, const EmulContext&) const override;
   virtual std::unordered_map<std::string, std::vector<std::pair<const xAOD::Jet*, bool>>> getEmulatedJets(std::string) const override;
