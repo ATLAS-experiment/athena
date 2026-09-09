@@ -9,19 +9,15 @@
 #include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 
-static const InterfaceID IID_PFTrackCaloExtensionTool("PFTrackCaloExtensionTool", 1, 0);
-
 /**
  Inherits from eflowTrackExtrapolatorBaseAlgTool and AthAlgTool. Uses ACTS to extrapolate tracks to the calorimeter, and creates an eflowTrackCaloPoints object.
 */
 class PFTrackCaloExtensionTool: virtual public eflowTrackExtrapolatorBaseAlgTool, public AthAlgTool {
 
 public:
-  PFTrackCaloExtensionTool(const std::string& type, const std::string& name,
-                             const IInterface* parent);
-  ~PFTrackCaloExtensionTool() {};
 
-  static const InterfaceID& interfaceID();
+  using AthAlgTool::AthAlgTool;
+  ~PFTrackCaloExtensionTool() {};
 
   virtual StatusCode initialize() override;
   virtual std::unique_ptr<eflowTrackCaloPoints> execute(const EventContext& ctx, const xAOD::TrackParticle* track) const override;
@@ -38,7 +34,7 @@ private:
 
     ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
 
-    std::map<std::string, Acts::GeometryIdentifier> m_caloNameGeoIDMap;
+    std::map<Acts::GeometryIdentifier, std::string> m_caloNameGeoIDMap;
 
 };
 #endif

@@ -11,13 +11,10 @@
 
 #include "eflowTrackCaloPoints.h"
 
-PFTrackCaloExtensionTool::PFTrackCaloExtensionTool(const std::string& type, const std::string& name, const IInterface* parent)  :
-    AthAlgTool(type, name, parent)
-{
-  declareInterface<eflowTrackExtrapolatorBaseAlgTool>(this);
-}
-
 StatusCode PFTrackCaloExtensionTool::initialize() {
+
+  ATH_CHECK( AthAlgTool::initialize() );
+
   ATH_CHECK(m_extrapolationTool.retrieve());
   ATH_CHECK(m_trackingGeometrySvc.retrieve());
 
