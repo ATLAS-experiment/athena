@@ -9,6 +9,7 @@
 #include <iostream>
 #include <vector>
 #include <memory>
+#include "TrkVKalVrtCore/Restrict.h"
 
 namespace{
 /*
@@ -36,7 +37,7 @@ double vkPythag(double a, double b) {
 /* MFIRST >= N */
 /* Author: V.Kostyukhin */
 /*-----------------------------------------------------*/
-void scaleg(double g[], double scale[], long int N, long int mfirst) noexcept {
+void scaleg(double * VKAL_RESTRICT g, double * VKAL_RESTRICT scale, long int N, long int mfirst) noexcept {
   if (N == 1)
     scale[0] = 1.;
   if (N <= 1)
@@ -322,7 +323,7 @@ int vkLUdcmp(double *a, long int n, int *indx) {
   }
   return 0;
 }
-void vkLUbksb(const double *a, long int n, const int *indx, double *b) {
+void vkLUbksb(const double * VKAL_RESTRICT a, long int n, const int * VKAL_RESTRICT indx, double * VKAL_RESTRICT b) {
   int i, ii = 0, ip, j;
   double sum;
   // make indeces start from 1....
@@ -355,7 +356,7 @@ void vkLUbksb(const double *a, long int n, const int *indx, double *b) {
   (a)[i][j] = g - s * (h + g * tau); \
   (a)[k][l] = h + s * (g - h * tau);
 
-int vkjacobi(double **a, int n, double d[], double **v) {
+int vkjacobi(double ** VKAL_RESTRICT a, int n, double * VKAL_RESTRICT d, double ** VKAL_RESTRICT v) {
   bool getEVect = true;
   if (v == nullptr)
     getEVect = false;
@@ -645,7 +646,7 @@ int vkMSolve(double *a, double *b, long int n, double *ainv/*=nullptr*/)
 //
 
 #define SIGN(a,b) ((b) >= 0.0 ? std::abs(a) : -std::abs(a))
-void vkSVDCmp(double **a, int m, int n, double w[], double **v)
+void vkSVDCmp(double ** VKAL_RESTRICT a, int m, int n, double * VKAL_RESTRICT w, double ** VKAL_RESTRICT v)
 {
 	int flag,i,its,j,jj,k,l=0, nm=0;
 	double anorm,c,f,g,h,s,scale,x,y,z;
