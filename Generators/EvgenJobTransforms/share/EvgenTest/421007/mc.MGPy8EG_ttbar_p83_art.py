@@ -22,20 +22,20 @@ class Sample(EvgenConfig):
 
         # Custom settings to pass to MadGraphControl.
         # These are native MadGraph settings, not MadGraphControl settings.
-        settings = { 
-                    'lhe_version':'3.0', 
-                    'cut_decays':'F', 
-                    'pdlabel':'lhapdf',
-                    'lhaid':'247000',
-                    'use_syst':'False'
-                    }
+        run_settings = {
+            'lhe_version':'3.0', 
+            'cut_decays':'F', 
+            'pdlabel':'lhapdf',
+            'lhaid':'247000',
+            'use_syst':'False'
+        }
 
         # Run MG to prepare the LHE file for showering
         from MadGraphControl.MadGraphConfig import MadGraphCfg
         sampleConfig = MadGraphCfg(
             flags,
             process_definition=process_def,
-            settings=settings,
+            run_card_settings=run_settings,
             prepare_lhe_for_shower=True
         )
 
