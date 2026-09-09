@@ -160,11 +160,12 @@ int main ATLAS_NOT_THREAD_SAFE () {
 
   std::vector<DebugComboHypoTool*> test_tools;
   const std::string comboHypoStr{"ComboHypo"};
+  const std::string dbgComboHypoStr{"DebugComboHypoTool"};
   for (const std::string& test_chain : test_chains) {
     log << MSG::INFO << "Creating HypoTool for " << test_chain << endmsg;
     // NOTE: Pointers look to be owned by Gaudi. Don't delete these manually.
     ComboHypo* ch = new ComboHypo(comboHypoStr, pSvcLoc);
-    DebugComboHypoTool* dcht = new DebugComboHypoTool("DebugComboHypoTool", test_chain, ch);
+    DebugComboHypoTool* dcht = new DebugComboHypoTool(dbgComboHypoStr, test_chain, ch);
     VALUE( dcht->initialize() ) EXPECTED ( StatusCode::SUCCESS );
     VALUE( dcht->setLegMultiplicity(mrm) ) EXPECTED ( StatusCode::SUCCESS );
     test_tools.push_back(dcht);
