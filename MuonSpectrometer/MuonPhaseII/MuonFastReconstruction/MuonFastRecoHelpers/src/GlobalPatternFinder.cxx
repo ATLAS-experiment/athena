@@ -3,32 +3,17 @@
 */
 
 #include "MuonFastRecoHelpers/GlobalPatternFinder.h"
-
-#include <xAODMuonPrepData/MdtDriftCircle.h>
-#include "MuonDetDescrUtils/MuonSectorMapping.h"
+#include "MuonFastRecoHelpers/GlobalPatternFinderDefs.h"
 
 #include "FourMomUtils/P4Helpers.h"
+#include "MuonDetDescrUtils/MuonSectorMapping.h"
 
-/// Macro printing verbose messages
-#define PRINT_VERBOSE( xmsg )                                      \
-    do {                                                           \
-        if( logger->msgLvl( MSG::VERBOSE ) ) {                     \
-            logger->msg( MSG::VERBOSE ) << xmsg << endmsg;         \
-        }                                                          \
-   } while( 0 ) 
 namespace {
     const Muon::MuonSectorMapping sectorMap{};
 
+    /** @brief Function to convert an angle from radians to degrees */
     double inDeg(double angle) {
         return angle / Gaudi::Units::deg;
-    }
-    /* Function to extract the distance between two points in the direction 
-     * perpendicular to measurement layers */
-    double layerDistance(Muon::MuonStationIndex::StIndex station, 
-                         const Amg::Vector3D& pos1, 
-                         const Amg::Vector3D& pos2) {
-        return isBarrel(station) ? std::abs(pos2.perp() - pos1.perp())
-                                 : std::abs(pos2.z() - pos1.z());
     }
 }
 
@@ -47,36 +32,25 @@ GlobalPatternFinder::GlobalPatternFinder(const std::string& name, Config&& confi
 };
 
 
-GlobalPatternFinder::PatternVec 
+std::vector<GlobalPattern> 
 GlobalPatternFinder::findPatterns(const ActsTrk::GeometryContext& gctx,
-                                  const SpacePointContainerVec& spacepoints,
-                                  BucketPerContainer& outBuckets) const {
+                                  std::span<const SpacePointContainer*> spacepoints) const {
     /** Create the search tree by ordering hits in theta and **expanded** spectrometer sector 
-     *  and find patterns in eta. The tree should outlive the pattern finding process */
-    const SearchTree_t orderedSpacepoints {constructTree(gctx, spacepoints)};
-    auto visualInfo {m_cfg.visionTool ? std::make_unique<PatternHitVisualInfoVec>() : nullptr};
-    PatternStateVec patterns{findPatternsInEta(orderedSpacepoints, visualInfo.get())};
+     *  and find patterns in eta. The hit payloads are stored in a vector, and the tree will
+     *  contain the index of the hits in the vector. */
+    const SearchTreeData treeData {constructTree(gctx, spacepoints)};
+
+    auto visualInfo {m_cfg.visionTool ? std::make_unique<std::vector<PatHitVisual>>() : nullptr};
+    PatternStateVec patterns{findPatternsInEta(treeData.tree, visualInfo.get())};
 
     /** Add phi-only hits to the patterns */
     addPhiOnlyHits(gctx, patterns);
     
     for (const PatternState& pat : patterns) {
         /** Add the successfull pattern to visual info, as we won't touch it again */
-        addVisualInfo(pat, PatternHitVisualInfo::PatternStatus::eSuccessful, visualInfo.get());
-
-        /** Fill the output buckets */
-        for (const std::vector<CandidateHit>&  hits : pat.hitsPerStation) {
-            for (const auto& hit : hits) {
-                if (outBuckets.find(hit->container) == outBuckets.end()) {
-                    throw std::runtime_error("The space point container associated to the pattern is not present in the output bucket map.");
-                }
-                auto& outBucketVec = outBuckets[hit->container];
-                if (std::ranges::find(outBucketVec, hit->bucket) == outBucketVec.end()) {
-                    outBucketVec.push_back(hit->bucket);
-                }
-            }
-        }
+        addVisualInfo(pat, PatHitVisual::PatternStatus::eSuccessful, visualInfo.get());
     }
+
     /** Plot patterns */
     if (visualInfo) {
         m_cfg.visionTool->plotPatternBuckets(Gaudi::Hive::currentContext(), "GlobPatFind_", std::move(*visualInfo));
@@ -85,21 +59,24 @@ GlobalPatternFinder::findPatterns(const ActsTrk::GeometryContext& gctx,
 }
 GlobalPatternFinder::PatternStateVec 
 GlobalPatternFinder::findPatternsInEta(const SearchTree_t& orderedSpacepoints,
-                                       PatternHitVisualInfoVec* visualInfo) const {
+                                       std::vector<PatHitVisual>* visualInfo) const {
     constexpr auto thetaIdx {Acts::toUnderlying(SeedCoords::eTheta)};
     constexpr auto sectorIdx {Acts::toUnderlying(SeedCoords::eSector)};
 
+    /** Define candidate hit buffer */
+    std::vector<CandidateHit> candidateHits{};
+    candidateHits.reserve(100);
+
     /** Define two PatternState buffers to avoid reallocations */
-    PatternStateVec startPatternBuff{};
-    startPatternBuff.reserve(20);
-    PatternStateVec endPatternBuff{};
-    endPatternBuff.reserve(20);
+    PatternStateVec startPatternBuff{}, endPatternBuff{};
+    startPatternBuff.reserve(10);
+    endPatternBuff.reserve(10);
 
     /** TODO: Retrieve the beamspot if desired */
     const Amg::Vector3D beamSpot{Amg::Vector3D::Zero()};
     
     PatternStateVec outPatterns{};
-    outPatterns.reserve(40);
+    outPatterns.reserve(10);
     /** @brief Helper function to count existing patterns containing a hit
      *  @param hit The hit to check
      *  @param coords The coordinates of the hit
@@ -108,9 +85,9 @@ GlobalPatternFinder::findPatternsInEta(const SearchTree_t& orderedSpacepoints,
                                 const HitPayload& hit,
                                 const SearchTree_t::coordinate_t& coords) -> uint8_t {
         return std::ranges::count_if(patterns, [&](const PatternState& pattern){
-            const double patSeedTheta {pattern.seedHit->position.theta()};
-            if (std::abs(patSeedTheta - coords[thetaIdx]) > 2.*m_cfg.thetaSearchWindow ||
-                !pattern.expSect.isNeighbour(ExpandedSector{static_cast<std::int8_t>(coords[sectorIdx])})) {
+            if (std::abs(pattern.patTheta - coords[thetaIdx]) > 2.*m_cfg.thetaSearchWindow ||
+                !pattern.expSect.isNeighbour(
+                    ExpandedSector{static_cast<std::int8_t>(coords[sectorIdx])})) {
                 return false;
             }
             return pattern.isInPattern(hit);
@@ -119,7 +96,9 @@ GlobalPatternFinder::findPatternsInEta(const SearchTree_t& orderedSpacepoints,
     using enum SeedCoords;
     for (const auto seedingLayer : m_cfg.layerSeedings) {
         /** We try to build a pattern in eta starting from every hit in the three */
-        for (const auto& [seedCoords, seed] : orderedSpacepoints) {
+        for (const auto& [seedCoords, seedPtr] : orderedSpacepoints) {
+            /** Get the seed hit */
+            const HitPayload& seed {*seedPtr};
             /** Check the seed is in the current seeding layer, and if seeding from MDT hits is enabled  */
             const LayerIndex seedLayer {toLayerIndex(seed.station)};
             if (seedLayer != seedingLayer || (seed.isStraw && !m_cfg.seedFromMdt)) {
@@ -133,7 +112,9 @@ GlobalPatternFinder::findPatternsInEta(const SearchTree_t& orderedSpacepoints,
                 outPatterns = resolveOverlaps(outPatterns, visualInfo);
                 nExistingPatterns = countPatterns(outPatterns,seed, seedCoords);
                 if (nExistingPatterns >= m_cfg.maxSeedAttempts) {
-                    ATH_MSG_VERBOSE(__func__<<"() Seed has already been used in "<<nExistingPatterns<<" patterns, which is above the limit - skip this seed.");
+                    ATH_MSG_VERBOSE(__func__<<"() Seed has already been used in "
+                        <<static_cast<int>(nExistingPatterns)
+                        <<" patterns, which is above the limit - skip this seed.");
                     continue;
                 }   
             }
@@ -148,10 +129,10 @@ GlobalPatternFinder::findPatternsInEta(const SearchTree_t& orderedSpacepoints,
                                     ? m_cfg.thetaSearchWindow : 0.5*m_cfg.thetaSearchWindow};
             selectRange[thetaIdx].shrink(seedCoords[thetaIdx] - thetaHalfWindow, seedCoords[thetaIdx] + thetaHalfWindow);
             /** Search for compatible spacepoints with the seed and check if there are enough to build a pattern */
-            std::vector<CandidateHit> candidateHits{};
-            orderedSpacepoints.rangeSearchMapDiscard(selectRange, [&candidateHits](const SearchTree_t::coordinate_t& /*coords*/,
-                                                                                        const HitPayload& hit){
-                candidateHits.emplace_back(&hit, hit.station, 0u, hit.sector, hit.isStraw);
+            candidateHits.clear();
+            orderedSpacepoints.rangeSearchMapDiscard(selectRange, [&](const SearchTree_t::coordinate_t& /*coords*/,
+                                                                      const HitPayload* hit) {
+                candidateHits.emplace_back(hit, hit->station, 0u);
             });
             if (candidateHits.size() < m_cfg.minTriggerLayers + m_cfg.minPrecisionLayers) {
                 ATH_MSG_VERBOSE(__func__<<"() Found "<<candidateHits.size()<<" candidate hits, below minimum required - skip seed.");
@@ -166,20 +147,21 @@ GlobalPatternFinder::findPatternsInEta(const SearchTree_t& orderedSpacepoints,
             /** Sort the compatible spacepoints by global logical layer */
             std::ranges::sort(candidateHits, [](const CandidateHit& c1, const CandidateHit& c2){
                 LayerOrdering ordering {checkLayerOrdering(*c1, *c2)};
-                if (ordering == eSameLayer) {
+                if (ordering == LayerOrdering::eSameLayer) {
                     /** If the two hits are in the same layer, sort them by local y coordinate. */
                     return c1.sp()->localPosition().y() < c2.sp()->localPosition().y();
                 }
-                return ordering == eLowerLayer;
+                return ordering == LayerOrdering::eLowerLayer;
             });
             /** Assign global layer number. This will avoid re-computing it many times later */
             for (std::size_t i {1}; i < candidateHits.size(); ++i) {
                 candidateHits[i].globLayer = candidateHits[i - 1].globLayer + 
-                    (checkLayerOrdering(*candidateHits[i - 1], *candidateHits[i]) != eSameLayer);
+                    (checkLayerOrdering(*candidateHits[i - 1], *candidateHits[i]) != LayerOrdering::eSameLayer);
             }
             if (candidateHits.back().globLayer + 1u < (m_cfg.minTriggerLayers + m_cfg.minPrecisionLayers)) {
-                ATH_MSG_VERBOSE(__func__<<"() Found "<<candidateHits.size()<<" candidate hits on "<<candidateHits.back().globLayer + 1u
-                                        <<" layers, below the minimum required - skip this seed.");
+                ATH_MSG_VERBOSE(__func__<<"() Found "<<candidateHits.size()<<" candidate hits on "
+                    <<static_cast<int>(candidateHits.back().globLayer + 1u)
+                    <<" layers, below the minimum required - skip this seed.");
                 continue;
             }
             if (msgLvl(MSG::VERBOSE)) {
@@ -197,8 +179,8 @@ GlobalPatternFinder::findPatternsInEta(const SearchTree_t& orderedSpacepoints,
 
             PatternState patternSeed{seedCand, static_cast<std::int8_t>(seedCoords[sectorIdx]), &m_cfg, this};
             if (visualInfo) {
-                patternSeed.visualInfo = std::make_unique<PatternHitVisualInfo>(
-                    seed.hit, seedCoords[thetaIdx] - thetaHalfWindow, seedCoords[thetaIdx] + thetaHalfWindow);
+                patternSeed.visualInfo = std::make_unique<PatHitVisual>(
+                    seed.sp, seedCoords[thetaIdx] - thetaHalfWindow, seedCoords[thetaIdx] + thetaHalfWindow);
             }
             
             /** @brief Helper function to extend a given pattern with a set of hits. We can have pattern
@@ -217,8 +199,8 @@ GlobalPatternFinder::findPatternsInEta(const SearchTree_t& orderedSpacepoints,
                 
                 for (auto testItr = begin; testItr != end; ++testItr) {
                     const CandidateHit& testHit {*testItr};
-                    if (testHit.globLayer == seedCand.globLayer && !seedCand.isStraw) {
-                        continue; // skip hits on the same layer as the seed, if straw
+                    if (testHit.globLayer == seedCand.globLayer) {
+                        continue; // skip hits on the same layer as the seed
                     }
                     extendPatterns(startPatternBuff, endPatternBuff, testHit, beamSpot, visualInfo);
                     // Swap the buffers for the next iteration
@@ -238,6 +220,7 @@ GlobalPatternFinder::findPatternsInEta(const SearchTree_t& orderedSpacepoints,
             backwardExtended.reserve(2*forwardExtended.size());
             
             for (PatternState& pat : forwardExtended) {
+                ATH_MSG_VERBOSE(__func__<<"() Start backward search for pattern "<<detailed(pat));
                 pat.moveLineAnchorHit(seedCand);
                 pat.lastInsertedHit = seedCand;
 
@@ -255,7 +238,7 @@ GlobalPatternFinder::findPatternsInEta(const SearchTree_t& orderedSpacepoints,
             for (PatternState& pat : backwardExtended) {
                 pat.meanNormResidual2 /= pat.nBendingLayers();
                 if (!passPatternCuts(pat)) {
-                    addVisualInfo(pat, PatternHitVisualInfo::PatternStatus::eFailed, visualInfo);
+                    addVisualInfo(pat, PatHitVisual::PatternStatus::eFailed, visualInfo);
                     continue;
                 }
                 ATH_MSG_VERBOSE(__func__<<"() Add new pattern "<<detailed(pat));
@@ -271,19 +254,20 @@ void GlobalPatternFinder::extendPatterns(PatternStateVec& startPatterns,
                                          PatternStateVec& endPatterns,
                                          const CandidateHit& testHit,
                                          const Amg::Vector3D& beamSpot,
-                                         PatternHitVisualInfoVec* visualInfo) const {
+                                         std::vector<PatHitVisual>* visualInfo) const {
     endPatterns.clear();
     ATH_MSG_VERBOSE(__func__<<"() *** Test "<<testHit<<" against " << startPatterns.size() << " active patterns.");
 
     // Compute the minimum number of missed layer hits among the active patterns, 
     // to use as reference for pruning patterns with too many missed layers. 
-    std::vector<unsigned> missedLayersVec{};
-    missedLayersVec.reserve(startPatterns.size());
-    std::ranges::transform(startPatterns, std::back_inserter(missedLayersVec), 
-        [&testHit](const PatternState& pat){
-            return std::abs(pat.lastInsertedHit.globLayer - testHit.globLayer);
+    auto missedLayers = [&testHit](const PatternState& pat) -> unsigned {
+        return std::abs(pat.lastInsertedHit.globLayer - testHit.globLayer);
+    };
+
+    unsigned minMissedLayers {std::numeric_limits<unsigned>::max()};
+    std::ranges::for_each(startPatterns, [&missedLayers, &minMissedLayers](const PatternState& pat){
+        minMissedLayers = std::min(minMissedLayers, missedLayers(pat));
     });
-    const unsigned minMissedLayers {std::ranges::min(missedLayersVec)};
 
     const bool shouldPrune {startPatterns.size() > 1 && 
         std::ranges::any_of(startPatterns, [](const PatternState& p){
@@ -291,15 +275,15 @@ void GlobalPatternFinder::extendPatterns(PatternStateVec& startPatterns,
     
     for (auto [i, pat] : Acts::enumerate(startPatterns)) {
         if (pat.isOverlap) {
-            addVisualInfo(pat, PatternHitVisualInfo::PatternStatus::eFailed, visualInfo);
+            addVisualInfo(pat, PatHitVisual::PatternStatus::eFailed, visualInfo);
             continue;
         }
         /** Check the pattern has not already missed too many layers compared to other patterns. */
         if (pat.lastInsertedHit.station == testHit.station && 
-            missedLayersVec[i] > std::max(m_cfg.maxMissLayersInStation, minMissedLayers)) {
-            ATH_MSG_VERBOSE(__func__<<"() Pattern " << detailed(pat) << "\nhas missed " << (int)missedLayersVec[i] 
+            missedLayers(pat) > std::max(m_cfg.maxMissLayersInStation, minMissedLayers)) {
+            ATH_MSG_VERBOSE(__func__<<"() Pattern " << detailed(pat) << "\nhas missed " << (int)missedLayers(pat) 
                                     << " layer hits, above the max allowed - abort pattern.");
-            addVisualInfo(pat, PatternHitVisualInfo::PatternStatus::eFailed, visualInfo);
+            addVisualInfo(pat, PatHitVisual::PatternStatus::eFailed, visualInfo);
             continue;
         }
         /** Prunes pattern hypotheses within groups sharing the same last-hit layer. This step reduces branching by  
@@ -316,55 +300,56 @@ void GlobalPatternFinder::extendPatterns(PatternStateVec& startPatterns,
                 }
                 ATH_MSG_VERBOSE("extendPatterns() Pruning: "<<detailed(p)<<"\nis BETTER than "<<detailed(pat));
                 return true; }) != startPatterns.end()) {
-            addVisualInfo(pat, PatternHitVisualInfo::PatternStatus::eFailed, visualInfo);
+            addVisualInfo(pat, PatHitVisual::PatternStatus::eFailed, visualInfo);
             continue;
         }
         /** Check angular compatibility of the test hit and the pattern */
-        const auto [result, residual, accWindow] {pat.checkLineComp(testHit, beamSpot)};
+        const auto [result, residual, resSigma] {pat.checkLineComp(testHit, beamSpot)};
         switch (result) {
             case LineTestDecision::eAddHit: {
-                if (accWindow > 4.*m_cfg.baseResidualSigma && residual > m_cfg.baseResidualSigma) {
+                /** TO DO: Study feasibility of loosening the criteria for low-confidence hits with OR */
+                const bool lowConfidenceRes {resSigma > m_cfg.lowConfidenceResSigma && 
+                                             residual / resSigma > 2.};
+                if (lowConfidenceRes) {
+                    ATH_MSG_VERBOSE(__func__<<"() Low-confidence hit: residual pull "<<residual / resSigma);
                     /** If hit is compatible but with poor confidence, we create both a pattern with the hit and a pattern without the hit,
                      *  to keep also the possibility of rejecting this hit in the next iterations. First we make sure that the low-confidence
                      *  pattern is original, i.e. accumulating not seen hits */
                     if (std::ranges::any_of(endPatterns, [&testHit, &pat](const PatternState& p) {
-                            return p.isInLastLayer(testHit) && 
+                            return p.lastInsertedHit == testHit && 
                                    (p.prevLayerHit == pat.lastInsertedHit || p.nBendingLayers() > (pat.nBendingLayers() + 1u)); })) {
-                        ATH_MSG_VERBOSE(__func__<<"() Low-confidence hit: forking leads to existing pattern - reject.");
+                        ATH_MSG_VERBOSE(__func__<<"() Forking leads to existing pattern - reject.");
                         break;
                     }
-                    ATH_MSG_VERBOSE(__func__<<"() Low-confidence hit: forking leads to new pattern - fork.");
                     /** Add the new pattern to the list of next patterns */
                     endPatterns.push_back(pat);
-                    endPatterns.back().addHit(testHit, residual, accWindow);
+                    endPatterns.back().addHit(testHit, residual, resSigma);
                     /** Update visual information of the original pattern */
                     if (visualInfo) {
                         pat.visualInfo->discardedHits.push_back(testHit.sp());
                     }
-                    ATH_MSG_VERBOSE("New pattern: " << brief(endPatterns.back()));
                     break;
                 }
-                ATH_MSG_VERBOSE(__func__<<"() Hit compatible - add to pattern.");
-                pat.addHit(testHit, residual, accWindow);
+                ATH_MSG_VERBOSE(__func__<<"() Hit compatible - add to pattern. Residual pull "<<residual / resSigma);
+                pat.addHit(testHit, residual, resSigma);
                 break;
             }
             case LineTestDecision::eBranchPattern: {
                 /* Check first if the branched pattern already exists*/
                 if (std::ranges::any_of(endPatterns, [&testHit, &pat](const PatternState& p) {
-                        return p.isInLastLayer(testHit) && p.prevLayerHit == pat.prevLayerHit; })) {
+                        return p.lastInsertedHit == testHit && p.prevLayerHit == pat.prevLayerHit; })) {
                     ATH_MSG_VERBOSE(__func__<<"() Hit compatible & on same layer of last added hit - branched pattern already exists.");
                     break;
                 }
                 /** Branch the pattern: we clone it and overwrite the existing hit with the test hit */
                 ATH_MSG_VERBOSE(__func__<<"() Hit compatible & on same layer of last added hit - branch pattern.");
                 endPatterns.push_back(pat);
-                endPatterns.back().overWriteHit(testHit, residual, accWindow);
+                endPatterns.back().overWriteHit(testHit, residual, resSigma);
             
                 /** Update visual information */
                 if (visualInfo) {
                     pat.visualInfo->discardedHits.push_back(testHit.sp());
                 }
-                ATH_MSG_VERBOSE("New pattern: " << brief(endPatterns.back()));
                 break;
             }
             case LineTestDecision::eRejectHit: {
@@ -372,17 +357,6 @@ void GlobalPatternFinder::extendPatterns(PatternStateVec& startPatterns,
                 if (visualInfo) {
                     pat.visualInfo->discardedHits.push_back(testHit.sp());
                 }
-                break;
-            }
-            case LineTestDecision::eConsecutiveMdt: {
-                ATH_MSG_VERBOSE(__func__<<"() Compatible MDT hits on same layer - accept.");
-                /* For consecutive MDT hits we don't add their residuals to not penalize patterns with many such hits */
-                pat.addHit(testHit, -1., -1.);
-                break;
-            }
-            case LineTestDecision::eOverwriteLastHit: {
-                ATH_MSG_VERBOSE(__func__<<"() Hit compatible & on same layer of last added hit - overwrite last hit.");
-                pat.overWriteHit(testHit, residual, accWindow);
                 break;
             }
         }
@@ -394,8 +368,8 @@ bool GlobalPatternFinder::passPatternCuts(const PatternState& pat) const {
     /** Check that the pattern meets the minimum requirements for trigger and precision layers */
     if (pat.nTriggerLayers < m_cfg.minTriggerLayers || 
         pat.nPrecisionLayers < m_cfg.minPrecisionLayers ||
-        std::ranges::count_if(pat.nMeasurementLayers, 
-            [this](const uint8_t nLayers) { return nLayers >= m_cfg.minStationLayers; }) < 2) {
+        std::ranges::count_if(pat.hitsPerStation, 
+            [this](const auto& hits) { return hits.size() >= m_cfg.minStationLayers; }) < 2) {
         ATH_MSG_VERBOSE(__func__<<"() Pattern " << detailed(pat) << "\ndoes not meet minimum layer requirements - reject.");
         return false;
     }
@@ -408,7 +382,8 @@ bool GlobalPatternFinder::passPatternCuts(const PatternState& pat) const {
 }
 GlobalPatternFinder::PatternStateVec
 GlobalPatternFinder::resolveOverlaps(PatternStateVec& toResolve,
-                                     PatternHitVisualInfoVec* visualInfo) const {
+                                     std::vector<PatHitVisual>* visualInfo) const {
+    ATH_MSG_VERBOSE(__func__<<"() Resolving overlaps among "<<toResolve.size()<<" patterns.");
     PatternStateVec outputPatterns{};
     outputPatterns.reserve(toResolve.size());
     /** Check if two patterns overlap in space */
@@ -417,13 +392,12 @@ GlobalPatternFinder::resolveOverlaps(PatternStateVec& toResolve,
         if(!a.expSect.isNeighbour(b.expSect)) {
             return false;
         }
-        const double deltaThetaSeed {a.seedHit->position.theta() - b.seedHit->position.theta()};
-        if (std::abs(deltaThetaSeed) > 2.*m_cfg.thetaSearchWindow) {
+        /** Check the angular difference between the seed hits */
+        if (std::abs(a.patTheta - b.patTheta) > 2.*m_cfg.thetaSearchWindow) {
             return false;
         }
-        
         if (a.nPhiLayers > 0 && b.nPhiLayers > 0) {
-            if (std::abs(P4Helpers::deltaPhi(a.patPhi, b.patPhi)) > 2.*m_cfg.phiTolerance) {
+            if (std::abs(P4Helpers::deltaPhi(a.patPhi, b.patPhi)) > 5.*Gaudi::Units::deg) {
                 return false;
             }
         } else if (a.nPhiLayers > 0) {
@@ -438,22 +412,27 @@ GlobalPatternFinder::resolveOverlaps(PatternStateVec& toResolve,
             }
         }
         /** If we reach here, the patterns can overlap geometrically, so check the hit content */
-        int nSharedHits{0};
+        std::size_t nSharedHits{0}, nSharedStations{0};
         for (std::size_t st{0u}; st < s_nStations; ++st) {
             const auto& hitsA {a.hitsPerStation[st]};
             const auto& hitsB {b.hitsPerStation[st]};
             if (hitsA.empty() || hitsB.empty()) {
                 continue;
             }
-            nSharedHits += std::ranges::count_if(hitsA, [&](const CandidateHit& hitA){
+            const std::size_t nSharedInStation = std::ranges::count_if(hitsA, [&](const CandidateHit& hitA){
                 return std::ranges::any_of(hitsB, [&hitA](const CandidateHit& hitB) {
                     return hitA.sp()->primaryMeasurement() == hitB.sp()->primaryMeasurement();
                 });
             });
+            nSharedHits += nSharedInStation;
+            if (nSharedInStation >= m_cfg.minStationLayers) {
+                nSharedStations++;
+            }
         }
         /** Overlap if more than 50% of the hits of the smaller pattern are shared */
-        const int minHits {std::min(a.nBendingHits(), b.nBendingHits())};
-        return nSharedHits >= 0.5 *minHits;
+        const std::size_t minHits {std::min(a.nBendingLayers(), b.nBendingLayers())};
+        const std::size_t minStations {std::min(a.nStations(/*onlyGoodStations=*/ true), b.nStations(/*onlyGoodStations=*/ true))};
+        return nSharedHits >= 0.5 *minHits && nSharedStations >= std::min(2ul, minStations);
     };
     /** Determine best pattern */
     auto isBetterOverlap = [](const PatternState& a, const PatternState& b) {
@@ -467,7 +446,7 @@ GlobalPatternFinder::resolveOverlaps(PatternStateVec& toResolve,
     for (auto it = toResolve.begin(); it != toResolve.end(); ++it) {
         if (it->isOverlap) {
             // If already marked as overlap, add to visual info, and discard the pattern
-            addVisualInfo(*it, PatternHitVisualInfo::PatternStatus::eOverlap, visualInfo);
+            addVisualInfo(*it, PatHitVisual::PatternStatus::eOverlap, visualInfo);
             continue;
         }
         for (auto jt = std::next(it); jt != toResolve.end(); ++jt) {
@@ -487,7 +466,7 @@ GlobalPatternFinder::resolveOverlaps(PatternStateVec& toResolve,
             outputPatterns.push_back( std::move(*it));
         } else {
             // If overlap, add to visual info, as the pattern will be discarded
-            addVisualInfo(*it, PatternHitVisualInfo::PatternStatus::eOverlap, visualInfo);
+            addVisualInfo(*it, PatHitVisual::PatternStatus::eOverlap, visualInfo);
         }
     }
     ATH_MSG_VERBOSE(__func__<<"() Patterns surviving overlap removal: "<< outputPatterns.size());
@@ -495,56 +474,36 @@ GlobalPatternFinder::resolveOverlaps(PatternStateVec& toResolve,
 }
 void GlobalPatternFinder::addPhiOnlyHits(const ActsTrk::GeometryContext& gctx,
                                          PatternStateVec& patterns) const {
-    constexpr auto covIdxEta {Acts::toUnderlying(SpacePoint::CovIdx::etaCov)};
-    /** @brief Struct to model the projection of the pattern line onto the phi strip in a certain station
-     *  @param station: Station index of the projection model
-     *  @param patPosition: Pattern line position in its phi plane
-     *  @param patDirection: Pattern line direction in its phi plane
-     *  @param isValid: Whether the projection is valid */
-    struct PhiStripProjectionModel {
-        StIndex station{};
-        Amg::Vector3D patPosition{Amg::Vector3D::Zero()};
-        Amg::Vector3D patDirection{Amg::Vector3D::Zero()};
-        bool isValid{false};
 
-        double residual(const Amg::Vector3D& stripPos, const Amg::Vector3D& stripDir) const {
-            return Acts::detail::LineHelper::lineIntersect<3>(
-                patPosition, patDirection, stripPos, stripDir).pathLength();
-        }
-    };
-    auto makeProjectionModel = [this](PatternState& pat, const StIndex station) {
-        PhiStripProjectionModel result{};
-        result.station = station;
+    auto computePatternLineInStation = [](PatternState& pat, 
+                                          const StIndex station) -> bool {
         const std::vector<CandidateHit>& stationHits {
             pat.hitsPerStation[Acts::toUnderlying(station)]};
-        if (stationHits.empty()) return result;
+        if(stationHits.empty()) {
+            return false;
+        }
 
-        const HitPayload* sp1 {nullptr};
-        const HitPayload* sp2 {nullptr};
-        if (pat.nMeasurementLayers[Acts::toUnderlying(station)] > 1) {
+        /** We use useBeamspot as a flag to indicate whether the pattern line has been determined successfully */
+        pat.useBeamspot = true;
+
+        if (stationHits.size() > 1) {
             // if we have >= 2 eta hits in the station, we use the furthestmost to define the pattern line
             const auto [minIt, maxIt] {std::ranges::minmax_element(stationHits, {},
                 [](const CandidateHit& c){ return c.globLayer; })};
-            sp1 = minIt->hit;
-            sp2 = maxIt->hit;
+            pat.lineAnchorHit = *minIt;
+            pat.lastInsertedHit = *maxIt;
+            pat.updateLineParameters(Amg::Vector3D::Zero());
         }
-        if (!sp1 || !sp2 || 
-            layerDistance(station, pat.projToPhiPlane(*sp1), pat.projToPhiPlane(*sp2)) < m_cfg.minHitDistance4Line) {
+        if (pat.useBeamspot) {
             // if we have only one eta hit or the layer separation is too small, to find the second hit 
             // we use the functionality of anchor hit
             pat.moveLineAnchorHit(stationHits.front());
-            sp1 = stationHits.front().hit;
-            sp2 = pat.lineAnchorHit.hit;
+            pat.lastInsertedHit = *std::ranges::max_element(stationHits, {},
+                [&pat](const CandidateHit& c){ 
+                    return (pat.projToPhiPlane(*c) - pat.projToPhiPlane(*pat.lineAnchorHit)).mag(); }); 
+            pat.updateLineParameters(Amg::Vector3D::Zero());
         }
-        if (!sp1 || !sp2 ) return result;
-
-        Amg::Vector3D pos1 {pat.projToPhiPlane(*sp1)};
-        Amg::Vector3D pos2 {pat.projToPhiPlane(*sp2)};
-        
-        result.patPosition = pos1;
-        result.patDirection = (pos2 - pos1).unit();
-        result.isValid = true;
-        return result;
+        return !pat.useBeamspot;
     };
 
     PatternStateVec survivingPatterns{};
@@ -553,86 +512,97 @@ void GlobalPatternFinder::addPhiOnlyHits(const ActsTrk::GeometryContext& gctx,
         /** We look for phi-only hits in the buckets associated with the pattern */
         ATH_MSG_VERBOSE(__func__<<"() Search for phi-only hits for pattern: " << brief(pat));
 
-        // Projection model of pattern line onto a given phi strip
-        std::optional<PhiStripProjectionModel> patProjOnStrip{};
-        bool stopSearch {false};
+        std::optional<StIndex> patterLineStation{std::nullopt};
+
+        auto projOntoPhiPlane = [&pat](const Amg::Vector3D& pos) -> Amg::Vector3D {
+            return pos - pos.dot(pat.bendPlaneNorm) * pat.bendPlaneNorm;
+        };
+
         for (const SpacePointBucket* bucket : pat.getParentBuckets()) {
-            if (stopSearch) break;
 
             const Amg::Transform3D& localToGlobal {bucket->msSector()->localToGlobalTransform(gctx)};
             const StIndex station {m_cfg.idHelperSvc->stationIndex(bucket->front()->identify())};
-            // If the projection model is not valid, we will use the pattern theta. We cache the local Y in glob frame
-            const Amg::Vector3D locY {localToGlobal.linear() * Amg::Vector3D::UnitY()};
+            const uint8_t sector = bucket->msSector()->sector();
             
             for (const auto& hit : *bucket) {
-                if (pat.nPhiLayers >= m_cfg.minPhiLayers) {
-                    stopSearch = true;
-                    break;
-                }
                 // We are looking for phi-only hits
                 if (hit->measuresEta()){
                     continue;
                 }
                 ATH_MSG_VERBOSE(__func__<<"() *** Test phi-only hit "<<*hit);
-                // Check phi compatibility
-                const Amg::Vector3D locPosTest {hit->localPosition()};
-                const Amg::Vector3D globPosTest {localToGlobal * locPosTest};
-                const double globPhi {globPosTest.phi()};
-                if (!pat.isPhiCompatible(globPhi)) {
-                    ATH_MSG_VERBOSE(__func__<<"() Phi-only hit not compatible");
-                    continue;
-                }
-                // Check there are not other phi hits in the same layer
+
+                /** Reject hits from a layer that already contains a phi hit */
                 const uint8_t layNum = m_spSorter.sectorLayerNum(*hit);
                 const std::vector<CandidateHit>& stationHits {
                     pat.hitsPerStation[Acts::toUnderlying(station)]};
                 assert(!stationHits.empty());
                 if (std::ranges::any_of(stationHits, [&](const CandidateHit& h){
-                        return h.sp()->measuresPhi() && hit->msSector() == h.sp()->msSector() && layNum == h->locLayer; }) ||
+                        return h->measuresPhi && 
+                               hit->msSector() == h.sp()->msSector() && 
+                               layNum == h->locLayer;
+                        }) ||
                     std::ranges::any_of(pat.phiOnlyHits, [&](const HitPayload& h){
-                        return station == h.station && hit->msSector() == h->msSector() && layNum == h.locLayer; })) {
+                        return station == h.station && 
+                               hit->msSector() == h->msSector() && 
+                               layNum == h.locLayer; 
+                        })) {
                     ATH_MSG_VERBOSE(__func__<<"() The pattern already has a phi hit in the same layer - skip hit.");
                     continue;
                 }
-                // Check eta compatibility.
-                if (!patProjOnStrip.has_value() || patProjOnStrip->station != station) {
-                    patProjOnStrip = makeProjectionModel(pat, station);
-                }
-                if (!patProjOnStrip->isValid) {
-                    ATH_MSG_VERBOSE(__func__<<"() Invalid projection model for station "<<station<<" - skip hit.");
+                /** Build the quantities needed for the phi compatibility test. */
+                HitPayload newHit {hit.get(), bucket, localToGlobal, layNum, sector, station};
+
+                if (!pat.isPhiCompatible(newHit)) {
+                    ATH_MSG_VERBOSE(__func__<<"() Phi-only hit not compatible");
                     continue;
                 }
-                const Amg::Vector3D stripDir {localToGlobal.linear() * hit->sensorDirection()};
-                const double stripHalfLength {std::sqrt(hit->covariance()[covIdxEta])};
-                ATH_MSG_VERBOSE(__func__<<"() Distance pattern line from strip center: "
-                    <<patProjOnStrip->residual(globPosTest, stripDir)<<", strip half-length: "<<stripHalfLength);
 
-                if (patProjOnStrip->residual(globPosTest, stripDir) > 1.1*stripHalfLength) {
+                if (!patterLineStation || *patterLineStation != station) {
+                    if (!computePatternLineInStation(pat, station)) {
+                        ATH_MSG_VERBOSE(__func__<<"() Invalid projection model for station "<<station<<" - skip hit.");
+                        continue;
+                    }
+                    patterLineStation = station;
+                }
+
+                const double stripHalfLength {
+                    std::sqrt(hit->covariance()[Acts::toUnderlying(SpacePoint::CovIdx::etaCov)])};
+                const Amg::Vector3D stripLow {
+                    projOntoPhiPlane(newHit.position - stripHalfLength * newHit.sensorDir)};
+                const Amg::Vector3D stripHigh {
+                    projOntoPhiPlane(newHit.position + stripHalfLength * newHit.sensorDir)};
+                const Amg::Vector3D stripDirOnPlane {(stripHigh - stripLow).unit()};
+                
+                const double stripIntersect {Acts::detail::LineHelper::lineIntersect<3>(
+                    pat.linePos, pat.lineDir, stripLow, stripDirOnPlane).pathLength()};
+                const double stripProjLength {(stripHigh - stripLow).mag()};
+
+                ATH_MSG_VERBOSE(__func__<<"() Intersect distance from lower strip edge: "
+                    <<stripIntersect<<", proj strip length: "<< (stripHigh - stripLow).mag());
+                
+                constexpr double margin {10 * Gaudi::Units::mm};
+                if (stripIntersect < -margin || stripIntersect > (stripProjLength + margin)) {
                     ATH_MSG_VERBOSE(__func__<<"() The pattern falls outside the test hit strip in eta - skip hit.");
                     continue;
                 }
-                // Create the hit payload and add the hit to the pattern. Save only relevant quantities for phi-only hits.
-                ATH_MSG_VERBOSE(__func__<<"() Phi-only hit compatible - add it to the pattern.");
-                pat.phiOnlyHits.emplace_back(hit.get(), /*bucket*/nullptr, /*container*/nullptr, globPosTest, Amg::Vector3D::Zero(),
-                    station, layNum, /*sector*/0u, /*isPrecision*/false, /*isStraw*/false);
-
-                if (pat.nPhiLayers == 0) pat.updatePatternPhi(globPhi);
+                pat.phiOnlyHits.push_back(std::move(newHit));
                 pat.nPhiLayers++;
+                pat.updatePatternPhi();
             }
         }
         if (pat.nPhiLayers < m_cfg.minPhiLayers) {
-            ATH_MSG_VERBOSE(__func__<<"() Pattern "<< detailed(pat)<<" has only "<<pat.nPhiLayers
-                                    <<" phi layers, below the minimum required - reject this pattern.");
+            ATH_MSG_VERBOSE(__func__<<"() Pattern "<<detailed(pat)
+                <<" has only "<<static_cast<int>(pat.nPhiLayers)
+                <<" phi layers, below the minimum required - reject this pattern.");
             continue;
         }
-        pat.finalizePatternPhi();
         survivingPatterns.push_back(std::move(pat));
     }
     std::swap(patterns, survivingPatterns);
 }
 GlobalPattern GlobalPatternFinder::convertToPattern(const PatternState& cache) const {
     GlobalPattern::HitCollection hitPerStation{};
-    GlobalPattern::BucketCollection bucketPerStation{};
+    std::vector<const SpacePointBucket*> parentBuckets{};
     /** Add eta hits */
     for (uint8_t st{0u}; st < s_nStations; ++st) {
         const auto& hits {cache.hitsPerStation[st]};
@@ -640,21 +610,21 @@ GlobalPattern GlobalPatternFinder::convertToPattern(const PatternState& cache) c
 
         auto& outHits {hitPerStation[static_cast<StIndex>(st)]};
         outHits.reserve(hits.size());
-        auto& outBuckets {bucketPerStation[static_cast<StIndex>(st)]};
         
-        std::ranges::for_each(hits, [&outHits, &outBuckets](const CandidateHit& h){
+        std::ranges::for_each(hits, [&outHits, &parentBuckets](const CandidateHit& h){
             outHits.push_back(h.sp());
-            if (std::ranges::find(outBuckets, h->bucket) == outBuckets.end()) {
-                outBuckets.push_back(h->bucket);
+            if (std::ranges::find(parentBuckets, h->bucket) == parentBuckets.end()) {
+                parentBuckets.push_back(h->bucket);
             }
         });
     }
+
     /** Add phi-only hits */
     for (const HitPayload& hit : cache.phiOnlyHits) {
-        hitPerStation[static_cast<StIndex>(hit.station)].push_back(hit.sp());
+        hitPerStation[static_cast<StIndex>(hit.station)].push_back(hit.sp);
     }
-    GlobalPattern pattern{std::move(hitPerStation), std::move(bucketPerStation)};
-    pattern.setTheta(cache.seedHit->position.theta());
+    GlobalPattern pattern{std::move(hitPerStation), std::move(parentBuckets)};
+    pattern.setTheta(cache.patTheta);
     pattern.setPhi(cache.patPhi);
     // Set the pattern sector(s) and theta.
     pattern.setSector(cache.expSect.sector());
@@ -666,9 +636,9 @@ GlobalPattern GlobalPatternFinder::convertToPattern(const PatternState& cache) c
     return pattern;
 }
 
-GlobalPatternFinder::PatternVec
+std::vector<GlobalPattern>
 GlobalPatternFinder::convertToPattern(const PatternStateVec& cache) const {
-    PatternVec patterns{};
+    std::vector<GlobalPattern> patterns{};
     patterns.reserve(cache.size());
     std::transform(cache.begin(), cache.end(), std::back_inserter(patterns), 
         [this](const PatternState& cacheEntry) {
@@ -677,493 +647,119 @@ GlobalPatternFinder::convertToPattern(const PatternStateVec& cache) const {
     return patterns;
 }
 
-GlobalPatternFinder::SearchTree_t 
+GlobalPatternFinder::SearchTreeData 
 GlobalPatternFinder::constructTree(const ActsTrk::GeometryContext& gctx,
-                                   const SpacePointContainerVec& spacepoints) const {
-    SearchTree_t::vector_t rawData{};
+                                   std::span<const SpacePointContainer*> spacepoints) const {
+    
+    std::vector<HitPayload> hitPayloads{};
     using SectorProjector = ExpandedSector::SectorProjector;
     using enum SectorProjector;
-    // Before the loops: estimate the total number of hits 
+    /** First estimate the number of hits */
     size_t totalHits = 0;
     for (const SpacePointContainer* spc : spacepoints) {
         for (const SpacePointBucket* bucket : *spc) {
             totalHits += bucket->size();
         }
     }
-    // We can have up to 3 entries per hit (when the hit does not measure phi).
-    rawData.reserve(3 * totalHits);
+    hitPayloads.reserve(totalHits);
 
     for (const SpacePointContainer* spc : spacepoints) {
-        ATH_MSG_VERBOSE(__func__<<"() Processing "<<spc->size()<<" space point buckets...");
         for (const SpacePointBucket* bucket : *spc) {
-            ATH_MSG_VERBOSE(__func__<<"() Processing " << bucket->size() << " spacepoints...");
+            
             const Amg::Transform3D& localToGlobal {bucket->msSector()->localToGlobalTransform(gctx)};
-            const Acts::SquareMatrix<3> rotation {localToGlobal.linear()};
-            const StIndex bucketStation {m_cfg.idHelperSvc->stationIndex(bucket->front()->identify())};
+            const StIndex station {m_cfg.idHelperSvc->stationIndex(bucket->front()->identify())};
             const uint8_t sector = bucket->msSector()->sector();
 
             for (const auto& hit : *bucket) {
                 // Ignore only-phi hits and MDT hits if desired
-                const bool isStraw {hit->isStraw()};
-                if (!hit->measuresEta() || (!m_cfg.useMdtHits && isStraw)) {
+                if (!hit->measuresEta() || (!m_cfg.useMdtHits && hit->isStraw())) {
                     continue;
                 }
-                ATH_MSG_VERBOSE(__func__<<"() Spacepoint: " << *hit);
-                const Amg::Vector3D globalPos {localToGlobal * hit->localPosition()};
-                const Amg::Vector3D globWireDir {rotation * hit->sensorDirection()};
-                const ExpandedSector hitExpSector {globalPos.phi()};
-
-                /** Try to duplicate the hit in the neighboring sectors if it is close to the sector border. This ensures 
-                 *  that we can find patterns crossing the sector borders. */ 
-                for (const SectorProjector proj : {leftOverlap, center, rightOverlap}) {
-                    /// Check whether the hit belongs to the left or right sector as well
-                    const ExpandedSector expSect {sector, proj};
-                    if (proj != SectorProjector::center && hit->measuresPhi() && expSect != hitExpSector) {
-                        ATH_MSG_VERBOSE(__func__<<"() Hit with "<<hitExpSector<<" is not compatible with "<<expSect);
-                        continue;
+                const uint8_t layNum = m_spSorter.sectorLayerNum(*hit);
+         
+                hitPayloads.emplace_back(hit.get(), bucket, localToGlobal, layNum, sector, station);
+  
+                if (msgLvl(MSG::VERBOSE)) {
+                    const HitPayload& newHit {hitPayloads.back()};
+                    std::ostringstream oss{};
+                    oss<<__func__<<"() Building hit from "<<*hit<<std::endl<<"PhiCov: "<<newHit.phiCov
+                        <<", Pos: "<<Amg::toString(newHit.position)<<", SensorDir: "<<Amg::toString(newHit.sensorDir);
+                    if (newHit.isStraw) {
+                        oss<<", discCov: "<<newHit.secondaryMeasDir.x();
+                    } else {
+                        oss<<"orthogonalStrips: "<<!newHit.nonOrthogonalStrips
+                           <<", secondaryMeasDir: "<<Amg::toString(newHit.secondaryMeasDir);
                     }
-
-                    /* Project the hit onto the plane along the sector radial direction. 
-                     * This allows to remove the bias of hit displacement in phi direction */
-                    const Amg::Vector3D planeNormal {expSect.normalDir()};
-                    const double projR {hit->measuresPhi() ? globalPos.perp() : (globalPos - globalPos.dot(planeNormal) * planeNormal).perp()};
-                    
-                    std::array<double, 2> coords{};
-                    coords[Acts::toUnderlying(SeedCoords::eTheta)] = atan2(projR, globalPos.z());
-                    coords[Acts::toUnderlying(SeedCoords::eSector)] = expSect.sector();
-
-                    ATH_MSG_VERBOSE(__func__<<"() Add hit: Z: " << globalPos.z() << ", R: " << globalPos.perp() 
-                        <<", ProjR: " << globalPos.perp()<< ", Phi: "<< inDeg(globalPos.phi()) 
-                        <<", SectorPhi: "<< inDeg(expSect.phi())<<" and coordinates "<<coords<<" to search tree");
-                    rawData.emplace_back(std::move(coords), HitPayload{hit.get(), bucket, spc, globalPos, globWireDir, bucketStation,
-                        static_cast<uint8_t>(m_spSorter.sectorLayerNum(*hit)), sector, isPrecisionHit(*hit), isStraw});
-                }  
+                    ATH_MSG_VERBOSE(oss.str());
+                }
             }
         }
     }
-    ATH_MSG_VERBOSE(__func__<<"() Create a new tree with "<<rawData.size()<<" entries. ");
-    return SearchTree_t{std::move(rawData)};
-}
-GlobalPatternFinder::PatternState::PatternState(const CandidateHit& seed,
-                                                const std::int8_t expSector,          
-                                                const Config* cfg,
-                                                const AthMessaging* logger)
-        : cfg{cfg},
-          logger{logger},
-          lastInsertedHit{seed},
-          prevLayerHit{seed},
-          lineAnchorHit{seed},
-          seedHit{seed},
-          expSect{ExpandedSector{expSector}} {
-          
-    /** Update the hit counts in bending direction */
-    nMeasurementLayers[Acts::toUnderlying(seed.station)]++;
-    if (seed->isPrecision) nPrecisionLayers++;
-    else nTriggerLayers++;
-    if (seed->sp()->measuresPhi()) nPhiLayers++;
 
-    updatePatternPhi(seed->position.phi());
+    SearchTree_t::vector_t treeData{};
+    treeData.reserve(3 * hitPayloads.size());
 
-    /** Add now the new hit */
-    hitsPerStation[Acts::toUnderlying(seed.station)].push_back(seed);
-    needLineUpdate = true;
-}
-GlobalPatternFinder::LineTestRes 
-GlobalPatternFinder::PatternState::checkLineComp(const CandidateHit& testHit,
-                                                 const Amg::Vector3D& beamSpot) {
-    // We test hits in same **expanded** sector, so we need just to compare hit's phi with pattern's phi, if available
-    const double phiHit {testHit->position.phi()};
-    if (nPhiLayers) {
-        const double maxPhiDiff {testHit.sp()->measuresPhi() ? 
-            cfg->phiTolerance : sectorMap.sectorWidth(testHit.sector)};
-        if (std::abs(P4Helpers::deltaPhi(patPhi, phiHit)) > maxPhiDiff) {
-            PRINT_VERBOSE(__func__<<"() The pattern with phi = "<<inDeg(patPhi)
-                <<" is not compatible with the test hit with phi "<<inDeg(phiHit) << " - reject.");
-            return LineTestRes{};
-        }
-    }
-    
-    /** @brief Helper function to make the result
-     *  @param decision The decision for the test result if the residual is within the acceptance window 
-     *  @return The test result */
-    auto makeResult = [&testHit, this](const LineTestDecision decision) -> LineTestRes {
-        LineTestRes res{computeLineResidual(testHit)};
-        if (res.residual < res.accWindow) {
-            res.result = decision;
-        }
-        if (visualInfo) {
-            visualInfo->hitLineInfo[testHit.sp()] =
-                std::make_pair(std::tan(lineDir.theta()), res.accWindow);
-        }
-        return res;
-    };
-
-    /*************** Test hit is on a new layer — draw line from line anchor to lastHit */
-    if(testHit.globLayer != lastInsertedHit.globLayer) {
-        updateLineParameters(beamSpot);
-        return makeResult(LineTestDecision::eAddHit);
-    }
-    /*************** Test hit is on the same layer as the last inserted hit ***************/
-    /** Sanity check: Test hit coincides with the last inserted hit */
-    if (testHit == lastInsertedHit) {
-        PRINT_VERBOSE(__func__<<"() Test hit is the same as last inserted hit - reject.");
-        return LineTestRes{};
-    }
-    /** We add the test hit to the pattern if they are consecutive MDT hits */
-    if (areConsecutiveMdt(testHit, lastInsertedHit)) {
-        return makeResult(LineTestDecision::eConsecutiveMdt);
-    }
-    /** If they are not consecutive MDT hits && all insterted hits are on the same layer */
-    if (lineAnchorHit.globLayer == lastInsertedHit.globLayer) {
-        PRINT_VERBOSE(__func__<<"() Test hit on same layer as seed with no prior hits, but not consecutive MDT hits - reject.");
-        return LineTestRes{};
-    }
-    /** If the primary measurement is the same and both measure phi, we keep the most compatible in phi */
-    if (testHit.sp()->primaryMeasurement() == lastInsertedHit.sp()->primaryMeasurement()) { 
-        if (testHit.sp()->measuresPhi() && !lastInsertedHit.sp()->measuresPhi()) {
-            return makeResult(LineTestDecision::eOverwriteLastHit);
-        }
-        if (!testHit.sp()->measuresPhi() && lastInsertedHit.sp()->measuresPhi()) {
-            return LineTestRes{};
-        }
-        if (nPhiLayers && std::abs(P4Helpers::deltaPhi(patPhi, phiHit)) < 
-                          std::abs(P4Helpers::deltaPhi(patPhi, lastInsertedHit->position.phi()))) {
-            return makeResult(LineTestDecision::eOverwriteLastHit);
-        }
-        return LineTestRes{};
-    }
-    /** sTGCs: we can have trigger hits (Pad) and precision hits (strip) on the same layer */
-    if (testHit->isPrecision != lastInsertedHit->isPrecision) {
-        if (lastInsertedHit->isPrecision) {
-            /** Test hit is a trigger hit and last inserted is precision, keep the precision hit */
-            PRINT_VERBOSE(__func__<<"() Test hit is trigger hit and last inserted hit is precision, on the same layer - keep precision hit.");
-            return LineTestRes{};
-        }
-        /** Test hit is a precision hit and last inserted is trigger, if compatible we overwrite the last inserted hit */
-        PRINT_VERBOSE(__func__<<"() Test hit is a precision hit and last inserted hit is trigger on the same layer - check residual...");
-        return makeResult(LineTestDecision::eOverwriteLastHit);
-    }
-    return makeResult(LineTestDecision::eBranchPattern);
-}
-void GlobalPatternFinder::PatternState::moveLineAnchorHit(const CandidateHit& refHit) {
-    // Treat first the special case where we have only one station
-    if (nStations(/*onlyGoodStations=*/ false) < 2) {
-        // If we call this method with only one station, it means that we inverted the hit search direction without
-        // finding any hit in other stations beside the initial one. So the anchor is the last added hit.
-        lineAnchorHit = lastInsertedHit;
-        return;
-    }
-    // Find first the closest station to the reference station among the pattern stations
-    const auto& closestStIt = std::ranges::min_element(hitsPerStation, std::ranges::less{},
-        [&refHit](const auto& hits){
-            if (hits.empty() || hits.front().station == refHit.station) {
-                return std::numeric_limits<int>::max();
+    for (const HitPayload& hit : hitPayloads) {
+        ATH_MSG_VERBOSE(__func__<<"() Spacepoint: " << *hit);
+        const Amg::Vector3D& pos {hit.position};
+        const ExpandedSector hitExpSector {pos.phi()};
+        
+        /** Try to duplicate the hit in the neighboring sectors if it is close to the sector border.  
+         *  This ensures that we can find patterns crossing the sector borders. */ 
+        for (const SectorProjector proj : {leftOverlap, center, rightOverlap}) {
+            /// Check whether the hit belongs to the left or right sector as well
+            const ExpandedSector expSect {hit.sector, proj};
+            if (proj != SectorProjector::center && hit.measuresPhi && expSect != hitExpSector) {
+                ATH_MSG_VERBOSE("addHitToTree() Hit with "<<hitExpSector<<" is not compatible with "<<expSect);
+                continue;
             }
-            return std::abs(hits.front().globLayer - refHit.globLayer);
-        });
 
-    // Then find the closest hit in that station to the reference hit
-    const auto& hits {*closestStIt};
-    auto it {std::ranges::min_element(hits, std::ranges::less{},
-        [&refHit](const CandidateHit& hit){
-            return std::abs(hit.globLayer - refHit.globLayer); })};
-    
-    // Find how many hits in the same layer we have, to be able to set the line anchor at the central hit
-    uint8_t nSameLayer {1u};
-    for (auto jt = std::next(it); jt != hits.end() && jt->globLayer == it->globLayer; ++jt) {
-        ++nSameLayer;
-    }
-    lineAnchorHit = *std::next(it, (nSameLayer - 1u) / 2u);
-}
-void GlobalPatternFinder::PatternState::updateLineParameters(const Amg::Vector3D& beamSpot) {
-    if (!needLineUpdate) {
-        return;
-    }
-    const StIndex lastSt {lastInsertedHit.station};
-    Amg::Vector3D pos1 {projToPhiPlane(*lineAnchorHit)};
-    Amg::Vector3D pos2 {projToPhiPlane(*lastInsertedHit)};
-    
-    // Check whether we have to use the beamspot instead of the last pattern hit to draw the line with the line anchor.
-    useBeamspot = (lastSt == lineAnchorHit.station) && 
-        (pos1 - pos2).mag() < cfg->minHitDistance4Line;
+            /* Project the hit onto the plane along the sector radial direction. 
+             * This allows to remove the bias of hit displacement in phi direction */
+            const Amg::Vector3D planeNormal {expSect.normalDir()};
+            const double projR {hit.measuresPhi
+                ? pos.perp() 
+                : (pos - pos.dot(planeNormal) * planeNormal).perp()};
+            
+            std::array<double, 2> coords{};
+            coords[Acts::toUnderlying(SeedCoords::eTheta)] = atan2(projR, pos.z());
+            coords[Acts::toUnderlying(SeedCoords::eSector)] = expSect.sector();
 
-    if (useBeamspot) {
-        pos1 = beamSpot;
+            ATH_MSG_VERBOSE("addHitToTree() Add hit: Z: " << pos.z() << ", R: " << pos.perp() 
+                <<", ProjR: "<<projR<< ", Phi: "<< inDeg(pos.phi()) 
+                <<", SectorPhi: "<< inDeg(expSect.phi())<<" and coordinates "<<coords<<" to search tree");
+            treeData.emplace_back(std::move(coords), &hit);
+        }  
     }
-
-    /* Determine the (average) coordinates of the last added hit(s). If it is a straw, find  
-     * the consecutive (MDT) hits on the same layer and return use average position
-     * for next computations — gives a more central reference for the line direction */
-    std::vector<CandidateHit>& hitsLastSt {hitsPerStation[Acts::toUnderlying(lastSt)]};
-    uint8_t nSameLayer {1u};
-    for (const CandidateHit& hit : hitsLastSt) {
-        if (hit == lastInsertedHit || 
-            hit.globLayer != lastInsertedHit.globLayer) {
-            continue;
-        }
-        pos2 += projToPhiPlane(*hit);
-        ++nSameLayer;
-    }
-    if (nSameLayer > 1u) {
-        pos2 = pos2 / nSameLayer;
-    }
-
-    const Amg::Vector3D d {pos2 - pos1};
-    linePos = pos1;
-    leverArm = d.mag();
-    lineDir = d / leverArm;
-    needLineUpdate = false;
-
-    PRINT_VERBOSE(__func__<<"() Update line parameters --> Pos: "<<Amg::toString(linePos)
-        <<" R/Z: "<<linePos.perp()<<"/"<<linePos.z()<<", Dir: " << Amg::toString(lineDir) 
-        <<", slope: "<<std::tan(lineDir.theta())<<", LeverArm: " << leverArm);
-}
-GlobalPatternFinder::LineTestRes 
-GlobalPatternFinder::PatternState::computeLineResidual(const CandidateHit& testHit) const {
-    LineTestRes res{};
-
-    // Compute the residual
-    const Amg::Vector3D pos {projToPhiPlane(*testHit)};
-    const Amg::Vector3D K {pos - linePos};
-    res.residual = (K.cross(lineDir)).mag();
-
-    /** Dynamic acceptance window derived from the propagation of the measurement variance to the residual.
-     *  In this simple model, the measurement variance is assumed isotropic. The residual variance increases  
-     *  with the normalized extrapolation distance alpha = s / L, where s is the projection of the hit
-     *  onto the pattern direction and L is the pattern lever arm. */
-    const double alpha {K.dot(lineDir) / leverArm};
-    const double varianceScale {2. * (1. - alpha + Acts::square(alpha))};
-    res.accWindow = cfg->baseResidualSigma * std::sqrt(varianceScale);
-    /** Loosen the window when using the beamspot as reference, as the line slope is less well defined, 
-     *  and when we are looking for hits in a new station. */
-    if (useBeamspot || testHit->station != lastInsertedHit.station ||
-        (testHit->station != prevLayerHit.station && testHit.globLayer == lastInsertedHit.globLayer)) {
-        res.accWindow *= 2.;
-    }
-    PRINT_VERBOSE(__func__<<"() "<< brief(*this)<<"\nUse beamspot: "<<useBeamspot<<", Slope: "
-        <<std::tan(lineDir.theta())<<", Residual: "<<res.residual<<", Window: "<<res.accWindow
-        <<", alpha: "<<alpha<<", Scale Factor: "<<std::sqrt(varianceScale));
-    return res;
-}
-Amg::Vector3D GlobalPatternFinder::PatternState::projToPhiPlane(const HitPayload& hit) const {
-    const Amg::Vector3D& toProject {hit.position};
-    if (hit->measuresPhi()) {
-        const double R {toProject.perp()};
-        return Amg::Vector3D{R * std::cos(patPhi), R * std::sin(patPhi), toProject.z()};
-    }
-    return Acts::PlanarHelper::intersectPlane(toProject, hit.sensorDir,
-        bendPlaneNorm, Amg::Vector3D::Zero()).position();        
-}
-bool GlobalPatternFinder::PatternState::isPhiCompatible(const double testPhi) const {
-    /** We check that the test hit is compatible with the pattern phi, if available, which is given by the first
-     *  phi measurement in the pattern. If the pattern doesn't have a phi yet, we check that the test hit is in 
-     *  the same pattern sector(s) */
-    if (nPhiLayers) {
-        if (std::abs(P4Helpers::deltaPhi(patPhi, testPhi)) > cfg->phiTolerance) {
-            PRINT_VERBOSE(__func__<<"() The pattern with phi = "<<inDeg(patPhi)
-                <<" is not compatible with the test hit with phi "<<inDeg(testPhi));
-            return false;
-        }
-    } else {
-        const unsigned sector1 {expSect.msSector()};
-        const unsigned sector2 {expSect.adjacentMsSector()};
-        const bool isCompatible {sector1 == sector2 
-            ? sectorMap.insideSector(sector1, testPhi)
-            : sectorMap.insideSector(sector1, testPhi) && sectorMap.insideSector(sector2, testPhi)};
-        if (!isCompatible) {
-            PRINT_VERBOSE(__func__<<"() The test hit with phi = "<<inDeg(testPhi)
-                <<" is not inside the pattern sectors: "<<sector1<<" and "<<sector2);
-            return false;
-        }            
-    }
-    return true;
-}
-void GlobalPatternFinder::PatternState::addHit(const CandidateHit& hit,
-                                               const double residual,
-                                               const double acceptWindow) {
-    
-    if (hit.globLayer != lastInsertedHit.globLayer) {
-        /** Update the pointers to previous layer hit */
-        prevLayerHit = lastInsertedHit;
-
-        /** Update the hit counts in bending direction */
-        nMeasurementLayers[Acts::toUnderlying(hit.station)]++;
-        if (hit->isPrecision) nPrecisionLayers++;
-        else nTriggerLayers++;
-        /** Update the phi of the pattern if there are no phi hits yet */
-        if (hit.sp()->measuresPhi()) {
-            if (nPhiLayers == 0) {\
-                updatePatternPhi(hit->position.phi());
-            }
-            nPhiLayers++;
-        }
-    }
-    /** Add now the new hit */
-    hitsPerStation[Acts::toUnderlying(hit.station)].push_back(hit);
-    lastInsertedHit = hit;
-
-    /** Update the residual. Since we can also add consecutive MDT hits without updating the residual, we need to check the accept window */
-    if (acceptWindow > 0.) {
-        meanNormResidual2 += Acts::square(residual / acceptWindow);
-        lastAcceptWindow = acceptWindow;
-        lastResidual = residual;
-    }
-    // If the new compatible hit is in a different station, update the line anchor
-    if (hit.station != lastInsertedHit.station) {
-        moveLineAnchorHit(hit);
-    }
-    needLineUpdate = true;
-}
-void GlobalPatternFinder::PatternState::overWriteHit(const CandidateHit& newHit,
-                                                     const double newResidual,
-                                                     const double newAcceptWindow) {
-    const StIndex st {newHit.station};
-    if (st != lastInsertedHit.station || lastInsertedHit.globLayer != newHit.globLayer) {
-        throw std::runtime_error(std::format(
-            "Trying to overwrite a hit in station/layer {}/{} with another one from station/layer {}/{}", 
-                stName(lastInsertedHit.station), lastInsertedHit.globLayer, stName(st), newHit.globLayer));
-    }
-    /* We expect to overwrite hits of the same type (precision/trigger), since we only branch when we have 
-     * compatible hits in the same layer, except for sTGC hits, where we have pad and strips in the same layer */
-    if (lastInsertedHit->isPrecision != newHit->isPrecision) {
-        if (newHit.sp()->type() != xAOD::UncalibMeasType::sTgcStripType) {
-            std::stringstream ss {};
-            ss << "Trying to overwrite a hit with incompatible type\n";
-            ss << "Old hit: " << **lastInsertedHit << ", isPrecision: " << lastInsertedHit->isPrecision << ", measuresEta: " << lastInsertedHit.sp()->measuresEta() << "\n";
-            ss << "New hit: " << **newHit << ", isPrecision: " << newHit->isPrecision << ", measuresEta: " << newHit.sp()->measuresEta();
-            throw std::runtime_error(ss.str());
-        }
-        nTriggerLayers--;
-        nPrecisionLayers++;
-    }
-    /** Update the phi counts */
-    if (lastInsertedHit.sp()->measuresPhi()) nPhiLayers--;
-    if (newHit.sp()->measuresPhi()) {
-        if (nPhiLayers == 0) {
-            updatePatternPhi(newHit->position.phi());
-        }
-        nPhiLayers++;
-    }
-    /** Update the residual */
-    meanNormResidual2 += Acts::square(newResidual / newAcceptWindow) - Acts::square(lastResidual / lastAcceptWindow);
-    lastAcceptWindow = newAcceptWindow;
-    lastResidual = newResidual;
-
-    auto& stHits {hitsPerStation[Acts::toUnderlying(st)]};
-    /* Remove ALL hits in the same layer */
-    while (!stHits.empty()) {
-        if (stHits.back().globLayer != lastInsertedHit.globLayer) {
-            break;
-        }
-        if (visualInfo) {
-            visualInfo->replacedHits.push_back(stHits.back().sp());
-        }
-        stHits.pop_back();
-    }
-    /** Add now the new hit */
-    hitsPerStation[Acts::toUnderlying(st)].push_back(newHit);
-    lastInsertedHit = newHit;
-    needLineUpdate = true;
-}
-bool GlobalPatternFinder::PatternState::isInPattern(const HitPayload& hit) const {
-    const auto& hits {hitsPerStation[Acts::toUnderlying(hit.station)]};
-    return std::ranges::find_if(hits, 
-        [&hit](const CandidateHit& c){ return *c == hit; }) != hits.end();                                           
-}
-void GlobalPatternFinder::PatternState::finalizePatternPhi() {
-    if (!nPhiLayers) {
-        /** If there are no phi hits, we just use the central phi of the sector/overlap region */
-        patPhi = sectorMap.sectorOverlapPhi(expSect.msSector(), expSect.adjacentMsSector());
-        return;
-    }
-    double deltaPhiAcc {0.};
-    std::optional<double> centralPhi {};
-    auto processPhiHit = [&deltaPhiAcc, &centralPhi](const HitPayload& hit){
-        if (!hit->measuresPhi()) {
-            return;
-        }
-        const double hitPhi {hit.position.phi()};
-        if (!centralPhi) {
-            centralPhi = hitPhi;
-        }
-        deltaPhiAcc += P4Helpers::deltaPhi(hitPhi, *centralPhi);
-    };
-    for (const std::vector<CandidateHit>&  hits : hitsPerStation) {
-        for (const auto& hit : hits) {
-            processPhiHit(*hit);
-        }
-    }
-    for (const HitPayload& hit : phiOnlyHits) {
-        processPhiHit(hit);
-    }
-    patPhi = P4Helpers::deltaPhi(centralPhi.value_or(0.) + deltaPhiAcc / nPhiLayers, 0.);
-}
-uint8_t GlobalPatternFinder::PatternState::nStations(const bool onlyGoodStations) const {
-    uint8_t nStations {0u};
-    for (uint8_t st{0u}; st < s_nStations; ++st) {
-        if (!hitsPerStation[st].empty() && (!onlyGoodStations || nMeasurementLayers[st] >= cfg->minStationLayers)) {
-            nStations++;
-        }
-    }
-    return nStations;
-}
-uint8_t GlobalPatternFinder::PatternState::nBendingHits() const {
-    return std::accumulate(hitsPerStation.begin(), hitsPerStation.end(), uint8_t{0u}, 
-        [](uint8_t acc, const auto& hits){
-            return acc + hits.size(); });
-}
-uint8_t GlobalPatternFinder::PatternState::nBendingLayers() const {
-    return nPrecisionLayers + nTriggerLayers;
-}
-double GlobalPatternFinder::PatternState::getMeanResidual2() const {
-    if (isFinalized) {
-        return meanNormResidual2;
-    }
-    return meanNormResidual2 / nBendingLayers();
-}
-std::vector<const SpacePointBucket*> GlobalPatternFinder::PatternState::getParentBuckets() const {
-    std::vector<const SpacePointBucket*> buckets{};
-    for (const std::vector<CandidateHit>&  hits : hitsPerStation) {
-        for (const auto& hit : hits) {
-            if (std::ranges::find(buckets, hit->bucket) == buckets.end()) {
-                buckets.push_back(hit->bucket);
-            }
-        }
-    }
-    return buckets;
-}
-bool GlobalPatternFinder::PatternState::isInLastLayer(const CandidateHit& hit) const {
-    if (lastInsertedHit.globLayer != hit.globLayer) {
-        return false;
-    }
-    if (hit.isStraw && lastInsertedHit.isStraw) {
-        const auto& stationHits {hitsPerStation[Acts::toUnderlying(hit.station)]};
-        for (auto it = stationHits.rbegin(); it != stationHits.rend(); ++it) {
-            if (it->globLayer != hit.globLayer) {
-                return false;
-            }
-            if (*it == hit) {
-                return true;
-            }
-        }
-        return false;
-    }
-    return lastInsertedHit == hit;
-}
-void GlobalPatternFinder::PatternState::updatePatternPhi(const double newPhi) {
-    patPhi = newPhi;
-    bendPlaneNorm = Acts::makeDirectionFromPhiTheta(newPhi + 90._degree, 90._degree);
+    ATH_MSG_VERBOSE(__func__<<"() Create a new tree with "<<treeData.size()
+        <<" entries and "<<hitPayloads.size()<<" hits.");
+    return SearchTreeData{std::move(hitPayloads), SearchTree_t{std::move(treeData)}};
 }
 bool GlobalPatternFinder::isBetter(const PatternState& a, const PatternState& b) {
+    const double resA {a.getMeanResidual2()};
+    const double resB {b.getMeanResidual2()};
+    const double resDiff {
+        std::abs(resA - resB) / std::max(resA, resB)
+    };
     const int nLayerDiff {a.nBendingLayers() - b.nBendingLayers()};
-    if (std::abs(nLayerDiff) >= 3) {
-        return nLayerDiff > 0;
+    const int nPrecLayDiff {a.nPrecisionLayers - b.nPrecisionLayers};
+
+    /** For patterns that differ by 1–2 layers, don't sacrifice fit quality  
+     *  unless the extra layers are genuinely comparable. For a ≥3-layer difference,  
+     *  the multiplicity advantage is strong enough to dominate. */
+    if ((nLayerDiff == 0 && nPrecLayDiff == 0) ||
+        (std::abs(nLayerDiff) < 3 && resDiff > 0.1)) {
+        return resA < resB;
     }
-    return a.getMeanResidual2() < b.getMeanResidual2();
+    if (nLayerDiff == 0) {
+        return nPrecLayDiff > 0;
+    }
+    return nLayerDiff > 0;
 }
 GlobalPatternFinder::LayerOrdering
 GlobalPatternFinder::checkLayerOrdering(const HitPayload& hit1,
                                         const HitPayload& hit2) {
+    using enum LayerOrdering;
     auto getLayerOrdering = [](const bool isLayer1Lower) {
         return isLayer1Lower ? eLowerLayer : eHigherLayer;
     };
@@ -1174,17 +770,21 @@ GlobalPatternFinder::checkLayerOrdering(const HitPayload& hit1,
     if (hit1->msSector() == hit2->msSector()) {
         if (hit1.locLayer == hit2.locLayer) {
             return eSameLayer;
-        } else {
-            return getLayerOrdering(hit1.locLayer < hit2.locLayer);
         }
+        return getLayerOrdering(hit1.locLayer < hit2.locLayer);
     }
     StIndex st1 {hit1.station};
     StIndex st2 {hit2.station};
-    /** Hits in the same station and different sectors. We can have this case for hits in the overlap region of two adjacent sectors. */
+    /** Hits in the same station and different sectors. We can have this case for hits 
+     *  in the overlap region of two adjacent sectors. */
     if (st1 == st2) {
-        return getLayerOrdering(isBarrel(st1) 
-            ? hit1.position.perp() < hit2.position.perp() 
-            : std::abs(hit1.position.z()) < std::abs(hit2.position.z()));
+        const double delta {isBarrel(st1) 
+            ? hit1.position.perp() - hit2.position.perp() 
+            : std::abs(hit1.position.z()) - std::abs(hit2.position.z())}; 
+        if (std::abs(delta) <= Acts::s_epsilon) {
+            return eSameLayer;
+        }
+        return getLayerOrdering(delta < 0.);
     }
     LayerIndex layer1 {toLayerIndex(st1)};
     LayerIndex layer2 {toLayerIndex(st2)};
@@ -1218,24 +818,9 @@ GlobalPatternFinder::checkLayerOrdering(const HitPayload& hit1,
     }
     return getLayerOrdering(st1 == StIndex::BM);
 }
-bool GlobalPatternFinder::areConsecutiveMdt(const CandidateHit& hit1, 
-                                            const CandidateHit& hit2) {
-        if (!hit1.isStraw || !hit2.isStraw) {
-            return false;
-        }
-        const uint16_t tubeNum1 {static_cast<const xAOD::MdtDriftCircle*>(hit1.sp()->primaryMeasurement())->driftTube()};
-        const uint16_t tubeNum2 {static_cast<const xAOD::MdtDriftCircle*>(hit2.sp()->primaryMeasurement())->driftTube()};
-        /** To understand: in principle we should not have two MDT hits in the same tube... but this can happen 
-         *  now when running run4 digitization. Therefore, for now we don't throw when hit1==hit2 but we just reject
-         *  one of the two... to understand for future improvements */
-        if(tubeNum1 == tubeNum2) {
-            return false;
-        }; 
-        return std::abs(tubeNum1-tubeNum2) < 2;
-    }
 void GlobalPatternFinder::addVisualInfo(const PatternState& cache,
-                                        PatternHitVisualInfo::PatternStatus status,
-                                        PatternHitVisualInfoVec* visualInfo) const {
+                                        PatHitVisual::PatternStatus status,
+                                        std::vector<PatHitVisual>* visualInfo) const {
     if (!visualInfo) {
         return;
     }
@@ -1255,48 +840,5 @@ void GlobalPatternFinder::addVisualInfo(const PatternState& cache,
 
     visualInfo->back().patternCopy = std::make_unique<GlobalPattern>(std::move(pattern));
     visualInfo->back().status = status;
-}
-bool GlobalPatternFinder::HitPayload::operator==(const HitPayload& other) const {
-    return hit == other.hit;
-}
-void GlobalPatternFinder::CandidateHit::print(std::ostream& ostr) const {
-    ostr<<**hit<<", glob Z/R/phi: "<<hit->position.z()<<" / "<<hit->position.perp()<<" / "
-        <<inDeg(hit->position.phi())<< ", st: " << station <<", loc/glob lay: "
-        <<static_cast<int>(hit->locLayer)<<"/"<<static_cast<int>(globLayer);
-}
-void GlobalPatternFinder::PatternState::print(std::ostream& ostr, bool detailed) const {
-    ostr<<"PatternState Exp Sector: "<<static_cast<int>(expSect.sector())
-    <<", Theta: "<<inDeg(seedHit->position.theta()) << ", Phi: "<<inDeg(patPhi);
-    ostr<<", nPrec: "<<(int)nPrecisionLayers<<", nEtaNonPrec: "<<(int)nTriggerLayers<<", nPhi: "<<(int)nPhiLayers;
-    ostr<<", mean norma res sq: "<<getMeanResidual2();
-    ostr<<", Hit per station: \n";
-    for (uint8_t st{0u}; st < s_nStations; ++st) {
-        const auto& hits {hitsPerStation[st]};
-        if (hits.empty()) continue;
-
-        ostr<<"  Station "<<static_cast<StIndex>(st)<<" has "<<hits.size()<<" hits ";
-        if (detailed) {
-            ostr<<"\n";
-            for (const auto& hit : hits) {
-                ostr<<"    "<<hit<<"\n";
-            }
-        }
-    }
-    if (!detailed) {
-        ostr <<"\n    Last hit: "<<lastInsertedHit<<"\n    prevLayerHit: "
-            <<prevLayerHit << "\n    lineAnchorHit: "<<lineAnchorHit;
-    }
-}
-GlobalPatternFinder::PatternPrintView
-GlobalPatternFinder::brief(const PatternState& p) {
-    return {p, /*detailed=*/false};
-}
-GlobalPatternFinder::PatternPrintView
-GlobalPatternFinder::detailed(const PatternState& p) {
-    return {p, /*detailed=*/true};
-}
-std::ostream& operator<<(std::ostream& os, const GlobalPatternFinder::PatternPrintView& v) {
-    v.pat.print(os, v.detailed);
-    return os;
 }
 }
