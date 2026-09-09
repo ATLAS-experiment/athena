@@ -22,3 +22,7 @@ atlas_add_component( HGTD_Analysis
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 atlas_install_joboptions( share/*.py )
+
+# ROOT plotting macros for the validation chain. Interpreted, not compiled --
+# installed as data so they stay co-located for their relative #includes.
+atlas_install_data( scripts/*.cxx scripts/*.h )
