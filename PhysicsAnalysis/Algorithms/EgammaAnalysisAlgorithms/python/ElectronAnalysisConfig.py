@@ -50,6 +50,10 @@ class ElectronMomentumCalibrationConfig (ConfigBlock) :
         self.addOption ('recalibratePhyslite', True, type=bool,
             info="whether to run the `CP::EgammaCalibrationAndSmearingAlg` on "
             "PHYSLITE derivations.")
+        self.addOption ('selectAuthor', False, type=bool,
+            info="whether to select electrons with a given author value")
+        self.addOption ('author', 1, type=int,
+            info=r"the electron author cut value. Only used if selectAuthor is true.")
         self.addOption ('minPt', 4.5*GeV, type=float,
             info=r"the minimum $p_\mathrm{T}$ cut (in MeV) to apply to calibrated electrons.")
         self.addOption ('maxEta', 2.47, type=float,
@@ -192,6 +196,18 @@ class ElectronMomentumCalibrationConfig (ConfigBlock) :
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
         config.addSelection (self.containerName, '', alg.selectionDecoration)
+
+        # Electron author selection
+        if (self.selectAuthor):
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronAuthorAlg' )
+            alg.selectionDecoration = 'selectElectronAuthor' + self.postfix + ',as_char'
+            config.addPrivateTool( 'selectionTool', 'CP::AsgNumDecorationSelectionToolUInt16' )
+            alg.selectionTool.decorationName = "author"
+            alg.selectionTool.doEqual = True
+            alg.selectionTool.equal = self.author
+            alg.particles = config.readName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, '')
+            config.addSelection (self.containerName, '', alg.selectionDecoration)
 
         if not self.splitCalibrationAndSmearing :
             # Set up the calibration and smearing algorithm:
