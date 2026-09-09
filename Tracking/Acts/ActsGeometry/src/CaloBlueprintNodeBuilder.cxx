@@ -399,6 +399,9 @@ std::shared_ptr<CylinderSurface> ActsTrk::CaloBlueprintNodeBuilder::generateCyli
   double LArBLength = std::abs(highZLarB - lowZLarB);
 
   double zShift = (highZLarB + lowZLarB) / 2.0;
+
+  if (highZLarB > 0 && lowZLarB < 0) zShift = highZLarB-zShift;
+
   ATH_MSG_DEBUG("Cylinder radius and length are " << LArBRadius << " and " << LArBLength << " with shift of " << zShift);
   return Surface::makeShared<CylinderSurface>(Transform3(Translation3(0.0, 0.0, zShift)), LArBRadius, LArBLength/2);
 
