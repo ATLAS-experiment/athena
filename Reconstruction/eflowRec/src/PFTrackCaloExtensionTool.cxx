@@ -3,11 +3,13 @@
 #include "PFTrackCaloExtensionTool.h"
 
 #include "Acts/Geometry/TrackingGeometry.hpp"
-#include "ActsGeometryInterfaces/GeometryDefs.h"
 #include "Acts/Material/MaterialInteraction.hpp"
 #include "Acts/Propagator/detail/SteppingLogger.hpp"
 #include "Acts/Surfaces/CurvilinearSurface.hpp"
 #include "Acts/Surfaces/PlaneSurface.hpp"
+
+#include "ActsGeometryInterfaces/GeometryDefs.h"
+#include "ActsInterop/UnitConverters.h"
 
 #include "eflowTrackCaloPoints.h"
 
@@ -43,10 +45,9 @@ std::unique_ptr<eflowTrackCaloPoints> PFTrackCaloExtensionTool::execute(const Ev
     Acts::Vector3 lastPos{track->parameterX(lastMeasIdx),
                           track->parameterY(lastMeasIdx),
                           track->parameterZ(lastMeasIdx)};
-    Acts::Vector3 lastMom{track->parameterPX(lastMeasIdx),
-                          track->parameterPY(lastMeasIdx),
-                          track->parameterPZ(lastMeasIdx)};
-    lastMom *= Acts::UnitConstants::MeV;
+    Acts::Vector3 lastMom{ActsTrk::energyToActs(track->parameterPX(lastMeasIdx)),
+                          ActsTrk::energyToActs(track->parameterPY(lastMeasIdx)),
+                          ActsTrk::energyToActs(track->parameterPZ(lastMeasIdx))};
 
     Acts::BoundVector lastBoundParams = Acts::BoundVector::Zero();
     lastBoundParams[Acts::eBoundPhi]    = lastMom.phi();
