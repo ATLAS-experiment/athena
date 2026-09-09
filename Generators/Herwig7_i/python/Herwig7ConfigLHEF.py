@@ -136,10 +136,14 @@ saverun {} /Herwig/Generators/EventGenerator
     if me_pdf_order not in ["LO", "NLO"]:
       raise RuntimeError(hw7Utils.ansi_format_error("Herwig7ConfigLHEF.py:__lhef_commands: Parameter 'me_pdf_order' must either be 'LO' or 'NLO'!"))
 
-    if lhe_filename.endswith(".tar.gz"): # athena will decompress the LHE file for us
+    if lhe_filename == "events.lhe":
+      lhe_filename = getattr(self.runArgs, "inputGeneratorFile", "events.lhe")
+
+    if lhe_filename.endswith(".tar.gz"):
       lhe_filename = lhe_filename.replace(".tar.gz", ".events")
       if not os.path.isfile(lhe_filename):
         raise RuntimeError(hw7Utils.ansi_format_error("Herwig7ConfigLHEF.py:__lhef_commands: Could not find decompressed LHE file '{}'!".format(lhe_filename)))
+
 
     momentum_treatment = ""
     beam_commands = ""
