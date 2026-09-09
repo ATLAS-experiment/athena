@@ -21,14 +21,3 @@ StatusCode HGTD_AnalysisAlgBase::initialize() {
 
   return StatusCode::SUCCESS;
 }
-
-StatusCode HGTD_AnalysisAlgBase::finalize() {
-  ATH_MSG_INFO("Finalizing HGTD_AnalysisAlgBase ...");
-  return StatusCode::SUCCESS;
-}
-
-StatusCode HGTD_AnalysisAlgBase::execute(const EventContext& /*ctx*/) {
-  ATH_MSG_DEBUG("Executing HGTD_AnalysisAlgBase ...");
-
-  return StatusCode::SUCCESS;
-}

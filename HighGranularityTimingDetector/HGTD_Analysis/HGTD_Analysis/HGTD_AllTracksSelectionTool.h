@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_Analysis/HGTD_AllTracksSelectionTool.h
  *
@@ -29,10 +29,10 @@ public:
   // for AthAlgTool interface
   virtual StatusCode initialize() override final;
 
-  // for IHGTD_TrackTimeAccessor interface
+  // for IHGTD_TrackSelectionTool interface
 
   virtual bool trackPassesSelection(
-      const xAOD::TrackParticle* track_particle) override final;
+      const xAOD::TrackParticle* track_particle) const override final;
   //////////////////////////////////////////////////////////////////////////////
 };
 

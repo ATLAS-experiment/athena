@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_Analysis/IHGTD_TrackSelectionTool.h
  *
@@ -26,7 +26,7 @@ public:
    * @brief Returns true if the track passes a given selection
    */
   virtual bool
-  trackPassesSelection(const xAOD::TrackParticle* track_particle) = 0;
+  trackPassesSelection(const xAOD::TrackParticle* track_particle) const = 0;
 };
 
 #endif // IHGTD_TRACKSELECTIONTOOL_H

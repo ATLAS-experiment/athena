@@ -1,3 +1,11 @@
+/**
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
+ *
+ * @file HGTD_Analysis/src/HGTD_TrkTimePerformanceStudies.cxx
+ *
+ * @author Alexander Leopold <alexander.leopold@cern.ch>
+ */
+
 #include "HGTD_TrkTimePerformanceStudies.h"
 #include "xAODTruth/xAODTruthHelpers.h"
 
@@ -12,16 +20,11 @@ StatusCode HGTD_TrkTimePerformanceStudies::initialize() {
 
   ATH_MSG_INFO("Initializing HGTD_TrkTimePerformanceStudies ...");
 
-  for (auto tool : m_track_sel_tools) {
-    CHECK(tool.retrieve());
-  }
+  ATH_CHECK(m_track_sel_tools.retrieve());
+  ATH_CHECK(m_track_time_tools.retrieve());
 
-  for (auto tool : m_track_time_tools) {
-    CHECK(tool.retrieve());
-  }
-
-  for (auto track_tool : m_track_sel_tools) {
-    for (auto time_tool : m_track_time_tools) {
+  for (const auto& track_tool : m_track_sel_tools) {
+    for (const auto& time_tool : m_track_time_tools) {
 
       bookEffSubdir(track_tool->name(), time_tool->name(), "m_eff_vs_eta",
                     ";|#eta| ;frequency", 32, 2.4, 4.0);
@@ -55,38 +58,16 @@ StatusCode HGTD_TrkTimePerformanceStudies::initialize() {
 
 StatusCode HGTD_TrkTimePerformanceStudies::execute(const EventContext& ctx) {
 
-  //   ATH_CHECK(evtStore()->retrieve(m_track_particles, m_trkpart_cont_name));
-
   SG::ReadHandle<xAOD::TrackParticleContainer> track_particles_hdl(
-      m_track_particles_key,ctx);
+      m_track_particles_key, ctx);
   const xAOD::TrackParticleContainer* track_particles =
       track_particles_hdl.cptr();
 
-  //   if (evtStore()->retrieve(m_truth_event_container, "TruthEvents") ==
-  //       StatusCode::FAILURE) {
-  //     ATH_MSG_ERROR("Failed to retrieve TruthEvents collection. ");
-  //     return StatusCode::SUCCESS;
-  //   }
-
-  //   if (not evtStore()
-  //               ->retrieve(m_pileup_truth_container, "TruthPileupEvents")
-  //               .isSuccess()) {
-  //     ATH_MSG_ERROR("Failed to retrieve TruthPileupEvents container. ");
-  //     return StatusCode::SUCCESS;
-  //   }
-
-  for (const auto* track : *track_particles) { // tack is not a pointer!
+  for (const auto* track : *track_particles) {
     for (const auto& track_tool : m_track_sel_tools) {
       for (const auto& time_tool : m_track_time_tools) {
 
         const float trk_eta = track->eta();
-
-        if (std::abs(trk_eta) < 2.4) {
-          continue;
-        }
-        if ((track->pt() / 1.e3) < 1.0) {
-          continue;
-        }
 
         if (!track_tool->trackPassesSelection(track)) {
           continue;
@@ -97,19 +78,27 @@ StatusCode HGTD_TrkTimePerformanceStudies::execute(const EventContext& ctx) {
 
         auto purity = time_tool->fracPrimaryHits(*track);
         int n_potential_primes = time_tool->numberPotentialPrimaryHits(*track);
-        bool has_time = time_tool->hasTime(*track);
+        bool has_time = time_tool->expertHasTime(*track);
 
         PrimesFractions primes_fraction = PrimesFractions::AllPrimes;
-        if (purity < 0.01 and n_potential_primes == 0) {
-          primes_fraction = PrimesFractions::NoPrimesNoPossiblePrimes;
-        } else if (purity < 0.01 and n_potential_primes == 1) {
-          primes_fraction = PrimesFractions::NoPrimes1PossiblePrimes;
-        } else if (purity < 0.01 and n_potential_primes == 2) {
-          primes_fraction = PrimesFractions::NoPrimes2PossiblePrimes;
-        } else if (purity < 0.01 and n_potential_primes == 3) {
-          primes_fraction = PrimesFractions::NoPrimes3PossiblePrimes;
-        } else if (purity < 0.01 and n_potential_primes == 4) {
-          primes_fraction = PrimesFractions::NoPrimes4PossiblePrimes;
+        if (purity < 0.01) {
+          switch (n_potential_primes) {
+          case 0:
+            primes_fraction = PrimesFractions::NoPrimesNoPossiblePrimes;
+            break;
+          case 1:
+            primes_fraction = PrimesFractions::NoPrimes1PossiblePrimes;
+            break;
+          case 2:
+            primes_fraction = PrimesFractions::NoPrimes2PossiblePrimes;
+            break;
+          case 3:
+            primes_fraction = PrimesFractions::NoPrimes3PossiblePrimes;
+            break;
+          case 4:
+            primes_fraction = PrimesFractions::NoPrimes4PossiblePrimes;
+            break;
+          }
         } else if (purity > 0.01 and purity < 0.48) {
           primes_fraction = PrimesFractions::LessThanHalfPrimes;
         } else if (purity > 0.48 and purity < 0.52) {
@@ -123,18 +112,13 @@ StatusCode HGTD_TrkTimePerformanceStudies::execute(const EventContext& ctx) {
         bool morethanhalfprimes =
             primes_fraction == PrimesFractions::AllPrimes or
             primes_fraction == PrimesFractions::MoreThanHalfPrimes;
-        // FIXME: not used yet, maybe we can replace morethanhalfprimes by it
-        // bool atleasthalfprimes =
-        //     primes_fraction == PrimesFractions::AllPrimes or
-        //     primes_fraction == PrimesFractions::MoreThanHalfPrimes or
-        //     primes_fraction == PrimesFractions::HalfPrimesHasPrimes;
 
         fillEffSubDir(track_tool->name(), time_tool->name(), "m_eff_vs_eta",
                       has_time, std::abs(trk_eta));
 
         bool count_primesfrac_category_as_good = false;
-        for (int i = 0; i < m_number_primes_fractions; i++) {
-          if (i == primes_fraction) {
+        for (size_t i = 0; i < m_primes_fractions.size(); i++) {
+          if (i == static_cast<size_t>(primes_fraction)) {
             count_primesfrac_category_as_good = has_time;
           } else {
             count_primesfrac_category_as_good = false;
@@ -147,7 +131,7 @@ StatusCode HGTD_TrkTimePerformanceStudies::execute(const EventContext& ctx) {
         if (has_time) {
           auto truth_vertex = getTruthVertex(truth_particle);
           if (truth_particle and truth_vertex) {
-            float track_time = time_tool->time(*track);
+            float track_time = time_tool->expertTime(*track);
             float truth_time = time_tool->getTruthTime(*truth_vertex);
             float time_res = track_time - truth_time;
             fillSubdir<TH1F>(track_tool->name(), time_tool->name(),
@@ -175,10 +159,6 @@ StatusCode HGTD_TrkTimePerformanceStudies::execute(const EventContext& ctx) {
   return StatusCode::SUCCESS;
 }
 
-StatusCode HGTD_TrkTimePerformanceStudies::finalize() {
-  return StatusCode::SUCCESS;
-}
-
 const xAOD::TruthVertex* HGTD_TrkTimePerformanceStudies::getTruthVertex(
     const xAOD::TruthParticle* truth_particle) {
   if (not truth_particle) {
@@ -202,16 +182,14 @@ const xAOD::TruthVertex* HGTD_TrkTimePerformanceStudies::getTruthVertex(
     return nullptr;
   }
   int n_hs_truthparticles = truth_hs_event->nTruthParticles();
-  // auto truth_hs_vtx = truth_hs_event->truthVertex(1);
   auto truth_hs_vtx = truth_event_container->at(0)->signalProcessVertex();
 
   for (int i = 0; i < n_hs_truthparticles; i++) {
     if (not truth_hs_event->truthParticle(i)) {
       continue;
     }
-    if (truth_hs_event->truthParticle(i)->uid() < 200000 and
-        truth_hs_event->truthParticle(i)->uid() != 0 and
-        truth_hs_event->truthParticle(i)->status() == 1 and
+    if (not truth_hs_event->truthParticle(i)->isSimulationParticle() and
+        truth_hs_event->truthParticle(i)->isStable() and
         truth_hs_event->truthParticle(i)->isCharged() and
         truth_hs_event->truthParticle(i)->index() == truth_particle->index()) {
       return truth_hs_vtx;
@@ -245,9 +223,8 @@ const xAOD::TruthVertex* HGTD_TrkTimePerformanceStudies::getTruthVertex(
       if (not truth_pu_event->truthParticle(i)) {
         continue;
       }
-      if (truth_pu_event->truthParticle(i)->uid() < 200000 and
-          truth_pu_event->truthParticle(i)->uid() != 0 and
-          truth_pu_event->truthParticle(i)->status() == 1 and
+      if (not truth_pu_event->truthParticle(i)->isSimulationParticle() and
+          truth_pu_event->truthParticle(i)->isStable() and
           truth_pu_event->truthParticle(i)->isCharged() and
           truth_particle->index() ==
               truth_pu_event->truthParticle(i)->index()) {

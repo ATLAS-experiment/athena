@@ -1,3 +1,7 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
+*/
+
 #include "HGTD_Analysis/HGTD_TrackDecaySelectionTool.h"
 
 #include "xAODTruth/TruthParticle.h"
@@ -18,7 +22,7 @@ StatusCode HGTD_TrackDecaySelectionTool::initialize() {
  * the selected min/max values.
  */
 bool HGTD_TrackDecaySelectionTool::trackPassesSelection(
-    const xAOD::TrackParticle* track_particle) {
+    const xAOD::TrackParticle* track_particle) const {
 
   const xAOD::TruthParticle* truth_particle =
       xAOD::TruthHelpers::getTruthParticle(*track_particle);

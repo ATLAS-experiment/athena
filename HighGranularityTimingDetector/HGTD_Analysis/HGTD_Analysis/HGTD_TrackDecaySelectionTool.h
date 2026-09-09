@@ -1,3 +1,7 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
+*/
+
 #ifndef HGTD_TRACKDECAYSELECTIONTOOL_H
 #define HGTD_TRACKDECAYSELECTIONTOOL_H
 
@@ -21,7 +25,7 @@ public:
   // for IHGTD_TrackSelectionTool interface
 
   virtual bool trackPassesSelection(
-      const xAOD::TrackParticle* track_particle) override final;
+      const xAOD::TrackParticle* track_particle) const override final;
   //////////////////////////////////////////////////////////////////////////////
 
 private:

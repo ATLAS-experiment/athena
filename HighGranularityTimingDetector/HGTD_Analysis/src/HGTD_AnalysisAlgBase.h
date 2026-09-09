@@ -36,8 +36,6 @@ public:
   virtual ~HGTD_AnalysisAlgBase();
 
   virtual StatusCode initialize();
-  virtual StatusCode execute(const EventContext& ctx);
-  virtual StatusCode finalize();
 
   Gaudi::Property<std::string> m_directory_name{
       this, "DirectoryName", "/HGTD_ANA/", "The output directory name"};
