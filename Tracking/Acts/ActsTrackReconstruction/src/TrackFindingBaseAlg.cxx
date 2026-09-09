@@ -77,7 +77,7 @@ namespace ActsTrk {
     ATH_CHECK(m_monTool.retrieve(EnableTool{not m_monTool.empty()}));
     ATH_CHECK(m_trackingGeometrySvc.retrieve());
     ATH_CHECK(m_ctxProvider.initialize());
-    ATH_CHECK(m_trackStatePrinter.retrieve(EnableTool{not m_trackStatePrinter.empty()}));
+    ATH_CHECK(m_trackFindingMonitor.retrieve(EnableTool{not m_trackFindingMonitor.empty()}));
     ATH_CHECK(m_pixelCalibTool.retrieve(EnableTool{not m_pixelCalibTool.empty()}));
     ATH_CHECK(m_stripCalibTool.retrieve(EnableTool{not m_stripCalibTool.empty()}));
     ATH_CHECK(m_hgtdCalibTool.retrieve(EnableTool{not m_hgtdCalibTool.empty()}));
@@ -318,12 +318,13 @@ namespace ActsTrk {
       }
     }
 
-    if (m_trackStatePrinter.isSet()) {
-      m_trackStatePrinter->printTrackState(tgContext, trackState,
-                                           measurementIndex, true);
-    }
-
     if (!m_doBranchStopper) {
+      if (m_trackFindingMonitor.isEnabled()) {
+         m_trackFindingMonitor->newTrackState(tgContext, track.container(),track,trackState,
+                                              measurementIndex,
+                                              ITrackFindingMonitorTool::kTrackInProgress,
+                                              true);
+      }
       return BranchStopperResult::Continue;
     }
 
@@ -338,9 +339,16 @@ namespace ActsTrk {
                   parameters[Acts::eBoundQOverP];
       if (std::abs(pT) < cutSet.ptMin * m_branchStopperPtMinFactor) {
         ++event_stat_category_i[kNStoppedTracksMinPt];
+        // @TODO move debug messages to special track monitor ?
         ATH_MSG_DEBUG("CkfBranchStopper: drop branch with q*pT="
                       << pT << " after " << track.nMeasurements()
                       << " measurements");
+        if (m_trackFindingMonitor.isEnabled()) {
+           m_trackFindingMonitor->newTrackState(tgContext, track.container(),track,trackState,
+                                                measurementIndex,
+                                                ITrackFindingMonitorTool::kTrackIsFinal | ITrackFindingMonitorTool::kTrackFailedPtCut,
+                                                true);
+        }
         return BranchStopperResult::StopAndDrop;
       }
     }
@@ -353,6 +361,12 @@ namespace ActsTrk {
       ATH_MSG_DEBUG("CkfBranchStopper: drop branch with eta="
                     << eta << " after " << track.nMeasurements()
                     << " measurements");
+      if (m_trackFindingMonitor.isEnabled()) {
+         m_trackFindingMonitor->newTrackState(tgContext, track.container(),track,trackState,
+                                              measurementIndex,
+                                              ITrackFindingMonitorTool::kTrackIsFinal | ITrackFindingMonitorTool::kTrackFailedEtaCut,
+                                              true);
+      }
       return BranchStopperResult::StopAndDrop;
     }
 
@@ -372,6 +386,12 @@ namespace ActsTrk {
     }
 
     if (!(tooManyHoles || tooManyOutliers)) {
+      if (m_trackFindingMonitor.isEnabled()) {
+         m_trackFindingMonitor->newTrackState(tgContext, track.container(),track,trackState,
+                                              measurementIndex,
+                                              ITrackFindingMonitorTool::kTrackInProgress,
+                                              true);
+      }
       return BranchStopperResult::Continue;
     }
 
@@ -400,6 +420,15 @@ namespace ActsTrk {
                     << " branch with nHoles=" << track.nHoles()
                     << ", nOutliers=" << track.nOutliers()
                     << ", nMeasurements=" << track.nMeasurements());
+    }
+    if (m_trackFindingMonitor.isEnabled()) {
+       m_trackFindingMonitor->newTrackState(tgContext, track.container(),track,trackState,
+                                            measurementIndex,
+                                            ITrackFindingMonitorTool::kTrackIsFinal
+                                            | ( tooManyOutliers ?     static_cast<unsigned int>(ITrackFindingMonitorTool::kTrackFailedOutlierCut) : 0u)
+                                            | ( tooManyHoles ?        static_cast<unsigned int>(ITrackFindingMonitorTool::kTrackFailedHoleCut)    : 0u)
+                                            | ( !enoughMeasurements ? static_cast<unsigned int>(ITrackFindingMonitorTool::kTrackFailedHitCut)     : 0u),
+                                            true);
     }
 
     return enoughMeasurements ? BranchStopperResult::StopAndKeep

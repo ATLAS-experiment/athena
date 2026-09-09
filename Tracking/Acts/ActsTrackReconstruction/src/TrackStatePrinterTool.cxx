@@ -1,3 +1,4 @@
+
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
@@ -445,9 +446,18 @@ namespace ActsTrk
 				   const Acts::BoundTrackParameters &initialParameters,
 				   const detail::MeasurementIndex &measurementIndexer,
 				   unsigned int iseed,
-				   bool isKF) const
+				   bool isKF,
+				   const char *seedType,
+				   bool first_seed) const
   {
-    if (!isKF)
+     if (first_seed) {
+        ATH_MSG_INFO("CKF results for " << seedType << " seeds:");
+     }
+     else {
+        std::cout << std::flush;
+     }
+
+     if (!isKF)
       printHeader(1);
 
     std::ostringstream os;
