@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration 
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration 
 */
 
 #include "src/TrigBtagEmulationChain.h"
@@ -111,7 +111,7 @@ void TrigBtagEmulationChain::parseChainDefinition(const std::vector< std::string
     }
     
     if(m_dijetmass.empty() || dijetmass != "None") {
-      m_dijetmass = dijetmass;
+      m_dijetmass = std::move(dijetmass);
     }
   }
   
