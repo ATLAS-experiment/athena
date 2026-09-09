@@ -319,8 +319,15 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
 	    }
         } else if(m_sCampaign=="mc20"){
             if(m_useGNTau){
-              ATH_MSG_ERROR("Eveto with GNTau ID correction not supported for campaign "<< m_sCampaign);
-	      return StatusCode::FAILURE;
+	      if( m_iJetIDLevel == static_cast<int>(JETIDGNTAULOOSE)){
+                  m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_TrueElectron_Run2_looseGNTauID_1p.root";
+              } else if( m_iJetIDLevel == static_cast<int>(JETIDGNTAUMEDIUM)){
+                  m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_TrueElectron_Run2_mediumGNTauID_1p.root";
+              }
+              else {
+                  ATH_MSG_ERROR("SFEleIDElectron correction not supported for JetIDLevel="<<m_iJetIDLevel);
+                  return StatusCode::FAILURE;
+              } 	    
 	    } else {
               if( m_iJetIDLevel == static_cast<int>(JETIDRNNLOOSE)){
                   m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_TrueElectron_Run2_looseRNNTauID_1p.root";
