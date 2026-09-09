@@ -29,9 +29,9 @@ parser.add_argument("--skipEvents",default=0, type=int,
 from AthenaConfiguration.TestDefaults import defaultGeometryTags
 parser.add_argument("--geometrytag",default=defaultGeometryTags.RUN4, type=str,
                     help="The geometry tag to use")
-# parser.add_argument("--inputMaterial",
-#                     required=True, type=str,
-#                     help="Input material maps produced in the material mapping process.")
+parser.add_argument("--inputMaterial",
+                    required=True, type=str,
+                    help="Input material maps produced in the material mapping process.")
 args = parser.parse_args()
 
 
@@ -78,7 +78,8 @@ else:
     detectors.append('Bpipe')  # always run with beam pipe
     setupDetectorFlags(flags, detectors, toggle_geometry=True)
 
-flags.Acts.TrackingGeometry.UseBlueprint = True
+flags.Acts.TrackingGeometry.UseBlueprint = True 
+flags.Acts.TrackingGeometry.ITkMaterialSource = args.inputMaterial
 
 flags.Exec.SkipEvents = args.skipEvents
 

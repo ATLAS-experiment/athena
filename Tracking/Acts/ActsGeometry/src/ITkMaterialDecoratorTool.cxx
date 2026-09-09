@@ -13,6 +13,7 @@ namespace ActsTrk {
     StatusCode ITkMaterialDecoratorTool::initialize() {
         ActsPlugins::RootMaterialDecorator::Config decoratorConfig;
         decoratorConfig.fileName = m_materialMapFile;
+        ATH_MSG_INFO("Loading material map from " << m_materialMapFile);
         m_matDecorator = std::make_unique<ActsPlugins::RootMaterialDecorator>(decoratorConfig,
                                                                               ActsTrk::actsLevelVector(msg().level()));
        return StatusCode::SUCCESS;

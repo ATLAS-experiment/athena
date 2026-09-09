@@ -141,6 +141,12 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.TrackingGeometry.UseBlueprint', False)
     actscf.addFlag('Acts.TrackingGeometry.ObjDebugOutput', False)
     actscf.addFlag('Acts.TrackingGeometry.KeepGoingOnMaterialMergeFailure', False)
+    # ITkMaterialSource can be:
+    # a path to a local file
+    # 'Default' : material map source is evaluated from the geometry tag
+    # 'None'    : no material map is provided
+    actscf.addFlag('Acts.TrackingGeometry.ITkMaterialSource', 'None')
+    actscf.addFlag('Acts.TrackingGeometry.ITkMaterialMapPath', '')
 
     ## Enable Tracking geometry with additional passive layers
     actscf.addFlag('Acts.TrackingGeometry.InsertITkPassiveMaterialLayers', False)

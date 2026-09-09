@@ -89,7 +89,7 @@ if __name__ == "__main__":
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
     # Some info about the job
-    print("----RunMaterialMapping for ITk geometry----")
+    print("----RunMaterialMapping for ACTS Tracking geometry----")
     print()
     print("Using Geometry Tag: "+args.geometrytag)
     if args.localgeo:
@@ -111,7 +111,16 @@ if __name__ == "__main__":
         flags.ITk.Geometry.AllLocal = True
     from MuonConfig.MuonConfigUtils import configureDefaultTags
     from MuonGeoModelTestR4.testGeoModel import MuonPhaseIITestDefaults
-    flags.Input.Files = MuonPhaseIITestDefaults.EVGEN_PG
+
+    flags.Input.Files = []
+    allfiles=[]
+    eosfolder = "root://eosuser//eos/user/n/ncalace/material-maps/ATLAS-P2-RUN4-05-00-00/geantinos-material-steps/"
+    for i in range(0, 500):
+        filename="material-tracks."+str(i)+".root"
+        allfiles.append(eosfolder+filename)
+ 
+
+    #MuonPhaseIITestDefaults.EVGEN_PG
     flags.Input.isMC=True
     flags.GeoModel.AtlasVersion = args.geometrytag
     flags.IOVDb.GlobalTag = "OFLCOND-SIM-00-00-00"
@@ -141,15 +150,14 @@ if __name__ == "__main__":
          flags.GeoModel.Run = LHCPeriod.Run4
          configureDefaultTags(flags)
     else:
-        defaultDetectors = ['ITkPixel', 'ITkStrip']
+        defaultDetectors = ['ITkPixel', 'ITkStrip', 'HGTD']
         detectors = args.detectors if 'detectors' in args and args.detectors else defaultDetectors
         detectors.append('Bpipe')  # always run with beam pipe
         setupDetectorFlags(flags, detectors, toggle_geometry=True)
 
     flags.Acts.TrackingGeometry.UseBlueprint = True
+    flags.Acts.TrackingGeometry.ITkMaterialSource = "None"
 
-    #flags.Exec.SkipEvents = args.skipEvents
-    
     log.debug('Lock config flags now.')
     flags.lock()
 
@@ -162,8 +170,10 @@ if __name__ == "__main__":
 
 
     ### setup dumping of additional information
-    if args.verboseAccumulators: acc.printConfig(withDetails=True)
-    if args.verboseStoreGate: acc.getService("StoreGateSvc").Dump = True
+    if args.verboseAccumulators: 
+        acc.printConfig(withDetails=True)
+    if args.verboseStoreGate: 
+        acc.getService("StoreGateSvc").Dump = True
 
     log.debug('Dumping of ConfigFlags now.')
     flags.dump()
@@ -175,7 +185,7 @@ if __name__ == "__main__":
                                      maxEvents =  args.maxEvents if args.maxEvents > 0 else sys.maxsize,
                                      skipEvents = args.skipEvents,
                                      batchSize = args.batchSize,
-                                     FileNames=assembleFiles(args.inputFiles),
+                                     FileNames=assembleFiles(allfiles),
                                      TreeName=args.treeName))
 
     acc.merge(MaterialMappingCfg(flags, 
