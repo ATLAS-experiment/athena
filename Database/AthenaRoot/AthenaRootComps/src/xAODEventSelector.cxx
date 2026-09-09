@@ -1047,12 +1047,12 @@ StatusCode xAODEventSelector::setFile(const std::string& fname) {
       ATH_MSG_DEBUG("Creating poolsvc collection for " << fname);
       StatusCode sc = m_poolSvc->connectCollection( "PFN:"+fname , fname , pool::POOL_StorageType.type() );
       pool::CollectionService collSvc ATLAS_THREAD_SAFE = pool::CollectionService();
-      pool::ICollection* collPtr ATLAS_THREAD_SAFE = nullptr;
+      std::unique_ptr<pool::ICollection> collPtr ATLAS_THREAD_SAFE;
       // Try to open EventTags Collection in the input file
       try {
          collPtr = collSvc.open(fname, pool::POOL_StorageType.type(), "PFN:"+fname, m_poolSvc->getInputContextSession(IPoolSvc::kInputStream));
       } catch (std::exception &e) {
-         collPtr = nullptr;
+         collPtr.reset();
       }
       if (sc.isRecoverable() || collPtr == nullptr) {
          m_poolSvc->checkCollection("PFN:"+fname, IPoolSvc::kInputStream, collPtr == nullptr).ignore();
