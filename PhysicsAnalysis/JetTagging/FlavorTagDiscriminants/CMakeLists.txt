@@ -124,3 +124,8 @@ atlas_add_executable( get-onnx-metadata
                       util/get-onnx-metadata.cxx
                       INCLUDE_DIRS ${ONNXRUNTIME_INCLUDE_DIRS}
                       LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} )
+
+# Tests in the package:
+atlas_add_test( JetHitPhiRanges_test
+                SOURCES test/JetHitPhiRanges_test.cxx
+                POST_EXEC_SCRIPT noerror.sh )
