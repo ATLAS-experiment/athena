@@ -77,7 +77,7 @@ std::unique_ptr<eflowTrackCaloPoints> PFTrackCaloExtensionTool::execute(const Ev
     Acts::Result<std::pair<std::vector<Acts::detail::Step>, Acts::RecordedMaterial>> result = m_extrapolationTool.get()->propagationSteps(ctx, boundPars);
 
     if( !result.ok() ) {
-        ATH_MSG_ERROR("Error during extrapolation: " << result.error().message());
+        ATH_MSG_WARNING("Error during extrapolation: " << result.error().message());
         return nullptr;
     }
 
