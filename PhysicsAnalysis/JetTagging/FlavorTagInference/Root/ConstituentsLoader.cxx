@@ -49,6 +49,25 @@ namespace {
     return config;
   }
 
+  // Impact parameters whose sign the flip taggers invert. Each quantity is
+  // listed under every name the custom getters accept for it, see
+  // CustomGetterUtils; variances and uncertainties are never flipped.
+  std::regex flip_variable_regex(FlipTagConfig flip_config) {
+    // lifetime sign, referenced to the jet axis
+    const std::string jet_signed =
+      "IP2D_signed_d0|IP3D_signed_[dz]0(_significance)?"
+      "|lifetimeSigned(D0|Z0SinTheta)(Significance)?";
+    // perigee sign, no jet reference
+    const std::string perigee_signed =
+      "(btagIp_)?(d0|z0SinTheta)"
+      "|(d0|z0|z0SinTheta)RelativeToBeamspot(Significance)?";
+    const std::string suffix = "(_MuonPrimaryTrack)?";
+    if (flip_config == FlipTagConfig::SIMPLE_FLIP) {
+      return std::regex("(" + jet_signed + "|" + perigee_signed + ")" + suffix);
+    }
+    return std::regex("(" + jet_signed + ")" + suffix);
+  }
+
   ConstituentsInputConfig get_track_input_config(
     const std::string& name,
     const std::vector<std::string>& input_variables,
@@ -218,17 +237,10 @@ namespace FlavorTagInference {
       };
       
       if (name.find("tracks") != std::string::npos){
-        std::regex flip_sequences;
-        if (flip_config == FlipTagConfig::FLIP_SIGN || flip_config == FlipTagConfig::NEGATIVE_IP_ONLY){
-          flip_sequences=std::regex(".*signed_[dz]0.*");
-        }
-        if (flip_config == FlipTagConfig::SIMPLE_FLIP){
-          flip_sequences=std::regex("(.*signed_[dz]0.*)|d0|z0SinTheta");
-        }
         config = get_track_input_config(
           name, input_variables,
           trk_type_regexes, trk_sort_regexes, trk_select_regexes,
-          flip_sequences, flip_config);
+          flip_variable_regex(flip_config), flip_config);
         config.type = ConstituentsType::TRACK;
         config.output_name = "tracks";
       }

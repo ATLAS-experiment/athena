@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArTPCnv/LArDigitContainerCnv_p2.h"
@@ -7,7 +7,6 @@
 #include "Identifier/Identifier.h"
 #include "LArIdentifier/LArOnlineID_Base.h"
 #include "GaudiKernel/GaudiException.h"
-#include "CxxUtils/AthUnlikelyMacros.h"
 
 #include "AthAllocators/DataPool.h"
 
@@ -90,7 +89,7 @@ LArDigitContainerCnv_p2::transToPers(const LArDigitContainer* trans,
   std::vector<const LArDigit*> digitsvsHash(hashMax,nullptr); 
   for (const LArDigit* transDigit : *trans) {
     const IdentifierHash h=m_idHelper->channel_Hash(transDigit->hardwareID());
-    if (ATH_UNLIKELY(transDigit->samples().size()!=pers->m_nSamples)) {
+    if (transDigit->samples().size()!=pers->m_nSamples) [[unlikely]] {
       log << MSG::ERROR << "Encountered LArDigit Container with varying numbers of ADC samples" << endmsg;
       throw GaudiException("Encountered LArDigit Container with varying numbers of ADC samples",
 			   "LArDigitContainerCnv_p2",StatusCode::FAILURE);

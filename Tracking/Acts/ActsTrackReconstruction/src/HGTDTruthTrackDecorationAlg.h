@@ -15,6 +15,7 @@
 #include "ActsEvent/TrackContainer.h"
 #include "ActsEvent/MeasurementToTruthParticleAssociation.h"
 #include "Identifier/Identifier.h"
+#include "HGTD_Identifier/HGTD_ID.h"
 
 #include "src/detail/AtlasMeasurementSelector.h"
 #include "src/detail/OnTrackCalibrator.h"
@@ -27,6 +28,10 @@
 
 
 #include "xAODTruth/TruthParticleContainer.h"
+
+#include <array>
+#include <cstddef>
+#include <unordered_map>
 
 namespace ActsTrk {
   
@@ -67,9 +72,11 @@ namespace ActsTrk {
     SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerPrimaryExpectedKey { this, "HGTD_primary_expected", m_trackParticleContainerName, "HGTD_primary_expected", "Decoration for primary expected cluster" };  
       
     ActsTrk::detail::xAODUncalibMeasSurfAcc m_surfAcc{};
-   ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
+    ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
 
     std::unique_ptr<SG::AuxElement::Accessor<int>> m_acc_nHgtdHits;
+
+    const HGTD_ID* m_id_helper{nullptr}; //!< Handle to the ID helper
 
     /// @brief Data structure to hold truth information about the HGTD track extension
     struct TruthTrackExtensionData {
@@ -106,30 +113,30 @@ namespace ActsTrk {
       const typename ActsTrk::TrackContainer::ConstTrackProxy trackProxy,
       const ActsTrk::MeasurementToTruthParticleAssociation* association_map) const; 
     
-    /**
-      * @brief Checks if truth particle produced hits at each one of the HGTD layers
-      *
-      * @param truthParticle - truth particle associated with track
-      * @param measurementContainer - measurement container with HGTD clusters
-      * @param association_map - hgtd cluster to truth particles map 
-      * @param isPrimaryExistsVec - vector to be return with the information about the  
-      */
-    StatusCode isPrimaryExpected(
-      const xAOD::TruthParticle* truthParticle,
-      const xAOD::UncalibratedMeasurementContainer & measurementContainer,
-      const ActsTrk::MeasurementToTruthParticleAssociation* association_map,
-      std::vector<char> &isPrimaryExistsVec) const;    
+    /// Number of HGTD layers the per-track decorations are indexed by.
+    static constexpr std::size_t s_nHgtdLayers = 4;
+    /// Per-layer flags for a single truth particle.
+    using HgtdLayerFlags = std::array<char, s_nHgtdLayers>;
+    /// Maps the index of a truth particle onto the HGTD layers it deposited a hit in.
+    using PrimaryExpectedLookup = std::unordered_map<std::size_t, HgtdLayerFlags>;
 
     /**
-      * @brief returns the index of HGTD layer where surfaces lies.
-      * This index is used at to locate where in the vectors of
-      * TrackExtensionData the hit information should be written
-      * Returns 99 if surface is outiside of HGTD.
+      * @brief Builds, once per event, the map from truth particle index onto the set of
+      *        HGTD layers in which that particle contributed to a cluster.
       *
-      * @param geoID - surface geometry id
-      */  
-    std::size_t getHGTDLayerIndex(const Acts::GeometryIdentifier& geoID) const;
-    
+      * The information is a property of the measurements alone and does not depend on the
+      * track being decorated, so it is evaluated once instead of once per track. This
+      * replaces a scan of the full HGTD measurement container for every TrackParticle.
+      *
+      * @param measurementContainer - measurement container with HGTD clusters
+      * @param association_map - hgtd cluster to truth particles map (may be nullptr)
+      * @param lookup - filled with one entry per truth particle that has an HGTD cluster
+      */
+    StatusCode buildPrimaryExpectedLookup(
+      const xAOD::UncalibratedMeasurementContainer & measurementContainer,
+      const ActsTrk::MeasurementToTruthParticleAssociation* association_map,
+      PrimaryExpectedLookup& lookup) const;
+
   };
   
 } // namespace ActsTrk

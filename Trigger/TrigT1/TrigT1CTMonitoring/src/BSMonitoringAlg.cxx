@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "BSMonitoringAlg.h"
 
@@ -256,7 +256,7 @@ StatusCode TrigT1CTMonitoring::BSMonitoringAlgorithm::fillHistograms( const Even
 						 //<< ", MuCTPI_RIO: " << validMuCTPI_RIO << ", MuCTPI_RDO: " << validMuCTPI_RDO
 						 << ", RoIBResult: " << validRoIBResult);
 		//ATH_MSG_INFO( "Run number: " << eventInfo->runNumber() << ", Event: " << eventInfo->eventNumber() << ", LB: " << eventInfo->lumiBlock() );
-		if (validCTP_RIO) {
+		if (validCTP_RIO && theCTP_RIO) {
 			ATH_MSG_WARNING( "CTP_RIO says LB: " << (theCTP_RIO->getDetectorEventType() & 0xffff)
 							 << ", L1ID: " << std::dec << theCTP_RIO->getLvl1Id()
 							 << " (HEX: " << std::hex << theCTP_RIO->getLvl1Id() << ")" << std::dec
@@ -1611,7 +1611,7 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_RDO* theMuCTPI_
     }
     else if (dataWord.getSectorLocation() == MuCTPI_RDO::ENDCAP) {
       endcapSectorIDAllX = dataWord.getSectorID()+48*dataWord.getHemisphere();
-      fill(m_packageName, barrelSectorIDAllX);
+      fill(m_packageName, endcapSectorIDAllX);
       endcapRoiSectorIDAllX = dataWord.getSectorID()+48*dataWord.getHemisphere();
       endcapRoiSectorIDAllY = dataWord.getRoiNumber();
       fill(m_packageName, endcapRoiSectorIDAllX, endcapRoiSectorIDAllY);
@@ -2131,7 +2131,7 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doCtp(const CTP_RDO* theCTP_RDO,
 
 	// fill turn counter monitoring plots if at least one of first and current turn-counter values are non-zero
 	if ( !(firstEventTC == 0 && theCTP_RDO->getTurnCounter() == 0) ) {
-	  std::string bm = currentBeamMode; 
+	  std::string bm = std::move(currentBeamMode); 
 	  double tDiffInNs = timeDiffInBc_TC*bcDurationInNs-timeDiff_GPS;
 	  // flag an error if the offset for the timestamp calculated from TC+BCID is off by > half an LHC turn
 	  // (if we're in STABLE BEAMS and did not just transition to ATLAS_READY in this LB)

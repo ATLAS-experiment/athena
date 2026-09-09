@@ -39,7 +39,9 @@ def createIDPVMConfigFlags():
     icf.addFlag("maxProdVertRadius", 300)
     icf.addFlag("minProdVertRadius", 0)
     icf.addFlag("minAbsD0", 0)
-    icf.addFlag("hardScatterStrategy", HardScatterStrategy.SUM_PT2) # The hard-scatter vertex selection strategy to use when running hard-scatter efficiency / performance plots in IDPVM. 0 corresponds to sumPt^2, 1 corresponds to sumPt
+     # The hard-scatter vertex selection strategy to use when running hard-scatter efficiency / performance plots in IDPVM.
+    icf.addFlag("hardScatterStrategy", HardScatterStrategy.DEFAULT,
+                type=HardScatterStrategy)
     icf.addFlag("truthMinPt", lambda pcf : 500 if pcf.GeoModel.Run <= LHCPeriod.Run3 else 1000) # Configurable pT cut for determining a "reconstructable" particle
     icf.addFlag("GRL", [])
     icf.addFlag("doTechnicalEfficiency", False) # for enabling the filling of technical efficiency

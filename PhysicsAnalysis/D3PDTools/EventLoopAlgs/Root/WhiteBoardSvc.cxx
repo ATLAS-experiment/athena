@@ -38,9 +38,7 @@ namespace EL
 
   void WhiteBoardSvc ::
   testInvariant () const
-  {
-    RCU_INVARIANT (this != 0);
-  }
+  {}
 
 
 

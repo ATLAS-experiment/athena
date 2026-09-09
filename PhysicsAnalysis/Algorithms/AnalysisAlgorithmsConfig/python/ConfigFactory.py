@@ -407,8 +407,7 @@ class ConfigFactory():
 
         # overlap removal
         from AsgAnalysisAlgorithms.OverlapAnalysisConfig import OverlapAnalysisConfig
-        self.addAlgConfigBlock(algName="OverlapRemoval", alg=OverlapAnalysisConfig,
-            defaults={'configName': 'OverlapRemoval'})
+        self.addAlgConfigBlock(algName="OverlapRemoval", alg=OverlapAnalysisConfig)
 
         # object-based cutflow
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import ObjectCutFlowBlock
@@ -448,8 +447,7 @@ class ConfigFactory():
 
         # thinning
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import OutputThinningBlock
-        self.addAlgConfigBlock(algName="Thinning", alg=OutputThinningBlock,
-            defaults={'configName': 'Thinning'})
+        self.addAlgConfigBlock(algName="Thinning", alg=OutputThinningBlock)
 
         # selection decorations
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import SelectionDecorationBlock
@@ -474,8 +472,7 @@ class ConfigFactory():
 
         # output
         from AsgAnalysisAlgorithms.OutputAnalysisConfig import OutputAnalysisConfig
-        self.addAlgConfigBlock(algName="Output", alg=OutputAnalysisConfig,
-            defaults={'configName': 'Output'})
+        self.addAlgConfigBlock(algName="Output", alg=OutputAnalysisConfig)
 
         # IOStats printouts
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import IOStatsBlock

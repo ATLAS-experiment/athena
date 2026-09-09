@@ -35,6 +35,7 @@ namespace DerivationFramework {
         ATH_CHECK(m_dec_prodModeKey.initialize());
         ATH_CHECK(m_dec_errorCodeKey.initialize());
         ATH_CHECK(m_dec_stage0CatKey.initialize());
+        ATH_CHECK(m_dec_stage0DecayCatKey.initialize());
         ATH_CHECK(m_dec_stage1CatPt25Key.initialize());
         ATH_CHECK(m_dec_stage1CatPt30Key.initialize());
         ATH_CHECK(m_dec_stage1IdxPt25Key.initialize());
@@ -69,6 +70,20 @@ namespace DerivationFramework {
         // Everybody might not want this ... but good for validation
         ATH_CHECK(m_decp4_Higgs_decayKeys.initialize(m_detailLevel > 2));
         ATH_CHECK(m_decp4_V_decayKeys.initialize(m_detailLevel > 2));
+
+        // Decay-side information
+        ATH_CHECK(m_dec_4ldecay_m34.initialize());
+        ATH_CHECK(m_dec_4ldecay_phi.initialize());
+        ATH_CHECK(m_dec_4ldecay_cutflow_passed.initialize());
+        ATH_CHECK(m_dec_4ldecay_m12.initialize(m_detailLevel > 2));
+        ATH_CHECK(m_dec_4ldecay_phi1.initialize(m_detailLevel > 2));
+        ATH_CHECK(m_dec_4ldecay_costh1.initialize(m_detailLevel > 2));
+        ATH_CHECK(m_dec_4ldecay_costh2.initialize(m_detailLevel > 2));
+        ATH_CHECK(m_dec_4ldecay_costhstr.initialize(m_detailLevel > 2));
+        ATH_CHECK(m_dec_4ldecay_m14.initialize(m_detailLevel > 2));
+        ATH_CHECK(m_dec_4ldecay_m23.initialize(m_detailLevel > 2));
+        ATH_CHECK(m_dec_4ldecay_m13.initialize(m_detailLevel > 2));
+        ATH_CHECK(m_dec_4ldecay_m24.initialize(m_detailLevel > 2));
         
         // Open the TEnv configuration file
         TEnv config{};
@@ -103,6 +118,24 @@ namespace DerivationFramework {
                 smp.prod = HTXS::HiggsProdMode::TH;
             }
             std::vector<std::string> dsid_str = CxxUtils::tokenize(config.GetValue(Form("HTXS.MCsamples.%s", prod_mode.c_str()), ""), " ");
+
+            for (const std::string decay_mode : {"ZZ4l"}) {
+                HTXSSample smp_decay = smp;
+                if (decay_mode == "ZZ4l") {
+                    smp_decay.decay = HTXS::HiggsDecayMode::ZZ4l;
+                }
+                
+                std::vector<std::string> dsid_str_decay = CxxUtils::tokenize(config.GetValue(Form("HTXS.MCsamples.%s", decay_mode.c_str()), ""), " ");
+                std::erase_if(dsid_str,
+                    [&dsid_str_decay, &smp_decay](std::string &dsid) { 
+                        if(std::find(dsid_str_decay.begin(), dsid_str_decay.end(), dsid) == dsid_str_decay.end()) return false;
+                        smp_decay.dsids.insert(std::stoi(dsid));
+                        return true;
+                    }
+                );
+                if (!smp_decay.dsids.empty()) m_htxs_samples.push_back(std::move(smp_decay));
+            }
+
             for (const std::string& dsid : dsid_str) { smp.dsids.insert(std::atoi(dsid.c_str())); }
             m_htxs_samples.push_back(std::move(smp));
         }
@@ -182,6 +215,7 @@ namespace DerivationFramework {
 
         const HTXS::HiggsProdMode prodMode = smp_itr->prod;
         const HTXS::tH_type th_type = smp_itr->th_type;
+        const HTXS::HiggsDecayMode decayMode = smp_itr->decay;
 
         // Retrieve the xAOD truth
         SG::ReadHandle<xAOD::TruthEventContainer> xTruthEventContainer{m_truthEvtKey, ctx};
@@ -201,12 +235,13 @@ namespace DerivationFramework {
         }
 
         // classify event according to simplified template cross section
-        std::unique_ptr<HTXS::HiggsClassification> htxs{m_higgsTruthCatTool->getHiggsTruthCategoryObject(hepmc_evts[0], prodMode)};
+        std::unique_ptr<HTXS::HiggsClassification> htxs{m_higgsTruthCatTool->getHiggsTruthCategoryObject(hepmc_evts[0], prodMode, decayMode)};
         ATH_MSG_DEBUG("Truth categorization done ");
         // Decorate the enums
         intEIDecor (m_dec_prodModeKey) = htxs->prodMode;
         intEIDecor (m_dec_errorCodeKey) = htxs->errorCode;
         intEIDecor (m_dec_stage0CatKey) = htxs->stage0_cat;
+        intEIDecor (m_dec_stage0DecayCatKey) = htxs->decaystage0_cat;
 
         // Stage-1 binning
         intEIDecor (m_dec_stage1CatPt25Key) = htxs->stage1_cat_pTjet25GeV;
@@ -246,6 +281,11 @@ namespace DerivationFramework {
         intEIDecor (m_dec_NJets30Key) = htxs->jets30.size();
 
         intEIDecor (m_dec_isZnunuKey) = htxs->isZ2vvDecay;
+        if(decayMode != HTXS::HiggsDecayMode::UNKNOWNDecay && htxs->decay_observables.size() > 0){
+            intEIDecor (m_dec_4ldecay_cutflow_passed) = htxs->decay_cuts_passed;
+            floatEIDecor(m_dec_4ldecay_m34) = htxs->decay_observables[1];
+            floatEIDecor(m_dec_4ldecay_phi) = htxs->decay_observables[3];
+        }
 
         // At the very least, save the Higgs boson pT
         if (!m_detailLevel) {
@@ -267,6 +307,17 @@ namespace DerivationFramework {
             // Everybody might not want this ... but good for validation
             ATH_CHECK(decorateFourVec(ctx, m_decp4_Higgs_decayKeys, *eventInfo, htxs->p4decay_higgs));
             ATH_CHECK(decorateFourVec(ctx, m_decp4_V_decayKeys, *eventInfo, htxs->p4decay_V));
+            if(decayMode != HTXS::HiggsDecayMode::UNKNOWNDecay && htxs->decay_observables.size() > 0){
+                floatEIDecor(m_dec_4ldecay_m12)      = htxs->decay_observables[0];
+                floatEIDecor(m_dec_4ldecay_costhstr) = htxs->decay_observables[2];
+                floatEIDecor(m_dec_4ldecay_phi1)     = htxs->decay_observables[4];
+                floatEIDecor(m_dec_4ldecay_costh1)   = htxs->decay_observables[5];
+                floatEIDecor(m_dec_4ldecay_costh2)   = htxs->decay_observables[6];
+                floatEIDecor(m_dec_4ldecay_m14)      = htxs->decay_observables[7];
+                floatEIDecor(m_dec_4ldecay_m23)      = htxs->decay_observables[8];
+                floatEIDecor(m_dec_4ldecay_m13)      = htxs->decay_observables[9];
+                floatEIDecor(m_dec_4ldecay_m24)      = htxs->decay_observables[10];
+            }
         }
         /// Summary of the HTXS categorization. Used mainly in the testing algorithm
         ATH_MSG_DEBUG("production mode: " << intEIDecor(m_dec_prodModeKey) << ", errorCode: " << intEIDecor (m_dec_errorCodeKey) << ", Stage0: " << intEIDecor (m_dec_stage0CatKey) 

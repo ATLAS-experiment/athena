@@ -845,7 +845,7 @@ for( auto isoType : isoTypes ){
 	std::map<Iso::IsolationCorrectionParameter,float> corecorr;
 	corecorr[Iso::coreEnergy] = totE;
 	corecorr[Iso::coreArea]   = coreConeDR*coreConeDR*M_PI;
-	result.coreCorrections[Iso::coreCone] = corecorr;
+	result.coreCorrections[Iso::coreCone] = std::move(corecorr);
 	ATH_MSG_DEBUG("done etcone, coreCone");
 	
 	/// apply the correction if required.
@@ -1189,20 +1189,10 @@ for( auto isoType : isoTypes ){
     ATH_MSG_DEBUG("In CaloIsolationTool::correctIsolationEnergy_TopoCore");
     ATH_MSG_DEBUG("particle: eta " << eta << " phi " << phi);
 
-
-    // I do not remember why I put areacore = 0 for fwdClus !!
     float areacore = -999.;
-    if (fwdClus == nullptr) {
-      if (dEtaMax_core>0 && dPhiMax_core>0) areacore = 4*dEtaMax_core*dPhiMax_core;
-      else if (dR2Max_core>0) areacore = M_PI*dR2Max_core;
-    } else
-      areacore = 0;
-
+    if (dEtaMax_core>0 && dPhiMax_core>0) areacore = 4*dEtaMax_core*dPhiMax_core;
+    else if (dR2Max_core>0) areacore = M_PI*dR2Max_core;
     double topoCore(0.);
-    if (fwdClus) {
-      topoCore = fwdClus->p4(CaloCluster::State::UNCALIBRATED).Et();
-      ATH_MSG_DEBUG("Including " << topoCore << " in the core transverse energy of the fwd electron");
-    } else {
       for (const CaloCluster* cl : clusts) {
 	ATH_MSG_DEBUG("cl: eta " << cl->eta() << " phi " << cl->phi()
 		      << " E " << cl->p4(CaloCluster::State::UNCALIBRATED).E()
@@ -1228,7 +1218,7 @@ for( auto isoType : isoTypes ){
 
 	/// if only EM
 	double emfrac = 1.;
-	if(onlyEM){
+	if(onlyEM && !fwdClus){
 	  double eEM = cl->energyBE(0)+cl->energyBE(1)+cl->energyBE(2)+cl->energyBE(3);
 	  emfrac     = std::min(1., eEM / cl->p4(CaloCluster::State::UNCALIBRATED).E());
 	}
@@ -1238,7 +1228,6 @@ for( auto isoType : isoTypes ){
 	topoCore += et;
 	ATH_MSG_DEBUG("adding in core et: " << et << " (em frac = " << emfrac << " dR = " << sqrt(dPhi*dPhi+dEta*dEta) << ") total " << topoCore);
       }
-    }
 
     double topoCoreSC(0.);
     double test         = 0;

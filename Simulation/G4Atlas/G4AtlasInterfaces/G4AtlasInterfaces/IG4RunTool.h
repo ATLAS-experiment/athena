@@ -33,7 +33,8 @@ class IG4RunTool : virtual public IAlgTool {
   
   // Event queue management
   virtual size_t Size() const = 0;
-  // push an event to the queue
+  // Push a non-null event to the queue. Null events are rejected; queue
+  // shutdown is controlled internally by G4RunTool::finalize().
   virtual void PushEvent(UPEvent) = 0;
   // pop the event from the queue and return it
   virtual UPEvent GetEvent() = 0;

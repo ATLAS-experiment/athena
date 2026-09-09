@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // TruthRivetTools includes
@@ -45,10 +45,11 @@ StatusCode HiggsTruthCategoryTool :: finalize () {
   return StatusCode::SUCCESS;
 }
 
-HTXS::HiggsClassification* HiggsTruthCategoryTool :: getHiggsTruthCategoryObject (const HepMC::GenEvent& HepMCEvent, const HTXS::HiggsProdMode prodMode) const {
+HTXS::HiggsClassification* HiggsTruthCategoryTool :: getHiggsTruthCategoryObject (const HepMC::GenEvent& HepMCEvent, const HTXS::HiggsProdMode prodMode, const HTXS::HiggsDecayMode decayMode) const {
   if ( !m_isInitialized.test_and_set() ) {
     [&]() {
       m_higgsTemplateCrossSections->setHiggsProdMode(prodMode);
+      m_higgsTemplateCrossSections->setHiggsDecayMode(decayMode);
       m_rivetAnaHandler->init(HepMCEvent);
     }();
   }
@@ -57,6 +58,6 @@ HTXS::HiggsClassification* HiggsTruthCategoryTool :: getHiggsTruthCategoryObject
 
   // get the category output object containing the template cross section category,
   // and Higgs, V-boson, jets 4-vectors
-  const Rivet::HiggsClassification htxs_cat_rivet = m_higgsTemplateCrossSections->classifyEvent(const_cast<HepMC::GenEvent&>(HepMCEvent),prodMode);
+  const Rivet::HiggsClassification htxs_cat_rivet = m_higgsTemplateCrossSections->classifyEvent(const_cast<HepMC::GenEvent&>(HepMCEvent),prodMode,decayMode);
   return HTXS::Rivet2Root(htxs_cat_rivet);
 }

@@ -1,5 +1,5 @@
 
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -155,9 +155,22 @@ def ActsMainTrackFindingAlgCfg(flags,
     ### kwargs.setdefault("maxSharedHits", tolist(flags.Tracking.ActiveConfig.maxShared))
 
     # GBTS produces much purer seeds, so the branch stopper selections aren't needed with GBTS seeds.
-    if flags.Acts.SeedingStrategy not in (SeedingStrategy.GbtsFtf, SeedingStrategy.Gbts):
+    if flags.Tracking.ActiveConfig.SeedingStrategy not in [
+            SeedingStrategy.GbtsFtf, SeedingStrategy.Gbts]:
         kwargs.setdefault("ptMinMeasurements", seedOrder(flags, pixel=[3], strip=[6]))
         kwargs.setdefault("absEtaMaxMeasurements", seedOrder(flags, pixel=[3], strip=[999999]))
+
+    if 'TrackParamsEstimationTool' not in kwargs:
+        from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
+
+        # set TrackParamsEstimationTool in case not defined by caller
+        tpe_tool_kwargs = {}
+        if flags.Tracking.ActiveConfig.isLargeD0:
+            tpe_tool_kwargs["allowPropagatorFailure"] = True
+        tpe_tool_kwargs["stripCalibrationIterations"] = flags.Acts.stripCalibrationIterations
+        tpe = acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags, **tpe_tool_kwargs))
+
+        kwargs.setdefault('TrackParamsEstimationTool', seedOrder(flags, pixel=[tpe], strip=[tpe]))
 
     if flags.Acts.doPrintTrackStates and 'TrackStatePrinter' not in kwargs:
         kwargs.setdefault(
@@ -169,11 +182,11 @@ def ActsMainTrackFindingAlgCfg(flags,
         from AthenaConfiguration.Enums import BeamType
 
         if flags.Beam.Type is not BeamType.Cosmics and flags.Acts.PixelCalibrationStrategy.usesCalibration():
-            from ActsConfig.ActsMeasurementCalibrationConfig import ActsAnalogueClusteringToolCfg
+            from ActsConfig.ActsMeasurementCalibrationConfig import ActsPixelCalibrationToolCfg
 
             kwargs.setdefault(
                 'PixelCalibrator',
-                acc.popToolsAndMerge(ActsAnalogueClusteringToolCfg(flags))
+                acc.popToolsAndMerge(ActsPixelCalibrationToolCfg(flags))
             )
 
     if 'StripCalibrator' not in kwargs:
@@ -323,14 +336,20 @@ def ActsTrackFindingGNNCfg(flags, **kwargs) -> ComponentAccumulator:
     # Adopt standard convention
     kwargs.setdefault('ACTSTracksLocation', f"{flags.Tracking.ActiveConfig.extension}Tracks")
 
-    kwargs.setdefault("moduleMapPath", flags.Acts.GNN.ModuleMapPath)
-    kwargs.setdefault("gnnPath", flags.Acts.GNN.ModelPath)
-    kwargs.setdefault("numTrtContexts", flags.Acts.GNN.NumTrtContexts)
-    kwargs.setdefault("maxGpuInstances", flags.Acts.GNN.MaxGpuInstances)
+    # The GNN inference (graph construction, edge classification, track building)
+    if 'GnnPipelineTool' not in kwargs:
+        kwargs.setdefault('GnnPipelineTool', CompFactory.ActsTrk.GnnPipelineTool(
+            "GnnPipeline",
+            moduleMapPath=flags.Acts.GNN.ModuleMapPath,
+            gnnPath=flags.Acts.GNN.ModelPath,
+            numTrtContexts=flags.Acts.GNN.NumTrtContexts,
+            maxGpuInstances=flags.Acts.GNN.MaxGpuInstances,
+            edgeCut=flags.Acts.GNN.EdgeCut,
+            minCandidateMeasurements=flags.Acts.GNN.MinCandidateMeasurements,
+        ))
+
     kwargs.setdefault("varianceInflation", flags.Acts.GNN.VarianceInflation)
     kwargs.setdefault("tightSeeds", flags.Acts.GNN.TightSeeds)
-    kwargs.setdefault("edgeCut", flags.Acts.GNN.EdgeCut)
-    kwargs.setdefault("minCandidateMeasurements", flags.Acts.GNN.MinCandidateMeasurements)
     kwargs.setdefault("minDeltaR", flags.Acts.GNN.MinDeltaR)
     kwargs.setdefault("relaxCentralHoleSel", flags.Acts.GNN.RelaxCentralHoleSel)
     kwargs.setdefault("relaxMeasurementSel", flags.Acts.GNN.RelaxMeasurementSel)
@@ -340,6 +359,13 @@ def ActsTrackFindingGNNCfg(flags, **kwargs) -> ComponentAccumulator:
     if 'TrackParamsEstimationTool' not in kwargs:
         from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
         kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags)))
+
+    # The fitter tool is used in the GNN track finding to fit the track candidates after the GNN has selected the measurements.
+    if 'FitterTool' not in kwargs:
+        from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg
+        kwargs.setdefault('FitterTool', acc.popToolsAndMerge(ActsFitterCfg(flags, 
+                                                                           ReverseFilteringPt=0, 
+                                                                           OutlierChi2Cut=float('inf'))))
 
     from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
     from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg

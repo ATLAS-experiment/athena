@@ -2,7 +2,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import Format
+from AthenaConfiguration.Enums import Format, LHCPeriod
 from IOVDbSvc.IOVDbSvcConfig import addFolders
 
 def TMDBConfig(flags):
@@ -43,7 +43,7 @@ def TMDBConfig(flags):
 
 def MuonBytestream2RdoConfig(flags):
     acc = ComponentAccumulator()
-    if flags.Input.isMC:
+    if flags.Input.Format is Format.POOL:
         return acc
 
     postFix = "_L1MuonSim"
@@ -140,7 +140,7 @@ def MuonRdo2PrdConfig(flags):
     if not flags.Trigger.L1MuonSim.EmulateNSW or not flags.Trigger.L1MuonSim.NSWVetoMode:
         return acc
     postFix = "_L1MuonSim"
-    suffix = "" if flags.Input.isMC else "_L1"
+    suffix = "" if flags.Input.Format is Format.POOL else "_L1"
     if flags.Input.Format is Format.POOL:
         rdoInputs = [
             ('RpcPadContainer','RPCPAD'),
@@ -318,7 +318,7 @@ def TGCTriggerConfig(flags):
     acc = ComponentAccumulator()
     tgcAlg = CompFactory.LVL1TGCTrigger.LVL1TGCTrigger("LVL1TGCTrigger",
                                                        InputData_perEvent  = "TGC_DIGITS_L1",
-                                                       InputRDO = "TGCRDO" if flags.Input.isMC else "TGCRDO_L1",
+                                                       InputRDO = "TGCRDO" if flags.Input.Format is Format.POOL  else "TGCRDO_L1",
                                                        useRun3Config = True,
                                                        TileMuRcv_Input = "rerunTileMuRcvCnt",
                                                        TILEMU = True)
@@ -343,12 +343,17 @@ def TGCTriggerConfig(flags):
         tgcAlg.ByteStreamMetadataRHKey = ''
     acc.addEventAlgo(tgcAlg)
 
-    from PathResolver import PathResolver
-    bwCW_Run3_filePath=PathResolver.FindCalibFile("TrigT1TGC_CW/BW/CW_BW_Run3.v01.db")
-    acc.merge(addFolders(flags, '<db>sqlite://;schema={0};dbname=OFLP200</db> /TGC/TRIGGER/CW_BW_RUN3'.format(bwCW_Run3_filePath),
-                                tag='TgcTriggerCwBwRun3-01',
-                                className='CondAttrListCollection'))
-    acc.addCondAlgo(CompFactory.TGCTriggerCondAlg())
+    bwCW_folder="/TGC/TRIGGER/CW_BW"
+    if flags.GeoModel.Run == LHCPeriod.Run3:
+        from PathResolver import PathResolver
+        bwCW_Run3_filePath=PathResolver.FindCalibFile("TrigT1TGC_CW/BW/CW_BW_Run3.v01.db")
+        bwCW_folder="/TGC/TRIGGER/CW_BW_RUN3"
+        acc.merge(addFolders(flags, '<db>sqlite://;schema={0};dbname=OFLP200</db> /TGC/TRIGGER/CW_BW_RUN3'.format(bwCW_Run3_filePath),
+                             tag='TgcTriggerCwBwRun3-01',
+                             className='CondAttrListCollection'))
+    else:
+        acc.merge(addFolders(flags,bwCW_folder,className='CondAttrListCollection'))
+    acc.addCondAlgo(CompFactory.TGCTriggerCondAlg(name="TGCTriggerCondAlg",ReadKeyBw=bwCW_folder))
     from MuonConfig.MuonCablingConfig import TGCCablingConfigCfg
     acc.merge( TGCCablingConfigCfg(flags) )
     return acc

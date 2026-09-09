@@ -571,12 +571,6 @@ def runDataPrepChain():
     from InDetConfig.ConfigurationHelpers import OnlyTrackingPreInclude
     OnlyTrackingPreInclude(flags)
     
-    
-    
-    ############################################    
-    from ActsConfig.ActsCIFlags import actsProductionFlags
-    actsProductionFlags(flags)
-    
     ############################################
     flags.Concurrency.NumThreads=1
     flags.Concurrency.NumConcurrentEvents=1
@@ -584,6 +578,11 @@ def runDataPrepChain():
     flags.Scheduler.ShowDataDeps=False
     flags.Scheduler.CheckDependencies=True
     flags.Debug.DumpEvtStore=False # Set to Truth to enable Event Store printouts
+
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
+
+    
     # flags.Exec.DebugStage="exec" # useful option to debug the execution of the job - we want it commented out for production
     flags.fillFromArgs()
     if isinstance(flags.Trigger.FPGATrackSim.wrapperFileName, str):

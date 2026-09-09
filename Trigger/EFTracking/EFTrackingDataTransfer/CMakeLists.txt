@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 atlas_subdir( EFTrackingDataTransfer )
 
@@ -19,10 +19,10 @@ enable_language( SYCL )
 atlas_add_test( TransferBenchmark_test
 	SOURCES test/TransferBenchmark_test.cxx
 	LINK_LIBRARIES TestTools ActsEventLib xAODInDetMeasurement
-	POST_EXEC_SCRIPT nopost.sh)
+	POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( SyclTransferBenchmark_test 
 	SOURCES test/SyclTransferBenchmark_test.sycl
 	LINK_LIBRARIES TestTools ActsEventLib xAODInDetMeasurement AsgTools
-	POST_EXEC_SCRIPT nopost.sh)
+	POST_EXEC_SCRIPT noerror.sh)
 

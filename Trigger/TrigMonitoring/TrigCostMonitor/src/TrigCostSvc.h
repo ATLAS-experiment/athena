@@ -77,22 +77,14 @@ class TrigCostSvc : public extends <AthService, ITrigCostSvc> {
    * @brief Implementation of ITrigCostSvc::endEvent.
    * @param[in] context The event context
    * @param[out] costOutputHandle Write handle to fill with execution summary if the event was monitored
-   * @param[out] rosOutputHandle Write handle to fill with ROS requests summary if the event was monitored
    */
-  virtual StatusCode endEvent(const EventContext& context, SG::WriteHandle<xAOD::TrigCompositeContainer>& costOutputHandle, SG::WriteHandle<xAOD::TrigCompositeContainer>& rosOutputHandle) override; 
+  virtual StatusCode endEvent(const EventContext& context, SG::WriteHandle<xAOD::TrigCompositeContainer>& costOutputHandle) override; 
 
   /**
    * @return If the current context is flagged as being monitored. 
    * @param[in] context The event context
    */
   virtual bool isMonitoredEvent(const EventContext& context, const bool includeMultiSlot = true) const override;
-
-  /**
-   * @brief Implementation of ITrigCostSvc::monitorROS.
-   * @param[in] context The event context
-   * @param[in] payload ROB data to be associated with ROS
-   */
-  virtual StatusCode monitorROS(const EventContext& context, robmonitor::ROBDataMonitorStruct payload) override;
 
   /**
    * @return Generate timeout report with the most time consuming algorithms
@@ -149,7 +141,6 @@ class TrigCostSvc : public extends <AthService, ITrigCostSvc> {
   std::mutex m_globalMutex; //!< Used to protect all-slot modifications.
   TrigCostDataStore<AlgorithmPayload> m_algStartInfo; //!< Thread-safe store of algorithm start payload.
   TrigCostDataStore<TrigTimeStamp> m_algStopTime; //!< Thread-safe store of algorithm stop times.
-  TrigCostDataStore<std::vector<robmonitor::ROBDataMonitorStruct>> m_rosData; //!< Thread-safe store of ROS data
 
   tbb::concurrent_hash_map<std::thread::id, AlgorithmIdentifier, ThreadHashCompare> m_threadToAlgMap; //!< Keeps track of what is running right now in each thread.
 

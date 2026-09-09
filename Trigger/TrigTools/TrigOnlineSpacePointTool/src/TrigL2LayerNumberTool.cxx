@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetIdentifier/SCT_ID.h"
@@ -10,6 +10,7 @@
 
 #include "TrigL2LayerNumberTool.h"
 #include "InDetReadoutGeometry/SiNumerology.h"
+#include <stdexcept>
 
 TrigL2LayerNumberTool::TrigL2LayerNumberTool(const std::string& t, 
 					     const std::string& n,
@@ -200,6 +201,9 @@ void TrigL2LayerNumberTool::createModuleHashMap(std::map<std::tuple<short,short,
 	if(p->rMax() > maxBound) maxBound = p->rMax();	
       }
       nModules++;
+    }
+    if (nModules == 0)[[unlikely]]{
+      throw std::runtime_error("TrigL2LayerNumberTool::createModuleHashMap: nModules is zero.");
     }
     m_layerGeometry[layerId].m_refCoord = rc/nModules;
     m_layerGeometry[layerId].m_minBound = minBound;

@@ -120,6 +120,15 @@ def LArOFFCRawChannelBuilderCfg(flags, name="LArOFFCRawChannelBuilder", **kwargs
         kwargs.setdefault("Q3Cut", flags.LAr.ROD.OFFCQ3Cut)
         kwargs.setdefault("Q3Offset", flags.LAr.ROD.OFFCQ3Offset)
         kwargs.setdefault("FilterThreshold", flags.LAr.ROD.OFFCFilterThreshold)
+        # Per-layer tuning. The scalars above stay the fallback for any layer
+        # not named in these maps, so a job that clears them behaves exactly
+        # as it did before.
+        kwargs.setdefault("FilterThresholdByLayer",
+                          flags.LAr.ROD.OFFCFilterThresholdByLayer)
+        kwargs.setdefault("Q3CutByLayer", flags.LAr.ROD.OFFCQ3CutByLayer)
+        kwargs.setdefault("Q3OffsetByLayer", flags.LAr.ROD.OFFCQ3OffsetByLayer)
+        kwargs.setdefault("NPulseByLayer", flags.LAr.ROD.OFFCNPulseByLayer)
+        kwargs.setdefault("EnabledLayers", flags.LAr.ROD.OFFCEnabledLayers)
 
         acc.addEventAlgo(CompFactory.LArOFFCRawChannelBuilder(name, **kwargs))
 

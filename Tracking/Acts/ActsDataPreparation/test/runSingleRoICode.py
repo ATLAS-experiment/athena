@@ -20,20 +20,17 @@ if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
 
-    flags.Detector.GeometryITkPixel = True
-    flags.Detector.GeometryITkStrip = True
-    flags.Detector.EnableITkPixel = True
-    flags.Detector.EnableITkStrip = True
     flags.DQ.useTrigger = False
     flags.Output.HISTFileName = "ActsMonitoringOutput.root"
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultConditionsTags
     flags.Input.Files = defaultTestFiles.RDO_RUN4
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
     flags.Exec.MaxEvents = 1
 
     # Set the Main Pass
     flags = flags.cloneAndReplace(
         "Tracking.ActiveConfig",
-        "Tracking.ITkMainPass")
+        "Tracking.ITkActsPass")
     
     flags.fillFromArgs()
     flags.lock()

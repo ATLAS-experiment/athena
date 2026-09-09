@@ -16,19 +16,13 @@
 #include <EventLoop/Job.h>
 #include <EventLoop/ManagerData.h>
 #include <EventLoop/MessageCheck.h>
+#include <RootCoreUtils/ShellExec.h>
 #include <TSystem.h>
 #include <sstream>
 
 //
 // method implementations
 //
-
-std::string convertInt(int number)
-{
-   std::stringstream ss;//create a stringstream
-   ss << number;//add number to the stream
-   return ss.str();//return a string with the contents of the stream
-}
 
 ClassImp(EL::LLDriver)
 
@@ -37,9 +31,7 @@ namespace EL
 {
   void LLDriver ::
   testInvariant () const
-  {
-    RCU_INVARIANT (this != 0);
-  }
+  {}
 
 
 
@@ -86,7 +78,7 @@ namespace EL
           // Submit!
 
           std::ostringstream cmd;
-          cmd << "cd " << data.submitDir << "/submit && llsubmit "
+          cmd << "cd " << RCU::Shell::quote (data.submitDir) << "/submit && llsubmit "
               << data.options.castString (Job::optSubmitFlags)
               << " run"<<iter<<".cmd";
 

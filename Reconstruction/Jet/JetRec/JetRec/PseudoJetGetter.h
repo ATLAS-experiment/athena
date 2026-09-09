@@ -76,11 +76,11 @@ namespace PseudoJetGetter {
 #ifndef GENERATIONBASE
 
   struct EMTopoRejecter{
-    const xAOD::CaloCluster* cluster{0};
+    const xAOD::CaloCluster* cluster{};
 
     bool operator()(const xAOD::IParticle* ip){
       cluster = dynamic_cast<const xAOD::CaloCluster*>(ip);
-      return cluster == 0;  // reject if not a cluster
+      return cluster == nullptr;  // reject if not a cluster
     }
   };
 
@@ -164,7 +164,7 @@ namespace PseudoJetGetter {
         return reject;
       }
     
-      const xAOD::PFO* pfo = dynamic_cast<const xAOD::PFO*>(ip);
+      const xAOD::PFO* pfo = static_cast<const xAOD::PFO*>(ip);
     
       // keep charged PFOs with energy==0 because for MET TST with PFlow, 
       // there may be high pt 
@@ -226,7 +226,7 @@ namespace PseudoJetGetter {
     // loop over the input iparticles, select and  convert to pseudojets
     for(const xAOD::IParticle* ip: ips) {
 
-      const xAOD::FlowElement* pfo = dynamic_cast<const xAOD::FlowElement*>(ip);
+      const xAOD::FlowElement* pfo = static_cast<const xAOD::FlowElement*>(ip);
       ++index;
       if(rejecter(ip)){
         continue;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonLayerHoughAlg.h"
@@ -12,24 +12,6 @@
 #include "MuonPrepRawData/RpcPrepDataCollection.h"
 #include "MuonPrepRawData/TgcPrepDataCollection.h"
 #include "MuonPrepRawData/sTgcPrepDataCollection.h"
-
-MuonLayerHoughAlg::MuonLayerHoughAlg(const std::string& name, ISvcLocator* pSvcLocator) : 
-        AthReentrantAlgorithm(name, pSvcLocator) {}
-
-
-template <class T> StatusCode MuonLayerHoughAlg::retrieveContainer(const EventContext& ctx,
-                                                                   const SG::ReadHandleKey<T>& key,
-                                                                   const T*& contPtr) const {
-    if (key.empty()) {
-        ATH_MSG_DEBUG("No key of type "<<typeid(T).name()<<" has been set. Set to nullptr");
-        contPtr = nullptr;
-        return StatusCode::SUCCESS;
-    }
-    SG::ReadHandle<T> handle(key, ctx);
-    ATH_CHECK(handle.isValid());
-    contPtr = handle.cptr();
-    return StatusCode::SUCCESS;
-}
 
 StatusCode MuonLayerHoughAlg::initialize() {
     if (m_layerTool.empty()) {
@@ -57,34 +39,27 @@ StatusCode MuonLayerHoughAlg::execute(const EventContext& ctx) const {
     const Muon::CscPrepDataContainer* cscPrds{nullptr};
     const Muon::sTgcPrepDataContainer* stgcPrds{nullptr};
     const Muon::MMPrepDataContainer* mmPrds{nullptr};
-    ATH_CHECK(retrieveContainer(ctx, m_keyMdt, mdtPrds));
-    ATH_CHECK(retrieveContainer(ctx, m_keyRpc, rpcPrds));
-    ATH_CHECK(retrieveContainer(ctx, m_keyTgc, tgcPrds));
-    ATH_CHECK(retrieveContainer(ctx, m_keyCsc, cscPrds));
-    ATH_CHECK(retrieveContainer(ctx, m_keysTgc, stgcPrds));
-    ATH_CHECK(retrieveContainer(ctx, m_keyMM, mmPrds));
+    ATH_CHECK(SG::get( mdtPrds, m_keyMdt, ctx));
+    ATH_CHECK(SG::get( rpcPrds, m_keyRpc, ctx));
+    ATH_CHECK(SG::get( tgcPrds, m_keyTgc, ctx));
+    ATH_CHECK(SG::get( cscPrds, m_keyCsc, ctx));
+    ATH_CHECK(SG::get( stgcPrds, m_keysTgc, ctx));
+    ATH_CHECK(SG::get( mmPrds, m_keyMM, ctx));
     
     
  
     ATH_MSG_VERBOSE("calling layer tool ");
     auto [combis, houghDataPerSectorVec] = m_layerTool->find(mdtPrds, cscPrds, tgcPrds, rpcPrds, stgcPrds, mmPrds, ctx);
-    SG::WriteHandle<MuonPatternCombinationCollection> Handle(m_combis, ctx);
+    SG::WriteHandle Handle(m_combis, ctx);
     if (combis) {
-        if (Handle.record(std::move(combis)).isFailure()) {
-            ATH_MSG_WARNING("Failed to record MuonPatternCombinationCollection at MuonLayerHoughCombis");
-        } else {
-            ATH_MSG_DEBUG("Recorded MuonPatternCombinationCollection at MuonLayerHoughCombis: size " << Handle->size());
-            if (m_printSummary || msgLvl(MSG::DEBUG)) {
-                ATH_MSG_INFO("Number of MuonPatternCombinations  " << Handle->size() << std::endl << m_printer->print(*Handle));
-            }
-        }
+        ATH_CHECK(Handle.record(std::move(combis)));
     } else {
         ATH_MSG_VERBOSE("CombinationCollection " << m_combis << " is empty, recording");
         ATH_CHECK(Handle.record(std::make_unique<MuonPatternCombinationCollection>()));
     }
 
     // write hough data to SG
-    SG::WriteHandle<Muon::HoughDataPerSectorVec> handle{m_houghDataPerSectorVecKey, ctx};
+    SG::WriteHandle handle{m_houghDataPerSectorVecKey, ctx};
     if (houghDataPerSectorVec) {
         ATH_CHECK(handle.record(std::move(houghDataPerSectorVec)));
     } else {

@@ -66,6 +66,18 @@ namespace EL
     private:
       Long_t m_finMemVirtual = -1; //!
 
+      /// \brief buffer for the resident memory increase branch
+      ///
+      /// This needs to be a member (not a local in \ref postFinalize),
+      /// because the job statistics tree is filled later in
+      /// `Worker::finalize`, so the branch address has to stay valid.
+    private:
+      Float_t m_incResBuffer = 0; //!
+
+      /// \brief buffer for the virtual memory increase branch
+    private:
+      Float_t m_incVirtBuffer = 0; //!
+
 
       /// \brief Resident memory leak/increase during the job
       ///

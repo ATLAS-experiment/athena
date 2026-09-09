@@ -30,7 +30,7 @@ namespace SH
 
   DiskListLocal :: 
   DiskListLocal (const std::string& val_dir)
-    : m_dir (val_dir), m_prefix (val_dir), m_dirp (0)
+    : m_dir (val_dir), m_prefix (val_dir), m_dirp (nullptr)
   {
     RCU_NEW_INVARIANT (this);
   }
@@ -39,7 +39,7 @@ namespace SH
 
   DiskListLocal ::
   DiskListLocal (const std::string& val_dir, const std::string& val_prefix)
-    : m_dir (val_dir), m_prefix (val_prefix), m_dirp (0)
+    : m_dir (val_dir), m_prefix (val_prefix), m_dirp (nullptr)
   {
     RCU_NEW_INVARIANT (this);
   }
@@ -54,7 +54,7 @@ namespace SH
     if (m_dirp)
     {
       gSystem->FreeDirectory (m_dirp);
-      m_dirp = 0;
+      m_dirp = nullptr;
     }
   }
 
@@ -72,20 +72,20 @@ namespace SH
         throw std::runtime_error ("could not open directory " + m_dir);
     }
 
-    const char *subresult = 0;
+    const char *subresult = nullptr;
     do
     {
       subresult = gSystem->GetDirEntry (m_dirp);
-      if (subresult == 0)
+      if (subresult == nullptr)
       {
 	gSystem->FreeDirectory (m_dirp);
-	m_dirp = 0;
+	m_dirp = nullptr;
 	m_file.clear ();
 	return false;
       }
     } while (strcmp (subresult, ".") == 0 || strcmp (subresult, "..") == 0);
     m_file = subresult;
-    return subresult;
+    return true;
   }
 
 
@@ -109,7 +109,7 @@ namespace SH
     result->m_dirp = gSystem->OpenDirectory (result->m_dir.c_str());
     if (result->m_dirp)
       return result.release();
-    return 0;
+    return nullptr;
   }
 
 

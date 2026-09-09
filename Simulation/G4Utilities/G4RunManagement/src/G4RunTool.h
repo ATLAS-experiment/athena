@@ -5,6 +5,7 @@
 #ifndef G4ATLASSERVICES_G4RunTool_H
 #define G4ATLASSERVICES_G4RunTool_H
 
+#include "G4RunToolEventQueue.h"
 #include "G4RunToolStateSynchronization.h"
 
 // Base classes
@@ -22,15 +23,12 @@
 #include "G4AtlasInterfaces/IUserActionSvc.h"
 #include "G4AtlasInterfaces/IUserActionTool.h"
 #include "G4AtlasInterfaces/IUserLimitsSvc.h"
-#include "G4RunManagement/AtlasG4SyncEventUserInfo.h"
-
 // STL headers
-#include <condition_variable>
 #include <memory>
-#include <mutex>
-#include <queue>
 #include <string>
 #include <thread>
+
+class G4MTRunManager;
 
   /// @class G4RunTool
   /// @brief Front-end service for initializing and interacting with the Geant4 run.
@@ -72,7 +70,7 @@ class G4RunTool : public extends<AthAlgTool , IG4RunTool> {
   /// Geant4 main thread function, this is executed in a separate thread and blocks on BeamOn
   void Geant4main() noexcept;
   /// Implementation called inside the Geant4 main thread exception boundary.
-  void Geant4mainImpl();
+  void Geant4mainImpl(G4MTRunManager& runManager);
   /// This command prints a message about a G4Command depending on its returnCode
   void commandLog(int returnCode, const std::string& commandString) const;
 
@@ -94,13 +92,6 @@ class G4RunTool : public extends<AthAlgTool , IG4RunTool> {
   Gaudi::Property<int> m_nG4threads{this, "NG4threads", 1, "Number of parallel G4 worker threads to launch"};
   Gaudi::Property<int> m_nG4eventsPerRun{this, "NG4eventsPerRun", 100000, "Number of G4 events foreseen for each Run"};
 
-  struct EventQueueSynchronization
-  {
-    std::queue<UPEvent> m_events;
-    mutable std::mutex m_mutex;
-    std::condition_variable m_cv;
-  };
-
   // The Geant4 main thread
   std::unique_ptr<std::thread> m_thread;
   
@@ -108,7 +99,7 @@ class G4RunTool : public extends<AthAlgTool , IG4RunTool> {
   G4RunToolStateSynchronization m_statusSync;
   
   // Event queue management
-  EventQueueSynchronization m_eventQueueSync;
+  G4RunToolEventQueue m_eventQueue;
 };
 
 #endif

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibUtils/LArRTMParamExtractor.h"
@@ -670,39 +670,17 @@ StatusCode LArRTMParamExtractor::stop()
 
   // record extracted LArCaliPulseParamsComplete to detStore
   ATH_MSG_INFO( "...recording LArCaliPulseParams into det.store, key=" << m_keyExtractedCaliPulse ) ;
-  const LArCaliPulseParamsComplete* paramsPtr=newCaliPulseParams.get(); // remember ptr for 
   if ( StatusCode::FAILURE == ( detStore()->record(std::move(newCaliPulseParams), m_keyExtractedCaliPulse ) ) ) {
     ATH_MSG_ERROR( "Could not record LArCaliPulseParams into det.store!" ) ;
     return StatusCode::FAILURE ;
   }
   
-  // Symlink LArCaliPulseParamsComplete to ILArCaliPulseParams for further use
-  ATH_MSG_DEBUG( "Trying to symlink ILArCaliPulseParams with LArCaliPulseParamsComplete...");
-  ILArCaliPulseParams *larCaliPulseParams = nullptr;
-  sc = detStore()->symLink(paramsPtr,larCaliPulseParams);
-  if (sc.isFailure()) {
-    ATH_MSG_FATAL( "Could not symlink ILArCaliPulseParams with LArCaliPulseParamsComplete." );
-    return StatusCode::FAILURE;
-  } 
-  ATH_MSG_INFO( "ILArCaliPulseParams symlink with LArCaliPulseParamsComplete successfully");
-
   // record extracted LArDetCellParamsComplete to detStore
   ATH_MSG_INFO( "...recording LArDetCellParams into det.store, key=" << m_keyExtractedDetCell) ;
-  const LArDetCellParamsComplete* detcellPtr=newDetCellParams.get();
   if ( StatusCode::FAILURE == ( detStore()->record(std::move(newDetCellParams), m_keyExtractedDetCell ) ) ) {
     ATH_MSG_ERROR( "Could not record LArDetCellParams into det.store!" ) ;
     return StatusCode::FAILURE ;
   }
-
-  // Symlink LArDetCellParamsComplete to ILArDetCellParams for further use
-  ATH_MSG_DEBUG( "Trying to symlink ILArDetCellParams with LArDetCellParamsComplete...");
-  ILArDetCellParams *lArDetCellParams = nullptr;
-  sc = detStore()->symLink(detcellPtr,lArDetCellParams);
-  if (sc.isFailure()) {
-    ATH_MSG_FATAL( "Could not symlink ILArDetCellParams with LArDetCellParamsComplete." );
-    return StatusCode::FAILURE;
-  } 
-  ATH_MSG_INFO( "ILArDetCellParams symlink with LArDetCellParamsComplete successfully" ) ;
 
   if ( omegaScanContainer ) {
     ATH_MSG_INFO( "Recording omega scan container into det.store, key=" << m_omegaScanKey ) ;

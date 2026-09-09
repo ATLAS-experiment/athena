@@ -26,9 +26,7 @@
 
 #include "Gaudi/PluginService.h"
 
-#include <vector>
 #include <memory>
-#include <map>
 
 using namespace std;
 
@@ -43,8 +41,6 @@ namespace pool  {
   typedef const DbTypeInfo    *DbTypeInfoH;
   typedef const DbDatabaseObj *DbDatabaseH;
   typedef       DbDatabaseObj *DbDatabaseHNC;
-
-  class DbClassMap : public map<RootType, Guid> {};
 
 
    

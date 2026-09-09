@@ -1,22 +1,18 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 */
 
 #ifndef TrigHLTJetHypo_TrigJetEJsHypoAlg_H
 #define TrigHLTJetHypo_TrigJetEJsHypoAlg_H
 
-#include <string>
-
-#include "TrigJetEJsHypoAlg.h"
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "xAODJet/JetContainer.h"
-#include "xAODTracking/VertexContainer.h"
 
 #include "DecisionHandling/HypoBase.h"
 
+#include "xAODTracking/TrackParticleContainer.h"
+#include "xAODTracking/VertexContainer.h"
 #include "TrigJetEJsHypoTool.h"
-
+#include <string>
 /**
  * @class TrigJetEJsHypoAlg
  * @brief HypoAlg for exotic jets / emerging jets algorithm

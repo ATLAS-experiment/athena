@@ -17,6 +17,8 @@
 #include <utility>
 #include <TChain.h>
 #include <TFile.h>
+#include <TLeaf.h>
+#include <TTree.h>
 #include <RootCoreUtils/Assert.h>
 #include <SampleHandler/MessageCheck.h>
 #include <SampleHandler/Sample.h>
@@ -32,10 +34,50 @@ namespace SH
   namespace
   {
     /// description: the type for run-event number pairs
-    typedef std::pair<UInt_t,UInt_t> RunEvent;
+    ///
+    /// rationale: the event number is 64-bit (ULong64_t) in the xAOD
+    ///   data model, so both members are stored as ULong64_t to avoid
+    ///   truncation.
+    using RunEvent = std::pair<ULong64_t,ULong64_t>;
 
     /// description: the type for lists of run-event numbers
-    typedef std::set<RunEvent> RunEventList;
+    using RunEventList = std::set<RunEvent>;
+
+
+
+    /// \brief a helper to read an integer run/event-number branch of
+    ///   unknown width (32- or 64-bit) into a ULong64_t via the
+    ///   type-checked SetBranchAddress overload
+    ///
+    /// rationale: the previous code bound every branch to a 4-byte
+    ///   UInt_t through a type-erasing void* cast, which silently
+    ///   corrupted the stack when reading a 64-bit event-number branch.
+    struct NumberBranch
+    {
+      ULong64_t m_value64 = 0;
+      UInt_t m_value32 = 0;
+      bool m_is64 = false;
+
+      void connect (TTree& tree, const std::string& name)
+      {
+        TLeaf *leaf = tree.GetLeaf (name.c_str());
+        if (leaf == nullptr)
+          throw std::runtime_error ("failed to find leaf: " + name);
+        const std::string type = leaf->GetTypeName();
+        m_is64 = (type == "ULong64_t" || type == "Long64_t");
+        tree.SetBranchStatus (name.c_str(), 1);
+        const Int_t rc = m_is64
+          ? tree.SetBranchAddress (name.c_str(), &m_value64)
+          : tree.SetBranchAddress (name.c_str(), &m_value32);
+        if (rc < 0)
+          throw std::runtime_error ("failed to set branch address for: " + name);
+      }
+
+      ULong64_t value () const
+      {
+        return m_is64 ? m_value64 : ULong64_t (m_value32);
+      }
+    };
 
 
 
@@ -73,11 +115,10 @@ namespace SH
       TTree& tree_nc ATLAS_THREAD_SAFE = const_cast<TTree&>(tree);
       TObjArray *branches = tree_nc.GetListOfBranches();
 
-      for (std::set<std::string>::const_iterator name = names.begin(),
-	     end = names.end(); name != end; ++ name)
+      for (const auto& name : names)
       {
-	if (branches->FindObject (name->c_str()) != 0)
-	  return *name;
+	if (branches->FindObject (name.c_str()) != 0)
+	  return name;
       }
       throw std::runtime_error ("failed to find branch of valid name");
     }
@@ -103,12 +144,10 @@ namespace SH
       const std::string eventName = findBranch (tree, eventNames());
 
       tree.SetBranchStatus ("*", 0);
-      UInt_t run = 0;
-      tree.SetBranchStatus (runName.c_str(), 1);
-      tree.SetBranchAddress (runName.c_str(), static_cast<void*>(&run));
-      UInt_t event = 0;
-      tree.SetBranchStatus (eventName.c_str(), 1);
-      tree.SetBranchAddress (eventName.c_str(), static_cast<void*>(&event));
+      NumberBranch run;
+      run.connect (tree, runName);
+      NumberBranch event;
+      event.connect (tree, eventName);
 
       tree.SetCacheSize (10 * 1024 * 1024);
       for (Long64_t entry = 0;
@@ -116,13 +155,13 @@ namespace SH
       {
 	if (tree.GetEntry (entry) < 0)
 	  throw std::runtime_error ("failed to read event");
-	RunEvent runEvent (run, event);
+	RunEvent runEvent (run.value(), event.value());
 	if (list.find (runEvent) == list.end())
 	{
 	  list.insert (runEvent);
 	} else
 	{
-	  ANA_MSG_WARNING ("duplicate event run=" << run << " event=" << event << " file=" << tree.GetCurrentFile()->GetName());
+	  ANA_MSG_WARNING ("duplicate event run=" << run.value() << " event=" << event.value() << " file=" << tree.GetCurrentFile()->GetName());
 	}
       }
     }
@@ -141,10 +180,9 @@ namespace SH
 
   void printDuplicateEventsSplit (const SampleHandler& sh)
   {
-    for (SampleHandler::iterator sample = sh.begin(),
-	   end = sh.end(); sample != end; ++ sample)
+    for (auto *sample : sh)
     {
-      printDuplicateEvents (**sample);
+      printDuplicateEvents (*sample);
     }
   }
 
@@ -153,10 +191,9 @@ namespace SH
   void printDuplicateEventsJoint (const SampleHandler& sh)
   {
     RunEventList list;
-    for (SampleHandler::iterator sample = sh.begin(),
-	   end = sh.end(); sample != end; ++ sample)
+    for (auto *sample : sh)
     {
-      std::unique_ptr<TChain> chain ((*sample)->makeTChain ());
+      std::unique_ptr<TChain> chain (sample->makeTChain ());
       printDuplicateEvents (*chain, list);
     }
   }

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, ConfigurationError
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -71,7 +71,7 @@ def OutputStreamCfg(
    msg = logging.getLogger("OutputStreamCfg")
    flagName = f"Output.{streamName}FileName"
    if flags.hasFlag(flagName):
-      fileName = flags._get(flagName)
+      fileName = flags[flagName]
    else:
       fileName = f"my{streamName}.pool.root"
       msg.info("No file name predefined for stream %s. Using %s", streamName, fileName)
@@ -105,7 +105,7 @@ def OutputStreamCfg(
       writingTool.PoolContainerPrefix = f"CollectionTree_{streamName}"
       writingTool.MetaDataOutputCollection = f"MetaDataHdr_{streamName}"
       writingTool.MetaDataPoolContainerPrefix = f"MetaData_{streamName}"
-      msg.info("Stream %s running in augmentation mode with %s as parent", streamName, flags._get(parentStream))
+      msg.info("Stream %s running in augmentation mode with %s as parent", streamName, flags[parentStream])
 
    # In DAOD production the EventInfo is prepared specially by the SlimmingHelper to ensure it is written in AuxDyn form
    # So for derivations the ItemList from the SlimmingHelper alone is used without the extra EventInfo items

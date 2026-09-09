@@ -597,7 +597,7 @@ std::map<std::string, std::map<std::string, double>> JSSWTopTaggerANN::getJetPro
     ATH_MSG_ERROR( "Loading variables failed because the tagger type is not supported" );
   }
 
-  ANN_inputs["node_0"] = ANN_inputValues;
+  ANN_inputs["node_0"] = std::move(ANN_inputValues);
 
   return ANN_inputs;
 

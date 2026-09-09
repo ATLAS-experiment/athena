@@ -11,7 +11,7 @@ n_events=1
 
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py \
-  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsProductionFlags" \
+  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
   --preExec 'flags.Exec.FPE=-1; \
              from ActsConfig.ActsConfigFlags import PixelCalibrationStrategy; \
              flags.Acts.PixelCalibrationStrategy=PixelCalibrationStrategy.NNClustering; \

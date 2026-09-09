@@ -17,16 +17,9 @@ TrigBSExtraction::TrigBSExtraction(const std::string& name, ISvcLocator* pSvcLoc
 
 StatusCode TrigBSExtraction::initialize() {
 
-  // L2 navigation tool is optional
-  if ( !m_l2ResultKeyIn.empty() ) ATH_CHECK( m_navToolL2.retrieve() );
-  else m_navToolL2.disable();
-
   ATH_CHECK( m_navTool.retrieve() );
 
   // Initialize handle keys
-  ATH_CHECK( m_l2ResultKeyIn.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_l2ResultKeyOut.initialize(SG::AllowEmpty) );
-
   ATH_CHECK( m_hltResultKeyIn.initialize(SG::AllowEmpty) );
   ATH_CHECK( m_hltResultKeyOut.initialize(SG::AllowEmpty) );
 
@@ -51,21 +44,13 @@ StatusCode TrigBSExtraction::initialize() {
 
 StatusCode TrigBSExtraction::execute(const EventContext& ctx) {
 
-  const bool isRun1 = m_navToolL2.isEnabled();
-  if ( isRun1 ) {
-    ATH_MSG_ERROR("Unpacking of Run-1 bytestream is no longer supported");
-    return StatusCode::FAILURE;
-  }
-  
   if ( !m_hltResultKeyIn.empty() ) {
-    // unpack, merge with L2 result and do xAOD conversion
-    // xAOD conversion is only done for HLTResult_EF in Run-1
-    if ( repackFeaturesToSG(ctx, *m_navTool, m_hltResultKeyIn, m_hltResultKeyOut, isRun1).isFailure() )
+    if ( repackFeaturesToSG(ctx, *m_navTool, m_hltResultKeyIn, m_hltResultKeyOut).isFailure() )
       ATH_MSG_WARNING( "failed unpacking features from BS to SG for: " << m_hltResultKeyIn  );
   }
 
   for (size_t i = 0; i<m_dataScoutingKeysIn.size(); i++ ) {
-    if ( repackFeaturesToSG(ctx, *m_navTool, m_dataScoutingKeysIn[i], m_dataScoutingKeysOut[i], false).isFailure() )
+    if ( repackFeaturesToSG(ctx, *m_navTool, m_dataScoutingKeysIn[i], m_dataScoutingKeysOut[i]).isFailure() )
       ATH_MSG_WARNING( "failed unpacking features from BS to SG for: " << m_dataScoutingKeysIn[i] );
   }
   m_navTool->reset();
@@ -77,8 +62,7 @@ StatusCode TrigBSExtraction::execute(const EventContext& ctx) {
 StatusCode TrigBSExtraction::repackFeaturesToSG (const EventContext& ctx,
                                                  HLT::Navigation& navTool,
                                                  const SG::ReadHandleKey<HLT::HLTResult>& key,
-                                                 SG::WriteHandleKey<HLT::HLTResult>& keyOut,
-                                                 bool equalize) {
+                                                 SG::WriteHandleKey<HLT::HLTResult>& keyOut) {
 
   ATH_MSG_DEBUG( "Trying to deserialize content of " << key );
   auto cresult = SG::makeHandle(key, ctx);
@@ -96,11 +80,6 @@ StatusCode TrigBSExtraction::repackFeaturesToSG (const EventContext& ctx,
     navTool.deserialize( navData );
   } else {
     ATH_MSG_WARNING( "Navigation payload obtained from " << key << " has size 0" );
-  }
-
-  if ( equalize && m_navToolL2.isEnabled() ) {
-    ATH_MSG_DEBUG( "Merging L2 and EF navigation structures for " << key );
-    navTool.merge(*m_navToolL2);
   }
 
   navTool.prepare();

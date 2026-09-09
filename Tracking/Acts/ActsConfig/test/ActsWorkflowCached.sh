@@ -15,7 +15,7 @@ Reco_tf.py \
   --preExec "flags.Exec.FPE=-1; \
 	     flags.Acts.useCache=True; \
 	     flags.Detector.EnableCalo=True;" \
-  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsProductionFlags" \
+  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
   --ignorePatterns "${ignore_pattern}" \
   --conditionsTag ${conditions_tag} \
   --inputRDOFile ${input_rdo} \

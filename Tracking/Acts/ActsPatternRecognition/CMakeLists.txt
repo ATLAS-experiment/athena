@@ -27,10 +27,10 @@ atlas_add_component( ActsPatternRecognition
                MagFieldConditions
                MagFieldElements
                PixelReadoutGeometryLib
+               SCT_ReadoutGeometry
                SiSPSeededTrackFinderData
                SiSpacePoint
                StoreGateLib
-               TrigInDetToolInterfacesLib
                TrkEventUtils
                TrkParameters
                TrkSpacePoint

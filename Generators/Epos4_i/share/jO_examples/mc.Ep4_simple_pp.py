@@ -17,6 +17,11 @@ with open("Epos4.optns", "w") as f:
 
 include("Epos4_i/Epos4_Base_Fragment.py")
 
+# EvtGen fragment
+include("EvtGen_i/EvtGen_Fragment.py")
+evgenConfig.auxfiles+=['inclusive.pdt']
+genSeq.EvtInclusiveDecay.allowAllKnownDecays=True
+
 #Disable energy and momentum test due to internal generator problem
 TestHepMC.EnergyImbalanceTest = False
 TestHepMC.MomImbalanceTest    = False

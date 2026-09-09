@@ -269,7 +269,8 @@ StatusCode TriggerEDMDeserialiserAlg::deserialise( const Payload* dataptr ) cons
   // invalid conditions are: invalid interface pointer when decoding Aux store
   //                         invalid aux store and interface when decoding the decoration
   // these pointer should be invalidated when: decoding TP containers, aux store when decoding the xAOD interface 
-  WritableAuxStore* currentAuxStore = nullptr;         // set when decoding Aux
+  std::unique_ptr<WritableAuxStore> currentAuxStoreOwner;         // set when decoding Aux
+  WritableAuxStore* currentAuxStore = nullptr; //need to hang on to an observing ptr
   SG::AuxVectorBase* xAODInterfaceContainer = nullptr; // set when decoding xAOD interface
   
   size_t fragmentCount = 0;
@@ -360,7 +361,7 @@ StatusCode TriggerEDMDeserialiserAlg::deserialise( const Payload* dataptr ) cons
     }
 
     if ( isxAODInterfaceContainer or isxAODAuxContainer or isTPContainer ) {
-      BareDataBucket* dataBucket = new BareDataBucket( obj, clid, classDesc );
+      BareDataBucket* dataBucket = new BareDataBucket( obj, clid, std::move(classDesc) );
       const std::string outputName = m_prefix + key;
       auto proxyPtr = evtStore()->recordObject( SG::DataObjectSharedPtr<BareDataBucket>( dataBucket ),
                                                 outputName, false, false );
@@ -396,9 +397,14 @@ StatusCode TriggerEDMDeserialiserAlg::deserialise( const Payload* dataptr ) cons
             reinterpret_cast<SG::IAuxStore*>(
                 bib->cast(dataBucket->object(), ClassID_traits<SG::IAuxStore>::ID()));
         ATH_CHECK(auxHolder != nullptr);
+        //coverity[FORWARD_NULL:FALSE]
         xAODInterfaceContainer->setStore(auxHolder);
-        currentAuxStore = new WritableAuxStore();
-        dynamic_cast<SG::IAuxStoreHolder*>(auxHolder)->setStore( currentAuxStore );
+        currentAuxStoreOwner = std::make_unique<WritableAuxStore>();
+        currentAuxStore = currentAuxStoreOwner.get();
+        auto p = dynamic_cast<SG::IAuxStoreHolder*>(auxHolder);
+        ATH_CHECK(p != nullptr);
+        //coverity[FORWARD_NULL:FALSE]
+        p->setStore( currentAuxStoreOwner.release() ); //IAuxStoreHolder takes ownership
       } else {
         currentAuxStore = nullptr;
         xAODInterfaceContainer = nullptr; // invalidate xAOD related pointers
@@ -505,7 +511,7 @@ void TriggerEDMDeserialiserAlg::add_bs_streamerinfos(){
       continue;
     }
 
-    TStreamerInfo* inf = dynamic_cast<TStreamerInfo*>(infObj);
+    TStreamerInfo* inf = static_cast<TStreamerInfo*>(infObj);
     inf->BuildCheck();
     TClass *cl = inf->GetClass();
     if (cl != nullptr) {

@@ -61,9 +61,10 @@ namespace TrigCompositeUtils
   {
     const EventContext& ctx = Gaudi::Hive::currentContext();
     std::set<std::pair<uint32_t, uint32_t>> seen;
+    static const std::string roiStr{"roi"};
     for (const auto &info : links)
     {
-      LinkInfo<TrigRoiDescriptorCollection> roi = findLink<TrigRoiDescriptorCollection>(ctx, info.source, "roi");
+      LinkInfo<TrigRoiDescriptorCollection> roi = findLink<TrigRoiDescriptorCollection>(ctx, info.source, roiStr);
       if (!seen.insert(std::make_pair(roi.link.persKey(), roi.link.persIndex())).second)
         // Insert returns false if that item already exists in it
         return false;

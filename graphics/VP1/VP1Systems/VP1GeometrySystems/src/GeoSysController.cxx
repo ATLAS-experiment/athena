@@ -121,6 +121,13 @@ GeoSysController::GeoSysController(IVP1System * sys)
     m_d->ui_muon.groupBox_muonchamberconfig->setVisible(VP1JobConfigInfo::hasMuonGeometry());
     m_d->ui_misc.groupBox_show_NSW_chambers->setVisible(VP1JobConfigInfo::hasMuonNSWGeometry());
     m_d->ui_misc.groupBox_show_HGTD->setVisible(VP1JobConfigInfo::hasHGTDGeometry());
+    m_d->ui_misc.checkBox_HGTD_Glue->setVisible(false);
+    m_d->ui_misc.checkBox_HGTD_Sensors->setVisible(false);
+    m_d->ui_misc.checkBox_HGTD_Inactive->setVisible(false);
+    m_d->ui_misc.checkBox_HGTD_ASIC->setVisible(false);
+    m_d->ui_misc.checkBox_HGTD_BackCover->setVisible(false);
+    m_d->ui_misc.checkBox_HGTD_ModeratorOut->setVisible(false);
+    m_d->ui_misc.checkBox_HGTD_OuterRCover->setVisible(false);
     m_d->ui_int.checkBox_AutomaticMuonChamberEndViews->setVisible(VP1JobConfigInfo::hasMuonGeometry());
   }
   #endif
@@ -598,22 +605,15 @@ void GeoSysController::emit_autoAdaptHGTD()
   if (sender()==m_d->ui_misc.toolButton_hgtd_reset) {
     reset = true;
   }
-  bool flex = m_d->ui_misc.checkBox_HGTD_Flex->isChecked();
-  bool hybrid = m_d->ui_misc.checkBox_HGTD_Hybrid->isChecked();
-  bool glue = m_d->ui_misc.checkBox_HGTD_Glue->isChecked();
-  bool sensors = m_d->ui_misc.checkBox_HGTD_Sensors->isChecked();
-  bool inactive = m_d->ui_misc.checkBox_HGTD_Inactive->isChecked();
-  bool asic = m_d->ui_misc.checkBox_HGTD_ASIC->isChecked();
-  bool supportPlate = m_d->ui_misc.checkBox_HGTD_SupportPlate->isChecked();
-  bool frontCover = m_d->ui_misc.checkBox_HGTD_FrontCover->isChecked();
-  bool backCover = m_d->ui_misc.checkBox_HGTD_BackCover->isChecked();
-  bool moderatorIn = m_d->ui_misc.checkBox_HGTD_ModeratorIn->isChecked();
-  bool moderatorOut = m_d->ui_misc.checkBox_HGTD_ModeratorOut->isChecked();
-  bool outerRCover = m_d->ui_misc.checkBox_HGTD_OuterRCover->isChecked();
+  bool modules = m_d->ui_misc.checkBox_HGTD_Flex->isChecked();
+  bool supportStructure = m_d->ui_misc.checkBox_HGTD_SupportPlate->isChecked();
   bool coolingLines = m_d->ui_misc.checkBox_HGTD_CoolingLines->isChecked();
+  bool covers = m_d->ui_misc.checkBox_HGTD_FrontCover->isChecked();
+  bool moderator = m_d->ui_misc.checkBox_HGTD_ModeratorIn->isChecked();
+  bool servicesElectronics = m_d->ui_misc.checkBox_HGTD_Hybrid->isChecked();
 
-  messageVerbose ("Emitting autoAdaptHGTD("+str(reset)+","+str(flex)+","+str(hybrid)+","+str(glue)+","+str(sensors)+","+str(inactive)+","+str(asic)+","+str(supportPlate)+","+str(frontCover)+","+str(backCover)+","+str(moderatorIn)+","+str(moderatorOut)+","+str(outerRCover)+","+str(coolingLines)+")");
-  emit autoAdaptHGTD(reset, flex, hybrid, glue, sensors, inactive, asic, supportPlate, frontCover, backCover, moderatorIn, moderatorOut, outerRCover, coolingLines);
+  messageVerbose ("Emitting autoAdaptHGTD("+str(reset)+","+str(modules)+","+str(supportStructure)+","+str(coolingLines)+","+str(covers)+","+str(moderator)+","+str(servicesElectronics)+")");
+  emit autoAdaptHGTD(reset, modules, supportStructure, coolingLines, covers, moderator, servicesElectronics);
 }
 
 

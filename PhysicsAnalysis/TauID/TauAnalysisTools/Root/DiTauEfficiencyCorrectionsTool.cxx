@@ -1,6 +1,6 @@
 /**
  *
- * @copyright Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ * @copyright Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  *
  * @file DiTauEfficiencyCorrectionsTool.cxx
  * @brief Class for ditau efficiency correction scale factors and uncertainties
@@ -17,6 +17,7 @@
 #include "TauAnalysisTools/Enums.h"
 #include "TauAnalysisTools/SharedFilesVersion.h"
 
+#include <AsgTools/AsgToolConfig.h>
 
 namespace TauAnalysisTools
 {
@@ -24,7 +25,6 @@ namespace TauAnalysisTools
 //______________________________________________________________________________
 DiTauEfficiencyCorrectionsTool::DiTauEfficiencyCorrectionsTool( const std::string& sName )
   : asg::AsgMetadataTool( sName )
-  , m_vCommonEfficiencyTools()
   , m_bIsData(false)
   , m_bIsConfigured(false)
 {
@@ -33,8 +33,6 @@ DiTauEfficiencyCorrectionsTool::DiTauEfficiencyCorrectionsTool( const std::strin
 //______________________________________________________________________________
 DiTauEfficiencyCorrectionsTool::~DiTauEfficiencyCorrectionsTool()
 {
-  for (auto tTool : m_vCommonEfficiencyTools)
-    delete tTool;
 }
 
 
@@ -53,12 +51,6 @@ StatusCode DiTauEfficiencyCorrectionsTool::initialize()
   {
     ATH_MSG_FATAL("Unknown RecommendationTag: "<<m_sRecommendationTag);
     return StatusCode::FAILURE;
-  }
-
-  for (auto it = m_vCommonEfficiencyTools.begin(); it != m_vCommonEfficiencyTools.end(); it++)
-  {
-    ATH_CHECK((**it).setProperty("OutputLevel", this->msg().level()));
-    ATH_CHECK((**it).initialize());
   }
 
   // Add the affecting systematics to the global registry
@@ -111,14 +103,12 @@ CP::CorrectionCode DiTauEfficiencyCorrectionsTool::getEfficiencyScaleFactor( con
   if (m_bIsData)
     return CP::CorrectionCode::Ok;
 
-  for (auto it = m_vCommonEfficiencyTools.begin(); it != m_vCommonEfficiencyTools.end(); it++)
-  {
-    double dToolEff = 1.;
-    CP::CorrectionCode tmpCorrectionCode = (**it)->getEfficiencyScaleFactor(xDiTau, dToolEff);
-    if (tmpCorrectionCode != CP::CorrectionCode::Ok)
-      return tmpCorrectionCode;
-    eff *= dToolEff;
-  }
+  double dToolEff = 1.;
+  CP::CorrectionCode tmpCorrectionCode = m_tTool->getEfficiencyScaleFactor(xDiTau, dToolEff);
+  if (tmpCorrectionCode != CP::CorrectionCode::Ok)
+    return tmpCorrectionCode;
+
+  eff *= dToolEff;
   return CP::CorrectionCode::Ok;
 }
 
@@ -128,14 +118,12 @@ CP::CorrectionCode DiTauEfficiencyCorrectionsTool::applyEfficiencyScaleFactor( c
   if (m_bIsData)
     return CP::CorrectionCode::Ok;
 
-  for (auto it = m_vCommonEfficiencyTools.begin(); it != m_vCommonEfficiencyTools.end(); it++)
+  CP::CorrectionCode tmpCorrectionCode = m_tTool->applyEfficiencyScaleFactor(xDiTau);
+  if (tmpCorrectionCode != CP::CorrectionCode::Ok)
   {
-    CP::CorrectionCode tmpCorrectionCode = (**it)->applyEfficiencyScaleFactor(xDiTau);
-    if (tmpCorrectionCode != CP::CorrectionCode::Ok)
-    {
-      return tmpCorrectionCode;
-    }
+    return tmpCorrectionCode;
   }
+
   return CP::CorrectionCode::Ok;
 }
 
@@ -143,9 +131,9 @@ CP::CorrectionCode DiTauEfficiencyCorrectionsTool::applyEfficiencyScaleFactor( c
 //______________________________________________________________________________
 bool DiTauEfficiencyCorrectionsTool::isAffectedBySystematic( const CP::SystematicVariation& systematic ) const
 {
-  for (auto it = m_vCommonEfficiencyTools.begin(); it != m_vCommonEfficiencyTools.end(); it++)
-    if ((**it)->isAffectedBySystematic(systematic))
-      return true;
+  if (m_tTool->isAffectedBySystematic(systematic))
+    return true;
+
   return false;
 }
 
@@ -154,8 +142,8 @@ bool DiTauEfficiencyCorrectionsTool::isAffectedBySystematic( const CP::Systemati
 CP::SystematicSet DiTauEfficiencyCorrectionsTool::affectingSystematics() const
 {
   CP::SystematicSet sAffectingSystematics;
-  for (auto it = m_vCommonEfficiencyTools.begin(); it != m_vCommonEfficiencyTools.end(); it++)
-    sAffectingSystematics.insert((**it)->affectingSystematics());
+  sAffectingSystematics.insert(m_tTool->affectingSystematics());
+
   return sAffectingSystematics;
 }
 
@@ -164,21 +152,20 @@ CP::SystematicSet DiTauEfficiencyCorrectionsTool::affectingSystematics() const
 CP::SystematicSet DiTauEfficiencyCorrectionsTool::recommendedSystematics() const
 {
   CP::SystematicSet sRecommendedSystematics;
-  for (auto it = m_vCommonEfficiencyTools.begin(); it != m_vCommonEfficiencyTools.end(); it++)
-  {
-    sRecommendedSystematics.insert((**it)->recommendedSystematics());
-  }
+  sRecommendedSystematics.insert(m_tTool->recommendedSystematics());
+
   return sRecommendedSystematics;
 }
 
 //______________________________________________________________________________
 StatusCode DiTauEfficiencyCorrectionsTool::applySystematicVariation ( const CP::SystematicSet& sSystematicSet)
 {
-  for (auto it = m_vCommonEfficiencyTools.begin(); it != m_vCommonEfficiencyTools.end(); it++)
-    if ((**it)->applySystematicVariation(sSystematicSet) == StatusCode::FAILURE)
-    {
-      return StatusCode::FAILURE;
-    }
+  if (m_tTool->applySystematicVariation(sSystematicSet) == StatusCode::FAILURE)
+  {
+    ATH_MSG_ERROR( "failing in appying systematic uncertainty."); 
+    return StatusCode::FAILURE;
+  }
+
   return StatusCode::SUCCESS;
 }
 
@@ -199,13 +186,17 @@ StatusCode DiTauEfficiencyCorrectionsTool::initializeTools_2017_moriond()
       }
       if (m_sVarNameJetIDHadTau.empty()) m_sVarNameJetIDHadTau = "DiTauScaleFactorJetIDHadTau";
 
-      asg::AnaToolHandle<IDiTauEfficiencyCorrectionsTool>* tTool = new asg::AnaToolHandle<IDiTauEfficiencyCorrectionsTool>("JetIDHadTauTool", this);
-      m_vCommonEfficiencyTools.push_back(tTool);
-      ATH_CHECK(ASG_MAKE_ANA_TOOL(*tTool, TauAnalysisTools::CommonDiTauEfficiencyTool));
-      ATH_CHECK(tTool->setProperty("InputFilePath", m_sInputFilePathJetIDHadTau));
-      ATH_CHECK(tTool->setProperty("VarName", m_sVarNameJetIDHadTau));
-      ATH_CHECK(tTool->setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
-      ATH_CHECK(tTool->setProperty("WP", ConvertJetIDToString(m_iJetIDLevel)));
+      std::string wp = ConvertJetIDToString(m_iJetIDLevel);
+
+      if (m_tTool.empty()){
+        asg::AsgToolConfig config("TauAnalysisTools::CommonDiTauEfficiencyTool/JetIDHadTauTool_"+wp);
+	ATH_CHECK(config.setProperty("InputFilePath", m_sInputFilePathJetIDHadTau));
+        ATH_CHECK(config.setProperty("VarName", m_sVarNameJetIDHadTau));
+        ATH_CHECK(config.setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
+        ATH_CHECK(config.setProperty("WP", wp));
+        ATH_CHECK(config.makePrivateTool(m_tTool));
+      }
+      ATH_CHECK(m_tTool.retrieve());
     }
     else
     {

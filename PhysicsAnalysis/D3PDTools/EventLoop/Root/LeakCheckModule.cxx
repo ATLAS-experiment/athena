@@ -62,14 +62,17 @@ namespace EL
         ANA_MSG_DEBUG ("finishing memory: " << pinfo.fMemResident << " " << pinfo.fMemVirtual);
 
         // Save the memory increase values into the job statistics tree.
+        // The values are held in module members because the tree is only
+        // filled later, in Worker::finalize, by which point any function
+        // local would be out of scope and the branch address dangling.
         RCU_ASSERT (data.m_jobStats != nullptr);
-        Float_t incRes = memIncreaseResident();
-        if (! data.m_jobStats->Branch ("memIncreaseResident", &incRes)) {
+        m_incResBuffer = memIncreaseResident();
+        if (! data.m_jobStats->Branch ("memIncreaseResident", &m_incResBuffer)) {
           ANA_MSG_ERROR ("Failed to create branch memIncreaseResident");
           return StatusCode::FAILURE;
         }
-        Float_t incVirt = memIncreaseVirtual();
-        if (! data.m_jobStats->Branch ("memIncreaseVirtual", &incVirt)) {
+        m_incVirtBuffer = memIncreaseVirtual();
+        if (! data.m_jobStats->Branch ("memIncreaseVirtual", &m_incVirtBuffer)) {
           ANA_MSG_ERROR ("Failed to create branch memIncreaseVirtual");
           return StatusCode::FAILURE;
         }

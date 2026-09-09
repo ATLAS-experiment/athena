@@ -72,6 +72,10 @@ private:
   bool m_initialised = false;
   bool m_continuous   = false; //Continuous1D
   bool m_continuous2D = false; //Continuous2D
+  // Boolean set in the initialize function, it is set to true if tagger outputs tau-probability or false otherwise 
+  // All recent taggers (GN2v01 or above) are outputting a tau-probabilitiy  
+  bool m_taggerWithTauFractions = true; 
+ 
   /// Object used to store the last decision
   asg::AcceptInfo m_acceptinfo;
   

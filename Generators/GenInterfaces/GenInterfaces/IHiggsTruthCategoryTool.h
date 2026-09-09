@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -24,7 +24,7 @@ class IHiggsTruthCategoryTool : public virtual asg::IAsgTool {
   ASG_TOOL_INTERFACE( IHiggsTruthCategoryTool ) //declares the interface to athena
     virtual ~IHiggsTruthCategoryTool() = default;
  public: 
-  virtual HTXS::HiggsClassification* getHiggsTruthCategoryObject(const HepMC::GenEvent& HepMCEvent, const HTXS::HiggsProdMode prodMode) const =0;
+  virtual HTXS::HiggsClassification* getHiggsTruthCategoryObject(const HepMC::GenEvent& HepMCEvent, const HTXS::HiggsProdMode prodMode, const HTXS::HiggsDecayMode decayMode) const =0;
 };
 
 #endif //> !GENINTERFACES_IHIGGSTRUTHCATEGORYTOOL_H

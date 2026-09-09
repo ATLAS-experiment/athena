@@ -466,7 +466,7 @@ StatusCode TrigVrtSecInclusive::findDiTrackVertex
          if (errorcode != 0) {
             ATH_MSG_VERBOSE( ": two circles intersect failed");
             wrkcuts.twoCircErrcut   = true;
-            wrkvrt.param            = wrkprm;
+            wrkvrt.param            = std::move(wrkprm);
             wrkvrt.cuts             = wrkcuts;
             wrkvrt.isPair           = true;
 
@@ -504,7 +504,7 @@ StatusCode TrigVrtSecInclusive::findDiTrackVertex
          if( sc.isFailure() ) {
             ATH_MSG_VERBOSE( ": fast crude estimation fails ");
             wrkcuts.fastErrcut  = true;
-            wrkvrt.param        = wrkprm;
+            wrkvrt.param        = std::move(wrkprm);
             wrkvrt.cuts         = wrkcuts;
             wrkvrt.isPair       = true;
 
@@ -558,7 +558,7 @@ StatusCode TrigVrtSecInclusive::findDiTrackVertex
          timerVrtFit.stop();
          if( sc.isFailure() ) {
             wrkcuts.fitErrcut  = true;
-            wrkvrt.param       = wrkprm;
+            wrkvrt.param       = std::move(wrkprm);
             wrkvrt.cuts        = wrkcuts;
             wrkvrt.isPair      = true;
 
@@ -572,7 +572,7 @@ StatusCode TrigVrtSecInclusive::findDiTrackVertex
          if( wrkvrt.chi2 > m_selVrtChi2Cut) {
             ATH_MSG_VERBOSE( ": failed to pass chi2 threshold." );
             wrkcuts.chi2cut = true;
-            wrkvrt.param    = wrkprm;
+            wrkvrt.param    = std::move(wrkprm);
             wrkvrt.cuts     = wrkcuts;
             wrkvrt.isPair   = true;
 
@@ -640,7 +640,7 @@ StatusCode TrigVrtSecInclusive::findDiTrackVertex
          // Therefore the track pair is removed from the incompatibility list.
          if (wrkcuts.isFullPass()) incomp.pop_back();
 
-         wrkvrt.param = wrkprm;
+         wrkvrt.param = std::move(wrkprm);
          wrkvrt.cuts  = wrkcuts;
          wrkvrt.isGood  = true;
          wrkvrt.isPair  = true;
@@ -748,7 +748,7 @@ StatusCode TrigVrtSecInclusive::findDiTrackVertexVSI
          if (errorcode != 0) {
             ATH_MSG_VERBOSE( ": two circles intersect failed");
             wrkcuts.twoCircErrcut   = true;
-            wrkvrt.param            = wrkprm;
+            wrkvrt.param            = std::move(wrkprm);
             wrkvrt.cuts             = wrkcuts;
             wrkvrt.isPair           = true;
 
@@ -783,7 +783,7 @@ StatusCode TrigVrtSecInclusive::findDiTrackVertexVSI
          if( sc.isFailure() ) {
             ATH_MSG_VERBOSE( ": fast crude estimation fails ");
             wrkcuts.fastErrcut  = true;
-            wrkvrt.param        = wrkprm;
+            wrkvrt.param        = std::move(wrkprm);
             wrkvrt.cuts         = wrkcuts;
             wrkvrt.isPair       = true;
 
@@ -835,7 +835,7 @@ StatusCode TrigVrtSecInclusive::findDiTrackVertexVSI
          timerVrtFit.stop();
          if( sc.isFailure() ) {
            wrkcuts.fitErrcut = true;
-           wrkvrt.param = wrkprm;
+           wrkvrt.param = std::move(wrkprm);
            wrkvrt.cuts  = wrkcuts;
            wrkvrt.isPair  = true;
 
@@ -850,7 +850,7 @@ StatusCode TrigVrtSecInclusive::findDiTrackVertexVSI
          if( wrkvrt.chi2 > m_selVrtChi2Cut) {
             ATH_MSG_VERBOSE( ": failed to pass chi2 threshold." );
             wrkcuts.chi2cut = true;
-            wrkvrt.param    = wrkprm;
+            wrkvrt.param    = std::move(wrkprm);
             wrkvrt.cuts     = wrkcuts;
             wrkvrt.isPair   = true;
 
@@ -891,7 +891,7 @@ StatusCode TrigVrtSecInclusive::findDiTrackVertexVSI
          // Therefore the track pair is removed from the incompatibility list.
          if (wrkcuts.isFullPass()) incomp.pop_back();
 
-         wrkvrt.param = wrkprm;
+         wrkvrt.param = std::move(wrkprm);
          wrkvrt.cuts  = wrkcuts;
          wrkvrt.isGood  = true;
          wrkvrt.isPair  = true;
@@ -1095,13 +1095,13 @@ StatusCode TrigVrtSecInclusive::findNtrackVerticesVSI
                                     *fitterState, false);
 
           if( sc.isFailure() ) {
-            tmp = backup;
+            tmp = std::move(backup);
             continue;
           }
 
         }
 
-        wrkvrt = tmp;
+        wrkvrt = std::move(tmp);
         ATH_MSG_DEBUG(" > " << __FUNCTION__ << ": VKalVrtFit succeeded; register the vertex to the list.");
         wrkvrt.isGood                = true;
         wrkvrt.closestWrkVrtIndex    = std::numeric_limits<unsigned>::max();
@@ -1469,7 +1469,7 @@ StatusCode TrigVrtSecInclusive::fitVertexFromTracks
                                 *fitterState, false);
 
       if( sc.isFailure() ) {
-        tmp = backup;
+        tmp = std::move(backup);
         continue;
       }
 

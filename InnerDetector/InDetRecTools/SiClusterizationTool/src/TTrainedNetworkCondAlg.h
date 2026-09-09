@@ -19,7 +19,6 @@
 
 #include "TFile.h"
 
-class IPoolSvc;
 class TTrainedNetwork;
 
 namespace InDet {

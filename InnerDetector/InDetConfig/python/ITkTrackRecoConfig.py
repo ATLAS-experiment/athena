@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import Format
@@ -7,7 +7,7 @@ from AthenaCommon.Constants import WARNING, INFO
 
 _flags_set = []  # For caching
 _extensions_list = [] # For caching, possible legacy / validate Passes/Configurations
-_actsExtensions  = ['Acts', 'ActsLegacy', 'ActsConversion', 'ActsLargeRadius', 'ActsLowPt', 'ActsValidateF100', 'ActsValidateF150', 'ActsValidateLargeRadiusStandalone'] # Possible Acts Alone Passes/Configurations
+_actsExtensions  = ['Acts', 'ActsLegacy', 'ActsConversion', 'ActsLargeRadius', 'ActsLowPt', 'ActsValidateF100', 'ActsValidateF150'] # Possible Acts Alone Passes/Configurations
 _outputExtensions  = [] # Passes/Configurations to be passed to the output job option
 
 def CombinedTrackingPassFlagSets(flags, resetCache=False):
@@ -20,10 +20,6 @@ def CombinedTrackingPassFlagSets(flags, resetCache=False):
     # Primary Pass(es)
     from TrkConfig.TrkConfigFlags import TrackingComponent
     validation_configurations = {
-        TrackingComponent.ActsValidateClusters : "ActsValidateClusters",
-        TrackingComponent.ActsValidateLargeRadiusStandalone: "ActsValidateLargeRadiusStandalone",
-        TrackingComponent.ActsValidateTracks : "ActsValidateTracks",
-        TrackingComponent.ActsValidateAmbiguityResolution : "ActsValidateAmbiguityResolution",
         TrackingComponent.ActsValidateF100 : "ActsValidateF100",
         TrackingComponent.ActsValidateF150 : "ActsValidateF150",
     }
@@ -392,14 +388,7 @@ def ITkTrackFinalCfg(flags,
             AssociationMapName=(
                 "" if skipClusterMerge else
                 f"PRDtoTrackMapMerge_{TrackContainer}"),
-            isActsAmbi = 'ActsValidateResolvedTracks' in splitProbName or \
-            'ActsValidateAmbiguityResolution' in splitProbName or \
-            'ActsValidateScoreBasedAmbiguityResolution' in splitProbName or \
-            'ActsConversion' in splitProbName or \
-            'ActsLargeRadius' in splitProbName or \
-            'ActsValidateLargeRadiusStandalone' in splitProbName or \
-            'ActsLowPt' in splitProbName or \
-            ('Acts' in  splitProbName and 'Validate' not in splitProbName) ))
+            isActsAmbi = 'Acts' in splitProbName and 'Validate' not in splitProbName))
         
     return result
 
@@ -710,13 +699,10 @@ if __name__ == "__main__":
     # Disable calo for this test
     flags.Detector.EnableCalo = False
 
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultConditionsTags
     flags.Input.Files = defaultTestFiles.RDO_RUN4
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
 
-    import sys
-    if "--doFTF" in sys.argv:
-       flags.Tracking.useITkFTF = True
-       flags.Tracking.doITkFastTracking = True
 
     flags.lock()
 
@@ -737,6 +723,7 @@ if __name__ == "__main__":
     top_acc.printConfig(withDetails=True, summariseProps=True)
     top_acc.store(open("ITkTrackReco.pkl", "wb"))
 
+    import sys
     if "--norun" not in sys.argv:
         sc = top_acc.run(5)
         if sc.isFailure():

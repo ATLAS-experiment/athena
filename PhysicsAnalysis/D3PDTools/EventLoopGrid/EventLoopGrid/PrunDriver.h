@@ -12,10 +12,6 @@
 
 #include "EventLoop/Driver.h"
 
-namespace SH {
-  class SampleGrid;
-}
-
 namespace EL {
 
   /// \brief a \ref Driver to submit jobs via prun

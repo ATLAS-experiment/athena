@@ -9,7 +9,13 @@
 
 #include "src/GbtsSeedingTool.h"
 
+#include "src/GbtsConnectionTableReader.h"
+
 #include "CxxUtils/inline_hints.h"
+
+#include <fstream>
+#include <memory>
+#include <unordered_map>
 
 namespace ActsTrk {
 
@@ -20,7 +26,7 @@ namespace ActsTrk {
   {}
 
   StatusCode GbtsSeedingTool::initialize() {
-    ATH_CHECK(m_layerNumberTool.retrieve());
+    ATH_CHECK(m_layerTool.retrieve());
     ATH_MSG_DEBUG("Initializing " << name() << "...");
 
     // Make the logger And Propagate to ACTS routines
@@ -32,36 +38,33 @@ namespace ActsTrk {
     ATH_CHECK( prepareConfiguration());
     printGbtsConfig();
 
-    // layer geometry creation 
-    const std::vector<TrigInDetSiLayer>* pVL = m_layerNumberTool->layerGeometry(); 
-    
-    // layer objects used by GBTS
-    std::vector<Acts::Experimental::GbtsLayerDescription> layers;
-    layers.reserve(pVL->size());
+    // The layer tool builds the GBTS layers, in dense layer index order, and
+    // knows which layer each module hash belongs to and what it is made of.
+    const std::vector<Acts::Experimental::GbtsLayerDescription>& layers =
+      m_layerTool->layerDescriptions();
+    const std::vector<GbtsTechnology>& technologies =
+      m_layerTool->layerTechnologies();
 
-    // convert from trigindetsilayer to acts::experimental::trigindetsilayer
-    for (const TrigInDetSiLayer&s : *pVL) {
-      const Acts::Experimental::GbtsLayerType type = s.m_type == 0 ? Acts::Experimental::GbtsLayerType::Barrel : Acts::Experimental::GbtsLayerType::Endcap;
-      layers.emplace_back(s.m_subdet, type, s.m_refCoord, s.m_minBound, s.m_maxBound);
+    m_pixelHashToLayer = &m_layerTool->pixelLayers();
+    m_stripHashToLayer = &m_layerTool->stripLayers();
+
+    m_are_pixels.clear();
+    m_are_pixels.reserve(technologies.size());
+    for (const GbtsTechnology technology : technologies) {
+      m_are_pixels.push_back(technology == GbtsTechnology::Pixel);
     }
 
-    // fill which has id for each module belongs to what layer
-    m_sct_h2l = m_layerNumberTool->sctLayers();
-    m_pix_h2l = m_layerNumberTool->pixelLayers();
-    m_are_pixels.resize(m_layerNumberTool->maxNumberOfUniqueLayers(), true);
-    for(const auto& l : *m_sct_h2l) m_are_pixels[l] = false;
-
-    // parse connection 
-    auto layerConnectionMap = Acts::Experimental::GbtsLayerConnectionMap::fromFile(m_finderCfg.connectorInputFile, m_finderCfg.lrtMode);
+    Acts::Experimental::GbtsLayerConnectionMap connections;
+    ATH_CHECK(readConnections(layers, technologies, connections));
 
     // option that allows for adding custom eta binning (default is at 0.2)
     if (m_finderCfg.etaBinWidthOverride != 0.0f) {
-      layerConnectionMap.etaBinWidth = m_finderCfg.etaBinWidthOverride;
+      connections.etaBinWidth = m_finderCfg.etaBinWidthOverride;
     }
   
     // create geoemtry object that holds allowed pairing of allowed eta regions in each layer
     // holds all geometry information (m_layergeomtry and connection table)
-    auto gbtsGeo = std::make_shared<Acts::Experimental::GbtsGeometry>(layers, layerConnectionMap);
+    auto gbtsGeo = std::make_shared<Acts::Experimental::GbtsGeometry>(layers, connections);
 
     m_finder = Acts::Experimental::GraphBasedTrackSeeder(
       Acts::Experimental::GraphBasedTrackSeeder::DerivedConfig(m_finderCfg),
@@ -98,6 +101,11 @@ namespace ActsTrk {
     // create the node storage and fill it from the xAOD space points
     Acts::Experimental::GbtsNodeStorage nodeStorage = m_finder->makeNodeStorage(m_are_pixels);
 
+    // space points GBTS has no layer for, counted rather than reported per
+    // space point: the loop runs over the whole event
+    std::size_t nUnmappedHashes = 0;
+    std::size_t nUngroupedModules = 0;
+
     // add spacepoints to node storage
     for(std::size_t idx = 0; idx < tmpSpacePoints.size(); ++idx){
       // obtain module hash for spacepoint
@@ -106,7 +114,20 @@ namespace ActsTrk {
 
       const bool isPixel(elementlist.size() == 1);
 
-	    const short layer = (isPixel ? m_pix_h2l : m_sct_h2l)->operator[](static_cast<int>(elementlist[0]));
+      const std::vector<short>& hashToLayer =
+        isPixel ? *m_pixelHashToLayer : *m_stripHashToLayer;
+      const auto hash = static_cast<std::size_t>(elementlist[0]);
+      if (hash >= hashToLayer.size()) [[unlikely]] {
+        ++nUnmappedHashes;
+        continue;
+      }
+
+      const short layer = hashToLayer[hash];
+      if (layer == IGbtsLayerTool::kNoLayer) {
+        // a wafer GBTS does not group into any of its layers
+        ++nUngroupedModules;
+        continue;
+      }
 
       float clusterWidth = 0.0f;
       float localPositionY = 0.0f;
@@ -130,6 +151,15 @@ namespace ActsTrk {
           std::hypot(new_x, new_y), static_cast<float>(std::atan2(sp->y(), sp->x())),
           static_cast<std::uint32_t>(layer), clusterWidth, localPositionY);
       }
+    }
+
+    if (nUnmappedHashes != 0) [[unlikely]] {
+      ATH_MSG_WARNING(nUnmappedHashes << " space points sit on a wafer hash "
+                      "outside the GBTS layer map and were dropped");
+    }
+    if (nUngroupedModules != 0) {
+      ATH_MSG_DEBUG(nUngroupedModules << " space points sit on a wafer GBTS "
+                    "does not group into a layer");
     }
 
     // order the nodes and build the derived per-node data
@@ -157,6 +187,83 @@ namespace ActsTrk {
   // this is called in initialise
   // adds all veriables that may have been changed in the gaudi properties defined in headerfile 
   
+  StatusCode GbtsSeedingTool::readConnections(
+    const std::vector<Acts::Experimental::GbtsLayerDescription>& layers,
+    const std::vector<GbtsTechnology>& technologies,
+    Acts::Experimental::GbtsLayerConnectionMap& connections) const
+  {
+    std::ifstream connectionStream(m_connectorInputFile.value());
+    if (!connectionStream.is_open()) {
+      ATH_MSG_ERROR("Cannot open the GBTS connection table "
+                    << m_connectorInputFile.value());
+      return StatusCode::FAILURE;
+    }
+
+    GbtsConnectionTable::ReadResult table;
+    try {
+      table = GbtsConnectionTable::read(connectionStream);
+    } catch (const std::exception& e) {
+      ATH_MSG_ERROR("Cannot read " << m_connectorInputFile.value() << ": "
+                    << e.what());
+      return StatusCode::FAILURE;
+    }
+
+    // the table names a layer by its id, the layer tool by its dense index
+    std::unordered_map<std::uint32_t, GbtsTechnology> layerTechnologies;
+    layerTechnologies.reserve(layers.size());
+    for (std::size_t layer = 0; layer < layers.size(); ++layer) {
+      layerTechnologies.emplace(static_cast<std::uint32_t>(layers[layer].id),
+                                technologies[layer]);
+    }
+
+    connections.etaBinWidth = table.etaBinWidth;
+
+    std::size_t nKept = 0;
+    std::size_t nOtherTechnology = 0;
+    std::size_t nUnknownLayer = 0;
+
+    for (const GbtsConnectionTable::Connection& connection :
+         table.connections) {
+      const auto src = layerTechnologies.find(connection.src);
+      const auto dst = layerTechnologies.find(connection.dst);
+      if (src == layerTechnologies.end() || dst == layerTechnologies.end()) {
+        ++nUnknownLayer;
+        continue;
+      }
+
+      // GBTS pairs a layer only with one of its own technology
+      const bool wanted = src->second == dst->second &&
+                          (src->second == GbtsTechnology::Pixel
+                             ? m_pixelConnections.value()
+                             : m_stripConnections.value());
+      if (!wanted) {
+        ++nOtherTechnology;
+        continue;
+      }
+
+      connections.connectionMap[static_cast<std::int32_t>(connection.stage)]
+        .push_back(std::make_unique<Acts::Experimental::GbtsLayerConnection>(
+          connection.src, connection.dst));
+      ++nKept;
+    }
+
+    if (nUnknownLayer != 0) {
+      ATH_MSG_WARNING(nUnknownLayer << " connections of "
+                      << m_connectorInputFile.value() << " name no GBTS layer "
+                      "and were dropped");
+    }
+    if (nKept == 0) {
+      ATH_MSG_ERROR("None of the connections of "
+                    << m_connectorInputFile.value() << " are usable: the table "
+                    "does not match the detector this job is reconstructing");
+      return StatusCode::FAILURE;
+    }
+    ATH_MSG_DEBUG("Kept " << nKept << " GBTS layer connections, dropping "
+                  << nOtherTechnology << " of a technology not asked for");
+
+    return StatusCode::SUCCESS;
+  }
+
   StatusCode GbtsSeedingTool::prepareConfiguration() {
     m_finderCfg.lrtMode = m_LRTmode;
     m_finderCfg.useClusterWidthCuts = m_useML;
@@ -166,7 +273,6 @@ namespace ActsTrk {
     m_finderCfg.beamSpotCorrection = m_beamSpotCorrection;
     m_finderCfg.minPt = m_minPt;
     m_finderCfg.nMaxPhiSlice = m_nMaxPhiSlice;
-    m_finderCfg.connectorInputFile = m_connectorInputFile;
     m_finderCfg.lutInputFile = m_lutFile;
     m_finderCfg.useEtaBinning = m_useEtaBinning;
     m_finderCfg.doubletFilterRZ = m_doubletFilterRZ;
@@ -212,7 +318,7 @@ namespace ActsTrk {
 void GbtsSeedingTool::printGbtsConfig() const {
   ATH_MSG_DEBUG("===== GBTS finder config =====");
   ATH_MSG_DEBUG( "beamSpotCorrection: " << m_finderCfg.beamSpotCorrection);
-  ATH_MSG_DEBUG( "connectorInputFile: " << m_finderCfg.connectorInputFile);
+  ATH_MSG_DEBUG( "connectorInputFile: " << m_connectorInputFile.value());
   ATH_MSG_DEBUG( "lutInputFile: " << m_finderCfg.lutInputFile);
   ATH_MSG_DEBUG( "lrtMode: " << m_finderCfg.lrtMode);
   ATH_MSG_DEBUG( "useClusterWidthCuts: " << m_finderCfg.useClusterWidthCuts);

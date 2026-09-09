@@ -36,9 +36,7 @@ namespace EL
 {
   void DuplicateChecker :: 
   testInvariant () const
-  {
-    RCU_INVARIANT (this != nullptr);
-  }
+  {}
 
 
 

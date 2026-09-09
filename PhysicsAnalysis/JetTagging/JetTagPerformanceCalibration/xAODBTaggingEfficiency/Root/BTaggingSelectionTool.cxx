@@ -75,7 +75,11 @@ StatusCode BTaggingSelectionTool::initialize() {
  
   //set taggerEnum to avid string comparison:
   m_taggerEnum = SetTaggerEnum(m_taggerName);
- 
+  
+  // For all recent taggers (GN2v01 or above), the tau fraction(s) should be saved in the CDI file and retrieved/set within the BTaggingSelectionTool
+  // This boolean allows the tool knowing if we expect tau fractions or no for the tagger the user wants to use
+  m_taggerWithTauFractions = (m_taggerEnum != Tagger::MV2c10 && m_taggerEnum != Tagger::DL1 && m_taggerEnum != Tagger::GN1 && !(m_taggerName.value().find("GN2v00") != std::string::npos)); 
+
  // Change the minPt cut if the user didn't touch it
  if (m_minPt < 0){
     ATH_MSG_ERROR( "Tagger: "+m_taggerName+" and Jet Collection : "+m_jetAuthor+" do not have a minimum jet pT cut set.");
@@ -130,7 +134,7 @@ StatusCode BTaggingSelectionTool::initialize() {
      return StatusCode::FAILURE;
    }
    //now the tau-fraction if the tagger is GN2* or GN3*:
-   if ( m_taggerName.value().find("GN2") != std::string::npos || m_taggerName.value().find("GN3") != std::string::npos ){
+   if ( m_taggerWithTauFractions ){
      fraction_data_name = m_taggerName+"/"+m_jetAuthor+"/Continuous2D/fraction_tau";
      TString fraction_data_name_cTag = m_taggerName+"/"+m_jetAuthor+"/Continuous2D/fraction_tau_cTag";
      fraction_data = dynamic_cast<TVector*> (m_inf->Get(fraction_data_name));
@@ -267,7 +271,7 @@ StatusCode BTaggingSelectionTool::ExtractTaggerProperties(taggerproperties &tagg
 
   //retrieve the "fraction" used in the DL1 log likelihood from the CDI, if its not there, use the hard coded values
   // (backwards compatibility)
-  if( (m_taggerEnum == Tagger::DL1) || (m_taggerEnum == Tagger::GN1) || (m_taggerEnum == Tagger::GN2) || (m_taggerEnum == Tagger::GN3EPCLV01) || (m_taggerEnum == Tagger::GN3PflowMuonsV00) ){
+  if( m_taggerEnum != Tagger::MV2c10 ){
     
     double fraction_b = -1;
     const TString basePath = taggerName + "/" + m_jetAuthor + "/" + OP;
@@ -296,7 +300,7 @@ StatusCode BTaggingSelectionTool::ExtractTaggerProperties(taggerproperties &tagg
     double fraction_tau_cTag = 0.;
     TVector* fraction_tau_data = dynamic_cast<TVector*>( m_inf->Get(basePath + "/fraction_tau") );
     TVector* fraction_tau_cTag_data = dynamic_cast<TVector*>( m_inf->Get(basePath + "/fraction_tau_cTag") );
-    if (m_taggerEnum == Tagger::GN2 && !(taggerName.find("GN2v00") != std::string::npos)){
+    if (m_taggerWithTauFractions){
       if( fraction_tau_data ) {
         fraction_tau = fraction_tau_data[0](0);
       }
@@ -305,8 +309,13 @@ StatusCode BTaggingSelectionTool::ExtractTaggerProperties(taggerproperties &tagg
         return StatusCode::FAILURE;
       }    
       fraction_tau_cTag = fraction_tau_cTag_data[0](0);
-    }
 
+      if (!fraction_tau_data && !fraction_tau_cTag){
+      // For all recent taggers GN2v01 or above, the tau fraction(s) should be saved in the CDI file and retrieved/set within the BTaggingSelectionTool
+      // Hence raising error and failure here as at least one of those fractions should not be a null pointer
+      ATH_MSG_ERROR("Tau-fraction(s) should have been retrieved for taggerName=" << taggerName << " but both fraction_tau_data and fraction_tau_cTag are null pointers");
+      return StatusCode::FAILURE;
+    }
     tagger.fraction_b = fraction_b;
     tagger.fraction_c = fraction_c;
     tagger.fraction_tau = fraction_tau;
@@ -316,6 +325,7 @@ StatusCode BTaggingSelectionTool::ExtractTaggerProperties(taggerproperties &tagg
     delete fraction_c_data;
     delete fraction_tau_data;
     delete fraction_tau_cTag_data;
+    }
   }
   return StatusCode::SUCCESS;
 }
@@ -379,7 +389,7 @@ CorrectionCode BTaggingSelectionTool::getTaggerWeight( const xAOD::Jet& jet, dou
   tagger_pb = m_accessor_pb(*btagInfo);  
   tagger_pc = m_accessor_pc(*btagInfo);  
   tagger_pu = m_accessor_pu(*btagInfo);  
-  if(m_taggerEnum == Tagger::GN2 || m_taggerEnum == Tagger::GN3EPCLV01 || m_taggerEnum == Tagger::GN3PflowMuonsV00){
+  if(m_taggerWithTauFractions){
       tagger_ptau = m_accessor_ptau(*btagInfo);  
   }
 
@@ -394,8 +404,8 @@ CorrectionCode BTaggingSelectionTool::getTaggerWeight( const xAOD::Jet& jet, dou
 }
 
 CorrectionCode BTaggingSelectionTool::getTaggerWeight( double pb, double pc, double pu, double & tagweight) const{
-  if (m_tagger.name == "GN2v01"){
-    ATH_MSG_ERROR("For GN2v01 tagger, there is a new tau claass in the NN output. Please update your getTaggerWeight() to getTaggerWeight( double pb, double pc, double pu, double & tagweight, double ptau)");
+  if (m_taggerWithTauFractions){
+    ATH_MSG_ERROR("For GN2v01 or newer taggers, there is a new tau class in the NN output. Please update your getTaggerWeight() to getTaggerWeight( double pb, double pc, double pu, double & tagweight, double ptau)");
     return CorrectionCode::Error;
   } else {
     return getTaggerWeight(pb, pc, pu, tagweight, m_useCTag, 0.);
@@ -416,7 +426,7 @@ CorrectionCode BTaggingSelectionTool::getTaggerWeight( double pb, double pc, dou
   }
 
   tagweight = -100.;
-  if( (m_taggerEnum == Tagger::DL1) || (m_taggerEnum == Tagger::GN1) || (m_taggerEnum == Tagger::GN2) || (m_taggerEnum == Tagger::GN3EPCLV01) || (m_taggerEnum == Tagger::GN3PflowMuonsV00) ){
+  if( m_taggerEnum != Tagger::MV2c10 ){
 
     bool valid_input = (!std::isnan(pu) && pb>=0 && pc>=0 && pu>=0 && ptau>=0);
 
@@ -595,7 +605,7 @@ asg::AcceptData BTaggingSelectionTool::accept(double pT, double eta, double tagg
 
 asg::AcceptData BTaggingSelectionTool::accept(double pT, double eta, double pb, double pc, double pu) const
 {
-  if (m_tagger.name == "GN2v01" || m_tagger.name.find("GN3") != std::string::npos ){
+  if (m_taggerWithTauFractions){
     asg::AcceptData acceptData (&m_acceptinfo);
     ATH_MSG_ERROR("For GN2v01 and GN3 taggers, there is a new tau class in the NN output. Please update the accept() to accept(double pT, double eta, double pb, double pc, double pu, double ptau)");
     return acceptData;

@@ -1,6 +1,6 @@
 /**
  *
- * @copyright Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ * @copyright Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  *
  * @file DiTauEfficiencyCorrectionsTool.h
  * @author Guillermo Hamity (ghamity@cern.ch)
@@ -15,7 +15,7 @@
 
 // Framework include(s):
 #include "AsgTools/AsgMetadataTool.h"
-#include "AsgTools/AnaToolHandle.h"
+#include "AsgTools/ToolHandle.h"
 #include "AsgTools/PropertyWrapper.h"
 
 // Local include(s):
@@ -112,7 +112,7 @@ private:
   Gaudi::Property<bool> m_bSkipTruthMatchCheck{this, "SkipTruthMatchCheck", false};   
   Gaudi::Property<std::vector<int>> m_vEfficiencyCorrectionTypes{this, "EfficiencyCorrectionTypes", {SFJetIDHadTau}};
 
-  std::vector< asg::AnaToolHandle<IDiTauEfficiencyCorrectionsTool>* > m_vCommonEfficiencyTools;
+  ToolHandle<IDiTauEfficiencyCorrectionsTool> m_tTool{this, "Tool", {}};
   bool m_bIsData;
   bool m_bIsConfigured;
 

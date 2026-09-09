@@ -29,6 +29,7 @@ atlas_add_component(JetTagDerivationUtils
   FourMomUtils
   StoreGateLib
   xAODBase
+  xAODTracking
   xAODPFlow
   xAODJet
   xAODBTagging
@@ -48,6 +49,7 @@ atlas_install_python_modules(
   python/JetMatchingConfig.py
   python/TrigBTagCopierConfig.py
   python/CopyJetParentInfoConfig.py
+  python/CalibratedCopyTaggingConfig.py
   python/SubjetBuilderConfig.py
   python/TruthTauDecoratorConfig.py
   POST_BUILD_CMD ${ATLAS_FLAKE8}

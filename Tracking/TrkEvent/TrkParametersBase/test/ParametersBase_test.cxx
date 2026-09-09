@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -97,10 +97,10 @@ public:
   Trk::ParametersBase<DIM,T>* clone() const override{
     return new ChargedParametersStub(*this);
   }
-  Trk::SurfaceType surfaceType() const override{
+  constexpr virtual Trk::SurfaceType surfaceType() const override{
     return Trk::SurfaceType::Other;
   }
-  Trk::ParametersType type() const override{
+  constexpr virtual Trk::ParametersType type() const override{
     return Trk::ParametersType::AtaSurface;
   }
 

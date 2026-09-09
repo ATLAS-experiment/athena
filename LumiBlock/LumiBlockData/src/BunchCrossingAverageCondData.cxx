@@ -8,7 +8,6 @@
 
 
 float BunchCrossingAverageCondData::GetBeam1IntensityAll(int channel) const {
-  // if (ATH_UNLIKELY(bcid>=m_MAX_BCID)) return false;
   if(channel==0)
     return m_beam1IntensityAll;
   else if(channel==1)
@@ -23,7 +22,6 @@ float BunchCrossingAverageCondData::GetBeam1IntensityAll(int channel) const {
 
 
 float BunchCrossingAverageCondData::GetBeam2IntensityAll(int channel) const {
-  // if (ATH_UNLIKELY(bcid>=m_MAX_BCID)) return false;
   if(channel==0)
     return m_beam2IntensityAll;
   else if(channel==1)
@@ -38,7 +36,6 @@ float BunchCrossingAverageCondData::GetBeam2IntensityAll(int channel) const {
 
 
 float BunchCrossingAverageCondData::GetBeam1Intensity(int channel) const {
-  // if (ATH_UNLIKELY(bcid>=m_MAX_BCID)) return false;
   if(channel==0)
     return m_beam1Intensity;
   else if(channel==1)
@@ -53,7 +50,6 @@ float BunchCrossingAverageCondData::GetBeam1Intensity(int channel) const {
 
 
 float BunchCrossingAverageCondData::GetBeam2Intensity(int channel) const {
-  // if (ATH_UNLIKELY(bcid>=m_MAX_BCID)) return false;
   if(channel==0)
     return m_beam2Intensity;
   else if(channel==1)
@@ -72,7 +68,6 @@ float BunchCrossingAverageCondData::GetBeam2Intensity(int channel) const {
 
 
 float BunchCrossingAverageCondData::GetBeam1IntensityAllSTD(int channel) const {
-  // if (ATH_UNLIKELY(bcid>=m_MAX_BCID)) return false;
   if(channel==0)
     return m_beam1IntensityAllSTD;
   else if(channel==1)
@@ -87,7 +82,6 @@ float BunchCrossingAverageCondData::GetBeam1IntensityAllSTD(int channel) const {
 
 
 float BunchCrossingAverageCondData::GetBeam2IntensityAllSTD(int channel) const {
-  // if (ATH_UNLIKELY(bcid>=m_MAX_BCID)) return false;
   if(channel==0)
     return m_beam2IntensityAllSTD;
   else if(channel==1)
@@ -102,7 +96,6 @@ float BunchCrossingAverageCondData::GetBeam2IntensityAllSTD(int channel) const {
 
 
 float BunchCrossingAverageCondData::GetBeam1IntensitySTD(int channel) const {
-  // if (ATH_UNLIKELY(bcid>=m_MAX_BCID)) return false;
   if(channel==0)
     return m_beam1IntensitySTD;
   else if(channel==1)
@@ -117,7 +110,6 @@ float BunchCrossingAverageCondData::GetBeam1IntensitySTD(int channel) const {
 
 
 float BunchCrossingAverageCondData::GetBeam2IntensitySTD(int channel) const {
-  // if (ATH_UNLIKELY(bcid>=m_MAX_BCID)) return false;
   if(channel==0)
     return m_beam2IntensitySTD;
   else if(channel==1)
@@ -131,7 +123,6 @@ float BunchCrossingAverageCondData::GetBeam2IntensitySTD(int channel) const {
 }
 
 unsigned long long BunchCrossingAverageCondData::GetRunLB() const {
-  // if (ATH_UNLIKELY(bcid>=m_MAX_BCID)) return false;
   return m_RunLB;
 }
 

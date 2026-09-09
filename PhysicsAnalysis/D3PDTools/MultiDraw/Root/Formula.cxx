@@ -31,7 +31,6 @@ namespace MD
   void Formula ::
   testInvariant () const
   {
-    RCU_INVARIANT (this != 0);
     if (!m_formula.empty())
     {
       RCU_INVARIANT (!m_name.empty());

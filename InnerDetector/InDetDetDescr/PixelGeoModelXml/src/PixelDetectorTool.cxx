@@ -121,11 +121,6 @@ StatusCode PixelDetectorTool::create()
   ATH_CHECK(detStore()->record(m_detManager, m_detManager->getName()));
   theExpt->addManager(m_detManager);
 
-  // Create a symLink to the SiDetectorManager base class so it can be accessed as either SiDetectorManager or
-  // PixelDetectorManager
-  const InDetDD::SiDetectorManager *siDetManager = m_detManager;
-  ATH_CHECK(detStore()->symLink(m_detManager, siDetManager));
-
   return StatusCode::SUCCESS;
 }
 

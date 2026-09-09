@@ -7,7 +7,6 @@
 #include "AthenaBaseComps/AthService.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "PathResolver/PathResolver.h"
-#include "ActsGPUInterfaces/IDeviceDetectorDescriptionProviderSvc.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
 #include "AthDeviceInterfaces/IMemoryResourcesTool.h"
@@ -17,16 +16,14 @@
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "PixelReadoutGeometry/PixelDetectorManager.h"
 #include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
-
+#include "ActsGPUEvent/TracccDetectorGeometryDescription.h"
+#include "ActsGPUEvent/GeometryIdMapping.h"
 #include "traccc/geometry/detector_design_description.hpp"
 #include "traccc/geometry/detector_conditions_description.hpp"
 
 #include "detray/core/detail/container_views.hpp"
 #include "detray/core/detector.hpp"
 #include "detray/detectors/itk_metadata.hpp"
-
-
-#include "vecmem/utils/cuda/copy.hpp"
 
 #include <memory>
 #include <string>
@@ -59,22 +56,14 @@ namespace ActsTrk {
  * @author Neža Ribarič <neza.ribaric@cern.ch>
  */
 class JSONDeviceDetectorDescriptionProviderSvc
-    : public extends<AthService, ActsTrk::IDeviceDetectorDescriptionProviderSvc>
+    : public AthService
 {
 public:
 
-    using extends::extends;
+    using AthService::AthService;
 
     /// Function initializing and executing the file loading
     virtual StatusCode initialize() override;
-
-    /// @name Athena<->detray ID map accessors for EDM converters
-    /// @{
-    virtual const std::unordered_map<uint64_t, Identifier>&
-        detrayToAthenaMap() const override;
-    virtual const std::unordered_map<Identifier, uint64_t>&
-        athenaToDetrayMap() const override;
-    ///@}
 
 private:
 
@@ -93,6 +82,12 @@ private:
     Gaudi::Property<std::string> m_geometryFile{
         this, "GeometryFile", "",
         "Detray geometry JSON file"};
+    Gaudi::Property<std::string> m_materialFile{
+        this, "MaterialFile", "",
+        "Detray material JSON file"};
+    Gaudi::Property<std::string> m_surfaceGridFile{
+        this, "SurfaceGridFile", "",
+        "Detray surface grid JSON file"};        
     Gaudi::Property<std::string> m_digitizationFile{
         this, "DigitizationFile", "",
         "Traccc digitization config JSON file"};
@@ -101,7 +96,7 @@ private:
         "Traccc conditions config JSON file"};
     Gaudi::Property<std::string> m_mapFile{
         this, "MapFile", "",
-        "Path to the athena<->detray ID map CSV file"};   
+        "Path to the athena<->detray ID map CSV file"};
     /// @}
 
     /// @name The output object names
@@ -123,14 +118,15 @@ private:
         "Detray device detector object"};
     Gaudi::Property<std::string> m_hostDetectorName{
         this, "HostDetectorName", "",
-        "Detray host detector object"};    
+        "Detray host detector object"};
+    Gaudi::Property<std::string> m_geoIdMappingObjectName{
+        this, "GeoIdMappingObjectName", "",
+        "StoreGate name for the detray/acts/athena geo id mapping"};    
     /// @}
 
     /// Helper function to load Athena<->detray ID maps from csv
-    StatusCode loadIdMaps();
-
-    std::unordered_map<uint64_t, Identifier> m_detrayToAthena;
-    std::unordered_map<Identifier, uint64_t> m_athenaToDetray;
+    StatusCode loadIdMaps(const std::unique_ptr<traccc::host_detector>& hostDetector);
+    std::unique_ptr<ActsTrk::GeometryIdMapping> m_idMapping;
 
 };
 

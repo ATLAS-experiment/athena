@@ -371,9 +371,8 @@ def FTAG1LITEKernelCfg(flags, name='FTAG1LITEKernel', **kwargs):
     acc.addEventAlgo(
         CompFactory.JetCalibrationDecoratorAlg(
             "JetCalibrationDecoratorAlg",
-            JetCalibrationTool="JetCalibrationTool/JetCalibTool_AntiKt4EMPFlow",
-            JetContainer=JETS,
-            ptCalibratedKey=f"{JETS}.pt_calibrated",
+            JetCalibrationTool=calibTool,
+            JetContainer=JETS
         )
     )
 

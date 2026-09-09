@@ -245,7 +245,7 @@ int LArSCvsRawChannelMonAlg::getPartition(const Identifier& id) const {
   };
 
   const int pNoSide = samplingToPartitonMap[s];
-  if (ATH_UNLIKELY(pNoSide < 0)) {
+  if (pNoSide < 0) [[unlikely]] {
     return MAXPARTITIONS;
   }
 

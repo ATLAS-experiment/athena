@@ -35,6 +35,7 @@ StatusCode TracccSeedConverterAlg::execute(const EventContext& ctx) const
     // These are made during the TracccMeasurementConverterAlg therefore the pixel meas index in PixelCluster container
     // is the same as the pixel spacepoint index in the SpacePoint container
     auto spacepoints = SG::makeHandle(m_inputSPKey, ctx);
+    ATH_MSG_DEBUG("Read SPs from " << m_inputSPKey.key());
     ATH_CHECK(spacepoints.isValid());
 
     // ---- Retrieve mapping from traccc measurement index to pixel spacepoint index (always needed) ----
@@ -62,6 +63,7 @@ StatusCode TracccSeedConverterAlg::execute(const EventContext& ctx) const
 
     // ---- Retrieve DEVICE resident traccc seeds ----
     auto seeds = SG::makeHandle(m_inputSeedsKey, ctx);
+    ATH_MSG_DEBUG("Read seeds from " << m_inputSeedsKey.key());
     ATH_CHECK(seeds.isValid());
 
     traccc::edm::seed_collection::buffer traccc_seeds_buffer{

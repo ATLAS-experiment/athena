@@ -85,6 +85,7 @@ if __name__ == "__main__":
             flags,
             CandidateKey=validation_candidate_key,
             SegmentKey=validation_segment_key,
+            ValidateFinalCandidates=True,
             ValidateSectorLogic=True,
         )
     )

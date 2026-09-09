@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaCommon.Logging import logging
@@ -17,6 +17,24 @@ try:
     from GaudiKernel.DataHandle import DataHandle
 except ImportError:
     class DataHandle: pass  # for analysis releases
+
+
+def make_hashable(obj):
+    """Make obj hashable by turning mutable lists into non-mutable tuples.
+    This is e.g. useful when kwargs is passed to a cached Cfg function and
+    contains non-hashable lists.
+    This transformation is usually safe because list-valued properties can
+    be set from a tuple or list.
+
+    Example:  myCfg(**make_hashable(kwargs))
+    """
+    if isinstance(obj, list):
+        return tuple(make_hashable(item) for item in obj)
+    elif isinstance(obj, dict):
+        return {key: make_hashable(value) for key, value in obj.items()}
+    elif isinstance(obj, set):
+        return {make_hashable(item) for item in obj}
+    return obj
 
 
 class NotHashable(Exception):

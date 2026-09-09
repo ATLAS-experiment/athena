@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -51,7 +51,7 @@ namespace asg
     using namespace msgComponentConfig;
     if (!s_factories.emplace (type, factory).second)
     {
-      ATH_MSG_ERROR ("attempt to register a factory for type " << type << " that already has a factory");
+      ANA_MSG_ERROR ("attempt to register a factory for type " << type << " that already has a factory");
       return StatusCode::FAILURE;
     }
     return StatusCode::SUCCESS;
@@ -90,18 +90,18 @@ namespace asg
     });
     if (auto iter = s_typeModuleMap.find (type); iter != s_typeModuleMap.end())
     {
-      ATH_MSG_DEBUG ("loading component factory module for type " << type << " from " << iter->second);
+      ANA_MSG_DEBUG ("loading component factory module for type " << type << " from " << iter->second);
       loadComponentFactoryModule (iter->second);
     } else
     {
-      ATH_MSG_DEBUG ("no component factory module known for type " << type);
+      ANA_MSG_DEBUG ("no component factory module known for type " << type);
       return nullptr;
     }
     if (auto iter = s_factories.find (type); iter != s_factories.end())
       return &iter->second;
     else
     {
-      ATH_MSG_WARNING ("no component factory found for type " << type << " even after loading its module");
+      ANA_MSG_WARNING ("no component factory found for type " << type << " even after loading its module");
       return nullptr;
     }
   }
@@ -111,7 +111,7 @@ namespace asg
   std::vector<std::string> getLoadedComponentFactoryTypes ()
   {
     using namespace msgComponentConfig;
-    ATH_MSG_DEBUG ("getting component factory types");
+    ANA_MSG_DEBUG ("getting component factory types");
     std::vector<std::string> result;
     result.reserve (s_factories.size());
     for (const auto& pair : s_factories)
@@ -125,18 +125,18 @@ namespace asg
   void loadComponentFactoryModule (const std::string& moduleName, const std::string& modulePath)
   {
     using namespace msgComponentConfig;
-    ATH_MSG_DEBUG ("loading component factory module " << moduleName);
+    ANA_MSG_DEBUG ("loading component factory module " << moduleName);
 
     auto [iter, inserted] = s_modules.emplace(std::piecewise_construct, std::forward_as_tuple(moduleName), std::forward_as_tuple());
     if (iter->second.loaded == true)
     {
-      ATH_MSG_DEBUG ("component factory module " << moduleName << " already loaded");
+      ANA_MSG_DEBUG ("component factory module " << moduleName << " already loaded");
       return;
     }
     std::scoped_lock lock(iter->second.mutex);
     if (iter->second.loaded == true)
     {
-      ATH_MSG_DEBUG ("component factory module " << moduleName << " already loaded");
+      ANA_MSG_DEBUG ("component factory module " << moduleName << " already loaded");
       return;
     }
 
@@ -149,7 +149,7 @@ namespace asg
     ANA_MSG_DEBUG ("loading component factory module from " << path);
     if (gSystem->Load (path.c_str()) < 0)
     {
-      ATH_MSG_FATAL ("failed to preload component factory module " << moduleName);
+      ANA_MSG_FATAL ("failed to preload component factory module " << moduleName);
       std::terminate();
     }
     iter->second.loaded = true;
@@ -160,12 +160,12 @@ namespace asg
   void loadComponentFactoryMap (const std::string& path)
   {
     using namespace msgComponentConfig;
-    ATH_MSG_DEBUG ("loading component factory map from " << path);
+    ANA_MSG_DEBUG ("loading component factory map from " << path);
 
     std::ifstream inputStream (path);
     if (!inputStream)
     {
-      ATH_MSG_FATAL ("failed to open component factory map file " << path);
+      ANA_MSG_FATAL ("failed to open component factory map file " << path);
       std::abort();
     }
     std::unordered_set<std::string> foundModules;
@@ -184,19 +184,19 @@ namespace asg
         continue;
       }
       foundModules.insert(moduleName);
-      ATH_MSG_DEBUG ("registering component factory type " << typeName << " from module " << moduleName);
+      ANA_MSG_DEBUG ("registering component factory type " << typeName << " from module " << moduleName);
       auto [iter, success] = s_typeModuleMap.emplace (typeName, moduleName);
       if (!success)
       {
         if (iter->second != moduleName)
         {
-          ATH_MSG_FATAL ("conflicting component factory module for type " << typeName
+          ANA_MSG_FATAL ("conflicting component factory module for type " << typeName
                          << ": already registered from " << iter->second
                          << ", but trying to register from " << moduleName);
           std::abort();
         } else
         {
-          ATH_MSG_DEBUG ("component factory type " << typeName << " registered twice for module " << moduleName);
+          ANA_MSG_DEBUG ("component factory type " << typeName << " registered twice for module " << moduleName);
         }
       }
     }

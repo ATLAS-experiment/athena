@@ -5,23 +5,32 @@
 #ifndef ACTSTRK_IDEVICESPFORMATIONALGPROVIDERTOOL_H
 #define ACTSTRK_IDEVICESPFORMATIONALGPROVIDERTOOL_H
 
-#include "GaudiKernel/IAlgTool.h"
+// Framework include(s).
 #include "GaudiKernel/EventContext.h"
+#include "GaudiKernel/IAlgTool.h"
 
-#include <traccc/utils/algorithm.hpp>
-#include <traccc/edm/measurement_collection.hpp>
+// ActsGPU include(s).
+#include "ActsGPUInterfaces/DeviceAlgorithmT.h"
+
+// Traccc include(s).
 #include <traccc/seeding/device/silicon_pixel_spacepoint_formation_algorithm.hpp>
 
 namespace ActsTrk {
 
+/// Interface for tools providing an Acts device/GPU spacepoint formation
+/// algorithm
 class IDeviceSPFormationAlgProviderTool : virtual public IAlgTool {
-public:
+ public:
+  /// Declare the interface ID for this tool.
   DeclareInterfaceID(IDeviceSPFormationAlgProviderTool, 1, 0);
 
-   virtual std::pair<std::shared_ptr<const vecmem::copy>, std::shared_ptr<const traccc::device::silicon_pixel_spacepoint_formation_algorithm>> getPixelSPFormationAlgorithm(const EventContext& ctx) const = 0;
+  /// Get the device specific spacepoint formation algorithm.
+  virtual DeviceAlgorithmT<
+      traccc::device::silicon_pixel_spacepoint_formation_algorithm>
+  getAlgorithm(const EventContext& ctx) const = 0;
 
-};
+};  // class IDeviceSPFormationAlgProviderTool
 
-} // namespace ActsTrk
+}  // namespace ActsTrk
 
-#endif // ACTSTRK_IDEVICESPFORMATIONALGPROVIDERTOOL_H
+#endif  // ACTSTRK_IDEVICESPFORMATIONALGPROVIDERTOOL_H

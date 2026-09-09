@@ -184,14 +184,14 @@ namespace RCU
 
 
 
-#ifndef NDEBUG
-
 #define RCU_INVARIANT(x)			\
   RCU_CHECK (invariant, x, #x)
 #define RCU_INVARIANT2(x,y)			\
   RCU_CHECK (invariant, x,  y)
 #define RCU_INVARIANT0(y)			\
   RCU_CHECK (invariant, 0,  y)
+
+#ifndef NDEBUG
 
 #define RCU_REQUIRE(x)				\
   RCU_CHECK (require_hard,   x, #x)
@@ -223,16 +223,8 @@ namespace RCU
 #define RCU_DESTROY_INVARIANT(x)		\
   (x)->testInvariant ()
 
-
-
 #else
 
-#define RCU_INVARIANT(x)			\
-  (void) 0
-#define RCU_INVARIANT2(x,y)			\
-  (void) 0
-#define RCU_INVARIANT0(y)			\
-  (void) 0
 #define RCU_REQUIRE(x)				\
   (void) 0
 #define RCU_REQUIRE2(x,y)			\

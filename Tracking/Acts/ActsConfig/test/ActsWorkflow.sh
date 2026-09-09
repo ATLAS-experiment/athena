@@ -14,7 +14,7 @@ Reco_tf.py \
 	     flags.Acts.doLowPt=True; \
 	     flags.Reco.EnableHGTDExtension=True; \
 	     flags.Detector.EnableCalo=True;" \
-  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsProductionFlags" \
+  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
   --outputDAOD_IDTRKVALIDFile DAOD.IDTRKVALID.pool.root \
   --outputDAOD_IDTIDEFile DAOD.CTIDE.pool.root \
   --ignorePatterns "${ignore_pattern}" \

@@ -8,7 +8,7 @@ ReadData                                             INFO in initialize()
 MetaDataSvc                                          INFO Initializing MetaDataSvc
 PoolSvc                                             DEBUG OutputLevel is 2
 PoolSvc                                             DEBUG POOL ReadCatalog is file:Catalog1.xml
-PoolSvc                                             DEBUG createCollection() type=POOL, connection=PFN:SimplePoolFile3.root, name=Input, contextID=0
+PoolSvc                                             DEBUG connectCollection() type=POOL, connection=PFN:SimplePoolFile3.root, name=Input, contextID=0
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
@@ -36,7 +36,7 @@ SimplePoolFile3.root                                DEBUG --> Access   DbContain
 SimplePoolFile3.root                                DEBUG --->Reading Param:PFN=[SimplePoolFile3.root]
 SimplePoolFile3.root                                DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTTAG=[POOLCollectionTree]
 SimplePoolFile3.root                                DEBUG --->Reading Param:POOL_CONTAINERNAME_DATAHEADER=[POOLContainer]
-##Params                                            DEBUG No objects passing selection criteria... Container has 6 Entries in total.
+##Params                                            DEBUG No objects passing selection criteria... Container has 5 Entries in total.
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] POOLContainer(DataHeader)
 POOLContainer(DataHeader)                           DEBUG Opening
 POOLContainer(DataHeader)                           DEBUG    attributes# = 1
@@ -94,7 +94,7 @@ StreamWritexAODElectrons                            DEBUG data dependencies:
 AthenaEventLoopMgr                                   INFO Setup EventSelector service EventSelector
 ApplicationMgr                                       INFO Application Manager Initialized successfully
 RootDatabase                                        DEBUG Closing DB SimplePoolFile3.root
-PoolSvc                                             DEBUG createCollection() type=POOL, connection=PFN:SimplePoolFile3.root, name=Input, contextID=0
+PoolSvc                                             DEBUG connectCollection() type=POOL, connection=PFN:SimplePoolFile3.root, name=Input, contextID=0
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
@@ -122,7 +122,7 @@ SimplePoolFile3.root                                DEBUG --> Access   DbContain
 SimplePoolFile3.root                                DEBUG --->Reading Param:PFN=[SimplePoolFile3.root]
 SimplePoolFile3.root                                DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTTAG=[POOLCollectionTree]
 SimplePoolFile3.root                                DEBUG --->Reading Param:POOL_CONTAINERNAME_DATAHEADER=[POOLContainer]
-##Params                                            DEBUG No objects passing selection criteria... Container has 6 Entries in total.
+##Params                                            DEBUG No objects passing selection criteria... Container has 5 Entries in total.
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] POOLContainer(DataHeader)
 POOLContainer(DataHeader)                           DEBUG Opening
 POOLContainer(DataHeader)                           DEBUG    attributes# = 1

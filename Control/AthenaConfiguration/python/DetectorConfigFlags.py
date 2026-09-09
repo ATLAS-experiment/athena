@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.AutoConfigFlags import getDefaultDetectors
@@ -385,7 +385,7 @@ def setupDetectorsFromList(flags, detectors, toggle_geometry=False, validate_onl
                     log.warning("Flag '%s' should be %s but is set to %s", name, status, not status)
                 else:
                     log.debug("Toggling '%s' from %s to %s", name, not status, status)
-                    flags._set(name, status)
+                    flags[name] = status
         if toggle_geometry:
             name = f'Detector.Geometry{d}'
             if flags.hasFlag(name):
@@ -395,7 +395,7 @@ def setupDetectorsFromList(flags, detectors, toggle_geometry=False, validate_onl
                         log.warning("Flag '%s' should be %s but is set to %s", name, status, not status)
                     else:
                         log.debug("Toggling '%s' from %s to %s", name, not status, status)
-                        flags._set(name, status)
+                        flags[name] = status
 
     return changed
 
@@ -419,14 +419,14 @@ def enableDetectors(flags, detectors, toggle_geometry=False):
             if flags[name] is not True:
                 changed = True
                 log.info("Enabling '%s'", name)
-                flags._set(name, True)
+                flags[name] = True
         if toggle_geometry:
             name = f'Detector.Geometry{d}'
             if flags.hasFlag(name):
                 if flags[name] is not True:
                     changed = True
                     log.info("Enabling '%s'", name)
-                    flags._set(name, True)
+                    flags[name] = True
 
     return changed
 
@@ -450,14 +450,14 @@ def disableDetectors(flags, detectors, toggle_geometry=False):
             if flags[name] is not False:
                 changed = True
                 log.info("Disabling '%s'", name)
-                flags._set(name, False)
+                flags[name] = False
         if toggle_geometry:
             name = f'Detector.Geometry{d}'
             if flags.hasFlag(name):
                 if flags[name] is not False:
                     changed = True
                     log.info("Disabling '%s'", name)
-                    flags._set(name, False)
+                    flags[name] = False
 
     return changed
 

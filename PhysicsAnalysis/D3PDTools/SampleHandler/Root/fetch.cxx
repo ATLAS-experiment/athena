@@ -10,6 +10,8 @@
 
 #include <sstream>
 #include <mutex>
+#include <stdexcept>
+#include <RVersion.h>
 #include <TPython.h>
 #include <TString.h>
 #include <TSystem.h>
@@ -26,15 +28,36 @@
 // method implementations
 //
 
+namespace
+{
+  /// \brief escape a string for embedding inside single quotes in
+  ///   generated Python
+  std::string pyQuote (const std::string& name)
+  {
+    std::string result = "'";
+    for (char c : name)
+    {
+      if (c == '\\' || c == '\'')
+        result += '\\';
+      result += c;
+    }
+    result += "'";
+    return result;
+  }
+}
+
 namespace SH
 {
   void fetchMetaData (MetaDataQuery& query)
   {
     static std::once_flag loaded;
     auto do_load = []() {
-      TString path = "$ROOTCOREBIN/python/SampleHandler/SampleHandler_QueryAMI.py";
-      gSystem->ExpandPathName (path);
-      TPython::LoadMacro (path.Data());
+      // rationale: the helper module is installed via
+      //   atlas_install_python_modules and is importable through
+      //   PYTHONPATH, so import it by name rather than loading it from
+      //   the dead RootCore $ROOTCOREBIN path.
+      if (!TPython::Exec ("import SampleHandler.SampleHandler_QueryAMI"))
+        throw std::runtime_error ("failed to import python module SampleHandler.SampleHandler_QueryAMI");
     };
     std::call_once (loaded, do_load);
 
@@ -42,21 +65,24 @@ namespace SH
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,33,01)
     command << "_anyresult = ";
 #endif
-    command << "SampleHandler_QueryAmi([";
+    command << "SampleHandler.SampleHandler_QueryAMI.SampleHandler_QueryAmi([";
     for (std::size_t iter = 0, end = query.samples.size(); iter != end; ++ iter)
     {
       if (iter != 0)
 	command << ", ";
-      command << "'" << query.samples[iter].name << "'";
+      command << pyQuote (query.samples[iter].name);
     }
     command << "])";
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6,33,01)
     std::any result;
-    TPython::Exec (command.str().c_str(), &result);
+    if (!TPython::Exec (command.str().c_str(), &result))
+      throw std::runtime_error ("failed to execute AMI metadata query");
     query = std::any_cast<MetaDataQuery>(result);
 #else
     MetaDataQuery* myquery = static_cast<MetaDataQuery*>
       ((void*) TPython::Eval (command.str().c_str()));
+    if (myquery == nullptr)
+      throw std::runtime_error ("failed to execute AMI metadata query");
     query = *myquery;
 #endif
   }
@@ -69,12 +95,11 @@ namespace SH
     std::vector<SH::Sample*> samples;
     // typedef std::vector<SH::Sample*> SamplesIter;
     MetaDataQuery query;
-    for (SH::SampleHandler::iterator sample = sh.begin(),
-	   end = sh.end(); sample != end; ++ sample)
+    for (auto *sample : sh)
     {
-      std::string name = (*sample)->meta()->castString (SH::MetaFields::gridName,(*sample)->name());
+      std::string name = sample->meta()->castString (SH::MetaFields::gridName, sample->name());
       query.samples.push_back (MetaDataSample (name));
-      samples.push_back (&**sample);
+      samples.push_back (sample);
     }
     fetchMetaData (query);
 
@@ -87,7 +112,8 @@ namespace SH
         ANA_MSG_WARNING ("failed to find sample " << query.samples[iter].name);
       } else
       {
-	RCU_ASSERT (iter != samples.size());
+	if (iter >= samples.size())
+	  throw std::runtime_error ("AMI query returned more samples than were requested");
 	SH::Sample *sample = samples[iter];
 
 	if (!override)

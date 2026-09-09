@@ -222,8 +222,8 @@ def STDM17KernelCfg(flags, name='STDM17Kernel', **kwargs):
     thinningTools.append(STDM17CaloThinningTool)
 
     if flags.Input.isMC:
-        truth_cond_status    = "( (TruthParticles.pdgId == 24) || (TruthParticles.pdgId == -24) )"       # decay products of W so we know which are signal
-        truth_cond_Lepton = "((abs(TruthParticles.pdgId) >= 11) && (abs(TruthParticles.pdgId) <= 16) && (TruthParticles.barcode < 200000))" # Leptons
+        truth_cond_status    = "( (TruthParticles.isW) )"       # decay products of W so we know which are signal
+        truth_cond_Lepton = "((TruthParticles.isLepton) && !(TruthParticles.isSimulationParticle))" # Leptons
         truth_expression = '('+truth_cond_status+' || '+truth_cond_Lepton +')'
 
         STDM17TruthThinningTool = CompFactory.DerivationFramework.GenericTruthThinning(name = "STDM17TruthThinningTool",

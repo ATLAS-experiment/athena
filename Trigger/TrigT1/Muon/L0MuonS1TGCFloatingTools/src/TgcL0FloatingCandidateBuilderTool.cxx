@@ -88,17 +88,6 @@ StatusCode TgcL0FloatingCandidateBuilderTool::initialize() {
     ATH_MSG_ERROR("Failed to load GoodMag map: " << error);
     return StatusCode::FAILURE;
   }
-  if (m_goodMagMap->version() != m_ptLut->version() ||
-      m_goodMagMap->etaBins() != m_ptLut->etaBins() ||
-      m_goodMagMap->phiBinsPerFold() != m_ptLut->phiBinsPerFold()) {
-    ATH_MSG_ERROR("Incompatible Floating-pT and GoodMag payloads: pT="
-                  << m_ptLut->version() << " (" << m_ptLut->etaBins() << "x"
-                  << m_ptLut->phiBinsPerFold() << "), GoodMag="
-                  << m_goodMagMap->version() << " ("
-                  << m_goodMagMap->etaBins() << "x"
-                  << m_goodMagMap->phiBinsPerFold() << ")");
-    return StatusCode::FAILURE;
-  }
   ATH_MSG_INFO("Loaded GoodMag map "
                << m_goodMagMap->version() << " from " << goodMagMapPath
                << " (eta bins=" << m_goodMagMap->etaBins()
@@ -163,10 +152,9 @@ StatusCode TgcL0FloatingCandidateBuilderTool::build(
   for (TgcL0Candidate& candidate : candidates) {
     const TgcL0FloatingPtEvaluation evaluation =
         m_ptLut->evaluate(candidate.eta, candidate.phi, candidate.deltaTheta);
-    if (evaluation.modelValid) {
-      candidate.goodMagneticField =
-          m_goodMagMap->isGood(evaluation.etaBin, evaluation.phiFoldBin);
-    }
+    candidate.goodMagneticField = m_goodMagMap->isGood(
+        candidate.eta, candidate.phi, m_ptLut->absEtaMin(),
+        m_ptLut->absEtaMax());
     if (!evaluation.ptEstimateValid) continue;
     candidate.preInnerCoincidencePt = evaluation.ptEstimateGeV;
     candidate.preInnerCoincidenceThreshold = evaluation.thresholdCode;

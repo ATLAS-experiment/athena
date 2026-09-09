@@ -38,7 +38,7 @@ namespace SH
   /// objects as part of the EventLoop job configuration.  As such all
   /// derived objects need to be designed to be streamable.
   ///
-  /// \warn This interface is not considered fixed, it can change as
+  /// \warning This interface is not considered fixed, it can change as
   /// the needs of EventLoop change or as more output location types
   /// are added.
 
@@ -124,7 +124,7 @@ namespace SH
     // private interface
     //
 
-    ClassDef (DiskOutput, 1);
+    ClassDefOverride (DiskOutput, 1);
   };
 }
 

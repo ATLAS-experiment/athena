@@ -23,6 +23,7 @@
 #include <Acts/Geometry/TrackingVolume.hpp>
 #include <Acts/Geometry/VolumeAttachmentStrategy.hpp>
 #include <Acts/Navigation/SurfaceArrayNavigationPolicy.hpp>
+#include <Acts/Navigation/CylinderNavigationPolicy.hpp>
 #include <Acts/Navigation/TryAllNavigationPolicy.hpp>
 #include <Acts/Surfaces/SurfaceArray.hpp>
 #include <Acts/Utilities/AxisDefinitions.hpp>
@@ -159,9 +160,15 @@ void HgtdBlueprintNodeBuilder::buildHgtdBlueprintNode(
 
         hgtd.addCylinderContainer(
             ecName + "_Container", AxisZ, [&](auto& hgtdContainer) {
-              hgtdContainer.setAttachmentStrategy(AttachmentStrategy::Gap);
+              // Collapse inter-disk gaps by extending the outer disk inward
+              // (Second for +z, First for -z); material kept only on outward
+              // discs (see addHgtdLayers), so it stays at the smaller-|z| side.
+              hgtdContainer.setAttachmentStrategy(
+                  bec > 0 ? AttachmentStrategy::Second
+                          : AttachmentStrategy::First);
               hgtdContainer.setResizeStrategy(ResizeStrategy::Gap);
 
+              const int innermostLayer = layers.begin()->first;
               for (auto& [key, surfaces] : layers) {
                 std::string layerName = ecName + "_" + std::to_string(key);
 
@@ -169,7 +176,8 @@ void HgtdBlueprintNodeBuilder::buildHgtdBlueprintNode(
                                               << surfaces.size()
                                               << " surfaces");
 
-                addHgtdLayers(hgtdContainer, bec, key, layerName, surfaces);
+                addHgtdLayers(hgtdContainer, bec, key, layerName, surfaces,
+                              key == innermostLayer);
               }
             });
       });
@@ -180,31 +188,29 @@ void HgtdBlueprintNodeBuilder::buildHgtdBlueprintNode(
 void HgtdBlueprintNodeBuilder::addHgtdLayers(
     Acts::BlueprintNode& parent, int bec, int index,
     const std::string& name,
-    std::vector<std::shared_ptr<Acts::Surface>>& surfaces) {
+    std::vector<std::shared_ptr<Acts::Surface>>& surfaces, bool isInnermost) {
   using enum Acts::SurfaceArrayNavigationPolicy::LayerType;
   using enum Acts::CylinderVolumeBounds::Face;
   using enum Acts::AxisDirection;
 
-  parent.addMaterial(name + "_Material", [&](auto& mat) {
-    if (index == 3) {
-      mat.configureFace(bec > 0 ? NegativeDisc : PositiveDisc,
-                        AxisSpec::DeferredEquidistant(20, AxisR),
-                        AxisSpec::DeferredEquidistant(40, AxisPhi));
-    } else {
-      mat.configureFace(NegativeDisc, AxisSpec::DeferredEquidistant(20, AxisR),
-                        AxisSpec::DeferredEquidistant(40, AxisPhi));
-      mat.configureFace(PositiveDisc, AxisSpec::DeferredEquidistant(20, AxisR),
-                        AxisSpec::DeferredEquidistant(40, AxisPhi));
-    }
+  // Keep material on each layer's outward disc so the inter-disk gaps can be
+  // collapsed (the material-free inward disc fuses with the neighbour's kept
+  // outward disc); the innermost layer keeps its inward disc too. The outermost
+  // layer (index 3) historically carries material only on its inward disc and,
+  // being non-innermost, becomes material-free — that gap's material survives
+  // on the previous layer's kept outward disc, at the smaller-|z| side.
+  const auto outwardDisc = (bec > 0) ? PositiveDisc : NegativeDisc;
+  const auto inwardDisc = (bec > 0) ? NegativeDisc : PositiveDisc;
+  const bool hasMaterial = (index != 3) || isInnermost;
 
-    mat.addLayer(name, [&surfaces](auto& layer) {
+  auto configureLayer = [&](auto& node) {
+    node.addLayer(name, [&surfaces](auto& layer) {
       layer.setNavigationPolicyFactory(
           Acts::NavigationPolicyFactory{}
               .add<Acts::SurfaceArrayNavigationPolicy>(
                   Acts::SurfaceArrayNavigationPolicy::Config{.layerType = Disc,
-                                                             .bins = {20, 20}})
-              .add<Acts::TryAllNavigationPolicy>(
-                  Acts::TryAllNavigationPolicy::Config{.sensitives = false})
+                                                             .bins = {0, 0}, .numberOfBinsFactor = 5.0})
+              .add<Acts::CylinderNavigationPolicy>()
               .asUniquePtr());
       layer.setSurfaces(surfaces);
       layer.setEnvelope(Acts::ExtentEnvelope{{
@@ -212,7 +218,25 @@ void HgtdBlueprintNodeBuilder::addHgtdLayers(
           .r = {2_mm, 2_mm},
       }});
     });
-  });
+  };
+
+  // Layer 3 (non-innermost) has no material faces; skip the
+  // MaterialDesignator wrapper to avoid empty-designator warnings.
+  if (hasMaterial) {
+    parent.addMaterial(name + "_Material", [&](auto& mat) {
+      if (index != 3) {
+        mat.configureFace(outwardDisc, AxisSpec::DeferredEquidistant(20, AxisR),
+                          AxisSpec::DeferredEquidistant(40, AxisPhi));
+      }
+      if (isInnermost) {
+        mat.configureFace(inwardDisc, AxisSpec::DeferredEquidistant(20, AxisR),
+                          AxisSpec::DeferredEquidistant(40, AxisPhi));
+      }
+      configureLayer(mat);
+    });
+  } else {
+    configureLayer(parent);
+  }
 }
 
 }  // namespace ActsTrk

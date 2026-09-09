@@ -19,7 +19,6 @@
 #include "GeoModelInterfaces/IGeoModelSvc.h"
 #include "G4RunManagement/AtlasG4SyncEventUserInfo.h"
 #include "HitManagement/HitCollectionMap.h"
-#include "MCTruthBase/TruthStrategyManager.h"
 #include "PathResolver/PathResolver.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
@@ -48,15 +47,9 @@ StatusCode G4RunAlg::initialize ATLAS_NOT_THREAD_SAFE ()
     parser.Read(geoFile, false);
   }
 
-  // Truth services
+  // Truth service
   ATH_CHECK(m_truthRecordSvc.retrieve());
   ATH_MSG_INFO("- Using ISF TruthRecordSvc : " << m_truthRecordSvc.typeAndName());
-  ATH_CHECK(m_geoIDSvc.retrieve());
-  ATH_MSG_INFO("- Using ISF GeoIDSvc       : " << m_geoIDSvc.typeAndName());
-
-  TruthStrategyManager& sManager = TruthStrategyManager::GetStrategyManager_nc();
-  sManager.SetISFTruthSvc(&(*m_truthRecordSvc));
-  sManager.SetISFGeoIDSvc(&(*m_geoIDSvc));
 
   // Retrieve the G4RunTool. This will start the G4 main thread
   ATH_CHECK(m_g4RunTool.retrieve());
@@ -231,6 +224,10 @@ StatusCode G4RunAlg::execute(const EventContext& ctx)
 
   if (eventOutcome == EventOutcome::PreparationFailed) {
     ATH_MSG_ERROR("Failed to prepare Geant4 event");
+    return StatusCode::FAILURE;
+  }
+  if (eventOutcome == EventOutcome::RunTerminated) {
+    ATH_MSG_ERROR("Geant4 terminated before completing this event");
     return StatusCode::FAILURE;
   }
 

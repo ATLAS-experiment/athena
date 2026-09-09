@@ -63,7 +63,7 @@ void TrigTauMonitorDiTauAlgorithm::fillDiTauHLTEfficiencies(const EventContext& 
     // Require 2 offline taus
     if(offline_tau_vec.size() != 2) return;
 
-    auto monGroup = getGroup(trigger+"_DiTauHLT_Efficiency");
+    const auto & monGroup =getGroup(trigger+"_DiTauHLT_Efficiency");
 
     auto dR = Monitored::Scalar<float>("dR", 0.0);
     auto dEta = Monitored::Scalar<float>("dEta", 0.0);
@@ -119,7 +119,7 @@ void TrigTauMonitorDiTauAlgorithm::fillDiTauVars(const std::string& trigger, con
 {
     ATH_MSG_DEBUG("Fill DiTau Variables: " << trigger); 
 
-    auto monGroup = getGroup(trigger+"_DiTauVars");
+    const auto & monGroup =getGroup(trigger+"_DiTauVars");
 
     if(tau_vec.size() != 2) return; 
     

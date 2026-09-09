@@ -38,10 +38,10 @@ namespace GlobalSim {
 // ============================================================================
 
     struct AuxSpec {
-        std::string_view name;
-        std::uint64_t mask;
-        std::size_t shift;
-        bool has_mask;
+        std::string_view name{};
+        std::uint64_t mask{};
+        std::size_t shift{};
+        bool has_mask{};
 
         static constexpr std::size_t parseNumber(std::string_view str,std::size_t& pos,std::size_t end) {
             std::size_t value{};
@@ -196,13 +196,19 @@ namespace GlobalSim {
         AuxValue& store(SG::AuxElement &obj, Value value) const {
             if constexpr (std::is_integral_v<AuxValue>)
             { // ensures have bitwise operators, has_mask is not constexpr so must hide this from invalid AuxValue types
-                // leaving this commented as may revery to constexpr again at some point
+                // leaving this commented as may revert to constexpr again at some point
                 //            if constexpr (has_mask) {
                 //                auto& val = m_wacc(obj);
                 //                val = (val & ~Mask) | ((value << shift) & Mask);
                 if (auxspec.has_mask) {
                     auto &val = m_wacc(obj);
-                    return (val = (val & ~auxspec.mask) | ((value << auxspec.shift) & auxspec.mask));
+                    //avoid unintended sign extension, make everything unsigned
+                    using unsigned_aux_type = std::make_unsigned_t<AuxValue>;
+                    const auto mask = static_cast<unsigned_aux_type>(auxspec.mask);
+                    const auto current = static_cast<unsigned_aux_type>(val);
+                    const auto encoded = (static_cast<unsigned_aux_type>(value) << auxspec.shift) & mask;
+                    val = static_cast<AuxValue>((current & ~mask) | encoded);
+                    return val;
                 }
             }
             return (m_wacc(obj) = value);

@@ -115,7 +115,24 @@ namespace EL
     /// rationale: this is a pointer to avoid including the header in this file
   private:
     TBenchmark *m_benchmark; //!
-    
+
+    /// \brief buffers for the per-file cache-stats branches
+    ///
+    /// These are members (not locals in \ref endOfFile) so that the
+    /// branches can be created once and their addresses stay valid across
+    /// all the per-file \c Fill() calls.
+  private:
+    Int_t m_nBranches = 0; //!
+    Int_t m_nLearn = 0; //!
+    Double_t m_cacheEfficiency = 0; //!
+    Double_t m_cacheEfficiencyRel = 0; //!
+    Long64_t m_bytesRead = 0; //!
+    Int_t m_readCalls = 0; //!
+    Long64_t m_noCacheBytesRead = 0; //!
+    Int_t m_noCacheReadCalls = 0; //!
+    Int_t m_readaheadSize = 0; //!
+    Long64_t m_bytesReadExtra = 0; //!
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpragmas"
 #pragma GCC diagnostic ignored "-Wunknown-pragmas"

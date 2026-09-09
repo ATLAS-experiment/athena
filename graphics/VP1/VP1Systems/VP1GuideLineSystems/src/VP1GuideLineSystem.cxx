@@ -30,12 +30,67 @@
 #include "VP1Base/VP1Deserialise.h"
 #include "VP1Base/VP1Msg.h"
 
+#include <Inventor/nodes/SoDrawStyle.h>
+#include <Inventor/nodes/SoLineSet.h>
+#include <Inventor/nodes/SoMaterial.h>
+#include <Inventor/nodes/SoPointSet.h>
 #include <Inventor/nodes/SoSeparator.h>
+#include <Inventor/nodes/SoSwitch.h>
+#include <Inventor/nodes/SoText2.h>
+#include <Inventor/nodes/SoTranslation.h>
+#include <Inventor/nodes/SoVertexProperty.h>
 #include <Inventor/nodes/SoPickStyle.h>
 #include <Inventor/nodes/SoComplexity.h>
 #include <Inventor/SbVec3f.h>
 
+#include <QByteArray>
+#include <QMap>
+#include <algorithm>
 #include <map>
+#include <vector>
+
+#ifndef BUILDVP1LIGHT
+#include "VP1Utils/VP1JobConfigInfo.h"
+#include "VP1Utils/VP1ParticleData.h"
+#include "VP1UtilsCoinSoQt/VP1ColorUtils.h"
+
+#include "GeoAdaptors/GeoSiHit.h"
+#include "GeneratorObjects/HepMcParticleLink.h"
+#include "InDetSimEvent/SiHitCollection.h"
+#include "StoreGate/StoreGateSvc.h"
+
+namespace {
+struct TruthHitPoint {
+  TruthHitPoint(double t, const HepGeom::Point3D<double>& p) : time(t), position(p) {}
+  double time;
+  HepGeom::Point3D<double> position;
+};
+
+struct TruthHitLabel {
+  TruthHitLabel(const HepGeom::Point3D<double>& p, const QString& l) : position(p), label(l) {}
+  HepGeom::Point3D<double> position;
+  QString label;
+};
+
+void addHGTDLabel(SoSwitch* labelsSwitch, const TruthHitLabel& label)
+{
+  if (!labelsSwitch || label.label.isEmpty())
+    return;
+
+  SoSeparator* oneLabelSep = new SoSeparator();
+  SoTranslation* labelTranslation = new SoTranslation();
+  labelTranslation->translation.setValue(label.position.x()+2.0,
+                                         label.position.y()+2.0,
+                                         label.position.z()+2.0);
+  SoText2* labelText = new SoText2();
+  QByteArray labelArray = label.label.toLatin1();
+  labelText->string.setValue(labelArray.data());
+  oneLabelSep->addChild(labelTranslation);
+  oneLabelSep->addChild(labelText);
+  labelsSwitch->addChild(oneLabelSep);
+}
+}
+#endif
 
 class VP1GuideLineSystem::Imp {
 public:
@@ -69,6 +124,15 @@ public:
   VP1EtaCone * etacone3{};
   VP1TrackingVolumes * trackingVolumes{};
   VP1Lines * lines = nullptr;
+  SoSwitch* hgtdGuideRootSwitch = nullptr;
+  SoSwitch* hgtdHitSwitch = nullptr;
+  SoSwitch* hgtdTruthTrackSwitch = nullptr;
+  SoSwitch* hgtdPrimaryParticleSwitch = nullptr;
+  SoSwitch* hgtdSecondaryParticleSwitch = nullptr;
+  SoSwitch* hgtdUnlinkedParticleSwitch = nullptr;
+  SoSwitch* hgtdPrimaryParticleLabelsSwitch = nullptr;
+  SoSwitch* hgtdSecondaryParticleLabelsSwitch = nullptr;
+  SoSwitch* hgtdUnlinkedParticleLabelsSwitch = nullptr;
 
   ProjectionSurfacesHelper * projsurfhelper_pixel{};
   ProjectionSurfacesHelper * projsurfhelper_sct{};
@@ -79,6 +143,34 @@ public:
 
   //For knowing which ID parts are used by data systems:
   std::map<QObject*,InDetProjFlags::DetTypeFlags> sender2iddettypeswithprojs;
+
+  void updateHGTDGuideVisibility() {
+    if (!controller)
+      return;
+    const bool showHGTDGuides = controller->showHGTDGuideLines();
+    if (hgtdGuideRootSwitch)
+      hgtdGuideRootSwitch->whichChild = showHGTDGuides ? SO_SWITCH_ALL : SO_SWITCH_NONE;
+    if (hgtdHitSwitch)
+      hgtdHitSwitch->whichChild = controller->showHGTDGuideHits() ? SO_SWITCH_ALL : SO_SWITCH_NONE;
+    if (hgtdTruthTrackSwitch)
+      hgtdTruthTrackSwitch->whichChild = controller->showHGTDTruthTracks() ? SO_SWITCH_ALL : SO_SWITCH_NONE;
+    if (hgtdPrimaryParticleSwitch)
+      hgtdPrimaryParticleSwitch->whichChild =
+        (controller->showHGTDGuideHits() && controller->showHGTDPrimaryParticles()) ? SO_SWITCH_ALL : SO_SWITCH_NONE;
+    if (hgtdSecondaryParticleSwitch)
+      hgtdSecondaryParticleSwitch->whichChild =
+        (controller->showHGTDGuideHits() && controller->showHGTDSecondaryParticles()) ? SO_SWITCH_ALL : SO_SWITCH_NONE;
+    if (hgtdUnlinkedParticleSwitch)
+      hgtdUnlinkedParticleSwitch->whichChild =
+        (controller->showHGTDGuideHits() && controller->showHGTDUnlinkedParticles()) ? SO_SWITCH_ALL : SO_SWITCH_NONE;
+    const bool showLabels = controller->showHGTDGuideHits() && controller->showHGTDParticleNames();
+    if (hgtdPrimaryParticleLabelsSwitch)
+      hgtdPrimaryParticleLabelsSwitch->whichChild = showLabels ? SO_SWITCH_ALL : SO_SWITCH_NONE;
+    if (hgtdSecondaryParticleLabelsSwitch)
+      hgtdSecondaryParticleLabelsSwitch->whichChild = showLabels ? SO_SWITCH_ALL : SO_SWITCH_NONE;
+    if (hgtdUnlinkedParticleLabelsSwitch)
+      hgtdUnlinkedParticleLabelsSwitch->whichChild = showLabels ? SO_SWITCH_ALL : SO_SWITCH_NONE;
+  }
 };
 
 //_____________________________________________________________________________________
@@ -104,8 +196,190 @@ QWidget * VP1GuideLineSystem::buildController()
 }
 
 //_____________________________________________________________________________________
-void VP1GuideLineSystem::buildEventSceneGraph(StoreGateSvc*, SoSeparator *)
+void VP1GuideLineSystem::buildEventSceneGraph(StoreGateSvc* sg, SoSeparator *root)
 {
+  m_d->hgtdGuideRootSwitch = nullptr;
+  m_d->hgtdHitSwitch = nullptr;
+  m_d->hgtdTruthTrackSwitch = nullptr;
+  m_d->hgtdPrimaryParticleSwitch = nullptr;
+  m_d->hgtdSecondaryParticleSwitch = nullptr;
+  m_d->hgtdUnlinkedParticleSwitch = nullptr;
+  m_d->hgtdPrimaryParticleLabelsSwitch = nullptr;
+  m_d->hgtdSecondaryParticleLabelsSwitch = nullptr;
+  m_d->hgtdUnlinkedParticleLabelsSwitch = nullptr;
+
+#ifdef BUILDVP1LIGHT
+  (void)sg;
+  (void)root;
+#else
+  if (!m_d->controller || !sg || !root || !VP1JobConfigInfo::hasHGTDGeometry())
+    return;
+
+  const SiHitCollection* collection = nullptr;
+  if (sg->retrieve(collection,"HGTD_Hits")!=StatusCode::SUCCESS) {
+    message("Unable to retrieve HGTD Hits for guide lines");
+    return;
+  }
+
+  SoSwitch* hgtdGuideRootSwitch = new SoSwitch();
+  m_d->hgtdGuideRootSwitch = hgtdGuideRootSwitch;
+  root->addChild(hgtdGuideRootSwitch);
+
+  SoVertexProperty* primaryHitVtxProperty = new SoVertexProperty();
+  SoVertexProperty* secondaryHitVtxProperty = new SoVertexProperty();
+  SoVertexProperty* unlinkedHitVtxProperty = new SoVertexProperty();
+  SoPointSet* primaryHitPointSet = new SoPointSet();
+  SoPointSet* secondaryHitPointSet = new SoPointSet();
+  SoPointSet* unlinkedHitPointSet = new SoPointSet();
+  primaryHitVtxProperty->enableNotify(FALSE);
+  secondaryHitVtxProperty->enableNotify(FALSE);
+  unlinkedHitVtxProperty->enableNotify(FALSE);
+  primaryHitPointSet->enableNotify(FALSE);
+  secondaryHitPointSet->enableNotify(FALSE);
+  unlinkedHitPointSet->enableNotify(FALSE);
+  unsigned int primaryHitCount = 0;
+  unsigned int secondaryHitCount = 0;
+  unsigned int unlinkedHitCount = 0;
+  std::vector<TruthHitLabel> primaryHitLabels;
+  std::vector<TruthHitLabel> secondaryHitLabels;
+  std::vector<TruthHitLabel> unlinkedHitLabels;
+  QMap<QString, std::vector<TruthHitPoint> > truthHitPoints;
+
+  for (const SiHit& hit : *collection) {
+    GeoSiHit ghit(hit);
+    if(!ghit)
+      continue;
+
+    HepGeom::Point3D<double> pos = ghit.getGlobalPosition();
+    const HepMcParticleLink& particleLink = hit.particleLink();
+    const HepMC::ConstGenParticlePtr particle = particleLink.cptr();
+    QString particleLabel("unlinked");
+    QString trackKey;
+    if (particle) {
+      const int barcode = HepMC::barcode(particle);
+      trackKey = QString("truth:%1").arg(barcode);
+      bool particleNameOK = false;
+      particleLabel = VP1ParticleData::particleName(particle->pdg_id(), particleNameOK);
+      if (!particleNameOK || particleLabel.isEmpty())
+        particleLabel = QString("pdg %1").arg(particle->pdg_id());
+    }
+
+    if (!particle) {
+      unlinkedHitVtxProperty->vertex.set1Value(unlinkedHitCount++, pos.x(), pos.y(), pos.z());
+      unlinkedHitLabels.emplace_back(pos, particleLabel);
+    } else if (particle->status()==1) {
+      primaryHitVtxProperty->vertex.set1Value(primaryHitCount++, pos.x(), pos.y(), pos.z());
+      primaryHitLabels.emplace_back(pos, particleLabel);
+    } else {
+      secondaryHitVtxProperty->vertex.set1Value(secondaryHitCount++, pos.x(), pos.y(), pos.z());
+      secondaryHitLabels.emplace_back(pos, particleLabel);
+    }
+
+    if (!trackKey.isEmpty())
+      truthHitPoints[trackKey].emplace_back(hit.meanTime(), pos);
+  }
+
+  SoSwitch* hitSwitch = new SoSwitch();
+  m_d->hgtdHitSwitch = hitSwitch;
+  hgtdGuideRootSwitch->addChild(hitSwitch);
+
+  auto addParticleCategory = [](SoSwitch* rootSwitch,
+                                SoSwitch*& categorySwitch,
+                                SoSwitch*& labelsSwitch,
+                                SoVertexProperty* vertexProperty,
+                                SoPointSet* pointSet,
+                                unsigned int count,
+                                const SbColor& color,
+                                const std::vector<TruthHitLabel>& labels) {
+    categorySwitch = new SoSwitch();
+    rootSwitch->addChild(categorySwitch);
+
+    SoMaterial* hitMaterial = new SoMaterial();
+    hitMaterial->diffuseColor.setValue(color);
+    categorySwitch->addChild(hitMaterial);
+    pointSet->numPoints=count;
+    pointSet->vertexProperty.setValue(vertexProperty);
+    categorySwitch->addChild(pointSet);
+
+    labelsSwitch = new SoSwitch();
+    for (const TruthHitLabel& label : labels)
+      addHGTDLabel(labelsSwitch, label);
+    categorySwitch->addChild(labelsSwitch);
+
+    pointSet->enableNotify(TRUE);
+    vertexProperty->enableNotify(TRUE);
+  };
+
+  addParticleCategory(hgtdGuideRootSwitch,
+                      m_d->hgtdPrimaryParticleSwitch,
+                      m_d->hgtdPrimaryParticleLabelsSwitch,
+                      primaryHitVtxProperty,
+                      primaryHitPointSet,
+                      primaryHitCount,
+                      SbColor(VP1ColorUtils::getSbColorFromRGB(255, 170, 0)),
+                      primaryHitLabels);
+  addParticleCategory(hgtdGuideRootSwitch,
+                      m_d->hgtdSecondaryParticleSwitch,
+                      m_d->hgtdSecondaryParticleLabelsSwitch,
+                      secondaryHitVtxProperty,
+                      secondaryHitPointSet,
+                      secondaryHitCount,
+                      SbColor(VP1ColorUtils::getSbColorFromRGB(255, 0, 190)),
+                      secondaryHitLabels);
+  addParticleCategory(hgtdGuideRootSwitch,
+                      m_d->hgtdUnlinkedParticleSwitch,
+                      m_d->hgtdUnlinkedParticleLabelsSwitch,
+                      unlinkedHitVtxProperty,
+                      unlinkedHitPointSet,
+                      unlinkedHitCount,
+                      SbColor(VP1ColorUtils::getSbColorFromRGB(170, 170, 170)),
+                      unlinkedHitLabels);
+
+  SoVertexProperty* truthTrackVtxProperty = new SoVertexProperty();
+  SoLineSet* truthTrackLineSet = new SoLineSet();
+  truthTrackVtxProperty->enableNotify(FALSE);
+  truthTrackLineSet->enableNotify(FALSE);
+  unsigned int truthTrackVertexCount = 0;
+  unsigned int truthTrackCount = 0;
+  for (auto it = truthHitPoints.begin(); it != truthHitPoints.end(); ++it) {
+    std::vector<TruthHitPoint>& points = it.value();
+    if (points.empty())
+      continue;
+    std::sort(points.begin(), points.end(),
+              [](const TruthHitPoint& a, const TruthHitPoint& b) { return a.time < b.time; });
+
+    const int verticesInTrack = points.size() == 1 ? 2 : static_cast<int>(points.size());
+    truthTrackLineSet->numVertices.set1Value(truthTrackCount++, verticesInTrack);
+    if (points.size()==1)
+      truthTrackVtxProperty->vertex.set1Value(truthTrackVertexCount++, 0.0, 0.0, 0.0);
+    for (const TruthHitPoint& point : points)
+      truthTrackVtxProperty->vertex.set1Value(truthTrackVertexCount++,
+                                              point.position.x(),
+                                              point.position.y(),
+                                              point.position.z());
+  }
+
+  SoSwitch* trackSwitch = new SoSwitch();
+  m_d->hgtdTruthTrackSwitch = trackSwitch;
+  hgtdGuideRootSwitch->addChild(trackSwitch);
+  if (truthTrackCount>0) {
+    SoSeparator* trackSep = new SoSeparator();
+    SoDrawStyle* trackDrawStyle = new SoDrawStyle();
+    trackDrawStyle->style.setValue(SoDrawStyle::LINES);
+    trackDrawStyle->lineWidth = 2;
+    trackSep->addChild(trackDrawStyle);
+    SoMaterial* trackMaterial = new SoMaterial();
+    trackMaterial->diffuseColor.setValue(SbColor(VP1ColorUtils::getSbColorFromRGB(0, 255, 190)));
+    trackSep->addChild(trackMaterial);
+    truthTrackLineSet->vertexProperty.setValue(truthTrackVtxProperty);
+    trackSep->addChild(truthTrackLineSet);
+    trackSwitch->addChild(trackSep);
+    truthTrackLineSet->enableNotify(TRUE);
+    truthTrackVtxProperty->enableNotify(TRUE);
+  }
+
+  m_d->updateHGTDGuideVisibility();
+#endif
 }
 
 //_____________________________________________________________________________________
@@ -238,6 +512,14 @@ void VP1GuideLineSystem::buildPermanentSceneGraph(StoreGateSvc* /*detstore*/, So
 	m_d->lines->setShown(m_d->controller->showLines());	
   connect(m_d->controller,SIGNAL(lineDirectionChanged(const SbVec3f&)),m_d->lines,SLOT(setDirection(const SbVec3f&)));
   m_d->lines->setDirection(m_d->controller->lineDirection());  
+
+  connect(m_d->controller,SIGNAL(showHGTDGuideLinesChanged(bool)),this,SLOT(updateHGTDGuideVisibility()));
+  connect(m_d->controller,SIGNAL(showHGTDGuideHitsChanged(bool)),this,SLOT(updateHGTDGuideVisibility()));
+  connect(m_d->controller,SIGNAL(showHGTDTruthTracksChanged(bool)),this,SLOT(updateHGTDGuideVisibility()));
+  connect(m_d->controller,SIGNAL(showHGTDParticleNamesChanged(bool)),this,SLOT(updateHGTDGuideVisibility()));
+  connect(m_d->controller,SIGNAL(showHGTDPrimaryParticlesChanged(bool)),this,SLOT(updateHGTDGuideVisibility()));
+  connect(m_d->controller,SIGNAL(showHGTDSecondaryParticlesChanged(bool)),this,SLOT(updateHGTDGuideVisibility()));
+  connect(m_d->controller,SIGNAL(showHGTDUnlinkedParticlesChanged(bool)),this,SLOT(updateHGTDGuideVisibility()));
   
   SoSeparator * projsep = new SoSeparator;
   root->addChild(projsep);
@@ -283,6 +565,12 @@ void VP1GuideLineSystem::systemuncreate()
   delete m_d->trackingVolumes; m_d->trackingVolumes = 0;
 
   m_d->controller=0;
+}
+
+//_____________________________________________________________________________________
+void VP1GuideLineSystem::updateHGTDGuideVisibility()
+{
+  m_d->updateHGTDGuideVisibility();
 }
 
 

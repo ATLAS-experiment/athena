@@ -8,31 +8,32 @@
 #include "TrigConfBase/TrigConfMessaging.h"
 #include "boost/property_tree/ptree.hpp"
 #include <string>
+#include <string_view>
 
 
 class MuctpiXMLHelper : TrigConf::TrigConfMessaging {
 public:
    MuctpiXMLHelper();
 
-   std::string readAttribute(const boost::property_tree::ptree & tree, const std::string & attr);
+   std::string readAttribute(const boost::property_tree::ptree & tree, std::string_view attr);
 
-   bool hasAttribute(const boost::property_tree::ptree & tree, const std::string & attr);
+   bool hasAttribute(const boost::property_tree::ptree & tree, std::string_view attr);
 
-   std::string getAttribute(const boost::property_tree::ptree & tree, const std::string & attr);
+   std::string getAttribute(const boost::property_tree::ptree & tree, std::string_view attr);
 
-   std::string getAttribute(const boost::property_tree::ptree & tree, const std::string & attr, const std::string & defval);
+   std::string getAttribute(const boost::property_tree::ptree & tree, std::string_view attr, std::string_view defval);
 
-   int getIntAttribute(const boost::property_tree::ptree & tree, const std::string & attr);
+   int getIntAttribute(const boost::property_tree::ptree & tree, std::string_view attr);
 
-   int getIntAttribute(const boost::property_tree::ptree & tree, const std::string & attr, int defval);
+   int getIntAttribute(const boost::property_tree::ptree & tree, std::string_view attr, int defval);
 
-   unsigned int getUIntAttribute(const boost::property_tree::ptree & tree, const std::string & attr);
+   unsigned int getUIntAttribute(const boost::property_tree::ptree & tree, std::string_view attr);
 
-   unsigned int getUIntAttribute(const boost::property_tree::ptree & tree, const std::string & attr, unsigned int & defval);
+   unsigned int getUIntAttribute(const boost::property_tree::ptree & tree, std::string_view attr, unsigned int & defval);
 
-   float getFloatAttribute(const boost::property_tree::ptree & tree, const std::string & attr);
+   float getFloatAttribute(const boost::property_tree::ptree & tree, std::string_view attr);
 
-   float getFloatAttribute(const boost::property_tree::ptree & tree, const std::string & attr, float & defval);
+   float getFloatAttribute(const boost::property_tree::ptree & tree, const std::string_view attr, float & defval);
 
    void printAttributes(const boost::property_tree::ptree & tree);
 

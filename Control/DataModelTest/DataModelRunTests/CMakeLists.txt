@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( DataModelRunTests )
@@ -42,8 +42,8 @@ function (datamodel_run_test testName)
   atlas_add_test( ${testName}
                   SCRIPT ${_command} ${_arg} ${_options}
                   PROPERTIES TIMEOUT 800
-                  LOG_IGNORE_PATTERN "has different type than the branch|no dictionary for class|^StorageSvc +INFO|Cache alignment|Unable to locate catalog|IOVDbSvc[0-9 ]+INFO|Invalid ./TagInfo${ARG_EXTRA_IGNORE}|The database does not exist|IDatabaseSvc::openDatabase.*=>|New file created|MessageSvc not found"
-                  ENVIRONMENT "ATLAS_REFERENCE_TAG=DataModelRunTests/DataModelRunTestsReference-01-00-03;CREST_URL=http://crest-j23.cern.ch:8081/api-v6.0"
+                  LOG_IGNORE_PATTERN "has different type than the branch|no dictionary for class|^StorageSvc +INFO|Cache alignment|Unable to locate catalog|IOVDbSvc[0-9 ]+INFO|Invalid ./TagInfo${ARG_EXTRA_IGNORE}|The database does not exist|IDatabaseSvc::openDatabase.*=>|New file created|MessageSvc not found|^Avalan.*INFO"
+                  ENVIRONMENT "ATLAS_REFERENCE_TAG=DataModelRunTests/DataModelRunTestsReference-01-00-03"
                   DEPENDS ${ARG_DEPENDS} )
 endfunction (datamodel_run_test)
 
@@ -77,7 +77,7 @@ datamodel_run_test (ByteStreamTestRead DEPENDS ByteStreamTestWrite)
 
 datamodel_run_test (xAODTestSymlinks1)
 datamodel_run_test (xAODTestSymlinks1 MT
-                    EXTRA_IGNORE "|^xAODTe|none|OUTPUT.*McEventInfo|^Avalan.*INFO")
+                    EXTRA_IGNORE "|^xAODTe|none|OUTPUT.*McEventInfo")
 
 datamodel_run_test (xAODTestSymlinks2
                     DEPENDS xAODTestWrite)
@@ -86,7 +86,7 @@ datamodel_run_test (xAODTestSymlinks2 MT
 
 datamodel_run_test (xAODTestDecorHandle1)
 datamodel_run_test (xAODTestDecorHandle1 MT
-                    EXTRA_IGNORE "|^xAODTe|none|OUTPUT.*McEventInfo|^Avalan.*INFO")
+                    EXTRA_IGNORE "|^xAODTe|none|OUTPUT.*McEventInfo")
 
 datamodel_run_test (xAODTestDecorHandle2
                     DEPENDS xAODTestWrite)
@@ -98,7 +98,7 @@ datamodel_run_test (CondReader
                     DEPENDS CondWriter)
 datamodel_run_test (CondReader MT
                     DEPENDS CondWriter
-                    EXTRA_IGNORE "|^xAODTe|none|OUTPUT.*McEventInfo|^Avalan.*INFO")
+                    EXTRA_IGNORE "|^xAODTe|none|OUTPUT.*McEventInfo")
 
 datamodel_run_test (CondReadWriteCool
   COMMAND athena.py
@@ -107,7 +107,7 @@ datamodel_run_test (CondReadWriteCool
 
 # Uncomment the lines below to enable the CondReadWriteCrest test.
 # Note: This test requires network access to the CREST service set
-# via CREST_URL
+# via CREST_URL=http://crest-j23.cern.ch:8081/api-v6.0
 #datamodel_run_test (CondReadWriteCrest
 #  COMMAND athena.py
 #  ARG "CondReadWrite.py --condDB=crest"

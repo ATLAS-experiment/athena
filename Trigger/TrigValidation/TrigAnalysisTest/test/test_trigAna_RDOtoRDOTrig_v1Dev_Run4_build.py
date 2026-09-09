@@ -24,6 +24,9 @@ ex.args += ' --steering "doRDO_TRIG"'
 ex.args += ' --preInclude "all:Campaigns.MC23PhaseIIPileUp200"'
 ex.args += f' --preExec "all:{preExec};"'
 ex.args += f' --conditionsTag "default:{defaultConditionsTags.RUN4_MC}"'
+ex.flags+=   ['Tracking.doITkFastTracking=False',
+              'Tracking.doPixelDigitalClustering=False',
+              ]
 ex.timeout = 5400 # default = 3600 s
 
 test = Test.Test()

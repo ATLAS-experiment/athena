@@ -408,18 +408,14 @@ def EGAM1KernelCfg(flags, name="EGAM1Kernel", **kwargs):
     # truth thinning
     if flags.Input.isMC:
         # W, Z and Higgs
-        truth_cond_WZH = " && ".join(
-            ["(abs(TruthParticles.pdgId) >= 23)", "(abs(TruthParticles.pdgId) <= 25)"]
-        )
+        truth_cond_WZH = "(TruthParticles.isW || TruthParticles.isZ || TruthParticles.isHiggs)"
         # Leptons
-        truth_cond_lep = " && ".join(
-            ["(abs(TruthParticles.pdgId) >= 11)", "(abs(TruthParticles.pdgId) <= 16)"]
-        )
+        truth_cond_lep = "(TruthParticles.isLepton)"
         # Top quark
-        truth_cond_top = "(abs(TruthParticles.pdgId) ==  6)"
+        truth_cond_top = "(TruthParticles.isTop)"
         # Photon
         truth_cond_gam = " && ".join(
-            ["(abs(TruthParticles.pdgId) == 22)", "(TruthParticles.pt > 1*GeV)"]
+            ["(TruthParticles.isPhoton)", "(TruthParticles.pt > 1*GeV)"]
         )
         # stable particles
         truth_cond_finalState = "(TruthParticles.isGenStable)"

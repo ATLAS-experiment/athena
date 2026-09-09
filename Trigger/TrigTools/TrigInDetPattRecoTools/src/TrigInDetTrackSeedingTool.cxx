@@ -81,7 +81,6 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
   float shift_x = vertex.x() - beamSpotHandle->beamTilt(0)*vertex.z();
   float shift_y = vertex.y() - beamSpotHandle->beamTilt(1)*vertex.z();
 
-  std::unique_ptr<GNN_DataStorage> storage = std::make_unique<GNN_DataStorage>(*m_geo, m_mlLUT);
   
   int nPixels = 0;
   int nStrips = 0;
@@ -417,7 +416,7 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
 		
 		std::shared_ptr<TrigAccel::OffloadBuffer> pBuff = std::make_shared<TrigAccel::OffloadBuffer>(dataBuffer.get());
     
-		std::unique_ptr<TrigAccel::Work> pWork = std::unique_ptr<TrigAccel::Work>(m_accelSvc->createWork(TrigAccel::InDetJobControlCode::RUN_GBTS, pBuff));
+		std::unique_ptr<TrigAccel::Work> pWork = std::unique_ptr<TrigAccel::Work>(m_accelSvc->createWork(TrigAccel::InDetJobControlCode::RUN_GBTS, std::move(pBuff)));
     
 		if(!pWork) {
 			ATH_MSG_WARNING("Failed to create a work item for task "<<TrigAccel::InDetJobControlCode::RUN_GBTS);
@@ -456,24 +455,21 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
 			//populating the edgeStorage
 
 			std::vector<GNN_Node> nodes;
-
-			nodes.reserve(vSP.size());
-
+      nodes.reserve(vSP.size());
+      
 			for(unsigned int idx = 0;idx < vSP.size(); idx++) {
-
-				nodes.emplace_back(vL[idx]);
+				nodes.emplace_back(static_cast<unsigned short>(vL[idx]));
+				auto &node = nodes.back();
 				
 				const auto& pos = vSP[idx]->globalPosition();
 				float xs = pos.x() - shift_x;
 				float ys = pos.y() - shift_y;
-				float zs = pos.z();
 				
-				nodes[idx].m_x = xs;
-				nodes[idx].m_y = ys;
-				nodes[idx].m_z = zs;
-				nodes[idx].m_r = std::sqrt(xs*xs + ys*ys);
-
-				nodes[idx].m_idx = idx;
+				node.m_x = xs;
+				node.m_y = ys;
+				node.m_z = pos.z();
+				node.m_r = std::sqrt(xs*xs + ys*ys);
+				node.m_idx = idx;
 
 			}
 			
@@ -493,8 +489,9 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
 				int nNei     = pGraph->m_graphArray[pos + TrigAccel::ITk::nNei];
 
 				if(nNei > N_SEG_CONNS) nNei = N_SEG_CONNS;
-				
+				//coverity[WRAPPER_ESCAPE]
 				edgeStorage[idx].m_n1 = &nodes[node1Idx];
+				//coverity[WRAPPER_ESCAPE]
 				edgeStorage[idx].m_n2 = &nodes[node2Idx];
 				edgeStorage[idx].m_level = 1;
 				edgeStorage[idx].m_nNei = nNei;
@@ -531,7 +528,9 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
 			std::sort(vSeeds.begin(), vSeeds.end(), GNN_Edge::CompareLevel());
 
 			//backtracking
-
+      //Local variable tFilter uses 320048 bytes of stack space;
+      //Total stack use for this function is 331508 bytes
+      //coverity[STACK_USE]
 			TrigFTF_GNN_TrackingFilter tFilter(m_layerGeometry, edgeStorage);
 
 			output.reserve(vSeeds.size());

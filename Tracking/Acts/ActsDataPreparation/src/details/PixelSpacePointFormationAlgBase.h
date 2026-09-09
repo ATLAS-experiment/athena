@@ -14,6 +14,7 @@
 #include "StoreGate/ReadCondHandleKey.h"
 
 #include "ActsToolInterfaces/IPixelSpacePointFormationTool.h"
+#include "ActsEvent/ContextUtility.h"
 
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 
@@ -78,6 +79,11 @@ namespace ActsTrk {
         /// For monitoring
         ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "", "Monitoring tool"};
         //@}
+
+        /// Only used, and only initialized, if the space point formation tool
+        /// reports that it needs a geometry context
+        ActsTrk::ContextUtility m_ctxProvider{this};
+        bool m_useGeometryContext{false};
 
         using Cache_IDC = typename Cache::Handles<xAOD::SpacePoint>::IDC;
         using Cache_BackendUpdateHandleKey = typename Cache::Handles<xAOD::SpacePoint>::BackendUpdateHandleKey;

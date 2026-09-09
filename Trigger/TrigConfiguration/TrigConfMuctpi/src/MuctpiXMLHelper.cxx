@@ -30,7 +30,7 @@ MuctpiXMLHelper::printAttributes(const ptree & tree) {
 }
 
 bool
-MuctpiXMLHelper::hasAttribute(const ptree & tree, const string & attr) {
+MuctpiXMLHelper::hasAttribute(const ptree & tree, string_view attr) {
 
    // initialize attributes ptree 
    ptree tmp_ptree;
@@ -48,24 +48,23 @@ MuctpiXMLHelper::hasAttribute(const ptree & tree, const string & attr) {
 }
 
 
-string
-MuctpiXMLHelper::readAttribute(const ptree & tree, const string & attr) {
- 
-      // initialize attributes ptree 
-      ptree tmp_ptree;
-      ptree attributes = tree.get_child("<xmlattr>", tmp_ptree);
-  
-      // iterate through children
-      for(const ptree::value_type &a : attributes) {
-         if(a.first != attr) continue;
-         return a.second.data(); //a.second.data is the value!
-      }
-      return "";
+std::string 
+MuctpiXMLHelper::readAttribute(const ptree& tree, std::string_view attr){
+  const auto attributes = tree.get_child_optional("<xmlattr>");
+  if (!attributes) {
+    return {};
+  }
+  for (const auto& [name, value] : *attributes) {
+    if (name == attr) {
+      return value.data();
+    }
+  }
+  return {};
 }
 
 
 std::string
-MuctpiXMLHelper::getAttribute(const ptree & tree, const string & attr) {
+MuctpiXMLHelper::getAttribute(const ptree & tree, string_view attr) {
    if( ! hasAttribute(tree, attr) ) {
       TRG_MSG_WARNING("attribute " << attr << " does not exist");
       return "";
@@ -74,15 +73,15 @@ MuctpiXMLHelper::getAttribute(const ptree & tree, const string & attr) {
 }
 
 std::string
-MuctpiXMLHelper::getAttribute(const ptree & tree, const string & attr, const std::string & defval) {
+MuctpiXMLHelper::getAttribute(const ptree & tree, string_view attr, std::string_view defval) {
    if( ! hasAttribute(tree, attr) )
-      return defval;
+      return std::string{defval};
    return readAttribute(tree,attr);
 }
 
 
 int
-MuctpiXMLHelper::getIntAttribute(const ptree & tree, const string & attr) {
+MuctpiXMLHelper::getIntAttribute(const ptree & tree, string_view attr) {
    if( ! hasAttribute(tree, attr) ) {
       TRG_MSG_WARNING("attribute " << attr << " does not exist");
       return 0;
@@ -98,7 +97,7 @@ MuctpiXMLHelper::getIntAttribute(const ptree & tree, const string & attr) {
 }
 
 int
-MuctpiXMLHelper::getIntAttribute(const ptree & tree, const string & attr, int defval) {
+MuctpiXMLHelper::getIntAttribute(const ptree & tree, string_view attr, int defval) {
    if( ! hasAttribute(tree, attr) )
       return defval;
    int ret_value{0};
@@ -112,7 +111,7 @@ MuctpiXMLHelper::getIntAttribute(const ptree & tree, const string & attr, int de
 
 
 unsigned int
-MuctpiXMLHelper::getUIntAttribute(const ptree & tree, const string & attr) {
+MuctpiXMLHelper::getUIntAttribute(const ptree & tree, string_view attr) {
    if( ! hasAttribute(tree, attr) ) {
       TRG_MSG_WARNING("attribute " << attr << " does not exist");
       return 0;
@@ -127,7 +126,7 @@ MuctpiXMLHelper::getUIntAttribute(const ptree & tree, const string & attr) {
 }
 
 unsigned int
-MuctpiXMLHelper::getUIntAttribute(const ptree & tree, const string & attr, unsigned int & defval) {
+MuctpiXMLHelper::getUIntAttribute(const ptree & tree, string_view attr, unsigned int & defval) {
    if( ! hasAttribute(tree, attr) )
       return defval;
    unsigned int ret_value{0};
@@ -141,7 +140,7 @@ MuctpiXMLHelper::getUIntAttribute(const ptree & tree, const string & attr, unsig
 
 
 float
-MuctpiXMLHelper::getFloatAttribute(const ptree & tree, const string & attr) {
+MuctpiXMLHelper::getFloatAttribute(const ptree & tree, string_view attr) {
    if( ! hasAttribute(tree, attr) ) {
       TRG_MSG_WARNING("attribute " << attr << " does not exist");
       return 0;
@@ -157,7 +156,7 @@ MuctpiXMLHelper::getFloatAttribute(const ptree & tree, const string & attr) {
 }
 
 float
-MuctpiXMLHelper::getFloatAttribute(const ptree & tree, const string & attr, float & defval) {
+MuctpiXMLHelper::getFloatAttribute(const ptree & tree, string_view attr, float & defval) {
    if( ! hasAttribute(tree, attr) )
       return defval;
    float ret_value{0};

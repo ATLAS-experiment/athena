@@ -27,12 +27,20 @@ atlas_add_test( MaterialStepWriter
                 SCRIPT RunGeantinoMaterialTrackProduction.py --maxEvents 1
                 PROPERTIES TIMEOUT 600
                 PRIVATE_WORKING_DIRECTORY
+                # Ignore spurious FPEs originating from inside Geant (G4Tubs)
+                # in the clang build (due to Geant not being compiled
+                # with trapping FP).
+                LOG_IGNORE_PATTERN "FPE .*G4AtlasAlg"
                 POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( MaterialStepWriterToroid
                 SCRIPT testMaterialWriteToroid.sh
                 PROPERTIES TIMEOUT 600
                 PRIVATE_WORKING_DIRECTORY
+                # Ignore spurious FPEs originating from inside Geant (G4Tubs)
+                # in the clang build (due to Geant not being compiled
+                # with trapping FP).
+                LOG_IGNORE_PATTERN "FPE .*G4AtlasAlg"
                 POST_EXEC_SCRIPT noerror.sh )
 
 

@@ -1,18 +1,41 @@
-#  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import ROOT
 
-def EFMuonMonConfig(helper):
+from TriggerMenuMT.HLT.Muon.TrigMuonKeys import muonNames
+muNames = muonNames().getNames('RoI')
+
+def EFMuonMonConfig(helper, isPhaseII=False, **kwargs):
     
     from AthenaConfiguration.ComponentFactory import CompFactory
 
     GroupName = 'EFMuon'
 
+    # Set the offline muon container
+    kwargs.setdefault("MuonContainerName", "Muons")
+
     from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
     from .MuonMatchingToolConfig import MuonMatchingToolConfig
-    monAlg = helper.addAlgorithm(CompFactory.EFMuonMon,'EFMuonMon',
-                                 MuonSelectionTool = helper.result().popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(helper.flags, MuQuality=1)),
-                                 MuonMatchingTool = helper.result().popToolsAndMerge(MuonMatchingToolConfig(helper.flags)))
+    monAlg = helper.addAlgorithm(CompFactory.EFMuonMon, name='EFMuonMon',
+                                 MuonSelectionTool = helper.result().popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(helper.flags, 
+                                                                                                                                MuQuality=1)),
+                                 MuonMatchingTool = helper.result().popToolsAndMerge(MuonMatchingToolConfig(helper.flags, 
+                                                                                                            isPhaseII=isPhaseII, 
+                                                                                                            MuonContainerName=kwargs["MuonContainerName"])),
+                                 **kwargs)
+    
+    from TrigConfigSvc.TriggerConfigAccess import getHLTMenuAccess
+    isR4Menu = "run4" in getHLTMenuAccess(helper.flags).name()
+
+    # Set muon containers names
+    monAlg.EFSAMuonContainerName = muNames.EFSAMuonsPhII if isPhaseII else muNames.EFSAMuons
+    monAlg.EFCBMuonContainerName = muNames.EFCBMuons
+    monAlg.EFSAMlbktMuonContainerName = muNames.EFSAMuonsPhIIMlbkt if isPhaseII and isR4Menu else ""
+    monAlg.EFSANewFastMuonContainerName = muNames.EFSAMuonsPhIINewFast if isPhaseII and isR4Menu else ""
+    # Set track particle containers names
+    monAlg.EFSATrackContainerName = muNames.EFSATrackParticlesPhII if isPhaseII else "HLT_MSExtrapolatedMuons_RoITrackParticles"
+    monAlg.EFSAMlbktTrackContainerName = muNames.EFSATrackParticlesPhIIMlbkt if isPhaseII and isR4Menu else ""
+    monAlg.EFSANewFastTrackContainerName = muNames.EFSATrackParticlesPhIINewFast if isPhaseII and isR4Menu else ""
 
     ### monitorig groups
     from TrigConfigSvc.TriggerConfigAccess import getHLTMonitoringAccess

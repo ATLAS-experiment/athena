@@ -248,7 +248,7 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
                             if (Eofflinepv) {
                                 NameH = "DiffOnOffPVy_tr_"+trigName;
                                 ATH_MSG_DEBUG( " NameH: " << NameH  );
-                                auto DiffOnOffPVy_tr = Monitored::Scalar<float>(NameH,0.0);
+                                auto DiffOnOffPVy_tr = Monitored::Scalar<float>(std::move(NameH),0.0);
                                 DiffOnOffPVy_tr = vtx->y()-offlinepvy;
                                 ATH_MSG_DEBUG("        DiffOnOffPVy_tr: " << DiffOnOffPVy_tr);
                                 fill("TrigBjetMonitor",DiffOnOffPVy_tr);
@@ -364,7 +364,7 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 
                         NameH = "GN2Xv01_mv_tr_"+trigName;
                         ATH_MSG_DEBUG( " NameH: " << NameH  );
-                        auto GN2Xv01_mv = Monitored::Scalar<float>(NameH,0.0);
+                        auto GN2Xv01_mv = Monitored::Scalar<float>(std::move(NameH),0.0);
                         ATH_MSG_DEBUG("  GN2Xv01_pqcd: " << GN2Xv01_pqcd << "  GN2Xv01_ptop: " << GN2Xv01_ptop << "  GN2Xv01_phbb: " << GN2Xv01_phbb );
                         theLLRW = LLRW (GN2Xv01_pqcd, GN2Xv01_ptop, GN2Xv01_phbb, GN2Xv01_mv);
                         ATH_MSG_DEBUG("        GN2Xv01_mv: " << GN2Xv01_mv << " LLRW: " << theLLRW);
@@ -524,7 +524,7 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
                         // Delta R(muon,jet)
                         std::string DeltaRH = "DeltaR_"+trigName;
                         ATH_MSG_DEBUG( " DeltaRH: " << DeltaRH  );
-                        auto DeltaR = Monitored::Scalar<float>(DeltaRH,0.0);
+                        auto DeltaR = Monitored::Scalar<float>(std::move(DeltaRH),0.0);
                         float DeltaEta = muonEta1 - jetEta1;
                         float DeltaPhi = phiCorr( phiCorr(muonPhi1) - phiCorr(jetPhi1) );
                         DeltaR = sqrt( DeltaEta*DeltaEta + DeltaPhi*DeltaPhi );
@@ -534,7 +534,7 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
                         // Delta Z(muon,jet)
                         std::string DeltaZH = "DeltaZ_"+trigName;
                         ATH_MSG_DEBUG( " DeltaZH: " << DeltaZH  );
-                        auto DeltaZ = Monitored::Scalar<float>(DeltaZH,0.0);
+                        auto DeltaZ = Monitored::Scalar<float>(std::move(DeltaZH),0.0);
                         DeltaZ = std::abs(muonZ1-jetZ1);
                         ATH_MSG_DEBUG("       Delta Z : " << DeltaZ);
                         if (plotDeltaZ) fill("TrigBjetMonitor",DeltaZ);
@@ -542,7 +542,7 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
                         // muonPt/jetPt
                         std::string RatioPtH = "RatioPt_"+trigName;
                         ATH_MSG_DEBUG( " RatioPtH: " << RatioPtH  );
-                        auto RatioPt = Monitored::Scalar<float>(RatioPtH,0.0);
+                        auto RatioPt = Monitored::Scalar<float>(std::move(RatioPtH),0.0);
                         RatioPt = -100.;
                         if (jetPt1 > 0.) RatioPt = muonPt1/jetPt1;
                         ATH_MSG_DEBUG("        RatioPt : " << RatioPt);
@@ -551,7 +551,7 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
                         // muonPt relative to jet direction
                         std::string RelPtH = "RelPt_"+trigName;
                         ATH_MSG_DEBUG( " RelPtH: " << RelPtH  );
-                        auto RelPt = Monitored::Scalar<float>(RelPtH,0.0);
+                        auto RelPt = Monitored::Scalar<float>(std::move(RelPtH),0.0);
                         RelPt = 1.e10;
                         bool calc_relpt = CalcRelPt (muonPt1, muonEta1, muonPhi1, jetPt1, jetEta1, jetPhi1, RelPt);
                         ATH_MSG_DEBUG("        RelPt : " << RelPt);
@@ -559,7 +559,7 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
                         // wGN1
                         std::string wGN1H = "wGN1_"+trigName;
                         ATH_MSG_DEBUG( " NameH: " << wGN1H  );
-                        auto wGN1 = Monitored::Scalar<float>(wGN1H,0.0);
+                        auto wGN1 = Monitored::Scalar<float>(std::move(wGN1H),0.0);
                         wGN1 = float(GN1_mv);
                         ATH_MSG_DEBUG("        wGN1: " << wGN1 << " RelPt : " << RelPt);
                         if (calc_relpt && theLLR_GN1) fill("TrigBjetMonitor",wGN1,RelPt);
@@ -567,7 +567,7 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
                         // wGN2
                         std::string wGN2H = "wGN2_"+trigName;
                         ATH_MSG_DEBUG( " NameH: " << wGN2H  );
-                        auto wGN2 = Monitored::Scalar<float>(wGN2H,0.0);
+                        auto wGN2 = Monitored::Scalar<float>(std::move(wGN2H),0.0);
                         wGN2 = float(GN2_mv);
                         ATH_MSG_DEBUG("        wGN2: " << wGN2 << " RelPt : " << RelPt);
                         if (calc_relpt && theLLR_GN2) fill("TrigBjetMonitor",wGN2,RelPt);
@@ -586,7 +586,7 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
                     int ijet = 0;
                     int itrack = 0;
                     std::string nJetH = "nJet_"+trigName;
-                    auto nJet = Monitored::Scalar<int>(nJetH,0.0);
+                    auto nJet = Monitored::Scalar<int>(std::move(nJetH),0.0);
                     nJet = onlinejets.size();
                     fill("TrigBjetMonitor",nJet);
 
@@ -720,7 +720,7 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 
                             NameH = "GN2_mv_tr_"+trigName;
                             ATH_MSG_DEBUG( " NameH: " << NameH  );
-                            auto GN2_mv = Monitored::Scalar<double>(NameH,0.0);
+                            auto GN2_mv = Monitored::Scalar<double>(std::move(NameH),0.0);
                             theLLR = LLR (GN2_pu, GN2_pc, GN2_pb, GN2_mv);
                             if ( theLLR ) fill("TrigBjetMonitor",GN2_mv);
                             ATH_MSG_DEBUG("        GN2_mv: " << GN2_mv << " LLR: " << theLLR);
@@ -781,7 +781,7 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
                                 fill("TrigBjetMonitor",sd0);
                                 NameH = "ez0_"+trigName;
                                 ATH_MSG_DEBUG( " NameH: " << NameH  );
-                                auto ez0 = Monitored::Scalar<float>(NameH,0.0);
+                                auto ez0 = Monitored::Scalar<float>(std::move(NameH),0.0);
                                 ez0 = Amg::error((*it)->definingParametersCovMatrix(), 1);
                                 ATH_MSG_DEBUG("        ez0: " << ez0);
                                 fill("TrigBjetMonitor",ez0);
@@ -794,7 +794,7 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
                         ATH_MSG_DEBUG("  Total number of triggered b-jets: " << ijet << " nJet : " << nJet);
                         ATH_MSG_DEBUG(" Total number of triggered tracks associated to the b-jets: " << itrack);
                         std::string nTrackH = "nTrack_"+trigName;
-                        auto nTrack = Monitored::Scalar<int>(nTrackH,0.0);
+                        auto nTrack = Monitored::Scalar<int>(std::move(nTrackH),0.0);
                         nTrack = itrack;
                         fill("TrigBjetMonitor",nTrack);
 

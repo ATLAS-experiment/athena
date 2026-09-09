@@ -21,6 +21,7 @@ from DerivationFrameworkInDet.InDetToolsConfig import (
     JetGhostThinningCfg,
     JetTrackParticleThinningCfg,
     MuonTrackParticleThinningCfg,
+    UFOTrackParticleThinningCfg,
 )
 from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
 from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
@@ -91,54 +92,39 @@ def _get_thinning_tools(
     )
     thinning_tools.append(electron_tp_thinning_tool)
 
-    # Define the jet pT cut
-    pflow_jet_thinning_selection = "AntiKt4EMPFlowJets.pt > 15*GeV"
-    lctopo_jet_thinning_selection = "AntiKt4LCTopoJets.pt > 20*GeV"
+    # Jet collections to thin, mapped to the selection defining which jets are kept.
+    # Large-R jets carry no pT cut; their constituents are thinned by association.
+    jet_thinning_selections = {
+        "AntiKt4EMPFlowJets": "AntiKt4EMPFlowJets.pt > 15*GeV",
+        "AntiKt4LCTopoJets": "AntiKt4LCTopoJets.pt > 20*GeV",
+        "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets": "",
+    }
 
-    # Keep small-R jet content above the calibration threshold.
-    pflow_jet_thinning_tool = acc.getPrimaryAndMerge(
-        GenericObjectThinningCfg(
-            flags=flags,
-            name="FTAG2AntiKt4EMPFlowJetsThinningTool",
-            StreamName=stream_name,
-            ContainerName="AntiKt4EMPFlowJets",
-            SelectionString=pflow_jet_thinning_selection,
+    for jet_collection, selection in jet_thinning_selections.items():
+        if selection:
+            thinning_tools.append(
+                acc.getPrimaryAndMerge(
+                    GenericObjectThinningCfg(
+                        flags=flags,
+                        name=f"FTAG2{jet_collection}ThinningTool",
+                        StreamName=stream_name,
+                        ContainerName=jet_collection,
+                        SelectionString=selection,
+                    )
+                )
+            )
+        thinning_tools.append(
+            acc.getPrimaryAndMerge(
+                JetTrackParticleThinningCfg(
+                    flags=flags,
+                    name=f"FTAG2{jet_collection}TPThinningTool",
+                    StreamName=stream_name,
+                    JetKey=jet_collection,
+                    SelectionString=selection,
+                    InDetTrackParticlesKey="InDetTrackParticles",
+                )
+            )
         )
-    )
-    lctopo_jet_thinning_tool = acc.getPrimaryAndMerge(
-        GenericObjectThinningCfg(
-            flags=flags,
-            name="FTAG2AntiKt4LCTopoJetsThinningTool",
-            StreamName=stream_name,
-            ContainerName="AntiKt4LCTopoJets",
-            SelectionString=lctopo_jet_thinning_selection,
-        )
-    )
-    thinning_tools.append(pflow_jet_thinning_tool)
-    thinning_tools.append(lctopo_jet_thinning_tool)
-
-    pflow_jet_tp_thinning_tool = acc.getPrimaryAndMerge(
-        JetTrackParticleThinningCfg(
-            flags=flags,
-            name="FTAG2AntiKt4EMPFlowJetsTPThinningTool",
-            StreamName=stream_name,
-            JetKey="AntiKt4EMPFlowJets",
-            SelectionString=pflow_jet_thinning_selection,
-            InDetTrackParticlesKey="InDetTrackParticles",
-        )
-    )
-    lctopo_jet_tp_thinning_tool = acc.getPrimaryAndMerge(
-        JetTrackParticleThinningCfg(
-            flags=flags,
-            name="FTAG2AntiKt4LCTopoJetsTPThinningTool",
-            StreamName=stream_name,
-            JetKey="AntiKt4LCTopoJets",
-            SelectionString=lctopo_jet_thinning_selection,
-            InDetTrackParticlesKey="InDetTrackParticles",
-        )
-    )
-    thinning_tools.append(pflow_jet_tp_thinning_tool)
-    thinning_tools.append(lctopo_jet_tp_thinning_tool)
 
     ghost_tower_thinning_tool = acc.getPrimaryAndMerge(
         JetGhostThinningCfg(
@@ -146,7 +132,7 @@ def _get_thinning_tools(
             name="FTAG2AntiKt4EMPFlowJetsGhostTowerThinningTool",
             StreamName=stream_name,
             JetKey="AntiKt4EMPFlowJets",
-            SelectionString=pflow_jet_thinning_selection,
+            SelectionString=jet_thinning_selections["AntiKt4EMPFlowJets"],
             GhostName="GhostTower",
             GhostContainerName="CaloCalFwdTopoTowers",
         )
@@ -159,13 +145,27 @@ def _get_thinning_tools(
             name="FTAG2AntiKt4EMPFlowJetsConstituentThinningTool",
             StreamName=stream_name,
             JetKey="AntiKt4EMPFlowJets",
-            SelectionString=pflow_jet_thinning_selection,
+            SelectionString=jet_thinning_selections["AntiKt4EMPFlowJets"],
             JetConstituentName="CHSG",
             GlobalConstituentName="Global",
             OtherObjectsName="CaloCalTopoClusters",
         )
     )
     thinning_tools.append(jet_constituent_thinning_tool)
+
+    large_r_constituent_thinning_tool = acc.getPrimaryAndMerge(
+        UFOTrackParticleThinningCfg(
+            flags=flags,
+            name="FTAG2AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsUFOThinningTool",
+            StreamName=stream_name,
+            JetKey="AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
+            UFOKey="UFOCSSK",
+            PFOCollectionSGKey="CSSKG",
+            InDetTrackParticlesKey="InDetTrackParticles",
+            ThinTrackingContainer=True,
+        )
+    )
+    thinning_tools.append(large_r_constituent_thinning_tool)
 
     return thinning_tools
 
@@ -193,6 +193,8 @@ def FTAG2KernelCfg(
                 f"({_get_two_lepton_skimming_expression()})"
                 " || "
                 f"({_get_one_lepton_and_jets_skimming_expression()})"
+                " || "
+                "(count( AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.pt > 450*GeV ) >= 1)"
             ),
         )
     )

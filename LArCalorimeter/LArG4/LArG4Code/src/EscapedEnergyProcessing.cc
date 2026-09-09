@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArG4Code/EscapedEnergyProcessing.h"
@@ -12,7 +12,6 @@
 #include "G4VPhysicalVolume.hh"
 #include "G4LogicalVolume.hh"
 #include "G4VSensitiveDetector.hh"
-#include "CxxUtils/AthUnlikelyMacros.h"
 
 #undef DEBUG_PROCESS
 
@@ -64,7 +63,7 @@ G4bool EscapedEnergyProcessing::Process( G4Step* fakeStep ) {
   G4VPhysicalVolume* physicalVolume = a_touchableHandle->GetVolume();
 
   // If the volume is valid...
-  if (ATH_LIKELY(physicalVolume)) {
+  if (physicalVolume) [[likely]] {
 #ifdef DEBUG_PROCESS
     G4cout << "LArG4::EscapedEnergyProcessing::Process - "
            << " particle created in volume '"
@@ -83,14 +82,14 @@ G4bool EscapedEnergyProcessing::Process( G4Step* fakeStep ) {
     G4VSensitiveDetector* sensitiveDetector =
       logicalVolume->GetSensitiveDetector();
 
-    if (ATH_LIKELY(sensitiveDetector)) {
+    if (sensitiveDetector) [[likely]] {
 #ifdef DEBUG_PROCESS
       G4cout << "   ... which has sensitive detector '" << sensitiveDetector->GetName() << "'" << G4endl;
 #endif
       LArG4CalibSD* larG4CalibSD(nullptr);
       G4MultiSensitiveDetector* larG4MultSD = dynamic_cast<G4MultiSensitiveDetector*>(sensitiveDetector);
       // Most probably this is a LArG4MultSD
-      if (ATH_LIKELY(larG4MultSD)) {
+      if (larG4MultSD) [[likely]] {
         G4bool found(false);
         for (unsigned int i=0; i<larG4MultSD->GetSize(); i++) {
           larG4CalibSD = dynamic_cast<LArG4CalibSD*>(larG4MultSD->GetSD(i));
@@ -103,7 +102,7 @@ G4bool EscapedEnergyProcessing::Process( G4Step* fakeStep ) {
             larG4CalibSD->SpecialHit(fakeStep,energies);
           }
         }// -- for (1)
-        if (ATH_UNLIKELY(!found)) {
+        if (!found) [[unlikely]] {
 #ifdef DEBUG_PROCESS
           const G4ThreeVector& a_point = fakePreStepPoint->GetPosition();
           G4cout << "LArG4::EscapedEnergyProcessing::Process - "
@@ -127,7 +126,7 @@ G4bool EscapedEnergyProcessing::Process( G4Step* fakeStep ) {
       } else {// larG4MultSD !=0
         // Next possibility - LArG4CalibSD
         larG4CalibSD = dynamic_cast<LArG4CalibSD*>(sensitiveDetector);
-        if (ATH_LIKELY(larG4CalibSD)) {
+        if (larG4CalibSD) [[likely]] {
 #ifdef DEBUG_PROCESS
           G4cout << "   ... which is a LArG4CalibSD " << G4endl;
 #endif

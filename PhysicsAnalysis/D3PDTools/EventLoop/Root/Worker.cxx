@@ -68,7 +68,6 @@ namespace EL
   void Worker ::
   testInvariant () const
   {
-    RCU_INVARIANT (this != nullptr);
     for (std::size_t iter = 0, end = m_algs.size(); iter != end; ++ iter)
     {
       RCU_INVARIANT (m_algs[iter].m_algorithm != nullptr);
@@ -242,6 +241,8 @@ namespace EL
   inputFileName () const
   {
     // no invariant used
+    if (inputFile() == nullptr)
+      throw std::runtime_error ("no input file is currently open");
     std::string path = inputFile()->GetName();
     auto split = path.rfind ('/');
     if (split != std::string::npos)
@@ -256,6 +257,8 @@ namespace EL
   triggerConfig () const
   {
     RCU_READ_INVARIANT (this);
+    if (inputFile() == nullptr)
+      throw std::runtime_error ("no input file is currently open");
     return dynamic_cast<TTree*>(inputFile()->Get("physicsMeta/TrigConfTree"));
   }
 
@@ -655,9 +658,6 @@ namespace EL
       msg += " ";
       msg += s2;
       throw std::runtime_error(msg);
-
-      // No need for further error handling
-      return false;
     }
 
     // Pass to the default error handlers
@@ -738,7 +738,7 @@ namespace EL
     m_inputTree = tree;
     m_inputEntry = 0;
     m_inputFile = std::move (inputFile);
-    m_inputFileUrl = std::move (inputFileUrl);
+    m_inputFileUrl = inputFileUrl;
 
     // onFirstInputFile to setup Event object
     if (m_firstInputFile)
@@ -853,6 +853,9 @@ namespace EL
     ANA_CHECK (initialize ());
     ANA_CHECK (processInputs ());
     ANA_CHECK (finalize ());
+    // the metadata pointer refers to the local `meta`, which is destroyed
+    // when this function returns; clear it now that processing is done
+    setMetaData (nullptr);
     return ::StatusCode::SUCCESS;
   }
 
@@ -920,12 +923,26 @@ namespace EL
       ANA_CHECK (processInputs ());
       ANA_CHECK (finalize ());
 
+      // m_batchJob and the metadata pointer refer into the local `job`,
+      // which is destroyed when this function returns; clear them now that
+      // all the processing that consumes them is done.
+      m_batchJob = nullptr;
+      setMetaData (nullptr);
+
       std::ostringstream job_name;
       job_name << job_id;
-      std::ofstream completed ((job->location + "/status/completed-" + job_name.str()).c_str());
+      const std::string completedName (job->location + "/status/completed-" + job_name.str());
+      std::ofstream completed (completedName.c_str());
+      if (!completed)
+      {
+        ANA_MSG_ERROR ("failed to write completion marker " << completedName);
+        return ::StatusCode::FAILURE;
+      }
       return ::StatusCode::SUCCESS;
     } catch (...)
     {
+      m_batchJob = nullptr;
+      setMetaData (nullptr);
       Detail::report_exception (std::current_exception());
       return ::StatusCode::FAILURE;
     }

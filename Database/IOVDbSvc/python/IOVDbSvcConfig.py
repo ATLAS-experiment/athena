@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, ConfigurationError
 import os
@@ -114,12 +114,15 @@ def addFolderList(flags, listOfFolderInfoTuple, extensible=False, db=None, modif
     This allows the possibility of later adding a new IOV using IOVSvc::setRange."""
     loadFolders = set()
     folders = []
-    if flags.IOVDb.UseCREST:
-        sqliteFolders=getCrestDirContent(flags)
-    else:
-        sqliteFolders=getSqliteContent(flags.IOVDb.SqliteInput,
-                                       flags.IOVDb.SqliteFolders,
-                                       flags.IOVDb.DatabaseInstance)
+    sqliteFolders = dict()
+
+    if flags.IOVDb.SqliteInput:
+        if flags.IOVDb.UseCREST:
+            sqliteFolders = getCrestDirContent(flags)
+        else:
+            sqliteFolders = getSqliteContent(flags.IOVDb.SqliteInput,
+                                             flags.IOVDb.SqliteFolders,
+                                             flags.IOVDb.DatabaseInstance)
 
     for (fs, detDb, className) in listOfFolderInfoTuple:
         fse= _extractFolder(fs)
@@ -129,7 +132,7 @@ def addFolderList(flags, listOfFolderInfoTuple, extensible=False, db=None, modif
 
         if fse in sqliteFolders:
             msg.warning(f'Reading folder {fs} from local storage, bypassing production database')
-            fs+=sqliteFolders[fse]
+            fs += sqliteFolders[fse]
         elif detDb is not None and fs.find('<db>') == -1:
 
             if db:  # override database name if provided
@@ -335,7 +338,12 @@ def getCrestDirContent(flags):
 
     missedTags=set(requestedTags) #copy of the tags        
 
-    import chai
+    try:
+        import chai
+    except ImportError as e:
+        msg.error("Cannot import chai, can not inspect local crest directory %s",crestDir)
+        raise e
+    
     try:
         localdb = chai.Database(crestDir)
     except Exception as e:
@@ -447,12 +455,18 @@ def blockFolder(ca,folder):
 
 @cache
 def checkGlobalTag(connStr,currGlobalTag):
+    try:
+        import chai
+    except ImportError:    
+        msg.warning("Cannot import chai, cannot check global tag validity. ")
+        return None
+    
     fail=False
     if connStr.startswith("http"):
        connStr1="crest:"+connStr
     else: #Assume local file
         connStr1="crest_fs:"+connStr 
-    import chai
+    
     try:
         db=chai.Database(connStr1)
         allGlobalTags=set(db.find_global_tags())

@@ -244,6 +244,16 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
 
   static const SG::ConstAccessor<char> passThinningAcc("passThinning");
   static const SG::ConstAccessor<float> scoreAcc("GNTauScore_v0prune");
+  static const SG::ConstAccessor<float> EMFracFixedAcc("EMFracFixed");
+  static const SG::ConstAccessor<float> d0SigTJVAAcc("d0SigTJVA"); 
+  static const SG::ConstAccessor<float> z0sinthetaSigTJVAAcc("z0sinthetaSigTJVA");
+  static const SG::ConstAccessor<float> acc_trackScoreCharged("rnn_chargedScore");
+  static const SG::ConstAccessor<float> acc_trackScoreIso("rnn_isolationScore");
+  static const SG::ConstAccessor<float> acc_trackScoreConv("rnn_conversionScore");
+  static const SG::ConstAccessor<float> z0sinthetaTJVAAcc("z0sinthetaTJVA");
+  static const SG::ConstAccessor<float> eProbabilityNNAcc("eProbabilityNN");
+
+  static const SG::Accessor< xAOD::TauTrack::TrackParticleLinks_t>trackAcc("trackLinks");
 
   for (const auto tau : *shallowTaus) {
 
@@ -309,7 +319,6 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
 
     // TauB/Identification/EleVetoBDTinputs
     PSSFrac = tau->detail<float>(xAOD::TauJetParameters::PSSFraction);
-    static const SG::ConstAccessor<float> EMFracFixedAcc("EMFracFixed");
     EMFrac = EMFracFixedAcc(*tau);
 
     // TauB/SubStructure
@@ -388,7 +397,6 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
         trFlightPathSig =
             tau->detail<float>(xAOD::TauJetParameters::trFlightPathSig);
 
-	static const SG::ConstAccessor<float> d0SigTJVAAcc("d0SigTJVA");
 	if (d0SigTJVAAcc.isAvailable(*tau->track(0))) {
 	  ipSigLeadTrk = tau->track(0)->d0SigTJVA();
 	}
@@ -396,7 +404,6 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
 	  ipSigLeadTrk = tau->detail<float>(xAOD::TauJetParameters::ipSigLeadTrk);
 	}
 
-	static const SG::ConstAccessor<float> z0sinthetaSigTJVAAcc("z0sinthetaSigTJVA");
 	if (z0sinthetaSigTJVAAcc.isAvailable(*tau->track(0))) {
           ipZ0SinThetaSigLeadTrk = tau->track(0)->z0sinthetaSigTJVA();
 	}
@@ -481,12 +488,6 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
 
       fill(tool, trackLogSeedJetPt);
 
-      static const SG::Accessor< xAOD::TauTrack::TrackParticleLinks_t>trackAcc("trackLinks");
-
-      static const SG::ConstAccessor<float> acc_trackScoreCharged("rnn_chargedScore");
-      static const SG::ConstAccessor<float> acc_trackScoreIso("rnn_isolationScore");
-      static const SG::ConstAccessor<float> acc_trackScoreConv("rnn_conversionScore");
-
       for (const xAOD::TauTrack *track : tau->allTracks()) {
         if (!trackAcc(*track)[0]) {
           continue;
@@ -500,7 +501,6 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
         trackZ0sinthetaSigTJVA = 999.;
         float rConv = 999.;
         float rConvII = 999.;
-        static const SG::ConstAccessor<float> z0sinthetaTJVAAcc("z0sinthetaTJVA");
         if (z0sinthetaTJVAAcc.isAvailable(*track)) {
           d0TJVA = track->d0TJVA();
           trackZ0SinthetaTJVA = track->z0sinthetaTJVA();
@@ -535,7 +535,6 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
         uint8_t numberOfSCTHoles = 0;
         trackParticle->summaryValue(numberOfSCTHoles, xAOD::numberOfSCTHoles);
         float eProbabilityHT = 0.;
-        static const SG::ConstAccessor<float> eProbabilityNNAcc("eProbabilityNN"); 
 
         float eProbabilityNN = eProbabilityNNAcc.withDefault(*trackParticle, -1);
         // hybrid variable (eProbabilityNN is not computed for tracks with pt

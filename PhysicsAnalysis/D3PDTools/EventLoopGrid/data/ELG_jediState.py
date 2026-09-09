@@ -50,6 +50,9 @@ def ELG_jediState(sample) :
     # behavior from the PrunDriver.cxx
     elif status == "finished": return Status.FAIL
     elif status == "running": return Status.RUNNING
+    # Terminal JEDI states: the task will never progress, so report failure
+    # rather than leaving the sample stuck polling in the RUN state forever.
+    elif status in ("aborted", "broken", "exhausted"): return Status.FAIL
 
     # Value for states not considered by PrunDriver.cxx
     return Status.OTHER

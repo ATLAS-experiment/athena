@@ -42,6 +42,12 @@ namespace EL
   public:
     ~Algorithm ();
 
+    // we never copy algorithms, they get created using TObject::Clone()
+    // and their dicitionary
+  public:
+    Algorithm (const Algorithm&) = delete;
+    Algorithm& operator = (const Algorithm&) = delete;
+
 
     /// description: the worker that is controlling us
     /// guarantee: no-fail
@@ -287,13 +293,9 @@ namespace EL
     // friend interface for Job
     //
 
-#if 1
     friend class AlgorithmWrapper;
     friend class Job;
   private:
-#else
-  public:
-#endif
 
     /// effects: give the algorithm a chance to intialize the job with
     ///   anything this algorithm needs.  this method is automatically
@@ -310,11 +312,6 @@ namespace EL
     //
     // private interface
     //
-
-    /// rationale: the worker is essentially controlling the
-    ///   algorithm.  this allows it to do it without having to
-    ///   duplicate most of the interface.
-    friend class AlgorithmWrapper;
 
     // description: members directly corresponding to accessors
   private:
