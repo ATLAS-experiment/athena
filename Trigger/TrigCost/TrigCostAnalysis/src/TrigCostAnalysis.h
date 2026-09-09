@@ -17,7 +17,6 @@
 #include "GaudiKernel/ITHistSvc.h"
 
 #include "MonitoredRange.h"
-#include "CostROSData.h"
 
 #include <unordered_map>
 #include <mutex>
@@ -108,9 +107,6 @@ class TrigCostAnalysis: public ::AthAlgorithm {
     Gaudi::Property<bool> m_doMonitorThreadOccupancy { this, "DoMonitorThreadOccupancy", true,
       "Monitor algorithm occupancy load of individual threads in an MT execution environment" };
 
-    Gaudi::Property<bool> m_doMonitorROS { this, "DoMonitorROS", true,
-      "Monitor Read-Out System" };
-
     Gaudi::Property<bool> m_doMonitorChain { this, "DoMonitorChain", true,
       "Monitor individual chains by instance name" };
 
@@ -131,9 +127,6 @@ class TrigCostAnalysis: public ::AthAlgorithm {
 
     Gaudi::Property<float> m_baseEventWeight { this, "BaseEventWeight", true,
       "Base events weight, other weights may be multiplied on top of this one." };
-
-    Gaudi::Property<std::map<std::string, std::vector<uint32_t>>> m_rosToRob {
-      this, "ROSToROBMap", {}, "ROS to ROB mapping" };
 
   Gaudi::Property<std::set<std::string>> m_excludeAlgsFromChain {
     this, "ExcludeAlgsFromChainTime", {}, "Algorithms to exclude from chain time calculation"};
