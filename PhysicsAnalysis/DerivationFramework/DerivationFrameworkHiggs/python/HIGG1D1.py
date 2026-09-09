@@ -165,8 +165,9 @@ def HIGG1D1KernelCfg(flags, name='HIGG1D1Kernel', **kwargs):
             # 13.6 TeV
             TriggerExp               = ["HLT_g35_medium_g25_medium_L12EM20VH",
                                         "HLT_g35_medium_g25_medium_L12eEM24L",
+                                        "HLT_g45_medium_g20_medium_L1eEM40L_2eEM18L",
                                         "HLT_g140_loose_L1EM22VHI",
-                                        "HLT_g140_loose_L1eEM26M"
+                                        "HLT_g140_loose_L1eEM26M",
                                         "HLT_g120_loose_L1EM22VHI",
                                         "HLT_g120_loose_L1eEM26M",
                                         "HLT_2g9_loose_25dphiAA_invmAA80_L1DPHI-M70-2eEM9",
