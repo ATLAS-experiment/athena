@@ -76,8 +76,8 @@ StatusCode HGTD_TrkTimePerformanceStudies::execute(const EventContext& ctx) {
   //   }
 
   for (const auto* track : *track_particles) { // tack is not a pointer!
-    for (auto& track_tool : m_track_sel_tools) {
-      for (auto& time_tool : m_track_time_tools) {
+    for (const auto& track_tool : m_track_sel_tools) {
+      for (const auto& time_tool : m_track_time_tools) {
 
         const float trk_eta = track->eta();
 
