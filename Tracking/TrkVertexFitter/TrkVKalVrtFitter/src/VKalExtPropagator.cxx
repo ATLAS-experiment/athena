@@ -83,9 +83,9 @@ namespace Trk {
 //  VKalVrtCore works in relative coordinates wrt (state.m_refFrameX,state.m_refFrameY,state.m_refFrameZ)
 //  For ATLAS propagator the Core coordinates must be moved back to global ref.frame
 /*------------------------------------------------------------------------------------*/
-  void VKalExtPropagator::Propagate( long int trkID, long int Charge,
-                                     double *ParOld, double *CovOld, double *RefStart,
-                                     double *RefEnd, double *ParNew, double *CovNew,
+  void VKalExtPropagator::Propagate( long int trkID, long int Charge, const double *ParOld,
+                                     const double *CovOld, const double *RefStart, const double *RefEnd,
+                                     double *ParNew, double *CovNew,
                                      IVKalState& istate) const
   {
       TrkVKalVrtFitter::State& state = static_cast<TrkVKalVrtFitter::State&> (istate);
@@ -99,8 +99,8 @@ namespace Trk {
 //
 // ---- Make MeasuredPerigee from input. Mag.field at start point is used here
 //
-      std::vector<double> PerigeeIni( ParOld, ParOld+5 );
-      std::vector<double> CovPerigeeIni( 15, 0. );
+      std::span<const double, 5> PerigeeIni( ParOld, 5 );
+      std::array<double, 15> CovPerigeeIni{};
       if( CovOld != nullptr) {
 //        for(int i=0; i<15;i++) CovPerigeeIni.push_back( CovOld[i] );
         std::copy(CovOld,CovOld+15,CovPerigeeIni.begin() );
