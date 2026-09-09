@@ -5,10 +5,13 @@
 
 #include "TrigMuonEvent/TileTrackMuFeature.h"
 
+
+
 /** Distance used by the comparison operators */
 namespace{
   constexpr double DELTA = 0.001;
 } 
+
 
 
 TileTrackMuFeature::TileTrackMuFeature(
@@ -78,6 +81,12 @@ std::string str ( const TileTrackMuFeature& d )
 
   return ss.str();
 }
+
+const TileMuFeature*  
+TileTrackMuFeature::TileMuOutput() const { return *m_TileMuOutput; }
+
+const TrigInDetTrack* 
+TileTrackMuFeature::IDScanOutput() const { return *m_IDScanOutput; }
 
 MsgStream& operator<< ( MsgStream& m, const TileTrackMuFeature& d )
 {

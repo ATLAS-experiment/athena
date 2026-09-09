@@ -29,8 +29,14 @@
 // Trigger includes:
 #include "TrigMuonEvent/TileMuFeatureContainer.h"
 #include "TrigInDetEvent/TrigInDetTrackCollection.h"
+
 #include <string>
-#include <vector>
+#include <map>
+
+
+class TrigInDetTrack;
+class TileMuFeature;
+class MsgStream;
 
 class TileTrackMuFeature :  public P4PtEtaPhiMBase,
                             public NavigableTerminalNode,
@@ -68,11 +74,11 @@ class TileTrackMuFeature :  public P4PtEtaPhiMBase,
   double PhiTR_Trk() const { return m_PhiTR_Trk; }
   int	 Typ_IDTrk() const { return m_Typ_IDTrk; }
 
-  const TileMuFeature*  TileMuOutput() const { return *m_TileMuOutput; }
-  const TrigInDetTrack* IDScanOutput() const { return *m_IDScanOutput; }
+  const TileMuFeature*  TileMuOutput() const;
+  const TrigInDetTrack* IDScanOutput() const; 
 
-  const ElementLink<TileMuFeatureContainer>&   TileMuLink() const { return m_TileMuOutput; }
-  const ElementLink<TrigInDetTrackCollection>& IDScanLink() const { return m_IDScanOutput; }
+  const ElementLink<TileMuFeatureContainer>&   TileMuLink() const; 
+  const ElementLink<TrigInDetTrackCollection>& IDScanLink() const;
 
   double pt()  const { return m_IDScanOutput ? (*m_IDScanOutput)->param()->pT():-9999.9; }
   double eta() const { return m_IDScanOutput ? (*m_IDScanOutput)->param()->eta():-9999.9; }
