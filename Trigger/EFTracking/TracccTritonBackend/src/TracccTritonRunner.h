@@ -3,7 +3,7 @@
 */
 
 /**
- * @file  Trigger/EFTracking/TracccTritonBackend/src/TracccTritonRunner.hpp
+ * @file  Trigger/EFTracking/TracccTritonBackend/src/TracccTritonRunner.h
  * @author Miles Cochran-Branson
  * @date September 2026
  * @brief Call the device reconstruction algs. once per-event in the Triton backend

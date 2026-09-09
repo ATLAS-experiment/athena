@@ -30,7 +30,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /**
- * @file  Trigger/EFTracking/TracccTritonBackend/src/TracccTritonBackend.cc
+ * @file  Trigger/EFTracking/TracccTritonBackend/src/TracccTritonBackend.cxx
  * @author Miles Cochran-Branson
  * @date September 2026
  * @brief Implementation of the Triton traccc-aaS backend
@@ -43,8 +43,8 @@
 #include <cmath>
 #include <set>
 
-#include "TracccTritonInitializer.hpp"
-#include "TracccTritonRunner.hpp"
+#include "TracccTritonInitializer.h"
+#include "TracccTritonRunner.h"
 #include "triton/backend/backend_common.h"
 #include "triton/backend/backend_input_collector.h"
 #include "triton/backend/backend_model.h"

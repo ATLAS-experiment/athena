@@ -3,15 +3,15 @@
 */
 
 /**
- * @file  Trigger/EFTracking/TracccTritonBackend/src/TracccTritonRunner.cpp
+ * @file  Trigger/EFTracking/TracccTritonBackend/src/TracccTritonRunner.cxx
  * @author Miles Cochran-Branson
  * @date September 2026
  * @brief Call the device reconstruction algs. once per-event in the Triton backend
  */
 
-#include "TracccTritonRunner.hpp"
+#include "TracccTritonRunner.h"
 
-#include "TracccTritonInitializer.hpp"
+#include "TracccTritonInitializer.h"
 
 #include <chrono>
 #include <cstring>
@@ -242,6 +242,8 @@ TracccTritonRunner::run(const uint8_t* buffer,
     auto t2 = std::chrono::high_resolution_clock::now();
 
     // Run the device chain
+    // TODO: this should get the order from the python config; make this an alg chain from the 
+    // python config
     for (IAlgorithm* alg :
          {m_impl->clusterization.get(), m_impl->spFormation.get(),
           m_impl->seeding.get(), m_impl->trkParamEstimation.get(),

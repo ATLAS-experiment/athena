@@ -3,7 +3,7 @@
 */
 
 /**
- * @file  Trigger/EFTracking/TracccTritonBackend/src/TracccTritonInitializer.hpp
+ * @file  Trigger/EFTracking/TracccTritonBackend/src/TracccTritonInitializer.h
  * @author Miles Cochran-Branson
  * @date September 2026
  * @brief Initialization of GPU tracking algs. for use in Triton as-a-Service implementation

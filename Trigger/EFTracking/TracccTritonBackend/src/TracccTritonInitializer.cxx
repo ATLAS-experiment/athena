@@ -3,7 +3,7 @@
 */
 
 /**
- * @file  Trigger/EFTracking/TracccTritonBackend/src/TracccTritonInitializer.cpp
+ * @file  Trigger/EFTracking/TracccTritonBackend/src/TracccTritonInitializer.cxx
  * @author Miles Cochran-Branson
  * @date September 2026
  * @brief Initialization of GPU tracking algs. for use in Triton as-a-Service implementation
@@ -11,7 +11,7 @@
 
 #include "Python.h"
 
-#include "TracccTritonInitializer.hpp"
+#include "TracccTritonInitializer.h"
 
 #include <dlfcn.h>
 
