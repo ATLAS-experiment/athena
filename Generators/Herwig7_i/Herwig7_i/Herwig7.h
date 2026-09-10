@@ -47,6 +47,7 @@ public:
 
   /// Repository name to operate on
   virtual std::string repository() const { return(m_repository); }
+  void repository(const std::string& repository) { m_repository = repository; }
 
   /// Name of the file to be read
   virtual std::string inputfile() const { return(m_inputfile); }
@@ -174,6 +175,9 @@ private:
   /// In-memory run settings provided by CA fragments.
   /// These are written to m_runfile. 
   std::string m_runSettings;
+
+  /// Herwig/ThePEG repository used to materialise CA run settings.
+  std::string m_repository;
 
   /// Name of setup file
   std::string m_setupfile;

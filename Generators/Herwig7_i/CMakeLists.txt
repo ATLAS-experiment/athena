@@ -35,7 +35,7 @@ atlas_add_component( Herwig7_i
    -DHWVER_IS_72=\"${HW3_VER_IS_72}\"
    LINK_LIBRARIES ${HERWIG3_LIBRARIES}
    ${THEPEG_LIBRARIES} ${GSL_LIBRARIES} ${OPENLOOPS_LIBRARIES}
-   GeneratorModulesLib xAODEventInfo GaudiKernel PathResolver AtlasHepMCLib powhegHerwig )
+   GeneratorModulesLib xAODEventInfo GaudiKernel AtlasHepMCLib powhegHerwig )
 
 # Suppress ABI warning on ARM (AGENE-2423)
 if( "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "aarch64" )
