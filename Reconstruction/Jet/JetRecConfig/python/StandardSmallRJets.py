@@ -98,9 +98,8 @@ AntiKt4EMPFlow_deriv = AntiKt4EMPFlow.clone(
 )
 
 AntiKt4EMPFlowML = JetDefinition("AntiKt",0.4,cst.GPFlowML,
-                               infix = "ML",
                                ghostdefs = standardghosts+flavourghosts,
-                               modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:1","JetGhostLabel","JetDeltaRInitialLabel:5000","JetGhostInitialLabel","JetQuarkChargeLabel","LArHVCorr","jetiso"),
+                               modifiers = calibmods_noCut+truthmods+standardmods+("Filter_calibThreshold:1","JetGhostLabel","JetDeltaRInitialLabel:5000","JetGhostInitialLabel","JetQuarkChargeLabel","LArHVCorr","jetiso"),
                                lock = True
 )
 
