@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // *****************************************************************************
@@ -11,17 +11,13 @@
 //    Contain the muon candidates from TileCal and the combined tracks from
 //    Inner-Detector.
 //
-//  HISTORY:
-//
-//  BUGS:
 //
 //*****************************************************************************
 
 #ifndef TRIGMUONEVENT_TILETRACKMUFEATURE_H
 #define TRIGMUONEVENT_TILETRACKMUFEATURE_H
 
-#include <string>
-#include <vector>
+
 
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthContainers/DataVector.h"
@@ -34,6 +30,13 @@
 #include "TrigMuonEvent/TileMuFeatureContainer.h"
 #include "TrigInDetEvent/TrigInDetTrackCollection.h"
 
+#include <string>
+#include <map>
+
+
+class TrigInDetTrack;
+class TileMuFeature;
+class MsgStream;
 
 class TileTrackMuFeature :  public P4PtEtaPhiMBase,
                             public NavigableTerminalNode,
@@ -42,7 +45,7 @@ class TileTrackMuFeature :  public P4PtEtaPhiMBase,
  public:  
 
   /** Constructor */
-  TileTrackMuFeature(); 
+  TileTrackMuFeature() = default; 
 
   TileTrackMuFeature (
 	float PtTR_Trk,
@@ -51,42 +54,45 @@ class TileTrackMuFeature :  public P4PtEtaPhiMBase,
 	const ElementLink< TrigInDetTrackCollection>& IDScanOutput);
 
   /** Destructor */
-  ~TileTrackMuFeature();
+  ~TileTrackMuFeature() = default;
 
-  /** Copy pointer constructor */
-  TileTrackMuFeature(const TileTrackMuFeature* muon_feature);
-
-  /** Copy reference constructor */
+  /** Copy constructor */
   TileTrackMuFeature(const TileTrackMuFeature& muon_feature); 
+  
+  /** Move assignment **/
+  TileTrackMuFeature& operator=(TileTrackMuFeature&& muon_feature) noexcept;
 
-  /** Assignement operator */ 
+  /** Move c'tor **/
+  TileTrackMuFeature(TileTrackMuFeature&&) noexcept;
+  
+  /** Assignment operator */ 
   TileTrackMuFeature& operator=(const TileTrackMuFeature& muon_feature);
 
-  /** Ovveride pure virtual methods */
+  /** Override pure virtual methods */
   double PtTR_Trk()  const { return m_PtTR_Trk;	}
   double EtaTR_Trk() const { return m_EtaTR_Trk; }
   double PhiTR_Trk() const { return m_PhiTR_Trk; }
   int	 Typ_IDTrk() const { return m_Typ_IDTrk; }
 
-  const TileMuFeature*  TileMuOutput(void) const { return *m_TileMuOutput; }
-  const TrigInDetTrack* IDScanOutput(void) const { return *m_IDScanOutput; }
+  const TileMuFeature*  TileMuOutput() const;
+  const TrigInDetTrack* IDScanOutput() const; 
 
-  const ElementLink<TileMuFeatureContainer>&   TileMuLink(void) const { return m_TileMuOutput; }
-  const ElementLink<TrigInDetTrackCollection>& IDScanLink(void) const { return m_IDScanOutput; }
+  const ElementLink<TileMuFeatureContainer>&   TileMuLink() const; 
+  const ElementLink<TrigInDetTrackCollection>& IDScanLink() const;
 
-  double pt(void)  const { return m_IDScanOutput ? (*m_IDScanOutput)->param()->pT():-9999.9; }
-  double eta(void) const { return m_IDScanOutput ? (*m_IDScanOutput)->param()->eta():-9999.9; }
-  double phi(void) const { return m_IDScanOutput ? (*m_IDScanOutput)->param()->phi0():-9999.9; }
-  double m(void)   const { return -9999.9; } 
+  double pt()  const { return m_IDScanOutput ? (*m_IDScanOutput)->param()->pT():-9999.9; }
+  double eta() const { return m_IDScanOutput ? (*m_IDScanOutput)->param()->eta():-9999.9; }
+  double phi() const { return m_IDScanOutput ? (*m_IDScanOutput)->param()->phi0():-9999.9; }
+  double m()   const { return -9999.9; } 
 
  private:
 
-  float m_PtTR_Trk;
-  float m_EtaTR_Trk;
-  float m_PhiTR_Trk;
-  int	m_Typ_IDTrk;
+  float m_PtTR_Trk{9999.9F};
+  float m_EtaTR_Trk{9999.9F};
+  float m_PhiTR_Trk{9999.9F};
+  int m_Typ_IDTrk{0};
 
-  ElementLink<TileMuFeatureContainer>	m_TileMuOutput;
+  ElementLink<TileMuFeatureContainer> m_TileMuOutput;
   ElementLink<TrigInDetTrackCollection> m_IDScanOutput;
 };
 
@@ -99,11 +105,6 @@ MsgStream& operator<< ( MsgStream& m, const TileTrackMuFeature& d );
 /** Operator comparing two CombinedMuonFeature objects for equality */
 bool operator== ( const TileTrackMuFeature& a, const TileTrackMuFeature& b );
 
-/** Operator comparing two CombinedMuonFeature objects for inequality */
-inline bool operator!= ( const TileTrackMuFeature& a, const TileTrackMuFeature& b )
-{
-  return !( a == b );
-}
 
 /** Comparison with feedback */
 void diff( const TileTrackMuFeature& a, const TileTrackMuFeature& b, std::map< std::string, double >& variableChange );
@@ -111,6 +112,5 @@ void diff( const TileTrackMuFeature& a, const TileTrackMuFeature& b, std::map< s
 CLASS_DEF(TileTrackMuFeature,             77762301, 0)
 CLASS_DEF(DataVector<TileTrackMuFeature>, 61923500, 0) 
 
-#include "TrigMuonEvent/TileTrackMuFeatureContainer.h"
  
 #endif  
