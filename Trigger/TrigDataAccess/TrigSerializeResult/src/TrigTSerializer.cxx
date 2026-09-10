@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///
@@ -20,11 +20,6 @@
 #include "TClass.h"
 #include "TError.h"
 #include "TMethodCall.h"
-#include <vector>
-#include <string>
-#include <iostream>
-
-//
 #include "TFile.h"
 #include "TList.h"
 #include "TStreamerInfo.h"
@@ -33,6 +28,13 @@
 #include "DataModelRoot/RootType.h"
 #include "RootUtils/WithRootErrorHandler.h"
 #include "CxxUtils/no_sanitize_undefined.h"
+#include <vector>
+#include <string>
+#include <iostream>
+#include <array>
+#include <bit>
+#include <cstddef>
+#include <cstdint>
 
 #define  TRIGTSERHEADER  0xf00dbeef
 //#define  TRIGTSERTRAILER 0xbeeff00d
@@ -532,21 +534,14 @@ void* TrigTSerializer::deserialize(const std::string &nameOfClass, const std::ve
   //
   char *pbuf = NULL;
 
-  if (newFormatOK){
-    union {
-      uint32_t uint;
-      char pp[4];
-    } pbytes;
-
-    //  const size_t bufsiz = v.size();
+  if (newFormatOK) {
     pbuf = new char[bufsiz];
-    size_t bufpos=0;
-    const size_t nints = bufsiz/4;
-    for (size_t i=pBuffOffset; i<nints+pBuffOffset; i++){
-      pbytes.uint = v.at(i);
-      for (size_t c=0; c<4; c++){
-	pbuf[bufpos] = pbytes.pp[3-c];
-	bufpos++;
+    std::size_t bufpos = 0;
+    const std::size_t nints = bufsiz / 4;
+    for (std::size_t i = pBuffOffset; i < nints + pBuffOffset; ++i) {
+      const auto bytes = std::bit_cast<std::array<std::byte, 4>>(v.at(i));
+      for (std::size_t c = 0; c < 4; ++c) {
+        pbuf[bufpos++] = static_cast<char>(bytes[3 - c]);
       }
     }
 
