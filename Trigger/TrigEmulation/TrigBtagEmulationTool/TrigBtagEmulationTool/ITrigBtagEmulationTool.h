@@ -6,7 +6,6 @@
 #define I_TRIGBTAGEMULATIONTOOL_H
 
 #include "AsgTools/IAsgTool.h"
-//#include "TrigBtagEmulationTool/EmulContext.h"
 #include "xAODJet/Jet.h"
 
 #include <string>
