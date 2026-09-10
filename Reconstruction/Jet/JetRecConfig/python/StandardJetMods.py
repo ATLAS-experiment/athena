@@ -74,7 +74,7 @@ try:
     stdJetModifiers.update(
         Calib = JetModifier("JetCalibrationTool","jetcalib_jetcoll_calibseq",
                             createfn=JetCalibToolsConfig.getJetCalibToolFromString,
-                            prereqs=lambda mod,jetdef : JetCalibToolsConfig.getJetCalibToolPrereqs(mod,jetdef)+[inputsFromContext("Vertices")])
+                            prereqs=lambda modspec,jetdef : JetCalibToolsConfig.getJetCalibToolPrereqs(modspec,jetdef)+[inputsFromContext("Vertices")])
     )
 
     from JetCalibTools import JetResponseToolConfig
@@ -84,6 +84,7 @@ try:
         Response = JetModifier("JetResponseTool","response",
                              JetContainer=_jetname,
                              createfn=JetResponseToolConfig.getJetResponseTool,
+                             prereqs=lambda modspec, jetdef: (f'mod:JetTaggingTruthLabel:{modspec}','mod:jetiso'),
                              ),
     )
 
@@ -98,7 +99,7 @@ try:
     stdJetModifiers.update(
         CalibNew = JetModifier("JetCalibTool","jetcalib_jetcoll_calibseq",
                                createfn=JetCalibToolsCfg.defineJetCalibTool,
-                               prereqs=lambda mod,jetdef : JetCalibToolsCfg.getJetCalibToolPrereqs(jetdef,mod)+[inputsFromContext("Vertices")])
+                               prereqs=lambda modspec,jetdef : JetCalibToolsCfg.getJetCalibToolPrereqs(jetdef,modspec)+[inputsFromContext("Vertices")])
     )
 except ModuleNotFoundError:
     from AthenaCommon import Logging
@@ -112,16 +113,11 @@ except ModuleNotFoundError:
 # determined by interface called from parent tool/alg.
 
 
-# Many JetMoment tools need to know the name of the container they operate on.
-# We set the function below as the 'JetContainer' property so the config system
-# can assign the right name to the c++ tool.
-def _jetname(jetdef,modspec):
-    return jetdef.fullname()
-
 
 # Standard jet moments
 try:
     from JetMomentTools import JetMomentToolsConfig
+    from EventShapeTools.EventDensityConfig import getEventShapeName
     stdJetModifiers.update(
 
         # Easy cases, no special config or prereqs, just default tool config 
@@ -231,8 +227,8 @@ try:
                              JetContainer=_jetname,
                              InputConstitContainer = _constitContainername,
                              IsolationCalculations = ["IsoFixedCone:5:Pt",   "IsoFixedCone:5:PtPUsub",],
-                             RhoKey = lambda jetdef, specs : "Kt4"+jetdef.inputdef.label+"EventShape" ,
-                             prereqs= ["input:EventDensity"], #lambda spec,jetdef : ["input:Kt4"+jetdef.inputdef.label+"EventShape",],
+                             RhoKey = lambda jetdef, specs : getEventShapeName(jetdef.inputdef),
+                             prereqs= ["input:EventDensity"],
                              ),
 
         jetisoTruth = JetModifier("JetIsolationTool","isoTruth",
@@ -246,7 +242,7 @@ try:
                              JetContainer=_jetname,
                              InputConstitContainer = _constitContainername,
                              IsolationCalculations = ["IsoFixedCone:5:Pt",   "IsoFixedCone:5:PtPUsub",],
-                             RhoKey = lambda jetdef, specs : "HLT_Kt4"+jetdef.inputdef.label+"EventShape" ,
+                             RhoKey = lambda jetdef, specs : getEventShapeName(jetdef.inputdef,prefix='HLT_'),
                              prereqs= ["input:HLT_EventDensity"],
                              ),
     )
