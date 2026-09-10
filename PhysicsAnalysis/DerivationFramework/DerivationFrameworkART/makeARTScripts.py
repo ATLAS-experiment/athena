@@ -54,7 +54,8 @@ mc23PHYSFile = os.getenv('ASG_TEST_FILE_RUN3_MC')
 data18PHYSFile = os.getenv('ASG_TEST_FILE_DATA')
 data23PHYSFile = os.getenv('ASG_TEST_FILE_RUN3_DATA')
 
-def generateText(formatName,label,inputFile,isTruth,nEvents,inputExpression="",artInput=""):
+def generateText(formatName, label, inputFile, isTruth, nEvents,
+                 inputExpression="", conditionExpression="", artInput=""):
    add_str = ""
    outputFileName = "test_"+label+formatName+add_str+".sh"
    outputFile = open(outputFileName,"w")
@@ -85,7 +86,14 @@ def generateText(formatName,label,inputFile,isTruth,nEvents,inputExpression="",a
          + inputExpression + ")\")\n"
       )
       outputFile.write("\n")
-   
+
+   if conditionExpression:
+      outputFile.write(
+         'condition=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print('
+         + conditionExpression + ')")\n'
+      )
+      outputFile.write("\n")
+
    outputFile.write("set -e"+"\n")
    outputFile.write("\n")
 
@@ -103,8 +111,10 @@ def generateText(formatName,label,inputFile,isTruth,nEvents,inputExpression="",a
       else:
          outputFile.write("--inputAODFile "+inputFile+" \\\n")
    outputFile.write("--outputDAODFile art.pool.root \\\n")
+   if conditionExpression:
+      outputFile.write("--conditionsTag ${condition} \\\n")
    outputFile.write("--formats "+formatName+" \\\n")
-   outputFile.write("--maxEvents "+nEvents+" \\\n")
+   outputFile.write("--maxEvents "+nEvents+" \n")
 
    outputFile.write("\n")
    outputFile.write("echo \"art-result: $? reco\""+"\n")
@@ -123,7 +133,8 @@ def generateText(formatName,label,inputFile,isTruth,nEvents,inputExpression="",a
    outputFile.close()
    os.system("chmod +x "+outputFileName)
 
-def generateTrains(formatList,label,inputFile,nEvents,inputExpression=""):
+def generateTrains(formatList, label, inputFile, nEvents,
+                   inputExpression="", conditionExpression=""):
    add_str = ""
    outputFileName = "test_"+label+"_".join(formatList)+add_str+".sh"
    outputFile = open(outputFileName,"w")
@@ -151,15 +162,24 @@ def generateTrains(formatList,label,inputFile,nEvents,inputExpression=""):
          'AOD_File=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print('
          + inputExpression + ')")\n' )
       outputFile.write("\n")
-   
+
+   if conditionExpression:
+      outputFile.write(
+         'condition=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print('
+         + conditionExpression + ')")\n'
+      )
+      outputFile.write("\n")
+
    outputFile.write("Derivation_tf.py \\\n")
    if inputExpression:
       outputFile.write("--inputAODFile ${AOD_File} \\\n")
    else:
       outputFile.write("--inputAODFile "+inputFile+" \\\n")
    outputFile.write("--outputDAODFile art.pool.root \\\n")
+   if conditionExpression:
+      outputFile.write("--conditionsTag ${condition} \\\n")
    outputFile.write("--formats $formats \\\n")
-   outputFile.write("--maxEvents "+nEvents+" \\\n")
+   outputFile.write("--maxEvents "+nEvents+" \n")
    outputFile.write("\n")
 
    outputFile.write("echo \"art-result: $? reco\""+"\n")
@@ -181,7 +201,7 @@ def generateTrains(formatList,label,inputFile,nEvents,inputExpression=""):
    outputFile.close()
    os.system("chmod +x "+outputFileName)
 
-def generatePHYStoPHYSLITE(label,inputFile,nEvents):
+def generatePHYStoPHYSLITE(label, inputFile, nEvents, conditionExpression=""):
    add_str = "PHYStoPHYSLITE"
    outputFileName = "test_"+label+"_"+add_str+".sh"
    outputFile = open(outputFileName,"w")
@@ -195,11 +215,21 @@ def generatePHYStoPHYSLITE(label,inputFile,nEvents):
    outputFile.write("# art-output: checkxAOD*.txt"+"\n")
    outputFile.write("# art-output: checkIndexRefs*.txt"+"\n")
    outputFile.write("\n")
+
+   if conditionExpression:
+      outputFile.write(
+         'condition=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print('
+         + conditionExpression + ')")\n'
+      )
+      outputFile.write("\n")
+
    outputFile.write("set -e"+"\n")
    outputFile.write("\n")
    outputFile.write("Derivation_tf.py \\\n")
    outputFile.write("--inputDAOD_PHYSFile "+inputFile+" \\\n")
    outputFile.write("--outputD2AODFile art.pool.root \\\n")
+   if conditionExpression:
+      outputFile.write("--conditionsTag ${condition} \\\n")
    outputFile.write("--formats PHYSLITE \\\n")
    outputFile.write("--maxEvents "+nEvents+" \\\n")
    outputFile.write("\n")
@@ -225,80 +255,110 @@ if (makeDataDAODs or makeMCDAODs):
       if formatName == "JETM7":
          # JETM7 requires per-vertex jet reconstruction, therefore running only over 100 events
          if makeDataDAODs:
-            generateText(formatName,"data18",None,False,"100",
-                         "defaultTestFiles.AOD_RUN2_DATA[0]")
-            generateText(formatName,"data24",data24File,False,"100")
+            generateText(formatName, "data18", None, False, "100",
+                         inputExpression="defaultTestFiles.AOD_RUN2_DATA[0]",
+                         conditionExpression="defaultConditionsTags.RUN2_DATA")
+            generateText(formatName, "data24", data24File, False, "100",
+                         conditionExpression="defaultConditionsTags.RUN3_DATA24")
          if makeMCDAODs:
-            generateText(formatName,"mc20",None,False,"100",
-                         "defaultTestFiles.AOD_RUN2_MC[0]")
-            generateText(formatName,"mc23",None,False,"100",
-                         "defaultTestFiles.AOD_RUN3_MC[0]")
-            generateText(formatName,"mc21_14TeV_",None,False,"100",
-                         "defaultTestFiles.AOD_RUN4_MC[0]")
+            generateText(formatName, "mc20", None, False, "100",
+                         inputExpression="defaultTestFiles.AOD_RUN2_MC[0]",
+                         conditionExpression="defaultConditionsTags.RUN2_MC")
+            generateText(formatName, "mc23", None, False, "100",
+                         inputExpression="defaultTestFiles.AOD_RUN3_MC[0]",
+                         conditionExpression="defaultConditionsTags.RUN4_MC")
+            generateText(formatName, "mc21_14TeV_", None, False, "100",
+                         inputExpression="defaultTestFiles.AOD_RUN4_MC[0]",
+                         conditionExpression="defaultConditionsTags.RUN4_MC")
          continue
       if formatName == "JETM42":
          # JETM42 currently only used for upgrade studies
          if makeMCDAODs:
-            generateText(formatName,"mc21_14TeV_",mc21_14TeV_JETM42_Input,False,"-1")
+            generateText(formatName, "mc21_14TeV_", mc21_14TeV_JETM42_Input, False, "-1",
+                         conditionExpression="defaultConditionsTags.RUN4_MC")
          continue
 
       # End special cases
       if makeDataDAODs and not formatName in ["TOPQ7", "FTAG1", "FTAG1LITE"]:
-         generateText(formatName,"data18",None,False,"-1",
-                      "defaultTestFiles.AOD_RUN2_DATA[0]")
-         generateText(formatName,"data22",None,False,"-1",
-                      "defaultTestFiles.AOD_RUN3_DATA[0]")
-         generateText(formatName,"data23",data23File,False,"-1")
-         generateText(formatName,"data24",data24File,False,"-1")
+         if not formatName in ["TRIG8"]:
+            generateText(formatName, "data18", None, False, "-1",
+                         inputExpression="defaultTestFiles.AOD_RUN2_DATA[0]",
+                      conditionExpression="defaultConditionsTags.RUN2_DATA")
+         generateText(formatName, "data22", None, False, "-1",
+                      inputExpression="defaultTestFiles.AOD_RUN3_DATA[0]",
+                      conditionExpression="defaultConditionsTags.RUN3_DATA22")
+         generateText(formatName, "data23", data23File, False, "-1",
+                      conditionExpression="defaultConditionsTags.RUN3_DATA23")
+         generateText(formatName, "data24", data24File, False, "-1",
+                      conditionExpression="defaultConditionsTags.RUN3_DATA24")
          if formatName in ["PHYS", "PHYSLITE"]:
-            generateText(formatName,"data25",data25File,False,"1000",
-                         artInput=data25Input)
+            generateText(formatName, "data25", data25File, False, "1000",
+                         artInput=data25Input,
+                         conditionExpression="defaultConditionsTags.RUN3_DATA25")
 
       if makeMCDAODs:
-         generateText(formatName,"mc20",None,False,"-1",
-                      "defaultTestFiles.AOD_RUN2_MC[0]")
+         generateText(formatName, "mc20", None, False, "-1",
+                      inputExpression="defaultTestFiles.AOD_RUN2_MC[0]",
+                      conditionExpression="defaultConditionsTags.RUN2_MC")
          if formatName in ["PHYS", "PHYSLITE"]:
-            generateText(formatName,"mc23a",None,False,"-1",
-                         "defaultTestFiles.AOD_RUN3_MC[0]")
-            generateText(formatName,"mc23d",mc23dFile,False,"1000",
-                         artInput=mc23dInput)
-            generateText(formatName,"mc23e",mc23eFile,False,"1000",
-                         artInput=mc23eInput)
-            generateText(formatName,"mc23g",mc23gFile,False,"1000",
-                         artInput=mc23gInput)
+            generateText(formatName, "mc23a", None, False, "-1",
+                         inputExpression="defaultTestFiles.AOD_RUN3_MC[0]",
+                         conditionExpression="defaultConditionsTags.RUN3_MC")
+            generateText(formatName, "mc23d", mc23dFile, False, "1000",
+                         artInput=mc23dInput,
+                         conditionExpression="defaultConditionsTags.RUN3_MC")
+            generateText(formatName, "mc23e", mc23eFile, False, "1000",
+                         artInput=mc23eInput,
+                         conditionExpression="defaultConditionsTags.RUN3_MC")
+            generateText(formatName, "mc23g", mc23gFile, False, "1000",
+                         artInput=mc23gInput,
+                         conditionExpression="defaultConditionsTags.RUN3_MC")
          else:
-            generateText(formatName,"mc23",None,False,"-1",
-                         "defaultTestFiles.AOD_RUN3_MC[0]")
-         generateText(formatName,"mc21_14TeV_",None,False,"-1",
-                      "defaultTestFiles.AOD_RUN4_MC[0]")
+            generateText(formatName, "mc23", None, False, "-1",
+                         inputExpression="defaultTestFiles.AOD_RUN3_MC[0]",
+                         conditionExpression="defaultConditionsTags.RUN3_MC")
+         generateText(formatName, "mc21_14TeV_", None, False, "-1",
+                      inputExpression="defaultTestFiles.AOD_RUN4_MC[0]",
+                      conditionExpression="defaultConditionsTags.RUN4_MC")
 
-      generateText("NCB1","data23cos",data23CosFile,False,"-1")
+      generateText("NCB1", "data23cos", data23CosFile, False, "-1",
+                   conditionExpression="defaultConditionsTags.RUN3_DATA23")
 
 if makeTruthDAODs:
    for formatName in truthFormatList:
-      generateText(formatName,"mc23",None,True,"1000",
-                   "defaultTestFiles.EVNT[0]")
+      generateText(formatName, "mc23", None, True, "1000",
+                   inputExpression="defaultTestFiles.EVNT[0]",
+                   conditionExpression="defaultConditionsTags.RUN3_MC")
 
 if makeTrains:
    for train in trainList:
       if makeDataDAODs:
          generateTrains([f for f in train if f != "TRIG8"],
-                        "data18",None,"-1",
-                        "defaultTestFiles.AOD_RUN2_DATA[0]")
-         generateTrains(train,"data22",None,"-1",
-                        "defaultTestFiles.AOD_RUN3_DATA[0]")
+                        "data18", None, "-1",
+                        inputExpression="defaultTestFiles.AOD_RUN2_DATA[0]",
+                        conditionExpression="defaultConditionsTags.RUN2_DATA")
+         generateTrains(train, "data22", None, "-1",
+                        inputExpression="defaultTestFiles.AOD_RUN3_DATA[0]",
+                        conditionExpression="defaultConditionsTags.RUN3_DATA22")
       if makeMCDAODs:
-         generateTrains(train,"mc20",None,"-1",
-                        "defaultTestFiles.AOD_RUN2_MC[0]")
-         generateTrains(train,"mc23",None,"-1",
-                        "defaultTestFiles.AOD_RUN3_MC[0]")
-         generateTrains(train,"mc21_14TeV_",None,"-1",
-                        "defaultTestFiles.AOD_RUN4_MC[0]")
+         generateTrains(train, "mc20", None, "-1",
+                        inputExpression="defaultTestFiles.AOD_RUN2_MC[0]",
+                        conditionExpression="defaultConditionsTags.RUN2_MC")
+         generateTrains(train, "mc23", None, "-1",
+                        inputExpression="defaultTestFiles.AOD_RUN3_MC[0]",
+                        conditionExpression="defaultConditionsTags.RUN3_MC")
+         generateTrains(train, "mc21_14TeV_", None, "-1",
+                        inputExpression="defaultTestFiles.AOD_RUN4_MC[0]",
+                        conditionExpression="defaultConditionsTags.RUN4_MC")
 
 if makePHYStoPHYSLITE:
    if makeDataDAODs: 
-      generatePHYStoPHYSLITE("data18",data18PHYSFile,"-1")
-      generatePHYStoPHYSLITE("data23",data23PHYSFile,"-1")
+      generatePHYStoPHYSLITE("data18", data18PHYSFile, "-1",
+                             conditionExpression="defaultConditionsTags.RUN2_DATA")
+      generatePHYStoPHYSLITE("data23", data23PHYSFile, "-1",
+                             conditionExpression="defaultConditionsTags.RUN3_DATA23")
    if makeMCDAODs:
-      generatePHYStoPHYSLITE("mc20",mc20PHYSFile,"-1")
-      generatePHYStoPHYSLITE("mc23a",mc23PHYSFile,"-1")
+      generatePHYStoPHYSLITE("mc20", mc20PHYSFile, "-1",
+                             conditionExpression="defaultConditionsTags.RUN2_MC")
+      generatePHYStoPHYSLITE("mc23a", mc23PHYSFile, "-1",
+                             conditionExpression="defaultConditionsTags.RUN3_MC")

@@ -9,13 +9,16 @@
 # art-output: checkxAOD*.txt
 # art-output: checkIndexRefs*.txt
 
+condition=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_DATA24)")
+
 set -e
 
 Derivation_tf.py \
 --inputAODFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data24/AOD/data24_13p6TeV.00486658.physics_Main.recon.AOD.f1522_m2262_r16385_r16377/AOD.43718985._000221.pool.root.1 \
 --outputDAODFile art.pool.root \
+--conditionsTag ${condition} \
 --formats FTAG4 \
---maxEvents -1 \
+--maxEvents -1 
 
 echo "art-result: $? reco"
 

@@ -11,13 +11,16 @@
 
 AOD_File=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.AOD_RUN3_MC[0])")
 
+condition=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+
 set -e
 
 Derivation_tf.py \
 --inputAODFile ${AOD_File} \
 --outputDAODFile art.pool.root \
+--conditionsTag ${condition} \
 --formats JETM3 \
---maxEvents -1 \
+--maxEvents -1 
 
 echo "art-result: $? reco"
 
