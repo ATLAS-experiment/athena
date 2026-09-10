@@ -1,22 +1,18 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "TrigMuonEvent/TileTrackMuFeature.h"
 
+
+
 /** Distance used by the comparison operators */
-static const double DELTA = 0.001;
+namespace{
+  constexpr double DELTA = 0.001;
+} 
 
-TileTrackMuFeature::TileTrackMuFeature() : P4PtEtaPhiMBase(), m_TileMuOutput(), m_IDScanOutput()
-{
-  m_PtTR_Trk  = 9999.9;
-  m_EtaTR_Trk = 9999.9;
-  m_PhiTR_Trk = 9999.9;
-  m_Typ_IDTrk = 0;
-}
 
-TileTrackMuFeature::~TileTrackMuFeature() {}
 
 TileTrackMuFeature::TileTrackMuFeature(
         float PtTR_Trk,
@@ -33,28 +29,31 @@ TileTrackMuFeature::TileTrackMuFeature(
 {
 }
 
-/** Copy constructor (Note that also the base class is copied) */
-TileTrackMuFeature::TileTrackMuFeature(const TileTrackMuFeature* muon_feature)
-  : m_PtTR_Trk ( muon_feature-> m_PtTR_Trk)
-  , m_EtaTR_Trk ( muon_feature-> m_EtaTR_Trk)
-  , m_PhiTR_Trk ( muon_feature-> m_PhiTR_Trk)
-  , m_Typ_IDTrk ( muon_feature-> m_Typ_IDTrk)
-  , m_TileMuOutput ( muon_feature-> m_TileMuOutput)
-  , m_IDScanOutput ( muon_feature-> m_IDScanOutput)
+
+TileTrackMuFeature::TileTrackMuFeature(const TileTrackMuFeature& muon_feature)
+  : m_PtTR_Trk(muon_feature.m_PtTR_Trk)
+  , m_EtaTR_Trk(muon_feature.m_EtaTR_Trk)
+  , m_PhiTR_Trk(muon_feature.m_PhiTR_Trk)
+  , m_Typ_IDTrk(muon_feature.m_Typ_IDTrk)
+  , m_TileMuOutput(muon_feature.m_TileMuOutput)
+  , m_IDScanOutput(muon_feature.m_IDScanOutput)
 {
 }
 
-TileTrackMuFeature::TileTrackMuFeature(const TileTrackMuFeature& muon_feature)
-  : I4Momentum(),INavigable(),IAthenaBarCode(),INavigable4Momentum(),
-    P4PtEtaPhiMBase(),NavigableTerminalNode()
-  , m_PtTR_Trk ( muon_feature.m_PtTR_Trk)
-  , m_EtaTR_Trk ( muon_feature.m_EtaTR_Trk)
-  , m_PhiTR_Trk ( muon_feature.m_PhiTR_Trk)
-  , m_Typ_IDTrk ( muon_feature.m_Typ_IDTrk)
-  , m_TileMuOutput ( muon_feature.m_TileMuOutput)
-  , m_IDScanOutput ( muon_feature.m_IDScanOutput)
+TileTrackMuFeature&
+TileTrackMuFeature::operator=(TileTrackMuFeature&& muon_feature) noexcept
 {
+  if (this != &muon_feature) {
+    m_PtTR_Trk     = muon_feature.m_PtTR_Trk;
+    m_EtaTR_Trk    = muon_feature.m_EtaTR_Trk;
+    m_PhiTR_Trk    = muon_feature.m_PhiTR_Trk;
+    m_Typ_IDTrk    = muon_feature.m_Typ_IDTrk;
+    m_TileMuOutput = std::move(muon_feature.m_TileMuOutput);
+    m_IDScanOutput = std::move(muon_feature.m_IDScanOutput);
+  }
+  return *this;
 }
+
 
 /** Assignement operator */
 TileTrackMuFeature&
@@ -83,6 +82,19 @@ std::string str ( const TileTrackMuFeature& d )
   return ss.str();
 }
 
+const TileMuFeature*  
+TileTrackMuFeature::TileMuOutput() const { return *m_TileMuOutput; }
+
+const TrigInDetTrack* 
+TileTrackMuFeature::IDScanOutput() const { return *m_IDScanOutput; }
+ const ElementLink<TileMuFeatureContainer>&   
+TileTrackMuFeature::TileMuLink() const{ 
+  return m_TileMuOutput;
+}
+  const ElementLink<TrigInDetTrackCollection>& 
+TileTrackMuFeature::IDScanLink() const{ 
+  return m_IDScanOutput;
+}
 MsgStream& operator<< ( MsgStream& m, const TileTrackMuFeature& d )
 {
   return ( m << str( d ) );
