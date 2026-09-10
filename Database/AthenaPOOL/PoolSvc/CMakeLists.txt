@@ -7,7 +7,6 @@ atlas_subdir( PoolSvc )
 atlas_add_library( PoolSvcLib
                    src/*.cxx
                    PUBLIC_HEADERS PoolSvc
-                   PRIVATE_INCLUDE_DIRS GaudiUtils
                    LINK_LIBRARIES AthenaBaseComps CxxUtils DataModelRoot GaudiKernel PathResolver PersistentDataModel StorageSvc )
 
 # Component(s) in the package:
