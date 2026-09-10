@@ -12,7 +12,7 @@
 #include "./ModAntikTJetMaker.h"
 #include "./ConeJetMaker.h"
 #include "./WTAConeJetMaker.h"
-#include "./JetTaggerLRJMaker.h"
+#include "./JetTaggerLRJJetMaker.h"
 
 // input and output types
 #include "./Cluster.h"
@@ -71,7 +71,7 @@ StatusCode GepJetAlg::configureLRJMaker() {
 
   // Geometry.
   cfg.r2Cut     = static_cast<double>(m_LRJJetR) * static_cast<double>(m_LRJJetR);
-  cfg.rMergeCut = m_LRJDSearch;
+  cfg.midpointSearchDistance = m_LRJDSearch;
 
   // Multiplicities.
   cfg.nSeedsInput          = m_LRJNSeedsInput;
@@ -102,6 +102,7 @@ StatusCode GepJetAlg::configureLRJMaker() {
   // Thresholds.
   cfg.subjetEtThresholdGeV  = m_LRJSubjetEtThresholdGeV;
   cfg.minEtSeedPosOptCutGeV = m_LRJMinEtSeedPosOptCutGeV;
+  cfg.constEtCutGeV         = m_LRJConstEtCutGeV;
 
   // Flow / output toggles.
   cfg.enableOverlapRemoval     = m_LRJEnableOverlapRemoval;
@@ -165,7 +166,7 @@ StatusCode GepJetAlg::configureLRJMaker() {
   ATH_MSG_INFO("Configured JetTaggerLRJ (v" << cfg.algoVersion
                << ", seed=" << m_LRJSeedSource.value()
                << ", const=" << m_LRJConstSource.value()
-               << "): r2Cut=" << cfg.r2Cut << ", rMergeCut=" << cfg.rMergeCut
+               << "): r2Cut=" << cfg.r2Cut << ", midpointSearchDistance=" << cfg.midpointSearchDistance
                << ", deltaR LUT size=" << cfg.lutR_8b.size());
 
   return StatusCode::SUCCESS;

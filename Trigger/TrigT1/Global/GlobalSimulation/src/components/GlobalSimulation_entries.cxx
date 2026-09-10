@@ -32,6 +32,7 @@
 
 #include "../GraphSvc.h"
 #include "../JET1Alg.h"
+#include "../Jet_TagAlg.h"
 #include "../TOBTextReader.h"
 #include "../TOBTextWriter.h"
 
@@ -65,6 +66,7 @@ DECLARE_COMPONENT(GlobalSim::PU1SuppAlgTool)
 
 
 DECLARE_COMPONENT(GlobalSim::JET1Alg)
+DECLARE_COMPONENT(GlobalSim::Jet_TagAlg)
 DECLARE_COMPONENT(GlobalSim::TOBTextReader)
 DECLARE_COMPONENT(GlobalSim::TOBTextWriter)
 
