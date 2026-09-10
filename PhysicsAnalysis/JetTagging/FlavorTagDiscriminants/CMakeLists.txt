@@ -126,6 +126,12 @@ atlas_add_executable( get-onnx-metadata
                       LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} )
 
 # Tests in the package:
+# asked for here rather than with the other find_package calls above, so that
+# the unit test framework is linked by the test alone and not by the library
+find_package( Boost COMPONENTS unit_test_framework )
+
 atlas_add_test( JetHitPhiRanges_test
                 SOURCES test/JetHitPhiRanges_test.cxx
+                INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+                LINK_LIBRARIES ${Boost_LIBRARIES}
                 POST_EXEC_SCRIPT noerror.sh )

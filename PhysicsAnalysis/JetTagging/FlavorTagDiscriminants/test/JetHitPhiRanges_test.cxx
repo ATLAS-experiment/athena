@@ -5,12 +5,16 @@
 // Unit test for getPhiRanges, the phi window search JetHitAssociationAlg uses
 // to pull the hits near a jet out of a phi-sorted vector.
 
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MAIN
+#define BOOST_TEST_MODULE TEST_JetHitPhiRanges
+
+#include <boost/test/unit_test.hpp>
+
 #include "../src/JetHitPhiRanges.h"
 
 #include <algorithm>
 #include <cmath>
-#include <iostream>
-#include <string>
 #include <vector>
 
 using namespace FlavorTagDiscriminants;
@@ -21,21 +25,6 @@ namespace {
   // z, r and a link to the xAOD object, none of which matter here.
   struct JetHit {
     float phi;
-  };
-
-  // Counting rather than asserting keeps one failure from hiding the rest.
-  // An instance in main, not a file static, which the thread-safety checker
-  // would rightly complain about.
-  struct Checks {
-    int n = 0;
-    int failed = 0;
-    void operator()(bool ok, const std::string& what) {
-      n++;
-      if(!ok) {
-        failed++;
-        std::cout << "FAILED: " << what << std::endl;
-      }
-    }
   };
 
   std::vector<JetHit> makeHits(const std::vector<float>& phis) {
@@ -69,18 +58,18 @@ namespace {
   // Compare with the answer found the slow way. Hits within a thin band around
   // the window edge are skipped: the two ways of getting there differ by a
   // float rounding, so either verdict is fine for them.
-  void checkAgainstBruteForce(Checks& check, const std::vector<JetHit>& hits,
-                              float phi, float halfWidth,
-                              const std::string& what) {
+  void checkAgainstBruteForce(const std::vector<JetHit>& hits,
+                              float phi, float halfWidth) {
     bool valid = true;
     for(const auto& [first, last] : getPhiRanges(hits, phi, halfWidth)) {
       if(first > last || first < hits.begin() || last > hits.end()) valid = false;
     }
-    check(valid, what + ": ranges lie inside hits");
+    BOOST_CHECK_MESSAGE(valid, "ranges lie inside hits");
 
     const std::vector<float> found = foundPhis(hits, phi, halfWidth);
-    check(std::adjacent_find(found.begin(), found.end()) == found.end(),
-          what + ": no hit is counted twice");
+    BOOST_CHECK_MESSAGE(
+      std::adjacent_find(found.begin(), found.end()) == found.end(),
+      "no hit is counted twice");
 
     bool agrees = true;
     for(const JetHit& hit : hits) {
@@ -89,59 +78,96 @@ namespace {
       if(dPhi < halfWidth - 1e-4 && !isFound) agrees = false;
       if(dPhi > halfWidth + 1e-4 && isFound) agrees = false;
     }
-    check(agrees, what + ": same hits as the brute force scan");
+    BOOST_CHECK_MESSAGE(agrees, "same hits as the brute force scan");
   }
 
 }
 
 
-int main() {
+BOOST_AUTO_TEST_SUITE( JetHitPhiRangesTest )
 
-  Checks check;
-
-  // Every window over a ring of hits, against the brute force answer. The
-  // widths bracket the ones we run with (0.1 for the wedge, 0.4 for the cone)
-  // and go past pi, where the window is the whole circle. The jet phi sweeps
-  // the full circle, so the windows wrapping at +-pi are covered here too.
+// Every window over a ring of hits, against the brute force answer. The widths
+// bracket the ones we run with (0.1 for the wedge, 0.4 for the cone) and go
+// past pi, where the window is the whole circle. The jet phi sweeps the full
+// circle, so the windows wrapping at +-pi are covered here too -- including the
+// ones where a wrapped half comes back empty.
+BOOST_AUTO_TEST_CASE( against_the_brute_force_answer )
+{
   const std::vector<JetHit> ring = evenlySpacedHits(64);
   for(double halfWidth : {0.0, 0.01, 0.05, 0.2, 0.4, 1.0, 3.0, M_PI, 4.0}) {
     for(int i = -100; i <= 100; i++) {
       const double phi = i * M_PI / 100;
-      checkAgainstBruteForce(check, ring, phi, halfWidth,
-                             "ring, phi = " + std::to_string(phi)
-                             + ", halfWidth = " + std::to_string(halfWidth));
+      // one case covers ~1800 windows, so name the one that fails
+      BOOST_TEST_CONTEXT("phi = " << phi << ", halfWidth = " << halfWidth) {
+        checkAgainstBruteForce(ring, phi, halfWidth);
+      }
     }
   }
+}
 
-  // That the window is closed is the one thing the scan above cannot see: it
-  // lets either verdict stand for a hit within a rounding of the edge. The
-  // phis here are all exact in binary, so there is nothing to round.
+// That the window is closed is the one thing the scan above cannot see: it
+// lets either verdict stand for a hit within a rounding of the edge. The phis
+// here are all exact in binary, so there is nothing to round.
+BOOST_AUTO_TEST_CASE( the_window_is_closed )
+{
   const std::vector<JetHit> quarters =
     makeHits({-1.f, -0.5f, -0.25f, 0.f, 0.25f, 0.5f, 0.75f, 1.f});
-  check(foundPhis(quarters, 0.5f, 0.25f)
-        == std::vector<float>({0.25f, 0.5f, 0.75f}), "hits on the edges are kept");
-  check(foundPhis(quarters, 0.5f, 0.2f) == std::vector<float>({0.5f}),
-        "hits just outside the edges are dropped");
 
-  // A hit at exactly +-pi is at zero distance from a jet pointing at pi
+  const std::vector<float> onEdge = foundPhis(quarters, 0.5f, 0.25f);
+  const std::vector<float> kept{0.25f, 0.5f, 0.75f};
+  BOOST_CHECK_EQUAL_COLLECTIONS(onEdge.begin(), onEdge.end(),
+                                kept.begin(), kept.end());
+
+  const std::vector<float> outside = foundPhis(quarters, 0.5f, 0.2f);
+  const std::vector<float> dropped{0.5f};
+  BOOST_CHECK_EQUAL_COLLECTIONS(outside.begin(), outside.end(),
+                                dropped.begin(), dropped.end());
+}
+
+// A hit at exactly +-pi is at zero distance from a jet pointing at pi
+BOOST_AUTO_TEST_CASE( hits_sitting_on_pi )
+{
   const float pi_f = static_cast<float>(M_PI);
   const std::vector<JetHit> atPi = makeHits({-pi_f, -1.f, 0.f, 1.f, pi_f});
-  check(foundPhis(atPi, pi_f, 0.1f) == std::vector<float>({-pi_f, pi_f}),
-        "hits sitting on +-pi");
 
-  // Degenerate cases
-  const std::vector<JetHit> none;
-  check(foundPhis(none, 0.f, 0.2f).empty(), "no hits at all");
-  const std::vector<JetHit> clump = makeHits({1.f, 1.1f, 1.2f});
-  check(foundPhis(clump, -1.f, 0.2f).empty(), "no hits in the window");
-  check(foundPhis(clump, 1.1f, 4.f) == std::vector<float>({1.f, 1.1f, 1.2f}),
-        "window covering the whole circle");
-  check(foundPhis(clump, 1.1f, 0.f) == std::vector<float>({1.1f}),
-        "window of zero width, on a hit");
-  check(foundPhis(clump, 1.05f, 0.f).empty(),
-        "window of zero width, between hits");
-
-  std::cout << check.n - check.failed << " of " << check.n << " checks passed"
-            << std::endl;
-  return check.failed > 0 ? 1 : 0;
+  const std::vector<float> found = foundPhis(atPi, pi_f, 0.1f);
+  const std::vector<float> expected{-pi_f, pi_f};
+  BOOST_CHECK_EQUAL_COLLECTIONS(found.begin(), found.end(),
+                                expected.begin(), expected.end());
 }
+
+BOOST_AUTO_TEST_CASE( no_hits_at_all )
+{
+  const std::vector<JetHit> none;
+  BOOST_CHECK(foundPhis(none, 0.f, 0.2f).empty());
+}
+
+BOOST_AUTO_TEST_CASE( no_hits_in_the_window )
+{
+  const std::vector<JetHit> clump = makeHits({1.f, 1.1f, 1.2f});
+  BOOST_CHECK(foundPhis(clump, -1.f, 0.2f).empty());
+}
+
+BOOST_AUTO_TEST_CASE( window_covering_the_whole_circle )
+{
+  const std::vector<JetHit> clump = makeHits({1.f, 1.1f, 1.2f});
+
+  const std::vector<float> found = foundPhis(clump, 1.1f, 4.f);
+  const std::vector<float> expected{1.f, 1.1f, 1.2f};
+  BOOST_CHECK_EQUAL_COLLECTIONS(found.begin(), found.end(),
+                                expected.begin(), expected.end());
+}
+
+BOOST_AUTO_TEST_CASE( window_of_zero_width )
+{
+  const std::vector<JetHit> clump = makeHits({1.f, 1.1f, 1.2f});
+
+  const std::vector<float> onHit = foundPhis(clump, 1.1f, 0.f);
+  const std::vector<float> expected{1.1f};
+  BOOST_CHECK_EQUAL_COLLECTIONS(onHit.begin(), onHit.end(),
+                                expected.begin(), expected.end());
+
+  BOOST_CHECK(foundPhis(clump, 1.05f, 0.f).empty());
+}
+
+BOOST_AUTO_TEST_SUITE_END()
