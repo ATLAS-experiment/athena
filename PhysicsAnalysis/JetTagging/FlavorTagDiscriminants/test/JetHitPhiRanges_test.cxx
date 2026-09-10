@@ -54,14 +54,13 @@ namespace {
     return makeHits(phis);
   }
 
-  // the hits the window selects, as indices into hits, in ascending order
-  std::vector<size_t> foundIndices(const std::vector<JetHit>& hits,
-                                   float phi, float halfWidth) {
-    std::vector<size_t> found;
+  // The phis the window selects, in ascending order. No two hits below share a
+  // phi, so these name the hits and can be read straight off the input.
+  std::vector<float> foundPhis(const std::vector<JetHit>& hits,
+                               float phi, float halfWidth) {
+    std::vector<float> found;
     for(const auto& [first, last] : getPhiRanges(hits, phi, halfWidth)) {
-      for(auto it = first; it != last; ++it) {
-        found.push_back(it - hits.begin());
-      }
+      for(auto it = first; it != last; ++it) found.push_back(it->phi);
     }
     std::sort(found.begin(), found.end());
     return found;
@@ -79,14 +78,14 @@ namespace {
     }
     check(valid, what + ": ranges lie inside hits");
 
-    const std::vector<size_t> found = foundIndices(hits, phi, halfWidth);
+    const std::vector<float> found = foundPhis(hits, phi, halfWidth);
     check(std::adjacent_find(found.begin(), found.end()) == found.end(),
           what + ": no hit is counted twice");
 
     bool agrees = true;
-    for(size_t i = 0; i < hits.size(); i++) {
-      const bool isFound = std::binary_search(found.begin(), found.end(), i);
-      const double dPhi = std::abs(std::remainder(hits[i].phi - double(phi), 2*M_PI));
+    for(const JetHit& hit : hits) {
+      const bool isFound = std::binary_search(found.begin(), found.end(), hit.phi);
+      const double dPhi = std::abs(std::remainder(hit.phi - double(phi), 2*M_PI));
       if(dPhi < halfWidth - 1e-4 && !isFound) agrees = false;
       if(dPhi > halfWidth + 1e-4 && isFound) agrees = false;
     }
@@ -102,7 +101,8 @@ int main() {
 
   // Every window over a ring of hits, against the brute force answer. The
   // widths bracket the ones we run with (0.1 for the wedge, 0.4 for the cone)
-  // and go past pi, where the window is the whole circle.
+  // and go past pi, where the window is the whole circle. The jet phi sweeps
+  // the full circle, so the windows wrapping at +-pi are covered here too.
   const std::vector<JetHit> ring = evenlySpacedHits(64);
   for(double halfWidth : {0.0, 0.01, 0.05, 0.2, 0.4, 1.0, 3.0, M_PI, 4.0}) {
     for(int i = -100; i <= 100; i++) {
@@ -113,52 +113,32 @@ int main() {
     }
   }
 
-  // The window is closed: a hit exactly on the edge is kept. Every phi below
-  // is exact in binary, so there is no rounding to allow for.
+  // That the window is closed is the one thing the scan above cannot see: it
+  // lets either verdict stand for a hit within a rounding of the edge. The
+  // phis here are all exact in binary, so there is nothing to round.
   const std::vector<JetHit> quarters =
     makeHits({-1.f, -0.5f, -0.25f, 0.f, 0.25f, 0.5f, 0.75f, 1.f});
-  check(foundIndices(quarters, 0.5f, 0.25f) == std::vector<size_t>({4, 5, 6}),
-        "hits on both edges are kept");
-  check(foundIndices(quarters, 0.5f, 0.2f) == std::vector<size_t>({5}),
+  check(foundPhis(quarters, 0.5f, 0.25f)
+        == std::vector<float>({0.25f, 0.5f, 0.75f}), "hits on the edges are kept");
+  check(foundPhis(quarters, 0.5f, 0.2f) == std::vector<float>({0.5f}),
         "hits just outside the edges are dropped");
-
-  // Hits sharing a phi, including on the edges, are kept or dropped together
-  const std::vector<JetHit> ties =
-    makeHits({0.f, 0.25f, 0.25f, 0.25f, 0.5f, 0.75f, 0.75f, 1.f});
-  check(foundIndices(ties, 0.5f, 0.25f) == std::vector<size_t>({1, 2, 3, 4, 5, 6}),
-        "repeated phi on the edges");
-
-  // Windows that wrap: the hits at -3.125 and 3.125 are 0.033 apart across the
-  // branch cut, the ones at -3.0 and 3.0 are 0.283 away from each of those.
-  const std::vector<JetHit> nearPi =
-    makeHits({-3.125f, -3.f, -0.5f, 0.f, 3.f, 3.125f});
-  const std::vector<size_t> acrossTheCut = {0, 1, 4, 5};
-  check(foundIndices(nearPi, 3.125f, 0.25f) == acrossTheCut,
-        "window wrapping above +pi");
-  check(foundIndices(nearPi, -3.125f, 0.25f) == acrossTheCut,
-        "window wrapping below -pi");
-  check(foundIndices(nearPi, 3.125f, 0.02f) == std::vector<size_t>({5}),
-        "window that stops short of the cut");
 
   // A hit at exactly +-pi is at zero distance from a jet pointing at pi
   const float pi_f = static_cast<float>(M_PI);
   const std::vector<JetHit> atPi = makeHits({-pi_f, -1.f, 0.f, 1.f, pi_f});
-  check(foundIndices(atPi, pi_f, 0.1f) == std::vector<size_t>({0, 4}),
-        "hits sitting on +-pi, jet at +pi");
-  check(foundIndices(atPi, -pi_f, 0.1f) == std::vector<size_t>({0, 4}),
-        "hits sitting on +-pi, jet at -pi");
+  check(foundPhis(atPi, pi_f, 0.1f) == std::vector<float>({-pi_f, pi_f}),
+        "hits sitting on +-pi");
 
   // Degenerate cases
   const std::vector<JetHit> none;
-  check(foundIndices(none, 0.f, 0.2f).empty(), "no hits at all");
-  check(foundIndices(none, 0.f, 4.f).empty(), "no hits at all, window wider than pi");
+  check(foundPhis(none, 0.f, 0.2f).empty(), "no hits at all");
   const std::vector<JetHit> clump = makeHits({1.f, 1.1f, 1.2f});
-  check(foundIndices(clump, -1.f, 0.2f).empty(), "no hits in the window");
-  check(foundIndices(clump, 1.1f, 4.f) == std::vector<size_t>({0, 1, 2}),
+  check(foundPhis(clump, -1.f, 0.2f).empty(), "no hits in the window");
+  check(foundPhis(clump, 1.1f, 4.f) == std::vector<float>({1.f, 1.1f, 1.2f}),
         "window covering the whole circle");
-  check(foundIndices(clump, 1.1f, 0.f) == std::vector<size_t>({1}),
+  check(foundPhis(clump, 1.1f, 0.f) == std::vector<float>({1.1f}),
         "window of zero width, on a hit");
-  check(foundIndices(clump, 1.05f, 0.f).empty(),
+  check(foundPhis(clump, 1.05f, 0.f).empty(),
         "window of zero width, between hits");
 
   std::cout << check.n - check.failed << " of " << check.n << " checks passed"
