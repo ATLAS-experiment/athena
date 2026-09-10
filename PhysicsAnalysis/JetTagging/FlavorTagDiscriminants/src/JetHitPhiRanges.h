@@ -5,7 +5,7 @@
 #ifndef JET_HIT_PHI_RANGES_H
 #define JET_HIT_PHI_RANGES_H
 
-#include <algorithm> //lower_bound, is_sorted
+#include <algorithm> //lower_bound, upper_bound, is_sorted
 #include <cassert>
 #include <cmath>
 #include <utility> //std::pair
@@ -43,8 +43,8 @@ namespace FlavorTagDiscriminants {
     };
     // first hit above p, i.e. the end of a window that includes p itself
     auto upper = [&hits](float p) {
-      return std::lower_bound(hits.begin(), hits.end(), p,
-                              [](const Hit& h, float q) { return h.phi <= q; });
+      return std::upper_bound(hits.begin(), hits.end(), p,
+                              [](float q, const Hit& h) { return q < h.phi; });
     };
 
     using HitItr = typename std::vector<Hit>::const_iterator;
