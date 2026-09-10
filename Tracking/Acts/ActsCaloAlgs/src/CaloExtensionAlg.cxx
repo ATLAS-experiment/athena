@@ -123,6 +123,10 @@ namespace ActsTrk{
         auto extension = std::make_unique<CaloExtension>(track);
         /// Retrieve the last track parameters with a measurement state
         auto lastTrackPars = extension->lastParameters();
+        if (!lastTrackPars) {
+            ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - The track does not have any Acts::BoundTrack parameters");
+            return nullptr;
+        }
         using SurfaceRecordOptions = IExtrapolationTool::SurfaceRecordOptions;
         SurfaceRecordOptions propOpts{caloExit, IExtrapolationTool::VolumeAbort::atExit};
         propOpts.recordMaterial = true;
