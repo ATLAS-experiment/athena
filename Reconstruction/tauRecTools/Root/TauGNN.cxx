@@ -22,7 +22,7 @@ TauGNN::compute(const xAOD::TauJet &tau) const {
     ATH_MSG_DEBUG("Computing TauGNN features...");
     auto salt_model_input_data = m_dataloader.loadInputs(&tau);
     // m_dataloader.DumpGnnInputs(salt_model_input_data.gnn_inputs);
-    std::map<std::string, FlavorTagInference::Inputs> input_with_aliases = salt_model_input_data.gnn_inputs;
+    FlavorTagInference::InputMap input_with_aliases = salt_model_input_data.gnn_inputs;
     // Support both legacy loader keys and ONNX-hard-coded input tensor names.
     const std::map<std::string, std::string> alias_map = {
       {"jet_var", "jet_features"},
