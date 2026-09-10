@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthContainers/DataVector.h
@@ -648,16 +648,20 @@ struct DataVectorBase
  */
 #define DATAVECTOR_BASE(T, BASE)          \
 DATAVECTOR_BASE_FWD(T, BASE);             \
-template struct DataVector_detail::DVLEltBaseInit<T>
+DATAVECTOR_BASE_FIN(T, BASE);
 
 
 /**
  * @brief Version of @c DATAVECTOR_BASE that can be used
  *        in forward declarations.
+ *
+ * We also need to defer the definition of bi_destroy<DV>::destroy until
+ * the element is defined.
  */
 #define DATAVECTOR_BASE_FWD(T, BASE)      \
 template <> struct DataVectorBase<T>      \
 { typedef DataVector<BASE> Base; };       \
+namespace SG { template<> struct bi_destroy<DataVector<T> > { static void destroy(void*); }; } \
 SG_BASE(DataVector<T>, DataVector<BASE>)
 
 
@@ -672,17 +676,21 @@ SG_BASE(DataVector<T>, DataVector<BASE>)
  */
 #define DATAVECTOR_VIRTBASES1(T, B1)                  \
 DATAVECTOR_VIRTBASES1_FWD(T, B1);                     \
-template struct DataVector_detail::DVLEltBaseInit<T>
+DATAVECTOR_BASE_FIN(T, B1);
 
 
 
 /**
  * @brief Version of @c DATAVECTOR_VIRTBASES1 that can be used
  *        in forward declarations.
+ *
+ * We also need to defer the definition of bi_destroy<DV>::destroy until
+ * the element is defined.
  */
 #define DATAVECTOR_VIRTBASES1_FWD(T, B1)              \
 template <> struct DataVectorBase<T>                  \
 { typedef DataVector_detail::VirtBases<B1> Base; };   \
+namespace SG { template<> struct bi_destroy<DataVector<T> > { static void destroy(void*); }; } \
 SG_BASES1(DataVector<T>, SG_VIRTUAL(DataVector<B1>))
 
 
@@ -698,16 +706,20 @@ SG_BASES1(DataVector<T>, SG_VIRTUAL(DataVector<B1>))
  */
 #define DATAVECTOR_VIRTBASES2(T, B1, B2)                \
 DATAVECTOR_VIRTBASES2_FWD(T, B1, B2);                   \
-template struct DataVector_detail::DVLEltBaseInit<T>
+DATAVECTOR_BASE_FIN(T, B1);
 
 
 /**
  * @brief Version of @c DATAVECTOR_VIRTBASES2 that can be used
  *        in forward declarations.
+ *
+ * We also need to defer the definition of bi_destroy<DV>::destroy until
+ * the element is defined.
  */
 #define DATAVECTOR_VIRTBASES2_FWD(T, B1, B2)            \
 template <> struct DataVectorBase<T>                    \
 { typedef DataVector_detail::VirtBases<B1, B2> Base; }; \
+namespace SG { template<> struct bi_destroy<DataVector<T> > { static void destroy(void*); }; } \
 SG_BASES2(DataVector<T>, SG_VIRTUAL(DataVector<B1>),    \
                          SG_VIRTUAL(DataVector<B2>))
 
@@ -723,16 +735,20 @@ SG_BASES2(DataVector<T>, SG_VIRTUAL(DataVector<B1>),    \
  */
 #define DATAVECTOR_VIRTBASES3(T, B1, B2, B3)            \
 DATAVECTOR_VIRTBASES3_FWD(T, B1, B2, B3);               \
-template struct DataVector_detail::DVLEltBaseInit<T>
+DATAVECTOR_BASE_FIN(T, B1);
 
 
 /**
  * @brief Version of @c DATAVECTOR_VIRTBASES3 that can be used
  *        in forward declarations.
+ *
+ * We also need to defer the definition of bi_destroy<DV>::destroy until
+ * the element is defined.
  */
 #define DATAVECTOR_VIRTBASES3_FWD(T, B1, B2, B3)            \
 template <> struct DataVectorBase<T>                        \
 { typedef DataVector_detail::VirtBases<B1, B2, B3> Base; }; \
+namespace SG { template<> struct bi_destroy<DataVector<T> > { static void destroy(void*); }; } \
 SG_BASES3(DataVector<T>, SG_VIRTUAL(DataVector<B1>),        \
                          SG_VIRTUAL(DataVector<B2>),        \
                          SG_VIRTUAL(DataVector<B3>))
@@ -749,16 +765,20 @@ SG_BASES3(DataVector<T>, SG_VIRTUAL(DataVector<B1>),        \
  */
 #define DATAVECTOR_VIRTBASES4(T, B1, B2, B3, B4)            \
 DATAVECTOR_VIRTBASES4_FWD(T, B1, B2, B3, B4);               \
-template struct DataVector_detail::DVLEltBaseInit<T>
+DATAVECTOR_BASE_FIN(T, B1);
 
 
 /**
  * @brief Version of @c DATAVECTOR_VIRTBASES4 that can be used
  *        in forward declarations.
+ *
+ * We also need to defer the definition of bi_destroy<DV>::destroy until
+ * the element is defined.
  */
 #define DATAVECTOR_VIRTBASES4_FWD(T, B1, B2, B3, B4)            \
 template <> struct DataVectorBase<T>                            \
 { typedef DataVector_detail::VirtBases<B1, B2, B3, B4> Base; }; \
+namespace SG { template<> struct bi_destroy<DataVector<T> > { static void destroy(void*); }; } \
 SG_BASES4(DataVector<T>, SG_VIRTUAL(DataVector<B1>),            \
                          SG_VIRTUAL(DataVector<B2>),            \
                          SG_VIRTUAL(DataVector<B3>),            \
@@ -772,6 +792,7 @@ SG_BASES4(DataVector<T>, SG_VIRTUAL(DataVector<B1>),            \
  * consistency and documentation.
  */
 #define DATAVECTOR_BASE_FIN(T, B) \
+  namespace SG { inline void bi_destroy<DataVector<T> >::destroy(void* p) { delete (DataVector<T>*)p; } } \
 template struct DataVector_detail::DVLEltBaseInit<T>
 
 
