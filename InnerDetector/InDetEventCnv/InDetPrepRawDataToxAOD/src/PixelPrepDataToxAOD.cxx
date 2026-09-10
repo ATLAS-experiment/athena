@@ -68,7 +68,8 @@ StatusCode PixelPrepDataToxAOD::initialize()
   ATH_CHECK(m_readKeyTemp.initialize());
   ATH_CHECK(m_readKeyHV.initialize());
 
-  ATH_CHECK(m_pixelSummary.retrieve(DisableTool{!m_writeRDOinformation} ));
+  ATH_CHECK(m_pixelSummary.retrieve(
+    DisableTool{!(m_writeRDOinformation || m_writeModuleStatus)} ));
 
   ATH_CHECK(m_lorentzAngleTool.retrieve());
 
@@ -259,7 +260,10 @@ StatusCode PixelPrepDataToxAOD::execute(const EventContext& ctx)
       AUXDATA(xprd,int,eta_pixel_index)         =  m_PixelHelper->eta_index(clusterId);
       AUXDATA(xprd,int,phi_pixel_index)         =  m_PixelHelper->phi_index(clusterId);
 
-      cluster_map[ makeKey(the_phi, the_eta, the_layer)].push_back(cluster_idx);
+      // only consumed by the SiHit module-overlap pass below
+      if (m_writeSiHits) {
+        cluster_map[ makeKey(the_phi, the_eta, the_layer)].push_back(cluster_idx);
+      }
 
       const InDet::SiWidth cw = prd->width();
       AUXDATA(xprd,int,sizePhi) = (int)cw.colRow()[0];
@@ -281,11 +285,16 @@ StatusCode PixelPrepDataToxAOD::execute(const EventContext& ctx)
       // Need to add something to Add the NN splitting information
       if(m_writeNNinformation) addNNInformation( xprd,  prd, 7, 7);
       
-      // Add information for each contributing hit
-      if(m_writeRDOinformation) {
+      // module status flags, also wanted without the RDO information
+      if(m_writeRDOinformation || m_writeModuleStatus) {
         IdentifierHash moduleHash = clusterCollection->identifyHash();
         AUXDATA(xprd,int,hasBSError) = (int)m_pixelSummary->hasBSError(moduleHash, ctx);
         AUXDATA(xprd,int,DCSState) = dcsState->getModuleStatus(moduleHash);
+      }
+
+      // Add information for each contributing hit
+      if(m_writeRDOinformation) {
+        IdentifierHash moduleHash = clusterCollection->identifyHash();
 
         float deplVoltage = 0.0;
         AUXDATA(xprd,float,BiasVoltage) = dcsHV->getBiasVoltage(moduleHash);
@@ -388,36 +397,40 @@ StatusCode PixelPrepDataToxAOD::execute(const EventContext& ctx)
   m_missingTruthParticle += missing_truth_particle;
   m_missingParentParticle += missing_parent_particle;
 
-  static const SG::AuxElement::Accessor<int> acc_layer ("layer");
-  static const SG::AuxElement::Accessor<int> acc_phi_module ("phi_module");
-  static const SG::AuxElement::Accessor<int> acc_eta_module ("eta_module");
-  static const SG::AuxElement::Accessor<std::vector<int> > acc_sihit_barcode ("sihit_barcode"); // TODO rename variable to be consistent?
-  for ( auto clusItr = xaod->begin(); clusItr != xaod->end(); ++clusItr)
-  {
+  // Flag clusters that share a SiHit with another cluster on the same module.
+  // Needs sihit_barcode, so it only means anything with the SiHit truth on.
+  if (m_writeSiHits) {
+    static const SG::AuxElement::Accessor<int> acc_layer ("layer");
+    static const SG::AuxElement::Accessor<int> acc_phi_module ("phi_module");
+    static const SG::AuxElement::Accessor<int> acc_eta_module ("eta_module");
+    static const SG::AuxElement::Accessor<std::vector<int> > acc_sihit_barcode ("sihit_barcode"); // TODO rename variable to be consistent?
+    for ( auto clusItr = xaod->begin(); clusItr != xaod->end(); ++clusItr)
+    {
       auto pixelCluster = *clusItr;
       int layer = acc_layer(*pixelCluster);
       std::vector<int> uniqueIDs = acc_sihit_barcode(*pixelCluster); // TODO rename variable to be consistent?
 
       const std::vector< unsigned int> &cluster_idx_list = cluster_map.at( makeKey(acc_phi_module(*pixelCluster), acc_eta_module(*pixelCluster), acc_layer(*pixelCluster) ));
       for (unsigned int cluster_idx : cluster_idx_list) {
-          auto pixelCluster2 = xaod->at(cluster_idx);
-	  if ( acc_layer(*pixelCluster2) != layer )
-	      continue;
-	  if ( acc_eta_module(*pixelCluster) != acc_eta_module(*pixelCluster2) )
-	      continue;
-	  if ( acc_phi_module(*pixelCluster) != acc_phi_module(*pixelCluster2) )
-	      continue;
+        auto pixelCluster2 = xaod->at(cluster_idx);
+        if ( acc_layer(*pixelCluster2) != layer )
+          continue;
+        if ( acc_eta_module(*pixelCluster) != acc_eta_module(*pixelCluster2) )
+          continue;
+        if ( acc_phi_module(*pixelCluster) != acc_phi_module(*pixelCluster2) )
+          continue;
 
-	  std::vector<int> uniqueIDs2 = acc_sihit_barcode(*pixelCluster2); // TODO rename variable to be consistent?
-	  
-	  for ( auto uid : uniqueIDs ) {
-              if (std::find(uniqueIDs2.begin(), uniqueIDs2.end(), uid ) == uniqueIDs2.end()) continue;
-              static const SG::AuxElement::Accessor<char> acc_broken ("broken");
-              acc_broken(*pixelCluster)  = true;
-              acc_broken(*pixelCluster2) = true;
-              break;
-          }
+        std::vector<int> uniqueIDs2 = acc_sihit_barcode(*pixelCluster2); // TODO rename variable to be consistent?
+
+        for ( auto uid : uniqueIDs ) {
+          if (std::find(uniqueIDs2.begin(), uniqueIDs2.end(), uid ) == uniqueIDs2.end()) continue;
+          static const SG::AuxElement::Accessor<char> acc_broken ("broken");
+          acc_broken(*pixelCluster)  = true;
+          acc_broken(*pixelCluster2) = true;
+          break;
+        }
       }
+    }
   }
 
   ATH_MSG_DEBUG( " recorded PixelPrepData objects: size " << xaod->size() );
