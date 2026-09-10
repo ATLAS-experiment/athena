@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #if defined(FLATTEN) && defined(__GNUC__)
@@ -13,9 +13,11 @@
 
 #include "CxxUtils/inline_hints.h"
 
+#include <algorithm>
 #include <fstream>
 #include <memory>
 #include <unordered_map>
+#include <utility>
 
 namespace ActsTrk {
 
@@ -48,23 +50,24 @@ namespace ActsTrk {
     m_pixelHashToLayer = &m_layerTool->pixelLayers();
     m_stripHashToLayer = &m_layerTool->stripLayers();
 
-    m_are_pixels.clear();
-    m_are_pixels.reserve(technologies.size());
-    for (const GbtsTechnology technology : technologies) {
-      m_are_pixels.push_back(technology == GbtsTechnology::Pixel);
-    }
-
-    Acts::Experimental::GbtsLayerConnectionMap connections;
-    ATH_CHECK(readConnections(layers, technologies, connections));
+    std::vector<Acts::Experimental::GbtsLayerConnection> connections;
+    float etaBinWidth = 0.0f;
+    ATH_CHECK(readConnections(layers, technologies, connections, etaBinWidth));
 
     // option that allows for adding custom eta binning (default is at 0.2)
-    if (m_finderCfg.etaBinWidthOverride != 0.0f) {
-      connections.etaBinWidth = m_finderCfg.etaBinWidthOverride;
+    if (m_etaBinWidthOverride.value() != 0.0f) {
+      etaBinWidth = m_etaBinWidthOverride.value();
     }
-  
+
+    // the cluster width cuts are the only user of the tau lookup table
+    if (m_finderCfg.useClusterWidthCuts) {
+      ATH_CHECK(readTauLookupTable(m_finderCfg.tauLookupTable));
+    }
+
     // create geoemtry object that holds allowed pairing of allowed eta regions in each layer
     // holds all geometry information (m_layergeomtry and connection table)
-    auto gbtsGeo = std::make_shared<Acts::Experimental::GbtsGeometry>(layers, connections);
+    auto gbtsGeo = std::make_shared<Acts::Experimental::GbtsGeometry>(
+      layers, connections, etaBinWidth, Acts::Experimental::GbtsZ0Range{}, logger());
 
     m_finder = Acts::Experimental::GraphBasedTrackSeeder(
       Acts::Experimental::GraphBasedTrackSeeder::DerivedConfig(m_finderCfg),
@@ -99,7 +102,7 @@ namespace ActsTrk {
 
 
     // create the node storage and fill it from the xAOD space points
-    Acts::Experimental::GbtsNodeStorage nodeStorage = m_finder->makeNodeStorage(m_are_pixels);
+    Acts::Experimental::GbtsNodeStorage nodeStorage = m_finder->makeNodeStorage();
 
     // space points GBTS has no layer for, counted rather than reported per
     // space point: the loop runs over the whole event
@@ -190,7 +193,8 @@ namespace ActsTrk {
   StatusCode GbtsSeedingTool::readConnections(
     const std::vector<Acts::Experimental::GbtsLayerDescription>& layers,
     const std::vector<GbtsTechnology>& technologies,
-    Acts::Experimental::GbtsLayerConnectionMap& connections) const
+    std::vector<Acts::Experimental::GbtsLayerConnection>& connections,
+    float& etaBinWidth) const
   {
     std::ifstream connectionStream(m_connectorInputFile.value());
     if (!connectionStream.is_open()) {
@@ -216,9 +220,12 @@ namespace ActsTrk {
                                 technologies[layer]);
     }
 
-    connections.etaBinWidth = table.etaBinWidth;
+    etaBinWidth = table.etaBinWidth;
 
-    std::size_t nKept = 0;
+    // the stage column only fixes the order the connections are handed over in
+    std::vector<std::pair<std::uint32_t, Acts::Experimental::GbtsLayerConnection>> staged;
+    staged.reserve(table.connections.size());
+
     std::size_t nOtherTechnology = 0;
     std::size_t nUnknownLayer = 0;
 
@@ -241,11 +248,19 @@ namespace ActsTrk {
         continue;
       }
 
-      connections.connectionMap[static_cast<std::int32_t>(connection.stage)]
-        .push_back(std::make_unique<Acts::Experimental::GbtsLayerConnection>(
-          connection.src, connection.dst));
-      ++nKept;
+      staged.emplace_back(connection.stage,
+                          Acts::Experimental::GbtsLayerConnection{connection.src,
+                                                                  connection.dst});
     }
+
+    std::ranges::stable_sort(staged, {}, [](const auto& entry) { return entry.first; });
+
+    connections.clear();
+    connections.reserve(staged.size());
+    for (const auto& entry : staged) {
+      connections.push_back(entry.second);
+    }
+    const std::size_t nKept = connections.size();
 
     if (nUnknownLayer != 0) {
       ATH_MSG_WARNING(nUnknownLayer << " connections of "
@@ -259,21 +274,59 @@ namespace ActsTrk {
       return StatusCode::FAILURE;
     }
     ATH_MSG_DEBUG("Kept " << nKept << " GBTS layer connections, dropping "
-                  << nOtherTechnology << " of a technology not asked for");
+                  << nOtherTechnology << " of a technology not asked for, eta bin width "
+                  << etaBinWidth);
+
+    return StatusCode::SUCCESS;
+  }
+
+  StatusCode GbtsSeedingTool::readTauLookupTable(
+    Acts::Experimental::detail::GbtsTauLookupTable& tauLookupTable) const
+  {
+    std::ifstream lutStream(m_lutFile.value());
+    if (!lutStream.is_open()) {
+      ATH_MSG_ERROR("Cannot open the GBTS tau lookup table " << m_lutFile.value());
+      return StatusCode::FAILURE;
+    }
+
+    tauLookupTable.clear();
+
+    // the width is dropped: a row is located by index, one row per
+    // tauLutBinWidth of cluster width, never searched
+    float clusterWidth = 0.0f;
+    Acts::Experimental::detail::GbtsTauBounds bounds;
+    while (lutStream >> clusterWidth >> bounds.minTau >> bounds.maxTau >>
+           bounds.minTauNearEdge >> bounds.maxTauNearEdge) {
+      tauLookupTable.push_back(bounds);
+    }
+
+    if (!lutStream.eof()) {
+      // ended on a parse error, not on a clean end of file
+      ATH_MSG_ERROR("Malformed GBTS tau lookup table " << m_lutFile.value());
+      return StatusCode::FAILURE;
+    }
+    if (tauLookupTable.empty()) {
+      ATH_MSG_ERROR("The GBTS tau lookup table " << m_lutFile.value() << " is empty");
+      return StatusCode::FAILURE;
+    }
+
+    ATH_MSG_DEBUG("Read " << tauLookupTable.size() << " rows of the GBTS tau lookup table "
+                  << m_lutFile.value());
 
     return StatusCode::SUCCESS;
   }
 
   StatusCode GbtsSeedingTool::prepareConfiguration() {
-    m_finderCfg.lrtMode = m_LRTmode;
+    m_finderCfg.useStripConnections = m_stripConnections;
     m_finderCfg.useClusterWidthCuts = m_useML;
     m_finderCfg.matchBeforeCreate = m_matchBeforeCreate;
-    m_finderCfg.useOldTunings = m_useOldTunings;
-    m_finderCfg.etaBinWidthOverride = m_etaBinWidthOverride;
+    // useOldTunings gated the curvature bounds and the phi window together,
+    // while LRT mode only wanted the first, so the seeder now has them apart
+    m_finderCfg.useOldTuningsCurvature = m_useOldTunings || m_LRTmode;
+    m_finderCfg.useOldTuningsPhiWindow = m_useOldTunings;
     m_finderCfg.beamSpotCorrection = m_beamSpotCorrection;
     m_finderCfg.minPt = m_minPt;
     m_finderCfg.nMaxPhiSlice = m_nMaxPhiSlice;
-    m_finderCfg.lutInputFile = m_lutFile;
     m_finderCfg.useEtaBinning = m_useEtaBinning;
     m_finderCfg.doubletFilterRZ = m_doubletFilterRZ;
     m_finderCfg.minDeltaRadius = m_minDeltaRadius;
@@ -293,11 +346,23 @@ namespace ActsTrk {
     m_finderCfg.useAdaptiveCuts = m_useAdaptiveCuts;
     m_finderCfg.tauRatioCorr = m_tauRatioCorr;
     m_finderCfg.addTriplets = m_addTriplets;
-    m_finderCfg.maxAbsEtaAddTripelts = m_maxEtaAddTriplets;
+    m_finderCfg.maxAbsEtaAddTriplets = m_maxEtaAddTriplets;
     m_finderCfg.cutDPhiMax = m_cutDPhiMax;
     m_finderCfg.cutDCurvMax = m_cutDCurvMax;
     m_finderCfg.minDeltaPhi = m_minDeltaPhi;
     m_finderCfg.maxOuterRadius = m_maxOuterRadius;
+
+    // The seeder no longer recognises an LRT mode, so spell out the rest of
+    // what it used to imply: the whole of maxCurv for the curvature bounds and
+    // the phi window, a triplet with no confirmation, and no added triplets.
+    // Keep this last, it overrides addTriplets.
+    if (m_LRTmode) {
+      m_finderCfg.oldTuningsCurvatureHighEtaFraction = 1.f;
+      m_finderCfg.oldTuningsCurvatureLowEtaFraction = 1.f;
+      m_finderCfg.oldTuningsPhiWindowFraction = 1.f;
+      m_finderCfg.minSeedLevel = 2;
+      m_finderCfg.addTriplets = false;
+    }
 
     m_filterCfg.sigmaMS = m_sigmaMS;
     m_filterCfg.radLen = m_radLen;
@@ -319,15 +384,18 @@ void GbtsSeedingTool::printGbtsConfig() const {
   ATH_MSG_DEBUG("===== GBTS finder config =====");
   ATH_MSG_DEBUG( "beamSpotCorrection: " << m_finderCfg.beamSpotCorrection);
   ATH_MSG_DEBUG( "connectorInputFile: " << m_connectorInputFile.value());
-  ATH_MSG_DEBUG( "lutInputFile: " << m_finderCfg.lutInputFile);
-  ATH_MSG_DEBUG( "lrtMode: " << m_finderCfg.lrtMode);
+  ATH_MSG_DEBUG( "lutInputFile: " << m_lutFile.value());
+  ATH_MSG_DEBUG( "LRTmode: " << m_LRTmode.value());
+  ATH_MSG_DEBUG( "useStripConnections: " << m_finderCfg.useStripConnections);
   ATH_MSG_DEBUG( "useClusterWidthCuts: " << m_finderCfg.useClusterWidthCuts);
   ATH_MSG_DEBUG( "matchBeforeCreate: " << m_finderCfg.matchBeforeCreate);
-  ATH_MSG_DEBUG( "useOldTunings: " << m_finderCfg.useOldTunings);
+  ATH_MSG_DEBUG( "useOldTuningsCurvature: " << m_finderCfg.useOldTuningsCurvature);
+  ATH_MSG_DEBUG( "useOldTuningsPhiWindow: " << m_finderCfg.useOldTuningsPhiWindow);
+  ATH_MSG_DEBUG( "minSeedLevel: " << m_finderCfg.minSeedLevel);
   ATH_MSG_DEBUG( "tauRatioPrecut: " << m_finderCfg.tauRatioPrecut);
   ATH_MSG_DEBUG( "tauRatioCut: " << m_finderCfg.tauRatioCut);
   ATH_MSG_DEBUG( "tauRatioCorr: " << m_finderCfg.tauRatioCorr);
-  ATH_MSG_DEBUG( "etaBinWidthOverride: " << m_finderCfg.etaBinWidthOverride);
+  ATH_MSG_DEBUG( "etaBinWidthOverride: " << m_etaBinWidthOverride.value());
   ATH_MSG_DEBUG( "nMaxPhiSlice: " << m_finderCfg.nMaxPhiSlice);
   ATH_MSG_DEBUG( "minPt: " << m_finderCfg.minPt);
   ATH_MSG_DEBUG( "useEtaBinning: " << m_finderCfg.useEtaBinning);
@@ -343,7 +411,7 @@ void GbtsSeedingTool::printGbtsConfig() const {
   ATH_MSG_DEBUG( "validateTriplets: " << m_finderCfg.validateTriplets);
   ATH_MSG_DEBUG( "useAdaptiveCuts: " << m_finderCfg.useAdaptiveCuts);
   ATH_MSG_DEBUG( "addTriplets: " << m_finderCfg.addTriplets);
-  ATH_MSG_DEBUG( "maxEtaAddTriplets: " << m_finderCfg.maxAbsEtaAddTripelts);
+  ATH_MSG_DEBUG( "maxEtaAddTriplets: " << m_finderCfg.maxAbsEtaAddTriplets);
   ATH_MSG_DEBUG("cutDphiMax: " << m_finderCfg.cutDPhiMax);
   ATH_MSG_DEBUG("cutDCurvMax: " << m_finderCfg.cutDCurvMax);
   ATH_MSG_DEBUG("minDeltaPhi: " << m_finderCfg.minDeltaPhi);
