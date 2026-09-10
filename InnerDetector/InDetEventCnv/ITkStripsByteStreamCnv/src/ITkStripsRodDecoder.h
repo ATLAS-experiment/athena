@@ -115,7 +115,7 @@ class ITkStripsRodDecoder : public extends<AthAlgTool, IITkStripsRodDecoder>
   enum ITk_DecoderNumbers { N_SIDES = 2,
                             N_CHIPS_PER_SIDE = 6,
                             N_STRIPS_PER_CHIP = 128,
-                            N_STRIPS_PER_SIDE = N_CHIPS_PER_SIDE*N_STRIPS_PER_CHIP,
+                            N_STRIPS_PER_SIDE = 9999,
   }; //Check this numbers
 
   /** Struct to hold data shared in methods used in fillCollection method */
@@ -135,8 +135,6 @@ class ITkStripsRodDecoder : public extends<AthAlgTool, IITkStripsRodDecoder>
     std::vector<int> errorHit;
 
     int side {-1};
-    int oldSide  {-1};
-    int oldStrip {INVALID_STRIP};
     int linkNumber{0}; // Determined from header and may be changed for links using Rx redundancy
 
     std::array<bool, N_STRIPS_PER_SIDE*N_SIDES> saved{};//defaults to false
@@ -159,41 +157,20 @@ class ITkStripsRodDecoder : public extends<AthAlgTool, IITkStripsRodDecoder>
 
     void reset() {
       strip = INVALID_STRIP;
-      oldStrip = INVALID_STRIP;
-      oldSide = -1;
       groupSize = 0;
       errors = 0;
       saved.fill(false);
       errorHit.clear();
     };
-    void setOld() {
-      oldStrip = strip;
-      oldSide = side;
-      groupSize = 0;
+    void setSaved(const int code) {
+      saved.at(side*N_STRIPS_PER_SIDE + strip) = code;
     }
-    void setSaved(const bool isOld, const int code) {
-      if (isOld) {
-        saved.at(oldSide*N_STRIPS_PER_SIDE + oldStrip) = code;
-      }
-      else {
-        saved.at(   side*N_STRIPS_PER_SIDE +    strip) = code;
-      }
-    }
-    bool isSaved(const bool isOld) {
-      if (isOld) {
-        unsigned int idx = static_cast<std::size_t>(oldSide*N_STRIPS_PER_SIDE + oldStrip);
-        return idx  < saved.size() ? saved[idx] : true;
-      }
-      else {
-        const unsigned int  idx = static_cast<unsigned int>(side*N_STRIPS_PER_SIDE +    strip);
-        return idx < saved.size() ? saved[idx] : true;
-      }
+    bool isSaved() {
+      unsigned int idx = static_cast<std::size_t>(side*N_STRIPS_PER_SIDE + strip);
+      return idx  < saved.size() ? saved[idx] : true;
     }
     bool isStripValid() const {
        return static_cast<unsigned int>(strip) < N_STRIPS_PER_SIDE;
-    }
-    bool isOldStripValid() const {
-       return static_cast<unsigned int>(oldStrip) < N_STRIPS_PER_SIDE;
     }
     void setStripInvalid()  {
        strip = INVALID_STRIP;
@@ -236,12 +213,10 @@ class ITkStripsRodDecoder : public extends<AthAlgTool, IITkStripsRodDecoder>
    *   0 if collection was deliberately skipped (for trigger)
    *  -1 if there was an error in the decoding - will be passed on as StatusCode::RECOVERABLE by fillCollection()
    *
-   * @param isOld if true use data.oldStrip, otherwise use data.strip.
    * @param data Struct to hold data shared in methods used in fillCollection method
    * @param cache Cache.
    */
-  int makeRDO(const bool isOld,
-              SharedData& data,
+  int makeRDO(SharedData& data,
               CacheHelper& cache,
               DataPool<SCT3_RawData>* dataItemsPool) const;
 

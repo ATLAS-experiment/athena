@@ -434,8 +434,7 @@ namespace {
   }
 
 
-  // Eigen::Vector3d getJab(const Eigen::Vector3d local_hits, const xAOD::IParticle& j)
-  Eigen::Vector3d getJab(const float local_hitX, const float local_hitY, const float local_hitZ, const xAOD::IParticle& j)
+  Eigen::Matrix3d getJabTransform(const xAOD::IParticle& j)
   {
     // I want to compute jab coordinates: jet projection, adjacent
     // projection, beamline projection. The "adjacent" projection
@@ -443,7 +442,6 @@ namespace {
     // isn't a fully orthogonal basis.
 
     auto p4 = j.p4();
-    Eigen::Vector3d local_hits (local_hitX, local_hitY, local_hitZ);
     Eigen::Vector3d bhat(0,0,1);
     Eigen::Vector3d jet (p4.X(), p4.Y(), p4.Z());
     Eigen::Vector3d jhat = jet.normalized();
@@ -452,38 +450,52 @@ namespace {
     // build the matrix m that maps the jab displacement such that m*jab = detector
     Eigen::Matrix3d m;
     m << jhat, ahat, bhat;
-    // now solve this for jab = m^-1 * detector
-    Eigen::Vector3d jab = m.inverse() * local_hits;
-    return jab;
+    // jab = m^-1 * detector; the caller applies it to each hit
+    return m.inverse();
   }
+
+  // One jab coordinate for a whole hit sequence: the jet four-vector and the
+  // 3x3 inverse are built once per jet rather than once per hit and coordinate.
+  class JabSeqGetter
+  {
+    private:
+      int m_row;
+      SG::AuxElement::ConstAccessor<float> m_hitX;
+      SG::AuxElement::ConstAccessor<float> m_hitY;
+      SG::AuxElement::ConstAccessor<float> m_hitZ;
+    public:
+      explicit JabSeqGetter(int row):
+        m_row(row),
+        m_hitX("HitsXRelToBeamspot"),
+        m_hitY("HitsYRelToBeamspot"),
+        m_hitZ("HitsZRelToBeamspot")
+        {}
+
+      std::vector<double> operator()(
+        const xAOD::IParticle& jet,
+        const std::vector<const xAOD::TrackMeasurementValidation*>& hits) const
+      {
+        const Eigen::RowVector3d row = getJabTransform(jet).row(m_row);
+        std::vector<double> sequence;
+        sequence.reserve(hits.size());
+        for (const xAOD::TrackMeasurementValidation* hit: hits) {
+          sequence.push_back(
+            row(0) * m_hitX(*hit) +
+            row(1) * m_hitY(*hit) +
+            row(2) * m_hitZ(*hit));
+        }
+        return sequence;
+      }
+  };
 
 
   // Getters from general xAOD::TrackMeasurementValidation and derived classes
   std::optional<SequenceGetterFunc<xAOD::TrackMeasurementValidation>>
   getterFromHits(const std::string& name)
   {
-    using Tmv = xAOD::TrackMeasurementValidation;
-    using Jet = xAOD::IParticle;
-
-    SG::AuxElement::ConstAccessor<float> local_hitX("HitsXRelToBeamspot");
-    SG::AuxElement::ConstAccessor<float> local_hitY("HitsYRelToBeamspot");
-    SG::AuxElement::ConstAccessor<float> local_hitZ("HitsZRelToBeamspot");
-
-    if (name == "j") {
-      return CustomSeqGetter<Tmv>([local_hitX, local_hitY, local_hitZ](const Tmv& tmv, const Jet& j) {
-        return getJab(local_hitX(tmv), local_hitY(tmv), local_hitZ(tmv), j)(0);
-      });
-    }
-    else if (name == "a") {
-      return CustomSeqGetter<Tmv>([local_hitX, local_hitY, local_hitZ](const Tmv& tmv, const Jet& j) {
-        return getJab(local_hitX(tmv), local_hitY(tmv), local_hitZ(tmv), j)(1);
-      });
-    }
-    else if (name == "b") {
-      return CustomSeqGetter<Tmv>([local_hitX, local_hitY, local_hitZ](const Tmv& tmv, const Jet& j) {
-        return getJab(local_hitX(tmv), local_hitY(tmv), local_hitZ(tmv), j)(2);
-      });
-    }
+    if (name == "j") return JabSeqGetter(0);
+    if (name == "a") return JabSeqGetter(1);
+    if (name == "b") return JabSeqGetter(2);
     return std::nullopt;
   }
 

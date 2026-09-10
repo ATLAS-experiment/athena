@@ -89,7 +89,7 @@ StatusCode TrigEgammaPrecisionPhotonHypoAlg::execute( const EventContext& contex
           idx++;
         }
 
-        toolInput.push_back(info);
+        toolInput.push_back(std::move(info));
         validphotons++;
       }
     }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGEGAMMAHYPO_ITRIGPRECISIONELECTRONHYPOTOOL_H
 #define TRIGEGAMMAHYPO_ITRIGPRECISIONELECTRONHYPOTOOL_H 1
@@ -37,8 +37,8 @@ class ITrigEgammaPrecisionElectronHypoTool
     TrigCompositeUtils::Decision* decision;
     const TrigRoiDescriptor* roi;
     const xAOD::Electron* electron;
-    std::map<std::string, bool> pidDecorator;
-    std::map<std::string, float> valueDecorator;
+    std::map<std::string, bool, std::less<>> pidDecorator;
+    std::map<std::string, float, std::less<>> valueDecorator;
     const TrigCompositeUtils::DecisionIDContainer previousDecisionIDs;
   };
   

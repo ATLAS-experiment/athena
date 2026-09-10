@@ -24,7 +24,9 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 /**
  * @class ITkPixelCnvTool
  * This tool orchestrates the individual steps
- * in the BS conversion
+ * in the BS conversion - sorting the hits into
+ * individual FEs, encoding the data streams
+ * and formatting them into eformat fragments
  */
 
 class ITkPixelCnvTool : public AthAlgTool {
@@ -45,7 +47,7 @@ class ITkPixelCnvTool : public AthAlgTool {
         ToolHandle<ITkPixelEncodingTool> m_encodingTool{this, "EncodingTool", "", "The encoding tool"};
 
         ServiceHandle<IByteStreamCnvSvc> m_byteStreamCnvSvc{this, "ByteStreamConvertionService", "ByteStreamCnvSvc", "The Byte stream coversion service"};
-        
+
         SG::ReadCondHandleKey<ITkPixelCablingData> m_pixelCablingKey{this, "PixelCablingKey", "", "Cond Key of Pixel Cabling"};
 
         ToolHandle<ITkPixelDataRateMonTool> m_dataRateMonTool{this, "DataRateMonitoringTool", "", "Monitoring tool for data rate evaluation"};

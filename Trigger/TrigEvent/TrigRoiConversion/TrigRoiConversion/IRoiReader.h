@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGROICONVERSION_IROIREADER_H
@@ -7,7 +7,6 @@
 
 #include <string>
 #include <vector>
-#include <iostream>
 
 #include "AsgTools/IAsgTool.h"
 
@@ -21,10 +20,5 @@ public:
   virtual void execute( std::vector<std::string>& keys ) = 0;
 
 };
-
-inline std::ostream& operator<<( std::ostream& s, const IRoiReader& ) { 
-  return s;
-}
-
 
 #endif

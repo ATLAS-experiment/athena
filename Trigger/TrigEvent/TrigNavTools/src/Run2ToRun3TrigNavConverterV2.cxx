@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <boost/functional/hash.hpp>
@@ -193,7 +193,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::initialize()
     if ( collName.empty() )
       m_collectionsToSaveDecoded[id]; // creates empty set
     else
-      m_collectionsToSaveDecoded[id].insert(collName);
+      m_collectionsToSaveDecoded[id].insert(std::move(collName));
   }
 
   for (const auto &name : m_roisToSave)
@@ -202,9 +202,9 @@ StatusCode Run2ToRun3TrigNavConverterV2::initialize()
   }
 
   // sanity check, i.e. if there is at least one entry w/o the coll name no other entries are needed for a given clid
-  for (auto [clid, keysSet] : m_collectionsToSaveDecoded)
+  for (const auto & [clid, keysSet] : m_collectionsToSaveDecoded)
   {
-    if (keysSet.size() > 1 and keysSet.count("") != 0)
+    if (!keysSet.empty() and keysSet.contains(""))
     {
       ATH_MSG_ERROR("Bad configuration for CLID " << clid << " requested saving of all (empty coll name configures) collections, yet there are also specific keys");
       return StatusCode::FAILURE;
@@ -213,8 +213,8 @@ StatusCode Run2ToRun3TrigNavConverterV2::initialize()
   }
 
   bool anyChainBad=false;
-  for ( auto chain: m_chainsToSave ) {
-    if ( chain.find('*') != std::string::npos or chain.find('|') != std::string::npos ) {
+  for ( const auto & chain: m_chainsToSave ) {
+    if ( chain.contains('*') or chain.contains('|')) {
       ATH_MSG_ERROR("Supplied chain name: " << chain << " contains wildcard characters, this is not supported by the conversion tool");
       anyChainBad=true;
     }
@@ -267,7 +267,11 @@ StatusCode Run2ToRun3TrigNavConverterV2::execute(const EventContext &context) co
   {
     SG::ReadHandle navReadHandle(m_trigNavKey, context);
     ATH_CHECK(navReadHandle.isValid());
-    standaloneNav.deserialize(navReadHandle->serialized());
+    bool ok = standaloneNav.deserialize(navReadHandle->serialized());
+    if (not ok)[[unlikely]]{
+      ATH_MSG_ERROR("deserialize returned false");
+      return StatusCode::FAILURE;
+    }
     run2NavigationPtr = &standaloneNav;
   }
   else
@@ -1355,16 +1359,17 @@ StatusCode Run2ToRun3TrigNavConverterV2::linkTrkNode(ConvProxySet_t &convProxies
           if (ROIElementLink.isValid())
           {
             static const SG::Decorator<ElementLink<TrigRoiDescriptorCollection>> viewBookkeeper("viewIndex");
-            auto [sgKey, sgCLID, sgName] = getSgKey(run2Nav, trk);
+            const auto & [sgKey, sgCLID, sgName] = getSgKey(run2Nav, trk);
             if (sgCLID == m_TrackParticleContainerCLID || sgCLID == m_TauTrackContainerCLID)
             {
-              const char *tName = sgCLID == m_TrackParticleContainerCLID ? "TEMP_TRACKS" : "TEMP_TAU_TRACKS";
+              const char *tName = (sgCLID == m_TrackParticleContainerCLID) ? "TEMP_TRACKS" : "TEMP_TAU_TRACKS";
+              const std::string tNameStr{tName};
               auto d = std::make_unique<TrigCompositeUtils::Decision>();
               d->makePrivateStore();
               d->typelessSetObjectLink(tName, sgKey, sgCLID, trk.getIndex().objectsBegin());
               if (sgCLID == m_TrackParticleContainerCLID)
               {
-                for (const ElementLink<xAOD::TrackParticleContainer> &track : d->objectCollectionLinks<xAOD::TrackParticleContainer>(tName))
+                for (const ElementLink<xAOD::TrackParticleContainer> &track : d->objectCollectionLinks<xAOD::TrackParticleContainer>(tNameStr))
                 {
                   if (track.isValid())
                   {
@@ -1375,7 +1380,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::linkTrkNode(ConvProxySet_t &convProxies
               }
               if (m_includeTauTrackFeatures == false && sgCLID == m_TauTrackContainerCLID)
               {
-                for (const ElementLink<xAOD::TauTrackContainer> &track : d->objectCollectionLinks<xAOD::TauTrackContainer>(tName))
+                for (const ElementLink<xAOD::TauTrackContainer> &track : d->objectCollectionLinks<xAOD::TauTrackContainer>(tNameStr))
                 {
                   if (track.isValid())
                   {

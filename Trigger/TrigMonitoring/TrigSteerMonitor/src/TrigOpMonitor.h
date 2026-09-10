@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRIGONLINEMONITOR_TRIGOPMONITOR_H
-#define TRIGONLINEMONITOR_TRIGOPMONITOR_H
+#ifndef TRIGSTEERMONITOR_TRIGOPMONITOR_H
+#define TRIGSTEERMONITOR_TRIGOPMONITOR_H
 
 /**
  * @file   TrigOpMonitor.h

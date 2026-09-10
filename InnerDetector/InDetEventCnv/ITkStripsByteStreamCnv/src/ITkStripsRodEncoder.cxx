@@ -81,9 +81,8 @@ namespace { // Anonymous namespace
     }
     
     barrelEC = (barrelEC == 0) ? 1 : 0;
-      
     //Set the eta group number    
-    hcckey = hcckey | (eta_group);
+    hcckey = hcckey | (eta_mod); // For now, use eta_mod. This should later be changed to eta_group
     
     return hcckey << 8;
   }
@@ -164,9 +163,7 @@ ITkStripsRodEncoder::fillROD(std::vector<uint32_t>& vec32Data, const uint32_t& r
 
     offlineHash = m_itkStripsID->wafer_hash(offlineID(rdo));
     keyToHash.insert({key,offlineHash});
-    
     ATH_MSG_DEBUG("barrel: "<< barrelEC<<" sideAC: " << (uint32_t)sideAC << " disk: "<<(uint32_t)disk << " side: " << (uint32_t)side <<" phi_mod: "<<(uint32_t)phi_mod << " eta_mod: " << eta_mod << " eta group: "<<(uint32_t)eta_group << " chips per module: " << (uint32_t)chips_per_module << " " << (uint32_t)robID << " " << (uint32_t)m_itkStripsID->wafer_hash(offlineID(rdo)));
-    
     ATH_MSG_DEBUG("key: " << std::bitset<32>(key));
     auto& StripData = allStripData[key];
 
@@ -178,7 +175,7 @@ ITkStripsRodEncoder::fillROD(std::vector<uint32_t>& vec32Data, const uint32_t& r
     int strip = getStrip(rdo);
     int chip = static_cast<int>(std::floor(strip / 128));
     int strip_position = strip % 128;
-    int strip_logical_channel = 2*strip_position + (eta_mod & 1);
+    int strip_logical_channel = 2*strip_position + (isNear(eta_mod, barrelEC == 0)? 0 : 1);
 
     ATH_MSG_DEBUG("strip N: "<< strip << " chip n: " << chip << " Strip position: " << strip_position << " Strip position logical: " << strip_logical_channel);
     StripData[chip].set(strip_logical_channel);

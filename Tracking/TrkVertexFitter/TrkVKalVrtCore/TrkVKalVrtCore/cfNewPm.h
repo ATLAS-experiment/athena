@@ -11,9 +11,9 @@
 #include "TrkVKalVrtCore/TrkVKalVrtCoreBase.h"
 
 namespace Trk {
-void cfnewpm(double *par, const double *xyzStart, double *xyzEnd,
+void cfnewpm(const double *par, const double *xyzStart, const double *xyzEnd,
              const double ustep, double *parn, double *closePoint,
-             VKalVrtControlBase *CONTROL);
+             const VKalVrtControlBase * CONTROL);
 
 }  // namespace Trk
 

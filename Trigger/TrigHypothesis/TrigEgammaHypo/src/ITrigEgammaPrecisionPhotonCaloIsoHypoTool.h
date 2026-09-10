@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGEGAMMAHYPO_ITRIGPHOTONCALOISOHYPOTOOL_H
 #define TRIGEGAMMAHYPO_ITRIGPHOTONCALOISOHYPOTOOL_H 1
@@ -35,8 +35,8 @@ class ITrigEgammaPrecisionPhotonCaloIsoHypoTool
     TrigCompositeUtils::Decision* decision;
     const TrigRoiDescriptor* roi;
     const xAOD::Photon_v1* photon;
-    std::map<std::string, float> valueDecorator;
-    std::map<std::string, bool> pidDecorator;
+    std::map<std::string, float, std::less<>> valueDecorator;
+    std::map<std::string, bool, std::less<>> pidDecorator;
     const TrigCompositeUtils::DecisionIDContainer previousDecisionIDs;
   };
   

@@ -43,8 +43,8 @@ class ITrigEgammaFastCaloHypoTool
     const TrigRoiDescriptor* roi;
     const xAOD::TrigEMCluster* cluster;
     const xAOD::TrigRingerRings* ringerShape;
-    std::map<std::string, float> valueDecorator;
-    std::map<std::string, bool> pidDecorator;
+    std::map<std::string, float, std::less<>> valueDecorator;
+    std::map<std::string, bool, std::less<>> pidDecorator;
     const TrigCompositeUtils::DecisionIDContainer previousDecisionIDs;
   };
   

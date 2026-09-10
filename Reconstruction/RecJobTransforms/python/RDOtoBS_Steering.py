@@ -34,9 +34,6 @@ def RDOtoBS_Steering(flags):
     if flags.GeoModel.Run >= LHCPeriod.Run4:
         # ITk pixel
         if flags.Detector.EnableITkPixel:
-            from ITkPixelCabling.ITkPixelCablingAlgConfig import ITkPixelCablingAlgCfg
-            acc.merge(ITkPixelCablingAlgCfg(flags, name="ITkPixelCablingAlg", UseTestCabling=True))
-
             from PixelReadoutGeometry.PixelReadoutGeometryConfig import ITkPixelReadoutManagerCfg
             acc.merge(ITkPixelReadoutManagerCfg(flags, name="ITkPixelReadoutManager"))
 
