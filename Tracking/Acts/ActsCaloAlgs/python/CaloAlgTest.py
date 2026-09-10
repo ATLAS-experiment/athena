@@ -30,47 +30,15 @@ if __name__=="__main__":
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     cfg.merge(PoolReadCfg(cfgFlags))
 
-
-    from eflowRec.PFRun3Config import PFFullCfg
-    cfg.merge(PFFullCfg(cfgFlags,runTauReco=True))
-
-
-    from eflowRec.PFRun3Config import PFTauFELinkCfg
-    cfg.merge(PFTauFELinkCfg(cfgFlags))
-
-
-    from eflowRec.PFRun3Remaps import ListRemaps
-
-
-    list_remaps=ListRemaps(cfg, 'AOD')
-    for mapping in list_remaps:
-        cfg.merge(mapping)    
-
-
-    from PFlowUtils.configureRecoForPFlow import configureRecoForPFlowCfg
-    cfg.merge(configureRecoForPFlowCfg(cfgFlags))
-
-
-    #Add containers needed to run jet finding from resultant AOD for pflow CP studies
-    from PFlowUtils.configureRecoForPFlow import addContainersForPFlowCPStudiesCfg
-    cfg.merge(addContainersForPFlowCPStudiesCfg(cfgFlags))
-
-
     from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
     from pathlib import Path
-    trackingGeometrySvc = ActsTrackingGeometrySvcCfg(cfgFlags,
+    cfg.merge(ActsTrackingGeometrySvcCfg(cfgFlags,
                                     RunConsistencyChecks=True,
                                     #  ConsistencyCheckOutput="trk_geo_check.csv", # enable debug output writing
                                     BlueprintGraphviz=str(Path.cwd() / "blueprint.dot"),
-                                    ObjDebugOutput=False)
+                                    ObjDebugOutput=False))
 
-
-    cfg.merge(trackingGeometrySvc)
-
-    #cfg.getEventAlgo("PFTrackSelector").OutputLevel=DEBUG
-    cfg.getService("MessageSvc").debugLimit=999999999
-    cfg.getService("MessageSvc").verboseLimit=999999999
-
+  
     from ActsConfig.CaloExtensionBuilderConfig import ActsCaloExtensionBuilderCfg
     cfg.merge(ActsCaloExtensionBuilderCfg(cfgFlags))
 
