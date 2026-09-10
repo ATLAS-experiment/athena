@@ -18,7 +18,7 @@
 #include <vector>
 #include <unordered_map>
 #include <algorithm>
-#include <boost/functional/hash.hpp>
+#include "CxxUtils/hash_utils.h"
 
 #include "TTree.h"
 
@@ -99,7 +99,7 @@ template <typename Container>
 struct container_hash
 {
   std::size_t operator()(Container const& c) const
-  { return boost::hash_range(c.begin(), c.end()); }
+  { return CxxUtils::hash_range(c.begin(), c.end()); }
 };
 
 

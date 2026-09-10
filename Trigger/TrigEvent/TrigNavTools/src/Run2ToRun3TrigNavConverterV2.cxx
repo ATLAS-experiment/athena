@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <boost/functional/hash.hpp>
+#include "CxxUtils/hash_utils.h"
 #include <GaudiKernel/StatusCode.h>
 #include "AthLinks/ElementLinkVector.h"
 #include "TrigConfHLTUtils/HLTUtils.h"
@@ -1625,18 +1625,18 @@ uint64_t Run2ToRun3TrigNavConverterV2::feaToHash(const std::vector<HLT::TriggerE
     }
 
     ATH_MSG_VERBOSE("Including FEA in hash CLID: " << fea.getCLID() << " te Id: " << te_ptr->getId());
-    boost::hash_combine(hash, fea.getCLID());
-    boost::hash_combine(hash, fea.getIndex().subTypeIndex());
-    boost::hash_combine(hash, fea.getIndex().objectsBegin());
-    boost::hash_combine(hash, fea.getIndex().objectsEnd());
+    CxxUtils::hash_combine(hash, fea.getCLID());
+    CxxUtils::hash_combine(hash, fea.getIndex().subTypeIndex());
+    CxxUtils::hash_combine(hash, fea.getIndex().objectsBegin());
+    CxxUtils::hash_combine(hash, fea.getIndex().objectsEnd());
   }
   // Include the originating TE identifier and pointer to ensure that
   // navigation elements stemming from different Trigger Elements do not
   // collapse into a single proxy even if their features are otherwise
   // identical. The TE ID alone is not sufficient, as multiple clones of the
   // same TE share the ID, so we also add the pointer value to the hash.
-  boost::hash_combine(hash, te_ptr->getId());
-  boost::hash_combine(hash, reinterpret_cast<std::uintptr_t>(te_ptr));
+  CxxUtils::hash_combine(hash, te_ptr->getId());
+  CxxUtils::hash_combine(hash, reinterpret_cast<std::uintptr_t>(te_ptr));
   ATH_MSG_VERBOSE("Obtained FEA hash " << hash);
   return hash;
 }
