@@ -242,7 +242,7 @@ StatusCode TauWPDecorator::execute(xAOD::TauJet& tau) const {
   else if (nProng == 2) histArray = m_hists2p;
   else histArray = m_hists3p;
   
-  std::array<double, 2> cuts = {-0.01, 14.01}; // lower and upper bounday of the score
+  std::array<double, 2> cuts = {m_ScoreBounds[0], m_ScoreBounds[1]}; // lower and upper boundaRy of the score
   std::array<double, 2> effs = {1.0, 0.0}; // efficiency corresponding to the score cut
   bool gotLow = false; // whether lower bounday is found
   bool gotHigh = false; // whether upper bounday is found
