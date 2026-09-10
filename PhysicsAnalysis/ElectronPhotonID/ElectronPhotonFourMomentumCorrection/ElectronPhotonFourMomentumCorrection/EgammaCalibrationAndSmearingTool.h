@@ -6,6 +6,7 @@
 #define EGAMMA_CALIB_TOOL_H_
 
 #include <array>
+#include <cstdint>
 #include <functional>
 #include <map>
 #include <memory>
@@ -198,8 +199,7 @@ class EgammaCalibrationAndSmearingTool
   enum class ResolutionDecorrelation { FULL, ONENP };
   static const int AUTO = 2;  // this is used as a third state for boolean
                               // properties (true/false/automatic)
-  typedef unsigned int RandomNumber;
-  typedef std::function<int(const EgammaCalibrationAndSmearingTool&,
+  typedef std::function<Philox4x32Engine(const EgammaCalibrationAndSmearingTool&,
                             columnar::EgammaId, columnar::EventInfoId)>
       IdFunction;
   typedef std::function<bool(const EgammaCalibrationAndSmearingTool&, columnar::EgammaId)> EgammaPredicate;
@@ -301,6 +301,10 @@ class EgammaCalibrationAndSmearingTool
   Gaudi::Property<std::string> m_pVtxKey{
     this, "PrimaryVerticesKey", "PrimaryVertices",
       "Name of the primary vertex container"};
+
+  Gaudi::Property<std::uint64_t> m_seedBase{
+    this, "seedBase", 42,
+      "extra seed component to incorporate into the random seed"};
 
   void setupSystematics();
 
