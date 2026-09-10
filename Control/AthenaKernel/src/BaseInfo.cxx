@@ -96,6 +96,8 @@ struct BaseInfoBaseImpl {
   };
   static Deleter s_deleter;
 
+  BaseInfoBase::destroy_fn* m_destroy = nullptr;
+
   /// For thread-safety.
   typedef std::mutex mutex_t;
   typedef std::lock_guard<mutex_t> lock_t;
@@ -430,6 +432,18 @@ BaseInfoBase::copy_conversion (CLID clid) const
 
 
 /**
+ * @brief Delete an instance of the described type.
+ * @param p Pointer to the instance to delete (a @a T* cast to a @a void*).
+ */
+void BaseInfoBase::destroy (void* p) const
+{
+  BaseInfoBaseImpl::lock_t lock (m_impl->m_mutex);
+  if (m_impl->m_destroy)
+    m_impl->m_destroy (p);
+}
+
+
+/**
  * @brief Add a new copy conversion.
  * @param tinfo The @c std::type_info of the target class.
  * @param cnv A @c CopyConversionBase instance describing the conversion.
@@ -526,11 +540,13 @@ BaseInfoBaseImpl::info::info (BaseInfoBase::castfn_t* converter /*= 0*/,
  * @brief Constructor.
  * @param tinfo The @c std::type_info for this class.
  */
-BaseInfoBase::BaseInfoBase (const std::type_info& tinfo)
+BaseInfoBase::BaseInfoBase (const std::type_info& tinfo,
+                            destroy_fn* destroy)
   : m_impl (new BaseInfoBaseImpl)
 {
   m_impl->m_clid = CLIDRegistry::typeinfoToCLID (tinfo);
   m_impl->m_typeinfo = &tinfo;
+  m_impl->m_destroy = destroy;
   m_impl->m_needs_init = true;
 
   BaseInfoBaseImpl::lock_t lock (BaseInfoBaseImpl::s_mutex);
