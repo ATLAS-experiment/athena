@@ -4,6 +4,7 @@
 #define ATHEXMPI_RPCFUNCTIONENTRY_H
 
 // Local include(s)
+#include "AthenaKernel/ClusterMessage.h"
 #include "HostDevicePtr.h"
 
 // System include(s)
@@ -12,6 +13,7 @@
 #include <memory>
 #include <string>
 #include <string_view>
+#include <typeinfo>
 #include <vector>
 
 namespace RemoteCall {
@@ -20,25 +22,43 @@ using RPCFunctionID = std::size_t;
 
 /// Describes an RPC argument / return value
 struct RPCArgEntry {
-  enum class ArgType : char { HostPtr, DevicePtr };
-  const ArgType argType;
-  const std::type_info* valType = nullptr;
-  std::size_t len;
-  std::size_t align;
+  /// Receive destination for arguments, or source memory for results.
+  const Destination destination;
+  const std::type_info* valType =
+      nullptr;              ///< Registered scalar or range type.
+  std::size_t elementSize;  ///< Size of one transferred element in bytes.
+  std::size_t align;        ///< Required buffer alignment in bytes.
+  bool isRange;             ///< Whether the registered type describes a range.
 
-  template <typename T>
-  RPCArgEntry(HostPtr<T> placeholder);
+  /// Describe an argument from its wrapper type.
+  template <RPCMemory M, RPCSupported T>
+  RPCArgEntry(RPCArg<M, T> placeholder);
 
-  template <typename T>
-  RPCArgEntry(DevicePtr<T> placeholder);
+  /// Describe a result from its wrapper type without taking ownership.
+  template <RPCMemory M, RPCSupported T>
+  RPCArgEntry(const RPCRet<M, T>& placeholder);
+};
+
+/// Holds a result allocation until the dispatcher finishes sending it.
+struct RPCResultBuffer {
+  void* ptr;                    ///< Address of the result data.
+  std::size_t len;              ///< Number of bytes to send.
+  std::size_t align;            ///< Required buffer alignment in bytes.
+  std::shared_ptr<void> owner;  ///< Allocation owner and its deallocator.
 };
 
 /// Describes an RPC callable function
 class RPCFunctionEntry {
  public:
-  using Wrapper = std::move_only_function<std::vector<void*>(
-      const std::vector<void*>&) const>;
+  /// Invoke the registered function using received buffers and return owned
+  /// results.
+  using Wrapper = std::move_only_function<std::vector<RPCResultBuffer>(
+      const std::vector<ClusterMessage::DataDescr>&) const>;
 
+  /// Register a callable and derive its argument and result descriptions.
+  /// @param f Function whose parameters use RPCArg and whose results use
+  /// RPCRet.
+  /// @param name Name used to identify the remote function.
   template <RPCCallable F>
   RPCFunctionEntry(F&& f, std::string name);
 
@@ -50,10 +70,20 @@ class RPCFunctionEntry {
   template <RPCSupported... Args>
   bool validateArgTypes() const;
 
-  /// Convert a type-erased vector of void* to a tuple of unique_ptrs
+  /// Check the requested return count and types against the registration.
   template <RPCSupported... Rs>
-  std::tuple<std::unique_ptr<Rs>...> retrieve(
-      std::vector<void*>&& returnVals) const;
+  bool validateReturnTypes() const;
+
+  /// Transfer received buffers into typed results with their original
+  /// deallocators.
+  /// @param returnVals Received result descriptors, consumed on successful
+  /// validation.
+  /// @return Owned host buffers in the registered result order.
+  /// @throws std::logic_error if types, counts or buffer descriptions do not
+  /// match.
+  template <RPCSupported... Rs>
+  std::tuple<RPCRet<Host, Rs>...> retrieve(
+      std::vector<ClusterMessage::DataDescr>&& returnVals) const;
 
   const Wrapper& wrapper() const noexcept;
 

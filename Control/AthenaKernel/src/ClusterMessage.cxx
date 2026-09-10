@@ -5,6 +5,7 @@
 
 #include <bit>
 #include <cstdint>
+#include <utility>
 
 ClusterMessage::DataDescr::DataDescr(void* ptr, std::size_t len,
                                      std::size_t align)
@@ -79,15 +80,20 @@ ClusterMessage::DataDescr& ClusterMessage::DataDescr::operator=(
   return *this;
 }
 
-void* ClusterMessage::DataDescr::release() {
-  if (allocating_memory_resource != nullptr &&
-      allocating_memory_resource != std::pmr::new_delete_resource()) {
-    throw std::runtime_error(
-        "We can only release a DataDescr holding a CPU pointer");
+std::shared_ptr<void> ClusterMessage::DataDescr::takeOwnership() {
+  if (allocating_memory_resource == nullptr) {
+    throw std::logic_error("Cannot take ownership of borrowed cluster data");
   }
-
-  allocating_memory_resource = nullptr;
-  return ptr;
+  auto* resource = std::exchange(allocating_memory_resource, nullptr);
+  void* data = std::exchange(ptr, nullptr);
+  const auto bytes = std::exchange(len, 0);
+  const auto alignment = std::exchange(align, 0);
+  // If shared_ptr cannot allocate its bookkeeping storage, it still calls the
+  // deleter.
+  return {data, [resource, bytes, alignment](void* p) {
+            if (p != nullptr)
+              resource->deallocate(p, bytes, alignment);
+          }};
 }
 
 ClusterMessage::ClusterMessage(ClusterMessageType mType, WorkerStatus payload)

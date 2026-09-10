@@ -32,7 +32,12 @@ class RemoteGPUExampleAlg : public AthAsynchronousAlgorithm {
       this, "RemoteGPUSvc", "RemoteCall::RemoteGPUSvc", "Remote GPU service"};
 
   /// Example CPU offloaded function
-  static HostPtr<double> test_fn(HostPtr<int> arg1, HostPtr<double> arg2);
+  static RPCRet<Host, double> test_fn(RPCArg<Host, int> arg1,
+                                      RPCArg<Host, double> arg2);
+
+  /// Return doubled range elements and their count in owned host buffers.
+  static std::tuple<RPCRet<Host, std::span<double>>, RPCRet<Host, std::size_t>>
+  test_range(RPCArg<Host, std::span<double>> values);
 };
 
 }  // namespace RemoteCall

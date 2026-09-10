@@ -6,6 +6,7 @@
 
 #include <array>
 #include <cstdint>
+#include <memory>
 #include <memory_resource>
 #include <optional>
 #include <variant>
@@ -92,7 +93,13 @@ struct ClusterMessage {
 
     DataDescr& operator=(DataDescr&& rhs) noexcept;
 
-    void* release();
+    /// Transfer a received allocation into an owner that retains its
+    /// deallocator. The owner preserves the memory resource, byte count and
+    /// alignment. The descriptor relinquishes ownership and clears ptr, len and
+    /// align.
+    /// @return The owner of the received host or device buffer.
+    /// @throws std::logic_error if this descriptor only borrows the buffer.
+    std::shared_ptr<void> takeOwnership();
 
     ~DataDescr();
   };

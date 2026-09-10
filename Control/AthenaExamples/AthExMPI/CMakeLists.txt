@@ -21,3 +21,7 @@ atlas_add_component(AthExMPI
 
 # Install files from the package.
 atlas_install_python_modules(python/*.py)
+
+atlas_add_test(RPCFunctionEntry_test
+   SOURCES test/RPCFunctionEntry_test.cxx
+   LINK_LIBRARIES AthenaKernel CxxUtils)

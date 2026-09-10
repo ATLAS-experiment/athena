@@ -135,7 +135,7 @@ StatusCode RemoteGPUSvc::runClient() {
       return StatusCode::FAILURE;
     }
     auto& [id, request] = *acc;
-    request->returnVals.push_back(desc.release());
+    request->returnVals.push_back(std::move(desc));
 
     // If complete, set the promise and remove the request
     if (request->returnVals.size() ==
@@ -192,23 +192,23 @@ StatusCode RemoteGPUSvc::runServer() {
       } else {
         // Already exists, this is an argument
         auto& [id, request] = *acc;
-        request->args.push_back(desc.ptr);
         // Necessary because DataDescr manages the memory
         request->argData.push_back(std::move(desc));
         // Run if ready
-        if (request->args.size() == request->rpcFunction->arguments().size()) {
+        if (request->argData.size() ==
+            request->rpcFunction->arguments().size()) {
           // TODO: Do this in a smarter way
           std::jthread(
               [&clusterSvc = this->m_clusterSvc](
                   ServerRequestID id,
                   std::unique_ptr<ServerRequest>&& request) {
-                std::vector<void*> result =
-                    request->rpcFunction->wrapper()(request->args);
+                auto result = request->rpcFunction->wrapper()(request->argData);
                 // Send back the results
                 for (std::size_t i = 0; i < result.size(); ++i) {
-                  const auto& argDef = request->rpcFunction->returnVals()[i];
-                  ClusterMessage::DataDescr desc(result[i], argDef.len,
-                                                 argDef.align);
+                  // Keep each source allocation alive until the blocking MPI
+                  // sends finish. Each message borrows its result buffer.
+                  ClusterMessage::DataDescr desc(result[i].ptr, result[i].len,
+                                                 result[i].align);
                   desc.dest =
                       Destination::Host;  // Returned results always go to CPU
                   desc.evtNumber = request->eventNumber;

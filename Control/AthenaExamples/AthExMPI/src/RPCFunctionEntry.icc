@@ -46,31 +46,39 @@ inline bool RPCFunctionEntry::validateArgTypes() const {
 }
 
 template <RPCSupported... Rs>
-inline std::tuple<std::unique_ptr<Rs>...> RPCFunctionEntry::retrieve(
-    std::vector<void*>&& returnVals) const {
-  if (sizeof...(Rs) != m_returnVals.size()) {
-    // Number of returnVals matches expected
-    throw std::logic_error(
-        "Requested number of return value types don't match RPCFunctionEntry");
-  }
-
-  // Each type matches
+inline bool RPCFunctionEntry::validateReturnTypes() const {
+  if (sizeof...(Rs) != m_returnVals.size())
+    return false;
   std::size_t counter = 0;
-  if (!((typeid(Rs) == *m_returnVals[counter++].valType) && ...)) {
-    throw std::logic_error(
-        "Requested return value types don't match RPCFunctionEntry");
-  }
+  return ((typeid(Rs) == *m_returnVals[counter++].valType) && ...);
+}
 
-  auto returnValsMoved = std::move(returnVals);  // Empty source container
-  if (sizeof...(Rs) != returnValsMoved.size()) {
-    throw std::logic_error(
-        "std::vector<void*> passed to RPCFunctionEntry::retrieve has wrong "
-        "number of elements");
+template <RPCSupported... Rs>
+inline std::tuple<RPCRet<Host, Rs>...> RPCFunctionEntry::retrieve(
+    std::vector<ClusterMessage::DataDescr>&& returnVals) const {
+  if (!validateReturnTypes<Rs...>() || sizeof...(Rs) != returnVals.size()) {
+    throw std::logic_error("RPC return types or result count do not match");
   }
-
-  counter = 0;
-  return std::make_tuple(
-      std::unique_ptr<Rs>(static_cast<Rs*>(returnValsMoved[counter++]))...);
+  // Keep the descriptors in this scope so exceptions release every result
+  // buffer.
+  auto received = std::move(returnVals);
+  auto makeResult = [&received]<typename R>(std::size_t i) {
+    using E = typename RPCDataTraits<R>::element_type;
+    auto& desc = received[i];
+    if (desc.dest != Destination::Host || desc.align < alignof(E) ||
+        desc.len % sizeof(E) != 0 ||
+        (!RPCDataTraits<R>::isRange && desc.len != sizeof(E))) {
+      throw std::logic_error(
+          "Invalid RPC result size, alignment or destination");
+    }
+    const auto count = desc.len / sizeof(E);
+    return RPCRet<Host, R>(desc.takeOwnership(), count);
+  };
+  std::size_t counter = 0;
+  // Braced initialization evaluates left to right, so counter follows result
+  // order.
+  return std::tuple<RPCRet<Host, Rs>...>{
+      makeResult.template operator()<Rs>(counter++)...};
 }
 
 inline const RPCFunctionEntry::Wrapper& RPCFunctionEntry::wrapper()
@@ -118,19 +126,18 @@ inline std::size_t RPCFunctionEntryHash::operator()(
   return xxh3::hash64(name);
 }
 
-template <typename T>
-RPCArgEntry::RPCArgEntry(HostPtr<T> /* placeholder */)
-    : argType(ArgType::HostPtr),
+template <RPCMemory M, RPCSupported T>
+RPCArgEntry::RPCArgEntry(RPCArg<M, T> /* placeholder */)
+    : destination(std::same_as<M, Host> ? Destination::Host
+                                        : Destination::Device),
       valType(&typeid(T)),
-      len(sizeof(T)),
-      align(alignof(T)) {}
+      elementSize(sizeof(typename RPCDataTraits<T>::element_type)),
+      align(alignof(typename RPCDataTraits<T>::element_type)),
+      isRange(RPCDataTraits<T>::isRange) {}
 
-template <typename T>
-RPCArgEntry::RPCArgEntry(DevicePtr<T> /* placeholder */)
-    : argType(ArgType::DevicePtr),
-      valType(&typeid(T)),
-      len(sizeof(T)),
-      align(alignof(T)) {}
+template <RPCMemory M, RPCSupported T>
+RPCArgEntry::RPCArgEntry(const RPCRet<M, T>& /* placeholder */)
+    : RPCArgEntry(RPCArg<M, T>{}) {}
 
 /// Create an RPCFunctionEntry
 template <RPCCallable F>
@@ -148,12 +155,14 @@ RPCFunctionEntry::RPCFunctionEntry(F&& f, std::string name)
 
   mp11::tuple_for_each(arg_t{},
                        [&args = m_arguments](auto a) { args.emplace_back(a); });
-  mp11::tuple_for_each(
-      ret_tup_t{}, [&rets = m_returnVals](auto r) { rets.emplace_back(r); });
+  mp11::tuple_for_each(ret_tup_t{}, [&rets = m_returnVals](const auto& r) {
+    rets.emplace_back(r);
+  });
 
   // Define the wrapper function.
   m_wrapper = [f = std::forward<F>(f)](
-                  const std::vector<void*>& argsVec) -> std::vector<void*> {
+                  const std::vector<ClusterMessage::DataDescr>& argsVec)
+      -> std::vector<RPCResultBuffer> {
     if (argsVec.size() != std::tuple_size_v<arg_t>) {
       throw std::logic_error(
           "RPC function called with incorrect number of arguments");
@@ -161,8 +170,19 @@ RPCFunctionEntry::RPCFunctionEntry(F&& f, std::string name)
     auto makeArgs = [&argsVec]<std::size_t I>(
                         mp11::mp_size_t<I>) -> std::tuple_element_t<I, arg_t> {
       using T = std::tuple_element_t<I, arg_t>;
-      using inner_t = decltype(T::ptr);
-      return T{.ptr = static_cast<inner_t>(argsVec[I])};
+      using E = typename T::element_type;
+      const auto& desc = argsVec[I];
+      constexpr auto destination = std::same_as<typename T::memory_type, Host>
+                                       ? Destination::Host
+                                       : Destination::Device;
+      if (desc.dest != destination || desc.align < alignof(E) ||
+          desc.len % sizeof(E) != 0 ||
+          (!RPCDataTraits<typename T::value_type>::isRange &&
+           desc.len != sizeof(E))) {
+        throw std::logic_error(
+            "Invalid RPC argument size, alignment or destination");
+      }
+      return T{.ptr = static_cast<E*>(desc.ptr), .size = desc.len / sizeof(E)};
     };
     arg_t args = mp11::tuple_transform(
         makeArgs, mp11::mp_apply<std::tuple,
@@ -170,10 +190,18 @@ RPCFunctionEntry::RPCFunctionEntry(F&& f, std::string name)
 
     ret_tup_t result = std::apply(f, args);
 
-    std::vector<void*> resultVec;
+    std::vector<RPCResultBuffer> resultVec;
     resultVec.reserve(std::tuple_size_v<ret_tup_t>);
-    mp11::tuple_for_each(result, [&resultVec](auto p) {
-      resultVec.push_back(static_cast<void*>(p.ptr));
+    mp11::tuple_for_each(result, [&resultVec](auto& p) {
+      using R = std::remove_cvref_t<decltype(p)>;
+      using E = typename R::element_type;
+      if ((!RPCDataTraits<typename R::value_type>::isRange && p.size != 1) ||
+          (p.size != 0 && p.ptr == nullptr) ||
+          p.size > std::numeric_limits<std::size_t>::max() / sizeof(E)) {
+        throw std::logic_error("Invalid RPC return buffer");
+      }
+      resultVec.push_back({p.ptr, p.size * sizeof(E), alignof(E),
+                           std::move(p).takeOwnership()});
     });
     return resultVec;
   };

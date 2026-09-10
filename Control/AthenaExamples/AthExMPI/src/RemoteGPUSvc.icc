@@ -28,7 +28,7 @@ StatusCode RemoteGPUSvc::registerFunction(F&& f, std::string name) {
 
 /// Submit a request and suspend the asynchronous algorithm for its result.
 template <RPCSupported... R, RPCSupported... Args>
-std::tuple<std::unique_ptr<R>...> RemoteGPUSvc::call(
+std::tuple<RPCRet<Host, R>...> RemoteGPUSvc::call(
     const EventContext& ctx, const AthAsynchronousAlgorithm& algorithm,
     std::string_view functionName, const Args*... args) const {
   if (isServer()) {
@@ -46,6 +46,15 @@ std::tuple<std::unique_ptr<R>...> RemoteGPUSvc::call(
         "Argument type mismatch in call to remote function {}", functionName));
   }
 
+  if (!fn_iter->validateReturnTypes<R...>()) {
+    throw std::logic_error(std::format(
+        "Return type mismatch in call to remote function {}", functionName));
+  }
+
+  // Validate sizes and pointers before sending anything to the server.
+  std::vector<ClusterMessage::DataDescr> argData;
+  argData.reserve(sizeof...(Args));
+  (argData.push_back(describeArg(args)), ...);
   auto request = std::make_unique<ClientRequest>(ctx.evt(), &*fn_iter);
   auto request_future = request->completion.get_future();
   {
@@ -62,7 +71,15 @@ std::tuple<std::unique_ptr<R>...> RemoteGPUSvc::call(
     // from this rank with this request id.
     startRequest(*request_);
     // Now send each argument
-    (sendArg(*request_, args), ...);
+    for (std::size_t i = 0; i < argData.size(); ++i) {
+      auto& desc = argData[i];
+      desc.dest = fn_iter->arguments()[i].destination;
+      desc.evtNumber = request_->eventNumber;
+      desc.requestNumber = request_->id();
+      m_clusterSvc->sendMessage(
+          ServerRank, ClusterMessage(ClusterMessageType::Data, std::move(desc)),
+          ClusterComm::EventData);
+    }
   }
 
   // Wait for results to come back. This is handled in a dedicated thread.
@@ -75,18 +92,21 @@ std::tuple<std::unique_ptr<R>...> RemoteGPUSvc::call(
 }
 
 template <RPCSupported T>
-void RemoteGPUSvc::sendArg(ClientRequest& req, const T* arg) const {
-  ClusterMessage::DataDescr desc(arg);
-  desc.dest = req.rpcFunction->arguments()[req.argsSent].argType ==
-                      RPCArgEntry::ArgType::HostPtr
-                  ? Destination::Host
-                  : Destination::Device;
-  desc.evtNumber = req.eventNumber;
-  desc.requestNumber = req.id();
-  m_clusterSvc->sendMessage(
-      ServerRank, ClusterMessage(ClusterMessageType::Data, std::move(desc)),
-      ClusterComm::EventData);
-  ++req.argsSent;
+ClusterMessage::DataDescr RemoteGPUSvc::describeArg(const T* arg) {
+  if (arg == nullptr)
+    throw std::invalid_argument("Null RPC argument");
+  if constexpr (RPCRange<T>) {
+    using E = typename RPCDataTraits<T>::element_type;
+    const auto count = std::ranges::size(*arg);
+    const auto* data = std::ranges::data(*arg);
+    if (count > std::numeric_limits<std::size_t>::max() / sizeof(E) ||
+        (count != 0 && data == nullptr)) {
+      throw std::invalid_argument("Invalid RPC argument range");
+    }
+    return ClusterMessage::DataDescr(data, count);
+  } else {
+    return ClusterMessage::DataDescr(arg);
+  }
 }
 }  // namespace RemoteCall
 

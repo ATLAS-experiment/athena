@@ -84,11 +84,16 @@ class RemoteGPUSvc : public AthService {
   /// Submit a request and suspend the asynchronous algorithm for its result.
   /// This will be called from a multithreaded context therefore it is marked
   /// const. Thread-safety is ensured by using a concurrent container for the
-  /// request map
+  /// request map.
+  /// Arguments must remain valid until call() returns. Range arguments send
+  /// their elements, and returned buffers always reside in host memory.
+  /// @return Owned result buffers in the registered order.
+  /// @throws std::logic_error if the function is unknown or types do not match.
   template <RPCSupported... R, RPCSupported... Args>
-  std::tuple<std::unique_ptr<R>...> call(
-      const EventContext& ctx, const AthAsynchronousAlgorithm& algorithm,
-      std::string_view functionName, const Args*... args) const;
+  std::tuple<RPCRet<Host, R>...> call(const EventContext& ctx,
+                                      const AthAsynchronousAlgorithm& algorithm,
+                                      std::string_view functionName,
+                                      const Args*... args) const;
 
  private:
   /// Description of a request on client side
@@ -105,8 +110,8 @@ class RemoteGPUSvc : public AthService {
     std::size_t id() const noexcept { return m_requestID; }
     EventContext::ContextID_t eventNumber;
     const RPCFunctionEntry* rpcFunction;
-    std::vector<void*> returnVals;
-    std::size_t argsSent = 0;
+    /// Received buffers retained until ownership passes to the caller.
+    std::vector<ClusterMessage::DataDescr> returnVals;
     boost::fibers::promise<std::unique_ptr<ClientRequest>> completion;
 
    private:
@@ -121,13 +126,11 @@ class RemoteGPUSvc : public AthService {
                            const RPCFunctionEntry* rpcFunction)
         : eventNumber(eventNumber), rpcFunction(rpcFunction) {
       argData.reserve(rpcFunction->arguments().size());
-      args.reserve(rpcFunction->arguments().size());
     }
 
     EventContext::ContextID_t eventNumber;
     const RPCFunctionEntry* rpcFunction = nullptr;
     std::vector<ClusterMessage::DataDescr> argData;
-    std::vector<void*> args;
   };
 
   /// Run the worker-rank remote GPU client.
@@ -139,9 +142,12 @@ class RemoteGPUSvc : public AthService {
   /// Start request
   void startRequest(const ClientRequest& req) const;
 
-  /// Send a request argument
+  /// Describe a borrowed scalar or contiguous range before starting a request.
+  /// @param arg Pointer to the scalar or range object on the client.
+  /// @return A descriptor borrowing the scalar or range elements.
+  /// @throws std::invalid_argument if the pointer or range size is invalid.
   template <RPCSupported T>
-  void sendArg(ClientRequest& req, const T* arg) const;
+  static ClusterMessage::DataDescr describeArg(const T* arg);
 
   /// MPI service used to communicate with the client ranks.
   ServiceHandle<IMPIClusterSvc> m_clusterSvc{
