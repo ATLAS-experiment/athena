@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -159,12 +159,13 @@ int main ATLAS_NOT_THREAD_SAFE () {
   mrm["HLT_2e35_e45_3mu15_mu35_j25"] = {2,1,3,1,1};
 
   std::vector<DebugComboHypoTool*> test_tools;
-
+  const std::string comboHypoStr{"ComboHypo"};
+  const std::string dbgComboHypoStr{"DebugComboHypoTool"};
   for (const std::string& test_chain : test_chains) {
     log << MSG::INFO << "Creating HypoTool for " << test_chain << endmsg;
     // NOTE: Pointers look to be owned by Gaudi. Don't delete these manually.
-    ComboHypo* ch = new ComboHypo("ComboHypo", pSvcLoc);
-    DebugComboHypoTool* dcht = new DebugComboHypoTool("DebugComboHypoTool", test_chain, ch);
+    ComboHypo* ch = new ComboHypo(comboHypoStr, pSvcLoc);
+    DebugComboHypoTool* dcht = new DebugComboHypoTool(dbgComboHypoStr, test_chain, ch);
     VALUE( dcht->initialize() ) EXPECTED ( StatusCode::SUCCESS );
     VALUE( dcht->setLegMultiplicity(mrm) ) EXPECTED ( StatusCode::SUCCESS );
     test_tools.push_back(dcht);
