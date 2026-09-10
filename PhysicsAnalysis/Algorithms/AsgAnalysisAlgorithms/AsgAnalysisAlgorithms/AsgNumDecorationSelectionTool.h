@@ -91,13 +91,7 @@ namespace CP
     : public AsgNumDecorationSelectionTool<uint16_t>
   {
   public:
-    #ifndef XAOD_STANDALONE
-    AsgNumDecorationSelectionToolUInt16(const std::string& type,
-                                       const std::string& myname,
-                                       const IInterface* parent);
-    #else
-    AsgNumDecorationSelectionToolUInt16(const std::string& myname);
-    #endif
+    using AsgNumDecorationSelectionTool<uint16_t>::AsgNumDecorationSelectionTool;
   };
 }
 
