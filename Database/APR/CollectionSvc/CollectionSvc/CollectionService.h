@@ -9,6 +9,8 @@
 
 #include "StorageSvc/DbType.h"
 
+#include "GaudiKernel/IFileMgr.h"
+
 #include "CxxUtils/checker_macros.h"
 
 
@@ -71,7 +73,7 @@ namespace pool {
     static void setMessageSvcQuiet( bool quiet=true );
 
     static ICollection* plugin ATLAS_NOT_THREAD_SAFE ( const CollectionDescription& description,
-                                 ICollection::OpenMode openMode,
+                                 Io::IoFlag openMode,
                                  ISession* session = 0 );
 
   };
