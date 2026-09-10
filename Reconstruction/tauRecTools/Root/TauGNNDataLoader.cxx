@@ -386,11 +386,8 @@ bool ClustersMeanSecondLambda(const xAOD::TauJet &tau, float &out){
 bool TauChargedTrk_eProbNN(const xAOD::TauJet &tau, float &out){
     float TauChargedTrk_eProbNN = 0.f;
     static const SG::ConstAccessor<float> acc_eProbabilityNN("eProbabilityNN");
-    const xAOD::TauTrack* tauTrack = tau.track(0); // Grab the Charged track of the tau
-    const xAOD::TrackParticle* track = tauTrack ? tauTrack->track() : nullptr;
-    if (track) { 
-        TauChargedTrk_eProbNN = acc_eProbabilityNN(*track); 
-    }
+    const xAOD::TrackParticle* track = tau.track(0)->track(); // Grab charged track of tau
+    TauChargedTrk_eProbNN = acc_eProbabilityNN(*track); 
     out = std::max(0.f, TauChargedTrk_eProbNN);
     return true;
 }
