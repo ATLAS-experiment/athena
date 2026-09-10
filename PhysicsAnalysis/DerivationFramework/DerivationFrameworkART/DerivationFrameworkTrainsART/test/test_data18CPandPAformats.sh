@@ -14,11 +14,14 @@ formats="EGAM1 EGAM2 EGAM3 EGAM4 EGAM5 EGAM7 EGAM8 EGAM9 EGAM10 JETM1 JETM3 JETM
 
 AOD_File=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.AOD_RUN2_DATA[0])")
 
+condition=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN2_DATA)")
+
 Derivation_tf.py \
 --inputAODFile ${AOD_File} \
 --outputDAODFile art.pool.root \
+--conditionsTag ${condition} \
 --formats $formats \
---maxEvents -1 \
+--maxEvents -1 
 
 echo "art-result: $? reco"
 

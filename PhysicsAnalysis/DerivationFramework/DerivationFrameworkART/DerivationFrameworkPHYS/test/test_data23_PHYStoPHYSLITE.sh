@@ -8,11 +8,14 @@
 # art-output: checkxAOD*.txt
 # art-output: checkIndexRefs*.txt
 
+condition=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_DATA23)")
+
 set -e
 
 Derivation_tf.py \
 --inputDAOD_PHYSFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ASG/DAOD_PHYS/p7267/data23_13p6TeV.00456749.physics_Main.deriv.DAOD_PHYS.r15774_p6304_p7267/DAOD_PHYS.49630893._000015.pool.root.1 \
 --outputD2AODFile art.pool.root \
+--conditionsTag ${condition} \
 --formats PHYSLITE \
 --maxEvents -1 \
 

@@ -15,13 +15,16 @@ if [[ -z ${ArtInFile} ]]; then
     ArtInFile="root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/data-art/large-input/CampaignInputs/data25/AOD/data25_13p6TeV.00498515.physics_Main.merge.AOD.r17521_p7232/AOD.49752827._000024.pool.root.1"
 fi
 
+condition=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_DATA25)")
+
 set -e
 
 Derivation_tf.py \
 --inputAODFile ${ArtInFile} \
 --outputDAODFile art.pool.root \
+--conditionsTag ${condition} \
 --formats PHYS \
---maxEvents 1000 \
+--maxEvents 1000 
 
 echo "art-result: $? reco"
 

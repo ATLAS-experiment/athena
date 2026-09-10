@@ -11,13 +11,16 @@
 
 EVNT_File=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.EVNT[0])")
 
+condition=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+
 set -e
 
 Derivation_tf.py \
 --inputEVNTFile ${EVNT_File} \
 --outputDAODFile art.pool.root \
+--conditionsTag ${condition} \
 --formats TRUTH1 \
---maxEvents 1000 \
+--maxEvents 1000 
 
 echo "art-result: $? reco"
 
