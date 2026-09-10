@@ -17,6 +17,13 @@ def getLastGlobalTag(prevFlags):
     if isinstance(globaltag, list):  # if different tags have been used at different steps
         globaltag = globaltag[-1]
 
+
+    #With the migration to crest, the global tag name also changed,
+    #even for tags that are straight copies from COOL. Adjust global
+    #tag names read from input metadata
+    if prevFlags.IOVDb.UseCREST and globaltag.startswith("OFL"):
+        globaltag=globaltag[3:]
+        
     return globaltag
 
 
