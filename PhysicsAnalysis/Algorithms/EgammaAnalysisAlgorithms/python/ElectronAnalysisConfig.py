@@ -732,7 +732,7 @@ class ElectronWorkingPointEfficiencyConfig (ConfigBlock) :
                 warnings.warn_explicit(
                     "Only TOTAL correlation model is currently supported "
                     "for reconstruction efficiency correction in Run 3."
-                    "Your choice {self.correlationModelReco} will be "
+                    "Your choice f"{self.correlationModelReco}" will be "
                     "overwritten with TOTAL",
                     ElectronEfficiencyCorrelationWarning,
                     filename='', lineno=0)
@@ -802,7 +802,7 @@ class ElectronWorkingPointEfficiencyConfig (ConfigBlock) :
                 warnings.warn_explicit(
                     "Only TOTAL correlation model is currently supported "
                     "for isolation efficiency correction in Run 3."
-                    "Your choice {self.correlationModelIso} will be "
+                    "Your choice f"{self.correlationModelIso}" will be "
                     "overwritten with TOTAL",
                     ElectronEfficiencyCorrelationWarning,
                     filename='', lineno=0)
