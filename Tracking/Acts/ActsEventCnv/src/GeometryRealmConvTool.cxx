@@ -125,7 +125,9 @@ namespace ActsTrk{
                                                         cBounds.get(ParEnum_t::eHalfLengthXposY),
                                                         cBounds.get(ParEnum_t::eHalfLengthYneg),
                                                         cBounds.get(ParEnum_t::eHalfLengthYpos));
-        } default:
+        } case eBoundless:{
+            return nullptr;
+        }  default:
             break;
         }
         THROW_EXCEPTION("The bounds "<<bounds<<" cannot be translated");
