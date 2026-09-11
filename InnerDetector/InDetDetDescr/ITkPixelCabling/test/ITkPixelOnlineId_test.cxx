@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_SUITE(ITkPixelOnlineIdTest)
  
   BOOST_AUTO_TEST_CASE(ITkPixelOnlineIdConstructors){
     BOOST_CHECK_NO_THROW([[maybe_unused]] ITkPixelOnlineId s);
-    std::uint32_t onlineId{1};
+    std::uint64_t onlineId{1};
     BOOST_CHECK_NO_THROW([[maybe_unused]] ITkPixelOnlineId s(onlineId));
     std::uint32_t rodId{1};
     std::uint32_t fibre{2};
@@ -38,25 +38,25 @@ BOOST_AUTO_TEST_SUITE(ITkPixelOnlineIdTest)
     //default constructed Id should be invalid
     ITkPixelOnlineId s;
     BOOST_CHECK(not s.isValid());
-    BOOST_CHECK(s.rod() == ITkPixelOnlineId::INVALID_ROD);
-    BOOST_CHECK(s.fibre() == ITkPixelOnlineId::INVALID_FIBRE);
-    BOOST_CHECK(unsigned(s) == ITkPixelOnlineId::INVALID_ONLINE_ID);    
+    BOOST_CHECK(s.sourceID() == ITkPixelOnlineId::INVALID_SOURCE_ID);
+    BOOST_CHECK(s.detectorResourceID() == ITkPixelOnlineId::INVALID_DETECTORRESOURCE_ID);
+    BOOST_CHECK(uint64_t(s) == ITkPixelOnlineId::INVALID_ONLINE_ID);    
   }
   
   BOOST_AUTO_TEST_CASE(ITkPixelOnlineIdValidlyConstructedMethods){
     //construct with valid rod id and fibre number
     ITkPixelOnlineId s(0x210000,1);
     BOOST_CHECK(s.isValid());
-    BOOST_CHECK(s.rod() == 0x210000);
-    BOOST_CHECK(s.fibre() == 1);
+    BOOST_CHECK(s.sourceID() == 0x210000);
+    BOOST_CHECK(s.detectorResourceID() == 1);
     //construct from an unsigned int
-    ITkPixelOnlineId t(18939904);
+    ITkPixelOnlineId t(9288674231451649);
     //equality operator
     BOOST_CHECK(s == t);
     //test representation (stream insertion). Uses hex representation
     std::stringstream os;
     os<<s;
-    BOOST_TEST (os.str() == "0x1210000");
+    BOOST_TEST (os.str() == "0x21000000000001");
   }
   
 BOOST_AUTO_TEST_SUITE_END()

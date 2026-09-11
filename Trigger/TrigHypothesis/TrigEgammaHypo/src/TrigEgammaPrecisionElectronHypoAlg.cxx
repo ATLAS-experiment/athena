@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigEgammaPrecisionElectronHypoAlg.h"
@@ -208,7 +208,7 @@ StatusCode TrigEgammaPrecisionElectronHypoAlg::execute( const EventContext& cont
           decor_clPhi(*ele) = ele->caloCluster()->phiBE(2);
         }
 
-        toolInput.push_back( info );
+        toolInput.push_back( std::move(info) );
         validelectrons++;
       }
     }

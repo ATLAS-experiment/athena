@@ -27,9 +27,6 @@ def HGTDHitAnalysis(flags):
     if flags.Detector.EnableHGTD:
         result.merge(HGTD_HitAnalysisCfg(flags))
 
-    result.getService("THistSvc").Output = [
-        "HGTDHitAnalysis DATAFILE='HGTDHitValid.root' OPT='RECREATE'"]
-
     return result
 
 

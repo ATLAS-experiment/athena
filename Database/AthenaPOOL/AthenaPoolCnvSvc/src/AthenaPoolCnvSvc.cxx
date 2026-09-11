@@ -311,10 +311,6 @@ unsigned int AthenaPoolCnvSvc::outputContextId(const std::string& outputConnecti
 }
 
 //______________________________________________________________________________
-IPoolSvc* AthenaPoolCnvSvc::getPoolSvc() {
-   return(&*m_poolSvc);
-}
-//______________________________________________________________________________
 Token* AthenaPoolCnvSvc::registerForWrite(Placement* placement, const void* obj, const RootType& classDesc) {
    // StopWatch listens from here until the end of this current scope
    PMonUtils::BasicStopWatch stopWatch("cRepR_ALL", m_chronoMap);

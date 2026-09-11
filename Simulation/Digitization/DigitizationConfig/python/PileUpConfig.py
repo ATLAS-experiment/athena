@@ -313,7 +313,9 @@ def PileUpEventLoopMgrCfg(flags, name="PileUpEventLoopMgr", **kwargs):
         ]))
 
     elmgr = CompFactory.PileUpEventLoopMgr(name, **kwargs)
-    acc.setAppProperty('EventLoop', elmgr.name)
+    # In MP mode, we are only the secondary EventLoopMgr
+    if flags.Concurrency.NumProcs == 0:
+        acc.setAppProperty('EventLoop', elmgr.name)
     acc.addService(elmgr)
 
     return acc

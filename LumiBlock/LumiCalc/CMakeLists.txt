@@ -5,6 +5,7 @@ atlas_subdir( LumiCalc )
 
 # External dependencies:
 find_package( COOL COMPONENTS CoolKernel )
+find_package( CORAL COMPONENTS RelationalAccess )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
 
 # Component(s) in the package:
@@ -15,8 +16,8 @@ atlas_add_library( LumiBlockCoolQuery
                    src/ReplicaSorter.cxx
                    src/LumiBlockCollectionConverter.cxx
                    PUBLIC_HEADERS LumiCalc
-                   INCLUDE_DIRS ${COOL_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} 
-                   LINK_LIBRARIES ${COOL_LIBRARIES} ${ROOT_LIBRARIES} AthenaKernel CxxUtils GoodRunsListsLib LumiBlockData xAODLuminosity )
+                   INCLUDE_DIRS ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+                   LINK_LIBRARIES ${COOL_LIBRARIES} ${CORAL_LIBRARIES} ${ROOT_LIBRARIES} AthenaKernel CxxUtils GoodRunsListsLib LumiBlockData xAODLuminosity )
 
 atlas_add_executable( iLumiCalc
                       src/iLumiCalc.cxx

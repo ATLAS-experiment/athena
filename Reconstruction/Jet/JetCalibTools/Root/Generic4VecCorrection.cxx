@@ -147,7 +147,10 @@ StatusCode Generic4VecCorrection::calibrate(xAOD::Jet& jet, JetEventInfo& jetEve
     static const SG::ConstAccessor<float> DetectorEtaAcc ("DetectorEta");
     this_eta = DetectorEtaAcc(jet);
     h_correction_2D = m_only_correction_2D;
-
+    //Make sure we STAY within the bin boundaries when performing the interpolation hack
+    const float minY = m_etaAxis.GetBinLowEdge(1);
+    const float maxY = m_etaAxis.GetBinLowEdge(m_etaAxis.GetNbins()+1);
+    this_eta = std::clamp(this_eta, minY, maxY);
     // PtResidual should not interpolate across eta bins, so set this_eta to the center of its histogram bin
     int eta_bin = m_etaAxis.FindBin(this_eta);
     this_eta = m_etaAxis.GetBinCenter(eta_bin);
@@ -156,6 +159,13 @@ StatusCode Generic4VecCorrection::calibrate(xAOD::Jet& jet, JetEventInfo& jetEve
     this_pt = jet.pt()/1000.;
     this_eta = fabs(jet.rapidity());
     h_correction_2D = m_only_correction_2D;
+    //Make sure we STAY within the bin boundaries when performing the interpolation hack
+    const float minY = m_etaAxis.GetBinLowEdge(1);
+    const float maxY = m_etaAxis.GetBinLowEdge(m_etaAxis.GetNbins()+1);
+    this_eta = std::clamp(this_eta, minY, maxY);
+    // AF3 should not interpolate across eta (Y) bins, so set this_eta to the center of its histogram bin
+    int eta_bin = m_etaAxis.FindBin(this_eta);
+    this_eta = m_etaAxis.GetBinCenter(eta_bin);
   } else if (m_correctionType == JET_CORRTYPE::MC2MC){
     this_pt = jet.pt()/1000.;
     this_eta = fabs(jet.rapidity());

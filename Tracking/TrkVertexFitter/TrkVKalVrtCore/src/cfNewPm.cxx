@@ -13,7 +13,9 @@
 
 namespace Trk {
 
-void cfnewpm(double *par, const double *xyzStart, double *xyzEnd, const double ustep, double *parn, double *closePoint, VKalVrtControlBase * CONTROL)
+void cfnewpm(const double *par, const double *xyzStart, const double *xyzEnd,
+             const double ustep, double *parn, double *closePoint,
+             const VKalVrtControlBase * CONTROL)
 {
     double d__1, d__2,dist_left;
     double vect[7], stmg, vout[7]={0.}, dpar0[5];

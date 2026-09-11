@@ -10,9 +10,10 @@ find_package( CORAL COMPONENTS CoralBase )
 atlas_add_library( CollectionSvc
                    src/*.cpp
                    PUBLIC_HEADERS CollectionSvc
-                   INCLUDE_DIRS ${CORAL_INCLUDE_DIRS} 
+                   INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
                    LINK_LIBRARIES ${CORAL_LIBRARIES} CxxUtils StorageSvc
-                   PRIVATE_LINK_LIBRARIES CxxUtils PoolSvcLib )
+                   PRIVATE_LINK_LIBRARIES AthenaKernel GaudiKernel
+                      PersistentDataModel PoolSvcLib )
 
 atlas_add_dictionary( CollectionSvcDict
                       CollectionSvc/CollectionSvcDict.h

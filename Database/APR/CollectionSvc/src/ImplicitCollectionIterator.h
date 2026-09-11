@@ -42,8 +42,7 @@ namespace pool {
      virtual bool                         next();
 
      /// Returns the token of the current position
-     virtual Token*                         token() const;
-     virtual const Token&                 eventRef() const { return *token(); }
+     virtual const Token&                 eventRef() const;
 
      virtual const CollectionRowBuffer& currentRow() const;
 
@@ -65,11 +64,6 @@ namespace pool {
 
      /// Destructor
      virtual ~ImplicitCollectionIterator();
-
-
-     // ------------------- Unimplemented methods
-
-     virtual void close() {}
 
 
   protected:

@@ -93,10 +93,7 @@ StatusCode TrigEgammaPrecisionPhotonCaloIsoHypoAlg::execute( const EventContext&
         d->setObjectLink( TCU::featureString(), ElementLink<xAOD::PhotonContainer>(*h_isoPhotons, isoPhoton->index(), context) );
         TrigCompositeUtils::linkToPrevious( d, decisionInput().key(), counter );
 
-        ITrigEgammaPrecisionPhotonCaloIsoHypoTool::PhotonInfo info(d, roi, isoPhoton, previousDecision);
-
-
-        toolInput.push_back(info);
+        toolInput.emplace_back(d, roi, isoPhoton, previousDecision);
         validphotons++;
       }
     }

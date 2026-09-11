@@ -50,7 +50,7 @@ private:
 
   SG::ReadHandleKey<xAOD::JetContainer> m_jetContainerKey{this, "JetContainer", "", "SG key for the input jet container"};
   SG::ReadHandleKey<xAOD::JetContainer> m_truthJetContainerKey{this, "TruthJetContainer", "", "SG key for the truth jet container"}; // For isolation decoration
-  SG::ReadDecorHandleKey<xAOD::JetContainer> m_jetMatchedTruthJetKey{this, "JetMatchedTruthJetName", "_MatchedTruthJet", "SG key for the matched truth jet ElementLink attribute"};
+  SG::ReadDecorHandleKey<xAOD::JetContainer> m_jetMatchedTruthJetKey{this, "JetMatchedTruthJetName", "_TruthMatch_Jet", "SG key for the matched truth jet ElementLink attribute"};
 
   SG::ReadDecorHandleKey<xAOD::JetContainer> m_jetTruthIsolKey{this, "JetTruthIsolName", "IsoFixedCone5Pt", "SG key for the matched truth jet ElementLink attribute"};
   SG::ReadDecorHandleKey<xAOD::JetContainer> m_jetRecoIsolKey{this, "JetRecoIsolName", "IsoFixedCone5PtPUsub", "SG key for the matched truth jet ElementLink attribute"};

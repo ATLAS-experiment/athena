@@ -3,6 +3,8 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAOD_STANDALONE
 #include "src/TrigBtagValidationTest.h"
+#include "TrigBtagEmulationTool/EmulContext.h"
+
 
 namespace Trig {
 
@@ -38,10 +40,11 @@ StatusCode TrigBtagValidationTest::initialize() {
 StatusCode TrigBtagValidationTest::execute(const EventContext& /*ctx*/) 
 {
   ATH_MSG_DEBUG("Executing " << name() );
-  const auto& emulCtx =  m_emulationTool->populateJetManagersTriggerObjects();
+  std::unique_ptr<EmulContext> emulCtx ( new EmulContext());
+  ATH_CHECK(m_emulationTool->populateJetManagersTriggerObjects(*emulCtx));
   int chain_idx = 0;
   for(const auto& chain: m_emulatedChains) {
-    bool tbet_pass = m_emulationTool->isPassed(chain, emulCtx);
+    bool tbet_pass = m_emulationTool->isPassed(chain, *emulCtx);
     bool tdt_pass = m_trigDec->isPassed(chain);
     ATH_MSG_DEBUG( chain << " TDT:" << (tdt_pass ? "PASS":"NO") << " TBET:" << (tbet_pass ? "PASS":"NO"));
     

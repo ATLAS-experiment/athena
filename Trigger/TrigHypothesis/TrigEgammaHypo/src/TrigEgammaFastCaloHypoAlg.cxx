@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <algorithm>
@@ -115,7 +115,7 @@ StatusCode TrigEgammaFastCaloHypoAlg::execute( const EventContext& context ) con
       }   
     }
             
-    toolInput.push_back( info );
+    toolInput.push_back( std::move(info) );
     
 
     // link the cluster
@@ -129,7 +129,8 @@ StatusCode TrigEgammaFastCaloHypoAlg::execute( const EventContext& context ) con
     {
       auto rings =  ViewHelper::makeLink( *viewEL, ringsHandle, 0 );
       ATH_CHECK( rings.isValid() );
-      d->setObjectLink( "ringer",  rings );
+      static const std::string ringerStr{"ringer"};
+      d->setObjectLink( ringerStr,  rings );
     }
     
     // link the RoI

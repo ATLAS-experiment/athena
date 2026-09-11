@@ -187,6 +187,7 @@ def configure_algorithm(alg,
   # as a Herwig infile only during run time.
   if run_settings is not None:  
     alg.RunSettings = run_settings
+    alg.Repository = os.path.join(herwig7_share_path, 'HerwigDefaults.rpo')
 
   if decode_runfile:
     ConfigDecoder.DecodeRunCard(input_file=alg.RunFile)

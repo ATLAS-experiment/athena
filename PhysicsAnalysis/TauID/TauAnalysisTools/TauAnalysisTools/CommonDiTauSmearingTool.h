@@ -85,11 +85,16 @@ protected:
   Gaudi::Property<bool> m_bSkipTruthMatchCheck{this, "SkipTruthMatchCheck", false};
 
   bool m_bIsData;
+  bool m_bIsConfigured; 
 
   TruthMatchedParticleType m_eCheckTruth;
   CP::SystematicSet m_sAffectingSystematics;
   CP::SystematicSet m_sRecommendedSystematics;
 
+private:
+
+  // Execute at each event
+  virtual StatusCode beginEvent();
 
 };
 } // namespace TauAnalysisTools
