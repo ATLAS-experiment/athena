@@ -18,6 +18,8 @@
 #include "PersistentDataModelTPCnv/DataHeaderCnv_p6.h"
 
 #include "GaudiKernel/IIncidentListener.h"
+#include "GaudiKernel/ServiceHandle.h"
+#include "PoolSvc/IPoolSvc.h"
 
 #include <map>
 
@@ -94,6 +96,7 @@ protected:
    std::map< std::string, std::unique_ptr<DataHeaderForm_p6> >  m_sharedWriterCachedDHForm;
    std::string                          m_sharedWriterCachedDHKey;
    std::string                          m_sharedWriterCachedDHToken;
+   ServiceHandle<IPoolSvc>              m_poolSvc{"PoolSvc", "DataHeaderCnv"};
 };
 
 #endif

@@ -15,6 +15,7 @@
 #include "AthenaKernel/IAddressProvider.h"
 #include "AthenaBaseComps/AthService.h"
 #include "AthenaPoolCnvSvc/IAthenaPoolCnvSvc.h"
+#include "PoolSvc/IPoolSvc.h"
 #include <memory>
 
 // Forward declarations
@@ -23,6 +24,7 @@ namespace pool {
 }
 class ISvcLocator;
 class PoolCollectionConverter;
+class IPoolSvc;
 class StoreGateSvc;
 
 /** @class CondProxyProvider
@@ -54,6 +56,7 @@ public: // Constructor and Destructor
 
 private: // data
    ServiceHandle<IAthenaPoolCnvSvc> m_athenaPoolCnvSvc{this, "ConversionService", "AthenaPoolCnvSvc"};
+   ServiceHandle<IPoolSvc> m_poolSvc{this, "PoolSvc", "PoolSvc"};
    unsigned int m_contextId;
 
 private: // properties
