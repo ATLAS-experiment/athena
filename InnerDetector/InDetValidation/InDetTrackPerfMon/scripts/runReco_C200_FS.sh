@@ -56,7 +56,7 @@ Reco_tf.py --CA \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD} \
     --steering 'doRAWtoALL' \
-    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
+    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.athenaLegacyTrackingFlags' \
     --postInclude 'ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
     --preExec "flags.Tracking.useITkFTF=True; \
                flags.Tracking.doITkFastTracking=True; \
