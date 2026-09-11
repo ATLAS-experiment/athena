@@ -4,6 +4,8 @@
 
 #include "ActsEvent/CaloExtension.h"
 #include "ActsEvent/Decoration.h"
+#include "ActsEvent/ParticleHypothesisEncoding.h"
+#include "ActsInterop/UnitConverters.h"
 
 #include "GeoModelKernel/throwExcept.h"
 
@@ -28,11 +30,35 @@ namespace ActsTrk{
         return m_idTrack;
     }
     std::optional<Acts::BoundTrackParameters> CaloExtension::lastTrackParameters() const {
-        return m_idTrack ? ActsTrk::lastTrackParameters(*m_idTrack) : std::nullopt;
+        if (!m_idTrack) {
+            return std::nullopt;
+        }
+        if (auto result = ActsTrk::lastTrackParameters(*m_idTrack); result != std::nullopt){
+            return result;
+        }
+        /// Fall back solution
+        unsigned int lastMeasIdx = 0;
+        if (!m_idTrack->indexOfParameterAtPosition(lastMeasIdx, xAOD::LastMeasurement)) {
+            return std::nullopt;
+        }
+
+        const Acts::Vector3 lastPos{m_idTrack->parameterX(lastMeasIdx),
+                                    m_idTrack->parameterY(lastMeasIdx),
+                                    m_idTrack->parameterZ(lastMeasIdx)};
+
+        const Acts::Vector3 lastMom{m_idTrack->parameterPX(lastMeasIdx),
+                                    m_idTrack->parameterPY(lastMeasIdx),
+                                    m_idTrack->parameterPZ(lastMeasIdx)};
+        Acts::BoundMatrix cov{Acts::BoundMatrix::Identity()};
+
+        return Acts::BoundTrackParameters::createCurvilinear(
+                    convertPosToActs(lastPos, m_idTrack->hasValidTime() ? m_idTrack->time() : 0.), 
+                    lastMom.unit(), m_idTrack->charge() / energyToActs(lastMom.mag()),
+                    cov, ParticleHypothesis::convert(m_idTrack->particleHypothesis()));
     }
     std::optional<Acts::BoundTrackParameters> CaloExtension::lastParameters() const {
-        if (! m_parameters.empty()) {
-            return  m_parameters.back();
+        if (!m_parameters.empty()) {
+            return m_parameters.back();
         }
         return lastTrackParameters();
     }
