@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGMUONEFFICIENCY_MUONEFFICIENCYTOOL_H
@@ -11,7 +11,6 @@
 #include "AsgTools/AsgMetadataTool.h"
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/ToolHandle.h"
-#include <iostream>
 
 #include "TrigDecisionTool/TrigDecisionTool.h"
 
@@ -33,11 +32,11 @@ namespace Trig {
       virtual StatusCode initialize(void) override;
       
       virtual Bool_t match(const xAOD::Muon* mu,
-			   const std::string &chain,
+			   std::string_view chain,
 			   const double mindelR = 0.1) const override;
       
       virtual Bool_t matchL1(const xAOD::Muon* mu,
-			     const std::string &l1item,
+			     std::string_view l1item,
 			     const double DelR = 0.2) const override;
 
       virtual Bool_t matchL2SA(const xAOD::Muon* mu,
@@ -66,12 +65,12 @@ namespace Trig {
       
       virtual Bool_t match(const double eta,
 			   const double phi,
-			   const std::string &chain,
+			   std::string_view chain,
 			   const double mindelR = 0.1) const override;
       
       virtual Bool_t matchL1(const double eta,
 			     const double phi,
-			     const std::string &l1item,
+			     std::string_view l1item,
 			     const double DelR = 0.2) const override;
       
       virtual Bool_t matchDimuon(const TLorentzVector& muon1,
@@ -84,12 +83,11 @@ namespace Trig {
       virtual Bool_t isPassedRerun(const std::string& trigger) const override;
       
       struct EFmuon {
-	bool valid;
-	float pt;
-	float eta;
-	float phi;
+	bool valid{};
+	float pt{-1.e30};
+	float eta{-1.e30};
+	float phi{-1.e30};
 	
-      EFmuon() : valid(false), pt(-1.e30), eta(-1.e30), phi(-1.e30) {}
       };
       
     private:
@@ -114,12 +112,6 @@ namespace Trig {
 		    std::vector<std::string>& tokens,
 		    const std::string& delimiters) const;
       
-      /*
-      double matchedTrackDetail(const double eta,
-				const double phi,
-				const std::string chain,
-				const std::string l1item);
-      */
       
       Double_t matchedTrackDetail(EFmuon& efMuonId,
 				  const EFmuon& usedEFMuonId,

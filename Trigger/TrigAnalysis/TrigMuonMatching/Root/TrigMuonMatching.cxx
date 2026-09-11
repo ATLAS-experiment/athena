@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigMuonMatching/TrigMuonMatching.h"
@@ -40,14 +40,14 @@ namespace Trig {
   }
 
   Bool_t TrigMuonMatching::match(const xAOD::Muon* mu,
-				 const std::string &chain,
+				 std::string_view chain,
 				 const double mindelR) const
   {
     return match(mu->eta(),mu->phi(),chain,mindelR);
   }
   
   Bool_t TrigMuonMatching::matchL1(const xAOD::Muon* mu,
-				   const std::string &l1item,
+				   std::string_view l1item,
 				   const double DelR) const
   {
     return matchL1(mu->eta(),mu->phi(),l1item,DelR);
@@ -103,7 +103,7 @@ namespace Trig {
   
   Bool_t TrigMuonMatching::match(const double eta,
 				 const double phi,
-				 const std::string &chain,
+				 std::string_view chain,
 				 const double mindelR) const
   {    
     if(!m_trigDecTool->isPassed(chain)){
@@ -118,7 +118,7 @@ namespace Trig {
 
   Bool_t TrigMuonMatching::matchL1(const double eta,
 				   const double phi,
-				   const std::string &l1item,
+				   std::string_view l1item,
 				   const double DelR) const
   {
     if(!m_trigDecTool->isPassed("L1_MU.*")){
@@ -291,7 +291,7 @@ namespace Trig {
   }
   
   
-  int TrigMuonMatching::getL1pt(const std::string& l1item) const
+  int TrigMuonMatching::getL1pt(std::string_view l1item) const
   {
     int rc = -1;
     
@@ -299,10 +299,10 @@ namespace Trig {
     tokenize(l1item, tokens, "_");
     std::string pt;
     if (tokens.size() == 1) {
-      pt = tokens.at(0);
+      pt = tokens.front();
       
-    } else if ((tokens.size() == 2 ) and (tokens.at(0) == "L1")) {
-      pt = tokens.at(1);
+    } else if ((tokens.size() == 2 ) and (tokens.front() == "L1")) {
+      pt = tokens[1];
       
     } else {
       ATH_MSG_ERROR("TrigMuonMatching::getL1pt : cannot parse " << l1item);
