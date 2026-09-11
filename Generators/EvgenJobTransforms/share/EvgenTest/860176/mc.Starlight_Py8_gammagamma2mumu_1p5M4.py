@@ -1,5 +1,4 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
-# Gen_tf.py --CA --jobConfig=860176 --ecmEnergy=5360 --maxEvents=100 --outputEVNTFile=out.root &> out.log
 
 from EvgenJobTransforms.EvgenCAConfig import EvgenConfig
 
