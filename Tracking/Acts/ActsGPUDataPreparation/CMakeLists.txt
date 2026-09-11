@@ -2,6 +2,9 @@
 
 atlas_subdir( ActsGPUDataPreparation )
 
+find_package(vecmem)
+find_package(traccc)
+
 # Common source files — always compiled
 set( _sources
    src/*.h src/*.cxx
@@ -27,7 +30,7 @@ set( _libraries
 
 
 # CUDA-only sources and libraries
-if( CMAKE_CUDA_COMPILER )
+if (TARGET traccc::cuda)
   list( APPEND _sources
     src/cuda/*.h
     src/cuda/*.cxx

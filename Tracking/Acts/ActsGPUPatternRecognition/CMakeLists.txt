@@ -31,7 +31,7 @@ set( _libraries
 
 
 # CUDA-only sources and libraries
-if( CMAKE_CUDA_COMPILER )
+if (TARGET traccc::cuda)
   list( APPEND _sources
     src/cuda/*.h
     src/cuda/*.cxx
