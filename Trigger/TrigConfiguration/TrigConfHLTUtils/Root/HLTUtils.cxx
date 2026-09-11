@@ -1,13 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
-#include <sstream>
 #include <stdexcept>
-#include <string>
 #include <algorithm>
-#include <iterator>
 #include <fstream>
 
 #include "TrigConfHLTUtils/HLTUtils.h"
@@ -46,6 +43,7 @@ HLTHash HLTUtils::string2hash( const std::string& s, const std::string& category
   *********************************************************************/
   HLTHash hash = 0xd2d84a61;
   for ( int i = (int)s.size()-1; i >= 0; --i )
+  //coverity[INTEGER_OVERFLOW]
     hash ^= ( hash >> 5) + s[i] + ( hash << 7 );
 
   for ( int i = 0; i < (int)s.size(); ++i )
