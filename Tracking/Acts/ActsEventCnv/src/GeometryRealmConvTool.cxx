@@ -224,7 +224,6 @@ namespace ActsTrk{
             GeometryRealmConvTool::convertTrackParametersToActs(const EventContext& ctx,
                                                                       const Trk::TrackParameters& atlasParameter, 
                                                                        Trk::ParticleHypothesis hypothesis) const {
-
         std::shared_ptr<const Acts::Surface> actsSurface{};
         Acts::BoundVector params{};
         const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
