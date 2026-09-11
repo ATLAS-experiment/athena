@@ -27,30 +27,34 @@ namespace triton { namespace backend { namespace traccc {
 /// @brief Owns the embedded Gaudi/Athena kernel that backs the Traccc Triton
 ///        backend, plus the process-wide device infrastructure it brings up.
 ///
-/// The device reconstruction algorithms
-/// (@c ActsTrk::DeviceClusterizationAlg, @c ActsTrk::DeviceSPFormationAlg,
-/// @c ActsTrk::DeviceTripletSeedingAlg, @c ActsTrk::DeviceTrkParamEstimationAlg
-/// and @c ActsTrk::DeviceTrackFindingAlg) are ordinary Gaudi
+/// The device reconstruction algorithms are ordinary Gaudi
 /// @c AthReentrantAlgorithm components: they read/write StoreGate and depend
 /// on provider tools and DetectorStore services. They therefore cannot be
 /// constructed as plain C++ objects; a Gaudi kernel has to be running.
+///
+/// The python configuration schedules them inside a single @c AthSequencer
+/// named @c Config::sequenceName, which is what @c TracccTritonRunner
+/// executes; the composition and ordering of the chain therefore live
+/// entirely in @c TracccTritonDeviceRecoCfg.
 class TracccTritonInitializer {
 public:
-    /// @brief Construction parameters, normally read from the model config.
+    /// @brief Construction parameters, normally read from the model config,
+    ///        plus the StoreGate keys @c initialize() fills in from the
+    ///        python configuration.
     struct Config {
         /// CUDA device id this instance is pinned to.
         int deviceId = 0;
         /// Number of event-store slots to create, one per Triton model instance
         std::size_t nSlots = 1;
-        /// StoreGate keys shared with @c TracccTritonRunner. These must match
-        /// the values used in @c TracccTritonDeviceRecoCfg.
-        std::string cellsKey = "TracccTritonCells";
-        std::string measurementsKey = "TracccTritonMeasurements";
-        std::string spacepointsKey = "TracccTritonSpacepoints";
-        std::string seedsKey = "TracccTritonSeeds";
-        std::string trkParamsKey = "TracccTritonTrackParameters";
-        std::string tracksKey = "TracccTritonTracks";
-        std::string geoIdMappingKey = "TracccGeometryIdMapping";
+        /// Name of the @c AthSequencer holding the per-request device chain.
+        std::string sequenceName = "TracccDeviceRecoSeq";
+        /// @name StoreGate keys, filled in by @c initialize().
+        /// intermediate keys of the algorithm are not needed
+        std::string cellsKey;
+        std::string measurementsKey;
+        std::string tracksKey;
+        std::string geoIdMappingKey;
+        /// @}
     };
 
     /// Get the process-wide singleton.
@@ -73,7 +77,7 @@ public:
     int deviceId() const;
 
     /// The service locator of the embedded Gaudi kernel (never null once
-    /// ready). Used by @c TracccTritonRunner to look up the device algorithms.
+    /// ready). Used by @c TracccTritonRunner to look up the device chain.
     ISvcLocator& serviceLocator() const;
 
     const ActsTrk::GeometryIdMapping& geometryIdMapping() const;

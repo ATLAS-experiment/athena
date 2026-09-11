@@ -13,6 +13,8 @@
 
 #include "TracccTritonInitializer.h"
 
+#include "CxxUtils/checker_macros.h"
+
 #include <dlfcn.h>
 
 #include <atomic>
@@ -36,16 +38,9 @@
 
 namespace triton { namespace backend { namespace traccc {
 
-// TracccTritonBootstrap.bootstrap() brings up the Gaudi kernel
-// with the device chain configured by TracccTritonDeviceRecoCfg, under these
-// fixed algorithm instance names, so the Runner can look them up afterward.
+// TracccTritonBootstrap.bootstrap() brings up the Gaudi kernel with the device
+// chain configured by TracccTritonDeviceRecoCfg, scheduled inside an AthSequencer
 namespace {
-    constexpr const char* kClusterizationAlg = "DeviceClusterizationAlg";
-    constexpr const char* kSPFormationAlg = "DeviceSPFormationAlg";
-    constexpr const char* kTripletSeedingAlg = "DeviceTripletSeedingAlg";
-    constexpr const char* kTrkParamEstimationAlg = "DeviceTrkParamEstimationAlg";
-    constexpr const char* kTrackFindingAlg = "DeviceTrackFindingAlg";
-
     void promoteSelfToGlobal() {
         Dl_info info{};
         if (!dladdr(reinterpret_cast<void*>(&promoteSelfToGlobal), &info) ||
@@ -72,7 +67,7 @@ struct TracccTritonInitializer::Impl {
     std::atomic<std::size_t> nextSlot{0};
     PyThreadState* pyMainThreadState = nullptr;
 
-    /// Look up one of the device algorithms by the name it was created under.
+    /// Look up an algorithm (or sequence) by the name it was created under.
     SmartIF<IAlgorithm> algorithm(const std::string& name) const {
         IAlgManager* algMgr = svcLocator.as<IAlgManager>();
         if (!algMgr) {
@@ -88,8 +83,30 @@ struct TracccTritonInitializer::Impl {
         return alg;
     }
 
-    /// Embed a Python interpreter and call TracccTritonBackend.TracccTritonBootstrap.bootstrap()
-    void bootstrapPython(std::size_t nSlots) {
+    /// Read one string entry out of the dictionary bootstrap() returned.
+    /// Must be called with the GIL held.
+    static std::string keyFromDict(PyObject* dict, const char* name) {
+        PyObject* item = PyDict_GetItemString(dict, name);  // borrowed
+        if (!item || !PyUnicode_Check(item)) {
+            throw std::runtime_error(
+                std::string("TracccTritonInitializer: TracccTritonBootstrap."
+                            "bootstrap() returned no string entry '") + name +
+                "' in its StoreGate key dictionary");
+        }
+        const char* value = PyUnicode_AsUTF8(item);
+        if (!value || !*value) {
+            throw std::runtime_error(
+                std::string("TracccTritonInitializer: empty StoreGate key '") +
+                name + "' returned by TracccTritonBootstrap.bootstrap()");
+        }
+        return value;
+    }
+
+    /// Embed a Python interpreter and call
+    /// TracccTritonBackend.TracccTritonBootstrap.bootstrap().
+    void bootstrapPython() {
+        const std::size_t nSlots = config.nSlots;
+        const std::string& sequenceName = config.sequenceName;
         if (!Py_IsInitialized()) {
             if (!dlopen(TRACCC_TRITON_PYTHON_LIBRARY, RTLD_NOW | RTLD_GLOBAL)) {
                 throw std::runtime_error(
@@ -127,13 +144,29 @@ struct TracccTritonInitializer::Impl {
         }
 
         PyObject* result =
-            PyObject_CallFunction(func, "n", static_cast<Py_ssize_t>(nSlots));
+            PyObject_CallFunction(func, "ns", static_cast<Py_ssize_t>(nSlots),
+                                  sequenceName.c_str());
         Py_DECREF(func);
         if (!result) {
             PyErr_Print();
             throw std::runtime_error(
                 "TracccTritonInitializer: TracccTritonBootstrap.bootstrap() "
                 "raised a Python exception (see stderr above)");
+        }
+        if (!PyDict_Check(result)) {
+            Py_DECREF(result);
+            throw std::runtime_error(
+                "TracccTritonInitializer: TracccTritonBootstrap.bootstrap() "
+                "did not return a dictionary of StoreGate keys");
+        }
+        try {
+            config.cellsKey = keyFromDict(result, "cells");
+            config.measurementsKey = keyFromDict(result, "measurements");
+            config.tracksKey = keyFromDict(result, "tracks");
+            config.geoIdMappingKey = keyFromDict(result, "geoIdMapping");
+        } catch (...) {
+            Py_DECREF(result);
+            throw;
         }
         Py_DECREF(result);
 
@@ -153,7 +186,10 @@ TracccTritonInitializer::~TracccTritonInitializer() {
 
 TracccTritonInitializer&
 TracccTritonInitializer::instance() {
-    static TracccTritonInitializer theInstance;
+    // The singleton is mutable, but every method that touches its state
+    // serialises on its own mutex, so sharing it between Triton's worker
+    // threads is safe.
+    static TracccTritonInitializer theInstance ATLAS_THREAD_SAFE;
     return theInstance;
 }
 
@@ -187,7 +223,8 @@ TracccTritonInitializer::initialize(const Config& config) {
 
     promoteSelfToGlobal();
 
-    m_impl->bootstrapPython(config.nSlots);
+    // Fills in the StoreGate keys on m_impl->config from the python configuration
+    m_impl->bootstrapPython();
 
     // Fetch the (already-initialized) singleton kernel
     m_impl->app = Gaudi::createApplicationMgr();
@@ -224,20 +261,16 @@ TracccTritonInitializer::initialize(const Config& config) {
         throw std::runtime_error(
             "TracccTritonInitializer: DetectorStore not available");
     }
-    if (detStore->retrieve(m_impl->geoIdMapping, config.geoIdMappingKey)
+    if (detStore->retrieve(m_impl->geoIdMapping, m_impl->config.geoIdMappingKey)
                 .isFailure() ||
         m_impl->geoIdMapping == nullptr) {
         throw std::runtime_error(
             "TracccTritonInitializer: no ActsTrk::GeometryIdMapping in the "
-            "DetectorStore under '" + config.geoIdMappingKey + "'");
+            "DetectorStore under '" + m_impl->config.geoIdMappingKey + "'");
     }
 
-    // Sanity-check that every algorithm of the chain exists.
-    m_impl->algorithm(kClusterizationAlg);
-    m_impl->algorithm(kSPFormationAlg);
-    m_impl->algorithm(kTripletSeedingAlg);
-    m_impl->algorithm(kTrkParamEstimationAlg);
-    m_impl->algorithm(kTrackFindingAlg);
+    // Sanity-check that the device chain the Runner will execute exists.
+    m_impl->algorithm(m_impl->config.sequenceName);
 
     m_impl->ready = true;
 }

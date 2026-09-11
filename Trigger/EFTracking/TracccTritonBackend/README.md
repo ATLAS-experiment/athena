@@ -72,22 +72,3 @@ A successful start ends with
 The [TracccTritonClient](https://gitlab.cern.ch/atlas/athena/-/tree/main/Trigger/EFTracking/TracccTritonClient?ref_type=heads) 
 can then be run as before, using the setup server (instructions in [client README](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/EFTracking/TracccTritonClient/README.md?ref_type=heads)).
 
-## StoreGate key contract
-
-The keys below are shared between three places and must stay in sync:
-
-| Key | Default | Written by | Read by |
-| --- | --- | --- | --- |
-| cells | `TracccTritonCells` | `TracccTritonRunner` | `DeviceClusterizationAlg` |
-| measurements | `TracccTritonMeasurements` | `DeviceClusterizationAlg` | `DeviceSPFormationAlg` |
-| spacepoints | `TracccTritonSpacepoints` | `DeviceSPFormationAlg` | `DeviceTripletSeedingAlg` |
-| seeds | `TracccTritonSeeds` | `DeviceTripletSeedingAlg` | `DeviceTrkParamEstimationAlg` |
-| track parameters | `TracccTritonTrackParameters` | `DeviceTrkParamEstimationAlg` | `DeviceTrackFindingAlg` |
-| tracks | `TracccTritonTracks` | `DeviceTrackFindingAlg` | `TracccTritonRunner` |
-
-The measurement collection is read back by the runner too: the track container
-carries only a *device* view of the measurements its states index into.
-
-Defined in `TracccTritonInitializer::Config`, passed to
-`TracccTritonDeviceRecoCfg` in `python/TracccTritonBackendConfig.py`.
-

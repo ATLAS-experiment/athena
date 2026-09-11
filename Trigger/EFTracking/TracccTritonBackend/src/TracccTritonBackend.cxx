@@ -178,10 +178,10 @@ class ModelState : public BackendModel {
   virtual ~ModelState() = default;
 
     // Name of the input tensor
-    const std::string &InputCellsTensorName() const { return input_cells_name_; }
+    const std::string &InputCellsTensorName() const { return m_inputCellsName; }
 
     // Datatype of the input tensor
-    TRITONSERVER_DataType InputCellsTensorDataType() const { return input_cells_datatype_; }
+    TRITONSERVER_DataType InputCellsTensorDataType() const { return m_inputCellsDatatype; }
 
     // Shape of the input and output tensor as given in the model
     // configuration file. This shape will not include the batch
@@ -196,10 +196,10 @@ class ModelState : public BackendModel {
     // should only call it in TRITONBACKEND_ModelInstanceExecute.
     const std::vector<int64_t> &InputCellsTensorNonBatchShape() const
     {
-        return input_cells_nb_shape_;
+        return m_inputCellsNbShape;
     }
 
-    size_t TotalInstanceCount() const { return total_instance_count_; }
+    size_t TotalInstanceCount() const { return m_totalInstanceCount; }
 
     // Validate that this model is supported by this backend.
     TRITONSERVER_Error *ValidateModelConfig();
@@ -210,20 +210,20 @@ class ModelState : public BackendModel {
  private:
   ModelState(TRITONBACKEND_Model* triton_model);
 
-    std::string input_cells_name_;
+    std::string m_inputCellsName;
 
-    TRITONSERVER_DataType input_cells_datatype_;
+    TRITONSERVER_DataType m_inputCellsDatatype;
 
-    std::vector<int64_t> input_cells_nb_shape_;
+    std::vector<int64_t> m_inputCellsNbShape;
 
-    size_t total_instance_count_ = 1;
+    size_t m_totalInstanceCount = 1;
 
-    bool shape_initialized_;
+    bool m_shapeInitialized;
 };
 
 //! Also possible problems in this function!
 ModelState::ModelState(TRITONBACKEND_Model* triton_model)
-    : BackendModel(triton_model), shape_initialized_(false)
+    : BackendModel(triton_model), m_shapeInitialized(false)
 {
   // Validate that the model's configuration matches what is supported
   // by this backend.
@@ -288,18 +288,18 @@ ModelState::ValidateModelConfig()
     // length must be used. Building the name with the const char* overload
     // instead can append trailing garbage, which then makes
     // TRITONBACKEND_RequestInput fail to find the tensor at execute time.
-    input_cells_name_ = std::string(input_cells_name, input_cells_len);
+    m_inputCellsName = std::string(input_cells_name, input_cells_len);
 
     LOG_MESSAGE(TRITONSERVER_LOG_INFO,
                 (std::string("'traccc' backend: input tensor is '") +
-                 input_cells_name_ + "' (" +
-                 std::to_string(input_cells_name_.size()) + " chars)").c_str());
+                 m_inputCellsName + "' (" +
+                 std::to_string(m_inputCellsName.size()) + " chars)").c_str());
 
     std::string input_cells_dtype;
     RETURN_IF_ERROR(input_cells.MemberAsString("data_type", &input_cells_dtype));
-    input_cells_datatype_ = ModelConfigDataTypeToTritonServerDataType(input_cells_dtype);
+    m_inputCellsDatatype = ModelConfigDataTypeToTritonServerDataType(input_cells_dtype);
 
-    RETURN_IF_ERROR(backend::ParseShape(input_cells, "dims", &input_cells_nb_shape_));
+    RETURN_IF_ERROR(backend::ParseShape(input_cells, "dims", &m_inputCellsNbShape));
 
     // The output tensors are written by fixed name, so the configured names
     // must be exactly the expected set (order is irrelevant).
@@ -321,7 +321,7 @@ ModelState::ValidateModelConfig()
 
     // Count the instances Triton is going to create, so the embedded Gaudi
     // kernel can be brought up with one event-store slot per instance.
-    total_instance_count_ = 0;
+    m_totalInstanceCount = 0;
     common::TritonJson::Value instance_groups;
     if (ModelConfig().Find("instance_group", &instance_groups)) {
         for (size_t i = 0; i < instance_groups.ArraySize(); ++i) {
@@ -341,18 +341,18 @@ ModelState::ValidateModelConfig()
             if (group.Find("gpus", &gpus) && gpus.ArraySize() > 0) {
                 devices = gpus.ArraySize();
             }
-            total_instance_count_ += static_cast<size_t>(count) * devices;
+            m_totalInstanceCount += static_cast<size_t>(count) * devices;
         }
     }
     // No instance_group at all, or one that resolves to nothing, still means
     // Triton creates a single instance.
-    if (total_instance_count_ == 0) {
-        total_instance_count_ = 1;
+    if (m_totalInstanceCount == 0) {
+        m_totalInstanceCount = 1;
     }
 
     LOG_MESSAGE(TRITONSERVER_LOG_INFO,
                 (std::string("'traccc' backend: model configured with ") +
-                 std::to_string(total_instance_count_) +
+                 std::to_string(m_totalInstanceCount) +
                  " instance(s), one event slot each").c_str());
 
     return nullptr; // success
@@ -414,13 +414,13 @@ class ModelInstanceState : public BackendModelInstance
 {
 private:
 
-    ModelState* model_state_;
+    ModelState* m_modelState;
 
     ModelInstanceState(
         ModelState* model_state,
         TRITONBACKEND_ModelInstance* triton_model_instance)
         : BackendModelInstance(model_state, triton_model_instance),
-            model_state_(model_state)
+            m_modelState(model_state)
     {
     }
 
@@ -432,7 +432,7 @@ public:
     virtual ~ModelInstanceState() = default;
 
     // Get the state of the model that corresponds to this instance.
-    ModelState* StateForModel() const { return model_state_; }
+    ModelState* StateForModel() { return m_modelState; }
 
     // Drives the device reconstruction chain for each request
     std::unique_ptr<TracccTritonRunner> traccc_triton_runner_;
