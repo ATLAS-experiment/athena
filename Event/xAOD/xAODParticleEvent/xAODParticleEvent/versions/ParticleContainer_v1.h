@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: ParticleContainer_v1.h 637086 2014-12-19 16:02:19Z kkoeneke $
@@ -17,7 +17,7 @@
 #include "xAODParticleEvent/ParticleContainerFwd.h"
 
 // To complete the DATAVECTOR_BASE macro:
-template struct DataVector_detail::DVLEltBaseInit< xAOD::Particle_v1 >;
+DATAVECTOR_BASE_FIN( xAOD::Particle, xAOD::IParticle );
 
 namespace xAOD {
    /// Define the particle container as a simple DataVector
