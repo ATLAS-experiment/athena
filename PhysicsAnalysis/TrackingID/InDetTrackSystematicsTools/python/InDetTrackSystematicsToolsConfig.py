@@ -37,7 +37,7 @@ def InDetTrackTruthFilterToolCfg(flags, name="InDetTrackTruthFilterTool",
             InDetTrackTruthOriginToolCfg(flags)))
         
     # 2022 recommendations (MC23a)
-    if flags.Input.MCCampaign in [Campaign.MC23a, Campaign.MC23d, Campaign.MC23e]:
+    if flags.Input.MCCampaign in [Campaign.MC23a, Campaign.MC23d, Campaign.MC23e, Campaign.MC23g]:
         kwargs.setdefault("calibFileNomEff", "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/TrackingRecommendations_prelim_rel22.root")
         kwargs.setdefault("fFakeLoose", 0.40)
         kwargs.setdefault("fFakeTight", 1.00)
