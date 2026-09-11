@@ -79,9 +79,6 @@ class ITauToolBase : virtual public asg::IAsgTool
   //-----------------------------------------------------------------
   virtual StatusCode finalize() = 0;
 
-  //make pure
-  virtual StatusCode readConfig() = 0;
-
 };
 
 #endif // TAURECTOOLS_ITAUTOOLBASE_H
