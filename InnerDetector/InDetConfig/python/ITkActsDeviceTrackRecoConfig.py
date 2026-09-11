@@ -89,7 +89,7 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
 
         from ActsConfig.ActsConfigFlags import SeedingStrategy
 
-        print(f"Performing seeding on device with seeding strategy set to {flags.Tracking.ActiveConfig.SeedingStrategy}")
+        print(f"Performing seeding on device with seeding strategy set to {flags.Acts.Device.seedingStrategy}")
         if flags.Acts.Device.seedingStrategy in [SeedingStrategy.Gbts, SeedingStrategy.GbtsFtf]:
             from ActsGPUPatternRecognition.ActsGPUPatternRecognitionConfig import DeviceGBTSSeedingAlgCfg
             acc.merge(DeviceGBTSSeedingAlgCfg(flags,
@@ -148,7 +148,85 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
     # --- Track Reconstruction ---
     if flags.Acts.Device.doTrackReconstruction:
 
-        raise ValueError("Unsupported operation, we do not have this step on device yet")
+        if clustersLocation is not DataLocation.DEVICE or seedsLocation is not DataLocation.DEVICE:
+            raise ValueError("Device track reconstruction requires device clusterization "
+                "(flags.Acts.Device.doClusterization=True) and device seeding "
+                "(flags.Acts.Device.doSeeding=True): it reads the traccc measurement "
+                "and seed collections straight out of device memory and there is "
+                "currently no host->device converter for these yet.")
+
+
+        from ActsGPUMagField.ActsGPUMagFieldConfig import JSONDeviceMagFieldProviderSvcCfg
+        acc.merge(JSONDeviceMagFieldProviderSvcCfg(flags,
+            DeviceMagFieldObjectName="TracccMagneticField",
+            HostMagFieldObjectName="TracccHostMagField",
+        ))
+
+        from ActsGPUPatternRecognition.ActsGPUPatternRecognitionConfig import DeviceTrkParamEstimationAlgCfg, DeviceTrackFindingAlgCfg
+        acc.merge(DeviceTrkParamEstimationAlgCfg(flags,
+            InputTracccSpacepoints="TracccPixelSpacepointCollection",
+            InputTracccMeasurements="TracccMeasurementCollection",
+            InputTracccSeeds="TracccPixelSeedCollection",
+            InputTracccMagField="TracccMagneticField",
+            OutputTracccTrackParameters="TracccTrackParameterCollection",
+        ))
+
+        acc.merge(DeviceTrackFindingAlgCfg(flags,
+            InputTracccMeasurements="TracccMeasurementCollection",
+            InputTracccMagField="TracccMagneticField",
+            InputTracccTrackParameters="TracccTrackParameterCollection",
+            InputTracccDetectorGeometry="TracccDeviceDetectorGeometry",
+            OutputTracccTracks="TracccTrackCollection",
+        ))
+            
+        if clustersLocation is not DataLocation.DEVICE:
+            acc.merge(TracccMeasurementConverterAlgCfg(flags,
+                InputMeasurements="TracccMeasurementCollection",
+                InputClusters="TracccClusterCollection",
+                InputCells="TracccCellCollection",
+                ConvertClustersWithCells = flags.Tracking.doTruth,
+                OutputPixelClusters="ITkPixelClusters",
+                OutputPixelSpacePoints="ITkPixelSpacePoints",
+                OutputMeasToPixelSP="ITkTracccMeasToPixelSP",
+                OutputMeasToStripCl="ITkTracccMeasToStripCl",
+                OutputStripClusters="ITkStripClusters",
+                GeoIdMapping="TracccGeoIdMapping",
+            ))
+
+        from ActsGPUEventCnv.ActsGPUEventCnvConfig import TracccTrackConverterAlgCfg, TracccMeasurementConverterAlgCfg
+        if clustersLocation is DataLocation.DEVICE:
+            acc.merge(TracccMeasurementConverterAlgCfg(flags,
+                    InputMeasurements="TracccMeasurementCollection",
+                    InputClusters="TracccClusterCollection",
+                    InputCells="TracccCellCollection",
+                    ConvertClustersWithCells = flags.Tracking.doTruth,
+                    OutputPixelClusters="ITkPixelClusters",
+                    OutputPixelSpacePoints="ITkPixelSpacePoints",
+                    OutputMeasToPixelSP="ITkTracccMeasToPixelSP",
+                    OutputMeasToStripCl="ITkTracccMeasToStripCl",
+                    OutputStripClusters="ITkStripClusters"
+            ))
+
+            # Strip clusters were just produced above, but nothing forms strip
+            # space points on the device path — mirror the host-side flow
+            if flags.Tracking.ActiveConfig.useITkStripSeeding or (flags.Acts.SpacePoints.doStrip and not flags.Tracking.ActiveConfig.isSecondaryPass):
+                from ActsConfig.ActsSpacePointFormationConfig import ActsStripSpacePointFormationAlgCfg
+                acc.merge(ActsStripSpacePointFormationAlgCfg(flags,
+                    name=f"{flags.Tracking.ActiveConfig.extension}StripSpacePointFormationAlg",
+                    StripClusters="ITkStripClusters",
+                    StripSpacePoints="ITkStripSpacePoints",
+                    StripOverlapSpacePoints="ITkStripOverlapSpacePoints"))
+
+        acc.merge(TracccTrackConverterAlgCfg(flags,
+            InputPixelClusters="ITkPixelClusters",
+            InputStripClusters="ITkStripClusters",
+            InputMeasToPixelSP="ITkTracccMeasToPixelSP",
+            InputMeasToStripCl="ITkTracccMeasToStripCl",
+            InputTracks="TracccTrackCollection",
+            OutputTracks=f"{flags.Tracking.ActiveConfig.extension}Tracks",
+        ))
+
+
 
     else:
 
@@ -163,6 +241,7 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
                 OutputPixelClusters="ITkPixelClusters",
                 OutputPixelSpacePoints="ITkPixelSpacePoints",
                 OutputMeasToPixelSP="ITkTracccMeasToPixelSP",
+                OutputMeasToStripCl="ITkTracccMeasToStripCl",
                 OutputStripClusters="ITkStripClusters"
             ))
             from ActsConfig.ActsSpacePointFormationConfig import ActsStripSpacePointFormationAlgCfg
@@ -188,16 +267,26 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
         # Extract track parameters from device seeds if requested
         if flags.Tracking.ActiveConfig.storeTrackSeeds and flags.Acts.Device.doSeeding: # for clustering only pipelines this is controlled via the ActsSeedingConfig file
             from ActsConfig.ActsSeedingConfig import ActsStoreTrackSeedsCfg
-            from InDetConfig.ITkActsHelpers import isFastPrimaryPass
-            processPixels = flags.Detector.EnableITkPixel
-            processStrips = flags.Detector.EnableITkStrip
-            if flags.Tracking.ActiveConfig.extension == "ActsConversion" or flags.Tracking.ActiveConfig.isLargeD0:
-                processPixels = False
-            elif isFastPrimaryPass(flags):
-                processStrips = False
-            acc.merge(ActsStoreTrackSeedsCfg(flags,
-                                             processPixels=processPixels,
-                                             processStrips=processStrips))
+            from ActsConfig.ActsAnalysisConfig import ActsPixelSeedsToTrackParamsAlgCfg, ActsStripSeedsToTrackParamsAlgCfg
+            processPixels = flags.Tracking.ActiveConfig.useITkPixelSeeding
+            processStrips = flags.Tracking.ActiveConfig.useITkStripSeeding
+
+            prefix = flags.Tracking.ActiveConfig.extension
+            # Create track parameters before ActsStoreTrackSeedsCfg (following ActsSeedingCfg pattern)
+            if processPixels:
+                acc.merge(ActsPixelSeedsToTrackParamsAlgCfg(
+                    flags,
+                    name = prefix + 'PixelSeedsToTrackParamsAlg',
+                    InputSeedContainerKey = prefix + 'PixelSeeds',
+                    OutputTrackParamsCollectionKey = prefix + 'PixelEstimatedTrackParams'))
+            if processStrips:
+                acc.merge(ActsStripSeedsToTrackParamsAlgCfg(
+                    flags,
+                    name = prefix + 'StripSeedsToTrackParamsAlg',
+                    InputSeedContainerKey = prefix + 'StripSeeds',
+                    OutputTrackParamsCollectionKey = prefix + 'StripEstimatedTrackParams'))
+
+            acc.merge(ActsStoreTrackSeedsCfg(flags, processPixels=processPixels, processStrips=processStrips))
             
         # CKF
         from ActsConfig.ActsTrackFindingConfig import ActsTrackFindingCfg

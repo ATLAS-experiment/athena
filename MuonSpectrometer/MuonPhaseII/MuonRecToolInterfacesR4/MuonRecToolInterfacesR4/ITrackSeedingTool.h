@@ -7,6 +7,13 @@
 #include "GaudiKernel/IAlgTool.h"
 #include "GaudiKernel/EventContext.h"
 
+// Must be included before any header that pulls in <Eigen/Core> (e.g. Acts
+// below): it arms EIGEN_MATRIXBASE_PLUGIN/EIGEN_TRANSFORM_PLUGIN, which add
+// the Amg::Vector3D methods (mag(), unit(), perp(), ...) used throughout
+// this interface and its implementations. Eigen headers are include-guarded,
+// so if something else includes plain Eigen first, those methods silently
+// never exist for the rest of the translation unit.
+#include "GeoPrimitives/GeoPrimitives.h"
 
 #include "Acts/EventData/BoundTrackParameters.hpp"
 

@@ -25,6 +25,14 @@ atlas_add_test( TgcL0GoodMagMap_test
   LINK_LIBRARIES CxxUtils
   POST_EXEC_SCRIPT noerror.sh )
 
+atlas_add_test( TgcL0SegmentReconstruction_test
+  SOURCES test/TgcL0SegmentReconstruction_test.cxx
+          src/TgcL0FloatingData.cxx
+          src/TgcL0SegmentReconstruction.cxx
+  INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src ${Boost_INCLUDE_DIRS}
+  LINK_LIBRARIES ${Boost_LIBRARIES} FourMomUtils L0MuonS1TGCToolInterfaces
+  POST_EXEC_SCRIPT nopost.sh )
+
 atlas_add_test( TgcL0TrackSelector_test
   SOURCES test/TgcL0TrackSelector_test.cxx
           src/TgcL0TrackSelector.cxx

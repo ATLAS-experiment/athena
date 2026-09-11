@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
   * Trigger Hypo Tool, that is aimed at triggering large dEdx tracks
   * author Kunihiro Nagano <kunihiro.nagano@cern.ch> - KEK
@@ -130,8 +130,7 @@ StatusCode TrigdEdxTrackHypoAlg::execute( const EventContext& context ) const
 
       ATH_CHECK( newDecision->setObjectLink<xAOD::TrigCompositeContainer>(TrigCompositeUtils::featureString(), dedxEL) );
 
-      TrigdEdxTrackHypoTool::dEdxTrkHypoInfo hypoInfo{ newDecision, dedx, previousDecisionIDs };
-      dEdxTrkHypoInputs.push_back( hypoInfo );
+      dEdxTrkHypoInputs.emplace_back(newDecision, dedx, previousDecisionIDs);
    }
 
    // monitor

@@ -13,7 +13,6 @@ def main(args):
         flags.Exec.DebugMessageComponents = [
             "SegmentEdgeInferenceAlg",
             "SegmentEdgeInferenceAlg.SegmentEdgeClassifierTool",
-            "SegmentEdgeInferenceAlg.SegmentTrackCandidateBuilderTool",
             "SegmentEdgeInferenceAlg.SegmentEdgeClassifierTool.OnnxRuntimeSessionToolCPU",
             "SegmentEdgeInferenceAlg.SegmentEdgeClassifierTool.OnnxRuntimeSessionToolCUDA",
             "GraphInferenceAlg",
@@ -71,7 +70,7 @@ def main(args):
         SegmentEdgeInferenceAlgCfg(
             flags,
             EdgeClassifierTool=edge_classifier_kwargs,
-            EdgeThreshold=args.edge_threshold,
+            PairGateThreshold=args.edge_threshold,
             OutputLevel=output_level,
         )
     )
@@ -85,8 +84,8 @@ if __name__ == "__main__":
     parser.set_defaults(inputFile=MuonPhaseIITestDefaults.HITS_PG_R3)
     parser.add_argument("--edgeModel", "--edge-model", required=True, dest="edgeModel",
                         help="ONNX segment-edge classifier")
-    parser.add_argument("--edge-threshold", type=float, default=0.00013,
-                        help="Candidate-builder edge probability threshold")
+    parser.add_argument("--edge-threshold", type=float, default=0.975,
+                        help="Minimum high-confidence edge probability used to form ML track components")
     parser.add_argument("--max-delta-theta-deg", type=float, default=35.0,
                         help="Graph edge direction window in degrees")
     parser.add_argument("--max-delta-sector", type=int, default=1,

@@ -37,6 +37,9 @@
 #include <iostream>
 #include <fstream>
 
+//json
+#include <nlohmann/json.hpp>
+
 
 
 // Constructor
@@ -107,7 +110,7 @@ ITkPixelCablingAlg::execute(const EventContext& ctx) const {
   }
 
 
-  inputFile>>*pCabling;
+  ATH_CHECK(fillFromFile(inputFile, pCabling));
   const int numEntries = pCabling->size();
   ATH_MSG_DEBUG(numEntries << " entries were made to the identifier map.");
 
@@ -132,12 +135,20 @@ StatusCode ITkPixelCablingAlg::generateTestCabling(std::unique_ptr<ITkPixelCabli
     //What's used as the online "base" (32 bit) is just the offline ID (64bit) >> 32.
     //Lowest two bits are always 0 in the base - in fact, at least 2 bytes are. Fine for testing.
     
+    std::unordered_set<uint32_t> seen;
+
     for (size_t hash = 0; hash < m_idHelper->wafer_hash_max(); hash++){
         Identifier id = m_idHelper->wafer_id(hash);
-        uint32_t onID = (id.get_compact() >> 32) & 0xFFFFFFFF;
+        uint32_t onID = (id.get_identifier32().get_compact());
         
         const InDetDD::SiDetectorElement *element = m_detManager->getDetectorElement(id);
         const InDetDD::PixelModuleDesign *p_design = static_cast<const InDetDD::PixelModuleDesign *>(&element->design());
+
+        //a dummy sourceID - has nothing to do with reality, and is intended
+        //for testing purposes only
+        
+        uint32_t sourceID = std::abs(m_idHelper->barrel_ec(id)) << 26 | m_idHelper->layer_disk(id) << 20;
+        if (seen.insert(sourceID).second) cabling->addSourceID(sourceID);
 
         ITkPixelCabling::ModuleType moduleType;
         ITkPixelCabling::TransformType moduleTransform;
@@ -156,7 +167,7 @@ StatusCode ITkPixelCablingAlg::generateTestCabling(std::unique_ptr<ITkPixelCabli
                 cabling->addEntryOnOff(onID | 0b01, ITkPixelCabling::ModuleInfo(id, moduleType, moduleTransform));
                 cabling->addEntryOnOff(onID | 0b10, ITkPixelCabling::ModuleInfo(id, moduleType, moduleTransform));
                 cabling->addEntryOnOff(onID | 0b11, ITkPixelCabling::ModuleInfo(id, moduleType, moduleTransform));
-            
+
             }
             else{
                 //Merged quads have 1:1 online:offline correspondence.
@@ -170,8 +181,15 @@ StatusCode ITkPixelCablingAlg::generateTestCabling(std::unique_ptr<ITkPixelCabli
             //We can also fill in the offline->online map
             //Were are creating the "base" online ID, i. e. without the chip ID
             cabling->addEntryOffOn(id, ITkPixelCabling::ModuleInfo<ITkPixelOnlineId>(onID, moduleType, moduleTransform));
+            
 
-
+            //Fill in also the updated ROB-structure-respecting map with some dummy values
+            cabling->addEntryOffOn((onID >> 8) | 0x00000000, ITkPixelOnlineId(sourceID, (onID >> 8) | 0x00000000));
+            cabling->addEntryOffOn((onID >> 8) | 0x40000000, ITkPixelOnlineId(sourceID, (onID >> 8) | 0x40000000));
+            cabling->addEntryOffOn((onID >> 8) | 0x80000000, ITkPixelOnlineId(sourceID, (onID >> 8) | 0x80000000));
+            cabling->addEntryOffOn((onID >> 8) | 0xC0000000, ITkPixelOnlineId(sourceID, (onID >> 8) | 0xC0000000));
+            cabling->addTransformType(onID, ITkPixelCabling::TransformType::NominalQuad);
+        
         }
         else {
             
@@ -184,10 +202,57 @@ StatusCode ITkPixelCablingAlg::generateTestCabling(std::unique_ptr<ITkPixelCabli
             //We can also fill in the offline->online map
             //Were are creating the "base" online ID, i. e. without the chip ID
             cabling->addEntryOffOn(id, ITkPixelCabling::ModuleInfo<ITkPixelOnlineId>(onID, moduleType, moduleTransform));
+            
+            //Fill in also the updated ROB-structure-respecting map with some dummy values
+            cabling->addEntryOffOn((onID >> 8), ITkPixelOnlineId(sourceID, onID >> 8));
+            if (m_idHelper->barrel_ec(id) == 0){
+                cabling->addTransformType(onID, ITkPixelCabling::TransformType::NominalIBTriplet);
+            }
+            else {
+                cabling->addTransformType(onID, ITkPixelCabling::TransformType::NominalIECTriplet);
+            }
         }
  
     }
     
+    return StatusCode::SUCCESS;
+}
+
+StatusCode ITkPixelCablingAlg::fillFromFile(std::ifstream& file, std::unique_ptr<ITkPixelCablingData>& cabling) const {
+    
+    nlohmann::json config;
+    file >> config;
+
+    std::unordered_set<uint32_t> seen;
+
+    for (const auto& [side, groups] : config.items()) {
+        
+        for (const auto& group : groups) {
+        
+            for (const auto& entry : group) {
+        
+                const uint32_t detectorResourceID = std::stoul(entry.at("DetectorResourceID").get<std::string>(), nullptr, 16);
+
+                const uint32_t trueDetectorResourceID = std::stoul(entry.at("TrueDetectorResourceID").get<std::string>(), nullptr, 16);
+
+                const uint32_t sourceID = std::stoul(entry.at("SourceID").get<std::string>(), nullptr, 16);
+
+                cabling->addEntryOffOn(detectorResourceID & ITkPixelCabling::OFFLINE_DRID_MASK, ITkPixelOnlineId(sourceID, detectorResourceID));
+
+                if (seen.insert(sourceID).second) cabling->addSourceID(sourceID);
+
+                uint64_t moduleID = (static_cast<uint64_t>(ITkPixelCabling::dridToModuleID(trueDetectorResourceID)) << 32);
+
+                Identifier id(static_cast<Identifier::value_type>(moduleID));
+                if      (m_idHelper->barrel_ec(id) == 0 && m_idHelper->layer_disk(id) == 0) cabling->addTransformType(ITkPixelCabling::dridToModuleID(trueDetectorResourceID), ITkPixelCabling::TransformType::NominalIBTriplet);
+                else if (m_idHelper->barrel_ec(id) != 0 && m_idHelper->layer_disk(id) == 0) cabling->addTransformType(ITkPixelCabling::dridToModuleID(trueDetectorResourceID), ITkPixelCabling::TransformType::NominalIECTriplet);
+                else cabling->addTransformType(ITkPixelCabling::dridToModuleID(trueDetectorResourceID), ITkPixelCabling::TransformType::NominalQuad);
+
+                ATH_MSG_DEBUG(std::hex << " key " << (detectorResourceID & ITkPixelCabling::OFFLINE_DRID_MASK) << " detectorResourceID " << detectorResourceID << " trueDetectorResourceID " << trueDetectorResourceID << " sourceID " << sourceID);
+            }
+        }
+    }
+
     return StatusCode::SUCCESS;
 }
 

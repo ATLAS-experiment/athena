@@ -16,20 +16,26 @@
 
 #include <cmath>
 #include <numbers>
-#include <string>
 
 namespace {
 
 L0Muon::TgcL0Floating::Station station(
     const Identifier& identifier, const Muon::IMuonIdHelperSvc& idHelperSvc) {
   using L0Muon::TgcL0Floating::Station;
-  const std::string stationName = idHelperSvc.tgcIdHelper().stationNameString(
-      idHelperSvc.tgcIdHelper().stationName(identifier));
-  if (stationName.rfind("T1", 0) == 0) return Station::M1;
-  if (stationName.rfind("T2", 0) == 0) return Station::M2;
-  if (stationName.rfind("T3", 0) == 0) return Station::M3;
-  if (stationName.rfind("T4", 0) == 0) return Station::Inner;
-  return Station::Unknown;
+  using Muon::MuonStationIndex::PhiIndex;
+
+  switch (idHelperSvc.phiIndex(identifier)) {
+    case PhiIndex::T1:
+      return Station::M1;
+    case PhiIndex::T2:
+      return Station::M2;
+    case PhiIndex::T3:
+      return Station::M3;
+    case PhiIndex::T4:
+      return Station::Inner;
+    default:
+      return Station::Unknown;
+  }
 }
 
 std::uint16_t triggerSector(const float phi) {

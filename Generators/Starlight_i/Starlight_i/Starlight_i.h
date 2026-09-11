@@ -25,6 +25,7 @@
 
 #include "starlight.h"
 #include "upcevent.h"
+#include "upcXevent.h" // not compatible with Starlight older than r330
 #include "inputParameters.h"
 
 class Starlight_i:public GenModule {
@@ -45,14 +46,21 @@ protected:
   BooleanProperty m_doTauolappLheFormat{this, "doTauolappLheFormat", false};
   BooleanProperty m_suppressVMdecay{this, "suppressVMdecay", false};
   // Commands to setup starlight
-  StringArrayProperty m_InitializeVector{this, "Initialize", {} };
+  StringArrayProperty m_InitializeVector{this,
+                                         "Initialize",
+                                         {},
+                                         "List of parameters for Starlight initialization",
+                                         "GeneratorSettings<std::string>"};
 
   int              m_events{0}; // event counter
-  starlight*       m_starlight{};         // pointer to starlight instance // TODO convert to unique_ptr
+  std::unique_ptr<starlight> m_starlight{};   // pointer to starlight instance
   std::shared_ptr<randomGenerator> m_randomGenerator{};
   inputParameters  m_inputParameters;   // parameter instance
   double           m_axionMass{1.};
-  upcEvent        *m_event{}; // TODO convert to unique_ptr
+  std::variant<
+      std::unique_ptr<upcEvent>,  // Starting from version r330 m_event can be either
+      std::unique_ptr<upcXEvent>  // upcEvent or upcXEvent depending on the process
+  >                m_event{};
 
   unsigned int m_beam1Z{0};
   unsigned int m_beam1A{0};

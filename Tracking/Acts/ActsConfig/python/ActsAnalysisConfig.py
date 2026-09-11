@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -758,7 +758,6 @@ def ActsBaseSeedsToTrackParamsAlgCfg(flags,
 
 def ActsPixelSeedsToTrackParamsAlgCfg(flags,
                                       name: str = 'ActsPixelSeedsToTrackParamsAlg',
-                                      extension: str = "Acts",
                                       **kwargs) -> ComponentAccumulator:
     kwargs.setdefault('InputSeedContainerKey', 'ActsPixelSeeds')
     kwargs.setdefault('DetectorElementsKey', 'ITkPixelDetectorElementCollection')
@@ -770,7 +769,6 @@ def ActsPixelSeedsToTrackParamsAlgCfg(flags,
 
 def ActsStripSeedsToTrackParamsAlgCfg(flags,
                                       name: str = 'ActsStripSeedsToTrackParamsAlgCfg',
-                                      extension: str = "Acts",
                                       **kwargs) -> ComponentAccumulator:
     kwargs.setdefault('InputSeedContainerKey', 'ActsStripSeeds')
     kwargs.setdefault('DetectorElementsKey', 'ITkStripDetectorElementCollection')

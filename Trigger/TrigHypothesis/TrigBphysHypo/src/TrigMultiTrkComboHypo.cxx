@@ -12,8 +12,7 @@
  **
  **************************************************************************/
 
-#include <algorithm>
-#include <numeric>
+
 
 #include "Constants.h"
 #include "TrigMultiTrkComboHypo.h"
@@ -38,7 +37,8 @@
 
 #include "Math/GenVector/VectorUtil.h"
 #include "Math/Vector2D.h"
-
+#include <algorithm>
+#include <numeric>
 
 using TrigCompositeUtils::Decision;
 using TrigCompositeUtils::DecisionContainer;
@@ -733,7 +733,7 @@ StatusCode TrigMultiTrkComboHypo::processMergedElectrons(TrigMultiTrkState<xAOD:
     // add electron from decision to state.leptons
     DecisionIDContainer decisionIDs;
     TrigCompositeUtils::decisionIDs(decision, decisionIDs);
-    leptons.push_back({electronEL, std::vector<ElementLink<DecisionContainer>>(1, decisionEL), decisionIDs});
+    leptons.push_back({electronEL, std::vector<ElementLink<DecisionContainer>>(1, decisionEL), std::move(decisionIDs)});
 
     // get initialRoI this electron originating from
     auto roiInfo = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(state.context(), decision, TrigCompositeUtils::initialRoIString(), true);
@@ -788,7 +788,7 @@ StatusCode TrigMultiTrkComboHypo::findMuTrkCandidates(TrigMultiTrkState<xAOD::Mu
     // add muon from decision to state.leptons
     DecisionIDContainer decisionIDs;
     TrigCompositeUtils::decisionIDs(decision, decisionIDs);
-    muons.push_back({muonEL, std::vector<ElementLink<DecisionContainer>>(1, decisionEL), decisionIDs});
+    muons.push_back({muonEL, std::vector<ElementLink<DecisionContainer>>(1, decisionEL), std::move(decisionIDs)});
 
     ATH_MSG_DEBUG( "Found muon (CombinedTrackParticle): " << muon->pt() << " / " << muon->eta() << " / " << muon->phi() << " / " << muon->charge() );
 
@@ -882,7 +882,8 @@ StatusCode TrigMultiTrkComboHypo::createDecisionObjects(TrigMultiTrkStateBase& s
 
     // set mandatory feature ElementLink to xAOD::TrigBphys object
     decision->setObjectLink<xAOD::TrigBphysContainer>(TrigCompositeUtils::featureString(), triggerObjectEL);
-    decision->setDetail<int32_t>("noCombo", 1);
+    static const std::string noComboStr{"noCombo"};
+    decision->setDetail<int32_t>(noComboStr, 1);
 
     for (const auto& tool : hypoTools()) {
       ATH_MSG_DEBUG( "Go to " << tool );

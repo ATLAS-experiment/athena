@@ -14,11 +14,18 @@ def main(args):
     run_bucket_filter = args.enableBucketFilter and not args.skip_onnx
     run_edge_classifier = args.enableEdgeClassifier and not args.skip_onnx
     run_ml_seeder = args.useMlSeeder and not args.skip_onnx
+    filter_segment_container = (
+        args.filterSegmentsWithoutMlConnections and run_edge_classifier
+    )
+    filtered_segment_key = "MuonSegmentsFromR4MlConnected"
 
     if args.skip_onnx and (args.enableBucketFilter or args.enableEdgeClassifier):
         print("INFO: --skip-onnx requested. Disabling bucket filter and edge classifier inference stages.")
     if args.skip_onnx and args.useMlSeeder:
-        print("INFO: --skip-onnx requested. Switching to legacy seeder for a non-ONNX baseline.")
+        print("INFO: --skip-onnx requested. Switching to the standard seeder for the non-ONNX baseline.")
+    if args.filterSegmentsWithoutMlConnections and not run_edge_classifier:
+        print("WARNING: --filterSegmentsWithoutMlConnections requires the edge "
+              "classifier and will be ignored.")
 
     if args.athenaDebug:
         flags.Exec.DebugMessageComponents = [
@@ -30,7 +37,6 @@ def main(args):
             "SegmentEdgeInferenceAlg.SegmentEdgeClassifierTool",
             "SegmentEdgeInferenceAlg.SegmentEdgeClassifierTool.OnnxRuntimeSessionToolCPU",
             "SegmentEdgeInferenceAlg.SegmentEdgeClassifierTool.OnnxRuntimeSessionToolCUDA",
-            "SegmentEdgeInferenceAlg.SegmentTrackCandidateBuilderTool",
             "MSTrackFinderAlg",
             "MSTrackFinderAlg.MlMsTrackSeeder",
         ]
@@ -77,25 +83,56 @@ def main(args):
             "ReadSpacePoints": (
                 "FilteredMlBuckets" if run_bucket_filter else "MuonSpacePoints"
             ),
+            # These cuts run before ONNX.  MaxEdgesPerSegment below acts only
+            # after all model scores have already been computed.
+            "MaxSegmentsPerBucket": args.maxSegmentsPerBucket,
+            "MaxEdgesPerNodeBeforeInference": args.maxEdgesBeforeInference,
+            "MaxEdgesPerTargetChamberBeforeInference": (
+                args.maxEdgesPerTargetChamber
+            ),
+            "DropSameChamberEdgesBeforeInference": (
+                not args.keepSameChamberEdgesBeforeInference
+            ),
+            "DropIsolatedNodesBeforeInference": (
+                not args.keepIsolatedNodesBeforeInference
+            ),
         }
-        cfg.merge(SegmentEdgeInferenceAlgCfg(
-            flags,
-            EdgeClassifierTool=edge_classifier_kwargs,
-            EdgeThreshold=args.edgeThreshold,
-            OverlapThreshold=args.overlapThreshold,
-            UseRecoveryComponents=args.useRecoveryComponents,
-            OutputLevel=output_level,
-        ))
+        if args.maxDeltaThetaDeg is not None:
+            edge_classifier_kwargs["MaxDeltaThetaDeg"] = args.maxDeltaThetaDeg
+        edge_inference_kwargs = {
+            "EdgeClassifierTool": edge_classifier_kwargs,
+            "PairGateDecoration": "MuonSegmentsFromR4.mlTrackComponent",
+            "PairGateThreshold": args.edgeThreshold,
+            "MaxEdgesPerNode": args.maxEdgesPerSegment,
+            "UseDegreeCappedComponents": args.useDegreeCappedMlComponents,
+            "RequireMutualTopKEdges": not args.allowOneSidedMlEdges,
+            "RecoverOrphanNodes": not args.disableOrphanRecovery,
+            "SeedAnchorsPerComponent": args.seedAnchorsPerComponent,
+            "MinSegmentsPerComponent": args.minSegmentsPerComponent,
+            "KeepBestSegmentPerChamber": not args.keepAllSegmentsPerChamber,
+            "OutputLevel": output_level,
+        }
+        if filter_segment_container:
+            edge_inference_kwargs["FilteredSegmentKey"] = filtered_segment_key
+        cfg.merge(SegmentEdgeInferenceAlgCfg(flags, **edge_inference_kwargs))
 
     if run_ml_seeder and not run_edge_classifier:
         print("WARNING: ML seeder enabled while edge classifier is disabled."
-              " The decoration 'trackCandidateIds' may be missing.")
+              " The decoration 'mlTrackComponent' may be missing.")
 
     ms_track_finder = cfg.getEventAlgo("MSTrackFinderAlg")
+    ms_track_finder.OutputLevel = output_level
     ms_track_finder.UseMlSeeder = run_ml_seeder
-    ms_track_finder.MlCandidateDecoration = "trackCandidateIds"
+    ms_track_finder.MlCandidateDecoration = "mlTrackComponent"
+    if filter_segment_container:
+        # SegmentEdgeInferenceAlg writes a VIEW of the original elements.
+        ms_track_finder.SegmentContainer = filtered_segment_key
+        # The decoration lives on the original owning container, not the view.
+        ms_track_finder.MlCandidateDecorationKey = (
+            "MuonSegmentsFromR4.mlTrackComponent"
+        )
     ms_track_finder.MlFallbackToBaselineIfUndecorated = True
-    ms_track_finder.MlFallbackToBaselineIfNoCandidates = True
+    ms_track_finder.MlFallbackToBaselineIfNoCandidates = False
 
     if not args.skipTrackTester:
         from MuonTrackFindingTest.MsTrackFindingTester import MsTrackTesterCfg
@@ -157,16 +194,52 @@ if __name__ == "__main__":
     score_mode.add_argument("--is-prob", action="store_const", const="prob", dest="single_output_mode",
                             help="Alias for --single-output-mode prob.")    
     parser.add_argument("--edgeModel")
+    parser.add_argument("--maxDeltaThetaDeg", type=float, default=None,
+                        help="Override the edge-building opening-angle gate (deg); 180 disables it")
     parser.add_argument("--athenaDebug", action="store_true",
                         help="Enable Athena DEBUG verbosity for inference and seeding components")
     parser.add_argument("--noPerfMon", default=False, action="store_true",
                         help="Disable performance monitoring")
-    parser.add_argument("--edgeThreshold", type=float, default=0.01,
-                        help="Loose threshold for recovery components")
-    parser.add_argument("--overlapThreshold", type=float, default=0.20,
-                        help="High-purity threshold for core components")
-    parser.add_argument("--useRecoveryComponents", action="store_true", default=True,
-                        help="Use loose recovery connected components")
+    parser.add_argument("--edgeThreshold", type=float, default=0.975,
+                        help="Minimum high-confidence edge probability used to form ML track components")
+    parser.add_argument("--maxEdgesPerSegment", type=int, default=2,
+                        help="Keep this many highest-score neighbours per segment in the ML path graph (default: 2)")
+    parser.add_argument("--useDegreeCappedMlComponents", action="store_true", default=False,
+                        help="Use a global greedy degree cap instead of mutual top-K path extraction")
+    parser.add_argument("--allowOneSidedMlEdges", "--allowBranchingMlComponents",
+                        dest="allowOneSidedMlEdges", action="store_true", default=False,
+                        help="Keep an edge selected by only one endpoint; use only for validation/recovery")
+    parser.add_argument("--disableOrphanRecovery", action="store_true", default=False,
+                        help="Disable bounded one-sided recovery for nodes with no mutual top-K ML edge")
+    parser.add_argument("--seedAnchorsPerComponent", type=int, default=0,
+                        help="Launch this many ranked ML anchors per component; zero keeps every retained segment (default: 0)")
+    parser.add_argument("--minSegmentsPerComponent", type=int, default=2,
+                        help="Require this many retained chambers in an ML component before seeding (default: 2)")
+    parser.add_argument("--maxSegmentsPerBucket", type=int, default=2,
+                        help="Keep at most this many best duplicate segments in each "
+                             "(sector,chamber,eta) bucket before ONNX; 0 keeps all")
+    parser.add_argument("--maxEdgesBeforeInference", type=int, default=6,
+                        help="Each node nominates this many geometrically best "
+                             "undirected edges before ONNX; 0 keeps all")
+    parser.add_argument("--maxEdgesPerTargetChamber", type=int, default=1,
+                        help="Keep at most this many geometrical neighbours from a "
+                             "single target chamber for each node before ONNX; 0 keeps all")
+    parser.add_argument("--keepSameChamberEdgesBeforeInference",
+                        action="store_true", default=False,
+                        help="Keep same-chamber edges in the ONNX input graph. "
+                             "Disabled by default because direct ML seeding keeps "
+                             "only one segment per chamber.")
+    parser.add_argument("--keepIsolatedNodesBeforeInference",
+                        action="store_true", default=False,
+                        help="Keep nodes with no retained pre-ONNX edge. Disabled by "
+                             "default because isolated nodes cannot contribute to edge scores.")
+    chamber_representatives = parser.add_mutually_exclusive_group()
+    chamber_representatives.add_argument(
+        "--keepAllSegmentsPerChamber", dest="keepAllSegmentsPerChamber", action="store_true", default=False,
+        help="Keep all ML component segments from a chamber")
+    chamber_representatives.add_argument(
+        "--keepBestSegmentPerChamber", dest="keepAllSegmentsPerChamber", action="store_false",
+        help="Keep only the highest-ranked segment per chamber")
     parser.add_argument("--enableRecoChainTester", action="store_true", default=False,
                         help="Enable MuonRecoChainTester (can crash for some custom chains)")
     parser.add_argument("--skipTrackTester", action="store_true", default=False,
@@ -179,10 +252,15 @@ if __name__ == "__main__":
                         help="Enable segment-edge classifier stage")
     parser.add_argument("--disableEdgeClassifier", dest="enableEdgeClassifier", action="store_false",
                         help="Disable segment-edge classifier stage")
+    parser.add_argument("--filterSegmentsWithoutMlConnections",
+                        "--filter-segments-without-ml-connections",
+                        action="store_true", default=False,
+                        help="Pass MSTrackFinderAlg a VIEW containing only "
+                             "segments incident to a selected ML edge")
     parser.add_argument("--useMlSeeder", dest="useMlSeeder", action="store_true", default=True,
                         help="Use new ML-assisted seeder (default)")
-    parser.add_argument("--useOldSeeder", dest="useMlSeeder", action="store_false",
-                        help="Use legacy seeder")
+    parser.add_argument("--useStandardSeeder", dest="useMlSeeder", action="store_false",
+                        help="Use the standard seeder")
     parser.add_argument("--use-cpu", action="store_true", default=False,
                         help="Force CPU for ONNX inference")
     parser.add_argument("--skip-onnx", action="store_true", default=False,

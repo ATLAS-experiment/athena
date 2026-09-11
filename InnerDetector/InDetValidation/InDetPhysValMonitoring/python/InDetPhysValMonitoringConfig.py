@@ -14,6 +14,9 @@ from enum import IntEnum
 
 
 class HardScatterStrategy(IntEnum):
+    # Use directly the HS vertex in the input file
+    DEFAULT = -1
+    # Recompute the HS selection
     SUM_PT2 = 0
     SUM_PT = 1
     SUM_PTW = 2
@@ -182,22 +185,23 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
             kwargs.setdefault("TruthSelectionTool", acc.popToolsAndMerge(
                 InDetRttTruthSelectionToolCfg(flags)))
 
-        doHyyHSSelection = hs_strategy == HardScatterStrategy.HYY
-        if 'hardScatterSelectionTool' not in kwargs:
-            from InDetConfig.InDetHardScatterSelectionToolConfig import (
-                InDetHardScatterSelectionToolCfg)
-            kwargs.setdefault("hardScatterSelectionTool", acc.popToolsAndMerge(
-                InDetHardScatterSelectionToolCfg(
-                    flags,
-                    RedoHardScatter=not doHyyHSSelection,
-                    SelectionMode=hs_strategy,
-                    # make sure the HS selection tool picks up the correct jets
-                    JetContainer=flags.PhysVal.IDPVM.jetsNameForHardScatter,
-                    VertexContainer=flags.PhysVal.IDPVM.PrimaryVertexContainer
-                )))
+        if hs_strategy is not HardScatterStrategy.DEFAULT:
+            doHyyHSSelection = hs_strategy == HardScatterStrategy.HYY
+            if 'hardScatterSelectionTool' not in kwargs:
+                from InDetConfig.InDetHardScatterSelectionToolConfig import (
+                    InDetHardScatterSelectionToolCfg)
+                kwargs.setdefault("hardScatterSelectionTool", acc.popToolsAndMerge(
+                    InDetHardScatterSelectionToolCfg(
+                        flags,
+                        RedoHardScatter=not doHyyHSSelection,
+                        SelectionMode=hs_strategy,
+                        # make sure the HS selection tool picks up the correct jets
+                        JetContainer=flags.PhysVal.IDPVM.jetsNameForHardScatter,
+                        VertexContainer=flags.PhysVal.IDPVM.PrimaryVertexContainer
+                    )))
 
-        if doHyyHSSelection:
-            assert flags.PhysVal.IDPVM.PrimaryVertexContainer == 'HggPrimaryVertices'
+            if doHyyHSSelection:
+                assert flags.PhysVal.IDPVM.PrimaryVertexContainer == 'HggPrimaryVertices'
 
         kwargs.setdefault("FillTruthToRecoNtuple",
                           flags.PhysVal.IDPVM.doValidateTruthToRecoNtuple)

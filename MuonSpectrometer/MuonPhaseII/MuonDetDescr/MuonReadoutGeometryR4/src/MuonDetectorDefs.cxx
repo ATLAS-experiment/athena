@@ -31,8 +31,8 @@ namespace MuonGMR4 {
         return newStore;
     }
     namespace detail{
-        Amg::Transform3D rotationToAMDB(const ActsTrk::DetectorType type) {
-            return type == ActsTrk::DetectorType::sTgc ? Amg::Transform3D::Identity()
+        Amg::Isometry3D rotationToAMDB(const ActsTrk::DetectorType type) {
+            return type == ActsTrk::DetectorType::sTgc ? Amg::Isometry3D::Identity()
                   : Amg::getRotateY3D(90. * Gaudi::Units::deg) * Amg::getRotateZ3D(90. * Gaudi::Units::deg);
         }
     }

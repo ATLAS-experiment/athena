@@ -11,7 +11,7 @@
 # Format is "test" : "version"
 references_map = {
     # Simulation
-    "s3761": "v32",
+    "s3761": "v33",
     "s4005": "v21",
     "s4006": "v30",
     "s4007": "v29",
@@ -19,7 +19,7 @@ references_map = {
     "s4454": "v14",
     "a913": "v24",
     # Digi
-    "d1920": "v23",
+    "d1920": "v24",
     # Overlay
     "d1726": "v19",
     "d1759": "v27",
@@ -31,18 +31,18 @@ references_map = {
     "q449": "v185",
     "q452": "v89",
     "q454": "v113",
-    "q447": "v15",
+    "q447": "v17",
     # Derivations
-    "data_PHYS_Run2": "v93",
+    "data_PHYS_Run2": "v95",
     "data_PHYSLITE_Run2": "v55",
-    "data_PHYS_Run3": "v107",
+    "data_PHYS_Run3": "v109",
     "data_PHYSLITE_Run3": "v69",
-    "mc_PHYS_Run2": "v128",
+    "mc_PHYS_Run2": "v131",
     "mc_PHYSLITE_Run2": "v65",
-    "mc_PHYS_Run3": "v136",
+    "mc_PHYS_Run3": "v139",
     "mc_PHYSLITE_Run3": "v78",
-    "af3_PHYS_Run2": "v80",
+    "af3_PHYS_Run2": "v83",
     "af3_PHYSLITE_Run2": "v44",
-    "af3_PHYS_Run3": "v118",
+    "af3_PHYS_Run3": "v121",
     "af3_PHYSLITE_Run3": "v81",
 }

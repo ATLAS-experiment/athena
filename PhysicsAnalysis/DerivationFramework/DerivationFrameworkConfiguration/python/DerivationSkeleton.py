@@ -56,7 +56,7 @@ def fromRunArgs(runArgs):
                 if not flags.hasFlag(childStreamFlag):
                     flags.addFlag(childStreamFlag, [f'DAOD_{child}'])
                 else:
-                    flags._set(childStreamFlag, flags._get(childStreamFlag) + [f'DAOD_{child}'])
+                    flags[childStreamFlag] += [f'DAOD_{child}']
                 logDerivation.info('Setting up event augmentation as {0} => {1}'.format(child, parent))
 
     # Output formats

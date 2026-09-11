@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArEventTest/FakeLArTimeOffset.h"
@@ -29,8 +29,6 @@ StatusCode FakeLArTimeOffset::initialize() {
   LArGlobalTimeOffset* globalTimeOffset=new LArGlobalTimeOffset();
   globalTimeOffset->setTimeOffset(m_globalTimeOffset);
   ATH_CHECK( detStore()->record(globalTimeOffset,m_keyGlobalOffset) );
-  const ILArGlobalTimeOffset* ilarGobalTimeOffset=globalTimeOffset;
-  ATH_CHECK( detStore()->symLink(globalTimeOffset,ilarGobalTimeOffset) );
 
   LArFEBTimeOffset* febTimeOffset=new LArFEBTimeOffset();
   for (unsigned i=0;i<m_FEBids.size();i++) {
@@ -39,8 +37,6 @@ StatusCode FakeLArTimeOffset::initialize() {
     ATH_MSG_DEBUG ( "FEB 0x" << MSG::hex << id << " Offset=" << m_FEBtimeOffsets[i] );
   }
   ATH_CHECK( detStore()->record(febTimeOffset,m_keyFebOffset) );
-  const ILArFEBTimeOffset* ilarFEBTimeOffset=febTimeOffset;
-  ATH_CHECK( detStore()->symLink(febTimeOffset,ilarFEBTimeOffset) );
   return StatusCode::SUCCESS;
 }
 

@@ -31,9 +31,11 @@ using namespace Trk;
 //   Due to a translation invariance propagation is done in relative coordinates
 //   assuming that starting point is (0,0,0)
 //
-void PropagateSTD(long int, long int Charge, double *ParOld, double *CovOld,
-                  double *RefStart, double *RefEnd, double *ParNew,
-                  double *CovNew, VKalVrtControlBase *CONTROL) {
+void PropagateSTD(long int /*TrkID*/, long int Charge,
+                  const double *ParOld, const double *CovOld,
+                  const double *RefStart, const double *RefEnd,
+                  double *ParNew, double *CovNew,
+                  const VKalVrtControlBase *CONTROL) {
   double Way, closePoint[3], Goal[3];
   Goal[0] = RefEnd[0] - RefStart[0];
   Goal[1] = RefEnd[1] - RefStart[1];
@@ -63,9 +65,11 @@ void PropagateSTD(long int, long int Charge, double *ParOld, double *CovOld,
 //--------------------------------------------------------------------------------
 //   Runge-Kutta propagator in nonuniform field
 //
-void PropagateRKM(long int Charge, double *ParOld, double *CovOld,
-                  double *RefStart, double *RefEnd, double *ParNew,
-                  double *CovNew, VKalVrtControlBase *CONTROL) {
+void PropagateRKM(long int Charge,
+                  const double *ParOld, const double *CovOld,
+                  const double *RefStart, const double *RefEnd,
+                  double *ParNew, double *CovNew,
+                  VKalVrtControlBase *CONTROL){
   double Way;
   double closePoint[3], Goal[3];
   Goal[0] = RefEnd[0] - RefStart[0];
@@ -105,7 +109,7 @@ vkalPropagator::vkalPropagator() = default;
 basePropagator::basePropagator() = default;
 basePropagator::~basePropagator() = default;
 
-bool vkalPropagator::checkTarget(double *) {
+bool vkalPropagator::checkTarget(const double *) {
   // if ( m_typePropagator == 3 ) return vk_objectProp->checkTarget(RefNew);
   return true;
 }
@@ -124,8 +128,8 @@ bool vkalPropagator::checkTarget(double *) {
 //   A final position after propagation is PERIGEE assuming that a REF(target)
 //   is a CENTER OF NEW COORDINATE SYSTEM  with axes parallel to initial ones
 
-void vkalPropagator::Propagate(long int TrkID, long int Charge, double *ParOld,
-                               double *CovOld, double *RefOld, double *RefNew,
+void vkalPropagator::Propagate(long int TrkID, long int Charge, const double *ParOld,
+                               const double *CovOld, const double *RefOld, double *RefNew,
                                double *ParNew, double *CovNew,
                                VKalVrtControlBase *FitControl) {
   if (RefOld[0] == RefNew[0] && RefOld[1] == RefNew[1] &&
@@ -180,7 +184,7 @@ void vkalPropagator::Propagate(long int TrkID, long int Charge, double *ParOld,
   //-------------------
 }
 
-void vkalPropagator::Propagate(VKTrack *trk, double *RefOld, double *RefNew,
+void vkalPropagator::Propagate(VKTrack *trk, const double *RefOld, const double *RefNew,
                                double *ParNew, double *CovNew,
                                VKalVrtControlBase *FitControl) {
   if (RefOld[0] == RefNew[0] && RefOld[1] == RefNew[1] &&

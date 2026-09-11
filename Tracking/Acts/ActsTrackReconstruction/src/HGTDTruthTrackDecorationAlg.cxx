@@ -31,6 +31,8 @@
 #include "StoreGate/ReadDecorHandle.h"
 #include "Acts/Utilities/Helpers.hpp"
 
+#include <algorithm>
+
 
 namespace ActsTrk{
 
@@ -118,6 +120,15 @@ namespace ActsTrk{
     SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<char>> layerClusterMergedHandle(m_layerClusterMergedKey, ctx);
     SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<char>> layerPrimaryExpectedHandle(m_layerPrimaryExpectedKey, ctx);
 
+    // The HGTD layers in which a given truth particle left a cluster depend only on the
+    // measurements, not on the track being decorated. Evaluate it once per event instead
+    // of rescanning the whole HGTD measurement container for every TrackParticle.
+    PrimaryExpectedLookup primaryExpectedLookup;
+    ATH_CHECK(buildPrimaryExpectedLookup(
+        *uncalibratedMeasurementContainer,
+        measurement_to_truth_association_maps[Acts::toUnderlying(xAOD::UncalibMeasType::HGTDClusterType)],
+        primaryExpectedLookup));
+
     TruthTrackExtensionData data;
 
     for (const xAOD::TrackParticle* trackParticle : *trackParticles) {
@@ -130,7 +141,7 @@ namespace ActsTrk{
         layerClusterShadowedHandle(*trackParticle) = {false, false, false, false};
         layerClusterMergedHandle(*trackParticle)  = {false, false, false, false};
         layerPrimaryExpectedHandle(*trackParticle) = {false, false, false, false};
-        ATH_MSG_WARNING("TrackParticle " << trackParticle->index() << ": invalid truth link");
+        ATH_MSG_DEBUG("TrackParticle " << trackParticle->index() << ": invalid truth link");
         continue;
       }
       else {
@@ -154,10 +165,11 @@ namespace ActsTrk{
       }
       
 
-      ATH_CHECK(isPrimaryExpected(truthParticle,
-        *uncalibratedMeasurementContainer,
-        measurement_to_truth_association_maps[Acts::toUnderlying(xAOD::UncalibMeasType::HGTDClusterType)],
-        data.primaryExistsVec));
+      data.primaryExistsVec.assign(s_nHgtdLayers, false);
+      if (auto itr = primaryExpectedLookup.find(truthParticle->index());
+          itr != primaryExpectedLookup.end()) {
+        std::copy(itr->second.begin(), itr->second.end(), data.primaryExistsVec.begin());
+      }
 
       layerClusterTruthClassHandle(*trackParticle) = data.truthClassVec;
       layerClusterShadowedHandle(*trackParticle) = data.isShadowedVec;
@@ -245,42 +257,39 @@ namespace ActsTrk{
     return data;
   }
   
-  StatusCode HGTDTruthTrackDecorationAlg::isPrimaryExpected(
-    const xAOD::TruthParticle* truthParticle,
+  StatusCode HGTDTruthTrackDecorationAlg::buildPrimaryExpectedLookup(
     const xAOD::UncalibratedMeasurementContainer & measurementContainer,
     const ActsTrk::MeasurementToTruthParticleAssociation* association_map,
-    std::vector<char> &isPrimaryExistsVec) const{
+    PrimaryExpectedLookup& lookup) const {
 
-    isPrimaryExistsVec = {false, false, false, false};
-  
-    for(auto uncalibMeas: measurementContainer) {
+    if (association_map == nullptr) {
+      return StatusCode::SUCCESS;
+    }
 
-      auto measurementTruthParticles = association_map->at(uncalibMeas->index());
+    for (const xAOD::UncalibratedMeasurement* uncalibMeas : measurementContainer) {
+
       const Acts::Surface* surface = m_surfAcc.get(uncalibMeas);
-      Acts::GeometryIdentifier geoID = surface->geometryId();
-
       const auto* detElem = getActsDetectorElement(surface);
-      if(detElem->detectorType() != DetectorType::Hgtd){
+      if (detElem == nullptr || detElem->detectorType() != DetectorType::Hgtd) {
         continue;
       }
-      
-      std::size_t layerIndex = m_id_helper->layer(detElem->identify());
 
-      ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - "<<uncalibMeas->type()<<", geoID: "<<geoID<<", layerIndex: "<<layerIndex);
-      if (layerIndex >= isPrimaryExistsVec.size()) {
-          ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - "<<uncalibMeas->type()<<", geoID: "<<geoID<<" results in an invalid index "<<layerIndex);
-          continue;
+      const std::size_t layerIndex = m_id_helper->layer(detElem->identify());
+
+      ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - "<<uncalibMeas->type()
+                      <<", geoID: "<<surface->geometryId()<<", layerIndex: "<<layerIndex);
+      if (layerIndex >= s_nHgtdLayers) {
+        ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - "<<uncalibMeas->type()
+                        <<", geoID: "<<surface->geometryId()<<" results in an invalid index "<<layerIndex);
+        continue;
       }
-      if(measurementTruthParticles.size() > 0) {
-        for(auto measTruthParticle : measurementTruthParticles){
-          if ( truthParticle->index() == measTruthParticle->index()){
-            isPrimaryExistsVec.at(layerIndex) = true;
-            ATH_MSG_DEBUG("         \\__HIT Exepected at " << layerIndex);
-          }
-        }
+
+      for (const xAOD::TruthParticle* measTruthParticle : association_map->at(uncalibMeas->index())) {
+        lookup.try_emplace(measTruthParticle->index(), HgtdLayerFlags{})
+              .first->second[layerIndex] = true;
       }
     }
-  
+
     return StatusCode::SUCCESS; 
   }
   

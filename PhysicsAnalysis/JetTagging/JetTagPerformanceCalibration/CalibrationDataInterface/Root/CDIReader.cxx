@@ -85,6 +85,8 @@ void Analysis::CDIReader::crawlCDI(TDirectoryFile* parentDir, int depth, const s
               for(const std::string &s : uncertainties){
                 systematics_set.insert(s);
               }
+              cont->DeleteAll();  // TMap does not own its values: free the histograms it holds
+              delete cont;        // then the (now empty) map itself
             }
             // add the flavour specific uncertainties here
             std::string flav_spec_unc_name = labelname + "_syst";

@@ -17,11 +17,11 @@
 
 // We need the definition of the domain for defining the Database
 #include "PersistentDataModel/Guid.h"
-#include "StorageSvc/DbAccessObj.h"
 #include "StorageSvc/DbDomain.h"
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbContainer.h"
 #include "StorageSvc/DbPrint.h"
+#include "DbAccessObj.h"
 
 // STL include files
 #include <map>

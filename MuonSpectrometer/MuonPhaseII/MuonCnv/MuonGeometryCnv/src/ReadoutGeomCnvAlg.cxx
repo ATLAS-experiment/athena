@@ -389,7 +389,7 @@ StatusCode ReadoutGeomCnvAlg::buildRpc(const ActsTrk::GeometryContext& gctx, Con
             const Amg::Transform3D refTrf{copyMe->localToGlobalTransform(gctx, gapId)* 
                                           (m_idHelperSvc->measuresPhi(gapId) ? 
                                                 Amg::getRotateZ3D(90_degree) :
-                                                Amg::Transform3D::Identity())};
+                                                Amg::Isometry3D::Identity())};
             ATH_MSG_VERBOSE("Assign transform: "<<m_idHelperSvc->toString(gapId)<<", "<<Amg::toString(refTrf));
             newElement->m_surfaceData->m_layerTransforms[surfaceHash] = refTrf;
             newElement->m_surfaceData->m_layerCenters[layerHash] = refTrf.translation();
@@ -958,7 +958,7 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gct
                     
                     const Amg::Transform3D refTrans{refEle.localToGlobalTransform(gctx, stripId) * 
                                                     (measPhi ? Amg::getRotateZ3D(90_degree) : 
-                                                               Amg::Transform3D::Identity())};
+                                                               Amg::Isometry3D::Identity())};
                     const Amg::Transform3D& testTrans{testEle.transform(stripId)};
                     if (strip == 1 && !Amg::isIdentity(refTrans.inverse()*testTrans)) {
                         ATH_MSG_ERROR("Transformation for "<<m_idHelperSvc->toString(stripId)<<" - "<<refEle.identHash()<<std::endl
@@ -1020,7 +1020,7 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gct
             ATH_MSG_VERBOSE("Test layer "<<m_idHelperSvc->toString(layId)<<", nCh: "<<refEle.numChannels(layHash)<<", layHash: "<<layHash);
             if (!refEle.numChannels(layHash)) continue;
             const Amg::Transform3D refLayerTrf = refEle.localToGlobalTransform(gctx, refEle.constructHash(0, gasGap, false)) *
-                                                                            (!isStrip ? Amg::Transform3D::Identity()
+                                                                            (!isStrip ? Amg::Isometry3D::Identity()
                                                                                       : Amg::getRotateZ3D(-90._degree));
             const Amg::Transform3D& testLayerTrf = testEle.transform(layId);
             if (!Amg::isIdentity(refLayerTrf.inverse()* testLayerTrf)) {

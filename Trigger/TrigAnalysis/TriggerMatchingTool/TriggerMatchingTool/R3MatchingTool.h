@@ -6,6 +6,7 @@
 #define TRIGGERMATCHINGTOOL_R3MATCHINGTOOL_H
 
 #include "AsgTools/AsgTool.h"
+#include "AsgTools/PropertyWrapper.h"
 #include "AsgTools/ToolHandle.h"
 #include "TriggerMatchingTool/IMatchingTool.h"
 #include "TriggerMatchingTool/IMatchScoringTool.h"
@@ -45,6 +46,9 @@ namespace Trig
     ToolHandle<TrigDecisionTool> m_trigDecTool;
     ToolHandle<Trig::IMatchScoringTool> m_scoreTool{
         this, "ScoringTool", "Trig::DRScoringTool","Tool to score pairs of particles"};
+    Gaudi::Property<bool> m_includeSubfeatures{
+        this, "IncludeSubfeatures", false,
+        "When true, also retrieve 'subfeature' links (lower-pT objects from Run2->Run3 conversion)"};
     bool matchObjects(
         const xAOD::IParticle *reco,
         const ElementLink<xAOD::IParticleContainer> &onlineLink,

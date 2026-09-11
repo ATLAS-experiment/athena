@@ -6,24 +6,30 @@
 #include "ITkPixelCabling/ITkPixelOnlineId.h"
 #include <iostream>
 
-ITkPixelOnlineId::ITkPixelOnlineId(const std::uint32_t onlineId):m_onlineId(onlineId){
+ITkPixelOnlineId::ITkPixelOnlineId(const std::uint64_t onlineId):m_onlineId(onlineId){
   //nop
 }
 
 
-ITkPixelOnlineId::ITkPixelOnlineId(const std::uint32_t rodId, const std::uint32_t fibre){
-    m_onlineId = rodId + (fibre<<24);
+ITkPixelOnlineId::ITkPixelOnlineId(const std::uint32_t rodId, const std::uint32_t detectorResourceID){
+    m_onlineId = 0;
+    m_onlineId = (( m_onlineId | rodId ) << 32) | detectorResourceID;
 }
 
 std::uint32_t
-ITkPixelOnlineId::rod() const {
-  return m_onlineId & 0xFFFFFF;
+ITkPixelOnlineId::sourceID() const {
+  return static_cast<uint32_t>((m_onlineId & ITkPixelCabling::SOURCE_ID_MASK) >> 32);
 }
 
 //
 std::uint32_t
-ITkPixelOnlineId::fibre() const {
-  return m_onlineId>>24;
+ITkPixelOnlineId::detectorResourceID() const {
+  return static_cast<uint32_t>(m_onlineId & ITkPixelCabling::DRID_MASK);
+}
+
+std::uint32_t
+ITkPixelOnlineId::offlineModuleID() const {
+    return (detectorResourceID() & ITkPixelCabling::OFFLINE_DRID_MASK) >> 2;
 }
 
 bool

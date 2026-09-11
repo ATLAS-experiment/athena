@@ -4,31 +4,6 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from ActsConfig.ActsUtilities import extractChildKwargs
 
-def reconstructStripSpacePointsInPrimaryPass(flags) -> bool:
-    # Unlike for clusters, we need some non-trivial logic to understand
-    # if we want reconstruct strip space points
-    # Strip clusters are always created in the Full-Scan primary pass, since they
-    # are used in Track Finding
-    # But for space points this really depends on the fast tracking configuration
-    # and the sequence of secondary passes
-
-    # If strip detector is disabled we reconstruct nothing
-    if not flags.Detector.EnableITkStrip:
-        return False
-
-    # If primary pass is not fast tracking configuration, we reconstruct all space points
-    if not flags.Tracking.doITkFastTracking:
-        return True
-
-    # If we schedule LRT or Low Pt configurations (both are full scan) we reconstruct
-    # space points in primary pass
-    # We do the same for the conversion pass
-    if flags.Acts.doLargeRadius or flags.Acts.doLowPt or flags.Acts.doITkConversion:
-        return True
-
-    # If we only have the primary pass, no need to process strip space points
-    return False
-
 
 def ActsSpacePointCacheCreatorAlgCfg(flags,
                                      name: str = "ActsSpacePointCacheCreatorAlg",
@@ -281,8 +256,8 @@ def ActsMainSpacePointFormationCfg(flags,
                                    **kwargs: dict) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    kwargs.setdefault('processPixels', flags.Detector.EnableITkPixel)
-    kwargs.setdefault('processStrips', flags.Detector.EnableITkStrip)
+    kwargs.setdefault('processPixels', flags.Acts.SpacePoints.doPixel)
+    kwargs.setdefault('processStrips', flags.Acts.SpacePoints.doStrip)
     kwargs.setdefault('runCacheCreation', flags.Acts.useCache)
     kwargs.setdefault('runReconstruction', True)
     kwargs.setdefault('runPreparation', flags.Acts.useCache)  
@@ -339,21 +314,13 @@ def ActsSpacePointFormationCfg(flags,
                                previousActsExtension = None) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    processPixels = flags.Detector.EnableITkPixel
-    processStrips = flags.Detector.EnableITkStrip
-
-    # For conversion and LRT pass we do not process pixels since we assume
-    # they have been processed on the primary pass.
-    from InDetConfig.ITkActsHelpers import isPrimaryPass
-    if flags.Acts.GNN.Enable and isPrimaryPass(flags):
-        processStrips = True
-    elif flags.Tracking.ActiveConfig.extension == "ActsConversion" or flags.Tracking.ActiveConfig.isLargeD0:
-        processPixels = False
-    elif isPrimaryPass(flags) and flags.Tracking.doITkFastTracking:
-        processStrips = reconstructStripSpacePointsInPrimaryPass(flags)
-    elif flags.Tracking.ActiveConfig.extension == "ActsValidateF100" and flags.Tracking.doITkFastTracking:
-        processStrips = False
     kwargs = dict()
+
+    processPixels = flags.Tracking.ActiveConfig.useITkPixelSeeding or (
+        flags.Acts.SpacePoints.doPixel and not flags.Tracking.ActiveConfig.isSecondaryPass)
+    processStrips = flags.Tracking.ActiveConfig.useITkStripSeeding or (
+        flags.Acts.SpacePoints.doStrip and not flags.Tracking.ActiveConfig.isSecondaryPass)
+
     kwargs.setdefault('processPixels', processPixels)
     kwargs.setdefault('processStrips', processStrips)
 
@@ -374,7 +341,7 @@ def ActsSpacePointFormationCfg(flags,
     # the clusters from all views before passing them to the downstream algorithms
 
     from InDetConfig.ITkActsHelpers import isValidationPass
-    if isPrimaryPass(flags) or isValidationPass(flags):
+    if not flags.Tracking.ActiveConfig.isSecondaryPass or isValidationPass(flags):
         # Primary pass
         # Validation passes count as primary passes
         kwargs.setdefault('runCacheCreation', flags.Acts.useCache)
@@ -387,7 +354,7 @@ def ActsSpacePointFormationCfg(flags,
         kwargs.setdefault('runPreparation', True)
 
     # Overlap Space Points may not be required
-    processOverlapSpacePoints = processStrips
+    processOverlapSpacePoints = kwargs['processStrips']
     from AthenaConfiguration.Enums import BeamType
     if flags.Tracking.ActiveConfig.extension in ['ActsConversion'] or flags.Beam.Type is BeamType.Cosmics:
         processOverlapSpacePoints = False

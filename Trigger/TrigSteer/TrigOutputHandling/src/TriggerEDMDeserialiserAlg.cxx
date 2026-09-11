@@ -269,7 +269,8 @@ StatusCode TriggerEDMDeserialiserAlg::deserialise( const Payload* dataptr ) cons
   // invalid conditions are: invalid interface pointer when decoding Aux store
   //                         invalid aux store and interface when decoding the decoration
   // these pointer should be invalidated when: decoding TP containers, aux store when decoding the xAOD interface 
-  WritableAuxStore* currentAuxStore = nullptr;         // set when decoding Aux
+  std::unique_ptr<WritableAuxStore> currentAuxStoreOwner;         // set when decoding Aux
+  WritableAuxStore* currentAuxStore = nullptr; //need to hang on to an observing ptr
   SG::AuxVectorBase* xAODInterfaceContainer = nullptr; // set when decoding xAOD interface
   
   size_t fragmentCount = 0;
@@ -398,11 +399,12 @@ StatusCode TriggerEDMDeserialiserAlg::deserialise( const Payload* dataptr ) cons
         ATH_CHECK(auxHolder != nullptr);
         //coverity[FORWARD_NULL:FALSE]
         xAODInterfaceContainer->setStore(auxHolder);
-        currentAuxStore = new WritableAuxStore();
+        currentAuxStoreOwner = std::make_unique<WritableAuxStore>();
+        currentAuxStore = currentAuxStoreOwner.get();
         auto p = dynamic_cast<SG::IAuxStoreHolder*>(auxHolder);
         ATH_CHECK(p != nullptr);
         //coverity[FORWARD_NULL:FALSE]
-        p->setStore( currentAuxStore );
+        p->setStore( currentAuxStoreOwner.release() ); //IAuxStoreHolder takes ownership
       } else {
         currentAuxStore = nullptr;
         xAODInterfaceContainer = nullptr; // invalidate xAOD related pointers

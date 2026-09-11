@@ -14,12 +14,12 @@
 
 bool 
 ITkPixelCablingData::empty() const{
-  return m_offline2OnlineMap.empty();
+  return (m_offlineDetectorResourceID2OnlineIdMap.empty());
 }
 
 std::size_t 
 ITkPixelCablingData::size() const{
-  return m_offline2OnlineMap.size();
+  return m_offline2OnlineMap.size() + m_offlineDetectorResourceID2OnlineIdMap.size();
 }
 
 ITkPixelOnlineId 
@@ -66,12 +66,24 @@ void ITkPixelCablingData::addEntryOffOn(const Identifier& offlineId, const ITkPi
     m_offline2ModuleInfoMap.insert({offlineId, moduleInfo});
 }
 
+void ITkPixelCablingData::addEntryOffOn(const uint32_t& offlineDetectorResourceID, const ITkPixelOnlineId& onlineId){
+    m_offlineDetectorResourceID2OnlineIdMap.insert({offlineDetectorResourceID, onlineId});
+}
+
+void ITkPixelCablingData::addSourceID(const uint32_t& sourceID){
+    m_sourceIDs.push_back(sourceID);
+}
+
 void ITkPixelCablingData::addEntryOnOff(const ITkPixelOnlineId& onlineId, const Identifier& offlineId){
     m_online2OfflineMap.insert({onlineId, offlineId});
 }
 
 void ITkPixelCablingData::addEntryOnOff(const ITkPixelOnlineId& onlineId, const ITkPixelCabling::ModuleInfo<Identifier>& moduleInfo){
     m_online2ModuleInfoMap.insert({onlineId, moduleInfo});
+}
+
+void ITkPixelCablingData::addTransformType(const uint32_t& moduleID, const ITkPixelCabling::TransformType& transform){
+    m_module2TransformTypeMap.insert({moduleID, transform});
 }
 
 ITkPixelCabling::ModuleInfo<ITkPixelOnlineId> ITkPixelCablingData::onlineModuleInfo(const Identifier & id) const {
@@ -87,6 +99,24 @@ ITkPixelCabling::ModuleInfo<Identifier> ITkPixelCablingData::offlineModuleInfo(c
     std::unordered_map<ITkPixelOnlineId, ITkPixelCabling::ModuleInfo<Identifier>>::const_iterator it = m_online2ModuleInfoMap.find(id);
     if (it == m_online2ModuleInfoMap.end()){
         return {Identifier(0), ITkPixelCabling::ModuleType::Undefined, ITkPixelCabling::TransformType::UndefinedTransform};
+    }
+    
+    return it->second;
+}
+
+ITkPixelOnlineId ITkPixelCablingData::onlineId(const uint32_t& offlineDetectorResourceID) const {
+    std::unordered_map<uint32_t, ITkPixelOnlineId>::const_iterator it = m_offlineDetectorResourceID2OnlineIdMap.find(offlineDetectorResourceID);
+    if (it == m_offlineDetectorResourceID2OnlineIdMap.end()){
+        return ITkPixelOnlineId();
+    }
+    
+    return it->second;
+}
+
+ITkPixelCabling::TransformType ITkPixelCablingData::transformType(const uint32_t& moduleID) const {
+    std::unordered_map<uint32_t, ITkPixelCabling::TransformType>::const_iterator it = m_module2TransformTypeMap.find(moduleID);
+    if (it == m_module2TransformTypeMap.end()){
+        return ITkPixelCabling::TransformType::UndefinedTransform;
     }
     
     return it->second;

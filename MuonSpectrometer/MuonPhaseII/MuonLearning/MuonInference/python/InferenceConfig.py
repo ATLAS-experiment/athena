@@ -84,61 +84,41 @@ def SegmentEdgeClassifierToolCfg(flags, name="SegmentEdgeClassifierTool", **kwar
     kwargs.setdefault("MaxDeltaSector", 1)
     kwargs.setdefault("SectorModulo", 16)
     kwargs.setdefault("ReadSpacePoints", "MuonSpacePoints")
+    # Zero leaves pre-inference pruning disabled.
+    kwargs.setdefault("MaxSegmentsPerBucket", 0)
+    kwargs.setdefault("MaxEdgesPerNodeBeforeInference", 0)
+    kwargs.setdefault("MaxEdgesPerTargetChamberBeforeInference", 0)
     tool = CompFactory.MuonML.SegmentEdgeClassifierTool(name, **kwargs)
-    result.setPrivateTools(tool)
-    return result
-
-
-def SegmentTrackCandidateBuilderToolCfg(flags, name="SegmentTrackCandidateBuilderTool", **kwargs):
-    result = ComponentAccumulator()
-    # High-purity candidate cores are built with OverlapThreshold.
-    # A second low-threshold recovery pass is added with EdgeThreshold.
-    # This strongly reduces candidate loss from borderline true edges.
-    kwargs.setdefault("EdgeThreshold", 0.25)
-    kwargs.setdefault("OverlapThreshold", 0.8)
-    kwargs.setdefault("UseRecoveryComponents", True)
-    kwargs.setdefault("SymmetrizeDirectedEdges", True)
-    kwargs.setdefault("AddAllSegmentsRecoveryCandidate", False)
-    kwargs.setdefault("KeepIsolatedSegments", False)
-    kwargs.setdefault("MinCandidateSize", 2)
-    tool = CompFactory.MuonML.SegmentTrackCandidateBuilderTool(name, **kwargs)
     result.setPrivateTools(tool)
     return result
 
 
 def SegmentEdgeInferenceAlgCfg(flags, name="SegmentEdgeInferenceAlg", **kwargs):
     result = ComponentAccumulator()
-    # Accept EdgeModelPath as a convenience shortcut so callers don't need to
-    # build the tool object themselves; a raw dict is also unwrapped for
-    # backwards-compatibility with call-sites that used dict syntax.
+    # Accept a model-path shortcut or an EdgeClassifierTool settings
     edge_tool_kwargs = {}
     if "EdgeModelPath" in kwargs:
         edge_tool_kwargs["ModelPath"] = kwargs.pop("EdgeModelPath")
-    # Silently unwrap legacy dict-style: EdgeClassifierTool={"ModelPath": ...}
+    # Unwrap a settings mapping supplied for EdgeClassifierTool.
     if isinstance(kwargs.get("EdgeClassifierTool"), dict):
         edge_tool_kwargs.update(kwargs.pop("EdgeClassifierTool"))
-
-    candidate_builder_kwargs = {}
-    for key in ("EdgeThreshold",
-                "OverlapThreshold",
-                "UseRecoveryComponents",
-                "SymmetrizeDirectedEdges",
-                "AddAllSegmentsRecoveryCandidate",
-                "KeepIsolatedSegments",
-                "MinCandidateSize"):
-        if key in kwargs:
-            candidate_builder_kwargs[key] = kwargs.pop(key)
-
-    if isinstance(kwargs.get("CandidateBuilderTool"), dict):
-        candidate_builder_kwargs.update(kwargs.pop("CandidateBuilderTool"))
 
     if "EdgeClassifierTool" not in kwargs:
         kwargs["EdgeClassifierTool"] = result.popToolsAndMerge(
             SegmentEdgeClassifierToolCfg(flags, **edge_tool_kwargs))
-    kwargs.setdefault("CandidateBuilderTool", result.popToolsAndMerge(
-        SegmentTrackCandidateBuilderToolCfg(flags, **candidate_builder_kwargs)))
     kwargs.setdefault("SegmentKey", "MuonSegmentsFromR4")
-    kwargs.setdefault("CandidateDecoration", "MuonSegmentsFromR4.trackCandidateIds")
+    kwargs.setdefault("PairGateDecoration", "MuonSegmentsFromR4.mlTrackComponent")
+    # An empty key disables this optional non-owning view. When enabled it
+    # contains only segments incident to a post-classifier selected edge.
+    kwargs.setdefault("FilteredSegmentKey", "")
+    kwargs.setdefault("PairGateThreshold", 0.975)
+    # Build components from mutual top-K edge associations 
+    kwargs.setdefault("UseDegreeCappedComponents", False)
+    kwargs.setdefault("RequireMutualTopKEdges", True)
+    kwargs.setdefault("RecoverOrphanNodes", True)
+    # Every retained segment may start a seed. 
+    kwargs.setdefault("SeedAnchorsPerComponent", 0)
+    kwargs.setdefault("MinSegmentsPerComponent", 2)
     alg = CompFactory.MuonML.SegmentEdgeInferenceAlg(name=name, **kwargs)
     result.addEventAlgo(alg, primary=True)
     return result

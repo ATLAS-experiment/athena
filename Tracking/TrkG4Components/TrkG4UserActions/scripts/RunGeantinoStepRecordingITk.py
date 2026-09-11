@@ -61,7 +61,8 @@ flags.Input.Files = [args.inputevntfile]
 flags.Output.HITSFileName = args.outputhitsfile
 
 flags.GeoModel.AtlasVersion = args.geometrytag
-flags.IOVDb.GlobalTag = "OFLCOND-SIM-00-00-00"
+from AthenaConfiguration.TestDefaults import defaultConditionsTags
+flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
 flags.GeoModel.Align.Dynamic = False
 
 flags.Exec.SkipEvents = args.skipEvents

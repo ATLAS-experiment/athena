@@ -213,7 +213,7 @@ namespace MuonGM {
     }
     Amg::Transform3D RpcReadoutElement::localToGlobalTransf(int dbPhi, int gasGap) const {
         return absTransform() * Amg::Translation3D{localGasGapPos(dbPhi, gasGap)} *
-               (rotatedRpcModule() ? Amg::getRotateY3D(180. * CLHEP::deg) : Amg::Transform3D::Identity());     
+               (rotatedRpcModule() ? Amg::getRotateY3D(180. * CLHEP::deg) : Amg::Isometry3D::Identity());     
     }
     Amg::Transform3D RpcReadoutElement::globalToLocalTransf(const Identifier& id) const { return localToGlobalTransf(id).inverse(); }
     Amg::Vector3D RpcReadoutElement::globalToLocalCoords(const Amg::Vector3D& x, const Identifier& id) const {

@@ -1,114 +1,203 @@
-ApplicationMgr       INFO Application Manager Configured successfully
-AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr
-WriteDataReentrant   INFO in initialize()
-ReadDataReentrant    INFO in initialize()
-ApplicationMgr       INFO Application Manager Initialized successfully
-ApplicationMgr       INFO Application Manager Started successfully
-AthenaEventLoopMgr   INFO   ===>>>  start of run 1    <<<===
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #1 0 events processed so far  <<<===
-WriteDataReentrant   INFO in execute()
-WriteDataReentrant WARNING we expect  an error message here
-StoreGateSvc_Impl  WARNING  setupProxy:: error setting up proxy for key dobj and clid 8000
-VarHandle(StoreGateSvc+dobj[8000]) ERROR FILE:LINE (StatusCode SG::VarHandleBase::record_impl(std::unique_ptr<DataObject>, void*, bool, bool)): code FAILURE: recordObject failed
-WriteDataReentrant WARNING end of error message
-WriteDataReentrant   INFO  registered all data objects
-WriteDataReentrant   INFO  StoreGate structure before returning from execute 
+Wed Aug 12 11:09:00 EDT 2026
+Preloading libexcabort.so
+ApplicationMgr     SUCCESS 
+====================================================================================================================================
+                                                   Welcome to ApplicationMgr (GaudiCoreSvc v27r1p99)
+                                          running on karma on Wed Aug 12 11:09:01 2026
+====================================================================================================================================
+ApplicationMgr        INFO Application Manager Configured successfully
+Py:ComponentAccumulator    INFO Athena job with pid 2738399
+CoreDumpSvc                                          INFO Handling signals: 11(Segmentation fault) 7(Bus error) 4(Illegal instruction) 6(Aborted) 14(Alarm clock) 
+AthenaEventLoopMgr                                   INFO Initializing AthenaEventLoopMgr
+WriteDataReentrant                                   INFO in initialize()
+ClassIDSvc                                           INFO getRegistryEntries: read 3538 CLIDRegistry entries for module ALL
+ReadDataReentrant                                    INFO in initialize()
+ApplicationMgr                                       INFO Application Manager Initialized successfully
+ApplicationMgr                                       INFO Application Manager Started successfully
+AthenaEventLoopMgr                                   INFO   ===>>>  start of run 1    <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #1, run #1 0 events processed so far  <<<===
+WriteDataReentrant                                   INFO in execute()
+WriteDataReentrant                                WARNING we expect  an error message here
+StoreGateSvc_Impl                                 WARNING  setupProxy:: error setting up proxy for key dobj and clid 8000
+ Pre-existing valid DataProxy @0x558f5a678d40 found in Store for key dobj with clid 8000
+ClassIDSvc                                           INFO getRegistryEntries: read 313 CLIDRegistry entries for module ALL
+StoreGateSvc_Impl                                 WARNING record_impl: Problem setting up the proxy for object @0x558f5a678c90
+ recorded with key dobj of type MyDataObj (CLID 8000) in DataObject @0x558f5a678f80
+VarHandle(StoreGateSvc+dobj[8000])                  ERROR FILE:LINE (StatusCode SG::VarHandleBase::record_impl(std::unique_ptr<DataObject>, void*, bool, bool)): code FAILURE: recordObject failed
+WriteDataReentrant                                WARNING end of error message
+WriteDataReentrant                                   INFO  registered all data objects
+WriteDataReentrant                                   INFO  StoreGate structure before returning from execute 
 StoreGateSvc_Impl: <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
 StoreGateSvc_Impl: SGImplSvc()::dump() which is NOT LOADED 
-StoreGateSvc_Impl: Found 2 proxies for ClassID 1434 (BaseClass): 
+StoreGateSvc_Impl: Found 6 proxies for ClassID 1434 (BaseClass): 
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x558f5a684430 --- key: WriteDataReentrant
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x558f5a678cf0 --- key: dobj
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x558f5a681e90 --- key: dobj2
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x558f5a681570 --- key: x1
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x558f5a67fef0 --- key: x2
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x558f5a67eb00 --- key: x3
 StoreGateSvc_Impl: Found 1 proxy for ClassID 2101 (EventInfo): 
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x558f5a670460 --- key: 
 StoreGateSvc_Impl: Found 6 proxies for ClassID 8000 (MyDataObj): 
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x558f5a684430 --- key: WriteDataReentrant
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x558f5a678cf0 --- key: dobj
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x558f5a681e90 --- key: dobj2
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x558f5a681570 --- key: x1
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x558f5a67fef0 --- key: x2
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x558f5a67eb00 --- key: x3
 StoreGateSvc_Impl: Found 1 proxy for ClassID 9967 (DataVector<MyContObj>): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x558f5a680650 --- key: cobj
 StoreGateSvc_Impl: Found 1 proxy for ClassID 9983 (std::vector< ElementLink<MapStringFloat> >): 
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x558f5a682a30 --- key: linkvec
 StoreGateSvc_Impl: Found 1 proxy for ClassID 9984 (std::list< ElementLink< std::vector<float> > >): 
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x558f5a681300 --- key: WriteDataReentrant
 StoreGateSvc_Impl: Found 1 proxy for ClassID 33347479 (SG::AuxVectorBase): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x558f5a680650 --- key: cobj
 StoreGateSvc_Impl: Found 1 proxy for ClassID 55596997 (EventContext): 
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x558f5a6786c0 --- key: EventContext
 StoreGateSvc_Impl: Found 1 proxy for ClassID 193758082 (std::map<std::string,float>): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x558f5a6817c0 --- key: mkey
 StoreGateSvc_Impl: Found 1 proxy for ClassID 202242136 (std::vector<float>): 
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x558f5a67f5c0 --- key: vFloat
 StoreGateSvc_Impl: Found 1 proxy for ClassID 289238765 (TestDataObject): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x558f5a682cd0 --- key: testobj
 StoreGateSvc_Impl: <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
 
-ReadDataReentrant    INFO in execute()
-ReadDataReentrant    INFO Time: 11.3  ID: 132
-ReadDataReentrant    INFO Time: 41.7  ID: 291
-ReadDataReentrant    INFO pVec [0] = 1
-ReadDataReentrant    INFO pVec [1] = 2
-ReadDataReentrant    INFO pVec [2] = 3
-ReadDataReentrant    INFO event store does not contain MyDataObj with 'StoreGateSvc+foo'
-ReadDataReentrant    INFO ListVecLinks::linked element 1
-ReadDataReentrant    INFO ListVecLinks::linked element 3
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #1 1 events processed so far  <<<===
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #2, run #1 1 events processed so far  <<<===
-WriteDataReentrant   INFO in execute()
-WriteDataReentrant WARNING we expect  an error message here
-StoreGateSvc_Impl  WARNING  setupProxy:: error setting up proxy for key dobj and clid 8000
-VarHandle(StoreGateSvc+dobj[8000]) ERROR FILE:LINE (StatusCode SG::VarHandleBase::record_impl(std::unique_ptr<DataObject>, void*, bool, bool)): code FAILURE: recordObject failed
-WriteDataReentrant WARNING end of error message
-WriteDataReentrant   INFO  registered all data objects
-WriteDataReentrant   INFO  StoreGate structure before returning from execute 
+ReadDataReentrant                                    INFO in execute()
+ReadDataReentrant                                    INFO Time: 11.3  ID: 132
+ReadDataReentrant                                    INFO Time: 41.7  ID: 291
+ReadDataReentrant                                    INFO pVec [0] = 1
+ReadDataReentrant                                    INFO pVec [1] = 2
+ReadDataReentrant                                    INFO pVec [2] = 3
+ReadDataReentrant                                    INFO event store does not contain MyDataObj with 'StoreGateSvc+foo'
+ReadDataReentrant                                    INFO ListVecLinks::linked element 1
+ReadDataReentrant                                    INFO ListVecLinks::linked element 3
+ReadDataReentrant                                    INFO VectorMapLinks::linked element: key uno - value 1 - stored as 0x558f5a5d60e8
+ReadDataReentrant                                    INFO VectorMapLinks::linked element: key due - value 2 - stored as 0x558f5a5d6128
+AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #1, run #1 1 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #2, run #1 1 events processed so far  <<<===
+WriteDataReentrant                                   INFO in execute()
+WriteDataReentrant                                WARNING we expect  an error message here
+StoreGateSvc_Impl                                 WARNING  setupProxy:: error setting up proxy for key dobj and clid 8000
+ Pre-existing valid DataProxy @0x558f5a678d40 found in Store for key dobj with clid 8000
+StoreGateSvc_Impl                                 WARNING record_impl: Problem setting up the proxy for object @0x558f5a678bb0
+ recorded with key dobj of type MyDataObj (CLID 8000) in DataObject @0x558f5a681e20
+VarHandle(StoreGateSvc+dobj[8000])                  ERROR FILE:LINE (StatusCode SG::VarHandleBase::record_impl(std::unique_ptr<DataObject>, void*, bool, bool)): code FAILURE: recordObject failed
+WriteDataReentrant                                WARNING end of error message
+WriteDataReentrant                                   INFO  registered all data objects
+WriteDataReentrant                                   INFO  StoreGate structure before returning from execute 
 StoreGateSvc_Impl: <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
 StoreGateSvc_Impl: SGImplSvc()::dump() which is NOT LOADED 
-StoreGateSvc_Impl: Found 2 proxies for ClassID 1434 (BaseClass): 
+StoreGateSvc_Impl: Found 6 proxies for ClassID 1434 (BaseClass): 
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x558f5a681dd0 --- key: WriteDataReentrant
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x558f5a6817c0 --- key: dobj
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x558f5a678f80 --- key: dobj2
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x558f5a67fef0 --- key: x1
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x558f5a681570 --- key: x2
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x558f5a682cd0 --- key: x3
 StoreGateSvc_Impl: Found 1 proxy for ClassID 2101 (EventInfo): 
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x558f5a681300 --- key: 
 StoreGateSvc_Impl: Found 6 proxies for ClassID 8000 (MyDataObj): 
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x558f5a681dd0 --- key: WriteDataReentrant
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x558f5a6817c0 --- key: dobj
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x558f5a678f80 --- key: dobj2
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x558f5a67fef0 --- key: x1
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x558f5a681570 --- key: x2
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x558f5a682cd0 --- key: x3
 StoreGateSvc_Impl: Found 1 proxy for ClassID 9967 (DataVector<MyContObj>): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x558f5a680150 --- key: cobj
 StoreGateSvc_Impl: Found 1 proxy for ClassID 9983 (std::vector< ElementLink<MapStringFloat> >): 
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x558f5a680ec0 --- key: linkvec
 StoreGateSvc_Impl: Found 1 proxy for ClassID 9984 (std::list< ElementLink< std::vector<float> > >): 
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x558f5a680850 --- key: WriteDataReentrant
 StoreGateSvc_Impl: Found 1 proxy for ClassID 33347479 (SG::AuxVectorBase): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x558f5a680150 --- key: cobj
 StoreGateSvc_Impl: Found 1 proxy for ClassID 55596997 (EventContext): 
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x558f5a681e90 --- key: EventContext
 StoreGateSvc_Impl: Found 1 proxy for ClassID 193758082 (std::map<std::string,float>): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x558f5a678cf0 --- key: mkey
 StoreGateSvc_Impl: Found 1 proxy for ClassID 202242136 (std::vector<float>): 
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x558f5a684430 --- key: vFloat
 StoreGateSvc_Impl: Found 1 proxy for ClassID 289238765 (TestDataObject): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x558f5a67eb00 --- key: testobj
 StoreGateSvc_Impl: <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
 
-ReadDataReentrant    INFO in execute()
-ReadDataReentrant    INFO Time: 11.3  ID: 132
-ReadDataReentrant    INFO Time: 41.7  ID: 291
-ReadDataReentrant    INFO pVec [0] = 1
-ReadDataReentrant    INFO pVec [1] = 2
-ReadDataReentrant    INFO pVec [2] = 3
-ReadDataReentrant    INFO event store does not contain MyDataObj with 'StoreGateSvc+foo'
-ReadDataReentrant    INFO ListVecLinks::linked element 1
-ReadDataReentrant    INFO ListVecLinks::linked element 3
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #2, run #1 2 events processed so far  <<<===
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #3, run #1 2 events processed so far  <<<===
-WriteDataReentrant   INFO in execute()
-WriteDataReentrant WARNING we expect  an error message here
-StoreGateSvc_Impl  WARNING  setupProxy:: error setting up proxy for key dobj and clid 8000
-VarHandle(StoreGateSvc+dobj[8000]) ERROR FILE:LINE (StatusCode SG::VarHandleBase::record_impl(std::unique_ptr<DataObject>, void*, bool, bool)): code FAILURE: recordObject failed
-WriteDataReentrant WARNING end of error message
-WriteDataReentrant   INFO  registered all data objects
-WriteDataReentrant   INFO  StoreGate structure before returning from execute 
+ReadDataReentrant                                    INFO in execute()
+ReadDataReentrant                                    INFO Time: 11.3  ID: 132
+ReadDataReentrant                                    INFO Time: 41.7  ID: 291
+ReadDataReentrant                                    INFO pVec [0] = 1
+ReadDataReentrant                                    INFO pVec [1] = 2
+ReadDataReentrant                                    INFO pVec [2] = 3
+ReadDataReentrant                                    INFO event store does not contain MyDataObj with 'StoreGateSvc+foo'
+ReadDataReentrant                                    INFO ListVecLinks::linked element 1
+ReadDataReentrant                                    INFO ListVecLinks::linked element 3
+ReadDataReentrant                                    INFO VectorMapLinks::linked element: key uno - value 1 - stored as 0x558f5a5d60e8
+ReadDataReentrant                                    INFO VectorMapLinks::linked element: key due - value 2 - stored as 0x558f5a5d6128
+AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #2, run #1 2 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #3, run #1 2 events processed so far  <<<===
+WriteDataReentrant                                   INFO in execute()
+WriteDataReentrant                                WARNING we expect  an error message here
+StoreGateSvc_Impl                                 WARNING  setupProxy:: error setting up proxy for key dobj and clid 8000
+ Pre-existing valid DataProxy @0x558f5a678d40 found in Store for key dobj with clid 8000
+StoreGateSvc_Impl                                 WARNING record_impl: Problem setting up the proxy for object @0x558f5a677a00
+ recorded with key dobj of type MyDataObj (CLID 8000) in DataObject @0x558f5a670460
+VarHandle(StoreGateSvc+dobj[8000])                  ERROR FILE:LINE (StatusCode SG::VarHandleBase::record_impl(std::unique_ptr<DataObject>, void*, bool, bool)): code FAILURE: recordObject failed
+WriteDataReentrant                                WARNING end of error message
+WriteDataReentrant                                   INFO  registered all data objects
+WriteDataReentrant                                   INFO  StoreGate structure before returning from execute 
 StoreGateSvc_Impl: <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
 StoreGateSvc_Impl: SGImplSvc()::dump() which is NOT LOADED 
-StoreGateSvc_Impl: Found 2 proxies for ClassID 1434 (BaseClass): 
+StoreGateSvc_Impl: Found 6 proxies for ClassID 1434 (BaseClass): 
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x558f5a6786c0 --- key: WriteDataReentrant
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x558f5a678cf0 --- key: dobj
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x558f5a681300 --- key: dobj2
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x558f5a682cd0 --- key: x1
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x558f5a681570 --- key: x2
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x558f5a67fef0 --- key: x3
 StoreGateSvc_Impl: Found 1 proxy for ClassID 2101 (EventInfo): 
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x558f5a680850 --- key: 
 StoreGateSvc_Impl: Found 6 proxies for ClassID 8000 (MyDataObj): 
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x558f5a6786c0 --- key: WriteDataReentrant
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x558f5a678cf0 --- key: dobj
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x558f5a681300 --- key: dobj2
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x558f5a682cd0 --- key: x1
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x558f5a681570 --- key: x2
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x558f5a67fef0 --- key: x3
 StoreGateSvc_Impl: Found 1 proxy for ClassID 9967 (DataVector<MyContObj>): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x558f5a680200 --- key: cobj
 StoreGateSvc_Impl: Found 1 proxy for ClassID 9983 (std::vector< ElementLink<MapStringFloat> >): 
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x558f5a682a30 --- key: linkvec
 StoreGateSvc_Impl: Found 1 proxy for ClassID 9984 (std::list< ElementLink< std::vector<float> > >): 
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x558f5a681e20 --- key: WriteDataReentrant
 StoreGateSvc_Impl: Found 1 proxy for ClassID 33347479 (SG::AuxVectorBase): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x558f5a680200 --- key: cobj
 StoreGateSvc_Impl: Found 1 proxy for ClassID 55596997 (EventContext): 
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x558f5a678f80 --- key: EventContext
 StoreGateSvc_Impl: Found 1 proxy for ClassID 193758082 (std::map<std::string,float>): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x558f5a681dd0 --- key: mkey
 StoreGateSvc_Impl: Found 1 proxy for ClassID 202242136 (std::vector<float>): 
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x558f5a67eb00 --- key: vFloat
 StoreGateSvc_Impl: Found 1 proxy for ClassID 289238765 (TestDataObject): 
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x558f5a684430 --- key: testobj
 StoreGateSvc_Impl: <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
 
-ReadDataReentrant    INFO in execute()
-ReadDataReentrant    INFO Time: 11.3  ID: 132
-ReadDataReentrant    INFO Time: 41.7  ID: 291
-ReadDataReentrant    INFO pVec [0] = 1
-ReadDataReentrant    INFO pVec [1] = 2
-ReadDataReentrant    INFO pVec [2] = 3
-ReadDataReentrant    INFO event store does not contain MyDataObj with 'StoreGateSvc+foo'
-ReadDataReentrant    INFO ListVecLinks::linked element 1
-ReadDataReentrant    INFO ListVecLinks::linked element 3
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #3, run #1 3 events processed so far  <<<===
-ApplicationMgr       INFO Application Manager Stopped successfully
+ReadDataReentrant                                    INFO in execute()
+ReadDataReentrant                                    INFO Time: 11.3  ID: 132
+ReadDataReentrant                                    INFO Time: 41.7  ID: 291
+ReadDataReentrant                                    INFO pVec [0] = 1
+ReadDataReentrant                                    INFO pVec [1] = 2
+ReadDataReentrant                                    INFO pVec [2] = 3
+ReadDataReentrant                                    INFO event store does not contain MyDataObj with 'StoreGateSvc+foo'
+ReadDataReentrant                                    INFO ListVecLinks::linked element 1
+ReadDataReentrant                                    INFO ListVecLinks::linked element 3
+ReadDataReentrant                                    INFO VectorMapLinks::linked element: key uno - value 1 - stored as 0x558f5a5d60e8
+ReadDataReentrant                                    INFO VectorMapLinks::linked element: key due - value 2 - stored as 0x558f5a5d6128
+AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #3, run #1 3 events processed so far  <<<===
+ApplicationMgr                                       INFO Application Manager Stopped successfully
 FPEAuditor                                           INFO FPE summary for this job
 FPEAuditor                                           INFO  FPE OVERFLOWs  : 0
 FPEAuditor                                           INFO  FPE INVALIDs   : 0
 FPEAuditor                                           INFO  FPE DIVBYZEROs : 0
-ApplicationMgr       INFO Application Manager Finalized successfully
-ApplicationMgr       INFO Application Manager Terminated successfully
+ApplicationMgr                                       INFO Application Manager Finalized successfully
+ApplicationMgr                                       INFO Application Manager Terminated successfully
 Py:Athena            INFO leaving with code 0: "successful run"

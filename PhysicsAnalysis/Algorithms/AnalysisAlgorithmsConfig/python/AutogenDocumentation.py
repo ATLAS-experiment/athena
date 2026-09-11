@@ -67,6 +67,7 @@ def extract_block_options(block_class: Type) -> Dict[str, Any]:
             "required": option_obj.required,
             "noneAction": option_obj.noneAction,
             "physicalUnit": interpret_physical_unit(option_obj.info),
+            "meta": option_obj.meta,
         }
         # Check if this option has expert mode settings
         if (

@@ -16,8 +16,8 @@
 #include "JetCalibTools/JetDNNCalibStep.h"
 
 #ifndef XAOD_STANDALONE
-#include "CalibratedJetCopyAlg.h"
-#include "JetCalibrationDecoratorAlg.h"
+#include "../CalibratedJetCopyAlg.h"
+#include "../JetCalibrationDecoratorAlg.h"
 #endif
 
 // Project include(s).

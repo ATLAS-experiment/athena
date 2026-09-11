@@ -102,6 +102,17 @@ def BTaggingLargeRContent(flags: AthConfigFlags, jetcol: str) -> list[str]:
         name="GN3XPV01",
         extra_flavours=["htautauhad", "qcdbb", "qcdbx", "qcdcx", "qcdll", "Wqq"],
     )
+    # tautauJRv00: subjet-regression + 1-vs-2+ subjet classifier. These are
+    # regression/classification scalars, not p<flavour> discriminants, so the
+    # decoration names are listed explicitly rather than via the helper above.
+    xbb_aux_vars += [
+        "tautauJRv00_leadingSubjetPt",
+        "tautauJRv00_subleadingSubjetPt",
+        "tautauJRv00_leadingSubjetMass", "tautauJRv00_subleadingSubjetMass",
+        "tautauJRv00_leadingSubjetDeta", "tautauJRv00_subleadingSubjetDeta",
+        "tautauJRv00_leadingSubjetDphi", "tautauJRv00_subleadingSubjetDphi",
+        "tautauJRv00_ptwoPlusSubjets",
+    ]
 
     btag_content = _get_variable_list(collection=jetcol, aux_list=xbb_aux_vars)
     return jet_content + btag_content

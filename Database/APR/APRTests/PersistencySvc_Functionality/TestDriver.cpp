@@ -11,13 +11,11 @@
 
 #include "PersistentDataModel/Placement.h"
 #include "PersistentDataModel/Token.h"
-#include "PersistencySvc/IFileCatalog.h"
-#include "PersistencySvc/ISession.h"
-#include "PersistencySvc/ITransaction.h"
-#include "PersistencySvc/IDatabase.h"
-#include "PersistencySvc/ITechnologySpecificAttributes.h"
-#include "PersistencySvc/IContainer.h"
-#include "PersistencySvc/ITokenIterator.h"
+
+#include "PoolSvc/IContainer.h"
+#include "PoolSvc/IFileCatalog.h"
+#include "PoolSvc/ISession.h"
+#include "PoolSvc/ITokenIterator.h"
 
 #include "StorageSvc/DbType.h"
 

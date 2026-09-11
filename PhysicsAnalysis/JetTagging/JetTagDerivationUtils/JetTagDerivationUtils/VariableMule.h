@@ -33,9 +33,17 @@ private:
   std::vector<SG::AuxElement::ConstAccessor<T>> m_fromAcc;
 public:
   VariableMule(const T& default_value): m_default(default_value) {}
-  StatusCode initialize(Gaudi::Algorithm* parent,
+  // the owner is templated so that the keys are declared through the
+  // AthCommonDataStore overload: a Gaudi::Algorithm declares them as plain
+  // properties, and the scheduler never sees them as data dependencies
+  template <typename OWNER>
+  StatusCode initialize(OWNER* parent,
                         const std::vector<std::string>& froms,
                         const std::string& to) {
+    // the owner keeps pointers to the keys, so the storage must not move
+    m_fromKeys.reserve(toCopy.size() * froms.size());
+    m_toKeys.reserve(toCopy.size());
+    m_fromAcc.reserve(toCopy.size());
     for (const auto& key: toCopy) {
       std::string fullto = to + "." + key.second;
       std::string doc = "Key to move " + key.first + "->" + key.second;

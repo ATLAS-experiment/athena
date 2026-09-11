@@ -61,7 +61,9 @@ float physicalDeltaTheta(const Coincidence& inner,
   if (deltaR == 0.F && deltaZ == 0.F) return 0.F;
   const float segmentTheta = std::atan2(deltaR, deltaZ);
   const float pivotTheta = std::atan2(outer.r, outer.z);
-  return segmentTheta - pivotTheta;
+  // Use the shortest signed angular separation across the atan2 branch cut.
+  return static_cast<float>(
+      xAOD::P4Helpers::deltaPhi(segmentTheta, pivotTheta));
 }
 
 struct ProjectionSegment {

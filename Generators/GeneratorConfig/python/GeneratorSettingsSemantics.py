@@ -52,6 +52,8 @@ class GeneratorSettingsPrecedence(IntEnum):
     """
     BASE = 10
     TUNE = 20
+    MATCHING = 30
+    WEIGHTS = 40
     USER = 100
 
 
