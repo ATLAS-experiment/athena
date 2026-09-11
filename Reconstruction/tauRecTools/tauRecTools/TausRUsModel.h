@@ -99,12 +99,6 @@ constexpr size_t PT_MEDIAN_QUANTILE = 2;
 /// the unit circle: phi = atan2(sin, cos).
 enum PhiComponent : size_t { PHI_SIN = 0, PHI_COS = 1 };
 
-/// PDG masses in MeV, used to complete the regressed four-momenta, which the
-/// network gives as pt, eta and phi only.
-constexpr float TAU_MASS = 1776.86f;
-constexpr float CHARGED_PION_MASS = 139.57039f;
-constexpr float NEUTRAL_PION_MASS = 134.9768f;
-
 std::vector<Input> inputs();
 std::vector<Output> outputs();
 

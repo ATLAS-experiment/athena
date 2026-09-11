@@ -5,6 +5,7 @@
 #include "tauRecTools/TausRUsEvaluator.h"
 
 #include "AsgDataHandles/ReadHandle.h"
+#include "TruthUtils/ParticleConstants.h"
 
 #include <algorithm>
 #include <cmath>
@@ -322,14 +323,17 @@ StatusCode TausRUsEvaluator::execute(xAOD::TauJet& tau) const {
     m_decayModeScores[iMode](tau) = decayMode[iMode];
   }
 
+  // The network gives pt, eta and phi only, so the four-momenta are completed
+  // with the PDG masses.
   decorateFourMomentum(tau, m_tauP4, raw.at("tes"), raw.at("tau_eta"),
-                       raw.at("tau_phi"), TAU_MASS);
+                       raw.at("tau_phi"),
+                       ParticleConstants::PDG2024::tauMassInMeV);
   decorateFourMomentum(tau, m_chargedPionP4, raw.at("charged_pion_pt"),
                        raw.at("charged_pion_eta"), raw.at("charged_pion_phi"),
-                       CHARGED_PION_MASS);
+                       ParticleConstants::PDG2024::chargedPionMassInMeV);
   decorateFourMomentum(tau, m_neutralPionP4, raw.at("neutral_pion_pt"),
                        raw.at("neutral_pion_eta"), raw.at("neutral_pion_phi"),
-                       NEUTRAL_PION_MASS);
+                       ParticleConstants::PDG2024::piZeroMassInMeV);
 
   decorateVertex(tau, raw.at("vertex_classification"),
                  m_loader->selectVertices(*vertexInHandle, m_maxVertices));

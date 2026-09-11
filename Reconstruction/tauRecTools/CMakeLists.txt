@@ -35,7 +35,7 @@ atlas_add_library( tauRecToolsLib
    CxxUtils AthLinks AsgMessagingLib AsgDataHandlesLib AsgTools xAODCaloEvent
    xAODEventInfo xAODJet xAODParticleEvent xAODPFlow xAODTau xAODTracking xAODEventShape
    MVAUtils FlavorTagInference AthOnnxInterfaces ${extra_public_libs}
-   PRIVATE_LINK_LIBRARIES CaloGeoHelpers FourMomUtils PathResolver )
+   PRIVATE_LINK_LIBRARIES CaloGeoHelpers FourMomUtils PathResolver TruthUtils )
 
 atlas_add_dictionary( tauRecToolsDict
    tauRecTools/tauRecToolsDict.h tauRecTools/selection.xml
