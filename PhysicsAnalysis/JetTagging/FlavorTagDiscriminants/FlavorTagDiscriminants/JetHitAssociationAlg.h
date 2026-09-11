@@ -101,6 +101,8 @@ namespace FlavorTagDiscriminants {
 
 
       // Helper methods
+
+      // hits must be sorted by phi.
       const std::vector<std::pair<float, const xAOD::TrackMeasurementValidation*>>
       getJetHits(const xAOD::IParticle* jet,
                     const std::vector<Hit>& hits,
