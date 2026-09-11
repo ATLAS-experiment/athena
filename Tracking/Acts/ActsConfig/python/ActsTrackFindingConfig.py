@@ -236,7 +236,7 @@ def ActsTrackFindingCfg(flags,
     if flags.Tracking.ActiveConfig.extension == 'ActsConversion' or flags.Tracking.ActiveConfig.isLargeD0:
         pixelSeedLabels = None
     # Disable strip seeds if turned off
-    elif flags.Tracking.ActiveConfig.useITkStripSeeding == False:
+    elif flags.Tracking.ActiveConfig.useITkStripSeeding is False:
         stripSeedLabels = None
 
     # Now set the seed and estimated parameters keys accordingly
