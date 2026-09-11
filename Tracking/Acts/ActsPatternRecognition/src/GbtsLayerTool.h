@@ -54,10 +54,6 @@ class GbtsLayerTool final : public extends<AthAlgTool, IGbtsLayerTool> {
     return m_stripLayers;
   }
 
-  virtual const std::vector<GbtsTechnology>& layerTechnologies() const override {
-    return m_layerTechnologies;
-  }
-
  private:
   /// One module, as grouped into a layer.
   struct ModuleEntry {
@@ -84,8 +80,6 @@ class GbtsLayerTool final : public extends<AthAlgTool, IGbtsLayerTool> {
   const InDetDD::SCT_DetectorManager* m_stripManager{nullptr};
 
   std::vector<Acts::Experimental::GbtsLayerDescription> m_layerDescriptions;
-  /// What each layer is made of, parallel to m_layerDescriptions.
-  std::vector<GbtsTechnology> m_layerTechnologies;
   /// Wafer hash addressable dense GBTS layer indices.
   std::vector<short> m_pixelLayers, m_stripLayers;
 };

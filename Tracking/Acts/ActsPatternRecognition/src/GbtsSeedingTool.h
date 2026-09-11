@@ -76,7 +76,6 @@ namespace ActsTrk {
     /// @param etaBinWidth filled with the eta bin width the table was made for
     StatusCode readConnections(
       const std::vector<Acts::Experimental::GbtsLayerDescription>& layers,
-      const std::vector<GbtsTechnology>& technologies,
       std::vector<Acts::Experimental::GbtsLayerConnection>& connections,
       float& etaBinWidth) const;
 
