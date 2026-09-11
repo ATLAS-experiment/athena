@@ -21,6 +21,7 @@
 using namespace Acts::UnitLiterals;
 
 namespace {
+    /** @brief Count the hits on segment including outliers */
     std::uint8_t countHits(const xAOD::MuonSegment& s) {
         return s.nPrecisionHits() + s.nTrigEtaLayers() + s.nPhiLayers() +
                s.nPrecisionOutliers() + s.nTriggerEtaOutliers() + s.nTriggerPhiOutliers();

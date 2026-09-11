@@ -19,6 +19,12 @@
 
 
 namespace MuonR4 {
+/** @brief The TruthTrackSeederTool combines the Segments based on their common 
+ *         truthParticleLink. If multiple segments in the same chamber share the
+ *         truthParticle, then the one which has the most amount of hits is chosen
+ *         The initial track parameters are predicted from the closest truth segment
+ *         along the trajectory. The tool only works on MC and is also entirely meant
+ *         to evaluate the performance of the global chi2 fitter. */
 class TruthTrackSeederTool: public extends<AthAlgTool, ITrackSeedingTool> {
         public:
             /** @brief Copy the constructor from the base class */
@@ -32,8 +38,6 @@ class TruthTrackSeederTool: public extends<AthAlgTool, ITrackSeedingTool> {
             virtual Acts::Result<Acts::BoundTrackParameters> 
                                 estimateStartParameters(const EventContext& ctx,
                                                         const MsTrackSeed& seed) const override final;
-
-            
             /** @copydoc ITrackSeedingTool::estimateQtimesP */
             virtual double estimateQtimesP(const EventContext& ctx,
                                            const Amg::Vector3D& planeNorm,
