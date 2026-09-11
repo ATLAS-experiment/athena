@@ -49,9 +49,6 @@ namespace pool {
          /// Returns the event reference Token for the current row.
          virtual const Token& eventRef() const override;
 
-         /// Cleanup.
-         virtual void close() override;
-
          virtual ~CollectionCursor();
 
       protected:
@@ -68,7 +65,7 @@ namespace pool {
          /// Temporary storage for Event Reference in string format as it is in RNTuple
          std::string                         m_tokenStr;
 
-	      std::size_t                         m_idx;
+         std::size_t                         m_idx;
       };
 
 }

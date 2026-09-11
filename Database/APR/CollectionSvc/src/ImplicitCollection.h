@@ -12,15 +12,13 @@
 
 #include "CxxUtils/checker_macros.h"
 #include "Gaudi/PluginService.h"
+#include "GaudiKernel/IFileMgr.h"
 
 namespace pool {
 
   // forward declarations
    class ISession;
    class IContainer;
-   class ICollectionQuery;
-   class ICollectionIterator;
-   class ImplicitCollectionIterator;
 
   /// An implicit collection implementation of the ICollection interface
   class ATLAS_NOT_THREAD_SAFE ImplicitCollection : virtual public ICollection, public APRMessaging
@@ -30,7 +28,7 @@ namespace pool {
     /// Constructor compying to the new Collections API
     /// parameters as above, but name and connection passed in description
     ImplicitCollection( const CollectionDescription* description,
-                        ICollection::OpenMode mode,
+                        Io::IoFlag mode,
                         ISession* session );
     
     /// Destructor
@@ -54,7 +52,7 @@ namespace pool {
     virtual std::unique_ptr<ICollectionCursor> cursor() override final;
 
   protected:
-    void open( ICollection::OpenMode mode, ISession* session );
+    void open( Io::IoFlag mode, ISession* session );
 
   private:
     /// The underlying container handle
