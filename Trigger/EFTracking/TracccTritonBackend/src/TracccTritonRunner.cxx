@@ -16,6 +16,7 @@
 #include <chrono>
 #include <cstring>
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 
@@ -25,6 +26,7 @@
 #include "AthenaKernel/ExtendedEventContext.h"
 #include "GaudiKernel/EventContext.h"
 #include "GaudiKernel/ThreadLocalContext.h"
+#include "GaudiKernel/IAlgExecStateSvc.h"
 #include "GaudiKernel/IAlgManager.h"
 #include "GaudiKernel/IAlgorithm.h"
 #include "GaudiKernel/IHiveWhiteBoard.h"
@@ -42,15 +44,6 @@
 
 namespace triton { namespace backend { namespace traccc {
 
-namespace {
-    // Algorithm names must match the ones the bootstrap jobOptions creates.
-    constexpr const char* kClusterizationAlg = "DeviceClusterizationAlg";
-    constexpr const char* kSPFormationAlg = "DeviceSPFormationAlg";
-    constexpr const char* kTripletSeedingAlg = "DeviceTripletSeedingAlg";
-    constexpr const char* kTrkParamEstimationAlg = "DeviceTrkParamEstimationAlg";
-    constexpr const char* kTrackFindingAlg = "DeviceTrackFindingAlg";
-}  // namespace
-
 struct StreamGuard {
     cudaStream_t stream = nullptr;
     StreamGuard() { cudaStreamCreate(&stream); }
@@ -59,7 +52,7 @@ struct StreamGuard {
     }
     StreamGuard(const StreamGuard&) = delete;
     StreamGuard& operator=(const StreamGuard&) = delete;
-    void synchronize() const {
+    void synchronize() {
         if (stream) cudaStreamSynchronize(stream);
     }
 };
@@ -79,11 +72,9 @@ struct TracccTritonRunner::Impl {
     const std::size_t slot;
     std::size_t eventCounter = 0;
 
-    SmartIF<IAlgorithm> clusterization;
-    SmartIF<IAlgorithm> spFormation;
-    SmartIF<IAlgorithm> seeding;
-    SmartIF<IAlgorithm> trkParamEstimation;
-    SmartIF<IAlgorithm> trackFinding;
+    /// The AthSequencer configured by TracccTritonDeviceRecoCfg
+    SmartIF<IAlgorithm> chain;
+    SmartIF<IAlgExecStateSvc> algExecStates;
 
     Impl(TracccTritonInitializer& init, std::size_t theSlot)
         : initializer(init)
@@ -137,22 +128,23 @@ TracccTritonRunner::TracccTritonRunner(TracccTritonInitializer& initializer,
         throw std::runtime_error(
             "TracccTritonRunner: no IAlgManager in the embedded kernel");
     }
-    m_impl->clusterization =
-        algMgr->algorithm(std::string(kClusterizationAlg), /*createIf*/ false);
-    m_impl->spFormation =
-        algMgr->algorithm(std::string(kSPFormationAlg), /*createIf*/ false);
-    m_impl->seeding =
-        algMgr->algorithm(std::string(kTripletSeedingAlg), /*createIf*/ false);
-    m_impl->trkParamEstimation = algMgr->algorithm(
-        std::string(kTrkParamEstimationAlg), /*createIf*/ false);
-    m_impl->trackFinding =
-        algMgr->algorithm(std::string(kTrackFindingAlg), /*createIf*/ false);
-
-    if (!m_impl->clusterization || !m_impl->spFormation || !m_impl->seeding ||
-        !m_impl->trkParamEstimation || !m_impl->trackFinding) {
+    m_impl->chain = algMgr->algorithm(initializer.config().sequenceName,
+                                      /*createIf*/ false);
+    if (!m_impl->chain) {
         throw std::runtime_error(
-            "TracccTritonRunner: could not retrieve one of the device "
-            "algorithms");
+            "TracccTritonRunner: could not retrieve the device chain '" +
+            initializer.config().sequenceName +
+            "' from the embedded Gaudi kernel");
+    }
+
+    // AthSequencer::execute() skips itself if its AlgExecState for this
+    // context is already Done, so the states have to be reset once per
+    // request the way AthenaEventLoopMgr does between events
+    m_impl->algExecStates = svcLocator->service<IAlgExecStateSvc>(
+        "AlgExecStateSvc", /*createIf*/ false);
+    if (!m_impl->algExecStates) {
+        throw std::runtime_error(
+            "TracccTritonRunner: could not retrieve AlgExecStateSvc");
     }
 }
 
@@ -241,18 +233,17 @@ TracccTritonRunner::run(const uint8_t* buffer,
 
     auto t2 = std::chrono::high_resolution_clock::now();
 
-    // Run the device chain
-    // TODO: this should get the order from the python config; make this an alg chain from the 
-    // python config
-    for (IAlgorithm* alg :
-         {m_impl->clusterization.get(), m_impl->spFormation.get(),
-          m_impl->seeding.get(), m_impl->trkParamEstimation.get(),
-          m_impl->trackFinding.get()}) {
-        if (alg->sysExecute(ctx).isFailure()) {
-            throw std::runtime_error(
-                "TracccTritonRunner: algorithm '" + alg->name() +
-                "' failed during execute()");
-        }
+    // Run the device chain as the python configuration declared it.
+    // Clear the previous request's execution states first, otherwise the
+    // sequencer sees itself as Done and silently runs nothing.
+    m_impl->algExecStates->reset(ctx);
+
+    if (m_impl->chain->sysExecute(ctx).isFailure()) {
+        std::ostringstream states;
+        m_impl->algExecStates->dump(states, ctx);
+        throw std::runtime_error(
+            "TracccTritonRunner: device chain '" + m_impl->chain->name() +
+            "' failed during execute(). Algorithm states:\n" + states.str());
     }
     m_impl->stream.synchronize();
 
@@ -302,7 +293,7 @@ TracccTritonRunner::run(const uint8_t* buffer,
             "[TIMING][slot " + std::to_string(m_impl->slot) + "] ";
         std::cout << tag << "Cell deserialization : " << ms(t0, t1) << " ms\n"
                   << tag << "Cell H2D + record    : " << ms(t1, t2) << " ms\n"
-                  << tag << "Device chain (5 alg) : " << ms(t2, t3) << " ms\n"
+                  << tag << "Device chain         : " << ms(t2, t3) << " ms\n"
                   << tag << "Tracks: " << output.nTracks << std::endl;
     }
 
