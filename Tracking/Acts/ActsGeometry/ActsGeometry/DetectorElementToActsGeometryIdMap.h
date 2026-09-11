@@ -8,6 +8,10 @@
 #include "Acts/Utilities/Helpers.hpp"
 #include <unordered_map>
 
+namespace Acts {
+   class Surface;
+}
+
 namespace ActsTrk {
    using DetectorElementKey=unsigned int;
    constexpr unsigned int DETELEMENT_TYPE_SHIFT = 28;
@@ -19,15 +23,27 @@ namespace ActsTrk {
       assert( (identifier_hash & DETELEMENT_HASH_MASK) == identifier_hash);
       return (Acts::toUnderlying(meas_type) << DETELEMENT_TYPE_SHIFT) | (identifier_hash & DETELEMENT_HASH_MASK);
    }
+
+   /** @brief Geometry identifier and surface of a detector element. */
+   struct DetectorElementGeoInfo {
+      Acts::GeometryIdentifier geoId{};
+      const Acts::Surface* surface{nullptr};
+   };
+
    struct DetectorElementToActsGeometryIdMap : std::unordered_map<ActsTrk::DetectorElementKey,
-                                                                  Acts::GeometryIdentifier>
+                                                                  DetectorElementGeoInfo>
    {
       // utilities to abstract what is actually stored
-      static const Acts::GeometryIdentifier &makeValue(const Acts::GeometryIdentifier &geo_id) {
-         return geo_id;
+      static DetectorElementGeoInfo makeValue(const Acts::GeometryIdentifier &geo_id,
+                                              const Acts::Surface *surface = nullptr) {
+         return DetectorElementGeoInfo{geo_id, surface};
       }
       static const Acts::GeometryIdentifier &getValue(const value_type &element) {
-         return element.second;
+         return element.second.geoId;
+      }
+      /** @brief Surface of the detector element, or nullptr if none was stored. */
+      static const Acts::Surface *getSurface(const value_type &element) {
+         return element.second.surface;
       }
    };
 }

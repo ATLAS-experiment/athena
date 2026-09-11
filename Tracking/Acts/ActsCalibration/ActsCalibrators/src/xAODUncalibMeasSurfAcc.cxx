@@ -30,6 +30,10 @@ namespace ActsTrk::detail{
                 if (geoid_iter == m_detectorElementToGeometryIdMap->end()) {
                     return nullptr;
                 }
+                /** Fall back to the tracking geometry only if the map holds no surface. */
+                if (const Acts::Surface* surface = DetectorElementToActsGeometryIdMap::getSurface(*geoid_iter)) {
+                    return surface;
+                }
                 return m_actsTrackingGeometry->findSurface( DetectorElementToActsGeometryIdMap::getValue(*geoid_iter));
             }
             /** Muon measurements have a direct link to the readout geometry -> surface */

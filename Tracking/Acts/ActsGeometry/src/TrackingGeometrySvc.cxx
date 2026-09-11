@@ -1299,7 +1299,7 @@ std::unique_ptr<ActsTrk::DetectorElementToActsGeometryIdMap>
             } 
             auto hash = possibleElement->identifyHash();
             detector_element_to_geoid->insert(std::make_pair(makeDetectorElementKey(type, hash),
-                                                             DetectorElementToActsGeometryIdMap::makeValue(surface->geometryId())));
+                                                             DetectorElementToActsGeometryIdMap::makeValue(surface->geometryId(), surface)));
             ++counter.n_detector_elements;
         };
         switch(placement->detectorType()) {
