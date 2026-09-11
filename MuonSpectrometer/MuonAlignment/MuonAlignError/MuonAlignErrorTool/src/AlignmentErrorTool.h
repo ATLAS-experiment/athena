@@ -7,7 +7,7 @@
 
 #include <iosfwd>
 #include <string>
-#include <boost/regex.hpp>
+#include <regex>
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ServiceHandle.h"
@@ -48,8 +48,8 @@ namespace MuonAlign {
             double translation{0.0};
             double rotation{0.0};
             // RULE
-            boost::regex stationName{""};
-            boost::regex multilayer{""};
+            std::regex stationName{""};
+            std::regex multilayer{""};
             // SET OF HITS SATISFYING THE RULE
             std::vector<const Trk::RIO_OnTrack*> hits{};
             // USEFUL NUMBERS
