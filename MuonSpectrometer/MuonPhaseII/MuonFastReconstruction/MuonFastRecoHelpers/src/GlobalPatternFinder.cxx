@@ -697,17 +697,22 @@ GlobalPatternFinder::constructTree(const ActsTrk::GeometryContext& gctx,
     SearchTree_t::vector_t treeData{};
     treeData.reserve(3 * hitPayloads.size());
 
+    uint8_t msSector = hitPayloads.front()->msSector()->sector();
+    const SpacePointBucket* currentBucket = hitPayloads.front().bucket;
     for (const HitPayload& hit : hitPayloads) {
         ATH_MSG_VERBOSE(__func__<<"() Spacepoint: " << *hit);
         const Amg::Vector3D& pos {hit.position};
         const ExpandedSector hitExpSector {pos.phi()};
+        if (hit.bucket != currentBucket) {
+            currentBucket = hit.bucket;
+            msSector = hit->msSector()->sector();
+        }
         
         /** Try to duplicate the hit in the neighboring sectors if it is close to the sector border.  
          *  This ensures that we can find patterns crossing the sector borders. */ 
         for (const SectorProjector proj : {leftOverlap, center, rightOverlap}) {
             /// Check whether the hit belongs to the left or right sector as well
-            const ExpandedSector expSect {static_cast<uint8_t>(hit->msSector()->sector()), 
-                                          proj};
+            const ExpandedSector expSect {msSector, proj};
             if (proj != SectorProjector::center && hit.measuresPhi && expSect != hitExpSector) {
                 ATH_MSG_VERBOSE("addHitToTree() Hit with "<<hitExpSector<<" is not compatible with "<<expSect);
                 continue;
