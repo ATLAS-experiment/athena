@@ -209,11 +209,8 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
 
             # Strip clusters were just produced above, but nothing forms strip
             # space points on the device path — mirror the host-side flow
-            from ActsConfig.ActsSpacePointFormationConfig import (
-                ActsStripSpacePointFormationAlgCfg,
-                reconstructStripSpacePointsInPrimaryPass,
-            )
-            if reconstructStripSpacePointsInPrimaryPass(flags):
+            if flags.Tracking.ActiveConfig.useITkStripSeeding or (flags.Acts.SpacePoints.doStrip and not flags.Tracking.ActiveConfig.isSecondaryPass):
+                from ActsConfig.ActsSpacePointFormationConfig import ActsStripSpacePointFormationAlgCfg
                 acc.merge(ActsStripSpacePointFormationAlgCfg(flags,
                     name=f"{flags.Tracking.ActiveConfig.extension}StripSpacePointFormationAlg",
                     StripClusters="ITkStripClusters",

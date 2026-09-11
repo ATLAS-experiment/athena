@@ -19,7 +19,9 @@ namespace GlobalSim {
     for (const char c : bits) {
       value = (value << 1) | (c == '1');
     }
-    return (value < 10) ? static_cast<char>('0' + value) : static_cast<char>('a' + value - 10);
+    // Upper case: the implementations these files are compared against -- GoldenGate
+    // and the firmware simulation -- both write upper case hex.
+    return (value < 10) ? static_cast<char>('0' + value) : static_cast<char>('A' + value - 10);
   }
   
   inline std::string

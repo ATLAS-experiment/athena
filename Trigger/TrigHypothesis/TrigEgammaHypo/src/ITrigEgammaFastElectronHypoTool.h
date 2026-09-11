@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGEGAMMAHYPO_ITRIGEGAMMAFASTELECTRONHYPOTOOL_H
 #define TRIGEGAMMAHYPO_ITRIGEGAMMAFASTELECTRONHYPOTOOL_H 1
@@ -29,6 +29,8 @@ class ITrigEgammaFastElectronHypoTool: virtual public ::IAlgTool
     virtual ~ITrigEgammaFastElectronHypoTool(){}
 
     struct ElectronInfo {
+      using StringFloatMap = std::map<std::string, float, std::less<>>;
+      using StringBoolMap = std::map<std::string, bool, std::less<>>;
       ElectronInfo( TrigCompositeUtils::Decision* d, 
                     const xAOD::TrigElectron* el,
                     const xAOD::TrigEMCluster* cl,
@@ -45,8 +47,8 @@ class ITrigEgammaFastElectronHypoTool: virtual public ::IAlgTool
         const xAOD::TrigEMCluster *cluster;
         const xAOD::TrigRingerRings* rings;
         const TrigCompositeUtils::DecisionIDContainer previousDecisionIDs;
-        std::map<std::string, float> valueDecorator;
-        std::map<std::string, bool> pidDecorator;
+        StringFloatMap valueDecorator;
+        StringBoolMap pidDecorator;
     };
 
 

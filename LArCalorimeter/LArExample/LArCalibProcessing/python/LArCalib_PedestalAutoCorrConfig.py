@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory 
@@ -27,7 +29,6 @@ def AccCalibDataReadingCfg(flags, digKey):
                                                               BEPreselection=flags.LArCalib.Preselection.BEC,
                                                               FTNumPreselection=flags.LArCalib.Preselection.FT))
      return result
-
 
 def LArPedestalAutoCorrCfg(flags):
 

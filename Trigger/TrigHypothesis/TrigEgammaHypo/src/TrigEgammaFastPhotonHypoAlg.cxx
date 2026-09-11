@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigEgammaFastPhotonHypoAlg.h"
@@ -35,13 +35,14 @@ StatusCode TrigEgammaFastPhotonHypoAlg::execute( const EventContext& context ) c
 
   std::map<const xAOD::TrigEMCluster*, size_t> clusterToIndexMap;
   size_t clusterCounter = 0;
+  const std::string featureStr{"feature"};
   for ( auto previousDecision : *previousDecisionsHandle){
-    auto clusterELInfo = TCU::findLink<xAOD::TrigEMClusterContainer>(context,  previousDecision, "feature" );
+    auto clusterELInfo = TCU::findLink<xAOD::TrigEMClusterContainer>(context,  previousDecision, featureStr );
 
     if( not clusterELInfo.isValid() ) {
       ATH_MSG_ERROR("Can not obtain the link to Cluster");
-      ATH_MSG_ERROR( TCU::dump( previousDecision, [](const xAOD::TrigComposite* tc){
-	    return tc->name() + " " + (tc->object<xAOD::TrigEMCluster>("feature") == 0 ? "has no cluster": "has cluster");
+      ATH_MSG_ERROR( TCU::dump( previousDecision, [&featureStr](const xAOD::TrigComposite* tc){
+	    return tc->name() + " " + (tc->object<xAOD::TrigEMCluster>(featureStr) == 0 ? "has no cluster": "has cluster");
 	  }) );
       return StatusCode::FAILURE;
     }

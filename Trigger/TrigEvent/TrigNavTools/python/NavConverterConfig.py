@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -54,6 +54,7 @@ def NavConverterCfg(flags, chainsList = [], runTheChecker = False):
     log.info("Assuming these collections are relevant for trigger: %s", " ".join(types))
     cnvAlg.Collections = types
     cnvAlg.Chains = chainsList
+    log.debug("Chains configured for conversion: %s", cnvAlg.Chains)
     cnvAlg.doCompression = True # set True for compression
     acc.addEventAlgo(cnvAlg)
 
@@ -68,7 +69,8 @@ def NavConverterCfg(flags, chainsList = [], runTheChecker = False):
                                                     AcceptMultipleInstance=True,
                                                     TrigConfigSvc = tdt.TrigConfigSvc) #, OutputLevel = 2)
         acc.addPublicTool(run3tdt)
-        checker.RetrievalToolRun3Nav = CompFactory.Trig.R3IParticleRetrievalTool(TrigDecisionTool = run3tdt) #, OutputLevel = 2)
+        checker.RetrievalToolRun3Nav = CompFactory.Trig.R3IParticleRetrievalTool(
+            TrigDecisionTool = run3tdt) #, OutputLevel = 1)
         checker.Chains = chainsList
         checker.TrigDecisionToolRun3 = run3tdt
         checker.TrigDecisionToolRun2 = tdt

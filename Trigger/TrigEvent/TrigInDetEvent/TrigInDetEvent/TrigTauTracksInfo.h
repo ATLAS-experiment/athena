@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGTAUTRACKSINFO_H
@@ -104,10 +104,7 @@ MsgStream& operator<< ( MsgStream& m, const TrigTauTracksInfo& tau );
 
 /// Operator comparing two TrigTauTracksInfo objects for equality
 bool operator== ( const TrigTauTracksInfo& left, const TrigTauTracksInfo& right );
-/// Operator comparing two TrigTauTracksInfo objects for inequality
-inline bool operator!= ( const TrigTauTracksInfo& left, const TrigTauTracksInfo& right ) {
-   return !( left == right );
-}
+
 	
 /// Comparison with feedback
 void diff( const TrigTauTracksInfo& left, const TrigTauTracksInfo& right,
@@ -117,5 +114,4 @@ void diff( const TrigTauTracksInfo& left, const TrigTauTracksInfo& right,
 
 CLASS_DEF( TrigTauTracksInfo , 239760293 , 1 )
 
-#include "TrigInDetEvent/TrigTauTracksInfoCollection.h"
 #endif

@@ -51,6 +51,8 @@ def createITkConfigFlags():
     itkcf.addFlag("ITk.Conditions.PixelOfflineCalibTag",
                   "PixelITkError_v5_ATLAS-P2-RUN4-01")
     itkcf.addFlag("ITk.Conditions.PixelOfflineCalibFile", "")
+    #explicitly allow falling back to a dummy test cabling if no config available through CREST
+    itkcf.addFlag("ITk.Conditions.PixelTestCablingFallback", False)
 
     # Turn on running of PRD MultiTruthMaker
     itkcf.addFlag("ITk.doTruth", lambda prevFlags: prevFlags.Input.isMC)

@@ -1,7 +1,5 @@
-// -*- C++ -*-
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGMUONEVENT_COMBINED_MUON_FEATURE_H
@@ -18,7 +16,6 @@
 
 // STL include(s):
 #include <vector>
-#include <stdint.h>
 #include <map>
 #include <string>
 
@@ -89,10 +86,7 @@ MsgStream& operator<< ( MsgStream& m, const CombinedMuonFeature& d );
 
 /// Operator comparing two CombinedMuonFeature objects for equality
 bool operator== ( const CombinedMuonFeature& a, const CombinedMuonFeature& b );
-/// Operator comparing two CombinedMuonFeature objects for inequality
-inline bool operator!= ( const CombinedMuonFeature& a, const CombinedMuonFeature& b ) {
-   return !( a == b );
-}
+
 
 /// Comparison with feedback
 void diff( const CombinedMuonFeature& a, const CombinedMuonFeature& b,
@@ -100,7 +94,5 @@ void diff( const CombinedMuonFeature& a, const CombinedMuonFeature& b,
 
 CLASS_DEF(CombinedMuonFeature, 1501, 1)
 CLASS_DEF( DataVector<CombinedMuonFeature> , 225396276 , 1 )
-
-#include "TrigMuonEvent/CombinedMuonFeatureContainer.h"
 
 #endif // TRIGMUONEVENT_COMBINED_MUON_FEATURE_H

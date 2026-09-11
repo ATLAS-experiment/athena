@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //
 //   @file    RoiSerialise.h        
@@ -12,13 +12,16 @@
 
 
 #include <vector>
+#include <cstdint>
 
-#include "TrigSteeringEvent/TrigRoiDescriptor.h"
-#include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
+
+class TrigRoiDescriptor;
+class TrigRoiDescriptorCollection;
+class IRoiDescriptor;
 
 namespace RoiUtil { 
 
-  typedef uint32_t roitype_t;
+  typedef std::uint32_t roitype_t;
   typedef std::vector< std::vector<roitype_t> > roiserial_type;
 
   /// serialise an entire vector of IRoiDescriptors

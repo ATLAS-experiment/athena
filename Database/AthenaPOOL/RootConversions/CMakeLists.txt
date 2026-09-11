@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( RootConversions )
@@ -10,27 +10,11 @@ find_package( ROOT COMPONENTS RIO Tree Core )
 atlas_add_library( RootConversions
                    src/*.cxx
                    PUBLIC_HEADERS RootConversions
-                   LINK_LIBRARIES CxxUtils
-                   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} RootUtils )
+                   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+                   LINK_LIBRARIES ${ROOT_LIBRARIES} CxxUtils
+                   PRIVATE_LINK_LIBRARIES RootUtils )
 
 atlas_add_dictionary( RootConversionsDict
                       RootConversions/RootConversionsDict.h
                       RootConversions/selection.xml
-                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                      LINK_LIBRARIES ${ROOT_LIBRARIES} RootConversions )
-
-atlas_add_dictionary( TestRootConversions1Dict
-                      test/RootConversionsTest1Dict.h
-                      test/selection_test1.xml
-                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                      LINK_LIBRARIES ${ROOT_LIBRARIES} RootConversions
-                      NO_ROOTMAP_MERGE )
-
-atlas_add_dictionary( TestRootConversions2Dict
-                      test/RootConversionsTest2Dict.h
-                      test/selection_test2.xml
-                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                      LINK_LIBRARIES ${ROOT_LIBRARIES} RootConversions
-                      NO_ROOTMAP_MERGE )
-
+                      LINK_LIBRARIES RootConversions )

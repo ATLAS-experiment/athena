@@ -18,7 +18,7 @@ atlas_add_component( ITkPixelCabling
                      PRIVATE_LINK_LIBRARIES AthenaBaseComps GaudiKernel Identifier InDetIdentifier PathResolver StoreGateLib InDetReadoutGeometry PixelReadoutGeometryLib)
 
 atlas_install_joboptions(share/*.txt)
-atlas_install_runtime(share/*.dat)
+atlas_install_runtime(share/*.json)
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 # Tests in the package:

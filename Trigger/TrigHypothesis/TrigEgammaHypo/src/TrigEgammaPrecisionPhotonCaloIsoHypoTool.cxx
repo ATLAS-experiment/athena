@@ -121,7 +121,7 @@ bool TrigEgammaPrecisionPhotonCaloIsoHypoTool::decide( const ITrigEgammaPrecisio
   const int cutIndex = findCutIndex( absEta );
 
   // eta range
-  if ( !m_acceptAll && cutIndex == -1 ) {  // VD
+  if ( cutIndex < 0) {  // VD
     ATH_MSG_DEBUG( "Photon : " << absEta << " outside eta range " << m_etabin[m_etabin.size()-1] );
     return false;
   } else { 

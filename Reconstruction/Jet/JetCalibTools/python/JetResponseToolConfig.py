@@ -19,7 +19,6 @@ def getJetResponseTool(jetdef, modspec=''):
 
     from JetRecConfig.JetDefinition import buildJetAlgName
 
-    label = modspec
     prefix, suffix = {
         'R4TruthLabel': ('',''),
         'R4TruthDressedWZLabel': ('','DressedWZ'),
@@ -27,10 +26,12 @@ def getJetResponseTool(jetdef, modspec=''):
     }[modspec]
     truthJetAlg = prefix+buildJetAlgName(jetdef.algorithm, jetdef.radius)+'Truth'+suffix+'Jets'
 
-    jetPtAssociation = CompFactory.JetResponseTool(
+    jetResponse = CompFactory.JetResponseTool(
         'jetResponse',
-        JetMatchedTruthJetName = f'{label}_MatchedTruthJet',
+        JetMatchedTruthJetName = 'TruthMatch_Jet',
         TruthJetContainer = truthJetAlg,
         )
 
-    return jetPtAssociation
+    print(jetResponse)
+
+    return jetResponse
