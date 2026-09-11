@@ -89,7 +89,7 @@ StatusCode DerivationFramework::TauThinningTool::doThinning(const EventContext& 
     }
   }   
 
-  static const SG::ConstAccessor< xAOD::TauJet_v3::PFOLinks_t > neutralPFOAcc( "neutralPFOLinks" );
+  static const SG::ConstAccessor< xAOD::TauJet::PFOLinks_t > neutralPFOAcc( "neutralPFOLinks" );
 
   // keep the various tau-related objects for taus passing the selection
   for (const auto* tau : tausToKeep) {
