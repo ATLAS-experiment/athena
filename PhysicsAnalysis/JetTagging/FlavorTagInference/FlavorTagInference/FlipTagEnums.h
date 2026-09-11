@@ -12,7 +12,8 @@ namespace FlavorTagInference {
   // note that all the "non-standard" ones here use the default flip
   // config for SV1, JF, and IPxD. The variants are just for the RNN.
   // The variables each config inverts are listed in flip_variable_regex,
-  // in ConstituentsLoader.cxx.
+  // in ConstituentsLoader.cxx. They are inverted on the track, electron
+  // and muon inputs alike.
   enum class FlipTagConfig {
     STANDARD,                   // use all tracks
     NEGATIVE_IP_ONLY,           // use only negative IP, flip the lifetime-signed impact parameters
