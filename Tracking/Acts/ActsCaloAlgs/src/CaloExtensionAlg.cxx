@@ -173,7 +173,7 @@ namespace ActsTrk{
         
         using Link_t = ElementLink<CaloExtensionContainer>;
         SG::WriteDecorHandle<xAOD::TrackParticleContainer, Link_t> decorHandle{m_extensionDecorKey, ctx};
-        
+       
         /** Loop over the track particles */
         for (const xAOD::TrackParticle* track : *idTracks) {
             Link_t& extensionLink = decorHandle(*track);
