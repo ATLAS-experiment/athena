@@ -2,9 +2,10 @@
 # art-description: Nightly test to compare G-130 vs C-230 (Full-scan) for EFTrack studies using singleMu 100GeV sample
 # art-type: grid
 # art-include: main/Athena/x86_64-el9-gcc15-opt
-# art-pathena-flags-add: --site=UKI-LT2-QMUL_GPU,UKI-NORTHGRID-MAN-HEP_GPU
-# art-architecture: '#&nvidia'
+# art-pathena-flags-add: --site=CERN-GPU
 # art-memory: 4095
+# art-input: mc21_14TeV:mc21_14TeV.900495.PG_single_muonpm_Pt10_etaFlatnp0_43.recon.RDO.e8557_s4422_r16128
+# art-input-nfiles: 400
 # art-output: IDTPM.*.root
 # art-output: *.json
 # art-output: *.xml
@@ -62,10 +63,18 @@ run () {
 }
 
 ## Getting the comma-separated list of input RDOs
-InputRDOfiles=$( getEFTrackSample.py -s ${SampleName} )
-if [ ! -f "${InputRDOfiles}" ]; then
-    echo "art-result: 1 Sample ${SampleName} not found"
-    exit 1
+## Prefer ArtInFile in case of grid ART (where it should be available)
+if [ -n "${ArtInFile}" ]; then
+    # ArtInFile is space-separated; convert to comma-separated for runReco
+    InputRDOfiles="${ArtInFile// /,}"
+    echo "Using ArtInFile: ${InputRDOfiles}"
+else # otherwise fall back to getEFTrackSample.py
+    echo "ArtInFile not set, falling back to getEFTrackSample.py..."
+    InputRDOfiles=$( getEFTrackSample.py -s ${SampleName} )
+    if [ ! -f "${InputRDOfiles}" ]; then
+        echo "art-result: 1 Sample ${SampleName} not found"
+        exit 1
+    fi
 fi
 
 ## Track reconstruction step. See runReco_G130_FS.sh --help for list of supported options.
@@ -87,7 +96,8 @@ echo "Running IDTPM with the following json config:"
 jq --arg coll "$TrkCollName" --arg seedcoll "$TrkSeedCollName" '
   (.TruthMuons.OfflineTrkKey         = $coll) |
   (.TruthMuons_EFsel.OfflineTrkKey   = $coll) |
-  (.TrackSeeds.OfflineTrkKey         = $seedcoll)
+  (.TrackSeeds.OfflineTrkKey         = $seedcoll) |
+  (.TrackSeeds.enabled               = true)
 ' "$IDTPMjsonConfig_absPath" | tee ${cwd}/IDTPMconfig.json
 
 ## IDTPM step
