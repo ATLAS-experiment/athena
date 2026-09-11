@@ -36,7 +36,11 @@ def full_calib_path(rel_path: str) -> str:
 def get_jet_collection_name(name: str) -> str:
     # For some specific jet collections, e.g. lepton-free PFlow jets,
     # we want to apply the calibrations of the default PFlow jets
-    for suffix in ("_noElectrons", "_noMuons", "_noLeptons", "_tauSeedEleRM"):
+    for suffix in (
+        "_noElectrons", "_noMuons", "_noLeptons",
+        "_inclMuons", "_tauSeedEleRM",
+        "ByVertex", "CustomVtx",
+    ):
         name = name.replace(suffix, "")
     return name
 
