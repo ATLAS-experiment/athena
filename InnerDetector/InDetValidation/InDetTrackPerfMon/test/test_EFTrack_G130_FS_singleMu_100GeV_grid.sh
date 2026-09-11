@@ -3,7 +3,7 @@
 # art-type: grid
 # art-include: main/Athena/x86_64-el9-gcc15-opt
 # art-pathena-flags-add: --site=CERN-GPU
-# art-memory: 4095
+# art-memory: 8192
 # art-input: mc21_14TeV:mc21_14TeV.900495.PG_single_muonpm_Pt10_etaFlatnp0_43.recon.RDO.e8557_s4422_r16128
 # art-input-nfiles: 400
 # art-output: IDTPM.*.root
