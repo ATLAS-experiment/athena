@@ -210,6 +210,8 @@ def createActsConfigFlags():
                                                                        # the files are located in /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/
                                                                        # this flag is used only if PixelCalibrationStrategy is one of the NN strategies
     actscf.addFlag('Acts.refitSeeds', False) # refit seeds for CKF initial parameters
+    actscf.addFlag('Acts.initialVarInflation', [1., 1., 1., 1., 1., 1.])
+    actscf.addFlag('Acts.refitErrInflation', [1., 1., 1., 1., 1., 1.])
 
     # Ambiguity resolution    
     actscf.addFlag('Acts.doAmbiguityResolution', False)
