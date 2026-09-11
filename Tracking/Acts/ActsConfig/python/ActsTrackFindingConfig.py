@@ -235,8 +235,8 @@ def ActsTrackFindingCfg(flags,
     from InDetConfig.ITkActsHelpers import isFastPrimaryPass
     if flags.Tracking.ActiveConfig.extension == 'ActsConversion' or flags.Tracking.ActiveConfig.isLargeD0:
         pixelSeedLabels = None
-    # Main pass does not process strip seeds in the fast tracking configuration
-    elif isFastPrimaryPass(flags):
+    # Disable strip seeds if turned off
+    elif flags.Tracking.ActiveConfig.useITkStripSeeding == False:
         stripSeedLabels = None
 
     # Now set the seed and estimated parameters keys accordingly
