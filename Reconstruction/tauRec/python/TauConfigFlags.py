@@ -75,6 +75,16 @@ def createTauConfigFlags():
                         ["GNTauVL_v1trunc", "GNTauL_v1trunc", "GNTauM_v1trunc", "GNTauT_v1trunc"]
                     ])
 
+
+    tau_cfg.addFlag("Tau.doTausRUs", False)
+    tau_cfg.addFlag("Tau.TausRUsModelFile", "tausrus.onnx") # TODO: put this in cvmfs
+    tau_cfg.addFlag("Tau.TausRUsMinPt", lambda prevFlags: prevFlags.Tau.MinPtDAOD)
+    # Inference-as-a-service config (optional)
+    tau_cfg.addFlag("Tau.TausRUsUseTriton", False)
+    tau_cfg.addFlag("Tau.TausRUsTritonModel", "tausrus")
+    tau_cfg.addFlag("Tau.TausRUsTritonUrl", "localhost")
+    tau_cfg.addFlag("Tau.TausRUsTritonPort", 8001)
+
     # PanTau config flags
     from PanTauAlgs.PanTauConfigFlags import createPanTauConfigFlags
     tau_cfg.addFlagsCategory("Tau.PanTau", createPanTauConfigFlags, prefix=True)

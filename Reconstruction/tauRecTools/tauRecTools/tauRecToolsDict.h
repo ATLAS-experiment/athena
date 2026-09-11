@@ -19,6 +19,7 @@
 #include "tauRecTools/TauIDVarCalculator.h"
 #include "tauRecTools/TauJetRNNEvaluator.h"
 #include "tauRecTools/TauGNNEvaluator.h"
+#include "tauRecTools/TausRUsEvaluator.h"
 #include "tauRecTools/TauDecayModeNNClassifier.h"
 #include "tauRecTools/TauAODSelector.h"
 #include "tauRecTools/TauAODMuonRemovalTool.h"

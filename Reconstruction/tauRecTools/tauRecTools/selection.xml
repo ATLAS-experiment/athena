@@ -16,6 +16,7 @@
    <class name="TauIDVarCalculator" />
    <class name="TauJetRNNEvaluator" />
    <class name="TauGNNEvaluator" />
+   <class name="TausRUsEvaluator" />
    <class name="TauDecayModeNNClassifier" />
    <class name="TauAODSelector" />
    <class name="TauAODMuonRemovalTool" />
