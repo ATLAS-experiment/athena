@@ -106,11 +106,8 @@ namespace Trig {
 		const double eta2,
 		const double phi2) const;
 
-      int getL1pt(const std::string& l1item) const;
+      int getL1pt(std::string_view l1item) const;
       
-      void tokenize(const std::string& str,
-		    std::vector<std::string>& tokens,
-		    const std::string& delimiters) const;
       
       
       Double_t matchedTrackDetail(EFmuon& efMuonId,
@@ -118,7 +115,7 @@ namespace Trig {
 				  const double eta,
 				  const double phi,
 				  const double mindelR,
-				  const std::string& chainEventTrigger) const;
+				  std::string_view chainEventTrigger) const;
       
       bool decodeDimuonChain(DimuonChainInfo& chainInfo);
 
