@@ -14,7 +14,9 @@ if ( NOT CMAKE_CUDA_COMPILER )
    return()
 endif()
 
-# Triton backend has to go after these configs
+# Triton backend has to go after these configs... the lines until find_package( TritonBackend )
+# are a hack to get around the improper configuration of the TritonBackend. Once fixed, all these
+# lines will not be necessary. 
 find_package( TritonCore )
 find_package( TritonCommon )
 find_package( CUDAToolkit )
@@ -34,20 +36,16 @@ find_package( TritonBackend )
 find_package( vecmem )
 find_package( traccc )
 find_package( Python COMPONENTS Development )
-get_target_property( TRACCC_PYTHON_SHARED_LIBRARY Python::Python LOCATION )
-if ( NOT TRACCC_PYTHON_SHARED_LIBRARY )
-   get_target_property( TRACCC_PYTHON_SHARED_LIBRARY Python::Python IMPORTED_LOCATION )
-endif()
-if ( NOT TRACCC_PYTHON_SHARED_LIBRARY )
-   get_target_property( TRACCC_PYTHON_SHARED_LIBRARY Python::Python IMPORTED_LOCATION_RELEASE )
-endif()
 
 atlas_add_library( triton_traccc
    src/*.h src/*.cxx
    SHARED
    NO_PUBLIC_HEADERS
    DEFINITIONS
-      -DTRACCC_TRITON_PYTHON_LIBRARY="${TRACCC_PYTHON_SHARED_LIBRARY}"
+      # Triton dlopen()s this backend, so libpython arrives with local symbol
+      # visibility and Python extension modules cannot resolve the Py* symbols
+      # they expect to find already loaded
+      -DTRACCC_TRITON_PYTHON_LIBRARY="$<TARGET_FILE:Python::Python>"
    INCLUDE_DIRS
       ${CMAKE_CURRENT_SOURCE_DIR}/src
    LINK_LIBRARIES
