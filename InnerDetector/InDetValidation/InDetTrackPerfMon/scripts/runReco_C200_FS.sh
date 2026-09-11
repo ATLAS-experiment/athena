@@ -49,7 +49,9 @@ if [ ! -f $inputRDO ]; then
 fi
 
 ## running reconstruction
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 Reco_tf.py --CA \
+    --conditionsTag "default:${conditionsTag}" \
     --maxEvents ${nEvents} \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD} \

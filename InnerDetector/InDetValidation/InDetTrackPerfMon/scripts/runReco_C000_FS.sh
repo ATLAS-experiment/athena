@@ -52,8 +52,10 @@ if [ ! -f $inputRDO ]; then
 fi
 
 ## running reconstruction
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 if [ "$doClusters" == "1" ]; then
   Reco_tf.py --CA \
+    --conditionsTag "default:${conditionsTag}" \
     --maxEvents ${nEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
     --postInclude 'InDetConfig.InDetPrepRawDataFormationConfig.ITkInDetToXAODClusterConversionCfg,InDetConfig.SiSpacePointFormationConfig.InDetToXAODSpacePointConversionCfg,ActsConfig.ActsPostIncludes.PersistifyActsEDMCfg' \
@@ -64,6 +66,7 @@ if [ "$doClusters" == "1" ]; then
     #--preExec 'flags.Tracking.writeExtendedSi_PRDInfo=True' \
 else
   Reco_tf.py --CA \
+    --conditionsTag "default:${conditionsTag}" \
     --maxEvents ${nEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
     --postInclude 'ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
