@@ -102,50 +102,31 @@ std::shared_ptr<BlueprintNode> ActsTrk::CaloBlueprintNodeBuilder::buildBlueprint
     volumeCounter++;
   }
 
-  //now do asymmetric cylinders, first negative z
-  
-  CylinderContainerBlueprintNode& caloBarrelCylinderNegativeZNode = caloNode->addCylinderContainer("CaloBarrelNegativeZAsymmetricCylinders", AxisDirection::AxisR);
-  caloBarrelCylinderNegativeZNode.setAttachmentStrategy(VolumeAttachmentStrategy::Gap);
-  caloBarrelCylinderNegativeZNode.setResizeStrategy(ResizeStrategy::Gap);
-
-  //then positive z
-  CylinderContainerBlueprintNode& caloBarrelCylinderPositiveZNode = caloNode->addCylinderContainer("CaloBarrelPositiveZAsymmetricCylinders", AxisDirection::AxisR);
-  caloBarrelCylinderPositiveZNode.setAttachmentStrategy(VolumeAttachmentStrategy::Gap);
-  caloBarrelCylinderPositiveZNode.setResizeStrategy(ResizeStrategy::Gap);
-
+  //now do asymmetric cylinders
   for (unsigned int sampleIndex = 0; sampleIndex < m_caloCylinderAsymmetricSampleList.size(); ++sampleIndex) {
     auto& sampleName = m_caloCylinderAsymmetricSampleList.at(sampleIndex).first;
-    //We only add TileGap1 and 2 here, because the TileExt0,1,2
-    //will need a special treatment to avoid clashes in Z.
-    if (sampleIndex < 2){
-      addCylindricalTrackingVolumeToCaloNode(caloBarrelCylinderNegativeZNode, sampleName+"NegZ", caloRegionSampleSurfaceMap[caloRegion::CylinderNegativeZ].at({sampleName, getSampleEnum(sampleName)}), volumeCounter, false);
-      volumeCounter++;
-      addCylindricalTrackingVolumeToCaloNode(caloBarrelCylinderPositiveZNode, sampleName+"PosZ", caloRegionSampleSurfaceMap[caloRegion::CylinderPositiveZ].at({sampleName, getSampleEnum(sampleName)}), volumeCounter, false);
-      volumeCounter++;
-    }
-    else{
-      //Tile extended barrel surfaces must be added to top level node directly because they always overlap in R
-      //or Z with other calorimeter surfaces, volumes etc.
-      //Note there is a speed penalty to do it this way.
-      itkCaloNode->addLayer(sampleName+"NegZ" + "_Layer", [&](auto& layer) {
-        layer.setSurfaces(caloRegionSampleSurfaceMap[caloRegion::CylinderNegativeZ].at({sampleName, getSampleEnum(sampleName)}));
-        layer.setEnvelope(Acts::ExtentEnvelope{{
-            .z = {0.1_mm, 0.1_mm},
-            .r = {2_mm, 2_mm},
-        }});
-      });
-      itkCaloNode->addLayer(sampleName+"PosZ" + "_Layer", [&](auto& layer) {
-        layer.setSurfaces(caloRegionSampleSurfaceMap[caloRegion::CylinderPositiveZ].at({sampleName, getSampleEnum(sampleName)}));
-        layer.setEnvelope(Acts::ExtentEnvelope{{
-            .z = {0.1_mm, 0.1_mm},
-            .r = {2_mm, 2_mm},
-        }});
-      });
-    }
+    //The tile extended barrel and gap must be added to top level node directly because they always overlap in R
+    //or Z with other calorimeter surfaces, volumes etc.
+    //Note there is a speed penalty to do it this way.
+    itkCaloNode->addLayer(sampleName+"NegZ" + "_Layer", [&](auto& layer) {
+      layer.setSurfaces(caloRegionSampleSurfaceMap[caloRegion::CylinderNegativeZ].at({sampleName, getSampleEnum(sampleName)}));
+      layer.setEnvelope(Acts::ExtentEnvelope{{
+          .z = {0.1_mm, 0.1_mm},
+          .r = {2_mm, 2_mm},
+      }});
+    });
+    itkCaloNode->addLayer(sampleName+"PosZ" + "_Layer", [&](auto& layer) {
+      layer.setSurfaces(caloRegionSampleSurfaceMap[caloRegion::CylinderPositiveZ].at({sampleName, getSampleEnum(sampleName)}));
+      layer.setEnvelope(Acts::ExtentEnvelope{{
+          .z = {0.1_mm, 0.1_mm},
+          .r = {2_mm, 2_mm},
+      }});
+    });
   }
-  
 
-  CylinderContainerBlueprintNode& caloEndCapDiscNegativeZNode = caloNode->addCylinderContainer("CaloEndCapDiscNegativeZ", AxisDirection::AxisZ);
+  auto caloEndCapNegativeNode = std::make_shared<CylinderContainerBlueprintNode>("CaloNode", AxisDirection::AxisZ);
+  
+  CylinderContainerBlueprintNode& caloEndCapDiscNegativeZNode = caloEndCapNegativeNode->addCylinderContainer("CaloEndCapDiscNegativeZ", AxisDirection::AxisZ);
   caloEndCapDiscNegativeZNode.setAttachmentStrategy(VolumeAttachmentStrategy::Gap);
   // The -z end of this container defines the calorimeter's global minZ, so the
   // enclosing envelope's -z edge coincides with this container's own -z edge to
@@ -156,7 +137,8 @@ std::shared_ptr<BlueprintNode> ActsTrk::CaloBlueprintNodeBuilder::buildBlueprint
   // (+z) side. NOTE: (inner, outer) map to (minZ, maxZ) for an AxisZ stack.
   caloEndCapDiscNegativeZNode.setResizeStrategies(ResizeStrategy::Expand, ResizeStrategy::Gap);
 
-  CylinderContainerBlueprintNode& caloEndCapDiscPositiveZNode = caloNode->addCylinderContainer("CaloEndCapDiscPositiveZ", AxisDirection::AxisZ);
+  auto caloEndCapPositiveNode = std::make_shared<CylinderContainerBlueprintNode>("CaloNode", AxisDirection::AxisZ);
+  CylinderContainerBlueprintNode& caloEndCapDiscPositiveZNode = caloEndCapPositiveNode->addCylinderContainer("CaloEndCapDiscPositiveZ", AxisDirection::AxisZ);
   caloEndCapDiscPositiveZNode.setAttachmentStrategy(VolumeAttachmentStrategy::Gap);
   // Mirror of the negative endcap: the +z (maxZ, outer) end is the global maxZ
   // boundary, so Expand there and keep Gap on the interior (-z) side.
@@ -169,11 +151,13 @@ std::shared_ptr<BlueprintNode> ActsTrk::CaloBlueprintNodeBuilder::buildBlueprint
     addCylindricalTrackingVolumeToCaloNode(caloEndCapDiscPositiveZNode, sampleName+"PosZ", caloRegionSampleSurfaceMap[caloRegion::DiscPositiveZ].at({sampleName, getSampleEnum(sampleName)}), volumeCounter, true);
     volumeCounter++;
   }
-
+  
   ATH_MSG_DEBUG("Have added all Barrel layers to caloBarrelCylinderNode");
 
   // Add calo barrel node to the top level calo node.
   itkCaloNode->addChild(caloNode);
+  itkCaloNode->addChild(caloEndCapNegativeNode);
+  itkCaloNode->addChild(caloEndCapPositiveNode);
 
   //return the top level calo node
   return itkCaloNode;
@@ -373,7 +357,7 @@ void ActsTrk::CaloBlueprintNodeBuilder::generateCylinderSurfaces(caloSampleSurfa
             ATH_MSG_DEBUG("CYLINDER: Create Cylinder: Min and Max LAr B radius are " << minLArBRadius << " " << maxLArBRadius);
             ATH_MSG_DEBUG("CYLINDER: Create Cylinder: Min and Max LAr B z are " << lowZLarB << " " << highZLarB);
 
-            caloSampleSurfaceMap[currentSample].push_back(generateCylinderSurface(maxLArBRadius, minLArBRadius, lowZLarB, highZLarB, asymmetricZ));
+            caloSampleSurfaceMap[currentSample].push_back(generateCylinderSurface(maxLArBRadius, minLArBRadius, lowZLarB, highZLarB));
 
             //reset the dimensions of the cylinder to the initial conditions, in 
            //preparation for the next cylinder
@@ -403,25 +387,23 @@ void ActsTrk::CaloBlueprintNodeBuilder::generateCylinderSurfaces(caloSampleSurfa
       ATH_MSG_DEBUG("CYLINDER: Zero size Vector: Create cylinder for layer " << currentSample.first);   
       ATH_MSG_DEBUG("CYLINDER: Create Cylinder: Min and Max LAr B radius are " << minLArBRadius << " " << maxLArBRadius);
       ATH_MSG_DEBUG("CYLINDER: Create Cylinder: Min and Max LAr B z are " << lowZLarB << " " << highZLarB);
-      caloSampleSurfaceMap[currentSample].push_back(generateCylinderSurface(maxLArBRadius, minLArBRadius, lowZLarB, highZLarB, asymmetricZ));
+      caloSampleSurfaceMap[currentSample].push_back(generateCylinderSurface(maxLArBRadius, minLArBRadius, lowZLarB, highZLarB));
     }
   }   
 }
 
-std::shared_ptr<CylinderSurface> ActsTrk::CaloBlueprintNodeBuilder::generateCylinderSurface(const double& maxLArBRadius, const double& minLArBRadius, const double& lowZLarB, const double& highZLarB, bool asymmetricZ) const{
+std::shared_ptr<CylinderSurface> ActsTrk::CaloBlueprintNodeBuilder::generateCylinderSurface(const double& maxLArBRadius, const double& minLArBRadius, const double& lowZLarB, const double& highZLarB) const{
 
   //Characterise the dimensions of the  cylinder
   double LArBRadius = (maxLArBRadius + minLArBRadius) / 2.0;
   double LArBLength = std::abs(highZLarB - lowZLarB);
 
-  ATH_MSG_DEBUG("Cylinder radius and length are " << LArBRadius << " and " << LArBLength);
+  double zShift = (highZLarB + lowZLarB) / 2.0;
 
-  if (asymmetricZ) {
-    double zShift = (highZLarB + lowZLarB) / 2.0;
-    ATH_MSG_DEBUG("Cylinder is asymmetric in Z, with shift of " << zShift);
-     return Surface::makeShared<CylinderSurface>(Transform3(Translation3(0.0, 0.0, zShift)), LArBRadius, LArBLength/2);
-  }
-  else return Surface::makeShared<CylinderSurface>(Transform3::Identity(), LArBRadius, LArBLength/2);
+  if (highZLarB > 0 && lowZLarB < 0) zShift = highZLarB-zShift;
+
+  ATH_MSG_DEBUG("Cylinder radius and length are " << LArBRadius << " and " << LArBLength << " with shift of " << zShift);
+  return Surface::makeShared<CylinderSurface>(Transform3(Translation3(0.0, 0.0, zShift)), LArBRadius, LArBLength/2);
 
 }
 
