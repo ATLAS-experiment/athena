@@ -18,6 +18,7 @@
 #include "Acts/EventData/SpacePointContainer.hpp"
 #include "Acts/Seeding/BroadTripletSeedFilter.hpp"
 #include "Acts/Seeding/CylindricalSpacePointGrid.hpp"
+#include "Acts/Seeding/SphericalSpacePointGrid.hpp"
 #include "Acts/Seeding/TripletSeeder.hpp"
 
 // Other
@@ -41,12 +42,25 @@ class GridTripletSeedingTool
                           const Eigen::Vector3f& beamSpotPos, float bFieldInZ,
                           ActsTrk::SeedContainer& seedContainer) const override;
 
+  template<typename GridType>
+  StatusCode createSeedsImpl(const EventContext& ctx,
+                          const std::vector<const xAOD::SpacePointContainer*>&
+                              spacePointCollections,
+                          const Eigen::Vector3f& beamSpotPos, float bFieldInZ,
+                          ActsTrk::SeedContainer& seedContainer, GridType::Config gridCfg) const;
+  
+
  protected:
   Gaudi::Property<bool> m_seedQualitySelection{
       this, "doSeedQualitySelection", true,
       "Select seed according to quality criteria"};
 
-  // Cylindrical space point grid properties. Some are also used for the seed
+  //Use spherical grid. Most of the configs are shared with Cylindrical
+  Gaudi::Property<bool> m_sphericalGrid{
+      this, "sphericalGrid", false,
+      "Use spherical grid instead of cylindrical grid for seeding"};
+
+  // Space point grid properties. Some are also used for the seed
   // finder.
   Gaudi::Property<float> m_minPt{this, "minPt", 900. * Acts::UnitConstants::MeV,
                                  "lower pT cutoff for seeds"};
@@ -56,6 +70,12 @@ class GridTripletSeedingTool
                                 "limiting location of measurements"};
   Gaudi::Property<float> m_zMax{this, "zMax", 3000. * Acts::UnitConstants::mm,
                                 "limiting location of measurements"};
+  //Spherical grid specialities
+  Gaudi::Property<float> m_etaMin{this, "etaMin", -3.,
+                                "Eta range minimum (for spherical grid only)"};
+  Gaudi::Property<float> m_etaMax{this, "etaMax", 3.,
+                                "Eta range maximum (for spherical grid only)"};
+  //
   Gaudi::Property<float> m_deltaRMax{
       this, "deltaRMax", 280. * Acts::UnitConstants::mm,
       "maximum distance in r between two measurements within one "
@@ -69,6 +89,11 @@ class GridTripletSeedingTool
       {-3000., -2700., -2500., -1400., -925., -500., -250., 250., 500., 925.,
        1400., 2500., 2700, 3000.},
       "enable non equidistant binning in z"};
+  Gaudi::Property<std::vector<float>> m_etaBinEdges{
+      this,
+      "etaBinEdges",
+      {-3., -1.8, -0.6, 0.6, 1.8, 3.},
+      "enable non equidistant binning in eta (for spherical grid only)"};
   Gaudi::Property<std::vector<float>> m_rBinEdges{
       this,
       "rBinEdges",
@@ -339,6 +364,12 @@ class GridTripletSeedingTool
        {-1, 0},
        {0, 0}},
       "vector containing the map of z bins in the top layers"};
+  
+    Gaudi::Property<int> m_numEtaNeighbors{
+      this, "numPhiNeighbors", 0,
+      "number of eta bin neighbors at each side of the current bin that will "
+      "be used to search for SPs"};
+
   Gaudi::Property<std::vector<std::pair<int, int>>> m_rBinNeighborsTop{
       this,
       "rBinNeighborsTop",
@@ -353,6 +384,8 @@ class GridTripletSeedingTool
       this, "numPhiNeighbors", 1,
       "number of phi bin neighbors at each side of the current bin that will "
       "be used to search for SPs"};
+
+
 
   Gaudi::Property<bool> m_useExperimentCuts{this, "useExperimentCuts", false,
                                             ""};
@@ -379,7 +412,8 @@ class GridTripletSeedingTool
                                       45. * Acts::UnitConstants::mm};
 
  private:
-  Acts::CylindricalSpacePointGrid::Config m_gridCfg;
+  Acts::CylindricalSpacePointGrid::Config m_cylindricalGridCfg;
+  Acts::Experimental::SphericalSpacePointGrid::Config m_sphericalGridCfg;
   Acts::DoubletSeedFinder::Config m_bottomDoubletFinderCfg;
   Acts::DoubletSeedFinder::Config m_topDoubletFinderCfg;
   Acts::TripletSeedFinder::Config m_tripletFinderCfg;
@@ -410,7 +444,32 @@ class GridTripletSeedingTool
       const Acts::Range1D<float>& rMiddleSpRange) const;
 
   SG::ReadHandleKey<xAOD::VertexContainer> m_inputHoughVtxKey{this, "inputHoughVtx", "", "input vertex container"};
+
+
+
 };
+
+template <typename Grid>
+struct SPGridTraits;
+
+template<>
+struct SPGridTraits<Acts::CylindricalSpacePointGrid> {
+
+  static void insert(auto& grid, std::size_t index, float phi, float z, float r) {
+      grid.insert(index, phi, z, r);
+  }
+
+};
+
+template<>
+struct SPGridTraits<Acts::Experimental::SphericalSpacePointGrid> {  
+
+  static void insert(auto& grid, std::size_t index, float phi, float z, float r) {
+      grid.insert(index, phi, z/r, r);
+  }
+
+};
+
 
 }  // namespace ActsTrk
 

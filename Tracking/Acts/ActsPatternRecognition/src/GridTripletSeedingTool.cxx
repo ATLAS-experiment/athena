@@ -224,30 +224,56 @@ StatusCode GridTripletSeedingTool::initialize() {
     return StatusCode::FAILURE;
   }
 
-  m_gridCfg.minPt = m_minPt;
-  m_gridCfg.rMin = 0;
-  m_gridCfg.rMax = m_gridRMax;
-  m_gridCfg.zMin = m_zMin;
-  m_gridCfg.zMax = m_zMax;
-  m_gridCfg.deltaRMax = m_deltaRMax;
-  m_gridCfg.cotThetaMax = m_cotThetaMax;
-  m_gridCfg.impactMax = m_impactMax;
-  m_gridCfg.phiMin = m_gridPhiMin;
-  m_gridCfg.phiMax = m_gridPhiMax;
-  m_gridCfg.phiBinDeflectionCoverage = m_phiBinDeflectionCoverage;
-  m_gridCfg.maxPhiBins = m_maxPhiBins;
-  m_gridCfg.zBinEdges = m_zBinEdges;
-  m_gridCfg.rBinEdges = m_rBinEdges;
-  m_gridCfg.bFieldInZ = 0;  // will be set later
-  m_gridCfg.bottomBinFinder = Acts::GridBinFinder<3ul>(
-      m_numPhiNeighbors.value(), m_zBinNeighborsBottom.value(),
-      m_rBinNeighborsBottom.value());
-  m_gridCfg.topBinFinder = Acts::GridBinFinder<3ul>(m_numPhiNeighbors.value(),
-                                                    m_zBinNeighborsTop.value(),
-                                                    m_rBinNeighborsTop.value());
-  m_gridCfg.navigation[0ul] = {};
-  m_gridCfg.navigation[1ul] = m_zBinsCustomLooping;
-  m_gridCfg.navigation[2ul] = m_rBinsCustomLooping;
+  
+  if (m_sphericalGrid){
+    m_sphericalGridCfg.minPt = m_minPt;
+    m_sphericalGridCfg.rMin = 0;
+    m_sphericalGridCfg.rMax = m_gridRMax;
+    m_sphericalGridCfg.etaMin = m_etaMin;
+    m_sphericalGridCfg.etaMax = m_etaMax;
+    m_sphericalGridCfg.deltaRMax = m_deltaRMax;
+    m_sphericalGridCfg.impactMax = m_impactMax;
+    m_sphericalGridCfg.phiMin = m_gridPhiMin;
+    m_sphericalGridCfg.phiMax = m_gridPhiMax;
+    m_sphericalGridCfg.phiBinDeflectionCoverage = m_phiBinDeflectionCoverage;
+    m_sphericalGridCfg.maxPhiBins = m_maxPhiBins;
+    m_sphericalGridCfg.etaBinEdges = m_etaBinEdges;
+    m_sphericalGridCfg.rBinEdges = m_rBinEdges;
+    m_sphericalGridCfg.bFieldInZ = 0;  // will be set later
+    m_sphericalGridCfg.bottomBinFinder = Acts::GridBinFinder<3ul>(
+        m_numPhiNeighbors.value(), m_numEtaNeighbors.value(),
+        m_rBinNeighborsBottom.value());
+    m_sphericalGridCfg.topBinFinder = Acts::GridBinFinder<3ul>(m_numPhiNeighbors.value(),
+                                                      m_numEtaNeighbors.value(),
+                                                      m_rBinNeighborsTop.value());
+  }
+
+  else {
+    m_cylindricalGridCfg.minPt = m_minPt;
+    m_cylindricalGridCfg.rMin = 0;
+    m_cylindricalGridCfg.rMax = m_gridRMax;
+    m_cylindricalGridCfg.zMin = m_zMin;
+    m_cylindricalGridCfg.zMax = m_zMax;
+    m_cylindricalGridCfg.deltaRMax = m_deltaRMax;
+    m_cylindricalGridCfg.cotThetaMax = m_cotThetaMax;
+    m_cylindricalGridCfg.impactMax = m_impactMax;
+    m_cylindricalGridCfg.phiMin = m_gridPhiMin;
+    m_cylindricalGridCfg.phiMax = m_gridPhiMax;
+    m_cylindricalGridCfg.phiBinDeflectionCoverage = m_phiBinDeflectionCoverage;
+    m_cylindricalGridCfg.maxPhiBins = m_maxPhiBins;
+    m_cylindricalGridCfg.zBinEdges = m_zBinEdges;
+    m_cylindricalGridCfg.rBinEdges = m_rBinEdges;
+    m_cylindricalGridCfg.bFieldInZ = 0;  // will be set later
+    m_cylindricalGridCfg.bottomBinFinder = Acts::GridBinFinder<3ul>(
+        m_numPhiNeighbors.value(), m_zBinNeighborsBottom.value(),
+        m_rBinNeighborsBottom.value());
+    m_cylindricalGridCfg.topBinFinder = Acts::GridBinFinder<3ul>(m_numPhiNeighbors.value(),
+                                                      m_zBinNeighborsTop.value(),
+                                                      m_rBinNeighborsTop.value());
+    m_cylindricalGridCfg.navigation[0ul] = {};
+    m_cylindricalGridCfg.navigation[1ul] = m_zBinsCustomLooping;
+    m_cylindricalGridCfg.navigation[2ul] = m_rBinsCustomLooping;
+  }
 
   m_bottomDoubletFinderCfg.spacePointsSortedByRadius = true;
   m_bottomDoubletFinderCfg.candidateDirection = Acts::Direction::Backward();
@@ -468,18 +494,17 @@ std::pair<float, float> GridTripletSeedingTool::retrieveRadiusRangeForMiddle(
   return {m_rRangeMiddleSP[zBin][0], m_rRangeMiddleSP[zBin][1]};
 }
 
-StatusCode GridTripletSeedingTool::createSeeds(
+template<typename GridType>
+StatusCode GridTripletSeedingTool::createSeedsImpl(
     const EventContext& ctx,
     const std::vector<const xAOD::SpacePointContainer*>& spacePointCollections,
     const Eigen::Vector3f& beamSpotPos, float bFieldInZ,
-    ActsTrk::SeedContainer& seedContainer) const {
+    ActsTrk::SeedContainer& seedContainer, GridType::Config gridCfg) const {
   (void)ctx;
 
-  auto gridCfg = m_gridCfg;
   gridCfg.bFieldInZ = bFieldInZ;
 
-  Acts::CylindricalSpacePointGrid grid(gridCfg,
-                                        logger().cloneWithSuffix("Grid"));
+  GridType grid(gridCfg, logger().cloneWithSuffix("Grid"));
 
   std::size_t totalSpacePoints = 0;
   for (const xAOD::SpacePointContainer* spacePoints : spacePointCollections) {
@@ -513,7 +538,8 @@ StatusCode GridTripletSeedingTool::createSeeds(
         continue;
       }
 
-      grid.insert(selectedXAODSpacePoints.size(), phi, z, r);
+      //This takes care of using translating z -> z/r in the spherical grid insertion
+      SPGridTraits<GridType>::insert(grid, selectedXAODSpacePoints.size(), phi, z, r);
       selectedXAODSpacePoints.push_back(sp);
       selectedSpacePointsR.push_back(r);
       if (m_doubletDPhiCut) {
@@ -745,4 +771,16 @@ StatusCode GridTripletSeedingTool::createSeeds(
   return StatusCode::SUCCESS;
 }
 
+StatusCode GridTripletSeedingTool::createSeeds(
+    const EventContext& ctx,
+    const std::vector<const xAOD::SpacePointContainer*>& spacePointCollections,
+    const Eigen::Vector3f& beamSpotPos, float bFieldInZ,
+    ActsTrk::SeedContainer& seedContainer) const {
+
+      if (m_sphericalGrid) return createSeedsImpl<Acts::Experimental::SphericalSpacePointGrid>(ctx, spacePointCollections, beamSpotPos, bFieldInZ, seedContainer, m_sphericalGridCfg);
+      else                 return createSeedsImpl<Acts::CylindricalSpacePointGrid>(ctx, spacePointCollections, beamSpotPos, bFieldInZ, seedContainer, m_cylindricalGridCfg);
+
+
+
+    }
 }  // namespace ActsTrk
