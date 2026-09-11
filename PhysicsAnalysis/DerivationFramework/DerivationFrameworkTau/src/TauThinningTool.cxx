@@ -89,6 +89,8 @@ StatusCode DerivationFramework::TauThinningTool::doThinning(const EventContext& 
     }
   }   
 
+  static const SG::Accessor< xAOD::TauJet_v3::PFOLinks_t > neutralPFOAcc( "neutralPFOLinks" );
+
   // keep the various tau-related objects for taus passing the selection
   for (const auto* tau : tausToKeep) {
     // tau
@@ -103,11 +105,17 @@ StatusCode DerivationFramework::TauThinningTool::doThinning(const EventContext& 
     }
 
     // neutral PFOs
-    for (size_t i=0; i<tau->nNeutralPFOs(); i++) {
+    auto nPFOs = neutralPFOAcc(*tau);
+    //for (size_t i=0; i<tau->nNeutralPFOs(); i++) {
       // prevent accessing some neutral PFO which might be thinned 
-      try{ tau->neutralPFO(i); } catch (...) { continue;}
-      neutralPFOs.keep(tau->neutralPFO(i)->index());   
-
+      //try{ tau->neutralPFO(i); } catch (...) { continue;}
+      //neutralPFOs.keep(tau->neutralPFO(i)->index());
+    for (size_t i=0; i<nPFOs.size(); i++) {
+      auto pfoLink = nPFOs.at(i);
+      // prevent accessing some neutral PFO which might be thinned
+      if (pfoLink.isValid()) {
+         neutralPFOs.keep(tau->neutralPFO(i)->index()); 
+      }
     }  
 
     // secondary vertex
