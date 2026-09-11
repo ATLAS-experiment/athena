@@ -58,13 +58,13 @@ ByteStreamMetadataTool::beginInputFile(const SG::SourceID&)
     copy.clear();
 
     if(m_inputStore->contains<ByteStreamMetadata>(key)) {
-      ByteStreamMetadata* obj = nullptr;
+      const ByteStreamMetadata* obj = nullptr;
       ATH_CHECK(m_inputStore->retrieve(obj, key));
       copy.push_back(std::make_unique<ByteStreamMetadata>(*obj));
     }
 
     if(m_inputStore->contains<ByteStreamMetadataContainer>(key)) {
-      ByteStreamMetadataContainer* obj = nullptr;
+      const ByteStreamMetadataContainer* obj = nullptr;
       ATH_CHECK(m_inputStore->retrieve(obj, key));
       for(const ByteStreamMetadata* md : *obj)
         copy.push_back(std::make_unique<ByteStreamMetadata>(*md));
