@@ -40,6 +40,7 @@ set( ATLAS_GEANT4_USE_LTO @ATLAS_GEANT4_USE_LTO@ CACHE BOOL
 # Look for optional languages.
 include( CheckLanguage )
 check_language( CUDA )
+check_language( HIP )
 
 # Figure out whether to use QUIET in the following calls.
 set( _quietFlag )
@@ -58,6 +59,9 @@ find_package( LCG @LCG_VERSION_NUMBER@ REQUIRED EXACT ${_quietFlag} )
 # to be imported explicitly here.
 if( CMAKE_CUDA_COMPILER )
    find_package( CUDAToolkit ${_quietFlag} )
+endif()
+if( CMAKE_HIP_COMPILER )
+   find_package( hip ${_quietFlag} )
 endif()
 find_package( Acts ${_quietFlag} )
 if( TARGET Acts::PluginDetray )
