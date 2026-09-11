@@ -106,10 +106,6 @@ StatusCode DerivationFramework::TauThinningTool::doThinning(const EventContext& 
 
     // neutral PFOs
     auto nPFOs = neutralPFOAcc(*tau);
-    //for (size_t i=0; i<tau->nNeutralPFOs(); i++) {
-      // prevent accessing some neutral PFO which might be thinned 
-      //try{ tau->neutralPFO(i); } catch (...) { continue;}
-      //neutralPFOs.keep(tau->neutralPFO(i)->index());
     for (size_t i=0; i<nPFOs.size(); i++) {
       auto pfoLink = nPFOs.at(i);
       // prevent accessing some neutral PFO which might be thinned
