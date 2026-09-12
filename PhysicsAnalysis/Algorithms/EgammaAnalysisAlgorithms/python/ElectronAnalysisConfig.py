@@ -730,9 +730,9 @@ class ElectronWorkingPointEfficiencyConfig (ConfigBlock) :
                                  f'has to be one of: {", ".join(correlationModels)}')
             if config.geometry() >= LHCPeriod.Run3 and self.correlationModelReco != "TOTAL":
                 warnings.warn_explicit(
-                    "Only TOTAL correlation model is currently supported "
+                    f"Only TOTAL correlation model is currently supported "
                     "for reconstruction efficiency correction in Run 3."
-                    "Your choice f"{self.correlationModelReco}" will be "
+                    "Your choice {self.correlationModelReco} will be "
                     "overwritten with TOTAL",
                     ElectronEfficiencyCorrelationWarning,
                     filename='', lineno=0)
