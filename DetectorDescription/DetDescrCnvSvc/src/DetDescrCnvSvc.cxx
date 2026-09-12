@@ -46,6 +46,16 @@ StatusCode DetDescrCnvSvc::initialize() {
     // fill in the Addresses for Transient Detector Store objects
     ATH_MSG_INFO(" filling proxies for detector managers ");
 
+    // Additional CLIDS used as base classes.
+    constexpr CLID PixelID_CLID = 2516;
+    constexpr CLID LArEM_Base_ID_CLID = 166227018;
+    constexpr CLID LArHEC_Base_ID_CLID = 181654777;
+    constexpr CLID LArFCAL_Base_ID_CLID = 225948692;
+    constexpr CLID LArOnlineID_Base_CLID = 28598761;
+    constexpr CLID Tile_Base_ID_CLID = 241188216;
+    constexpr CLID CaloCell_Base_ID_CLID = 257140327;
+    constexpr CLID JGTowerBase_ID_CLID = 131336095;
+
     ATH_CHECK(addToDetStore(117659265, "CaloTTMgr"));
     ATH_CHECK(addToDetStore(4548337, "CaloMgr"));
     ATH_CHECK(addToDetStore(241807251, "CaloSuperCellMgr"));
@@ -61,23 +71,23 @@ StatusCode DetDescrCnvSvc::initialize() {
     if (m_hasTRT)
       ATH_CHECK(addToDetStore(2518, "TRT_ID"));
 
-    ATH_CHECK(addToDetStore(131939624, "PLR_ID"));
+    ATH_CHECK(addToDetStore(131939624, "PLR_ID", {PixelID_CLID}));
     ATH_CHECK(addToDetStore(79264207, "HGTD_ID"));
     ATH_CHECK(addToDetStore(129452393, "SiliconID"));
-    ATH_CHECK(addToDetStore(163583365, "LArEM_ID"));
-    ATH_CHECK(addToDetStore(99488227, "LArEM_SuperCell_ID"));
-    ATH_CHECK(addToDetStore(3870484, "LArHEC_ID"));
-    ATH_CHECK(addToDetStore(254277678, "LArHEC_SuperCell_ID"));
-    ATH_CHECK(addToDetStore(45738051, "LArFCAL_ID"));
-    ATH_CHECK(addToDetStore(12829437, "LArFCAL_SuperCell_ID"));
+    ATH_CHECK(addToDetStore(163583365, "LArEM_ID", {LArEM_Base_ID_CLID}));
+    ATH_CHECK(addToDetStore(99488227, "LArEM_SuperCell_ID", {LArEM_Base_ID_CLID}));
+    ATH_CHECK(addToDetStore(3870484, "LArHEC_ID", {LArHEC_Base_ID_CLID}));
+    ATH_CHECK(addToDetStore(254277678, "LArHEC_SuperCell_ID", {LArHEC_Base_ID_CLID}));
+    ATH_CHECK(addToDetStore(45738051, "LArFCAL_ID", {LArFCAL_Base_ID_CLID}));
+    ATH_CHECK(addToDetStore(12829437, "LArFCAL_SuperCell_ID", {LArFCAL_Base_ID_CLID}));
     ATH_CHECK(addToDetStore(79264204, "LArMiniFCAL_ID"));
-    ATH_CHECK(addToDetStore(158698068, "LArOnlineID"));
+    ATH_CHECK(addToDetStore(158698068, "LArOnlineID", {LArOnlineID_Base_CLID}));
     ATH_CHECK(addToDetStore(38321944, "TTOnlineID"));
-    ATH_CHECK(addToDetStore(115600394, "LArOnline_SuperCellID"));
+    ATH_CHECK(addToDetStore(115600394, "LArOnline_SuperCellID", {LArOnlineID_Base_CLID}));
     ATH_CHECK(addToDetStore(27863673, "LArHVLineID"));
     ATH_CHECK(addToDetStore(80757351, "LArElectrodeID"));
-    ATH_CHECK(addToDetStore(2901, "TileID"));
-    ATH_CHECK(addToDetStore(49557789, "Tile_SuperCell_ID"));
+    ATH_CHECK(addToDetStore(2901, "TileID", {Tile_Base_ID_CLID}));
+    ATH_CHECK(addToDetStore(49557789, "Tile_SuperCell_ID", {Tile_Base_ID_CLID}));
     ATH_CHECK(addToDetStore(2902, "TileHWID"));
     ATH_CHECK(addToDetStore(2903, "TileTBID"));
 
@@ -96,14 +106,14 @@ StatusCode DetDescrCnvSvc::initialize() {
         ATH_CHECK(addToDetStore(4175, "MMIDHELPER"));
 
     ATH_CHECK(addToDetStore(108133391, "CaloLVL1_ID"));
-    ATH_CHECK(addToDetStore(123500438, "CaloCell_ID"));
-    ATH_CHECK(addToDetStore(128365736, "CaloCell_SuperCell_ID"));
+    ATH_CHECK(addToDetStore(123500438, "CaloCell_ID", {CaloCell_Base_ID_CLID}));
+    ATH_CHECK(addToDetStore(128365736, "CaloCell_SuperCell_ID", {CaloCell_Base_ID_CLID}));
     ATH_CHECK(addToDetStore(167756483, "CaloDM_ID"));
     ATH_CHECK(addToDetStore(190591643, "ZdcID"));
 
     // for J/GTower
-    ATH_CHECK(addToDetStore(218674799, "JTower_ID"));
-    ATH_CHECK(addToDetStore(49678914, "GTower_ID"));
+    ATH_CHECK(addToDetStore(218674799, "JTower_ID", {JGTowerBase_ID_CLID}));
+    ATH_CHECK(addToDetStore(49678914, "GTower_ID", {JGTowerBase_ID_CLID}));
 
     return StatusCode::SUCCESS;
 }
@@ -161,7 +171,8 @@ StatusCode DetDescrCnvSvc::convertAddress(const IOpaqueAddress *pAddress,
 //-------------------------------------------------------------------------
 
 StatusCode DetDescrCnvSvc::addToDetStore(const CLID &clid,
-                                         const std::string &name) const {
+                                         const std::string &name,
+                                         const std::vector<CLID>& bases /*= {}*/) const {
     // Based on input parameters, create StoreGate proxies with
     // DetDescrAddresses in the detector store for the different
     // detectors.
@@ -174,6 +185,6 @@ StatusCode DetDescrCnvSvc::addToDetStore(const CLID &clid,
                                          << addr->clID() << " and storage type "
                                          << addr->svcType()
                                          << " to detector store ");
-    ATH_CHECK(m_detStore->recordAddress(std::move(addr)));
+    ATH_CHECK(m_detStore->recordAddress(std::move(addr), true, bases));
     return StatusCode::SUCCESS;
 }
