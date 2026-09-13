@@ -3,13 +3,6 @@
 # Set the name of the package.
 atlas_subdir( ActsGPUEvent )
 
-# Decide whether we can build the package.
-find_package(Acts)
-if (NOT TARGET Acts::PluginDetray)
-   # Without PluginDetray, the traccc code will not be available.
-   return()
-endif()
-
 # External dependencies.
 find_package(traccc)
 find_package(Boost COMPONENTS unit_test_framework)
