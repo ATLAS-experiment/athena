@@ -44,7 +44,6 @@ class chainString:
       if len(parts)>3 and self.vtx==""     : self.vtx  = parts[3]
       if len(parts)>4 and self.element=="" : self.element = parts[4]
       if len(parts)>5 and self.extra==""   : self.extra   = parts[5]
-      if len(parts)>6 and self.tail==""    : self.tail    = parts[6]
             
     stuff = [ self.roi, self.vtx, self.element, self.extra ]
 
