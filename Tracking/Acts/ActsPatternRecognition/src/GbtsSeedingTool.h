@@ -76,7 +76,6 @@ namespace ActsTrk {
     /// @param etaBinWidth filled with the eta bin width the table was made for
     StatusCode readConnections(
       const std::vector<Acts::Experimental::GbtsLayerDescription>& layers,
-      const std::vector<GbtsTechnology>& technologies,
       std::vector<Acts::Experimental::GbtsLayerConnection>& connections,
       float& etaBinWidth) const;
 
@@ -119,6 +118,11 @@ namespace ActsTrk {
     Gaudi::Property<bool> m_pixelConnections {this, "usePixelConnections", true, "keep the pixel to pixel connections of the table"};
     Gaudi::Property<bool> m_stripConnections {this, "useStripConnections", false, "keep the strip to strip connections of the table"};
     Gaudi::Property<std::string> m_lutFile {this, "lutInputFile", "gbts_ml_pixel_barrel_loose.lut", "file to LUT"}; 
+
+    /// Which technologies this instance seeds on. A space point is used only
+    /// when its layer is enabled.
+    Gaudi::Property<bool> m_usePixelLayers {this, "usePixelLayers", true, "seed on the pixel layers"};
+    Gaudi::Property<bool> m_useStripLayers {this, "useStripLayers", false, "seed on the strip layers"};
     
     // GraphBasedTrackSeeder: feature option
     Gaudi::Property<bool> m_LRTmode {this, "LRTmode", false, "whether strip or pixel hits are used"};
