@@ -19,12 +19,26 @@ namespace{
 
 namespace MuonR4{
 
-   std::string printID(const xAOD::MuonSegment& seg) {
+    std::string printID(const xAOD::MuonSegment& seg) {
         using namespace Muon::MuonStationIndex;
         return std::format("{:}{:}{:}{:}", chName(seg.chamberIndex()),
                                                   std::abs(seg.etaIndex()),
                                                   seg.etaIndex() > 0 ? 'A' : 'C',
                                                   seg.sector());
+    }
+    std::string printSegment(const xAOD::MuonSegment& seg) {
+        std::ostringstream oss;
+        oss <<"Segment "<<printID(seg)
+            <<", Dir theta/phi: "<<(seg.direction().theta() /Gaudi::Units::degree)
+            <<" / "<<(seg.direction().phi() /Gaudi::Units::degree)
+            <<", Pos theta/phi: "<<(seg.position().theta() / Gaudi::Units::degree)
+            <<" / "<<(seg.position().phi() / Gaudi::Units::degree)
+            <<", R: "<<Acts::fastHypot(seg.x(), seg.y()) <<", Z: "<<seg.z()
+            <<", chi2: "<<(seg.chiSquared() / std::max(seg.numberDoF(), 1.f))
+            <<", nPrec: "<<static_cast<int>(seg.nPrecisionHits())
+            <<", nPhi: "<<static_cast<int>(seg.nPhiLayers())
+            <<", nTrigEta: "<<static_cast<int>(seg.nTrigEtaLayers());
+        return oss.str();
     }
     const Segment* detailedSegment(const xAOD::MuonSegment& seg) {
         using SegLink_t = ElementLink<SegmentContainer>;

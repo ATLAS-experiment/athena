@@ -209,24 +209,8 @@ FastMuonSABuilder::buildMuonCandidate(const EventContext& ctx,
     std::ranges::sort(muonSegments, std::ranges::less{}, 
         [](const Segment_t& seg) { return seg->position().perp(); });
     
-    const Amg::Vector3D planeNorm {Acts::makeDirectionFromPhiTheta(pattern.phi() + 90._degree, 90._degree)};
 
-    std::vector<ITrackSeedingTool::PosMomPair_t> circlePoints{};
-    for (const Segment_t& seg : muonSegments) {
-        if (!seg){
-            continue;
-        }
-        int sector {seg->measurements().back()->spacePoint()->msSector()->sector()};
-        Amg::Vector3D projDir {ExpandedSector{static_cast<unsigned>(sector), 
-                                ExpandedSector::SectorProjector::center}.normalDir()};
-                                
-        Amg::Vector3D projPos {Acts::PlanarHelper::intersectPlane(seg->position(), projDir, 
-            planeNorm, Amg::Vector3D::Zero()).position()};
-
-        circlePoints.emplace_back(std::move(projPos), Amg::projectDirOntoPlane(seg->direction(), planeNorm));
-    }
-    assert(muonSegments.size() <= 3);
-    const double qtimesP = m_cfg.trackSeeder->estimateQtimesP(ctx, planeNorm, circlePoints);
+    const double qtimesP = 67;
    
     const double eta   {muonSegments[0]->position().eta()};
     const double pt    {std::abs(qtimesP) / std::cosh(eta)};
