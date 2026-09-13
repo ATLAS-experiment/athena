@@ -51,6 +51,7 @@ private:
   void subtractChargedEnergyFromNeutralPFOs(const xAOD::TauJet& tau, xAOD::PFOContainer& pNeutralPFOContainer) const;
 
   Gaudi::Property<double> m_maxDeltaRNeutralCharged {this, "MaxDeltaRNeutralCharged", 0.04, "max DeltaR for neutral-charged cluster association"};
+  Gaudi::Property<float> m_minNeutralPFOPt{this, "MinNeutralPFOPt", 100., "mininum threshold to reset NeutralPFO trasverse momentum"};
 
 };
 

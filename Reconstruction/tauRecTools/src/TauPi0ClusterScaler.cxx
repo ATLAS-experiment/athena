@@ -274,7 +274,7 @@ void TauPi0ClusterScaler::subtractChargedEnergyFromNeutralPFOs(const xAOD::TauJe
       ATH_MSG_DEBUG("Subtracting charged energy: " << chargedEMEnergy );
     } 
     float neutralPt = neutralEnergy / std::cosh(neutralPFO->eta());
-    if (neutralPt <= 100.) neutralPt = 100.0;
+    if (neutralPt <= m_minNeutralPFOPt) neutralPt = m_minNeutralPFOPt;
     
     ATH_MSG_DEBUG("Neutral PFO pt, original: " << neutralPFO->pt() << "  subtracted: " << neutralPt); 
     neutralPFO->setP4(neutralPt , neutralPFO->eta(), neutralPFO->phi(), neutralPFO->m());
