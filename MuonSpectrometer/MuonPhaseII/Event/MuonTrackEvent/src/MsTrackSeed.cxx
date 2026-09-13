@@ -15,31 +15,6 @@
 
 namespace MuonR4 {
 
-    std::ostream& operator<<(std::ostream& ostr, const MuonR4::MsTrackSeed& seed) {
-      ostr<<"MS Track seed @"<<Amg::toString(seed.position())<<", sector: "<<seed.sector() << ", location: "<< Acts::toUnderlying(seed.location())<< std::endl;
-      using namespace Muon::MuonStationIndex;
-      for (const xAOD::MuonSegment* seg : seed.segments()) {
-        ostr<<"  **** "<< printID(*seg)
-            <<", theta: "<<(seg->direction().theta() /Gaudi::Units::degree)
-            <<", phi: "<<(seg->direction().phi() /Gaudi::Units::degree)
-            <<", R: "<<Acts::fastHypot(seg->x(), seg->y())
-            <<", Z: "<<seg->z()<<" "<<(seg->position().theta() / Gaudi::Units::degree)
-            // <<", "<<SegmentFit::toString(SegmentFit::localSegmentPars(*seg))
-            <<", chi2: "<<(seg->chiSquared() / std::max(seg->numberDoF(), 1.f))
-            <<", nPrec: "<<seg->nPrecisionHits()
-            <<", nPhi: "<<seg->nPhiLayers()
-            <<", nTrigEta: "<<seg->nTrigEtaLayers();
-
-            const xAOD::MuonSegment* truthSeg{getMatchedTruthSegment(*seg)};
-            if(truthSeg){
-                  ostr << " truth theta " << (truthSeg->direction().theta() / Gaudi::Units::degree)
-                       << " truth phi " << (truthSeg->direction().phi() / Gaudi::Units::degree);
-            }
-             
-            ostr <<std::endl;
-      }
-      return ostr;
-    }
     std::string MsTrackSeed::toString(const Location loc) {
         switch (loc) {
           using enum Location;
@@ -48,6 +23,21 @@ namespace MuonR4 {
           case Endcap: return "Endcap";
         }
         return "";
+    }
+    std::ostream& operator<<(std::ostream& ostr, const MuonR4::MsTrackSeed& seed) {
+        ostr<<"MS Track seed @"<<Amg::toString(seed.position())<<", sector: "<<seed.sector() << ", location: "<< MsTrackSeed::toString(seed.location())<< std::endl;
+        using namespace Muon::MuonStationIndex;
+        for (const xAOD::MuonSegment* seg : seed.segments()) {
+            ostr<<"  **** "<< printSegment(*seg);
+
+            const xAOD::MuonSegment* truthSeg{getMatchedTruthSegment(*seg)};
+            if(truthSeg){
+                ostr << " truth theta " << (truthSeg->direction().theta() / Gaudi::Units::degree)
+                    << " truth phi " << (truthSeg->direction().phi() / Gaudi::Units::degree);
+            }
+            ostr <<std::endl;
+        }
+        return ostr;
     }
     MsTrackSeed::MsTrackSeed(const Location loc, const ExpandedSector sector): 
           m_loc{loc}, m_sector{sector}{}
