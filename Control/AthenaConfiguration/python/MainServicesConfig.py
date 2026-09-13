@@ -211,7 +211,8 @@ def AthenaMtesEventLoopMgrCfg(flags, mtEs=False, channel=''):
         EventRangeChannel = channel,
         EventPrintoutInterval = flags.Exec.EventPrintoutInterval)
 
-    cfg.setAppProperty('EventLoop', elmgr.name)
+    if mtEs:
+        cfg.setAppProperty('EventLoop', elmgr.name)
 
     if flags.Input.OverrideRunNumber:
         from AthenaKernel.EventIdOverrideConfig import EvtIdModifierSvcCfg
