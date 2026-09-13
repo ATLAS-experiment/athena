@@ -57,7 +57,7 @@ if [ "$doClusters" == "1" ]; then
   Reco_tf.py --CA \
     --conditionsTag "default:${conditionsTag}" \
     --maxEvents ${nEvents} \
-    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
+    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.athenaLegacyTrackingFlags' \
     --postInclude 'InDetConfig.InDetPrepRawDataFormationConfig.ITkInDetToXAODClusterConversionCfg,InDetConfig.SiSpacePointFormationConfig.InDetToXAODSpacePointConversionCfg,ActsConfig.ActsPostIncludes.PersistifyActsEDMCfg' \
     --preExec 'flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True;' \
     --steering 'doRAWtoALL' \
@@ -68,7 +68,7 @@ else
   Reco_tf.py --CA \
     --conditionsTag "default:${conditionsTag}" \
     --maxEvents ${nEvents} \
-    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
+    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.athenaLegacyTrackingFlags' \
     --postInclude 'ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
     --preExec 'flags.Tracking.doPixelDigitalClustering=True' \
     --steering 'doRAWtoALL' \
