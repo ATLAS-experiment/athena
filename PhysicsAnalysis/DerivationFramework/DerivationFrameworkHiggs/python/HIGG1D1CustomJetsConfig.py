@@ -99,7 +99,7 @@ def HIGG1D1CustomJetsCfg(ConfigFlags):
     
     
     stdConstitDic["GPFlowCustomVtx"] = JetInputConstitSeq("GPFlowCustomVtx", xAODType.FlowElement,["CorrectPFOCustomVtx", "CHSCustomVtx"] , 'GlobalParticleFlowObjects', 'CHSGCustomVtxParticleFlowObjects',
-                        label='EMPFlow')
+                        label='EMPFlowCustomVtx')
 
     stdContitModifDic["CorrectPFOCustomVtx"] = JetConstitModifier("CorrectPFOCustomVtx", "CorrectPFOTool",
                                                                   prereqs=[inputsFromContext("Vertices")],
@@ -117,7 +117,6 @@ def HIGG1D1CustomJetsCfg(ConfigFlags):
 
 
     AntiKt4EMPFlowCustomVtx = JetDefinition("AntiKt",0.4,stdConstitDic.GPFlowCustomVtx,
-                                        infix = "CustomVtx",
                                         context = jetContextName,
                                         ghostdefs = ghostCustomVtx,
                                         modifiers = modsCustomVtx+("JetPtAssociation","QGTaggingCustomVtx","BoostedQGTaggingCustomVtx","fJVTCustomVtx","NNJVTCustomVtx","CaloEnergiesClus","JetPileupLabel"),

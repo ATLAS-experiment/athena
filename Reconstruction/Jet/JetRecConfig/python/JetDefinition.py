@@ -79,6 +79,9 @@ class JetDefinition(object):
                  prefix = "",         # allows to tune the full JetContainer name
                  suffix = "",         # allows to tune the full JetContainer name
                  infix = "",         # allows to tune the full JetContainer name
+                 # As a rough convention, the 'infix' should not be used to distinguish
+                 # different jet constituents as input. Rather, these variations should
+                 # be described with different 'label' values in the JetInput definition
                  context = "default", # describe a context for which this definition will be used. See StandardJetContext
                  VRMinR = -1.0, # Minimum radius for VR jet finding
                  VRMassSc = -1.0, # Mass scale for VR jet finding, in MeV
