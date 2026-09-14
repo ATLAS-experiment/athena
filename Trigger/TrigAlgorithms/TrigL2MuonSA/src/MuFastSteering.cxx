@@ -697,11 +697,10 @@ StatusCode MuFastSteering::findMuonSignature(const std::vector<const TrigRoiDesc
 	      ATH_MSG_DEBUG("The size of the TrigCompositeContainer is: " << outputMuonCal->size() );
 	    }else{
 	      ATH_MSG_ERROR("Trying to fill nullptr container.");
+	      delete tc;
 	      return StatusCode::FAILURE;
 	    }
-	    
             tc->setDetail("muCalibDS", localBuffer );
-	      
 	}
         }
 
