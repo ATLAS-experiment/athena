@@ -42,7 +42,6 @@
 #include "Acts/Geometry/PassiveLayerBuilder.hpp"
 #include <ActsPlugins/Json/JsonMaterialDecorator.hpp>
 #include <ActsPlugins/Json/MaterialMapJsonConverter.hpp>
-#ifdef ACTSGEOMETRY_HAVE_DETRAY
 #include <detray/geometry/surface.hpp>
 #include <detray/geometry/tracking_volume.hpp>
 #include <detray/utils/consistency_checker.hpp>
@@ -51,7 +50,6 @@
 #include <set>
 #include <utility>
 #include <vector>
-#endif
 #include <Acts/Surfaces/PlanarBounds.hpp>
 #include <Acts/Surfaces/AnnulusBounds.hpp>
 #include <Acts/Surfaces/DiscSurface.hpp>
@@ -259,13 +257,7 @@ StatusCode TrackingGeometrySvc::initialize() {
     }
 
     if (m_buildDetrayGeometry) {
-#ifdef ACTSGEOMETRY_HAVE_DETRAY
       ATH_CHECK(buildDetrayGeometry());
-#else
-      ATH_MSG_FATAL("BuildDetrayGeometry was requested, but this build of ACTS "
-                    "does not include the Detray plugin (Acts::PluginDetray)");
-      return StatusCode::FAILURE;
-#endif
     }
 
     return StatusCode::SUCCESS;
@@ -574,13 +566,7 @@ StatusCode TrackingGeometrySvc::initialize() {
   }
 
   if (m_buildDetrayGeometry) {
-#ifdef ACTSGEOMETRY_HAVE_DETRAY
     ATH_CHECK(buildDetrayGeometry());
-#else
-    ATH_MSG_FATAL("BuildDetrayGeometry was requested, but this build of ACTS "
-                  "does not include the Detray plugin (Acts::PluginDetray)");
-    return StatusCode::FAILURE;
-#endif
   }
 
   ATH_MSG_INFO("Acts TrackingGeometry construction completed");
@@ -1299,7 +1285,6 @@ const Acts::TrackingVolume*
       return retVol;
 }
 
-#ifdef ACTSGEOMETRY_HAVE_DETRAY
 StatusCode TrackingGeometrySvc::finalize() {
   // Release the Detray geometry while the memory resource tool it allocated
   // from is still around, which is not guaranteed any more once the service
@@ -1470,7 +1455,6 @@ void TrackingGeometrySvc::reportDetrayPortalLinks(
     }
   }
 }
-#endif
 
 std::unique_ptr<ActsTrk::DetectorElementToActsGeometryIdMap>
     TrackingGeometrySvc::createDetectorElementToGeoIdMap() const {

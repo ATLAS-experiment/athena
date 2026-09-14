@@ -4,21 +4,12 @@
 atlas_subdir( ActsGeometry )
 
 # External dependencies:
-find_package( Acts COMPONENTS Core PluginJson PluginGeoModel PluginRoot OPTIONAL_COMPONENTS PluginDetray)
+find_package( Acts COMPONENTS Core PluginJson PluginGeoModel PluginRoot PluginDetray)
 find_package( Boost )
 find_package( CLHEP )
 find_package( GeoModel COMPONENTS GeoModelKernel )
 find_package( ROOT COMPONENTS Core Tree RIO )
 find_package( TBB )
-
-# The conversion of the Gen3 Acts::TrackingGeometry into a Detray geometry is
-# only available if ACTS was built with the Detray plugin.
-set( _actsGeometryDetrayDefinitions )
-set( _actsGeometryDetrayLibraries )
-if( TARGET Acts::PluginDetray )
-  list( APPEND _actsGeometryDetrayDefinitions ACTSGEOMETRY_HAVE_DETRAY )
-  list( APPEND _actsGeometryDetrayLibraries Acts::PluginDetray AthDeviceInterfacesLib )
-endif()
 
 # Component(s) in the package:
 atlas_add_library( ActsGeometryLib
@@ -75,9 +66,9 @@ atlas_add_component( ActsGeometry
                      src/ActsVolumeIdToDetectorElementCollectionMappingAlg.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
-                     DEFINITIONS ${_actsGeometryDetrayDefinitions}
                      LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} ${GEOMODEL_LIBRARIES} ${ROOT_LIBRARIES}
-                     ${_actsGeometryDetrayLibraries}
+                     Acts::PluginDetray
+                     AthDeviceInterfacesLib
                      ActsGeometryInterfacesLib
                      ActsGeometryLib
                      ActsInteropLib

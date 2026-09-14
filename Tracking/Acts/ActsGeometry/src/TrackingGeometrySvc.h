@@ -20,14 +20,12 @@
 // ACTS
 #include "Acts/Geometry/CylinderVolumeBuilder.hpp"
 
-#ifdef ACTSGEOMETRY_HAVE_DETRAY
 #include "AthDeviceInterfaces/IMemoryResourceTool.h"
 #include "GaudiKernel/ToolHandle.h"
 
 #include <ActsPlugins/Detray/DetrayGeometryConverter.hpp>
 #include <detray/core/detector.hpp>
 #include <detray/detectors/itk_metadata.hpp>
-#endif
 
 // STL
 #include <map>
@@ -63,7 +61,6 @@ class BlueprintNode;
 
 namespace ActsTrk{
 
-#ifdef ACTSGEOMETRY_HAVE_DETRAY
 /// @brief Detray metadata used when converting the Acts::TrackingGeometry into
 ///        a Detray geometry. detray::itk_metadata is generated for the ATLAS ITk
 ///        (see DETRAY_GENERATE_METADATA in the ACTS build) and carries only the
@@ -74,15 +71,12 @@ namespace ActsTrk{
 ///        absent, so the ITk metadata can be used directly.
 using DetrayMetadata = detray::itk_metadata<detray::array<float>>;
 using DetrayDetector = detray::detector<DetrayMetadata>;
-#endif
 
 class TrackingGeometrySvc : public extends<AthService, ActsTrk::ITrackingGeometrySvc> {
 public:
 
   StatusCode initialize() override;
-#ifdef ACTSGEOMETRY_HAVE_DETRAY
   StatusCode finalize() override;
-#endif
 
   TrackingGeometrySvc( const std::string& name, ISvcLocator* pSvcLocator );
     /** @copydoc ActsTrk::ITrackingGeometrySvc::trackingGeometry */
@@ -97,22 +91,17 @@ public:
   /** @copydoc ActsTrk::ITrackingGeometrySvc::surfaceIdMap */
   virtual const ActsTrk::DetectorElementToActsGeometryIdMap* surfaceIdMap() const override;
 
-#ifdef ACTSGEOMETRY_HAVE_DETRAY
   /** @brief Returns the Detray geometry converted from the Acts::TrackingGeometry,
              or nullptr if none was built. The service stays the owner: the
              geometry is released in finalize(), while the memory resource it
              was allocated from is still around.
-             Only populated when the BuildDetrayGeometry property is enabled.
-             Only available in builds where ACTS was compiled with the Detray
-             plugin (Acts::PluginDetray). */
+             Only populated when the BuildDetrayGeometry property is enabled. */
   const DetrayDetector* detrayGeometry() const { return m_detrayGeometry.get(); }
-#endif
 
 private:
   /** @brief Creates and popules the DetectorElement -> Acts::Surface geo identifier map from the geometry service */
   std::unique_ptr<ActsTrk::DetectorElementToActsGeometryIdMap> createDetectorElementToGeoIdMap() const;
 
-#ifdef ACTSGEOMETRY_HAVE_DETRAY
   /** @brief Converts the built Acts::TrackingGeometry into a Detray geometry and stores it in m_detrayGeometry */
   StatusCode buildDetrayGeometry();
 
@@ -123,7 +112,6 @@ private:
              makes the navigation a one-way street. */
   void reportDetrayPortalLinks(const DetrayDetector& detector,
                                const detray::name_map& names) const;
-#endif
 
 
   ActsLayerBuilder::Config
@@ -213,14 +201,12 @@ private:
   Gaudi::Property<bool> m_useBlueprint{this, "UseBlueprint", false, "Use the new Blueprint API for geometry construction"};
 
   Gaudi::Property<bool> m_buildDetrayGeometry{this, "BuildDetrayGeometry", false,
-      "Convert the constructed Acts::TrackingGeometry into a Detray geometry. "
-      "Requires ACTS to have been built with the Detray plugin (Acts::PluginDetray)."};
+      "Convert the constructed Acts::TrackingGeometry into a Detray geometry."};
 
   Gaudi::Property<bool> m_checkDetrayGeometry{this, "CheckDetrayGeometry", true,
       "Run the Detray consistency check on the converted geometry. "
       "Only used when BuildDetrayGeometry is enabled."};
 
-#ifdef ACTSGEOMETRY_HAVE_DETRAY
   /// Tool providing the memory resource that the Detray geometry is allocated
   /// from. The detector keeps referring to that resource for its deallocations,
   /// so the tool has to outlive m_detrayGeometry. Only used, and only required
@@ -229,7 +215,6 @@ private:
       "Host memory resource tool used for the Detray geometry allocations. The "
       "conversion runs entirely on the host, so the resource has to be host "
       "accessible: a plain host or a managed/shared one, not a device one."};
-#endif
   
   Gaudi::Property<std::string> m_blueprintGraphviz{this, "BlueprintGraphviz", 
                                                    "", "Write the blueprint graph to a file. No file will be written if empty"};
@@ -245,9 +230,7 @@ private:
   
   std::unique_ptr<const ActsTrk::DetectorElementToActsGeometryIdMap> m_detIdMap{};
 
-#ifdef ACTSGEOMETRY_HAVE_DETRAY
   std::shared_ptr<const DetrayDetector> m_detrayGeometry{nullptr};
-#endif
 };
 
 }
