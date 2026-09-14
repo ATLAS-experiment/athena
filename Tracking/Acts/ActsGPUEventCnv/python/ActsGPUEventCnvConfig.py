@@ -118,7 +118,7 @@ def TracccTrackConverterAlgCfg(flags,
     kwargs.setdefault("HostMR", acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags)))
     kwargs.setdefault("CopyProviderTool", acc.popToolsAndMerge(CopyToolCfg(flags)))
     kwargs.setdefault("InputTracks", "TracccMeasurements")
-    kwargs.setdefault("OutputTracks", "ITkTracccSeeds")
+    kwargs.setdefault("OutputTracks", "ITkTracccTracks")
     acc.addEventAlgo(
         CompFactory.ActsTrk.TracccTrackConverterAlg(name, **kwargs))
     return acc 
