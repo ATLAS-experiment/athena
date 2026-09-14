@@ -87,11 +87,9 @@ StatusCode
 
       // Retrieve the input container:
       for (const std::string& key : keys) {
-        std::list<SG::ObjectWithVersion<xAOD::EventFormat> > allVersions;
-        if (!m_inputMetaStore->retrieveAllVersions(allVersions, key)
-                 .isSuccess()) {
-          ATH_MSG_DEBUG("Failed to retrieve \""
-                        << key << "\" from InputMetaDataStore");
+        const xAOD::EventFormat* input = nullptr;
+        if (!m_inputMetaStore->retrieve(input, key).isSuccess()) {
+          ATH_MSG_DEBUG("Failed to retrieve \"" << key << "\" from InputMetaDataStore");
           continue;  // try next key
         }
 
@@ -107,14 +105,11 @@ StatusCode
           }
         }
 
-        ATH_MSG_VERBOSE("Merging all versions of " << key);
-        for (auto& version : allVersions) {
-          const auto* input = version.dataObject.cptr();
-          // Merge the new object into the output one:
-          for (const auto& pair : *input) {
-            if (!output->exists(pair.second.hash())) {
-              output->add(pair.second);
-            }
+        ATH_MSG_VERBOSE("Merging of " << key);
+        // Merge the new object into the output one:
+        for (const auto& pair : *input) {
+          if (!output->exists(pair.second.hash())) {
+            output->add(pair.second);
           }
         }
       }

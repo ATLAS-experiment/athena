@@ -578,40 +578,32 @@ StatusCode IOVDbMetaDataTool::processInputFileMetaData(const std::string& fileNa
     IOVMetaDataContainer* contMaster = getMetaDataContainer(cont->folderName()
 							    , cont->folderDescription());
 
-    // We assume that the folder is the same for all versions, and
-    // now we loop over versions for the payloads
-    std::list<SG::ObjectWithVersion<IOVMetaDataContainer> > allVersions;
-    sc = m_inputStore->retrieveAllVersions(allVersions, cont.key());
+    const IOVMetaDataContainer* obj = nullptr;
+    sc = m_inputStore->retrieve(obj, cont.key());
     if (!sc.isSuccess()) {
-      ATH_MSG_ERROR("Could not retrieve all versions for " << cont.key());
+      ATH_MSG_ERROR("Could not retrieve " << cont.key());
       return sc;
     }
-
-    for (SG::ObjectWithVersion<IOVMetaDataContainer>& obj : allVersions) {
-      const IOVPayloadContainer*  payload = obj.dataObject->payloadContainer();
-
-      ATH_MSG_DEBUG("processInputFileMetaData: New container: payload size " << payload->size() << " version key " << obj.versionedKey);
-
-      // detailed printout before merge
-      if (msgLvl(MSG::VERBOSE)) {
-	const IOVPayloadContainer*  payloadMaster = contMaster->payloadContainer();
-	ATH_MSG_VERBOSE("Before merge, payload minRange for folder " << cont->folderName());
-	if (payloadMaster && payloadMaster->size()) {
-	  // Loop over AttrColls and print out minRange
-	  IOVPayloadContainer::const_iterator itColl    = payloadMaster->begin();
-	  IOVPayloadContainer::const_iterator itCollEnd = payloadMaster->end();
-	  unsigned int iPayload = 0;
-	  for (; itColl != itCollEnd; ++itColl, ++iPayload) {
-	    ATH_MSG_VERBOSE(iPayload << " " << (*itColl)->minRange() << " " 
-			    << (*itColl)->size());
-	  }
-	}
-	else { 
-	  ATH_MSG_VERBOSE("  no payloads yet!"); 
-	}
+    const IOVPayloadContainer*  payload = obj->payloadContainer();
+    ATH_MSG_DEBUG("processInputFileMetaData: New container: payload size " << payload->size() << " key " << cont.key());
+    // detailed printout before merge
+    if (msgLvl(MSG::VERBOSE)) {
+      const IOVPayloadContainer*  payloadMaster = contMaster->payloadContainer();
+      ATH_MSG_VERBOSE("Before merge, payload minRange for folder " << cont->folderName());
+      if (payloadMaster && payloadMaster->size()) {
+        // Loop over AttrColls and print out minRange
+        IOVPayloadContainer::const_iterator itColl    = payloadMaster->begin();
+        IOVPayloadContainer::const_iterator itCollEnd = payloadMaster->end();
+        unsigned int iPayload = 0;
+        for (; itColl != itCollEnd; ++itColl, ++iPayload) {
+          ATH_MSG_VERBOSE(iPayload << " " << (*itColl)->minRange() << " " << (*itColl)->size());
+        }
+      }
+      else {
+        ATH_MSG_VERBOSE("  no payloads yet!");
       }
     }
-        
+
     // Detailed printout
     if (msgLvl(MSG::DEBUG)) {
       ATH_MSG_DEBUG("processInputFileMetaData: Current payload before merge " << contMaster->folderName());
@@ -625,38 +617,34 @@ StatusCode IOVDbMetaDataTool::processInputFileMetaData(const std::string& fileNa
     //
     // Loop over CondAttrListCollections and do merge
     //
-    for (SG::ObjectWithVersion<IOVMetaDataContainer>& obj : allVersions) {
-      const IOVPayloadContainer*  payload = obj.dataObject->payloadContainer();
       IOVPayloadContainer::const_iterator itColl    = payload->begin();
       IOVPayloadContainer::const_iterator itCollEnd = payload->end();
       for (; itColl != itCollEnd; ++itColl) {
 
-	// Make a copy of the collection and merge it into
-	// master container in meta data store 
-	CondAttrListCollection* coll = new CondAttrListCollection(**itColl);
-	// Override run number if requested
-	if (m_overrideRunNumber || m_overrideMinMaxRunNumber) {
+      // Make a copy of the collection and merge it into
+      // master container in meta data store
+      CondAttrListCollection* coll = new CondAttrListCollection(**itColl);
+      // Override run number if requested
+      if (m_overrideRunNumber || m_overrideMinMaxRunNumber) {
           ATH_CHECK( overrideIOV(coll) );
-        }
+      }
 
-	// first check if we need to modify the incoming payload
-	if (!modifyPayload (contMaster->folderName(), coll).isSuccess()) {
-          ATH_MSG_ERROR("processInputFileMetaData: Could not modify the payload for folder " << contMaster->folderName());
-          return StatusCode::FAILURE;
-        }
+      // first check if we need to modify the incoming payload
+      if (!modifyPayload (contMaster->folderName(), coll).isSuccess()) {
+        ATH_MSG_ERROR("processInputFileMetaData: Could not modify the payload for folder " << contMaster->folderName());
+        return StatusCode::FAILURE;
+      }
 
-	ATH_MSG_VERBOSE("processInputFileMetaData: merge minRange: " << coll->minRange());
-	if (!contMaster->merge(coll)) {
-	  // Did not merge it in - was a duplicate, so we need to delete it 
-	  delete coll;
-	  ++ndupColls;
-	  ATH_MSG_VERBOSE(" => not merged ");
-	}
-	else {
-	  ++ncolls;
-	  ATH_MSG_VERBOSE(" => merged ");
-	}
-
+      ATH_MSG_VERBOSE("processInputFileMetaData: merge minRange: " << coll->minRange());
+      if (!contMaster->merge(coll)) {
+        // Did not merge it in - was a duplicate, so we need to delete it
+        delete coll;
+        ++ndupColls;
+        ATH_MSG_VERBOSE(" => not merged ");
+      }
+      else {
+        ++ncolls;
+        ATH_MSG_VERBOSE(" => merged ");
       }
       ATH_MSG_DEBUG("processInputFileMetaData: Merged together containers for folder " << cont->folderName() << " ncoll/ndup " 
 		    << ncolls << " " << ndupColls);

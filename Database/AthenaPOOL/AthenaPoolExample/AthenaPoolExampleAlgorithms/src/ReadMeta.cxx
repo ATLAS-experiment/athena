@@ -55,34 +55,34 @@ StatusCode ReadMeta::beginInputFile(const SG::SourceID&)
 {
    ATH_MSG_DEBUG("saw BeginInputFile incident.");
    if (m_pInputStore->contains<ExampleHitContainer>("PedestalWriteData")) {
-      std::list<SG::ObjectWithVersion<ExampleHitContainer> > allVersions;
-      ATH_CHECK( m_pInputStore->retrieveAllVersions(allVersions, "PedestalWriteData") );
-      //const ExampleHitContainer* ep;
+      const ExampleHitContainer* ep = nullptr;
       ExampleHitContainer* ep_out = nullptr;
-      for (SG::ObjectWithVersion<ExampleHitContainer>& obj : allVersions) {
-         const ExampleHitContainer* ep = obj.dataObject.cptr();
-         if (!m_pMetaDataStore->contains<ExampleHitContainer>("PedestalWriteData")) {
-            auto ep_out_unique = std::make_unique<ExampleHitContainer>();
-            const ExampleHit* entry = *ep->begin();
-            auto entry_out = std::make_unique<ExampleHit>();
-            entry_out->setX(entry->getX());
-            entry_out->setY(entry->getY());
-            entry_out->setZ(entry->getZ());
-            entry_out->setDetector(entry->getDetector());
-            ep_out_unique->push_back(std::move(entry_out));
-            ep_out = ep_out_unique.get();
-            ATH_CHECK( m_pMetaDataStore->record(std::move(ep_out_unique), "PedestalWriteData") );
-         } else {
-            ATH_CHECK( m_pMetaDataStore->retrieve(ep_out, "PedestalWriteData") );
-            const ExampleHit* entry = *ep->begin();
-            ExampleHit* entry_out = *ep_out->begin();
-            int weight = entry->getDetector().size() - 2;
-            int weight_out = entry_out->getDetector().size() - 2;
-            entry_out->setX((entry->getX() * weight + entry_out->getX() * weight_out) / (weight + weight_out));
-            entry_out->setY((entry->getY() * weight + entry_out->getY() * weight_out) / (weight + weight_out));
-            entry_out->setZ((entry->getZ() * weight + entry_out->getZ() * weight_out) / (weight + weight_out));
-            entry_out->setDetector(entry->getDetector().substr(0, entry->getDetector().size() - 1) + entry_out->getDetector().substr(1));
-         }
+      ATH_CHECK( m_pInputStore->retrieve(ep, "PedestalWriteData") );
+      if (ep == nullptr) {
+         ATH_MSG_ERROR("Could not get PedestalWriteData");
+         return(StatusCode::FAILURE);
+      }
+      if (!m_pMetaDataStore->contains<ExampleHitContainer>("PedestalWriteData")) {
+         auto ep_out_unique = std::make_unique<ExampleHitContainer>();
+         const ExampleHit* entry = *ep->begin();
+         auto entry_out = std::make_unique<ExampleHit>();
+         entry_out->setX(entry->getX());
+         entry_out->setY(entry->getY());
+         entry_out->setZ(entry->getZ());
+         entry_out->setDetector(entry->getDetector());
+         ep_out_unique->push_back(std::move(entry_out));
+         ep_out = ep_out_unique.get();
+         ATH_CHECK( m_pMetaDataStore->record(std::move(ep_out_unique), "PedestalWriteData") );
+      } else {
+         ATH_CHECK( m_pMetaDataStore->retrieve(ep_out, "PedestalWriteData") );
+         const ExampleHit* entry = *ep->begin();
+         ExampleHit* entry_out = *ep_out->begin();
+         int weight = entry->getDetector().size() - 2;
+         int weight_out = entry_out->getDetector().size() - 2;
+         entry_out->setX((entry->getX() * weight + entry_out->getX() * weight_out) / (weight + weight_out));
+         entry_out->setY((entry->getY() * weight + entry_out->getY() * weight_out) / (weight + weight_out));
+         entry_out->setZ((entry->getZ() * weight + entry_out->getZ() * weight_out) / (weight + weight_out));
+         entry_out->setDetector(entry->getDetector().substr(0, entry->getDetector().size() - 1) + entry_out->getDetector().substr(1));
       }
       if (ep_out != nullptr) {
          for (const ExampleHit* obj : *ep_out) {

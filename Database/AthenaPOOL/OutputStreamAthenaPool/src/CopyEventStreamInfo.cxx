@@ -52,33 +52,31 @@ StatusCode CopyEventStreamInfo::beginInputFile(const SG::SourceID&)
          ATH_MSG_VERBOSE( "Ignore versioned container: " << key );
          continue;
       }
-      std::list<SG::ObjectWithVersion<EventStreamInfo> > allVersions;
-      ATH_CHECK( m_inputMetaDataStore->retrieveAllVersions(allVersions, key) );
+
+      const EventStreamInfo* evtStrInfo_in = 0;
+      ATH_CHECK( m_inputMetaDataStore->retrieve(evtStrInfo_in, key) );
 
       EventStreamInfo* evtStrInfo_out = 0;
-      for (SG::ObjectWithVersion<EventStreamInfo>& obj : allVersions) {
-         const EventStreamInfo* evtStrInfo_in = obj.dataObject.cptr();
-         evtStrInfo_out = m_metaDataSvc->tryRetrieve<EventStreamInfo>(key);
-         if( !evtStrInfo_out ) {
-            auto esinfo_up = std::make_unique<EventStreamInfo>(*evtStrInfo_in);
-            ATH_CHECK( m_metaDataSvc->record( std::move(esinfo_up), key ) );
-         } else {
-            evtStrInfo_out->addEvent(evtStrInfo_in->getNumberOfEvents());
-            for (const auto& elem : evtStrInfo_in->getRunNumbers()) {
-               evtStrInfo_out->insertRunNumber(elem);
-            }
-            for (const auto& elem : evtStrInfo_in->getLumiBlockNumbers()) {
-               evtStrInfo_out->insertLumiBlockNumber(elem);
-            }
-            for (const auto& elem : evtStrInfo_in->getProcessingTags()) {
-               evtStrInfo_out->insertProcessingTag(elem);
-            }
-            for (const auto& [classId, key] : evtStrInfo_in->getItemList()) {
-               evtStrInfo_out->insertItemList(classId, key);
-            }
-            for (const auto& elem : evtStrInfo_in->getEventTypes()) {
-               evtStrInfo_out->insertEventType(elem);
-            }
+      evtStrInfo_out = m_metaDataSvc->tryRetrieve<EventStreamInfo>(key);
+      if( !evtStrInfo_out ) {
+         auto esinfo_up = std::make_unique<EventStreamInfo>(*evtStrInfo_in);
+         ATH_CHECK( m_metaDataSvc->record( std::move(esinfo_up), key ) );
+      } else {
+         evtStrInfo_out->addEvent(evtStrInfo_in->getNumberOfEvents());
+         for (const auto& elem : evtStrInfo_in->getRunNumbers()) {
+            evtStrInfo_out->insertRunNumber(elem);
+         }
+         for (const auto& elem : evtStrInfo_in->getLumiBlockNumbers()) {
+            evtStrInfo_out->insertLumiBlockNumber(elem);
+         }
+         for (const auto& elem : evtStrInfo_in->getProcessingTags()) {
+            evtStrInfo_out->insertProcessingTag(elem);
+         }
+         for (const auto& [classId, key] : evtStrInfo_in->getItemList()) {
+            evtStrInfo_out->insertItemList(classId, key);
+         }
+         for (const auto& elem : evtStrInfo_in->getEventTypes()) {
+            evtStrInfo_out->insertEventType(elem);
          }
       }
    }
