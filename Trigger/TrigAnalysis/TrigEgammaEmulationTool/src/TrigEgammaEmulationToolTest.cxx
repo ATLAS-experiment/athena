@@ -279,7 +279,7 @@ TrigEgammaEmulationToolTest::TrigInfo TrigEgammaEmulationToolTest::getInfo( cons
 
 
 
-    return TrigEgammaEmulationToolTest::TrigInfo{trigger,type,et,etcut,idperf,gsf,lrt};
+    return TrigEgammaEmulationToolTest::TrigInfo{trigger,std::move(type),et,etcut,idperf,gsf,lrt};
 }
 
 //**********************************************************************
