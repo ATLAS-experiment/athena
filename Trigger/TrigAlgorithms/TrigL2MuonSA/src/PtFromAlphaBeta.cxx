@@ -116,6 +116,7 @@ StatusCode TrigL2MuonSA::PtFromAlphaBeta::setPt(TrigL2MuonSA::TrackPattern& trac
     const bool validrange = (20<=etabin && etabin<=27) || (etabin==20 && std::abs(side-charge)!=1);//side-charge==0 <=> Qeta==1
     const bool validchamber = !m_avoid_misaligned_cscs || (16!=trackPattern.hashID_CSC && 17!=trackPattern.hashID_CSC);
     if( etabin !=23 && etabin!=24 &&  validrange && validchamber){
+      //coverity[DIVIDE_BY_ZERO:FALSE]
       if(std::abs(trackPattern.ptEndcapBeta)<ZERO_LIMIT && std::abs(cscPt)>ZERO_LIMIT 
 	 &&  std::abs((cscPt - mdtPt) / mdtPt)<ALPHA_TO_CSC_RATIO && std::abs(1./cscPt-1./mdtPt)<ALPHA_TO_CSC_RATIO_PT ){
 	trackPattern.pt = std::abs(cscPt);
