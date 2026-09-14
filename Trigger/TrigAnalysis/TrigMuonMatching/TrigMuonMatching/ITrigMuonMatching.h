@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGMUONEFFICIENCY_IMUONEFFICIENCYTOOL_H
@@ -9,6 +9,8 @@
 
 #include "xAODMuon/Muon.h"
 #include "TrigDecisionTool/TrigDecisionTool.h"
+#include <string>
+#include <string_view>
 
 struct DimuonChainInfo {
 public:
@@ -34,11 +36,11 @@ namespace Trig {
     virtual StatusCode initialize(void) = 0;
     
     virtual Bool_t match(const xAOD::Muon* mu,
-			 const std::string &chain,
+			 std::string_view chain,
 			 const double mindelR = 0.1) const = 0;
     
     virtual Bool_t matchL1(const xAOD::Muon* mu,
-			   const std::string &l1item,
+			   std::string_view l1item,
 			   const double DelR = 0.2) const = 0;
 
     virtual Bool_t matchL2SA(const xAOD::Muon* mu,
@@ -67,12 +69,12 @@ namespace Trig {
     
     virtual Bool_t match(const double eta,
 			 const double phi,
-			 const std::string &chain,
+			 std::string_view chain,
 			 const double mindelR = 0.1) const = 0;
     
     virtual Bool_t matchL1(const double eta,
 			   const double phi,
-			   const std::string &l1item,
+			   std::string_view l1item,
 			   const double DelR = 0.2) const = 0;
 
     virtual Bool_t matchDimuon(const TLorentzVector& muon1,

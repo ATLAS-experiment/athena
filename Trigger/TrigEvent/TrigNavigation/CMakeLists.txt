@@ -14,7 +14,7 @@ atlas_add_library( TrigNavigationLib
    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS}
    LINK_LIBRARIES AthContainers AthLinks AsgMessagingLib
    AthenaBaseComps AthenaKernel CxxUtils SGTools GaudiKernel TrigNavStructure
-   TrigSerializeResultLib TrigStorageDefinitions StoreGateLib xAODCore
+   TrigSerializeResultLib TrigStorageDefinitions StoreGateLib xAODCore  
    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${TBB_LIBRARIES} AthContainersInterfaces AthContainersRoot RootUtils
    TrigConfHLTUtilsLib TrigSerializeCnvSvcLib )
 
@@ -33,7 +33,7 @@ foreach( name TriggerElement_test Holder_test Registration_test Ownership_test H
    atlas_add_test( ${name}
       SOURCES test/${name}.cxx
       LINK_LIBRARIES TrigNavigationLib AsgMessagingLib AthContainers AthContainersRoot
-      AthLinks AthenaKernel StoreGateLib GaudiKernel TestTools xAODCore
+      AthLinks AthenaKernel StoreGateLib GaudiKernel TestTools xAODCore TrigConfHLTUtilsLib
       TrigSerializeCnvSvcLib
       PROPERTIES TIMEOUT 300
       ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/share"
