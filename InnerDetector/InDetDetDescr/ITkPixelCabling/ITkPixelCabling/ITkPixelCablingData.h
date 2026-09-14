@@ -106,6 +106,26 @@ namespace ITkPixelCabling {
             std::swap(col, row);
         };
     
+    static constexpr TransformFn nominalQuadInverseTable[4] = {
+        []([[maybe_unused]] uint16_t& col, uint16_t& row){row = 383 - row;},
+        [](uint16_t& col, uint16_t& row){row = 383 - row; col -= 400;},
+        []([[maybe_unused]] uint16_t& col, uint16_t& row){row = 767 - row;},
+        [](uint16_t& col, uint16_t& row){row = 767 - row; col -= 400;}
+    };
+
+    static constexpr TransformFn ibInverseTransformFn =
+        [](uint16_t& col, uint16_t& row) {
+            const uint16_t parity = row & 1;
+            row = 383 - ((row - parity) >> 1);
+            col = (col << 1) | parity;
+        };
+
+    static constexpr TransformFn iecInverseTransformFn =
+        [](uint16_t& col, uint16_t& row) {
+            std::swap(col, row);
+        };
+
+
     static inline void chipToModuleTransform(const TransformType& transform, const uint8_t& chipID, uint16_t& col, uint16_t& row){
         switch (transform){
             case TransformType::NominalQuad:
@@ -116,6 +136,22 @@ namespace ITkPixelCabling {
                 break;
             case TransformType::NominalIECTriplet:
                 iecTransformFn(col, row);
+                break;
+            case TransformType::UndefinedTransform:
+                break;
+        }
+    }
+
+    static inline void chipToModuleInverseTransform(const TransformType& transform, const uint8_t& chipID, uint16_t& col, uint16_t& row){
+        switch (transform){
+            case TransformType::NominalQuad:
+                nominalQuadInverseTable[chipID](col, row);
+                break;
+            case TransformType::NominalIBTriplet:
+                ibInverseTransformFn(col, row);
+                break;
+            case TransformType::NominalIECTriplet:
+                iecInverseTransformFn(col, row);
                 break;
             case TransformType::UndefinedTransform:
                 break;

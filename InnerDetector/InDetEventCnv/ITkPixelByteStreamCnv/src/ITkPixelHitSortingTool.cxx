@@ -51,20 +51,29 @@ std::map<ITkPixelOnlineId, ITkPixLayout<uint16_t>> ITkPixelHitSortingTool::sortR
         //with 25x100 or R0 modules can be greatly simplified.
         //---------->
         const uint32_t chip = m_pixelReadout->getFE( rdoID, waferID);
-        uint32_t col  = m_pixelReadout->getColumn( rdoID, waferID);
-        uint32_t row  = m_pixelReadout->getRow( rdoID, waferID);
-        
+        //uint32_t col  = m_pixelReadout->getColumn( rdoID, waferID);
+        //uint32_t row  = m_pixelReadout->getRow( rdoID, waferID);
+        // row is phi_index, col is eta_index
+        uint16_t col  = (uint16_t) m_pixIdHelper->eta_index(rdoID);
+        uint16_t row  = (uint16_t) m_pixIdHelper->phi_index(rdoID);
+
+        ATH_MSG_DEBUG("Before Inverse transform");
+        ITkPixelCabling::chipToModuleInverseTransform(cabling->transformType(waferID.get_identifier32().get_compact()), chip, col, row);
+
+        ATH_MSG_DEBUG("After Inverse transform");
         //find out if we're dealing with 25x100 sensors
         const InDetDD::SiDetectorElement *element = m_detManager->getDetectorElement(waferID);
         const InDetDD::PixelModuleDesign *p_design = static_cast<const InDetDD::PixelModuleDesign *>(&element->design());
         const uint nChips = p_design->numberOfCircuits();
         const uint rowsPerFE =  p_design->rowsPerCircuit();
         const uint colsPerFE =  p_design->columnsPerCircuit();
-        bool is25x100 = rowsPerFE == 768 && colsPerFE == 200;
+        
+        // now, we do not need that anymore
+        //bool is25x100 = rowsPerFE == 768 && colsPerFE == 200;
         ATH_MSG_DEBUG("Module specs: nChips = " << nChips << ", rows per FE = " << rowsPerFE << " cols per FE = " << colsPerFE);
         //<----------        
         
-        if (is25x100){
+        /*if (is25x100){
             //The bonding pattern as understood at the time of writing this code is
             //that odd sensor rows (with even indices if numbered from 0) are bonded to the left and even (= odd indices) to the right.
             col = 2 * col + (row + 1)% 2;
@@ -75,7 +84,7 @@ std::map<ITkPixelOnlineId, ITkPixLayout<uint16_t>> ITkPixelHitSortingTool::sortR
             //R0 EC modules are 90 degrees rotated, the readout manager doesn't know about it
             std::swap(col, row);
             ATH_MSG_DEBUG("Rotated chip - swapping col and row");
-        }
+        }*/
         
         //Store ToT+1, reserve 0 for no hit.
         //HitMap and encoder labels rows/cols from 0

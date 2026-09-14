@@ -23,6 +23,10 @@ if __name__=="__main__":
    from AthenaCommon.Logging import log
    from AthenaCommon.Constants import INFO #DEBUG
    log.setLevel(INFO)
+
+
+   from AthenaCommon.Constants import DEBUG
+   flags.Exec.OutputLevel=DEBUG
    
    # --- set flags
    # the input file
@@ -30,6 +34,8 @@ if __name__=="__main__":
    #from AthenaConfiguration.TestDefaults import defaultTestFiles
    #flags.Input.Files = defaultTestFiles.RDO_RUN4
    
+   flags.IOVDb.GlobalTag = 'COND-MC21-SDR-RUN4-06'
+
    # --- end flag customization
    flags.lock()
 
