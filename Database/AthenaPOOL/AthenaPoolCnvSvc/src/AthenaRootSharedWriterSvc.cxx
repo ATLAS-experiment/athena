@@ -22,6 +22,7 @@
 #include "TServerSocket.h"
 #include "TSocket.h"
 #include "TString.h"
+#include "TSystem.h"
 #include "TTree.h"
 
 #include <set>
@@ -168,29 +169,64 @@ StatusCode AthenaRootSharedWriterSvc::initialize() {
       if (propertyServer->getProperty(&parallelCompressionProp).isFailure()) {
          ATH_MSG_INFO("Conversion service does not have ParallelCompression property");
       } else if (parallelCompressionProp.value()) {
-         int streamPort = 0;
          propertyName = "StreamPortString";
          std::string streamPortString("");
          StringProperty streamPortStringProp(propertyName, streamPortString);
          if (propertyServer->getProperty(&streamPortStringProp).isFailure()) {
-            ATH_MSG_INFO("Conversion service does not have StreamPortString property, using default: " << streamPort);
-         } else {
-            streamPort = atoi(streamPortStringProp.value().substr(streamPortStringProp.value().find(':') + 1).c_str());
+            ATH_MSG_INFO("Conversion service does not have StreamPortString property, using default TCP port: 0");
+            streamPortStringProp.setValue("?pmerge=localhost:0");
          }
-         m_rootServerSocket = new TServerSocket(streamPort, (streamPort == 0 ? false : true), 100, -1, ESocketBindOption::kInaddrLoopback);
-         if (m_rootServerSocket == nullptr || !m_rootServerSocket->IsValid()) {
-            ATH_MSG_FATAL("Could not create ROOT TServerSocket: " << streamPort);
+         const std::string& pmergeProperty = streamPortStringProp.value();
+         const std::size_t eqPos = pmergeProperty.find('=');
+         if (eqPos == std::string::npos) {
+            ATH_MSG_FATAL("Malformed StreamPortString property (missing '='): " << pmergeProperty);
             return StatusCode::FAILURE;
          }
-         streamPort = m_rootServerSocket->GetLocalPort();
-         const std::string newStreamPortString{streamPortStringProp.value().substr(0,streamPortStringProp.value().find(':')+1) + std::to_string(streamPort)};
+         const std::string pmergePrefix = pmergeProperty.substr(0, eqPos + 1);
+         const std::string pmergeArg = pmergeProperty.substr(eqPos + 1);
+         if (pmergeArg.empty()) {
+            ATH_MSG_FATAL("Malformed StreamPortString property (empty value after '='): " << pmergeProperty);
+            return StatusCode::FAILURE;
+         }
+         std::string newStreamPortString;
+         // "?pmerge=<host>:<port>" (default) selects a TCP socket.
+         // Anything else (e.g. "?pmerge=<prefix>") is passed to gSystem->TempFileName() as a
+         // (possibly relative) prefix for a UNIX domain socket file, created as $TMPDIR/<prefix>XXXXXX.
+         if (pmergeArg.find(':') == std::string::npos) {
+            TString socketPath = pmergeArg.c_str();
+            FILE* dummy = gSystem->TempFileName(socketPath);
+            if (dummy == nullptr) {
+               ATH_MSG_FATAL("Could not create temporary file for UNIX domain socket: " << pmergeArg);
+               return StatusCode::FAILURE;
+            }
+            m_socketPath = socketPath.Data();
+            std::remove(m_socketPath.c_str());
+            std::fclose(dummy);
+            m_rootServerSocket = new TServerSocket(socketPath);
+            if (m_rootServerSocket == nullptr || !m_rootServerSocket->IsValid()) {
+               ATH_MSG_FATAL("Could not create ROOT TServerSocket (UNIX domain socket): " << m_socketPath);
+               return StatusCode::FAILURE;
+            }
+            newStreamPortString = pmergePrefix + m_socketPath;
+            ATH_MSG_DEBUG("Successfully created ROOT TServerSocket (UNIX domain socket) and added it to TMonitor: ready to accept connections, " << m_socketPath);
+         } else {
+            const std::size_t colonPos = pmergeArg.find(':');
+            int streamPort = atoi(pmergeArg.substr(colonPos + 1).c_str());
+            m_rootServerSocket = new TServerSocket(streamPort, (streamPort == 0 ? false : true), 100, -1, ESocketBindOption::kInaddrLoopback);
+            if (m_rootServerSocket == nullptr || !m_rootServerSocket->IsValid()) {
+               ATH_MSG_FATAL("Could not create ROOT TServerSocket: " << streamPort);
+               return StatusCode::FAILURE;
+            }
+            streamPort = m_rootServerSocket->GetLocalPort();
+            newStreamPortString = pmergePrefix + pmergeArg.substr(0, colonPos + 1) + std::to_string(streamPort);
+            ATH_MSG_DEBUG("Successfully created ROOT TServerSocket and added it to TMonitor: ready to accept connections, " << streamPort);
+         }
          if (propertyServer->setProperty(propertyName,newStreamPortString).isFailure()) {
             ATH_MSG_FATAL("Could not set Conversion Service property " << propertyName << " from " << streamPortString << " to " << newStreamPortString);
             return StatusCode::FAILURE;
          }
          m_rootMonitor = new TMonitor;
          m_rootMonitor->Add(m_rootServerSocket);
-         ATH_MSG_DEBUG("Successfully created ROOT TServerSocket and added it to TMonitor: ready to accept connections, " << streamPort);
       }
    }
    // Count the number of output streams
@@ -318,6 +354,9 @@ StatusCode AthenaRootSharedWriterSvc::finalize() {
    ATH_MSG_INFO("in finalize()");
    delete m_rootMonitor; m_rootMonitor = nullptr;
    delete m_rootServerSocket; m_rootServerSocket = nullptr;
+   if (!m_socketPath.empty()) {
+      std::remove(m_socketPath.c_str());
+   }
    for (auto& [cl, ptr] : m_dummyCache) {
       if (cl && ptr) {
          cl->Destructor(ptr, false);
