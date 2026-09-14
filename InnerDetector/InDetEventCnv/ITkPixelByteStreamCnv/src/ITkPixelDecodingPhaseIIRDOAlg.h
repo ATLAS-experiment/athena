@@ -88,13 +88,12 @@ namespace PixelCallbacksPhaseIIRDO{
 
         public:
             explicit PhaseIIRDOCallback(PhaseIIPixelRawDataContainerMT* cont_coll,
-                    PhaseIIPixelRawDataContainerMT::ContainerPtr rdo_container_dest, const PixelID* idHelper, MsgStream& msg_source) :
+                    PhaseIIPixelRawDataContainerMT::ContainerPtr rdo_container_dest, const PixelID* idHelper) :
                 m_rdo_container_dest(rdo_container_dest),
                 m_cont_coll(cont_coll),
                 m_dest_range_guard(rdo_container_dest),
                 m_currentIdentifierHash(0),
-                m_idHelper(idHelper),
-                m_msg_source(msg_source)
+                m_idHelper(idHelper)
                 {};
 
             ~PhaseIIRDOCallback() = default;
@@ -211,9 +210,6 @@ namespace PixelCallbacksPhaseIIRDO{
 
             // Identifier helper
             const PixelID* m_idHelper{};
-            
-            // Athena message stream for debug output
-            MsgStream& m_msg_source;
     };
 
     //This prints the decoded hits on the screen,
