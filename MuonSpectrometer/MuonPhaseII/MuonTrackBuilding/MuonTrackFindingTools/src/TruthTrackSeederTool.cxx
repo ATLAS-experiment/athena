@@ -168,12 +168,4 @@ namespace MuonR4 {
         }
         return result;                                             
     }
-
-            
-    double TruthTrackSeederTool::estimateQtimesP(const EventContext&/* ctx*/,
-                                              const Amg::Vector3D& /*planeNorm*/,
-                                           std::span<const PosMomPair_t> /*circlePoints*/) const {
-        ATH_MSG_INFO(__func__<<"() Will be removed soon");
-        return 0.;
-    } 
 }
