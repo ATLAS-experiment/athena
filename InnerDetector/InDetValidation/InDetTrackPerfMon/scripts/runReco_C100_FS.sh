@@ -59,7 +59,12 @@ if [ "$doClusters" == "1" ]; then
     --maxEvents ${nEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
     --postInclude "ActsConfig.ActsRegionsOfInterestConfig.ActsMainRegionsOfInterestCreatorAlgCfg,ActsConfig.ActsClusterizationConfig.ActsMainClusterizationCfg,ActsConfig.ActsSpacePointFormationConfig.ActsMainSpacePointFormationStandaloneCfg,ActsConfig.ActsPostIncludes.PersistifyActsEDMCfg" \
-    --preExec "flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True;flags.Tracking.doPixelDigitalClustering=True;flags.Tracking.ITkActsPass.storeTrackSeeds=True;" \
+    --preExec "flags.Acts.EDM.PersistifyClusters=True; \
+               flags.Acts.EDM.PersistifySpacePoints=True; \
+               flags.Tracking.doPixelDigitalClustering=True; \
+               flags.Tracking.ITkActsPass.storeTrackSeeds=True;
+               from ActsConfig.ActsConfigFlags import SeedingStrategy; \
+               flags.Tracking.ITkActsPass.PixelSeedingStrategy=SeedingStrategy.GridTriplet" \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD}
 else
@@ -68,7 +73,10 @@ else
     --maxEvents ${nEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
     --postInclude 'ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
-    --preExec "flags.Tracking.doPixelDigitalClustering=True;flags.Tracking.ITkActsPass.storeTrackSeeds=True;" \
+    --preExec "flags.Tracking.doPixelDigitalClustering=True; \
+               flags.Tracking.ITkActsPass.storeTrackSeeds=True;
+               from ActsConfig.ActsConfigFlags import SeedingStrategy; \
+               flags.Tracking.ITkActsPass.PixelSeedingStrategy=SeedingStrategy.GridTriplet" \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD}
     #--preExec 'flags.Tracking.writeExtendedSi_PRDInfo=True' \

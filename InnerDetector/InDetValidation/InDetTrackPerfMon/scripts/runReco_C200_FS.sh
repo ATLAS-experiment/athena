@@ -62,10 +62,11 @@ Reco_tf.py --CA \
                flags.Tracking.doITkFastTracking=True; \
                flags.Tracking.ITkFTFPass.useTracklets=True; \
                flags.Detector.GeometryHGTD=False; \
-	       flags.Tracking.ITkFTFPass.useTrigRoadPredictor=True; \
-	       flags.Tracking.ITkFTFPass.useTrigTrackFollowing=False; \
-               flags.Trigger.InDetTracking.doGPU=False"
-
+	           flags.Tracking.ITkFTFPass.useTrigRoadPredictor=True; \
+	           flags.Tracking.ITkFTFPass.useTrigTrackFollowing=False; \
+               flags.Trigger.InDetTracking.doGPU=False; \
+               from ActsConfig.ActsConfigFlags import SeedingStrategy; \
+               flags.Tracking.ITkFTFPass.PixelSeedingStrategy=SeedingStrategy.GridTriplet" \
 
 rc=$?
 echo "Reco_tf.py result: $rc"
