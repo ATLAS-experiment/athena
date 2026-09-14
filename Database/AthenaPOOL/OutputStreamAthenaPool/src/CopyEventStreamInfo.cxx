@@ -53,7 +53,7 @@ StatusCode CopyEventStreamInfo::beginInputFile(const SG::SourceID&)
          continue;
       }
 
-      const EventStreamInfo* evtStrInfo_in = 0;
+      const EventStreamInfo* evtStrInfo_in = nullptr;
       ATH_CHECK( m_inputMetaDataStore->retrieve(evtStrInfo_in, key) );
 
       EventStreamInfo* evtStrInfo_out = 0;
