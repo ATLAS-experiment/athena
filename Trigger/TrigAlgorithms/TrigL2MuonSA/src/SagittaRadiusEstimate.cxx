@@ -101,7 +101,9 @@ StatusCode TrigL2MuonSA::SagittaRadiusEstimate::setSagittaRadius(const TrigRoiDe
 
         dx = x3 - x2;
         dy = y3 - y2;
-        
+        if (y2 == 0.)[[unlikely]]{
+          throw std::runtime_error("y2 is zero in setSagittaRadius");
+        }
         x0 = y0*x2/y2;
         
         c3  = dy;
