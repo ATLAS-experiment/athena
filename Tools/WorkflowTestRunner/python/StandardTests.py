@@ -278,6 +278,9 @@ class GenerationTest(WorkflowTest):
     """Generation test."""
 
     def __init__(self, ID: str, run: WorkflowRun, type: WorkflowType, steps: List[str], setup: TestSetup, extra_args: str = "") -> None:
+        if "output" not in extra_args:
+            extra_args += " --outputEVNTFile myEVNT.pool.root"
+
         if "maxEvents" not in extra_args:
             extra_args += " --maxEvents 10"
 
@@ -293,7 +296,6 @@ class GenerationTest(WorkflowTest):
 
         self.command = \
             (f"Gen_tf.py --jobConfig {dsid}"
-             " --outputEVNTFile myEVNT.pool.root"
              f" --imf False {extra_args}")
 
         super().__init__(ID, run, type, steps, setup)
