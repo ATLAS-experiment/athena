@@ -23,7 +23,7 @@ bool TrigEgammaEmulationL1CaloHypoTool::emulate(  const Trig::TrigData &input, b
 {
   pass=false;
   if( !input.l1 ){
-    ATH_MSG_WARNING("L1 not found. poinet is null");
+    ATH_MSG_WARNING("L1 not found. pointer is null");
     return false;
   }
 
@@ -36,9 +36,12 @@ bool TrigEgammaEmulationL1CaloHypoTool::emulate(  const Trig::TrigData &input, b
 bool TrigEgammaEmulationL1CaloHypoTool::decide(  const Trig::TrigData &input ) const
 {
   auto l1 = input.l1;
+  if (!l1)[unlikely]{ 
+    ATH_MSG_WARNING("L1 not found. pointer is null");
+    return false;
+  }
   std::string l1item = m_l1item;
 
-  //for(const auto& l1 : *l1Cont){
   if (l1->roiType() != xAOD::EmTauRoI::EMRoIWord){
     ATH_MSG_DEBUG("This roi is not EMRoIWord!");
     return true;
