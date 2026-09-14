@@ -16,7 +16,7 @@ Service("PoolSvc").ReadCatalog= ["file:PoolFileCatalog.xml",
  "xmlcatalog_http://atlas.web.cern.ch/Atlas/GROUPS/DATABASE/project/catrep/condcat.xml"]
 
 #ctbcon="<dbConnection>impl=conddb;techno=mysql;atlobk02.cern.ch:conditions_ctb_2004:conditions:conditions</dbConnection>"
-#ctbcon="<dbConnection>impl=cool;techno=oracle;schema=ATLAS_COOL_INDET;ATLAS_COOLPROD:TBMCPROD:ATLAS_COOL_READER:COOLRED4PRO</dbConnection>"
+#ctbcon="<dbConnection>impl=cool;techno=oracle;schema=ATLAS_COOL_INDET;ATLAS_COOLPROD:TBMCPROD:ATLAS_COOL_READER:_</dbConnection>"
 ctbcon="<dbConnection>impl=cool;techno=sqlite;schema=sqlite/TBMCPROD.db;X:TBMCPROD</dbConnection>"
 IOVDbSvc.Folders+=[ ctbcon+" /Indet/Align"]
 
