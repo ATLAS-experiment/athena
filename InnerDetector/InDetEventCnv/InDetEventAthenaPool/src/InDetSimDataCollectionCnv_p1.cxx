@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetSimData/InDetSimData.h"
@@ -10,11 +10,12 @@
 #include "Identifier/Identifier.h"
 #include "MsgUtil.h"
 #include "AthenaKernel/errorcheck.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 #include "StoreGate/StoreGateSvc.h"
 
 void InDetSimDataCollectionCnv_p1::transToPers(const InDetSimDataCollection* transCont, InDetSimDataCollection_p1* persCont, MsgStream &log)
 {
-  InDetSimDataCnv_p1  simDataCnv;
+  InDetSimDataCnv_p1  simDataCnv (Gaudi::Hive::currentContext());;
   persCont->m_simdata.resize(transCont->size());
   MSG_DEBUG(log," Preparing " << persCont->m_simdata.size() << "Collections");
   unsigned int collIndex(0);
@@ -31,14 +32,13 @@ void InDetSimDataCollectionCnv_p1::transToPers(const InDetSimDataCollection* tra
 
 void  InDetSimDataCollectionCnv_p1::persToTrans(const InDetSimDataCollection_p1* persCont, InDetSimDataCollection* transCont, MsgStream &log)
 {
-  InDetSimDataCnv_p1  simDataCnv;
+  InDetSimDataCnv_p1  simDataCnv (Gaudi::Hive::currentContext());;
   if(!m_isInitialized) {
     if (this->initialize(log) != StatusCode::SUCCESS) {
       log << MSG::FATAL << "Could not initialize InDetSimDataCollectionCnv_p1 " << endmsg;
     }
   }
   MSG_DEBUG(log," Preparing " << persCont->m_simdata.size() << "Collections");
-  simDataCnv.setCurrentStore (SG::CurrentEventStore::store());
   for (const auto& persSimDataPair : persCont->m_simdata) {
     // Add in new collection
     const InDetSimData_p1& psimData = persSimDataPair.second;
