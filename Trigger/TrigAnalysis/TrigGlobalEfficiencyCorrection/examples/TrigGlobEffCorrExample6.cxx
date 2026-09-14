@@ -217,7 +217,7 @@ int main(int argc, char* argv[])
         if(matched) nMatched += 1;
     }
     
-    if(errors < nSuitableEvents)
+    if(nSuitableEvents!= 0 && errors < nSuitableEvents)
     {
         Info(MSGSOURCE, "Fraction of trigger-matched events: %f (over %ld events)",
             nMatched / nSuitableEvents, long(nSuitableEvents));
