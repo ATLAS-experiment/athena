@@ -107,7 +107,7 @@ StatusCode TrigL2MuonSA::NswPatternFinder::outlierMm(const TrigL2MuonSA::MuonRoa
     mmSegment.push_back(mmHits[i_hit]);
   }
 
-  trackPattern.mmSegment = mmSegment;
+  trackPattern.mmSegment = std::move(mmSegment);
 
   return StatusCode::SUCCESS;
 }
