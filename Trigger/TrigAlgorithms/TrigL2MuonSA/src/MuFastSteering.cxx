@@ -1575,7 +1575,7 @@ bool MuFastSteering::storeMuonSA(const xAOD::MuonRoI*                roi,
     }
   }
   static const SG::Accessor< std::vector<std::string> > accessor_mdthitid( "mdtHitId" );
-  accessor_mdthitid( *muonSA ) = mdtId;
+  accessor_mdthitid( *muonSA ) = std::move(mdtId);
 
   //CSC hits
   std::vector<float> cscResol;
@@ -1609,7 +1609,7 @@ bool MuFastSteering::storeMuonSA(const xAOD::MuonRoI*                roi,
     }
   }
   static const SG::Accessor< std::vector<float> > accessor_cschitresol( "cscHitResolution" );
-  accessor_cschitresol( *muonSA ) = cscResol;
+  accessor_cschitresol( *muonSA ) = std::move(cscResol);
 
   // RPC hits
   float sumbeta[8]={0};
