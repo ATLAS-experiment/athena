@@ -201,7 +201,7 @@ namespace Trig {
     const std::vector< Trig::Feature<xAOD::L2CombinedMuonContainer> > MuFeatureContainers = fc.get<xAOD::L2CombinedMuonContainer>("", TrigDefs::alsoDeactivateTEs);
 #endif 
     
-    for(auto mucont : MuFeatureContainers){
+    for(const auto & mucont : MuFeatureContainers){
       for(auto muon : *mucont.cptr()){
 	Double_t dR = TrigMuonMatching::dR(mu->eta(), mu->phi(), muon->eta(), muon->phi());
 	if(dR < DelR) return true;
