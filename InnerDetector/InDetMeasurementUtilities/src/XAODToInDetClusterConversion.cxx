@@ -7,6 +7,7 @@
 
 #include "InDetIdentifier/PixelID.h"
 #include "InDetIdentifier/SCT_ID.h"
+#include "HGTD_Identifier/HGTD_ID.h"
 #include "xAODInDetMeasurement/ContainerAccessor.h"
 
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
@@ -125,15 +126,13 @@ namespace InDet {
       for (const auto& this_range : pixelAccessor.rangesForIdentifierDirect(hashId)) {
         for (auto start = this_range.first; start != this_range.second; ++start) {
           const xAOD::PixelCluster* in_cluster = *start;
-
-          InDet::PixelCluster* cluster = nullptr;
-          ATH_CHECK( TrackingUtilities::convertXaodToInDetCluster(*in_cluster, *element, *design, *m_pixelID, cluster) );
-          //coverity[FORWARD_NULL:FALSE]
+          auto cluster = TrackingUtilities::convertXaodToInDetCluster(*in_cluster, *element, *design, *m_pixelID);
+          if (!cluster) continue;
           cluster->setHashAndIndex(hashId, collection->size());
 
           // Add to Collection
-          collection->push_back(cluster);
-          dec_link(*in_cluster) = Link_t{cluster, *collection};
+          collection->push_back(cluster.get());
+          dec_link(*in_cluster) = Link_t{cluster.release(), *collection};
         }
       }
 
@@ -206,15 +205,14 @@ namespace InDet {
         for (auto start = this_range.first; start != this_range.second; ++start) {
           const xAOD::StripCluster* in_cluster = *start;
 
-          InDet::SCT_Cluster* cluster = nullptr;
-          ATH_CHECK( TrackingUtilities::convertXaodToInDetCluster(*in_cluster, *element, *design, *m_stripID, cluster, shift) );
-          //coverity[FORWARD_NULL:FALSE]
+          auto cluster = TrackingUtilities::convertXaodToInDetCluster(*in_cluster, *element, *design, *m_stripID, shift);
+          if (!cluster) continue;
           cluster->setHashAndIndex(hashId, collection->size());
 
 
           // Add to Collection
-          collection->push_back( cluster );
-          dec_link(*in_cluster) = Link_t{cluster, *collection};
+          collection->push_back( cluster.get() );
+          dec_link(*in_cluster) = Link_t{cluster.release(), *collection};
         }
       }
 
@@ -269,15 +267,12 @@ namespace InDet {
         for (auto start = this_range.first; start != this_range.second; ++start) {
           const xAOD::HGTDCluster* in_cluster = *start;
 
-          ::HGTD_Cluster* cluster = nullptr;
-          //cluster is overwritten, but it is saved in 'collection' and later moved
-          //coverity[RESOURCE_LEAK]
-          ATH_CHECK( TrackingUtilities::convertXaodToInDetCluster(*in_cluster, *element, cluster) );
+          auto cluster = TrackingUtilities::convertXaodToInDetCluster(*in_cluster, *element);
           cluster->setHashAndIndex(hashId, collection->size());
 
           // Add to Collection
-          collection->push_back(cluster);
-          dec_link(*in_cluster) = Link_t{cluster, *collection};
+          collection->push_back(cluster.get());
+          dec_link(*in_cluster) = Link_t{cluster.release(), *collection};
         }
       }
 

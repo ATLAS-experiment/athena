@@ -50,7 +50,8 @@ class CommonServicesConfig (ConfigBlock) :
             info="a list of strings defining categories of systematics to enable "
             "(only recommended for studies / partial ntuple productions). Choose amongst: "
             "`jets`, `JER`, `FTag`, `electrons`, `muons`, `photons`, `taus`, `met`, `tracks`, `generator`, `PRW`, `event`. "
-            "This option is overridden by `filterSystematics`.")
+            "This option is overridden by `filterSystematics`.",
+            meta={'choices':(['jets', 'JER', 'FTag', 'electrons', 'muons', 'photons', 'taus', 'met', 'tracks', 'generator', 'PRW', 'event'], None)})
         self.addOption ('systematicsHistogram', None , type=str,
             info="the name of the histogram to which a list of executed "
             "systematics will be printed. If left empty, the histogram is not written at all.")
@@ -564,13 +565,15 @@ class PtEtaSelectionBlock (ConfigBlock):
         super (PtEtaSelectionBlock, self).__init__ ()
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the input container.")
+            info="the name of the input container.",
+            meta={'role':'containerRef'})
         self.addOption ('selectionName', '', type=str,
             noneAction='error',
             info="the name of the selection to append this to. If left empty, "
             "the cuts are applied to every "
             "object within the container. Specifying a name (e.g. `loose`) "
-            "applies the cut only to those object who also pass that selection.")
+            "applies the cut only to those object who also pass that selection.",
+            meta={'role':'selection'})
         self.addOption ('minPt', None, type=float,
             info=r"minimum $p_\mathrm{T}$ value to cut on (in MeV).")
         self.addOption ('maxPt', None, type=float,
@@ -635,14 +638,16 @@ class ObjectCutFlowBlock (ConfigBlock):
         super (ObjectCutFlowBlock, self).__init__ ()
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the input container.")
+            info="the name of the input container.",
+            meta={'role':'containerRef'})
         self.addOption ('selectionName', '', type=str,
             noneAction='error',
             info="the name of the selection to perform the cutflow for. If left empty, "
             "the cutflow is "
             "performed for every object within the container. Specifying a "
             "name (e.g. `loose`) generates the cutflow only for those objects "
-            "that also pass that selection.")
+            "that also pass that selection.",
+            meta={'role':'selection'})
         self.addOption ('forceCutSequence', False, type=bool,
             info="whether to force the cut sequence and not accept objects "
             "if previous cuts failed.")
@@ -726,7 +731,8 @@ class OutputThinningBlock (ConfigBlock):
         self.setBlockName('Thinning')
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the input container.")
+            info="the name of the input container.",
+            meta={'role':'containerRef'})
         self.addOption ('postfix', '', type=str,
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here.")
@@ -738,7 +744,8 @@ class OutputThinningBlock (ConfigBlock):
             "object within the container. Specifying a name (e.g. `loose`) "
             "applies the cut only to those object who also pass that selection.")
         self.addOption ('outputName', None, type=str,
-            info="an optional name for the output container.")
+            info="an optional name for the output container.",
+            meta={'role':'container'})
         self.addOption ('deepCopy', False, type=bool,
             info="run a deep copy of the container.")
         self.addOption ('sortPt', False, type=bool,
@@ -798,7 +805,8 @@ class IFFLeptonDecorationBlock (ConfigBlock):
         super (IFFLeptonDecorationBlock, self).__init__()
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the input electron or muon container.")
+            info="the name of the input electron or muon container.",
+            meta={'role':'containerRef'})
         self.addOption ('separateChargeFlipElectrons', True, type=bool,
             info="whether to consider charged-flip electrons as a separate class.")
         self.addOption ('decoration', 'IFFClass_%SYS%', type=str,
@@ -834,7 +842,8 @@ class MCTCLeptonDecorationBlock (ConfigBlock):
         self.addOption ("containerName", '', type=str,
                         noneAction='error',
                         info="the input lepton container, with a possible selection, "
-                        "in the format `container` or `container.selection`.")
+                        "in the format `container` or `container.selection`.",
+                        meta={'role':'containerRef'})
         self.addOption ("prefix", 'MCTC_', type=str,
                         info="the prefix of the decorations based on the MCTC "
                         "classification.")
@@ -868,7 +877,8 @@ class PerEventSFBlock (ConfigBlock):
             "per-event scale factors.")
         self.addOption('particles', '', type=str,
             info="the input object container, with a possible selection, in the "
-            "format `container` or `container.selection`.")
+            "format `container` or `container.selection`.",
+            meta={'role':'containerRef'})
         self.addOption('objectSF', '', type=str,
             info="the name of the per-object SF decoration to be used.")
         self.addOption('eventSF', '', type=str,

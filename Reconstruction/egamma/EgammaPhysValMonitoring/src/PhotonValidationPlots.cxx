@@ -29,6 +29,7 @@ PhotonValidationPlots::PhotonValidationPlots(PlotBase* pParent, const std::strin
 										  convTruthMatchedR(nullptr),
 										  convTruthRvsEta(nullptr),
 										  convTruthMatchedRvsEta(nullptr),
+										  convTruthRvsRecoR(nullptr),
 										  res_et(nullptr),
 										  res_eta(nullptr),
 										  res_et_cut(nullptr),
@@ -41,6 +42,7 @@ void PhotonValidationPlots::initializePlots(){
   convTruthMatchedR = Book1D("convTruthMatchedR", "Radius Of conversion vertex for truth matched to reco" + m_sParticleType + ";convR;Conversions", 1200,0.,1200.);
   convTruthRvsEta = Book2D("convTruthRvsEta", "Radius Of conversion vertex for truth vs #eta" + m_sParticleType + ";convR;#eta", 1200,0.,1200., 1000,-5.,5.);
   convTruthMatchedRvsEta = Book2D("convTruthMatchedRvsEta", "Radius Of conversion vertex for truth matched to reco vs #eta" + m_sParticleType + ";convR;#eta", 1200,0.,1200., 1000,-5.,5.);
+  convTruthRvsRecoR = Book2D("convTruthRvsRecoR", "Radius Of conversion vertex for truth vs radius of reco conversion vertex" + m_sParticleType + ";convR;recoR", 120,0.,1200., 120,0.,1200);
   res_et  = BookTProfile("res_et"," IsoPhoton;E_{T}^{truth}, [GeV];(E_{T} - E_{T}^{truth})/E_{T}^{truth}",100, 0., 200.);
   res_eta = BookTProfile("res_eta"," IsoPhoton;#eta;(E_{T} - E_{T}^{truth})/E_{T}^{truth}",60, -3., 3.);
   res_et_cut  = BookTProfile("res_et_cut"," IsoPhoton;E_{T}^{truth}, [GeV];(E_{T} - E_{T}^{truth})/E_{T}^{truth}",100, 0., 200.);

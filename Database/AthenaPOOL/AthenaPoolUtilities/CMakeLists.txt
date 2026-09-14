@@ -4,7 +4,7 @@
 atlas_subdir( AthenaPoolUtilities )
 
 # External dependencies:
-find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
+find_package( CORAL COMPONENTS CoralBase )
 
 # Component(s) in the package:
 atlas_add_library( AthenaPoolUtilities

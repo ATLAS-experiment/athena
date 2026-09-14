@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#include <map>
-#include "Gaudi/Property.h"
+
 #include "TrigEgammaFastElectronHypoAlg.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "AthViews/ViewHelper.h"
-
+#include <map>
 
 using TrigCompositeUtils::createAndStore; 
 using TrigCompositeUtils::DecisionContainer;
@@ -113,12 +112,14 @@ StatusCode TrigEgammaFastElectronHypoAlg::execute( const EventContext& context )
       // since we have a map made in advance we can make use of the index lookup w/o the need for additional loop 
       auto origCluster = clusterToIndexMap.find( clusterPtr );
       ATH_CHECK( origCluster != clusterToIndexMap.end() );
+      //coverity[INVALIDATE_ITERATOR:FALSE]
       linkToPrevious( d, decisionInput().key(), origCluster->second );
       
-
+      
       const xAOD::TrigRingerRings *rings=nullptr;
       {
-        LinkInfo<xAOD::TrigRingerRingsContainer> linkInfo = findLink<xAOD::TrigRingerRingsContainer>(context, previousDecision, "ringer");
+        static const std::string ringerStr{"ringer"};
+        LinkInfo<xAOD::TrigRingerRingsContainer> linkInfo = findLink<xAOD::TrigRingerRingsContainer>(context, previousDecision, ringerStr);
         auto ringerLink = linkInfo.link;
         ATH_CHECK( ringerLink.isValid() ); 
         rings = *ringerLink;
@@ -153,7 +154,7 @@ StatusCode TrigEgammaFastElectronHypoAlg::execute( const EventContext& context )
         }   
       }
             
-      hypoToolInput.push_back(info);
+      hypoToolInput.push_back(std::move(info));
 
     }// loop over all electrons
 

@@ -74,6 +74,8 @@ StatusCode JetResponseTool::decorate(const xAOD::JetContainer& jets) const {
   ATH_MSG_DEBUG("Selected " << sel_jets.size() << " reco jets above " << m_recoJetMinPt.value() << " MeV");
 
   for(const xAOD::Jet* jet : sel_jets) {
+    ATH_MSG_VERBOSE("On jet " << jet->index());
+    ATH_MSG_VERBOSE("  Matched truth jet index: " << jetMatchedTruthJetHandle(*jet).index());
     if(jetMatchedTruthJetHandle(*jet).isValid()) {
       const xAOD::Jet* matched_truthjet = *jetMatchedTruthJetHandle(*jet);
       float Eresponse = jet->e() / matched_truthjet->e();

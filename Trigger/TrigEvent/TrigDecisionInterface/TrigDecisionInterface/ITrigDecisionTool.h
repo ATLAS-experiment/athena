@@ -1,19 +1,21 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: ITrigDecisionTool.h 624182 2014-10-25 21:44:42Z lheinric $
 #ifndef TRIGDECISIONINTERFACE_ITRIGDECISIONTOOL_H
 #define TRIGDECISIONINTERFACE_ITRIGDECISIONTOOL_H
 
-// System include(s):
-#include <string>
-#include <vector>
-
 // Framework include(s):
 #include "AsgTools/IAsgTool.h"
+// System include(s):
+#include <string>
+#include <string_view>
+#include <vector>
+
+
 
 namespace Trig {
 
@@ -33,12 +35,12 @@ namespace Trig {
       /**
        * @see Trig::TrigDecisionTool::isPassed
        */
-      virtual bool isPassed( const std::string& pattern ) const = 0;
+      virtual bool isPassed( std::string_view pattern ) const = 0;
       /// Get the decision for a trigger chain with a given condition
       /**
        * @see Trig::TrigDecisionTool::isPassed
        */
-      virtual bool isPassed( const std::string& pattern,
+      virtual bool isPassed( std::string_view pattern,
                              unsigned int condition ) const = 0;
       /// Get expert-level information about a given trigger chain
       /**

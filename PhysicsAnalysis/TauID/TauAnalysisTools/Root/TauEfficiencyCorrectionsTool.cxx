@@ -210,9 +210,9 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
         
 	if(m_useGNTau){
           if(m_sCampaign=="mc23"){
-              m_sInputFilePathJetIDHadTau = sDirectory + "GNTauID_TrueHadTau_Run3.root";  		  
+              m_sInputFilePathJetIDHadTau = m_useFastSim ? sDirectory + "GNTauID_TrueHadTau_Run3_incl_AF3.root" : sDirectory + "GNTauID_TrueHadTau_Run3.root";
 	  } else if (m_sCampaign=="mc20"){
-	      m_sInputFilePathJetIDHadTau = sDirectory + "GNTauID_TrueHadTau_Run2.root";
+	      m_sInputFilePathJetIDHadTau = m_useFastSim ? sDirectory + "GNTauID_TrueHadTau_Run2_incl_AF3.root" : sDirectory + "GNTauID_TrueHadTau_Run2.root";
 	  } else {  
               ATH_MSG_ERROR("GNTau ID correction not supported for campaign "<< m_sCampaign);
 	      return StatusCode::FAILURE;
@@ -319,8 +319,15 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
 	    }
         } else if(m_sCampaign=="mc20"){
             if(m_useGNTau){
-              ATH_MSG_ERROR("Eveto with GNTau ID correction not supported for campaign "<< m_sCampaign);
-	      return StatusCode::FAILURE;
+	      if( m_iJetIDLevel == static_cast<int>(JETIDGNTAULOOSE)){
+                  m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_TrueElectron_Run2_looseGNTauID_1p.root";
+              } else if( m_iJetIDLevel == static_cast<int>(JETIDGNTAUMEDIUM)){
+                  m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_TrueElectron_Run2_mediumGNTauID_1p.root";
+              }
+              else {
+                  ATH_MSG_ERROR("SFEleIDElectron correction not supported for JetIDLevel="<<m_iJetIDLevel);
+                  return StatusCode::FAILURE;
+              } 	    
 	    } else {
               if( m_iJetIDLevel == static_cast<int>(JETIDRNNLOOSE)){
                   m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_TrueElectron_Run2_looseRNNTauID_1p.root";

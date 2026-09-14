@@ -11,4 +11,4 @@ atlas_add_poolcnv_library( PersistentDataModelAthenaPoolPoolCnv
                            src/*.cxx
                            FILES PersistentDataModel/DataHeader.h
                            INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
-                           LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaBaseComps AthenaPoolCnvSvcLib GaudiKernel PersistentDataModel PersistentDataModelTPCnv )
+                           LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaBaseComps AthenaPoolCnvSvcLib GaudiKernel PersistentDataModel PersistentDataModelTPCnv PoolSvcLib )

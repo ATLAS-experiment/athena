@@ -37,7 +37,7 @@ bool Trig::DecisionAccess::isPassed(const Trig::ChainGroup* chainGroup,
   return chainGroup->isPassed(condition);
 }
 
-bool Trig::DecisionAccess::isPassed(const std::string& chain,
+bool Trig::DecisionAccess::isPassed(std::string_view chain,
 				    unsigned int condition ) const
 
 {
@@ -45,7 +45,7 @@ bool Trig::DecisionAccess::isPassed(const std::string& chain,
   return isPassed(g,condition);
 }
 
-bool Trig::DecisionAccess::isPassed(const std::string& chain) const {
+bool Trig::DecisionAccess::isPassed(std::string_view chain) const {
   return isPassed(chain, TrigDefs::Physics);
 }
 

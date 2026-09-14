@@ -209,11 +209,8 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
 
             # Strip clusters were just produced above, but nothing forms strip
             # space points on the device path — mirror the host-side flow
-            from ActsConfig.ActsSpacePointFormationConfig import (
-                ActsStripSpacePointFormationAlgCfg,
-                reconstructStripSpacePointsInPrimaryPass,
-            )
-            if reconstructStripSpacePointsInPrimaryPass(flags):
+            if flags.Tracking.ActiveConfig.useITkStripSeeding or (flags.Acts.SpacePoints.doStrip and not flags.Tracking.ActiveConfig.isSecondaryPass):
+                from ActsConfig.ActsSpacePointFormationConfig import ActsStripSpacePointFormationAlgCfg
                 acc.merge(ActsStripSpacePointFormationAlgCfg(flags,
                     name=f"{flags.Tracking.ActiveConfig.extension}StripSpacePointFormationAlg",
                     StripClusters="ITkStripClusters",
@@ -270,16 +267,26 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
         # Extract track parameters from device seeds if requested
         if flags.Tracking.ActiveConfig.storeTrackSeeds and flags.Acts.Device.doSeeding: # for clustering only pipelines this is controlled via the ActsSeedingConfig file
             from ActsConfig.ActsSeedingConfig import ActsStoreTrackSeedsCfg
-            from InDetConfig.ITkActsHelpers import isFastPrimaryPass
-            processPixels = flags.Detector.EnableITkPixel
-            processStrips = flags.Detector.EnableITkStrip
-            if flags.Tracking.ActiveConfig.extension == "ActsConversion" or flags.Tracking.ActiveConfig.isLargeD0:
-                processPixels = False
-            elif isFastPrimaryPass(flags):
-                processStrips = False
-            acc.merge(ActsStoreTrackSeedsCfg(flags,
-                                             processPixels=processPixels,
-                                             processStrips=processStrips))
+            from ActsConfig.ActsAnalysisConfig import ActsPixelSeedsToTrackParamsAlgCfg, ActsStripSeedsToTrackParamsAlgCfg
+            processPixels = flags.Tracking.ActiveConfig.useITkPixelSeeding
+            processStrips = flags.Tracking.ActiveConfig.useITkStripSeeding
+
+            prefix = flags.Tracking.ActiveConfig.extension
+            # Create track parameters before ActsStoreTrackSeedsCfg (following ActsSeedingCfg pattern)
+            if processPixels:
+                acc.merge(ActsPixelSeedsToTrackParamsAlgCfg(
+                    flags,
+                    name = prefix + 'PixelSeedsToTrackParamsAlg',
+                    InputSeedContainerKey = prefix + 'PixelSeeds',
+                    OutputTrackParamsCollectionKey = prefix + 'PixelEstimatedTrackParams'))
+            if processStrips:
+                acc.merge(ActsStripSeedsToTrackParamsAlgCfg(
+                    flags,
+                    name = prefix + 'StripSeedsToTrackParamsAlg',
+                    InputSeedContainerKey = prefix + 'StripSeeds',
+                    OutputTrackParamsCollectionKey = prefix + 'StripEstimatedTrackParams'))
+
+            acc.merge(ActsStoreTrackSeedsCfg(flags, processPixels=processPixels, processStrips=processStrips))
             
         # CKF
         from ActsConfig.ActsTrackFindingConfig import ActsTrackFindingCfg

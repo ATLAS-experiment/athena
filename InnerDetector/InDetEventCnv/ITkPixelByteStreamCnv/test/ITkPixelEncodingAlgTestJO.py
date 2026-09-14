@@ -42,10 +42,6 @@ if __name__=="__main__":
    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
    cfg.merge(PoolReadCfg(flags))
 
-   #add cabling
-   from ITkPixelCabling.ITkPixelCablingAlgConfig import ITkPixelCablingAlgCfg
-   cfg.merge(ITkPixelCablingAlgCfg(flags, name="ITkPixelCablingAlg", UseTestCabling=True))
-
    from PixelReadoutGeometry.PixelReadoutGeometryConfig import ITkPixelReadoutManagerCfg
    cfg.merge(ITkPixelReadoutManagerCfg(flags, name="ITkPixelReadoutManager"))
 
@@ -64,5 +60,5 @@ if __name__=="__main__":
    sg.Dump = True
 
    # loop over 1 events
-   cfg.run(20)
+   cfg.run(1)
 

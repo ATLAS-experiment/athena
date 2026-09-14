@@ -37,7 +37,8 @@ def DigitizationMainServicesCfg(flags):
             acc.merge(PileUpMTAlgCfg(flags))
         else:
             from DigitizationConfig.PileUpConfig import PileUpEventLoopMgrCfg
-            acc = MainServicesCfg(flags, createEventLoopMgr=False)
+            # For MP, we let MainServicesCfg create the MpEventLoopMgr
+            acc = MainServicesCfg(flags, createEventLoopMgr=(flags.Concurrency.NumProcs > 0))
             acc.merge(PileUpEventLoopMgrCfg(flags))
     else:
         acc = MainServicesCfg(flags)

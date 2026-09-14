@@ -95,10 +95,10 @@ namespace Trig {
      * @see Trig::DecisionAccess
      * @see Trig::ITrigDecisionTool
      **/ 
-    virtual bool isPassed(const std::string& chain, 
+    virtual bool isPassed(std::string_view chain, 
                           unsigned int condition) const;
     /// Implementation of the ITrigDecisionTool function
-    virtual bool isPassed(const std::string& chain) const;
+    virtual bool isPassed(std::string_view chain) const;
     /// Implementation of the ITrigDecisionTool function
     virtual unsigned int isPassedBits( const std::string& chain ) const;
     

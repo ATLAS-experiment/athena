@@ -1,19 +1,21 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTRACKFINDINGTEST_TRACKVISUALIZATIONTOOL_H
 #define MUONTRACKFINDINGTEST_TRACKVISUALIZATIONTOOL_H
 
-#include <AthenaBaseComps/AthAlgTool.h>
-#include <MuonRecToolInterfacesR4/ITrackVisualizationTool.h>
-#include <MuonRecToolInterfacesR4/IRootVisualizationService.h>
-#include <MuonRecToolInterfacesR4/IRootVisualizationService.h>
-#include <MuonRecToolInterfacesR4/ITrackSeedingDiagnosticsTool.h>
-#include <ActsGeometryInterfaces/IExtrapolationTool.h>
+#include "AthenaBaseComps/AthAlgTool.h"
+#include "MuonRecToolInterfacesR4/ITrackVisualizationTool.h"
+#include "MuonRecToolInterfacesR4/IRootVisualizationService.h"
+#include "MuonRecToolInterfacesR4/IRootVisualizationService.h"
+#include "MuonRecToolInterfacesR4/ITrackSeedingDiagnosticsTool.h"
+#include "ActsGeometryInterfaces/IExtrapolationTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
+
+#include "ActsEvent/ContextUtility.h"
 
 #include "TColor.h"
-
-#include <TLegend.h>
+#include "TLegend.h"
 
 
 namespace MuonValR4{
@@ -108,6 +110,8 @@ namespace MuonValR4{
             ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool" ,"" };
             /** @brief Service handle of the visualization service */
             ServiceHandle<IRootVisualizationService> m_visualSvc{this, "VisualSvc", "MuonValR4::RootVisualizationService"};
+            /** @brief Service handle to the tracking geometry service */
+            ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
             /** @brief Token to present to the visualization service such that the display froms this 
              *          tool are grouped together */
             IRootVisualizationService::ClientToken m_clientToken{};
@@ -120,7 +124,7 @@ namespace MuonValR4{
             SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "SegmentContainer", "MuonSegmentsFromR4" };
 
             /** @brief Dependency on the geometry alignment */
-            ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+            ActsTrk::ContextUtility m_contextProvider{this};
             /** @brief Maximum canvases to draw */
             Gaudi::Property<unsigned> m_canvasLimit{this, "CanvasLimit", 5000};
             /** @brief If set to true each canvas is saved into a dedicated pdf file */ 

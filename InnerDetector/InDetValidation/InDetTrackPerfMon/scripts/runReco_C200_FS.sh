@@ -49,12 +49,14 @@ if [ ! -f $inputRDO ]; then
 fi
 
 ## running reconstruction
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 Reco_tf.py --CA \
+    --conditionsTag "default:${conditionsTag}" \
     --maxEvents ${nEvents} \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD} \
     --steering 'doRAWtoALL' \
-    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
+    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.athenaLegacyTrackingFlags' \
     --postInclude 'ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
     --preExec "flags.Tracking.useITkFTF=True; \
                flags.Tracking.doITkFastTracking=True; \

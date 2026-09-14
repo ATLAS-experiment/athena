@@ -63,17 +63,17 @@ class TrackFitterType(FlagEnum):
 # Flag for pixel calibration strategy during track finding
 # - use cluster as is (Uncalibrated)
 # - perform AnalogueClustering either before selecting
-#   measurements for extending tracks (AnalogueClustering)
+#   measurements for extending tracks (AnalogueClusteringBeforeSelection)
 # - or only apply the AnalogueClustering to selected measurements
-#   (AnalogueClusteringAfterSelection)
+#   (AnalogueClustering)
 # - or add NN corrections, again either on the selected measurements
 #   (NNClustering) or on all candidates (NNClusteringBeforeSelection)
 class PixelCalibrationStrategy(FlagEnum):
     Uncalibrated = "Uncalibrated"
+    AnalogueClusteringBeforeSelection = "AnalogueClusteringBeforeSelection"
     AnalogueClustering = "AnalogueClustering"
-    AnalogueClusteringAfterSelection = "AnalogueClusteringAfterSelection"
-    NNClustering = "NNClustering"
     NNClusteringBeforeSelection = "NNClusteringBeforeSelection"
+    NNClustering = "NNClustering"
 
     def usesCalibration(self):
         """whether a calibrator is needed at all"""
@@ -84,28 +84,28 @@ class PixelCalibrationStrategy(FlagEnum):
         return self in (PixelCalibrationStrategy.NNClustering,
                         PixelCalibrationStrategy.NNClusteringBeforeSelection)
 
-    def calibrateAfterSelection(self):
+    def calibrateBeforeSelection(self):
         """whether only the selected measurements are calibrated"""
-        return self in (PixelCalibrationStrategy.AnalogueClusteringAfterSelection,
+        return self in (PixelCalibrationStrategy.AnalogueClusteringBeforeSelection,
                         PixelCalibrationStrategy.NNClustering)
 
 # Flag for strip calibration strategy during track finding
 # - use cluster as is (Uncalibrated)
 # - use strip pitch / sqrt(12) as error either before selecting
-#   measurements for extending tracks (DigitalCalibration)
-# - or only apply it to selected measurements (DigitalCalibrationAfterSelection)
+#   measurements for extending tracks (DigitalCalibrationBeforeSelection)
+# - or only apply it to selected measurements (DigitalCalibration)
 class StripCalibrationStrategy(FlagEnum):
     Uncalibrated = "Uncalibrated"
+    DigitalCalibrationBeforeSelection = "DigitalCalibrationBeforeSelection"
     DigitalCalibration = "DigitalCalibration"
-    DigitalCalibrationAfterSelection = "DigitalCalibrationAfterSelection"
 
     def usesCalibration(self):
         """whether a calibrator is needed at all"""
         return self is not StripCalibrationStrategy.Uncalibrated
 
-    def calibrateAfterSelection(self):
+    def calibrateBeforeSelection(self):
         """whether only the selected measurements are calibrated"""
-        return self is StripCalibrationStrategy.DigitalCalibrationAfterSelection
+        return self is StripCalibrationStrategy.DigitalCalibrationBeforeSelection
 
 
 def createActsConfigFlags():
@@ -209,7 +209,7 @@ def createActsConfigFlags():
                                                                        # the files are located in /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/
                                                                        # this flag is used only if PixelCalibrationStrategy is one of the NN strategies
     actscf.addFlag('Acts.refitSeeds', False) # refit seeds for CKF initial parameters
-        
+
     # Ambiguity resolution    
     actscf.addFlag('Acts.doAmbiguityResolution', False)
     actscf.addFlag('Acts.AmbiguitySolverStrategy', AmbiguitySolverStrategy.Greedy, type=AmbiguitySolverStrategy)  # Define Ambiguity Solver Strategy

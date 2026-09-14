@@ -9,8 +9,8 @@
 #define TRKVKALVRTCORE_CFERPR_H
 
 namespace Trk {
-void cferpr(const long int ich, double *par, double *ref, const double s0,
-            double *errold, double *errnew);
+void cferpr(const long int ich, const double *par, const double *ref,
+            const double s0, const double *errold, double *errnew);
 }  // namespace Trk
 
 #endif

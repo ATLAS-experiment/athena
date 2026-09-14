@@ -815,8 +815,10 @@ namespace InDet{
 				errorMatrixV0, Chi2PerTrk, TrkAtVrtV0, Chi2V0,
 				*state, true);
 	    if(sc.isSuccess()) {
+        
+        std::array<double, 5> VKPerigee{};
+        std::array<double, 15> CovPerigee{};
 
-	      std::vector<double> VKPerigee, CovPerigee;
 	      sc = m_fitSvc->VKalVrtCvtTool(fitVertexV0, MomentumV0, errorMatrixV0, 0,
 					    VKPerigee, CovPerigee, *state);
 

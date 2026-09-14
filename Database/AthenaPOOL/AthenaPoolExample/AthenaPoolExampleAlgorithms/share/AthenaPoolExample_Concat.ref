@@ -37,10 +37,6 @@ StreamStream1                                       DEBUG data dependencies:
   + OUTPUT  ( 'DataHeader' , 'StoreGateSvc+StreamStream1' ) 
   + OUTPUT  ( 'SG::CompressionInfo' , 'StoreGateSvc+CompressionInfo_StreamStream1' ) 
   + OUTPUT  ( 'SG::SelectionVetoes' , 'StoreGateSvc+SelectionVetoes_StreamStream1' ) 
-MakeInputDH                                          INFO Name of Stream to be made Input: StreamStream1
-MakeInputDH                                         DEBUG data dependencies:
-  + INPUT   ( 'DataHeader' , 'StoreGateSvc+StreamStream1' ) 
-  + OUTPUT  ( 'DataHeader' , 'StoreGateSvc+StreamStream1_Input' ) 
 StreamStream2                                       DEBUG In initialize
 DecisionSvc                                          INFO Inserting stream: StreamStream2 with no Algs
 StreamStream2                                       DEBUG Found StoreGateSvc/StoreGateSvc store.

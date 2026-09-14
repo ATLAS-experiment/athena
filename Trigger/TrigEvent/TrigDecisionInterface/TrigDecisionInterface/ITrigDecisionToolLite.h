@@ -7,7 +7,7 @@
 
 // Framework include(s):
 #include "AsgTools/IAsgTool.h"
-
+#include <string_view>
 #include <string>
 #include <vector>
 
@@ -47,7 +47,7 @@ namespace Trig {
       virtual bool isPassed( const HLT::Identifier& chain, const EventContext& ctx ) const = 0;
 
       /// Get the physics decision for a HLT trigger chain, by string
-      virtual bool isPassed( const std::string& chain, const EventContext& ctx ) const = 0;
+      virtual bool isPassed( std::string_view chain, const EventContext& ctx ) const = 0;
 
       /// Get the physics decision for the OR of a number of HLT trigger chains, by identifier
       virtual bool isPassed( const std::vector<HLT::Identifier>& chains, const EventContext& ctx ) const = 0;

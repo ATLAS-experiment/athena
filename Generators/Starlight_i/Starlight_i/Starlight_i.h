@@ -46,10 +46,14 @@ protected:
   BooleanProperty m_doTauolappLheFormat{this, "doTauolappLheFormat", false};
   BooleanProperty m_suppressVMdecay{this, "suppressVMdecay", false};
   // Commands to setup starlight
-  StringArrayProperty m_InitializeVector{this, "Initialize", {} };
+  StringArrayProperty m_InitializeVector{this,
+                                         "Initialize",
+                                         {},
+                                         "List of parameters for Starlight initialization",
+                                         "GeneratorSettings<std::string>"};
 
   int              m_events{0}; // event counter
-  starlight*       m_starlight{};         // pointer to starlight instance // TODO convert to unique_ptr
+  std::unique_ptr<starlight> m_starlight{};   // pointer to starlight instance
   std::shared_ptr<randomGenerator> m_randomGenerator{};
   inputParameters  m_inputParameters;   // parameter instance
   double           m_axionMass{1.};

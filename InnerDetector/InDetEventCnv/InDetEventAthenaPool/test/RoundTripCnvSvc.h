@@ -43,8 +43,6 @@ public:
 
   virtual StatusCode disconnectOutput(const std::string& /*outputFile*/) override
   { std::abort(); }
-  virtual IPoolSvc* getPoolSvc() override
-  { std::abort(); }
   virtual Token* registerForWrite(Placement* /*placement*/,
                                         const void* /*obj*/,
                                         const RootType& /*classDesc*/) override

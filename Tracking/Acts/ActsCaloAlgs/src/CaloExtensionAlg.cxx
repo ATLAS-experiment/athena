@@ -123,6 +123,10 @@ namespace ActsTrk{
         auto extension = std::make_unique<CaloExtension>(track);
         /// Retrieve the last track parameters with a measurement state
         auto lastTrackPars = extension->lastParameters();
+        if (!lastTrackPars) {
+            ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - The track does not have any Acts::BoundTrack parameters");
+            return nullptr;
+        }
         using SurfaceRecordOptions = IExtrapolationTool::SurfaceRecordOptions;
         SurfaceRecordOptions propOpts{caloExit, IExtrapolationTool::VolumeAbort::atExit};
         propOpts.recordMaterial = true;
@@ -169,7 +173,7 @@ namespace ActsTrk{
         
         using Link_t = ElementLink<CaloExtensionContainer>;
         SG::WriteDecorHandle<xAOD::TrackParticleContainer, Link_t> decorHandle{m_extensionDecorKey, ctx};
-        
+       
         /** Loop over the track particles */
         for (const xAOD::TrackParticle* track : *idTracks) {
             Link_t& extensionLink = decorHandle(*track);

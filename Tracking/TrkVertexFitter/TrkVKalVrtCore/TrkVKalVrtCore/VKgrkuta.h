@@ -12,7 +12,7 @@
 
 namespace Trk {
 void vkgrkuta_(const double charge, const double step, double *vect,
-               double *vout, VKalVrtControlBase *CONTROL);
+               double *vout, const VKalVrtControlBase *CONTROL);
 
 }  // namespace Trk
 

@@ -227,6 +227,11 @@ class DerivationTest(WorkflowTest):
         if setup.custom_threads is not None:
             threads = setup.custom_threads
 
+        # If we're running a DAOD to DAOD job, the output stream is called D2AOD
+        out_stream = "DAOD"
+        if "inputDAOD_PHYSFile" in extra_args:
+            out_stream = "D2AOD"
+
         if "maxEvents" not in extra_args:
             base_events = 100
             events = threads * base_events + 1
@@ -234,7 +239,7 @@ class DerivationTest(WorkflowTest):
 
             if not multithreaded:
                 flush = 80
-                format_flush = ", ".join([f"\"DAOD_{format}\": {flush}" for format in formats])
+                format_flush = ", ".join([f"\"{out_stream}_{format}\": {flush}" for format in formats])
                 extra_args += f" --preExec 'flags.Output.TreeAutoFlush={{{format_flush}}}'"
 
         if "inputAODFile" not in extra_args and "inputDAOD_PHYSFile" not in extra_args:
@@ -246,16 +251,16 @@ class DerivationTest(WorkflowTest):
                 (f"ATHENA_CORE_NUMBER={threads} Derivation_tf.py"
                 f" --formats {' '.join(formats)}"
                 " --multiprocess --multithreadedFileValidation True"
-                " --athenaMPMergeTargetSize 'DAOD_*:0'"
+                f" --athenaMPMergeTargetSize '{out_stream}_*:0'"
                 " --sharedWriter True"
-                " --outputDAODFile myOutput.pool.root"
+                f" --output{out_stream}File myOutput.pool.root"
                 f" --imf False {extra_args}")
         else:
             self.command = \
                 (f"ATHENA_CORE_NUMBER={threads} Derivation_tf.py"
                 f" --formats {' '.join(formats)}"
                 " --multithreaded"
-                " --outputDAODFile myOutput.pool.root"
+                f" --output{out_stream}File myOutput.pool.root"
                 f" --imf False {extra_args}")
 
         # skip performance checks for now
@@ -263,8 +268,8 @@ class DerivationTest(WorkflowTest):
 
         self.output_checks = []
         for format in formats:
-            self.output_checks.append(FrozenTier0PolicyCheck(setup, f"DAOD_{format}", 10))
-            self.output_checks.append(MetadataCheck(setup, f"DAOD_{format}"))
+            self.output_checks.append(FrozenTier0PolicyCheck(setup, f"{out_stream}_{format}", 10))
+            self.output_checks.append(MetadataCheck(setup, f"{out_stream}_{format}"))
 
         super().__init__("_".join(test_def), run, type, steps, setup)
 
@@ -273,6 +278,9 @@ class GenerationTest(WorkflowTest):
     """Generation test."""
 
     def __init__(self, ID: str, run: WorkflowRun, type: WorkflowType, steps: List[str], setup: TestSetup, extra_args: str = "") -> None:
+        if "output" not in extra_args:
+            extra_args += " --outputEVNTFile myEVNT.pool.root"
+
         if "maxEvents" not in extra_args:
             extra_args += " --maxEvents 10"
 
@@ -288,7 +296,6 @@ class GenerationTest(WorkflowTest):
 
         self.command = \
             (f"Gen_tf.py --jobConfig {dsid}"
-             " --outputEVNTFile myEVNT.pool.root"
              f" --imf False {extra_args}")
 
         super().__init__(ID, run, type, steps, setup)

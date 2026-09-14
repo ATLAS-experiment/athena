@@ -1,26 +1,26 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthenaPoolCnvSvc )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Core Net )
+find_package( ROOT COMPONENTS Core RIO Tree Net )
 
 # Component(s) in the package:
 atlas_add_library( AthenaPoolCnvSvcLib
    AthenaPoolCnvSvc/*.h AthenaPoolCnvSvc/*.icc src/*.cxx
    PUBLIC_HEADERS AthenaPoolCnvSvc
    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES AthContainers AthLinks AthenaBaseComps AthenaKernel AthenaPoolUtilities CxxUtils DataModelRoot GaudiKernel PersistentDataModel PmbCxxUtils PoolSvcLib StoreGateLib StorageSvc TPTools
-   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainersInterfaces AthContainersRoot RootAuxDynIOHeaders RootUtils SGTools )
+   LINK_LIBRARIES AthContainers AthContainersInterfaces AthLinks AthenaBaseComps AthenaKernel AthenaPoolUtilities CxxUtils DataModelRoot GaudiKernel PersistentDataModel PoolSvcLib StoreGateLib StorageSvc TPTools
+   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} PmbCxxUtils RootAuxDynIOHeaders SGTools )
 
 atlas_add_component( AthenaPoolCnvSvc
    src/components/*.cxx
-   LINK_LIBRARIES AthenaPoolCnvSvcLib )
+   LINK_LIBRARIES AthenaPoolCnvSvcLib PmbCxxUtils )
 
 atlas_add_dictionary( AthenaPoolCnvSvcTestDict
    test/AthenaPoolCnvSvcTestDict.h
-   AthenaPoolCnvSvc/selection_test.xml
+   test/selection_test.xml
    LINK_LIBRARIES AthenaPoolCnvSvcLib
    NO_ROOTMAP_MERGE )
 

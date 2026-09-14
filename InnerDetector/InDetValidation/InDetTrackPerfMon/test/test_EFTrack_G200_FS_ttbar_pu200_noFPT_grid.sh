@@ -18,8 +18,8 @@
 pipelineName='G200'
 SampleName='ttbar_pu200_noFPT'  # as defined in samplesDict of InDetTrackPerfMon/scripts/getEFTrackSample.py
 OutSampleName="${pipelineName}_FS.${SampleName}"
-TrkCollName='TracccTrackParticles'
-TrkSeedCollName='TracccSeedTrackParticles'
+TrkCollName='InDetTrackParticles'
+TrkSeedCollName='SiSPSeedSegmentsActsPixelTrackParticles'
 referencePath='/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetTrackPerfMon/EFTrackRefereceHistograms/'
 referenceName="C100_FS.${SampleName}"
 referenceName_absPath="${referencePath}/IDTPM.${referenceName}.HIST.root"
@@ -69,12 +69,12 @@ if [ ! -f "${InputRDOfiles}" ]; then
     exit 1
 fi
 
-## Track reconstruction step
+## Track reconstruction step. See runReco_G200_FS.sh --help for list of supported options.
 run "${pipelineName}" \
   runReco_G200_FS.sh \
     -i ${InputRDOfiles} \
-    -o "${OutSampleName}.AOD.pool.root"
-    #-n 10
+    -o "${OutSampleName}.AOD.pool.root" \
+    "$@"
 
 ## Don't run if IDTPM json config is not found
 if [ ! -f "$IDTPMjsonConfig_absPath" ]; then
