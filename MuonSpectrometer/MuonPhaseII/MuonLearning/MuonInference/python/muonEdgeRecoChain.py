@@ -108,6 +108,7 @@ def main(args):
             "RequireMutualTopKEdges": not args.allowOneSidedMlEdges,
             "RecoverOrphanNodes": not args.disableOrphanRecovery,
             "SeedAnchorsPerComponent": args.seedAnchorsPerComponent,
+            "AnchorInnermostLayer": args.anchorInnermostLayer,
             "MinSegmentsPerComponent": args.minSegmentsPerComponent,
             "KeepBestSegmentPerChamber": not args.keepAllSegmentsPerChamber,
             "OutputLevel": output_level,
@@ -122,17 +123,28 @@ def main(args):
 
     ms_track_finder = cfg.getEventAlgo("MSTrackFinderAlg")
     ms_track_finder.OutputLevel = output_level
-    ms_track_finder.UseMlSeeder = run_ml_seeder
-    ms_track_finder.MlCandidateDecoration = "mlTrackComponent"
-    if filter_segment_container:
-        # SegmentEdgeInferenceAlg writes a VIEW of the original elements.
-        ms_track_finder.SegmentContainer = filtered_segment_key
-        # The decoration lives on the original owning container, not the view.
-        ms_track_finder.MlCandidateDecorationKey = (
-            "MuonSegmentsFromR4.mlTrackComponent"
+    if run_ml_seeder:
+        from MuonTrackFindingAlgs.TrackFindingConfig import MsTrackSeedingToolCfg
+        from AthenaConfiguration.ComponentFactory import CompFactory
+        baseline_seeder = cfg.popToolsAndMerge(MsTrackSeedingToolCfg(flags))
+        ml_seeder_segment_container = (
+            filtered_segment_key if filter_segment_container else "MuonSegmentsFromR4"
         )
-    ms_track_finder.MlFallbackToBaselineIfUndecorated = True
-    ms_track_finder.MlFallbackToBaselineIfNoCandidates = False
+        ms_track_finder.SeedingTool = CompFactory.MuonR4.MlMsTrackSeeder(
+            "MlMsTrackSeeder",
+            BaselineSeeder=baseline_seeder,
+            SegmentContainer=ml_seeder_segment_container,
+            CandidateDecoration="mlTrackComponent",
+            MinSegmentsPerCandidate=args.minSegmentsPerComponent,
+        )
+    elif filter_segment_container:
+        # Standard seeder: this is the actual combinatorics cut. Point
+        # MsTrackSeederTool's own geometric range-tree search at the
+        # ML-filtered segment view instead of the full MuonSegmentsFromR4,
+        # so both its candidate search and its resolveOverlaps() dedup run
+        # over fewer segments. (MSTrackFinderAlg/MsTrackFindingAlg itself
+        # has no SegmentContainer property - only the seeding tool's does.)
+        ms_track_finder.SeedingTool.SegmentContainer = filtered_segment_key
 
     if not args.skipTrackTester:
         from MuonTrackFindingTest.MsTrackFindingTester import MsTrackTesterCfg
@@ -213,6 +225,8 @@ if __name__ == "__main__":
                         help="Disable bounded one-sided recovery for nodes with no mutual top-K ML edge")
     parser.add_argument("--seedAnchorsPerComponent", type=int, default=0,
                         help="Launch this many ranked ML anchors per component; zero keeps every retained segment (default: 0)")
+    parser.add_argument("--anchorInnermostLayer", action="store_true", default=False,
+                        help="Restrict seed anchors to inner segment(s)")
     parser.add_argument("--minSegmentsPerComponent", type=int, default=2,
                         help="Require this many retained chambers in an ML component before seeding (default: 2)")
     parser.add_argument("--maxSegmentsPerBucket", type=int, default=2,

@@ -4,6 +4,7 @@
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 #include "xAODMuonViews/ContainerDecorator.h"
+#include "MuonStationIndex/MuonStationIndex.h"
 #include "Acts/Utilities/Helpers.hpp"
 #include <algorithm>
 #include <cmath>
@@ -50,6 +51,26 @@ private:
   std::vector<std::size_t> m_parent;
   std::vector<unsigned char> m_rank;
 };
+
+// Explicit radial ranking (0 = closest to the IP), independent of the
+// LayerIndex enum's underlying integer values. BarrelExtended is the
+// barrel's BI-equivalent chamber, so it ranks alongside Inner.
+int layerRadialRank(Muon::MuonStationIndex::LayerIndex layer) {
+  using enum Muon::MuonStationIndex::LayerIndex;
+  switch (layer) {
+    case Inner:
+    case BarrelExtended:
+      return 0;
+    case Middle:
+      return 1;
+    case Outer:
+      return 2;
+    case Extended:
+      return 3;
+    default:
+      return 4;
+  }
+}
 
 }  // namespace
 
@@ -324,16 +345,31 @@ StatusCode SegmentEdgeInferenceAlg::execute(const EventContext& ctx) const {
     // Only ranked component members launch seeds. The edge score therefore
     // reduces seed attempts directly rather than serving only as a label.
     std::vector<std::size_t> rankedNodes{retained};
-    std::ranges::sort(rankedNodes, isBetterNode);
-    const std::size_t nAnchors = m_seedAnchorsPerComponent.value() == 0
-        ? rankedNodes.size()
-        : std::min<std::size_t>(m_seedAnchorsPerComponent.value(),
-                                rankedNodes.size());
-    if (nAnchors == 0) {
+    if (m_anchorInnermostLayer.value()) {
+      // Anchor only on the inner segment(s)
+      int bestRank = std::numeric_limits<int>::max();
+      for (const std::size_t node : rankedNodes) {
+        bestRank = std::min(
+            bestRank,
+            layerRadialRank(Muon::MuonStationIndex::toLayerIndex(
+                graph.segments[node]->chamberIndex())));
+      }
+      std::erase_if(rankedNodes, [&](std::size_t node) {
+        return layerRadialRank(Muon::MuonStationIndex::toLayerIndex(
+                   graph.segments[node]->chamberIndex())) != bestRank;
+      });
+    } else {
+      std::ranges::sort(rankedNodes, isBetterNode);
+      const std::size_t nAnchors = m_seedAnchorsPerComponent.value() == 0
+          ? rankedNodes.size()
+          : std::min<std::size_t>(m_seedAnchorsPerComponent.value(),
+                                  rankedNodes.size());
+      rankedNodes.resize(nAnchors);
+    }
+    if (rankedNodes.empty()) {
       ++rejectedComponents;
       continue;
     }
-    rankedNodes.resize(nAnchors);
     std::ranges::sort(rankedNodes);
 
     const unsigned componentId = nextComponentId++;
@@ -343,7 +379,7 @@ StatusCode SegmentEdgeInferenceAlg::execute(const EventContext& ctx) const {
           componentId, static_cast<unsigned int>(isAnchor)};
     }
     retainedNodes += retained.size();
-    anchors += nAnchors;
+    anchors += rankedNodes.size();
     ++componentsKept;
   }
 
