@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODTRIGGER_VERSIONS_TRIGCOMPOSITE_V1_ICC
@@ -12,7 +12,7 @@
 #include <stdexcept>
 
 // xAOD include(s):
-#include "AthContainers/tools/CurrentEventStore.h"
+#include "AthContainers/CurrentContext.h"
 #include "AthContainers/DataVector.h"
 #include "AthContainers/normalizedTypeinfoName.h"
 #include "AthContainers/Accessor.h"
@@ -117,8 +117,8 @@ namespace xAOD {
    ElementLink< CONTAINER >
    TrigComposite_v1::objectLink( const std::string& name ) const {
 
-      // Retrieve current store once (would be better to pass EventContext everywhere)
-      auto sg = SG::CurrentEventStore::store();
+      // Retrieve current store once
+      const EventContext& ctx = Gaudi::Hive::currentContext();
 
       // Find the right object:
       const std::vector< std::string >& names = linkColNames();
@@ -127,7 +127,7 @@ namespace xAOD {
          checkTypes< CONTAINER >(linkColClids()[ i ], name);
          ElementLink< CONTAINER > link( linkColKeys()[ i ],
                                         linkColIndices()[ i ],
-                                        sg );
+                                        ctx );
          
          if (link.isValid()) {
             return link;
@@ -136,7 +136,7 @@ namespace xAOD {
          if (isRemapped()) {
             return ElementLink< CONTAINER >( linkColKeysRemap()[ i ],
                                              linkColIndicesRemap()[ i ],
-                                             sg );
+                                             ctx );
          }
 
          return link;
@@ -155,8 +155,8 @@ namespace xAOD {
          return nullptr;
       }
 
-      // Retrieve current store once (would be better to pass EventContext everywhere)
-      auto sg = SG::CurrentEventStore::store();
+      // Retrieve current store once
+      const EventContext& ctx = Gaudi::Hive::currentContext();
 
       // Now look for it:
       const std::vector< std::string >& names = linkColNames();
@@ -167,7 +167,7 @@ namespace xAOD {
          // Create a temporary ElementLink:
          ElementLink< DataVector< OBJECT > > link( linkColKeys()[ i ],
                                                    linkColIndices()[ i ],
-                                                   sg );
+                                                   ctx );
          if( link.isValid() ) {
             return *link;
          }
@@ -175,7 +175,7 @@ namespace xAOD {
          if (isRemapped()) {
            link = ElementLink< DataVector< OBJECT > >( linkColKeysRemap()[ i ],
                                                        linkColIndicesRemap()[ i ],
-                                                       sg );
+                                                       ctx );
            if( link.isValid() ) {
               return *link;
            }
@@ -226,8 +226,8 @@ namespace xAOD {
     std::vector<ElementLink< CONTAINER >> links;
     const std::string mangledName = collectionName + s_collectionSuffix;
 
-    // Retrieve current store once (would be better to pass EventContext everywhere)
-    auto sg = SG::CurrentEventStore::store();
+    // Retrieve current store once
+    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     const std::vector< std::string >& names = linkColNames();
     for( size_t i = 0; i < names.size(); ++i ) {
@@ -237,13 +237,13 @@ namespace xAOD {
        // Construct and add the link:
        ElementLink< CONTAINER > link(linkColKeys()[ i ],
                                      linkColIndices()[ i ],
-                                     sg);
+                                     ctx);
        if (link.isValid()) {
           links.push_back( link );
        } else if (isRemapped()) {
           link = ElementLink< CONTAINER >(linkColKeysRemap()[ i ],
                                           linkColIndicesRemap()[ i ],
-                                          sg);
+                                          ctx);
           links.push_back( link );
        } else {
           links.push_back( link );
