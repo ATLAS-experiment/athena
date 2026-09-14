@@ -194,7 +194,7 @@ namespace JiveXML {
     dataMap["prescaleListEF"] = std::move(prescaleListHLTVec);
     dataMap["passedTrigger"] = std::move(passedTrigger);
     dataMap["passedL1"] = std::move(passedL1);
-    dataMap["passedL2"] = std::move(passedHLT); // temporary. AtlantisJava doesn't know 'HLT' yet. jpt 23Jun15
+    dataMap["passedL2"] = passedHLT; // temporary. AtlantisJava doesn't know 'HLT' yet. jpt 23Jun15
     dataMap["passedEF"] = std::move(passedHLT); // temporary. AtlantisJava doesn't know 'HLT' yet. jpt 23Jun15
     dataMap["energySumEt"] = std::move(energySumEt);
     dataMap["energyEx"] = std::move(energyEx);
