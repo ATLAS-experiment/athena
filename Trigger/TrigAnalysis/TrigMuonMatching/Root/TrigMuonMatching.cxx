@@ -341,7 +341,7 @@ namespace Trig {
     const std::vector< Trig::Feature<xAOD::MuonContainer> > MuFeatureContainers = fc.get<xAOD::MuonContainer>();
 #endif 
     
-    for(auto mucont : MuFeatureContainers){
+    for(const auto & mucont : MuFeatureContainers){
       for(auto mu : *mucont.cptr()){
 
 	// l1 matching
