@@ -77,7 +77,7 @@ def createTauConfigFlags():
 
 
     tau_cfg.addFlag("Tau.doTausRUs", False)
-    tau_cfg.addFlag("Tau.TausRUsModelFile", "tausrus.onnx") # TODO: put this in cvmfs
+    tau_cfg.addFlag("Tau.TausRUsModelFile", "tauRecTools/R22_preprod/tausrus_6.8.26.onnx")
     tau_cfg.addFlag("Tau.TausRUsMinPt", lambda prevFlags: prevFlags.Tau.MinPtDAOD)
     # Inference-as-a-service config (optional)
     tau_cfg.addFlag("Tau.TausRUsUseTriton", False)
