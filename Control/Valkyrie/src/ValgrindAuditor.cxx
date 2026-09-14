@@ -12,14 +12,40 @@
 
 // STL includes
 #include <algorithm>
+#include <cctype>
 #include <iterator>
 #include <limits>
-
-// Boost includes
-#include <boost/algorithm/string.hpp>
+#include <regex>
 
 using std::string;
+namespace {
+  static std::string to_lower_copy(const std::string& s)
+  {
+    std::string result(s);
+    std::transform(result.begin(), result.end(), result.begin(),
+                   [](unsigned char c) { return std::tolower(c); });
+    return result;
+  }
 
+  // Helper to decode name/event pair from string (e.g. MyAlg.initialize)
+  StatusCode decodeNameEvt(const std::string& s, ValgrindAuditor::NameEvt& nameEvt)
+  {
+    // Find last(!) "." delimiter (earlier ones might be part of regexp)
+    string::size_type loc = s.rfind('.');
+    if ( loc==string::npos ) return StatusCode::FAILURE;
+
+    try {
+      nameEvt.first = ValgrindAuditor::Regex(s.substr(0,loc));
+    }
+    catch ( const std::regex_error& ) {
+      return StatusCode::FAILURE;
+    }
+    
+    nameEvt.second = s.substr(loc+1);
+    
+    return StatusCode::SUCCESS;
+  }
+}
 // Constructor
 ValgrindAuditor::ValgrindAuditor(const std::string& name,
                                  ISvcLocator* pSvcLocator)
@@ -87,9 +113,9 @@ StatusCode ValgrindAuditor::initialize()
   // Create regular expressions from algorithm names
   for( const std::string& re : m_algs ) {
     try {
-      m_algsRegEx.push_back( boost::regex(re) );
+      m_algsRegEx.push_back( std::regex(re) );
     }
-    catch ( const boost::regex_error& ) {
+    catch ( const std::regex_error& ) {
       msgStream() << MSG::ERROR << "Ignoring invalid regular expression: " << re << endmsg;
     }
   }
@@ -149,8 +175,7 @@ void ValgrindAuditor::handle( const Incident& inc )
   }
 
   // Check if the incident appears at beginning or end of interval
-  std::vector< std::pair<NameEvt,NameEvt> >::const_iterator h;
-  for (h=m_hooks.begin(); h!=m_hooks.end(); ++h) {
+  for (auto h = m_hooks.begin(); h!=m_hooks.end(); ++h) {
     if ( h->first.second=="incident" ) do_before(inc.type(), "incident");
     if ( h->second.second=="incident" ) do_after(inc.type(), "incident");
   }
@@ -164,14 +189,14 @@ void ValgrindAuditor::before (const std::string& event, const std::string& name,
                               const EventContext&)
 {
   if ( event == IAuditor::Execute ) do_beforeExecute(name);
-  else do_before(name, boost::to_lower_copy(event));
+  else do_before(name, to_lower_copy(event));
 }
 
 void ValgrindAuditor::after(const std::string& event, const std::string& name,
                             const EventContext&, const StatusCode&)
 {
   if ( event == IAuditor::Execute ) do_afterExecute(name);
-  else do_after(name, boost::to_lower_copy(event));
+  else do_after(name, to_lower_copy(event));
 }
 
 
@@ -213,10 +238,9 @@ void ValgrindAuditor::do_afterExecute(const std::string& name)
  */
 void ValgrindAuditor::do_before(const std::string& name, const std::string& hook)
 {
-  std::vector< std::pair<NameEvt,NameEvt> >::const_iterator iter;
 
-  for (iter=m_hooks.begin(); iter!=m_hooks.end(); ++iter) {
-    if ( boost::regex_match(name, iter->first.first) &&
+  for (auto iter=m_hooks.begin(); iter!=m_hooks.end(); ++iter) {
+    if ( std::regex_match(name, iter->first.first) &&
          iter->first.second == hook ) {
       m_valSvc->callgrindStartInstrumentation();
       if ( msgLevel() <= MSG::DEBUG )
@@ -231,10 +255,8 @@ void ValgrindAuditor::do_before(const std::string& name, const std::string& hook
  */
 void ValgrindAuditor::do_after(const std::string& name, const std::string& hook)
 {
-  std::vector< std::pair<NameEvt,NameEvt> >::const_iterator iter;
-
-  for (iter=m_hooks.begin(); iter!=m_hooks.end(); ++iter) {
-    if ( boost::regex_match(name, iter->second.first) &&
+  for (auto iter=m_hooks.begin(); iter!=m_hooks.end(); ++iter) {
+    if ( std::regex_match(name, iter->second.first) &&
          iter->second.second == hook ) {
       m_valSvc->callgrindStopInstrumentation();
       if ( msgLevel() <= MSG::DEBUG )
@@ -255,26 +277,7 @@ void ValgrindAuditor::do_after(const std::string& name, const std::string& hook)
  * Decodes the intervals
  */
 
-namespace {
-  // Helper to decode name/event pair from string (e.g. MyAlg.initialize)
-  StatusCode decodeNameEvt(const std::string& s, ValgrindAuditor::NameEvt& nameEvt)
-  {
-    // Find last(!) "." delimiter (earlier ones might be part of regexp)
-    string::size_type loc = s.rfind('.');
-    if ( loc==string::npos ) return StatusCode::FAILURE;
 
-    try {
-      nameEvt.first = boost::regex(s.substr(0,loc));
-    }
-    catch ( const boost::regex_error& ) {
-      return StatusCode::FAILURE;
-    }
-    
-    nameEvt.second = s.substr(loc+1);
-    
-    return StatusCode::SUCCESS;
-  }
-}
 
 StatusCode ValgrindAuditor::decodeIntervals()
 {  
@@ -313,10 +316,7 @@ StatusCode ValgrindAuditor::decodeIntervals()
  */
 bool ValgrindAuditor::algMatch(const std::string& name)
 {
-  std::vector<boost::regex>::const_iterator iter;
-  for ( iter=m_algsRegEx.begin(); iter!=m_algsRegEx.end(); ++iter ) {
-    if ( boost::regex_match(name,*iter) ) return true;
-  }
-  return false;
+  return std::any_of(m_algsRegEx.begin(), m_algsRegEx.end(),
+                     [&](const std::regex& re) { return std::regex_match(name, re); });
 }
     

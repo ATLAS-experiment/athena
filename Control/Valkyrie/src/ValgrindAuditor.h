@@ -5,11 +5,11 @@
 #ifndef VALKYRIE_VALGRINDAUDITOR_H
 #define VALKYRIE_VALGRINDAUDITOR_H
 
-// STL/Boost includes
+// STL includes
+#include <regex>
 #include <string>
 #include <vector>
 #include <utility>
-#include <boost/regex.hpp>
 
 // FrameWork includes
 #include "Gaudi/Auditor.h"
@@ -60,10 +60,17 @@ public:
   virtual void do_afterExecute(const std::string& name);
 
 public:
+  class Regex : public std::regex {
+  public:
+    Regex() = default;
+    explicit Regex(const std::string& pattern,std::regex::flag_type flags = std::regex::ECMAScript): std::regex(pattern, flags), m_pattern(pattern) {}
+    explicit Regex(const char* pattern, std::regex::flag_type flags = std::regex::ECMAScript): std::regex(pattern, flags), m_pattern(pattern) {}
+    const std::string& str() const {return m_pattern;}
+  private:
+    std::string m_pattern;
+  };
   /// Typedef for algorithm/event pair, e.g. ("MyAlg","initialize")
-  typedef std::pair<boost::regex,std::string> NameEvt;
-
-
+  typedef std::pair<Regex, std::string> NameEvt;
 private:
   /// Handle to ValgrindSvc
   ServiceHandle<IValgrindSvc> m_valSvc;
@@ -84,7 +91,7 @@ private:
   unsigned int m_eventCounter;
 
   /// Regular expressions for algorithm name matching
-  std::vector<boost::regex> m_algsRegEx;
+  std::vector<std::regex> m_algsRegEx;
 
   /// Internal storage of intervals
   std::vector< std::pair<NameEvt,NameEvt> > m_hooks;
