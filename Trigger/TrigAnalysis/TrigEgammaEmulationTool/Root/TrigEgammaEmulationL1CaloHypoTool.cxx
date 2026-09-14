@@ -22,7 +22,7 @@ TrigEgammaEmulationL1CaloHypoTool::TrigEgammaEmulationL1CaloHypoTool( const std:
 bool TrigEgammaEmulationL1CaloHypoTool::emulate(  const Trig::TrigData &input, bool &pass ) const
 {
   pass=false;
-  if( !input.l1 ){
+  if( !input.l1 )[[unlikely]]{
     ATH_MSG_WARNING("L1 not found. pointer is null");
     return false;
   }
@@ -36,7 +36,7 @@ bool TrigEgammaEmulationL1CaloHypoTool::emulate(  const Trig::TrigData &input, b
 bool TrigEgammaEmulationL1CaloHypoTool::decide(  const Trig::TrigData &input ) const
 {
   auto l1 = input.l1;
-  if (!l1)[unlikely]{ 
+  if (!l1)[[unlikely]]{ 
     ATH_MSG_WARNING("L1 not found. pointer is null");
     return false;
   }
@@ -77,7 +77,7 @@ bool TrigEgammaEmulationL1CaloHypoTool::decide(  const Trig::TrigData &input ) c
   ATH_MSG_DEBUG("Apply L1 Et cut " << m_l1threshold << " cluster emE " << emE << " eta " << eta);
   if (l1item.contains("V")) {
     ATH_MSG_DEBUG("L1 (V) CUT");
-    if (!variableEtL1(l1item,emE,eta)) {
+    if (!variableEtL1(std::move(l1item),emE,eta)) {
       ATH_MSG_DEBUG("rejected");
       return false;
     }
