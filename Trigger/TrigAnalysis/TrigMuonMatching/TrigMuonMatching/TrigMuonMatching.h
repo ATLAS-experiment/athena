@@ -40,20 +40,20 @@ namespace Trig {
 			     const double DelR = 0.2) const override;
 
       virtual Bool_t matchL2SA(const xAOD::Muon* mu,
-			       const std::string &l1item,
-			       const std::string & chain,
+			       std::string_view l1item,
+			       std::string_view chain,
 			       const double DelR = 0.2) const override;
 
       virtual Bool_t matchL2CB(const xAOD::Muon* mu,
-			       const std::string & chain,
+			       std::string_view chain,
 			       const double DelR = 0.2) const override;
       
       virtual Double_t minDelR(const xAOD::Muon* mu,
-			       const std::string &chain,
+			       std::string_view chain,
 			       const double mindelR = 0.1) const override;
       
       virtual Double_t minDelRL1(const xAOD::Muon* mu,
-				 const std::string &l1item,
+				 std::string_view l1item,
 				 const double DelR = 0.2) const override;
       
       virtual Bool_t matchDimuon(const xAOD::Muon* mu1,
