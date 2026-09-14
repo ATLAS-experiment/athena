@@ -240,7 +240,7 @@ JetTriggerDecoratorAlg::JetTriggerDecoratorAlg(const std::string& name,
     if (m_doHLTMatching) {
       if (m_useEmulationTool)
         ANA_MSG_DEBUG(m_trigger << " isPassed "
-                                << m_emulationTool->isPassed(m_trigger));
+                                << m_emulationTool->isPassed(m_trigger.value()));
       else {
         hltJetsFromCont = SG::makeHandle(m_HLTJetsInKey, ctx);
         ANA_CHECK(hltJetsFromCont.isValid());
@@ -255,7 +255,7 @@ JetTriggerDecoratorAlg::JetTriggerDecoratorAlg(const std::string& name,
         emulatedJets = {};
     if (m_doHLTMatching && m_useEmulationTool)
       emulatedJets = m_emulationTool->getEmulatedJets(m_trigger);
-    bool isTrigPassed = m_trigDecisionTool->isPassed(m_trigger);
+    bool isTrigPassed = m_trigDecisionTool->isPassed(m_trigger.value());
     const TrigConf::HLTChain* hltChain =
         m_trigDecisionTool->ExperimentalAndExpertMethods()
             .getChainConfigurationDetails(m_trigger);
