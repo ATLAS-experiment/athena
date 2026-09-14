@@ -95,6 +95,13 @@ def AddTauIDDecorationCfg(flags, **kwargs):
         scoreNames.append(tools[-1].NewScoreName)
         WPNames += tools[-1].DecorWPNames
 
+        # Add the dedicated e-veto GNN score and WP decoration when the standard GNTauID configuration branch is active. 
+        tools.append( acc.popToolsAndMerge(tauTools.TauGNNeVetoEvaluatorCfg(flags, applyLooseTrackSel=True, tauContainerName=tauContainerKey)) )
+        tools.append( acc.popToolsAndMerge(tauTools.TauGNNeVetoWPDecoratorCfg(flags, tauContainerName=tauContainerKey)) )
+        if tools[-1].ScoreName != "RNNEleScore": scoreNames.append(tools[-1].ScoreName)
+        scoreNames.append(tools[-1].NewScoreName)
+        WPNames += tools[-1].DecorWPNames
+
     if tools:
         kwargs.setdefault("DoEvetoWP", doEvetoWP)
         kwargs.setdefault("ScoreDecorationKeys", scoreNames)

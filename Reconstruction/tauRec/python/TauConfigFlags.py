@@ -74,6 +74,16 @@ def createTauConfigFlags():
                         ["GNTauVL_v0prune", "GNTauL_v0prune", "GNTauM_v0prune", "GNTauT_v0prune"],
                         ["GNTauVL_v1trunc", "GNTauL_v1trunc", "GNTauM_v1trunc", "GNTauT_v1trunc"]
                     ])
+    # GNN eVeto config flags
+    tau_cfg.addFlag("Tau.TauGNNeVetoConfig", ["GNTaueVeto_2025Retune.onnx"])
+    tau_cfg.addFlag("Tau.TauGNNeVetoWP", ["GNTaueVeto_flat_model_1p.root", "GNTaueVeto_flat_model_1p.root", "GNTaueVeto_flat_model_1p.root"])
+    tau_cfg.addFlag("Tau.TauGNNeVetoScoreName", "TauGNNeVetoScore")
+    tau_cfg.addFlag("Tau.TauGNNeVetoTransScoreName", "TauGNNeVetoSigTrans")
+    tau_cfg.addFlag("Tau.TauGNNeVetoMaxTracks", [30,10])
+    tau_cfg.addFlag("Tau.TauGNNeVetoMaxClusters", [20,6])
+    tau_cfg.addFlag("Tau.TauGNNeVetoNodeNameTau", "TauGNNeVeto_pb")
+    tau_cfg.addFlag("Tau.TauGNNeVetoNodeNameJet", "TauGNNeVeto_pu")
+    tau_cfg.addFlag("Tau.TauGNNeVetoDecorWPNames", ["TauGNNeVeto_L", "TauGNNeVeto_M", "TauGNNeVeto_T"])
 
     # PanTau config flags
     from PanTauAlgs.PanTauConfigFlags import createPanTauConfigFlags
