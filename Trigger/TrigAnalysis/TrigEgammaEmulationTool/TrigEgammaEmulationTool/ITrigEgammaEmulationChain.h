@@ -7,7 +7,6 @@
 #define ITrigEgammaEmulationChain_h
 
 #include "AsgTools/IAsgTool.h"
-//#include "PATCore/AcceptData.h"
 #include <string>
 
 namespace asg{
