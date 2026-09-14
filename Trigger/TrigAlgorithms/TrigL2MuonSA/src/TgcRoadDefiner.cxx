@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TgcRoadDefiner.h"
@@ -236,10 +236,11 @@ StatusCode TrigL2MuonSA::TgcRoadDefiner::defineRoad(const EventContext& ctx,
         }
       } else {
         ATH_MSG_ERROR("Null pointer to ITrigMuonBackExtrapolator");
+        delete muonSA;
         return StatusCode::FAILURE;
       }
 
-      if (muonSA) delete muonSA;
+      delete muonSA;
       
       double theta = 0.;
       if (extrInnerEta != 0.) {
