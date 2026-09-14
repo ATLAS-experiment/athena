@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PtFromAlphaBeta.h"
@@ -125,7 +125,7 @@ StatusCode TrigL2MuonSA::PtFromAlphaBeta::setPt(TrigL2MuonSA::TrackPattern& trac
   }//use pt calculated from CSC-gamma
   
   
-  bool pTCB = false;
+  constexpr bool pTCB = false;
   if( pTCB ){
     double Co_APt = 0.;
     double Co_BPt = 0.;
