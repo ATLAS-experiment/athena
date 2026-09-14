@@ -1107,11 +1107,11 @@ StatusCode TrigL2MuonSA::NswStationFitter::calcMergedHit(TrigL2MuonSA::TrackPatt
   double MmSegZ = 7526.329;
   double MmSegR = 0;
   if (mse_stgc < 1.e7 && mse_mm < 1.e7) {
-    r = r_stgc;
+    r = std::move(r_stgc);
     copy(r_mm.begin(), r_mm.end(), back_inserter(r));
     z = z_stgc;
     copy(z_mm.begin(), z_mm.end(), back_inserter(z));
-    isStgc = isStgc_stgc;
+    isStgc = std::move(isStgc_stgc);
     copy(isStgc_mm.begin(), isStgc_mm.end(), back_inserter(isStgc));
 
     if(side_stgc < -1.*ZERO_LIMIT){
