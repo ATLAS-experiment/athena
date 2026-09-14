@@ -9,10 +9,12 @@
 #include "MuonRecToolInterfacesR4/IFastRecoVisualizationTool.h"
 #include "MuonSpacePoint/SpacePoint.h"
 #include "MuonTrackEvent/ExpandedSector.h"
-
+#include "xAODMuonPrepData/UtilFunctions.h"
 
 namespace MuonR4::FastReco{
     using StIndex = GlobalPatternFinder::StIndex;
+
+    static const SpacePointPerLayerSorter s_spSorter{};
 
     /** @brief Base class for hit struct containing hit information. */
     struct GlobalPatternFinder::HitPayload{
@@ -22,49 +24,40 @@ namespace MuonR4::FastReco{
          *  @param localToGlobal The transformation from local to global coordinates
          *  @param locLayer The layer number in the sector frame
          *  @param station The station index */
-        explicit HitPayload(const SpacePoint* sp,
+        explicit HitPayload(const Acts::GeometryContext& gctx,
+                            const SpacePoint* sp,
                             const SpacePointBucket* bucket,
-                            const Amg::Transform3D& localToGlobal,
-                            uint8_t locLayer,
-                            StIndex station);
+                            const Amg::Transform3D& localToGlobal);
+        /** @brief Sensor direction */
+        Amg::Vector3D sensorDir(const Acts::GeometryContext& gctx) const;
 
         /** @brief Hit contribution contribution to the residual variance 
                    due to its intrinsic position uncertainty.
          *  @param contractionVector The contraction vector to compute the residual variance
          *  @param isProjected Whether the hit has been projected
          *  @return Residual variance contribution */
-        double residualVariance(const Amg::Vector3D& contractionVector, 
+        double residualVariance(const Acts::GeometryContext& gctx, 
+                                const Amg::Vector3D& contractionVector, 
                                 const bool isProjected) const;
 
         /** @brief Global position */
         Amg::Vector3D position{Amg::Vector3D::Zero()};
-        /** @brief Global sensor direction of the precision measurement */
-        Amg::Vector3D sensorDir{Amg::Vector3D::Zero()};
-        /** @brief For strip hits with phi: we store the measurement direction that is 
-                   independent of sensorDir, which is the eta measurement direction if
-                   the strips are orthogonal, the phi measurement direction otherwise. 
-                   
-                   For straw hits, the x component is repurposed to store the trasnverse
-                   covariance of the drift radius. */
-        Amg::Vector3D secondaryMeasDir{Amg::Vector3D::Zero()};
         /** @brief Pointer to the underlying hit */
         const SpacePoint* sp{nullptr};
         /** @brief Pointer to the parent bucket */
         const SpacePointBucket* bucket{nullptr};
+        /** @brief Associated detector surface */
+        const Acts::Surface& surface{xAOD::muonSurface(sp->primaryMeasurement())};
         /** @brief Cached angular covariance [rad^2] of the hit in the phi angle */
         double phiCov{0.};
+        /** @brief Strip angle when the strips are non-orthogonal */
+        double stripAngle{0.};
         /** @brief Station index */
-        StIndex station{};
+        StIndex station{toStationIndex(sp->msSector()->chamberIndex())};
         /** @brief Layer number in the sector frame */
-        uint8_t locLayer{0u};
-        /** @brief Is the hit a straw (otherwise unused padding) */
-        bool isStraw{false};
+        uint8_t locLayer{static_cast<uint8_t>(s_spSorter.sectorLayerNum(*sp))};
         /** @brief Is precision hit */
-        bool isPrecision{false};
-        /** @brief Does the hit measure phi (otherwise unused padding) */
-        bool measuresPhi{false};
-        /** @brief Does the hit measure eta (otherwise unused padding) */
-        bool measuresEta{false};
+        bool isPrecision{isPrecisionHit(*sp)};
         /** @brief Are the strips non-orthogonal */
         bool nonOrthogonalStrips{false};
         /** @brief Equal operator: it compares the underlying hit */
@@ -167,18 +160,21 @@ namespace MuonR4::FastReco{
             *  @param testHit: test hit information
             *  @param beamSpot: Beam spot position, needed to update the pattern line
             *  @return: result of the test, including the computed line residual and acceptance window */
-        LineTestRes checkLineComp(const CandidateHit& testHit,
-                                    const Amg::Vector3D& beamSpot);
+        LineTestRes checkLineComp(const Acts::GeometryContext& gctx,
+                                  const CandidateHit& testHit,
+                                  const Amg::Vector3D& beamSpot);
         /** @brief Method to compute the residual of a test hit against the pattern line
             *  @param testHit: test hit information
             *  @return: Test result holding the residual and acceptance window. The decision is set later. */
-        LineTestRes computeLineResidual(const CandidateHit& testHit) const;
+        LineTestRes computeLineResidual(const Acts::GeometryContext& gctx,
+                                        const CandidateHit& testHit) const;
         /** @brief Project a certain hit position onto the bending plane where the pattern is defined. 
             *         The hit is moved along the sensor direction if it does not measure phi, 
             *         or is rotated around the Z axis if it does.
             *  @param hit: hit whose position is to be projected
             *  @return: projected position */
-        Amg::Vector3D projToPhiPlane(const HitPayload& hit) const;
+        Amg::Vector3D projToPhiPlane(const Acts::GeometryContext& gctx,
+                                     const HitPayload& hit) const;
         /** @brief Method to check the phi compatibility of a test hit with a given pattern
             *  @param hit: hit to be checked
             *  @return: true if the test hit is phi compatible with the pattern, false otherwise */
@@ -192,7 +188,8 @@ namespace MuonR4::FastReco{
         void moveLineAnchorHit(const CandidateHit& refHit);
         /** @brief Update the line parameters based on the current hits
             *  @param beamSpot: position of the beam spot, needed when there are not enough hits */
-        void updateLineParameters(const Amg::Vector3D& beamSpot);
+        void updateLineParameters(const Acts::GeometryContext& gctx,
+                                  const Amg::Vector3D& beamSpot);
         /** @brief Helper method to update the pattern phi and bending plane normal */
         void updatePatternPhi();
         /** @brief Return the mean normalized residual squared */

@@ -67,6 +67,11 @@ namespace MuonR4{
                 estimateStartParameters(const EventContext& ctx,
                                         const MsTrackSeed& seed) const override final;
 
+            /**  @copydoc ITrackSeedingTool::estimateQtimesP  */
+            virtual double estimateQtimesP(const EventContext& ctx,
+                                           const Amg::Vector3D& planeNorm,
+                                           std::span<const PosMomPair_t> circlePoints) const override final;
+
             /** @copydoc ITrackSeedingDiagnosticsTool::wthinBounds */
             virtual bool withinBounds(const Amg::Vector2D& projPos,
                                       const Location loc) const override final;
@@ -105,8 +110,7 @@ namespace MuonR4{
              *  @param segments: Reference to the segment container to construct. */
             SearchTree_t constructTree(const Acts::GeometryContext& tgContext,
                                        const xAOD::MuonSegmentContainer& segments) const;
-            
-            using PosMomPair_t = std::pair<Amg::Vector3D, Amg::Vector3D>;
+
             /** @brief Estimate the charge times momentum of a muon candidate when three points 
              *         are available. The given position and direction of each point need to be projected onto the given 
              *         phi plane, and the muon trajectory is approximated as 2D trajectory within this plane.
@@ -177,28 +181,24 @@ namespace MuonR4{
             /** @brief The list of field steps in the force field integration */
             std::vector<double> m_fieldExtpSteps{};
             /** @brief The radius of he barrel cylinder */
-            DoubleProperty m_barrelRadius{this, "BarrelRadius", 7.*Gaudi::Units::m};
+            Gaudi::Property<double> m_barrelRadius{this, "BarrelRadius", 7.*Gaudi::Units::m};
             /** @brief The maximum length of the barrel cylinder, if 
              *         not capped by the placement of the endcap discs */
-            DoubleProperty m_barrelLength{this, "BarrelLength", 25.*Gaudi::Units::m};
+            Gaudi::Property<double> m_barrelLength{this, "BarrelLength", 25.*Gaudi::Units::m};
             /** @brief Position of the endcap discs */
-            DoubleProperty m_endcapDiscZ{this, "EndcapDiscZ", 15.*Gaudi::Units::m};
+            Gaudi::Property<double> m_endcapDiscZ{this, "EndcapDiscZ", 15.*Gaudi::Units::m};
             /** @brief Radius of the endcap discs */
-            DoubleProperty m_endcapDiscRadius{this, "EndcapRadius", 13.*Gaudi::Units::m};
+            Gaudi::Property<double> m_endcapDiscRadius{this, "EndcapRadius", 13.*Gaudi::Units::m};
             /** @brief Maximum separation of point on the cylinder to be picked up
               *         onto a seed */
-            DoubleProperty m_seedHalfLength{this, "SeedHalfLength", 25.*Gaudi::Units::cm};
-            /** @brief Momentum resolution in the barrel */
-            DoubleProperty m_barrelMomentumRes{this, "BarrelMomentumResolution", 0.05};
-            /** @brief Momentum resolution in the endcap */
-            DoubleProperty m_endcapMomentumRes{this, "EndcapMomentumResolution", 0.1};
+            Gaudi::Property<double> m_seedHalfLength{this, "SeedHalfLength", 25.*Gaudi::Units::cm};
             /** @brief number of steps between two segments to integrate the magnetic field */
-            UnsignedIntegerProperty m_nFieldSteps{this, "nFieldSteps", 10};
+            Gaudi::Property<unsigned> m_nFieldSteps{this, "nFieldSteps", 10};
             /** @brief Pointer to the segement selection tool which compares
              *         two segments for their compatibilitiy */
             ToolHandle<ISegmentSelectionTool> m_segSelector{this, "SegmentSelectionTool" , "" };
             /** @brief Tracking geometry tool */
-            ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
+           ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
 
             /** @brief Utility to fetch the geometry, magnetic field and calibration context in the event */
             ActsTrk::ContextUtility m_ctxProvider{this};

@@ -23,9 +23,6 @@ namespace MuonR4{
      *         segment is in the first BMS eta station on the A-side in sector 12
      *  @param seg: Reference to the segment from which the id should be printed */
     std::string printID(const xAOD::MuonSegment& seg);
-    /** @brief Print the details of a segment
-     *  @param seg: Reference to the segment from which the details should be printed */
-    std::string printSegment(const xAOD::MuonSegment& seg);
     /** @brief Returns the number of associated Uncalibrated measurements
      *  @param segment: Reference to the segment of interest */
     std::size_t nMeasurements(const xAOD::MuonSegment& segment);

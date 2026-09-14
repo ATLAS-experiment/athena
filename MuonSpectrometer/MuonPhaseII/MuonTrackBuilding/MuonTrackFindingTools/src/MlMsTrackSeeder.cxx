@@ -97,4 +97,12 @@ MlMsTrackSeeder::estimateStartParameters(
   return m_seedParameterEstimator->estimateStartParameters(ctx, seed);
 }
 
+double MlMsTrackSeeder::estimateQtimesP(
+    const EventContext& ctx,
+    const Amg::Vector3D& planeNorm,
+    std::span<const PosMomPair_t> circlePoints) const {
+  return m_seedParameterEstimator->estimateQtimesP(ctx, planeNorm,
+                                                   circlePoints);
+}
+
 }  // namespace MuonR4

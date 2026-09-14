@@ -9,6 +9,8 @@
 
 #include "MuonFastRecoHelpers/GlobalPatternFinder.h"
 
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
+
 namespace MuonR4 {
     /// @brief Algorithm performing global pattern recognition. 
     /// 

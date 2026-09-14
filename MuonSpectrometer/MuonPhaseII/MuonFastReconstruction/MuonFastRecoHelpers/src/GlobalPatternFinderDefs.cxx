@@ -4,7 +4,6 @@
 
 #include "MuonFastRecoHelpers/GlobalPatternFinderDefs.h"
 
-#include "MuonSpacePoint/SpacePointHelpers.h"
 #include "MuonDetDescrUtils/MuonSectorMapping.h"
 #include "FourMomUtils/P4Helpers.h"
 
@@ -45,111 +44,117 @@ namespace {
 namespace MuonR4::FastReco {
     using namespace Acts::UnitLiterals;
     
-    GlobalPatternFinder::HitPayload::HitPayload(const SpacePoint* sp,
+    GlobalPatternFinder::HitPayload::HitPayload(const Acts::GeometryContext& gctx,
+                                                const SpacePoint* spacepoint,
                                                 const SpacePointBucket* bucket,
-                                                const Amg::Transform3D& localToGlobal,
-                                                uint8_t locLayer,
-                                                StIndex station)
-        : position{localToGlobal * sp->localPosition()}, 
-          sp{sp}, bucket{bucket}, station{station}, locLayer{locLayer},
-          isStraw{sp->isStraw()}, isPrecision{isPrecisionHit(*sp)}, 
-          measuresPhi{sp->measuresPhi()}, measuresEta{sp->measuresEta()} {
+                                                const Amg::Transform3D& localToGlobal)
+        : position{localToGlobal * spacepoint->localPosition()}, 
+          sp{spacepoint}, bucket{bucket} {
 
         using CovIdx = SpacePoint::CovIdx;
-        const auto& rotation {localToGlobal.rotation()};
         
-        if (!measuresEta) {
-            // Phi-only measurement: we need only the phi covariance
-            const Amg::Vector3D phiMeasDir {rotation * sp->toNextSensor()};
+        if (!sp->measuresEta()) {
+            // Phi-only measurements
+            const Amg::Vector3D phiMeasDir {localToGlobal.rotation() * sp->toNextSensor()};
 
             phiCov = sp->covariance()[Acts::toUnderlying(CovIdx::phiCov)] *
                 Acts::square(phiMeasDir.dot(phiGradient(position)));
             return;
         }
-    
-        nonOrthogonalStrips = !isStraw && measuresPhi && 
-            std::abs(sp->sensorDirection().dot(sp->toNextSensor())) > Acts::s_epsilon;    
+        const auto& surfLinearTrf = surface.localToGlobalTransform(gctx).linear();
         
-        sensorDir = nonOrthogonalStrips
-            ? rotation * (sp->planeNormal().cross(sp->toNextSensor())).unit()
-            : rotation * sp->sensorDirection();
-        
-        if (isStraw) {
+        if (sp->isStraw()) {
             // Remember that for straw hits, the x component of secondaryMeasDir is repurposed 
             // to store the transverse covariance of the drift radius
-            double& discCov = secondaryMeasDir.x(); 
+            double& discCov = stripAngle; 
             discCov = Acts::square(sp->driftRadius()) +
                 sp->covariance()[Acts::toUnderlying(CovIdx::etaCov)];
             
-            if (measuresPhi) {
+            if (sp->measuresPhi()) {
                 phiCov = discCov / Acts::square(position.perp()) +
-                    Acts::square(sensorDir.dot(phiGradient(position))) * 
+                    Acts::square(sensorDir(gctx).dot(phiGradient(position))) * 
                         (sp->covariance()[Acts::toUnderlying(CovIdx::phiCov)] - discCov);
             }
-        } else {
-            // Strip hits measuring eta and eventually phi:
-            secondaryMeasDir = nonOrthogonalStrips
-                ? rotation * sp->sensorDirection()
-                : rotation * sp->toNextSensor();
-
-            if (measuresPhi) {
-                const Amg::Vector3D gradPhi {phiGradient(position)};
-                /** @brief Helper method to compute the contribution of a 1D measurement to the residual variance */
-                auto oneDimContribution = [&](CovIdx idx, const Amg::Vector3D& measDir) -> double {
-                    return sp->covariance()[Acts::toUnderlying(idx)] * 
-                        Acts::square(measDir.dot(gradPhi));
-                };
-
-                if (nonOrthogonalStrips) {
-                    // Compute the primary measurement direction:
-                    const Amg::Vector3D primaryMeasDir {rotation * sp->toNextSensor()};
-                    phiCov = oneDimContribution(CovIdx::etaCov, primaryMeasDir) +
-                             oneDimContribution(CovIdx::phiCov, secondaryMeasDir);
-                } else {
-                    phiCov = oneDimContribution(CovIdx::etaCov, secondaryMeasDir) +
-                             oneDimContribution(CovIdx::phiCov, sensorDir);
+        } else if (sp->measuresPhi()) {
+            const Amg::Vector3D phiMeasDir = surfLinearTrf.col(Amg::y);
+            const Amg::Vector3D gradPhi {phiGradient(position)};
+            /** @brief Helper method to compute the contribution of a 1D measurement to the residual variance */
+            auto oneDimContribution = [&](CovIdx idx, const Amg::Vector3D& measDir) -> double {
+                return sp->covariance()[Acts::toUnderlying(idx)] * 
+                    Acts::square(measDir.dot(gradPhi));
+            };
+            
+            // Handle the case of TGC separately
+            if (sp->type() == xAOD::UncalibMeasType::TgcStripType) {
+                const Amg::Vector3D etaMeasDir = localToGlobal.rotation() * sp->toNextSensor();
+                const Amg::Vector3D phiSensorDir = surfLinearTrf.col(Amg::x);
+                
+                const double c {etaMeasDir.dot(phiMeasDir)};
+                if (std::abs(c) > Acts::s_epsilon) {
+                    stripAngle = std::atan2(etaMeasDir.dot(phiSensorDir), c);
+                    nonOrthogonalStrips = true;
                 }
+                phiCov = oneDimContribution(CovIdx::etaCov, etaMeasDir) +
+                         oneDimContribution(CovIdx::phiCov, phiMeasDir);
+            } else {
+                const Amg::Vector3D etaMeasDir = surfLinearTrf.col(Amg::x);
+                phiCov = oneDimContribution(CovIdx::etaCov, etaMeasDir) +
+                         oneDimContribution(CovIdx::phiCov, phiMeasDir);
             }
         }
     }
+    Amg::Vector3D GlobalPatternFinder::HitPayload::sensorDir(const Acts::GeometryContext& gctx) const {
+        const auto& surfLinearTrf = surface.localToGlobalTransform(gctx).linear();
+        
+        if (sp->isStraw()) {
+            return surfLinearTrf.col(Amg::z);
+        } else {
+            if (nonOrthogonalStrips) {
+                return - std::sin(stripAngle) * surfLinearTrf.col(Amg::y)
+                       + std::cos(stripAngle) * surfLinearTrf.col(Amg::x);
+            }
+            return surfLinearTrf.col(Amg::y);
+        }
+    }
     double 
-    GlobalPatternFinder::HitPayload::residualVariance(const Amg::Vector3D& contractionVector, 
+    GlobalPatternFinder::HitPayload::residualVariance(const Acts::GeometryContext& gctx,
+                                                      const Amg::Vector3D& contractionVector, 
                                                       const bool isProjected) const {
         using CovIdx = SpacePoint::CovIdx;
 
         /** If the hit is not projected, the contraction vector is the residual direction */
         assert(isProjected || std::abs(contractionVector.mag() - 1.0) < Acts::s_epsilon);
         
-        if (isStraw) {
-            const double discCov {secondaryMeasDir.x()};
+        if (sp->isStraw()) {
+            const double discCov {stripAngle};
             if (!isProjected) {
-                const double vDotRsq {Acts::square(sensorDir.dot(contractionVector))};
-                return measuresPhi 
-                    ? discCov * (1 - vDotRsq) + vDotRsq * sp->covariance()[Acts::toUnderlying(CovIdx::phiCov)]
-                    : discCov * (1 - vDotRsq);
+                assert(sp->measuresPhi());
+                const double vDotRsq {Acts::square(sensorDir(gctx).dot(contractionVector))};
+                return discCov * (1 - vDotRsq) + 
+                       vDotRsq * sp->covariance()[Acts::toUnderlying(CovIdx::phiCov)];
             }
             /** If the hit is projected, the contraction vector is J^T * residualDirection,
             *  where J is the Jacobian of the projection. The phi measurement if available is
             *  cancelled by the projection. */
             return discCov * contractionVector.mag2();
 
-        } else if (measuresEta) {
+        } else if (sp->measuresEta()) {
+            const auto& surfLinearTrf = surface.localToGlobalTransform(gctx).linear();
             /** @brief Helper method to compute the contribution of a 1D measurement to the residual variance */
             auto oneDimContribution = [&](CovIdx idx, const Amg::Vector3D& measDir) -> double {
                 return sp->covariance()[Acts::toUnderlying(idx)] * 
                     Acts::square(measDir.dot(contractionVector));
             };
-            if (nonOrthogonalStrips) {
-                const Amg::Vector3D primaryMeasDir {(secondaryMeasDir - 
-                    sensorDir.dot(secondaryMeasDir) * sensorDir).unit()};
-                return oneDimContribution(CovIdx::etaCov, primaryMeasDir) + 
-                       oneDimContribution(CovIdx::phiCov, secondaryMeasDir);
-            } else {
-                return measuresPhi
-                    ? oneDimContribution(CovIdx::etaCov, secondaryMeasDir) + 
-                      oneDimContribution(CovIdx::phiCov, sensorDir)
-                    : oneDimContribution(CovIdx::etaCov, secondaryMeasDir);
+            if (sp->measuresPhi()) {
+                const Amg::Vector3D etaMeasDir {nonOrthogonalStrips 
+                    ? sensorDir(gctx).cross(surfLinearTrf.col(Amg::z))
+                    : surfLinearTrf.col(Amg::x)};
+                const Amg::Vector3D phiMeasDir {surfLinearTrf.col(Amg::y)};
+                return oneDimContribution(CovIdx::etaCov, etaMeasDir) + 
+                       oneDimContribution(CovIdx::phiCov, phiMeasDir);
             }
+            const Amg::Vector3D etaMeasDir {surfLinearTrf.col(Amg::x)};
+            return oneDimContribution(CovIdx::etaCov, etaMeasDir);
         } else {
             throw std::runtime_error("Phi only hits are not meant to be used for residual computation.");
         }
@@ -177,15 +182,16 @@ namespace MuonR4::FastReco {
         if (seed->isPrecision) nPrecisionLayers++;
         else nTriggerLayers++;
 
-        if (seed->measuresPhi) nPhiLayers++;
+        if (seed.sp()->measuresPhi()) nPhiLayers++;
 
         updatePatternPhi();
         needLineUpdate = true;
     }
-    LineTestRes GlobalPatternFinder::PatternState::checkLineComp(const CandidateHit& testHit,
+    LineTestRes GlobalPatternFinder::PatternState::checkLineComp(const Acts::GeometryContext& gctx,
+                                                                 const CandidateHit& testHit,
                                                                  const Amg::Vector3D& beamSpot) {
 
-        if (testHit->measuresPhi && !isPhiCompatible(*testHit)) {
+        if (testHit.sp()->measuresPhi() && !isPhiCompatible(*testHit)) {
             PRINT_VERBOSE(__func__<<"() Test hit phi "<<testHit->position.phi()
                 <<" not compatible with "<<brief(*this));
             return LineTestRes{};
@@ -194,8 +200,8 @@ namespace MuonR4::FastReco {
         /** @brief Helper function to make the result
         *  @param decision The decision for the test result if the residual is within the acceptance window 
         *  @return The test result */
-        auto makeResult = [&testHit, this](const LineTestDecision decision) -> LineTestRes {
-            LineTestRes res{computeLineResidual(testHit)};
+        auto makeResult = [&](const LineTestDecision decision) -> LineTestRes {
+            LineTestRes res{computeLineResidual(gctx, testHit)};
             double accWindow {cfg->nResidualSigma * res.sigma};
             /** Loosen the window when we use the beamspot or when we are looking for hits in a new station, as
              *  the straight line approximation becomes less accurate on large distances. TO DO: investigate this further */
@@ -214,7 +220,7 @@ namespace MuonR4::FastReco {
         };
 
         if(testHit.globLayer != lastInsertedHit.globLayer) {
-            updateLineParameters(beamSpot);
+            updateLineParameters(gctx, beamSpot);
             return makeResult(LineTestDecision::eAddHit);
         }
         if (testHit == lastInsertedHit) {
@@ -250,12 +256,13 @@ namespace MuonR4::FastReco {
             [&refHit](const CandidateHit& hit){
                 return std::abs(hit.globLayer - refHit.globLayer); });
     }
-    void GlobalPatternFinder::PatternState::updateLineParameters(const Amg::Vector3D& beamSpot) {
+    void GlobalPatternFinder::PatternState::updateLineParameters(const Acts::GeometryContext& gctx,
+                                                                 const Amg::Vector3D& beamSpot) {
         if (!needLineUpdate) {
             return;
         }
-        Amg::Vector3D pos1 {projToPhiPlane(*lineAnchorHit)};
-        Amg::Vector3D pos2 {projToPhiPlane(*lastInsertedHit)};
+        Amg::Vector3D pos1 {projToPhiPlane(gctx, *lineAnchorHit)};
+        Amg::Vector3D pos2 {projToPhiPlane(gctx, *lastInsertedHit)};
         Amg::Vector3D d {pos2 - pos1};
         leverArm = d.mag();
         
@@ -276,14 +283,15 @@ namespace MuonR4::FastReco {
             <<" / "<<inDeg(linePos.theta())<<", lineDir theta: "<<inDeg(lineDir.theta())
             <<", LeverArm: "<<leverArm<<", Use beamspot: "<<useBeamspot);
     }
-    LineTestRes GlobalPatternFinder::PatternState::computeLineResidual(const CandidateHit& testHit) const {
+    LineTestRes GlobalPatternFinder::PatternState::computeLineResidual(const Acts::GeometryContext& gctx, 
+                                                                       const CandidateHit& testHit) const {
         LineTestRes res{};
 
         /** We project the test hit onto the phi plane only when the test hit does 
          *  not measure phi or when we have no phi layers, otherwise we do not project
          *  so the residual include the error in the phi direction. */
-        const bool projectTestHit {!testHit->measuresPhi || nPhiLayers == 0u};
-        const Amg::Vector3D testPos {projectTestHit ? projToPhiPlane(*testHit) 
+        const bool projectTestHit {!testHit.sp()->measuresPhi() || nPhiLayers == 0u};
+        const Amg::Vector3D testPos {projectTestHit ? projToPhiPlane(gctx,*testHit) 
                                                     : testHit->position};
         const Amg::Vector3D K {testPos - linePos};
         const double KdotD {K.dot(lineDir)};
@@ -327,15 +335,16 @@ namespace MuonR4::FastReco {
                     
             if (!isProjected) {
                 residualCovAcc += Acts::square(preFactor) * 
-                    hit.residualVariance(resDir, /*isProjected=*/false);
+                    hit.residualVariance(gctx, resDir, /*isProjected=*/false);
                 return;
             }
-            const double projFactor {hit.sensorDir.dot(resDir) / 
-                hit.sensorDir.dot(bendPlaneNorm)};
+            const Amg::Vector3D sensorDir {hit.sensorDir(gctx)};
+            const double projFactor {sensorDir.dot(resDir) / 
+                                     sensorDir.dot(bendPlaneNorm)};
             const Amg::Vector3D trfDir {resDir - projFactor * bendPlaneNorm};
             
             residualCovAcc += Acts::square(preFactor) 
-                * hit.residualVariance(trfDir, /*isProjected=*/true);  
+                * hit.residualVariance(gctx, trfDir, /*isProjected=*/true);  
             phiPlaneDerivativeAcc += preFactor * pos.perp() * projFactor;
         };
 
@@ -367,8 +376,9 @@ namespace MuonR4::FastReco {
             <<", phi plane sigma: "<<std::abs(phiPlaneDerivativeAcc)*std::sqrt(patPhiCov));
         return res;
     }
-    Amg::Vector3D GlobalPatternFinder::PatternState::projToPhiPlane(const HitPayload& hit) const {
-        return Acts::PlanarHelper::intersectPlane(hit.position, hit.sensorDir,
+    Amg::Vector3D GlobalPatternFinder::PatternState::projToPhiPlane(const Acts::GeometryContext& gctx, 
+                                                                    const HitPayload& hit) const {
+        return Acts::PlanarHelper::intersectPlane(hit.position, hit.sensorDir(gctx),
             bendPlaneNorm, Amg::Vector3D::Zero()).position();        
     }
     void GlobalPatternFinder::PatternState::updatePatternPhi() {
@@ -386,7 +396,7 @@ namespace MuonR4::FastReco {
         double sumSin{0.}, sumCos{0.}, sumWeight{0.};
 
         auto processPhiHit = [&sumSin, &sumCos, &sumWeight](const HitPayload& hit){
-            if (!hit.measuresPhi) {
+            if (!hit->measuresPhi()) {
                 return;
             }
             if (hit.phiCov < Acts::s_epsilon) {
@@ -453,7 +463,7 @@ namespace MuonR4::FastReco {
         if (hit->isPrecision) nPrecisionLayers++;
         else nTriggerLayers++;
 
-        if (hit->measuresPhi) {
+        if (hit.sp()->measuresPhi()) {
             nPhiLayers++;
             updatePatternPhi();
         }
@@ -488,8 +498,8 @@ namespace MuonR4::FastReco {
             if (newHit.sp()->type() != xAOD::UncalibMeasType::sTgcStripType) {
                 std::stringstream ss {};
                 ss << "Trying to overwrite a hit with incompatible type\n";
-                ss << "Old hit: " << **lastInsertedHit << ", isPrecision: " << lastInsertedHit->isPrecision << ", measuresEta: " << lastInsertedHit->measuresEta << "\n";
-                ss << "New hit: " << **newHit << ", isPrecision: " << newHit->isPrecision << ", measuresEta: " << newHit->measuresEta;
+                ss << "Old hit: " << **lastInsertedHit << ", isPrecision: " << lastInsertedHit->isPrecision << ", measuresEta: " << lastInsertedHit.sp()->measuresEta() << "\n";
+                ss << "New hit: " << **newHit << ", isPrecision: " << newHit->isPrecision << ", measuresEta: " << newHit.sp()->measuresEta();
                 throw std::runtime_error(ss.str());
             }
             if (newHit->isPrecision) {
@@ -502,11 +512,11 @@ namespace MuonR4::FastReco {
         }
         /** Update the phi counts */
         bool updatePhi {false};
-        if (lastInsertedHit->measuresPhi) {
+        if (lastInsertedHit.sp()->measuresPhi()) {
             nPhiLayers--;
             updatePhi = true;
         }
-        if (newHit->measuresPhi) {
+        if (newHit.sp()->measuresPhi()) {
             nPhiLayers++;
             updatePhi = true;
         }

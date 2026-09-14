@@ -10,6 +10,8 @@
 #include "MuonSpacePoint/SpacePointPerLayerSorter.h"
 #include <MuonSpacePoint/SpacePointHelpers.h>
 
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
+
 #include "Acts/Utilities/KDTree.hpp"
 
 namespace MuonR4::FastReco{
@@ -109,7 +111,7 @@ namespace MuonR4::FastReco{
             /** @brief Type alias for the visual information of a pattern */
             using PatHitVisual = MuonValR4::IFastRecoVisualizationTool::PatternHitVisualInfo;
             /** @brief Definition of the search tree class */
-            using SearchTree_t = Acts::KDTree<2, const HitPayload*, double, std::array, 15>;
+            using SearchTree_t = Acts::KDTree<2, const HitPayload*, double, std::array, 50>;
             /** @brief Abrivation of the seed coordinates */
             enum class SeedCoords : std::uint8_t{
                 /** **Expanded** sector coordinate of the associated spectrometer sector */
@@ -135,7 +137,8 @@ namespace MuonR4::FastReco{
              *  @param visualInfo: Pointer to visual information for pattern visualization (nullptr if the VisualizationTool is disabled).
              *                     Needed to add visual info about pattern candidates discarded during the building stage.
              *  @return: resulting vector of PatternStates successfully built */
-            PatternStateVec findPatternsInEta(const SearchTree_t& orderedSpacepoints,
+            PatternStateVec findPatternsInEta(const Acts::GeometryContext& gctx,
+                                              const SearchTree_t& orderedSpacepoints,
                                               std::vector<PatHitVisual>* visualInfo = nullptr) const;
             /** @brief Main function controlling the development of patterns, including pattern branching when necessary. 
              *         It tests pattern compatibility of a set of active patterns (patterns produced from the same seed hit) against one 
@@ -145,7 +148,8 @@ namespace MuonR4::FastReco{
              *  @param testHit: Hit to be tested against the patterns
              *  @param beamSpot: Beam spot position, needed when the pattern line cannot be reliably defined from the pattern hits
              *  @param visualInfo: Pointer to visual information for pattern visualization (nullptr if the VisualizationTool is disabled) */
-            void extendPatterns(PatternStateVec& startPatterns,
+            void extendPatterns(const Acts::GeometryContext& gctx,
+                                PatternStateVec& startPatterns,
                                 PatternStateVec& endPatterns,
                                 const CandidateHit& testHit,
                                 const Amg::Vector3D& beamSpot,
