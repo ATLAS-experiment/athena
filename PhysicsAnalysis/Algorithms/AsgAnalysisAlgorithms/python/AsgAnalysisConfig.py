@@ -419,6 +419,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
             info="save the necessary information to run the LHAPDF tool offline.")
         self.addOption ('doPDFReweighting', False, type=bool,
             info="perform the PDF reweighting to do the PDF sensitivity studies with the existing sample, intrinsic charm PDFs as the default here. WARNING: the reweighting closure should be validated within analysis (it has been proved to be good for Madgraph, aMC@NLO, Pythia8, Herwig, and Alpgen, but not good for Sherpa and Powheg).")
+        self.addOption ('inPDFName', None, type=str, info="initial PDF set")
         self.addOption ('outPDFName', [
             "CT14nnloIC/0", "CT14nnloIC/1", "CT14nnloIC/2", 
             "CT18FC/0", "CT18FC/3", "CT18FC/6", "CT18FC/9", 
@@ -476,10 +477,17 @@ class GeneratorAnalysisBlock (ConfigBlock):
 
         if self.doPDFReweighting:
             alg = config.createAlgorithm( 'CP::PDFReweightAlg', 'PDFReweightAlg', reentrant=True )
+
+            if self.inPDFName is None:
+                log.error("Reading the PDF set from DAOD not available yet")
+            else:
+                alg.inPDFName = self.inPDFName
+
+            alg.outPDFName = self.outPDFName
         
             for pdf_set in self.outPDFName:
                 config.addOutputVar('EventInfo', f'PDFReweightSF_{pdf_set.replace("/", "_")}', 
-                                    f'PDFReweightSF_{pdf_set.replace("/", "_")}', noSys=True) 
+                                    f'PDFReweightSF_{pdf_set.replace("/", "_")}', noSys=True, auxType='float') 
 
         
         if self.doHFProdFracReweighting:
