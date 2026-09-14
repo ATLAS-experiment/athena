@@ -38,10 +38,6 @@ class TruthTrackSeederTool: public extends<AthAlgTool, ITrackSeedingTool> {
             virtual Acts::Result<Acts::BoundTrackParameters> 
                                 estimateStartParameters(const EventContext& ctx,
                                                         const MsTrackSeed& seed) const override final;
-            /** @copydoc ITrackSeedingTool::estimateQtimesP */
-            virtual double estimateQtimesP(const EventContext& ctx,
-                                           const Amg::Vector3D& planeNorm,
-                                           std::span<const PosMomPair_t> circlePoints) const override final; 
         private:
             /** @brief Declare the data dependency on the standard Mdt+Rpc+Tgc segment container
              *         & on the NSW segment container */
