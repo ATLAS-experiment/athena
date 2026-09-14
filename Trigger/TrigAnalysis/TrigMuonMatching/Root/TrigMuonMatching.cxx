@@ -57,7 +57,7 @@ namespace Trig {
   }
 
   Double_t TrigMuonMatching::minDelR(const xAOD::Muon* mu,
-				     const std::string &chain,
+				     std::string_view chain,
 				     const double mindelR) const
   {
     Double_t delmin = mindelR;
@@ -66,7 +66,7 @@ namespace Trig {
   }
 
   Double_t TrigMuonMatching::minDelRL1(const xAOD::Muon* mu,
-				       const std::string &l1item,
+				       std::string_view l1item,
 				       const double DelR) const
   {
     Double_t l1dr = DelR;
@@ -149,8 +149,8 @@ namespace Trig {
   }
 
   Bool_t TrigMuonMatching::matchL2SA(const xAOD::Muon* mu,
-				     const std::string &l1item,
-				     const std::string &chain,
+				     std::string_view l1item,
+				     std::string_viewchain,
 				     const double DelR) const
   {
     if(!m_trigDecTool->isPassed("L1_MU.*")){
@@ -192,7 +192,7 @@ namespace Trig {
   }
 
   Bool_t TrigMuonMatching::matchL2CB(const xAOD::Muon* mu,
-				     const std::string &chain,
+				     std::string_view chain,
 				     const double DelR) const
   {
     const std::string eventTrigger = chain;
