@@ -24,15 +24,26 @@ StatusCode AthOnnx::OnnxRuntimeSessionToolCUDA::initialize()
     // TODO: add more cuda options to the interface
     // https://onnxruntime.ai/docs/execution-providers/CUDA-ExecutionProvider.html#cc
     // Options: https://onnxruntime.ai/docs/api/c/struct_ort_c_u_d_a_provider_options.html
-    OrtCUDAProviderOptions cuda_options;
-    cuda_options.device_id = m_deviceId;
-    cuda_options.cudnn_conv_algo_search = OrtCudnnConvAlgoSearch::OrtCudnnConvAlgoSearchExhaustive;
-    cuda_options.gpu_mem_limit = std::numeric_limits<size_t>::max();
+    //
+    // The V2 options are used because use_tf32 has no field in the V1 struct
+    // and can only be set through the string interface.
+    Ort::CUDAProviderOptions cuda_options;
+    cuda_options.Update({
+        {"device_id", std::to_string(m_deviceId.value())},
+        {"cudnn_conv_algo_search", "EXHAUSTIVE"},
+        {"gpu_mem_limit", std::to_string(std::numeric_limits<size_t>::max())},
+        // tensor cores otherwise round fp32 matmuls to a 10 bit mantissa,
+        // which is enough to change the decisions some networks make
+        {"use_tf32", m_useTF32.value() ? "1" : "0"},
+    });
 
     // memorry arena options for cuda memory shrinkage
     // https://github.com/microsoft/onnxruntime/blob/main/onnxruntime/test/shared_lib/utils.cc#L7
+    //
+    // declared here rather than in the branch below because the provider
+    // options keep a pointer to it until the session is built
+    Ort::ArenaCfg arena_cfg{0, 0, 1024, 0};
     if (m_enableMemoryShrinkage) {
-        Ort::ArenaCfg arena_cfg{0, 0, 1024, 0};
         // other options are not available in this release.
         // https://github.com/microsoft/onnxruntime/blob/main/onnxruntime/test/shared_lib/test_inference.cc#L2802C21-L2802C21
         // arena_cfg.max_mem = 0;   // let ORT pick default max memory
@@ -42,10 +53,11 @@ StatusCode AthOnnx::OnnxRuntimeSessionToolCUDA::initialize()
         // arena_cfg.initial_growth_chunk_size_bytes = 256;
         // arena_cfg.max_power_of_two_extend_bytes = 1L << 24;
 
-        cuda_options.default_memory_arena_cfg = arena_cfg;
+        cuda_options.UpdateWithValue("default_memory_arena_cfg",
+                                     static_cast<OrtArenaCfg*>(arena_cfg));
     }
 
-    sessionOptions.AppendExecutionProvider_CUDA(cuda_options);
+    sessionOptions.AppendExecutionProvider_CUDA_V2(*cuda_options);
 
     // Create the session.
     ATH_MSG_INFO("Asking model from: " << m_modelFileName.value());

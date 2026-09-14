@@ -47,6 +47,9 @@ namespace AthOnnx {
         /// The device ID to use.
         Gaudi::Property<int> m_deviceId{this, "DeviceId", 0, "Device ID to use"};
         Gaudi::Property<bool> m_enableMemoryShrinkage{this, "EnableMemoryShrinkage", false, "Enable automatic memory shrinkage"};
+        /// TF32 evaluates fp32 matmuls with a 10 bit mantissa. Off by default
+        /// so that results follow the CPU execution provider.
+        Gaudi::Property<bool> m_useTF32{this, "UseTF32", false, "Allow tensor cores to evaluate fp32 matmuls in TF32"};
 
         /// runtime service
         ServiceHandle<IOnnxRuntimeSvc> m_onnxRuntimeSvc{this, "OnnxRuntimeSvc", "AthOnnx::OnnxRuntimeSvc/OnnxRuntimeSvc", "The Onnx runtime service"};
