@@ -256,7 +256,7 @@ asg::AcceptData TrigEgammaEmulationToolTest::setAccept( const EventContext& ctx,
 //**********************************************************************
 
 
-TrigEgammaEmulationToolTest::TrigInfo TrigEgammaEmulationToolTest::getInfo( std::string trigger ) const
+TrigEgammaEmulationToolTest::TrigInfo TrigEgammaEmulationToolTest::getInfo( const std::string & trigger ) const
 {
     std::string type = "electron"; // default
     std::vector<std::string> strs;
