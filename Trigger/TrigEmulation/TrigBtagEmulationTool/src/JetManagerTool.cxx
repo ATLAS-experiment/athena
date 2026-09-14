@@ -16,6 +16,12 @@ JetManagerTool::JetManagerTool(const std::string& name)
 StatusCode JetManagerTool::initialize() {
   ATH_MSG_DEBUG( "Initializing " << name() );
 
+  if (m_LHCPeriod != 2 && m_LHCPeriod != 3) {
+    ATH_MSG_ERROR("Property \"LHCPeriod\" must be set explicitly to 2 (Run 2) or 3 (Run 3); "
+                  "got " << m_LHCPeriod.value() << ". Refusing to guess the LHC period.");
+    return StatusCode::FAILURE;
+  }
+
   m_jetInputKey = m_jetcontainer.value();
 
   ATH_CHECK(m_jetInputKey.initialize( SG::AllowEmpty ));

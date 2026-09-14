@@ -55,7 +55,8 @@ namespace Trig {
 
     Gaudi::Property<std::string> m_btagging_link {this, "BTaggingLink", "btaggingLink"};    
     Gaudi::Property<std::string> m_jetcontainer {this, "JetContainerName", "", "Jet Container"};
-    Gaudi::Property<int> m_LHCPeriod {this, "LHCPeriod", 3, "LHC Period Run2 or Run3"};
+    Gaudi::Property<int> m_LHCPeriod {this, "LHCPeriod", -1,
+        "LHC Period: MUST be set explicitly to 2 (Run 2) or 3 (Run 3); no default"};
 
     bool matchedSPLITjet(const xAOD::Jet*, const xAOD::Jet*) const;
   };
