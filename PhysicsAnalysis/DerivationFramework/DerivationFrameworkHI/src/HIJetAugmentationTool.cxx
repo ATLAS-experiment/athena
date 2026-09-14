@@ -83,6 +83,9 @@ namespace DerivationFramework
       float mindR = 999.;
       float matchedEta = 999.;
       float matchedJvt = -1;
+      // temporary HI jvt selection
+      bool passJvtMedium = false;
+      bool passJvtTight  = false;
       // second loop over topo jets
       for (const auto *tjet : *caloJets) {
         float newjvt = m_jvtUpdateTool->updateJvt(*tjet);
@@ -100,14 +103,7 @@ namespace DerivationFramework
     
       if (mindR < m_deltaR.value()) {
         (jvtMatchedHandle)(*hjet) = matchedJvt;
-      } else {
-        (jvtMatchedHandle)(*hjet) = -1; 
-      }
 
-      // temporary HI jvt selection
-      bool passJvtMedium = false;
-      bool passJvtTight  = false;
-      if (matchedEta < 10.){
       	if (fabs(matchedEta) < 2.4) {
         	passJvtMedium = matchedJvt > 0.59;
         	passJvtTight  = matchedJvt > 0.91;
@@ -118,10 +114,14 @@ namespace DerivationFramework
         	passJvtMedium = true;
         	passJvtTight  = true;
       	}
+        (jvtMediumPassedHandle)(*hjet) = passJvtMedium;
+        (jvtTightPassedHandle)(*hjet)  = passJvtTight;
+
+      } else {
+        (jvtMatchedHandle)(*hjet) = -1;
+        (jvtMediumPassedHandle)(*hjet) = false;
+        (jvtTightPassedHandle)(*hjet)  = false;
       }
-      (jvtMediumPassedHandle)(*hjet) = passJvtMedium;
-      (jvtTightPassedHandle)(*hjet)  = passJvtTight;
-      
     }
 
     return StatusCode::SUCCESS;
