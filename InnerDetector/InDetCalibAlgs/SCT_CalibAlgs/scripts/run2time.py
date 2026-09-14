@@ -8,7 +8,7 @@ runNum = int(sys.argv[1])
 since = (runNum << 32)
 until = ((runNum+1) << 32)-1
 dbSvc = cool.DatabaseSvcFactory.databaseService()
-RunCtrlDB = 'oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TDAQ;dbname=COMP200;user=ATLAS_COOL_READER;password=COOLRED4PRO'
+RunCtrlDB = 'oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TDAQ;dbname=COMP200;user=ATLAS_COOL_READER;password=_'
 RunCtrlDb = dbSvc.openDatabase( RunCtrlDB )
 try: RunCtrlDb = dbSvc.openDatabase( RunCtrlDB )
 except Exception,e:

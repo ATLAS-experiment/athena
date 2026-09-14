@@ -2,7 +2,7 @@
 
 <connection name="oracle://ATLAS_COOLPROD/ATLAS_COOLONL_PIXEL">
   <parameter name="user" value="ATLAS_COOL_READER" />
-  <parameter name="password" value="COOLRED4PRO" />
+  <parameter name="password" value="_" />
 </connection>
 
 </connectionlist>

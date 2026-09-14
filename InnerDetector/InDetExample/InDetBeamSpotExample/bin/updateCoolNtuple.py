@@ -21,7 +21,7 @@ from InDetBeamSpotExample import COOLUtils
 # Connect to ATLAS_COOLPROD DB for NEMO folders
 try:
     #oracle = cx_Oracle.connect(dsn="ATLAS_COOLREADER_U",user="ATLAS_COOL_GLOBAL_W")
-    oracle = cx_Oracle.connect(dsn="ATLAS_COOLPROD",user="ATLAS_COOL_READER_U",password="LMXTPRO4RED")
+    oracle = cx_Oracle.connect(dsn="ATLAS_COOLPROD",user="ATLAS_COOL_READER_U",password="_")
     cur = oracle.cursor()
 except Exception,e:
     print e
