@@ -404,14 +404,14 @@ namespace Trig {
     if(chainInfo.isSymmetric) {
       std::string threshold = std::string("HLT_" + tokens[1].substr(1));
       chainInfo.thresholds.first = threshold;
-      chainInfo.thresholds.second = threshold;
+      chainInfo.thresholds.second = std::move(threshold);
       chainInfo.isValid = true;
     }
     else {
       if(tokens.size() != 3) return false;
 
       std::string high = std::string("HLT_" + tokens[1]);
-      chainInfo.thresholds.first = high;
+      chainInfo.thresholds.first = std::move(high);
       chainInfo.thresholds.second = chainInfo.chain;
       chainInfo.isValid = true;
       return chainInfo.isValid;
@@ -421,10 +421,9 @@ namespace Trig {
   return chainInfo.isValid;
   }
   
-  bool TrigMuonMatching::isEqual(const double x,
-				 const double y) const
+  bool TrigMuonMatching::isEqual(const double x, const double y) const
   {
-    if (fabs(x - y) < std::numeric_limits<float>::epsilon()) return true;
+    if (std::fabs(x - y) < std::numeric_limits<float>::epsilon()) return true;
     return false;
   }
   
