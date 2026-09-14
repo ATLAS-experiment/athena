@@ -1194,8 +1194,7 @@ StatusCode MuFastSteering::findMultiTrackSignature(const std::vector<const TrigR
       } // end the clusterRoad loop
       if(trackPatterns.empty()){
 	ATH_MSG_DEBUG("multi-track SA falied to reconstruct muons");
- 	TrigL2MuonSA::TrackPattern trackPattern;
-	trackPatterns.push_back(trackPattern);
+	trackPatterns.emplace_back();
 	storeMuonSA(*p_roi, *p_roids, muonRoad, mdtRegion, rpcHits, tgcHits,
 		    rpcFitResult, tgcFitResult, mdtHits, cscHits,
 		    stgcHits, mmHits, trackPatterns.back(), outputTracks, ctx);
@@ -1223,8 +1222,7 @@ StatusCode MuFastSteering::findMultiTrackSignature(const std::vector<const TrigR
                                            mmHits);
         if (!sc.isSuccess()) {
           ATH_MSG_WARNING("Data preparation failed");
-          TrigL2MuonSA::TrackPattern trackPattern;
-          trackPatterns.push_back(trackPattern);
+          trackPatterns.emplace_back();
           // Update output trigger element
           storeMuonSA(*p_roi, *p_roids, muonRoad, mdtRegion, rpcHits, tgcHits,
                       rpcFitResult, tgcFitResult, mdtHits, cscHits,
