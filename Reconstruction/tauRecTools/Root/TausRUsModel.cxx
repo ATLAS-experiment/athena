@@ -100,14 +100,6 @@ std::vector<TrackVariable> trackVariables() {
       out = deltaPhi(t.track()->phi(), tau.phi());
       return true;
     }},
-    // The eProbabilityNN decoration lives on the TrackParticle, not the TauTrack.
-    {"trk_eProbNN", [](const xAOD::TauJet&, const xAOD::TauTrack& t, float& out) {
-      static const SG::ConstAccessor<float> acc("eProbabilityNN");
-      const xAOD::TrackParticle* trackParticle = t.track();
-      if (!trackParticle || !acc.isAvailable(*trackParticle)) return false;
-      out = acc(*trackParticle);
-      return true;
-    }},
     {"trk_pT",     trackParticleGetter([](const xAOD::TrackParticle& t) { return static_cast<float>(t.pt()); }),
                    {Transform::Log}},
     {"trk_E",      trackParticleGetter([](const xAOD::TrackParticle& t) { return static_cast<float>(t.e()); }),
@@ -127,6 +119,13 @@ std::vector<TrackVariable> trackVariables() {
     {"trk_nSCTHits",              summaryGetter(xAOD::numberOfSCTHits)},
     {"trk_nPixelHits",            summaryGetter(xAOD::numberOfPixelHits)},
     {"trk_nBLayerHits",           summaryGetter(xAOD::numberOfInnermostPixelLayerHits)},
+    {"trk_eProbNN", [](const xAOD::TauJet&, const xAOD::TauTrack& t, float& out) {
+      static const SG::ConstAccessor<float> acc("eProbabilityNN");
+      const xAOD::TrackParticle* trackParticle = t.track();
+      if (!trackParticle || !acc.isAvailable(*trackParticle)) return false;
+      out = acc(*trackParticle);
+      return true;
+    }},
   };
 }
 
@@ -136,8 +135,8 @@ std::vector<TrackVariable> trackVariables() {
 
 std::vector<VertexVariable> vertexVariables() {
   return {
-    // Index 0 doubles as the slot-validity mask: a real vertex has
-    // sumPt2 > 0, a padded slot stays at 0.
+    // A padded slot stays all zero; the model counts a vertex slot real if any of
+    // its four features is nonzero
     {"Vertex_sumPt2", [](const xAOD::TauJet&, const xAOD::Vertex& v, float& out) {
       static const SG::ConstAccessor<float> acc("sumPt2");
       if (!acc.isAvailable(v)) return false;

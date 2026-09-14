@@ -87,7 +87,7 @@ TausRUsDataLoader::selectTracks(const xAOD::TauJet& tau, size_t maxConstituents)
   });
   std::sort(tracks.begin(), tracks.end(),
             [](const xAOD::TauTrack* lhs, const xAOD::TauTrack* rhs) {
-              return lhs->pt() > rhs->pt();
+              return lhs->track()->pt() > rhs->track()->pt();
             });
   if (tracks.size() > maxConstituents) tracks.resize(maxConstituents);
   return tracks;
