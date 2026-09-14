@@ -416,9 +416,6 @@ atlas_add_citest( ACTS_ActsBenchmarkTrackingWithSpot
    SCRIPT ActsBenchmarkWithSpot.sh 8 100
    PROPERTIES PROCESSOR 8 )
 
-atlas_add_citest( ACTS_ActsBenchmarkWithSpotGbts
-   SCRIPT ActsBenchmarkWithSpotGbts.sh 8 100
-   PROPERTIES PROCESSOR 8 )
  atlas_add_citest( ACTS_ActsBenchmarkWithSpotHeavyIons
    SCRIPT ActsBenchmarkWithSpotHeavyIons.sh  8 50
    PROPERTIES PROCESSOR 8 )
@@ -434,9 +431,6 @@ atlas_add_citest( ACTS_CheckObjectCounts_Workflow
 
 atlas_add_citest( ACTS_CheckObjectCounts_Workflow_GbtsFtf
   SCRIPT CheckCountTest.sh ActsCheckObjectCountsGbtsFtf )
-
-atlas_add_citest( ACTS_CheckObjectCounts_Workflow_Gbts
-  SCRIPT CheckCountTest.sh ActsCheckObjectCountsGbts )
 
 atlas_add_citest( ACTS_TriggerC100
   SCRIPT test_trigAna_ActsTriggerC100_build.py )

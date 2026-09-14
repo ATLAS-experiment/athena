@@ -73,6 +73,8 @@ run Reco_tf.py \
                flags.Acts.Device.doTrackReconstruction=True; \
                flags.Tracking.doPixelDigitalClustering=True; \
                flags.Tracking.ITkActsPass.storeTrackSeeds=${storeTrackSeeds}; \
+               from ActsConfig.ActsConfigFlags import SeedingStrategy; \
+               flags.Tracking.ITkActsPass.PixelSeedingStrategy=SeedingStrategy.GridTriplet; \
                flags.Concurrency.NumThreads=${numThreads}; \
                flags.Concurrency.NumConcurrentEvents=${numThreads};" \
     --inputRDOFile ${inputRDO} \
