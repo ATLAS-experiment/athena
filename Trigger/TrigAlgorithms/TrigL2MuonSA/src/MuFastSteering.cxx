@@ -971,7 +971,7 @@ StatusCode MuFastSteering::findMuonSignatureIO(const xAOD::TrackParticleContaine
 
     }
 
-    if(outputSAs.empty() {
+    if(outputSAs.empty()) {
       ATH_MSG_DEBUG("outputSAs size = 0 -> push_back dummy");
       muonRoad.Clear();
       mdtRegion.Clear();
@@ -989,7 +989,7 @@ StatusCode MuFastSteering::findMuonSignatureIO(const xAOD::TrackParticleContaine
       		  rpcFitResult, tgcFitResult, mdtHits, cscHits,
       		  stgcHits, mmHits,
       		  trackPattern, outputSAs, ctx);
-      if (outputSAs.empty)[[unlikely]]{
+      if (outputSAs.empty())[[unlikely]]{
         ATH_MSG_ERROR("outputSAs is still empty after attempted dummy store.");
         return StatusCode::FAILURE;
       }
