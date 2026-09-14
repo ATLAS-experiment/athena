@@ -317,7 +317,6 @@ CalibrationDataContainer::computeVariables(const CalibrationDataVariables& x, bo
 
   // ensure that the variable types have been computed properly
   if (m_variables.size() == 0) computeVariableTypes();
-  if (m_variablesStatus == Analysis::kError) return Analysis::kError;
 
   // also keep track of whether the variables are within bounds
   CalibrationStatus status(kSuccess);
