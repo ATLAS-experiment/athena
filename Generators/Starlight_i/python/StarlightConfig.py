@@ -7,6 +7,7 @@ from GeneratorConfig.GeneratorSettingsSemantics import (
     GeneratorSettingsPrecedence,
 )
 from GeneratorConfig.Sequences import EvgenSequence, EvgenSequenceFactory
+from EvgenJobTransforms.EvgenHelpers import _get_nevents
 from Pythia8_i.Pythia8Config import (
     Pythia8_A14_NNPDF23LO_Common_Cfg,
     Pythia8CommandsCfg
@@ -190,23 +191,3 @@ def Starlight_EvtGen_Common_Cfg(flags, **kwargs):
     ))
 
     return ca
-
-
-def _get_nevents(flags, safety=1.):
-    """Helper function to determing number of events to be generated
-    in Starlight, based on MaxEvents or nEventsPerJob and a user-provided 
-    safety factor to allow for failures in showering stage."""
-    try:
-        sf = float(safety)
-    except (TypeError, ValueError) as exc:
-        raise RuntimeError(f"safety must be numeric, got {safety}.") from exc
-    if sf <= 0:
-        raise RuntimeError(f"safety must be > 0, got {safety}.")
-
-    base_events = (
-        flags.Exec.MaxEvents
-        if flags.Exec.MaxEvents > 0
-        else flags.Generator.nEventsPerJob
-    )
-
-    return int(base_events * sf)
