@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "NswPatternFinder.h"
@@ -191,7 +191,7 @@ StatusCode TrigL2MuonSA::NswPatternFinder::outlierStgc(const TrigL2MuonSA::MuonR
     stgcSegment.push_back(stgcHits[i_hit]);
   }
 
-  trackPattern.stgcSegment = stgcSegment;
+  trackPattern.stgcSegment = std::move(stgcSegment);
 
   return StatusCode::SUCCESS;
 }
