@@ -329,6 +329,35 @@ def ActsPixelGbtsSeedingToolCfg(flags,
     acc.setPrivateTools(CompFactory.ActsTrk.GbtsSeedingTool(name, **kwargs))
     return acc
 
+def ActsPrimaryStripGbtsSeedingToolCfg(flags,
+                                       name: str = "ActsPrimaryStripGbtsSeedingTool",
+                                       **kwargs) -> ComponentAccumulator:
+    """GBTS strip seeding for the primary pass. ActsStripGbtsSeedingToolCfg is the LRT one."""
+    acc = ComponentAccumulator()
+    if "layerTool" not in kwargs:
+        kwargs.setdefault(
+            "layerTool",
+            acc.popToolsAndMerge(ActsGbtsLayerToolCfg(flags))
+        )
+
+    kwargs.setdefault("usePixelLayers", False)
+    kwargs.setdefault("useStripLayers", True)
+    kwargs.setdefault("usePixelConnections", False)
+    kwargs.setdefault("useStripConnections", True)
+    ## the z0 range comes from the RoI
+    kwargs.setdefault("LRTmode", False)
+    ## the cluster width cuts are pixel-only
+    kwargs.setdefault("useML", False)
+    kwargs.setdefault("connectorInputFile", find_datafile(flags.Acts.Gbts.connectionTable))
+
+    kwargs.setdefault("minPt", flags.Tracking.ActiveConfig.minPTSeed *
+                      ActsUnits.GeV / GaudiUnits.GeV)
+    ## the strips reach far beyond the pixel default of 550 mm
+    kwargs.setdefault("maxOuterRadius", 1100.0)
+
+    acc.setPrivateTools(CompFactory.ActsTrk.GbtsSeedingTool(name, **kwargs))
+    return acc
+
 def ActsStripGbtsSeedingToolCfg(flags,
                                 name: str = "ActsStripGbtsSeedingTool",
                                 **kwargs) -> ComponentAccumulator:
@@ -440,8 +469,11 @@ def ActsStripSeedingAlgCfg(flags,
     acc.merge(ITkStripReadoutGeometryCfg(flags))
 
     if "SeedTool" not in kwargs:
-        if flags.Tracking.ActiveConfig.StripSeedingStrategy in [
-            SeedingStrategy.Gbts, SeedingStrategy.GbtsFtf]:
+        if flags.Tracking.ActiveConfig.StripSeedingStrategy is SeedingStrategy.Gbts:
+            kwargs.setdefault('SeedTool', acc.popToolsAndMerge(
+              ActsStripGbtsSeedingToolCfg(flags) if flags.Tracking.ActiveConfig.isLargeD0
+              else ActsPrimaryStripGbtsSeedingToolCfg(flags)))
+        elif flags.Tracking.ActiveConfig.StripSeedingStrategy is SeedingStrategy.GbtsFtf:
             kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsStripGbtsSeedingToolCfg(flags)))
         elif flags.Tracking.ActiveConfig.StripSeedingStrategy is SeedingStrategy.GridTriplet:
             if flags.Tracking.ActiveConfig.isLargeD0:
