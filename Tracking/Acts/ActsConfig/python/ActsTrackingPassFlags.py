@@ -31,7 +31,8 @@ def setActsDefaultTunings(icf):
     icf.addFlag("isSecondaryPass", False)
     icf.addFlag("isLargeD0", False)
     icf.addFlag("autoReverseSearch", False)
-    icf.addFlag("SeedingStrategy", SeedingStrategy.GridTriplet, type=SeedingStrategy)
+    icf.addFlag("PixelSeedingStrategy", SeedingStrategy.Gbts, type=SeedingStrategy)
+    icf.addFlag("StripSeedingStrategy", SeedingStrategy.GridTriplet, type=SeedingStrategy)
     # Extension used to name the persistified track particle container
     # (InDet{extension}TrackParticles) when storeSeparateContainer is
     # requested. If empty, the pass extension is used.
@@ -49,6 +50,7 @@ def createActsLegacyTrackingPassFlags():
     deactivateAthenaComponents(icf)
     activateActsComponents(icf)
     setActsDefaultTunings(icf)
+    icf.PixelSeedingStrategy = SeedingStrategy.GridTriplet
     return icf
 
 # Main ACTS Tracking pass with Fast Tracking configuration
@@ -179,7 +181,7 @@ def createEFValidateF150TrackingPassFlags():
     # Override acts default values
     icf.Xi2max = [50]
     icf.Xi2maxNoAdd = [100]
-    icf.SeedingStrategy = SeedingStrategy.F150
+    icf.PixelSeedingStrategy = SeedingStrategy.F150
     icf.useITkStripSeeding = False
     return icf
 
