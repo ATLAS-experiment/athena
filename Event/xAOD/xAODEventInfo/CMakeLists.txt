@@ -10,7 +10,7 @@ find_package( xAODUtilities )
 # Extra dependencies, based on what environment we're in.
 set( extra_libs )
 if( NOT XAOD_STANDALONE )
-   set( extra_libs StoreGateLib SGTools )
+   set( extra_libs StoreGateLib AthenaKernel GaudiKernel )
 endif()
 
 # Component(s) in the package.

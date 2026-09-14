@@ -20,7 +20,7 @@
 
 #ifndef XAOD_STANDALONE
 # include "StoreGate/StoreGateSvc.h"
-# include "SGTools/CurrentEventStore.h"
+# include "AthenaKernel/proxyDictFromEventContext.h"
 #endif
 
 namespace xAODEventInfoPrivate {
@@ -1022,7 +1022,7 @@ namespace xAOD {
 #ifdef XAOD_STANDALONE
       m_evtStore = nullptr;
 #else
-      m_evtStore = dynamic_cast<StoreGateSvc*> (SG::CurrentEventStore::store());
+      m_evtStore = dynamic_cast<StoreGateSvc*> (Atlas::proxyDictFromEventContext());
 #endif
 
       if( usingStandaloneStore() ) {
