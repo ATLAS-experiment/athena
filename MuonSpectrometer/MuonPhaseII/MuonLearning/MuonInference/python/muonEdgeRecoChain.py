@@ -137,9 +137,14 @@ def main(args):
             CandidateDecoration="mlTrackComponent",
             MinSegmentsPerCandidate=args.minSegmentsPerComponent,
         )
-    if filter_segment_container:
-        # SegmentEdgeInferenceAlg writes a VIEW of the original elements.
-        ms_track_finder.SegmentContainer = filtered_segment_key
+    elif filter_segment_container:
+        # Standard seeder: this is the actual combinatorics cut. Point
+        # MsTrackSeederTool's own geometric range-tree search at the
+        # ML-filtered segment view instead of the full MuonSegmentsFromR4,
+        # so both its candidate search and its resolveOverlaps() dedup run
+        # over fewer segments. (MSTrackFinderAlg/MsTrackFindingAlg itself
+        # has no SegmentContainer property - only the seeding tool's does.)
+        ms_track_finder.SeedingTool.SegmentContainer = filtered_segment_key
 
     if not args.skipTrackTester:
         from MuonTrackFindingTest.MsTrackFindingTester import MsTrackTesterCfg
