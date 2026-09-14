@@ -1084,10 +1084,18 @@ StatusCode TrigL2MuonSA::NswStationFitter::calcMergedHit(TrigL2MuonSA::TrackPatt
         r_mm.push_back(rProj);
       }
       else if ((mmHits.at(iHit).layerNumber)%2 == 0) { // layer U
-        double rPrime = (rProj * cosTiltAngleU)/(cos(phiLocalAvg)*cosTiltAngleU + sin(phiLocalAvg)*sinTiltAngleU);
+        const double denom = std::cos(phiLocalAvg)*cosTiltAngleU + std::sin(phiLocalAvg)*sinTiltAngleU;
+        if (denom == 0.)[[unlikely]]{
+          throw std::runtime_error("NswStationFitter::calcMergedHit: Denominator is zero (U layer branch).");
+        }
+        double rPrime = (rProj * cosTiltAngleU)/denom;
         r_mm.push_back(rPrime);
       } else { //layer V
-        double rPrime = (rProj * cosTiltAngleV)/(cos(phiLocalAvg)*cosTiltAngleV + sin(phiLocalAvg)*sinTiltAngleV);
+        const double denom = std::cos(phiLocalAvg)*cosTiltAngleV + std::sin(phiLocalAvg)*sinTiltAngleV;
+        if (denom == 0.)[[unlikely]]{
+          throw std::runtime_error("NswStationFitter::calcMergedHit: Denominator is zero (V layer branch).");
+        }
+        double rPrime = (rProj * cosTiltAngleV)/denom;
         r_mm.push_back(rPrime);
       }
     }
