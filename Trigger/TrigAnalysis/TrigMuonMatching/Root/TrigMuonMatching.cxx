@@ -166,15 +166,16 @@ namespace Trig {
     xAOD::MuonRoIContainer::const_iterator muroi_end = muonrois->end();
     Int_t threshold = getL1pt(l1item);
     unsigned int ROI = 0;
+    const std::string emptyStr;
     for( ; muroi_itr != muroi_end; ++muroi_itr ) {
       if(!((*muroi_itr)->thrValue() >= threshold*1000)) continue;
       ROI = (*muroi_itr)->getRoI();
       auto cg = m_trigDecTool->getChainGroup(chain);
       auto fc = cg->features(TrigDefs::alsoDeactivateTEs);
 #if defined(XAOD_STANDALONE) || defined(XAOD_ANALYSIS)
-      auto MuFeatureContainers = fc.containerFeature<xAOD::L2StandAloneMuonContainer>("",TrigDefs::alsoDeactivateTEs);
+      auto MuFeatureContainers = fc.containerFeature<xAOD::L2StandAloneMuonContainer>(emptyStr,TrigDefs::alsoDeactivateTEs);
 #else
-      const std::vector< Trig::Feature<xAOD::L2StandAloneMuonContainer> > MuFeatureContainers = fc.get<xAOD::L2StandAloneMuonContainer>("", TrigDefs::alsoDeactivateTEs);
+      const std::vector< Trig::Feature<xAOD::L2StandAloneMuonContainer> > MuFeatureContainers = fc.get<xAOD::L2StandAloneMuonContainer>(emptyStr, TrigDefs::alsoDeactivateTEs);
 #endif 
       for(const auto & mucont : MuFeatureContainers){
 	for(auto muon : *mucont.cptr()){
