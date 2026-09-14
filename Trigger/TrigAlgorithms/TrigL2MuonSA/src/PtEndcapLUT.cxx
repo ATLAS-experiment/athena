@@ -367,8 +367,9 @@ double TrigL2MuonSA::PtEndcapLUT::ptcombined(int iEta, int iPhi, double ApT, dou
   if(BpT == 0. ) CBpT = 0.;
   double NSigmaA= Asigmaa * ApT_tmp * ApT_tmp + Asigmab * ApT_tmp + Asigmac;
   double NSigmaB= Bsigmaa * BpT_tmp * BpT_tmp + Bsigmab * BpT_tmp + Bsigmac;
-
+  //coverity[DIVIDE_BY_ZERO:FALSE]
   double NVsigpTA = notZero(NSigmaA * ApT_tmp) ? (1./(NSigmaA * ApT_tmp) ): 1.0; 
+  //coverity[DIVIDE_BY_ZERO:FALSE]
   double NVsigpTB = notZero(NSigmaB * BpT_tmp) ? (1./(NSigmaB * BpT_tmp) ): 1.0; 
   double NVsigAsq = notZero(NSigmaA * NSigmaA) ? (1./(NSigmaA * NSigmaA))  : 1.0; //should check the multiple, not individually
   double NVsigBsq = notZero(NSigmaB * NSigmaB) ? (1./(NSigmaB * NSigmaB))  : 1.0;  //should check the multiple, not individually

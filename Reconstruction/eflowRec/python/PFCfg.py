@@ -9,15 +9,24 @@ def PFTrackSelectorAlgCfg(inputFlags,algName,useCaching=True):
 
     result = ComponentAccumulator()
 
-    from TrackToCalo.TrackToCaloConfig import ParticleCaloExtensionToolCfg
-    pcExtensionTool = result.popToolsAndMerge(ParticleCaloExtensionToolCfg(inputFlags))
+    if inputFlags.PF.useActsExtrapolation:
+        #do something
+        from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
+        ActsExtrapolationTool = result.popToolsAndMerge(ActsExtrapolationToolCfg(inputFlags,MaxSteps=10000))
+        PFTrackCaloExtensionTool=CompFactory.PFTrackCaloExtensionTool
+        TrackCaloExtensionTool=PFTrackCaloExtensionTool("PFTrackCaloExtensionTool_ACTS",ExtrapolationTool=ActsExtrapolationTool)
+        PFTrackSelector.trackExtrapolatorTool = TrackCaloExtensionTool
+    else:
 
-    eflowTrackCaloExtensionTool=CompFactory.eflowTrackCaloExtensionTool
-    TrackCaloExtensionTool=eflowTrackCaloExtensionTool(TrackCaloExtensionTool=pcExtensionTool)
-    if (not useCaching):
-      TrackCaloExtensionTool.PFParticleCache = ""
+        from TrackToCalo.TrackToCaloConfig import ParticleCaloExtensionToolCfg
+        pcExtensionTool = result.popToolsAndMerge(ParticleCaloExtensionToolCfg(inputFlags))
 
-    PFTrackSelector.trackExtrapolatorTool = TrackCaloExtensionTool
+        eflowTrackCaloExtensionTool=CompFactory.eflowTrackCaloExtensionTool
+        TrackCaloExtensionTool=eflowTrackCaloExtensionTool(TrackCaloExtensionTool=pcExtensionTool)
+        if (not useCaching):
+          TrackCaloExtensionTool.PFParticleCache = ""
+
+        PFTrackSelector.trackExtrapolatorTool = TrackCaloExtensionTool
 
     from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
         PFTrackSelectionToolCfg)

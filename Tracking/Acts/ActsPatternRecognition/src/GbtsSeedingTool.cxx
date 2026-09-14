@@ -44,15 +44,19 @@ namespace ActsTrk {
     // knows which layer each module hash belongs to and what it is made of.
     const std::vector<Acts::Experimental::GbtsLayerDescription>& layers =
       m_layerTool->layerDescriptions();
-    const std::vector<GbtsTechnology>& technologies =
-      m_layerTool->layerTechnologies();
 
     m_pixelHashToLayer = &m_layerTool->pixelLayers();
     m_stripHashToLayer = &m_layerTool->stripLayers();
 
+    if (!m_usePixelLayers && !m_useStripLayers) {
+      ATH_MSG_ERROR("Neither pixel nor strip layers are enabled, there is "
+                    "nothing to seed on.");
+      return StatusCode::FAILURE;
+    }
+
     std::vector<Acts::Experimental::GbtsLayerConnection> connections;
     float etaBinWidth = 0.0f;
-    ATH_CHECK(readConnections(layers, technologies, connections, etaBinWidth));
+    ATH_CHECK(readConnections(layers, connections, etaBinWidth));
 
     // option that allows for adding custom eta binning (default is at 0.2)
     if (m_etaBinWidthOverride.value() != 0.0f) {
@@ -115,7 +119,12 @@ namespace ActsTrk {
       const xAOD::SpacePoint* sp = tmpSpacePoints[idx];
       const std::vector<xAOD::DetectorIDHashType>& elementlist = sp->elementIdList();
 
+      // a strip space point is made of one cluster on each side of a stereo pair
       const bool isPixel(elementlist.size() == 1);
+
+      if (isPixel ? !m_usePixelLayers : !m_useStripLayers) {
+        continue;
+      }
 
       const std::vector<short>& hashToLayer =
         isPixel ? *m_pixelHashToLayer : *m_stripHashToLayer;
@@ -192,7 +201,6 @@ namespace ActsTrk {
   
   StatusCode GbtsSeedingTool::readConnections(
     const std::vector<Acts::Experimental::GbtsLayerDescription>& layers,
-    const std::vector<GbtsTechnology>& technologies,
     std::vector<Acts::Experimental::GbtsLayerConnection>& connections,
     float& etaBinWidth) const
   {
@@ -213,11 +221,12 @@ namespace ActsTrk {
     }
 
     // the table names a layer by its id, the layer tool by its dense index
-    std::unordered_map<std::uint32_t, GbtsTechnology> layerTechnologies;
+    std::unordered_map<std::uint32_t, Acts::Experimental::GbtsLayerTechnology>
+      layerTechnologies;
     layerTechnologies.reserve(layers.size());
-    for (std::size_t layer = 0; layer < layers.size(); ++layer) {
-      layerTechnologies.emplace(static_cast<std::uint32_t>(layers[layer].id),
-                                technologies[layer]);
+    for (const Acts::Experimental::GbtsLayerDescription& layer : layers) {
+      layerTechnologies.emplace(static_cast<std::uint32_t>(layer.id),
+                                layer.technology);
     }
 
     etaBinWidth = table.etaBinWidth;
@@ -240,7 +249,8 @@ namespace ActsTrk {
 
       // GBTS pairs a layer only with one of its own technology
       const bool wanted = src->second == dst->second &&
-                          (src->second == GbtsTechnology::Pixel
+                          (src->second ==
+                             Acts::Experimental::GbtsLayerTechnology::Pixel
                              ? m_pixelConnections.value()
                              : m_stripConnections.value());
       if (!wanted) {

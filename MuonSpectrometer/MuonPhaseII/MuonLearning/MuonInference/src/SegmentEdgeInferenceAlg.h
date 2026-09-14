@@ -52,6 +52,9 @@ namespace MuonML {
     Gaudi::Property<unsigned int> m_seedAnchorsPerComponent{
         this, "SeedAnchorsPerComponent", 0,
         "Number of highest-score segments that may seed each ML component; zero keeps every retained segment"};
+    Gaudi::Property<bool> m_anchorInnermostLayer{
+        this, "AnchorInnermostLayer", false,
+        "Restrict seed anchors to inner segment(s)."};
     Gaudi::Property<bool> m_keepBestSegmentPerChamber{
         this, "KeepBestSegmentPerChamber", true,
         "Keep only the ML-best segment in each chamber within a component"};

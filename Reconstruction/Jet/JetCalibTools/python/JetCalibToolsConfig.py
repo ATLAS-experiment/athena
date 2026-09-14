@@ -82,6 +82,7 @@ calibcontexts = {
     "AntiKt4EMPFlow_noLeptons":pflowcontexts,
     "AntiKt4EMPFlow_inclMuons":pflowcontexts,
     "AntiKt4EMPFlow_tauSeedEleRM":pflowcontexts,
+    "AntiKt4EMPFlowCustomVtx":pflowcontexts,
     "AntiKt4EMPFlowByVertex":pflowcontexts,
     "AntiKt4GPFlow":pflowcontexts,
     "AntiKt4UFOCSSK":ufocontexts,
@@ -165,19 +166,18 @@ def getJetCalibTool(jetdef, context, data_type, calibseq = "", rhoname = "", pvn
         _jetcollection = jetcollection
         if "PFlow" in jetcollection and (context=="TrigSoftDrop" or context=="TrigHLTSoftDrop"):
             _jetcollection = jetcollection.replace("EMPFlow","UFO")
-        if "_noElectrons" in jetcollection :
-            _jetcollection = _jetcollection.replace("_noElectrons","")
-        if "_noMuons" in jetcollection :
-            _jetcollection = _jetcollection.replace("_noMuons","")
-        if "_noLeptons" in jetcollection :
-            _jetcollection = _jetcollection.replace("_noLeptons","")
-        if "_inclMuons" in jetcollection :
-            _jetcollection = _jetcollection.replace("_inclMuons","")
-        if "_tauSeedEleRM" in jetcollection :
-            _jetcollection = _jetcollection.replace("_tauSeedEleRM","")
+        # Use standard calibrations for certain jet collections
+        # with minor changes to their constituents that should
+        # not invalidate the JES
+        ignore_substr = [
+            '_noElectrons', '_noMuons', '_noLeptons', '_inclMuons',
+            '_tauSeedEleRM',
+            'ByVertex', 'CustomVtx',
+        ]
+        for text in ignore_substr:
+            if text in jetcollection :
+                _jetcollection = _jetcollection.replace(text,"")
 
-        if "ByVertex" in jetcollection:
-            _jetcollection = jetcollection.replace("ByVertex","")
         return defineJetCalibTool(_jetcollection, context, _configfile, calibarea, _calibseq, _data_type, rhoname, _pvname, gscdepth)
     except KeyError as e:
         jetcaliblog.error("Context '{0}' not found for jet collection '{1}'".format(context,jetcollection))

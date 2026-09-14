@@ -10,20 +10,29 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Constants import DEBUG
 
 from ActsGPUDataPreparation.ActsGPUDataPreparationConfig import DeviceClusterizationAlgCfg, DeviceSPFormationAlgCfg
-from ActsGPUPatternRecognition.ActsGPUPatternRecognitionConfig import DeviceGBTSSeedingAlgCfg, DeviceTripletSeedingAlgCfg, DeviceTrkParamEstimationAlgCfg
+from ActsGPUPatternRecognition.ActsGPUPatternRecognitionConfig import DeviceGBTSSeedingAlgCfg, DeviceTripletSeedingAlgCfg, DeviceTrkParamEstimationAlgCfg, DeviceTrackFindingAlgCfg
 from ActsGPUEventCnv.ActsGPUEventCnvConfig import RDOtoTracccCellConverterAlgCfg, TracccMeasurementConverterAlgCfg
 from ActsGPUGeometry.ActsGPUGeometryConfig import JSONDeviceDetectorDescriptionProviderSvcCfg
 from ActsGPUMagField.ActsGPUMagFieldConfig import JSONDeviceMagFieldProviderSvcCfg
 
-def GPUSeedingCfg(flags) -> ComponentAccumulator:
+def GPUTrackingCfg(flags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     # Service runs first — loads all device detector description data into detStore
     acc.merge(JSONDeviceDetectorDescriptionProviderSvcCfg(flags,
-        OutputLevel = DEBUG))
-    acc.merge(JSONDeviceMagFieldProviderSvcCfg(flags,
-        OutputLevel = DEBUG))    
+        HostConditionsObjectName="TracccHostCondConfig",
+        HostDigitizationObjectName="TracccHostDigitizationConfig",
+        DeviceConditionsObjectName="TracccDeviceCondConfig",
+        DeviceDigitizationObjectName="TracccDeviceDigitizationConfig",
+        OutputLevel = DEBUG
+    ))
 
+    acc.merge(JSONDeviceMagFieldProviderSvcCfg(flags,
+        DeviceMagFieldObjectName="TracccMagneticField",
+        HostMagFieldObjectName="TracccHostMagField",
+        OutputLevel = DEBUG
+    ))
+   
     acc.merge(RDOtoTracccCellConverterAlgCfg(flags,
         TracccCells = "TracccCellCollection",
         OutputLevel = DEBUG
@@ -59,8 +68,19 @@ def GPUSeedingCfg(flags) -> ComponentAccumulator:
         InputTracccMeasurements="TracccMeasurementCollection",
         InputTracccSeeds="TracccPixelGBTSSeedCollection",
         OutputTracccTrackParameters="TracccTrkParamCollection",
+        InputTracccMagField="TracccMagneticField",
         OutputLevel = DEBUG
-    ))    
+    ))
+
+    acc.merge(DeviceTrackFindingAlgCfg(flags,
+        InputTracccMeasurements="TracccMeasurementCollection",
+        InputTracccMagField="TracccMagneticField",
+        InputTracccTrackParameters="TracccTrkParamCollection",
+        InputTracccDetectorGeometry="TracccDeviceDetectorGeometry",
+        OutputTracccTracks="TracccTrackCollection",
+        OutputLevel = DEBUG
+    ))
+    
 
     return acc
 
@@ -94,7 +114,7 @@ if __name__ == "__main__":
     from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
     acc.merge(ITkStripReadoutGeometryCfg(flags))
 
-    acc.merge(GPUSeedingCfg(flags))
+    acc.merge(GPUTrackingCfg(flags))
     acc.printConfig(withDetails=True, summariseProps=True)
 
     statusCode = acc.run(flags.Exec.MaxEvents)
