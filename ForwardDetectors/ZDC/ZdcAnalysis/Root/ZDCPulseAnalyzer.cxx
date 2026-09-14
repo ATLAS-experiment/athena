@@ -2363,7 +2363,7 @@ void ZDCPulseAnalyzer::dumpConfiguration() const    // setting
   if (!m_doPrePulseCheck) {
     (*m_msgFunc_p)(ZDCMsg::Info, "Pre-pulse and negative exponential pulse checking disabled");
   }
-  if (m_doPostPulseCheck) {
+  if (!m_doPostPulseCheck) {
     (*m_msgFunc_p)(ZDCMsg::Info, "Post-pulse checking disabled");
   }
   
