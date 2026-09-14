@@ -366,6 +366,25 @@ def ActsStripGbtsSeedingToolCfg(flags,
     return acc
 
 
+def ActsGnnSeedingToolCfg(flags,
+                          name: str = "ActsGnnSeedingTool",
+                          **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    if 'GnnPipelineTool' not in kwargs:
+        kwargs.setdefault('GnnPipelineTool', CompFactory.ActsTrk.GnnPipelineTool(
+            "GnnSeedingPipeline",
+            moduleMapPath=flags.Acts.GNN.ModuleMapPath,
+            gnnPath=flags.Acts.GNN.ModelPath,
+            numTrtContexts=flags.Acts.GNN.NumTrtContexts,
+            maxGpuInstances=flags.Acts.GNN.MaxGpuInstances,
+            edgeCut=flags.Acts.GNN.EdgeCut,
+            minCandidateMeasurements=flags.Acts.GNN.MinCandidateMeasurements,
+        ))
+
+    acc.setPrivateTools(CompFactory.ActsTrk.GnnSeedingTool(name, **kwargs))
+    return acc
+
 # ACTS algorithm using Athena objects upstream
 def ActsPixelSeedingAlgCfg(flags,
                            name: str = 'PixelSeedingAlg',
@@ -392,6 +411,9 @@ def ActsPixelSeedingAlgCfg(flags,
         elif flags.Tracking.ActiveConfig.PixelSeedingStrategy is SeedingStrategy.GbtsFtf:
             kwargs.setdefault('SeedTool', acc.popToolsAndMerge(
               ActsGbtsFtfSeedingTrigToolCfg(flags)))
+        elif flags.Tracking.ActiveConfig.PixelSeedingStrategy is SeedingStrategy.Gnn:
+            kwargs.setdefault('SeedTool', acc.popToolsAndMerge(
+              ActsGnnSeedingToolCfg(flags)))
         elif flags.Tracking.ActiveConfig.PixelSeedingStrategy is SeedingStrategy.GridTriplet:
             if useFastTracking:
                 kwargs.setdefault('SeedTool', acc.popToolsAndMerge(

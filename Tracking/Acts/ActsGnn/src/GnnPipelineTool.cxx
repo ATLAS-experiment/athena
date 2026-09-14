@@ -10,6 +10,7 @@
 #include <numbers>
 #include <numeric>
 
+#include "Acts/Utilities/MathHelpers.hpp"
 #include "ActsPlugins/Gnn/CudaTrackBuilding.hpp"
 #include "ActsPlugins/Gnn/GnnPipeline.hpp"
 #include "ActsPlugins/Gnn/ModuleMapCuda.hpp"
@@ -152,6 +153,13 @@ StatusCode GnnPipelineTool::buildSeed(
     for (int spi : candidate) {
       seedSPs.push_back(allSPPtrs.at(spi));
     }
+    // Order the space points from the innermost to the outermost one, as
+    // expected by the downstream parameter estimation and track finding
+    std::ranges::sort(seedSPs, [](const xAOD::SpacePoint* a,
+                                  const xAOD::SpacePoint* b) {
+      return Acts::fastHypot(a->x(), a->y(), a->z()) <
+             Acts::fastHypot(b->x(), b->y(), b->z());
+    });
     constexpr float quality = 0.f; // quality is not computed in the GNN pipeline
     constexpr float vertexZ = 0.f; // vertexZ is not computed in the GNN pipeline
     seeds.push_back(ActsTrk::SpacePointRange(seedSPs.data(), seedSPs.size()),
