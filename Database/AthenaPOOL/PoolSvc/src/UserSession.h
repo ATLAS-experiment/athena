@@ -106,6 +106,9 @@ namespace pool {
     virtual  ITechnologySpecificAttributes&
     technologySpecificAttributes( long technology ) override final;
 
+    /// Return StorageSvc for a given technology used in this session
+    virtual IStorageSvc& getStorageSvc( long technology ) override final;
+
     /// Returns the technology given a technology type.
     MicroSessionManager& microSessionManager( long technology );
 

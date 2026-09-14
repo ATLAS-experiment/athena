@@ -21,6 +21,7 @@ namespace pool {
   // forward declarations
   class ITechnologySpecificAttributes;
   class IFileCatalog;
+  class IStorageSvc;
 
   /// Factory method to create a session object
   class ISession;
@@ -77,6 +78,9 @@ namespace pool {
 
     /// Returns the object holding the technology specific attributes for a given technology domain
     virtual ITechnologySpecificAttributes& technologySpecificAttributes( long technology ) = 0;
+
+    /// Return StorageSvc for a given technology used in this session
+    virtual IStorageSvc& getStorageSvc( long technology ) = 0;
 
     /// virtual destructor for the interface
     virtual ~ISession() = default;

@@ -55,13 +55,12 @@ StatusCode PoolCollectionConverter::initialize() {
    }
    StatusCode sc = StatusCode::SUCCESS;
    try {
-      if (m_collectionType == "RootCollection") {
+      if( m_collectionType == "RootCollection" || m_collectionType == "ImplicitCollection" ) {
          sc = m_poolSvc->connectCollection(m_inputCollection, "Input", pool::ROOT_StorageType.type(), m_contextId);
          m_poolCollection = createCollection(m_inputCollection, "Input", pool::ROOT_StorageType.type(), m_contextId);
-      }
-      if (m_poolCollection == nullptr) { // Open as ImplicitCollection if technologies fail, or none was specified
-         sc = m_poolSvc->connectCollection(m_inputCollection, "Input", pool::POOL_StorageType.type(), m_contextId);
-         m_poolCollection = createCollection(m_inputCollection, "Input", pool::POOL_StorageType.type(), m_contextId);
+      } else {
+         // ATH_MSG_ERROR("initialize: Unsupported collection type \"" << m_collectionType << "\".");
+         return StatusCode::FAILURE;
       }
    } catch (std::exception &e) {
       if (m_poolCollection == nullptr) return StatusCode::RECOVERABLE;

@@ -4,11 +4,13 @@
 
 #include "RootCollection.h"
 #include "CollectionCursor.h"
+#include "ImplicitCollectionIterator.h"
 
 #include "CoralBase/Attribute.h"
 #include "CoralBase/AttributeList.h"
 
 #include "PersistentDataModel/Token.h"
+#include "PoolSvc/ISession.h"
 #include "StorageSvc/APRDefaults.h"
 #include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbDatabase.h"
@@ -29,14 +31,16 @@
 
 namespace pool {
 
-   RootCollection::RootCollection( const pool::CollectionDescription* description,
-                                   Io::IoFlag mode )
+   RootCollection::RootCollection( const pool::CollectionDescription& description,
+                                   Io::IoFlag mode,
+                                   ISession* session )
       : APRMessaging( "RootCollection"),
-        m_description( *description ),
-        m_name( description->name() ),
-        m_fileName( description->connection() ),
+        m_description( description ),
+        m_name( description.name() ),
+        m_fileName( description.connection() ),
         m_mode( mode ),
-        m_open( false )
+        m_open( false ),
+        m_session( session )
       {
          RootCollection::open();
       }
@@ -105,20 +109,35 @@ namespace pool {
          }
          m_storageSvc->endSession().ignore();
       }
+      if( m_ownStorageSvc ) {
+         delete m_storageSvc;
+         m_storageSvc = nullptr;
+      }
    }
 
 
     // throw all errors as exceptions, because this method is called from the constructor
    void RootCollection::open()
    {
-      if( m_fileName.starts_with ( "PFN:") ) {
-        m_fileName = m_fileName.substr(4);
+      if( m_fileName.empty() ) {
+         ATH_MSG_ERROR( "No database name given" );
+         throw std::runtime_error( "No database name (APR: RootCollection::open() )" );
       }
-
-      m_storageSvc.reset( pool::createStorageSvc("StorageSvc") );
-      // MN: TODO: use m_session if provided?
-      if( !m_storageSvc->startSession( m_mode, m_description.type().type()) .isSuccess() ) {
-         throw std::runtime_error( "RootCollection failed to start a session." );
+      if( m_fileName.starts_with("PFN:") ) {
+         m_fileName = m_fileName.substr(4);
+         // TODO: handle other prefixes too
+      }
+      if( !m_session ) {
+         // not creating a new session to avoid playing with the filecatalog
+         // working directly with the StorageSvc
+         m_storageSvc = pool::createStorageSvc("StorageSvc");
+         m_ownStorageSvc = true;
+         if( !m_storageSvc->startSession( m_mode, m_description.type().type()) .isSuccess() ) {
+            throw std::runtime_error( "RootCollection failed to start a session." );
+         }
+      } else {
+         m_storageSvc = &m_session->getStorageSvc( m_description.type().type() );
+         m_ownStorageSvc = false;
       }
       m_fileDescr.initFromFilename( m_fileName );
       if( !m_storageSvc->connect( m_mode, m_fileDescr ).isSuccess() ) {
@@ -136,6 +155,8 @@ namespace pool {
             throw std::runtime_error( "RootCollection: error reading " + m_fileName );
          }
          m_containerPrefix = APRDefaults::ReadConfig::getEventTagName( m_fileDescr.FID() );
+         const std::string& newDHContName = std::format("{}(DataHeader)", APRDefaults::ReadConfig::getDataHeaderName( m_fileDescr.FID() ));
+         const std::string& oldDHContName = std::format("{}_DataHeader",  APRDefaults::ReadConfig::getDataHeaderName( m_fileDescr.FID() ));
          ATH_MSG_DEBUG("Opening RootCollection '" << m_fileName << "' using container prefix: " << m_containerPrefix );
          std::string tagContName = m_containerPrefix + "(";
          for( const Token *t : containerTokens ) {
@@ -151,12 +172,17 @@ namespace pool {
                      m_description.insertColumn( attrName, typ_info->clazz().Name() );
                   }
                   m_containerMap.emplace( attrName, std::move(cnt) );
+               } else {
+                  ATH_MSG_WARNING("EventTag container " << contName << " could not be opened");
                }
+            } else if( contName == newDHContName or contName == oldDHContName ) {
+               ATH_MSG_DEBUG("  :container " << contName << " is the DataHeader container");
+               m_dhContName = contName;
             }
          }
-         if( m_containerMap.empty() ) {
+         if( m_containerMap.empty() and m_dhContName.empty() ) {
             db.close().ignore();
-            throw std::runtime_error( "No RootCollection found in " + m_fileName );
+            throw std::runtime_error( "No Event Collections found in " + m_fileName );
          }
       }
       if( m_mode == Io::WRITE || m_mode == Io::APPEND) {
@@ -175,8 +201,39 @@ namespace pool {
       if( !m_open ) {
          throw std::runtime_error( "Attempt to get cursor for a closed collection. (APR: \" RootCollection::cursor \" from \" RootCollection \")" );
       }
-      pool::CollectionRowBuffer collectionRowBuffer;
-      initNewRow(collectionRowBuffer);
-      return std::make_unique<CollectionCursor>( m_description, collectionRowBuffer, m_containerMap);
+      if( !m_containerMap.empty() ) {
+         pool::CollectionRowBuffer collectionRowBuffer;
+         initNewRow(collectionRowBuffer);
+         return std::make_unique<CollectionCursor>( m_description, collectionRowBuffer, m_containerMap);
+      } else {
+
+         auto database = m_session->databaseHandle( m_fileName, DatabaseSpecification::PFN );
+         if( !database ) {
+            throw std::runtime_error( "Could not retrieve a database handle (APR: RootCollection::cursor)" );
+         }
+         if( database->openMode() == Io::INVALID ) {
+            database->setTechnology( m_description.type().type() );
+            database->connectForRead();
+         }
+         IContainer *dhCont = database->containerHandle( m_dhContName );
+         if( !dhCont ) {
+            throw std::runtime_error( "Could not retrieve a handle to the DataHeader container (APR: RootCollection::cursor)" );
+         }
+         return std::make_unique<ImplicitCollectionIterator>( *dhCont );
+      }
    }
-}
+
+
+   /// Initialize a new RowBuffer by adding all Attributes and Tokens of this collection to it
+   void RootCollection::initNewRow( CollectionRowBuffer& rowBuffer ) const
+   {
+      coral::AttributeList          attributeList;
+
+      for( int j = 0; j < description().numberOfAttributeColumns(); j++ ) {
+         const auto& attrCol = description().attributeColumn( j );
+         attributeList.extend( attrCol.name(), attrCol.type() );
+      }
+      rowBuffer.setAttributeList( attributeList );   
+   }
+
+} //namespace pool

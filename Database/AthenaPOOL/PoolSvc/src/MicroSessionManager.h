@@ -52,6 +52,10 @@ namespace pool {
     /// Fetches the FID by trying to temporatily connect to a database.
     std::string fidForPfn( const std::string& pfn );
 
+    /// Return StorageSvc 
+    IStorageSvc& getStorageSvc( ) { return *m_storageSvc; }
+
+
   protected:
     virtual
     bool attributeOfType( const std::string& attributeName,

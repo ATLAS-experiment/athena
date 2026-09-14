@@ -71,11 +71,6 @@ namespace pool {
      * suppress (or enable) warning about a missing MessageSvc (logging)
      */
     static void setMessageSvcQuiet( bool quiet=true );
-
-    static ICollection* plugin ATLAS_NOT_THREAD_SAFE ( const CollectionDescription& description,
-                                 Io::IoFlag openMode,
-                                 ISession* session = 0 );
-
   };
 }
 
