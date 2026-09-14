@@ -19,7 +19,7 @@ der_tf_exit_code=$?
 echo "art-result: $der_tf_exit_code deriv sumpt2"
 
 run runIDPVM.py \
-  --filesInput PHYSVAL.sumpt2.root \
+  --filesInput DAOD_PHYSVAL.sumpt2.root \
   --outputFile idpvm.sumpt2.root 
 idpvm_tf_exit_code=$?
 echo "art-result: $idpvm_tf_exit_code idpvm sumpt2"
@@ -36,7 +36,7 @@ der_tf_exit_code=$?
 echo "art-result: $der_tf_exit_code deriv hsgnn"
 
 run runIDPVM.py \
-  --filesInput PHYSVAL.hsgnn.root \
+  --filesInput DAOD_PHYSVAL.hsgnn.root \
   --outputFile idpvm.hsgnn.root 
 idpvm_tf_exit_code=$?
 echo "art-result: $idpvm_tf_exit_code idpvm hsgnn"
