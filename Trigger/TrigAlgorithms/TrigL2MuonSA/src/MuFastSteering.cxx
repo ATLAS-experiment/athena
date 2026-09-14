@@ -542,7 +542,7 @@ StatusCode MuFastSteering::findMuonSignature(const std::vector<const TrigRoiDesc
             if (!sc.isSuccess()) {
                 ATH_MSG_WARNING("Data preparation failed");
                 TrigL2MuonSA::TrackPattern trackPattern;
-                trackPatterns.push_back(trackPattern);
+                trackPatterns.push_back(std::move(trackPattern));
                     // Update output trigger element
                     updateOutputObjects(*p_roi, *p_roids, muonRoad, mdtRegion, rpcHits, tgcHits,
                                     rpcFitResult, tgcFitResult, mdtHits, cscHits,
