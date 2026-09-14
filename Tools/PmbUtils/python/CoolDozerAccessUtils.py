@@ -156,8 +156,7 @@ class CDDataRetrievalHelper(object):
 
     #Static private data. Hands off!:
     __private__dbhandler=None
-    connectString='oracle://atlas_coolprod;schema=ATLAS_LTM_RTT;dbname=ATLR;user=ATLAS_LTM_RTT_R;password=%s'% \
-                   '4c544d52656164657232303039'.decode('hex_codec')
+    connectString='oracle://atlas_coolprod;schema=ATLAS_LTM_RTT;dbname=ATLR;user=ATLAS_LTM_RTT_R;password=_'
     #Workhorse is a static method which takes a list of objects
     #implementing the CDJobDefinitionBase above, and returning a list
     #of Job's (from ValuePerDomainCalcUtils).
