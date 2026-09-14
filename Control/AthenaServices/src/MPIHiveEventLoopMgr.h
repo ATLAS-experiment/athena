@@ -12,7 +12,7 @@
 */
 
 // Base class headers
-#include "AthenaHiveEventLoopMgr.h"
+#include "AthenaServices/AthenaHiveEventLoopMgr.h"
 
 // Athena headers
 #include "AthenaKernel/IMPIClusterSvc.h"

@@ -50,7 +50,7 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "EventInfoUtils/EventInfoFromxAOD.h"
 
-#include "AthenaHiveEventLoopMgr.h"
+#include "AthenaServices/AthenaHiveEventLoopMgr.h"
 
 #include <GaudiKernel/IScheduler.h>
 // External libraries
@@ -101,6 +101,7 @@ AthenaHiveEventLoopMgr::AthenaHiveEventLoopMgr(const std::string& nam,
 		  "Name of the Whiteboard to be used");
 
   declareProperty("EventStore", m_eventStore);
+  declareProperty("ConditionsCleanerSvc", m_conditionsCleaner);
 
   declareProperty("EvtIdModifierSvc", m_evtIdModSvc,
                   "ServiceHandle for EvtIdModifierSvc");
@@ -581,33 +582,19 @@ StatusCode AthenaHiveEventLoopMgr::executeEvent( EventContext &&ctx )
     }
   }
 
-  // Reset the timeout singleton
-  resetTimeout(Athena::Timeout::instance(ctx));
   if(toolsPassed) {
 
-    CHECK( m_conditionsCleaner->event (ctx, true) );
-
-    // Remember the last event context for after event processing finishes.
-    m_lastEventContext = ctx;
-    
-    // Now add event to the scheduler 
-    ATH_MSG_DEBUG ( "Adding event {}, slot {} to the scheduler",
-                    ctx.evt(), ctx.slot());
-    
-    m_incidentSvc->fireIncident(Incident(name(), IncidentType::BeginProcessing, 
-					 ctx));
-    StatusCode addEventStatus = m_schedulerSvc->pushNewEvent( new EventContext{ std::move(ctx) } );
-    
-    // If this fails, we need to wait for something to complete
-    if (!addEventStatus.isSuccess()){
-      ATH_MSG_FATAL ( "An event processing slot should be now free in the scheduler, but it appears not to be the case." );
+    if (submitEvent(std::move(ctx)).isFailure()) {
+      m_whiteboard->clearStore(ctx.slot()).ignore();
+      clearWBSlot(ctx.slot()).ignore();
+      Gaudi::Hive::setCurrentContext(EventContext());
+      return StatusCode::FAILURE;
     }
-    
-  }  // end of toolsPassed test
 
-  ++m_nev;
-
-  ++m_nevt;
+  } else {
+    ++m_nev;
+    ++m_nevt;
+  }
 
   // invalidate thread local context once outside of event execute loop
   Gaudi::Hive::setCurrentContext( EventContext() );
@@ -667,7 +654,7 @@ StatusCode AthenaHiveEventLoopMgr::stop()
   // may not have been cleared.  This can lead to segfaults later,
   // as DetectorStore will usually get finalized before HiveSvcMgr.
   // So make sure that all stores have been cleared at this point.
-  size_t nslot = m_whiteboard->getNumberOfStores();
+  size_t nslot = m_whiteboard ? m_whiteboard->getNumberOfStores() : 0;
   for (size_t islot = 0; islot < nslot; islot++) {
     sc &= clearWBSlot (islot);
   }
@@ -840,6 +827,7 @@ void AthenaHiveEventLoopMgr::handle(const Incident& inc)
 {
 
   if(inc.type() == "EndAlgorithms") {
+    if (!clearStoreOnEndAlgorithms()) return;
     // Clear the store at the end of the event.
     // Do it here so that it executes in an algorithm context and thus
     // multiple stores can be cleared at the same time.
@@ -1155,23 +1143,95 @@ void AthenaHiveEventLoopMgr::modifyEventContext(EventContext& ctx, const EventID
 
 //---------------------------------------------------------------------------
 EventContext AthenaHiveEventLoopMgr::createEventContext() {
+  return allocateEventContext(m_nevt);
+}
 
-  EventContext ctx{ m_nevt, m_whiteboard->allocateStore( m_nevt ) };
+EventContext AthenaHiveEventLoopMgr::allocateEventContext(size_t eventNumber) {
+  const size_t slot = m_whiteboard->allocateStore(eventNumber);
+  if (slot == std::string::npos) {
+    ATH_MSG_ERROR("No free whiteboard slot");
+    return EventContext{};
+  }
+  if (m_whiteboard->selectStore(slot).isFailure()) {
+    ATH_MSG_ERROR("Could not select whiteboard slot {}", slot);
+    m_whiteboard->freeStore(slot).ignore();
+    return EventContext{};
+  }
+  EventContext ctx{eventNumber, slot};
+  Atlas::setExtendedEventContext(
+      ctx, Atlas::ExtendedEventContext(m_eventStore->hiveProxyDict()));
+  return ctx;
+}
 
-  StatusCode sc = m_whiteboard->selectStore( ctx.slot() );
-  if (sc.isFailure()) {
-    ATH_MSG_FATAL ( "Slot {} could not be selected for the WhiteBoard",
-                    ctx.slot());
-    return EventContext{};       // invalid EventContext
+StatusCode AthenaHiveEventLoopMgr::submitEvent(EventContext&& ctx) {
+  CHECK(m_conditionsCleaner->event(ctx, true));
+  resetTimeout(Athena::Timeout::instance(ctx));
+  m_lastEventContext = ctx;
+
+  auto submitted = std::make_unique<EventContext>(ctx);
+  m_incidentSvc->fireIncident(
+      Incident(name(), IncidentType::BeginProcessing, ctx));
+  if (m_schedulerSvc->pushNewEvent(submitted.get()).isFailure()) {
+    m_incidentSvc->fireIncident(
+        Incident(name(), IncidentType::EndProcessing, ctx));
+    ATH_MSG_ERROR("Scheduler refused event {}", ctx.evt());
+    return StatusCode::FAILURE;
+  }
+  submitted.release(); // Ownership transferred to the scheduler.
+  ++m_nev;
+  ++m_nevt;
+  return StatusCode::SUCCESS;
+}
+
+StatusCode AthenaHiveEventLoopMgr::eventFinished(const EventContext& ctx) {
+  if (m_aess->eventStatus(ctx) != EventStatus::Success) {
+    // EventContext not working with std::format
+    ATH_MSG_ERROR("Failed event " << ctx << " with status "
+                  << m_aess->eventStatus(ctx));
+    return StatusCode::FAILURE;
+  }
+  return StatusCode::SUCCESS;
+}
+
+StatusCode AthenaHiveEventLoopMgr::finishEvent(const EventContext& ctx) {
+  StatusCode result = m_whiteboard->selectStore(ctx.slot());
+  if (result.isSuccess()) {
+    Gaudi::Hive::setCurrentContext(ctx);
+    result = eventFinished(ctx);
+    m_incidentSvc->fireIncident(
+        Incident(name(), IncidentType::EndProcessing, ctx));
   } else {
-    Atlas::setExtendedEventContext(ctx,
-                                   Atlas::ExtendedEventContext( m_eventStore->hiveProxyDict() ) );
-
-    ATH_MSG_DEBUG ( "created EventContext, num: {}  in slot: {}",
-                    ctx.evt(), ctx.slot());
+    ATH_MSG_ERROR("Could not select completed slot {}", ctx.slot());
   }
 
-  return ctx;
+  // Result handling may fail; the event has nevertheless left the scheduler
+  // and must relinquish its slot. Batch jobs already cleared at EndAlgorithms.
+  if (!clearStoreOnEndAlgorithms()) {
+    result &= m_whiteboard->clearStore(ctx.slot());
+  }
+  result &= clearWBSlot(ctx.slot());
+  if (result.isFailure()) {
+    Gaudi::Hive::setCurrentContext(EventContext());
+    return result;
+  }
+  writeHistograms().ignore();
+  ++m_proc;
+  if (m_doEvtHeartbeat) {
+    const auto n_evt = ctx.eventID().event_number();
+    const auto n_run = ctx.eventID().run_number();
+    ATH_MSG_INFO("  ===>>>  done processing event #{}, run #{} on slot {}, {} events processed so far <<<===",
+                 n_evt, n_run, ctx.slot(), m_proc);
+    std::ofstream outfile("eventLoopHeartBeat.txt");
+    if (!outfile) {
+      ATH_MSG_ERROR("Unable to open eventLoopHeartBeat.txt");
+      Gaudi::Hive::setCurrentContext(EventContext());
+      return StatusCode::FAILURE;
+    }
+    std::println(outfile, "  done processing event #{}, run #{} {} events read so far <<<===",
+                 n_evt, n_run, m_nev);
+  }
+  Gaudi::Hive::setCurrentContext(EventContext());
+  return StatusCode::SUCCESS;
 }
 
 //---------------------------------------------------------------------------
@@ -1216,73 +1276,12 @@ AthenaHiveEventLoopMgr::drainScheduler(int& finishedEvts){
       continue;
     }
 
-    if (m_aess->eventStatus(*thisFinishedEvtContext) != EventStatus::Success) {
-      // EventContext not working with std::format
-      ATH_MSG_FATAL ( "Failed event detected on " << thisFinishedEvtContext 
-              << " w/ fail mode: "
-              << m_aess->eventStatus(*thisFinishedEvtContext) );
+    if (finishEvent(*thisFinishedEvtContext).isFailure()) {
       fail = true;
-      continue;
-    }
-    
-    EventID::number_type n_run(0);
-    EventID::event_number_t n_evt(0);
-
-    if (m_whiteboard->selectStore(thisFinishedEvtContext->slot()).isSuccess()) {
-      n_run = thisFinishedEvtContext->eventID().run_number();
-      n_evt = thisFinishedEvtContext->eventID().event_number();
     } else {
-      ATH_MSG_ERROR ( "DrainSched: unable to select store {}",
-                      thisFinishedEvtContext->slot() );
-      fail = true;
-      continue;
+      ++finishedEvts;
     }
 
-    // m_incidentSvc->fireIncident(Incident(name(), IncidentType::EndEvent,
-    // 					 *thisFinishedEvtContext ));
-    
-    // Some code still needs global context in addition to that passed in the incident
-    Gaudi::Hive::setCurrentContext( *thisFinishedEvtContext );
-    m_incidentSvc->fireIncident(Incident(name(), IncidentType::EndProcessing, *thisFinishedEvtContext ));
-
-    ATH_MSG_DEBUG( "Clearing slot {} (event {}) of the whiteboard",
-                   thisFinishedEvtContext->slot(),
-                   thisFinishedEvtContext->evt() );
-    
-    StatusCode sc = clearWBSlot(thisFinishedEvtContext->slot());
-    if (!sc.isSuccess()) {
-      ATH_MSG_ERROR ( "Whiteboard slot {} could not be properly cleared",
-                      thisFinishedEvtContext->slot() );
-      fail = true;
-      continue;
-    }
-    
-    finishedEvts++;
-
-    writeHistograms().ignore();
-    ++m_proc;
-
-    if (m_doEvtHeartbeat) {
-      if(!m_useTools) 
-        ATH_MSG_INFO ( "  ===>>>  done processing event #{}, run #{} on slot {},  {} events processed so far  <<<===",
-                       n_evt, n_run, thisFinishedEvtContext->slot(), m_proc);
-      else 
-	ATH_MSG_INFO ( "  ===>>>  done processing event #{}, run #{} on slot {},  {} events read and {} events processed so far <<<===",
-                       n_evt, n_run, thisFinishedEvtContext->slot(), m_nev, m_proc);
-      std::ofstream outfile( "eventLoopHeartBeat.txt");
-      if ( !outfile ) {
-	ATH_MSG_ERROR ( " unable to open: eventLoopHeartBeat.txt" );
-	fail = true;
-	continue;
-      } else {
-        std::print (outfile, "  done processing event #{}, run # {} events read so far  <<<===",
-                    n_evt, n_run, m_nev);
-	outfile.close();
-      }  
-    }
-
-    // EventContext not working with format.
-    ATH_MSG_DEBUG ( "drainScheduler thisFinishedEvtContext: " << thisFinishedEvtContext );
   }
 
   return (  fail ? -1 : 1 );
@@ -1295,4 +1294,3 @@ StatusCode AthenaHiveEventLoopMgr::clearWBSlot(int evtSlot)  {
   return m_whiteboard->freeStore(evtSlot);  
 }
 //---------------------------------------------------------------------------
-
