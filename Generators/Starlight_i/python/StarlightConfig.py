@@ -111,34 +111,6 @@ def StarlightBaseCfg(flags, name="Starlight_i", safety=1., **kwargs):
     return ca
 
 
-def StarlightPythia8BaseCfg(flags, ShowerCfg=Pythia8_A14_NNPDF23LO_Common_Cfg, **kwargs):
-    """
-    Modular fragment for setting up Pythia 8 on top of Starlight.
-    """
-
-    # Create CA for basic Pythia8 shower configuration
-    ca = ShowerCfg(
-        flags,
-        LHEFile="events.lhe",
-        # IsAfterburner must be true to remove empty HepMC
-        # events produced by Starlight GenModule
-        IsAfterburner=True,
-        **kwargs
-    )
-
-    # Add Pythia8 commands common for QED final state radiation
-    # If needed can be overriden by user comands
-    common_commands = ['SpaceShower:QEDshowerByL = 1']
-    ca.merge(Pythia8CommandsCfg(
-        flags,
-        source="common_commands",
-        commands=common_commands,
-        precedence=GeneratorSettingsPrecedence.WEIGHTS,
-    ))
-
-    return ca
-
-
 def Starlight_Pythia8_Common_Cfg(flags,
                                 ShowerCfg=Pythia8_A14_NNPDF23LO_Common_Cfg,
                                 Commands=[],
@@ -160,10 +132,26 @@ def Starlight_Pythia8_Common_Cfg(flags,
     ca = StarlightBaseCfg(flags, **kwargs)
 
     # Add Pythia8
-    ca.merge(StarlightPythia8BaseCfg(
+    ca.merge(ShowerCfg(
         flags,
-        ShowerCfg,
-        Commands=Commands
+        Commands=Commands,
+        LHEFile="events.lhe",
+        # IsAfterburner must be true to remove empty
+        # HepMC events produced by Starlight GenModule
+        IsAfterburner=True,
+        **kwargs
+    ))
+
+    # Ensure the showering is switched on for leptons
+    base_commands = [
+        'SpaceShower:QEDshowerByL = 1',
+        'TimeShower:QEDshowerByL = 1'
+    ]
+    ca.merge(Pythia8CommandsCfg(
+        flags,
+        source="base_commands",
+        commands=base_commands,
+        precedence=GeneratorSettingsPrecedence.BASE,
     ))
 
     return ca
