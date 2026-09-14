@@ -65,7 +65,7 @@ if (run == -1 or len(lbList) == 0) :
 
 # get database service and open database
 dbSvc=cool.DatabaseSvcFactory.databaseService()
-dbstring="oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TRIGGER;dbname=COMP200;user=ATLAS_COOL_READER;password=COOLRED4PRO"
+dbstring="oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TRIGGER;dbname=COMP200;user=ATLAS_COOL_READER;password=_"
 
 try:
     db=dbSvc.openDatabase(dbstring,False)
@@ -147,7 +147,7 @@ db.closeDatabase()
 ####################################
 # < --
 # now read further trigger counters
-dbstring="oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TRIGGER;dbname=MONP200;user=ATLAS_COOL_READER;password=COOLRED4PRO"
+dbstring="oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TRIGGER;dbname=MONP200;user=ATLAS_COOL_READER;password=_"
 #dbstring = "TRIG_PIT/MONP200"
 try:
     db=dbSvc.openDatabase(dbstring,False)

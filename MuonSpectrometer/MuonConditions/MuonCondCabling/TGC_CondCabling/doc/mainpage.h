@@ -149,7 +149,7 @@ You also need to have authentication.xml file in your current (run) directory:
 
 <connection name="oracle://intr/ATLAS_COOL_TGCMAP">
  <parameter name="user" value="ATLAS_COOL_TGCMAP"/>
- <parameter name="password" value="ATLAS4TGCMAP"/>
+ <parameter name="password" value="_"/>
 </connection>
 
 </connectionlist>

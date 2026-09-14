@@ -20,7 +20,7 @@ ORBIT_FREQUENCY = 40.0790e6 / 3564.
 
 _COOLDBOWNER='' 
 
-_COOLDB="oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TRIGGER;dbname=DBNAME;user=ATLAS_COOL_READER;password=COOLRED4PRO"
+_COOLDB="oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TRIGGER;dbname=DBNAME;user=ATLAS_COOL_READER;password=_"
 
 def get_dbid_MONP(owner=False):
    if owner:
@@ -38,7 +38,7 @@ def get_dbid_COMP(owner=False):
    
 
 def get_dbid_TDAQ_COMP(owner=False):
-   _COOLDB="oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TDAQ;dbname=DBNAME;user=ATLAS_COOL_READER;password=COOLRED4PRO"
+   _COOLDB="oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TDAQ;dbname=DBNAME;user=ATLAS_COOL_READER;password=_"
    if owner:
        print "NO OWNER ACCOUNT IMPLEMENTED"
        return _COOLDBOWNER.replace("DBNAME","COMP200")

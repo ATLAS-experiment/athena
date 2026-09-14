@@ -26,12 +26,12 @@ def main( runNum=None, projectName='' ):
     #load COMP200 or CONDBR2 depending on date A.Gascon 2014-12-08
 
     if (year > 13):
-        RunCtrlDB = 'oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TDAQ;dbname=CONDBR2;user=ATLAS_COOL_READER;password=COOLRED4PRO'
+        RunCtrlDB = 'oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TDAQ;dbname=CONDBR2;user=ATLAS_COOL_READER;password=_'
     else:
-        RunCtrlDB = 'oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TDAQ;dbname=COMP200;user=ATLAS_COOL_READER;password=COOLRED4PRO'
+        RunCtrlDB = 'oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TDAQ;dbname=COMP200;user=ATLAS_COOL_READER;password=_'
     
     # use new CONDBR2, A.N., 2014-11-28
-    # RunCtrlDB = 'oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TDAQ;dbname=CONDBR2;user=ATLAS_COOL_READER;password=COOLRED4PRO'
+    # RunCtrlDB = 'oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TDAQ;dbname=CONDBR2;user=ATLAS_COOL_READER;password=_'
     #    RunCtrlDb = dbSvc.openDatabase( RunCtrlDB )
     try:
         RunCtrlDb = dbSvc.openDatabase( RunCtrlDB )
