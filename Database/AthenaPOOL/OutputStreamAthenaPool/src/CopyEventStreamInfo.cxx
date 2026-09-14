@@ -47,12 +47,6 @@ StatusCode CopyEventStreamInfo::beginInputFile(const SG::SourceID&)
    if (keys.empty()) return StatusCode::SUCCESS;
 
    for (const auto &key : keys) {
-      // Ignore versioned container
-      if (key.substr(0, 1) == ";" && key.substr(3, 1) == ";") {
-         ATH_MSG_VERBOSE( "Ignore versioned container: " << key );
-         continue;
-      }
-
       const EventStreamInfo* evtStrInfo_in = nullptr;
       ATH_CHECK( m_inputMetaDataStore->retrieve(evtStrInfo_in, key) );
 
