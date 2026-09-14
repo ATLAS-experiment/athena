@@ -52,9 +52,9 @@ def AddTauMassDecoratorCfg(flags, **kwargs):
     acc.merge(InputRenameCfg("xAOD::TauJetContainer", kwargs['TauContainerName'], "old_"+kwargs['TauContainerName']))
     acc.merge(InputRenameCfg("xAOD::TauJetAuxContainer", kwargs['TauContainerName']+"Aux.", "old_"+kwargs['TauContainerName']+"Aux."))
 
-    #acc.addEventAlgo(CompFactory.DerivationFramework.TauMassDecorator(name               = kwargs['TauContainerName']+"_MassDecorator",
-    #                                                                  TauOutputName      = kwargs['TauContainerName'],
-    #                                                                  TauInputName       = "old_"+kwargs['TauContainerName']))
+    acc.addEventAlgo(CompFactory.DerivationFramework.TauMassDecorator(name               = kwargs['TauContainerName']+"_MassDecorator",
+                                                                      TauOutputName      = kwargs['TauContainerName'],
+                                                                      TauInputName       = "old_"+kwargs['TauContainerName']))
 
     return acc
 

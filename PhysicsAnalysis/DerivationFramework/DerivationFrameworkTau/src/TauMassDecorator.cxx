@@ -22,7 +22,7 @@ namespace DerivationFramework {
     // initialize read/write handle keys
     ATH_CHECK(m_tauOutputKey.initialize());
     ATH_CHECK(m_tauInputKey.initialize());
-    ATH_CHECK( m_massKey.initialize() ); 
+    //ATH_CHECK( m_massKey.initialize() ); 
 
     return StatusCode::SUCCESS;
   }
@@ -48,6 +48,7 @@ namespace DerivationFramework {
         *tau=*old_tau;
     }	    
 
+    /*
     SG::WriteDecorHandle<xAOD::TauJetContainer, float> dec_mass (m_massKey, ctx);
 
     // update the mass value
@@ -65,7 +66,7 @@ namespace DerivationFramework {
         }
 	dec_mass(*tau) = tau_comp.M();
     }
-
+    */
     return StatusCode::SUCCESS;
   }
 }

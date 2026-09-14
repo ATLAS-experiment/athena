@@ -34,7 +34,7 @@ namespace DerivationFramework {
       /** @brief Name of the tau input collection */
       SG::ReadHandleKey<xAOD::TauJetContainer> m_tauInputKey {this, "TauInputName", "old_TauJets", "Name of TauJet container to be read in"};
 
-      SG::WriteDecorHandleKey<xAOD::TauJetContainer> m_massKey{ this, "massKey", m_tauOutputKey, "m", "Decoration name"};
+      //SG::WriteDecorHandleKey<xAOD::TauJetContainer> m_massKey{ this, "massKey", m_tauOutputKey, "m", "Decoration name"};
 
   };
 }
