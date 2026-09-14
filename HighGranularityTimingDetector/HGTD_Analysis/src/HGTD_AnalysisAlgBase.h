@@ -61,10 +61,10 @@ public:
       return;
     }
     m_histos[name] = new T(hist_name.c_str(), title.c_str(), args...);
-    static_cast<T*>(m_histos[name])->Sumw2();
+    dynamic_cast<T*>(m_histos[name])->Sumw2();
     if (not m_hist_svc
                 ->regHist(m_directory_name + name,
-                          static_cast<T*>(m_histos[name]))
+                          dynamic_cast<T*>(m_histos[name]))
                 .isSuccess()) {
       ATH_MSG_WARNING("Failed to book " << name);
     }
