@@ -20,7 +20,7 @@ export POOL_OUTMSG_LEVEL=4
 if [ -n "${DBNAME}" ]
    then
    echo "Remove cool database ${DBNAME}"
-   coolDropDB "oracle://devdb10;schema=ATLAS_COOLTEST;user=ATLAS_COOLTEST;password=cool4devdb;dbname=${DBNAME}"
+   coolDropDB "oracle://devdb10;schema=ATLAS_COOLTEST;user=ATLAS_COOLTEST;password=_;dbname=${DBNAME}"
 fi
 
 # For test remove data file

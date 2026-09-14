@@ -150,7 +150,7 @@ float convertStringToFloat(const std::string & s) {
   throw TrigConfError(std::string("Could not convert to float: ")+s, 1);
 }
 
-std::string test_cool_connection = "oracle://devdb;schema=atltrig;dbname=COOLTEST;user=atltrig;password=trigconf2007";
+std::string test_cool_connection = "oracle://devdb;schema=atltrig;dbname=COOLTEST;user=atltrig;password=_";
 //std::string test_trig_connection = "mysql://lxmrra3801.cern.ch/Preseries";
 std::string test_trig_connection = "mysql://pcatr13.cern.ch/Preseries";
 

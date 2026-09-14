@@ -168,7 +168,7 @@ def InitDB(foldertype='TRIGGER'):
             return #already initialized
 
         try:
-            dbMonpString="oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TDAQ;dbname=MONP200;user=ATLAS_COOL_READER;password=COOLRED4PRO"
+            dbMonpString="oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TDAQ;dbname=MONP200;user=ATLAS_COOL_READER;password=_"
             dbMonp = indirectOpen('COOLONL_TDAQ/MONP200', oracle=True) # last two = oracle, debug
             log.info("Connected to database: "+dbMonpString)
         except Exception,e:
@@ -183,7 +183,7 @@ def InitDB(foldertype='TRIGGER'):
             return #already initialized
 
         try:
-            dbCompString="oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TDAQ;dbname=CONDBR2;user=ATLAS_COOL_READER;password=COOLRED4PRO"
+            dbCompString="oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TDAQ;dbname=CONDBR2;user=ATLAS_COOL_READER;password=_"
             dbComp = indirectOpen('COOLONL_TDAQ/CONDBR2', oracle=True)
             log.info("Connected to database: "+dbCompString)
         except Exception,e:
@@ -197,7 +197,7 @@ def InitDB(foldertype='TRIGGER'):
         return #already initialized
 
     dbSvc=cool.DatabaseSvcFactory.databaseService()
-    dbTrigString="oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TRIGGER;dbname=CONDBR2;user=ATLAS_COOL_READER;password=COOLRED4PRO"
+    dbTrigString="oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TRIGGER;dbname=CONDBR2;user=ATLAS_COOL_READER;password=_"
 
     try:
         dbTrig=dbSvc.openDatabase(dbTrigString, False)
