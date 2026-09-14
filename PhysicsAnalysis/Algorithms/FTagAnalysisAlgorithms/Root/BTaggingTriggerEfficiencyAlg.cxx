@@ -125,7 +125,7 @@ namespace CP
 		  sf = invalidScaleFactor();
 		  ANA_MSG_WARNING ("SF computed with negative efficiency num="<<num<<" denom="<<denom);
 		  ANA_MSG_WARNING ("Setting SF="<<sf);
-		            }
+                }
               }
             } else {
               valid = m_offlineEfficiencyTool->getScaleFactor(*jet, sf);
