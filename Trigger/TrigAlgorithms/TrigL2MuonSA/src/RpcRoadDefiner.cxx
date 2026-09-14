@@ -1,15 +1,15 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <cmath>
-#include <functional>
-#include <type_traits>
+
 
 #include "RpcRoadDefiner.h"
 #include "TrigSteeringEvent/TrigRoiDescriptor.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
-
+#include <cmath>
+#include <functional>
+#include <type_traits>
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 
@@ -130,12 +130,8 @@ StatusCode TrigL2MuonSA::RpcRoadDefiner::defineRoad(const EventContext& ctx,
 
     auto roi = std::make_unique<TrigRoiDescriptor>( p_roi->eta(), etaMin, etaMax, muonRoad.phiMiddle, phiMin, phiMax );
 
-    if (roi) m_regionSelector->lookup(ctx)->HashIDList( *roi, mdtHashList);
-    else {
-        TrigRoiDescriptor fullscan_roi( true );
-        m_regionSelector->lookup(ctx)->HashIDList(fullscan_roi, mdtHashList);
-    }
-
+    m_regionSelector->lookup(ctx)->HashIDList( *roi, mdtHashList);
+    
     int &sector_trigger {muonRoad.MDT_sector_trigger}, &sector_overlap {muonRoad.MDT_sector_overlap};
     sector_trigger = (PhysicsSector - 1)*2 + muonRoad.LargeSmall;
     sector_overlap = 99;
