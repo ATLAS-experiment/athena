@@ -18,8 +18,6 @@
 #include "MuonRecToolInterfacesR4/ISegmentSelectionTool.h"
 #include "MuonRecToolInterfacesR4/ITrackSeedingDiagnosticsTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
-#include "ActsGeometryInterfaces/IExtrapolationTool.h"
-#include "MagFieldConditions/AtlasFieldCacheCondObj.h"
 
 #include <span>
 
@@ -41,6 +39,8 @@ namespace MuonR4{
             using Location = MsTrackSeed::Location;
             /** @brief Recycle the expanded sector */
             using SectorProjector = ExpandedSector::SectorProjector;
+            /** @brief Abrivate the segment vector */
+            using SegVec_t = std::vector<const xAOD::MuonSegment*>;
             /** @brief Abrivation of the seed coordinates */
             enum class SeedCoords : std::uint8_t{
                 /** Encode the seed location (-1,1 -> endcaps, 0 -> barrel  */
@@ -173,7 +173,25 @@ namespace MuonR4{
             /** @brief Removes exact duplciates or partial subsets of the MsTrackSeeds
              *  @param unresolved: Input MsTrackSeedContainer with duplicates */
             MsTrackSeedContainer resolveOverlaps(MsTrackSeedContainer&& unresolved) const;
-            
+            /** @brief  */
+            MsTrackSeedContainer splitSeeds(MsTrackSeedContainer&& unsplitted) const;
+            /** @brief Checks whether the seed has collected two segments on the same
+             *         stations. Such that it needs to be split into multiple seeds 
+             *  @param seed: The reference to the seed to check */
+            bool splitSeed(const MsTrackSeed& seed) const;
+            /** @brief Counts the number of shared precision hits betwen two segments
+             *         Two segment share the same hit if the identifier of the precision
+             *         hit is the same       
+             *  @param a: Reference to the first segment in the comparison
+             *  @param b: Reference to the second segment in the comparison */
+            std::uint8_t countShared(const xAOD::MuonSegment& a, 
+                                    const xAOD::MuonSegment& b) const;
+            /** @brief Counts the number of stations sharing each at least
+             *         one segment between two track seed.
+             *  @param a: Reference to the first track seed
+             *  @param b: Reference to the second track seed */
+            std::uint8_t countShared(const MsTrackSeed& a,
+                                     const MsTrackSeed& b) const;
             /** @brief The list of field steps in the force field integration */
             std::vector<double> m_fieldExtpSteps{};
             /** @brief The radius of he barrel cylinder */
@@ -187,19 +205,24 @@ namespace MuonR4{
             DoubleProperty m_endcapDiscRadius{this, "EndcapRadius", 13.*Gaudi::Units::m};
             /** @brief Maximum separation of point on the cylinder to be picked up
               *         onto a seed */
-            DoubleProperty m_seedHalfLength{this, "SeedHalfLength", 25.*Gaudi::Units::cm};
+            DoubleProperty m_seedHalfLength{this, "SeedHalfLength", 100.*Gaudi::Units::cm};
             /** @brief Momentum resolution in the barrel */
             DoubleProperty m_barrelMomentumRes{this, "BarrelMomentumResolution", 0.05};
             /** @brief Momentum resolution in the endcap */
             DoubleProperty m_endcapMomentumRes{this, "EndcapMomentumResolution", 0.1};
             /** @brief number of steps between two segments to integrate the magnetic field */
             UnsignedIntegerProperty m_nFieldSteps{this, "nFieldSteps", 10};
+            /** @brief Consider two track seeds sharing a segment if their
+             *         number of precision hits exceeds the threshold */
+            UnsignedIntegerProperty m_nHitsShareSeg{this, "numHitsSegmentSharing", 3};
+            /** @brief Consider two segments to be equivalent if they share segments on
+             *         in x stations */
+            UnsignedIntegerProperty m_nSegShareSeed{this, "numSegmentsSeedSharing", 2};
             /** @brief Pointer to the segement selection tool which compares
              *         two segments for their compatibilitiy */
             ToolHandle<ISegmentSelectionTool> m_segSelector{this, "SegmentSelectionTool" , "" };
             /** @brief Tracking geometry tool */
             ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
-
             /** @brief Utility to fetch the geometry, magnetic field and calibration context in the event */
             ActsTrk::ContextUtility m_ctxProvider{this};
             /** @brief Declare the data dependency on the standard Mdt+Rpc+Tgc segment container
