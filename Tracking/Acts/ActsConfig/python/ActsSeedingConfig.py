@@ -317,6 +317,8 @@ def ActsPixelGbtsSeedingToolCfg(flags,
         )
 
     ## For ITkPixel, use default values for ActsTrk::GbtsSeedingTool
+    kwargs.setdefault("usePixelLayers", True)
+    kwargs.setdefault("useStripLayers", False)
     kwargs.setdefault("connectorInputFile" , find_datafile(flags.Acts.Gbts.connectionTable))
     kwargs.setdefault("lutInputFile" , find_datafile("gbts_ml_pixel_barrel_loose.lut"))
     kwargs.setdefault("minPt" , flags.Tracking.ActiveConfig.minPTSeed *
@@ -338,6 +340,8 @@ def ActsStripGbtsSeedingToolCfg(flags,
         )
 
     ## For ITkStrip LRT, enable LRT mode and use the LRT connector file
+    kwargs.setdefault("usePixelLayers", False)
+    kwargs.setdefault("useStripLayers", True)
     kwargs.setdefault("LRTmode", True)
     kwargs.setdefault("usePixelConnections", False)
     kwargs.setdefault("useStripConnections", True)
