@@ -2,16 +2,8 @@
 
 atlas_subdir( ActsGPUDataPreparation )
 
-find_package(Acts)
-
-# placeholder for what will eventually be Acts::PluginTraccc
-if (NOT TARGET Acts::PluginDetray)
-   # Without PluginDetray, the traccc code will not be available.
-   return()
-endif()
-
-find_package(traccc)
 find_package(vecmem)
+find_package(traccc)
 
 # Common source files — always compiled
 set( _sources
@@ -38,7 +30,7 @@ set( _libraries
 
 
 # CUDA-only sources and libraries
-if( CMAKE_CUDA_COMPILER )
+if (TARGET traccc::cuda)
   list( APPEND _sources
     src/cuda/*.h
     src/cuda/*.cxx
@@ -64,8 +56,11 @@ atlas_add_component( ActsGPUDataPreparation
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
-# depends on having the configurations for EDM converters
-# atlas_add_test( ActsDeviceClusterizationTest
-#     SCRIPT athena.py --threads=1 ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsDeviceClusterizationTest.py
-#     POST_EXEC_SCRIPT nopost.sh
-#     PROPERTIES SKIP_RETURN_CODE 2)
+if (TARGET traccc::cuda)
+atlas_add_test( ActsDeviceClusterizationTest
+   PRE_EXEC_SCRIPT "nvidia-check.sh || exit 2"
+   ENVIRONMENT "PATHRESOLVER_DEVAREARESPONSE=WARNING"
+   SCRIPT ActsDeviceClusterizationTest.py Device.Backend=DeviceBackend.CUDA
+   POST_EXEC_SCRIPT noerror.sh
+   PROPERTIES SKIP_RETURN_CODE 2 )
+endif()
