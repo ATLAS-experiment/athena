@@ -16,13 +16,17 @@ if TYPE_CHECKING:
     from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 
 
-def HLTJetFTagDecorationCfg(flags: AthConfigFlags) -> ComponentAccumulator:
+def HLTJetFTagDecorationCfg(
+    flags: AthConfigFlags,
+    name: str = "hltJetLabelingAlg",
+    jet_container: str = "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf",
+) -> ComponentAccumulator:
     """Configure HLT jet flavour-label decoration."""
     acc = ComponentAccumulator()
 
     jet_decoration_alg = CompFactory.JetDecorationAlg(
-        name="hltJetLabelingAlg",
-        JetContainer="HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf",
+        name=name,
+        JetContainer=jet_container,
         Decorators=[getJetDeltaRFlavorLabelTool()],
     )
     acc.addEventAlgo(jet_decoration_alg)

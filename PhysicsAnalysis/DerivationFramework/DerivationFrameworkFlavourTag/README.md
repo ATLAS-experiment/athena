@@ -14,6 +14,7 @@ questions. Contact details can be found in the main FTAG docs: https://ftag.docs
 | `FTAG3` | Slim derivation for boosted `g->bb` and Xbb calibration studies | Requires at least one muon and one large-`R` jet, and keeps the large-`R` / VR track-jet content needed for calibration. |
 | `FTAGPU` | FTAG derivation focused on by-vertex jet content and pile-up related studies | Includes `AntiKt4EMPFlowByVertexJets`, related thinning, and FTAG augmentations for this jet view. |
 | `FTAGSSV` | PHYS-like derivation for the soft b-tagging calibration | Uses `PHYS` content plus the NVSI_SecVrt_Tight* secondary-vertex containers rebuilt under each tracking systematic variation. |
+| `FTAGTRIGCAL` | PHYS-like derivation for the b-jet trigger calibration | Uses `PHYS` content, applies a two-lepton `ttbar` selection and keeps the HLT b-jet trigger content, with truth labels for the HLT b-jets on MC. |
 | `FTAGXBB` | Skimmed derivation for Xbb calibration | Requires at least one large-`R` UFO soft-drop jet and adds Xbb-oriented large-`R` discriminant content. |
 
 ## Shared modules
