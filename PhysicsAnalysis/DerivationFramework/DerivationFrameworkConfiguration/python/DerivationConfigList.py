@@ -30,8 +30,6 @@ from DerivationFrameworkMCTruth.TRUTH3 import TRUTH3Cfg
 from DerivationFrameworkPhys.PHYS import PHYSCfg
 # PHYSLITE - calibrated physics analysis objects, reduced slimming list
 from DerivationFrameworkPhys.PHYSLITE import PHYSLITECfg
-# TREASURE - extended PHYSLITE for TREASURE
-from DerivationFrameworkPhys.TREASURE import TREASURECfg
 # SKIM - format allowing skimming of PHYS/PHYSLITE via a command line string
 from DerivationFrameworkPhys.SKIM import SKIMCfg
 
@@ -131,6 +129,8 @@ from DerivationFrameworkJetEtMiss.JETM5 import JETM5Cfg
 from DerivationFrameworkJetEtMiss.JETM7 import JETM7Cfg
 # JETM12: E/p studies in W to tau + v events
 from DerivationFrameworkJetEtMiss.JETM12 import JETM12Cfg
+# JETM16: calibrated analysis objects for open-data production
+from DerivationFrameworkJetEtMiss.JETM16 import JETM16Cfg
 # JETM42: MC only - Upgrade studies format
 from DerivationFrameworkJetEtMiss.JETM42 import JETM42Cfg
 
@@ -193,11 +193,11 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg','TE
            'TCAL1Cfg', 'TCAL2Cfg',
            'EGAM1Cfg', 'EGAM2Cfg', 'EGAM3Cfg', 'EGAM4Cfg', 'EGAM5Cfg',
            'EGAM7Cfg', 'EGAM8Cfg', 'EGAM9Cfg', 'EGAM10Cfg', 'EGAM11Cfg', 'EGAM12Cfg',
-           'JETM1Cfg','JETM2Cfg','JETM3Cfg','JETM4Cfg','JETM5Cfg','JETM7Cfg','JETM12Cfg','JETM42Cfg',
+           'JETM1Cfg','JETM2Cfg','JETM3Cfg','JETM4Cfg','JETM5Cfg','JETM7Cfg','JETM12Cfg','JETM16Cfg','JETM42Cfg',
            'TOPQ7Cfg',
            'TRIG8Cfg',"TRIG9Cfg","TRIG10Cfg",'L1CALO1Cfg',
            'MUON1Cfg','MUON5Cfg',
            'TLA0Cfg', 'TLA1Cfg', 'TLA2Cfg',
            'HION2Cfg','HION4Cfg','HION5Cfg','HION7Cfg','HION12Cfg','HION14Cfg','HION15Cfg','HIONHPODCfg',
-           'NCB1Cfg', 'TREASURECfg'
+           'NCB1Cfg'
            ]

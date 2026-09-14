@@ -1,10 +1,10 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
-# DAOD_TREASURE.py
-# This defines DAOD_TREASURE, an unskimmed DAOD format for Run 3.
-# It contains the variables and objects needed for the large majority 
+# DAOD_JETM16.py
+# This defines DAOD_JETM16, an unskimmed DAOD format for Run 3.
+# It contains the variables and objects needed for the large majority
 # of physics analyses in ATLAS.
-# It requires the flag TREASURE in Derivation_tf.py   
+# It requires the flag JETM16 in Derivation_tf.py
 #====================================================================
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -14,11 +14,11 @@ from DerivationFrameworkPhys.PHYSLITE import CPAlgorithmsCfg
 from GoodRunsLists.GoodRunsListsDictionary import getGoodRunsLists
 
 
-def TREASUREKernelCfg(flags, name='TREASUREKernel', **kwargs):
-    """Configure the derivation framework driving algorithm (kernel) for TREASURE"""
+def JETM16KernelCfg(flags, name='JETM16Kernel', **kwargs):
+    """Configure the derivation framework driving algorithm (kernel) for JETM16"""
     acc = ComponentAccumulator()
 
-    # This block does the common physics augmentation  which isn't needed (or possible) for PHYS->TREASURE
+    # This block does the common physics augmentation  which isn't needed (or possible) for PHYS->JETM16
     # Ensure block only runs for AOD input
     if 'StreamAOD' in flags.Input.ProcessingTags:
         # Common augmentations
@@ -26,24 +26,24 @@ def TREASUREKernelCfg(flags, name='TREASUREKernel', **kwargs):
         acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
     # Thinning tools
-    # These are set up in PhysCommonThinningConfig. Only thing needed here the list of tools to schedule 
+    # These are set up in PhysCommonThinningConfig. Only thing needed here the list of tools to schedule
     # This differs depending on whether the input is AOD or PHYS
     # These are needed whatever the input since they are not applied in PHYS
     thinningToolsArgs = {
-        'ElectronCaloClusterThinningToolName' : "TREASUREElectronCaloClusterThinningTool",
-        'PhotonCaloClusterThinningToolName'   : "TREASUREPhotonCaloClusterThinningTool",     
-        'ElectronGSFTPThinningToolName'       : "TREASUREElectronGSFTPThinningTool",
-        'PhotonGSFTPThinningToolName'         : "TREASUREPhotonGSFTPThinningTool"
+        'ElectronCaloClusterThinningToolName' : "JETM16ElectronCaloClusterThinningTool",
+        'PhotonCaloClusterThinningToolName'   : "JETM16PhotonCaloClusterThinningTool",
+        'ElectronGSFTPThinningToolName'       : "JETM16ElectronGSFTPThinningTool",
+        'PhotonGSFTPThinningToolName'         : "JETM16PhotonGSFTPThinningTool"
     }
     # whereas these are only needed if the input is AOD since they are applied already in PHYS
     if 'StreamAOD' in flags.Input.ProcessingTags:
         thinningToolsArgs.update({
-            'MuonTPThinningToolName'              : "TREASUREMuonTPThinningTool",
-            'TauJetThinningToolName'              : "TREASURETauJetThinningTool",
-            'TauJets_MuonRMThinningToolName'      : "TREASURETauJets_MuonRMThinningTool",
-            'DiTauTPThinningToolName'             : "TREASUREDiTauTPThinningTool",
-            'DiTauLowPtThinningToolName'          : "TREASUREDiTauLowPtThinningTool",
-            'DiTauLowPtTPThinningToolName'        : "TREASUREDiTauLowPtTPThinningTool",
+            'MuonTPThinningToolName'              : "JETM16MuonTPThinningTool",
+            'TauJetThinningToolName'              : "JETM16TauJetThinningTool",
+            'TauJets_MuonRMThinningToolName'      : "JETM16TauJets_MuonRMThinningTool",
+            'DiTauTPThinningToolName'             : "JETM16DiTauTPThinningTool",
+            'DiTauLowPtThinningToolName'          : "JETM16DiTauLowPtThinningTool",
+            'DiTauLowPtTPThinningToolName'        : "JETM16DiTauLowPtTPThinningTool",
         })
     # Configure the thinning tools
     from DerivationFrameworkPhys.PhysCommonThinningConfig import PhysCommonThinningCfg
@@ -53,7 +53,7 @@ def TREASUREKernelCfg(flags, name='TREASUREKernel', **kwargs):
     for key in thinningToolsArgs:
         thinningTools.append(acc.getPublicTool(thinningToolsArgs[key]))
 
-    ####### ADD TREASURE SPECIFIC PORTION ########
+    ####### ADD JETM16 SPECIFIC PORTION ########
     # Add some more track particles, stolen from FTAG1LITE
     from DerivationFrameworkInDet.InDetToolsConfig import (
         EgammaTrackParticleThinningCfg,
@@ -75,7 +75,7 @@ def TREASUREKernelCfg(flags, name='TREASUREKernel', **kwargs):
 
     thinningTools.append(acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(
         flags,
-        name="TREASUREJetTPThinningTool",
+        name="JETM16JetTPThinningTool",
         StreamName=stream,
         JetKey='AntiKt4EMPFlowJets',
         InDetTrackParticlesKey="InDetTrackParticles",
@@ -83,7 +83,7 @@ def TREASUREKernelCfg(flags, name='TREASUREKernel', **kwargs):
     )))
     thinningTools.append(acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(
         flags,
-        name="TREASURELargeRJetTPThinningTool",
+        name="JETM16LargeRJetTPThinningTool",
         StreamName=stream,
         JetKey='AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets',
         InDetTrackParticlesKey="InDetTrackParticles",
@@ -92,16 +92,16 @@ def TREASUREKernelCfg(flags, name='TREASUREKernel', **kwargs):
 
     thinningTools.append(acc.getPrimaryAndMerge(EgammaTrackParticleThinningCfg(
         flags,
-        name="TREASUREElectronTPThinningTool",
+        name="JETM16ElectronTPThinningTool",
         StreamName=stream,
         SGKey="Electrons",
         InDetTrackParticlesKey="InDetTrackParticles",
     )))
-    
+
     # Add PFlow Constituents (from FTAG1LITE)
     thinningTools.append(acc.getPrimaryAndMerge(JetConstituentThinningCfg(
         flags,
-        name="TREASUREJetConstituentThinningTool",
+        name="JETM16JetConstituentThinningTool",
         StreamName=stream,
         JetKey='AntiKt4EMPFlowJets',
         JetConstituentName="CHSG",
@@ -110,15 +110,15 @@ def TREASUREKernelCfg(flags, name='TREASUREKernel', **kwargs):
     )))
     # thinningTools.append(acc.getPrimaryAndMerge(JetConstituentThinningCfg(
     #     flags,
-    #     name="TREASURELargeRJetConstituentThinningTool",
+    #     name="JETM16LargeRJetConstituentThinningTool",
     #     StreamName=stream,
     #     JetKey='AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets',
     #     JetConstituentName="CHSG",
     #     GlobalConstituentName="Global",
     #     OtherObjectsName="CaloCalTopoClusters",
     # )))
-    ####### END TREASURE SPECIFIC PORTION #######
-    
+    ####### END JETM16 SPECIFIC PORTION #######
+
 
     # Higgs augmentations - 4l vertex, Higgs STXS truth variables, CloseBy isolation correction (for all analyses)
     # For PhysLite, must run CloseBy BEFORE running analysis sequences to be able to 'pass through' to the shallow copy the added isolation values
@@ -129,20 +129,20 @@ def TREASUREKernelCfg(flags, name='TREASUREKernel', **kwargs):
         ## Higgs - create 4l vertex
         from DerivationFrameworkHiggs.HiggsPhysContent import  HiggsAugmentationAlgsCfg
         acc.merge(HiggsAugmentationAlgsCfg(flags))
-         
+
         ## CloseByIsolation correction augmentation
         from IsolationSelection.IsolationSelectionConfig import  IsoCloseByAlgsCfg
         acc.merge(IsoCloseByAlgsCfg(flags, isPhysLite = True))
 
     #==============================================================================
-    # Analysis-level variables 
+    # Analysis-level variables
     #==============================================================================
 
-    # Needed in principle to support MET association when running PHYS->TREASURE, 
-    # but since this doesn't work for PHYS->TREASURE anyway, commenting for now
+    # Needed in principle to support MET association when running PHYS->JETM16,
+    # but since this doesn't work for PHYS->JETM16 anyway, commenting for now
     #if 'StreamDAOD_PHYS' in flags.Input.ProcessingTags
     #    from AtlasGeoModel.GeoModelConfig import GeoModelCfg
-    #    acc.merge(GeoModelCfg(flags))    
+    #    acc.merge(GeoModelCfg(flags))
 
     # add CP algorithms to job
     acc.merge(CPAlgorithmsCfg(flags))
@@ -157,13 +157,13 @@ def TREASUREKernelCfg(flags, name='TREASUREKernel', **kwargs):
                        AssocConfig('Gamma', 'AnalysisPhotons'),
                        AssocConfig('Tau', 'AnalysisTauJets'),
                        AssocConfig('Soft', '')]
-        TREASURE_cfg = METAssocConfig('AnalysisMET',
+        JETM16_cfg = METAssocConfig('AnalysisMET',
                                       flags,
                                       associators,
                                       doPFlow=True,
                                       usePFOLinks=True)
-        components_TREASURE_cfg = getAssocCA(TREASURE_cfg,METName='AnalysisMET')
-        acc.merge(components_TREASURE_cfg)
+        components_JETM16_cfg = getAssocCA(JETM16_cfg,METName='AnalysisMET')
+        acc.merge(components_JETM16_cfg)
     elif 'StreamDAOD_PHYS' in flags.Input.ProcessingTags:
         from DerivationFrameworkJetEtMiss.METCommonConfig import METRemappingCfg
 
@@ -172,12 +172,12 @@ def TREASUREKernelCfg(flags, name='TREASUREKernel', **kwargs):
 
     # The derivation kernel itself
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
-    acc.addEventAlgo(DerivationKernel(name, ThinningTools = thinningTools)) 
+    acc.addEventAlgo(DerivationKernel(name, ThinningTools = thinningTools))
 
     return acc
 
 
-def TREASURECfg(flags):
+def JETM16Cfg(flags):
 
     acc = ComponentAccumulator()
 
@@ -186,13 +186,13 @@ def TREASURECfg(flags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    TREASURETriggerListsHelper = TriggerListsHelper(flags)
+    JETM16TriggerListsHelper = TriggerListsHelper(flags)
 
     # Set the stream name - varies depending on whether the input is AOD or DAOD_PHYS
-    streamName = 'StreamDAOD_TREASURE' if 'StreamAOD' in flags.Input.ProcessingTags else 'StreamD2AOD_TREASURE' 
+    streamName = 'StreamDAOD_JETM16' if 'StreamAOD' in flags.Input.ProcessingTags else 'StreamD2AOD_JETM16'
 
     # Common augmentations
-    acc.merge(TREASUREKernelCfg(flags, name="TREASUREKernel", StreamName = streamName, TriggerListsHelper = TREASURETriggerListsHelper))
+    acc.merge(JETM16KernelCfg(flags, name="JETM16Kernel", StreamName = streamName, TriggerListsHelper = JETM16TriggerListsHelper))
 
     # ============================
     # Define contents of the format
@@ -200,59 +200,59 @@ def TREASURECfg(flags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
-    
-    TREASURESlimmingHelper = SlimmingHelper("TREASURESlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
-    TREASURESlimmingHelper.ExtraVariables = []
+
+    JETM16SlimmingHelper = SlimmingHelper("JETM16SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
+    JETM16SlimmingHelper.ExtraVariables = []
     # Trigger content
-    TREASURESlimmingHelper.IncludeTriggerNavigation = False
-    TREASURESlimmingHelper.IncludeJetTriggerContent = False
-    TREASURESlimmingHelper.IncludeMuonTriggerContent = False
-    TREASURESlimmingHelper.IncludeEGammaTriggerContent = False
-    TREASURESlimmingHelper.IncludeTauTriggerContent = False
-    TREASURESlimmingHelper.IncludeEtMissTriggerContent = False
-    TREASURESlimmingHelper.IncludeBJetTriggerContent = False
-    TREASURESlimmingHelper.IncludeBPhysTriggerContent = False
-    TREASURESlimmingHelper.IncludeMinBiasTriggerContent = False
-    
+    JETM16SlimmingHelper.IncludeTriggerNavigation = False
+    JETM16SlimmingHelper.IncludeJetTriggerContent = False
+    JETM16SlimmingHelper.IncludeMuonTriggerContent = False
+    JETM16SlimmingHelper.IncludeEGammaTriggerContent = False
+    JETM16SlimmingHelper.IncludeTauTriggerContent = False
+    JETM16SlimmingHelper.IncludeEtMissTriggerContent = False
+    JETM16SlimmingHelper.IncludeBJetTriggerContent = False
+    JETM16SlimmingHelper.IncludeBPhysTriggerContent = False
+    JETM16SlimmingHelper.IncludeMinBiasTriggerContent = False
+
     # Trigger matching
     # Run 2
     if flags.Trigger.EDMVersion == 2:
         # Need to re-run matching so that new Analysis<X> containers are matched to triggers
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import TriggerMatchingCommonRun2Cfg
-        acc.merge(TriggerMatchingCommonRun2Cfg(flags, 
-                                               name = "TREASURETrigMatchNoTau", 
-                                               OutputContainerPrefix = "AnalysisTrigMatch_", 
-                                               ChainNames = TREASURETriggerListsHelper.Run2TriggerNamesNoTau,
+        acc.merge(TriggerMatchingCommonRun2Cfg(flags,
+                                               name = "JETM16TrigMatchNoTau",
+                                               OutputContainerPrefix = "AnalysisTrigMatch_",
+                                               ChainNames = JETM16TriggerListsHelper.Run2TriggerNamesNoTau,
                                                InputElectrons = "AnalysisElectrons",
                                                InputPhotons = "AnalysisPhotons",
                                                InputMuons = "AnalysisMuons",
                                                InputTaus = "AnalysisTauJets"))
-        acc.merge(TriggerMatchingCommonRun2Cfg(flags, 
-                                               name = "TREASURETrigMatchTau", 
-                                               OutputContainerPrefix = "AnalysisTrigMatch_", 
-                                               ChainNames = TREASURETriggerListsHelper.Run2TriggerNamesTau, 
+        acc.merge(TriggerMatchingCommonRun2Cfg(flags,
+                                               name = "JETM16TrigMatchTau",
+                                               OutputContainerPrefix = "AnalysisTrigMatch_",
+                                               ChainNames = JETM16TriggerListsHelper.Run2TriggerNamesTau,
                                                DRThreshold = 0.2,
                                                InputElectrons = "AnalysisElectrons",
                                                InputPhotons = "AnalysisPhotons",
                                                InputMuons = "AnalysisMuons",
                                                InputTaus = "AnalysisTauJets"))
-        # Now add the resulting decorations to the output 
+        # Now add the resulting decorations to the output
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = TREASURESlimmingHelper, 
-                                         OutputContainerPrefix = "AnalysisTrigMatch_", 
-                                         TriggerList = TREASURETriggerListsHelper.Run2TriggerNamesTau)
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = TREASURESlimmingHelper, 
+        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = JETM16SlimmingHelper,
                                          OutputContainerPrefix = "AnalysisTrigMatch_",
-                                         TriggerList = TREASURETriggerListsHelper.Run2TriggerNamesNoTau)
+                                         TriggerList = JETM16TriggerListsHelper.Run2TriggerNamesTau)
+        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = JETM16SlimmingHelper,
+                                         OutputContainerPrefix = "AnalysisTrigMatch_",
+                                         TriggerList = JETM16TriggerListsHelper.Run2TriggerNamesNoTau)
 
     # Run 3, or Run 2 with navigation conversion
     if flags.Trigger.EDMVersion == 3 or (flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion):
         # No need to run matching: just keep navigation so matching can be done by analysts
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
-        AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(TREASURESlimmingHelper)
+        AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(JETM16SlimmingHelper)
 
     # Event content
-    TREASURESlimmingHelper.AppendToDictionary.update({
+    JETM16SlimmingHelper.AppendToDictionary.update({
         'TruthEvents':'xAOD::TruthEventContainer','TruthEventsAux':'xAOD::TruthEventAuxContainer',
         'MET_Truth':'xAOD::MissingETContainer','MET_TruthAux':'xAOD::MissingETAuxContainer',
         'TruthElectrons':'xAOD::TruthParticleContainer','TruthElectronsAux':'xAOD::TruthParticleAuxContainer',
@@ -281,34 +281,34 @@ def TREASURECfg(flags):
         'AnalysisLargeRJets':'xAOD::JetContainer','AnalysisLargeRJetsAux':'xAOD::AuxContainerBase'
     })
 
-    TREASURESlimmingHelper.SmartCollections = [
+    JETM16SlimmingHelper.SmartCollections = [
         'EventInfo',
         'InDetTrackParticles',
         'PrimaryVertices',
     ]
-    TREASURESlimmingHelper.AllVariables = [
+    JETM16SlimmingHelper.AllVariables = [
         "CHSGNeutralParticleFlowObjects",
         "CHSGChargedParticleFlowObjects",
         "AntiKt4EMPFlowJets",
     ]
-    
+
     from DerivationFrameworkMuons.MuonsCommonConfig import MuonVariablesCfg
-    
-    # add in extra values for Higgs 
+
+    # add in extra values for Higgs
     from DerivationFrameworkHiggs.HiggsPhysContent import  setupHiggsSlimmingVariables
-    setupHiggsSlimmingVariables(flags, TREASURESlimmingHelper)
-    
+    setupHiggsSlimmingVariables(flags, JETM16SlimmingHelper)
+
     if flags.Input.isMC:
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
-        addTruth3ContentToSlimmerTool(TREASURESlimmingHelper)
-        # This block is only needed if input is AOD, as it is already done for PHYS->TREASURE
+        addTruth3ContentToSlimmerTool(JETM16SlimmingHelper)
+        # This block is only needed if input is AOD, as it is already done for PHYS->JETM16
         if 'StreamAOD' in flags.Input.ProcessingTags:
             from DerivationFrameworkMCTruth.HFClassificationCommonConfig import HFClassificationCommonCfg
             acc.merge(HFClassificationCommonCfg(flags))
 
     # Save the extra variables which aren't included by other means
     btag_variables = [f'{flags.BTagging.AK4TaggerName}_p{x}' for x in ['b', 'c', 'u', 'tau']]
-    TREASURESlimmingHelper.ExtraVariables += [ 
+    JETM16SlimmingHelper.ExtraVariables += [
         'AnalysisElectrons.trackParticleLinks.f1.pt.eta.phi.charge.author.DFCommonElectronsLHVeryLoose.DFCommonElectronsLHLoose.DFCommonElectronsLHLooseBL.DFCommonElectronsLHMedium.DFCommonElectronsLHTight.DFCommonElectronsLHVeryLooseIsEMValue.DFCommonElectronsLHLooseIsEMValue.DFCommonElectronsLHLooseBLIsEMValue.DFCommonElectronsLHMediumIsEMValue.DFCommonElectronsLHTightIsEMValue.DFCommonElectronsDNNLoose.DFCommonElectronsDNNMedium.DFCommonElectronsDNNTight.DFCommonElectronsDNNVeryLooseNoCF97.DFCommonElectronsDNNMediumNoCF.DFCommonElectronsDNNTightNoCF.DFCommonElectronsECIDS.DFCommonElectronsECIDSResult.topoetcone20.topoetcone20ptCorrection.neflowisol20.ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt500.ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt500.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000.topoetcone20_CloseByCorr.ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr.caloClusterLinks.ambiguityLink.TruthLink.truthOrigin.truthType.truthPdgId.firstEgMotherTruthType.firstEgMotherTruthOrigin.firstEgMotherTruthParticleLink.firstEgMotherPdgId.ambiguityType.OQ.Eadded_Lr2.Eadded_Lr3.E_mva_only.DFCommonAddAmbiguity',
         'AnalysisSiHitElectrons.pt.eta.phi.charge.author.topoetcone20_CloseByCorr.DFCommonElectronsLHVeryLoose.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr.OQ.truthOrigin.truthType.firstEgMotherTruthType.firstEgMotherTruthOrigin.z0stheta.d0Normalized.nInnerExpPix.clEta.clPhi.E_mva_only',
         'AnalysisPhotons.f1.pt.eta.phi.author.OQ.DFCommonPhotonsIsEMLoose.DFCommonPhotonsIsEMMedium.DFCommonPhotonsIsEMTight.DFCommonPhotonsIsEMTightIsEMValue.DFCommonPhotonsCleaning.DFCommonPhotonsCleaningNoTime.ptcone20.topoetcone20.topoetcone40.topoetcone20ptCorrection.topoetcone40ptCorrection.topoetcone20_CloseByCorr.topoetcone40_CloseByCorr.ptcone20_CloseByCorr.caloClusterLinks.vertexLinks.ambiguityLink.TruthLink.truthOrigin.truthType.Eadded_Lr2.Eadded_Lr3.E_mva_only',
@@ -333,12 +333,11 @@ def TREASURECfg(flags):
         'AnalysisLargeRJets.pt.eta.phi.m.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m.DetectorEta.TrackSumMass.TrackSumPt.constituentLinks.ECF1.ECF2.ECF3.Tau1_wta.Tau2_wta.Tau3_wta.Split12.Split23.Qw.D2.C2.R10TruthLabel_R22v1.R10TruthLabel_R21Precision_2022v1.GhostBHadronsFinalCount.GhostCHadronsFinalCount.Parent.GN2Xv01_phbb.GN2Xv01_phcc.GN2Xv01_ptop.GN2Xv01_pqcd',
         ]
 
-    # Output stream    
-    TREASUREItemList = TREASURESlimmingHelper.GetItemList()
-    
-    formatString = 'D2AOD_TREASURE' if 'StreamDAOD_PHYS' in flags.Input.ProcessingTags else 'DAOD_TREASURE'
-    acc.merge(OutputStreamCfg(flags, formatString, ItemList=TREASUREItemList, AcceptAlgs=["TREASUREKernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(flags, formatString, AcceptAlgs=["TREASUREKernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
+    # Output stream
+    JETM16ItemList = JETM16SlimmingHelper.GetItemList()
+
+    formatString = 'D2AOD_JETM16' if 'StreamDAOD_PHYS' in flags.Input.ProcessingTags else 'DAOD_JETM16'
+    acc.merge(OutputStreamCfg(flags, formatString, ItemList=JETM16ItemList, AcceptAlgs=["JETM16Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, formatString, AcceptAlgs=["JETM16Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
 
     return acc
-
