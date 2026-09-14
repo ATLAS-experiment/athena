@@ -45,11 +45,31 @@ namespace {
     }
     /** @brief Check if a segment is an NSW segment. */
     bool isNswSegment(const xAOD::MuonSegment& seg) {
-        using namespace Muon::MuonStationIndex;        
-        return seg.technology() == TechnologyIndex::STGC || 
+        using namespace Muon::MuonStationIndex;
+        return seg.technology() == TechnologyIndex::STGC ||
                seg.technology() == TechnologyIndex::MM ||
                toStationIndex(seg.chamberIndex()) == StIndex::EE;
     }
+
+    /// A seed whose segments can't fill at least two slots crashes it. Check the topology before calling.
+    bool canEstimateQtimesP(const MuonR4::MsTrackSeed& seed) {
+        using namespace Muon::MuonStationIndex;
+        bool hasInner{false}, hasMiddle{false}, hasOuter{false};
+        unsigned int nExtended{0};
+        for (const xAOD::MuonSegment* seg : seed.segments()) {
+            switch (toLayerIndex(seg->chamberIndex())) {
+                case LayerIndex::Inner:  hasInner = true; break;
+                case LayerIndex::Middle: hasMiddle = true; break;
+                case LayerIndex::Outer:  hasOuter = true; break;
+                case LayerIndex::Extended:
+                case LayerIndex::BarrelExtended: ++nExtended; break;
+                default: break;
+            }
+        }
+        const unsigned int nIMO = hasInner + hasMiddle + hasOuter;
+        return nIMO + nExtended >= 2u;
+    }
+
     /** @brief Convert rad to deg. */
     double inDeg(double angle) {
         return angle / Gaudi::Units::deg;
@@ -289,10 +309,15 @@ namespace MuonR4{
                 ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" Cannot create valid start parameters from seed "<<seed<<".");
                 return Acts::Result<Acts::BoundTrackParameters>::failure(std::make_error_code(std::errc::invalid_argument));
             }
+            if (!canEstimateQtimesP(seed)) {
+                ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" Cannot estimate q*p from seed "<<seed
+                                <<" - insufficient inner/middle/outer layer coverage.");
+                return Acts::Result<Acts::BoundTrackParameters>::failure(std::make_error_code(std::errc::invalid_argument));
+            }
             ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Extrapolated seed position: "<<Amg::toString(*pIsect)
                             <<" eta/phi: "<<pIsect->eta()<<" / "<<(inDeg(pIsect->phi())));
-
-            Acts::Vector4 fourPos = ActsTrk::convertPosToActs(*pIsect, (*pIsect).mag() / Gaudi::Units::c_light);
+ 
+            const Acts::Vector4 fourPos = ActsTrk::convertPosToActs(*pIsect, (*pIsect).mag() / Gaudi::Units::c_light);
             /** Calculate the initial q / p estimator */
             const double momRes {seed.location() == Location::Barrel ? m_barrelMomentumRes : m_endcapMomentumRes};
             const double qOverP = 1./ ActsTrk::energyToActs(estimateQtimesP(tgContext, seed, magField));
@@ -506,6 +531,13 @@ namespace MuonR4{
                                               const MsTrackSeed& seed,
                                               MagField::AtlasFieldCache& magField) const {
         using namespace Muon::MuonStationIndex;
+
+        // Guard canEstimateQtimesP here, not only at call sites.
+        if (!canEstimateQtimesP(seed)) {
+            ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" Cannot estimate q*p from seed "<<seed
+                            <<" - insufficient inner/middle/outer layer coverage.");
+            return 0.;
+        }
 
         /** Calculate the averaged phi from the segments */
         double deltaPhiAcc {0.};
