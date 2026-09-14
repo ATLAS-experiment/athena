@@ -361,24 +361,9 @@ def ActsPrimaryStripGbtsSeedingToolCfg(flags,
 def ActsStripGbtsSeedingToolCfg(flags,
                                 name: str = "ActsStripGbtsSeedingTool",
                                 **kwargs) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
-    if "layerTool" not in kwargs:
-        kwargs.setdefault(
-            "layerTool",
-            acc.popToolsAndMerge(ActsGbtsLayerToolCfg(flags))
-        )
-
     ## For ITkStrip LRT, enable LRT mode and use the LRT connector file
-    kwargs.setdefault("usePixelLayers", False)
-    kwargs.setdefault("useStripLayers", True)
     kwargs.setdefault("LRTmode", True)
-    kwargs.setdefault("usePixelConnections", False)
-    kwargs.setdefault("useStripConnections", True)
-    kwargs.setdefault("useML", False)
     kwargs.setdefault("connectorInputFile", find_datafile(flags.Acts.Gbts.connectionTableLrt))
-
-    kwargs.setdefault("minPt", flags.Tracking.ActiveConfig.minPTSeed *
-                      ActsUnits.GeV / GaudiUnits.GeV)
     kwargs.setdefault("d0Max", flags.Tracking.ActiveConfig.maxPrimaryImpactSeed *
                       ActsUnits.mm / GaudiUnits.mm)
     kwargs.setdefault("filterMaxZ0", 500. * ActsUnits.mm)
@@ -391,8 +376,8 @@ def ActsStripGbtsSeedingToolCfg(flags,
                       ActsUnits.mm / GaudiUnits.mm)
     kwargs.setdefault("minDeltaPhi", 0.01)
     kwargs.setdefault("maxOuterRadius", 1050.0)
-    acc.setPrivateTools(CompFactory.ActsTrk.GbtsSeedingTool(name, **kwargs))
-    return acc
+
+    return ActsPrimaryStripGbtsSeedingToolCfg(flags, name, **kwargs)
 
 
 # ACTS algorithm using Athena objects upstream
