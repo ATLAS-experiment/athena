@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuFastTrackExtrapolator.h"
@@ -65,6 +65,7 @@ StatusCode TrigL2MuonSA::MuFastTrackExtrapolator::extrapolateTrack(std::vector<T
     } else {
 
       ATH_MSG_ERROR("Null pointer to ITrigMuonBackExtrapolator");
+      delete muonSA;
 	return StatusCode::FAILURE;
 
     }
@@ -75,7 +76,7 @@ StatusCode TrigL2MuonSA::MuFastTrackExtrapolator::extrapolateTrack(std::vector<T
     track.deltaEtaVtx = sigEta;
     track.deltaPhiVtx = sigPhi;
 
-    if (muonSA) delete muonSA;
+    delete muonSA;
   }
   return sc;
 }

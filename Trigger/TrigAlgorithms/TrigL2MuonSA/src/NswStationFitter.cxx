@@ -1084,10 +1084,18 @@ StatusCode TrigL2MuonSA::NswStationFitter::calcMergedHit(TrigL2MuonSA::TrackPatt
         r_mm.push_back(rProj);
       }
       else if ((mmHits.at(iHit).layerNumber)%2 == 0) { // layer U
-        double rPrime = (rProj * cosTiltAngleU)/(cos(phiLocalAvg)*cosTiltAngleU + sin(phiLocalAvg)*sinTiltAngleU);
+        const double denom = std::cos(phiLocalAvg)*cosTiltAngleU + std::sin(phiLocalAvg)*sinTiltAngleU;
+        if (denom == 0.)[[unlikely]]{
+          throw std::runtime_error("NswStationFitter::calcMergedHit: Denominator is zero (U layer branch).");
+        }
+        double rPrime = (rProj * cosTiltAngleU)/denom;
         r_mm.push_back(rPrime);
       } else { //layer V
-        double rPrime = (rProj * cosTiltAngleV)/(cos(phiLocalAvg)*cosTiltAngleV + sin(phiLocalAvg)*sinTiltAngleV);
+        const double denom = std::cos(phiLocalAvg)*cosTiltAngleV + std::sin(phiLocalAvg)*sinTiltAngleV;
+        if (denom == 0.)[[unlikely]]{
+          throw std::runtime_error("NswStationFitter::calcMergedHit: Denominator is zero (V layer branch).");
+        }
+        double rPrime = (rProj * cosTiltAngleV)/denom;
         r_mm.push_back(rPrime);
       }
     }
@@ -1107,11 +1115,11 @@ StatusCode TrigL2MuonSA::NswStationFitter::calcMergedHit(TrigL2MuonSA::TrackPatt
   double MmSegZ = 7526.329;
   double MmSegR = 0;
   if (mse_stgc < 1.e7 && mse_mm < 1.e7) {
-    r = r_stgc;
+    r = std::move(r_stgc);
     copy(r_mm.begin(), r_mm.end(), back_inserter(r));
     z = z_stgc;
     copy(z_mm.begin(), z_mm.end(), back_inserter(z));
-    isStgc = isStgc_stgc;
+    isStgc = std::move(isStgc_stgc);
     copy(isStgc_mm.begin(), isStgc_mm.end(), back_inserter(isStgc));
 
     if(side_stgc < -1.*ZERO_LIMIT){
