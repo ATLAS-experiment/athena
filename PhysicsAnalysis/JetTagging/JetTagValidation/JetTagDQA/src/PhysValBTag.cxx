@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // PhysValBTag.cxx
@@ -176,7 +176,7 @@ namespace JetTagDQA {
 
     // get the primary vertex
     const xAOD::VertexContainer *vertices = 0;
-    CHECK( evtStore()->retrieve(vertices, "PrimaryVertices") );
+    CHECK( evtStore()->retrieve(vertices, m_vertexName) );
     int npv(0);
     size_t indexPV = 0;
     bool has_pv = false;
@@ -268,6 +268,15 @@ namespace JetTagDQA {
           double jet_Lxy = -1;
           plot->fillOther(jet, contains_muon, jet_Lxy, truth_label, event);
           if(contains_muon) nJets_containing_muon++;
+
+          static const SG::ConstAccessor<std::vector<ElementLink<xAOD::IParticleContainer> > >
+            trackLinksAcc("TracksForBTagging");
+          if (!trackLinksAcc.isAvailable(*jet)) {
+            if (m_collectionsWithoutTrackLinks.insert(name).second) {
+              ATH_MSG_WARNING("No TracksForBTagging on " << name << ", skipping track, SV and tagger histograms");
+            }
+            continue;
+          }
 
           // get the track to truth associations
           std::map<const xAOD::TrackParticle*, int> track_truth_associations = getTrackTruthAssociations(jet);

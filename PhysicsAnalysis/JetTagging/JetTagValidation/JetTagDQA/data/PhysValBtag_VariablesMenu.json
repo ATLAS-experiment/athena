@@ -324,19 +324,6 @@
             "forData": "false"
         },
 
-        "llr_nTracksCut": {
-            "_comment": "",
-            "title": "loglikelihoodratio of matched jets with nTracks cut",
-            "xtitle": "loglikelihoodratio",
-            "ytitle": "Jets",
-            "path":  {"PHYSVAL": "tagger"},
-            "xbins": 250,
-            "xmin": -10,
-            "xmax": 40,
-            "type": "TH1D",
-            "forData": "false"
-        },
-
         "pT_llrCut_Zprime": {
             "_comment": "",
             "title": "p_{T} of matched jets on Zprime samples",
