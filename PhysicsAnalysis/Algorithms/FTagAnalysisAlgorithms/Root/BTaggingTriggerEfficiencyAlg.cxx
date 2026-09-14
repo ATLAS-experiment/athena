@@ -81,6 +81,7 @@ namespace CP
           }
 
           else {
+            // keep track of the worst correction code
             CP::CorrectionCode worst = CP::CorrectionCode::Ok;
             float trigSF = 0;
             valid = m_triggerEfficiencyTool->getScaleFactor(*jet, trigSF);
@@ -127,13 +128,12 @@ namespace CP
 		  ANA_MSG_WARNING ("Setting SF="<<sf);
                 }
               }
+              // decorate the jet with the worst CorrectionCode observed
+              ANA_CHECK_CORRECTION (m_outOfValidity, *jet, worst);
             } else {
               valid = m_offlineEfficiencyTool->getScaleFactor(*jet, sf);
-              worst = std::min(valid, worst);
               ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
             }
-            // decorate the jet with the worst CorrectionCode observed
-            ANA_CHECK_CORRECTION (m_outOfValidity, *jet, worst); 
           }
 
           if (m_outOfValidity.get(*jet))
