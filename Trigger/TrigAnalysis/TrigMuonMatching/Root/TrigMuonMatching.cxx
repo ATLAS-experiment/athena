@@ -150,7 +150,7 @@ namespace Trig {
 
   Bool_t TrigMuonMatching::matchL2SA(const xAOD::Muon* mu,
 				     std::string_view l1item,
-				     std::string_viewchain,
+				     std::string_view chain,
 				     const double DelR) const
   {
     if(!m_trigDecTool->isPassed("L1_MU.*")){
@@ -169,9 +169,7 @@ namespace Trig {
     for( ; muroi_itr != muroi_end; ++muroi_itr ) {
       if(!((*muroi_itr)->thrValue() >= threshold*1000)) continue;
       ROI = (*muroi_itr)->getRoI();
-      const std::string eventTrigger = chain;
-      
-      auto cg = m_trigDecTool->getChainGroup(eventTrigger);
+      auto cg = m_trigDecTool->getChainGroup(chain);
       auto fc = cg->features(TrigDefs::alsoDeactivateTEs);
 #if defined(XAOD_STANDALONE) || defined(XAOD_ANALYSIS)
       auto MuFeatureContainers = fc.containerFeature<xAOD::L2StandAloneMuonContainer>("",TrigDefs::alsoDeactivateTEs);
@@ -195,9 +193,7 @@ namespace Trig {
 				     std::string_view chain,
 				     const double DelR) const
   {
-    const std::string eventTrigger = chain;
-
-    auto cg = m_trigDecTool->getChainGroup(eventTrigger);
+    auto cg = m_trigDecTool->getChainGroup(chain);
     auto fc = cg->features(TrigDefs::alsoDeactivateTEs);
 #if defined(XAOD_STANDALONE) || defined(XAOD_ANALYSIS)
     auto MuFeatureContainers = fc.containerFeature<xAOD::L2CombinedMuonContainer>("",TrigDefs::alsoDeactivateTEs);
@@ -336,9 +332,7 @@ namespace Trig {
     efMuonId.valid = false;
     Double_t drmin = mindelR;
     
-    const std::string eventTrigger{chainForEventTrigger};
-
-    auto cg = m_trigDecTool->getChainGroup(eventTrigger);
+    auto cg = m_trigDecTool->getChainGroup(chainForEventTrigger);
     auto fc = cg->features();
 
 #if defined(XAOD_STANDALONE) || defined(XAOD_ANALYSIS)
