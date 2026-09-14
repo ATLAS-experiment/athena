@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigMuonMatching/TrigMuonMatching.h"
@@ -15,8 +15,11 @@
 #include "xAODTrigMuon/L2StandAloneMuonContainer.h"
 #include "xAODTrigMuon/L2CombinedMuonContainer.h"
 #include "TruthUtils/ParticleConstants.h"
+#include "CxxUtils/StringUtils.h"
 
 #define MUONMASS ParticleConstants::muonMassInMeV
+
+using CxxUtils::tokenize;
 
 namespace Trig {
 
@@ -40,14 +43,14 @@ namespace Trig {
   }
 
   Bool_t TrigMuonMatching::match(const xAOD::Muon* mu,
-				 const std::string &chain,
+				 std::string_view chain,
 				 const double mindelR) const
   {
     return match(mu->eta(),mu->phi(),chain,mindelR);
   }
   
   Bool_t TrigMuonMatching::matchL1(const xAOD::Muon* mu,
-				   const std::string &l1item,
+				   std::string_view l1item,
 				   const double DelR) const
   {
     return matchL1(mu->eta(),mu->phi(),l1item,DelR);
@@ -103,7 +106,7 @@ namespace Trig {
   
   Bool_t TrigMuonMatching::match(const double eta,
 				 const double phi,
-				 const std::string &chain,
+				 std::string_view chain,
 				 const double mindelR) const
   {    
     if(!m_trigDecTool->isPassed(chain)){
@@ -118,7 +121,7 @@ namespace Trig {
 
   Bool_t TrigMuonMatching::matchL1(const double eta,
 				   const double phi,
-				   const std::string &l1item,
+				   std::string_view l1item,
 				   const double DelR) const
   {
     if(!m_trigDecTool->isPassed("L1_MU.*")){
@@ -291,18 +294,17 @@ namespace Trig {
   }
   
   
-  int TrigMuonMatching::getL1pt(const std::string& l1item) const
+  int TrigMuonMatching::getL1pt(std::string_view l1item) const
   {
     int rc = -1;
     
-    std::vector<std::string> tokens;
-    tokenize(l1item, tokens, "_");
+    std::vector<std::string> tokens = tokenize(l1item, '_');
     std::string pt;
     if (tokens.size() == 1) {
-      pt = tokens.at(0);
+      pt = tokens.front();
       
-    } else if ((tokens.size() == 2 ) and (tokens.at(0) == "L1")) {
-      pt = tokens.at(1);
+    } else if ((tokens.size() == 2 ) and (tokens.front() == "L1")) {
+      pt = tokens[1];
       
     } else {
       ATH_MSG_ERROR("TrigMuonMatching::getL1pt : cannot parse " << l1item);
@@ -321,20 +323,7 @@ namespace Trig {
   }
   
   
-  void TrigMuonMatching::tokenize(const std::string& str,
-				     std::vector<std::string>& tokens,
-				     const std::string& delimiters) const
-  {
-    tokens.clear();
-    std::string::size_type lastPos = str.find_first_not_of(delimiters, 0);
-    std::string::size_type pos = str.find_first_of(delimiters, lastPos);
-    
-    while ((std::string::npos != pos) or (std::string::npos != lastPos)) {
-      tokens.push_back(str.substr(lastPos, pos - lastPos));
-      lastPos = str.find_first_not_of(delimiters, pos);
-      pos = str.find_first_of(delimiters, lastPos);
-    }
-  }
+ 
 
 
   Double_t TrigMuonMatching::matchedTrackDetail(EFmuon& efMuonId,
@@ -342,12 +331,12 @@ namespace Trig {
 						const double eta,
 						const double phi,
 						const double mindelR,
-						const std::string& chainForEventTrigger) const
+						std::string_view chainForEventTrigger) const
   {
     efMuonId.valid = false;
     Double_t drmin = mindelR;
     
-    const std::string eventTrigger = chainForEventTrigger;
+    const std::string eventTrigger{chainForEventTrigger};
 
     auto cg = m_trigDecTool->getChainGroup(eventTrigger);
     auto fc = cg->features();
@@ -413,8 +402,7 @@ namespace Trig {
       chainInfo = p->second;
       return chainInfo.isValid;
     }
-    std::vector<std::string> tokens;
-    tokenize(chainInfo.chain, tokens, "_");
+    std::vector<std::string> tokens = tokenize(chainInfo.chain, '_');
     if (tokens.size() < 2) return false;
     if (tokens[0] != "HLT") return false;
     chainInfo.isSymmetric = (tokens[1].substr(0, 3) == "2mu");
@@ -424,7 +412,6 @@ namespace Trig {
       chainInfo.thresholds.first = threshold;
       chainInfo.thresholds.second = threshold;
       chainInfo.isValid = true;
-      //if (tokens.size() == 3) chainInfo.tightness = tokens[2];
     }
     else {
       if(tokens.size() != 3) return false;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Thomas Strebler
@@ -101,7 +101,7 @@ namespace CP
    bool& btag, bool& matched) const{
     btag = false;
     matched = false;
-    if(!m_trigDecTool->isPassed(m_trigger)){
+    if(!m_trigDecTool->isPassed(m_trigger.value())){
       // No further check, btag will be false
       return StatusCode::SUCCESS;
     }
