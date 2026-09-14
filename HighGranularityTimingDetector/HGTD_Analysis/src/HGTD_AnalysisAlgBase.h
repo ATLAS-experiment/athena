@@ -64,7 +64,7 @@ public:
     static_cast<T*>(m_histos[name])->Sumw2();
     if (not m_hist_svc
                 ->regHist(m_directory_name + name,
-                          dynamic_cast<T*>(m_histos[name]))
+                          static_cast<T*>(m_histos[name]))
                 .isSuccess()) {
       ATH_MSG_WARNING("Failed to book " << name);
     }
