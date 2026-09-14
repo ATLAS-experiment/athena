@@ -792,6 +792,7 @@ def TausRUsDecorationNames(flags):
         "TausRUsTauIDScore",
         "TausRUsEleRejScore",
         "TausRUsDecayMode",
+        "TausRUsTauCharge",
     ]
     names += [f"TausRUsDecayModeScore{i}" for i in range(5)]
     names += [f"TausRUs{particle}P4_{component}"

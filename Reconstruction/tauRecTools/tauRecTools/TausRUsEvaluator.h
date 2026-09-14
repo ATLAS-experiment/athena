@@ -45,6 +45,7 @@
  *   TausRUsChargedPionP4_* the two pion four-momenta, each four floats,
  *   TausRUsNeutralPionP4_* _pt, _eta, _phi and _m. The mass is the PDG mass of the particle.
  *   TausRUsVertex_x/_y/_z  position of the vertex the 'vertex_classification' head picks out of the event vertex collection
+ *   TausRUsTauCharge       sum of the charges of the tracks classified as tau tracks, kept only when it is -1 or +1, else 0
  *
  * Then, per xAOD::TauTrack the following are parsed
  *
@@ -86,7 +87,7 @@ private:
                       const std::vector<const xAOD::Vertex*>& vertices) const;
 
   /// Decorate each track of @p tau with its slot of the per-track head.
-  void decorateTracks(const xAOD::TauJet& tau, std::span<const float> scores) const;
+  void decorateTracks(xAOD::TauJet& tau, std::span<const float> scores) const;
 
   ToolHandle<AthInfer::IAthInferenceTool> m_inferenceTool{
     this, "InferenceTool", "", "ONNX Runtime or Triton inference backend"};
@@ -119,11 +120,13 @@ private:
   SG::Accessor<float> m_tauIDScore;
   SG::Accessor<float> m_eleRejScore;
   SG::Accessor<float> m_decayMode;
+  SG::Accessor<float> m_tauCharge;
   std::vector<SG::Accessor<float>> m_decayModeScores;
   FourMomDecorators m_tauP4;
   FourMomDecorators m_chargedPionP4;
   FourMomDecorators m_neutralPionP4;
   std::vector<SG::Accessor<float>> m_vertexPosition;
+  // decorators to the vertices
   SG::Decorator<int> m_trackClass;
   std::vector<SG::Decorator<float>> m_trackScores;
 

@@ -124,7 +124,11 @@ def AddTauIDDecorationCfg(flags, **kwargs):
         if not doVertexedClusters:
             tools.append( acc.popToolsAndMerge(tauTools.TauVertexedClusterDecoratorCfg(flags)) )
             doVertexedClusters = True
-        tools.append( acc.popToolsAndMerge(tauTools.TausRUsEvaluatorCfg(flags)) )
+        # Give the container a unique name for running
+        tools.append( acc.popToolsAndMerge(tauTools.TausRUsEvaluatorCfg(
+            flags,
+            name=f"{tauContainerKey}_TausRUs",
+            tauTrackContainerName=tauContainerKey.replace("TauJets", "TauTracks"))) )
         # The tools run on a shallow copy of the taus, so every tau decoration
         # has to be copied back, which is what the score list is. The per-track
         # decorations need no copy-back: the tracks the shallow copy links to

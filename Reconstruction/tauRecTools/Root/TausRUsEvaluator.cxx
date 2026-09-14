@@ -29,6 +29,7 @@ constexpr char TAU_P4[] = "TausRUsTauP4";
 constexpr char CHARGED_PION_P4[] = "TausRUsChargedPionP4";
 constexpr char NEUTRAL_PION_P4[] = "TausRUsNeutralPionP4";
 constexpr char VERTEX[] = "TausRUsVertex";
+constexpr char TAU_CHARGE[] = "TausRUsTauCharge";
 
 /// On each of the tau's tracks.
 constexpr char TRACK_CLASS[] = "TausRUsTrackClass";
@@ -42,7 +43,7 @@ constexpr char POSITION_SUFFIXES[3][3] = {"_x", "_y", "_z"};
 /// Every decoration written on the tau, and every one written on its tracks,
 /// which is what the output data dependencies are declared from.
 std::vector<std::string> tauDecorationNames() {
-  std::vector<std::string> names{TAU_ID_SCORE, ELE_REJ_SCORE, DECAY_MODE};
+  std::vector<std::string> names{TAU_ID_SCORE, ELE_REJ_SCORE, DECAY_MODE, TAU_CHARGE};
   for (size_t iMode = 0; iMode < N_DECAY_MODES; ++iMode) {
     names.emplace_back(std::string(DECAY_MODE_SCORE_PREFIX) + std::to_string(iMode));
   }
@@ -86,6 +87,7 @@ TausRUsEvaluator::TausRUsEvaluator(const std::string& name)
     m_tauIDScore(TAU_ID_SCORE),
     m_eleRejScore(ELE_REJ_SCORE),
     m_decayMode(DECAY_MODE),
+    m_tauCharge(TAU_CHARGE),
     m_trackClass(TRACK_CLASS) {}
 
 TausRUsEvaluator::~TausRUsEvaluator() {}
@@ -177,13 +179,18 @@ StatusCode TausRUsEvaluator::initialize() {
       ATH_CHECK(key.initialize());
     }
   }
-  if (!m_tauTrackContainerName.empty()) {
-    for (const std::string& decoration : trackDecorationNames()) {
-      m_trackDecorKeys.emplace_back(m_tauTrackContainerName + "." + decoration);
-    }
-    for (SG::WriteDecorHandleKey<xAOD::TauTrackContainer>& key : m_trackDecorKeys) {
-      ATH_CHECK(key.initialize());
-    }
+  // The per-track decorations are written through handles on these keys, so
+  // unlike the tau ones the container has to be named.
+  if (m_tauTrackContainerName.empty()) {
+    ATH_MSG_ERROR("TauTrackContainerName is not set, but the per-track "
+                  << trackDecorationNames().size() << " decorations are written on it");
+    return StatusCode::FAILURE;
+  }
+  for (const std::string& decoration : trackDecorationNames()) {
+    m_trackDecorKeys.emplace_back(m_tauTrackContainerName + "." + decoration);
+  }
+  for (SG::WriteDecorHandleKey<xAOD::TauTrackContainer>& key : m_trackDecorKeys) {
+    ATH_CHECK(key.initialize());
   }
 
   return StatusCode::SUCCESS;
@@ -193,6 +200,7 @@ void TausRUsEvaluator::setDefaults(xAOD::TauJet& tau) const {
   m_tauIDScore(tau) = DEFAULT_VALUE;
   m_eleRejScore(tau) = DEFAULT_VALUE;
   m_decayMode(tau) = DEFAULT_VALUE;
+  m_tauCharge(tau) = DEFAULT_VALUE;
   for (const SG::Accessor<float>& decorator : m_decayModeScores) {
     decorator(tau) = DEFAULT_VALUE;
   }
@@ -257,24 +265,36 @@ void TausRUsEvaluator::decorateVertex(xAOD::TauJet& tau,
   m_vertexPosition[2](tau) = vertex->z();
 }
 
-void TausRUsEvaluator::decorateTracks(const xAOD::TauJet& tau,
+void TausRUsEvaluator::decorateTracks(xAOD::TauJet& tau,
                                       std::span<const float> scores) const {
-  // Slot i of the head is track i of the same selection the input tensor was
-  // built from, hence going through the loader rather than tau.allTracks().
+
   const std::vector<const xAOD::TauTrack*> tracks = m_loader->selectTracks(tau, m_maxTracks);
+
+  int tauCharge = 0; // set default value of charge 
   for (size_t iTrack = 0; iTrack < tracks.size(); ++iTrack) {
     const std::span<const float> slot =
       scores.subspan(iTrack * N_TRACK_CLASSES, N_TRACK_CLASSES);
-    m_trackClass(*tracks[iTrack]) = argMax(slot);
+    const int trackClass = argMax(slot);
+    m_trackClass(*tracks[iTrack]) = trackClass;
     for (size_t iClass = 0; iClass < N_TRACK_CLASSES; ++iClass) {
       m_trackScores[iClass](*tracks[iTrack]) = slot[iClass];
     }
+    // only add charge to tau charge if the track is the correct one.
+    if (trackClass == TAU_TRACK_CLASS) {
+      tauCharge += static_cast<int>(tracks[iTrack]->track()->charge());
+    }
+  }
+
+  // Only append a valid charge
+  if (tauCharge == -1 || tauCharge == 1) {
+    m_tauCharge(tau) = tauCharge;
   }
 }
 
 StatusCode TausRUsEvaluator::execute(xAOD::TauJet& tau) const {
   // Set the defaults before any early return, so that a tau skipped below still
   // carries every decoration and no consumer has to test for their presence.
+
   setDefaults(tau);
 
   if (tau.pt() < m_minTauPt) {

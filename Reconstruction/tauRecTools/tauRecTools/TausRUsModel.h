@@ -47,7 +47,7 @@ template <class Getter>
 struct Variable {
   std::string name;              ///< reference-dumper branch name, for logging
   Getter get;
-  Normalisation norm;
+  Normalisation norm{};
 };
 
 using ClusterVariable = Variable<ClusterGetter>;
@@ -88,6 +88,9 @@ constexpr size_t N_DECAY_MODES = 5;
 
 /// Number of classes of the 'tautrack_class' head, which is raw logits per track slot.
 constexpr size_t N_TRACK_CLASSES = 4;
+
+/// Class for true-tau track from tau_track_class head
+constexpr int TAU_TRACK_CLASS = 0;
 
 /// The pt heads ('tes', 'charged_pion_pt', 'neutral_pion_pt') regress five
 /// quantiles of the log response, log(pt_seedjet / pt_true). This is the index
