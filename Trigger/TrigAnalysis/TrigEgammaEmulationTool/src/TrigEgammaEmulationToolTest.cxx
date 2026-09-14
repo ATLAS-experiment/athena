@@ -178,7 +178,7 @@ asg::AcceptData TrigEgammaEmulationToolTest::setAccept( const EventContext& ctx,
     
     if (dec) {
 
-        auto trigger = info.trigger; 
+        const auto & trigger = info.trigger; 
         // Step 1
         passedL1Calo = m_matchTool->ancestorPassed<TrigRoiDescriptorCollection>(ctx, dec , trigger , "initialRois", condition);
 
