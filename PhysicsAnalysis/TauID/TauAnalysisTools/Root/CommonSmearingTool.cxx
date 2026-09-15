@@ -158,7 +158,10 @@ CP::CorrectionCode CommonSmearingTool::applyCorrection( xAOD::TauJet& xTau ) con
     bool compatibility = true;
     static const SG::ConstAccessor<float> accPtTauEnergyScale ("ptTauEnergyScale");
     if(accPtTauEnergyScale.isAvailable(xTau)) {
-      const auto combinedTEStool = static_cast<const TauCombinedTES*>(m_tTauCombinedTES.get());
+      const auto combinedTEStool = dynamic_cast<const TauCombinedTES*>(m_tTauCombinedTES.get());
+      if (!combinedTEStool)[[unlikely]]{
+        throw std::runtime_error("CommonSmearingTool::applyCorrection: combinedTEStool is null");
+      }
       compatibility = combinedTEStool->getTESCompatibility(xTau);	
     }
     static const SG::Accessor<char> accTESCompatibility("TESCompatibility");
@@ -205,8 +208,8 @@ CP::CorrectionCode CommonSmearingTool::applyCorrection( xAOD::TauJet& xTau ) con
     {
       // check if systematic is available
       auto it = m_mSystematicsHistNames.find(syst.basename());
-      if (it == m_mSystematicsHistNames)[[unlikely]]{
-        continue
+      if (it == m_mSystematicsHistNames.end())[[unlikely]]{
+        continue;
       }
       // get uncertainty value
       double dUncertaintySyst = 0.;
