@@ -158,7 +158,7 @@ CP::CorrectionCode CommonSmearingTool::applyCorrection( xAOD::TauJet& xTau ) con
     bool compatibility = true;
     static const SG::ConstAccessor<float> accPtTauEnergyScale ("ptTauEnergyScale");
     if(accPtTauEnergyScale.isAvailable(xTau)) {
-      const auto combinedTEStool = dynamic_cast<const TauCombinedTES*>(m_tTauCombinedTES.get());
+      const auto combinedTEStool = static_cast<const TauCombinedTES*>(m_tTauCombinedTES.get());
       compatibility = combinedTEStool->getTESCompatibility(xTau);	
     }
     static const SG::Accessor<char> accTESCompatibility("TESCompatibility");
