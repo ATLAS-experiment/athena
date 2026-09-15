@@ -4,7 +4,7 @@
 # art-include: main/Athena/x86_64-el9-gcc15-opt
 # art-pathena-flags-add: --site=CERN-GPU
 # art-memory: 8192
-# art-input: mc21_14TeV:mc21_14TeV.900495.PG_single_muonpm_Pt10_etaFlatnp0_43.recon.RDO.e8557_s4422_r16128
+# art-input: mc21_14TeV:mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8557_s4422_r16128
 # art-input-nfiles: 400
 # art-output: IDTPM.*.root
 # art-output: *.json
@@ -82,6 +82,7 @@ run "${pipelineName}" \
   runReco_G130_FS.sh \
     -i ${InputRDOfiles} \
     -o "${OutSampleName}.AOD.pool.root" \
+    -n -1 \
     "$@"
 
 ## Don't run if IDTPM json config is not found
