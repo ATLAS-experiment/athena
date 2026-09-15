@@ -6,15 +6,6 @@
 
 #include "TrigGlobalEfficiencyCorrection/TrigGlobalEfficiencyCorrectionTool.h"
 
-#include <algorithm>
-#include <array>
-#include <cctype>
-#include <cmath>
-#include <limits>
-#include <regex>
-#include <sstream>
-#include <type_traits>
-
 #include "TrigGlobalEfficiencyCorrection/Calculator.h"
 #include "TrigGlobalEfficiencyCorrection/CheckConfig.h"
 #include "TrigGlobalEfficiencyCorrection/Efficiencies.h"
@@ -23,6 +14,14 @@
 #include "xAODEgamma/Electron.h"
 #include "xAODEgamma/Photon.h"
 #include "xAODEventInfo/EventInfo.h"
+#include <algorithm>
+#include <array>
+#include <cctype>
+#include <cmath>
+#include <limits>
+#include <regex>
+#include <sstream>
+#include <type_traits>
 
 using CheckConfig = TrigGlobEffCorr::CheckConfig;
 using Calculator = TrigGlobEffCorr::Calculator;
