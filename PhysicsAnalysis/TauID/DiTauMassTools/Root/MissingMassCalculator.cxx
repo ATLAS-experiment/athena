@@ -1567,7 +1567,7 @@ MissingMassCalculator::maxFromHist(TH1F *theHist, std::vector<double> &histInfo,
       sumw += weight;
       sumx += weight * theHist->GetBinCenter(iBin);
     }
-    maxPos = sumx / sumw;
+    maxPos = (sumw != 0.) ? (sumx / sumw) : 0.;
 
     // FIXME GetEntries is unweighted
     prob = sumw / theHist->GetEntries();
