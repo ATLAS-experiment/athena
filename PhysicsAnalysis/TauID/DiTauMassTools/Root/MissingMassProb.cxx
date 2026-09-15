@@ -990,7 +990,7 @@ double MissingMassProb::dTheta3d_probabilityFast(MissingMassInput& preparedInput
     }
 
 
-  double myDelThetaParam[6];
+  double myDelThetaParam[6]{};
 
   for (int i=0;i<6;++i)
     {
