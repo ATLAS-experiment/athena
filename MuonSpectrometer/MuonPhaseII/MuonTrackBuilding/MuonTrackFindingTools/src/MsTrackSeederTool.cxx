@@ -614,6 +614,12 @@ namespace MuonR4{
         auto point = [&](const xAOD::MuonSegment* seg) {
             const Amg::Vector3D projSegPos {segPosOntoPhiPlane(tgContext, planeNorm, *seg)};
 
+            /** Fall back function for the truth segment test */
+            if (nMeasurements(*seg) == 0ul) {
+                return std::make_pair(projSegPos,
+                                      Acts::makeDirectionFromPhiTheta(circPhi, seg->direction().theta()));
+            }
+            
             const Acts::Surface& firstSurf {xAOD::muonSurface(firstMeasurement(*seg))};
             const Acts::TrackingVolume* volume{
                 MuonGMR4::highestAlignable(m_trackingGeometrySvc->trackingGeometry()->findVolume(volumeId(firstSurf)))};
