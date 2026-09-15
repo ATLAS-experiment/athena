@@ -588,7 +588,7 @@ void CommonEfficiencyTool::generateSystematicSets()
   // 3p eVeto, still need this to be measurable in T&P
   if (sEfficiencyType=="ELERNN" || sEfficiencyType=="ELEOLR") m_bNoMultiprong = true;
 
-  for (auto mSF : *m_mSF)
+  for (const auto & mSF : *m_mSF)
   {
     // parse for nuisance parameter in histogram name
     std::vector<std::string> vSplitNP = {};
