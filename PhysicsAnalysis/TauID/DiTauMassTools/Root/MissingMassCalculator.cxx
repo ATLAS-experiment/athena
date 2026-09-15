@@ -2190,22 +2190,17 @@ void MissingMassCalculator::handleSolutions()
 
   for (int isol = 0; isol < m_nsol; ++isol) {
     ++m_iter5;
-    double totalProb;
-    double mtautau;
+    double totalProb{};
+    double mtautau{};
     const PtEtaPhiMVector *pnuvec1_tmpj;
     const PtEtaPhiMVector *pnuvec2_tmpj;
 
-    if (oldToBeUsed) {
-      totalProb = m_probFinalSolOldVec[isol];
-      mtautau = m_mtautauFinalSolOldVec[isol];
-      pnuvec1_tmpj = &m_nu1FinalSolOldVec[isol];
-      pnuvec2_tmpj = &m_nu2FinalSolOldVec[isol];
-    } else {
-      totalProb = m_probFinalSolVec[isol];
-      mtautau = m_mtautauFinalSolVec[isol];
-      pnuvec1_tmpj = &m_nu1FinalSolVec[isol];
-      pnuvec2_tmpj = &m_nu2FinalSolVec[isol];
-    }
+    //oldToBeUsed must be true at this point
+    totalProb = m_probFinalSolOldVec[isol];
+    mtautau = m_mtautauFinalSolOldVec[isol];
+    pnuvec1_tmpj = &m_nu1FinalSolOldVec[isol];
+    pnuvec2_tmpj = &m_nu2FinalSolOldVec[isol];
+    
     const PtEtaPhiMVector &nuvec1_tmpj = *pnuvec1_tmpj;
     const PtEtaPhiMVector &nuvec2_tmpj = *pnuvec2_tmpj;
 
