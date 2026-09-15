@@ -11,7 +11,9 @@ if __name__=="__main__":
     cfgFlags.Output.AODFileName="output_AOD.root"
     cfgFlags.Output.doWriteAOD=True
     cfgFlags.DiTau.doDiTauRec = False #does not run from ESD - tries to use aux variables which do not exist
-    #Auto configure does not work with Run 4 files made with pre-CREST conditions data
+    #Auto configure works by reading the conditions tag  metadata from the input file.
+    #Hence for files produced using pre-CREST conditions tags this choice is not
+    #compatible with the latest releases which only support CREST conditions tags.
     #So we force it to use the current Run 4 tag
     #See https://its.cern.ch/jira/browse/ATLASRECTS-8434
     from AthenaConfiguration.TestDefaults import defaultConditionsTags
