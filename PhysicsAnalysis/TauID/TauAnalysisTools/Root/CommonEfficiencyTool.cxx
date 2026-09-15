@@ -224,7 +224,9 @@ CP::CorrectionCode CommonEfficiencyTool::getEfficiencyScaleFactor(columnar::TauJ
   {
     // check if systematic is available
     auto it = m_mSystematicsHistNames.find(syst.basename());
-
+    if (it == m_mSystematicsHistNames.end())[[unlikely]]{
+      continue;
+    }
     // get uncertainty value
     double dUncertaintySyst = 0.;
 
