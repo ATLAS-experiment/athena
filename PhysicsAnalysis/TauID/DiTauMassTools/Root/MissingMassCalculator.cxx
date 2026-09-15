@@ -2304,7 +2304,9 @@ void MissingMassCalculator::handleSolutions()
       m_nu2FinalSolOldVec[isol] = m_nu2FinalSolVec[isol];
     }
   }
-
+  if (m_nsol == 0) [[unlikely]]{
+    throw std::runtime_error("DitauMassCalculatorV9walk: divisor is zero.");
+  }
   // compute rms of solutions
   const double solRMS = sqrt(solSum2 / m_nsol - std::pow(solSum / m_nsol, 2));
   OutputInfo.m_AveSolRMS += solRMS;
