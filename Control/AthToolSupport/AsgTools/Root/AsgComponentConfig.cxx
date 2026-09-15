@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -311,7 +311,7 @@ namespace asg
       TClass* componentClass = TClass::GetClass (type.c_str());
       if (!componentClass)
       {
-        ATH_MSG_ERROR ("Unable to load class dictionary for type " << type);
+        ANA_MSG_ERROR ("Unable to load class dictionary for type " << type);
         return StatusCode::FAILURE;
       }
       std::string fmt = convert_boost_format_to_std_format(newCommand);

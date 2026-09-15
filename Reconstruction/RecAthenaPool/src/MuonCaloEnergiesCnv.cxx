@@ -31,7 +31,7 @@ void
 MuonCaloEnergiesCnv::readObjectFromPool( const Token* token )
 {
     
-   static const pool::Guid p1_guid( "E60630E0-FAA1-4658-9BDD-8BB977C4200B" );
+   static const Guid p1_guid( "E60630E0-FAA1-4658-9BDD-8BB977C4200B" );
 
    // select the object type based on its GUID 
    if( compareClassGuid(token,  p1_guid ) )     {

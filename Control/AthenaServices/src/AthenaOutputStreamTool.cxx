@@ -26,19 +26,6 @@
 #include "PersistentDataModel/TokenAddress.h"
 
 
-namespace {
-
-/// Check to see if a DataHeader has been marked as input
-/// by MakeInputDataHeader.
-bool hasInputAlias (const SG::DataProxy& dp)
-{
-  std::string inputName = dp.name() + "_Input";
-  return dp.hasAlias (inputName);
-}
-
-
-} // anonymous namespace
-
 /// Constructor
 AthenaOutputStreamTool::AthenaOutputStreamTool(const std::string& type,
 		const std::string& name,
@@ -210,7 +197,12 @@ StatusCode AthenaOutputStreamTool::connectOutput(const std::string& outputName) 
       if (m_store->retrieve(dh, dhKey).isFailure()) {
          ATH_MSG_DEBUG("Unable to retrieve the DataHeader with key " << dhKey);
       }
-      if (dh->isInput() || hasInputAlias(*m_store->proxy(dh)) || primaryDH) {
+      // Propagate provenance from file inputs and the primary event-selector
+      // header. Headers produced earlier in this job are intentionally not
+      // treated as inputs; for example, an AOD written after an ESD in the
+      // same job will not automatically retain provenance back to that ESD.
+      // Revisit this policy if same-job output chaining needs support again.
+      if (dh->isInput() || primaryDH) {
          propagateProvenance( *dh );
       }
    }
@@ -253,16 +245,6 @@ StatusCode AthenaOutputStreamTool::connectOutput(const std::string& outputName) 
             } else {
                m_dataHeader->setAttributeList(attrList2);
             }
-/*
-            SG::WriteHandle<AthenaAttributeList> attrWrite(m_attrListWrite);
-            std::unique_ptr<AthenaAttributeList> uptr = std::make_unique<AthenaAttributeList>(*newone);
-            if ( attrWrite.record(std::move(uptr)).isFailure() ) {
-               ATH_MSG_ERROR("Unable to record att list " << m_attrListWrite);
-            } else {
-               ATH_MSG_DEBUG("Decisions already added by a different stream");
-            }
-*/
-            //m_dataHeader->setAttributeList(newone);
          }    // list extend check
       }       // list retrieve check
    }          // list property check

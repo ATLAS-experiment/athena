@@ -25,7 +25,9 @@ namespace ActsTrk {
     }
 
     StatusCode
-    PixelSpacePointFormationTool::producePixelSpacePoint(const xAOD::PixelCluster& cluster,
+    PixelSpacePointFormationTool::producePixelSpacePoint(const EventContext& /*ctx*/,
+                                                         const Acts::GeometryContext& /*gctx*/,
+                                                         const xAOD::PixelCluster& cluster,
                                                          xAOD::SpacePoint& sp,
                                                          const InDetDD::SiDetectorElement& element) const
     {

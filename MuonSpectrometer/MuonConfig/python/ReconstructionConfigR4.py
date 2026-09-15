@@ -126,7 +126,8 @@ def MuonReconstructionConfig(flags):
     ### Track building
     from MuonTrackFindingAlgs.TrackFindingConfig import MSTrackFinderAlgCfg, MuidSaTagMakerAlgCfg, \
                                                         StandaloneTrackPartCnvCfg, MuonCreatorAlgCfg, \
-                                                        MuonCombinedStacoAlgCfg, TrackSummaryLockCfg
+                                                        MuonCombinedStacoAlgCfg, TrackSummaryLockCfg, \
+                                                        MuonCombinedFitAlgCfg
     result.merge(MSTrackFinderAlgCfg(flags))
     
     ### MuTag conversion to share same format as the combined chain
@@ -145,6 +146,8 @@ def MuonReconstructionConfig(flags):
         MuonTags+= ["SegmentTags"]
         result.merge(MuonCombinedStacoAlgCfg(flags))
         MuonTags+=["MuonTagsSTACO"]
+        result.merge(MuonCombinedFitAlgCfg(flags))
+        MuonTags+=["MuonTagsMuidCo"]
     
     result.merge(MuidSaTagMakerAlgCfg(flags,
                                       CombinedTags="MuonTagsSTACO" if flags.Reco.EnableTracking else ""))

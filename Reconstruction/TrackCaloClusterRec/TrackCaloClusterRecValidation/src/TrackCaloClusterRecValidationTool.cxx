@@ -82,7 +82,10 @@ TrackCaloClusterRecValidationTool::initialize()
     }
     CHECK(m_jetCalibrationTools.retrieve());
   }
-
+  const std::string jetStr{"jets"};
+  const std::string trackStr{"tracks"};
+  const std::string clusterStr{"clusters"};
+  const std::string tccStr{"tccs"};
   if (m_saveJetInfo) {
     for (const auto& name : m_jetContainerNames) {
       ATH_MSG_INFO("Saving Plots for " << name << "...");
@@ -95,7 +98,7 @@ TrackCaloClusterRecValidationTool::initialize()
       if (name == "AntiKt10TrackCaloClustersChargedTrimmedJets")
         myname = "AntiKt10TrackCaloClustersCombinedTrimmedJets";
 
-      m_tccPlots.insert(std::pair<std::string, TCCPlots*>(name, new TCCPlots(nullptr, m_dirName + myname, "jets")));
+      m_tccPlots.insert(std::pair<std::string, TCCPlots*>(name, new TCCPlots(nullptr, m_dirName + myname, jetStr)));
       m_tccPlots.at(name)->setJetPtBinning(m_jetPtBins);
       m_tccPlots.at(name)->setJetMassOverPtBinning(m_jetMassOverPtBins);
     }
@@ -104,7 +107,7 @@ TrackCaloClusterRecValidationTool::initialize()
   if (m_saveTrackInfo) {
     ATH_MSG_INFO("Saving Plots for " << m_trackParticleCollectionName << "...");
     m_tccPlots.insert(std::pair<std::string, TCCPlots*>(
-      m_trackParticleCollectionName, new TCCPlots(nullptr, m_dirName + m_trackParticleCollectionName, "tracks")));
+      m_trackParticleCollectionName, new TCCPlots(nullptr, m_dirName + m_trackParticleCollectionName, trackStr)));
     m_tccPlots.at(m_trackParticleCollectionName)->setTrackPtBinning(m_trackPtBins);
     m_tccPlots.at(m_trackParticleCollectionName)->setTrackProdRadiusBinning(m_trackProdRadiusBins);
   }
@@ -112,13 +115,13 @@ TrackCaloClusterRecValidationTool::initialize()
   if (m_saveClusterInfo) {
     ATH_MSG_INFO("Saving Plots for " << m_caloClusterCollectionName << "...");
     m_tccPlots.insert(std::pair<std::string, TCCPlots*>(
-      m_caloClusterCollectionName, new TCCPlots(nullptr, m_dirName + m_caloClusterCollectionName, "clusters")));
+      m_caloClusterCollectionName, new TCCPlots(nullptr, m_dirName + m_caloClusterCollectionName, clusterStr)));
   }
 
   if (m_saveTCCInfo) {
     for (const auto& name : m_TCCCombinedCollectionNames) {
       ATH_MSG_INFO("Saving Plots for " << name << "...");
-      m_tccPlots.insert(std::pair<std::string, TCCPlots*>(name, new TCCPlots(nullptr, m_dirName + name, "tccs")));
+      m_tccPlots.insert(std::pair<std::string, TCCPlots*>(name, new TCCPlots(nullptr, m_dirName + name, tccStr)));
       m_tccPlots.at(name)->setTrackPtBinning(m_trackPtBins);
     }
   }

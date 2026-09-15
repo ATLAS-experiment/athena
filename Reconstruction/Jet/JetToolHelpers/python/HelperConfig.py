@@ -15,7 +15,7 @@ def VarToolCfg(flags, var, Tname="VarTool", **kwargs):
     else:
         raise TypeError('Unregonised type for VarTool block')
     # Guess if this is a jet variable if not explicitly set
-    if var in ["e", "et", "pt", "eta", "abseta", "|eta|", "rapidity", "y", "|y|", "absy", "absrapidity", "|rapidity|", "DetectorEta", "absDetEta", "LOGmOe", "mass", "M", "m"]:
+    if var in ["e", "et", "pt", "eta", "abseta", "|eta|", "rapidity", "y", "|y|", "absy", "absrapidity", "|rapidity|", "DetectorEta", "absDetEta", "absConstEta", "LOGmOe", "mass", "M", "m"]:
         kwargs.setdefault("isJetVar", True)
     else:
         kwargs.setdefault("isJetVar", False)

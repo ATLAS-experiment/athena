@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 import unittest
 
-from AthenaConfiguration.AccumulatorCache import AccumulatorCache , AccumulatorDecorator
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache, AccumulatorDecorator, make_hashable
 
 class TestCache(unittest.TestCase):
     def test_basic(self):
@@ -366,6 +366,37 @@ class TestCA(unittest.TestCase):
         del acc  # no ERROR here as we consumed the private tools
         del cfg  # this produces an ERROR if private tools of cached CAs are not deleted
         self.assertTrue(len(self.errors.getvalue())==0)
+
+
+class TestHelper(unittest.TestCase):
+    """Test of helper functions"""
+
+    def test_make_hashable(self):
+        self.assertEqual(make_hashable([1,2]),
+                         (1,2))
+        self.assertEqual(make_hashable([[1,2],[3,4]]),
+                         ((1,2),(3,4)))
+        self.assertEqual(make_hashable([(1,2),(3,4)]),
+                         ((1,2),(3,4)))
+        self.assertEqual(make_hashable({"a": [1,2], "b": [3,4]}),
+                         {"a": (1,2), "b": (3,4)}),
+
+    def test_make_hashable_kwargs(self):
+        @AccumulatorCache
+        def func(arg1, arg2):
+            return len(arg1)
+
+        kwargs = {'arg1' : [1,2,3],  # not hashable
+                  'arg2' : 42}
+
+        r = func(**kwargs)
+        self.assertEqual(r, 3)
+        self.assertEqual(func.getInfo()['cache_size'], 0)
+
+        r = func(**make_hashable(kwargs))
+        self.assertEqual(r, 3)
+        self.assertEqual(func.getInfo()['cache_size'], 1)
+
 
 if __name__ == '__main__':
     unittest.main()

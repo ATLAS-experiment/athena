@@ -20,6 +20,10 @@ def TTVAToolCfg(flags, name, addDecoAlg=True, VertexContName="PrimaryVertices", 
 
     acc = ComponentAccumulator()
 
+    # For cosmics or config without PV reconstruction, don't even try
+    if not flags.Tracking.doVertexFinding:
+        return acc
+
     kwargs.setdefault("TrackContName", "InDetTrackParticles")
     kwargs.setdefault("AMVFVerticesDeco", "TTVA_AMVFVertices_forReco")
     kwargs.setdefault("AMVFWeightsDeco",  "TTVA_AMVFWeights_forReco")

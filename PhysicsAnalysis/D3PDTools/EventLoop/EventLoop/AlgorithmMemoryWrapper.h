@@ -13,7 +13,6 @@
 
 #include <AnaAlgorithm/IAlgorithmWrapper.h>
 #include <Rtypes.h>
-#include <chrono>
 
 namespace EL
 {
@@ -46,9 +45,6 @@ namespace EL
     /// ==============
 
   public:
-
-    /// \brief the clock we use for our Memory
-    using clock_type = std::chrono::high_resolution_clock;
 
     /// \brief test the invariant of this object
     void testInvariant () const;

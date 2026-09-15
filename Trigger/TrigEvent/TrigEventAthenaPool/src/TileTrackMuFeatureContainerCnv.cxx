@@ -28,9 +28,9 @@ TileTrackMuFeatureContainer * TileTrackMuFeatureContainerCnv::createTransient(co
   
   mlog << MSG::DEBUG << "TileTrackMuFeatureContainerCnv::createTransient called" << endmsg;
 
-  static const pool::Guid p3_guid( "25018D00-1D18-4B4C-9C07-37993260EADB");
-  static const pool::Guid tlp1_guid( "983ED5FE-D0A2-43AE-90A9-268C8B61E8B3");
-  static const pool::Guid p0_guid( "1AFABC18-EB97-412D-B27C-C744ABA6E1DC");
+  static const Guid p3_guid( "25018D00-1D18-4B4C-9C07-37993260EADB");
+  static const Guid tlp1_guid( "983ED5FE-D0A2-43AE-90A9-268C8B61E8B3");
+  static const Guid p0_guid( "1AFABC18-EB97-412D-B27C-C744ABA6E1DC");
 
   if( compareClassGuid(token,  p3_guid ) ){
          std::unique_ptr< TileTrackMuFeatureContainer_p3 > col_vect( poolReadObject< TileTrackMuFeatureContainer_p3 >(token) );

@@ -463,7 +463,10 @@ namespace ActsTrk
         if (geoid_iter == detectorElementToGeometryIdMapPtr->end()) {
            throw std::runtime_error("measurement not linked to Acts surface.");
         }
-        const Acts::Surface *surface = actsTrackingGeometryPtr->findSurface( DetectorElementToActsGeometryIdMap::getValue(*geoid_iter) );
+        const Acts::Surface *surface = DetectorElementToActsGeometryIdMap::getSurface(*geoid_iter);
+        if (surface == nullptr) {
+           surface = actsTrackingGeometryPtr->findSurface( DetectorElementToActsGeometryIdMap::getValue(*geoid_iter) );
+        }
         assert(surface);
         return *surface;
       };

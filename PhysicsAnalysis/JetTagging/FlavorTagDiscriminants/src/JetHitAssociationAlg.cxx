@@ -5,6 +5,8 @@ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //Include header file
 #include "FlavorTagDiscriminants/JetHitAssociationAlg.h"
 
+#include "JetHitPhiRanges.h"
+
 #include "StoreGate/WriteDecorHandle.h"
 #include "StoreGate/ReadDecorHandle.h"
 #include "StoreGate/ReadHandle.h"
@@ -103,6 +105,11 @@ namespace FlavorTagDiscriminants {
       hits.push_back({hit, std::atan2(hy, hx), z(*hit), std::sqrt(hx*hx + hy*hy)});
     }
 
+    // Sorting once per event lets each jet binary-search its phi window in
+    // getPhiRanges rather than scan every hit in the event
+    std::sort(hits.begin(), hits.end(),
+              [](const Hit& a, const Hit& b) { return a.phi < b.phi; });
+
     // Loop over jets
     for(const xAOD::IParticle* jet : *jetReadHandle) {
 
@@ -142,15 +149,28 @@ namespace FlavorTagDiscriminants {
 
     std::vector<std::pair<float, const xAOD::TrackMeasurementValidation*>> ret;
 
+    // Both selections below imply |dphi| <= halfWidth, so only the hits in
+    // that phi window need testing. The epsilon keeps float rounding from
+    // dropping a hit on the boundary.
+    const float halfWidth =
+      (m_useDRCone ? m_dRHitToJet.value() : m_dPhiHitToJet.value()) + 1e-5f;
+
+    using HitItr = std::vector<Hit>::const_iterator;
+    const std::vector<std::pair<HitItr, HitItr>> ranges =
+      getPhiRanges(hits, phi, halfWidth);
+
     if(m_useDRCone) {
-      for(const Hit& hit : hits) {
-        const float dEta = eta - std::asinh((hit.z - zed) / hit.r);
-        const float dPhi = CxxUtils::wrapToPi(phi - hit.phi);
+      for(const auto& [first, last] : ranges) {
+        for(HitItr it = first; it != last; ++it) {
+          const Hit& hit = *it;
+          const float dEta = eta - std::asinh((hit.z - zed) / hit.r);
+          const float dPhi = CxxUtils::wrapToPi(phi - hit.phi);
 
-        const float dR = std::sqrt(dEta * dEta + dPhi * dPhi);
-        if(dR > m_dRHitToJet) continue;
+          const float dR = std::sqrt(dEta * dEta + dPhi * dPhi);
+          if(dR > m_dRHitToJet) continue;
 
-        ret.emplace_back(dR, hit.original_hit);
+          ret.emplace_back(dR, hit.original_hit);
+        }
       }
     }
     else {
@@ -160,10 +180,13 @@ namespace FlavorTagDiscriminants {
         zed, zed - m_dZHitToVertex, zed + m_dZHitToVertex
       );
 
-      for(const Hit& hit : hits) {
-        if(!RoiUtil::contains(roi, hit.z, hit.r, hit.phi)) continue;
+      for(const auto& [first, last] : ranges) {
+        for(HitItr it = first; it != last; ++it) {
+          const Hit& hit = *it;
+          if(!RoiUtil::contains(roi, hit.z, hit.r, hit.phi)) continue;
 
-        ret.emplace_back(std::abs(CxxUtils::wrapToPi(phi - hit.phi)), hit.original_hit);
+          ret.emplace_back(std::abs(CxxUtils::wrapToPi(phi - hit.phi)), hit.original_hit);
+        }
       }
     }
 

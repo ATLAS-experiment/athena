@@ -44,7 +44,7 @@ namespace GlobalSim {
     if (dc){dc->collect(*this, "start");}
     
     unsigned int N_pass_tobs{0};
-    ATH_CHECK( countPassingTOBs(ctx, N_pass_tobs) );
+    ATH_CHECK( countPassingTOBs(ctx, dc, N_pass_tobs) );
     ATH_MSG_DEBUG("no of passing TOBS" << N_pass_tobs);
 
     auto count_bits = std::bitset<s_nbits_TIP>(N_pass_tobs);

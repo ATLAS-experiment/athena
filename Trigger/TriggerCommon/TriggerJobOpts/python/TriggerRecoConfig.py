@@ -261,9 +261,6 @@ def Run2BSExtractionCfg( flags ):
     if flags.Trigger.decodeHLT:
         serialiserTool = CompFactory.TrigTSerializer()
         acc.addPublicTool(serialiserTool)
-        extr.NavigationForL2 = CompFactory.HLT.Navigation("NavigationForL2", 
-                                                          ClassesFromPayloadIgnore = ["TrigPassBits#passbits"]) # Ignore the L2 TrigPassBits to avoid clash with EF (ATR-23411)
-
         extr.Navigation = CompFactory.HLT.Navigation("Navigation")
         from TrigEDMConfig.TriggerEDM import getEDMLibraries
         extr.Navigation.Dlls = getEDMLibraries()            
@@ -271,15 +268,8 @@ def Run2BSExtractionCfg( flags ):
         extr.Navigation.ClassesToPreregister = getPreregistrationList(flags.Trigger.EDMVersion, flags.Trigger.doxAODConversion)
         from eformat import helper as efh
  
-        if flags.Trigger.EDMVersion == 1:  # Run-1 has L2 and EF result
-            acc.merge(InputRenameCfg("HLT::HLTResult", "HLTResult_L2", "HLTResult_L2_BS"))
-            acc.merge(InputRenameCfg("HLT::HLTResult", "HLTResult_EF", "HLTResult_EF_BS"))
-            robIDMap["HLTResult_L2_BS"] = efh.SourceIdentifier(efh.SubDetector.TDAQ_LVL2, 0).code()
-            robIDMap["HLTResult_EF_BS"] = efh.SourceIdentifier(efh.SubDetector.TDAQ_EVENT_FILTER, 0).code()
-            extr.L2ResultKeyIn = "HLTResult_L2_BS"
-            extr.L2ResultKeyOut = "HLTResult_L2"
-            extr.HLTResultKeyIn = "HLTResult_EF_BS"
-            extr.HLTResultKeyOut = "HLTResult_EF"
+        if flags.Trigger.EDMVersion == 1:
+            raise RuntimeError("Run-1 trigger reconstruction is no longer supported")
         else:
             acc.merge(InputRenameCfg("HLT::HLTResult", "HLTResult_HLT", "HLTResult_HLT_BS"))
             robIDMap["HLTResult_HLT_BS"] = efh.SourceIdentifier(efh.SubDetector.TDAQ_HLT, 0).code()

@@ -320,7 +320,7 @@
    <item>
     <widget class="QGroupBox" name="groupBox_show_HGTD">
      <property name="title">
-      <string>HGTD parts/components</string>
+      <string>HGTD geometry groups</string>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_7">
       <item>
@@ -330,10 +330,10 @@
         <item>
          <widget class="QCheckBox" name="checkBox_HGTD_Flex">
           <property name="toolTip">
-           <string>Show HGTD flex package and flex tubes</string>
+           <string>Show HGTD module components: sensors, inactive LGAD, ASIC, hybrid, flex and glue volumes</string>
           </property>
           <property name="text">
-           <string>Flex</string>
+           <string>Modules</string>
           </property>
           <property name="checked">
            <bool>true</bool>
@@ -343,10 +343,10 @@
         <item>
          <widget class="QCheckBox" name="checkBox_HGTD_Hybrid">
           <property name="toolTip">
-           <string>Show HGTD hybrid volumes</string>
+           <string>Show HGTD services and electronics volumes</string>
           </property>
           <property name="text">
-           <string>Hybrid</string>
+           <string>Services / electronics</string>
           </property>
           <property name="checked">
            <bool>true</bool>
@@ -355,6 +355,9 @@
         </item>
         <item>
          <widget class="QCheckBox" name="checkBox_HGTD_Glue">
+          <property name="visible">
+           <bool>false</bool>
+          </property>
           <property name="toolTip">
            <string>Show HGTD glue volumes</string>
           </property>
@@ -368,6 +371,9 @@
         </item>
         <item>
          <widget class="QCheckBox" name="checkBox_HGTD_Sensors">
+          <property name="visible">
+           <bool>false</bool>
+          </property>
           <property name="toolTip">
            <string>Show HGTD silicon sensor volumes</string>
           </property>
@@ -381,6 +387,9 @@
         </item>
         <item>
          <widget class="QCheckBox" name="checkBox_HGTD_Inactive">
+          <property name="visible">
+           <bool>false</bool>
+          </property>
           <property name="toolTip">
            <string>Show HGTD inactive LGAD volumes</string>
           </property>
@@ -394,6 +403,9 @@
         </item>
         <item>
          <widget class="QCheckBox" name="checkBox_HGTD_ASIC">
+          <property name="visible">
+           <bool>false</bool>
+          </property>
           <property name="toolTip">
            <string>Show HGTD ASIC volumes</string>
           </property>
@@ -412,10 +424,10 @@
         <item>
          <widget class="QCheckBox" name="checkBox_HGTD_SupportPlate">
           <property name="toolTip">
-           <string>Show HGTD support plate volumes</string>
+           <string>Show HGTD support structure volumes</string>
           </property>
           <property name="text">
-           <string>Support plate</string>
+           <string>Support structure</string>
           </property>
           <property name="checked">
            <bool>true</bool>
@@ -425,10 +437,10 @@
         <item>
          <widget class="QCheckBox" name="checkBox_HGTD_FrontCover">
           <property name="toolTip">
-           <string>Show HGTD front cover volumes</string>
+           <string>Show HGTD cover volumes</string>
           </property>
           <property name="text">
-           <string>Front cover</string>
+           <string>Covers</string>
           </property>
           <property name="checked">
            <bool>true</bool>
@@ -437,6 +449,9 @@
         </item>
         <item>
          <widget class="QCheckBox" name="checkBox_HGTD_BackCover">
+          <property name="visible">
+           <bool>false</bool>
+          </property>
           <property name="toolTip">
            <string>Show HGTD back cover volumes</string>
           </property>
@@ -451,10 +466,10 @@
         <item>
          <widget class="QCheckBox" name="checkBox_HGTD_ModeratorIn">
           <property name="toolTip">
-           <string>Show HGTD inner moderator volumes</string>
+           <string>Show HGTD moderator volumes</string>
           </property>
           <property name="text">
-           <string>Moderator in</string>
+           <string>Moderator</string>
           </property>
           <property name="checked">
            <bool>true</bool>
@@ -463,6 +478,9 @@
         </item>
         <item>
          <widget class="QCheckBox" name="checkBox_HGTD_ModeratorOut">
+          <property name="visible">
+           <bool>false</bool>
+          </property>
           <property name="toolTip">
            <string>Show HGTD outer moderator volumes</string>
           </property>
@@ -476,6 +494,9 @@
         </item>
         <item>
          <widget class="QCheckBox" name="checkBox_HGTD_OuterRCover">
+          <property name="visible">
+           <bool>false</bool>
+          </property>
           <property name="toolTip">
            <string>Show HGTD outer-radius cover volumes</string>
           </property>

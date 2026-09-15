@@ -28,7 +28,7 @@ rdo_23p0=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/AT
 Reco_tf.py \
     --steering doRAWtoALL \
     --preExec "flags.Trigger.FPGATrackSim.wrapperFileName=None; flags.Trigger.FPGATrackSim.mapsDir='directory_with_map_files'" \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateTracksFlags" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
     --postInclude "FPGATrackSimConfTools.FPGATrackSimAnalysisConfig.FPGATrackSimLogicalHitsProcessAlgCfg" \
     --inputRDOFile ${rdo_23p0} \
     --outputAODFile AOD.root \

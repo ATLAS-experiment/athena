@@ -156,9 +156,7 @@ namespace CP
 
   void SystematicVariation ::
   testInvariant () const
-  {
-    //RCU_INVARIANT (this != 0);
-  }
+  {}
 
 
 

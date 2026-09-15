@@ -17,11 +17,11 @@
 
 // We need the definition of the domain for defining the Database
 #include "PersistentDataModel/Guid.h"
-#include "StorageSvc/DbAccessObj.h"
 #include "StorageSvc/DbDomain.h"
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbContainer.h"
 #include "StorageSvc/DbPrint.h"
+#include "DbAccessObj.h"
 
 // STL include files
 #include <map>
@@ -46,8 +46,6 @@ namespace pool    {
     */
   class DbDatabaseObj : public  DbAccessObj<std::string, DbContainerObj >, public APRMessaging {
   private:
-    /// Reflection class identifier
-    typedef RootType                            TypeH;
     /// Database parameter definition
     typedef std::pair<std::string, std::string>      Parameter;
     /// Database parameter container definition
@@ -88,7 +86,7 @@ namespace pool    {
     /// Map with all cached file properties
     ParamMap                      m_paramMap;
     /// Map with all cached mappings between known reflection classes
-    std::map<TypeH, const DbTypeInfo*> m_classMap;
+    std::map<RootType, const DbTypeInfo*> m_classMap;
     /// Collection of retired database containers
     Containers                    m_retiredConts;
     /// Internal string representation type
@@ -143,7 +141,7 @@ namespace pool    {
     /// Add association link to link container
     StatusCode makeLink(Token* pToken, Token::OID_t& refLink);
     /// Retrieve persistent type information by class handle
-    const DbTypeInfo* objectShape(const TypeH& classH) const;
+    const DbTypeInfo* objectShape(const RootType& classH) const;
     /// Retrieve persistent type information by shape identifier
     const DbTypeInfo* objectShape(const Guid& nam) const;
     /// Retrieve persistent type information by container

@@ -13,8 +13,8 @@ export ATHENA_CORE_NUMBER=1
 Reco_tf.py \
   --preExec "flags.Exec.FPE=-1; \
        from ActsConfig.ActsConfigFlags import SeedingStrategy; \
-       flags.Acts.SeedingStrategy=SeedingStrategy.GbtsFtf;" \
-  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsProductionFlags" \
+       flags.Tracking.ITkActsPass.PixelSeedingStrategy=SeedingStrategy.GbtsFtf;" \
+  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
   --conditionsTag ${conditions_tag} \
   --ignorePatterns "${ignore_pattern}" \
   --inputRDOFile ${input_rdo} \

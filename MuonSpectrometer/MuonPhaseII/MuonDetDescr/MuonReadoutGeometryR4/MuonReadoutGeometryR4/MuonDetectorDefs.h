@@ -48,7 +48,7 @@ namespace MuonGMR4 {
     namespace detail {
         /** @brief Returns the rotation matrix from the readout element coordinate system
           *         into the AMDB coordinate system */
-        Amg::Transform3D rotationToAMDB(const ActsTrk::DetectorType type);
+        Amg::Isometry3D rotationToAMDB(const ActsTrk::DetectorType type);
     }
 
     /** @brief Returns whether the parsed type is muon

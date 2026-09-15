@@ -35,7 +35,9 @@ namespace GlobalSim {
 				 const std::unique_ptr<IDataCollector>&, 
 				 const EventContext&) const override;
 
-    virtual StatusCode countPassingTOBs(const EventContext&, unsigned int&) const = 0;
+    virtual StatusCode countPassingTOBs(const EventContext&,
+					const std::unique_ptr<IDataCollector>&, 
+					unsigned int&) const = 0;
 
     // For TIP alg initialize to check for overlaps
     TIPword getFullTIPWord() const override;

@@ -92,10 +92,28 @@ def _t_branches(suffix: str = "t") -> list:
             )
     return result
 
+def _t_FCNC_branches(suffix: str = "t") -> list:
+    """Branches for a top quark undergoing FCNC decay t -> q X, X -> decay1 decay2.
+
+    Sub-particles carry the FSR stage in their prefix so we pass ``stages=()``
+    to avoid appending a spurious stage token to the variable name.
+    For tbar, the q-quark is named 'qbar'.
+    """
+    q_name = "qbar" if suffix == "tbar" else "q"
+    sub_particles = ("X", q_name, "Xdecay1", "Xdecay2")
+    result = _make_particle_branches(suffix)
+    for particle in sub_particles:
+        for stage in ("beforeFSR", "afterFSR"):
+            result += _make_particle_branches(
+                f"{particle}_{stage}_from_{suffix}", stages=()
+            )
+    return result
 
 BRANCHES: dict[str, list[str]] = {
     "t": _t_branches("t"),
     "tbar": _t_branches("tbar"),
+    "t_FCNC": _t_FCNC_branches("t"),
+    "tbar_FCNC": _t_FCNC_branches("tbar"),
     "ttbar": (
         _make_particle_branches("ttbar", include_pdgid=False)
         + _make_particle_branches("ttbar_fromDecay", include_pdgid=False)
@@ -148,6 +166,7 @@ _TTBAR = BRANCHES["t"] + BRANCHES["tbar"] + BRANCHES["ttbar"]
 
 TRUTH_BRANCHES: dict[str, list[str]] = {
     "Ttbar": _TTBAR,
+    "TtbarFCNC": BRANCHES["t_FCNC"] + BRANCHES["tbar_FCNC"] + BRANCHES["ttbar"],
     "Ttbarbbbar": _TTBAR + BRANCHES["b"] + BRANCHES["bbar"],
     "Ttbarccbar": _TTBAR + BRANCHES["c"] + BRANCHES["cbar"],
     "Ttz": _TTBAR + BRANCHES["Z"],

@@ -31,12 +31,13 @@ stdContitModifDic = ldict()
 # This module contains the helper functions needed to instantiate the input container external
 # to Jet domain
 import JetRecConfig.JetInputConfig as inputcfg
+import JetRecConfig.JetRecConfig as jrcfg
 try:
     import JetRecTools.JetRecToolsConfig as jrtcfg
 except ModuleNotFoundError:
     # In some releases JetRecTools is not existing
     pass
-    
+
 try:
     import TrackCaloClusterRecTools.TrackCaloClusterConfig as tcccfg
 except ModuleNotFoundError:
@@ -280,6 +281,14 @@ _stdInputList = [
                      containername = lambda jetdef, specs : (specs or "")+"Kt4"+jetdef.inputdef.label+"EventShape",
                      prereqs = lambda jetdef : ["input:"+jetdef.inputdef.name] # this will force the input to be build *before* the EventDensity alg.
     ),
+
+    # EventDensity calculated from neutral objects only
+    JetInputExternal("EventDensityNeut", "EventShape",
+                     algoBuilder = lambda jetdef,_: inputcfg.buildEventShapeAlg(jetdef, '', suffix='Neut'),
+                     containername = lambda jetdef, specs : (specs or "")+"Kt4"+jetdef.inputdef.label+"NeutEventShape",
+                     prereqs = lambda jetdef : ["input:"+jetdef.inputdef.name+'_Neut']
+    ),
+
     # alternative EventDensity for AntiKt4LCTopo_EleRM jets used for the electron removed tau reconstruction  
     JetInputExternal("EleRM_EventDensity", "EventShape", algoBuilder = inputcfg.buildEventShapeAlg,
                     containername = lambda jetdef, specs : (specs or "")+"Kt4"+jetdef.inputdef.label+"EventShape",
@@ -380,13 +389,18 @@ _stdInputList = [
                      algoBuilder = lambda jdef,_ : tcccfg.runUFOReconstruction(jdef._cflags, stdConstitDic['GPFlowCSSK_inclMuons'])
                      ),
 
-
-
     JetInputExternal("UFO", xAODType.FlowElement,
                      prereqs = ['input:GPFlow'],
                      algoBuilder = lambda jdef,_ : tcccfg.runUFOReconstruction(jdef._cflags, stdConstitDic['GPFlow'])
                      ),
-    
+
+    # PseudoJet algorithm for PFlow objects, filtering out charged objects
+    # Needed as input for the Kt4EMPFlowNeutEventShape algorithm
+    JetInputExternal("GPFlow_Neut", xAODType.FlowElement,
+                     prereqs = ['input:GPFlow'],
+                     algoBuilder = lambda jdef,_ : jrcfg.getConstitPJGAlg(stdConstitDic['GPFlow'], suffix='Neut'),
+    ),
+
 ]
 
 
@@ -458,7 +472,7 @@ _stdSeqList = [
     JetInputConstitSeq("EMPFlow", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'JetETMissParticleFlowObjects', 'CHSParticleFlowObjects'),
 
     # EM-scale particle flow objects with correction to ML cluster scale, with charged hadron subtraction
-    JetInputConstitSeq("GPFlowML", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'GlobalClusterMLCorrectedParticleFlowObjects', 'CHSGlobalClusterMLCorrectedParticleFlowObjects', label = 'EMPFlow',),
+    JetInputConstitSeq("GPFlowML", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'GlobalClusterMLCorrectedParticleFlowObjects', 'CHSGlobalClusterMLCorrectedParticleFlowObjects', label = 'EMPFlowML',),
 
     # GPFlow are the same than EMPFlow except they have pflow linked to elec or muons filtered out.
     JetInputConstitSeq("GPFlow", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'GlobalParticleFlowObjects', 'CHSGParticleFlowObjects',
@@ -481,11 +495,10 @@ _stdSeqList = [
     JetInputConstitSeq("GPFlow_tauSeedEleRM", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'GlobalParticleFlowObjects_tauSeedEleRM', 'CHSGParticleFlowObjects_tauSeedEleRM',
                         label='EMPFlow_tauSeedEleRM'),
 
-
     # Particle Flow Objects with several neutral PFO copies for by-vertex reconstruction
     JetInputConstitSeq("GPFlowByVtx", xAODType.FlowElement, ["CorrectPFO", "CHS"] , 'GlobalParticleFlowObjects', 'CHSByVtxGParticleFlowObjects',
                        label='EMPFlowByVertex', byVertex=True),
-    
+
     # Particle Flow Objects with Constituent Subtraction + SoftKiller
     JetInputConstitSeq("EMPFlowCSSK", xAODType.FlowElement,["CorrectPFO",  "CS","SK", "CHS"] ,
                        'JetETMissParticleFlowObjects', 'CSSKParticleFlowObjects', jetinputtype="EMPFlow"),
@@ -506,7 +519,6 @@ _stdSeqList = [
     JetInputConstitSeq("GPFlowCSSK_inclMuons", xAODType.FlowElement,["CorrectPFO",  "CS","SK", "CHS"] ,
                        'GlobalParticleFlowObjects_inclMuons', 'CSSKGParticleFlowObjects_inclMuons', jetinputtype="EMPFlow", label='EMPFlowCSSK_inclMuons'),
 
-
     JetInputConstit("UFOCSSK", xAODType.FlowElement, "UFOCSSK" ),
 
     JetInputConstit("UFOCSSK_noElectrons", xAODType.FlowElement, "UFOCSSK_noElectrons" ),
@@ -519,7 +531,7 @@ _stdSeqList = [
     JetInputConstit("UFOCSSK_inclMuons", xAODType.FlowElement, "UFOCSSK_inclMuons" ),
 
     JetInputConstit("UFO", xAODType.FlowElement, "UFO" ),
-    
+
     # *****************************
     # Tower (used only as ghosts atm)
     JetInputConstit("Tower", xAODType.CaloCluster, "CaloCalFwdTopoTowers",

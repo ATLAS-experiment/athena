@@ -52,7 +52,7 @@ jet collection, including input collections, ghosts and modifiers.
 
 Standard jet definitions are defined in [StandardSmallRJets.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/Jet/JetRecConfig/python/StandardSmallRJets.py) and  [StandardLargeRJets.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/Jet/JetRecConfig/python/StandardLargeRJets.py). The default small-R jet collection `AntiKt4EMPFlowJets` is defined as follows: 
 
-```
+```python
 AntiKt4EMPFlow = JetDefinition("AntiKt",0.4,cst.GPFlow,
                                ghostdefs=("BHadronsFinal", "Track", "Truth"),
                                modifiers=("Filter:10000","JVT","CaloEnergies","Calib:T0")
@@ -65,12 +65,12 @@ where
 - modifiers: e.g. apply calibration, filter on jets with pT > 10 GeV, calculate JVT, ... , defined in [StandardJetMods.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/Jet/JetRecConfig/python/StandardJetMods.py). More details can be found below on the configuration of JetModifiers.
 
 If working with standard objects, users can simply add these definitions to their configuration:
-```
+```python
 from JetRecConfig.StandardSmallRJets import AntiKt4LCTopo
 acc = JetRecConfig.JetRecCfg(AntiKt4LCTopo)
 ```
 For minor variations (e.g. apply Constituent Subtraction + Soft Killer) , one can copy and modify the standard definitions:
-```
+```python
 from JetRecConfig.StandardSmallRJets import AntiKt4LCTopo
 from JetRecConfig.StandardJetConstits import stdConstitDic as cst
 AntiKt4LCTopoCSSK = AntiKt4LCTopo.clone(inputdef = cst.LCTopoCSSK, modifiers=["Filter:13000"] )
@@ -95,19 +95,19 @@ jet input objects (e.g. tracks) or ghosts (e.g. GhostTracks).
 
 The simplest possible `JetModifier` is one that only needs to produce a default
 tool, e.g.
-```
+```python
 jetsort = JetModifier("JetSorter","jetsort")
 ```
 Another modifier may not need any special configuration, but does require that
 some other mods be run first:
-```
+```python
 jvt = JetModifier("JetVertexTaggerTool", "jvt",
                   prereqs = [ "mod:JVF" ])
 ```
 
 One can pass the properties need for the tool in the ctor of the modifier
 
-```
+```python
 ktdr = JetModifier("KtDeltaRTool", "ktdr", JetRadius = 0.4),
 ```
 
@@ -116,7 +116,7 @@ useful when the property needs to depend on the jet definition to
 which the modifier is attached. The function will be called with 2
 args : the jet definition and a specifier (defaulting to "", see below).
 
-```
+```python
 def _jetname(jetdef,modspec):
     return jetdef.fullname()
 
@@ -127,7 +127,7 @@ A helper function can potentially be provided for the prereqs as well.
 This permits us to build up a dictionary of modifier configurations, keyed by
 strings, so a user can simply set a list of strings describing how they want
 to apply the modifiers, e.g.
-```
+```python
 AntiKt4LCTopo.modifiers = ["Calib:AnalysisLatest:mc","Sort","JVT"]
 ```
 which will first ensure that all tools are called that are needed for
@@ -147,9 +147,9 @@ for those tools live.
 
 `JetInputConstitSeq` is used to define a new jet constituent type that depends on a sequence of algorithms, otherwise `JetInputConstit` can be used. The inputs for the above defined particle flow jets are defined as follows:
 
-```
+```python
 JetInputConstitSeq("EMPFlow", xAODType.FlowElement, ["CorrectPFO", "CHS"],
-                   "JetETMissParticleFlowObjects", ’CHSParticleFlowObjects’)
+                   "JetETMissParticleFlowObjects", "CHSParticleFlowObjects")
 ```
 
 with:
@@ -165,7 +165,7 @@ Some additional examples can be found in these talks: [talk1](https://indico.cer
 ### Instructions
 
 To run:
-```
+```shell
 cd $MYWORKDIR
 mkdir run
 cd run

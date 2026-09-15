@@ -197,6 +197,9 @@ StatusCode SmoothedWZTagger::initialize() {
     renounce(m_decValidEventContentKey);
     renounce(m_decPassNtrkKey);
     renounce(m_decCutNtrkKey);
+    renounce(m_decValidKinRangeKey);
+    renounce(m_decCutScoreKey);
+    renounce(m_decPassScoreKey);
   }
 #endif
   
@@ -254,6 +257,7 @@ StatusCode SmoothedWZTagger::decorate( const xAOD::JetContainer& jets ) const {
     float jet_mass = jet -> m()/1000.0;
 
     /// Get D2 value
+    //coverity[UNNECESSARY_STRING_COPY:FALSE]
     static const SG::AuxElement::ConstAccessor<float> D2("D2");
     float jet_d2 = D2(*jet);
 

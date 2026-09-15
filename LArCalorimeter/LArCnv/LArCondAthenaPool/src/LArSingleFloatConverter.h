@@ -50,7 +50,7 @@ LArSingleFloatSubset_p1* LArSingleFloatConverter<TransientClass>::createPersiste
 
 template<class TransientClass>
 LArConditionsSubset<LArSingleFloatP>* LArSingleFloatConverter<TransientClass>::createTransientSingleFloat (const Token* token) {
-  static const pool::Guid p1_guid("85C3E380-4F5C-4F2B-81F0-D7C08A446800");
+  static const Guid p1_guid("85C3E380-4F5C-4F2B-81F0-D7C08A446800");
   if(this->compareClassGuid(token,p1_guid) ) {
     MsgStream log(this->msgSvc(), "LArSingleFloatCompleteCnv" );
     LArSingleFloatSubset_p1* p;

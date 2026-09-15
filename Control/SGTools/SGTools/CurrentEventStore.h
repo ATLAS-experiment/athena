@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file SGTools/CurrentEventStore.h
  * @author scott snyder <snyder@bnl.gov>
@@ -40,10 +37,6 @@ public:
   static IProxyDict* store();
 
 
-  /// Fetch the current store (out-of-line version).
-  static IProxyDict* storeOol();
-
-
   /// Set the current store.
   /// Returns the previous store.
   static IProxyDict* setStore (IProxyDict* store);
@@ -66,6 +59,10 @@ public:
 
 
 private:
+  /// Update the current EventContext to reference store.
+  static void storeToCtx (IProxyDict* store);
+
+
   /// The current event store.
   static thread_local IProxyDict* m_curStore;
 };

@@ -48,7 +48,7 @@ IParticleLinkContainer* IParticleLinkContainerCnv::createTransient(const Token* 
   MsgStream log( msgSvc(), "IParticleLinkContainerConverter" );
 
   // Define the pool IDs
-  static const pool::Guid  p1_guid("E82C71AF-AC5C-453B-9A35-FA45A849838E");
+  static const Guid  p1_guid("E82C71AF-AC5C-453B-9A35-FA45A849838E");
 
   if( compareClassGuid(token, p1_guid) )
     {

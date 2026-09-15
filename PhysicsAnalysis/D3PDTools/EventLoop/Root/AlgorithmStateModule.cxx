@@ -97,6 +97,11 @@ namespace EL
     StatusCode AlgorithmStateModule ::
     onCloseInputFile (ModuleData& data)
     {
+      // beginInputFile is skipped for files without events (see
+      // onNewInputFile), so skip the matching endInputFile as well to keep
+      // the calls paired.
+      if (!data.m_hasInputEvents) return StatusCode::SUCCESS;
+
       return forAllAlgorithms (msg(), data, "endInputFile", [&] (AlgorithmData& alg) {
           return alg->endInputFile ();});
     }
@@ -151,7 +156,7 @@ namespace EL
           }
 
           algData.m_executeCount += 1;
-          if (algData.m_algorithm->execute(ctx) == StatusCode::FAILURE)
+          if (algData.m_algorithm->execute(ctx).isFailure())
           {
             ANA_MSG_ERROR ("while calling execute() on algorithm " << algData.m_algorithm->getName());
             return StatusCode::FAILURE;
@@ -184,7 +189,7 @@ namespace EL
             algData.m_wasSkipped = false;
             continue;
           }
-          if (algData.m_algorithm->postExecute() == StatusCode::FAILURE)
+          if (algData.m_algorithm->postExecute().isFailure())
           {
             ANA_MSG_ERROR ("while calling postExecute() on algorithm " << algData.m_algorithm->getName());
             return StatusCode::FAILURE;

@@ -127,7 +127,7 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr, 
     ATH_MSG_INFO("Keys for Muon Switches are  (key) " << detectorKey << " (node) " << detectorNode);
 
     std::string tempLayout = m_layout;
-    std::map<std::string, std::string> altAsciiDBMap{};
+    std::map<std::string, std::string,std::less<>> altAsciiDBMap{};
 
     
     // Get the detector configuration.

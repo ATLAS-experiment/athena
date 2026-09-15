@@ -5,8 +5,8 @@
 #include "ImplicitCollectionIterator.h"
 #include "CollectionSvc/CollectionDescription.h"
 
-#include "PersistencySvc/IContainer.h"
-#include "PersistencySvc/ITokenIterator.h"
+#include "PoolSvc/IContainer.h"
+#include "PoolSvc/ITokenIterator.h"
 
 #include "PersistentDataModel/Token.h"
 
@@ -37,10 +37,10 @@ pool::ImplicitCollectionIterator::next()
 }
 
 
-Token*
-pool::ImplicitCollectionIterator::token() const
+const Token&
+pool::ImplicitCollectionIterator::eventRef() const
 {
-  return m_token;
+  return *m_token;
 }
 
 const pool::CollectionRowBuffer&

@@ -1,24 +1,30 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaCommon.Constants import INFO
+from AthenaCommon.Constants import INFO, WARNING
 
 
-def MainServicesMiniCfg(flags, loopMgr='AthenaEventLoopMgr', masterSequence='AthAlgSeq'):
-    """Mininmal basic config, just good enough for HelloWorld and alike"""
-    cfg = ComponentAccumulator(CompFactory.AthSequencer(masterSequence, Sequential=True))
+def AppMgrCfg(flags):
+    """Top-level CA with TopAlg and ApplicationMgr settings"""
+
+    topSeq = CompFactory.AthSequencer('AthMasterSeq', Sequential=True)
+    cfg = ComponentAccumulator(sequence=topSeq)
     cfg.setAsTopLevel()
-    cfg.setAppProperty('TopAlg',['AthSequencer/'+masterSequence])
-    cfg.setAppProperty('MessageSvcType', 'MessageSvc')
-    cfg.setAppProperty('EventLoop', loopMgr)
-    cfg.setAppProperty('ExtSvcCreates', 'False')
-    cfg.setAppProperty('JobOptionsSvcType', 'JobOptionsSvc')
+
+    # AppMgr properties:
+    cfg.setAppProperty('AuditAlgorithms', True)
+    cfg.setAppProperty('InitializationLoopCheck', False)
+    cfg.setAppProperty('ExtSvcCreates', False)
     cfg.setAppProperty('JobOptionsType', 'NONE')
-    cfg.setAppProperty('JobOptionsPostAction', '')
-    cfg.setAppProperty('JobOptionsPreAction', '')
+    cfg.setAppProperty('EvtMax', flags.Exec.MaxEvents)
+    cfg.setAppProperty('TopAlg', [topSeq.getFullJobOptName()])
     cfg.setAppProperty('PrintAlgsSequence', flags.Exec.PrintAlgsSequence)
-    if flags.Debug.NameAuditor:
-        cfg.addAuditor(CompFactory.NameAuditor())
+    cfg.setAppProperty('OutputLevel', flags.Exec.OutputLevel)
+
+    if flags.Exec.OutputLevel > INFO:
+        # this turns off the AppMgr splash
+        cfg.setAppProperty('AppName', '')
+
     if flags.Exec.StopOnSignal:
         cfg.setAppProperty("StopOnSignal", True)
         cfg.addService(CompFactory.Gaudi.Utils.StopSignalHandler(Signals=flags.Exec.StopOnSignal))
@@ -68,6 +74,8 @@ def OutputUsageIgnoreCfg(flags, algorithm):
 def AthenaEventLoopMgrCfg(flags):
     cfg = ComponentAccumulator()
     elmgr = CompFactory.AthenaEventLoopMgr(EventPrintoutInterval = flags.Exec.EventPrintoutInterval)
+    cfg.setAppProperty('EventLoop', elmgr.name)
+
     if flags.Input.OverrideRunNumber:
         from AthenaKernel.EventIdOverrideConfig import EvtIdModifierSvcCfg
         elmgr.EvtIdModifierSvc = cfg.getPrimaryAndMerge( EvtIdModifierSvcCfg(flags) )
@@ -114,10 +122,9 @@ def MPIHiveEventLoopMgrCfg(flags):
         SchedulerSvc=scheduler.getName(),
         FirstEventIndex=flags.Exec.SkipEvents,
     )
+    cfg.setAppProperty('EventLoop', elmgr.name)
 
-    from AthenaServices.OutputStreamSequencerSvcConfig import (
-        OutputStreamSequencerSvcCfg,
-    )
+    from AthenaServices.OutputStreamSequencerSvcConfig import OutputStreamSequencerSvcCfg
 
     cfg.merge(
         OutputStreamSequencerSvcCfg(
@@ -126,7 +133,6 @@ def MPIHiveEventLoopMgrCfg(flags):
     )
     if flags.Input.OverrideRunNumber:
         from AthenaKernel.EventIdOverrideConfig import EvtIdModifierSvcCfg
-
         elmgr.EvtIdModifierSvc = cfg.getPrimaryAndMerge(EvtIdModifierSvcCfg(flags)).name
 
     if flags.Common.isOverlay and not flags.Overlay.DataOverlay:
@@ -136,6 +142,7 @@ def MPIHiveEventLoopMgrCfg(flags):
     cfg.addService(elmgr)
 
     return cfg
+
 
 def AthenaHiveEventLoopMgrCfg(flags):
     cfg = ComponentAccumulator()
@@ -153,6 +160,8 @@ def AthenaHiveEventLoopMgrCfg(flags):
         SchedulerSvc = scheduler.getName(),
         EventPrintoutInterval = flags.Exec.EventPrintoutInterval)
 
+    cfg.setAppProperty('EventLoop', elmgr.name)
+
     if flags.Input.OverrideRunNumber:
         from AthenaKernel.EventIdOverrideConfig import EvtIdModifierSvcCfg
         elmgr.EvtIdModifierSvc = cfg.getPrimaryAndMerge(EvtIdModifierSvcCfg(flags))
@@ -165,12 +174,16 @@ def AthenaHiveEventLoopMgrCfg(flags):
 
     return cfg
 
+
 def AthenaMpEventLoopMgrCfg(flags):
     cfg = ComponentAccumulator()
     if flags.Common.isOverlay and not flags.Overlay.DataOverlay:
-        elmgr = CompFactory.AthenaEventLoopMgr(EventPrintoutInterval = flags.Exec.EventPrintoutInterval)
-        elmgr.RequireInputAttributeList = True
-        elmgr.UseSecondaryEventNumber = True
+        # Configure the AthenaEventLoopMgr, which is used by AthMpEvtLoopMgr,
+        # but do NOT set it as the main EventLoopMgr:
+        elmgr = CompFactory.AthenaEventLoopMgr(
+            EventPrintoutInterval = flags.Exec.EventPrintoutInterval,
+            RequireInputAttributeList = True,
+            UseSecondaryEventNumber = True)
         cfg.addService( elmgr )
 
     from AthenaMP.AthenaMPConfig import AthenaMPCfg
@@ -198,6 +211,9 @@ def AthenaMtesEventLoopMgrCfg(flags, mtEs=False, channel=''):
         EventRangeChannel = channel,
         EventPrintoutInterval = flags.Exec.EventPrintoutInterval)
 
+    if mtEs:
+        cfg.setAppProperty('EventLoop', elmgr.name)
+
     if flags.Input.OverrideRunNumber:
         from AthenaKernel.EventIdOverrideConfig import EvtIdModifierSvcCfg
         elmgr.EvtIdModifierSvc = cfg.getPrimaryAndMerge(EvtIdModifierSvcCfg(flags))
@@ -217,32 +233,37 @@ def AthenaMtesEventLoopMgrCfg(flags, mtEs=False, channel=''):
     return cfg
 
 
+def PyAthenaEventLoopMgrCfg(flags):
+    cfg = ComponentAccumulator()
+    cfg.setAppProperty('EventLoop', "PyAthenaEventLoopMgr")
+    return cfg
+
+
 def MessageSvcCfg(flags):
     cfg = ComponentAccumulator()
-    msgsvc = CompFactory.MessageSvc()
-    msgsvc.OutputLevel = flags.Exec.OutputLevel
-    msgsvc.Format = "% F%{:d}W%C%7W%R%T %0W%M".format(flags.Common.MsgSourceLength)
-    msgsvc.enableSuppression = flags.Common.MsgSuppression
-    if flags.Common.ShowMsgStats:
-        msgsvc.showStats = True
-        from AthenaCommon.Constants import WARNING
-        msgsvc.statLevel = WARNING
+    defaultLimit = 500
 
+    msgsvc = CompFactory.MessageSvc(
+        OutputLevel = flags.Exec.OutputLevel,
+        Format = (f"% F%{flags.Common.MsgSourceLength}W%C%6W%R%e%s%8W%R%T %0W%M" if flags.Concurrency.NumThreads>0 else
+                  f"% F%{flags.Common.MsgSourceLength}W%C%7W%R%T %0W%M"),
+        enableSuppression = flags.Common.MsgSuppression,
+        showStats = flags.Common.ShowMsgStats,
+        statLevel = WARNING,
+        # Disable suppression limit if we are debugging components
+        verboseLimit = 0 if flags.Exec.VerboseMessageComponents else defaultLimit,
+        debugLimit = 0 if flags.Exec.DebugMessageComponents else defaultLimit,
+        infoLimit = 0 if flags.Exec.InfoMessageComponents else defaultLimit,
+        warningLimit = 0 if flags.Exec.WarningMessageComponents else defaultLimit,
+        errorLimit = 0 if flags.Exec.ErrorMessageComponents else defaultLimit,
+    )
+
+    # Temporary to match legacy configuration for serial simulation/digitization/overlay jobs (FIXME)
     from AthenaConfiguration.Enums import ProductionStep
-    if flags.Common.ProductionStep not in [ProductionStep.Default, ProductionStep.Reconstruction, ProductionStep.Derivation]:
-        msgsvc.Format = "% F%18W%S%7W%R%T %0W%M" # Temporary to match legacy configuration for serial simulation/digitization/overlay jobs
-    if flags.Concurrency.NumThreads>0:
-        msgsvc.Format = "% F%{:d}W%C%6W%R%e%s%8W%R%T %0W%M".format(flags.Common.MsgSourceLength)
-    if flags.Exec.VerboseMessageComponents:
-        msgsvc.verboseLimit=0
-    if flags.Exec.DebugMessageComponents:
-        msgsvc.debugLimit=0
-    if flags.Exec.InfoMessageComponents:
-        msgsvc.infoLimit=0
-    if flags.Exec.WarningMessageComponents:
-        msgsvc.warningLimit=0
-    if flags.Exec.ErrorMessageComponents:
-        msgsvc.errorLimit=0
+    if flags.Common.ProductionStep not in (ProductionStep.Default,
+                                           ProductionStep.Reconstruction,
+                                           ProductionStep.Derivation):
+        msgsvc.Format = "% F%18W%S%7W%R%T %0W%M"
 
     cfg.addService(msgsvc)
     return cfg
@@ -251,10 +272,12 @@ def MessageSvcCfg(flags):
 def addMainSequences(flags, cfg):
     """Add the standard sequences to cfg"""
 
+    topSeqName = cfg.getSequence().name  # usually AthMasterSeq
+
     # Build standard sequences:
     AthSequencer = CompFactory.AthSequencer
-    cfg.addSequence(AthSequencer('AthAlgEvtSeq', Sequential=True, StopOverride=True), parentName='AthMasterSeq')
-    cfg.addSequence(AthSequencer('AthOutSeq', StopOverride=True), parentName='AthMasterSeq')
+    cfg.addSequence(AthSequencer('AthAlgEvtSeq', Sequential=True, StopOverride=True), parentName=topSeqName)
+    cfg.addSequence(AthSequencer('AthOutSeq', StopOverride=True), parentName=topSeqName)
 
     cfg.addSequence(AthSequencer('AthBeginSeq', Sequential=True), parentName='AthAlgEvtSeq')
     cfg.addSequence(AthSequencer('AthAllAlgSeq', StopOverride=True), parentName='AthAlgEvtSeq')
@@ -297,10 +320,10 @@ def addMainSequences(flags, cfg):
 
     # Should be after all other algorithms:
     cfg.addEventAlgo(AthIncFirerAlg('EndAlgorithmsFiringAlg', FireSerial=False, Incidents=['EndAlgorithms']),
-                     sequenceName="AthMasterSeq")
+                     sequenceName=topSeqName)
 
     cfg.addEventAlgo(IncidentProcAlg('IncidentProcAlg3'),
-                     sequenceName="AthMasterSeq")
+                     sequenceName=topSeqName)
 
     cfg.flagPerfmonDomain(previousPerfmonDomain)
 
@@ -316,45 +339,29 @@ def addEvgenSequences(flags, cfg):
     cfg.addSequence(EvgenSequenceFactory(EvgenSequence.Post), parentName=EvgenSequence.Main.value)
 
 
-def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
+def MainServicesCfg(flags, createEventLoopMgr=True):
+    """Configuration of main services. An appropriate EventLoopMgr is configured (MT/MP/etc).
+    If you have configured your own EventLoopMgr set createEventLoopMgr to False."""
+
     # Set the Python OutputLevel on the root logger
     from AthenaCommon.Logging import log
     log.setLevel(flags.Exec.OutputLevel)
 
-    if flags.Exec.Interactive == "run":
-        LoopMgr="PyAthenaEventLoopMgr"
-        log.info("Interactive mode, switching to %s", LoopMgr)
-    else:
-        # Guard incorrect MPI configurations
-        if flags.Exec.MPI:
-            # start msg here but don't use it if config is OK
-            msg = "ERRONEOUS CONFIGURATION FOR MPI:\n"
-            OK = True
-            if flags.Concurrency.NumThreads < 1:
-                msg = f"{msg} - Concurrency.NumThreads = {flags.Concurrency.NumThreads}, must be >= 1\n"
-                OK = False
-            if flags.Concurrency.NumProcs > 0:
-                msg = f"{msg} - Concurrency.NumProcs = {flags.Concurrency.NumProcs}, must be 0\n"
-                OK = False
-            if not OK:
-                raise Exception(msg)
-        # Run a serial job for threads=0
-        if flags.Concurrency.NumThreads > 0:
-            if flags.Concurrency.NumConcurrentEvents==0:
-                raise Exception("Requested Concurrency.NumThreads>0 and Concurrency.NumConcurrentEvents==0, "
-                                "which will not process events!")
-            if flags.Exec.MTEventService:
-                LoopMgr = "AthenaMtesEventLoopMgr"
-            elif flags.Exec.MPI:
-                LoopMgr = "MPIHiveEventLoopMgr"
-            else:
-                LoopMgr = "AthenaHiveEventLoopMgr"
-
+    # Guard incorrect configurations
+    if flags.Exec.MPI:
+        if flags.Concurrency.NumThreads < 1:
+            raise Exception("Erroneous configuration for MPI: "
+                            f"Concurrency.NumThreads = {flags.Concurrency.NumThreads}, must be >= 1")
         if flags.Concurrency.NumProcs > 0:
-            LoopMgr = "AthMpEvtLoopMgr"
+            raise Exception("Erroneous configuration for MPI: "
+                            f"Concurrency.NumProcs = {flags.Concurrency.NumProcs}, must be 0")
 
-    # Core components needed for serial and threaded jobs:
-    cfg = MainServicesMiniCfg(flags, loopMgr=LoopMgr, masterSequence='AthMasterSeq')
+    if flags.Concurrency.NumThreads > 0 and flags.Concurrency.NumConcurrentEvents==0:
+        raise Exception("Requested Concurrency.NumThreads>0 and Concurrency.NumConcurrentEvents==0, "
+                        "which will not process events!")
+
+    # Top-level CA with ApplicationMgr settings
+    cfg = AppMgrCfg(flags)
 
     # Main sequences and incident handling:
     addMainSequences(flags, cfg)
@@ -372,8 +379,11 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
 
     cfg.merge(MessageSvcCfg(flags))
 
-    from AthenaConfiguration.FPEAndCoreDumpConfig import FPEAndCoreDumpCfg
+    from AthenaServices.FPEAndCoreDumpConfig import FPEAndCoreDumpCfg
     cfg.merge(FPEAndCoreDumpCfg(flags))
+
+    if flags.Debug.NameAuditor:
+        cfg.addAuditor(CompFactory.NameAuditor())
 
     # Avoid stack traces to the exception handler. These traces
     # aren't very useful since they just point to the handler, not
@@ -386,22 +396,10 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
     # hardware with differing cache sizes.
     cfg.addService(CompFactory.AthEnvironmentSvc(), create=True)
 
-    # ApplicationMgr properties:
-    cfg.setAppProperty('AuditAlgorithms', True)
-    cfg.setAppProperty('InitializationLoopCheck', False)
-    cfg.setAppProperty('EvtMax', flags.Exec.MaxEvents)
-    if flags.Exec.OutputLevel > INFO:
-        # this turns off the appMgr spalsh
-        cfg.setAppProperty('AppName', '')
-    cfg.setAppProperty('OutputLevel', flags.Exec.OutputLevel)
-
     if flags.Exec.DebugStage != "":
         cfg.setDebugStage(flags.Exec.DebugStage)
 
-    cfg.interactive=flags.Exec.Interactive
-
-    if flags.Concurrency.NumProcs > 0:
-        cfg.merge(AthenaMpEventLoopMgrCfg(flags))
+    cfg.interactive = flags.Exec.Interactive
 
     # Timeout
     if flags.Exec.EventTimeOut > 0:
@@ -411,17 +409,29 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
             DumpSchedulerState = False)
         cfg.addEventAlgo(timeoutAlg, sequenceName='AthBeginSeq')
 
-    # Additional components needed for threaded jobs only:
-    if flags.Concurrency.NumThreads > 0:
+    # Configure EventLoopMgr:
+    if flags.Exec.Interactive == "run":
+        cfg.merge(PyAthenaEventLoopMgrCfg(flags))
+        log.info("Interactive mode, switching to PyAthenaEventLoopMgr")
+
+    elif flags.Concurrency.NumProcs > 0:
+        cfg.merge(AthenaMpEventLoopMgrCfg(flags))
+
+    elif createEventLoopMgr is False:
+        pass  # the user will have to configure one
+
+    elif flags.Concurrency.NumThreads > 0:
+        # Setup SGCommitAuditor to sweep new DataObjects at end of Alg execute
+        cfg.addAuditor( CompFactory.SGCommitAuditor() )
+
         if flags.Exec.MTEventService:
             cfg.merge(AthenaMtesEventLoopMgrCfg(flags,True,flags.Exec.MTEventServiceChannel))
         elif flags.Exec.MPI:
             cfg.merge(MPIHiveEventLoopMgrCfg(flags))
         else:
             cfg.merge(AthenaHiveEventLoopMgrCfg(flags))
-        # Setup SGCommitAuditor to sweep new DataObjects at end of Alg execute
-        cfg.addAuditor( CompFactory.SGCommitAuditor() )
-    elif LoopMgr == 'AthenaEventLoopMgr':
+
+    elif flags.Concurrency.NumThreads == 0:
         cfg.merge(AthenaEventLoopMgrCfg(flags))
 
     # Performance monitoring and profiling:
@@ -440,7 +450,7 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
     return cfg
 
 
-def MainEvgenServicesCfg(flags, LoopMgr="AthenaEventLoopMgr", withSequences=True):
+def MainEvgenServicesCfg(flags, withSequences=True):
     """ComponentAccumulator-based equivalent of:
     import AthenaCommon.AtlasUnixGeneratorJob
 
@@ -448,7 +458,7 @@ def MainEvgenServicesCfg(flags, LoopMgr="AthenaEventLoopMgr", withSequences=True
     flags.Input.TimeStamps before calling to avoid
     attempted auto-configuration from an input file.
     """
-    cfg = MainServicesCfg(flags, LoopMgr)
+    cfg = MainServicesCfg(flags)
     if not flags.Input.Files:
         from McEventSelector.McEventSelectorConfig import McEventSelectorCfg
         cfg.merge(McEventSelectorCfg(flags))
@@ -464,16 +474,3 @@ def JobOptionsDumpCfg(flags, fileName="JobOptsConfig.txt"):
     acc = ComponentAccumulator()
     acc.addService(CompFactory.JobOptionsSvc(DUMPFILE=fileName))
     return acc
-
-
-if __name__=="__main__":
-    from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    flags = initConfigFlags()
-    try:
-        flags.Input.RunNumbers = [284500] # Set to either MC DSID or MC Run Number
-        flags.Input.TimeStamps = [1] # dummy value
-        cfg = MainEvgenServicesCfg(flags, withSequences=True)
-    except ModuleNotFoundError:
-        #  The McEventSelector package required by MainEvgenServicesCfg is not part of the AthAnalysis project
-        cfg = MainServicesCfg(flags)
-    cfg.wasMerged()   # to avoid errror that CA was not merged

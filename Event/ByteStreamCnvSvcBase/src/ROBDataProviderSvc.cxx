@@ -82,197 +82,181 @@
 //
 //===================================================================
 
-// Include files.
 #include "ByteStreamCnvSvcBase/ROBDataProviderSvc.h"
 #include "eformat/Status.h"
 
-// Constructor.
-ROBDataProviderSvc::ROBDataProviderSvc(const std::string& name, ISvcLocator* svcloc)
-  : base_class(name, svcloc) {}
+#include <algorithm>
 
 
-// Initialization
+/// Initialization.
 StatusCode ROBDataProviderSvc::initialize() {
    ATH_MSG_INFO("Initializing");
-   m_eventsCache = SG::SlotSpecificObj<EventCache>( SG::getNSlots() );
-   
-   for (unsigned int i = 0; i < m_filterRobWithStatus.value().size(); i++) {
-      eformat::helper::SourceIdentifier tmpsrc(m_filterRobWithStatus.value()[i].first);
-      if (tmpsrc.human_detector() != "UNKNOWN") {
-         m_filterRobMap[tmpsrc.code()].push_back(m_filterRobWithStatus.value()[i].second);
+
+   for (const auto& [srcid, status] : m_filterRobWithStatus) {
+      eformat::helper::SourceIdentifier src(srcid);
+      if (src.human_detector() != "UNKNOWN") {
+         m_filterRobMap[src.code()].push_back(status);
       }
    }
-   for (unsigned int i = 0; i < m_filterSubDetWithStatus.value().size(); i++) {
-      eformat::helper::SourceIdentifier tmpsrc((eformat::SubDetector)m_filterSubDetWithStatus.value()[i].first, 0);
-      if (tmpsrc.human_detector() != "UNKNOWN") {
-         m_filterSubDetMap[tmpsrc.subdetector_id()].push_back(m_filterSubDetWithStatus.value()[i].second);
+   for (const auto& [subdet, status] : m_filterSubDetWithStatus) {
+      eformat::helper::SourceIdentifier src(static_cast<eformat::SubDetector>(subdet), 0);
+      if (src.human_detector() != "UNKNOWN") {
+         m_filterSubDetMap[src.subdetector_id()].push_back(status);
       }
    }
-   ATH_MSG_INFO(" ---> Filter out empty ROB fragments                               = " << m_filterEmptyROB);
-   ATH_MSG_INFO(" ---> Filter out specific ROBs by Status Code: # ROBs = " << m_filterRobMap.size());
-   for (const auto& p : m_filterRobMap) {
-      eformat::helper::SourceIdentifier tmpsrc(p.first);
-      ATH_MSG_INFO("      RobId=0x" << MSG::hex << p.first << " -> in Sub Det = " << tmpsrc.human_detector());
-      for (uint32_t status : p.second) {
+   ATH_MSG_INFO("---> Filter out empty ROB fragments = " << std::boolalpha << m_filterEmptyROB.value());
+   ATH_MSG_INFO("---> Filter out specific ROBs by Status Code: # ROBs = " << m_filterRobMap.size());
+
+   for (const auto& [id, status_vec] : m_filterRobMap) {
+      eformat::helper::SourceIdentifier src(id);
+      ATH_MSG_INFO("      RobId=0x" << MSG::hex << id << " -> in Sub Det = " << src.human_detector());
+      for (uint32_t status : status_vec) {
          eformat::helper::Status tmpstatus(status);
          ATH_MSG_INFO("         Status Code=0x"
-	         << MSG::hex << std::setfill( '0' ) << std::setw(8) << tmpstatus.code()
-	         << " Generic Part=0x" << std::setw(4) << tmpstatus.generic()
-	         << " Specific Part=0x" << std::setw(4) << tmpstatus.specific());
+                      << MSG::hex << std::setfill( '0' ) << std::setw(8) << tmpstatus.code()
+                      << " Generic Part=0x" << std::setw(4) << tmpstatus.generic()
+                      << " Specific Part=0x" << std::setw(4) << tmpstatus.specific());
       }
    }
 
-   ATH_MSG_INFO(" ---> Filter out Sub Detector ROBs by Status Code: # Sub Detectors = " << m_filterSubDetMap.size());
-   for (const auto& p : m_filterSubDetMap) {
-      eformat::helper::SourceIdentifier tmpsrc(p.first, 0);
-      ATH_MSG_INFO("      SubDetId=0x" << MSG::hex << p.first << " -> " << tmpsrc.human_detector());
-      for (uint32_t status : p.second) {
+   ATH_MSG_INFO("---> Filter out Sub Detector ROBs by Status Code: # Sub Detectors = " <<
+                m_filterSubDetMap.size());
+
+   for (const auto& [det, status_vec] : m_filterSubDetMap) {
+      eformat::helper::SourceIdentifier src(det, 0);
+      ATH_MSG_INFO("      SubDetId=0x" << MSG::hex << det << " -> " << src.human_detector());
+      for (uint32_t status : status_vec) {
          eformat::helper::Status tmpstatus(status);
-         ATH_MSG_INFO("         Status Code=0x"
-	         << MSG::hex << std::setfill( '0' ) << std::setw(8) << tmpstatus.code()
-	         << " Generic Part=0x" << std::setw(4) << tmpstatus.generic()
-	         << " Specific Part=0x" << std::setw(4) << tmpstatus.specific());
+         ATH_MSG_INFO("         Status Code=0x" <<
+                      MSG::hex << std::setfill( '0' ) << std::setw(8) << tmpstatus.code() <<
+                      " Generic Part=0x" << std::setw(4) << tmpstatus.generic() <<
+                      " Specific Part=0x" << std::setw(4) << tmpstatus.specific());
       }
    }
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 
 
-/** - add a new Raw event
-    - rebuild the map
-*/
-void ROBDataProviderSvc::setNextEvent( const EventContext& context, const RawEvent* re ) {
-  EventCache* cache = m_eventsCache.get( context );
-  
+/// Add a new RAW event and rebuild map.
+void ROBDataProviderSvc::setNextEvent( const EventContext& ctx, const RawEvent* re ) {
+
+   EventCache* cache = m_eventsCache.get(ctx);
+   // assign the event
    cache->event=re;
    // clear the old map
-   robmapClear( cache->robmap );
+   cache->robmap.clear();
    // set the LVL1 id
    cache->currentLvl1ID = re->lvl1_id();
 
    // loop over all ROBs
    auto iter = re->child_iter();
    while (OFFLINE_FRAGMENTS_NAMESPACE::PointerType fp = iter.next()) {
-      // add to the map
+      // create ROBFragment
       auto rob = std::make_unique<const ROBF>(fp);
       const uint32_t id = rob->source_id();
+
       if (filterRobWithStatus(rob.get())) {
          if (rob->nstatus() > 0) {
             const uint32_t* it_status;
             rob->status(it_status);
             eformat::helper::Status tmpstatus(*it_status);
-            ATH_MSG_DEBUG(" ---> ROB Id = 0x" << MSG::hex << id << std::setfill('0')
-	            << " with Generic Status Code = 0x" << std::setw(4) << tmpstatus.generic()
-	            << " and Specific Status Code = 0x" << std::setw(4) << tmpstatus.specific() << MSG::dec
-	            << " removed for L1 Id = " << cache->currentLvl1ID);
+            ATH_MSG_DEBUG("---> ROB Id = 0x" << MSG::hex << id << std::setfill('0') <<
+                          " with Generic Status Code = 0x" << std::setw(4) << tmpstatus.generic() <<
+                          " and Specific Status Code = 0x" << std::setw(4) << tmpstatus.specific() << MSG::dec <<
+                          " removed for L1 Id = " << cache->currentLvl1ID);
          }
          rob.reset();
-      } else if ((rob->rod_ndata() == 0) && (m_filterEmptyROB.value())) {
-         ATH_MSG_DEBUG( " ---> Empty ROB Id = 0x" << MSG::hex << id << MSG::dec
-	         << " removed for L1 Id = " << cache->currentLvl1ID);
+      } else if ((rob->rod_ndata() == 0) && m_filterEmptyROB) {
+         ATH_MSG_DEBUG("---> Empty ROB Id = 0x" << MSG::hex << id << MSG::dec <<
+                       " removed for L1 Id = " << cache->currentLvl1ID);
          rob.reset();
       } else {
-         ROBMAP::const_iterator it = cache->robmap.find(id);
-         if (it != cache->robmap.end()) {
-            ATH_MSG_WARNING(" ROBDataProviderSvc:: Duplicate ROBID 0x" << MSG::hex << id
-	            << " found. " << MSG::dec << " Overwriting the previous one ");
-         } 
-         cache->robmap[id]=std::move(rob);
-         
+         // add to the map, warn in case of overwrite
+         const auto& [itr, new_entry] = cache->robmap.insert_or_assign(id, std::move(rob));
+         if (!new_entry) {
+            ATH_MSG_WARNING("ROBDataProviderSvc:: Duplicate ROBID 0x" << MSG::hex << id <<
+                            " found. " << MSG::dec << "Overwriting the previous one.");
+         }
       }
    }
-   ATH_MSG_DEBUG(" ---> setNextEvent offline for " << name() );
-   ATH_MSG_DEBUG("      current LVL1 id   = " << cache->currentLvl1ID );
-   ATH_MSG_DEBUG("      size of ROB cache = " << cache->robmap.size() );
-   return;
+   ATH_MSG_DEBUG("---> setNextEvent offline for " << name() <<
+                 ", current LVL1 id = " << cache->currentLvl1ID <<
+                 ", size of ROB cache = " << cache->robmap.size());
 }
-/** return ROBData for ROBID
- */
 
-void ROBDataProviderSvc::getROBData(const EventContext& context, const std::vector<uint32_t>& ids, std::vector<const ROBF*>& v, 
-				    const std::string_view callerName) {
-  EventCache* cache = m_eventsCache.get( context );
+
+/// Return ROBData for ROB ids.
+void ROBDataProviderSvc::getROBData(const EventContext& ctx, const std::vector<uint32_t>& ids,
+                                    VROBFRAG& robFragments, const std::string_view callerName) {
+
+   EventCache* cache = m_eventsCache.get(ctx);
 
    for (uint32_t id : ids) {
-      ROBMAP::iterator map_it = cache->robmap.find(id);
+      const auto map_it = cache->robmap.find(id);
       if (map_it != cache->robmap.end()) {
-         v.push_back((*map_it).second.get());
+         robFragments.push_back(map_it->second.get());
       } else {
         ATH_MSG_DEBUG("Failed to find ROB for id 0x" << MSG::hex << id << MSG::dec << ", Caller Name = " << callerName);
       }
    }
-   return;
 }
-/** - clear ROB map
- */
-void ROBDataProviderSvc::robmapClear( ROBMAP& toclear) {
-   for (auto& it : toclear) {
-     it.second.reset();  
-  }
-  toclear.clear();
-}
+
+
 /// Retrieve the whole event.
-const RawEvent* ROBDataProviderSvc::getEvent( const EventContext& context ) {
-  
-  return m_eventsCache.get( context )->event;
+const RawEvent* ROBDataProviderSvc::getEvent( const EventContext& ctx ) {
+   return m_eventsCache.get(ctx)->event;
 }
 
 
 /// Set the status for the event.
-
-void ROBDataProviderSvc::setEventStatus(const EventContext& context, uint32_t status) {
-  m_eventsCache.get(context)->eventStatus = status;
+void ROBDataProviderSvc::setEventStatus(const EventContext& ctx, uint32_t status) {
+   m_eventsCache.get(ctx)->eventStatus = status;
 }
+
+
 /// Retrieve the status for the event.
-
-uint32_t ROBDataProviderSvc::getEventStatus( const EventContext& context ) {
-  return m_eventsCache.get( context )->eventStatus;
+uint32_t ROBDataProviderSvc::getEventStatus( const EventContext& ctx ) {
+   return m_eventsCache.get(ctx)->eventStatus;
 }
 
-void ROBDataProviderSvc::processCachedROBs(const EventContext& context, 
+
+void ROBDataProviderSvc::processCachedROBs(const EventContext& ctx,
 					   const std::function< void(const ROBF* )>& fn ) const {
-  for ( const auto&  el : m_eventsCache.get( context )->robmap ) {
-    fn( el.second.get() );
-  }
+   for ( const auto&  el : m_eventsCache.get(ctx)->robmap ) {
+      fn( el.second.get() );
+   }
 }
 
 
-
-/** - filter ROB with Sub Detector Id and Status Code
-*/
+/// Filter ROB with Sub Detector Id and Status Code
 bool ROBDataProviderSvc::filterRobWithStatus(const ROBF* rob) {
    // No filter criteria defined
-   if ((m_filterRobMap.size() == 0) && (m_filterSubDetMap.size() == 0)) {
-      return(false);
+   if (m_filterRobMap.empty() && m_filterSubDetMap.empty()) {
+      return false;
    }
    // There should be at least one status element if there was an error
    // in case there are 0 status elements then there was no known error
    // (see event format document ATL-D-ES-0019 (EDMS))
    if (rob->nstatus() == 0) {
-      return(false);
+      return false;
    }
    // The ROB has at least one status element, access it via an iterator
    const uint32_t* rob_it_status;
    rob->status(rob_it_status);
+
    // Build the full ROB Sourceidentifier
-   eformat::helper::SourceIdentifier tmpsrc(rob->rob_source_id());
+   eformat::helper::SourceIdentifier src(rob->rob_source_id());
    // Check if there is a ROB specific filter rule defined for this ROB Id and match the status code
-   FilterRobMap::iterator map_it_rob = m_filterRobMap.find(tmpsrc.code());
-   if (map_it_rob != m_filterRobMap.end()) {
-      for (uint32_t status : map_it_rob->second) {
-         if (*rob_it_status == status) {
-            return(true);
-         }
-      }
+   if (auto it = m_filterRobMap.find(src.code()); it != m_filterRobMap.end()) {
+      if (std::ranges::contains(it->second, *rob_it_status))
+         return true;
    }
+
    // Check if there is a sub detector specific filter rule defined for this ROB Id and match the status code
-   FilterSubDetMap::iterator map_it_subdet = m_filterSubDetMap.find(tmpsrc.subdetector_id());
-   if (map_it_subdet != m_filterSubDetMap.end()) {
-      for (uint32_t status : map_it_subdet->second) {
-         if (*rob_it_status == status) {
-            return(true);
-         }
-      }
+   if (auto it = m_filterSubDetMap.find(src.subdetector_id()); it != m_filterSubDetMap.end()) {
+      if (std::ranges::contains(it->second, *rob_it_status))
+         return true;
    }
-   return(false);
+
+   return false;
 }

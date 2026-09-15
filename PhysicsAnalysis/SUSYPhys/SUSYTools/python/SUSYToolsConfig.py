@@ -32,11 +32,11 @@ def SUSYToolsAlgCfg(flags, **kwargs):
             STconfig_lite = str(alg.SUSYTools.ConfigFile).replace(".conf","_LITE.conf")
             alg.SUSYTools.IsPHYSLITE = True
             alg.SUSYTools.ConfigFile = STconfig_lite
-
+    
     log.info("Configuration file: %s",alg.SUSYTools.ConfigFile)
 
     alg.SUSYTools.DataSource = 0 if not isMC else (1 if not isFastSim else 2) # data/FS/atlfast
-
+    alg.SUSYTools.mcCampaign = susyArgs.testCampaign
     log.info("Configuration SUSYTools.DataSource: %s",alg.SUSYTools.DataSource)
 
     if isMC:
@@ -52,7 +52,7 @@ def SUSYToolsAlgCfg(flags, **kwargs):
             from PileupReweighting.AutoconfigurePRW import getLumicalcFiles
             alg.SUSYTools.PRWLumiCalcFiles = getLumicalcFiles(flags.Input.MCCampaign)
 
-
+            
     acc.addEventAlgo(alg)
     
     return acc
@@ -80,13 +80,14 @@ if __name__ == "__main__": # typically not needed in top level script
     susyArgs = flags.fillFromArgs(parser=susyArgsParser)
 
     if susyArgs.testCampaign:
-        pTag = 'p6269' if ('data2' in susyArgs.testCampaign) else 'p6266'
-        inputDir = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools'
+        pTag = 'p7267' if ('data2' in susyArgs.testCampaign) else 'p7266'
+        
+        inputDir = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/'
         inputFiles = {}
-        inputFiles['data18'] = f'data18_13TeV.39757132_{pTag}.{susyArgs.testFormat}.pool.root'
-        inputFiles['data22'] = f'data22_13p6TeV.39672246_{pTag}.{susyArgs.testFormat}.pool.root'
-        inputFiles['data23'] = f'data23_13p6TeV.39756993_{pTag}.{susyArgs.testFormat}.pool.root'
-        inputFiles['mc20e']  = f'DAOD_{susyArgs.testFormat}.mc20_13TeV.410470.FS_mc20e_{pTag}.{susyArgs.testFormat}.pool.root'
+        inputFiles['data18'] = f'data18_13TeV.00364292_{pTag}.{susyArgs.testFormat}.pool.root'
+        inputFiles['data22'] = f'data22_13p6TeV.00440613_{pTag}.{susyArgs.testFormat}.pool.root'
+        inputFiles['data23'] = f'data23_13p6TeV.00456749_{pTag}.{susyArgs.testFormat}.pool.root'
+        inputFiles['mc20e']  = f'mc20_13TeV.410470.FS_mc20e_{pTag}.{susyArgs.testFormat}.pool.root'
         inputFiles['mc23a']  = f'mc23_13p6TeV.601229.FS_mc23a_{pTag}.{susyArgs.testFormat}.pool.root'
         inputFiles['mc23d']  = f'mc23_13p6TeV.601229.FS_mc23d_{pTag}.{susyArgs.testFormat}.pool.root'
         flags.Input.Files = [f'{inputDir}/{inputFiles[susyArgs.testCampaign]}']
@@ -99,7 +100,17 @@ if __name__ == "__main__": # typically not needed in top level script
     flags.lock()
     
     acc = MainServicesCfg(flags)
+
+    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+    acc.merge(PoolReadCfg(flags))
+
+    from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
+    tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
+
     acc.merge(SUSYToolsAlgCfg(flags))
+
+    from AthenaConfiguration.ComponentFactory import CompFactory
+    acc.addService(CompFactory.THistSvc(Output=[f"ANALYSIS DATAFILE='{susyArgs.fileOutput}' OPT='RECREATE'"]))
 
     status = acc.run()
 

@@ -16,10 +16,6 @@
 #include "ActsGPUEvent/TracccMeasurementCollection.h"
 #include "ActsGPUEvent/TracccSpacepointCollection.h"
 
-
-
-#include "vecmem/utils/cuda/copy.hpp"
-
 namespace ActsTrk {
 /**
  * @class DeviceSPFormationAlg

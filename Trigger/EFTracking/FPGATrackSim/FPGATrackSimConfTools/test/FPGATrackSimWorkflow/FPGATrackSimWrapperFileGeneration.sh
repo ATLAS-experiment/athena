@@ -3,11 +3,15 @@ set -e
 
 source FPGATrackSim_CommonEnv.sh
 
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
+
+
 echo "... RDO to AOD with sim"
 Reco_tf.py \
     --steering doRAWtoALL \
+    --conditionsTag="default:${conditions}" \
     --preExec "flags.Trigger.FPGATrackSim.wrapperFileName='wrapper.root'" \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateTracksFlags" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
     --postInclude "FPGATrackSimSGInput.FPGATrackSimSGInputConfig.FPGATrackSimSGInputCfg" \
     --inputRDOFile ${RDO_SINGLE_MUON} \
     --outputAODFile AOD.pool.root \

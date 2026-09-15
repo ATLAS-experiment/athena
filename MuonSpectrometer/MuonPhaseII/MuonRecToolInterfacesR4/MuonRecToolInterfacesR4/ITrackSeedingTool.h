@@ -7,6 +7,13 @@
 #include "GaudiKernel/IAlgTool.h"
 #include "GaudiKernel/EventContext.h"
 
+// Must be included before any header that pulls in <Eigen/Core> (e.g. Acts
+// below): it arms EIGEN_MATRIXBASE_PLUGIN/EIGEN_TRANSFORM_PLUGIN, which add
+// the Amg::Vector3D methods (mag(), unit(), perp(), ...) used throughout
+// this interface and its implementations. Eigen headers are include-guarded,
+// so if something else includes plain Eigen first, those methods silently
+// never exist for the rest of the translation unit.
+#include "GeoPrimitives/GeoPrimitives.h"
 
 #include "Acts/EventData/BoundTrackParameters.hpp"
 
@@ -37,25 +44,20 @@ namespace MuonR4 {
             virtual ~ITrackSeedingTool() = default;
             /** @brief Declare the interface  */
             DeclareInterfaceID(MuonR4::ITrackSeedingTool, 1, 0);
-           /** @brief Retrieves the segment container from StoreGate and constructs TrackSeeds
+            /** @brief Retrieves the segment container from StoreGate and constructs TrackSeeds
              *        from them. The seed canddiates are pushed to the output seed container
              * @param ctx: EventContext to access the xAOD::MuonSegmentContainer from store
              *             gate and additional conditions data if needed to construct the seed
              * @param outSeeds: Mutable reference to the container to whichh the seeds are pushed to. */
             virtual StatusCode findTrackSeeds(const EventContext& ctx,
                                               std::vector<MsTrackSeed>& outSeeds) const = 0;
-
+            /** @brief Estimate the start track parameters for a given track seed
+             * @param ctx: EventContext
+             * @param seed: The track seed for which to estimate start parameters
+             * @return The estimated start parameters or an error */
             virtual Acts::Result<Acts::BoundTrackParameters> 
                                 estimateStartParameters(const EventContext& ctx,
                                                         const MsTrackSeed& seed) const = 0;
-
-            using PosMomPair_t = std::pair<Amg::Vector3D, Amg::Vector3D>;
-
-            virtual double estimateQtimesP(const EventContext& ctx,
-                                           const Amg::Vector3D& planeNorm,
-                                           std::span<const PosMomPair_t> circlePoints) const = 0;
-
-
     };
 }
 #endif

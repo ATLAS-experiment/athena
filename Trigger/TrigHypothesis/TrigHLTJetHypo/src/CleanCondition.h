@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGHLTJETHYPO_CLEANCONDITION_H
@@ -13,10 +13,11 @@
  * AUTHOR:   M. Valente
  *********************************************************************/
 
-#include <string>
+
 #include "./ICondition.h"
-#include "AsgTools/AsgTool.h"
-#include "xAODJet/JetContainer.h"
+#include <string>
+#include <memory>
+
 namespace HypoJet{
   class IJet;
 }

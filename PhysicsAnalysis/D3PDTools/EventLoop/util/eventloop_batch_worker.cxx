@@ -5,6 +5,7 @@
 #include <EventLoop/Worker.h>
 #include <xAODRootAccess/Init.h>
 #include <AsgMessaging/MessageCheck.h>
+#include <sstream>
 
 int main (int argc, char **argv)
 {
@@ -24,7 +25,7 @@ int main (int argc, char **argv)
     std::istringstream str (argv[1]);
     if (!(str >> job_id))
     {
-      ANA_MSG_ERROR ("failed to parse job_id: " << job_id);
+      ANA_MSG_ERROR ("failed to parse job_id: " << argv[1]);
       return -1;
 
     }

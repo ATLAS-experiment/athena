@@ -11,6 +11,9 @@
 #include "TrigL2LayerNumberToolITk.h"
 #include "InDetReadoutGeometry/SiNumerology.h"
 
+#include <fstream>
+#include <stdexcept>
+
 TrigL2LayerNumberToolITk::TrigL2LayerNumberToolITk(const std::string& t, 
                                                    const std::string& n,
                                                    const IInterface*  p ) :
@@ -147,6 +150,11 @@ void TrigL2LayerNumberToolITk::createModuleHashMap(std::map<std::tuple<int, int,
 
   m_LastBarrelLayer=0;
 
+  std::ofstream geometryStream;
+  if(m_dumpGeometry){
+    geometryStream.open(m_geometryDumpDir);
+  }
+
   for(std::map<std::tuple<int, int, short, short>,std::vector<PhiEtaHashITk> >::iterator it = hashMap.begin();it!=hashMap.end();++it, layerId++) {
 
     short vol_id = std::get<2>((*it).first);
@@ -167,39 +175,72 @@ void TrigL2LayerNumberToolITk::createModuleHashMap(std::map<std::tuple<int, int,
     //m_layerGeometry[layerId].m_subdet = subdetId;
 
     float rc=0.0;
-    float minBound = 100000.0;
-    float maxBound =-100000.0;
     int nModules = 0;
+    double minZ = 100000.0;
+    double maxZ = -100000.0;
+    double minR = 100000.0;
+    double maxR = -100000.0;
     
     for(std::vector<PhiEtaHashITk>::iterator hIt = (*it).second.begin();hIt != (*it).second.end();++hIt) {
    
       const InDetDD::SiDetectorElement *p = nullptr;
 
       if(subdetId == 1) {//pixel
-	m_pixelLayers[(*hIt).m_hash] = layerId;
-	p = m_pixelManager->getDetectorElement((*hIt).m_hash);
+	      m_pixelLayers[(*hIt).m_hash] = layerId;
+	      p = m_pixelManager->getDetectorElement((*hIt).m_hash);
       }
       if(subdetId == 2) {//SCT
-	m_sctLayers[(*hIt).m_hash] = layerId;
-	p = m_sctManager->getDetectorElement((*hIt).m_hash);
+	      m_sctLayers[(*hIt).m_hash] = layerId;
+	      p = m_sctManager->getDetectorElement((*hIt).m_hash);
       }
-    
+      if (!p)[[unlikely]]{
+        ATH_MSG_WARNING("SiDetectorElement pointer is null.");
+        continue;
+      }
       const Amg::Vector3D& C = p->center();
+  
+      // find min and max r and z values of the layers
+      minZ = std::min(minZ, p->zMin());
+      maxZ = std::max(maxZ, p->zMax());
+      minR = std::min(minR, p->rMin());
+      maxR = std::max(maxR, p->rMax());
+
+      // find average average position of layer in coordinnate that is constant
       if(barrel_ec == 0) {
-	rc += sqrt(C(0)*C(0)+C(1)*C(1));
-	if(p->zMin() < minBound) minBound = p->zMin();
-	if(p->zMax() > maxBound) maxBound = p->zMax();
+	      rc += sqrt(C(0)*C(0)+C(1)*C(1));
+  
       }
       else {
-	rc += C(2);
-	if(p->rMin() < minBound) minBound = p->rMin();
-	if(p->rMax() > maxBound) maxBound = p->rMax();	
+	      rc += C(2);
+	
       }
       nModules++;
     }
+    if (nModules == 0)[[unlikely]]{
+      throw std::runtime_error("TrigL2LayerNumberToolITk::createModuleHashMap: nModules is zero.");
+    }
     m_layerGeometry[layerId].m_refCoord = rc/nModules;
-    m_layerGeometry[layerId].m_minBound = minBound;
-    m_layerGeometry[layerId].m_maxBound = maxBound;
+    // r or z max/man are added depending on if layer is 
+    // barrel or endcap
+    if(barrel_ec == 0){
+      m_layerGeometry[layerId].m_minBound = minZ;
+      m_layerGeometry[layerId].m_maxBound = maxZ;
+    }
+    else{
+      m_layerGeometry[layerId].m_minBound = minR;
+      m_layerGeometry[layerId].m_maxBound = maxR;
+    }
+
+    // dump detailed layer information if requested
+    if(m_dumpGeometry){
+      
+      // outputs like, minR, maxR, minZ, maxZ, gbts Id
+      geometryStream << minR << " "
+                     << maxR << " "
+                     << minZ << " "
+                     << maxZ << " "
+                     << combinedId << "\n";
+    }
   }
   
   ATH_MSG_DEBUG("List of unique layers in Pixel and SCT :");

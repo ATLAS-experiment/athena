@@ -18,13 +18,8 @@
 
 // Forward declarations
 class IOpaqueAddress;
-class IPoolSvc;
 class Placement;
 class Token;
-
-namespace pool {
-   class DbType;
-}
 
 
 /** @class IAthenaPoolCnvSvc
@@ -39,9 +34,6 @@ public:
 
    /// Disconnect to the output connection.
    virtual StatusCode disconnectOutput(const std::string& outputConnectionSpec) = 0;
-
-   /// @return pointer to PoolSvc instance.
-   virtual IPoolSvc* getPoolSvc() = 0;
 
    /// @return a string token to a Data Object written to Pool
    /// @param placement [IN] pointer to the placement hint

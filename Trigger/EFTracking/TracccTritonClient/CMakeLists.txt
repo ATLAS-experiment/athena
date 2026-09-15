@@ -5,6 +5,13 @@ atlas_subdir( TracccTritonClient )
 
 find_package( Acts COMPONENTS Core )
 
+if (NOT TARGET Acts::PluginDetray)
+   return()
+endif()
+
+find_package(vecmem)
+find_package(traccc)
+
 # Component(s) in the package:
 atlas_add_component( TracccTritonClient
     src/*.cxx
@@ -18,6 +25,8 @@ atlas_add_component( TracccTritonClient
         xAODInDetMeasurement xAODTracking xAODTruth
         Acts::Core
         ActsEventLib ActsGeometryLib ActsGeometryInterfacesLib ActsCalibBase
+        vecmem::core traccc::core
+        ActsGPUEventLib
 )
 
 atlas_install_python_modules( python/*.py )

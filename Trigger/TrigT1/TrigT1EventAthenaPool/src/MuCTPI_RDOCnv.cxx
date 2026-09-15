@@ -26,8 +26,8 @@ MuCTPI_RDO_PERS* MuCTPI_RDOCnv::createPersistent( MuCTPI_RDO* transObj ) {
  */
 MuCTPI_RDO* MuCTPI_RDOCnv::createTransient(const Token* token) {
 
-   static const pool::Guid p1_guid( "406BC4C7-56B6-4956-A66A-B749BCD35009" );
-   static const pool::Guid p0_guid( "5BE3FA7E-CC70-4842-A095-CA046164764D" );
+   static const Guid p1_guid( "406BC4C7-56B6-4956-A66A-B749BCD35009" );
+   static const Guid p0_guid( "5BE3FA7E-CC70-4842-A095-CA046164764D" );
 
    if( this->compareClassGuid(token,  p1_guid ) ) {
 

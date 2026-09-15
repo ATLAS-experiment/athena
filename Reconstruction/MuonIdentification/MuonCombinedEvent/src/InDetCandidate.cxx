@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCombinedEvent/InDetCandidate.h"
 
-#include <iostream>
+#include <sstream>
 
 namespace MuonCombined {
 
@@ -25,8 +25,9 @@ namespace MuonCombined {
     }
 
     const xAOD::TrackParticle& InDetCandidate::indetTrackParticle() const {
-        if (!m_idTrackParticleLink.isValid()) {}
-        return **m_idTrackParticleLink;
+        if (m_idTrackParticleLink.isValid()) {
+          return **m_idTrackParticleLink;
+        }
         return *m_idTrackParticle;
     }
 

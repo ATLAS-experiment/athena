@@ -31,8 +31,8 @@ MuonSpShowerContainerCnv::createTransient(const Token* token)
     // std::cout<<"Test - MuonSpShowerContainerCnv::createTransient(const Token* token)"<<std::endl;
     Rec::MuonSpShowerContainer *transObj = 0;
 
-    static const pool::Guid tr_guid("64AE1E07-67EC-549C-DE00-A953259EBC9E");
-    static const pool::Guid p1_guid("522A7143-856B-41E6-A3FA-AB97693010D8");
+    static const Guid tr_guid("64AE1E07-67EC-549C-DE00-A953259EBC9E");
+    static const Guid p1_guid("522A7143-856B-41E6-A3FA-AB97693010D8");
 
     if ( compareClassGuid(token, tr_guid) ) {
 

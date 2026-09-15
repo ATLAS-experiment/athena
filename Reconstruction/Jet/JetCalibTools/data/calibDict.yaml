@@ -1,0 +1,30 @@
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+#
+# Index of jet calibration configurations: jet collection -> context -> config file.
+# Paths are relative to commonPath. Once the config files are distributed via
+# cvmfs, commonPath can be dropped and the paths resolved by PathResolver.
+commonPath: /eos/atlas/atlascerngroupdisk/perf-jets/JSV/JetCalibToolsMigration/configFiles/
+
+AntiKt4EMPFlow:
+  T0: "T0/EMPFlow/JES_MC15cRecommendation_PFlow_Aug2016_rel21.yaml"
+  AnalysisLatest: "LatestRecommendations/EMPFlow_combined/JetCalibration_JetETMiss_AKt4EMPFlow_V01PreRec_Aug2026.yaml"
+  TrigR22Prerec: "LatestRecommendations/EMPFlow_mc20_Run2/PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.yaml"
+
+AntiKt4EMTopo:
+  T0: "T0/EMTopo/JES_MC15cRecommendation_May2016_rel21.yaml"
+  AnalysisLatest: "LatestRecommendations/EMTopo/PreRec_R22_EMTopo_ResPU_EtaJES_October23_231024.yaml"
+  TrigLS2: "Trigger/JES_MC16Recommendation_Consolidated_EMTopo_Apr2019_Rel21_Trigger.yaml"
+
+AntiKt4LCTopo:
+  T0: "T0/LCTopo/JES_MC15cRecommendation_May2016_LCTopo_rel21.yaml"
+
+AntiKt10UFOCSSKSoftDropBeta100Zcut10:
+  T0: "LatestRecommendations/largeR_Run23/JES_MC20PreRecommendation_R10_UFO_CSSK_SoftDrop_JMS_R21Insitu_26Nov2024.yaml"
+  AnalysisLatest: "LatestRecommendations/largeR_Run23/JES_MC20PreRecommendation_R10_UFO_CSSK_SoftDrop_JMS_R21Insitu_26Nov2024.yaml"
+  TrigSoftDrop: "Trigger/JES_MC16recommendation_R10_UFO_CSSK_SoftDrop_JMS_01April2020.yaml"
+
+AntiKt10LCTopoTrimmedPtFrac4SmallR20:
+  TrigTrimmed: "Trigger/JES_MC15recommendation_FatJet_June2015_PtFrac4.yaml"
+
+AntiKt10LCTopo:
+  TrigUngroomed: "Trigger/JES_Full2012dataset_Rscan_June2014.yaml"

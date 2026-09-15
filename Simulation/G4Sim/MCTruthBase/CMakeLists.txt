@@ -10,12 +10,11 @@ find_package( Geant4 )
 atlas_add_library( MCTruthBaseLib
                    src/*.cxx
                    OBJECT
-                   PUBLIC_HEADERS MCTruthBase
+                   NO_PUBLIC_HEADERS
                    INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${GEANT4_LIBRARIES} AtlasHepMCLib AthenaKernel CxxUtils GaudiKernel StoreGateLib G4AtlasToolsLib TrackRecordLib
-                   PRIVATE_LINK_LIBRARIES AthenaBaseComps
-                   G4AtlasInterfaces MCTruth SimHelpers ISF_InterfacesLib
-                   AtlasDetDescr ISF_Geant4Event TruthUtils
+                   LINK_LIBRARIES ${GEANT4_LIBRARIES} AthenaBaseComps GaudiKernel G4AtlasToolsLib ISF_InterfacesLib TrackRecordLib
+                   PRIVATE_LINK_LIBRARIES G4AtlasInterfaces MCTruth
+                   AtlasDetDescr ISF_Geant4Event
                  )
 set_target_properties( MCTruthBaseLib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 

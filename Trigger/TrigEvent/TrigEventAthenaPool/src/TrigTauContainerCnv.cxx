@@ -24,8 +24,8 @@ TrigTauContainer * TrigTauContainerCnv::createTransient(const Token* token)
   
   mlog << MSG::DEBUG << "TrigTauContainerCnv::createTransient called" << endmsg;
 
-  static const pool::Guid p3_guid( "32FE95F3-F85E-481E-9DD6-7BBA08ABDBD7" );
-  static const pool::Guid tlp1_guid( "1551CECC-52C7-4B5B-876C-27005A8DCCC8" );
+  static const Guid p3_guid( "32FE95F3-F85E-481E-9DD6-7BBA08ABDBD7" );
+  static const Guid tlp1_guid( "1551CECC-52C7-4B5B-876C-27005A8DCCC8" );
 
  if( compareClassGuid(token,  p3_guid ) ){
          std::unique_ptr< TrigTauContainer_p3 > col_vect( poolReadObject< TrigTauContainer_p3 >(token) );

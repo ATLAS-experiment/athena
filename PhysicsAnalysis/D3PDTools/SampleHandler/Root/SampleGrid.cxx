@@ -74,9 +74,9 @@ namespace SH
   {
     RCU_READ_INVARIANT (this);
 
-    std::unique_ptr<SampleLocal> result (new SampleLocal (name()));
+    auto result = std::make_unique<SampleLocal> (name());
     for (auto& file : makeFileList ())
-      result->add (file.c_str());
+      result->add (file);
     return result;
   }
 

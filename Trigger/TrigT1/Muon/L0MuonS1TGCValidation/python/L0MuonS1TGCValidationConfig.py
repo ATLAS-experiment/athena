@@ -52,7 +52,7 @@ def L0MuonS1TGCTruthValidationCfg(
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from L0MuonS1TGC.L0MuonS1TGCConfig import L0MuonTGCSimCfg
+    from L0MuonEndcap.L0MuonEndcapConfig import L0MuonTGCChainCfg
     from MuonConfig.MuonConfigUtils import executeTest
     from MuonGeoModelTestR4.testGeoModel import (
         MuonPhaseIITestDefaults,
@@ -72,10 +72,12 @@ if __name__ == "__main__":
     validation_candidate_key = "L0MuonTGCValidationCandidates"
     validation_segment_key = "L0MuonTGCValidationSegments"
     acc.merge(
-        L0MuonTGCSimCfg(
+        L0MuonTGCChainCfg(
             flags,
-            ValidationCandidateKey=validation_candidate_key,
-            ValidationSegmentKey=validation_segment_key,
+            S1TGC={
+                "ValidationCandidateKey": validation_candidate_key,
+                "ValidationSegmentKey": validation_segment_key,
+            },
         )
     )
     acc.merge(
@@ -83,6 +85,8 @@ if __name__ == "__main__":
             flags,
             CandidateKey=validation_candidate_key,
             SegmentKey=validation_segment_key,
+            ValidateFinalCandidates=True,
+            ValidateSectorLogic=True,
         )
     )
     executeTest(acc)

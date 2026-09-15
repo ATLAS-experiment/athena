@@ -1,0 +1,31 @@
+{
+  "side-A": [
+    [
+      {
+        "DetectorResourceID": "802001a",
+        "TrueDetectorResourceID": "802001a",
+        "SourceID": "a10510"
+      },
+      {
+        "DetectorResourceID": "802001a",
+        "TrueDetectorResourceID": "802001a",
+        "SourceID": "a10510"
+      }
+    ]
+  ],
+  "side-C": [
+    [
+      {
+        "DetectorResourceID": "8020016",
+        "TrueDetectorResourceID": "8020016",
+        "SourceID": "a20510"
+      },
+      {
+        "DetectorResourceID": "8020016",
+        "TrueDetectorResourceID": "8020016",
+        "SourceID": "a20510"
+      }
+    ]
+  ]
+}
+

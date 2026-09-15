@@ -149,9 +149,9 @@ public:
   void Copy2GPU(); // copy all the paramterization files to GPU
 #endif
 
-  // Called immediately after being read to check the integrity
-  // of histograms.  See ATLASSIM-7031.
-  virtual void checkHists() {}
+  // Called immediately after being read to fix histograms that erroneously
+  // have kIsOnHeap set.  See ATLASSIM-7031.
+  virtual void fixHists() {}
 
 protected:
   static constexpr double init_Ekin_nominal = 0;    //! Do not persistify!

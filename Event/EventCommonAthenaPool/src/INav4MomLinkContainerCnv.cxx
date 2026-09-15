@@ -41,7 +41,7 @@ INav4MomLinkContainer* INav4MomLinkContainerCnv::createTransient(const Token* to
   MsgStream log( msgSvc(), "INav4MomLinkContainerConverter" );
 
   // Define the pool IDs
-  static const pool::Guid  p1_guid("A7F0A4C5-F343-4724-B317-FB5A890355FA");
+  static const Guid  p1_guid("A7F0A4C5-F343-4724-B317-FB5A890355FA");
 
   if( compareClassGuid(token, p1_guid) )
     {

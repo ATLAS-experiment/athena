@@ -10,7 +10,7 @@ Reco_tf.py \
     --inputRDOFile  ${input_rdo} \
     --outputAODFile AOD.acts.pool.root \
     --outputESDFile ESD.acts.pool.root \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsProductionFlags" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
     --preExec "flags.Exec.FPE=-1;" "flags.Tracking.doStoreTrackSeeds=True;flags.Tracking.doStoreSiSPSeededTracks=True;flags.Tracking.ITkActsPass.storeTrackSeeds=True;flags.Tracking.ITkActsPass.storeSiSPSeededTracks=True;flags.Tracking.writeExtendedSi_PRDInfo=False;flags.Tracking.ITkActsPass.doAthenaSeed=False;flags.Tracking.ITkActsPass.doActsSeed=True" \
     --postExec "from OutputStreamAthenaPool.OutputStreamConfig import addToAOD; toAOD = ['xAOD::TrackParticleContainer#SiSPSeedSegments*', 'xAOD::TrackParticleAuxContainer#SiSPSeedSegments*']; cfg.merge(addToAOD(flags, toAOD))" \
     --maxEvents ${n_events} \

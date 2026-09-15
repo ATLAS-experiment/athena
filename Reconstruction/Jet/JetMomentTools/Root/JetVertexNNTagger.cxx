@@ -186,7 +186,7 @@ namespace JetPileupTag {
         lwt::VectorX<double> inputvals = lwt::build_vector(features_double);
 
         // Wrap inputs into a vector of scalars as required by FastGraph
-        std::vector<lwt::VectorX<double>> scalars{inputvals};
+        std::vector<lwt::VectorX<double>> scalars{std::move(inputvals)};
 
         // Compute the output using the NN model
         lwt::VectorX<double> output = m_lwnn->compute(std::move(scalars));

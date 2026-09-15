@@ -20,27 +20,27 @@ StatusCode TrigTauMonitorSingleAlgorithm::initialize()
     ATH_CHECK( createKeys(m_monitoredHLTIdScores) );
     ATH_CHECK( createKeys(m_monitoredHLTCaloHitsPreselIdScores) );
     ATH_CHECK( createKeys(m_monitoredHLTHitZVars) );
-
-    if(m_monitoredVarPairsDecorHandleKeys.find("OfflineTauJets") != m_monitoredVarPairsDecorHandleKeys.end()) {
+    const std::string jetName{"OfflineTauJets"};
+    if(m_monitoredVarPairsDecorHandleKeys.find(jetName) != m_monitoredVarPairsDecorHandleKeys.end()) {
         ATH_MSG_ERROR("Cannot have an HLT monitored ID or HitZ variable with the key OfflineTauJets.");
         return StatusCode::FAILURE;
     }
-
+    
     for(const auto& [key, p] : m_monitoredOfflineIdScores) {
         if(p.first.empty() || p.second.empty()) {
             ATH_MSG_WARNING("Invalid Offline TauID score variable names; skipping this entry for the monitoring!");
             continue;
         }
 
-        m_monitoredVarPairsDecorHandleKeys["OfflineTauJets"].emplace(
+        m_monitoredVarPairsDecorHandleKeys[jetName].emplace(
             key, 
             std::make_pair(
                 SG::ReadDecorHandleKey<xAOD::TauJetContainer>(m_offlineTauJetKey.key() + "." + p.first),
                 SG::ReadDecorHandleKey<xAOD::TauJetContainer>(m_offlineTauJetKey.key() + "." + p.second)
             )
         );
-        ATH_CHECK(m_monitoredVarPairsDecorHandleKeys.at("OfflineTauJets").at(key).first.initialize());
-        ATH_CHECK(m_monitoredVarPairsDecorHandleKeys.at("OfflineTauJets").at(key).second.initialize());
+        ATH_CHECK(m_monitoredVarPairsDecorHandleKeys.at(jetName).at(key).first.initialize());
+        ATH_CHECK(m_monitoredVarPairsDecorHandleKeys.at(jetName).at(key).second.initialize());
     }
 
     return StatusCode::SUCCESS;
@@ -183,7 +183,7 @@ void TrigTauMonitorSingleAlgorithm::fillHLTEfficiencies(const EventContext& ctx,
     // denominator = offline tau + matching with L1 object with dR(offline tau,L1 item) < 0.3
     // numerator = denominator + hlt fires + matching with HLT tau with dR(offline tau, HLT tau) < 0.2
 
-    auto monGroup = getGroup(trigger+"_HLT_Efficiency_"+nProng);
+    const auto & monGroup = getGroup(trigger+"_HLT_Efficiency_"+nProng);
 
     auto tauPt = Monitored::Scalar<float>("tauPt", 0.0);
     auto tauEta = Monitored::Scalar<float>("tauEta", 0.0);
@@ -246,7 +246,7 @@ void TrigTauMonitorSingleAlgorithm::fillIDInputVars(const std::string& trigger, 
 {
     ATH_MSG_DEBUG("Fill ID input variables: " << trigger);
 
-    auto monGroup = getGroup(trigger+"_ID_"+(online ? "HLT" : "Offline")+"_InputScalar_"+nProng);  
+    const auto & monGroup = getGroup(trigger+"_ID_"+(online ? "HLT" : "Offline")+"_InputScalar_"+nProng);  
 
     auto centFrac           = Monitored::Collection("centFrac", tau_vec, [](const xAOD::TauJet* tau){
                                                         float detail = -999;
@@ -315,13 +315,14 @@ void TrigTauMonitorSingleAlgorithm::fillIDTrack(const std::string& trigger, cons
 {
     ATH_MSG_DEBUG("Fill ID input Track: " << trigger);
 
-    auto monGroup = getGroup(trigger+"_ID_"+(online ? "HLT" : "Offline")+"_InputTrack");  
+    const auto & monGroup = getGroup(trigger+"_ID_"+(online ? "HLT" : "Offline")+"_InputTrack");  
 
     auto track_pt_jetseed_log = Monitored::Collection("track_pt_jetseed_log", tau_vec, [](const xAOD::TauJet* tau){ return std::log10(tau->ptJetSeed()); });
     fill(monGroup, track_pt_jetseed_log);
 
     for(const auto *tau : tau_vec) {
         // Don't call ->allTracks() unless the element links are valid
+        //coverity[UNNECESSARY_STRING_COPY:FALSE]
         static const SG::ConstAccessor< std::vector<ElementLink<xAOD::TauTrackContainer>> > tauTrackAcc("tauTrackLinks");
         bool linksValid = true;
         for(const ElementLink<xAOD::TauTrackContainer>& trackEL : tauTrackAcc(*tau)) {
@@ -386,7 +387,7 @@ void TrigTauMonitorSingleAlgorithm::fillIDCluster(const std::string& trigger, co
 {
     ATH_MSG_DEBUG("Fill ID input Cluster: " << trigger << " for online/offline " << online);
     
-    auto monGroup = getGroup(trigger+"_ID_"+(online ? "HLT" : "Offline")+"_InputCluster");  
+    const auto & monGroup = getGroup(trigger+"_ID_"+(online ? "HLT" : "Offline")+"_InputCluster");  
     
     for(const auto *tau : tau_vec){
         auto cluster_pt_jetseed_log = Monitored::Collection("cluster_pt_jetseed_log", tau_vec, [](const xAOD::TauJet* tau){ return std::log10(tau->ptJetSeed()); });
@@ -438,7 +439,7 @@ void TrigTauMonitorSingleAlgorithm::fillBasicVars(const EventContext& ctx, const
 {
     ATH_MSG_DEBUG("Fill Basic Variables: " << trigger); 
 
-    auto monGroup = getGroup(trigger+"_"+(online ? "HLT" : "Offline")+"_basicVars_"+nProng);  
+    const auto & monGroup = getGroup(trigger+"_"+(online ? "HLT" : "Offline")+"_basicVars_"+nProng);  
 
     auto Pt = Monitored::Collection("Pt", tau_vec, [](const xAOD::TauJet* tau){ return tau->pt()/Gaudi::Units::GeV; });
     auto Eta = Monitored::Collection("Eta", tau_vec, [](const xAOD::TauJet* tau){ return tau->eta(); });                                                     
@@ -488,7 +489,7 @@ void TrigTauMonitorSingleAlgorithm::fillIDScores(const EventContext& ctx, const 
         const bool monitor_ch_presel = m_monitoredHLTCaloHitsPreselIdScores.value().find(info.getHLTTauLegContainerSfx()) != m_monitoredHLTCaloHitsPreselIdScores.value().end();
         if(!monitor_ids && !monitor_ch_presel) return;
 
-        auto monGroup = getGroup(trigger+"_HLT_IDScores_"+nProng);
+        const auto & monGroup = getGroup(trigger+"_HLT_IDScores_"+nProng);
 
         if(monitor_ids) {
             std::string match = info.getHLTTauID();
@@ -507,7 +508,7 @@ void TrigTauMonitorSingleAlgorithm::fillIDScores(const EventContext& ctx, const 
     } else {
         if(m_monitoredOfflineIdScores.value().size() == 0) return;
 
-        auto monGroup = getGroup(trigger+"_Offline_IDScores_"+nProng);
+        const auto & monGroup = getGroup(trigger+"_Offline_IDScores_"+nProng);
         fillVarPairs(ctx, monGroup, m_monitoredOfflineIdScores.value(), "OfflineTauJets", "", "TauIDScore", "TauIDScoreSigTrans", tau_vec);
     }
 
@@ -516,7 +517,7 @@ void TrigTauMonitorSingleAlgorithm::fillIDScores(const EventContext& ctx, const 
 
 
 void TrigTauMonitorSingleAlgorithm::fillVarPairs(const EventContext& ctx, 
-                                                 ToolHandle<GenericMonitoringTool>& mon_group, 
+                                                 const ToolHandle<GenericMonitoringTool>& mon_group, 
                                                  const VarPropertyMap::mapped_type& vars, 
                                                  const std::string& category, 
                                                  const std::string& match_var_name, 
@@ -555,7 +556,7 @@ void TrigTauMonitorSingleAlgorithm::fillHitZVars(const EventContext& ctx, const 
     if(m_monitoredHLTHitZVars.value().find(info.getHLTTauLegContainerSfx()) == m_monitoredHLTHitZVars.value().end()) return;
     if(info.getHLTTauHitZAlg().empty() && info.getHLTTauCaloHitsPreselectionID().empty()) return;
 
-    auto monGroup = getGroup(trigger+"_HLT_HitZ_"+nProng);
+    const auto & monGroup = getGroup(trigger+"_HLT_HitZ_"+nProng);
 
     for(const auto& [key, p] : m_monitoredHLTHitZVars.value().at(info.getHLTTauLegContainerSfx())) {
         const auto& [z0_key, z0_sigma_key] = m_monitoredVarPairsDecorHandleKeys.at(info.getHLTTauLegContainerSfx()).at(key);

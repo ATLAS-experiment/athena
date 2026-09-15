@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef HLTSEEDING_ROISUNPACKINGTOOLPHASE1_H
 #define HLTSEEDING_ROISUNPACKINGTOOLPHASE1_H
@@ -133,9 +133,9 @@ public:
         addChainsToDecision(HLT::Identifier(thr->name()), decisionMain, activeChains);
         if (doProbe) addChainsToDecision(HLT::Identifier(getProbeThresholdName(thr->name())), decisionProbe, activeChains);
       }
-
-      decisionMain->setDetail("thresholds", passedThresholdIDs);
-      if (doProbe) decisionProbe->setDetail("thresholds", passedThresholdIDs);
+      static const std::string thresholdsStr{"thresholds"};
+      decisionMain->setDetail(thresholdsStr, passedThresholdIDs);
+      if (doProbe) decisionProbe->setDetail(thresholdsStr, passedThresholdIDs);
 
       ++linkIndex;
     }

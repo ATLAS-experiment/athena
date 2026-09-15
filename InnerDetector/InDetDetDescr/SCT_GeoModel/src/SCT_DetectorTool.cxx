@@ -123,10 +123,6 @@ SCT_DetectorTool::create()
     ATH_CHECK(detStore()->record(m_manager, m_manager->getName()));
     theExpt->addManager(m_manager);
 
-    // Create a symLink to the SiDetectorManager base class
-    const SiDetectorManager* siDetManager{m_manager};
-    ATH_CHECK(detStore()->symLink(m_manager, siDetManager));
-
     return StatusCode::SUCCESS;
 }
 

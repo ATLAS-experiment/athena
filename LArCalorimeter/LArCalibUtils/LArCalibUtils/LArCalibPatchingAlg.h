@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -172,13 +172,6 @@ private:
   
   /* Get list of channels in the same FEB. Used for FEBAverage method */
   std::vector<HWIdentifier>& getFEBChans(const HWIdentifier chid, const LArBadChannelCont* bcCont);
-
-  StatusCode setSymlink(const LArRampComplete* ramp) const;
-  StatusCode setSymlink(const LArOFCComplete* ofc) const;
-  StatusCode setSymlink(const LArMphysOverMcalComplete* ramp) const;
-  StatusCode setSymlink(const LArCaliWaveContainer* ) const 
-  {return StatusCode::SUCCESS;};
-  StatusCode setSymlink(const LArAutoCorrComplete* ) const; 
 
   enum patchMethod{
     FEBNeighbor,

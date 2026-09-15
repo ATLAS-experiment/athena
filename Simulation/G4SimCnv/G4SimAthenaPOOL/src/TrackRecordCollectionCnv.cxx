@@ -22,8 +22,8 @@ TrackRecordCollection* TrackRecordCollectionCnv::createTransient(const Token* to
     TrackRecordCollection       *trans_cont(0);
     
    // GUIDs are here:
-    static const pool::Guid   p1_guid("1B1EEE3B-4647-41B4-B1D4-495DF77F0D3C");
-    static const pool::Guid   p2_guid("22D044AD-A13A-42BF-B2A4-BDAF5BE2D819");
+    static const Guid   p1_guid("1B1EEE3B-4647-41B4-B1D4-495DF77F0D3C");
+    static const Guid   p2_guid("22D044AD-A13A-42BF-B2A4-BDAF5BE2D819");
 
    if( this->compareClassGuid(token, p1_guid))  {
       std::unique_ptr< TrackRecordCollection_p1 >   col_vect( this->poolReadObject< TrackRecordCollection_p1 >(token) );

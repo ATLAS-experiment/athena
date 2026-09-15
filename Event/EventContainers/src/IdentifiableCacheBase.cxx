@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: IdentifiableCacheBase.cxx 791541 2017-01-09 10:43:53Z smh $
@@ -16,7 +16,6 @@
 // INVALID --- Conversion in progress or intention to add soon.
 
 #include "EventContainers/IdentifiableCacheBase.h"
-#include "CxxUtils/AthUnlikelyMacros.h"
 #include <bit>
 
 namespace EventContainers {
@@ -101,7 +100,7 @@ int IdentifiableCacheBase::itemInProgress (IdentifierHash hash){
 
 const void* IdentifiableCacheBase::find (IdentifierHash hash) noexcept
 {
-  if (ATH_UNLIKELY(hash >= m_vec.size())) return nullptr;
+  if (hash >= m_vec.size()) [[unlikely]] return nullptr;
   const void* p = m_vec[hash].load(std::memory_order_acquire);
   if (p >= ABORTED)
     return nullptr;
@@ -122,7 +121,7 @@ const void* IdentifiableCacheBase::waitFor(IdentifierHash hash)
 
 const void* IdentifiableCacheBase::findWait (IdentifierHash hash)
 {
-  if (ATH_UNLIKELY(hash >= m_vec.size())) return nullptr;
+  if (hash >= m_vec.size()) [[unlikely]] return nullptr;
   const void* p = waitFor(hash);
   if(p>=ABORTED) return nullptr;
   return p;
@@ -137,7 +136,7 @@ const void* IdentifiableCacheBase::get (IdentifierHash hash)
 {
   // If it's there already, return directly without locking.
   const void* ptr = nullptr;
-  if (ATH_UNLIKELY(hash >= m_vec.size())) return ptr;
+  if (hash >= m_vec.size()) [[unlikely]] return ptr;
 
   if(m_vec[hash].compare_exchange_strong(ptr, INVALID) ) {//Exchanges ptr with current value!!
      // Make the payload.
@@ -203,7 +202,7 @@ std::vector<IdentifierHash> IdentifiableCacheBase::ids()
 
 std::pair<bool, const void*> IdentifiableCacheBase::add (IdentifierHash hash, const void* p) noexcept
 {
-  if (ATH_UNLIKELY(hash >= m_vec.size())) return std::make_pair(false, nullptr);
+  if (hash >= m_vec.size()) [[unlikely]] return std::make_pair(false, nullptr);
   if(p==nullptr) return std::make_pair(false, nullptr);
   const void* nul=nullptr;
   if(m_vec[hash].compare_exchange_strong(nul, p, std::memory_order_release, std::memory_order_relaxed)){

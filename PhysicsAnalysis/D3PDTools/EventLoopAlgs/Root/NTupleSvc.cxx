@@ -53,9 +53,7 @@ namespace EL
 
   void NTupleSvc ::
   testInvariant () const
-  {
-    RCU_INVARIANT (this != 0);
-  }
+  {}
 
 
 

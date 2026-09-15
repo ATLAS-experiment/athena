@@ -31,6 +31,9 @@
 #include "../PU1/PU1SuppAlgTool.h"
 
 #include "../GraphSvc.h"
+#include "../JET1Alg.h"
+#include "../TOBTextReader.h"
+#include "../TOBTextWriter.h"
 
 DECLARE_COMPONENT(GlobalSim::GlobalSimulationAlg)
 
@@ -59,5 +62,10 @@ DECLARE_COMPONENT(GlobalSim::GlobalCellTowerAlgTool)
 
 DECLARE_COMPONENT(GlobalSim::PU1SuppTestBenchAlg)
 DECLARE_COMPONENT(GlobalSim::PU1SuppAlgTool)
+
+
+DECLARE_COMPONENT(GlobalSim::JET1Alg)
+DECLARE_COMPONENT(GlobalSim::TOBTextReader)
+DECLARE_COMPONENT(GlobalSim::TOBTextWriter)
 
 DECLARE_COMPONENT(GlobalSim::GraphSvc)

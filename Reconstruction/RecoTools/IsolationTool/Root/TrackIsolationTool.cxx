@@ -18,6 +18,7 @@
 #include "xAODPrimitives/IsolationHelpers.h"
 #include "xAODPrimitives/IsolationCorrectionHelper.h"
 #include "xAODMuon/Muon.h"
+#include "xAODEgamma/Electron.h"
 #include <iomanip>
 
 namespace xAOD {
@@ -97,6 +98,15 @@ namespace xAOD {
                         muon->phi()<<" q: "<<muon->charge()<<" primaryAuthor: "<<muon->author()<< " allAuthors: "<<muon->allAuthors());
       } else return tp;
     }
+    else if( particle.type() == xAOD::Type::ObjectType::Electron )
+      {
+	const Electron* electron = static_cast<const xAOD::Electron*>(&particle);
+	if (electron->author(xAOD::EgammaParameters::AuthorFwdElectron) && m_DoTimingSel)
+	  {
+	    const xAOD::TrackParticle* tp = electron->trackParticle();
+	    return tp;
+	  }
+      }
     return &particle;
   }
 
@@ -262,6 +272,20 @@ namespace xAOD {
 
     // check dr2
     float dr2 = deta*deta + dphi*dphi;
+
+    float dT_Sig=0;
+    //CheckTiming for ForwardElectron case
+    if(m_DoTimingSel &&  input.particle->type() == xAOD::Type::ObjectType::TrackParticle)
+      {
+	const xAOD::TrackParticle* tp = static_cast<const xAOD::TrackParticle*>(input.particle);
+        if(tp->hasValidTime() && tp2.hasValidTime()) {
+          dT_Sig = abs(tp->time() - tp2.time()) / sqrt( pow(tp2.timeResolution(),2)+pow(tp->timeResolution(),2));
+        } else {
+           ATH_MSG_DEBUG("No valid time for the track while doing track->time()" );
+           dT_Sig=0;
+        }
+      }
+    if( dT_Sig > m_maxTime) return;
 
     // check cone if using cone based overlap removal
     if(input.corrections.trackbitset.test(static_cast<unsigned int>(Iso::coreTrackCone))

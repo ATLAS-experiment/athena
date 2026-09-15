@@ -8,7 +8,7 @@
 #include <TList.h>
 #include <TSystem.h>
 #include <TFile.h>
-#include <regex>
+#include <string>
 
 bool try_exec(const std::string& cmd)
 {
@@ -51,8 +51,14 @@ int main (int argc, char **argv)
   TObject* obj;
   while ((obj = itr())) {
     EL::OutputStream* os = dynamic_cast<EL::OutputStream*>(obj);
-    if (std::regex_match(output, std::regex(os->label() + "\\.root.*")) ||
-	std::regex_match(output, std::regex(".*\\." + os->label() + "\\.root.*")))
+    // Match the output file against this stream's label using plain string
+    // comparison: either it starts with "<label>.root" or it contains
+    // ".<label>.root".  (Interpolating the label into a regex would misbehave
+    // for labels containing regex metacharacters.)
+    const std::string prefix = os->label() + ".root";
+    const std::string infix = "." + os->label() + ".root";
+    if (output.compare(0, prefix.size(), prefix) == 0 ||
+	output.find(infix) != std::string::npos)
     {
       type = os->options()->castString(EL::OutputStream::optType, "", SH::MetaObject::CAST_NOCAST_DEFAULT);
       mergeCmd = os->options()->castString(EL::OutputStream::optMergeCmd, "", SH::MetaObject::CAST_NOCAST_DEFAULT);
@@ -71,4 +77,5 @@ int main (int argc, char **argv)
   }
   mergeCmd += " " + output + " " + input;
   if (not try_exec(mergeCmd)) return -1;
+  return 0;
 }

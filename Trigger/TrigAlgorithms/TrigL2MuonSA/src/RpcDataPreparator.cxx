@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RpcDataPreparator.h"
@@ -179,13 +179,16 @@ StatusCode TrigL2MuonSA::RpcDataPreparator::prepareData(const EventContext& ctx,
             const float l = std::sqrt(hitz*hitz+r2);
             const float tan = std::sqrt( (l-hitz)/(l+hitz) );
             const float eta = -std::log(tan);
+            if (!p_roids)[[unlikely]]{
+              throw std::runtime_error("p_roids is nullptr in prepareData");
+            }
             const float deta = std::abs(p_roids->eta() - eta);
             const float dphi = std::abs(CxxUtils::wrapToPi(p_roids->phi() - phi));
 
             lutDigit.eta = eta;
             lutDigit.phi = phi;
             lutDigit.l = l;
-            rpcHits.push_back(lutDigit);
+            rpcHits.push_back(std::move(lutDigit));
 
             float deta_thr = 0.1;
             float dphi_thr = 0.1;

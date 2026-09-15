@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -106,8 +106,10 @@ StatusCode TauIDVarCalculator::execute(xAOD::TauJet& tau) const {
         }
         const xAOD::PFO* shot = *shotLink;
         float etShot = 0.;
-        shot->attribute(xAOD::PFODetails::tauShots_pt3, etShot);
-       
+        bool ok = shot->attribute(xAOD::PFODetails::tauShots_pt3, etShot);
+        if (!ok) {
+         ATH_MSG_WARNING("TauIDVarCalculator::execute: Something wrong in retrieve of attribute.");
+        }
         // In 0.012 x 0.1 window
         if(std::abs(shot->eta() - etaCalo) > 0.012 ) continue;
         if(std::abs(xAOD::P4Helpers::deltaPhi(shot->phi(), phiCalo)) > 0.1 ) continue;

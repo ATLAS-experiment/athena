@@ -28,9 +28,9 @@ void addCrossVertexDeriv(CascadeEvent &cascadeEvent_, double *ader,
                          long int MATRIXSIZE,
                          const std::vector<int> &matrixPnt);
 void copyFullMtx(const double *Input, long int IPar, long int IDIM,
-                 double *Target, long int TStart, long int TDIM);
+                 double *Target, long int TStart, long int TDIM) noexcept;
 void getNewCov(const double *OldCov, const double *Der, double *Cov,
-               long int DIM) noexcept;
+               long int DIM);
 }  // namespace Trk
 
 #endif

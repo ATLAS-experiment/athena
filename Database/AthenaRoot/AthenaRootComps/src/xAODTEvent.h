@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // xAODTEvent.h 
@@ -22,12 +22,12 @@ namespace xAOD {
 class xAODTEvent : public xAOD::TEvent
 { 
  public: 
-  using TEvent::TEvent;
+  xAODTEvent(EAuxMode mode = kClassAccess)
+    : xAOD::TEvent (mode)
+  {
+    m_ctx = Gaudi::Hive::currentContext();
+  }
   using TEvent::getInputObject;
-  /*inline virtual const void* getInputObject( const std::string& key,
-			const std::type_info& ti ) {
-      return TEvent::getInputObject(key, ti);
-  }*/
 }; 
 
 } //> end namespace xAOD

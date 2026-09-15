@@ -20,8 +20,13 @@ namespace Trk {
 class VKalVrtControl;
 class IVKalState;
 
-typedef void (*addrPropagator)(long int, long int, double *, double *, double *,
-                               double *, double *, double *);
+typedef void (*addrPropagator)(long int, long int,
+                               const double *,  // ParOld
+                               const double *,  // CovOld
+                               const double *,  // RefStart
+                               const double *,  // RefEnd
+                               double *,        // ParNew
+                               double *);       // CovNew
 
 class VKTrack;
 class VKalVrtControlBase;
@@ -38,8 +43,8 @@ class basePropagator {
   // Propagator from RefStart point to RefEnd point
   //     ParOld[5] - track perigee parameters with respect to RefStart point
   //     ParNew[5] - track perigee parameters with respect to RefEnd point
-  virtual void Propagate(long int TrkID, long int Charge, double *ParOld,
-                         double *CovOld, double *RefStart, double *RefEnd,
+  virtual void Propagate(long int TrkID, long int Charge, const double *ParOld,
+                         const double *CovOld, const double *RefStart, const double *RefEnd,
                          double *ParNew, double *CovNew,
                          IVKalState &istate) const = 0;
   virtual bool checkTarget(double *RefEnd, const IVKalState &istate) const = 0;
@@ -56,12 +61,12 @@ class vkalPropagator {
   vkalPropagator();
   ~vkalPropagator() = default;
 
-  static void Propagate(long int TrkID, long int Charge, double *ParOld,
-                        double *CovOld, double *RefStart, double *RefEnd,
-                        double *ParNew, double *CovNew,
-                        VKalVrtControlBase *FitControl = 0);
-  static bool checkTarget(double *RefEnd);
-  static void Propagate(VKTrack *trk, double *RefStart, double *RefEnd,
+  static void Propagate(long int TrkID, long int Charge, const double *ParOld,
+                               const double *CovOld, const double *RefOld, double *RefNew,
+                               double *ParNew, double *CovNew,
+                               VKalVrtControlBase *FitControl = 0);
+  static bool checkTarget(const double *RefEnd);
+  static void Propagate(VKTrack *trk, const double *RefStart, const double *RefEnd,
                         double *ParNew, double *CovNew,
                         VKalVrtControlBase *FitControl = 0);
 };

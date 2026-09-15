@@ -1,5 +1,5 @@
 
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -147,7 +147,7 @@ def ActsInDetMainTrackFindingAlgCfg(flags,
     ### kwargs.setdefault("maxSharedHits", tolist(flags.Tracking.ActiveConfig.maxShared))
 
     # GBTS produces much purer seeds, so the branch stopper selections aren't needed with GBTS seeds.
-    if flags.Acts.SeedingStrategy is not SeedingStrategy.Gbts:
+    if flags.Tracking.ActiveConfig.PixelSeedingStrategy is not SeedingStrategy.Gbts:
         kwargs.setdefault("ptMinMeasurements", seedOrder(flags, pixel=[3], strip=[6]))
         kwargs.setdefault("absEtaMaxMeasurements", seedOrder(flags, pixel=[3], strip=[999999]))
 
@@ -170,11 +170,11 @@ def ActsInDetMainTrackFindingAlgCfg(flags,
         from AthenaConfiguration.Enums import BeamType
 
         if flags.Beam.Type is not BeamType.Cosmics and flags.Acts.PixelCalibrationStrategy.usesCalibration():
-            from ActsConfig.ActsMeasurementCalibrationConfig import ActsAnalogueClusteringToolCfg
+            from ActsConfig.ActsMeasurementCalibrationConfig import ActsPixelCalibrationToolCfg
 
             kwargs.setdefault(
                 'PixelCalibrator',
-                acc.popToolsAndMerge(ActsAnalogueClusteringToolCfg(flags))
+                acc.popToolsAndMerge(ActsPixelCalibrationToolCfg(flags))
             )
     # !!! Calibrator is not used for Inner Detector yet
     if 'StripCalibrator' not in kwargs:
@@ -273,7 +273,7 @@ def ActsInDetTrackFindingCfg(flags,
     #                                                 InputDestinyCollection = f'{seedKey}Destiny'))
 
     # Persistification
-    if flags.Acts.EDM.PersistifyTracks:
+    if flags.Acts.EDM.PersistifyTracks or flags.Output.doWriteESD:
         trackColl = kwargs['ACTSTracksLocation']
         from ActsConfig.ActsEventCnvConfig import ActsToXAODTrackConverterAlgCfg
         acc.merge(ActsToXAODTrackConverterAlgCfg(flags,

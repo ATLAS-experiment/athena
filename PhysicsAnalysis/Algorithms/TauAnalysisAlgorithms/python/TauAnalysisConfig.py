@@ -440,60 +440,55 @@ class TauWorkingPointEfficiencyConfig (ConfigBlock) :
 
             # TauEfficiencyCorrectionTool for Identification, use only in case TauID is requested in TauSelectionTool
             if self.quality not in ('VeryLoose','Baseline','BaselineForFakes'):
-                # current recommendations are for RNN ID Run2/Run3 or GNTAU for Run3, 
-                if (not self.useGNTau or (self.useGNTau and campaign == "mc23")): 
+                alg = config.createAlgorithm( 'CP::TauEfficiencyCorrectionsAlg',
+                               'TauEfficiencyCorrectionsAlgID' )
+                config.addPrivateTool( 'efficiencyCorrectionsTool',
+                            'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
+                alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [4]
 
-                    alg = config.createAlgorithm( 'CP::TauEfficiencyCorrectionsAlg',
-                                   'TauEfficiencyCorrectionsAlgID' )
-                    config.addPrivateTool( 'efficiencyCorrectionsTool',
-                                'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
-                    alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [4]
-
-                    jetIDLevels = (
-                        {"Loose": 11, "Medium": 12, "Tight": 13}
-                        if self.useGNTau
-                        else {"Loose": 7, "Medium": 8, "Tight": 9}
+                jetIDLevels = (
+                    {"Loose": 11, "Medium": 12, "Tight": 13}
+                    if self.useGNTau
+                    else {"Loose": 7, "Medium": 8, "Tight": 9}
+                )
+                wp = self.quality
+                if not self.useGNTau and self.manual_sel_rnnwp is not None:
+                    wp = self.manual_sel_rnnwp.capitalize()
+                if wp not in jetIDLevels:
+                    raise ValueError(
+                        'Invalid tauID: "'
+                        + str(wp)
+                        + '". Allowed values are Loose, Medium, Tight'
                     )
-                    wp = self.quality
-                    if not self.useGNTau and self.manual_sel_rnnwp is not None:
-                        wp = self.manual_sel_rnnwp.capitalize()
-                    if wp not in jetIDLevels:
-                        raise ValueError(
-                            'Invalid tauID: "'
-                            + str(wp)
-                            + '". Allowed values are Loose, Medium, Tight'
-                        )
 
-                    alg.efficiencyCorrectionsTool.JetIDLevel = jetIDLevels[wp]
-                    alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
-                    alg.efficiencyCorrectionsTool.Campaign = campaign
-                    alg.efficiencyCorrectionsTool.useGNTau = self.useGNTau
-                    alg.scaleFactorDecoration = 'tau_ID_effSF' + selectionPostfix + '_%SYS%'
-                    alg.outOfValidity = 2 #silent
-                    alg.outOfValidityDeco = 'bad_ID_eff' + selectionPostfix
-                    alg.taus = config.readName (self.containerName)
-                    alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-                    if self.saveDetailedSF:
-                        config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
-                                             'ID_effSF' + postfix)
-                    sfList += [alg.scaleFactorDecoration]
+                alg.efficiencyCorrectionsTool.JetIDLevel = jetIDLevels[wp]
+                alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
+                alg.efficiencyCorrectionsTool.Campaign = campaign
+                alg.efficiencyCorrectionsTool.useGNTau = self.useGNTau
+                alg.scaleFactorDecoration = 'tau_ID_effSF' + selectionPostfix + '_%SYS%'
+                alg.outOfValidity = 2 #silent
+                alg.outOfValidityDeco = 'bad_ID_eff' + selectionPostfix
+                alg.taus = config.readName (self.containerName)
+                alg.preselection = config.getPreselection (self.containerName, self.selectionName)
+                if self.saveDetailedSF:
+                    config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
+                                         'ID_effSF' + postfix)
+                sfList += [alg.scaleFactorDecoration]
 
             # TauEfficiencyCorrectionTool for eVeto both on true tau and fake tau, use only in case eVeto is requested in TauSelectionTool
             if self.use_eVeto:
-                # eVeto correction for fake tau are for RNN ID Run2/Run3, or for GNTau for Run3   
-                if (not self.useGNTau or (self.useGNTau and campaign == "mc23")):
+                #use only in case TauID is requested in TauSelectionTool
+                if self.quality not in ('VeryLoose','Baseline','BaselineForFakes'): 
                     # correction for fake tau
                     alg = config.createAlgorithm( 'CP::TauEfficiencyCorrectionsAlg',
-                                       'TauEfficiencyCorrectionsAlgEvetoFakeTau' )
+                                        'TauEfficiencyCorrectionsAlgEvetoFakeTau' )
                     config.addPrivateTool( 'efficiencyCorrectionsTool',
                                     'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
                     alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [10]
                     # since all TauSelectionTool config files have loose eRNN, code only this option for now
                     alg.efficiencyCorrectionsTool.EleIDLevel = 2
-                    #overwrite decision in case user selects a WP manually
-                    if self.manual_sel_evetowp == "loose":
-                        alg.efficiencyCorrectionsTool.EleIDLevel = 2
-                    elif self.manual_sel_evetowp == "medium":
+                    #overwrite decision in case user selects a WP different than "loose" manually
+                    if self.manual_sel_evetowp == "medium":
                         alg.efficiencyCorrectionsTool.EleIDLevel = 3
 
                     alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
@@ -543,10 +538,8 @@ class TauWorkingPointEfficiencyConfig (ConfigBlock) :
                 alg.scaleFactorDecoration = 'tau_EvetoTrueTau_effSF' + selectionPostfix + '_%SYS%'
                 # since all TauSelectionTool config files have loose eRNN, code only this option for now
                 alg.efficiencyCorrectionsTool.EleIDLevel = 2
-                #overwrite decision in case user selects a WP manually
-                if self.manual_sel_evetowp == "loose":
-                    alg.efficiencyCorrectionsTool.EleIDLevel = 2
-                elif self.manual_sel_evetowp == "medium":
+                #overwrite decision in case user selects a WP different than "loose" manually
+                if self.manual_sel_evetowp == "medium":
                     alg.efficiencyCorrectionsTool.EleIDLevel = 3
                 alg.outOfValidity = 2 #silent
                 alg.outOfValidityDeco = 'bad_EvetoTrueTau_eff' + selectionPostfix

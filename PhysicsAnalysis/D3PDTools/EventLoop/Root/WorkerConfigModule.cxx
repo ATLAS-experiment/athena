@@ -33,11 +33,25 @@ namespace EL
       std::string configFile = data.m_worker->metaData()->castString (Job::optWorkerConfigFile, "");
       if (!configFile.empty())
       {
-        configFile = PathResolverFindDataFile (configFile);
-        TPython::LoadMacro (configFile.c_str());
+        const std::string resolved = PathResolverFindDataFile (configFile);
+        if (resolved.empty())
+        {
+          ANA_MSG_ERROR ("failed to find worker config file " << configFile);
+          return StatusCode::FAILURE;
+        }
+        TPython::LoadMacro (resolved.c_str());
         WorkerConfig config (&data);
-        TPython::Bind (&config, "workerConfig");
-        TPython::Exec ("fillWorkerConfig (workerConfig)");
+        if (!TPython::Bind (&config, "workerConfig"))
+        {
+          ANA_MSG_ERROR ("failed to bind the worker config object");
+          return StatusCode::FAILURE;
+        }
+        if (!TPython::Exec ("fillWorkerConfig (workerConfig)"))
+        {
+          ANA_MSG_ERROR ("failed to execute the worker config script " << resolved);
+          TPython::Bind (nullptr, "workerConfig");
+          return StatusCode::FAILURE;
+        }
         TPython::Bind (nullptr, "workerConfig");
       }
 

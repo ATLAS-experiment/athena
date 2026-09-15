@@ -285,7 +285,6 @@ void LArGeo::EndcapDMConstruction::create(GeoIntrusivePtr<GeoFullPhysVol> envelo
     const double coldbox3_height = 220.*Gaudi::Units::mm;
     const GeoMaterial* coldbox_mat = iron;
     GeoShape* coldbox1 = new GeoTube(coldbox1_Router - coldbox1_wall, coldbox1_Router, coldbox1_height/2); // wide part
-    GeoShape* coldbox11 = new GeoTube(0., coldbox1_Router, coldbox1_height/2); // wide part for FTenvelope
     GeoLogVol* coldbox1LV = new GeoLogVol(name + "ColdBox1", coldbox1, coldbox_mat);
     GeoIntrusivePtr<GeoPhysVol> coldbox1PV = new GeoPhysVol(coldbox1LV);
     GeoShape* coldbox21 = new GeoTube(0., coldbox1_Router, coldbox2_height/2); // plate
@@ -311,17 +310,41 @@ void LArGeo::EndcapDMConstruction::create(GeoIntrusivePtr<GeoFullPhysVol> envelo
       -wflange_height/2 - bellow_height - cflange_height - coldbox1_height - coldbox2_height - coldbox3_height/2
     );
 
-    const GeoShape& FTenvelope = wflange->add(
-      (*bellow) << bellow_pos
-    ).add(
-      (*cflange) << cflange_pos
-    ).add(
-      (*coldbox11) << coldbox1_pos
-    ).add(
-      (*coldbox21) << coldbox2_pos
-    ).add(
-      (*coldbox31) << coldbox3_pos
+    // The SignalFT air envelope is built as one coaxial polycone, plus one
+    // boolean union with the non-coaxial ColdBox3 tube below.  From negative
+    // to positive z, the polycone covers these coaxial envelope sections:
+    // - z_min to the bellow: ColdBox2 plate, ColdBox1 and ColdFlange,
+    //   all enclosed at coldbox1_Router;
+    // - bellow: Bellow and VacuumCables, enclosed at bellow_Router;
+    // - warm end: WarmFlange, enclosed at wflange_R.
+    // Repeated z planes below encode the radius steps between these sections.
+    GeoPcon* coaxialEnvelope = new GeoPcon(0., 360.*Gaudi::Units::deg);
+    coaxialEnvelope->addPlane(
+      -wflange_height/2 - bellow_height - cflange_height - coldbox1_height - coldbox2_height,
+      0., coldbox1_Router
     );
+    coaxialEnvelope->addPlane(
+      -wflange_height/2 - bellow_height,
+      0., coldbox1_Router
+    );
+    coaxialEnvelope->addPlane(
+      -wflange_height/2 - bellow_height,
+      0., bellow_Router
+    );
+    coaxialEnvelope->addPlane(
+      -wflange_height/2,
+      0., bellow_Router
+    );
+    coaxialEnvelope->addPlane(
+      -wflange_height/2,
+      0., wflange_R
+    );
+    coaxialEnvelope->addPlane(
+      wflange_height/2,
+      0., wflange_R
+    );
+
+    const GeoShape& FTenvelope = coaxialEnvelope->add((*coldbox31) << coldbox3_pos);
 
     GeoLogVol* FTLV = new GeoLogVol(name + "Envelope",
       &FTenvelope,

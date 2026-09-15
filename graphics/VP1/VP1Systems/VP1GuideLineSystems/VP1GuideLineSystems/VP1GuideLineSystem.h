@@ -59,6 +59,7 @@ public Q_SLOTS:
 
   //Channel should explicitly call this after making all connections to other systems.
   void possiblyEmit_ApplicableProjectionsChanged();
+  void updateHGTDGuideVisibility();
 
 signals:
 

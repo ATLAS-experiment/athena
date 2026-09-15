@@ -4,6 +4,7 @@
 #define XAODEVENTFORMATCNV_EVENTFORMATSTREAMHELPERTOOL
 
 #include <mutex>
+#include <regex>
 #include <set>
 #include <string>
 #include <vector>
@@ -87,6 +88,11 @@ class EventFormatStreamHelperTool : public extends< AthAlgTool, IAthenaOutputToo
     "Key of DataHeader produced by output stream" };
 
   StatusCode collectFormatMetadata();
+
+  /// @c m_ignoreKeys, compiled once in @c initialize()
+  std::vector< std::regex > m_ignoreKeyRegexes;
+  /// @c m_typeNames, compiled once in @c initialize()
+  std::vector< std::regex > m_typeNameRegexes;
 
   /** @brief look up hash corresponding to primary class ID
 

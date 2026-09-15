@@ -11,13 +11,14 @@
 #include "TauAnalysisTools/Enums.h"
 #include "TauAnalysisTools/SharedFilesVersion.h"
 
+#include <AsgTools/AsgToolConfig.h>
+
 namespace TauAnalysisTools
 {
 
 //______________________________________________________________________________
 TauEfficiencyCorrectionsTool::TauEfficiencyCorrectionsTool( const std::string& sName )
   : asg::AsgMetadataTool( sName )
-  , m_tTool()
   , m_bIsData(false)
   , m_bIsConfigured(false)
   , m_iRunNumber(0)
@@ -50,9 +51,6 @@ StatusCode TauEfficiencyCorrectionsTool::initialize()
     ATH_MSG_ERROR("Unknown RecommendationTag " << m_sRecommendationTag);
     return StatusCode::FAILURE;
   }
-
-  ATH_CHECK(m_tTool.setProperty("OutputLevel", this->msg().level()));
-  ATH_CHECK(m_tTool.initialize());
 
   // Add the affecting systematics to the global registry
   CP::SystematicRegistry& registry = CP::SystematicRegistry::getInstance();
@@ -212,7 +210,9 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
         
 	if(m_useGNTau){
           if(m_sCampaign=="mc23"){
-              m_sInputFilePathJetIDHadTau = sDirectory + "GNTauID_TrueHadTau_Run3.root";  		  
+              m_sInputFilePathJetIDHadTau = m_useFastSim ? sDirectory + "GNTauID_TrueHadTau_Run3_incl_AF3.root" : sDirectory + "GNTauID_TrueHadTau_Run3.root";
+	  } else if (m_sCampaign=="mc20"){
+	      m_sInputFilePathJetIDHadTau = m_useFastSim ? sDirectory + "GNTauID_TrueHadTau_Run2_incl_AF3.root" : sDirectory + "GNTauID_TrueHadTau_Run2.root";
 	  } else {  
               ATH_MSG_ERROR("GNTau ID correction not supported for campaign "<< m_sCampaign);
 	      return StatusCode::FAILURE;
@@ -234,23 +234,31 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
         continue;
       }
 
-      m_tTool.setTypeAndName("TauAnalysisTools::CommonEfficiencyTool/JetIDHadTauTool_tauID_"+sJetIDWP);
-      ATH_CHECK(m_tTool.setProperty("InputFilePath", m_sInputFilePathJetIDHadTau));
-      ATH_CHECK(m_tTool.setProperty("VarName", m_sVarName));
-      ATH_CHECK(m_tTool.setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
-      ATH_CHECK(m_tTool.setProperty("WP", sJetIDWP));
-      ATH_CHECK(m_tTool.setProperty("ApplyToData", m_applyToData));
+      if (m_tTool.empty()){
+        asg::AsgToolConfig config("TauAnalysisTools::CommonEfficiencyTool/JetIDHadTauTool_tauID_"+sJetIDWP);
+        ATH_CHECK(config.setProperty("InputFilePath", m_sInputFilePathJetIDHadTau));
+        ATH_CHECK(config.setProperty("VarName", m_sVarName));
+        ATH_CHECK(config.setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
+        ATH_CHECK(config.setProperty("WP", sJetIDWP));
+        ATH_CHECK(config.setProperty("ApplyToData", m_applyToData));
+        ATH_CHECK(config.makePrivateTool(m_tTool));
+      }
+      ATH_CHECK(m_tTool.retrieve());
     }
     else if (iEfficiencyCorrectionType == SFRecoHadTau)
     {
       if (m_sInputFilePathRecoHadTau.empty()) m_sInputFilePathRecoHadTau = sDirectory + "Reco_TrueHadTau_2026_v0.root";
       m_sVarName = "TauScaleFactorReconstructionHadTau";
 
-      m_tTool.setTypeAndName("TauAnalysisTools::CommonEfficiencyTool/RecoHadTauTool");
-      ATH_CHECK(m_tTool.setProperty("InputFilePath", m_sInputFilePathRecoHadTau));
-      ATH_CHECK(m_tTool.setProperty("VarName", m_sVarName));
-      ATH_CHECK(m_tTool.setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
-      ATH_CHECK(m_tTool.setProperty("ApplyToData", m_applyToData));
+      if (m_tTool.empty()){
+        asg::AsgToolConfig config("TauAnalysisTools::CommonEfficiencyTool/RecoHadTauTool");
+        ATH_CHECK(config.setProperty("InputFilePath", m_sInputFilePathRecoHadTau));
+        ATH_CHECK(config.setProperty("VarName", m_sVarName));
+        ATH_CHECK(config.setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
+        ATH_CHECK(config.setProperty("ApplyToData", m_applyToData));
+        ATH_CHECK(config.makePrivateTool(m_tTool));
+      }
+      ATH_CHECK(m_tTool.retrieve());   
     }
     else if (iEfficiencyCorrectionType == SFEleIDHadTau)
     {
@@ -267,13 +275,17 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
       m_sVarName = "TauScaleFactorEleIDHadTau";
       std::string ele_wp = ConvertEleIDToString(m_iEleIDLevel);
 
-      m_tTool.setTypeAndName("TauAnalysisTools::CommonEfficiencyTool/EleIDHadTauTool_eRNN_"+ele_wp);
-      ATH_CHECK(m_tTool.setProperty("InputFilePath", m_sInputFilePathEleIDHadTau));
-      ATH_CHECK(m_tTool.setProperty("VarName", m_sVarName));
-      ATH_CHECK(m_tTool.setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
-      ATH_CHECK(m_tTool.setProperty("WP", ele_wp));
-      ATH_CHECK(m_tTool.setProperty("UseTauSubstructure", false));
-      ATH_CHECK(m_tTool.setProperty("ApplyToData", m_applyToData));
+      if (m_tTool.empty()){
+        asg::AsgToolConfig config("TauAnalysisTools::CommonEfficiencyTool/EleIDHadTauTool_eRNN_"+ele_wp);
+        ATH_CHECK(config.setProperty("InputFilePath", m_sInputFilePathEleIDHadTau));
+        ATH_CHECK(config.setProperty("VarName", m_sVarName));
+        ATH_CHECK(config.setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
+        ATH_CHECK(config.setProperty("WP", ele_wp));
+        ATH_CHECK(config.setProperty("UseTauSubstructure", false));
+        ATH_CHECK(config.setProperty("ApplyToData", m_applyToData));   
+        ATH_CHECK(config.makePrivateTool(m_tTool));
+      }
+      ATH_CHECK(m_tTool.retrieve());
     }
     else if (iEfficiencyCorrectionType == SFEleIDElectron)
     {
@@ -307,8 +319,15 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
 	    }
         } else if(m_sCampaign=="mc20"){
             if(m_useGNTau){
-              ATH_MSG_ERROR("Eveto with GNTau ID correction not supported for campaign "<< m_sCampaign);
-	      return StatusCode::FAILURE;
+	      if( m_iJetIDLevel == static_cast<int>(JETIDGNTAULOOSE)){
+                  m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_TrueElectron_Run2_looseGNTauID_1p.root";
+              } else if( m_iJetIDLevel == static_cast<int>(JETIDGNTAUMEDIUM)){
+                  m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_TrueElectron_Run2_mediumGNTauID_1p.root";
+              }
+              else {
+                  ATH_MSG_ERROR("SFEleIDElectron correction not supported for JetIDLevel="<<m_iJetIDLevel);
+                  return StatusCode::FAILURE;
+              } 	    
 	    } else {
               if( m_iJetIDLevel == static_cast<int>(JETIDRNNLOOSE)){
                   m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_TrueElectron_Run2_looseRNNTauID_1p.root";
@@ -326,13 +345,17 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
       std::string ele_wp = ConvertEleIDToString(m_iEleIDLevel);
       std::string sJetIDWP = ConvertJetIDToString(m_iJetIDLevel); 
 
-      m_tTool.setTypeAndName("TauAnalysisTools::CommonEfficiencyTool/EleIDElectronTool_eRNN_"+ele_wp+"_tauID_"+sJetIDWP);
-      ATH_CHECK(m_tTool.setProperty("InputFilePath", m_sInputFilePathEleIDElectron));
-      ATH_CHECK(m_tTool.setProperty("VarName", m_sVarName));
-      ATH_CHECK(m_tTool.setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
-      ATH_CHECK(m_tTool.setProperty("WP", ele_wp));
-      ATH_CHECK(m_tTool.setProperty("UseTauSubstructure", false));
-      ATH_CHECK(m_tTool.setProperty("ApplyToData", m_applyToData));
+      if (m_tTool.empty()){
+        asg::AsgToolConfig config("TauAnalysisTools::CommonEfficiencyTool/EleIDHadTauTool_eRNN_"+ele_wp);
+        ATH_CHECK(config.setProperty("InputFilePath", m_sInputFilePathEleIDElectron));
+        ATH_CHECK(config.setProperty("VarName", m_sVarName));
+        ATH_CHECK(config.setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
+        ATH_CHECK(config.setProperty("WP", ele_wp));
+        ATH_CHECK(config.setProperty("UseTauSubstructure", false));
+        ATH_CHECK(config.setProperty("ApplyToData", m_applyToData));
+        ATH_CHECK(config.makePrivateTool(m_tTool));
+      }
+      ATH_CHECK(m_tTool.retrieve());
 
     } else if (iEfficiencyCorrectionType == SFTriggerHadTau){
 
@@ -390,14 +413,18 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
       }
       m_sVarName = "TauScaleFactorTriggerHadTau";
       std::string sJetIDWP = ConvertTriggerIDToString(m_iJetIDLevel);
-            
-      m_tTool.setTypeAndName("TauAnalysisTools::CommonEfficiencyTool/TriggerHadTauTool_"+m_sTriggerName+"_tauID_"+sJetIDWP); 
-      ATH_CHECK(m_tTool.setProperty("InputFilePath", m_sInputFilePathTriggerHadTau));
-      ATH_CHECK(m_tTool.setProperty("VarName", m_sVarName));
-      ATH_CHECK(m_tTool.setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
-      ATH_CHECK(m_tTool.setProperty("WP", sJetIDWP));
-      ATH_CHECK(m_tTool.setProperty("DoTauTrig", true));
-      ATH_CHECK(m_tTool.setProperty("ApplyToData", m_applyToData));
+       
+      if (m_tTool.empty()){  
+        asg::AsgToolConfig config("TauAnalysisTools::CommonEfficiencyTool/TriggerHadTauTool_"+m_sTriggerName+"_tauID_"+sJetIDWP);
+        ATH_CHECK(config.setProperty("InputFilePath", m_sInputFilePathTriggerHadTau));
+        ATH_CHECK(config.setProperty("VarName", m_sVarName));
+        ATH_CHECK(config.setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
+        ATH_CHECK(config.setProperty("WP", sJetIDWP));
+        ATH_CHECK(config.setProperty("DoTauTrig", true));
+        ATH_CHECK(config.setProperty("ApplyToData", m_applyToData));
+        ATH_CHECK(config.makePrivateTool(m_tTool));
+      }
+      ATH_CHECK(m_tTool.retrieve());
     }
     else {
       ATH_MSG_WARNING("unsupported EfficiencyCorrectionsType with enum " << iEfficiencyCorrectionType);

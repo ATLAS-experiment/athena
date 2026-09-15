@@ -21,7 +21,7 @@ ALFA_GloRecEvCollection* ALFA_GloRecEvCollectionCnv::createTransient(const Token
     ALFA_GloRecEvCollectionCnv_p1   TPConverter_p1;
 
     ALFA_GloRecEvCollection       *trans_cont(nullptr); // probably inicialization
-    static const pool::Guid p1_guid ("210D255A-F94F-4009-9A9B-2122597330D5");
+    static const Guid p1_guid ("210D255A-F94F-4009-9A9B-2122597330D5");
     
     if( this->compareClassGuid(token, p1_guid)) {
          std::unique_ptr< ALFA_GloRecEvCollection_p1 >   col_vect( this->poolReadObject< ALFA_GloRecEvCollection_p1 >(token) );

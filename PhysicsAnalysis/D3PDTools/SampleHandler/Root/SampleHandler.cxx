@@ -8,7 +8,6 @@
 // includes
 //
 
-//protect
 #include <SampleHandler/SampleHandler.h>
 
 #include <iostream>
@@ -52,16 +51,15 @@ namespace SH
   std::string dbg (const SampleHandler& obj, unsigned verbosity)
   {
     std::ostringstream result;
-    result << "SampleHandler with " << obj.size() << " files";
+    result << "SampleHandler with " << obj.size() << " samples";
     if (verbosity % 10 > 0)
     {
       result << "\n";
-      for (SampleHandler::iterator sample = obj.begin(),
-	     end = obj.end(); sample != end; ++ sample)
+      for (auto *sample : obj)
       {
-	result << dbg (**sample, verbosity / 10) << "\n";
-      };
-    };
+	result << dbg (*sample, verbosity / 10) << "\n";
+      }
+    }
     return result.str();
   }
 
@@ -139,20 +137,21 @@ namespace SH
     if (!sample->name().empty() && m_named.find (sample->name()) != m_named.end())
       throw std::runtime_error ("can't add sample of name " + sample->name() + "\na sample with that name already exists\nold sample:\n" + dbg (*m_named.find (sample->name())->second, 9999) + "\nnew sample:\n" + dbg (*sample, 9999));
 
-    try
+    m_samples.push_back (sample);
+    if (!sample->name().empty())
     {
-      m_samples.push_back (sample);
-      if (!sample->name().empty())
+      try
       {
-        sample->lockName ();
-        m_named[sample->name()] = std::move (sample);
-        sample.reset();
-      }
-    } catch (...)
-    {
-      if (!m_samples.empty() && m_samples.back().get() == sample.get())
+        m_named[sample->name()] = sample;
+      } catch (...)
+      {
         m_samples.pop_back();
-      throw;
+        throw;
+      }
+      // rationale: only lock the name once the sample has been
+      //   successfully registered in both containers, so that a failed
+      //   insert does not leave the sample permanently name-locked.
+      sample->lockName ();
     }
   }
 
@@ -167,7 +166,7 @@ namespace SH
     for (auto& sample : sh.m_samples)
     {
       add (sample);
-    };
+    }
   }
 
 
@@ -178,14 +177,13 @@ namespace SH
     // invariant not used
     RCU_REQUIRE_SOFT (this != &sh);
 
-    for (iterator iter = sh.begin(), end2 = sh.end();
-	 iter != end2; ++ iter)
+    for (auto *source : sh)
     {
-      std::unique_ptr<Sample> sample (dynamic_cast<Sample*>((*iter)->Clone ()));
+      std::unique_ptr<Sample> sample (dynamic_cast<Sample*>(source->Clone ()));
       RCU_ASSERT (sample != nullptr);
-      sample->name (prefix + (*iter)->name());
+      sample->name (prefix + source->name());
       add (std::move (sample));
-    };
+    }
   }
 
 
@@ -195,7 +193,7 @@ namespace SH
   {
     // invariant not used
     const Sample *sample = get (name);
-    if (sample == 0)
+    if (sample == nullptr)
       throw std::runtime_error ("sample " + name + " not found in SampleHandler");
     remove (sample);
   }
@@ -206,7 +204,7 @@ namespace SH
   remove (const Sample *sample)
   {
     RCU_CHANGE_INVARIANT (this);
-    RCU_REQUIRE_SOFT (sample != 0);
+    RCU_REQUIRE_SOFT (sample != nullptr);
 
     auto nameIter = m_named.find (sample->name());
     if (nameIter == m_named.end())
@@ -227,7 +225,7 @@ namespace SH
     auto iter = m_named.find (name);
     if (iter != m_named.end())
       return iter->second.get();
-    return 0;
+    return nullptr;
   }
 
 
@@ -239,7 +237,7 @@ namespace SH
     auto iter = m_named.find (name);
     if (iter != m_named.end())
       return iter->second.get();
-    return 0;
+    return nullptr;
   }
 
 
@@ -268,7 +266,7 @@ namespace SH
         use = sample->tags().has (*iter);
       if (use)
         result.add (sample);
-    };
+    }
     return result;
   }
 
@@ -280,23 +278,21 @@ namespace SH
     RCU_READ_INVARIANT (this);
 
     std::vector<Sample*> result;
-    for (iterator sample = begin(),
-	   end2 = end(); sample != end2; ++ sample)
+    for (auto *sample : *this)
     {
-      if (name == (*sample)->meta()->castString (MetaFields::sourceSample, (*sample)->name()))
-	result.push_back ((*sample));
-    };
+      if (name == sample->meta()->castString (MetaFields::sourceSample, sample->name()))
+	result.push_back (sample);
+    }
     if (result.size() > 1)
     {
       std::ostringstream message;
       message << "multiple samples have " << name << " as a source:";
-      for (std::vector<Sample*>::const_iterator sample = result.begin(),
-	     end = result.end(); sample != end; ++ sample)
-	message << " " << (*sample)->name();
+      for (auto *sample : result)
+	message << " " << sample->name();
       throw std::runtime_error (message.str());
-    };
+    }
     if (result.empty())
-      return 0;
+      return nullptr;
     return result.front();
   }
 
@@ -344,12 +340,11 @@ namespace SH
     // rationale: not checking the return status, since this is just a
     //   courtesy directory creation that is Ok to fail.
     gSystem->MakeDirectory (directory.c_str());
-    for (iterator iter = this->begin(),
-	   end = this->end(); iter != end; ++ iter)
+    for (auto *sample : *this)
     {
-      TFile file ((directory + "/" + (*iter)->name() + ".root").c_str(), "RECREATE");
-      (*iter)->Write ("sample");
-    };
+      TFile file ((directory + "/" + sample->name() + ".root").c_str(), "RECREATE");
+      sample->Write ("sample");
+    }
   }
 
 
@@ -364,15 +359,14 @@ namespace SH
     {
       const std::string file = mydir.fileName();
 
-      if (file.size() > 5 &&
-	  file.rfind (".root") == file.size() - 5)
+      if (file.size() > 5 && file.rfind (".root") == file.size() - 5)
       {
-	TFile myfile (mydir.path().c_str(), "READ");
-	std::unique_ptr<Sample> sample {dynamic_cast<Sample*>(myfile.Get ("sample"))};
-	if (sample != 0)
-	  add (std::move(sample));
-      };
-    };    
+        TFile myfile (mydir.path().c_str(), "READ");
+        std::unique_ptr<Sample> sample {dynamic_cast<Sample*>(myfile.Get ("sample"))};
+        if (sample != 0)
+          add (std::move(sample));
+      }
+    }
   }
 
 
@@ -383,9 +377,8 @@ namespace SH
     // no invariant used
     RCU_REQUIRE_SOFT (!from.empty());
     RCU_REQUIRE_SOFT (!to.empty());
-    for (iterator sample = begin(),
-	   end = this->end(); sample != end; ++ sample)
-      (*sample)->updateLocation (from, to);
+    for (auto *sample : *this)
+      sample->updateLocation (from, to);
   }
 
 
@@ -395,15 +388,14 @@ namespace SH
   {
     // invariant not used
 
-    for (iterator sample = begin(),
-	   end2 = end(); sample != end2; ++ sample)
+    for (auto *sample : *this)
     {
       const std::string name
-	= (*sample)->meta()->castString (MetaFields::sourceSample, (*sample)->name());
+	= sample->meta()->castString (MetaFields::sourceSample, sample->name());
       const Sample *const mysource = source.get (name);
       if (mysource)
-	(*sample)->meta()->fetch (*mysource->meta());
-    };
+	sample->meta()->fetch (*mysource->meta());
+    }
   }
 
 
@@ -413,15 +405,14 @@ namespace SH
   {
     // invariant not used
 
-    for (iterator sample = begin(),
-	   end2 = end(); sample != end2; ++ sample)
+    for (auto *sample : *this)
     {
       const std::string name
-	= (*sample)->meta()->castString (MetaFields::sourceSample, (*sample)->name());
+	= sample->meta()->castString (MetaFields::sourceSample, sample->name());
       const Sample *const mysource = source.get (name);
       if (mysource)
-	(*sample)->meta()->fetchDefaults (*mysource->meta());
-    };
+	sample->meta()->fetchDefaults (*mysource->meta());
+    }
   }
 
 
@@ -432,18 +423,16 @@ namespace SH
     // invariant not used
 
     std::set<std::string> names;
-    for (iterator sample = begin(),
-	   end2 = end(); sample != end2; ++ sample)
+    for (auto *sample : *this)
     {
-      names.insert ((*sample)->meta()->castString (MetaFields::sourceSample, (*sample)->name()));
-    };
+      names.insert (sample->meta()->castString (MetaFields::sourceSample, sample->name()));
+    }
 
-    for (iterator sample = source.begin(),
-	   end2 = source.end(); sample != end2; ++ sample)
+    for (auto *sample : source)
     {
-      if (names.find ((*sample)->name()) == names.end())
+      if (names.find (sample->name()) == names.end())
 	return false;
-    };
+    }
     return true;
   }
 
@@ -454,11 +443,10 @@ namespace SH
   {
     // no invariant used
 
-    for (iterator sample = begin(),
-	   end2 = end(); sample != end2; ++ sample)
+    for (auto *sample : *this)
     {
-      (*sample)->meta()->setDouble (name, value);
-    };
+      sample->meta()->setDouble (name, value);
+    }
   }
 
 
@@ -468,11 +456,10 @@ namespace SH
   {
     // no invariant used
 
-    for (iterator sample = begin(),
-	   end2 = end(); sample != end2; ++ sample)
+    for (auto *sample : *this)
     {
-      (*sample)->meta()->setString (name, value);
-    };
+      sample->meta()->setString (name, value);
+    }
   }
 
 
@@ -485,12 +472,11 @@ namespace SH
 
     std::regex mypattern (pattern);
 
-    for (iterator sample = begin(),
-	   end2 = end(); sample != end2; ++ sample)
+    for (auto *sample : *this)
     {
-      if (RCU::match_expr (mypattern, (*sample)->name()))
-	(*sample)->meta()->setDouble (name, value);
-    };
+      if (RCU::match_expr (mypattern, sample->name()))
+	sample->meta()->setDouble (name, value);
+    }
   }
 
 
@@ -503,12 +489,11 @@ namespace SH
 
     std::regex mypattern (pattern);
 
-    for (iterator sample = begin(),
-	   end2 = end(); sample != end2; ++ sample)
+    for (auto *sample : *this)
     {
-      if (RCU::match_expr (mypattern, (*sample)->name()))
-	(*sample)->meta()->setString (name, value);
-    };
+      if (RCU::match_expr (mypattern, sample->name()))
+	sample->meta()->setString (name, value);
+    }
   }
 
 
@@ -569,11 +554,11 @@ namespace SH
 
 
 
-  std::span<std::shared_ptr<Sample>> SampleHandler ::
-  samples ()
+  std::span<const std::shared_ptr<Sample>> SampleHandler ::
+  samples () const
   {
     RCU_READ_INVARIANT (this);
-    return std::span<std::shared_ptr<Sample>> (m_samples.data(), m_samples.size());
+    return std::span<const std::shared_ptr<Sample>> (m_samples.data(), m_samples.size());
   }
 
 
@@ -589,7 +574,7 @@ namespace SH
       b.ReadULong (count);
       for (ULong_t iter = 0; iter != count; ++ iter)
       {
-	Sample *sample = 0;
+	Sample *sample = nullptr;
 	b >> sample;
 	sh.add (std::shared_ptr<Sample>(sample));
       }
@@ -599,12 +584,11 @@ namespace SH
       RCU_READ_INVARIANT (this);
       ULong_t count = m_samples.size();
       b.WriteULong (count);
-      for (auto iter = m_samples.begin(),
-	     end = m_samples.end(); iter != end; ++ iter)
+      for (const auto& sample_ptr : m_samples)
       {
-	Sample *sample = iter->get();
+	Sample *sample = sample_ptr.get();
 	b << sample;
       }
-    };
+    }
   }
 }

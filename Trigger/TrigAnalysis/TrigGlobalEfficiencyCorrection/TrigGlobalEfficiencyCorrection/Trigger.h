@@ -13,9 +13,9 @@
 
 #include "TrigGlobalEfficiencyCorrection/ImportData.h"
 #include "xAODBase/ObjectType.h"
-#include "CxxUtils/flat_set.h"
+#include <flat_set>
 template <typename Key>
-using flat_set = CxxUtils::flat_set<Key>;
+using flat_set = std::flat_set<Key>;
 
 namespace TrigGlobEffCorr {
 

@@ -39,8 +39,8 @@ public:
   CaloTowerBuilderToolBase* m_fcalTowerBldr{nullptr}; 
   CaloTowerBuilderToolBase* m_tileTowerBldr{nullptr}; 
   
-  pool::Guid  p0_guid{"8F94A938-3C19-4509-BBAA-E8EB0A64B524"};
-  pool::Guid  p1_guid{"E56D5471-A9E2-4787-B413-D3BD9F2AC55D"};
+  Guid  p0_guid{"8F94A938-3C19-4509-BBAA-E8EB0A64B524"};
+  Guid  p1_guid{"E56D5471-A9E2-4787-B413-D3BD9F2AC55D"};
   CaloTowerContainerCnv_p1 m_converter;
 };
 

@@ -11,9 +11,7 @@
 #include "src/ProtoTrackReportingAlg.h"
 #include "src/HGTDTrackExtensionAlg.h"
 #include "src/HGTDTruthTrackDecorationAlg.h"
-#ifdef ACTS_GNN_WITH_MODULEMAP
 #include "src/TrackFindingGNNAlg.h"
-#endif
 
 // Tools
 #include "src/ITkAnalogueClusteringTool.h"
@@ -37,9 +35,7 @@ DECLARE_COMPONENT( ActsTrk::TrackExtensionAlg )
 DECLARE_COMPONENT( ActsTrk::ProtoTrackReportingAlg )
 DECLARE_COMPONENT( ActsTrk::HGTDTrackExtensionAlg)
 DECLARE_COMPONENT( ActsTrk::HGTDTruthTrackDecorationAlg )
-#ifdef ACTS_GNN_WITH_MODULEMAP
 DECLARE_COMPONENT( ActsTrk::TrackFindingGNNAlg )
-#endif
 
 // Tools
 DECLARE_COMPONENT( ActsTrk::ITkAnalogueClusteringTool )

@@ -18,11 +18,13 @@
 #include <EventLoop/ManagerOrder.h>
 #include <EventLoop/MessageCheck.h>
 #include <RootCoreUtils/Assert.h>
+#include <RootCoreUtils/ShellExec.h>
 #include <TSystem.h>
 #include <format>
 #include <boost/functional/hash.hpp>
 #include <fcntl.h>
 #include <regex>
+#include <system_error>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
@@ -44,9 +46,8 @@ namespace EL
     {
       void reportErrno (int myerrno)
       {
-        char error [160];
-        strerror_r (myerrno, error, sizeof (error));
-        ANA_MSG_ERROR ("encountered system error: " << error);
+        ANA_MSG_ERROR ("encountered system error: "
+                       << std::system_category().message (myerrno));
       }
 
       void reportErrno ()
@@ -180,8 +181,12 @@ namespace EL
                   data.options.castString (Job::optUniqueDateFormat,
                                            "-%Y-%m-%d-%H%M-")};
                 char timeString [160];
-                strftime (timeString, sizeof (timeString),
-                          uniqueDateFormat.c_str(), &tvSplit);
+                if (strftime (timeString, sizeof (timeString),
+                              uniqueDateFormat.c_str(), &tvSplit) == 0)
+                {
+                  ANA_MSG_ERROR ("failed to format the unique date, please check optUniqueDateFormat: " << uniqueDateFormat);
+                  return ::StatusCode::FAILURE;
+                }
 
                 // make a hash value and reduce it to 16 bits
                 boost::hash_combine (hash, std::hash<pid_t>() (getpid()));
@@ -228,7 +233,8 @@ namespace EL
                     return ::StatusCode::FAILURE;
                   }
                   ANA_MSG_DEBUG ("removing directory " << submitDir);
-                  gSystem->Exec (("rm -rf " + submitDir).c_str());
+                  if (gSystem->Exec (("rm -rf " + RCU::Shell::quote (submitDir)).c_str()) != 0)
+                    ANA_MSG_WARNING ("failed to remove directory " << submitDir);
                   break;
                 case SubmitDirMode::UNIQUE:
                 case SubmitDirMode::UNIQUE_LINK:

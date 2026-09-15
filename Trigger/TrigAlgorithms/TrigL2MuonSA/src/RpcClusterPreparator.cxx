@@ -1,15 +1,15 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <iostream>
-#include <cmath>
+
 
 #include "RpcClusterPreparator.h"
 
 #include "MuonReadoutGeometry/RpcReadoutElement.h"
 #include "CxxUtils/phihelper.h"
-
+#include <iostream>
+#include <cmath>
 TrigL2MuonSA::RpcClusterPreparator::RpcClusterPreparator(const std::string& type, 
                                                          const std::string& name,
                                                          const IInterface*  parent): 
@@ -119,7 +119,7 @@ int TrigL2MuonSA::RpcClusterPreparator::buildPatterns(const bool doMultiMuon,
       if(digits.find(panelId)==digits.end()){ // first hit on this panel
         pattern newPatt;
         newPatt[nstrip]=rpcDigit;
-        digits[panelId]=newPatt;
+        digits[panelId]= std::move(newPatt);
 
       } else { // use existing pattern
 

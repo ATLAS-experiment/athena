@@ -1,16 +1,12 @@
 /*
- *   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
- *   */
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+ */
 
 
 #ifndef ITrigEgammaEmulationBaseHypoTool_h
 #define ITrigEgammaEmulationBaseHypoTool_h
 
 #include "AsgTools/IAsgTool.h"
-#include "TrigDecisionTool/TrigDecisionTool.h"
-#include "TrigEgammaEmulationTool/TrigEgammaEmulationToolMT.h"
-#include "LumiBlockComps/ILumiBlockMuTool.h"
-#include "GaudiKernel/SystemOfUnits.h"
 
 
 namespace Trig{

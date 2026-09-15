@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <algorithm>
+#include "TrigEgammaPrecisionPhotonHypoTool.h"
 #include "TrigCompositeUtils/HLTIdentifier.h"
 #include "TrigCompositeUtils/Combinators.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
@@ -10,7 +10,7 @@
 #include "xAODEgamma/Photon.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 
-#include "TrigEgammaPrecisionPhotonHypoTool.h"
+#include <algorithm>
 
 namespace TCU = TrigCompositeUtils;
 
@@ -163,8 +163,8 @@ bool TrigEgammaPrecisionPhotonHypoTool::decide( const ITrigEgammaPrecisionPhoton
     return pass;
   }
   
-  if(input.pidDecorator.count(m_pidName)){
-    pass = input.pidDecorator.at(m_pidName);
+  if(auto p  = input.pidDecorator.find(m_pidName.value()); p != input.pidDecorator.end()){
+    pass = p->second;
   }
 
   // get average luminosity information to calculate LH

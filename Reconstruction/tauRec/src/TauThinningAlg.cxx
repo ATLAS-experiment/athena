@@ -155,8 +155,11 @@ StatusCode TauThinningAlg::execute (const EventContext& ctx) const
       // pi0 clusters
       const xAOD::CaloCluster* cluster = tau->neutralPFO(i)->cluster(0);
 
-      // check if neutral should be kept 
+      // check if neutral should be kept based on dR between neutralPFO and tau 
       if(cluster->p4().DeltaR(tauAxis) > m_DrTauNeutrals) continue;	     
+
+      // check if neutral should be kept based on neutral PFO min pt - applied only to Run4
+      if(tau->neutralPFO(i)->pt() <= m_minNeutralPFOPt) continue;
 
       // neutral PFOs
       neutralPFOs.keep(tau->neutralPFO(i)->index());

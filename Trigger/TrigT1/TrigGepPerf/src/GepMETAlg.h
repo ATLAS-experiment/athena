@@ -2,8 +2,8 @@
  *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
-#ifndef TRIGL0GEPPERF_GEPMISSINGETALG_K
-#define TRIGL0GEPPERF_GEPMISSINGETALG_K
+#ifndef TRIGGEPPERF_GEPMISSINGETALG_K
+#define TRIGGEPPERF_GEPMISSINGETALG_K
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "xAODTrigger/EnergySumRoI.h"
@@ -27,4 +27,4 @@ private:
 
 }; 
 
-#endif //> !TRIGL0GEPPERF_MISSINGETGEP_H
+#endif //> !TRIGGEPPERF_MISSINGETGEP_H

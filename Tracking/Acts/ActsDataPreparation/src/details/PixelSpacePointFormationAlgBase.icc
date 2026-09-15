@@ -32,6 +32,9 @@ namespace ActsTrk {
     ATH_CHECK( m_pixelDetEleCollKey.initialize() );
     ATH_CHECK( m_spacePointMakerTool.retrieve() );
 
+    m_useGeometryContext = m_spacePointMakerTool->usesGeometryContext();
+    ATH_CHECK( m_ctxProvider.initialize(m_useGeometryContext) );
+
     if ( not m_monTool.empty() )
       ATH_CHECK( m_monTool.retrieve() );
 
@@ -114,6 +117,9 @@ namespace ActsTrk {
     //need to track the index of the spacepoints which are being inserted, so they are continuous and so that the output collection can be trimmed
     unsigned int spIdx = 0;
 
+    Acts::GeometryContext gctx = Acts::GeometryContext::dangerouslyDefaultConstruct();
+    if (m_useGeometryContext) gctx = m_ctxProvider.getGeometryContext(ctx);
+
     for(unsigned int idx=0; idx<pixelClusters->size(); idx++){
       const xAOD::PixelCluster* cluster = pixelClusters->at(idx);
       IdentifierHash idHash = cluster->identifierHash();
@@ -131,7 +137,9 @@ namespace ActsTrk {
       //get the index of the output spacepoint, when not using the cache this should be equal to the cluster index
       unsigned int thisSpIdx = spIdx++;
 
-      ATH_CHECK( m_spacePointMakerTool->producePixelSpacePoint(*cluster,
+      ATH_CHECK( m_spacePointMakerTool->producePixelSpacePoint(ctx,
+                                gctx,
+                                *cluster,
                                 *pixelSpacePoints->at(thisSpIdx),
                                 *pixelElement ) );
 

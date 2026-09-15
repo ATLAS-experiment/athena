@@ -7,11 +7,6 @@
 #ifndef TRIGGLOBALEFFICIENCYCORRECTION_TRIGGLOBALEFFICIENCYCORRECTIONTOOL_H
 #define TRIGGLOBALEFFICIENCYCORRECTION_TRIGGLOBALEFFICIENCYCORRECTIONTOOL_H 1
 
-#include <map>
-#include <memory>
-#include <set>
-#include <string>
-#include <vector>
 
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/ToolHandleArray.h"
@@ -22,7 +17,12 @@
 #include "TriggerAnalysisInterfaces/ITrigGlobalEfficiencyCorrectionTool.h"
 #include "TriggerMatchingTool/IMatchingTool.h"
 #include "xAODEgamma/PhotonFwd.h"
-#include "CxxUtils/flat_set.h"
+#include <flat_set>
+#include <map>
+#include <memory>
+#include <set>
+#include <string>
+#include <vector>
 
 namespace TrigGlobEffCorr {
 class ImportData;
@@ -161,8 +161,8 @@ class TrigGlobalEfficiencyCorrectionTool
   std::map<std::string, std::string> m_muonLegsPerTag;      /// deprecated
   std::map<std::string, std::string> m_legsPerTag;
   std::map<std::string, std::string> m_overrideThresholds;
-  unsigned long m_numberOfToys;
-  bool m_useInternalSeed;
+  unsigned long m_numberOfToys{};
+  bool m_useInternalSeed{};
   ToolHandle<Trig::IMatchingTool> m_trigMatchTool;
 
   std::hash<std::string> m_hasher;                                //!
@@ -174,9 +174,9 @@ class TrigGlobalEfficiencyCorrectionTool
   std::map<ToolKey, std::size_t> m_photonEffToolIndex;            //!
   std::map<ToolKey, std::size_t> m_muonToolIndex;                 //!
   std::set<std::size_t> m_validLegTagPairs;                       //!
-  bool m_checkElectronLegTag;                                     //!
-  bool m_checkMuonLegTag;                                         //!
-  bool m_checkPhotonLegTag;                                       //!
+  bool m_checkElectronLegTag{};                                     //!
+  bool m_checkMuonLegTag{};                                         //!
+  bool m_checkPhotonLegTag{};                                       //!
   std::map<std::size_t, std::string> m_dictionary;                //!
   std::set<ToolKey> m_unsupportedLegs;                            //!
 
@@ -185,7 +185,7 @@ class TrigGlobalEfficiencyCorrectionTool
 
   bool m_initialized = false;                            //!
   CP::CorrectionCode m_cpCode = CP::CorrectionCode::Ok;  //!
-  unsigned long m_seed;
+  unsigned long m_seed{};
   bool m_validTrigMatchTool;  //!
 
   std::vector<TagDecorator> m_leptonTagDecorators;                   //!
@@ -193,7 +193,7 @@ class TrigGlobalEfficiencyCorrectionTool
   std::unique_ptr<TrigGlobEffCorr::Calculator> m_calculator;         //!
 
   template <typename Key>
-  using flat_set = CxxUtils::flat_set<Key>;
+  using flat_set = std::flat_set<Key>;
 
   /// Internal methods (I) -- initialization of the tool
   bool loadHierarchies();

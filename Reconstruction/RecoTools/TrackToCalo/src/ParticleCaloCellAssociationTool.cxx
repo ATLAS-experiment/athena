@@ -1,11 +1,9 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ParticleCaloCellAssociationTool.h"
-// forward declares
-#include <cmath>
-#include <memory>
+
 
 #include "CaloEvent/CaloCellContainer.h"
 #include "CaloUtils/CaloCellList.h"
@@ -16,7 +14,8 @@
 #include "TrkCaloExtension/CaloExtensionCollection.h"
 #include "TrkCaloExtension/CaloExtensionHelpers.h"
 #include "xAODTracking/TrackingPrimitives.h"
-
+#include <cmath>
+#include <memory>
 namespace Rec {
 
 ParticleCaloCellAssociationTool::ParticleCaloCellAssociationTool(
@@ -147,7 +146,7 @@ ParticleCaloCellAssociationTool::getCellIntersections(
 {
   // use 3D pathlength in cells
 
-  bool use3D = true;
+  constexpr bool use3D = true;
 
   cellIntersections.reserve(extension.caloLayerIntersections().size() * 1.3);
 

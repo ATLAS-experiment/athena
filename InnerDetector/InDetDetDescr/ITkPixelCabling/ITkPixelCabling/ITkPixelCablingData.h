@@ -5,7 +5,7 @@
 #define ITkPixelCablingData_h
 /**
   * @file ITkPixelCablingData/ITkPixelCablingData.h
-  * @author Shaun Roe
+  * @author Ondra Kovanda, Shaun Roe
   * @date June 2024
   * @brief Data object containing the offline-online mapping for ITkPixels
   */
@@ -51,6 +51,28 @@ namespace ITkPixelCabling {
         ModuleType type {};
         TransformType transform {};
     };
+
+    //Update to a realistic ROB structure that has ROBs
+    //identified with sourceID (32b) and holds data from
+    //multiple 'elinks' (front-ends, to all practicality)
+    //in the payload, each data block prepended by
+    //'DetectorResourceID'.
+
+    //For **encoding**
+    //1. we read in an RDO that contains offline ID only
+    //2. that RDO also gives us chipID based on where in
+    //   the module the row, col are
+    //3. from that we can build (offline ID) << 2 | chipID,
+    //   which gives us (almost) the entire DetectorResourceID
+    //4. the online part of the DetectorResourceID has to come from cabling
+    //5. What we need for encoding is therefore Offline part of
+    //   DetectorResourceID -> {online part, sourceID} mapping. That way we
+    //   can fill in a map of <(sourceID << 32 | DetectorResourceID), HitMap>
+    //   and encode and place it in the ROB fragments accordingly with no further
+    //   need for cabling.
+    //   
+    //   We will use ITkPixelOnlineId to store sourceID | DetectorResourceId in
+    //   64b.
 
     //define transforms, assuming
     // Y | 2 | 3 |
@@ -116,12 +138,32 @@ public:
   ITkPixelCabling::ModuleInfo<ITkPixelOnlineId> onlineModuleInfo(const Identifier & id) const;
   ITkPixelCabling::ModuleInfo<Identifier> offlineModuleInfo(const ITkPixelOnlineId & id) const;
 
+  //Updating to a realistic ROB structure
+  ITkPixelOnlineId onlineId(const uint32_t& offlineDetectorResourceID) const;
+  const std::unordered_map<uint32_t, ITkPixelOnlineId>& onlineIdMap() const {return m_offlineDetectorResourceID2OnlineIdMap;}
+  const std::vector<uint32_t>& sourceIDs() const {return m_sourceIDs;}
+  ITkPixelCabling::TransformType transformType(const uint32_t& moduleID) const;
+  template<typename Func> void forEachOffOn(Func&& f) const {
+    for (const auto& [key, val] : m_offlineDetectorResourceID2OnlineIdMap){
+        f(key, val);
+    }
+  }
+  
   //Add entry to the offline->online map. This is only for producing test streams,
   //from MC, and needs to propagate the type of the module. We also can at most map
   //with 4-fold degeneracy due to non-merged quads, which have 4 online IDs mapped to
   //a single offline ID.
   void addEntryOffOn(const Identifier& idOff, const ITkPixelOnlineId& idOn);
   void addEntryOffOn(const Identifier& idOff, const ITkPixelCabling::ModuleInfo<ITkPixelOnlineId>& moduleInfo);
+  
+  //Updating to a realistic ROB structure, working with the detectorResourceIDs
+  //a la Data Handler, mapping the 'offline part' of the detectorResourceID (module ID << 2 | chipID)
+  //to the full detectorResourceId and sourceID (a. k. a. ROB ID)
+  void addEntryOffOn(const uint32_t& offlineDetectorResourceID, const ITkPixelOnlineId& onlineId);
+
+  void addSourceID(const uint32_t& sourceID);
+
+  void addTransformType(const uint32_t& moduleID, const ITkPixelCabling::TransformType& transform);
 
   //Add entry to the online->offline map. This is for decoding. For quick access,
   //these maps can also cache the type of the module, so that we know how to translate
@@ -151,6 +193,15 @@ private:
 
   //offline -> module type
   std::unordered_map<Identifier, ITkPixelCabling::ModuleType> m_offline2ModuleType;
+
+  //offline part of DetectorResourceID -> {online part of DetectorResourceID, sourceID}
+  std::unordered_map<uint32_t, ITkPixelOnlineId> m_offlineDetectorResourceID2OnlineIdMap{};
+
+  //list of sourceIDs
+  std::vector<uint32_t> m_sourceIDs{};
+
+  //list of IDs in l0 barrel - needed for decoding
+  std::unordered_map<uint32_t, ITkPixelCabling::TransformType> m_module2TransformTypeMap{};
 
 };
 // Magic "CLassID" for storage/retrieval in StoreGate

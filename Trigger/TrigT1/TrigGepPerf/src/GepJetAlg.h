@@ -2,8 +2,8 @@
  *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
-#ifndef TRIGL0GEPPERF_GEPJETALG_H
-#define TRIGL0GEPPERF_GEPJETALG_H
+#ifndef TRIGGEPPERF_GEPJETALG_H
+#define TRIGGEPPERF_GEPJETALG_H
 
 /*
   This algorithm creates jets from CaloClusters, and writes them out
@@ -201,4 +201,4 @@ class GepJetAlg: public ::AthReentrantAlgorithm {
 
 };
 
-#endif //> !TRIGL0GEPPERF_GEPJETALG_H
+#endif //> !TRIGGEPPERF_GEPJETALG_H

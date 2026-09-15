@@ -74,13 +74,13 @@ Analysis::MuonContainer* MuonContainerCnv::createTransient(const Token* token)
 
   Analysis::MuonContainer *transObj = 0;
 
-  static const pool::Guid tr_guid("E5B86159-2270-4770-A412-078D09F12215");
-  static const pool::Guid p1_guid("2B37C58D-4FBF-46F3-AB5C-B1408DBB99BE");
-  static const pool::Guid p2_guid("AB37C580-4FBF-51F3-F85D-014F8DBBE9BC");
-  static const pool::Guid p3_guid("FB88C580-EFBF-5CDE-EEED-AABF8DBCE9EE");
-  static const pool::Guid p4_guid("01887544-EFBF-E099-1116-0051F2678B09");
-  static const pool::Guid p5_guid("45887564-EABA-EBC9-DE1A-2459F21780CC");
-  static const pool::Guid p6_guid("56E6FC8D-E6B3-4FFB-83A2-A9AEF6E35FF3");
+  static const Guid tr_guid("E5B86159-2270-4770-A412-078D09F12215");
+  static const Guid p1_guid("2B37C58D-4FBF-46F3-AB5C-B1408DBB99BE");
+  static const Guid p2_guid("AB37C580-4FBF-51F3-F85D-014F8DBBE9BC");
+  static const Guid p3_guid("FB88C580-EFBF-5CDE-EEED-AABF8DBCE9EE");
+  static const Guid p4_guid("01887544-EFBF-E099-1116-0051F2678B09");
+  static const Guid p5_guid("45887564-EABA-EBC9-DE1A-2459F21780CC");
+  static const Guid p6_guid("56E6FC8D-E6B3-4FFB-83A2-A9AEF6E35FF3");
 
   if ( compareClassGuid(token, p6_guid) ) {
 

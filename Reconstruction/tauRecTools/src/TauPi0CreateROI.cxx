@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -90,7 +90,7 @@ StatusCode TauPi0CreateROI::executePi0CreateROI(xAOD::TauJet& tau, CaloConstCell
   }
  
   static const SG::Accessor<std::vector<const CaloCell*>> acc_shotCells("shotCells");
-  acc_shotCells(tau) = shotCells;
+  acc_shotCells(tau) = std::move(shotCells);
 
   return StatusCode::SUCCESS;
 }

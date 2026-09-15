@@ -37,7 +37,7 @@ namespace Rivet {
     // Constructor
     HiggsTemplateCrossSections()
       : Analysis("HiggsTemplateCrossSections"),
-        m_HiggsProdMode(HTXS::UNKNOWN) {}
+        m_HiggsProdMode(HTXS::UNKNOWN), m_HiggsDecayMode(HTXS::UNKNOWNDecay) {}
 
   public:
 
@@ -129,7 +129,7 @@ namespace Rivet {
     /// @}
 
     /// @brief Main classificaion method.
-    HiggsClassification classifyEvent(const Event& event, const HTXS::HiggsProdMode prodMode ) const {
+    HiggsClassification classifyEvent(const Event& event, const HTXS::HiggsProdMode prodMode, const HTXS::HiggsDecayMode decayMode ) const {
 
       // the classification object
       HiggsClassification cat;
@@ -147,7 +147,8 @@ namespace Rivet {
       cat.stage1_3_fine_cat_pTjet25GeV = HTXS::Stage1_3_Fine::UNKNOWN;
       cat.stage1_3_fine_cat_pTjet30GeV = HTXS::Stage1_3_Fine::UNKNOWN;
       cat.isTHW = false;
- 
+      cat.decaystage0_cat = HTXS::Stage0::UNKNOWNDecay;
+
       if (prodMode == HTXS::UNKNOWN)
         return error(cat,HTXS::PRODMODE_DEFINED,
                      "Unkown Higgs production mechanism. Cannot classify event."
@@ -274,12 +275,14 @@ namespace Rivet {
       // Obtain all stable, final-state particles
       const Particles FS = apply<FinalState>(event, "FS").particles();
       Particles hadrons;
+      Particles decayparticles;
+
       FourMomentum sum(0,0,0,0), vSum(0,0,0,0), hSum(0,0,0,0);
       for ( const Particle &p : FS ) {
         // Add up the four momenta of all stable particles as a cross check
         sum += p.momentum();
         // ignore particles from the Higgs boson
-        if ( originateFrom(p,cat.higgs) ) { hSum += p.momentum(); continue; }
+        if ( originateFrom(p,cat.higgs) ) { hSum += p.momentum(); decayparticles += p; continue; }
         // Cross-check the V decay products for VH
         if ( isVH(prodMode) && !is_uncatdV && originateFrom(p,Ws) ) vSum += p.momentum();
         // ignore final state particles from leptonic V decays
@@ -334,6 +337,9 @@ namespace Rivet {
       cat.stage1_3_fine_cat_pTjet25GeV = getStage1_3_Fine_Category(prodMode,cat.higgs,cat.jets25,cat.V,cat.isTHW);
       cat.stage1_3_fine_cat_pTjet30GeV = getStage1_3_Fine_Category(prodMode,cat.higgs,cat.jets30,cat.V,cat.isTHW);
       cat.errorCode = HTXS::SUCCESS; ++m_errorCount[HTXS::SUCCESS];
+
+      // Apply the Higgs decay categorization
+      if (decayMode != HTXS::HiggsDecayMode::UNKNOWNDecay) cat.decaystage0_cat = getStage0DecayCategory(cat.higgs, decayparticles, cat.decay_observables, cat.decay_cuts_passed);
 
       return cat;
     }
@@ -682,6 +688,12 @@ int getBin(double x, const std::vector<double>& bins) const {
   HTXS::Stage1_3::Category getStage1_3_Category(const HTXS::HiggsProdMode prodMode, const Particle &higgs,
                                                 const Jets &jets, const Particle &V) const {
     using namespace HTXS::Stage1_3;
+    if (prodMode == HTXS::BBH) {
+      const Category ggFCategory = getStage1_3_Category(HTXS::GGF, higgs, jets, V);
+      if (ggFCategory == UNKNOWN) return UNKNOWN;
+      return Category(BBH_FWDH + static_cast<int>(ggFCategory) - GG2H_FWDH);
+    }
+
     int Njets = jets.size(), ctrlHiggs = std::abs(higgs.rapidity()) < 2.5, fwdHiggs = !ctrlHiggs;
     int vbfTopo = vbfTopology(jets, higgs);
 
@@ -775,9 +787,7 @@ int getBin(double x, const std::vector<double>& bins) const {
         return TTH_FWDH;
       else
         return Category(TTH_PTH_0_60 + getBin(higgs.pt(), {0, 60, 120, 200, 300, 450, 650}));
-    } else if (prodMode == HTXS::BBH)
-      return Category(BBH_FWDH + ctrlHiggs);
-    else if (prodMode == HTXS::TH)
+    } else if (prodMode == HTXS::TH)
       return Category(TH_FWDH + ctrlHiggs);
     return UNKNOWN;
   }
@@ -786,24 +796,14 @@ int getBin(double x, const std::vector<double>& bins) const {
   HTXS::Stage1_3_Fine::Category getStage1_3_Fine_Category(const HTXS::HiggsProdMode prodMode, const Particle &higgs,
                                                           const Jets &jets, const Particle &V, const bool isTHW) const {
     using namespace HTXS::Stage1_3_Fine;
+    if (prodMode == HTXS::BBH) {
+      const Category ggFCategory = getStage1_3_Fine_Category(HTXS::GGF, higgs, jets, V, isTHW);
+      if (ggFCategory == UNKNOWN) return UNKNOWN;
+      return Category(BBH_FWDH + static_cast<int>(ggFCategory) - GG2H_FWDH);
+    }
+
     int Njets = jets.size(), ctrlHiggs = std::abs(higgs.rapidity()) < 2.5, fwdHiggs = !ctrlHiggs;
     int vbfTopo = vbfTopology_Stage1_3_Fine(jets, higgs);
-
-    // For debugging:
-    std::cout << "[Event] pth = " << higgs.pt() << ", yh = " << std::abs(higgs.rapidity()) << ", njet = " << Njets << ", ptv = " << V.pt() << std::endl;
-    if (Njets >= 1){
-        double pthj = (jets[0].momentum() + higgs.momentum()).pt();
-        std::cout << "pthj/pth = " << pthj/higgs.pt() << std::endl;
-    }
-    if (Njets >= 2){
-        double mjj = (jets[0].mom() + jets[1].mom()).mass();
-        double pthjj = (jets[0].momentum() + jets[1].momentum() + higgs.momentum()).pt();
-        double deltaphijj =
-        jets[0].eta() > jets[1].eta()
-        ? deltaPhi(jets[0], jets[1])
-        : -1*deltaPhi(jets[0], jets[1]);
-        std::cout << "mjj = " << mjj << ", pthjj = " << pthjj << ", dphijj = " << deltaphijj << std::endl; 
-    }
 
     // 1. GGF Stage 1.3 categories (fine)
     if (prodMode == HTXS::GGF || (prodMode == HTXS::GG2ZH && quarkDecay(V))) {
@@ -901,12 +901,383 @@ int getBin(double x, const std::vector<double>& bins) const {
         return TTH_FWDH;
       else
         return Category(TTH_PTH_0_60 + getBin(higgs.pt(), {0, 60, 120, 200, 300, 450, 650}));
-    } else if (prodMode == HTXS::BBH)
-      return Category(BBH_FWDH + ctrlHiggs);
-    else if (prodMode == HTXS::TH)
+    } else if (prodMode == HTXS::TH)
       return Category(THQ_FWDH + 2*isTHW + ctrlHiggs);
     return UNKNOWN;
   }
+
+    /// @name Higgs decay categorization methods
+    /// Methods to classify the Higgs boson decay mode according to the
+    /// Stage-0 decay categorization defined in HTXS::Stage0::DecayCategory
+    /// @{
+
+    /// @brief Stage-0 Higgs decay categorization.
+    ///        Identifies the stable final-state decay products originating from
+    ///        the Higgs boson and classifies the decay mode.
+    HTXS::Stage0::DecayCategory getStage0DecayCategory(const Particle &higgs,
+                                                        const Particles &decayparticles,
+                                                        std::vector<float> &decay_observables,
+                                                        int &cuts_passed) const {
+      using namespace HTXS::Stage0;
+
+      decay_observables = std::vector<float>(11, -999);
+      // 0: Z1m
+      // 1: Z2m
+      // 2: cthstr
+      // 3: phi
+      // 4: phi1
+      // 5: cth1
+      // 6: cth2
+      // 7-10: m14, m23, m13, m24
+
+      // Set up kinematics in the Higgs rest frame
+      auto &higgsmom = higgs.momentum();
+
+      double higgsm2 = higgsmom.invariant();
+      double higgsm  = (higgsm2 > 0 ? sqrt(higgsm2) : 0);
+
+      const int N = static_cast<int>(decayparticles.size());
+      std::vector<double> Ep(N), pp(N);
+      std::vector<std::vector<double>> cosangle(N, std::vector<double>(N, 1.0));
+
+      LorentzTransform toHiggs = LorentzTransform::mkFrameTransform(higgsmom);
+      for (int i = 0; i < N; ++i) {
+        auto &mom  = decayparticles[i].momentum();
+        double m2  = mom.invariant();
+        double hp  = higgsmom * mom;
+        Ep[i]      = hp / higgsm;
+        double p2v = Ep[i] * Ep[i] - m2;
+        pp[i]      = (p2v > 0 ? sqrt(p2v) : 0);
+        for (int j = 0; j < i; ++j) {
+          auto &mom2    = decayparticles[j].momentum();
+          cosangle[i][j] = (Ep[i]*Ep[j] - mom*mom2) / (pp[i]*pp[j]);
+          cosangle[j][i] = cosangle[i][j];
+        }
+      }
+
+      // Work on a mutable copy boosted into the Higgs rest frame
+      Particles dp_rest = decayparticles;
+      for (int i = 0; i < N; ++i)
+        dp_rest[i] = dp_rest[i].transformBy(toHiggs);
+
+      // Accumulate identified objects into these vectors
+      std::vector<FourMomentum> v_p4{};
+      std::vector<int>          v_pid{};
+
+      doAngleDressing(dp_rest, cosangle, v_p4, v_pid);
+      
+      // findZZ4ldecay outputs a byte, last 6 bits indicate cuts passed
+      cuts_passed = findZZ4ldecay(std::move(v_p4), std::move(v_pid), decay_observables);
+      bool isZZ4l = (cuts_passed & 0b111111) == 0b111111;
+
+      // H -> ZZ* -> 4l
+      if (isZZ4l) {
+        switch ((cuts_passed >> 6) & 0b11) { // 0b xx 111111 (read @returns of findZZ4ldecay)
+          case 0b01: return HZZ4e;
+          case 0b10: return HZZ4mu;
+          case 0b11: return HZZ2e2mu;
+          case 0b00: MSG_WARNING("Found HZZ4l event but unable to categorise. This shouldn't happen!");
+        }
+      }
+      
+      //Here other final states will be added in future
+
+      return DecayCategory(UNKNOWNDecay);
+    }
+
+    /// @brief dress leptons with photons within a 0.1 radian angle.
+    ///        Also puts isolated photons (photons with no leptons within 0.1 rad cone) into v_p4.
+    int doAngleDressing(const Particles &dp,
+                     const std::vector<std::vector<double>> &cosangle,
+                     std::vector<FourMomentum> &v_p4,
+                     std::vector<int>          &v_pid) const {
+      const double cos_cut = cos(0.1);
+      int num_photons = 0;
+      // dressers[i] contains the index of photons that get dressed to dp[i]
+      std::vector<std::vector<int>> dressers(dp.size());
+
+      // Loop over all photons to find their closest lepton
+      for (size_t i = 0; i < dp.size(); i++) { 
+        const Particle &p = dp[i];
+        if (p.pid() != 22) continue;
+        int max_cos_index = -1;
+        for (size_t j = 0; j < dp.size(); j++) {
+          if (!(PID::isElectron(dp[j].pid()) || PID::isMuon(dp[j].pid()))) continue;
+          if (cosangle[i][j] < cos_cut) continue;
+          if (max_cos_index != -1 && cosangle[i][j] < cosangle[i][max_cos_index]) continue;
+          max_cos_index = j;
+        }
+        if(max_cos_index != -1) 
+          dressers[max_cos_index].push_back(i);
+        else {
+          v_p4.push_back(p.momentum());
+          v_pid.push_back(p.pid());
+        }
+      }
+
+      // Then loop over leptons to dress photons into it
+      for (size_t i = 0; i < dp.size(); i++) {
+        const Particle &p = dp[i];
+        if (!(PID::isElectron(p.pid()) || PID::isMuon(p.pid()))) continue;
+        v_p4.push_back(p.momentum());
+        v_pid.push_back(p.pid());
+        for (auto photon : dressers[i]) {
+          v_p4.back() += dp[photon].momentum();
+          num_photons++;
+        }
+      }
+      return num_photons;
+    }
+
+    /// @brief Select H->ZZ->4l candidate: 4 charged leptons, net charge=0,
+    ///        combined invariant mass in [105, 130] GeV, passing angular overlap cut.
+    /// @return a 8 bit number, first 6 bits for 6 cuts (lepton_num, jpsi, m12, m34, delta <, h_mass), 
+    /// @return last 2 bits (i.e. most significant): 0b10 for contains mu, 0b01 for contains e (so 0b11 for 2e2mu)
+    unsigned char findZZ4ldecay(std::vector<FourMomentum>        v_p4,
+                       std::vector<int>                 v_pid,
+                       std::vector<float>               &decay_observables) const {
+
+      int lepton_num = 0;
+      for (int pid : v_pid) lepton_num += (std::abs(pid) == 11 || std::abs(pid) == 13);
+
+      std::vector<int> lepton_index{};
+
+      unsigned char cut_passed = 0;
+      // bit 0: lepton_num, bit 1: > 4 leptons after removing mij < 5, bit 2: m12, bit 3: m34, bit 4: angle ij > 0.1, bit 5: higgs mass
+      cut_passed |= (lepton_num >= 4);
+      cut_passed |= ZZ4lJpsi_cut(v_p4, v_pid) << 1;
+      cut_passed |= ZZ4lm12m34_cut(v_p4, v_pid, lepton_index) << 2; // <- this outputs 2 bits of data
+      cut_passed |= ZZ4langle_cut(v_p4, v_pid) << 4; // that's why it's << 4 here
+
+      FourMomentum hsum{};
+      for (uint i = 0; i < v_pid.size(); ++i) {
+        if (std::abs(v_pid[i]) == 11 || std::abs(v_pid[i]) == 13) {
+          hsum += v_p4[i];
+        }
+      }
+
+      cut_passed |= (hsum.mass() > 105 && hsum.mass() < 130) << 5;
+
+      // We put additional 2 bits of info to cut_passed to determine if is 4e, 2e2mu, or 4mu!
+      // side note: [0] and [2] takes 1 particle from each lepton pair
+      if(lepton_index.size() == 4) {
+        if (PID::isElectron(v_pid[lepton_index[0]]) || PID::isElectron(v_pid[lepton_index[2]]))
+          cut_passed |= 0b01000000; // 0b01111111 => 4e
+        if (PID::isMuon(v_pid[lepton_index[0]]) || PID::isMuon(v_pid[lepton_index[2]]))
+          cut_passed |= 0b10000000; // 0b10111111 => 4mu
+                                    // 0b11111111 => 2e2mu
+      }
+
+      calculate_decay_observables(v_p4, lepton_index, decay_observables);
+      return cut_passed;
+    }
+
+    /// @brief Reject lepton pairs whose opening angle is too small (cos > cos(0.1))
+    bool ZZ4langle_cut(const std::vector<FourMomentum> &v_p4,
+                        const std::vector<int>           &v_pid) const {
+      
+      std::vector<FourMomentum> v_p4_lepton = v_p4;
+
+      const double cos_cut = cos(0.1);
+      double cos_max = 0;
+      for (uint i = 0; i < v_p4_lepton.size(); ++i) {
+        if ( !(PID::isMuon(v_pid[i]) || PID::isElectron(v_pid[i])) ) continue;
+        for (uint j = 0; j < i; ++j) {
+          if ( !(PID::isMuon(v_pid[j]) || PID::isElectron(v_pid[j])) ) continue;
+          double ca = (v_p4_lepton[i].E()*v_p4_lepton[j].E() - v_p4_lepton[i]*v_p4_lepton[j])
+                      / (v_p4_lepton[i].p()*v_p4_lepton[j].p());
+          cos_max = std::max(ca, cos_max);
+        }
+      }
+      return cos_cut > cos_max;
+    }
+
+    /// @brief Apply m12 and m34 mass window cuts for ZZ->4l selection
+    /// Also insert the leading lepton pair and subleading lepton pair index into lepton_index
+    /// We always have lepton_index[0] = e/mu, lepton_index[1] = anti-(e/mu), etc
+    /// @returns 0b00 for not pass anything, 0b01 for passm12, 0b10 for passm34, 0b11 for passm12 && passm34
+    unsigned char ZZ4lm12m34_cut(const std::vector<FourMomentum> &v_p4,
+                        const std::vector<int>           &v_pid,
+                        std::vector<int>                 &lepton_index) const {
+      std::vector<int> lepIdx;
+      for (size_t i = 0; i < v_pid.size(); ++i)
+        if (std::abs(v_pid[i]) == 11 || std::abs(v_pid[i]) == 13) lepIdx.push_back(i);
+      if (lepIdx.size() < 2) return 0b00;
+
+      const double mZ = 91.1876;
+
+      double bestDM = 1e30;
+      double bestM12 = -1, bestM34 = -1;
+      size_t bestpair[4] = {999, 999, 999, 999};
+      for (size_t i = 0; i < lepIdx.size(); i++) { // find pair for m12 first
+        for (size_t j = i+1; j < lepIdx.size(); j++) {
+          int a=lepIdx[i], b=lepIdx[j];
+          if(v_pid[a] != -v_pid[b]) continue; // not SFOS
+          double m12cur = (v_p4[a] + v_p4[b]).mass();
+          if (std::fabs(m12cur - mZ) >= bestDM) continue;
+          bestDM = std::fabs(m12cur - mZ);
+          bestpair[0] = i; bestpair[1] = j;
+          bestM12 = m12cur;
+        }
+      }
+
+      // Find pair for m34
+      for (size_t i = 0; i < lepIdx.size(); i++) {
+        if (i == bestpair[0] || i == bestpair[1]) continue;
+        for (size_t j = i+1; j < lepIdx.size(); j++) {
+          if (j == bestpair[0] || j == bestpair[1]) continue;
+
+          int a=lepIdx[i], b=lepIdx[j];
+          if(v_pid[a] != -v_pid[b]) continue; // not SFOS
+          double m34cur = (v_p4[a] + v_p4[b]).mass();
+          if (m34cur <= bestM34) continue;
+          bestpair[2] = i; bestpair[3] = j;
+          bestM34 = m34cur;
+        }
+      }
+
+      if (bestpair[0] == 999) {
+        MSG_WARNING("Unable to find lepton pairings, returning null");
+        return 0b00;
+      }
+
+      for (int i = 0; i < 4; i++) {
+        if (bestpair[i] == 999) break;
+        if(v_pid[lepIdx[bestpair[i]]] < 0 && ((i % 2) == 0)) { // we are at [0] or [2]... supposed to put matter
+          std::swap(bestpair[i], bestpair[i+1]); // so we swap
+        }
+        lepton_index.push_back(lepIdx[bestpair[i]]);
+      }
+
+      return passm12(bestM12) | (passm34(bestM34) << 1);
+    }
+
+    /// @brief J/psi veto: reject events with a same-flavour opposite-sign lepton
+    ///        pair with invariant mass below 5 GeV, or if there are more than 4 leptons,
+    ///        remove all lepton pairs with invariant mass below 5 Gev
+    bool ZZ4lJpsi_cut(std::vector<FourMomentum> &v_p4,
+                       std::vector<int>           &v_pid) const {
+
+      while (remove_least_mij(v_p4, v_pid));
+      int lepton_num = 0;
+      for (int pid : v_pid) lepton_num += (std::abs(pid) == 11 || std::abs(pid) == 13);
+      return lepton_num >= 4;
+    }
+
+    /// @brief removes SFOS lepton pairs with invariant mass < 5GeV
+    ///        removes only the pair with the least invariant mass
+    bool remove_least_mij(std::vector<FourMomentum> &v_p4,
+                      std::vector<int>           &v_pid) const {
+      float mij_min = 5.0;
+      size_t min_pair[2] = {999, 999};
+      for (size_t i = 0; i < v_p4.size(); i++) {
+        for (size_t j = i+1; j < v_p4.size(); j++) {
+          if (v_pid[i] + v_pid[j] != 0) continue;
+          if (!(PID::isMuon(v_pid[i]) || PID::isElectron(v_pid[i]))) continue;
+          float mij = (v_p4[i] + v_p4[j]).mass();
+          if (mij >= mij_min) continue;
+          mij_min = mij;
+          min_pair[0] = i;
+          min_pair[1] = j;
+        }
+      }
+      if (min_pair[0] == 999) return false;
+      v_p4.erase(v_p4.begin() + min_pair[1]); // min_pair[1] > min_pair[0] always, so this is safe
+      v_p4.erase(v_p4.begin() + min_pair[0]);
+
+      v_pid.erase(v_pid.begin() + min_pair[1]);
+      v_pid.erase(v_pid.begin() + min_pair[0]);
+
+      return true;
+    }
+
+    /// @brief calculate the relevant 4l decay observables
+    bool calculate_decay_observables(const std::vector<FourMomentum> &v_p4,
+                                     const std::vector<int>          &v_4l_index,
+                                     std::vector<float> &decay_observable) const {
+      
+      if (v_4l_index.size() != 4) {
+        if (v_4l_index.size() >= 2) decay_observable[0] = (v_p4[v_4l_index[0]] + v_p4[v_4l_index[1]]).mass();
+        return false;
+      }
+
+      FourMomentum v1 = (v_p4[v_4l_index[0]]);
+      FourMomentum v2 = (v_p4[v_4l_index[1]]);
+      FourMomentum v3 = (v_p4[v_4l_index[2]]);
+      FourMomentum v4 = (v_p4[v_4l_index[3]]);
+
+      float Z1m = (v1 + v2).mass();
+      float Z2m = (v3 + v4).mass();
+      
+      float m14 = (v1 + v4).mass();
+      float m23 = (v2 + v3).mass();
+      float m13 = (v1 + v3).mass();
+      float m24 = (v2 + v4).mass();
+
+      FourMomentum Z1 = ( v1 + v2 );
+      FourMomentum Z2 = ( v3 + v4 );
+
+      Vector3 z1 = Z1.vector3().unit();
+      Vector3 z2 = Z2.vector3().unit();
+
+      // Costh*
+      float cthstr = z1.z();
+
+      Vector3 v1p = v1.vector3();
+      Vector3 v2p = v2.vector3();
+      Vector3 v3p = v3.vector3();
+      Vector3 v4p = v4.vector3();
+      Vector3 nz(0, 0, 1.);
+
+      // Phi, Phi1
+      Vector3 n1p = v1p.cross(v2p).unit();
+      Vector3 n2p = v3p.cross(v4p).unit();
+      Vector3 nscp = nz.cross(z1).unit();
+      float phi = (z1.dot(n1p.cross(n2p)) / std::fabs(z1.dot(n1p.cross(n2p))) *
+             std::acos(-n1p.dot(n2p)));
+      float phi1 = (z1.dot(n1p.cross(nscp)) / std::fabs(z1.dot(n1p.cross(nscp))) *
+              std::acos(n1p.dot(nscp)));
+
+      // Costh1,2
+      LorentzTransform toZ1 = LorentzTransform::mkFrameTransform(Z1);
+      LorentzTransform toZ2 = LorentzTransform::mkFrameTransform(Z2);
+
+      FourMomentum Z2_rfr_Z1 = toZ1.transform(Z2);  // now it's in Z1 RFR (both Z1 and Z2 are in H RFR)
+      Vector3 z2_rfr_Z1 = Z2_rfr_Z1.vector3();
+
+      FourMomentum Z1_rfr_Z2 =  toZ2.transform(Z1); // now it's in Z2 RFR (both Z1 and Z2 are still in H RFR)
+      Vector3 z1_rfr_Z2 = Z1_rfr_Z2.vector3();
+
+      FourMomentum v1_rfr_Z1 = toZ1.transform(v1); // Z1 and Z2 still in H RFR: put leptons
+                                                       // in their Z's reference frame
+      FourMomentum v3_rfr_Z2 = toZ2.transform(v3);
+
+      float cth1 = -(z2_rfr_Z1.dot(v1_rfr_Z1.vector3()) /
+               std::fabs(z2_rfr_Z1.mod() * v1_rfr_Z1.vector3().mod()));
+      float cth2 = -(z1_rfr_Z2.dot(v3_rfr_Z2.vector3()) /
+               std::fabs(z1_rfr_Z2.mod() * v3_rfr_Z2.vector3().mod()));
+      
+      decay_observable[0]  = Z1m;
+      decay_observable[1]  = Z2m;
+      decay_observable[2]  = cthstr;
+      decay_observable[3]  = phi;
+      decay_observable[4]  = phi1;
+      decay_observable[5]  = cth1;
+      decay_observable[6]  = cth2;
+      decay_observable[7]  = m14;
+      decay_observable[8]  = m23;
+      decay_observable[9]  = m13;
+      decay_observable[10] = m24;
+      return true;
+    }
+
+    /// @brief Pass leading lepton-pair mass window [50, 106] GeV
+    bool passm12(double m) const { return (m > 50.0 && m < 106.0); }
+
+    /// @brief Pass sub-leading lepton-pair mass window [12, 115] GeV
+    bool passm34(double m) const { return (m > 12.0 && m < 115.0); }
+    
+    /// @}
 
 
     /// @name Default Rivet analysis methods and steering methods
@@ -914,6 +1285,9 @@ int getBin(double x, const std::vector<double>& bins) const {
 
     /// @brief Sets the Higgs production mode
     void setHiggsProdMode( HTXS::HiggsProdMode prodMode ){ m_HiggsProdMode = prodMode; }
+
+    /// @brief Sets the Higgs production mode
+    void setHiggsDecayMode( HTXS::HiggsDecayMode decayMode ){ m_HiggsDecayMode = decayMode; }
 
     /// @brief default Rivet Analysis::init method
     /// Booking of histograms, initializing Rivet projection
@@ -958,7 +1332,7 @@ int getBin(double x, const std::vector<double>& bins) const {
     void analyze(const Event& event) {
 
       // get the classification
-      HiggsClassification cat = classifyEvent(event,m_HiggsProdMode);
+      HiggsClassification cat = classifyEvent(event,m_HiggsProdMode,m_HiggsDecayMode);
 
       // Fill histograms: categorization --> linerize the categories
       const double weight = 1.; // Event weights are now all 1 in Rivet
@@ -976,11 +1350,11 @@ int getBin(double x, const std::vector<double>& bins) const {
       // Stage 1.2-Fine enum offsets for each production mode: GGF=28, VBF=25, WH= 16, QQ2ZH=16, GG2ZH=16, TTH=7, BBH=2, TH=2
       static const vector<int> offset1_2_Fine({0,1,29,54,70,86,102,109,111,113});
       int off1_2_Fine = offset1_2_Fine[P];
-      // Stage 1_3 enum offsets for each production mode: GGF=25, VBF=15, WH= 9, QQ2ZH=9, GG2ZH=9, TTH=8, BBH=2, TH=2
-      static const vector<int> offset1_3({0,1,26,41,50,59,68,76,78,80});
+      // Stage 1_3 enum offsets for each production mode: GGF=25, VBF=15, WH=9, QQ2ZH=9, GG2ZH=9, TTH=8, BBH=25, TH=2
+      static const vector<int> offset1_3({0,1,26,41,50,59,68,76,101,103});
       int off1_3 = offset1_3[P];
-      // Stage 1_3 Fine enum offsets for each production mode: GGF=62, VBF=86, WH= 19, QQ2ZH=19, GG2ZH=19, TTH=8, BBH=2, TH=3
-      static const vector<int> offset1_3_fine({0,1,63,149,168,187,206,214,216,219});
+      // Stage 1_3 Fine enum offsets for each production mode: GGF=62, VBF=86, WH=19, QQ2ZH=19, GG2ZH=19, TTH=8, BBH=62, TH=4
+      static const vector<int> offset1_3_fine({0,1,63,149,168,187,206,214,276,280});
       int off1_3_fine = offset1_3_fine[P];
 
 
@@ -1057,10 +1431,10 @@ int getBin(double x, const std::vector<double>& bins) const {
       book(m_hist_stage1_2_pTjet30,"HTXS_stage1_2_pTjet30",57,0,57);
       book(m_hist_stage1_2_fine_pTjet25,"HTXS_stage1_2_fine_pTjet25",113,0,113);
       book(m_hist_stage1_2_fine_pTjet30,"HTXS_stage1_2_fine_pTjet30",113,0,113);
-      book(m_hist_stage1_3_pTjet25, "STXS_stage1_3_pTjet25", 80, 0, 80);
-      book(m_hist_stage1_3_pTjet30, "STXS_stage1_3_pTjet30", 80, 0, 80);
-      book(m_hist_stage1_3_fine_pTjet25, "STXS_stage1_3_fine_pTjet25", 220, 0, 220);
-      book(m_hist_stage1_3_fine_pTjet30, "STXS_stage1_3_fine_pTjet30", 220, 0, 220);
+      book(m_hist_stage1_3_pTjet25, "STXS_stage1_3_pTjet25", 103, 0, 103);
+      book(m_hist_stage1_3_pTjet30, "STXS_stage1_3_pTjet30", 103, 0, 103);
+      book(m_hist_stage1_3_fine_pTjet25, "STXS_stage1_3_fine_pTjet25", 280, 0, 280);
+      book(m_hist_stage1_3_fine_pTjet30, "STXS_stage1_3_fine_pTjet30", 280, 0, 280);
       book(m_hist_pT_Higgs,"pT_Higgs",80,0,400);
       book(m_hist_y_Higgs,"y_Higgs",80,-4,4);
       book(m_hist_pT_V,"pT_V",80,0,400);
@@ -1081,6 +1455,7 @@ int getBin(double x, const std::vector<double>& bins) const {
   private:
     double m_sumw=0.0;
     HTXS::HiggsProdMode m_HiggsProdMode;
+    HTXS::HiggsDecayMode m_HiggsDecayMode;
     mutable std::array<std::atomic<size_t>, HTXS::NUM_ERRORCODES> m_errorCount ATLAS_THREAD_SAFE {};
     Histo1DPtr m_hist_stage0;
     Histo1DPtr m_hist_stage1_pTjet25, m_hist_stage1_pTjet30;

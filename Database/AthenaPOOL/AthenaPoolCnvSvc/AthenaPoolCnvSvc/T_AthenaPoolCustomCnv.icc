@@ -11,8 +11,6 @@
 #include "GaudiKernel/DataObject.h"
 #include "GaudiKernel/IOpaqueAddress.h"
 
-#include "StorageSvc/DbReflex.h"
-
 #include "AthenaKernel/StorableConversions.h"
 
 #include "AthenaPoolCnvSvc/exceptions.h"

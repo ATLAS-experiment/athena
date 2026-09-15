@@ -223,7 +223,7 @@ namespace ActsTrk {
       for (auto [src_region, dest_xaod_summary_layer, dest_xaod_summary_hits, add_outlier] : std::span(copy_summary.begin(),
                                                                                                        m_itkDecorationLevel>=s_expertLevel
                                                                                                        ? copy_summary.end()
-                                                                                                       : copy_summary.begin()+1)) {
+                                                                                                       : copy_summary.begin()+3)) {
          setSummaryValue(track_particle,
                          hitInfo.contributingLayers(static_cast<ActsTrk::detail::HitSummaryData::DetectorRegion>(src_region)),
                          static_cast<xAOD::SummaryType>(dest_xaod_summary_layer));

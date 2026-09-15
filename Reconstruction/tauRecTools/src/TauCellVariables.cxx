@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -24,6 +24,8 @@ StatusCode TauCellVariables::execute(xAOD::TauJet& pTau) const {
   double sumHadCellET = 0.;
 
   int numCells = 0;
+  //Local variable cellSeen uses 25000 bytes of stack space
+  //coverity[STACK_USE]
   std::bitset<200000> cellSeen;
 
   TLorentzVector tauAxis = tauRecTools::getTauAxis(pTau, m_doVertexCorrection);
@@ -96,7 +98,9 @@ StatusCode TauCellVariables::execute(xAOD::TauJet& pTau) const {
   // take care of the variables with division
   // -- fraction of cell energy within [0,0.1] and [0.1,0.2]
   if (std::abs(sumCellET) > 1e-6) {
+    //coverity[DIVIDE_BY_ZERO:FALSE]
     pTau.setDetail(xAOD::TauJetParameters::centFrac , static_cast<float>( sumCellET01 / sumCellET ));
+    //coverity[DIVIDE_BY_ZERO:FALSE]
     pTau.setDetail(xAOD::TauJetParameters::isolFrac , static_cast<float>( sumCellET12 / sumCellET ));
   } 
   else {

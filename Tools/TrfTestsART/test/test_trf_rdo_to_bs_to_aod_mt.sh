@@ -8,7 +8,7 @@
 : ${events:=100} #Allow overwriting from command line
 RDOFile=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RDO_RUN4[0])")
 conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
-geometry="ATLAS-P2-RUN4-04-00-00" # Should match RDO input file, which might not use the default geotag
+geometry="ATLAS-P2-RUN4-05-00-00" # Should match RDO input file, which might not use the default geotag
 Reco_tf.py \
 --inputRDOFile ${RDOFile} \
 --outputBSFile created.BS \
@@ -20,7 +20,7 @@ Reco_tf.py \
 --outputAODFile AOD.ttbar.fromBS.pool.root \
 --conditionsTag ${conditions} \
 --geometryVersion ${geometry} \
---preExec "flags.Tracking.doTruth=False;flags.Tracking.doITkFastTracking=True;flags.Reco.PostProcessing.GeantTruthThinning=False;flags.Reco.EnableHGTDExtension=False"
+--preExec "flags.Tracking.doTruth=False;flags.Tracking.doITkFastTracking=True;flags.Reco.PostProcessing.GeantTruthThinning=False;flags.Reco.EnableHGTDExtension=False;flags.Detector.EnableITkStrip=False;flags.Detector.EnablePLR=False;flags.Acts.doITkConversion=False;flags.Acts.doLargeRadius=False;flags.Acts.useCache=False;flags.Acts.EDM.PhaseII=True" \
 rc1=$?
 echo "art-result: ${rc1} Reco_tf_rdo_to_bs_to_aod"
 

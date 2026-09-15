@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONLAYERHOUGHALG_H
@@ -13,7 +13,7 @@
 
 class MuonLayerHoughAlg : public AthReentrantAlgorithm {
 public:
-    MuonLayerHoughAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual ~MuonLayerHoughAlg() = default;
 
@@ -21,10 +21,6 @@ public:
     virtual StatusCode execute(const EventContext& ctx) const override;
 
 private:
-    template <class T> StatusCode retrieveContainer(const EventContext& ctx,
-                                                    const SG::ReadHandleKey<T>& key,
-                                                    const T* & contPtr ) const;
-
     SG::ReadHandleKey<Muon::TgcPrepDataContainer> m_keyTgc{this, "TgcPrepDataContainer", "TGC_Measurements"};
     SG::ReadHandleKey<Muon::RpcPrepDataContainer> m_keyRpc{this, "RpcPrepDataContainer", "RPC_Measurements"};
     SG::ReadHandleKey<Muon::CscPrepDataContainer> m_keyCsc{this, "CscPrepDataContainer", "CSC_Clusters"};

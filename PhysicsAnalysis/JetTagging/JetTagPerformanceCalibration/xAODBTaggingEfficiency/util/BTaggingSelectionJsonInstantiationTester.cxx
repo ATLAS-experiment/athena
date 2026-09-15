@@ -38,7 +38,9 @@ ANA_MSG_SOURCE(testBTagSelJsonInst, "BTaggingSelectionJsonInstantiationTester")
 using namespace testBTagSelJsonInst;
 
 int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
+#ifdef XAOD_STANDALONE
     ANA_CHECK_SET_TYPE(int);
+#endif
 
     std::string jsonCalibPath;
     bool allowBinMismatch = false;

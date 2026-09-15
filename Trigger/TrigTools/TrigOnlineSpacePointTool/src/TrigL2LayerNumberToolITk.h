@@ -5,6 +5,7 @@
 #ifndef TRIGONLINESPACEPOINTTOOL_TRIG_L2_LAYER_NUMBER_TOOL_ITK_H
 #define TRIGONLINESPACEPOINTTOOL_TRIG_L2_LAYER_NUMBER_TOOL_ITK_H
 
+#include <Gaudi/Property.h>
 #include <vector>
 #include <map>
 #include <tuple>
@@ -79,7 +80,8 @@ class TrigL2LayerNumberToolITk : virtual public ITrigL2LayerNumberTool, public A
  protected:
 
   Gaudi::Property<bool> m_useNewScheme{this, "UseNewLayerScheme", false};
-
+  Gaudi::Property<bool> m_dumpGeometry{this, "dumpGbtsGeometry", false};
+  Gaudi::Property<std::string> m_geometryDumpDir{this, "geometryDump", ""};
   //cached values
   int m_MaxSiliconLayerNum{-1};
   int m_OffsetEndcapPixels{-1};

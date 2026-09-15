@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -85,11 +85,11 @@ StatusCode CountHepMC::execute(const EventContext& ctx) {
     // retrieve event from Transient Store (Storegate)
     const McEventCollection* oldmcEvtColl=0;
     if (evtStore()->retrieve(oldmcEvtColl, key).isSuccess()){
-      McEventCollection* newmcEvtColl = new McEventCollection(*oldmcEvtColl);
+      auto newmcEvtColl = std::make_unique<McEventCollection>(*oldmcEvtColl);
       McEventCollection::iterator evt = newmcEvtColl->begin();
       HepMC::GenEvent* hepMC = *evt;
       HepMC::set_ll_event_number(hepMC, newnum);
-      CHECK(evtStore()->overwrite( newmcEvtColl, key));
+      CHECK(evtStore()->overwrite( std::move(newmcEvtColl), key, true));
     }
     else{
       ATH_MSG_ERROR("No McEventCollection object found");

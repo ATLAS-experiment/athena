@@ -31,6 +31,8 @@ inputRDO=""
 outputAOD=""
 nEvents="-1"
 skipCheck=0
+storeTrackSeeds=True
+numThreads=1
 
 ## parsing flags
 while [ $# -ge 1 ];do
@@ -40,6 +42,8 @@ while [ $# -ge 1 ];do
         -o  | --outputAOD )     if [ $# -lt 2 ] ; then usage ; fi ; outputAOD="$2" ; shift ;;
         -n  | --nEvents )       if [ $# -lt 2 ] ; then usage ; fi ; nEvents="$2"   ; shift ;;
         -s  | --skipCheck )     if [ $# -lt 1 ] ; then usage ; fi ; skipCheck=1    ;;
+        -t  | --noStoreSeeds )  if [ $# -lt 1 ] ; then usage ; fi ; storeTrackSeeds=False ;;
+        -T  | --numThreads )    if [ $# -lt 2 ] ; then usage ; fi ; numThreads="$2" ; shift ;;
         -h  | --help )          usage 0 ;;
         *) shift ;;
     esac
@@ -55,23 +59,26 @@ if [ ! -f $inputRDO ]; then
     exit 1
 fi
 
-source "$(dirname "$0")/setup_G200_ART.sh"
-
 ## running reconstruction
-run Reco_tf.py --CA \
+ignore_pattern='ERROR Locating dev file .+ Do not let this propagate to a release'
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
+run Reco_tf.py \
+    --conditionsTag "default:${conditionsTag}" \
     --maxEvents ${nEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
-    --postInclude 'EFTracking.TrackingAlgConfig.g1xxAlgCfg,ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
-    --preExec 'from EFTracking.GpuEFTrackingConfigFlags import createGpuEFTrackingConfigFlags; \
-               flags.addFlagsCategory("Trigger.EFTracking.GPU", createGpuEFTrackingConfigFlags, prefix=True); \
-               flags.Trigger.EFTracking.GPU.inputDirectory="'"$PWD"'/ITk_data/"; \
-               flags.Trigger.EFTracking.GPU.pipeline="g130"; \
-               flags.Trigger.EFTracking.GPU.checkSeeds=True; \
+    --postInclude 'ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
+    --preExec "flags.Detector.EnableHGTD=False; \
+               flags.Acts.Device.doClusterization=True; \
+               flags.Acts.Device.doSeeding=True; \
+               flags.Tracking.doPixelDigitalClustering=True; \
                from ActsConfig.ActsConfigFlags import SeedingStrategy; \
-               flags.Acts.SeedingStrategy=SeedingStrategy.GbtsFtf;' \
-    --steering 'doRAWtoALL' \
+               flags.Acts.Device.seedingStrategy=SeedingStrategy.Gbts; \
+               flags.Tracking.ITkActsPass.storeTrackSeeds=${storeTrackSeeds}; \
+               flags.Concurrency.NumThreads=${numThreads}; \
+               flags.Concurrency.NumConcurrentEvents=${numThreads};" \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD} \
+    --ignorePatterns "${ignore_pattern}" \
     --perfmon fullmonmt
 
 rc=$?

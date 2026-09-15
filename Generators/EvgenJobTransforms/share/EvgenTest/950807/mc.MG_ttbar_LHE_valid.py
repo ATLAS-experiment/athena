@@ -36,7 +36,7 @@ class Sample(EvgenConfig):
         return MadGraphCfg(
             flags,
             process_definition=process_def,
-            settings=settings,
+            run_card_settings=settings,
             pdf_setting=pdf_set
         )
 

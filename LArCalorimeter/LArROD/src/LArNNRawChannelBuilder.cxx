@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2024-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2024-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "LArNNRawChannelBuilder.h"
@@ -223,14 +223,14 @@ StatusCode LArNNRawChannelBuilder::execute(const EventContext& ctx) const {
     //The following autos will resolve either into vectors or vector-proxies
     const auto& adc2mev = adc2MeVs->ADC2MEV(id, gain);
 
-    if (ATH_UNLIKELY(pedestal_value == ILArPedestal::ERRORCODE)) {
+    if (pedestal_value == ILArPedestal::ERRORCODE) [[unlikely]] {
       if (!connected) continue;       //No conditions for disconencted channel, who cares?
       ATH_MSG_ERROR("No valid pedestal for connected channel " << m_onlineId->channel_name(id)
                                                                << " gain " << gain);
       return StatusCode::FAILURE;
     }
 
-    if (ATH_UNLIKELY(adc2mev.size() < 2)) {
+    if (adc2mev.size() < 2) [[unlikely]] {
       if (!connected) continue;       //No conditions for disconencted channel, who cares?
       ATH_MSG_ERROR("No valid ADC2MeV for connected channel " << m_onlineId->channel_name(id)
                                                               << " gain " << gain);

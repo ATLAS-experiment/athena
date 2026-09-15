@@ -45,8 +45,8 @@ TrigMonEventCollection* TrigMonEventCollectionCnv::createTransient(const Token* 
 {
   (*m_log) << MSG::DEBUG << "TrigMonEventCollectionCnv::createTransient " << endmsg;
   
-  static const pool::Guid tlp1_guid("F224B21A-0CE8-40F1-B88B-027DA832A2A5");
-  static const pool::Guid p1_guid("9A0D41EB-9A40-42A1-8CDA-C80845FC7271");
+  static const Guid tlp1_guid("F224B21A-0CE8-40F1-B88B-027DA832A2A5");
+  static const Guid p1_guid("9A0D41EB-9A40-42A1-8CDA-C80845FC7271");
   
   TrigMonEventCollection *trans_obj(0);
   

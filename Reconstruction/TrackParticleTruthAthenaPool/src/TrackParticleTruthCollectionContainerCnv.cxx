@@ -40,9 +40,9 @@ TrackParticleTruthCollectionContainerPERS* TrackParticleTruthCollectionContainer
 
 
 TrackParticleTruthCollectionContainer* TrackParticleTruthCollectionContainerCnv::createTransient(const Token* token) {
-  pool::Guid p1_guid("9F47124C-0033-4556-B14A-D7F28E4249EC");
-  pool::Guid p2_guid("9F47124C-0033-4556-B14A-D7F28E4249ED");
-  pool::Guid p3_guid("018F1AD6-09F9-7634-A065-2343D74DD289");
+  Guid p1_guid("9F47124C-0033-4556-B14A-D7F28E4249EC");
+  Guid p2_guid("9F47124C-0033-4556-B14A-D7F28E4249ED");
+  Guid p3_guid("018F1AD6-09F9-7634-A065-2343D74DD289");
 
   MsgStream log(msgSvc(), "TrackParticleTruthCollectionContainerCnv" );
   TrackParticleTruthCollectionContainer *p_collection = 0;

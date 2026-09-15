@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGGER_DECISION_TOOL_DecisionAccess_H
@@ -32,7 +32,7 @@
 #include "TrigDecisionTool/ChainGroup.h"
 
 #include "TrigAnalysisHelpers/FeatureRequestDescriptor.h"
-
+#include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 
 #include "AsgDataHandles/ReadHandle.h"
@@ -69,10 +69,10 @@ namespace Trig {
      * @see Trig::ChainGroup
      * @see TrigDefs::Conditions
      **/ 
-    bool isPassed(const std::string& chain,
+    bool isPassed(std::string_view chain,
                   unsigned int condition) const;
 
-    bool isPassed(const std::string& chain) const;
+    bool isPassed(std::string_view chain) const;
 
     /**
      * @brief return decision for each chain in group

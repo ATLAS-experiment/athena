@@ -30,9 +30,7 @@ namespace EL
 {
   void Algorithm ::
   testInvariant () const
-  {
-    RCU_INVARIANT (this != 0);
-  }
+  {}
 
 
 
@@ -65,7 +63,7 @@ namespace EL
 
   Algorithm ::
   Algorithm ()
-    : m_wk (0)
+    : m_wk (nullptr)
   {
     RCU_NEW_INVARIANT (this);
   }
@@ -138,7 +136,7 @@ namespace EL
   void Algorithm ::
   setMsgLevel (int level)
   {
-    RCU_READ_INVARIANT (this);
+    RCU_CHANGE_INVARIANT (this);
     if (m_msg)
       m_msg->setLevel (MSG::Level (level));
     m_msgLevel = level;

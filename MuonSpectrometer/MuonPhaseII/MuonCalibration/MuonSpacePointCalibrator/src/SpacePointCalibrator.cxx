@@ -130,7 +130,7 @@ namespace MuonR4{
                 Amg::Vector3D closestApproach{locToGlob* locClosestApproach};
                 const double timeOfArrival = closestApproach.mag() * c_inv  + ActsTrk::timeToAthena(timeDelay);
 
-                if (ATH_LIKELY(spacePoint->dimension() == 1)) {
+                if (spacePoint->dimension() == 1) [[likely]] {
                     auto* dc = static_cast<const xAOD::MdtDriftCircle*>(spacePoint->primaryMeasurement());
                     MdtCalibInput calibInput{*dc, *gctx};
                     calibInput.setTrackDirection(locToGlob.linear() * dirInChamb,
@@ -308,6 +308,11 @@ namespace MuonR4{
                 cov[Acts::toUnderlying(AxisDefs::etaCov)] = calibCov;
                 Amg::Transform3D toChamberTrans{ locToGlob.inverse() * cluster->readoutElement()->localToGlobalTransform(*gctx, cluster->layerHash())};
 
+                if (spacePoint->dimension() == 2) {
+                    cov[Acts::toUnderlying(AxisDefs::phiCov)] *=
+                        Acts::square(m_sTgcNonPrecCoordErrorScale.value());
+                }
+
                 // since we want to take the second coordiante from the external estimate we need to transform the sp posiiton to the layer frame, replace the precission coordinate and transform back
                 Amg::Vector3D calibSpPosInLayer = toChamberTrans.inverse() * calibSpPos;
                 ATH_MSG_DEBUG("in layer before calibration" << Amg::toString(calibSpPosInLayer));
@@ -387,7 +392,7 @@ namespace MuonR4{
             THROW_EXCEPTION("Failed to calibrate MM cluster "<<m_idHelperSvc->toString(cluster.identify()));
         }
         ATH_MSG_DEBUG("new loc pos " << locPos[0] << " new cov" << calibCov(0,0)  );
-        return std::make_pair(locPos[0], calibCov(0,0));
+        return std::make_pair(locPos[0], Acts::square(m_mmStripErrorScale.value()) * calibCov(0,0));
     }
 
     std::pair<double, double> SpacePointCalibrator::calibratesTGC(const EventContext& /*ctx*/, 
@@ -404,8 +409,7 @@ namespace MuonR4{
         }
 
         // For now just copying over the local position and covariance. Eventually this should apply corrections from B-Lines and as build geometry
-        
-        return std::make_pair(cluster.localPosition<1>()[0], cluster.localCovariance<1>()(0,0));
+        return std::make_pair( cluster.localPosition<1>()[0], Acts::square(m_sTgcPrecCoordErrorScale.value()) * cluster.localCovariance<1>()(0,0));
     }
     void SpacePointCalibrator::calibrateCombinedPrd(const EventContext& ctx, 
                                                     const ActsTrk::GeometryContext& gctx,
@@ -444,6 +448,9 @@ namespace MuonR4{
                                                                     trackPars.direction())};
                 cmbPos[0] = calibPosCov.first;
                 cmbCov(0,0) = calibPosCov.second;
+
+                // Loosen non-precision / second coordinate
+                cmbCov(1,1) *= Acts::square(m_sTgcNonPrecCoordErrorScale.value());
             }
             setState<2>(ProjectorType::e2DimNoTime, cmbPos, cmbCov, sl, state);
         
@@ -491,7 +498,7 @@ namespace MuonR4{
                                          Acts::copySign(1.,trackPars.parameters()[Acts::eBoundLoc0]);
 
                 /** Vast majority of the measurements are ordinary drift tubes */
-                if (ATH_LIKELY(muonMeas->numDimensions() == 1)) {
+                if (muonMeas->numDimensions() == 1) [[likely]] {
                     MdtCalibOutput calibOutput = m_mdtCalibrationTool->calibrate(*ctx, calibInput);
                     ATH_MSG_VERBOSE("Returned calibration object "<<calibOutput);
                     AmgVector(1) pos{AmgVector(1)::Zero()};
@@ -536,7 +543,7 @@ namespace MuonR4{
             } case RpcStripType: {
                 const auto* rpcClust = static_cast<const xAOD::RpcMeasurement*>(muonMeas);
                 /** Legacy BM / BO chambers */
-                if (ATH_LIKELY(rpcClust->numDimensions() == 1)) {
+                if (rpcClust->numDimensions() == 1) [[likely]] {
 
                     if (!m_useRpcTime) {
                         const auto proj = rpcClust->measuresPhi() ? ProjectorType::e1DimRotNoTime

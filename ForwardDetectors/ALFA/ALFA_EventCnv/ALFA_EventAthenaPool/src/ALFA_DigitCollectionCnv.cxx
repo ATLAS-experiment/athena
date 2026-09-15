@@ -21,7 +21,7 @@ ALFA_DigitCollection* ALFA_DigitCollectionCnv::createTransient(const Token* toke
     ALFA_DigitCollectionCnv_p1   TPConverter_p1;
 
     ALFA_DigitCollection       *trans_cont(nullptr); // probably inicialization
-    static const pool::Guid p1_guid ("0F21F6BB-6719-41D3-8219-3ABF523826CD");   
+    static const Guid p1_guid ("0F21F6BB-6719-41D3-8219-3ABF523826CD");   
  
     if( this->compareClassGuid(token, p1_guid)) {
          std::unique_ptr< ALFA_DigitCollection_p1 >   col_vect( this->poolReadObject< ALFA_DigitCollection_p1 >(token) );

@@ -3,6 +3,7 @@
  */
 
 #include "MMT_Road.h"
+#include <stdexcept>
 
 MMT_Road::MMT_Road(const char sector, const int roadSize,
                    const int UpX, const int DownX, const int UpUV, const int DownUV,
@@ -71,6 +72,9 @@ double MMT_Road::avgSofXUV(const char type) const {
       ++N;
     }
     else continue;
+  }
+  if (N == 0)[[unlikely]]{
+    throw std::runtime_error("MMT_Road::avgSofXUV: N is zero.");
   }
   return sum/N;
 }

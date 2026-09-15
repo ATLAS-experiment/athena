@@ -31,6 +31,8 @@
 #include "StoreGate/ReadDecorHandle.h"
 #include "Acts/Utilities/Helpers.hpp"
 
+#include <algorithm>
+
 
 namespace ActsTrk{
 
@@ -48,6 +50,7 @@ namespace ActsTrk{
     ATH_CHECK( m_hgtdTrackLinkKey.initialize() );
     ATH_CHECK( m_truthParticleLinkKey.initialize() );
     ATH_CHECK( m_trackingGeometrySvc.retrieve());
+    ATH_CHECK(detStore()->retrieve(m_id_helper, "HGTD_ID"));
     ATH_CHECK( m_uncalibratedMeasurementContainerKey_HGTD.initialize() );
 
     // Initialize surface accessor
@@ -117,6 +120,15 @@ namespace ActsTrk{
     SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<char>> layerClusterMergedHandle(m_layerClusterMergedKey, ctx);
     SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<char>> layerPrimaryExpectedHandle(m_layerPrimaryExpectedKey, ctx);
 
+    // The HGTD layers in which a given truth particle left a cluster depend only on the
+    // measurements, not on the track being decorated. Evaluate it once per event instead
+    // of rescanning the whole HGTD measurement container for every TrackParticle.
+    PrimaryExpectedLookup primaryExpectedLookup;
+    ATH_CHECK(buildPrimaryExpectedLookup(
+        *uncalibratedMeasurementContainer,
+        measurement_to_truth_association_maps[Acts::toUnderlying(xAOD::UncalibMeasType::HGTDClusterType)],
+        primaryExpectedLookup));
+
     TruthTrackExtensionData data;
 
     for (const xAOD::TrackParticle* trackParticle : *trackParticles) {
@@ -129,7 +141,7 @@ namespace ActsTrk{
         layerClusterShadowedHandle(*trackParticle) = {false, false, false, false};
         layerClusterMergedHandle(*trackParticle)  = {false, false, false, false};
         layerPrimaryExpectedHandle(*trackParticle) = {false, false, false, false};
-        ATH_MSG_WARNING("TrackParticle " << trackParticle->index() << ": invalid truth link");
+        ATH_MSG_DEBUG("TrackParticle " << trackParticle->index() << ": invalid truth link");
         continue;
       }
       else {
@@ -153,10 +165,11 @@ namespace ActsTrk{
       }
       
 
-      ATH_CHECK(isPrimaryExpected(truthParticle,
-        *uncalibratedMeasurementContainer,
-        measurement_to_truth_association_maps[Acts::toUnderlying(xAOD::UncalibMeasType::HGTDClusterType)],
-        data.primaryExistsVec));
+      data.primaryExistsVec.assign(s_nHgtdLayers, false);
+      if (auto itr = primaryExpectedLookup.find(truthParticle->index());
+          itr != primaryExpectedLookup.end()) {
+        std::copy(itr->second.begin(), itr->second.end(), data.primaryExistsVec.begin());
+      }
 
       layerClusterTruthClassHandle(*trackParticle) = data.truthClassVec;
       layerClusterShadowedHandle(*trackParticle) = data.isShadowedVec;
@@ -186,14 +199,18 @@ namespace ActsTrk{
       if (flags.isMeasurement()) {
         // Check if this is an HGTD hit 
         const auto& surface = state.referenceSurface();
+        const auto* detElem = getActsDetectorElement(surface);
+        if(detElem->detectorType() != DetectorType::Hgtd){
+          continue;
+        }
+
         Acts::GeometryIdentifier geoID = surface.geometryId();
-                              
-        std::size_t layerIndex = getHGTDLayerIndex(geoID);
+        std::size_t layerIndex = m_id_helper->layer(detElem->identify());
+
         ClusterTruthInfo cluster_truth_info;
-        
+
         assert( state.hasUncalibratedSourceLink() );
         auto uncalibMeas = detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());
-      
         if (association_map->at(uncalibMeas->index()).empty()) {
           cluster_truth_info.origin = ActsTrk::ClusterTruthOrigin::SECONDARY;
           ATH_MSG_DEBUG("    \\__Layer "<< layerIndex << " SECONDARY: hit doesnt have truth particle associated with it");
@@ -221,10 +238,14 @@ namespace ActsTrk{
           }
         }
       
-        
-        truthClassPerLayer[layerIndex]      = (int) cluster_truth_info.origin;
-        isShadowedPerLayer[layerIndex]      = cluster_truth_info.is_shadowed;
-        isMergedPerLayer[layerIndex]        = cluster_truth_info.is_merged;
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - "<<uncalibMeas->type()<<", geoID: "<<geoID<<", layerIndex: "<<layerIndex);
+        if (layerIndex >= truthClassPerLayer.size()) {
+          ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - "<<uncalibMeas->type()<<", geoID: "<<geoID<<" results in an invalid index "<<layerIndex);
+          continue;
+        }
+        truthClassPerLayer.at(layerIndex)      = Acts::toUnderlying(cluster_truth_info.origin);
+        isShadowedPerLayer.at(layerIndex)      = cluster_truth_info.is_shadowed;
+        isMergedPerLayer.at(layerIndex)        = cluster_truth_info.is_merged;
       }
     }
 
@@ -236,64 +257,40 @@ namespace ActsTrk{
     return data;
   }
   
-  StatusCode HGTDTruthTrackDecorationAlg::isPrimaryExpected(
-    const xAOD::TruthParticle* truthParticle,
+  StatusCode HGTDTruthTrackDecorationAlg::buildPrimaryExpectedLookup(
     const xAOD::UncalibratedMeasurementContainer & measurementContainer,
     const ActsTrk::MeasurementToTruthParticleAssociation* association_map,
-    std::vector<char> &isPrimaryExistsVec) const{
+    PrimaryExpectedLookup& lookup) const {
 
-    isPrimaryExistsVec = {false, false, false, false};
-  
-    for(auto uncalibMeas: measurementContainer) {
+    if (association_map == nullptr) {
+      return StatusCode::SUCCESS;
+    }
 
-      auto measurementTruthParticles = association_map->at(uncalibMeas->index());
+    for (const xAOD::UncalibratedMeasurement* uncalibMeas : measurementContainer) {
+
       const Acts::Surface* surface = m_surfAcc.get(uncalibMeas);
-      Acts::GeometryIdentifier geoID = surface->geometryId();
-      std::size_t layerIndex = getHGTDLayerIndex(geoID);
-      if(measurementTruthParticles.size() > 0){
-        for(auto measTruthParticle : measurementTruthParticles){
-          if ( truthParticle->index() == measTruthParticle->index()){
-            isPrimaryExistsVec[layerIndex] = true;
-            ATH_MSG_DEBUG("         \\__HIT Exepected at " << layerIndex);
-          }
-        }
+      const auto* detElem = getActsDetectorElement(surface);
+      if (detElem == nullptr || detElem->detectorType() != DetectorType::Hgtd) {
+        continue;
       }
-    }
-  
-    return StatusCode::SUCCESS; 
-  }
 
-  std::size_t HGTDTruthTrackDecorationAlg::getHGTDLayerIndex(const Acts::GeometryIdentifier& geoID) const {
-    // Get volume and layer ID
-    std::uint32_t volume = geoID.volume();
-    std::uint32_t layer = geoID.layer();
-    
-    // Check if we're in the positive or negative endcap 
-    bool isPositiveEndcap = (volume == 25); 
-    bool isNegativeEndcap = (volume == 2); 
-    
-    // Different mapping for different sides to maintain consistent physical ordering
-    if (isPositiveEndcap) {
-      // Mapping for positive endcap
-      switch(layer) {
-        case 2: return 0;  // First HGTD layer (closest to IP)
-        case 4: return 1;  // Second HGTD layer
-        case 6: return 2;  // Third HGTD layer
-        case 8: return 3;  // Fourth HGTD layer (farthest from IP)
-        default: return 99; // Invalid layer
+      const std::size_t layerIndex = m_id_helper->layer(detElem->identify());
+
+      ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - "<<uncalibMeas->type()
+                      <<", geoID: "<<surface->geometryId()<<", layerIndex: "<<layerIndex);
+      if (layerIndex >= s_nHgtdLayers) {
+        ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - "<<uncalibMeas->type()
+                        <<", geoID: "<<surface->geometryId()<<" results in an invalid index "<<layerIndex);
+        continue;
       }
-    } else if (isNegativeEndcap) {
-      // Mapping for negative endcap - potentially different ordering
-      switch(layer) {
-        case 2: return 3; 
-        case 4: return 2;  
-        case 6: return 1;
-        case 8: return 0;
-        default: return 99; // Invalid layer
+
+      for (const xAOD::TruthParticle* measTruthParticle : association_map->at(uncalibMeas->index())) {
+        lookup.try_emplace(measTruthParticle->index(), HgtdLayerFlags{})
+              .first->second[layerIndex] = true;
       }
-    } else {
-      return 99; // Not an HGTD volume
     }
+
+    return StatusCode::SUCCESS; 
   }
   
 }

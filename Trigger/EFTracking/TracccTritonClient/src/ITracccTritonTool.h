@@ -8,21 +8,8 @@
 #include "GaudiKernel/IAlgTool.h"
 #include "TrkSpacePoint/SpacePoint.h"
 #include "TrkTrack/Track.h"
+#include <cstdint>
 #include <vector>
-
-class MsgStream;
-
-// model input
-struct TracccCell {
-
-    int64_t geometry_id = 0;
-    int64_t measurement_id = 0;
-    int64_t channel0 = 0;
-    int64_t channel1 = 0;
-    float timestamp = 0.f;
-    float value = 0.f;
-
-};
 
 // model output
 struct TracccTrackParameters {
@@ -42,7 +29,7 @@ struct LocalMeasurementInfoInTracks {
     std::vector<float> theta;
     std::vector<float> qop;
     std::vector<float> time;
-    std::vector<float> covariances; // flattened 5x5 covariance matrix per measurement
+    std::vector<float> covariances; // flattened 6x6 covariance matrix per measurement
     std::vector<int64_t> athena_id;
 };
 
@@ -57,20 +44,21 @@ public:
     DeclareInterfaceID(ITracccTritonTool, 1, 0);
 
     /**
-     * @brief Get track candidates from hits.
-     * @param cells a vector of hits per cell
+     * @brief Get track candidates from serialized traccc cells.
+     * @param cellBytes serialized traccc silicon_cell_collection (see
+     *        TrackMaker::serializeCells for the byte layout), sent to the
+     *        server as a single UINT8 tensor
      * @param TracccTrackParameters a vector of fitted track parameters
      * @param TracccMeasurementInfoInTracks a vector of measurements per fitted track
      * @return StatusCode indicating success or failure
      */
 
     virtual StatusCode getTracks(
-        std::vector<TracccCell>& cells,
+        std::vector<uint8_t>& cellBytes,
         std::vector<TracccTrackParameters>& TracccTrackParameters,
         std::vector<LocalMeasurementInfoInTracks>& TracccMeasurementInfoInTracks
     ) const = 0;
 
-    // TODO: Add pipeline for combined GNN+traccc (should be nearly identical to getTracks)
 };
 
 #endif  // ITracccTritonTool_H

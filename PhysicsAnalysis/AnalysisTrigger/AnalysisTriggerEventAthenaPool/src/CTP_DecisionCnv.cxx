@@ -22,9 +22,9 @@ CTP_Decision_PERS* CTP_DecisionCnv::createPersistent( CTP_Decision* transObj ) {
 
 CTP_Decision* CTP_DecisionCnv::createTransient(const Token* token) {
   
-  static const pool::Guid p2_guid( "08922DA9-6E47-4D3A-9FEC-0B4440644B50" );
-  static const pool::Guid p1_guid( "1F421F32-8FBD-47B7-82ED-5354B9BE96D8" );
-  static const pool::Guid p0_guid( "2A450F66-8A30-42E1-91CB-BE1CEE3C772F" );
+  static const Guid p2_guid( "08922DA9-6E47-4D3A-9FEC-0B4440644B50" );
+  static const Guid p1_guid( "1F421F32-8FBD-47B7-82ED-5354B9BE96D8" );
+  static const Guid p0_guid( "2A450F66-8A30-42E1-91CB-BE1CEE3C772F" );
 
   if( this->compareClassGuid(token,  p2_guid ) ) {
 

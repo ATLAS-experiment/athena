@@ -3,6 +3,7 @@
 # art-include: main/Athena
 # art-description: DAOD building NCB1 data23cos
 # art-type: grid
+# art-memory: 4096
 # art-output: *.pool.root
 # art-output: checkFile*.txt
 # art-output: checkxAOD*.txt
@@ -14,7 +15,7 @@ Derivation_tf.py \
 --inputAODFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data23_cos/AOD/data23_cos.00459152.physics_CosmicMuons.merge.AOD.f1383_m2195/data23_cos.00459152.physics_CosmicMuons.merge.AOD.f1383_m2195._lb0124-lb0126._0001.1 \
 --outputDAODFile art.pool.root \
 --formats NCB1 \
---maxEvents 2000 \
+--maxEvents -1 \
 
 echo "art-result: $? reco"
 

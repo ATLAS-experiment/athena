@@ -286,9 +286,15 @@ int getFullVrtCov(VKVertex * vk, double *ader, const double *dcv, double verr[6]
             }
           }
 // R,RC[ic][i]
-	  double **R =new double*[totNC]; for(ic=0; ic<totNC; ic++) R[ic]=new double[NVar];
-	  double **RC=new double*[totNC]; for(ic=0; ic<totNC; ic++)RC[ic]=new double[NVar];
-	  double *RCRt=new double[totNC*totNC];
+      std::unique_ptr<double[]> R_data(new double[totNC * NVar]);
+      std::unique_ptr<double*[]> R(new double*[totNC]);
+      std::unique_ptr<double[]> RC_data(new double[totNC * NVar]);
+      std::unique_ptr<double*[]> RC(new double*[totNC]);
+      for(ic=0; ic<totNC; ic++) {
+        R[ic] = &R_data[ic * NVar];
+        RC[ic] = &RC_data[ic * NVar];
+      }
+	  std::unique_ptr<double[]> RCRt(new double[totNC*totNC]);
 	  for(ic=0; ic<totNC; ic++){
 	    R[ic][0]=th0t[ic].X;
 	    R[ic][1]=th0t[ic].Y;
@@ -311,7 +317,7 @@ int getFullVrtCov(VKVertex * vk, double *ader, const double *dcv, double verr[6]
 	      for(i=0; i<NVar; i++) RCRt[ic*totNC + jc] += RC[ic][i]*R[jc][i];
 	    }
           }
-	  dsinv(totNC, RCRt, totNC, &IERR);
+	  dsinv(totNC, RCRt.get(), totNC, &IERR);
 	  if ( IERR != 0) return IERR;
 // Correction matrix
 	 for(i=0; i<NVar; i++){
@@ -324,12 +330,6 @@ int getFullVrtCov(VKVertex * vk, double *ader, const double *dcv, double verr[6]
 	     ader_ref(i+1, j+1) -= COR;
 	   }
 	 }
-// Delete temporary matrices
-         for(ic=0; ic<totNC; ic++) delete[]  R[ic];
-         delete[] R;
-         for(ic=0; ic<totNC; ic++) delete[] RC[ic];
-         delete[] RC;
-	 delete[] RCRt;
 //for(int ii=1; ii<=9; ii++)std::cout<<ader_ref(ii,ii)<<", "; std::cout<<__func__<<" avery full m NEW"<<'\n';
        }  //end of Avery matrix
 

@@ -1,0 +1,10 @@
+# This file is an EXAMPLE of the BaseConfig functionality, it is NOT a recommended configuration.
+
+# Configuration based on this file, with specific settings below overridden
+BaseConfig: calibConfigExample.yaml
+
+Residual:
+  RhoKey: "Kt4EMPFlowCustomVtxEventShape" 
+
+GSC:
+  VertexContainer: HggPrimaryVertices

@@ -10,8 +10,8 @@ def defineMenu():
 
     l1items = L1MenuFlags.items()
 
-    # remove AFP and MBTS items, plus any item which are being remapped and which are in the pp menu
-    discard_list = ["L1_AFP", "L1_MBTS", "L1_eTAU140", "L1_eTAU35", "L1_3jJ90", "L1_MU14FCH_jJ90", "L1_jJ90", "L1_2jJ90_jXE80", "L1_LATE-MU8F_jJ90"]
+    # remove AFP, MBTS, TRT items, plus any item which are being remapped and which are in the pp menu
+    discard_list = ["L1_AFP", "L1_MBTS", "L1_TRT", "L1_eTAU140", "L1_eTAU35", "L1_3jJ90", "L1_MU14FCH_jJ90", "L1_jJ90", "L1_2jJ90_jXE80", "L1_LATE-MU8F_jJ90"]
 
     def match_any(item):
         return any([item.startswith(pattern) for pattern in discard_list])
@@ -42,6 +42,7 @@ def defineMenu():
     try_add("L1_2jJ70_jXE80")
     try_add("L1_HT150-jJ50s5pETA32")    
     try_add("L1_MU8VF_2MU8F")
+    try_add("L1_2MU12FCH")
     
     # recover the ones removed by run3 MC
     try_recover("L1_eEM22M")

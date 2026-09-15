@@ -23,7 +23,8 @@ RDOtoTracccCellConverterCommons::RDOtoTracccCellConverterCommons(
   , m_hostMR{&parent, "HostMR", "", "The host memory resource tool to use"}
   , m_deviceMR{&parent, "DeviceMR", "", "The device memory resource tool to use"}
   , m_copiesTool{&parent, "CopiesTool", "", "Tool that provides host and device copy objects"}
-  , m_detDescSvc{&parent, "DetectorDescriptionSvc", "ActsTrk::JSONDeviceDetectorDescriptionProviderSvc"}
+  , m_geoIdMappingObjectName{&parent, "GeoIdMappingObjectName", "",
+      "StoreGate name for the detray/acts/athena geo id mapping"} 
   , m_hostCondObjectName{&parent, "HostConditionsObjectName", "",
       "Traccc host conditions object"}
   , m_CPUCellSorting{&parent, "CPUCellSorting", false,
@@ -43,18 +44,32 @@ StatusCode RDOtoTracccCellConverterCommons::initialize()
   ATH_CHECK(m_tracccCellsKey.initialize());
   ATH_CHECK(m_copiesTool.retrieve());
 
-  m_athenaToDetray = &m_detDescSvc->athenaToDetrayMap();
+  ATH_CHECK(m_parent.detStore()->retrieve(m_geoIdMapping, m_geoIdMappingObjectName.value()));
   ATH_CHECK(m_parent.detStore()->retrieve(m_hostCond, m_hostCondObjectName.value()));
 
-  const auto& gids = m_hostCond->geometry_id();
-  m_DetrayIdToDetDescrIndexMap.reserve(gids.size());
-  for (unsigned int i = 0; i < gids.size(); ++i) {
-    m_DetrayIdToDetDescrIndexMap[gids[i].value()] = i;
-  }
   ATH_MSG_INFO("Built detray→detcond map with "
       << m_DetrayIdToDetDescrIndexMap.size() << " entries");
 
   ATH_CHECK(decodeTimeBins());
+
+  return StatusCode::SUCCESS;
+}
+
+StatusCode RDOtoTracccCellConverterCommons::buildDetrayMaps() const
+{
+  
+  const auto& gids = m_hostCond->geometry_id();
+  // NOTE: m_DetrayIdToDetDescrIndexMap is built once here; 
+  // meaning it is only valid as long as the geometry does not change.
+  // if the job ever spans multiple IOVs with a
+  // genuinely different geometry_id() payload, this caching strategy
+  // would need to become IOV-aware instead.
+  const_cast<RDOtoTracccCellConverterCommons*>(this)->m_DetrayIdToDetDescrIndexMap.reserve(gids.size());
+  for (unsigned int i = 0; i < gids.size(); ++i) {
+    const_cast<RDOtoTracccCellConverterCommons*>(this)->m_DetrayIdToDetDescrIndexMap[gids[i].value()] = i;
+  }
+  ATH_MSG_INFO("Built detray→detcond map with "
+      << m_DetrayIdToDetDescrIndexMap.size() << " entries");
 
   return StatusCode::SUCCESS;
 }

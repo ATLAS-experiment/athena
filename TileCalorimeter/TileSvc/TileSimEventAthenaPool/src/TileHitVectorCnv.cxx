@@ -22,8 +22,8 @@ TileHitVector* TileHitVectorCnv::createTransient(const Token* token) {
 
     TileHitVector* trans_cont(0);
 
-    static const pool::Guid   p1_guid("65AD597A-BF97-46EE-B9E3-203B35218EA7");
-    static const pool::Guid   p0_guid("EA2209D1-C339-453D-AEAD-21C026F0735E");
+    static const Guid   p1_guid("65AD597A-BF97-46EE-B9E3-203B35218EA7");
+    static const Guid   p0_guid("EA2209D1-C339-453D-AEAD-21C026F0735E");
 
     if( this->compareClassGuid(token, p1_guid)) {
 

@@ -88,9 +88,6 @@ public:
 private:
     StatusCode initializeRunDependentParameters();
 
-    template <class CondType> StatusCode retrieveCondData(const EventContext& ctx,
-                                                          const SG::ReadCondHandleKey<CondType>& key,
-                                                          const CondType* & condPtr) const;
     using Collections_t = std::vector<std::unique_ptr<RpcDigitCollection> >;
     /** Get next event and extract collection of hit collections: */
     StatusCode getNextEvent(const EventContext& ctx);

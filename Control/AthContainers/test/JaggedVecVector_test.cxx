@@ -15,7 +15,6 @@
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthContainers/JaggedVecImpl.h"
 #include "AthContainers/AuxStoreInternal.h"
-#include "CxxUtils/ranges.h"
 #include <iostream>
 #include <cassert>
 
@@ -39,7 +38,7 @@ T makeT(int x=0) { return makeT1(x, static_cast<T*>(nullptr)); }
 template <class T>
 std::vector<T> makeTVec (const std::vector<int>& v)
 {
-  return CxxUtils::to<std::vector<T> >(v | std::views::transform (makeT<T>));
+  return std::ranges::to<std::vector<T> >(v | std::views::transform (makeT<T>));
 }
 
 

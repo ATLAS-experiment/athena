@@ -38,23 +38,6 @@ namespace pool   {
     enum Action { TRANSACT_COMMIT, TRANSACT_FLUSH };
   }
 
-  /// Issue a debug break
-  void      debugBreak();
-
-  /// Issue a debug break with error message (to std::cout !!)
-  void      debugBreak( const std::string& src, 
-                        const std::string& msg,
-                        bool rethrow=true);
-
-  /// Debug break with printout and exception chaining
-  void      debugBreak( const std::string& src, 
-                        const std::string& msg,
-                        const std::exception& e,
-                        bool rethrow=true);
-
-  /// Check for tracing
-  bool      doTrace();
-
   /// Translate access mode to string
   const char* accessMode(Io::IoFlag access_mode);
 
@@ -71,18 +54,6 @@ namespace pool   {
       p->release();
       p = 0;
     }
-  }
-
-  /// Release Reference countable pointer
-  template<class T> inline int decrementPtr(T*& p)  {
-    if ( p )    {
-      int cnt = p->release();
-      if ( 0 >= cnt )  {
-        p = 0;
-      }
-      return cnt;
-    }
-    return ~0x0;
   }
 
   class RefCounter {

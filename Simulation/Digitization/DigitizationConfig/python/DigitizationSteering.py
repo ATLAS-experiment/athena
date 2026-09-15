@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Main steering for the digitization jobs
 
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -37,7 +37,8 @@ def DigitizationMainServicesCfg(flags):
             acc.merge(PileUpMTAlgCfg(flags))
         else:
             from DigitizationConfig.PileUpConfig import PileUpEventLoopMgrCfg
-            acc = MainServicesCfg(flags, LoopMgr="PileUpEventLoopMgr")
+            # For MP, we let MainServicesCfg create the MpEventLoopMgr
+            acc = MainServicesCfg(flags, createEventLoopMgr=(flags.Concurrency.NumProcs > 0))
             acc.merge(PileUpEventLoopMgrCfg(flags))
     else:
         acc = MainServicesCfg(flags)

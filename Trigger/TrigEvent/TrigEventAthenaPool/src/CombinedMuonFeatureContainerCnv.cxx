@@ -29,11 +29,11 @@ CombinedMuonFeatureContainer * CombinedMuonFeatureContainerCnv::createTransient(
   
   mlog << MSG::DEBUG << "CombinedMuonFeatureContainerCnv::createTransient called" << endmsg;
   
-  static const pool::Guid p4_guid( "A06B9B51-FFA9-4AC1-9079-8AF49C4A9B87" );
-  static const pool::Guid p3_guid( "02262E5F-7645-4919-9CD9-66D88796DCFA" );
-  static const pool::Guid p2_guid( "E9D9F99E-D64F-4114-90EA-236FAF9063BB" );
-  static const pool::Guid tlp1_guid( "9C558B18-1B1D-4186-AF26-A5F3EACCBE1B" );
-  static const pool::Guid p0_guid( "574BFA1C-ADB8-40DB-B538-0CA20E20CAAD" );
+  static const Guid p4_guid( "A06B9B51-FFA9-4AC1-9079-8AF49C4A9B87" );
+  static const Guid p3_guid( "02262E5F-7645-4919-9CD9-66D88796DCFA" );
+  static const Guid p2_guid( "E9D9F99E-D64F-4114-90EA-236FAF9063BB" );
+  static const Guid tlp1_guid( "9C558B18-1B1D-4186-AF26-A5F3EACCBE1B" );
+  static const Guid p0_guid( "574BFA1C-ADB8-40DB-B538-0CA20E20CAAD" );
   
   //CombinedMuonFeatureContainer *p_collection = 0;
   if( compareClassGuid(token,  p4_guid ) ){

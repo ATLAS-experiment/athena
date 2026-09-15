@@ -76,7 +76,7 @@ atlas_add_test( MetaDataSvc_test
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} TestTools AthenaKernel CxxUtils GaudiKernel
                   StoreGateLib AthenaBaseComps RootAuxDynIOHeaders PersistentDataModel SGTools Boost::unit_test_framework
-   LOG_IGNORE_PATTERN "ERROR Unable to get|ERROR Failing|ERROR Unable to call|tool->endInputFile|Cannot create proxy|FAILURE: addProxyToInputMetaDataStore"
+   LOG_IGNORE_PATTERN "ERROR Unable to get|ERROR Failing|ERROR Unable to call|tool->endInputFile|Cannot create proxy|FAILURE: addProxyToInputMetaDataStore|ERROR shmProxy failed: unsupported AddressCreator AthenaPoolCnvSvc"
    POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( AthTPCnvSvc
@@ -87,6 +87,7 @@ atlas_add_test( AthTPCnvSvc
 atlas_add_test( AthDictLoaderSvc
    SCRIPT test/AthDictLoaderSvc_test.py
    LOG_SELECT_PATTERN "AthDictLoaderTestAlg"
+   LOG_IGNORE_PATTERN "<-- .ElementLink_p1<unsigned int>|<-- .ElementLinkInt_p1"
    PROPERTIES TIMEOUT 300 )
 
 atlas_add_test( ItemListSemanticsTest

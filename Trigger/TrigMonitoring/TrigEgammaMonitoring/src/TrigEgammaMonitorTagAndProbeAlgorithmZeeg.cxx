@@ -174,7 +174,7 @@ StatusCode TrigEgammaMonitorTagAndProbeAlgorithmZeeg::fillHistograms( const Even
     ATH_MSG_DEBUG("Made it pass LAR");
      //To keep track of the number of events that pass the trigger (includes both tag and probe)
      //We needed to add in the monGroup
-     auto monGroup = getGroup( m_anatype );
+     const auto & monGroup = getGroup( m_anatype );
 
      //Looping over the tag triggers
      for(const std::string& tagTrigger : m_tagTrigList){
@@ -264,7 +264,7 @@ bool TrigEgammaMonitorTagAndProbeAlgorithmZeeg::executeTandP( const EventContext
 {
 
     //Get the monitoring group for each trigger (m_anatype)
-    auto monGroup = getGroup( m_anatype );
+    const auto & monGroup = getGroup( m_anatype );
     
     //Starting number of events for the trigger
     fillLabel(monGroup, "CutCounter", "Events");
@@ -352,6 +352,10 @@ bool TrigEgammaMonitorTagAndProbeAlgorithmZeeg::executeTandP( const EventContext
 
     //We are now entering the function where we select our tag electrons
     ATH_MSG_INFO("Execute TandP BaseTool " << offElectrons->size());
+    const std::string tagCutStr{"TagCutCounter"};
+    const std::string electronsStr{"Electrons"};
+    const std::string osStr{"OS"};
+    const std::string ssStr{"SS"};
     for(const auto *const elTag1 : *offElectrons)
     {
         if( !isGoodElectron( monGroup, elTag1) ) continue;
@@ -367,16 +371,16 @@ bool TrigEgammaMonitorTagAndProbeAlgorithmZeeg::executeTandP( const EventContext
             if(!isGoodElectron(monGroup, elTag2)) continue;
        	    ATH_MSG_INFO("Electron 2 is good"); 
 
-            fillLabel(monGroup, "TagCutCounter", "Electrons");
+            fillLabel(monGroup, tagCutStr, electronsStr);
             // Check opposite charge
             if(m_oppositeCharge && (elTag2->charge() == elTag1->charge()) ) continue;
             ATH_MSG_INFO("Electron 2 charge == Electron 1 charge"); 
 
-            fillLabel(monGroup, "TagCutCounter", "OS");
+            fillLabel(monGroup, tagCutStr, osStr);
             if(!m_oppositeCharge && (elTag2->charge() != elTag1->charge()) ) continue;
             ATH_MSG_INFO("Electron 2 charge != Electron 1 charge"); 
 
-            fillLabel(monGroup, "TagCutCounter", "SS");
+            fillLabel(monGroup, tagCutStr, ssStr);
 
 	    //Di-electron trigger matching
 	    if (!matchDiElectronTrigger(elTag1, elTag2)) continue;
@@ -401,12 +405,15 @@ bool TrigEgammaMonitorTagAndProbeAlgorithmZeeg::executeTandP( const EventContext
     //Now we have a vector of tag combinations 
      //selecting the photon and tag and probe
      ATH_MSG_INFO("Entering photonZeeg loop"); 
+     const std::string hName{"ProbeCutCounter"};
+     const std::string label{"GoodProbe"};
+     const std::string zMassStr{"ZMass"};
      for (const auto *const photProbe : *photons) {
          
 	 if(!isGoodProbePhoton(monGroup, photProbe, jets.cptr())) continue;
          // Probe available. Good Probe?
          ATH_MSG_DEBUG("is good probe Photon");
-         fillLabel( monGroup, "ProbeCutCounter", "GoodProbe");
+         fillLabel( monGroup, hName, label);
 
          //Must be an easy way with IParticle
          TLorentzVector ph;
@@ -429,12 +436,12 @@ bool TrigEgammaMonitorTagAndProbeAlgorithmZeeg::executeTandP( const EventContext
              continue;
          }
 	 else {
-             fillLabel(monGroup, "ProbeCutCounter", "ZMass");
+             fillLabel(monGroup, hName, zMassStr);
 
              auto selProbe = std::make_shared<const xAOD::Photon>(*photProbe);
              probePhotons.emplace_back(std::move(selProbe));
 
-             auto mon_count_probe= Monitored::Scalar<std::string>("ProbeCutCounter","GoodProbe");
+             auto mon_count_probe= Monitored::Scalar<std::string>(hName,label);
              auto mon_meeg = Monitored::Scalar<float>("Meeg" , eegMass/1.e3 );
              fill( monGroup , mon_count_probe, mon_meeg );
              ATH_MSG_INFO("Fill TP Meeg and count");

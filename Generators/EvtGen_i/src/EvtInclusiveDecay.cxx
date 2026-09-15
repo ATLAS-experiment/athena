@@ -222,22 +222,24 @@ StatusCode EvtInclusiveDecay::execute(const EventContext& ctx) {
 
   // Load HepMC info
   // FIXME should be using Read/WriteHandles here
-  const McEventCollection* oldmcEvtColl{};
+
+  /// New collection that we made.
+  std::unique_ptr<McEventCollection> mcEvtCollPtr;
+
+  /// Collection on which we're operating.
+  McEventCollection* mcEvtColl = nullptr;
+
   if(m_readExisting) {
+    const McEventCollection* oldmcEvtColl = nullptr;
     CHECK(evtStore()->retrieve(oldmcEvtColl, key));
     // Fill the new McEventCollection with a copy of the initial HepMC::GenEvent
-    m_mcEvtColl = new McEventCollection(*oldmcEvtColl);
+    mcEvtCollPtr = std::make_unique<McEventCollection>(*oldmcEvtColl);
+    mcEvtColl = mcEvtCollPtr.get();
   }
-  else {CHECK(evtStore()->retrieve(m_mcEvtColl, key));}
-
-  if(m_readExisting) {
-    if(m_outputKeyName!=key) {
-     CHECK(evtStore()->record( m_mcEvtColl,m_outputKeyName));
-    }
-  }
+  else {CHECK(evtStore()->retrieve(mcEvtColl, key));}
 
   McEventCollection::iterator mcItr;
-  for( mcItr = m_mcEvtColl->begin(); mcItr != m_mcEvtColl->end(); ++mcItr )   {
+  for( mcItr = mcEvtColl->begin(); mcItr != mcEvtColl->end(); ++mcItr )   {
     HepMC::GenEvent* hepMC = *mcItr;
 
     // Search HepMC record for particles to be decayed by EvtGen
@@ -301,8 +303,13 @@ StatusCode EvtInclusiveDecay::execute(const EventContext& ctx) {
     }
   }
 
-  if(m_readExisting && m_outputKeyName==key) {
-    CHECK(evtStore()->overwrite(m_mcEvtColl, m_outputKeyName));
+  if (mcEvtCollPtr) {
+    if(m_outputKeyName!=key) {
+      ATH_CHECK(evtStore()->record(std::move(mcEvtCollPtr),m_outputKeyName));
+    }
+    else {
+      ATH_CHECK(evtStore()->overwrite(std::move(mcEvtCollPtr), m_outputKeyName, true));
+    }
   }
 
   return StatusCode::SUCCESS;

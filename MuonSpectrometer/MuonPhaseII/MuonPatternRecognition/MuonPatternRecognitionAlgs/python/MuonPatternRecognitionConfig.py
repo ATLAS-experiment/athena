@@ -15,7 +15,12 @@ def MuonPhiHoughTransformAlgCfg(flags, name = "MuonPhiHoughTransformAlg", **kwar
 def MuonNSWSegmentFinderAlgCfg(flags, name = "MuonNswSegmentFinderAlg", **kwargs):
     result = ComponentAccumulator()
     from MuonSpacePointCalibrator.CalibrationConfig import MuonSpacePointCalibratorCfg
-    kwargs.setdefault("Calibrator", result.popToolsAndMerge(MuonSpacePointCalibratorCfg(flags)))
+    calibrator_kwargs = {}
+    if flags.Input.isMC:
+        #See !90511, possibility to adjust precision strips with sTgcPrecCoordErrorScale and both eta and stereo MMG with mmStripErrorScale
+        calibrator_kwargs["sTgcNonPrecCoordErrorScale"] = 4.
+
+    kwargs.setdefault("Calibrator", result.popToolsAndMerge(MuonSpacePointCalibratorCfg(flags, **calibrator_kwargs)))
     theAlg = CompFactory.MuonR4.NswSegmentFinderAlg(name, **kwargs)
     result.addEventAlgo(theAlg, primary=True)
     return result

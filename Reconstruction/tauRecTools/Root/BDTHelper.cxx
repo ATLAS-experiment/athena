@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/BDTHelper.h"
@@ -60,8 +60,8 @@ std::vector<TString> BDTHelper::parseString(const TString& str, const TString& d
   
   // split the string with ",", and put them into a vector
   for(size_t i = 0; i < arraySize; ++i) {
-    if (auto *str = dynamic_cast<TObjString*> (objList->At(i))) {
-      TString var = str->String();
+    if (auto *thisStr = static_cast<TObjString*> (objList->At(i))) {
+      TString var = thisStr->String();
       var.ReplaceAll(" ", "");
       if(var.Contains(":=")) {
         var=var(var.Index(":=")+2, var.Length()-var.Index(":=")-2);

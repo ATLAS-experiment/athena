@@ -65,7 +65,7 @@ StatusCode TrigTauMonitorBaseAlgorithm::initialize() {
 }
 
 
-std::vector<const xAOD::TauJet*> TrigTauMonitorBaseAlgorithm::getOnlineTausAll(const std::string& trigger, bool include_0P, bool filter_legs) const
+std::vector<const xAOD::TauJet*> TrigTauMonitorBaseAlgorithm::getOnlineTausAll(const std::string& trigger, bool /*include_0P*/, bool filter_legs) const
 {
     std::vector<const xAOD::TauJet*> tau_vec;
     
@@ -87,8 +87,7 @@ std::vector<const xAOD::TauJet*> TrigTauMonitorBaseAlgorithm::getOnlineTausAll(c
             feat->detail(xAOD::TauJetParameters::nChargedTracks, nTracks);
             ATH_MSG_DEBUG("NTracks Online: " << nTracks);
 
-            if(include_0P && nTracks == 0) tau_vec.push_back(feat);
-            else tau_vec.push_back(feat);
+            tau_vec.push_back(feat);
         }
     }
 

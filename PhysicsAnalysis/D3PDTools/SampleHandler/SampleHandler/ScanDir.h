@@ -208,7 +208,7 @@ namespace SH
 
     /// \brief the list of entries from \ref sampleRename
   private:
-    typedef std::vector<std::pair<std::regex,std::string> >::const_iterator SampleRenameIter;
+    using SampleRenameIter = std::vector<std::pair<std::regex,std::string> >::const_iterator;
     std::vector<std::pair<std::regex,std::string> > m_sampleRename;
 
     /// \brief the depth set with \ref extraNameComponent, or 0 otherwise

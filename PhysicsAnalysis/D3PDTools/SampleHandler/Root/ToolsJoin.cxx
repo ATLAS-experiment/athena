@@ -12,6 +12,7 @@
 
 #include <memory>
 #include <RootCoreUtils/StringUtil.h>
+#include <SampleHandler/MetaObject.h>
 #include <SampleHandler/SampleHandler.h>
 #include <SampleHandler/SampleLocal.h>
 
@@ -26,12 +27,21 @@ namespace SH
   {
     SampleHandler mysh;
     auto mysample = std::make_shared<SampleLocal> (sampleName);
+    bool matched = false;
 
-    std::regex mypattern (pattern.c_str());
+    std::regex mypattern (pattern);
     for (auto& sample : sh.samples())
     {
       if (RCU::match_expr (mypattern, sample->name()))
       {
+        if (!matched)
+        {
+          // rationale: inherit the metadata (tree name, cross section,
+          //   ...) from the first matched sample instead of falling
+          //   back to the defaults.
+          *mysample->meta() = *sample->meta();
+          matched = true;
+        }
         for (unsigned file = 0, end = sample->numFiles();
             file != end; ++ file)
         {
@@ -42,7 +52,10 @@ namespace SH
         mysh.add (sample);
       }
     }
-    mysh.add (mysample);
+    // rationale: only add the merged sample if at least one sample
+    //   matched, so we do not create a spurious empty sample.
+    if (matched)
+      mysh.add (mysample);
     swap (mysh, sh);
   }
 }

@@ -50,6 +50,11 @@ namespace FlavorTagInference {
     std::function<std::pair<std::string, double>(const xAOD::IParticle&)>
     namedCustomJetGetter(const std::string&);
 
+    // impact parameter decorations a constituent variable reads, empty
+    // for variables that don't use them
+    std::set<std::string> ipDataDependencies(
+      const std::string& name, const std::string& prefix);
+
     template <typename T>
     std::pair<SequenceGetterFunc<T>, std::set<std::string>>
     buildCustomSeqGetter(const std::string& name, const std::string& prefix);

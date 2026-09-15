@@ -7,6 +7,10 @@
 #include "GaudiKernel/SystemOfUnits.h"
 #include "LArCOOLConditions/LArDSPThresholdsFlat.h"
 #include "LArElecCalib/LArProvenance.h"
+#include "CaloIdentifier/CaloCell_ID.h"
+#include "CaloIdentifier/LArEM_ID.h"
+#include "CaloIdentifier/LArFCAL_ID.h"
+#include "CaloIdentifier/LArHEC_ID.h"
 #include "LArIdentifier/LArOnlineID.h"
 #include "LArRawEvent/LArDigitContainer.h"
 #include "LArRawEvent/LArRawChannelContainer.h"
@@ -18,6 +22,7 @@
 #include <cmath>
 #include <memory>
 #include <span>
+#include <limits>
 #include <vector>
 
 namespace {
@@ -35,6 +40,88 @@ int anchorIndex(const std::vector<double>& response) {
   return std::distance(response.begin(), std::ranges::max_element(response));
 }
 }  // namespace
+
+namespace {
+// Region codes: |barrel_ec|-1 gives 0 = EMB, 1 = EMEC outer wheel,
+// 2 = EMEC inner wheel; HEC is 3 and FCAL 4. Written once because getting
+// it wrong attaches a channel to a plausible but wrong configuration,
+// which reads as a resolution problem rather than a lookup bug.
+constexpr std::array<const char*, 5> regionNames{"EMB", "EMEC-OW", "EMEC-IW",
+                                                 "HEC", "FCAL"};
+constexpr int maxLayer = 4;  // samplings 0..3; FCAL modules 1..3
+}  // namespace
+
+size_t LArOFFCRawChannelBuilder::slotOf(int region, int layer) {
+  if (region < 0 || region >= static_cast<int>(regionNames.size()))
+    return s_nSlots;
+  if (layer < 0 || layer >= maxLayer) return s_nSlots;
+  return static_cast<size_t>(region) * maxLayer + static_cast<size_t>(layer);
+}
+
+size_t LArOFFCRawChannelBuilder::slotOfKey(const std::string& key) {
+  const auto slash = key.rfind('/');
+  if (slash == std::string::npos || slash + 1 >= key.size()) return s_nSlots;
+  const std::string region = key.substr(0, slash);
+  int layer = -1;
+  try {
+    layer = std::stoi(key.substr(slash + 1));
+  } catch (...) {
+    return s_nSlots;
+  }
+  for (size_t r = 0; r < regionNames.size(); ++r)
+    if (region == regionNames[r]) return slotOf(static_cast<int>(r), layer);
+  return s_nSlots;
+}
+
+std::string LArOFFCRawChannelBuilder::keyOfSlot(size_t slot) {
+  if (slot >= s_nSlots) return "?";
+  return std::string(regionNames[slot / maxLayer]) + "/" +
+         std::to_string(slot % maxLayer);
+}
+
+StatusCode LArOFFCRawChannelBuilder::buildLayerMap(
+    const EventContext& ctx) const {
+  // Layer is an IDENTIFIER quantity, not a geometric one, so this needs no
+  // CaloDetDescrManager and has no matching tolerance to get wrong: a
+  // channel resolves to exactly one layer or to none.
+  const LArOnOffIdMapping* cabling{};
+  ATH_CHECK(SG::get(cabling, m_cablingKey, ctx));
+
+  const LArEM_ID* emId = m_caloId->em_idHelper();
+  const LArHEC_ID* hecId = m_caloId->hec_idHelper();
+  const LArFCAL_ID* fcalId = m_caloId->fcal_idHelper();
+
+  m_slotByHash.assign(m_onlineId->channelHashMax(),
+                      static_cast<uint8_t>(s_nSlots));
+  size_t nMapped = 0, nUnmapped = 0;
+  for (auto it = m_onlineId->channel_begin(); it != m_onlineId->channel_end();
+       ++it) {
+    const HWIdentifier hw = *it;
+    if (!cabling->isOnlineConnected(hw)) continue;
+    const Identifier cid = cabling->cnvToIdentifier(hw);
+    int region = -1, layer = -1;
+    if (m_caloId->is_em(cid)) {
+      region = std::abs(emId->barrel_ec(cid)) - 1;
+      layer = emId->sampling(cid);
+    } else if (m_caloId->is_hec(cid)) {
+      region = 3;
+      layer = hecId->sampling(cid);
+    } else if (m_caloId->is_fcal(cid)) {
+      region = 4;
+      layer = fcalId->module(cid);
+    } else {
+      continue;
+    }
+    const size_t slot = slotOf(region, layer);
+    if (slot >= s_nSlots) { ++nUnmapped; continue; }
+    m_slotByHash[m_onlineId->channel_Hash(hw)] = static_cast<uint8_t>(slot);
+    ++nMapped;
+  }
+  ATH_MSG_INFO("layer map: " << nMapped << " channels resolved, " << nUnmapped
+                             << " outside the known regions (these fall back "
+                                "to the global settings)");
+  return StatusCode::SUCCESS;
+}
 
 std::vector<double> LArOFFCRawChannelBuilder::pulseResponse(
     const ILArShape::ShapeRef_t& shape, const ILArOFC::OFCRef_t& ofc) const {
@@ -67,7 +154,8 @@ double LArOFFCRawChannelBuilder::computeOFFC(const std::vector<short>& samples,
                                              int firstSample,
                                              const ILArOFC::OFCRef_t& ofc,
                                              const ILArShape::ShapeRef_t& shape,
-                                             double pedestal) const {
+                                             double pedestal,
+                                             const LayerParams& par) const {
   // OFFC parameters (configured via job options)
   // belowThreshold   : ADC threshold to detect quiet regions
   // belowTillReset   : consecutive quiet samples before cache reset
@@ -129,7 +217,7 @@ double LArOFFCRawChannelBuilder::computeOFFC(const std::vector<short>& samples,
   const int correctionLength = responseSize - 2 - lagZero;
 
   // Sample at which each pulse slot becomes available again
-  std::vector<int> slotFreeAt(m_nPulse, 0);
+  std::vector<int> slotFreeAt(par.nPulse, 0);
   int belowCounter = 0;
 
   const int loopEnd = std::max(0, nSamples - ofcLen + 1);
@@ -137,12 +225,12 @@ double LArOFFCRawChannelBuilder::computeOFFC(const std::vector<short>& samples,
   for (int i = 0; i < loopEnd; ++i) {
 
     // Reset the correction cache after an extended quiet region
-    if (std::abs(samp_no_ped[i]) < m_belowThreshold)
+    if (std::abs(samp_no_ped[i]) < par.belowThreshold)
       ++belowCounter;
     else
       belowCounter = 0;
 
-    if (m_belowTillReset > 0 && belowCounter >= m_belowTillReset) {
+    if (par.belowTillReset > 0 && belowCounter >= par.belowTillReset) {
       belowCounter = 0;
       std::fill(cache.begin(), cache.end(), 0.0);
       // The corrections these slots were tracking have just been dropped, so
@@ -169,7 +257,7 @@ double LArOFFCRawChannelBuilder::computeOFFC(const std::vector<short>& samples,
       // Local maximum + amplitude cut on the corrected waveform: a pulse
       // riding on the tail of one already subtracted need not be a local
       // maximum of the raw filter output at all.
-      if (A > m_filterThreshold && A > reco.at(peak - 1) && A > recoCurrent) {
+      if (A > par.filterThreshold && A > reco.at(peak - 1) && A > recoCurrent) {
 
         auto responseVal = [&](int lag) {
           const int k = lagZero + lag;
@@ -190,7 +278,7 @@ double LArOFFCRawChannelBuilder::computeOFFC(const std::vector<short>& samples,
         // noise floor does not, so the cut carries one term of each: written
         // as a product rather than a ratio to avoid dividing, and A>0 here for
         // any sensible FilterThreshold.
-        if (Q3 < m_Q3Offset + m_Q3cut * A) {
+        if (Q3 < par.q3Offset + par.q3Cut * A) {
           const auto slot = std::ranges::find_if(
               slotFreeAt, [i](int freeAt) { return freeAt <= i; });
           if (slot == slotFreeAt.end()) {
@@ -241,6 +329,79 @@ StatusCode LArOFFCRawChannelBuilder::initialize() {
   }
 
   ATH_CHECK(detStore()->retrieve(m_onlineId, "LArOnlineID"));
+  ATH_CHECK(detStore()->retrieve(m_caloId, "CaloCell_ID"));
+
+  // Resolve the per-layer table once. Every slot starts at the global values,
+  // so a job that sets no per-layer property behaves exactly as before.
+  m_layerParams.assign(s_nSlots + 1,
+                       LayerParams{m_Q3cut, m_Q3Offset, m_filterThreshold,
+                                   m_nPulse, m_belowThreshold,
+                                   m_belowTillReset});
+  auto applyD = [&](const std::map<std::string, double>& m, const char* what,
+                    double LayerParams::*field) -> StatusCode {
+    for (const auto& [key, val] : m) {
+      const size_t slot = slotOfKey(key);
+      if (slot >= s_nSlots) {
+        ATH_MSG_ERROR(what << " has key '" << key
+                           << "' which is not <REGION>/<LAYER> with REGION in "
+                              "EMB, EMEC-OW, EMEC-IW, HEC, FCAL and LAYER 0-3");
+        return StatusCode::FAILURE;
+      }
+      m_layerParams[slot].*field = val;
+    }
+    return StatusCode::SUCCESS;
+  };
+  ATH_CHECK(applyD(m_filterThresholdByLayer, "FilterThresholdByLayer",
+                   &LayerParams::filterThreshold));
+  ATH_CHECK(applyD(m_q3CutByLayer, "Q3CutByLayer", &LayerParams::q3Cut));
+  ATH_CHECK(applyD(m_q3OffsetByLayer, "Q3OffsetByLayer",
+                   &LayerParams::q3Offset));
+  for (const auto& [key, val] : m_nPulseByLayer) {
+    const size_t slot = slotOfKey(key);
+    if (slot >= s_nSlots) {
+      ATH_MSG_ERROR("NPulseByLayer has unparseable key '" << key << "'");
+      return StatusCode::FAILURE;
+    }
+    if (val < 1) {
+      ATH_MSG_ERROR("NPulseByLayer['" << key << "'] is " << val
+                                      << ", must be >= 1");
+      return StatusCode::FAILURE;
+    }
+    m_layerParams[slot].nPulse = val;
+  }
+
+  // Disabling is an unreachable threshold, not a separate branch: no
+  // amplitude satisfies A > filterThreshold, so nothing is subtracted and
+  // the output is bit-identical to the plain OF (verified to 0 ADC).
+  if (!m_enabledLayers.empty()) {
+    std::vector<bool> on(s_nSlots + 1, false);
+    for (const std::string& key : m_enabledLayers.value()) {
+      const size_t slot = slotOfKey(key);
+      if (slot >= s_nSlots) {
+        ATH_MSG_ERROR("EnabledLayers contains unparseable key '" << key << "'");
+        return StatusCode::FAILURE;
+      }
+      on[slot] = true;
+    }
+    size_t nOff = 0;
+    for (size_t slot = 0; slot <= s_nSlots; ++slot) {
+      if (slot < s_nSlots && on[slot]) continue;
+      m_layerParams[slot].filterThreshold =
+          std::numeric_limits<double>::max();
+      ++nOff;
+    }
+    ATH_MSG_INFO("forward correction enabled in "
+                 << m_enabledLayers.size() << " layers; " << nOff
+                 << " slots left at the Optimal Filter");
+  }
+  for (size_t slot = 0; slot < s_nSlots; ++slot) {
+    const LayerParams& p = m_layerParams[slot];
+    if (p.filterThreshold == std::numeric_limits<double>::max()) continue;
+    ATH_MSG_DEBUG(keyOfSlot(slot) << ": Q3Cut=" << p.q3Cut << " Q3Offset="
+                                  << p.q3Offset << " FilterThreshold="
+                                  << p.filterThreshold << " NPulse="
+                                  << p.nPulse);
+  }
 
   // The earliest testable candidate peak sits -q3Lags.front() samples into the
   // digit, so anything less leaves no room to find a pulse before the in-time
@@ -325,7 +486,7 @@ StatusCode LArOFFCRawChannelBuilder::execute(const EventContext& ctx) const {
       SG::ReadCondHandle<AthenaAttributeList> dspThrshAttr(
           m_run2DSPThresholdsKey, ctx);
       run2DSPThresh = std::make_unique<LArDSPThresholdsFlat>(*dspThrshAttr);
-      if (ATH_UNLIKELY(!run2DSPThresh->good())) {
+      if (!run2DSPThresh->good()) [[unlikely]] {
         ATH_MSG_ERROR(
             "Failed to initialize LArDSPThresholdFlat from attribute list "
             "loaded from "
@@ -343,6 +504,13 @@ StatusCode LArOFFCRawChannelBuilder::execute(const EventContext& ctx) const {
   }
 
   // Loop over digits:
+  // Built once on the first event, not in initialize(): it needs the
+  // cabling, which is conditions data with an IOV.
+  std::call_once(m_slotOnce, [&]() {
+    m_slotStatus = this->buildLayerMap(ctx);
+  });
+  ATH_CHECK(m_slotStatus);
+
   for (const LArDigit* digit : *inputContainer) {
 
     const size_t firstSample = m_firstSample;
@@ -350,6 +518,14 @@ StatusCode LArOFFCRawChannelBuilder::execute(const EventContext& ctx) const {
     const HWIdentifier id = digit->hardwareID();
 
     const bool connected = cabling->isOnlineConnected(id);
+
+    // Per-layer parameters. The last entry is the global fallback, used for
+    // any channel outside the five known regions.
+    const IdentifierHash hash = m_onlineId->channel_Hash(id);
+    const size_t slot = (hash < m_slotByHash.size())
+                            ? static_cast<size_t>(m_slotByHash[hash])
+                            : s_nSlots;
+    const LayerParams& par = m_layerParams[slot];
 
     const std::vector<short>& samples = digit->samples();
     const int gain = digit->gain();
@@ -379,7 +555,7 @@ StatusCode LArOFFCRawChannelBuilder::execute(const EventContext& ctx) const {
       return StatusCode::FAILURE;
     }
 
-    if (ATH_UNLIKELY(p == ILArPedestal::ERRORCODE)) {
+    if (p == ILArPedestal::ERRORCODE) [[unlikely]] {
       if (!connected)
         continue;  // No conditions for disconencted channel, who cares?
       ATH_MSG_ERROR("No valid pedestal for connected channel "
@@ -387,7 +563,7 @@ StatusCode LArOFFCRawChannelBuilder::execute(const EventContext& ctx) const {
       return StatusCode::FAILURE;
     }
 
-    if (ATH_UNLIKELY(adc2mev.size() < 2)) {
+    if (adc2mev.size() < 2) [[unlikely]] {
       if (!connected)
         continue;  // No conditions for disconencted channel, who cares?
       ATH_MSG_ERROR("No valid ADC2MeV for connected channel "
@@ -431,7 +607,7 @@ StatusCode LArOFFCRawChannelBuilder::execute(const EventContext& ctx) const {
 
     const auto& fullShape = shapes->Shape(id, gain);
 
-    double A = computeOFFC(samples, firstSample, ofca, fullShape, p);
+    double A = computeOFFC(samples, firstSample, ofca, fullShape, p, par);
 
     const float E = adc2mev[0] + A * adc2mev[1];
 
@@ -462,8 +638,7 @@ StatusCode LArOFFCRawChannelBuilder::execute(const EventContext& ctx) const {
       const int shapeShift =
           resp.empty() ? -1 : anchorIndex(resp) - static_cast<int>(nOFC) + 1;
 
-      if (ATH_UNLIKELY(shapeShift < 0 ||
-                       fullShape.size() < nOFC + shapeShift)) {
+      if (shapeShift < 0 || fullShape.size() < nOFC + shapeShift) [[unlikely]] {
         if (!connected)
           continue;  // No conditions for disconnected channel, who cares?
         ATH_MSG_ERROR("No valid shape for channel "
@@ -480,7 +655,7 @@ StatusCode LArOFFCRawChannelBuilder::execute(const EventContext& ctx) const {
       double q = 0;
       if (m_useShapeDer) {
         const auto& fullshapeDer = shapes->ShapeDer(id, gain);
-        if (ATH_UNLIKELY(fullshapeDer.size() < nOFC + shapeShift)) {
+        if (fullshapeDer.size() < nOFC + shapeShift) [[unlikely]] {
           ATH_MSG_ERROR("No valid shape derivative for channel "
                         << m_onlineId->channel_name(id) << " gain " << gain);
           ATH_MSG_ERROR("Got size " << fullshapeDer.size()

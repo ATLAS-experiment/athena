@@ -2,6 +2,7 @@
 set -e
 
 GEO_TAG="ATLAS-P2-RUN4-03-00-00"
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 export CALIBPATH=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/${GEO_TAG}/:$CALIBPATH
 
 source FPGATrackSim_CommonEnv.sh
@@ -15,6 +16,7 @@ python -m FPGATrackSimConfTools.FPGATrackSimMapMakerConfig \
     Trigger.FPGATrackSim.spacePoints=False \
     KeyString="plane 0" \
     GeoModel.AtlasVersion=${GEO_TAG} \
+    IOVDb.GlobalTag=${conditions} \
     --evtMax=200
 }
 

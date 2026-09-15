@@ -61,7 +61,6 @@
 + Control/xAODRootAccess
 + Control/xAODRootAccessInterfaces
 + Database/APR/CollectionSvc
-+ Database/APR/PersistencySvc
 + Database/APR/RootStorageSvc
 + Database/APR/StorageSvc
 + Database/AthenaPOOL/AthenaPoolCnvSvc

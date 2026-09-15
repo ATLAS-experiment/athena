@@ -48,8 +48,8 @@ LArShape32MCCnv::createPersistent (LArShapeTransType* transObj)
 LArConditionsSubset<LArShapeP1>*
 LArShape32MCCnv::createTransient(const Token* token)
 {
-    static const pool::Guid   p1_guid("95B61750-4C45-412D-B4D4-9758E9DB40D1");
-    static const pool::Guid   p0_guid("055CF2F5-08D0-4EAA-B154-8CE5B1A599E7");
+    static const Guid   p1_guid("95B61750-4C45-412D-B4D4-9758E9DB40D1");
+    static const Guid   p0_guid("055CF2F5-08D0-4EAA-B154-8CE5B1A599E7");
     MsgStream log(msgSvc(), "LArShape32MCCnv" ); 
     if( compareClassGuid(token, p1_guid) ) {  
         // using unique_ptr ensures deletion of the persistent object

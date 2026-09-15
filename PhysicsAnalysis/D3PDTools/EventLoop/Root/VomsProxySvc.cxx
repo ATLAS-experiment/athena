@@ -18,8 +18,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <unistd.h>
-#include <sys/types.h>
 #include <fstream>
 #include <TSystem.h>
 
@@ -43,7 +41,6 @@ namespace EL
   void VomsProxySvc ::
   testInvariant () const
   {
-    RCU_INVARIANT (this != nullptr);
   }
 
 
@@ -103,7 +100,7 @@ namespace EL
     RCU_READ_INVARIANT (this);
     if (!SH::checkVomsProxy())
     {
-      int fd = open (m_fileName.c_str(), O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR);
+      int fd = open (m_fileName.c_str(), O_CREAT | O_WRONLY | O_TRUNC, S_IRUSR | S_IWUSR);
       if (fd == -1)
       {
 	auto myerrno = errno;

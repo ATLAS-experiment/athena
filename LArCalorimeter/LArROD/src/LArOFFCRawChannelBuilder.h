@@ -14,17 +14,23 @@
 #include "LArElecCalib/ILArShape.h"
 #include "LArRawConditions/LArADC2MeV.h"
 #include "LArRawConditions/LArDSPThresholdsComplete.h"
+#include "CaloIdentifier/CaloCell_ID.h"
+#include "CxxUtils/checker_macros.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 
 #include <atomic>
+#include <map>
+#include <mutex>
+#include <string>
 #include <vector>
 
 // Event classes
 class LArDigitContainer;
 class LArRawChannelContainer;
 class LArOnlineID;
+class CaloCell_ID;
 
 class LArOFFCRawChannelBuilder : public AthReentrantAlgorithm {
 
@@ -140,8 +146,65 @@ class LArOFFCRawChannelBuilder : public AthReentrantAlgorithm {
       this, "FilterThreshold", 0,
       "Minimum corrected amplitude for pulse finding"};
 
-  // Identifier helper
+  // PER-LAYER CONFIGURATION. The scalars above remain the global fallback,
+  // so a job setting nothing new behaves as before. FilterThreshold is in
+  // ADC, a different energy in every layer -- the useful threshold sits near
+  // 3 sigma of local noise, 25 ADC in EMB/2 but 100 in EMEC-OW/1.
+  // Keys are "<REGION>/<LAYER>": EMB, EMEC-OW, EMEC-IW, HEC, FCAL, and the
+  // sampling (FCAL module).
+  Gaudi::Property<std::map<std::string, double>> m_filterThresholdByLayer{
+      this, "FilterThresholdByLayer", {},
+      "Per-layer FilterThreshold, keyed <REGION>/<LAYER>; unlisted layers "
+      "fall back to FilterThreshold"};
+  Gaudi::Property<std::map<std::string, double>> m_q3CutByLayer{
+      this, "Q3CutByLayer", {},
+      "Per-layer Q3Cut; unlisted layers fall back to Q3Cut"};
+  Gaudi::Property<std::map<std::string, double>> m_q3OffsetByLayer{
+      this, "Q3OffsetByLayer", {},
+      "Per-layer Q3Offset; unlisted layers fall back to Q3Offset"};
+  Gaudi::Property<std::map<std::string, int>> m_nPulseByLayer{
+      this, "NPulseByLayer", {},
+      "Per-layer NPulse; unlisted layers fall back to NPulse"};
+
+  /// Layers the correction may run in; empty means all. A layer left out gets
+  /// an unreachable FilterThreshold, so nothing is subtracted and the output
+  /// is bit-identical to the plain OF -- no separate code path.
+  Gaudi::Property<std::vector<std::string>> m_enabledLayers{
+      this, "EnabledLayers", {},
+      "Layers where the correction may fire; empty means all"};
+
+  /// Resolved parameters for one layer.
+  struct LayerParams {
+    double q3Cut = 0.1;
+    double q3Offset = 2.0;
+    double filterThreshold = 0.0;
+    int nPulse = 0;
+    double belowThreshold = 0.0;
+    int belowTillReset = 0;
+  };
+
+  /// Five regions x at most four samplings. m_layerParams holds s_nSlots+1:
+  /// the last entry is the global fallback for channels outside those.
+  static constexpr size_t s_nSlots = 20;
+  std::vector<LayerParams> m_layerParams;
+
+  /// Slot for a region code (0=EMB..4=FCAL) and sampling/module;
+  /// s_nSlots if out of range.
+  static size_t slotOf(int region, int layer);
+  /// Parse "<REGION>/<LAYER>" into a slot. Returns s_nSlots if unparseable.
+  static size_t slotOfKey(const std::string& key);
+  static std::string keyOfSlot(size_t slot);
+
+  /// online hash -> slot, built on the first event: it needs the cabling,
+  /// which is conditions data with an IOV.
+  mutable std::vector<uint8_t> m_slotByHash ATLAS_THREAD_SAFE;
+  mutable std::once_flag m_slotOnce ATLAS_THREAD_SAFE;
+  mutable StatusCode m_slotStatus ATLAS_THREAD_SAFE{StatusCode::SUCCESS};
+  StatusCode buildLayerMap(const EventContext& ctx) const;
+
+  // Identifier helpers
   const LArOnlineID* m_onlineId = nullptr;
+  const CaloCell_ID* m_caloId = nullptr;
 
   /// Accepted pulses, and those NPulse left no room to subtract. Only touched
   /// on the rare accepted-pulse branch, summarised in finalize().
@@ -157,7 +220,8 @@ class LArOFFCRawChannelBuilder : public AthReentrantAlgorithm {
 
   double computeOFFC(const std::vector<short>& samples, int firstSample,
                      const ILArOFC::OFCRef_t& ofc,
-                     const ILArShape::ShapeRef_t& shape, double pedestal) const;
+                     const ILArShape::ShapeRef_t& shape, double pedestal,
+                     const LayerParams& par) const;
 };
 
 #endif

@@ -131,6 +131,7 @@ def InDetPhysValTruthDecoratorAlgCfg(
 
     kwargs.setdefault('TruthParticleIndexDecoration',
                       'origTruthIndex' if flags.PhysVal.IDPVM.doTechnicalEfficiency else '')
+    kwargs.setdefault('UseTruthPVAsPerigee', flags.Tracking.perigeeExpression=="Vertex")
 
     acc.addEventAlgo(CompFactory.InDetPhysValTruthDecoratorAlg(name, **kwargs))
     return acc

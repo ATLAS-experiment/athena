@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -114,10 +114,6 @@ if __name__ == "__main__":
     log = logging.getLogger(__name__)
     
     flags.fillFromArgs()
-
-    
-    from ActsConfig.ActsCIFlags import actsProductionFlags
-    actsProductionFlags(flags)
 
     flags.lock()
     flags = flags.cloneAndReplace("Tracking.ActiveConfig", "Tracking.ITkActsPass")

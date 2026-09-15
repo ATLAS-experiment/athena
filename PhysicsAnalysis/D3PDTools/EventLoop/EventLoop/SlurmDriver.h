@@ -13,8 +13,6 @@
 #include <EventLoop/BatchDriver.h>
 #include <SampleHandler/Global.h>
 
-#include <iostream>
-
 namespace EL
 {
   /// \brief a \ref Driver for running on SLURM batch systems

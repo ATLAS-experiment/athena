@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AthenaMonitoringKernel_HistogramFiller_HistogramFiller1D_h
@@ -11,7 +11,6 @@
 #include "HistogramFillerUtils.h"
 
 #include "AthenaKernel/getMessageSvc.h"
-#include "CxxUtils/AthUnlikelyMacros.h"
 #include "GaudiKernel/MsgStream.h"
 
 namespace Monitored {
@@ -31,7 +30,7 @@ namespace Monitored {
         const size_t maskSize = vars.cut->size();
         // Abort if no cut entries or first (and only) entry is false
         if (maskSize == 0 || (maskSize == 1 && !vars.cut->get(0))) { return 0; }
-        if (ATH_UNLIKELY(maskSize > 1 && maskSize != vars[0]->size())) {
+        if (maskSize > 1 && maskSize != vars[0]->size()) [[unlikely]] {
           MsgStream log(Athena::getMessageSvc(), "HistogramFiller1D");
           log << MSG::ERROR << "CutMask does not match the size of plotted variable: "
               << maskSize << " " << vars[0]->size() << endmsg;
@@ -44,7 +43,7 @@ namespace Monitored {
       if (vars.weight) {
         auto weightAccessor = [&](size_t i){ return vars.weight->get(i); };
 
-        if (ATH_UNLIKELY(vars.weight->size() != vars[0]->size())) {
+        if (vars.weight->size() != vars[0]->size()) [[unlikely]] {
           MsgStream log(Athena::getMessageSvc(), "HistogramFiller1D");
           log << MSG::ERROR << "Weight does not match the size of plotted variable: "
               << vars.weight->size() << " " << vars[0]->size() << endmsg;

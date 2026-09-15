@@ -169,7 +169,8 @@ int HIEfficiencyResponseHistos::fillHistosFromContainer(const xAOD::JetContainer
       m_eff3_60_100->Fill(refPt, dr<0.3 ?  weight : 0 ); // 0 weight if not matching close enough
     }
     m_deltaRclosest->Fill( dr );
-    float Acos = std::acos(std::cos(2*(matched->getAttribute<float>("JetEtaJESScaleMomentum_phi") - m_psiN_FCal)));
+    static const std::string phiStr{"JetEtaJESScaleMomentum_phi"};
+    float Acos = std::acos(std::cos(2*(matched->getAttribute<float>(phiStr) - m_psiN_FCal)));
     // float diff = fabs(matched->phi() - m_psiN_FCal);
     // while (diff > TMath::Pi()/2. ) diff = TMath::Pi() - diff;
 

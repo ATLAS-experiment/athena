@@ -30,7 +30,7 @@ namespace GlobalSim::IOBitwise {
   std::string gFexRhoTOB::to_string() const {
     std::stringstream ss;
     
-    ss << "TODO";
+    ss << "rho_bits "<< rho_bits() << " rho_scale "<< rho_scale();
 	
     return ss.str();
   }

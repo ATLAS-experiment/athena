@@ -6,46 +6,75 @@ from PathResolver import PathResolver
 from AthenaCommon import Logging
 jetcaliblog = Logging.logging.getLogger('JetCalibToolsConfig')
 
-from AthenaConfiguration.Enums import LHCPeriod
 
 all = ['getJetCalibTool']
 
-commonPath = '/eos/atlas/atlascerngroupdisk/perf-jets/JSV/JetCalibToolsMigration/configFiles/'
+import yaml
+from functools import lru_cache
 
-calibdic_T0 = {
-    "AntiKt4EMPFlow": commonPath+"T0/EMPFlow/JES_MC15cRecommendation_PFlow_Aug2016_rel21.yaml",
-    "AntiKt4EMTopo":  commonPath+"T0/EMTopo/JES_MC15cRecommendation_May2016_rel21.yaml",
-    "AntiKt4LCTopo":  commonPath+"T0/LCTopo/JES_MC15cRecommendation_May2016_rel21.yaml",
-    "AntiKt10UFOCSSKSoftDropBeta100Zcut10": commonPath+"LatestRecommendations/largeR_Run23/JES_MC20PreRecommendation_R10_UFO_CSSK_SoftDrop_JMS_R21Insitu_26Nov2024.yaml",
-}
+# Index mapping jet collection and calibration context to the config file
+CONFIG_FILE = "JetCalibTools/calibDict.yaml"
 
-calibdic_analysis_Run2 = {
-    "AntiKt4EMPFlow": commonPath+"LatestRecommendations/smallR_mc20_Run2/PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.yaml",
-    "AntiKt4EMTopo":  commonPath+"LatestRecommendations/EMTopo/PreRec_R22_EMTopo_ResPU_EtaJES_October23_231024.yaml",
-    "AntiKt10UFOCSSKSoftDropBeta100Zcut10": commonPath+"LatestRecommendations/largeR_Run23/JES_MC20PreRecommendation_R10_UFO_CSSK_SoftDrop_JMS_R21Insitu_26Nov2024.yaml",
-}
+# Optional: once the config files are distributed via cvmfs
+# it can be dropped from the yaml and the paths left for PathResolver.
+COMMONPATH_KEY = "commonPath"
 
-calibdic_analysis_Run3 = {
-    "AntiKt4EMPFlow": commonPath+"LatestRecommendations/smallR_mc23_Run3/AntiKt4EMPFlow_MC23a_PreRecR22_Phase2_CalibConfig_ResPU_EtaJES_GSC_241208_InSitu.yaml",
-    "AntiKt4EMTopo":  commonPath+"LatestRecommendations/EMTopo/PreRec_R22_EMTopo_ResPU_EtaJES_October23_231024.yaml",
-    "AntiKt10UFOCSSKSoftDropBeta100Zcut10": commonPath+"LatestRecommendations/largeR_Run23/JES_MC20PreRecommendation_R10_UFO_CSSK_SoftDrop_JMS_R21Insitu_26Nov2024.yaml",
-}
+@lru_cache(maxsize=1)
+def load_calib_cfg():
+    path = PathResolver.FindCalibFile(CONFIG_FILE)
+    if not path:
+        raise FileNotFoundError("Could not locate %s via PathResolver" % CONFIG_FILE)
+    with open(path, "r", encoding="utf-8") as f:
+        return yaml.safe_load(f)
 
-calibdic = {
-    "T0": calibdic_T0,
-    "Run2": calibdic_analysis_Run2,
-    "Run3": calibdic_analysis_Run3,
-}
+def full_calib_path(rel_path: str) -> str:
+    commonPath = load_calib_cfg().get(COMMONPATH_KEY)
+    if not commonPath or rel_path.startswith("/"):
+        return rel_path
+    return commonPath.rstrip("/") + "/" + rel_path
+
+def get_jet_collection_name(name: str) -> str:
+    # For some specific jet collections, e.g. lepton-free PFlow jets,
+    # we want to apply the calibrations of the default PFlow jets
+    for suffix in (
+        "_noElectrons", "_noMuons", "_noLeptons",
+        "_inclMuons", "_tauSeedEleRM",
+        "ByVertex", "CustomVtx",
+    ):
+        name = name.replace(suffix, "")
+    return name
+
+def get_calib_cfg_path(context: str, jetcollection: str) -> str:
+    """ Look up the calibration config file for a jet collection and context.
+    The config file itself holds any run-dependent settings, in 'RunX:' blocks. """
+    data = load_calib_cfg()
+
+    contexts = data.get(jetcollection)
+    if contexts is None or jetcollection == COMMONPATH_KEY:
+        known = [k for k in data if k != COMMONPATH_KEY]
+        raise KeyError(f"No calibrations listed in {CONFIG_FILE} for jet collection "
+                       f"'{jetcollection}'. Known collections: {known}")
+
+    rel = contexts.get(context)
+    if rel is None:
+        raise KeyError(f"No '{context}' calibration listed in {CONFIG_FILE} for jet collection "
+                       f"'{jetcollection}'. Known contexts: {list(contexts)}")
+
+    return full_calib_path(rel)
+
+def get_calib_cfg(context: str, jetcollection: str):
+    from JetCalibTools.JetCalibStepsConfig import load_yaml_cfg
+    return load_yaml_cfg(get_calib_cfg_path(context, jetcollection))
 
 # This method actually sets up the tool
 def defineJetCalibTool(jetdef, modspec):
     from JetCalibTools.JetCalibStepsConfig import calibToolFromConfigFile
 
     # Get the yaml file and calibration sequence
-    cfg, calibSeqOverride = getJetCalibToolSettings(jetdef, modspec)
+    cfg, calibSeqKey = getJetCalibToolSettings(jetdef, modspec)
     path_configFile = PathResolver.FindCalibFile(cfg) 
     toolname = "jetcalib_new_{0}_{1}".format(jetdef.basename,modspec)
-    jct = calibToolFromConfigFile(jetdef._cflags, path_configFile, toolname, calibSeqOverride)
+    jct = calibToolFromConfigFile(jetdef._cflags, path_configFile, toolname, calibSeqKey)
 
     return jct
 
@@ -54,7 +83,7 @@ def defineJetCalibTool(jetdef, modspec):
 def getJetCalibToolPrereqs(jetdef, modspec):
     from JetCalibTools.JetCalibStepsConfig import load_yaml_cfg
 
-    cfg, calibSeqOverride = getJetCalibToolSettings(jetdef, modspec)
+    cfg, _ = getJetCalibToolSettings(jetdef, modspec)
     configDic = load_yaml_cfg(cfg)
 
     prereqs = ["mod:ConstitFourMom"]
@@ -91,52 +120,11 @@ def getJetCalibToolPrereqs(jetdef, modspec):
 def getJetCalibToolSettings(jetdef, modspec):
 
     calibspecs = modspec.split(':')
-    context = calibspecs[0]
 
-    ##############################
-    # Get the jet collection name
-    ##############################
+    context = calibspecs[0] # T0/Trigger/etc. - used to extract calbration sequence from YAML config file
 
-    # For some specific jet collections, e.g. lepton-free PFlow jets,
-    # we want to apply the calibrations of the default jet PFlow jets
+    jetcollection = get_jet_collection_name(jetdef.basename)
 
-    jetcollection = jetdef.basename
+    cfg = get_calib_cfg_path(context, jetcollection)
 
-    if "_noElectrons" in jetcollection:
-        jetcollection = jetcollection.replace("_noElectrons","")
-    if "_noMuons" in jetcollection:
-        jetcollection = jetcollection.replace("_noMuons","")
-    if "_noLeptons" in jetcollection :
-        jetcollection = jetcollection.replace("_noLeptons","")
-    if "_tauSeedEleRM" in jetcollection :
-        jetcollection = jetcollection.replace("_tauSeedEleRM","")
-
-    ##############################
-    # Get the calibration sequence
-    ##############################
-
-    # Per default, the calibration sequence is determined from the yaml file
-    calibSeqOverride = None
-    # Check if specified in configuration (e.g. for low / no pT jet collections)
-    if len(calibspecs) > 2:
-        calibSeqOverride = calibspecs[2]
-    # Check if T0 configuration, if yes, want to apply only certain calibrations
-    elif context == "T0":
-        calibSeqOverride = "JetArea_Residual_EtaJES"
-        if jetcollection == "AntiKt10UFOCSSKSoftDropBeta100Zcut10":
-            calibSeqOverride = "EtaJES_JMS"
-
-    ##########################################
-    # Retrieve the yaml file for JetCalibTools
-    ##########################################
-    if context == "AnalysisLatest":
-        if jetdef._cflags.GeoModel.Run == LHCPeriod.Run2:
-            cfg = calibdic["Run2"][jetcollection]
-        elif jetdef._cflags.GeoModel.Run == LHCPeriod.Run3:
-            cfg = calibdic["Run3"][jetcollection]
-        elif jetdef._cflags.GeoModel.Run >= LHCPeriod.Run4:
-            cfg = calibdic["HLLHC"][jetcollection]
-    else:
-        cfg = calibdic[context][jetcollection]
-
-    return cfg, calibSeqOverride
+    return cfg, context

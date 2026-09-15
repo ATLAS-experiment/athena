@@ -194,11 +194,13 @@ GlobalChiSquareFitterTool::fit(const std::vector<Acts::SourceLink>& sourceLinks,
                                                         std::move(multiTrajBackEnd));
   
   // Perform the fit
-  auto result = ATH_LIKELY(m_fitter) 
-    ? m_fitter->fit(sourceLinks.begin(), sourceLinks.end(), initialParams, kfOptions, *tracks)
-    : m_slFitter->fit(sourceLinks.begin(), sourceLinks.end(), initialParams, kfOptions, *tracks);
+  bool ok = false;
+  if (m_fitter) [[likely]]
+    ok = m_fitter->fit(sourceLinks.begin(), sourceLinks.end(), initialParams, kfOptions, *tracks).ok();
+  else
+    ok = m_slFitter->fit(sourceLinks.begin(), sourceLinks.end(), initialParams, kfOptions, *tracks).ok();
 
-  if (not result.ok()) {
+  if (not ok) {
       ATH_MSG_VERBOSE("Global chi2 fit failed");
       return nullptr;
   }

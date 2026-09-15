@@ -5,9 +5,9 @@
 #include "ImplicitCollection.h"
 #include "ImplicitCollectionIterator.h"
 
-#include "PersistencySvc/ISession.h"
-#include "PersistencySvc/IDatabase.h"
-#include "PersistencySvc/IContainer.h"
+#include "PoolSvc/ISession.h"
+#include "PoolSvc/IContainer.h"
+
 #include "StorageSvc/DbType.h"
 #include "StorageSvc/APRDefaults.h"
 
@@ -19,7 +19,7 @@
 namespace pool {
 
    ImplicitCollection::ImplicitCollection( const CollectionDescription* description,
-                       ICollection::OpenMode mode,
+                       Io::IoFlag mode,
                        ISession* session )
          : APRMessaging("ImplicitCollection"),
          m_container( 0 ),
@@ -30,9 +30,9 @@ namespace pool {
 
 
    void
-   ImplicitCollection::open( ICollection::OpenMode mode, ISession* session )
+   ImplicitCollection::open( Io::IoFlag mode, ISession* session )
    {
-      if ( mode != ICollection::READ ) {
+      if ( mode != Io::READ ) {
          ATH_MSG_ERROR( "An implicit collection can be opened only in READ mode" );
          throw std::runtime_error( "An implicit collection can be opened only in READ mode (APR: \" ImplicitCollection::ImplicitCollection \" from \" ImplicitCollection \")" );
       }

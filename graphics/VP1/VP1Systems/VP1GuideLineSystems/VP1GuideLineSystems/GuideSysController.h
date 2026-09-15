@@ -113,6 +113,15 @@ public:
   bool showLines() const;
   double lineLength() const;
   SbVec3f lineDirection() const;
+
+  // HGTD hit guide lines
+  bool showHGTDGuideLines() const;
+  bool showHGTDGuideHits() const;
+  bool showHGTDTruthTracks() const;
+  bool showHGTDParticleNames() const;
+  bool showHGTDPrimaryParticles() const;
+  bool showHGTDSecondaryParticles() const;
+  bool showHGTDUnlinkedParticles() const;
   
   //ID Proj surfs:
 
@@ -171,6 +180,13 @@ signals:
   void showMuonSpectrometerChanged(bool);
   void showLinesChanged(bool);
   void lineDirectionChanged(const SbVec3f&);
+  void showHGTDGuideLinesChanged(bool);
+  void showHGTDGuideHitsChanged(bool);
+  void showHGTDTruthTracksChanged(bool);
+  void showHGTDParticleNamesChanged(bool);
+  void showHGTDPrimaryParticlesChanged(bool);
+  void showHGTDSecondaryParticlesChanged(bool);
+  void showHGTDUnlinkedParticlesChanged(bool);
 
 private:
 
@@ -220,6 +236,13 @@ private Q_SLOTS:
   void possibleChange_showMuonSpectrometer();
   void possibleChange_showLines();
   void possibleChange_lineDirection();
+  void possibleChange_showHGTDGuideLines();
+  void possibleChange_showHGTDGuideHits();
+  void possibleChange_showHGTDTruthTracks();
+  void possibleChange_showHGTDParticleNames();
+  void possibleChange_showHGTDPrimaryParticles();
+  void possibleChange_showHGTDSecondaryParticles();
+  void possibleChange_showHGTDUnlinkedParticles();
 };
 
 

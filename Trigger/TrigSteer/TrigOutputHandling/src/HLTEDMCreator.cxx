@@ -1,10 +1,9 @@
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
-//#include "GaudiKernel/IToolSvc.h"
 #include "AthViews/ViewHelper.h"
 #include "HLTEDMCreator.h"
 #include "StoreGate/WriteDecorHandle.h"
@@ -349,8 +348,8 @@ StatusCode HLTEDMCreator::fixLinks( EventContext const& context ) const {
       }
       
       // Save the remaps
-      keyDecor( *inputDecision ) = remappedKeys;
-      indexDecor( *inputDecision ) = remappedIndexes;
+      keyDecor( *inputDecision ) = std::move(remappedKeys);
+      indexDecor( *inputDecision ) = std::move(remappedIndexes);
 
     }    
   }  

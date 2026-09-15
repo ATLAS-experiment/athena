@@ -1,8 +1,7 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <algorithm>
 #include "TrigJetCRVARHypoAlg.h"
 #include "TrigJetCRVARHypoTool.h"
 #include "TrigCompositeUtils/HLTIdentifier.h"
@@ -68,7 +67,7 @@ StatusCode TrigJetCRVARHypoAlg::execute( const EventContext& context ) const {
 
     // Collect all the required information for the tool together in a handy struct 
 
-    hypoToolInput.emplace_back( TrigJetCRVARHypoTool::JetInfo{previousDecisionIDs, *(jetLinkInfo.link),cells, d} );
+    hypoToolInput.emplace_back( TrigJetCRVARHypoTool::JetInfo{std::move(previousDecisionIDs), *(jetLinkInfo.link),cells, d} );
   } 
 
   //Loop over all hypoToolinputs and get their decisions

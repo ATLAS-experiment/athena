@@ -1,6 +1,6 @@
 // this file is -*- C++ -*-
 /*
-  Copyright (C) 2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////////
@@ -9,7 +9,7 @@
 ///
 /// Defines implementions of ITrackCaloClusterTool in charge of building different taste of TCC or UFO
 /// 
-/// \authors : Naomie Calace, P-A Delsart, Jennifer Roloff
+/// \authors : Noemie Calace, P-A Delsart, Jennifer Roloff
 ///////////////////////////////////////////////////////////////////////
 
 #ifndef TRACKCALOCLUSTERREC_TRACKCALOCLUSTERRECTOOLS_TRACKCALOCLUSTER_H

@@ -18,7 +18,6 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 
-#include "StorageSvc/DbType.h"
 #include "AthenaBaseComps/AthCnvSvc.h"
 #include "AthenaKernel/IAthenaIPCTool.h"
 #include "PmbCxxUtils/BasicStopWatch.h"
@@ -86,9 +85,6 @@ public:
 
    /// Disconnect to the output connection.
    virtual StatusCode disconnectOutput(const std::string& outputConnectionSpec) override;
-
-   /// @return pointer to PoolSvc instance.
-   virtual IPoolSvc* getPoolSvc() override;
 
    /// @return a string token to a Data Object written to Pool
    /// @param placement [IN] pointer to the placement hint
@@ -169,10 +165,10 @@ private: // member functions
 private: // data
    /// decoded storage tech requested in "StorageTechnology" property
    std::string                   m_lastInputFileName;
-   ServiceHandle<IPoolSvc>       m_poolSvc{this,"PoolSvc","PoolSvc"};
    ServiceHandle<IClassIDSvc>    m_clidSvc{this,"ClassIDSvc","ClassIDSvc"};
 
 protected: // shared with derived services
+   ServiceHandle<IPoolSvc>       m_poolSvc{this,"PoolSvc","PoolSvc"};
    /// Map that holds chrono information
    PMonUtils::BasicStopWatchResultMap_t m_chronoMap{};
 

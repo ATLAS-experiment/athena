@@ -1,15 +1,15 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <algorithm>
-#include <format>
 #include "TrigCompositeUtils/HLTIdentifier.h"
 #include "TrigCompositeUtils/Combinators.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "TrigEgammaFastCaloHypoTool.h"
 
+#include <algorithm>
+#include <format>
 
 using namespace TrigCompositeUtils;
 
@@ -367,9 +367,9 @@ bool TrigEgammaFastCaloHypoTool::decide_ringer ( const ITrigEgammaFastCaloHypoTo
   mon_phi = phi;
 
   bool pass = false;
-  if( input.pidDecorator.count(m_pidName)){
+  if( auto p = input.pidDecorator.find(m_pidName.value()); p != input.pidDecorator.end()){
     NNOutput = input.valueDecorator.at(m_pidName+"NNOutput");
-    pass = input.pidDecorator.at(m_pidName);
+    pass = p->second;
     ATH_MSG_DEBUG( "ET Cut " << m_emEtCut <<" Get the decision for " << m_pidName << ": " << (pass?"Yes":"No") );
   }else{
     ATH_MSG_DEBUG( "Pid name " << m_pidName << " not found into the decorator. Probably this decision was not computed by the hypo alg." );

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 ### This module contains functions which may need to peek at the input file metadata
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.Enums import FlagEnum, ProductionStep
@@ -39,6 +39,12 @@ def collectSimulationMetadata(flags):
             if "InDetParameterization" in flag and flags.Sim.InDetParameterization is not InDetParameterization.FatrasG4:
                 # This flag is only written to metadata when FatrasG4 is enabled
                 continue
+            if "InDetParameterization" in flag and flags.Sim.InDetParameterization is not InDetParameterization.AFatrasG4:
+                # This flag is only written to metadata when AFatrasG4 is enabled
+                continue
+            if "ActsFatrasG4.DebugInjectParticle" in flag and not flags.Sim.ActsFatrasG4.DebugInjectParticle:
+                # This flag is only written to metadata when DebugInjectParticle is enabled
+                continue
             if "SimplifiedGeoPath" in flag and not flags.Sim.SimplifiedGeoPath:
                 # This flag is only written to metadata in case the FastCaloSim simplified geometry path is set
                 continue
@@ -50,7 +56,7 @@ def collectSimulationMetadata(flags):
                 continue
 
             key = flag.split(".")[-1] #use final part of flag as the key
-            value = flags._get(flag)
+            value = flags[flag]
             if isinstance(value, FlagEnum):
                 value = value.value
             if not isinstance(value, str):

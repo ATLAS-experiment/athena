@@ -12,10 +12,12 @@ def MsTrackTesterCfg(flags, name = "MsTrackTester", scheduleLegacy = True,
     result.merge(setupHistSvcCfg(flags, outFile=outFile,
                                  outStream="MuonTrackTester"))
 
-    from MuonTrackFindingAlgs.TrackFindingConfig import SegmentSelectorCfg, TrackSummaryToolCfg, MsTrackSeedingToolCfg
+    from MuonTrackFindingAlgs.TrackFindingConfig import SegmentSelectorCfg, TrackSummaryToolCfg, MsTrackSeedingToolCfg, MSExtrapolatorCfg
+    kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(MSExtrapolatorCfg(flags)))
     kwargs.setdefault("SegmentSelectionTool", result.popToolsAndMerge(SegmentSelectorCfg(flags)))
     kwargs.setdefault("SummaryTool", result.popToolsAndMerge(TrackSummaryToolCfg(flags)))
     kwargs.setdefault("SeedingTool", result.popToolsAndMerge(MsTrackSeedingToolCfg(flags)))
+    kwargs.setdefault("storeIdTrks", flags.Reco.EnableTracking)
     if not scheduleLegacy:
         kwargs.setdefault("LegacySegmentKey", "")
         kwargs.setdefault("LegacyTrackKey", "")
@@ -30,8 +32,8 @@ def MsTrackVisualizationToolCfg(flags, name = "VisualizationTool", **kwargs):
         from MuonPatternRecognitionTest.PatternTestConfig import LegacyMuonRecoChainCfg
         result.merge(LegacyMuonRecoChainCfg(flags))
         kwargs.setdefault("TruthSegkey", "MuonSegments")
-    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
-    kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)))
+    from MuonTrackFindingAlgs.TrackFindingConfig import MSExtrapolatorCfg
+    kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(MSExtrapolatorCfg(flags)))
     from MuonTrackFindingAlgs.TrackFindingConfig import MsTrackSeedingToolCfg
     kwargs.setdefault("SeedingTool", result.popToolsAndMerge(MsTrackSeedingToolCfg(flags)))
 

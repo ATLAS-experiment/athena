@@ -11,7 +11,6 @@
 
 set -e
 
-# Use custom AOD input with CaloTopoClusters422 container, see ATLJETMET-2058
 Derivation_tf.py \
 --inputAODFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/AOD/ATLAS-P2-RUN4-03-00-01/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8514_s4422_r16129/AOD.41929775._000127.pool.root.1 \
 --outputDAODFile art.pool.root \

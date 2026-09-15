@@ -51,7 +51,7 @@ class HiggsTruthCategoryTool
    Rivet::HiggsTemplateCrossSections* m_higgsTemplateCrossSections; //!
    virtual StatusCode  initialize() override;
    StatusCode finalize () override;
-   HTXS::HiggsClassification* getHiggsTruthCategoryObject(const HepMC::GenEvent& HepMCEvent, const HTXS::HiggsProdMode prodMode) const override;
+   HTXS::HiggsClassification* getHiggsTruthCategoryObject(const HepMC::GenEvent& HepMCEvent, const HTXS::HiggsProdMode prodMode, const HTXS::HiggsDecayMode decayMode) const override;
  private:
    mutable std::atomic_flag m_isInitialized ATLAS_THREAD_SAFE = ATOMIC_FLAG_INIT;
    bool m_outHistos;

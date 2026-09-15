@@ -50,6 +50,13 @@ private:
   ToolHandleArray<JetHelper::IVarTool> m_histTool_nTrk = {this , "histTool_nTrk", {}, "nTrk histo reader" };
   ToolHandleArray<JetHelper::IVarTool> m_histTool_trackWIDTH = {this , "histTool_trackWIDTH", {}, "trackWIDTH histo reader" };
 
+  /// Booleans to apply calibration steps:
+  Gaudi::Property<bool> m_applyChargedFraction {this, "applyChargedFraction", true, "Boolean to turn on/off chargedFraction corretion"};
+  Gaudi::Property<bool> m_applyTile0 {this, "applyTile0", true, "Boolean to turn on/off Tile0 corretion"};
+  Gaudi::Property<bool> m_applyEM3 {this, "applyEM3", true, "Boolean to turn on/off EM3 corretion"};
+  Gaudi::Property<bool> m_applyNtrk {this, "applyNtrk", true, "Boolean to turn on/off Ntrk corretion"};
+  Gaudi::Property<bool> m_applyTrackWidth {this, "applyTrackWidth", true, "Boolean to turn on/off trackWidth corretion"};
+
   /// Properties for the punch-through correction:
   Gaudi::Property<bool> m_applyPunchThrough {this, "applyPunchThrough", false, "Boolean to turn on punch-through corretion"};
   Gaudi::Property<std::vector<double>> m_punchThroughEtaBins {this, "PunchThroughEtaBins", {}, "Eta bins for punch through correction"};

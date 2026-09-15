@@ -26,9 +26,9 @@ TrigMuonEFContainer * TrigMuonEFContainerCnv::createTransient(const Token* token
   
   mlog << MSG::DEBUG << "TrigMuonEFContainerCnv::createTransient called" << endmsg;
   
-  static const pool::Guid p2_guid( "3BB5C107-2975-4F9E-AACC-9FD948C3D2A8" );
-  static const pool::Guid p1_guid( "567E65A0-23E8-469F-94F7-A03F6E9C1C2E" );
-  static const pool::Guid p0_guid( "BB866230-C9D8-437A-A11B-A0CC08ACD97B" );
+  static const Guid p2_guid( "3BB5C107-2975-4F9E-AACC-9FD948C3D2A8" );
+  static const Guid p1_guid( "567E65A0-23E8-469F-94F7-A03F6E9C1C2E" );
+  static const Guid p0_guid( "BB866230-C9D8-437A-A11B-A0CC08ACD97B" );
   
   if( compareClassGuid(token,  p2_guid ) ){
          std::unique_ptr< TrigMuonEFContainer_p2 > col_vect( poolReadObject< TrigMuonEFContainer_p2 >(token) );

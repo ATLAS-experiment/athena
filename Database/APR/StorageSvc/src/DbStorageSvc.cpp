@@ -15,7 +15,6 @@
 // Framework include files
 #include "PersistentDataModel/Token.h"
 #include "DbStorageSvc.h"
-#include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbContainer.h"
 #include "StorageSvc/DbDatabase.h"
@@ -27,9 +26,7 @@
 
 #include "Gaudi/PluginService.h"
 
-#include <vector>
 #include <memory>
-#include <map>
 
 using namespace std;
 
@@ -44,8 +41,6 @@ namespace pool  {
   typedef const DbTypeInfo    *DbTypeInfoH;
   typedef const DbDatabaseObj *DbDatabaseH;
   typedef       DbDatabaseObj *DbDatabaseHNC;
-
-  class DbClassMap : public map<TypeH, Guid> {};
 
 
    

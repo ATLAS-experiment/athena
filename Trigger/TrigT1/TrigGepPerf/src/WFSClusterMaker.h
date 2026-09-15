@@ -2,8 +2,8 @@
     Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRIGL0GEPPERF_WFSCLUSTERMAKER_H
-#define TRIGL0GEPPERF_WFSCLUSTERMAKER_H
+#ifndef TRIGGEPPERF_WFSCLUSTERMAKER_H
+#define TRIGGEPPERF_WFSCLUSTERMAKER_H
 
 #include "./IClusterMaker.h"
 

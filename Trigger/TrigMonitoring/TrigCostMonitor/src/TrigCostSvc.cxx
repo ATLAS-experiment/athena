@@ -56,7 +56,6 @@ StatusCode TrigCostSvc::initialize() {
 
   ATH_CHECK(m_algStartInfo.initialize(m_eventSlots));
   ATH_CHECK(m_algStopTime.initialize(m_eventSlots));
-  ATH_CHECK(m_rosData.initialize(m_eventSlots));
 
   return StatusCode::SUCCESS;
 }
@@ -87,7 +86,6 @@ StatusCode TrigCostSvc::startEvent(const EventContext& context, const bool enabl
       // Empty transient thread-safe stores in preparation for recording this event's cost data
       ATH_CHECK(m_algStartInfo.clear(context, msg()));
       ATH_CHECK(m_algStopTime.clear(context, msg()));
-      ATH_CHECK(m_rosData.clear(context, msg()));
     }
 
     // Enable collection of data in this slot for monitoredEvents
@@ -171,41 +169,9 @@ StatusCode TrigCostSvc::monitor(const EventContext& context, const AlgorithmIden
   return StatusCode::SUCCESS;
 }
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-StatusCode TrigCostSvc::monitorROS(const EventContext& context, robmonitor::ROBDataMonitorStruct payload){
-  ATH_CHECK(checkSlot(context));
-  ATH_MSG_DEBUG( "Received ROB payload " << payload );
-
-  // Associate payload with an algorithm
-  AlgorithmIdentifier theAlg;
-  {
-    tbb::concurrent_hash_map<std::thread::id, AlgorithmIdentifier, ThreadHashCompare>::const_accessor acc;
-    bool result = m_threadToAlgMap.find(acc, std::this_thread::get_id());
-    //checking the return type 'result' is sufficient to know whether acc is bound
-    if (!result){
-      ATH_MSG_WARNING( "Cannot find algorithm on this thread (id=" << std::this_thread::get_id() << "). Request "<< payload <<" won't be monitored");
-      return StatusCode::SUCCESS;
-    }
-    //coverity[FORWARD_NULL:FALSE]
-    theAlg = acc->second;
-  }
-
-  // Record data in TrigCostDataStore
-  ATH_MSG_DEBUG( "Adding ROBs from" << payload.requestor_name << " to " << theAlg.m_hash );
-  {
-    std::shared_lock lockShared( m_slotMutex[ context.slot() ] );
-    ATH_CHECK( m_rosData.push_back(theAlg, std::move(payload), msg()) );
-  }
-
-  return StatusCode::SUCCESS;
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-StatusCode TrigCostSvc::endEvent(const EventContext& context, SG::WriteHandle<xAOD::TrigCompositeContainer>& costOutputHandle, SG::WriteHandle<xAOD::TrigCompositeContainer>& rosOutputHandle) { 
+StatusCode TrigCostSvc::endEvent(const EventContext& context, SG::WriteHandle<xAOD::TrigCompositeContainer>& costOutputHandle) { 
   ATH_CHECK(checkSlot(context));
   if (m_eventMonitored[ context.slot() ] == false) {
     // This event was not monitored - nothing to do.
@@ -352,56 +318,6 @@ StatusCode TrigCostSvc::endEvent(const EventContext& context, SG::WriteHandle<xA
     if (!result) ATH_MSG_WARNING("Failed to append one or more details to trigger cost TC");
 
     aiToHandleIndex[ai.m_hash] = costOutputHandle->size() - 1;
-  }
-
-  typedef tbb::concurrent_hash_map< AlgorithmIdentifier, std::vector<robmonitor::ROBDataMonitorStruct>, AlgorithmIdentifierHashCompare>::const_iterator ROBConstIt;
-  ROBConstIt beginRob;
-  ROBConstIt endRob;
-  
-  ATH_CHECK(m_rosData.getIterators(context, msg(), beginRob, endRob));
-  
-  for (ROBConstIt it = beginRob; it != endRob; ++it) {
-    size_t aiHash = it->first.m_hash;
-
-    if (aiToHandleIndex.count(aiHash) == 0) {
-      ATH_MSG_WARNING("Algorithm with hash " << aiHash << " not found!");
-    }
-
-    // Save ROB data via TrigComposite
-    for (const robmonitor::ROBDataMonitorStruct& robData : it->second) {
-      xAOD::TrigComposite* tc = new xAOD::TrigComposite();
-      rosOutputHandle->push_back(tc); 
-
-      // Retrieve ROB requests data into primitives vectors
-      std::vector<uint32_t> robs_id;
-      std::vector<uint32_t> robs_size;
-      std::vector<unsigned> robs_history;
-      std::vector<unsigned short> robs_status;
-
-      robs_id.reserve(robData.requested_ROBs.size());
-      robs_size.reserve(robData.requested_ROBs.size());
-      robs_history.reserve(robData.requested_ROBs.size());
-      robs_status.reserve(robData.requested_ROBs.size());
-
-      for (const auto& rob : robData.requested_ROBs) {
-        robs_id.push_back(rob.second.rob_id);
-        robs_size.push_back(rob.second.rob_size);
-        robs_history.push_back(rob.second.rob_history);
-        robs_status.push_back(rob.second.isStatusOk());
-      }
-
-      bool result = true;
-      result &= tc->setDetail("alg_idx", aiToHandleIndex[aiHash]);
-      result &= tc->setDetail("lvl1ID", robData.lvl1ID);
-      result &= tc->setDetail<std::vector<uint32_t>>("robs_id", robs_id);
-      result &= tc->setDetail<std::vector<uint32_t>>("robs_size", robs_size);
-      result &= tc->setDetail<std::vector<unsigned>>("robs_history", robs_history);
-      result &= tc->setDetail<std::vector<unsigned short>>("robs_status", robs_status);
-      result &= tc->setDetail("start", robData.start_time);
-      result &= tc->setDetail("stop", robData.end_time);
-
-      if (!result) ATH_MSG_WARNING("Failed to append one or more details to trigger cost ROS TC");
-    }
   }
 
   if (msg().level() <= MSG::VERBOSE) {

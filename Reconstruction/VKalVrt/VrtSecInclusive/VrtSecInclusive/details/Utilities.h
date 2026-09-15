@@ -193,7 +193,7 @@ namespace VKalVrtAthena {
 
         // The linking to the vertices need to be done only once
         if( !linkFlag ) {
-          ( *m_decor_svLink )( *lepton ) = links;
+          ( *m_decor_svLink )( *lepton ) = std::move(links);
           linkFlag = true;
         }
 

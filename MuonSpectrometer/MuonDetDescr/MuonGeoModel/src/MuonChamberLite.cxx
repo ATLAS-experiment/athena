@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/getMessageSvc.h"
@@ -246,7 +246,7 @@ namespace MuonGM {
             StandardComponent *c = static_cast<StandardComponent *>(m_station->GetComponent(i));
             std::string_view cname = std::string_view(c->name).substr(0, 2);
             if (cname == "LB") {
-                const LBI *lb = dynamic_cast<const LBI *>(mysql.GetTechnology(c->name));
+                const LBI *lb = static_cast<const LBI *>(mysql.GetTechnology(c->name));
                 numLB++;
                 LBpos[numLB] = c->posy + c->dy / 2.;
                 LBheight = lb->height;
@@ -862,7 +862,7 @@ namespace MuonGM {
       throw std::runtime_error(" MuonChamberLite::setCscReadoutGeom: position not found ");
         }
 
-        const CSC *thisc = dynamic_cast<const CSC*>(mysql.GetTechnology(tname));
+        const CSC *thisc = static_cast<const CSC*>(mysql.GetTechnology(tname));
         re->m_anodecathode_distance = thisc->anocathodist;
         re->m_ngasgaps = thisc->numOfLayers;
         re->m_nstriplayers = thisc->numOfLayers;
@@ -904,7 +904,7 @@ namespace MuonGM {
 
         std::string tname = cc->name;
         re->setTechnologyName(tname);
-        const MDT *thism = dynamic_cast<const MDT*>(mysql.GetTechnology(tname));
+        const MDT *thism = static_cast<const MDT*>(mysql.GetTechnology(tname));
         re->m_nlayers = thism->numOfLayers;
         re->m_tubepitch = thism->pitch;
         re->m_tubelayerpitch = thism->y[1] - thism->y[0];
@@ -961,7 +961,7 @@ namespace MuonGM {
 
         std::string tname = cc->name;
         re->setTechnologyName(tname);
-        const RPC *thisr = dynamic_cast<const RPC*>(mysql.GetTechnology(tname));
+        const RPC *thisr = static_cast<const RPC*>(mysql.GetTechnology(tname));
         re->m_nphigasgaps = thisr->NGasGaps_in_s;
         re->m_gasgapssize = re->m_Ssize / re->m_nphigasgaps - 2. * thisr->bakeliteframesize;
         re->m_gasgapzsize = re->m_Zsize - 2. * thisr->bakeliteframesize;
@@ -973,7 +973,7 @@ namespace MuonGM {
             re->setNumberOfLayers(3); // all BI RPCs always have 3 gas gaps
 
         }
-        const RPC* genericRpc = dynamic_cast<const RPC*>(mysql.GetATechnology("RPC0"));
+        const RPC* genericRpc = static_cast<const RPC*>(mysql.GetATechnology("RPC0"));
 
         if (re->numberOfLayers() == 3) {
             constexpr double rpc3GapLayerThickness = 11.8;  // gas vol. + ( bakelite + graphite + PET )x2
@@ -1041,7 +1041,7 @@ namespace MuonGM {
         re->setLongZsize(cc->GetThickness(mysql));
 
 
-        const TGC *genericTgc = dynamic_cast<const TGC*>(mysql.GetATechnology("TGC0"));
+        const TGC *genericTgc = static_cast<const TGC*>(mysql.GetATechnology("TGC0"));
         re->setFrameThickness(genericTgc->frame_h,
                               genericTgc->frame_ab);
 
@@ -1059,7 +1059,7 @@ namespace MuonGM {
         re->setReadOutName(stName.substr(0, 4) + '_' + std::to_string(cc->index));
         re->setReadOutParams(mysql.GetTgcRPars(tname_index));
 
-        const TGC *thist = dynamic_cast<const TGC*>(mysql.GetTechnology(tname));
+        const TGC *thist = static_cast<const TGC*>(mysql.GetTechnology(tname));
         const std::size_t ncomp = (thist->materials).size();
         
         unsigned int gasGap{0};

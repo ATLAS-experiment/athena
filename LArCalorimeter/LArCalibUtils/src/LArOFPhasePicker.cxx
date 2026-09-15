@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibUtils/LArOFPhasePicker.h"
@@ -211,11 +211,6 @@ StatusCode LArOFPhasePicker::pickOFC() {
     ATH_MSG_ERROR( "Failed to record LArOFCComplete object with key " << m_keyOFC_new );
     return sc;
   }
-  sc=detStore()->symLink(ClassID_traits<LArOFCComplete>::ID(),m_keyOFC_new,ClassID_traits<ILArOFC>::ID());
-  if (sc.isFailure()) {
-    ATH_MSG_ERROR( "Failed to sym-link LArOFCComplete object" );
-    return sc;
-  }
   return StatusCode::SUCCESS;
   
 }
@@ -288,11 +283,6 @@ StatusCode LArOFPhasePicker::pickShape()
   sc = detStore()->record(std::move(larShapeComplete),  m_keyShape_new);
   if (sc.isFailure()) {
     ATH_MSG_ERROR( "Failed to record LArShapeComplete object with key " << m_keyShape_new );
-    return sc;
-  }
-  sc=detStore()->symLink(ClassID_traits<LArShapeComplete>::ID(),m_keyShape_new,ClassID_traits<ILArShape>::ID());
-  if (sc.isFailure()) {
-    ATH_MSG_ERROR( "Failed to sym-link LArShapeComplete object" );
     return sc;
   }
 

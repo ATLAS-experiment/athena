@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "ActsEvent/TrackContainerHandlesHelper.h"
 #include "xAODTracking/TrackStateContainer.h"
@@ -13,6 +13,7 @@
 #include <regex>
 #include <span>
 
+#include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 
 namespace ActsTrk {

@@ -33,9 +33,7 @@ namespace EL
 {
   void KubernetesDriver ::
   testInvariant () const
-  {
-    RCU_INVARIANT (this != 0);
-  }
+  {}
 
 
 
@@ -86,7 +84,18 @@ namespace EL
           data.options.castString(Job::optBatchConfigFile, "EventLoop/kubernetes_job.yml")};
         std::string baseConfig;
         {
-          std::ifstream file (PathResolverFindDataFile (batchConfigFile).c_str());
+          const std::string resolved {PathResolverFindDataFile (batchConfigFile)};
+          if (resolved.empty())
+          {
+            ANA_MSG_ERROR ("failed to find batch config file " << batchConfigFile);
+            return StatusCode::FAILURE;
+          }
+          std::ifstream file (resolved.c_str());
+          if (!file)
+          {
+            ANA_MSG_ERROR ("failed to open batch config file " << resolved);
+            return StatusCode::FAILURE;
+          }
           baseConfig = std::string (std::istreambuf_iterator<char>(file),
                                     std::istreambuf_iterator<char>() );
         }
@@ -110,7 +119,18 @@ namespace EL
           std::ofstream jobFile (jobFilePath.c_str());
           if (!batchSetupFile.empty())
           {
-            std::ifstream file (PathResolverFindDataFile (batchSetupFile).c_str());
+            const std::string resolved {PathResolverFindDataFile (batchSetupFile)};
+            if (resolved.empty())
+            {
+              ANA_MSG_ERROR ("failed to find batch setup file " << batchSetupFile);
+              return StatusCode::FAILURE;
+            }
+            std::ifstream file (resolved.c_str());
+            if (!file)
+            {
+              ANA_MSG_ERROR ("failed to open batch setup file " << resolved);
+              return StatusCode::FAILURE;
+            }
             std::string setupConfig {std::istreambuf_iterator<char>(file),
                 std::istreambuf_iterator<char>()};
             setupConfig = RCU::substitute (setupConfig, "%%DOCKERIMAGE%%", dockerImage);
@@ -123,7 +143,9 @@ namespace EL
           {
             std::ostringstream dirName;
             dirName << basedirName.str() << "/" << jobIndex;
-            if (gSystem->MakeDirectory (dirName.str().c_str()) != 0)
+            // on resubmit the per-index directory already exists from the
+            // first submission, so tolerate that
+            if (gSystem->MakeDirectory (dirName.str().c_str()) != 0 && !data.resubmit)
             {
               ANA_MSG_ERROR ("failed to create directory " << dirName.str());
               return StatusCode::FAILURE;
@@ -137,7 +159,7 @@ namespace EL
             std::string myConfig = baseConfig;
             myConfig = RCU::substitute (myConfig, "%%JOBINDEX%%", std::to_string (jobIndex));
             std::ostringstream command;
-            command << data.submitDir << "/submit/run " << jobIndex;
+            command << RCU::Shell::quote (data.submitDir) << "/submit/run " << jobIndex;
             myConfig = RCU::substitute (myConfig, "%%COMMAND%%", command.str());
 
             jobFile << myConfig << "\n";

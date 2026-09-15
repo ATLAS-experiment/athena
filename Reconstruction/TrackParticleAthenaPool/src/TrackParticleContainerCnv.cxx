@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------------
@@ -40,11 +40,11 @@ TrackParticleContainerCnv::createPersistent( Rec::TrackParticleContainer *transC
 Rec::TrackParticleContainer * TrackParticleContainerCnv::createTransient(const Token* token)
 {
   std::string logname = "TrackParticleContainerCnv";
-  MsgStream log (m_msgSvc, logname);
-  static const pool::Guid p3_guid( "8C84D957-1899-4C98-A49D-D6AC0F85C5EC" );
-  static const pool::Guid p2_guid( "170211F9-C4E1-4173-B0FB-71322899C8B9" );
-  static const pool::Guid p1_guid( "4A8CEB2C-0833-4C83-8514-A69928DE4672" );
-  static const pool::Guid p0_guid( "35BE1E01-658C-438A-AC86-F951006ECC6B" );
+  MsgStream log (m_msgSvc, std::move(logname));
+  static const Guid p3_guid( "8C84D957-1899-4C98-A49D-D6AC0F85C5EC" );
+  static const Guid p2_guid( "170211F9-C4E1-4173-B0FB-71322899C8B9" );
+  static const Guid p1_guid( "4A8CEB2C-0833-4C83-8514-A69928DE4672" );
+  static const Guid p0_guid( "35BE1E01-658C-438A-AC86-F951006ECC6B" );
 
   Rec::TrackParticleContainer *p_collection = 0;
   if( compareClassGuid(token,  p3_guid ) ) {

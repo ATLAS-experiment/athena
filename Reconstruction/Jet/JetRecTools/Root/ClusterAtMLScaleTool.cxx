@@ -22,34 +22,64 @@ StatusCode ClusterAtMLScaleTool::initialize() {
     }
 
     ATH_CHECK(m_clusterMLCorrectedEnergyKey.initialize());
+
+    const std::string& type = m_clusterMLCorrectedEnergyDecorationType.value();
+    if (type != "float" && type != "double") {
+        ATH_MSG_ERROR(
+            "Invalid value for ClusterMLCorrectedEnergyDecorationType: '"
+            << type
+            << "'. Allowed values are 'float' and 'double'.");
+        return StatusCode::FAILURE;
+    }
+
     return StatusCode::SUCCESS;
 }
 
+
+template <typename T>
+StatusCode ClusterAtMLScaleTool::setClustersToMLScaleImpl(
+      xAOD::CaloClusterContainer& cont,
+      const EventContext& ctx) const
+  {
+      SG::ReadDecorHandle<xAOD::CaloClusterContainer, T> dec(
+          m_clusterMLCorrectedEnergyKey, ctx);
+
+      if (!dec.isValid()) {
+          ATH_MSG_ERROR("Decoration handle is not valid: "
+                        << m_clusterMLCorrectedEnergyKey.key());
+          return StatusCode::FAILURE;
+      }
+
+      for (xAOD::CaloCluster* cl : cont) {
+          if (!cl) continue;
+
+          const double calE = dec(*cl);
+
+          cl->setCalE(calE);
+          cl->setCalM(cl->rawM());
+          cl->setCalPhi(cl->rawPhi());
+          cl->setCalEta(cl->rawEta());
+      }
+
+      return StatusCode::SUCCESS;
+  }
+template StatusCode
+ClusterAtMLScaleTool::setClustersToMLScaleImpl<float>(
+    xAOD::CaloClusterContainer&,
+    const EventContext&) const;
+
+template StatusCode
+ClusterAtMLScaleTool::setClustersToMLScaleImpl<double>(
+    xAOD::CaloClusterContainer&,
+    const EventContext&) const;
 
 
 StatusCode ClusterAtMLScaleTool::setClustersToMLScale(xAOD::CaloClusterContainer& cont) const {
 
     const EventContext& ctx = Gaudi::Hive::currentContext();
-
-    SG::ReadDecorHandle<xAOD::CaloClusterContainer, double> dec(
-        m_clusterMLCorrectedEnergyKey, ctx);
-
-    if (!dec.isValid()) {
-        ATH_MSG_ERROR("Decoration handle is not valid: " 
-                      << m_clusterMLCorrectedEnergyKey.key());
-        return StatusCode::FAILURE;
-    }
-
-    for (xAOD::CaloCluster* cl : cont) {
-        if (!cl) continue;
-       
-        cl->setCalE(dec(*cl));
-        cl->setCalM(cl->rawM());
-        cl->setCalPhi(cl->rawPhi());
-        cl->setCalEta(cl->rawEta());
-    }
-
-    return StatusCode::SUCCESS;
+    return (m_clusterMLCorrectedEnergyDecorationType.value() == "double")
+        ? setClustersToMLScaleImpl<double>(cont, ctx)
+        : setClustersToMLScaleImpl<float>(cont, ctx);
 }
 
 

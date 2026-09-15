@@ -25,5 +25,8 @@ atlas_install_scripts( scripts/*.py )
 # Test(s) in the package:
 atlas_add_test( Geantino_ITk
                 SCRIPT RunGeantinoStepRecordingITk.py
-                LOG_IGNORE_PATTERN "FPE OVERFLOW in .Execute. of .ITkG4AtlasAlg."
+                # Ignore spurious FPEs originating from inside Geant (G4Tubs)
+                # in the clang build (due to Geant not being compiled
+                # with trapping FP).
+                LOG_IGNORE_PATTERN "FPE .*G4AtlasAlg"
                 POST_EXEC_SCRIPT noerror.sh )

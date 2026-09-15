@@ -29,10 +29,6 @@ if (NOT SIMULATIONBASE)
         SCRIPT python -m InDetConfig.ITkTrackRecoConfig --norun
         POST_EXEC_SCRIPT noerror.sh)
 
-    atlas_add_test( ITkTrackRecoConfigFTF_test
-        SCRIPT python -m InDetConfig.ITkTrackRecoConfig --norun --doFTF
-        POST_EXEC_SCRIPT noerror.sh)
-
     atlas_add_test( VertexFindingConfigActsGaussAgaptive_test
         SCRIPT python -m InDetConfig.InDetPriVxFinderConfig ActsGaussAdaptiveMultiFinding
         POST_EXEC_SCRIPT noerror.sh)

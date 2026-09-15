@@ -23,10 +23,7 @@ if __name__ == "__main__":
     configurations = ["Main",
                       "Acts",
                       "ActsLargeRadius",
-                      "ActsHeavyIon",
-                      "ActsValidateClusters",
-                      "ActsValidateTracks",
-                      "ActsValidateAmbiguityResolution"]
+                      "ActsHeavyIon"]
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
@@ -36,11 +33,6 @@ if __name__ == "__main__":
     for configuration in configurations:
         current_flags = deduceConfiguration(flags, configuration)
         printConfiguration(current_flags)
-
-    # Test workflow with ambiguity resolution
-    flags.Acts.doAmbiguityResolution = True
-    current_flags = deduceConfiguration(flags, "ActsValidateTracks")
-    printConfiguration(current_flags)
 
     # Test workflow with Conversion pass
     current_flags = deduceConfiguration(flags, "ActsConversion")

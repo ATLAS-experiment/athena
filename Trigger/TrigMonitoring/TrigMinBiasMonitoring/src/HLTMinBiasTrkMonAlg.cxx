@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "xAODTracking/TrackingPrimitives.h"
 #include "Utils.h"
@@ -162,11 +162,13 @@ StatusCode HLTMinBiasTrkMonAlg::monitorTrkCounts(const EventContext& context) co
   float zPos = -999;
   if (not m_zFinderDataKey.empty()) {
     auto zFinderDataHandle = SG::makeHandle(m_zFinderDataKey, context);
-    for (auto vertex : *zFinderDataHandle) {
-      float weight = vertex->getDetail<float>("zfinder_vtx_weight");
+    const std::string weightStr{"zfinder_vtx_weight"};
+    const std::string zStr{"zfinder_vtx_z"};
+    for (const auto * vertex : *zFinderDataHandle) {
+      float weight = vertex->getDetail<float>(weightStr);
       if (weight > maxWeight) {
-        maxWeight = std::max(weight, maxWeight);
-        zPos = vertex->getDetail<float>("zfinder_vtx_z");
+        maxWeight = weight;
+        zPos = vertex->getDetail<float>(zStr);
       }
     }
   }

@@ -6,7 +6,7 @@ from AthenaConfiguration.AutoConfigFlags import GetFileMD, getInitialTimeStampsF
 from AthenaConfiguration.Enums import BeamType, Format, ProductionStep, BunchStructureSource, Project, LHCPeriod
 from Campaigns.Utils import Campaign
 from PyUtils.moduleExists import moduleExists
-import os
+
 
 def _addFlagsCategory (acf, name, generator, modName = None):
     """Add flags category and return True/False on success/failure"""
@@ -343,7 +343,8 @@ def initConfigFlags():
 
 #IOVDbSvc Flags:
     if isGaudiEnv():
-        from IOVDbSvc.IOVDbAutoCfgFlags import getLastGlobalTag, getDatabaseInstanceDefault
+        from IOVDbSvc.IOVDbAutoCfgFlags import (getLastGlobalTag, getDatabaseInstanceDefault,
+                                                getCrestServer, getCrestAPI, getCrestConnection)
 
         def __getTrigTag(flags):
             from TriggerJobOpts.TriggerConfigFlags import trigGlobalTag
@@ -362,14 +363,14 @@ def initConfigFlags():
             if flags.Common.Project is Project.AthGeneration:
                 return False
             elif flags.GeoModel.Run > LHCPeriod.Run3:
-                return False #To be set true when we make switch to CREST for Run4
+                return True
             else:
                 return False
-        
+
         acf.addFlag("IOVDb.UseCREST", __useCrest, help='Use CREST for conditions access')
-        acf.addFlag("IOVDb.CrestServer", lambda prevFlags: os.getenv('CREST_SERVER','crest.cern.ch'),help="CREST server URL")
-        acf.addFlag("IOVDb.CrestAPI","api-v6.0",help="CREST API version")
-        
+        acf.addFlag("IOVDb.CrestServer", lambda prevFlags: getCrestServer(), help="CREST server URL")
+        acf.addFlag("IOVDb.CrestAPI", lambda prevFlags : getCrestAPI(), help="CREST API version")
+
         #For HLT-jobs, the ring-size should be 0 (eg no cleaning at all since there are no IOV-updates during the job)
         acf.addFlag("IOVDb.CleanerRingSize",lambda prevFlags : 0 if prevFlags.Trigger.doHLT else 2*max(1, prevFlags.Concurrency.NumConcurrentEvents), help='size of ring-buffer for conditions cleaner')
         acf.addFlag("IOVDb.SqliteInput","",help="Folders found in this file will be used instead of the production db")
@@ -377,23 +378,13 @@ def initConfigFlags():
         acf.addFlag("IOVDb.WriteParametersAsMetaData", True, help="Write simulation/digitization parameters directly as in-file metadata (True) or via intermediate sqlite files (False)")
 
         def _buildDBConn(flags):
-            if not flags.IOVDb.UseCREST: #COOL case
-                #In case of COOL, we have many different connection string (liek COOLONL_LAR/CONDR2 or COOLOFL_SCT/OFLP200),
-                #they are set for each folder individually. The value is rather a dummy
-                return "sqlite://;schema=mycool.db;dbname="+flags.IOVDb.DatabaseInstance
-            #Crest case:
-            connStr=flags.IOVDb.CrestServer
-            if os.access(connStr,os.F_OK):
-                #Reading crest from a local file-system
-                return connStr
-            #else, assume we are connection to a server
-            if not connStr.startswith("https://"):
-                connStr="https://"+connStr
-            if connStr.endswith("/"):
-                connStr=connStr+flags.IOVDb.CrestAPI
+            if flags.IOVDb.UseCREST:
+                return getCrestConnection(flags.IOVDb.CrestServer, flags.IOVDb.CrestAPI)
             else:
-                connStr=connStr+"/"+flags.IOVDb.CrestAPI
-            return connStr
+                # In case of COOL, we have many different connection strings
+                # (like COOLONL_LAR/CONDR2 or COOLOFL_SCT/OFLP200), which are set for each
+                # folder individually. The value here is rather a dummy.
+                return "sqlite://;schema=mycool.db;dbname="+flags.IOVDb.DatabaseInstance
 
         acf.addFlag("IOVDb.DBConnection", _buildDBConn, help='database connection string')
 
@@ -595,6 +586,12 @@ def initConfigFlags():
         from AthCUDAServices.CUDAConfigFlags import createCUDAConfigFlags
         return createCUDAConfigFlags()
     _addFlagsCategory(acf, "CUDA", __cuda, 'AthCUDAServices')
+
+    # HIP flags.
+    def __hip():
+        from AthHIPComps.HIPConfigFlags import createHIPConfigFlags
+        return createHIPConfigFlags()
+    _addFlagsCategory(acf, "HIP", __hip, 'AthHIPComps')
 
     #EFTracking fpga data prep (F100)
     def _eftracking_f100():

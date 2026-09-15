@@ -24,23 +24,13 @@ namespace EL
 {
   namespace Detail
   {
-    FileExecutedModule ::
-    ~FileExecutedModule () noexcept
-    {
-      m_fileExecutedTree.release ();
-      delete m_fileExecutedName;
-    }
-
-
-
     StatusCode FileExecutedModule ::
     onInitialize (ModuleData& /*data*/)
     {
       m_fileExecutedTree = std::make_unique<TTree>
         ("EventLoop_FileExecuted", "executed files");
       m_fileExecutedTree->SetDirectory (nullptr);
-      m_fileExecutedName = new TString;
-      m_fileExecutedTree->Branch ("file", &m_fileExecutedName);
+      m_fileExecutedTree->Branch ("file", &m_fileExecutedNamePtr);
       return StatusCode::SUCCESS;
     }
 
@@ -51,9 +41,9 @@ namespace EL
     {
       auto split = data.m_inputFileUrl.rfind ('/');
       if (split != std::string::npos)
-        *m_fileExecutedName = data.m_inputFileUrl.substr (split + 1);
+        m_fileExecutedName = data.m_inputFileUrl.substr (split + 1);
       else
-        *m_fileExecutedName = data.m_inputFileUrl;
+        m_fileExecutedName = data.m_inputFileUrl;
       m_fileExecutedTree->Fill ();
       return StatusCode::SUCCESS;
     }

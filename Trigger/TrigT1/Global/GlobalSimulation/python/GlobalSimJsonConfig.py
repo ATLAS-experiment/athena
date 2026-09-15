@@ -152,9 +152,16 @@ def GenericTOBProducerAlgCfg(flags, name, type, input, output, **params):
             forward_to_subtool(prop,val,props)
         else:
             props[prop] = val
-    alg = CompFactory.getComp(f"GlobalSim::{type}")(
-        name,
-        **props)
+    # Hack to handle input/output properties that don't fit the naming convention '[Type]Key'
+    try:
+        alg = CompFactory.getComp(f"GlobalSim::{type}")(
+            name,
+            **props)
+    except AttributeError:
+        props_nokey = {k.replace('Key',''):v for k,v in props.items()}
+        alg = CompFactory.getComp(f"GlobalSim::{type}")(
+            name,
+            **props_nokey)
     cfg.addEventAlgo(alg)
 
     # At the moment it doesn't seem like we want to write anything but it might be more
@@ -212,7 +219,7 @@ def TOBProvider_cfg_fn(name):
         return lambda flags, **params: (getattr(module,cfgname)(flags, **params), set())
     elif name.endswith('AlgTool'):
         return GenericTOBProducerAlgToolCfg
-    elif name.endswith('Alg'):
+    elif name.endswith('Alg') or name in ['TOBTextWriter','TOBTextReader']:
         return GenericTOBProducerAlgCfg
     else:
         return None
@@ -237,7 +244,7 @@ def expand_io(io):
 
 
 # Configure the components necessary to generate a list of required input TOBs
-# By default, recurse through the prerequisites of these components to capture all requirements.
+# Recurse through the prerequisites of these components to capture all requirements.
 # Another way to do this would be to construct a DAG from the inputs/outputs,
 # then iterate through the nodes and instantiate each component.
 #
@@ -251,7 +258,7 @@ inputs_to_gsim = {
     'L1_jFexSRJetRoI_ReSim',
     'L1_gFexRhoRoI',
 }
-def config_TOB_providers(flags, tobs_to_providers, input, recurse=True):
+def config_TOB_providers(flags, tobs_to_providers, input):
     TOB_CAs = []
     all_vector_outputs = set()
 
@@ -287,8 +294,8 @@ def config_TOB_providers(flags, tobs_to_providers, input, recurse=True):
     # then iterating backwards
     # Mostly only for clarity in the sequence, but
     # useful if setting threads=0 (but why?)
-    if recurse and upstream_deps:
-        upstream_CAs, upstream_vecs = config_TOB_providers(flags, tobs_to_providers, upstream_deps, recurse=True)
+    if upstream_deps:
+        upstream_CAs, upstream_vecs = config_TOB_providers(flags, tobs_to_providers, upstream_deps)
         TOB_CAs += upstream_CAs
         all_vector_outputs |= upstream_vecs
 
@@ -362,12 +369,13 @@ def L0HypoCfg(flags, threshold, hypo_specs, tobs_to_providers, triggerlines):
 def GlobalSimJsonCfg(
     flags,
     json_name,
+    ignore_menu_items=False,
     force_config_TOBs=[],
-    ignore_prereqs=[],
+    txt_inputs={},
+    txt_outputs={},
     print_detailed_config=False
     ):
     menu = json.load(open(json_name))
-    log.setLevel(INFO)
 
     gsim_alg_prefix = "GlobalSim_"
 
@@ -387,6 +395,8 @@ def GlobalSimJsonCfg(
     )
 
     cfg.addSequence(CompFactory.AthSequencer('GlobalSimulation'))
+
+    cfg.addService( CompFactory.GlobalSim.GraphSvc(SequenceNameFilter='GlobalSimulation'), create=True )
 
     all_vector_outputs = set()
 
@@ -417,13 +427,32 @@ def GlobalSimJsonCfg(
 
     log.debug(pformat(tobs_to_providers))
 
+    # Replace providers by text file readers if provided
+    if txt_inputs:
+        for key, (bitspec, filepath) in txt_inputs.items():
+            if key in tobs_to_providers:
+                log.warning(f"Replacing {key} algorithm of type {tobs_to_providers[key]} with text reader")
+            else:
+                log.info(f"Inserting text reader to provide {key}")
+            tobs_to_providers[key] = {
+                'type': 'TOBTextReader',
+                'name': f'{key}_{bitspec}_from_txt',
+                'input': [],
+                'output': [('Output',key)],
+                'parameters': {
+                    'BitSpec': bitspec,
+                    'InputFile': filepath
+                }
+            }
+
     # Get L1 items (never mind CTP logic for now) and run configuration for each threshold
     # Let CA merging sort out all overlaps (add caching a la HLT later)
     active_thresholds = set()
     TIP_bits = 0
-    for item, item_dict in menu['items'].items():
-        for threshold in item_dict['thresholds']:
-            active_thresholds.add(threshold)
+    if not ignore_menu_items:
+        for item, item_dict in menu['items'].items():
+            for threshold in item_dict['thresholds']:
+                active_thresholds.add(threshold)
 
     for threshold in active_thresholds:
         hypo_ca, vector_outputs, hypo_dict = L0HypoCfg(
@@ -443,13 +472,26 @@ def GlobalSimJsonCfg(
 
     # Explicitly requested TOBproviders
     for tob in force_config_TOBs:
-        recurse = tob not in ignore_prereqs
-        log.info(f"Explicitly configuring {tob} from menu {'with' if recurse else 'without'} prereqs")
-        tob_cfgs, vector_outputs = config_TOB_providers(flags,tobs_to_providers,{tob},recurse)
+        log.info(f"Explicitly configuring {tob} from menu")
+        tob_cfgs, vector_outputs = config_TOB_providers(flags,tobs_to_providers,{tob})
         # Try to put in serial execution order, no guarantees
         for ca in reversed(tob_cfgs):
             cfg.merge(ca,'GlobalSimulation')
         all_vector_outputs |= vector_outputs
+
+
+    # Replace providers by text file readers if provided
+    if txt_outputs:
+        for key, (bitspec, filepath) in txt_outputs.items():
+            log.info(f"Inserting text writer to record {key}")
+            cfg.addEventAlgo(
+                CompFactory.GlobalSim.TOBTextWriter(
+                    f'{key}_{bitspec}_to_txt',
+                    Input=key,
+                    BitSpec=bitspec,
+                    OutputFile=filepath
+                )
+            )
 
     # Record diagnostic data to output stream (auto-extract from algs?)
     from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
@@ -477,20 +519,42 @@ def main():
         help='The input json config (L0 menu prototype)'
     )
     parser.add_argument(
+        '--ignore-menu-items',
+        action='store_true',
+        help='Skip the L1 item thresholds for dependency resolution -- requires force-TOBs'
+    )
+    parser.add_argument(
         '--force-TOBs',
         default=[],
         nargs='+',
         help='List of TOBs to force on'
     )
     parser.add_argument(
-        '--ignore-prereqs',
+        '--txt-inputs',
         default=[],
         nargs='+',
-        help='List of forced TOBs for which prerequisites should be ignored'
+        help='''
+        List of text files to be read to provide inputs.
+        These will replace the standard prereq chains.
+        Format is bitspec:key:path.
+        '''
     )
+    parser.add_argument(
+        '--txt-outputs',
+        default=[],
+        nargs='+',
+        help='''
+        List of text files into which containers should be written.
+        Format is bitspec:key:path.
+        '''
+    )
+    log.setLevel(INFO)
 
     args = flags.fillFromArgs(parser=parser)
     flags.lock()
+
+    if args.ignore_menu_items:
+        assert args.force_TOBs, "Ignored menu without force-TOBs list -- nothing to do!"
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     cfg = MainServicesCfg(flags)
@@ -518,9 +582,35 @@ def main():
     else:
         raise RuntimeError(f'Unrecognised input file format {flags.Input.Format} for {flags.Input.Files}')
 
+    txt_inputs = {}
+    if args.txt_inputs:
+        try:
+            txt_inputs = {
+                k:(t,v) for t,k,v in [s.split(':') for s in args.txt_inputs]
+            }
+        except ValueError:
+            raise RuntimeError(f'Failed to interpret text input list {args.txt_inputs}')
+
+    txt_outputs = {}
+    if args.txt_outputs:
+        try:
+            txt_outputs = {
+                k:(t,v) for t,k,v in [s.split(':') for s in args.txt_outputs]
+            }
+        except ValueError:
+            raise RuntimeError(f'Failed to interpret text output list {args.txt_inputs}')
+
     from TrigValTools.TrigValSteering.Common import find_file_in_path
     jsonpath = find_file_in_path(args.config_json, 'DATAPATH')
-    cfg.merge( GlobalSimJsonCfg(flags, jsonpath, args.force_TOBs, args.ignore_prereqs, print_detailed_config=True) )
+    cfg.merge( GlobalSimJsonCfg(
+        flags,
+        jsonpath,
+        args.ignore_menu_items,
+        args.force_TOBs,
+        txt_inputs,
+        txt_outputs,
+        print_detailed_config=True
+     ) )
 
     cfg.run()
 

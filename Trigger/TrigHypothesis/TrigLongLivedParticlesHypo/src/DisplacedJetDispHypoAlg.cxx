@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DisplacedJetDispHypoAlg.h"
@@ -103,7 +103,8 @@ StatusCode DisplacedJetDispHypoAlg::execute(const EventContext& context) const
     d->setObjectLink(featureString(), jet_feature_link.link);
 
     //get my count object which has been linked to the decision
-    auto count_links = TrigCompositeUtils::findLinks<xAOD::TrigCompositeContainer>(context, previousDecision, "djtrig_counts");
+    static const std::string countsStr{"djtrig_counts"};
+    auto count_links = TrigCompositeUtils::findLinks<xAOD::TrigCompositeContainer>(context, previousDecision, countsStr);
     ATH_CHECK(count_links.size() == 1); //ensure we only have 1 link
     auto count_link = count_links.at(0);
     ATH_CHECK(count_link.isValid());
@@ -113,7 +114,7 @@ StatusCode DisplacedJetDispHypoAlg::execute(const EventContext& context) const
     //count the number of tracks in the RoI (at this point it is running in RoI mode)
     //apply the nprompt, nother, ndisp requirements and generated the per jet decision
 
-    DisplacedJetDispHypoTool::Info info{d, prev, jet, lrtTracks, primary_vertex, count, beamspot_info};
+    DisplacedJetDispHypoTool::Info info{d, std::move(prev), jet, lrtTracks, primary_vertex, count, beamspot_info};
 
     for(auto &tool:m_hypoTools)
     {

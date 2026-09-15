@@ -1,31 +1,29 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SyncEventAction.h"
 
+#include "G4RunManagement/AtlasG4SyncEventUserInfo.h"
+
 #include "G4RunManager.hh"
 #include "G4Event.hh"
-#include "G4EventManager.hh"
-
-#include "G4RunManagement/AtlasG4SyncEventUserInfo.h"
 
 namespace G4UA
 {
 
 void SyncEventAction::BeginOfEventAction(const G4Event* event)
 {
-  if(!event->GetUserInformation()) {
+  const auto* eventInfo = dynamic_cast<const AtlasG4SyncEventUserInfo*>(
+    event->GetUserInformation());
+  if(!eventInfo) {
+    // A closed event queue supplies no sync event user info.
     G4RunManager::GetRunManager()->AbortRun();
   }
-}
-
-void SyncEventAction::EndOfEventAction(const G4Event* event)
-{
-  // Simulation is done, signal back to Athena
-  if(auto* atlasG4EvtUserInfo = dynamic_cast< AtlasG4SyncEventUserInfo* >( event->GetUserInformation() )) { 
-    atlasG4EvtUserInfo->SyncInterface()->EventAborted(event->IsAborted());
-    atlasG4EvtUserInfo->SyncInterface()->SetStatusDone();
+  else if(eventInfo->EventPreparationFailed()) {
+    // Event preparation failed. Abort only this event so that the worker can
+    // continue processing subsequent Athena events.
+    G4RunManager::GetRunManager()->AbortEvent();
   }
 }
 

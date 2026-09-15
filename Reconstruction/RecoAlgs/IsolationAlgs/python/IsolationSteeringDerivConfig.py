@@ -8,6 +8,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def IsolationSteeringDerivCfg(flags, name = 'IsolationSteeringDeriv', inType = 'EMPFlow'):
 
+    includeFwdElectrons = "ForwardElectrons" in flags.Input.Collections 
     mlog = logging.getLogger(name)
     mlog.info('Starting Isolation steering')
 
@@ -49,12 +50,59 @@ def IsolationSteeringDerivCfg(flags, name = 'IsolationSteeringDeriv', inType = '
     kwargs['PhIsoTypes'] = isoType
     kwargs['PhCorTypes'] = isoCor
     kwargs['PhCorTypesExtra'] = isoExCor
-
+    if includeFwdElectrons:
+        kwargs['FwdElIsoTypes'] = isoType
+        kwargs['FwdElCorTypes'] = isoCor
+        kwargs['FwdElCorTypesExtra'] = isoExCor
+        
     kwargs['name'] = suff+'PFlowIsolationBuilder'
     
     acc.addEventAlgo(CompFactory.IsolationBuilder(**kwargs))
 
     mlog.info("PFlow isolation configured")
+
+    return acc
+
+def FwdElectronIsolationSteeringDerivCfg(flags, name = 'FwdElectronIsolationSteeringDeriv'):
+    
+    kwargs = dict()
+    mlog = logging.getLogger(name)
+    mlog.info('Starting Forward electron Isolation steering')
+    acc = ComponentAccumulator()
+
+    suff = 'forwardElectron'
+    
+    from xAODPrimitives.xAODIso import xAODIso as isoPar
+    from IsolationAlgs.IsoToolsConfig import EGammaCaloIsolationToolCfg
+    isoType  = [ [ isoPar.topoetcone20, isoPar.topoetcone30, isoPar.topoetcone40 ] ]
+    isoCor   = [ [ isoPar.coreCone, isoPar.pileupCorrection ] ]
+    isoExCor = [ [ ] ]
+    kwargs['CaloTopoIsolationTool'] = acc.popToolsAndMerge(EGammaCaloIsolationToolCfg(flags))
+    
+    
+    if flags.Detector.EnableITk :
+        from IsolationAlgs.IsoToolsConfig import ElectronTrackIsolationToolCfg
+        isoType.append([ isoPar.ptcone30, isoPar.ptcone20 ])
+        isoCor.append([ isoPar.coreTrackPtr ])
+        isoExCor.append([])
+        if flags.Reco.EnableHGTDExtension:
+            extraInputs = []
+            extraInputs += [("xAOD::TrackParticleContainer","StoreGateSvc+GSFTrackParticles.time")]
+            kwargs.setdefault("ExtraInputs", extraInputs)
+            kwargs['TrackIsolationTool'] = acc.popToolsAndMerge(ElectronTrackIsolationToolCfg(flags,DoForwardIsoTiming=True))
+        else:
+            kwargs['TrackIsolationTool'] = acc.popToolsAndMerge(ElectronTrackIsolationToolCfg(flags))
+        
+    kwargs['FwdElIsoTypes'] = isoType
+    kwargs['FwdElCorTypes'] = isoCor
+    kwargs['FwdElCorTypesExtra'] = isoExCor
+
+    
+    kwargs['name'] = suff+'IsolationBuilder'
+    
+    acc.addEventAlgo(CompFactory.IsolationBuilder(**kwargs))
+
+    mlog.info(suff+" isolation configured")
 
     return acc
 

@@ -21,7 +21,7 @@ SimulationHitCollection* SimulationHitCollectionCnv::createTransient(const Token
 	MsgStream mlog(msgSvc(), "SimulationHitCollectionConverter" );
 
 	//GUID of persistence collection class (see selection.xml in ForwardRegion_EventTPCnv, class item SimulationHitCollection_p1
-	static const pool::Guid p1_guid("DD6CF87F-4D7E-4BF6-9FAC-156DB34C08C7");
+	static const Guid p1_guid("DD6CF87F-4D7E-4BF6-9FAC-156DB34C08C7");
 
 	SimulationHitCollectionCnv_p1 TPConverter_p1;
 	SimulationHitCollection *pTransColl=NULL;

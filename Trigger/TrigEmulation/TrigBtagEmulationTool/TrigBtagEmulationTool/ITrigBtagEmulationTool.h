@@ -6,20 +6,23 @@
 #define I_TRIGBTAGEMULATIONTOOL_H
 
 #include "AsgTools/IAsgTool.h"
-#include "TrigBtagEmulationTool/EmulContext.h"
 #include "xAODJet/Jet.h"
+
 #include <string>
-#include <TLorentzVector.h>
+#include <unordered_map>
+#include <vector>
+
 
 namespace Trig {
-
+  class EmulContext;
+  
   class ITrigBtagEmulationTool 
     : virtual public asg::IAsgTool {
   public:
-    virtual const EmulContext& populateJetManagersTriggerObjects() const = 0;
+    virtual StatusCode populateJetManagersTriggerObjects(EmulContext&) const = 0;
     virtual bool isPassed(const std::string& chain) const = 0;
     virtual bool isPassed(const std::string& chain, const EmulContext&) const = 0;
-    virtual std::unordered_map<std::string, std::vector<std::pair<const xAOD::Jet*, bool>>> getEmulatedJets(std::string) const = 0;
+    virtual std::unordered_map<std::string, std::vector<std::pair<const xAOD::Jet*, bool>>> getEmulatedJets(const std::string&) const = 0;
   };
 
 }

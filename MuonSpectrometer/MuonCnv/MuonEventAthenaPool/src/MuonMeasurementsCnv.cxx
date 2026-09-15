@@ -17,8 +17,8 @@ MuonMeasurementsCnv::MuonMeasurementsCnv(ISvcLocator* svcloc):
 void 
 MuonMeasurementsCnv::readObjectFromPool( const Token* token )
 {
-  static const pool::Guid p1_guid( "C4979DA5-4193-410B-9476-A51708C01CF7" );
-  static const pool::Guid p2_guid( "87FC613F-390A-4AB0-9BBF-28CE788867D5" );
+  static const Guid p1_guid( "C4979DA5-4193-410B-9476-A51708C01CF7" );
+  static const Guid p2_guid( "87FC613F-390A-4AB0-9BBF-28CE788867D5" );
 
    // select the object type based on its GUID 
    if( compareClassGuid(token,  p2_guid ) )     {

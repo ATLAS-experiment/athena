@@ -384,7 +384,7 @@ namespace SH
     /// \par Failues
     ///   no-fail
   public:
-    std::string dumpToString();
+    std::string dumpToString() const;
 
 
     //
@@ -399,8 +399,8 @@ namespace SH
     /// \par Failures
     ///   out of memory II
   public:
-    virtual void Add (TObject *meta_swallow);
-    virtual void Add (TObject *meta_swallow, Option_t*);
+    virtual void Add (TObject *meta_swallow) override;
+    virtual void Add (TObject *meta_swallow, Option_t*) override;
 
 
     /// \brief clear out the content of the collection
@@ -408,7 +408,7 @@ namespace SH
     /// \par Guarantee
     ///   no-fail
   public:
-    virtual void Clear (Option_t *option = "");
+    virtual void Clear (Option_t *option = "") override;
 
 
     /// \brief clear out the content of the collection
@@ -416,7 +416,7 @@ namespace SH
     /// \par Guarantee
     ///   no-fail
   public:
-    virtual void Delete (Option_t *option = "");
+    virtual void Delete (Option_t *option = "") override;
 
 
     /// \brief return the number of entries of this collection
@@ -424,7 +424,15 @@ namespace SH
     /// \par Guarantee
     ///   no-fail
   public:
-    virtual Int_t GetEntries () const;
+    virtual Int_t GetEntries () const override;
+
+
+    /// \brief return the size of this collection
+    ///
+    /// \par Guarantee
+    ///   no-fail
+  public:
+    virtual Int_t GetSize () const override;
 
 
     /// \brief return pointer to pointer of object meta
@@ -437,7 +445,7 @@ namespace SH
     /// \par Failures
     ///   meta not in collection
   public:
-    virtual TObject **GetObjectRef (const TObject *meta) const;
+    virtual TObject **GetObjectRef (const TObject *meta) const override;
 
 
     /// \brief make a new iterator for this collection
@@ -448,7 +456,7 @@ namespace SH
     /// \par Failures
     ///   out of memory I
   public:
-    virtual TIterator *MakeIterator (Bool_t dir = kIterForward) const;
+    virtual TIterator *MakeIterator (Bool_t dir = kIterForward) const override;
 
 
     /// \brief remove the given object from the list
@@ -459,7 +467,7 @@ namespace SH
     /// \par Failures
     ///   meta not in list
   public:
-    virtual TObject *Remove (TObject *meta);
+    virtual TObject *Remove (TObject *meta) override;
 
     //
     // private interface
@@ -469,7 +477,7 @@ namespace SH
   private:
     TList *m_dataList;
 
-    ClassDef(MetaObject, 1);
+    ClassDefOverride(MetaObject, 1);
   };
 }
 
