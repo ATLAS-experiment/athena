@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // vim: ts=2 sw=2
@@ -9,6 +9,15 @@
 
 // local include(s)
 #include "DiTauMassTools/HelperFunctions.h"
+#include "xAODBase/IParticle.h"
+#include "xAODBase/ObjectType.h"
+#include "xAODTau/TauJet.h"
+
+#include <TKey.h>
+#include <TCollection.h> // for TIter
+#include <TDirectory.h>
+#include <TF1.h>
+#include <TROOT.h> //for gROOT
 
 using namespace DiTauMassTools;
 

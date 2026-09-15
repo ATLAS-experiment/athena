@@ -15,7 +15,7 @@
 #include "DiTauMassTools/MissingMassCalculator.h" // this is for RootCore package
 #include "DiTauMassTools/MissingMassProb.h"
 #include "xAODMissingET/MissingET.h"
-
+#include "xAODTau/TauJet.h"
 
 #include <TObject.h>
 // SpeedUp committed from revision 163876
@@ -1957,7 +1957,7 @@ int MissingMassCalculator::refineSolutions(const double &M_nu1, const double &M_
                     // happen
         }
         
-        if ((m_nsol) < 0 or (m_n_sol >= m_nsolfinalmax))[[unlikely]]{
+        if ((m_nsol) < 0 or (m_nsol >= m_nsolfinalmax))[[unlikely]]{
           throw std::out_of_range("refineSolutions: index m_nsol out of range.");
         }
         // good solution found, copy in vector
