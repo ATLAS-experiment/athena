@@ -4,8 +4,7 @@
 atlas_subdir( AthExAlpaka )
 
 # External dependencies.
-#find_package( vecmem )
-find_package( acts COMPONENTS Traccc )
+find_package( traccc )
 
 # Add a component library that has some Alpaka code in it.
 atlas_add_component( AthExAlpaka
