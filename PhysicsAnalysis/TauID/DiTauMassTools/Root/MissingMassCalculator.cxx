@@ -1956,18 +1956,19 @@ int MissingMassCalculator::refineSolutions(const double &M_nu1, const double &M_
           --m_nsol; // overwrite last solution. However this should really never
                     // happen
         }
-
+        
+        if ((m_nsol) < 0 or (m_n_sol >= m_nsolfinalmax))[[unlikely]]{
+          throw std::out_of_range("refineSolutions: index m_nsol out of range.");
+        }
         // good solution found, copy in vector
         m_mtautauFinalSolVec[m_nsol] = mtautau;
         m_probFinalSolVec[m_nsol] = totalProb;
 
         PtEtaPhiMVector &nu1Final = m_nu1FinalSolVec[m_nsol];
         PtEtaPhiMVector &nu2Final = m_nu2FinalSolVec[m_nsol];
-        //      for (int iv=0;iv<4;++iv){
 
         nu1Final.SetPxPyPzE(nuvec1_tmpj.Px(), nuvec1_tmpj.Py(), nuvec1_tmpj.Pz(), nuvec1_tmpj.E());
         nu2Final.SetPxPyPzE(nuvec2_tmpj.Px(), nuvec2_tmpj.Py(), nuvec2_tmpj.Pz(), nuvec2_tmpj.E());
-        // }
 
         ++m_nsol;
       } // else totalProb<=0
