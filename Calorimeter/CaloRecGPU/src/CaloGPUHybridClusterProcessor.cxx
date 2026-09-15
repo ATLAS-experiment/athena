@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -396,7 +396,8 @@ StatusCode CaloGPUHybridClusterProcessor::execute(const EventContext & ctx) cons
 
   SG::WriteHandle<CaloClusterCellLinkContainer> cell_links(m_clusterCellLinkOutput, ctx);
 
-  ATH_CHECK( CaloClusterStoreHelper::finalizeClusters(cell_links, cluster_collection.ptr()) );
+  ATH_CHECK( cell_links.record (std::make_unique<CaloClusterCellLinkContainer>()) );
+  CaloClusterStoreHelper::finalizeClusters(ctx, cluster_collection, cell_links);
 
   if (m_measureTimes)
     {
