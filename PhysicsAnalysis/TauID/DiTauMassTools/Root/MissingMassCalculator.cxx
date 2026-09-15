@@ -35,6 +35,7 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 namespace {
   constexpr double GEV = 1000.0;
 }
@@ -1411,7 +1412,7 @@ int MissingMassCalculator::DitauMassCalculatorV9lfv(bool refit) {
              .c_str());
   }
 
-  if (m_fMfit_all->GetEntries() > 0 && m_iter3 > 0) {
+  if (m_fMfit_all && m_fMfit_all->GetEntries() > 0 && m_iter3 > 0) {
 #ifdef SMOOTH
     m_fMfit_all->Smooth();
     m_fMfit_allNoWeight->Smooth();
@@ -1517,6 +1518,9 @@ MissingMassCalculator::maxFromHist(TH1F *theHist, std::vector<double> &histInfo,
   // enum e {
   // PROB=0,INTEGRAL,CHI2,DISCRI,TANTHETA,TANTHETAW,FITLENGTH,RMS,RMSVSDISCRI,MAXHISTINFO
   // };
+  if (!theHist)[[unlikely]]{
+    throw std::exception("MissingMassCalculator::maxFromHist: histogram pointer is null.")
+  }
   double maxPos = 0.;
   double prob = 0.;
 
