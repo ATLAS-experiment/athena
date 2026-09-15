@@ -16,6 +16,13 @@ if __name__=="__main__":
     cfgFlags.Detector.GeometryITk = True
     cfgFlags.Detector.GeometryBpipe = True
     cfgFlags.PF.useActsExtrapolation=True #Toggle usage of ACTS extrapolation for track propagation to calorimeter
+    #Auto configure works by reading the conditions tag  metadata from the input file.
+    #Hence for files produced using pre-CREST conditions tags this choice is not
+    #compatible with the latest releases which only support CREST conditions tags.
+    #So we force it to use the current Run 4 tag
+    #See https://its.cern.ch/jira/browse/ATLASRECTS-8434
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags
+    cfgFlags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
     cfgFlags.fillFromArgs()
     cfgFlags.lock()
 
