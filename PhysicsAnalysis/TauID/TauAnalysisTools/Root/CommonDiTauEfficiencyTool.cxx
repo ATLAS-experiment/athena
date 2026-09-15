@@ -246,7 +246,7 @@ StatusCode CommonDiTauEfficiencyTool::applySystematicVariation ( const CP::Syste
   // sanity checks if systematic set is supported
   double dDirection = 0.;
   CP::SystematicSet sSystematicSetAvailable;
-  for (auto sSyst : sSystematicSet)
+  for (const auto & sSyst : sSystematicSet)
   {
     // check if systematic is available
     auto it = m_mSystematicsHistNames.find(sSyst.basename());
