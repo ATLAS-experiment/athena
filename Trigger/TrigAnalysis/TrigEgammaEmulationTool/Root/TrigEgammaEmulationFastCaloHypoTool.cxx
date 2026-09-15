@@ -1,4 +1,6 @@
-
+/*
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+ */
 
 #include "TrigEgammaEmulationTool/TrigEgammaEmulationFastCaloHypoTool.h"
 #include "GaudiKernel/SystemOfUnits.h"
@@ -119,6 +121,7 @@ bool TrigEgammaEmulationFastCaloHypoTool::decide(  const Trig::TrigData &input )
   float e2 = pClus->energy( CaloSampling::EMB2 ) + pClus->energy( CaloSampling::EME2 );
   float e3 = pClus->energy( CaloSampling::EMB3 ) + pClus->energy( CaloSampling::EME3 );
   float eallsamples = e0+e1+e2+e3;
+  //coverity[DIVIDE_BY_ZERO:FALSE]
   F3 = std::abs( eallsamples )>0. ? e3/eallsamples : 0.; 
 
   // apply cuts: DeltaEta( clus-ROI )

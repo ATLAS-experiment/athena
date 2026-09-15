@@ -1,3 +1,6 @@
+/*
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+ */
 #include "TrigEgammaEmulationTool/TrigEgammaEmulationPrecisionPhotonHypoTool.h"
 #include "GaudiKernel/SystemOfUnits.h"
 

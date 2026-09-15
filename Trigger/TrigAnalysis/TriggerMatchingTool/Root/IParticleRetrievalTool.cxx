@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Package includes
@@ -116,7 +116,7 @@ namespace Trig {
         ATH_MSG_WARNING("Skipping combination for chain " << chain 
             << " due to navigation failure");
       else
-        combinations.push_back(currentCombination);
+        combinations.push_back(std::move(currentCombination));
     }
     return StatusCode::SUCCESS;
   }
