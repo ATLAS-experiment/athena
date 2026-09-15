@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration.
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
 */
 
 #include "ClusterCellRelinkAlg.h"
@@ -65,7 +65,8 @@ StatusCode ClusterCellRelinkAlg::execute (const EventContext& ctx) const
   }
 
   SG::WriteHandle<CaloClusterCellLinkContainer> cellLinksOutputHandle (m_cellLinksOutput, ctx);
-  ATH_CHECK( CaloClusterStoreHelper::finalizeClusters(cellLinksOutputHandle, clustersOutputContainer) );
+  ATH_CHECK( cellLinksOutputHandle.record (std::make_unique<CaloClusterCellLinkContainer>()) );
+  CaloClusterStoreHelper::finalizeClusters(ctx, clustersOutputHandle, cellLinksOutputHandle);
 
   return StatusCode::SUCCESS;
 }

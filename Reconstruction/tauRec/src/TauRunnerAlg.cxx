@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TauRunnerAlg.h"
@@ -192,7 +192,8 @@ StatusCode TauRunnerAlg::execute(const EventContext& ctx) const {
 
   // build cell link container for shot clusters
   SG::WriteHandle<CaloClusterCellLinkContainer> tauShotClusLinkHandle( m_tauShotClusLinkContainer, ctx );
-  ATH_CHECK(CaloClusterStoreHelper::finalizeClusters (tauShotClusLinkHandle, tauShotClusContainer));
+  ATH_CHECK( tauShotClusLinkHandle.record (std::make_unique<CaloClusterCellLinkContainer>()) );
+  CaloClusterStoreHelper::finalizeClusters (ctx, tauShotClusHandle, tauShotClusLinkHandle);
 
   // sort taus by decreasing pt
   auto sortByPt = [](const xAOD::TauJet* tau1, const xAOD::TauJet* tau2 ) { return tau1->pt() > tau2->pt(); };
