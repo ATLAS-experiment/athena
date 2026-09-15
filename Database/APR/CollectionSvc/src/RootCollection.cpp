@@ -29,6 +29,9 @@
 #include <exception>
 #include <map>
 
+#include <iostream>
+using namespace std;
+
 namespace pool {
 
    RootCollection::RootCollection( const pool::CollectionDescription& description,
@@ -212,6 +215,7 @@ namespace pool {
             throw std::runtime_error( "Could not retrieve a database handle (APR: RootCollection::cursor)" );
          }
          if( database->openMode() == Io::INVALID ) {
+            cout << "MN: RootCollection::cursor: database is not open, opening " << m_fileName << " for read" << endl;
             database->setTechnology( m_description.type().type() );
             database->connectForRead();
          }

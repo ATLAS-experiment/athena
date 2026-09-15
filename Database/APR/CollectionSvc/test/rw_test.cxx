@@ -36,8 +36,6 @@ TestDriver::TestDriver( const std::string& name,
 void
 TestDriver::write ATLAS_NOT_THREAD_SAFE ()
 {
-   cout << "Creating CollectionService" << endl;
-   unique_ptr<CollectionService> serviceHandle(new CollectionService());
    cout << "Creating Collection Description" << endl;
    pool::CollectionDescription description( m_name, m_type, m_connection );
    description.insertColumn( "attr1", "int" );
@@ -47,7 +45,7 @@ TestDriver::write ATLAS_NOT_THREAD_SAFE ()
    description.insertColumn( "attr64bit", "unsigned long long" );
 
    cout << "Creating Collection" << endl;
-   pool::ICollection* collection = serviceHandle->create( description );
+   pool::ICollection* collection = CollectionService::create( description );
    if ( ! collection )   {
       throw std::runtime_error( "Could not create a relational collection object" );
    }
@@ -98,11 +96,8 @@ TestDriver::write ATLAS_NOT_THREAD_SAFE ()
 void
 TestDriver::read ATLAS_NOT_THREAD_SAFE ()
 {
-   cout << endl << "Creating CollectionService" << endl;
-   unique_ptr<CollectionService> serviceHandle(new CollectionService());
-
   cout << "Getting handle to existing collection ( opened for read-only transactions by default )" << endl;
-  pool::ICollection* collection = serviceHandle->open( m_name, m_type , m_connection );
+  pool::ICollection* collection = CollectionService::open( m_name, m_connection );
 
   if( ! collection )   {
      throw std::runtime_error( "Could not create a rootCollection object" );

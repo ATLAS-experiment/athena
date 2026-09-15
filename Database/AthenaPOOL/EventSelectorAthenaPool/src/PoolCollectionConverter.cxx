@@ -55,15 +55,10 @@ StatusCode PoolCollectionConverter::initialize() {
    }
    StatusCode sc = StatusCode::SUCCESS;
    try {
-      if( m_collectionType == "RootCollection" || m_collectionType == "ImplicitCollection" ) {
-         sc = m_poolSvc->connectCollection(m_inputCollection, "Input", pool::ROOT_StorageType.type(), m_contextId);
-         m_poolCollection = createCollection(m_inputCollection, "Input", pool::ROOT_StorageType.type(), m_contextId);
-      } else {
-         // ATH_MSG_ERROR("initialize: Unsupported collection type \"" << m_collectionType << "\".");
-         return StatusCode::FAILURE;
-      }
+      sc = m_poolSvc->connectCollection(m_inputCollection, "Input", pool::ROOT_StorageType.type(), m_contextId);
+      m_poolCollection = pool::CollectionService::open("Input", m_inputCollection, m_poolSvc->getInputContextSession(m_contextId));
    } catch (std::exception &e) {
-      if (m_poolCollection == nullptr) return StatusCode::RECOVERABLE;
+      return StatusCode::RECOVERABLE;
    }
    bool insertFile = false;
    if (sc.isRecoverable()) {
@@ -76,23 +71,7 @@ StatusCode PoolCollectionConverter::initialize() {
    }
    return StatusCode::SUCCESS;
 }
-//______________________________________________________________________________
-pool::ICollection* PoolCollectionConverter::createCollection(const std::string& connection,
-                const std::string& collectionName,
-                const pool::DbType& collectionType,
-                unsigned int contextId) const {
-   // access to these variables is serial, since this is called by event selector only
-   pool::CollectionService collSvc ATLAS_THREAD_SAFE = pool::CollectionService();
-   pool::ICollection* collPtr ATLAS_THREAD_SAFE = nullptr;
 
-   // Try to open EventTags Collection in the input file
-   try {
-      collPtr = collSvc.open(collectionName, collectionType, connection, m_poolSvc->getInputContextSession(contextId));
-   } catch (std::exception &e) {
-      collPtr = nullptr;
-   }
-   return(collPtr);
-}
 //______________________________________________________________________________
 StatusCode PoolCollectionConverter::disconnectDb() {
    if (m_poolCollection == nullptr) {

@@ -1,5 +1,4 @@
 Read test starting...
-Creating CollectionService
 Creating Collection Description
 Creating Collection
 Adding 10 elements to the collection.
@@ -17,8 +16,6 @@ Done.
 Commiting the collection.
 Closing the collection.
 [OVAL] finished hopefully
-
-Creating CollectionService
 Getting handle to existing collection ( opened for read-only transactions by default )
 Iterating over collection...
 Token : [DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-0000-000000000000][TECH=00000000][OID=FFFFFFFFFFFFFFFF-FFFFFFFFFFFFFFFF]

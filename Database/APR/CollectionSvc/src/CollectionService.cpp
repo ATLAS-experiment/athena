@@ -7,6 +7,7 @@
 #include "RootCollection.h"
 
 #include "AthenaKernel/getMessageSvc.h"
+#include "GaudiKernel/IFileMgr.h"
 
 #include <stdexcept>
 
@@ -26,11 +27,10 @@ pool::CollectionService::create( const CollectionDescription& description )
 
 pool::ICollection* 
 pool::CollectionService::open( const std::string& name,
-                               const DbType& type,
                                const std::string& connection,
                                pool::ISession* session )
 {
-   pool::CollectionDescription description( name, type, connection );
+   pool::CollectionDescription description( name, ROOT_StorageType.type(), connection );
    return new RootCollection( description, Io::READ, session );
 }
 
