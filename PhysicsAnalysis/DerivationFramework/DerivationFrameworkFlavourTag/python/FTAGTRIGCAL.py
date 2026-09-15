@@ -123,6 +123,19 @@ def FTAGTRIGCALExtraContentCfg(
     slimming_helper.IncludeEGammaTriggerContent = True
     slimming_helper.IncludeBJetTriggerContent = True
     slimming_helper.IncludeBPhysTriggerContent = True
+
+    # Preselection taggers, the TLA and precision taggers come with the b-jet content.
+    # The fastftag jets are a shallow copy and take their kinematics from the parent.
+    fastftag_vars = [
+        f"{tagger}_{prob}"
+        for tagger in ["fastDips", "fastGN220240122"]
+        for prob in ["pb", "pc", "pu"]
+    ]
+    slimming_helper.ExtraVariables += [
+        "HLT_AntiKt4EMTopoJets_subjesIS.pt.eta.phi.m",
+        ".".join(["HLT_AntiKt4EMTopoJets_subjesIS_fastftag"] + fastftag_vars),
+    ]
+
     trigger_matching(
         flags=flags,
         slimming_helper=slimming_helper,
