@@ -27,9 +27,7 @@ namespace JetTagDQA{
                                                    std::string sParticleType) :
                                                    PlotBase(pParent, sDir),
                                                    AthMessaging("BTaggingValidationPlots"),
-                                                   m_sParticleType(std::move(sParticleType)),
-                                                   m_JVT_defined(false),
-                                                   m_JVTLargerEta_defined(false)
+                                                   m_sParticleType(std::move(sParticleType))
   {
     //std::cout << "m_sParticleType=" << m_sParticleType << std::endl;
   }     
@@ -43,19 +41,8 @@ namespace JetTagDQA{
     m_HistogramDefinitions = std::move(HistogramDefinitions);
   }
   
-  // implement the setter function for the cuts that can be set in the config
-  void BTaggingValidationPlots::setIsDataJVTCutsAndTMPCut(bool isData, float JVTCutAntiKt4EMTopoJets, float JVTCutLargerEtaAntiKt4EMTopoJets, float JVTCutAntiKt4EMPFlowJets, float truthMatchProbabilityCut){
+  void BTaggingValidationPlots::setIsDataAndTMPCut(bool isData, float truthMatchProbabilityCut){
     m_isData = isData;
-    if (m_sParticleType=="antiKt4EMTopoJets"){ 
-      m_JVT_defined = true; 
-      m_JVT_cut = JVTCutAntiKt4EMTopoJets;
-      m_JVTLargerEta_defined = true;
-      m_JVTLargerEta_cut = JVTCutLargerEtaAntiKt4EMTopoJets;
-    }
-    if (m_sParticleType=="antiKt4EMPFlowJets"){
-      m_JVT_defined = true; 
-      m_JVT_cut = JVTCutAntiKt4EMPFlowJets;
-    }
     m_truthMatchProbabilityCut = truthMatchProbabilityCut;
   }
 
