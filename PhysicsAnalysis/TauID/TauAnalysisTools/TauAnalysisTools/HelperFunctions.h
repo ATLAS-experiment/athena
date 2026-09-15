@@ -29,6 +29,7 @@
 // stl include(s)
 #include <vector>
 #include <string>
+#include <tuple>
 
 namespace TauAnalysisTools
 {
@@ -80,7 +81,9 @@ void correctedPi0Vectors(const xAOD::TauJet* xTau, std::vector<TLorentzVector>& 
 /** return TauJet match type*/
 TruthMatchedParticleType getTruthParticleType(const xAOD::TauJet& xTau);
 /** return DiTauJet match type*/
-TruthMatchedParticleType getTruthParticleType(const xAOD::DiTauJet& xDiTau); 
+TruthMatchedParticleType getTruthParticleType(const xAOD::DiTauJet& xDiTau);
+/**Classify the ancestry of the truth particle matched to a tau **/
+std::tuple<int, int> tauOrigin(const xAOD::TauJet &xTau);
 /** combine the standard taujets container with the muon removal container **/
 std::vector<const xAOD::TauJet*> combineTauJetsWithMuonRM(const xAOD::TauJetContainer* taus_std, const xAOD::TauJetContainer* taus_muonRM);
 }
