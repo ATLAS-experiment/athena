@@ -75,17 +75,17 @@ namespace Trig{
     }
 
     template<>
-    void collect<Muon_ROI>(const HLT::TriggerElement* te, std::vector<Trig::Feature<Muon_ROI> >& data, const std::string&, unsigned int condition, const std::string&, const HLT::TrigNavStructure* navigation) {
+    void collect<Muon_ROI>(const HLT::TriggerElement* te, std::vector<Trig::Feature<Muon_ROI> >& data, std::string_view, unsigned int condition, const std::string&, const HLT::TrigNavStructure* navigation) {
       l1collect<Muon_ROI>(te, data, condition, &LVL1_ROI::getMuonROIs, navigation);
     }
 
     template<>
-    void collect<EmTau_ROI>(const HLT::TriggerElement* te, std::vector<Trig::Feature<EmTau_ROI> >& data, const std::string&, unsigned int condition, const std::string&, const HLT::TrigNavStructure* navigation) {
+    void collect<EmTau_ROI>(const HLT::TriggerElement* te, std::vector<Trig::Feature<EmTau_ROI> >& data, std::string_view, unsigned int condition, const std::string&, const HLT::TrigNavStructure* navigation) {
       l1collect<EmTau_ROI>(te, data, condition, &LVL1_ROI::getEmTauROIs, navigation);
     }
 
     template<>
-    void collect<Jet_ROI>(const HLT::TriggerElement* te, std::vector<Trig::Feature<Jet_ROI> >& data, const std::string&, unsigned int condition, const std::string&, const HLT::TrigNavStructure* navigation) {
+    void collect<Jet_ROI>(const HLT::TriggerElement* te, std::vector<Trig::Feature<Jet_ROI> >& data, std::string_view, unsigned int condition, const std::string&, const HLT::TrigNavStructure* navigation) {
       l1collect<Jet_ROI>(te, data, condition, &LVL1_ROI::getJetROIs, navigation);
     }
 
@@ -123,17 +123,17 @@ namespace Trig{
     }
 
     template<>
-    void collect<xAOD::EmTauRoI>(const HLT::TriggerElement* te, std::vector<Trig::Feature<xAOD::EmTauRoI> >& data, const std::string&, unsigned int condition, const std::string&, const HLT::TrigNavStructure* navigation) {
+    void collect<xAOD::EmTauRoI>(const HLT::TriggerElement* te, std::vector<Trig::Feature<xAOD::EmTauRoI> >& data, std::string_view, unsigned int condition, const std::string&, const HLT::TrigNavStructure* navigation) {
       xAODcollect<xAOD::EmTauRoI,xAOD::EmTauRoIContainer>(te, data, condition, navigation,"LVL1EmTauRoIs");
     }
 
     template<>
-    void collect<xAOD::MuonRoI>(const HLT::TriggerElement* te, std::vector<Trig::Feature<xAOD::MuonRoI> >& data, const std::string&, unsigned int condition, const std::string&, const HLT::TrigNavStructure* navigation) {
+    void collect<xAOD::MuonRoI>(const HLT::TriggerElement* te, std::vector<Trig::Feature<xAOD::MuonRoI> >& data, std::string_view, unsigned int condition, const std::string&, const HLT::TrigNavStructure* navigation) {
       xAODcollect<xAOD::MuonRoI,xAOD::MuonRoIContainer>(te, data, condition, navigation,"LVL1MuonRoIs");
     }
 
     template<>
-    void collect<xAOD::JetRoI>(const HLT::TriggerElement* te, std::vector<Trig::Feature<xAOD::JetRoI> >& data, const std::string&, unsigned int condition, const std::string&, const HLT::TrigNavStructure* navigation) {
+    void collect<xAOD::JetRoI>(const HLT::TriggerElement* te, std::vector<Trig::Feature<xAOD::JetRoI> >& data, std::string_view, unsigned int condition, const std::string&, const HLT::TrigNavStructure* navigation) {
       xAODcollect<xAOD::JetRoI,xAOD::JetRoIContainer>(te, data, condition, navigation,"LVL1JetRoIs");
     }
 
