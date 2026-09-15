@@ -157,11 +157,6 @@ StatusCode ActsTrk::MaterialTrackReader::execute(const EventContext& ctx) {
           std::make_move_iterator(rmTrack.second.materialInteractions.end()));
       pendingTrack->second.materialInX0 += rmTrack.second.materialInX0;
       pendingTrack->second.materialInL0 += rmTrack.second.materialInL0;
-      if (interactions.size() % 50 == 0) {
-        ATH_MSG_INFO("DEBUGFIX merge: pending track now has "
-                     << interactions.size() << " interactions (event_id "
-                     << nCurrentEvt << ")");
-      }
     }
   }
   // end of tree reached while a track was still being assembled
