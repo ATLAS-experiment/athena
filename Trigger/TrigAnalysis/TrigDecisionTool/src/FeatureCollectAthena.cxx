@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS // Full Athena only
@@ -17,9 +17,9 @@ namespace Trig{
   namespace FeatureAccessImpl {
     // returns TrigPassBits object appropriate for given object 
     // if there is none returns 0 pointer
-    // not this is not templated function, can be changed anytime needed
-    const TrigPassBits* getBits(size_t sz, const HLT::TriggerElement* te, const std::string& /*label*/, const HLT::NavigationCore* navigation ) {
-      if (!sz)
+    // note this is not templated function, can be changed anytime needed
+    const TrigPassBits* getBits(size_t sz, const HLT::TriggerElement* te, const HLT::NavigationCore* navigation ) {
+      if (!sz || !navigation)
 	return 0;
 
       const TrigPassBits* bits(0);

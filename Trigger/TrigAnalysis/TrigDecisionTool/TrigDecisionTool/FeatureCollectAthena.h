@@ -66,8 +66,8 @@ namespace Trig {
   
   namespace FeatureAccessImpl {
     // function declaration (see cxx for the deifinition) wanted to have this freedom in case of patches needed
-    const TrigPassBits* getBits(size_t sz, const HLT::TriggerElement* te,
-                                const std::string& label, const HLT::NavigationCore* navigation );
+    const TrigPassBits* getBits(size_t sz, const HLT::TriggerElement* te, 
+      const HLT::NavigationCore* navigation );
 
     const TrigPassFlags* getFlags(size_t sz, const HLT::TriggerElement* te,
                                   const std::string& label, const HLT::NavigationCore* navigation );
@@ -162,8 +162,10 @@ namespace Trig {
           // do retrieve
           std::string sourceLabel;
           link_type link;
-          const bool new_result = m_navigation->getRecentFeatureDataOrElementLink( m_te, link, m_label, *m_sourceTE, sourceLabel );
-
+          bool new_result{false};
+          if (m_navigation){
+            new_result = m_navigation->getRecentFeatureDataOrElementLink( m_te, link, m_label, *m_sourceTE, sourceLabel );
+          }
           if (new_result) {
             if (m_teName.empty() || m_teName == Trig::getTEName(**m_sourceTE)) {
               if (link.cptr()) {
