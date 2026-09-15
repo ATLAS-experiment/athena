@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -54,19 +54,12 @@ def AFatrasG4Cfg(flags, **kwargs):
 
 def FastCaloSimCfg(flags, **kwargs):
     result = ComponentAccumulator()
-    # Set the parametrization service
-    from ISF_FastCaloSimServices.ISF_FastCaloSimServicesConfig import FastCaloSimV2ParamSvcCfg
-    kwargs.setdefault("ISF_FastCaloSimV2ParamSvc", result.getPrimaryAndMerge(FastCaloSimV2ParamSvcCfg(flags)))
-    # Set the FastCaloSim extrapolation tool
-    from ISF_FastCaloSimParametrization.ISF_FastCaloSimParametrizationConfig import FastCaloSimCaloExtrapolationCfg
-    kwargs.setdefault("FastCaloSimCaloExtrapolation", result.addPublicTool(result.popToolsAndMerge(FastCaloSimCaloExtrapolationCfg(flags))))
-    # Name of region where FastCaloSim will be triggered
+    # Must match the region created by CALOPhysicsRegionToolCfg.
     kwargs.setdefault("RegionName", "CALO")
-    kwargs.setdefault('CaloCellContainerSDName', "ToolSvc.SensitiveDetectorMasterTool.CaloCellContainerSD")
-    
-    # Set the G4CaloTransportTool
-    from G4AtlasTools.G4AtlasToolsConfig import G4CaloTransportToolCfg
-    kwargs.setdefault("G4CaloTransportTool", result.addPublicTool(result.popToolsAndMerge(G4CaloTransportToolCfg(flags))))
+    kwargs.setdefault("CaloCellContainerSDName", "ToolSvc.SensitiveDetectorMasterTool.CaloCellContainerSD")
+
+    from G4AtlasTools.G4AtlasToolsConfig import FastCaloSimParametrizationToolCfg
+    kwargs.setdefault("FastCaloSimParametrizationTool", result.addPublicTool(result.popToolsAndMerge(FastCaloSimParametrizationToolCfg(flags))))
 
     # Set the PunchThrough G4 part
     from G4AtlasTools.G4AtlasToolsConfig import PunchThroughSimWrapperCfg
@@ -77,4 +70,59 @@ def FastCaloSimCfg(flags, **kwargs):
     kwargs.setdefault('doPunchThrough', flags.Sim.FastCalo.doPunchThrough)
 
     result.setPrivateTools(CompFactory.FastCaloSimTool(name="FastCaloSim", **kwargs))
+    return result
+
+
+def FastCaloSimParamHitAnalysisCfg(flags, name="FastCaloSimParamHitAnalysis",
+                                   NTruthParticles=1, saveAllBranches=False,
+                                   doG4Hits=False, doClusterInfo=False,
+                                   outputGeoFileName=None, **kwargs):
+    """Configure the FastCaloSim parametrization-input ntuple algorithm.
+
+    Transport requires an initialized Geant4 particle table and field. The
+    simulation-job path provides both; standalone ESD use must do the same.
+    """
+    result = ComponentAccumulator()
+
+    from LArGeoAlgsNV.LArGMConfig import LArGMCfg
+    result.merge(LArGMCfg(flags))
+    kwargs.setdefault("CaloDetDescrManager", "CaloDetDescrManager")
+
+    from TileConditions.TileSamplingFractionConfig import TileSamplingFractionCondAlgCfg
+    result.merge(TileSamplingFractionCondAlgCfg(flags))
+    kwargs.setdefault("TileSamplingFraction", "TileSamplingFraction")
+
+    from TileConditions.TileCablingSvcConfig import TileCablingSvcCfg
+    kwargs.setdefault("TileCablingSvc", result.getPrimaryAndMerge(TileCablingSvcCfg(flags)).name)
+
+    # Preserve the stream name used by downstream regression tools.
+    kwargs.setdefault("NtupleFileName", 'ISF_HitAnalysis')
+    kwargs.setdefault("GeoFileName", 'ISF_Geometry')
+    # Sim jobs have no HIST output stream by default; fall back to a fixed name
+    histFileName = flags.Output.HISTFileName or "ISF_HitAnalysis.root"
+    histOutputArray = ["ISF_HitAnalysis DATAFILE='%s' OPT='RECREATE'" % (histFileName)]
+    if outputGeoFileName:
+        histOutputArray += ["ISF_Geometry DATAFILE='%s' OPT='RECREATE'" % (outputGeoFileName)]
+    result.addService(CompFactory.THistSvc(Output=histOutputArray))
+    kwargs.setdefault("NTruthParticles", NTruthParticles)
+
+    # Use the same transport and extrapolation as the fast-sim model.
+    from G4AtlasTools.G4AtlasToolsConfig import FastCaloSimParametrizationToolCfg
+    kwargs.setdefault("FastCaloSimParametrizationTool", result.addPublicTool(result.popToolsAndMerge(FastCaloSimParametrizationToolCfg(flags))))
+
+    kwargs.setdefault("CaloBoundaryR", 1148.0)
+    kwargs.setdefault("CaloBoundaryZ", 3550.0)
+    kwargs.setdefault("SaveAllBranches", saveAllBranches)
+    kwargs.setdefault("DoAllCells", False)
+    kwargs.setdefault("DoLayers", True)
+    kwargs.setdefault("DoLayerSums", True)
+    kwargs.setdefault("DoG4Hits", doG4Hits)
+    kwargs.setdefault("DoClusterInfo", doClusterInfo)
+    kwargs.setdefault("TimingCut", 999999)
+
+    # Pure simulation jobs do not have digitization metadata.
+    from IOVDbSvc.IOVDbSvcConfig import addFolders
+    result.merge(addFolders(flags, ["/Simulation/Parameters"]))
+
+    result.addEventAlgo(CompFactory.FastCaloSimParamHitAnalysis(name, **kwargs))
     return result

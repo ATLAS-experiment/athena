@@ -16,6 +16,8 @@ atlas_add_dictionary( TileEventDict
                       LINK_LIBRARIES TileEvent )
 
 # Tests in the package:
+# Not built for AthSimulation, which does not run them.
+if( NOT GENERATIONBASE AND NOT SIMULATIONBASE )
 atlas_add_test( TileRawChannelCollection_test
                 SOURCES
                 test/TileRawChannelCollection_test.cxx
@@ -60,3 +62,4 @@ atlas_add_test( TileMutableBeamElemContainer_test
                 SOURCES
                 test/TileMutableBeamElemContainer_test.cxx
                 LINK_LIBRARIES IdDictParser TileConditionsLib TileEvent TileIdentifier )
+endif()

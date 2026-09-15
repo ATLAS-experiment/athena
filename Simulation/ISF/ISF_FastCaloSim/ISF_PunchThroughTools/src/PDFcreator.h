@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -17,7 +17,7 @@
 #include "TH2F.h"
 
 //ISF includes
-#include "ISF_FastCaloSimEvent/TFCS1DFunction.h"
+#include "FastCaloSim/Core/TFCS1DFunction.h"
 
 
 

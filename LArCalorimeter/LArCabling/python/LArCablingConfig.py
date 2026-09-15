@@ -3,7 +3,6 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg, addFolders
-LArOnOffMappingAlg, LArFebRodMappingAlg, LArCalibLineMappingAlg,LArLATOMEMappingAlg=CompFactory.getComps("LArOnOffMappingAlg","LArFebRodMappingAlg","LArCalibLineMappingAlg","LArLATOMEMappingAlg")
 
 def _larCablingCfg(configFlags,algo,folder,algName=None):
     result=ComponentAccumulator()
@@ -48,7 +47,7 @@ def _larLatomeCfg(configFlags,algo,folder,outkey):
     return result
 
 def LArOnOffIdMappingCfg(configFlags):
-    return _larCablingCfg(configFlags,LArOnOffMappingAlg,"/LAR/Identifier/OnOffIdMap")
+    return _larCablingCfg(configFlags,CompFactory.LArOnOffMappingAlg,"/LAR/Identifier/OnOffIdMap")
 
 def LArOnOffIdMappingSCCfg(configFlags):
     result = ComponentAccumulator()
@@ -56,25 +55,25 @@ def LArOnOffIdMappingSCCfg(configFlags):
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     result.merge(LArGMCfg(configFlags))
     if configFlags.Input.isMC:
-       result.merge(_larCablingCfg(configFlags,LArOnOffMappingAlg,"/LAR/IdentifierOfl/OnOffIdMap_SC","LArOnOffMappingAlgSC"))
+       result.merge(_larCablingCfg(configFlags,CompFactory.LArOnOffMappingAlg,"/LAR/IdentifierOfl/OnOffIdMap_SC","LArOnOffMappingAlgSC"))
        from IOVDbSvc.IOVDbSvcConfig import addOverride
        result.merge(addOverride(configFlags, "/LAR/IdentifierOfl/OnOffIdMap_SC", "LARIdentifierOflOnOffIdMap_SC-000")) # FIXME temporary?
     else:
-       result.merge(_larCablingCfg(configFlags,LArOnOffMappingAlg,"/LAR/Identifier/OnOffIdMap_SC","LArOnOffMappingAlgSC"))
+       result.merge(_larCablingCfg(configFlags,CompFactory.LArOnOffMappingAlg,"/LAR/Identifier/OnOffIdMap_SC","LArOnOffMappingAlgSC"))
     result.getCondAlgo("LArOnOffMappingAlgSC").WriteKey = "LArOnOffIdMapSC"
     result.getCondAlgo("LArOnOffMappingAlgSC").isSuperCell = True
     return result
 
 def LArFebRodMappingCfg(configFlags):
-    return _larCablingCfg(configFlags,LArFebRodMappingAlg,"/LAR/Identifier/FebRodMap")
+    return _larCablingCfg(configFlags,CompFactory.LArFebRodMappingAlg,"/LAR/Identifier/FebRodMap")
 
 def LArCalibIdMappingCfg(configFlags):
-    return _larCablingCfg(configFlags,LArCalibLineMappingAlg,"/LAR/Identifier/CalibIdMap")
+    return _larCablingCfg(configFlags,CompFactory.LArCalibLineMappingAlg,"/LAR/Identifier/CalibIdMap")
 
 def LArCalibIdMappingSCCfg(configFlags):
     result = ComponentAccumulator()
     if not configFlags.Input.isMC:
-       result.merge(_larCablingCfg(configFlags,LArCalibLineMappingAlg,"/LAR/Identifier/CalibIdMap_SC","LArCalibLineMappingAlgSC"))
+       result.merge(_larCablingCfg(configFlags,CompFactory.LArCalibLineMappingAlg,"/LAR/Identifier/CalibIdMap_SC","LArCalibLineMappingAlgSC"))
        result.getCondAlgo("LArCalibLineMappingAlgSC").WriteKey="LArCalibIdMapSC"
        result.getCondAlgo("LArCalibLineMappingAlgSC").isSuperCell=True
        result.getCondAlgo("LArCalibLineMappingAlgSC").MaxCL=16
@@ -82,7 +81,7 @@ def LArCalibIdMappingSCCfg(configFlags):
 
 def LArLATOMEMappingCfg(configFlags):
     result = ComponentAccumulator()
-    result.merge(_larLatomeCfg(configFlags,LArLATOMEMappingAlg,"/LAR/Identifier/LatomeMapping","LArLATOMEMap"))
+    result.merge(_larLatomeCfg(configFlags,CompFactory.LArLATOMEMappingAlg,"/LAR/Identifier/LatomeMapping","LArLATOMEMap"))
     return result
 
 def LArIdMapCfg(configFlags):

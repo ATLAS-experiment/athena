@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_PUNCHTHROUGHTOOLS_SRC_PUNCHTHROUGHCLASSIFIER_H
@@ -10,7 +10,7 @@
 
 #include "ISF_FastCaloSimInterfaces/IPunchThroughClassifier.h"
 
-#include "ISF_FastCaloSimEvent/TFCSSimulationState.h"
+#include "FastCaloSim/Core/TFCSSimulationState.h"
 
 #include "AthenaBaseComps/AthAlgTool.h"
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMV2TOOL_H
@@ -10,16 +10,17 @@
 #include "ISF_Interfaces/ITruthSvc.h"
 
 // FastCaloSim includes
-#include "ISF_FastCaloSimInterfaces/IFastCaloSimParamSvc.h"
-#include "ISF_FastCaloSimParametrization/IFastCaloSimCaloExtrapolation.h"
+#include "G4AtlasInterfaces/IFastCaloSimParametrizationTool.h"
 #include "ISF_FastCaloSimInterfaces/IPunchThroughTool.h"
 
 #include "CaloInterface/ICaloCellMakerTool.h"
+#include "CaloEvent/CaloCellContainer.h"
 
 #include "AthenaKernel/IAthRNGSvc.h"
 #include "CxxUtils/checker_macros.h"
 
 #include "AtlasDetDescr/AtlasDetectorID.h"
+#include "CaloIdentifier/CaloCell_ID.h"
 #include "CaloIdentifier/LArEM_ID.h"
 #include "CaloIdentifier/LArHEC_ID.h"
 #include "CaloIdentifier/LArFCAL_ID.h"
@@ -29,9 +30,6 @@ namespace CLHEP
 {
   class HepRandomEngine;
 }
-
-//forward declarations
-class CaloCellContainer;
 
 namespace ISF {
   /** @class FastCaloSimV2Tool
@@ -69,16 +67,18 @@ namespace ISF {
   private:
     StatusCode commonSetup(const EventContext& ctx);
 
-    ServiceHandle<IFastCaloSimParamSvc> m_paramSvc{this, "ParamSvc", "ISF_FastCaloSimV2ParamSvc"};
     bool m_doPunchThrough{true};
     ToolHandle< IPunchThroughTool >     m_punchThroughTool{this, "PunchThroughTool", ""};
     PublicToolHandleArray<ICaloCellMakerTool> m_caloCellMakerToolsSetup{this, "CaloCellMakerTools_setup", {}, ""};
     PublicToolHandleArray<ICaloCellMakerTool> m_caloCellMakerToolsRelease{this, "CaloCellMakerTools_release", {}, ""};
 
-    PublicToolHandle<IFastCaloSimCaloExtrapolation> m_FastCaloSimCaloExtrapolation{this, "FastCaloSimCaloExtrapolation", "", ""};
+    // Shared transport, extrapolation, and parametrization engine.
+    PublicToolHandle<IFastCaloSimParametrizationTool> m_FastCaloSimParametrizationTool{this, "FastCaloSimParametrizationTool", "", ""};
 
     std::unique_ptr<CaloCellContainer>        m_theContainer{};
     CaloCellContainer*                                    m_theContainerPtr{};
+    /// Converts compact cell identifiers into CaloCellContainer hashes.
+    const CaloCell_ID* m_caloCellID{};
     SG::WriteHandleKey< CaloCellContainer > m_caloCellKey{ this, "CaloCells", "DefaultCaloCellContainer", "The name of the output CaloCellContainer" };
 
     ServiceHandle<IAthRNGSvc> m_rndmGenSvc{this, "RandomSvc", "AthRNGSvc", ""};

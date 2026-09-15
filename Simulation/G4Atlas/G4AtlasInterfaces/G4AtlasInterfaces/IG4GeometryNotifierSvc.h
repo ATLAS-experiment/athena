@@ -20,10 +20,11 @@ class IG4GeometryNotifierSvc : virtual public IService {
   IG4GeometryNotifierSvc() {}
   virtual ~IG4GeometryNotifierSvc() {}
   /// Creates the InterfaceID and interfaceID() method
-  DeclareInterfaceID(IG4GeometryNotifierSvc, 1, 0);
+  DeclareInterfaceID(IG4GeometryNotifierSvc, 1, 1);
   virtual void SetCurrentDetectorName(const std::string&) = 0;
-
   virtual const std::string GetCurrentDetectorName() const = 0;
+  virtual void SetNamePrefixing(bool) = 0;
+  virtual bool GetNamePrefixing() const = 0;
 };
 
 #endif

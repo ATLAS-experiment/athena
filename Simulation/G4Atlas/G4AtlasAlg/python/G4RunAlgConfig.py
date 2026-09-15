@@ -33,17 +33,6 @@ def G4RunAlgCfg(flags, name="G4RunAlg", **kwargs):
     kwargs.setdefault("ExtraOutputs", SimHitContainerListCfg(flags) )
     kwargs.setdefault("ExtraInputs" , InputContainerListCfg(flags))
 
-    from SimulationConfig.SimEnums import LArParameterization
-    # Configure fast simulation
-    if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
-        # Set the path to the simplified calorimeter geometry for particle transport if provided
-        if flags.Sim.SimplifiedGeoPath:
-            kwargs.setdefault('SimplifiedGeoPath', flags.Sim.SimplifiedGeoPath)
-
-    # Set the path to the simplified calorimeter geometry for particle transport if provided
-    if flags.Sim.LArParameterization is LArParameterization.FastCaloSim and flags.Sim.SimplifiedGeoPath:
-        kwargs.setdefault("SimplifiedGeoPath", flags.Sim.SimplifiedGeoPath)
-
     if flags.Sim.FlagAbortedEvents:
         ## default false
         kwargs.setdefault("FlagAbortedEvents", flags.Sim.FlagAbortedEvents)

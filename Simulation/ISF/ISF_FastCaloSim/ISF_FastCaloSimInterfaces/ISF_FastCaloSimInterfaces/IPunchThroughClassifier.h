@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMINTERFACES_IPUNCHTHROUGHCLASSIFIER_H
@@ -11,7 +11,7 @@
 // ISF includes
 #include "ISF_Event/ISFParticle.h"
 
-#include "ISF_FastCaloSimEvent/TFCSSimulationState.h"
+#include "FastCaloSim/Core/TFCSSimulationState.h"
 
 
 namespace ISF {

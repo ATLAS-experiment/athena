@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 def fromRunArgs(runArgs):
 
@@ -103,11 +103,11 @@ def fromRunArgs(runArgs):
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     cfg.merge(PoolReadCfg(flags))
 
-    from ISF_FastCaloSimParametrization.ISF_FastCaloSimParametrizationConfig import ISF_HitAnalysisCfg
-    cfg.merge(ISF_HitAnalysisCfg(flags,
+    # Reuse the simulation job's FastCaloSim ntuple algorithm.
+    from G4FastSimulation.G4FastSimulationConfig import FastCaloSimParamHitAnalysisCfg
+    cfg.merge(FastCaloSimParamHitAnalysisCfg(flags,
                                  NTruthParticles=NTruthParticlesArg, saveAllBranches=saveAllBranchesArg,
                                  doG4Hits=doG4HitsArg, doClusterInfo=doClusterInfoArg, outputGeoFileName=outputGeoFileName))
-    # TODO! FCS config here
 
     # Post-include
     log.info('**** Processing postInclude')

@@ -5,6 +5,9 @@ atlas_subdir( AtlasGeant4 )
 
 find_package( AtlasGeant4Utilities )
 
+# Embed FastCaloSim here so the process uses one Geant4 instance.
+find_package( FastCaloSim )
+
 # Generations correspond to topologically sorted list:
 # - https://its.cern.ch/jira/secure/attachment/282935/topologically_sorted_package_generations.txt
 set( AtlasGeant4_TARGET_OBJECTS
@@ -161,18 +164,28 @@ endif()
 # ordered correctly with respect to objects.
 atlas_disable_as_needed()
 
+# Preserve the unreferenced ROOT dictionary in the static FastCaloSim archive.
+set( _fcsLink )
+foreach( _lib IN LISTS FASTCALOSIM_LIBRARIES )
+   if( _lib MATCHES "libFastCaloSim[^/]*\\.a$" )
+      list( APPEND _fcsLink "-Wl,--whole-archive,${_lib},--no-whole-archive" )
+   else()
+      list( APPEND _fcsLink "${_lib}" )
+   endif()
+endforeach()
+
 # Shared library that only tests should link to, composed of library OBJECTs
 atlas_add_library( AtlasGeant4Lib
                    ${AtlasGeant4_DUMMY_SOURCES}
                    SHARED
                    NO_PUBLIC_HEADERS
-                   LINK_LIBRARIES ${AtlasGeant4_TARGET_OBJECTS} )
+                   LINK_LIBRARIES ${_fcsLink} ${AtlasGeant4_TARGET_OBJECTS} )
 set_target_properties( AtlasGeant4Lib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 # Primary "big" component composed of all library/component OBJECT libs
 atlas_add_component( AtlasGeant4
                      ${AtlasGeant4_DUMMY_SOURCES}
-                     LINK_LIBRARIES "-Wl,--exclude-libs,ALL" ${AtlasGeant4Component_TARGET_OBJECTS} ${AtlasGeant4_TARGET_OBJECTS} )
+                     LINK_LIBRARIES "-Wl,--exclude-libs,ALL" ${_fcsLink} ${AtlasGeant4Component_TARGET_OBJECTS} ${AtlasGeant4_TARGET_OBJECTS} )
 set_target_properties( AtlasGeant4 PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 if( ATLAS_GEANT4_USE_LTO AND CMAKE_COMPILER_IS_GNUCXX )
@@ -188,3 +201,12 @@ atlas_configure_g4_targets( TARGETS AtlasGeant4 AtlasGeant4Lib )
 atlas_install_generic( cmake/AtlasGeant4UtilitiesConfig.cmake
    DESTINATION ${CMAKE_INSTALL_CMAKEDIR} )
 
+# ROOT looks for the embedded dictionary's PCM beside the loading library.
+if( FASTCALOSIM_PCM_FILE )
+   foreach( _fcsPcmTarget AtlasGeant4Lib AtlasGeant4 )
+      add_custom_command( TARGET ${_fcsPcmTarget} POST_BUILD
+         COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                 "${FASTCALOSIM_PCM_FILE}" "$<TARGET_FILE_DIR:${_fcsPcmTarget}>"
+         COMMENT "Copying FastCaloSim ROOT dictionary pcm next to ${_fcsPcmTarget}" )
+   endforeach()
+endif()

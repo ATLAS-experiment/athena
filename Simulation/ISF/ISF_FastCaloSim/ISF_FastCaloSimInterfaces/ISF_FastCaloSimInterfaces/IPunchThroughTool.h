@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMINTERFACES_IPUNCHTHROUGHTOOL_H
@@ -12,7 +12,7 @@
 #include "ISF_Event/ISFParticle.h"
 #include "ISF_Event/ISFParticleContainer.h"
 
-#include "ISF_FastCaloSimEvent/TFCSSimulationState.h"
+#include "FastCaloSim/Core/TFCSSimulationState.h"
 
 namespace Trk{
   class Track;

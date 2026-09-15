@@ -10,6 +10,7 @@
 + AtlasTest/CITest
 + AtlasTest/GoogleTestTools
 + AtlasTest/TestTools
++ Calorimeter/CaloAlignment/CaloAlignmentAlgs
 + Calorimeter/CaloCnv/CaloIdCnv
 + Calorimeter/CaloCnv/CaloSimEventAthenaPool
 + Calorimeter/CaloCnv/CaloSimEventTPCnv
@@ -19,9 +20,11 @@
 + Calorimeter/CaloDetDescr
 + Calorimeter/CaloDetDescrUtils
 + Calorimeter/CaloDmDetDescr
++ Calorimeter/CaloEvent
 + Calorimeter/CaloG4Sim
 + Calorimeter/CaloGeoHelpers
 + Calorimeter/CaloIdentifier
++ Calorimeter/CaloInterface
 + Calorimeter/CaloSimEvent
 + Control/AthAllocators
 + Control/AthContainers
@@ -127,6 +130,8 @@
 + Event/EventKernel
 + Event/EventPrimitives
 + Event/EventTPCnv
++ Event/FourMom
++ Event/NavFourMom
 + Event/PyDumper
 + Event/xAOD/xAODBase
 + Event/xAOD/xAODCaloEvent
@@ -210,6 +215,8 @@
 + InnerDetector/InDetSimUtils/TRT_TR_Process
 + LArCalorimeter/LArCOOLConditions
 + LArCalorimeter/LArCabling
++ LArCalorimeter/LArCnv/LArCondAthenaPool
++ LArCalorimeter/LArCnv/LArCondTPCnv
 + LArCalorimeter/LArCnv/LArIdCnv
 + LArCalorimeter/LArCnv/LArSimEventAthenaPool
 + LArCalorimeter/LArCnv/LArSimEventTPCnv
@@ -235,6 +242,8 @@
 + LArCalorimeter/LArGeoModel/LArGeoFcal
 + LArCalorimeter/LArGeoModel/LArGeoHec
 + LArCalorimeter/LArGeoModel/LArGeoRAL
++ LArCalorimeter/LArRawConditions
++ LArCalorimeter/LArRecUtils
 + LArCalorimeter/LArGeoModel/LArGeoTBBarrel
 + LArCalorimeter/LArGeoModel/LArHV
 + LArCalorimeter/LArGeoModel/LArReadoutGeometry
@@ -277,6 +286,8 @@
 + Simulation/Barcode/BarcodeServices
 + Simulation/BeamEffects
 + Simulation/AtlasGeant4
++ Simulation/FastShower/FastCaloSim
++ Simulation/FastShower/FastCaloSimHit
 + Simulation/G4Atlas/G4AtlasAlg
 + Simulation/G4Atlas/G4AtlasInterfaces
 + Simulation/G4Atlas/G4AtlasServices
@@ -296,6 +307,7 @@
 + Simulation/G4Sim/TrackRecord
 + Simulation/G4SimCnv/G4SimAthenaPOOL
 + Simulation/G4SimCnv/G4SimTPCnv
++ Simulation/G4Utilities/FCALGeoPlugin
 + Simulation/G4Utilities/G4DebuggingTools
 + Simulation/G4Utilities/G4FastSimulation
 + Simulation/G4Utilities/G4PhysicsLists
@@ -337,6 +349,7 @@
 + TileCalorimeter/TileCalib/TileCalibBlobObjs
 + TileCalorimeter/TileConditions
 + TileCalorimeter/TileDetDescr
++ TileCalorimeter/TileEvent
 + TileCalorimeter/TileG4/TileAncillary/DeadMaterial
 + TileCalorimeter/TileG4/TileAncillary/MinBiasScintillator
 + TileCalorimeter/TileG4/TileG4Interfaces

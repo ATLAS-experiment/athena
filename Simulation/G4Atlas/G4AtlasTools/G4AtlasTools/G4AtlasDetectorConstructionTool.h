@@ -18,8 +18,8 @@
 #include "G4AtlasInterfaces/IFastSimulationMasterTool.h"
 #include "G4AtlasInterfaces/IFieldManagerTool.h"
 #include "G4AtlasInterfaces/IG4GeometryConfigurationTool.h"
+#include "G4AtlasInterfaces/IG4GeometryNotifierSvc.h"
 #include "G4AtlasInterfaces/ISensitiveDetectorMasterTool.h"
-#include "G4AtlasInterfaces/IG4CaloTransportTool.h"
 
 // Geant4 headers
 #include "G4VUserDetectorConstruction.hh"
@@ -77,9 +77,14 @@ class G4AtlasDetectorConstructionTool final : public extends<AthAlgTool, IDetect
   PublicToolHandle<ISensitiveDetectorMasterTool> m_senDetTool{this, "SenDetMasterTool", "SensitiveDetectorMasterTool", ""};
   PublicToolHandle<IFastSimulationMasterTool> m_fastSimTool{this, "FastSimMasterTool", "FastSimulationMasterTool", ""};
   ToolHandleArray<IFieldManagerTool> m_fieldManagers{this, "FieldManagers", {}, "field managers used"};
-  PublicToolHandle<IG4CaloTransportTool> m_G4CaloTransportTool{this, "G4CaloTransportTool", "", "Tool handle of the Geant4 transport tool for the FastCaloSim in Geant4 implementation"};
+  ServiceHandle<IG4GeometryNotifierSvc> m_notifierSvc{
+      this, "GeometryNotifierSvc", "G4GeometryNotifierSvc",
+      "Service which names detector-owned Geant4 volumes"};
   Gaudi::Property<bool> m_activateParallelWorlds{this, "ActivateParallelWorlds", false, "Toggle on/off the G4 parallel geometry system"};
+  Gaudi::Property<std::string> m_simplifiedGeoPath{this, "SimplifiedGeoPath", "", "Path to the simplified geometry file used to transport particles (empty to disable)"};
   std::vector<std::string> m_parallelWorldNames{};
+  /// Resolved location of m_simplifiedGeoPath, filled in initialize()
+  std::string m_simplifiedGeoFile{};
 
 };
 

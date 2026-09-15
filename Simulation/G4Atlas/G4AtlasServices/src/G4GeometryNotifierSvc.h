@@ -25,9 +25,12 @@ public:
   //that the geometry building will be done in a single thread.
   void SetCurrentDetectorName(const std::string& s) override final {m_currentDetectorName=s;}
   const std::string GetCurrentDetectorName() const override final {return m_currentDetectorName;}
+  void SetNamePrefixing(bool value) override final {m_namePrefixing = value;}
+  bool GetNamePrefixing() const override final {return m_namePrefixing;}
 
 private:
   std::string m_currentDetectorName{""};
+  bool m_namePrefixing{true};
 
   Gaudi::Property<bool> m_activateLVNotifier{this, "ActivateLVNotifier", true, "Toggle on/off the G4 LV notifier"};
   Gaudi::Property<bool> m_activatePVNotifier{this, "ActivatePVNotifier", false, "Toggle on/off the G4 PV notifier"};

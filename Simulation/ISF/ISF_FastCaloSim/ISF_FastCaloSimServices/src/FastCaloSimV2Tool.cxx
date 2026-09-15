@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header include
@@ -7,11 +7,21 @@
 
 
 // FastCaloSim includes
-#include "ISF_FastCaloSimEvent/TFCSParametrizationBase.h"
-#include "ISF_FastCaloSimEvent/TFCSSimulationState.h"
-#include "ISF_FastCaloSimEvent/TFCSTruthState.h"
-#include "ISF_FastCaloSimEvent/TFCSExtrapolationState.h"
-#include "ISF_FastCaloSimParametrization/CaloGeometryFromCaloDDM.h"
+#include "FastCaloSim/Core/TFCSParametrizationBase.h"
+#include "FastCaloSim/Core/TFCSSimulationState.h"
+#include "FastCaloSim/Core/TFCSTruthState.h"
+#include "FastCaloSim/Core/TFCSExtrapolationState.h"
+#include "ISF_FastCaloSimEvent/FastCaloSim_CaloCell_ID.h"
+
+// Geant4 track construction
+#include "G4ParticleTable.hh"
+#include "G4ParticleDefinition.hh"
+#include "G4DynamicParticle.hh"
+#include "G4Track.hh"
+#include "G4FieldTrack.hh"
+#include "G4ThreeVector.hh"
+#include <memory>
+#include <vector>
 
 #include "AthenaKernel/RNGWrapper.h"
 
@@ -42,6 +52,21 @@
 using std::abs;
 using std::atan2;
 
+namespace {
+  /// Build a Geant4 track from a FastCaloSim truth state.
+  std::unique_ptr<G4Track> makeG4Track(const TFCSTruthState& truth) {
+    G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
+    if (!particleTable) return nullptr;
+    G4ParticleDefinition* particle = particleTable->FindParticle(truth.pdgid());
+    if (!particle) return nullptr;
+    const G4ThreeVector momentum(truth.Px(), truth.Py(), truth.Pz());
+    auto* dynamicParticle = new G4DynamicParticle(particle, momentum);
+    const G4ThreeVector position(truth.vertex().X(), truth.vertex().Y(),
+                                 truth.vertex().Z());
+    return std::make_unique<G4Track>(dynamicParticle, /*time=*/0.0, position);
+  }
+}
+
 /** Constructor **/
 ISF::FastCaloSimV2Tool::FastCaloSimV2Tool( const std::string& type, const std::string& name,  const IInterface* parent)
   : BaseSimulatorTool(type, name, parent)
@@ -59,10 +84,6 @@ StatusCode ISF::FastCaloSimV2Tool::initialize()
 
   ATH_CHECK(m_rndmGenSvc.retrieve());
 
-  ATH_CHECK(m_paramSvc.retrieve());
-
-  // m_paramSvc->setLevel(MSG::VERBOSE);
-
   m_doPunchThrough = not m_punchThroughTool.empty();
   if (m_doPunchThrough) {
     ATH_CHECK(m_punchThroughTool.retrieve());
@@ -70,8 +91,12 @@ StatusCode ISF::FastCaloSimV2Tool::initialize()
 
   ATH_CHECK(m_truthRecordSvc.retrieve());
 
-  // Get FastCaloSimCaloExtrapolation
-  ATH_CHECK(m_FastCaloSimCaloExtrapolation.retrieve());
+  ATH_CHECK(m_FastCaloSimParametrizationTool.retrieve());
+
+  // Workers cannot create the shared transport world.
+  ATH_CHECK(m_FastCaloSimParametrizationTool->initializeTransportGeometry());
+
+  ATH_CHECK( detStore()->retrieve(m_caloCellID, "CaloCell_ID") );
 
   // Output data handle
   ATH_CHECK( m_caloCellKey.initialize() );
@@ -190,8 +215,16 @@ StatusCode ISF::FastCaloSimV2Tool::simulate(const EventContext& ctx, ISF::ISFPar
     ATH_MSG_VERBOSE("Found anti-proton/neutron, setting Ekin offset in TFCSTruthState.");
   }
 
+  // Use the same transport and extrapolation as the Geant4 fast-sim model.
+  std::unique_ptr<G4Track> g4track = makeG4Track(truth);
+  if (!g4track) {
+    ATH_MSG_WARNING("Could not build G4Track for pdgid " << isfp.pdgCode()
+                    << ", skipping FastCaloSim simulation for this particle");
+    return StatusCode::SUCCESS;
+  }
   TFCSExtrapolationState extrapol;
-  m_FastCaloSimCaloExtrapolation->extrapolate(extrapol, &truth);
+  const std::vector<G4FieldTrack> caloSteps = m_FastCaloSimParametrizationTool->transport(*g4track);
+  m_FastCaloSimParametrizationTool->extrapolate(extrapol, &truth, caloSteps);
 
   ATH_MSG_DEBUG(" particle: " << isfp.pdgCode() << " Ekin: " << isfp.ekin() << " position eta: " << particle_position.eta() << " direction eta: " << particle_direction.eta() << " position phi: " << particle_position.phi() << " direction phi: " << particle_direction.phi());
 
@@ -203,16 +236,26 @@ StatusCode ISF::FastCaloSimV2Tool::simulate(const EventContext& ctx, ISF::ISFPar
     // ATH_MSG_WARNING("Event number for this event: " << ctx.evt());
     simulstate.setAuxInfo<int>("EventNr"_FCShash, ctx.evt() );
     
-    ATH_CHECK(m_paramSvc->simulate(simulstate, &truth, &extrapol));
+    if (m_FastCaloSimParametrizationTool->simulate(simulstate, &truth, &extrapol) != FCSSuccess) {
+      ATH_MSG_ERROR("FastCaloSim simulation call failed");
+      return StatusCode::FAILURE;
+    }
 
     ATH_MSG_DEBUG("Energy returned: " << simulstate.E());
     ATH_MSG_VERBOSE("Energy fraction for layer: ");
     for (int s = 0; s < CaloCell_ID_FCS::MaxSample; s++)
     ATH_MSG_VERBOSE(" Sampling " << s << " energy " << simulstate.E(s));
 
-    //Now deposit all cell energies into the CaloCellContainer
+    // FastCaloSim uses compact identifiers, not calorimeter cell hashes.
     for(const auto& iter : simulstate.cells()) {
-      CaloCell* theCell = (CaloCell*)m_theContainerPtr->findCell(iter.first->calo_hash());
+      const IdentifierHash cellHash =
+        m_caloCellID->calo_cell_hash(Identifier(iter.first));
+      CaloCell* theCell =
+        static_cast<CaloCell*>(m_theContainerPtr->findCell(cellHash));
+      if (!theCell) {
+        ATH_MSG_WARNING("Skipping simulated energy deposit in unknown cell id " << iter.first);
+        continue;
+      }
       theCell->addEnergy(iter.second);
     }
 
