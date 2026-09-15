@@ -149,15 +149,17 @@ TrackParticleClusterAssociationAlg::associatedClusters(const Trk::CaloExtension 
   float eta = pars->position().eta();
   float phi = pars->position().phi();
 
-  double uncertEta = 0.;
-  double uncertPhi = 0.;
+  double sigmaEtaEta = 0.;
+  double sigmaPhiPhi = 0.;
+  double rhosigmaPhiEta = 0.;
   if(pars->covariance()) {
-    uncertEta = -2.*sin(pars->position().theta()) / (cos(2.*pars->position().theta())-1.) * sqrt((*pars->covariance())(Trk::theta,Trk::theta));
-    uncertPhi = sqrt((*pars->covariance())(Trk::phi,Trk::phi));
+    sigmaEtaEta = 1.0/(sin(pars->position().theta())*sin(pars->position().theta())) * (*pars->covariance())(Trk::theta,Trk::theta);
+    sigmaPhiPhi = (*pars->covariance())(Trk::phi,Trk::phi);
+    rhosigmaPhiEta = 1.0/(sin(pars->position().theta()))*(*pars->covariance())(Trk::theta,Trk::phi);
   } 
-  double uncertExtrp = uncertEta*uncertEta + uncertPhi*uncertPhi;
+  double uncertExtrp = sigmaEtaEta + sigmaPhiPhi + 2*rhosigmaPhiEta ;
 
-  float dr2Cut0 = m_dr*m_dr;
+  const float dr2Cut0 = m_dr*m_dr;
   // to access the pre-calculated width :
   static const SG::AuxElement::ConstAccessor<float> sig_acc("sigmaWidth");
 
@@ -187,7 +189,7 @@ TrackParticleClusterAssociationAlg::associatedClusters(const Trk::CaloExtension 
 	continue;
       }
       
-      dr2Cut = (sigmaWidth+uncertEta)*(sigmaWidth+uncertEta)+(sigmaWidth+uncertPhi)*(sigmaWidth+uncertPhi);   
+      dr2Cut = uncertClus + uncertExtrp;   
     }
     if( dr2 < dr2Cut ) clusters.push_back( cl );    
   }
