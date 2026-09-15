@@ -127,7 +127,6 @@ int DiTauMassTools::getLFVMode( const xAOD::IParticle* p1, const xAOD::IParticle
     }
   }
 
-  if(!p) return -1;//return CP::CorrectionCode::Error;
 
   int LFVMode = -1;
   if(p->type() == xAOD::Type::Muon) {
