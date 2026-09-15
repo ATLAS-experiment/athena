@@ -220,7 +220,7 @@ CP::CorrectionCode CommonEfficiencyTool::getEfficiencyScaleFactor(columnar::TauJ
   // get uncertainties summed in quadrature
   double dTotalSystematic2 = 0.;
   double dDirection = 0.;
-  for (auto syst : *m_sSystematicSet)
+  for (const auto &  syst : *m_sSystematicSet)
   {
     // check if systematic is available
     auto it = m_mSystematicsHistNames.find(syst.basename());
