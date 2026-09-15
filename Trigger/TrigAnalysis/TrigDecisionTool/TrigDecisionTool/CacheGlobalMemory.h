@@ -102,6 +102,13 @@ namespace Trig {
     const TrigConf::HLTChain* config_chain(const std::string& name) const;   //!< HLT config chain from given name
 
     const HLT::TrigNavStructure* navigation() const {   //!< gives back pointer to navigation object (unpacking if necessary)
+      /*
+        Assumed intentional (cid 24125)
+        Accessing this->m_navigationUnpacked without holding lock 
+        Trig::CacheGlobalMemory.m_cgmMutex. Elsewhere, 
+        Trig::CacheGlobalMemory.m_navigationUnpacked is written to with 
+        CacheGlobalMemory.m_cgmMutex held 1 out of 2 times
+      */
       //coverity[MISSING_LOCK]
       if(!m_navigationUnpacked){
         // CGM is slot-specific and unpackNavigation is locked
