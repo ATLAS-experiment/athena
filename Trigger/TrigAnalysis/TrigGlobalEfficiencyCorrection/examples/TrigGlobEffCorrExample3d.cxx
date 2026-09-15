@@ -356,8 +356,10 @@ int main(int argc, char* argv[])
             break;
         }
     }
+    if (nSuitableEvents > 0){
     Info(MSGSOURCE, "Average scale factor: %f (over %ld events)",
             sumW / nSuitableEvents, long(nSuitableEvents));
+    }
     #ifndef XAOD_STANDALONE
 		ANA_CHECK(app->finalize());
     #endif
