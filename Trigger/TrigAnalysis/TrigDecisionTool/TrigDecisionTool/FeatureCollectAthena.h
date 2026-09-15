@@ -88,7 +88,7 @@ namespace Trig {
       else {
         const TrigPassBits* bits{nullptr};
         if ( condition == TrigDefs::Physics ) {// only passing objects
-          bits = getBits(source->size(), te, label , navigation);
+          bits = getBits(source->size(), te, navigation);
         }
         if ( bits ) { // the actual filtering
           auto destination = new ConstDataVector<T>(SG::VIEW_ELEMENTS);
@@ -121,7 +121,7 @@ namespace Trig {
       if constexpr(flatten) {
         const TrigPassBits* bits{nullptr};
         if ( condition == TrigDefs::Physics ) {// only passing objects
-          bits = getBits(source->size(), te, label , navigation);
+          bits = getBits(source->size(), te, navigation);
         }
 
         for(const T* obj : *source) {
