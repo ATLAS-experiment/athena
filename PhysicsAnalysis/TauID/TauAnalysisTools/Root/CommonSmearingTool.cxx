@@ -205,7 +205,9 @@ CP::CorrectionCode CommonSmearingTool::applyCorrection( xAOD::TauJet& xTau ) con
     {
       // check if systematic is available
       auto it = m_mSystematicsHistNames.find(syst.basename());
-
+      if (it == m_mSystematicsHistNames)[[unlikely]]{
+        continue
+      }
       // get uncertainty value
       double dUncertaintySyst = 0.;
       tmpCorrectionCode = getValue(it->second+sProng,
