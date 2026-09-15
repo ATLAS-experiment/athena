@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: CaloClusterAccessors_v1.cxx 794609 2017-01-30 15:51:25Z menke $
@@ -143,6 +143,9 @@ namespace xAOD {
        DEFINE_ACCESSOR( HAD_WEIGHT_DigiHSTruth       , float );
        DEFINE_ACCESSOR( OOC_WEIGHT_DigiHSTruth       , float );
        DEFINE_ACCESSOR( DM_WEIGHT_DigiHSTruth        , float );
+       DEFINE_ACCESSOR( MASS_DigiHSTruth             , float );
+       DEFINE_ACCESSOR( PTD_DigiHSTruth              , float );
+       DEFINE_ACCESSOR( SECOND_TIME_DigiHSTruth      , float );
 
       default:
          std::cerr << "xAOD::CaloCluster_v1 ERROR Unknown scalar moment ("
