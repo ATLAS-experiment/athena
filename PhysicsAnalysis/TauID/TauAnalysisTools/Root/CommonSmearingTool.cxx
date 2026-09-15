@@ -79,6 +79,7 @@ CommonSmearingTool::CommonSmearingTool(const std::string& sName)
   , m_bIsConfigured(false)
   , m_tTauCombinedTES("TauCombinedTES", this)
   , m_eCheckTruth(TauAnalysisTools::Unknown)
+  , m_accessors{std::make_unique<Accessors>(*this)}		
 {
 }
 
@@ -130,6 +131,8 @@ StatusCode CommonSmearingTool::initialize()
     ATH_CHECK(m_tTauCombinedTES.initialize());
   }
 
+  ATH_CHECK (initializeColumns());
+
   return StatusCode::SUCCESS;
 }
 
@@ -157,28 +160,34 @@ CP::CorrectionCode CommonSmearingTool::applyCorrection( xAOD::TauJet& xTau ) con
     static const SG::ConstAccessor<float> accPtTauEnergyScale ("ptTauEnergyScale");
     if(accPtTauEnergyScale.isAvailable(xTau)) {
       const auto combinedTEStool = dynamic_cast<const TauCombinedTES*>(m_tTauCombinedTES.get());
-      compatibility = combinedTEStool->getTESCompatibility(xTau);	
+      compatibility = combinedTEStool->getTESCompatibility(xTau);
     }
     static const SG::Accessor<char> accTESCompatibility("TESCompatibility");
     accTESCompatibility(xTau) = char(compatibility);
   }
+
+  return applyCorrection(columnar::TauJetId(xTau));  
+}
+
+CP::CorrectionCode CommonSmearingTool::applyCorrection( columnar::TauJetId tau ) const
+{
 
   // step out here if we run on data
   if (m_bIsData)
     return CP::CorrectionCode::Ok;
 
   // check which true state is requested
-  if (!m_bSkipTruthMatchCheck and getTruthParticleType(xTau) != m_eCheckTruth) {
+  if (!m_bSkipTruthMatchCheck and getTruthParticleType(tau.getXAODObject()) != m_eCheckTruth) {
     return CP::CorrectionCode::Ok;
   }
 
   // skip taus which are not 1 or 3 prong
-  if( xTau.nTracks() != 1 && xTau.nTracks() != 3) {
+  if( tau.getXAODObject().nTracks() != 1 && tau.getXAODObject().nTracks() != 3) {
     return CP::CorrectionCode::Ok;  
   } 
 
   // get prong extension for histogram name
-  std::string sProng = ConvertProngToString(xTau.nTracks());
+  std::string sProng = ConvertProngToString(tau.getXAODObject().nTracks());
 
   double dCorrection = 1.;
   CP::CorrectionCode tmpCorrectionCode;
@@ -186,7 +195,7 @@ CP::CorrectionCode CommonSmearingTool::applyCorrection( xAOD::TauJet& xTau ) con
   {
     // get standard scale factor
     tmpCorrectionCode = getValue("sf"+sProng,
-				 xTau,
+				 tau.getXAODObject(),
 				 dCorrection);
     // return correction code if histogram is not available
     if (tmpCorrectionCode != CP::CorrectionCode::Ok)
@@ -207,7 +216,7 @@ CP::CorrectionCode CommonSmearingTool::applyCorrection( xAOD::TauJet& xTau ) con
       // get uncertainty value
       double dUncertaintySyst = 0.;
       tmpCorrectionCode = getValue(it->second+sProng,
-                                   xTau,
+                                   tau.getXAODObject(),
                                    dUncertaintySyst);
       // return correction code if histogram is not available
       if (tmpCorrectionCode != CP::CorrectionCode::Ok)
@@ -233,8 +242,8 @@ CP::CorrectionCode CommonSmearingTool::applyCorrection( xAOD::TauJet& xTau ) con
   // finally apply correction
   // in-situ TES is applied w.r.t. ptFinalCalib, use explicit calibration for pt to avoid irreproducibility upon re-calibration (PHYSLITE)
   // not required for eta/phi/m that we don't correct (only ptFinalCalib and etaFinalCalib are stored in DAODs)
-  xTau.setP4( xTau.ptFinalCalib() * dCorrection,
-              xTau.eta(), xTau.phi(), xTau.m());
+  const_cast<xAOD::TauJet&>(tau.getXAODObject()).setP4( tau.getXAODObject().ptFinalCalib() * dCorrection,
+              tau.getXAODObject().eta(), tau.getXAODObject().phi(), tau.getXAODObject().m());
   return CP::CorrectionCode::Ok;
 }
 
@@ -528,3 +537,23 @@ CP::CorrectionCode CommonSmearingTool::getValue(const std::string& sHistName,
   }
   return CP::CorrectionCode::Ok;
 }
+
+
+void CommonSmearingTool::callSingleEvent (columnar::TauJetRange taus) const
+{
+  for (auto tau : taus)
+  {
+    if (applyCorrection(tau) != CP::CorrectionCode::Ok)
+      throw std::runtime_error ("CommonSmearingTool::callEvents: apply failed");
+  }
+}
+
+void CommonSmearingTool::callEvents (columnar::EventContextRange events) const
+{
+  const Accessors& acc = *m_accessors;
+  for (auto event : events)
+  {
+    callSingleEvent (acc.m_taus(event));
+  }
+}
+

@@ -35,12 +35,20 @@
 // tauRecTools include(s)
 #include "tauRecTools/ITauToolBase.h"
 
+#include <ColumnarEventInfo/EventInfoDef.h>
+#include <ColumnarCore/ColumnAccessor.h>
+#include <ColumnarCore/LinkColumn.h>
+#include <ColumnarCore/ObjectColumn.h>
+#include <ColumnarCore/VectorColumn.h>
+#include <ColumnarTau/TauJetDef.h>
+
 namespace TauAnalysisTools
 {
 
 class CommonSmearingTool
   : public virtual ITauSmearingTool
   , public asg::AsgMetadataTool
+  , public columnar::ColumnarTool<>	
 {
   /// Create a proper constructor for Athena
   ASG_TOOL_CLASS( CommonSmearingTool, TauAnalysisTools::ITauSmearingTool )
@@ -51,30 +59,32 @@ public:
 
   ~CommonSmearingTool();
 
-  virtual StatusCode initialize();
+  virtual StatusCode initialize() override;
 
   // CommonSmearingTool pure virtual public functionality
   //__________________________________________________________________________
 
   /// Apply the correction on a modifyable object
-  virtual CP::CorrectionCode applyCorrection( xAOD::TauJet& xTau ) const;
+  virtual CP::CorrectionCode applyCorrection( xAOD::TauJet& xTau ) const override;
+ 
+  CP::CorrectionCode applyCorrection( columnar::TauJetId tau ) const;
 
   /// Create a corrected copy from a constant tau
   virtual CP::CorrectionCode correctedCopy( const xAOD::TauJet& xTau,
-      xAOD::TauJet*& xTauCopy) const;
+      xAOD::TauJet*& xTauCopy) const override;
 
   /// returns: whether this tool is affected by the given systematics
-  virtual bool isAffectedBySystematic( const CP::SystematicVariation& systematic ) const;
+  virtual bool isAffectedBySystematic( const CP::SystematicVariation& systematic ) const override;
 
   /// returns: the list of all systematics this tool can be affected by
-  virtual CP::SystematicSet affectingSystematics() const;
+  virtual CP::SystematicSet affectingSystematics() const override;
 
   /// returns: the list of all systematics this tool recommends to use
-  virtual CP::SystematicSet recommendedSystematics() const;
+  virtual CP::SystematicSet recommendedSystematics() const override;
 
   /// configure this tool for the given list of systematic variations.  any
   /// requested systematics that are not affecting this tool will be silently ignored
-  virtual StatusCode applySystematicVariation ( const CP::SystematicSet& sSystematicSet);
+  virtual StatusCode applySystematicVariation ( const CP::SystematicSet& sSystematicSet) override;
 
 protected:
 
@@ -119,7 +129,27 @@ private:
   CxxUtils::CachedValue<bool> m_bIsTESCompatibilityCheckAvailable; 
 
   // Execute at each event
-  virtual StatusCode beginEvent();
+  virtual StatusCode beginEvent() override;
+
+public:
+
+  struct Accessors : public columnar::ColumnarTool<>
+  {
+    Accessors(CommonSmearingTool& tool) : columnar::ColumnarTool<>(&tool) {}
+
+    columnar::EventInfoAccessor<columnar::ObjectColumn> m_eventInfo {*this, "EventInfo", {.addMTDependency=true}};
+    columnar::EventInfoAccessor<uint32_t> randomrunnumber;
+
+    columnar::TauJetAccessor<columnar::ObjectColumn> m_taus {*this, "TauJets"};
+    //columnar::TauJetAccessor<float> m_eta{*this,"eta"};
+    //columnar::TauJetAccessor<float> m_pt{*this,"pt"};
+    columnar::TauJetDecorator<float> m_sfDec{*this,"sfOut"};
+    columnar::TauJetDecorator<char> m_validDec{*this,"validOut"};
+  };
+  std::unique_ptr<Accessors> m_accessors;
+
+  void callSingleEvent (columnar::TauJetRange taus) const;
+  void callEvents (columnar::EventContextRange events) const override;
 
 };
 } // namespace TauAnalysisTools
