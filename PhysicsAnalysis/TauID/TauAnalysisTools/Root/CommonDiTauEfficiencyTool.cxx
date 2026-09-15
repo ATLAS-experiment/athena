@@ -423,8 +423,9 @@ CP::CorrectionCode CommonDiTauEfficiencyTool::getValue(const std::string& sHistN
   {
     ATH_MSG_ERROR("Object with name "<<sHistName<<" was not found in input file.");
     ATH_MSG_DEBUG("Content of input file");
-    for (auto eEntry : mSF)
+    for (const auto & eEntry : mSF){
       ATH_MSG_DEBUG("  Entry: "<<eEntry.first);
+    }
     return CP::CorrectionCode::Error;
   }
 
