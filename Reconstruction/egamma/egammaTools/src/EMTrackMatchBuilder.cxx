@@ -18,7 +18,6 @@
 #include "egammaUtils/CandidateMatchHelpers.h"
 
 #include "GaudiKernel/EventContext.h"
-#include "SGTools/CurrentEventStore.h"
 #include "StoreGate/ReadHandle.h"
 
 
