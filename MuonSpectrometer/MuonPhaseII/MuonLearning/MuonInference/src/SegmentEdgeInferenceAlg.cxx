@@ -272,25 +272,7 @@ StatusCode SegmentEdgeInferenceAlg::execute(const EventContext& ctx) const {
   xAOD::ContainerDecorator<xAOD::MuonSegmentContainer, std::vector<unsigned>>
       decor{m_pairGateDecorKey, ctx};
 
-  if (!m_filteredSegmentKey.empty()) {
-    auto connectedSegments =
-        std::make_unique<ConstDataVector<xAOD::MuonSegmentContainer>>(
-            SG::VIEW_ELEMENTS);
-    connectedSegments->reserve(graph.nNodes);
-    for (std::size_t node = 0; node < graph.nNodes; ++node) {
-      if (!activeNode[node] || !graph.segments[node]) continue;
-      connectedSegments->push_back(graph.segments[node]);
-    }
-
-    const std::size_t nConnectedSegments = connectedSegments->size();
-    SG::WriteHandle<ConstDataVector<xAOD::MuonSegmentContainer>> connectedHandle{
-        m_filteredSegmentKey, ctx};
-    ATH_CHECK(connectedHandle.record(std::move(connectedSegments)));
-    ATH_MSG_DEBUG("Event " << ctx.eventID().event_number()
-                  << ": wrote " << nConnectedSegments
-                  << " ML-connected segment(s) to '"
-                  << m_filteredSegmentKey.key() << "'");
-  }
+  std::vector<bool> keptNode(graph.nNodes, false);
 
   std::size_t topologyNodes = 0;
   std::size_t retainedNodes = 0;
@@ -377,10 +359,31 @@ StatusCode SegmentEdgeInferenceAlg::execute(const EventContext& ctx) const {
       const bool isAnchor = Acts::rangeContainsValue(rankedNodes, node);
       decor(*graph.segments[node]) = {
           componentId, static_cast<unsigned int>(isAnchor)};
+      keptNode[node] = true;
     }
     retainedNodes += retained.size();
     anchors += rankedNodes.size();
     ++componentsKept;
+  }
+
+  if (!m_filteredSegmentKey.empty()) {
+    auto connectedSegments =
+        std::make_unique<ConstDataVector<xAOD::MuonSegmentContainer>>(
+            SG::VIEW_ELEMENTS);
+    connectedSegments->reserve(graph.nNodes);
+    for (std::size_t node = 0; node < graph.nNodes; ++node) {
+      if (!keptNode[node] || !graph.segments[node]) continue;
+      connectedSegments->push_back(graph.segments[node]);
+    }
+
+    const std::size_t nConnectedSegments = connectedSegments->size();
+    SG::WriteHandle<ConstDataVector<xAOD::MuonSegmentContainer>> connectedHandle{
+        m_filteredSegmentKey, ctx};
+    ATH_CHECK(connectedHandle.record(std::move(connectedSegments)));
+    ATH_MSG_DEBUG("Event " << ctx.eventID().event_number()
+                  << ": wrote " << nConnectedSegments
+                  << " ML-connected segment(s) to '"
+                  << m_filteredSegmentKey.key() << "'");
   }
 
   ATH_MSG_DEBUG("Event " << ctx.eventID().event_number()
