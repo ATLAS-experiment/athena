@@ -366,21 +366,29 @@ def ActsStripGbtsSeedingToolCfg(flags,
     return acc
 
 
+def ActsGnnPipelineToolCfg(flags,
+                           name: str = "GnnPipelineTool",
+                           **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault('moduleMapPath', flags.Acts.GNN.ModuleMapPath)
+    kwargs.setdefault('gnnPath', flags.Acts.GNN.ModelPath)
+    kwargs.setdefault('numTrtContexts', flags.Acts.GNN.NumTrtContexts)
+    kwargs.setdefault('maxGpuInstances', flags.Acts.GNN.MaxGpuInstances)
+    kwargs.setdefault('edgeCut', flags.Acts.GNN.EdgeCut)
+    kwargs.setdefault('minCandidateMeasurements', flags.Acts.GNN.MinCandidateMeasurements)
+
+    acc.setPrivateTools(CompFactory.ActsTrk.GnnPipelineTool(name, **kwargs))
+    return acc
+
 def ActsGnnSeedingToolCfg(flags,
                           name: str = "ActsGnnSeedingTool",
                           **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     if 'GnnPipelineTool' not in kwargs:
-        kwargs.setdefault('GnnPipelineTool', CompFactory.ActsTrk.GnnPipelineTool(
-            "GnnSeedingPipeline",
-            moduleMapPath=flags.Acts.GNN.ModuleMapPath,
-            gnnPath=flags.Acts.GNN.ModelPath,
-            numTrtContexts=flags.Acts.GNN.NumTrtContexts,
-            maxGpuInstances=flags.Acts.GNN.MaxGpuInstances,
-            edgeCut=flags.Acts.GNN.EdgeCut,
-            minCandidateMeasurements=flags.Acts.GNN.MinCandidateMeasurements,
-        ))
+        kwargs.setdefault('GnnPipelineTool', acc.popToolsAndMerge(
+            ActsGnnPipelineToolCfg(flags, name="GnnSeedingPipeline")))
 
     acc.setPrivateTools(CompFactory.ActsTrk.GnnSeedingTool(name, **kwargs))
     return acc

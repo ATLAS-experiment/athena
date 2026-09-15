@@ -338,15 +338,9 @@ def ActsTrackFindingGNNCfg(flags, **kwargs) -> ComponentAccumulator:
 
     # The GNN inference (graph construction, edge classification, track building)
     if 'GnnPipelineTool' not in kwargs:
-        kwargs.setdefault('GnnPipelineTool', CompFactory.ActsTrk.GnnPipelineTool(
-            "GnnPipeline",
-            moduleMapPath=flags.Acts.GNN.ModuleMapPath,
-            gnnPath=flags.Acts.GNN.ModelPath,
-            numTrtContexts=flags.Acts.GNN.NumTrtContexts,
-            maxGpuInstances=flags.Acts.GNN.MaxGpuInstances,
-            edgeCut=flags.Acts.GNN.EdgeCut,
-            minCandidateMeasurements=flags.Acts.GNN.MinCandidateMeasurements,
-        ))
+        from ActsConfig.ActsSeedingConfig import ActsGnnPipelineToolCfg
+        kwargs.setdefault('GnnPipelineTool', acc.popToolsAndMerge(
+            ActsGnnPipelineToolCfg(flags, name="GnnPipeline")))
 
     kwargs.setdefault("varianceInflation", flags.Acts.GNN.VarianceInflation)
     kwargs.setdefault("tightSeeds", flags.Acts.GNN.TightSeeds)

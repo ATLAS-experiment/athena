@@ -9,10 +9,6 @@
 
 namespace ActsTrk {
 
-GnnSeedingTool::GnnSeedingTool(const std::string& type, const std::string& name,
-                               const IInterface* parent)
-    : base_class(type, name, parent) {}
-
 StatusCode GnnSeedingTool::initialize() {
   ATH_MSG_DEBUG("Initializing " << name() << " ...");
   ATH_CHECK(m_gnnPipelineTool.retrieve());

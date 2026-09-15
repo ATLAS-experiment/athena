@@ -22,8 +22,7 @@ namespace ActsTrk {
 /// Each GNN track candidate is passed on as one (long) seed.
 class GnnSeedingTool : public extends<AthAlgTool, ActsTrk::ISeedingTool> {
  public:
-  GnnSeedingTool(const std::string& type, const std::string& name,
-                 const IInterface* parent);
+  using base_class::base_class;
 
   virtual StatusCode initialize() override;
 
