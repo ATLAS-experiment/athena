@@ -15,10 +15,6 @@ ActsTrk::MaterialTrackReader::~MaterialTrackReader() = default;
 
 StatusCode ActsTrk::MaterialTrackReader::initialize() {
 
-  std::cout
-      << "DEBUGFIX marker: MaterialTrackReader running the event_id-grouping "
-         "patch"
-      << std::endl;
   ATH_CHECK(m_materialTrackCollectionKey.initialize());
 
   if (m_fileNames.empty()) {
