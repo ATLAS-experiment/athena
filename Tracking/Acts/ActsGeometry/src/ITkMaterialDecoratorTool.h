@@ -22,6 +22,7 @@ namespace ActsTrk {
             virtual StatusCode finalize() override final;
         private:
             Gaudi::Property<std::string> m_materialMapFile{this, "MaterialDbFile", "", ""};
+            Gaudi::Property<std::string> m_materialMapFolder{this, "MaterialDbFolder", "", ""};
             std::unique_ptr<ActsPlugins::RootMaterialDecorator> m_matDecorator{};
     };
 }
