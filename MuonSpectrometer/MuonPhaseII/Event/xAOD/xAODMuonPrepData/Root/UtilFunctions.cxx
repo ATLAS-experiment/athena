@@ -44,11 +44,27 @@ namespace xAOD{
         if (!meas) {
             THROW_EXCEPTION("No measurement passed");
         }
-        const auto* muon = dynamic_cast<const MuonMeasurement*>(meas);
-        if (!muon) {
-            THROW_EXCEPTION("Failed to cast measurement to MuonMeasurement");
+        /// Composite space point EDM
+        if (meas->numDimensions() == 0u) {
+           const auto* comp = static_cast<const CombinedMuonStrip*>(meas);
+           return muonSurface(comp->primaryStrip());
         }
-        return muon->surface();
+        switch (meas->type()) {
+            using enum UncalibMeasType;
+            case MdtDriftCircleType: {
+                return static_cast<const MdtDriftCircle*>(meas)->surface();
+            } case RpcStripType: {
+                return static_cast<const RpcMeasurement*>(meas)->surface();
+            } case TgcStripType:{
+                return static_cast<const TgcStrip*>(meas)->surface();
+            } case sTgcStripType: {
+                return static_cast<const sTgcMeasurement*>(meas)->surface();
+            } case MMClusterType:{
+                return static_cast<const MMCluster*>(meas)->surface();
+            } default:
+                THROW_EXCEPTION("Unsupported measurement given "<<typeid(*meas).name());
+                break;
+        }
     }
 
     ::Muon::MuonStationIndex::TechnologyIndex toTechnologyIndex(const UncalibMeasType aodType){
