@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -82,9 +82,6 @@ public:
   static StatusCode AddContainerWriteHandle(SG::WriteHandle<xAOD::CaloClusterContainer> &clusColl);
 
   /** @brief Finalize clusters (move CaloClusterCellLink to a separate container). */
-  static StatusCode finalizeClusters(SG::WriteHandle<CaloClusterCellLinkContainer>& h,
-				     xAOD::CaloClusterContainer* pClusterColl);
-
   static void finalizeClusters(
     const EventContext& ctx,
     SG::WriteHandle<xAOD::CaloClusterContainer>& outClusterContainer,
