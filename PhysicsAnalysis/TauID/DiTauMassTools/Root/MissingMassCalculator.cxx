@@ -1519,7 +1519,7 @@ MissingMassCalculator::maxFromHist(TH1F *theHist, std::vector<double> &histInfo,
   // PROB=0,INTEGRAL,CHI2,DISCRI,TANTHETA,TANTHETAW,FITLENGTH,RMS,RMSVSDISCRI,MAXHISTINFO
   // };
   if (!theHist)[[unlikely]]{
-    throw std::exception("MissingMassCalculator::maxFromHist: histogram pointer is null.")
+    throw std::runtime_error("MissingMassCalculator::maxFromHist: histogram pointer is null.");
   }
   double maxPos = 0.;
   double prob = 0.;

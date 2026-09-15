@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Class handling the probability calculation of the MissingMassCalculator
@@ -7,10 +7,12 @@
 
 // Local include(s):
 #include "DiTauMassTools/MissingMassProb.h"
+#include "DiTauMassTools/MissingMassInput.h"
 #include "PathResolver/PathResolver.h"
-#include <cmath>
 
 #include "TruthUtils/ParticleConstants.h"
+#include <TFile.h>
+#include <cmath>
 
 namespace {
   constexpr double GEV = 1000.0;
