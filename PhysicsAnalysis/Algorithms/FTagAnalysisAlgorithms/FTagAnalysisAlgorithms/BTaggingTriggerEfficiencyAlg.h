@@ -19,6 +19,8 @@
 
 #include <xAODJet/JetContainer.h>
 #include <FTagAnalysisInterfaces/IBTaggingEfficiencyTool.h>
+#include <PATInterfaces/CorrectionCode.h>
+#include <PATInterfaces/SystematicSet.h>
 
 namespace CP
 {
@@ -34,6 +36,16 @@ namespace CP
 				 ISvcLocator *svcLoc = nullptr);
     StatusCode initialize () override;
     StatusCode execute (const EventContext& ctx) override;
+
+    /// \brief compute the b-jet trigger scale factor for one jet
+    ///
+    /// The returned code is the worst code of the calibration lookups that
+    /// entered the value: Ok when the scale factor is valid,
+    /// OutOfValidityRange when no scale factor can be given for this jet,
+    /// Error on a tool failure.  Jets the trigger did not look at, and jets
+    /// outside the trigger calibration, receive the offline scale factor.
+  private:
+    CP::CorrectionCode triggerScaleFactor (const xAOD::Jet& jet, const CP::SystematicSet& sys, float& sf);
 
     /// \brief the smearing tool
   private:
