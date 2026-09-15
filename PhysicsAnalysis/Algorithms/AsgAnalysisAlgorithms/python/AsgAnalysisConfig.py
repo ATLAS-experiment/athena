@@ -440,7 +440,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
         if config.dataType() is DataType.Data:
             # there are no generator weights in data!
             return
-        log = logging.getLogger('makeGeneratorAnalysisSequence')
+        log = logging.getLogger('GeneratorAnalysis')
 
         # Setup stream name
         streamName = self.streamName or config.defaultHistogramStream()
@@ -476,6 +476,28 @@ class GeneratorAnalysisBlock (ConfigBlock):
                 config.addOutputVar ('EventInfo', var, 'PDFinfo_' + var, noSys=True)
 
         if self.doPDFReweighting:
+            generatorInfo = config.flags.Input.GeneratorsInfo
+            log.info(f"Loaded generator info: {generatorInfo}")
+
+            if not generatorInfo:
+                warnings.warn_explicit("No generator info found.", GeneratorWeightWarning, filename='', lineno=0)
+            elif isinstance(generatorInfo, dict):
+
+                unsupported_generators = {
+                    "Sherpa": "PDF reweighting for Sherpa is not proven to be reliable. The reweighting closure should be validated within the analysis.",
+                    "Powheg": "PDF reweighting for Powheg is not proven to be reliable. The reweighting closure should be validated within the analysis."
+                }
+
+                # Check for unsupported generators
+                for generator, message in unsupported_generators.items():
+                    if generator in generator_info:
+                        warnings.warn_explicit(
+                            message,
+                            GeneratorWeightWarning,
+                            filename='',
+                            lineno=0
+                        )
+
             alg = config.createAlgorithm( 'CP::PDFReweightAlg', 'PDFReweightAlg', reentrant=True )
 
             if self.inPDFName is None:
