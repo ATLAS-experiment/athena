@@ -23,7 +23,7 @@ fi
 echo Executing eventloop_run_grid_job \"$1\" ${SkipEvents} ${nEventsPerJob}
 date
 
-eventloop_run_grid_job "$1" ${SkipEvents} ${nEventsPerJob}
+eventloop_run_grid_job $1 ${SkipEvents} ${nEventsPerJob}
 exitcode=$?
 
 echo Finished executing root
