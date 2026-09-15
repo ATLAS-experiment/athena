@@ -12,6 +12,7 @@
 // ROOT include(s)
 #include "TH2F.h"
 #include "TROOT.h"
+#include "TKey.h"
 #include "TClass.h"
 #include <utility>
 
@@ -112,7 +113,7 @@ CP::CorrectionCode CommonDiTauEfficiencyTool::getEfficiencyScaleFactor(const xAO
   // get uncertainties summed in quadrature
   double dTotalSystematic2 = 0.;
   double dDirection = 0.;
-  for (auto syst : *m_sSystematicSet)
+  for (const auto & syst : *m_sSystematicSet)
   {
 
     // check if systematic is available
