@@ -1,18 +1,21 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// Framework include(s):
-#include "PathResolver/PathResolver.h"
+
 
 // local include(s)
 #include "TauAnalysisTools/CommonEfficiencyTool.h"
 #include "TauAnalysisTools/TauEfficiencyCorrectionsTool.h"
+// Framework include(s):
+#include "PathResolver/PathResolver.h"
 
-// ROOT include(s)
+// ROOT include(s):
+#include "TKey.h"
 #include "TF1.h"
 #include "TH1.h"
 #include "TH2.h"
+#include "TFile.h"
 #include "TROOT.h"
 #include "TClass.h"
 
