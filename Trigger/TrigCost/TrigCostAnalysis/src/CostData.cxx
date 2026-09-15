@@ -16,6 +16,14 @@ CostData::CostData() :
   m_typeMapPtr(nullptr) {
 }
 
+StatusCode CostData::set(const xAOD::TrigCompositeContainer* costCollection, uint32_t onlineSlot) {
+  m_costCollection = costCollection;
+
+  setOnlineSlot( onlineSlot );
+  ATH_CHECK(cache());
+  return StatusCode::SUCCESS;
+}
+
 StatusCode CostData::cache() {
   for (const xAOD::TrigComposite* tc : costCollection()) {
     if (tc->getDetail<uint32_t>("slot") != onlineSlot()) {

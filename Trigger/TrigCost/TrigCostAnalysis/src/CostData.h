@@ -46,6 +46,11 @@ class CostData {
     CostData(const CostData&) = delete;
 
     /**
+     * @brief Cache the cost and ros collections, after formally requesting it from storegate.
+     */
+    StatusCode set(const xAOD::TrigCompositeContainer* costCollection, uint32_t onlineSlot);
+
+    /**
      * @brief Getter of the cached algorithm cost collection pointer.
      */
     const xAOD::TrigCompositeContainer& costCollection() const;
