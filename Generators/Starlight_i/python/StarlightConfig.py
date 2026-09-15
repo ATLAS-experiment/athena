@@ -117,7 +117,7 @@ def Starlight_Pythia8_Common_Cfg(flags,
                                 safety=1.1,
                                 **kwargs):
     """
-    Fragment for setting up Starlight with Pythia8 for final state radiation.
+    Fragment for setting up Starlight with Pythia8 for showering.
     By deafault use Pythia8_A14_NNPDF23LO_Common_Cfg.
     """
 
@@ -142,7 +142,7 @@ def Starlight_Pythia8_Common_Cfg(flags,
         **kwargs
     ))
 
-    # Ensure the showering is switched on for leptons
+    # Ensure the showering for leptons is switched on
     base_commands = [
         'SpaceShower:QEDshowerByL = 1',
         'TimeShower:QEDshowerByL = 1'
