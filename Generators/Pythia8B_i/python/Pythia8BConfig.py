@@ -6,16 +6,15 @@ from AthenaCommon.SystemOfUnits import GeV
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from GeneratorConfig.GeneratorSettingsSemantics import (
+    GeneratorSettingsKeep,
     GeneratorSettingsLayer,
     GeneratorSettingsPrecedence,
 )
 from GeneratorConfig.Sequences import EvgenSequence, EvgenSequenceFactory
 
 
-_B_PDG_CODES = (
-    511, 521, 531, 541, 5122, 5132, 5232, 5332,
-    -511, -521, -531, -541, -5122, -5132, -5232, -5332,
-)
+_B_PARTICLE_PDG_CODES = (511, 521, 531, 541, 5122, 5132, 5232, 5332)
+_B_PDG_CODES = _B_PARTICLE_PDG_CODES + tuple(-pdg for pdg in _B_PARTICLE_PDG_CODES)
 
 _CLOSE_B_DECAY_COMMANDS = (
     "511:onMode = 3",
@@ -42,24 +41,37 @@ _CLOSE_ANTI_B_DECAY_COMMANDS = (
 _CHARMONIUM_PDG_CODES = (443, 100443, 445, 10441, 10443, 20443)
 
 _OPEN_B_JPSI_DECAY_COMMANDS = tuple(
-    f"{b_hadron}:onIfAny = {charmonium}"
-    for b_hadron in _B_PDG_CODES[:8]
-    for charmonium in _CHARMONIUM_PDG_CODES
+    f"{b_hadron}:onIfAny = {' '.join(map(str, _CHARMONIUM_PDG_CODES))}"
+    for b_hadron in _B_PARTICLE_PDG_CODES
 )
 
 
+def _command_tuple(commands):
+    """Copy a command sequence without interpreting Pythia operations."""
+    if isinstance(commands, str):
+        raise TypeError("Commands must be a sequence of strings, not a string")
+    commands = tuple(commands or ())
+    if any(not isinstance(command, str) for command in commands):
+        raise TypeError("Commands must contain only strings")
+    return commands
+
+
+def _command_layer(source, commands, precedence):
+    return GeneratorSettingsLayer(
+        source=source,
+        values=_command_tuple(commands),
+        precedence=precedence,
+        keep=GeneratorSettingsKeep.ALL,
+        report_context="Pythia8BCfg.Commands",
+    )
+
+
 def Pythia8BCommandsCfg(flags, source, commands, precedence, name="Pythia8B"):
-    """Return a CA fragment containing one Pythia8B command layer."""
+    """Add an ordered command layer; each precedence may occur only once."""
     ca = ComponentAccumulator(EvgenSequenceFactory(EvgenSequence.Generator))
     ca.addEventAlgo(
         CompFactory.Pythia8B_i(
-            name,
-            Commands=GeneratorSettingsLayer(
-                source=source,
-                values=tuple(commands or ()),
-                precedence=precedence,
-                report_context="Pythia8BCfg.Commands",
-            ),
+            name, Commands=_command_layer(source, commands, precedence)
         )
     )
     return ca
@@ -84,16 +96,23 @@ def Pythia8BBaseCfg(flags, name="Pythia8B", **kwargs):
     kwargs.setdefault("RandomSeed", flags.Random.SeedOffset)
     kwargs.setdefault("Dsid", flags.Generator.DSID)
 
-    user_commands = tuple(kwargs.pop("Commands", ()) or ())
-    kwargs["Commands"] = GeneratorSettingsLayer(
-        source="base_fragment_commands",
-        values=base_commands,
-        precedence=GeneratorSettingsPrecedence.BASE,
-        report_context="Pythia8BCfg.Commands",
+    user_commands = _command_tuple(kwargs.pop("Commands", ()))
+    process_commands = _command_tuple(kwargs.pop("_process_commands", ()))
+    kwargs["Commands"] = _command_layer(
+        "base_fragment_commands", base_commands, GeneratorSettingsPrecedence.BASE
     )
 
     ca = ComponentAccumulator(EvgenSequenceFactory(EvgenSequence.Generator))
     ca.addEventAlgo(CompFactory.Pythia8B_i(name, **kwargs))
+
+    if process_commands:
+        ca.merge(Pythia8BCommandsCfg(
+            flags,
+            source="process_commands",
+            commands=process_commands,
+            precedence=GeneratorSettingsPrecedence.PROCESS,
+            name=name,
+        ))
 
     if user_commands:
         ca.merge(
@@ -117,8 +136,6 @@ def Pythia8BBaseCfg(flags, name="Pythia8B", **kwargs):
 
 def _Pythia8BTuneCfg(flags, commands, source, tune, name="Pythia8B", **kwargs):
     """Configure a tune between the base and user command layers."""
-    user_commands = tuple(kwargs.pop("Commands", ()) or ())
-
     ca = Pythia8BBaseCfg(flags, name=name, **kwargs)
     ca.merge(
         Pythia8BCommandsCfg(
@@ -129,17 +146,6 @@ def _Pythia8BTuneCfg(flags, commands, source, tune, name="Pythia8B", **kwargs):
             name=name,
         )
     )
-
-    if user_commands:
-        ca.merge(
-            Pythia8BCommandsCfg(
-                flags,
-                source="job_options",
-                commands=user_commands,
-                precedence=GeneratorSettingsPrecedence.USER,
-                name=name,
-            )
-        )
 
     from GeneratorConfig.GeneratorInfoSvcConfig import GeneratorInfoSvcCfg
 
@@ -212,65 +218,46 @@ def Pythia8B_A14_NNPDF23LO_Common_Cfg(flags, name="Pythia8B", **kwargs):
     )
 
 
-def Pythia8BEvtGenCfg(flags):
-    """Configure the Pythia8-compatible EvtGen afterburner."""
-    from Pythia8_i.Pythia8Config import Pythia8EvtGenBaseCfg
+def Pythia8BEvtGenCfg(flags, name="EvtInclusiveDecay", **kwargs):
+    """Configure EvtGen; kwargs are EvtGen properties, including userDecayFile."""
+    from EvtGen_i.EvtGenConfig import EvtGenCfg
 
-    return Pythia8EvtGenBaseCfg(flags)
+    kwargs.setdefault("pdtFile", "inclusiveP8DsDPlus.pdt")
+    kwargs.setdefault("whiteList", [-5334, 5334])
+    return EvtGenCfg(flags, name=name, **kwargs)
 
 
 def Pythia8B_A14_CTEQ6L1_EvtGen_Common_Cfg(
-    flags, name="Pythia8B", **kwargs
+    flags, name="Pythia8B", *, EvtGenOptions=None, **kwargs
 ):
     """Configure Pythia8B with the A14 CTEQ6L1 tune and EvtGen."""
     ca = Pythia8B_A14_CTEQ6L1_Common_Cfg(flags, name=name, **kwargs)
-    ca.merge(Pythia8BEvtGenCfg(flags))
+    ca.merge(Pythia8BEvtGenCfg(flags, **(EvtGenOptions or {})))
     return ca
 
 
 def Pythia8B_A14_NNPDF23LO_EvtGen_Common_Cfg(
-    flags, name="Pythia8B", **kwargs
+    flags, name="Pythia8B", *, EvtGenOptions=None, **kwargs
 ):
     """Configure Pythia8B with the A14 NNPDF23LO tune and EvtGen."""
     ca = Pythia8B_A14_NNPDF23LO_Common_Cfg(flags, name=name, **kwargs)
-    ca.merge(Pythia8BEvtGenCfg(flags))
+    ca.merge(Pythia8BEvtGenCfg(flags, **(EvtGenOptions or {})))
     return ca
 
 
-def _Pythia8BProcessCfg(
-    flags,
-    *,
-    ShowerCfg,
-    source,
-    commands,
-    name="Pythia8B",
-    **kwargs,
-):
-    """Apply process settings after the tune and before job-option commands."""
-    user_commands = tuple(kwargs.pop("Commands", ()) or ())
+def _Pythia8BProcessCfg(flags, *, ShowerCfg, commands, name="Pythia8B", **kwargs):
+    """Collect nested fragments into one layer, inner commands before outer ones.
 
-    ca = ShowerCfg(flags, name=name, **kwargs)
-    ca.merge(
-        Pythia8BCommandsCfg(
-            flags,
-            source=source,
-            commands=commands,
-            precedence=GeneratorSettingsPrecedence.PROCESS,
-            name=name,
-        )
+    The selected ShowerCfg must ultimately call Pythia8BBaseCfg. Its private
+    _process_commands argument is consumed there, never passed to the algorithm.
+    """
+    outer_commands = _command_tuple(kwargs.pop("_process_commands", ()))
+    return ShowerCfg(
+        flags,
+        name=name,
+        _process_commands=_command_tuple(commands) + outer_commands,
+        **kwargs,
     )
-
-    if user_commands:
-        ca.merge(
-            Pythia8BCommandsCfg(
-                flags,
-                source="job_options",
-                commands=user_commands,
-                precedence=GeneratorSettingsPrecedence.USER,
-                name=name,
-            )
-        )
-    return ca
 
 
 def _set_b_selection_defaults(kwargs):
@@ -281,10 +268,8 @@ def _set_b_selection_defaults(kwargs):
     kwargs.setdefault("BPDGCodes", list(_B_PDG_CODES))
 
 
-def Pythia8B_Bottomonium_Common_Cfg(
-    flags, *, ShowerCfg, name="Pythia8B", **kwargs
-):
-    """Configure direct bottomonium production."""
+def _set_quarkonium_defaults(kwargs):
+    """Set the shared direct-quarkonium hook and selection defaults."""
     kwargs.setdefault("SuppressSmallPT", True)
     kwargs.setdefault("pT0timesMPI", 1.0)
     kwargs.setdefault("numberAlphaS", 3.0)
@@ -294,12 +279,18 @@ def Pythia8B_Bottomonium_Common_Cfg(
     kwargs.setdefault("VetoDoubleBEvents", False)
     kwargs.setdefault("VetoDoubleCEvents", False)
     kwargs.setdefault("NHadronizationLoops", 1)
+
+
+def Pythia8B_Bottomonium_Common_Cfg(
+    flags, *, ShowerCfg, name="Pythia8B", **kwargs
+):
+    """Configure direct bottomonium production."""
+    _set_quarkonium_defaults(kwargs)
     kwargs.setdefault("BPDGCodes", list(_B_PDG_CODES))
 
     return _Pythia8BProcessCfg(
         flags,
         ShowerCfg=ShowerCfg,
-        source="pythia8b_bottomonium",
         commands=(
             "PhaseSpace:pTHatMin = 1.",
             "ParticleDecays:mixB = off",
@@ -316,20 +307,11 @@ def Pythia8B_Charmonium_Common_Cfg(
     flags, *, ShowerCfg, name="Pythia8B", **kwargs
 ):
     """Configure direct charmonium production."""
-    kwargs.setdefault("SuppressSmallPT", True)
-    kwargs.setdefault("pT0timesMPI", 1.0)
-    kwargs.setdefault("numberAlphaS", 3.0)
-    kwargs.setdefault("useSameAlphaSasMPI", False)
-    kwargs.setdefault("SelectBQuarks", False)
-    kwargs.setdefault("SelectCQuarks", False)
-    kwargs.setdefault("VetoDoubleBEvents", False)
-    kwargs.setdefault("VetoDoubleCEvents", False)
-    kwargs.setdefault("NHadronizationLoops", 1)
+    _set_quarkonium_defaults(kwargs)
 
     return _Pythia8BProcessCfg(
         flags,
         ShowerCfg=ShowerCfg,
-        source="pythia8b_charmonium",
         commands=(
             "PhaseSpace:pTHatMin = 1.",
             "ParticleDecays:mixB = off",
@@ -349,7 +331,6 @@ def Pythia8B_CloseBDecays_Cfg(
     return _Pythia8BProcessCfg(
         flags,
         ShowerCfg=ShowerCfg,
-        source="pythia8b_close_b_decays",
         commands=_CLOSE_B_DECAY_COMMANDS,
         name=name,
         **kwargs,
@@ -363,7 +344,6 @@ def Pythia8B_CloseAntiBDecays_Cfg(
     return _Pythia8BProcessCfg(
         flags,
         ShowerCfg=ShowerCfg,
-        source="pythia8b_close_anti_b_decays",
         commands=_CLOSE_ANTI_B_DECAY_COMMANDS,
         name=name,
         **kwargs,
@@ -377,7 +357,6 @@ def Pythia8B_OpenBJpsiDecays_Cfg(
     return _Pythia8BProcessCfg(
         flags,
         ShowerCfg=ShowerCfg,
-        source="pythia8b_open_b_jpsi_decays",
         commands=_OPEN_B_JPSI_DECAY_COMMANDS,
         name=name,
         **kwargs,
@@ -392,7 +371,6 @@ def Pythia8B_exclusiveB_Common_Cfg(
     return _Pythia8BProcessCfg(
         flags,
         ShowerCfg=ShowerCfg,
-        source="pythia8b_exclusive_b",
         commands=(
             "HardQCD:all = on",
             "ParticleDecays:mixB = off",
@@ -412,7 +390,6 @@ def Pythia8B_exclusiveAntiB_Common_Cfg(
     return _Pythia8BProcessCfg(
         flags,
         ShowerCfg=ShowerCfg,
-        source="pythia8b_exclusive_anti_b",
         commands=(
             "HardQCD:all = on",
             "ParticleDecays:mixB = off",
@@ -433,7 +410,6 @@ def Pythia8B_inclusiveBJpsi_Common_Cfg(
     return _Pythia8BProcessCfg(
         flags,
         ShowerCfg=ShowerCfg,
-        source="pythia8b_inclusive_b_jpsi",
         commands=(
             "HardQCD:all = on",
             "ParticleDecays:mixB = off",
@@ -456,7 +432,6 @@ def Pythia8B_inclusiveAntiBJpsi_Common_Cfg(
     return _Pythia8BProcessCfg(
         flags,
         ShowerCfg=ShowerCfg,
-        source="pythia8b_inclusive_anti_b_jpsi",
         commands=(
             "HardQCD:all = on",
             "ParticleDecays:mixB = off",
@@ -467,3 +442,24 @@ def Pythia8B_inclusiveAntiBJpsi_Common_Cfg(
         name=name,
         **kwargs,
     )
+
+
+def Pythia8B_Photospp_Cfg(
+    flags, *, ShowerCfg, name="Pythia8B", PhotosppOptions=None, **kwargs
+):
+    """Append Photos++ after the shower (and EvtGen, when configured).
+
+    Disable native lepton QED showering as in the legacy Pythia8B fragment.
+    Explicit user Commands still execute last and can override this default.
+    """
+    from Photospp_i.PhotosppConfig import PhotosppCfg
+
+    ca = _Pythia8BProcessCfg(
+        flags,
+        ShowerCfg=ShowerCfg,
+        commands=("TimeShower:QEDshowerByL = off",),
+        name=name,
+        **kwargs,
+    )
+    ca.merge(PhotosppCfg(flags, **(PhotosppOptions or {})))
+    return ca

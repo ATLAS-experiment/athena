@@ -36,6 +36,6 @@ atlas_install_python_modules( python/*.py
 
 if( NOT XAOD_STANDALONE )
    atlas_add_test( Pythia8BConfig
-                   SCRIPT test/Pythia8BConfigTest.py
+                   SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/test/Pythia8BConfigTest.py
                    POST_EXEC_SCRIPT noerror.sh )
 endif()

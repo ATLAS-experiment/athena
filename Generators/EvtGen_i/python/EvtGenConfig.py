@@ -10,14 +10,17 @@ import os
 from AthenaCommon.Logging import logging
 log = logging.getLogger("EvtGenConfig")
 
-def EvtGenCfg(
-    flags,
-    decayFile=None,
-    whiteList=None,
-    allowAllKnownDecays=False,
-    auxfiles=None,
-    pdtFile=None,
-):
+def EvtGenCfg(flags, 
+              decayFile = None,
+              whiteList = None,
+              allowAllKnownDecays = False,
+              auxfiles = None,
+              pdtFile = None,
+              *,
+              name = "EvtInclusiveDecay",
+              userDecayFile = None,
+              **kwargs):
+    """Configure EvtGen, including optional particle-data and user-decay files."""
 
     # Set defaults
     if flags.Beam.Energy*2/GeV > 13001.:
@@ -30,7 +33,14 @@ def EvtGenCfg(
     else:
         log.info("EVTGENVER not available !!! assuming version == 1.7")
         decayfile_str = "2014Inclusive_17.dec"
-    default_auxfiles = [decayfile_str]
+    default_auxfiles = [decayfile_str if decayFile is None else decayFile]
+    if pdtFile is not None:
+        kwargs["pdtFile"] = pdtFile
+        default_auxfiles.append(pdtFile)
+    if userDecayFile is not None:
+        kwargs["userDecayFile"] = userDecayFile
+        if userDecayFile:
+            default_auxfiles.append(userDecayFile)
 
     default_whitelist = [-411, -421, -10411, -10421, -413, -423,
                         -10413, -10423, -20413, -20423, -415, -425, -431, -10431, -433, -10433, -20433,
@@ -67,20 +77,19 @@ def EvtGenCfg(
     if decayFile is None:
         decayFile = decayfile_str
 
+    kwargs.setdefault("RandomSeed", flags.Random.SeedOffset)
+    kwargs.setdefault("Dsid", flags.Generator.DSID)
+
     # Define CA object
     ca = ComponentAccumulator(EvgenSequenceFactory(EvgenSequence.Generator)) 
-    evtgen_kwargs = {
-        "decayFile": decayFile,
-        "allowAllKnownDecays": allowAllKnownDecays,
-        "whiteList": whiteList,
-        "RandomSeed": flags.Random.SeedOffset,
-        "Dsid": flags.Generator.DSID,
-    }
-    if pdtFile is not None:
-        evtgen_kwargs["pdtFile"] = pdtFile
-
     ca.addEventAlgo(
-        CompFactory.EvtInclusiveDecay("EvtInclusiveDecay", **evtgen_kwargs)
+        CompFactory.EvtInclusiveDecay(
+          name,
+          decayFile = decayFile,
+          allowAllKnownDecays = allowAllKnownDecays,
+          whiteList = whiteList,
+          **kwargs
+        )
     )
 
     # Announce generator to service
@@ -89,6 +98,8 @@ def EvtGenCfg(
 
     # Copy necessary files
     from PyJobTransformsCore.trfutil import get_files
-    get_files(auxfiles, keepDir=False, errorIfNotFound=True)
+    auxfiles = [path for path in auxfiles if not os.path.isfile(path)]
+    if auxfiles:
+        get_files(auxfiles, keepDir=True, errorIfNotFound=True)
 
     return ca

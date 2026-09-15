@@ -4,7 +4,7 @@
 import unittest
 
 # Always import this to initialize the semantics registry.
-from AthenaConfiguration import AtlasSemantics
+from AthenaConfiguration import AtlasSemantics  # noqa: F401 (register semantics)
 from GaudiConfig2._configurables import Configurable, Property
 from GeneratorConfig.GeneratorSettingsSemantics import (
     GeneratorSettingsKeep,
@@ -79,6 +79,7 @@ class TestGeneratorSettingsSemantics(unittest.TestCase):
                 GeneratorSettingsPrecedence.PROCESS,
             ),
         )
+        self.assertEqual(result.data, ["HardQCD:all = on"])
         result = self.semantics.merge(
             result,
             self._layer(
@@ -89,6 +90,48 @@ class TestGeneratorSettingsSemantics(unittest.TestCase):
         )
 
         self.assertEqual(result.data, ["HardQCD:all = off"])
+
+    def test_keep_all_preserves_operations_and_layer_order(self):
+        base = self._layer(
+            "base", ["443:onMode = off"], GeneratorSettingsPrecedence.BASE,
+            keep=GeneratorSettingsKeep.ALL,
+        )
+        commands = ["443:onIfAny = 13", "443:onMode = on", "443:onIfAny = 11",
+                    "443:addChannel = 1 0.1 0 13 -13",
+                    "443:addChannel = 1 0.1 0 13 -13"]
+        user = self._layer("user", commands, GeneratorSettingsPrecedence.USER,
+                           keep=GeneratorSettingsKeep.ALL)
+        for first, second in ((base, user), (user, base)):
+            result = self.semantics.merge(first, second)
+            self.assertEqual(result.data, ["443:onMode = off"] + commands)
+            result = self.semantics.merge(result, user)
+            self.assertEqual(result.data, ["443:onMode = off"] + commands)
+            self.assertEqual(result._resolve()[1]["conflict_details"], [])
+
+    def test_keep_all_rejects_ambiguous_composition(self):
+        base = self._layer("one", ["443:onMode = off"],
+                           GeneratorSettingsPrecedence.PROCESS,
+                           keep=GeneratorSettingsKeep.ALL)
+        same_precedence = self._layer("two", ["443:onIfAny = 13"],
+                                      GeneratorSettingsPrecedence.PROCESS,
+                                      keep=GeneratorSettingsKeep.ALL)
+        with self.assertRaisesRegex(ValueError, "duplicate precedence PROCESS"):
+            self.semantics.merge(base, same_precedence).data
+        different_policy = self._layer("user", ["443:onMode = on"],
+                                       GeneratorSettingsPrecedence.USER)
+        with self.assertRaisesRegex(ValueError, "different parsing settings"):
+            self.semantics.merge(base, different_policy).data
+
+    def test_keep_all_configurable_merge_and_serialization(self):
+        commands = ["443:addChannel = 1 0.1 0 13 -13"] * 2
+        layer = self._layer("user", commands, GeneratorSettingsPrecedence.USER,
+                            keep=GeneratorSettingsKeep.ALL)
+        first = GeneratorSettingsTestAlg("OrderedCommands", Commands=layer)
+        second = GeneratorSettingsTestAlg("OrderedCommands", Commands=layer)
+        first.merge(second)
+        self.assertEqual(first.Commands.data, commands)
+        self.assertEqual(str(first.Commands), str(commands))
+        self.assertEqual(self.semantics.opt_value(first.Commands), commands)
 
     def test_identical_assignment_with_different_spacing_is_deduplicated(self):
         result = self.semantics.merge(

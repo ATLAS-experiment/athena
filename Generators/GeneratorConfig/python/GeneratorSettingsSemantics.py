@@ -22,9 +22,14 @@ class GeneratorSettingsKeep(str, Enum):
 
     LAST keeps the last duplicate encountered. This is the normal generator
     behavior: each higher-precedence layer overrides the layers below it.
+
+    ALL preserves the command sequence within each layer, including repeated
+    operations such as Pythia's addChannel and onIfAny. Layers still execute
+    in precedence order; the generator interprets the commands itself.
     """
     FIRST = "first"
     LAST = "last"
+    ALL = "all"
 
 
 class GeneratorSettingsRecord(str, Enum):
@@ -197,6 +202,14 @@ class GeneratorSettingsValue:
                 f"cannot merge generator settings with different parsing "
                 f"settings: "
                 f"{summary}"
+            )
+
+        if keep == GeneratorSettingsKeep.ALL:
+            # Operation sequences cannot be interpreted as independent settings:
+            # even a repeated identical operation may have a side effect.
+            return (
+                [command for layer in layers for command in layer.values],
+                _build_report([], [], []),
             )
 
         records = _build_records(layers, separators)
