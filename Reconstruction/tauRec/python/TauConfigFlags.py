@@ -37,6 +37,7 @@ def createTauConfigFlags():
     tau_cfg.addFlag("Tau.pi0EtCuts", [2800.*Units.MeV, 2700.*Units.MeV, 2500.*Units.MeV, 2900.*Units.MeV, 2700.*Units.MeV])
     tau_cfg.addFlag("Tau.pi0MVACuts_1prong", [0.45, 0.37, 0.39, 0.40, 0.38])
     tau_cfg.addFlag("Tau.pi0MVACuts_mprong", [0.73, 0.69, 0.58, 0.69, 0.67])
+    tau_cfg.addFlag("Tau.MinNeutralPFOPt", 100.*Units.MeV)
 
     # Run2 settings and calibration files
     tau_cfg.addFlag("Tau.tauRecToolsCVMFSPath", "tauRecTools/R22_preprod")

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// Based on CPToolTester.cxx (A. Kraznahorkay) 
@@ -158,18 +158,21 @@ int main(int argc, char* argv[])
     unsigned errors = 0;
     double nSuitableEvents = 0., nMatched = 0.;
     static const SG::Decorator<unsigned> RandomRunNumberDec("RandomRunNumber");
+    const std::string evInfoStr{"EventInfo"};
+    const std::string electronsStr{"Electrons"};
+    const std::string muonsStr{"Muons"};
     for(Long64_t entry = 0; entry < entries; ++entry)
     {
         event.getEntry(entry);
         
         /// Get a random run number, and decorate the event info
         const xAOD::EventInfo* eventInfo = nullptr;
-        event.retrieve(eventInfo,"EventInfo").ignore();
+        event.retrieve(eventInfo,evInfoStr).ignore();
         unsigned runNumber = periodRuns[uniformPdf(randomEngine)];
         RandomRunNumberDec(*eventInfo) = runNumber;
         vector<const xAOD::Electron*> myTriggeringElectrons;
         const xAOD::ElectronContainer* electrons = nullptr;
-        event.retrieve(electrons,"Electrons").ignore();
+        event.retrieve(electrons,electronsStr).ignore();
         for(auto electron : *electrons)
         {
             if(!electron->caloCluster()) continue;
@@ -185,7 +188,7 @@ int main(int argc, char* argv[])
 		
         vector<const xAOD::Muon*> myTriggeringMuons;
         const xAOD::MuonContainer* muons = nullptr;
-        event.retrieve(muons,"Muons").ignore();
+        event.retrieve(muons,muonsStr).ignore();
         for(auto muon : *muons)
         {
             float pt = muon->pt();
@@ -214,7 +217,7 @@ int main(int argc, char* argv[])
         if(matched) nMatched += 1;
     }
     
-    if(errors < nSuitableEvents)
+    if(nSuitableEvents!= 0 && errors < nSuitableEvents)
     {
         Info(MSGSOURCE, "Fraction of trigger-matched events: %f (over %ld events)",
             nMatched / nSuitableEvents, long(nSuitableEvents));

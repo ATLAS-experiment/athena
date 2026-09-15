@@ -69,10 +69,10 @@ namespace Trig {
      * @see Trig::ChainGroup
      * @see TrigDefs::Conditions
      **/ 
-    bool isPassed(const std::string& chain,
+    bool isPassed(std::string_view chain,
                   unsigned int condition) const;
 
-    bool isPassed(const std::string& chain) const;
+    bool isPassed(std::string_view chain) const;
 
     /**
      * @brief return decision for each chain in group

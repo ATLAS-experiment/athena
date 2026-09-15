@@ -59,7 +59,7 @@ class TrigEgammaEmulationToolTest : public AthMonitorAlgorithm
                                  const TrigCompositeUtils::Decision *dec,
                                  const TrigEgammaEmulationToolTest::TrigInfo& info) const;
 
-      TrigEgammaEmulationToolTest::TrigInfo getInfo( std::string trigger ) const;
+      TrigEgammaEmulationToolTest::TrigInfo getInfo( const std::string & trigger ) const;
 
 
       void fillLabel( const ToolHandle<GenericMonitoringTool>& groupHandle, 

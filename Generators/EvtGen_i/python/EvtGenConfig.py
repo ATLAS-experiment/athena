@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -14,15 +14,16 @@ def EvtGenCfg(flags,
               decayFile = None,
               whiteList = None,
               allowAllKnownDecays = False,
-              auxfiles = None):
+              auxfiles = None,
+              **kwargs):
 
     # Set defaults
     if flags.Beam.Energy*2/GeV > 13001.:
         decayfile_str = "2022inclusive_BELLE.dec"
-        log.info("Belle decay table updated Nov 2022")  
+        log.info("Belle decay table updated Nov 2022")
     elif "EVTGENVER" in os.environ:
         evtgenver = float(str(os.environ['EVTGENVER'])[:3])
-        log.info(" ver of EvtGen ", evtgenver)
+        log.info(f" ver of EvtGen {evtgenver}")
         decayfile_str =  "2014Inclusive_17.dec" if evtgenver == 1.7 else "2014Inclusive.dec"
     else:
         log.info("EVTGENVER not available !!! assuming version == 1.7")
@@ -71,7 +72,8 @@ def EvtGenCfg(flags,
           "EvtInclusiveDecay", 
           decayFile = decayFile,
           allowAllKnownDecays = allowAllKnownDecays,
-          whiteList = whiteList
+          whiteList = whiteList,
+          **kwargs
         )
     )
 

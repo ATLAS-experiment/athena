@@ -17,3 +17,8 @@ atlas_add_library( HGTD_AnalysisLib
 atlas_add_component( HGTD_Analysis
                      src/components/*.cxx
                      LINK_LIBRARIES HGTD_AnalysisLib GaudiKernel )
+
+# Install files from the package:
+atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+
+atlas_install_joboptions( share/*.py )

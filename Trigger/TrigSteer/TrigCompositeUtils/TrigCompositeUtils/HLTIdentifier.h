@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigCompositeUtils_HLTIdentifier_h
 #define TrigCompositeUtils_HLTIdentifier_h
 
 #include <string>
+#include <string_view>
 #include <vector>
 #include <set>
 
@@ -23,7 +24,7 @@ public:
   /**
    * @brief constructs identifier from human redable name
    **/  
-  explicit Identifier( const std::string& stringID );
+  explicit Identifier( std::string_view stringID );
 
   /**
    * @brief Construct wiht numeric ID

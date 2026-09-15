@@ -137,7 +137,8 @@ namespace ActsTrk {
       //get the index of the output spacepoint, when not using the cache this should be equal to the cluster index
       unsigned int thisSpIdx = spIdx++;
 
-      ATH_CHECK( m_spacePointMakerTool->producePixelSpacePoint(gctx,
+      ATH_CHECK( m_spacePointMakerTool->producePixelSpacePoint(ctx,
+                                gctx,
                                 *cluster,
                                 *pixelSpacePoints->at(thisSpIdx),
                                 *pixelElement ) );

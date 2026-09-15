@@ -61,7 +61,7 @@ bool Trig::TrigDecisionToolLite::isPassed(const std::vector<std::string>& chains
   return isPassed( chainIDs, ctx );
 }
 
-bool Trig::TrigDecisionToolLite::isPassed(const std::string& chain, const EventContext& ctx) const {
+bool Trig::TrigDecisionToolLite::isPassed(std::string_view chain, const EventContext& ctx) const {
   return isPassed( HLT::Identifier(chain), ctx );
 }
 

@@ -105,7 +105,7 @@ def UseFrontier(flags):
 def UseCREST(flags):
     """PreInclude to switch to using CREST rather than COOL
     """
-    msg.warning('CREST is now used by default for Run4 and beyond, Please remove this PreInclude from commands!')
+    msg.error('CREST is now used by default for Run4 and beyond, Please remove this PreInclude from commands!')
     flags.IOVDb.UseCREST = True
     from os import environ
     msg.info('Enabling CREST DB access')

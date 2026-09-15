@@ -30,7 +30,7 @@
 namespace pool {
 
    RootCollection::RootCollection( const pool::CollectionDescription* description,
-                                   pool::ICollection::OpenMode mode )
+                                   Io::IoFlag mode )
       : APRMessaging( "RootCollection"),
         m_description( *description ),
         m_name( description->name() ),
@@ -49,7 +49,7 @@ namespace pool {
 
    void RootCollection::insertRow( const pool::CollectionRowBuffer& inputRowBuffer )
    {
-      if( m_mode == ICollection::READ ) {
+      if( m_mode == Io::READ ) {
          throw std::runtime_error( "Cannot modify the data of a collection in READ open mode. (APR: \" RootCollection::insertRow \" from \" RootCollection \")" );
       }
   
@@ -117,15 +117,15 @@ namespace pool {
 
       m_storageSvc.reset( pool::createStorageSvc("StorageSvc") );
       // MN: TODO: use m_session if provided?
-      if( !m_storageSvc->startSession( collModeToPoolMode[m_mode], m_description.type().type()) .isSuccess() ) {
+      if( !m_storageSvc->startSession( m_mode, m_description.type().type()) .isSuccess() ) {
          throw std::runtime_error( "RootCollection failed to start a session." );
       }
       m_fileDescr.initFromFilename( m_fileName );
-      if( !m_storageSvc->connect( collModeToPoolMode[m_mode], m_fileDescr ).isSuccess() ) {
+      if( !m_storageSvc->connect( m_mode, m_fileDescr ).isSuccess() ) {
          throw std::runtime_error( "RootCollection failed to open: " + m_fileName + " for " + poolOptToRootOpt[m_mode] );
       }
 
-      if( m_mode == ICollection::READ ) {
+      if( m_mode == Io::READ ) {
          CollectionDescription desc( m_description.name(), m_description.type(), m_description.connection() );
          // clear the description
          m_description = std::move(desc);
@@ -159,7 +159,7 @@ namespace pool {
             throw std::runtime_error( "No RootCollection found in " + m_fileName );
          }
       }
-      if( m_mode == ICollection::CREATE_AND_OVERWRITE ) {
+      if( m_mode == Io::WRITE || m_mode == Io::APPEND) {
          ATH_MSG_DEBUG( "Creating collection in overwrite mode..." );
          m_containerPrefix = APRDefaults::WriteConfig::getEventTagName();
       }

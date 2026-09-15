@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration 
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration 
 */
 
 #include "src/JetManagerTool.h"
@@ -132,6 +132,7 @@ StatusCode JetManagerTool::retrieveByContainer(const EventContext& ctx,
       bool isGSCchain = jetContainerName().find("GSC")!=std::string::npos;
 
       for ( const xAOD::BTagging *btag : *theBTagContainer ) {
+        //coverity[UNNECESSARY_STRING_COPY:FALSE]
         static const SG::ConstAccessor<std::vector<ElementLink<xAOD::IParticleContainer>>> btagToJetAccessor("BTagBtagToJetAssociator");
         if (btagToJetAccessor.isAvailable(*btag)) {
           const auto &jetLink = btagToJetAccessor(*btag);

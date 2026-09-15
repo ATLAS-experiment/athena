@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigMuonMatching/TrigMuonMatching.h"
@@ -15,8 +15,11 @@
 #include "xAODTrigMuon/L2StandAloneMuonContainer.h"
 #include "xAODTrigMuon/L2CombinedMuonContainer.h"
 #include "TruthUtils/ParticleConstants.h"
+#include "CxxUtils/StringUtils.h"
 
 #define MUONMASS ParticleConstants::muonMassInMeV
+
+using CxxUtils::tokenize;
 
 namespace Trig {
 
@@ -40,21 +43,21 @@ namespace Trig {
   }
 
   Bool_t TrigMuonMatching::match(const xAOD::Muon* mu,
-				 const std::string &chain,
+				 std::string_view chain,
 				 const double mindelR) const
   {
     return match(mu->eta(),mu->phi(),chain,mindelR);
   }
   
   Bool_t TrigMuonMatching::matchL1(const xAOD::Muon* mu,
-				   const std::string &l1item,
+				   std::string_view l1item,
 				   const double DelR) const
   {
     return matchL1(mu->eta(),mu->phi(),l1item,DelR);
   }
 
   Double_t TrigMuonMatching::minDelR(const xAOD::Muon* mu,
-				     const std::string &chain,
+				     std::string_view chain,
 				     const double mindelR) const
   {
     Double_t delmin = mindelR;
@@ -63,7 +66,7 @@ namespace Trig {
   }
 
   Double_t TrigMuonMatching::minDelRL1(const xAOD::Muon* mu,
-				       const std::string &l1item,
+				       std::string_view l1item,
 				       const double DelR) const
   {
     Double_t l1dr = DelR;
@@ -103,7 +106,7 @@ namespace Trig {
   
   Bool_t TrigMuonMatching::match(const double eta,
 				 const double phi,
-				 const std::string &chain,
+				 std::string_view chain,
 				 const double mindelR) const
   {    
     if(!m_trigDecTool->isPassed(chain)){
@@ -118,7 +121,7 @@ namespace Trig {
 
   Bool_t TrigMuonMatching::matchL1(const double eta,
 				   const double phi,
-				   const std::string &l1item,
+				   std::string_view l1item,
 				   const double DelR) const
   {
     if(!m_trigDecTool->isPassed("L1_MU.*")){
@@ -146,8 +149,8 @@ namespace Trig {
   }
 
   Bool_t TrigMuonMatching::matchL2SA(const xAOD::Muon* mu,
-				     const std::string &l1item,
-				     const std::string &chain,
+				     std::string_view l1item,
+				     std::string_view chain,
 				     const double DelR) const
   {
     if(!m_trigDecTool->isPassed("L1_MU.*")){
@@ -163,19 +166,18 @@ namespace Trig {
     xAOD::MuonRoIContainer::const_iterator muroi_end = muonrois->end();
     Int_t threshold = getL1pt(l1item);
     unsigned int ROI = 0;
+    const std::string emptyStr;
     for( ; muroi_itr != muroi_end; ++muroi_itr ) {
       if(!((*muroi_itr)->thrValue() >= threshold*1000)) continue;
       ROI = (*muroi_itr)->getRoI();
-      const std::string eventTrigger = chain;
-      
-      auto cg = m_trigDecTool->getChainGroup(eventTrigger);
+      auto cg = m_trigDecTool->getChainGroup(chain);
       auto fc = cg->features(TrigDefs::alsoDeactivateTEs);
 #if defined(XAOD_STANDALONE) || defined(XAOD_ANALYSIS)
-      auto MuFeatureContainers = fc.containerFeature<xAOD::L2StandAloneMuonContainer>("",TrigDefs::alsoDeactivateTEs);
+      auto MuFeatureContainers = fc.containerFeature<xAOD::L2StandAloneMuonContainer>(emptyStr,TrigDefs::alsoDeactivateTEs);
 #else
-      const std::vector< Trig::Feature<xAOD::L2StandAloneMuonContainer> > MuFeatureContainers = fc.get<xAOD::L2StandAloneMuonContainer>("", TrigDefs::alsoDeactivateTEs);
+      const std::vector< Trig::Feature<xAOD::L2StandAloneMuonContainer> > MuFeatureContainers = fc.get<xAOD::L2StandAloneMuonContainer>(emptyStr, TrigDefs::alsoDeactivateTEs);
 #endif 
-      for(auto mucont : MuFeatureContainers){
+      for(const auto & mucont : MuFeatureContainers){
 	for(auto muon : *mucont.cptr()){
 	  if(muon->roiNumber() == ROI){
 	    Double_t dR = TrigMuonMatching::dR(mu->eta(), mu->phi(), muon->eta(), muon->phi());
@@ -189,12 +191,10 @@ namespace Trig {
   }
 
   Bool_t TrigMuonMatching::matchL2CB(const xAOD::Muon* mu,
-				     const std::string &chain,
+				     std::string_view chain,
 				     const double DelR) const
   {
-    const std::string eventTrigger = chain;
-
-    auto cg = m_trigDecTool->getChainGroup(eventTrigger);
+    auto cg = m_trigDecTool->getChainGroup(chain);
     auto fc = cg->features(TrigDefs::alsoDeactivateTEs);
 #if defined(XAOD_STANDALONE) || defined(XAOD_ANALYSIS)
     auto MuFeatureContainers = fc.containerFeature<xAOD::L2CombinedMuonContainer>("",TrigDefs::alsoDeactivateTEs);
@@ -202,7 +202,7 @@ namespace Trig {
     const std::vector< Trig::Feature<xAOD::L2CombinedMuonContainer> > MuFeatureContainers = fc.get<xAOD::L2CombinedMuonContainer>("", TrigDefs::alsoDeactivateTEs);
 #endif 
     
-    for(auto mucont : MuFeatureContainers){
+    for(const auto & mucont : MuFeatureContainers){
       for(auto muon : *mucont.cptr()){
 	Double_t dR = TrigMuonMatching::dR(mu->eta(), mu->phi(), muon->eta(), muon->phi());
 	if(dR < DelR) return true;
@@ -291,18 +291,17 @@ namespace Trig {
   }
   
   
-  int TrigMuonMatching::getL1pt(const std::string& l1item) const
+  int TrigMuonMatching::getL1pt(std::string_view l1item) const
   {
     int rc = -1;
     
-    std::vector<std::string> tokens;
-    tokenize(l1item, tokens, "_");
+    std::vector<std::string> tokens = tokenize(l1item, '_');
     std::string pt;
     if (tokens.size() == 1) {
-      pt = tokens.at(0);
+      pt = tokens.front();
       
-    } else if ((tokens.size() == 2 ) and (tokens.at(0) == "L1")) {
-      pt = tokens.at(1);
+    } else if ((tokens.size() == 2 ) and (tokens.front() == "L1")) {
+      pt = tokens[1];
       
     } else {
       ATH_MSG_ERROR("TrigMuonMatching::getL1pt : cannot parse " << l1item);
@@ -321,20 +320,7 @@ namespace Trig {
   }
   
   
-  void TrigMuonMatching::tokenize(const std::string& str,
-				     std::vector<std::string>& tokens,
-				     const std::string& delimiters) const
-  {
-    tokens.clear();
-    std::string::size_type lastPos = str.find_first_not_of(delimiters, 0);
-    std::string::size_type pos = str.find_first_of(delimiters, lastPos);
-    
-    while ((std::string::npos != pos) or (std::string::npos != lastPos)) {
-      tokens.push_back(str.substr(lastPos, pos - lastPos));
-      lastPos = str.find_first_not_of(delimiters, pos);
-      pos = str.find_first_of(delimiters, lastPos);
-    }
-  }
+ 
 
 
   Double_t TrigMuonMatching::matchedTrackDetail(EFmuon& efMuonId,
@@ -342,14 +328,12 @@ namespace Trig {
 						const double eta,
 						const double phi,
 						const double mindelR,
-						const std::string& chainForEventTrigger) const
+						std::string_view chainForEventTrigger) const
   {
     efMuonId.valid = false;
     Double_t drmin = mindelR;
     
-    const std::string eventTrigger = chainForEventTrigger;
-
-    auto cg = m_trigDecTool->getChainGroup(eventTrigger);
+    auto cg = m_trigDecTool->getChainGroup(chainForEventTrigger);
     auto fc = cg->features();
 
 #if defined(XAOD_STANDALONE) || defined(XAOD_ANALYSIS)
@@ -358,7 +342,7 @@ namespace Trig {
     const std::vector< Trig::Feature<xAOD::MuonContainer> > MuFeatureContainers = fc.get<xAOD::MuonContainer>();
 #endif 
     
-    for(auto mucont : MuFeatureContainers){
+    for(const auto & mucont : MuFeatureContainers){
       for(auto mu : *mucont.cptr()){
 
 	// l1 matching
@@ -413,8 +397,7 @@ namespace Trig {
       chainInfo = p->second;
       return chainInfo.isValid;
     }
-    std::vector<std::string> tokens;
-    tokenize(chainInfo.chain, tokens, "_");
+    std::vector<std::string> tokens = tokenize(chainInfo.chain, '_');
     if (tokens.size() < 2) return false;
     if (tokens[0] != "HLT") return false;
     chainInfo.isSymmetric = (tokens[1].substr(0, 3) == "2mu");
@@ -422,15 +405,14 @@ namespace Trig {
     if(chainInfo.isSymmetric) {
       std::string threshold = std::string("HLT_" + tokens[1].substr(1));
       chainInfo.thresholds.first = threshold;
-      chainInfo.thresholds.second = threshold;
+      chainInfo.thresholds.second = std::move(threshold);
       chainInfo.isValid = true;
-      //if (tokens.size() == 3) chainInfo.tightness = tokens[2];
     }
     else {
       if(tokens.size() != 3) return false;
 
       std::string high = std::string("HLT_" + tokens[1]);
-      chainInfo.thresholds.first = high;
+      chainInfo.thresholds.first = std::move(high);
       chainInfo.thresholds.second = chainInfo.chain;
       chainInfo.isValid = true;
       return chainInfo.isValid;
@@ -440,10 +422,9 @@ namespace Trig {
   return chainInfo.isValid;
   }
   
-  bool TrigMuonMatching::isEqual(const double x,
-				 const double y) const
+  bool TrigMuonMatching::isEqual(const double x, const double y) const
   {
-    if (fabs(x - y) < std::numeric_limits<float>::epsilon()) return true;
+    if (std::fabs(x - y) < std::numeric_limits<float>::epsilon()) return true;
     return false;
   }
   

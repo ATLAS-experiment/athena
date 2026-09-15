@@ -2,14 +2,14 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <cmath>
+
 
 #include "SagittaRadiusEstimate.h"
 
 #include "xAODTrigMuon/TrigMuonDefs.h"
 
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
-
+#include <cmath>
 
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
@@ -63,6 +63,10 @@ StatusCode TrigL2MuonSA::SagittaRadiusEstimate::setSagittaRadius(const TrigRoiDe
         else if ( i_station == 1 ) chamberID = xAOD::L2MuonParameters::Chamber::BarrelMiddle;
         else if ( i_station == 2 ) chamberID = xAOD::L2MuonParameters::Chamber::BarrelOuter;
         else if ( i_station == 3 ) chamberID = xAOD::L2MuonParameters::Chamber::EndcapInner;
+        if (chamberID < 0)[[unlikely]]{
+          ATH_MSG_ERROR("Chamber ID is ill defined.");
+          return StatusCode::FAILURE;
+        }
         superPoints[i_station] = &(trackPattern.superPoints[chamberID]);
 
         if (superPoints[i_station]->R > ZERO_LIMIT)  {
@@ -97,7 +101,9 @@ StatusCode TrigL2MuonSA::SagittaRadiusEstimate::setSagittaRadius(const TrigRoiDe
 
         dx = x3 - x2;
         dy = y3 - y2;
-        
+        if (y2 == 0.)[[unlikely]]{
+          throw std::runtime_error("y2 is zero in setSagittaRadius");
+        }
         x0 = y0*x2/y2;
         
         c3  = dy;

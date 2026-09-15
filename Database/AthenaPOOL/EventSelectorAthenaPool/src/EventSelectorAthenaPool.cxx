@@ -118,6 +118,7 @@ StatusCode EventSelectorAthenaPool::initialize() {
 
    // Get AthenaPoolCnvSvc
    ATH_CHECK(m_athenaPoolCnvSvc.retrieve());
+   ATH_CHECK(m_poolSvc.retrieve());
    // Get CounterTool (if configured)
    if (!m_counterTool.empty()) {
       ATH_CHECK(m_counterTool.retrieve());
@@ -161,7 +162,7 @@ StatusCode EventSelectorAthenaPool::initialize() {
    }
 
    // Connect to PersistencySvc
-   if (!m_athenaPoolCnvSvc->getPoolSvc()->connect(Io::READ, IPoolSvc::kInputStream).isSuccess()) {
+   if (!m_poolSvc->connect(Io::READ, IPoolSvc::kInputStream).isSuccess()) {
       ATH_MSG_FATAL("Cannot connect to POOL PersistencySvc.");
       return StatusCode::FAILURE;
    }
@@ -632,7 +633,7 @@ StatusCode EventSelectorAthenaPool::seek(Context& /*ctxt*/, int evtNum) const {
          m_poolCollectionConverter = std::make_unique<PoolCollectionConverter>(m_collectionType.value(),
 	         m_inputCollectionsProp.value()[m_curCollection],
 	         IPoolSvc::kInputStream,
-	         m_athenaPoolCnvSvc->getPoolSvc());
+	         m_poolSvc.get());
          if (!m_poolCollectionConverter || !m_poolCollectionConverter->initialize().isSuccess()) {
             m_headerIterator = nullptr;
             ATH_MSG_ERROR("seek: Unable to initialize PoolCollectionConverter.");
@@ -675,7 +676,7 @@ int EventSelectorAthenaPool::findEvent(int evtNum) const {
          PoolCollectionConverter pcc(m_collectionType.value(),
 	         m_inputCollectionsProp.value()[i],
 	         IPoolSvc::kInputStream,
-	         m_athenaPoolCnvSvc->getPoolSvc());
+	         m_poolSvc.get());
          if (!pcc.initialize().isSuccess()) {
             break;
          }
@@ -717,7 +718,7 @@ EventSelectorAthenaPool::getCollectionCnv(bool throwIncidents) const {
       auto pCollCnv = std::make_unique<PoolCollectionConverter>(m_collectionType.value(),
 	      *m_inputCollectionsIterator,
 	      IPoolSvc::kInputStream,
-	      m_athenaPoolCnvSvc->getPoolSvc());
+	      m_poolSvc.get());
       StatusCode status = pCollCnv->initialize();
       if (!status.isSuccess()) {
          // Close previous collection.
@@ -739,7 +740,7 @@ EventSelectorAthenaPool::getCollectionCnv(bool throwIncidents) const {
                               *m_inputCollectionsIterator, {},
                               "eventless " + *m_inputCollectionsIterator);
             }
-            m_athenaPoolCnvSvc->getPoolSvc()->disconnectDb(*m_inputCollectionsIterator).ignore();
+            m_poolSvc->disconnectDb(*m_inputCollectionsIterator).ignore();
             ++m_inputCollectionsIterator;
          } else {
             return(pCollCnv);
@@ -825,7 +826,7 @@ StatusCode EventSelectorAthenaPool::io_reinit() {
       }
       if (savedName != fname) {
          ATH_MSG_DEBUG("Mapping value for [" << savedName << "] to [" << fname << "]");
-         m_athenaPoolCnvSvc->getPoolSvc()->renamePfn(savedName, fname);
+         m_poolSvc->renamePfn(savedName, fname);
       }
       updatedIndexes.insert(i);
       for (std::size_t j = i + 1; j < imax; j++) {
@@ -907,7 +908,7 @@ bool EventSelectorAthenaPool::disconnectIfFinished( const SG::SourceID &fid ) co
       // EndInputFile is handled by the InputFileIncidentGuard.
       if( !m_keepInputFilesOpen.value() ) {
          ATH_MSG_INFO("Disconnecting input sourceID: " << fid );
-         m_athenaPoolCnvSvc->getPoolSvc()->disconnectDb("FID:" + fid, IPoolSvc::kInputStream).ignore();
+         m_poolSvc->disconnectDb("FID:" + fid, IPoolSvc::kInputStream).ignore();
          m_activeEventsPerSource.erase( fid );
          return true;
       }

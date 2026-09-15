@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file TrigInDetEventTPCnv/test/TrigInDetTrackCnv_p3_test.cxx
@@ -159,10 +159,10 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
       315.5*315.5 };
   auto param = std::make_unique<TrigInDetTrackFitPar>
     (2.5, 3.5, 4.5, 5.5, 6.5, TrigInDetTrackFitPar::PERIGEE, 7.5,
-    new std::vector<double> (cov1));
+    new std::vector<double> (std::move(cov1)));
   auto endParam = std::make_unique<TrigInDetTrackFitPar>
     (102.5, 103.5, 104.5, 105.5, 106.5, TrigInDetTrackFitPar::BARREL, 107.5,
-    new std::vector<double> (cov2));
+    new std::vector<double> (std::move(cov2)));
   TrigInDetTrack trans1 (param.release(), endParam.release(), 1.5);
   trans1.algorithmId (TrigInDetTrack::IDSCANID);
   trans1.StrawHits (1);
