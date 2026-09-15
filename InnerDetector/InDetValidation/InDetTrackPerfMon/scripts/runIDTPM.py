@@ -8,6 +8,7 @@ def GetCustomAthArgs() :
     IDTPMparser = ArgumentParser( description='Parser for IDTPM configuration' )
     IDTPMparser.add_argument( "--inputFileNames", help="Comma-separated list of input files", required=True)
     IDTPMparser.add_argument( "--maxEvents", help="Limit number of events. Default: all input events", default=-1, type=int )
+    IDTPMparser.add_argument( "--threads", help="Athena number of threads", default=None, type=int )
     IDTPMparser.add_argument( "--debug", help="Enable debugging messages", action="store_true", default=False )
     IDTPMparser.add_argument( "--dirName", help="Main directory name for storing plots", default="InDetTrackPerfMonPlots/" )
     IDTPMparser.add_argument( "--outputFilePrefix", help='Name of output file', default="myIDTPM_out" )
@@ -60,6 +61,10 @@ flags.PhysVal.IDTPM.commonTrkAnaFlags = MyArgs.commonTrkAnaFlags
 flags = initializeIDTPMTrkAnaConfigFlags( flags )
 
 flags.PhysVal.doExample = False
+
+if MyArgs.threads:
+    flags.Concurrency.NumThreads = MyArgs.threads
+    flags.Concurrency.NumConcurrentEvents = 1 # given that the current IDTPM code is not thread-safe, limit the number of concurrent events to 1
 
 flags.lock()
 flags.dump()
