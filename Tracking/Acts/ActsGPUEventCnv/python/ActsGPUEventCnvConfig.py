@@ -5,6 +5,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthDeviceComps.AthDeviceCompsConfig import (
     HostMemoryResourceToolCfg,
     DeviceMemoryResourceToolCfg,
+    MemoryResourcesToolCfg,
     CopyToolCfg,
     CopiesToolCfg,
 )
@@ -127,8 +128,7 @@ def xAODToTracccMeasurementConverterAlgCfg(flags,
                                            name="xAODToTracccMeasurementConverterAlg",
                                            **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    kwargs.setdefault("HostMR", acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags)))
-    kwargs.setdefault("DeviceMR", acc.popToolsAndMerge(DeviceMemoryResourceToolCfg(flags)))
+    kwargs.setdefault("MemoryResourcesTool", acc.popToolsAndMerge(MemoryResourcesToolCfg(flags)))
     kwargs.setdefault("CopiesTool", acc.popToolsAndMerge(CopiesToolCfg(flags)))
     kwargs.setdefault("InputPixelClusters", "ITkPixelClusters")
     kwargs.setdefault("InputStripClusters", "ITkStripClusters")
@@ -146,8 +146,7 @@ def xAODToTracccSpacePointConverterAlgCfg(flags,
                                           name="xAODToTracccSpacePointConverterAlg",
                                           **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    kwargs.setdefault("HostMR", acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags)))
-    kwargs.setdefault("DeviceMR", acc.popToolsAndMerge(DeviceMemoryResourceToolCfg(flags)))
+    kwargs.setdefault("MemoryResourcesTool", acc.popToolsAndMerge(MemoryResourcesToolCfg(flags)))
     kwargs.setdefault("CopiesTool", acc.popToolsAndMerge(CopiesToolCfg(flags)))
     kwargs.setdefault("InputSpacePoints", ["ITkPixelSpacePoints"])
     kwargs.setdefault("InputMeasToCluster", "TracccMeasToPixelCluster")

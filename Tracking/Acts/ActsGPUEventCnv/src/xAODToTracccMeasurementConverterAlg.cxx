@@ -27,8 +27,7 @@ StatusCode xAODToTracccMeasurementConverterAlg::initialize()
   ATH_CHECK(m_outputMeasToPixelKey.initialize());
   ATH_CHECK(m_outputMeasToStripKey.initialize());
 
-  ATH_CHECK(m_hostMR.retrieve());
-  ATH_CHECK(m_deviceMR.retrieve());
+  ATH_CHECK(m_MRs.retrieve());
   ATH_CHECK(m_copiesTool.retrieve());
 
   ATH_CHECK(detStore()->retrieve(m_pixelID, "PixelID"));
@@ -145,12 +144,15 @@ StatusCode xAODToTracccMeasurementConverterAlg::execute(const EventContext& ctx)
     return a.localPosition[1] < b.localPosition[1];
   });
 
+  // Without a separate host memory resource the main memory resource is host accessible
+  std::pmr::memory_resource* hostMR = m_MRs->hostMR();
   auto hostCopy = m_copiesTool->hostCopy(ctx);
-  traccc::edm::measurement_collection::buffer measHostBuffer{nMeas, m_hostMR->mr()};
-  hostCopy->setup(measHostBuffer)->wait();
+  auto measHostBuffer = std::make_unique<traccc::edm::measurement_collection::buffer>(
+      nMeas, hostMR ? *hostMR : m_MRs->mainMR());
+  hostCopy->setup(*measHostBuffer)->wait();
 
   // Create a "device" collection around the buffer to work on it
-  traccc::edm::measurement_collection::device measurements{measHostBuffer};
+  traccc::edm::measurement_collection::device measurements{*measHostBuffer};
 
   auto measToPixel = std::make_unique<std::vector<unsigned int>>(nMeas, invalidIndex);
   auto measToStrip = std::make_unique<std::vector<unsigned int>>(nMeas, invalidIndex);
@@ -178,16 +180,19 @@ StatusCode xAODToTracccMeasurementConverterAlg::execute(const EventContext& ctx)
     }
   }
 
-  auto deviceCopy = m_copiesTool->deviceCopy(ctx);
-  auto measDeviceBuffer = std::make_unique<traccc::edm::measurement_collection::buffer>(
-      measHostBuffer.capacity(), m_deviceMR->mr());
-
-  // We ignore() the setup and wait() on the copy to allow parallelism.
-  deviceCopy->setup(*measDeviceBuffer)->ignore();
-  (*deviceCopy)(measHostBuffer, *measDeviceBuffer)->wait();
-
   auto measHandle = SG::makeHandle(m_outputMeasKey, ctx);
-  ATH_CHECK(measHandle.record(std::move(measDeviceBuffer)));
+  if (hostMR) {
+    auto deviceCopy = m_copiesTool->deviceCopy(ctx);
+    auto measDeviceBuffer = std::make_unique<traccc::edm::measurement_collection::buffer>(
+        measHostBuffer->capacity(), m_MRs->mainMR());
+
+    // We ignore() the setup and wait() on the copy to allow parallelism.
+    deviceCopy->setup(*measDeviceBuffer)->ignore();
+    (*deviceCopy)(*measHostBuffer, *measDeviceBuffer)->wait();
+    ATH_CHECK(measHandle.record(std::move(measDeviceBuffer)));
+  } else {
+    ATH_CHECK(measHandle.record(std::move(measHostBuffer)));
+  }
 
   auto measToPixelHandle = SG::makeHandle(m_outputMeasToPixelKey, ctx);
   ATH_CHECK(measToPixelHandle.record(std::move(measToPixel)));

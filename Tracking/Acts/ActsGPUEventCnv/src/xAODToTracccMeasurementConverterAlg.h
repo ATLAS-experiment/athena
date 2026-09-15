@@ -14,7 +14,7 @@
 #include "ActsGPUEvent/TracccDetectorDesignDescription.h"
 #include "ActsGPUEvent/GeometryIdMapping.h"
 
-#include "AthDeviceInterfaces/IMemoryResourceTool.h"
+#include "AthDeviceInterfaces/IMemoryResourcesTool.h"
 #include "AthDeviceInterfaces/ICopiesTool.h"
 
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
@@ -25,6 +25,7 @@
 
 #include <array>
 #include <atomic>
+#include <memory_resource>
 #include <cstdint>
 #include <unordered_map>
 #include <vector>
@@ -99,12 +100,11 @@ private:
       "Output mapping from traccc measurement index to xAOD strip cluster index"};
   /// @}
 
-  /// @name The memory resource and copy tools
+  /// @name The memory resources and copy tools
   /// {@
-  ToolHandle<AthDevice::IMemoryResourceTool> m_hostMR{
-      this, "HostMR", "", "The host memory resource tool to use"};
-  ToolHandle<AthDevice::IMemoryResourceTool> m_deviceMR{
-      this, "DeviceMR", "", "The device memory resource tool to use"};
+  ToolHandle<AthDevice::IMemoryResourcesTool> m_MRs{
+      this, "MemoryResourcesTool", "",
+      "The memory resources tool to use for allocating memory on the host and the device"};
   ToolHandle<AthDevice::ICopiesTool> m_copiesTool{
       this, "CopiesTool", "", "Tool that provides host and device copy objects"};
   /// @}

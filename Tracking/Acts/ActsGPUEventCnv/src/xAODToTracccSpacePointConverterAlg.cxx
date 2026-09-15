@@ -30,8 +30,7 @@ StatusCode xAODToTracccSpacePointConverterAlg::initialize()
   ATH_CHECK(m_outputSPContainerKey.initialize());
   ATH_CHECK(m_outputSPIndexKey.initialize());
 
-  ATH_CHECK(m_hostMR.retrieve());
-  ATH_CHECK(m_deviceMR.retrieve());
+  ATH_CHECK(m_MRs.retrieve());
   ATH_CHECK(m_copiesTool.retrieve());
 
   ATH_MSG_DEBUG("Successfully initialized");
@@ -64,12 +63,15 @@ StatusCode xAODToTracccSpacePointConverterAlg::execute(const EventContext& ctx) 
   ATH_MSG_DEBUG("Found " << nSpacePoints << " space points in "
                 << spacePointHandles.size() << " containers");
 
+  // Without a separate host memory resource the main memory resource is host accessible
+  std::pmr::memory_resource* hostMR = m_MRs->hostMR();
   auto hostCopy = m_copiesTool->hostCopy(ctx);
-  traccc::edm::spacepoint_collection::buffer spHostBuffer{nSpacePoints, m_hostMR->mr()};
-  hostCopy->setup(spHostBuffer)->wait();
+  auto spHostBuffer = std::make_unique<traccc::edm::spacepoint_collection::buffer>(
+      nSpacePoints, hostMR ? *hostMR : m_MRs->mainMR());
+  hostCopy->setup(*spHostBuffer)->wait();
 
   // Create a "device" collection around the buffer to work on it
-  traccc::edm::spacepoint_collection::device spacepoints{spHostBuffer};
+  traccc::edm::spacepoint_collection::device spacepoints{*spHostBuffer};
 
   auto spToContainer = std::make_unique<std::vector<unsigned int>>(nSpacePoints, invalidIndex);
   auto spToIndex = std::make_unique<std::vector<unsigned int>>(nSpacePoints, invalidIndex);
@@ -125,16 +127,19 @@ StatusCode xAODToTracccSpacePointConverterAlg::execute(const EventContext& ctx) 
     }
   }
 
-  auto deviceCopy = m_copiesTool->deviceCopy(ctx);
-  auto spDeviceBuffer = std::make_unique<traccc::edm::spacepoint_collection::buffer>(
-      spHostBuffer.capacity(), m_deviceMR->mr());
-
-  // We ignore() the setup and wait() on the copy to allow parallelism.
-  deviceCopy->setup(*spDeviceBuffer)->ignore();
-  (*deviceCopy)(spHostBuffer, *spDeviceBuffer)->wait();
-
   auto spHandle = SG::makeHandle(m_outputSPKey, ctx);
-  ATH_CHECK(spHandle.record(std::move(spDeviceBuffer)));
+  if (hostMR) {
+    auto deviceCopy = m_copiesTool->deviceCopy(ctx);
+    auto spDeviceBuffer = std::make_unique<traccc::edm::spacepoint_collection::buffer>(
+        spHostBuffer->capacity(), m_MRs->mainMR());
+
+    // We ignore() the setup and wait() on the copy to allow parallelism.
+    deviceCopy->setup(*spDeviceBuffer)->ignore();
+    (*deviceCopy)(*spHostBuffer, *spDeviceBuffer)->wait();
+    ATH_CHECK(spHandle.record(std::move(spDeviceBuffer)));
+  } else {
+    ATH_CHECK(spHandle.record(std::move(spHostBuffer)));
+  }
   auto spToContainerHandle = SG::makeHandle(m_outputSPContainerKey, ctx);
   ATH_CHECK(spToContainerHandle.record(std::move(spToContainer)));
   auto spToIndexHandle = SG::makeHandle(m_outputSPIndexKey, ctx);

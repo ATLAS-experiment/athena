@@ -12,13 +12,14 @@
 
 #include "ActsGPUEvent/TracccSpacepointCollection.h"
 
-#include "AthDeviceInterfaces/IMemoryResourceTool.h"
+#include "AthDeviceInterfaces/IMemoryResourcesTool.h"
 #include "AthDeviceInterfaces/ICopiesTool.h"
 
 #include "xAODInDetMeasurement/SpacePointContainer.h"
 #include "SGTools/StlVectorClids.h"
 
 #include <atomic>
+#include <memory_resource>
 #include <vector>
 
 namespace ActsTrk {
@@ -83,12 +84,11 @@ private:
       "Output mapping from traccc spacepoint index to index in the input container"};
   /// @}
 
-  /// @name The memory resource and copy tools
+  /// @name The memory resources and copy tools
   /// {@
-  ToolHandle<AthDevice::IMemoryResourceTool> m_hostMR{
-      this, "HostMR", "", "The host memory resource tool to use"};
-  ToolHandle<AthDevice::IMemoryResourceTool> m_deviceMR{
-      this, "DeviceMR", "", "The device memory resource tool to use"};
+  ToolHandle<AthDevice::IMemoryResourcesTool> m_MRs{
+      this, "MemoryResourcesTool", "",
+      "The memory resources tool to use for allocating memory on the host and the device"};
   ToolHandle<AthDevice::ICopiesTool> m_copiesTool{
       this, "CopiesTool", "", "Tool that provides host and device copy objects"};
   /// @}
