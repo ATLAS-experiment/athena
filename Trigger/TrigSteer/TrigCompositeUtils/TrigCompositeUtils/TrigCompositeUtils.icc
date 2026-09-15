@@ -145,15 +145,15 @@ namespace TrigCompositeUtils {
 
   // DEPRECATED
   template<class CONTAINER>
-  void filterLinkVectorByContainerKey(const std::string& containerSGKey, std::vector<ElementLink<CONTAINER>>& vector) {
+  void filterLinkVectorByContainerKey(std::string_view containerSGKey, std::vector<ElementLink<CONTAINER>>& vector) {
     if (containerSGKey.empty()) {
       return;
     }
-    auto it = std::remove_if(vector.begin(), vector.end(), [&](const ElementLink<CONTAINER>& el) {
- 	return  !std::regex_match( el.dataID(), std::regex(containerSGKey) );
-      });
-    // Collection has been re-ordered to put the bad elements at the end
-    vector.erase(it, vector.end());
+    //note: if this is simple text, then plain equality will be much quicker
+    const std::regex pattern(containerSGKey.begin(), containerSGKey.end());
+    std::erase_if(vector, [&pattern](const auto& el) {
+ 	    return  !std::regex_match( el.dataID(), pattern );
+    });
   }
 
   // DEPRECATED
