@@ -84,7 +84,7 @@ namespace Trig{
           //so we'll let this slip silently
           return;
         }
-        data.push_back(Trig::TypelessFeature(answer,source,typelessholder->label()));
+        data.emplace_back(answer,source,typelessholder->label());
       }
     }
   } // EOF namespace FeatureAccessImpl 

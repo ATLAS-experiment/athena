@@ -79,7 +79,7 @@ namespace Trig {
     };
 
     template<class T>
-    const T* use_or_construct(const T* source, const HLT::TriggerElement* te, const std::string& label,
+    const T* use_or_construct(const T* source, const HLT::TriggerElement* te,
                               unsigned int condition, const HLT::NavigationCore* navigation ) {
 
       if constexpr(!isDataVector<T>) {
@@ -133,7 +133,7 @@ namespace Trig {
         }
       }
       else {
-        const T* possibly_reduced_container = use_or_construct<T>(source, te, label, condition, navigation);
+        const T* possibly_reduced_container = use_or_construct<T>(source, te, condition, navigation);
 
         destination.push_back(Trig::Feature<T>(possibly_reduced_container, te, label,
                                                // true: Feature<T> deletes container at deletion
