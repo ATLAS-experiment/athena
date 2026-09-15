@@ -43,7 +43,7 @@ StatusCode xAODToTracccMeasurementConverterAlg::initialize()
   for (unsigned int i = 0; i < gids.size(); ++i) {
     m_detrayIdToCondIndex[gids[i].value()] = i;
   }
-  ATH_MSG_INFO("Built detray→detcond map with "
+  ATH_MSG_INFO("Built detray->detcond map with "
       << m_detrayIdToCondIndex.size() << " entries");
 
   ATH_MSG_DEBUG("Successfully initialized");
@@ -144,7 +144,6 @@ StatusCode xAODToTracccMeasurementConverterAlg::execute(const EventContext& ctx)
     return a.localPosition[1] < b.localPosition[1];
   });
 
-  // Without a separate host memory resource the main memory resource is host accessible
   std::pmr::memory_resource* hostMR = m_MRs->hostMR();
   auto hostCopy = m_copiesTool->hostCopy(ctx);
   auto measHostBuffer = std::make_unique<traccc::edm::measurement_collection::buffer>(

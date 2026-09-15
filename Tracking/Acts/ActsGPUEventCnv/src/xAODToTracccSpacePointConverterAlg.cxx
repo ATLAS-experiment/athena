@@ -63,7 +63,6 @@ StatusCode xAODToTracccSpacePointConverterAlg::execute(const EventContext& ctx) 
   ATH_MSG_DEBUG("Found " << nSpacePoints << " space points in "
                 << spacePointHandles.size() << " containers");
 
-  // Without a separate host memory resource the main memory resource is host accessible
   std::pmr::memory_resource* hostMR = m_MRs->hostMR();
   auto hostCopy = m_copiesTool->hostCopy(ctx);
   auto spHostBuffer = std::make_unique<traccc::edm::spacepoint_collection::buffer>(
