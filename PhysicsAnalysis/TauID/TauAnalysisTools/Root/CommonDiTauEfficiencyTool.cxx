@@ -378,7 +378,7 @@ void CommonDiTauEfficiencyTool::generateSystematicSets()
   if (sTruthType=="TRUEHADTAU") m_eCheckTruth = TauAnalysisTools::TruthHadronicTau;
   if (sTruthType=="TRUEHADDITAU") m_eCheckTruth = TauAnalysisTools::TruthHadronicDiTau;
 
-  for (auto mSF : *m_mSF)
+  for (const auto & mSF : *m_mSF)
   {
     // parse for nuisance parameter in histogram name
     std::vector<std::string> vSplitNP = {};
