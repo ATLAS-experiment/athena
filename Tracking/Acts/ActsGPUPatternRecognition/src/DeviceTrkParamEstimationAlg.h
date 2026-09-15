@@ -12,6 +12,7 @@
 #include "IDeviceTrkParamAlgProviderTool.h"
 #include "AthDeviceInterfaces/ICopyTool.h"
 #include "ActsGPUEvent/TracccMagField.h"
+#include "ActsGPUEvent/TracccDetectorGeometryDescription.h"
 #include "ActsGPUEvent/TracccTrkParamCollection.h"
 #include "ActsGPUEvent/TracccSeedCollection.h"
 #include "ActsGPUEvent/TracccSpacepointCollection.h"
@@ -73,6 +74,11 @@ private:
     Gaudi::Property<std::string> m_inputMagFieldKey{
         this, "InputTracccMagField", "",
         "Input traccc inhom. mag. field"};
+    /// @name The name of device resident input traccc detector geometry,
+    /// required for spacepoints made of two measurements
+    Gaudi::Property<std::string> m_deviceDetectorObjectName{
+        this, "InputTracccDetectorGeometry", "",
+        "Input traccc detector geometry"};
 
     /// @name The name of device resident output traccc track parameter collection
     /// {@
@@ -83,6 +89,7 @@ private:
 
     traccc::track_params_estimation_config m_trkparam_config;
     const traccc::magnetic_field* m_deviceMagField{nullptr};
+    const traccc::detector_buffer* m_deviceDetector{nullptr};
 
 };
 
