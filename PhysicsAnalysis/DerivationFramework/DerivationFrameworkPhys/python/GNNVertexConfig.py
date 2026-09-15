@@ -25,13 +25,10 @@ def CustomJetsCfg(flags):
 
     acc = ComponentAccumulator()
 
-    CustomJetContainerName = "AntiKt4EMTopoCustomVtxGNNJets"
-
     from JetRecConfig.StandardJetConstits import stdInputExtDic, JetInputExternal, JetInputConstitSeq, JetConstitModifier, xAODType
     from JetRecConfig.JetDefinition import JetDefinition 
     from JetRecConfig.StandardSmallRJets import AntiKt4EMTopo
     from JetRecTools import JetRecToolsConfig as jrtcfg
-    from JetMomentTools import JetMomentToolsConfig
     from JetRecConfig.StandardJetConstits import stdConstitDic, stdContitModifDic
     from JetRecConfig.StandardJetContext import inputsFromContext
     from JetRecConfig.JetInputConfig import buildEventShapeAlg
