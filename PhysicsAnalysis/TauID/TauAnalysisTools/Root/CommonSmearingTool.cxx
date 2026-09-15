@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Framework include(s):
@@ -14,6 +14,8 @@
 
 // ROOT include(s)
 #include "TROOT.h"
+#include "TFile.h"
+#include "TH1.h"
 #include "TF1.h"
 #include "TClass.h"
 #include "TKey.h"
