@@ -56,18 +56,18 @@ def TrigIDR4Monitoring( flags=None, name=None, monlevel=None ) :
 # like this ...
 
 # TIDAsignature( flags, "Egamma", key, toolkey, tools, monlevel, 
-#               [ "HLT_e.(?!.*lrtloose.*).*idperf(?!.*lrtloose.*).*:key=HLT_IDTrack_Electron_FTF:roi=HLT_Roi_FastElectron",  
-#                 "HLT_e.(?!.*lrtloose.*).*idperf(?!.*lrtloose.*).*:key=HLT_IDTrack_Electron_IDTrig",
-#                 "HLT_e.(?!.*lrtloose.*).*idperf(?!.*lrtloose.*)(?!.*nogsf.*).*:key=HLT_IDTrack_Electron_GSF",                              
-#                 "HLT_e.*_lhtight.*_e.*_idperf_tight_nogsf_probe_.*inv.*:key=HLT_IDTrack_Electron_FTF:roi=HLT_Roi_FastElectron:te=1",
-#                 "HLT_e.*_lhtight.*_e.*_idperf_tight_nogsf_probe_.*inv.*:key=HLT_IDTrack_Electron_FTF:extra=el_tag:roi=HLT_Roi_FastElectron:te=0",
-#                 "HLT_e.*_lhtight.*_e.*_idperf_tight_nogsf_probe_.*inv.*:key=HLT_IDTrack_Electron_FTF:extra=el_probe:roi=HLT_Roi_FastElectron:te=1",
-#                 "HLT_e.*_lhtight.*_e.*_idperf_tight_nogsf_probe_.*inv.*:key=HLT_IDTrack_Electron_IDTrig:te=1",
-#                 "HLT_e.*_lhtight.*_e.*_idperf_tight_nogsf_probe_.*inv.*:key=HLT_IDTrack_Electron_IDTrig:extra=el_tag:te=0",
-#                 "HLT_e.*_lhtight.*_e.*_idperf_tight_nogsf_probe_.*inv.*:key=HLT_IDTrack_Electron_IDTrig:extra=el_probe:te=1",
-#                 "HLT_e.*_lhtight.*_e.*_idperf_tight_probe_.*inv.*:key=HLT_IDTrack_Electron_GSF:te=1",
-#                 "HLT_e.*_lhtight.*_e.*_idperf_tight_probe_.*inv.*:key=HLT_IDTrack_Electron_GSF:extra=el_tag:te=0",
-#                 "HLT_e.*_lhtight.*_e.*_idperf_tight_probe_.*inv.*:key=HLT_IDTrack_Electron_GSF:extra=el_probe:te=1" ] ) 
+#               [ "EF_e.(?!.*lrtloose.*).*idperf(?!.*lrtloose.*).*:key=HLT_IDTrack_Electron_FTF:roi=HLT_Roi_FastElectron",  
+#                 "EF_e.(?!.*lrtloose.*).*idperf(?!.*lrtloose.*).*:key=HLT_IDTrack_Electron_IDTrig",
+#                 "EF_e.(?!.*lrtloose.*).*idperf(?!.*lrtloose.*)(?!.*nogsf.*).*:key=HLT_IDTrack_Electron_GSF",                              
+#                 "EF_e.*_lhtight.*_e.*_idperf_tight_nogsf_probe_.*inv.*:key=HLT_IDTrack_Electron_FTF:roi=HLT_Roi_FastElectron:te=1",
+#                 "EF_e.*_lhtight.*_e.*_idperf_tight_nogsf_probe_.*inv.*:key=HLT_IDTrack_Electron_FTF:extra=el_tag:roi=HLT_Roi_FastElectron:te=0",
+#                 "EF_e.*_lhtight.*_e.*_idperf_tight_nogsf_probe_.*inv.*:key=HLT_IDTrack_Electron_FTF:extra=el_probe:roi=HLT_Roi_FastElectron:te=1",
+#                 "EF_e.*_lhtight.*_e.*_idperf_tight_nogsf_probe_.*inv.*:key=HLT_IDTrack_Electron_IDTrig:te=1",
+#                 "EF_e.*_lhtight.*_e.*_idperf_tight_nogsf_probe_.*inv.*:key=HLT_IDTrack_Electron_IDTrig:extra=el_tag:te=0",
+#                 "EF_e.*_lhtight.*_e.*_idperf_tight_nogsf_probe_.*inv.*:key=HLT_IDTrack_Electron_IDTrig:extra=el_probe:te=1",
+#                 "EF_e.*_lhtight.*_e.*_idperf_tight_probe_.*inv.*:key=HLT_IDTrack_Electron_GSF:te=1",
+#                 "EF_e.*_lhtight.*_e.*_idperf_tight_probe_.*inv.*:key=HLT_IDTrack_Electron_GSF:extra=el_tag:te=0",
+#                 "EF_e.*_lhtight.*_e.*_idperf_tight_probe_.*inv.*:key=HLT_IDTrack_Electron_GSF:extra=el_probe:te=1" ] ) 
                
 
 def TrigIDR4Monsignature( flags, signature, key, toolkey, tools, monlevel, chain_regex ) :
@@ -108,18 +108,18 @@ def TIDR4MonElectron( flags, key, toolkey, tools, monlevel ) :
         from TrigInDetMonitoring.TIDAChains import getchains
         
         chains = getchains( flags, 
-                            [ "HLT_e.(?!.*lrtloose.*).*idperf(?!.*lrtloose.*).*:key=HLT_IDTrack_Electron_FTF:roi=HLT_Roi_FastElectron",  
-                              "HLT_e.(?!.*lrtloose.*).*idperf(?!.*lrtloose.*).*:key=HLT_IDTrack_Electron_IDTrig",
-                              "HLT_e.(?!.*lrtloose.*).*idperf(?!.*lrtloose.*)(?!.*nogsf.*).*:key=HLT_IDTrack_Electron_GSF",                              
-                              "HLT_e.*_lhtight.*_e.*_idperf_tight_nogsf_probe_.*inv.*:key=HLT_IDTrack_Electron_FTF:roi=HLT_Roi_FastElectron:te=1",
-                              "HLT_e.*_lhtight.*_e.*_idperf_tight_nogsf_probe_.*inv.*:key=HLT_IDTrack_Electron_FTF:extra=el_tag:roi=HLT_Roi_FastElectron:te=0",
-                              "HLT_e.*_lhtight.*_e.*_idperf_tight_nogsf_probe_.*inv.*:key=HLT_IDTrack_Electron_FTF:extra=el_probe:roi=HLT_Roi_FastElectron:te=1",
-                              "HLT_e.*_lhtight.*_e.*_idperf_tight_nogsf_probe_.*inv.*:key=HLT_IDTrack_Electron_IDTrig:te=1",
-                              "HLT_e.*_lhtight.*_e.*_idperf_tight_nogsf_probe_.*inv.*:key=HLT_IDTrack_Electron_IDTrig:extra=el_tag:te=0",
-                              "HLT_e.*_lhtight.*_e.*_idperf_tight_nogsf_probe_.*inv.*:key=HLT_IDTrack_Electron_IDTrig:extra=el_probe:te=1",
-                              "HLT_e.*_lhtight.*_e.*_idperf_tight_probe_.*inv.*:key=HLT_IDTrack_Electron_GSF:te=1",
-                              "HLT_e.*_lhtight.*_e.*_idperf_tight_probe_.*inv.*:key=HLT_IDTrack_Electron_GSF:extra=el_tag:te=0",
-                              "HLT_e.*_lhtight.*_e.*_idperf_tight_probe_.*inv.*:key=HLT_IDTrack_Electron_GSF:extra=el_probe:te=1" ], monlevel )
+                            [ "EF_e.(?!.*lrtloose.*).*idperf(?!.*lrtloose.*).*:key=HLT_IDTrack_Electron_FTF:roi=HLT_Roi_FastElectron",  
+                              "EF_e.(?!.*lrtloose.*).*idperf(?!.*lrtloose.*).*:key=HLT_IDTrack_Electron_IDTrig",
+                              "EF_e.(?!.*lrtloose.*).*idperf(?!.*lrtloose.*)(?!.*nogsf.*).*:key=HLT_IDTrack_Electron_GSF",                              
+                              "EF_e.*_lhtight.*_e.*_idperf_tight_nogsf_probe_.*inv.*:key=HLT_IDTrack_Electron_FTF:roi=HLT_Roi_FastElectron:te=1",
+                              "EF_e.*_lhtight.*_e.*_idperf_tight_nogsf_probe_.*inv.*:key=HLT_IDTrack_Electron_FTF:extra=el_tag:roi=HLT_Roi_FastElectron:te=0",
+                              "EF_e.*_lhtight.*_e.*_idperf_tight_nogsf_probe_.*inv.*:key=HLT_IDTrack_Electron_FTF:extra=el_probe:roi=HLT_Roi_FastElectron:te=1",
+                              "EF_e.*_lhtight.*_e.*_idperf_tight_nogsf_probe_.*inv.*:key=HLT_IDTrack_Electron_IDTrig:te=1",
+                              "EF_e.*_lhtight.*_e.*_idperf_tight_nogsf_probe_.*inv.*:key=HLT_IDTrack_Electron_IDTrig:extra=el_tag:te=0",
+                              "EF_e.*_lhtight.*_e.*_idperf_tight_nogsf_probe_.*inv.*:key=HLT_IDTrack_Electron_IDTrig:extra=el_probe:te=1",
+                              "EF_e.*_lhtight.*_e.*_idperf_tight_probe_.*inv.*:key=HLT_IDTrack_Electron_GSF:te=1",
+                              "EF_e.*_lhtight.*_e.*_idperf_tight_probe_.*inv.*:key=HLT_IDTrack_Electron_GSF:extra=el_tag:te=0",
+                              "EF_e.*_lhtight.*_e.*_idperf_tight_probe_.*inv.*:key=HLT_IDTrack_Electron_GSF:extra=el_probe:te=1" ], monlevel )
 
         if  len(chains)>0 : 
 
@@ -145,10 +145,10 @@ def TIDR4MonElectronLRT( flags, key, toolkey, tools, monlevel ) :
         from TrigInDetMonitoring.TIDAChains import getchains
 
         chains = getchains( flags, 
-                            [ "HLT_e.*idperf_loose_lrtloose.*:key=HLT_IDTrack_ElecLRT_FTF:roi=HLT_Roi_FastElectron_LRT",
-                              "HLT_e.*idperf_loose_lrtloose.*:key=HLT_IDTrack_ElecLRT_IDTrig:roi=HLT_Roi_FastElectron_LRT",
-                              "HLT_e.*lrtloose_idperf.*:key=HLT_IDTrack_ElecLRT_FTF:roi=HLT_Roi_FastElectron_FTF",
-                              "HLT_e.*lrtloose_idperf.*:key=HLT_IDTrack_ElecLRT_IDTrig:roi=HLT_Roi_FastElectron_LRT",
+                            [ "EF_e.*idperf_loose_lrtloose.*:key=HLT_IDTrack_ElecLRT_FTF:roi=HLT_Roi_FastElectron_LRT",
+                              "EF_e.*idperf_loose_lrtloose.*:key=HLT_IDTrack_ElecLRT_IDTrig:roi=HLT_Roi_FastElectron_LRT",
+                              "EF_e.*lrtloose_idperf.*:key=HLT_IDTrack_ElecLRT_FTF:roi=HLT_Roi_FastElectron_FTF",
+                              "EF_e.*lrtloose_idperf.*:key=HLT_IDTrack_ElecLRT_IDTrig:roi=HLT_Roi_FastElectron_LRT",
                             ], monlevel )
         
         if len(chains)>0 : 
@@ -182,26 +182,26 @@ def TIDR4MonMuon( flags, key, toolkey, tools, monlevel ) :
         from TrigInDetMonitoring.TIDAChains import getchains
         
         chains = getchains( flags, 
-                            [ "HLT_mu(?!.*LRT.*)(?!.*tau.*).*_idperf.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon",
-                              "HLT_mu(?!.*LRT.*)(?!.*tau.*).*_idperf.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon",
-                              "HLT_mu.*ivarperf.*:key=HLT_IDTrack_MuonIso_FTF:roi=HLT_Roi_MuonIso",
-                              "HLT_mu.*ivarperf.*:key=HLT_IDTrack_MuonIso_IDTrig:roi=HLT_Roi_MuonIso",
-                              "HLT_mu.*_mu.*_idperf.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon",
-                              "HLT_mu.*_mu.*_idperf.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon",
-                              "HLT_mu.*_mu.*idtp.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon",
-                              "HLT_mu.*_mu.*idtp.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon",
-                              "HLT_mu.*_mu.*idtp.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:te=1",
-                              "HLT_mu.*_mu.*idtp.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:te=1",
-                              "HLT_mu.*_mu.*idtp.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:extra=mu_tag:te=0",
-                              "HLT_mu.*_mu.*idtp.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:extra=mu_probe:te=1",
-                              "HLT_mu.*_mu.*idtp.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:extra=mu_tag:te=0",
-                              "HLT_mu.*_mu.*idtp.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:extra=mu_probe:te=1",
-                              "HLT_mu.*_mu.*_idperf.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:te=1",
-                              "HLT_mu.*_mu.*_idperf.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:te=1",
-                              "HLT_mu.*_mu.*_idperf.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:extra=mu_tag:te=0",
-                              "HLT_mu.*_mu.*_idperf.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:extra=mu_probe:te=1",
-                              "HLT_mu.*_mu.*_idperf.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:extra=mu_tag:te=0",
-                              "HLT_mu.*_mu.*_idperf.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:extra=mu_probe:te=1" ], monlevel )
+                            [ "EF_mu(?!.*LRT.*)(?!.*tau.*).*_idperf.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon",
+                              "EF_mu(?!.*LRT.*)(?!.*tau.*).*_idperf.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon",
+                              "EF_mu.*ivarperf.*:key=HLT_IDTrack_MuonIso_FTF:roi=HLT_Roi_MuonIso",
+                              "EF_mu.*ivarperf.*:key=HLT_IDTrack_MuonIso_IDTrig:roi=HLT_Roi_MuonIso",
+                              "EF_mu.*_mu.*_idperf.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon",
+                              "EF_mu.*_mu.*_idperf.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon",
+                              "EF_mu.*_mu.*idtp.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon",
+                              "EF_mu.*_mu.*idtp.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon",
+                              "EF_mu.*_mu.*idtp.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:te=1",
+                              "EF_mu.*_mu.*idtp.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:te=1",
+                              "EF_mu.*_mu.*idtp.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:extra=mu_tag:te=0",
+                              "EF_mu.*_mu.*idtp.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:extra=mu_probe:te=1",
+                              "EF_mu.*_mu.*idtp.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:extra=mu_tag:te=0",
+                              "EF_mu.*_mu.*idtp.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:extra=mu_probe:te=1",
+                              "EF_mu.*_mu.*_idperf.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:te=1",
+                              "EF_mu.*_mu.*_idperf.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:te=1",
+                              "EF_mu.*_mu.*_idperf.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:extra=mu_tag:te=0",
+                              "EF_mu.*_mu.*_idperf.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:extra=mu_probe:te=1",
+                              "EF_mu.*_mu.*_idperf.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:extra=mu_tag:te=0",
+                              "EF_mu.*_mu.*_idperf.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:extra=mu_probe:te=1" ], monlevel )
                               
         if len(chains)>0 : 
 
@@ -225,8 +225,8 @@ def TIDR4MonMuonLRT( flags, key, toolkey, tools, monlevel ) :
         from TrigInDetMonitoring.TIDAChains import getchains
         
         chains = getchains( flags, 
-                            [ "HLT_mu.*_LRT_idperf.*:key=HLT_IDTrack_MuonLRT_FTF:roi=HLT_Roi_L2SAMuon_LRT",
-                              "HLT_mu.*_LRT_idperf.*:key=HLT_IDTrack_MuonLRT_IDTrig:roi=HLT_Roi_L2SAMuon_LRT"], monlevel )
+                            [ "EF_mu.*_LRT_idperf.*:key=HLT_IDTrack_MuonLRT_FTF:roi=HLT_Roi_L2SAMuon_LRT",
+                              "EF_mu.*_LRT_idperf.*:key=HLT_IDTrack_MuonLRT_IDTrig:roi=HLT_Roi_L2SAMuon_LRT"], monlevel )
 
         if len(chains)>0 :
 
@@ -253,18 +253,18 @@ def TIDR4MonTau( flags, key, toolkey, tools, monlevel ) :
         from TrigInDetMonitoring.TIDAChains import getchains
         
         chains = getchains( flags, 
-                            [ "HLT_tau.*idperf.*tracktwoMVA_.*:key=HLT_IDTrack_TauCore_FTF:roi=HLT_Roi_TauCore",
-                              "HLT_tau.*idperf.*tracktwoMVA_.*:key=HLT_IDTrack_TauIso_FTF:roi=HLT_Roi_TauIso",
-                              "HLT_tau.*idperf.*tracktwoMVA_.*:key=HLT_IDTrack_Tau_IDTrig:roi=HLT_Roi_TauIso",
-                              "HLT_mu.*tau.*idperf.*:key=HLT_IDTrack_TauCore_FTF:roi=HLT_Roi_TauCore",
-                              "HLT_mu.*tau.*idperf.*:key=HLT_IDTrack_TauIso_FTF:roi=HLT_Roi_TauIso",
-                              "HLT_mu.*tau.*idperf.*:key=HLT_IDTrack_Tau_IDTrig:roi=HLT_Roi_TauIso",
-                              "HLT_mu.*tau.*idperf.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:extra=tau1_tag:te=0",
-                              "HLT_mu.*tau.*idperf.*:key=HLT_IDTrack_TauCore_FTF:roi=HLT_Roi_TauCore:extra=tau1_probe:te=1",
-                              "HLT_mu.*tau.*idperf.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:extra=tau0_tag:te=0",
-                              "HLT_mu.*tau.*idperf.*:key=HLT_IDTrack_TauIso_FTF:roi=HLT_Roi_TauIso:extra=tau0_probe:te=1",
-                              "HLT_mu.*tau.*idperf.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:extra=tau_tag:te=0",
-                              "HLT_mu.*tau.*idperf.*:key=HLT_IDTrack_Tau_IDTrig:roi=HLT_Roi_TauIso:extra=tau_probe:te=1" ],  monlevel )
+                            [ "EF_tau.*idperf.*tracktwoMVA_.*:key=HLT_IDTrack_TauCore_FTF:roi=HLT_Roi_TauCore",
+                              "EF_tau.*idperf.*tracktwoMVA_.*:key=HLT_IDTrack_TauIso_FTF:roi=HLT_Roi_TauIso",
+                              "EF_tau.*idperf.*tracktwoMVA_.*:key=HLT_IDTrack_Tau_IDTrig:roi=HLT_Roi_TauIso",
+                              "EF_mu.*tau.*idperf.*:key=HLT_IDTrack_TauCore_FTF:roi=HLT_Roi_TauCore",
+                              "EF_mu.*tau.*idperf.*:key=HLT_IDTrack_TauIso_FTF:roi=HLT_Roi_TauIso",
+                              "EF_mu.*tau.*idperf.*:key=HLT_IDTrack_Tau_IDTrig:roi=HLT_Roi_TauIso",
+                              "EF_mu.*tau.*idperf.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:extra=tau1_tag:te=0",
+                              "EF_mu.*tau.*idperf.*:key=HLT_IDTrack_TauCore_FTF:roi=HLT_Roi_TauCore:extra=tau1_probe:te=1",
+                              "EF_mu.*tau.*idperf.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:extra=tau0_tag:te=0",
+                              "EF_mu.*tau.*idperf.*:key=HLT_IDTrack_TauIso_FTF:roi=HLT_Roi_TauIso:extra=tau0_probe:te=1",
+                              "EF_mu.*tau.*idperf.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:extra=tau_tag:te=0",
+                              "EF_mu.*tau.*idperf.*:key=HLT_IDTrack_Tau_IDTrig:roi=HLT_Roi_TauIso:extra=tau_probe:te=1" ],  monlevel )
 
         if len(chains)>0 : 
 
@@ -286,8 +286,8 @@ def TIDR4MonTau( flags, key, toolkey, tools, monlevel ) :
         from TrigInDetMonitoring.TIDAChains import getchains
         
         chains = getchains( flags, 
-                            [ "HLT_tau.*_idperf.*_trackLRT.*:key=HLT_IDTrack_TauLRT_FTF:roi=HLT_Roi_LRT",
-                              "HLT_tau.*_idperf.*_trackLRT.*:key=HLT_IDTrack_TauLRT_IDTrig:roi=HLT_Roi_TauLRT"], monlevel )
+                            [ "EF_tau.*_idperf.*_trackLRT.*:key=HLT_IDTrack_TauLRT_FTF:roi=HLT_Roi_LRT",
+                              "EF_tau.*_idperf.*_trackLRT.*:key=HLT_IDTrack_TauLRT_IDTrig:roi=HLT_Roi_TauLRT"], monlevel )
 
         if len(chains)>0 :
 
@@ -314,14 +314,14 @@ def TIDR4MonBjet( flags, key, toolkey, tools, monlevel ) :
         from TrigInDetMonitoring.TIDAChains import getchains
         
         chains = getchains( flags, 
-                            [ "HLT_j.*presel.*b.*:key=HLT_IDTrack_JetSuper_FTF:roi=HLT_Roi_JetSuper:vtx=HLT_IDVertex_JetSuper",
-                              "HLT_j.*roiftf.*:key=HLT_IDTrack_JetSuper_FTF:roi=HLT_Roi_JetSuper:vtx=HLT_IDVertex_JetSuper",
-                              "HLT_j.*presel.*b.*:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS",
-                              "HLT_j.*boffperf.*:key=HLT_IDTrack_Bjet_FTF:roi=HLT_Roi_Bjet",
-                              "HLT_j.*boffperf.*:key=HLT_IDTrack_Bjet_IDTrig:roi=HLT_Roi_Bjet", 
-                              "HLT_j45_pf_ftf_preselj20_L1J15:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS",
-                              "HLT_j.*_ftf.*boffperf.*:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS",
-                              "HLT_j.*boffperf.*_ftf.*:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS"
+                            [ "EF_j.*presel.*b.*:key=HLT_IDTrack_JetSuper_FTF:roi=HLT_Roi_JetSuper:vtx=HLT_IDVertex_JetSuper",
+                              "EF_j.*roiftf.*:key=HLT_IDTrack_JetSuper_FTF:roi=HLT_Roi_JetSuper:vtx=HLT_IDVertex_JetSuper",
+                              "EF_j.*presel.*b.*:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS",
+                              "EF_j.*boffperf.*:key=HLT_IDTrack_Bjet_FTF:roi=HLT_Roi_Bjet",
+                              "EF_j.*boffperf.*:key=HLT_IDTrack_Bjet_IDTrig:roi=HLT_Roi_Bjet", 
+                              "EF_j45_pf_ftf_preselj20_L1J15:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS",
+                              "EF_j.*_ftf.*boffperf.*:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS",
+                              "EF_j.*boffperf.*_ftf.*:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS"
                             ], monlevel )
 
         # if we find no chains, try to get more generic chains
@@ -329,9 +329,9 @@ def TIDR4MonBjet( flags, key, toolkey, tools, monlevel ) :
         if len(chains)==0 : 
                 chains = getchains( flags, 
                             [ 
-#                             "HLT_j(?!0).*:key=HLT_IDTrack_Bjet_FTF",
-#                             "HLT_j(?!0).*:key=HLT_IDTrack_Bjet_IDTrig", 
-                              "HLT_j(?!0).*:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS",
+#                             "EF_j(?!0).*:key=HLT_IDTrack_Bjet_FTF",
+#                             "EF_j(?!0).*:key=HLT_IDTrack_Bjet_IDTrig", 
+                              "EF_j(?!0).*:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS",
                             ], None )
         
 
@@ -413,10 +413,10 @@ def TIDR4MonBphys( flags, key, toolkey, tools, monlevel ) :
         from TrigInDetMonitoring.TIDAChains import getchains
         
         chains = getchains( flags, 
-                            [ "HLT_mu.*_bBmumux_BsmumuPhi.*:key=HLT_IDTrack_Bmumux_FTF",
-                              "HLT_mu.*_bBmumux_BsmumuPhi.*:key=HLT_IDTrack_Bmumux_IDTrig",
-                              "HLT_mu.*_bBmumux_Bidperf.*:key=HLT_IDTrack_Bmumux_FTF",
-                              "HLT_mu.*_bBmumux_Bidperf.*:key=HLT_IDTrack_Bmumux_IDTrig"], monlevel )
+                            [ "EF_mu.*_bBmumux_BsmumuPhi.*:key=HLT_IDTrack_Bmumux_FTF",
+                              "EF_mu.*_bBmumux_BsmumuPhi.*:key=HLT_IDTrack_Bmumux_IDTrig",
+                              "EF_mu.*_bBmumux_Bidperf.*:key=HLT_IDTrack_Bmumux_FTF",
+                              "EF_mu.*_bBmumux_Bidperf.*:key=HLT_IDTrack_Bmumux_IDTrig"], monlevel )
 
         if len(chains)>0 :
 
@@ -441,7 +441,7 @@ def TIDR4MonUtt( flags, key, toolkey, tools, monlevel ) :
         from TrigInDetMonitoring.TIDAChains import getchains
         
         chains = getchains( flags, 
-                            [ "HLT_j180_.*dispjet.*_L1J100:key=HLT_IDTrack_DJLRT_FTF:roi=HLT_Roi_DJ", "HLT_j180_.*dispjet.*_L1jJ160:key=HLT_IDTrack_DJLRT_FTF:roi=HLT_Roi_DJ" ], monlevel )
+                            [ "EF_j180_.*dispjet.*_L1J100:key=HLT_IDTrack_DJLRT_FTF:roi=HLT_Roi_DJ", "EF_j180_.*dispjet.*_L1jJ160:key=HLT_IDTrack_DJLRT_FTF:roi=HLT_Roi_DJ" ], monlevel )
 
         if len(chains)>0 : 
                         

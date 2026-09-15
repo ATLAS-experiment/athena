@@ -227,7 +227,7 @@ StatusCode TrigIDR4Mon::bookHistograms() {
     
   	/// check for configured chains only ...
 
-	if ( chainName.head().find("HLT_")==std::string::npos ) {
+	if ( chainName.head().find("EF_")==std::string::npos ) {
 	  // with the O2 optimisation that ATLAS uses, unevaluated pre- and postfix operators produce identical code - I prefer the postfix
 	  //cppcheck-suppress postfixOperator 
 	  toolitr++;
@@ -288,7 +288,7 @@ StatusCode TrigIDR4Mon::fillHistograms(const EventContext &/*context*/) const {
 
   ATH_MSG_DEBUG( " ----- enter fill() ----- " );
 
-  const Trig::ChainGroup* chainGroup = m_tdt->getChainGroup( "HLT_e.*" );
+  const Trig::ChainGroup* chainGroup = m_tdt->getChainGroup( "EF_e.*" );
   const std::vector<std::string> selectChains = chainGroup->getListOfTriggers();
 
   /// print out all the configured chains if need be
