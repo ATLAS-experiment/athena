@@ -50,7 +50,7 @@ StatusCode ITkPixelCsvWaferIdAlg::execute(const EventContext& ctx) const {
         ATH_MSG_FATAL("Could not open wafer ID output file: " << m_outputFile.value());
         return StatusCode::FAILURE;
     }
-    output << "DetectorResourceID,True DetectorResourceID,FELIX Card Name,Uplink Pin,DMA buffer,SourceID\n"; 
+    output << "DetectorResourceID,TrueDetectorResourceID,FELIX Card Name,Uplink Pin,DMA buffer,SourceID\n";
 
     std::vector<int> dma_buffer_vec = DmaBuffer();
 
@@ -59,7 +59,8 @@ StatusCode ITkPixelCsvWaferIdAlg::execute(const EventContext& ctx) const {
         const auto w_and_fe_id = waferId(row);
         const Identifier& id = std::get<0>(w_and_fe_id);
         const int fe = std::get<1>(w_and_fe_id);
-        std::bitset<32> onlineId = std::get<2>(w_and_fe_id);
+        //std::bitset<32> onlineId = std::get<2>(w_and_fe_id);
+        std::bitset<32> onlineId = std::bitset<32>("00001000000000000000000000000000");
         const std::string waferId_str = id.get_identifier32().getString();
         const auto bec = m_pixIdHelper->barrel_ec(id);
         const auto ld = m_pixIdHelper->layer_disk(id);
@@ -74,13 +75,14 @@ StatusCode ITkPixelCsvWaferIdAlg::execute(const EventContext& ctx) const {
         unsigned n;
         ss >> n;
         std::bitset<32> b(n);
-        b <<= 2; //shift left by two bits, to add FE bits
         // Check bit position
-        bitcheck(b, 2, 25, "DetResID: Wafer ID");
+        bitcheck(b, 0, 23, "DetResID: Wafer ID");
 
         std::bitset<32> febits = std::bitset<32>(fe);
+        febits <<= 30; //shift left by 30 bits
+
         // Check bit position
-        bitcheck(febits, 0, 1, "DetResID: Front-End ID");
+        bitcheck(febits, 30, 31, "DetResID: Chip ID");
 
         b |= febits;
 
@@ -89,7 +91,7 @@ StatusCode ITkPixelCsvWaferIdAlg::execute(const EventContext& ctx) const {
                    << x << "\t"
                    << b.to_string() << "\t"
                    << febits.to_string() << "\t"
-                   << bec << "\t"
+                   << std::dec << bec << "\t"
                    << ld << "\t"
                    << phi << "\t"
                    << eta << "\t"
@@ -372,7 +374,17 @@ int ITkPixelCsvWaferIdAlg::phi_module(const std::vector<std::string>& spchain, c
             return phi;
         }
         else if(ld == 1){  //end-cap intermediate rings, inner system, disk 1 - triplets: one module per FE /!\ 0-17
-            return 6 * (stoi(mod) - 1 ) + 2 * (fe - 1); // probably wrong offset, TODO need to revisit
+            std::string sp_str(1, spchain.at(5)[2]); // SP=2 and SP=4 alternate in phi
+            if(sp_str == "1"){
+                return 6 * (stoi(mod) - 1 ) + 2 * (fe - 1) ; // probably wrong offset, TODO need to revisit
+            }
+            else if(sp_str == "2"){
+                return 6 * (stoi(mod) - 1 ) + 2 * (fe - 1) + 1; // probably wrong offset, TODO need to revisit
+            }
+            else{
+                ATH_MSG_WARNING("Bad input for phi_module,return -9999 ");
+                return -9999;
+            }
         }
         else if(ld == 2){  // end-cap rings, inner system, layer 2 // 0-19
             std::string sp_str(1, spchain.at(5)[2]); // SP=1 and SP=2 alternate in phi
@@ -465,6 +477,7 @@ int ITkPixelCsvWaferIdAlg::feID(const std::vector<std::string>& spchain, int fe)
 
 std::bitset<32> ITkPixelCsvWaferIdAlg::onlineId(const std::vector<std::string>& spchain, const std::string& mod, int fe, bool legacy) const {
     // onlineID = chipID (4b) chipID ON/OFF (1b) RD53C/BCID (1b)
+    // we don't need this function for the moment but it is still evolving
     std::bitset<32> febits(0);
     int ld = layer_disk(spchain);
     int fe_id = feID(spchain, fe);
@@ -525,10 +538,10 @@ std::bitset<32> ITkPixelCsvWaferIdAlg::onlineId(const std::vector<std::string>& 
             }
         }
     }
-    //add the chip ID ON/OFF (1b) and RD53c or BCID (1b) bits
-    febits |= std::bitset<32>("00001100000000000000000000000000");
+    //add the chip ID ON/OFF (1b, set to 1) and BCID (1b, set to 0) bits
+    febits |= std::bitset<32>("00000010000000000000000000000000");
 
-    bitcheck(febits, 26, 29, "DetResID: Online ID");
+    //bitcheck(febits, 26, 29, "DetResID: Online ID");
 
     return febits;
 }
@@ -651,33 +664,33 @@ std::bitset<32> ITkPixelCsvWaferIdAlg::subDetID(int barrel_endcap, int layer_dis
     if(barrel_endcap == 0){
         if(layer_disk < 2){
             if(eta > 0 ){
-                return std::bitset<32>(0x90); // Inner barrel A
+                return std::bitset<32>(0xa1); // Inner barrel A
             }
             else{
-                return std::bitset<32>(0x91);  // Inner barrel C
+                return std::bitset<32>(0xa2);  // Inner barrel C
             }
         }
         else{
             if(eta > 0){
-                return std::bitset<32>(0x92); // Outer Barrel A
+                return std::bitset<32>(0xa3); // Outer Barrel A
             }
             else{
-                return std::bitset<32>(0x93); // Outer Barrel C
+                return std::bitset<32>(0xa4); // Outer Barrel C
             }
         }
     }
     else if(barrel_endcap == 2){
         if(layer_disk == 0 || (layer_disk == 2 && eta < 15)){
-            return std::bitset<32>(0x90); // Inner barrel A
+            return std::bitset<32>(0xa1); // Inner barrel A
         }
         else if(layer_disk == 3 || layer_disk == 5 || layer_disk == 7){
-            return std::bitset<32>(0x92); // Outer barrel A
+            return std::bitset<32>(0xa3); // Outer barrel A
         }
         else if(layer_disk == 1 || (layer_disk == 2 || eta >=15 ) ){
-            return std::bitset<32>(0x94); // Inner end-cap A
+            return std::bitset<32>(0xa5); // Inner end-cap A
         }
         else if(layer_disk == 4 || layer_disk == 6 || layer_disk == 8){
-            return std::bitset<32>(0x96); // Outer end-cap A
+            return std::bitset<32>(0xa7); // Outer end-cap A
         }
         else{
             ATH_MSG_ERROR("Wrong barrel_endcap / layer_disk / eta_mod values ");
@@ -687,16 +700,16 @@ std::bitset<32> ITkPixelCsvWaferIdAlg::subDetID(int barrel_endcap, int layer_dis
     }
     else if(barrel_endcap == -2){
         if(layer_disk == 0 || (layer_disk == 2 && eta < 15)){
-            return std::bitset<32>(0x91); // Inner barrel C
+            return std::bitset<32>(0xa2); // Inner barrel C
         }
         else if(layer_disk == 3 || layer_disk == 5 || layer_disk == 7){
-            return std::bitset<32>(0x93); // Outer barrel C
+            return std::bitset<32>(0xa4); // Outer barrel C
         }
         else if(layer_disk == 1 || (layer_disk == 2 || eta >=15 ) ){
-            return std::bitset<32>(0x95); // Inner end-cap C
+            return std::bitset<32>(0xa6); // Inner end-cap C
         }
         else if(layer_disk == 4 || layer_disk == 6 || layer_disk == 8){
-            return std::bitset<32>(0x97); // Outer end-cap C
+            return std::bitset<32>(0xa8); // Outer end-cap C
         }
         else{
             ATH_MSG_ERROR("Wrong barrel_endcap / layer_disk / eta_mod values ");
@@ -713,7 +726,11 @@ std::bitset<32> ITkPixelCsvWaferIdAlg::subDetID(int barrel_endcap, int layer_dis
 }
 
 
-const StatusCode ITkPixelCsvWaferIdAlg::sanityCheck(const std::string & s, bool legacy) const {
+const StatusCode ITkPixelCsvWaferIdAlg::sanityCheck(std::string s, bool legacy) const {
+
+    if(legacy){
+        ATH_MSG_INFO("Using old format");
+    }
 
     std::ifstream fcheck(s);
     if (!fcheck.good()) {
@@ -786,6 +803,8 @@ const StatusCode ITkPixelCsvWaferIdAlg::sanityCheck(const std::string & s, bool 
                 ATH_MSG_WARNING("Sanity check of file " << s << "  :   Bad number of fibers, line: " << j );
                 ATH_MSG_WARNING("Nfiber = " << rowVec[j].fiber);
             }
+            // Keep it around in case it's needed at some point - format is still evolving
+            /*
             if(legacy){
                 if( (rowVec[j].detResId & std::bitset<32>(0xf0000000)) == std::bitset<32>(0xf0000000) ){
                     fiber_links_map[rowVec[j].fiber] += 0.25;
@@ -816,6 +835,7 @@ const StatusCode ITkPixelCsvWaferIdAlg::sanityCheck(const std::string & s, bool 
                     ATH_MSG_WARNING("Sanity check of file " << s << "  :   Bad Chip ID value in DetResID, line: " << j );
                 }
             }
+            */
         }
 
         // 2. Check that there are <= 6 lpGBT links per fiber
@@ -857,7 +877,7 @@ const StatusCode ITkPixelCsvWaferIdAlg::sanityCheck(const std::string & s, bool 
 
 
 
-void ITkPixelCsvWaferIdAlg::bitcheck(std::bitset<32> b, uint32_t lsb_lim, uint32_t msb_lim , std::string_view s) const {
+void ITkPixelCsvWaferIdAlg::bitcheck(std::bitset<32> b, uint32_t lsb_lim, uint32_t msb_lim , const std::string& s) const {
 
     uint32_t x = static_cast<uint32_t> (b.to_ulong());
     if(x!=0){
