@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGGER_DECISION_TOOL_CACHE_GLOBAL_MEMORY_H
@@ -102,6 +102,7 @@ namespace Trig {
     const TrigConf::HLTChain* config_chain(const std::string& name) const;   //!< HLT config chain from given name
 
     const HLT::TrigNavStructure* navigation() const {   //!< gives back pointer to navigation object (unpacking if necessary)
+      //coverity[MISSING_LOCK]
       if(!m_navigationUnpacked){
         // CGM is slot-specific and unpackNavigation is locked
         auto cgm ATLAS_THREAD_SAFE = const_cast<CacheGlobalMemory*>(this);
