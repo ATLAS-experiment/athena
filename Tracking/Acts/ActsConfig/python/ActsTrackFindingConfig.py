@@ -326,6 +326,21 @@ def ActsTrackFindingCfg(flags,
     return acc
 
 
+def ActsGnnPipelineToolCfg(flags,
+                           name: str = "GnnPipelineTool",
+                           **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault('moduleMapPath', flags.Acts.GNN.ModuleMapPath)
+    kwargs.setdefault('gnnPath', flags.Acts.GNN.ModelPath)
+    kwargs.setdefault('numTrtContexts', flags.Acts.GNN.NumTrtContexts)
+    kwargs.setdefault('maxGpuInstances', flags.Acts.GNN.MaxGpuInstances)
+    kwargs.setdefault('edgeCut', flags.Acts.GNN.EdgeCut)
+    kwargs.setdefault('minCandidateMeasurements', flags.Acts.GNN.MinCandidateMeasurements)
+
+    acc.setPrivateTools(CompFactory.ActsTrk.GnnPipelineTool(name, **kwargs))
+    return acc
+
 def ActsTrackFindingGNNCfg(flags, **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
@@ -338,7 +353,6 @@ def ActsTrackFindingGNNCfg(flags, **kwargs) -> ComponentAccumulator:
 
     # The GNN inference (graph construction, edge classification, track building)
     if 'GnnPipelineTool' not in kwargs:
-        from ActsConfig.ActsSeedingConfig import ActsGnnPipelineToolCfg
         kwargs.setdefault('GnnPipelineTool', acc.popToolsAndMerge(
             ActsGnnPipelineToolCfg(flags, name="GnnPipeline")))
 
