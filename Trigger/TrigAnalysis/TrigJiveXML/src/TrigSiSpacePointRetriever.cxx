@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigJiveXML/TrigSiSpacePointRetriever.h"
 
-#include <string>
+
 
 #include "CLHEP/Units/SystemOfUnits.h"
 
@@ -12,7 +12,7 @@
 #include "TrigInDetEvent/TrigSiSpacePoint.h"
 #include "InDetIdentifier/SCT_ID.h"
 #include "InDetIdentifier/PixelID.h"
-
+#include <string>
 namespace JiveXML {
 
   //--------------------------------------------------------------------------
@@ -90,13 +90,14 @@ namespace JiveXML {
        }
     }
     DataMap myDataMap;
-    myDataMap["x"] = x;
-    myDataMap["y"] = y;
-    myDataMap["z"] = z;
-    myDataMap["layer"] = layer;
-    myDataMap[clustersStr] = clustersVec;
+    const std::size_t n = x.size();
+    myDataMap["x"] = std::move(x);
+    myDataMap["y"] = std::move(y);
+    myDataMap["z"] = std::move(z);
+    myDataMap["layer"] = std::move(layer);
+    myDataMap[clustersStr] = std::move(clustersVec);
 
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< x.size() << endmsg;
+    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< n << endmsg;
 
     //forward data to formating tool
     std::string emptyStr="";
