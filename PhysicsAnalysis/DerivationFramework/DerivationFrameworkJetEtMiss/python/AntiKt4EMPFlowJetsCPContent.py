@@ -14,6 +14,7 @@ AntiKt4EMPFlowJetsCPContent = [
 "AntiKt4EMPFlowJetsAux.NNJvt.NNJvtRpt.NNJvtPass",
 "AntiKt4EMPFlowJetsAux.bJR4v01_pt",
 "AntiKt4EMPFlowJetsAux.EnergyPerSampling.FracSamplingMax.FracSamplingMaxIndex.Timing.N90Constituents",
+"AntiKt4EMPFlowJetsAux.LArQuality.HECQuality.NegativeE.AverageLArQF",
 "AntiKt4EMPFlowJetsAux.DFCommonJets_jetClean_LooseBad.DFCommonJets_jetClean_TightBad",
 "AntiKt4EMPFlowJetsAux.PartonTruthLabelID.HadronConeExclExtendedTruthLabelID.HadronConeExclTruthLabelID",
 "AntiKt4EMPFlowJetsAux.QGTransformer_ConstScore",
