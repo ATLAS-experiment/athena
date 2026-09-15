@@ -21,9 +21,3 @@ atlas_add_test( UnitTest
    SCRIPT athena.py --threads=1 AthExAlpaka/AthExAlpakaConfig.py
    POST_EXEC_SCRIPT noerror.sh
    PROPERTIES SKIP_RETURN_CODE 2 )
-#
-#atlas_add_test( LinearTransformAsync
-#   PRE_EXEC_SCRIPT "nvidia-check.sh || exit 2"
-#   SCRIPT athena.py --threads=4 AthExAlpaka/LinearTransformAsyncExampleConfig.py
-#   POST_EXEC_SCRIPT noerror.sh
-#   PROPERTIES SKIP_RETURN_CODE 2 )
