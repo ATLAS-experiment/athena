@@ -245,7 +245,7 @@ StatusCode ITkPixelCablingAlg::fillFromFile(std::ifstream& file, std::unique_ptr
 
                 Identifier id(static_cast<Identifier::value_type>(moduleID));
                 if      (m_idHelper->barrel_ec(id) == 0 && m_idHelper->layer_disk(id) == 0) cabling->addTransformType(ITkPixelCabling::dridToModuleID(trueDetectorResourceID), ITkPixelCabling::TransformType::NominalIBTriplet);
-                else if (m_idHelper->barrel_ec(id) != 0 && m_idHelper->layer_disk(id) == 0) cabling->addTransformType(ITkPixelCabling::dridToModuleID(trueDetectorResourceID), ITkPixelCabling::TransformType::NominalIECTriplet);
+                else if (m_idHelper->barrel_ec(id) != 0 && (m_idHelper->layer_disk(id) == 0 || m_idHelper->layer_disk(id) == 1) ) cabling->addTransformType(ITkPixelCabling::dridToModuleID(trueDetectorResourceID), ITkPixelCabling::TransformType::NominalIECTriplet);
                 else cabling->addTransformType(ITkPixelCabling::dridToModuleID(trueDetectorResourceID), ITkPixelCabling::TransformType::NominalQuad);
 
                 ATH_MSG_DEBUG(std::hex << " key " << (detectorResourceID & ITkPixelCabling::OFFLINE_DRID_MASK) << " detectorResourceID " << detectorResourceID << " trueDetectorResourceID " << trueDetectorResourceID << " sourceID " << sourceID);

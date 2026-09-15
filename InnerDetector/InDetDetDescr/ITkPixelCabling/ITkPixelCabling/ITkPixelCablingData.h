@@ -108,15 +108,15 @@ namespace ITkPixelCabling {
     
     static constexpr TransformFn nominalQuadInverseTable[4] = {
         []([[maybe_unused]] uint16_t& col, uint16_t& row){row = 383 - row;},
-        [](uint16_t& col, uint16_t& row){row = 383 - row; col -= 400;},
+        []([[maybe_unused]] uint16_t& col, uint16_t& row){row = 383 - row; col -= 400;},
         []([[maybe_unused]] uint16_t& col, uint16_t& row){row = 767 - row;},
-        [](uint16_t& col, uint16_t& row){row = 767 - row; col -= 400;}
+        []([[maybe_unused]] uint16_t& col, uint16_t& row){row = 767 - row; col -= 400;}
     };
 
     static constexpr TransformFn ibInverseTransformFn =
         [](uint16_t& col, uint16_t& row) {
             const uint16_t parity = row & 1;
-            row = 383 - ((row - parity) >> 1);
+            row = 383 - (row >> 1);
             col = (col << 1) | parity;
         };
 
@@ -184,7 +184,10 @@ public:
         f(key, val);
     }
   }
-  
+
+  // chip ID number from 0 to 3
+  static uint8_t chipID(const ITkPixelCabling::TransformType& t, const uint16_t& col, const uint16_t& row) ;
+
   //Add entry to the offline->online map. This is only for producing test streams,
   //from MC, and needs to propagate the type of the module. We also can at most map
   //with 4-fold degeneracy due to non-merged quads, which have 4 online IDs mapped to

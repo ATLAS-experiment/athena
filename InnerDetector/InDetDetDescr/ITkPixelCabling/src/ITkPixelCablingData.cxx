@@ -113,6 +113,31 @@ ITkPixelOnlineId ITkPixelCablingData::onlineId(const uint32_t& offlineDetectorRe
     return it->second;
 }
 
+uint8_t ITkPixelCablingData::chipID(const  ITkPixelCabling::TransformType& t, const uint16_t& col, const uint16_t& row) {
+
+    if(t == ITkPixelCabling::TransformType::NominalIECTriplet || t == ITkPixelCabling::TransformType::NominalIBTriplet){
+        // Triplets always have chipID =0
+        return 0;
+    }
+    else if(row <= 383 && col <= 399){
+        return 0;
+    }
+    else if(row <= 383 && col <= 799){
+        return 1;
+    }
+    else if(row <= 767 && col <= 399){
+        return 2;
+    }
+    else if(row <= 767 && col <= 799){
+        return 3;
+    }
+    else{
+        //ATH_MSG_WARNING("No chip ID recognized for col = "<< col " ; row = " << row);
+        //ATH_MSG_WARNING("Return 0");
+        return 0;
+    }
+}
+
 ITkPixelCabling::TransformType ITkPixelCablingData::transformType(const uint32_t& moduleID) const {
     std::unordered_map<uint32_t, ITkPixelCabling::TransformType>::const_iterator it = m_module2TransformTypeMap.find(moduleID);
     if (it == m_module2TransformTypeMap.end()){
