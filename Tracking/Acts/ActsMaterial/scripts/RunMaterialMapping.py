@@ -111,16 +111,7 @@ if __name__ == "__main__":
         flags.ITk.Geometry.AllLocal = True
     from MuonConfig.MuonConfigUtils import configureDefaultTags
     from MuonGeoModelTestR4.testGeoModel import MuonPhaseIITestDefaults
-
-    flags.Input.Files = []
-    allfiles=[]
-    eosfolder = "root://eosuser//eos/user/n/ncalace/material-maps/ATLAS-P2-RUN4-05-00-00/geantinos-material-steps/"
-    for i in range(0, 500):
-        filename="material-tracks."+str(i)+".root"
-        allfiles.append(eosfolder+filename)
- 
-
-    #MuonPhaseIITestDefaults.EVGEN_PG
+    flags.Input.Files = MuonPhaseIITestDefaults.EVGEN_PG
     flags.Input.isMC=True
     flags.GeoModel.AtlasVersion = args.geometrytag
     flags.IOVDb.GlobalTag = "OFLCOND-SIM-00-00-00"
@@ -185,7 +176,7 @@ if __name__ == "__main__":
                                      maxEvents =  args.maxEvents if args.maxEvents > 0 else sys.maxsize,
                                      skipEvents = args.skipEvents,
                                      batchSize = args.batchSize,
-                                     FileNames=assembleFiles(allfiles),
+                                     FileNames=assembleFiles(args.inputFiles),
                                      TreeName=args.treeName))
 
     acc.merge(MaterialMappingCfg(flags, 
