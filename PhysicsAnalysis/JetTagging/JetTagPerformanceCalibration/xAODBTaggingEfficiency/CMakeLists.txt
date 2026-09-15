@@ -248,8 +248,3 @@ unset(FTAG_LATEST_CDI_RUN3_PCBT)
 unset(FTAG_LATEST_CDI_RUN2_PCFT)
 unset(FTAG_LATEST_CDI_RUN3_PCFT)
 unset(FTAG_XBB_LATEST_JSON)
-
-
-
-# Install files from the package:
-atlas_install_runtime( share/*.root )
