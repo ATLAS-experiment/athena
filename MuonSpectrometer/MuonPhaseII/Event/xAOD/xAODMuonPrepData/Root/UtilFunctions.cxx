@@ -30,19 +30,6 @@
 #include "Acts/Utilities/MathHelpers.hpp"
 #include "Acts/Definitions/Units.hpp"
 
-namespace {
-    template <class MeasType> const Acts::Surface& fetchSurface(const xAOD::UncalibratedMeasurement* meas) {
-        auto castedM = static_cast<const MeasType*>(meas);
-        IdentifierHash hash{};
-        if constexpr(std::is_same_v<xAOD::MdtDriftCircle, MeasType>) {
-            hash = castedM->measurementHash();
-        } else {
-            hash = castedM->layerHash();
-        }
-        return castedM->readoutElement()->surface(hash);
-    }
-}
-
 namespace xAOD{
     
 
@@ -57,27 +44,11 @@ namespace xAOD{
         if (!meas) {
             THROW_EXCEPTION("No measurement passed");
         }
-        /// Composite space point EDM
-        if (meas->numDimensions() == 0u) {
-           const auto* comp = static_cast<const CombinedMuonStrip*>(meas);
-           return muonSurface(comp->primaryStrip());
+        const auto* muon = dynamic_cast<const MuonMeasurement*>(meas);
+        if (!muon) {
+            THROW_EXCEPTION("Failed to cast measurement to MuonMeasurement");
         }
-        switch (meas->type()) {
-            using enum UncalibMeasType;
-            case MdtDriftCircleType: {
-                return fetchSurface<MdtDriftCircle>(meas);
-            } case RpcStripType: {
-                return fetchSurface<RpcMeasurement>(meas);
-            } case TgcStripType:{
-                return fetchSurface<TgcStrip>(meas);
-            } case sTgcStripType: {
-                return fetchSurface<sTgcMeasurement>(meas);
-            } case MMClusterType:{
-                return fetchSurface<MMCluster>(meas);
-            } default:
-                THROW_EXCEPTION("Unsupported measurement given "<<typeid(*meas).name());
-                break;
-        }
+        return muon->surface();
     }
 
     ::Muon::MuonStationIndex::TechnologyIndex toTechnologyIndex(const UncalibMeasType aodType){
