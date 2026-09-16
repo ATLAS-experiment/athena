@@ -45,7 +45,7 @@ class StreamSvcAdaptorTool : public extends<AthAlgTool, IStreamTool> {
   /// @param ctx The event context for which the stream is requested
   /// @returns The CUDA stream to use for the current event context
   ///
-  virtual cudaStream_t stream(const EventContext& ctx) const override;
+  virtual void* stream(const EventContext& ctx) const override;
 
   /// @}
 

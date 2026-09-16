@@ -19,7 +19,7 @@ StatusCode StreamSvcAdaptorTool::initialize() {
   return StatusCode::SUCCESS;
 }
 
-cudaStream_t StreamSvcAdaptorTool::stream(const EventContext& ctx) const {
+void* StreamSvcAdaptorTool::stream(const EventContext& ctx) const {
 
   // Just return the stream provided by the service.
   assert(m_svc.isValid());
