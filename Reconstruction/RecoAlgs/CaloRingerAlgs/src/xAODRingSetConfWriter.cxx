@@ -152,6 +152,7 @@ StatusCode xAODRingSetConfWriter::searchAndCopyCLID(
   // Now loop retrieving them and recording on the outputContainer:
   for ( const auto &key : ringConfKeys ) 
   {
+    ATH_MSG_VERBOSE( "Attempting to copy " << key );
     // Check if this meta isn't already available in output, if so, do not copy it:
     if ( std::any_of( m_rsMetaNames.begin(), m_rsMetaNames.end(),  
         [&key](std::string &builderKey){
