@@ -180,13 +180,7 @@ StatusCode MetaDataSvc::loadAddresses(StoreID::type storeID, IAddressProvider::t
       return(StatusCode::SUCCESS);
    }
    const DataHeader* dataHeader = nullptr;
-   if (m_inputDataStore->retrieve(dataHeader, name()).isFailure()) {
-      ATH_MSG_WARNING("Could not retrieve DataHeader, will not read Metadata");
-   }
-   if (dataHeader == nullptr) {
-      ATH_MSG_ERROR("Could not get DataHeader, will not read Metadata");
-      return(StatusCode::FAILURE);
-   }
+   ATH_CHECK( m_inputDataStore->retrieve(dataHeader, name()) );
    for (const DataHeaderElement& dhe : *dataHeader) {
       const CLID clid = dhe.getPrimaryClassID();
       if (clid != ClassID_traits<DataHeader>::ID()) {
