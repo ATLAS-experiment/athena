@@ -256,7 +256,7 @@ Acts::FreeVector estimateTrackParamsFromSeed(
     ATH_MSG_DEBUG("Refit " << seed.sp().size() << "-SP seed (" << (reverseSearch ? "top" : "bottom") << " start) " << (refitResult ? "succeeded" : "failed"));
     if (refitResult) {
       if (m_doRefitErrInflation) {
-        // scale r_i * C_ij * r_j -> C_ij (code suggested by Copilot, tested on Godbolt)
+        // scale r_i * C_ij * r_j -> C_ij
         const auto refitErrInflation = Eigen::Map<const Acts::BoundVector>(m_refitErrInflation.value().data());
         refitResult->covariance()->array().colwise() *= refitErrInflation.array();
         refitResult->covariance()->array().rowwise() *= refitErrInflation.transpose().array();
