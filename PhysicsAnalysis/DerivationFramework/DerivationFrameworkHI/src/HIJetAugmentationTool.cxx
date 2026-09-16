@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HIJetAugmentationTool.h"
@@ -103,11 +103,13 @@ namespace DerivationFramework
     
       if (mindR < m_deltaR.value()) {
         (jvtMatchedHandle)(*hjet) = matchedJvt;
-
-      	if (fabs(matchedEta) < 2.4) {
+	// HI jet sub-group pre-recommendation for JVT: https://atlas-heavy-ions.docs.cern.ch/Jets/jetselection/
+	// applying JVT selection on EMTopo jet matched to HI jet
+	// using selections from: https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/PileupJetRecommendations#JVT
+      	if (std::abs(matchedEta) < 2.4) {
         	passJvtMedium = matchedJvt > 0.59;
         	passJvtTight  = matchedJvt > 0.91;
-      	} else if (fabs(matchedEta) < 2.5) {
+      	} else if (std::abs(matchedEta) < 2.5) {
         	passJvtMedium = matchedJvt > 0.11;
         	passJvtTight  = true; // no tight JVT in this region
       	} else {
