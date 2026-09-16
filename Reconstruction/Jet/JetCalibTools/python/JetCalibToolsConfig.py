@@ -88,6 +88,7 @@ calibcontexts = {
     "AntiKt4UFOCSSK":ufocontexts,
     "AntiKt4EMTopo":topocontexts,
     "AntiKt4LCTopo":topocontexts,
+    "AntiKt4EMTopoCustomVtxGNN":topocontexts,
     "AntiKt10LCTopo":fatjetcontexts,
     # Standard trimmed
     "AntiKt10LCTopoTrimmedPtFrac5SmallR20":fatjetcontexts,
@@ -172,7 +173,7 @@ def getJetCalibTool(jetdef, context, data_type, calibseq = "", rhoname = "", pvn
         ignore_substr = [
             '_noElectrons', '_noMuons', '_noLeptons', '_inclMuons',
             '_tauSeedEleRM',
-            'ByVertex', 'CustomVtx',
+            'ByVertex', 'CustomVtxGNN', 'CustomVtx',
         ]
         for text in ignore_substr:
             if text in jetcollection :
