@@ -107,16 +107,20 @@ class TriggerAnalysisSFBlock(ConfigBlock):
             info="the muon quality WP to use.")
         self.addOption ('electrons', '', type=str,
             info="the input electron container, with a possible selection, in "
-            "the format `container` or `container.selection`.")
+            "the format `container` or `container.selection`.",
+            meta={'role':'containerRef'})
         self.addOption ('muons', '', type=str,
             info="the input muon container, with a possible selection, in the "
-            "format `container` or `container.selection`.")
+            "format `container` or `container.selection`.",
+            meta={'role':'containerRef'})
         self.addOption ('photons', '', type=str,
             info="the input photon container, with a possible selection, in "
-            "the format `container` or `container.selection`.")
+            "the format `container` or `container.selection`.",
+            meta={'role':'containerRef'})
         self.addOption ('taus', '', type=str,
             info="the input tau-jet container, with a possible selection, in "
-            "the format `container` or `container.selection`.")
+            "the format `container` or `container.selection`.",
+            meta={'role':'containerRef'})
         self.addOption ('numberOfToys', 0, type=int,
             info="the number of toy experiments to run to estimate the trigger efficiencies, "
             "instead of using explicit formulas. Set it to 0 to not use toys.")
