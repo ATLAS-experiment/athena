@@ -50,8 +50,7 @@ StatusCode CopyEventStreamInfo::beginInputFile(const SG::SourceID&)
       const EventStreamInfo* evtStrInfo_in = nullptr;
       ATH_CHECK( m_inputMetaDataStore->retrieve(evtStrInfo_in, key) );
 
-      EventStreamInfo* evtStrInfo_out = 0;
-      evtStrInfo_out = m_metaDataSvc->tryRetrieve<EventStreamInfo>(key);
+      EventStreamInfo* evtStrInfo_out = m_metaDataSvc->tryRetrieve<EventStreamInfo>(key);
       if( !evtStrInfo_out ) {
          auto esinfo_up = std::make_unique<EventStreamInfo>(*evtStrInfo_in);
          ATH_CHECK( m_metaDataSvc->record( std::move(esinfo_up), key ) );
