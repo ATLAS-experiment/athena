@@ -4,13 +4,8 @@ if (NOT (CMAKE_CUDA_COMPILER OR CMAKE_HIP_COMPILER))
    message( STATUS "Neither CUDA nor HIP are available, not building package" )
 endif()
 
-find_package(Acts)
-# placeholder for what will eventually be Acts::PluginTraccc
-if (NOT TARGET Acts::PluginDetray)
-   # Without PluginDetray, the traccc code will not be available.
-   return()
-endif()
 find_package(traccc)
+
 # Common source files — always compiled
 set( _sources
    src/*.h src/*.cxx
@@ -26,7 +21,7 @@ set( _libraries
   ActsGPUEventLib
 )
 # CUDA-only sources and libraries
-if( CMAKE_CUDA_COMPILER )
+if (TARGET traccc::cuda)
   list( APPEND _sources
     src/cuda/*.h
     src/cuda/*.cxx
@@ -40,7 +35,7 @@ if( CMAKE_CUDA_COMPILER )
 endif()
 
 # HIP-only sources and libraries
-if( CMAKE_HIP_COMPILER )
+if (TARGET traccc::hip_utils)
   list( APPEND _sources
     src/hip/*.h
     src/hip/*.cxx
@@ -67,7 +62,7 @@ atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 #Need to set environment to change PathResolver ERROR about using the dev area to a WARNING (Locating dev file dev/ACTS/detray-itk/ITk_bfield.cvf. Do not let this propagate to a release!)
 
 #need to check for presence of compilers again because the library might not have been built
-if (CMAKE_CUDA_COMPILER)
+if (TARGET traccc::cuda)
 atlas_add_test( CUDAGPUMagFieldExample
    PRE_EXEC_SCRIPT "nvidia-check.sh || exit 2"
    ENVIRONMENT "PATHRESOLVER_DEVAREARESPONSE=WARNING"
@@ -76,7 +71,7 @@ atlas_add_test( CUDAGPUMagFieldExample
    PROPERTIES SKIP_RETURN_CODE 2 )
 endif()
 
-if (CMAKE_HIP_COMPILER)
+if (TARGET traccc::hip_utils)
 atlas_add_test( HIPGPUMagFieldExample
    PRE_EXEC_SCRIPT "amd-check.sh || exit 2"
    ENVIRONMENT "PATHRESOLVER_DEVAREARESPONSE=WARNING"

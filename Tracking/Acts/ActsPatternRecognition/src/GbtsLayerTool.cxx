@@ -126,8 +126,6 @@ StatusCode GbtsLayerTool::buildLayers() {
   m_stripLayers.assign(m_stripId->wafer_hash_max(), kNoLayer);
   m_layerDescriptions.clear();
   m_layerDescriptions.reserve(hashMap.size());
-  m_layerTechnologies.clear();
-  m_layerTechnologies.reserve(hashMap.size());
 
   std::ofstream geometryStream;
   if (m_dumpGeometry) {
@@ -198,8 +196,6 @@ StatusCode GbtsLayerTool::buildLayers() {
 
     Acts::Experimental::GbtsLayerDescription& layer =
         m_layerDescriptions.emplace_back();
-    m_layerTechnologies.push_back(technology == kPixel ? GbtsTechnology::Pixel
-                                                       : GbtsTechnology::Strip);
     layer.id = combinedId;
     layer.type = barrelEc == 0 ? Acts::Experimental::GbtsLayerType::Barrel
                                : Acts::Experimental::GbtsLayerType::Endcap;

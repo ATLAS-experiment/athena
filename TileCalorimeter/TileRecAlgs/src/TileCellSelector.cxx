@@ -17,7 +17,6 @@
 
 // Atlas includes
 #include "StoreGate/ReadHandle.h"
-#include "CxxUtils/StrFormat.h"
 
 #include "boost/date_time/local_time/local_time.hpp"
 #include "boost/date_time/posix_time/posix_time.hpp"
@@ -30,7 +29,7 @@ using xAOD::EventInfo;
 
 static std::string drwname(int id) {
   static const char name[5][6] = { "", "LBA", "LBC", "EBA", "EBC" };
-  return CxxUtils::strformat ("%s%2.2d", name[id >> 8], id % 0x100 + 1);
+  return std::format ("{}%{:02}", name[id >> 8], id % 0x100 + 1);
 }
 
 TileCellSelector::TileCellSelector(const std::string& name, ISvcLocator* pSvcLocator)

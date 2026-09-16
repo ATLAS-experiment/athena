@@ -22,9 +22,11 @@
 class PixelID;
 class SCT_ID;
 
+#ifdef ACTS_GNN_WITH_MODULEMAP
 namespace ActsPlugins {
 class GnnPipeline;
 }  // namespace ActsPlugins
+#endif
 
 
 namespace ActsTrk {
@@ -79,7 +81,9 @@ class GnnPipelineTool : public extends<AthAlgTool, IGnnPipelineTool> {
       std::vector<const xAOD::SpacePoint*>& allSPPtrs,
       std::size_t nFeatures = 12) const;
 
+#ifdef ACTS_GNN_WITH_MODULEMAP
   std::unique_ptr<ActsPlugins::GnnPipeline> m_gnnPipeline;
+#endif
   mutable std::optional<std::counting_semaphore<>> m_gpuInstanceCount
       ATLAS_THREAD_SAFE{};
 };

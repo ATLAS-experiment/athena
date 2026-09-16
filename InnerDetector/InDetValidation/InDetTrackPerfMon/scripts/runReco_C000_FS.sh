@@ -57,9 +57,11 @@ if [ "$doClusters" == "1" ]; then
   Reco_tf.py --CA \
     --conditionsTag "default:${conditionsTag}" \
     --maxEvents ${nEvents} \
-    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
+    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.athenaLegacyTrackingFlags' \
     --postInclude 'InDetConfig.InDetPrepRawDataFormationConfig.ITkInDetToXAODClusterConversionCfg,InDetConfig.SiSpacePointFormationConfig.InDetToXAODSpacePointConversionCfg,ActsConfig.ActsPostIncludes.PersistifyActsEDMCfg' \
-    --preExec 'flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True;' \
+    --preExec 'flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True; \
+               from ActsConfig.ActsConfigFlags import SeedingStrategy; \
+               flags.Tracking.ITkActsPass.PixelSeedingStrategy=SeedingStrategy.GridTriplet' \
     --steering 'doRAWtoALL' \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD}
@@ -68,9 +70,11 @@ else
   Reco_tf.py --CA \
     --conditionsTag "default:${conditionsTag}" \
     --maxEvents ${nEvents} \
-    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
+    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.athenaLegacyTrackingFlags' \
     --postInclude 'ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
-    --preExec 'flags.Tracking.doPixelDigitalClustering=True' \
+    --preExec 'flags.Tracking.doPixelDigitalClustering=True; \
+               from ActsConfig.ActsConfigFlags import SeedingStrategy; \
+               flags.Tracking.ITkActsPass.PixelSeedingStrategy=SeedingStrategy.GridTriplet' \
     --steering 'doRAWtoALL' \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD}

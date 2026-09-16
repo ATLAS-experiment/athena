@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -16,5 +16,13 @@ def MuonSpacePointCalibratorCfg(flags,name="MuonSpacePointCalibrator", **kwargs)
 
 
     the_tool = CompFactory.MuonR4.SpacePointCalibrator(name, **kwargs)
+    result.setPrivateTools(the_tool)
+    return result
+
+def TruthSpacePointCalibratorCfg(flags, name="TruthSpacePointCalibrator", **kwargs):
+    result = ComponentAccumulator()
+    from MuonConfig.MuonDataPrepConfig import PrimaryMeasContNamesCfg
+    kwargs.setdefault("prdContainers", PrimaryMeasContNamesCfg(flags))
+    the_tool = CompFactory.MuonR4.TruthCalibrator(name=name, **kwargs)
     result.setPrivateTools(the_tool)
     return result

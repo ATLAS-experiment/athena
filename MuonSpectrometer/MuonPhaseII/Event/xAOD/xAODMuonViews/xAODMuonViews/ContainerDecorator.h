@@ -62,7 +62,7 @@ namespace xAOD{
             }
             /** @brief Access the decoration value */
             dType& operator()(const SG::AuxElement& auxElem) {
-                if (ATH_UNLIKELY(!m_decorHandle)) {
+                if (!m_decorHandle) [[unlikely]] {
                     THROW_EXCEPTION("No decorator has been defined. Please use initialize() beforhand");
                 }
                 m_seenAux.insert(&auxElem);

@@ -473,6 +473,7 @@ StatusCode TrigNavSlimmingMTAlg::propagateSeedingRelation(
     {
       IOCacheMap::const_iterator it = cache.find(inputSeedDecision);
       ATH_CHECK( it != cache.end() );
+      //coverity[INVALIDATE_ITERATOR:FALSE]
       outputSeedDecision = it->second;
     }
     // Perform the linking only using nodes from the slimmed output graph

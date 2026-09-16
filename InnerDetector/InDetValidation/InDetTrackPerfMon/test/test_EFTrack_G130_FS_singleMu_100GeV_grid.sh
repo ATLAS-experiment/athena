@@ -1,9 +1,11 @@
 #!/bin/bash
-# art-description: Nightly test to compare G-400 vs C-000 (Full-scan) for EFTrack studies using ttbar pu200 noFPT sample
+# art-description: Nightly test to compare G-130 vs C-230 (Full-scan) for EFTrack studies using singleMu 100GeV sample
 # art-type: grid
-# art-memory: 6144
-# art-include: main/Athena
-# art-architecture: '#&nvidia'
+# art-include: main/Athena/x86_64-el9-gcc15-opt
+# art-pathena-flags-add: --site=CERN-GPU
+# art-memory: 8192
+# art-input: mc21_14TeV:mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8557_s4422_r16128
+# art-input-nfiles: 400
 # art-output: IDTPM.*.root
 # art-output: *.json
 # art-output: *.xml
@@ -12,21 +14,21 @@
 # art-output: dcube*
 # art-html: dcube_cmp
 
-
 ## Input parameters
-pipelineName='G400'
-SampleName='ttbar_pu200_noFPT'  # as defined in samplesDict of InDetTrackPerfMon/scripts/getEFTrackSample.py
+pipelineName='G130'
+SampleName='singleMu_100GeV'
 OutSampleName="${pipelineName}_FS.${SampleName}"
 TrkCollName='InDetTrackParticles'
+TrkSeedCollName='SiSPSeedSegmentsActsPixelTrackParticles'
 referencePath='/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetTrackPerfMon/EFTrackRefereceHistograms/'
-referenceName="C000_FS.${SampleName}"
+referenceName="C230_FS.${SampleName}"
 referenceName_absPath="${referencePath}/IDTPM.${referenceName}.HIST.root"
-refLabel="C-000"
-testLabel="G-400"
+refLabel="C-230"
+testLabel="G-130"
 
 ## search in $DATAPATH for matching files
-IDTPMjsonConfig='EFTrack_ttbar_FS_IDTPMconfig_EFsel.json'
-dcubeXmlIDTPMconfig='dcube_EFTrack_ttbar_pu200_EFsel.xml'
+IDTPMjsonConfig='EFTrack_singleMu_FS_IDTPMconfig.json'
+dcubeXmlIDTPMconfig='dcube_EFTrack_SingleMu.xml'
 
 IDTPMjsonConfig_absPath=$( find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 2 -name $IDTPMjsonConfig -print -quit 2>/dev/null )
 dcubeXmlIDTPMconfig_absPath=$( find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 2 -name $dcubeXmlIDTPMconfig -print -quit 2>/dev/null )
@@ -61,17 +63,26 @@ run () {
 }
 
 ## Getting the comma-separated list of input RDOs
-InputRDOfiles=$( getEFTrackSample.py -s ${SampleName} )
-if [ ! -f "${InputRDOfiles}" ]; then
-    echo "art-result: 1 Sample ${SampleName} not found"
-    exit 1
+## Prefer ArtInFile in case of grid ART (where it should be available)
+if [ -n "${ArtInFile}" ]; then
+    # ArtInFile is space-separated; convert to comma-separated for runReco
+    InputRDOfiles="${ArtInFile// /,}"
+    echo "Using ArtInFile: ${InputRDOfiles}"
+else # otherwise fall back to getEFTrackSample.py
+    echo "ArtInFile not set, falling back to getEFTrackSample.py..."
+    InputRDOfiles=$( getEFTrackSample.py -s ${SampleName} )
+    if [ ! -f "${InputRDOfiles}" ]; then
+        echo "art-result: 1 Sample ${SampleName} not found"
+        exit 1
+    fi
 fi
 
-## Track reconstruction step. See runReco_G400_FS.sh --help for list of supported options.
+## Track reconstruction step. See runReco_G130_FS.sh --help for list of supported options.
 run "${pipelineName}" \
-  runReco_G400_FS.sh \
+  runReco_G130_FS.sh \
     -i ${InputRDOfiles} \
     -o "${OutSampleName}.AOD.pool.root" \
+    -n -1 \
     "$@"
 
 ## Don't run if IDTPM json config is not found
@@ -83,7 +94,12 @@ fi
 ## Copying json config in the output directory
 echo "Running IDTPM with the following json config:"
 ## change the name of the track collection to monitor and copy json config in work dir
-cat $IDTPMjsonConfig_absPath | sed "s|_TRKCOLLNAME_|${TrkCollName}|g" | tee ${cwd}/IDTPMconfig.json
+jq --arg coll "$TrkCollName" --arg seedcoll "$TrkSeedCollName" '
+  (.TruthMuons.OfflineTrkKey         = $coll) |
+  (.TruthMuons_EFsel.OfflineTrkKey   = $coll) |
+  (.TrackSeeds.OfflineTrkKey         = $seedcoll) |
+  (.TrackSeeds.enabled               = true)
+' "$IDTPMjsonConfig_absPath" | tee ${cwd}/IDTPMconfig.json
 
 ## IDTPM step
 run "IDTPM" \

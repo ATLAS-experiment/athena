@@ -39,12 +39,6 @@ class MlMsTrackSeeder final :
       const EventContext& ctx,
       const MsTrackSeed& seed) const override final;
 
-  /** @copydoc ITrackSeedingTool::estimateQtimesP */
-  double estimateQtimesP(
-      const EventContext& ctx,
-      const Amg::Vector3D& planeNorm,
-      std::span<const PosMomPair_t> circlePoints) const override final;
-
  private:
   ToolHandle<ITrackSeedingTool> m_seedParameterEstimator{
       this, "BaselineSeeder", "",

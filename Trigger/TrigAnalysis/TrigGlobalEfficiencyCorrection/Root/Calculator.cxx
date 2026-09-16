@@ -1646,7 +1646,7 @@ struct TrigGlobEffCorr::Calculator::Helper::BindPackedParam<
 
 template <typename Param>
 auto Calculator::Helper::extract() {
-  std::remove_cv_t<std::remove_reference_t<typename Param::ArgType>> trigs;
+  std::remove_cvref_t<typename Param::ArgType> trigs;
   for (auto& def : m_defs) {
     if (def.used || def.type != Param::TrigType::type())
       continue;
@@ -1661,23 +1661,22 @@ auto Calculator::Helper::extract() {
 }
 
 template <typename... Trigs>
-bool Calculator::Helper::bindFunction() {
-  for (auto& def : m_defs)
+bool Calculator::Helper::bindFunction(){
+  for (auto& def : m_defs) {
     def.used = false;
-  using fnptr = bool (Calculator::*)(
-      const LeptonList&, unsigned, typename BindPackedParam<Trigs>::ArgType...,
-      Efficiencies&);
+  }
   try {
     m_formula =
-        std::bind<fnptr>(&Calculator::globalEfficiency, ::_1, ::_2, ::_3,
-                         extract<BindPackedParam<Trigs>>()..., ::_4);
-    if (std::all_of(m_defs.cbegin(), m_defs.cend(),
-                    [](auto& def) { return def.used; }))
-      return true;
-  } catch (NoSuchTrigger) {
+      [...params = extract<BindPackedParam<Trigs>>()]( Calculator* calculator,
+        const LeptonList& leptons, unsigned runNumber, Efficiencies& efficiencies){
+        return calculator->globalEfficiency(
+          leptons, runNumber, params..., efficiencies);
+      };
+    return std::ranges::all_of( m_defs, [](const auto& def) { return def.used; });
+  } catch (const NoSuchTrigger&) {
+    m_formula = nullptr;
+    return false;
   }
-  m_formula = nullptr;
-  return false;
 }
 
 template <TriggerType object_flag>
