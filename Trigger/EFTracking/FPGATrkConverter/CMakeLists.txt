@@ -8,7 +8,7 @@ atlas_add_component( FPGATrkConverter
                      src/*.cxx
                      src/components/*.cxx
                      LINK_LIBRARIES ActsEventLib ActsGeometryLib AthenaBaseComps AtlasDetDescr
-                     BeamSpotConditionsData FPGATrackSimObjectsLib FPGATrkConverterInterface
+                     FPGATrackSimObjectsLib FPGATrkConverterInterface
                      GaudiKernel Identifier InDetCondTools InDetIdentifier InDetPrepRawData
                      PixelReadoutGeometryLib SCT_ReadoutGeometry StoreGateLib TrkEventPrimitives
                      xAODInDetMeasurement TrkSpacePoint )
