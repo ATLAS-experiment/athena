@@ -169,7 +169,7 @@ namespace TrigCompositeUtils {
 
   HLT::Identifier createLegName(const std::string& name, size_t counter) {
     if (!isChainId(name)) {
-      throw std::runtime_error("TrigCompositeUtils::createLegName chainIdentifier '"+name+"' does not start with 'HLT_'");
+      throw std::runtime_error("TrigCompositeUtils::createLegName chainIdentifier '"+name+"' does not start with 'HLT_' or 'EF_'");
     }
     if (counter > 999) {
       throw std::runtime_error("TrigCompositeUtils::createLegName Leg counters above 999 are invalid.");
@@ -184,7 +184,7 @@ namespace TrigCompositeUtils {
     } else if (isLegId(name)){
       return HLT::Identifier(name.substr(7));
     } else{
-      throw std::runtime_error("TrigCompositeUtils::getIDFromLeg legIdentifier '"+name+"' does not start with 'HLT_' or 'leg' ");
+      throw std::runtime_error("TrigCompositeUtils::getIDFromLeg legIdentifier '"+name+"' does not start with 'HLT_' or 'EF_' or 'leg' ");
     }
   }
 
@@ -212,7 +212,7 @@ namespace TrigCompositeUtils {
       std::from_chars(name.data()+3, name.data()+6, id);
       return {name.substr(7), id};
     } else {
-      throw std::runtime_error("TrigCompositeUtils::getIDFromLeg legIdentifier '"+name+"' does not start with 'HLT_' or 'leg' ");
+      throw std::runtime_error("TrigCompositeUtils::getIDFromLeg legIdentifier '"+name+"' does not start with 'HLT_' or 'EF_' or 'leg' ");
     }
   }
 
@@ -229,7 +229,7 @@ namespace TrigCompositeUtils {
   }
 
   bool isChainId(const std::string& name) {
-    return name.starts_with("HLT_");
+    return name.starts_with("HLT_") || name.starts_with("EF_");
   }
   
   
