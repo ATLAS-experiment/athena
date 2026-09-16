@@ -28,7 +28,7 @@
 #include <set>
 #include <map>
 
-void* getCachedDummyAddress(TClass* cl, std::unordered_map<TClass*, void*>& cache) 
+void* getCachedObjectAddress(TClass* cl, std::unordered_map<TClass*, void*>& cache)
 {
    if (!cl) return nullptr;
 
@@ -83,8 +83,8 @@ struct ParallelFileMerger : public TObject
             TClass* cl = TClass::GetClass(branch->GetClassName());
             if (cl != nullptr) {
                newBranch = toTree->Branch(branch->GetName(), branch->GetClassName(), nullptr, branch->GetBasketSize(), branch->GetSplitLevel());
-               void* empty = getCachedDummyAddress(cl, *m_cache);
-               newBranch->SetAddress(empty);
+               void* objectAddress = getCachedObjectAddress(cl, *m_cache);
+               newBranch->SetAddress(objectAddress);
             } else {
                TObjArray* outLeaves = branch->GetListOfLeaves();
                TLeaf* leaf = static_cast<TLeaf*>(outLeaves->UncheckedAt(0));
@@ -194,14 +194,14 @@ StatusCode AthenaRootSharedWriterSvc::initialize() {
          // (possibly relative) prefix for a UNIX domain socket file, created as $TMPDIR/<prefix>XXXXXX.
          if (pmergeArg.find(':') == std::string::npos) {
             TString socketPath = pmergeArg.c_str();
-            FILE* dummy = gSystem->TempFileName(socketPath);
-            if (dummy == nullptr) {
+            FILE* reservedFile = gSystem->TempFileName(socketPath);
+            if (reservedFile == nullptr) {
                ATH_MSG_FATAL("Could not create temporary file for UNIX domain socket: " << pmergeArg);
                return StatusCode::FAILURE;
             }
             m_socketPath = socketPath.Data();
             std::remove(m_socketPath.c_str());
-            std::fclose(dummy);
+            std::fclose(reservedFile);
             m_rootServerSocket = new TServerSocket(socketPath);
             if (m_rootServerSocket == nullptr || !m_rootServerSocket->IsValid()) {
                ATH_MSG_FATAL("Could not create ROOT TServerSocket (UNIX domain socket): " << m_socketPath);
@@ -317,7 +317,7 @@ StatusCode AthenaRootSharedWriterSvc::share(int numClients, bool motherClient) {
                   message->SetBufferOffset(message->Length() + length);
                   ParallelFileMerger* info = static_cast<ParallelFileMerger*>(m_rootMergers.FindObject(filename));
                   if (!info) {
-                     info = new ParallelFileMerger(filename, &m_dummyCache, transient->GetCompressionSettings());
+                     info = new ParallelFileMerger(filename, &m_cachedObjects, transient->GetCompressionSettings());
                      m_rootMergers.Add(info);
                      ATH_MSG_INFO("ROOT Monitor ParallelFileMerger: " << info << ", for: " << filename);
                   }
@@ -357,11 +357,11 @@ StatusCode AthenaRootSharedWriterSvc::finalize() {
    if (!m_socketPath.empty()) {
       std::remove(m_socketPath.c_str());
    }
-   for (auto& [cl, ptr] : m_dummyCache) {
+   for (auto& [cl, ptr] : m_cachedObjects) {
       if (cl && ptr) {
          cl->Destructor(ptr, false);
       }
    }
-   m_dummyCache.clear();
+   m_cachedObjects.clear();
    return StatusCode::SUCCESS;
 }
