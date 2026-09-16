@@ -630,8 +630,9 @@ void print_pad( const std::string& s ) {
   if ( EPS ) gPad->Print( (s+".eps").c_str() );
 }
 
-template<typename T>
-TH1F* makeplot( T* hreft ) {
+// template<typename T>
+// TH1F* makeplot( T* hreft ) {
+TH1F* makeplot( TObject* hreft ) {
 
   TH1F* href = 0; // (TH1F*)hreft->Clone();
       
@@ -639,14 +640,17 @@ TH1F* makeplot( T* hreft ) {
     
     TH1F* hn = (TH1F*)dynamic_cast<TEfficiency*>(hreft)->GetPassedHistogram();
     TH1F* hd = (TH1F*)dynamic_cast<TEfficiency*>(hreft)->GetTotalHistogram();
+    /// these are nice, would have liked to keep them ...
+    // TH1F* hn = (TH1F*)((TEfficiency*)hreft)->GetPassedHistogram();
+    // TH1F* hd = (TH1F*)((TEfficiency*)hreft)->GetTotalHistogram();
 
-    hd->DrawCopy();
-    gPad->SetLogy(true);
-    gPad->Print("den.pdf");
+    //    hd->DrawCopy();
+    //    gPad->SetLogy(true);
+    //    gPad->Print("den.pdf");
 
-    hn->DrawCopy("same");
-    gPad->SetLogy(true);
-    gPad->Print("num.pdf");
+    //    hn->DrawCopy("same");
+    //    gPad->SetLogy(true);
+    //    gPad->Print("num.pdf");
 
     href = (TH1F*)hn->Clone("ars"); href->SetDirectory(0);
     for ( int ie=1 ; ie<=href->GetNbinsX() ; ie++ ) {
@@ -661,9 +665,9 @@ TH1F* makeplot( T* hreft ) {
     }
   }
 
-  if ( href) href->DrawCopy();
-  gPad->SetLogy(false);
-  gPad->Print("plot.pdf");
+  // if ( href) href->DrawCopy();
+  // gPad->SetLogy(false);
+  // gPad->Print("plot.pdf");
   
   return href;
 }
