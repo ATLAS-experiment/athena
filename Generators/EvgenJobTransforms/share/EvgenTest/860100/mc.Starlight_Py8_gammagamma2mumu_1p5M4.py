@@ -34,8 +34,6 @@ class Sample(EvgenConfig):
             flags,
             Initialize=slightIn,
             Commands=[
-                    'SpaceShower:QEDshowerByL = 1',
-                    'TimeShower:QEDshowerByL = 1',
                     'TimeShower:QEDshowerByOther = off', # for Photos
                     '15:onMode = off' # for tau decay with Taola
                     ],
