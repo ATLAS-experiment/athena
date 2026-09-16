@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BTaggingValidationPlots.h"
@@ -15,6 +15,8 @@
 #include "xAODMuon/MuonContainer.h"
 #include "AthContainers/ConstAccessor.h"
 
+#include <algorithm>
+#include <initializer_list>
 #include <stdexcept>
 #include <utility>
 
@@ -93,12 +95,11 @@ namespace JetTagDQA{
   int BTaggingValidationPlots::getTrackHits(const xAOD::TrackParticle& part, xAOD::SummaryType info) {
     uint8_t val;
     bool ok = part.summaryValue(val, info);
-    if (!ok) throw std::logic_error("Problem getting track summary value.");
-    return val;
+    return ok ? val : -1;
   }
 
   // util function to fill the tagger discriminant related histograms
-  void BTaggingValidationPlots::fillDiscriminantHistograms(const std::string& tagger_name, const double& discriminant_value, const std::map<std::string, double>& working_points, const int& truth_label, std::map<std::string, TH1*>::const_iterator hist_iter, std::map<std::string, int>::const_iterator label_iter, const bool& pass_nTracksCut, const double& jet_pT, const double& jet_Lxy, const bool& onZprime, const xAOD::EventInfo* event){
+  void BTaggingValidationPlots::fillDiscriminantHistograms(const std::string& tagger_name, const double& discriminant_value, const std::map<std::string, double>& working_points, const int& truth_label, std::map<std::string, TH1*>::const_iterator hist_iter, std::map<std::string, int>::const_iterator label_iter, const double& jet_pT, const double& jet_Lxy, const bool& onZprime, const xAOD::EventInfo* event){
     // TODO: GN3XPV01 will not fill any WPs for now. This need to be adapted when WPs as a function of pT and mass are defined.
     if (tagger_name == "GN3XPV01_") {
       ATH_MSG_DEBUG("GN3XPV01 has no WPs defined. Not filling any WP-related histograms.");
@@ -108,15 +109,7 @@ namespace JetTagDQA{
     if((hist_iter->first).find(tagger_name) < 1 && (hist_iter->first).find("matched") < (hist_iter->first).length()){                        
       // check if the current histograms is to be filled with the discrinimant and the current truth label
       if( (hist_iter->first).find("_"+label_iter->first+"_") < (hist_iter->first).length() && truth_label == label_iter->second && (hist_iter->first).find("_weight") < (hist_iter->first).length()){
-   
-        // now fill it if it is the nTracksCut histogram
-        if((hist_iter->first).find("_trackCuts") < (hist_iter->first).length()){
-          if(pass_nTracksCut) (hist_iter->second)->Fill(discriminant_value, event->beamSpotWeight());
-        }
-        // else fill it without the nTracksCut
-        else{
-          (hist_iter->second)->Fill(discriminant_value, event->beamSpotWeight());
-        }
+        (hist_iter->second)->Fill(discriminant_value, event->beamSpotWeight());
       }
       // if it's not to be filled with the discriminant it's the jet pT with discriminant cut selection
       else if((hist_iter->first).find("_matched_pt") < (hist_iter->first).length()){
@@ -259,7 +252,6 @@ namespace JetTagDQA{
     m_jet_pt_b  = bookHistogram("jet_pt_b_ttbar", "jet_pT", m_sParticleType, "b-jets - ");
     m_jet_pt_c  = bookHistogram("jet_pt_c_ttbar", "jet_pT", m_sParticleType, "c-jets - ");
     m_jet_pt_l  = bookHistogram("jet_pt_l_ttbar", "jet_pT", m_sParticleType, "l-jets - ");
-    m_jet_pt_top  = bookHistogram("jet_pt_top_ttbar", "jet_pT", m_sParticleType, "top-jets - ");
 
     m_jet_pt_Zprime_b  = bookHistogram("jet_pt_b_Zprime", "jet_pT_Zprime", m_sParticleType, "b-jets - ");
     m_jet_pt_Zprime_c  = bookHistogram("jet_pt_c_Zprime", "jet_pT_Zprime", m_sParticleType, "c-jets - ");
@@ -268,7 +260,6 @@ namespace JetTagDQA{
     m_jet_eta_b  = bookHistogram("jet_eta_b", "jet_eta", m_sParticleType, "b-jets - ");
     m_jet_eta_c  = bookHistogram("jet_eta_c", "jet_eta", m_sParticleType, "c-jets - ");
     m_jet_eta_l  = bookHistogram("jet_eta_l", "jet_eta", m_sParticleType, "l-jets - ");
-    m_jet_eta_top  = bookHistogram("jet_eta_top", "jet_eta", m_sParticleType, "top-jets - ");
 
     // SV1 related vars
     m_SV1_numSVs_incl = bookHistogram("SV1_numSVs_incl", "SV1_numSVs", m_sParticleType);
@@ -659,10 +650,12 @@ namespace JetTagDQA{
     m_nJetsWithMuon->Fill(nJetsWithMuon, event->beamSpotWeight());
     m_nJetsWithSV->Fill(nJetsWithSV, event->beamSpotWeight());
 
-    double fracJetsWithMuon = static_cast<double>(nJetsWithMuon) / nJets;
-    double fracJetsWithSV = static_cast<double>(nJetsWithSV) / nJets;
-    m_fracJetsWithMuon->Fill(fracJetsWithMuon, event->beamSpotWeight());
-    m_fracJetsWithSV->Fill(fracJetsWithSV, event->beamSpotWeight());
+    if (nJets > 0) {
+      double fracJetsWithMuon = static_cast<double>(nJetsWithMuon) / nJets;
+      double fracJetsWithSV = static_cast<double>(nJetsWithSV) / nJets;
+      m_fracJetsWithMuon->Fill(fracJetsWithMuon, event->beamSpotWeight());
+      m_fracJetsWithSV->Fill(fracJetsWithSV, event->beamSpotWeight());
+    }
 
     fillNJetsThatPassedWPCutsHistos(nJetsThatPassedWPCuts, event);
   }
@@ -712,7 +705,10 @@ namespace JetTagDQA{
           // check if the BHadron is not a null pointer
           if(! BHadrons[0]){
             ATH_MSG_WARNING("A BHadron in the 'ConeExclBHadronsFinal' collection is a null pointer. Might be related to ATLPHYSVAL-783.");
-          } 
+          }
+          else if(! BHadrons[0]->decayVtx()){
+            ATH_MSG_DEBUG("BHadron without decay vertex, no truth Lxy");
+          }
           else{
             // get the Lxy
             Lxy = BHadrons[0]->decayVtx()->perp();
@@ -735,7 +731,10 @@ namespace JetTagDQA{
           // check if the CHadron is not a null pointer
           if(! CHadrons[0]){
             ATH_MSG_WARNING("A CHadron in the 'ConeExclCHadronsFinal' collection is a null pointer. Might be related to ATLPHYSVAL-783.");
-          } 
+          }
+          else if(! CHadrons[0]->decayVtx()){
+            ATH_MSG_DEBUG("CHadron without decay vertex, no truth Lxy");
+          }
           else{
             // get the Lxy
             Lxy = CHadrons[0]->decayVtx()->perp();
@@ -1046,22 +1045,22 @@ namespace JetTagDQA{
 
     // SV1 deltaR jex axis - PV-SV
     static const SG::ConstAccessor<float> SV1_deltaRAcc("SV1_deltaR");
-    float SV1_deltaR = SV1_deltaRAcc(*jet);
+    float SV1_deltaR = SV1_deltaRAcc.withDefault(*jet, -1);
 
     // SV1 significance 3d
     static const SG::ConstAccessor<float> SV1_significance3dAcc("SV1_significance3d");
-    float SV1_significance3d = SV1_significance3dAcc(*jet);
+    float SV1_significance3d = SV1_significance3dAcc.withDefault(*jet, -1);
 
     // SV1 energyTrkInJet
     static const SG::ConstAccessor<float> SV1_energyTrkInJetAcc("SV1_energyTrkInJet");
-    float SV1_energyTrkInJet = SV1_energyTrkInJetAcc(*jet);
+    float SV1_energyTrkInJet = SV1_energyTrkInJetAcc.withDefault(*jet, -1);
 
     // SV1 NGTinSvx 
     static const SG::ConstAccessor<int> SV1_NGTinSvxAcc("SV1_NGTinSvx");
-    int SV1_NGTinSvx = SV1_NGTinSvxAcc(*jet);
+    int SV1_NGTinSvx = SV1_NGTinSvxAcc.withDefault(*jet, -1);
     // SV1 Lxy 
     static const SG::ConstAccessor<float> SV1_LxyAcc("SV1_Lxy");
-    float SV1_Lxy = SV1_LxyAcc(*jet);
+    float SV1_Lxy = SV1_LxyAcc.withDefault(*jet, -1);
 
     // SV1 track origing related variables (have them double such that taking a fraction doesn't result in an int)
     double SV1_numTracks = 0;
@@ -1085,7 +1084,7 @@ namespace JetTagDQA{
     static const SG::ConstAccessor<std::vector< ElementLink< xAOD::VertexContainer > > >
       SV1_verticesAcc("SV1_vertices");
     std::vector< ElementLink< xAOD::VertexContainer > > SV1_vertex =
-      SV1_verticesAcc(*jet);
+      SV1_verticesAcc.withDefault(*jet, {});
 
     if(SV1_vertex.size() >= 1) contains_SV = true;
     else contains_SV = false;
@@ -1207,18 +1206,21 @@ namespace JetTagDQA{
   void BTaggingValidationPlots::fillDiscriminantVariables(const xAOD::Jet* jet, const double& jet_Lxy, const int& truth_label, const bool& onZprime, std::map<std::string, int>& nJetsThatPassedWPCuts, const xAOD::EventInfo* event){
 
     // get the GN2v01 vars
-    double GN2v01_pb, GN2v01_pu, GN2v01_pc, GN2v01_ptau;
     SG::ConstAccessor<float> GN2pbAcc(m_GN2v01Name + "_pb");
-    GN2v01_pb = GN2pbAcc.withDefault(*jet, -1);
-
     SG::ConstAccessor<float> GN2puAcc(m_GN2v01Name + "_pu");
-    GN2v01_pu = GN2puAcc.withDefault(*jet, -1);
-
     SG::ConstAccessor<float> GN2pcAcc(m_GN2v01Name + "_pc");
-    GN2v01_pc = GN2pcAcc.withDefault(*jet, -1);
-
     SG::ConstAccessor<float> GN2ptauAcc(m_GN2v01Name + "_ptau");
-    GN2v01_ptau = GN2ptauAcc.withDefault(*jet, -1);
+    if (!GN2pbAcc.isAvailable(*jet) || !GN2puAcc.isAvailable(*jet) || !GN2pcAcc.isAvailable(*jet) || !GN2ptauAcc.isAvailable(*jet)) {
+      if (!m_warnedMissingTaggerOutputs) {
+        ATH_MSG_WARNING("Missing " << m_GN2v01Name << " outputs on " << m_sParticleType << ", skipping tagger histograms");
+        m_warnedMissingTaggerOutputs = true;
+      }
+      return;
+    }
+    double GN2v01_pb = GN2pbAcc(*jet);
+    double GN2v01_pu = GN2puAcc(*jet);
+    double GN2v01_pc = GN2pcAcc(*jet);
+    double GN2v01_ptau = GN2ptauAcc(*jet);
 
     m_GN2v01_pb->Fill(GN2v01_pb, event->beamSpotWeight());
     m_GN2v01_pu->Fill(GN2v01_pu, event->beamSpotWeight());
@@ -1234,8 +1236,7 @@ namespace JetTagDQA{
       for(std::map<std::string, int>::const_iterator label_iter = m_truthLabels.begin(); label_iter != m_truthLabels.end(); ++label_iter){
 
         // GN2v01 taggers
-        bool pass_nTracksCut_GN2v01 = true;
-        BTaggingValidationPlots::fillDiscriminantHistograms("GN2v01_", weight_GN2v01, m_GN2v01_workingPoints, truth_label, hist_iter, label_iter, pass_nTracksCut_GN2v01, jet->pt(), jet_Lxy, onZprime, event);
+        BTaggingValidationPlots::fillDiscriminantHistograms("GN2v01_", weight_GN2v01, m_GN2v01_workingPoints, truth_label, hist_iter, label_iter, jet->pt(), jet_Lxy, onZprime, event);
 
       }
     }
@@ -1244,34 +1245,32 @@ namespace JetTagDQA{
   // a fill method for discriminant related vars
   void BTaggingValidationPlots::fillDiscriminantVariables_for_largeRjet(const xAOD::Jet* jet, const int& truth_label, const bool& onZprime, std::map<std::string, int>& nJetsThatPassedWPCuts, const xAOD::EventInfo* event){
     // get the GN3XPV01 vars
-    double GN3XPV01_phtautauhad, GN3XPV01_phbb, GN3XPV01_phcc, GN3XPV01_ptop, GN3XPV01_pqcdbb, GN3XPV01_pqcdbx, GN3XPV01_pqcdcx, GN3XPV01_pqcdll, GN3XPV01_pwqq;
-
     SG::ConstAccessor<float> GN3XPV01_phtautauhadAcc(m_GN3XPV01Name + "_phtautauhad");
-    GN3XPV01_phtautauhad = GN3XPV01_phtautauhadAcc.withDefault(*jet, -1);
-
     SG::ConstAccessor<float> GN3XPV01phbbAcc(m_GN3XPV01Name + "_phbb");
-    GN3XPV01_phbb = GN3XPV01phbbAcc.withDefault(*jet, -1);
-
     SG::ConstAccessor<float> GN3XPV01phccAcc(m_GN3XPV01Name + "_phcc");
-    GN3XPV01_phcc = GN3XPV01phccAcc.withDefault(*jet, -1);
-
     SG::ConstAccessor<float> GN3XPV01ptopAcc(m_GN3XPV01Name + "_ptop");
-    GN3XPV01_ptop = GN3XPV01ptopAcc.withDefault(*jet, -1);
-
     SG::ConstAccessor<float> GN3XPV01pqcdbbAcc(m_GN3XPV01Name + "_pqcdbb");
-    GN3XPV01_pqcdbb = GN3XPV01pqcdbbAcc.withDefault(*jet, -1);
-
     SG::ConstAccessor<float> GN3XPV01pqcdbxAcc(m_GN3XPV01Name + "_pqcdbx");
-    GN3XPV01_pqcdbx = GN3XPV01pqcdbxAcc.withDefault(*jet, -1);
-
     SG::ConstAccessor<float> GN3XPV01pqcdcxAcc(m_GN3XPV01Name + "_pqcdcx");
-    GN3XPV01_pqcdcx = GN3XPV01pqcdcxAcc.withDefault(*jet, -1);
-
     SG::ConstAccessor<float> GN3XPV01pqcdllAcc(m_GN3XPV01Name + "_pqcdll");
-    GN3XPV01_pqcdll = GN3XPV01pqcdllAcc.withDefault(*jet, -1);
-
     SG::ConstAccessor<float> GN3XPV01pwqqAcc(m_GN3XPV01Name + "_pWqq");
-    GN3XPV01_pwqq = GN3XPV01pwqqAcc.withDefault(*jet, -1);
+    const std::initializer_list<const SG::ConstAccessor<float>*> GN3XPV01Accs = {&GN3XPV01_phtautauhadAcc, &GN3XPV01phbbAcc, &GN3XPV01phccAcc, &GN3XPV01ptopAcc, &GN3XPV01pqcdbbAcc, &GN3XPV01pqcdbxAcc, &GN3XPV01pqcdcxAcc, &GN3XPV01pqcdllAcc, &GN3XPV01pwqqAcc};
+    if (!std::all_of(GN3XPV01Accs.begin(), GN3XPV01Accs.end(), [jet](const auto* acc) { return acc->isAvailable(*jet); })) {
+      if (!m_warnedMissingTaggerOutputs) {
+        ATH_MSG_WARNING("Missing " << m_GN3XPV01Name << " outputs on " << m_sParticleType << ", skipping tagger histograms");
+        m_warnedMissingTaggerOutputs = true;
+      }
+      return;
+    }
+    double GN3XPV01_phtautauhad = GN3XPV01_phtautauhadAcc(*jet);
+    double GN3XPV01_phbb = GN3XPV01phbbAcc(*jet);
+    double GN3XPV01_phcc = GN3XPV01phccAcc(*jet);
+    double GN3XPV01_ptop = GN3XPV01ptopAcc(*jet);
+    double GN3XPV01_pqcdbb = GN3XPV01pqcdbbAcc(*jet);
+    double GN3XPV01_pqcdbx = GN3XPV01pqcdbxAcc(*jet);
+    double GN3XPV01_pqcdcx = GN3XPV01pqcdcxAcc(*jet);
+    double GN3XPV01_pqcdll = GN3XPV01pqcdllAcc(*jet);
+    double GN3XPV01_pwqq = GN3XPV01pwqqAcc(*jet);
 
     m_GN3XPV01_phtautauhad->Fill(GN3XPV01_phtautauhad, event->beamSpotWeight());
     m_GN3XPV01_phbb->Fill(GN3XPV01_phbb, event->beamSpotWeight());
@@ -1293,8 +1292,7 @@ namespace JetTagDQA{
       for(std::map<std::string, int>::const_iterator label_iter = m_truthLabels.begin(); label_iter != m_truthLabels.end(); ++label_iter){
 
         // GN3XPV01 taggers
-        bool pass_nTracksCut_GN3XPV01 = true;
-        BTaggingValidationPlots::fillDiscriminantHistograms("GN3XPV01_", weight_GN3XPV01, m_GN3XPV01_workingPoints, truth_label, hist_iter, label_iter, pass_nTracksCut_GN3XPV01, jet->pt(), -1, onZprime, event);
+        BTaggingValidationPlots::fillDiscriminantHistograms("GN3XPV01_", weight_GN3XPV01, m_GN3XPV01_workingPoints, truth_label, hist_iter, label_iter, jet->pt(), -1, onZprime, event);
 
       }
     }
@@ -1417,14 +1415,6 @@ namespace JetTagDQA{
         if((*tag_iter).find("MV") < 1) var_name_matched += "_MV";
         TH1* histo_matched = bookHistogram(histo_name_matched, var_name_matched, m_sParticleType, label_iter->first + "-jets" + ", " + *tag_iter);    
         m_weight_histos.insert(std::make_pair(histo_name_matched, histo_matched));
-
-        // book discriminant with nTracksCut histograms
-        std::string histo_name_trackCuts = *tag_iter+"_"+label_iter->first+"_matched_weight_trackCuts";
-        std::string var_name_trackCuts = "llr_nTracksCut";
-        if((*tag_iter).find("MV") < 1) var_name_trackCuts += "_MV";
-        TH1* histo_trackCuts = bookHistogram(histo_name_trackCuts, var_name_trackCuts, m_sParticleType, label_iter->first + "-jets" + ", " + *tag_iter);    
-        m_weight_histos.insert(std::make_pair(histo_name_trackCuts, histo_trackCuts));
-        
 
         // book the vs pT histograms (the bool in the argument says if it is an old tagger (for sub-folder sorting later))
         //GN2v01 
