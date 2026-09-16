@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigDecisionMakerValidator.h"
@@ -104,6 +104,7 @@ StatusCode TrigDec::TrigDecisionMakerValidator::execute(const EventContext& cont
       if (!terminusNode) {
         ATH_CHECK( reportError(m_navigationReadHandleKey.key(), "Terminus Node could not be located from the primary navigation collection.") );
       }
+      //coverity[FORWARD_NULL:FALSE]
       TrigCompositeUtils::decisionIDs(terminusNode, terminusIDs);
     }
 
