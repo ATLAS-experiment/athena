@@ -46,6 +46,13 @@ class BasicTests(FlagsSetup):
         with self.assertRaises(AttributeError):
             self.flags.A.B.X
 
+        with self.assertRaises(KeyError):
+            self.flags["X"]
+
+        with self.assertRaises(KeyError):
+            self.flags.A.B["X"]
+
+
     def test_exists(self):
         """Test `has` methods"""
         self.assertTrue( self.flags.hasFlag("Atest") )
@@ -80,6 +87,11 @@ class BasicTests(FlagsSetup):
         with self.assertRaises(KeyError) as cm:
             self.flags.A.one = 1
         self.assertIn("A.One", str(cm.exception))
+
+    def test_duplicate(self):
+        """Test duplicate detection"""
+        with self.assertRaises(KeyError):
+            self.flags.addFlag("Atest", True)
 
     def test_dependentFlag(self):
         """The dependent flags will use another flag value to establish its own value"""

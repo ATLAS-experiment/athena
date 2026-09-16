@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // /***************************************************************************
@@ -151,7 +151,6 @@ void LVL1::JEMJetSim::storeBackplaneTOBs(const EventContext& ctx) {
   size_t datasize = m_JetCMXData->size();
 
   // Store backplane data objects
-  ///StatusCode sc = evtStore()->overwrite(m_JetCMXData, m_JetCMXDataLocation, true);
   StatusCode sc = SG::makeHandle(m_JetCMXDataOutputKey, ctx).record( std::unique_ptr<DataVector<JetCMXData>>(m_JetCMXData) );
   m_JetCMXData = nullptr;
 

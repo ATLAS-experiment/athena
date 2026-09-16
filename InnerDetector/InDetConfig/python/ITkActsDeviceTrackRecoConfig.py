@@ -263,31 +263,7 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
                 InputSeeds="TracccPixelSeedCollection",
                 OutputSeeds=f'{flags.Tracking.ActiveConfig.extension}PixelSeeds'))
             seedsLocation = DataLocation.HOST
-           
-        # Extract track parameters from device seeds if requested
-        if flags.Tracking.ActiveConfig.storeTrackSeeds and flags.Acts.Device.doSeeding: # for clustering only pipelines this is controlled via the ActsSeedingConfig file
-            from ActsConfig.ActsSeedingConfig import ActsStoreTrackSeedsCfg
-            from ActsConfig.ActsAnalysisConfig import ActsPixelSeedsToTrackParamsAlgCfg, ActsStripSeedsToTrackParamsAlgCfg
-            processPixels = flags.Tracking.ActiveConfig.useITkPixelSeeding
-            processStrips = flags.Tracking.ActiveConfig.useITkStripSeeding
-
-            prefix = flags.Tracking.ActiveConfig.extension
-            # Create track parameters before ActsStoreTrackSeedsCfg (following ActsSeedingCfg pattern)
-            if processPixels:
-                acc.merge(ActsPixelSeedsToTrackParamsAlgCfg(
-                    flags,
-                    name = prefix + 'PixelSeedsToTrackParamsAlg',
-                    InputSeedContainerKey = prefix + 'PixelSeeds',
-                    OutputTrackParamsCollectionKey = prefix + 'PixelEstimatedTrackParams'))
-            if processStrips:
-                acc.merge(ActsStripSeedsToTrackParamsAlgCfg(
-                    flags,
-                    name = prefix + 'StripSeedsToTrackParamsAlg',
-                    InputSeedContainerKey = prefix + 'StripSeeds',
-                    OutputTrackParamsCollectionKey = prefix + 'StripEstimatedTrackParams'))
-
-            acc.merge(ActsStoreTrackSeedsCfg(flags, processPixels=processPixels, processStrips=processStrips))
-            
+                            
         # CKF
         from ActsConfig.ActsTrackFindingConfig import ActsTrackFindingCfg
         acc.merge(ActsTrackFindingCfg(flags))
@@ -345,4 +321,44 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
                                                        name = f"{acts_tracks}TrackFindingValidationAlg",
                                                        TrackToTruthAssociationMap = f"{acts_tracks}ToTruthParticleAssociation"))
 
+        # Extract track parameters from device seeds if requested
+        if flags.Tracking.ActiveConfig.storeTrackSeeds and flags.Acts.Device.doSeeding: # for clustering only pipelines this is controlled via the ActsSeedingConfig file
+            from ActsConfig.ActsSeedingConfig import ActsStoreTrackSeedsCfg
+            from ActsConfig.ActsAnalysisConfig import ActsPixelSeedsToTrackParamsAlgCfg, ActsStripSeedsToTrackParamsAlgCfg
+            processPixels = flags.Tracking.ActiveConfig.useITkPixelSeeding
+            processStrips = flags.Tracking.ActiveConfig.useITkStripSeeding
+
+            prefix = flags.Tracking.ActiveConfig.extension
+            
+            if flags.Acts.Device.doTrackReconstruction:
+                from ActsGPUEventCnv.ActsGPUEventCnvConfig import TracccSeedConverterAlgCfg
+                acc.merge(TracccSeedConverterAlgCfg(flags,
+                    name="TracccSeedConverterAlg",
+                    InputSpacepointsDevice="TracccPixelSpacepointCollection",
+                    InputSpacepoints="ITkPixelSpacePoints",
+                    InputMeasToPixelSP="ITkTracccMeasToPixelSP",
+                    InputSeeds="TracccPixelSeedCollection",
+                    OutputSeeds=f'{flags.Tracking.ActiveConfig.extension}PixelSeeds'))
+            
+            # Create track parameters before ActsStoreTrackSeedsCfg (following ActsSeedingCfg pattern)
+            if processPixels:
+                acc.merge(ActsPixelSeedsToTrackParamsAlgCfg(
+                    flags,
+                    name = prefix + 'PixelSeedsToTrackParamsAlg',
+                    InputSeedContainerKey = prefix + 'PixelSeeds',
+                    OutputTrackParamsCollectionKey = prefix + 'PixelEstimatedTrackParams'))
+            if processStrips:
+                acc.merge(ActsStripSeedsToTrackParamsAlgCfg(
+                    flags,
+                    name = prefix + 'StripSeedsToTrackParamsAlg',
+                    InputSeedContainerKey = prefix + 'StripSeeds',
+                    OutputTrackParamsCollectionKey = prefix + 'StripEstimatedTrackParams'))
+                
+            if processPixels:
+                acc.merge(ActsStoreTrackSeedsCfg(flags,processPixels=True, processStrips=False))
+            if processStrips:
+                acc.merge(ActsStoreTrackSeedsCfg(flags,processPixels=False, processStrips=True))
+            if processPixels and processStrips:
+                acc.merge(ActsStoreTrackSeedsCfg(flags,processPixels=True, processStrips=True))
+                
     return acc

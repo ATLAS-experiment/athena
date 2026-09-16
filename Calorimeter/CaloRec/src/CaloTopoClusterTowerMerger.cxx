@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StoreGate/ReadHandle.h"
@@ -173,18 +173,3 @@ CaloTopoClusterTowerMerger::makeDeepCopy(const xAOD::CaloCluster& rClus,
 
 StatusCode CaloTopoClusterTowerMerger::addContainerWriteHandle(whandle_t& signalHandle) 
 { return CaloClusterStoreHelper::AddContainerWriteHandle(signalHandle); }
-//   // get a new signal handle
-//   signalHandle = std::unique_ptr<xAOD::CaloClusterContainer>(new xAOD::CaloClusterContainer());
-//   if ( !signalHandle.isValid() ) { return StatusCode::FAILURE; }
-//   // get AUX container
-//   xAOD::CaloClusterAuxContainer* auxData = new xAOD::CaloClusterAuxContainer();
-//   std::string auxName(m_topoSignalContainerKey.key()+"Aux.");
-//   if ( evtStore()->overwrite(auxData,auxName).isFailure() ) {
-//     ATH_MSG_ERROR("Failed to record xAOD::CaloClusterAuxContainer with key <" << auxName << ">");
-//     delete auxData;
-//     return StatusCode::FAILURE;
-//   } 
-//   // connect store with object container
-//   signalHandle.ptr()->setStore(auxData);
-//   return StatusCode::SUCCESS;
-// }
