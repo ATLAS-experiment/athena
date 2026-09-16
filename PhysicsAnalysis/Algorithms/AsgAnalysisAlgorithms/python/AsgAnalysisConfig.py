@@ -419,7 +419,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
             info="save the necessary information to run the LHAPDF tool offline.")
         self.addOption ('doPDFReweighting', False, type=bool,
             info="perform the PDF reweighting to do the PDF sensitivity studies with the existing sample, intrinsic charm PDFs as the default here. WARNING: the reweighting closure should be validated within analysis (it has been proved to be good for Madgraph, aMC@NLO, Pythia8, Herwig, and Alpgen, but not good for Sherpa and Powheg).")
-        self.addOption ('inPDFName', None, type=str, info="initial PDF set")
+        self.addOption ('inPDFName', None, type=str, info="PDF set the input sample was produced with, for use in PDF reweighting")
         self.addOption ('outPDFName', [
             "CT14nnloIC/0", "CT14nnloIC/1", "CT14nnloIC/2", 
             "CT18FC/0", "CT18FC/3", "CT18FC/6", "CT18FC/9", 
