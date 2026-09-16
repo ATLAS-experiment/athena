@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETTOXAOD_SPACEPOINT_CONVERSION_H
@@ -18,8 +18,6 @@
 
 #include "TrkSpacePoint/SpacePointContainer.h" 
 #include "TrkSpacePoint/SpacePointOverlapCollection.h"
-
-#include "BeamSpotConditionsData/BeamSpotData.h"
 
 #include "InDetIdentifier/PixelID.h"
 #include "InDetIdentifier/SCT_ID.h"
@@ -45,18 +43,13 @@ namespace InDet {
     StatusCode convertPixel(const EventContext& ctx,
 			    xAOD::PixelClusterContainer* cluster_xaod_container) const;
     StatusCode convertStrip(const EventContext& ctx, 
-			    const Amg::Vector3D& vertex,
 			    xAOD::StripClusterContainer* cluster_xaod_container,
 			    std::unordered_map<Identifier, std::size_t>& mapClusters) const;
     StatusCode convertStripOverlap(const EventContext& ctx, 
-				   const Amg::Vector3D& vertex,
 				   xAOD::StripClusterContainer* cluster_xaod_container,
 				   std::unordered_map<Identifier, std::size_t>& mapClusters) const;
 
   private:
-    SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey { this, "BeamSpotKey", "BeamSpotData", 
-	"SG key for beam spot" };
-
     SG::ReadHandleKey< ::SpacePointContainer > m_inSpacepointsPixel {this, "InputPixelSpacePointsName", "ITkPixelSpacePoints", 
 	"Input Pixel space points container"};
     SG::ReadHandleKey< ::SpacePointContainer > m_inSpacepointsStrip {this, "InputStripSpacePointsName", "ITkStripSpacePoints", 
