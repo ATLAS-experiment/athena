@@ -12,5 +12,6 @@
 #pragma link C++ namespace EL;
 
 #pragma link C++ class EL::PrunDriver+;
+#pragma link C++ function EL::getRootCoreConfig ();
 
 #endif

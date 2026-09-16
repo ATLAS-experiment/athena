@@ -21,7 +21,7 @@ test -f "$tmp_output_file"
 
 #runMerge gives one of the input files as the output file,
 #doing this to avoid potential problems
-rm -f "$output_file"
-mv "$tmp_output_file" "$output_file"
+rm -f $output_file
+mv $tmp_output_file $output_file
 
 test -f "$output_file"
