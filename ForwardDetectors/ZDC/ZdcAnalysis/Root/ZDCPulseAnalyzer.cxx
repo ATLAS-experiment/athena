@@ -80,6 +80,8 @@ const ZDCJSONConfig::JSONParamList ZDCPulseAnalyzer::JSONConfigParams = {
     {"enablePostExclusion", {JSON::value_t::array, 3, false, false}},
     {"enableUnderflowExclusionHG", {JSON::value_t::array, 2, true, false}},
     {"enableUnderflowExclusionLG", {JSON::value_t::array, 2, true, false}},
+    {"enablePrePulseDetection", {JSON::value_t::boolean, 1, false, false}},
+    {"enablePostPulseDetection", {JSON::value_t::boolean, 1, false, false}},
     {"enableTimingCorrection", {JSON::value_t::array, 3, false, false}},
     {"timeCorrCoeffHG", {JSON::value_t::array, 6, true, false}},
     {"timeCorrCoeffLG", {JSON::value_t::array, 6, true, false}},
@@ -321,6 +323,7 @@ void ZDCPulseAnalyzer::setDefaults()
   m_postPulseAbsDer2ndMinSig = 5;
   m_postPulseMainMinDer2ndRatio = 0.05;
 
+  m_doPrePulseCheck = true;
   m_prePulseDelta = 2;
   
   m_initialPrePulseT0  = -10;
@@ -426,8 +429,8 @@ void ZDCPulseAnalyzer::reset(bool repass)
   }
 
   
-  m_defaultT0Max = m_deltaTSample * (m_peak2ndDerivMinSample + m_peak2ndDerivMinTolerance + 0.5);
-  m_defaultT0Min = m_deltaTSample * (m_peak2ndDerivMinSample - m_peak2ndDerivMinTolerance - 0.5);
+  m_defaultT0Max = m_deltaTSample * (m_peak2ndDerivMinSample + m_peak2ndDerivMinTolerance + 1.5);
+  m_defaultT0Min = m_deltaTSample * (m_peak2ndDerivMinSample - m_peak2ndDerivMinTolerance - 1.5);
 
   if (m_initializedFits) {
     m_defaultFitWrapper ->SetT0Range(m_defaultT0Min, m_defaultT0Max);
@@ -1001,12 +1004,12 @@ bool ZDCPulseAnalyzer::ScanAndSubtractSamples()
       m_ADCSamplesHGSub[isample] *= fadcCorrHG;
       m_ADCSamplesLGSub[isample] *= fadcCorrLG;
 
-      if (doDump) {
-	std::ostringstream dumpString;
-	dumpString << "After FADC correction, sample " << isample << ", HG ADC = " << m_ADCSamplesHGSub[isample]
-		   << ", LG ADC = " << m_ADCSamplesLGSub[isample] << std::endl;
-	(*m_msgFunc_p)(ZDCMsg::Verbose, dumpString.str().c_str());
-      }
+      // if (doDump) {
+      // 	std::ostringstream dumpString;
+      // 	dumpString << "After FADC correction, sample " << isample << ", HG ADC = " << m_ADCSamplesHGSub[isample]
+      // 		   << ", LG ADC = " << m_ADCSamplesLGSub[isample] << std::endl;
+      // 	(*m_msgFunc_p)(ZDCMsg::Verbose, dumpString.str().c_str());
+      // }
     }
 
     if (ADCHG > m_maxADCHG) {
@@ -1179,7 +1182,7 @@ bool ZDCPulseAnalyzer::DoAnalysis(bool repass)
       (float chisq, float amp, unsigned int fitNDoF, float& ratio)->bool
     {
       if (amp < 1e-6) return true;
-      ratio = chisq /(scale* (std::pow(amp/1000 + offset, power)));
+      ratio = chisq /(offset + scale* (std::pow(amp/1000, power)));
       if (chisq/fitNDoF > 2 && ratio > cut) return false;
       else return true;
     };
@@ -1226,7 +1229,7 @@ bool ZDCPulseAnalyzer::DoAnalysis(bool repass)
       (float chisq, float amp, unsigned int fitNDoF, float& ratio)->bool
     {
       if (amp < 1e-6) return true;
-      ratio = chisq /(scale*(std::pow(amp/1000 + offset, power)));
+      ratio = chisq /(offset + scale*(std::pow(amp/1000, power)));
       if (chisq/float(fitNDoF) > 2 && ratio > cut) return false;
       else return true;
     };
@@ -1377,7 +1380,7 @@ bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
 
   // Do the presample subtraction
   //
-  std::for_each(m_samplesSub.begin(), m_samplesSub.end(), [ = ] (float & adcUnsub) {return adcUnsub -= m_preSample;} );
+  std::for_each(m_samplesSub.begin(), m_samplesSub.end(), [psval = m_preSample] (float & adcUnsub) {return adcUnsub -= psval;} );
 
   // Calculate the second derivatives using step size m_2ndDerivStep
   //
@@ -1470,86 +1473,86 @@ bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
   //   that subtraction has already been done.
   //
   if (m_havePulse) {
-    // If we've alreday excluded early samples, we have almost by construction have negative exponential tail
-    //
-    if (m_ExcludeEarly) m_preExpTail = true;
-
-    //
-    //  The subtracted ADC value at m_usedPresampIdx is, by construction, zero
-    //    The next sample has had the pre-sample subtracted, so it represents the initial derivative
-    //
-    float derivPresampleErr = std::sqrt(Sqr(m_samplesNoise[m_usedPresampIdx]) + Sqr(m_samplesNoise[m_usedPresampIdx+1]));
-    float derivPresampleSig = m_samplesSub[m_usedPresampIdx+1]/derivPresampleErr;
-    if (derivPresampleSig < -5) {
-      m_preExpTail = true;
-      m_preExpSig = derivPresampleSig;
-    }
-    
-    for (unsigned int isample = m_usedPresampIdx; isample <= m_minDeriv2ndIndex - m_prePulseDelta; isample++) {
-      if (!useSample[isample]) continue;
-
-      float sampleSig = -m_samplesSub[isample]/m_samplesNoise[isample];
-
-      // Compare the derivative significant to the 2nd derivative significance, 
-      //   so we don't waste time dealing with small perturbations on large signals
+    if (m_doPrePulseCheck) {
+      // If we've alreday excluded early samples, we have almost by construction have negative exponential tail
       //
-      if ((sampleSig > 5 && sampleSig > 0.02*m_minDeriv2ndSig) || sampleSig > 0.5*m_minDeriv2ndSig) {
+      if (m_ExcludeEarly) m_preExpTail = true;
+
+      //
+      //  The subtracted ADC value at m_usedPresampIdx is, by construction, zero
+      //    The next sample has had the pre-sample subtracted, so it represents the initial derivative
+      //
+      float derivPresampleErr = std::sqrt(Sqr(m_samplesNoise[m_usedPresampIdx]) + Sqr(m_samplesNoise[m_usedPresampIdx+1]));
+      float derivPresampleSig = m_samplesSub[m_usedPresampIdx+1]/derivPresampleErr;
+      if (derivPresampleSig < -5) {
 	m_preExpTail = true;
-
-	// std::cout << "Found preExpTail at sample " << isample << ", sampleSig = " << sampleSig
-	// 	  << ", m_minDeriv2ndSig = " << m_minDeriv2ndSig << std::endl;
-	if (sampleSig > m_preExpSig) m_preExpSig = sampleSig;
+	m_preExpSig = derivPresampleSig;
       }
-    }
-
-    // Now we search for maxima before the main pulse
-    //
-    int loopLimit = (m_havePulse ? m_minDeriv2ndIndex - 2 : m_peak2ndDerivMinSample - 2);
-    int loopStart = m_minSampleEvt == 0 ? 1 : m_minSampleEvt;
     
-    float maxPrepulseSig = 0;
-    unsigned int maxPrepulseSample = 0;
+      for (unsigned int isample = m_usedPresampIdx; isample <= m_minDeriv2ndIndex - m_prePulseDelta; isample++) {
+	if (!useSample[isample]) continue;
+
+	float sampleSig = -m_samplesSub[isample]/m_samplesNoise[isample];
+
+	// Compare the derivative significant to the 2nd derivative significance, 
+	//   so we don't waste time dealing with small perturbations on large signals
+	//
+	if ((sampleSig > 5 && sampleSig > 0.02*m_minDeriv2ndSig) || sampleSig > 0.5*m_minDeriv2ndSig) {
+	  m_preExpTail = true;
+
+	  if (sampleSig > m_preExpSig) m_preExpSig = sampleSig;
+	}
+      }
+
+      // Now we search for maxima before the main pulse
+      //
+      int loopLimit = (m_havePulse ? m_minDeriv2ndIndex - 2 : m_peak2ndDerivMinSample - 2);
+      int loopStart = m_minSampleEvt == 0 ? 1 : m_minSampleEvt;
     
-    for (int isample = loopStart; isample <= loopLimit; isample++) {
-      if (!useSample[isample]) continue;
+      float maxPrepulseSig = 0;
+      unsigned int maxPrepulseSample = 0;
+    
+      for (int isample = loopStart; isample <= loopLimit; isample++) {
+	if (!useSample[isample]) continue;
       
-      //
-      // If any of the second derivatives prior to the peak are significantly negative, we have a an extra pulse
-      //   prior to the main one -- as opposed to just an expnential tail
-      //
-      double prePulseSig = -m_samplesDeriv2nd[isample]/(1e-6 + m_samplesDeriv2ndErr[isample]);
-      //
-      // apply a cut on the significance (as above) but without using division
-      //
-      if ((prePulseSig > 6 && m_samplesDeriv2nd[isample] < 0.05 * m_minDeriv2nd) ||
-	  m_samplesDeriv2nd[isample]  < 0.5*m_minDeriv2nd)
-      {
-	m_prePulse = true;
-	if (prePulseSig > maxPrepulseSig) {
-	  maxPrepulseSig = prePulseSig;
-	  maxPrepulseSample = isample;
-	}
-      }
-    }
-
-    if (m_prePulse) {
-      m_prePulseSig = maxPrepulseSig;
-      
-      if (m_preExpTail) {
 	//
-	// We have a prepulse. If we already indicated an negative exponential,
-	//   if the prepulse has greater significance, we override the negative exponential
+	// If any of the second derivatives prior to the peak are significantly negative, we have a an extra pulse
+	//   prior to the main one -- as opposed to just an expnential tail
 	//
-	if (m_prePulseSig >  m_preExpSig) {
-	  m_preExpTail = false;
-	}
-	else {
-	  m_prePulse = false;
-	}
+	double prePulseSig = -m_samplesDeriv2nd[isample]/(1e-6 + m_samplesDeriv2ndErr[isample]);
+	//
+	// apply a cut on the significance (as above) but without using division
+	//
+	if ((prePulseSig > 6 && m_samplesDeriv2nd[isample] < 0.05 * m_minDeriv2nd) ||
+	    m_samplesDeriv2nd[isample]  < 0.5*m_minDeriv2nd)
+	  {
+	    m_prePulse = true;
+	    if (prePulseSig > maxPrepulseSig) {
+	      maxPrepulseSig = prePulseSig;
+	      maxPrepulseSample = isample;
+	    }
+	  }
       }
 
-      m_initialPrePulseAmp = m_samplesSub[maxPrepulseSample];
-      m_initialPrePulseT0 = m_deltaTSample * (maxPrepulseSample);
+      if (m_prePulse) {
+	m_prePulseSig = maxPrepulseSig;
+      
+	if (m_preExpTail) {
+	  //
+	  // We have a prepulse. If we already indicated an negative exponential,
+	  //   if the prepulse has greater significance, we override the negative exponential
+	  //
+	  if (m_prePulseSig >  m_preExpSig) {
+	    m_preExpTail = false;
+	  }
+	  else {
+	    m_prePulse = false;
+	  }
+	}
+
+	m_initialPrePulseAmp = m_samplesSub[maxPrepulseSample];
+	m_initialPrePulseT0 = m_deltaTSample * (maxPrepulseSample);
+      }
     }
 
     // -----------------------------------------------------
@@ -1738,8 +1741,8 @@ void ZDCPulseAnalyzer::DoFit(bool refitLG)
   }
   
   if (m_adjTimeRangeEvent) {
-    m_fitTMin = std::max(m_fitTMin, m_deltaTSample * m_minSampleEvt - m_deltaTSample / 2);
-    m_fitTMax = std::min(m_fitTMax, m_deltaTSample * m_maxSampleEvt + m_deltaTSample / 2);
+    m_fitTMin = std::max(m_fitTMin, m_deltaTSample * m_minSampleEvt - m_deltaTSample);
+    m_fitTMax = std::min(m_fitTMax, m_deltaTSample * m_maxSampleEvt + m_deltaTSample);
 
     float fitTReference = m_deltaTSample * m_usedPresampIdx;
 
@@ -1814,6 +1817,10 @@ void ZDCPulseAnalyzer::DoFit(bool refitLG)
     }
   }
 
+  // At this point we're don varying function parameters
+  //
+  fitWrapper->Finalize();
+  
   if (!m_fitFailed && m_saveFitFunc) {
     hist_p->GetListOfFunctions()->Clear();
 
@@ -1837,7 +1844,7 @@ void ZDCPulseAnalyzer::DoFit(bool refitLG)
       m_fitExpAmp = 0;
     }
     
-    m_fitTime      = fitWrapper->GetTime();
+    m_fitTime    = fitWrapper->GetTime();
     m_fitTimeSub = m_fitTime - t0Initial;
 
     m_fitChisq = result_ptr->Chi2();
@@ -2353,6 +2360,13 @@ void ZDCPulseAnalyzer::dumpConfiguration() const    // setting
     (*m_msgFunc_p)(ZDCMsg::Info, ostrStream.str()); ostrStream.str(""); ostrStream.clear();
   }
 
+  if (!m_doPrePulseCheck) {
+    (*m_msgFunc_p)(ZDCMsg::Info, "Pre-pulse and negative exponential pulse checking disabled");
+  }
+  if (!m_doPostPulseCheck) {
+    (*m_msgFunc_p)(ZDCMsg::Info, "Post-pulse checking disabled");
+  }
+  
   if (m_enablePreExcl) {
     ostrStream << "Pre-exclusion enabled for up to " << m_maxSamplesPreExcl << ", samples with ADC threshold HG = "
 	       << m_preExclHGADCThresh << ", LG = " << m_preExclLGADCThresh;
@@ -2777,6 +2791,12 @@ std::pair<bool, std::string> ZDCPulseAnalyzer::ConfigFromJSON(const JSON& config
       m_enableUnderflowExclLG = true;
       m_underFlowExclSamplesPreLG  = value[0];
       m_underFlowExclSamplesPostLG = value[1];
+    }
+    else if (key == "enablePrePulseDetection") {
+      m_doPrePulseCheck = value;
+    }
+    else if (key == "enablePostPulseDetection") {
+      m_doPostPulseCheck = value;
     }
     else if (key == "ampMinSignifHGLG") {
       m_haveSignifCuts = true;
