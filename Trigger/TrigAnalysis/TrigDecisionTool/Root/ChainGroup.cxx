@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -13,9 +13,7 @@
  * @author Alexander Mann  <mann@cern.ch> - University of Goettingen
  *
  ***********************************************************************************/
-#include <limits>
-#include <regex>
-#include <ranges>
+
 
 #include "CxxUtils/bitmask.h"
 #include "TrigConfHLTData/HLTChain.h"
@@ -33,7 +31,9 @@
 #include "TrigDecisionTool/ChainGroup.h"
 #include "TrigDecisionTool/TDTUtilities.h"
 #include "TrigDecisionTool/Logger.h"
-
+#include <limits>
+#include <regex>
+#include <ranges>
 
 
 using namespace std;
@@ -130,8 +130,8 @@ bool Trig::ChainGroup::L1Result(const std::string& item, unsigned int condition)
   bool r = false;
   if (item.empty()) return r;
   if (item.find(',')!=std::string::npos) {
-    for(const std::string& item : convertStringToVector(item)) {
-      if(L1Result(item,condition)) return true;
+    for(const std::string& thisItem : convertStringToVector(item)) {
+      if(L1Result(thisItem,condition)) return true;
     }
     return false;
   }
