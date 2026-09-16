@@ -74,29 +74,6 @@ namespace MissingEtDQA {
   ///////////////
   PhysValMET::~PhysValMET()
   {
-    m_term_names.clear();
-    m_jet_types.clear();
-    m_terms.clear();
-    m_MET.clear();
-    m_MET_x.clear();
-    m_MET_y.clear();
-    m_MET_phi.clear();
-    m_MET_sum.clear();
-    m_MET_Diff.clear();
-    m_MET_Diff_x.clear();
-    m_MET_Diff_y.clear();
-    m_MET_Diff_phi.clear();
-    m_MET_Diff_sum.clear();
-    m_MET_Cumu.clear();
-    m_MET_Resolution.clear();
-    m_MET_Significance.clear();
-    m_MET_dPhi.clear();
-    m_MET_CorrFinalTrk.clear();
-    m_MET_CorrFinalClus.clear();
-    m_MET_Kinematic_pt.clear();
-    m_MET_Kinematic_eta.clear();
-    m_MET_Kinematic_phi.clear();
-    m_MET_multi.clear();
   }
    
   // Athena algtool's Hooks
