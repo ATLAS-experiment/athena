@@ -3,8 +3,8 @@
 */
 
 
-#ifndef ACTSEVENT_CONTEXTUTILITY_ICC
-#define ACTSEVENT_CONTEXTUTILITY_ICC
+#ifndef ACTSGEOMETRY_CONTEXTUTILITY_ICC
+#define ACTSGEOMETRY_CONTEXTUTILITY_ICC
 
 //this file is included at the end of ContextUtility.h
 
