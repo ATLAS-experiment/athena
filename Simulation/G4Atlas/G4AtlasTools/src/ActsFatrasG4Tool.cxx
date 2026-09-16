@@ -589,10 +589,10 @@ StatusCode ActsFatrasG4Tool::createHitsFromG4(
   int barcode = helper.GetBarcode();
 
   // initialize partLink
-  HepMcParticleLink partLink(HepMC::UNDEFINED_ID, 0, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE);
+  HepMcParticleLink partLink(HepMC::UNDEFINED_ID, 0, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE, ctx);
 
   if (barcode != 0 && barcode != HepMC::UNDEFINED_ID && barcode != HepMC::INVALID_PARTICLE_ID) {
-    partLink = HepMcParticleLink(barcode, 0, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE);
+    partLink = HepMcParticleLink(barcode, 0, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE, ctx);
   }
 
   // ============================================
