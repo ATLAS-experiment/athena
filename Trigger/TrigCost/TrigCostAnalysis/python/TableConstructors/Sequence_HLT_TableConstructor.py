@@ -25,8 +25,7 @@ class Sequence_HLT_TableConstructor(TableConstructorBase):
                                    "Time_perEvent",
                                    "Request_perEvent",
                                    "CachedROBSize_perEvent",
-                                   "NetworkROBSize_perEvent",
-                                   "RequestTime_perEvent"]
+                                   "NetworkROBSize_perEvent"]
 
 
     def defineColumns(self):
@@ -66,7 +65,6 @@ class Sequence_HLT_TableConstructor(TableConstructorBase):
         self.columns["timePerCall"].addValue((self.getHistogram("Time_perCall").GetMean()))
         self.columns["timePerEvent"].addValue(self.getHistogram("Time_perEvent").GetMean())
         self.columns["algsPerEvent"].addValue(self.getHistogram("AlgCalls_perEvent").GetMean())
-        self.columns["requestTimePerEvent"].addValue(self.getHistogram("RequestTime_perEvent").GetMean())
         self.columns["dataRate"].addValue(self.getXWeightedIntegral("Request_perEvent", isLog=False))
         self.columns["cachedDataSizeRate"].addValue(self.getXWeightedIntegral("CachedROBSize_perEvent", isLog=False))
         self.columns["retrievedDataSizeRate"].addValue(self.getXWeightedIntegral("NetworkROBSize_perEvent", isLog=False))
