@@ -281,6 +281,9 @@ def getTopoTruthMoments(flags):
                                       ,"CELL_SIG_SAMPLING_DigiHSTruth"
                                       ,"AVG_LAR_Q_DigiHSTruth"
                                       ,"AVG_TILE_Q_DigiHSTruth"
+                                      ,"PTD_DigiHSTruth"
+                                      ,"MASS_DigiHSTruth"
+                                      ,"SECOND_TIME_DigiHSTruth"
                                       ,"ENERGY_DigiHSTruth"
                                       ,"PHI_DigiHSTruth"
                                       ,"ETA_DigiHSTruth"
@@ -515,7 +518,9 @@ def CaloTopoClusterCfg(
                 caloCalibDecoratorDM,
             ]
 
-
+    if flags.Calo.TopoCluster.doDigiHSTruthMoments:
+        truthMomentMaker=getTopoTruthMoments(flags)
+        CaloTopoCluster.ClusterCorrectionTools += [truthMomentMaker]
     
     if doLCCalib:
         theCaloClusterSnapshot=CaloClusterSnapshot(OutputName=clustersnapname,SetCrossLinks=True,FinalClusterContainerName=clustersname)        
@@ -592,6 +597,39 @@ def CaloTopoClusterCfg(
                        ,"ENG_CALIB_FRAC_HAD"
                        ,"ENG_CALIB_FRAC_REST"]
 
+    if flags.Calo.TopoCluster.writeDigiHSTruthMoments:
+        AODMoments += ["FIRST_PHI_DigiHSTruth"
+                       ,"FIRST_ETA_DigiHSTruth"
+                       ,"SECOND_R_DigiHSTruth"
+                       ,"SECOND_LAMBDA_DigiHSTruth"
+                       ,"DELTA_PHI_DigiHSTruth"
+                       ,"DELTA_THETA_DigiHSTruth"
+                       ,"DELTA_ALPHA_DigiHSTruth"
+                       ,"CENTER_X_DigiHSTruth"
+                       ,"CENTER_Y_DigiHSTruth"
+                       ,"CENTER_Z_DigiHSTruth"
+                       ,"CENTER_MAG_DigiHSTruth"
+                       ,"CENTER_LAMBDA_DigiHSTruth"
+                       ,"LATERAL_DigiHSTruth"
+                       ,"LONGITUDINAL_DigiHSTruth"
+                       ,"ENG_FRAC_CORE_DigiHSTruth"
+                       ,"FIRST_ENG_DENS_DigiHSTruth"
+                       ,"SECOND_ENG_DENS_DigiHSTruth"
+                       ,"ISOLATION_DigiHSTruth"
+                       ,"BAD_CELLS_CORR_E_DigiHSTruth"
+                       ,"ENG_POS_DigiHSTruth"
+                       ,"SIGNIFICANCE_DigiHSTruth"
+                       ,"CELL_SIGNIFICANCE_DigiHSTruth"
+                       ,"CELL_SIG_SAMPLING_DigiHSTruth"
+                       ,"AVG_LAR_Q_DigiHSTruth"
+                       ,"AVG_TILE_Q_DigiHSTruth"
+                       ,"PTD_DigiHSTruth"
+                       ,"MASS_DigiHSTruth"
+                       ,"SECOND_TIME_DigiHSTruth"
+                       ,"ENERGY_DigiHSTruth"
+                       ,"PHI_DigiHSTruth"
+                       ,"ETA_DigiHSTruth"]
+
 
     from OutputStreamAthenaPool.OutputStreamConfig import addToAOD, addToESD
     toESD = [f"xAOD::CaloClusterContainer#{clustersname_final}",
@@ -614,7 +652,11 @@ def CaloTopoClusterCfg(
         AODMoments += ["ClusterWidthEta","ClusterWidthPhi"]
 
     auxItems = f"xAOD::CaloClusterAuxContainer#{clustersname_final}Aux."
-    auxItems+= ".".join(AODMoments)    
+    auxItems+= ".".join(AODMoments)
+
+    if flags.Calo.TopoCluster.writeDigiHSTruthMoments:
+        toAOD.append("CaloCellContainer#AllCalo_DigiHSTruth")
+        toESD.append("CaloCellContainer#AllCalo_DigiHSTruth")
 
     toAOD.append(auxItems)
  
