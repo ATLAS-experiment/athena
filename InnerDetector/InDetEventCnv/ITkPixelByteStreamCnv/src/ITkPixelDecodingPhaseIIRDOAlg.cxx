@@ -62,7 +62,7 @@ StatusCode ITkPixelDecodingPhaseIIRDOAlg::execute(const EventContext& ctx) const
 
     auto cont_coll = std::make_unique< PhaseIIPixelRawDataContainerMT>(m_idHelper->wafer_hash_max(), container_list_size);
     PhaseIIPixelRawDataContainerMT::ContainerPtr rdoCont = cont_coll->getNewContainerPtr();
-    PixelCallbacksPhaseIIRDO::PhaseIIRDOCallback cb(cont_coll.get(), rdoCont, m_idHelper, msg());
+    PixelCallbacksPhaseIIRDO::PhaseIIRDOCallback cb(cont_coll.get(), rdoCont, m_idHelper);
 
     // Instantiate the output (PhaseII).
     rdoCont->reserve(m_n_rdos_est);

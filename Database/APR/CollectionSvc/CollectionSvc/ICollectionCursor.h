@@ -36,9 +36,6 @@ namespace pool {
     /// Returns the event reference Token for the current row.
     virtual const Token& eventRef() const = 0;
 
-    /// Cleanup.
-    virtual void close() = 0;
-
 //  protected:   // MN: why protected?
     /// Empty destructor.
     virtual ~ICollectionCursor() {}

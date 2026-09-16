@@ -7,6 +7,7 @@
 
 // Athena
 #include "GaudiKernel/IAlgTool.h"
+#include "GaudiKernel/EventContext.h"
 
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "xAODInDetMeasurement/PixelCluster.h"
@@ -27,7 +28,8 @@ namespace ActsTrk {
         /// @name Production of space points
         //@{
 	/// @param gctx only valid if usesGeometryContext() returns true
-	virtual StatusCode producePixelSpacePoint(const Acts::GeometryContext& gctx,
+	virtual StatusCode producePixelSpacePoint(const EventContext& ctx,
+						  const Acts::GeometryContext& gctx,
 						  const xAOD::PixelCluster& cluster,
 						  xAOD::SpacePoint& sp,
 						  const InDetDD::SiDetectorElement& element) const = 0;

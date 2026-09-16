@@ -155,7 +155,7 @@ def ActsMainTrackFindingAlgCfg(flags,
     ### kwargs.setdefault("maxSharedHits", tolist(flags.Tracking.ActiveConfig.maxShared))
 
     # GBTS produces much purer seeds, so the branch stopper selections aren't needed with GBTS seeds.
-    if flags.Tracking.ActiveConfig.SeedingStrategy not in [
+    if flags.Tracking.ActiveConfig.PixelSeedingStrategy not in [
             SeedingStrategy.GbtsFtf, SeedingStrategy.Gbts]:
         kwargs.setdefault("ptMinMeasurements", seedOrder(flags, pixel=[3], strip=[6]))
         kwargs.setdefault("absEtaMaxMeasurements", seedOrder(flags, pixel=[3], strip=[999999]))
@@ -231,12 +231,9 @@ def ActsTrackFindingCfg(flags,
     # Understand what are the seeds we need to consider
     pixelSeedLabels = ['PPP']
     stripSeedLabels = ['SSS']
-    # Conversion and LRT do not process pixel seeds
-    from InDetConfig.ITkActsHelpers import isFastPrimaryPass
-    if flags.Tracking.ActiveConfig.extension == 'ActsConversion' or flags.Tracking.ActiveConfig.isLargeD0:
+    if not flags.Tracking.ActiveConfig.useITkPixelSeeding:
         pixelSeedLabels = None
-    # Main pass does not process strip seeds in the fast tracking configuration
-    elif isFastPrimaryPass(flags):
+    if not flags.Tracking.ActiveConfig.useITkStripSeeding:
         stripSeedLabels = None
 
     # Now set the seed and estimated parameters keys accordingly
@@ -326,6 +323,21 @@ def ActsTrackFindingCfg(flags,
     return acc
 
 
+def ActsGnnPipelineToolCfg(flags,
+                           name: str = "GnnPipelineTool",
+                           **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault('moduleMapPath', flags.Acts.GNN.ModuleMapPath)
+    kwargs.setdefault('gnnPath', flags.Acts.GNN.ModelPath)
+    kwargs.setdefault('numTrtContexts', flags.Acts.GNN.NumTrtContexts)
+    kwargs.setdefault('maxGpuInstances', flags.Acts.GNN.MaxGpuInstances)
+    kwargs.setdefault('edgeCut', flags.Acts.GNN.EdgeCut)
+    kwargs.setdefault('minCandidateMeasurements', flags.Acts.GNN.MinCandidateMeasurements)
+
+    acc.setPrivateTools(CompFactory.ActsTrk.GnnPipelineTool(name, **kwargs))
+    return acc
+
 def ActsTrackFindingGNNCfg(flags, **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
@@ -338,15 +350,8 @@ def ActsTrackFindingGNNCfg(flags, **kwargs) -> ComponentAccumulator:
 
     # The GNN inference (graph construction, edge classification, track building)
     if 'GnnPipelineTool' not in kwargs:
-        kwargs.setdefault('GnnPipelineTool', CompFactory.ActsTrk.GnnPipelineTool(
-            "GnnPipeline",
-            moduleMapPath=flags.Acts.GNN.ModuleMapPath,
-            gnnPath=flags.Acts.GNN.ModelPath,
-            numTrtContexts=flags.Acts.GNN.NumTrtContexts,
-            maxGpuInstances=flags.Acts.GNN.MaxGpuInstances,
-            edgeCut=flags.Acts.GNN.EdgeCut,
-            minCandidateMeasurements=flags.Acts.GNN.MinCandidateMeasurements,
-        ))
+        kwargs.setdefault('GnnPipelineTool', acc.popToolsAndMerge(
+            ActsGnnPipelineToolCfg(flags, name="GnnPipeline")))
 
     kwargs.setdefault("varianceInflation", flags.Acts.GNN.VarianceInflation)
     kwargs.setdefault("tightSeeds", flags.Acts.GNN.TightSeeds)

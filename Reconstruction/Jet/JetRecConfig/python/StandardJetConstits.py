@@ -472,7 +472,7 @@ _stdSeqList = [
     JetInputConstitSeq("EMPFlow", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'JetETMissParticleFlowObjects', 'CHSParticleFlowObjects'),
 
     # EM-scale particle flow objects with correction to ML cluster scale, with charged hadron subtraction
-    JetInputConstitSeq("GPFlowML", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'GlobalClusterMLCorrectedParticleFlowObjects', 'CHSGlobalClusterMLCorrectedParticleFlowObjects', label = 'EMPFlow',),
+    JetInputConstitSeq("GPFlowML", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'GlobalClusterMLCorrectedParticleFlowObjects', 'CHSGlobalClusterMLCorrectedParticleFlowObjects', label = 'EMPFlowML',),
 
     # GPFlow are the same than EMPFlow except they have pflow linked to elec or muons filtered out.
     JetInputConstitSeq("GPFlow", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'GlobalParticleFlowObjects', 'CHSGParticleFlowObjects',

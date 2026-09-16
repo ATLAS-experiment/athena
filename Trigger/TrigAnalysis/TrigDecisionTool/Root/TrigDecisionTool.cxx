@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -267,13 +267,13 @@ Trig::TrigDecisionTool::handle(const Incident& inc) {
 #endif
 
 bool
-Trig::TrigDecisionTool::isPassed(const std::string& chain, unsigned int condition) const {
+Trig::TrigDecisionTool::isPassed(std::string_view chain, unsigned int condition) const {
    return TrigDecisionToolCore::isPassed(chain, condition);
 }
 
 
 bool
-Trig::TrigDecisionTool::isPassed(const std::string& chain) const {
+Trig::TrigDecisionTool::isPassed(std::string_view chain) const {
    return TrigDecisionToolCore::isPassed(chain);
 }
 

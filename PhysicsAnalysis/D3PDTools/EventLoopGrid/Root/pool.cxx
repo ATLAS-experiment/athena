@@ -5,23 +5,32 @@
 
 #include "pool.h"
 
-#include <atomic>
 #include <thread>
+#include <mutex>
 
 namespace {
 
-  // Pull work units off the shared list by atomically claiming the next index,
-  // so multiple worker threads never run the same unit.
-  void worker(const WorkList& workList, std::atomic<size_t>& next)
+  using WorkList_cit = std::vector<WorkUnit>::const_iterator;
+  
+  const WorkList_cit safe_advance(WorkList_cit& next, const WorkList_cit end)
   {
-    for (size_t i = next++; i < workList.size(); i = next++) {
-      workList[i]();
-    }
+    static std::mutex mutex;
+    std::lock_guard<std::mutex> lock(mutex);
+    return next != end ? next++ : end;
   }
 
-  struct Threads
+  void worker(WorkList_cit& next, const WorkList_cit end)
   {
-    Threads(const size_t n, std::function<void(void)> function)
+    for (;;) {
+      const WorkList_cit last = safe_advance(next, end);
+      if (last == end) { return; }
+      (*last)();
+    }
+  }
+  
+  struct Threads 
+  {
+    Threads(const size_t n, std::function<void(void)> function) 
       {
 	for (size_t k = 0; k != n; k++) { threads.emplace_back( function ); }
       }
@@ -34,11 +43,11 @@ namespace {
 
 void process(const WorkList& workList, const size_t nThreads)
 {
-  std::atomic<size_t> next{0};
+  WorkList_cit begin(std::begin(workList)), end(std::end(workList));
   if (nThreads == 0) {
-    worker(workList, next);
+    worker(begin, end);
   } else {
-    Threads(nThreads, [&](){ worker(workList, next); });
+    Threads(nThreads, [&](){ worker(begin, end); });
   }
 }
 

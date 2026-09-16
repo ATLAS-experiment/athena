@@ -51,11 +51,6 @@ acc.merge( OutputStreamCfg(flags, stream1name, disableEventTag = noTag,
                            ItemList = ['EventInfo#*', 'ExampleHitContainer#My*']
                            ) )
 
-acc.addEventAlgo(
-    CompFactory.MakeInputDataHeader(
-        "MakeInputDH", StreamName = outputStreamName(stream1name), OutputLevel = DEBUG ),
-    sequenceName = outSequence )
-
 # ----------------  Output Stream 2 configuration
 acc.merge( AthenaPoolExampleWriteCfg(flags, stream2name, disableEventTag = noTag) )
 acc.merge( OutputStreamCfg(flags, stream2name, disableEventTag = noTag,

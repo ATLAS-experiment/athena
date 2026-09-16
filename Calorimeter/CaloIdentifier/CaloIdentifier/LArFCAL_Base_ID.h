@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOIDENTIFIER_LARFCAL_BASE_ID_H
@@ -11,6 +11,7 @@
 #include "IdDict/IdDictFieldImplementation.h"
 #include "CaloIdentifier/LArNeighbours.h"
 #include "CaloIdentifier/LArID_Exception.h"
+#include "AthenaKernel/CLASS_DEF.h"
 #include <ranges>
 
 class IdDictRegion;
@@ -234,6 +235,8 @@ private:
   std::vector<std::set<IdentifierHash> >  m_neighbours_3d_next_vec;
   std::vector<std::set<IdentifierHash> >  m_neighbours_3d_prev_vec;
 };
+CLASS_DEF( LArFCAL_Base_ID , 225948692 , 1 )
+
 
 #include "CaloIdentifier/LArFCAL_Base_ID.icc"
 

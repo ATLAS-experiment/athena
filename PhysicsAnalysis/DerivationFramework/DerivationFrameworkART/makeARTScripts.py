@@ -11,7 +11,7 @@ formatList = ["PHYSVAL","PHYS","PHYSLITE",
               "JETM1","JETM2","JETM3","JETM4","JETM5","JETM7","JETM12","JETM42",
               "IDTR2",
               "EGAM1","EGAM2","EGAM3","EGAM4","EGAM5","EGAM7","EGAM8","EGAM9","EGAM10",
-              "FTAG1","FTAG1LITE","FTAG2","FTAG3","FTAG4","FTAG5","FTAGPU","FTAGXBB","FTAGSSV",
+              "FTAG1","FTAG1LITE","FTAG2","FTAG3","FTAGPU","FTAGXBB","FTAGSSV",
               "BPHY1","BPHY2","BPHY3","BPHY4","BPHY5","BPHY6","BPHY10","BPHY12","BPHY14","BPHY15","BPHY16","BPHY18","BPHY21","BPHY22",
               "BPHY23","BPHY24","BPHY28",
               "STDM6","STDM7","STDM13","STDM16","STDM17",
@@ -45,7 +45,7 @@ mc23eFile = "root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/data-art/larg
 mc23gInput = "user.martindl.mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8514_s4618_r17610"
 mc23gFile = "root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/data-art/large-input/CampaignInputs/mc23/AOD/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8514_s4618_r17610/AOD.50092877._002250.pool.root.1"
 
-mc21_14TeV_JETM42_Input = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/AOD/ATLAS-P2-RUN4-03-00-01/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8514_s4422_r16129/AOD.41929775._000127.pool.root.1"
+mc21_14TeV_JETM42_Input = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/AOD/ATLAS-P2-RUN4-04-00-00/RUN4.AOD.JETM42.pool.root"
 
 
 import os

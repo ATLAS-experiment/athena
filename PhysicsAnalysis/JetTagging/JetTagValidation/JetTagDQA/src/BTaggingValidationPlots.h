@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGDQA_BTagPLOTS_H
@@ -82,14 +82,12 @@ namespace JetTagDQA{
       TH1* m_jet_pt_b = nullptr;
       TH1* m_jet_pt_c = nullptr;
       TH1* m_jet_pt_l = nullptr;
-      TH1* m_jet_pt_top = nullptr;
       TH1* m_jet_pt_Zprime_b = nullptr;
       TH1* m_jet_pt_Zprime_c = nullptr;
       TH1* m_jet_pt_Zprime_l = nullptr;
       TH1* m_jet_eta_b = nullptr;
       TH1* m_jet_eta_c = nullptr;
       TH1* m_jet_eta_l = nullptr;
-      TH1* m_jet_eta_top = nullptr;
 
 
       // SV1 related vars
@@ -498,10 +496,11 @@ namespace JetTagDQA{
       enum position{histo_name, histo_title, histo_path, histo_xbins, histo_xmin, histo_xmax, histo_type, histo_ymin, histo_ymax};
       float m_truthMatchProbabilityCut = 0.0F;
       bool m_isData = false;
+      bool m_warnedMissingTaggerOutputs = false;
       // some helper functions
       TH1* bookHistogram(std::string histo_name, const std::string& var_name, const std::string& part = "", const std::string& prefix = "");
       int getTrackHits(const xAOD::TrackParticle& part, xAOD::SummaryType info);
-      void fillDiscriminantHistograms(const std::string& tagger_name, const double& discriminant_value, const std::map<std::string, double>& working_points, const int& truth_label, std::map<std::string, TH1*>::const_iterator hist_iter, std::map<std::string, int>::const_iterator label_iter, const bool& pass_nTracksCut, const double& jet_pT, const double& jet_Lxy, const bool& onZprime, const xAOD::EventInfo* event);
+      void fillDiscriminantHistograms(const std::string& tagger_name, const double& discriminant_value, const std::map<std::string, double>& working_points, const int& truth_label, std::map<std::string, TH1*>::const_iterator hist_iter, std::map<std::string, int>::const_iterator label_iter, const double& jet_pT, const double& jet_Lxy, const bool& onZprime, const xAOD::EventInfo* event);
       void bookDiscriminantVsPTAndLxyHistograms(const std::string& tagger_name, const std::map<std::string, double>& workingPoints, const bool& isOldTagger, std::map<std::string, int>::const_iterator label_iter, const std::string& m_sParticleType);
       template <class T>
       void fillHistoWithTruthCases(T value, TH1* histo_incl, TH1* histo_b, TH1* histo_c, TH1* histo_l, TH1* histo_muon, const int& truth_label, const bool& has_muon, const xAOD::EventInfo* event);

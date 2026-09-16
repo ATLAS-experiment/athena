@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  *   */
 
 
@@ -7,10 +7,11 @@
 #define ITrigEgammaEmulationChain_h
 
 #include "AsgTools/IAsgTool.h"
-#include "PATCore/AcceptInfo.h"
-#include "PATCore/AcceptData.h"
-#include "TrigEgammaEmulationTool/TrigEgammaEmulationToolMT.h"
+#include <string>
 
+namespace asg{
+  class AcceptData;
+}
 
 namespace Trig{
 

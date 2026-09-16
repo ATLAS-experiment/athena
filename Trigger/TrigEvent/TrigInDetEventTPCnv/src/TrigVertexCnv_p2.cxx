@@ -6,6 +6,7 @@
 #include "TrigInDetEventTPCnv/TrigVertex_p2.h"
 #include "TrigInDetEventTPCnv/TrigVertexCnv_p2.h"
 #include <fenv.h>
+#include <cmath>
 
 
 //-----------------------------------------------------------------------------
@@ -28,7 +29,7 @@ void TrigVertexCnv_p2::persToTrans( const TrigVertex_p2 *persObj,
   transObj->m_mass              = persObj->m_allFloats[3];
   transObj->m_massVar           = persObj->m_allFloats[4];
   for(int i=0;i<6;i++){
-    if (isnan(persObj->m_allFloats[5+i])) {
+    if (std::isnan(persObj->m_allFloats[5+i])) {
       transObj->m_cov[i]          = 0;
     }
     else {

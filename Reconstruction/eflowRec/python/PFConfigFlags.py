@@ -37,4 +37,7 @@ def createPFConfigFlags():
     #Toggle usage of new unified tools
     pfConfigFlags.addFlag("PF.useUnified",False)
 
+    #Toggle usage of ACTS extrapolation for track propagation to calorimeter
+    pfConfigFlags.addFlag("PF.useActsExtrapolation",False)
+
     return pfConfigFlags

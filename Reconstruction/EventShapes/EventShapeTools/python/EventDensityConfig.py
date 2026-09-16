@@ -17,8 +17,7 @@ def getEventShapeName( defOrLabel, nameprefix="", suffix=None, radius=0.4):
     tail=''
     if isinstance(defOrLabel, JetDefinition):
         label = defOrLabel.inputdef.label
-        if 'NoPtCut' not in defOrLabel.infix and 'LowPt' not in defOrLabel.infix:
-            tail = defOrLabel.infix or ''
+        # Ignore jet definition infix
     elif isinstance(defOrLabel, JetInputConstit):
         label = defOrLabel.label
     else:

@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfHLTUtils/HLTUtils.h"
 #include "TrigCompositeUtils/HLTIdentifier.h"
 
 
-HLT::Identifier::Identifier( const std::string& stringID )
+HLT::Identifier::Identifier( std::string_view stringID )
   : m_id( TrigConf::HLTUtils::string2hash( stringID, "Identifier" ) ) {}
 
 std::string HLT::Identifier::name() const {

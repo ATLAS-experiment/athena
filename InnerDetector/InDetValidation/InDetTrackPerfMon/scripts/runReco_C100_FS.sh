@@ -52,20 +52,31 @@ if [ ! -f $inputRDO ]; then
 fi
 
 ## running reconstruction
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 if [ "$doClusters" == "1" ]; then
   Reco_tf.py \
+    --conditionsTag "default:${conditionsTag}" \
     --maxEvents ${nEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
     --postInclude "ActsConfig.ActsRegionsOfInterestConfig.ActsMainRegionsOfInterestCreatorAlgCfg,ActsConfig.ActsClusterizationConfig.ActsMainClusterizationCfg,ActsConfig.ActsSpacePointFormationConfig.ActsMainSpacePointFormationStandaloneCfg,ActsConfig.ActsPostIncludes.PersistifyActsEDMCfg" \
-    --preExec "flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True;flags.Tracking.doPixelDigitalClustering=True;flags.Tracking.ITkActsPass.storeTrackSeeds=True;" \
+    --preExec "flags.Acts.EDM.PersistifyClusters=True; \
+               flags.Acts.EDM.PersistifySpacePoints=True; \
+               flags.Tracking.doPixelDigitalClustering=True; \
+               flags.Tracking.ITkActsPass.storeTrackSeeds=True; \
+               from ActsConfig.ActsConfigFlags import SeedingStrategy; \
+               flags.Tracking.ITkActsPass.PixelSeedingStrategy=SeedingStrategy.GridTriplet" \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD}
 else
   Reco_tf.py \
+    --conditionsTag "default:${conditionsTag}" \
     --maxEvents ${nEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
     --postInclude 'ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
-    --preExec "flags.Tracking.doPixelDigitalClustering=True;flags.Tracking.ITkActsPass.storeTrackSeeds=True;" \
+    --preExec "flags.Tracking.doPixelDigitalClustering=True; \
+               flags.Tracking.ITkActsPass.storeTrackSeeds=True; \
+               from ActsConfig.ActsConfigFlags import SeedingStrategy; \
+               flags.Tracking.ITkActsPass.PixelSeedingStrategy=SeedingStrategy.GridTriplet" \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD}
     #--preExec 'flags.Tracking.writeExtendedSi_PRDInfo=True' \

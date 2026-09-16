@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "TrackVisualizationTool.h"
 
@@ -9,6 +9,11 @@
 #include "MuonVisualizationHelpersR4/ObjVisualizationHelpers.h"
 #include "MuonVisualizationHelpersR4/FileHelpers.h"
 
+#include "xAODMuonPrepData/UtilFunctions.h"
+
+#include "Acts/Geometry/TrackingGeometry.hpp"
+#include "Acts/Geometry/TrackingVolume.hpp"
+#include "Acts/Visualization/GeometryView3D.hpp"
 
 #include <filesystem>
 #include <format>
@@ -120,7 +125,7 @@ namespace MuonValR4{
                                                      const DisplayView view) {
         using enum DisplayView;
         if (view == RZ) { 
-            return Amg::Vector2D{ posOnCylinder[1]*inM,  posOnCylinder[0]*inM};
+            return Amg::Vector2D{posOnCylinder[1]*inM,  posOnCylinder[0]*inM};
         }
         const CxxUtils::sincos phi{phiV};
         return posOnCylinder[0] * inM * Amg::Vector2D{phi.cs, phi.sn};
@@ -139,8 +144,9 @@ namespace MuonValR4{
         }
         ATH_CHECK(m_truthSegKey.initialize(SG::AllowEmpty));
         ATH_CHECK(m_segmentKey.initialize());
-        ATH_CHECK(m_geoCtxKey.initialize());
+        ATH_CHECK(m_contextProvider.initialize());
         ATH_CHECK(m_seedingTool.retrieve());
+        ATH_CHECK(m_trackingGeometrySvc.retrieve());
         ATH_CHECK(m_extrapolationTool.retrieve(EnableTool{!m_extrapolationTool.empty()}));
         return StatusCode::SUCCESS;
     }
@@ -321,11 +327,7 @@ void TrackVisualizationTool::displaySeedSegmentsGlobalWithTruth(
             });
         };
            
-        const ActsTrk::GeometryContext* gctx{nullptr};
-        if (!SG::get(gctx, m_geoCtxKey, ctx).isSuccess()) {
-            THROW_EXCEPTION("Failed to fetch the geometry context "<<m_geoCtxKey.fullKey());
-        }
-        const Acts::GeometryContext tgContext = gctx->context();
+        const Acts::GeometryContext tgContext = m_contextProvider.getGeometryContext(ctx);
         bool drawnPoint{false};
 
         for (const xAOD::MuonSegment* segment: segments) {
@@ -415,11 +417,7 @@ void TrackVisualizationTool::displaySeedSegmentsGlobalWithTruth(
         if (!truthSegs) {
             return;
         }
-        const ActsTrk::GeometryContext* gctx{nullptr};
-        if (!SG::get(gctx, m_geoCtxKey, ctx).isSuccess()) {
-            THROW_EXCEPTION("Failed to fetch the geometry context "<<m_geoCtxKey.fullKey());
-        }
-        const Acts::GeometryContext tgContext = gctx->context();
+        const Acts::GeometryContext tgContext = m_contextProvider.getGeometryContext(ctx);
         bool addedEntry{false};
         for (const xAOD::MuonSegment* segment: *truthSegs) {
             const auto chIdx = segment->chamberIndex();
@@ -449,25 +447,43 @@ void TrackVisualizationTool::displaySeedSegmentsGlobalWithTruth(
         if (m_objCounter >= m_canvasLimit) {
             return;
         }
-        const ActsTrk::GeometryContext* gctx{nullptr};
-        SG::get(gctx, m_geoCtxKey, ctx).ignore();
-
+        const Acts::GeometryContext tgContext = m_contextProvider.getGeometryContext(ctx);
         Acts::ObjVisualization3D visualHelper{};
         const std::string subDir = std::format("./ObjDisplays/{:}/", m_subDir.value());
         ensureDirectory(subDir);
+
+        std::string segStr{removeNonAlphaNum(objName)};
+        std::unordered_set<Acts::GeometryIdentifier> surfaceIds{};
+        for (const xAOD::MuonSegment* seg : seed.segments()) {
+            for (unsigned m = 0 ; m < nMeasurements(*seg) ; ++m) {
+                surfaceIds.insert(xAOD::muonSurface(getMeasurement(*seg,m)).geometryId());
+            }
+            MuonValR4::drawSegmentMeasurements(tgContext,* seg, visualHelper);
+            MuonValR4::drawSegmentLine(tgContext, *seg, visualHelper);
+            segStr += std::format("_{:}", MuonR4::printID(*seg));
+        }
+
         if (parsToExt.ok() && m_extrapolationTool.isEnabled()) {
             auto stepsResult = m_extrapolationTool->propagationSteps(ctx, *parsToExt);
             if (stepsResult.ok()) {
+                const auto* vol = m_trackingGeometrySvc->trackingGeometry()->highestTrackingVolume();
+
+                auto [begin, end] = std::ranges::remove_if(stepsResult->first,
+                                    [vol](const Acts::detail::Step& step) {
+                    return !vol->volumeBounds().inside(step.position);
+                });
+                stepsResult->first.erase(begin, end);
+                for (const Acts::detail::Step& step: stepsResult->first) {
+                    if (!step.surface || surfaceIds.count(step.surface->geometryId())) {
+                        continue;
+                    }
+                    Acts::GeometryView3D::drawSurface(visualHelper, *step.surface, tgContext,
+                                              Amg::Transform3D::Identity(), Acts::s_viewPassive);
+                }
                 MuonValR4::drawPropagation(stepsResult->first, visualHelper);
             } else {
                 ATH_MSG_WARNING("Failed to extrapolate the seed for visualization: " << stepsResult.error().message());
             }
-        }
-        std::string segStr{removeNonAlphaNum(objName)};
-        for (const xAOD::MuonSegment* seg : seed.segments()) {
-            MuonValR4::drawSegmentMeasurements(gctx->context(),* seg, visualHelper);
-            MuonValR4::drawSegmentLine(gctx->context(), *seg, visualHelper);
-            segStr += std::format("_{:}", MuonR4::printID(*seg));
         }
 
         unsigned fileVersion{0};

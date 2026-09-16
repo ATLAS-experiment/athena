@@ -370,21 +370,21 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
     int nMatchedOOTJets = 0;
     int nMatchedITJets = 0;
     int pileupTag = SmallRJetPileupLabel::enumToInt(SmallRJetPileupLabel::Unknown);
+    static const SG::ConstAccessor<float> accGhostTruthPt("GhostTruthPt");
 
     // Ensure that the reco jet has at least one constituent
     // (and thus a well-defined four-vector)
     if (jet->numConstituents() > 0) {
-        // Access ghostTruthPt now so it is available for pileup jets
-        static const SG::ConstAccessor<float> accGhostTruthPt("GhostTruthPt");
-        float ghostTruthPt = accGhostTruthPt(*jet);
         for (const xAOD::Jet* truthJet : *truthJets) { // Truth jet loop
             // Calculate DR
             float dR = jet->p4().DeltaR(truthJet->p4(),true);
             // If parent jet has been retrieved, calculate dR w.r.t. it instead
             if (parent) dR = parent->p4().DeltaR(truthJet->p4(),true);
             // Calculate GF
-            float ghostPtFraction = (ghostTruthPt / (truthJet->pt()));
             if (m_useGhostJetMatch) { // GA matching. Upper bound applied for completeness, but realistically not needed.
+                // Access ghostTruthPt now so it is available for pileup jets
+                float ghostTruthPt = accGhostTruthPt(*jet);
+                float ghostPtFraction = (ghostTruthPt / (truthJet->pt()));
                 if ((ghostPtFraction >= m_recoGhostFrac) && (ghostPtFraction <= (2 - m_recoGhostFrac))) { // All matches
                     nMatchedHSJets += 1;
                     sumPtMatchedHSJets += truthJet->pt();
@@ -408,8 +408,9 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
         if (!m_doLargeRLabels && usePileupJets) {
             for (const xAOD::Jet* ootJet : *outOfTimeTruthJets) { // Out of time pileup truth jet loop
                 float dR = jet->p4().DeltaR(ootJet->p4(), true);
-                float ghostPtFraction = (ghostTruthPt / (ootJet->pt()));
                 if (m_useGhostJetMatch) {
+                    float ghostTruthPt = accGhostTruthPt(*jet);
+                    float ghostPtFraction = (ghostTruthPt / (ootJet->pt()));
                     if ((ghostPtFraction >= m_recoGhostFrac) && (ghostPtFraction <= (2 - m_recoGhostFrac))) { // All matches
                         nMatchedOOTJets += 1;
                         sumPtMatchedOOTJets += ootJet->pt();
@@ -431,8 +432,9 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
             }
             for (const xAOD::Jet* itJet : *inTimeTruthJets) { // In time pileup truth jet loop
                 float dR = jet->p4().DeltaR(itJet->p4(), true);
-                float ghostPtFraction = (ghostTruthPt / (itJet->pt()));
                 if (m_useGhostJetMatch) {
+                    float ghostTruthPt = accGhostTruthPt(*jet);
+                    float ghostPtFraction = (ghostTruthPt / (itJet->pt()));
                     if ((ghostPtFraction >= m_recoGhostFrac) && (ghostPtFraction <= (2 - m_recoGhostFrac))) { // All matches
                         nMatchedITJets += 1;
                         sumPtMatchedITJets += itJet->pt();
@@ -522,20 +524,32 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
     float truthJetPhi = -9999;
     float deltaR = -2;
 
+    const xAOD::JetContainer* truthJetCont = truthJets.cptr();
+
     //If the best match is PU, reassign the truth jet to take variables from
-    if (pileupTag == SmallRJetPileupLabel::ITPU) {
+    switch(pileupTag) {
+      case SmallRJetPileupLabel::ITPU: {
         matchTruthJet = it_matchTruthJet;
-    }
-    else if (pileupTag == SmallRJetPileupLabel::OOTPU) {
+        truthJetCont = inTimeTruthJets.cptr();
+        break;
+      }
+    case SmallRJetPileupLabel::OOTPU: {
         matchTruthJet = oot_matchTruthJet;
-    }
-    else if (pileupTag == SmallRJetPileupLabel::MixPU) {
+        truthJetCont = outOfTimeTruthJets.cptr();
+        break;
+      }
+    case SmallRJetPileupLabel::MixPU: {
         if (bestITpTRatio >= bestOOTpTRatio) {
-            matchTruthJet = it_matchTruthJet;
+          matchTruthJet = it_matchTruthJet;
+          truthJetCont = inTimeTruthJets.cptr();
         }
         else {
-            matchTruthJet = oot_matchTruthJet;
+          matchTruthJet = oot_matchTruthJet;
+          truthJetCont = outOfTimeTruthJets.cptr();
         }
+      }
+    default:
+      break;
     }
 
     if ( matchTruthJet ) {
@@ -554,7 +568,8 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
             }
             if (nbAcc.isAvailable(*matchTruthJet)) truthJetNB = nbAcc(*matchTruthJet);
         }
-        truthJetEL = ElementLink<xAOD::JetContainer>(*truthJets, matchTruthJet->index(), ctx);
+        ATH_MSG_VERBOSE("For reco jet " << jet->index() << ", matched truth jet index " << matchTruthJet->index());
+        truthJetEL = ElementLink<xAOD::JetContainer>(*truthJetCont, matchTruthJet->index(), ctx);
         truthJetMass = matchTruthJet->m();
         truthJetPt = matchTruthJet->pt();
         truthJetRapidity = matchTruthJet->rapidity();

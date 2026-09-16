@@ -46,6 +46,9 @@ class TauThinningAlg : public AthReentrantAlgorithm
   Gaudi::Property<bool> m_doVertexCorrection
     { this, "VertexCorrection", true, "Tau vertex correction" };
 
+  Gaudi::Property<float> m_minNeutralPFOPt
+    {this, "MinNeutralPFOPt", 0.0, "mininum threshold to keep NeutralPFO and related cells"};
+
   // save only tracks passing quality requirements
   Gaudi::Property<bool> m_saveOnlyGoodTracks
     { this, "SaveOnlyGoodTracks", false, "Option to save only tracks passing quality requirements"};	    

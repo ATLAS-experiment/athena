@@ -490,9 +490,14 @@ StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMa
 
       // hack for HLT.*tau.*xe.* case
       if (std::regex_match(chainName, SpecialCases::tauXeChain)) {
-          std::vector<size_t> mult_hack; // type mismatch with ChainNameParser::multiplicities
-          if (multiplicities.size()==3) mult_hack={1,1};
-          else if (multiplicities.size()==2) mult_hack={1};
+          // The Run-2 configuration lacks usable leg multiplicities for these
+          // chains. Set them to the chain-name structure: the TDT
+          // (Trig::ChainGroup, which follows getLegMultiplicities), the R3
+          // matching (which parses the chain name) and the leg assignment
+          // below must all agree on the leg structure, otherwise leg-filtered
+          // feature retrieval comes back empty. The xe leg keeps its place and
+          // simply owns no IParticle features.
+          std::vector<size_t> mult_hack(multiplicities.begin(), multiplicities.end());
           ptrChain->set_leg_multiplicities(mult_hack); // HLTChain needs vector<size_t>
       }
 
@@ -502,46 +507,176 @@ StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMa
           if (multiplicities.size()==3) mult_hack={1,1};
           else if (multiplicities.size()==2) mult_hack={2}; // HLT_mu11_nomucomb_2mu4noL1_nscan03_L1MU11_2MU6
           ptrChain->set_leg_multiplicities(mult_hack);
+          multiplicities.assign(mult_hack.begin(), mult_hack.end());
       }
 
       ATH_MSG_DEBUG("CHAIN " << chainName << " needs legs: " << multiplicities );
-      std::vector<unsigned int> teIdsLastHealthyStepIds;
+
+      if ( multiplicities.size() <= 1 ) {
+        ATH_MSG_DEBUG("Chain " << chainName << " has a single effective leg after special-case handling - no leg IDs assigned");
+      }
+      else {
+
+      // Build per-leg name tokens (e.g. "mu14", "tau35") from the chain name.
+      // The Run-2 menu does not guarantee that the TEs of a signature step are
+      // listed in the leg order of the chain name (e.g. for mu+tau chains the
+      // tau TEs come first), so a purely positional leg assignment can swap
+      // the legs and - via the chain-ID propagation - pool the features of
+      // different legs. Where possible the TE name, which carries the leg
+      // token, decides the leg number instead.
+      std::vector<std::string> legTokens;
+      bool legTokensUsable = true;
+      for (const ChainNameParser::LegInfo& legInfo : ChainNameParser::HLTChainInfo(chainName)) {
+        if (legInfo.signature.empty() || legInfo.threshold < 0) {
+          legTokensUsable = false;
+          break;
+        }
+        legTokens.push_back(legInfo.signature + std::to_string(legInfo.threshold));
+      }
+      if (legTokens.size() > multiplicities.size()) {
+        // special-case handling dropped trailing leg(s) (e.g. the xe leg)
+        legTokens.resize(multiplicities.size());
+      }
+      if (legTokens.size() != multiplicities.size()
+          || std::set<std::string>(legTokens.begin(), legTokens.end()).size() != legTokens.size()) {
+        // e.g. two legs with an identical token (HLT_mu13_mu13_idperf_Zmumu):
+        // fall back to the positional assignment
+        legTokensUsable = false;
+      }
+      ATH_MSG_DEBUG("Semantic leg tokens " << (legTokensUsable ? "usable" : "NOT usable") << ": " << legTokens);
+
+      // noL1 legs (e.g. mu8noL1, mu6noL1_nscan03) have no leg token in their
+      // TE names: the leg is implemented as a full-scan reconstruction
+      // (EF_*_FS*/FSHypo/FStracks TEs) plus a joint "MultiComb" multiplicity
+      // hypo TE which decides ALL thresholds at once. Identify such a leg so
+      // full-scan TEs can be routed to it by name pattern.
+      int noL1Leg = -1;
+      int legIndex = 0;
+      for (const ChainNameParser::LegInfo& legInfo : ChainNameParser::HLTChainInfo(chainName)) {
+        if (legInfo.legName().find("noL1") != std::string::npos) {
+          noL1Leg = (noL1Leg == -1) ? legIndex : -2; // -2: more than one noL1 leg -> rule unusable
+        }
+        ++legIndex;
+      }
+      if (noL1Leg == -2) noL1Leg = -1; // more than one noL1 leg: the rule is unusable
+
+      // Semantic leg for a single TE name:
+      //   >= 0 : leg number
+      //   -1   : unknown (positional fallback in pattern-matched steps)
+      //   -2   : joint/combined decision TE (gets NO leg ID)
+      const size_t nLegs = multiplicities.size();
+      auto semanticLeg = [&legTokens, legTokensUsable, noL1Leg, nLegs](const std::string& teName) -> int {
+        if (teName.find("MultiComb") != std::string::npos)
+          return -2; // joint multiplicity hypo of a noL1 chain: chain-level, not a leg
+        if (legTokensUsable) {
+          int found = -1;
+          for (size_t l = 0; l < legTokens.size(); ++l) {
+            if (teName.find(legTokens[l]) != std::string::npos) {
+              if (found != -1) { found = -1; break; } // ambiguous TE name
+              found = static_cast<int>(l);
+            }
+          }
+          if (found >= 0) return found;
+        }
+        if (noL1Leg >= 0) {
+          if (teName.find("_FS") != std::string::npos || teName.find("FSHypo") != std::string::npos
+              || teName.find("FStracks") != std::string::npos) {
+            return noL1Leg; // full-scan reconstruction TE -> the noL1 leg
+          }
+          if (nLegs == 2) {
+            return 1 - noL1Leg; // two legs, one noL1: everything else is the RoI-seeded leg
+          }
+        }
+        return -1;
+      };
+
+      // Decide the leg number for each TE of a pattern-matched step: semantic
+      // assignment first, remaining TEs distributed over the remaining leg
+      // numbers in positional order (the previous behaviour).
+      auto assignLegNumbers = [&semanticLeg, nLegs](const std::vector<std::string>& teNames) {
+        const size_t n = teNames.size();
+        std::vector<int> legOf(n, -1);
+        std::vector<bool> legUsed(nLegs, false); // leg numbers range over the CHAIN's legs,
+                                                 // not over the TEs of this step (they can
+                                                 // differ, e.g. for the tau+xe special case)
+        for (size_t pos = 0; pos < n; ++pos) {
+          const int l = semanticLeg(teNames[pos]);
+          if (l >= 0 && l < static_cast<int>(nLegs) && !legUsed[l]) {
+            legOf[pos] = l;
+            legUsed[l] = true;
+          }
+          else if (l == -2) {
+            legOf[pos] = -2;
+          }
+        }
+        size_t nextFree = 0;
+        for (size_t pos = 0; pos < n; ++pos) {
+          if (legOf[pos] != -1) continue;
+          while (nextFree < nLegs && legUsed[nextFree]) ++nextFree;
+          if (nextFree >= nLegs) break;
+          legOf[pos] = static_cast<int>(nextFree);
+          legUsed[nextFree] = true;
+        }
+        return legOf;
+      };
+
+      // The terminus of each leg (for the SF nodes / per-leg retrieval
+      // anchors) is the LAST TE assigned to that leg over the signature steps.
+      std::map<int, unsigned int> lastTEofLeg;
 
       for (auto ptrHLTSignature : ptrChain->signatures())
         {
           std::vector<int> teCounts;
           std::vector<unsigned int> teIds;
+          std::vector<std::string> teNames;
           unsigned int lastSeenId = 0;
           for (auto ptrHLTTE : ptrHLTSignature->outputTEs())
           {
             if ( lastSeenId != ptrHLTTE->id()) {
               teCounts.push_back(1);
               teIds.push_back(ptrHLTTE->id());
+              teNames.push_back(ptrHLTTE->name());
             } else {
               teCounts.back()++;
             }
             lastSeenId = ptrHLTTE->id();
           }
 
-          ATH_MSG_DEBUG("TE multiplicities seen in this step " << teCounts);
+          ATH_MSG_DEBUG("TE multiplicities seen in this step " << teCounts << " TEs: " << teNames);
           bool multiplicityCounts = multiplicities == teCounts;
           // hack for HLT.*tau.*xe.* case
           if(std::regex_match(chainName, SpecialCases::tauXeChain)) multiplicityCounts = true;
           if ( multiplicityCounts ) {
-            teIdsLastHealthyStepIds = teIds;
+            const std::vector<int> legOf = assignLegNumbers(teNames);
             ATH_MSG_DEBUG("There is a match, will assign chain leg IDs to TEs " << teCounts << " " << teIds);
-            for ( size_t legNumber = 0; legNumber < teIds.size(); ++ legNumber){
-              HLT::Identifier chainLegId = TrigCompositeUtils::createLegName(chainId, legNumber);
-              allTEs[etcutReplacement(teIds[legNumber])].insert(chainLegId);
+            for ( size_t pos = 0; pos < teIds.size(); ++ pos){
+              if (legOf[pos] < 0) continue; // joint-decision TE: stays chain-level
+              HLT::Identifier chainLegId = TrigCompositeUtils::createLegName(chainId, legOf[pos]);
+              ATH_MSG_DEBUG("  TE " << teNames[pos] << " -> " << chainLegId);
+              allTEs[etcutReplacement(teIds[pos])].insert(chainLegId);
+              lastTEofLeg[legOf[pos]] = teIds[pos];
+            }
+          }
+          else {
+            // Steps whose TE pattern does not match the leg multiplicities
+            // (e.g. the interleaved single-TE steps of noL1 chains) still get
+            // a leg ID when the TE name identifies the leg unambiguously.
+            for ( size_t pos = 0; pos < teIds.size(); ++ pos){
+              const int leg = semanticLeg(teNames[pos]);
+              if (leg < 0) continue;
+              HLT::Identifier chainLegId = TrigCompositeUtils::createLegName(chainId, leg);
+              ATH_MSG_DEBUG("  (irregular step) TE " << teNames[pos] << " -> " << chainLegId);
+              allTEs[etcutReplacement(teIds[pos])].insert(chainLegId);
+              lastTEofLeg[leg] = teIds[pos];
             }
           }
         }
-        for ( size_t legNumber = 0; legNumber < teIdsLastHealthyStepIds.size(); ++ legNumber ) {
+        for (const auto& [legNumber, teId] : lastTEofLeg) {
           HLT::Identifier chainLegId = TrigCompositeUtils::createLegName(chainId, legNumber);
-
-          ATH_MSG_DEBUG("created leg id " << chainLegId << " that will replace TE ID " << etcutReplacement(teIdsLastHealthyStepIds[legNumber]));
-          finalTEs[etcutReplacement(teIdsLastHealthyStepIds[legNumber])].insert(chainLegId);
+          ATH_MSG_DEBUG("created leg id " << chainLegId << " that will replace TE ID " << etcutReplacement(teId));
+          finalTEs[etcutReplacement(teId)].insert(chainLegId);
         }
+      } // end of the multi-effective-leg assignment
     }
   }
   ATH_MSG_DEBUG("Recognised " << allTEs.size() << " kinds of TEs and among them " << finalTEs.size() << " final types");
@@ -707,6 +842,25 @@ StatusCode Run2ToRun3TrigNavConverterV2::cureUnassociatedProxies(ConvProxySet_t 
   // technically each proxy looks at the children proxies and inserts from it all unseen chains
   // procedure is repeated until, no single proxy needs an update (tedious - we may be smarter in future)
 
+  // Helper: insert the child's IDs into the given set. Across a multi-parent
+  // child (e.g. the combined TE of a multi-leg chain, which joins several
+  // branches) only chain-level IDs are propagated: propagating LEG IDs there
+  // would smear them onto all parent branches and pool the per-leg features.
+  auto insertFromChild = [](const ConvProxy& child, std::set<HLT::Identifier>& dest) {
+    if (child.parents.size() > 1)
+    {
+      for (const HLT::Identifier& id : child.runChains)
+      {
+        if (!TCU::isLegId(id))
+          dest.insert(id);
+      }
+    }
+    else
+    {
+      dest.insert(std::begin(child.runChains), std::end(child.runChains));
+    }
+  };
+
   while (true)
   {
     size_t numberOfUpdates = 0;
@@ -715,13 +869,13 @@ StatusCode Run2ToRun3TrigNavConverterV2::cureUnassociatedProxies(ConvProxySet_t 
       for (auto child : p->children)
       {
         size_t startSize = p->runChains.size();
-        p->runChains.insert(std::begin(child->runChains), std::end(child->runChains));
+        insertFromChild(*child, p->runChains);
 
         if (startSize != p->runChains.size())
         { // some chain needed to be inserted
           numberOfUpdates++;
           // if update was need, it means set of chains that passed need update as well
-          p->passChains.insert(std::begin(child->runChains), std::end(child->runChains));
+          insertFromChild(*child, p->passChains);
         }
       }
     }
@@ -835,13 +989,13 @@ StatusCode Run2ToRun3TrigNavConverterV2::collapseFeaturesProxies(ConvProxySet_t 
                         filterFEAs(p->te->getFeatureAccessHelpers(), run2Nav))
       {
         ATH_MSG_ERROR("Proxies grouped by FEA hash have actually distinct features (specific FEAs are different)");
-        for (auto id: p->passChains ) ATH_MSG_ERROR("... chain id for this proxy " << id);
-        ATH_MSG_ERROR(".... TE id of this proxy: " << TrigConf::HLTUtils::hash2string(p->te->getId()));
+        for (auto id: p->passChains ) ATH_MSG_ERROR("  Chain ID: " << id);
+        ATH_MSG_ERROR("  TE ID: " << TrigConf::HLTUtils::hash2string(p->te->getId()));
         for ( auto fea: first->te->getFeatureAccessHelpers() ) {
-          ATH_MSG_ERROR("FEA1 " << fea);
+          ATH_MSG_ERROR("  FEA (reference): " << fea);
         }
         for ( auto fea: p->te->getFeatureAccessHelpers() ) {
-          ATH_MSG_ERROR("FEA2 " << fea);
+          ATH_MSG_ERROR("  FEA (mismatched): " << fea);
         }
 
         return StatusCode::FAILURE;
@@ -1069,18 +1223,35 @@ StatusCode Run2ToRun3TrigNavConverterV2::fillRelevantTracks(ConvProxySet_t &conv
 
 StatusCode Run2ToRun3TrigNavConverterV2::createIMHNodes(ConvProxySet_t &convProxies, xAOD::TrigCompositeContainer &decisions, const EventContext &context) const
 {
+  // Write the decision IDs of a proxy to a node, SKIPPING the plain chain ID
+  // when the proxy also carries a leg ID of that chain. This follows the
+  // native Run-3 convention: nodes of a leg carry only the leg ID, the plain
+  // chain ID appears on chain-level (combined/terminus) nodes. The feature
+  // retrieval (Trig::ChainGroup::features) always includes the plain chain ID
+  // in the request - even for leg-restricted requests - so a plain chain ID
+  // left on per-leg nodes would match every leg of the chain and pool the
+  // features of all legs together (the "cross-leg feature pooling" defect).
+  auto addNodeIDs = [](const std::set<HLT::Identifier>& ids, TrigCompositeUtils::Decision* node) {
+    std::set<HLT::Identifier> chainsWithLegs;
+    for (const HLT::Identifier& id : ids)
+    {
+      if (TCU::isLegId(id))
+        chainsWithLegs.insert(TCU::getIDFromLeg(id));
+    }
+    for (const HLT::Identifier& id : ids)
+    {
+      if (!TCU::isLegId(id) && chainsWithLegs.count(id))
+        continue;
+      TrigCompositeUtils::addDecisionID(id, node);
+    }
+  };
+
   for (auto &proxy : convProxies)
   {
     proxy->imNode = TrigCompositeUtils::newDecisionIn(&decisions, TrigCompositeUtils::inputMakerNodeName()); // IM
-    for (auto chainId : proxy->runChains)
-    {
-      TrigCompositeUtils::addDecisionID(chainId, proxy->imNode);
-    }
+    addNodeIDs(proxy->runChains, proxy->imNode);
     proxy->hNode.push_back(TrigCompositeUtils::newDecisionIn(&decisions, TrigCompositeUtils::hypoAlgNodeName())); // H
-    for (auto chainId : proxy->passChains)
-    {
-      TrigCompositeUtils::addDecisionID(chainId, proxy->hNode.back());
-    }
+    addNodeIDs(proxy->passChains, proxy->hNode.back());
 
     TrigCompositeUtils::linkToPrevious(proxy->hNode.front(), proxy->imNode, context); // H low IM up
   }
@@ -1517,11 +1688,11 @@ StatusCode Run2ToRun3TrigNavConverterV2::allProxiesConnected(const ConvProxySet_
   {
     if (p->children.empty() and p->parents.empty() and not p->runChains.empty())
     {
-      ATH_MSG_ERROR("Orphanted proxy N chains run:" << p->runChains.size());
+      ATH_MSG_ERROR("Orphaned proxy, N chains run: " << p->runChains.size());
       return StatusCode::FAILURE;
     }
   }
-  ATH_MSG_DEBUG("CHECK OK, no orphanted proxies");
+  ATH_MSG_DEBUG("CHECK OK, no orphaned proxies");
   return StatusCode::SUCCESS;
 }
 

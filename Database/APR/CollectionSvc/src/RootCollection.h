@@ -26,9 +26,6 @@ namespace pool {
 
    // Create and Overwrite is only option, we'll never update
    constexpr const char* const poolOptToRootOpt[] = {"UPDATE", "READ"};
-   // Collection open mode mapping to StorageSvc open mode
-   inline const Io::IoFlag collModeToPoolMode[]   = { Io::WRITE, Io::READ };
-
 
    /**
       @brief Collection implementation
@@ -42,7 +39,7 @@ namespace pool {
         /// @param mode The open mode of the collection
         /// @param session If you want to access the referenced objects you have to provide an ISession
         RootCollection( const pool::CollectionDescription* description,
-                        pool::ICollection::OpenMode mode );
+                        Io::IoFlag mode );
 
         /// Destructor
         ~RootCollection();
@@ -81,7 +78,7 @@ namespace pool {
         std::string                          m_fileName;
         /// The common prefix for branch container names for attributes
         std::string                          m_containerPrefix;
-        ICollection::OpenMode                m_mode;
+        Io::IoFlag                m_mode;
 
         bool                                 m_open;
 
