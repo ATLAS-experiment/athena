@@ -9,10 +9,12 @@ class ParticleLevelElectronsBlock(ConfigBlock):
     def __init__(self):
         super(ParticleLevelElectronsBlock, self).__init__()
         self.addOption('containerName', 'TruthElectrons', type=str,
-                       info='the name of the input truth electrons container.')
+                       info='the name of the input truth electrons container.',
+                       meta={'role':'container'})
         self.addOption('selectionName', '', type=str,
                        info='the name of the selection to create. If left empty, '
-                       'applies the selection to all truth electrons.')
+                       'applies the selection to all truth electrons.',
+                       meta={'role':'selection'})
         self.addOption('isolated', True, type=bool,
                        info='select only truth electrons that are isolated.')
         self.addOption('notFromTau', True, type=bool,

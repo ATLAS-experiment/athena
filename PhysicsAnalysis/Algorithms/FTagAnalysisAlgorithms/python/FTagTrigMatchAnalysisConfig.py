@@ -17,7 +17,8 @@ class FTagJetTrigMatchingBlock(ConfigBlock):
         super(FTagJetTrigMatchingBlock, self).__init__()
         self.addOption('containerName', '', type=str,
             noneAction='error',
-            info="the name of the input container.")
+            info="the name of the input container.",
+            meta={'role':'containerRef'})
         self.addOption ('triggerChainsPerYear', {}, type=dict,
             info="a dictionary with key (string) the year and value (list of "
             "strings) the trigger chains. The default is {} (empty dictionary).")
