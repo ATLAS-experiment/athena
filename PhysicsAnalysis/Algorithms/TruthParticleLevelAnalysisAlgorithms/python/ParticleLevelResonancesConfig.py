@@ -12,7 +12,8 @@ class ParticleLevelResonancesBlock(ConfigBlock):
     def __init__(self):
         super(ParticleLevelResonancesBlock, self).__init__()
         self.addOption('containerName', '', type=str,
-                       info='the name of the input truth container. Supported options: `TruthBoson`, `TruthBottom`, `TruthTop`, `TruthBSM`.')
+                       info='the name of the input truth container. Supported options: `TruthBoson`, `TruthBottom`, `TruthTop`, `TruthBSM`.',
+                       meta={'role':'container','choices':(['TruthBoson','TruthBottom','TruthTop','TruthBSM'],1)})
         # Always skip on data
         self.setOptionValue('skipOnData', True)
 

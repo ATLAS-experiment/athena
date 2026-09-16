@@ -9,10 +9,12 @@ class ParticleLevelPhotonsBlock(ConfigBlock):
     def __init__(self):
         super(ParticleLevelPhotonsBlock, self).__init__()
         self.addOption('containerName', 'TruthPhotons', type=str,
-                       info='the name of the input truth photons container.')
+                       info='the name of the input truth photons container.',
+                       meta={'role':'container'})
         self.addOption('selectionName', '', type=str,
                        info='the name of the selection to create. If left empty, '
-                       'applies the selection to all truth photons.')
+                       'applies the selection to all truth photons.',
+                       meta={'role':'selection'})
         self.addOption('isolated', True, type=bool,
                        info='select only truth photons that are isolated.')
         self.addOption('isolationVariable', '', type=str,

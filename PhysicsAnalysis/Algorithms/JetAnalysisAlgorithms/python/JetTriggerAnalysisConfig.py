@@ -23,7 +23,8 @@ class JetTriggerMatchingBlock (ConfigBlock):
                         info="remove the HLT prefix from trigger chain names.")
         self.addOption ('containerName', '', type=str,
                         info="the input jet container, with a possible selection, in "
-                        "the format `container` or `container.selection`.")
+                        "the format `container` or `container.selection`.",
+                        meta={'role':'containerRef'})
         self.addOption ('runL1Matching', True, type=bool,
                         info="Add L1 matching decorations")
         self.addOption ('runHLTMatching', True, type=bool,
