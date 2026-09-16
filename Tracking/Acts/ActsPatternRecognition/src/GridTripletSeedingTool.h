@@ -42,14 +42,6 @@ class GridTripletSeedingTool
                           const Eigen::Vector3f& beamSpotPos, float bFieldInZ,
                           ActsTrk::SeedContainer& seedContainer) const override;
 
-  template<typename GridType>
-  StatusCode createSeedsImpl(const EventContext& ctx,
-                          const std::vector<const xAOD::SpacePointContainer*>&
-                              spacePointCollections,
-                          const Eigen::Vector3f& beamSpotPos, float bFieldInZ,
-                          ActsTrk::SeedContainer& seedContainer, GridType::Config gridCfg) const;
-  
-
  protected:
   Gaudi::Property<bool> m_seedQualitySelection{
       this, "doSeedQualitySelection", true,
@@ -442,6 +434,14 @@ class GridTripletSeedingTool
   std::pair<float, float> retrieveRadiusRangeForMiddle(
       const Acts::ConstSpacePointProxy& spM,
       const Acts::Range1D<float>& rMiddleSpRange) const;
+
+  template<typename GridType>
+  StatusCode createSeedsImpl(const EventContext& ctx,
+                          const std::vector<const xAOD::SpacePointContainer*>&
+                              spacePointCollections,
+                          const Eigen::Vector3f& beamSpotPos, float bFieldInZ,
+                          ActsTrk::SeedContainer& seedContainer, GridType::Config gridCfg) const;
+
 
   SG::ReadHandleKey<xAOD::VertexContainer> m_inputHoughVtxKey{this, "inputHoughVtx", "", "input vertex container"};
 
