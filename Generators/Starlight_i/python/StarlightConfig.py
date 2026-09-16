@@ -139,19 +139,6 @@ def Starlight_Pythia8_Common_Cfg(flags,
         # IsAfterburner must be true to remove empty
         # HepMC events produced by Starlight GenModule
         IsAfterburner=True,
-        **kwargs
-    ))
-
-    # Ensure the showering for leptons is switched on
-    base_commands = [
-        'SpaceShower:QEDshowerByL = 1',
-        'TimeShower:QEDshowerByL = 1'
-    ]
-    ca.merge(Pythia8CommandsCfg(
-        flags,
-        source="base_commands",
-        commands=base_commands,
-        precedence=GeneratorSettingsPrecedence.BASE,
     ))
 
     return ca
