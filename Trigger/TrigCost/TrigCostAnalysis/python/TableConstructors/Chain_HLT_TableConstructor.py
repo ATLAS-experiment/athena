@@ -28,8 +28,7 @@ class Chain_HLT_TableConstructor(TableConstructorBase):
                                    "UniqueTime_perCall",
                                    "ChainPassed_perEvent",
                                    "Request_perEvent",
-                                   "CachedROBSize_perEvent",
-                                   "NetworkROBSize_perEvent"]
+                                   "CachedROBSize_perEvent"]
 
     def defineColumns(self):
         self.columns['name'] = Column("Name", "Chain name")
@@ -68,7 +67,6 @@ class Chain_HLT_TableConstructor(TableConstructorBase):
         self.columns["algPerEvent"].addValue(self.getHistogram("AlgCalls_perEvent").GetMean())
         self.columns["dataRate"].addValue(self.getXWeightedIntegral("Request_perEvent", isLog=False))
         self.columns["cachedDataSizeRate"].addValue(self.getXWeightedIntegral("CachedROBSize_perEvent", isLog=False))
-        self.columns["retrievedDataSizeRate"].addValue(self.getXWeightedIntegral("NetworkROBSize_perEvent", isLog=False))
 
         groups = ""
         for i in range (1, self.getHistogram("Group_perCall").GetNbinsX()):
