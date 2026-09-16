@@ -458,7 +458,7 @@ def getJetRecAlg( jetdef, monTool = None, ftf_suffix = '', extraOutputs = None):
 
     # Explicitly register (ghost)associated branches for downstream dependency resolution
     _extraOutputs = extraOutputs if extraOutputs is not None else []
-    jra.ExtraOutputs = extraOutputs + [
+    jra.ExtraOutputs = _extraOutputs + [
         ('xAOD::JetContainer',f'{jetname}.Ghost{ghost}') for ghost in jetdef.ghostdefs
     ]
     return jra
@@ -495,7 +495,7 @@ def getJetRecGroomAlg(groomdef,monTool=None,extraOutputs=None):
 
     # Explicitly register (ghost)associated branches for downstream dependency resolution
     _extraOutputs = extraOutputs if extraOutputs is not None else []
-    jra.ExtraOutputs = extraOutputs + [
+    jra.ExtraOutputs = _extraOutputs + [
         ('xAOD::JetContainer',f'{jetname}.Ghost{ghost}') for ghost in groomdef.ungroomeddef.ghostdefs
     ]
 
