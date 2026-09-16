@@ -41,9 +41,13 @@ namespace xAOD{
 
             /** @brief Returns the Athena identifier of the measurement */
             const Identifier& identify() const;
+            /** @brief Returns the Acts surface associated with the measurement */
+            const Acts::Surface& surface() const;
         protected:
             /** @brief Cache value of the  */
             CxxUtils::CachedValue<const MuonGMR4::MuonReadoutElement*> m_readoutEle{};
+            /** @brief Cached associated Acts Surface */
+            CxxUtils::CachedValue<const Acts::Surface*> m_surface{};
         private:
             CxxUtils::CachedValue<Identifier> m_identifier{};
     };

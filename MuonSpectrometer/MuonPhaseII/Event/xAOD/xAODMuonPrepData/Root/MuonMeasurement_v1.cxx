@@ -18,4 +18,14 @@ namespace xAOD{
         }
         return (*m_identifier.ptr());
     }
+    const Acts::Surface& MuonMeasurement_v1::surface() const {
+        if (!m_surface.isValid()){
+            const IdentifierHash hash = 
+                type() == UncalibMeasType::MdtDriftCircleType 
+                    ? measurementHash() 
+                    : layerHash();
+            m_surface.set(&readoutElement()->surface(hash));
+        }
+        return (**m_surface.ptr());
+    }
 }
