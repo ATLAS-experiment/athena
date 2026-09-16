@@ -268,6 +268,7 @@ StatusCode TrigCostAnalysis::execute(const EventContext& ctx) {
 
   const uint32_t onlineSlot = getOnlineSlot( costDataHandle.get() );
   CostData costData;
+  ATH_CHECK( costData.set(costDataHandle.get(), onlineSlot) );
   costData.setChainToAlgMap(chainToAlgIdx);
   costData.setChainToUniqAlgMap(chainToUniqAlgs);
   costData.setSequencersMap(seqToAlgIdx);
