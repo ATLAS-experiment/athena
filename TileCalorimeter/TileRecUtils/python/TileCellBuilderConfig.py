@@ -27,11 +27,11 @@ def TileCellBuilderCfg(flags, mergeChannels=True, doDigiHSTruth=False, **kwargs)
 
     testBeam = flags.Beam.Type is BeamType.TestBeam
     if doDigiHSTruth:
-        kwargs.setdefault('MBTSContainer', 'MBTSContainer2_DigiHSTruth' if flags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2, LHCPeriod.Run3] else "")
-        kwargs.setdefault('E4prContainer', 'E4prContainer2_DigiHSTruth' if flags.GeoModel.Run is LHCPeriod.Run2 else "")
+        kwargs.setdefault('MBTSContainer', 'MBTSContainer2_DigiHSTruth' if not testBeam and flags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2, LHCPeriod.Run3] else "")
+        kwargs.setdefault('E4prContainer', 'E4prContainer2_DigiHSTruth' if not testBeam and flags.GeoModel.Run is LHCPeriod.Run2 else "")
     else:
-        kwargs.setdefault('MBTSContainer', 'MBTSContainer' if flags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2, LHCPeriod.Run3] else "")
-        kwargs.setdefault('E4prContainer', 'E4prContainer' if flags.GeoModel.Run is LHCPeriod.Run2 else "")
+        kwargs.setdefault('MBTSContainer', 'MBTSContainer' if not testBeam and flags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2, LHCPeriod.Run3] else "")
+        kwargs.setdefault('E4prContainer', 'E4prContainer' if not testBeam and flags.GeoModel.Run is LHCPeriod.Run2 else "")
 
     kwargs['mergeChannels'] = mergeChannels
     if flags.Common.ProductionStep in [ProductionStep.PileUpPretracking, ProductionStep.MinbiasPreprocessing]:
