@@ -8,7 +8,7 @@
  **     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
-// cppcheck-suppress-file stlIfStrFind; cannot use C++20 starts_with in this standalone code
+// cppcheck-suppress-file stlIfStrFind; cannot use C++20
 
 #ifndef COMPUTILS_H
 #define COMPUTILS_H
@@ -24,21 +24,25 @@
 #include "utils.h"
 #include "DrawLabel.h" 
 
-
 #include "TStyle.h"
 #include "TPad.h"
 #include "TH1D.h"
 #include "TFile.h"
 #include "TH1.h"
+#include "TF1.h"
 #include "TGraphAsymmErrors.h"
 
 #include "TLegend.h"
-#include <cmath>
 
+// #define JL
+
+extern bool JLflag;
 
 extern bool LINEF;
 extern bool LINES;
 
+
+void band_plot( TH1* h, double xlo, double xhi, double ylo=-999, double yhi=-999 );
 
 void ATLASFORAPP_LABEL( double x, double y, int color, double size=0.06 ); 
 
@@ -51,7 +55,7 @@ static std::string release;
 
 double integral( TH1* h );
 
-void Norm( TH1* h, double scale=1 );
+void Norm( TH1* h, double scale=1, double xmin=0, double xmax=0 );
 
 double Entries( TH1* h );
 
@@ -187,7 +191,7 @@ public:
       else if  ( keys[i]=="auto" )  m_autoset   = true;
       else if  ( keys[i]=="trim" )  m_trim      = true;
       //cppcheck-suppress stlIfStrFind
-      else if  ( keys[i].find("offset")==0  )  {
+      else if  ( keys[i].find("offset")==0  )  { 
 
 	std::cout << "offset:" << std::endl;
 	std::cout << "\tkey: " << keys[i] << std::endl;
@@ -267,11 +271,14 @@ public:
 
   double lo() const { return m_lo; } 
   double hi() const { return m_hi; } 
+
+  double lo(double x) { return m_lo=x; } 
+  double hi(double x) { return m_hi=x; } 
+
   
   double binwidth() const { return m_binwidth; }
 
   const std::string& c_str() const { return m_info; }
-
 
 public:
 
@@ -287,7 +294,7 @@ public:
       pos = sc.find(t);
     }
     
-    tags.push_back(std::move(sc));
+    tags.push_back(sc);
     
     return tags;
   } 
@@ -397,13 +404,15 @@ public:
     }
       
     m_leg = new TLegend( m_x[0], y0, m_x[1], m_y[1] );
-     
+
+#if 1
     m_leg->SetBorderSize(0);
     m_leg->SetTextFont(42);
     m_leg->SetTextSize(0.04);
     m_leg->SetFillStyle(3000);
     m_leg->SetFillColor(0);
     m_leg->SetLineColor(0);
+#endif
     
     for ( size_t i=0 ; i<m_entries.size() ; i++ ) { 
       m_leg->AddEntry( m_obj[i], m_entries[i].c_str(), m_type[i].c_str() );
@@ -444,8 +453,8 @@ void setParameters( T* h, TGraphAsymmErrors* tg ) {
 
 
 template<typename T>
-void zeroErrors( T* h ) {
-  for ( int i=1 ; i<=h->GetNbinsX() ; i++ ) h->SetBinError( i, 1e-100 ); 
+void zeroErrors( T* /* h */ ) {
+  // for ( int i=1 ; i<=h->GetNbinsX() ; i++ ) h->SetBinError( i, 1e-100 ); 
 } 
 
 
@@ -459,14 +468,17 @@ class tPlotter {
 
 public: 
   
-  tPlotter(T* htest=0, T* href=0, const std::string& s="", TGraphAsymmErrors* tgtest=0, TGraphAsymmErrors* tgref=0 ) :
-    m_htest(htest), m_href(href),
-    m_tgtest(tgtest), m_tgref(tgref),
+  tPlotter(T* fo_htest=0, T* fo_href=0, const std::string& s="", TGraphAsymmErrors* fo_tgtest=0, TGraphAsymmErrors* fo_tgref=0 ) : 
+    m_htest(fo_htest), m_href(fo_href),
+    m_tgtest(fo_tgtest), m_tgref(fo_tgref),
     m_plotfilename(s),
     m_max_entries(4),
     m_entries(0), 
-    m_trim_errors(false)
-  {
+    m_trim_errors(false),
+    m_mc(false), 
+    m_lo(-999),  m_hi(-999),
+    m_xlo(-999), m_xhi(-999),
+    m_xaxis(0),  m_yaxis(0) {
   }
 
   
@@ -476,10 +488,12 @@ public:
     m_plotfilename(p.m_plotfilename),
     m_max_entries(p.m_max_entries),
     m_entries(0),
-    m_trim_errors(p.m_trim_errors) {     
+    m_trim_errors(p.m_trim_errors),
+    m_mc(p.m_mc),
+    m_lo(p.m_lo), m_hi(p.m_hi),
+    m_xlo(-999),  m_xhi(-999),
+    m_xaxis(0),   m_yaxis(0) {
   }
-
-  
 
   /// sadly, root manages all the histograms (does it really? 
   /// who can tell) so we mustn't delete anything just in case
@@ -488,16 +502,101 @@ public:
   /// it is TOO STUPID to allow objects to be used as actual objects
   ~tPlotter() { } 
 
+
+  void xlo( double x ) { m_xlo = x; } 
+  void xhi( double x ) { m_xhi = x; } 
+
+  double xlo() const { return m_xlo; } 
+  double xhi() const { return m_xhi; } 
+  
   const std::string& plotfilename() const { return m_plotfilename; }
 
   void trim_errors(bool b) { m_trim_errors=b; } 
   
   bool  trim_errors() const { return m_trim_errors; } 
   
+  void SetRange( double lo, double hi ) { m_lo=lo, m_hi=hi; }
+
   void Draw( int i, Legend* lleg, bool mean=false, bool first=true, bool drawlegend=false ) { 
+
+    std::cout << "Draw " << __LINE__ << std::endl; 
+
+    double phibeam = 0;
+    double xbeam   = 0;
+    double ybeam   = 0;
+    double offbeam = 0;
+
     
     if ( htest() ) {
+      
       gStyle->SetOptStat(0);
+
+#if 1      
+      if ( first ) { 
+
+	// double lo = xlo();
+	// double hi = xhi();
+
+	double lo = htest()->GetBinLowEdge(1);
+	double hi = htest()->GetBinLowEdge(htest()->GetNbinsX()+1);  
+
+	std::cout << "aes lo:   " << lo << std::endl;
+	std::cout << "ase hi:   " << hi << std::endl;
+	
+	std::cout << "ase m_lo: " << m_lo << std::endl;
+	std::cout << "ase m_hi: " << m_hi << std::endl;
+
+
+	if ( m_xaxis ) {
+	  std::cout << "ase: " << *m_xaxis << std::endl;
+	  std::cout << "ase: " <<  m_xaxis->m_lo << std::endl;
+	  std::cout << "ase: " <<  m_xaxis->m_hi << std::endl;
+	  
+	  if ( m_xaxis->m_lo!=0 || m_xaxis->m_hi!=0 ) {
+	    // hnull->GetXaxis()->SetRangeUser( m_xaxis->m_lo, m_xaxis->m_hi!=0 );
+
+	    //	    if ( lo>m_xaxis->m_lo ) lo = m_xaxis->m_lo;
+	    //	    if ( hi<m_xaxis->m_hi ) hi = m_xaxis->m_hi;
+
+	    lo = m_xaxis->m_lo;
+	    hi = m_xaxis->m_hi;
+	  }
+	  else {
+	    if ( m_lo!=m_hi )  {
+	      if ( m_lo>lo ) lo = m_lo;
+	      if ( m_hi<hi ) hi = m_hi;
+	    }
+	  }
+	}
+
+	
+	std::cout << "fck lo: " << lo << std::endl;
+	std::cout << "fck hi: " << hi << std::endl;
+	
+	TH1D* hnull = new TH1D("hnull", htest()->GetTitle(), 100, lo, hi );  // htest()->GetBinLowEdge(1),  htest()->GetBinLowEdge(htest()->GetNbinsX()+1) );  
+	hnull->SetDirectory(0);
+	
+	hnull->SetMaximum(htest()->GetMaximum());
+	hnull->SetMinimum(htest()->GetMinimum());
+	hnull->GetXaxis()->SetMoreLogLabels(true);
+
+	hnull->GetXaxis()->SetTitle(htest()->GetXaxis()->GetTitle());
+	hnull->GetYaxis()->SetTitle(htest()->GetYaxis()->GetTitle());
+
+
+
+	for ( int ib=1 ; ib<101 ; ib++ ) hnull->SetBinContent(ib, hnull->GetMinimum()-1e10);
+	
+	hnull->DrawCopy();
+
+	std::cout << htest()->GetTitle() << std::endl;
+	std::cout << hnull->GetXaxis()->GetTitle() << std::endl;
+	std::cout << hnull->GetYaxis()->GetTitle() << std::endl;
+
+	first = false;
+      }
+#endif
+      
       if ( href() ) { 
 	href()->SetLineColor(colours[i%6]);
 	href()->SetLineStyle(2);
@@ -505,6 +604,13 @@ public:
       }
       
       if ( LINEF ) htest()->SetLineColor(colours[i%6]);
+
+      if ( JLflag ) { 
+	if ( contains( std::string(htest()->GetName()), "vs_mu") ) htest()->GetXaxis()->SetRangeUser( 18, 58 );
+	if ( contains( std::string(htest()->GetName()), "a0_eff") ) htest()->GetXaxis()->SetRangeUser( -200, 200 );
+
+	std::cout << "TEST: " << htest()->GetName() << "   " << mc() << "\t" << std::endl;
+      }
 
       htest()->SetLineStyle(1);
 
@@ -519,10 +625,42 @@ public:
 
       std::cout << std::endl;
 
+
       if ( first )  {
 
+	if ( !mc() ) { 
 	if ( tgtest() ) { 
+
+#if 0	   
+	  TH1F* h = (TH1F*)htest()->Clone("h"); h->SetDirectory(0);
+
+	    zeroErrors(h);
+	    h->GetXaxis()->SetMoreLogLabels(true);
+	    if ( trim_errors() ) trim_tgraph( h, tgtest() );
+
+	    if ( m_xlo!=-999 && m_xhi!=-999 ) { 
+	      TH1D* hnull = nrew TH1D( "hnull", "", 100, m_xlo, m_xhi );
+	      hnull->SetMinimum( h->GetMinimum() );
+	      hnull->SetMaximum( h->GetMaximum() );
+	      hnull->SetTitle( h->GetTitle() );
+	      hnull->DrawCopy();
+	      h->Draw("ep same");
+	    }
+	    else {
+	      h->Draw("ep");
+	      first = false;
+	    }
+
+	    if ( LINES ) h->Draw("lhistsame");
+	    setParameters( h, tgtest() );
+	    tgtest()->Draw("esame");
+#else
 	    zeroErrors(htest());
+
+	    std::cout << "shte lo: " << m_lo << std::endl;
+	    std::cout << "shte hi: " << m_hi << std::endl;
+
+	    
 	    htest()->GetXaxis()->SetMoreLogLabels(true);
 	    if ( trim_errors() ) trim_tgraph( htest(), tgtest() );
 
@@ -531,11 +669,21 @@ public:
 	    if ( LINES ) htest()->Draw("lhistsame");
 	    setParameters( htest(), tgtest() );
 	    tgtest()->Draw("esame");
+	    first = false;
+
+
+#endif
 	}
-	else { 
-	    htest()->GetXaxis()->SetMoreLogLabels(true);
-	    htest()->Draw("ep");
-	    if ( LINES ) htest()->Draw("lhistsame");
+	else {
+
+	  std::cout << "cck lo: " << m_lo << std::endl;
+	  std::cout << "cck hi: " << m_hi << std::endl;
+	  
+	  htest()->GetXaxis()->SetMoreLogLabels(true);
+	  htest()->Draw("ep");
+	  first = false;
+	  if ( LINES ) htest()->Draw("lhistsame");
+	}
 	}
        
       }
@@ -550,14 +698,14 @@ public:
 	else                                      href()->Draw("hist same");
       }
 
-      if ( tgtest() ) { 
+      if ( !mc() && tgtest() ) { 
 	zeroErrors(htest());
 
 	if ( trim_errors() ) trim_tgraph( htest(), tgtest() );
 	setParameters( htest(), tgtest() );
 	tgtest()->Draw("e1same");
 	if ( LINES ) tgtest()->Draw("lsame");
-
+	
       }
       
 #if 0
@@ -572,12 +720,115 @@ public:
 	hnull->SetMarkerSize( htest()->GetMarkerSize()*0.75 );
 	// hnull->SetMarkerSize( 0 );
 	hnull->DrawCopy("l same");
+
+	std::cout << "cnt lo: " << m_lo << std::endl;
+	std::cout << "cnt hi: " << m_hi << std::endl;
+
+	
 	delete hnull;
       }
 #endif
 
-      htest()->Draw("ep same");
-      if ( LINES ) htest()->Draw("lhist same");
+      std::cout << "TEST MC: " << htest()->GetName() << " " << mc() << std::endl;  
+
+      TH1* h = htest();
+      
+      TList* ccklist = h->GetListOfFunctions();
+      
+      size_t tlsize = ccklist->GetSize();
+      
+      std::cout << "tlsize: " << tlsize << std::endl; 
+
+      
+      for ( size_t icck=0 ; icck<tlsize ; icck++ ) {  
+	std::cout << "tlist: " << icck << "  " << ccklist->At(icck)->GetName() << std::endl;
+
+	TF1* cck = (TF1*)ccklist->At(icck);
+
+	cck->SetLineColor(htest()->GetLineColor());
+	
+	if ( std::string(cck->GetName()) == "sinus" ) {
+	  phibeam = cck->GetParameter(1);
+	  xbeam   = cck->GetParameter(0)*cos(phibeam);
+	  ybeam   = cck->GetParameter(0)*sin(phibeam);
+	  offbeam = cck->GetParameter(2);
+
+	  std::cout << "phi = " << phibeam
+		    << "\nx   = " << xbeam
+		    << " mm\ny   = " << ybeam
+		    << " mm\noff = " << offbeam << " mm" << std::endl;  
+	  
+	}
+	
+      }
+      
+      //      if ( tlsize > 0 ) std::exit(0);
+
+
+      if ( !mc() ) { 
+	
+	std::cout << "TEST mtype " << htest()->GetMarkerStyle() << "  " <<  htest()->GetMarkerColor() << std::endl;
+
+	if ( contains( std::string(h->GetName()), "a0_eff") ) {
+	  // h->GetXaxis()->SetRangeUser( -200,200 );
+	  
+	  /// this is a hack, and should be removed 
+	  std::cout << "STUFF" << std::endl; 
+
+       
+	  for (int i=0 ; i<h->GetNbinsX() ; i++ ) {
+	    if (h->GetBinCenter(i)<-200 ) {
+	      h->SetBinContent(i,0);
+	      h->SetBinError(i,0);
+	    }
+	  }
+	}
+
+	std::cout << "SHTE" << std::endl;
+	
+	htest()->Draw("ep same");
+	if ( LINES ) htest()->Draw("lhist same");
+      }
+      else {
+
+	std::cout << "SHTE" << std::endl;
+
+
+#if 1 
+	std::cout << "colour: " << htest()->GetMarkerColor() << std::endl; 
+
+#if 1
+	/// filled ...
+	htest()->SetFillStyle(455);
+	htest()->SetFillColor(htest()->GetMarkerColor());
+	htest()->SetMarkerStyle(0);
+#endif
+	
+	/// this is also a hack and needs to be removed ...
+	if ( contains( std::string(h->GetName()), "vs_mu") ) h->GetXaxis()->SetRangeUser( 18, 58 );
+	if ( contains( std::string(h->GetName()), "a0_eff") ) {
+	  h->GetXaxis()->SetRangeUser( -200,200 );
+
+	  std::cout << "STUFF" << std::endl; 
+
+	  for (int i=0 ; i<h->GetNbinsX() ; i++ ) {
+	    if (h->GetBinCenter(i)<-200 ) {
+	      h->SetBinContent(i,0);
+	      h->SetBinError(i,0);
+	    }
+	  }
+
+	}
+
+	htest()->Draw("e3lhistsame");
+	// htest()->Draw("e1same");
+
+	//	std::cout << "band plot: " << m_lo << " " << m_hi << std::endl;
+	
+	band_plot( htest(), m_lo, m_hi, htest()->GetMinimum(), htest()->GetMaximum()  );
+	if ( LINES ) htest()->Draw("e3lhist same");
+#endif
+      }
 
       // href()->Draw("lhistsame");
       // htest()->Draw("lhistsame");
@@ -604,17 +855,17 @@ public:
 	  if ( s_meanplotref && href() ) {
 	    displayref = true;
 	    true_mean muref( href() );
-	    std::sprintf( meanrefc, " <t> = %3.2f #pm %3.2f ms (ref)", muref.mean(), muref.error() );
+	    std::snprintf( meanrefc, 64, " <t> = %3.2f #pm %3.2f ms (ref)", muref.mean(), muref.error() );
 	  }
 	  else { 
-	    std::sprintf( meanrefc, "%s", "" );
+	    std::snprintf( meanrefc, 64, "%s", "" );
 	  }
 	  
 	  true_mean mutest( htest() );
 	  char meanc[64];
-	  std::sprintf( meanc, " <t> = %3.2f #pm %3.2f ms", mutest.mean(), mutest.error() );
+	  std::snprintf( meanc, 64, " <t> = %3.2f #pm %3.2f ms", mutest.mean(), mutest.error() );
 	  
-	  std::string dkey = std::move(key);
+	  std::string dkey = key;
 	  
 	  std::string remove[7] = { "TIME_", "Time_", "All_", "Algorithm_", "Class_", "HLT_", "Chain_HLT_" };
 	  
@@ -658,12 +909,30 @@ public:
 	  
 	}
 	else { 
-	  if ( LINEF || leg.size()<m_max_entries ) leg.AddEntry( htest(), key, "p" );
+	  if ( !mc() ) { 
+	    if ( LINEF || leg.size()<m_max_entries ) leg.AddEntry( htest(), key, "p" );
+	  }
+	  else { 
+	    if ( LINEF || leg.size()<m_max_entries ) leg.AddEntry( htest(), key, "f" );
+	  }
 	}
 	
 	m_entries++;
 	
 	if ( drawlegend ) leg.Draw();
+
+
+	if ( xbeam!=0 || ybeam!=0 ) {
+	  //	  DrawLabel( 0.19, 0.24+i*0.085, label( "x_{beam} = %6.3lf mm", int(1000*xbeam + 0.5)*0.001), htest()->GetLineColor() );
+	  //	  DrawLabel( 0.19, 0.20+i*0.085, label( "y_{beam} = %6.3lf mm", int(1000*ybeam + 0.5)*0.001), htest()->GetLineColor() );
+	  DrawLabel( 0.19, 0.20+i*0.045, label( "x =%6.3lf mm  y =%6.3lf mm   off =%6.3lf mm", xbeam, ybeam, offbeam, 0 ), htest()->GetLineColor() ); 
+	  //	  DrawLabel( 0.19, 0.20+i*0.045,
+		     // int(1000*xbeam + 0.5)*0.001,
+		     //	int(1000*ybeam + 0.5)*0.001,
+		     //	int(1000*offbeam + 0.5)*0.001 ),
+		     //	htest()->GetLineColor() );
+	}
+	
       }
       
     }
@@ -828,7 +1097,12 @@ public:
 
       }
       else { 
-	if ( LINEF || leg.size()<m_max_entries ) leg.AddEntry( htest(), key, "p" );
+	if ( !mc() ) { 
+	  if ( LINEF || leg.size()<m_max_entries ) leg.AddEntry( htest(), key, "p" ); 
+	}
+	else { 
+	  if ( LINEF || leg.size()<m_max_entries ) leg.AddEntry( htest(), key, "f" );
+	}
       }
 
       m_entries++;
@@ -849,10 +1123,12 @@ public:
   T* htest() { return m_htest; }
   T* href()  { return m_href; }
 
+  bool mc(bool b) { return m_mc=b; }
+
+  bool mc() const { return m_mc; }  
 
   TGraphAsymmErrors* tgtest() { return m_tgtest; }
   TGraphAsymmErrors* tgref()  { return m_tgref; }
-
 
   void max_entries( int i ) { m_max_entries = i; } 
 
@@ -860,6 +1136,12 @@ public:
 
   static void setplotref( bool b )     { s_plotref=s_meanplotref=b; }
   static void setmeanplotref( bool b ) { s_meanplotref=b; }
+
+  void xaxis( const AxisInfo* a ) { m_xaxis = a; }
+  void yaxis( const AxisInfo* a ) { m_yaxis = a; }
+
+  const AxisInfo* xaxis() const { return m_xaxis; } 
+  const AxisInfo* yaxis() const { return m_yaxis; } 
 
 private:
 
@@ -880,6 +1162,17 @@ private:
 
   bool m_trim_errors;
 
+  bool m_mc;
+
+  double m_lo; 
+  double m_hi;
+
+  double m_xlo; 
+  double m_xhi;
+
+  const AxisInfo* m_xaxis;
+  const AxisInfo* m_yaxis;
+  
 };
 
 
@@ -960,7 +1253,7 @@ public:
     double tmax = realmax(lo,hi);
     double tmin = realmin(lo,hi);
    
-    m_max = scale*tmin;
+    m_max = scale*tmax;
     
     if ( m_logy ) m_min = tmin;
 
@@ -1052,9 +1345,8 @@ public:
 
       double lo = limits[0];
       double hi = limits[1];
-      //coverity[dead_error_condition]
+
       if ( first ) { 
-      //coverity[dead_error_begin]
 	v[0] = lo;
 	v[1] = hi;
       }
@@ -1088,7 +1380,8 @@ public:
 
   void sortx( const AxisInfo& xinfo ) {
     
-    if ( xinfo.rangeset() ) { 
+    if ( xinfo.rangeset() ) {       
+      std::cout << "xr1: " << xinfo << std::endl;
       m_lo = xinfo.lo();
       m_hi = xinfo.hi();
     }
@@ -1096,10 +1389,12 @@ public:
     if ( xinfo.autoset() && size() > 0 ) {
       std::vector<double> limits = findxrange( xinfo.symmetric() );
       if ( xinfo.rangeset() ) { 
+	std::cout << "xr2: " << xinfo << std::endl;
 	if ( limits[0]<m_lo ) m_lo = limits[0];
 	if ( limits[1]>m_hi ) m_hi = limits[1];
       }
       else { 
+	std::cout << "xr3: " << xinfo << std::endl;
 	m_lo = limits[0];
 	m_hi = limits[1];
       }
@@ -1139,6 +1434,7 @@ public:
     for ( unsigned i=0 ; i<size() ; i++ ) { 
       if ( at(i).href() ) at(i).href()->GetXaxis()->SetRangeUser( m_lo, m_hi );
       at(i).htest()->GetXaxis()->SetRangeUser( m_lo, m_hi );
+      at(i).SetRange(m_lo, m_hi);
     }
   }
   
@@ -1165,32 +1461,43 @@ public:
   void Draw_i( Legend& leg, bool means=false ) {  
 
     bool first = true;
-    
+
+#if 1
     if ( m_logy ) {      /// increase the number of log labels if only a few decades
-      //coverity[UNREACHABLE]
       for ( unsigned i=0 ; i<size() ; i++, first=false ) { 
-	      double ymax = at(i).htest()->GetMaximum();
-	      double ymin = at(i).htest()->GetMinimum();
-	      at(i).htest()->GetYaxis()->SetMoreLogLabels(true);
-	      if ( ymax/ymin>1e6 ) at(i).htest()->GetYaxis()->SetMoreLogLabels(false);
-	      break;
+	double ymax = at(i).htest()->GetMaximum();
+	double ymin = at(i).htest()->GetMinimum();
+	at(i).htest()->GetYaxis()->SetMoreLogLabels(true);
+	if ( ymax/ymin>1e6 ) at(i).htest()->GetYaxis()->SetMoreLogLabels(false);
+	break;
       }
-
     }
+#endif
 
+#if 1
     for ( unsigned i=0 ; i<size() ; i++ ) at(i).trim_errors( m_trim_errors );
 
     /// still can't get this working correctly - for the time being leave these alternative
     /// loop orders in place but commented out until we can find a better solution ...
-  
-    //  for ( unsigned i=0 ; i<size() ; i++,  first=false ) at(i).DrawLegend( i, leg, means, first, (i==size()-1) );
-    //  for ( unsigned i=0 ; i<size() ; i++,  first=false ) at(i).Draw( i, &leg, means, first, (i==size()-1) );
+
+#endif
+    
+    // for ( unsigned i=0 ; i<size() ; i++,  first=false ) at(i).Draw( i, &leg, means, first, (i==size()-1) );
+    //    for ( unsigned i=size() ; i-- ;  first=false ) at(i).Draw( i, &leg, means, first, i==0 );
+
     for ( unsigned i=size() ; i-- ;  first=false ) at(i).Draw( i, &leg, means, first, i==0 );
 
+    // dev versions ... 
+    //  for ( unsigned i=0 ; i<size() ; i++,  first=false ) at(i).DrawLegend( i, leg, means, first, (i==size()-1) );
+    // for ( unsigned i=0 ; i<size() ; i++,  first=false ) at(i).Draw( i, &leg, means, first, i==size() );
+
+
+    
     if ( s_watermark ) DrawLabel(0.1, 0.02, "built "+stime()+release, kBlack, 0.03 );
 
     gPad->SetLogy(m_logy);
     gPad->SetLogx(m_logx);
+
   }
 
   void SetLogx( bool b=true ) { m_logx=b; } 
@@ -1275,14 +1582,14 @@ public:
     getextra();
   }
 
-  std::string  name() const { return m_details[0]; } 
+  const std::string&  name() const { return m_details[0]; } 
 
   const std::string&  detail() const { return m_extra; }
 
-  std::string  info() const { return m_details[1]; } 
+  const std::string&  info() const { return m_details[1]; } 
 
-  std::string xtitle() const { return m_details[3]; }
-  std::string ytitle() const { return m_details[5]; }
+  const std::string& xtitle() const { return m_details[3]; }
+  const std::string& ytitle() const { return m_details[5]; }
 
   const AxisInfo& xaxis() const { return m_xinfo; }
   const AxisInfo& yaxis() const { return m_yinfo; }
