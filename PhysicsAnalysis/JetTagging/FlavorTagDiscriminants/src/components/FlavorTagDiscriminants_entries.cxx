@@ -3,7 +3,6 @@
 */
 
 #include "FlavorTagDiscriminants/VRJetOverlapDecoratorTool.h"
-#include "FlavorTagDiscriminants/HbbTagTool.h"
 #include "FlavorTagDiscriminants/DL2Tool.h"
 #include "FlavorTagDiscriminants/PoorMansIpAugmenterAlg.h"
 #include "FlavorTagDiscriminants/TrackLeptonDecoratorAlg.h"
@@ -28,7 +27,6 @@
 
 
 DECLARE_COMPONENT(FlavorTagDiscriminants::VRJetOverlapDecoratorTool)
-DECLARE_COMPONENT(FlavorTagDiscriminants::HbbTagTool)
 DECLARE_COMPONENT(FlavorTagDiscriminants::DL2Tool)
 DECLARE_COMPONENT(FlavorTagDiscriminants::PoorMansIpAugmenterAlg)
 DECLARE_COMPONENT(FlavorTagDiscriminants::TrackLeptonDecoratorAlg)
