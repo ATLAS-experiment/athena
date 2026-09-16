@@ -501,7 +501,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
             alg = config.createAlgorithm( 'CP::PDFReweightAlg', 'PDFReweightAlg', reentrant=True )
 
             if self.inPDFName is None:
-                log.error("Reading the PDF set from DAOD not available yet")
+                log.error("Option inPDFName not specified, but is required for PDF reweighting. This means the PDF set the input dataset was generated with is determined as …")
             else:
                 alg.inPDFName = self.inPDFName
 
