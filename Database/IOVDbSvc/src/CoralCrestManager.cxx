@@ -561,7 +561,9 @@ namespace{
         {
           const auto &charVec = row.get<chai::BlobData>(att.specification().name()).m_bytes;//CxxUtils::base64_decode(strVal);
           coral::Blob blob(charVec.size());
-          memcpy(blob.startingAddress(), charVec.data(), charVec.size());
+          if (!charVec.empty()) {  // Avoid ubsan warning.
+            memcpy(blob.startingAddress(), charVec.data(), charVec.size());
+          }
           att.setValue<coral::Blob>(blob);		  
           break;
         }
