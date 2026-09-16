@@ -33,6 +33,12 @@ def PhysValBTagCfg(flags, **kwargs):
     kwargs.setdefault("HistogramDefinitions", definitions + definitions_Run)
     kwargs.setdefault("JetEtaCut", 2.5 if flags.GeoModel.Run <= LHCPeriod.Run3 else 4.0)
     kwargs.setdefault("JetContainerEMTopo", "" if flags.GeoModel.Run <= LHCPeriod.Run3 else "AntiKt4EMTopoJets")
+    kwargs.setdefault("JetContainerPFlow", "AntiKt4EMPFlowJets")
+
+    from FlavorTagDiscriminants.FTagMuonAssociationConfig import FTagMuonAssociationCfg
+    for jetCollection in [kwargs["JetContainerEMTopo"], kwargs["JetContainerPFlow"]]:
+        if jetCollection:
+            acc.merge(FTagMuonAssociationCfg(flags, jetCollection=jetCollection, outputMuons="GhostMuons"))
 
     if "trackTruthOriginTool" not in kwargs:
         from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import InDetTrackTruthOriginToolCfg
