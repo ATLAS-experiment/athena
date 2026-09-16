@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = """
           Instantiate the TRT Standalone Thinning
@@ -20,7 +20,6 @@ def ThinGeantTruthCfg(flags, name="ThinGeantTruthAlg", **kwargs):
     if flags.GeoModel.Run >= LHCPeriod.Run4:
         kwargs.setdefault("EtaMaxEGammaTruth", 4.1)
         kwargs.setdefault("FwdElectronsKey", "ForwardElectrons")
-    # keep the truth ancestry of LRT electrons, as for the standard ones
     if flags.Tracking.doLargeD0:
         kwargs.setdefault("LRTElectronsKey",
                           f"LRT{flags.Egamma.Keys.Output.Electrons}")

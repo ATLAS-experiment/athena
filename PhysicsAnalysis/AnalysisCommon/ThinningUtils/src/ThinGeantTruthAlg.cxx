@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ThinGeantTruthAlg.cxx
@@ -126,7 +126,7 @@ ThinGeantTruthAlg::execute(const EventContext& ctx) const
       }
     }
 
-    // LRT muons: same ancestor protection as the standard ones
+    // LRT muons
     const xAOD::MuonContainer* lrtMuons{nullptr};
     ATH_CHECK(SG::get(lrtMuons, m_lrtMuonsKey, ctx));
     if (lrtMuons) {
@@ -171,9 +171,7 @@ ThinGeantTruthAlg::execute(const EventContext& ctx) const
       }
     }
 
-    // LRT electrons: their truth particles need the same ancestor protection as
-    // the standard ones, otherwise consumers walking the lineage (e.g.
-    // xAOD::EgammaHelpers::getBkgElectronLineage) meet thinned-away parents
+    // LRT electrons
     const xAOD::ElectronContainer* lrtElectrons{nullptr};
     ATH_CHECK(SG::get(lrtElectrons, m_lrtElectronsKey, ctx));
     if (lrtElectrons) {

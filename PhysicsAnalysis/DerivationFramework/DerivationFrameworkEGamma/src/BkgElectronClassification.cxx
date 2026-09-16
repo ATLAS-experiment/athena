@@ -88,7 +88,19 @@ BkgElectronClassification::addBranches(const EventContext& ctx) const
   for (const xAOD::Electron* el : *electrons) {
     tPdgID(*el) = 0;
     if (tPL.isPresent() && tPL(*el).isValid()) {
-      tPdgID(*el) = (*tPL(*el))->pdgId();
+      const xAOD::TruthParticle* truthEl = *tPL(*el);
+      tPdgID(*el) = truthEl->pdgId();
+      // Parents can be removed by truth thinning in e.g cases of Geant4 produced LRT electrons
+      // throw a warning in these cases and prevent a crash
+      for (size_t p = 0; p < truthEl->nParents(); ++p) {
+        if (!truthEl->parent(p)) {
+          ATH_MSG_WARNING("Unresolvable truth parent link (ancestry removed by "
+                          << "truth thinning) for truth electron with pdgId "
+                          << truthEl->pdgId() << " and pt " << truthEl->pt()
+                          << " MeV");
+          break;
+        }
+      }
     }
     // Use the Helpers for electron from electron or photon
     // Add Extra Decoration from Egamma helpers in case of BkgElectron (Electron
