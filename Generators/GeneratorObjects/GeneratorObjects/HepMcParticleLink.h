@@ -12,12 +12,12 @@
  **/
 
 #include "SGTools/DataProxy.h"
-#include "SGTools/CurrentEventStore.h"
 #include "AthenaKernel/proxyDictFromEventContext.h"
 #include "CxxUtils/CachedValue.h"
 #include "CxxUtils/no_unique_address.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/EventContext.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 #include <cassert>
 #include <cstdint> /*int32_t etc*/
 #include <iostream>
@@ -65,7 +65,7 @@ class McEventCollection;
  *
  * In order to dereference a link, we need to reference a particular
  * event store.  By default, the current store (as defined by
- * SG::CurrentEventStore::store()) is stored when the link is constructed;
+ * the current EventContext) is stored when the link is constructed;
  * however, an explicit IProxyDict* or EventContext may also be specified.
  */
 class HepMcParticleLink
@@ -380,7 +380,7 @@ public:
                      uint32_t eventIndex /*= 0*/,
                      PositionFlag positionFlag /*= IS_EVENTNUM*/,
                      UniqueIDFlag uniqueIDFlag /*= IS_ID*/,
-                     IProxyDict* sg = SG::CurrentEventStore::store());
+                     IProxyDict* sg);
 
 
   /**
@@ -398,7 +398,7 @@ public:
                      uint32_t eventIndex,
                      PositionFlag positionFlag,
                      UniqueIDFlag uniqueIDFlag,
-                     const EventContext& ctx);
+                     const EventContext& ctx = Gaudi::Hive::currentContext());
 
 
  /**
@@ -415,7 +415,7 @@ public:
   HepMcParticleLink (const HepMC::ConstGenParticlePtr& p,
                      uint32_t eventIndex /*= 0 */,
                      PositionFlag positionFlag /*= IS_EVENTNUM */,
-                     IProxyDict* sg = SG::CurrentEventStore::store());
+                     IProxyDict* sg);
 
 
  /**
@@ -432,7 +432,7 @@ public:
   HepMcParticleLink (const HepMC::ConstGenParticlePtr& part,
                      uint32_t eventIndex,
                      PositionFlag positionFlag,
-                     const EventContext& ctx);
+                     const EventContext& ctx = Gaudi::Hive::currentContext());
 
 
   /**
