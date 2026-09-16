@@ -3,15 +3,11 @@
 # Declare the package name:
 atlas_subdir( Identifier )
 
-# External dependencies:
-find_package( Boost COMPONENTS container )
-
 # Component(s) in the package:
 atlas_add_library( Identifier
    src/*.cxx
    PUBLIC_HEADERS Identifier
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} GaudiKernel CxxUtils )
+   LINK_LIBRARIES GaudiKernel CxxUtils )
 
 # Force IdentifierField.cxx to be compiled with optimization, even in a debug build.
 # This significantly speeds up some tests (for example MuonCondDump_TestMdtCablingDump).
