@@ -490,7 +490,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
 
                 # Check for unsupported generators
                 for generator, message in unsupported_generators.items():
-                    if generator in generator_info:
+                    if generator in generatorInfo:
                         warnings.warn_explicit(
                             message,
                             GeneratorWeightWarning,
