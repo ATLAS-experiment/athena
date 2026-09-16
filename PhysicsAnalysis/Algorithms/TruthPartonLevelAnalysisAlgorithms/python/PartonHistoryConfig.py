@@ -173,6 +173,7 @@ TRUTH_BRANCHES: dict[str, list[str]] = {
     "Ttw": _TTBAR + BRANCHES["W"],
     "Tth": _TTBAR + BRANCHES["Higgs"],
     "Ttgamma": _TTBAR + BRANCHES["Photon"],
+    "Tq": BRANCHES["t"] + BRANCHES["b"],
     "Tzq": BRANCHES["t"] + BRANCHES["Z"] + BRANCHES["b"],
     "Thq": BRANCHES["t"] + BRANCHES["Higgs"] + BRANCHES["b"] + BRANCHES["W"],
     "Tqgamma": BRANCHES["t"] + BRANCHES["Photon"] + BRANCHES["b"],
