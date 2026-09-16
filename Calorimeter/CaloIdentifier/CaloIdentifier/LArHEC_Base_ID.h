@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CaloIdentifier/LArHEC_Base_ID.h
@@ -292,6 +292,7 @@ private:
   std::vector<LArHEC_region*>   m_vecOfRegions;
   std::vector<short int>        m_vecOfCellInfo;
 };
+CLASS_DEF( LArHEC_Base_ID , 181654777 , 1 )
 
 
 #include "CaloIdentifier/LArHEC_Base_ID.icc"
