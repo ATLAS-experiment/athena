@@ -496,13 +496,11 @@ StatusCode MetaDataSvc::initInputMetaDataStore(const std::string& fileName) {
       } else {
          const unsigned long ipar[2] = { 0 , 0 };
          IOpaqueAddress* opqAddr = nullptr;
-         if (!m_addrCrtr->createAddress(m_storageType, ClassID_traits<DataHeader>::ID(), par, ipar, opqAddr).isSuccess()) {
-            if (!m_addrCrtr->createAddress(m_storageType, ClassID_traits<DataHeader>::ID(), parOld, ipar, opqAddr).isSuccess()) {
+         if (m_addrCrtr->createAddress(m_storageType, ClassID_traits<DataHeader>::ID(), par, ipar, opqAddr).isSuccess()
+          || m_addrCrtr->createAddress(m_storageType, ClassID_traits<DataHeader>::ID(), parOld, ipar, opqAddr).isSuccess()) {
+            if (m_inputDataStore->recordAddress(name(), opqAddr).isFailure()) {
                ATH_MSG_WARNING("initInputMetaDataStore: Cannot create proxy for DataHeader, key = " << name());
             }
-         }
-         if (m_inputDataStore->recordAddress(name(), opqAddr).isFailure()) {
-            ATH_MSG_WARNING("initInputMetaDataStore: Cannot record proxy for DataHeader, key = " << name());
          }
       }
       std::list<SG::TransientAddress*> tList;
