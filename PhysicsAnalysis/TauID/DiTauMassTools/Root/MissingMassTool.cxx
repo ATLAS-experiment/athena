@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // vim: ts=2 sw=2
 // Local include(s)
 #include "DiTauMassTools/MissingMassTool.h"
+#include "DiTauMassTools/MissingMassProb.h"
 
 // EDM include(s):
 #include "xAODTau/TauJet.h"
