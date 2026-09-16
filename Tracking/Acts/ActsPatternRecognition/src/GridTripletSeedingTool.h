@@ -452,24 +452,6 @@ class GridTripletSeedingTool
 template <typename Grid>
 struct SPGridTraits;
 
-template<>
-struct SPGridTraits<Acts::CylindricalSpacePointGrid> {
-
-  static void insert(auto& grid, std::size_t index, float phi, float z, float r) {
-      grid.insert(index, phi, z, r);
-  }
-
-};
-
-template<>
-struct SPGridTraits<Acts::Experimental::SphericalSpacePointGrid> {  
-
-  static void insert(auto& grid, std::size_t index, float phi, float z, float r) {
-      grid.insert(index, phi, z/r, r);
-  }
-
-};
-
 
 }  // namespace ActsTrk
 
