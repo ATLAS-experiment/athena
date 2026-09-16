@@ -576,6 +576,12 @@ StatusCode IOVDbMetaDataTool::processInputFileMetaData(const std::string& fileNa
   unsigned int ndupColls = 0;
   for (; cont != contEnd; ++cont) {
     IOVMetaDataContainer* contMaster = getMetaDataContainer(cont->folderName(), cont->folderDescription());
+    const IOVMetaDataContainer* obj = nullptr;
+    sc = m_inputStore->retrieve(obj, cont.key());
+    if (!sc.isSuccess()) {
+      ATH_MSG_ERROR("Could not retrieve " << cont.key());
+      return sc;
+    }
     const IOVPayloadContainer*  payload = obj->payloadContainer();
     ATH_MSG_DEBUG("processInputFileMetaData: New container: payload size " << payload->size() << " key " << cont.key());
     // detailed printout before merge
