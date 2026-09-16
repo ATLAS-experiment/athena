@@ -22,4 +22,4 @@ atlas_add_test( TgcL0MdtCandidateSelector_test
 
 atlas_add_test( L0MuonS1TGCConfig
                 SCRIPT python -m L0MuonS1TGC.L0MuonS1TGCConfig
-                POST_EXEC_SCRIPT noerror.sh )
+                POST_EXEC_SCRIPT nopost.sh )
