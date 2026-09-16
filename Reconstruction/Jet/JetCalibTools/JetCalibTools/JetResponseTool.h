@@ -42,7 +42,7 @@ public:
 
 private:
 
-  Gaudi::Property<float> m_recoJetMinPt{this, "RecoJetMinPt", 7000, "Minimum reco jet pT in MeV"};
+  Gaudi::Property<float> m_recoJetMinPt{this, "RecoJetMinPt", 1, "Minimum reco jet pT in MeV"};
   Gaudi::Property<float> m_truthIsolMaxFrac{this, "TruthIsolMaxFrac", 0.3, "Maximum truth particle pt in isolation cone"};
   Gaudi::Property<float> m_recoIsolMaxFrac{this, "RecoIsolMaxFrac", 0.3, "Maximum reco constituent pt in isolation cone"};
 
