@@ -1,5 +1,10 @@
 /*
 Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+
+* Author: Fabrice Balli, fabrice.balli at cern.ch
+* Date: 04/2026
+* Description: ITkPix front end chip identifier calculation
+
 */
 
 #include "ITkPixelCsvWaferIdAlg.h"
