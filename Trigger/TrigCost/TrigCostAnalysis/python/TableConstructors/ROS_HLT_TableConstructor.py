@@ -23,7 +23,6 @@ class ROS_HLT_TableConstructor(TableConstructorBase):
     def __init__(self, tableObj, underflowThreshold, overflowThreshold):
         super(). __init__(tableObj, underflowThreshold, overflowThreshold) 
         self.expectedHistograms = ["Request_perEvent", 
-                                   "NetworkRequest_perEvent", 
                                    "CachedROBSize_perEvent",
                                    "NetworkROBSize_perEvent",
                                    "Time_perEvent",
@@ -55,7 +54,6 @@ class ROS_HLT_TableConstructor(TableConstructorBase):
         self.columns['events'].addValue(self.getHistogram("Request_perEvent").GetEntries())
         self.columns['eventsWeighted'].addValue(self.getHistogram("Request_perEvent").Integral())
         self.columns['requestRate'].addValue(self.getXWeightedIntegral("Request_perEvent", isLog=False))
-        self.columns['networkRequestRate'].addValue(self.getXWeightedIntegral("NetworkRequest_perEvent", isLog=False))
         self.columns['retrievedSizeRate'].addValue(self.getXWeightedIntegral("NetworkROBSize_perEvent", isLog=False))
         self.columns['cachedSizeRate'].addValue(self.getXWeightedIntegral("CachedROBSize_perEvent", isLog=False))
         self.columns['time'].addValue(self.getHistogram("Time_perEvent").GetMean())
