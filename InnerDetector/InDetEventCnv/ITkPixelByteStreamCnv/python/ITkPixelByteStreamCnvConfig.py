@@ -13,19 +13,16 @@ def addITkPixelCabling(flags):
 
     acc = ComponentAccumulator()
 
-    ITkPixelCablingFromCREST(output_file='cabling.json')
    
-    if os.path.isfile("cabling.json"):
-        acc.merge(ITkPixelCablingAlgCfg(flags, name="ITkPixelCablingAlg", UseTestCabling=False, DataSource='cabling.json'))
-        return acc
-   
-    else:  
-        if flags.ITk.Conditions.PixelTestCablingFallback:
-            acc.merge(ITkPixelCablingAlgCfg(flags, name="ITkPixelCablingAlg", UseTestCabling=True))
-            return acc
-    
+    if flags.ITk.Conditions.PixelTestCablingFallback:
+        acc.merge(ITkPixelCablingAlgCfg(flags, name="ITkPixelCablingAlg", UseTestCabling=True))
+    else:
+        ITkPixelCablingFromCREST(output_file='cabling.json')
+        if os.path.isfile("cabling.json"):
+            acc.merge(ITkPixelCablingAlgCfg(flags, name="ITkPixelCablingAlg", UseTestCabling=False, DataSource='cabling.json'))
         else:
             sys.exit("Error: cabling couldn't be fetched from CREST. Provide a cabling.json file in the run directory, or explicitly allow flags.ITk.Conditions.PixelTestCablingFallback=True")
+    return acc
 
 
 def ITkPixelHitSortingToolCfg(flags, name = "ITkPixelHitSortingTool", **kwargs) -> ComponentAccumulator:
