@@ -100,7 +100,7 @@ namespace CP
     if (code == CP::CorrectionCode::Error) return code;
     // the trigger calibration does not cover this jet: fall back to the offline scale factor
     if (code == CP::CorrectionCode::OutOfValidityRange)
-      return m_offlineEfficiencyTool->getScaleFactor (jet, sf);
+      return outsideTriggerCalibration (jet, sys, sf);
 
     // online b-tag passed: p(trig) * p(off | trig)
     if (static_cast<bool> (m_bTagMatchingDecoration.get (jet, sys)))
@@ -117,7 +117,7 @@ namespace CP
                       m_offlineEfficiencyTool->getScaleFactor (jet, offlSF)});
     if (code == CP::CorrectionCode::Error) return code;
     if (code == CP::CorrectionCode::OutOfValidityRange)
-      return m_offlineEfficiencyTool->getScaleFactor (jet, sf);
+      return outsideTriggerCalibration (jet, sys, sf);
 
     const float trigEff_MC = trigEff_data / trigSF;
     const float condEff_MC = condEff_data / condSF;
@@ -132,6 +132,40 @@ namespace CP
     }
     sf = num / denom;
     return CP::CorrectionCode::Ok;
+  }
+
+
+
+  CP::CorrectionCode BTaggingTriggerEfficiencyAlg ::
+  outsideTriggerCalibration (const xAOD::Jet& jet, const CP::SystematicSet& sys, float& sf)
+  {
+    CP::CorrectionCode code = m_offlineEfficiencyTool->getScaleFactor (jet, sf);
+    // The offline calibration does not cover this jet either (e.g. |eta| >= 2.5): return the code without reporting.
+    if (code != CP::CorrectionCode::Ok) return code;
+    if (sys.empty()) ++m_nOutsideTriggerCalibration;
+    if (!m_reportedOutsideTriggerCalibration)
+    {
+      m_reportedOutsideTriggerCalibration = true;
+      ANA_MSG_WARNING ("trigger-matched b-jet with pt=" << jet.pt() << " MeV, eta=" << jet.eta()
+                       << " is outside the calibration range of the b-jet trigger scale factor inputs;"
+                       << " using the offline scale factor for it. Further such jets are counted and"
+                       << " reported at the end of the job.");
+    }
+    return code;
+  }
+
+
+
+  StatusCode BTaggingTriggerEfficiencyAlg ::
+  finalize ()
+  {
+    if (m_nOutsideTriggerCalibration > 0)
+    {
+      ANA_MSG_WARNING (m_nOutsideTriggerCalibration << " trigger-matched b-jets (nominal) were outside"
+                       << " the calibration range of the b-jet trigger scale factor inputs and"
+                       << " received the offline scale factor");
+    }
+    return StatusCode::SUCCESS;
   }
 
 }

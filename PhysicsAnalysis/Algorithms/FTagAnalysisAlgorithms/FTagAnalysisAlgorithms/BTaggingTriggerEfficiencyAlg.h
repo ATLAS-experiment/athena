@@ -36,6 +36,7 @@ namespace CP
 				 ISvcLocator *svcLoc = nullptr);
     StatusCode initialize () override;
     StatusCode execute (const EventContext& ctx) override;
+    StatusCode finalize () override;
 
     /// \brief compute the b-jet trigger scale factor for one jet
     ///
@@ -46,6 +47,19 @@ namespace CP
     /// outside the trigger calibration, receive the offline scale factor.
   private:
     CP::CorrectionCode triggerScaleFactor (const xAOD::Jet& jet, const CP::SystematicSet& sys, float& sf);
+
+    /// \brief give the offline scale factor to a trigger-matched b-jet that
+    /// the trigger scale factor inputs do not cover, and report it
+    ///
+    /// The first such jet is reported with a warning; the number of such
+    /// jets in the nominal pass is reported in finalize().
+    CP::CorrectionCode outsideTriggerCalibration (const xAOD::Jet& jet, const CP::SystematicSet& sys, float& sf);
+
+    /// \brief number of nominal jets that received the offline scale factor
+    /// because they are outside the trigger calibration
+    std::size_t m_nOutsideTriggerCalibration = 0;
+    /// \brief whether the first such jet has been reported
+    bool m_reportedOutsideTriggerCalibration = false;
 
     /// \brief the smearing tool
   private:
