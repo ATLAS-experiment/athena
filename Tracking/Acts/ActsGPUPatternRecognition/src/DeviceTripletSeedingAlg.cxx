@@ -56,21 +56,6 @@ StatusCode DeviceTripletSeedingAlg::configureTripletSeeder()
   m_seedfinder.radLengthPerSeed = m_radLengthPerSeed;
   m_seedfinder.maxSeedsPerSpM = m_maxSeedsPerSpM;
   m_seedfinder.phiBinDeflectionCoverage = m_phiBinDeflectionCoverage;
-  m_seedfinder.deltaRMinBottomSP = m_deltaRMinBottomSP * unit<traccc::scalar>::mm;
-  m_seedfinder.deltaRMaxBottomSP = m_deltaRMaxBottomSP * unit<traccc::scalar>::mm;
-  m_seedfinder.deltaRMinTopSP = m_deltaRMinTopSP * unit<traccc::scalar>::mm;
-  m_seedfinder.deltaRMaxTopSP = m_deltaRMaxTopSP * unit<traccc::scalar>::mm;
-  m_seedfinder.rMinMiddle = m_rMinMiddle * unit<traccc::scalar>::mm;
-  m_seedfinder.rMaxMiddle = m_rMaxMiddle * unit<traccc::scalar>::mm;
-  m_seedfinder.zMinMiddle = m_zMinMiddle * unit<traccc::scalar>::mm;
-  m_seedfinder.zMaxMiddle = m_zMaxMiddle * unit<traccc::scalar>::mm;
-  m_seedfinder.interactionPointCut = m_interactionPointCut;
-  m_seedfinder.doubletDPhiCut = m_doubletDPhiCut;
-  m_seedfinder.doubletDPhiD0Max = m_doubletDPhiD0Max * unit<traccc::scalar>::mm;
-  m_seedfinder.doubletDPhiConst = m_doubletDPhiConst;
-  m_seedfinder.doubletDPhiSlope = m_doubletDPhiSlope / unit<traccc::scalar>::mm;
-  m_seedfinder.doubletDPhiCap = m_doubletDPhiCap;
-  m_seedfinder.cotThetaDiffMax = m_cotThetaDiffMax;
   m_seedfinder.setup();
 
   m_seedfilter.deltaInvHelixDiameter = m_deltaInvHelixDiameter / unit<traccc::scalar>::mm;

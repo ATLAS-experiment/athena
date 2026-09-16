@@ -27,6 +27,10 @@ def primaryPassUsesDevice(flags) -> bool:
             flags.Acts.Device.doSeeding or
             flags.Acts.Device.doTrackReconstruction)
 
+def secondaryPassUsesDevice(flags) -> bool:
+    return (flags.Tracking.ActiveConfig.isLargeD0 and
+            flags.Acts.Device.doLargeRadiusPass)
+
 def primaryPassUsesActs(flags) -> bool:
     from TrkConfig.TrkConfigFlags import ITkPrimaryPassConfig
     return flags.Tracking.ITkPrimaryPassConfig in [ITkPrimaryPassConfig.Acts, \

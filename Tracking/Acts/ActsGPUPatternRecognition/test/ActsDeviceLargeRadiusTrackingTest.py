@@ -75,7 +75,6 @@ def DeviceLargeRadiusTrackingCfg(flags, previousExtension: str) -> ComponentAccu
         InputTracccMeasurements="TracccLargeRadiusMeasurementCollection",
         InputTracccSeeds="TracccLargeRadiusStripSeedCollection",
         InputTracccMagField="TracccMagneticField",
-        InputTracccDetectorGeometry="TracccDeviceDetectorGeometry",
         OutputTracccTrackParameters="TracccLargeRadiusTrkParamCollection",
         OutputLevel=DEBUG,
     ))
@@ -93,8 +92,8 @@ def DeviceLargeRadiusTrackingCfg(flags, previousExtension: str) -> ComponentAccu
     acc.merge(ActsTrackingGeometrySvcCfg(flags))
     acc.merge(TracccTrackConverterAlgCfg(flags,
         name="TracccLargeRadiusTrackConverterAlg",
-        InputPixelClusters=pixelClusters,
-        InputStripClusters=stripClusters,
+        InputPixelClusters="ITkPixelClusters",
+        InputStripClusters="ITkStripClusters",
         InputMeasToPixelSP="TracccLargeRadiusMeasToPixelCluster",
         InputMeasToStripCl="TracccLargeRadiusMeasToStripCluster",
         InputTracks="TracccLargeRadiusTrackCollection",

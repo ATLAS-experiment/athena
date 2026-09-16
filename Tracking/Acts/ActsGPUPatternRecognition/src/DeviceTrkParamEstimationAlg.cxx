@@ -24,9 +24,6 @@ StatusCode DeviceTrkParamEstimationAlg::initialize()
   ATH_CHECK(m_outputTrkParamKey.initialize());
 
   ATH_CHECK(detStore()->retrieve(m_deviceMagField, m_inputMagFieldKey.value()));
-  if (!m_deviceDetectorObjectName.empty()) {
-    ATH_CHECK(detStore()->retrieve(m_deviceDetector, m_deviceDetectorObjectName.value()));
-  }
 
   ATH_CHECK(configureTrkParamEstimation());
 
@@ -67,10 +64,7 @@ StatusCode DeviceTrkParamEstimationAlg::execute(const EventContext& ctx) const
   auto trkparam_alg = m_trkParamAlgProviderTool->getAlgorithm(ctx, m_trkparam_config);
 
   // ---- 3. Run traccc initial track params estimation ---------------------------------------------
-  traccc::bound_track_parameters_collection_types::buffer trkparam_gpu_buffer =
-      m_deviceDetector
-          ? (*trkparam_alg)(*m_deviceDetector, *m_deviceMagField, *inputTracccMeasurements, *inputTracccSpacePoints, *inputTracccSeeds)
-          : (*trkparam_alg)(*m_deviceMagField, *inputTracccMeasurements, *inputTracccSpacePoints, *inputTracccSeeds);
+  traccc::bound_track_parameters_collection_types::buffer trkparam_gpu_buffer = (*trkparam_alg)(*m_deviceMagField, *inputTracccMeasurements, *inputTracccSpacePoints, *inputTracccSeeds);
 
   ATH_MSG_DEBUG("Reconstructed " << trkparam_alg.copy().get_size(trkparam_gpu_buffer) << " track parameters.");
 

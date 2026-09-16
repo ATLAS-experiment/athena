@@ -110,36 +110,6 @@ private:
         "maximum number of seeds per middle spacepoint"};
     Gaudi::Property<int> m_phiBinDeflectionCoverage{this, "phiBinDeflectionCoverage", 1,
         "sets of consecutive phi bins to cover full deflection of minimum pT particle"};
-    Gaudi::Property<float> m_deltaRMinBottomSP{this, "deltaRMinBottomSP", -1.f,
-        "minimum distance in r between middle and bottom SP [mm], deltaRMin if negative"};
-    Gaudi::Property<float> m_deltaRMaxBottomSP{this, "deltaRMaxBottomSP", -1.f,
-        "maximum distance in r between middle and bottom SP [mm], deltaRMax if negative"};
-    Gaudi::Property<float> m_deltaRMinTopSP{this, "deltaRMinTopSP", -1.f,
-        "minimum distance in r between middle and top SP [mm], deltaRMin if negative"};
-    Gaudi::Property<float> m_deltaRMaxTopSP{this, "deltaRMaxTopSP", -1.f,
-        "maximum distance in r between middle and top SP [mm], deltaRMax if negative"};
-    Gaudi::Property<float> m_rMinMiddle{this, "rMinMiddle", 0.f,
-        "minimum radius of the middle SP [mm]"};
-    Gaudi::Property<float> m_rMaxMiddle{this, "rMaxMiddle", 1.e9f,
-        "maximum radius of the middle SP [mm]"};
-    Gaudi::Property<float> m_zMinMiddle{this, "zMinMiddle", -1.e9f,
-        "minimum z of the middle SP [mm]"};
-    Gaudi::Property<float> m_zMaxMiddle{this, "zMaxMiddle", 1.e9f,
-        "maximum z of the middle SP [mm]"};
-    Gaudi::Property<bool> m_interactionPointCut{this, "interactionPointCut", true,
-        "enable cut on the compatibility between interaction point and doublet"};
-    Gaudi::Property<bool> m_doubletDPhiCut{this, "doubletDPhiCut", false,
-        "enable cut on the azimuthal separation of the doublet SPs"};
-    Gaudi::Property<float> m_doubletDPhiD0Max{this, "doubletDPhiD0Max", -1.f,
-        "impact parameter used in the azimuthal separation cut [mm], impactMax if negative"};
-    Gaudi::Property<float> m_doubletDPhiConst{this, "doubletDPhiConst", 0.015f,
-        "constant term of the azimuthal separation bound"};
-    Gaudi::Property<float> m_doubletDPhiSlope{this, "doubletDPhiSlope", 2.0e-4f,
-        "radial slope of the azimuthal separation bound [1/mm]"};
-    Gaudi::Property<float> m_doubletDPhiCap{this, "doubletDPhiCap", 10.f,
-        "upper limit of the impact parameter term of the azimuthal separation bound"};
-    Gaudi::Property<float> m_cotThetaDiffMax{this, "cotThetaDiffMax", 1.e9f,
-        "maximum difference of the cot(theta) of the two doublets of a triplet"};
     /// @}
 
     /// @name Spacepoint grid properties
