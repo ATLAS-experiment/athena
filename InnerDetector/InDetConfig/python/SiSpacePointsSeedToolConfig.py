@@ -35,13 +35,13 @@ def SiSpacePointsSeedMaker_HeavyIonCfg(
         kwargs.setdefault("radStep", 10)
         kwargs.setdefault("mindRadius", 10)
         kwargs.setdefault("mindRadiusTop", 10)
-    else:
-        kwargs.setdefault("maxSeedsForSpacePoint", 5)
-        kwargs.setdefault("minVRadius1", 0 * Units.mm)
-        kwargs.setdefault("maxVRadius1", 100 * Units.mm)
-        kwargs.setdefault("minVRadius2", 70 * Units.mm)
-        kwargs.setdefault("maxVRadius2", 200 * Units.mm)
-        kwargs.setdefault("minVRadius3", 0 * Units.mm)
+    # else:
+    #     kwargs.setdefault("maxSeedsForSpacePoint", 5)
+    #     kwargs.setdefault("minVRadius1", 0 * Units.mm)
+    #     kwargs.setdefault("maxVRadius1", 100 * Units.mm)
+    #     kwargs.setdefault("minVRadius2", 70 * Units.mm)
+    #     kwargs.setdefault("maxVRadius2", 200 * Units.mm)
+    #     kwargs.setdefault("minVRadius3", 0 * Units.mm)
 
     kwargs.setdefault("maxdImpact",
                       flags.Tracking.ActiveConfig.maxPrimaryImpact)

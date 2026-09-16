@@ -46,8 +46,7 @@
   </test_desc>
   <plimit fail="0.75" warn="0.95"/>
   <TDirectory name="/">
-    <TDirectory name="SquirrelPlots">
-      <TDirectory name="InDetHeavyIonLowPtTracks">
+   <TDirectory name="SquirrelPlots">
     <TDirectory name="Tracks">
      <TDirectory name="Selected">
       <TDirectory name="Parameters">
@@ -284,8 +283,6 @@
      <TDirectory name="Efficiency">
       <graph name="efficiency_vs_eta" plotopts="" type="TEfficiency"/>
       <graph name="efficiency_vs_pt" plotopts="" type="TEfficiency"/>
-      <graph name="efficiency_vs_pt_low" plotopts="" type="TEfficiency"/>
-      <graph name="efficiency_vs_lowpt" plotopts="" type="TEfficiency"/>
       <graph name="efficiency_vs_phi" plotopts="" type="TEfficiency"/>
       <graph name="efficiency_vs_d0" plotopts="" type="TEfficiency"/>
       <graph name="efficiency_vs_z0" plotopts="" type="TEfficiency"/>
@@ -320,7 +317,6 @@
       <hist1D name="vx_track_z0" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="vx_track_err_z0" plotopts="" tests="KS" type="TH1F"/>
      </TDirectory>
-    </TDirectory>
     </TDirectory>
    </TDirectory>
   </TDirectory>
