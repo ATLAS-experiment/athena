@@ -335,7 +335,8 @@ StatusCode SGImplSvc::reinitialize()    {
 //////////////////////////////////////////////////////////////////////
 StatusCode SGImplSvc::recordAddress(const std::string& skey,
                                     CxxUtils::RefCountedPtr<IOpaqueAddress> pAddress,
-                                    bool clearAddressFlag)
+                                    bool clearAddressFlag,
+                                    const std::vector<CLID>& bases)
 {
   lock_t lock (m_mutex);
   assert(0 != pAddress);
@@ -384,6 +385,14 @@ StatusCode SGImplSvc::recordAddress(const std::string& skey,
       m_pStore->addToStore(dataID, dp).ignore();
 
       addAutoSymLinks (skey, dataID, dp, 0, false);
+
+      // Add extra bases.
+      for (CLID b : bases) {
+        if (addSymLink (b, dp).isFailure()) {
+          warning() << std::format ("Can't add extra base {} for object {}/{}",
+                                    b, dataID, skey) << endmsg;
+        }
+      }
     }
   else if ((0 != dp) && (0 == dp->address()))
     // Note: intentionally not checking dp->isValidAddress()
@@ -412,7 +421,8 @@ StatusCode SGImplSvc::recordAddress(const std::string& skey,
 // add proxy (with IOpaqueAddress that will later be retrieved from P)
 //////////////////////////////////////////////////////////////////////
 StatusCode SGImplSvc::recordAddress(CxxUtils::RefCountedPtr<IOpaqueAddress> pAddress,
-                                    bool clearAddressFlag)
+                                    bool clearAddressFlag,
+                                    const std::vector<CLID>& bases)
 {
   lock_t lock (m_mutex);
   assert(0 != pAddress);
@@ -423,7 +433,7 @@ StatusCode SGImplSvc::recordAddress(CxxUtils::RefCountedPtr<IOpaqueAddress> pAdd
   if (gK.empty()) gK = (pAddress->par())[0];   // FIXME backward compatibility
   if (gK.empty()) gK = createKey(dataID);
 
-  return this->recordAddress(gK, std::move(pAddress), clearAddressFlag);
+  return this->recordAddress(gK, std::move(pAddress), clearAddressFlag, bases);
 }    
 
 DataProxy* SGImplSvc::setupProxy(const CLID& dataID, 
