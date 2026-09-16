@@ -630,8 +630,7 @@ void print_pad( const std::string& s ) {
   if ( EPS ) gPad->Print( (s+".eps").c_str() );
 }
 
-// template<typename T>
-// TH1F* makeplot( T* hreft ) {
+
 TH1F* makeplot( TObject* hreft ) {
 
   TH1F* href = 0; // (TH1F*)hreft->Clone();

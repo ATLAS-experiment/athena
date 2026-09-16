@@ -8,7 +8,7 @@
  **     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
-// cppcheck-suppress-file stlIfStrFind; cannot use C++20
+// cppcheck-suppress-file stlIfStrFind; cannot use C++20 starts_with in this standalone code
 
 #ifndef COMPUTILS_H
 #define COMPUTILS_H
