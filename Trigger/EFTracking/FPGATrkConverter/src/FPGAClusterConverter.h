@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FPGATrkConverter_FPGAClusterConverter_H
@@ -16,7 +16,6 @@
 #include "xAODInDetMeasurement/StripClusterContainer.h" 
 #include "xAODInDetMeasurement/SpacePointContainer.h"
 #include "xAODInDetMeasurement/SpacePointAuxContainer.h"
-#include "BeamSpotConditionsData/BeamSpotData.h"
 
 class AtlasDetectorID;
 class PixelID;
@@ -81,7 +80,6 @@ class FPGAClusterConverter : public extends<AthAlgTool,IFPGAClusterConverter>
     virtual StatusCode getStripsInfo(const xAOD::StripCluster& cl, float& halfStripLength, Amg::Vector3D& stripDirection, Amg::Vector3D& stripCenter) const override final;
 
     SG::ReadHandleKey<FPGATrackSimClusterCollection> m_FPGAClusterKey{this, "FPGATrackSimClusterKey","FPGAClusters","FPGATrackSim Clusters key"};
-    SG::ReadCondHandleKey< InDet::BeamSpotData > m_beamSpotKey{ this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
 
 
   private:

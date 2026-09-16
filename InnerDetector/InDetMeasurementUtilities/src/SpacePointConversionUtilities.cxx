@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetMeasurementUtilities/SpacePointConversionUtilities.h"
@@ -41,7 +41,6 @@ namespace TrackingUtilities {
   }
 
   StatusCode convertTrkToXaodStripSpacePoint(const InDet::SCT_SpacePoint& trkSpacePoint,
-					     const Amg::Vector3D& vertex,
 					     xAOD::SpacePoint& xaodSpacePoint) 
   {
     std::pair<unsigned int, unsigned int> idHashes = trkSpacePoint.elementIdList();
@@ -62,14 +61,13 @@ namespace TrackingUtilities {
     
     auto stripCenter_1 = 0.5 * (e0.first + e0.second);
     auto stripDir_1 = e0.first - e0.second;
-    auto trajDir_1 = 2. * ( stripCenter_1 - vertex);
     
     auto stripCenter_2 = 0.5 * (e1.first + e1.second);
     auto stripDir_2 = e1.first - e1.second;
     
     float topHalfStripLength = 0.5 * stripDir_1.norm();
     Eigen::Matrix<double, 3, 1> topStripDirection = - stripDir_1 / (2. * topHalfStripLength);
-    Eigen::Matrix<double, 3, 1> topStripCenter = 0.5 * trajDir_1;
+    Eigen::Matrix<double, 3, 1> topStripCenter = stripCenter_1;
     float bottomHalfStripLength = 0.5 * stripDir_2.norm();
     Eigen::Matrix<double, 3, 1> bottomStripDirection = - stripDir_2 / (2. * bottomHalfStripLength);
     Eigen::Matrix<double, 3, 1> stripCenterDistance = stripCenter_1 - stripCenter_2;
