@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import HIMode
@@ -50,6 +50,8 @@ def createCaloConfigFlags():
     ccf.addFlag("Calo.TopoCluster.addCalibrationHitDecoration",False)
     ccf.addFlag("Calo.TopoCluster.doCalibHitMoments",False)
     ccf.addFlag("Calo.TopoCluster.writeCalibHitClusterMoments",False)
+    ccf.addFlag("Calo.TopoCluster.doDigiHSTruthMoments",False)
+    ccf.addFlag("Calo.TopoCluster.writeDigiHSTruthMoments",False)
     ccf.addFlag("Calo.TopoCluster.doCellWeightCalib", False)
     ccf.addFlag("Calo.TopoCluster.addCPData",False)
     ccf.addFlag("Calo.TopoCluster.skipWriteList", lambda prevFlags:
