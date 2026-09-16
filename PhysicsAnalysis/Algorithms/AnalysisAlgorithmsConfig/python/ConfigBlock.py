@@ -367,11 +367,12 @@ class ConfigBlock(metaclass=BlockNameProcessorMeta):
 
             if 'role' in meta:
                 role = meta['role']
-                if role not in {'container', 'containerRef', 'selection'}:
+                if role not in {'container', 'containerRef', 'selection', 'region'}:
                     # container: defines a new container name
                     # containerRef: expects a container and possibly a selection, i.e. 'container' or 'container.selection'
                     # selection: defines a new selection name
-                    raise ValueError(f"meta['role'] must be one of 'container', 'containerRef', 'selection', got '{role}'")
+                    # region: specifically for event selections
+                    raise ValueError(f"meta['role'] must be one of 'container', 'containerRef', 'selection', 'region', got '{role}'")
 
         setattr (self, name, defaultValue)
         self._options[name] = ConfigBlockOption(type=type, info=info,
