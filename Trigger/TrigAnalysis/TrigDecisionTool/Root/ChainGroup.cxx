@@ -174,7 +174,7 @@ bool Trig::ChainGroup::isPassed(const TrigConf::HLTChain& chain, unsigned int co
   bool result = HLTResult(chain.chain_name(),condition);
   if (result && (condition & TrigDefs::enforceLogicalFlow)) {
     // enforceLogicalFlow
-    if (chain.level()=="EF") {
+    if (chain.has_l2() && chain.level()=="EF") {
       const std::string& nexttwo = getLowerName(chain.chain_name());
       result = result && HLTResult(nexttwo,condition);
       result = result && L1Result(getLowerName(nexttwo),condition);
@@ -182,9 +182,14 @@ bool Trig::ChainGroup::isPassed(const TrigConf::HLTChain& chain, unsigned int co
     } else if (chain.level()=="L2") {
       result = result && L1Result(getLowerName(chain.chain_name()),condition);
 
-    } else if (chain.level()=="HLT"){
+    } else if (chain.level()=="HLT" || chain.level()=="EF"){ // && !chain.has_l2() - implied
       result = result && L1Result(getLowerName(chain.chain_name()),condition);
+  
+    } else {
+
+      ATH_MSG_ERROR("Unknown chain level " << chain.level() << " cannot do 'enforceLogicalFlow'");
     }
+
   }
 
   return result;
@@ -280,7 +285,7 @@ std::vector<unsigned int> Trig::ChainGroup::isPassedBitsForEach() const
 
     unsigned int RESULT = HLTBits(ch->chain_name(), ch->level(), passExpress);
 
-    if (ch->level()=="EF") {
+    if (ch->has_l2() && ch->level()=="EF") {
       const std::string& nexttwo = getLowerName(ch->chain_name());
       RESULT = RESULT | HLTBits(nexttwo,"L2", passExpress);
       RESULT = RESULT | L1Bits(getLowerName(nexttwo));
@@ -288,8 +293,11 @@ std::vector<unsigned int> Trig::ChainGroup::isPassedBitsForEach() const
     } else if (ch->level()=="L2") {
       RESULT = RESULT | L1Bits(getLowerName(ch->chain_name()));
       
-    } else if (ch->level()=="HLT") {
+    } else if (ch->level()=="HLT" || ch->level()=="EF") { // && !ch->has_l2() - implied
       RESULT = RESULT | L1Bits(getLowerName(ch->chain_name()));
+
+    } else {
+      ATH_MSG_ERROR("Unknown chain level " << ch->level() << " cannot look at lower level results to compute isPassedBitsForEach");
     }
 
     all.push_back(RESULT);
@@ -421,7 +429,7 @@ float Trig::ChainGroup::calculatePrescale(unsigned int condition)
     
     if (condition & TrigDefs::enforceLogicalFlow) {
       // enforceLogicalFlow
-      if (ch->level()=="EF") {
+      if (ch->has_l2() && ch->level()=="EF") {
         const std::string& hltChainNameL2 = getLowerName(hltChainName);
         const std::string& l1ItemName     = getLowerName(hltChainNameL2);
         chainRESULT *= HLTPrescale(hltChainNameL2,condition);
@@ -433,7 +441,7 @@ float Trig::ChainGroup::calculatePrescale(unsigned int condition)
         chainRESULT *= L1Prescale(l1ItemName,condition);
         if(l1ItemName.find(',')!=std::string::npos) singleTrigger=false;
 
-      } else if (ch->level()=="HLT") {
+      } else if (ch->level()=="HLT" || ch->level()=="EF") { // && !ch->has_l2() - implied
         const std::string& l1ItemName       = getLowerName(hltChainName);
         chainRESULT *= L1Prescale(l1ItemName,condition);
         if(l1ItemName.find(',')!=std::string::npos and !isCorrelatedL1items(l1ItemName) ) singleTrigger=false;
