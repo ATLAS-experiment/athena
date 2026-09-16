@@ -212,6 +212,7 @@ class PartonHistoryBlock(ConfigBlock):
             info="parton-level interpretation of the MC truth record. Possible values:"
             + ", ".join(sorted(TRUTH_BRANCHES))
             + ".",
+            meta={'choices':(sorted(TRUTH_BRANCHES),1)},
         )
         # Always skip on data
         self.setOptionValue("skipOnData", True)
