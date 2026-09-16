@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # art-include: main/Athena
-# art-description: DAOD building FTAGTRIGCAL data23
+# art-description: DAOD building FTAGTRIG data23
 # art-type: grid
 # art-memory: 4096
 # art-output: *.pool.root
@@ -14,19 +14,19 @@ set -e
 Derivation_tf.py \
 --inputAODFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data23/AOD/data23_13p6TeV.00453713.physics_Main.recon.AOD.f1357/2012events.data23_13p6TeV.00453713.physics_Main.recon.AOD.f1357._lb1416._0006.1 \
 --outputDAODFile art.pool.root \
---formats FTAGTRIGCAL \
+--formats FTAGTRIG \
 --maxEvents -1 \
 
 echo "art-result: $? reco"
 
-checkFile.py DAOD_FTAGTRIGCAL.art.pool.root > checkFile_FTAGTRIGCAL.txt
+checkFile.py DAOD_FTAGTRIG.art.pool.root > checkFile_FTAGTRIG.txt
 
 echo "art-result: $?  checkfile"
 
-checkxAOD.py DAOD_FTAGTRIGCAL.art.pool.root > checkxAOD_FTAGTRIGCAL.txt
+checkxAOD.py DAOD_FTAGTRIG.art.pool.root > checkxAOD_FTAGTRIG.txt
 
 echo "art-result: $?  checkxAOD"
 
-checkIndexRefs.py DAOD_FTAGTRIGCAL.art.pool.root > checkIndexRefs_FTAGTRIGCAL.txt 2>&1
+checkIndexRefs.py DAOD_FTAGTRIG.art.pool.root > checkIndexRefs_FTAGTRIG.txt 2>&1
 
 echo "art-result: $?  checkIndexRefs"

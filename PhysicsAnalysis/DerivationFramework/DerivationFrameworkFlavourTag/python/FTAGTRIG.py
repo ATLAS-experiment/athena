@@ -1,10 +1,10 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # ====================================================================
-# DAOD_FTAGTRIGCAL.py
+# DAOD_FTAGTRIG.py
 #
 # PHYS-like DAOD format with a two-lepton skim and the b-jet trigger content
 # needed for the b-jet trigger calibration.
-# Requires the FTAGTRIGCAL flag in Derivation_tf.py
+# Requires the FTAGTRIG flag in Derivation_tf.py
 # ====================================================================
 
 from __future__ import annotations
@@ -36,7 +36,7 @@ if TYPE_CHECKING:
 
 
 def _get_lepton_skimming_expression() -> str:
-    """Return the FTAGTRIGCAL dilepton skimming expression."""
+    """Return the FTAGTRIG dilepton skimming expression."""
     muon_quality = "(0 == Muons.muonType || 1 == Muons.muonType || 4 == Muons.muonType)"
     electron_quality = "((Electrons.Loose) || (Electrons.DFCommonElectronsLHLoose))"
 
@@ -49,12 +49,12 @@ def _get_lepton_skimming_expression() -> str:
     )
 
 
-def FTAGTRIGCALKernelCfg(
+def FTAGTRIGKernelCfg(
     flags: AthConfigFlags,
-    name: str = "FTAGTRIGCALKernel",
+    name: str = "FTAGTRIGKernel",
     **kwargs: Any,
 ) -> ComponentAccumulator:
-    """Configure the derivation kernel for FTAGTRIGCAL."""
+    """Configure the derivation kernel for FTAGTRIG."""
     acc = ComponentAccumulator()
 
     acc.merge(
@@ -69,7 +69,7 @@ def FTAGTRIGCALKernelCfg(
     lepton_skimming_tool = acc.getPrimaryAndMerge(
         xAODStringSkimmingToolCfg(
             flags=flags,
-            name="FTAGTRIGCALLeptonSkimmingTool",
+            name="FTAGTRIGLeptonSkimmingTool",
             expression=_get_lepton_skimming_expression(),
         )
     )
@@ -86,12 +86,12 @@ def FTAGTRIGCALKernelCfg(
     return acc
 
 
-def FTAGTRIGCALExtraContentCfg(
+def FTAGTRIGExtraContentCfg(
     flags: AthConfigFlags,
-    name_tag: str = "FTAGTRIGCAL",
+    name_tag: str = "FTAGTRIG",
     trigger_lists_helper: TriggerListsHelper | None = None,
 ) -> ComponentAccumulator:
-    """Configure FTAGTRIGCAL-specific output additions."""
+    """Configure FTAGTRIG-specific output additions."""
     acc = ComponentAccumulator()
 
     if trigger_lists_helper is None:
@@ -173,18 +173,18 @@ def FTAGTRIGCALExtraContentCfg(
     return acc
 
 
-def FTAGTRIGCALCfg(
+def FTAGTRIGCfg(
     flags: AthConfigFlags,
-    name_tag: str = "FTAGTRIGCAL",
+    name_tag: str = "FTAGTRIG",
 ) -> ComponentAccumulator:
-    """Configure the full FTAGTRIGCAL derivation."""
+    """Configure the full FTAGTRIG derivation."""
     acc = ComponentAccumulator()
 
     trigger_lists_helper = TriggerListsHelper(flags)
     stream_name = "StreamDAOD_" + name_tag
 
     acc.merge(
-        FTAGTRIGCALKernelCfg(
+        FTAGTRIGKernelCfg(
             flags=flags,
             name=name_tag + "Kernel",
             StreamName=stream_name,
@@ -203,7 +203,7 @@ def FTAGTRIGCALCfg(
     )
 
     acc.merge(
-        FTAGTRIGCALExtraContentCfg(
+        FTAGTRIGExtraContentCfg(
             flags=flags,
             name_tag=name_tag,
             trigger_lists_helper=trigger_lists_helper,
