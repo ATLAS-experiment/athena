@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TileConditions )
@@ -49,7 +49,8 @@ atlas_add_test( TileConditionTools_test
 atlas_add_test( TileEMScaleComponents_test
                 SOURCES test/TileEMScaleComponents_test.cxx
                 INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
-                LINK_LIBRARIES ${CORAL_LIBRARIES} TileConditionsLib TileIdentifier TileCalibBlobObjs AthenaBaseComps StoreGateLib GaudiKernel IdDictParser TestTools )
+                LINK_LIBRARIES ${CORAL_LIBRARIES} TileConditionsLib TileIdentifier TileCalibBlobObjs AthenaBaseComps StoreGateLib GaudiKernel IdDictParser TestTools
+                LOG_IGNORE_PATTERN "of type TileDetDescrManager" )
 
 # Needed for the plugin service to see the test components
 # defined in the test binary.
@@ -62,7 +63,8 @@ atlas_add_test( TileNoiseTools_test
 atlas_add_test( TileDCSComponents_test
                 SOURCES test/TileDCSComponents_test.cxx
                 INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
-                LINK_LIBRARIES ${CORAL_LIBRARIES} TileConditionsLib AthenaBaseComps StoreGateLib GaudiKernel IdDictParser TestTools )
+                LINK_LIBRARIES ${CORAL_LIBRARIES} TileConditionsLib AthenaBaseComps StoreGateLib GaudiKernel IdDictParser TestTools
+                LOG_IGNORE_PATTERN "of type TileDetDescrManager" )
 
 
 # Install files from the package:

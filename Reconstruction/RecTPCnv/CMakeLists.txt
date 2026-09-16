@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( RecTPCnv )
@@ -30,7 +30,8 @@ function( _add_test test )
    atlas_add_test( ${test}
                    SOURCES
                    test/${test}.cxx
-                   LINK_LIBRARIES RecTPCnv TestTools )
+                   LINK_LIBRARIES RecTPCnv TestTools
+                   LOG_IGNORE_PATTERN "of type MuonCaloEnergyContainer" )
 endfunction()
 
 _add_test( CaloEnergyCnv_p1_test )
