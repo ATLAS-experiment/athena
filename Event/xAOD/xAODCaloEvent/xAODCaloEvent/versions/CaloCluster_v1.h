@@ -1,6 +1,6 @@
 // -*- c++ -*-
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODCALOEVENT_VERSIONS_CALOCLUSTER_V1_H
 #define XAODCALOEVENT_VERSIONS_CALOCLUSTER_V1_H
@@ -300,7 +300,11 @@ namespace xAOD {
          EM_PROBABILITY_DigiHSTruth    = 50900, ///< Classification probability to be em-like
          HAD_WEIGHT_DigiHSTruth        = 50901, ///< Hadronic weight (E_w/E_em)
          OOC_WEIGHT_DigiHSTruth        = 50902, ///< Out-of-cluster weight (E_ooc/E_w)
-         DM_WEIGHT_DigiHSTruth         = 50903  ///< Dead-material weight (E_dm/E_ooc)
+         DM_WEIGHT_DigiHSTruth         = 50903, ///< Dead-material weight (E_dm/E_ooc)
+	 MASS_DigiHSTruth              = 50831,
+	 PTD_DigiHSTruth               = 50830,
+	 SECOND_TIME_DigiHSTruth       = 50910
+
       };
 
      /// enum of possible signal states.
