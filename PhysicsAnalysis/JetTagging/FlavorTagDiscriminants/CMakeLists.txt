@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # This package is a collection of 'dual-use' tools to calculate
 # high-level flavor tagging discriminants. Because it should work both
@@ -23,10 +23,6 @@ set(FTDSource
   Root/DL2Tool.cxx
   Root/VRJetOverlapDecorator.cxx
   Root/VRJetOverlapDecoratorTool.cxx
-  Root/HbbTag.cxx
-  Root/HbbTagTool.cxx
-  Root/HbbTagConfig.cxx
-  Root/HbbGraphConfig.cxx
   Root/VRJetOverlapDecorator.cxx
   Root/TrackClassifier.cxx
 )
@@ -102,11 +98,6 @@ if (NOT XAOD_STANDALONE)
     PROPERTIES LINK_FLAGS " -Wno-maybe-uninitialized "  )
 
 endif()
-
-atlas_add_dictionary( FlavorTagDiscriminantsDict
-   FlavorTagDiscriminants/FlavorTagDiscriminantsDict.h
-   FlavorTagDiscriminants/selection.xml
-   LINK_LIBRARIES FlavorTagDiscriminants )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
