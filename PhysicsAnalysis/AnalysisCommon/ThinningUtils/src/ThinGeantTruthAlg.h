@@ -98,6 +98,13 @@ private:
     "Name of the input forward electron container"
   };
 
+  SG::ReadHandleKey<xAOD::ElectronContainer> m_lrtElectronsKey{
+    this,
+    "LRTElectronsKey",
+    "",
+    "Name of the input large-radius-tracking electron container"
+  };
+
   SG::ReadHandleKey<xAOD::PhotonContainer> m_photonsKey{
     this,
     "PhotonsKey",
@@ -107,6 +114,13 @@ private:
 
   SG::ReadHandleKey<xAOD::MuonContainer>
     m_muonsKey{ this, "MuonsKey", "Muons", "Name of the input muon container" };
+
+  SG::ReadHandleKey<xAOD::MuonContainer> m_lrtMuonsKey{
+    this,
+    "LRTMuonsKey",
+    "",
+    "Name of the input large-radius-tracking muon container"
+  };
 
   SG::ReadHandleKey<xAOD::TruthParticleContainer> m_egammaTruthKey{
     this,

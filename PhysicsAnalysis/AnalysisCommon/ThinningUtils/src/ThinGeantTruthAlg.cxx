@@ -49,8 +49,10 @@ ThinGeantTruthAlg::initialize()
   ATH_CHECK(m_truthVerticesKey.initialize(m_streamName));
   ATH_CHECK(m_electronsKey.initialize(m_keepEGamma));
   ATH_CHECK(m_fwdElectronsKey.initialize(m_keepEGamma && !m_fwdElectronsKey.empty()));
+  ATH_CHECK(m_lrtElectronsKey.initialize(m_keepEGamma && !m_lrtElectronsKey.empty()));
   ATH_CHECK(m_photonsKey.initialize(m_keepEGamma));
   ATH_CHECK(m_muonsKey.initialize(m_keepMuons));
+  ATH_CHECK(m_lrtMuonsKey.initialize(m_keepMuons && !m_lrtMuonsKey.empty()));
   ATH_CHECK(m_egammaTruthKey.initialize(m_keepEGamma));
   if (m_keepEGamma) {
     m_readDecorKeys.emplace_back(m_electronsKey, m_truthLinkDecor);
@@ -58,9 +60,15 @@ ThinGeantTruthAlg::initialize()
     if (!m_fwdElectronsKey.empty()){
       m_readDecorKeys.emplace_back(m_fwdElectronsKey, m_truthLinkDecor);
     }
+    if (!m_lrtElectronsKey.empty()){
+      m_readDecorKeys.emplace_back(m_lrtElectronsKey, m_truthLinkDecor);
+    }
   }
   if (!m_muonsKey.empty()){
     m_readDecorKeys.emplace_back(m_muonsKey, m_truthLinkDecor);
+  }
+  if (!m_lrtMuonsKey.empty()){
+    m_readDecorKeys.emplace_back(m_lrtMuonsKey, m_truthLinkDecor);
   }
   
   ATH_CHECK(m_readDecorKeys.initialize());
@@ -117,6 +125,21 @@ ThinGeantTruthAlg::execute(const EventContext& ctx) const
         }
       }
     }
+
+    // LRT muons: same ancestor protection as the standard ones
+    const xAOD::MuonContainer* lrtMuons{nullptr};
+    ATH_CHECK(SG::get(lrtMuons, m_lrtMuonsKey, ctx));
+    if (lrtMuons) {
+      for (const xAOD::Muon* muon : *lrtMuons) {
+        const xAOD::TruthParticle* truthMuon = xAOD::TruthHelpers::getTruthParticle(*muon);
+        if (truthMuon) {
+          truthMuon = xAOD::TruthHelpers::getTruthParticle(*truthMuon);
+          if (truthMuon) {
+            recoParticleTruthIndices.push_back(truthMuon->index());
+          }
+        }
+      }
+    }
   }
 
   // Electrons and photons
@@ -140,6 +163,21 @@ ThinGeantTruthAlg::execute(const EventContext& ctx) const
     if (fwdElectrons) {
       
       for (const xAOD::Electron* electron : *fwdElectrons) {
+        const xAOD::TruthParticle* truthElectron =
+          xAOD::TruthHelpers::getTruthParticle(*electron);
+        if (truthElectron) {
+          recoParticleTruthIndices.push_back(truthElectron->index());
+        }
+      }
+    }
+
+    // LRT electrons: their truth particles need the same ancestor protection as
+    // the standard ones, otherwise consumers walking the lineage (e.g.
+    // xAOD::EgammaHelpers::getBkgElectronLineage) meet thinned-away parents
+    const xAOD::ElectronContainer* lrtElectrons{nullptr};
+    ATH_CHECK(SG::get(lrtElectrons, m_lrtElectronsKey, ctx));
+    if (lrtElectrons) {
+      for (const xAOD::Electron* electron : *lrtElectrons) {
         const xAOD::TruthParticle* truthElectron =
           xAOD::TruthHelpers::getTruthParticle(*electron);
         if (truthElectron) {

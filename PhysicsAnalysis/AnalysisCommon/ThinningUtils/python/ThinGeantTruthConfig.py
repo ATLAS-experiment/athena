@@ -20,6 +20,11 @@ def ThinGeantTruthCfg(flags, name="ThinGeantTruthAlg", **kwargs):
     if flags.GeoModel.Run >= LHCPeriod.Run4:
         kwargs.setdefault("EtaMaxEGammaTruth", 4.1)
         kwargs.setdefault("FwdElectronsKey", "ForwardElectrons")
+    # keep the truth ancestry of LRT electrons, as for the standard ones
+    if flags.Tracking.doLargeD0:
+        kwargs.setdefault("LRTElectronsKey",
+                          f"LRT{flags.Egamma.Keys.Output.Electrons}")
+        kwargs.setdefault("LRTMuonsKey", "MuonsLRT")
 
     acc.addEventAlgo(CompFactory.ThinGeantTruthAlg(name, **kwargs))
     mlog.info("Geant4 Truth Thinning configured")
