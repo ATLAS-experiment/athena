@@ -9,7 +9,6 @@
 #include "MuonRecToolInterfacesR4/IFastRecoVisualizationTool.h"
 #include "MuonSpacePoint/SpacePoint.h"
 #include "MuonTrackEvent/ExpandedSector.h"
-#include "xAODMuonPrepData/UtilFunctions.h"
 
 namespace MuonR4::FastReco{
     using StIndex = GlobalPatternFinder::StIndex;
@@ -43,29 +42,27 @@ namespace MuonR4::FastReco{
         /** @brief Global position */
         Amg::Vector3D position{Amg::Vector3D::Zero()};
         /** @brief Pointer to the underlying hit */
-        const SpacePoint* sp{nullptr};
+        const SpacePoint* spacePoint{nullptr};
         /** @brief Pointer to the parent bucket */
         const SpacePointBucket* bucket{nullptr};
-        /** @brief Associated detector surface */
-        const Acts::Surface& surface{xAOD::muonSurface(sp->primaryMeasurement())};
         /** @brief Cached angular covariance [rad^2] of the hit in the phi angle */
         double phiCov{0.};
         /** @brief Strip angle when the strips are non-orthogonal */
         double stripAngle{0.};
         /** @brief Station index */
-        StIndex station{toStationIndex(sp->msSector()->chamberIndex())};
+        StIndex station{toStationIndex(spacePoint->msSector()->chamberIndex())};
         /** @brief Layer number in the sector frame */
-        uint8_t locLayer{static_cast<uint8_t>(s_spSorter.sectorLayerNum(*sp))};
+        uint8_t locLayer{static_cast<uint8_t>(s_spSorter.sectorLayerNum(*spacePoint))};
         /** @brief Is precision hit */
-        bool isPrecision{isPrecisionHit(*sp)};
+        bool isPrecision{isPrecisionHit(*spacePoint)};
         /** @brief Are the strips non-orthogonal */
         bool nonOrthogonalStrips{false};
         /** @brief Equal operator: it compares the underlying hit */
         bool operator==(const HitPayload& other) const;
         /** @brief Arrow operator: it allows to access the underlying hit */
-        const SpacePoint* operator->() const { return sp; }
+        const SpacePoint* operator->() const { return spacePoint; }
         /** @brief Dereference operator: it allows to access the underlying hit */
-        const SpacePoint& operator*() const { return *sp; }
+        const SpacePoint& operator*() const { return *spacePoint; }
     };
 
     /** @brief Structure to hold the search tree data */
@@ -78,19 +75,16 @@ namespace MuonR4::FastReco{
 
     /** @brief Small wrapper for candidate hits used to build patterns. This is needed
      *         because the global layer number cannot be defined globally, but it can be
-     *         computed given a set of hits. We store locally most frequently accessed data 
-     *         to avoid frequentpointer indirection (memory anyhow used for padding). */
+     *         computed given a set of hits. */
     struct GlobalPatternFinder::CandidateHit {
         /** @brief Pointer to the underlying hit */
         const HitPayload* hit{nullptr};
-        /** @brief Station index */
-        StIndex station{};
         /** @brief Global measurement layer number */
         uint8_t globLayer{0u};
         // Forward commonly used accessors for convenience
         const HitPayload* operator->() const { return hit; }
         const HitPayload& operator*() const { return *hit; }
-        const SpacePoint* sp() const { return hit->sp; }
+        const SpacePoint* sp() const { return hit->spacePoint; }
         bool operator==(const CandidateHit& other) const { return *hit == *other.hit; }
         bool operator==(const HitPayload& other) const { return *hit == other; }
         // Print and stream operator
@@ -126,7 +120,7 @@ namespace MuonR4::FastReco{
         explicit PatternState(const CandidateHit& seed,
                               const std::int8_t expSector,
                               const Config* cfg,
-                              const AthMessaging* logger);
+                              const Acts::Logger* logger);
         /** @brief Move constructor
             *  @param other: other pattern state to move from */
         PatternState(PatternState&& other) noexcept = default;
@@ -202,11 +196,15 @@ namespace MuonR4::FastReco{
         uint8_t nStations(const bool onlyGoodStations) const;
         /** @brief Get the buckets associated with the pattern */
         std::vector<const SpacePointBucket*> getParentBuckets() const;
+        /** @brief Return the logger */
+        const Acts::Logger& logger() const {
+            return *m_logger;
+        }
 
         /** @brief Pointer to cfg option */
         const Config* cfg{nullptr};
         /** @brief Logger */
-        const AthMessaging* logger{nullptr};
+        const Acts::Logger* m_logger{nullptr};
         /** @brief Pointer to Visual Information for pattern visualization */
         Acts::CloneablePtr<PatHitVisual> visualInfo{nullptr};
         /** @brief Last inserted hit. Needed to speed-up lookup */

@@ -4,6 +4,8 @@
 
 #include "MuonGlobalPatternFindingAlg.h"
 
+#include <ActsInterop/Logger.h>
+
 namespace MuonR4 {
 using namespace FastReco;
 using LayerIndex = GlobalPatternFinder::LayerIndex;
@@ -37,7 +39,7 @@ StatusCode MuonGlobalPatternFindingAlg::initialize() {
     }
     patCfg.visionTool = m_patVisionTool.get();
     patCfg.idHelperSvc = m_idHelperSvc.get();
-    m_globPatFinder = std::make_unique<GlobalPatternFinder>(name(), std::move(patCfg));
+    m_globPatFinder = std::make_unique<GlobalPatternFinder>(std::move(patCfg), makeActsAthenaLogger(this, name()));
 
     //Print Configuration
     ATH_MSG_DEBUG("Global Pattern Finder Configuration:\n"

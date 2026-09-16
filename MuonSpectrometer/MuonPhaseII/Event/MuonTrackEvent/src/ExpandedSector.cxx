@@ -83,6 +83,16 @@ namespace MuonR4 {
         return msSec + Acts::toUnderlying(proj);
 
     }
+    double ExpandedSector::sectorSize() const {
+        unsigned sector1 {msSector()};
+        unsigned sector2 {adjacentMsSector()};
+
+        if (sector1 == sector2) {
+            return sectorMap.sectorSize(sector1);
+        }
+        /** The overlap size is the same for small and large sectors */
+        return sectorMap.sectorWidth(sector1) - sectorMap.sectorSize(sector1);
+    }
     bool ExpandedSector::operator<(const ExpandedSector& other) const {
         return sector() < other.sector();
     }

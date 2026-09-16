@@ -10,8 +10,6 @@
 #include "MuonSpacePoint/SpacePointPerLayerSorter.h"
 #include <MuonSpacePoint/SpacePointHelpers.h>
 
-#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
-
 #include "Acts/Utilities/KDTree.hpp"
 
 namespace MuonR4::FastReco{
@@ -27,7 +25,7 @@ namespace MuonR4::FastReco{
 
     /// @note The definition and implementation of structs and classes used
     ///       in the pattern finding are contained in the GlobalPatternFinderDefs.h
-    class GlobalPatternFinder : public AthMessaging {
+    class GlobalPatternFinder {
         public:  
             /** @brief Type alias for the station index */
             using StIndex = Muon::MuonStationIndex::StIndex;
@@ -84,8 +82,9 @@ namespace MuonR4::FastReco{
             /** @brief Standard constructor
              *  @param name: Name to be printed in the messaging
              *  @param config: Configuration parameters */
-            GlobalPatternFinder(const std::string& name,
-                                Config&& config);
+            GlobalPatternFinder(Config&& config,
+                                std::unique_ptr<const Acts::Logger> logger = Acts::getDefaultLogger(
+                                    "GlobalPatternFinder", Acts::Logging::Level::INFO));
 
             /** @brief Main methods steering the pattern finding. Given the space-point containers, it creates the search tree,  
              *         builds patterns in eta, attach compatible only-phi measurements, and convert PatternStates into GlobalPatterns
@@ -213,8 +212,14 @@ namespace MuonR4::FastReco{
 
             /** @brief Spacepoint sorter per logical measurement layer */
             SpacePointPerLayerSorter m_spSorter{};
+
             /** @brief Global Pattern Recognition configuration */
             Config m_cfg;
+            /** @brief Logger for the Global Pattern Finder */
+            std::unique_ptr<const Acts::Logger> m_logger{};
+            const Acts::Logger& logger() const {
+                return *m_logger;
+            }
     };
 }
 

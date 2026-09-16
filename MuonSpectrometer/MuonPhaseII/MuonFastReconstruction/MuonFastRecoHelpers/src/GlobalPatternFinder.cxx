@@ -7,7 +7,6 @@
 
 #include "FourMomUtils/P4Helpers.h"
 #include "MuonDetDescrUtils/MuonSectorMapping.h"
-
 namespace {
     const Muon::MuonSectorMapping sectorMap{};
 
@@ -20,9 +19,10 @@ namespace {
 namespace MuonR4::FastReco {
 using namespace Acts::UnitLiterals;
 
-GlobalPatternFinder::GlobalPatternFinder(const std::string& name, Config&& config) :
-    AthMessaging{name},
-    m_cfg{config} {
+GlobalPatternFinder::GlobalPatternFinder(Config&& config,
+                                         std::unique_ptr<const Acts::Logger> logger) :
+    m_cfg{config},
+    m_logger{std::move(logger)} {
         static_assert(std::is_move_assignable_v<PatternState>);
         static_assert(std::is_move_constructible_v<PatternState>);
         static_assert(std::is_copy_assignable_v<PatternState>);
@@ -105,7 +105,7 @@ GlobalPatternFinder::findPatternsInEta(const Acts::GeometryContext& gctx,
             if (seedLayer != seedingLayer || (seed->isStraw() && !m_cfg.seedFromMdt)) {
                 continue;
             }
-            ATH_MSG_VERBOSE(__func__<<"() New seed hit "<<*seed<<", coordinates "<<seedCoords);
+            ACTS_VERBOSE(__func__<<"() New seed hit "<<*seed<<", coordinates ["<<seedCoords[0]<<", "<<seedCoords[1]<<"]");
             /** check how many existing patterns contain this hit */
             uint8_t nExistingPatterns {countPatterns(outPatterns, seed, seedCoords)};
             if (nExistingPatterns >= m_cfg.maxSeedAttempts) {
@@ -113,7 +113,7 @@ GlobalPatternFinder::findPatternsInEta(const Acts::GeometryContext& gctx,
                 outPatterns = resolveOverlaps(outPatterns, visualInfo);
                 nExistingPatterns = countPatterns(outPatterns,seed, seedCoords);
                 if (nExistingPatterns >= m_cfg.maxSeedAttempts) {
-                    ATH_MSG_VERBOSE(__func__<<"() Seed has already been used in "
+                    ACTS_VERBOSE(__func__<<"() Seed has already been used in "
                         <<static_cast<int>(nExistingPatterns)
                         <<" patterns, which is above the limit - skip this seed.");
                     continue;
@@ -133,16 +133,16 @@ GlobalPatternFinder::findPatternsInEta(const Acts::GeometryContext& gctx,
             candidateHits.clear();
             orderedSpacepoints.rangeSearchMapDiscard(selectRange, [&](const SearchTree_t::coordinate_t& /*coords*/,
                                                                       const HitPayload* hit) {
-                candidateHits.emplace_back(hit, hit->station, 0u);
+                candidateHits.emplace_back(hit, 0u);
             });
             if (candidateHits.size() < m_cfg.minTriggerLayers + m_cfg.minPrecisionLayers) {
-                ATH_MSG_VERBOSE(__func__<<"() Found "<<candidateHits.size()<<" candidate hits, below minimum required - skip seed.");
+                ACTS_VERBOSE(__func__<<"() Found "<<candidateHits.size()<<" candidate hits, below minimum required - skip seed.");
                 continue;
             }
             /** Check that the candidate hits extend at least in two layers */
             if (std::ranges::none_of(candidateHits, [this, seedLayer](const CandidateHit& c){
                     return m_cfg.idHelperSvc->layerIndex(c.sp()->identify()) != seedLayer; }) ) {
-                ATH_MSG_VERBOSE(__func__<<"() All candidates in same station layer, and we need at least two - skip seed.");
+                ACTS_VERBOSE(__func__<<"() All candidates in same station layer, and we need at least two - skip seed.");
                 continue;
             }
             /** Sort the compatible spacepoints by global logical layer */
@@ -160,15 +160,15 @@ GlobalPatternFinder::findPatternsInEta(const Acts::GeometryContext& gctx,
                     (checkLayerOrdering(*candidateHits[i - 1], *candidateHits[i]) != LayerOrdering::eSameLayer);
             }
             if (candidateHits.back().globLayer + 1u < (m_cfg.minTriggerLayers + m_cfg.minPrecisionLayers)) {
-                ATH_MSG_VERBOSE(__func__<<"() Found "<<candidateHits.size()<<" candidate hits on "
+                ACTS_VERBOSE(__func__<<"() Found "<<candidateHits.size()<<" candidate hits on "
                     <<static_cast<int>(candidateHits.back().globLayer + 1u)
                     <<" layers, below the minimum required - skip this seed.");
                 continue;
             }
-            if (msgLvl(MSG::VERBOSE)) {
-                ATH_MSG_VERBOSE(__func__<<"() Found "<< candidateHits.size()<<" candidate hits: ");
+            if (m_logger->level() <= Acts::Logging::Level::VERBOSE) {
+                ACTS_VERBOSE(__func__<<"() Found "<< candidateHits.size()<<" candidate hits: ");
                 for (const auto& c : candidateHits) {
-                    ATH_MSG_VERBOSE(__func__<<"() \t**"<<c);
+                    ACTS_VERBOSE(__func__<<"() \t**"<<c);
                 }
             }
 
@@ -178,10 +178,10 @@ GlobalPatternFinder::findPatternsInEta(const Acts::GeometryContext& gctx,
             assert(seedItr != candidateHits.end());
             const CandidateHit& seedCand {*seedItr};
 
-            PatternState patternSeed{seedCand, static_cast<std::int8_t>(seedCoords[sectorIdx]), &m_cfg, this};
+            PatternState patternSeed{seedCand, static_cast<std::int8_t>(seedCoords[sectorIdx]), &m_cfg, m_logger.get()};
             if (visualInfo) {
                 patternSeed.visualInfo = std::make_unique<PatHitVisual>(
-                    seed.sp, seedCoords[thetaIdx] - thetaHalfWindow, seedCoords[thetaIdx] + thetaHalfWindow);
+                    seed.spacePoint, seedCoords[thetaIdx] - thetaHalfWindow, seedCoords[thetaIdx] + thetaHalfWindow);
             }
             
             /** @brief Helper function to extend a given pattern with a set of hits. We can have pattern
@@ -216,12 +216,12 @@ GlobalPatternFinder::findPatternsInEta(const Acts::GeometryContext& gctx,
             PatternStateVec forwardExtended {processHitRange(std::next(seedItr), candidateHits.end(), std::move(patternSeed))};
 
             /** When inverting the search direction, update last inserted hit and line anchor */
-            ATH_MSG_VERBOSE(__func__<<"() Finished forward search, found "<<forwardExtended.size()<<" forward patterns, start backward search.");
+            ACTS_VERBOSE(__func__<<"() Finished forward search, found "<<forwardExtended.size()<<" forward patterns, start backward search.");
             PatternStateVec backwardExtended{};
             backwardExtended.reserve(2*forwardExtended.size());
             
             for (PatternState& pat : forwardExtended) {
-                ATH_MSG_VERBOSE(__func__<<"() Start backward search for pattern "<<detailed(pat));
+                ACTS_VERBOSE(__func__<<"() Start backward search for pattern "<<detailed(pat));
                 pat.moveLineAnchorHit(seedCand);
                 pat.lastInsertedHit = seedCand;
 
@@ -242,13 +242,13 @@ GlobalPatternFinder::findPatternsInEta(const Acts::GeometryContext& gctx,
                     addVisualInfo(pat, PatHitVisual::PatternStatus::eFailed, visualInfo);
                     continue;
                 }
-                ATH_MSG_VERBOSE(__func__<<"() Add new pattern "<<detailed(pat));
+                ACTS_VERBOSE(__func__<<"() Add new pattern "<<detailed(pat));
                 pat.isFinalized = true;
                 outPatterns.push_back(std::move(pat));
             }
         }
     }
-    ATH_MSG_VERBOSE(__func__<<"() Found in total "<<outPatterns.size()<<" patterns in eta before overlap removal");
+    ACTS_VERBOSE(__func__<<"() Found in total "<<outPatterns.size()<<" patterns in eta before overlap removal");
     return resolveOverlaps(outPatterns, visualInfo);
 }
 void GlobalPatternFinder::extendPatterns(const Acts::GeometryContext& gctx,
@@ -258,7 +258,7 @@ void GlobalPatternFinder::extendPatterns(const Acts::GeometryContext& gctx,
                                          const Amg::Vector3D& beamSpot,
                                          std::vector<PatHitVisual>* visualInfo) const {
     endPatterns.clear();
-    ATH_MSG_VERBOSE(__func__<<"() *** Test "<<testHit<<" against " << startPatterns.size() << " active patterns.");
+    ACTS_VERBOSE(__func__<<"() *** Test "<<testHit<<" against " << startPatterns.size() << " active patterns.");
 
     // Compute the minimum number of missed layer hits among the active patterns, 
     // to use as reference for pruning patterns with too many missed layers. 
@@ -281,9 +281,9 @@ void GlobalPatternFinder::extendPatterns(const Acts::GeometryContext& gctx,
             continue;
         }
         /** Check the pattern has not already missed too many layers compared to other patterns. */
-        if (pat.lastInsertedHit.station == testHit.station && 
+        if (pat.lastInsertedHit->station == testHit->station && 
             missedLayers(pat) > std::max(m_cfg.maxMissLayersInStation, minMissedLayers)) {
-            ATH_MSG_VERBOSE(__func__<<"() Pattern " << detailed(pat) << "\nhas missed " << (int)missedLayers(pat) 
+            ACTS_VERBOSE(__func__<<"() Pattern " << detailed(pat) << "\nhas missed " << (int)missedLayers(pat) 
                                     << " layer hits, above the max allowed - abort pattern.");
             addVisualInfo(pat, PatHitVisual::PatternStatus::eFailed, visualInfo);
             continue;
@@ -296,11 +296,11 @@ void GlobalPatternFinder::extendPatterns(const Acts::GeometryContext& gctx,
                 if (p.lastInsertedHit != pat.lastInsertedHit || p.isOverlap) return false;
 
                 if (isBetter(pat, p)) {
-                    ATH_MSG_VERBOSE("extendPatterns() Pruning: "<<detailed(pat)<<"\nis BETTER than "<<detailed(p));
+                    ACTS_VERBOSE("extendPatterns() Pruning: "<<detailed(pat)<<"\nis BETTER than "<<detailed(p));
                     p.isOverlap = true;
                     return false;
                 }
-                ATH_MSG_VERBOSE("extendPatterns() Pruning: "<<detailed(p)<<"\nis BETTER than "<<detailed(pat));
+                ACTS_VERBOSE("extendPatterns() Pruning: "<<detailed(p)<<"\nis BETTER than "<<detailed(pat));
                 return true; }) != startPatterns.end()) {
             addVisualInfo(pat, PatHitVisual::PatternStatus::eFailed, visualInfo);
             continue;
@@ -313,14 +313,14 @@ void GlobalPatternFinder::extendPatterns(const Acts::GeometryContext& gctx,
                 const bool lowConfidenceRes {resSigma > m_cfg.lowConfidenceResSigma && 
                                              residual / resSigma > 2.};
                 if (lowConfidenceRes) {
-                    ATH_MSG_VERBOSE(__func__<<"() Low-confidence hit: residual pull "<<residual / resSigma);
+                    ACTS_VERBOSE(__func__<<"() Low-confidence hit: residual pull "<<residual / resSigma);
                     /** If hit is compatible but with poor confidence, we create both a pattern with the hit and a pattern without the hit,
                      *  to keep also the possibility of rejecting this hit in the next iterations. First we make sure that the low-confidence
                      *  pattern is original, i.e. accumulating not seen hits */
                     if (std::ranges::any_of(endPatterns, [&testHit, &pat](const PatternState& p) {
                             return p.lastInsertedHit == testHit && 
                                    (p.prevLayerHit == pat.lastInsertedHit || p.nBendingLayers() > (pat.nBendingLayers() + 1u)); })) {
-                        ATH_MSG_VERBOSE(__func__<<"() Forking leads to existing pattern - reject.");
+                        ACTS_VERBOSE(__func__<<"() Forking leads to existing pattern - reject.");
                         break;
                     }
                     /** Add the new pattern to the list of next patterns */
@@ -332,7 +332,7 @@ void GlobalPatternFinder::extendPatterns(const Acts::GeometryContext& gctx,
                     }
                     break;
                 }
-                ATH_MSG_VERBOSE(__func__<<"() Hit compatible - add to pattern. Residual pull "<<residual / resSigma);
+                ACTS_VERBOSE(__func__<<"() Hit compatible - add to pattern. Residual pull "<<residual / resSigma);
                 pat.addHit(testHit, residual, resSigma);
                 break;
             }
@@ -340,11 +340,11 @@ void GlobalPatternFinder::extendPatterns(const Acts::GeometryContext& gctx,
                 /* Check first if the branched pattern already exists*/
                 if (std::ranges::any_of(endPatterns, [&testHit, &pat](const PatternState& p) {
                         return p.lastInsertedHit == testHit && p.prevLayerHit == pat.prevLayerHit; })) {
-                    ATH_MSG_VERBOSE(__func__<<"() Hit compatible & on same layer of last added hit - branched pattern already exists.");
+                    ACTS_VERBOSE(__func__<<"() Hit compatible & on same layer of last added hit - branched pattern already exists.");
                     break;
                 }
                 /** Branch the pattern: we clone it and overwrite the existing hit with the test hit */
-                ATH_MSG_VERBOSE(__func__<<"() Hit compatible & on same layer of last added hit - branch pattern.");
+                ACTS_VERBOSE(__func__<<"() Hit compatible & on same layer of last added hit - branch pattern.");
                 endPatterns.push_back(pat);
                 endPatterns.back().overWriteHit(testHit, residual, resSigma);
             
@@ -355,7 +355,7 @@ void GlobalPatternFinder::extendPatterns(const Acts::GeometryContext& gctx,
                 break;
             }
             case LineTestDecision::eRejectHit: {
-                ATH_MSG_VERBOSE(__func__<<"() Hit is not compatible with the pattern - reject hit.");
+                ACTS_VERBOSE(__func__<<"() Hit is not compatible with the pattern - reject hit.");
                 if (visualInfo) {
                     pat.visualInfo->discardedHits.push_back(testHit.sp());
                 }
@@ -372,12 +372,12 @@ bool GlobalPatternFinder::passPatternCuts(const PatternState& pat) const {
         pat.nPrecisionLayers < m_cfg.minPrecisionLayers ||
         std::ranges::count_if(pat.hitsPerStation, 
             [this](const auto& hits) { return hits.size() >= m_cfg.minStationLayers; }) < 2) {
-        ATH_MSG_VERBOSE(__func__<<"() Pattern " << detailed(pat) << "\ndoes not meet minimum layer requirements - reject.");
+        ACTS_VERBOSE(__func__<<"() Pattern " << detailed(pat) << "\ndoes not meet minimum layer requirements - reject.");
         return false;
     }
     /** Check requirement on the residual */
     if (pat.meanNormResidual2 > m_cfg.meanNormRes2Cut) {
-        ATH_MSG_VERBOSE(__func__<<"() Pattern " << detailed(pat) << "\ndoes not meet the mean norm residual2 cut - reject.");
+        ACTS_VERBOSE(__func__<<"() Pattern " << detailed(pat) << "\ndoes not meet the mean norm residual2 cut - reject.");
         return false;
     }
     return true;
@@ -385,7 +385,7 @@ bool GlobalPatternFinder::passPatternCuts(const PatternState& pat) const {
 GlobalPatternFinder::PatternStateVec
 GlobalPatternFinder::resolveOverlaps(PatternStateVec& toResolve,
                                      std::vector<PatHitVisual>* visualInfo) const {
-    ATH_MSG_VERBOSE(__func__<<"() Resolving overlaps among "<<toResolve.size()<<" patterns.");
+    ACTS_VERBOSE(__func__<<"() Resolving overlaps among "<<toResolve.size()<<" patterns.");
     PatternStateVec outputPatterns{};
     outputPatterns.reserve(toResolve.size());
     /** Check if two patterns overlap in space */
@@ -456,11 +456,11 @@ GlobalPatternFinder::resolveOverlaps(PatternStateVec& toResolve,
                 continue;
             }
             if (isBetterOverlap(*it, *jt)) {
-                ATH_MSG_VERBOSE(__func__<<"() Pattern "<<detailed(*it)<<"\nis BETTER than "<<detailed(*jt));
+                ACTS_VERBOSE(__func__<<"() Pattern "<<detailed(*it)<<"\nis BETTER than "<<detailed(*jt));
                 jt->isOverlap = true;
             } else {
                 it->isOverlap = true;
-                ATH_MSG_VERBOSE(__func__<<"() Pattern "<<detailed(*jt)<<"\nis BETTER than "<<detailed(*it));
+                ACTS_VERBOSE(__func__<<"() Pattern "<<detailed(*jt)<<"\nis BETTER than "<<detailed(*it));
                 break;
             }
         }
@@ -471,7 +471,7 @@ GlobalPatternFinder::resolveOverlaps(PatternStateVec& toResolve,
             addVisualInfo(*it, PatHitVisual::PatternStatus::eOverlap, visualInfo);
         }
     }
-    ATH_MSG_VERBOSE(__func__<<"() Patterns surviving overlap removal: "<< outputPatterns.size());
+    ACTS_VERBOSE(__func__<<"() Patterns surviving overlap removal: "<< outputPatterns.size());
     return outputPatterns;
 }
 void GlobalPatternFinder::addPhiOnlyHits(const ActsTrk::GeometryContext& gctx,
@@ -512,7 +512,7 @@ void GlobalPatternFinder::addPhiOnlyHits(const ActsTrk::GeometryContext& gctx,
     survivingPatterns.reserve(patterns.size());
     for (PatternState& pat : patterns) {
         /** We look for phi-only hits in the buckets associated with the pattern */
-        ATH_MSG_VERBOSE(__func__<<"() Search for phi-only hits for pattern: " << brief(pat));
+        ACTS_VERBOSE(__func__<<"() Search for phi-only hits for pattern: " << brief(pat));
 
         std::optional<StIndex> patterLineStation{std::nullopt};
 
@@ -530,7 +530,7 @@ void GlobalPatternFinder::addPhiOnlyHits(const ActsTrk::GeometryContext& gctx,
                 if (hit->measuresEta()){
                     continue;
                 }
-                ATH_MSG_VERBOSE(__func__<<"() *** Test phi-only hit "<<*hit);
+                ACTS_VERBOSE(__func__<<"() *** Test phi-only hit "<<*hit);
                 HitPayload newHit {gctx.context(), hit.get(), bucket, localToGlobal};
 
                 /** Reject hits from a layer that already contains a phi hit */
@@ -547,18 +547,18 @@ void GlobalPatternFinder::addPhiOnlyHits(const ActsTrk::GeometryContext& gctx,
                                hit->msSector() == h->msSector() && 
                                newHit.locLayer == h.locLayer; 
                         })) {
-                    ATH_MSG_VERBOSE(__func__<<"() The pattern already has a phi hit in the same layer - skip hit.");
+                    ACTS_VERBOSE(__func__<<"() The pattern already has a phi hit in the same layer - skip hit.");
                     continue;
                 }
                 
                 if (!pat.isPhiCompatible(newHit)) {
-                    ATH_MSG_VERBOSE(__func__<<"() Phi-only hit not compatible");
+                    ACTS_VERBOSE(__func__<<"() Phi-only hit not compatible");
                     continue;
                 }
 
                 if (!patterLineStation || *patterLineStation != station) {
                     if (!computePatternLineInStation(pat, station)) {
-                        ATH_MSG_VERBOSE(__func__<<"() Invalid projection model for station "<<station<<" - skip hit.");
+                        ACTS_VERBOSE(__func__<<"() Invalid projection model for station "<<station<<" - skip hit.");
                         continue;
                     }
                     patterLineStation = station;
@@ -577,12 +577,12 @@ void GlobalPatternFinder::addPhiOnlyHits(const ActsTrk::GeometryContext& gctx,
                     pat.linePos, pat.lineDir, stripLow, stripDirOnPlane).pathLength()};
                 const double stripProjLength {(stripHigh - stripLow).mag()};
 
-                ATH_MSG_VERBOSE(__func__<<"() Intersect distance from lower strip edge: "
+                ACTS_VERBOSE(__func__<<"() Intersect distance from lower strip edge: "
                     <<stripIntersect<<", proj strip length: "<< (stripHigh - stripLow).mag());
                 
                 constexpr double margin {10 * Gaudi::Units::mm};
                 if (stripIntersect < -margin || stripIntersect > (stripProjLength + margin)) {
-                    ATH_MSG_VERBOSE(__func__<<"() The pattern falls outside the test hit strip in eta - skip hit.");
+                    ACTS_VERBOSE(__func__<<"() The pattern falls outside the test hit strip in eta - skip hit.");
                     continue;
                 }
                 pat.phiOnlyHits.push_back(std::move(newHit));
@@ -591,7 +591,7 @@ void GlobalPatternFinder::addPhiOnlyHits(const ActsTrk::GeometryContext& gctx,
             }
         }
         if (pat.nPhiLayers < m_cfg.minPhiLayers) {
-            ATH_MSG_VERBOSE(__func__<<"() Pattern "<<detailed(pat)
+            ACTS_VERBOSE(__func__<<"() Pattern "<<detailed(pat)
                 <<" has only "<<static_cast<int>(pat.nPhiLayers)
                 <<" phi layers, below the minimum required - reject this pattern.");
             continue;
@@ -621,7 +621,7 @@ GlobalPattern GlobalPatternFinder::convertToPattern(const PatternState& cache) c
 
     /** Add phi-only hits */
     for (const HitPayload& hit : cache.phiOnlyHits) {
-        hitPerStation[static_cast<StIndex>(hit.station)].push_back(hit.sp);
+        hitPerStation[static_cast<StIndex>(hit.station)].push_back(hit.spacePoint);
     }
     GlobalPattern pattern{std::move(hitPerStation), std::move(parentBuckets)};
     pattern.setTheta(cache.patTheta);
@@ -676,7 +676,7 @@ GlobalPatternFinder::constructTree(const ActsTrk::GeometryContext& gctx,
          
                 hitPayloads.emplace_back(gctx.context(), hit.get(), bucket, localToGlobal);
   
-                if (msgLvl(MSG::VERBOSE)) {
+                if (m_logger->level() <= Acts::Logging::Level::VERBOSE) {
                     const HitPayload& newHit {hitPayloads.back()};
                     std::ostringstream oss{};
                     oss<<__func__<<"() Building hit from "<<*hit<<std::endl<<"PhiCov: "<<newHit.phiCov
@@ -686,7 +686,7 @@ GlobalPatternFinder::constructTree(const ActsTrk::GeometryContext& gctx,
                     } else {
                         oss<<"orthogonalStrips: "<<!newHit.nonOrthogonalStrips;
                     }
-                    ATH_MSG_VERBOSE(oss.str());
+                    ACTS_VERBOSE(oss.str());
                 }
             }
         }
@@ -698,7 +698,7 @@ GlobalPatternFinder::constructTree(const ActsTrk::GeometryContext& gctx,
     uint8_t msSector = hitPayloads.front()->msSector()->sector();
     const SpacePointBucket* currentBucket = hitPayloads.front().bucket;
     for (const HitPayload& hit : hitPayloads) {
-        ATH_MSG_VERBOSE(__func__<<"() Spacepoint: " << *hit);
+        ACTS_VERBOSE(__func__<<"() Spacepoint: " << *hit);
         const Amg::Vector3D& pos {hit.position};
         const ExpandedSector hitExpSector {pos.phi()};
         if (hit.bucket != currentBucket) {
@@ -712,7 +712,7 @@ GlobalPatternFinder::constructTree(const ActsTrk::GeometryContext& gctx,
             /// Check whether the hit belongs to the left or right sector as well
             const ExpandedSector expSect {msSector, proj};
             if (proj != SectorProjector::center && hit->measuresPhi() && expSect != hitExpSector) {
-                ATH_MSG_VERBOSE("addHitToTree() Hit with "<<hitExpSector<<" is not compatible with "<<expSect);
+                ACTS_VERBOSE("addHitToTree() Hit with "<<hitExpSector<<" is not compatible with "<<expSect);
                 continue;
             }
 
@@ -727,13 +727,14 @@ GlobalPatternFinder::constructTree(const ActsTrk::GeometryContext& gctx,
             coords[Acts::toUnderlying(SeedCoords::eTheta)] = atan2(projR, pos.z());
             coords[Acts::toUnderlying(SeedCoords::eSector)] = expSect.sector();
 
-            ATH_MSG_VERBOSE("addHitToTree() Add hit: Z: " << pos.z() << ", R: " << pos.perp() 
+            ACTS_VERBOSE("addHitToTree() Add hit: Z: " << pos.z() << ", R: " << pos.perp() 
                 <<", ProjR: "<<projR<< ", Phi: "<< inDeg(pos.phi()) 
-                <<", SectorPhi: "<< inDeg(expSect.phi())<<" and coordinates "<<coords<<" to search tree");
+                <<", SectorPhi: "<< inDeg(expSect.phi())<<" and coordinates ["
+                <<coords[0]<<", "<<coords[1]<<"] to search tree");
             treeData.emplace_back(std::move(coords), &hit);
         }  
     }
-    ATH_MSG_VERBOSE(__func__<<"() Create a new tree with "<<treeData.size()
+    ACTS_VERBOSE(__func__<<"() Create a new tree with "<<treeData.size()
         <<" entries and "<<hitPayloads.size()<<" hits.");
     return SearchTreeData{std::move(hitPayloads), SearchTree_t{std::move(treeData)}};
 }

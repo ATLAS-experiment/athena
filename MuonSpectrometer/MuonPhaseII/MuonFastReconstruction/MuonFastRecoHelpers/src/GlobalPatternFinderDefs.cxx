@@ -6,14 +6,10 @@
 
 #include "MuonDetDescrUtils/MuonSectorMapping.h"
 #include "FourMomUtils/P4Helpers.h"
+#include "xAODMuonPrepData/UtilFunctions.h"
+#include "Acts/Utilities/Logger.hpp"
 
-/// Macro printing verbose messages
-#define PRINT_VERBOSE( xmsg )                                      \
-    do {                                                           \
-        if( logger->msgLvl( MSG::VERBOSE ) ) {                     \
-            logger->msg( MSG::VERBOSE ) << xmsg << endmsg;         \
-        }                                                          \
-   } while( 0 ) 
+
 
 namespace {
     const Muon::MuonSectorMapping sectorMap{};
@@ -24,17 +20,6 @@ namespace {
     Amg::Vector3D phiGradient(const Amg::Vector3D& pos) {
         return Amg::Vector3D{-pos.y(), pos.x(), 0.} / pos.perp2();
     }
-    /** @brief Helper functon to compute the size of an expanded sector */
-    double expandedSectorSize (const MuonR4::ExpandedSector& sect) {
-        unsigned sector1 {sect.msSector()};
-        unsigned sector2 {sect.adjacentMsSector()};
-
-        if (sector1 == sector2) {
-            return sectorMap.sectorSize(sector1);
-        }
-        /** The overlap size is the same for small and large sectors */
-        return sectorMap.sectorWidth(sector1) - sectorMap.sectorSize(sector1);
-    };
     /** @brief Convert an angle from radians to degrees */
     constexpr double inDeg(double angle) {
         return angle / Gaudi::Units::deg;
@@ -45,11 +30,11 @@ namespace MuonR4::FastReco {
     using namespace Acts::UnitLiterals;
     
     GlobalPatternFinder::HitPayload::HitPayload(const Acts::GeometryContext& gctx,
-                                                const SpacePoint* spacepoint,
+                                                const SpacePoint* sp,
                                                 const SpacePointBucket* bucket,
                                                 const Amg::Transform3D& localToGlobal)
-        : position{localToGlobal * spacepoint->localPosition()}, 
-          sp{spacepoint}, bucket{bucket} {
+        : position{localToGlobal * sp->localPosition()}, 
+          spacePoint{sp}, bucket{bucket} {
 
         using CovIdx = SpacePoint::CovIdx;
         
@@ -61,7 +46,7 @@ namespace MuonR4::FastReco {
                 Acts::square(phiMeasDir.dot(phiGradient(position)));
             return;
         }
-        const auto& surfLinearTrf = surface.localToGlobalTransform(gctx).linear();
+        const auto& surfLinearTrf = xAOD::muonSurface(sp->primaryMeasurement()).localToGlobalTransform(gctx).linear();
         
         if (sp->isStraw()) {
             // Remember that for straw hits, the x component of secondaryMeasDir is repurposed 
@@ -104,9 +89,10 @@ namespace MuonR4::FastReco {
         }
     }
     Amg::Vector3D GlobalPatternFinder::HitPayload::sensorDir(const Acts::GeometryContext& gctx) const {
-        const auto& surfLinearTrf = surface.localToGlobalTransform(gctx).linear();
+        const auto& surfLinearTrf = 
+            xAOD::muonSurface(spacePoint->primaryMeasurement()).localToGlobalTransform(gctx).linear();
         
-        if (sp->isStraw()) {
+        if (spacePoint->isStraw()) {
             return surfLinearTrf.col(Amg::z);
         } else {
             if (nonOrthogonalStrips) {
@@ -125,27 +111,27 @@ namespace MuonR4::FastReco {
         /** If the hit is not projected, the contraction vector is the residual direction */
         assert(isProjected || std::abs(contractionVector.mag() - 1.0) < Acts::s_epsilon);
         
-        if (sp->isStraw()) {
+        if (spacePoint->isStraw()) {
             const double discCov {stripAngle};
             if (!isProjected) {
                 assert(sp->measuresPhi());
                 const double vDotRsq {Acts::square(sensorDir(gctx).dot(contractionVector))};
                 return discCov * (1 - vDotRsq) + 
-                       vDotRsq * sp->covariance()[Acts::toUnderlying(CovIdx::phiCov)];
+                       vDotRsq * spacePoint->covariance()[Acts::toUnderlying(CovIdx::phiCov)];
             }
             /** If the hit is projected, the contraction vector is J^T * residualDirection,
             *  where J is the Jacobian of the projection. The phi measurement if available is
             *  cancelled by the projection. */
             return discCov * contractionVector.mag2();
 
-        } else if (sp->measuresEta()) {
-            const auto& surfLinearTrf = surface.localToGlobalTransform(gctx).linear();
+        } else if (spacePoint->measuresEta()) {
+            const auto& surfLinearTrf = xAOD::muonSurface(spacePoint->primaryMeasurement()).localToGlobalTransform(gctx).linear();
             /** @brief Helper method to compute the contribution of a 1D measurement to the residual variance */
             auto oneDimContribution = [&](CovIdx idx, const Amg::Vector3D& measDir) -> double {
-                return sp->covariance()[Acts::toUnderlying(idx)] * 
+                return spacePoint->covariance()[Acts::toUnderlying(idx)] * 
                     Acts::square(measDir.dot(contractionVector));
             };
-            if (sp->measuresPhi()) {
+            if (spacePoint->measuresPhi()) {
                 const Amg::Vector3D etaMeasDir {nonOrthogonalStrips 
                     ? sensorDir(gctx).cross(surfLinearTrf.col(Amg::z))
                     : surfLinearTrf.col(Amg::x)};
@@ -160,15 +146,15 @@ namespace MuonR4::FastReco {
         }
     }
     bool GlobalPatternFinder::HitPayload::operator==(const HitPayload& other) const {
-        return sp == other.sp;
+        return spacePoint == other.spacePoint;
     }
 
     GlobalPatternFinder::PatternState::PatternState(const CandidateHit& seed,
                                                     const std::int8_t expSector,          
                                                     const Config* cfg,
-                                                    const AthMessaging* logger)
+                                                    const Acts::Logger* logger)
             : cfg{cfg},
-              logger{logger},
+              m_logger{logger},
               lastInsertedHit{seed},
               prevLayerHit{seed},
               lineAnchorHit{seed},
@@ -176,7 +162,7 @@ namespace MuonR4::FastReco {
               expSect{ExpandedSector{expSector}} {
                 
         /** Add the new hit */
-        hitsPerStation[Acts::toUnderlying(seed.station)].push_back(seed);
+        hitsPerStation[Acts::toUnderlying(seed->station)].push_back(seed);
 
         /** Update the hit counts */
         if (seed->isPrecision) nPrecisionLayers++;
@@ -192,7 +178,7 @@ namespace MuonR4::FastReco {
                                                                  const Amg::Vector3D& beamSpot) {
 
         if (testHit.sp()->measuresPhi() && !isPhiCompatible(*testHit)) {
-            PRINT_VERBOSE(__func__<<"() Test hit phi "<<testHit->position.phi()
+            ACTS_VERBOSE(__func__<<"() Test hit phi "<<testHit->position.phi()
                 <<" not compatible with "<<brief(*this));
             return LineTestRes{};
         }
@@ -205,8 +191,8 @@ namespace MuonR4::FastReco {
             double accWindow {cfg->nResidualSigma * res.sigma};
             /** Loosen the window when we use the beamspot or when we are looking for hits in a new station, as
              *  the straight line approximation becomes less accurate on large distances. TO DO: investigate this further */
-            if (useBeamspot || testHit->station != lastInsertedHit.station ||
-                (testHit->station != prevLayerHit.station && testHit.globLayer == lastInsertedHit.globLayer)) {
+            if (useBeamspot || testHit->station != lastInsertedHit->station ||
+                (testHit->station != prevLayerHit->station && testHit.globLayer == lastInsertedHit.globLayer)) {
                 accWindow *= 2.;
             }
             if (res.residual < accWindow) {
@@ -224,11 +210,11 @@ namespace MuonR4::FastReco {
             return makeResult(LineTestDecision::eAddHit);
         }
         if (testHit == lastInsertedHit) {
-            PRINT_VERBOSE(__func__<<"() Test hit is the same as last inserted hit - reject.");
+            ACTS_VERBOSE(__func__<<"() Test hit is the same as last inserted hit - reject.");
             return LineTestRes{};
         }
         if (lineAnchorHit.globLayer == lastInsertedHit.globLayer) {
-            PRINT_VERBOSE(__func__<<"() Test hit on same layer as seed with no prior hits - reject.");
+            ACTS_VERBOSE(__func__<<"() Test hit on same layer as seed with no prior hits - reject.");
             return LineTestRes{};
         }
         return makeResult(LineTestDecision::eBranchPattern);
@@ -244,7 +230,7 @@ namespace MuonR4::FastReco {
         // Find first the closest station to the reference station among the pattern stations
         const auto& closestStIt = std::ranges::min_element(hitsPerStation, std::ranges::less{},
             [&refHit](const auto& hits){
-                if (hits.empty() || hits.front().station == refHit.station) {
+                if (hits.empty() || hits.front()->station == refHit->station) {
                     return std::numeric_limits<int>::max();
                 }
                 return std::abs(hits.front().globLayer - refHit.globLayer);
@@ -267,7 +253,7 @@ namespace MuonR4::FastReco {
         leverArm = d.mag();
         
         /** Check whether we have to use the beamspot instead of the anchor hit to draw the line. */
-        useBeamspot = (lastInsertedHit.station == lineAnchorHit.station) && 
+        useBeamspot = (lastInsertedHit->station == lineAnchorHit->station) && 
                     leverArm < cfg->minHitDistance4Line;
         if (useBeamspot) {
             linePos = beamSpot;
@@ -279,7 +265,7 @@ namespace MuonR4::FastReco {
         lineDir = d / leverArm;
         needLineUpdate = false;
 
-        PRINT_VERBOSE(__func__<<"() Updated --> linePos R/z/theta: "<<linePos.perp()<<" / "<<linePos.z()
+        ACTS_VERBOSE(__func__<<"() Updated --> linePos R/z/theta: "<<linePos.perp()<<" / "<<linePos.z()
             <<" / "<<inDeg(linePos.theta())<<", lineDir theta: "<<inDeg(lineDir.theta())
             <<", LeverArm: "<<leverArm<<", Use beamspot: "<<useBeamspot);
     }
@@ -366,7 +352,7 @@ namespace MuonR4::FastReco {
       
         res.sigma = std::sqrt(residualCovAcc + Acts::square(phiPlaneDerivativeAcc) * patPhiCov);
 
-        PRINT_VERBOSE(__func__<<"() "<< brief(*this)<<"\nUse beamspot: "<<useBeamspot
+        ACTS_VERBOSE(__func__<<"() "<< brief(*this)<<"\nUse beamspot: "<<useBeamspot
             <<", alpha: "<<alpha<<", Residual: "<<res.residual<<" +- "<<res.sigma
             <<", linePos R/theta: "<<linePos.perp()<<" / "<<inDeg(linePos.theta())
             <<", lineDir theta: "<<inDeg(lineDir.theta())
@@ -387,9 +373,9 @@ namespace MuonR4::FastReco {
              *  with a standard deviation based on the expanded sector size. */
             patPhi = sectorMap.sectorOverlapPhi(expSect.msSector(), 
                                                 expSect.adjacentMsSector());
-            patPhiCov = Acts::square(expandedSectorSize(expSect)) / 3.;
+            patPhiCov = Acts::square(expSect.sectorSize()) / 3.;
             bendPlaneNorm = Acts::makeDirectionFromPhiTheta(patPhi + 90._degree, 90._degree);
-            PRINT_VERBOSE(__func__<<"() No phi hits in the pattern, set pattern phi to "
+            ACTS_VERBOSE(__func__<<"() No phi hits in the pattern, set pattern phi to "
                 <<inDeg(patPhi)<<" +- "<<inDeg(std::sqrt(patPhiCov)));
             return;
         }
@@ -401,7 +387,7 @@ namespace MuonR4::FastReco {
             }
             if (hit.phiCov < Acts::s_epsilon) {
                 std::stringstream ss {};
-                ss << "Unexpected to have a phi hit with zero variance in phi direction: " << *hit.sp << "\n";
+                ss << "Unexpected to have a phi hit with zero variance in phi direction: " << *hit.spacePoint << "\n";
                 throw std::runtime_error(ss.str());
             }
             const double w = 1./hit.phiCov;
@@ -423,7 +409,7 @@ namespace MuonR4::FastReco {
         patPhi = std::atan2(sumSin, sumCos);
         patPhiCov = 1./sumWeight;
         bendPlaneNorm = Acts::makeDirectionFromPhiTheta(patPhi + 90._degree, 90._degree);
-        PRINT_VERBOSE(__func__<<"() Updated pattern phi to "
+        ACTS_VERBOSE(__func__<<"() Updated pattern phi to "
             <<inDeg(patPhi)<<" +- "<<inDeg(std::sqrt(patPhiCov)));
     }
     bool GlobalPatternFinder::PatternState::isPhiCompatible(const HitPayload& hit) const {
@@ -435,7 +421,7 @@ namespace MuonR4::FastReco {
             const double deltaPhiSigma {std::sqrt(patPhiCov + hit.phiCov)};
             const double deltaPhi {P4Helpers::deltaPhi(patPhi, testPhi)};
             if (std::abs(deltaPhi) > cfg->nPhiSigma * deltaPhiSigma) {
-                PRINT_VERBOSE(__func__<<"() The pattern with phi = "<<inDeg(patPhi)<<" +- "<<inDeg(std::sqrt(patPhiCov))
+                ACTS_VERBOSE(__func__<<"() The pattern with phi = "<<inDeg(patPhi)<<" +- "<<inDeg(std::sqrt(patPhiCov))
                     <<" is not compatible with the test hit with phi "<<inDeg(testPhi) <<" +- "<<inDeg(std::sqrt(hit.phiCov)));
                 return false;
             }
@@ -446,7 +432,7 @@ namespace MuonR4::FastReco {
                 ? sectorMap.insideSector(sector1, testPhi)
                 : sectorMap.insideSector(sector1, testPhi) && sectorMap.insideSector(sector2, testPhi)};
             if (!isCompatible) {
-                PRINT_VERBOSE(__func__<<"() The test hit with phi = "<<inDeg(testPhi)
+                ACTS_VERBOSE(__func__<<"() The test hit with phi = "<<inDeg(testPhi)
                     <<" is not inside the pattern sectors: "<<sector1<<" and "<<sector2);
                 return false;
             }            
@@ -457,7 +443,7 @@ namespace MuonR4::FastReco {
                                                    const double residual,
                                                    const double resSigma) {
         /** Add the new hit */
-        hitsPerStation[Acts::toUnderlying(hit.station)].push_back(hit);
+        hitsPerStation[Acts::toUnderlying(hit->station)].push_back(hit);
 
         /** Update the hit counts */
         if (hit->isPrecision) nPrecisionLayers++;
@@ -469,7 +455,7 @@ namespace MuonR4::FastReco {
         }
 
         /** Update the pointers to previous layer hit */
-        const bool isNewStation {hit.station != lastInsertedHit.station};
+        const bool isNewStation {hit->station != lastInsertedHit->station};
         prevLayerHit = lastInsertedHit;
         lastInsertedHit = hit;
 
@@ -486,11 +472,11 @@ namespace MuonR4::FastReco {
     void GlobalPatternFinder::PatternState::overWriteHit(const CandidateHit& newHit,
                                                          const double newResidual,
                                                          const double newResSigma) {
-        const StIndex st {newHit.station};
-        if (st != lastInsertedHit.station || lastInsertedHit.globLayer != newHit.globLayer) {
+        const StIndex st {newHit->station};
+        if (st != lastInsertedHit->station || lastInsertedHit.globLayer != newHit.globLayer) {
             throw std::runtime_error(std::format(
                 "Trying to overwrite a hit in station/layer {}/{} with another one from station/layer {}/{}", 
-                    stName(lastInsertedHit.station), lastInsertedHit.globLayer, stName(st), newHit.globLayer));
+                    stName(lastInsertedHit->station), lastInsertedHit.globLayer, stName(st), newHit.globLayer));
         }
         /* We expect to overwrite hits of the same type (precision/trigger), since we only branch when we have 
          * compatible hits in the same layer, except for sTGC hits, where we have pad and strips in the same layer */
@@ -614,7 +600,7 @@ namespace MuonR4::FastReco {
 
     void GlobalPatternFinder::CandidateHit::print(std::ostream& ostr) const {
         ostr<<*sp()<<", glob Z/R/phi: "<<hit->position.z()<<" / "<<hit->position.perp()<<" / "
-            <<inDeg(hit->position.phi())<< ", st: " << station <<", loc/glob lay: "
+            <<inDeg(hit->position.phi())<< ", st: " << hit->station <<", loc/glob lay: "
             <<static_cast<int>(hit->locLayer)<<"/"<<static_cast<int>(globLayer);
     }
 
