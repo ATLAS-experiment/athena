@@ -104,15 +104,22 @@ inline StatusCode GnnPipelineTool::buildFeatures(
       idxs, [&](auto a, auto b) { return moduleIds.at(a) < moduleIds.at(b); });
   std::ranges::sort(moduleIds);
 
+  // Reorder the space point pointers to match the sorted module ids, so that
+  // the node ids returned by the pipeline index allSPPtrs directly
+  std::vector<const xAOD::SpacePoint*> sortedSPPtrs(nSP);
+  for (std::size_t k = 0; k < nSP; ++k) {
+    sortedSPPtrs.at(k) = allSPPtrs.at(idxs.at(k));
+  }
+  allSPPtrs.swap(sortedSPPtrs);
+
   features.assign(nFeatures * nSP, 0.f);
   ids.resize(nSP);
 
   for (std::size_t k = 0; k < nSP; ++k) {
     ids.at(k) = static_cast<int>(k);
-    auto i = idxs.at(k);
 
     std::span<float> f(features.data() + k * nFeatures, nFeatures);
-    const auto& sp = *allSPPtrs.at(i);
+    const auto& sp = *allSPPtrs.at(k);
 
     using namespace Acts::VectorHelpers;
 
