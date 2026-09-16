@@ -14,6 +14,7 @@
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 // EDM includes for the particles we need
 #include "xAODTruth/TruthParticle.h"
+#include "GeneratorObjects/McEventCollection.h"
 // R/W/D key handles
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
@@ -61,8 +62,12 @@ namespace DerivationFramework {
       {this, "Classification", m_collectionName, "Classification", "Classification code decoration"};
 
     ServiceHandle<StoreGateSvc> m_metaStore; //!< Handle on the metadata store for init
+/*
     /// Helper function for finding bare descendents of born leptons
     bool hasBareDescendent( const xAOD::TruthParticle* p ) const;
+*/    
+      SG::ReadHandleKey<McEventCollection> m_mcEventsName{this,"McEvent", "GEN_AOD", "input McEventCollection container name"};
+    
   };
 }
 
