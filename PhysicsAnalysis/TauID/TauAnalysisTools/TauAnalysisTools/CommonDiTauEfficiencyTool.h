@@ -28,7 +28,9 @@
 
 // ROOT include(s):
 #include "TFile.h"
-#include "TKey.h"
+
+class TKey;
+
 
 namespace TauAnalysisTools
 {

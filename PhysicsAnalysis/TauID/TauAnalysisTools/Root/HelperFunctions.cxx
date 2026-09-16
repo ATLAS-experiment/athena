@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <fstream>
+
 
 // local include(s)
 #include "TauAnalysisTools/HelperFunctions.h"
@@ -16,6 +16,10 @@ using CLHEP::GeV;
 #else
 #define GeV 1000
 #endif
+
+#include <sstream>
+#include <fstream>
+#include <cmath>
 
 using namespace TauAnalysisTools;
 
@@ -365,7 +369,7 @@ void TauAnalysisTools::correctedPi0Vectors(const xAOD::TauJet* xTau, std::vector
       correctedPi0s.push_back(P4_correctedPi0s);
     }
   }else{
-    correctedPi0s = vPi0s;
+    correctedPi0s = std::move(vPi0s);
   }
 
   //Correct angles between pi0s for 1pXn decays with 1 cluster

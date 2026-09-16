@@ -24,8 +24,12 @@
 #include "TauAnalysisTools/IDiTauSmearingTool.h"
 #include "TauAnalysisTools/CommonDiTauEfficiencyTool.h"
 #include "TauAnalysisTools/HelperFunctions.h"
+#include <map>
+#include <unordered_map>
+#include <string>
 
-#include "TH3.h"
+class TH3;
+class TFile;
 
 namespace TauAnalysisTools
 {

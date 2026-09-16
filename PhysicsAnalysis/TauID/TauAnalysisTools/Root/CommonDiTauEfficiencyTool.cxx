@@ -12,6 +12,7 @@
 // ROOT include(s)
 #include "TH2F.h"
 #include "TROOT.h"
+#include "TKey.h"
 #include "TClass.h"
 #include <utility>
 
@@ -112,12 +113,12 @@ CP::CorrectionCode CommonDiTauEfficiencyTool::getEfficiencyScaleFactor(const xAO
   // get uncertainties summed in quadrature
   double dTotalSystematic2 = 0.;
   double dDirection = 0.;
-  for (auto syst : *m_sSystematicSet)
+  for (const auto & syst : *m_sSystematicSet)
   {
 
     // check if systematic is available
     auto it = m_mSystematicsHistNames.find(syst.basename());
-
+    if (it == m_mSystematicsHistNames.end())[[unlikely]] continue;
     // get uncertainty value
     double dUncertaintySyst = 0.;
 
@@ -245,7 +246,7 @@ StatusCode CommonDiTauEfficiencyTool::applySystematicVariation ( const CP::Syste
   // sanity checks if systematic set is supported
   double dDirection = 0.;
   CP::SystematicSet sSystematicSetAvailable;
-  for (auto sSyst : sSystematicSet)
+  for (const auto & sSyst : sSystematicSet)
   {
     // check if systematic is available
     auto it = m_mSystematicsHistNames.find(sSyst.basename());
@@ -377,7 +378,7 @@ void CommonDiTauEfficiencyTool::generateSystematicSets()
   if (sTruthType=="TRUEHADTAU") m_eCheckTruth = TauAnalysisTools::TruthHadronicTau;
   if (sTruthType=="TRUEHADDITAU") m_eCheckTruth = TauAnalysisTools::TruthHadronicDiTau;
 
-  for (auto mSF : *m_mSF)
+  for (const auto & mSF : *m_mSF)
   {
     // parse for nuisance parameter in histogram name
     std::vector<std::string> vSplitNP = {};
@@ -422,8 +423,9 @@ CP::CorrectionCode CommonDiTauEfficiencyTool::getValue(const std::string& sHistN
   {
     ATH_MSG_ERROR("Object with name "<<sHistName<<" was not found in input file.");
     ATH_MSG_DEBUG("Content of input file");
-    for (auto eEntry : mSF)
+    for (const auto & eEntry : mSF){
       ATH_MSG_DEBUG("  Entry: "<<eEntry.first);
+    }
     return CP::CorrectionCode::Error;
   }
 

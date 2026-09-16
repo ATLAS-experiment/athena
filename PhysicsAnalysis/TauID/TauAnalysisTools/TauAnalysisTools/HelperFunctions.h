@@ -12,10 +12,7 @@
 #ifndef TAUANALYSISTOOLS_HELPERFUNCTIONS_H
 #define TAUANALYSISTOOLS_HELPERFUNCTIONS_H
 
-// stl include(s)
-#include <vector>
-#include <string>
-#include <sstream>
+
 
 // ROOT include(s)
 #include "TEnv.h"
@@ -26,10 +23,12 @@
 #include "xAODTau/TauxAODHelpers.h"
 #include "xAODTau/DiTauJet.h"
 #include "xAODTruth/TruthParticle.h"
-#include "xAODTruth/TruthVertex.h"
 
 // Local include(s):
 #include "TauAnalysisTools/Enums.h"
+// stl include(s)
+#include <vector>
+#include <string>
 
 namespace TauAnalysisTools
 {
