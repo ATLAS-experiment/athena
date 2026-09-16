@@ -58,10 +58,6 @@ StatusCode ReadMeta::beginInputFile(const SG::SourceID&)
       const ExampleHitContainer* ep = nullptr;
       ExampleHitContainer* ep_out = nullptr;
       ATH_CHECK( m_pInputStore->retrieve(ep, "PedestalWriteData") );
-      if (ep == nullptr) {
-         ATH_MSG_ERROR("Could not get PedestalWriteData");
-         return(StatusCode::FAILURE);
-      }
       if (!m_pMetaDataStore->contains<ExampleHitContainer>("PedestalWriteData")) {
          auto ep_out_unique = std::make_unique<ExampleHitContainer>();
          const ExampleHit* entry = *ep->begin();
