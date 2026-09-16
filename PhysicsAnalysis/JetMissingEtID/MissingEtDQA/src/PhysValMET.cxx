@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // PhysValMET.cxx 
@@ -261,11 +261,12 @@ namespace MissingEtDQA {
 
           //Setup Term histograms
           for(const auto& term : m_terms){
-            v_MET.push_back( new  TH1D((name_met + "_" + term).c_str(), (name_met + " " + m_term_names[term] + "; E_{T}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinp, 0., suptmi) );
-            v_MET_x.push_back( new  TH1D((name_met + "_" + term +"_x").c_str(), (name_met + " " + m_term_names[term] + " x; E_{x}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -suptmixy, suptmixy) );
-            v_MET_y.push_back( new  TH1D((name_met + "_" + term + "_y").c_str(), (name_met + " " + m_term_names[term] + " y; E_{y}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -suptmixy, suptmixy) );
-            v_MET_phi.push_back( new  TH1D((name_met + "_" + term + "_phi").c_str(), (name_met + " " + m_term_names[term] + " phi; #Phi; Entries / 0.1").c_str(), nbinphi,-binphi,binphi) );
-            v_MET_sum.push_back( new  TH1D((name_met + "_" + term + "_sum").c_str(), (name_met + " " + m_term_names[term] + " sum; E_{T}^{sum} [GeV]; Entries / 25 GeV").c_str(), nbinE, lowET, suET) );
+            const std::string hist_title = name_met + " " + m_term_names[term];
+            v_MET.push_back( new  TH1D((name_met + "_" + term).c_str(), (hist_title + "; E_{T}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinp, 0., suptmi) );
+            v_MET_x.push_back( new  TH1D((name_met + "_" + term +"_x").c_str(), (hist_title + " x; E_{x}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -suptmixy, suptmixy) );
+            v_MET_y.push_back( new  TH1D((name_met + "_" + term + "_y").c_str(), (hist_title + " y; E_{y}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -suptmixy, suptmixy) );
+            v_MET_phi.push_back( new  TH1D((name_met + "_" + term + "_phi").c_str(), (hist_title + " phi; #Phi; Entries / 0.1").c_str(), nbinphi,-binphi,binphi) );
+            v_MET_sum.push_back( new  TH1D((name_met + "_" + term + "_sum").c_str(), (hist_title + " sum; E_{T}^{sum} [GeV]; Entries / 25 GeV").c_str(), nbinE, lowET, suET) );
             m_dir_met.push_back("MET/" + name_met + "/Terms/" + term + "/");
           }
         
@@ -367,11 +368,12 @@ namespace MissingEtDQA {
          
           //Setup Diff histograms
           for(const auto& it : sum_names) {
-            v_MET_Diff.push_back( new  TH1D((name_met + "_Diff_" + it).c_str(), ("MET_Diff " + m_term_names[it] + " in " + name_met +"; #Sigma p_{T}^{Val} - #Sigma p_{T}^{No Val} [GeV]; Entries / 4 GeV").c_str(), nbinpxy, -200, 200));
-            v_MET_Diff_x.push_back( new  TH1D((name_met + "_Diff_" + it +"_x").c_str(), ("MET_Diff x " + m_term_names[it] + " in " + name_met +"; #Sigma p_{x}^{Val} - #Sigma p_{x}^{No Val} [GeV]; Entries / 4 GeV").c_str(), nbinpxy, -200, 200) );
-            v_MET_Diff_y.push_back( new  TH1D((name_met + "_Diff_" + it +"_y").c_str(), ("MET_Diff y " + m_term_names[it] + " in " + name_met +"; #Sigma p_{y}^{Val} - #Sigma p_{y}^{No Val} [GeV]; Entries / 4 GeV").c_str(), nbinpxy, -200, 200) );
-            v_MET_Diff_phi.push_back( new  TH1D((name_met + "_Diff_" + it +"_phi").c_str(), ("MET_Diff phi " + m_term_names[it] + " in " + name_met +"; #Delta#Phi(#Sigma p_{T}^{Val},#Sigma p_{T}^{No Val}); Entries / 0.1").c_str(), nbinphi,-binphi,binphi) );
-            v_MET_Diff_sum.push_back( new  TH1D((name_met + "_Diff_" + it +"_sum").c_str(), ("MET_Diff sumet " + m_term_names[it] + " in " + name_met +"; E_{T}^{sum Val} - #Sigma |p_{T}^{No Val}| [GeV]; Entries / 6 GeV").c_str(), nbinpxy, -300, 300) );
+            const std::string hist_title = m_term_names[it] + " in " + name_met;
+            v_MET_Diff.push_back( new  TH1D((name_met + "_Diff_" + it).c_str(), ("MET_Diff " + hist_title +"; #Sigma p_{T}^{Val} - #Sigma p_{T}^{No Val} [GeV]; Entries / 4 GeV").c_str(), nbinpxy, -200, 200));
+            v_MET_Diff_x.push_back( new  TH1D((name_met + "_Diff_" + it +"_x").c_str(), ("MET_Diff x " + hist_title +"; #Sigma p_{x}^{Val} - #Sigma p_{x}^{No Val} [GeV]; Entries / 4 GeV").c_str(), nbinpxy, -200, 200) );
+            v_MET_Diff_y.push_back( new  TH1D((name_met + "_Diff_" + it +"_y").c_str(), ("MET_Diff y " + hist_title +"; #Sigma p_{y}^{Val} - #Sigma p_{y}^{No Val} [GeV]; Entries / 4 GeV").c_str(), nbinpxy, -200, 200) );
+            v_MET_Diff_phi.push_back( new  TH1D((name_met + "_Diff_" + it +"_phi").c_str(), ("MET_Diff phi " + hist_title +"; #Delta#Phi(#Sigma p_{T}^{Val},#Sigma p_{T}^{No Val}); Entries / 0.1").c_str(), nbinphi,-binphi,binphi) );
+            v_MET_Diff_sum.push_back( new  TH1D((name_met + "_Diff_" + it +"_sum").c_str(), ("MET_Diff sumet " + hist_title +"; E_{T}^{sum Val} - #Sigma |p_{T}^{No Val}| [GeV]; Entries / 6 GeV").c_str(), nbinpxy, -300, 300) );
             m_dir_met.push_back("MET/" + name_met + "/Differences/" + it + "/");
           }
         
@@ -393,10 +395,11 @@ namespace MissingEtDQA {
 
           //Setup Kin histos
           for(const auto& it : sum_names){
-            v_MET_Kinematic_pt.push_back( new  TH1D((name_met + "_Kinematic_" + it+"_pt").c_str(), ("MET_Kinematic_pt " + m_term_names[it] + " in " + name_met +"; p_{T} [GeV]; Entries / 3 GeV").c_str(), nbinpxy, 0, 300));
-            v_MET_Kinematic_eta.push_back( new  TH1D((name_met + "_Kinematic_" + it +"_eta").c_str(), ("MET_Kinematic_eta " + m_term_names[it] + " in " + name_met +"; #eta ; Entries / 0.1").c_str(), 100, -5, 5) );
-            v_MET_Kinematic_phi.push_back( new  TH1D((name_met + "_Kinematic_" + it +"_phi").c_str(), ("MET_Kinematic_phi " + m_term_names[it] + " in " + name_met +"; #Phi ; Entries / 0.1").c_str(), nbinphi, -binphi, binphi) );
-            v_MET_multi.push_back( new  TH1D((name_met + "_multi_" + it).c_str(), ("MET_multi " + m_term_names[it] + " in " + name_met +"; Multiplicity; Entries").c_str(), 20,-0.5,20.5) );
+            const std::string hist_title = m_term_names[it] + " in " + name_met;
+            v_MET_Kinematic_pt.push_back( new  TH1D((name_met + "_Kinematic_" + it+"_pt").c_str(), ("MET_Kinematic_pt " + hist_title +"; p_{T} [GeV]; Entries / 3 GeV").c_str(), nbinpxy, 0, 300));
+            v_MET_Kinematic_eta.push_back( new  TH1D((name_met + "_Kinematic_" + it +"_eta").c_str(), ("MET_Kinematic_eta " + hist_title +"; #eta ; Entries / 0.1").c_str(), 100, -5, 5) );
+            v_MET_Kinematic_phi.push_back( new  TH1D((name_met + "_Kinematic_" + it +"_phi").c_str(), ("MET_Kinematic_phi " + hist_title +"; #Phi ; Entries / 0.1").c_str(), nbinphi, -binphi, binphi) );
+            v_MET_multi.push_back( new  TH1D((name_met + "_multi_" + it).c_str(), ("MET_multi " + hist_title +"; Multiplicity; Entries").c_str(), 20,-0.5,20.5) );
             m_dir_met.push_back("MET/" + name_met + "/Kinematics/" + it + "/");                                      
           }
           m_MET_Kinematic_pt[name_met] = v_MET_Kinematic_pt;
