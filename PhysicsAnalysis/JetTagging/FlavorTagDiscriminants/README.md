@@ -62,12 +62,6 @@ There are several user-level tools here:
 
 Some components of Hbb tagging also live here. These include:
 
-   - `HbbTag`: Similar to DL2, but for large-R jets. Uses high-level
-     flavor tagging inputs. It also uses `HbbGraphConfig` and
-     `HbbConstants`.
-
-   - `HbbTagTool`: ASG Tool interface around `HbbTag`.
-
    - `VRJetOverlapDecorator`: Adds decorations which quantify the
      degree of overlap between VR subjets. The validity of flavor
      tagging calibrations depends on this overlap being small. Two
