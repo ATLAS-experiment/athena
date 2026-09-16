@@ -39,7 +39,7 @@ def get_jet_collection_name(name: str) -> str:
     for suffix in (
         "_noElectrons", "_noMuons", "_noLeptons",
         "_inclMuons", "_tauSeedEleRM",
-        "ByVertex", "CustomVtx",
+        "ByVertex", "CustomVtxGNN", "CustomVtx",
     ):
         name = name.replace(suffix, "")
     return name
