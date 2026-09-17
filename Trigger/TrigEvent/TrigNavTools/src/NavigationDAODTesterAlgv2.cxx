@@ -442,6 +442,7 @@ StatusCode NavigationDAODTesterAlgv2::execute(const EventContext& ctx) const {
             ATH_MSG_DEBUG("################################### TrigMatch container for " << chain << " (" << composites->size() << " combinations)");
             int comboIdx = 0;
             for (const xAOD::TrigComposite* combination : *composites) {
+                //coverity[UNNECESSARY_STRING_COPY:FALSE]
                 static const SG::AuxElement::ConstAccessor<std::vector<ElementLink<xAOD::IParticleContainer>>> accMatched("TrigMatchedObjects");
                 const std::vector<ElementLink<xAOD::IParticleContainer>> featuresInCombination = accMatched(*combination);
                 ATH_MSG_DEBUG("  Combo[" << comboIdx++ << "] (size=" << featuresInCombination.size() << "):");

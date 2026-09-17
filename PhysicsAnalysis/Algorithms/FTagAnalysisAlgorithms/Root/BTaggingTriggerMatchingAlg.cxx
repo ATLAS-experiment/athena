@@ -107,7 +107,7 @@ namespace CP
     }
 
     Trig::FeatureRequestDescriptor frd;
-    frd.setChainGroup(m_trigger);
+    frd.setChainGroup(m_trigger.value());
 
     int ileg = 0;
     const xAOD::IParticle* bestHLT = nullptr;
@@ -190,13 +190,13 @@ namespace CP
     SG::ConstAccessor<const xAOD::BTagging*> acc("HLTBTag");
     const xAOD::BTagging* tagInfo = acc(*jet);
 
-    if(m_trigger.value().find("mv2c20") != std::string::npos){
+    if(m_trigger.value().contains("mv2c20")){
       if(!tagInfo->MVx_discriminant("MV2c20", hlt_bscore)){
 	ATH_MSG_ERROR("MV2c20 discriminant not accessible");
 	return StatusCode::FAILURE;
       }
     }
-    else if(m_trigger.value().find("mv2c10") != std::string::npos){
+    else if(m_trigger.value().contains("mv2c10")){
       if(!tagInfo->MVx_discriminant("MV2c10", hlt_bscore)){
 	ATH_MSG_ERROR("MV2c10 discriminant not accessible");
 	return StatusCode::FAILURE;
