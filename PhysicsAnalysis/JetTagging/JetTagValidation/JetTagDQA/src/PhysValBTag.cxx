@@ -86,6 +86,22 @@ namespace JetTagDQA {
     // initialize the truth-track-assoiation tool
     ATH_CHECK(m_trackTruthOriginTool.retrieve( EnableTool {true} ));
 
+    ATH_CHECK(m_GN2v01SelectionTools.retrieve());
+    if (m_GN2v01SelectionTools.size() != m_GN2v01WorkingPoints.size()) {
+      ATH_MSG_ERROR("GN2v01SelectionTools and GN2v01WorkingPoints need to have the same length");
+      return StatusCode::FAILURE;
+    }
+    std::map<std::string, double> GN2v01WorkingPoints;
+    for (std::size_t i = 0; i < m_GN2v01SelectionTools.size(); ++i) {
+      double cut = 0;
+      if (m_GN2v01SelectionTools[i]->getCutValue(0., cut) != CP::CorrectionCode::Ok) {
+        ATH_MSG_ERROR("Cannot get the GN2v01 cut value for working point " << m_GN2v01WorkingPoints[i]);
+        return StatusCode::FAILURE;
+      }
+      GN2v01WorkingPoints.emplace(m_GN2v01WorkingPoints[i], cut);
+    }
+    const IBTaggingSelectionTool* GN2v01SelectionTool = m_GN2v01SelectionTools.empty() ? nullptr : m_GN2v01SelectionTools[0].get();
+
     // convert the HistogramDefinitions vector to a map 
     for(unsigned int i = 0; i < m_HistogramDefinitionsVector.size(); i++){
       std::string name = m_HistogramDefinitionsVector[i][0];
@@ -105,7 +121,9 @@ namespace JetTagDQA {
 				      m_JVTCutLargerEtaAntiKt4EMTopoJets,
 				      m_JVTCutAntiKt4EMPFlowJets,
 				      m_truthMatchProbabilityCut);
-      plot->setTaggerNames(m_GN2v01Name, m_GN3XPV01Name);
+      plot->setTaggerNames(m_GN2v01Name, m_GN3EPCLV01Name, m_GN3XPV01Name);
+      plot->setGN2v01Config(GN2v01SelectionTool, GN2v01WorkingPoints, m_GN2v01FractionC, m_GN2v01FractionTau);
+      plot->setGN3EPCLV01Config(m_GN3EPCLV01WorkingPoints, m_GN3EPCLV01FractionC, m_GN3EPCLV01FractionTau);
     }
    
     return StatusCode::SUCCESS;

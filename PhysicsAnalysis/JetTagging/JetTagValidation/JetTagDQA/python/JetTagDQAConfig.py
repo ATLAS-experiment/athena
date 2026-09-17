@@ -46,6 +46,27 @@ def PhysValBTagCfg(flags, **kwargs):
             InDetTrackTruthOriginToolCfg(flags)))
 
     kwargs.setdefault("GN2v01TaggerName", flags.BTagging.AK4TaggerName)
+    if flags.GeoModel.Run <= LHCPeriod.Run3:
+        GN2v01WorkingPoints = ["70"] if kwargs["DetailLevel"] <= 10 else ["65", "70", "77", "85", "90"]
+        kwargs.setdefault("GN2v01WorkingPoints", GN2v01WorkingPoints)
+        kwargs.setdefault("GN2v01SelectionTools", [
+            CompFactory.BTaggingSelectionTool(
+                f"GN2v01SelectionTool_{wp}",
+                TaggerName=flags.BTagging.AK4TaggerName,
+                JetAuthor="AntiKt4EMPFlowJets",
+                OperatingPoint=f"FixedCutBEff_{wp}",
+                ErrorOnTagWeightFailure=False,
+            ) for wp in GN2v01WorkingPoints
+        ])
+
+        # Taken from the GN3EPCLV01 CDI in the GroupData dev area (MC23_2026-08-04_GN3EPCLV01_GN3PflowMuonsV00_GN2v01_v1_noSF.root),
+        # which cannot be used here since reading dev files fails the transform in Athena
+        # TODO: read them with BTaggingSelectionTool, as for GN2v01, once GN3EPCLV01 is in a production CDI
+        GN3EPCLV01WorkingPoints = {"70": 2.8414, "75": 2.0235, "80": 1.1988, "85": 0.3328, "90": -0.6835}
+        kwargs.setdefault("GN3EPCLV01TaggerName", "GN3EPCLV01")
+        kwargs.setdefault("GN3EPCLV01FractionC", 0.3)
+        kwargs.setdefault("GN3EPCLV01FractionTau", 0.05)
+        kwargs.setdefault("GN3EPCLV01WorkingPoints", {"70": GN3EPCLV01WorkingPoints["70"]} if kwargs["DetailLevel"] <= 10 else GN3EPCLV01WorkingPoints)
 
     tool = CompFactory.JetTagDQA.PhysValBTag(**kwargs)
     acc.setPrivateTools(tool)
