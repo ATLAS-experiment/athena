@@ -25,6 +25,7 @@
 #include <memory>
 #include <optional>
 #include <vector>
+#include <variant>
 
 namespace ActsTrk {
 
@@ -404,6 +405,7 @@ class GridTripletSeedingTool
                                       45. * Acts::UnitConstants::mm};
 
  private:
+  std::variant<Acts::CylindricalSpacePointGrid::Config, Acts::Experimental::SphericalSpacePointGrid::Config> m_gridCfg;
   Acts::CylindricalSpacePointGrid::Config m_cylindricalGridCfg;
   Acts::Experimental::SphericalSpacePointGrid::Config m_sphericalGridCfg;
   Acts::DoubletSeedFinder::Config m_bottomDoubletFinderCfg;
