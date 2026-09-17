@@ -74,7 +74,7 @@ namespace CP
       for (xAOD::Jet* jet : *jets)
       {
         static const std::string noCalib{"NoBJetCalibMomentum"};
-        static const std::string muonCorr{"MuonCorrMomentum"}
+        static const std::string muonCorr{"MuonCorrMomentum"};
         static const std::string calib{"BJetCalibMomentum"};
         jet->setJetP4(noCalib, jet->jetP4());
         jet->setJetP4(muonCorr, jet->jetP4());
