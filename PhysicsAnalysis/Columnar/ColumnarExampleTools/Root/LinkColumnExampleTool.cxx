@@ -35,7 +35,7 @@ namespace columnar
 
 
   void LinkColumnExampleTool ::
-  callEvents (EventContextRange<CMode> events) const
+  callEvents (columnar::EventContextRange<CMode> events) const
   {
     // loop over all events and particles.  note that this is
     // deliberately looping by value, as the ID classes are very small
@@ -48,7 +48,7 @@ namespace columnar
       for (auto muon : muonsHandle(event))
       {
         // retrieve the track linked to the muon
-        OptTrackId<CMode> track = trackLinkAcc(muon);
+        columnar::OptTrackId<CMode> track = trackLinkAcc(muon);
 
         // apply the selection, the OptTrackId<CMode> tries to (mostly) behave
         // like a std::optional<TrackId<CMode>>, so we can use it in a similar

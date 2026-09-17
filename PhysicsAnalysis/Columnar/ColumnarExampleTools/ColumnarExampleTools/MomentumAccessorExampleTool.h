@@ -29,7 +29,7 @@ namespace columnar
 
   class MomentumAccessorExampleTool final
     : public asg::AsgTool,
-      public ColumnarTool<CMode>
+      public columnar::ColumnarTool<CMode>
   {
   public:
 
@@ -40,9 +40,9 @@ namespace columnar
 
     virtual StatusCode initialize () override;
 
-    void callSingleEvent (ParticleRange<CMode> particles) const;
+    void callSingleEvent (columnar::ParticleRange<CMode> particles) const;
 
-    virtual void callEvents (EventContextRange<CMode> events) const override;
+    virtual void callEvents (columnar::EventContextRange<CMode> events) const override;
 
 
     /// @brief the energy cut to apply
@@ -54,7 +54,7 @@ namespace columnar
     /// This is equivalent to a `ReadHandleKey` in the xAOD world.  It
     /// is used to access the particle range/container for a given
     /// event.
-    ParticleAccessor<ObjectColumn,CMode> particlesHandle {*this, "Particles"};
+    columnar::ParticleAccessor<columnar::ObjectColumn,CMode> particlesHandle {*this, "Particles"};
 
 
     /// @brief the momentum accessors for the particle container
@@ -62,7 +62,7 @@ namespace columnar
     /// This is an accessor that provides access to all the available
     /// momentum variables and can be reconfigured at configuration time
     /// to different momentum accessors.
-    MomentumAccessors<ParticleDef,CMode> momAcc;
+    columnar::MomentumAccessors<columnar::ParticleDef,CMode> momAcc;
 
     /// @brief the object type accessor for the particle container
     ///
@@ -70,7 +70,7 @@ namespace columnar
     /// column accessor, as it needs to be able to access the property
     /// type at configuration time (to set the correct momentum
     /// accessor).
-    ObjectTypeAccessor<ParticleDef,CMode> objectTypeAcc {*this, "ObjectType", "the object type of the particles"};
+    columnar::ObjectTypeAccessor<columnar::ParticleDef,CMode> objectTypeAcc {*this, "ObjectType", "the object type of the particles"};
 
     // If you want to use a statically configured momentum accessor,
     // this would be the basic way to do it. For now (24 Jul 25) I don't
@@ -87,7 +87,7 @@ namespace columnar
     /// the option to return individual output values.  Instead it needs
     /// to provide an output value per object, which in the columnar
     /// world is done by filling a column.
-    ParticleDecorator<char,CMode> selectionDec {*this, "selection"};
+    columnar::ParticleDecorator<char,CMode> selectionDec {*this, "selection"};
   };
 }
 

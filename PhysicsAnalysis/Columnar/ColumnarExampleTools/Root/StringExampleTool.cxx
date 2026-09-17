@@ -35,7 +35,7 @@ namespace columnar
 
 
   void StringExampleTool ::
-  callEvents (EventContextRange<CMode> events) const
+  callEvents (columnar::EventContextRange<CMode> events) const
   {
     // loop over all events and met terms.  note that this is
     // deliberately looping by value, as the ID classes are very small
@@ -45,7 +45,7 @@ namespace columnar
     // per-event things, e.g. retrieve `EventInfo`.
     for (columnar::EventContextId<CMode> event : events)
     {
-      for (MetId<CMode> met : metAcc(event))
+      for (columnar::MetId<CMode> met : metAcc(event))
       {
         selectionDec(met) = nameAcc(met) == "Final";
       }

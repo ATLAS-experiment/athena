@@ -45,7 +45,7 @@ namespace columnar
 
 
   void ModularExampleTool ::
-  callEvents (EventContextRange<CMode> events) const
+  callEvents (columnar::EventContextRange<CMode> events) const
   {
     // loop over all events and particles.  note that this is
     // deliberately looping by value, as the ID classes are very small
@@ -72,7 +72,7 @@ namespace columnar
 
 
   bool ModularExampleTool::SubtoolPt ::
-  select (ParticleId<CMode> particle) const
+  select (columnar::ParticleId<CMode> particle) const
   {
     return ptAcc(particle) > m_cutValue;
   }
@@ -80,14 +80,14 @@ namespace columnar
 
 
   ModularExampleTool::SubtoolEta ::
-  SubtoolEta (ColumnarTool<CMode> *val_parent, float val_cutValue)
-    : ColumnarTool<CMode> (val_parent), m_cutValue (val_cutValue)
+  SubtoolEta (columnar::ColumnarTool<CMode> *val_parent, float val_cutValue)
+    : columnar::ColumnarTool<CMode> (val_parent), m_cutValue (val_cutValue)
   {}
 
 
 
   bool ModularExampleTool::SubtoolEta ::
-  select (ParticleId<CMode> particle) const
+  select (columnar::ParticleId<CMode> particle) const
   {
     return std::abs(etaAcc(particle)) < m_cutValue;
   }

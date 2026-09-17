@@ -43,7 +43,7 @@ namespace columnar
 
 
   void ConfigurableColumnExampleTool ::
-  callEvents (EventContextRange<CMode> events) const
+  callEvents (columnar::EventContextRange<CMode> events) const
   {
     // loop over all events and particles.  note that this is
     // deliberately looping by value, as the ID classes are very small
