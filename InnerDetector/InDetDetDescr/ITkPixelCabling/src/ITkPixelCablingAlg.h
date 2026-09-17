@@ -9,7 +9,7 @@
  *
  *   @brief Fills an ITkPixelCablingData  object and records it in Storegate
  *
- *   @author Shaun Roe, Ondra Kovanda
+ *   @author Shaun Roe, Ondra Kovanda, Fabrice Balli
  *   @date June 2024
  */
 
@@ -53,10 +53,12 @@ private:
 
   StatusCode generateTestCabling(std::unique_ptr<ITkPixelCablingData>& cabling) const;
 
-  StatusCode fillFromFile(std::ifstream& file, std::unique_ptr<ITkPixelCablingData>& cabling) const;
+  StatusCode fillFromCREST(std::unique_ptr<ITkPixelCablingData>& cabling) const;
 
-  StringProperty m_source{this, "DataSource", "ITkPixelTestCabling.json", "a json file for the ITkPixel cabling"};
   Gaudi::Property<bool> m_useTestCabling{this, "UseTestCabling", false, "Generate a dummy cabling for testing/development purposes, as the online IDs don't exist yet"};
+  Gaudi::Property<std::string> m_crestServer{this, "CrestServer", "crest:https://atlas-crest-dev.cern.ch/api-v6.4", "CREST server name"};
+  Gaudi::Property<std::string> m_crestTag{this, "CrestTag", "ITkPixModIDMap-RUN4-00-00-TEST", "CREST Tag name"};
+  Gaudi::Property<uint64_t> m_crestTime{this, "CrestTime", 0, "Time within iov"};
   SG::WriteCondHandleKey<ITkPixelCablingData> m_writeKey{this, "WriteKey", "ITkPixelCablingData", "Key of output (derived) conditions data"};
   const PixelID* m_idHelper{nullptr};
   const InDetDD::PixelDetectorManager* m_detManager{};

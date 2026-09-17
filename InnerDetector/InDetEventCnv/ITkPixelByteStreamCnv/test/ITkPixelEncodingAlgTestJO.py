@@ -25,8 +25,8 @@ if __name__=="__main__":
    log.setLevel(INFO)
 
 
-   from AthenaCommon.Constants import DEBUG
-   flags.Exec.OutputLevel=DEBUG
+   #from AthenaCommon.Constants import DEBUG
+   #flags.Exec.OutputLevel=DEBUG
    
    # --- set flags
    # the input file
