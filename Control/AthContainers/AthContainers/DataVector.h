@@ -539,7 +539,6 @@
 #include "AthContainers/tools/IsMostDerivedFlag.h"
 #include "AthContainers/DataVectorWithAllocFwd.h"
 #include "CxxUtils/concepts.h"
-#include <boost/iterator/iterator_adaptor.hpp>
 #include <type_traits>
 #include <vector>
 #include <typeinfo>
