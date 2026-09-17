@@ -104,7 +104,7 @@ def doFixTime(flags,relNum = None):
       releaseInRange(flags,"Athena-24.0.0","Athena-24.0.200",relNum) or \
       releaseInRange(flags,"Athena-25.0.0","Athena-25.0.200",relNum)
 
-def runAODFix(flags, correctCluster = True, checkRelWithAMI = True):
+def runAODFix(flags, correctCluster = True, checkRelMerge = True):
 
     msg=logging.getLogger("GetDecisionToRunAODFix")
 
@@ -123,7 +123,7 @@ def runAODFix(flags, correctCluster = True, checkRelWithAMI = True):
 
 
     
-    if checkRelWithAMI:
+    if checkRelMerge:
         doFixFromAMITags = []
         doFixFromAMITags, inputReleaseFromAMITags = FixFromAMITag(flags)
         msg.info('doFix from AMI tags = %s',doFixFromAMITags)
