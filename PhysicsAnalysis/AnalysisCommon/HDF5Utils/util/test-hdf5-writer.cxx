@@ -28,8 +28,8 @@ using consumer_t = H5Utils::Consumers<const out_t&>;
 
 // a non-movable member silently deletes a defaulted move constructor
 static_assert(
-  std::is_move_constructible_v<H5Utils::Writer<0, consumer_t::input_type>>,
-  "H5Utils::Writer must stay move constructible");
+  std::is_nothrow_move_constructible_v<H5Utils::Writer<0, consumer_t::input_type>>,
+  "H5Utils::Writer must stay nothrow move constructible");
 
 consumer_t getConsumers() {
   consumer_t consumers;

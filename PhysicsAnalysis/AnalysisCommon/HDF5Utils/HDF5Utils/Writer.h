@@ -358,7 +358,7 @@ namespace H5Utils {
            const Consumers<I>& consumers,
            const WriterConfiguration<N>& = WriterConfiguration<N>());
     Writer(const Writer&) = delete;
-    Writer(Writer&&);
+    Writer(Writer&&) noexcept;
     Writer& operator=(Writer&) = delete;
     ~Writer();
     template <typename T>
@@ -371,7 +371,7 @@ namespace H5Utils {
     using function_type = typename consumer_type::template function_type<T>;
     using configuration_type = WriterConfiguration<N>;
   private:
-    Writer(Writer&& other, std::unique_lock<std::recursive_mutex> other_lock);
+    Writer(Writer&& other, std::unique_lock<std::recursive_mutex> other_lock) noexcept;
     const internal::DSParameters<I,N> m_par;
     hsize_t m_offset;
     hsize_t m_buffer_rows;
@@ -433,13 +433,13 @@ namespace H5Utils {
 
   // the mutex isn't movable, the moved-from writer is left empty; don't move a writer other threads still use
   template <size_t N, typename I>
-  Writer<N, I>::Writer(Writer&& other):
+  Writer<N, I>::Writer(Writer&& other) noexcept:
     Writer(std::move(other), std::unique_lock(other.m_mutex))
   {
   }
 
   template <size_t N, typename I>
-  Writer<N, I>::Writer(Writer&& other, std::unique_lock<std::recursive_mutex>):
+  Writer<N, I>::Writer(Writer&& other, std::unique_lock<std::recursive_mutex>) noexcept:
     m_par(other.m_par),
     m_offset(other.m_offset),
     m_buffer_rows(other.m_buffer_rows),
