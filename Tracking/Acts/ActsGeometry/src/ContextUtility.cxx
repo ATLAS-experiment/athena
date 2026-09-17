@@ -1,7 +1,7 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#include "ActsEvent/ContextUtility.h"
+#include "ActsGeometry/ContextUtility.h"
 
 #include "AthenaBaseComps/AthCheckMacros.h"
 

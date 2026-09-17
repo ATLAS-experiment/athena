@@ -46,8 +46,10 @@ private:
 
    TServerSocket* m_rootServerSocket;
    TMonitor* m_rootMonitor;
+   /// Path of the UNIX domain socket file, if used, removed on finalize
+   std::string m_socketPath;
    THashTable m_rootMergers;
-   std::unordered_map<TClass*, void*> m_dummyCache;
+   std::unordered_map<TClass*, void*> m_cachedObjects;
    int m_rootClientIndex;
    int m_rootClientCount;
    int m_numberOfStreams;

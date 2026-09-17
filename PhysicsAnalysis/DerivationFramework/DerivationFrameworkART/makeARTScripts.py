@@ -45,7 +45,7 @@ mc23eFile = "root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/data-art/larg
 mc23gInput = "user.martindl.mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8514_s4618_r17610"
 mc23gFile = "root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/data-art/large-input/CampaignInputs/mc23/AOD/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8514_s4618_r17610/AOD.50092877._002250.pool.root.1"
 
-mc21_14TeV_JETM42_Input = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/AOD/ATLAS-P2-RUN4-03-00-01/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8514_s4422_r16129/AOD.41929775._000127.pool.root.1"
+mc21_14TeV_JETM42_Input = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/AOD/ATLAS-P2-RUN4-04-00-00/RUN4.AOD.JETM42.pool.root"
 
 
 import os

@@ -97,6 +97,7 @@ atlas_test_hlt_trigger_menu( Cosmic_run3_v1 )
 atlas_test_hlt_trigger_menu( Dev_HI_run3_v1 )
 atlas_test_hlt_trigger_menu( PhysicsP1_pp_run3_v1_HLTReprocessing_prescale )
 atlas_test_hlt_trigger_menu( PhysicsP1_pp_lowMu_run3_v1 )
+atlas_test_hlt_trigger_menu( Dev_pp_run4_v1 )
 
 # Test other HLT menus not included above
 atlas_test_l1defined_menu( Dev_pp_run4_v1 )

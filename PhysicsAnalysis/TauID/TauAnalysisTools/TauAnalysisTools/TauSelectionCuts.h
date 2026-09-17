@@ -13,13 +13,17 @@
 
 // Framework include(s):
 #include "xAODTau/TauJet.h"
-#include "PATCore/AcceptData.h"
-#include "PATCore/AcceptInfo.h"
+
 
 // ROOT include(s):
 #include "TH1F.h"
 
 #include <memory>
+
+namespace asg{
+ class AcceptData;
+ class AcceptInfo;
+}
 
 namespace TauAnalysisTools
 {

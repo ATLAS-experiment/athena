@@ -182,34 +182,43 @@ class EventSelectionConfig(ConfigBlock):
         self.addOption('selectionName', '', type=str,
             noneAction='error',
             info="the name of the event selection, used to uniquely identify "
-            "the `EventSelectionConfig` block.")
+            "the `EventSelectionConfig` block.",
+            meta={'role':'region'})
         self.addOption('electrons', "", type=str,
             info="the input electron container, with a possible selection, in "
-            "the format `container` or `container.selection`.")
+            "the format `container` or `container.selection`.",
+            meta={'role':'containerRef'})
         self.addOption('muons', "", type=str,
             info="the input muon container, with a possible selection, in the "
-            "format `container` or `container.selection`.")
+            "format `container` or `container.selection`.",
+            meta={'role':'containerRef'})
         self.addOption('jets', "", type=str,
             info="the input jet container, with a possible selection, in the "
-            "format `container` or `container.selection`.")
+            "format `container` or `container.selection`.",
+            meta={'role':'containerRef'})
         self.addOption('largeRjets', "", type=str,
             info="the large-R jet container, with a possible selection, in "
-            "the format `container` or `container.selection`.")
+            "the format `container` or `container.selection`.",
+            meta={'role':'containerRef'})
         self.addOption('photons', "", type=str,
             info="the input photon container, with a possible selection, in "
-            "the format `container` or `container.selection`.")
+            "the format `container` or `container.selection`.",
+            meta={'role':'containerRef'})
         self.addOption('taus', "", type=str,
             info="the input tau-jet container, with a possible selection, in "
-            "the format `container` or `container.selection`.")
+            "the format `container` or `container.selection`.",
+            meta={'role':'containerRef'})
         self.addOption('met', "", type=str,
-            info="the input MET container.")
+            info="the input MET container.",
+            meta={'role':'containerRef'})
         self.addOption('metTerm', "Final", type=str,
             info="the MET term to use when computing MET-based quantities.")
         self.addOption('btagDecoration', "", type=str,
             info="the b-tagging decoration to use when defining b-jets.")
         self.addOption('preselection', "", type=str,
             info="the event-wise selection flag to start this event selection "
-            "from.")
+            "from.",
+            meta={'role':'region'})
         self.addOption('selectionCuts', "", type=str,
             noneAction='error',
             info="a single string listing one selection cut per line. "

@@ -1,13 +1,14 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //Dear emacs, this is -*-c++-*-
-#ifndef CALOCLUSTERMOMENTSMAKER_DigiHSTruth_H
-#define CALOCLUSTERMOMENTSMAKER_DigiHSTruth_H
+#ifndef CALOCLUSTERMOMENTSMAKER_DIGIHSTRUTH_H
+#define CALOCLUSTERMOMENTSMAKER_DIGIHSTRUTH_H
 /**
  * @class CaloClusterMomentsMaker
  * @author Sven Menke <menke@mppmu.mpg.de>
- * @date 28-February-2005
+ * @author Peter Loch <loch@physics.arizona.edu>
+ * @date 23-March-2021
  * @brief Calculate moments for CaloCluster objects
  *
  * This is a CaloClusterCollectionProcessor which can be plugged into a
@@ -24,20 +25,22 @@
  * Note that only cells with positive energy are used in this definition.
  * Common variables to calculate first and second moments of are
  * \f$\phi\f$, \f$\eta\f$, and radial and longitudinal distances from
- * the shower axis and the shower center, respectively.  */
+ * the shower axis and the shower center, respectively.
+ *
+ * @since 23-March-2021: second moment of cell time distribution is calculated
+ */
 
 #include "GaudiKernel/ToolHandle.h"
 
 class CaloCell_ID;
-class LArHVFraction;
 
 #include "CaloUtils/CaloClusterCollectionProcessor.h"
 #include "CaloDetDescr/CaloDepthTool.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CaloInterface/ILArHVFraction.h"
 #include "CaloConditions/CaloNoise.h"
-#include "CaloEvent/CaloCellContainer.h"
 #include "StoreGate/ReadCondHandleKey.h"
+
 #include <string>
 #include <vector>
 
@@ -139,6 +142,16 @@ class CaloClusterMomentsMaker_DigiHSTruth: public AthAlgTool, virtual public Cal
  *    * @brief if set to true use abs E value of cells to calculate 
  *       * cluster moments */
    bool m_absOpt;
+
+  /**
+   * @brief Retrieve second moment of cell times and store as moment */
+  bool m_secondTime = { false };
+
+  /**
+   * @brief Transition from outer to inner wheel in EME2 */
+  double m_etaInnerWheel = { 2.52 };
+
+  Gaudi::Property<bool> m_useGPUCriteria {this, "UseGPUCriteria", false, "Adopt a set of criteria that is consistent with the GPU implementation."};
 };
 
 #endif // CALOCLUSTERMOMENTSMAKER_H

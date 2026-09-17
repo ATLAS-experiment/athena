@@ -161,9 +161,9 @@ namespace ActsTrk {
       Acts::OuterStripSpacePointCalibrationDetails stripDetails{};
       const Acts::OuterStripSpacePointCalibrationDetails* strip = nullptr;
       if (!isPixel) {
-        // topStripCenter is relative to the beam spot, the node frame shifts only x and y
+        // topStripCenter is global, the node frame shifts only x and y
         Eigen::Map<Eigen::Vector3f>(stripDetails.outerCenter.data()) =
-          sp->topStripCenter() + beamSpotPos - Eigen::Vector3f(offsetX, offsetY, 0.0f);
+          sp->topStripCenter() - Eigen::Vector3f(offsetX, offsetY, 0.0f);
         Eigen::Map<Eigen::Vector3f>(stripDetails.innerToOuterSeparation.data()) =
           sp->stripCenterDistance();
         Eigen::Map<Eigen::Vector3f>(stripDetails.outerHalfVector.data()) =

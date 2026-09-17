@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Class handling the probability calculation of the MissingMassCalculator
@@ -10,20 +10,21 @@
 
 // Local include(s):
 #include "DiTauMassTools/HelperFunctions.h"
-#include "DiTauMassTools/MissingMassInput.h"
 
 // ROOT include(s):
-#include <TFile.h>
 #include <TF1.h>
-#include <TGraphAsymmErrors.h>
-#include <Math/Vector4D.h>
+#include <Math/Vector4D.h> //for PtEtaPhiMVector
 
 #include <string>
+#include <list>
+
+class TFile;
 
 namespace DiTauMassTools{
   using ROOT::Math::PtEtaPhiMVector;
 
 class MissingMassCalculator;
+class MissingMassInput;
 
 class MissingMassProb {
 
@@ -99,8 +100,8 @@ class MissingMassProb {
 
     TF1 *m_formulaAngle1 = new TF1("formulaAngle1", "[0]*exp(-[2]*(log((x+[3])/[1]))**2)");
     TF1 *m_formulaAngle2 = new TF1("formulaAngle2", "[0]*exp(-[2]*(log((x+[3])/[1]))**2)");
-    TF1 *m_formulaRatio1;
-    TF1 *m_formulaRatio2;
+    TF1 *m_formulaRatio1{};
+    TF1 *m_formulaRatio2{};
     TF1 *m_formulaRatioLep1 = new TF1("formulaRatio1", "gaus(0)+expo(3)");
     TF1 *m_formulaRatioLep2 = new TF1("formulaRatio2", "gaus(0)+expo(3)");
     TF1 *m_formulaRatioHad1 = new TF1("formulaRatio1", "gaus(0)");
@@ -113,14 +114,14 @@ class MissingMassProb {
     std::vector<TF1*> m_paramVectorNuMass;
 
     std::string m_paramFilePath;
-    TFile *m_fParams;
-    MMCCalibrationSet::e m_mmcCalibrationSet;
+    TFile *m_fParams{};
+    MMCCalibrationSet::e m_mmcCalibrationSet{};
 
-    bool m_allowUseHT;
-    bool m_UseHT;
-    bool m_fUseTauProbability; // switch to apply TauProbability
-    bool m_fUseMnuProbability; // switch to apply MnuProbability
-    bool m_fUseDphiLL; //for leplep
+    bool m_allowUseHT{};
+    bool m_UseHT{};
+    bool m_fUseTauProbability{}; // switch to apply TauProbability
+    bool m_fUseMnuProbability{}; // switch to apply MnuProbability
+    bool m_fUseDphiLL{}; //for leplep
 
   // comment by Sasha to keep this for the future
   //inline double AngularProbability(PtEtaPhiMVector nu_vec, PtEtaPhiMVector vis_vec, int decayType);

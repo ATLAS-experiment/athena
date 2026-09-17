@@ -22,7 +22,7 @@
 #include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 
-#include "ActsEvent/ContextUtility.h"
+#include "ActsGeometry/ContextUtility.h"
 
 // ACTS
 #include "Acts/MagneticField/ConstantBField.hpp"

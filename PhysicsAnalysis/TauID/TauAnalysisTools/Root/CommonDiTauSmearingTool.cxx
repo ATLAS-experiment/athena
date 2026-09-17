@@ -2,12 +2,12 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// Framework include(s):
-#include "PathResolver/PathResolver.h"
+
 
 // local include(s)
 #include "TauAnalysisTools/CommonDiTauSmearingTool.h"
-
+// Framework include(s):
+#include "PathResolver/PathResolver.h"
 #include "xAODEventInfo/EventInfo.h"
 
 // ROOT include(s)
@@ -100,7 +100,9 @@ CP::CorrectionCode CommonDiTauSmearingTool::applyCorrection( xAOD::DiTauJet& xDi
     {
       // check if systematic is available
       auto it = m_mSystematicsHistNames.find(syst.basename());
-
+      if (it == m_mSystematicsHistNames.end())[[unlikely]] {
+        continue;
+      }
       // get uncertainty value
       double dUncertaintySyst = 0;
       tmpCorrectionCode = getValue(it->second,
@@ -293,7 +295,7 @@ void CommonDiTauSmearingTool::generateSystematicSets()
   if (sTruthType=="TRUEHADTAU") m_eCheckTruth = TauAnalysisTools::TruthHadronicTau;
   if (sTruthType=="TRUEHADDITAU") m_eCheckTruth = TauAnalysisTools::TruthHadronicDiTau;
 
-  for (auto mSF : m_mDTSF)
+  for (const auto & mSF : m_mDTSF)
   {
     // parse for nuisance parameter in histogram name
     std::vector<std::string> vSplitNP = {};

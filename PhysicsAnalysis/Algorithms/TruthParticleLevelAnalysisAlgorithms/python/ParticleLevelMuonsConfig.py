@@ -9,10 +9,12 @@ class ParticleLevelMuonsBlock(ConfigBlock):
     def __init__(self):
         super(ParticleLevelMuonsBlock, self).__init__()
         self.addOption('containerName', 'TruthMuons', type=str,
-                       info='the name of the input truth muons container.')
+                       info='the name of the input truth muons container.',
+                       meta={'role':'container'})
         self.addOption('selectionName', '', type=str,
                        info='the name of the selection to create. If left empty, '
-                       'applies the selection to all truth muons.')
+                       'applies the selection to all truth muons.',
+                       meta={'role':'selection'})
         self.addOption('isolated', True, type=bool,
                        info='select only truth muons that are isolated.')
         self.addOption('notFromTau', True, type=bool,

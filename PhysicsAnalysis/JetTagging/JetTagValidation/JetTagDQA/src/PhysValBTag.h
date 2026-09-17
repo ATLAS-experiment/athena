@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // PhysValBTag.h
@@ -13,6 +13,7 @@
 #define JETTAGDQA_PHYSVALBTag_H 1
 
 // STL includes
+#include <set>
 #include <string>
 
 // FrameWork includes
@@ -24,6 +25,7 @@
 #include "BTaggingValidationPlots.h"
 
 #include "InDetTrackSystematicsTools/InDetTrackTruthOriginTool.h"
+#include "FTagAnalysisInterfaces/IBTaggingSelectionTool.h"
 
 // Root includes
 #include "TH1.h"
@@ -75,6 +77,7 @@ namespace JetTagDQA {
     PhysValBTag();
 
     ToolHandle<InDet::IInDetTrackTruthOriginTool> m_trackTruthOriginTool{this, "trackTruthOriginTool", "InDet::InDetTrackTruthOriginTool"};
+    ToolHandleArray<IBTaggingSelectionTool> m_GN2v01SelectionTools{this, "GN2v01SelectionTools", {}, "Selection tools providing the GN2v01 discriminant and cut values from the CDI, one per working point"};
 
     // isData flag
     bool m_isData;
@@ -90,6 +93,7 @@ namespace JetTagDQA {
     std::string m_vertexName;
 
     std::map<std::string, JetTagDQA::BTaggingValidationPlots*> m_btagplots;
+    std::set<std::string> m_collectionsWithoutTrackLinks;
     
     // histogram definitions
     // the first one is a vector because I can only pass vectors from the joboptions to the algs (and no maps)
@@ -110,6 +114,13 @@ namespace JetTagDQA {
 
     std::string m_GN2v01Name;
     std::string m_GN3XPV01Name;
+    Gaudi::Property<std::vector<std::string>> m_GN2v01WorkingPoints{this, "GN2v01WorkingPoints", {}, "Working point labels of GN2v01SelectionTools"};
+    Gaudi::Property<double> m_GN2v01FractionC{this, "GN2v01FractionC", 0.2, "GN2v01 c-fraction, used without GN2v01SelectionTools"};
+    Gaudi::Property<double> m_GN2v01FractionTau{this, "GN2v01FractionTau", 0.01, "GN2v01 tau-fraction, used without GN2v01SelectionTools"};
+    Gaudi::Property<std::string> m_GN3EPCLV01Name{this, "GN3EPCLV01TaggerName", "", "GN3EPCLV01 decoration prefix, empty to disable"};
+    Gaudi::Property<std::map<std::string, double>> m_GN3EPCLV01WorkingPoints{this, "GN3EPCLV01WorkingPoints", {}, "GN3EPCLV01 working point labels and cut values"};
+    Gaudi::Property<double> m_GN3EPCLV01FractionC{this, "GN3EPCLV01FractionC", 0., "GN3EPCLV01 c-fraction"};
+    Gaudi::Property<double> m_GN3EPCLV01FractionTau{this, "GN3EPCLV01FractionTau", 0., "GN3EPCLV01 tau-fraction"};
 
     JetTagDQA::BTaggingValidationPlots m_antiKt4EMTopoPlots;
     JetTagDQA::BTaggingValidationPlots m_antiKt4EMPFlowJetsPlots;

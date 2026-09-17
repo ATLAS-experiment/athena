@@ -173,6 +173,7 @@ TRUTH_BRANCHES: dict[str, list[str]] = {
     "Ttw": _TTBAR + BRANCHES["W"],
     "Tth": _TTBAR + BRANCHES["Higgs"],
     "Ttgamma": _TTBAR + BRANCHES["Photon"],
+    "Tq": BRANCHES["t"] + BRANCHES["b"],
     "Tzq": BRANCHES["t"] + BRANCHES["Z"] + BRANCHES["b"],
     "Thq": BRANCHES["t"] + BRANCHES["Higgs"] + BRANCHES["b"] + BRANCHES["W"],
     "Tqgamma": BRANCHES["t"] + BRANCHES["Photon"] + BRANCHES["b"],
@@ -212,6 +213,7 @@ class PartonHistoryBlock(ConfigBlock):
             info="parton-level interpretation of the MC truth record. Possible values:"
             + ", ".join(sorted(TRUTH_BRANCHES))
             + ".",
+            meta={'choices':(sorted(TRUTH_BRANCHES),1)},
         )
         # Always skip on data
         self.setOptionValue("skipOnData", True)
