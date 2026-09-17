@@ -441,19 +441,17 @@ private:
       const Acts::Range1D<float> &rMiddleSpRange) const;
 
   template <typename GridType>
-  StatusCode
-  createSeedsImpl(const EventContext &ctx,
-                  const std::vector<const xAOD::SpacePointContainer *>
-                      &spacePointCollections,
-                  const Eigen::Vector3f &beamSpotPos, float bFieldInZ,
-                  ActsTrk::SeedContainer &seedContainer,
-                  GridType::Config gridCfg) const;
+  StatusCode createSeedsImpl(const EventContext &ctx,
+                             const std::vector<const xAOD::SpacePointContainer *>
+                             &spacePointCollections,
+                             const Eigen::Vector3f &beamSpotPos, float bFieldInZ,
+                             ActsTrk::SeedContainer &seedContainer,
+                             GridType::Config gridCfg) const;
 
   SG::ReadHandleKey<xAOD::VertexContainer> m_inputHoughVtxKey{
-      this, "inputHoughVtx", "", "input vertex container"};
-};
+    this, "inputHoughVtx", "", "input vertex container"};
 
-template <typename Grid> struct SPGridTraits;
+};
 
 } // namespace ActsTrk
 

@@ -488,6 +488,8 @@ std::pair<float, float> GridTripletSeedingTool::retrieveRadiusRangeForMiddle(
   return {m_rRangeMiddleSP[zBin][0], m_rRangeMiddleSP[zBin][1]};
 }
 
+template <typename Grid> struct SPGridTraits;
+
 template<typename GridType>
 StatusCode GridTripletSeedingTool::createSeedsImpl(
     const EventContext& ctx,
@@ -786,15 +788,16 @@ struct SPGridTraits<Acts::Experimental::SphericalSpacePointGrid> {
 
 
 StatusCode GridTripletSeedingTool::createSeeds(
-    const EventContext& ctx,
-    const std::vector<const xAOD::SpacePointContainer*>& spacePointCollections,
-    const Eigen::Vector3f& beamSpotPos, float bFieldInZ,
-    ActsTrk::SeedContainer& seedContainer) const {
+  const EventContext& ctx,
+  const std::vector<const xAOD::SpacePointContainer*>& spacePointCollections,
+  const Eigen::Vector3f& beamSpotPos, float bFieldInZ,
+  ActsTrk::SeedContainer& seedContainer) const {
 
-      if (m_sphericalGrid) return createSeedsImpl<Acts::Experimental::SphericalSpacePointGrid>(ctx, spacePointCollections, beamSpotPos, bFieldInZ, seedContainer, std::get<Acts::Experimental::SphericalSpacePointGrid::Config>(m_gridCfg));
-      else                 return createSeedsImpl<Acts::CylindricalSpacePointGrid>(ctx, spacePointCollections, beamSpotPos, bFieldInZ, seedContainer, std::get<Acts::CylindricalSpacePointGrid::Config>(m_gridCfg));
+  if (m_sphericalGrid){
+    return createSeedsImpl<Acts::Experimental::SphericalSpacePointGrid>(ctx, spacePointCollections, beamSpotPos, bFieldInZ, seedContainer, std::get<Acts::Experimental::SphericalSpacePointGrid::Config>(m_gridCfg));}
+  else {
+    return createSeedsImpl<Acts::CylindricalSpacePointGrid>(ctx, spacePointCollections, beamSpotPos, bFieldInZ, seedContainer, std::get<Acts::CylindricalSpacePointGrid::Config>(m_gridCfg));
+  }
 
-
-
-    }
+}
 }  // namespace ActsTrk
