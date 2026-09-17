@@ -24,31 +24,31 @@
 // Other
 #include <memory>
 #include <optional>
-#include <vector>
 #include <variant>
+#include <vector>
 
 namespace ActsTrk {
 
 class GridTripletSeedingTool
     : public extends<AthAlgTool, ActsTrk::ISeedingTool> {
- public:
-  GridTripletSeedingTool(const std::string& type, const std::string& name,
-                         const IInterface* parent);
+public:
+  GridTripletSeedingTool(const std::string &type, const std::string &name,
+                         const IInterface *parent);
 
   virtual StatusCode initialize() override;
 
-  StatusCode createSeeds(const EventContext& ctx,
-                          const std::vector<const xAOD::SpacePointContainer*>&
-                              spacePointCollections,
-                          const Eigen::Vector3f& beamSpotPos, float bFieldInZ,
-                          ActsTrk::SeedContainer& seedContainer) const override;
+  StatusCode createSeeds(const EventContext &ctx,
+                         const std::vector<const xAOD::SpacePointContainer *>
+                             &spacePointCollections,
+                         const Eigen::Vector3f &beamSpotPos, float bFieldInZ,
+                         ActsTrk::SeedContainer &seedContainer) const override;
 
- protected:
+protected:
   Gaudi::Property<bool> m_seedQualitySelection{
       this, "doSeedQualitySelection", true,
       "Select seed according to quality criteria"};
 
-  //Use spherical grid. Most of the configs are shared with Cylindrical
+  // Use spherical grid. Most of the configs are shared with Cylindrical
   Gaudi::Property<bool> m_sphericalGrid{
       this, "sphericalGrid", false,
       "Use spherical grid instead of cylindrical grid for seeding"};
@@ -63,11 +63,11 @@ class GridTripletSeedingTool
                                 "limiting location of measurements"};
   Gaudi::Property<float> m_zMax{this, "zMax", 3000. * Acts::UnitConstants::mm,
                                 "limiting location of measurements"};
-  //Spherical grid specialities
-  Gaudi::Property<float> m_etaMin{this, "etaMin", -3.,
-                                "Eta range minimum (for spherical grid only)"};
-  Gaudi::Property<float> m_etaMax{this, "etaMax", 3.,
-                                "Eta range maximum (for spherical grid only)"};
+  // Spherical grid specialities
+  Gaudi::Property<float> m_etaMin{
+      this, "etaMin", -3., "Eta range minimum (for spherical grid only)"};
+  Gaudi::Property<float> m_etaMax{
+      this, "etaMax", 3., "Eta range maximum (for spherical grid only)"};
   //
   Gaudi::Property<float> m_deltaRMax{
       this, "deltaRMax", 280. * Acts::UnitConstants::mm,
@@ -140,11 +140,11 @@ class GridTripletSeedingTool
       this, "collisionRegionMax", 200. * Acts::UnitConstants::mm,
       "limiting location of collision region in z"};
   Gaudi::Property<bool> m_useHVCollisionRegion{
-      this, "useHVCollisionRegion", false, 
+      this, "useHVCollisionRegion", false,
       "restrict collision region by Hough vertex position"};
   Gaudi::Property<float> m_hvCollisionRegionTolerance{
       this, "hvCollisionRegionTolerance", 10. * Acts::UnitConstants::mm,
-      "size of collision region when using Hough vertex"};  
+      "size of collision region when using Hough vertex"};
   Gaudi::Property<float> m_sigmaScattering{
       this, "sigmaScattering", 2.,
       "how many sigmas of scattering angle should be considered"};
@@ -321,7 +321,6 @@ class GridTripletSeedingTool
       this, "absDeltaEtaMinImpact", 2. * Acts::UnitConstants::mm,
       "minimum impact parameter to apply abs(delta-eta) weight"};
 
-
   // Properties to set other objects used in seeding algorithm
   Gaudi::Property<std::vector<std::pair<int, int>>> m_zBinNeighborsTop{
       this,
@@ -357,8 +356,8 @@ class GridTripletSeedingTool
        {-1, 0},
        {0, 0}},
       "vector containing the map of z bins in the top layers"};
-  
-    Gaudi::Property<int> m_numEtaNeighbors{
+
+  Gaudi::Property<int> m_numEtaNeighbors{
       this, "numPhiNeighbors", 0,
       "number of eta bin neighbors at each side of the current bin that will "
       "be used to search for SPs"};
@@ -378,23 +377,26 @@ class GridTripletSeedingTool
       "number of phi bin neighbors at each side of the current bin that will "
       "be used to search for SPs"};
 
-
-
   Gaudi::Property<bool> m_useExperimentCuts{this, "useExperimentCuts", false,
                                             ""};
 
   // per-pair azimuthal-swing doublet cut (displaced-aware, same physics as
   // the GBTS phi window): independent of useExperimentCuts so that the
   // pixel-specific experiment cuts stay off for strip instances
-  Gaudi::Property<bool> m_doubletDPhiCut{this, "doubletDPhiCut", false,
+  Gaudi::Property<bool> m_doubletDPhiCut{
+      this, "doubletDPhiCut", false,
       "apply the per-pair azimuthal-swing doublet cut"};
-  Gaudi::Property<float> m_doubletDPhiD0Max{this, "doubletDPhiD0Max", -1.,
-      "impact parameter bounding the doublet phi swing; negative uses impactMax"};
-  Gaudi::Property<float> m_doubletDPhiCap{this, "doubletDPhiCap", 10.,
-      "cap on the displaced phi-swing term [rad]"};
-  Gaudi::Property<float> m_doubletDPhiConst{this, "doubletDPhiConst", 0.015,
+  Gaudi::Property<float> m_doubletDPhiD0Max{
+      this, "doubletDPhiD0Max", -1.,
+      "impact parameter bounding the doublet phi swing; negative uses "
+      "impactMax"};
+  Gaudi::Property<float> m_doubletDPhiCap{
+      this, "doubletDPhiCap", 10., "cap on the displaced phi-swing term [rad]"};
+  Gaudi::Property<float> m_doubletDPhiConst{
+      this, "doubletDPhiConst", 0.015,
       "constant term of the prompt doublet phi window [rad]"};
-  Gaudi::Property<float> m_doubletDPhiSlope{this, "doubletDPhiSlope", 2.0e-4,
+  Gaudi::Property<float> m_doubletDPhiSlope{
+      this, "doubletDPhiSlope", 2.0e-4,
       "curvature term of the prompt doublet phi window [rad/mm]"};
 
   Gaudi::Property<int> m_stateVectorReserveSize{
@@ -404,10 +406,10 @@ class GridTripletSeedingTool
   Gaudi::Property<float> m_expCutrMin{this, "SpSelectionExpCutrMin",
                                       45. * Acts::UnitConstants::mm};
 
- private:
-  std::variant<Acts::CylindricalSpacePointGrid::Config, Acts::Experimental::SphericalSpacePointGrid::Config> m_gridCfg;
-  Acts::CylindricalSpacePointGrid::Config m_cylindricalGridCfg;
-  Acts::Experimental::SphericalSpacePointGrid::Config m_sphericalGridCfg;
+private:
+  std::variant<Acts::CylindricalSpacePointGrid::Config,
+               Acts::Experimental::SphericalSpacePointGrid::Config>
+      m_gridCfg;
   Acts::DoubletSeedFinder::Config m_bottomDoubletFinderCfg;
   Acts::DoubletSeedFinder::Config m_topDoubletFinderCfg;
   Acts::TripletSeedFinder::Config m_tripletFinderCfg;
@@ -419,42 +421,40 @@ class GridTripletSeedingTool
   std::unique_ptr<const Acts::Logger> m_logger;
   std::unique_ptr<const Acts::Logger> m_loggerFilter;
 
-  const PixelID* m_pixelId{nullptr};
+  const PixelID *m_pixelId{nullptr};
 
   /// Private access to the logger
-  const Acts::Logger& logger() const { return *m_logger; }
+  const Acts::Logger &logger() const { return *m_logger; }
 
-  bool spacePointSelectionFunction(const xAOD::SpacePoint* sp, float r) const;
+  bool spacePointSelectionFunction(const xAOD::SpacePoint *sp, float r) const;
 
-  /// doublet selection which caches per SP phi and asin(d0/r) values for the middle and other SPs
-  bool doubletSelectionFunction(const std::vector<float>& spPhi,
-                                const std::vector<float>& spAsinD0OverR,
-                                const Acts::ConstSpacePointProxy& middle,
-                                const Acts::ConstSpacePointProxy& other,
+  /// doublet selection which caches per SP phi and asin(d0/r) values for the
+  /// middle and other SPs
+  bool doubletSelectionFunction(const std::vector<float> &spPhi,
+                                const std::vector<float> &spAsinD0OverR,
+                                const Acts::ConstSpacePointProxy &middle,
+                                const Acts::ConstSpacePointProxy &other,
                                 float cotTheta, bool isBottomCandidate) const;
 
   std::pair<float, float> retrieveRadiusRangeForMiddle(
-      const Acts::ConstSpacePointProxy& spM,
-      const Acts::Range1D<float>& rMiddleSpRange) const;
+      const Acts::ConstSpacePointProxy &spM,
+      const Acts::Range1D<float> &rMiddleSpRange) const;
 
-  template<typename GridType>
-  StatusCode createSeedsImpl(const EventContext& ctx,
-                          const std::vector<const xAOD::SpacePointContainer*>&
-                              spacePointCollections,
-                          const Eigen::Vector3f& beamSpotPos, float bFieldInZ,
-                          ActsTrk::SeedContainer& seedContainer, GridType::Config gridCfg) const;
+  template <typename GridType>
+  StatusCode
+  createSeedsImpl(const EventContext &ctx,
+                  const std::vector<const xAOD::SpacePointContainer *>
+                      &spacePointCollections,
+                  const Eigen::Vector3f &beamSpotPos, float bFieldInZ,
+                  ActsTrk::SeedContainer &seedContainer,
+                  GridType::Config gridCfg) const;
 
-
-  SG::ReadHandleKey<xAOD::VertexContainer> m_inputHoughVtxKey{this, "inputHoughVtx", "", "input vertex container"};
-
-
-
+  SG::ReadHandleKey<xAOD::VertexContainer> m_inputHoughVtxKey{
+      this, "inputHoughVtx", "", "input vertex container"};
 };
 
-template <typename Grid>
-struct SPGridTraits;
+template <typename Grid> struct SPGridTraits;
 
-
-}  // namespace ActsTrk
+} // namespace ActsTrk
 
 #endif
