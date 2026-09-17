@@ -4,10 +4,10 @@
 
 #include "L1TopoHardware/L1TopoHardware.h"
 
-#define DEF_HW_GET_MACRO(_1, _2, _3, NAME, ...) NAME
+#include "boost/preprocessor/facilities/overload.hpp"
 
 #define DEF_HW(...) \
-    DEF_HW_GET_MACRO(__VA_ARGS__, DEF_HW3, DEF_HW2, DEF_HW1)(__VA_ARGS__)
+   BOOST_PP_OVERLOAD(DEF_HW, __VA_ARGS__)(__VA_ARGS__)
 
 #define DEF_HW1(VARNAME)                                               \
    {#VARNAME, TCS::HardwareParam{#VARNAME, TCS::VARNAME, "", ""}}
