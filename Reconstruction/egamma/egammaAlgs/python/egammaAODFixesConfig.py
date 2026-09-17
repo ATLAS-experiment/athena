@@ -53,7 +53,7 @@ def FixFromAMITag(flags):
 
     if len(listOfRecoTags) == 0:
         doFixFromAMITags.append((True,True))
-        return doFixFromAMITags
+        return doFixFromAMITags, listOfRecoTags
 
 
     filename_merging = PathResolver.FindCalibFile("egammaAlgs/Merging_reco_tag.txt") ##list of the reconstruction tag that are merging tag
@@ -70,7 +70,7 @@ def FixFromAMITag(flags):
 
     if len(listOfRecoTags_noMerge) == 0:
         doFixFromAMITags.append((True,True))
-        return doFixFromAMITags
+        return doFixFromAMITags, listOfRecoTags_noMerge
 
     
     msg.info('remaining tag after removing merge tag %s',listOfRecoTags_noMerge)
@@ -134,7 +134,7 @@ def runAODFix(flags, correctCluster = True, checkRelMerge = True):
                 if ie ==0:
                     msg.warning('if no flag , will use the info collected from AMI')
                     doFix_time = e[0] and TimeToFix
-                    doAmbiguityFix = e[1] and ALToFIx
+                    doAmbiguityFix = e[1] and ALToFix
                     doFix = doFix_time or doAmbiguityFix    
 
     fixes = set()
