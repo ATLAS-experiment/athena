@@ -56,6 +56,12 @@ namespace DerivationFramework {
     SG::WriteDecorHandleKey<xAOD::JetContainer> m_jvtMatchedKey{
         this, "JVTMatchedName", "JvtMatched",
         "SG Key for JVT AuxData"};
+    SG::WriteDecorHandleKey<xAOD::JetContainer> m_jvtMediumPassedKey{
+        this, "JVTMediumPassedName", "JvtMediumPassed",
+        "SG Key for JVT Medium Passed AuxData"};
+    SG::WriteDecorHandleKey<xAOD::JetContainer> m_jvtTightPassedKey{
+        this, "JVTTightPassedName", "JvtTightPassed",
+        "SG Key for JVT Tight Passed AuxData"};
 
   };
 
