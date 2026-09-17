@@ -122,8 +122,9 @@ def WZTagAlgCfg(configFlags, **kwargs):
     kwargs.setdefault("generation", "ParT")
     kwargs.setdefault("WP", "50")
     if "cfg_file" not in kwargs:
-        _log.warning("Please, provide a Config file")
-    
+        raise ValueError("Please, provide a Config file")
+
+
     # jet container name
     jets_container = "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"
 
@@ -157,7 +158,7 @@ def TopTagAlgCfg(configFlags, **kwargs):
     kwargs.setdefault("generation", "ParT")
     kwargs.setdefault("WP", "50")
     if "cfg_file" not in kwargs:
-        _log.warning("Please, provide a Config file")
+        raise ValueError("Please, provide a Config file")
 
     # jet container name
     jets_container = "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"
