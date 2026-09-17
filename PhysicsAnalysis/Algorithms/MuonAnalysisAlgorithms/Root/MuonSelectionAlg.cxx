@@ -29,7 +29,11 @@ namespace CP
     ANA_CHECK (m_badMuonVetoHandle.initialize (m_systematicsList, m_muonsHandle, SG::AllowEmpty));
     ANA_CHECK (m_systematicsList.initialize());
 
-    auto *selectionTool = static_cast<IAsgSelectionTool *>(&*m_selectionTool);
+    auto *selectionTool = dynamic_cast<IAsgSelectionTool *>(&*m_selectionTool);
+    if (!selectionTool) {
+      ANA_MSG_ERROR ("m_selectionTool cast failed.");
+      return StatusCode::FAILURE;
+    }
     asg::AcceptData blankAccept {&selectionTool->getAcceptInfo()};
     m_setOnFail = selectionFromAccept(blankAccept);
 
