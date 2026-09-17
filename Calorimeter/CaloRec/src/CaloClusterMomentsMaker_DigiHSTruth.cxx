@@ -18,14 +18,11 @@
 
 #include "CaloClusterMomentsMaker_DigiHSTruth.h"
 #include "CaloEvent/CaloCell.h"
-#include "CaloEvent/CaloClusterContainer.h"
 #include "CaloEvent/CaloCluster.h"
 #include "CaloGeoHelpers/proxim.h"
 #include "CaloEvent/CaloPrefetch.h"
-#include "CaloInterface/ILArHVFraction.h"
 #include "CaloGeoHelpers/CaloPhiRange.h"
 #include "CaloIdentifier/CaloCell_ID.h"
-#include "AthAllocators/ArenaPoolSTLAllocator.h"
 
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
@@ -36,9 +33,7 @@
 #include <Eigen/Dense>
 #include <cmath>
 #include <cstdint>
-#include <iterator>
 #include <limits>
-#include <sstream>
 
 #include <map>
 #include <vector>
@@ -433,8 +428,9 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
     double theClusterAbsEnergy = 0;
     double theClusterEta = 0;
     double theClusterPhi = 0;
-    double theNewTime(0),theNewSecondTime(0),timeNorm(0);
-    
+    double theNewSecondTime = 0;
+		double timeNorm = 0;
+
     // these two are needed for the LATERAL moment
     int iCellMax(-1);
     int iCellScndMax(-1);
@@ -583,7 +579,6 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
 	    if ( pCell->provenance() & pmask ) {
 	      // keep the sign of weight for the time norm in case a cell is removed
 	      double theTimeNorm = std::abs(weight) * weight * ene * ene;
-	      theNewTime       += theTimeNorm * pCell->time();
 	      theNewSecondTime += theTimeNorm * pCell->time() * pCell->time();
 	      timeNorm         += theTimeNorm;
 	    }
