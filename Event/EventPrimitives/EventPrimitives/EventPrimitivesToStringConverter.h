@@ -35,6 +35,14 @@ namespace Amg {
     @author Niels.Van.Eldik@cern.ch
 
     */
+    
+inline double
+roundWithPrecision(double val, int precision)
+{
+  const double scale = std::pow(10.0, precision);
+  const double rounded = std::round(val * scale) / scale;
+  return rounded == 0.0 ? 0.0 : val;
+}
 
 inline std::string
 toString(const MatrixX& matrix, int precision = 4,

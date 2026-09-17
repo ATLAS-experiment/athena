@@ -7,15 +7,17 @@
 #ifndef TRIGGLOBALEFFICIENCYCORRECTION_CALCULATOR_H
 #define TRIGGLOBALEFFICIENCYCORRECTION_CALCULATOR_H 1
 
-#include <algorithm>
-#include <functional>
-#include <map>
+
 
 #include "AsgMessaging/AsgMessaging.h"
 #include "TrigGlobalEfficiencyCorrection/Efficiencies.h"
 #include "TrigGlobalEfficiencyCorrection/ImportData.h"
 #include "TrigGlobalEfficiencyCorrection/TrigGlobalEfficiencyCorrectionTool.h"
 #include <flat_set>
+#include <algorithm>
+#include <functional>
+#include <map>
+
 template <typename Key>
 using flat_set = std::flat_set<Key>;
 
@@ -58,7 +60,7 @@ class Calculator : public asg::AsgMessaging {
                      /// Also, single-lepton _OR_ triggers are split!
     Period(const decltype(m_boundaries)& b, decltype(m_formula)&& f,
            decltype(m_triggers)&& t = {})
-        : m_boundaries(b), m_formula(f), m_triggers(t) {}
+        : m_boundaries(b), m_formula(std::move(f)), m_triggers(std::move(t)) {}
   };
 
  private:
