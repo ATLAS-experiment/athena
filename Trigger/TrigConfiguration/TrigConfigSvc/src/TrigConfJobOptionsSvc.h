@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigConfigSvc_JobOptionsSvc
@@ -81,11 +81,6 @@ namespace TrigConf {
                             OnlyDefaults defaults = OnlyDefaults{true} ) override
     {
       return m_optsvc->broadcast(filter, value, defaults);
-    }
-
-    virtual StatusCode readOptions(std::string_view, std::string_view) override
-    {
-      throw std::runtime_error("TrigConf::JobOptionsSvc::readOptions() is not supported");
     }
     ///@}
 
