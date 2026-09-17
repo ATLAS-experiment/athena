@@ -8,12 +8,16 @@
 
 #ifndef EVENTPRIMITIVESTOSTRINGCONVERTER_H_
 #define EVENTPRIMITIVESTOSTRINGCONVERTER_H_
+#include "EventPrimitives/EventPrimitives.h"
 
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <string>
+#include <string_view>
+#include <cmath>
 
-#include "EventPrimitives/EventPrimitives.h"
+
 
 namespace Amg {
 
@@ -32,45 +36,35 @@ namespace Amg {
 
     */
 
-inline double roundWithPrecision(double val, int precision) {
-  if (val < 0 && std::abs(val) * std::pow(10, precision) < 1.)
-    return -val;
-  return val;
-}
-
-inline std::string toString(const MatrixX& matrix, int precision = 4,
-                            const std::string& offset = "") {
+inline std::string
+toString(const MatrixX& matrix, int precision = 4,
+         std::string_view offset = "")
+{
   std::ostringstream sout;
+  sout << std::fixed << std::setprecision(precision);
 
-  sout << std::setiosflags(std::ios::fixed) << std::setprecision(precision);
-  if (matrix.cols() == 1) {
-    sout << "(";
-    for (int i = 0; i < matrix.rows(); ++i) {
-      double val = roundWithPrecision(matrix(i, 0), precision);
-      sout << val;
-      if (i != matrix.rows() - 1)
+  const double scale = std::pow(10.0, precision);
+
+  for (int i = 0; i < matrix.rows(); ++i) {
+    sout << '(';
+
+    for (int j = 0; j < matrix.cols(); ++j) {
+      const double val = matrix(i, j);
+
+      sout << (std::round(val * scale) == 0.0 ? 0.0 : val);
+
+      if (j + 1 != matrix.cols()) {
         sout << ", ";
+      }
     }
-    sout << ")";
-  } else {
-    for (int i = 0; i < matrix.rows(); ++i) {
-      for (int j = 0; j < matrix.cols(); ++j) {
-        if (j == 0)
-          sout << "(";
-        double val = roundWithPrecision(matrix(i, j), precision);
-        sout << val;
-        if (j == matrix.cols() - 1)
-          sout << ")";
-        else
-          sout << ", ";
-      }
-      if (i != matrix.rows() -
-                   1) {  // make the end line and the offset in the next line
-        sout << std::endl;
-        sout << offset;
-      }
+
+    sout << ')';
+
+    if (i + 1 != matrix.rows()) {
+      sout << '\n' << offset;
     }
   }
+
   return sout.str();
 }
 
