@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -398,6 +398,14 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
     const xAOD::TruthParticle* ptrPart{};
     do {
       ptrPart = prodVert->incomingParticle(0); // FIXME just taking the first one
+      // the incoming particle is absent in cases of truth thinning or corruption
+      if (!ptrPart) {
+        ATH_MSG_WARNING("Unresolvable truth parent link in defOrigOfElectron: the truth "
+                        << "ancestry was removed by thinning or is corrupted, so the "
+                        << "ancestry walk is truncated and classifications may be unreliable");
+        prodVert = nullptr;
+        break;
+      }
       prodVert = ptrPart->hasProdVtx() ? ptrPart->prodVtx() : nullptr;
     } while (MC::isW(ptrPart) && prodVert);
 
@@ -462,8 +470,17 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
     //--Sherpa W->enu ??
     if ((numberOfChildren - NumOfquark - NumOfgluon) == 2 && (NumOfEl == 1 || NumOfPos == 1) && NumOfElNeut == 1) return WBoson;
     
-    const int pdg1 = partProdVtx->incomingParticle(0)->pdgId();
-    const int pdg2 = partProdVtx->incomingParticle(1)->pdgId();
+    // the incoming particles are absent due to truth thinning or corruption;
+    // pdgId 0 then fails the quark/gluon tests below, as an unknown parent should
+    const xAOD::TruthParticle* inPart1 = partProdVtx->incomingParticle(0);
+    const xAOD::TruthParticle* inPart2 = partProdVtx->incomingParticle(1);
+    const int pdg1 = inPart1 ? inPart1->pdgId() : 0;
+    const int pdg2 = inPart2 ? inPart2->pdgId() : 0;
+    if (!inPart1 || !inPart2) {
+      ATH_MSG_WARNING("Unresolvable truth parent link in defOrigOfElectron: an incoming "
+                      << "particle of the production vertex was removed by truth "
+                      << "thinning or is corrupted, quark/gluon classifications may not be reliable");
+    }
     //--Sherpa ZZ,ZW
     if ((numberOfChildren - NumOfquark - NumOfgluon) == 4 &&
         (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 4) &&
@@ -643,6 +660,15 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
     const xAOD::TruthParticle* itrP;
     do {
       itrP = prodVert->incomingParticle(0); // FIXME just taking the first one
+      // the incoming particle is absent when truth thinning removed it
+      if (!itrP) {
+        ATH_MSG_WARNING("Unresolvable truth parent link in defOrigOfMuon: the truth "
+                        << "ancestry was removed by thinning or is corrupted, so the "
+                        << "ancestry walk stops here and the classification uses only "
+                        << "the information available");
+        prodVert = nullptr;
+        break;
+      }
       prodVert = itrP->hasProdVtx() ? itrP->prodVtx() : nullptr;
     } while (MC::isW(itrP) && prodVert);
 
@@ -703,8 +729,17 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
     // if(numOfParents==2&&(numberOfChildren-NumOfquark-NumOfgluon)==2&&(NumOfEl==1||NumOfPos==1)&&NumOfElNeut==1) return WBoson;
     if ((numberOfChildren - NumOfquark - NumOfgluon) == 2 && (NumOfMuPl == 1 || NumOfMuMin == 1) && NumOfMuNeut == 1) return WBoson;
 
-    const int pdg1 = partProdVtx->incomingParticle(0)->pdgId();
-    const int pdg2 = partProdVtx->incomingParticle(1)->pdgId();
+    // the incoming particles are absent due to truth thinning or corruption;
+    // pdgId 0 then fails the quark/gluon tests below, as an unknown parent should
+    const xAOD::TruthParticle* inPart1 = partProdVtx->incomingParticle(0);
+    const xAOD::TruthParticle* inPart2 = partProdVtx->incomingParticle(1);
+    const int pdg1 = inPart1 ? inPart1->pdgId() : 0;
+    const int pdg2 = inPart2 ? inPart2->pdgId() : 0;
+    if (!inPart1 || !inPart2) {
+      ATH_MSG_WARNING("Unresolvable truth parent link in defOrigOfMuon: an incoming "
+                      << "particle of the production vertex was removed by thinning or is corrupted, "
+                      << "quark/gluon classification may be unreliable");
+    }
     //--Sherpa ZZ,ZW
     if ((numberOfChildren - NumOfquark - NumOfgluon) == 4 &&
         (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 4) &&
@@ -847,6 +882,14 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
     const xAOD::TruthParticle* itrP;
     do {
       itrP = prodVert->incomingParticle(0); // FIXME just taking the first one
+      // the incoming particle is absent when truth thinning removed it
+      if (!itrP) {
+        ATH_MSG_WARNING("Unresolvable truth parent link in defOrigOfTau: the truth "
+                        << "ancestry was removed by thinning or is corrupted;"
+                        << "classifications may be unreliable");
+        prodVert = nullptr;
+        break;
+      }
       prodVert = itrP->hasProdVtx() ? itrP->prodVtx() : nullptr;
     } while (MC::isW(itrP) && prodVert);
 
@@ -898,8 +941,17 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
     if (isZboson) return ZBoson;
   }
   if (numOfParents == 2 ) {
-    const int pdg1 = partProdVtx->incomingParticle(0)->pdgId();
-    const int pdg2 = partProdVtx->incomingParticle(1)->pdgId();
+    // the incoming particles are absent due to truth thinning or corruption;
+    // pdgId 0 then fails the quark/gluon tests below, as an unknown parent should
+    const xAOD::TruthParticle* inPart1 = partProdVtx->incomingParticle(0);
+    const xAOD::TruthParticle* inPart2 = partProdVtx->incomingParticle(1);
+    const int pdg1 = inPart1 ? inPart1->pdgId() : 0;
+    const int pdg2 = inPart2 ? inPart2->pdgId() : 0;
+    if (!inPart1 || !inPart2) {
+      ATH_MSG_WARNING("Unresolvable truth parent link in defOrigOfTau: an incoming "
+                      << "particle of the production vertex was removed by truth "
+                      << "thinning or corruption, quark/gluon-based classifications may not be reliable");
+    }
     //--Sherpa Z->tautau
     if ((numberOfChildren - NumOfquark - NumOfgluon) == 2 && NumOfTau == 2  && (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return ZBoson; // FIXME Why the extra checks on incoming particles compared to Z->ee, Z->mumu and Z->nunu?
 
@@ -1118,7 +1170,16 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
   // FSR  from Photos
   //-- Exotics- CompHep
   if (numOfParents == 2 && ((MC::isElectron(ancestorPDG) && NumOfEl == 1 && NumOfPos == 1) || (MC::isMuon(ancestorPDG) && NumOfMu == 2) || (MC::isTau(ancestorPDG) && NumOfTau == 2))) {
-    if (std::abs(partProdVtx->incomingParticle(0)->pdgId()) == std::abs(partProdVtx->incomingParticle(1)->pdgId())) return FSRPhot;
+    // absent incoming particles (truth thinning or corruption) cannot be compared
+    const xAOD::TruthParticle* fsrPart1 = partProdVtx->incomingParticle(0);
+    const xAOD::TruthParticle* fsrPart2 = partProdVtx->incomingParticle(1);
+    if (!fsrPart1 || !fsrPart2) {
+      ATH_MSG_WARNING("Unresolvable truth parent link in defOrigOfPhoton: the two incoming "
+                      << "particles cannot be compared due to truth thinning or corruption, so the Photos FSR test is "
+                      << "skipped");
+    }
+    if (fsrPart1 && fsrPart2 &&
+        std::abs(fsrPart1->pdgId()) == std::abs(fsrPart2->pdgId())) return FSRPhot;
   }
 
   if (numOfParents == 2 && NumOfLep == 1 && NumOfNeut == 1 && (MC::isElectron(ancestorPDG) || std::abs(ancestorPDG) == MC::NU_E)) return FSRPhot;
@@ -1147,6 +1208,14 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
       const xAOD::TruthParticle* itrP;
       do {
         itrP = prodVert->incomingParticle(0); // FIXME just taking the first one
+        // the incoming particle is absent when truth thinning removed it
+        if (!itrP) {
+          ATH_MSG_WARNING("Unresolvable truth parent link in defOrigOfPhoton: the truth "
+                          << "ancestry was removed by thinning or is corrupted, so the "
+                          << "ancestry walk is truncated and classifications may be unreliable");
+          prodVert = nullptr;
+          break;
+        }
         prodVert = itrP->hasProdVtx() ? itrP->prodVtx() : nullptr;
       } while (MC::isW(itrP) && prodVert);
 
@@ -1343,6 +1412,14 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
     const xAOD::TruthParticle* ptrPart;
     do {
       ptrPart = prodVert->incomingParticle(0); // FIXME just taking the first one
+      // the incoming particle is absent when truth thinning removed it
+      if (!ptrPart) {
+        ATH_MSG_WARNING("Unresolvable truth parent link in defOrigOfPhoton: the truth "
+                        << "ancestry was removed by thinning or is corrupted, so the "
+                        << "ancestry walk is truncated and classifications may be unreliable");
+        prodVert = nullptr;
+        break;
+      }
       prodVert = ptrPart->hasProdVtx() ? ptrPart->prodVtx() : nullptr;
     } while (MC::isW(ptrPart) && prodVert);
 
@@ -1419,8 +1496,17 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
     //--Sherpa W->enu ??
     if ((numberOfChildren - NumOfquark - NumOfgluon) == 2 && ((NumOfEl == 1 && NumOfElNeut == 1) || (NumOfMu == 1 && NumOfMuNeut == 1) || (NumOfTau == 1 && NumOfTauNeut == 1))) return WBoson;
 
-    const int pdg1 = partProdVtx->incomingParticle(0)->pdgId();
-    const int pdg2 = partProdVtx->incomingParticle(1)->pdgId();
+    // the incoming particles are absent when truth thinning removed them;
+    // pdgId 0 then fails the quark/gluon tests below, as an unknown parent should
+    const xAOD::TruthParticle* inPart1 = partProdVtx->incomingParticle(0);
+    const xAOD::TruthParticle* inPart2 = partProdVtx->incomingParticle(1);
+    const int pdg1 = inPart1 ? inPart1->pdgId() : 0;
+    const int pdg2 = inPart2 ? inPart2->pdgId() : 0;
+    if (!inPart1 || !inPart2) {
+      ATH_MSG_WARNING("Unresolvable truth parent link in defOrigOfPhoton: an incoming "
+                      << "particle of the production vertex was removed by truth "
+                      << "thinning or corruption, so quark/gluon classifications may not be reliable");
+    }
     //--Sherpa ZZ,ZW
     if ( (numberOfChildren - NumOfquark - NumOfgluon) == 4 && (NumOfEl + NumOfMu + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 4) &&
          (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return DiBoson;

@@ -10,6 +10,7 @@
 #include "xAODEgamma/Electron.h"
 #include "xAODTruth/TruthParticle.h"
 #include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 namespace DerivationFramework {
 
@@ -91,14 +92,15 @@ BkgElectronClassification::addBranches(const EventContext& ctx) const
       const xAOD::TruthParticle* truthEl = *tPL(*el);
       tPdgID(*el) = truthEl->pdgId();
       // Parents can be removed by truth thinning in e.g cases of Geant4 produced LRT electrons
-      // throw a warning in these cases and prevent a crash
-      for (size_t p = 0; p < truthEl->nParents(); ++p) {
-        if (!truthEl->parent(p)) {
-          ATH_MSG_WARNING("Unresolvable truth parent link (ancestry removed by "
-                          << "truth thinning) for truth electron with pdgId "
-                          << truthEl->pdgId() << " and pt " << truthEl->pt()
-                          << " MeV");
-          break;
+      // throw a warning in these cases so this is transparent
+      if (MC::isElectron(truthEl)) {
+        for (size_t p = 0; p < truthEl->nParents(); ++p) {
+          if (!truthEl->parent(p)) {
+            ATH_MSG_WARNING("Unresolvable truth parent link (ancestry removed by "
+                            << "truth thinning) for truth electron with pt "
+                            << truthEl->pt() << " MeV: lineage truncated");
+            break;
+          }
         }
       }
     }
