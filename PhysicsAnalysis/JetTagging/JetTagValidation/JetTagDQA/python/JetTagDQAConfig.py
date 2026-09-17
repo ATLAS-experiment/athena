@@ -81,6 +81,14 @@ def PhysValBTagCfg(flags, **kwargs):
         kwargs.setdefault("GN3EPCLV01FractionTau", 0.05)
         kwargs.setdefault("GN3EPCLV01WorkingPoints", {"70": GN3EPCLV01WorkingPoints["70"]} if kwargs["DetailLevel"] <= 10 else GN3EPCLV01WorkingPoints)
 
+    # background fractions of the GN3XPV01 discriminants, see https://ftag.docs.cern.ch/xbb/taggers/gn3xpv01-working-points/
+    kwargs.setdefault("GN3XPV01HbbFractions", {
+        "phcc": 0.02, "phtautauhad": 0.0, "pWqq": 0.10, "ptop": 0.25,
+        "pqcdll": 0.1575, "pqcdcx": 0.1575, "pqcdbx": 0.1575, "pqcdbb": 0.1575})
+    kwargs.setdefault("GN3XPV01HccFractions", {
+        "phbb": 0.02, "phtautauhad": 0.0, "pWqq": 0.0, "ptop": 0.15,
+        "pqcdll": 0.65, "pqcdcx": 0.03, "pqcdbx": 0.03, "pqcdbb": 0.12})
+
     tool = CompFactory.JetTagDQA.PhysValBTag(**kwargs)
     acc.setPrivateTools(tool)
     return acc

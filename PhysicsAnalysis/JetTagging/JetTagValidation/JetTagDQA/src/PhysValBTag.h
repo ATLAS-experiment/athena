@@ -92,6 +92,7 @@ namespace JetTagDQA {
     std::string m_vertexName;
     std::string m_truthVertexName;
     std::string m_truthJetName;
+    bool m_warnedMissingTruthPV = false;
 
     std::map<std::string, JetTagDQA::BTaggingValidationPlots*> m_btagplots;
     std::set<std::string> m_collectionsWithoutTrackLinks;
@@ -121,6 +122,8 @@ namespace JetTagDQA {
     Gaudi::Property<std::map<std::string, double>> m_GN3EPCLV01WorkingPoints{this, "GN3EPCLV01WorkingPoints", {}, "GN3EPCLV01 working point labels and cut values"};
     Gaudi::Property<double> m_GN3EPCLV01FractionC{this, "GN3EPCLV01FractionC", 0., "GN3EPCLV01 c-fraction"};
     Gaudi::Property<double> m_GN3EPCLV01FractionTau{this, "GN3EPCLV01FractionTau", 0., "GN3EPCLV01 tau-fraction"};
+    Gaudi::Property<std::map<std::string, double>> m_GN3XPV01HbbFractions{this, "GN3XPV01HbbFractions", {}, "Background fractions of the GN3XPV01 Hbb discriminant, empty to disable"};
+    Gaudi::Property<std::map<std::string, double>> m_GN3XPV01HccFractions{this, "GN3XPV01HccFractions", {}, "Background fractions of the GN3XPV01 Hcc discriminant, empty to disable"};
 
     JetTagDQA::BTaggingValidationPlots m_antiKt4EMTopoPlots;
     JetTagDQA::BTaggingValidationPlots m_antiKt4EMPFlowJetsPlots;
