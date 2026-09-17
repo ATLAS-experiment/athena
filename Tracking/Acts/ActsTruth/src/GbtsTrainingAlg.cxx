@@ -9,46 +9,98 @@
 
 namespace ActsTrk{
 
-  // static string parser for detector layer information
-  static std::vector<Acts::Experimental::GbtsLayerConnectionTool::LayerDescription> geometryParser(
-  const std::string& geometryInformation) {
+  namespace{
 
-    std::ifstream inStream(geometryInformation);
+    // string parser for detector layer information
+    std::vector<Acts::Experimental::GbtsLayerConnectionTool::LayerDescription> geometryParser(
+    const std::string& geometryInformation) {
 
-    if (!inStream) {
-      throw std::runtime_error("File does not exist or could not be opened");
+      std::ifstream inStream(geometryInformation);
+
+      if (!inStream) {
+        throw std::runtime_error("File does not exist or could not be opened: " + geometryInformation);
+      }
+
+      std::vector<Acts::Experimental::GbtsLayerConnectionTool::LayerDescription> detectorGeometry{};
+      // create geometry objects
+      float minR{};
+      float maxR{};
+
+      float minZ{};
+      float maxZ{};
+
+      std::int32_t gbtsId{};
+
+      while (inStream >> minR >> maxR >> minZ >> maxZ >> gbtsId) {
+        detectorGeometry.emplace_back(minR, maxR, minZ, maxZ, gbtsId);
+      }
+
+      // the loop above stops on the first extraction that fails, so check why:
+      // reaching the end of the file is the only acceptable reason
+      if (inStream.bad()) {
+        throw std::runtime_error("I/O error while reading geometry file: " + geometryInformation);
+      }
+
+      if (!inStream.eof()) {
+        throw std::runtime_error("Malformed record in geometry file: " + geometryInformation);
+      }
+
+      return detectorGeometry;
     }
 
-    std::vector<Acts::Experimental::GbtsLayerConnectionTool::LayerDescription> detectorGeometry{};
-    // create geometry objects
-    float minR{};
-    float maxR{};
+    // function for obtaining old formatting of connection table (will be retired at some point soon)
+    // but good to keep for comparison for now
+    bool writeOldConnectionTable(
+    const std::string& outputFileLocation,
+    const Acts::Experimental::GbtsLayerConnectionTool::LayerIdPairs& tempTable){
 
-    float minZ{};
-    float maxZ{};
+      std::ofstream outputFile(outputFileLocation);
 
-    std::int32_t gbtsId{};
+      if (!outputFile) {
+        return false;
+      }
 
-    while (inStream >> minR >> maxR >> minZ >> maxZ >> gbtsId) {
-      detectorGeometry.emplace_back(minR, maxR, minZ, maxZ, gbtsId);
+      outputFile << tempTable.size() << " " << 0.2 << "\n";
+      for (const auto& layerPair : tempTable) {
+          outputFile << 0 << " " << 1 << " " << layerPair.second << " "
+                  << layerPair.first << " " << 1 << " " << 1 << " " << 100 << "\n"
+                  << 100 << "\n";
+      }
+
+      // close explicitly so that any failure to flush is reported here
+      outputFile.close();
+
+      return outputFile.good();
     }
-        
-    return detectorGeometry;
-  }
 
-  // static function for obtaining old formatting of connection table (will be retired at some point soon)
-  // but good to keep for comparison for now 
-  static void oldStyleFormatting(
-  const std::string& outputFileLocation,
-  const Acts::Experimental::GbtsLayerConnectionTool::LayerIdPairs& tempTable){
+    // writes the layer transitions out, in either the current or the old format
+    bool writeConnectionTable(
+    const std::string& outputFileLocation,
+    const Acts::Experimental::GbtsLayerConnectionTool::LayerIdPairs& layerTable,
+    const bool useOldFormatting){
 
-    std::ofstream outputFile(outputFileLocation);
+      if (useOldFormatting) {
+        return writeOldConnectionTable(outputFileLocation, layerTable);
+      }
 
-    outputFile << tempTable.size() << " " << 0.2 << "\n";
-    for (const auto& layerPair : tempTable) {
-        outputFile << 0 << " " << 1 << " " << layerPair.second << " "
-                << layerPair.first << " " << 1 << " " << 1 << " " << 100 << "\n"
-                << 100 << "\n";
+      // define output text file
+      std::ofstream outputFile(outputFileLocation);
+
+      if (!outputFile) {
+        return false;
+      }
+
+      outputFile << layerTable.size() << "\n";
+      for (const auto& layerPair : layerTable) {
+
+        // swap order as we want outward -> inward ordering
+        outputFile << layerPair.second << " " << layerPair.first << "\n";
+      }
+
+      // close explicitly so that any failure to flush is reported here
+      outputFile.close();
+
+      return outputFile.good();
     }
   }
 
@@ -101,24 +153,15 @@ namespace ActsTrk{
 
   StatusCode GbtsTrainingAlg::finalize(){
 
-    const auto layerTable = m_layerConnectionTool->createConnectionTable(m_outputConnectionTable);
+    const auto layerTable = m_layerConnectionTool->createConnectionTable();
 
     // finally, add transitions to output file (old or new format)
-    if (m_useOldFormatting) {
-        
-      oldStyleFormatting(m_outputConnectionTable, layerTable);
-    } else {
+    if (!writeConnectionTable(m_outputConnectionTable, layerTable, m_useOldFormatting)) {
 
-      // define output text file
-      std::ofstream outputFile(m_outputConnectionTable);
-      outputFile << layerTable.size() << "\n";
-      for (const auto& layerPair : layerTable) {
-
-        // swap order as we want outward -> inward ordering
-        outputFile << layerPair.second << " " << layerPair.first << "\n";
-      }
+      ATH_MSG_ERROR("Could not write connection table to " << m_outputConnectionTable.value());
+      return StatusCode::FAILURE;
     }
-        
+
     return StatusCode::SUCCESS;
   }
 

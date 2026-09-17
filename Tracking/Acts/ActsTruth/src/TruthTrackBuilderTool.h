@@ -56,34 +56,12 @@ namespace ActsTrk{
     Gaudi::Property<bool> m_useStripClusters{this, "useStripClusters", true, "option for using strip clusters"};
 
     // templated function to fill truth tracks map for both pixel and strip clusters
-    // This is a small function so did not feel the need to supply its own ipp file
+    // defined in the source file, where it is instantiated for the pixel and strip containers
     template <typename ClusterContainer>
-    void addClusterToTruthTracks( const ClusterContainer& clusters, 
+    void addClusterToTruthTracks( const ClusterContainer& clusters,
                                  const MeasurementToTruthParticleAssociation& truthAssociations,
-                                 TruthTracks& truthTracks) const {
-        
-      for (const auto* cluster : clusters){
+                                 TruthTracks& truthTracks) const;
 
-        const auto& matchedTruthParticles = truthAssociations.at(cluster->index());
-
-        // if no truth particles for cluster, skip
-        if (matchedTruthParticles.empty()) {
-            ATH_MSG_WARNING("empty truth particle vector for cluster, skipping");
-            continue;
-        }
-
-        // only taking leading order truth particle 
-        // (most likely to be the correct truth match as it has largest depsoit in cluster)
-        const xAOD::TruthParticle* truthParticle = matchedTruthParticles.front();
-
-        // obtain global position of cluster before upcasting (makes sorting easier)
-        const auto& globalPosition = cluster->globalPosition();
-        TruthHit hit{cluster, globalPosition};
-
-
-        truthTracks[truthParticle].push_back(hit);
-      }
-    }
   };
 }
 
