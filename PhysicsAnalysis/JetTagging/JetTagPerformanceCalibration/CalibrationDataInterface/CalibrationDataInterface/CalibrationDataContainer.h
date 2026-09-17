@@ -224,6 +224,10 @@ namespace Analysis {
     // mutable std::map<std::string, std::vector<unsigned int> > m_variables; //! persistency not needed for this variable
     // mutable std::vector<unsigned int>* m_variablesResult;                  //! persistency not needed for this variable
 
+    /** @brief cached result of computeVariableTypes(): kSuccess if the calibration object's
+	variable names (histogram axis titles, or equivalent) were all resolved, kError otherwise */
+    CalibrationStatus m_variablesStatus{kSuccess};   //! don't persistify
+
   private:
 
     /** @brief specifies whether the performance evaluation is to be done strictly within the range of validity */

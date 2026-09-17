@@ -506,6 +506,7 @@ CalibrationDataHistogramContainer::computeVariableTypes()
   const TH1* hobj = dynamic_cast<const TH1*>(m_objResult);
   if (not hobj){
     std::cerr << "in CalibrationDataHistogramContainer::computeVariableTypes(): dynamic_cast failed\n";
+    m_variablesStatus = Analysis::kError;
     return;
   }
 
@@ -522,6 +523,7 @@ CalibrationDataHistogramContainer::computeVariableTypes()
       // Only flag the issue but otherwise take no action (assume non-argument use of a semicolon)
       std::cerr << "in CalibrationDataHistogramContainer::computeVariableTypes(): cannot construct variable type from name "
 		<< axis->GetTitle() << std::endl;
+      m_variablesStatus = Analysis::kError;
     } else {
       m_variables.push_back((unsigned int) vartype);
     }
@@ -1043,6 +1045,7 @@ CalibrationDataMappedHistogramContainer::computeVariableTypes()
   const TH1* hobj = dynamic_cast<const TH1*>(m_objResult);
   if (not hobj){
     std::cerr << "in CalibrationDataMappedHistogramContainer::computeVariableTypes(): dynamic cast failed\n";
+    m_variablesStatus = Analysis::kError;
     return;
   }
 
@@ -1072,6 +1075,7 @@ CalibrationDataMappedHistogramContainer::computeVariableTypes()
 	// Only flag the issue but otherwise take no action (assume non-argument use of a semicolon)
 	std::cerr << "in CalibrationDataMappedHistogramContainer::computeVariableTypes(): cannot construct variable type from name "
 		  << var << std::endl;
+	m_variablesStatus = Analysis::kError;
       } else {
 	m_variables.push_back((unsigned int)vartype);
       }
@@ -1594,6 +1598,7 @@ CalibrationDataFunctionContainer::computeVariableTypes()
       // Only flag the issue but otherwise take no action (assume non-argument use of a semicolon)
       std::cerr << "in CalibrationDataFunctionContainer::computeVariableTypes(): cannot construct variable type from name "
 		<< var << std::endl;
+      m_variablesStatus = Analysis::kError;
     } else {
       m_variables.push_back((unsigned int)vartype);
     }

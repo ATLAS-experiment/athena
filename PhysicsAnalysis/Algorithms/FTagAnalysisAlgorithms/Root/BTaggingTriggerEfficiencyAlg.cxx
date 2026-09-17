@@ -81,11 +81,15 @@ namespace CP
           }
 
           else {
+            // keep track of the worst correction code
+            CP::CorrectionCode worst = CP::CorrectionCode::Ok;
             float trigSF = 0;
             valid = m_triggerEfficiencyTool->getScaleFactor(*jet, trigSF);
+            worst = std::min(valid, worst);
             ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
             float condSF = 0;
             valid = m_conditionalEfficiencyTool->getScaleFactor(*jet, condSF);
+            worst = std::min(valid, worst);
             ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
 
             if(static_cast<bool>(m_matchingDecoration.get(*jet, sys))){
@@ -93,21 +97,25 @@ namespace CP
                 sf = condSF * trigSF;
               }
               else{
-		float trigEff_data = 0;
-		valid = m_triggerEfficiencyTool->getEfficiency(*jet, trigEff_data);
+                float trigEff_data = 0;
+                valid = m_triggerEfficiencyTool->getEfficiency(*jet, trigEff_data);
+                worst = std::min(valid, worst);
                 ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
                 float trigEff_MC = trigEff_data / trigSF;
 
                 float condEff_data = 0;
                 valid = m_conditionalEfficiencyTool->getEfficiency(*jet, condEff_data);
+                worst = std::min(valid, worst);
                 ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
                 float condEff_MC = condEff_data / condSF;
 
                 float offlEff_data = 0;
                 valid = m_offlineEfficiencyTool->getEfficiency(*jet, offlEff_data);
+                worst = std::min(valid, worst);
                 ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
                 float offlSF = 0;
                 valid = m_offlineEfficiencyTool->getScaleFactor(*jet, offlSF);
+                worst = std::min(valid, worst);
                 ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
                 float offlEff_MC = offlEff_data / offlSF;
 
@@ -118,8 +126,10 @@ namespace CP
 		  sf = invalidScaleFactor();
 		  ANA_MSG_WARNING ("SF computed with negative efficiency num="<<num<<" denom="<<denom);
 		  ANA_MSG_WARNING ("Setting SF="<<sf);
-		}
+                }
               }
+              // decorate the jet with the worst CorrectionCode observed
+              ANA_CHECK_CORRECTION (m_outOfValidity, *jet, worst);
             } else {
               valid = m_offlineEfficiencyTool->getScaleFactor(*jet, sf);
               ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
