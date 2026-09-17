@@ -26,14 +26,6 @@ class CounterChain : public CounterBase {
     CounterChain(const std::string& name, const MonitorBase* parent);
 
     /**
-     * @brief Construct counter.
-     * @param[in] name Counter's name
-     * @param[in] nRos Number of possible ROSes
-     * @param[in] parent Counter's parent monitor, cached non-owning pointer.
-     */
-    CounterChain(const std::string& name, unsigned nRos, const MonitorBase* parent);
-
-    /**
      * @brief Default destructor.
      */
     virtual ~CounterChain() = default;
