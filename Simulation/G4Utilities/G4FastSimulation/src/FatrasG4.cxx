@@ -5,6 +5,8 @@
 // Header include
 #include "FatrasG4.h"
 
+// FatrasG4 physics models
+#include "FatrasG4PhotonConversion.h"
 
 // Geant4 particle includes
 #include "G4Gamma.hh"
@@ -16,6 +18,16 @@
 //Geant4
 #include "G4ParticleTable.hh"
 #include "Randomize.hh"
+#include "G4TouchableHandle.hh"
+#include "G4Step.hh"
+#include "G4StepPoint.hh"
+#include "G4DynamicParticle.hh"
+#include "G4TransportationManager.hh"
+#include "G4Navigator.hh"
+#include "G4EventManager.hh"
+#include "G4TrackingManager.hh"
+
+#include <cmath>
 
 // HepMCHelpers include
 #include "TruthUtils/HepMCHelpers.h"
@@ -23,16 +35,18 @@
 // G4 sensitive detector includes
 #include "G4SDManager.hh"
 
+// CLHEP units and constants
+#include "CLHEP/Units/SystemOfUnits.h"
+
 //#define FATRASG4_DEBUG
+//#define FATRASG4DOIT_DEBUG
 
 
 FatrasG4::FatrasG4(const std::string& name,
-                         G4Region* region,
-                         const PublicToolHandle<IActsFatrasG4Tool>& ActsFatrasG4Tool,
-                         FatrasG4Tool * /*FatrasG4Tool*/)
-
+                   G4Region* region)
 : G4VFastSimulationModel(name, region),
-  m_ActsFatrasG4Tool(ActsFatrasG4Tool)
+  m_photonConversion(),
+  m_generator(*G4Random::getTheEngine())
 {
 }
 
@@ -42,10 +56,22 @@ G4bool FatrasG4::IsApplicable(const G4ParticleDefinition& particleType)
   bool isPhoton   = &particleType == G4Gamma::GammaDefinition();
   bool isElectron = &particleType == G4Electron::ElectronDefinition();
   bool isPositron = &particleType == G4Positron::PositronDefinition();
-  bool isHadron   = MC::isHadron(particleType.GetPDGEncoding());
 
-  // FatrasG4 is applicable if it is photon, electron, positron or any hadron
-  bool isApplicable = isPhoton || isElectron || isPositron || isHadron;
+  // Check particle energy
+  // for FatrasG4 we use the fast models for 1-100GeV
+  // IsApplicable is handed a particle type without a track, so the energy is
+  // taken from the track Geant4 is currently tracking: that is the very track
+  // this call is about, as Geant4 calls IsApplicable at each of its steps.
+  const G4TrackingManager * trackingManager = G4EventManager::GetEventManager() -> GetTrackingManager();
+  const G4Track * currentTrack = trackingManager ? trackingManager -> GetTrack() : nullptr;
+  const auto particleEnergy = currentTrack ? currentTrack -> GetTotalEnergy() : 0.;
+  if (particleEnergy < s_minEnergy || particleEnergy > s_maxEnergy) return false;
+
+  // The model only acts on photons. Electrons and positrons are declared
+  // applicable so that Geant4 attaches the fast simulation process to them in
+  // the region as well; ModelTrigger then always declines them, leaving their
+  // transport to the standard physics.
+  bool isApplicable = isPhoton || isElectron || isPositron;
 
   #ifdef FATRASG4_DEBUG
     const std::string pName = particleType.GetParticleName();
@@ -54,15 +80,25 @@ G4bool FatrasG4::IsApplicable(const G4ParticleDefinition& particleType)
     else G4cout<<"[FatrasG4::IsApplicable] NOT APPLICABLE"<<G4endl;
   #endif
 
-
   return isApplicable;
 }
 
 G4bool FatrasG4::ModelTrigger(const G4FastTrack& fastTrack)
 {
+  // IsApplicable also accepts electrons and positrons, so that Geant4 attaches
+  // the fast simulation process to them inside the region. The model never acts
+  // on them, so they are declined before anything else is done.
+  const G4ParticleDefinition* definition =
+      fastTrack.GetPrimaryTrack() -> GetDefinition();
+  if (definition == G4Electron::ElectronDefinition() ||
+      definition == G4Positron::PositronDefinition())
+    return false;
+
+  // No conversion until the trigger below fires
+  m_doConversion = false;
 
   #ifdef FATRASG4_DEBUG
-    G4cout<<"[FatrasG4::ModelTrigger] Got particle with "                                                         <<"\n"
+    G4cout<<"[FatrasG4::ModelTrigger] Got particle with "                                                      <<"\n"
                                     <<" pdg=" <<fastTrack.GetPrimaryTrack() -> GetDefinition()->GetPDGEncoding()  <<"\n"
                                     <<" Ekin="<<fastTrack.GetPrimaryTrack() -> GetKineticEnergy()                 <<"\n"
                                     <<" p="   <<fastTrack.GetPrimaryTrack() -> GetMomentum().mag()                <<"\n"
@@ -75,37 +111,84 @@ G4bool FatrasG4::ModelTrigger(const G4FastTrack& fastTrack)
                                     <<G4endl;
   #endif
 
-  const G4ParticleDefinition * G4Particle = fastTrack.GetPrimaryTrack() -> GetDefinition();
-  
-  // Check particle type
-  bool isPhoton    = G4Particle == G4Gamma::Definition();
-  bool isElectron  = G4Particle == G4Electron::Definition();
-  bool isPositron  = G4Particle == G4Positron::Definition();
+  // Decide whether the photon converts in this step
+  return ACTSConversionTrigger(fastTrack);
 
-  // Pass all photons, electrons and positrons to FatrasG4
-  if (isPhoton || isElectron || isPositron){
-    #ifdef FATRASG4_DEBUG 
-      G4cout<<"[FatrasG4::ModelTrigger] Photons, electrons or positron. Model triggered."<<G4endl;
-    #endif
-    return true;
+}
+
+bool FatrasG4::ACTSConversionTrigger(const G4FastTrack& fastTrack)
+{
+  // The fast model samples the conversion limit in units of radiation length,
+  // so the radiation lengths traversed by the photon are accumulated and
+  // compared against it. No special case is needed for air: its radiation
+  // length suppresses its contribution on its own.
+  const G4Track * track = fastTrack.GetPrimaryTrack();
+  const bool isNewPhoton = isNewPhotonTrack(*track);
+  const double stepLength = isNewPhoton ? 0.0 : track -> GetTrackLength() - m_photonPathLength;
+  m_photonPathLength = track -> GetTrackLength();
+
+  const double radLength = track -> GetVolume() -> GetLogicalVolume() -> GetMaterial() -> GetRadlen();
+
+  if (isNewPhoton) {
+    m_x0PhotonTraversed = 0.0;
+    m_x0Photon = m_photonConversion.generatePathLimits(m_generator, fastTrack).first;
   }
-  else return false;
+  else if (m_photonRadLength > 0.) {
+    m_x0PhotonTraversed += stepLength / m_photonRadLength;
+  }
+  m_photonRadLength = radLength;
 
+  m_doConversion = m_x0PhotonTraversed >= m_x0Photon;
+
+  #ifdef FATRASG4_DEBUG
+    G4cout<<"[FatrasG4::ACTSConversionTrigger] photon trackID="<<track -> GetTrackID()
+          <<" X0="<<m_x0PhotonTraversed<<" / limit="<<m_x0Photon<<G4endl;
+  #endif
+
+  return m_doConversion;
+}
+
+bool FatrasG4::isNewPhotonTrack(const G4Track& track)
+{
+  // An unseen track ID - or a track length that went backwards - means this is
+  // a new photon, for which a fresh conversion limit has to be sampled. The
+  // track length check matters because Geant4 track IDs restart at 1 in every
+  // event, so an ID comparison alone would let the material budget of one
+  // photon leak into the next event.
+  const auto trackID = track.GetTrackID();
+
+  if (trackID == m_photonID && track.GetTrackLength() >= m_photonPathLength) return false;
+
+  m_prevPhotonID = m_photonID;
+  m_photonID = trackID;
+
+  return true;
 }
 
 void FatrasG4::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep)
 {
-  #ifdef FATRASG4_DEBUG 
-    G4cout<<"FatrasG4::DoIt called"<<G4endl;
+    
+  #ifdef FATRASG4DOIT_DEBUG
+    const G4Track* G4PrimaryTrack = fastTrack.GetPrimaryTrack();
+    G4cout << "[FatrasG4::DoIt] Material: " << G4PrimaryTrack -> GetVolume() -> GetLogicalVolume() -> GetMaterial() -> GetName() << G4endl;
+    G4cout << "                 Particle PDG encoding: " << G4PrimaryTrack -> GetDefinition() -> GetPDGEncoding() << G4endl;
+    G4cout << "                 Track ID: " << G4PrimaryTrack -> GetTrackID() << G4endl;
   #endif
 
-  if (!m_ActsFatrasG4Tool.isValid()) {
-      G4cerr << "ActsFatrasG4Tool not valid!" << G4endl;
-      fastStep.KillPrimaryTrack();
-      return;
-  }
+  // The decision is taken in ModelTrigger only, so there is nothing to do
+  // unless the conversion trigger has fired
+  if (!m_doConversion) return;
 
-  m_ActsFatrasG4Tool->simulateFatrasTrack(fastTrack, fastStep);
+  // Start photon conversion modelling
+  m_doConversion = false;
+  m_photonID = -999;
+
+  // ACTS/Fatras conversion: creates the electron positron pair and kills the photon
+  #ifdef FATRASG4DOIT_DEBUG
+    G4cout << "[FatrasG4::DoIt] Running the ACTS photon conversion." << G4endl;
+  #endif
+  m_photonConversion.run(m_generator, fastTrack, fastStep);
+
+  return;
 }
-
 

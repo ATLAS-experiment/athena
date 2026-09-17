@@ -22,17 +22,7 @@ def FatrasG4Cfg(flags, **kwargs):
     result = ComponentAccumulator()
     # Name of region where FatrasG4 will be triggered
     kwargs.setdefault("RegionName", "InDet")
-
-    # Set the ActsFatrasG4Tool part
-    from G4AtlasTools.G4AtlasToolsConfig import ActsFatrasG4ToolCfg
-    if "ActsFatrasG4Tool" not in kwargs:        
-        kwargs.setdefault("ActsFatrasG4Tool", result.addPublicTool(result.popToolsAndMerge(ActsFatrasG4ToolCfg(flags))))
-    
-    fatrasG4Tool = CompFactory.FatrasG4Tool(name="FatrasG4", **kwargs)
-    # declare produced data
-    # ExtraOutputs is now declared in SimHitContainerListCfg in G4AtlasToolsConfig.py, and called from G4AtlasAlgConfig.py
-    result.setPrivateTools(fatrasG4Tool)
-
+    result.setPrivateTools(CompFactory.FatrasG4Tool(name="FatrasG4", **kwargs))
     return result
 
 def AFatrasG4Cfg(flags, **kwargs):
