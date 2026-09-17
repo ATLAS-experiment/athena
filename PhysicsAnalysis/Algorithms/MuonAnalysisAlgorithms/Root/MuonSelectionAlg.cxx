@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -30,6 +30,10 @@ namespace CP
     ANA_CHECK (m_systematicsList.initialize());
 
     auto *selectionTool = dynamic_cast<IAsgSelectionTool *>(&*m_selectionTool);
+    if (!selectionTool) {
+      ANA_MSG_ERROR ("m_selectionTool cast failed.");
+      return StatusCode::FAILURE;
+    }
     asg::AcceptData blankAccept {&selectionTool->getAcceptInfo()};
     m_setOnFail = selectionFromAccept(blankAccept);
 

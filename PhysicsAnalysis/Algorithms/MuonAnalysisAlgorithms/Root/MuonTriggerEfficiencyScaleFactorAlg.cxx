@@ -75,7 +75,7 @@ namespace CP
       ANA_CHECK (m_muonHandle.retrieve (muons, sys, ctx));
       const xAOD::EventInfo *eventInfo = nullptr;
       ANA_CHECK (m_eventInfoHandle.retrieve (eventInfo, sys, ctx));
-
+      //coverity[UNNECESSARY_STRING_COPY:FALSE]
       static const SG::ConstAccessor<unsigned int> acc_rnd("RandomRunNumber");
       unsigned int randomRunNumber = acc_rnd(*eventInfo);
       bool validEvent = m_minRunNumber <= randomRunNumber && m_maxRunNumber >= randomRunNumber;
