@@ -204,11 +204,12 @@ def muFastRecoSequenceCfg( flags, RoIs, suffix="", doFullScanID = False, InsideO
     if useNewFast:
         acc.merge(muFastVDVCfg(flags, RoIs=RoIs, suffix=suffix, InsideOutMode=False, extraLoads=None))
 
-        from MuonFastRecoAlgs.MuonFastReconstructionConfig import MuonFastReconstructionAlgCfg
-        acc.merge(MuonFastReconstructionAlgCfg(flags, name=f"MuonFastReconstructionAlg{suffix}",
-                                                      OutMuons=muNames.L2SAMuonsPhII))
+        from MuonFastRecoAlgs.MuonFastReconstructionConfig import MuonGlobalPatternFindingAlgCfg, MuonFastSegmentFittingAlgCfg, MuonFastSABuilderAlgCfg
+        acc.merge(MuonGlobalPatternFindingAlgCfg(flags, name=f"MuonGlobalPatternFindingAlg_{suffix}"))
+        acc.merge(MuonFastSegmentFittingAlgCfg(flags, name=f"MuonFastSegmentFittingAlg_{suffix}"))
+        acc.merge(MuonFastSABuilderAlgCfg(flags, name=f"MuonFastSABuilderAlg_{suffix}",
+                                                 OutMuons=muNames.L2SAMuonsPhII))
     else:
-
         suffix = ""
         if InsideOutMode:
             suffix="IOmode"
