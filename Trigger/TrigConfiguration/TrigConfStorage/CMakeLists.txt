@@ -15,7 +15,7 @@ atlas_add_library( TrigConfStorage
                    src/*.cxx
                    PUBLIC_HEADERS TrigConfStorage
                    INCLUDE_DIRS ${COOL_INCLUDE_DIRS}
-                   PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} ${TDAQ-COMMON_INCLUDE_DIRS}
+                   PRIVATE_INCLUDE_DIRS ${CORAL_INCLUDE_DIRS} ${TDAQ-COMMON_INCLUDE_DIRS}
                    LINK_LIBRARIES ${COOL_LIBRARIES} TrigConfBase TrigConfL1Data
                    PRIVATE_LINK_LIBRARIES ${CORAL_LIBRARIES} ${TDAQ-COMMON_LIBRARIES} TrigConfJobOptData TrigConfHLTData L1TopoConfig )
 
