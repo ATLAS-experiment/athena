@@ -167,9 +167,6 @@ def TauRunnerAlgCfg(flags):
             # only compute GNTau for 1p/3p, as this is internally required by the tau trigger monitoring
             tools.append( result.popToolsAndMerge(tauTools.TauGNNEvaluatorCfg(flags, version=0, applyTightTrackSel=True)) )
             tools.append( result.popToolsAndMerge(tauTools.TauWPDecoratorGNNCfg(flags, version=0, tauContainerName=flags.Tau.ActiveConfig.TauJets)) )
-            # GNN e-veto score and WP decoration for the tau identification stream
-            #tools.append( result.popToolsAndMerge(tauTools.TauGNNeVetoEvaluatorCfg(flags, applyTightTrackSel=True, tauContainerName=flags.Tau.ActiveConfig.TauJets)) )
-            #tools.append( result.popToolsAndMerge(tauTools.TauGNNeVetoWPDecoratorCfg(flags, tauContainerName=flags.Tau.ActiveConfig.TauJets)) )
 
     TauRunnerAlg = CompFactory.getComp("TauRunnerAlg")
     RunnerAlg = TauRunnerAlg(name                           = flags.Tau.ActiveConfig.prefix+"TauRecRunnerAlg",
