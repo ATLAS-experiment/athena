@@ -3,14 +3,13 @@
 */
 
 #include "xAODTrigger/TrigCompositeContainer.h"
-#include "TrigDataAccessMonitoring/ROBDataMonitor.h"
 
 #include "CounterChain.h"
 #include <cstdint>
 
 
 CounterChain::CounterChain(const std::string& name, const MonitorBase* parent) 
-  : CounterBase(name, parent), m_isInitialized(false)
+  : CounterBase(name, parent)
 {
   regHistogram("Group_perCall", "Chain group/Call;Group;Calls", VariableType::kPerCall, kLinear, -0.5, 9.5, 10);
   regHistogram("Chain_perEvent", "Chain calls/Event;Chain call;Events", VariableType::kPerEvent, kLinear, -0.5, 49.5);
