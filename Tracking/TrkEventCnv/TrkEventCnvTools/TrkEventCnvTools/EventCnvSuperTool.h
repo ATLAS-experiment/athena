@@ -27,9 +27,7 @@ class EventCnvSuperTool : public extends<AthAlgTool, IEventCnvSuperTool>
     {
     public:
 
-      EventCnvSuperTool(const std::string& t,
-        const std::string& n,
-        const IInterface*  p);
+      using base_class::base_class;
 
       virtual ~EventCnvSuperTool ();
 
@@ -64,18 +62,22 @@ class EventCnvSuperTool : public extends<AthAlgTool, IEventCnvSuperTool>
     private:
       ToolHandle<Trk::ITrkEventCnvTool>   m_idCnvTool {this, "IdCnvTool", "InDet::InDetEventCnvTool/InDetEventCnvTool", "Tool used to handle ID RoTs etc"}; //!< Tool used to handle ID RoTs etc
       ToolHandle<Trk::ITrkEventCnvTool>   m_muonCnvTool {this, "MuonCnvTool", "Muon::MuonEventCnvTool/MuonEventCnvTool", "Tool used to handle Muon RoTs etc"}; //!< Tool used to handle Muon RoTs etc
-      const AtlasDetectorID*              m_detID;             // atlas id helper
+      const AtlasDetectorID*              m_detID = nullptr;             // atlas id helper
 
-      bool                                m_haveIdCnvTool; //!< Flag set in intialise, letting us know whether the tool has been found.
-      bool                                m_haveMuonCnvTool; //!< Flag set in intialise, letting us know whether the tool has been found.
+      bool                                m_haveIdCnvTool = false; //!< Flag set in intialise, letting us know whether the tool has been found.
+      bool                                m_haveMuonCnvTool = false; //!< Flag set in intialise, letting us know whether the tool has been found.
 
-      bool                                m_doMuons; //!< Property deciding whether to attempt Muon conversions
-      bool                                m_doID;    //!< Property deciding whether to attempt ID conversions
+      Gaudi::Property<bool> m_doMuons{this, "DoMuons", true,
+	"If true (default), attempt to retrieve Muon helper tool and convert Muon objects."};
+      Gaudi::Property<bool> m_doID{this, "DoID", true,
+	"If true (default), attempt to retrieve Inner Detector helper tool and convert ID objects."};
 
-      bool                                m_doTrackOverlay; //!< Property for whether track overlay is being used, in which case different PRD containers are used by the converters
+      Gaudi::Property<bool> m_doTrackOverlay{this, "DoTrackOverlay", false,
+	"If true, ID on-track conversion tools will look for background PRD collections"};
 
-      mutable std::atomic_int             m_errCount; //!< Current number of ERROR/WARNING messages sent to output
-      int                                 m_maxErrCount; //!< Maximum number of permissable ERROR/WARNING messages sent to output.
+      mutable std::atomic_int             m_errCount = 0; //!< Current number of ERROR/WARNING messages sent to output
+      Gaudi::Property<int> m_maxErrCount{this, "MaxErrorCount", 10,
+	"Maximum number of errors that will be reported"};
     };
   }
 #endif
