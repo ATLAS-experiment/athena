@@ -55,7 +55,10 @@
 
 #include "default_panels.h"
 
-
+const std::string reset  = "\033[0m";
+const std::string black  = "\033[0;30m";
+const std::string red    = "\033[0;31m";
+const std::string green  = "\033[0;32m";
 
 bool fulldbg = false;
 
@@ -625,7 +628,7 @@ std::string fullreplace( std::string s, const std::string& s2, const std::string
 } 
 
 void print_pad( const std::string& s ) { 
-  std::cout << "Printing " << s << std::endl;
+  std::cout << green << "Printing " << s << reset << std::endl;
   gPad->Print( s.c_str() );
   if ( EPS ) gPad->Print( (s+".eps").c_str() );
 }
@@ -1987,11 +1990,11 @@ int main(int argc, char** argv) {
 	if ( pos!=std::string::npos ) yaxis.replace( pos, xregex.size(), xpattern );  
       }
 
-      //      const AxisInfo& xinfo = histo.xaxis(); 
-      //      const AxisInfo& yinfo = histo.yaxis(); 
+      const AxisInfo& xinfo = histo.xaxis(); 
+      const AxisInfo& yinfo = histo.yaxis(); 
 
-      AxisInfo xinfo = histo.xaxis(); 
-      AxisInfo yinfo = histo.yaxis(); 
+      // AxisInfo xinfo = histo.xaxis(); 
+      // AxisInfo yinfo = histo.yaxis(); 
 
       std::string hname  = histo.name();
       std::string detail = histo.detail();
@@ -2000,16 +2003,22 @@ int main(int argc, char** argv) {
 
       if ( ( lumiref_trans || lumitest_trans ) && contains(histo.xtitle(), "Pile-up" ) ) translate_x = true;
 
+#if 0
+      /// exclude for the time being pending further checks ...
       if ( translate_x ) { 
-	// xinfo.lo( xinfo.lo()*(1-0.054) );
-	// xinfo.lo(10);
-	//	xinfo.hi( xinfo.hi()*(1-0.054) );
+	 xinfo.lo( xinfo.lo()*(1-0.054) );
+	 xinfo.lo(10);
+	 xinfo.hi( xinfo.hi()*(1-0.054) );
       }
-
+#endif
+      
       double rebin = 1;
+
+#ifdef D0REBIN
       bool d0rebin_flag = false;
 
       if ( contains( detail, "+d0rebin" ) ) d0rebin_flag = true; 
+#endif
       
       if ( contains( detail, "+Rebin" ) ) { 
 	rebin = std::atof( detail.substr( detail.find("+Rebin")+6, detail.size() ).c_str() ); 
@@ -2117,22 +2126,12 @@ int main(int argc, char** argv) {
       
       /// legends ....
 
-      /// SUTT: THIS NEEDS TO BE ALWAYS EXECUTED SOME TIMES FOR SOME REASON
-
-      //      bool shift_key = false;
-      
-      //      if ( contains( ftest->GetName(), "-mc") ) {
-      //   	shift_key = true;
-      //      }
-
       if ( JLflag ) { 
 	ylo -= 0.02;
       }
       else {
 	if ( !contains(histo.name(),"eff") && !contains(histo.name(),"Eff_") ) ylo -= 0.02;
       }
-
-      // ylo -= 0.02;
 
       Legend legend(     xpos, xpos+0.1, ylo, ylo+Nrows*0.06-0.005 );
       Legend legend_eff( xpos, xpos+0.1, ylo, ylo+Nrows*0.06-0.005 );
@@ -2327,12 +2326,12 @@ int main(int argc, char** argv) {
 	  if ( bmean  ) { htest = (TH1F*)rtest.Mean()->Clone("rtest_mean");   htest->SetDirectory(0); }
 
 	  if ( htest==0 ) { 
-	    std::cerr << "missing test histogram: " << (refchain[j]+" / "+histo.name()) << " " << htest << "(test)" << std::endl; 
+	    std::cerr << red << "missing test histogram: " << (refchain[j]+" / "+histo.name()) << " " << htest
+		      << "(test)" << reset <<  std::endl; 
 	    continue;
 	  }
 	  else {
-	    std::cout << "htest: " << "ars" << std::endl;
-	    std::cout << "htest: " << htest->GetName() << std::endl;
+	    std::cout << green << "htest: " << htest->GetName() << reset << std::endl;
 	  }
 
 	  std::cout << "\nhisto.name(): " << histo.name() << std::endl;
@@ -2340,8 +2339,6 @@ int main(int argc, char** argv) {
 	  
 	  if ( true && histo.name().find("d0_vs_phi")!=std::string::npos ) {
 	    
-	    std::cout << "SHTE !" << std::endl;
-
 	    TVirtualPad* old = gPad;
 	    
 	    std::cout << "old canvas: " << gPad << std::endl;
@@ -2372,14 +2369,13 @@ int main(int argc, char** argv) {
 
 	    if ( tc ) tc->cd();
 
+	    /// do we need these ? - keep for the time being ...
 	    //	    TH1D* hf = (TH1D*)rtest.Mean()->Clone("cck");
+	    //	    TH1D* hf = rtest.Mean(); 
 
 	    rtest.Mean()->SetDirectory(0);
 	    
-	    //	    TH1D* hf = rtest.Mean(); 
 	    TH1* hf = htest; 
-
-	    //	    std::cout << "CNT\nCNT\nCNThf:    " << hf << "\nCNT\nCNT" << std::endl;
 
 	    if ( histo.name().find("_rec")!=std::string::npos ) hf->SetTitle(";Trigger #phi;Trigger d_{0} [mm]");
 	    else                                                 hf->SetTitle(";Offline #phi;Offline d_{0} [mm]");
@@ -2553,10 +2549,6 @@ int main(int argc, char** argv) {
 	}
 	else { 
 
-	  std::cout << "AAAAARRRGGHH " << __LINE__ << std::endl;
-	  
-	  if ( fulldbg ) std::cout << __LINE__ << std::endl;
-
 	  /// everything else 
        	
 	  std::string reghist = histo.name();
@@ -2570,8 +2562,6 @@ int main(int argc, char** argv) {
 	  std::cout << "\nhist: " << htest << std::endl;
 
 	  std::cout << "fftest: " << fftest->GetName() << std::endl;
-
-	  //	  std::cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n\n" << std::endl; 
 
 	  
 	  if ( contains( fftest->GetName(), "-mc" ) ) translate_x = false;
@@ -2623,7 +2613,8 @@ int main(int argc, char** argv) {
 
 	  if ( !noreftmp && hreft==0 ) { 
 	    std::cerr << "missing ref histogram: " << (refchain[j]+" / "+reghist)  
-				      << " " << hreft << std::endl; 
+		      << " " << hreft << std::endl;
+	    
 	    noreftmp = true;
 	    Plotter::setplotref(false);
 	    noreflabel="reference not found";
@@ -2795,26 +2786,23 @@ int main(int argc, char** argv) {
 
 	    if ( htestnum && htestden ) { 
 
-#if 1
+#ifdef D0REBIN
+	      /// need this for some cases - need to work out what the
+	      /// condition to run this will be ...
 	      if ( d0rebin_flag ) {
-		//	htestnum = d0rebin( htestnum );
-		//	htestden = d0rebin( htestden );
+		htestnum = d0rebin( htestnum );
+		htestden = d0rebin( htestden );
 	      }
 	      else if ( rebin!=1 ) { 
-		// htestnum = Rebin(htestnum, rebin );
-		// htestden = Rebin(htestden, rebin );
+		htestnum = Rebin(htestnum, rebin );
+		htestden = Rebin(htestden, rebin );
 	      }
 #endif	      
 	      std::cout << "test histogram name: : " << htestnum->GetName() << "\txaxis: " << xaxis << "\t" << std::endl;
 	      
-	      //	if ( xaxis.find("p_{T}")!=std::string::npos || xaxis.find("pt")!=std::string::npos ) { 
 	      if ( make_efficiencies && std::string(htestnum->GetName()).find("ntrax_eff")!=std::string::npos ) {
 
-		std::cerr << "AARGH" << std::endl;
-
 		bool low = true;
-
-		//		if ( chains[j].find("j55")!=std::string::npos ) low = false;
 
 		htestnum = rebin_log( htestnum, low );
 		htestden = rebin_log( htestden, low );
@@ -2899,7 +2887,9 @@ int main(int argc, char** argv) {
 		  hrefden = trans( hrefden, translate_x );
 		}
 
-#if 0
+#ifdef D0REBIN
+		/// will need this, but still need to work out what
+		/// additional condition is needed ...
 		if ( d0rebin_flag ) {
 		  hrefnum = d0rebin( hrefnum );
 		  hrefden = d0rebin( hrefden );
@@ -2963,8 +2953,6 @@ int main(int argc, char** argv) {
 	  //	  continue;
 	}
 
-	//	std::cout << "cck: " << 0 << "\tsht" << std::endl;
-
 	std::cout << "htest: " << isTEfficiency(htest) << std::endl;
 
 	if ( isTEfficiency(htest) ) htest = makeplot(htest);
@@ -2974,8 +2962,7 @@ int main(int argc, char** argv) {
 	htest->GetXaxis()->SetTitle(xaxis.c_str());
 	htest->GetYaxis()->SetTitle(yaxis.c_str());
 
-	std::cout << "cck: " << 1 << "\t" << htest << " CNT" << std::endl;
-
+	std::cout << "htest: " << htest << "\t" << __LINE__ << std::endl;
 
 	
 	if ( !noreftmp ) { 
@@ -2984,28 +2971,13 @@ int main(int argc, char** argv) {
 
 	  href->GetYaxis()->SetTitleOffset(1.5);
 
-	  std::cout << "cck: " << -2 << std::endl;
-
 	  href->GetXaxis()->SetTitleOffset(1.5);
-
-	  std::cout << "cck: " << -3 << std::endl;
 
 	  std::cout << "xaxis: " << xaxis << std::endl;
 
 	  std::cout << "xaxis: " << href->GetXaxis()->GetTitle() << std::endl;
 
-	  //	  href->GetXaxis()->SetTitle(xaxis.c_str());
-
-	  std::cout << "cck: " << -4 << std::endl;
-
-	  //	  if ( contains(yaxis,"Efficiency") && !contains(yaxis,"%") && scale_eff==100 ) href->GetYaxis()->SetTitle((yaxis+" [%]").c_str());
-	  //      else href->GetYaxis()->SetTitle(yaxis.c_str());
-
-	  std::cout << "cck: " << -5 << std::endl;
-
 	}	
-
-	std::cout << "cck: " << 2 << std::endl;
 
 	std::cout << "cck: " << htest << " CNT" << std::endl;
 
@@ -3466,6 +3438,8 @@ int main(int argc, char** argv) {
 	if ( xinfo.rangeset() ) { 
 	  rmin = plots.realmin( plots.lo(), plots.hi() );
 	  rmax = plots.realmax( plots.lo(), plots.hi() );
+	  /// this stuff is tricky to get right - leave this here
+	  /// until we know it will no loner be needed
 	  // if ( yinfo.normset() ) { 
 	  //  Norm( htest, 1, rmin, rmax ); 
 	  //  if ( href ) Norm( href, 1, rmin, rmax );
