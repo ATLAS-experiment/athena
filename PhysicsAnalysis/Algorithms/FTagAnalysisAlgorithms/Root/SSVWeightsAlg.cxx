@@ -681,12 +681,15 @@ namespace CP{
       std::string bjets_key = std::to_string(m_upperboundNbjets) + "p_bjets";
       n_F_value = m_nFPileupBJetMap.at(mu_key).at(bjets_key);
     }
-
+    auto denom = poisson_pmf(N_fake, n_F_value);
+    if (denom == 0. )[[unlikely]]{
+      throw std::runtime_error("nFMethodPileupBJetBasedClass::getPFake: divide-by-zero");
+    }
     if (muactual >= m_lowMuHighMuThreshold){
-      P_fake = (poisson_pmf(N_fake, SF_fake_high*n_F_value))/poisson_pmf(N_fake, n_F_value);
+      P_fake = (poisson_pmf(N_fake, SF_fake_high*n_F_value))/denom;
     }
     else {
-      P_fake = (poisson_pmf(N_fake, SF_fake_low*n_F_value))/poisson_pmf(N_fake, n_F_value);
+      P_fake = (poisson_pmf(N_fake, SF_fake_low*n_F_value))/denom;
     }
 
     return P_fake;
@@ -737,10 +740,14 @@ namespace CP{
     for (size_t j = 0; j < m_muactualBins.size() - 1; ++j) {
       if (muactual >= m_muactualBins[j] && muactual < m_muactualBins[j + 1]) {
         nF = m_nFBins[j];
+        const auto denom = poisson_pmf(N_fake, nF);
+        if (denom == 0.)[[unlikely]]{
+          continue;
+        }
         if (muactual < m_lowMuHighMuThreshold){
-          P_fake = poisson_pmf(N_fake, SF_fake_low * nF) / poisson_pmf(N_fake, nF);
+          P_fake = poisson_pmf(N_fake, SF_fake_low * nF) / denom;
         } else {
-          P_fake = poisson_pmf(N_fake, SF_fake_high * nF) / poisson_pmf(N_fake, nF);
+          P_fake = poisson_pmf(N_fake, SF_fake_high * nF) / denom;
         }
         break; // Bin found, no need to continue loop
       }
