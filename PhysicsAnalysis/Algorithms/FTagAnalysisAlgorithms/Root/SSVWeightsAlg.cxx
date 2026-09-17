@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Hagen Möbius, hagen.mobius@cern.ch
@@ -567,6 +567,8 @@ namespace CP{
     const std::vector<double> &ptbins = m_ptbins;
 
     double P_ineff = 1;
+    const std::string etaStr{"eta"};
+    const std::string effStr{"efficiency"};
     for (size_t i = 0; i < missed_truthBhs.size(); ++i) { 
       //retrieve pt,eta of missed truthBh
       double pt = missed_truthBhs[i]->pt();
@@ -587,8 +589,8 @@ namespace CP{
         continue;
       }
       //retrieve eta and efficiency bins for the pT bin
-      const std::vector<double>& eta_bins = m_BhadronPtEtaEfficiencyMap.at(pt_bin_of_truthBh).at("eta");
-      const std::vector<double>& efficiencies = m_BhadronPtEtaEfficiencyMap.at(pt_bin_of_truthBh).at("efficiency");
+      const std::vector<double>& eta_bins = m_BhadronPtEtaEfficiencyMap.at(pt_bin_of_truthBh).at(etaStr);
+      const std::vector<double>& efficiencies = m_BhadronPtEtaEfficiencyMap.at(pt_bin_of_truthBh).at(effStr);
 
       double efficiency = 1;
 
