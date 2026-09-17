@@ -11,8 +11,8 @@
    <typedef name="xAOD::MuonMeasurement" />
    <typedef name="xAOD::MuonMeasurementContainer" />
 
-    <!-- Mdt Drift Circle -->
-    <class name="xAOD::MdtDriftCircle_v1" >
+   <!-- Mdt Drift Circle -->
+   <class name="xAOD::MdtDriftCircle_v1" >
         <field name="m_readoutEle" transient="true" />
         <field name="m_identifier" transient="true" />
        <field name="m_surface" transient="true" />
