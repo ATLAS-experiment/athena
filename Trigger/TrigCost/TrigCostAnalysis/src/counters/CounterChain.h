@@ -47,9 +47,6 @@ class CounterChain : public CounterBase {
      * @param[in] weight Global event weight
      */
     virtual StatusCode newEvent(const CostData& data, size_t index, const float weight = 1.) override;
-
-  private:
-    bool m_isInitialized{};
 };
 
 #endif // TRIGCOSTANALYSIS_COUNTERALGORITHM_H
