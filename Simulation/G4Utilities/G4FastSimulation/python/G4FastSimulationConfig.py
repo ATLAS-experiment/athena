@@ -22,17 +22,17 @@ def FatrasG4Cfg(flags, **kwargs):
     result = ComponentAccumulator()
     # Name of region where FatrasG4 will be triggered
     kwargs.setdefault("RegionName", "InDet")
-
-    # Set the ActsFatrasG4Tool part
-    from G4AtlasTools.G4AtlasToolsConfig import ActsFatrasG4ToolCfg
-    if "ActsFatrasG4Tool" not in kwargs:        
-        kwargs.setdefault("ActsFatrasG4Tool", result.addPublicTool(result.popToolsAndMerge(ActsFatrasG4ToolCfg(flags))))
-    
-    fatrasG4Tool = CompFactory.FatrasG4Tool(name="FatrasG4", **kwargs)
-    # declare produced data
-    # ExtraOutputs is now declared in SimHitContainerListCfg in G4AtlasToolsConfig.py, and called from G4AtlasAlgConfig.py
-    result.setPrivateTools(fatrasG4Tool)
-
+    # Use the normalizing flow photon conversion instead of the ACTS fast model
+    kwargs.setdefault("flowConversion", True)
+    # Normalizing flow photon conversion model: the single ONNX graph written by
+    # the gammaConversion study's export_flow_onnx.py. An absolute path is used
+    # as given; anything else is looked up along CALIBPATH.
+    # DEVELOPMENT DEFAULT - this points at a private working copy. It has to
+    # become a calibration-area-relative name, e.g.
+    # "FatrasG4/PhotonConversionFlow/conversion_flow_v00.onnx", once the model
+    # has been uploaded to GroupData.
+    kwargs.setdefault("flowConversionModelPath", "/home/s2612909/onnx/conversion_flow.onnx")
+    result.setPrivateTools(CompFactory.FatrasG4Tool(name="FatrasG4", **kwargs))
     return result
 
 def AFatrasG4Cfg(flags, **kwargs):
@@ -51,6 +51,7 @@ def AFatrasG4Cfg(flags, **kwargs):
     result.setPrivateTools(aFatrasG4Tool)
 
     return result
+
 
 def FastCaloSimCfg(flags, **kwargs):
     result = ComponentAccumulator()

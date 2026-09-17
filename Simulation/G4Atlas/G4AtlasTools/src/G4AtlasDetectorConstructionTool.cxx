@@ -70,6 +70,7 @@ StatusCode G4AtlasDetectorConstructionTool::initialize( )
 
   ATH_CHECK( m_G4CaloTransportTool.retrieve( DisableTool{ m_G4CaloTransportTool.empty() } ) ); 
 
+
   return StatusCode::SUCCESS;
 }
 
@@ -173,6 +174,7 @@ void G4AtlasDetectorConstructionTool::G4AtlasDetectorConstruction::
       return;
     }
   }
+
 
   return;
 }

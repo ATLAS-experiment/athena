@@ -740,6 +740,7 @@ def G4AtlasDetectorConstructionToolCfg(flags, name="G4AtlasDetectorConstructionT
     
         if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
             kwargs.setdefault("G4CaloTransportTool", result.addPublicTool(result.popToolsAndMerge(G4CaloTransportToolCfg(flags))))
+
         
     result.setPrivateTools(G4AtlasDetectorConstructionTool(name, **kwargs))
     return result

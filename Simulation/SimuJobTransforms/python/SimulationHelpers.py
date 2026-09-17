@@ -120,3 +120,8 @@ def useNystromRK4Stepper(flags):
 def enableFastIDKiller(flags):
     """ """
     flags.Sim.OptionalUserActionList += ['G4UserActions.G4UserActionsConfig.FastIDKillerToolCfg']
+
+
+def enableFastIDKillerAll(flags):
+    """Kill every particle leaving the ID envelope, with no exception."""
+    flags.Sim.OptionalUserActionList += ['G4UserActions.G4UserActionsConfig.FastIDKillerAllToolCfg']
