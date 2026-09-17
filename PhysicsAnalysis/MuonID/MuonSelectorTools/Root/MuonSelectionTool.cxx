@@ -57,10 +57,31 @@ namespace CP {
     StatusCode MuonSelectionTool::initialize() {
         // Greet the user:
         ATH_MSG_INFO("Initialising...");
-        if(m_isRun3) ATH_MSG_INFO("MuonSelectionTool will assume run3 geometry is used");
+
+        m_runPeriodEnum = static_cast<RunPeriod>(m_runPeriod.value());
+
+        if( m_runPeriodEnum == RunPeriod::Undefined || (m_runPeriodEnum != RunPeriod::Run2 && m_runPeriodEnum != RunPeriod::Run3) ) {
+            ATH_MSG_ERROR("Run period is not defined! Please set the RunPeriod property to 2 for Run 2 or 3 for Run 3.");
+            return StatusCode::FAILURE;
+        }
+
+        if(isRun3()) ATH_MSG_INFO("MuonSelectionTool will assume run3 geometry is used");
         else ATH_MSG_INFO("MuonSelectionTool will assume run2 geometry is used");
         ATH_MSG_INFO("Maximum eta: " << m_maxEta);
         ATH_MSG_INFO("Muon quality: " << m_quality);
+
+
+        //Crash if selection is veryloose and Run3
+        if( isRun3() && m_quality==3 && !m_developMode){
+            ATH_MSG_ERROR("muonSelectionTool currently supports for Run3 all WPs with the exception of veryLoose" );
+            return StatusCode::FAILURE;
+        }
+
+        if(!m_developMode && (m_excludeNSWFromPrecisionLayers || !m_recalcPrecisionLayerswNSW)){
+             ATH_MSG_ERROR("for run3, all WPs are only supported when ExcludeNSWFromPrecisionLayers=False and RecalcPrecisionLayerswNSW=True");
+             return StatusCode::FAILURE;
+        }
+
         if (m_toroidOff) ATH_MSG_INFO("!! CONFIGURED FOR TOROID-OFF COLLISIONS !!");
         if (m_SctCutOff) ATH_MSG_WARNING("!! SWITCHING SCT REQUIREMENTS OFF !! FOR DEVELOPMENT USE ONLY !!");
         if (m_PixCutOff) ATH_MSG_WARNING("!! SWITCHING PIXEL REQUIREMENTS OFF !! FOR DEVELOPMENT USE ONLY !!");
@@ -277,51 +298,16 @@ namespace CP {
         ATH_MSG_VERBOSE("Muon phi: " << mu.phi());
         
         static std::atomic<bool> isFirstRun3Check{true};
-        if(isFirstRun3Check)
-        {
-            int rn=getRunNumber(true);
-            
-            if(!m_isRun3 && rn>=399999)
-            {
-              if(m_geoOnTheFly)
-              {
-                ATH_MSG_WARNING("muonSelectionTool configured for run2 geometry, but rununmber "<<rn<<" is run3! configure properly the isRun3Geo property; geometry set to run2 on the fly");
-              }
-              else if(m_forceGeometry)
-              {
-                ATH_MSG_WARNING("muonSelectionTool configured for run2 geometry, but rununmber "<<rn<<" is run3! Since ForceGeometry is set to True, we'll keep using the wrong geometry, but this is an expert option, make sure you know what you're doing");
-              }
-              else
-              {
-                ATH_MSG_FATAL("muonSelectionTool configured for run2 geometry, but rununmber "<<rn<<" is run3! configure properly the isRun3Geo property");
+        //Crash if the tool is miconfigured for the wrong run
+        //Can we somehow retrieve this in metadata of the file and already crash in initialise rather than checking on the fly for each muon?
+        if(isFirstRun3Check){
+            if( isRun3() && getRunNumber(true) < 399999 ){
+                ATH_MSG_FATAL("muonSelectionTool configured for run3 geometry, but rununmber "<<getRunNumber(true)<<" is run2! configure properly the isRun3Geo property");
                 throw std::runtime_error("MuonSelectionTool() - wrong detector geometry");
-              }
-            }
-            if(m_isRun3 && rn<399999)
-            {
-              if(m_geoOnTheFly)
-              {
-                ATH_MSG_WARNING("muonSelectionTool configured for run3 geometry, but rununmber "<<rn<<" is run2! configure properly the isRun3Geo property; geometry set to run2 on the fly");
-              }
-              else if(m_forceGeometry)
-              {
-                ATH_MSG_WARNING("muonSelectionTool configured for run3 geometry, but rununmber "<<rn<<" is run3! Since ForceGeometry is set to True, we'll keep using the wrong geometry, but this is an expert option, make sure you know what you're doing");
-              }
-              else
-              {
-                ATH_MSG_FATAL("muonSelectionTool configured for run3 geometry, but rununmber "<<rn<<" is run2! configure properly the isRun3Geo property");
-                throw std::runtime_error("MuonSelectionTool() - wrong detector geometry");
-              }
-            }
-            if(isRun3())
-            {
-                
-                if(m_quality!=0 && m_quality!=1 && m_quality!=2 && m_quality!=4) ATH_MSG_WARNING("muonSelectionTool currently only supports loose, medium, tight and highpt WPs for run 3 data/MC, all other WPs can currently only be used for tests using Expert mode");
-                if(m_quality==0 && !m_developMode && (m_excludeNSWFromPrecisionLayers || !m_recalcPrecisionLayerswNSW)) ATH_MSG_WARNING("for run3, Tight WP is only supported when ExcludeNSWFromPrecisionLayers=False and RecalcPrecisionLayerswNSW=True");
             }
             isFirstRun3Check=false;
         }
-        
+
         asg::AcceptData acceptData(&m_acceptInfo);
 
         // Do the eta cut:
@@ -1401,7 +1387,7 @@ namespace CP {
         retrieveSummaryValue(muon, summary.extendedLargeHits, xAOD::MuonSummaryType::extendedLargeHits);
         retrieveSummaryValue(muon, summary.extendedSmallHoles, xAOD::MuonSummaryType::extendedSmallHoles);
         retrieveSummaryValue(muon, summary.isSmallGoodSectors, xAOD::MuonSummaryType::isSmallGoodSectors);
-        if(!isRun3(false)) retrieveSummaryValue(muon, summary.cscUnspoiledEtaHits, xAOD::MuonSummaryType::cscUnspoiledEtaHits); //setting allowForce to false for isRun3(bool) because otherwise that flag can be forced via tool properties to get a specific value, typically for testing purposes. But whatever you force that flag to be, you'll not have CSC hits in run-3 samples!
+        if(!isRun3()) retrieveSummaryValue(muon, summary.cscUnspoiledEtaHits, xAOD::MuonSummaryType::cscUnspoiledEtaHits); //setting allowForce to false for isRun3(bool) because otherwise that flag can be forced via tool properties to get a specific value, typically for testing purposes. But whatever you force that flag to be, you'll not have CSC hits in run-3 samples!
 
         if (!isRun3() && std::abs(muon.eta()) > 2.0) {
           ATH_MSG_VERBOSE("Recalculating number of precision layers for combined muon");

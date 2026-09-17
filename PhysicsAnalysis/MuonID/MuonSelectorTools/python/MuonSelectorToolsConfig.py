@@ -8,7 +8,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import LHCPeriod
+#from AthenaConfiguration.Enums import LHCPeriod
 
 ### Standard configuration of the MuonSelectionTool used in reconstruction & validation jobs
 ### The snippet is not meant for analysis jobs as it inherently switches off important cuts ensuring 
@@ -16,8 +16,8 @@ from AthenaConfiguration.Enums import LHCPeriod
 def MuonSelectionToolCfg(flags, name="MuonSelectionTool", **kwargs):
    """Configure the muon selection tool"""
    acc = ComponentAccumulator()
-   kwargs.setdefault("IsRun3Geo", flags.GeoModel.Run >= LHCPeriod.Run3 )
-   kwargs.setdefault("ForceGeometry", flags.GeoModel.Run > LHCPeriod.Run3 )   
+   #Extract the run period from the flags and set it for the tool. This is needed to ensure the tool applies the correct geometry cuts for Run 2, Run 3
+   kwargs.setdefault("RunPeriod", 3 if flags.GeoModel.Run >= LHCPeriod.Run3 else 2)
    kwargs.setdefault("DisablePtCuts", True)
    kwargs.setdefault("TurnOffMomCorr", True)
    the_tool = CompFactory.CP.MuonSelectionTool(name, **kwargs)   
