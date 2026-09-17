@@ -70,12 +70,10 @@ For example, `module_map_path` can be `/path/to/modulemaps/merged_ttbar_plus_sin
 ```bash
     conditions_tag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 
-    Reco_tf.py --CA 'all:True' \
+    Reco_tf.py \
         --conditionsTag "all:${conditions_tag}" \
-        --digiSteeringConf 'StandardInTimeOnlyTruth' \
         --geometryVersion "all:ATLAS-P2-RUN4-03-00-00" \
         --multithreaded 'True' \
-        --steering 'doRAWtoALL' \
         --preInclude 'all:Campaigns.MC23PhaseIIPileUp200' \
             'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
             'InDetGNNTracking.InDetGNNTrackingFlags.gnnActsPipelineValidation' \
