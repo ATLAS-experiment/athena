@@ -46,16 +46,10 @@ atlas_add_library( BoostedJetTaggersLib
    MuonAnalysisInterfacesLib  TruthUtils ${extra_libs} 
    PRIVATE_LINK_LIBRARIES JetEDM )
 
-if( XAOD_STANDALONE )
-   atlas_add_component( BoostedJetTaggers
-      src/components/*.cxx
-      LINK_LIBRARIES BoostedJetTaggersLib JetCalibToolsLib)
-else()
-   atlas_add_component( BoostedJetTaggers
-      src/components/*.cxx
-      src/*.cxx
-      LINK_LIBRARIES BoostedJetTaggersLib JetCalibToolsLib SystematicsHandlesLib)
-endif()
+atlas_add_component( BoostedJetTaggers
+   src/components/*.cxx
+   src/*.cxx # fix me
+   LINK_LIBRARIES BoostedJetTaggersLib JetCalibToolsLib SystematicsHandlesLib)
 
 atlas_add_dictionary( BoostedJetTaggersDict
    BoostedJetTaggers/BoostedJetTaggersDict.h

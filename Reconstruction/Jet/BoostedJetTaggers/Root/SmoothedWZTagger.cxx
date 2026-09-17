@@ -247,6 +247,9 @@ StatusCode SmoothedWZTagger::decorate( const xAOD::JetContainer& jets ) const {
   // loop over jets
   for(const xAOD::Jet* jet : jets){
 
+    /// Reset the AcceptData cut results per each jet
+    ATH_CHECK( resetCuts( acceptData ) );
+
     /// Check basic kinematic selection
     bool pass_kin_range = passKinRange(*jet);
     decValidKinRange(*jet) = pass_kin_range;
@@ -283,9 +286,11 @@ StatusCode SmoothedWZTagger::decorate( const xAOD::JetContainer& jets ) const {
     decCutScore(*jet) = cut_score;
 
     /// Evaluate the cut criteria on mass and d2
+    ATH_MSG_DEBUG( "Var Values : jet pT = " << jet_pt);
     ATH_MSG_DEBUG( "Cut Values : MassWindow = [" << cut_mass_low << "," << cut_mass_high << "], D2Cut = " << cut_d2 );
-    ATH_MSG_DEBUG( "Cut Values : JetMass = " << jet_mass << ", D2 = " << jet_d2 );
-    ATH_MSG_DEBUG( "Cut Values : score = " << jet_score);
+    ATH_MSG_DEBUG( "Var Values : JetMass = " << jet_mass << ", D2 = " << jet_d2 );
+    ATH_MSG_DEBUG( "Cut Values : score = " << cut_score);
+    ATH_MSG_DEBUG( "Var Values : score = " << jet_score);
 
     if ( jet_mass >= cut_mass_low ) acceptData.setCutResult( "PassMassLow", true );
 
@@ -343,6 +348,7 @@ StatusCode SmoothedWZTagger::decorate( const xAOD::JetContainer& jets ) const {
 
     /// Decorate jet with tagging summary
     decTagged(*jet) = passCuts;
+    ATH_MSG_DEBUG( "Tagger decision :" << passCuts);
 
     /// Get enum to decorate acceptData state if only using 2-var tagger
     TagResult::TypeEnum myCutResultForSF = TagResult::UNKNOWN;

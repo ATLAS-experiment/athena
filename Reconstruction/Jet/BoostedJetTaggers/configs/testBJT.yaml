@@ -1,0 +1,30 @@
+CommonServices: {}
+
+PileupReweighting: {}
+
+EventCleaning:
+  runEventCleaning: True
+
+Jets:
+  - containerName: AnaLargeRJets
+    jetCollection: AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets
+    BoostedJetTagger:
+      Tagger: W
+      Generation: ParT
+      WP: '50'
+      ConfigFile: /eos/atlas/atlascerngroupdisk/perf-jets/LocalStorage/TAGGING/PreliminaryConfigs/WTagger/WTagger_AntiKt10UFOSoftDrop_ParT_FixSigEff50.dat
+      CalibArea: Local
+      decorations: ['WTransformer_50eff']
+
+  - containerName: AnaJets
+    jetCollection: AntiKt4EMPFlowJets
+    runJvtUpdate: True
+
+Output:
+  treeName: analysis
+  vars:
+    - AnaLargeRJets_NOSYS.WTransformer_ConstScore -> jet_WTransformer_ConstScore type=float
+  containers:
+    jet_: AnaLargeRJets
+    "": EventInfo
+    
