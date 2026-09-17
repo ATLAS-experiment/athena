@@ -4,6 +4,7 @@
    <class name="xAOD::MuonMeasurement_v1" >
        <field name="m_readoutEle" transient="true" />
        <field name="m_identifier" transient="true" />
+       <field name="m_surface" transient="true" />
    </class>
    <class name="xAOD::MuonMeasurementContainer_v1"
           id="E16D1889-95C6-4DB5-A98B-BDB8CF3A2B31" />
@@ -14,6 +15,7 @@
     <class name="xAOD::MdtDriftCircle_v1" >
         <field name="m_readoutEle" transient="true" />
         <field name="m_identifier" transient="true" />
+       <field name="m_surface" transient="true" />
     </class>
     <class name="xAOD::MdtDriftCircleContainer_v1"
            id="A1A37753-0334-4D86-AB45-06DE59AF694E" />
@@ -28,6 +30,7 @@
     <class name="xAOD::MdtTwinDriftCircle_v1" >
        <field name="m_readoutEle" transient="true" />
        <field name="m_identifier" transient="true" />
+       <field name="m_surface" transient="true" />
     </class>
 
     <class name="xAOD::MdtTwinDriftCircleContainer_v1"
@@ -43,6 +46,7 @@
     <class name="xAOD::RpcMeasurement_v1" >
        <field name="m_readoutEle" transient="true" />
        <field name="m_identifier" transient="true" />
+       <field name="m_surface" transient="true" />
     </class>
     <typedef name="xAOD::RpcMeasurement" />
     <class name="xAOD::RpcMeasurementContainer_v1"
@@ -52,6 +56,7 @@
     <class name="xAOD::RpcStrip_v1" >
        <field name="m_readoutEle" transient="true" />
        <field name="m_identifier" transient="true" />
+       <field name="m_surface" transient="true" />
     </class>
     <class name="xAOD::RpcStripContainer_v1"
            id="BE381AB2-0A2A-46EC-B3FF-C254BBEB7912" />
@@ -65,6 +70,7 @@
     <class name="xAOD::RpcStrip2D_v1" >
        <field name="m_readoutEle" transient="true" />
        <field name="m_identifier" transient="true" />
+       <field name="m_surface" transient="true" />
     </class>
 
     <class name="xAOD::RpcStrip2DContainer_v1"
@@ -82,6 +88,7 @@
     <class name="xAOD::TgcStrip_v1" >
        <field name="m_readoutEle" transient="true" />
        <field name="m_identifier" transient="true" />
+       <field name="m_surface" transient="true" />
     </class>
 
     <class name="xAOD::TgcStripContainer_v1"
@@ -97,6 +104,7 @@
     <class name="xAOD::MMCluster_v1"  >
        <field name="m_readoutEle" transient="true" />
        <field name="m_identifier" transient="true" />
+       <field name="m_surface" transient="true" />
     </class>
     <class name="xAOD::MMClusterContainer_v1"
            id="C8ED2C42-FE97-4C67-BFBC-69A272A9A6D6" />
@@ -109,6 +117,7 @@
     <class name="xAOD::sTgcMeasurement_v1" >
        <field name="m_readoutEle" transient="true" />
        <field name="m_identifier" transient="true" />
+       <field name="m_surface" transient="true" />
     </class>
     <typedef name="xAOD::sTgcMeasurement" />
     <class name="xAOD::sTgcMeasContainer_v1"
@@ -117,6 +126,7 @@
     <class name="xAOD::sTgcStripCluster_v1"  >
        <field name="m_readoutEle" transient="true" />
        <field name="m_identifier" transient="true" />
+       <field name="m_surface" transient="true" />
     </class>
     <class name="xAOD::sTgcStripContainer_v1"
             id="B6801F5D-1E96-4B6D-A36E-3EEC436AFAFF" />
@@ -129,6 +139,7 @@
      <class name="xAOD::sTgcWireHit_v1" >
        <field name="m_readoutEle" transient="true" />
        <field name="m_identifier" transient="true" />
+       <field name="m_surface" transient="true" />
      </class>
      <class name="xAOD::sTgcWireContainer_v1" 
               id="22668EAD-FFC5-4DB0-8A30-DBE64EF1C1E7" />
@@ -141,6 +152,7 @@
      <class name="xAOD::sTgcPadHit_v1"  >
        <field name="m_readoutEle" transient="true" />
        <field name="m_identifier" transient="true" />
+       <field name="m_surface" transient="true" />
      </class>
      <class name="xAOD::sTgcPadContainer_v1" 
               id="2691143C-4EA0-4B28-AB01-2E62B3D09DB3" />
@@ -150,9 +162,13 @@
               id="7F62C588-0EF3-4E4B-BEC5-4881D7E24D72" />
       <typedef name="xAOD::sTgcPadAuxContainer" />
 
+       <!-- Combined muonstrip -->
+       <class name="xAOD::CombinedMuonStrip_v1" >
+              <field name="m_readoutEle" transient="true" />
+              <field name="m_identifier" transient="true" />
+              <field name="m_surface" transient="true" />
+       </class>
 
-       <!-- Combined muonstraip -->
-       <class name="xAOD::CombinedMuonStrip_v1" />
        <typedef name="xAOD::CombinedMuonStrip" />
        <class name="xAOD::CombinedMuonStripContainer_v1" 
                id="7C7907CD-4F95-4193-A8E2-7C4981A50784" />
