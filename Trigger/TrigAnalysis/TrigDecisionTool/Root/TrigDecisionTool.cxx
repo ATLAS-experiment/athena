@@ -211,7 +211,7 @@ StatusCode Trig::TrigDecisionTool::beginEvent() {
         << " and BGSK: " << newKeys[3]
         << " getForceConfigUpdate()=" << getForceConfigUpdate()
         << " HLT Chains: " << iHLTConfig->chains().size());
-    *getKeys() = newKeys;
+    *getKeys() = std::move(newKeys);
     configurationUpdate( &iHLTConfig->chains(), iL1Config->ctpConfig() );
     setForceConfigUpdate(false);
   }

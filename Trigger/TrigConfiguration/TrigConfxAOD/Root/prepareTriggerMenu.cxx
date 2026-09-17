@@ -93,10 +93,15 @@ namespace TrigConf {
 
          // Figure out which level this chain is from:
          std::string level = "";
+         bool has_l2 = false;
          if( menu->chainNames()[ i ].find( "L2_" ) == 0 ) {
             level = "L2";
          } else if( menu->chainNames()[ i ].find( "EF_" ) == 0 ) {
             level = "EF";
+            // xAOD::TriggerMenu was introduced during Run 2.
+            // Hence if we encounter an old POOL file whose metadata is in this format, and which contains EF chains.
+            // Then we can safely deduce that this chain is from Run 1, and hence will connect to a L2 chain.
+            has_l2 = true; 
          } else if( menu->chainNames()[ i ].find( "HLT_" ) == 0 ) {
             level = "HLT";
          } else {
@@ -165,6 +170,7 @@ namespace TrigConf {
                                          menu->chainParentNames()[ i ],
                                          -1, // Lower chain ID not important
                                          std::move(signatures) );
+         chain->set_has_l2(has_l2);
          if( menu->chainRerunPrescalesAvailable() ) {
             chain->set_rerun_prescale( menu->chainRerunPrescales()[ i ] );
          }
@@ -286,7 +292,7 @@ namespace TrigConf {
    }
 
    /// Load JSON derived data into legacy structures to maintain 
-   /// compatiblity with existing code.
+   /// compatibility with existing code.
    ///
    /// @param loadedHlt The incoming HLT trigger menu object to translate
    /// @param loadedL1 The incoming L1 trigger menu object to translate
@@ -395,10 +401,12 @@ namespace TrigConf {
                                             level,
                                             loadedChain.l1item(), // L1 seeds (string)
                                             -1, // Lower chain ID not important
-                                            std::move(signatures) ); // Empty for R3 JSONs
- 
-            chain->set_rerun_prescale( -1.0 ); // Not used in R3
-            chain->set_pass_through( -1.0 );  // Not used in R3
+                                            std::move(signatures) ); // Empty for Run 3+ JSONs
+            // Run 1 POOL files are not expected to have a JSON metadata payload (see above)
+            // Hence any EF chains encountered are Run 4 and not Run 1. They therefore do not connect to a L2 chain.
+            chain->set_has_l2(false); 
+            chain->set_rerun_prescale( -1.0 ); // Not used in Run 3+
+            chain->set_pass_through( -1.0 );  // Not used in Run 3+
             chain->set_leg_multiplicities( loadedChain.legMultiplicities() );
 
             for (const std::string& group : loadedChain.groups()){

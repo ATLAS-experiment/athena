@@ -10,7 +10,7 @@
 
 // PACKAGE
 #include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
-#include "ActsEvent/ContextUtility.h"
+#include "ActsGeometry/ContextUtility.h"
 
 // STL
 #include <fstream>

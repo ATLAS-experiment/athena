@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/GridTripletSeedingTool.h"
@@ -593,7 +593,8 @@ StatusCode GridTripletSeedingTool::createSeedsImpl(
         const Eigen::Vector3f stripSeparation = sp->stripCenterDistance();
 
         newSp.outerStripCalibrationDetails().outerCenter = std::array<float, 3>{
-            outerStripCenter.x(), outerStripCenter.y(), outerStripCenter.z()};
+            outerStripCenter.x() - beamSpotPos[0],
+            outerStripCenter.y() - beamSpotPos[1], outerStripCenter.z()};
         newSp.outerStripCalibrationDetails().innerToOuterSeparation =
             std::array<float, 3>{stripSeparation.x(), stripSeparation.y(),
                                  stripSeparation.z()};

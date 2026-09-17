@@ -283,6 +283,21 @@
             "forData": "true"
         },
 
+        "GN3EPCLV01": {
+            "_comment": "pb, pc, pu and ptau",
+            "title": "GN3EPCLV01",
+            "xtitle": "GN3EPCLV01 px",
+            "ytitle": "Jets",
+            "path":  {"PHYSVAL": "tagger"},
+            "xbins": 100,
+            "xmin": 0,
+            "xmax": 1,
+            "forEach": ["pb", "pc", "pu", "ptau"],
+            "forEachTruthType": ["U", "B", "C", "TAU", "DATA"],
+            "type": "TH1D",
+            "forData": "true"
+        },
+
 	"GN3XPV01": {
             "_comment": "phbb, phcc, phtautauhad, ptop, pqcdbb, pqcdbx, pqcdcx, pqcdll and pwqq",
             "title": "GN3XPV01",
@@ -314,19 +329,6 @@
         "llr": {
             "_comment": "",
             "title": "loglikelihoodratio of matched jets",
-            "xtitle": "loglikelihoodratio",
-            "ytitle": "Jets",
-            "path":  {"PHYSVAL": "tagger"},
-            "xbins": 250,
-            "xmin": -10,
-            "xmax": 40,
-            "type": "TH1D",
-            "forData": "false"
-        },
-
-        "llr_nTracksCut": {
-            "_comment": "",
-            "title": "loglikelihoodratio of matched jets with nTracks cut",
             "xtitle": "loglikelihoodratio",
             "ytitle": "Jets",
             "path":  {"PHYSVAL": "tagger"},

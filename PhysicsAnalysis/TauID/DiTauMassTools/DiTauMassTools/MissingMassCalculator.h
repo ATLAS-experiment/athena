@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -15,28 +15,23 @@ events where two particles decay into states with missing ET.
 
 
 #if !defined (__CINT__) || defined (__MAKECINT__)
-
+#include "DiTauMassTools/MissingMassInput.h"
+#include "DiTauMassTools/MissingMassOutput.h"
+#include "DiTauMassTools/HelperFunctions.h"
 #include <TRandom2.h>
 #include <TH1.h>
 #include <TGraph.h>
-#include <TF1.h>
-#include <TMath.h>
-#include <Math/Vector4D.h>
-#include <Math/Vector2D.h>
-#include <vector>
-#include <TObject.h>
-#include <TDirectory.h>
-#include "TMatrixD.h"
+#include <Math/Vector4D.h> //typedef for Math::PtEtaPhiMVector
 
 #include <memory>
 #include <string>
+#include <vector>
 
-#include "DiTauMassTools/MissingMassInput.h"
-#include "DiTauMassTools/MissingMassOutput.h"
-#include "DiTauMassTools/MissingMassProb.h"
-#include "DiTauMassTools/HelperFunctions.h"
-
-#include "xAODMissingET/MissingET.h"
+class TF1;
+namespace DiTauMassTools{
+  class MissingMassProb;
+  class MissingET;
+}
 
 #endif
 
@@ -71,7 +66,7 @@ class MissingMassCalculator {
   int m_fUseFloatStoppingCheckFreq{};
   double m_fUseFloatStoppingComp{};
 
-  int m_nsolmax,m_nsolfinalmax{};
+  int m_nsolmax{},m_nsolfinalmax{};
   int m_niterRandomLocal{};
   int m_nsucStop{};
   int m_rmsStop{};
@@ -332,7 +327,7 @@ public:
 
   MissingMassInput preparedInput;
   MissingMassOutput OutputInfo;
-  MissingMassProb* Prob;
+  MissingMassProb* Prob{};
 
   int RunMissingMassCalculator( const xAOD::IParticle* part1, const xAOD::IParticle* part2, const xAOD::MissingET* met, const int& njets );
   

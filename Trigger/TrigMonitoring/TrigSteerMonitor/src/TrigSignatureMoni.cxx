@@ -211,7 +211,7 @@ StatusCode TrigSignatureMoni::stop() {
   for (int bin = 1; bin <= (*m_passHistogram)->GetXaxis()->GetNbins(); ++bin) {
     const std::string chainName = m_passHistogram->GetXaxis()->GetBinLabel(bin);
     const std::string chainID = std::to_string(HLT::Identifier(chainName));
-    if (chainName.starts_with( "HLT")) { // print only for chains
+    if (chainName.starts_with( "HLT") || chainName.starts_with( "EF")) { // print only for chains
       ATH_MSG_INFO( std::format("{:s} #{:s}", chainName, chainID) );
       ATH_MSG_INFO( std::format("{:<30s}", std::format("-- #{} Events", chainID)) << collToString( bin, m_passHistogram) );
       ATH_MSG_INFO( std::format("{:<30s}", std::format("-- #{} Features", chainID)) << collToString( bin, m_countHistogram , 2, 1 ) );

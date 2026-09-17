@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGANALYSISHELPERS_FEATUREREQUESTDESCRIPTOR_H
@@ -13,13 +13,15 @@
  * request for trigger chain features using the TrigDecisionTool's run 3 interface.
  *
  ***********************************************************************************/
-#include <string>
-#include <sstream>
-#include <regex>
+
 
 #include "AsgMessaging/MsgStream.h"
 #include "TrigDecisionInterface/Conditions.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
+#include <string>
+#include <string_view>
+#include <sstream>
+#include <regex>
 
 namespace Trig {
 
@@ -32,9 +34,9 @@ namespace Trig {
      * @param[in] chainGroupName Chain or Chain Group, supplied by name.
      * Regex supported for chainGroupName with TrigDecisionTool. Only one exact individual chain name is supported in TrigDecisionToolLite.
      **/
-    FeatureRequestDescriptor(const std::string& chainGroupName = "",
+    FeatureRequestDescriptor(std::string_view chainGroupName = "",
       const unsigned int condition = TrigDefs::Physics,
-      const std::string& containerSGKey = "",
+      std::string_view containerSGKey = "",
       const unsigned int featureCollectionMode = TrigDefs::lastFeatureOfType,
       const std::string& navElementLinkKey = TrigCompositeUtils::featureString(),
       const int restrictToLegIndex = -1);
@@ -69,7 +71,7 @@ namespace Trig {
      * Regex supported with TrigDecisionTool. Only one exact individual chain name is supported in TrigDecisionToolLite.
      * @return reference to self, allows chaining.
      **/
-    FeatureRequestDescriptor& setChainGroup(const std::string& chainGroupName);
+    FeatureRequestDescriptor& setChainGroup(std::string_view chainGroupName);
 
     /**
      * @brief Set the Condition:
@@ -87,7 +89,7 @@ namespace Trig {
      * Set to an empty string (default) to disable the filter. 
      * @return reference to self, allows chaining.
      **/
-    FeatureRequestDescriptor& setRequireSGKey(const std::string& containerSGKey);
+    FeatureRequestDescriptor& setRequireSGKey(std::string_view containerSGKey);
 
     /**
      * @brief Set the Feature Collection Mode:

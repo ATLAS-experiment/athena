@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGDQA_BTagPLOTS_H
@@ -13,11 +13,13 @@
 #include "xAODTracking/VertexFwd.h"//lightweight typedef
 #include "xAODEventInfo/EventInfo.h" //typedef
 
+#include <set>
 #include <string>
 #include <vector>
 #include <map>
 
 class TH1;
+class IBTaggingSelectionTool;
 
     
 namespace JetTagDQA{
@@ -40,7 +42,7 @@ namespace JetTagDQA{
 
       void bookNJetsThatPassedWPCutsHistos();
       void initializeNJetsThatPassedWPCutsMap(std::map<std::string, int>& nJetsThatPassedWPCuts);
-      void updateNJetsThatPassedWPCutsMap(std::map<std::string, int>& nJetsThatPassedWPCuts, const double& GN2v01, const double& GN3XPV01);
+      void updateNJetsThatPassedWPCutsMap(std::map<std::string, int>& nJetsThatPassedWPCuts, const std::string& tagger, double discriminant);
       void fillNJetsThatPassedWPCutsHistos(std::map<std::string, int>& nJetsThatPassedWPCuts, const xAOD::EventInfo* event);
 
       void setTaggerInfos();    
@@ -82,14 +84,12 @@ namespace JetTagDQA{
       TH1* m_jet_pt_b = nullptr;
       TH1* m_jet_pt_c = nullptr;
       TH1* m_jet_pt_l = nullptr;
-      TH1* m_jet_pt_top = nullptr;
       TH1* m_jet_pt_Zprime_b = nullptr;
       TH1* m_jet_pt_Zprime_c = nullptr;
       TH1* m_jet_pt_Zprime_l = nullptr;
       TH1* m_jet_eta_b = nullptr;
       TH1* m_jet_eta_c = nullptr;
       TH1* m_jet_eta_l = nullptr;
-      TH1* m_jet_eta_top = nullptr;
 
 
       // SV1 related vars
@@ -439,6 +439,11 @@ namespace JetTagDQA{
       TH1* m_GN2v01_pc = nullptr;
       TH1* m_GN2v01_pu = nullptr;
       TH1* m_GN2v01_ptau = nullptr;
+
+      TH1* m_GN3EPCLV01_pb = nullptr;
+      TH1* m_GN3EPCLV01_pc = nullptr;
+      TH1* m_GN3EPCLV01_pu = nullptr;
+      TH1* m_GN3EPCLV01_ptau = nullptr;
       
       TH1* m_GN3XPV01_phtautauhad = nullptr;
       TH1* m_GN3XPV01_phbb = nullptr;
@@ -462,10 +467,14 @@ namespace JetTagDQA{
       std::vector<std::string> m_taggers;
       std::map<std::string, int> m_truthLabels;
       std::map<std::string, double> m_GN2v01_workingPoints;
+      std::map<std::string, double> m_GN3EPCLV01_workingPoints;
       std::map<std::string, double> m_GN3XPV01_workingPoints; // TODO: Change this in the future since GN3 has WPs pT and mass dependent
 
       double m_GN2v01_fc = 0.0;
       double m_GN2v01_ftau = 0.0;
+      double m_GN3EPCLV01_fc = 0.0;
+      double m_GN3EPCLV01_ftau = 0.0;
+      const IBTaggingSelectionTool* m_GN2v01SelectionTool = nullptr;
       double m_GN3XPV01_hcc_fc = 0.0;
       double m_GN3XPV01_top_fc = 0.0;
       std::map<std::string, TH1*> m_weight_histos; 
@@ -478,7 +487,9 @@ namespace JetTagDQA{
       // a setter for the HistogramDefinitions and the jvt and TMP cuts
       void setHistogramDefinitions( std::map< std::string, std::vector< std::string > > HistogramDefinitions);
       void setIsDataJVTCutsAndTMPCut(bool isData, float JVTCutAntiKt4EMTopoJets, float JVTCutLargerEtaAntiKt4EMTopoJets, float JVTCutAntiKt4EMPFlowJets, float truthMatchProbabilityCut);
-      void setTaggerNames(const std::string& GN2v01Name, const std::string& GN3XPV01Name);
+      void setTaggerNames(const std::string& GN2v01Name, const std::string& GN3EPCLV01Name, const std::string& GN3XPV01Name);
+      void setGN2v01Config(const IBTaggingSelectionTool* selectionTool, const std::map<std::string, double>& workingPoints, double fc, double ftau);
+      void setGN3EPCLV01Config(const std::map<std::string, double>& workingPoints, double fc, double ftau);
 
       // jvt variables 
       bool m_JVT_defined{};
@@ -498,10 +509,13 @@ namespace JetTagDQA{
       enum position{histo_name, histo_title, histo_path, histo_xbins, histo_xmin, histo_xmax, histo_type, histo_ymin, histo_ymax};
       float m_truthMatchProbabilityCut = 0.0F;
       bool m_isData = false;
+      std::set<std::string> m_taggersWithMissingOutputs;
       // some helper functions
       TH1* bookHistogram(std::string histo_name, const std::string& var_name, const std::string& part = "", const std::string& prefix = "");
       int getTrackHits(const xAOD::TrackParticle& part, xAOD::SummaryType info);
-      void fillDiscriminantHistograms(const std::string& tagger_name, const double& discriminant_value, const std::map<std::string, double>& working_points, const int& truth_label, std::map<std::string, TH1*>::const_iterator hist_iter, std::map<std::string, int>::const_iterator label_iter, const bool& pass_nTracksCut, const double& jet_pT, const double& jet_Lxy, const bool& onZprime, const xAOD::EventInfo* event);
+      bool hasTaggerOutputs(const xAOD::Jet& jet, const std::string& tagger, const std::vector<std::string>& outputs);
+      const std::map<std::string, double>& workingPoints(const std::string& tagger) const;
+      void fillDiscriminantHistograms(const std::string& tagger_name, const double& discriminant_value, const std::map<std::string, double>& working_points, const int& truth_label, std::map<std::string, TH1*>::const_iterator hist_iter, std::map<std::string, int>::const_iterator label_iter, const double& jet_pT, const double& jet_Lxy, const bool& onZprime, const xAOD::EventInfo* event);
       void bookDiscriminantVsPTAndLxyHistograms(const std::string& tagger_name, const std::map<std::string, double>& workingPoints, const bool& isOldTagger, std::map<std::string, int>::const_iterator label_iter, const std::string& m_sParticleType);
       template <class T>
       void fillHistoWithTruthCases(T value, TH1* histo_incl, TH1* histo_b, TH1* histo_c, TH1* histo_l, TH1* histo_muon, const int& truth_label, const bool& has_muon, const xAOD::EventInfo* event);
@@ -510,6 +524,7 @@ namespace JetTagDQA{
 
       // tagger names
       std::string m_GN2v01Name;
+      std::string m_GN3EPCLV01Name;
       std::string m_GN3XPV01Name;
   
   };

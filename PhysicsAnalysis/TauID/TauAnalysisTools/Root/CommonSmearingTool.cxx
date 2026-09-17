@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Framework include(s):
@@ -14,6 +14,8 @@
 
 // ROOT include(s)
 #include "TROOT.h"
+#include "TFile.h"
+#include "TH1.h"
 #include "TF1.h"
 #include "TClass.h"
 #include "TKey.h"
@@ -157,6 +159,9 @@ CP::CorrectionCode CommonSmearingTool::applyCorrection( xAOD::TauJet& xTau ) con
     static const SG::ConstAccessor<float> accPtTauEnergyScale ("ptTauEnergyScale");
     if(accPtTauEnergyScale.isAvailable(xTau)) {
       const auto combinedTEStool = dynamic_cast<const TauCombinedTES*>(m_tTauCombinedTES.get());
+      if (!combinedTEStool)[[unlikely]]{
+        throw std::runtime_error("CommonSmearingTool::applyCorrection: combinedTEStool is null");
+      }
       compatibility = combinedTEStool->getTESCompatibility(xTau);	
     }
     static const SG::Accessor<char> accTESCompatibility("TESCompatibility");
@@ -203,7 +208,9 @@ CP::CorrectionCode CommonSmearingTool::applyCorrection( xAOD::TauJet& xTau ) con
     {
       // check if systematic is available
       auto it = m_mSystematicsHistNames.find(syst.basename());
-
+      if (it == m_mSystematicsHistNames.end())[[unlikely]]{
+        continue;
+      }
       // get uncertainty value
       double dUncertaintySyst = 0.;
       tmpCorrectionCode = getValue(it->second+sProng,

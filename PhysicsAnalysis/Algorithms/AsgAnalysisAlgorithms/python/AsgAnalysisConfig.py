@@ -184,7 +184,8 @@ class IOStatsBlock(ConfigBlock):
     def __init__(self):
         super(IOStatsBlock, self).__init__()
         self.addOption("printOption", "Summary", type=str,
-                       info='option to pass the standard ROOT printing function. Can be `Summary`, `ByEntries` or `ByBytes`.')
+                       info='option to pass the standard ROOT printing function. Can be `Summary`, `ByEntries` or `ByBytes`.',
+                       meta={'choices':(['Summary','ByEntries','ByBytes'],1)})
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -678,7 +679,8 @@ class EventCutFlowBlock (ConfigBlock):
         self.addOption('selectionName', '', type=str,
             noneAction='error',
             info="the name of the event selection to generate cutflow histograms for. "
-            "If left blank, all selections on EventInfo will be used.")
+            "If left blank, all selections on EventInfo will be used.",
+            meta={'role':'region'})
         self.addOption('customSelections', [], type=None,
             info="explicit list of selection decorations to use for the cutflow. "
             "If provided, takes precedence over selectionName.")
@@ -737,12 +739,14 @@ class OutputThinningBlock (ConfigBlock):
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here.")
         self.addOption ('selection', '', type=str,
-            info="the name of an optional selection decoration to use.")
+            info="the name of an optional selection decoration to use.",
+            meta={'role':'selection'})
         self.addOption ('selectionName', '', type=str,
             info="the name of the selection to append this to. If left empty, "
             "the cuts are applied to every "
             "object within the container. Specifying a name (e.g. `loose`) "
-            "applies the cut only to those object who also pass that selection.")
+            "applies the cut only to those object who also pass that selection.",
+            meta={'role':'selection'})
         self.addOption ('outputName', None, type=str,
             info="an optional name for the output container.",
             meta={'role':'container'})

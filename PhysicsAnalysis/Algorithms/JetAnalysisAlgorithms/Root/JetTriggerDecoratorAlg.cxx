@@ -248,7 +248,7 @@ JetTriggerDecoratorAlg::JetTriggerDecoratorAlg(const std::string& name,
     }
 
     Trig::FeatureRequestDescriptor frd;
-    frd.setChainGroup(m_trigger);
+    frd.setChainGroup(m_trigger.value());
     // prepare Run2 emulation results
     std::unordered_map<std::string,
                        std::vector<std::pair<const xAOD::Jet*, bool>>>

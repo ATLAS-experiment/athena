@@ -201,10 +201,6 @@ StatusCode TrackFindingGNNAlg::execute(const EventContext &ctx) const {
     if (!pickedOpt.has_value()) continue;
 
     auto picked = *pickedOpt;
-    std::sort(picked.begin(), picked.end(),
-              [&](const xAOD::SpacePoint* a, const xAOD::SpacePoint* b) {
-                return R_of(a) < R_of(b);
-              });
     constexpr float quality = 0.f; // quality is not computed in the GNN pipeline
     constexpr float vertexZ = 0.f; // vertexZ is not computed in the GNN pipeline
     ActsTrk::Seed seed = seedContainer.push_back(
@@ -214,18 +210,10 @@ StatusCode TrackFindingGNNAlg::execute(const EventContext &ctx) const {
         seed, /*useTopSp=*/true, gctx, mctx, cctx, retrieveSurface);
     if (!initialParamsOpt.has_value()) continue;
 
-    boost::container::small_vector<const xAOD::SpacePoint*, 16> sortedSP;
-    sortedSP.reserve(cand.size());
-    for (const xAOD::SpacePoint* sp : cand)
-      sortedSP.push_back(sp);
-    std::sort(sortedSP.begin(), sortedSP.end(),
-              [&](const xAOD::SpacePoint* a, const xAOD::SpacePoint* b) {
-                return R_of(a) < R_of(b);
-              });
-
+    // Space points are already ordered by radius by the GNN pipeline tool
     std::vector<const xAOD::UncalibratedMeasurement*> measList;
-    measList.reserve(sortedSP.size() * 2);
-    for (const xAOD::SpacePoint* sp : sortedSP) {
+    measList.reserve(cand.size() * 2);
+    for (const xAOD::SpacePoint* sp : cand) {
       for (const xAOD::UncalibratedMeasurement* m : sp->measurements()) {
         measList.push_back(m);
       }
