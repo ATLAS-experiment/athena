@@ -8,6 +8,7 @@
 @brief Main CA-based python configuration for JetTagDQA
 '''
 
+from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod
@@ -17,6 +18,18 @@ def PhysValBTagCfg(flags, **kwargs):
 
     kwargs.setdefault("DetailLevel", 10)
     kwargs.setdefault("isData", not flags.Input.isMC)
+
+    if flags.Input.isMC:
+        ttbarDSIDs = {601229, 601230}
+        zprimeDSIDs = {801271, 800030, 802818}
+        dsid = flags.Input.MCChannelNumber
+        if dsid not in ttbarDSIDs | zprimeDSIDs:
+            logging.getLogger("PhysValBTagCfg").warning("DSID %s is not a known ttbar or Z' sample, using the ttbar jet selection", dsid)
+        kwargs.setdefault("OnZprime", dsid in zprimeDSIDs)
+
+    # Run 4 has no tuned JVT, and EMTopo is the main small-R collection since PFlow jets are not tuned for Run 4 yet.
+    # Both use the FTAG truth based JVT proxy there instead.
+    kwargs.setdefault("UseJvtProxy", flags.Input.isMC and flags.GeoModel.Run >= LHCPeriod.Run4)
 
     import ROOT
     path = ROOT.PathResolver.find_file( 'JetTagDQA/PhysValBtag_VariablesMenu.json', 'DATAPATH' )

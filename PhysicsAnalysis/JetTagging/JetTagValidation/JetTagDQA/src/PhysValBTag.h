@@ -81,7 +81,6 @@ namespace JetTagDQA {
 
     // isData flag
     bool m_isData;
-    bool m_doTrackTruth = true;
 
     // Containers
     std::string m_jetNameEMTopo;
@@ -91,6 +90,8 @@ namespace JetTagDQA {
 
     std::string m_trackName;
     std::string m_vertexName;
+    std::string m_truthVertexName;
+    std::string m_truthJetName;
 
     std::map<std::string, JetTagDQA::BTaggingValidationPlots*> m_btagplots;
     std::set<std::string> m_collectionsWithoutTrackLinks;
@@ -107,9 +108,8 @@ namespace JetTagDQA {
     float m_jetPtCutZprime;
     float m_jetPtCutR10;
     float m_jetEtaCut;
-    float m_JVTCutAntiKt4EMTopoJets;
-    float m_JVTCutLargerEtaAntiKt4EMTopoJets;
-    float m_JVTCutAntiKt4EMPFlowJets;
+    bool m_useJvtProxy;
+    bool m_warnedMissingNNJvt = false;
     float m_truthMatchProbabilityCut;
 
     std::string m_GN2v01Name;
