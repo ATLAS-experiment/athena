@@ -45,8 +45,6 @@ function gnn_tracking() {
         --conditionsTag 'all:${conditionsTag}' \
         --geometryVersion 'all:ATLAS-P2-RUN4-03-00-00' \
         --multithreaded 'True' \
-        --steering 'doRAWtoALL' \
-        --digiSteeringConf 'StandardInTimeOnlyTruth' \
         --postInclude 'all:PyJobTransforms.UseFrontier' \
         --preInclude 'all:Campaigns.MC23PhaseIIPileUp200' 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' 'InDetGNNTracking.InDetGNNTrackingFlags.gnnReaderValidation' \
         --preExec 'flags.Tracking.GNN.TrackReader.inputTracksDir = "gnntracks" \        
