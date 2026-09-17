@@ -6,6 +6,7 @@ from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.Enums import LHCPeriod
 from RecJobTransforms.AODFixHelper import releaseInRange
 from AthenaCommon.Logging import logging
+from PathResolver import PathResolver
 
 def getfunc():
     from inspect import currentframe, getframeinfo
@@ -19,7 +20,10 @@ def getfunc():
     return func
 
 @AccumulatorCache
-def listOfRecoReleases(flags):
+def FixFromAMITag(flags):
+    doFixFromAMITags = []
+
+
     msg=logging.getLogger("listOfRecoReleases")
     from PyUtils.AMITagHelperConfig import inputAMITags
     listOfTags = inputAMITags(flags)
@@ -43,34 +47,64 @@ def listOfRecoReleases(flags):
     if nf >= 1 and nr >= 1:
         msg.info('Both r- and f-tags are present, will remove the f ones')
     listOfRecoTags = [ e for e in listOfRecoTags if e[0] == 'r' ]
+    listOfRecoTags_noMerge = [ ]
+    has_been_merged = False
+    
 
     if len(listOfRecoTags) == 0:
-        return []
+        doFixFromAMITags.append((True,True))
+        return doFixFromAMITags
 
-    import pyAMI.client
-    import pyAMI.atlas.api as AtlasAPI
 
-    client = pyAMI.client.Client('atlas')
-
-    relList = set()
+    filename_merging = PathResolver.FindCalibFile("egammaAlgs/Merging_reco_tag.txt") ##list of the reconstruction tag that are merging tag
     for e in listOfRecoTags:
         msg.info('Testing %s',e)
-        d = AtlasAPI.get_ami_tag(client,e)
-        if len(d):
-            msg.info('List length %d',len(d))
-            if 'transformation' in d[0] and d[0]['transformation'].find('Merge') >= 0:
-                   msg.info('it is a merging tag; skip')
-                   continue
-            if 'cacheName' in d[0]: relList.add('Athena-'+d[0]['cacheName'])
+        with open(filename_merging) as f:
+            for line in f:
+                if e == line.strip():
+                    msg.info('it is a merging tag; skip')
+                    has_been_merged = True
+                    continue
+        if not  has_been_merged:
+            listOfRecoTags_noMerge.append(e)
 
-    return list(relList)
+    if len(listOfRecoTags_noMerge) == 0:
+        doFixFromAMITags.append((True,True))
+        return doFixFromAMITags
+
+    
+    msg.info('remaining tag after removing merge tag %s',listOfRecoTags_noMerge)
+    
+    filename_timingTag = PathResolver.FindCalibFile("egammaAlgs/Timing_fix_reco_tag.txt") ## List of reconstruction tag that belong in the range where the timing fix should not be applied (Athena-23.0.0 to Athena-23.0.11) 
+    filename_AmbiguityTag = PathResolver.FindCalibFile("egammaAlgs/Ambiguity_fix_reco_tag.txt") ## List of reconstruction tag that belong in the range wher the ambiguity link should be applied (Athena-24.0.0 to Athena-24.0.83)
+    
+    doFix_timing = True
+    doFix_amb = True
+    for e in listOfRecoTags_noMerge:
+        with open(filename_timingTag) as f:
+            for line in f:
+                if e == line.strip():
+                    doFix_timing = False and doFix_timing
+                else:
+                    doFix_timing = True and doFix_timing
+        with open(filename_AmbiguityTag) as f:
+            for line in f:
+                if e == line.strip():
+                    doFix_amb = True and doFix_amb
+                else:
+                    doFix_amb = False and doFix_amb
+
+    doFixFromAMITags.append((doFix_timing,doFix_amb))
+        
+    return  doFixFromAMITags,listOfRecoTags_noMerge
+
 
 def doFixTime(flags,relNum = None):
     return releaseInRange(flags,"Athena-23.0.12","Athena-23.0.200",relNum) or \
       releaseInRange(flags,"Athena-24.0.0","Athena-24.0.200",relNum) or \
       releaseInRange(flags,"Athena-25.0.0","Athena-25.0.200",relNum)
 
-def runAODFix(flags, correctCluster = True, checkRelWithAMI = False):
+def runAODFix(flags, correctCluster = True, checkRelWithAMI = True):
 
     msg=logging.getLogger("GetDecisionToRunAODFix")
 
@@ -83,36 +117,32 @@ def runAODFix(flags, correctCluster = True, checkRelWithAMI = False):
         doFix_meta=False
     doAmbiguityFix_meta = releaseInRange(flags,"Athena-24.0.0","Athena-24.0.83") and ALToFix
 
-    doFix = doFix_meta
+    doFix = doFix_meta or doAmbiguityFix_meta
+    doFix_time = doFix_meta
     doAmbiguityFix = doAmbiguityFix_meta
 
+
+    
     if checkRelWithAMI:
         doFixFromAMITags = []
-        inputReleaseFromAMITags = listOfRecoReleases(flags)
-        if len(inputReleaseFromAMITags) == 0:
-            pass
-        msg.info('Release list %s',' '.join(inputReleaseFromAMITags))
-        for e in inputReleaseFromAMITags:
-            doF = doFixTime(flags,e) and TimeToFix
-            doAF = releaseInRange(flags,"Athena-24.0.0","Athena-24.0.83",e) and ALToFix
-            doFixFromAMITags.append((doF,doAF))
+        doFixFromAMITags, inputReleaseFromAMITags = FixFromAMITag(flags)
         msg.info('doFix from AMI tags = %s',doFixFromAMITags)
-
-        for ie,e in enumerate(doFixFromAMITags):
-            if e[0] != doFix or e[1] != doAmbiguityFix:
+        for ie, e in enumerate(doFixFromAMITags):
+            if e[0] != doFix_time or e[1] != doAmbiguityFix:
                 msg.warning('Inconsistent information from AMI reco tag release %s and input release %s', \
                             inputReleaseFromAMITags[ie],flags.Input.Release)
-                if ie == 0:
-                    msg.warning('Will use the release number first in the list')
-                    doFix = e[0]
-                    doAmbiguityFix = e[1]
+                if ie ==0:
+                    msg.warning('if no flag , will use the info collected from AMI')
+                    doFix_time = e[0] and TimeToFix
+                    doAmbiguityFix = e[1] and ALToFIx
+                    doFix = doFix_time or doAmbiguityFix    
 
     fixes = set()
     if doFix:
         if doAmbiguityFix:
             fixes.add('egammaAmbiguityLinksFix')
         # no timing cut in HI reco, so not these fixes
-        if not flags.Reco.EnableHI:
+        if doFix_time and not flags.Reco.EnableHI:
             fixes.add('egammatopoIsoFix')
             if correctCluster:
                 fixes.add('egClusterL2_3Fix')
