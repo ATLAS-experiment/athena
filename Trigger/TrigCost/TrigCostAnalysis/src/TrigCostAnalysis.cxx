@@ -16,7 +16,6 @@
 #include "monitors/MonitorAlgorithmClass.h"
 #include "monitors/MonitorGlobal.h"
 #include "monitors/MonitorThreadOccupancy.h"
-#include "monitors/MonitorROS.h"
 #include "monitors/MonitorChain.h"
 #include "monitors/MonitorChainAlgorithm.h"
 #include "monitors/MonitorSequence.h"
@@ -35,7 +34,6 @@ StatusCode  TrigCostAnalysis::initialize() {
 
   ATH_MSG_DEBUG("Reading from " << m_costDataKey.key() << ", " << m_HLTMenuKey.key());
   ATH_CHECK( m_costDataKey.initialize() );
-  ATH_CHECK( m_rosDataKey.initialize() );
   ATH_CHECK( m_HLTMenuKey.initialize() );
 
   ATH_CHECK( m_metadataDataKey.initialize( SG::AllowEmpty ) );
@@ -62,8 +60,6 @@ StatusCode  TrigCostAnalysis::initialize() {
     }
   }
 
-  m_costROSData.initialize(m_rosToRob);
-  
   ATH_CHECK( m_histSvc->regTree("/COSTSTREAM/metadata", std::make_unique<TTree>("metadata", "metadata")) );
   ATH_CHECK( m_histSvc->getTree("/COSTSTREAM/metadata", m_metadataTree) );
   
@@ -201,10 +197,6 @@ StatusCode TrigCostAnalysis::execute(const EventContext& ctx) {
   SG::ReadHandle<xAOD::TrigCompositeContainer> costDataHandle(m_costDataKey, context);
   ATH_CHECK( costDataHandle.isValid() );
 
-  SG::ReadHandle<xAOD::TrigCompositeContainer> rosDataHandle(m_rosDataKey, context);
-  ATH_CHECK( rosDataHandle.isValid() );
-
-
   if (!m_metadataDataKey.empty()){
     SG::ReadHandle<xAOD::TrigCompositeContainer> metadataDataHandle(m_metadataDataKey, context);
     if (metadataDataHandle.isValid()){
@@ -276,8 +268,7 @@ StatusCode TrigCostAnalysis::execute(const EventContext& ctx) {
 
   const uint32_t onlineSlot = getOnlineSlot( costDataHandle.get() );
   CostData costData;
-  ATH_CHECK( costData.set(costDataHandle.get(), rosDataHandle.get(), onlineSlot) );
-  costData.setCostROSData(m_costROSData);
+  ATH_CHECK( costData.set(costDataHandle.get(), onlineSlot) );
   costData.setChainToAlgMap(chainToAlgIdx);
   costData.setChainToUniqAlgMap(chainToUniqAlgs);
   costData.setSequencersMap(seqToAlgIdx);
@@ -333,10 +324,6 @@ StatusCode TrigCostAnalysis::registerMonitors(MonitoredRange* range) {
   if (m_doMonitorThreadOccupancy) {
     ATH_CHECK( range->addMonitor(std::make_unique<MonitorThreadOccupancy>("Thread_Occupancy_HLT", range)) );
     ATH_MSG_DEBUG("Registering Thread_Occupancy_HLT Monitor for range " << range->getName() << ". Size:" << range->getMonitors().size());
-  }
-  if (m_doMonitorROS) {
-    ATH_CHECK( range->addMonitor(std::make_unique<MonitorROS>("ROS_HLT", range)) );
-    ATH_MSG_DEBUG("Registering ROS_HLT Monitor for range " << range->getName() << ". Size:" << range->getMonitors().size());
   }
   if (m_doMonitorChain) {
     ATH_CHECK( range->addMonitor(std::make_unique<MonitorChain>("Chain_HLT", range)) );
@@ -504,7 +491,6 @@ void TrigCostAnalysis::writeMetadata() {
   bool ChainAlgorithmMonitor = m_doMonitorChainAlgorithm;
   bool AlgorithmMonitor = m_doMonitorAlgorithm;
   bool AlgorithmClassMonitor = m_doMonitorAlgorithmClass;
-  bool ROSMonitor = m_doMonitorROS;
   bool GlobalsMonitor = m_doMonitorGlobal;
   bool ThreadMonitor = m_doMonitorThreadOccupancy;
 
@@ -512,7 +498,6 @@ void TrigCostAnalysis::writeMetadata() {
   m_metadataTree->Branch("ChainAlgorithmMonitor", &ChainAlgorithmMonitor);
   m_metadataTree->Branch("AlgorithmMonitor", &AlgorithmMonitor);
   m_metadataTree->Branch("AlgorithmClassMonitor", &AlgorithmClassMonitor);
-  m_metadataTree->Branch("ROSMonitor", &ROSMonitor);
   m_metadataTree->Branch("GlobalsMonitor", &GlobalsMonitor);
   m_metadataTree->Branch("ThreadMonitor", &ThreadMonitor);
 
