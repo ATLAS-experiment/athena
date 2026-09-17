@@ -55,7 +55,7 @@ StatusCode PoolCollectionConverter::initialize() {
    }
    StatusCode sc = StatusCode::SUCCESS;
    try {
-      sc = m_poolSvc->connectCollection(m_inputCollection, "Input", pool::ROOT_StorageType.type(), m_contextId);
+      sc = m_poolSvc->connectCollection(m_inputCollection, "Input", m_contextId);
       m_poolCollection = pool::CollectionService::open("Input", m_inputCollection, m_poolSvc->getInputContextSession(m_contextId));
    } catch (std::exception &e) {
       return StatusCode::RECOVERABLE;

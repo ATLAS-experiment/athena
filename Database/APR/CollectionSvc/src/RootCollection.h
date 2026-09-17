@@ -21,6 +21,7 @@ namespace pool {
 
    class ISession;
    class IStorageSvc;
+   class IDatabase;
 
    class Attribute;
 
@@ -88,11 +89,12 @@ namespace pool {
 
         bool                                 m_open;
 
-        ISession*                            m_session;
-        IStorageSvc*                         m_storageSvc;
+        ISession*                            m_session = nullptr;
+        IStorageSvc*                         m_storageSvc = nullptr;
         bool                                 m_ownStorageSvc;
         pool::FileDescriptor                 m_fileDescr;
         ContainerMap                         m_containerMap;
+        std::unique_ptr<pool::IDatabase>     m_database;
    };
 }
 #endif

@@ -107,14 +107,23 @@ namespace pool {
       ATH_MSG_INFO( "Closing " << (m_open? "open":"not open") << " collection '" << m_fileName << "'" );
       if(m_open) {
          m_open = false;
-         if( !m_storageSvc->disconnect( m_fileDescr ).isSuccess() ) {
-            throw std::runtime_error( "RootCollection '" + m_fileName + "' could not be properly closed" );
+         if( m_ownStorageSvc ) {
+            // only interact with the StorageSvc if we created it ourselves
+            StatusCode sc = m_storageSvc->disconnect( m_fileDescr );
+            if( sc.isSuccess() ) sc = m_storageSvc->endSession();
+            if( !sc.isSuccess() ) {
+               // just warn and continue, no much to be done here
+               ATH_MSG_WARNING("StorageSvc connection to '" + m_fileName + "' could not be properly closed" );
+            }
+            delete m_storageSvc; m_storageSvc = nullptr;
+            m_ownStorageSvc = false;
+         } else {
+            // just close the database, but do not end the session, as we did not create it
+            if( m_database ) {
+               // m_database->disconnect();
+               m_database.reset();
+            }
          }
-         m_storageSvc->endSession().ignore();
-      }
-      if( m_ownStorageSvc ) {
-         delete m_storageSvc;
-         m_storageSvc = nullptr;
       }
    }
 
@@ -138,14 +147,31 @@ namespace pool {
          if( !m_storageSvc->startSession( m_mode, m_description.type().type()) .isSuccess() ) {
             throw std::runtime_error( "RootCollection failed to start a session." );
          }
+         m_fileDescr.initFromFilename( m_fileName );
+         // cout << "MN: RootCollection::open: connection already exists for:" << m_fileName  << endl;
+         if( !m_storageSvc->connect( m_mode, m_fileDescr ).isSuccess() ) {
+           throw std::runtime_error( "RootCollection failed to open: " + m_fileName + " for " + poolOptToRootOpt[m_mode] );
+         }
       } else {
          m_storageSvc = &m_session->getStorageSvc( m_description.type().type() );
          m_ownStorageSvc = false;
+         m_database = m_session->databaseHandle( m_fileName, DatabaseSpecification::PFN );
+         if( !m_database ) {
+            throw std::runtime_error( "Could not retrieve a database handle to '" + m_fileName + "' (APR: RootCollection)" );
+         }
+         if( m_database->openMode() == Io::INVALID ) {
+            //      cout << "MN: RootCollection::cursor: database is not open, opening " << m_fileName << " for read" << endl;
+            m_database->setTechnology( m_description.type().type() );
+            m_database->connectForRead();
+         }
+         FileDescriptor* fd = m_database->fileDescriptor();
+         if( !fd ) {
+            throw std::runtime_error( "Could not retrieve connection info from DB '" + m_fileName + "' (APR: RootCollection)" );
+         }
+         m_fileDescr = *fd;
       }
-      m_fileDescr.initFromFilename( m_fileName );
-      if( !m_storageSvc->connect( m_mode, m_fileDescr ).isSuccess() ) {
-         throw std::runtime_error( "RootCollection failed to open: " + m_fileName + " for " + poolOptToRootOpt[m_mode] );
-      }
+
+//      cout << "MN: RootCollection:: connected file descriptor to " << m_fileName << endl;
 
       if( m_mode == Io::READ ) {
          CollectionDescription desc( m_description.name(), m_description.type(), m_description.connection() );
@@ -183,12 +209,18 @@ namespace pool {
                m_dhContName = contName;
             }
          }
-         if( m_containerMap.empty() and m_dhContName.empty() ) {
-            db.close().ignore();
-            throw std::runtime_error( "No Event Collections found in " + m_fileName );
+         //      cout << "MN: RootCollection::open: found " << m_containerMap.size() << " EventTag containers in " << m_fileName << endl;
+         if( m_containerMap.empty() ) {
+            // No EventTag containers found
+            if( m_dhContName.empty() ) {
+               // No DataHeader container, nothing to read
+               throw std::runtime_error( "No Event Collections found in " + m_fileName );
+            }
+            if( !m_session ) {
+               throw std::runtime_error( "Cannot read Athena file without a valid Session (" + m_fileName + ")" );
+            }
          }
-      }
-      if( m_mode == Io::WRITE || m_mode == Io::APPEND) {
+      } else {
          ATH_MSG_DEBUG( "Creating collection in overwrite mode..." );
          m_containerPrefix = APRDefaults::WriteConfig::getEventTagName();
       }
@@ -209,17 +241,7 @@ namespace pool {
          initNewRow(collectionRowBuffer);
          return std::make_unique<CollectionCursor>( m_description, collectionRowBuffer, m_containerMap);
       } else {
-
-         auto database = m_session->databaseHandle( m_fileName, DatabaseSpecification::PFN );
-         if( !database ) {
-            throw std::runtime_error( "Could not retrieve a database handle (APR: RootCollection::cursor)" );
-         }
-         if( database->openMode() == Io::INVALID ) {
-            cout << "MN: RootCollection::cursor: database is not open, opening " << m_fileName << " for read" << endl;
-            database->setTechnology( m_description.type().type() );
-            database->connectForRead();
-         }
-         IContainer *dhCont = database->containerHandle( m_dhContName );
+         IContainer *dhCont = m_database->containerHandle( m_dhContName );
          if( !dhCont ) {
             throw std::runtime_error( "Could not retrieve a handle to the DataHeader container (APR: RootCollection::cursor)" );
          }

@@ -34,6 +34,8 @@
 #include <cctype>
 #include <exception>  // for runtime_error
 
+#include <iostream>
+using namespace std;
 bool isNumber(const std::string& s) {
    return !s.empty() && (std::isdigit(s[0]) || s[0] == '+' || s[0] == '-');
 }
@@ -376,9 +378,9 @@ void PoolSvc::renamePfn(const std::string& pf, const std::string& newpf) {
 //__________________________________________________________________________
 StatusCode PoolSvc::connectCollection(const std::string& connection,
 		const std::string& collectionName,
-		const pool::DbType& collectionType,
-		unsigned int contextId) const {
-   ATH_MSG_DEBUG("connectCollection() type=" << collectionType.storageName() << ", connection=" << connection
+		unsigned int contextId) const
+{
+   ATH_MSG_DEBUG("connectCollection() connection=" << connection
                  << ", name=" << collectionName << ", contextID=" << contextId);
    if (contextId >= m_dbSessionVec.size()) {
       ATH_MSG_WARNING("connectCollection: Using default input Stream instead of id = " << contextId);
@@ -396,13 +398,10 @@ StatusCode PoolSvc::connectCollection(const std::string& connection,
          ATH_MSG_INFO("File is not in Catalog! Attempt to open it anyway.");
       }
    }
-   if (collectionType.majorType() == pool::POOL_StorageType.type()) {
-      // Check whether Collection Container exists.
-      std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, connection);
-      if (dbH == nullptr) {
-         ATH_MSG_INFO("Failed to get Session/DatabaseHandle to create POOL collection.");
-         return(StatusCode::FAILURE);
-      }
+
+   // Check whether Collection Container exists.
+   std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, connection);
+   if( dbH ) {
       try {
          if (dbH->openMode() == Io::INVALID) {
             dbH->connectForRead();

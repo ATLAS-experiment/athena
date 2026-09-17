@@ -351,6 +351,12 @@ pool::UserDatabase::checkInRegistry()
   else return false;
 }
 
+pool::FileDescriptor*
+pool::UserDatabase::fileDescriptor() 
+{
+  return m_databaseHandler? &m_databaseHandler->fileDescriptor() : nullptr;
+}
+
 
 pool::ITechnologySpecificAttributes&
 pool::UserDatabase::technologySpecificAttributes()

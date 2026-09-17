@@ -75,6 +75,9 @@ namespace pool {
     /// Returns a pointer to a container object. The user acquires ownership of that object.
     virtual IContainer* containerHandle( const std::string& name ) override;
 
+    // expose FileDescriptor object for the technology specific DB implementation
+    virtual FileDescriptor* fileDescriptor() override final;
+
     /// Returns the object holding the technology specific attributes
     virtual ITechnologySpecificAttributes& technologySpecificAttributes() override;
 
@@ -96,7 +99,7 @@ namespace pool {
     /// Reference to the file catalog
     IFileCatalog&                           m_catalog;
     /// Transaction type (read/update)
-    Io::IoFlag                        m_transactionType;
+    Io::IoFlag                              m_transactionType;
     /// Reference to the database registry
     DatabaseRegistry&                       m_registry;
     /// The database name
