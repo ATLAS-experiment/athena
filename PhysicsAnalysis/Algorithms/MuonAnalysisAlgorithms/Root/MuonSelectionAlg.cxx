@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -29,7 +29,7 @@ namespace CP
     ANA_CHECK (m_badMuonVetoHandle.initialize (m_systematicsList, m_muonsHandle, SG::AllowEmpty));
     ANA_CHECK (m_systematicsList.initialize());
 
-    auto *selectionTool = dynamic_cast<IAsgSelectionTool *>(&*m_selectionTool);
+    auto *selectionTool = static_cast<IAsgSelectionTool *>(&*m_selectionTool);
     asg::AcceptData blankAccept {&selectionTool->getAcceptInfo()};
     m_setOnFail = selectionFromAccept(blankAccept);
 
