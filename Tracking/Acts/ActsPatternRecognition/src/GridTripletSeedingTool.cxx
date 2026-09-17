@@ -238,7 +238,6 @@ StatusCode GridTripletSeedingTool::initialize() {
       cfg.rBinEdges = m_rBinEdges;
       cfg.bFieldInZ = 0;  // will be set later
 
-
       if constexpr (std::is_same_v<std::decay_t<decltype(cfg)>, Acts::Experimental::SphericalSpacePointGrid::Config>){
         cfg.etaMin = m_etaMin;
         cfg.etaMax = m_etaMax;
@@ -249,9 +248,7 @@ StatusCode GridTripletSeedingTool::initialize() {
         cfg.topBinFinder = Acts::GridBinFinder<3ul>(m_numPhiNeighbors.value(),
                                                           m_numEtaNeighbors.value(),
                                                           m_rBinNeighborsTop.value());
-      }
-
-      else {
+      } else {
         cfg.zMin = m_zMin;
         cfg.zMax = m_zMax;
         cfg.cotThetaMax = m_cotThetaMax;
