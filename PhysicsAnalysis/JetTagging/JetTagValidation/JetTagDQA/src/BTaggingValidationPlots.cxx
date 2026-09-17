@@ -5,6 +5,7 @@
 #include "BTaggingValidationPlots.h"
 #include "ParticleJetTools/JetFlavourInfo.h"
 #include "xAODBTagging/BTaggingUtilities.h" 
+#include "FTagAnalysisInterfaces/IBTaggingSelectionTool.h"
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "InDetTrackSystematicsTools/InDetTrackTruthOriginDefs.h"//TrkOrigin
 #include "xAODTruth/TruthParticle.h"
@@ -16,7 +17,6 @@
 #include "AthContainers/ConstAccessor.h"
 
 #include <algorithm>
-#include <initializer_list>
 #include <stdexcept>
 #include <utility>
 
@@ -60,9 +60,43 @@ namespace JetTagDQA{
   }
 
   void BTaggingValidationPlots::setTaggerNames(const std::string& GN2v01Name,
+					       const std::string& GN3EPCLV01Name,
 					       const std::string& GN3XPV01Name){
     m_GN2v01Name = GN2v01Name;
+    m_GN3EPCLV01Name = GN3EPCLV01Name;
     m_GN3XPV01Name = GN3XPV01Name;
+  }
+
+  void BTaggingValidationPlots::setGN2v01Config(const IBTaggingSelectionTool* selectionTool, const std::map<std::string, double>& workingPoints, double fc, double ftau){
+    m_GN2v01SelectionTool = selectionTool;
+    m_GN2v01_workingPoints = workingPoints;
+    m_GN2v01_fc = fc;
+    m_GN2v01_ftau = ftau;
+  }
+
+  void BTaggingValidationPlots::setGN3EPCLV01Config(const std::map<std::string, double>& workingPoints, double fc, double ftau){
+    m_GN3EPCLV01_workingPoints = workingPoints;
+    m_GN3EPCLV01_fc = fc;
+    m_GN3EPCLV01_ftau = ftau;
+  }
+
+  const std::map<std::string, double>& BTaggingValidationPlots::workingPoints(const std::string& tagger) const {
+    static const std::map<std::string, double> none;
+    if (tagger == "GN2v01") return m_GN2v01_workingPoints;
+    if (tagger == "GN3EPCLV01") return m_GN3EPCLV01_workingPoints;
+    if (tagger == "GN3XPV01") return m_GN3XPV01_workingPoints;
+    return none;
+  }
+
+  bool BTaggingValidationPlots::hasTaggerOutputs(const xAOD::Jet& jet, const std::string& tagger, const std::vector<std::string>& outputs){
+    for (const std::string& output : outputs) {
+      if (SG::ConstAccessor<float>(tagger + "_" + output).isAvailable(jet)) continue;
+      if (m_taggersWithMissingOutputs.insert(tagger).second) {
+        ATH_MSG_WARNING("Missing " << tagger << " outputs on " << m_sParticleType << ", skipping its histograms");
+      }
+      return false;
+    }
+    return true;
   }
   
   // implement the bookHistogram function using the histogram definitions
@@ -618,6 +652,13 @@ namespace JetTagDQA{
     m_GN2v01_pc = bookHistogram("GN2v01_pc", "GN2v01_pc", m_sParticleType);
     m_GN2v01_pu = bookHistogram("GN2v01_pu", "GN2v01_pu", m_sParticleType);
     m_GN2v01_ptau = bookHistogram("GN2v01_ptau", "GN2v01_ptau", m_sParticleType);
+
+    if (!m_GN3EPCLV01Name.empty()) {
+      m_GN3EPCLV01_pb = bookHistogram("GN3EPCLV01_pb", "GN3EPCLV01_pb", m_sParticleType);
+      m_GN3EPCLV01_pc = bookHistogram("GN3EPCLV01_pc", "GN3EPCLV01_pc", m_sParticleType);
+      m_GN3EPCLV01_pu = bookHistogram("GN3EPCLV01_pu", "GN3EPCLV01_pu", m_sParticleType);
+      m_GN3EPCLV01_ptau = bookHistogram("GN3EPCLV01_ptau", "GN3EPCLV01_ptau", m_sParticleType);
+    }
     
     m_GN3XPV01_phtautauhad = bookHistogram("GN3XPV01_phtautauhad", "GN3XPV01_phtautauhad",m_sParticleType);
     m_GN3XPV01_phbb = bookHistogram("GN3XPV01_phbb", "GN3XPV01_phbb",m_sParticleType);
@@ -1205,39 +1246,53 @@ namespace JetTagDQA{
   // a fill method for discriminant related vars
   void BTaggingValidationPlots::fillDiscriminantVariables(const xAOD::Jet* jet, const double& jet_Lxy, const int& truth_label, const bool& onZprime, std::map<std::string, int>& nJetsThatPassedWPCuts, const xAOD::EventInfo* event){
 
-    // get the GN2v01 vars
-    SG::ConstAccessor<float> GN2pbAcc(m_GN2v01Name + "_pb");
-    SG::ConstAccessor<float> GN2puAcc(m_GN2v01Name + "_pu");
-    SG::ConstAccessor<float> GN2pcAcc(m_GN2v01Name + "_pc");
-    SG::ConstAccessor<float> GN2ptauAcc(m_GN2v01Name + "_ptau");
-    if (!GN2pbAcc.isAvailable(*jet) || !GN2puAcc.isAvailable(*jet) || !GN2pcAcc.isAvailable(*jet) || !GN2ptauAcc.isAvailable(*jet)) {
-      if (!m_warnedMissingTaggerOutputs) {
-        ATH_MSG_WARNING("Missing " << m_GN2v01Name << " outputs on " << m_sParticleType << ", skipping tagger histograms");
-        m_warnedMissingTaggerOutputs = true;
+    // GN2v01
+    if (hasTaggerOutputs(*jet, m_GN2v01Name, {"pb", "pu", "pc", "ptau"})) {
+      double GN2v01_pb = SG::ConstAccessor<float>(m_GN2v01Name + "_pb")(*jet);
+      double GN2v01_pu = SG::ConstAccessor<float>(m_GN2v01Name + "_pu")(*jet);
+      double GN2v01_pc = SG::ConstAccessor<float>(m_GN2v01Name + "_pc")(*jet);
+      double GN2v01_ptau = SG::ConstAccessor<float>(m_GN2v01Name + "_ptau")(*jet);
+
+      m_GN2v01_pb->Fill(GN2v01_pb, event->beamSpotWeight());
+      m_GN2v01_pu->Fill(GN2v01_pu, event->beamSpotWeight());
+      m_GN2v01_pc->Fill(GN2v01_pc, event->beamSpotWeight());
+      m_GN2v01_ptau->Fill(GN2v01_ptau, event->beamSpotWeight());
+
+      double weight_GN2v01 = -100;
+      if (m_GN2v01SelectionTool) {
+        if (m_GN2v01SelectionTool->getTaggerWeight(GN2v01_pb, GN2v01_pc, GN2v01_pu, weight_GN2v01, GN2v01_ptau) != CP::CorrectionCode::Ok) weight_GN2v01 = -100;
       }
-      return;
+      else {
+        weight_GN2v01 = log( GN2v01_pb / ( GN2v01_pc * m_GN2v01_fc + GN2v01_pu * (1-m_GN2v01_fc-m_GN2v01_ftau) + GN2v01_ptau * m_GN2v01_ftau ));
+      }
+      updateNJetsThatPassedWPCutsMap(nJetsThatPassedWPCuts, "GN2v01", weight_GN2v01);
+
+      for(std::map<std::string, TH1*>::const_iterator hist_iter=m_weight_histos.begin(); hist_iter!=m_weight_histos.end(); ++hist_iter){
+        for(std::map<std::string, int>::const_iterator label_iter = m_truthLabels.begin(); label_iter != m_truthLabels.end(); ++label_iter){
+          BTaggingValidationPlots::fillDiscriminantHistograms("GN2v01_", weight_GN2v01, m_GN2v01_workingPoints, truth_label, hist_iter, label_iter, jet->pt(), jet_Lxy, onZprime, event);
+        }
+      }
     }
-    double GN2v01_pb = GN2pbAcc(*jet);
-    double GN2v01_pu = GN2puAcc(*jet);
-    double GN2v01_pc = GN2pcAcc(*jet);
-    double GN2v01_ptau = GN2ptauAcc(*jet);
 
-    m_GN2v01_pb->Fill(GN2v01_pb, event->beamSpotWeight());
-    m_GN2v01_pu->Fill(GN2v01_pu, event->beamSpotWeight());
-    m_GN2v01_pc->Fill(GN2v01_pc, event->beamSpotWeight());
-    m_GN2v01_ptau->Fill(GN2v01_ptau, event->beamSpotWeight());
-    // calculate the GN2 discriminant value
-    double weight_GN2v01 = log( GN2v01_pb / ( GN2v01_pc * m_GN2v01_fc + GN2v01_pu * (1-m_GN2v01_fc-m_GN2v01_ftau) + GN2v01_ptau * m_GN2v01_ftau ));
-  
-    updateNJetsThatPassedWPCutsMap(nJetsThatPassedWPCuts,  weight_GN2v01, -9999);
+    // GN3EPCLV01
+    if (!m_GN3EPCLV01Name.empty() && hasTaggerOutputs(*jet, m_GN3EPCLV01Name, {"pb", "pu", "pc", "ptau"})) {
+      double GN3EPCLV01_pb = SG::ConstAccessor<float>(m_GN3EPCLV01Name + "_pb")(*jet);
+      double GN3EPCLV01_pu = SG::ConstAccessor<float>(m_GN3EPCLV01Name + "_pu")(*jet);
+      double GN3EPCLV01_pc = SG::ConstAccessor<float>(m_GN3EPCLV01Name + "_pc")(*jet);
+      double GN3EPCLV01_ptau = SG::ConstAccessor<float>(m_GN3EPCLV01Name + "_ptau")(*jet);
 
-    // fill the histograms with the tagger discriminants
-    for(std::map<std::string, TH1*>::const_iterator hist_iter=m_weight_histos.begin(); hist_iter!=m_weight_histos.end(); ++hist_iter){
-      for(std::map<std::string, int>::const_iterator label_iter = m_truthLabels.begin(); label_iter != m_truthLabels.end(); ++label_iter){
+      m_GN3EPCLV01_pb->Fill(GN3EPCLV01_pb, event->beamSpotWeight());
+      m_GN3EPCLV01_pu->Fill(GN3EPCLV01_pu, event->beamSpotWeight());
+      m_GN3EPCLV01_pc->Fill(GN3EPCLV01_pc, event->beamSpotWeight());
+      m_GN3EPCLV01_ptau->Fill(GN3EPCLV01_ptau, event->beamSpotWeight());
 
-        // GN2v01 taggers
-        BTaggingValidationPlots::fillDiscriminantHistograms("GN2v01_", weight_GN2v01, m_GN2v01_workingPoints, truth_label, hist_iter, label_iter, jet->pt(), jet_Lxy, onZprime, event);
+      double weight_GN3EPCLV01 = log( GN3EPCLV01_pb / ( GN3EPCLV01_pc * m_GN3EPCLV01_fc + GN3EPCLV01_pu * (1-m_GN3EPCLV01_fc-m_GN3EPCLV01_ftau) + GN3EPCLV01_ptau * m_GN3EPCLV01_ftau ));
+      updateNJetsThatPassedWPCutsMap(nJetsThatPassedWPCuts, "GN3EPCLV01", weight_GN3EPCLV01);
 
+      for(std::map<std::string, TH1*>::const_iterator hist_iter=m_weight_histos.begin(); hist_iter!=m_weight_histos.end(); ++hist_iter){
+        for(std::map<std::string, int>::const_iterator label_iter = m_truthLabels.begin(); label_iter != m_truthLabels.end(); ++label_iter){
+          BTaggingValidationPlots::fillDiscriminantHistograms("GN3EPCLV01_", weight_GN3EPCLV01, m_GN3EPCLV01_workingPoints, truth_label, hist_iter, label_iter, jet->pt(), jet_Lxy, onZprime, event);
+        }
       }
     }
   }
@@ -1245,6 +1300,7 @@ namespace JetTagDQA{
   // a fill method for discriminant related vars
   void BTaggingValidationPlots::fillDiscriminantVariables_for_largeRjet(const xAOD::Jet* jet, const int& truth_label, const bool& onZprime, std::map<std::string, int>& nJetsThatPassedWPCuts, const xAOD::EventInfo* event){
     // get the GN3XPV01 vars
+    if (!hasTaggerOutputs(*jet, m_GN3XPV01Name, {"phtautauhad", "phbb", "phcc", "ptop", "pqcdbb", "pqcdbx", "pqcdcx", "pqcdll", "pWqq"})) return;
     SG::ConstAccessor<float> GN3XPV01_phtautauhadAcc(m_GN3XPV01Name + "_phtautauhad");
     SG::ConstAccessor<float> GN3XPV01phbbAcc(m_GN3XPV01Name + "_phbb");
     SG::ConstAccessor<float> GN3XPV01phccAcc(m_GN3XPV01Name + "_phcc");
@@ -1254,14 +1310,6 @@ namespace JetTagDQA{
     SG::ConstAccessor<float> GN3XPV01pqcdcxAcc(m_GN3XPV01Name + "_pqcdcx");
     SG::ConstAccessor<float> GN3XPV01pqcdllAcc(m_GN3XPV01Name + "_pqcdll");
     SG::ConstAccessor<float> GN3XPV01pwqqAcc(m_GN3XPV01Name + "_pWqq");
-    const std::initializer_list<const SG::ConstAccessor<float>*> GN3XPV01Accs = {&GN3XPV01_phtautauhadAcc, &GN3XPV01phbbAcc, &GN3XPV01phccAcc, &GN3XPV01ptopAcc, &GN3XPV01pqcdbbAcc, &GN3XPV01pqcdbxAcc, &GN3XPV01pqcdcxAcc, &GN3XPV01pqcdllAcc, &GN3XPV01pwqqAcc};
-    if (!std::all_of(GN3XPV01Accs.begin(), GN3XPV01Accs.end(), [jet](const auto* acc) { return acc->isAvailable(*jet); })) {
-      if (!m_warnedMissingTaggerOutputs) {
-        ATH_MSG_WARNING("Missing " << m_GN3XPV01Name << " outputs on " << m_sParticleType << ", skipping tagger histograms");
-        m_warnedMissingTaggerOutputs = true;
-      }
-      return;
-    }
     double GN3XPV01_phtautauhad = GN3XPV01_phtautauhadAcc(*jet);
     double GN3XPV01_phbb = GN3XPV01phbbAcc(*jet);
     double GN3XPV01_phcc = GN3XPV01phccAcc(*jet);
@@ -1284,7 +1332,7 @@ namespace JetTagDQA{
     
     // TODO: This is a dummy WP, need to define proper WPs for large-R jets as a function of pT and mass.
     double weight_GN3XPV01 = log( GN3XPV01_phbb / ( ( GN3XPV01_phcc * m_GN3XPV01_hcc_fc ) + ( GN3XPV01_ptop * m_GN3XPV01_top_fc )  + GN3XPV01_pqcdbb * (1-m_GN3XPV01_top_fc - m_GN3XPV01_hcc_fc ) ) );
-    updateNJetsThatPassedWPCutsMap(nJetsThatPassedWPCuts, -9999, weight_GN3XPV01);
+    updateNJetsThatPassedWPCutsMap(nJetsThatPassedWPCuts, "GN3XPV01", weight_GN3XPV01);
 
     // TODO: Fill the different WPs as a function of pT and mass.
     // fill the histograms with the tagger discriminants 
@@ -1306,9 +1354,7 @@ namespace JetTagDQA{
     // loop over the taggers
     for(std::vector<std::string>::const_iterator tag_iter = m_taggers.begin(); tag_iter != m_taggers.end(); ++tag_iter){
       // get the right working points
-      std::map<std::string, double> workingPoints;
-      if(*tag_iter == "GN2v01") workingPoints = m_GN2v01_workingPoints;
-      else if(*tag_iter == "GN3XPV01") workingPoints = m_GN3XPV01_workingPoints;
+      const std::map<std::string, double>& workingPoints = BTaggingValidationPlots::workingPoints(*tag_iter);
       // loop over the working points
       for(std::map<std::string, double>::const_iterator working_points_iter = workingPoints.begin(); working_points_iter != workingPoints.end(); ++working_points_iter){
         std::string name = "nJetsThatPassedWPCuts_" + *tag_iter + "_" + working_points_iter->first; 
@@ -1324,9 +1370,7 @@ namespace JetTagDQA{
     // loop over the taggers
     for(std::vector<std::string>::const_iterator tag_iter = m_taggers.begin(); tag_iter != m_taggers.end(); ++tag_iter){
       // get the right working points
-      std::map<std::string, double> workingPoints;
-      if(*tag_iter == "GN2v01") workingPoints = m_GN2v01_workingPoints;
-      else if(*tag_iter == "GN3XPV01") workingPoints = m_GN3XPV01_workingPoints;
+      const std::map<std::string, double>& workingPoints = BTaggingValidationPlots::workingPoints(*tag_iter);
       // loop over the working points
       for(std::map<std::string, double>::const_iterator working_points_iter = workingPoints.begin(); working_points_iter != workingPoints.end(); ++working_points_iter){
         std::string name = "nJetsThatPassedWPCuts_" + *tag_iter + "_" + working_points_iter->first; 
@@ -1336,21 +1380,10 @@ namespace JetTagDQA{
     }
   }
 
-  void BTaggingValidationPlots::updateNJetsThatPassedWPCutsMap(std::map<std::string, int>& nJetsThatPassedWPCuts, const double& discr_GN2v01, const double& discr_GN3XPV01){
-    // loop over the taggers
-    for(std::vector<std::string>::const_iterator tag_iter = m_taggers.begin(); tag_iter != m_taggers.end(); ++tag_iter){
-      // get the right working points and discriminant values
-      std::map<std::string, double> workingPoints;
-      double discriminant_value = 0;
-      if(*tag_iter == "GN2v01"){ workingPoints = m_GN2v01_workingPoints; discriminant_value = discr_GN2v01; }
-      else if(*tag_iter == "GN3XPV01"){ workingPoints = m_GN3XPV01_workingPoints; discriminant_value = discr_GN3XPV01; }
-      // loop over the working points
-      for(std::map<std::string, double>::const_iterator working_points_iter = workingPoints.begin(); working_points_iter != workingPoints.end(); ++working_points_iter){
-        std::string name = "nJetsThatPassedWPCuts_" + *tag_iter + "_" + working_points_iter->first; 
-        // update the njets value if the wp cut is passed
-        if(discriminant_value > working_points_iter->second){
-          nJetsThatPassedWPCuts.at(name) += 1;
-        }
+  void BTaggingValidationPlots::updateNJetsThatPassedWPCutsMap(std::map<std::string, int>& nJetsThatPassedWPCuts, const std::string& tagger, double discriminant){
+    for(const auto& [wp, cut] : workingPoints(tagger)){
+      if(discriminant > cut){
+        nJetsThatPassedWPCuts.at("nJetsThatPassedWPCuts_" + tagger + "_" + wp) += 1;
       }
     }
   }
@@ -1359,9 +1392,7 @@ namespace JetTagDQA{
     // loop over the taggers
     for(std::vector<std::string>::const_iterator tag_iter = m_taggers.begin(); tag_iter != m_taggers.end(); ++tag_iter){
       // get the right working points
-      std::map<std::string, double> workingPoints;
-      if(*tag_iter == "GN2v01") workingPoints = m_GN2v01_workingPoints;
-      else if(*tag_iter == "GN3XPV01") workingPoints = m_GN3XPV01_workingPoints;
+      const std::map<std::string, double>& workingPoints = BTaggingValidationPlots::workingPoints(*tag_iter);
       // loop over the working points
       for(std::map<std::string, double>::const_iterator working_points_iter = workingPoints.begin(); working_points_iter != workingPoints.end(); ++working_points_iter){
         std::string name = "nJetsThatPassedWPCuts_" + *tag_iter + "_" + working_points_iter->first; 
@@ -1374,6 +1405,7 @@ namespace JetTagDQA{
   void BTaggingValidationPlots::setTaggerInfos(){
     // list of all taggers
     m_taggers.push_back("GN2v01");
+    if (!m_GN3EPCLV01Name.empty()) m_taggers.push_back("GN3EPCLV01");
     m_taggers.push_back("GN3XPV01");
 
     // list of all truth labels
@@ -1381,17 +1413,6 @@ namespace JetTagDQA{
     m_truthLabels.insert(std::make_pair("c", 4));
     m_truthLabels.insert(std::make_pair("u", 0));
     m_truthLabels.insert(std::make_pair("tau", 15));
-
-    // GN2v01   
-    m_GN2v01_fc = 0.2;
-    m_GN2v01_ftau = 0.01;
-    m_GN2v01_workingPoints.insert(std::make_pair("70", 1.892));
-    if(m_detailLevel > 10){
-      m_GN2v01_workingPoints.insert(std::make_pair("65", 2.669));
-      m_GN2v01_workingPoints.insert(std::make_pair("77", 0.844));
-      m_GN2v01_workingPoints.insert(std::make_pair("85", -0.378));
-      m_GN2v01_workingPoints.insert(std::make_pair("90", -1.34));
-    }
 
     // GN3XPV01 // TODO: update WPs in the future as a function of pT and mass.
     m_GN3XPV01_hcc_fc = 0.02;
@@ -1417,13 +1438,7 @@ namespace JetTagDQA{
         m_weight_histos.insert(std::make_pair(histo_name_matched, histo_matched));
 
         // book the vs pT histograms (the bool in the argument says if it is an old tagger (for sub-folder sorting later))
-        //GN2v01 
-        if(*tag_iter == "GN2v01"){
-          bookDiscriminantVsPTAndLxyHistograms("GN2v01", m_GN2v01_workingPoints, false, label_iter, m_sParticleType);
-        }
-        else if(*tag_iter == "GN3XPV01"){
-          bookDiscriminantVsPTAndLxyHistograms("GN3XPV01", m_GN3XPV01_workingPoints, false, label_iter, m_sParticleType);
-        }
+        bookDiscriminantVsPTAndLxyHistograms(*tag_iter, workingPoints(*tag_iter), false, label_iter, m_sParticleType);
       }
     }
 
