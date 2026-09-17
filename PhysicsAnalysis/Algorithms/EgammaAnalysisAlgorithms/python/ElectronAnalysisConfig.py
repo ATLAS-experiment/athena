@@ -714,7 +714,7 @@ class ElectronWorkingPointEfficiencyConfig (ConfigBlock) :
             postfix = '_' + postfix
 
         correlationModels = ["SIMPLIFIED", "FULL", "TOTAL", "TOYS"]
-        map_file = 'ElectronEfficiencyCorrection/2015_2025/rel22.2/2026_Run2Run3_Recommendation_v2/map1.txt'
+        map_file = 'ElectronEfficiencyCorrection/2015_2025/rel22.2/2026_Run2Run3_Recommendation_v3/map1.txt'
         sfList = []
         # Set up the RECO electron efficiency correction algorithm:
         if config.dataType() is not DataType.Data and not self.noEffSF:
