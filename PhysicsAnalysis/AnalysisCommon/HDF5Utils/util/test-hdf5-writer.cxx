@@ -109,10 +109,14 @@ void fill(H5::Group& out_file, size_t iterations) {
   scalar_config.name = "scalar";
   scalar_config.deflate = deflate;
   consumer_t consumers = getConsumers();
-  scalar_writer_t scalar_source(out_file, consumers, scalar_config);
-  // the moved-from writer is destroyed while this one still writes to the dataset
-  scalar_writer_t scalar(std::move(scalar_source));
-  for (size_t n = 0; n < iterations; n++) {
+  // the moved-from writer holds buffered rows and is destroyed while
+  // the new one still writes to the dataset
+  scalar_writer_t scalar = [&] {
+    scalar_writer_t source(out_file, consumers, scalar_config);
+    source.fill(getOutputs(1, 1, 0.5).at(0));
+    return scalar_writer_t(std::move(source));
+  }();
+  for (size_t n = 1; n < iterations; n++) {
     scalar.fill(getOutputs(1 + n, 1, 0.5).at(0));
   }
 
