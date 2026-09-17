@@ -23,7 +23,6 @@ These helper tools are implemented:
 <ul>
   <li>HistoHelper</li>
   <li>LikelihoodTool</li>
-  <li>CombinerTool</li>
 </ul>
 The HistoHelper makes it easier to book and fill histos. In addition it takes
 care that all values are filled inside the histogram range (too low value are filled into
