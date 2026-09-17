@@ -22,6 +22,9 @@
 // Traccc include(s).
 #include <traccc/edm/track_collection.hpp>
 
+// CUDA include(s).
+#include <cuda_runtime_api.h>
+
 namespace AthCUDAExamples {
 
 /// Example algorithm performing "track particle calibration"
