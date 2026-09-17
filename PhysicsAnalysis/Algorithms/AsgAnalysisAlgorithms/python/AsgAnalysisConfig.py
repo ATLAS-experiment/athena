@@ -420,6 +420,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
             info="save the necessary information to run the LHAPDF tool offline.")
         self.addOption ('doPDFReweighting', False, type=bool,
             info="perform the PDF reweighting to do the PDF sensitivity studies with the existing sample, intrinsic charm PDFs as the default here. WARNING: the reweighting closure should be validated within analysis (it has been proved to be good for Madgraph, aMC@NLO, Pythia8, Herwig, and Alpgen, but not good for Sherpa and Powheg).")
+        self.addOption ('inPDFName', None, type=str, info="PDF set the input sample was produced with, for use in PDF reweighting")
         self.addOption ('outPDFName', [
             "CT14nnloIC/0", "CT14nnloIC/1", "CT14nnloIC/2", 
             "CT18FC/0", "CT18FC/3", "CT18FC/6", "CT18FC/9", 
@@ -440,7 +441,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
         if config.dataType() is DataType.Data:
             # there are no generator weights in data!
             return
-        log = logging.getLogger('makeGeneratorAnalysisSequence')
+        log = logging.getLogger('GeneratorAnalysis')
 
         # Setup stream name
         streamName = self.streamName or config.defaultHistogramStream()
@@ -476,11 +477,40 @@ class GeneratorAnalysisBlock (ConfigBlock):
                 config.addOutputVar ('EventInfo', var, 'PDFinfo_' + var, noSys=True)
 
         if self.doPDFReweighting:
+            generatorInfo = config.flags.Input.GeneratorsInfo
+            log.info(f"Loaded generator info: {generatorInfo}")
+
+            if not generatorInfo:
+                warnings.warn_explicit("No generator info found.", GeneratorWeightWarning, filename='', lineno=0)
+            elif isinstance(generatorInfo, dict):
+
+                unsupported_generators = {
+                    "Sherpa": "PDF reweighting for Sherpa is not proven to be reliable. The reweighting closure should be validated within the analysis.",
+                    "Powheg": "PDF reweighting for Powheg is not proven to be reliable. The reweighting closure should be validated within the analysis."
+                }
+
+                # Check for unsupported generators
+                for generator, message in unsupported_generators.items():
+                    if generator in generatorInfo:
+                        warnings.warn_explicit(
+                            message,
+                            GeneratorWeightWarning,
+                            filename='',
+                            lineno=0
+                        )
+
             alg = config.createAlgorithm( 'CP::PDFReweightAlg', 'PDFReweightAlg', reentrant=True )
+
+            if self.inPDFName is None:
+                log.error("Option inPDFName not specified, but is required for PDF reweighting. This means the PDF set the input dataset was generated with is determined as …")
+            else:
+                alg.inPDFName = self.inPDFName
+
+            alg.outPDFName = self.outPDFName
         
             for pdf_set in self.outPDFName:
                 config.addOutputVar('EventInfo', f'PDFReweightSF_{pdf_set.replace("/", "_")}', 
-                                    f'PDFReweightSF_{pdf_set.replace("/", "_")}', noSys=True) 
+                                    f'PDFReweightSF_{pdf_set.replace("/", "_")}', noSys=True, auxType='float') 
 
         
         if self.doHFProdFracReweighting:
