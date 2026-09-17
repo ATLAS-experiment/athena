@@ -714,7 +714,7 @@ namespace CP{
     double n_F_scaled = m_slopeScaled * muactual + m_interceptScaled;
     auto denom = poisson_pmf(N_fake, n_F);
     if (denom == 0.)[[unlikely]]{
-      throw std::runtime error("nFMethodPileupBasedLinearFitClass::getPFake: divide-by-zero.");
+      throw std::runtime_error("nFMethodPileupBasedLinearFitClass::getPFake: divide-by-zero.");
     }
     // Calculate P_fake
     double P_fake = poisson_pmf(N_fake, n_F_scaled) / poisson_pmf(N_fake, n_F);
