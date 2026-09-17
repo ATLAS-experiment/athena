@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthenaKernel/src/proxyDictFromEventContext.cxx
@@ -67,6 +67,27 @@ SG::SourceID sourceIDFromEventContext ()
 SG::SourceID sourceIDFromEventContext (const EventContext& ctx)
 {
   return Atlas::getExtendedEventContext(ctx).proxy()->sourceID();
+}
+
+
+/**
+ * @brief Update the @c IProxyDict in the current EventContext.
+ * @param sg The new @c IProxyDict.
+ *
+ * Mainly intended as a helper for unit tests.
+ * Athena code would not normally do this.
+ */
+void setProxyDictInEventContext (IProxyDict* sg)
+{
+  EventContext ctx = Gaudi::Hive::currentContext();
+  ExtendedEventContext* ectx = tryGetExtendedEventContext (ctx);
+  if (ectx) {
+    ectx->setProxy (sg);
+  }
+  else {
+    ctx.setExtension (ExtendedEventContext (sg));
+  }
+  Gaudi::Hive::setCurrentContext (ctx);
 }
 
 

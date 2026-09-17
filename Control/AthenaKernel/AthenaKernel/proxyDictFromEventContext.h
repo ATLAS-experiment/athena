@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthenaKernel/proxyDictFromEventContext.h
@@ -50,6 +50,16 @@ SG::SourceID sourceIDFromEventContext();
  * @param ctx The context.
  */
 SG::SourceID sourceIDFromEventContext (const EventContext& ctx);
+
+
+/**
+ * @brief Update the @c IProxyDict in the current EventContext.
+ * @param sg The new @c IProxyDict.
+ *
+ * Mainly intended as a helper for unit tests.
+ * Athena code would not normally do this.
+ */
+void setProxyDictInEventContext (IProxyDict* sg);
 
 
 }
