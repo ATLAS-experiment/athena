@@ -1,6 +1,6 @@
 # Graph Neural Network for ITk tracking
 
-## Dump Athena space points, clusters and training information to root ntuple for ACORN.
+## Dump Athena space points, clusters and training information to root ntuple for ACORN
 
 The following is an example on how to dump the training / evaluation data to ACORN. The examples uses an old ttbar (geometry ATLAS-P2-RUN4-03-00-00) but is only intended to show the Reco_tf configuration. Some additional information:
 
@@ -29,10 +29,6 @@ Reco_tf.py \
          --maxEvents 5 2>&1 | tee log.gnnreader_debug.txt
 ```
 
-
-
-
-
 ## To Fit track candidates from ACORN
 
 GNN can be configured through the flags defined in `InDetGNNTrackingConfigFlags.py`. For example, to change the input dictory for the TrackReader, one can set the flag `flags.Tracking.GNN.TrackReader.inputTracksDir = "gnntracks"`. The following is an example of how to run the GNN track fitting on the ACORN track candidates.
@@ -60,4 +56,35 @@ function gnn_tracking() {
         --postExec 'msg=cfg.getService("MessageSvc"); msg.infoLimit = 9999999; msg.debugLimit = 9999999; msg.verboseLimit = 9999999;' \
         --maxEvents 1  2>&1 | tee log.gnnreader_debug.txt
 }
-````
+```
+
+## Run ACTS-based GNN pipeline
+
+To run the ACTS integrated pipeline, one can use the following `Reco_tf` script:
+The GNN model can either be an `.onnx`, `.pt` or `.engine` file.
+The MM path should points to the directory where the two `*.doublets.root` and `*.triplets.root` files are.
+MMG expect a path without the 2 suffix.
+
+For example, `module_map_path` can be `/path/to/modulemaps/merged_ttbar_plus_singles_mmg1.3.0_cleaned_mean_rms_replaced_thr5_tol1e-10_float` (without `*.doublets.root` and `*.triplets.root` at the end).
+
+```bash
+    conditions_tag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
+
+    Reco_tf.py --CA 'all:True' \
+        --conditionsTag "all:${conditions_tag}" \
+        --digiSteeringConf 'StandardInTimeOnlyTruth' \
+        --geometryVersion "all:ATLAS-P2-RUN4-03-00-00" \
+        --multithreaded 'True' \
+        --steering 'doRAWtoALL' \
+        --preInclude 'all:Campaigns.MC23PhaseIIPileUp200' \
+            'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
+            'InDetGNNTracking.InDetGNNTrackingFlags.gnnActsPipelineValidation' \
+        --preExec "flags.ITk.doEndcapEtaNeighbour=True; \
+            flags.Tracking.GNN.ActsPipeline.moduleMapPath=\"${module_map_path}\"; \
+            flags.Tracking.GNN.ActsPipeline.gnnPath=\"${gnn_model_path}\"; \
+            flags.Tracking.GNN.ActsPipeline.saveEdgeScore = True" \
+        --postInclude 'all:PyJobTransforms.UseFrontier' \
+        --inputRDOFile "$RDO_FILE" \
+        --outputAODFile "$AOD_FILE" \
+        --maxEvents 10 \
+```
