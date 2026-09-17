@@ -72,7 +72,7 @@ if __name__=="__main__":
     flags = initConfigFlags()
     flags.PerfMon.doFullMonMT = not args.noPerfMon
     flags.PerfMon.OutputJSON="perfmonmt_MuonR4FastReco.json"
-    flags.PerfMon.VTune.ProfiledAlgs = ["MuonFastReconstructionAlg"]
+    flags.PerfMon.VTune.ProfiledAlgs = ["MuonGlobalPatternFindingAlg"]
 
     flags, cfg = setupGeoR4TestCfg(args,flags)
   
@@ -87,14 +87,18 @@ if __name__=="__main__":
     cfg.merge(MuonSpacePointFormationCfg(flags))
     
     # Schedule fast reconstruction alg & the Fast Reco Tester Alg
-    from MuonFastRecoAlgs.MuonFastReconstructionConfig import MuonFastReconstructionAlgCfg, PatternRecognitionFromFastRecoCfg
-    cfg.merge(MuonFastReconstructionAlgCfg(flags))
+    from MuonFastRecoAlgs.MuonFastReconstructionConfig import MuonGlobalPatternFindingAlgCfg, MuonFastSegmentFittingAlgCfg, MuonFastSABuilderAlgCfg
+    cfg.merge(MuonGlobalPatternFindingAlgCfg(flags))
+    cfg.merge(MuonFastSegmentFittingAlgCfg(flags))
+    cfg.merge(MuonFastSABuilderAlgCfg(flags))
     cfg.merge(MuonFastRecoTesterCfg(flags, outFile = args.outRootFile,
                                            writeSpacePoints = args.writeSpacePoints))
 
     if args.runHoughTest or args.runMSTrackTest:
         # Schedule pattern recognition either on space points from fast reco or from standard space point maker
         if args.useFastRecoSpacePoints:
+            from MuonFastRecoAlgs.MuonFastReconstructionConfig import MuonFastSpacepointFilteringAlgCfg, PatternRecognitionFromFastRecoCfg
+            cfg.merge(MuonFastSpacepointFilteringAlgCfg(flags))
             cfg.merge(PatternRecognitionFromFastRecoCfg(flags))
         else:
             from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonPatternRecognitionCfg
@@ -134,15 +138,22 @@ if __name__=="__main__":
         cfg.merge(addOverride(flags, "/MDT/TWINMAPPING", "MDTTwinMapping_compactFormat_Run123"))
 
     if not args.noMonitorPlots:
-        cfg.getEventAlgo("MuonFastReconstructionAlg").VisualizationTool = cfg.popToolsAndMerge(FastRecoVisualizationToolCfg(flags, 
-                                                                                                CanvasPreFix="FastRecoValid", 
-                                                                                                doPhiBucketViews = False,
-                                                                                                doEtaBucketViews = False,
-                                                                                                doRZBucketViews = True,
-                                                                                                paintTruthSegment = False,
-                                                                                                outSubDir="FastReconstructionValidPlots", 
-                                                                                                displayTruthOnly = False,
-                                                                                                saveSinglePDFs = True))
+        cfg.getEventAlgo("MuonGlobalPatternFindingAlg").VisualizationTool = cfg.popToolsAndMerge(FastRecoVisualizationToolCfg(flags, 
+                                                                                                 CanvasPreFix="GlobPatFinderValid", 
+                                                                                                 doPhiBucketViews = False,
+                                                                                                 doEtaBucketViews = False,
+                                                                                                 doRZBucketViews = True,
+                                                                                                 paintTruthSegment = False,
+                                                                                                 outSubDir="GlobPatFinderValidPlots", 
+                                                                                                 displayTruthOnly = False,
+                                                                                                 saveSinglePDFs = True))
+        from MuonPatternRecognitionTest.PatternTestConfig import PatternVisualizationToolCfg                                                                                                
+        cfg.getEventAlgo("MuonFastSegmentFittingAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags,
+                                                                                               CanvasPreFix="FastSegmentValid", 
+                                                                                               outSubDir="FastSegmentValidPlots", 
+                                                                                               displayTruthOnly = True,
+                                                                                               saveSinglePDFs = True, 
+                                                                                               saveSummaryPDF= True))
     
     if args.evtNumber is not None:
         mainSeq = "AthAllAlgSeq"
@@ -156,6 +167,6 @@ if __name__=="__main__":
         cfg.addEventAlgo(CompFactory.EventNumberFilterAlgorithm("EvtNumberFilter",EventNumbers=args.evtNumber),sequenceName=mainSeq)
         cfg.getSequence(mainSeq).Members += [algSeq]
 
-        cfg.getService("MessageSvc").setVerbose = ["MuonFastReconstructionAlg", "MuonFastRecoTester"]
+        cfg.getService("MessageSvc").setVerbose = ["MuonGlobalPatternFindingAlg", "MuonFastSegmentFittingAlg", "MuonFastSABuilderAlg", "MuonFastRecoTester"]
     
     executeTest(cfg)
