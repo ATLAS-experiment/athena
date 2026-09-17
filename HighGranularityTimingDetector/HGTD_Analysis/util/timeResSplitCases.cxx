@@ -1,28 +1,31 @@
 /**
  * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  *
- * @file HGTD_Analysis/scripts/timeResSplitCases.cxx
+ * @file HGTD_Analysis/util/timeResSplitCases.cxx
  *
  * @brief Time-resolution outlier stack, split by prime-fraction case.
  *
- * ROOT/cling macro for the HGTD validation chain -- INTERPRETED ONLY, never
- * compiled. It relies on cling's implicit ROOT headers and will not build as a
- * translation unit; do not add it to any CMake source glob. Migrated as-is from
- * atlas-hgtd/SimulationAndPerformance/hgtdanalysisathena (HGTD_Plots/).
+ * Plotting step of the HGTD validation chain:
  *
- * Run it as its own root process -- the two macros in this directory declare
- * identically named globals and cannot share one ROOT session:
- *
- *     root -l -b -q 'timeResSplitCases.cxx("/path/to/my.cfg")'
+ *     HGTD_timeResSplitCases /path/to/my.cfg
  *
  * See README.md for the config keys.
  */
 
-/// @cond -- ROOT macro, not part of the package API.
+/// @cond -- plotting executable, not part of the package API.
 
 #include "timeResSplitCases.h"
 
-TFile *file = nullptr;
+#include "CxxUtils/checker_macros.h"
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // single-threaded plotting application
+
+#include "TCanvas.h"
+#include "TEnv.h"
+#include "THStack.h"
+#include "TLegend.h"
+#include "TPad.h"
+
+#include <iostream>
 
 void timeResSplitCases(TString config_file_name = "") {
   if (config_file_name != "") {
@@ -46,45 +49,36 @@ void timeResSplitCases(TString config_file_name = "") {
       "track_selection_tool",
       "HGTD_TrkTimePerformanceStudies.AllTracksSelection/");
 
-  file = TFile::Open(g_input_file_path, "READ");
+  TFile* file = TFile::Open(g_input_file_path, "READ");
+  if (file == nullptr || file->IsZombie()) {
+    std::cout << "could not open input file " << g_input_file_path << std::endl;
+    return;
+  }
 
   SetAtlasStyle();
 
-  plot();
+  plot(file);
 
 }
 
-void plot() {
+void plot(TFile* file) {
 
   std::vector<Color_t> colors = {
       kTeal + 4, kTeal + 2, kTeal, kTeal - 9, kMagenta, kRed, kRed, kRed, kRed};
 
   std::vector<TH1F *> hists;
-  cout << g_track_selection_tool + g_time_acc_tool << endl;
+  std::cout << g_track_selection_tool + g_time_acc_tool << std::endl;
 
-  auto hist1 =
-      (TH1F *)file->Get(g_track_selection_tool + g_time_acc_tool + "m_hist_timeres_outlier_casesAllPrimes");
-  hists.push_back(hist1);
-
-  auto hist2 = (TH1F *)file->Get(g_track_selection_tool + g_time_acc_tool + "m_hist_timeres_outlier_casesMoreThanHalfPrimes");
-  hists.push_back(hist2);
-  auto hist3 = (TH1F *)file->Get(g_track_selection_tool + g_time_acc_tool + "m_hist_timeres_outlier_casesHalfPrimesHasPrimes");
-  hists.push_back(hist3);
-  auto hist4 = (TH1F *)file->Get(g_track_selection_tool + g_time_acc_tool + "m_hist_timeres_outlier_casesLessThanHalfPrimes");
-  hists.push_back(hist4);
-  auto hist5 = (TH1F *)file->Get(g_track_selection_tool + g_time_acc_tool + "m_hist_timeres_outlier_casesNoPrimesNoPossiblePrimes");
-  hists.push_back(hist5);
-  auto hist6 = (TH1F *)file->Get(g_track_selection_tool + g_time_acc_tool + "m_hist_timeres_outlier_casesNoPrimes1PossiblePrimes");
-  hists.push_back(hist6);
-  auto hist7 = (TH1F *)file->Get(g_track_selection_tool + g_time_acc_tool + "m_hist_timeres_outlier_casesNoPrimes2PossiblePrimes");
-  hists.push_back(hist7);
-  auto hist8 = (TH1F *)file->Get(g_track_selection_tool + g_time_acc_tool + "m_hist_timeres_outlier_casesNoPrimes3PossiblePrimes");
-  hists.push_back(hist8);
-  auto hist9 = (TH1F *)file->Get(g_track_selection_tool + g_time_acc_tool + "m_hist_timeres_outlier_casesNoPrimes4PossiblePrimes");
-  hists.push_back(hist9);
-
-  double total = 0;
-
+  for (const TString& primes_fraction : primes_fractions) {
+    TString plotname = "m_hist_timeres_outlier_cases" + primes_fraction;
+    auto hist = (TH1F*)file->Get(g_track_selection_tool + g_time_acc_tool +
+                                 plotname);
+    if (hist == nullptr) {
+      std::cout << "could not find " << plotname << std::endl;
+      return;
+    }
+    hists.push_back(hist);
+  }
 
   auto overall_hist =
       new TH1F("overall_hist", ";t_{reco} - t_{truth} [ns]; number of tracks",
@@ -156,7 +150,7 @@ void plot() {
   legend->SetBorderSize(0);
   legend->SetTextSize(0.035);
 
-  for (int i = 0; i < labels.size(); i++) {
+  for (size_t i = 0; i < labels.size(); i++) {
     legend->AddEntry(hists.at(i), labels.at(i), "f");
   }
 
@@ -176,6 +170,15 @@ void plot() {
   plot_name.ReplaceAll(".png", ".C");
   c->Print(plot_name);
 
+}
+
+int main(int argc, char* argv[]) {
+  if (argc != 2) {
+    std::cout << "Syntax: " << argv[0] << " <config file>" << std::endl;
+    return 1;
+  }
+  timeResSplitCases(argv[1]);
+  return 0;
 }
 
 /// @endcond

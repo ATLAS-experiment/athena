@@ -1,7 +1,7 @@
 /**
  * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  *
- * @file HGTD_Analysis/scripts/HGTD_PlottingHelpers.h
+ * @file HGTD_Analysis/util/HGTD_PlottingHelpers.h
  *
  * @author M. Sutton (original AtlasStyle/AtlasUtils);
  *         Alexander Leopold <alexander.leopold@cern.ch> (merge and trim)
@@ -18,20 +18,19 @@
  * TH1TOTGraph, myBoxText, myMarkerText) are used by no macro in that repository
  * and were dropped.
  *
- * Definitions are inline in this header on purpose: these are ROOT-interpreted
- * macros, so the previous arrangement had the macro headers #include the .cxx
- * bodies by relative path. A single guarded header removes that, along with the
- * guard collision between AtlasStyle.cxx and AtlasStyle.h and the duplicated
- * default argument on ATLAS_LABEL.
- *
- * NOTE: interpreted by cling only -- never compiled into a library. It is
- * installed as package data (see the package CMakeLists.txt).
+ * Definitions are inline in this header on purpose: it is included by both
+ * plotting executables, which removes the guard collision between
+ * AtlasStyle.cxx and AtlasStyle.h and the duplicated default argument on
+ * ATLAS_LABEL that the original pair carried.
  */
 
-/// @cond -- ROOT macro helper, not part of the package API.
+/// @cond -- plotting helper, not part of the package API.
 
 #ifndef HGTD_ANALYSIS_HGTD_PLOTTINGHELPERS_H
 #define HGTD_ANALYSIS_HGTD_PLOTTINGHELPERS_H
+
+#include "CxxUtils/checker_macros.h"
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // single-threaded plotting application
 
 #include <cmath>
 #include <iostream>

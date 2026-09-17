@@ -4,7 +4,7 @@
 atlas_subdir( HGTD_Analysis )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO Physics )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO Physics Graf Gpad )
 
 # Component(s) in the package:
 atlas_add_library( HGTD_AnalysisLib
@@ -23,6 +23,15 @@ atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 atlas_install_joboptions( share/*.py )
 
-# ROOT plotting macros for the validation chain. Interpreted, not compiled --
-# installed as data so they stay co-located for their relative #includes.
-atlas_install_data( scripts/*.cxx scripts/*.h )
+# Plotting executables of the validation chain. They take a TEnv config file
+# and turn the histograms written by HGTD_TrkTimePerformanceStudies into the
+# HGTD track-time validation plots. See util/README.md.
+atlas_add_executable( HGTD_effCurvesVersionsEta
+                      util/effCurvesVersionsEta.cxx
+                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+                      LINK_LIBRARIES ${ROOT_LIBRARIES} CxxUtils )
+
+atlas_add_executable( HGTD_timeResSplitCases
+                      util/timeResSplitCases.cxx
+                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+                      LINK_LIBRARIES ${ROOT_LIBRARIES} CxxUtils )

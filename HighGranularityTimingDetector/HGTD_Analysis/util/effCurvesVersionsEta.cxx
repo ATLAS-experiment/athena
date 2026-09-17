@@ -1,27 +1,33 @@
 /**
  * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  *
- * @file HGTD_Analysis/scripts/effCurvesVersionsEta.cxx
+ * @file HGTD_Analysis/util/effCurvesVersionsEta.cxx
  *
  * @brief Time-association efficiency and misassignment vs |eta|, plus the
  * stacked prime-fraction breakdown.
  *
- * ROOT/cling macro for the HGTD validation chain -- INTERPRETED ONLY, never
- * compiled. It relies on cling's implicit ROOT headers and will not build as a
- * translation unit; do not add it to any CMake source glob. Migrated as-is from
- * atlas-hgtd/SimulationAndPerformance/hgtdanalysisathena (HGTD_Plots/).
+ * Plotting step of the HGTD validation chain:
  *
- * Run it as its own root process -- the two macros in this directory declare
- * identically named globals and cannot share one ROOT session:
- *
- *     root -l -b -q 'effCurvesVersionsEta.cxx("/path/to/my.cfg")'
+ *     HGTD_effCurvesVersionsEta /path/to/my.cfg
  *
  * See README.md for the config keys.
  */
 
-/// @cond -- ROOT macro, not part of the package API.
+/// @cond -- plotting executable, not part of the package API.
 
 #include "effCurvesVersionsEta.h"
+
+#include "CxxUtils/checker_macros.h"
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // single-threaded plotting application
+
+#include "TCanvas.h"
+#include "TEnv.h"
+#include "TGraphAsymmErrors.h"
+#include "THStack.h"
+#include "TLegend.h"
+#include "TPad.h"
+
+#include <iostream>
 
 ///////////////////////////////////////////////////////
 
@@ -46,24 +52,25 @@ void effCurvesVersionsEta(TString config_file_name = "") {
       "track_selection_tool",
       "HGTD_TrkTimePerformanceStudies.AllTracksSelection/");
 
-  g_file = TFile::Open(g_input_file_path, "READ");
+  TFile* file = TFile::Open(g_input_file_path, "READ");
+  if (file == nullptr || file->IsZombie()) {
+    std::cout << "could not open input file " << g_input_file_path << std::endl;
+    return;
+  }
 
   SetAtlasStyle();
 
-  efficiencyAndMistagLinePrimeFractionGT50("|#eta|");
-  efficiencyStackPlotAllCases("|#eta|");
+  efficiencyAndMistagLinePrimeFractionGT50(file, "|#eta|");
+  efficiencyStackPlotAllCases(file, "|#eta|");
 
-  return;
-
-  g_file->Close();
-
+  file->Close();
 }
 
-void efficiencyAndMistagLinePrimeFractionGT50(TString xlabel) {
+void efficiencyAndMistagLinePrimeFractionGT50(TFile* file, TString xlabel) {
 
-  auto eff = (TEfficiency *)g_file->Get(g_track_selection_tool + g_time_acc_tool + "m_eff_vs_eta");
+  auto eff = (TEfficiency *)file->Get(g_track_selection_tool + g_time_acc_tool + "m_eff_vs_eta");
   if (eff == nullptr) {
-    cout << "s_m_eff_vs_eta histogram not found" << endl;
+    std::cout << "s_m_eff_vs_eta histogram not found" << std::endl;
     return;
   }
   TGraphAsymmErrors *graph_total = eff->CreateGraph();
@@ -74,9 +81,9 @@ void efficiencyAndMistagLinePrimeFractionGT50(TString xlabel) {
   graph_total->SetLineColor(marker_color);
   graph_total->SetLineWidth(4);
 
-  auto eff2 = (TEfficiency *)g_file->Get(g_track_selection_tool + g_time_acc_tool + "m_eff_gt50pcprimes_vs_eta");
+  auto eff2 = (TEfficiency *)file->Get(g_track_selection_tool + g_time_acc_tool + "m_eff_gt50pcprimes_vs_eta");
   if (eff2 == nullptr) {
-    cout << "histogram m_eff_gt50pcprimes_vs_eta not found" << endl;
+    std::cout << "histogram m_eff_gt50pcprimes_vs_eta not found" << std::endl;
     return;
   }
   TGraphAsymmErrors *graph2 = eff2->CreateGraph();
@@ -87,9 +94,10 @@ void efficiencyAndMistagLinePrimeFractionGT50(TString xlabel) {
   graph2->SetLineColor(marker_color2);
   graph2->SetLineWidth(4);
 
-  auto eff3 = (TEfficiency *)g_file->Get(g_track_selection_tool + g_time_acc_tool + "m_eff_gt50pcprimes_vs_eta_mistag");
+  auto eff3 = (TEfficiency *)file->Get(g_track_selection_tool + g_time_acc_tool + "m_eff_gt50pcprimes_vs_eta_mistag");
   if (eff3 == nullptr) {
-    cout << "s_m_eff_gt50pcprimes_vs__mistag histogram not found" << endl;
+    std::cout << "s_m_eff_gt50pcprimes_vs__mistag histogram not found"
+              << std::endl;
     return;
   }
   TGraphAsymmErrors *graph3 = eff3->CreateGraph();
@@ -150,11 +158,11 @@ void efficiencyAndMistagLinePrimeFractionGT50(TString xlabel) {
   canvas->Print(plot_name);
 }
 
-void efficiencyStackPlotAllCases(TString xlabel) {
+void efficiencyStackPlotAllCases(TFile* file, TString xlabel) {
 
-  auto eff = (TEfficiency *)g_file->Get(g_track_selection_tool + g_time_acc_tool + "m_eff_vs_eta");
+  auto eff = (TEfficiency *)file->Get(g_track_selection_tool + g_time_acc_tool + "m_eff_vs_eta");
   if (eff == nullptr) {
-    cout << "s_m_eff_vs_eta histogram not found" << endl;
+    std::cout << "s_m_eff_vs_eta histogram not found" << std::endl;
     return;
   }
   TGraphAsymmErrors *graph_total = eff->CreateGraph();
@@ -168,10 +176,10 @@ void efficiencyStackPlotAllCases(TString xlabel) {
   std::vector<TEfficiency *> effs;
   std::vector<TH1F *> hists;
 
-  for (int i = 0; i < primes_fractions.size(); i++) {
+  for (size_t i = 0; i < primes_fractions.size(); i++) {
     TString plotname = Form("m_eff_vs_eta_primesfrac%s",
                              primes_fractions.at(i).Data());
-    auto eff = (TEfficiency *)g_file->Get(g_track_selection_tool + g_time_acc_tool + plotname);
+    auto eff = (TEfficiency *)file->Get(g_track_selection_tool + g_time_acc_tool + plotname);
     if (eff == nullptr) {
       std::cout << "efficiencyStackPlotAllCases ERROR\n";
       std::cout << "could not find " << plotname << '\n';
@@ -184,10 +192,10 @@ void efficiencyStackPlotAllCases(TString xlabel) {
   THStack *stack_hist =
       new THStack("stack_hist", ";|#eta|; Time Association Rate");
 
-  for (int i = 0; i < effs.size(); i++) {
+  for (size_t i = 0; i < effs.size(); i++) {
     auto graph = effs.at(i)->CreateGraph();
     TH1F *hist =
-        turnGraphIntoHist(graph, graph->GetName() + TString::Format("h%i", i),
+        turnGraphIntoHist(graph, graph->GetName() + TString::Format("h%zu", i),
                           "", 32, 2.4, 4.0, effs.at(i)->GetFillColor());
     hist->SetFillColor(colors.at(i));
     hists.push_back(hist);
@@ -229,7 +237,7 @@ void efficiencyStackPlotAllCases(TString xlabel) {
   legend->SetTextSize(0.035);
 
   legend->AddEntry(graph_total, "Total", "lp");
-  for (int i = 0; i < labels.size(); i++) {
+  for (size_t i = 0; i < labels.size(); i++) {
     legend->AddEntry(hists.at(i), labels.at(i), "f");
   }
 
@@ -265,6 +273,15 @@ TH1F* turnGraphIntoHist(TGraph *graph, TString name, TString label, int bins,
   hist->SetMarkerSize(0);
   hist->SetMarkerColor(color);
   return hist;
+}
+
+int main(int argc, char* argv[]) {
+  if (argc != 2) {
+    std::cout << "Syntax: " << argv[0] << " <config file>" << std::endl;
+    return 1;
+  }
+  effCurvesVersionsEta(argv[1]);
+  return 0;
 }
 
 /// @endcond
