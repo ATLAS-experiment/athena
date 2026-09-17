@@ -1,5 +1,6 @@
 # Steering script for IDPVM ART jobs with Data Reco config
 inputAOD=$1
+maxEvents=1000
 
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
 dcubeShifterXml=${artdata}/InDetPhysValMonitoring/dcube/config/IDPVMPlots_MC_baseline.xml
@@ -10,6 +11,7 @@ run() { (set -x; exec "$@") }
 run  Derivation_tf.py \
      --inputAODFile "$inputAOD" \
      --outputDAODFile sumpt2.root \
+     --maxEvents $maxEvents \
      --formats PHYSVAL \
      --preExec "from TrkConfig.VertexFindingFlags import VertexSortingSetup; flags.Tracking.PriVertex.sortingSetup=VertexSortingSetup.SumPt2Sorting"
 
@@ -27,6 +29,7 @@ echo "art-result: $idpvm_tf_exit_code idpvm sumpt2"
 run  Derivation_tf.py \
      --inputAODFile "$inputAOD" \
      --outputDAODFile hsgnn.root \
+     --maxEvents $maxEvents \
      --formats PHYSVAL \
      --preExec "from TrkConfig.VertexFindingFlags import VertexSortingSetup; flags.Tracking.PriVertex.sortingSetup=VertexSortingSetup.GNNSorting"
 
