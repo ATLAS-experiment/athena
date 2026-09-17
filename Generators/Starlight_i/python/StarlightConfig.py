@@ -8,10 +8,7 @@ from GeneratorConfig.GeneratorSettingsSemantics import (
 )
 from GeneratorConfig.Sequences import EvgenSequence, EvgenSequenceFactory
 from EvgenJobTransforms.EvgenHelpers import _get_nevents
-from Pythia8_i.Pythia8Config import (
-    Pythia8_A14_NNPDF23LO_Common_Cfg,
-    Pythia8CommandsCfg
-)
+from Pythia8_i.Pythia8Config import Pythia8_A14_NNPDF23LO_Common_Cfg
 from AthenaCommon.SystemOfUnits import GeV
 
 # Get logger
