@@ -42,22 +42,22 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
                                             55.5,
                                             65.5,
                                             75.5,
-                                            333,
-                                            1));
+                                            1,
+                                            333));
   trans1.push_back (new CaloCalibrationHit (Identifier(234),
                                             145.5,
                                             155.5,
                                             165.5,
                                             175.5,
-                                            444,
-                                            2));
+                                            2,
+                                            444));
   trans1.push_back (new CaloCalibrationHit (Identifier(345),
                                             245.5,
                                             255.5,
                                             265.5,
                                             275.5,
-                                            555,
-                                            3));
+                                            3,
+                                            555));
 
   Athena_test::Leakcheck check;
 

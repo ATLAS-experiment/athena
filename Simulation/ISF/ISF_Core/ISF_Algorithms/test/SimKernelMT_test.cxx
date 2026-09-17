@@ -766,7 +766,7 @@ DECLARE_COMPONENT( MockEntryLayerTool )
                                        678.9/Gaudi::Units::c_light*Gaudi::Units::ns,  // time
                                        particleOrigin, // parent
                                        HepMC::UNDEFINED_ID, // id
-                                       10001,  // barcode
+                                       // 10001,  // barcode
                                        truthBinding
                                        );
 

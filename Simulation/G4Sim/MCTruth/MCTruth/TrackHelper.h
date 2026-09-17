@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MCTRUTH_TRACKHELPER_H
@@ -25,15 +25,15 @@ public:
   bool IsRegisteredSecondary() const ;
   bool IsSecondary() const ;
   /**
-   * @brief Return the truth barcode/id/status used for detector output.
+   * @brief Return the truth id/status used for detector output.
    *
    * TrackInformation can keep both the generation-zero particle and the
    * current regenerated particle. Detector hit links and track records use
    * the generation-zero particle to preserve legacy output attribution,
    * falling back to the current particle for older TrackInformation objects.
-   * Barcode-only track info keeps using its stored barcode/id/status values.
+   * "Barcode-only" track info keeps using its stored id/status values.
    */
-  int GetBarcode() const ; // TODO Drop this once UniqueID and Status are used instead
+  // int GetBarcode() const ; // TODO Drop this once UniqueID and Status are used instead
   int GetUniqueID() const;
   int GetStatus() const ;
   /**

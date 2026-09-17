@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MCTRUTH_TRACKBARCODEINFO_H
@@ -22,12 +22,14 @@ namespace ISF {
  * member variables are: m_theBaseISFParticle - a pointer to the
  * ISFParticle corresponding to the current G4Track, m_returnedToISF -
  * a flag indicating whether the ISFParticle corresponding to the
- * current G4Track scheduled to be returned to the ISF, m_barcode,
- * m_uniqueID and m_status - ???
+ * current G4Track scheduled to be returned to the ISF, m_uniqueID and
+ * m_status - ???
  */
 class TrackBarcodeInfo: public VTrackInformation {
 public:
-  TrackBarcodeInfo(int uid, int bc, ISF::ISFParticle* baseIsp=0);
+  TrackBarcodeInfo(int uid,
+                   //int bc,
+                   ISF::ISFParticle* baseIsp=nullptr);
 
   /**
    * @brief return a pointer to the ISFParticle corresponding to the
@@ -55,12 +57,12 @@ public:
    */
   virtual void SetReturnedToISF(bool returned) override;
 
-  virtual int GetParticleBarcode() const override {return m_barcode;}  // TODO Drop this once UniqueID and Status are used instead
+  // virtual int GetParticleBarcode() const override {return m_barcode;}  // TODO Drop this once UniqueID and Status are used instead
   virtual int GetParticleUniqueID() const override {return m_uniqueID;}
   virtual int GetParticleStatus() const override {return m_status;}
 private:
   ISF::ISFParticle *m_theBaseISFParticle{};
-  int m_barcode;  // TODO Drop this once UniqueID and Status are used instead
+  // int m_barcode;  // TODO Drop this once UniqueID and Status are used instead
   int m_uniqueID;
   int m_status{0}; //FIXME
   bool m_returnedToISF;

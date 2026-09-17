@@ -136,7 +136,6 @@ bool TRTProcessingOfBarrelHits::ProcessHit(G4Step* pStep)
   int hitID = gasID % 2;
 
   G4Track* pTrack = pStep->GetTrack();
-  // get the HepMC barcode using the track helper
   TrackHelper trHelp(pTrack);
 
   G4ThreeVector globalPreStepPoint = pPreStepPoint->GetPosition();

@@ -92,7 +92,7 @@ TEST_F( BCMSensorSDtest, ProcessHits )
   P2[SiHit::xPhi] = 0;
   P2[SiHit::xDep] = 0;
 
-  int barcode = 0;
+  int barcode = HepMC::UNDEFINED_ID;
   HepMcParticleLink plink(barcode,0,HepMcParticleLink::IS_POSITION,HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
 
   SiHitCollection* a = sd2.m_HitColl;
@@ -144,7 +144,7 @@ TEST_F( BCMSensorSDtest, AddHit )
   P2[SiHit::xPhi] = 0;
   P2[SiHit::xDep] = 0;
   
-  int barcode = 0;
+  int barcode = HepMC::UNDEFINED_ID;
   HepMcParticleLink plink(barcode,0,HepMcParticleLink::IS_POSITION,HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
   
   SiHitCollection* a = sd3.m_HitColl;

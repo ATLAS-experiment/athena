@@ -388,7 +388,7 @@ G4bool TileGeoG4CalibSD::ProcessHits(G4Step* step, G4TouchableHistory* /*ROhist*
   CaloCalibrationHit* hit = new CaloCalibrationHit(m_id, m_result.energy[CaloG4::SimulationEnergies::kEm],
                                                    m_result.energy[CaloG4::SimulationEnergies::kNonEm],
                                                    m_result.energy[CaloG4::SimulationEnergies::kInvisible0],
-                                                   m_result.energy[CaloG4::SimulationEnergies::kEscaped], primary_barcode, primary_id);
+                                                   m_result.energy[CaloG4::SimulationEnergies::kEscaped], primary_id, primary_barcode);
 
   // If we haven't had a hit in this cell before, add the current hit
   // to the hit collection.

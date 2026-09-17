@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -172,10 +172,10 @@ namespace MCTesting {
       int    pdgCode = 675;
       int status     =  200045;
       double time    = 923.;
-      int partBC = 1;
+      // int partBC = 1;
       int partID = 1;
       ISF::TruthBinding *truth = 0;
-      int part2BC = 2;
+      // int part2BC = 2;
       int part2ID = 2;
       m_isp1 = std::make_unique<ISF::ISFParticle>(
                                                   pos,
@@ -187,7 +187,7 @@ namespace MCTesting {
                                                   time,
                                                   test::origin,
                                                   partID,
-                                                  partBC,
+                                                  // partBC,
                                                   truth );
       m_isp2 = std::make_unique<ISF::ISFParticle>(
                                                   pos,
@@ -199,7 +199,7 @@ namespace MCTesting {
                                                   time,
                                                   *(m_isp1.get()), // parent
                                                   part2ID,
-                                                  part2BC,
+                                                  // part2BC,
                                                   truth );
 
       m_pvec_children = std::make_unique<ISF::ISFParticleVector>();
@@ -232,11 +232,6 @@ namespace MCTesting {
 
   TEST_F(ISFTruthIncident_test, testParentPdgCode) {
     ASSERT_EQ(m_isp1->pdgCode(), m_truthIncident->parentPdgCode());
-  }
-
-  TEST_F(ISFTruthIncident_test, testParentBarcode) {
-    ASSERT_EQ(m_isp1->barcode(), m_truthIncident->parentBarcode());
-
   }
 
   TEST_F(ISFTruthIncident_test, testParentUniqueID) {
@@ -280,14 +275,6 @@ namespace MCTesting {
   }
 
 
-  TEST_F(ISFTruthIncident_test, testChildBarcode) {
-    ASSERT_EQ(m_truthIncident->childBarcode(0), m_isp2->barcode());
-    const int undefBC = HepMC::UNDEFINED_ID;
-    const unsigned int childIndexOutOfRange = 1;
-    ASSERT_EQ(undefBC, m_truthIncident->childBarcode(childIndexOutOfRange));
-  }
-
-
   TEST_F(ISFTruthIncident_test, testChildParticle) {
 
     // ChildParticle(index, bc):
@@ -318,12 +305,12 @@ namespace MCTesting {
     // do gP properties match original child, apart from barcode?
     ASSERT_TRUE(test::eps >= std::fabs(gPP->momentum().perp2() - originalChildPt2));
     ASSERT_EQ(gPP->pdg_id(), originalChildPdgCode);
-    ASSERT_EQ(HepMC::barcode(gPP), childBarcode);
+    // ASSERT_EQ(HepMC::barcode(gPP), childBarcode);
 
     // truthIncident: no change to properties, apart from BC?
     ASSERT_EQ(m_truthIncident->childPt2(0), originalChildPt2);
     ASSERT_EQ(m_truthIncident->childPdgCode(0), originalChildPdgCode);
-    ASSERT_EQ(m_truthIncident->childBarcode(0), childBarcode);
+    // ASSERT_EQ(m_truthIncident->childBarcode(0), childBarcode);
 
   }
 

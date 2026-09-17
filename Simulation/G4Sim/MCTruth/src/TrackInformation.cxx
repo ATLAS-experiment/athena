@@ -24,15 +24,15 @@ TrackInformation::TrackInformation(HepMC::GenParticlePtr p, ISF::ISFParticle* ba
 {
 }
 
-int TrackInformation::GetParticleBarcode() const
-{
-  if (m_barcode != HepMC::INVALID_PARTICLE_BARCODE) return m_barcode;
-  if (m_currentGenParticle) {
-    m_barcode = HepMC::barcode(m_currentGenParticle);
-    return m_barcode;
-  }
-  return HepMC::UNDEFINED_ID;
-}
+// int TrackInformation::GetParticleBarcode() const
+// {
+//   if (m_barcode != HepMC::INVALID_PARTICLE_BARCODE) return m_barcode;
+//   if (m_currentGenParticle) {
+//     m_barcode = HepMC::barcode(m_currentGenParticle);
+//     return m_barcode;
+//   }
+//   return HepMC::UNDEFINED_ID;
+// }
 
 int TrackInformation::GetParticleUniqueID() const
 {
@@ -56,8 +56,8 @@ int TrackInformation::GetParticleStatus() const
 void TrackInformation::SetCurrentGenParticle(HepMC::GenParticlePtr p)
 {
   m_currentGenParticle = std::move(p);
-  m_barcode = HepMC::INVALID_PARTICLE_BARCODE;
-  m_uniqueID = HepMC::INVALID_PARTICLE_BARCODE;
+  //m_barcode = HepMC::INVALID_PARTICLE_BARCODE;
+  m_uniqueID = HepMC::INVALID_PARTICLE_ID;
 }
 
 void TrackInformation::SetGenerationZeroGenParticle(HepMC::GenParticlePtr p)

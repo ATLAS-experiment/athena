@@ -17,8 +17,8 @@ void CaloCalibrationHitCnv_p2::persToTrans(const CaloCalibrationHit_p2* persObj,
                                   persObj->m_energy1,
                                   persObj->m_energy2,
                                   persObj->m_energy3,
-                                  static_cast<int>(persObj->m_particleID),
-                                  HepMC::INVALID_PARTICLE_ID);
+                                  HepMC::INVALID_PARTICLE_ID,
+                                  static_cast<int>(persObj->m_particleID));
 }
 
 

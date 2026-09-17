@@ -17,7 +17,10 @@
 // Version4
 #include "CaloSimEventTPCnv/CaloCalibrationHitContainer_p4.h"
 
-// Add SR CaloCalibrationHitContainer_p1
+// SR CaloCalibrationHitContainer_p1
 #include "CaloSimEventTPCnv/SrCaloCalibrationHitContainer_p1.h"
+
+// SR CaloCalibrationHitContainer_p2
+#include "CaloSimEventTPCnv/SrCaloCalibrationHitContainer_p2.h"
 
 #endif

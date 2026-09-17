@@ -89,7 +89,7 @@ void CaloCalibrationHitContainerCnv_p4::persToTrans(const CaloCalibrationHitCont
                               tempE[i*4+1],
                               tempE[i*4+2],
                               tempE[i*4+3],
-                              HepMC::INVALID_PARTICLE_ID,
-                              static_cast<int>(persCont->m_particleUID[i])));
+                              static_cast<int>(persCont->m_particleUID[i]),
+                              HepMC::INVALID_PARTICLE_ID));
   }
 }

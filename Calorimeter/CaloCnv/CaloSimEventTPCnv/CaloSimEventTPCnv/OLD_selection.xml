@@ -12,6 +12,7 @@
 
   <class name="CaloCalibrationHitContainer_p4" id="0191C6F6-90B5-7B57-861D-6865CE3FDF69" />
   <class name="SrCaloCalibrationHitContainer_p1" id="A435D71D-5A7B-4B96-AE4A-F245D14432D9" />
+  <class name="SrCaloCalibrationHitContainer_p2" id="59548EE4-CE16-3C5E-805C-2ADBE38BBC8A" />
 
 
 </lcgdict>

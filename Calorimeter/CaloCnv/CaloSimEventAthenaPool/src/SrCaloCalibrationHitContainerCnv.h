@@ -7,11 +7,11 @@
 
 #include "AthenaPoolCnvSvc/T_AthenaPoolCustomCnv.h"
 #include "CaloSimEvent/SrCaloCalibrationHitContainer.h"
-#include "CaloSimEventTPCnv/SrCaloCalibrationHitContainer_p1.h"
+#include "CaloSimEventTPCnv/SrCaloCalibrationHitContainer_p2.h"
 // Gaudi
 #include "GaudiKernel/MsgStream.h"
 // typedef to the latest persistent versioCn
-typedef SrCaloCalibrationHitContainer_p1 SrCaloCalibrationHitContainer_PERS;
+typedef SrCaloCalibrationHitContainer_p2 SrCaloCalibrationHitContainer_PERS;
 
 class SrCaloCalibrationHitContainerCnv
     : public T_AthenaPoolCustomCnv<SrCaloCalibrationHitContainer,

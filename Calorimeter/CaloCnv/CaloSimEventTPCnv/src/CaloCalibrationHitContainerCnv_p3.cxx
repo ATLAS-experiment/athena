@@ -118,8 +118,8 @@ void CaloCalibrationHitContainerCnv_p3::persToTrans(const CaloCalibrationHitCont
                                   tempE[i*4+1],
                                   tempE[i*4+2],
                                   tempE[i*4+3],
-                                  static_cast<int>(persCont->m_particleID[i]),
-                                  HepMC::INVALID_PARTICLE_ID));
+                                  HepMC::INVALID_PARTICLE_ID,
+                                  static_cast<int>(persCont->m_particleID[i])));
 
 //		if(!dog) std::cout<<"Reading hash: "<<sum <<"\t E: "<< (double)tempE[i] <<std::endl;
     }

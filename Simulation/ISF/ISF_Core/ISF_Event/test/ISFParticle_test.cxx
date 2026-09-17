@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -20,9 +20,9 @@ void testConstructors() {
     int    status =  10005;
     double time    = 923.;
     const ISF::DetRegionSvcIDPair origin( AtlasDetDescr::fAtlasCalo, 2 );
-    int bc = HepMC::UNDEFINED_ID;
-    int id = 0;
-    ISF::TruthBinding *truth = 0;
+    // int bc = HepMC::UNDEFINED_ID;
+    int id = HepMC::UNDEFINED_ID;
+    ISF::TruthBinding *truth{};
 
     //
     // Amg & origin
@@ -35,7 +35,7 @@ void testConstructors() {
                            status,
                            time,
                            origin,
-                           bc,
+                           // bc,
                            id,
                            truth );
 
@@ -49,7 +49,7 @@ void testConstructors() {
     const ISF::ParticleHistory &history1 = isp1.history();
     assert( 1       == history1.size()     );
     assert( origin  == history1[0]         );
-    assert( bc      == HepMC::barcode(isp1)      );
+    // assert( bc      == HepMC::barcode(isp1)      );
     assert( id == isp1.id() );
     assert( truth   == isp1.getTruthBinding() );
 
@@ -64,7 +64,7 @@ void testConstructors() {
                            status,
                            time,
                            isp1, // parent
-                           bc,
+                           // bc,
                            id,
                            truth );
 
@@ -78,7 +78,7 @@ void testConstructors() {
     const ISF::ParticleHistory &history2 = isp2.history();
     assert( 1       == history2.size()     );
     assert( origin  == history2[0]         );
-    assert( bc      == HepMC::barcode(isp2)      );
+    // assert( bc      == HepMC::barcode(isp2)      );
     assert( id      == isp2.id()      );
     assert( truth   == isp2.getTruthBinding() );
 
@@ -95,7 +95,7 @@ void testConstructors() {
                            status,
                            time,
                            isp2, // parent
-                           bc,
+                           // bc,
                            id,
                            truth );
 
@@ -109,7 +109,7 @@ void testConstructors() {
     const ISF::ParticleHistory &history3 = isp3.history();
     assert( 1       == history3.size()     );
     assert( origin  == history3[0]         );
-    assert( bc      == HepMC::barcode(isp3)      );
+    // assert( bc      == HepMC::barcode(isp3)      );
     assert( id      == isp3.id()      );
     assert( truth   == isp3.getTruthBinding() );
 }

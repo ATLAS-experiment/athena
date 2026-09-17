@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_EVENT_ITRUTHINCIDENT_H
@@ -72,15 +72,19 @@ namespace ISF {
         (only called for particles that will enter the HepMC truth event) */
     virtual HepMC::GenParticlePtr      parentParticle() = 0;
     virtual int      parentStatus() = 0;
-    /** Return the barcode of the parent particle */
-    virtual int  parentBarcode() = 0; // TODO Remove this method
+    // /** Return the barcode of the parent particle */
+    // virtual int  parentBarcode() = 0; // TODO Remove this method
     /** Return the unique ID of the parent particle */
     virtual int  parentUniqueID() = 0;
     /** Return a boolean whether or not the parent particle survives the incident */
     virtual bool                      parentSurvivesIncident() const = 0;
     /** Return the parent particle after the TruthIncident vertex (and assign
-        a new barcode to it) */
+        a new barcode to it - HEPMC2) */
+    #ifdef HEPMC3
+    virtual HepMC::GenParticlePtr     parentParticleAfterIncident() = 0;
+    #else
     virtual HepMC::GenParticlePtr     parentParticleAfterIncident(int newBC) = 0;
+    #endif
 
     /** Return total number of child particles */
     inline unsigned short             numberOfChildren() const;
@@ -92,8 +96,10 @@ namespace ISF {
     virtual double                    childEkin(unsigned short index) const = 0;
     /** Return the PDG Code of the i-th child particle */
     virtual int                       childPdgCode(unsigned short index) const = 0;
+#ifndef HEPMC3
     /** Return the barcode of the i-th child particle (if defined as part of the TruthIncident) otherwise return 0 */
     virtual int  childBarcode(unsigned short index) const = 0;
+#endif
     /** Return true if at least one child particle passes the given p^2 cut
         (= at least one child with p^2 >= pt2cut) */
     inline bool                       childrenP2Pass(double p2cut);

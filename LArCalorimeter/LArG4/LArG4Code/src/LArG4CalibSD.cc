@@ -141,8 +141,8 @@ G4bool LArG4CalibSD::SimpleHit(const LArG4Identifier& a_ident,
                                                              energies[1],
                                                              energies[2],
                                                              energies[3],
-                                                             particleID,
-                                                             particleUID));
+                                                             particleUID,
+                                                             particleID));
 
   return true;
 }
@@ -208,8 +208,8 @@ G4bool LArG4CalibSD::SrHit(const LArG4Identifier& a_ident, const LArG4Identifier
                               energies[1],
                               energies[2],
                               energies[3],
-                              particleID,
-                              particleUID));
+                              particleUID,
+                              particleID));
   return true;
 }
 

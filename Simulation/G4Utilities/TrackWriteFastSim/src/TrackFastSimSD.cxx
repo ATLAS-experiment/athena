@@ -79,7 +79,7 @@ G4bool TrackFastSimSD::ProcessHits(G4Step* aStep,G4TouchableHistory* )
 
   // Barcode
   TrackHelper trHelp(track);
-  const int barcode = trHelp.GetBarcode(); // FIXME barcode based
+  // const int barcode = trHelp.GetBarcode(); // FIXME barcode based
   const int id = trHelp.GetUniqueID();
   const int status = trHelp.GetStatus();
 
@@ -90,7 +90,7 @@ G4bool TrackFastSimSD::ProcessHits(G4Step* aStep,G4TouchableHistory* )
                 mom,
                 pos,
                 time,
-                barcode, // FIXME barcode based
+                HepMC::INVALID_PARTICLE_ID, // barcode
                 id,
                 preVol->GetName());
 }
@@ -113,7 +113,7 @@ void TrackFastSimSD::WriteTrack(const G4Track* track, const bool originPos, cons
 
   const double time=track->GetGlobalTime();
   TrackHelper trHelp(track);
-  const int barcode = trHelp.GetBarcode(); // FIXME barcode based
+  //const int barcode = trHelp.GetBarcode(); // FIXME barcode based
   const int id = trHelp.GetUniqueID();
   const int status = trHelp.GetStatus();
 
@@ -124,7 +124,7 @@ void TrackFastSimSD::WriteTrack(const G4Track* track, const bool originPos, cons
          mom,
          pos,
          time,
-         barcode, // FIXME barcode based
+         HepMC::INVALID_PARTICLE_ID, //barcode,
          id,
          preVol ? preVol->GetName() : "Unknown");
 }

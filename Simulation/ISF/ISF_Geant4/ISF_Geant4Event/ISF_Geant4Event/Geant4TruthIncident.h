@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_GEANT4TOOLS_Geant4TruthIncident_H
@@ -61,8 +61,8 @@ namespace iGeant4 {
       double                    parentEkin() const override final;
       /** Return the PDG Code of the parent particle */
       int                       parentPdgCode() const override final;
-      /** Return the barcode of the parent particle */
-      int  parentBarcode() override final; // TODO Remove this method
+      // /** Return the barcode of the parent particle */
+      // int  parentBarcode() override final; // TODO Remove this method
       /** Return the unique ID of the parent particle */
       int  parentUniqueID() override final;
       /** Return the status of the parent particle */
@@ -70,8 +70,12 @@ namespace iGeant4 {
       /** Return a boolean whether or not the parent particle survives the incident */
       bool                      parentSurvivesIncident() const override final;
       /** Return the parent particle after the TruthIncident vertex (and give
-          it a new barcode) */
+          it a new barcode - HEPMC2) */
+#ifdef HEPMC3
+      HepMC::GenParticlePtr     parentParticleAfterIncident() override final;
+#else
       HepMC::GenParticlePtr     parentParticleAfterIncident(int newBC) override final;
+#endif
 
       /** Return p of the i-th child particle */
       const G4ThreeVector       childP(unsigned short index) const;
@@ -83,8 +87,10 @@ namespace iGeant4 {
       double                    childEkin(unsigned short index) const override final;
       /** Return the PDG Code of the i-th child particle */
       int                       childPdgCode(unsigned short index) const override final;
+#ifndef HEPMC3
       /** Return the barcode of the i-th child particle (if defined as part of the TruthIncident) otherwise return 0 */
       int  childBarcode(unsigned short index) const override final; // TODO Remove - only used in one place in TruthSvc
+#endif
 
       /**  The interaction classifications are described as follows:
            STD_VTX: interaction of a particle without a pre-defined decay;
@@ -111,7 +117,11 @@ namespace iGeant4 {
       /** check if the given G4Track represents a particle that is alive in ISF or ISF-G4 */
       inline bool particleAlive(const G4Track *track) const;
 
-      HepMC::GenParticlePtr convert(const G4Track *particle, const int barcode, const bool secondary) const;
+#ifdef HEPMC3
+       HepMC::GenParticlePtr convert(const G4Track *particle, const bool secondary) const;
+#else
+       HepMC::GenParticlePtr convert(const G4Track *particle, const int barcode, const bool secondary) const;
+#endif
 
       bool                          m_positionSet;
       HepMC::FourVector             m_position;

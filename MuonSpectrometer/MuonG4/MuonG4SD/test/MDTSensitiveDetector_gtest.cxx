@@ -238,7 +238,7 @@ TEST_F ( MDTSensitiveDetectortest, ProcessHits )
   sd2.m_MDTHitColl = hitColl.get();
   sd2.ProcessHits(&sp, &th );
 
-  int barcode = 0;
+  int barcode = HepMC::UNDEFINED_ID;
   HepMcParticleLink plink(barcode,0,HepMcParticleLink::IS_POSITION,HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
 
   MDTSimHitCollection* a = sd2.m_MDTHitColl;

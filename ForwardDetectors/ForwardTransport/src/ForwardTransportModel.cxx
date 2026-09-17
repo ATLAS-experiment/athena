@@ -181,7 +181,7 @@ void ForwardTransportModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastS
                                                           time, // TODO Update??
                                                           *initialISP,
                                                           particleID,
-                                                          pBarcode,
+                                                          //pBarcode,
                                                           tBinding.release(),
                                                           hmpl.release());
   }

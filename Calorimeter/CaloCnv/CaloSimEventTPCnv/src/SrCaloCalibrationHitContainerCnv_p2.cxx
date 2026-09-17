@@ -2,9 +2,9 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "CaloSimEventTPCnv/SrCaloCalibrationHitContainerCnv_p1.h"
+#include "CaloSimEventTPCnv/SrCaloCalibrationHitContainerCnv_p2.h"
 
-#include "CxxUtils/Compressor.h"
+#include "AthenaPoolCnvSvc/Compressor.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "CaloIdentifier/CaloDM_ID.h"
 #include "CaloIdentifier/CaloIdManager.h"
@@ -14,14 +14,14 @@
 #include "Identifier/IdentifierHash.h"
 #include <map>
 
-void SrCaloCalibrationHitContainerCnv_p1::transToPers(
+void SrCaloCalibrationHitContainerCnv_p2::transToPers(
     const SrCaloCalibrationHitContainer* transCont,
-    SrCaloCalibrationHitContainer_p1* persCont, MsgStream& log) {
+    SrCaloCalibrationHitContainer_p2* persCont, MsgStream& log) {
 
   size_t size = transCont->size();
   if (log.level() <= MSG::DEBUG)
     log << MSG::DEBUG
-        << " ***  Writing SrCaloCalibrationHitContainer_p1 of size: " << size
+        << " ***  Writing SrCaloCalibrationHitContainer_p2 of size: " << size
         << endmsg;
 
   persCont->m_channelHash.reserve(size);
@@ -54,7 +54,7 @@ void SrCaloCalibrationHitContainerCnv_p1::transToPers(
     tempE.push_back(static_cast<float>(hit.energyNonEM()));
     tempE.push_back(static_cast<float>(hit.energyInvisible()));
     tempE.push_back(static_cast<float>(hit.energyEscaped()));
-    tempPID.push_back(static_cast<unsigned int>(hit.particleID()));
+    tempPID.push_back( static_cast<unsigned int>(hit.particleUID()) );
   }
   // For future development: use Compressor class to reduce size of energy
   // storage ?
@@ -62,11 +62,11 @@ void SrCaloCalibrationHitContainerCnv_p1::transToPers(
   // A.reduce(tempE,persCont->m_energy); // packs energy
   persCont->m_energy = std::move(tempE);            // Store directly without compression
   persCont->m_name = transCont->Name();  // stores name
-  persCont->m_particleID = std::move(tempPID);
+  persCont->m_particleUID = std::move(tempPID);
 }
 
-void SrCaloCalibrationHitContainerCnv_p1::persToTrans(
-    const SrCaloCalibrationHitContainer_p1* persCont,
+void SrCaloCalibrationHitContainerCnv_p2::persToTrans(
+    const SrCaloCalibrationHitContainer_p2* persCont,
     SrCaloCalibrationHitContainer* transCont, MsgStream& log) {
   size_t cells = persCont->m_channelHash.size();
   if (log.level() <= MSG::DEBUG)
@@ -90,7 +90,7 @@ void SrCaloCalibrationHitContainerCnv_p1::persToTrans(
     transCont->push_back(new CaloCalibrationHit(
         static_cast<Identifier>(sum), tempE[i * 4], tempE[i * 4 + 1],
         tempE[i * 4 + 2], tempE[i * 4 + 3],
-        HepMC::INVALID_PARTICLE_ID,
-        static_cast<int>(persCont->m_particleID[i])));
+        static_cast<int>(persCont->m_particleUID[i]),
+        HepMC::INVALID_PARTICLE_ID));
   }
 }

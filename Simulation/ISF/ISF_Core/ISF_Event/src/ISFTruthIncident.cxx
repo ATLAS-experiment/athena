@@ -95,9 +95,9 @@ HepMC::GenParticlePtr ISF::ISFTruthIncident::parentParticle() {
     return getHepMCTruthParticle(m_parent);
 }
 
-int ISF::ISFTruthIncident::parentBarcode() { // TODO Remove this method
-  return HepMC::barcode(m_parent); // FIXME barcode-based
-}
+// int ISF::ISFTruthIncident::parentBarcode() { // TODO Remove this method
+//   return HepMC::barcode(m_parent); // FIXME barcode-based
+// }
 
 int ISF::ISFTruthIncident::parentUniqueID() {
   return m_parent.id();
@@ -107,14 +107,11 @@ bool ISF::ISFTruthIncident::parentSurvivesIncident() const {
   return !(m_killsPrimary == ISF::fKillsPrimary);
 }
 
-HepMC::GenParticlePtr ISF::ISFTruthIncident::parentParticleAfterIncident(int newBC) {
+HepMC::GenParticlePtr ISF::ISFTruthIncident::parentParticleAfterIncident() {
   // if parent is killed in the interaction -> return nullptr
   if (m_killsPrimary==ISF::fKillsPrimary) return nullptr;
 
   // only update the parent particle, if it survived the interaction
-
-  // set a new barcode
-  m_parent.setBarcode( newBC );
 
   // set a new status
   m_parent.setStatus( parentStatus() + HepMC::SIM_STATUS_INCREMENT );
@@ -143,19 +140,11 @@ int ISF::ISFTruthIncident::childPdgCode(unsigned short index) const {
   return m_children[index]->pdgCode();
 }
 
-int ISF::ISFTruthIncident::childBarcode(unsigned short index) const {
-  return numberOfChildren() > index ? HepMC::barcode(m_children[index]) : HepMC::UNDEFINED_ID;
-}
-
 HepMC::GenParticlePtr ISF::ISFTruthIncident::childParticle(unsigned short index,
                                                            int bc) {
   // the child particle
   ISF::ISFParticle *sec = m_children[index];
 
-  // set particle barcode of the child particle
-  if (bc) {
-    sec->setBarcode( bc);
-  }
 
   // Enforce that the status is set correctly
   sec->setStatus(1 + HepMC::SIM_STATUS_THRESHOLD);

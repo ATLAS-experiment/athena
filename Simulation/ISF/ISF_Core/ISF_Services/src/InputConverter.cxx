@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header include
@@ -280,7 +280,7 @@ ISF::InputConverter::convertParticle(const HepMC::GenParticlePtr& genPartPtr) co
   const double pTime = pVertex->position().t() / Gaudi::Units::c_light;
   /// particle origin (TODO: add proper GeoID, collision/cosmics)
   DetRegionSvcIDPair origin(AtlasDetDescr::fUndefinedAtlasRegion, ISF::fEventGeneratorSimID);
-  const auto pBarcode = HepMC::barcode(genPartPtr);
+  // const auto pBarcode = HepMC::barcode(genPartPtr);
   const auto particleID = HepMC::uniqueID(genPartPtr);
   auto tBinding = std::make_unique<ISF::TruthBinding>(genPartPtr);
 
@@ -295,7 +295,7 @@ ISF::InputConverter::convertParticle(const HepMC::GenParticlePtr& genPartPtr) co
                                                        pTime,
                                                        origin,
                                                        particleID,
-                                                       pBarcode,
+                                                       // pBarcode,
                                                        tBinding.release(),
                                                        hmpl.release() );
   return sParticle.release();
@@ -506,7 +506,7 @@ G4PrimaryParticle* ISF::InputConverter::getDaughterG4PrimaryParticle(const HepMC
     // Set the user information for this primary to point to the HepMcParticleLink...
     std::unique_ptr<PrimaryParticleInformation> primaryPartInfo = std::make_unique<PrimaryParticleInformation>(genpart);
     primaryPartInfo->SetRegenerationNr(0);
-    ATH_MSG_VERBOSE("Making primary down the line with barcode " << primaryPartInfo->GetParticleUniqueID());
+    ATH_MSG_VERBOSE("Making primary down the line with unique ID " << primaryPartInfo->GetParticleUniqueID());
     g4particle->SetUserInformation(primaryPartInfo.release());
   }
 
@@ -594,7 +594,7 @@ G4PrimaryParticle* ISF::InputConverter::getDaughterG4PrimaryParticle(const HepMC
 bool ISF::InputConverter::matchedGenParticles(const HepMC::ConstGenParticlePtr& p1,
                                               const HepMC::ConstGenParticlePtr& p2) const // TODO Helper method?
 {
-  return (HepMC::barcode(p1) == HepMC::barcode(p2))
+  return (HepMC::uniqueID(p1) == HepMC::uniqueID(p2))
     && (p1->status() == p2->status())
     && (p1->pdg_id() == p2->pdg_id())
     && ((p1->momentum().px()) == (p2->momentum().px()))
@@ -825,9 +825,9 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
   /// we may have particles which have already interacted, so we
   /// should set the regeneration number accordingly.
   const int regenerationNr = HepMC::StatusBased::generations(&isp);
-  if (HepMC::BarcodeBased::generations(&isp) != regenerationNr) {
-    ATH_MSG_WARNING ("StatusBased::generations() = " << regenerationNr << ", BarcodeBased::generations()  = " << HepMC::BarcodeBased::generations(&isp) << ", isp: " << isp);
-  }
+  // if (HepMC::BarcodeBased::generations(&isp) != regenerationNr) {
+  //   ATH_MSG_WARNING ("StatusBased::generations() = " << regenerationNr << ", BarcodeBased::generations()  = " << HepMC::BarcodeBased::generations(&isp) << ", isp: " << isp);
+  // }
   primaryPartInfo->SetRegenerationNr(regenerationNr);
 
   if ( currentGenPart ) {
@@ -835,8 +835,8 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
       // Old approach particle had an end vertex - predefined decays taken from the main GenEvent
       // No longer supported
       ATH_MSG_ERROR ( "getG4PrimaryParticle(): GenParticle has a valid end GenVertexPtr!" );
-      ATH_MSG_ERROR ( "getG4PrimaryParticle(): currentGenPart: " << currentGenPart << ", barcode: " << HepMC::barcode(currentGenPart) );
-      ATH_MSG_ERROR ( "getG4PrimaryParticle(): currentGenPart->end_vertex(): " << currentGenPart->end_vertex() << ", barcode: " << HepMC::barcode(currentGenPart->end_vertex()) );
+      ATH_MSG_ERROR ( "getG4PrimaryParticle(): currentGenPart: " << currentGenPart << ", uniqueID: " << HepMC::uniqueID(currentGenPart) );
+      ATH_MSG_ERROR ( "getG4PrimaryParticle(): currentGenPart->end_vertex(): " << currentGenPart->end_vertex() << ", uniqueID: " << HepMC::uniqueID(currentGenPart->end_vertex()) );
       ATH_MSG_FATAL ( "getG4PrimaryParticle(): Passing GenParticles with a valid end GenVertexPtr as input is no longer supported." );
       abort();
     }

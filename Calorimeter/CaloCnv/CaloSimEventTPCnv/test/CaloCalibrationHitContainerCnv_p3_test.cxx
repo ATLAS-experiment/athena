@@ -43,6 +43,7 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
                                             65.5,
                                             75.5,
                                             333,
+                                            HepMC::INVALID_PARTICLE_ID,
                                             HepMC::INVALID_PARTICLE_ID)); // Need a valid McEventCollection to test valid GenParticle::id() here
   trans1.push_back (new CaloCalibrationHit (Identifier(234),
                                             145.5,
@@ -50,6 +51,7 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
                                             165.5,
                                             175.5,
                                             444,
+                                            HepMC::INVALID_PARTICLE_ID,
                                             HepMC::INVALID_PARTICLE_ID)); // Need a valid McEventCollection to test valid GenParticle::id() here
   trans1.push_back (new CaloCalibrationHit (Identifier(345),
                                             245.5,
@@ -57,6 +59,7 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
                                             265.5,
                                             275.5,
                                             555,
+                                            HepMC::INVALID_PARTICLE_ID,
                                             HepMC::INVALID_PARTICLE_ID)); // Need a valid McEventCollection to test valid GenParticle::id() here
 
   Athena_test::Leakcheck check;
