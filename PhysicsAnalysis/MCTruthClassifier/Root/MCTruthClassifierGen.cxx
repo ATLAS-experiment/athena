@@ -281,9 +281,11 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
   // End of method 1 of protecting against loops
 
   if ((MC::isMuon(ancestor) || MC::isTau(ancestor) || MC::isW(ancestor)) && ancestor->hasProdVtx() && !samePart) {
+    int nAncestorIterations{0};
     int pPDG(0);
     const xAOD::TruthParticle* ancestorParent{};
     do {
+      ++nAncestorIterations;
       pPDG = 0; // reset pPDG
       ancestorParent = MC::findMother(ancestor);
       // Start of method 2 of protecting against loops
@@ -298,6 +300,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
       if (ancestorParent) {
         pPDG = ancestorParent->pdgId(); // Only set pPDG in the case that we aren't in a loop.
         if (MC::isMuon(pPDG) || MC::isTau(pPDG) || MC::isW(pPDG)) { // There will be another iteration so set ancestor to ancestorParent
+          ATH_MSG_WARNING("DefOrigOfElectron: no. interations = " << nAncestorIterations << ", override ancestor from pdgID: "<< ancestor->pdgId() << " to pdgID: " << ancestorParent ->pdgId());
           ancestor = ancestorParent; // ancestorParent is not nullptr here
         }
       }
@@ -307,8 +310,10 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
         MC::isMSSMHiggs(pPDG) || MC::isHeavyBoson(pPDG) || MC::isTop(pPDG) || // MSSM Higgs bosons, Heavy bosons( Z', Z'', W'+)
         std::abs(pPDG) == MC::WBOSON_LRSM || MC::isNeutrinoRH(pPDG) || // Left-right symmetric model WBoson || Right-handed neutrino (Pythia-specific)
         MC::isSUSY(pPDG)) {
+      ATH_MSG_WARNING("DefOrigOfElectron: no. interations = " << nAncestorIterations << ", override ancestor from pdgID: "<< ancestor->pdgId() << " to pdgID: " << ancestorParent ->pdgId());
       ancestor = ancestorParent; // ancestorParent is not nullptr here
     }
+    ATH_MSG_WARNING("DefOrigOfElectron: no. interations = " << nAncestorIterations << ", final ancestor is pdgID: "<< ancestor->pdgId() );
   }
 
   info.setMotherProperties(ancestor);
@@ -421,21 +426,16 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
     bool isZboson = false;
     bool isWboson = false;
     bool skipnext = false;
-
     for (unsigned int ipOut = 0; ipOut + 1 < partProdVtx->nOutgoingParticles(); ++ipOut) {
+      if (skipnext) { skipnext = false; continue; }
       const xAOD::TruthParticle* aChild = partProdVtx->outgoingParticle(ipOut);
-      if (!aChild) continue;
-      const xAOD::TruthParticle* theNextChild = nullptr;
+      if (!aChild) { continue; }
+      const xAOD::TruthParticle* theNextChild{};
       for (unsigned int ipOut1 = ipOut + 1; ipOut1 < partProdVtx->nOutgoingParticles(); ipOut1++) {
         theNextChild = partProdVtx->outgoingParticle(ipOut1);
-        if (theNextChild) break;
+        if (theNextChild) { break; }
       }
-      if (!theNextChild) continue;
-      if (skipnext) {
-        skipnext = false;
-        continue;
-      }
-
+      if (!theNextChild) { continue; }
       if (MC::isElectron(aChild) && MC::isElectron(theNextChild)) {
         // Zboson
         if (thePartToCheck == aChild || thePartToCheck == theNextChild) {
@@ -455,6 +455,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
     if (isWboson) return WBoson;
     if (isZboson) return ZBoson;
   }
+
   if (numOfParents == 2) {
     //--Sherpa Z->ee
     if ((numberOfChildren - NumOfquark - NumOfgluon) == 2 && NumOfEl == 1 && NumOfPos == 1) return ZBoson;
@@ -519,9 +520,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
   //-- McAtNLo
 
   if (MC::isHiggs(ancestorPDG)) return Higgs;
-
   if (MC::isMSSMHiggs(ancestorPDG)) return HiggsMSSM; // MSSM Higgs bosons
-
   if (MC::isHeavyBoson(ancestorPDG)) return HeavyBoson;  // Heavy bosons( Z', Z'', W'+)
 
   if (MC::isMuon(ancestorPDG)) return Mu;
@@ -572,9 +571,11 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
   // "method 1" for finding Sherpa loops from defOrigOfElectron not used here. Why?
 
   if ((MC::isTau(ancestor)|| MC::isW(ancestor)) && ancestor->hasProdVtx()) {
+    int nAncestorIterations{0};
     int pPDG(0);
     const xAOD::TruthParticle* ancestorParent{};
     do {
+      ++nAncestorIterations;
       pPDG = 0;
       ancestorParent = MC::findMother(ancestor);
       // Start of method 2 of protecting against loops
@@ -590,6 +591,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
         pPDG = ancestorParent->pdgId();// Only set pPDG in the case that we aren't in a loop.
         if (MC::isMuon(pPDG) || MC::isTau(pPDG) || MC::isW(pPDG)) { // FIXME should this be (MC::isTau(pPDG) || MC::isW(pPDG)) ???
           // There will be another iteration so set ancestor to ancestorParent
+          ATH_MSG_WARNING("DefOrigOfMuon: no. interations = " << nAncestorIterations << ", override ancestor from pdgID: "<< ancestor->pdgId() << " to pdgID: " << ancestorParent ->pdgId());
           ancestor = ancestorParent; // ancestorParent is not nullptr here
         }
       }
@@ -599,8 +601,10 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
         MC::isMSSMHiggs(pPDG) || MC::isHeavyBoson(pPDG) || MC::isTop(pPDG) || // MSSM Higgs bosons, Heavy bosons( Z', Z'', W'+)
         std::abs(pPDG) == MC::WBOSON_LRSM || MC::isNeutrinoRH(pPDG) ||  // Left-right symmetric model WBoson || Right-handed neutrino (Pythia-specific)
         MC::isSUSY(pPDG)) {
+      ATH_MSG_WARNING("DefOrigOfMuon: no. interations = " << nAncestorIterations << ", override ancestor from pdgID: "<< ancestor->pdgId() << " to pdgID: " << ancestorParent ->pdgId());
       ancestor = ancestorParent; // ancestorParent is not nullptr here
     }
+    ATH_MSG_WARNING("DefOrigOfMuon: no. interations = " << nAncestorIterations << ", final ancestor is pdgID: "<< ancestor->pdgId() );
   }
 
   info.setMotherProperties(ancestor);
@@ -664,18 +668,15 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
     bool isWboson = false;
     bool skipnext = false;
     for (unsigned int ipOut = 0; ipOut + 1 < partProdVtx->nOutgoingParticles(); ipOut++) {
-      if (skipnext) {
-        skipnext = false;
-        continue;
-      }
+      if (skipnext) { skipnext = false; continue; }
       const xAOD::TruthParticle* aChild = partProdVtx->outgoingParticle(ipOut);
       if (!aChild) continue;
       const xAOD::TruthParticle* theNextChild{};
       for (unsigned int ipOut1 = ipOut + 1; ipOut1 < partProdVtx->nOutgoingParticles(); ipOut1++) {
         theNextChild = partProdVtx->outgoingParticle(ipOut1);
-        if (theNextChild) break;
+        if (theNextChild) { break; }
       }
-      if (!theNextChild) continue;
+      if (!theNextChild) { continue; }
       if (MC::isMuon(aChild) && MC::isMuon(theNextChild)) {
         // Zboson
         if (thePriPart == aChild || thePriPart == theNextChild) {
@@ -695,6 +696,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
     if (isWboson) return WBoson;
     if (isZboson) return ZBoson;
   }
+
   if (numOfParents == 2 ) {
     //--Sherpa Z->mumu
     if ((numberOfChildren - NumOfquark - NumOfgluon) == 2 && NumOfMuPl == 1 && NumOfMuMin == 1) return ZBoson;
@@ -859,25 +861,22 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
   }
   if (MC::isW(ancestorPDG)) { return WBoson;}
   if (MC::isZ(ancestorPDG)) { return ZBoson;}
+
+  // MadGraphPythia ZWW*->lllnulnu
   if (numOfParents == 1 && numberOfChildren > 4 && (MC::isSMQuark(ancestorPDG) || MC::isGluon(ancestorPDG))) {
     bool isZboson = false;
     bool isWboson = false;
     bool skipnext = false;
     for (unsigned int ipOut = 0; ipOut + 1 < partProdVtx->nOutgoingParticles(); ipOut++) {
-      if (skipnext) {
-        skipnext = false;
-        continue;
-      }
+      if (skipnext) { skipnext = false; continue; }
       const xAOD::TruthParticle* aChild = partProdVtx->outgoingParticle(ipOut);
       if (!aChild) continue;
       const xAOD::TruthParticle* theNextChild{};
       for (unsigned int ipOut1 = ipOut + 1; ipOut1 < partProdVtx->nOutgoingParticles(); ipOut1++) {
         theNextChild = partProdVtx->outgoingParticle(ipOut1);
-        if (theNextChild) break;
+        if (theNextChild) { break; }
       }
-      if (!theNextChild) {
-        continue;
-      }
+      if (!theNextChild) { continue; }
       if (MC::isTau(aChild) && MC::isTau(theNextChild)) {
         // Zboson
         if (thePriPart == aChild || thePriPart == theNextChild) {
@@ -897,6 +896,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
     if (isWboson) return WBoson;
     if (isZboson) return ZBoson;
   }
+
   if (numOfParents == 2 ) {
     const int pdg1 = partProdVtx->incomingParticle(0)->pdgId();
     const int pdg2 = partProdVtx->incomingParticle(1)->pdgId();
@@ -1167,18 +1167,15 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
     bool isWboson = false;
     bool skipnext = false;
     for (unsigned int ipOut = 0; ipOut + 1 < partProdVtx->nOutgoingParticles(); ipOut++) {
-      if (skipnext) {
-        skipnext = false;
-        continue;
-      }
+      if (skipnext) { skipnext = false; continue; }
       const xAOD::TruthParticle* aChild = partProdVtx->outgoingParticle(ipOut);
-      if (!aChild) continue;
+      if (!aChild) { continue; }
       const xAOD::TruthParticle* theNextChild{};
       for (unsigned int ipOut1 = ipOut + 1; ipOut1 < partProdVtx->nOutgoingParticles(); ipOut1++) {
         theNextChild = partProdVtx->outgoingParticle(ipOut1);
-        if (theNextChild) break;
+        if (theNextChild) { break; }
       }
-      if (!theNextChild) continue;
+      if (!theNextChild) { continue; }
       if (MC::isTau(aChild) && MC::isTau(theNextChild)) {
         // Zboson
         if (thePriPart == aChild || thePriPart == theNextChild) {
@@ -1219,11 +1216,12 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
     }
   }
 
+  //-- McAtNLo
+
   if (MC::isHiggs(ancestorPDG)) return Higgs;
   if (std::abs(ancestorPDG) == MC::PI0) return PiZero;
   if (MC::isMSSMHiggs(ancestorPDG)) return HiggsMSSM; // MSSM Higgs bosons
   if (MC::isHeavyBoson(ancestorPDG) || std::abs(ancestorPDG) == 5100039 ) return HeavyBoson; // Heavy Bosons (Z' Z'' W'+) + KK excited graviton
-
   if (MC::isSUSY(ancestorPDG)) return SUSY;
   if (MC::isBSM(ancestorPDG)) return OtherBSM;
 
@@ -1274,23 +1272,20 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
       ancestorParent = MC::findMother(ancestor);
       // Start of method 2 of protecting against loops
       // to prevent Sherpa loop
+      if (ancestor == ancestorParent) { break; }
       if (TruthLoopDetectionMethod2(ancestor,ancestorParent)) {
         ancestorParent = ancestor;
         break;
       }
-      //
-      if (ancestorParent) {
-        pPDG = ancestorParent->pdgId(); // FIXME difference in behaviour compared to defOrigOfElectron/Muon pPDG set even if we are in a loop
-      }
-      // to prevent Sherpa loop
-      if (ancestor == ancestorParent) { break; }
       // End of method 2 of protecting against Sherpa loops
-      if (std::abs(pPDG) == nuFlav || MC::isTau(pPDG) || MC::isW(pPDG) ) {
-        // There will be another iteration so set ancestor to ancestorParent
-        ancestor = ancestorParent; // ancestorParent is not a nullptr
-        info.setMotherProperties(ancestor); // FIXME difference in behaviour compared to MCTruthClassifier::defOrigOfElectron/Muon
+      
+      if (ancestorParent) {
+        pPDG = ancestorParent->pdgId();
+        if (std::abs(pPDG) == nuFlav || MC::isTau(pPDG) || MC::isW(pPDG) ) {
+          // There will be another iteration so set ancestor to ancestorParent
+          ancestor = ancestorParent; // ancestorParent is not a nullptr
+        }
       }
-
     } while ((std::abs(pPDG) == nuFlav || MC::isTau(pPDG) || MC::isW(pPDG)));
 
     if (std::abs(pPDG) == nuFlav || MC::isTau(pPDG) || MC::isW(pPDG) || MC::isZ(pPDG) || MC::isHiggs(pPDG) ||
@@ -1298,7 +1293,6 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
         std::abs(pPDG) == MC::WBOSON_LRSM || MC::isNeutrinoRH(pPDG) || // Left-right symmetric model WBoson || Right-handed neutrino (Pythia-specific)
         MC::isSUSY(pPDG)) {
       ancestor = ancestorParent; // ancestorParent is not nullptr here
-      info.setMotherProperties(ancestor);
     }
   }
   //if ancestor is still nullptr, we have a problem
@@ -1370,20 +1364,15 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
     bool skipnext = false;
 
     for (unsigned int ipOut = 0; ipOut + 1 < partProdVtx->nOutgoingParticles(); ++ipOut) {
+      if (skipnext) { skipnext = false; continue; }
       const xAOD::TruthParticle* aChild = partProdVtx->outgoingParticle(ipOut);
-      if (!aChild) continue;
+      if (!aChild) { continue; }
       const xAOD::TruthParticle* theNextChild{};
       for (unsigned int ipOut1 = ipOut + 1; ipOut1 < partProdVtx->nOutgoingParticles(); ipOut1++) {
         theNextChild = partProdVtx->outgoingParticle(ipOut1);
-        if (theNextChild) break;
+        if (theNextChild) { break; }
       }
-      if (!theNextChild) continue;
-
-      if (skipnext) {
-        skipnext = false;
-        continue;
-      }
-
+      if (!theNextChild) { continue; }
       const int apdgID1 = std::abs(aChild->pdgId());
       const int apdgID2 = std::abs(theNextChild->pdgId());
       if (apdgID1 == apdgID2 && MC::isSMNeutrino(apdgID1)) {
