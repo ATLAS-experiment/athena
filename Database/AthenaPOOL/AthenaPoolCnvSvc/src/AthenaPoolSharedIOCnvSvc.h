@@ -139,7 +139,8 @@ private: // properties
    Gaudi::Property<int> m_streamingTechnology{this,"StreamingTechnology",-1};
    /// Use Athena Object sharing for metadata only, event data is collected and send via ROOT TMemFile
    Gaudi::Property<bool> m_parallelCompression{this,"ParallelCompression",true};
-   /// Extension to use ROOT TMemFile for event data, "?pmerge=<host>:<port>"
+   /// Extension to use ROOT TMemFile for event data, "?pmerge=<host>:<port>" for a TCP socket (default),
+   /// or "?pmerge=<prefix>" (no ':') to use a UNIX domain socket instead, created as $TMPDIR/<prefix>XXXXXX
    Gaudi::Property<std::string> m_streamPortString{this,"StreamPortString","?pmerge=localhost:0"};
    /// Force SharedWriter to flush data to output file at given intervals, needed by parallel compression
    std::map<std::string, int> m_fileCommitCounter;
