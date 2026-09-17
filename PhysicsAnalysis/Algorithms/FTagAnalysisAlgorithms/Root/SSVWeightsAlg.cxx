@@ -5,9 +5,11 @@
 /// @author Hagen Möbius, hagen.mobius@cern.ch
 #include <FTagAnalysisAlgorithms/SSVWeightsAlg.h>
 
-#include <fstream>
+
 #include <nlohmann/json.hpp>
 #include <PathResolver/PathResolver.h>
+#include <stdexcept>
+#include <fstream>
 using json = nlohmann::json;
 
 namespace CP{
@@ -710,7 +712,10 @@ namespace CP{
     // Calculate expected counts
     double n_F = m_slopeUnscaled * muactual + m_interceptUnscaled;
     double n_F_scaled = m_slopeScaled * muactual + m_interceptScaled;
-
+    auto denom = poisson_pmf(N_fake, n_F);
+    if (denom == 0.)[[unlikely]]{
+      throw std::runtime error("nFMethodPileupBasedLinearFitClass::getPFake: divide-by-zero.");
+    }
     // Calculate P_fake
     double P_fake = poisson_pmf(N_fake, n_F_scaled) / poisson_pmf(N_fake, n_F);
 
