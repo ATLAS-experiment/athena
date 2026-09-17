@@ -1,10 +1,9 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: TrigConfKeys_v1.h 630856 2014-11-25 11:22:49Z gwatts $
 #ifndef XAODTRIGGER_VERSIONS_TRIGCONFKEYS_V1_H
 #define XAODTRIGGER_VERSIONS_TRIGCONFKEYS_V1_H
 
@@ -62,5 +61,11 @@ namespace xAOD {
    }; // class TrigConfKeys_v1
 
 } // namespace xAOD
+
+// Need to declare this even if there are no bases in order to put this
+// in a TypelessDataBucket during trigger deserialization.
+#include "xAODCore/BaseInfo.h"
+SG_BASES(xAOD::TrigConfKeys_v1);
+
 
 #endif // XAODTRIGGER_VERSIONS_TRIGCONFKEYS_V1_H

@@ -1,10 +1,9 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: BaseInfo.h 611441 2014-08-12 14:53:49Z krasznaa $
 #ifndef XAODCORE_BASEINFO_H
 #define XAODCORE_BASEINFO_H
 
@@ -30,12 +29,13 @@
 /// relationships for their classes, instead of pulling in these macros from
 /// AthenaKernel directly.
 ///
-/// $Revision: 611441 $
-/// $Date: 2014-08-12 16:53:49 +0200 (Tue, 12 Aug 2014) $
 
 #ifdef XAOD_STANDALONE
 
 // Dummy macro definitions
+#ifndef SG_BASES
+#   define SG_BASES( D, ... ) class xAODCoreDummy
+#endif // not SG_BASES
 #ifndef SG_BASE
 #   define SG_BASE( D, B ) class xAODCoreDummy
 #endif // not SG_BASE

@@ -18,6 +18,12 @@
 #include "Acts/Propagator/Propagator.hpp"
 #include "Acts/Propagator/SympyStepper.hpp"
 
+#include <utility>
+#include <memory>
+#include <string>
+#include <vector>
+#include <optional>
+
 namespace ActsTrk {
   
   class TrackParamsEstimationTool :
@@ -77,7 +83,9 @@ namespace ActsTrk {
     Gaudi::Property< double > m_initialSigmaPtRel {this, "initialSigmaPtRel", 0.1,
         "Initial relative pT resolution"};
     Gaudi::Property< std::vector<double> > m_initialVarInflation {this, "initialVarInflation", {1., 1., 1., 1., 1., 1.},
-        "Inflate tracks"};
+        "Inflate track variances"};
+    Gaudi::Property< std::vector<double> > m_refitErrInflation {this, "refitErrInflation", {1., 1., 1., 1., 1., 1.},
+        "Inflate refit track errors"};
     Gaudi::Property< int > m_useLongSeeds {this, "useLongSeeds", 2,
         "0=use 1st 3 SPs, 1=use first,middle,last SPs to improve pT measurement, 2=use for all parameters"};
     Gaudi::Property<int> m_bFieldMode{this, "bFieldMode", 0,
@@ -116,6 +124,8 @@ namespace ActsTrk {
     std::unique_ptr<const Acts::Logger> m_logger;
 
     SpacePointIndicesFun_t m_spacePointIndicesFun{};
+
+    bool m_doRefitErrInflation = false;
   };
   
 } // namespace

@@ -23,7 +23,8 @@ class MuonMomentumCalibrationConfig (ConfigBlock):
             "to `AnalysisMuons` for PHYSLITE or `Muons` otherwise.")
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the output container after calibration.")
+            info="the name of the output container after calibration.",
+            meta={'role':'container'})
         self.addOption ('postfix', "", type=str,
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here since the calibration is common to "
@@ -38,7 +39,7 @@ class MuonMomentumCalibrationConfig (ConfigBlock):
         self.addOption ('excludeNSWFromPrecisionLayers', False, type=bool,
             info="only for testing purposes, turn on to ignore NSW hits and "
             "fix a crash with older derivations (p-tag <p5834).")
-        self.addOption ('calibMode', 'correctData_CB', type=str, info='calibration mode of the `MuonCalibTool` needed to turn on the sagitta bias corrections and to select the muon track calibration type (CB or ID+MS), see https://atlas-mcp.docs.cern.ch/guidelines/muonmomentumcorrections/index.html#cpmuoncalibtool-tool.')
+        self.addOption ('calibMode', 'correctData_CB', type=str, info='calibration mode of the `MuonCalibTool` needed to turn on the sagitta bias corrections and to select the muon track calibration type (CB or ID+MS), see https://atlas-mcp.docs.cern.ch/guidelines/muonmomentumcorrections/index.html#cpmuoncalibtool-tool.', meta={'choices':(['correctData_CB','correctData_IDMS','notCorrectData_IDMS','notCorrectData_CB','correctData_IDonly','correctData_MSonly'],1)})
         self.addOption ('useZeroPixMuons', False, type=bool, info='if True, a second `MuonCalibTool` instance with calibMode=correctData_MSonly is scheduled and applied only to ZeroPixelHit muons.')
         self.addOption ('zeroPixMuonType', None, type=int, info='muonType value used for the ZeroPix calibration tool. If left as None, the default xAOD::Muon::MuonType::ZeroPixelHit is used.')
         self.addOption ('decorateTruth', False, type=bool,
@@ -182,7 +183,8 @@ class MuonIPCalibrationConfig (ConfigBlock) :
         self.addDependency('MuonWorkingPointSelection', required=False)
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the output container after calibration.")
+            info="the name of the output container after calibration.",
+            meta={'role':'containerRef'})
         self.addOption ('postfix', "", type=str,
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here since the calibration is common to "
@@ -223,10 +225,12 @@ class MuonWorkingPointSelectionConfig (ConfigBlock) :
         self.setBlockName('MuonWorkingPointSelection')
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the input container.")
+            info="the name of the input container.",
+            meta={'role':'containerRef'})
         self.addOption ('selectionName', '', type=str,
             noneAction='error',
-            info="the name of the muon selection to define (e.g. `tight` or `loose`).")
+            info="the name of the muon selection to define (e.g. `tight` or `loose`).",
+            meta={'role':'selection'})
         self.addOption ('postfix', None, type=str,
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as `selectionName` is used internally.")
@@ -240,11 +244,13 @@ class MuonWorkingPointSelectionConfig (ConfigBlock) :
             info=r"maximum $\Delta z_0\sin\theta$ (in mm) used for the track selection.")
         self.addOption ('quality', None, type=str,
             info="the ID WP to use. Supported ID WPs: `Tight`, `Medium`, "
-            "`Loose`, `LowPt`, `HighPt`.")
+            "`Loose`, `LowPt`, `HighPt`.",
+            meta={'choices':(['Tight','Medium','Loose','LowPt','HighPt'],1)})
         self.addOption ('isolation', None, type=str,
             info="the isolation WP to use. Supported isolation WPs: "
             "`PflowLoose_VarRad`, `PflowTight_VarRad`, `Loose_VarRad`, "
-            "`Tight_VarRad`, `NonIso`.")
+            "`Tight_VarRad`, `NonIso`.",
+            meta={'choices':(['PflowLoose_VarRad','PflowTight_VarRad','Loose_VarRad','Tight_VarRad','NonIso'],1)})
         self.addOption ('addSelectionToPreselection', True, type=bool,
             info="whether to retain only muons satisfying the working point "
             "requirements.")
@@ -353,10 +359,12 @@ class MuonWorkingPointEfficiencyConfig (ConfigBlock) :
         self.addDependency('EventSelectionMerger', required=False)
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the input container.")
+            info="the name of the input container.",
+            meta={'role':'containerRef'})
         self.addOption ('selectionName', '', type=str,
             noneAction='error',
-            info="the name of the muon selection to define (e.g. `tight` or `loose`).")
+            info="the name of the muon selection to define (e.g. `tight` or `loose`).",
+            meta={'role':'selection'})
         self.addOption ('postfix', None, type=str,
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as `selectionName` is used internally.")
@@ -366,11 +374,13 @@ class MuonWorkingPointEfficiencyConfig (ConfigBlock) :
             r"$z_0\sin\theta$ cuts.")
         self.addOption ('quality', None, type=str,
             info="the ID WP to use. Supported ID WPs: `Tight`, `Medium`, "
-            "`Loose`, `LowPt`, `HighPt`.")
+            "`Loose`, `LowPt`, `HighPt`.",
+            meta={'choices':(['Tight','Medium','Loose','LowPt','HighPt'],1)})
         self.addOption ('isolation', None, type=str,
             info="the isolation WP to use. Supported isolation WPs: "
             "`PflowLoose_VarRad`, `PflowTight_VarRad`, `Loose_VarRad`, "
-            "`Tight_VarRad`, `NonIso`.")
+            "`Tight_VarRad`, `NonIso`.",
+            meta={'choices':(['PflowLoose_VarRad','PflowTight_VarRad','Loose_VarRad','Tight_VarRad','NonIso'],1)})
         self.addOption ('systematicBreakdown', False, type=bool,
             info="enables the full breakdown of efficiency SF systematics "
             "(1 NP per uncertainty source, instead of 1 NP in total).")
@@ -538,7 +548,8 @@ class MuonTriggerAnalysisSFBlock (ConfigBlock):
                         info="remove the HLT prefix from trigger chain names.")
         self.addOption ('containerName', '', type=str,
                         info="the input muon container, with a possible selection, in "
-                        "the format `container` or `container.selection`.")
+                        "the format `container` or `container.selection`.",
+                        meta={'role':'containerRef'})
         self.addOption ('customToolSuffix', '', type=str,
                         expertMode=True, info="EXPERIMENTAL: specify custom suffix for the public tool name")
         self.addOption ('customInputFolder', '', type=str,

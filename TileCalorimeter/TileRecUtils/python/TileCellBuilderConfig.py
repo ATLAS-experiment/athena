@@ -8,7 +8,7 @@ from AthenaConfiguration.Enums import LHCPeriod, BeamType
 from TileConfiguration.TileConfigFlags import TileRunType
 from AthenaConfiguration.Enums import ProductionStep
 
-def TileCellBuilderCfg(flags, mergeChannels=True, **kwargs):
+def TileCellBuilderCfg(flags, mergeChannels=True, doDigiHSTruth=False, **kwargs):
     """Return component accumulator with configured private Tile Cell builder tool
 
     Arguments:
@@ -19,12 +19,19 @@ def TileCellBuilderCfg(flags, mergeChannels=True, **kwargs):
 
     acc = ComponentAccumulator()
     kwargs.setdefault('CheckDCS', flags.Tile.useDCS)
-    kwargs.setdefault('TileRawChannelContainer', flags.Tile.RawChannelContainer)
+    if doDigiHSTruth:
+        kwargs.setdefault('TileRawChannelContainer', "TileRawChannelCnt_DigiHSTruth")
+    else:
+        kwargs.setdefault('TileRawChannelContainer', flags.Tile.RawChannelContainer)
     kwargs.setdefault('SkipGain', -1) # Never skip any gain by default
 
     testBeam = flags.Beam.Type is BeamType.TestBeam
-    kwargs.setdefault('MBTSContainer', 'MBTSContainer' if not testBeam and flags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2, LHCPeriod.Run3] else "")
-    kwargs.setdefault('E4prContainer', 'E4prContainer' if not testBeam and flags.GeoModel.Run is LHCPeriod.Run2 else "")
+    if doDigiHSTruth:
+        kwargs.setdefault('MBTSContainer', 'MBTSContainer2_DigiHSTruth' if not testBeam and flags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2, LHCPeriod.Run3] else "")
+        kwargs.setdefault('E4prContainer', 'E4prContainer2_DigiHSTruth' if not testBeam and flags.GeoModel.Run is LHCPeriod.Run2 else "")
+    else:
+        kwargs.setdefault('MBTSContainer', 'MBTSContainer' if not testBeam and flags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2, LHCPeriod.Run3] else "")
+        kwargs.setdefault('E4prContainer', 'E4prContainer' if not testBeam and flags.GeoModel.Run is LHCPeriod.Run2 else "")
 
     kwargs['mergeChannels'] = mergeChannels
     if flags.Common.ProductionStep in [ProductionStep.PileUpPretracking, ProductionStep.MinbiasPreprocessing]:

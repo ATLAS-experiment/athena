@@ -765,8 +765,9 @@ StatusCode AthenaPoolSharedIOCnvSvc::makeClient(int num) {
       if (m_outputStreamingTool->makeClient(num, streamPortSuffix).isFailure()) {
          ATH_MSG_ERROR("makeClient: " << m_outputStreamingTool << " failed");
          return(StatusCode::FAILURE);
-      } else if (m_streamPortString.value().find("localhost:0") != std::string::npos) {
-         // We don't seem to use a dedicated port per stream so doing this for the first client is probably OK
+      } else if (!streamPortSuffix.empty()) {
+         // streamPortSuffix is only filled by the shared memory tool for the first client,
+         // so doing this once is enough (works for both the TCP and UNIX domain socket forms).
          ATH_MSG_DEBUG("makeClient: Setting conversion service port suffix to " << streamPortSuffix);
          m_streamPortString.setValue(streamPortSuffix);
       }

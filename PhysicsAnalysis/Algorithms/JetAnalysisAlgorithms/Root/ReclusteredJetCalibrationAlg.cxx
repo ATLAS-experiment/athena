@@ -34,6 +34,8 @@ namespace CP
   StatusCode ReclusteredJetCalibrationAlg ::
   execute (const EventContext &ctx) const
   {
+    // construct constant string before loops
+    const std::string manualCalibScaleStr{"JetManualCalibScaleMomentum"};
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       // container we read in
@@ -44,8 +46,7 @@ namespace CP
       ATH_CHECK(m_smallRJetHandle.retrieve(smallRJets, sys, ctx));
      
       // loop over jets
-      // construct constant string before loops
-      const std::string manualCalibScaleStr{"JetManualCalibScaleMomentum"};
+      
       for (xAOD::Jet *jet : *reclusteredJets)
       {  
         const std::vector< ElementLink< xAOD::IParticleContainer > >& element_links = jet->constituentLinks();

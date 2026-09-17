@@ -1,7 +1,7 @@
 // Emacs -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -84,7 +84,7 @@ namespace Trig{
           //so we'll let this slip silently
           return;
         }
-        data.push_back(Trig::TypelessFeature(answer,source,typelessholder->label()));
+        data.emplace_back(answer,source,typelessholder->label());
       }
     }
   } // EOF namespace FeatureAccessImpl 

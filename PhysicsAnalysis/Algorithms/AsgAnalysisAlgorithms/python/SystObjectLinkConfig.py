@@ -11,7 +11,8 @@ class SystObjectLinkBlock (ConfigBlock):
         super (SystObjectLinkBlock, self).__init__ ()
         self.addOption('containerName', '', type=str,
             noneAction='error',
-            info="the name of the input container.")
+            info="the name of the input container.",
+            meta={'role':'containerRef'})
 
     def instanceName (self) :
         """Return the instance name for this block"""

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TauAnalysisTools/TauTruthTrackMatchingTool.h"
@@ -200,7 +200,7 @@ StatusCode TauTruthTrackMatchingTool::checkTrackIsTauInheritant(const xAOD::TauT
     }
   }
   decIsHadronicTrackDecayDepth(xTrackParticle) = iDepth;
-  decDecayHistory(xTrackParticle) = sHistory;
+  decDecayHistory(xTrackParticle) = std::move(sHistory);
 
   return StatusCode::SUCCESS;
 }

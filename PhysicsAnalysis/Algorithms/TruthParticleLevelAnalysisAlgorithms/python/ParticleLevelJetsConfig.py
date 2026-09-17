@@ -9,7 +9,8 @@ class ParticleLevelJetsBlock(ConfigBlock):
     def __init__(self):
         super(ParticleLevelJetsBlock, self).__init__()
         self.addOption('containerName', 'AntiKt4TruthDressedWZJets', type=str,
-                       info='the name of the input truth jets container.')
+                       info='the name of the input truth jets container.',
+                       meta={'role':'container'})
         self.addOption('outputTruthLabelIDs', False, type=bool,
                        info='enable `HadronConeExclTruthLabelID` and `PartonTruthLabelID` decorations.')
         # Always skip on data

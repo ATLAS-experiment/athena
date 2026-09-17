@@ -55,7 +55,7 @@ std::vector< TrigCompositeUtils::LinkInfo<CONTAINER> > Trig::DecisionAccess::fea
 template<class CONTAINER>
 std::vector< TrigCompositeUtils::LinkInfo<CONTAINER> > Trig::DecisionAccess::features(const Trig::ChainGroup* group,
                                                                   const unsigned int condition,
-                                                                  const std::string& containerSGKey,
+                                                                  std::string_view containerSGKey,
                                                                   const unsigned int featureCollectionMode,
                                                                   const std::string& navElementLinkKey,
                                                                   const int          restrictToLegIndex) const {
@@ -71,7 +71,7 @@ std::vector< TrigCompositeUtils::LinkInfo<CONTAINER> > Trig::DecisionAccess::fea
 template<class CONTAINER>
 std::vector< TrigCompositeUtils::LinkInfo<CONTAINER> > Trig::DecisionAccess::features(const std::string& chainName,
                                                                   const unsigned int condition,
-                                                                  const std::string& containerSGKey,
+                                                                  std::string_view containerSGKey,
                                                                   const unsigned int featureCollectionMode,
                                                                   const std::string& navElementLinkKey,
                                                                   const int          restrictToLegIndex) const {

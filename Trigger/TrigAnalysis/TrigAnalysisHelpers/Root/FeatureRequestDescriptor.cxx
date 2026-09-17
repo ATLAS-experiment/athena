@@ -7,9 +7,9 @@
 namespace Trig {
 
 
-  FeatureRequestDescriptor::FeatureRequestDescriptor(const std::string& chainGroupName,
+  FeatureRequestDescriptor::FeatureRequestDescriptor( std::string_view chainGroupName,
       const unsigned int condition,
-      const std::string& containerSGKey,
+       std::string_view containerSGKey,
       const unsigned int featureCollectionMode,
       const std::string& navElementLinkKey,
       const int restrictToLegIndex) {
@@ -71,8 +71,8 @@ namespace Trig {
   }
 
 
-  FeatureRequestDescriptor& FeatureRequestDescriptor::setChainGroup(const std::string& chainGroupName) {
-    m_chainGroupName = chainGroupName;
+  FeatureRequestDescriptor& FeatureRequestDescriptor::setChainGroup(std::string_view chainGroupName) {
+    m_chainGroupName.assign(chainGroupName);
     return *this;
   }
 
@@ -86,9 +86,9 @@ namespace Trig {
   }
 
 
-  FeatureRequestDescriptor& FeatureRequestDescriptor::setRequireSGKey(const std::string& containerSGKey) {
-    m_containerSGKey = containerSGKey;
-    m_containerSGKeyExpression = std::regex(containerSGKey);
+  FeatureRequestDescriptor& FeatureRequestDescriptor::setRequireSGKey(std::string_view containerSGKey) {
+    m_containerSGKey.assign(containerSGKey);
+    m_containerSGKeyExpression = std::regex{containerSGKey.begin(),containerSGKey.end()};
     return *this;
   }
 

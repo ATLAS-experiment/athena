@@ -42,7 +42,7 @@ atlas_add_component( JetTagTools
     LINK_LIBRARIES JetTagToolsLib )
 
 # Install files from the package:
-atlas_install_runtime( share/*.root share/*.txt )
+atlas_install_runtime( share/*.txt )
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 

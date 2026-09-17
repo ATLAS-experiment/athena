@@ -12,13 +12,15 @@ class MetAnalysisConfig (ConfigBlock):
         super (MetAnalysisConfig, self).__init__ ()
         self.addOption('containerName', '', type=str,
             noneAction='error',
-            info="the name of the output container.")
+            info="the name of the output container.",
+            meta={'role':'container'})
         self.addOption ('useJVT', True, type=bool,
             info="whether to use the JVT decision in the MET calculation.")
         self.addOption ('useFJVT', False, type=bool,
             info="whether to use the forward JVT decision in the MET calculation.")
         self.addOption ('selectionNameFJVT', "", type=str,
-            info="name of the forward JVT selection to be used if `useFJVT` is activated.")
+            info="name of the forward JVT selection to be used if `useFJVT` is activated.",
+            meta={'role':'selection'})
         self.addOption ('treatPUJets', False, type=bool,
             info="whether to treat pile-up jets in the MET significance calculation.")
         self.addOption ('setMuonJetEMScale', True, type=bool,
@@ -26,25 +28,32 @@ class MetAnalysisConfig (ConfigBlock):
             "Should be turned off for analyses where muons are not reconstructed "
             "at all.")
         self.addOption ('jets', "", type=str,
-            info="the input jet container.")
+            info="the input jet container.",
+            meta={'role':'containerRef'})
         self.addOption ('electrons', "", type=str,
             info="the input electron container, with a possible selection, in "
-            "the format `container` or `container.selection`.")
+            "the format `container` or `container.selection`.",
+            meta={'role':'containerRef'})
         self.addOption ('muons', "", type=str,
             info="the input muon container, with a possible selection, in the "
-            "format `container` or `container.selection`.")
+            "format `container` or `container.selection`.",
+            meta={'role':'containerRef'})
         self.addOption ('photons', "", type=str,
             info="the input photon container, with a possible selection, in "
-            "the format `container` or `container.selection`.")
+            "the format `container` or `container.selection`.",
+            meta={'role':'containerRef'})
         self.addOption ('taus', "", type=str,
             info="the input tau-jet container, with a possible selection, in "
-            "the format `container` or `container.selection`.")
+            "the format `container` or `container.selection`.",
+            meta={'role':'containerRef'})
         self.addOption ('invisible', [], type=None,
             info="any input containers to be treated as invisible particles, "
-            "as a single string or a list of strings in the format `container` or `container.selection`.")
+            "as a single string or a list of strings in the format `container` or `container.selection`.",
+            meta={'role':'containerRef'})
         self.addOption ('metWP', "Tight", type=str,
             info="the MET working point to use: `Loose`, `Tight`, `Tighter`, "
-            "`Tenacious`.")
+            "`Tenacious`.",
+            meta={'choices':(['Loose','Tight','Tighter','Tenacious'],1)})
         self.addOption ('skipSystematicJetSelection', False, type=bool,
             info="EXPERIMENTAL: whether to use simplified OR based on nominal jets "
             "and for jet-related systematics only. "

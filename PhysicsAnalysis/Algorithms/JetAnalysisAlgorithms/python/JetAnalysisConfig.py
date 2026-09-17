@@ -57,7 +57,8 @@ class PreJetAnalysisConfig (ConfigBlock) :
         super (PreJetAnalysisConfig, self).__init__ ()
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the output container after calibration.")
+            info="the name of the output container after calibration.",
+            meta={'role':'container'})
         self.addOption ('jetCollection', '', type=str,
             noneAction='error',
             info="the jet container to run on. It is interpreted to determine "
@@ -170,7 +171,8 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         super (SmallRJetAnalysisConfig, self).__init__ ()
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the output container after calibration.")
+            info="the name of the output container after calibration.",
+            meta={'role':'container'})
         self.addOption ('jetCollection', '', type=str,
             noneAction='error',
             info="the jet container to run on. It is interpreted to determine "
@@ -184,9 +186,11 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         self.addOption ('runFJvtSelection', False, type=bool,
             info="whether to run forward JVT selection.")
         self.addOption ('jvtWP', "FixedEffPt", type=str,
-            info="which Jvt WP to apply.")
+            info="which Jvt WP to apply.",
+            meta={'choices':(['FixedEffPt'],1)})
         self.addOption ('fJvtWP', "Loose", type=str,
-            info="which fJvt WP to apply.")
+            info="which fJvt WP to apply.",
+            meta={'choices':(['Loose','Tight','Tighter'],1)})
         self.addOption ('runJvtEfficiency', True, type=bool,
             info="whether to calculate the JVT efficiency.")
         self.addOption ('runFJvtEfficiency', False, type=bool,
@@ -201,7 +205,8 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             "Scenario. The default is Category.")
         self.addOption ('systematicsModelJER', "Full", type=str,
             info="the NP reduction scheme to use for JER: All, Full, Simple. The "
-            "default is Full.")
+            "default is Full.",
+            meta={'choices':(['All','Full','Simple'],1)})
         self.addOption ('runJERsystematicsOnData', False, type=bool,
             info="whether to run the All/Full JER model variations also on data samples. Expert option!",
             expertMode=True)
@@ -555,7 +560,8 @@ class RScanJetAnalysisConfig (ConfigBlock) :
         super (RScanJetAnalysisConfig, self).__init__ ()
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the output container after calibration.")
+            info="the name of the output container after calibration.",
+            meta={'role':'container'})
         self.addOption ('jetCollection', '', type=str,
             noneAction='error',
             info="the jet container to run on. It is interpreted to determine "
@@ -623,23 +629,26 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
         super (LargeRJetAnalysisConfig, self).__init__ ()
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the output container after calibration.")
+            info="the name of the output container after calibration.",
+            meta={'role':'container'})
         self.addOption ('jetCollection', '', type=str,
             noneAction='error',
             info="the jet container to run on. It is interpreted to determine "
             "the correct config blocks to call for small- or large-R jets.")
         self.addOption ('jetInput', '', type=str,
             noneAction='error',
-            info="the type of jet input. Supported options are: `UFO`.")
+            info="the type of jet input. Supported options are: `UFO`.",
+            meta={'choices':(['UFO'],1)})
         self.addOption ('recalibratePhyslite', True, type=bool,
             info="whether to run the CP::JetCalibrationAlg on PHYSLITE "
             "derivations. The default is True.")
         self.addOption ('runUncertainties', True, type=bool,
             info="whether to configure JetUncertaintiesTool.", expertMode=True )
-        self.addOption ('systematicsModelJER', "Full", type=str)
-        self.addOption ('systematicsModelJMS', "Full", type=str)
+        self.addOption ('systematicsModelJER', "Full", type=str, meta={'choices':(['Simple','Full'],1)})
+        self.addOption ('systematicsModelJMS', "Full", type=str, meta={'choices':(['Simple','Full'],1)})
         self.addOption ('systematicsModelJMR', "Full", type=str,
-            info="the NP reduction scheme to use for JMR: Full, Simple. The default is Full.")
+            info="the NP reduction scheme to use for JMR: Full, Simple. The default is Full.",
+            meta={'choices':(['Full','Simple'],1)})
         self.addOption ('runJERsystematicsOnData', False, type=bool,
             info="whether to run the All/Full JER model variations also on data samples. Expert option!",
             expertMode=True)
@@ -967,13 +976,16 @@ class JvtWorkingPointSelectionConfig (ConfigBlock) :
         self.setBlockName('JvtWorkingPointSelectionConfig')
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the input container.")
+            info="the name of the input container.",
+            meta={'role':'containerRef'})
         self.addOption ('selectionName', '', type=str,
             noneAction='error',
-            info="the name of the jet selection to define (e.g. `tight` or `loose`).")
+            info="the name of the jet selection to define (e.g. `tight` or `loose`).",
+            meta={'role':'selection'})
         self.addOption ('jvtWP', '', type=str,
             noneAction='error',
-            info="the NNJvt WP to use. Supported WPs: `FixedEffPt`.")
+            info="the NNJvt WP to use. Supported WPs: `FixedEffPt`.",
+            meta={'choices':(['FixedEffPt'],1)})
         self.addOption ('useSuffix', True, type=bool,
             info="whether the working point name is to be used as suffix ."
             "Not to be disabled if multiple working points are scheduled.")
@@ -1009,13 +1021,16 @@ class JvtWorkingPointEfficiencyConfig (ConfigBlock) :
         self.addDependency('EventSelectionMerger', required=False)
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the input container.")
+            info="the name of the input container.",
+            meta={'role':'containerRef'})
         self.addOption ('selectionName', '', type=str,
             noneAction='error',
-            info="the name of the jet selection to define (e.g. `tight` or `loose`).")
+            info="the name of the jet selection to define (e.g. `tight` or `loose`).",
+            meta={'role':'selection'})
         self.addOption ('jvtWP', '', type=str,
             noneAction='error',
-            info="the NNJvt WP to use. Supported WPs: `FixedEffPt`.")
+            info="the NNJvt WP to use. Supported WPs: `FixedEffPt`.",
+            meta={'choices':(['FixedEffPt'],1)})
         self.addOption ('useSuffix', True, type=bool,
             info="whether the working point name is to be used as suffix ."
             "Not to be disabled if multiple working points are scheduled.")
@@ -1065,13 +1080,16 @@ class JvtWorkingPointEventEfficiencyConfig (ConfigBlock) :
         self.addDependency('EventSelectionMerger', required=False)
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the input container.")
+            info="the name of the input container.",
+            meta={'role':'containerRef'})
         self.addOption ('selectionName', '', type=str,
             noneAction='error',
-            info="the name of the jet selection to define (e.g. `tight` or `loose`).")
+            info="the name of the jet selection to define (e.g. `tight` or `loose`).",
+            meta={'role':'selection'})
         self.addOption ('jvtWP', '', type=str,
             noneAction='error',
-            info="the NNJvt WP to use. Supported WPs: `FixedEffPt`.")
+            info="the NNJvt WP to use. Supported WPs: `FixedEffPt`.",
+            meta={'choices':(['FixedEffPt'],1)})
         self.addOption ('useSuffix', True, type=bool,
             info="whether the working point name is to be used as suffix ."
             "Not to be disabled if multiple working points are scheduled.")
@@ -1108,13 +1126,16 @@ class FJvtWorkingPointSelectionConfig (ConfigBlock) :
         self.setBlockName('FJvtWorkingPointSelectionConfig')
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the input container.")
+            info="the name of the input container.",
+            meta={'role':'containerRef'})
         self.addOption ('selectionName', '', type=str,
             noneAction='error',
-            info="the name of the jet selection to define (e.g. `tight` or `loose`).")
+            info="the name of the jet selection to define (e.g. `tight` or `loose`).",
+            meta={'role':'selection'})
         self.addOption ('fjvtWP', '', type=str,
             noneAction='error',
-            info="the fJvt WP to use. Supported WPs: `Loose`, `Tight`, `Tighter`.")
+            info="the fJvt WP to use. Supported WPs: `Loose`, `Tight`, `Tighter`.",
+            meta={'choices':(['Loose','Tight','Tighter'],1)})
         self.addOption ('useSuffix', True, type=bool,
             info="whether the working point name is to be used as suffix ."
             "Not to be disabled if multiple working points are scheduled.")
@@ -1149,13 +1170,16 @@ class FJvtWorkingPointEfficiencyConfig (ConfigBlock) :
         self.addDependency('EventSelectionMerger', required=False)
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the input container.")
+            info="the name of the input container.",
+            meta={'role':'containerRef'})
         self.addOption ('selectionName', '', type=str,
             noneAction='error',
-            info="the name of the jet selection to define (e.g. `tight` or `loose`).")
+            info="the name of the jet selection to define (e.g. `tight` or `loose`).",
+            meta={'role':'selection'})
         self.addOption ('fjvtWP', '', type=str,
             noneAction='error',
-            info="the fJvt WP to use. Supported WPs: `Loose`, `Tight`, `Tighter`.")
+            info="the fJvt WP to use. Supported WPs: `Loose`, `Tight`, `Tighter`.",
+            meta={'choices':(['Loose','Tight','Tighter'],1)})
         self.addOption ('useSuffix', True, type=bool,
             info="whether the working point name is to be used as suffix ."
             "Not to be disabled if multiple working points are scheduled.")
@@ -1204,13 +1228,16 @@ class FJvtWorkingPointEventEfficiencyConfig (ConfigBlock) :
         self.addDependency('EventSelectionMerger', required=False)
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the input container.")
+            info="the name of the input container.",
+            meta={'role':'containerRef'})
         self.addOption ('selectionName', '', type=str,
             noneAction='error',
-            info="the name of the jet selection to define (e.g. `tight` or `loose`).")
+            info="the name of the jet selection to define (e.g. `tight` or `loose`).",
+            meta={'role':'selection'})
         self.addOption ('fjvtWP', '', type=str,
             noneAction='error',
-            info="the fJvt WP to use. Supported WPs: `Loose`, `Tight`, `Tighter`.")
+            info="the fJvt WP to use. Supported WPs: `Loose`, `Tight`, `Tighter`.",
+            meta={'choices':(['Loose','Tight','Tighter'],1)})
         self.addOption ('useSuffix', True, type=bool,
             info="whether the working point name is to be used as suffix ."
             "Not to be disabled if multiple working points are scheduled.")

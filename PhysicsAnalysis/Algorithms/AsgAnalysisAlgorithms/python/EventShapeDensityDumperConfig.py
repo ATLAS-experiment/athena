@@ -12,7 +12,8 @@ class EventShapeDensityDumperBlock(ConfigBlock):
             "eventShape",
             "Kt4EMPFlowNeutEventShape",
             type=str,
-            info="event shape variable to restore. Available options are: `Kt4EMPFlowEventShape`, `Kt4EMPFlowPUSBEventShape`, `Kt4EMTopoOriginEventShape`. `Kt4EMPFlowNeutEventShape`.",
+            info="event shape variable to restore. Available options are: `Kt4EMPFlowEventShape`, `Kt4EMPFlowPUSBEventShape`, `Kt4EMTopoOriginEventShape`, `Kt4EMPFlowNeutEventShape`.",
+            meta={'choices':(['Kt4EMPFlowEventShape', 'Kt4EMPFlowPUSBEventShape', 'Kt4EMTopoOriginEventShape', 'Kt4EMPFlowNeutEventShape'],1)}
         )
 
     def instanceName(self):

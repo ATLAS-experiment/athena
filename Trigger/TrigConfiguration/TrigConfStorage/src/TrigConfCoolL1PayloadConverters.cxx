@@ -33,12 +33,7 @@
 
 #include <iostream>
 #include <iomanip>
-#include <bitset>
-
-#include "boost/lexical_cast.hpp"
-#include <boost/algorithm/string.hpp>    
-
-using boost::lexical_cast;
+#include <bitset> 
 
 using namespace std;
 using namespace cool;
@@ -113,7 +108,7 @@ TrigConfCoolL1PayloadConverters::createLvl1ThresholdPayload( cool::IFolderPtr fl
    thrDef += std::to_string(thr.version()); thrDef += ",";
    thrDef += thr.type(); thrDef += ",";
    thrDef += std::to_string(thr.mapping()); thrDef += ",";
-   thrDef += lexical_cast<std::string,bool>(thr.active());
+   thrDef += std::to_string(thr.active());
 
 
    // TriggerThresholdValue
@@ -435,7 +430,7 @@ TrigConfCoolL1PayloadConverters::createLvl1Threshold( const coral::AttributeList
    thr->setVersion(std::stoi(thrDefV[1]));
    thr->setType(thrDefV[2]);
    thr->setMapping(std::stoi(thrDefV[3]));
-   thr->setActive(lexical_cast<bool, string>(thrDefV[4]));
+   thr->setActive(thrDefV[4] == "1" || thrDefV[4] == "true");
 
    // internal triggers have no mapping (and are usually not stored in COOL, except by the online L1)
    // in order to insert them in the threshold vector at the right position they get a mapping according to their name
@@ -500,7 +495,7 @@ TrigConfCoolL1PayloadConverters::createLvl1Threshold( const coral::AttributeList
    thr->setCableName     ( cableName );
    thr->setCableCtpin    ( cableCtpin);
    string ctpin(std::move(cableCtpin));
-   boost::to_lower(ctpin);
+   std::transform(ctpin.begin(), ctpin.end(), ctpin.begin(), ::tolower);
    if( ctpin == "ctpcore" ) {
       thr->setInput( "ctpcore" );
    } else {
