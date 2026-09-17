@@ -55,6 +55,9 @@
 
 #include "default_panels.h"
 
+#include "TError.h"
+
+
 const std::string reset  = "\033[0m";
 const std::string black  = "\033[0;30m";
 const std::string red    = "\033[0;31m";
@@ -814,7 +817,9 @@ void ifdbg( const std::string& /* s */ ) {
 
 
 int main(int argc, char** argv) { 
-  
+
+  gErrorIgnoreLevel = kError;
+
   std::cout << "\n---------------------------------\n";
   std::cout << "\n comparitor is off ...\n";
 
