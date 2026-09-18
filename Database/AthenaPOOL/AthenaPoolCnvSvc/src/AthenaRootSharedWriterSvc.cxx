@@ -200,7 +200,8 @@ StatusCode AthenaRootSharedWriterSvc::initialize() {
                return StatusCode::FAILURE;
             }
             m_socketPath = socketPath.Data();
-            std::remove(m_socketPath.c_str());
+            //coverity[CHECKED_RETURN]
+            std::remove(m_socketPath.c_str()); //returns 0 if ok.
             std::fclose(reservedFile);
             m_rootServerSocket = new TServerSocket(socketPath);
             if (m_rootServerSocket == nullptr || !m_rootServerSocket->IsValid()) {
