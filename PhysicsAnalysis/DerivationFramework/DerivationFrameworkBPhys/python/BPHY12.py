@@ -60,27 +60,27 @@ def BPHY12Cfg(flags):
     
     
                 
-    BPHY12_SelectAndWrite_DiMuon = CompFactory.DerivationFramework.Reco_Vertex(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Reco_Vertex(
                              name                   = "BPHY12_SelectAndWrite_DiMuon",
-                             VertexSearchTool       = BPHY12_Finder_DiMuon,                             
+                             VertexSearchTool       = BPHY12_Finder_DiMuon,
                              OutputVtxContainerName = "BPHY12_DiMuon_Candidates",
                              PVContainerName        = "PrimaryVertices",
-                             V0Tools                = V0Tools,  
+                             V0Tools                = V0Tools,
                              PVRefitter             = PVrefit,
                              RefPVContainerName     = "SHOULDNOTBEUSED",
-                             DoVertexType           = 7)
+                             DoVertexType           = 7))
 
-    BPHY12_Select_DiMuons = CompFactory.DerivationFramework.Select_onia2mumu(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
       name                  = "BPHY12_Select_DiMuons",
       HypothesisName        = "Jpsi",
       V0Tools               = V0Tools,
       InputVtxContainerName = "BPHY12_DiMuon_Candidates",
       VtxMassHypo           = 3096.916,
-      MassMax               = 10000.,      
+      MassMax               = 10000.,
       MassMin               = 0.,
       Chi2Max               = 1000.,
       DoVertexType          = 7
-      )
+      ))
 
     BPHY12_Finder_BdKstarKpiMuMu = CompFactory.Analysis.JpsiPlus2Tracks(
         name                    = "BPHY12_Finder_BdKstarKpiMuMu",
@@ -110,7 +110,7 @@ def BPHY12Cfg(flags):
         CandidateLimit          = 5000
         )
     
-    BPHY12_SelectAndWrite_BdKstarKpiMuMu  = CompFactory.DerivationFramework.Reco_Vertex(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Reco_Vertex(
         name                   = "BPHY12_SelectAndWrite_BdKstarKpiMuMu",
         VertexSearchTool       = BPHY12_Finder_BdKstarKpiMuMu,
         OutputVtxContainerName = "BPHY12_BdKstarKpiMuMu_Candidates",
@@ -121,9 +121,9 @@ def BPHY12Cfg(flags):
         RefitPV                = True,
         MaxPVrefit             = 10000,
         DoVertexType           = 7
-        )
+        ))
 
-    BPHY12_Select_BdKstarKpiMuMu = CompFactory.DerivationFramework.Select_onia2mumu(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
         name                       = "BPHY12_Select_BdKstarKpiMuMu",
         V0Tools                    = V0Tools,
         HypothesisName             = "Bd",
@@ -132,9 +132,9 @@ def BPHY12Cfg(flags):
         VtxMassHypo                = 5279.6,
         MassMax                    = 10000.,                 
         MassMin                    = 0.,     
-        Chi2Max                    = 1000.)
+        Chi2Max                    = 1000.))
     
-    BPHY12_Select_BdKstarKpiMuMu_anti = CompFactory.DerivationFramework.Select_onia2mumu(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
         name                       = "BPHY12_Select_BdKstarKpiMuMu_anti",
         V0Tools                    = V0Tools,
         HypothesisName             = "Bdbar",
@@ -143,9 +143,9 @@ def BPHY12Cfg(flags):
         VtxMassHypo                = 5279.6,
         MassMax                    = 10000.,
         MassMin                    = 0.,     
-        Chi2Max                    = 1000.)  
+        Chi2Max                    = 1000.))
     
-    BPHY12_ReVertex_Kstar = CompFactory.DerivationFramework.ReVertex(
+    acc.addEventAlgo(CompFactory.DerivationFramework.ReVertex(
                            name                   = "BPHY12_ReVertex_Kstar",
                            InputVtxContainerName  = "BPHY12_BdKstarKpiMuMu_Candidates",
                            V0Tools                = V0Tools,
@@ -153,9 +153,9 @@ def BPHY12Cfg(flags):
                            TrackIndices           = [ 2, 3 ],
                            TrkVertexFitterTool    = vkalvrt,
                            OutputVtxContainerName = "BPHY12_Kstar_ReVertexCandidates"
-                           )
+                           ))
     
-    BPHY12_Select_KstarKpi = CompFactory.DerivationFramework.Select_onia2mumu(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
                           name                  = "BPHY12_Select_KstarKpi",
                           HypothesisName        = "Kstar",
                           InputVtxContainerName = "BPHY12_Kstar_ReVertexCandidates",
@@ -165,9 +165,9 @@ def BPHY12Cfg(flags):
                           MassMin               = 0.,
                           MassMax               = 10000.,
                           Chi2Max               = 1000.
-                          )
+                          ))
     
-    BPHY12_Select_KstarKpi_anti = CompFactory.DerivationFramework.Select_onia2mumu(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
                        name                  = "BPHY12_Select_KstarKpi_anti",
                        HypothesisName        = "Kstarbar",
                        InputVtxContainerName = "BPHY12_Kstar_ReVertexCandidates",
@@ -177,7 +177,7 @@ def BPHY12Cfg(flags):
                        MassMin               = 0.,
                        MassMax               = 10000.,
                        Chi2Max               = 1000.
-                       )
+                       ))
     
     if skimTruth or not isSimulation: #Only Skim Data
         from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
@@ -214,9 +214,6 @@ def BPHY12Cfg(flags):
     if isSimulation:
        BPHY12ThinningTools.append(BPHY12TruthThinTool)
 
-    augTools = [BPHY12_SelectAndWrite_DiMuon, BPHY12_Select_DiMuons,
-                BPHY12_SelectAndWrite_BdKstarKpiMuMu, BPHY12_Select_BdKstarKpiMuMu, BPHY12_Select_BdKstarKpiMuMu_anti,
-                BPHY12_ReVertex_Kstar, BPHY12_Select_KstarKpi, BPHY12_Select_KstarKpi_anti]
     skimTools = [BPHY12_SelectBmumuKstEvent] if skimTruth or not isSimulation else []
 
 

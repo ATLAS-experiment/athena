@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # ====================================================================
 # IDTR2.py
@@ -78,7 +78,7 @@ def IDTR2Cfg(flags):
         LambdabarContainerName=IDTR2LambdabarContainerName))
 
     from DerivationFrameworkBPhys.V0ToolConfig import BPHY_Reco_V0FinderCfg
-    IDTR2_Reco_V0Finder = acc.popToolsAndMerge(BPHY_Reco_V0FinderCfg(
+    acc.merge(BPHY_Reco_V0FinderCfg(
         flags, derivation = "IDTR2",
         V0ContainerName = IDTR2V0ContainerName,
         KshortContainerName = IDTR2KshortContainerName,
@@ -88,8 +88,6 @@ def IDTR2Cfg(flags):
         V0FinderTool = V0FinderTool))
 
     skimmingTools = []
-    augmentationTools = [IDTR2_Reco_V0Finder]
-
     if flags.Derivation.InDet.doTrackSystematics:
         from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import TrackSystematicsAlgCfg
         acc.merge(TrackSystematicsAlgCfg(
@@ -108,7 +106,7 @@ def IDTR2Cfg(flags):
             LambdaContainerName=IDTR2LambdaContainerName + "Syst",
             LambdabarContainerName=IDTR2LambdabarContainerName + "Syst"))
 
-        IDTR2_Reco_V0FinderSyst = acc.popToolsAndMerge(BPHY_Reco_V0FinderCfg(
+        acc.merge(BPHY_Reco_V0FinderCfg(
             flags, derivation = "IDTR2", suffix = "_Syst",
             V0ContainerName = IDTR2V0ContainerName + "Syst",
             KshortContainerName = IDTR2KshortContainerName + "Syst",
@@ -116,11 +114,6 @@ def IDTR2Cfg(flags):
             LambdabarContainerName = IDTR2LambdabarContainerName + "Syst",
             CheckVertexContainers = ['PrimaryVertices'],
             V0FinderTool = V0FinderToolSyst))
-
-        augmentationTools += [IDTR2_Reco_V0FinderSyst]
-
-    for t in augmentationTools:
-        acc.addPublicTool(t)
 
     # Define the main kernel
     for tool in augmentationTools:

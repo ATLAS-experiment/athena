@@ -30,7 +30,7 @@ def BPHY4Cfg(flags):
             TrackParticleCollection     = "InDetTrackParticles",
             TrkVertexFitterTool         = vkalvrt,        # VKalVrt vertex fitter
             TrackSelectorTool           = trackselect)
-    BPHY4_Reco_4mu = CompFactory.DerivationFramework.Reco_4mu(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Reco_4mu(
             name                    = "BPHY4_Reco_4mu",
             FourMuonTool            = BPHY4FourMuonTool,
             V0Tools                 = V0Tools,
@@ -41,7 +41,7 @@ def BPHY4Cfg(flags):
             RefPVContainerName      = "BPHY4RefittedPrimaryVertices",
             RefitPV                 = True,
             MaxPVrefit              = 100000,
-            DoVertexType            = 7)
+            DoVertexType            = 7))
 
     BPHY4MuonTPThinningTool = CompFactory.DerivationFramework.MuonTrackParticleThinning(name     = "BPHY4MuonTPThinningTool",
                                                                          MuonKey    = "Muons",
@@ -62,11 +62,8 @@ def BPHY4Cfg(flags):
 
     BPHY4ThinningTools = [BPHY4MuonTPThinningTool, BPHY4ElectronTPThinningTool]
     BPHY4SlimTools     = [BPHY4_SelectEvent]
-    BPHY4AugTools      = [BPHY4_Reco_4mu]
-    for t in BPHY4ThinningTools + BPHY4SlimTools + BPHY4AugTools: acc.addPublicTool(t)
-    for tool in BPHY4AugTools:
-        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
-    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY4Kernel", 
+    for t in BPHY4ThinningTools + BPHY4SlimTools: acc.addPublicTool(t)
+    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY4Kernel",
                                                                       SkimmingTools     = BPHY4SlimTools,  ThinningTools     = BPHY4ThinningTools  ))
 
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper

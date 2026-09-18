@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -34,7 +34,7 @@ def AugOriginalCountsCfg(flags, name="AugOriginalCounts", **kwargs):
     kwargs.setdefault("TrackLRTContainer",
                       "InDetLargeD0TrackParticles"
                       if flags.Tracking.doLargeD0 else "")
-    acc.setPrivateTools(
+    acc.addEventAlgo(
         CompFactory.DerivationFramework.AugOriginalCounts(name, **kwargs))
     return acc
 
@@ -44,14 +44,14 @@ def getDefaultAllVariables():
 def BPhysBGammaFinderCfg(flags, name="BPhysBGammaFinder", **kwargs):
     #Perhaps flesh out in future see ATLASG-2977
     acc = ComponentAccumulator()
-    acc.setPrivateTools(
+    acc.addEventAlgo(
     CompFactory.DerivationFramework.BPhysBGammaFinder(name, **kwargs))
     return acc
 
 def BPhysMetadataBaseCfg(flags, name="BPhysMetadataBase", **kwargs):
     #Perhaps flesh out in future see ATLASG-2977
     acc = ComponentAccumulator()
-    acc.setPrivateTools(
+    acc.addEventAlgo(
     CompFactory.DerivationFramework.BPhysMetadataBase(name, **kwargs))
     return acc
 

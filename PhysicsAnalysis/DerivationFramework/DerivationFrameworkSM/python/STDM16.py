@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
-# STDM16.py for c-fragmentation analysi 
+# STDM16.py for c-fragmentation analysis
 # Contact: eleni.skorda@cern.ch or andrew.chisolm@cern.ch
 #====================================================================
 
@@ -21,11 +21,11 @@ streamName = "StreamDAOD_STDM16"
 
 # Main algorithm config
 
-def DStarSelectionToolCfg(flags, name, **kwargs):
+def DStarSelectionAlgCfg(flags, name, **kwargs):
     acc = ComponentAccumulator()
-    acc.addPublicTool(CompFactory.DerivationFramework.DStarSelectionTool(name = "STDM16_DStarSelectionTool",
+    acc.addEventAlgo(CompFactory.DerivationFramework.DStarSelectionAlg(name = "STDM16_DStarSelectionAlg",
                                                                          InputVtxContainerName = CandidatesContainerName,
-                                                                         DeltaMassMax          = 200.0), primary = True)
+                                                                         DeltaMassMax          = 200.0))
     return acc 
 
 
@@ -141,7 +141,7 @@ def STDM16Kernel(flags, name='STDM16Kernel', **kwargs):
     PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
     acc.addPublicTool(PVrefit)
     
-    STDM16_Reco_D0 = CompFactory.DerivationFramework.Reco_Vertex(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Reco_Vertex(
         name                   = "STDM16_Reco_D0",
         VertexSearchTool       = STDM16_Finder_D0,
         OutputVtxContainerName = "STDM16_D0Candidates",
@@ -150,10 +150,7 @@ def STDM16Kernel(flags, name='STDM16Kernel', **kwargs):
         PVRefitter             = PVrefit,
         DoVertexType           = 7, #ES not sure how this actually works, it only takes 7(all) and 1 but what does it mean ?????
         RefPVContainerName     = "SHOULDNOTBEUSED",
-        RefitPV                = False)
-
-    acc.addPublicTool(STDM16_Reco_D0)
-    STDM16_AugmentationTools += [STDM16_Reco_D0]
+        RefitPV                = False))
 
     #====================================================================
     # Perform some selection on the D0 vertex candidates
@@ -166,7 +163,7 @@ def STDM16Kernel(flags, name='STDM16Kernel', **kwargs):
     cutMaxChiSq = 50.0
     
     # Need two of these, one for each track mass hypothesis
-    STDM16_Select_D0 = CompFactory.DerivationFramework.Select_onia2mumu(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
         name                  = "STDM16_Select_D0",
         HypothesisName        = "D0",
         InputVtxContainerName = STDM16_Reco_D0.OutputVtxContainerName,
@@ -175,12 +172,9 @@ def STDM16Kernel(flags, name='STDM16Kernel', **kwargs):
         MassMin               = cutMinMass,
         MassMax               = cutMaxMass,
         Chi2Max               = cutMaxChiSq,
-        LxyMin                = cutMinLxy)
+        LxyMin                = cutMinLxy))
 
-    acc.addPublicTool(STDM16_Select_D0)
-    STDM16_AugmentationTools += [STDM16_Select_D0]
-    
-    STDM16_Select_D0b = CompFactory.DerivationFramework.Select_onia2mumu(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
     name                  = "STDM16_Select_D0b",
     HypothesisName        = "D0b",
     InputVtxContainerName = STDM16_Reco_D0.OutputVtxContainerName,
@@ -189,10 +183,7 @@ def STDM16Kernel(flags, name='STDM16Kernel', **kwargs):
     MassMin               = cutMinMass,
     MassMax               = cutMaxMass,
     Chi2Max               = cutMaxChiSq,
-    LxyMin                = cutMinLxy)
-
-    acc.addPublicTool(STDM16_Select_D0b)
-    STDM16_AugmentationTools += [STDM16_Select_D0b]
+    LxyMin                = cutMinLxy))
 
     #====================================================================
     # Look for D*+ -> D0 + pi+ candidates by looking for tracks which
@@ -200,13 +191,10 @@ def STDM16Kernel(flags, name='STDM16Kernel', **kwargs):
     # are augmented with "passed_Dstar" flag
     #====================================================================
 
-    STDM16_DStarSelectionTool = acc.getPrimaryAndMerge(DStarSelectionToolCfg(flags,
-                                                                          name = "STDM16_DStarSelectionTool",
+    acc.merge(DStarSelectionAlgCfg(flags,
+                                                                          name = "STDM16_DStarSelectionAlg",
                                                                           InputVtxContainerName = STDM16_Reco_D0.OutputVtxContainerName,
-                                                                          DeltaMassMax          = 200.0))
-
-    STDM16_AugmentationTools += [STDM16_DStarSelectionTool]
-    
+                                                                          DeltaMassMax          = 200.0)) # TODO Migrate to AthReentrantAlgorithm
 
     #=======================================
     # SKIMMING TOOLS
@@ -246,7 +234,7 @@ def STDM16Kernel(flags, name='STDM16Kernel', **kwargs):
 
     #====================================================================
     # Only retain tracks associated with above D0 vertices and soft pion
-    # candiates found in DStarSelectionTool
+    # candiates found in DStarSelectionAlg
     #====================================================================
 
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import GenericObjectThinningCfg
@@ -316,7 +304,7 @@ def STDM16Cfg(flags):
                                              "PrimaryVertices",
                                              "InDetTrackParticles"]  
 
-    # This variable is augmented by DStarSelectionTool
+    # This variable is augmented by DStarSelectionAlg
     STDM16SlimmingHelper.ExtraVariables += ["InDetTrackParticles.trackPassDstar",
                                             "AntiKt4EMPFlowJets.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.GhostPartons.isJvtHS.isJvtPU.IsoFixedCone5PtPUsub",
                                             "TruthPrimaryVertices.t.x.y.z",

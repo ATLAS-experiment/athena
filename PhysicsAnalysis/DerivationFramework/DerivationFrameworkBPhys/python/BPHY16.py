@@ -45,7 +45,7 @@ def BPHY16Cfg(flags):
           VertexPointEstimator        = vpest,
           useMCPCuts                  = False )
     acc.addPublicTool(BPHY16JpsiFinder)
-    BPHY16_Reco_mumu = CompFactory.DerivationFramework.Reco_Vertex(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Reco_Vertex(
           name                   = "BPHY16_Reco_mumu",
           VertexSearchTool       = BPHY16JpsiFinder,
           OutputVtxContainerName = "BPHY16OniaCandidates",
@@ -55,9 +55,9 @@ def BPHY16Cfg(flags):
           V0Tools                = V0Tools,
           PVRefitter             = PVrefit,
           MaxPVrefit             = 100000,
-          DoVertexType           = 7)
+          DoVertexType           = 7))
 
-    BPHY16_Select_Upsi = CompFactory.DerivationFramework.Select_onia2mumu(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
           name                  = "BPHY16_Select_Upsi",
           HypothesisName        = "Upsilon",
           InputVtxContainerName = "BPHY16OniaCandidates",
@@ -66,7 +66,7 @@ def BPHY16Cfg(flags):
           MassMin               = 8000.,
           MassMax               = 12000.,
           Chi2Max               = 200,
-          DoVertexType          = 7)
+          DoVertexType          = 7))
 
     BPHY16Plus2Tracks = CompFactory.Analysis.JpsiPlus2Tracks(name = "BPHY16Plus2Tracks",
          kaonkaonHypothesis          = False,
@@ -88,7 +88,7 @@ def BPHY16Cfg(flags):
          TrackSelectorTool           = trackselect,
          UseMassConstraint           = False)
 
-    BPHY16FourTrackSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(name = "BPHY16FourTrackSelectAndWrite",
+    acc.addEventAlgo(CompFactory.DerivationFramework.Reco_Vertex(name = "BPHY16FourTrackSelectAndWrite",
                                       VertexSearchTool         = BPHY16Plus2Tracks,
                                       OutputVtxContainerName   = "BPHY16FourTrack",
                                       PVContainerName          = "PrimaryVertices",
@@ -96,9 +96,9 @@ def BPHY16Cfg(flags):
                                       RefitPV                  = True,
                                       V0Tools                  = V0Tools,
                                       PVRefitter               = PVrefit,
-                                      MaxPVrefit               = 10000, DoVertexType = 7)
+                                      MaxPVrefit               = 10000, DoVertexType = 7))
 
-    BPHY16_Select_FourTrack  = CompFactory.DerivationFramework.Select_onia2mumu(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
                                       name                       = "BPHY16_Select_FourTracks",
                                       HypothesisName             = "FourTracks",
                                       InputVtxContainerName      = "BPHY16FourTrack",
@@ -107,16 +107,18 @@ def BPHY16Cfg(flags):
                                       VtxMassHypo                = 18100.0,
                                       MassMin                    = 0,
                                       MassMax                    = 500000,
-                                      Chi2Max                    = BPHY16Plus2Tracks.Chi2Cut)
-    BPHY16_Revertex   = CompFactory.DerivationFramework.ReVertex(
+                                      Chi2Max                    = BPHY16Plus2Tracks.Chi2Cut))
+
+    acc.addEventAlgo(CompFactory.DerivationFramework.ReVertex(
                                       name                       = "BPHY16_ReVertex",
                                       InputVtxContainerName      = "BPHY16FourTrack",
                                       V0Tools                    = V0Tools,
                                       TrackIndices               = [ 2, 3 ],
                                       PVRefitter                 = PVrefit,
                                       TrkVertexFitterTool        = vkalvrt,
-                                      OutputVtxContainerName     = "BPHY16TwoTrack")
-    BPHY16_Select_TwoTrack  = CompFactory.DerivationFramework.Select_onia2mumu(
+                                      OutputVtxContainerName     = "BPHY16TwoTrack"))
+
+    acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
                                   name                       = "BPHY16_Select_TwoTracks",
                                   HypothesisName             = "TwoTracks",
                                   InputVtxContainerName      = "BPHY16TwoTrack",
@@ -125,7 +127,7 @@ def BPHY16Cfg(flags):
                                   VtxMassHypo                = 18100.0,
                                   MassMin                    = 1,
                                   MassMax                    = 500000,
-                                  Chi2Max                    = 90)
+                                  Chi2Max                    = 90))
 
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
         xAODStringSkimmingToolCfg)
@@ -133,11 +135,8 @@ def BPHY16Cfg(flags):
         flags, name = "BPHY16_SelectEvent",
         expression = "count(BPHY16FourTrack.passed_FourTracks) > 0"))
 
-    augTools = [BPHY16_Reco_mumu, BPHY16_Select_Upsi, BPHY16FourTrackSelectAndWrite, BPHY16_Select_FourTrack, BPHY16_Revertex, BPHY16_Select_TwoTrack]
     skimTools = [BPHY16_SelectEvent]
-    for t in  augTools +skimTools : acc.addPublicTool(t)
-    for tool in augTools:
-        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
+    for t in  skimTools : acc.addPublicTool(t)
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY16Kernel",
                                                     #Only skim if not MC
                                                     SkimmingTools     = skimTools,

@@ -50,14 +50,14 @@ def BPHY2Cfg(flags):
                                          VertexPointEstimator        = vpest,
                                          useMCPCuts                  = False)
 
-    BPHY2JpsiSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(name           = "BPHY2JpsiSelectAndWrite",
+    acc.addEventAlgo(CompFactory.DerivationFramework.Reco_Vertex(name           = "BPHY2JpsiSelectAndWrite",
                                                         VertexSearchTool       = BPHY2JpsiFinder,
                                                         OutputVtxContainerName = "BPHY2JpsiCandidates",
                                                         PVContainerName        = "PrimaryVertices",
                                                         RefPVContainerName     = "SHOULDNOTBEUSED",
                                                         V0Tools                = V0Tools,
                                                         PVRefitter             = PVrefit,
-                                                        DoVertexType           =1)
+                                                        DoVertexType           =1))
  
     BPHY2BsJpsiKK = CompFactory.Analysis.JpsiPlus2Tracks(name = "BPHY2BsJpsiKK",
                                          kaonkaonHypothesis      = True,
@@ -79,7 +79,7 @@ def BPHY2Cfg(flags):
                                          TrackSelectorTool       = trackselect,
                                          UseMassConstraint       = False)
 
-    BPHY2BsKKSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(name   = "BPHY2BsKKSelectAndWrite",
+    acc.addEventAlgo(CompFactory.DerivationFramework.Reco_Vertex(name   = "BPHY2BsKKSelectAndWrite",
                                                            VertexSearchTool       = BPHY2BsJpsiKK,
                                                            OutputVtxContainerName   = "BPHY2BsJpsiKKCandidates",
                                                            PVContainerName          = "PrimaryVertices",
@@ -87,9 +87,9 @@ def BPHY2Cfg(flags):
                                                            RefitPV                  = True,
                                                            V0Tools                  = V0Tools,
                                                            PVRefitter               = PVrefit,
-                                                           MaxPVrefit               = 10000, DoVertexType = 7)
+                                                           MaxPVrefit               = 10000, DoVertexType = 7))
 
-    BPHY2_Select_Psi2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
       name                  = "BPHY2_Select_Psi2mumu",
       HypothesisName        = "Psi",
       InputVtxContainerName = "BPHY2JpsiCandidates",
@@ -98,9 +98,9 @@ def BPHY2Cfg(flags):
       MassMin               = 3300.0,
       MassMax               = 4500.0,
       Chi2Max               = 200,
-      DoVertexType          = 7)
+      DoVertexType          = 7))
  
-    BPHY2_Select_Jpsi2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
       name                  = "BPHY2_Select_Jpsi2mumu",
       HypothesisName        = "Jpsi",
       InputVtxContainerName = "BPHY2JpsiCandidates",
@@ -109,9 +109,9 @@ def BPHY2Cfg(flags):
       MassMin               = 2000.0,
       MassMax               = 3600.0,
       Chi2Max               = 200,
-      DoVertexType          = 7)
+      DoVertexType          = 7))
  
-    BPHY2_Select_Bs2JpsiKK = CompFactory.DerivationFramework.Select_onia2mumu(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
       name                       = "BPHY2_Select_Bs2JpsiKK",
       HypothesisName             = "Bs",
       InputVtxContainerName      = "BPHY2BsJpsiKKCandidates",
@@ -120,9 +120,9 @@ def BPHY2Cfg(flags):
       VtxMassHypo                = 5366.3,
       MassMin                    = 5000.0,
       MassMax                    = 5800.0,
-      Chi2Max                    = 200)
+      Chi2Max                    = 200))
 
-    BPHY2_AugOriginalCounts = acc.popToolsAndMerge(
+    acc.merge(
         AugOriginalCountsCfg(flags, name = "BPHY2_AugOriginalCounts"))
  
     #Thinning tools
@@ -170,13 +170,7 @@ def BPHY2Cfg(flags):
 
 
     thiningCollection = [BPHY2_thinningTool_Tracks, BPHY2_thinningTool_TracksPsi, BPHY2_thinningTool_PV, BPHY2MuonTPThinningTool]
-    augCollection = [BPHY2JpsiSelectAndWrite, BPHY2BsKKSelectAndWrite,
-                     BPHY2_Select_Psi2mumu, BPHY2_Select_Jpsi2mumu,
-                     BPHY2_Select_Bs2JpsiKK, BPHY2_AugOriginalCounts]
-    for t in  augCollection + thiningCollection : acc.addPublicTool(t)
-    
-    for tool in augCollection:
-        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool])) # TODO Migrate public tool to AthReentrantAlgorithm
+    for t in thiningCollection : acc.addPublicTool(t)
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY2Kernel",
                                                      #Only skim if not MC
                                                      SkimmingTools     = [BPHY2SkimmingOR] if not isSimulation else [],

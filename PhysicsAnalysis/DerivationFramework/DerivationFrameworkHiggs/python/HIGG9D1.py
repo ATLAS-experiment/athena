@@ -44,9 +44,8 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
         AugOriginalCountsCfg)
 
     # Adds primary vertex counts and track counts to EventInfo before they are thinned
-    HIGG9D1_AugOriginalCounts = acc.popToolsAndMerge(
+    acc.merge(
         AugOriginalCountsCfg(flags, name = "HIGG9D1_AugOriginalCounts"))
-    acc.addPublicTool(HIGG9D1_AugOriginalCounts)
 
     V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, "HIGG9D1"))
     vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, "HIGG9D1"))
@@ -103,7 +102,7 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
         useMCPCuts                  = False )
     acc.addPublicTool(HIGG9D1UpsiFinder)
 
-    HIGG9D1_Jpsi = CompFactory.DerivationFramework.Reco_Vertex(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Reco_Vertex(
         name                   = "HIGG9D1_Jpsi",
         VertexSearchTool       = HIGG9D1JpsiFinder,
         OutputVtxContainerName = "HIGG9D1_JpsiCandidates",
@@ -115,10 +114,9 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
         RelinkTracks           = TrkToRelink,
         RelinkMuons            = MuonToRelink,
         PVRefitter             = pvRefitter,
-        DoVertexType           = 7)
-    acc.addPublicTool(HIGG9D1_Jpsi)
+        DoVertexType           = 7))
 
-    HIGG9D1_Upsi = CompFactory.DerivationFramework.Reco_Vertex(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Reco_Vertex(
         name                   = "HIGG9D1_Upsi",
         VertexSearchTool       = HIGG9D1UpsiFinder,
         OutputVtxContainerName = "HIGG9D1_UpsiCandidates",
@@ -130,8 +128,7 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
         RelinkTracks           = TrkToRelink,
         RelinkMuons            = MuonToRelink,
         PVRefitter             = pvRefitter,
-        DoVertexType           = 7)
-    acc.addPublicTool(HIGG9D1_Upsi)
+        DoVertexType           = 7))
 
     from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
         InDetTrackSelectionTool_Loose_Cfg)
@@ -148,23 +145,21 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
         TrackSelectionTool = HIGG9D1_isoTrackSelTool))
     acc.addPublicTool(HIGG9D1_TrackIsoTool)
 
-    HIGG9D1_JpsiVtxTrkIsoDecor = CompFactory.DerivationFramework.VertexTrackIsolation(
+    acc.addEventAlgo(CompFactory.DerivationFramework.VertexTrackIsolation(
         name                            = "HIGG9D1_JpsiVtxTrkIsoDecor",
         TrackIsoTool                    = HIGG9D1_TrackIsoTool,
         TrackContainer                  = "InDetTrackParticles",
         InputVertexContainer            = "HIGG9D1_JpsiCandidates",
         FixElecExclusion                = False,
-        IncludeV0                       = False)
-    acc.addPublicTool(HIGG9D1_JpsiVtxTrkIsoDecor)
+        IncludeV0                       = False))
 
-    HIGG9D1_UpsiVtxTrkIsoDecor = CompFactory.DerivationFramework.VertexTrackIsolation(
+    acc.addEventAlgo(CompFactory.DerivationFramework.VertexTrackIsolation(
         name                            = "HIGG9D1_UpsiVtxTrkIsoDecor",
         TrackIsoTool                    = HIGG9D1_TrackIsoTool,
         TrackContainer                  = "InDetTrackParticles",
         InputVertexContainer            = "HIGG9D1_UpsiCandidates",
         FixElecExclusion                = False,
-        IncludeV0                       = False)
-    acc.addPublicTool(HIGG9D1_UpsiVtxTrkIsoDecor)
+        IncludeV0                       = False))
 
     # New subsequence
     from AthenaCommon.CFElements import seqAND
@@ -180,8 +175,6 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
     HIGG9D1_onia_skim = CompFactory.DerivationFramework.AnyVertexSkimmingTool(name = "HIGG9D1_onia_skim", VertexContainerNames = ["HIGG9D1_JpsiCandidates", "HIGG9D1_UpsiCandidates"])
     acc.addPublicTool(HIGG9D1_onia_skim)
 
-    for tool in [ HIGG9D1_AugOriginalCounts, HIGG9D1_Jpsi, HIGG9D1_Upsi, HIGG9D1_JpsiVtxTrkIsoDecor, HIGG9D1_UpsiVtxTrkIsoDecor ]:
-        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]), sequenceName="HIGG9D1Sequence") # TODO Migrate public tool to AthReentrantAlgorithm
     HIGG9D1_onia_skimKernel = CompFactory.DerivationFramework.DerivationKernel(
         "HIGG9D1_onia_skimKernel",
         SkimmingTools     = [ HIGG9D1_onia_skim ])

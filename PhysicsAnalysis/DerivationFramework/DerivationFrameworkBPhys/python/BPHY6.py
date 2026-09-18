@@ -28,12 +28,9 @@ def BPHY6Cfg(flags):
     acc.addPublicTool(trackselect)
     vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName))
     acc.addPublicTool(vpest)
-    from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
-    extrap = acc.popToolsAndMerge(InDetExtrapolatorCfg(flags))
-    acc.addPublicTool(extrap)
     PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
     acc.addPublicTool(PVrefit)
-    BPHY6_Extrap_Tool = CompFactory.DerivationFramework.MuonExtrapolationTool(name = "BPHY6_ExtrapolationTool", Extrapolator = extrap)
+
     BPHY6JpsiFinder = CompFactory.Analysis.JpsiFinder(
                 name                        = "BPHY6JpsiFinder",
                 muAndMu                     = True,
@@ -53,16 +50,16 @@ def BPHY6Cfg(flags):
                 VertexPointEstimator        = vpest,
                 useMCPCuts                  = False )
 
-    BPHY6_Reco_mumu = CompFactory.DerivationFramework.Reco_Vertex(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Reco_Vertex(
                 name                   = "BPHY6_Reco_mumu",
                 VertexSearchTool             = BPHY6JpsiFinder,
                 OutputVtxContainerName = "BPHY6OniaCandidates",
                 V0Tools                = V0Tools,
                 PVRefitter             = PVrefit,
                 PVContainerName        = "PrimaryVertices",
-                RefPVContainerName     = "BPHY6RefittedPrimaryVertices")
+                RefPVContainerName     = "BPHY6RefittedPrimaryVertices"))
 
-    BPHY6_Select_Jpsi2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
                 name                  = "BPHY6_Select_Jpsi2mumu",
                 HypothesisName        = "Jpsi",
                 InputVtxContainerName = "BPHY6OniaCandidates",
@@ -70,9 +67,9 @@ def BPHY6Cfg(flags):
                 VtxMassHypo           = 3096.916,
                 MassMin               = 2700.0,
                 MassMax               = 3500.0,
-                Chi2Max               = 20)
+                Chi2Max               = 20))
 
-    BPHY6_Select_Psi2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
                 name                  = "BPHY6_Select_Psi2mumu",
                 HypothesisName        = "Psi",
                 InputVtxContainerName = "BPHY6OniaCandidates",
@@ -80,9 +77,9 @@ def BPHY6Cfg(flags):
                 VtxMassHypo           = 3686.09,
                 MassMin               = 3200.0,
                 MassMax               = 4200.0,
-                Chi2Max               = 20)
+                Chi2Max               = 20))
 
-    BPHY6_Select_Upsi2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
                 name                  = "BPHY6_Select_Upsi2mumu",
                 HypothesisName        = "Upsi",
                 InputVtxContainerName = "BPHY6OniaCandidates",
@@ -90,9 +87,9 @@ def BPHY6Cfg(flags):
                 VtxMassHypo           = 9460.30,
                 MassMin               = 8000.0,
                 MassMax               = 12000.0,
-                Chi2Max               = 20)
+                Chi2Max               = 20))
   
-    BPHY6_Select_Bmumu2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
                 name                  = "BPHY6_Select_Bmumu2mumu",
                 HypothesisName        = "Bmumu",
                 InputVtxContainerName = "BPHY6OniaCandidates",
@@ -100,9 +97,9 @@ def BPHY6Cfg(flags):
                 VtxMassHypo           = 5366.77,
                 MassMin               = 4200.0,
                 MassMax               = 8000.0,
-                Chi2Max               = 20)
+                Chi2Max               = 20))
   
-    BPHY6_Select_Zmumu2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
                 name                  = "BPHY6_Select_Zmumu2mumu",
                 HypothesisName        = "Zmumu",
                 InputVtxContainerName = "BPHY6OniaCandidates",
@@ -110,9 +107,9 @@ def BPHY6Cfg(flags):
                 VtxMassHypo           = 91187.6,
                 MassMin               = 60000.0,
                 MassMax               = 120000.0,
-                Chi2Max               = 20)
+                Chi2Max               = 20))
 
-    BPHY6_Select_Onia2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
                 name                  = "BPHY6_Select_Onia2mumu",
                 HypothesisName        = "Onia",
                 InputVtxContainerName = "BPHY6OniaCandidates",
@@ -120,7 +117,12 @@ def BPHY6Cfg(flags):
                 VtxMassHypo           = 3096.916,
                 MassMin               = dimuon_mass_min,
                 MassMax               = dimuon_mass_max,
-                Chi2Max               = 20)
+                Chi2Max               = 20))
+
+    from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
+    extrap = acc.popToolsAndMerge(InDetExtrapolatorCfg(flags))
+    acc.addPublicTool(extrap)
+    acc.addEventAlgo(CompFactory.DerivationFramework.MuonExtrapolationTool(name = "BPHY6_ExtrapolationTool", Extrapolator = extrap))
 
     skimmingTools = []
 
@@ -163,10 +165,7 @@ def BPHY6Cfg(flags):
         "BPHY6SkimmingOR",
         FilterList = skimmingTools)
 
-    augTools = [BPHY6_Reco_mumu, BPHY6_Select_Jpsi2mumu, BPHY6_Select_Psi2mumu,
-                BPHY6_Select_Upsi2mumu, BPHY6_Select_Bmumu2mumu,
-                BPHY6_Select_Zmumu2mumu, BPHY6_Select_Onia2mumu, BPHY6_Extrap_Tool]
-    for t in  augTools + BPHY6ThinningTools + [SkimmingORTool] + skimmingTools:
+    for t in  BPHY6ThinningTools + [SkimmingORTool] + skimmingTools:
         acc.addPublicTool(t)
 
     for tool in augTools:
