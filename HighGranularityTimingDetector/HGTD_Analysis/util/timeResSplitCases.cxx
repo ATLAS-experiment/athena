@@ -90,11 +90,9 @@ void plot(TFile* file) {
   THStack *stack_hist =
       new THStack("stack_hist", ";t_{reco} - t_{truth} [ns]; Number of Tracks");
 
-  int ntotal = 0;
   for (size_t i = 0; i < hists.size(); i++) {
     hists.at(i)->SetFillColor(colors.at(i));
     hists.at(i)->SetLineWidth(0.);
-    ntotal += hists.at(i)->Integral(0, hists.at(i)->GetNbinsX() + 1);
     stack_hist->Add(hists.at(i));
   }
 
