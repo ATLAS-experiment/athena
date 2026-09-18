@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
 #include <exception>
-#include "RVersion.h"
 
 #include "TestDriver.h"
 #include "AthenaKernel/getMessageSvc.h"
@@ -15,7 +14,7 @@ void testTechnology( TestDriver& driver, const pool::DbType& tech, bool commit_e
 {
    driver.m_storageType = tech;
    driver.m_commitEveryRow = commit_every_row;
-   
+
    std::cout << "[OVAL] Testing StorageSvc functionality for " << tech.storageName()
              << " storage technology" << std::endl;
    std::cout << "[OVAL] Testing the writing operations" << std::endl;
