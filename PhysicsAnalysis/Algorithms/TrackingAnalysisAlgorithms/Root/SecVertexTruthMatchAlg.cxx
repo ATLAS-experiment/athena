@@ -9,6 +9,7 @@
 #include "TMath.h"
 #include "TH1.h"
 #include "TEfficiency.h"
+#include <limits>
 
 const float GeV = 1000.;
 
@@ -449,7 +450,7 @@ namespace CP {
     hist("RecoVertex/" + matchType + "_phi")->Fill(sumP4.Phi());
     hist("RecoVertex/" + matchType + "_mass")->Fill(sumP4.M() / GeV);
     double muVal = std::numeric_limits<double>::max();
-    if (maxDR ! = 0.)[[likely]]{
+    if (maxDR != 0.)[[likely]]{
       muVal = sumP4.M()/maxDR / GeV;
     }
     hist("RecoVertex/" + matchType + "_mu")->Fill(muVal);
