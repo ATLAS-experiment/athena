@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkTruthCreatorTools/DetailedTrackTruthBuilder.h"
@@ -119,7 +119,7 @@ namespace Trk {
     // Find associated truth for each track
 
     for (unsigned itrack=0; itrack<tracks.size(); ++itrack) {
-      ElementLink<DataVector<Trk::Track> > ptrack(tracks, itrack);
+      ElementLink<DataVector<Trk::Track> > ptrack(tracks, itrack, ctx);
       addTrack(output, ptrack, orderedPRD_Truth, inverseTruth, ctx);
     }
 
@@ -275,7 +275,7 @@ namespace Trk {
         // add id 0 to pairs, we like to keep track of fake fakes
         unsigned int UID(HepMC::UNDEFINED_ID);
         unsigned int EV(0);
-        pairStat[HepMcParticleLink(UID,EV,HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_ID)].subDetHits[subdet].insert(id);
+        pairStat[HepMcParticleLink(UID,EV,HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_ID, ctx)].subDetHits[subdet].insert(id);
       }
        
     } // Loop over measurements
