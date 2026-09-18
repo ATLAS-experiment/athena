@@ -21,7 +21,6 @@
 #include "AthContainers/DataVector.h"
 #include "AthContainers/ConstDataVector.h"
 #include "AthenaKernel/errorcheck.h"
-#include "AthenaKernel/ExtendedEventContext.h"
 #include "CxxUtils/checker_macros.h"
 #include <cassert>
 #include <print>

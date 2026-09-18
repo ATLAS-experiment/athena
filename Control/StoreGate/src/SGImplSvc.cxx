@@ -26,6 +26,7 @@
 #include "AthenaKernel/CLIDRegistry.h"
 #include "AthenaKernel/errorcheck.h"
 #include "AthenaKernel/StoreID.h"
+#include "AthenaKernel/proxyDictFromEventContext.h"
 #include "GaudiKernel/IClassIDSvc.h"
 #include "GaudiKernel/IHistorySvc.h"
 #include "GaudiKernel/ISvcLocator.h"
@@ -164,6 +165,7 @@ StatusCode SGImplSvc::initialize()    {
   if (this->storeID() == StoreID::EVENT_STORE) {
     m_arena.makeCurrent();
     SG::CurrentEventStore::setStore (this);
+    Atlas::setProxyDictInEventContext (this);
   }
   // set up the incident service:
   if (!(m_pIncSvc.retrieve()).isSuccess()) {
