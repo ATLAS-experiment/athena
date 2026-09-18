@@ -47,9 +47,6 @@ namespace pool {
     /// Commits the holds transaction.
     virtual bool commitAndHold() = 0;
 
-    /// Checks if the transaction is active
-    virtual bool isActive() const = 0;
-
     /// Returns the transaction type
     virtual Io::IoFlag type() const = 0;
 
@@ -80,9 +77,6 @@ namespace pool {
     * @return Token*   the token address of the persistent object. I case of failure 0 is returned.
     */
     virtual Token* registerForWrite( const Placement& place, const void* object, const RootType& type ) = 0;
-
-    /// Returns the file catalog in use
-    virtual IFileCatalog& fileCatalog() = 0;
 
     /// Returns the object holding the technology specific attributes for a given technology domain
     virtual ITechnologySpecificAttributes& technologySpecificAttributes( long technology ) = 0;

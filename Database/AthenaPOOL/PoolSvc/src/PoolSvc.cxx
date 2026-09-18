@@ -498,10 +498,10 @@ StatusCode PoolSvc::connect(Io::IoFlag type, unsigned int contextId) {
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
    auto session = m_dbSessionVec[contextId];
    // Connect to a logical database using the pre-defined technology and dbID
-   if (session->isActive()) {
+   if (session != nullptr && session->type() != Io::INVALID) {
       return(StatusCode::SUCCESS);
    }
-   if (!session->start(type)) {
+   if (session == nullptr || !session->start(type)) {
       ATH_MSG_ERROR("connect failed session = " << session << " type = " << type);
       return(StatusCode::FAILURE);
    }
@@ -515,7 +515,7 @@ StatusCode PoolSvc::commit(unsigned int contextId) const {
    }
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
    auto session = m_dbSessionVec[contextId];
-   if (session != nullptr && session->isActive()) {
+   if (session != nullptr && session->type() != Io::INVALID) {
       if (!session->commit()) {
          ATH_MSG_ERROR("POOL commit failed " << session);
          return(StatusCode::FAILURE);
@@ -533,7 +533,7 @@ StatusCode PoolSvc::commitAndHold(unsigned int contextId) const {
    }
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
    pool::ISession* session = m_dbSessionVec[contextId];
-   if (session != nullptr && session->isActive()) {
+   if (session != nullptr && session->type() != Io::INVALID) {
       if (!session->commitAndHold()) {
          ATH_MSG_ERROR("POOL commitAndHold failed " << session);
          return(StatusCode::FAILURE);
@@ -549,7 +549,7 @@ StatusCode PoolSvc::disconnect(unsigned int contextId) const {
    }
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
    pool::ISession* session = m_dbSessionVec[contextId];
-   if (session != nullptr && session->isActive()) {
+   if (session != nullptr && session->type() != Io::INVALID) {
       if (!commit(contextId).isSuccess()) {
          ATH_MSG_ERROR("disconnect failed to commit " << session);
          return(StatusCode::FAILURE);
@@ -801,7 +801,7 @@ std::unique_ptr<pool::IDatabase> PoolSvc::getDbHandle(unsigned int contextId, co
       contextId = IPoolSvc::kInputStream;
    }
    pool::ISession* sesH = m_dbSessionVec[contextId];
-   if (!sesH->isActive()) {
+   if (sesH != nullptr && sesH->type() == Io::INVALID) {
       Io::IoFlag transMode = Io::READ;
       ATH_MSG_DEBUG("Start transaction, type = " << transMode);
       if (!sesH->start(transMode)) {

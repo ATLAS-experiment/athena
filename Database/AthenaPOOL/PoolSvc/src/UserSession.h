@@ -79,9 +79,6 @@ namespace pool {
     /// Commits and holds the transaction.
     virtual bool commitAndHold() override final;
 
-    /// Checks if the transaction is active
-    virtual bool isActive() const override final { return m_transactionType != Io::INVALID; }
-
     /// Returns the transaction type
     virtual Io::IoFlag type() const override final { return m_transactionType; }
 
@@ -90,10 +87,7 @@ namespace pool {
     databaseHandle( const std::string& dbName, DatabaseSpecification::NameType dbNameType ) override final;
 
     /// Returns the file catalog in use
-    virtual IFileCatalog& fileCatalog() override final;
-
-    /// Set the file catalog to be used
-    void setFileCatalog(IFileCatalog& catalog);
+    virtual IFileCatalog& fileCatalog();
 
     /// Returns the object holding the technology specific attributes for a given technology domain
     virtual  ITechnologySpecificAttributes&
@@ -106,9 +100,8 @@ namespace pool {
     IFileCatalog*                  m_catalog;
     int                            m_ageLimit;
     DatabaseRegistry*              m_registry;
-    Io::IoFlag               m_transactionType;
+    Io::IoFlag                     m_transactionType;
     std::map< long, std::unique_ptr<MicroSessionManager> >    m_technologies;
-
   };
 }
 

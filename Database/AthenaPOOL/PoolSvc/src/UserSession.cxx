@@ -41,7 +41,7 @@ void*
 pool::UserSession::readObject( const Token& token, void* object )
 {
   void* result {};
-  if( isActive() ) {
+  if( m_transactionType != Io::INVALID ) {
     UserDatabase db( *this, token.dbID().toString(), pool::DatabaseSpecification::FID );
     if ( db.openMode() == Io::INVALID ) {
       db.setTechnology( token.technology() );
@@ -90,7 +90,7 @@ pool::UserSession::disconnectAll()
 bool
 pool::UserSession::start( Io::IoFlag type )
 {
-  if( isActive() ) return false;
+  if( m_transactionType != Io::INVALID ) return false;
   m_transactionType = type;
   return true;
 }
@@ -99,7 +99,7 @@ pool::UserSession::start( Io::IoFlag type )
 bool
 pool::UserSession::commit()
 {
-  if( isActive() ) {
+  if( m_transactionType != Io::INVALID ) {
     bool OK = true;
     for( auto db : *m_registry ) {
       bool bCommit = db->commitTransaction(); // This has to be replaced with a two phase commit
@@ -119,7 +119,7 @@ pool::UserSession::commit()
 bool
 pool::UserSession::commitAndHold()
 {
-  if( isActive() ) {
+  if( m_transactionType != Io::INVALID ) {
     bool OK = true;
     for( auto db : *m_registry ) {
       bool bCommit = db->commitAndHoldTransaction(); // This has to be replaced with a two phase commit
@@ -140,7 +140,7 @@ std::unique_ptr<pool::IDatabase>
 pool::UserSession::databaseHandle( const std::string& dbName,
                                                    DatabaseSpecification::NameType dbNameType )
 {
-  if( isActive() ) {
+  if( m_transactionType != Io::INVALID ) {
      return std::make_unique<UserDatabase>( *this, dbName, dbNameType );
   }
   return nullptr;
@@ -151,13 +151,6 @@ pool::UserSession::fileCatalog()
 {
   return *m_catalog;
 }
-
-void
-pool::UserSession::setFileCatalog(pool::IFileCatalog& catalog)
-{
-  m_catalog = &catalog;
-}
-
 
 pool::MicroSessionManager&
 pool::UserSession::microSessionManager( long technology )
