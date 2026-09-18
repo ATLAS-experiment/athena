@@ -29,9 +29,6 @@
 #include <exception>
 #include <map>
 
-#include <iostream>
-using namespace std;
-
 namespace pool {
 
    RootCollection::RootCollection( const pool::CollectionDescription& description,
@@ -118,9 +115,9 @@ namespace pool {
             delete m_storageSvc; m_storageSvc = nullptr;
             m_ownStorageSvc = false;
          } else {
-            // just close the database, but do not end the session, as we did not create it
+            m_dhCont = nullptr;
+            // release the database handle
             if( m_database ) {
-               // m_database->disconnect();
                m_database.reset();
             }
          }
@@ -137,7 +134,6 @@ namespace pool {
       }
       if( m_fileName.starts_with("PFN:") ) {
          m_fileName = m_fileName.substr(4);
-         // TODO: handle other prefixes too
       }
       if( !m_session ) {
          // not creating a new session to avoid playing with the filecatalog
@@ -148,7 +144,6 @@ namespace pool {
             throw std::runtime_error( "RootCollection failed to start a session." );
          }
          m_fileDescr.initFromFilename( m_fileName );
-         // cout << "MN: RootCollection::open: connection already exists for:" << m_fileName  << endl;
          if( !m_storageSvc->connect( m_mode, m_fileDescr ).isSuccess() ) {
            throw std::runtime_error( "RootCollection failed to open: " + m_fileName + " for " + poolOptToRootOpt[m_mode] );
          }
@@ -160,7 +155,6 @@ namespace pool {
             throw std::runtime_error( "Could not retrieve a database handle to '" + m_fileName + "' (APR: RootCollection)" );
          }
          if( m_database->openMode() == Io::INVALID ) {
-            //      cout << "MN: RootCollection::cursor: database is not open, opening " << m_fileName << " for read" << endl;
             m_database->setTechnology( m_description.type().type() );
             m_database->connectForRead();
          }
@@ -170,8 +164,6 @@ namespace pool {
          }
          m_fileDescr = *fd;
       }
-
-//      cout << "MN: RootCollection:: connected file descriptor to " << m_fileName << endl;
 
       if( m_mode == Io::READ ) {
          CollectionDescription desc( m_description.name(), m_description.type(), m_description.connection() );
@@ -184,6 +176,7 @@ namespace pool {
             throw std::runtime_error( "RootCollection: error reading " + m_fileName );
          }
          m_containerPrefix = APRDefaults::ReadConfig::getEventTagName( m_fileDescr.FID() );
+         std::string dhContName;
          const std::string& newDHContName = std::format("{}(DataHeader)", APRDefaults::ReadConfig::getDataHeaderName( m_fileDescr.FID() ));
          const std::string& oldDHContName = std::format("{}_DataHeader",  APRDefaults::ReadConfig::getDataHeaderName( m_fileDescr.FID() ));
          ATH_MSG_DEBUG("Opening RootCollection '" << m_fileName << "' using container prefix: " << m_containerPrefix );
@@ -206,18 +199,21 @@ namespace pool {
                }
             } else if( contName == newDHContName or contName == oldDHContName ) {
                ATH_MSG_DEBUG("  :container " << contName << " is the DataHeader container");
-               m_dhContName = contName;
+               dhContName = contName;
             }
          }
          //      cout << "MN: RootCollection::open: found " << m_containerMap.size() << " EventTag containers in " << m_fileName << endl;
          if( m_containerMap.empty() ) {
             // No EventTag containers found
-            if( m_dhContName.empty() ) {
-               // No DataHeader container, nothing to read
-               throw std::runtime_error( "No Event Collections found in " + m_fileName );
-            }
             if( !m_session ) {
                throw std::runtime_error( "Cannot read Athena file without a valid Session (" + m_fileName + ")" );
+            }
+            if( m_database and !dhContName.empty() ) {
+               m_dhCont = m_database->containerHandle( dhContName );
+            }
+            if( !m_dhCont ) {
+               // No DataHeader container, nothing to read
+               throw std::runtime_error( "No Event Collections found in " + m_fileName );
             }
          }
       } else {
@@ -241,11 +237,7 @@ namespace pool {
          initNewRow(collectionRowBuffer);
          return std::make_unique<CollectionCursor>( m_description, collectionRowBuffer, m_containerMap);
       } else {
-         IContainer *dhCont = m_database->containerHandle( m_dhContName );
-         if( !dhCont ) {
-            throw std::runtime_error( "Could not retrieve a handle to the DataHeader container (APR: RootCollection::cursor)" );
-         }
-         return std::make_unique<ImplicitCollectionIterator>( *dhCont );
+         return std::make_unique<ImplicitCollectionIterator>( *m_dhCont );
       }
    }
 

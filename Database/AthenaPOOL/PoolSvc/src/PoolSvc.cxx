@@ -34,8 +34,6 @@
 #include <cctype>
 #include <exception>  // for runtime_error
 
-#include <iostream>
-using namespace std;
 bool isNumber(const std::string& s) {
    return !s.empty() && (std::isdigit(s[0]) || s[0] == '+' || s[0] == '-');
 }
@@ -416,12 +414,13 @@ StatusCode PoolSvc::connectCollection(const std::string& connection,
             }
          }
       } catch (std::exception& e) {
-         ATH_MSG_INFO("Failed to open container to check POOL collection - trying.");
+         ATH_MSG_INFO("connectCollection() failed to open '" << connection << "' - trying.");
       }
    }
    // For multithreaded processing (with multiple events in flight),
    // increase virtual tree size to accomodate back reads
    if (m_useROOTMaxTree && contextId == IPoolSvc::kInputStream && Gaudi::Concurrency::ConcurrencyFlags::numConcurrentEvents() > 1) {
+      ATH_MSG_DEBUG("connectCollection(): Increasing virtual TTree size for: " << connection);
       if (!this->setAttribute("TREE_MAX_VIRTUAL_SIZE", "-1", pool::ROOT_StorageType.type(), connection.substr(4), "CollectionTree", contextId).isSuccess()) {
          ATH_MSG_DEBUG("Failed to increase maximum virtual TTree size.");
       }

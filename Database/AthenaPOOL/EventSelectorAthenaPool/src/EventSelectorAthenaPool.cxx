@@ -214,7 +214,7 @@ StatusCode EventSelectorAthenaPool::reinit() const {
 	 m_inputCollectionsIterator = m_inputCollectionsProp.value().end();
 	 if (!m_inputCollectionsProp.value().empty()) --m_inputCollectionsIterator;
 	//NOTE (wb may 2016): this will make the FirstInputFile incident correspond to last file in the collection ... if want it to be first file then move iterator to begin and then move above two lines below this incident firing
-         if (m_collectionType.value() == "ImplicitCollection" && !m_firedIncident && !m_inputCollectionsProp.value().empty()) {
+         if( !m_firedIncident && !m_inputCollectionsProp.value().empty() ) {
             FileIncident firstInputFileIncident(name(), "FirstInputFile", *m_inputCollectionsIterator);
             m_incidentSvc->fireIncident(firstInputFileIncident);
             m_firedIncident = true;
@@ -226,7 +226,7 @@ StatusCode EventSelectorAthenaPool::reinit() const {
    try {
       m_headerIterator = m_poolCollectionConverter->selectAll();
    } catch (std::exception &e) {
-      ATH_MSG_FATAL("Cannot open implicit collection - check data/software version.");
+      ATH_MSG_FATAL("Cannot open input collection - check data/software version.");
       ATH_MSG_ERROR(e.what());
       return StatusCode::FAILURE;
    }
@@ -461,7 +461,6 @@ StatusCode EventSelectorAthenaPool::nextHandleFileTransition(IEvtSelector::Conte
    }
    const Token& headRef = m_headerIterator->eventRef();
    const Guid guid = headRef.dbID();
-   const int tech = headRef.technology();
    ATH_MSG_VERBOSE("next(): DataHeder Token=" << headRef.toString() );
 
    if (guid != m_guid) {
@@ -475,27 +474,22 @@ StatusCode EventSelectorAthenaPool::nextHandleFileTransition(IEvtSelector::Conte
       }
       m_guid = guid;
       m_activeEventsPerSource[guid.toString()] = 0;
-      // Fire BeginInputFile incident if current InputCollection is a payload file;
-      // otherwise, ascertain whether the pointed-to file is reachable before firing any incidents and/or proceeding
-      if (m_collectionType.value() == "ImplicitCollection") {
-         // For now, we can only deal with input metadata from POOL files, but we know we have a POOL file here
-         if (!m_athenaPoolCnvSvc->setInputAttributes(*m_inputCollectionsIterator).isSuccess()) {
-               ATH_MSG_ERROR("Failed to set input attributes.");
-               return StatusCode::FAILURE;
-         }
-         if (m_processMetadata.value()) {
-            InputFileIncidentGuard::transition(m_inputFileGuard, *m_incidentSvc, name(),
-                                    *m_inputCollectionsIterator, m_guid.toString(),
-                                    /*endFileName=*/{});
-         }
-      } else {
-         // Check if File is BS
-         if (tech != 0x00001000 && m_processMetadata.value()) {
-            InputFileIncidentGuard::transition(m_inputFileGuard, *m_incidentSvc, name(),
-                                    "FID:" + m_guid.toString(), m_guid.toString(),
-                                    /*endFileName=*/{});
-         }
+      if (!m_athenaPoolCnvSvc->setInputAttributes(*m_inputCollectionsIterator).isSuccess()) {
+         ATH_MSG_ERROR("Failed to set input attributes.");
+         return StatusCode::FAILURE;
       }
+      if (m_processMetadata.value()) {
+         InputFileIncidentGuard::transition(m_inputFileGuard, *m_incidentSvc, name(),
+                                            *m_inputCollectionsIterator, m_guid.toString(),
+                                            /*endFileName=*/{});
+      }
+      // MN: not sure what to do with this fragment:
+      //if( headRef.technology() != 0x00001000 && m_processMetadata.value() ) {
+      //   InputFileIncidentGuard::transition( m_inputFileGuard, *m_incidentSvc, name(),
+      //                                       "FID:" + m_guid.toString(), m_guid.toString(),
+      //                                       /*endFileName=*/{} );
+      //}
+
    }  // end if (guid != m_guid)
    return StatusCode::SUCCESS;
 }
@@ -629,10 +623,10 @@ StatusCode EventSelectorAthenaPool::seek(Context& /*ctxt*/, int evtNum) const {
          // Reset input collection iterator to the right place
          m_inputCollectionsIterator = m_inputCollectionsProp.value().begin();
          m_inputCollectionsIterator += m_curCollection;
-         m_poolCollectionConverter = std::make_unique<PoolCollectionConverter>(m_collectionType.value(),
-	         m_inputCollectionsProp.value()[m_curCollection],
-	         IPoolSvc::kInputStream,
-	         m_athenaPoolCnvSvc->getPoolSvc());
+         m_poolCollectionConverter = std::make_unique<PoolCollectionConverter>(
+                m_inputCollectionsProp.value()[m_curCollection],
+                IPoolSvc::kInputStream,
+                m_athenaPoolCnvSvc->getPoolSvc() );
          if (!m_poolCollectionConverter || !m_poolCollectionConverter->initialize().isSuccess()) {
             m_headerIterator = nullptr;
             ATH_MSG_ERROR("seek: Unable to initialize PoolCollectionConverter.");
@@ -672,10 +666,10 @@ int EventSelectorAthenaPool::curEvent (const Context& /*ctxt*/) const {
 int EventSelectorAthenaPool::findEvent(int evtNum) const {
    for (std::size_t i = 0, imax = m_numEvt.size(); i < imax; i++) {
       if (m_numEvt[i] == -1) {
-         PoolCollectionConverter pcc(m_collectionType.value(),
-	         m_inputCollectionsProp.value()[i],
-	         IPoolSvc::kInputStream,
-	         m_athenaPoolCnvSvc->getPoolSvc());
+         PoolCollectionConverter pcc(
+                m_inputCollectionsProp.value()[i],
+                IPoolSvc::kInputStream,
+                m_athenaPoolCnvSvc->getPoolSvc() );
          if (!pcc.initialize().isSuccess()) {
             break;
          }
@@ -714,10 +708,10 @@ EventSelectorAthenaPool::getCollectionCnv(bool throwIncidents) const {
          m_firstEvt[m_curCollection] = m_evtCount;
       }
       ATH_MSG_DEBUG("Try item: \"" << *m_inputCollectionsIterator << "\" from the collection list.");
-      auto pCollCnv = std::make_unique<PoolCollectionConverter>(m_collectionType.value(),
-	      *m_inputCollectionsIterator,
-	      IPoolSvc::kInputStream,
-	      m_athenaPoolCnvSvc->getPoolSvc());
+      auto pCollCnv = std::make_unique<PoolCollectionConverter>(
+             *m_inputCollectionsIterator,
+             IPoolSvc::kInputStream,
+             m_athenaPoolCnvSvc->getPoolSvc() );
       StatusCode status = pCollCnv->initialize();
       if (!status.isSuccess()) {
          // Close previous collection.

@@ -9,14 +9,12 @@
 
 #include "PoolCollectionConverter.h"
 #include "PoolSvc/IPoolSvc.h"
-#include "PoolSvc/ISession.h"
 #include "PersistentDataModel/Token.h"
 
 // Pool
 #include "CollectionSvc/ICollection.h"
 #include "CollectionSvc/ICollectionCursor.h"
 #include "CollectionSvc/CollectionService.h"
-#include "StorageSvc/DbType.h"
 
 // Gaudi
 #include "GaudiKernel/StatusCode.h"
@@ -27,11 +25,10 @@
 #include <stdexcept>
 
 //______________________________________________________________________________
-PoolCollectionConverter::PoolCollectionConverter(const std::string& collectionType,
+PoolCollectionConverter::PoolCollectionConverter(
 	const std::string& inputCollection,
 	unsigned int contextId,
 	const IPoolSvc* svc) :
-	m_collectionType(collectionType),
 	m_inputCollection(inputCollection),
 	m_contextId(contextId),
 	m_poolSvc(svc),
@@ -53,20 +50,13 @@ StatusCode PoolCollectionConverter::initialize() {
       // Prefix with PFN:
       m_inputCollection = std::format("PFN:{}", m_inputCollection);
    }
-   StatusCode sc = StatusCode::SUCCESS;
+   StatusCode sc = m_poolSvc->connectCollection(m_inputCollection, "Input", m_contextId);
    try {
-      sc = m_poolSvc->connectCollection(m_inputCollection, "Input", m_contextId);
       m_poolCollection = pool::CollectionService::open("Input", m_inputCollection, m_poolSvc->getInputContextSession(m_contextId));
    } catch (std::exception &e) {
-      return StatusCode::RECOVERABLE;
+      // MN: we should print the e.what()
    }
-   bool insertFile = false;
-   if (sc.isRecoverable()) {
-      insertFile = true;
-   } else if (sc.isFailure()) {
-      return StatusCode::FAILURE;
-   }
-   if (m_poolCollection == nullptr || insertFile) {
+   if( sc.isRecoverable() || m_poolCollection == nullptr ) {
       return m_poolSvc->checkCollection(m_inputCollection, m_contextId, m_poolCollection == nullptr);
    }
    return StatusCode::SUCCESS;

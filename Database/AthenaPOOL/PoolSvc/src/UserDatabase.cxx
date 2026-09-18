@@ -18,8 +18,8 @@
 static const std::string& emptyString = "";
 
 pool::UserDatabase::UserDatabase( pool::UserSession& session,
-                                                  const std::string& name,
-                                                  const pool::DatabaseSpecification::NameType nameType ):
+                                  const std::string& name,
+                                  const pool::DatabaseSpecification::NameType nameType ):
   APRMessaging("PersistencySvc::UserDB"),                                                  
   m_session( session ),
   m_catalog( session.fileCatalog() ),

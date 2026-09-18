@@ -22,6 +22,7 @@ namespace pool {
    class ISession;
    class IStorageSvc;
    class IDatabase;
+   class IContainer;
 
    class Attribute;
 
@@ -83,8 +84,6 @@ namespace pool {
         std::string                          m_fileName;
         /// The common prefix for branch container names for attributes
         std::string                          m_containerPrefix;
-        /// The name of the DataHeader container
-        std::string                          m_dhContName;
         Io::IoFlag                           m_mode;
 
         bool                                 m_open;
@@ -93,7 +92,10 @@ namespace pool {
         IStorageSvc*                         m_storageSvc = nullptr;
         bool                                 m_ownStorageSvc;
         pool::FileDescriptor                 m_fileDescr;
+        /// Map of container names to container handles for all EventTag attrikbutes in the file
         ContainerMap                         m_containerMap;
+        /// The DataHeader container, if present, in the file
+        IContainer*                          m_dhCont = nullptr;
         std::unique_ptr<pool::IDatabase>     m_database;
    };
 }
