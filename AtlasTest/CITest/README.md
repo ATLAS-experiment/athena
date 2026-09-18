@@ -59,6 +59,17 @@ Rather than matching the number of actual cores used, this number should reflect
 expected system load. E.g. if a job runs with 8 threads but the system load during running is
 significant lower, one can reduce this number to allow other jobs to run in parallel.
 
+## GPU tests
+Tests that require a GPU should be defined as follows:
+```cmake
+atlas_add_citest( GPUTest1
+   PRE_EXEC_SCRIPT "nvidia-check.sh || exit 2"
+   SCRIPT ...
+   PROPERTIES SKIP_RETURN_CODE 2 )
+```
+This ensures that the test is skipped if there is no Nvidia GPU available. In order for
+the MR to run on a GPU node, the `node::GPU_NVIDIA` needs to be assigned (we currently do
+not have AMD GPUs in the CI system).
 
 ## Test dependencies
 **Test dependencies** can be declared via the `DEPENDS` (or `DEPENDS_SUCCESS`) keyword 

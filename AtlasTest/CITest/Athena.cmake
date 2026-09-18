@@ -499,3 +499,9 @@ atlas_add_citest( DerivationRun3Data_Train_RNTuple
 atlas_add_citest( DerivationRun3MC_Train_RNTuple
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/DerivationRun3MC_Train_RNTuple.sh
    PROPERTIES PROCESSORS 4 )
+
+# GPU test
+atlas_add_citest( GPU_nvidia
+   PRE_EXEC_SCRIPT "nvidia-check.sh || exit 2"
+   SCRIPT athena.py --threads=1 AthExCUDA/LinearTransformStandaloneExampleConfig.py
+   PROPERTIES SKIP_RETURN_CODE 2 )
