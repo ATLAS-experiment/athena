@@ -79,11 +79,10 @@ def IDTRKVALIDKernelCommonCfg(flags, name='IDTRKVALIDKernel'):
         # Add unbiased track parameters to track particles
         from DerivationFrameworkInDet.InDetToolsConfig import (
             TrackToVertexWrapperCfg)
-        IDTRKVALIDTrackToVertexWrapper = acc.getPrimaryAndMerge(
+        acc.merge(
             TrackToVertexWrapperCfg(
                 flags, name="IDTRKVALIDTrackToVertexWrapper",
                 DecorationPrefix="IDTRKVALID"))
-        augmentationTools.append(IDTRKVALIDTrackToVertexWrapper)
 
         from DerivationFrameworkInDet.InDetToolsConfig import (
             UsedInVertexFitTrackDecoratorCfg)

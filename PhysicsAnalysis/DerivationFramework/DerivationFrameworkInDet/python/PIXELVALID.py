@@ -76,11 +76,10 @@ def PIXELVALIDKernelCommonCfg(flags, name='PIXELVALIDKernelCommon'):
 
     # Add unbiased track parameters to track particles
     from DerivationFrameworkInDet.InDetToolsConfig import (TrackToVertexWrapperCfg)
-    PIXELVALIDTrackToVertexWrapper = acc.getPrimaryAndMerge(TrackToVertexWrapperCfg(
+    acc.merge(TrackToVertexWrapperCfg(
         flags,
         name="PIXELVALIDTrackToVertexWrapper",
         DecorationPrefix="PIXELVALID"))
-    augmentationTools.append(PIXELVALIDTrackToVertexWrapper)
 
     from DerivationFrameworkInDet.InDetToolsConfig import (UsedInVertexFitTrackDecoratorCfg)
     PIXELVALIDUsedInFitDecorator = acc.getPrimaryAndMerge(UsedInVertexFitTrackDecoratorCfg(flags))

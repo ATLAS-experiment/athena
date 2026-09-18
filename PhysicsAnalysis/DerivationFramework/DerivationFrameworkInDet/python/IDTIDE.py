@@ -45,12 +45,11 @@ def IDTIDEKernelCommonCfg(flags, name='IDTIDEKernel'):
     # Add unbiased track parameters to track particles
     from DerivationFrameworkInDet.InDetToolsConfig import (
         TrackToVertexWrapperCfg)
-    IDTIDETrackToVertexWrapper = acc.getPrimaryAndMerge(
+    acc.merge(
         TrackToVertexWrapperCfg(
             flags, name="IDTIDETrackToVertexWrapper",
             DecorationPrefix="IDTIDE")
     )
-    augmentationTools.append(IDTIDETrackToVertexWrapper)
 
     from DerivationFrameworkInDet.InDetToolsConfig import (
         UsedInVertexFitTrackDecoratorCfg)
