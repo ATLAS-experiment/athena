@@ -6,6 +6,13 @@
 #define G4FASTSIMULATION_FATRASG4_H
 
 #include "G4VFastSimulationModel.hh"
+
+// Geant4 ACTSFatras G4 Tool
+#include "G4AtlasInterfaces/IActsFatrasG4Tool.h"
+
+// FatrasG4 tool
+#include "FatrasG4Tool.h"
+
 #include "FatrasG4PhotonConversion.h"
 #include "Randomize.hh"
 
@@ -21,7 +28,9 @@ class FatrasG4 : public G4VFastSimulationModel
 {
 public:
   FatrasG4(const std::string& name,
-           G4Region* region);
+           G4Region* region,
+           const PublicToolHandle<IActsFatrasG4Tool>& ActsFatrasG4Tool,
+           FatrasG4Tool * FatrasG4Tool);
 
   ~FatrasG4() = default;
 
@@ -46,6 +55,9 @@ private:
   // the track Geant4 is currently tracking.
   static constexpr double s_minEnergy = 1.*CLHEP::GeV;
   static constexpr double s_maxEnergy = 100.*CLHEP::GeV;
+
+  // Geant4 ACTSFatras G4 Tool
+  PublicToolHandle<IActsFatrasG4Tool> m_ActsFatrasG4Tool;
 
   // Photon conversion model
   FatrasG4PhotonConversion m_photonConversion;

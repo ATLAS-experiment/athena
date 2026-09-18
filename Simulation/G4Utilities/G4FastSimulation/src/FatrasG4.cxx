@@ -43,8 +43,11 @@
 
 
 FatrasG4::FatrasG4(const std::string& name,
-                   G4Region* region)
+                   G4Region* region,
+                   const PublicToolHandle<IActsFatrasG4Tool>& ActsFatrasG4Tool,
+                   FatrasG4Tool * /*FatrasG4Tool*/)
 : G4VFastSimulationModel(name, region),
+  m_ActsFatrasG4Tool(ActsFatrasG4Tool),
   m_photonConversion(),
   m_generator(*G4Random::getTheEngine())
 {
