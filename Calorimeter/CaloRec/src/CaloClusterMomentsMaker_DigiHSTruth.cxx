@@ -47,7 +47,7 @@ using enum xAOD::CaloCluster::MomentType;
 // Known moments
 namespace {
   // name -> enum translator
-  const std::map<std::string,xAOD::CaloCluster::MomentType> momentNameToEnumMap = {
+  const std::map<std::string,xAOD::CaloCluster::MomentType, std::less<>> momentNameToEnumMap = {
     { "AVG_LAR_Q_DigiHSTruth",         AVG_LAR_Q_DigiHSTruth },
     { "AVG_TILE_Q_DigiHSTruth",        AVG_TILE_Q_DigiHSTruth },
     { "BADLARQ_FRAC_DigiHSTruth",      BADLARQ_FRAC_DigiHSTruth },
