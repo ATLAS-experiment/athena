@@ -9,10 +9,7 @@
   <class name="Analysis::SoftElectronInfo" />
   <class name="std::vector<Analysis::SETrackInfo>" />
   <class name="Analysis::SETrackInfo" />
-  <class name="Analysis::SoftMuonInfo" />
-  <class name="std::vector<Analysis::SMTrackInfo>" />
-  <class name="Analysis::SMTrackInfo" />
-
+ 
   <class name="Analysis::TruthInfo" />
   <class name="Analysis::SoftLeptonTruthInfo" />
   <class name="std::vector<Analysis::SLTrueInfo>" />
