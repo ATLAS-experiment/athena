@@ -244,13 +244,17 @@ StatusCode CaloClusterMomentsMaker_DigiHSTruth::initialize()
         ATH_MSG_ERROR(buffer);
       }
       auto fmom(momentNameToEnumMap.find("SECOND_TIME_DigiHSTruth"));
-      sprintf(buffer, "moment name: %-*.*s - enumerator: %i", (int)nstr,
+      if (fmom != momentNameToEnumMap.end()){
+        sprintf(buffer, "moment name: %-*.*s - enumerator: %i", (int)nstr,
               (int)nstr, fmom->first.c_str(), (int)fmom->second);
-      ATH_MSG_ERROR(buffer);
+        ATH_MSG_ERROR(buffer);
+      }
       fmom = momentNameToEnumMap.find("NCELL_SAMPLING_DigiHSTruth");
-      sprintf(buffer, "moment name: %-*.*s - enumerator: %i", (int)nstr,
+      if (fmom != momentNameToEnumMap.end()){
+        sprintf(buffer, "moment name: %-*.*s - enumerator: %i", (int)nstr,
               (int)nstr, fmom->first.c_str(), (int)fmom->second);
-      ATH_MSG_ERROR(buffer);
+        ATH_MSG_ERROR(buffer);
+      }
       return StatusCode::FAILURE;
     }  // found unknown moment name
   }    // loop configured moment names
@@ -271,9 +275,11 @@ StatusCode CaloClusterMomentsMaker_DigiHSTruth::initialize()
   }
   if (m_secondTime) {
     auto fmom(momentNameToEnumMap.find("SECOND_TIME_DigiHSTruth"));
-    sprintf(buffer, "moment name: %-*.*s - enumerator: %i (save only)",
+    if (fmom != momentNameToEnumMap.end()){
+      sprintf(buffer, "moment name: %-*.*s - enumerator: %i (save only)",
             (int)nstr, (int)nstr, fmom->first.c_str(), (int)fmom->second);
-    ATH_MSG_INFO(buffer);
+      ATH_MSG_INFO(buffer);
+    }
   }
 
   // retrieve CaloCell ID server
