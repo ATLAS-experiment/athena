@@ -11,7 +11,7 @@
 #include <memory>
 #include <vector>
 
-#include "HyPERAlgorithms/HyPERGraph.h"
+#include "HyPERAnalysisAlgorithms/HyPERGraph.h"
 
 using indices = std::vector<std::vector<int64_t>>;
 using scores = std::vector<std::vector<float>>;

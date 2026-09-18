@@ -4,8 +4,8 @@
 #include <AsgMessaging/MessageCheck.h>  // To access ANA_MSG
 
 
-#include "HyPERAlgorithms/HyPERTopoReco.h"
-#include "HyPERAlgorithms/HyPERUtils.h"
+#include "HyPERAnalysisAlgorithms/HyPERTopoReco.h"
+#include "HyPERAnalysisAlgorithms/HyPERUtils.h"
 
 using indices = std::vector<std::vector<int64_t>>;
 using scores = std::vector<std::vector<float>>;

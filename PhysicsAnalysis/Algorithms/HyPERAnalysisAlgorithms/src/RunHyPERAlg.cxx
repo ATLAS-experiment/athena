@@ -9,15 +9,15 @@
 #include "AthContainers/ConstDataVector.h"
 
 // HyPER includes
-#include "HyPERAlgorithms/RunHyPERAlg.h"
-#include "HyPERAlgorithms/HyPERModel.h"
-#include "HyPERAlgorithms/HyPERTtbarAllHadronicModel.h"
-#include "HyPERAlgorithms/HyPERTtbarAllHadronicParser.h"
-#include "HyPERAlgorithms/HyPERTtbarDiLeptonModel.h"
-#include "HyPERAlgorithms/HyPERTtbarDiLeptonParser.h"
-#include "HyPERAlgorithms/HyPERTtbarLJetsModel.h"
-#include "HyPERAlgorithms/HyPERTtbarLJetsParser.h"
-#include "HyPERAlgorithms/HyPERUtils.h"
+#include "HyPERAnalysisAlgorithms/RunHyPERAlg.h"
+#include "HyPERAnalysisAlgorithms/HyPERModel.h"
+#include "HyPERAnalysisAlgorithms/HyPERTtbarAllHadronicModel.h"
+#include "HyPERAnalysisAlgorithms/HyPERTtbarAllHadronicParser.h"
+#include "HyPERAnalysisAlgorithms/HyPERTtbarDiLeptonModel.h"
+#include "HyPERAnalysisAlgorithms/HyPERTtbarDiLeptonParser.h"
+#include "HyPERAnalysisAlgorithms/HyPERTtbarLJetsModel.h"
+#include "HyPERAnalysisAlgorithms/HyPERTtbarLJetsParser.h"
+#include "HyPERAnalysisAlgorithms/HyPERUtils.h"
 
 namespace EventReco {
 

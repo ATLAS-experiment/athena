@@ -5,7 +5,7 @@
 #include <vector>
 
 // HyPER includes
-#include "HyPERAlgorithms/HyPERModel.h"
+#include "HyPERAnalysisAlgorithms/HyPERModel.h"
 
 namespace EventReco {
 /**

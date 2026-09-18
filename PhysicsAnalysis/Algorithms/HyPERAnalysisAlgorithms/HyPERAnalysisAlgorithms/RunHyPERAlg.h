@@ -1,5 +1,5 @@
-#ifndef HYPERALGORITHMS_RUNHYPERALG_H
-#define HYPERALGORITHMS_RUNHYPERALG_H
+#ifndef HYPERANALYSISALGORITHMS_RUNHYPERALG_H
+#define HYPERANALYSISALGORITHMS_RUNHYPERALG_H
 
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
@@ -31,9 +31,9 @@
 #include "AthContainers/ConstDataVector.h"
 
 // HyPER includes
-#include "HyPERAlgorithms/HyPERGraph.h"
-#include "HyPERAlgorithms/HyPERModel.h"
-#include "HyPERAlgorithms/HyPERParser.h"
+#include "HyPERAnalysisAlgorithms/HyPERGraph.h"
+#include "HyPERAnalysisAlgorithms/HyPERModel.h"
+#include "HyPERAnalysisAlgorithms/HyPERParser.h"
 
 namespace EventReco {
 using ROOT::Math::PtEtaPhiMVector;

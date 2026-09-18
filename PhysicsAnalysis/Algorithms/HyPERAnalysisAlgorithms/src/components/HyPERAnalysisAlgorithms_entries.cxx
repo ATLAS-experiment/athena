@@ -1,7 +1,7 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#include "HyPERAlgorithms/RunHyPERAlg.h"
+#include "HyPERAnalysisAlgorithms/RunHyPERAlg.h"
 
 // Project include(s).
 #include "AsgTools/AsgComponentFactories.h"

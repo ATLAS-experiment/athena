@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "TMath.h"
-#include "HyPERAlgorithms/HyPERUtils.h"
+#include "HyPERAnalysisAlgorithms/HyPERUtils.h"
 
 namespace EventReco {
 

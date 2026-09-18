@@ -5,8 +5,8 @@
 
 #include <memory>
 
-#include "HyPERAlgorithms/HyPERGraph.h"
-#include "HyPERAlgorithms/HyPERModel.h"
+#include "HyPERAnalysisAlgorithms/HyPERGraph.h"
+#include "HyPERAnalysisAlgorithms/HyPERModel.h"
 
 namespace EventReco {
 /**

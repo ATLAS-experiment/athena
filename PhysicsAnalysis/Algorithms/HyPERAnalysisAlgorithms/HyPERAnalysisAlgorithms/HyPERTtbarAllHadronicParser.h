@@ -6,14 +6,14 @@
 #include <string>
 #include <vector>
 
-#include "HyPERAlgorithms/HyPERParser.h"
-#include "HyPERAlgorithms/HyPERUtils.h"
+#include "HyPERAnalysisAlgorithms/HyPERParser.h"
+#include "HyPERAnalysisAlgorithms/HyPERUtils.h"
 
 namespace EventReco {
-class HyPERTtbarLJetsParser : public HyPERParser {
+class HyPERTtbarAllHadronicParser : public HyPERParser {
  public:
-  HyPERTtbarLJetsParser() = default;
-  ~HyPERTtbarLJetsParser() = default;
+  HyPERTtbarAllHadronicParser() = default;
+  ~HyPERTtbarAllHadronicParser() = default;
 
   void buildONNXInputs(const HyPERGraph& hyperGraph,
                        HyPERModel& hyperModel) override;
@@ -25,33 +25,31 @@ class HyPERTtbarLJetsParser : public HyPERParser {
   std::vector<std::string> getLabels() override { return m_reco_labels_out; }
   std::vector<float> getScores() override { return m_reco_scores_out; }
   std::vector<std::vector<int>> getIndices() override {
-
     return vector2DTypeConverter<int>(m_reco_indices_out);
   }
   std::vector<std::vector<int>> getIds() override {
-    return vector2DTypeConverter<int>(m_reco_ids_out);
+    return {{1, 1, 1}, {1, 1, 1}};
+  }
+
+  float getClassificationScore() override {
+    throw std::runtime_error(
+        "HyPERTtbarAllHadronicModel:: There is no classification score for "
+        "the ttbar all-hadronic topology.");
   }
 
   void clear() override;
   virtual void printOutputsForValidation() const override;
 
-  float getClassificationScore() override { return m_classification_score; }
-
  public:
   // Outputs
   std::vector<int64_t> m_edge_out_shape{};
   std::vector<int64_t> m_hyperedge_out_shape{};
-  std::vector<int64_t> m_classification_out_shape{
-      1, 1};  // This is just a single number.
   std::vector<std::vector<float>> m_edge_out{};
   std::vector<std::vector<float>> m_hyperedge_out{};
-  std::vector<std::vector<float>> m_classification_out{};
 
   std::vector<std::vector<int64_t>> m_reco_indices_out = {};
   std::vector<float> m_reco_scores_out = {};
   std::vector<std::string> m_reco_labels_out = {};
-  std::vector<std::vector<int64_t>> m_reco_ids_out = {};
-  float m_classification_score = -1.0f;
 
  private:
   // Input tensors for the ONNX model including shapes and names.
@@ -72,7 +70,7 @@ class HyPERTtbarLJetsParser : public HyPERParser {
   const std::string m_l_edge_index_h_name = "edge_index_h";
   std::vector<int64_t> m_l_edge_index_h_batch_ = {};
   std::vector<int64_t> m_l_edge_index_h_batch_shape;
-  const std::string m_l_edge_index_h_batch_name = "batch_hyperedge";
+  const std::string m_l_edge_index_h_batch_name = "edge_index_h_batch";
   std::vector<float> m_l_u_s_;
   std::vector<int64_t> m_l_u_s_shape;
   const std::string m_l_u_s_name = "u_s";

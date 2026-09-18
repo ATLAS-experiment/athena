@@ -3,15 +3,15 @@
 */
 #include <AsgMessaging/MessageCheck.h>  // To access ANA_MSG
 
-#include "HyPERAlgorithms/HyPERParser.h"
-#include "HyPERAlgorithms/HyPERTopoReco.h"
-#include "HyPERAlgorithms/HyPERTtbarDiLeptonParser.h"
-#include "HyPERAlgorithms/HyPERUtils.h"
+#include "HyPERAnalysisAlgorithms/HyPERParser.h"
+#include "HyPERAnalysisAlgorithms/HyPERTopoReco.h"
+#include "HyPERAnalysisAlgorithms/HyPERTtbarLJetsParser.h"
+#include "HyPERAnalysisAlgorithms/HyPERUtils.h"
 
 namespace EventReco {
 // Build and add all ONNX inputs
-void HyPERTtbarDiLeptonParser::buildONNXInputs(const HyPERGraph& hyperGraph,
-                                               HyPERModel& hyperModel) {
+void HyPERTtbarLJetsParser::buildONNXInputs(const HyPERGraph& hyperGraph,
+                                            HyPERModel& hyperModel) {
 
   // Build edge input tensors
   std::vector<std::vector<int64_t>> l_edge_index_ = {{}, {}};
@@ -99,7 +99,7 @@ void HyPERTtbarDiLeptonParser::buildONNXInputs(const HyPERGraph& hyperGraph,
 }
 
 // Get HyPER outputs
-void HyPERTtbarDiLeptonParser::getONNXOutputs(HyPERModel& hyperModel) {
+void HyPERTtbarLJetsParser::getONNXOutputs(HyPERModel& hyperModel) {
 
   // Get model-specific output names
   std::vector<std::string> outputNames = hyperModel.getOutputNames();
@@ -116,7 +116,7 @@ void HyPERTtbarDiLeptonParser::getONNXOutputs(HyPERModel& hyperModel) {
       convertONNXOutput<float>(classification_out, m_classification_out_shape);
 }
 
-void HyPERTtbarDiLeptonParser::printOutputsForValidation() const {
+void HyPERTtbarLJetsParser::printOutputsForValidation() const {
   using namespace asg::msgUserCode;
   setMsgLevel(MSG::INFO);
   ANA_MSG_INFO("HYPEREDGE OUT:");
@@ -144,15 +144,14 @@ void HyPERTtbarDiLeptonParser::printOutputsForValidation() const {
 }
 
 // Parser outputs
-void HyPERTtbarDiLeptonParser::reconstructOutputs(
-    const HyPERGraph& hyperGraph) {
-  RecoTtbarDiLepton(hyperGraph, m_edge_out, m_hyperedge_out,
-                    m_classification_out, m_reco_indices_out, m_reco_scores_out,
-                    m_reco_labels_out, m_reco_ids_out, m_classification_score);
+void HyPERTtbarLJetsParser::reconstructOutputs(const HyPERGraph& hyperGraph) {
+  RecoTtbarLJets(hyperGraph, m_edge_out, m_hyperedge_out, m_classification_out,
+                 m_reco_indices_out, m_reco_scores_out, m_reco_labels_out,
+                 m_reco_ids_out, m_classification_score);
 }
 
 // Clear the parser
-void HyPERTtbarDiLeptonParser::clear() {
+void HyPERTtbarLJetsParser::clear() {
   m_edge_out_shape.clear();
   m_hyperedge_out_shape.clear();
   m_edge_out.clear();

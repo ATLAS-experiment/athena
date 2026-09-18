@@ -5,10 +5,10 @@
 
 #include <string>
 
-#include "HyPERAlgorithms/GraphBase.h"
+#include "HyPERAnalysisAlgorithms/GraphBase.h"
 
-#include "HyPERAlgorithms/HyPERGraph.h"
-#include "HyPERAlgorithms/HyPERUtils.h"
+#include "HyPERAnalysisAlgorithms/HyPERGraph.h"
+#include "HyPERAnalysisAlgorithms/HyPERUtils.h"
 
 namespace EventReco {
 void HyPERGraph::addNode(const Features& attributes) {

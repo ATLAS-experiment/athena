@@ -11,7 +11,7 @@
 #include <map>
 #include <vector>
 
-#include "HyPERAlgorithms/GraphBase.h"
+#include "HyPERAnalysisAlgorithms/GraphBase.h"
 
 namespace EventReco {
 // @class HyPERGraph

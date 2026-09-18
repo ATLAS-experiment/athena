@@ -9,7 +9,7 @@
 #include <vector>
 
 #include <AsgMessaging/MsgLevel.h>
-#include "HyPERAlgorithms/HyPERModel.h"
+#include "HyPERAnalysisAlgorithms/HyPERModel.h"
 
 namespace EventReco {
 

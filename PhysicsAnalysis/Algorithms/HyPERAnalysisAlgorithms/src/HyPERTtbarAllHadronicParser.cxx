@@ -3,10 +3,10 @@
 */
 #include <AsgMessaging/MessageCheck.h>  // To access ANA_MSG
 
-#include "HyPERAlgorithms/HyPERParser.h"
-#include "HyPERAlgorithms/HyPERTopoReco.h"
-#include "HyPERAlgorithms/HyPERTtbarAllHadronicParser.h"
-#include "HyPERAlgorithms/HyPERUtils.h"
+#include "HyPERAnalysisAlgorithms/HyPERParser.h"
+#include "HyPERAnalysisAlgorithms/HyPERTopoReco.h"
+#include "HyPERAnalysisAlgorithms/HyPERTtbarAllHadronicParser.h"
+#include "HyPERAnalysisAlgorithms/HyPERUtils.h"
 
 namespace EventReco {
 // Build and add all ONNX inputs

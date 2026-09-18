@@ -1,11 +1,11 @@
-atlas_subdir( HyPERAlgorithms )
+atlas_subdir( HyPERAnalysisAlgorithms )
 
 find_package( onnxruntime )
 find_package( ROOT REQUIRED COMPONENTS Core Physics )
 
 atlas_add_library(
-  HyPERAlgorithmsLib
-  HyPERAlgorithms/*.h
+  HyPERAnalysisAlgorithmsLib
+  HyPERAnalysisAlgorithms/*.h
   src/HyPERGraph.cxx
   src/HyPERTtbarLJetsParser.cxx
   src/HyPERTtbarDiLeptonParser.cxx
@@ -13,7 +13,7 @@ atlas_add_library(
   src/HyPERTopoReco.cxx
   src/HyPERUtils.cxx
   src/RunHyPERAlg.cxx
-  PUBLIC_HEADERS HyPERAlgorithms
+  PUBLIC_HEADERS HyPERAnalysisAlgorithms
   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
   LINK_LIBRARIES
     ${ROOT_LIBRARIES}
@@ -35,9 +35,9 @@ atlas_add_library(
 )
 
 atlas_add_component(
-  HyPERAlgorithms
-  src/components/HyPERAlgorithms_entries.cxx
-  LINK_LIBRARIES HyPERAlgorithmsLib
+  HyPERAnalysisAlgorithms
+  src/components/HyPERAnalysisAlgorithms_entries.cxx
+  LINK_LIBRARIES HyPERAnalysisAlgorithmsLib
 )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

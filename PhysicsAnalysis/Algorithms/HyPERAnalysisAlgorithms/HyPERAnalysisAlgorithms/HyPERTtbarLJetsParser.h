@@ -6,14 +6,14 @@
 #include <string>
 #include <vector>
 
-#include "HyPERAlgorithms/HyPERParser.h"
-#include "HyPERAlgorithms/HyPERUtils.h"
+#include "HyPERAnalysisAlgorithms/HyPERParser.h"
+#include "HyPERAnalysisAlgorithms/HyPERUtils.h"
 
 namespace EventReco {
-class HyPERTtbarDiLeptonParser : public HyPERParser {
+class HyPERTtbarLJetsParser : public HyPERParser {
  public:
-  HyPERTtbarDiLeptonParser() = default;
-  ~HyPERTtbarDiLeptonParser() = default;
+  HyPERTtbarLJetsParser() = default;
+  ~HyPERTtbarLJetsParser() = default;
 
   void buildONNXInputs(const HyPERGraph& hyperGraph,
                        HyPERModel& hyperModel) override;
