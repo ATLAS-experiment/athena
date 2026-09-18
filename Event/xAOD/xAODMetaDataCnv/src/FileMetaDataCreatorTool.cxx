@@ -221,6 +221,9 @@ StatusCode
       set(xAOD::FileMetaData::productionRelease,
           m_tagInfoMgr->findTag("AtlasRelease"));
 
+      set(xAOD::FileMetaData::AODFixVersion,
+          m_tagInfoMgr->findTag("AODFixVersion"));
+
       set(xAOD::FileMetaData::amiTag, m_tagInfoMgr->findTag("AMITag"));
 
       set(xAOD::FileMetaData::geometryVersion, m_tagInfoMgr->findTag("GeoAtlas"));
