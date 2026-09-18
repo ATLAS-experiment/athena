@@ -263,9 +263,6 @@ def ActsTrackFindingCfg(flags,
         from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
         if flags.Tracking.ActiveConfig.isLargeD0 and flags.Acts.LrtStripSeedRefit:
             tpe_tool_kwargs["refitSeeds"] = True
-            # Override default in ActsConfigFlags to maintain the original behaviour.
-            # refitErrInflation could be very useful for LRT, but this still needs to be optimised.
-            tpe_tool_kwargs["refitErrInflation"] = [1., 1., 1., 1., 1., 1.]
         stripTpe = [acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags, "StripTrackParamsEstimationTool", **tpe_tool_kwargs))]
 
     kwargs.setdefault("TrackParamsEstimationTool", seedOrder(flags, pixel=pixelTpe, strip=stripTpe))
