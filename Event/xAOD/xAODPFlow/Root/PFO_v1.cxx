@@ -14,27 +14,27 @@
 namespace xAOD {
 
   struct PFOParticleTypeMapper_temp {
-    static const SG::AuxElement::Accessor<std::vector<ElementLink<IParticleContainer > > >* getAccessor(PFODetails::PFOParticleType type) {
+    static const SG::Accessor<std::vector<ElementLink<IParticleContainer > > >* getAccessor(PFODetails::PFOParticleType type) {
       switch (type){
       case PFODetails::CaloCluster:
-	const static SG::AuxElement::Accessor<std::vector<ElementLink<IParticleContainer > > > acc_cc("pfo_ClusterLinks");
+	const static SG::Accessor<std::vector<ElementLink<IParticleContainer > > > acc_cc("pfo_ClusterLinks");
 	return &acc_cc;
       case PFODetails::Track:
-	const static SG::AuxElement::Accessor<std::vector<ElementLink<IParticleContainer > > > acc_tp("pfo_TrackLinks");
+	const static SG::Accessor<std::vector<ElementLink<IParticleContainer > > > acc_tp("pfo_TrackLinks");
 	return &acc_tp;
 	// Note - clients should NEVER set both links to TauShot and HadroniCaloCluster - Tau WG agreed they NEVER will do such a thing (and they are only client)
       case PFODetails::TauShot:
       case PFODetails::HadronicCalo:
-	const static SG::AuxElement::Accessor<std::vector<ElementLink<IParticleContainer > > > acc_ts("pfo_TauShotLinks");
+	const static SG::Accessor<std::vector<ElementLink<IParticleContainer > > > acc_ts("pfo_TauShotLinks");
 	return &acc_ts;
       case PFODetails::ChargedPFO:
-	const static SG::AuxElement::Accessor<std::vector<ElementLink<IParticleContainer > > > acc_cpfo("pfo_Charged");
+	const static SG::Accessor<std::vector<ElementLink<IParticleContainer > > > acc_cpfo("pfo_Charged");
 	return &acc_cpfo;
       case PFODetails::NeutralPFO:
-	const static SG::AuxElement::Accessor<std::vector<ElementLink<IParticleContainer > > > acc_npfo("pfo_Neutral");
+	const static SG::Accessor<std::vector<ElementLink<IParticleContainer > > > acc_npfo("pfo_Neutral");
 	return &acc_npfo;
       case PFODetails::TauTrack:
-	const static SG::AuxElement::Accessor<std::vector<ElementLink<IParticleContainer > > > acc_tt("pfo_TauTrack");
+	const static SG::Accessor<std::vector<ElementLink<IParticleContainer > > > acc_tt("pfo_TauTrack");
 	return &acc_tt;	
       }//switch
       return nullptr;

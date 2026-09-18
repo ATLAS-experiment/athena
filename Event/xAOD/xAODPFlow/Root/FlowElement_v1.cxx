@@ -84,8 +84,8 @@ namespace xAOD {
     if(elV.size() != wV.size() ){
       throw std::runtime_error("FlowElement::setChargedObjectLinks : Can not set vectors of links and weights with different sizes");
     }
-    static const SG::AuxElement::Accessor< std::vector<ElementLink< xAOD::IParticleContainer >> >  accL( "chargedObjectLinks" );
-    static const SG::AuxElement::Accessor< std::vector<float> >  accW( "chargedObjectWeights" );
+    static const SG::Accessor< std::vector<ElementLink< xAOD::IParticleContainer >> >  accL( "chargedObjectLinks" );
+    static const SG::Accessor< std::vector<float> >  accW( "chargedObjectWeights" );
     accL(*this) = elV;
     accW(*this) = wV;    
   }
@@ -153,8 +153,8 @@ namespace xAOD {
       throw std::runtime_error("FlowElement::setOtherObjectLinks : Can not set vectors of links and weights with different sizes");
       return;
     }
-    static const SG::AuxElement::Accessor< std::vector<ElementLink< xAOD::IParticleContainer > > >  accL( "otherObjectLinks" );
-    static const  SG::AuxElement::Accessor< std::vector<float>  >  accW( "otherObjectWeights" );
+    static const SG::Accessor< std::vector<ElementLink< xAOD::IParticleContainer > > >  accL( "otherObjectLinks" );
+    static const  SG::Accessor< std::vector<float>  >  accW( "otherObjectWeights" );
     accL(*this) = elV;
     accW(*this) = wV;    
   }
