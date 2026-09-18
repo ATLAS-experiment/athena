@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -38,7 +38,8 @@ namespace CP
     {
       const xAOD::DiTauJetContainer *taus = nullptr;
       ANA_CHECK (m_tauHandle.retrieve (taus, sys, ctx));
-      // all decorations done within the DiTauTruthMatchingTool and to be saved in output  
+      // all decorations done within the DiTauTruthMatchingTool and to be saved in output
+      //coverity[UNNECESSARY_STRING_COPY:FALSE]  
       static const SG::Decorator<float> accTruthVisLeadPt("TruthVisLeadPt");
       static const SG::Decorator<float> accTruthVisLeadEta("TruthVisLeadEta");
       static const SG::Decorator<float> accTruthVisLeadPhi("TruthVisLeadPhi");
