@@ -49,7 +49,7 @@ def HIONHPODKernelCfg(flags, name='HIONHPODKernel', **kwargs):
     
     # Initialize a list for all the different type of tools
     thinningTool = []
-    augmentationTool = []
+    augmentationTools = []
 
     HITightTrackSelector = acc.popToolsAndMerge(InDetTrackSelectionTool_HITight_Cfg(
         flags,
@@ -115,16 +115,18 @@ def HIONHPODKernelCfg(flags, name='HIONHPODKernel', **kwargs):
 
     # Merge the augmentation tools to the ComponetAccumlator
     globalAugmentationTool = acc.getPrimaryAndMerge(HIONHPODGlobalAugmentationToolCfg(flags))
-    augmentationTool += [globalAugmentationTool]
+    augmentationTools += [globalAugmentationTool]
 
     centralityAugmentationTool = acc.getPrimaryAndMerge(HIONHPODCentralityAugmentationToolCfg(flags))
-    augmentationTool += [centralityAugmentationTool]
+    augmentationTools += [centralityAugmentationTool]
 
+    for tool in augmentationTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
+    acc.addEventAlgo(
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(DerivationKernel(
         name,
-        ThinningTools=thinningTool,
-        AugmentationTools=augmentationTool
+        ThinningTools=thinningTool
     ))
 
     return acc

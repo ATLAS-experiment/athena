@@ -168,8 +168,10 @@ def BPHY14Cfg(flags):
        BPHY14AugTools      = [BPHY14_Reco_mumu, BPHY14_AugOriginalCounts, BPHY14_Select_Jpsi2mumu, BPHY14_Select_Jpsi2mumu,
                               BPHY14_Select_Psi2mumu, BPHY14_Select_Upsi2mumu]
        for t in BPHY14ThinningTools + BPHY14SlimTools + BPHY14AugTools: acc.addPublicTool(t)
-       acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY14Kernel", 
-                    AugmentationTools= BPHY14AugTools,  SkimmingTools     = BPHY14SlimTools,  ThinningTools  = BPHY14ThinningTools  ))
+       for tool in BPHY14AugTools:
+              acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
+       acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY14Kernel",
+                                                                         SkimmingTools     = BPHY14SlimTools,  ThinningTools  = BPHY14ThinningTools  ))
        from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
        from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
        BPHY14SlimmingHelper = SlimmingHelper("BPHY14SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)

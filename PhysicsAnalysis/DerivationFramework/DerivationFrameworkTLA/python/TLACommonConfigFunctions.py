@@ -93,8 +93,9 @@ def PostTLAJetMCTruthAugmentationsCfg(flags, **kwargs):
         augmentationToolsList += [acc.getPrimaryAndMerge(SUSYSignalTaggerCfg(flags, 'MCTruthCommon'))]
 
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-    acc.addEventAlgo(CommonAugmentation(name              = "MCTruthCommonPostJetKernel", 
-                                        AugmentationTools = augmentationToolsList))
+    for i, tool in enumerate(augmentationToolsList):
+        acc.addEventAlgo(CommonAugmentation(name = f"MCTruthCommonPostJetKernel{i}",
+                                            AugmentationTools = [tool]))
 
     # add SoW of individual SUSY final states, relies on augmentation from DecorateSUSYProcess()
     if IsSUSYSignalRun3(flags):

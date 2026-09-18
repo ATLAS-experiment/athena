@@ -231,8 +231,9 @@ def BPHY10Cfg(flags):
                 BPHY10_AugOriginalCounts]
     for t in  augTools : acc.addPublicTool(t)
     #from AthenaCommon.Constants import DEBUG
+    for tool in augTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY10Kernel",
-                                                     AugmentationTools = augTools,
                                                      #OutputLevel = DEBUG,
                                                      #Only skim if not MC
                                                      SkimmingTools     = [BPHY10SkimmingOR] if not isSimulation else [],

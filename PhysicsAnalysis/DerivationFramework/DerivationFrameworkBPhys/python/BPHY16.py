@@ -136,8 +136,9 @@ def BPHY16Cfg(flags):
     augTools = [BPHY16_Reco_mumu, BPHY16_Select_Upsi, BPHY16FourTrackSelectAndWrite, BPHY16_Select_FourTrack, BPHY16_Revertex, BPHY16_Select_TwoTrack]
     skimTools = [BPHY16_SelectEvent]
     for t in  augTools +skimTools : acc.addPublicTool(t)
+    for tool in augTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY16Kernel",
-                                                    AugmentationTools = augTools,
                                                     #Only skim if not MC
                                                     SkimmingTools     = skimTools,
                                                     ThinningTools     = []))

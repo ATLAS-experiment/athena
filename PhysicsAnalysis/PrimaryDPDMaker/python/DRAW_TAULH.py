@@ -100,19 +100,19 @@ def DRAW_TAULHKernelCfg(flags, name='DRAW_TAULHKernel', **kwargs):
     acc.addPublicTool(combTool,primary = True)
 
     # The kernel for delta-R tool
+    for tool in [TauMediumWrapper, MuonMediumWrapper]:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]), sequenceName='DRAW_TAULHSequence')
     DRAW_TAULHPreKernel = CompFactory.DerivationFramework.DerivationKernel(
         name='DRAW_TAULHPreKernel',
-        AugmentationTools=[TauMediumWrapper, MuonMediumWrapper],
         SkimmingTools=[])
     acc.addEventAlgo(DRAW_TAULHPreKernel, sequenceName='DRAW_TAULHSequence')
 
     # The main kernel algo
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("DRAW_TAULHKernelAug", AugmentationTools = [tauLH_DeltaRTool]), sequenceName='DRAW_TAULHSequence')
     DRAW_TAULHKernel = CompFactory.DerivationFramework.DerivationKernel(
         name='DRAW_TAULHKernel',
         doChronoStat=(flags.Concurrency.NumThreads <= 1),
-        AugmentationTools=[tauLH_DeltaRTool],
         SkimmingTools=[combTool])
-
     acc.addEventAlgo(DRAW_TAULHKernel, sequenceName='DRAW_TAULHSequence')
 
 

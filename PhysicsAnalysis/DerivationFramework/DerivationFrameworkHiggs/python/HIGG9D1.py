@@ -180,9 +180,10 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
     HIGG9D1_onia_skim = CompFactory.DerivationFramework.AnyVertexSkimmingTool(name = "HIGG9D1_onia_skim", VertexContainerNames = ["HIGG9D1_JpsiCandidates", "HIGG9D1_UpsiCandidates"])
     acc.addPublicTool(HIGG9D1_onia_skim)
 
+    for tool in [ HIGG9D1_AugOriginalCounts, HIGG9D1_Jpsi, HIGG9D1_Upsi, HIGG9D1_JpsiVtxTrkIsoDecor, HIGG9D1_UpsiVtxTrkIsoDecor ]:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]), sequenceName="HIGG9D1Sequence")
     HIGG9D1_onia_skimKernel = CompFactory.DerivationFramework.DerivationKernel(
         "HIGG9D1_onia_skimKernel",
-        AugmentationTools = [ HIGG9D1_AugOriginalCounts, HIGG9D1_Jpsi, HIGG9D1_Upsi, HIGG9D1_JpsiVtxTrkIsoDecor, HIGG9D1_UpsiVtxTrkIsoDecor ],
         SkimmingTools     = [ HIGG9D1_onia_skim ])
     # Add skimming tool to subsequence
     acc.addEventAlgo(HIGG9D1_onia_skimKernel, sequenceName="HIGG9D1Sequence")
@@ -276,9 +277,10 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
         acc.addPublicTool(ClusterEnergyPerLayerDecorator)
         augmentationTools.append(ClusterEnergyPerLayerDecorator)
 
+    for tool in augmentationTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]), sequenceName="HIGG9D1Sequence")
     HIGG9D1_bb_tautau_yy_skimKernel = CompFactory.DerivationFramework.DerivationKernel(
         "HIGG9D1_bb_tautau_yy_skimKernel",
-        AugmentationTools = augmentationTools,
         SkimmingTools     = [ HIGG9D1_bb_tautau_yy_skim ])
     # Add skimming tool to subsequence
     acc.addEventAlgo(HIGG9D1_bb_tautau_yy_skimKernel, sequenceName="HIGG9D1Sequence")

@@ -301,11 +301,12 @@ def EGAM7KernelCfg(flags, name="EGAM7Kernel", **kwargs):
     skimmingTool = acc.getPrimaryAndMerge(EGAM7SkimmingToolCfg(flags))
 
     # setup the kernel
-    acc.addEventAlgo(
+    for tool in augmentationTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
+     acc.addEventAlgo(
         CompFactory.DerivationFramework.DerivationKernel(
             name,
             SkimmingTools=[skimmingTool],
-            AugmentationTools=augmentationTools,
             ThinningTools=thinningTools,
         )
     )

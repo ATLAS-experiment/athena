@@ -1,4 +1,4 @@
-## Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+## Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -186,12 +186,13 @@ def SCTVALIDKernelCfg(flags, name='SCTVALIDKernel', **kwargs):
                                                                                 expression = muonExpression))
         skimmingTools.append(SCTVALIDSkimmingTool)
 
-    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
-        name,
-        AugmentationTools=augmentationTools,
-        SkimmingTools=skimmingTools,
-        ThinningTools=thinningTools,
-        OutputLevel=INFO), sequenceName=SCTVALIDSequenceName)
+        for tool in augmentationTools:
+            acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]), sequenceName=SCTVALIDSequenceName)
+        acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
+            name,
+            SkimmingTools=skimmingTools,
+            ThinningTools=thinningTools,
+            OutputLevel=INFO), sequenceName=SCTVALIDSequenceName)
     return acc
 
 # Main config

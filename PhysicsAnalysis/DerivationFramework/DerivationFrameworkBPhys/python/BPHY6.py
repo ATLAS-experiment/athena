@@ -169,8 +169,9 @@ def BPHY6Cfg(flags):
     for t in  augTools + BPHY6ThinningTools + [SkimmingORTool] + skimmingTools:
         acc.addPublicTool(t)
 
+    for tool in augTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY6Kernel",
-                AugmentationTools = augTools,
                 SkimmingTools     =  [SkimmingORTool],
                 ThinningTools     = BPHY6ThinningTools  ))
 

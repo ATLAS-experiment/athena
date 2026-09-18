@@ -1066,9 +1066,10 @@ def BPHY23Cfg(flags):
     augmentation_tools = [BPHY23_Reco_mumu, BPHY23FourTrackReco_PsiX3872, BPHY23FourTrackReco_Bs0, BPHY23FourTrackReco_B0, BPHY23ThreeTrackReco_Zc3900, BPHY23ThreeTrackReco_Bpm, BPHY23Rev_Psi4Body, BPHY23Rev_X3872, BPHY23Rev_Bs0, BPHY23Rev_B0Kpi, BPHY23Rev_B0piK, BPHY23Rev_Zc3900, BPHY23Rev_Bpm, BPHY23Select_Jpsi, BPHY23Select_Psi, BPHY23Select_Upsi, BPHY23Rev_Jpsi, BPHY23Rev_Psi, BPHY23Rev_Upsi] + list_all_obj + list2_all_obj
     for t in augmentation_tools : acc.addPublicTool(t)
 
+    for tool in augmentation_tools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
         "BPHY23Kernel",
-        AugmentationTools = augmentation_tools,
         SkimmingTools     = [BPHY23_SelectEvent]
     ))
 

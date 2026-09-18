@@ -227,11 +227,12 @@ def HIGG1D1KernelCfg(flags, name='HIGG1D1Kernel', **kwargs):
         from DerivationFrameworkHiggs.TruthCategoriesConfig import TruthCategoriesDecoratorCfg
         acc.merge(TruthCategoriesDecoratorCfg(flags, name="TruthCategoriesDecorator"))
     
+    for tool in augmentationTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
-    acc.addEventAlgo(DerivationKernel(name, 
+    acc.addEventAlgo(DerivationKernel(name,
                                       SkimmingTools = [skimmingTool],
-                                      ThinningTools = thinningTools,
-                                      AugmentationTools = augmentationTools))     
+                                      ThinningTools = thinningTools))
     return acc
 
 

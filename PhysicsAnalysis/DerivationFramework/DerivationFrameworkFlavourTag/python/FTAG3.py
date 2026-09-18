@@ -83,11 +83,12 @@ def FTAG3KernelCfg(flags, name="FTAG3Kernel", **kwargs):
     skimmingTools += [FTAG3LargeRJetSkimmingTool, FTAG3LeptonSkimmingTool]
     thinningTools += [FTAG3MuonTPThinningTool]
 
+    for tool in augmentationTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(
         DerivationKernel(
             name=name,
-            AugmentationTools=augmentationTools,
             SkimmingTools=skimmingTools,
             ThinningTools=thinningTools,
         )

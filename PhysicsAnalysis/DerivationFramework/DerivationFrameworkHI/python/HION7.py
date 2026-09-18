@@ -256,13 +256,16 @@ def HION7KernelCfg(flags, name='HION7Kernel', **kwargs):
 #########################################################################################
     skimmingTool = acc.getPrimaryAndMerge(HION7SkimmingToolCfg(flags))
     globalAugmentationTool = acc.getPrimaryAndMerge(HION7GlobalAugmentationToolCfg(flags))
-    augmentationTool=[globalAugmentationTool]
+    augmentationTools=[globalAugmentationTool]
     from AthenaConfiguration.Enums import HIMode
     if flags.Reco.HIMode != HIMode.HI:
         jetAugmentationTool = acc.getPrimaryAndMerge(HION7JetAugmentationToolCfg(flags))
-        augmentationTool=[globalAugmentationTool,jetAugmentationTool]
+        augmentationTools=[globalAugmentationTool,jetAugmentationTool]
 
-    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(name,ThinningTools = thinningTools, SkimmingTools = [skimmingTool], AugmentationTools=augmentationTool),sequenceName="HION7Sequence")
+        CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
+    for tool in augmentationTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]),sequenceName="HION7Sequence")
+    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(name,ThinningTools = thinningTools, SkimmingTools = [skimmingTool]),sequenceName="HION7Sequence")
 
     return acc
 

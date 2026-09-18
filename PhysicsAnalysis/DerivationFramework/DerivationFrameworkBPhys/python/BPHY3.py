@@ -119,9 +119,10 @@ def BPHY3Cfg(flags):
     augCollections=[BPHY3_Reco_diTrk,BPHY3_Select_PiPi,BPHY3_Select_KPi,BPHY3_Select_PiK,BPHY3_Select_KK,BPHY3_Select_PP]
     skimCollections = [BPHY3_SelectEvent]
     BPHY3ThinningTools = [BPHY3Thin_vtxTrk]
+    for tool in augCollections:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
                     "BPHY3Kernel",
-                     AugmentationTools = augCollections,
                      SkimmingTools     = skimCollections,
                      ThinningTools     = BPHY3ThinningTools))
 

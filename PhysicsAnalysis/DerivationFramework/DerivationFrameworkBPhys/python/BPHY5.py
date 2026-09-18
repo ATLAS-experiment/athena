@@ -399,8 +399,9 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
    if "B+" in Decays : augTools += [BPHY5BplKplSelectAndWrite, BPHY5_Select_Bpl2JpsiKpl, BPHY5_Select_Bpl2JpsiPi]
    if "BdKst" in Decays : augTools += [ BPHY5BdKstSelectAndWrite, BPHY5_Select_Bd2JpsiKst, BPHY5_Select_Bd2JpsiKstbar, BPHY5_Revertex_Bd_NoMassConst, BPHY5_Select_BdBar2JpsiKpiNoConstraint, BPHY5_Select_Bd2JpsiKpiNoConstraint]
    if "BpipiX" in Decays : augTools+= [ BPHY5BpipiXSelectAndWrite, BPHY5_Select_B2JpsipipiX]
+    for tool in augTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY5Kernel",
-                                                    AugmentationTools = augTools,
                                                     #Only skim if not MC
                                                     SkimmingTools     = [BPHY5SkimmingOR] if not isSimulation else [],
                                                     ThinningTools     = []))

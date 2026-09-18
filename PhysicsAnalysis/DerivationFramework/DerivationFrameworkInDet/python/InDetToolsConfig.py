@@ -136,8 +136,8 @@ def TSOS_CommonKernelCfg(flags, name="TSOS_CommonKernel",
         TrackStateOnSurfaceDecorator.DecorationPrefix = "Reco_"
         listOfAugmTools.append(TrackStateOnSurfaceDecorator)
 
-    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
-        name, AugmentationTools=listOfAugmTools))
+    for tool in listOfAugmTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     return acc
 
 def DFTrackStateOnSurfaceDecoratorCfg(
@@ -163,10 +163,11 @@ def DFInDetTSOSKernelCfg(flags, name='DFInDetTSOSKernel'):
     DFTSOS = acc.getPrimaryAndMerge(DFTrackStateOnSurfaceDecoratorCfg(flags))
     tsos_augmentationTools.append(DFTSOS)
 
+    for tool in tsos_augmentationTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     # shared between IDTIDE and IDTRKVALID
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
         name,
-        AugmentationTools=tsos_augmentationTools,
         ThinningTools=[],
         OutputLevel=INFO))
     return acc
@@ -235,8 +236,8 @@ def SiSPSeedsTSOS_CommonKernelCfg(flags, name="SiSPSeedsTSOS_CommonKernel",
                 TrtMsosName = f"SiSPSeedSegments{extension}_TRT_MSOSs"))
         listOfAugmTools.append(SiSPSeedsTrackStateOnSurfaceDecorator)
 
-    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
-        name, AugmentationTools=listOfAugmTools))
+    for tool in listOfAugmTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     return acc
 
 def SiSPTrackStateOnSurfaceDecoratorCfg(
@@ -265,8 +266,8 @@ def SiSPTSOS_CommonKernelCfg(flags, name="SiSPTSOS_CommonKernel",
                 TrtMsosName = f"SiSP{extension}_TRT_MSOSs"))
         listOfAugmTools.append(SiSPTrackStateOnSurfaceDecorator)
 
-    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
-        name, AugmentationTools=listOfAugmTools))
+    for tool in listOfAugmTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     return acc
 
 def GSFTrackStateOnSurfaceDecoratorCfg(
@@ -346,8 +347,8 @@ def ITkTSOS_CommonKernelCfg(flags, name="ITkTSOS_CommonKernel",
                                                DecorationPrefix = "Reco_"))
         listOfAugmTools.append(TrackStateOnSurfaceDecorator)
 
-    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
-        name, AugmentationTools=listOfAugmTools))
+    for tool in listOfAugmTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     return acc
 
 def DFITkTrackStateOnSurfaceDecoratorCfg(
@@ -374,10 +375,11 @@ def DFITkTSOSKernelCfg(flags, name='DFITkTSOSKernel'):
         DFTSOS = acc.getPrimaryAndMerge(DFITkTrackStateOnSurfaceDecoratorCfg(flags))
         tsos_augmentationTools.append(DFTSOS)
 
+    for tool in tsos_augmentationTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     # shared between IDTIDE and IDTRKVALID
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
         name,
-        AugmentationTools=tsos_augmentationTools,
         ThinningTools=[],
         OutputLevel=INFO))
     return acc
@@ -407,8 +409,8 @@ def ITkSiSPSeedsTSOS_CommonKernelCfg(flags, name="ITkSiSPSeedsTSOS_CommonKernel"
                 SctMsosName = f"SiSPSeedSegments{extension}_ITkStripMSOSs"))
         listOfAugmTools.append(SiSPSeedsTrackStateOnSurfaceDecorator)
 
-    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
-        name, AugmentationTools=listOfAugmTools))
+    for tool in listOfAugmTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     return acc
 
 def ITkSiSPTrackStateOnSurfaceDecoratorCfg(
@@ -434,8 +436,8 @@ def ITkSiSPTSOS_CommonKernelCfg(flags, name="ITkSiSPTSOS_CommonKernel",
                 SctMsosName = f"SiSP{extension}_ITkStrip_MSOSs"))
         listOfAugmTools.append(ITkSiSPTrackStateOnSurfaceDecorator)
 
-    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
-        name, AugmentationTools=listOfAugmTools))
+    for tool in listOfAugmTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     return acc
 
 def ITkGSFTrackStateOnSurfaceDecoratorCfg(

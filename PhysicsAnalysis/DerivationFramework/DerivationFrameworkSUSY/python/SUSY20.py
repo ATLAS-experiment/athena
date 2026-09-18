@@ -286,19 +286,22 @@ def SUSY20KernelCfg(flags, name = "SUSY20Kernel", **kwargs):
 		flags, name = "SUSY20SkimmingTool_DT", FilterList = filterList))
 	skimmingTools.append(SUSY20xAODSkimmingTool_DT)
 
-	#
-	# The kernel algorithm itself
-	#
-	DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
-	acc.addEventAlgo(DerivationKernel(
-		name, 
-		SkimmingTools     = skimmingTools, 
-		ThinningTools     = thinningTools, 
-		AugmentationTools = augmentationTools, 
-		RunSkimmingFirst  = True
-	))       
-	
-	return acc
+        #
+        # The kernel algorithm itself
+        #
+        DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
+        acc.addEventAlgo(DerivationKernel(
+                name+"Skim",
+                SkimmingTools     = skimmingTools,
+        ))
+        for i, tool in enumerate(augmentationTools):
+                acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(f"{name}Aug{i}", AugmentationTools = [tool]))
+        acc.addEventAlgo(DerivationKernel(
+                name+"Thin",
+                ThinningTools     = thinningTools,
+        ))
+
+        return acc
 
 def SUSY20Cfg(flags):
 
