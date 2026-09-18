@@ -137,6 +137,14 @@ def runAODFix(flags, correctCluster = True, checkRelMerge = True):
                         doAmbiguityFix = e[1] and ALToFix
                         doFix = doFix_time or doAmbiguityFix    
 
+        for ie,e in enumerate(doFixFromAMITags):
+            if e[0] != doFix or e[1] != doAmbiguityFix:
+                msg.warning('Inconsistent information from AMI reco tag release %s and input release %s', \
+                            inputReleaseFromAMITags[ie],flags.Input.Release)
+                if ie == 0:
+                    msg.warning('Will use the release number first in the list')
+                    doFix = e[0]
+                    doAmbiguityFix = e[1]
     fixes = set()
     if doFix:
         if doAmbiguityFix:
