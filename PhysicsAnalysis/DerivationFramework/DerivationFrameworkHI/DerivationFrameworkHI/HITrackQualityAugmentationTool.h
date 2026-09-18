@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -9,8 +9,7 @@
 #ifndef DERIVATIONFRAMEWORK_HITrackQualityAugmentationTool_H
 #define DERIVATIONFRAMEWORK_HITrackQualityAugmentationTool_H
  
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
 #include "StoreGate/ReadHandle.h"
@@ -24,7 +23,7 @@
 
 namespace DerivationFramework {
  
-  class HITrackQualityAugmentationTool : public extends<AthAlgTool, IAugmentationTool> {
+  class HITrackQualityAugmentationTool : public AthReentrantAlgorithm { // FIXME RENAME
     public:
       enum{
         PP_MIN_BIAS=1<<1, //2
@@ -39,10 +38,10 @@ namespace DerivationFramework {
         HI_TIGHT_LOOSE_D0_Z0  =1<<6, //64
       };
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override final;
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
 
     private:
       unsigned short GetTrackQuality   (const xAOD::TrackParticle* track,float z_vtx           ) const;

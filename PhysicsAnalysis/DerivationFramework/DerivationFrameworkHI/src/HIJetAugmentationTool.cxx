@@ -8,17 +8,6 @@
 
 namespace DerivationFramework
 {
-  HIJetAugmentationTool::HIJetAugmentationTool(   const std::string& t,
-                                                                const std::string& n,
-                                                                const IInterface* p ) :   base_class(t,n,p)
-  {
-  }
-
-  // Destructor
-  HIJetAugmentationTool::~HIJetAugmentationTool()
-  {
-  }
-
   // Athena initialize and finalize
   StatusCode HIJetAugmentationTool::initialize()
   {
