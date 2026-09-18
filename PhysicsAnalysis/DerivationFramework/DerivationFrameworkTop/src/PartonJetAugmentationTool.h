@@ -5,8 +5,7 @@
 #ifndef DERIVATIONFRAMEWORK_PARTONJETAUGMENTATIONTOOL_H
 #define DERIVATIONFRAMEWORK_PARTONJETAUGMENTATIONTOOL_H
 
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODJet/JetContainer.h"
 
@@ -17,13 +16,13 @@ class TLorentzVector;
 
 namespace DerivationFramework {
 
-  class PartonJetAugmentationTool : public extends<AthAlgTool, IAugmentationTool>  {
+  class PartonJetAugmentationTool : public AthReentrantAlgorithm  { // FIXME RENAME
 
   public:
-    using base_class::base_class; 
+    using AthReentrantAlgorithm::AthReentrantAlgorithm; 
 
     virtual StatusCode initialize() override;
-    virtual StatusCode addBranches(const EventContext& ctx) const override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
 
   private:
     SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthKey{
