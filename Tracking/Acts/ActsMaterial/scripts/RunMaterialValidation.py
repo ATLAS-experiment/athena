@@ -55,7 +55,8 @@ if args.localgeo:
 flags.Input.Files = []
 flags.Input.isMC=True
 flags.GeoModel.AtlasVersion = args.geometrytag
-flags.IOVDb.GlobalTag = "OFLCOND-SIM-00-00-00"
+from AthenaConfiguration.TestDefaults import defaultConditionsTags
+flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC 
 flags.GeoModel.Align.Dynamic = False
 
 
@@ -78,8 +79,9 @@ else:
     detectors.append('Bpipe')  # always run with beam pipe
     setupDetectorFlags(flags, detectors, toggle_geometry=True)
 
-flags.Acts.TrackingGeometry.UseBlueprint = True 
-flags.Acts.TrackingGeometry.ITkMaterialSource = args.inputMaterial
+flags.Acts.TrackingGeometry.UseBlueprint = True
+flags.Acts.TrackingGeometry.ITkHgtdMaterialMapPath = "."
+flags.Acts.TrackingGeometry.ITkHgtdMaterialSource = args.inputMaterial
 
 flags.Exec.SkipEvents = args.skipEvents
 

@@ -157,10 +157,12 @@ def ActsTrackingGeometrySvcCfg(flags,
 def ITkMaterialDecoratorToolCfg(flags, name="ITkMaterialDecorator", **kwargs) -> ComponentAccumulator:
     result = ComponentAccumulator()
     filename = flags.Acts.TrackingGeometry.ITkHgtdMaterialSource
-    folder = ""
+    folder = flags.Acts.TrackingGeometry.ITkHgtdMaterialMapPath
     if flags.Acts.TrackingGeometry.ITkHgtdMaterialSource == "Default":
-        filename = "material-maps-itk-hgtd-" + flags.GeoModel.AtlasVersion + ".root"
-        folder = flags.Acts.TrackingGeometry.ITkHgtdMaterialMapPath
+        extension = "itk"
+        if flags.Detector.GeometryHGTD:
+            extension += "-hgtd"
+        filename = "material-maps-"+extension+"-" + flags.GeoModel.AtlasVersion + ".root"
     kwargs.setdefault("MaterialDbFile", filename)
     kwargs.setdefault("MaterialDbFolder", folder)
     the_tool = CompFactory.ActsTrk.ITkMaterialDecoratorTool(name, **kwargs)

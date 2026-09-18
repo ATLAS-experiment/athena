@@ -112,9 +112,12 @@ if __name__ == "__main__":
     from MuonConfig.MuonConfigUtils import configureDefaultTags
     from MuonGeoModelTestR4.testGeoModel import MuonPhaseIITestDefaults
     flags.Input.Files = MuonPhaseIITestDefaults.EVGEN_PG
+
+
     flags.Input.isMC=True
     flags.GeoModel.AtlasVersion = args.geometrytag
-    flags.IOVDb.GlobalTag = "OFLCOND-SIM-00-00-00"
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC 
     flags.GeoModel.Align.Dynamic = False
 
     # This should run serially
@@ -127,7 +130,8 @@ if __name__ == "__main__":
         flags.Exec.MaxEvents = procHostEvents
     from AthenaConfiguration.DetectorConfigFlags import getEnabledDetectors, setupDetectorFlags
     from AthenaConfiguration.AutoConfigFlags import getDefaultDetectors
-    
+
+
     ### Don't setup the active muon material in the Acts tracking goemerty
     ### but the passive material representing the coils etc.
     flags.Muon.trackGeometryActiveMaterial= False
@@ -147,7 +151,7 @@ if __name__ == "__main__":
         setupDetectorFlags(flags, detectors, toggle_geometry=True)
 
     flags.Acts.TrackingGeometry.UseBlueprint = True
-    flags.Acts.TrackingGeometry.ITkMaterialSource = "None"
+    flags.Acts.TrackingGeometry.ITkHgtdMaterialSource = "None"
 
     log.debug('Lock config flags now.')
     flags.lock()
