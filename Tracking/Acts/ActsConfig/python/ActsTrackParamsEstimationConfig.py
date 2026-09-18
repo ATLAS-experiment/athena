@@ -16,6 +16,9 @@ def ActsTrackParamsEstimationToolCfg(ConfigFlags,
 
     kwargs.setdefault('allowPropagatorFailure', False)
 
+    kwargs.setdefault('parameterEstimationMode', ConfigFlags.Acts.parameterEstimationMode.value)
+    kwargs.setdefault('minDeltaR', ConfigFlags.Acts.minDeltaRParameterEstimation)
+
     kwargs.setdefault("refitSeeds", ConfigFlags.Acts.refitSeeds)
 
     if 'FitterTool' not in kwargs:
