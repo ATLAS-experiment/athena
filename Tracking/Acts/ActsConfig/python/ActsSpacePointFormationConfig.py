@@ -353,6 +353,12 @@ def ActsSpacePointFormationCfg(flags,
         kwargs.setdefault('runReconstruction', flags.Acts.useCache)
         kwargs.setdefault('runPreparation', True)
 
+    # super special configuration (TEMP)
+    if flags.Acts.makeGlobalDataPreparation:
+        kwargs['runCacheCreation'] = False
+        kwargs['runReconstruction'] = False
+        kwargs['runPreparation'] = not isPrimaryPass(flags)
+        
     # Overlap Space Points may not be required
     processOverlapSpacePoints = kwargs['processStrips']
     from AthenaConfiguration.Enums import BeamType

@@ -25,6 +25,12 @@ def ITkActsTrackRecoCfg(flags) -> ComponentAccumulator:
     primaryVertices = "PrimaryVertices"
 
     # Reconstruction
+    if flags.Acts.makeGlobalDataPreparation:
+        # create FS clusters and space points
+        # all passes will select from these containers
+        from InDetConfig.ITkActsDataPreparationConfig import ITkActsGlobalDataPrepartionCfg
+        acc.merge(ITkActsGlobalDataPrepartionCfg(flags))
+
     from InDetConfig.ITkActsHelpers import isPrimaryPass, primaryPassUsesDevice
     for currentFlags in scheduledTrackingPasses:
         # Printing configuration

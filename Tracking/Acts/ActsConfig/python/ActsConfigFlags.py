@@ -128,6 +128,7 @@ def createActsConfigFlags():
         pcf.Detector.EnableCalo and primaryPassUsesActs(pcf)))
     actscf.addFlag('Acts.doLargeRadius', True)
     actscf.addFlag('Acts.doLowPt', False)
+    actscf.addFlag('Acts.makeGlobalDataPreparation', True)
     
     # Geometry Flags
 
