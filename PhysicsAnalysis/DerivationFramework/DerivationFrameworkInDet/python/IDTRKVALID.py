@@ -86,13 +86,11 @@ def IDTRKVALIDKernelCommonCfg(flags, name='IDTRKVALIDKernel'):
 
         from DerivationFrameworkInDet.InDetToolsConfig import (
             UsedInVertexFitTrackDecoratorCfg)
-        IDTRKVALIDUsedInFitDecorator = acc.getPrimaryAndMerge(
-            UsedInVertexFitTrackDecoratorCfg(flags))
-        augmentationTools.append(IDTRKVALIDUsedInFitDecorator)
+        acc.merge(UsedInVertexFitTrackDecoratorCfg(flags))
 
         # @TODO eventually computed for other extra outputs. Possible to come  up with a solution to use a common Z0AtPV if there is more than one client ?
         from DerivationFrameworkInDet.InDetToolsConfig import TrackParametersAtPVCfg
-        DFCommonZ0AtPV = acc.getPrimaryAndMerge(TrackParametersAtPVCfg(
+        acc.merge(TrackParametersAtPVCfg(
             flags, name="IDTRKVALID_DFCommonZ0AtPV",
             Z0SGEntryName="IDTRKVALIDInDetTrackZ0AtPV"))
         augmentationTools.append(DFCommonZ0AtPV)
@@ -114,8 +112,6 @@ def IDTRKVALIDKernelCommonCfg(flags, name='IDTRKVALIDKernel'):
         SkimmingTools     = skimmingTools,
         ThinningTools     = [],
         RunSkimmingFirst  = True))
-    for tool in augmentationTools:
-        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
 
     return acc
 

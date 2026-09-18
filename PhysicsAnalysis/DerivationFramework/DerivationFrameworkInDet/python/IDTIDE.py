@@ -38,35 +38,6 @@ def IDTIDEKernelCommonCfg(flags, name='IDTIDEKernel'):
     acc = ComponentAccumulator()
 
     # ====================================================================
-    # AUGMENTATION TOOLS
-    # ====================================================================
-    augmentationTools = []
-
-    # Add unbiased track parameters to track particles
-    from DerivationFrameworkInDet.InDetToolsConfig import (
-        TrackToVertexWrapperCfg)
-    acc.merge(
-        TrackToVertexWrapperCfg(
-            flags, name="IDTIDETrackToVertexWrapper",
-            DecorationPrefix="IDTIDE")
-    )
-
-    from DerivationFrameworkInDet.InDetToolsConfig import (
-        UsedInVertexFitTrackDecoratorCfg)
-    IDTIDEUsedInFitDecorator = acc.getPrimaryAndMerge(
-        UsedInVertexFitTrackDecoratorCfg(flags))
-    augmentationTools.append(IDTIDEUsedInFitDecorator)
-
-    # @TODO eventually computed for other extra outputs. Possible to come  up with a solution to use a common Z0AtPV if there is more than one client ?
-    from DerivationFrameworkInDet.InDetToolsConfig import (
-        TrackParametersAtPVCfg)
-    DFCommonZ0AtPV = acc.getPrimaryAndMerge(TrackParametersAtPVCfg(
-        flags, name="IDTIDE_DFCommonZ0AtPV",
-        Z0SGEntryName="IDTIDEInDetTrackZ0AtPV")
-    )
-    augmentationTools.append(DFCommonZ0AtPV)
-
-    # ====================================================================
     # SKIMMING TOOLS
     #
     # the list of active triggers for a particular release & menu can be found in the
@@ -197,6 +168,31 @@ def IDTIDEKernelCommonCfg(flags, name='IDTIDEKernel'):
         OutputLevel=INFO))
     for tool in augmentationTools:
         acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
+
+    # ====================================================================
+    # AUGMENTATION TOOLS
+    # ====================================================================
+
+    # Add unbiased track parameters to track particles
+    from DerivationFrameworkInDet.InDetToolsConfig import (
+        TrackToVertexWrapperCfg)
+    acc.merge(
+        TrackToVertexWrapperCfg(
+            flags, name="IDTIDETrackToVertexWrapper",
+            DecorationPrefix="IDTIDE")
+    )
+
+    from DerivationFrameworkInDet.InDetToolsConfig import (
+        UsedInVertexFitTrackDecoratorCfg)
+    acc.merge(UsedInVertexFitTrackDecoratorCfg(flags))
+
+    # @TODO eventually computed for other extra outputs. Possible to come  up with a solution to use a common Z0AtPV if there is more than one client ?
+    from DerivationFrameworkInDet.InDetToolsConfig import (
+        TrackParametersAtPVCfg)
+    acc.merge(TrackParametersAtPVCfg(
+        flags, name="IDTIDE_DFCommonZ0AtPV",
+        Z0SGEntryName="IDTIDEInDetTrackZ0AtPV")
+    )
 
     return acc
 

@@ -24,9 +24,8 @@ def InDetLRTMergeCfg(flags, name="InDetLRTMerge", **kwargs):
     acc.addEventAlgo(alg, primary=True)
     return acc
 
+
 # Used in vertex fit track decorator
-
-
 def UsedInVertexFitTrackDecoratorCfg(
         flags, name="UsedInVertexFitTrackDecorator", **kwargs):
     """Configure the UsedInVertexFitTrackDecorator"""
@@ -38,9 +37,9 @@ def UsedInVertexFitTrackDecoratorCfg(
         kwargs.setdefault("UsedInFitDecoratorTool", acc.popToolsAndMerge(
             InDetUsedInFitTrackDecoratorToolCfg(flags)))
 
-    acc.addPublicTool(
+    acc.AddEventAlgo(
         CompFactory.DerivationFramework.UsedInVertexFitTrackDecorator(
-            name, **kwargs), primary=True)
+            name, **kwargs))
     return acc
 
 
@@ -55,8 +54,8 @@ def HardScatterVertexDecoratorCfg(flags, name = "DFCommonHSDecorator", **kwargs)
     acc.addEventAlgo(CompFactory.DerivationFramework.HardScatterVertexDecorator(name, **kwargs))
     return acc
 
-# TrackStateOnSurface decorator
 
+# TrackStateOnSurface decorator
 def TrackStateOnSurfaceDecoratorCfg(flags, name, **kwargs):
     """Configure the TSOS decorator"""
     acc = ComponentAccumulator()
@@ -411,8 +410,8 @@ def ITkGSFTSOS_CommonKernelCfg(flags, name="ITkGSFTSOS_CommonKernel"):
 def TrackParametersAtPVCfg(flags, name, **kwargs):
     """Configure the TrackParametersAtPV tool"""
     acc = ComponentAccumulator()
-    acc.addPublicTool(CompFactory.DerivationFramework.TrackParametersAtPV(
-        name, **kwargs), primary=True)
+    acc.addEventAlgo(CompFactory.DerivationFramework.TrackParametersAtPV(
+        name, **kwargs))
     return acc
 
 # Pseudotrack selector
@@ -459,9 +458,8 @@ def InDetTrackSelectionToolWrapperCfg(
 def IsolationTrackDecoratorCfg(flags, name, **kwargs):
     """Confiure the isolation track decorator tool"""
     acc = ComponentAccumulator()
-    IsolationTrackDecorator = CompFactory.DerivationFramework.IsolationTrackDecorator
-    acc.addPublicTool(IsolationTrackDecorator(name, **kwargs),
-                      primary = True)
+    IsolationTrackDecorator = acc.addPublicTool(CompFactory.DerivationFramework.IsolationTrackDecorator(name, **kwargs)) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(name+"Aug", AugmentationTools = [IsolationTrackDecorator]))
     return acc
 
 # Tool for thinning TrackParticle containers via string selection
@@ -679,7 +677,7 @@ def TrackToVertexWrapperCfg(flags, name, **kwargs):
 
     kwargs.setdefault("ContainerName", "InDetTrackParticles")
 
-    acc.addPublicTool(CompFactory.DerivationFramework.TrackToVertexWrapper(
+    acc.addEventAlgo(CompFactory.DerivationFramework.TrackToVertexWrapper(
         name, **kwargs), primary=True)
     return acc
 
@@ -724,8 +722,8 @@ def IDTRKVALIDTruthThinningToolCfg(
 def EventInfoBSErrDecoratorCfg(
         flags, name="EventInfoBSErrDecorator", **kwargs):
     acc = ComponentAccumulator()
-    acc.addPublicTool(CompFactory.DerivationFramework.EventInfoBSErrDecorator(
-        name, **kwargs), primary=True)
+    acc.addEventAlgo(CompFactory.DerivationFramework.EventInfoBSErrDecorator(
+        name, **kwargs))
     return acc
 
 def UnassociatedHitsGetterToolCfg(
@@ -750,6 +748,6 @@ def UnassociatedHitsDecoratorCfg(
         kwargs.setdefault("UnassociatedHitsGetter", acc.popToolsAndMerge(
             UnassociatedHitsGetterToolCfg(flags)))
 
-    acc.addPublicTool(CompFactory.DerivationFramework.UnassociatedHitsDecorator(
-        name, **kwargs), primary=True)
+    acc.addEventAlgo(CompFactory.DerivationFramework.UnassociatedHitsDecorator(
+        name, **kwargs))
     return acc
