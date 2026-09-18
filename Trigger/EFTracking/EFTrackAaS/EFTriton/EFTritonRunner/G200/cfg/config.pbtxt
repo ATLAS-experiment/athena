@@ -1,0 +1,48 @@
+backend: "traccc"
+max_batch_size: 0
+input [
+   {
+    name: "CELL_POSITIONS"
+    data_type: TYPE_INT64
+    dims: [ -1, 4 ]
+  },
+  {
+    name: "CELL_PROPERTIES"
+    data_type: TYPE_FP32
+    dims: [ -1, 2 ]
+  }
+]
+output [
+  {
+    name: "TRK_PARAMS"
+    data_type: TYPE_FP32
+    dims: [ -1, 8 ]
+  },
+  {
+    name: "MEASUREMENTS"
+    data_type: TYPE_FP32
+    dims: [ -1, 6 ]
+  },
+  {
+    name: "COVARIANCES"
+    data_type: TYPE_FP32
+    dims: [-1, 25]
+  },
+  {
+    name: "GEOMETRY_IDS"
+    data_type: TYPE_INT64
+    dims: [ -1, 1 ]
+  }
+]
+instance_group [
+  {
+    count: 1
+    kind: KIND_GPU
+    gpus: [0]
+  }
+]
+
+parameters: {
+  key: "EXECUTION_MODEL_PATH",
+  value: {string_value: "/global/cfs/projectdirs/m3443/data/ACTS-aaS/models/smeared_hits/"}
+}

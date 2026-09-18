@@ -1,0 +1,28 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+# The EFTritonPipelines::pipelines INTERFACE target names these targets directly, so they
+# have to exist before EFTritonPipelinesTargets.cmake is included. Consumers are expected
+# to have an Athena environment sourced ('asetup Athena,main,latest'), which is what puts
+# traccc, detray, vecmem and covfie on CMAKE_PREFIX_PATH.
+find_dependency(covfie)
+find_dependency(traccc)
+find_dependency(CUDAToolkit)
+
+# traccc's own config normally re-exports vecmem and detray via find_dependency, so only
+# search for them separately if that did not happen. Doing this unconditionally would turn
+# them into hard requirements that the current backend build does not have.
+if(NOT TARGET vecmem::cuda)
+  find_dependency(vecmem)
+endif()
+
+if(NOT TARGET detray::core)
+  find_dependency(detray)
+endif()
+
+if(NOT TARGET EFTritonPipelines::pipelines)
+  include("${CMAKE_CURRENT_LIST_DIR}/EFTritonPipelinesTargets.cmake")
+endif()
+
+check_required_components(EFTritonPipelines)
