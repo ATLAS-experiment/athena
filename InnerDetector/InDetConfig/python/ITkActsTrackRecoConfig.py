@@ -25,7 +25,7 @@ def ITkActsTrackRecoCfg(flags) -> ComponentAccumulator:
     primaryVertices = "PrimaryVertices"
 
     # Reconstruction
-    from InDetConfig.ITkActsHelpers import isPrimaryPass, primaryPassUsesDevice
+    from InDetConfig.ITkActsHelpers import isPrimaryPass, primaryPassUsesDevice, secondaryPassUsesDevice
     for currentFlags in scheduledTrackingPasses:
         # Printing configuration
         print(f"---- Preparing scheduling of algorithms for tracking pass: {currentFlags.Tracking.ActiveConfig.extension}")
@@ -38,6 +38,11 @@ def ITkActsTrackRecoCfg(flags) -> ComponentAccumulator:
             from InDetConfig.ITkActsDeviceTrackRecoConfig import ITkActsDeviceTrackRecoCfg
             acc.merge(ITkActsDeviceTrackRecoCfg(currentFlags,
                                                        previousExtension = previousExtension))
+        elif not isPrimaryPass(currentFlags) and secondaryPassUsesDevice(currentFlags):
+            print("Configuring secondary pass track reconstruction on device")
+            from InDetConfig.ITkActsDeviceTrackRecoConfig import ITkActsDeviceSecondaryPassTrackRecoCfg
+            acc.merge(ITkActsDeviceSecondaryPassTrackRecoCfg(currentFlags,
+                                                             previousExtension = previousExtension))
         else:
             # Data Preparation
             # This includes Region-of-Interest creation, Cluster and Space Point formation

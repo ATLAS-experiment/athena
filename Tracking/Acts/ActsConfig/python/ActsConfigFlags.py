@@ -248,6 +248,7 @@ def createActsConfigFlags():
     actscf.addFlag("Acts.Device.doSeeding", False)
     actscf.addFlag("Acts.Device.seedingStrategy", SeedingStrategy.GridTriplet, type=SeedingStrategy)
     actscf.addFlag("Acts.Device.doTrackReconstruction", False)
+    actscf.addFlag("Acts.Device.doLargeRadiusPass", False)
 
     # GNN specific flags (scoped)
     actscf.addFlag("Acts.GNN.Enable", False)
