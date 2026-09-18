@@ -12,7 +12,7 @@
 #include "CxxUtils/no_sanitize_undefined.h"
 
 
-/**
+/**strformatstrformat
  * @brief Constructor.
  * @param svcloc The Gaudi service locator.
  */
@@ -55,7 +55,7 @@ T_AthenaPoolViewVectorCnv<DV>::initGuids (const std::type_info& ti) const
       if (vpos2 < name.size() && name[vpos2] == '>') {
         int vers = atoi (name.substr (vpos, vpos2-vpos).c_str());
         while (--vers > 0) {
-          std::string name2 = name.substr(0,vpos) + CxxUtils::strformat("%d", vers) + name.substr(vpos2,std::string::npos);
+          std::string name2 = name.substr(0,vpos) + std::to_string(vers) + name.substr(vpos2,std::string::npos);
           RootType typ2 = RootType(name2);
           if (typ2)
             guids.push_back (pool::DbReflex::guid (typ2));
