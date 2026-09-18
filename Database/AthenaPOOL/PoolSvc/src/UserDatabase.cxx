@@ -43,12 +43,6 @@ pool::UserDatabase::~UserDatabase()
 {}
 
 
-pool::DatabaseHandler&
-pool::UserDatabase::databaseHandler()
-{
-  return *m_databaseHandler;
-}
-
 void
 pool::UserDatabase::connectForRead()
 {
@@ -98,6 +92,16 @@ pool::UserDatabase::connectForRead()
       }
     }
   }
+}
+
+
+void*
+pool::UserDatabase::readObject( const Token& token, void* object )
+{
+   if( !m_databaseHandler) {
+      throw std::runtime_error( "Could not open a database for read object. (APR: \" UserDatabase::connectForWrite \" from \" PersistencySvc \")" );
+   }
+   return m_databaseHandler->readObject( token, object );
 }
 
 
@@ -165,6 +169,19 @@ pool::UserDatabase::connectForWrite()
     } // Connection established
 
   } // Database handler retrieved
+}
+
+
+Token*
+pool::UserDatabase::writeObject( const std::string& containerName,
+                                                    long minorTechnology,
+                                                    const void* object,
+                                                    const RootType& type )
+{
+   if( !m_databaseHandler) {
+      throw std::runtime_error( "Could not open a database for write object. (APR: \" UserDatabase::connectForWrite \" from \" PersistencySvc \")" );
+   }
+   return m_databaseHandler->writeObject( containerName, minorTechnology, object, type );
 }
 
 

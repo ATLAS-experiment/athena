@@ -47,7 +47,7 @@ pool::UserSession::readObject( const Token& token, void* object )
       db.setTechnology( token.technology() );
       db.connectForRead();
     }
-    result = db.databaseHandler().readObject( token, object );
+    result = db.readObject( token, object );
   }
   return result;
 }
@@ -65,10 +65,7 @@ pool::UserSession::registerForWrite( const Placement& place,
     db.setTechnology( place.technology() );
     db.connectForWrite();
   }
-  return db.databaseHandler().writeObject( place.containerName(),
-                                           place.technology(),
-                                           object,
-                                           type );
+  return db.writeObject( place.containerName(), place.technology(), object, type );
 }
 
 
