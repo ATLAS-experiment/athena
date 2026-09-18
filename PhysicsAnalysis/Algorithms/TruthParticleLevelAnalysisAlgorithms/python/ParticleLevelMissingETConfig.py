@@ -11,7 +11,8 @@ class ParticleLevelMissingETBlock(ConfigBlock):
         self.addOption('containerName', 'MET_Truth', type=str,
                        info='the name of the input truth MET container.')
         self.addOption('outputContainerName', 'TruthMET', type=str,
-                       info='the name of the output MET container.')
+                       info='the name of the output MET container.',
+                       meta={'role':'container'})
         # Always skip on data
         self.setOptionValue('skipOnData', True)
 

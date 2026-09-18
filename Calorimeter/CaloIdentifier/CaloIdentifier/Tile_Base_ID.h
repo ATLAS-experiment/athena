@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CaloIdentifier/Tile_Base_ID.h
@@ -13,7 +13,6 @@
 #define CALOIDENTIFIER_TILE_BASE_ID_H
 
 #include "AtlasDetDescr/AtlasDetectorID.h"
-// #include "Identifier/IdentifierHash.h"
 #include "IdDict/IdDictFieldImplementation.h"
 #include "CaloIdentifier/CaloIDHelper.h"
 #include "CaloIdentifier/TileID_Exception.h"
@@ -370,6 +369,7 @@ private:
 
   TileNeighbour                 m_neighbour;
 };
+CLASS_DEF( Tile_Base_ID , 241188216 , 1 )
 
 
 #endif // not CALOIDENTIFIER_TILE_BASE_ID_H

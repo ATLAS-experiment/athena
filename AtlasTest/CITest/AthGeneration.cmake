@@ -42,8 +42,29 @@ atlas_add_citest( Generation_Filters_13TeV
    SCRIPT RunWorkflowTests_Run2.py --CI -g --dsid 421408 -e '--inputEVNT_PreFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Evgen_E2E/mc15_13TeV/EVNT.25508216._000003.pool.root.1,/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Evgen_E2E/mc15_13TeV/EVNT.25508216._000001.pool.root.1' )
 
 # CA Config
+atlas_add_citest( Generation_CA_Sherpa_13p6TeV
+   SCRIPT RunWorkflowTests_Run3.py --CI -g --dsid Test421001 -e '--CA True' )
+
+atlas_add_citest( Generation_CA_MGPy8_ttbar_13p6TeV
+   SCRIPT RunWorkflowTests_Run3.py --CI -g --dsid Test421007 -e '--CA True' )
+
+atlas_add_citest( Generation_CA_MGPy8_toponium_fromLHE_13TeV
+   SCRIPT RunWorkflowTests_Run2.py --CI -g --dsid Test802381 -e '--CA True --inputGeneratorFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Generators/mc15_13TeV.440655.toponium_singlet_2l.evgen.TXT.e0000/TXT.440655._001077.tar.gz' )
+
+atlas_add_citest( Generation_CA_H7_13p6TeV
+   SCRIPT RunWorkflowTests_Run3.py --CI -g --dsid Test421106 -e '--CA True' )
+
+atlas_add_citest( Generation_CA_Py8_13p6TeV
+   SCRIPT RunWorkflowTests_Run3.py --CI -g --dsid Test421113 -e '--CA True' )
+
+atlas_add_citest( Generation_CA_PhPy8_13p6TeV
+   SCRIPT RunWorkflowTests_Run3.py --CI -g --dsid Test950070 -e '--CA True' )
+
 atlas_add_citest( Generation_CA_ParticleGun_13p6TeV
    SCRIPT RunWorkflowTests_Run3.py --CI -g --dsid Test950555 -e '--CA True' )
+
+atlas_add_citest( Generation_CA_MG_LHE_13p6TeV
+   SCRIPT RunWorkflowTests_Run3.py --CI -g --dsid Test950807 -e '--CA True --outputTXTFile events.lhe' )
 
 atlas_add_citest( Generation_CA_Filters_13TeV
    SCRIPT RunWorkflowTests_Run2.py --CI -g --dsid Test421408 -e '--CA True --inputEVNT_PreFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Evgen_E2E/mc15_13TeV/EVNT.25508216._000003.pool.root.1,/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Evgen_E2E/mc15_13TeV/EVNT.25508216._000001.pool.root.1' )

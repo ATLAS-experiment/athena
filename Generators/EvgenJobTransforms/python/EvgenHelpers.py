@@ -240,3 +240,23 @@ def _is_txt_only_run(flags):
     has_yoda =bool(flags.Generator.outputYODAFile)
     
     return has_txt and not has_evnt and not has_yoda
+
+
+def _get_nevents(flags, safety):
+    """Helper function to determing number of events to be generated
+    based on MaxEvents or nEventsPerJob and a user-provided safety
+    factor to allow for failures in showering stage."""
+    try:
+        sf = float(safety)
+    except (TypeError, ValueError) as exc:
+        raise RuntimeError(f"safety must be numeric, got {safety}.") from exc
+    if sf <= 0:
+        raise RuntimeError(f"safety must be > 0, got {safety}.")
+
+    base_events = (
+        flags.Exec.MaxEvents
+        if flags.Exec.MaxEvents > 0
+        else flags.Generator.nEventsPerJob
+    )
+
+    return int(base_events * sf)

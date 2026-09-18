@@ -374,6 +374,9 @@ if __name__=="__main__":
         )
     flags.GeoModel.AtlasVersion = geometry_tag
     _logger.verbose("+ Using detector description tag: '%s'", geometry_tag)
+    ### Setup the most recent conditions tag
+    from MuonConfig.MuonConfigUtils import configureCondTag
+    configureCondTag(flags)
 
     # Fail as soon as the final geometry tag is known and before detector or
     # geometry configuration. Resolving a metadata-derived tag necessarily

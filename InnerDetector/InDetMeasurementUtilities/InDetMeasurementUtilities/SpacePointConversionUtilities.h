@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SPACEPOINT_CONVERSION_UTILITIES_H
@@ -28,7 +28,6 @@ namespace TrackingUtilities {
 					     xAOD::SpacePoint& xaodSpacePoint);
 
   StatusCode convertTrkToXaodStripSpacePoint(const InDet::SCT_SpacePoint& trkSpacePoint,
-					     const Amg::Vector3D& vertex,
                                              xAOD::SpacePoint& xaodSpacePoint);
 
 }

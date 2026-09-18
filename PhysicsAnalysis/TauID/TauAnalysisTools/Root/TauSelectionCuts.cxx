@@ -10,7 +10,8 @@
 // framework include(s)
 #include "AsgDataHandles/ReadHandle.h"
 #include "AthContainers/ConstAccessor.h"
-
+#include "PATCore/AcceptData.h"
+#include "PATCore/AcceptInfo.h"
 // EDM include(s)
 #include "xAODMuon/MuonContainer.h"
 
@@ -73,8 +74,7 @@ void TauSelectionCut::setProperty(const std::string& name, const std::string& va
 //______________________________________________________________________________
 void TauSelectionCut::declareProperty(const std::string& name, std::string& loc)
 {
-  std::pair<std::string, std::string&> p(name, loc);
-  m_mProperties.insert(p);
+  m_mProperties.try_emplace(name, loc);
 }
 
 //______________________________________________________________________________

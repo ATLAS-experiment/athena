@@ -211,7 +211,8 @@ def AthenaMtesEventLoopMgrCfg(flags, mtEs=False, channel=''):
         EventRangeChannel = channel,
         EventPrintoutInterval = flags.Exec.EventPrintoutInterval)
 
-    cfg.setAppProperty('EventLoop', elmgr.name)
+    if mtEs:
+        cfg.setAppProperty('EventLoop', elmgr.name)
 
     if flags.Input.OverrideRunNumber:
         from AthenaKernel.EventIdOverrideConfig import EvtIdModifierSvcCfg
@@ -413,11 +414,11 @@ def MainServicesCfg(flags, createEventLoopMgr=True):
         cfg.merge(PyAthenaEventLoopMgrCfg(flags))
         log.info("Interactive mode, switching to PyAthenaEventLoopMgr")
 
-    elif createEventLoopMgr is False:
-        pass  # the user will have to configure one
-
     elif flags.Concurrency.NumProcs > 0:
         cfg.merge(AthenaMpEventLoopMgrCfg(flags))
+
+    elif createEventLoopMgr is False:
+        pass  # the user will have to configure one
 
     elif flags.Concurrency.NumThreads > 0:
         # Setup SGCommitAuditor to sweep new DataObjects at end of Alg execute

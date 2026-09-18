@@ -12,8 +12,6 @@ questions. Contact details can be found in the main FTAG docs: https://ftag.docs
 | `FTAG1LITE` | An extremely light weight training derivation. Instead of storing all collections, decorate jets with vectors representing constituent variables. | |
 | `FTAG2` | `ttbar` calibration derivation with dilepton selection | Built on top of `FTAG1` content and adds a two-lepton skim plus targeted thinning. Runs on data and MC. |
 | `FTAG3` | Slim derivation for boosted `g->bb` and Xbb calibration studies | Requires at least one muon and one large-`R` jet, and keeps the large-`R` / VR track-jet content needed for calibration. |
-| `FTAG4` | PHYS-like derivation with a one-lepton skim | Uses `PHYS` content and applies a single-lepton calibration-style event selection. |
-| `FTAG5` | PHYS-like derivation with a dilepton skim | Uses `PHYS` content and applies a two-lepton calibration-style event selection. |
 | `FTAGPU` | FTAG derivation focused on by-vertex jet content and pile-up related studies | Includes `AntiKt4EMPFlowByVertexJets`, related thinning, and FTAG augmentations for this jet view. |
 | `FTAGSSV` | PHYS-like derivation for the soft b-tagging calibration | Uses `PHYS` content plus the NVSI_SecVrt_Tight* secondary-vertex containers rebuilt under each tracking systematic variation. |
 | `FTAGXBB` | Skimmed derivation for Xbb calibration | Requires at least one large-`R` UFO soft-drop jet and adds Xbb-oriented large-`R` discriminant content. |

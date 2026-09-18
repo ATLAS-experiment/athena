@@ -61,7 +61,7 @@ StatusCode TrackParticleCalibratorExampleAlg::execute(
   }
 
   // Get the CUDA stream to use.
-  cudaStream_t stream = m_streamTool->stream(ctx);
+  cudaStream_t stream = static_cast<cudaStream_t>(m_streamTool->stream(ctx));
 
   // The object managing host memory copies.
   auto hostCopy = m_hostCopyTool->copy(ctx);

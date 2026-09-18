@@ -22,7 +22,7 @@ StatusCode SingleStreamSvc::initialize() {
   return StatusCode::SUCCESS;
 }
 
-cudaStream_t SingleStreamSvc::stream(const EventContext&) const {
+void* SingleStreamSvc::stream(const EventContext&) const {
 
   // Get the stream corresponding to the current slot.
   assert(m_stream);

@@ -63,7 +63,7 @@ namespace HLTTest {
     //map reco object and decision: find in reco obejct the initial RoI and map it to the correct decision
     size_t reco_counter = 0;
     for (const auto recoobj: *recoInput){
-      const auto roiInfo = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>( context, recoobj, "initialRoI"  );
+      const auto roiInfo = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>( context, recoobj, TrigCompositeUtils::initialRoIString()  );
       const auto roiEL = roiInfo.link;
       CHECK( roiEL.isValid() );
       

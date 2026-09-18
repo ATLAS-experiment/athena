@@ -11,15 +11,22 @@ class SSVWeightsAlgConfig(ConfigBlock):
         super (SSVWeightsAlgConfig, self).__init__ ()
         self.addDependency('EventSelection', required=False)
         self.addDependency('EventSelectionMerger', required=False)
-        self.addOption('jets', None, type = str, info = "jet container that will be used to define the good SSVs (ΔR(SSV,jet)>0.6) and the truth b-hadrons in acceptance (ΔR(truthBh,jet)>0.6) and that will be used to count the number of b-jets for b-jet based SSV weight calculation")
-        self.addOption('electrons', None, type = str, info = "electron container that will be used to define the good SSVs (ΔR(SSV,electron)>0.2)")
-        self.addOption('muons', None, type = str,  info = "muon container that will be used to define the good SSVs (ΔR(SSV,muon)>0.2)")
-        self.addOption('NVSI_WP', "NVSI_SecVrt_Tight", type = str, info = "Working point of the NewVrtSecInclusiveTool (algorithm that constructs the soft secondary vertices); possible working points are 'NVSI_SecVrt_Tight','NVSI_SecVrt_Medium','NVSI_SecVrt_Loose'")
+        self.addOption('jets', None, type = str, info = "jet container that will be used to define the good SSVs (ΔR(SSV,jet)>0.6) and the truth b-hadrons in acceptance (ΔR(truthBh,jet)>0.6) and that will be used to count the number of b-jets for b-jet based SSV weight calculation",
+                       meta = {'role':'containerRef'})
+        self.addOption('electrons', None, type = str, info = "electron container that will be used to define the good SSVs (ΔR(SSV,electron)>0.2)",
+                       meta = {'role':'containerRef'})
+        self.addOption('muons', None, type = str,  info = "muon container that will be used to define the good SSVs (ΔR(SSV,muon)>0.2)",
+                       meta = {'role':'containerRef'})
+        self.addOption('NVSI_WP', "NVSI_SecVrt_Tight", type = str, info = "Working point of the NewVrtSecInclusiveTool (algorithm that constructs the soft secondary vertices); possible working points are 'NVSI_SecVrt_Tight','NVSI_SecVrt_Medium','NVSI_SecVrt_Loose'",
+                       meta = {'choices':(['NVSI_SecVrt_Tight','NVSI_SecVrt_Medium','NVSI_SecVrt_Loose'],1)})
         self.addOption("JsonConfigFile_SSVWeightsAlg", None, type = str, info ="Path to the JSON config file that contains the SSV calibration results which are needed to calculate the SSV weights")
         self.addOption("BTaggingWP", "ftag_select_GN2v01_FixedCutBEff_85" , type = str, info = "b-tagging working point that is used to count the number of b-jets in the event for b-jet based SSV weight calculation")
-        self.addOption("EfficiencyMethod", "Bhadron_pT_eta_based", type = str, info = "efficiency definition that will be used to calculate the SSV weights, string can be 'Bhadron_pT_eta_based' or 'bjet_based'")
-        self.addOption("nFMethod", "pileup_based_binned", type = str, info = "average number of fake SSV definition that will be used to calculate the SSV weights, string can be 'pileup_bjet_based','pileup_based_linearfit' or 'pileup_based_binned'")
-        self.addOption("OutputVariableSize", "standard", type = str, info ="number of variables that will be saved to the output, string can be 'standard','extended','additional' or 'all'")
+        self.addOption("EfficiencyMethod", "Bhadron_pT_eta_based", type = str, info = "efficiency definition that will be used to calculate the SSV weights, string can be 'Bhadron_pT_eta_based' or 'bjet_based'",
+                       meta = {'choices':(['Bhadron_pT_eta_based','bjet_based'],1)})
+        self.addOption("nFMethod", "pileup_based_binned", type = str, info = "average number of fake SSV definition that will be used to calculate the SSV weights, string can be 'pileup_bjet_based','pileup_based_linearfit' or 'pileup_based_binned'",
+                       meta = {'choices':(['pileup_bjet_based','pileup_based_linearfit','pileup_based_binned'],1)})
+        self.addOption("OutputVariableSize", "standard", type = str, info ="number of variables that will be saved to the output, string can be 'standard','extended','additional' or 'all'",
+                       meta = {'choices':(['standard','extended','additional','all'],1)})
 
     def makeAlgs(self, config):
         #Algorithm is Monte Carlo only -> skip algorithm if it is run on Data

@@ -101,6 +101,7 @@ Acts::FreeVector estimateTrackParamsFromSeed(
     ATH_MSG_DEBUG( "   " << m_sigmaQOverP );
     ATH_MSG_DEBUG( "   " << m_sigmaT0 );
     ATH_MSG_DEBUG( "   " << m_initialVarInflation );
+    ATH_MSG_DEBUG( "   " << m_refitErrInflation );
     ATH_MSG_DEBUG( "   " << m_bFieldMode );
     ATH_MSG_DEBUG( "   " << m_firstSp );
     ATH_MSG_DEBUG( "   " << m_stripCalibrationIterations );
@@ -117,6 +118,7 @@ Acts::FreeVector estimateTrackParamsFromSeed(
     if (m_refitSeeds) {
       ATH_CHECK(m_trackingGeometrySvc.retrieve());
       m_uncalibMeasSurfAcc = detail::xAODUncalibMeasSurfAcc {m_trackingGeometrySvc.get()};
+      m_doRefitErrInflation = (m_refitErrInflation.value() != std::vector<double>{1., 1., 1., 1., 1., 1.});
     }
 
     return StatusCode::SUCCESS;
@@ -253,6 +255,12 @@ Acts::FreeVector estimateTrackParamsFromSeed(
     auto refitResult = doRefit(seed, *boundParams, geoContext, magFieldContext, calContext, reverseSearch);
     ATH_MSG_DEBUG("Refit " << seed.sp().size() << "-SP seed (" << (reverseSearch ? "top" : "bottom") << " start) " << (refitResult ? "succeeded" : "failed"));
     if (refitResult) {
+      if (m_doRefitErrInflation) {
+        // scale r_i * C_ij * r_j -> C_ij
+        const auto refitErrInflation = Eigen::Map<const Acts::BoundVector>(m_refitErrInflation.value().data());
+        refitResult->covariance()->array().colwise() *= refitErrInflation.array();
+        refitResult->covariance()->array().rowwise() *= refitErrInflation.transpose().array();
+      }
       return {refitResult, kSeedRefitSuccess};
     } else {
       return {boundParams, kSeedRefitFailed};

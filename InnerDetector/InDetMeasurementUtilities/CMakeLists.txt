@@ -32,7 +32,6 @@ atlas_add_component( InDetMeasurementUtilities
 						GaudiKernel
 						AthenaBaseComps
 						StoreGateLib
-						BeamSpotConditionsData
                                                 AthContainers
                                                 AthAllocators
 		     )

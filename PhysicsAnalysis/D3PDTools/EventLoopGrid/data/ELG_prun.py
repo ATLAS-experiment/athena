@@ -143,7 +143,7 @@ def ELG_prun(sample) :
                     dummycmd = [ x.replace('%nickname%',nickname) for x in dummycmd ]
                     cmd = [ x.replace('%nickname%',nickname) for x in cmd ]
                 except Exception as e_rep:
-                    print(f'Nickname replacement failed with error {e_rep}')
+                    print(f'Nickname replacement failed with error {e_rep.returncode}: {e_rep.output}')
                 # Now try the job again
                 try:
                     out = subprocess.check_output(dummycmd, stderr=subprocess.STDOUT, encoding="utf-8")

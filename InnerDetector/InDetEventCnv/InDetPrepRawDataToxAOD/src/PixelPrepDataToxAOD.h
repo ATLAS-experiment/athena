@@ -118,6 +118,10 @@ private:
   Gaudi::Property<bool> m_writeRDOinformation{this, "WriteRDOinformation", true};
   Gaudi::Property<bool> m_writeExtendedPRDinformation
     {this, "WriteExtendedPRDinformation", false};
+  // hasBSError and DCSState on their own, without the per-RDO information
+  // (and its charge calibration) that WriteRDOinformation also writes.
+  Gaudi::Property<bool> m_writeModuleStatus
+    {this, "WriteModuleStatus", false};
   Gaudi::Property<bool> m_useSiHitsGeometryMatching
     {this, "UseSiHitsGeometryMatching", true};
 

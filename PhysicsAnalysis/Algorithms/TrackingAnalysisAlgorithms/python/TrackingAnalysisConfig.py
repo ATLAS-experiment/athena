@@ -19,7 +19,8 @@ class InDetTrackCalibrationConfig (ConfigBlock):
             info="the name of the input track container.")
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the output container after calibration.")
+            info="the name of the output container after calibration.",
+            meta={'role':'container'})
         self.addOption ('postfix', '', type=str,
             info="a postfix to apply to decorations and algorithm names. Typically "
             "not needed here since the calibration is common to all tracks.")
@@ -239,11 +240,13 @@ class InDetTrackWorkingPointConfig (ConfigBlock):
         super (InDetTrackWorkingPointConfig, self).__init__ ()
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the input container.")
+            info="the name of the input container.",
+            meta={'role':'containerRef'})
         self.addOption ('selectionName', '', type=str,
             noneAction='error',
             info="the name of the track selection to define (e.g. `tightPrimary` "
-            "or `loose`).")
+            "or `loose`).",
+            meta={'role':'selection'})
         self.addOption ('postfix', None, type=str,
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as `selectionName` is used internally.")
@@ -256,7 +259,8 @@ class InDetTrackWorkingPointConfig (ConfigBlock):
             "`HILooseOptimized`, `HITightOptimized`.",
             expertMode=["NoCut", "LoosePrimary", "LooseElectron",
             "LooseMuon", "LooseTau", "MinBias", "HILoose", "HITight",
-            "HILooseOptimized", "HITightOptimized"])
+            "HILooseOptimized", "HITightOptimized"],
+            meta={'choices':(['Loose','TightPrimary','NoCut','LoosePrimary','LooseElectron','LooseMuon','LooseTau','MinBias','HILoose','HITight','HILooseOptimized','HITightOptimized'],1)})
         self.addOption ('additionalCuts', None, type=dict,
             info="additional cuts to modify the selection WP. Only meant for "
             "expert studies of track selection. Passed as pairs of `cutName: value`. "

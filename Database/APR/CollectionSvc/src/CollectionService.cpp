@@ -21,7 +21,7 @@ pool::CollectionService::create( const CollectionDescription& description )
       std::string errorMsg = "Must specify name of collection in description input argument.";
       throw std::runtime_error( errorMsg + " (APR: \" CollectionService::create \" from \" CollectionSvc \")" );
    }
-   ICollection::OpenMode openMode = ICollection::CREATE_AND_OVERWRITE;
+   Io::IoFlag openMode = Io::WRITE;
    return plugin( description, openMode );
 }
 
@@ -33,7 +33,7 @@ pool::CollectionService::open( const std::string& name,
                                pool::ISession* session )
 {
    pool::CollectionDescription description( name, type, connection );
-   return plugin( description, ICollection::READ, session );
+   return plugin( description, Io::READ, session );
 }
 
 
@@ -46,7 +46,7 @@ pool::CollectionService::setMessageSvcQuiet( bool quiet )
 
 pool::ICollection*
 pool::CollectionService::plugin( const CollectionDescription& description,
-                                 ICollection::OpenMode openMode,
+                                 Io::IoFlag openMode,
                                  ISession* session )
 {
    if( description.type().majorType() == pool::ROOT_StorageType.type() ) {

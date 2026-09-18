@@ -7,14 +7,13 @@
 #include "MuonReadoutGeometryR4/SpectrometerSector.h"
 #include "MuonTruthHelpers/MuonSimHitHelpers.h"
 #include "MuonSpacePoint/SpacePointHelpers.h"
+#include "MuonFastRecoEvent/FastRecoUtils.h"
 #include "MuonStationIndex/MuonStationIndex.h"
 #include "MuonDetDescrUtils/MuonSectorMapping.h"
 #include "CxxUtils/phihelper.h"
 
 namespace {
     static const Muon::MuonSectorMapping sectorMap{};
-    static const SG::ConstAccessor<ElementLink<MuonR4::GlobalPatternContainer>> patLinkAcc{"globalPatternLink"};
-
     void resize_all (const std::size_t nEle, const std::size_t size, auto&&... vecs) {
         for (std::size_t idx = 0; idx < nEle; ++idx) {
             (vecs[idx].resize(size), ...);
@@ -466,7 +465,7 @@ namespace MuonValR4 {
             m_muon_Pt.push_back(mu->pt());
             m_muon_Q.push_back(mu->charge());
 
-            auto patItr {std::ranges::find(*patternCont, *patLinkAcc(*mu))};
+            auto patItr {std::ranges::find(*patternCont, FastReco::getParentPattern(*mu))};
             assert(patItr != patternCont->end());
             const std::size_t patIdx = std::distance(patternCont->begin(), patItr);
             m_muon_MatchedToPattern.push_back(patIdx);

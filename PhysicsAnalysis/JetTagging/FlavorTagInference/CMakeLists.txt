@@ -114,11 +114,6 @@ if (NOT XAOD_STANDALONE)
 
 endif()
 
-atlas_add_dictionary( FlavorTagInferenceDict
-   FlavorTagInference/FlavorTagInferenceDict.h
-   FlavorTagInference/selection.xml
-   LINK_LIBRARIES FlavorTagInference )
-
 atlas_add_test( FlipVariables
    SOURCES test/test_flip_variables.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}

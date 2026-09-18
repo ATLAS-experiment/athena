@@ -41,16 +41,19 @@ class FTagJetSFBlock(ConfigBlock):
         self.addDependency('EventSelectionMerger', required=False)
         self.addOption('containerName', '', type=str,
             noneAction='error',
-            info="the name of the input container.")
+            info="the name of the input container.",
+            meta={'role':'containerRef'})
         self.addOption('selectionName', '', type=str,
             noneAction='error',
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as internally the string "
-            "`f'{btagger}_{btagWP}'` is used.")
+            "`f'{btagger}_{btagWP}'` is used.",
+            meta={'role':'selection'})
         self.addOption ('btagWP', "Continuous", type=str,
             info="the flavour tagging WP.")
         self.addOption('btagger', "GN2v01", type=str,
-            info="the flavour tagging algorithm: `DL1dv01`, `GN2v01`.")
+            info="the flavour tagging algorithm: `DL1dv01`, `GN2v01`.",
+            meta={'choices':(['DL1dv01','GN2v01'],1)})
         self.addOption('useCTagging', False, type=bool,
             info="whether the fixed WP refer to b-tagging or c-tagging. Set to `True` "
             "to make it refer to c-tagging.")
@@ -63,16 +66,20 @@ class FTagJetSFBlock(ConfigBlock):
             " (relies on the sample metadata).")
         self.addOption ('systematicsStrategy', 'SFEigen', type=str,
             info="name of systematics model; presently choose between `SFEigen` "
-            "and `Envelope`.")
+            "and `Envelope`.",
+            meta={'choices':(['SFEigen','Envelope'],1)})
         self.addOption ('eigenvectorReductionB', 'Loose', type=str,
             info="b-jet scale factor eigenvector reduction strategy; choose between "
-            "`Loose`, `Medium`, `Tight`.")
+            "`Loose`, `Medium`, `Tight`.",
+            meta={'choices':(['Loose','Medium','Tight'],1)})
         self.addOption ('eigenvectorReductionC', 'Loose', type=str,
             info="b-jet scale factor eigenvector reduction strategy; choose between "
-            "`Loose`, `Medium`, `Tight`.")
+            "`Loose`, `Medium`, `Tight`.",
+            meta={'choices':(['Loose','Medium','Tight'],1)})
         self.addOption ('eigenvectorReductionLight', 'Loose', type=str,
             info="b-jet scale factor eigenvector reduction strategy; choose between "
-            "`Loose`, `Medium`, `Tight`.")
+            "`Loose`, `Medium`, `Tight`.",
+            meta={'choices':(['Loose','Medium','Tight'],1)})
         self.addOption ('excludeFromEigenVectorTreatment', '', type=str,
             info="(semicolon-separated) names of uncertainties to be excluded from "
             "all eigenvector decompositions (if used).")
@@ -282,16 +289,19 @@ class FTagEventSFBlock(ConfigBlock):
             info="the input jet container with a possible selection, in the format "
             "`container` or `container.selection`. The default recommendation is to "
             "pass `container.baselineJvt` selection, e.g. if the calibrated jets "
-            "container is `AnaJets`, the recommendation is to pass `AnaJet.baselineJvt`.")
+            "container is `AnaJets`, the recommendation is to pass `AnaJet.baselineJvt`.",
+            meta={'role':'containerRef'})
         self.addOption('selectionName', '', type=str,
             noneAction='error',
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as internally the string "
-            "`f'{btagger}_{btagWP}'` is used.")
+            "`f'{btagger}_{btagWP}'` is used.",
+            meta={'role':'selection'})
         self.addOption ('btagWP', "Continuous", type=str,
             info="the flavour tagging WP.")
         self.addOption('btagger', "GN2v01", type=str,
-            info="the flavour tagging algorithm: `DL1dv01`, `GN2v01`.")
+            info="the flavour tagging algorithm: `DL1dv01`, `GN2v01`.",
+            meta={'choices':(['DL1dv01','GN2v01'],1)})
         self.addOption ('triggerChainsPerYear', {}, type=dict,
             info="a dictionary with key (string) the year and value (list of "
             "strings) the trigger chains.")

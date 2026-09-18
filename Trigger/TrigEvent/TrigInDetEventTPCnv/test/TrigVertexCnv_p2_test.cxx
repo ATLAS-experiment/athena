@@ -152,10 +152,10 @@ TrigInDetTrack makeTrack (int offs)
       315.5*315.5+offs };
   auto param = std::make_unique<TrigInDetTrackFitPar>
     (2.5+offs, 3.5+offs, 4.5+offs, 5.5+offs, 6.5+offs, TrigInDetTrackFitPar::PERIGEE, 7.5+offs,
-    new std::vector<double> (cov1));
+    new std::vector<double> (std::move(cov1)));
   auto endParam = std::make_unique<TrigInDetTrackFitPar>
     (102.5+offs, 103.5+offs, 104.5+offs, 105.5+offs, 106.5+offs, TrigInDetTrackFitPar::BARREL, 107.5+offs,
-    new std::vector<double> (cov2));
+    new std::vector<double> (std::move(cov2)));
   TrigInDetTrack trans1 (param.release(), endParam.release(), 1.5+offs);
   trans1.algorithmId (TrigInDetTrack::IDSCANID);
   trans1.StrawHits (1+offs);

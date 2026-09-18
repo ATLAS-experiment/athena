@@ -6,7 +6,6 @@
 #include <cassert>
 #include <iostream>
 #include <fstream>
-#include <boost/pool/pool_alloc.hpp>
 #include "CxxUtils/procmaps.h"
 //#define DEBUGIT 1
 using namespace std;
@@ -69,7 +68,6 @@ int main(void) {
 
 //make valgrind happy
   delete pi;
-  boost::singleton_pool<boost::pool_allocator_tag, sizeof(procmaps::Entry)>::release_memory();
 
   cout << "*** procmaps_test OK ***" <<endl;
   return 0;

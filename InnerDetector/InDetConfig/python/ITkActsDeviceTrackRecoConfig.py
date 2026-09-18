@@ -263,31 +263,7 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
                 InputSeeds="TracccPixelSeedCollection",
                 OutputSeeds=f'{flags.Tracking.ActiveConfig.extension}PixelSeeds'))
             seedsLocation = DataLocation.HOST
-           
-        # Extract track parameters from device seeds if requested
-        if flags.Tracking.ActiveConfig.storeTrackSeeds and flags.Acts.Device.doSeeding: # for clustering only pipelines this is controlled via the ActsSeedingConfig file
-            from ActsConfig.ActsSeedingConfig import ActsStoreTrackSeedsCfg
-            from ActsConfig.ActsAnalysisConfig import ActsPixelSeedsToTrackParamsAlgCfg, ActsStripSeedsToTrackParamsAlgCfg
-            processPixels = flags.Tracking.ActiveConfig.useITkPixelSeeding
-            processStrips = flags.Tracking.ActiveConfig.useITkStripSeeding
-
-            prefix = flags.Tracking.ActiveConfig.extension
-            # Create track parameters before ActsStoreTrackSeedsCfg (following ActsSeedingCfg pattern)
-            if processPixels:
-                acc.merge(ActsPixelSeedsToTrackParamsAlgCfg(
-                    flags,
-                    name = prefix + 'PixelSeedsToTrackParamsAlg',
-                    InputSeedContainerKey = prefix + 'PixelSeeds',
-                    OutputTrackParamsCollectionKey = prefix + 'PixelEstimatedTrackParams'))
-            if processStrips:
-                acc.merge(ActsStripSeedsToTrackParamsAlgCfg(
-                    flags,
-                    name = prefix + 'StripSeedsToTrackParamsAlg',
-                    InputSeedContainerKey = prefix + 'StripSeeds',
-                    OutputTrackParamsCollectionKey = prefix + 'StripEstimatedTrackParams'))
-
-            acc.merge(ActsStoreTrackSeedsCfg(flags, processPixels=processPixels, processStrips=processStrips))
-            
+                            
         # CKF
         from ActsConfig.ActsTrackFindingConfig import ActsTrackFindingCfg
         acc.merge(ActsTrackFindingCfg(flags))
@@ -341,6 +317,207 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
                                                         ACTSTracksLocation = acts_tracks,
                                                         AssociationMapOut = f"{acts_tracks}ToTruthParticleAssociation"))
 
+            acc.merge(ActsTrackFindingValidationAlgCfg(flags,
+                                                       name = f"{acts_tracks}TrackFindingValidationAlg",
+                                                       TrackToTruthAssociationMap = f"{acts_tracks}ToTruthParticleAssociation"))
+
+        # Extract track parameters from device seeds if requested
+        if flags.Tracking.ActiveConfig.storeTrackSeeds and flags.Acts.Device.doSeeding: # for clustering only pipelines this is controlled via the ActsSeedingConfig file
+            from ActsConfig.ActsSeedingConfig import ActsStoreTrackSeedsCfg
+            from ActsConfig.ActsAnalysisConfig import ActsPixelSeedsToTrackParamsAlgCfg, ActsStripSeedsToTrackParamsAlgCfg
+            processPixels = flags.Tracking.ActiveConfig.useITkPixelSeeding
+            processStrips = flags.Tracking.ActiveConfig.useITkStripSeeding
+
+            prefix = flags.Tracking.ActiveConfig.extension
+            
+            if flags.Acts.Device.doTrackReconstruction:
+                from ActsGPUEventCnv.ActsGPUEventCnvConfig import TracccSeedConverterAlgCfg
+                acc.merge(TracccSeedConverterAlgCfg(flags,
+                    name="TracccSeedConverterAlg",
+                    InputSpacepointsDevice="TracccPixelSpacepointCollection",
+                    InputSpacepoints="ITkPixelSpacePoints",
+                    InputMeasToPixelSP="ITkTracccMeasToPixelSP",
+                    InputSeeds="TracccPixelSeedCollection",
+                    OutputSeeds=f'{flags.Tracking.ActiveConfig.extension}PixelSeeds'))
+            
+            # Create track parameters before ActsStoreTrackSeedsCfg (following ActsSeedingCfg pattern)
+            if processPixels:
+                acc.merge(ActsPixelSeedsToTrackParamsAlgCfg(
+                    flags,
+                    name = prefix + 'PixelSeedsToTrackParamsAlg',
+                    InputSeedContainerKey = prefix + 'PixelSeeds',
+                    OutputTrackParamsCollectionKey = prefix + 'PixelEstimatedTrackParams'))
+            if processStrips:
+                acc.merge(ActsStripSeedsToTrackParamsAlgCfg(
+                    flags,
+                    name = prefix + 'StripSeedsToTrackParamsAlg',
+                    InputSeedContainerKey = prefix + 'StripSeeds',
+                    OutputTrackParamsCollectionKey = prefix + 'StripEstimatedTrackParams'))
+                
+            if processPixels:
+                acc.merge(ActsStoreTrackSeedsCfg(flags,processPixels=True, processStrips=False))
+            if processStrips:
+                acc.merge(ActsStoreTrackSeedsCfg(flags,processPixels=False, processStrips=True))
+            if processPixels and processStrips:
+                acc.merge(ActsStoreTrackSeedsCfg(flags,processPixels=True, processStrips=True))
+                
+    return acc
+
+
+def ITkActsDeviceSecondaryPassTrackRecoCfg(flags, *, previousExtension=None):
+    """Secondary tracking pass with data preparation on the host and
+    seeding and track finding on the device.
+
+    The clusters and space points of the pass are prepared on the host from
+    the objects of the previous pass (PRD association), converted to traccc
+    measurements and spacepoints, and the seeds and tracks are reconstructed
+    on the device. The tracks are converted back to an ACTS track container
+    named as for the host reconstruction of the pass.
+    """
+    acc = ComponentAccumulator()
+
+    if previousExtension is None:
+        raise ValueError("A secondary pass on the device requires a previous pass")
+
+    extension = flags.Tracking.ActiveConfig.extension
+    prefix = f"ITk{extension.replace('Acts', '')}"
+    pixelClusters = f"{prefix}PixelClusters"
+    stripClusters = f"{prefix}StripClusters"
+
+    if flags.Tracking.ActiveConfig.useITkPixelSeeding:
+        raise ValueError("Pixel seeding on the device is not supported for secondary passes")
+    if not flags.Tracking.ActiveConfig.useITkStripSeeding:
+        raise ValueError("Secondary pass on the device requires strip seeding")
+
+    print(f"Setting up GPU algorithms for the {extension} pass with {flags.Device.Backend.value} backend")
+
+    # Setup traccc detector description objects — loads all device detector description data into detStore
+    acc.merge(JSONDeviceDetectorDescriptionProviderSvcCfg(flags,
+        HostConditionsObjectName="TracccHostCondConfig",
+        HostDigitizationObjectName="TracccHostDigitizationConfig",
+        DeviceConditionsObjectName="TracccDeviceCondConfig",
+        DeviceDigitizationObjectName="TracccDeviceDigitizationConfig",
+    ))
+
+    from ActsGPUMagField.ActsGPUMagFieldConfig import JSONDeviceMagFieldProviderSvcCfg
+    acc.merge(JSONDeviceMagFieldProviderSvcCfg(flags,
+        DeviceMagFieldObjectName="TracccMagneticField",
+        HostMagFieldObjectName="TracccHostMagField",
+    ))
+
+    # --- Data preparation on the host ---
+    from InDetConfig.ITkActsDataPreparationConfig import ITkActsDataPreparationCfg
+    acc.merge(ITkActsDataPreparationCfg(flags, previousExtension=previousExtension))
+
+    # --- Conversion to traccc ---
+    measurements = f"Traccc{extension}MeasurementCollection"
+    measToPixelCluster = f"Traccc{extension}MeasToPixelCluster"
+    measToStripCluster = f"Traccc{extension}MeasToStripCluster"
+    stripSpacepoints = f"Traccc{extension}StripSpacepointCollection"
+
+    from ActsGPUEventCnv.ActsGPUEventCnvConfig import (
+        xAODToTracccMeasurementConverterAlgCfg,
+        xAODToTracccSpacePointConverterAlgCfg,
+    )
+    acc.merge(xAODToTracccMeasurementConverterAlgCfg(flags,
+        name=f"{extension}MeasurementConverterAlg",
+        InputPixelClusters=pixelClusters,
+        InputStripClusters=stripClusters,
+        OutputTracccMeasurements=measurements,
+        OutputMeasToPixelCluster=measToPixelCluster,
+        OutputMeasToStripCluster=measToStripCluster,
+    ))
+
+    stripSpacePoints = [f"{prefix}StripSpacePoints"]
+    if extension != "ActsConversion":
+        stripSpacePoints += [f"{prefix}StripOverlapSpacePoints"]
+    acc.merge(xAODToTracccSpacePointConverterAlgCfg(flags,
+        name=f"{extension}StripSpacePointConverterAlg",
+        InputSpacePoints=stripSpacePoints,
+        InputMeasToCluster=measToStripCluster,
+        OutputTracccSpacepoints=stripSpacepoints,
+    ))
+
+    # --- Seeding ---
+    seeds = f"Traccc{extension}StripSeedCollection"
+    from ActsGPUPatternRecognition.ActsGPUPatternRecognitionConfig import (
+        DeviceLargeRadiusStripTripletSeedingAlgCfg,
+        DeviceTrkParamEstimationAlgCfg,
+        DeviceLargeRadiusTrackFindingAlgCfg,
+    )
+    acc.merge(DeviceLargeRadiusStripTripletSeedingAlgCfg(flags,
+        name=f"{extension}DeviceStripTripletSeedingAlg",
+        InputTracccPixelSpacepoints=stripSpacepoints,
+        OutputTracccPixelSeeds=seeds,
+    ))
+
+    # --- Track Reconstruction ---
+    trackParameters = f"Traccc{extension}TrackParameterCollection"
+    tracccTracks = f"Traccc{extension}TrackCollection"
+    acc.merge(DeviceTrkParamEstimationAlgCfg(flags,
+        name=f"{extension}DeviceTrkParamEstimationAlg",
+        InputTracccSpacepoints=stripSpacepoints,
+        InputTracccMeasurements=measurements,
+        InputTracccSeeds=seeds,
+        InputTracccMagField="TracccMagneticField",
+        OutputTracccTrackParameters=trackParameters,
+    ))
+
+    acc.merge(DeviceLargeRadiusTrackFindingAlgCfg(flags,
+        name=f"{extension}DeviceTrackFindingAlg",
+        InputTracccMeasurements=measurements,
+        InputTracccMagField="TracccMagneticField",
+        InputTracccTrackParameters=trackParameters,
+        InputTracccDetectorGeometry="TracccDeviceDetectorGeometry",
+        OutputTracccTracks=tracccTracks,
+    ))
+
+    # The measurement to cluster maps hold the index of the cluster in its
+    # owning container, so the tracks are resolved against the primary pass
+    # cluster containers rather than the views of this pass
+    from ActsGPUEventCnv.ActsGPUEventCnvConfig import TracccTrackConverterAlgCfg
+    acc.merge(TracccTrackConverterAlgCfg(flags,
+        name=f"{extension}TracccTrackConverterAlg",
+        InputPixelClusters="ITkPixelClusters",
+        InputStripClusters="ITkStripClusters",
+        InputMeasToPixelSP=measToPixelCluster,
+        InputMeasToStripCl=measToStripCluster,
+        InputTracks=tracccTracks,
+        OutputTracks=f"{extension}Tracks",
+        GeoIdMapping="TracccGeometryIdMapping",
+        HostDetectorName="TracccHostDetectorGeometry",
+    ))
+
+    # Ambiguity Resolution
+    if flags.Acts.doAmbiguityResolution:
+        from ActsConfig.ActsTrackFindingConfig import ActsAmbiguityResolutionCfg
+        acc.merge(ActsAmbiguityResolutionCfg(flags))
+
+    # PRD association
+    from ActsConfig.ActsPrdAssociationConfig import ActsPrdAssociationAlgCfg
+    acc.merge(ActsPrdAssociationAlgCfg(flags,
+                                       name = f'{extension}PrdAssociationAlg',
+                                       previousActsExtension = previousExtension))
+
+    # Truth
+    if flags.Tracking.doTruth:
+        from ActsConfig.ActsTruthConfig import ActsTrackToTruthAssociationAlgCfg, ActsTrackFindingValidationAlgCfg
+        if flags.Tracking.ActiveConfig.storeSiSPSeededTracks or not flags.Acts.doAmbiguityResolution:
+            acts_tracks = f"{extension}Tracks"
+            acc.merge(ActsTrackToTruthAssociationAlgCfg(flags,
+                                                        name = f"{acts_tracks}TrackToTruthAssociationAlg",
+                                                        ACTSTracksLocation = acts_tracks,
+                                                        AssociationMapOut = f"{acts_tracks}ToTruthParticleAssociation"))
+            acc.merge(ActsTrackFindingValidationAlgCfg(flags,
+                                                       name = f"{acts_tracks}TrackFindingValidationAlg",
+                                                       TrackToTruthAssociationMap = f"{acts_tracks}ToTruthParticleAssociation"))
+
+        if flags.Acts.doAmbiguityResolution:
+            acts_tracks = f"{extension}ResolvedTracks"
+            acc.merge(ActsTrackToTruthAssociationAlgCfg(flags,
+                                                        name = f"{acts_tracks}TrackToTruthAssociationAlg",
+                                                        ACTSTracksLocation = acts_tracks,
+                                                        AssociationMapOut = f"{acts_tracks}ToTruthParticleAssociation"))
             acc.merge(ActsTrackFindingValidationAlgCfg(flags,
                                                        name = f"{acts_tracks}TrackFindingValidationAlg",
                                                        TrackToTruthAssociationMap = f"{acts_tracks}ToTruthParticleAssociation"))

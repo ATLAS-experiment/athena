@@ -30,12 +30,6 @@ CollectionCursor::CollectionCursor(
 
 CollectionCursor::~CollectionCursor()
 {
-   CollectionCursor::close();
-}
-
-
-void CollectionCursor::close()
-{
 }
 
 

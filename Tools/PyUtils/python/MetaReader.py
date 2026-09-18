@@ -1698,6 +1698,9 @@ def promote_keys(meta_dict, mode):
                 if 'geometryVersion' in md[key]:
                     md['GeoAtlas'] = md[key]['geometryVersion']
 
+                if 'AODFixVersion' in md[key]:
+                    md['AODFixVersion'] = md[key]['AODFixVersion']
+
                 # EventType checks
                 md['eventTypes'] = []
                 if mode == 'peeker' and 'simFlavour' in md[key]:

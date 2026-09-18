@@ -35,9 +35,9 @@ public:
   /// Function constructing the traccc device cuda magnetic field
   /// @return cuda magnetic field 
   virtual traccc::magnetic_field getDeviceMagneticField(traccc::magnetic_field const& host_bfield) const override;
-  traccc::cuda::magnetic_field_storage m_storage{};
 
   private:
+  traccc::cuda::magnetic_field_storage m_storage{traccc::cuda::magnetic_field_storage::global_memory};
   Gaudi::Property<std::string> m_magFieldStorage{
     this, "MagFieldStorage", "global_memory",
     "Storage method for the CUDA device magnetic field; global or texture memory"};

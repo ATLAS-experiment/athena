@@ -9,7 +9,6 @@
 #include "MuonSpacePoint/SpacePointContainer.h"
 #include "MuonStationIndex/MuonStationIndex.h"
 #include "MuonTrackEvent/ExpandedSector.h"
-#include "AthContainers/DataVector.h"
 
 namespace MuonR4 {
 /// @brief Data class to represent an eta maximum in hough space.
@@ -18,11 +17,10 @@ class GlobalPattern {
     using HitType = const SpacePoint*;
     using StIndex = Muon::MuonStationIndex::StIndex;
     using HitCollection = std::unordered_map<StIndex, std::vector<HitType>>;
-    using BucketCollection = std::unordered_map<StIndex, std::vector<const SpacePointBucket*>>;
     
     /// @brief c-tor consuming the hit collection per station
     GlobalPattern(HitCollection&& hitPerStation, 
-                  BucketCollection&& bucketPerStation);
+                  std::vector<const SpacePointBucket*>&& parentBuckets);
     GlobalPattern() = delete;
     /// @brief Copy c-tor
     GlobalPattern(const GlobalPattern& other) = default;
@@ -62,7 +60,9 @@ class GlobalPattern {
     /// @brief Return the pattern hits in the given station
     const std::vector<HitType>& hitsInStation(StIndex station) const;
     /// @brief Return the parent buckets of the pattern in the given station
-    const std::vector<const SpacePointBucket*>& bucketsInStation(StIndex station) const;
+    const std::vector<const SpacePointBucket*> bucketsInStation(StIndex station) const;
+    /// @brief Return all the parent buckets of the pattern
+    const std::vector<const SpacePointBucket*>& getParentBuckets() const { return m_parentBuckets; }
     /// @brief Return the number of precision layers in the pattern
     unsigned nPrecisionLayers() const { return m_nPrecisionLayers; }
     /// @brief Return the number of trigger layers in the pattern
@@ -106,7 +106,7 @@ class GlobalPattern {
     /** Hits of the pattern organized per station */
     const HitCollection m_hitsInStation{};
     /** Collection of parent buckets */
-    const BucketCollection m_parentBuckets{};
+    const std::vector<const SpacePointBucket*> m_parentBuckets{};
 };
 /** @brief Abrivation of the GlobalPattern container type */
 using GlobalPatternContainer = DataVector<GlobalPattern>;

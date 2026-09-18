@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
   SystObjectUnioniserAlg:
   This alg takes a set of systematic variation containers which have
@@ -20,10 +20,7 @@
 #ifndef CP_SYSTUNIONISERALG
 #define CP_SYSTUNIONISERALG
 
-#include <vector>
-#include <unordered_map>
-#include <utility>
-#include <memory>
+
 
 #include <AnaAlgorithm/AnaReentrantAlgorithm.h>
 #include "PATInterfaces/SystematicSet.h"
@@ -50,6 +47,11 @@
 #include <xAODTau/TauJetContainer.h>
 #include <xAODTau/DiTauJet.h>
 #include <xAODTau/DiTauJetContainer.h>
+
+#include <vector>
+#include <unordered_map>
+#include <utility>
+#include <memory>
 
 class EventContext;
 

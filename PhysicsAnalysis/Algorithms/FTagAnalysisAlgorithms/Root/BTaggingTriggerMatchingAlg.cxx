@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Thomas Strebler
@@ -101,13 +101,13 @@ namespace CP
    bool& btag, bool& matched) const{
     btag = false;
     matched = false;
-    if(!m_trigDecTool->isPassed(m_trigger)){
+    if(!m_trigDecTool->isPassed(m_trigger.value())){
       // No further check, btag will be false
       return StatusCode::SUCCESS;
     }
 
     Trig::FeatureRequestDescriptor frd;
-    frd.setChainGroup(m_trigger);
+    frd.setChainGroup(m_trigger.value());
 
     int ileg = 0;
     const xAOD::IParticle* bestHLT = nullptr;
@@ -190,13 +190,13 @@ namespace CP
     SG::ConstAccessor<const xAOD::BTagging*> acc("HLTBTag");
     const xAOD::BTagging* tagInfo = acc(*jet);
 
-    if(m_trigger.value().find("mv2c20") != std::string::npos){
+    if(m_trigger.value().contains("mv2c20")){
       if(!tagInfo->MVx_discriminant("MV2c20", hlt_bscore)){
 	ATH_MSG_ERROR("MV2c20 discriminant not accessible");
 	return StatusCode::FAILURE;
       }
     }
-    else if(m_trigger.value().find("mv2c10") != std::string::npos){
+    else if(m_trigger.value().contains("mv2c10")){
       if(!tagInfo->MVx_discriminant("MV2c10", hlt_bscore)){
 	ATH_MSG_ERROR("MV2c10 discriminant not accessible");
 	return StatusCode::FAILURE;

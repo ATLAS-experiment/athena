@@ -249,6 +249,8 @@ def LArOutputCfg(flags):
             ItemList.append("LArDigitContainer#LArDigitContainer_MC_Thinned")
         if flags.Common.ProductionStep != ProductionStep.PileUpPresampling:
             ItemList.append("LArRawChannelContainer#LArRawChannels")
+            if flags.Digitization.EnableCaloHSTruthRecoInputs:
+                ItemList.append("LArRawChannelContainer#LArRawChannels_DigiHSTruth")
         if flags.Overlay.DataOverlay:
             ItemList.append("LArFebHeaderContainer#LArFebHeader")
         if flags.Digitization.EnableTruth:
@@ -285,6 +287,10 @@ def LArDigitizationBasicCfg(flags, **kwargs):
     else:
         acc.merge(LArRawChannelBuilderAlgCfg(flags))
 
+    # Build the second instance with digi truth
+    if flags.Digitization.EnableCaloHSTruthRecoInputs:
+        acc.merge(LArRawChannelBuilderAlgCfg(flags, doDigiTruth=True))
+
     if flags.Digitization.AddCaloDigiThinned:
         acc.merge(LArDigitThinnerCfg(flags))
     return acc
@@ -312,6 +318,10 @@ def LArOverlayDigitizationBasicCfg(flags, name="digitmaker1", **kwargs):
     acc.merge(LArHitEMapToDigitAlgCfg(flags))
 
     acc.merge(LArRawChannelBuilderAlgCfg(flags))
+
+    if flags.Digitization.EnableCaloHSTruthRecoInputs:
+        acc.merge(LArRawChannelBuilderAlgCfg(flags, doDigiTruth=True))
+
     if flags.Digitization.AddCaloDigiThinned:
         acc.merge(LArDigitThinnerCfg(flags))
     return acc

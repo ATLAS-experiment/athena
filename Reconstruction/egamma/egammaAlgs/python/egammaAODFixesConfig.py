@@ -74,8 +74,8 @@ def runAODFix(flags, correctCluster = True, checkRelWithAMI = False):
 
     msg=logging.getLogger("GetDecisionToRunAODFix")
 
-    ALToFix = flags.Input.AODFixesDone.find('AmbiguityLinks') < 0
-    TimeToFix = flags.Input.AODFixesDone.find('egammatopoIsoFix') < 0
+    ALToFix = "egammaAmbiguityLinksFix" not in flags.Input.AODFixesDone
+    TimeToFix = "egammatopoIsoFix" not in flags.Input.AODFixesDone
 
     if flags.GeoModel.Run >= LHCPeriod.Run3:
         doFix_meta = doFixTime(flags) and TimeToFix
@@ -107,31 +107,31 @@ def runAODFix(flags, correctCluster = True, checkRelWithAMI = False):
                     doFix = e[0]
                     doAmbiguityFix = e[1]
 
-    name = ''
+    fixes = set()
     if doFix:
         if doAmbiguityFix:
-            name += 'egammaAmbiguityLinksFix'
+            fixes.add('egammaAmbiguityLinksFix')
         # no timing cut in HI reco, so not these fixes
         if not flags.Reco.EnableHI:
-            name += ' egammatopoIsoFix'
+            fixes.add('egammatopoIsoFix')
             if correctCluster:
-                name += ' egClusterL2_3Fix'
+                fixes.add('egClusterL2_3Fix')
         else:
             doFix = doAmbiguityFix
 
-    return doFix, name
+    return doFix, fixes
 
 def egammaAODFixesCfg(flags, correctCluster = True):
 
     msg=logging.getLogger("egammaAODFixes")
     #first check if we need to apply this AODFix
-    doFix, name = runAODFix(flags, correctCluster)
+    doFix, fixes = runAODFix(flags, correctCluster)
     msg.info('Decision for egamma AOD fix = %s',doFix)
     if not doFix:
         return None
     else: 
-        if name!='':
-            msg.info('Will apply fixes = %s',name)
+        if fixes:
+            msg.info('Will apply fixes = %s', ', '.join(fixes))
         else:
             msg.info('Range is ok but there are no fix to apply')
             return None
@@ -139,7 +139,7 @@ def egammaAODFixesCfg(flags, correctCluster = True):
     # I do this because there are in fact two AOD fixes here:
     # one for ambiguity links, one for timing issue (topoetcone + cluster fixes)
     # sometimes, the ambiguity link fix is not needed, need to now this
-    getfunc().__name__ = name
+    getfunc().__name__ = " ".join(fixes)
 
     result=ComponentAccumulator()
 
@@ -163,7 +163,7 @@ def egammaAODFixesCfg(flags, correctCluster = True):
 
     kwargs = dict()
     kwargs['CorrectCluster'] = correctCluster
-    kwargs['FixAmbiguityLinks'] = (name.find('egammaAmbiguityLinksFix') >= 0)
+    kwargs['FixAmbiguityLinks'] = 'egammaAmbiguityLinksFix' in fixes
     if correctCluster:
           # First some detector config
           # TO BE UNDERSTOOD : why is this explicitely needed here (without it : ERROR SG::ExcNoCondCont: Can't retrieve CondCont from ReadCondHandle for key ConditionStore+LArBadChannel. Can't retrieve.)

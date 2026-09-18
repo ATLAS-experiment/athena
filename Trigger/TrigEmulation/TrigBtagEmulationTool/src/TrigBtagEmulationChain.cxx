@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration 
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration 
 */
 
 #include "src/TrigBtagEmulationChain.h"
@@ -96,13 +96,13 @@ void TrigBtagEmulationChain::parseChainDefinition(const std::vector< std::string
     ATH_MSG_DEBUG( " -           is PFlow: " << (is_PFlow ? "YES":"NO"));
     ATH_MSG_DEBUG( " -      GSC threshold: " << gsc_pt);
     
-    m_chainPartName.push_back(chainPartName);
+    m_chainPartName.push_back(std::move(chainPartName));
     m_jet_multiplicity.push_back(jet_multiplicity);
     m_jet_pt.push_back(jet_pt);
     m_jet_eta_min.push_back(jet_eta_min);
     m_jet_eta_max.push_back(jet_eta_max);
     m_jvt.push_back(jvt);
-    m_tagger.push_back(tagger);
+    m_tagger.push_back(std::move(tagger));
     m_is_PFlow.push_back(is_PFlow);
     m_gsc_pt.push_back(gsc_pt);
     
@@ -111,7 +111,7 @@ void TrigBtagEmulationChain::parseChainDefinition(const std::vector< std::string
     }
     
     if(m_dijetmass.empty() || dijetmass != "None") {
-      m_dijetmass = dijetmass;
+      m_dijetmass = std::move(dijetmass);
     }
   }
   

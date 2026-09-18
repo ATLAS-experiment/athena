@@ -52,6 +52,7 @@ DataHeaderCnv::~DataHeaderCnv()
 //______________________________________________________________________________
 StatusCode DataHeaderCnv::initialize()
 {
+   ATH_CHECK(m_poolSvc.retrieve());
    // Read properties from the ConversionSvc
    m_inDHFMapMaxsize = 100;   // default DHForm cache size
    bool doFilterDHAliases = true;
@@ -571,7 +572,7 @@ DataHeader* DataHeaderCnv::createTransient(const Token* token) {
    if (token->technology() == 0x00001000) { // Artificial ByteStream DataHeader Token
       DataHeader* dh = new DataHeader();
       std::string bestPfn, fileType;
-      m_athenaPoolCnvSvc->getPoolSvc()->lookupBestPfn(token->dbID().toString(), bestPfn, fileType);
+      m_poolSvc->lookupBestPfn(token->dbID().toString(), bestPfn, fileType);
       DataHeaderElement dhe(ClassID_traits<DataHeader>::ID(), bestPfn, Token(token));
       dh->insert(dhe);
       return(dh);

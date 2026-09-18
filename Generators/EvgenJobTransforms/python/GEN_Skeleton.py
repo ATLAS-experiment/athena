@@ -130,7 +130,7 @@ def setupSample(flags):
 def checkBlackList(cache, generatorName, checkType) :
     isError = None
     fileName = "BlackList_caches.txt" if checkType == "black" else "PurpleList_generators.txt"
-    with open(f"/cvmfs/atlas.cern.ch/repo/sw/Generators/MC16JobOptions/common/{fileName}") as bfile:
+    with open(f"/cvmfs/atlas.cern.ch/repo/sw/Generators/MCJobOptions/common/{fileName}") as bfile:
         for line in bfile.readlines():
             if not line.strip():
                 continue

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRK_GBTSSEEDINGTOOL_SEEDINGTOOL_H
@@ -14,6 +14,7 @@
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 
 // ACTS CORE
+#include "Acts/Seeding/GbtsLayerConnection.hpp"
 #include "Acts/Seeding/GraphBasedTrackSeeder.hpp"
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/EventData/SeedContainer.hpp"
@@ -37,6 +38,7 @@
 #include "xAODInDetMeasurement/SpacePointAuxContainer.h"
 
 #include <memory>
+#include <vector>
 
 namespace ActsTrk {
 
@@ -70,10 +72,17 @@ namespace ActsTrk {
     /// Reads the connection table and keeps the connections this pass is for:
     /// both layers have to be layers this detector has, of one technology,
     /// and that technology has to be one the pass asked for.
+    /// @param connections filled with the layer pairs, in stage order
+    /// @param etaBinWidth filled with the eta bin width the table was made for
     StatusCode readConnections(
       const std::vector<Acts::Experimental::GbtsLayerDescription>& layers,
-      const std::vector<GbtsTechnology>& technologies,
-      Acts::Experimental::GbtsLayerConnectionMap& connections) const;
+      std::vector<Acts::Experimental::GbtsLayerConnection>& connections,
+      float& etaBinWidth) const;
+
+    /// Reads the tau lookup table the cluster width cuts need: per line a
+    /// cluster width, the bulk tau bounds and the near-edge ones.
+    StatusCode readTauLookupTable(
+      Acts::Experimental::detail::GbtsTauLookupTable& tauLookupTable) const;
 
     /// Private access to the logger
     const Acts::Logger &logger() const { return *m_logger; }
@@ -100,8 +109,6 @@ namespace ActsTrk {
     /// put a space point on the layer its module belongs to.
     const std::vector<short>* m_stripHashToLayer = nullptr;
     const std::vector<short>* m_pixelHashToLayer = nullptr;
-    /// Whether each dense GBTS layer index is a pixel layer.
-    std::vector<bool> m_are_pixels;
 
     /// Builds the GBTS layers out of the ITk readout geometry.
     ToolHandle<IGbtsLayerTool> m_layerTool {this, "layerTool", "ActsTrk::GbtsLayerTool/ActsGbtsLayerTool"}; 
@@ -111,6 +118,11 @@ namespace ActsTrk {
     Gaudi::Property<bool> m_pixelConnections {this, "usePixelConnections", true, "keep the pixel to pixel connections of the table"};
     Gaudi::Property<bool> m_stripConnections {this, "useStripConnections", false, "keep the strip to strip connections of the table"};
     Gaudi::Property<std::string> m_lutFile {this, "lutInputFile", "gbts_ml_pixel_barrel_loose.lut", "file to LUT"}; 
+
+    /// Which technologies this instance seeds on. A space point is used only
+    /// when its layer is enabled.
+    Gaudi::Property<bool> m_usePixelLayers {this, "usePixelLayers", true, "seed on the pixel layers"};
+    Gaudi::Property<bool> m_useStripLayers {this, "useStripLayers", false, "seed on the strip layers"};
     
     // GraphBasedTrackSeeder: feature option
     Gaudi::Property<bool> m_LRTmode {this, "LRTmode", false, "whether strip or pixel hits are used"};

@@ -12,7 +12,6 @@ namespace MagField{
   class AtlasFieldCache;
 }
 
-
 namespace MuonR4 {
     /** @brief Extension of the ITrackSeedinTool interface to monitor the performance
      *         of the most crucial methods inside the classical MS track seeding. 
@@ -23,8 +22,6 @@ namespace MuonR4 {
             virtual ~ITrackSeedingDiagnosticsTool() = default;
             /** @brief Declare the interface  */
             DeclareInterfaceID(MuonR4::ITrackSeedingDiagnosticsTool, 1, 0);
-            /** @brief Take the interface estimateQtimesP method upstream */
-            using ITrackSeedingTool::estimateQtimesP;
     
             using Location = MsTrackSeed::Location;
             /** @brief Returns whether the expression on the cylinder is within the surface bounds

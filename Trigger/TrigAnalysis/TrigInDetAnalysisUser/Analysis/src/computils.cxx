@@ -30,22 +30,172 @@
 #include "TObject.h"
 #include "TDirectory.h"
 #include "TH1D.h"
+#include "TLine.h"
 
 #include "TLegend.h"
 #include "TColor.h"
 
 #include "computils.h"
 
-
 bool LINEF = true;
 bool LINES = false;
 
+
+bool JLflag = false;
 
 bool Plots::s_watermark = true;
 
 int   colours[6] = {  1,    2, kBlue-4,  6, kCyan-2,  kMagenta+2 };
 int   markers[6] = { 20,   24,      25, 26,      25,          22 };
 double msizes[6] = {  0.85,  1,       1,  1,       1,           1 };
+
+
+void band_intersect( double& x0, double& x1, double& y0, double& y1, double ylo, double yhi ) { 
+  
+  double x0t = x0;
+  double x1t = x1;
+
+  double y0t = y0;
+  double y1t = y1;
+
+  if ( ylo!=-999 ) { 
+    if ( y0>ylo && y1<ylo) { 
+      double y =  ylo;
+      double x = (ylo-y0)*(x1-x0)/(y1-y0)+x0;
+      x1t = x;
+      y1t = y;
+    }
+    
+    if ( y0<ylo && y1>ylo) { 
+      double y =  ylo;
+      double x = x1-(y1-ylo)*(x1-x0)/(y1-y0);
+      x0t = x;
+      y0t = y;
+    }
+
+    if ( y0<ylo && y1<ylo) { 
+      y0t = ylo;
+      y1t = ylo;
+    }
+
+    x0 = x0t;
+    x1 = x1t;
+    y0 = y0t;
+    y1 = y1t;
+
+    return;
+  }
+
+  if ( yhi!=-999 ) { 
+    if ( y0<yhi && y1>yhi) { 
+      double y =  yhi;
+      double x = (yhi-y0)*(x1-x0)/(y1-y0)+x0;
+      x1t = x;
+      y1t = y;
+    }
+    
+    if ( y0>yhi && y1<yhi) { 
+      double y =  yhi;
+      double x = x1-(y1-yhi)*(x1-x0)/(y1-y0);
+      x0t = x;
+      y0t = y;
+    } 
+
+    x0 = x0t;
+    x1 = x1t;
+    y0 = y0t;
+    y1 = y1t;
+
+    return;
+  }
+
+}
+
+
+void band_plot( TH1* h, double xlo, double xhi, double ylo, double yhi ) { 
+
+  //  bool first = true;
+  bool last = true;
+
+  int ifirst = -1; 
+  //  int ilast  = -1;
+
+  for ( int i=h->GetNbinsX()+1 ; i-- ;  ) {
+    double yt = h->GetBinContent(i);
+    if ( last && ( yt<ylo || ( yt==0 && ylo==0 ) ) ) continue;
+    // ilast = i+1;
+    last = false;
+    break;
+  }
+
+  if ( JLflag ) { 
+    //  if ( contains( std::string(h->GetName()), "vs_mu") ) ilast = h->FindBin(80);
+    if ( contains( std::string(h->GetName()), "vs_mu") )  h->GetXaxis()->SetRangeUser(   18,  58 );
+    if ( contains( std::string(h->GetName()), "a0_eff") ) h->GetXaxis()->SetRangeUser( -190, 200 );
+    // if ( contains( std::string(h->GetName()), "a0") )     h->GetXaxis()->SetRangeUser( -200, 200 );
+  }
+
+  for ( int i=1 ; i<=h->GetNbinsX()+1 ; i++ ) {
+    
+    double x0 = h->GetBinCenter(i);
+    double x1 = h->GetBinCenter(i+1);
+
+    if ( JLflag ) { 
+      if ( contains( std::string(h->GetName()), "vs_mu") && x0<18 ) continue;
+      if ( contains( std::string(h->GetName()), "vs_mu") && x1>58 ) continue;
+      
+      if ( contains( std::string(h->GetName()), "a0_eff") && x0<-200 ) continue;
+      if ( contains( std::string(h->GetName()), "a0_eff") && x1> 200 ) continue;
+    }
+    
+    //    if ( first && ( _y<ylo || ( _y==0 && ylo==0 ) ) ) continue;
+
+    if ( ifirst<0 ) ifirst = i;
+
+    //    if ( ilast>0 && (i+1)>ilast ) continue;
+
+    //    first = false;
+
+    double x0_1 = x0;
+    double x1_1 = x1;
+
+    if ( xlo!=-999 && x0<xlo ) continue;
+    if ( xhi!=-999 && x1>xhi ) continue;
+
+    double y0_up = h->GetBinContent(i)   + h->GetBinError(i);
+    double y1_up = h->GetBinContent(i+1) + h->GetBinError(i+1);
+    double y0_lo = h->GetBinContent(i)   - h->GetBinError(i);
+    double y1_lo = h->GetBinContent(i+1) - h->GetBinError(i+1);
+
+    band_intersect( x0,   x1,   y0_up, y1_up, ylo, yhi );
+    band_intersect( x0_1, x1_1, y0_lo, y1_lo, ylo, yhi );
+   
+    TLine* t0 = new TLine( x0, y0_up, x1, y1_up );
+    TLine* t1 = new TLine( x0_1, y0_lo, x1_1, y1_lo );
+
+    t0->SetLineColor( h->GetLineColor() );
+    t0->Draw();
+
+    t1->SetLineColor( h->GetLineColor() );
+    t1->Draw();
+
+    //    std::cout << h->GetName() << "\tx1: " << x1 << std::endl;
+
+  }
+
+  //  if ( contains( std::string(h->GetName()), "vs_mu") ) ilast = h->FindBin(80);
+  
+  // if ( ilast>0 && ifirst>0 ) h->GetXaxis()->SetRange( ifirst, ilast );
+
+  if ( h->GetLineColor()>10 )  h->SetFillStyle(3395);
+  else                         h->SetFillStyle(3354);
+
+  h->SetFillColor(h->GetLineColor());
+  //  h->DrawCopy("same e3lhist" );
+  
+
+}
+
 
 
 
@@ -64,9 +214,19 @@ double integral( TH1* h ) {
 
 
 
-void Norm( TH1* h, double scale ) {
+void Norm( TH1* h, double scale, double xmin, double xmax ) {
   double n = 0;
-  for ( int i=h->GetNbinsX()+2 ; --i ; ) n += h->GetBinContent(i);
+
+  if ( xmin==0 && xmax==0 ) {   
+    for ( int i=h->GetNbinsX()+2 ; --i ; ) n += h->GetBinContent(i);
+  }  
+  else { 
+    for ( int i=h->GetNbinsX()+2 ; --i ; ) { 
+      double x = h->GetBinCenter(i);
+      if ( x>xmin && x<xmax ) n += h->GetBinContent(i);
+    }
+  }
+  
   if ( n!=0 ) {
     double in=scale/n;
     for ( int i=h->GetNbinsX()+2 ; --i ; ) {
@@ -178,7 +338,7 @@ void trim_tgraph( TH1* h, TGraphAsymmErrors* t ) {
 
     if ( (yt-ye) < ylo ) { 
       h->SetBinContent(ih, ylo-100 );
-      t->SetPoint( i, xt, ylo-100 ); 
+      t->SetPoint( i, xt, ylo-10000 ); 
     }
 
   }
@@ -203,7 +363,6 @@ void ATLASFORAPP_LABEL( double x, double  y, int color, double size )
 }
 
 void myText( Double_t x, Double_t y, Color_t color, const std::string& text, Double_t tsize) {
-
   //Double_t tsize=0.05;
   TLatex lat; lat.SetTextAlign(12); lat.SetTextSize(tsize); 
   lat.SetNDC();
@@ -360,12 +519,11 @@ void contents( std::vector<std::string>&  keys, TDirectory* td,
 	
 	bool matched = true;
 	for ( size_t i=patterns.size() ; i-- ; ) { 
-	  const std::string& pattern = patterns[i];  
+	  std::string pattern = patterns[i];  
 	  if ( contains(std::string(tobj->GetName()), pattern ) )  matched &=true;
 	  else matched = false;
 	}
 	if ( matched ) { 
-	  //coverity[DEADCODE]
 	  if ( print ) std::cout << "will process " << td->GetName() << " \t:: " << tobj->GetName() << "\tpatterns: " << patterns.size() << std::endl;
 	  print = false;
 	  keys.push_back( path+tobj->GetName() );
@@ -380,6 +538,7 @@ void contents( std::vector<std::string>&  keys, TDirectory* td,
 
 
 double realmax( TH1* h, bool include_error, double lo, double hi ) { 
+
   double rm = 0;
   if ( h->GetNbinsX()==0 )  return 0; 
 

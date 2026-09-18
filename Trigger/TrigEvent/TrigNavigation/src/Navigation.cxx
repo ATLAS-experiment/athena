@@ -1,17 +1,20 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <sstream>
-#include <iostream>
-#include <algorithm>
-#include <ranges>
-#include <string_view>
+
 
 #include "GaudiKernel/System.h"
 
 #include "TrigNavigation/Navigation.h"
 #include "AthContainers/AuxElement.h"
+#include "GaudiKernel/MsgStream.h"
+#include <sstream>
+#include <iostream>
+#include <algorithm>
+#include <charconv>
+#include <ranges>
+#include <string_view>
 
 using namespace HLT;
 
@@ -31,7 +34,8 @@ Navigation::Navigation(  const std::string& type, const std::string& name,
                   "List of classes which need to be serialized together with the Navigation (Only in DataScouting collection).");
 
   declareProperty("ClassesFromPayloadIgnore", m_classesFromPayloadIgnoreProperty,
-                  "List of classes (Type[#Key]) to ignore on deserialization of the Navigation.");
+                  "List of classes (Type[#Key]) to ignore on deserialization of the Navigation. "
+                  "Type can be an actual type name or CLID (useful for deleted classes).");
 
   declareProperty("ClassesToPreregister", m_classesToPreregisterProperty,
                   "List of classes which need to be put in SG independently if they appear in event.");
@@ -120,17 +124,23 @@ Navigation::classKey2CLIDKey(const std::vector<std::string>& property,
     std::string key;
     std::string type;
 
-    if ( cname.find('#') != std::string::npos ) {
-      type = cname.substr(0, cname.find('#') );
-      key  = cname.substr(cname.find('#')+1 );
+    if ( auto hashPos = cname.find('#'); hashPos!= std::string::npos ) {
+      type = cname.substr(0, hashPos);
+      key  = cname.substr(hashPos+1 );
     } else {
       type = cname;
       key = "";
     }
 
-    if ( m_clidSvc->getIDOfTypeName(type, clid).isFailure() ) {
-      ATH_MSG_ERROR("Unable to get CLID for class: " << cname);
-      return StatusCode::FAILURE;
+    // First check if type is already a CLID
+    auto result = std::from_chars(type.data(), type.data() + type.size(), clid);
+
+    // If not, convert type name to CLID
+    if (result.ec != std::errc()) {
+      if ( m_clidSvc->getIDOfTypeName(type, clid).isFailure() ) {
+        ATH_MSG_ERROR("Unable to get CLID for class: " << cname);
+        return StatusCode::FAILURE;
+      }
     }
 
     ATH_MSG_DEBUG("Recognized CLID : " << type << " and key: " << key);

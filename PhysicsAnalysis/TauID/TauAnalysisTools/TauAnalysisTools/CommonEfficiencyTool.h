@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUANALYSISTOOLS_COMMONEFFICIENCYTOOL_H
@@ -24,10 +24,6 @@
 #include "TauAnalysisTools/ITauEfficiencyCorrectionsTool.h"
 #include "TauAnalysisTools/HelperFunctions.h"
 
-// ROOT include(s):
-#include "TFile.h"
-#include "TKey.h"
-
 #include <ColumnarEventInfo/EventInfoDef.h>
 #include <ColumnarCore/ColumnAccessor.h>
 #include <ColumnarCore/LinkColumn.h>
@@ -35,6 +31,9 @@
 #include <ColumnarCore/VectorColumn.h>
 #include <ColumnarTau/TauJetDef.h>
 #include "TauAnalysisTools/ColumnarTauAccessors.h"
+
+class TFile;
+class TKey;
 
 namespace TauAnalysisTools
 {
