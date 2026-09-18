@@ -73,7 +73,7 @@ def Muon5ElElSelectionCfg(flags):
         ["(Electrons.DFCommonElectronsLHLoose)", "(Electrons.pt > 3.0*GeV)"]
     )
 
-    acc.setPrivateTools(
+    EGAM1_ZEEMassTool3 = acc.addPublicTool(
         CompFactory.DerivationFramework.EGInvariantMassTool(
             name="EGAM1_ZEEMassTool3",
             Object1Requirements=requirement_tag,
@@ -88,6 +88,7 @@ def Muon5ElElSelectionCfg(flags):
             MinDeltaR=0.0,
         )
     ) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("MUON5ElElSelectionAug", AugmentationTools = [EGAM1_ZEEMassTool3]), primary=True)
 
     return acc
 
@@ -127,16 +128,12 @@ def MUON5KernelCfg(flags, name='MUON5Kernel', **kwargs):
     # ------------
 
     # Augmentation tools
-    MUON5AugmentTools = []                                     
     muonThinFlags = []
     trkThinFlags = []
-    
-    Muon5ElElSelectionTool = acc.popToolsAndMerge(Muon5ElElSelectionCfg(flags))
-    acc.addPublicTool(Muon5ElElSelectionTool)
-    MUON5AugmentTools.append(Muon5ElElSelectionTool)
+
+    acc.merge(Muon5ElElSelectionCfg(flags))
     skimmingORs.append("(count( EGAM1_DiElectronMass3 > 60.0*GeV ) >= 1)")
 
-    
     ### isolation decorations
     from DerivationFrameworkMuons.TrackIsolationDecoratorConfig import TrackIsolationCfg
     acc.merge(TrackIsolationCfg(flags, TrackCollection="InDetTrackParticles"))
