@@ -170,11 +170,12 @@ def TRIG8KernelCfg(flags, name='TRIG8Kernel', **kwargs):
 
         skimmingTools.append(TRIG8TriggerSkimmingTool)
 
+    for tool in augmentationTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(DerivationKernel(name,
                                       SkimmingTools = skimmingTools,
-                                      ThinningTools = thinningTools,
-                                      AugmentationTools = augmentationTools))
+                                      ThinningTools = thinningTools))
 
     return acc
 

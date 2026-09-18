@@ -148,10 +148,8 @@ def PhotonVertexSelectionWrapperKernelCfg(
     augmentationTools = [
         acc.addPublicTool(acc.popToolsAndMerge(PhotonVertexSelectionWrapperCfg(flags)))
     ]
-    kwargs.setdefault("AugmentationTools", augmentationTools)
-
-    acc.addEventAlgo(
-        CompFactory.DerivationFramework.DerivationKernel(name, **kwargs))
+    for i, tool in enumerate(augmentationTools):
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(f"{name}Aug{i}", AugmentationTools = [tool]))
     return acc
 
 

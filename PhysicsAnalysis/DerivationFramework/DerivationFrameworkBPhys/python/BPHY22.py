@@ -264,8 +264,9 @@ def BPHY22Cfg(flags):
                          BPHY22MuLambdaC,
                          BPHY22_AugOriginalCounts]
     for t in  augTools : acc.addPublicTool(t)
+    for tool in augTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY22Kernel",
-                                                    AugmentationTools = augTools,
                                                     #Only skim if not MC
                                                     SkimmingTools     = [BPHY22SkimmingOR] if not isSimulation else [],
                                                     ThinningTools     = []))

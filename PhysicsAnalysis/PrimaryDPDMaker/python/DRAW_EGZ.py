@@ -80,10 +80,11 @@ def DRAW_EGZKernelCfg(flags, name='DRAW_EGZKernel', **kwargs):
         flags, name='DRAW_EGZSkimmingTool', expression=draw_egz))
 
     # The main kernel algo
+    for tool in augmentationTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]), sequenceName='DRAW_EGZSequence')
     DRAW_EGZKernel = CompFactory.DerivationFramework.DerivationKernel(
         name='DRAW_EGZKernel',
         doChronoStat=(flags.Concurrency.NumThreads <= 1),
-        AugmentationTools=augmentationTools,
         SkimmingTools=[skimmingTool])
 
     acc.addEventAlgo(DRAW_EGZKernel, sequenceName='DRAW_EGZSequence')

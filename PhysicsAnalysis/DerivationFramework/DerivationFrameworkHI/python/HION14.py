@@ -140,11 +140,12 @@ def HION14KernelCfg(flags, name='HION14Kernel', **kwargs):
     centralityAugmentatioTool = acc.getPrimaryAndMerge(HION14CentralityAugmentationToolCfg(flags))
     augmentationTool = [globalAugmentationTool, tightAugmentationTool, centralityAugmentatioTool]
 
+    for tool in augmentationTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(DerivationKernel(name,
                                     SkimmingTools= skimmingTool,
-                                    ThinningTools=thinningTool,
-                                    AugmentationTools=augmentationTool
+                                    ThinningTools=thinningTool
                                     ),
                                 )
 

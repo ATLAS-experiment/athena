@@ -1,4 +1,4 @@
-#Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+#Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 """
 Intended use:
@@ -31,7 +31,6 @@ def AODTSOSKernelCfg(flags, name="AODTSOSKernel", listOfExtensions=[]):
 
     from DerivationFrameworkInDet.InDetToolsConfig import TrackStateOnSurfaceDecoratorCfg
 
-    listOfAugmTools = []
     for extension in listOfExtensions:
         PixelMsosName = f"{extension}PixelMSOSs"
         SctMsosName = f"{extension}SCT_MSOSs"
@@ -49,10 +48,9 @@ def AODTSOSKernelCfg(flags, name="AODTSOSKernel", listOfExtensions=[]):
             )
         )
         TrackStateOnSurfaceDecorator.DecorationPrefix = "Reco_"
-        listOfAugmTools.append(TrackStateOnSurfaceDecorator)
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
+            name=f"{extension}TrackStateOnSurfaceDecoratorAug", AugmentationTools=[TrackStateOnSurfaceDecorator]))
 
-    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
-        name, AugmentationTools=listOfAugmTools))
     return acc
 
 

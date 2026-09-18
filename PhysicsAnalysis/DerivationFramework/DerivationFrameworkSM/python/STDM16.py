@@ -267,10 +267,12 @@ def STDM16Kernel(flags, name='STDM16Kernel', **kwargs):
     acc.addPublicTool(STDM16_Thin_Tracks)
 
     acc.addPublicTool(STDM16_SelectEvent)
+    for i, tool in enumerate(STDM16_AugmentationTools):
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(f"STDM16KernelAug{i}", AugmentationTools = [tool]))
+
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("STDM16Kernel",
                                                                       SkimmingTools = STDM16_SkimmingTools,
-                                                                      ThinningTools = STDM16_ThinningTools,
-                                                                      AugmentationTools = STDM16_AugmentationTools))
+                                                                      ThinningTools = STDM16_ThinningTools))
       
     return acc
 

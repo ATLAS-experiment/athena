@@ -455,9 +455,10 @@ def LRTElectronLHSelectorsCfg(flags):
                               ElectronPassLHTightNoPix,
                               ElectronPassLHTightNoPixLRT]
 
-    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
-        "LLP1EGammaLRTKernel",
-        AugmentationTools=LRTEGAugmentationTools
+    for i, tool in enumerate(LRTEGAugmentationTools):
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
+            f"LLP1EGammaLRTKernel{i}",
+            AugmentationTools=[tool]
     ))
 
     return acc

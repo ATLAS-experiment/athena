@@ -102,8 +102,10 @@ def JETM42KernelCfg(flags, name='JETM42Kernel', **kwargs):
     thinningTools = []
 
     # Finally the kernel itself
+    for tool in augmentationTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
-    acc.addEventAlgo(DerivationKernel(name, AugmentationTools = augmentationTools, ThinningTools = thinningTools, SkimmingTools = skimmingTools))
+    acc.addEventAlgo(DerivationKernel(name, ThinningTools = thinningTools, SkimmingTools = skimmingTools))
     return acc
 
 

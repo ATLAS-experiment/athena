@@ -673,9 +673,10 @@ def BPHY13Cfg(flags):
     augmentation_tools = [BPHY13_Reco_Phimumu, BPHY13_Reco_Jpsimumu, BPHY13_Reco_Psimumu, BPHY13_Reco_Upsimumu, BPHY13_Reco_Dimumumu, BPHY13_Reco_Phimutrk, BPHY13_Reco_Jpsimutrk, BPHY13_Reco_Psimutrk, BPHY13_Reco_Upsimutrk, BPHY13_Reco_Dimumutrk, BPHY13_Rev_Phimumu, BPHY13_Rev_Jpsimumu, BPHY13_Rev_Psimumu, BPHY13_Rev_Upsimumu, BPHY13_Rev_Phimutrk, BPHY13_Rev_Jpsimutrk, BPHY13_Rev_Psimutrk, BPHY13_Rev_Upsimutrk] + list_all_obj
     for t in augmentation_tools : acc.addPublicTool(t)
 
+    for tool in augmentation_tools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
         "BPHY13Kernel",
-        AugmentationTools = augmentation_tools,
         SkimmingTools     = [BPHY13_SelectEvent]
     ))
 

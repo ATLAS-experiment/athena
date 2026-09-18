@@ -220,9 +220,10 @@ def BPHY12Cfg(flags):
     skimTools = [BPHY12_SelectBmumuKstEvent] if skimTruth or not isSimulation else []
 
 
+    for tool in augTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
          "BPHY12Kernel",
-          AugmentationTools = augTools,
           SkimmingTools     = skimTools,
           ThinningTools     = BPHY12ThinningTools
           ))

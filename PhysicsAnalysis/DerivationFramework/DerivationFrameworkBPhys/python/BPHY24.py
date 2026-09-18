@@ -505,8 +505,9 @@ def BPHY24Cfg(flags):
       thinList += [ BPHY24_Thin_TruthQuarks ]
 
     for t in  augsList + skimList + thinList: acc.addPublicTool(t)
+    for tool in augsList:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY24Kernel",
-                                                     AugmentationTools = augsList,
                                                      #OutputLevel = DEBUG,
                                                      #Only skim if not MC
                                                      SkimmingTools     = skimList,

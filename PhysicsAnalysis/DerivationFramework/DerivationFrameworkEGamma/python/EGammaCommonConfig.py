@@ -956,11 +956,8 @@ def EGammaCommonCfg(flags):
     # CREATE THE DERIVATION KERNEL ALGORITHM
     # =======================================
 
-    acc.addEventAlgo(
-        CompFactory.DerivationFramework.CommonAugmentation(
-            "EGammaCommonKernel", AugmentationTools=EGAugmentationTools
-        )
-    )
+    for i, tool in enumerate(EGAugmentationTools):
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(f"EGammaCommonKernel{i}", AugmentationTools = [tool]))
 
     # =======================================
     # ADD TOOLS : custom electron, photon and muon track isolation

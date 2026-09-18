@@ -585,7 +585,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
 
     from DerivationFrameworkLLP.LLPToolsConfig import AugmentationToolLeadingJetsCfg
     augmentationToolLeadingJets = acc.getPrimaryAndMerge(AugmentationToolLeadingJetsCfg(flags))
-    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(name, AugmentationTools = [augmentationToolLeadingJets]))
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(name, AugmentationTools = [augmentationToolLeadingJets]))
 
     # Thinning tools...
     from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg, EgammaTrackParticleThinningCfg, MuonTrackParticleThinningCfg, TauTrackParticleThinningCfg, DiTauTrackParticleThinningCfg 
@@ -930,17 +930,14 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
 
         skimmingTools.append(LLP1TriggerSkimmingTool)
 
+    for tool in augmentationTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(DerivationKernel(name,
                                       SkimmingTools = skimmingTools,
-                                      ThinningTools = thinningTools,
-                                      AugmentationTools = augmentationTools))
+                                      ThinningTools = thinningTools))
 
     return acc
-
-
-
-
 
 
 def LLP1Cfg(flags):

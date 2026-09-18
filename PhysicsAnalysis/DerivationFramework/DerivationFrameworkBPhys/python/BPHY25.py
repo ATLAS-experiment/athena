@@ -690,9 +690,10 @@ def BPHY25Cfg(flags):
                           BPHY25Select_Jpsi, BPHY25Select_mumu] + list_obj
     for t in augmentation_tools : acc.addPublicTool(t)
 
+    for tool in augmentation_tools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
         "BPHY25Kernel",
-        AugmentationTools = augmentation_tools,
         SkimmingTools     = [BPHY25_SelectEvent]
     ))
 

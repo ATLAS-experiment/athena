@@ -243,8 +243,9 @@ def BPHY26KernelCfg(flags, **kwargs):
     augTools += [BPHY26TrackIsolationDecorator, BPHY26_Revertex_phipi , BPHY26_Select_phipi, BPHY26_Revertex_Jpsipi, BPHY26_Select_Jpsipi , BPHY26_Revertex_Upsipi , BPHY26_Select_Upsipi]
     skimTools = [BPHY26_SelectEvent]
     for t in  augTools +skimTools : acc.addPublicTool(t)
+    for tool in augTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY26Kernel",
-                                                    AugmentationTools = augTools,
                                                     #Only skim if not MC
                                                     SkimmingTools     = skimTools,
                                                     ThinningTools     = []))

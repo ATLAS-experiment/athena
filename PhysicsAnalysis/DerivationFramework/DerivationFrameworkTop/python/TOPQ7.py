@@ -79,14 +79,15 @@ def TOPQ7KernelCfg(flags, name='TOPQ7Kernel', **kwargs):
     
 
     # The kernel algorithm itself
+    for tool in augmentationTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(
         DerivationKernel(
-            name, 
+            name,
             ThinningTools = thinningTools,
             SkimmingTools=skimmingTools,
-            AugmentationTools=augmentationTools
-            ))       
+            ))
     return acc
 
 
