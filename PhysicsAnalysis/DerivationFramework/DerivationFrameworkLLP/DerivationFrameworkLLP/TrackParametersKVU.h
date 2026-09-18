@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -20,7 +20,7 @@
 #include<string>
 
 // Gaudi & Athena basics
-#include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 
 
@@ -29,9 +29,6 @@
 #include "VxVertex/VxTrackAtVertex.h"
 #include "TrkTrack/TrackCollection.h"
 #include "TrkTrack/Track.h"
-
-// DerivationFramework includes
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 
 #include "xAODTracking/VertexContainer.h"
 #include "TrkVertexFitterInterfaces/IVertexTrackUpdator.h"
@@ -50,17 +47,17 @@ namespace DerivationFramework {
 
       @author James Catmore -at- cern.ch
   */
-  class TrackParametersKVU : public extends<AthAlgTool, IAugmentationTool> {
+  class TrackParametersKVU : public AthReentrantAlgorithm {
 
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     // Athena algtool's Hooks
     virtual StatusCode initialize() override;
 
     /** Check that the current event passes this filter */
-    virtual StatusCode addBranches(const EventContext& ctx) const override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
 
   private:
     SG::ReadHandleKey< xAOD::TrackParticleContainer > m_trackContainerKey{
