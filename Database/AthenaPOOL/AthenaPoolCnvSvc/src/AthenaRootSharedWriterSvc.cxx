@@ -356,7 +356,8 @@ StatusCode AthenaRootSharedWriterSvc::finalize() {
    delete m_rootMonitor; m_rootMonitor = nullptr;
    delete m_rootServerSocket; m_rootServerSocket = nullptr;
    if (!m_socketPath.empty()) {
-      std::remove(m_socketPath.c_str());
+      //coverity[CHECKED_RETURN]
+      std::remove(m_socketPath.c_str()); //returns 0 on success.
    }
    for (auto& [cl, ptr] : m_cachedObjects) {
       if (cl && ptr) {
