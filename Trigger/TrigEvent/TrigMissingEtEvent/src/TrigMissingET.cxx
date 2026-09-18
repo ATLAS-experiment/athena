@@ -10,8 +10,6 @@
 #include <stdio.h>
 #include <string.h>
 
-
-
 TrigMissingET::TrigMissingET(unsigned char n) :
   m_ex(0), m_ey(0), m_ez(0), m_sum_et(0), m_sum_e(0),
   m_flag(0), m_roiWord(0)
