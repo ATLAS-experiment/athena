@@ -29,6 +29,7 @@ using xAOD::EventInfo;
 
 static std::string drwname(int id) {
   static const char name[5][6] = { "", "LBA", "LBC", "EBA", "EBC" };
+  //coverity[RW.CONSTEVAL_CALL_NONCONSTANT:FALSE]
   return std::format ("{}%{:02}", name[id >> 8], id % 0x100 + 1);
 }
 
