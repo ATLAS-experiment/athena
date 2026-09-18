@@ -8,8 +8,7 @@
 #include <vector>
 
 // Gaudi & Athena basics
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "MCTruthClassifier/IMCTruthClassifier.h"
 #include "StoreGate/ReadHandleKey.h"
@@ -19,15 +18,15 @@
 #include "xAODTruth/TruthPileupEventContainer.h"
 
 namespace DerivationFramework {
-  class MuonTruthClassifierFallback : public extends<AthAlgTool, IAugmentationTool> {
+  class MuonTruthClassifierFallback : public AthReentrantAlgorithm {
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     // Athena algtool's Hooks
     virtual StatusCode initialize() override;
 
-    virtual StatusCode addBranches(const EventContext& ctx) const override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
 
   private:
     SG::ReadHandleKey<xAOD::IParticleContainer> m_containerKey{this, "ContainerKey", "", "Key of the container to be decorated"};
