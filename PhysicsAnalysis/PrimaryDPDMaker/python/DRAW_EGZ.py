@@ -46,7 +46,6 @@ def DRAW_EGZKernelCfg(flags, name='DRAW_EGZKernel', **kwargs):
         'ForwardElectrons.pt > 20*GeV && ForwardElectrons.Loose']
     # Augmentation tools for the di-lepton mass computations
     EventSels = []
-    augmentationTools = []
     for key, sel in DRAWEGZSel.items():
         if key == 'Zefe':
             tool = CompFactory.DerivationFramework.EGInvariantMassTool(
@@ -59,6 +58,7 @@ def DRAW_EGZKernelCfg(flags, name='DRAW_EGZKernel', **kwargs):
                 Mass2Hypothesis=0.511,
                 CheckCharge=False,
                 StoreGateEntryName=sel[1]) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+            acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(name=f'llmassAugFor{key}', AugmentationTools = [tool]))
         else:
             tool = CompFactory.DerivationFramework.InvariantMassTool(
                 name=f'llmassToolFor{key}',
@@ -66,9 +66,8 @@ def DRAW_EGZKernelCfg(flags, name='DRAW_EGZKernel', **kwargs):
                 ObjectRequirements=sel[0],
                 MassHypothesis=0.511 if key.find('Zee') >= 0 else 105.66,
                 StoreGateEntryName=sel[1]) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+            acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(name=f'llmassAugFor{key}', AugmentationTools = [tool]))
 
-        augmentationTools.append(tool)
-        acc.addPublicTool(tool)
         EventSels.append(sel[2])
     draw_egz = " || ".join(EventSels)
     mlog.info('DRAW_EGZ selection '+draw_egz)

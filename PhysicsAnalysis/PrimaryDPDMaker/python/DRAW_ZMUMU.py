@@ -12,6 +12,19 @@ def DRAW_ZmumuKernelCfg(flags, name="DRAW_ZMUMUKernel", **kwargs):
     result = ComponentAccumulator()
     result.addSequence(seqAND("DRAWZMUMU_Sequence"))
 
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import AsgSelectionToolWrapperCfg
+    from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
+    muon_sel_tool = result.popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(flags, name="DRAW_ZMUMU_MuonsSelector",
+                                                                 MaxEta=3, MuQuality=2  # Use Medium muons
+                                                                 ))
+    result.addPublicTool(muon_sel_tool)
+    muonSkimmingTool = result.getPrimaryAndMerge(AsgSelectionToolWrapperCfg(flags,
+                                                                            name="DRAW_ZMUMU_GoodMuon_SkimmingTool",
+                                                                            ContainerName="Muons",
+                                                                            StoreGateEntryName="isMedium_DRAWZmumu",
+                                                                            AsgSelectionTool=muon_sel_tool))) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("DRAW_ZMUMU_GoodMuon_SkimmingAug", AugmentationTools = [muonSkimmingTool]), primary=True)
+
     massEntryName = "DRZmumuMass"
     # Object selection strings
     sel_muon1 = 'Muons.pt > 25*GeV && Muons.ptcone40/Muons.pt < 0.3'
@@ -25,19 +38,8 @@ def DRAW_ZmumuKernelCfg(flags, name="DRAW_ZMUMUKernel", **kwargs):
                                                                MassHypothesis=105.66,
                                                                SecondMassHypothesis=105.66,
                                                                StoreGateEntryName=massEntryName,
-                                                               InputDecorNames=["Muons.ptcone40"]))
-
-    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import AsgSelectionToolWrapperCfg
-    from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
-    muon_sel_tool = result.popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(flags, name="DRAW_ZMUMU_MuonsSelector",
-                                                                 MaxEta=3, MuQuality=2  # Use Medium muons
-                                                                 ))
-    result.addPublicTool(muon_sel_tool)
-    muonSkimmingTool = result.getPrimaryAndMerge(AsgSelectionToolWrapperCfg(flags,
-                                                                            name="DRAW_ZMUMU_GoodMuon_SkimmingTool",
-                                                                            ContainerName="Muons",
-                                                                            StoreGateEntryName="isMedium_DRAWZmumu",
-                                                                            AsgSelectionTool=muon_sel_tool))
+                                                               InputDecorNames=["Muons.ptcone40"])) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("DRZmumuMassAug", AugmentationTools = [mass_tool]), primary=True)
 
     dimuonMassString = "( count (  {mass} > 70*GeV   &&  {mass} < 110*GeV ) >= 1 )".format(
         mass=massEntryName)
@@ -72,8 +74,6 @@ def DRAW_ZmumuKernelCfg(flags, name="DRAW_ZMUMUKernel", **kwargs):
                                                         FilterList=[dimuonMassSkimmingTool,
                                                                     triggerSkimmingTool]))
 
-    for tool in [muonSkimmingTool, mass_tool]:
-        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool])
     kwargs.setdefault("SkimmingTools", [DRAW_ZMUMU_SkimmingTool])
     kwargs.setdefault("doChronoStat", flags.Concurrency.NumThreads <= 1)
     the_alg = CompFactory.DerivationFramework.DerivationKernel(name, **kwargs)
