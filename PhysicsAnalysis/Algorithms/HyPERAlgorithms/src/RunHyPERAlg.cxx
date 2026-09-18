@@ -698,27 +698,27 @@ StatusCode RunHyPERAlg::execute(const EventContext& ctx) {
       PtEtaPhiMVector top_b_p4 = invalidRecoParton();
       PtEtaPhiMVector top_Wplus_decay0_p4 = invalidRecoParton();
       PtEtaPhiMVector top_Wplus_decay1_p4 = invalidRecoParton();
-      buildTopP4TtbarAllHadronic(top1Indices, w1Indices, top_b_p4,
-                                 top_Wplus_decay0_p4, top_Wplus_decay1_p4);
-      if (!m_top_b_p4.empty())
+      if (!m_top_b_p4.empty() && !m_top_Wplus_decay0_p4.empty() &&
+          !m_top_Wplus_decay1_p4.empty()) {
+        buildTopP4TtbarAllHadronic(top1Indices, w1Indices, top_b_p4,
+                                   top_Wplus_decay0_p4, top_Wplus_decay1_p4);
         m_top_b_p4.set(*evtInfo, top_b_p4, sys);
-      if (!m_top_Wplus_decay0_p4.empty())
         m_top_Wplus_decay0_p4.set(*evtInfo, top_Wplus_decay0_p4, sys);
-      if (!m_top_Wplus_decay1_p4.empty())
         m_top_Wplus_decay1_p4.set(*evtInfo, top_Wplus_decay1_p4, sys);
+      }
       // Top2
       PtEtaPhiMVector topbar_bbar_p4 = invalidRecoParton();
       PtEtaPhiMVector topbar_Wminus_decay0_p4 = invalidRecoParton();
       PtEtaPhiMVector topbar_Wminus_decay1_p4 = invalidRecoParton();
-      buildTopP4TtbarAllHadronic(top2Indices, w2Indices, topbar_bbar_p4,
-                                 topbar_Wminus_decay0_p4,
-                                 topbar_Wminus_decay1_p4);
-      if (!m_topbar_bbar_p4.empty())
+      if (!m_topbar_bbar_p4.empty() && !m_topbar_Wminus_decay0_p4.empty() &&
+          !m_topbar_Wminus_decay1_p4.empty()) {
+        buildTopP4TtbarAllHadronic(top2Indices, w2Indices, topbar_bbar_p4,
+                                   topbar_Wminus_decay0_p4,
+                                   topbar_Wminus_decay1_p4);
         m_topbar_bbar_p4.set(*evtInfo, topbar_bbar_p4, sys);
-      if (!m_topbar_Wminus_decay0_p4.empty())
         m_topbar_Wminus_decay0_p4.set(*evtInfo, topbar_Wminus_decay0_p4, sys);
-      if (!m_topbar_Wminus_decay1_p4.empty())
         m_topbar_Wminus_decay1_p4.set(*evtInfo, topbar_Wminus_decay1_p4, sys);
+      }
     }
     if (hyperTopology == EventReco::HyPERTopology::TtbarLJets) {
       std::vector<std::string> recoLabels = m_hyperParser->getLabels();
