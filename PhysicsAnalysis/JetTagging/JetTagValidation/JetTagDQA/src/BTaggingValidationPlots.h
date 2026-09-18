@@ -484,18 +484,12 @@ namespace JetTagDQA{
       // detail level
       void setDetailLevel(const unsigned int& detailLevel);
 
-      // a setter for the HistogramDefinitions and the jvt and TMP cuts
+      // a setter for the HistogramDefinitions and the TMP cut
       void setHistogramDefinitions( std::map< std::string, std::vector< std::string > > HistogramDefinitions);
-      void setIsDataJVTCutsAndTMPCut(bool isData, float JVTCutAntiKt4EMTopoJets, float JVTCutLargerEtaAntiKt4EMTopoJets, float JVTCutAntiKt4EMPFlowJets, float truthMatchProbabilityCut);
+      void setIsDataAndTMPCut(bool isData, float truthMatchProbabilityCut);
       void setTaggerNames(const std::string& GN2v01Name, const std::string& GN3EPCLV01Name, const std::string& GN3XPV01Name);
       void setGN2v01Config(const IBTaggingSelectionTool* selectionTool, const std::map<std::string, double>& workingPoints, double fc, double ftau);
       void setGN3EPCLV01Config(const std::map<std::string, double>& workingPoints, double fc, double ftau);
-
-      // jvt variables 
-      bool m_JVT_defined{};
-      float m_JVT_cut = 0.0F;
-      bool m_JVTLargerEta_defined;
-      float m_JVTLargerEta_cut = 0.0F;
 
     private:
       virtual void initializePlots();     

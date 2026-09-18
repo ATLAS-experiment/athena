@@ -1,13 +1,15 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Hagen Möbius, hagen.mobius@cern.ch
 #include <FTagAnalysisAlgorithms/SSVWeightsAlg.h>
 
-#include <fstream>
+
 #include <nlohmann/json.hpp>
 #include <PathResolver/PathResolver.h>
+#include <stdexcept>
+#include <fstream>
 using json = nlohmann::json;
 
 namespace CP{
@@ -567,6 +569,8 @@ namespace CP{
     const std::vector<double> &ptbins = m_ptbins;
 
     double P_ineff = 1;
+    const std::string etaStr{"eta"};
+    const std::string effStr{"efficiency"};
     for (size_t i = 0; i < missed_truthBhs.size(); ++i) { 
       //retrieve pt,eta of missed truthBh
       double pt = missed_truthBhs[i]->pt();
@@ -587,8 +591,8 @@ namespace CP{
         continue;
       }
       //retrieve eta and efficiency bins for the pT bin
-      const std::vector<double>& eta_bins = m_BhadronPtEtaEfficiencyMap.at(pt_bin_of_truthBh).at("eta");
-      const std::vector<double>& efficiencies = m_BhadronPtEtaEfficiencyMap.at(pt_bin_of_truthBh).at("efficiency");
+      const std::vector<double>& eta_bins = m_BhadronPtEtaEfficiencyMap.at(pt_bin_of_truthBh).at(etaStr);
+      const std::vector<double>& efficiencies = m_BhadronPtEtaEfficiencyMap.at(pt_bin_of_truthBh).at(effStr);
 
       double efficiency = 1;
 
@@ -679,12 +683,15 @@ namespace CP{
       std::string bjets_key = std::to_string(m_upperboundNbjets) + "p_bjets";
       n_F_value = m_nFPileupBJetMap.at(mu_key).at(bjets_key);
     }
-
+    auto denom = poisson_pmf(N_fake, n_F_value);
+    if (denom == 0. )[[unlikely]]{
+      throw std::runtime_error("nFMethodPileupBJetBasedClass::getPFake: divide-by-zero");
+    }
     if (muactual >= m_lowMuHighMuThreshold){
-      P_fake = (poisson_pmf(N_fake, SF_fake_high*n_F_value))/poisson_pmf(N_fake, n_F_value);
+      P_fake = (poisson_pmf(N_fake, SF_fake_high*n_F_value))/denom;
     }
     else {
-      P_fake = (poisson_pmf(N_fake, SF_fake_low*n_F_value))/poisson_pmf(N_fake, n_F_value);
+      P_fake = (poisson_pmf(N_fake, SF_fake_low*n_F_value))/denom;
     }
 
     return P_fake;
@@ -705,7 +712,10 @@ namespace CP{
     // Calculate expected counts
     double n_F = m_slopeUnscaled * muactual + m_interceptUnscaled;
     double n_F_scaled = m_slopeScaled * muactual + m_interceptScaled;
-
+    auto denom = poisson_pmf(N_fake, n_F);
+    if (denom == 0.)[[unlikely]]{
+      throw std::runtime_error("nFMethodPileupBasedLinearFitClass::getPFake: divide-by-zero.");
+    }
     // Calculate P_fake
     double P_fake = poisson_pmf(N_fake, n_F_scaled) / poisson_pmf(N_fake, n_F);
 
@@ -735,10 +745,14 @@ namespace CP{
     for (size_t j = 0; j < m_muactualBins.size() - 1; ++j) {
       if (muactual >= m_muactualBins[j] && muactual < m_muactualBins[j + 1]) {
         nF = m_nFBins[j];
+        const auto denom = poisson_pmf(N_fake, nF);
+        if (denom == 0.)[[unlikely]]{
+          continue;
+        }
         if (muactual < m_lowMuHighMuThreshold){
-          P_fake = poisson_pmf(N_fake, SF_fake_low * nF) / poisson_pmf(N_fake, nF);
+          P_fake = poisson_pmf(N_fake, SF_fake_low * nF) / denom;
         } else {
-          P_fake = poisson_pmf(N_fake, SF_fake_high * nF) / poisson_pmf(N_fake, nF);
+          P_fake = poisson_pmf(N_fake, SF_fake_high * nF) / denom;
         }
         break; // Bin found, no need to continue loop
       }
