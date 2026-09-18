@@ -448,7 +448,11 @@ namespace CP {
     hist("RecoVertex/" + matchType + "_eta")->Fill(sumP4.Eta());
     hist("RecoVertex/" + matchType + "_phi")->Fill(sumP4.Phi());
     hist("RecoVertex/" + matchType + "_mass")->Fill(sumP4.M() / GeV);
-    hist("RecoVertex/" + matchType + "_mu")->Fill(sumP4.M()/maxDR / GeV);
+    double muVal = std::numeric_limits<double>::max();
+    if (maxDR ! = 0.)[[likely]]{
+      muVal = sumP4.M()/maxDR / GeV;
+    }
+    hist("RecoVertex/" + matchType + "_mu")->Fill(muVal);
     hist("RecoVertex/" + matchType + "_chi2")->Fill(Chi2(*secVtx)/nDoF(*secVtx));
     hist("RecoVertex/" + matchType + "_dir")->Fill(dir);
     hist("RecoVertex/" + matchType + "_charge")->Fill(charge);
