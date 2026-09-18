@@ -6,7 +6,7 @@ EgEfficiencyCorr_testE...INFO    ===> Model : SIMPLIFIED| electron : Pt = 41212.
 EgEfficiencyCorr_testEgEfficiencyCorrWithoutFile  -t FullSim -r 428648 -c FULL -e -0.94 -p 41212.10 -d MediumLH | grep SF  2>&1
 EgEfficiencyCorr_testE...INFO    ===> Model : FULL| electron : Pt = 41212.1 : eta = -0.94 : Bin index = 124 : SF = 0.982701 + 0.00113 - 0.00113 <===
 EgEfficiencyCorr_testEgEfficiencyCorrWithoutFile  -t FullSim -r 428648 -c TOTAL -e -0.94 -p 41212.10 -d MediumLH -l 0 | grep map  2>&1
-ToolSvc.ElEffCorrectionTool.MapFilePath = 'ElectronEfficiencyCorrection/2015_2025/rel22.2/2026_Run2Run3_Recommendation_v1/map1.txt'
+ToolSvc.ElEffCorrectionTool.MapFilePath = 'ElectronEfficiencyCorrection/2015_2025/rel22.2/2026_Run2Run3_Recommendation_v3/map1.txt'
  ==== CHECK II:  DEFAULT MAP ====
     ---> map looks good!
  ==== CHECK III:  ID LVL ====

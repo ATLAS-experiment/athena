@@ -122,7 +122,7 @@ def initConfigFlags():
 
     acf.addFlag('Input.MetadataItems', lambda prevFlags : _metadataItems(prevFlags.Input.Files), help='metadata items in input' )
     acf.addFlag('Input.Release',  lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("AtlasRelease", ""), help='release of input file')
-    acf.addFlag('Input.AODFixesDone', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("AODFixVersion", ""), help='set of already applied AODFixes')
+    acf.addFlag('Input.AODFixesDone', lambda prevFlags : set(GetFileMD(prevFlags.Input.Files).get("AODFixVersion", "").strip().split()), help='set of already applied AODFixes')
 
     acf.addFlag('Concurrency.NumProcs', 0, help='number of concurrent processes')
     acf.addFlag('Concurrency.NumThreads', 0, help='number of threads' )
