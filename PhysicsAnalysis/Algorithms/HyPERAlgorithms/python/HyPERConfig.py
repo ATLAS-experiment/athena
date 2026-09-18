@@ -102,7 +102,7 @@ class HyPERBlock(ConfigBlock):
         alg.fullLogEventNumber = self.fullLogEventNumber
 
         def form_even_odd_path(topology, run):
-            base_path = "dev/AnalysisTop/HyPERModels/" + topology
+            base_path = "TopReconstruction/HyPERModels/" + topology
             even_path = base_path + "_" + run + "_trained_on_even.onnx"
             odd_path = base_path + "_" + run + "_trained_on_odd.onnx"
             return even_path, odd_path
