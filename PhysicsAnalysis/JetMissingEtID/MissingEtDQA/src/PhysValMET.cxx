@@ -63,8 +63,8 @@ namespace MissingEtDQA {
     declareProperty( "InputPhotons",   m_gammaColl = "Photons"           );
     declareProperty( "InputTaus",      m_tauColl   = "TauJets"           );
     declareProperty( "InputMuons",     m_muonColl  = "Muons"             );
-    declareProperty( "DoTruth", m_doTruth = false );
-    declareProperty( "InputIsDAOD",    m_inputIsDAOD = false              );
+    declareProperty( "DoTruth",        m_doTruth = false                 );
+    declareProperty( "InputIsDAOD",    m_inputIsDAOD = false             );
     declareProperty( "DoMETRefPlots",  m_doMETRefPlots = false           );
     declareProperty( "METMapName",     m_mapname   = "METAssoc"          );
     declareProperty( "METCoreName",    m_corename  = "MET_Core"          );
@@ -179,38 +179,15 @@ namespace MissingEtDQA {
         //define variables
         std::string name_met;
         std::string name_sub;
-        std::vector<std::string> corrClus_names;
-        std::vector<std::string> corrTrk_names;
-        std::vector<std::string> sum_names;
         std::string dir;
-
-        corrClus_names.emplace_back("RefEle");
-        corrClus_names.emplace_back("RefGamma");
-        corrClus_names.emplace_back("RefTau");
-        corrClus_names.emplace_back("RefMuons");
-        corrClus_names.emplace_back("RefJet");
-        corrClus_names.emplace_back("SoftClus");
-        
-        corrTrk_names.emplace_back("RefEle");
-        corrTrk_names.emplace_back("RefGamma");
-        corrTrk_names.emplace_back("RefTau");
-        corrTrk_names.emplace_back("RefMuons");
-        corrTrk_names.emplace_back("RefJet");
-        corrTrk_names.emplace_back("PVSoftTrk");
-
-        sum_names.emplace_back("RefEle");
-        sum_names.emplace_back("RefGamma");
-        sum_names.emplace_back("RefTau");
-        sum_names.emplace_back("RefMuons");
-        sum_names.emplace_back("RefJet");
 
         //Create and Register histograms for and Rebuilt
         std::vector <std::string> met_type = {"MET_Rebuilt_"};
         ATH_MSG_DEBUG("****STARTING****");
 
-        //loop for rebuilt
+        //loop through EMPFlow and EMTopo
         for (const auto& type : met_type){
-          //define variables 
+          //define variables for histograms 
           name_met = type + jet_type;
           m_dir_met.clear();
           std::vector<TH1D*> v_MET;
@@ -237,6 +214,7 @@ namespace MissingEtDQA {
           //Create histograms
 
           //Setup Term histograms
+          //these produce x, y, phi, and sum histos for FinalClus, FinalTrk, RefMuons, PVsoftTrk, RefEle, RefGamma, RefJet, RefTau, and SoftClus 
           for(const auto& term : m_terms){
             const std::string hist_title = name_met + " " + m_term_names[term];
             v_MET.push_back( new  TH1D((name_met + "_" + term).c_str(), (hist_title + "; E_{T}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinp, 0., suptmi) );
@@ -263,6 +241,7 @@ namespace MissingEtDQA {
           }
  
           //Setup cumulative hists
+          //these produce cumulative histos for FinalClus and FinalTrk
           name_sub = name_met + "/Cumulative";
           v_MET_Cumu.push_back( new  TH1D((name_met + "_Cumulative_FinalClus").c_str(), (name_met + " CST MET cumulative; E_{T}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinp, 0., suptmi) );
           v_MET_Cumu.push_back( new  TH1D((name_met + "_Cumulative_FinalTrk").c_str(), (name_met + " TST MET cumulative; E_{T}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinp, 0., suptmi) );
@@ -275,6 +254,7 @@ namespace MissingEtDQA {
           }
 
           //Setup Residual histograms        
+          //these produce residual histos for FinalClus x and y & FinalTrk x and y
           name_sub = name_met + "/Residuals";
           v_MET_Resolution.push_back(  new TH1D((name_met + "_Resolution_FinalClus_x").c_str(), ("x-Residual of CST MET in " + name_met + "; #Delta(E_{T,CST}^{miss}, E_{T,truth}^{miss})_{x} [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -suptmixy, suptmixy) );
           v_MET_Resolution.push_back(  new TH1D((name_met + "_Resolution_FinalClus_y").c_str(), ("y-Residual of CST MET in " + name_met + "; #Delta(E_{T,CST}^{miss}, E_{T,truth}^{miss})_{y} [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -suptmixy, suptmixy) );
@@ -289,6 +269,7 @@ namespace MissingEtDQA {
           }
  
           //Setup Significance hists        
+          //these produce significance histos for FinalClus and FinalTrk
           name_sub = name_met + "/Significance";
           v_MET_Significance.push_back(  new TH1D((name_met + "_Significance_FinalClus").c_str(), ("MET / sqrt(sumet) for " + name_met + " CST; MET/#sqrt{SET} [#sqrt{GeV}]; Entries / 0.25 #sqrt{GeV}").c_str(), nbinp, 0., 25.) );
           v_MET_Significance.push_back(  new TH1D((name_met + "_Significance_FinalTrk").c_str(), ("MET / sqrt(sumet) for " + name_met + " TST; MET/#sqrt{SET} [#sqrt{GeV}]; Entries / 0.25 #sqrt{GeV}").c_str(), nbinp, 0., 25.) );
@@ -301,6 +282,7 @@ namespace MissingEtDQA {
           }
  
           //Setup dPhi hists        
+          //these produce dPhi histos for leading & sub leading jet and leading lepton for FinalClus and FinalTrk
           name_sub = name_met + "/dPhi";
           v_MET_dPhi.push_back(  new TH1D((name_met + "_dPhi_leadJetMET_FinalClus").c_str(), ("MET deltaPhi vs leading jet for " + name_met + " CST; #Delta#Phi(leadJet, MET); Entries / 0.05").c_str(), nbinphi, 0., binphi) );
           v_MET_dPhi.push_back(  new TH1D((name_met + "_dPhi_subleadJetMET_FinalClus").c_str(), ("MET deltaPhi vs subleading jet for " + name_met + " CST; #Delta#Phi(subleadJet, MET); Entries / 0.05").c_str(), nbinphi, 0., binphi) );
@@ -317,16 +299,25 @@ namespace MissingEtDQA {
           }
          
           //Setup Correlation hists
+          //these produce correlation histos
+          //for FinalClus there are correlation plots for RefMuons, RefEle, RefGamma, RefJet, RefTau, & SoftClus
+          //for FinalTrk there are correlation plots for RefMuons, RefEle, RefGamma, RefJet, RefTau, & PVSoftTrk
           name_sub = name_met + "/Correlations";
 
-          v_MET_CorrFinalClus.reserve(corrClus_names.size());
+          v_MET_CorrFinalClus.reserve(m_terms.size()-3);
 
-          for(const auto& it : corrClus_names) {
+          for(const auto& it : m_terms) {
+            if(it == "PVSoftTrk"){continue;}
+            if(it == "FinalTrk"){continue;}
+            if(it == "FinalClus"){continue;}
             v_MET_CorrFinalClus.push_back( new  TH2D((name_met + "_" + it + "_FinalClus").c_str(), (name_met + " " + m_term_names[it] + " vs. CST MET; E_{T," + it + "}^{miss} [GeV]; E_{T,CST}^{miss} [GeV]; Entries").c_str(), nbinp, 0., suptmi, nbinp, 0., suptmi) );
           }
-          v_MET_CorrFinalTrk.reserve(corrTrk_names.size());
+          v_MET_CorrFinalTrk.reserve(m_terms.size()-3);
 
-          for(const auto& it : corrTrk_names) {
+          for(const auto& it : m_terms) {
+            if(it == "SoftClus"){continue;}
+            if(it == "FinalTrk"){continue;}
+            if(it == "FinalClus"){continue;} 
             v_MET_CorrFinalTrk.push_back( new  TH2D((name_met + "_" + it + "_FinalTrk").c_str(), (name_met + " " + m_term_names[it] + " vs. TST MET; E_{T," + it + "}^{miss} [GeV]; E_{T,TST}^{miss} [GeV]; Entries").c_str(), nbinp, 0., suptmi, nbinp, 0., suptmi) );
           }
 
@@ -344,7 +335,13 @@ namespace MissingEtDQA {
           m_dir_met.clear();
          
           //Setup Diff histograms
-          for(const auto& it : sum_names) {
+          //these produce difference histograms for each particle: RefMuons, RefEle, RefGamma, RefJet, and RefTau
+          //For each particle histograms of pT, px, py, delta phi, and sum
+          for(const auto& it : m_terms) {
+            if(it == "SoftClus"){continue;}
+            if(it == "PVSoftTrk"){continue;}
+            if(it == "FinalTrk"){continue;}
+            if(it == "FinalClus"){continue;} 
             const std::string hist_title = m_term_names[it] + " in " + name_met;
             v_MET_Diff.push_back( new  TH1D((name_met + "_Diff_" + it).c_str(), ("MET_Diff " + hist_title +"; #Sigma p_{T}^{Val} - #Sigma p_{T}^{No Val} [GeV]; Entries / 4 GeV").c_str(), nbinpxy, -200, 200));
             v_MET_Diff_x.push_back( new  TH1D((name_met + "_Diff_" + it +"_x").c_str(), ("MET_Diff x " + hist_title +"; #Sigma p_{x}^{Val} - #Sigma p_{x}^{No Val} [GeV]; Entries / 4 GeV").c_str(), nbinpxy, -200, 200) );
@@ -370,13 +367,19 @@ namespace MissingEtDQA {
           }
           m_dir_met.clear();
 
-          //Setup Kin histos
-          for(const auto& it : sum_names){
+          //Setup Kinematic histos
+          //these produce kinematic histos for each particle: RefMuons, Refele, RefGamma, RefJet, and RefTau
+          //For each particle histograms of particle pt, eta, and phi. As well a histogram for multiplicity of each particle for events are stored
+          for(const auto& it : m_terms){
+            if(it == "SoftClus"){continue;}
+            if(it == "PVSoftTrk"){continue;}
+            if(it == "FinalTrk"){continue;}
+            if(it == "FinalClus"){continue;}
             const std::string hist_title = m_term_names[it] + " in " + name_met;
             v_MET_Kinematic_pt.push_back( new  TH1D((name_met + "_Kinematic_" + it+"_pt").c_str(), ("MET_Kinematic_pt " + hist_title +"; p_{T} [GeV]; Entries / 3 GeV").c_str(), nbinpxy, 0, 300));
             v_MET_Kinematic_eta.push_back( new  TH1D((name_met + "_Kinematic_" + it +"_eta").c_str(), ("MET_Kinematic_eta " + hist_title +"; #eta ; Entries / 0.1").c_str(), 100, -5, 5) );
             v_MET_Kinematic_phi.push_back( new  TH1D((name_met + "_Kinematic_" + it +"_phi").c_str(), ("MET_Kinematic_phi " + hist_title +"; #Phi ; Entries / 0.1").c_str(), nbinphi, -binphi, binphi) );
-            v_MET_multi.push_back( new  TH1D((name_met + "_multi_" + it).c_str(), ("MET_multi " + hist_title +"; Multiplicity; Entries").c_str(), 20,-0.5,20.5) );
+            v_MET_multi.push_back( new  TH1D((name_met + "_Multi_" + it).c_str(), ("MET_multi " + hist_title +"; Multiplicity; Entries").c_str(), 20,-0.5,20.5) );
             m_dir_met.push_back("MET/" + name_met + "/Kinematics/" + it + "/");                                      
           }
           m_MET_Kinematic_pt[name_met] = v_MET_Kinematic_pt;
@@ -397,11 +400,11 @@ namespace MissingEtDQA {
       
       //Now MET_Calo
   
-      //variables
       std::string name_met = "MET_Calo";
       std::string dir = "MET/" + name_met + "/";
 
       //Create and register Calo hists
+      //these produce calo histos for for ET, Ex, Ey, phi, and sum
       ATH_CHECK(regHist(m_MET_Calo = new  TH1D("Calo", (name_met + " " + m_term_names["Calo"] + "; E_{T}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinp, 0., suptmi), dir, all));
       ATH_CHECK(regHist(m_MET_Calo_x = new  TH1D("Calo_x", (name_met + " " + m_term_names["Calo"] + " x; E_{x}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -suptmixy, suptmixy), dir, all));
       ATH_CHECK(regHist(m_MET_Calo_y = new  TH1D("Calo_y", (name_met + " " + m_term_names["Calo"] + " y; E_{y}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -suptmixy, suptmixy), dir, all));
@@ -435,6 +438,9 @@ namespace MissingEtDQA {
     ATH_MSG_DEBUG("Physics objects");
 
     //Set up Physics Objects
+    //We will be grabbing all of the particles (electron, muon, gamma, tau, and jet) and then applying selections to them
+    //To apply OR and JVT the particles will be fed into METMaker. Then OR will be applied to Tau and jets and JVT will be applied to jets
+    //These particles will then be recieved from METMaker and used to fill the histograms
 
     //Muons 
     const xAOD::MuonContainer* muons = nullptr;
@@ -544,6 +550,8 @@ namespace MissingEtDQA {
       auto m_metmaker2 = m_metmaker;
 
       //See if we can build terms. This will also add the particles into METMaker
+      //METMaker will use the particles to apply OR and JVT
+
       // Electrons
       if( (*m_metmaker)->rebuildMET("RefEle", xAOD::Type::Electron, met, basicSelectionElectrons.asDataVector(), metHelper).isFailure() ) {
         ATH_MSG_WARNING("Failed to build electron term.");
@@ -582,13 +590,16 @@ namespace MissingEtDQA {
       }
 
       // Get elements with OR and JVT applied
+      // We are getting the particles out of METMaker
       std::vector<const xAOD::Electron*> el_elems = met::getMETElements<xAOD::Electron>(*(*met)["RefEle"]);
       std::vector<const xAOD::Photon*> ph_elems = met::getMETElements<xAOD::Photon>(*(*met)["RefGamma"]);
       std::vector<const xAOD::TauJet*> ta_elems = met::getMETElements<xAOD::TauJet>(*(*met)["RefTau"]);
       std::vector<const xAOD::Muon*> mu_elems = met::getMETElements<xAOD::Muon>(*(*met)["RefMuons"]);
       std::vector<const xAOD::Jet*> jet_elems = met::getMETElements<xAOD::Jet>(*(*met)["RefJet"]);
 
-      //Getting jets with JVT and OR without other particles applied. This is used for Jet Diff histos
+      //For difference histograms we need the jets to have JVT applied without OR.
+      //To do this a jets will be fed into a new METMaker with no other particles. This will apply JVT without considering OR with other particles.
+      //This produced a new group of jets that can be used for the difference histos
       auto met_jetonly = std::make_unique<xAOD::MissingETContainer>();
       auto aux_jetonly = std::make_unique<xAOD::MissingETAuxContainer>();
       met_jetonly->setStore(aux_jetonly.get());
@@ -636,6 +647,7 @@ namespace MissingEtDQA {
 
       std::cout<<"___Fill MET Reb___"<<std::endl;
       // Fill MET_Reb Term histograms
+      // For each section fill with MET, x, y, phi, and sum for each section
       for(const auto it : *met) {
         std::string name = it->name();
         std::cout<< name <<std::endl;
@@ -704,10 +716,8 @@ namespace MissingEtDQA {
         }
       }
 
-      //Fill MET Angles
       ATH_MSG_DEBUG( "  MET_Angles :" );
 
-      //define vars
       double leadPt = 0., subleadPt = 0., leadPhi = 0., subleadPhi = 0.;
 
       //for Jets find leading and subleading jet
@@ -725,6 +735,7 @@ namespace MissingEtDQA {
       }
 
       //Fill dPhi for Met Reb
+      //For leading and subleading jets
       (m_MET_dPhi["MET_Rebuilt_"+jet_type]).at(0)->Fill( -remainder( leadPhi - (*met)["FinalClus"]->phi(), 2*M_PI ), weight );
       (m_MET_dPhi["MET_Rebuilt_"+jet_type]).at(1)->Fill( -remainder( subleadPhi - (*met)["FinalClus"]->phi(), 2*M_PI ), weight );
       (m_MET_dPhi["MET_Rebuilt_"+jet_type]).at(3)->Fill( -remainder( leadPhi - (*met)["FinalTrk"]->phi(), 2*M_PI ), weight );
@@ -752,11 +763,13 @@ namespace MissingEtDQA {
         }
       }
 
-      //Fill dPhi for MET Rebuilt Final Clus and Final trk
+      //Fill dPhi for MET Reb
+      //for leading lepton
       (m_MET_dPhi["MET_Rebuilt_"+jet_type]).at(2)->Fill( -remainder( leadPhi - (*met)["FinalClus"]->phi(), 2*M_PI ), weight );
       (m_MET_dPhi["MET_Rebuilt_"+jet_type]).at(5)->Fill( -remainder( leadPhi - (*met)["FinalTrk"]->phi(), 2*M_PI ), weight );
 
       //Fill Correlation Histos
+      //for each fill for MET of FinalTrk/FinalClus vs particle (muon, electron, gamma, tau, jet)
       for(const auto it : *met) {
         std::string name = it->name();
         if(name == "RefEle"){
@@ -804,6 +817,7 @@ namespace MissingEtDQA {
       TLorentzVector target_tlv;
 
       // Collecting using Jets with JVT and OR without other elements
+      // this is collecting for the calculations for the difference histograms
       TLorentzVector jet_tlv;
       double sum_jet = 0;
       for(const auto jet : only_jet_elems) {
@@ -813,6 +827,8 @@ namespace MissingEtDQA {
       }
 
       //Fill MET Diff histos
+      //for each histo the difference is the Particle information with OR (METMaker) vs particle without OR (no METMaker)
+      //this allows the identification of the impact of putting the particles into METMaker
       for(const auto it : *met) {
         if(it->name() == "RefEle" && (has_electron or (it->sumet() > 0))){
           target_tlv.SetPxPyPzE(-it->mpx(), -it->mpy(), 0, it->met());
@@ -856,7 +872,8 @@ namespace MissingEtDQA {
         }
       }
 
-      //Fill Kin Histos
+      //Fill Kinematic Histos
+      //for each particle we are filling with the pT, eta, and phi
       for(const auto p : el_elems){
           (m_MET_Kinematic_pt["MET_Rebuilt_"+jet_type]).at(0)->Fill((p->pt())/1000., weight);
           (m_MET_Kinematic_eta["MET_Rebuilt_"+jet_type]).at(0)->Fill(p->eta(), weight);
@@ -882,7 +899,8 @@ namespace MissingEtDQA {
           (m_MET_Kinematic_eta["MET_Rebuilt_"+jet_type]).at(4)->Fill(p->eta(), weight);
           (m_MET_Kinematic_phi["MET_Rebuilt_"+jet_type]).at(4)->Fill(p->phi(), weight);
       }
-      //Fill Multiplicity Histos
+      //Fill Multiplicity Histos for Kinematic histos
+      //these are the number of each particle in the event saved in the histo
       (m_MET_multi["MET_Rebuilt_"+jet_type]).at(0)->Fill(el_elems.size(), weight);
       (m_MET_multi["MET_Rebuilt_"+jet_type]).at(1)->Fill(ph_elems.size(), weight);
       (m_MET_multi["MET_Rebuilt_"+jet_type]).at(2)->Fill(ta_elems.size(), weight);

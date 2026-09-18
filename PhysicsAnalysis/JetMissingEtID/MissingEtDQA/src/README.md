@@ -35,3 +35,94 @@ Types of histograms produced
 For validation the NTUP_PHYSVAL.root files produced using this will be used for the weekly physics validations. These validations produce comparison histograms between a pair of NTUP_PHYSVAL.root files and upload them to the PhysVal page: https://atlas-physval.web.cern.ch/ for examination.
 
 For more information on the full PhysVal procedure please check out this TWiki: https://twiki.cern.ch/twiki/bin/view/AtlasProtected/PhysValMonitoring
+
+#Produced histograms
+
+Outlined below are all histograms that should be produced and their sub folders. Within a produced ntuple these should all be under a folder called MET.
+
+##MET_Calo
+
+This folder contains the calo histograms. They are named as follows:
+Calo 
+Calo_x 
+Calo_y 
+Calo_phi 
+Calo_sum 
+
+##MET_Rebuilt_AntiKt4EMTopo &  MET_Rebuilt_AntiKt4EMPFlow
+
+These are two different folders each has the same histograms. However one is for EMTopo and the other for EMPFlow. The following sections are the major histogram folders.
+
+###Correlations
+
+This folder contains correlation histograms. Within the EMTopo section these are labeled as such:
+MET_Rebuilt_AntiKt4EMTopo_Muons_FinalClus 
+MET_Rebuilt_AntiKt4EMTopo_Muons_FinalTrk 
+MET_Rebuilt_AntiKt4EMTopo_PVSoftTrk_FinalTrk 
+MET_Rebuilt_AntiKt4EMTopo_RefEle_FinalClus 
+MET_Rebuilt_AntiKt4EMTopo_RefEle_FinalTrk 
+MET_Rebuilt_AntiKt4EMTopo_RefGamma_FinalClus 
+MET_Rebuilt_AntiKt4EMTopo_RefGamma_FinalTrk 
+MET_Rebuilt_AntiKt4EMTopo_RefJet_FinalClus 
+MET_Rebuilt_AntiKt4EMTopo_RefJet_FinalTrk 
+MET_Rebuilt_AntiKt4EMTopo_RefTau_FinalClus 
+MET_Rebuilt_AntiKt4EMTopo_RefTau_FinalTrk 
+MET_Rebuilt_AntiKt4EMTopo_SoftClus_FinalClus 
+
+###Cumulative
+
+This folder contains cumulative histograms. Within the EMTopo section these are labeled as such:
+MET_Rebuilt_AntiKt4EMTopo_Cumulative_FinalClus 
+MET_Rebuilt_AntiKt4EMTopo_Cumulative_FinalTrk 
+
+###Differences
+
+This folder contains subfolders for each particle. These are called RefEle, RefMuons, RefGamma, RefJet, and RefTau. Within each of these folders we have difference histograms for the particles. Within a RefMuons folder in the EMTopo section these are labeled as such:
+MET_Rebuilt_AntiKt4EMTopo_Diff_RefMuons 
+MET_Rebuilt_AntiKt4EMTopo_Diff_RefMuons_phi 
+MET_Rebuilt_AntiKt4EMTopo_Diff_RefMuons_sums 
+MET_Rebuilt_AntiKt4EMTopo_Diff_RefMuons_x 
+MET_Rebuilt_AntiKt4EMTopo_Diff_RefMuons_y 
+
+###Residuals
+
+This folder contains residual histograms. Within the EMTopo section these are labeled as such:
+MET_Rebuilt_AntiKt4EMTopo_Resolution_FinalClus_x 
+MET_Rebuilt_AntiKt4EMTopo_Resolution_FinalClus_y 
+MET_Rebuilt_AntiKt4EMTopo_Resolution_FinalTrk_x 
+MET_Rebuilt_AntiKt4EMTopo_Resolution_FinalTrk_y 
+
+###Significance
+
+This folder contains significance histograms. Within the EMTopo section these are labeled as such:
+MET_Rebuilt_AntiKt4EMTopo_Significance_FinalClus 
+MET_Rebuilt_AntiKt4EMTopo_Significance_FinalTrk 
+
+###Terms
+
+This folder contains the subfolders FinalClus, FinalTrk, PVSoftTrk, SoftClus, RefEle, RefMuons, RefGamma, RefJet, and RefTau. Within each of these folders we have terms histograms for the particles. Within a RefMuons folder in the EMTopo section these are labeled as such:
+MET_Rebuilt_AntiKt4EMTopo_RefMuons 
+MET_Rebuilt_AntiKt4EMTopo_RefMuons_phi 
+MET_Rebuilt_AntiKt4EMTopo_RefMuons_sum 
+MET_Rebuilt_AntiKt4EMTopo_RefMuons_x
+MET_Rebuilt_AntiKt4EMTopo_RefMuons_y 
+
+###dPhi
+
+This folder contains dPhi histograms. Within the EMTopo section these are labeled as such:
+MET_Rebuilt_AntiKt4EMTopo_dPhi_leadJetMET_FinalClus 
+MET_Rebuilt_AntiKt4EMTopo_dPhi_leadJetMET_FinalTrk 
+MET_Rebuilt_AntiKt4EMTopo_dPhi_subleadJetMET_FinalTrk 
+MET_Rebuilt_AntiKt4EMTopo_dPhi_subJetMET_FinalClus 
+MET_Rebuilt_AntiKt4EMTopo_dPhi_leadLepMET_FinalTrk 
+MET_Rebuilt_AntiKt4EMTopo_dPhi_leadLepMET_FinalClus 
+
+###Kinematics
+
+This folder contains subfolders for each particle. These are called RefEle, RefMuons, RefGamma, RefJet, and RefTau. Within each of these folders we have kinematics histograms for the particles. Within a RefMuons folder in the EMTopo section these are labeled as such:
+MET_Rebuilt_AntiKt4EMTopo_Kinematic_RefMuons_pt
+MET_Rebuilt_AntiKt4EMTopo_Kinematic_RefMuons_eta
+MET_Rebuilt_AntiKt4EMTopo_Kinematic_RefMuons_phi
+MET_Rebuilt_AntiKt4EMTopo_Multi_RefMuons
+
+
