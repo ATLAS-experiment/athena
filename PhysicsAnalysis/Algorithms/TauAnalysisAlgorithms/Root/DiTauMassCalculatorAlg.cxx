@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina <baptiste.ravina@cern.ch>
@@ -60,6 +60,7 @@ namespace CP {
 
   StatusCode DiTauMassCalculatorAlg::execute(const EventContext& ctx)
   {
+    const std::string finalStr{"Final"};
     for (const auto &sys : m_systematicsList.systematicsVector())
       {
 	// retrieve the EventInfo
@@ -160,12 +161,12 @@ namespace CP {
 	    ANA_MSG_WARNING("Not enough charged leptons in the event to run the MMC!");
 	  }
 
-    if ((*met)["Final"] == nullptr) {
-        ANA_MSG_ERROR("The MET term " << "Final" << " doesn't exist! Aborting.");
+    if ((*met)[finalStr] == nullptr) {
+        ANA_MSG_ERROR("The MET term " << finalStr << " doesn't exist! Aborting.");
         return StatusCode::FAILURE;
       }
 
-	ANA_CHECK(m_mmc->apply(*evtInfo, vis1, vis2, (*met)["Final"], nJets));
+	ANA_CHECK(m_mmc->apply(*evtInfo, vis1, vis2, (*met)[finalStr], nJets));
 
 	// retrieve the output variables and decorate them
 	PtEtaPhiMVector null4V(0.0, 0.0, 0.0, 0.0);
@@ -208,7 +209,7 @@ namespace CP {
 	  double coll_x0 = -1234.;
 	  double coll_x1 = -1234.;
 
-          ANA_CHECK(m_mmc->doCollinearApprox(vis1, vis2, (*met)["Final"], true, coll_mass, coll_x0, coll_x1)); 
+          ANA_CHECK(m_mmc->doCollinearApprox(vis1, vis2, (*met)[finalStr], true, coll_mass, coll_x0, coll_x1)); 
       
           m_coll_approx_mass_decor.set(*evtInfo, coll_mass, sys);
 	  m_coll_approx_x0_decor.set(*evtInfo, coll_x0, sys);
