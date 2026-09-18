@@ -41,7 +41,7 @@ def EGAM11SkimmingToolCfg(flags):
                                      expression=expression, TrigDecisionTool=None)
 
 
-def EGAM11ZeeMassTool1Cfg(flags):
+def EGAM11ZeeMassAug1Cfg(flags):
     """Configure the EGAM11 ee invariant mass augmentation tool 1"""
     acc = ComponentAccumulator()
 
@@ -63,7 +63,7 @@ def EGAM11ZeeMassTool1Cfg(flags):
         ["(Electrons.DFCommonElectronsLHMedium)", "(Electrons.pt > 19.5*GeV)"]
     )
 
-    acc.setPrivateTools(
+    EGAM11_ZEEMassTool1 = acc.addPublicTool(
         CompFactory.DerivationFramework.EGInvariantMassTool(
             name="EGAM11_ZEEMassTool1",
             Object1Requirements=requirement_tag,
@@ -78,11 +78,11 @@ def EGAM11ZeeMassTool1Cfg(flags):
             MinDeltaR=0.0,
         )
     ) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
-
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("EGAM11_ZEEMassAug1", AugmentationTools = [EGAM11_ZEEMassTool1]), primary=True)
     return acc
 
 
-def EGAM11ZeeMassTool2Cfg(flags):
+def EGAM11ZeeMassAug2Cfg(flags):
     """Configure the EGAM11 ee invariant mass augmentation tool 2"""
     acc = ComponentAccumulator()
 
@@ -99,7 +99,7 @@ def EGAM11ZeeMassTool2Cfg(flags):
         ["(Electrons.DFCommonElectronsLHMedium)", "(Electrons.pt > 19.5*GeV)"]
     )
 
-    acc.setPrivateTools(
+    EGAM11_ZEEMassTool2 = acc.addPublicTool(
         CompFactory.DerivationFramework.EGInvariantMassTool(
             name="EGAM11_ZEEMassTool2",
             Object1Requirements=requirement,
@@ -113,12 +113,12 @@ def EGAM11ZeeMassTool2Cfg(flags):
             DoTransverseMass=False,
             MinDeltaR=0.0,
         )
-    )
-
+    ) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("EGAM11_ZEEMassAug2", AugmentationTools = [EGAM11_ZEEMassTool2]), primary=True)
     return acc
 
 
-def EGAM11ZeeMassTool3Cfg(flags):
+def EGAM11ZeeMassAug3Cfg(flags):
     """Configure the EGAM11 ee invariant mass augmentation tool 3"""
     acc = ComponentAccumulator()
 
@@ -138,7 +138,7 @@ def EGAM11ZeeMassTool3Cfg(flags):
 
     requirement_probe = "Electrons.pt > 4*GeV"
 
-    acc.setPrivateTools(
+    EGAM11_ZEEMassTool3 = acc.addPublicTool(
         CompFactory.DerivationFramework.EGInvariantMassTool(
             name="EGAM11_ZEEMassTool3",
             Object1Requirements=requirement_tag,
@@ -152,12 +152,12 @@ def EGAM11ZeeMassTool3Cfg(flags):
             DoTransverseMass=False,
             MinDeltaR=0.0,
         )
-    )
-
+    ) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("EGAM11_ZEEMassAug3", AugmentationTools = [EGAM11_ZEEMassTool3]), primary=True)
     return acc
 
 
-def EGAM11ZegMassToolCfg(flags):
+def EGAM11ZegMassAugCfg(flags):
     """Configure the EGAM11 e+photon mass augmentation tool"""
     acc = ComponentAccumulator()
 
@@ -179,7 +179,7 @@ def EGAM11ZegMassToolCfg(flags):
 
     requirement_probe = "DFCommonPhotons_et > 14.5*GeV"
 
-    acc.setPrivateTools(
+    EGAM11_ZEGMassTool = acc.addPublicTool(
         CompFactory.DerivationFramework.EGInvariantMassTool(
             name="EGAM11_ZEGMassTool",
             Object1Requirements=requirement_tag,
@@ -196,7 +196,8 @@ def EGAM11ZegMassToolCfg(flags):
             DoTransverseMass=False,
             MinDeltaR=0.0,
         )
-    )
+    ) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("EGAM11_ZEGMassAug", AugmentationTools = [EGAM11_ZEGMassTool]), primary=True)
     return acc
 
 
@@ -272,26 +273,14 @@ def EGAM11KernelCfg(flags, name="EGAM11Kernel", **kwargs):
     acc.addEventAlgo(algOR)
 
     # EGAM11 augmentations
-    augmentationTools = []
 
     # ====================================================================
     # ee and egamma invariant masses
     # ====================================================================
-    EGAM11ZeeMassTool1 = acc.popToolsAndMerge(EGAM11ZeeMassTool1Cfg(flags))
-    acc.addPublicTool(EGAM11ZeeMassTool1)
-    augmentationTools.append(EGAM11ZeeMassTool1)
-
-    EGAM11ZeeMassTool2 = acc.popToolsAndMerge(EGAM11ZeeMassTool2Cfg(flags))
-    acc.addPublicTool(EGAM11ZeeMassTool2)
-    augmentationTools.append(EGAM11ZeeMassTool2)
-
-    EGAM11ZeeMassTool3 = acc.popToolsAndMerge(EGAM11ZeeMassTool3Cfg(flags))
-    acc.addPublicTool(EGAM11ZeeMassTool3)
-    augmentationTools.append(EGAM11ZeeMassTool3)
-
-    EGAM11ZegMassTool = acc.popToolsAndMerge(EGAM11ZegMassToolCfg(flags))
-    acc.addPublicTool(EGAM11ZegMassTool)
-    augmentationTools.append(EGAM11ZegMassTool)
+    acc.merge(EGAM11ZeeMassAug1Cfg(flags))
+    acc.merge(EGAM11ZeeMassAug2Cfg(flags))
+    acc.merge(EGAM11ZeeMassAug3Cfg(flags))
+    acc.merge(EGAM11ZegMassAugCfg(flags))
 
     # thinning tools
     thinningTools = []

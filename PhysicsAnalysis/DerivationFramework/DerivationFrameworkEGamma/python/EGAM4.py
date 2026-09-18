@@ -51,7 +51,7 @@ def EGAM4SkimmingToolCfg(flags):
                                      expression = expression)
 
 
-def EGAM4mumuMassToolCfg(flags):
+def EGAM4mumuMassAugCfg(flags):
     """Configure the EGAM4 mumu invariant mass augmentation tool"""
     acc = ComponentAccumulator()
 
@@ -63,7 +63,7 @@ def EGAM4mumuMassToolCfg(flags):
         ["Muons.pt>9.5*GeV", "abs(Muons.eta)<2.7", "Muons.DFCommonMuonPassPreselection"]
     )
 
-    acc.setPrivateTools(
+    EGAM4_MuMuMassTool = acc.addPublicTool(
         CompFactory.DerivationFramework.EGInvariantMassTool(
             name="EGAM4_MuMuMassTool",
             Object1Requirements=requirementMuons,
@@ -78,7 +78,7 @@ def EGAM4mumuMassToolCfg(flags):
             MinDeltaR=0.0,
         )
     ) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
-
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("EGAMM4_MuMuMassAug", AugmentationTools = [EGAMM4_MuMuMassTool]), primary=True)
     return acc
 
 
@@ -98,14 +98,11 @@ def EGAM4KernelCfg(flags, name="EGAM4Kernel", **kwargs):
     )
 
     # EGAM4 augmentations
-    augmentationTools = []
 
     # ====================================================================
     # ee and egamma invariant masses
     # ====================================================================
-    EGAM4mumuMassTool = acc.popToolsAndMerge(EGAM4mumuMassToolCfg(flags))
-    acc.addPublicTool(EGAM4mumuMassTool)
-    augmentationTools.append(EGAM4mumuMassTool)
+    acc.merge(EGAM4mumuMassAugCfg(flags))
 
     # ====================================================================
     # Common calo decoration tools
