@@ -59,4 +59,4 @@ atlas_add_test( egammaTrackThinnerConfig_test
     SCRIPT python -m egammaAlgs.egammaTrackThinnerConfig
     POST_EXEC_SCRIPT noerror.sh)
 
-atlas_install_data(share/*.txt)
+atlas_install_data(share/*.pkl)

@@ -7,6 +7,7 @@ from AthenaConfiguration.Enums import LHCPeriod
 from RecJobTransforms.AODFixHelper import releaseInRange
 from AthenaCommon.Logging import logging
 from PathResolver import PathResolver
+import pickle
 
 def getfunc():
     from inspect import currentframe, getframeinfo
@@ -56,44 +57,41 @@ def FixFromAMITag(flags):
         return doFixFromAMITags, listOfRecoTags
 
 
-    filename_merging = PathResolver.FindCalibFile("egammaAlgs/Merging_reco_tag.txt") ##list of the reconstruction tag that are merging tag
+    filename_merging = PathResolver.FindCalibFile("egammaAlgs/Merging_reco_tag.pkl") ##list of the reconstruction tag that are merging tag
     for e in listOfRecoTags:
         msg.info('Testing %s',e)
-        with open(filename_merging) as f:
-            for line in f:
-                if e == line.strip():
-                    msg.info('it is a merging tag; skip')
-                    has_been_merged = True
-                    continue
+        with open(filename_merging, "rb") as f:
+            releases = pickle.load(f)
+            if e in releases:
+                msg.info('it is a merging tag; skip')
+                has_been_merged = True
+                continue
         if not  has_been_merged:
             listOfRecoTags_noMerge.append(e)
 
+        
     if len(listOfRecoTags_noMerge) == 0:
         doFixFromAMITags.append((True,True))
         return doFixFromAMITags, listOfRecoTags_noMerge
-
     
+    listOfRecoTags_noMerge_set= set(listOfRecoTags_noMerge)
     msg.info('remaining tag after removing merge tag %s',listOfRecoTags_noMerge)
     
-    filename_timingTag = PathResolver.FindCalibFile("egammaAlgs/Timing_fix_reco_tag.txt") ## List of reconstruction tag that belong in the range where the timing fix should not be applied (Athena-23.0.0 to Athena-23.0.11) 
-    filename_AmbiguityTag = PathResolver.FindCalibFile("egammaAlgs/Ambiguity_fix_reco_tag.txt") ## List of reconstruction tag that belong in the range wher the ambiguity link should be applied (Athena-24.0.0 to Athena-24.0.83)
+    filename_timingTag = PathResolver.FindCalibFile("egammaAlgs/Timing_fix_reco_tag.pkl") ## List of reconstruction tag that belong in the range where the timing fix should not be applied (Athena-23.0.0 to Athena-23.0.11) 
+    filename_AmbiguityTag = PathResolver.FindCalibFile("egammaAlgs/Ambiguity_fix_reco_tag.pkl") ## List of reconstruction tag that belong in the range wher the ambiguity link should be applied (Athena-24.0.0 to Athena-24.0.83)
     
     doFix_timing = True
     doFix_amb = True
-    for e in listOfRecoTags_noMerge:
-        with open(filename_timingTag) as f:
-            for line in f:
-                if e == line.strip():
-                    doFix_timing = False and doFix_timing
-                else:
-                    doFix_timing = True and doFix_timing
-        with open(filename_AmbiguityTag) as f:
-            for line in f:
-                if e == line.strip():
-                    doFix_amb = True and doFix_amb
-                else:
-                    doFix_amb = False and doFix_amb
-
+    with open(filename_timingTag, "rb") as f:
+        TimingTag = pickle.load(f)
+        if(not listOfRecoTags_noMerge_set.intersection(TimingTag)):
+            doFix_timing = True and doFix_timing
+    with open(filename_AmbiguityTag, "rb") as f:
+        AmbiguityTag = pickle.load(f)
+        if(not listOfRecoTags_noMerge_set.intersection(AmbiguityTag)):
+            doFix_amb = True and doFix_amb
+    
+            
     doFixFromAMITags.append((doFix_timing,doFix_amb))
         
     return  doFixFromAMITags,listOfRecoTags_noMerge
@@ -115,6 +113,7 @@ def runAODFix(flags, correctCluster = True, checkRelMerge = True):
         doFix_meta = doFixTime(flags) and TimeToFix
     else:
         doFix_meta=False
+        checkRelMerge=False #no need to cross-check when a run 2 or run 1 are used
     doAmbiguityFix_meta = releaseInRange(flags,"Athena-24.0.0","Athena-24.0.83") and ALToFix
 
     doFix = doFix_meta or doAmbiguityFix_meta
