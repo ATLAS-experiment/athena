@@ -170,17 +170,6 @@ def createActsLegacyTrackingPassFlags():
 
 
 def setActsDefaultTunings(icf):
-    # ACTS specifc config flags
-    icf.addFlag("isSecondaryPass", False)
-    icf.addFlag("isLargeD0", False)
-    icf.addFlag("autoReverseSearch", False)
-    icf.addFlag("PixelSeedingStrategy", SeedingStrategy.Gbts, type=SeedingStrategy)
-    icf.addFlag("StripSeedingStrategy", SeedingStrategy.GridTriplet, type=SeedingStrategy)
-    # Extension used to name the persistified track particle container
-    # (InDet{extension}TrackParticles) when storeSeparateContainer is
-    # requested. If empty, the pass extension is used.
-    icf.addFlag("storedTrackParticlesExtension", "")
-    
     # Custom values for config flags
     icf.Xi2max = [25]
     icf.Xi2maxNoAdd = [25]
