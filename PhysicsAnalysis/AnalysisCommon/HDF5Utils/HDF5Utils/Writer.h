@@ -290,23 +290,6 @@ namespace H5Utils {
       return type;
     }
 
-    /// Mutex that is recreated on move, since std mutexes can't be moved
-    struct MovableMutex: std::recursive_mutex {
-      MovableMutex() = default;
-      MovableMutex(MovableMutex&&) noexcept {}
-    };
-
-    /// Row count that is reset when moved from, so the moved-from
-    /// writer doesn't flush anything
-    struct RowCount {
-      hsize_t value = 0;
-      RowCount() = default;
-      RowCount(RowCount&& o) noexcept: value(std::exchange(o.value, 0)) {}
-      RowCount& operator=(hsize_t v) noexcept { value = v; return *this; }
-      operator hsize_t&() noexcept { return value; }
-      operator hsize_t() const noexcept { return value; }
-    };
-
     /// Constant parameters for the writer
     template <typename I, size_t N>
     struct DSParameters {
@@ -376,7 +359,7 @@ namespace H5Utils {
            const Consumers<I>& consumers,
            const WriterConfiguration<N>& = WriterConfiguration<N>());
     Writer(const Writer&) = delete;
-    Writer(Writer&&) noexcept = default;
+    Writer(Writer&&) noexcept;
     Writer& operator=(Writer&) = delete;
     ~Writer();
     template <typename T>
@@ -389,14 +372,15 @@ namespace H5Utils {
     using function_type = typename consumer_type::template function_type<T>;
     using configuration_type = WriterConfiguration<N>;
   private:
+    Writer(Writer&& other, std::unique_lock<std::recursive_mutex> other_lock) noexcept;
     const internal::DSParameters<I,N> m_par;
     hsize_t m_offset;
-    internal::RowCount m_buffer_rows;
+    hsize_t m_buffer_rows;
     std::vector<internal::data_buffer_t> m_buffer;
     std::vector<SharedConsumer<I> > m_consumers;
     H5::DataSet m_ds;
     H5::DataSpace m_file_space;
-    internal::MovableMutex m_mutex;
+    std::recursive_mutex m_mutex;
   };
 
   template <size_t N, typename I>
@@ -422,6 +406,7 @@ namespace H5Utils {
     m_par(consumers.getConsumers(), cfg.extent,
           cfg.batch_size ? *cfg.batch_size : defaults::batch_size),
     m_offset(0),
+    m_buffer_rows(0),
     m_consumers(consumers.getConsumers()),
     m_file_space(H5S_SIMPLE)
   {
@@ -445,6 +430,25 @@ namespace H5Utils {
     m_ds = group.createDataSet(cfg.name, packed_type, space, params);
     m_file_space = m_ds.getSpace();
     m_file_space.selectNone();
+  }
+
+  // the mutex isn't movable, the moved-from writer is left empty; don't move a writer other threads still use
+  template <size_t N, typename I>
+  Writer<N, I>::Writer(Writer&& other) noexcept:
+    Writer(std::move(other), std::unique_lock(other.m_mutex))
+  {
+  }
+
+  template <size_t N, typename I>
+  Writer<N, I>::Writer(Writer&& other, std::unique_lock<std::recursive_mutex>) noexcept:
+    m_par(other.m_par),
+    m_offset(std::exchange(other.m_offset, 0)),
+    m_buffer_rows(std::exchange(other.m_buffer_rows, 0)),
+    m_buffer(std::exchange(other.m_buffer, {})),
+    m_consumers(std::move(other.m_consumers)),
+    m_ds(std::move(other.m_ds)),
+    m_file_space(std::move(other.m_file_space))
+  {
   }
 
   template <size_t N, typename I>
@@ -518,7 +522,7 @@ namespace H5Utils {
       m_file_space.selectElements(H5S_SELECT_APPEND, n_el, elements.data());
     }
     m_buffer.insert(m_buffer.end(), buf.buffer.begin(), buf.buffer.end());
-    ++m_buffer_rows;
+    m_buffer_rows++;
   }
 
   template <size_t N, typename I>
