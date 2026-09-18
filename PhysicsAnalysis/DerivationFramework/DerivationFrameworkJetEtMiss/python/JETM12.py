@@ -241,10 +241,9 @@ def JETM12KernelCfg(flags, name='JETM12Kernel', **kwargs):
     acc.addSequence( seqAND("JETM12Sequence") )
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     skimmingTool = acc.getPrimaryAndMerge(JETM12SkimmingToolCfg(flags))
-    augmentationToolSkim = acc.getPrimaryAndMerge(JETM12AugmentationToolsForSkimmingCfg(flags))
-    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(kwargs["PreselectionName"]+"Aug", AugmentationTools = [augmentationToolSkim]), sequenceName="JETM12Sequence" )
-    skimmingKernel = DerivationKernel(kwargs["PreselectionName"], SkimmingTools = [skimmingTool] )
-    acc.addEventAlgo( skimmingKernel, sequenceName="JETM12Sequence" )
+    augmentationToolSkim = acc.getPrimaryAndMerge(JETM12AugmentationToolsForSkimmingCfg(flags)) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(kwargs["PreselectionName"]+"Aug", AugmentationTools = [augmentationToolSkim]), sequenceName="JETM12Sequence")
+    acc.addEventAlgo( DerivationKernel(kwargs["PreselectionName"], SkimmingTools = [skimmingTool]), sequenceName="JETM12Sequence" )
 
     # Thinning tools...
     from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg, MuonTrackParticleThinningCfg, EgammaTrackParticleThinningCfg, TauTrackParticleThinningCfg
@@ -329,13 +328,13 @@ def JETM12KernelCfg(flags, name='JETM12Kernel', **kwargs):
 
     # augmentation tool
     augmentationTool = acc.getPrimaryAndMerge(JETM12AugmentationToolsCfg(flags))
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(kwargs["PreselectionName"]+"Aug", AugmentationTools = [augmentationTool]), sequenceName="JETM12Sequence" )
 
     # Main kernel
-    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(kwargs["PreselectionName"]+"Aug", AugmentationTools = [augmentationTool]), sequenceName="JETM12Sequence" )
-    acc.addEventAlgo(DerivationKernel(name, 
+    acc.addEventAlgo(DerivationKernel(name,
                                       ThinningTools = thinningTools),
                      sequenceName="JETM12Sequence")
-    
+
     return acc
 
 def JETM12Cfg(flags):
