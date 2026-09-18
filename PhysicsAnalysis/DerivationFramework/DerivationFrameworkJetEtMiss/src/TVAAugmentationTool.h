@@ -1,12 +1,11 @@
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef DERIVATIONFRAMEWORK_TVAAUGMENTATIONTOOL_H
 #define DERIVATIONFRAMEWORK_TVAAUGMENTATIONTOOL_H
 
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AsgTools/ToolHandle.h"
 #include "TrackVertexAssociationTool/ITrackVertexAssociationTool.h"
 #include "AthLinks/ElementLink.h"
@@ -15,14 +14,14 @@
 #include <memory>
 
 namespace DerivationFramework {
-  class TVAAugmentationTool : public extends<AthAlgTool, IAugmentationTool>
+  class TVAAugmentationTool : public AthReentrantAlgorithm // FIXME RENAME
   {
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override final;
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
   private:
     // Properties
     SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackName{this, "TrackName", "InDetTrackParticles"};

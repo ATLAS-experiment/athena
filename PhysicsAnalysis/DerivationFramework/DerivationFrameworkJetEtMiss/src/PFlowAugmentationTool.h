@@ -1,7 +1,7 @@
 ////////////////////-*- C++ -*-////////////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // PFlowAugmentationTool.h
@@ -13,8 +13,7 @@
 #include <string>
 #include <vector>
 
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 
 #include "StoreGate/WriteDecorHandleKey.h"
@@ -26,13 +25,13 @@
 
 namespace DerivationFramework {
 
-  class PFlowAugmentationTool : public extends<AthAlgTool, IAugmentationTool> {
+  class PFlowAugmentationTool : public AthReentrantAlgorithm { // FIXME RENAME
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override final;
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
 
   private:
 
