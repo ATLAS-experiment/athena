@@ -132,7 +132,7 @@ def STDM17AugmentationToolsCfg(flags):
                                                                                TargetContainer    = "InDetTrackParticles",
                                                                                iso                = [isoPar.ptcone40, isoPar.ptcone30, isoPar.ptcone20],
                                                                                isoSuffix          = ["ptcone40", "ptcone30", "ptcone20"],
-                                                                               Prefix             = "TrkIsoPt500_"))
+                                                                               Prefix             = "TrkIsoPt500_"))# TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
     acc.addPublicTool(Pt500IsoTrackDecorator, primary=True)
 
     return(acc)
@@ -240,13 +240,13 @@ def STDM17KernelCfg(flags, name='STDM17Kernel', **kwargs):
 
     # augmentation tool
     augmentationTool = acc.getPrimaryAndMerge(STDM17AugmentationToolsCfg(flags))
-    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(kwargs[name+"Aug", AugmentationTools = [augmentationTool]), sequenceName="STDM17Sequence")
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(name+"Aug", AugmentationTools = [augmentationTool]), sequenceName="STDM17Sequence" )
 
     # Main kernel
     acc.addEventAlgo(DerivationKernel(name,
-                                      ThinningTools = thinningTools),
-                     sequenceName="STDM17Sequence")
-    
+                                      ThinningTools = thinningTools,
+                                      sequenceName="STDM17Sequence")
+
     return acc
 
 def STDM17Cfg(flags):
