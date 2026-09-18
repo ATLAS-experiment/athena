@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Decorate egamma objects with the energy and number of cells per layer per
@@ -9,8 +9,7 @@
 #define DERIVATIONFRAMEWORK_GainDecorator_H
 
 
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteDecorHandleKeyArray.h"
@@ -23,14 +22,14 @@ class CaloCell;
 
 namespace DerivationFramework {
 
-  class GainDecorator : public extends<AthAlgTool, IAugmentationTool>
+  class GainDecorator : public AthReentrantAlgorithm
   {
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override final;
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
     static int getLayer(const CaloCell* cell); // TODO Why is this public?
 
     struct calculation

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_ClusterEnergyPerLayerDecorator_H
@@ -7,11 +7,10 @@
 
 #include <string>
 
-#include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "CaloEvent/CaloCellContainer.h"
 #include "CaloUtils/CaloClusterProcessor.h"
 #include "CaloClusterCorrection/CaloFillRectangularCluster.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "GaudiKernel/EventContext.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadHandleKey.h"
@@ -23,14 +22,14 @@ namespace DerivationFramework {
 /** Decorate egamma objects with the energy per layer for a rectangular cluster
  * of size neta X nphi built on the fly
  **/
-class ClusterEnergyPerLayerDecorator : public extends<AthAlgTool, IAugmentationTool>
+class ClusterEnergyPerLayerDecorator : public AthReentrantAlgorithm
 {
 public:
 
-  using base_class::base_class;
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
   virtual StatusCode initialize() override final;
-  virtual StatusCode addBranches(const EventContext& ctx) const override final;
+  virtual StatusCode execute(const EventContext& ctx) const override final;
 
 private:
   Gaudi::Property<std::vector<unsigned int>> m_layers{this, "layers", { 0, 1, 2, 3 } };
