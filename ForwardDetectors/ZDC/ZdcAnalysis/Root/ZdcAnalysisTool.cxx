@@ -3192,8 +3192,9 @@ void ZdcAnalysisTool::setFADCCorrections(unsigned int runNumber)
 	  readSuccess = false;
 	  break;
 	}
-	
+	histHG_ptr->SetDirectory(0);
 	histogramsHG[side][module].reset(histHG_ptr);
+	histLG_ptr->SetDirectory(0);
 	histogramsLG[side][module].reset(histLG_ptr);
       }
     }
