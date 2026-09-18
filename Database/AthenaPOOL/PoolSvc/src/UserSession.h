@@ -70,10 +70,6 @@ namespace pool {
      */
     virtual bool disconnectAll() override final;
 
-    /// Returns the transaction interface
-    virtual ITransaction& transaction() override final { return *this; }
-    virtual const ITransaction& transaction() const override final { return *this; }
-
     /// Starts a new transaction. Returns the success of the operation
     virtual bool start( Io::IoFlag type = Io::READ ) override final;
 
@@ -88,9 +84,6 @@ namespace pool {
 
     /// Returns the transaction type
     virtual Io::IoFlag type() const override final { return m_transactionType; }
-
-    /// Returns the transaction type
-    Io::IoFlag transactionType() const { return transaction().type(); }
 
     /// Creates and returns a new database handle object
     virtual std::unique_ptr<IDatabase>
