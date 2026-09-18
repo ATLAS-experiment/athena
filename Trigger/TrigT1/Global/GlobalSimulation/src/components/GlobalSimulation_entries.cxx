@@ -18,6 +18,7 @@
 #include "../Hypothesis/eEmMultTestComparator.h"
 
 #include "../Jet1/GlobalJet1AlgTool.h"
+#include "../Jet_Tag/GlobalJet_TagAlgTool.h"
 
 #include "../Lar_Preproc/Egamma1_LArStrip_Fex.h"
 #include "../Lar_Preproc/Egamma1_LArStrip_Fex_RowAware.h"
@@ -52,6 +53,7 @@ DECLARE_COMPONENT(GlobalSim::eEmMultTestBench)
 DECLARE_COMPONENT(GlobalSim::eEmMultTestComparator)
 
 DECLARE_COMPONENT(GlobalSim::GlobalJet1AlgTool)
+DECLARE_COMPONENT(GlobalSim::GlobalJet_TagAlgTool)
 
 DECLARE_COMPONENT(GlobalSim::Egamma1_LArStrip_Fex)
 DECLARE_COMPONENT(GlobalSim::Egamma1_LArStrip_Fex_RowAware)
