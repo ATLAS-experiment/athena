@@ -99,7 +99,7 @@ def SUSY20KernelCfg(flags, name = "SUSY20Kernel", **kwargs):
         acc.addPublicTool(SUSY20CaloIsoTool)
 
         from DerivationFrameworkInDet.InDetToolsConfig import IsolationTrackDecoratorCfg
-        SUSY20IDTrackDecoratorTool = acc.getPrimaryAndMerge(IsolationTrackDecoratorCfg(
+        SUSY20IDTrackDecoratorTool = acc.addPublicTool(acc.getPrimaryAndMerge(IsolationTrackDecoratorCfg(
                 flags,
                 name               = "SUSY20IDTrackDecoratorTool",
                 TrackIsolationTool = SUSY20TrackIsoTool,
@@ -109,8 +109,7 @@ def SUSY20KernelCfg(flags, name = "SUSY20Kernel", **kwargs):
                 iso                = deco_ptcones,
                 isoSuffix          = deco_ptcones_suffix,
                 Prefix             = deco_prefix,
-        ))
-        acc.addPublicTool(SUSY20IDTrackDecoratorTool)
+        ))) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
         acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("SUSY20IDTrackDecoratorAug", AugmentationTools = [SUSY20IDTrackDecoratorTool]))
 
         # Commented out calo isolation, not needed by current analyses but still included in r21 SUSY20_DAODs
@@ -124,7 +123,7 @@ def SUSY20KernelCfg(flags, name = "SUSY20Kernel", **kwargs):
                 iso                = [isoPar.topoetcone40, isoPar.topoetcone30, isoPar.topoetcone20],
                 isoSuffix          = ["topoetcone40", "topoetcone30", "topoetcone20"],
                 Prefix             = deco_prefix,
-        ))
+        )) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
         acc.addPublicTool(SUSY20ElectronDecorator)
         acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("SUSY20ElectronDecoratorAug", AugmentationTools = [SUSY20ElectronDecorator])
 
@@ -138,7 +137,7 @@ def SUSY20KernelCfg(flags, name = "SUSY20Kernel", **kwargs):
                 iso                = [isoPar.topoetcone40, isoPar.topoetcone30, isoPar.topoetcone20],
                 isoSuffix          = ["topoetcone40", "topoetcone30", "topoetcone20"],
                 Prefix             = deco_prefix,
-        ))
+        )) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
         acc.addPublicTool(SUSY20MuonDecorator)
         acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("SUSY20MuonDecoratorAug", AugmentationTools = [SUSY20MuonDecorator])
 
@@ -152,7 +151,7 @@ def SUSY20KernelCfg(flags, name = "SUSY20Kernel", **kwargs):
                 iso                = [isoPar.topoetcone40, isoPar.topoetcone30, isoPar.topoetcone20],
                 isoSuffix          = ["topoetcone40", "topoetcone30", "topoetcone20"],
                 Prefix             = deco_prefix,
-        ))
+        )) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
         acc.addPublicTool(SUSY20PhotonDecorator)
         acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("SUSY20PhotonDecoratorAug", AugmentationTools = [SUSY20PhotonDecorator])'''
 
