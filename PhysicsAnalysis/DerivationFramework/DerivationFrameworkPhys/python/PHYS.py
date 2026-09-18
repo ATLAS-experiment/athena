@@ -160,14 +160,14 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
                                               "Muons.TruthLink",
                                               "Photons.TruthLink",
                                               "AntiKt4TruthDressedWZJets.IsoFixedCone5Pt.HFHadronOriginID",
-                                              "TruthHFWithDecayParticles.prodVtxLink.prodVtxLink.prodVtxLink.decayVtxLink.decayVtxLink.decayVtxLink.parentLinks.childLinks.m.px.py.pz.e.pdgId.Classification.uid.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.status",
+                                              "TruthHFWithDecayParticles.prodVtxLink.prodVtxLink.prodVtxLink.decayVtxLink.decayVtxLink.decayVtxLink.parentLinks.childLinks.m.px.py.pz.e.pdgId.truthClassification.uid.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.status",
                                               "TruthHFWithDecayVertices.incomingParticleLinks.outgoingParticleLinks.uid.status.x.y.z.t",
-                                              "TruthCharm.prodVtxLink.prodVtxLink.prodVtxLink.decayVtxLink.decayVtxLink.decayVtxLink.parentLinks.childLinks.m.px.py.pz.e.pdgId.Classification.uid.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.status.barcode.polarizationPhi.polarizationTheta",
-                                              "TruthPileupParticles.prodVtxLink.prodVtxLink.prodVtxLink.decayVtxLink.decayVtxLink.decayVtxLink.m.px.py.pz.e.pdgId.Classification.uid.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.status.barcode.PVz.pileupEventNumber.parentHadronID"]
+                                              "TruthCharm.prodVtxLink.prodVtxLink.prodVtxLink.decayVtxLink.decayVtxLink.decayVtxLink.parentLinks.childLinks.m.px.py.pz.e.pdgId.truthClassification.uid.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.status.barcode.polarizationPhi.polarizationTheta",
+                                              "TruthPileupParticles.prodVtxLink.prodVtxLink.prodVtxLink.decayVtxLink.decayVtxLink.decayVtxLink.m.px.py.pz.e.pdgId.truthClassification.uid.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.status.barcode.PVz.pileupEventNumber.parentHadronID"]
 
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTauAndDownstreamParticlesCfg
         acc.merge(AddTauAndDownstreamParticlesCfg(flags))
-        PHYSSlimmingHelper.ExtraVariables += ["TruthTausWithDecayParticles.prodVtxLink.prodVtxLink.prodVtxLink.decayVtxLink.decayVtxLink.decayVtxLink.m.px.py.pz.e.pdgId.Classification.uid.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.status",
+        PHYSSlimmingHelper.ExtraVariables += ["TruthTausWithDecayParticles.prodVtxLink.prodVtxLink.prodVtxLink.decayVtxLink.decayVtxLink.decayVtxLink.m.px.py.pz.e.pdgId.truthClassification.uid.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.status",
                                               "TruthTausWithDecayVertices.incomingParticleLinks.outgoingParticleLinks.uid.status.x.y.z.t"]
         
         #Truth jet matching variables - largeR

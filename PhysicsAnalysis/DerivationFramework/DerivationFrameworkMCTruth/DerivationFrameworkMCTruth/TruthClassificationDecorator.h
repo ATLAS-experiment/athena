@@ -39,7 +39,7 @@ namespace DerivationFramework {
     SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_outcomeDecoratorKey
       {this, "classifierParticleOutCome", m_particlesKey, "classifierParticleOutCome", "Particle outcome decoration"};
     SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_classificationDecoratorKey
-      {this, "Classification", m_particlesKey, "Classification", "Classification code decorator"};
+      {this, "Classification", m_particlesKey, "truthClassification", "Classification code decorator"};
     PublicToolHandle<IMCTruthClassifier> m_classifier{this, "MCTruthClassifier", "MCTruthClassifier/MCTruthClassifier"};
   };
 }

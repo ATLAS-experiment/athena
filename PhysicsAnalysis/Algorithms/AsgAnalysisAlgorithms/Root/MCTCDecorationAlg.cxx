@@ -32,6 +32,7 @@ namespace CP
     }
 
     m_classificationAccessor = std::make_unique<SG::ConstAccessor<unsigned int> > (m_classificationDecoration);
+    m_legacyClassificationAccessor = std::make_unique<SG::ConstAccessor<unsigned int> > (m_legacyClassificationDecoration);
 
     if (!m_isPromptDecoration.empty())
     {
@@ -85,6 +86,11 @@ namespace CP
             if (m_classificationAccessor->isAvailable(*truthParticle))
             {
               result = (*m_classificationAccessor)(*truthParticle);
+            }
+            else if (m_legacyClassificationAccessor->isAvailable(*truthParticle))
+            {
+              ANA_MSG_DEBUG ("MCTC Classification decoration not available, trying legacy decoration name.");
+              result = (*m_legacyClassificationAccessor)(*truthParticle);
             }
             else
             {

@@ -53,11 +53,13 @@ namespace CP
 
     /// \brief the decoration for the MCTC classification bitmask
   private:
-    Gaudi::Property<std::string> m_classificationDecoration{this, "classificationDecoration", "Classification", "the decoration for the MCTC classification bitmask"};
+    Gaudi::Property<std::string> m_classificationDecoration{this, "classificationDecoration", "truthClassification", "the decoration for the MCTC classification bitmask"};
+    Gaudi::Property<std::string> m_legacyClassificationDecoration{this, "legacyClassificationDecoration", "Classification", "the decoration for the MCTC classification bitmask"};
 
     /// \brief the accessor for \ref m_classificationDecoration
   private:
     std::unique_ptr<const SG::ConstAccessor<unsigned int> > m_classificationAccessor{};
+    std::unique_ptr<const SG::ConstAccessor<unsigned int> > m_legacyClassificationAccessor{};
 
     /// \brief the decoration for the promptness
   private:

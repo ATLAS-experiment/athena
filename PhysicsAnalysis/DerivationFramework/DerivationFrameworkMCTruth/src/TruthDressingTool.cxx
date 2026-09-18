@@ -25,7 +25,7 @@
 #include <algorithm>
 #include <memory>
 namespace {
-  static const SG::ConstAccessor<unsigned int> acc_origin("Classification");
+  static const SG::ConstAccessor<unsigned int> acc_origin("truthClassification");
 }
 
 // Athena initialize
