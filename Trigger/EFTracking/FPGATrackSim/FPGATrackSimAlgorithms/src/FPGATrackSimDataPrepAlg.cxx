@@ -1,6 +1,6 @@
 //// FPGATrackSimDataPrepAlg.cxx
 
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #include "FPGATrackSimDataPrepAlg.h"
 
@@ -182,10 +182,10 @@ StatusCode FPGATrackSimDataPrepAlg::execute(const EventContext& ctx) const
             for (const FPGATrackSimTruthTrack& fpgaTruthTrack : fpgaTruthTracks) {
                 auto it = truthParticlesMap.find(fpgaTruthTrack.getUniqueID()); // TODO FIXME need to check FPGATrackSimTruthTrack uniqueIDs are properly filled
                 if (it != truthParticlesMap.end()) {
-                    ElementLink<xAOD::TruthParticleContainer> truthParticleLink(*truthParticleContainer, it->second.second);
+                    ElementLink<xAOD::TruthParticleContainer> truthParticleLink(*truthParticleContainer, it->second.second, ctx);
                     // TODO: check if we can avoid using the previously-created map and look directly for the unique ID in the link vector container
                     truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink(HepMC::uniqueID(it->second.first), 0,
-                        HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_ID), truthParticleLink));
+                        HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_ID, ctx), truthParticleLink));
                     ATH_MSG_DEBUG("Truth link added");
                 }
             }
