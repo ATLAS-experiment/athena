@@ -131,12 +131,56 @@ def DeviceTripletSeedingAlgCfg(flags,
 
     kwargs.setdefault("InputTracccPixelSpacepoints", "TracccPixelSpacepoints")
     kwargs.setdefault("OutputTracccPixelSeeds", "TracccPixelSeeds")
+
+    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+    acc.merge(BeamSpotCondAlgCfg(flags))
+    from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
+    acc.merge(AtlasFieldCacheCondAlgCfg(flags))
     
     kwargs.setdefault("SeedingAlgProviderTool", acc.popToolsAndMerge(DeviceSeedingProviderToolCfg(flags)))
     
     acc.addEventAlgo(
         CompFactory.ActsTrk.DeviceTripletSeedingAlg(name, **kwargs))
     return acc
+
+def DeviceLargeRadiusStripTripletSeedingAlgCfg(flags,
+                                               name="DeviceLargeRadiusStripTripletSeedingAlg",
+                                               **kwargs) -> ComponentAccumulator:
+    # Cuts following ActsLargeRadiusStripSeedingToolCfg, restricted to what the
+    # traccc triplet seeder supports
+    kwargs.setdefault("InputTracccPixelSpacepoints", "TracccStripSpacepoints")
+    kwargs.setdefault("OutputTracccPixelSeeds", "TracccStripSeeds")
+    # Seed finder
+    kwargs.setdefault("zMin", -3000.)
+    kwargs.setdefault("zMax", 3000.)
+    kwargs.setdefault("rMin", 350.)
+    kwargs.setdefault("rMax", flags.Tracking.ActiveConfig.radMax)
+    kwargs.setdefault("collisionRegionMin", -flags.Tracking.ActiveConfig.maxZImpactSeed)
+    kwargs.setdefault("collisionRegionMax", flags.Tracking.ActiveConfig.maxZImpactSeed)
+    kwargs.setdefault("minPt", flags.Tracking.ActiveConfig.minPTSeed)
+    kwargs.setdefault("impactMax", flags.Tracking.ActiveConfig.maxPrimaryImpactSeed)
+    kwargs.setdefault("cotThetaMax", 5.0)
+    kwargs.setdefault("deltaRMin", 50.)
+    kwargs.setdefault("deltaRMax", 250.)
+    kwargs.setdefault("gridDeltaRMax", 400.)
+    kwargs.setdefault("deltaZMax", 850.)
+    kwargs.setdefault("sigmaScattering", 2.)
+    kwargs.setdefault("maxPtScattering", 1.e9)
+    kwargs.setdefault("radLengthPerSeed", 0.098045)
+    kwargs.setdefault("maxSeedsPerSpM", 1)
+    kwargs.setdefault("phiBinDeflectionCoverage", 3)
+    # Seed filter
+    kwargs.setdefault("deltaInvHelixDiameter", 0.00003)
+    kwargs.setdefault("impactWeightFactor", 1.)
+    kwargs.setdefault("compatSeedWeight", 100.)
+    kwargs.setdefault("filterDeltaRMin", 20.)
+    kwargs.setdefault("compatSeedLimit", 4)
+    # Disable the radius based weights and cuts of the pixel seeding
+    kwargs.setdefault("goodSpBMinRadius", 1.e9)
+    kwargs.setdefault("goodSpTMaxRadius", -1.)
+    kwargs.setdefault("seedMinWeight", -1.e9)
+    kwargs.setdefault("spBMinRadius", 0.)
+    return DeviceTripletSeedingAlgCfg(flags, name, **kwargs)
 
 def DeviceTrkParamEstimationAlgCfg(flags,
                                name="DeviceTrkParamEstimationAlg",
@@ -176,4 +220,17 @@ def DeviceTrackFindingAlgCfg(flags,
     
     acc.addEventAlgo(
         CompFactory.ActsTrk.DeviceTrackFindingAlg(name, **kwargs))
-    return acc   
+    return acc
+
+def DeviceLargeRadiusTrackFindingAlgCfg(flags,
+                                        name="DeviceLargeRadiusTrackFindingAlg",
+                                        **kwargs) -> ComponentAccumulator:
+    # Cuts following ActsTrackFindingToolCfg for the large radius pass,
+    # restricted to what the traccc track finding supports
+    from AthenaCommon.SystemOfUnits import MeV
+    kwargs.setdefault("chi2Max", flags.Tracking.ActiveConfig.Xi2max[0])
+    kwargs.setdefault("minTrackCandidatesPerTrack", flags.Tracking.ActiveConfig.minClusters[0])
+    kwargs.setdefault("maxNumSkippingPerCand", flags.Tracking.ActiveConfig.maxHoles[0])
+    kwargs.setdefault("maxNumConsecutiveSkipped", flags.Tracking.ActiveConfig.maxHoles[0])
+    kwargs.setdefault("minPt", flags.Tracking.ActiveConfig.minPT[0] / MeV)
+    return DeviceTrackFindingAlgCfg(flags, name, **kwargs)   

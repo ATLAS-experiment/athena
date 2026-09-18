@@ -27,6 +27,9 @@ set( _libraries
   ActsGPUInterfacesLib
   ActsToolInterfacesLib
   TrigInDetPattRecoToolsLib
+  BeamSpotConditionsData
+  MagFieldConditions
+  MagFieldElements
 )
 
 
