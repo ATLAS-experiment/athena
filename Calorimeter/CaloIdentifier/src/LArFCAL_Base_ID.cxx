@@ -9,11 +9,8 @@
 #include "IdDict/IdDictRegion.h"
 #include "PathResolver/PathResolver.h"
 
-#include "CxxUtils/StrFormat.h"
 #include <iostream>
 #include <fstream>
-
-using CxxUtils::strformat;
 
 #define MAX_BUFFER_LEN 1024
 

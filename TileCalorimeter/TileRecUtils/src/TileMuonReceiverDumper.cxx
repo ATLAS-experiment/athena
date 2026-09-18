@@ -13,7 +13,7 @@
 
 #include "TileMuonReceiverDumper.h"
 #include "StoreGate/ReadHandle.h"
-#include "CxxUtils/StrFormat.h"
+#include <format>
 #include <fstream>
 
 
@@ -45,11 +45,11 @@ StatusCode TileMuonReceiverDumper::initialize()
  */
 StatusCode TileMuonReceiverDumper::execute (const EventContext& ctx) const
 {
-  std::string fname = CxxUtils::strformat ("%s%s_%08u_%08lu.dump",
-                                           m_prefix.value().c_str(),
-                                           m_contKey.key().c_str(),
-                                           ctx.eventID().run_number(),
-                                           ctx.eventID().event_number());
+  std::string fname = std::format("{}{}_ {:08d}_{:08d}.dump",
+                                  m_prefix.value(),
+                                  m_contKey.key(),
+                                  ctx.eventID().run_number(),
+                                  ctx.eventID().event_number());
   std::ofstream fout (fname);
   if (!fout) {
     ATH_MSG_ERROR ("Cannot open dump file: " << fname);

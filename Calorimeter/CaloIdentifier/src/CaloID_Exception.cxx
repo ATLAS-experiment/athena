@@ -3,9 +3,7 @@
 */
 
 #include "CaloIdentifier/CaloID_Exception.h"
-#include "CxxUtils/StrFormat.h"
-
-using CxxUtils::strformat;
+#include <format>
 
 
 CaloID_Exception::CaloID_Exception() : 
@@ -32,7 +30,7 @@ CaloID_Exception::operator std::string () const
 
 {
   return
-    strformat ("CaloID_Exception - Error code: %d  \n ", this->code()) +
+    std::format("CaloID_Exception - Error code: {}  \n ", this->code()) +
     this->message();
 }
 

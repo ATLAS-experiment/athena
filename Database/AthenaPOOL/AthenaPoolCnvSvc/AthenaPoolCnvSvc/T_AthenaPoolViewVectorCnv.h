@@ -28,7 +28,6 @@
 #include "AthLinks/ElementLink.h"
 #include "AthenaKernel/errorcheck.h"
 #include "AthenaKernel/ClassID_traits.h"
-#include "CxxUtils/StrFormat.h"
 #include "DataModelRoot/RootType.h"
 #include <vector>
 #include <cstdlib>
