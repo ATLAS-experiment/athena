@@ -120,6 +120,8 @@ def TracccTrackConverterAlgCfg(flags,
     kwargs.setdefault("CopyProviderTool", acc.popToolsAndMerge(CopyToolCfg(flags)))
     kwargs.setdefault("InputTracks", "TracccMeasurements")
     kwargs.setdefault("OutputTracks", "ITkTracccTracks")
+    kwargs.setdefault("GeoIdMapping", "TracccGeometryIdMapping")
+    kwargs.setdefault("HostDetectorName", "TracccHostDetectorGeometry")
     acc.addEventAlgo(
         CompFactory.ActsTrk.TracccTrackConverterAlg(name, **kwargs))
     return acc 
