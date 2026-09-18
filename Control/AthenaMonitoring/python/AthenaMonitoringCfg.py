@@ -32,14 +32,26 @@ def AthenaMonitoringCfg(flags):
         result.merge(TRTMonitoringRun3Cfg(flags))
     
     if flags.DQ.Steering.doInDetMon:
-        if flags.DQ.Steering.InDet.doGlobalMon:
-            info('Set up InDet Global monitoring')
-            from InDetGlobalMonitoringRun3Test.InDetGlobalMonitoringRun3TestConfig import InDetGlobalMonitoringRun3TestConfig
-            result.merge(InDetGlobalMonitoringRun3TestConfig(flags))
-        if flags.DQ.Steering.InDet.doAlignMon:  
-            info('Set up Alignment monitoring')
-            from InDetAlignmentMonitoringRun3.InDetAlignmentMonitoringRun3Config import InDetAlignmentMonitoringRun3Config
-            result.merge(InDetAlignmentMonitoringRun3Config(flags))
+        # The ITk (Run 4) tracker is monitored by dedicated packages;
+        # the InDet*Run3 packages cover the Run 1-3 InnerDetector.
+        if flags.Detector.GeometryITk:
+            if flags.DQ.Steering.InDet.doGlobalMon:
+                info('Set up ITk Global monitoring')
+                from ITkGlobalMonitoring.ITkGlobalMonitoringConfig import ITkGlobalMonitoringConfig
+                result.merge(ITkGlobalMonitoringConfig(flags))
+            if flags.DQ.Steering.InDet.doAlignMon:
+                info('Set up ITk Alignment monitoring')
+                from ITkAlignmentMonitoring.ITkAlignmentMonitoringConfig import ITkAlignmentMonitoringConfig
+                result.merge(ITkAlignmentMonitoringConfig(flags))
+        else:
+            if flags.DQ.Steering.InDet.doGlobalMon:
+                info('Set up InDet Global monitoring')
+                from InDetGlobalMonitoringRun3Test.InDetGlobalMonitoringRun3TestConfig import InDetGlobalMonitoringRun3TestConfig
+                result.merge(InDetGlobalMonitoringRun3TestConfig(flags))
+            if flags.DQ.Steering.InDet.doAlignMon:
+                info('Set up Alignment monitoring')
+                from InDetAlignmentMonitoringRun3.InDetAlignmentMonitoringRun3Config import InDetAlignmentMonitoringRun3Config
+                result.merge(InDetAlignmentMonitoringRun3Config(flags))
 
     if flags.DQ.Steering.doLArMon:
         info('Set up LAr monitoring')
