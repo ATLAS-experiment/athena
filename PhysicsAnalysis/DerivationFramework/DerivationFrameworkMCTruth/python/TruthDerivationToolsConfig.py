@@ -19,8 +19,8 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def TruthCollectionMakerCfg(flags, name, **kwargs):
     """Configure the TruthCollectionMaker tool"""
     acc = ComponentAccumulator()
-    acc.addPublicTool(CompFactory.DerivationFramework.TruthCollectionMaker(name = name,**kwargs),
-                      primary = True)
+    tool = acc.addPublicTool(CompFactory.DerivationFramework.TruthCollectionMaker(name = name,**kwargs))) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(name+"Aug1", AugmentationTools = [tool]))
     return acc
 
 
