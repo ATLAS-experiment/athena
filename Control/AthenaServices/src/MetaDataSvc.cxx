@@ -20,7 +20,6 @@
 
 #include "AthenaBaseComps/AthCnvSvc.h"
 #include "StoreGate/StoreGateSvc.h"
-#include "SGTools/SGVersionedKey.h"
 #include "PersistentDataModel/DataHeader.h"
 #include "RootAuxDynIO/RootAuxDynDefs.h"
 
@@ -180,31 +179,12 @@ StatusCode MetaDataSvc::loadAddresses(StoreID::type storeID, IAddressProvider::t
    if (storeID != StoreID::METADATA_STORE) { // should this (also) run in the INPUT_METADATA_STORE?
       return(StatusCode::SUCCESS);
    }
-   // Put Additional MetaData objects into Input MetaData Store using VersionedKey
-   std::list<SG::ObjectWithVersion<DataHeader> > allVersions;
-   StatusCode sc = m_inputDataStore->retrieveAllVersions(allVersions, name());
-   if (!sc.isSuccess()) {
-      ATH_MSG_WARNING("Could not retrieve all versions for DataHeader, will not read Metadata");
-   } else {
-      int verNumber = -1;
-      for (SG::ObjectWithVersion<DataHeader>& obj : allVersions) {
-         ++verNumber;
-         const DataHeader* dataHeader = obj.dataObject.cptr();
-         if (dataHeader == nullptr) {
-            ATH_MSG_ERROR("Could not get DataHeader, will not read Metadata");
-            return(StatusCode::FAILURE);
-         }
-         for (const DataHeaderElement& dhe : *dataHeader) {
-            const CLID clid = dhe.getPrimaryClassID();
-            if (clid != ClassID_traits<DataHeader>::ID()) {
-               SG::VersionedKey myVersObjKey(dhe.getKey(), verNumber);
-               std::string key = dhe.getKey();
-               if (verNumber != 0) {
-                  key = myVersObjKey;
-               }
-               tads.push_back(dhe.getAddress(m_storageType, key));
-            }
-         }
+   const DataHeader* dataHeader = nullptr;
+   ATH_CHECK( m_inputDataStore->retrieve(dataHeader, name()) );
+   for (const DataHeaderElement& dhe : *dataHeader) {
+      const CLID clid = dhe.getPrimaryClassID();
+      if (clid != ClassID_traits<DataHeader>::ID()) {
+         tads.push_back(dhe.getAddress(m_storageType, dhe.getKey()));
       }
    }
    return(StatusCode::SUCCESS);
@@ -505,20 +485,15 @@ StatusCode MetaDataSvc::initInputMetaDataStore(const std::string& fileName) {
          fileName,
          std::format("{}{}", m_metaDataCont.value(), "DataHeader")
       };
-      for (int verNumber = 0; verNumber < 100; verNumber++) {
-         SG::VersionedKey myVersKey(name(), verNumber);
-         if (m_inputDataStore->contains<DataHeader>(myVersKey)) {
-            ATH_MSG_DEBUG("initInputMetaDataStore: MetaData Store already contains DataHeader, key = " << myVersKey);
-         } else {
-            const unsigned long ipar[2] = { (unsigned long)verNumber , 0 };
-            IOpaqueAddress* opqAddr = nullptr;
-            if (!m_addrCrtr->createAddress(m_storageType, ClassID_traits<DataHeader>::ID(), par, ipar, opqAddr).isSuccess()) {
-               if (!m_addrCrtr->createAddress(m_storageType, ClassID_traits<DataHeader>::ID(), parOld, ipar, opqAddr).isSuccess()) {
-                  break;
-               }
-            }
-            if (m_inputDataStore->recordAddress(myVersKey, opqAddr).isFailure()) {
-               ATH_MSG_WARNING("initInputMetaDataStore: Cannot create proxy for DataHeader, key = " << myVersKey);
+      if (m_inputDataStore->contains<DataHeader>(name())) {
+         ATH_MSG_DEBUG("initInputMetaDataStore: MetaData Store already contains DataHeader, key = " << name());
+      } else {
+         const unsigned long ipar[2] = { 0 , 0 };
+         IOpaqueAddress* opqAddr = nullptr;
+         if (m_addrCrtr->createAddress(m_storageType, ClassID_traits<DataHeader>::ID(), par, ipar, opqAddr).isSuccess()
+          || m_addrCrtr->createAddress(m_storageType, ClassID_traits<DataHeader>::ID(), parOld, ipar, opqAddr).isSuccess()) {
+            if (m_inputDataStore->recordAddress(name(), opqAddr).isFailure()) {
+               ATH_MSG_WARNING("initInputMetaDataStore: Cannot create proxy for DataHeader, key = " << name());
             }
          }
       }
@@ -526,7 +501,7 @@ StatusCode MetaDataSvc::initInputMetaDataStore(const std::string& fileName) {
       ATH_CHECK(loadAddresses(StoreID::METADATA_STORE, tList));
       for (SG::TransientAddress* tad : tList) {
          CLID clid = tad->clID();
-          ATH_MSG_VERBOSE("initInputMetaDataStore: add proxy for clid = " << clid << ", key = " << tad->name());
+         ATH_MSG_VERBOSE("initInputMetaDataStore: add proxy for clid = " << clid << ", key = " << tad->name());
          if (m_inputDataStore->contains(tad->clID(), tad->name())) {
             ATH_MSG_DEBUG("initInputMetaDataStore: MetaData Store already contains clid = " << clid << ", key = " << tad->name());
          } else {
@@ -537,12 +512,11 @@ StatusCode MetaDataSvc::initInputMetaDataStore(const std::string& fileName) {
          }
 
          for (CLID tclid : tad->transientID()) {
-           if (tclid != clid) {
-             if (m_inputDataStore->symLink (clid, tad->name(), tclid).isFailure()) {
-               ATH_MSG_WARNING("Cannot make autosymlink from " <<
-                               clid << "/" << tad->name() << " to " << tclid);
-             }
-           }
+            if (tclid != clid) {
+               if (m_inputDataStore->symLink (clid, tad->name(), tclid).isFailure()) {
+                  ATH_MSG_WARNING("Cannot make autosymlink from " << clid << "/" << tad->name() << " to " << tclid);
+               }
+            }
          }
          delete tad;
       }
