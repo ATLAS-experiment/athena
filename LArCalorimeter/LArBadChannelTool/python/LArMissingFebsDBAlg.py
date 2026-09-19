@@ -37,7 +37,7 @@ def LArBadFebDBAlgCfg(flags,InputFile,dbname="LAR_OFL",folder=None,tag=None,
     result.addEventAlgo(theLArDBAlg)
 
     from RegistrationServices.OutputConditionsAlgConfig import OutputConditionsAlgCfg
-    result.merge(OutputConditionsAlgCfg(flags,"dummy.pool.root",
+    result.merge(OutputConditionsAlgCfg(flags,outputFile="dummy.pool.root",
                                         ObjectList=["AthenaAttributeList#"+folder],
                                         IOVTagList=[tag], 
                                         Run1=IOVStart[0],LB1=IOVStart[1],
