@@ -1,10 +1,10 @@
 /*
    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef L0MuonInterface_RPCCANDDATACONTAINER_H
-#define L0MuonInterface_RPCCANDDATACONTAINER_H
+#ifndef L1MuonInterface_RPCCANDDATACONTAINER_H
+#define L1MuonInterface_RPCCANDDATACONTAINER_H
 
-#include "L0MuonInterface/RPCCandData.h"
+#include "L1MuonInterface/RPCCandData.h"
 #include "AthContainers/DataVector.h"
 #include "AthenaKernel/CLASS_DEF.h"
 
@@ -16,4 +16,4 @@ using RPCCandDataContainer = DataVector<RPCCandData>;
 
 CLASS_DEF( L0Muon::RPCCandDataContainer , 1321396049 , 1 )
 
-#endif  // L0MuonInterface_RPCCANDDATACONTAINER_H
+#endif  // L1MuonInterface_RPCCANDDATACONTAINER_H

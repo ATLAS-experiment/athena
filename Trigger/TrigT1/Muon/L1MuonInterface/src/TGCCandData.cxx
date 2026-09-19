@@ -1,7 +1,7 @@
 /*
    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-#include "L0MuonInterface/TGCCandData.h"
+#include "L1MuonInterface/TGCCandData.h"
 
 namespace L0Muon {
 

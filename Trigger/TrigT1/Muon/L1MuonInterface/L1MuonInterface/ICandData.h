@@ -1,8 +1,8 @@
 /*
    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef L0MuonInterface_ICANDDATA_H
-#define L0MuonInterface_ICANDDATA_H
+#ifndef L1MuonInterface_ICANDDATA_H
+#define L1MuonInterface_ICANDDATA_H
 
 #include <cstdint>
 #include <cmath>

@@ -1,10 +1,10 @@
 /*
    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef L0MuonInterface_TGCCANDDATA_H
-#define L0MuonInterface_TGCCANDDATA_H
+#ifndef L1MuonInterface_TGCCANDDATA_H
+#define L1MuonInterface_TGCCANDDATA_H
 
-#include "L0MuonInterface/ICandData.h"
+#include "L1MuonInterface/ICandData.h"
 
 namespace L0Muon {
 
@@ -56,4 +56,4 @@ class TGCCandData : public ICandData {
 
 }  // namespace L0Muon
 
-#endif  // L0MuonInterface_TGCCANDDATA_H
+#endif  // L1MuonInterface_TGCCANDDATA_H
