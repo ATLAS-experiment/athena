@@ -245,9 +245,10 @@ bool eProbabilityHT_noTRT(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &/*t
     return true;
 }
 
-bool eProbabilityNN(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track, float &out) {  
+bool eProbabilityNN(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track, float &out) {
+    auto atrack = track.track();  
     static const SG::ConstAccessor<float> acc_eProbabilityNN("eProbabilityNN");
-    out = acc_eProbabilityNN(track);
+    out = acc_eProbabilityNN(*atrack);
     return true;
 }
 
