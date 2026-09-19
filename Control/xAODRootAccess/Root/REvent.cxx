@@ -1759,34 +1759,22 @@ StatusCode REvent::initStats() {
         continue;
       }
 
-      // And then check if it inherits from xAOD::AuxContainerBase or from
-      // xAOD::AuxInfoBase.
-      static TClass* const auxContCl = TClass::GetClass(
-          SG::normalizedTypeinfoName(typeid(xAOD::AuxContainerBase)).c_str());
+      // And then check if it inherits from xAOD::AuxInfoBase.
+      // If so, consider this standalone, otherwise a container.
       static TClass* const auxInfoCl = TClass::GetClass(
           SG::normalizedTypeinfoName(typeid(xAOD::AuxInfoBase)).c_str());
-      if ((auxContCl == nullptr) || (auxInfoCl == nullptr)) {
-        ATH_MSG_ERROR(
-            "Couldn't get dictionary for xAOD::AuxContainerBase or "
-            "xAOD::AuxInfoBase");
+      if (auxInfoCl == nullptr) {
+        ATH_MSG_ERROR("Couldn't get dictionary for xAOD::AuxInfoBase");
         return StatusCode::FAILURE;
       }
-      const bool isContainer = cl->InheritsFrom(auxContCl);
       const bool isInfo = cl->InheritsFrom(auxInfoCl);
-      if ((isContainer == false) && (isInfo == false)) {
-        ATH_MSG_WARNING("Auxiliary store \""
-                        << key
-                        << "\" is of an unknown type: " << format.className());
-        continue;
-      }
-      ATH_MSG_VERBOSE("isContainer = " << isContainer
-                                       << ", isInfo = " << isInfo);
+      ATH_MSG_VERBOSE("isInfo = {}", isInfo);
 
       // Scan the branches using a temporary RAuxStore instance.
       const std::string fieldName = key.substr(0, key.size() - 1) + ":";
       const RAuxStore::EStructMode mode =
-          (isContainer ? RAuxStore::EStructMode::kContainerStore
-                       : RAuxStore::EStructMode::kObjectStore);
+          (!isInfo ? RAuxStore::EStructMode::kContainerStore
+                   : RAuxStore::EStructMode::kObjectStore);
       static constexpr bool TOP_STORE = true;
       RAuxStore temp(this->currentContext(), fieldName, TOP_STORE, mode);
       ATH_CHECK(temp.readFrom(*m_eventReader));
