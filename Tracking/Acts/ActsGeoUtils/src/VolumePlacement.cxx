@@ -101,7 +101,7 @@ namespace ActsTrk{
         }
         return m_locToGlobCache->getTransform(tgContext);
     }
-    const Amg::Transform3D& VolumePlacement::localToGlobalTransform(const GeometryContext& gctx) const {
+    const Amg::Isometry3D& VolumePlacement::localToGlobalTransform(const GeometryContext& gctx) const {
         return localToGlobalTransform(gctx.context());
     }
     const Acts::Transform3& VolumePlacement::globalToLocalTransform(const Acts::GeometryContext& tgContext) const{
@@ -111,7 +111,7 @@ namespace ActsTrk{
         }
         return m_globToLocCache->getTransform(tgContext);
     }
-    const Amg::Transform3D& VolumePlacement::globalToLocalTransform(const GeometryContext& gctx) const {
+    const Amg::Isometry3D& VolumePlacement::globalToLocalTransform(const GeometryContext& gctx) const {
         return globalToLocalTransform(gctx.context());
     }
 
@@ -125,7 +125,7 @@ namespace ActsTrk{
             THROW_EXCEPTION("Center surface already defined");
         }
         m_surfacePlacement = std::make_shared<Acts::detail::PortalPlacement>(std::numeric_limits<std::size_t>::max(),
-                                                                             Amg::Transform3D::Identity(), this,
+                                                                             Amg::Isometry3D::Identity(), this,
                                                                              surface);
    }
    DetectorType VolumePlacement::detectorType() const { 

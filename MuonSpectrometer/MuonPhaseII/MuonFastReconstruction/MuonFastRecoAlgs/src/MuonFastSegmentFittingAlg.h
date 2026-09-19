@@ -76,14 +76,14 @@ namespace MuonR4{
              *  @param hits: Vector of hits to be fitted
              *  @return: Unique pointer to the fitted segment */
             SegmentSeedOpt_t fitSegment(const EventContext& ctx,
-                                        const Amg::Transform3D& localToGlobal,
+                                        const Amg::Isometry3D& localToGlobal,
                                         Bucket_t parentBucket,
                                         HitVec_t&& hits) const;
             /** @brief Estimate the initial parameters for the segment fitting.
              *  @param localToGlobal: Transformation from local to global coordinates
              *  @param hits: Vector of hits
              *  @return: Estimated initial parameters */
-            std::pair<HitVec_t, Parameters> initializePars(const Amg::Transform3D& localToGlobal,
+            std::pair<HitVec_t, Parameters> initializePars(const Amg::Isometry3D& localToGlobal,
                                                            const HitVec_t& hits) const;
             /** Define the coordinate planes */
             enum class CoordPlane : std::uint8_t {   
@@ -135,7 +135,7 @@ namespace MuonR4{
              *  @param localToGlobal: Transform from local to global coordinates
              *  @return: The beamspot covariance in the specified local coordinate */
             double beamspotCov(const CoordPlane Plane, 
-                               const Amg::Transform3D& localToGlobal) const;
+                               const Amg::Isometry3D& localToGlobal) const;
 
             /** @brief Write handle key for the output global patterns */ 
             SG::ReadHandleKey<GlobalPatternContainer> m_inPatterns{this, "InPatterns", "MuonR4GlobalPatterns", "Global patterns to read"};

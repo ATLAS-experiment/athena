@@ -46,8 +46,8 @@ inline Amg::Transform3D MuonReadoutElement::globalToLocalTransform(const ActsTrk
                                                                const Identifier& id) const {
     return globalToLocalTransform(ctx, layerHash(id));
 }
-inline const Amg::Transform3D& MuonReadoutElement::localToGlobalTransform(const ActsTrk::GeometryContext& ctx, 
-                                                                      const Identifier& id) const {
+inline const Amg::Isometry3D& MuonReadoutElement::localToGlobalTransform(const ActsTrk::GeometryContext& ctx, 
+                                                                     const Identifier& id) const {
     return localToGlobalTransform(ctx, layerHash(id));
 }
 #ifndef SIMULATIONBASE
@@ -55,18 +55,18 @@ inline const SpectrometerSector* MuonReadoutElement::msSector() const { return m
 inline const Chamber* MuonReadoutElement::chamber() const { return m_chambLink; }
 #endif
 
-inline const Amg::Transform3D& MuonReadoutElement::localToGlobalTransform(const ActsTrk::GeometryContext& ctx, 
-                                                                          const IdentifierHash& hash) const {
+inline const Amg::Isometry3D& MuonReadoutElement::localToGlobalTransform(const ActsTrk::GeometryContext& ctx, 
+                                                                         const IdentifierHash& hash) const {
     const ActsTrk::IReadoutSurfacePositioning* cache = transformCache(hash);
     if (cache) {
         return cache->getTransform(ctx.getStore(detectorType()).get());
     }
     ATH_MSG_FATAL(__func__<<"() "<<__LINE__<<" - "
                 <<idHelperSvc()->toStringDetEl(identify())<<" hash: "<<hash<<" is unknown.");
-    static const Amg::Transform3D dummyTrf{Amg::Transform3D::Identity()};
+    static const Amg::Isometry3D dummyTrf = Amg::Isometry3D::Identity();
     return dummyTrf;
 }
-inline const Amg::Transform3D& MuonReadoutElement::localToGlobalTransform(const ActsTrk::DetectorAlignStore* store) const {
+inline const Amg::Isometry3D& MuonReadoutElement::localToGlobalTransform(const ActsTrk::DetectorAlignStore* store) const {
     ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Return central transform for "<<idHelperSvc()->toStringDetEl(identify()));
     return m_centralTrfCache->getTransform(store);
 }

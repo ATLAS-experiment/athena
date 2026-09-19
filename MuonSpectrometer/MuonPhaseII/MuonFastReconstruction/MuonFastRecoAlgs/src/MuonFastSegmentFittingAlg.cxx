@@ -326,7 +326,7 @@ MuonFastSegmentFittingAlg::processPattern(const EventContext& ctx,
 }
 MuonFastSegmentFittingAlg::SegmentSeedOpt_t
 MuonFastSegmentFittingAlg::fitSegment(const EventContext& ctx,
-                                      const Amg::Transform3D& localToGlobal,
+                                      const Amg::Isometry3D& localToGlobal,
                                       Bucket_t parentBucket,
                                       std::vector<Hit_t>&& hits) const {
     /** Reject segment candidates with insufficient precision hits */
@@ -407,7 +407,7 @@ MuonFastSegmentFittingAlg::fitSegment(const EventContext& ctx,
     return std::nullopt;
 }
 std::pair<MuonFastSegmentFittingAlg::HitVec_t, Parameters>
-MuonFastSegmentFittingAlg::initializePars(const Amg::Transform3D& localToGlobal,
+MuonFastSegmentFittingAlg::initializePars(const Amg::Isometry3D& localToGlobal,
                                           const HitVec_t& hits) const { 
                                             
     auto [etaHits, etaPars] = linearRegression(CoordPlane::etaPlane, hits);
@@ -528,7 +528,7 @@ const Segment* MuonFastSegmentFittingAlg::findSegmentToAddPhi(std::vector<Segmen
     return nullptr;
 }
 double MuonFastSegmentFittingAlg::beamspotCov(const CoordPlane Plane, 
-                                              const Amg::Transform3D& localToGlobal) const {
+                                              const Amg::Isometry3D& localToGlobal) const {
 
     const Amg::Vector3D localAxisDir {Amg::Vector3D::Unit(Plane == CoordPlane::etaPlane)};
     const Amg::Vector3D globalAxisDir {localToGlobal.rotation() * localAxisDir};

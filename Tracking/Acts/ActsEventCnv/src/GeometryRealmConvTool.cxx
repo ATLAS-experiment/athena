@@ -201,7 +201,8 @@ namespace ActsTrk{
         if (it != m_actsSurfaceMap.end()) {
           return it->second;
         }
-        const Amg::Transform3D& trf{atlasSurface.transform()};
+        /// Trk surfaces carry a general affine placement; Acts requires an isometry
+        const Amg::Isometry3D trf = Amg::toIsometry3D(atlasSurface.transform());
         switch (atlasSurface.type()){
             using enum Trk::SurfaceType;
             case Plane:
@@ -326,7 +327,7 @@ namespace ActsTrk{
                     const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
                     auto& planeSurface{static_cast<const Trk::PlaneSurface&>(*trkSurface)};
                     // need to convert to plane position on plane surface (annulus bounds)
-                    auto helperSurface = Acts::Surface::makeShared<Acts::PlaneSurface>(planeSurface.transform());
+                    auto helperSurface = Acts::Surface::makeShared<Acts::PlaneSurface>(Amg::toIsometry3D(planeSurface.transform()));
 
                     auto covpc = actsParameter.covariance().value();
                     /// Convert to free parameters

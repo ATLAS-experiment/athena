@@ -119,12 +119,12 @@ namespace MuonR4 {
             <<msSector->idHelperSvc()->toString(xAOD::identify(firstMeasurement(*firstSeg, false)))
             <<", position: "<<Amg::toString(firstPos));
 
-        const Amg::Transform3D& oldTrf{sectorSurf.localToGlobalTransform(tgContext)};
+        const auto& oldTrf = sectorSurf.localToGlobalTransform(tgContext);
         const Amg::Vector3D segDir = truthSeg->direction();
         const Amg::Vector3D locDir = oldTrf.inverse().linear() * segDir;
         const double pathLength = std::abs((truthSeg->position() - firstPos).dot(segDir)) + 10._cm;
 
-        const Amg::Transform3D newTrf{oldTrf * Amg::getTranslate3D(-pathLength * locDir)};
+        const Amg::Isometry3D newTrf = oldTrf * Amg::getTranslate3D(-pathLength * locDir);
         ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Create new surface in front of "<<msSector->identString()
                                 <<", "<<Amg::toString(newTrf));
         auto shiftedSurf = Acts::Surface::makeShared<Acts::PlaneSurface>(newTrf);

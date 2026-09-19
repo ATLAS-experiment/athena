@@ -116,7 +116,7 @@ std::shared_ptr<const Acts::Surface> decodeSurface(
   // Translation and rotation
 
   // create the transformation matrix
-  Amg::Transform3D transform = 
+  Amg::Isometry3D transform = 
                    Amg::getTranslate3D(translation[0], translation[1], translation[2]) *
                    Amg::getRotateZ3D(rotation[0]) *
                    Amg::getRotateY3D(rotation[1]) *

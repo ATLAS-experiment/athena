@@ -75,11 +75,11 @@ unsigned MuonReadoutElement::storeAlignedTransforms(DetectorAlignStore& store) c
 Amg::Transform3D MuonReadoutElement::globalToLocalTransform(const GeometryContext& ctx) const {
     return globalToLocalTransform(ctx, geoTransformHash());
 }
-const Amg::Transform3D& MuonReadoutElement::localToGlobalTransform(const GeometryContext& ctx) const {
+const Amg::Isometry3D& MuonReadoutElement::localToGlobalTransform(const GeometryContext& ctx) const {
     return localToGlobalTransform(ctx, geoTransformHash());
 }
 #ifndef SIMULATIONBASE
-const Acts::Transform3& MuonReadoutElement::localToGlobalTransform(const Acts::GeometryContext& anygctx) const {
+const Amg::Isometry3D& MuonReadoutElement::localToGlobalTransform(const Acts::GeometryContext& anygctx) const {
     const GeometryContext *gctx = anygctx.get<const GeometryContext *>();
     return localToGlobalTransform(*gctx, geoTransformHash());
 }
