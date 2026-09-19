@@ -12,7 +12,7 @@
 #undef NDEBUG
 #include "AthContainersInterfaces/ToTransient.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 
 
 class C {} ;
@@ -26,7 +26,7 @@ public:
 
 int main()
 {
-  std::cout << "AthContainersInterfaces/ToTransient_test\n";
+  std::println ("AthContainersInterfaces/ToTransient_test");
   assert( SG::noToTransient<int>() );
   assert( !SG::noToTransient<C>() );
   return 0;
