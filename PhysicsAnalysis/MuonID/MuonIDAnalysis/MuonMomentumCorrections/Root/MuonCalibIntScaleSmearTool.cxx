@@ -8,7 +8,7 @@
 
 // Local include(s):
 #include <cmath>
-#include "TRandom3.h"
+#include "TRandom2.h"
 
 #include "MuonMomentumCorrections/MuonCalibTool.h"
 #include "MuonMomentumCorrections/MuonCalibIntScaleSmearTool.h"

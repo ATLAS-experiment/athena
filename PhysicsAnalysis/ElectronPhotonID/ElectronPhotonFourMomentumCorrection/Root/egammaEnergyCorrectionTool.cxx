@@ -22,7 +22,7 @@
 #include "TH2.h"
 #include "TList.h"
 #include "TSystem.h"
-#include "TRandom3.h"
+#include "TRandom2.h"
 #include "egammaUtils/eg_resolution.h"
 
 #include <format>
@@ -3065,7 +3065,7 @@ double egammaEnergyCorrectionTool::getSmearingCorrection(
 
   const double sigma = sqrt(sigma2);
 
-  TRandom3 rng(seed);
+  TRandom2 rng(seed);
 
   const double DeltaE0 = rng.Gaus(0, sigma);
   const double cor0 = (energyGeV + DeltaE0) / energyGeV;
