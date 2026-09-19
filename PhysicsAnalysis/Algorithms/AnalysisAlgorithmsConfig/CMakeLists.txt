@@ -13,7 +13,7 @@ atlas_install_scripts( scripts/CPGridRun.py )
 if( XAOD_STANDALONE )
    atlas_install_scripts( scripts/*_eljob.py )
 else()
-   atlas_install_scripts( scripts/*_CA.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+   atlas_install_scripts( scripts/*_CA.py scripts/extract_alg_dependencies.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 endif()
 
 if (NOT COLUMNAR_ANALYSIS)
@@ -25,6 +25,11 @@ if (NOT COLUMNAR_ANALYSIS)
 
    atlas_add_test( ConfigPropertySubstitution
       SCRIPT python/ConfigPropertySubstitution_unitTest.py
+      POST_EXEC_SCRIPT noerror.sh
+      PROPERTIES TIMEOUT 30 )
+
+   atlas_add_test( InvertAlgOrder
+      SCRIPT python/InvertAlgOrder_unitTest.py
       POST_EXEC_SCRIPT noerror.sh
       PROPERTIES TIMEOUT 30 )
 
