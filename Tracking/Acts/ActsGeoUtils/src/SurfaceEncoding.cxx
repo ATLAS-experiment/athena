@@ -129,9 +129,10 @@ std::shared_ptr<const Acts::Surface> decodeSurface(
                     boundValues[0], boundValues[1], boundValues[2],
                     decodeHalfPhiSector(boundValues[3]));
       case Cylinder:
+        // Older files store two trailing bevel values, which are always zero.
         return Acts::Surface::makeShared<Acts::CylinderSurface>(std::move(transform),
                 boundValues[0], boundValues[1], decodeHalfPhiSector(boundValues[2]),
-                boundValues[3], boundValues[4]);
+                boundValues[3]);
       case Disc:
         return Acts::Surface::makeShared<Acts::DiscSurface>(std::move(transform),
                 boundValues[0], boundValues[1], decodeHalfPhiSector(boundValues[2]));
