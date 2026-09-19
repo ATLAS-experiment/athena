@@ -4,11 +4,11 @@
 
 #include "TrigMissingEtEvent/TrigMissingET.h"
 #include "TrigMissingEtEvent/TrigMissingEtComponent.h"
-#include "CxxUtils/StrFormat.h"
 #include "GaudiKernel/MsgStream.h"
 
 #include <stdio.h>
 #include <string.h>
+#include <format>
 
 
 
@@ -285,20 +285,18 @@ bool operator== ( const TrigMissingET& a, const TrigMissingET& b ) {
 std::string str (const TrigMissingET& a){
   std::string s="";
 
-  using CxxUtils::strformat;
-
-  s += strformat("MEx   = %10.2f MeV\n", a.ex());
-  s += strformat("MEy   = %10.2f MeV\n", a.ey());
-  s += strformat("MEz   = %10.2f MeV\n", a.ez());
+  s += std::format("MEx   = {:10.2f} MeV\n", a.ex());
+  s += std::format("MEy   = {:10.2f} MeV\n", a.ey());
+  s += std::format("MEz   = {:10.2f} MeV\n", a.ez());
 
   float et = std::sqrt(a.ex()*a.ex()+a.ey()*a.ey());
-  s += strformat("MEt   = %10.2f MeV\n", et);
-  s += strformat("SumEt = %10.2f MeV\n", a.sumEt());
-  s += strformat("SumE  = %10.2f MeV\n", a.sumE());
+  s += std::format("MEt   = {:10.2f} MeV\n", et);
+  s += std::format("SumEt = {:10.2f} MeV\n", a.sumEt());
+  s += std::format("SumE  = {:10.2f} MeV\n", a.sumE());
 
-  s += strformat("Event status = 0x%08x\n", (unsigned)a.getFlag());
+  s += std::format("Event status = {:#010x}\n", (unsigned)a.getFlag());
   unsigned int N = a.getNumOfComponents();
-  s += strformat("Auxiliary components = %4u\n", N);
+  s += std::format("Auxiliary components = {:4}\n", N);
 
   if (N==0) return s; // basic info only
 
@@ -307,8 +305,8 @@ std::string str (const TrigMissingET& a){
   s += "/MeV___Ex/MeV_____Ey/MeV_____Ez/MeV___SumE/MeV__SumEt/MeV\n";
 
   for (unsigned int i=0; i<N; ++i){
-    s += strformat(
-      "%10s 0x%04x %8d %11d %7.2f %8.2f %10.2f %10.2f %10.2f %10.2f %10.2f\n", 
+    s += std::format(
+                 "{:10} {:#06x} {:8} {:11} {:7.2f} {:8.2f} {:10.2f} {:10.2f} {:10.2f} {:10.2f} {:10.2f}\n",
 		 a.getNameOfComponent(i).c_str(), 
 		 (unsigned)a.getStatus(i),
 		 a.getUsedChannels(i),
@@ -378,7 +376,7 @@ void diff(const TrigMissingET& a, const TrigMissingET& b,
      variableChange[ "sumE" ] = aSumE - bSumE;
 
   for (unsigned u=0; u<a.getNumOfComponents(); ++u) {
-    std::string num = CxxUtils::strformat("%02u", u);
+    std::string num = std::format("{:02}", u);
     std::string key;
 
     if( a.getNameOfComponent(u) != b.getNameOfComponent(u) ) {
