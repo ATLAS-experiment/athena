@@ -20,10 +20,6 @@
 #include <stdexcept>
 #include <string>
 
-#include "CxxUtils/StrFormat.h"
-
-using CxxUtils::strformat;
-
 
 LArMiniFCAL_ID::LArMiniFCAL_ID()
         : 
