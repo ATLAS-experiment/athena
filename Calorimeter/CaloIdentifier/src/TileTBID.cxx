@@ -15,14 +15,11 @@
 #include "IdDict/IdDictRegion.h"
 #include "Identifier/IdentifierHash.h"
 #include "Identifier/RangeIterator.h"
-#include "CxxUtils/StrFormat.h"
 
 #include <algorithm>
 #include <cassert>
 #include <cstdio>
 #include <iostream>
-
-using CxxUtils::strformat;
 
 
 TileTBID::TileTBID( )

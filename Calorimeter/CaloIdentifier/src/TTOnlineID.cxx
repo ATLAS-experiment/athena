@@ -9,7 +9,6 @@
 #include "IdDict/IdDictMgr.h"
 #include "IdDict/IdDictRegion.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
-#include "CxxUtils/StrFormat.h"
 #include "Identifier/IdentifierHash.h"
 #include "Identifier/RangeIterator.h"
 #include <algorithm>
@@ -19,8 +18,6 @@
 #include <iostream>
 #include <set>
 #include <string>
-
-using CxxUtils::strformat;
 
 
 TTOnlineID::TTOnlineID() :
