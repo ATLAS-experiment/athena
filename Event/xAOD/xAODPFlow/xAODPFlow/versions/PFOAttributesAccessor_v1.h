@@ -21,7 +21,7 @@ This is pretty much based on the class xAODJets/JetMomentsAccessor.h - i.e I cop
 #define DEFINE_PFO_CONSTACCESSOR( NAME )                                    \
   case xAOD::PFODetails::NAME:				\
   {									\
-    static const SG::AuxElement::Accessor< T > a( #NAME );			\
+    static const SG::Accessor< T > a( #NAME );			\
     return &a;								\
   }									\
   break
@@ -29,7 +29,7 @@ This is pretty much based on the class xAODJets/JetMomentsAccessor.h - i.e I cop
 namespace xAOD{
 
   template<class T> struct PFOAttributesAccessor_v1 {
-    static const SG::AuxElement::Accessor<T>* constAccessor (xAOD::PFODetails::PFOAttributes variable){
+    static const SG::Accessor<T>* constAccessor (xAOD::PFODetails::PFOAttributes variable){
       switch (variable){
 	DEFINE_PFO_CONSTACCESSOR(nPi0);
 	DEFINE_PFO_CONSTACCESSOR(nPi0Proto);
