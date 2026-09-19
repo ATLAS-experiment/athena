@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthAllocators/test/ArenaPoolAllocator_test.cxx
@@ -15,7 +15,7 @@
 #include <vector>
 #include <cassert>
 #include <algorithm>
-#include <iostream>
+#include <print>
 #include <atomic>
 #include <unistd.h>
 
@@ -66,7 +66,7 @@ std::vector<int> Payload::v;
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   SG::ArenaPoolAllocator apa
     (SG::ArenaPoolAllocator::initParams<Payload, true>(100, "foo"));
   assert (apa.name() == "foo");
@@ -233,7 +233,7 @@ void test1()
 
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
   Payload::v.clear();
   SG::ArenaPoolAllocator apa
     (SG::ArenaPoolAllocator::initParams<Payload, true>(100));
@@ -281,7 +281,7 @@ void test2()
 
 void test3()
 {
-  std::cout << "test3\n";
+  std::println ("test3");
 
   Payload::v.clear();
   SG::ArenaPoolAllocator apa

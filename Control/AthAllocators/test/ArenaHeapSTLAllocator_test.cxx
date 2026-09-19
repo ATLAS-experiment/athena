@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthAllocators/test/ArenaHeapSTLAllocator_test.cxx
@@ -15,7 +15,7 @@
 #include <list>
 #include <vector>
 #include <cassert>
-#include <iostream>
+#include <print>
 #include <atomic>
 #include <setjmp.h>
 #include <signal.h>
@@ -84,7 +84,7 @@ void test1()
   Payload::v.clear();
   Payload::n = 0;
 
-  std::cout << "test1\n";
+  std::println ("test1");
 
   SG::ArenaHeapSTLAllocator<Payload> a1;
   assert (a1.nblock() == 1000);
@@ -169,7 +169,7 @@ void test2()
   Payload::v.clear();
   Payload::n = 0;
 
-  std::cout << "test2\n";
+  std::println ("test2");
 
   SG::ArenaHeapSTLAllocator<int, int> a1;
   assert (a1.nblock() == 1000);
@@ -235,7 +235,7 @@ void test3()
   Payload::v.clear();
   Payload::n = 0;
 
-  std::cout << "test3\n";
+  std::println ("test3");
   SG::ArenaHeapSTLAllocator<Payload, int> b1 (100, "b1");
   assert (b1.nblock() == 100);
   assert (b1.name() == "b1");
@@ -298,7 +298,7 @@ void test4()
   Payload::v.clear();
   Payload::n = 0;
 
-  std::cout << "test4\n";
+  std::println ("test4");
 
   typedef SG::ArenaHeapSTLAllocator<int> allocator_t;
   typedef std::list<int,  allocator_t> list_t;
@@ -342,7 +342,7 @@ void test4()
 // Copy/move container.
 void test5()
 {
-  std::cout << "test5\n";
+  std::println ("test5");
   Payload::v.clear();
   Payload::n = 0;
 
@@ -470,7 +470,7 @@ void expect_signal (CALLABLE code)
 // protect
 void test6()
 {
-  std::cout << "test6\n";
+  std::println ("test6");
 
   SG::ArenaHeapSTLAllocator<Payload, int> b1;
   Payload* p = b1.allocate (1);
@@ -490,7 +490,7 @@ void test6()
 
 int main()
 {
-  std::cout << "AthAllocators/ArenaHeapSTLAllocator_test\n";
+  std::println ("AthAllocators/ArenaHeapSTLAllocator_test");
   test1();
   test2();
   test3();

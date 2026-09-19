@@ -22,6 +22,7 @@
 #include <string>
 #include <iosfwd>
 #include <type_traits>
+#include <format>
 #include "AthAllocators/ArenaBlockAlignDetail.h"
 
 namespace SG {
@@ -412,6 +413,26 @@ std::ostream& operator<< (std::ostream& os,
                           const ArenaAllocatorBase::Stats& stats);
 
 } // namespace SG
+
+
+/// C++20 style formatters.
+namespace std {
+template <>
+struct formatter<SG::ArenaAllocatorBase::Stats::Stat>
+  : public formatter<string_view>
+{
+  template <class FmtContext>
+  FmtContext::iterator format(const SG::ArenaAllocatorBase::Stats::Stat& stat, FmtContext& ctx) const;
+};
+
+template <>
+struct formatter<SG::ArenaAllocatorBase::Stats>
+  : public formatter<string_view>
+{
+  template <class FmtContext>
+  FmtContext::iterator format(const SG::ArenaAllocatorBase::Stats& stats, FmtContext& ctx) const;
+};
+} // namespace std
 
 
 #include "AthAllocators/ArenaAllocatorBase.icc"
