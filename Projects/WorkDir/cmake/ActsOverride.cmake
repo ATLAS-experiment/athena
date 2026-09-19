@@ -22,6 +22,10 @@ if(IS_DIRECTORY ${ATLAS_ACTS_SOURCE_DIR})
   set(ACTS_BUILD_PLUGIN_GEOMODEL ON CACHE BOOL "Build geomodel plugin")
   set(ACTS_BUILD_PLUGIN_ROOT ON CACHE BOOL "Build root plugin")
   set(ACTS_BUILD_FATRAS ON CACHE BOOL "Build ACTS FATRAS")
+  set(ACTS_BUILD_PLUGIN_TRACCC ON CACHE BOOL "Build TRACCC plugin")
+  set(ACTS_USE_SYSTEM_VECMEM ON CACHE BOOL "Use system vecmem")
+  set(DETRAY_SET_LOGGING NONE CACHE STRING "Disable logging in Detray")
+  set(TRACCC_SUPPORTED_DETECTORS "itk_detector" CACHE STRING "Supported detectors for TRACCC")
   if(CMAKE_CUDA_COMPILER)
     # Overall options.
     set(ACTS_ENABLE_CUDA ON CACHE BOOL "Enable CUDA support in Acts in general")
@@ -35,19 +39,23 @@ if(IS_DIRECTORY ${ATLAS_ACTS_SOURCE_DIR})
     set(ACTS_GNN_ENABLE_TENSORRT OFF CACHE BOOL "Disable TensorRT support in the GNN plugin")
     set(ACTS_GNN_ENABLE_MODULEMAP ON CACHE BOOL "Enable module map usage in the GNN plugin")
     # Turn on the build of the traccc plugin(s).
-    set(ACTS_BUILD_PLUGIN_TRACCC ON CACHE BOOL "Build TRACCC plugin")
-    set(ACTS_USE_SYSTEM_VECMEM ON CACHE BOOL "Use system vecmem")
     set(DETRAY_BUILD_CUDA ON CACHE BOOL "Turn on CUDA support in Detray") # Workaround for EFTRACK-1010
-    set(TRACCC_SUPPORTED_DETECTORS "default_detector;itk_detector" CACHE STRING "Supported detectors for TRACCC")
-    # Make sure that find_package(traccc) and find_package(detray) calls would
-    # not actually look for traccc or detray. Since in this setup both will be
-    # provided by this Acts build.
-    file(COPY "${CMAKE_CURRENT_LIST_DIR}/traccc-config.cmake"
-              "${CMAKE_CURRENT_LIST_DIR}/traccc-config-version.cmake"
-              "${CMAKE_CURRENT_LIST_DIR}/detray-config.cmake"
-              "${CMAKE_CURRENT_LIST_DIR}/detray-config-version.cmake"
-         DESTINATION "${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}" )
   endif()
+  if(CMAKE_HIP_COMPILER)
+    # Detray/Traccc option(s).
+    set(DETRAY_BUILD_HIP ON CACHE BOOL "Turn on HIP support in Detray")
+    set(TRACCC_BUILD_HIP ON CACHE BOOL "Turn on HIP support in Traccc")
+    set(TRACCC_SETUP_ROCTHRUST ON CACHE BOOL "Set up ROC Thrust for Traccc")
+  endif()
+
+  # Make sure that find_package(traccc) and find_package(detray) calls would
+  # not actually look for traccc or detray. Since in this setup both will be
+  # provided by this Acts build.
+  file(COPY "${CMAKE_CURRENT_LIST_DIR}/traccc-config.cmake"
+            "${CMAKE_CURRENT_LIST_DIR}/traccc-config-version.cmake"
+            "${CMAKE_CURRENT_LIST_DIR}/detray-config.cmake"
+            "${CMAKE_CURRENT_LIST_DIR}/detray-config-version.cmake"
+       DESTINATION "${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}" )
 
   # We need to set the library output directories to match the
   # expected location of the Athena build. Since the Athena CMake code
