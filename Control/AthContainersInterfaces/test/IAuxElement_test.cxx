@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainersInterfaces/test/IAuxElement_test.cxx
@@ -11,7 +11,7 @@
 
 #undef NDEBUG
 #include "AthContainersInterfaces/IAuxElement.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -37,7 +37,7 @@ public:
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   SG::ConstAuxElement e1;
   assert (e1.index() == 0);
