@@ -4,7 +4,7 @@ AthDictLoaderSvc     INFO in initialize...
 AthDictLoaderSvc     INFO acquired Dso-registry
 AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr
 HelloWorld           INFO   MyInt =    42
-HelloWorld           INFO   MyBool =   1
+HelloWorld           INFO   MyBool =   true
 HelloWorld           INFO   MyDouble = 3.14159
 HelloWorld           INFO   MyStringVec[0] = Welcome
 HelloWorld           INFO   MyStringVec[1] = to
