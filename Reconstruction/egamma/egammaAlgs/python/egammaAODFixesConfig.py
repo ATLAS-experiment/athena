@@ -53,6 +53,7 @@ def FixFromAMITag(flags):
     
 
     if len(listOfRecoTags) == 0:
+        msg.info("no reco tags")
         doFixFromAMITags.append((True,True))
         return doFixFromAMITags, listOfRecoTags
 
@@ -70,7 +71,8 @@ def FixFromAMITag(flags):
             listOfRecoTags_noMerge.append(e)
 
         
-    if len(listOfRecoTags_noMerge) == 0:
+    if len(listOfRecoTags_noMerge) == 0: 
+        msg.info("no reco tags after merge removal")
         doFixFromAMITags.append((True,True))
         return doFixFromAMITags, listOfRecoTags_noMerge
     
@@ -80,16 +82,16 @@ def FixFromAMITag(flags):
     filename_timingTag = PathResolver.FindCalibFile("egammaAlgs/Timing_fix_reco_tag.pkl") ## List of reconstruction tag that belong in the range where the timing fix should not be applied (Athena-23.0.0 to Athena-23.0.11) 
     filename_AmbiguityTag = PathResolver.FindCalibFile("egammaAlgs/Ambiguity_fix_reco_tag.pkl") ## List of reconstruction tag that belong in the range wher the ambiguity link should be applied (Athena-24.0.0 to Athena-24.0.83)
     
-    doFix_timing = True
-    doFix_amb = True
+    doFix_timing = False
+    doFix_amb = False
     with open(filename_timingTag, "rb") as f:
         TimingTag = pickle.load(f)
         if(not listOfRecoTags_noMerge_set.intersection(TimingTag)):
-            doFix_timing = True and doFix_timing
+            doFix_timing = True
     with open(filename_AmbiguityTag, "rb") as f:
         AmbiguityTag = pickle.load(f)
-        if(not listOfRecoTags_noMerge_set.intersection(AmbiguityTag)):
-            doFix_amb = True and doFix_amb
+        if(listOfRecoTags_noMerge_set.intersection(AmbiguityTag)):
+            doFix_amb = True
     
             
     doFixFromAMITags.append((doFix_timing,doFix_amb))
