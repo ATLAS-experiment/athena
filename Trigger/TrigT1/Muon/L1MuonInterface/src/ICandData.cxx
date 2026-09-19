@@ -2,7 +2,7 @@
    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "L0MuonInterface/ICandData.h"
+#include "L1MuonInterface/ICandData.h"
 
 namespace L0Muon
 {

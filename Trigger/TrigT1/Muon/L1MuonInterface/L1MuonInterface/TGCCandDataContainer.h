@@ -1,10 +1,10 @@
 /*
    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef L0MuonInterface_TGCCANDDATACONTAINER_H
-#define L0MuonInterface_TGCCANDDATACONTAINER_H
+#ifndef L1MuonInterface_TGCCANDDATACONTAINER_H
+#define L1MuonInterface_TGCCANDDATACONTAINER_H
 
-#include "L0MuonInterface/TGCCandData.h"
+#include "L1MuonInterface/TGCCandData.h"
 #include "AthContainers/DataVector.h"
 #include "AthenaKernel/CLASS_DEF.h"
 
@@ -16,4 +16,4 @@ using TGCCandDataContainer = DataVector<TGCCandData>;
 
 CLASS_DEF( L0Muon::TGCCandDataContainer , 1262868476 , 1 )
 
-#endif  // L0MuonInterface_TGCCANDDATACONTAINER_H
+#endif  // L1MuonInterface_TGCCANDDATACONTAINER_H

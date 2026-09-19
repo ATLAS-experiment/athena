@@ -1,10 +1,10 @@
 /*
    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef L0MuonInterface_RPCCANDDATA_H
-#define L0MuonInterface_RPCCANDDATA_H
+#ifndef L1MuonInterface_RPCCANDDATA_H
+#define L1MuonInterface_RPCCANDDATA_H
 
-#include "L0MuonInterface/ICandData.h"
+#include "L1MuonInterface/ICandData.h"
 #include <array>
 
 namespace L0Muon
@@ -56,4 +56,4 @@ namespace L0Muon
 
 }  // namespace L0Muon
 
-#endif  // L0MuonInterface_RPCCANDDATA_H
+#endif  // L1MuonInterface_RPCCANDDATA_H
