@@ -389,14 +389,12 @@ namespace ActsTrk {
 
     // The seeder no longer recognises an LRT mode, so spell out the rest of
     // what it used to imply: the whole of maxCurv for the curvature bounds and
-    // the phi window, a triplet with no confirmation, and no added triplets.
-    // Keep this last, it overrides addTriplets.
+    // the phi window, and a triplet with no confirmation.
     if (m_LRTmode) {
       m_finderCfg.oldTuningsCurvatureHighEtaFraction = 1.f;
       m_finderCfg.oldTuningsCurvatureLowEtaFraction = 1.f;
       m_finderCfg.oldTuningsPhiWindowFraction = 1.f;
       m_finderCfg.minSeedLevel = 2;
-      m_finderCfg.addTriplets = false;
     }
 
     m_filterCfg.sigmaMS = m_sigmaMS;
