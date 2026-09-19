@@ -191,6 +191,11 @@ namespace Gep {
     // pi_digitized_in_phi == phi_range/2. When the codes fill the field this is
     // 1 << (phi_bit_length - 1), the value used before phi_range existed.
     unsigned int calcLutIndex(unsigned int dEta, unsigned int dPhi) const {
+      // A wrapped |dPhi| runs over [0, phi_range/2] == [0, 32]. That is 33
+      // distinct values, while the LUT only has rows for [0, 31]: dPhi == 32
+      if (pi_digitized_in_phi > 0 && dPhi >= pi_digitized_in_phi) {
+        dPhi = pi_digitized_in_phi - 1;
+      }
       return dEta * pi_digitized_in_phi + dPhi;
     }
 

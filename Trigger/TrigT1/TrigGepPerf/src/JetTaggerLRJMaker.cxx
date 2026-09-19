@@ -26,7 +26,12 @@ namespace Gep {
     // The phi wrap point is half the index count, not M_PI/phi_granularity
     pi_digitized_in_phi= phi_range / 2;
     PI_D               = static_cast<int>(pi_digitized_in_phi);
-    TWO_PI_D           = 2 * static_cast<int>(pi_digitized_in_phi) + 1;
+
+    // The wrap period is the full circle in grid indices: phi_range == 64
+    // This comes from the grid index count, not from a field
+    // width -- since v3 the eta/phi fields carry three bits of TOB zero padding
+    // and no longer coincide with anything physical.
+    TWO_PI_D           = static_cast<int>(phi_range);
 
     // eta granularity is forced to match phi granularity,
     // which fixes eta_range for the given ranges/phi bit length.
@@ -183,8 +188,10 @@ namespace Gep {
     if (nOut >= 2 && indices[0] == indices[1] &&
         indices[0] != std::numeric_limits<unsigned int>::max()) skipSecondSeed = true;
 
-    const int etaHalf = 1 << (m_cfg.eta_bit_length - 1);
-    const int phiHalf = 1 << (m_cfg.phi_bit_length - 1);
+    // Use half of eta, phi index dynamic range rather than defined using 
+    // bit widths, as V3 algorithm has 3 bits of padding for eta, phi
+    const int etaHalf = static_cast<int>(m_cfg.eta_range / 2);
+    const int phiHalf = static_cast<int>(m_cfg.pi_digitized_in_phi);
 
     for (unsigned int iSeed = 0; iSeed < nOut; ++iSeed) {
       if (skipSecondSeed && iSeed == 1) continue;
