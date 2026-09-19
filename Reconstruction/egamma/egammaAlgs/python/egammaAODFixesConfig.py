@@ -52,7 +52,7 @@ def FixFromAMITag(flags):
     has_been_merged = False
     
 
-    if len(listOfRecoTags) == 0:
+    if not listOfRecoTags:
         msg.info("no reco tags")
         doFixFromAMITags.append((True,True))
         return doFixFromAMITags, listOfRecoTags
