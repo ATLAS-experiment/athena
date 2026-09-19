@@ -24,6 +24,7 @@ def ActsGbtsFtfSeedingTrigToolCfg(flags,name: str = "GbtsFtfActsSeedingTool", **
   kwargs.setdefault("UseBeamTilt", False)
   kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minPTSeed)
   kwargs.setdefault("MaxGraphEdges", 3000000)
+  kwargs.setdefault("AddTriplets", False)
 
   isLargeD0 = flags.Tracking.ActiveConfig.isLargeD0
   kwargs.setdefault("ConnectionFileName",
@@ -325,6 +326,7 @@ def ActsPixelGbtsSeedingToolCfg(flags,
                       ActsUnits.GeV / GaudiUnits.GeV)
     kwargs.setdefault("d0Max", flags.Tracking.ActiveConfig.maxPrimaryImpactSeed *
                       ActsUnits.mm / GaudiUnits.mm)
+    kwargs.setdefault("addTriplets", False)
 
     acc.setPrivateTools(CompFactory.ActsTrk.GbtsSeedingTool(name, **kwargs))
     return acc
@@ -352,6 +354,10 @@ def ActsStripGbtsSeedingToolCfg(flags,
 
     kwargs.setdefault("minPt", flags.Tracking.ActiveConfig.minPTSeed *
                       ActsUnits.GeV / GaudiUnits.GeV)
+    kwargs.setdefault("d0Max", flags.Tracking.ActiveConfig.maxPrimaryImpactSeed *
+                      ActsUnits.mm / GaudiUnits.mm)
+    ## the strips have few layers, so also keep the seeds with three space points
+    kwargs.setdefault("addTriplets", True)
     ## the strips reach far beyond the pixel default of 550 mm
     kwargs.setdefault("maxOuterRadius", 1100.0)
 
@@ -364,8 +370,6 @@ def ActsLargeRadiusStripGbtsSeedingToolCfg(flags,
     ## For ITkStrip LRT, enable LRT mode and use the LRT connector file
     kwargs.setdefault("LRTmode", True)
     kwargs.setdefault("connectorInputFile", find_datafile(flags.Acts.Gbts.connectionTableLrt))
-    kwargs.setdefault("d0Max", flags.Tracking.ActiveConfig.maxPrimaryImpactSeed *
-                      ActsUnits.mm / GaudiUnits.mm)
     kwargs.setdefault("filterMaxZ0", 500. * ActsUnits.mm)
     kwargs.setdefault("cutDPhiMax", 0.07)
     kwargs.setdefault("cutDCurvMax", 0.015)
