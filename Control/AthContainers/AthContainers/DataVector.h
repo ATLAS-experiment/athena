@@ -572,6 +572,9 @@
 # ifndef SG_VIRTUAL
 #  define SG_VIRTUAL(X) X
 # endif // not SG_VIRTUAL
+namespace SG {
+template <class T> struct bi_destroy {};
+}
 #else
 # include "AthenaKernel/BaseInfo.h"
 #endif
