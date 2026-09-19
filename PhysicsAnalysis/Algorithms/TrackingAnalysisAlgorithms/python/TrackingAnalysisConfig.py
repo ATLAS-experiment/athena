@@ -8,6 +8,72 @@ from AthenaConfiguration.Enums import LHCPeriod
 from Campaigns.Utils import Campaign
 from AthenaCommon.Logging import logging
 
+class PixelDEdxEqualizationBlock (ConfigBlock) :
+    """the ConfigBlock for the pixel dE/dx equalization"""
+
+    def __init__ (self, containerName='') :
+        super (PixelDEdxEqualizationBlock, self).__init__ ()
+        self.setBlockName('PixelDEdxEqualization')
+        self.addOption ('containerName', containerName, type=str,
+            noneAction='error',
+            info="the name of the input container.")
+        self.addOption ('postfix', "", type=str,
+            info="a postfix to apply to decorations and algorithm names.")
+        self.addOption ('msosLink', "", type=str,
+            info="Name of link from tracks to MSOSs.")
+        self.addOption ('equalizeClusterMeasurements', False, type=bool,
+            info="whether to equalize cluster level dE/dx measurements.")
+        self.addOption ('equalizeTrackMeasurements', False, type=bool,
+            info="whether to equalize track-level truncated mean dE/dx measurements (no pixel clusters required).")
+        self.addOption ('tightClusterCleaning', False, type=bool,
+            info="whether to perform extra cluster cleaning for dE/dx measurements (e.g. cluster size/shape).")
+        self.addOption ('sfLocalFileName', "", type=str,
+            info="Path to scale factor trees, overriding files stored in ASG calibration area.")
+        self.addOption ('clusterSFTreeName', "cluster_SFs", type=str,
+            info="Name of tree storing the cluster-level dE/dx equalization scale factors.")
+        self.addOption ('trackSFTreeName', "track_SFs", type=str,
+            info="Name of tree storing the track-level dE/dx equalization scale factors.")
+        self.addOption('trackdEdxEqKey', "", type=str,
+            info="SG key for the equalized truncated mean dE/dx decoration.")
+        self.addOption('trackdEdxStdDevKey', "", type=str,
+            info="SG key for the equalized truncated standard deviation dE/dx decoration.") # only used if equalizeClusterMeasurements == True
+        self.addOption('trackdEdxNUsedKey', "", type=str,
+           info="SG key for decorating track with the number of used hits in dE/dx truncated mean.") # only used if equalizeClusterMeasurements == True
+        self.addOption('trackdEdxIBLOFKey', "", type=str,
+           info="SG key for decorating track with the number of good IBL hits in overflow.") # only used if equalizeClusterMeasurements == True
+        self.addOption ('clusterdEdxKey', "PixelClusters.dEdx", type=str,
+            info="SG key for the raw pixel cluster dE/dx attribute.")
+        self.addOption ('clusterdEdxEqKey', "PixelClusters.dEdxEq", type=str,
+            info="SG key for the equalized pixel cluster dE/dx attribute.")
+
+    def makeAlgs (self, config) :
+        alg = config.createAlgorithm( 'CP::PixelDEdxEqualizationAlg',
+                                      'PixelDEdxEqualizationAlg' + self.postfix,
+                                      reentrant=True)
+        config.addPrivateTool( 'PixelDEdxEqualizationTool', 'CP::PixelDEdxEqualizationTool' )
+        ### Algorithm properties
+        alg.TrackContainerName = self.containerName
+        alg.MSOSLink = self.msosLink
+        alg.EqualizeClusterMeasurements = self.equalizeClusterMeasurements
+        alg.EqualizeTrackMeasurements = self.equalizeTrackMeasurements
+        alg.TightClusterCleaning = self.tightClusterCleaning
+
+        ### Decoration Keys
+        eqStrategy = "ClusterEqualized" if self.equalizeClusterMeasurements else "TrackEqualized" if self.equalizeTrackMeasurements else ""
+        alg.TrackdEdxDecorKey = self.trackdEdxEqKey if self.trackdEdxEqKey else f"{self.containerName}.pixeldEdx{eqStrategy}"
+        alg.TrackdEdxStdDevDecorKey = self.trackdEdxStdDevKey if self.trackdEdxStdDevKey else f"{self.containerName}.pixeldEdxStdDev{eqStrategy}"
+        alg.TrackdEdxNUsedDecorKey = self.trackdEdxNUsedKey if self.trackdEdxNUsedKey else f"{self.containerName}.numberOfUsedHitsdEdx{eqStrategy}"
+        alg.TrackdEdxIBLOFDecorKey = self.trackdEdxIBLOFKey if self.trackdEdxIBLOFKey else f"{self.containerName}.numberOfIBLOverflowsdEdx{eqStrategy}"
+        alg.ClusterdEdxKey = self.clusterdEdxKey
+        alg.ClusterdEdxEqKey = self.clusterdEdxEqKey
+
+        ### Tool properties
+        alg.PixelDEdxEqualizationTool.EqualizeClusterMeasurements = self.equalizeClusterMeasurements
+        alg.PixelDEdxEqualizationTool.EqualizeTrackMeasurements = self.equalizeTrackMeasurements
+        alg.PixelDEdxEqualizationTool.SFLocalFileName = self.sfLocalFileName
+        alg.PixelDEdxEqualizationTool.ClusterSFTreeName = self.clusterSFTreeName
+        alg.PixelDEdxEqualizationTool.TrackSFTreeName = self.trackSFTreeName
+    
 
 class InDetTrackCalibrationConfig (ConfigBlock):
     """the ConfigBlock for the track impact parameter correction"""

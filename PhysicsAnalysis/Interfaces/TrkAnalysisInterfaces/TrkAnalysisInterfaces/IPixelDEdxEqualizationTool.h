@@ -1,0 +1,53 @@
+#ifndef PIXELDEDXEQUALIZATIONTOOL_IPIXELDEDXEQUALIZATIONTOOL_H
+#define PIXELDEDXEQUALIZATIONTOOL_IPIXELDEDXEQUALIZATIONTOOL_H
+
+// Framework include(s):
+#include "AsgTools/IAsgTool.h"
+
+#include "xAODTracking/TrackParticle.h"
+
+#include "ROOT/RDataFrame.hxx"
+
+#include <cstdint>
+
+/// Forward declare
+namespace PixelDEdx {
+  struct PixelClusterStruct;
+}
+
+namespace CP {
+
+  // Full struct definition needed here.
+
+  struct TrackSFRecord {
+    double etaLow;
+    double etaHigh;
+    double SF_IBLOFYes;
+    double SF_IBLOFNo;
+  };
+  
+  struct ClusterSFRecord {
+    int bec;
+    int layerID;
+    int etaM;
+    double SF;
+    double SFerr;
+  };
+  
+  /// Interface for the Pixel ToT PID tool.
+  /// This is refactoring of the tool for dual use in Athena and AnalysisBase using CP Algs.
+
+  class IPixelDEdxEqualizationTool : public virtual asg::IAsgTool {
+    /// Declare the interface that the class provides
+    ASG_TOOL_INTERFACE(CP::IPixelDEdxEqualizationTool)
+    
+  public:
+
+    virtual double getTrackdEdxSF(const xAOD::TrackParticle& track, const uint32_t runNumber) const = 0;
+    virtual double getClusterdEdxSF(const PixelDEdx::PixelClusterStruct&, const uint32_t runNumber) const = 0;
+
+  }; //class IPixelDEdxEqualizationTool
+
+} // namespace CP
+
+#endif  // PIXELDEDXEQUALIZATIONTOOL_IPIXELDEDXEQUALIZATIONTOOL_H
