@@ -19,7 +19,8 @@ class DetDescrCnvSvc : public ConversionSvc {
 
     /// Add new address to the Detector Store
     virtual StatusCode addToDetStore(const CLID &clid,
-                                     const std::string &name) const;
+                                     const std::string &name,
+                                     const std::vector<CLID>& bases = {}) const;
 
     /// Basic create address
     virtual StatusCode createAddress(long svc_type, const CLID &clid,
