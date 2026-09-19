@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthAllocators/test/ArenaBlockAllocatorBase_test.cxx
@@ -17,7 +17,7 @@
 #include <cassert>
 #include <atomic>
 #include <vector>
-#include <iostream>
+#include <print>
 #include <setjmp.h>
 #include <signal.h>
 #include <unistd.h>
@@ -106,7 +106,7 @@ void test_stats (const SG::ArenaBlockAllocatorBase& bab,
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   TestAlloc bab
     (SG::ArenaAllocatorBase::initParams<Payload, true> (100, "foo"));
@@ -227,7 +227,7 @@ void expect_signal (CALLABLE code)
 // Test protect().
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
   TestAlloc bab
     (SG::ArenaAllocatorBase::initParams<Payload, true> (100, "foo"));
   while (bab.stats().elts.total < 1000) {
@@ -250,7 +250,7 @@ void test2()
 
 int main()
 {
-  std::cout << "AthAllocators/ArenaBlockAllocatorBase_test\n";
+  std::println ("AthAllocators/ArenaBlockAllocatorBase_test");
   test1();
   test2();
   return 0;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthAllocators/test/ArenaPoolAllocator_test.cxx
@@ -14,7 +14,7 @@
 #include "CxxUtils/checker_macros.h"
 #include <vector>
 #include <cassert>
-#include <iostream>
+#include <print>
 #include <atomic>
 #include <set>
 #include <unordered_map>
@@ -85,7 +85,7 @@ void test1()
   Payload::v.clear();
   Payload::n = 0;
 
-  std::cout << "test1\n";
+  std::println ("test1");
 
   SG::ArenaPoolSTLAllocator<Payload> a1;
   assert (a1.nblock() == 1000);
@@ -170,7 +170,7 @@ void test2()
   Payload::v.clear();
   Payload::n = 0;
 
-  std::cout << "test2\n";
+  std::println ("test2");
 
   SG::ArenaPoolSTLAllocator<Payload*, int> a1;
 
@@ -198,7 +198,7 @@ void test3()
   Payload::v.clear();
   Payload::n = 0;
 
-  std::cout << "test3\n";
+  std::println ("test3");
 
   SG::ArenaPoolSTLAllocator<int, int> a1;
   assert (a1.nblock() == 1000);
@@ -259,7 +259,7 @@ void test4()
   Payload::v.clear();
   Payload::n = 0;
 
-  std::cout << "test4\n";
+  std::println ("test4");
   SG::ArenaPoolSTLAllocator<Payload, int> b1 (100, "b1");
   assert (b1.nblock() == 100);
   assert (b1.name() == "b1");
@@ -317,7 +317,7 @@ void test5()
   Payload::v.clear();
   Payload::n = 0;
 
-  std::cout << "test5\n";
+  std::println ("test5");
 
   typedef std::unordered_map<int, int, std::hash<int>, std::equal_to<int>,
     SG::ArenaPoolSTLAllocator<std::pair<const int, int> > > map_t;
@@ -358,7 +358,7 @@ void test5()
 // Copy/move container.
 void test6()
 {
-  std::cout << "test6\n";
+  std::println ("test6");
 
   Payload::v.clear();
   Payload::n = 0;
@@ -467,7 +467,7 @@ void expect_signal (CALLABLE code)
 // Test protect().
 void test7()
 {
-  std::cout << "test7\n";
+  std::println ("test7");
   SG::ArenaPoolSTLAllocator<Payload, int> b1 (100, "b1");
   Payload* p = b1.allocate (1);
   p->x = 42;
@@ -486,7 +486,7 @@ void test7()
 
 int main()
 {
-  std::cout << "AthAllocators/ArenaPoolSTLAllocator_test\n";
+  std::println ("AthAllocators/ArenaPoolSTLAllocator_test");
   test1();
   test2();
   test3();

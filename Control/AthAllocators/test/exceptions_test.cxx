@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthAllocators/test/exceptions_test.cxx
@@ -11,16 +11,16 @@
 
 #undef NDEBUG
 #include "AthAllocators/exceptions.h"
-#include <iostream>
+#include <print>
 
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
-  std::cout << SG::ExcDifferentArenas().what() << "\n";
-  std::cout << SG::ExcProtection(EINVAL).what() << "\n";
-  std::cout << SG::ExcProtected().what() << "\n";
+  std::println ("{}", SG::ExcDifferentArenas().what());
+  std::println ("{}", SG::ExcProtection(EINVAL).what());
+  std::println ("{}", SG::ExcProtected().what());
 }
 
 
