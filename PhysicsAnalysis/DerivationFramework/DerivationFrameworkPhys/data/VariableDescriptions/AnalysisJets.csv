@@ -30,9 +30,10 @@ LineNumber,VariableName,Type,Description
 29,HadronConeExclExtendedTruthLabelID,vector<int>,"Extended truth label (additional states, e.g. BB, allowed) used by flavour tagging group"
 30,PartonTruthLabelID,vector<int>,PDG (Particle Data Group) identification of the highest-energy ghost-associated parton
 31,GhostMuonSegmentCount,vector<int>,Number of ghost-associated muon segments
-32,NNJvtPass,vector<char>,Flag indicating whether jet passes NNJvt
-33,GhostTrack,vector<vector<ElementLink<DataVector<xAOD::IParticle> > > >,Link from jets to ghost-associated tracks
-34,isJvtHS,vector<char>,Flag to indicate if a jet originates from the hard-scatter (HS) event or not
-35,DFCommonJets_jetClean_LooseBad,vector<char>,Loose working point for identifying "bad" jets from non-collision backgrounds
-36,DFCommonJets_jetClean_TightBad,vector<char>,Tight working point for identifying "bad" jets from non-collision backgrounds
-37,QGTransformer_ConstScore,vector<float>,Quark-gluon tagging score
+32,GhostUnAssocMuonSegmentCount,vector<int>,Number of unassociated ghost-associated muon segments
+33,NNJvtPass,vector<char>,Flag indicating whether jet passes NNJvt
+34,GhostTrack,vector<vector<ElementLink<DataVector<xAOD::IParticle> > > >,Link from jets to ghost-associated tracks
+35,isJvtHS,vector<char>,Flag to indicate if a jet originates from the hard-scatter (HS) event or not
+36,DFCommonJets_jetClean_LooseBad,vector<char>,Loose working point for identifying "bad" jets from non-collision backgrounds
+37,DFCommonJets_jetClean_TightBad,vector<char>,Tight working point for identifying "bad" jets from non-collision backgrounds
+38,QGTransformer_ConstScore,vector<float>,Quark-gluon tagging score
