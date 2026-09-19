@@ -127,7 +127,7 @@ def runAODFix(flags, correctCluster = True, checkRelMerge = True):
     if checkRelMerge:
         doFixFromAMITags = []
         doFixFromAMITags, inputReleaseFromAMITags = FixFromAMITag(flags)
-        if not inputReleaseFromAMITags==[]:
+        if inputReleaseFromAMITags:
             msg.info('doFix from AMI tags = %s',doFixFromAMITags)
             for ie, e in enumerate(doFixFromAMITags):
                 if e[0] != doFix_time or e[1] != doAmbiguityFix:
