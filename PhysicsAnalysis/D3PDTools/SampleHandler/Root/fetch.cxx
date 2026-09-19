@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -11,7 +11,7 @@
 #include <sstream>
 #include <mutex>
 #include <stdexcept>
-#include <RVersion.h>
+#include <ROOT/RVersion.hxx>
 #include <TPython.h>
 #include <TString.h>
 #include <TSystem.h>
