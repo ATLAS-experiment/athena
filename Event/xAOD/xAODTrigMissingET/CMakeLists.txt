@@ -23,8 +23,8 @@ atlas_add_dictionary( xAODTrigMissingETDict
    LINK_LIBRARIES xAODCore xAODTrigMissingET
    EXTRA_FILES Root/dict/*.cxx )
 
-IF( NOT XAOD_ANALYSIS )
-   atlas_add_sercnv_library( TrigMissingEtEventxAODSerCnv
+if( NOT XAOD_ANALYSIS )
+   atlas_add_sercnv_library( xAODTrigMissingETxAODSerCnv
       FILES xAODTrigMissingET/TrigMissingETContainer.h xAODTrigMissingET/TrigMissingETAuxContainer.h
       TYPES_WITH_NAMESPACE xAOD::TrigMissingETContainer xAOD::TrigMissingETAuxContainer
       CNV_PFX xAOD
