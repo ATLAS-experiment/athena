@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -8,14 +8,14 @@
  * PACKAGE:  offline/TileCalorimeter/TileCosmicAlgs
  *
  * AUTHOR :  J. Maneira
- * CREATED:  10-Jul-2006 
+ * CREATED:  10-Jul-2006
  *
  * PURPOSE:  Minuit fit function for TileMuonFitter
  *           Supplies summed distance from cells to track
  *
  *  Input: Cells
  *  Output: Track parameters
- *   
+ *
  ********************************************************************/
 
 // C++ STL includes
@@ -23,7 +23,6 @@
 
 // external packages declarations
 #include "Minuit2/FCNBase.h"
-#include "RVersion.h"
 #include "CLHEP/Vector/ThreeVector.h"
 
 namespace ROOT {
