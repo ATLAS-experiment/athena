@@ -33,7 +33,7 @@ OUTPUT="PhaseIISim.Celeritas"
 export ATHENA_CORE_NUMBER=8
 
 timeout 10800 AtlasG4_tf.py  \
-  --maxEvents 100 \
+  --maxEvents 500 \
   --multithreaded \
   --detectors 'Calo' \
   --preInclude 'AtlasG4Tf:Campaigns.MC23PhaseIISimulation,SimulationConfig.disablePhotonRussianRoulette,SimulationConfig.disableNeutronRussianRoulette,SimulationConfig.disableFrozenShowersFCalOnly' \
