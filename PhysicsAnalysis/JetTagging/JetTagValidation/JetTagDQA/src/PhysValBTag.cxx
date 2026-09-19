@@ -79,7 +79,7 @@ namespace JetTagDQA {
 
     declareProperty( "OnZprime", m_onZprime );
     declareProperty( "JetPtCutTtbar", m_jetPtCutTtbar = 20000);
-    declareProperty( "JetPtCutZprime", m_jetPtCutZprime = 500000);
+    declareProperty( "JetPtCutZprime", m_jetPtCutZprime = 400000);
     declareProperty( "JetPtCutR10", m_jetPtCutR10 = 200000); //pT>200 GeV for large-R jets
     declareProperty( "JetEtaCut", m_jetEtaCut = 2.5);
     declareProperty( "UseJvtProxy", m_useJvtProxy = false);
