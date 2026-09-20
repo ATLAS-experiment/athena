@@ -188,7 +188,7 @@ StatusCode WriteDataReentrant::execute (const EventContext& ctx) const
   //
   // DataLink referring to a storable object
   //
-  DataLink<MyDataObj> dobjLink(*dobj);
+  DataLink<MyDataObj> dobjLink(*dobj, ctx);
   //since dobj is identifiable in the SG a reference to it is all we need
 
   SG::WriteHandle<MyDataObj> dobj2 (m_dobjKey2, ctx);
@@ -197,7 +197,7 @@ StatusCode WriteDataReentrant::execute (const EventContext& ctx) const
   //Otherwise one could first create an empty link
   DataLink<MyDataObj> dobjLink2;
   //and later on set it to refer to its target
-  dobjLink2.toStorableObject(*dobj2);
+  dobjLink2.toStorableObject(*dobj2, ctx);
 
 
   // Added Aug 30, 2001  HMA 
@@ -206,7 +206,7 @@ StatusCode WriteDataReentrant::execute (const EventContext& ctx) const
   // persistency for it.  we use dobj3, which is an object registered with 
   // a key. 
 
-  DataLink<MyDataObj> dobjLink3(name());
+  DataLink<MyDataObj> dobjLink3(name(), ctx);
   // now access it.  DataLink will do a retrieve to get it from the store. 
   (void)dobjLink3.cptr();
 
@@ -216,7 +216,7 @@ StatusCode WriteDataReentrant::execute (const EventContext& ctx) const
   typedef ElementLink<std::vector<float> > VecElemLink;
 
 
-  VecElemLink thirdElementLink(*vFloat, 2);  //THIS CRASHES SUN CC
+  VecElemLink thirdElementLink(*vFloat, 2, ctx);
 
   //sometimes we would not know the index of the element we want to refer to
   
@@ -226,7 +226,7 @@ StatusCode WriteDataReentrant::execute (const EventContext& ctx) const
   //starting from an empty link
   VecElemLink aLink;
   //we can refer it to its target without knowing its index
-  aLink.toContainedElement(*vFloat, anElement);
+  aLink.toContainedElement(*vFloat, anElement, ctx);
   //it is better though to remember that toContainedElement for an
   //ElementLink performs a linear search of "anElement" into "vFloat".
   // If vFloat has a million elements think twice before using 
@@ -243,9 +243,9 @@ StatusCode WriteDataReentrant::execute (const EventContext& ctx) const
   typedef ElementLink<MapStringFloat> MapElemLink;
   SG::WriteHandle<std::vector<MapElemLink> > linkVector (m_linkVectorKey, ctx);
   linkVector = std::make_unique<std::vector<MapElemLink> >();
-  linkVector->push_back(MapElemLink(*m, "uno"));
+  linkVector->push_back(MapElemLink(*m, "uno", ctx));
   MapElemLink mLink;
-  mLink.toContainedElement(*m, (*m)["due"]);
+  mLink.toContainedElement(*m, (*m)["due"], ctx);
   linkVector->push_back(mLink);
 
   // Part 4

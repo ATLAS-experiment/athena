@@ -32,7 +32,7 @@ StatusCode WriteData::initialize(){
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 
-StatusCode WriteData::execute(const EventContext& /*ctx*/) {
+StatusCode WriteData::execute(const EventContext& ctx) {
   //this example illustrates how to record objects into the StoreGate(SG)
   //with and without providing a key
   //It then covers the new DataLink class and its usage as a persistable
@@ -220,7 +220,7 @@ StatusCode WriteData::execute(const EventContext& /*ctx*/) {
   //
   // DataLink referring to a storable object
   //
-  DataLink<MyDataObj> dobjLink(*dobj);
+  DataLink<MyDataObj> dobjLink(*dobj, ctx);
   //since dobj is identifiable in the SG a reference to it is all we need
 
   dobj2 = new MyDataObj;
@@ -230,7 +230,7 @@ StatusCode WriteData::execute(const EventContext& /*ctx*/) {
   //Otherwise one could first create an empty link
   DataLink<MyDataObj> dobjLink2;
   //and later on set it to refer to its target
-  dobjLink2.toStorableObject(*dobj2);
+  dobjLink2.toStorableObject(*dobj2, ctx);
 
 
   // Added Aug 30, 2001  HMA 
@@ -239,7 +239,7 @@ StatusCode WriteData::execute(const EventContext& /*ctx*/) {
   // persistency for it.  we use dobj3, which is an object registered with 
   // a key. 
 
-  DataLink<MyDataObj> dobjLink3(name()); 
+  DataLink<MyDataObj> dobjLink3(name(), ctx); 
   // now access it.  DataLink will do a retrieve to get it from the store. 
   (void)dobjLink3.cptr();
 
@@ -249,7 +249,7 @@ StatusCode WriteData::execute(const EventContext& /*ctx*/) {
   typedef ElementLink<std::vector<float> > VecElemLink;
 
 
-  VecElemLink thirdElementLink(*vFloat, 2);  //THIS CRASHES SUN CC
+  VecElemLink thirdElementLink(*vFloat, 2, ctx);
 
   //sometimes we would not know the index of the element we want to refer to
   
@@ -259,7 +259,7 @@ StatusCode WriteData::execute(const EventContext& /*ctx*/) {
   //starting from an empty link
   VecElemLink aLink;
   //we can refer it to its target without knowing its index
-  aLink.toContainedElement(*vFloat, anElement);
+  aLink.toContainedElement(*vFloat, anElement, ctx);
   //it is better though to remember that toContainedElement for an
   //ElementLink performs a linear search of "anElement" into "vFloat".
   // If vFloat has a million elements think twice before using 
@@ -283,9 +283,9 @@ StatusCode WriteData::execute(const EventContext& /*ctx*/) {
   typedef ElementLink<MapStringFloat> MapElemLink;
   std::vector<MapElemLink>* linkVector = new std::vector<MapElemLink>;
 
-  linkVector->push_back(MapElemLink(*m, "uno"));
+  linkVector->push_back(MapElemLink(*m, "uno", ctx));
   MapElemLink mLink;
-  mLink.toContainedElement(*m, (*m)["due"]);
+  mLink.toContainedElement(*m, (*m)["due"], ctx);
   linkVector->push_back(mLink);
 
   sc = evtStore()->record(linkVector, SG::DEFAULTKEY, false);  
