@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file ReWriteData.cxx
@@ -58,18 +58,18 @@ StatusCode ReWriteData::execute (const EventContext& ctx) const {
      trackObj->setEta(eta);
      trackObj->setPhi(phi);
      trackObj->setDetector("Track made in: " + (*hitCont->begin())->getDetector());
-     trackObj->getElementLink1()->toContainedElement(*hitCont, *hitCont->begin());
+     trackObj->getElementLink1()->toContainedElement(*hitCont, *hitCont->begin(), ctx);
      ATH_MSG_INFO("ElementLink1 = " << trackObj->getElement1()->getX());
-     trackObj->getElementLink2()->toIndexedElement(*hitCont, hitCont->size() - 1);
+     trackObj->getElementLink2()->toIndexedElement(*hitCont, hitCont->size() - 1, ctx);
      ATH_MSG_INFO("ElementLink2 = " << trackObj->getElement2()->getX());
      
      // ElementLink creation
      ElementLink<ExampleHitContainer> eLink1, eLink2, eLink3;
-     eLink1.toContainedElement(*hitCont, *hitCont->begin());
+     eLink1.toContainedElement(*hitCont, *hitCont->begin(), ctx);
      trackObj->getElementLinkVector()->push_back(eLink1);
-     eLink2.toIndexedElement(*hitCont, 1);
+     eLink2.toIndexedElement(*hitCont, 1, ctx);
      trackObj->getElementLinkVector()->push_back(eLink2);
-     eLink3.toContainedElement(*hitCont, (*hitCont)[3]);
+     eLink3.toContainedElement(*hitCont, (*hitCont)[3], ctx);
      trackObj->getElementLinkVector()->push_back(eLink3);
      ATH_MSG_INFO("Link ElementLinkVector = " << trackObj->getElementLinkVector()->size());
      for (const auto link : *trackObj->getElementLinkVector()) {
