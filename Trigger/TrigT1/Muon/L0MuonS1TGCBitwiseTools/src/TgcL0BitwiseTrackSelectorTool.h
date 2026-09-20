@@ -5,7 +5,7 @@
 #define L0MUONS1TGCBITWISETOOLS_TGCL0BITWISETRACKSELECTORTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "L0MuonS1TGCToolInterfaces/ITgcL0TrackSelectorTool.h"
+#include "L1MuonS1TGCToolInterfaces/ITgcL0TrackSelectorTool.h"
 
 namespace L0Muon {
 
