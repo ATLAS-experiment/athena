@@ -1,13 +1,13 @@
 /*
    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef L0MUONS1TGCINTERFACES_ITGCL0CANDIDATEBUILDERTOOL_H
-#define L0MUONS1TGCINTERFACES_ITGCL0CANDIDATEBUILDERTOOL_H
+#ifndef L1MUONS1TGCINTERFACES_ITGCL0CANDIDATEBUILDERTOOL_H
+#define L1MUONS1TGCINTERFACES_ITGCL0CANDIDATEBUILDERTOOL_H
 
 #include "GaudiKernel/EventContext.h"
 #include "GaudiKernel/IAlgTool.h"
-#include "L0MuonS1TGCToolInterfaces/TgcL0Candidate.h"
-#include "L0MuonS1TGCToolInterfaces/TgcL0Segment.h"
+#include "L1MuonS1TGCToolInterfaces/TgcL0Candidate.h"
+#include "L1MuonS1TGCToolInterfaces/TgcL0Segment.h"
 #include "MuonRDO/TgcRdoContainer.h"
 
 namespace L0Muon {
