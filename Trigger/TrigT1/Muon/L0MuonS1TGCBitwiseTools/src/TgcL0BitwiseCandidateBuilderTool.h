@@ -5,7 +5,7 @@
 #define L0MUONS1TGCBITWISETOOLS_TGCL0BITWISECANDIDATEBUILDERTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "L0MuonS1TGCToolInterfaces/ITgcL0CandidateBuilderTool.h"
+#include "L1MuonS1TGCToolInterfaces/ITgcL0CandidateBuilderTool.h"
 
 namespace L0Muon {
 
