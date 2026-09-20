@@ -1,8 +1,8 @@
 /*
    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef L0MUONEMULATION_L0MUONTRACK_H
-#define L0MUONEMULATION_L0MUONTRACK_H
+#ifndef L1MUONEMULATION_L0MUONTRACK_H
+#define L1MUONEMULATION_L0MUONTRACK_H
 
 #include <iostream>
 
@@ -39,5 +39,5 @@ inline std::ostream& operator << (std::ostream& s, const L0Muon::L0MuonTrack& t)
 }
 
 
-#endif   // L0MUONEMULATION_L0MUONTRACK_H
+#endif   // L1MUONEMULATION_L0MUONTRACK_H
 

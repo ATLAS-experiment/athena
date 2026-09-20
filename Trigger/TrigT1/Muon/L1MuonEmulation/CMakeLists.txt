@@ -1,10 +1,10 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-atlas_subdir ( L0MuonEmulation )
+atlas_subdir ( L1MuonEmulation )
 
 find_package( CLHEP )
 
-atlas_add_component (L0MuonEmulation
+atlas_add_component (L1MuonEmulation
         src/*.cxx src/components/*.cxx
         INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
 		    LINK_LIBRARIES AnaAlgorithmLib AthenaKernel xAODTruth xAODTrigger AthenaMonitoringKernelLib

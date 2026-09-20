@@ -1,8 +1,8 @@
 /*
    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef L0MUON_SMEARINGALG_H
-#define L0MUON_SMEARINGALG_H 
+#ifndef L1MUONEMULATION_L0MUONSMEARINGALG_H
+#define L1MUONEMULATION_L0MUONSMEARINGALG_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AthenaMonitoringKernel/Monitored.h"
@@ -40,5 +40,5 @@ class L0MuonSmearingAlg: public ::AthReentrantAlgorithm {
 
 }   // end of namespace
 
-#endif  // L0MUON_SMEARINGALG_H
+#endif  // L1MUONEMULATION_L0MUONSMEARINGALG_H
 
