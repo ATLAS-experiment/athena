@@ -1,0 +1,63 @@
+#include "IPPerformance/BaseHistos.h"
+#include "TKey.h"
+#include "TClass.h"
+#include "TProfile.h"
+
+
+TH1D* BaseHistos::plot1D(const std::string& name,const std::string& xtitle, int nbinsX, double xmin, double xmax) {
+  TH1D* h= new TH1D(name.c_str(),name.c_str(),nbinsX,xmin,xmax);
+  h->GetXaxis()->SetTitle(xtitle.c_str());
+  h->Sumw2();
+  return h;
+}
+
+TH1D* BaseHistos::plot1D(const std::string& name,const std::string& xtitle, int nbinsX, double* axisX) {
+  TH1D* h= new TH1D(name.c_str(),name.c_str(),nbinsX,axisX);
+  h->GetXaxis()->SetTitle(xtitle.c_str());
+  h->Sumw2();
+  return h;
+}
+
+
+TH2D* BaseHistos::plot2D(const std::string& name,
+                         const std::string& xtitle, int nbinsX, double* axisX,
+                         const std::string& ytitle, int nbinsY, double* axisY) {
+
+  TH2D * h = new TH2D(name.c_str(),name.c_str(),
+                      nbinsX,axisX,
+                      nbinsY,axisY);
+  h->GetXaxis()->SetTitle(xtitle.c_str());
+  h->GetYaxis()->SetTitle(ytitle.c_str());
+  h->Sumw2();
+  return h;
+}
+
+TH2D* BaseHistos::plot2D(const std::string& name,
+                         const std::string& xtitle, int nbinsX, double* axisX,
+                         const std::string& ytitle, int nbinsY, double  ymin, double ymax) {
+
+  TH2D * h = new TH2D(name.c_str(),name.c_str(),
+                      nbinsX,axisX,
+                      nbinsY,ymin,ymax);
+  h->GetXaxis()->SetTitle(xtitle.c_str());
+  h->GetYaxis()->SetTitle(ytitle.c_str());
+  h->Sumw2();
+  return h;
+}
+
+TH3D*  BaseHistos::plot3D(const std::string& name,
+                          const std::string& xtitle, int nbinsX, double* axisX,
+                          const std::string& ytitle, int nbinsY, double* axisY,
+                          const std::string& ztitle, int nbinsZ, double* axisZ) {
+  
+  TH3D* h = new TH3D(name.c_str(),name.c_str(),
+                     nbinsX,axisX,
+                     nbinsY,axisY,
+                     nbinsZ,axisZ);
+  
+  h->GetXaxis()->SetTitle(xtitle.c_str());
+  h->GetYaxis()->SetTitle(ytitle.c_str());
+  h->GetZaxis()->SetTitle(ztitle.c_str());
+  h->Sumw2();
+  return h;
+}
