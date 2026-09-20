@@ -33,7 +33,7 @@
  */
 
 #include "LegendreSegmentFinderTool.h"
-#include "L0MuonMDTTools/L0MDTSegment.h"
+#include "L1MuonMDTTools/L0MDTSegment.h"
 #include "MuonReadoutGeometryR4/MdtReadoutElement.h"
 #include "CxxUtils/trapping_fp.h"
 #include <algorithm>

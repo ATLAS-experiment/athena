@@ -2,15 +2,15 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef L0MuonMDTTools_LEGENDRESEGMENTFINDERTOOL_H
-#define L0MuonMDTTools_LEGENDRESEGMENTFINDERTOOL_H
+#ifndef L1MuonMDTTools_LEGENDRESEGMENTFINDERTOOL_H
+#define L1MuonMDTTools_LEGENDRESEGMENTFINDERTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
 
 // local includes
 #include "xAODMuonPrepData/MdtDriftCircleContainer.h"
-#include "L0MuonMDTTools/IL0MDTSegmentFinderTool.h"
-#include "L0MuonMDTTools/L0MDTSegment.h"
+#include "L1MuonMDTTools/IL0MDTSegmentFinderTool.h"
+#include "L1MuonMDTTools/L0MDTSegment.h"
 #include "ActsGeometryInterfaces/GeometryContext.h"
 
 // C++ std

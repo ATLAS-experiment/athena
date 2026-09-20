@@ -7,7 +7,7 @@
 
 
 #include "GaudiKernel/IAlgTool.h"
-#include "L0MuonMDTTools/L0MDTSegment.h"
+#include "L1MuonMDTTools/L0MDTSegment.h"
 #include "ActsGeometryInterfaces/GeometryContext.h"
 
 namespace L0MDT {
