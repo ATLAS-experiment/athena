@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file GeneratorObjects/HepMcParticleLink.icc
@@ -434,7 +434,7 @@ HepMcParticleLink::HepMcParticleLink (IProxyDict* sg /*= nullptr*/)
  */
 inline
 HepMcParticleLink::HepMcParticleLink (const EventContext& ctx)
-  : HepMcParticleLink (Atlas::getExtendedEventContext(ctx).proxy())
+  : HepMcParticleLink (Atlas::proxyDictFromEventContext(ctx))
 {
 }
 
@@ -479,7 +479,7 @@ HepMcParticleLink::HepMcParticleLink (barcode_type uid,
                                       UniqueIDFlag uniqueIDFlag,
                                       const EventContext& ctx)
   : HepMcParticleLink (uid, eventIndex, positionFlag, uniqueIDFlag,
-                       Atlas::getExtendedEventContext(ctx).proxy())
+                       Atlas::proxyDictFromEventContext(ctx))
 {
 }
 
@@ -501,7 +501,7 @@ HepMcParticleLink::HepMcParticleLink (const HepMC::ConstGenParticlePtr& part,
                                       PositionFlag positionFlag,
                                       const EventContext& ctx)
   : HepMcParticleLink (part, eventIndex, positionFlag,
-                       Atlas::getExtendedEventContext(ctx).proxy())
+                       Atlas::proxyDictFromEventContext(ctx))
 {
 }
 
