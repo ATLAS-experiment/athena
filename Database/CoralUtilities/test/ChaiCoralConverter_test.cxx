@@ -242,8 +242,8 @@ BOOST_AUTO_TEST_SUITE(ChaiCoralConverterTest)
     v0->push(static_cast<int32_t>(10));
     auto v1 = std::make_shared<Values>(spec.fields());
     v1->push(static_cast<int32_t>(20));
-    c.add(0, v0);
-    c.add(1, v1);
+    c.add(0, std::move(v0));
+    c.add(1, std::move(v1));
 
     const SpecHolder coralSpec(ChaiCoralConverter::toCoralSpec(c.payloadSpec().fields()));
     const coral::AttributeList a0 = ChaiCoralConverter::toAttributeList(*coralSpec, c[0]);
@@ -261,7 +261,7 @@ BOOST_AUTO_TEST_SUITE(ChaiCoralConverterTest)
       row->push(val);
       rows.push_back(std::move(row));
     }
-    vc.setRows(0, rows);
+    vc.setRows(0, std::move(rows));
 
     const SpecHolder coralSpec(ChaiCoralConverter::toCoralSpec(vc.payloadSpec().fields()));
     const auto attrs = ChaiCoralConverter::toAttributeListVec(*coralSpec, vc.rows(0));
@@ -288,7 +288,7 @@ BOOST_AUTO_TEST_SUITE(ChaiCoralConverterTest)
     auto r0 = std::make_shared<Values>(spec.fields());
     r0->push(static_cast<int32_t>(1));
     rows0.push_back(std::move(r0));
-    vc.setRows(0, rows0);
+    vc.setRows(0, std::move(rows0));
 
     std::vector<ValuesPtr> rows1;
     for (int32_t val : {2, 3}) {
@@ -313,7 +313,7 @@ BOOST_AUTO_TEST_SUITE(ChaiCoralConverterTest)
     const SpecHolder coralSpec(ChaiCoralConverter::toCoralSpec(spec.fields()));
     auto row0 = std::make_shared<Values>(spec.fields());
     row0->push(static_cast<int32_t>(1));
-    const std::vector<ValuesPtr> rows{row0, nullptr};
+    const std::vector<ValuesPtr> rows{std::move(row0), nullptr};
 
     BOOST_CHECK_EXCEPTION(ChaiCoralConverter::toAttributeListVec(*coralSpec, rows), std::invalid_argument,
       [](const std::invalid_argument& e){
@@ -537,8 +537,8 @@ BOOST_AUTO_TEST_SUITE(ChaiCoralConverterTest)
     v0->push(static_cast<int32_t>(1));
     auto v1 = std::make_shared<Values>(spec.fields());
     v1->push(static_cast<int32_t>(2));
-    c.add(0, v0);
-    c.add(1, v1);
+    c.add(0, std::move(v0));
+    c.add(1, std::move(v1));
 
     BOOST_CHECK_EXCEPTION(ChaiCoralConverter::toAthenaAttributeList(c), std::runtime_error,
       [](const std::runtime_error& e){
@@ -577,9 +577,9 @@ BOOST_AUTO_TEST_SUITE(ChaiCoralConverterTest)
     v1->push(static_cast<int32_t>(20));
     auto v2 = std::make_shared<Values>(spec.fields());
     v2->push(static_cast<int32_t>(30));
-    c.add(0, v0);
-    c.add(1, v1);
-    c.add(2, v2);
+    c.add(0, std::move(v0));
+    c.add(1, std::move(v1));
+    c.add(2, std::move(v2));
 
     const auto coll = ChaiCoralConverter::toCondAttrListCollection(c, true);
     BOOST_TEST(coll->size() == 3u);
@@ -609,8 +609,8 @@ BOOST_AUTO_TEST_SUITE(ChaiCoralConverterTest)
     v0->push(static_cast<int32_t>(1));
     auto v1 = std::make_shared<Values>(spec.fields());
     v1->push(static_cast<int32_t>(2));
-    c.add(0, v0);
-    c.add(1, v1);
+    c.add(0, std::move(v0));
+    c.add(1, std::move(v1));
     // Channel 2 is left unpopulated
 
     const auto coll = ChaiCoralConverter::toCondAttrListCollection(c, true);
@@ -624,8 +624,8 @@ BOOST_AUTO_TEST_SUITE(ChaiCoralConverterTest)
     v0->push(static_cast<int32_t>(1));
     auto v1 = std::make_shared<Values>(spec.fields());
     v1->push(static_cast<int32_t>(2));
-    c.add(0, v0);
-    c.add(1, v1);
+    c.add(0, std::move(v0));
+    c.add(1, std::move(v1));
     // Channel 2 ("ch2") is left unpopulated
 
     const auto coll = ChaiCoralConverter::toCondAttrListCollection(c, true);
@@ -638,7 +638,7 @@ BOOST_AUTO_TEST_SUITE(ChaiCoralConverterTest)
     Container c(spec);
     auto v0 = std::make_shared<Values>(spec.fields());
     v0->push();  // Null
-    c.add(0, v0);
+    c.add(0, std::move(v0));
 
     const auto coll = ChaiCoralConverter::toCondAttrListCollection(c, true);
     BOOST_TEST(coll->attributeList(0)["v"].isNull());
@@ -652,7 +652,7 @@ BOOST_AUTO_TEST_SUITE(ChaiCoralConverterTest)
     Container c(spec);
     auto v = std::make_shared<Values>(spec.fields());
     v->push(static_cast<int32_t>(1));
-    c.add(maxId, v);
+    c.add(maxId, std::move(v));
 
     const auto coll = ChaiCoralConverter::toCondAttrListCollection(c, true);
     BOOST_TEST(coll->size() == 1u);
@@ -664,7 +664,7 @@ BOOST_AUTO_TEST_SUITE(ChaiCoralConverterTest)
     Container c(spec);
     auto v = std::make_shared<Values>(spec.fields());
     v->push(static_cast<int32_t>(1));
-    c.add(badId, v);
+    c.add(badId, std::move(v));
 
     BOOST_CHECK_EXCEPTION(ChaiCoralConverter::toCondAttrListCollection(c, true), std::runtime_error,
       [badId](const std::runtime_error& e){
@@ -680,8 +680,8 @@ BOOST_AUTO_TEST_SUITE(ChaiCoralConverterTest)
     v0->push(static_cast<int32_t>(1));
     auto v1 = std::make_shared<Values>(spec.fields());
     v1->push(static_cast<int32_t>(2));
-    c.add(0, v0);
-    c.add(highId, v1);
+    c.add(0, std::move(v0));
+    c.add(highId, std::move(v1));
 
     BOOST_CHECK_THROW(ChaiCoralConverter::toCondAttrListCollection(c, true), std::runtime_error);
   }
@@ -750,9 +750,9 @@ BOOST_AUTO_TEST_SUITE(ChaiCoralConverterTest)
     v1->push(static_cast<int32_t>(2));
     auto v2 = std::make_shared<Values>(spec.fields());
     v2->push(static_cast<int32_t>(3));
-    c.add(0, v0);
-    c.add(1, v1);
-    c.add(2, v2);
+    c.add(0, std::move(v0));
+    c.add(1, std::move(v1));
+    c.add(2, std::move(v2));
 
     const auto coll = ChaiCoralConverter::toCondAttrListCollection(c, true);
     const auto& spec0 = coll->attributeList(0).specification();
@@ -795,8 +795,8 @@ BOOST_AUTO_TEST_SUITE(ChaiCoralConverterTest)
     v0->push(static_cast<int32_t>(1));
     auto v1 = std::make_shared<Values>(spec.fields());
     v1->push(static_cast<int32_t>(2));
-    c.add(0, v0);
-    c.add(1, v1);
+    c.add(0, std::move(v0));
+    c.add(1, std::move(v1));
     // Channel 2 is left unpopulated
 
     const unsigned int expected = ChaiCoralConverter::valuesSize(c[0]) + ChaiCoralConverter::valuesSize(c[1]);
@@ -810,7 +810,7 @@ BOOST_AUTO_TEST_SUITE(ChaiCoralConverterTest)
     auto r0 = std::make_shared<Values>(spec.fields());
     r0->push(static_cast<int32_t>(1));
     rows0.push_back(std::move(r0));
-    vc.setRows(0, rows0);
+    vc.setRows(0, std::move(rows0));
 
     std::vector<ValuesPtr> rows1;
     for (int32_t val : {2, 3}) {
@@ -818,7 +818,7 @@ BOOST_AUTO_TEST_SUITE(ChaiCoralConverterTest)
       row->push(val);
       rows1.push_back(std::move(row));
     }
-    vc.setRows(1, rows1);
+    vc.setRows(1, std::move(rows1));
 
     unsigned int expected{0};
     for (const auto& row : vc.rows(0)) {
@@ -835,7 +835,7 @@ BOOST_AUTO_TEST_SUITE(ChaiCoralConverterTest)
     VectorContainer vc(spec);
     auto row0 = std::make_shared<Values>(spec.fields());
     row0->push(static_cast<int32_t>(1));
-    const std::vector<ValuesPtr> rows{row0, nullptr};
+    const std::vector<ValuesPtr> rows{std::move(row0), nullptr};
     vc.setRows(0, rows);
 
     BOOST_CHECK_EXCEPTION(ChaiCoralConverter::payloadSize(vc), std::invalid_argument,
