@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "TruthSegToTruthPartAssocAlg.h"
 
@@ -168,8 +168,8 @@ namespace MuonR4{
                 continue;
             }
             const xAOD::TruthParticle* truthPart{std::get<0>(*best_itr)};
-            segLinkDecor(*truthPart).emplace_back(segments, segment->index());
-            truthLinkDecor(*segment) = TruthPartLink_t{truthParticles, truthPart->index()};
+            segLinkDecor(*truthPart).emplace_back(m_segmentKey.key(), segment->index(), ctx);
+            truthLinkDecor(*segment) = TruthPartLink_t{m_truthKey.key(), truthPart->index(), ctx};
         
         }
         matchPileupSegments(ctx, bkgMuons, bkgSegments, truthLinkDecor, segLinkDecor);
@@ -289,8 +289,8 @@ namespace MuonR4{
                         <<m_pileUpObjExtpDxCut<<", "<<m_pileUpObjExtpDyCut<<", "<<m_pileUpObjExtpDthetaCut<<", "<<m_pileUpObjExtpDphiCut);
                     continue;
                 }
-                truthPartDecor(*bkgSeg) = TruthPartLink_t{truthSegDecor.container(), bkgMuon->index()};
-                truthSegDecor(*bkgMuon).emplace_back(truthPartDecor.container(), bkgSeg->index());
+                truthPartDecor(*bkgSeg) = TruthPartLink_t{*truthSegDecor.container(), bkgMuon->index(), ctx};
+                truthSegDecor(*bkgMuon).emplace_back(*truthPartDecor.container(), bkgSeg->index(), ctx);
                 segmentMatched[sIdx] = true;
             }
         }

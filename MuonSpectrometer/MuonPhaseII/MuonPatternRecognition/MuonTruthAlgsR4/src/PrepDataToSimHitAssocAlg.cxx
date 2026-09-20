@@ -157,7 +157,7 @@ namespace MuonR4{
                     continue;
                 }
                 
-                decorHandle(*measurement) = LinkType{*simHits, bestSimHit->index()};
+                decorHandle(*measurement) = LinkType{*simHits, bestSimHit->index(), ctx};
             }
         } while (prdViewer.next());
         

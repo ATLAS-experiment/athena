@@ -246,7 +246,7 @@ namespace MuonR4{
                 <<", genParticle: "<<assocMe->genParticleLink().cptr()<<", beta: "<<simHit->beta()
                 <<" global time: "<<simHit->globalTime()<<", pos: "<<Amg::toString(pos)
                 <<", dir: "<<Amg::toString(dir));
-            EleLink_t link{*static_cast<const xAOD::MuonSimHitContainer*>(assocMe->container()), assocMe->index()};
+            EleLink_t link{*static_cast<const xAOD::MuonSimHitContainer*>(assocMe->container()), assocMe->index(), ctx};
             associatedHits.push_back(std::move(link));
         }
         int nPrecisionHits = nMdt + nMm + nStgcEta;
@@ -361,7 +361,7 @@ namespace MuonR4{
             handleMap.insert(std::make_pair(decorHandle.container(), std::move(decorHandle)));
         }
         for (const xAOD::MuonSegment* segment: segments) {
-            SegLink_t segLink{&segments, segment->index()};
+          SegLink_t segLink{segments, segment->index(), ctx};
             for (const xAOD::MuonSimHit* simHit : getMatchingSimHits(*segment)) {
                 handleMap.at(simHit->container())(*simHit) = segLink;
             }

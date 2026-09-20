@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrackToTruthPartAssocAlg.h"
@@ -118,7 +118,7 @@ namespace MuonR4{
             }
             acc_truthOrigin(*trackPart) = xAOD::TruthHelpers::getParticleTruthOrigin(*bestMatch);
             acc_truthType(*trackPart) = xAOD::TruthHelpers::getParticleTruthType(*bestMatch);
-            acc_truthLink(*trackPart) = TruthLink_t{truthMuonCont, bestMatch->index()};
+            acc_truthLink(*trackPart) = TruthLink_t{m_truthMuonKey.key(), bestMatch->index(), ctx};
             acc_truthClassification(*trackPart) = xAOD::TruthHelpers::getParticleTruthClassification(*bestMatch);
         }
         return StatusCode::SUCCESS;
