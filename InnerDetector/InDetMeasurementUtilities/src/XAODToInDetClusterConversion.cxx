@@ -132,7 +132,7 @@ namespace InDet {
 
           // Add to Collection
           collection->push_back(cluster.get());
-          dec_link(*in_cluster) = Link_t{cluster.release(), *collection};
+          dec_link(*in_cluster) = Link_t{cluster.release(), *collection, ctx};
         }
       }
 
@@ -212,7 +212,7 @@ namespace InDet {
 
           // Add to Collection
           collection->push_back( cluster.get() );
-          dec_link(*in_cluster) = Link_t{cluster.release(), *collection};
+          dec_link(*in_cluster) = Link_t{cluster.release(), *collection, ctx};
         }
       }
 
@@ -272,7 +272,7 @@ namespace InDet {
 
           // Add to Collection
           collection->push_back(cluster.get());
-          dec_link(*in_cluster) = Link_t{cluster.release(), *collection};
+          dec_link(*in_cluster) = Link_t{cluster.release(), *collection, ctx};
         }
       }
 

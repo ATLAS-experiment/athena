@@ -154,7 +154,7 @@ namespace InDet {
 	}
 
 	// Add link to this space point
-	ElementLink< ::SpacePointCollection > link(indetSP, *spc);
+	ElementLink< ::SpacePointCollection > link(indetSP, *spc, ctx);
 	linkAcc(*pixel_sp) = link;
       }
     }
@@ -248,7 +248,7 @@ namespace InDet {
 	}
 	
 	// Add link to this space point
-	ElementLink< ::SpacePointCollection > link(indetSP, *spc);
+	ElementLink< ::SpacePointCollection > link(indetSP, *spc, ctx);
 	linkAcc(*strip_xaod_container->back()) = link;
       }
     }
@@ -343,7 +343,7 @@ namespace InDet {
 	strip_overlap_xaod_container->back()->setMeasurements( {stripCl1, stripCl2} );
       }
       
-      ElementLink< ::SpacePointOverlapCollection > TrkLink(sp, *strip_overlap_container);
+      ElementLink< ::SpacePointOverlapCollection > TrkLink(sp, *strip_overlap_container, ctx);
       stripSpacePointLinkAcc( *strip_overlap_xaod_container->back() ) = TrkLink;
     }
 
