@@ -277,7 +277,7 @@ namespace xAODMaker {
             // Construct the link to the pile-up EventInfo object:
             ElementLink< xAOD::EventInfoContainer > link;
             static const std::string pileUpEventInfoStr{"PileUpEventInfo"};
-            link.resetWithKeyAndIndex( pileUpEventInfoStr, itr->index() );
+            link.resetWithKeyAndIndex( pileUpEventInfoStr, itr->index(), ctx );
 
             // Add the new object
             subEvents.emplace_back( itr->time(),
