@@ -644,11 +644,14 @@ StatusCode PoolSvc::getAttribute(const std::string& optName,
          return(StatusCode::FAILURE);
       }
       if (data == "DbLonglong") {
-         oss << std::dec << contH->technologySpecificAttributes().attribute<long long int>(optName);
+         long long int attr_data;
+         oss << std::dec << contH->attributeOfType(optName, static_cast< void* >( &attr_data ), typeid(long long int), "");
       } else if (data == "double") {
-         oss << std::dec << contH->technologySpecificAttributes().attribute<double>(optName);
+         double attr_data;
+         oss << std::dec << contH->attributeOfType(optName, static_cast< void* >( &attr_data ), typeid(double), "");
       } else {
-         oss << std::dec << contH->technologySpecificAttributes().attribute<int>(optName);
+         int attr_data;
+         oss << std::dec << contH->attributeOfType(optName, static_cast< void* >( &attr_data ), typeid(int), "");
       }
       ATH_MSG_INFO("Container attribute [" << contName << "." << optName << "]: " << oss.str());
    }
@@ -740,9 +743,11 @@ StatusCode PoolSvc::setAttribute(const std::string& optName,
          objName[off] = '_'; // Replace special chars (e.g. templates)
       }
       if (data[data.size() - 1] == 'L') {
-         retError = contH->technologySpecificAttributes().setAttribute<long long int>(optName, atoll(data.c_str()), objName);
+         const long long int& atttibuteValue = atoll(data.c_str());
+         retError = contH->setAttributeOfType(optName, static_cast<const void*>(&atttibuteValue), typeid(long long int), objName);
       } else {
-         retError = contH->technologySpecificAttributes().setAttribute<int>(optName, atoi(data.c_str()), objName);
+         const int& atttibuteValue = atoi(data.c_str());
+         retError = contH->setAttributeOfType(optName, static_cast<const void*>(&atttibuteValue), typeid(int), objName);
       }
       if (!retError) {
          ATH_MSG_DEBUG("Failed to set POOL container property, " << optName << " for " << contName << " : " << objName << " to " << data);
