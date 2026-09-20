@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -213,7 +213,7 @@ StatusCode AFPSiClusterTool::saveToXAOD(std::unique_ptr<xAOD::AFPSiHitsClusterCo
         // add links to hits
         for (const xAOD::AFPSiHit* theHit : theCluster.hits()) {
           ElementLink< xAOD::AFPSiHitContainer > hitLink;
-          hitLink.toContainedElement(*siHitContainer, theHit);
+          hitLink.toContainedElement(*siHitContainer, theHit, ctx);
           xAODCluster->addHitLink(hitLink);
         }
       } // end for over layers
