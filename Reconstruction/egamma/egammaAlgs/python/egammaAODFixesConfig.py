@@ -71,7 +71,7 @@ def FixFromAMITag(flags):
             listOfRecoTags_noMerge.append(e)
 
         
-    if len(listOfRecoTags_noMerge) == 0: 
+    if not listOfRecoTags_noMerge: 
         msg.info("no reco tags after merge removal")
         doFixFromAMITags.append((True,True))
         return doFixFromAMITags, listOfRecoTags_noMerge
