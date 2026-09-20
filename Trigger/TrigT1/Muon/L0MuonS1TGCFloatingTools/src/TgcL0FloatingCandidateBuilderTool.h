@@ -5,7 +5,7 @@
 #define L0MUONS1TGCFLOATINGTOOLS_TGCL0FLOATINGCANDIDATEBUILDERTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "L0MuonS1TGCToolInterfaces/ITgcL0CandidateBuilderTool.h"
+#include "L1MuonS1TGCToolInterfaces/ITgcL0CandidateBuilderTool.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonTGC_Cabling/TgcCablingMap.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
