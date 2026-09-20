@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file DataModelTestDataCommon/src/xAODTestWriteCVec.cxx
@@ -77,7 +77,7 @@ StatusCode xAODTestWriteCVec::execute (const EventContext& ctx) const
     anInt2(c) = count*300 + i+1;
     dVar1(c) = count*450 + i+1;
     dVar2(c) = count*750 + i+1;
-    cEL(c).toIndexedElement (*coll, 9-i);
+    cEL(c).toIndexedElement (*coll, 9-i, ctx);
   }
 
   SG::WriteHandle<DMTest::CVec> cvec (m_cvecKey, ctx);
