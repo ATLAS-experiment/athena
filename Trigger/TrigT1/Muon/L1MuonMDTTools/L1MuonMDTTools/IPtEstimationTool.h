@@ -2,11 +2,11 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef L0MuonMDTTools_IPTESTIMATIONTOOL_H
-#define L0MuonMDTTools_IPTESTIMATIONTOOL_H
+#ifndef L1MuonMDTTools_IPTESTIMATIONTOOL_H
+#define L1MuonMDTTools_IPTESTIMATIONTOOL_H
 
 #include "GaudiKernel/IAlgTool.h"
-#include "L0MuonMDTTools/L0MDTSegment.h"
+#include "L1MuonMDTTools/L0MDTSegment.h"
 #include <optional>
 
 namespace L0MDT {

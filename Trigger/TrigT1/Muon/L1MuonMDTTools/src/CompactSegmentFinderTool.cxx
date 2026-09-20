@@ -39,7 +39,7 @@
  */
 
 #include "CompactSegmentFinderTool.h"
-#include "L0MuonMDTTools/L0MDTSegment.h"
+#include "L1MuonMDTTools/L0MDTSegment.h"
 
 namespace L0MDT {
 
