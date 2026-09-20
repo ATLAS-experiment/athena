@@ -5,7 +5,7 @@
 #define ITkPixelCablingData_h
 /**
   * @file ITkPixelCablingData/ITkPixelCablingData.h
-  * @author Ondra Kovanda, Shaun Roe
+  * @author Ondra Kovanda, Shaun Roe, Fabrice Balli
   * @date June 2024
   * @brief Data object containing the offline-online mapping for ITkPixels
   */

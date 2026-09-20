@@ -7,9 +7,6 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def addITkPixelCabling(flags):
     from ITkPixelCabling.ITkPixelCablingAlgConfig import ITkPixelCablingAlgCfg
-    import os
-    import sys
-
     acc = ComponentAccumulator()
     
     if flags.ITk.Conditions.PixelTestCablingFallback:
