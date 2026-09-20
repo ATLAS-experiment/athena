@@ -2,8 +2,8 @@
    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef L0MUONEMULATION_TRUTHTRACKSMEARER_H
-#define L0MUONEMULATION_TRUTHTRACKSMEARER_H
+#ifndef L1MUONEMULATION_TRUTHTRACKSMEARER_H
+#define L1MUONEMULATION_TRUTHTRACKSMEARER_H
 
 #include <memory>
 #include <array>

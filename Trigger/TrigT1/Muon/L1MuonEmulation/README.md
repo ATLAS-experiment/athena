@@ -1,4 +1,4 @@
-# L0MuonEmulation
+# L1MuonEmulation
 
 This package contains tools to emulate L0Muon performance
 
