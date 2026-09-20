@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file  DataModelTestDataRead/src/xAODTestFilterCVec.cxx
  * @author snyder@bnl.gov
@@ -70,7 +68,7 @@ StatusCode xAODTestFilterCVec::execute (const EventContext& ctx) const
 
   size_t i = 0;
   for (C* c : *vecnew) {
-    cEL(*c).toIndexedElement (*vecnew, vecnew->size()-1-i);
+    cEL(*c).toIndexedElement (*vecnew, vecnew->size()-1-i, ctx);
     ++i;
   }
   SG::WriteHandle<DMTest::CVec> writevec (m_writeKey, ctx);
