@@ -8,7 +8,7 @@
  **/
 
 #include "PoolSvc.h"
-#include "ITechnologySpecificAttributes.h"
+#include "MicroSessionManager.h"
 
 #include "GaudiKernel/IIoComponentMgr.h"
 #include "GaudiKernel/ConcurrencyFlags.h"
@@ -133,7 +133,8 @@ StatusCode PoolSvc::setupPersistencySvc() {
    // Setup a persistency services
    m_dbSessionVec.push_back(pool::createSession(*m_catalog).release()); // Read Service
    m_pers_mut.push_back(new CallMutex);
-   if (!m_dbSessionVec[IPoolSvc::kInputStream]->technologySpecificAttributes(pool::ROOT_StorageType.type()).setAttribute<bool>("ENABLE_THREADSAFETY", true)) {
+   const bool& atttibuteValue = true;
+   if (!m_dbSessionVec[IPoolSvc::kInputStream]->microSessionManager(pool::ROOT_StorageType.type()).setAttributeOfType("ENABLE_THREADSAFETY", static_cast<const void*>(&atttibuteValue), typeid(bool), "")) {
       ATH_MSG_FATAL("Failed to enable thread safety in ROOT via PersistencySvc.");
       return(StatusCode::FAILURE);
    }
@@ -151,7 +152,8 @@ StatusCode PoolSvc::setupPersistencySvc() {
 StatusCode PoolSvc::start() {
    // Switiching on ROOT implicit multi threading for AthenaMT
    if (m_useROOTIMT && Gaudi::Concurrency::ConcurrencyFlags::numThreads() > 1) {
-      if (!m_dbSessionVec[IPoolSvc::kInputStream]->technologySpecificAttributes(pool::ROOT_StorageType.type()).setAttribute<int>("ENABLE_IMPLICITMT", Gaudi::Concurrency::ConcurrencyFlags::numThreads() - 1)) {
+      const int& atttibuteValue = Gaudi::Concurrency::ConcurrencyFlags::numThreads() - 1;
+      if (!m_dbSessionVec[IPoolSvc::kInputStream]->microSessionManager(pool::ROOT_StorageType.type()).setAttributeOfType("ENABLE_IMPLICITMT", static_cast<const void*>(&atttibuteValue), typeid(int), "")) {
          ATH_MSG_FATAL("Failed to enable implicit multithreading in ROOT via PersistencySvc.");
          return(StatusCode::FAILURE);
       }
@@ -594,11 +596,14 @@ StatusCode PoolSvc::getAttribute(const std::string& optName,
    pool::ISession* sesH = m_dbSessionVec[contextId];
    std::ostringstream oss;
    if (data == "DbLonglong") {
-      oss << std::dec << sesH->technologySpecificAttributes(tech).attribute<long long int>(optName);
+      long long int attr_data;
+      oss << std::dec << sesH->microSessionManager(tech).attributeOfType(optName, static_cast<void*>(&attr_data), typeid(long long int), "");
    } else if (data == "double") {
-      oss << std::dec << sesH->technologySpecificAttributes(tech).attribute<double>(optName);
+      double attr_data;
+      oss << std::dec << sesH->microSessionManager(tech).attributeOfType(optName, static_cast<void*>(&attr_data), typeid(double), "");
    } else {
-      oss << std::dec << sesH->technologySpecificAttributes(tech).attribute<int>(optName);
+      int attr_data;
+      oss << std::dec << sesH->microSessionManager(tech).attributeOfType(optName, static_cast<void*>(&attr_data), typeid(int), "");
    }
    data = oss.str();
    ATH_MSG_INFO("Domain attribute [" << optName << "]" << ": " << data);
@@ -629,16 +634,16 @@ StatusCode PoolSvc::getAttribute(const std::string& optName,
    if (contName.empty()) {
       if (data == "DbLonglong") {
          long long int attr_data;
-         oss << std::dec << dbH->attributeOfType(optName, static_cast< void* >( &attr_data ), typeid(long long int), "");
+         oss << std::dec << dbH->attributeOfType(optName, static_cast<void*>(&attr_data), typeid(long long int), "");
       } else if (data == "double") {
          double attr_data;
-         oss << std::dec << dbH->attributeOfType(optName, static_cast< void* >( &attr_data ), typeid(double), "");
+         oss << std::dec << dbH->attributeOfType(optName, static_cast<void*>(&attr_data), typeid(double), "");
       } else if (data == "string") {
          char* attr_data;
-         oss << std::dec << dbH->attributeOfType(optName, static_cast< void* >( &attr_data ), typeid(char*), "");
+         oss << std::dec << dbH->attributeOfType(optName, static_cast<void*>(&attr_data), typeid(char*), "");
       } else {
          int attr_data;
-         oss << std::dec << dbH->attributeOfType(optName, static_cast< void* >( &attr_data ), typeid(int), "");
+         oss << std::dec << dbH->attributeOfType(optName, static_cast<void*>(&attr_data), typeid(int), "");
       }
       ATH_MSG_INFO("Database (" << dbH->pfn() << ") attribute [" << optName << "]" << ": " << oss.str());
    } else {
@@ -649,13 +654,13 @@ StatusCode PoolSvc::getAttribute(const std::string& optName,
       }
       if (data == "DbLonglong") {
          long long int attr_data;
-         oss << std::dec << contH->attributeOfType(optName, static_cast< void* >( &attr_data ), typeid(long long int), "");
+         oss << std::dec << contH->attributeOfType(optName, static_cast<void*>(&attr_data), typeid(long long int), "");
       } else if (data == "double") {
          double attr_data;
-         oss << std::dec << contH->attributeOfType(optName, static_cast< void* >( &attr_data ), typeid(double), "");
+         oss << std::dec << contH->attributeOfType(optName, static_cast<void*>(&attr_data), typeid(double), "");
       } else {
          int attr_data;
-         oss << std::dec << contH->attributeOfType(optName, static_cast< void* >( &attr_data ), typeid(int), "");
+         oss << std::dec << contH->attributeOfType(optName, static_cast<void*>(&attr_data), typeid(int), "");
       }
       ATH_MSG_INFO("Container attribute [" << contName << "." << optName << "]: " << oss.str());
    }
@@ -674,12 +679,14 @@ StatusCode PoolSvc::setAttribute(const std::string& optName,
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
    pool::ISession* sesH = m_dbSessionVec[contextId];
    if (data[data.size() - 1] == 'L') {
-      if (!sesH->technologySpecificAttributes(tech).setAttribute<long long int>(optName, atoll(data.c_str()))) {
+      const long long int& atttibuteValue = atoll(data.c_str());
+      if (!sesH->microSessionManager(tech).setAttributeOfType(optName, static_cast<const void*>(&atttibuteValue), typeid(long long int), "")) {
          ATH_MSG_DEBUG("Failed to set POOL property, " << optName << " to " << data);
          return(StatusCode::FAILURE);
       }
    } else {
-      if (!sesH->technologySpecificAttributes(tech).setAttribute<int>(optName, atoi(data.c_str()))) {
+      const int& atttibuteValue = atoi(data.c_str());
+      if (!sesH->microSessionManager(tech).setAttributeOfType(optName, static_cast<const void*>(&atttibuteValue), typeid(int), "")) {
          ATH_MSG_DEBUG("Failed to set POOL property, " << optName << " to " << data);
          return(StatusCode::FAILURE);
       }

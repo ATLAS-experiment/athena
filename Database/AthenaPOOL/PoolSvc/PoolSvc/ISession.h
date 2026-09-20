@@ -18,7 +18,7 @@ class Token;
 namespace pool {
 
   // forward declarations
-  class ITechnologySpecificAttributes;
+  class MicroSessionManager;
   class IFileCatalog;
 
   /// Factory method to create a session object
@@ -78,8 +78,8 @@ namespace pool {
     */
     virtual Token* registerForWrite( const Placement& place, const void* object, const RootType& type ) = 0;
 
-    /// Returns the object holding the technology specific attributes for a given technology domain
-    virtual ITechnologySpecificAttributes& technologySpecificAttributes( long technology ) = 0;
+    /// Returns the technology given a technology type.
+    virtual MicroSessionManager& microSessionManager( long technology ) = 0;
 
     /// virtual destructor for the interface
     virtual ~ISession() = default;

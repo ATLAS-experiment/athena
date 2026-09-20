@@ -167,11 +167,3 @@ pool::UserSession::microSessionManager( long technology )
   mgr->connect( m_transactionType, m_ageLimit );
   return *mgr;
 }
-
-pool::ITechnologySpecificAttributes&
-pool::UserSession::technologySpecificAttributes( long technology )
-{
-  pool::MicroSessionManager& mgr = microSessionManager( technology );
-  mgr.connect( m_transactionType, m_ageLimit );
-  return mgr;
-}
