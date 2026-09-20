@@ -628,13 +628,17 @@ StatusCode PoolSvc::getAttribute(const std::string& optName,
    std::ostringstream oss;
    if (contName.empty()) {
       if (data == "DbLonglong") {
-         oss << std::dec << dbH->technologySpecificAttributes().attribute<long long int>(optName);
+         long long int attr_data;
+         oss << std::dec << dbH->attributeOfType(optName, static_cast< void* >( &attr_data ), typeid(long long int), "");
       } else if (data == "double") {
-         oss << std::dec << dbH->technologySpecificAttributes().attribute<double>(optName);
+         double attr_data;
+         oss << std::dec << dbH->attributeOfType(optName, static_cast< void* >( &attr_data ), typeid(double), "");
       } else if (data == "string") {
-         oss << dbH->technologySpecificAttributes().attribute<char*>(optName);
+         char* attr_data;
+         oss << std::dec << dbH->attributeOfType(optName, static_cast< void* >( &attr_data ), typeid(char*), "");
       } else {
-         oss << std::dec << dbH->technologySpecificAttributes().attribute<int>(optName);
+         int attr_data;
+         oss << std::dec << dbH->attributeOfType(optName, static_cast< void* >( &attr_data ), typeid(int), "");
       }
       ATH_MSG_INFO("Database (" << dbH->pfn() << ") attribute [" << optName << "]" << ": " << oss.str());
    } else {
@@ -713,11 +717,14 @@ StatusCode PoolSvc::setAttribute(const std::string& optName,
    if (contName.empty() || hasTTreeName || m_dbSessionVec[contextId]->type() == Io::READ) {
       objName = hasTTreeName ? contName.substr(6) : contName;
       if( !isNumber(data) ) {
-         retError = dbH->technologySpecificAttributes().setAttribute(optName, data.c_str(), objName);
+         const char* atttibuteValue = data.c_str();
+         retError = dbH->setAttributeOfType(optName, static_cast<const void*>(&atttibuteValue), typeid(char*), objName);
       } else if( data[data.size() - 1] == 'L' ) {
-         retError = dbH->technologySpecificAttributes().setAttribute<long long int>(optName, atoll(data.c_str()), objName);
+         const long long int& atttibuteValue = atoll(data.c_str());
+         retError = dbH->setAttributeOfType(optName, static_cast<const void*>(&atttibuteValue), typeid(long long int), objName);
       } else {
-         retError = dbH->technologySpecificAttributes().setAttribute<int>(optName, atoi(data.c_str()), objName);
+         const int& atttibuteValue = atoi(data.c_str());
+         retError = dbH->setAttributeOfType(optName, static_cast<const void*>(&atttibuteValue), typeid(int), objName);
       }
       if (!retError) {
          ATH_MSG_DEBUG("Failed to set POOL property, " << optName << " to " << data);

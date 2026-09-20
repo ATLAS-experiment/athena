@@ -369,13 +369,6 @@ pool::UserDatabase::checkInRegistry()
 }
 
 
-pool::ITechnologySpecificAttributes&
-pool::UserDatabase::technologySpecificAttributes()
-{
-  return static_cast< pool::ITechnologySpecificAttributes& >( *this );
-}
-
-
 bool
 pool::UserDatabase::attributeOfType( const std::string& attributeName,
                                                      void* data,

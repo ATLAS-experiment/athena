@@ -5,8 +5,6 @@
 #ifndef POOLSVC_USERDATABASE_H
 #define POOLSVC_USERDATABASE_H
 
-#include "ITechnologySpecificAttributes.h"
-
 #include "PoolSvc/IDatabase.h"
 #include "PoolSvc/ISession.h"
 #include "StorageSvc/DbPrint.h"
@@ -27,7 +25,6 @@ namespace pool {
    *
    */
   class UserDatabase : virtual public IDatabase,
-                       virtual public ITechnologySpecificAttributes,
                        public APRMessaging
   {
   public:
@@ -81,10 +78,6 @@ namespace pool {
     /// Returns a pointer to a container object. The user acquires ownership of that object.
     virtual IContainer* containerHandle( const std::string& name ) override;
 
-    /// Returns the object holding the technology specific attributes
-    virtual ITechnologySpecificAttributes& technologySpecificAttributes() override;
-
-  protected:
     virtual
     bool attributeOfType( const std::string& attributeName,
                           void* data,
