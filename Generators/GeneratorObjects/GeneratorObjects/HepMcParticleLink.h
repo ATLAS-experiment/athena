@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATOROBJECTS_HEPMCPARTICLELINK_H
@@ -13,7 +13,7 @@
 
 #include "SGTools/DataProxy.h"
 #include "SGTools/CurrentEventStore.h"
-#include "AthenaKernel/ExtendedEventContext.h"
+#include "AthenaKernel/proxyDictFromEventContext.h"
 #include "CxxUtils/CachedValue.h"
 #include "CxxUtils/no_unique_address.h"
 #include "GaudiKernel/MsgStream.h"
@@ -574,6 +574,16 @@ public:
 
 
   /**
+   * @brief Return the event number of the GenEvent at the specified
+   *        position in the McEventCollection.
+   * @param position in the McEventCollection
+   * @param sg Target event store.
+   * Returns -999 when position is larger than the McEventCollection size
+   */
+  static int getEventNumberAtPosition (index_type position, const EventContext& ctx);
+
+
+  /**
    * @brief Return a vector of the positions in the McEventCollection of the
    *        GenEvent(s) with a given event number.
    * @param index the event number of the required GenEvent
@@ -591,6 +601,15 @@ public:
    * FIXME - need to be able to flag when no event with the appropriate event_number was found.
    */
   index_type getEventPositionInCollection (const IProxyDict* sg) const;
+
+
+  /**
+   * @brief Return the position in the McEventCollection of the
+   *        GenEvent pointed to by this HepMcParticleLink
+   * @param sg Target event context.
+   * FIXME - need to be able to flag when no event with the appropriate event_number was found.
+   */
+  index_type getEventPositionInCollection (const EventContext& ctx) const;
 
 
   /**

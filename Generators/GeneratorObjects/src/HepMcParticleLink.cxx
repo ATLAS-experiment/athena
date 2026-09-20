@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -13,6 +13,7 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenEvent.h"
 #include "AthenaKernel/getMessageSvc.h"
+#include "AthenaKernel/IProxyDict.h"
 #include "GaudiKernel/MsgStream.h"
 #include "SGTools/CurrentEventStore.h"
 #include "SGTools/DataProxy.h"
@@ -408,6 +409,18 @@ HepMcParticleLink::getEventPositionInCollection (const IProxyDict* sg) const
  * @brief Return the position in the McEventCollection of the
  *        (first) GenEvent with a given event number
  */
+HepMcParticleLink::index_type
+HepMcParticleLink::getEventPositionInCollection (const EventContext& ctx) const
+{
+  IProxyDict* sg = Atlas::proxyDictFromEventContext (ctx);
+  return getEventPositionInCollection (sg);
+}
+
+
+/**
+ * @brief Return the position in the McEventCollection of the
+ *        (first) GenEvent with a given event number
+ */
 std::vector<HepMcParticleLink::index_type>
 HepMcParticleLink::getEventPositionInCollection (index_type event_number, const IProxyDict* sg)
 {
@@ -444,6 +457,16 @@ int HepMcParticleLink::getEventNumberAtPosition (index_type position, const IPro
   log << MSG::WARNING << "getEventNumberAtPosition: position = " << position << ", McEventCollection size = "<< coll->size() << endmsg;
 #endif
   return -999;
+}
+
+
+/**
+ * @brief Return the event number of the GenEvent at the specified
+ *        position in the McEventCollection.
+ */
+int HepMcParticleLink::getEventNumberAtPosition (index_type position, const EventContext& ctx)
+{
+  return getEventNumberAtPosition (position, Atlas::proxyDictFromEventContext (ctx));
 }
 
 
