@@ -382,7 +382,7 @@ StatusCode TriggerEDMDeserialiserAlg::deserialise( const EventContext& ctx,
         if (xAODInterfaceContainer!=nullptr &&
             xAODInterfaceContainer->trackIndices() && currentAuxStore==nullptr) {
           ATH_MSG_DEBUG("Container with key " << previousKey << " is missing its Aux store");
-          xAODInterfaceContainer->setStore( DataLink<SG::IConstAuxStore>(previousKey+"Aux.") );
+          xAODInterfaceContainer->setStore( DataLink<SG::IConstAuxStore>(previousKey+"Aux.", ctx) );
         }
         currentAuxStore = nullptr; // the store will be following, setting it to nullptr assure we catch issue with of missing Aux
         xAODInterfaceContainer = dataBucket->cast<SG::AuxVectorBase>();
