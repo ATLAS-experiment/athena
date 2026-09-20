@@ -97,7 +97,7 @@ StatusCode ViewCreatorCentredOnJetWithPVConstraintROITool::attachROILinks( TrigC
 
     outputDecision->setObjectLink( TrigCompositeUtils::roiString(), roiEL );
     outputDecision->setObjectLink( m_prmVtxLink.value(),
-				   ElementLink< xAOD::VertexContainer >( m_vertexReadHandleKey.key(),primaryVertex->index() ) );
+				   ElementLink< xAOD::VertexContainer >( m_vertexReadHandleKey.key(),primaryVertex->index(), ctx ) );
 
     ATH_MSG_DEBUG("PRINTING DECISION");
     ATH_MSG_DEBUG( *outputDecision );
