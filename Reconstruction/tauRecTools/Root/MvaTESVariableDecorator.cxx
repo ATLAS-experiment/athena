@@ -151,7 +151,7 @@ StatusCode MvaTESVariableDecorator::execute(xAOD::TauJet& xTau) const {
     
     // EM-scale equivalent of IntermediateAxis p4
     if (vertex) {
-      xAOD::CaloVertexedTopoCluster vertexedClusterEM(cluster, m_clusterState, vertex->position());
+      xAOD::CaloVertexedTopoCluster vertexedClusterEM(cluster, xAOD::CaloCluster::State::UNCALIBRATED, vertex->position());
       tauIntermediateAxisEM += vertexedClusterEM.p4(); 
     }
     else {
