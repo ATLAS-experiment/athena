@@ -972,12 +972,12 @@ StatusCode InDetPhysValMonitoringTool::fillHistogramsTrackingInDenseEnvironment(
 
 	const xAOD::TruthParticle *truth = static_cast<const xAOD::TruthParticle*>(*el);
     
-  // Check if ghost truth is in event TruthParticle vector
-  if (m_pileupSwitch != "All") {
-    if (std::find(truthParticles.begin(), truthParticles.end(), truth) == truthParticles.end()) {
-      continue;
-    }
-  }
+	// Check if ghost truth is in event TruthParticle vector
+	if (m_pileupSwitch != "All") {
+	  if (std::find(truthParticles.begin(), truthParticles.end(), truth) == truthParticles.end()) {
+	    continue;
+	  }
+	}
 
 	// Check delta R between track and jet axis
 	if (thisJet->p4().DeltaR(truth->p4()) > m_maxTrkJetDR) {
