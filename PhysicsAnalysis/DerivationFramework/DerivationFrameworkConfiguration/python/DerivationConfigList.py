@@ -112,6 +112,10 @@ from DerivationFrameworkFlavourTag.FTAGPU import FTAGPUCfg
 from DerivationFrameworkFlavourTag.FTAG1LITE import FTAG1LITECfg
 from DerivationFrameworkFlavourTag.FTAGSSV import FTAGSSVCfg
 
+# Hadronic ID derivations
+# HID1: combined FTAG and Jet/Etmiss content for hadronic identification studies
+from DerivationFrameworkHadronicID.HID1 import HID1Cfg
+
 # Jet/Etmiss derivations
 # JETM1: dijet for MC calibrations, JER, MJB, eta-intercalibration
 from DerivationFrameworkJetEtMiss.JETM1 import JETM1Cfg
@@ -190,6 +194,7 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg','TE
            'EGAM1Cfg', 'EGAM2Cfg', 'EGAM3Cfg', 'EGAM4Cfg', 'EGAM5Cfg',
            'EGAM7Cfg', 'EGAM8Cfg', 'EGAM9Cfg', 'EGAM10Cfg', 'EGAM11Cfg', 'EGAM12Cfg',
            'JETM1Cfg','JETM2Cfg','JETM3Cfg','JETM4Cfg','JETM5Cfg','JETM7Cfg','JETM12Cfg','JETM42Cfg',
+           'HID1Cfg',
            'TOPQ7Cfg',
            'TRIG8Cfg',"TRIG9Cfg","TRIG10Cfg",'L1CALO1Cfg',
            'MUON1Cfg','MUON5Cfg',

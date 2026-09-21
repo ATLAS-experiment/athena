@@ -12,6 +12,7 @@ formatList = ["PHYSVAL","PHYS","PHYSLITE",
               "IDTR2",
               "EGAM1","EGAM2","EGAM3","EGAM4","EGAM5","EGAM7","EGAM8","EGAM9","EGAM10",
               "FTAG1","FTAG1LITE","FTAG2","FTAG3","FTAGPU","FTAGXBB","FTAGSSV",
+              "HID1",
               "BPHY1","BPHY2","BPHY3","BPHY4","BPHY5","BPHY6","BPHY10","BPHY12","BPHY14","BPHY15","BPHY16","BPHY18","BPHY21","BPHY22",
               "BPHY23","BPHY24","BPHY28",
               "STDM6","STDM7","STDM13","STDM16","STDM17",
@@ -243,7 +244,7 @@ if (makeDataDAODs or makeMCDAODs):
          continue
 
       # End special cases
-      if makeDataDAODs and not formatName in ["TOPQ7", "FTAG1", "FTAG1LITE"]:
+      if makeDataDAODs and not formatName in ["TOPQ7", "FTAG1", "FTAG1LITE", "HID1"]:
          generateText(formatName,"data18",None,False,"-1",
                       "defaultTestFiles.AOD_RUN2_DATA[0]")
          generateText(formatName,"data22",None,False,"-1",
