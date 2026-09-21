@@ -125,7 +125,7 @@ def getCalibratedCopies(flags):
         'GN3V00': (gn3_probs, gn3_tracks, ()),
         'GN3PflowMuonsV00': (gn3_probs, gn3_tracks, ()),
         'GN3EPCLV01': (gn3_epcl_probs, gn3_tracks, ()),
-        'GN3V02': (gn3_epcl_probs, gn3_tracks, ()),
+        'GN3V03': (gn3_epcl_probs, gn3_tracks, ()),
     }
     return {
         'AntiKt4EMPFlowJets': {
@@ -166,8 +166,8 @@ def getNNs(flags):
     ] if isRun3Derivation(flags) else []
     # Trained on the poor man's impact parameters, so it needs its own
     # entry below rather than joining gn3_paths
-    gn3v02_paths = [
-        "dev/BTagging/20260921/GN3V02/antikt4empflow/network.onnx", # Electrons+Pflow+Charge+Muons
+    gn3v03_paths = [
+        "dev/BTagging/20260921/GN3V03/antikt4empflow/network.onnx", # Electrons+Pflow+Charge+Muons
     ] if isRun3Derivation(flags) else []
     # Combine the paths for GN3v00 and GN3v01 models
     gn3_paths = gn3v00_paths + gn3v01_paths
@@ -197,7 +197,7 @@ def getNNs(flags):
             },
             *[{'folds' : [nn_path]} for nn_path in gn3_paths+bjr4_paths],
             *[{'folds': [nn_path], 'ip_prefix': 'poormanIp_'}
-              for nn_path in gn3v02_paths]
+              for nn_path in gn3v03_paths]
         ],
         'AntiKt4EMTopoJets': [
             {

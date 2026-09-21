@@ -411,7 +411,8 @@ def getDependencySet(tagger_name: str, override: set[str] | None = None) -> set[
         "GN3PflowMuonsElectronsHybridV00": {"L", "E"},
         "GN3V01": {"L", "E"},
         "GN3EPCLV01": {"E", "L"},
-        "GN3V02": {"E", "M", "P"},
+        "GN3V02": {"E", "M"},
+        "GN3V03": {"E", "M", "P"},
 
         # Small-R jet regression
         "bJR4v01": {"E", "L", "MC", "R"},
