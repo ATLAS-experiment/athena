@@ -537,7 +537,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
               new GetAmountHisto2DEtaCaloRunNumber(*histo_acc));    
   }
   else if ("acc_zee_run3_v0" == tune){
-    const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v15/egammaLayerRecalibTunes.root");
+    const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v13/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
     TH2F* histo_acc = static_cast<TH2F*>(f.Get("hACC_Zee_rel23"));
     assert(histo_acc);
