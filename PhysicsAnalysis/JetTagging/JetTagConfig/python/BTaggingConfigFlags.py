@@ -122,7 +122,6 @@ def getCalibratedCopies(flags):
     gn3_tracks = ['TrackOrigin', 'TrackType', 'VertexIndex']
     taggers = {
         'GN2v01': (['pb', 'pc', 'pu', 'ptau'], gn2_tracks, _fold_hashes),
-        'GN3V00': (gn3_probs, gn3_tracks, ()),
         'GN3PflowMuonsV00': (gn3_probs, gn3_tracks, ()),
         'GN3EPCLV01': (gn3_epcl_probs, gn3_tracks, ()),
         'GN3V03': (gn3_epcl_probs, gn3_tracks, ()),
@@ -157,8 +156,7 @@ def getNNs(flags):
     # But this *should* be cleaned up at some point
     # Note also, reco tests failing due to leptonID missing, so for now don't run taggers unless derivation
     # https://gitlab.cern.ch/atlas/athena/-/merge_requests/77764#note_9063625
-    gn3v00_paths = [
-        "BTagging/20250213/GN3V00/antikt4empflow/network.onnx", # Only tracks
+    gn3pflowmuons_paths = [
         "BTagging/20250213/GN3PflowMuonsV00/antikt4empflow/network.onnx", # Tracks+Muons+PFlow
     ] if isRun3Derivation(flags) else []
     gn3v01_paths = [
@@ -169,8 +167,8 @@ def getNNs(flags):
     gn3v03_paths = [
         "dev/BTagging/20260922/GN3V03/antikt4empflow/network.onnx", # Electrons+Pflow+Charge+Muons
     ] if isRun3Derivation(flags) else []
-    # Combine the paths for GN3v00 and GN3v01 models
-    gn3_paths = gn3v00_paths + gn3v01_paths
+    # Combine the paths for the GN3PflowMuonsV00 and GN3v01 models
+    gn3_paths = gn3pflowmuons_paths + gn3v01_paths
 
     bjr4_paths = [
         "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bJES_calibFactors_R22_MC20MC23_AntiKt4EMPflow_bJR4v01_20260319.onnx" # bJR4v01

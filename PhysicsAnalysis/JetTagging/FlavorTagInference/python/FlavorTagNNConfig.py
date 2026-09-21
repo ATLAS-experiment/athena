@@ -16,7 +16,6 @@ _onnx_to_triton_map = {
     "BTagging/20231205/GN2v01/antikt4empflow/network_fold1.onnx"     : "BTagging_network_fold1_9280d77c131c",
     "BTagging/20231205/GN2v01/antikt4empflow/network_fold2.onnx"     : "BTagging_network_fold2_25c6ad03db10",
     "BTagging/20231205/GN2v01/antikt4empflow/network_fold3.onnx"     : "BTagging_network_fold3_0558b4924c49",
-    "BTagging/20250213/GN3V00/antikt4empflow/network.onnx"           : "BTagging_network_cce6be90efd1",
     "BTagging/20250213/GN3PflowMuonsV00/antikt4empflow/network.onnx" : "BTagging_network_d2138c4252e6",
     "BTagging/20240925/GN2Xv02/antikt10ufo/network.onnx"             : "BTagging_network_09c2dddf15bf",
     "BTagging/20250310/GN2XTauV00/antikt10ufo/network.onnx"          : "BTagging_network_e8d5e9a3059b",
@@ -403,7 +402,6 @@ def getDependencySet(tagger_name: str, override: set[str] | None = None) -> set[
     tagger_dep_dict: dict[str, set[str]] = {
         # Small-R jet taggers
         "GN2v01": {},
-        "GN3V00": {},
         "GN3MuonsV00": {"L"},
         "GN3PflowV00": {"P"},
         "GN3PflowMuonsV00": {"L"},

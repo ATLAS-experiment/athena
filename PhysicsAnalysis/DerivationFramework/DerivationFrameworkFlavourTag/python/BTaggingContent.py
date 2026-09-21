@@ -132,11 +132,6 @@ def BTaggingStandardContent(flags: AthConfigFlags, jetcol: str) -> list[str]:
 
     if not _is_run4(flags):
         btagging_aux += _get_small_r_discriminant_vars(
-            name="GN3V00",
-            extra_flavours=["tau"],
-            flip_modes=["SimpleFlip"],
-        )
-        btagging_aux += _get_small_r_discriminant_vars(
             name="GN3PflowMuonsV00",
             extra_flavours=["tau", "ud", "g", "s", "quark"],
             flip_modes=["SimpleFlip"],
