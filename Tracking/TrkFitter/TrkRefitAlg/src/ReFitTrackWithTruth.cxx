@@ -173,7 +173,7 @@ StatusCode Trk::ReFitTrackWithTruth::execute(const EventContext& ctx)
     // copy from DenseEnvironmentsAmbiguityProcessorTool.cxx
     ElementLink<TrackCollection> tracklink;
     tracklink.setElement(const_cast<Trk::Track*>(*itr));
-    tracklink.setStorableObject(*tracks);
+    tracklink.setStorableObject(*tracks, ctx);
     const ElementLink<TrackCollection> tracklink2=tracklink;
 
     TrackTruthCollection::const_iterator found = truthMap->find(tracklink2);
