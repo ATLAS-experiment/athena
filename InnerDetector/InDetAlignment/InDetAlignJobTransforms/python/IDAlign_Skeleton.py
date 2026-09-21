@@ -7,15 +7,62 @@ import contextlib
 import re
 import os
 
+from AthenaCommon.Logging import logging
+
+msg = logging.getLogger('MetaReader')
+
+
 from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, processPostExec, processPostInclude
+import PyJobTransforms.trfArgClasses as trfArgClasses
+from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags, defaultTestFiles
 
 from AthenaCommon.Logging import logging
-msg = logging.getLogger('IDAlign')
+
+from AthenaConfiguration.Enums import Format, LHCPeriod
 
 # force no legacy job properties
 from AthenaCommon import JobProperties
 import AthenaCommon.Constants
 JobProperties.jobPropertiesDisallowed = True
+
+
+def commonFlagsConfig(runArgs, flags):
+    ## Disable all non-track related flag parameter
+    from InDetConfig.ConfigurationHelpers import OnlyTrackingPreInclude
+    OnlyTrackingPreInclude(flags)
+
+    flags.Exec.MaxEvents = runArgs.maxEvents if not runArgs.solve else 1
+
+    flags.IOVDb.GlobalTag = runArgs.globalTag
+
+    if not flags.Input.isMC and runArgs.isCosmics:
+        from AthenaConfiguration.Enums import BeamType
+        
+        flags.Beam.NumberOfCollisions = 0
+        flags.Beam.Type = BeamType.Cosmics
+        flags.Beam.Energy = 0.
+        flags.Beam.BunchSpacing = 50
+
+    if runArgs.isHeavyIon:
+        flags.Beam.BunchSpacing = 50
+        flags.Reco.EnableHI = True
+        flags.HeavyIon.doGlobal = True
+        
+    else:
+        flags.Beam.BunchSpacing = 25
+                
+    if not runArgs.isBFieldOff:
+        flags.BField.solenoidOn = True
+        flags.BField.barrelToroidOn = True
+        flags.BField.endcapToroidOn = True
+            
+    else:
+        flags.BField.solenoidOn = False
+        flags.BField.barrelToroidOn = False
+        flags.BField.endcapToroidOn = False
+
+    return flags
+
 
 def getT0SolveDB(runArgs):
     # Check which file to use to extract metadata
@@ -62,9 +109,31 @@ def getT0SolveDB(runArgs):
     
     return latestLocalDataBase
 
-def configureFlags(runArgs):
-    from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    flags = initConfigFlags()
+
+def configureInDetFlags(runArgs, flags):
+
+    ## Detector defaults
+    if getattr(runArgs, "atlasVersion", None) is None:
+        runArgs.atlasVersion = defaultGeometryTags.RUN3
+    
+    flags.GeoModel.AtlasVersion = runArgs.atlasVersion    
+
+    if getattr(runArgs, "inputTracksCollection", None) is None:
+        runArgs.inputTracksCollection = "CombinedInDetTracks"
+
+    if getattr(runArgs, "globalTag", None) is None:
+        isMC = getattr(flags.Input, "isMC", None) 
+
+        if isMC:
+            msg.warn("Running Align_tf on Run2/3 RDOs is not yet supported. Please use RAW input files for pre-HL-LHC geometries.")
+    
+        runArgs.globalTag = (
+            defaultConditionsTags.RUN3_MC
+            if isMC
+            else defaultConditionsTags.RUN3_DATA
+        )
+
+    flags = commonFlagsConfig(runArgs, flags)
 
     ## Turn off ID parts if wished (may cause conflicts with level setting)
     for IDpart in runArgs.excludeIDPart:
@@ -115,16 +184,11 @@ def configureFlags(runArgs):
     else:
         raise Exception(f"No valid alignment level has been selected: '{runArgs.alignLevel}'")
 
-    ## Disable all non-track related flag parameter
-    from InDetConfig.ConfigurationHelpers import OnlyTrackingPreInclude
-    OnlyTrackingPreInclude(flags)
-
     ## Update flags based on parser line args
     flags.InDet.Align.accumulate = runArgs.accumulate
     flags.InDet.Align.baseDir = os.path.abspath(runArgs.baseDir)
     flags.InDet.Align.inputTracksCollection = runArgs.inputTracksCollection
-    flags.Input.Files = [os.path.abspath(inputFile) for inputFile in runArgs.inputRAWFile]
-    
+
     if runArgs.accumulate:
         if hasattr(runArgs, "outputTFile"):
             flags.InDet.Align.outputTFile = runArgs.outputTFile
@@ -137,41 +201,10 @@ def configureFlags(runArgs):
         flags.InDet.Align.inputTFiles = [os.path.abspath(inputTFile) for inputTFile in runArgs.inputTFile]
         flags.InDet.Align.outputConditionFile = f"{flags.InDet.Align.baseDir}/Solve/{runArgs.outputConditionFile}"
         flags.IOVDb.DBConnection = f"sqlite://;schema={flags.InDet.Align.baseDir}/Solve/{runArgs.outputDBFile};dbname=CONDBR2"
-
-    flags.Exec.MaxEvents = runArgs.maxEvents if not runArgs.solve else 1
+        
     flags.Exec.SkipEvents = runArgs.skipEvents if hasattr(runArgs, "skipEvents") else 0   
     flags.Exec.OutputLevel = getattr(AthenaCommon.Constants, runArgs.logLevel)
     flags.Exec.FPE = -2
-    flags.IOVDb.GlobalTag = runArgs.globalTag
-        
-    flags.GeoModel.Align.Dynamic = True
-    flags.GeoModel.AtlasVersion = runArgs.atlasVersion
-
-    if not flags.Input.isMC and runArgs.isCosmics:
-        from AthenaConfiguration.Enums import BeamType
-        
-        flags.Beam.NumberOfCollisions = 0
-        flags.Beam.Type = BeamType.Cosmics
-        flags.Beam.Energy = 0.
-        flags.Beam.BunchSpacing = 50
-
-    if runArgs.isHeavyIon:
-        flags.Beam.BunchSpacing = 50
-        flags.Reco.EnableHI = True
-        flags.HeavyIon.doGlobal = True
-          
-    else:
-        flags.Beam.BunchSpacing = 25
-                
-    if not runArgs.isBFieldOff:
-        flags.BField.solenoidOn = True
-        flags.BField.barrelToroidOn = True
-        flags.BField.endcapToroidOn = True
-            
-    else:
-        flags.BField.solenoidOn = False
-        flags.BField.barrelToroidOn = False
-        flags.BField.endcapToroidOn = False
 
     # process pre-include/exec
     processPreInclude(runArgs, flags)
@@ -184,16 +217,148 @@ def configureFlags(runArgs):
     flags.lock()
 
     return flags
+
+
+
+def configureITkFlags(runArgs, flags):
+
+    ## Detector defaults
+    if getattr(runArgs, "atlasVersion", None) is None:
+        runArgs.atlasVersion = defaultGeometryTags.RUN4
+    
+    flags.GeoModel.AtlasVersion = runArgs.atlasVersion   
+
+    if getattr(runArgs, "inputTracksCollection", None) is None:
+        runArgs.inputTracksCollection = "CombinedITkTracks"
+
+    if getattr(runArgs, "globalTag", None) is None:
+        runArgs.globalTag = defaultConditionsTags.RUN4_MC
+
+    
+    flags = commonFlagsConfig(runArgs, flags)
+
+    ## Update flags based on parser line args
+    flags.ITk.Align.accumulate = runArgs.accumulate
+    flags.ITk.Align.baseDir = os.path.abspath(runArgs.baseDir)
+
+
+    alignITk = getattr(runArgs, "alignITk", False)
+    alignITkPixel = getattr(runArgs, "alignITkPixel", False)
+    alignITkStrip = getattr(runArgs, "alignITkStrip", False)
+
+
+    flags.ITk.Align.alignITk = (
+        alignITk or
+        (not alignITk and not alignITkPixel and not alignITkStrip)
+    )
+    flags.ITk.Align.alignITkPixel = alignITkPixel or flags.ITk.Align.alignITk
+    flags.ITk.Align.alignITkStrip = alignITkStrip or flags.ITk.Align.alignITk
+
+    flags.addFlag("ConstrainedTrackProvider.InputTracksCollection", runArgs.inputTracksCollection)
+
+    flags.ITk.Align.writeSilicon = False
+
+    if runArgs.solve:
+        flags.ITk.Align.inputTFiles = os.path.basename(runArgs.inputTFile[0])
+    else:
+        flags.ITk.Align.inputTFiles = []
+
+
+
+    if runArgs.localgeo:
+        flags.ITk.Geometry.AllLocal = True      
+
+
+    if hasattr(runArgs, "localDB") and runArgs.localDB:
+        flags.ITk.Align.useLocalDatabase = True
+        DBFile = runArgs.localDB
+        flags.IOVDb.DBConnection = f"sqlite://;schema={runArgs.localDB};dbname=OFLCOND"
+        flags.ITk.Geometry.alignmentFolder = "/Indet/AlignITk"
+
+
+    if flags.ITk.Align.alignITkPixel:
+        flags.ITk.Geometry.pixelAlignable = True
+
+    if flags.ITk.Align.alignITkStrip:
+        flags.ITk.Geometry.stripAlignable = True
+
+    if runArgs.threads > 0:
+        flags.Concurrency.NumThreads = runArgs.threads
+
+    # Lock flags
+    flags.lock()
+
+    return flags
+
     
 
-def fromRunArgs(runArgs):
-    flags = configureFlags(runArgs)
+def fromRunArgsITk(runArgs, flags):
+
+    DBName="OFLCOND"
+    tag="InDetSi_MisalignmentMode_random misalignment"
+
+    from RecJobTransforms.RecoSteering import RecoSteering
+    cfg = RecoSteering(flags)
+
+    if flags.ITk.Align.useLocalDatabase:
+        from IOVDbSvc.IOVDbSvcConfig import addFolders, getSqliteContent
+
+        acc = addFolders(
+            flags,
+            flags.ITk.Geometry.alignmentFolder,
+            db=DBName,
+            detDb=runArgs.localDB,
+            tag=tag,
+            className="AlignableTransformContainer"
+        )
+
+        cfg.merge(acc)
+
+
+    from MuonConfig.MuonGeometryConfig import MuonIdHelperSvcCfg
+    cfg.getPrimaryAndMerge(MuonIdHelperSvcCfg(flags))
+
+
+    ## Accumulate step
+    if runArgs.accumulate and not runArgs.solve:
+        os.makedirs(f"{flags.ITk.Align.baseDir}/Accumulate", exist_ok = True)
+        os.chdir(f"{flags.ITk.Align.baseDir}/Accumulate")
+        from InDetAlignConfig.AccumulateITkConfig import ITkAccumulateCfg
+        cfg.merge(ITkAccumulateCfg(flags))
+
+
+    ## Solve step
+    elif runArgs.solve and not runArgs.accumulate:
+        os.makedirs(f"{flags.ITk.Align.baseDir}/Solve", exist_ok = True)
+        os.chdir(f"{flags.ITk.Align.baseDir}/Solve")
+        from InDetAlignConfig.SolveITkConfig import ITkSolveCfg
+        cfg.merge(ITkSolveCfg(flags))
+        
+    else:
+        raise Exception("You can run either the acculumation step or the solve step, but not both or neither at the same time!")
+
+    ##----- Run the setup -----##
+
+                
+    if runArgs.dryRun:
+        cfg.printConfig()
+    
+    else:
+        cfg.run()
+
+
+def fromRunArgsInDet(runArgs, flags):
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     cfg = MainServicesCfg(flags)
 
-    from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-    cfg.merge(ByteStreamReadCfg(flags))
+    if flags.Input.Format is Format.BS:
+        from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
+        cfg.merge(ByteStreamReadCfg(flags))
+
+    elif flags.Input.Format is Format.POOL:
+        from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+        cfg.merge(PoolReadCfg(flags))
 
     ## Reconstruction related cfg
     with open(os.devnull, 'w') as f, contextlib.redirect_stdout(f):
@@ -216,7 +381,7 @@ def fromRunArgs(runArgs):
                
     else:
         raise Exception("You can run either the acculumation step or the solve step, but not both or neither at the same time!")
-            
+
     ## Update condition database (Needs to be done last)
     from InDetAlignConfig.IDAlignConditionConfig import UpdateTagsCfg
     cfg.merge(UpdateTagsCfg(flags))
@@ -254,3 +419,33 @@ def fromRunArgs(runArgs):
         
     import sys
     sys.exit(sc.isFailure())
+
+
+def isITkGeometry(flags):
+    return flags.GeoModel.Run > LHCPeriod.Run3
+
+
+def fromRunArgs(runArgs):
+
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+
+    # Check if the input file is RDO 
+    # If not, RAW file is set as default
+    if hasattr(runArgs, "inputRDOFile"):
+        flags.Input.Files = [os.path.abspath(inputFile) for inputFile in runArgs.inputRDOFile]
+    else:
+        flags.Input.Files = [os.path.abspath(inputFile) for inputFile in runArgs.inputRAWFile]
+
+    # Configure flags based on the detector geometry
+    if isITkGeometry(flags):
+        msg = logging.getLogger('ITkAlign')
+        flags.GeoModel.Align.Dynamic = False
+        flags = configureITkFlags(runArgs, flags)
+        return fromRunArgsITk(runArgs, flags)
+    else:
+        msg = logging.getLogger('IDAlign')
+        flags.GeoModel.Align.Dynamic = True
+        flags = configureInDetFlags(runArgs, flags)
+        return fromRunArgsInDet(runArgs, flags)
+    

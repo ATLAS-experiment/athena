@@ -44,6 +44,7 @@ def createGeoModelConfigFlags(analysis=False):
 
     def _deduce_LHCPeriod(prevFlags):
         if prevFlags.GeoModel.AtlasVersion:
+            print("prevFlags Atlas version: ", LHCPeriod(DetDescrInfo(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB,prevFlags.GeoModel.SQLiteDBFullPath)['Common']['Run']))
             return LHCPeriod(DetDescrInfo(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB,prevFlags.GeoModel.SQLiteDBFullPath)['Common']['Run'])
 
         if prevFlags.Input.isMC:

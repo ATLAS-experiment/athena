@@ -24,6 +24,10 @@ from InDetAlignJobTransforms.IDAlignTransformUtils import addIDAlignArguments
 def main():
     trf = getTransform()
     trf.parseCmdLineArgs(sys.argv[1:])
+    print("print parser arguments: ")
+    print(trf.parser.parse_args(sys.argv[1:]))
+
+
 
     # Just add a note here that this is the place to insert extra checks or manipulations
     # after the arguments are known, but before the transform tries to trace the graph
@@ -45,6 +49,7 @@ def getTransform():
     trf = transform(executor = executorSet, description = 'Running the ID alignment using refitted tracks reconstructed from RAW files. Either accumulation step (track refitting, calculating derivates) or solve step (matrix inversion + constant update) can be run.')
     
     addAthenaArguments(trf.parser)
+    print("about to add the parser")
     addIDAlignArguments(trf.parser)
 
     return trf

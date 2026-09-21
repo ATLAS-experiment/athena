@@ -236,6 +236,7 @@ void InDetAlignWrt::doOutput() {
       if (m_par_wrtiov)
   p_iddbtool->fillDB(m_par_iovtag,m_par_run1,m_par_evt1,m_par_run2,m_par_evt2);
     } else {
+      std::cout << "AlignWrt.cxx 239" << std::endl;
       p_iddbtool->writeFile(m_par_ntuple,m_par_wfile);
     }
   }
@@ -276,9 +277,11 @@ void InDetAlignWrt::doMigration() {
   ATH_MSG_DEBUG( "Convert Pixel/SCT alignment from old to new format");
   // create new format database
   p_migratetool->createDB();
+  std::cout << "AlignWrt.cxx 280" << std::endl;
   // copy data from old to new database via temporary file
   p_iddbtool->writeFile(false,"migrate.dat");
   p_migratetool->readTextFile("migrate.dat");
+  std::cout << "AlignWrt.cxx 282" << std::endl;
   p_migratetool->writeFile(false,"migrate.check");
   // write data to POOL file and optionally IOV
   if (StatusCode::SUCCESS!=p_migratetool->outputObjs())

@@ -378,12 +378,25 @@ bool InDetAlignDBTool::idToDetSet(const Identifier ident, int& det, int& bec,
   bool resok=false;
   if (m_pixman && m_pixid->is_pixel(ident)) {
     det=1;
+    std::cout << "ident = " << ident.get_compact() << std::endl;
+    std::cout << "show = " << m_pixid->show_to_string(ident) << std::endl;
+
+    
     bec=m_pixid->barrel_ec(ident)/2;
+    std::cout << "bec : " << bec << std::endl;
+
     layer=m_pixid->layer_disk(ident);
+    std::cout << "layer: " << layer << std::endl;
+
     ring=m_pixid->eta_module(ident);
+    std::cout << "ring: " << ring << std::endl;
+
     sector=m_pixid->phi_module(ident);
+    std::cout << "sector: " << sector << std::endl;
+
     side=0;
     resok=true;
+
   } else if (m_sctman && m_sctid->is_sct(ident)) {
     det=2;
     bec=m_sctid->barrel_ec(ident)/2;
@@ -657,10 +670,18 @@ void InDetAlignDBTool::writeFile(const bool ntuple, const std::string& file)
   }
   int nobj=0;
   int ntrans=0;
-  for (std::vector<std::string>::const_iterator iobj=m_alignobjs.begin();
-       iobj!=m_alignobjs.end();++iobj) {
+
+  // For debugging
+  for (const auto& obj : m_alignobjs) {
+    ATH_MSG_INFO("Alignment object: " << obj);
+  }
+
+  for (std::vector<std::string>::const_iterator iobj=m_alignobjs.begin(); iobj!=m_alignobjs.end();++iobj) {
     const AlignableTransform* pat;
+    std::cout << "key: " << *iobj << std::endl;
+    std::cout << (pat=cgetTransPtr(*iobj)) << std::endl;
     if ((pat=cgetTransPtr(*iobj))) {
+      std::cout << "enter the if at 665" << std::endl;
       ++nobj;
       if (!ntuple) *outfile << *iobj << '\n';
       for (AlignableTransform::AlignTransMem_citr cit=pat->begin();
@@ -723,6 +744,7 @@ void InDetAlignDBTool::writeFile(const bool ntuple, const std::string& file)
             << *iobj << " when writing output file");
         }
       }
+      std::cout<< "arrives at end of for statement" << std::endl;
     } else {
       ATH_MSG_ERROR("Cannot find AlignableTransform for key "
             << *iobj << " when writing output file");
@@ -1054,12 +1076,38 @@ bool InDetAlignDBTool::tweakTrans(const Identifier& ident, const int level,
     std::string key=dirkey(ident,level);
     const AlignableTransform* pat;
     AlignableTransform* pat2;
+
+    std::cout << "m_pixid = " << m_pixid << std::endl;
+    std::cout << "m_sctid = " << m_sctid << std::endl;
+    std::cout << "ident: " << ident << std::endl;
+
+    if (m_pixid && m_pixid->is_pixel(ident)) {
+        std::cout << "is pixel = " << std::endl;
+        std::cout << m_pixid->show_to_string(ident) << std::endl;
+    }
+    else if (m_sctid && m_sctid->is_sct(ident)) {
+        std::cout << "is sct = "<< std::endl;
+        std::cout << m_sctid->show_to_string(ident) << std::endl;
+        std::cout << "passed sctid = "<< std::endl;
+    }
+    else {
+        std::cout << "Unknown identifier type" << std::endl;
+    }
+
     if ((pat=cgetTransPtr(key))) {
+      std::cout << "pat=cgetTransPtr(key)" << std::endl;
       pat2=const_cast<AlignableTransform*>(pat);
       if (pat2!=nullptr) {
-	result=pat2->tweak(ident,Amg::EigenTransformToCLHEP(trans));
-      if (!result) ATH_MSG_ERROR(
-				 "Attempt to tweak non-existent transform for element "<<m_pixid->show_to_string(ident));
+        std::cout << "pat2!=nullptr" << std::endl;
+	      result=pat2->tweak(ident,Amg::EigenTransformToCLHEP(trans));
+        if (!result) { 
+          std::cout << "!result" << std::endl;
+          if (m_pixid && m_pixid->is_pixel(ident)){
+            ATH_MSG_ERROR("Attempt to tweak non-existent transform for element "<<m_pixid->show_to_string(ident));
+          } else if (m_sctid && m_sctid->is_sct(ident)) {
+            ATH_MSG_ERROR("Attempt to tweak non-existent transform for element "<<m_sctid->show_to_string(ident));
+          }
+        }
       } else {
 	ATH_MSG_ERROR("tweakTrans: cast fails for key " << key );
       }
