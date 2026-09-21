@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**************************************************************************
@@ -195,10 +195,11 @@ StatusCode TrigDecisionMaker::execute(const EventContext& ctx) const
   trigDec->m_configMasterKey = hltMenu->smk();
 
   if (l1Result) trigDec->m_l1_result = *l1Result;
-  if (l2Result) trigDec->m_l2_result = *l2Result;
-  if (efResult) trigDec->m_ef_result = *efResult;
+  if (l2Result) trigDec->m_l2_result.toStorableObject (*l2Result, ctx);
+  if (efResult) trigDec->m_ef_result.toStorableObject (*efResult, ctx);
   if (hltResult){
-    trigDec->m_ef_result = *hltResult;//store the merged result into ef_result to propagate with getEFResult
+    //store the merged result into ef_result to propagate with getEFResult
+    trigDec->m_ef_result.toStorableObject (*hltResult, ctx);
   }
 
   // get the bunch crossing id
