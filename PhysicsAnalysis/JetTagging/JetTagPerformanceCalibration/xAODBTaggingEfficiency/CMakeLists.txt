@@ -19,16 +19,9 @@ atlas_add_library( xAODBTaggingEfficiencyLib
   PATCoreLib PATInterfaces CalibrationDataInterfaceLib PathResolver FTagAnalysisInterfacesLib ${extra_libs} )
 
 
-if( NOT XAOD_STANDALONE )
-   atlas_add_component( xAODBTaggingEfficiency
-      src/*.h src/*.cxx src/components/*.cxx
-      LINK_LIBRARIES xAODJet CalibrationDataInterfaceLib AthenaBaseComps
-      GaudiKernel PathResolver xAODBTaggingEfficiencyLib FTagAnalysisInterfacesLib )
-else()
-   atlas_add_component( xAODBTaggingEfficiency
-      src/components/*.cxx
-      LINK_LIBRARIES xAODBTaggingEfficiencyLib )
-endif()
+atlas_add_component( xAODBTaggingEfficiency
+   src/components/*.cxx
+   LINK_LIBRARIES xAODBTaggingEfficiencyLib )
 
 atlas_add_dictionary( xAODBTaggingEfficiencyDict
   xAODBTaggingEfficiency/xAODBTaggingEfficiencyDict.h

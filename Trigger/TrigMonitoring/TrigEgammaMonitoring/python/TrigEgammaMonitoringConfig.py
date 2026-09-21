@@ -675,9 +675,9 @@ class TrigEgammaMonAlgBuilder:
     monGroup = self.addGroup( monAlg, analysis, self.basePath+'/Expert/Event/'+analysis )
 
     if tap:
-      cutLabels = ["Events","LAr","RetrieveElectrons","TwoElectrons","PassMinimalTrigger", "PassFullTrigger"]
+      cutLabels = ["Events","LAr","RetrieveElectrons","RetrievePhotons","TwoElectrons","PassMinimalTrigger", "PassFullTrigger"]
       tagLabels=["Electrons","NotTag","OS","SS","ZMass","HasTrack","HasCluster","Eta","Et","IsGoodOQ","GoodPid","NearbyJet","Isolated","GoodProbe","PassTrigger","MatchTrigger"]
-      probeLabels=["Photons","HasCluster","EtCut","Eta","IsGoodOQ","NearbyJet","ZMass","GoodProbe","","PassTrigger","Et22","Et25","Et35","Et50"]
+      probeLabels=["Electrons","Photons","HasTrack","HasCluster","EtCut","Eta","IsGoodOQ","NearbyJet","ZMass","GoodProbe","GoodPid","","PassTrigger","Et22","Et25","Et35","Et50","NotTag","OS","SS"]
       #We need to add in the photons for the probe 
       #We also need to add in the photon selection (Is it a good photon)
 

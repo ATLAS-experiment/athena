@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-/*
- */
 /**
  * @file TileRecUtils/src/TileRawChannelDumper.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -13,7 +11,6 @@
 
 #include "TileRawChannelDumper.h"
 #include "StoreGate/ReadHandle.h"
-#include <format>
 #include <fstream>
 
 
@@ -52,11 +49,11 @@ StatusCode TileRawChannelDumper::execute (const EventContext& ctx) const
     *altCont;
   }
 
-  std::string fname = std::format("{}{}_ {:08d}_{:08d}.dump",
-                                  m_prefix.value(),
-                                  m_contKey.key(),
-                                  ctx.eventID().run_number(),
-                                  ctx.eventID().event_number());
+  std::string fname = std::format ("{}{}_{:08}_{:08}.dump",
+                                   m_prefix.value().c_str(),
+                                   m_contKey.key().c_str(),
+                                   ctx.eventID().run_number(),
+                                   ctx.eventID().event_number());
   std::ofstream fout (fname);
   if (!fout) {
     ATH_MSG_ERROR ("Cannot open dump file: " << fname);

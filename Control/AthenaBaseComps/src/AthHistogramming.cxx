@@ -84,9 +84,7 @@ TH1* AthHistogramming::bookGetPointer( TH1& histRef, std::string tDir, std::stri
 {
   std::string histName(histRef.GetName());
   const std::string histTitle(histRef.GetTitle());
-  std::string bookingString;
-
-  this->buildBookingString(bookingString, histName, tDir, stream);
+  std::string bookingString = buildBookingString(histName, tDir, stream);
 
   const std::string finalHistName = m_histNamePrefix + histName + m_histNamePostfix;
 
@@ -124,8 +122,7 @@ AthHistogramming::bookGetPointer(TEfficiency& effRef, std::string tDir, std::str
 {
   std::string effName(effRef.GetName());
   const std::string effTitle(effRef.GetTitle());
-  std::string bookingString;
-  this->buildBookingString(bookingString, effName, tDir, stream);
+  std::string bookingString = buildBookingString(effName, tDir, stream);
   const std::string finalEffName = m_histNamePrefix + effName + m_histNamePostfix;
   effRef.SetTitle((m_histTitlePrefix + effTitle + m_histTitlePostfix).c_str());
   effRef.SetName(finalEffName.c_str());
@@ -161,16 +158,15 @@ AthHistogramming::bookGetPointer(TEfficiency& effRef, std::string tDir, std::str
 // Simplify the retrieval of registered histograms of any type
 // =============================================================================
 TH1*
-AthHistogramming::hist(const std::string& histName,
+AthHistogramming::hist(std::string_view histName,
                        const std::string& tDir,
                        const std::string& stream)
 {
-  std::string histNameCopy = histName;
+  std::string histNameCopy{histName};
   std::string tDirCopy     = tDir;
   std::string streamCopy   = stream;
 
-  std::string bookingString;
-  this->buildBookingString(bookingString, histNameCopy, tDirCopy, streamCopy, false);
+  std::string bookingString = buildBookingString(histNameCopy, tDirCopy, streamCopy, false);
 
   const hash_t histHash = this->hash(histNameCopy);
 
@@ -179,13 +175,11 @@ AthHistogramming::hist(const std::string& histName,
     TH1* histPointer(nullptr);
 
     if (!histSvc()->getHist(bookingString, histPointer).isSuccess()) {
-      std::string prefixedHistNameCopy = histName;
+      std::string prefixedHistNameCopy{histName};
       std::string prefixedTDirCopy     = tDir;
       std::string prefixedStreamCopy   = stream;
 
-      std::string prefixedBookingString;
-      this->buildBookingString(prefixedBookingString,
-                               prefixedHistNameCopy,
+      std::string prefixedBookingString = buildBookingString(prefixedHistNameCopy,
                                prefixedTDirCopy,
                                prefixedStreamCopy,
                                true);
@@ -224,15 +218,13 @@ TEfficiency* AthHistogramming::efficiency( const std::string& effName, const std
       std::string streamCopy   = stream;
 
       // Massage the final string to book things
-      std::string bookingString("");
-      this->buildBookingString( bookingString, effNameCopy, tDirCopy, streamCopy ,false);
+      std::string bookingString = buildBookingString(effNameCopy, tDirCopy, streamCopy ,false);
 
       TEfficiency* effPointer(NULL);
       if ( !((histSvc()->getEfficiency(bookingString, effPointer)).isSuccess()) )
         {
           // Massage the final string to book things
-          std::string bookingString("");
-          this->buildBookingString( bookingString, effNameCopy, tDirCopy, streamCopy, true );
+          std::string bookingString = buildBookingString( effNameCopy, tDirCopy, streamCopy, true );
 
           if ( !((histSvc()->getEfficiency(bookingString, effPointer)).isSuccess()) )
             {
@@ -312,8 +304,7 @@ TTree* AthHistogramming::bookGetPointer( const TTree& treeRef, std::string tDir,
   treeClone->SetTitle (treeTitle.c_str());
 
   // Massage the final string to book things
-  std::string bookingString("");
-  this->buildBookingString( bookingString, treeName, tDir, stream );
+  std::string bookingString = buildBookingString( treeName, tDir, stream );
 
   // Register the TTree into the THistSvc
   if ( !((histSvc()->regTree(bookingString, treeClone)).isSuccess()) )
@@ -352,8 +343,7 @@ TTree* AthHistogramming::tree( const std::string& treeName, const std::string& t
       std::string streamCopy   = stream;
 
       // Massage the final string to book things
-      std::string bookingString("");
-      this->buildBookingString( bookingString, treeNameCopy, tDirCopy, streamCopy );
+      std::string bookingString = buildBookingString( treeNameCopy, tDirCopy, streamCopy );
 
       TTree* treePointer(NULL);
       if ( !((histSvc()->getTree(bookingString, treePointer)).isSuccess()) )
@@ -427,8 +417,7 @@ TGraph* AthHistogramming::bookGetPointer( const TGraph& graphRef, std::string tD
   graphClone->SetTitle ((m_histTitlePrefix+graphTitle+m_histTitlePostfix).c_str());
 
   // Massage the final string to book things
-  std::string bookingString("");
-  this->buildBookingString( bookingString, graphName, tDir, stream );
+  std::string bookingString = buildBookingString( graphName, tDir, stream );
 
   // Register the TGraph into the THistSvc
   if ( !((histSvc()->regGraph(bookingString, graphClone)).isSuccess()) )
@@ -466,15 +455,13 @@ TGraph* AthHistogramming::graph( const std::string& graphName, const std::string
       std::string streamCopy    = stream;
 
       // Massage the final string to book things
-      std::string bookingString("");
-      this->buildBookingString( bookingString, graphNameCopy, tDirCopy, streamCopy, false);
+      std::string bookingString = buildBookingString( graphNameCopy, tDirCopy, streamCopy, false);
 
       TGraph* graphPointer(nullptr);
       if ( !((histSvc()->getGraph(bookingString, graphPointer)).isSuccess()) )
         {
           // Massage the final string to book things
-          std::string bookingString("");
-          this->buildBookingString( bookingString, graphNameCopy, tDirCopy, streamCopy, true );
+          std::string bookingString = buildBookingString( graphNameCopy, tDirCopy, streamCopy, true );
 
           if ( !((histSvc()->getGraph(bookingString, graphPointer)).isSuccess()) )
             {
@@ -518,12 +505,11 @@ TGraph* AthHistogramming::graph( const std::string& graphName, const std::string
 // =============================================================================
 // Helper method to build the final string to be passed to the THistSvc
 // =============================================================================
-void AthHistogramming::buildBookingString( std::string& bookingString,
-                                           std::string& histName,
-                                           std::string& tDir,
-                                           std::string& stream,
-					   bool usePrefixPostfix)
+std::string
+AthHistogramming::buildBookingString( std::string& histName, std::string& tDir,
+  std::string& stream, bool usePrefixPostfix)
 {
+  std::string bookingString;
   // Massage the final string to book things
   if(tDir.empty()) tDir = m_rootDir;
   size_t pos = histName.rfind('/');
@@ -543,7 +529,7 @@ void AthHistogramming::buildBookingString( std::string& bookingString,
     this->myReplace(bookingString,"//","/");
   }
 
-  return;
+  return bookingString;
 }
 
 

@@ -358,7 +358,6 @@ def ActsTrackFindingGNNCfg(flags, **kwargs) -> ComponentAccumulator:
 
     kwargs.setdefault("varianceInflation", flags.Acts.GNN.VarianceInflation)
     kwargs.setdefault("tightSeeds", flags.Acts.GNN.TightSeeds)
-    kwargs.setdefault("minDeltaR", flags.Acts.GNN.MinDeltaR)
     kwargs.setdefault("relaxCentralHoleSel", flags.Acts.GNN.RelaxCentralHoleSel)
     kwargs.setdefault("relaxMeasurementSel", flags.Acts.GNN.RelaxMeasurementSel)
     kwargs.setdefault("offlineZ0Sel", flags.Acts.GNN.OfflineZ0Sel)

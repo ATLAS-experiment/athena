@@ -39,14 +39,20 @@ namespace pool {
     /// Destructor
     virtual ~UserDatabase();
 
-    /// Returns the database handler
-    DatabaseHandler& databaseHandler();
-
     /// Connects explicitly to the database for read operations
     virtual void connectForRead() override;
 
+    /// Reads an object given a token
+    void* readObject( const Token& token, void* object = 0 );
+
     /// Connects explicitly to the database for write/update operations
     virtual void connectForWrite() override;
+
+    /// Writes an object and returns a token
+    Token* writeObject( const std::string& containerName,
+                        long minorTechnology,
+                        const void* object,
+                        const RootType& type );
 
     /// Disconnects from the database
     virtual void disconnect() override;

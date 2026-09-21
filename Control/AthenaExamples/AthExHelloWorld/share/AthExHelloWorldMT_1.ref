@@ -1,6 +1,6 @@
 AthenaHiveEventLoopMgr                                            INFO Initializing AthenaHiveEventLoopMgr
 HelloWorld                                                   0    INFO   MyInt =    1
-HelloWorld                                                   0    INFO   MyBool =   1
+HelloWorld                                                   0    INFO   MyBool =   true
 HelloWorld                                                   0    INFO   MyDouble = 3.14159
 HelloWorld                                                   0    INFO   MyStringVec[0] = Welcome
 HelloWorld                                                   0    INFO   MyStringVec[1] = to

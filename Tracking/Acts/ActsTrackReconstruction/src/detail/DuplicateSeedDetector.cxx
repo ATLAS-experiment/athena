@@ -27,7 +27,7 @@ namespace ActsTrk::detail {
                                        const ActsTrk::SeedContainer &seeds,
                                        const MeasurementIndex& measurementIndex) {
     addSeeds(typeIndex, seeds, measurementIndex,
-             [](std::size_t) -> std::array<std::size_t, 3> { return {0, 1, 2}; },
+             [](const ActsTrk::SpacePointRange&, bool) -> std::array<std::size_t, 3> { return {0, 1, 2}; },
              [](const ActsTrk::Seed&) -> bool { return false; });
   }
 
@@ -47,7 +47,7 @@ namespace ActsTrk::detail {
       std::size_t nSP = 0;
       bool useTopSp = useTopSpFun(seed);
       const auto& sps = seed.sp();
-      for (std::size_t isp : spacePointIndicesFun(sps.size())) {
+      for (std::size_t isp : spacePointIndicesFun(sps, useTopSp)) {
         const xAOD::SpacePoint *sp = sps.at(useTopSp ? sps.size() - isp - 1 : isp);
         const std::vector<const xAOD::UncalibratedMeasurement *> &els = sp->measurements();
         for (const xAOD::UncalibratedMeasurement *meas : els) {

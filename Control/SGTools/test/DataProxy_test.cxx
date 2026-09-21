@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file DataProxy_test.cxx
@@ -487,17 +487,18 @@ void perftest1 (const int n)
   float t_storable = time_storable<TARGET> (n, *dbb_ptr, dp);
   float t_dp = time_proxy<TARGET> (n, dp);
   float t_acc = time_access (n, dp);
-  std::cout << std::format("{:>2} -> {:>2}  {:>6.2f}  {:>6.2f}  {:>6.2f}  {:>6.2f}  {:>6.2f}\n",
-                           ClassID_traits<SOURCE>::typeName(),
-                           ClassID_traits<TARGET>::typeName(),
-                           t_clid,  t_ti, t_storable, t_dp, t_acc);
+  std::cout << std::format
+    ("{:2} -> {:2}  {:6.2f} {:6.2f} {:6.2f} {:6.2f} {:6.2f}\n",
+     ClassID_traits<SOURCE>::typeName().c_str(),
+     ClassID_traits<TARGET>::typeName().c_str(),
+     t_clid,  t_ti, t_storable, t_dp, t_acc);
 }
 
 
 void perftest (const int n)
 {
-std::cout << std::format("{:>10}  {:>6}  {:>6}  {:>6}  {:>6}\n",
-                           "clid", "ti", "storab", "proxy", "acc");
+  std::cout << std::format ("          {:6}  {:6}  {:6}  {:6}  {:6}\n",
+                            "clid", "ti", "storab", "proxy", "acc");
 
   perftest1<X1, X1> (n);
   perftest1<X2, X1> (n);

@@ -9,6 +9,7 @@
 #include <format>
 #include <stdio.h>
 #include <string.h>
+#include <format>
 
 TrigMissingET::TrigMissingET(unsigned char n) :
   m_ex(0), m_ey(0), m_ez(0), m_sum_et(0), m_sum_e(0),
@@ -292,9 +293,9 @@ std::string str (const TrigMissingET& a){
   s += std::format("SumEt = {:10.2f} MeV\n", a.sumEt());
   s += std::format("SumE  = {:10.2f} MeV\n", a.sumE());
 
-  s += std::format("Event status = 0x{:08x}\n", static_cast<unsigned>(a.getFlag()));
+  s += std::format("Event status = {:#010x}\n", (unsigned)a.getFlag());
   unsigned int N = a.getNumOfComponents();
-  s += std::format("Auxiliary components = {:>4}\n", N);
+  s += std::format("Auxiliary components = {:4}\n", N);
 
   if (N==0) return s; // basic info only
 
@@ -304,18 +305,18 @@ std::string str (const TrigMissingET& a){
 
   for (unsigned int i=0; i<N; ++i){
     s += std::format(
-      "{:>10} 0x{:04x} {:>8d} {:>11d} {:>7.2f} {:>8.2f} {:>10.2f} {:>10.2f} {:>10.2f} {:>10.2f} {:>10.2f}\n",
-      a.getNameOfComponent(i),
-      static_cast<unsigned>(a.getStatus(i)),
-      a.getUsedChannels(i),
-      a.getSumOfSigns(i),
-      a.getComponentCalib1(i),
-      a.getComponentCalib0(i),
-      a.getExComponent(i),
-      a.getEyComponent(i),
-      a.getEzComponent(i),
-      a.getSumEComponent(i),
-      a.getSumEtComponent(i));
+                 "{:10} {:#06x} {:8} {:11} {:7.2f} {:8.2f} {:10.2f} {:10.2f} {:10.2f} {:10.2f} {:10.2f}\n",
+		 a.getNameOfComponent(i).c_str(), 
+		 (unsigned)a.getStatus(i),
+		 a.getUsedChannels(i),
+		 a.getSumOfSigns(i),
+		 a.getComponentCalib1(i),
+		 a.getComponentCalib0(i),
+		 a.getExComponent(i),
+		 a.getEyComponent(i),
+		 a.getEzComponent(i),
+		 a.getSumEComponent(i),
+		 a.getSumEtComponent(i));
   }
 
   return s;
@@ -374,7 +375,7 @@ void diff(const TrigMissingET& a, const TrigMissingET& b,
      variableChange[ "sumE" ] = aSumE - bSumE;
 
   for (unsigned u=0; u<a.getNumOfComponents(); ++u) {
-    std::string num = std::format("{:02d}", u);
+    std::string num = std::format("{:02}", u);
     std::string key;
 
     if( a.getNameOfComponent(u) != b.getNameOfComponent(u) ) {

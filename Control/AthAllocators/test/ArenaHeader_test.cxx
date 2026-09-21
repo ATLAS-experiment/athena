@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: ArenaHeader_test.cxx 470529 2011-11-24 23:54:22Z ssnyder $
 /**
  * @file AthAllocators/test/ArenaHeader_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -18,7 +16,8 @@
 #include "AthAllocators/ArenaBase.h"
 #include "CxxUtils/checker_macros.h"
 #include <cassert>
-#include <iostream>
+#include <print>
+#include <sstream>
 
 
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
@@ -62,7 +61,7 @@ class TestArena
 public:
   TestArena (std::string  name, int x) : m_name (std::move(name)), m_x (x) {}
   virtual void report (std::ostream& os) const override
-  { os << "foo " << m_x << "\n"; }
+  { std::println (os, "foo {}", m_x); }
   virtual const std::string& name() const override { return m_name; }
 private:
   std::string m_name;

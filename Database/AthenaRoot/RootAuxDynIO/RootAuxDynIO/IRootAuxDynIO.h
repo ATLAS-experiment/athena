@@ -14,8 +14,6 @@
 #include <mutex>
 #include <tuple>
 
-#include "RVersion.h"
-
 class TBranch;
 class TTree;
 class TFile;
@@ -47,13 +45,13 @@ namespace RootAuxDynIO
 
       virtual size_t getBytesRead() const = 0;
 
-      virtual void resetBytesRead() = 0; 
+      virtual void resetBytesRead() = 0;
 
       virtual ~IRootAuxDynReader() {}
    };
 
 
-   /// Interface for an AuxDyn Writer - TTree based 
+   /// Interface for an AuxDyn Writer - TTree based
    class IRootAuxDynWriter {
    public:
       virtual ~IRootAuxDynWriter() = default;
@@ -73,7 +71,7 @@ namespace RootAuxDynIO
       virtual void setBranchFillMode(bool) = 0;
    };
 
-   /// Interface for a RNTuple-based Writer that handles AuxDyn attributes 
+   /// Interface for a RNTuple-based Writer that handles AuxDyn attributes
    /// Works in conjuction with the generic writer
    class IRNTupleAuxDynWriter {
    public:
@@ -135,4 +133,3 @@ namespace RootAuxDynIO
 } // namespace
 
 #endif
-

@@ -103,10 +103,6 @@ private:
       this, "tightSeeds", false,
       "Use tight seeds instead of spread seeds for param estimation"};
 
-  Gaudi::Property<double> m_minDeltaR{
-      this, "minDeltaR", 10.0,
-      "Minimum difference in R to build the initial parameters"};
-
   Gaudi::Property<bool> m_relaxCentralHoleSel{
       this, "relaxCentralHoleSel", false, "Relax holes from 2 to 4 in central region"};
 

@@ -98,13 +98,13 @@ protected:
 
 
   ///Simplify the retrieval of registered histograms of any type
-  TH1* hist( const std::string&  histName, const std::string& tDir="", const std::string& stream="" );
+  TH1* hist( std::string_view  histName, const std::string& tDir="", const std::string& stream="" );
 
   ///Simplify the retrieval of registered 2-d histograms
-  inline TH2* hist2d( const std::string& histName, const std::string& tDir="", const std::string& stream="" );
+  inline TH2* hist2d( std::string_view histName, const std::string& tDir="", const std::string& stream="" );
 
   ///Simplify the retrieval of registered 3-d histograms
-  inline TH3* hist3d( const std::string& histName, const std::string& tDir="", const std::string& stream="" );
+  inline TH3* hist3d( std::string_view histName, const std::string& tDir="", const std::string& stream="" );
 
 
   // -----------------------
@@ -171,8 +171,7 @@ private:
   typedef uint32_t hash_t;
 
   /// Method to build individual booking string
-  void buildBookingString( std::string& bookingString,
-                           std::string& histName,
+  std::string buildBookingString( std::string& histName,
                            std::string& tDir,
                            std::string& stream,
 			   bool usePrefixPostfix = false);
@@ -368,7 +367,7 @@ inline StatusCode AthHistogramming::book( TEfficiency& effRef, const std::string
 
 
 // Simplify the retrieval of registered 2-d histograms
-inline TH2* AthHistogramming::hist2d( const std::string& histName, const std::string& tDir, const std::string& stream )
+inline TH2* AthHistogramming::hist2d( std::string_view histName, const std::string& tDir, const std::string& stream )
 {
   // Get the TH1 pointer
   TH1* th1Pointer = this->hist(histName, tDir, stream);
@@ -385,7 +384,7 @@ inline TH2* AthHistogramming::hist2d( const std::string& histName, const std::st
 
 
 // Simplify the retrieval of registered 3-d histograms
-inline TH3* AthHistogramming::hist3d( const std::string& histName, const std::string& tDir, const std::string& stream )
+inline TH3* AthHistogramming::hist3d( std::string_view histName, const std::string& tDir, const std::string& stream )
 {
   // Get the TH1 pointer
   TH1* th1Pointer = this->hist(histName, tDir, stream);
