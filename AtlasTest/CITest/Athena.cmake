@@ -311,7 +311,7 @@ atlas_add_citest( CPAlgorithmsRun3Data_PHYSLITE
 # Data Quality
 #################################################################################
 atlas_add_citest( GlobalMonitoring
-   SCRIPT GlobalMonitoring.py IOVDb.GlobalTag="CONDBR2-HLTP-2025-01" --offline  --evtMax 20 )
+   SCRIPT GlobalMonitoring.py IOVDb.GlobalTag="CONDBR2-HLTP-2026-02" --offline  --evtMax 20 )
 
 atlas_add_citest( DataQuality_Run3MC
    SCRIPT Run3DQTestingDriver.py 'Input.Files=["../RecoRun3MC/run_q454/myAOD.pool.root"]' DQ.Environment=AOD DQ.Steering.doHLTMon=False --threads=1
