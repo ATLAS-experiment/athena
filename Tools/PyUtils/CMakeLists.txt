@@ -80,10 +80,52 @@ else()
     if( NOT GENERATIONBASE AND NOT SIMULATIONBASE AND NOT XAOD_ANALYSIS )
         atlas_add_test( filter_files_raw_run3_data22
                         SCRIPT test/filter_files_raw_run3_data22.sh "${CMAKE_CURRENT_SOURCE_DIR}"
-                        POST_EXEC_SCRIPT noerror.sh
+                        LOG_SELECT_PATTERN "^[0-9]+ [0-9]+$"
+                        PRIVATE_WORKING_DIRECTORY
+                        PROPERTIES TIMEOUT 900 )
+
+        atlas_add_test( filter_files_raw_run2_data15
+                        SCRIPT test/filter_files_raw_run2_data15.sh "${CMAKE_CURRENT_SOURCE_DIR}"
+                        LOG_SELECT_PATTERN "^[0-9]+ [0-9]+$"
                         PRIVATE_WORKING_DIRECTORY
                         PROPERTIES TIMEOUT 900 )
     endif()
+
+    atlas_add_test( filter_files_aod_run2_data
+                    SCRIPT test/filter_files_aod_run2_data.sh "${CMAKE_CURRENT_SOURCE_DIR}"
+                    LOG_SELECT_PATTERN "^[0-9]+ [0-9]+$"
+                    PRIVATE_WORKING_DIRECTORY
+                    PROPERTIES TIMEOUT 900 )
+
+    atlas_add_test( filter_files_aod_run2_mc
+                    SCRIPT test/filter_files_aod_run2_mc.sh "${CMAKE_CURRENT_SOURCE_DIR}"
+                    LOG_SELECT_PATTERN "^[0-9]+ [0-9]+$"
+                    PRIVATE_WORKING_DIRECTORY
+                    PROPERTIES TIMEOUT 900 )
+
+    atlas_add_test( filter_files_aod_run3_data
+                    SCRIPT test/filter_files_aod_run3_data.sh "${CMAKE_CURRENT_SOURCE_DIR}"
+                    LOG_SELECT_PATTERN "^[0-9]+ [0-9]+$"
+                    PRIVATE_WORKING_DIRECTORY
+                    PROPERTIES TIMEOUT 900 )
+
+    atlas_add_test( filter_files_aod_run3_mc
+                    SCRIPT test/filter_files_aod_run3_mc.sh "${CMAKE_CURRENT_SOURCE_DIR}"
+                    LOG_SELECT_PATTERN "^[0-9]+ [0-9]+$"
+                    PRIVATE_WORKING_DIRECTORY
+                    PROPERTIES TIMEOUT 900 )
+
+    atlas_add_test( filter_files_esd_run3_mc
+                    SCRIPT test/filter_files_esd_run3_mc.sh "${CMAKE_CURRENT_SOURCE_DIR}"
+                    LOG_SELECT_PATTERN "^[0-9]+ [0-9]+$"
+                    PRIVATE_WORKING_DIRECTORY
+                    PROPERTIES TIMEOUT 900 )
+
+    atlas_add_test( filter_files_esd_run3_data22
+                    SCRIPT test/filter_files_esd_run3_data22.sh "${CMAKE_CURRENT_SOURCE_DIR}"
+                    LOG_SELECT_PATTERN "^[0-9]+ [0-9]+$"
+                    PRIVATE_WORKING_DIRECTORY
+                    PROPERTIES TIMEOUT 900 )
 
     # Create python package dependencies in release building mode.
     # Used as input for `acmd.py cmake depends`:

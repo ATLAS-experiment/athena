@@ -12,5 +12,5 @@ EventPick_tf.py --inputAODFiles "$inputFiles" --outputAOD_PICKEDFile "$outputFil
 
 pickedEventList=${ATLAS_CTEST_TESTNAME}.txt
 
-EventInfo.py --inputFiles "$outputFile" --outputFile "$pickedEventList"
+acmd list-events --output "$pickedEventList" "$outputFile"
 cat "$pickedEventList"
