@@ -22,7 +22,6 @@ using CLHEP::GeV;
 #include <functional>
 #include <set>
 #include <sstream>
-#include <tuple>
 
 using namespace TauAnalysisTools;
 
@@ -477,7 +476,7 @@ TruthMatchedParticleType TauAnalysisTools::getTruthParticleType(const xAOD::DiTa
   return eTruthMatchedParticleType;
 }
 
-std::tuple<int, int> TauAnalysisTools::tauOrigin(const xAOD::TauJet& xTau) 
+int TauAnalysisTools::tauOrigin(const xAOD::TauJet& xTau)
 {
   // Guard against missing truth match information
   typedef ElementLink< xAOD::TruthParticleContainer > Link_t;
@@ -504,23 +503,22 @@ std::tuple<int, int> TauAnalysisTools::tauOrigin(const xAOD::TauJet& xTau)
         break;
     }
   } 
-  else return std::make_tuple(-1, -1);
+  else return -1;
 
   // Recursively search through ancestor chain to find b, c, light hadron
   // origin. Higher-priority classifications found further up the chain override
   // lower ones. Priority: b-hadron (1) > c-hadron (2) > light hadron (3) > none
   // (0). If e.g. a charm hadron came from a b hadron, assign class 1.
-  std::function<std::tuple<int, int>(const xAOD::TruthParticle *, std::set<const xAOD::TruthParticle *> &)> classifyAncestor;
-  classifyAncestor = [&](const xAOD::TruthParticle* particle, std::set<const xAOD::TruthParticle *>& visited) -> std::tuple<int, int> 
+  std::function<int(const xAOD::TruthParticle *, std::set<const xAOD::TruthParticle *> &)> classifyAncestor;
+  classifyAncestor = [&](const xAOD::TruthParticle* particle, std::set<const xAOD::TruthParticle *>& visited) -> int
   {
     if (!particle || visited.count(particle))
-      return std::make_tuple(0, 0); // no classification
+      return 0; // no classification
     visited.insert(particle);
 
     // Classify this particle
     int thisClass = 0;
-    int thisPdgId = particle->pdgId();
-    
+
     if (particle->isBottomHadron())
       thisClass = 1;
     else if (particle->isCharmHadron())
@@ -530,42 +528,25 @@ std::tuple<int, int> TauAnalysisTools::tauOrigin(const xAOD::TauJet& xTau)
 
     // Guard against going all the way back up to the beam
     if (particle->nParents() == 0)
-      return std::make_tuple(thisClass, thisPdgId);
+      return thisClass;
 
-    // Recurse into parents; ancestors further up override current
-    // classification
+    // Recurse into parents; ancestors further up override current classification
     int bestClass = thisClass;
-    int bestPdgId = thisPdgId;
     const xAOD::TruthParticle *grandparent = particle->parent(0);
     // Also if nParents > 1 this is a sign that we've gone past the hadron that
     // produced the tau, so shouldn't recurse
-    if (particle->nParents() == 1) 
+    if (particle->nParents() == 1)
     {
-      auto [ancClass, ancPdgId] = classifyAncestor(grandparent, visited);
-      // A non-zero ancestor class with higher priority (lower number, but >0)
-      // overrides
-      if (ancClass > 0 && (bestClass == 0 || ancClass <= bestClass)) 
-      {
+      int ancClass = classifyAncestor(grandparent, visited);
+      // A non-zero ancestor class with higher priority (lower number, but >0) overrides
+      if (ancClass > 0 && (bestClass == 0 || ancClass <= bestClass))
         bestClass = ancClass;
-        bestPdgId = ancPdgId;
-      }
     }
-    return std::make_tuple(bestClass, bestPdgId);
+    return bestClass;
   };
 
   std::set<const xAOD::TruthParticle *> visited;
-  auto [cls, pdgId] = classifyAncestor(xTruthCandidate, visited);
-
-  // If no hadron was found (class 0), return the pdgId of the immediate parent
-  // instead, or -1 if the matched particle has no parent recorded
-  int returnPdgId = pdgId;
-  if (cls == 0)
-  {
-    const xAOD::TruthParticle* parent = xTruthCandidate->parent(0);
-    returnPdgId = parent ? parent->pdgId() : -1;
-  }
-
-  return std::make_tuple(cls, returnPdgId);
+  return classifyAncestor(xTruthCandidate, visited);
 }
 
 std::vector<const xAOD::TauJet*> TauAnalysisTools::combineTauJetsWithMuonRM(const xAOD::TauJetContainer* taus_std, const xAOD::TauJetContainer* taus_muonRM){
