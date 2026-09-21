@@ -83,7 +83,7 @@ public:
 		     LArRawSCContainer* et_id_coll,
 		     LArLATOMEHeaderContainer* header_coll) const;
 
-  StatusCode convert(const RawEvent* re, const LArLATOMEMapping *map, 
+  StatusCode convert(const RawEvent* re, const LArLATOMEMapping *map,
                      const LArOnOffIdMapping *onoffmap, const LArCalibLineMapping *clmap,
                      LArAccumulatedDigitContainer* accdigits,
                      LArAccumulatedCalibDigitContainer* caccdigits,
@@ -134,7 +134,7 @@ private:
     typedef int Sample;
     typedef std::string Path;
 
-    EventProcess(const LArLATOMEDecoder* decoderInput, 
+    EventProcess(const LArLATOMEDecoder* decoderInput,
                  LArDigitContainer* adc_coll,
 		 LArDigitContainer* adc_bas_coll,
 		 LArRawSCContainer* et_coll,
@@ -145,7 +145,7 @@ private:
     
     /** @brief Execute decoding for an event*/
 
-    void fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment* pROB, const LArLATOMEMapping *map, 
+    void fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment* pROB, const std::vector<HWIdentifier>* LATOME_Channels,
                         const LArOnOffIdMapping *onoffmap=nullptr, const LArCalibLineMapping *clmap=nullptr);
 
   private:
@@ -153,18 +153,18 @@ private:
     unsigned int decodeTrailer(const uint32_t* p, unsigned int offset);
     unsigned int decodeHeader(const uint32_t* p, unsigned int offset);
     unsigned int bytesPerChannel(MonDataType at0, MonDataType at1);
-    void increaseWordShift(unsigned int& wordshift);
-    void increaseByteShift(unsigned int& wordshift, unsigned int& byteshift);
-    void decodeByte(unsigned int& byte, unsigned int wordshift, unsigned int byteshift, const uint32_t* p);
-    void decodeWord(unsigned int& word, unsigned int& wordshift, unsigned int& byteshift, const uint32_t* p);
-    void decodeChannel(unsigned int& wordshift, unsigned int& byteshift, const uint32_t* p,
+    inline void increaseWordShift(unsigned int& wordshift);
+    inline void increaseByteShift(unsigned int& wordshift, unsigned int& byteshift);
+    inline void decodeByte(unsigned int& byte, unsigned int wordshift, unsigned int byteshift, const uint32_t* p);
+    inline void decodeWord(unsigned int& word, unsigned int& wordshift, unsigned int& byteshift, const uint32_t* p);
+    inline void decodeChannel(unsigned int& wordshift, unsigned int& byteshift, const uint32_t* p,
 		       MonDataType at0, MonDataType at1,
 		       unsigned int& at0Data, unsigned int& at1Data, unsigned int& satData,
 		       bool& at0val, bool& at1val);
-    int signEnergy(unsigned int energy);
+    inline int signEnergy(unsigned int energy);
     /** @brief Pass ADC values from an event*/
-    void fillRaw(const LArLATOMEMapping *map);
-    void fillCalib(const LArLATOMEMapping *map, 
+    void fillRaw(const std::vector<HWIdentifier>* LATOME_Channels);
+    void fillCalib(const std::vector<HWIdentifier>* LATOME_Channels,
                    const LArOnOffIdMapping *onoffmap, const LArCalibLineMapping *clmap);
     void fillHeader();
     
