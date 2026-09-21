@@ -19,6 +19,7 @@
 
 #include "../Jet1/GlobalJet1AlgTool.h"
 #include "../Jet_Tag/GlobalJet_TagAlgTool.h"
+#include "../MET/GlobalMETAlgTool.h"
 
 #include "../Lar_Preproc/Egamma1_LArStrip_Fex.h"
 #include "../Lar_Preproc/Egamma1_LArStrip_Fex_RowAware.h"
@@ -34,6 +35,7 @@
 #include "../GraphSvc.h"
 #include "../JET1Alg.h"
 #include "../Jet_TagAlg.h"
+#include "../METAlg.h"
 #include "../TOBTextReader.h"
 #include "../TOBTextWriter.h"
 
@@ -54,6 +56,7 @@ DECLARE_COMPONENT(GlobalSim::eEmMultTestComparator)
 
 DECLARE_COMPONENT(GlobalSim::GlobalJet1AlgTool)
 DECLARE_COMPONENT(GlobalSim::GlobalJet_TagAlgTool)
+DECLARE_COMPONENT(GlobalSim::GlobalMETAlgTool)
 
 DECLARE_COMPONENT(GlobalSim::Egamma1_LArStrip_Fex)
 DECLARE_COMPONENT(GlobalSim::Egamma1_LArStrip_Fex_RowAware)
@@ -69,6 +72,7 @@ DECLARE_COMPONENT(GlobalSim::PU1SuppAlgTool)
 
 DECLARE_COMPONENT(GlobalSim::JET1Alg)
 DECLARE_COMPONENT(GlobalSim::Jet_TagAlg)
+DECLARE_COMPONENT(GlobalSim::METAlg)
 DECLARE_COMPONENT(GlobalSim::TOBTextReader)
 DECLARE_COMPONENT(GlobalSim::TOBTextWriter)
 
