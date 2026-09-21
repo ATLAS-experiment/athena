@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Christian Grefe
@@ -145,7 +145,7 @@ namespace CP
 
       truthDecayModeHandle(*tau) = truthParticle ? TauAnalysisTools::getTruthDecayMode(*truthParticle) : xAOD::TauJetParameters::Mode_Error;
       truthParticleTypeHandle(*tau) = static_cast<int>(TauAnalysisTools::getTruthParticleType(*tau));
-
+      //coverity[UNNECESSARY_STRING_COPY:FALSE]
       static const SG::ConstAccessor<int> acc_PartonTruthLabelID("PartonTruthLabelID");
       const xAOD::Jet *truthJet = xAOD::TauHelpers::getLink<xAOD::Jet>(tau, "truthJetLink");
       if (truthJet != nullptr) {

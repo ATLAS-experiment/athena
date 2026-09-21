@@ -218,8 +218,8 @@ namespace Trk{
                                           const TLorentzVector& Momentum,
                                           const dvect& CovVrtMom,
                                           const long int& Charge,
-                                          dvect& Perigee,
-                                          dvect& CovPerigee,
+                                          std::span<double, 5> Perigee,
+                                          std::span<double, 15> CovPerigee,
                                           IVKalState& istate) const override final;
         //-----
         virtual StatusCode VKalVrtFitFast(
@@ -238,8 +238,8 @@ namespace Trk{
           IVKalState& istate) const override final;
 
         virtual std::unique_ptr<Trk::Perigee>
-          CreatePerigee(const std::vector<double>& VKPerigee,
-                        const std::vector<double>& VKCov,
+          CreatePerigee(const std::span<const double, 5> VKPerigee,
+                 const std::span<const double, 15> VKCov,
                         IVKalState& istate) const override final;
 
         virtual StatusCode VKalGetTrkWeights(
@@ -570,8 +570,8 @@ namespace Trk{
         std::unique_ptr<Perigee> CreatePerigee(double Vx,
 					       double Vy,
 					       double Vz,
-					       const std::vector<double>& VKPerigee,
-					       const std::vector<double>& VKCov,
+					       const std::span<const double, 5> VKPerigee,
+					       const std::span<const double, 15> VKCov,
 					       State& state) const;
 
         //

@@ -127,15 +127,13 @@ double cfchi2(const double *vrtt, const double * part, VKTrack * trk)
 //----------------------------------------------------------------------------
 double finter(double y0, double y1, double y2, double x0, double x1, double x2)
 {
-    double ret_val;
-    volatile double b1,b2; // To guarantee AMD==Intel
-
+    double ret_val=0;
+    double b1 = (y1 - y0) / (x1 - x0);
+    double b2 = (y2 - y0 - b1 * (x2 - x0)) / (x2 - x0) / (x2 - x1);
 /* ------------------------*/
 /*  Function interpolation */
 /* Author: V.Kostyukhin    */
 /* ------------------------*/
-    b1 = (y1 - y0) / (x1 - x0);
-    b2 = (y2 - y0 - b1 * (x2 - x0)) / (x2 - x0) / (x2 - x1);
     if (std::abs(b2) < 1e-8) {
 	if (y2 <= y0 && y2 < y1) {
 	    ret_val = x2;

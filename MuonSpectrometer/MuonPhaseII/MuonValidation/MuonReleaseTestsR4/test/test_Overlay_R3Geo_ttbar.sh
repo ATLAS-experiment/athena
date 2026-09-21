@@ -25,7 +25,7 @@ Overlay_tf.py \
     --multithreaded True \
     --geometrySQLite True \
     --geometrySQLiteFullPath "${GEOMODEL_DB_FILE}" \
-    --conditionsTag "default:${ATLAS_CONDDB_TAG} "\
+    --conditionsTag "default:${ATLAS_CONDDB_TAG}" \
     --geometryVersion "default:${ATLAS_GEO_TAG}" \
     --runNumber 601229 \
     --inputHITSFile ${HITS_FILE} \

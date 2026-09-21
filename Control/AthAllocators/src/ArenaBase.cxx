@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthAllocators/src/ArenaBase.cxx
@@ -15,6 +15,7 @@
 #include "AthAllocators/ArenaAllocatorBase.h"
 #include "AthAllocators/ArenaAllocatorRegistry.h"
 #include <ostream>
+#include <print>
 
 
 namespace SG {
@@ -81,7 +82,7 @@ void ArenaBase::report (std::ostream& os) const
     if (alloc.m_alloc) {
       if (first) {
         ArenaAllocatorBase::Stats::header (os);
-        os << std::endl;
+        std::println (os);
         first = false;
       }
       lock_t alloc_lock (*alloc.m_mutex);

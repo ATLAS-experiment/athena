@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -65,9 +65,9 @@ StatusCode TrigJetEJsHypoTool::finalize(){
 StatusCode
 TrigJetEJsHypoTool::decide( std::vector<JetInfo>& input ) const {
 
-  for ( auto i: input ) {
+  for ( const auto&  i: input ) {
 
-    if ( i.previousDecisionsIDs.count( m_decisionId.numeric() ) == 0 ) {
+    if ( !i.previousDecisionsIDs.contains( m_decisionId.numeric() )) {
       continue;
     }
 

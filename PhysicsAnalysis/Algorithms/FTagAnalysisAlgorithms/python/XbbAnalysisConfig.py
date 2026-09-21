@@ -10,7 +10,8 @@ class XbbConfig (ConfigBlock):
         self.setBlockName('Xbb')
         self.addOption ('containerName', '', type=str,
                         noneAction='error',
-                        info="the name of the input container.")
+                        info="the name of the input container.",
+                        meta={'role':'containerRef'})
         self.addOption('XbbWP', 'FlatMassQCDEff_0p25', type=str,
                        info="the Xbb tagging WP." )
         self.addOption('Xbbtagger', 'GN2Xv01', type=str,

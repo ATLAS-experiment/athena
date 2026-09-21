@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -15,32 +15,20 @@ def EvtGenCfg(flags,
               whiteList = None,
               allowAllKnownDecays = False,
               auxfiles = None,
-              pdtFile = None,
-              *,
-              name = "EvtInclusiveDecay",
-              userDecayFile = None,
               **kwargs):
-    """Configure EvtGen, including optional particle-data and user-decay files."""
 
     # Set defaults
     if flags.Beam.Energy*2/GeV > 13001.:
         decayfile_str = "2022inclusive_BELLE.dec"
-        log.info("Belle decay table updated Nov 2022")  
+        log.info("Belle decay table updated Nov 2022")
     elif "EVTGENVER" in os.environ:
         evtgenver = float(str(os.environ['EVTGENVER'])[:3])
-        log.info(" ver of EvtGen ", evtgenver)
+        log.info(f" ver of EvtGen {evtgenver}")
         decayfile_str =  "2014Inclusive_17.dec" if evtgenver == 1.7 else "2014Inclusive.dec"
     else:
         log.info("EVTGENVER not available !!! assuming version == 1.7")
         decayfile_str = "2014Inclusive_17.dec"
-    default_auxfiles = [decayfile_str if decayFile is None else decayFile]
-    if pdtFile is not None:
-        kwargs["pdtFile"] = pdtFile
-        default_auxfiles.append(pdtFile)
-    if userDecayFile is not None:
-        kwargs["userDecayFile"] = userDecayFile
-        if userDecayFile:
-            default_auxfiles.append(userDecayFile)
+    default_auxfiles = [decayfile_str]
 
     default_whitelist = [-411, -421, -10411, -10421, -413, -423,
                         -10413, -10423, -20413, -20423, -415, -425, -431, -10431, -433, -10433, -20433,
@@ -77,14 +65,11 @@ def EvtGenCfg(flags,
     if decayFile is None:
         decayFile = decayfile_str
 
-    kwargs.setdefault("RandomSeed", flags.Random.SeedOffset)
-    kwargs.setdefault("Dsid", flags.Generator.DSID)
-
     # Define CA object
     ca = ComponentAccumulator(EvgenSequenceFactory(EvgenSequence.Generator)) 
     ca.addEventAlgo(
         CompFactory.EvtInclusiveDecay(
-          name,
+          "EvtInclusiveDecay", 
           decayFile = decayFile,
           allowAllKnownDecays = allowAllKnownDecays,
           whiteList = whiteList,
@@ -98,8 +83,6 @@ def EvtGenCfg(flags,
 
     # Copy necessary files
     from PyJobTransformsCore.trfutil import get_files
-    auxfiles = [path for path in auxfiles if not os.path.isfile(path)]
-    if auxfiles:
-        get_files(auxfiles, keepDir=True, errorIfNotFound=True)
+    get_files(auxfiles, keepDir=False, errorIfNotFound=True)
 
     return ca

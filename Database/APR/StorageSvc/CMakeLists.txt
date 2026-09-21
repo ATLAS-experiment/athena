@@ -12,9 +12,9 @@ atlas_add_library( StorageSvc src/*.cpp
    PUBLIC_HEADERS StorageSvc
    INCLUDE_DIRS ${UUID_INCLUDE_DIRS}
    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${UUID_LIBRARIES} CxxUtils DataModelRoot GaudiKernel
-   PersistentDataModel AthenaKernel AthenaBaseComps
-   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers )
+   LINK_LIBRARIES ${UUID_LIBRARIES} AthenaBaseComps CxxUtils DataModelRoot
+   GaudiKernel PersistentDataModel
+   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AthenaKernel )
 
 atlas_add_dictionary( StorageSvcDict
    StorageSvc/dict.h StorageSvc/dict.xml

@@ -22,7 +22,15 @@
 #include <limits>
 #include <cstdint> //for uint8_t etc.
 
-//class PixelID;
+/**
+ * @class ITkPixelDecodingPhaseIIRDOAlg
+ * This algorithm translates the event-formatted
+ * bytestream into PhaseIIPixelRawDataContainer RDOs.
+ * This is the main pixel decoding algorithm intended
+ * for Run4, and the parallel using the old RDO will
+ * be phased out.
+ */
+
 
 class ITkPixelDecodingPhaseIIRDOAlg : public AthReentrantAlgorithm 
 {
@@ -80,13 +88,12 @@ namespace PixelCallbacksPhaseIIRDO{
 
         public:
             explicit PhaseIIRDOCallback(PhaseIIPixelRawDataContainerMT* cont_coll,
-                    PhaseIIPixelRawDataContainerMT::ContainerPtr rdo_container_dest, const PixelID* idHelper, MsgStream& msg_source) :
+                    PhaseIIPixelRawDataContainerMT::ContainerPtr rdo_container_dest, const PixelID* idHelper) :
                 m_rdo_container_dest(rdo_container_dest),
                 m_cont_coll(cont_coll),
                 m_dest_range_guard(rdo_container_dest),
                 m_currentIdentifierHash(0),
-                m_idHelper(idHelper),
-                m_msg_source(msg_source)
+                m_idHelper(idHelper)
                 {};
 
             ~PhaseIIRDOCallback() = default;
@@ -117,10 +124,7 @@ namespace PixelCallbacksPhaseIIRDO{
                 int bcid = 0;
                 int lvl0a = 0;
                 int lvl0d = 0;
-                if(col >= 400 || row >= 400) {
-                    //This check is needed because the decoder can call add_hit with invalid col and row to signal an error
-                    m_msg_source << MSG::WARNING << "Decoded hit with col and row >= 400, skipping. col=" << col << " row=" << row << endmsg;
-                }
+
                 PhaseII::addDataForModule(*m_cont_coll,
                         m_dest_range_guard,
                         std::array<std::int16_t,2>{static_cast<std::int16_t>(row), static_cast<std::int16_t>(col)},
@@ -206,9 +210,6 @@ namespace PixelCallbacksPhaseIIRDO{
 
             // Identifier helper
             const PixelID* m_idHelper{};
-            
-            // Athena message stream for debug output
-            MsgStream& m_msg_source;
     };
 
     //This prints the decoded hits on the screen,

@@ -20,7 +20,7 @@ class JetCalibAlgConfig(ConfigBlock):
         super(JetCalibAlgConfig, self).__init__()
 
         self.addOption('inputJets', '', type=str)
-        self.addOption('calibratedJets', '', type=str)
+        self.addOption('calibratedJets', '', type=str, meta={'role':'container'})
         self.addOption('context', 'AnalysisLatest', type=str)
         self.addOption('CalibFile', '', type=str)  # expert override: skips YAML index lookup
 

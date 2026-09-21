@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //
 //   @file    RoiReader.cxx         
@@ -36,10 +36,9 @@ void RoiReader::execute( std::vector<std::string>& keys ) {
 
   /// loop over all the keys creating actual TrigRoiDescriptor 
   /// collections
-  
+  const std::string collectionname = "RoiDescriptorStore";
   for ( unsigned ik=0 ; ik<keys.size() ; ik++ ) { 
 
-    std::string collectionname = "RoiDescriptorStore";
     
     std::string keybase = keys[ik];
     keybase.erase( 0, keybase.find(collectionname)+collectionname.size() );

@@ -5,6 +5,26 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+def addITkPixelCabling(flags):
+    from ITkPixelCabling.ITkPixelCablingAlgConfig import ITkPixelCablingAlgCfg
+    from ITkPixelCabling.ITkPixelCablingFromDB import ITkPixelCablingFromCREST
+    import os
+    import sys
+
+    acc = ComponentAccumulator()
+
+   
+    if flags.ITk.Conditions.PixelTestCablingFallback:
+        acc.merge(ITkPixelCablingAlgCfg(flags, name="ITkPixelCablingAlg", UseTestCabling=True))
+    else:
+        ITkPixelCablingFromCREST(output_file='cabling.json')
+        if os.path.isfile("cabling.json"):
+            acc.merge(ITkPixelCablingAlgCfg(flags, name="ITkPixelCablingAlg", UseTestCabling=False, DataSource='cabling.json'))
+        else:
+            sys.exit("Error: cabling couldn't be fetched from CREST. Provide a cabling.json file in the run directory, or explicitly allow flags.ITk.Conditions.PixelTestCablingFallback=True")
+    return acc
+
+
 def ITkPixelHitSortingToolCfg(flags, name = "ITkPixelHitSortingTool", **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
@@ -35,9 +55,7 @@ def ITkPixelDecodingAlgCfg(flags, name = "ITkPixelDecodingAlg", **kwargs) -> Com
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
     acc.merge(ITkPixelReadoutGeometryCfg(flags))
 
-    from ITkPixelCabling.ITkPixelCablingAlgConfig import ITkPixelCablingAlgCfg
-    acc.merge(ITkPixelCablingAlgCfg(flags, UseTestCabling=True))
-
+    acc.merge(addITkPixelCabling(flags))
 
     acc.addEventAlgo(CompFactory.ITkPixelDecodingAlg(name, **kwargs))
 
@@ -52,9 +70,9 @@ def ITkPixelDecodingPhaseIIRDOAlgCfg(flags,
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
     acc.merge(ITkPixelReadoutGeometryCfg(flags))
 
-    from ITkPixelCabling.ITkPixelCablingAlgConfig import ITkPixelCablingAlgCfg
-    acc.merge(ITkPixelCablingAlgCfg(flags))
     kwargs.setdefault("nRDOs", nRDOs)
+
+    acc.merge(addITkPixelCabling(flags))
 
     acc.addEventAlgo(CompFactory.ITkPixelDecodingPhaseIIRDOAlg(name, **kwargs))
 
@@ -74,6 +92,8 @@ def ITkPixelEncodingAlgCfg(flags, name = "ITkPixelEncodingAlg",
                                                                                         doMonitoring = doMonitoring,
                                                                                         doExpertPlots = doExpertPlots,
                                                                                         **kwargs) ))
+
+    acc.merge(addITkPixelCabling(flags))
 
     acc.addEventAlgo(CompFactory.ITkPixelEncodingAlg(name, **kwargs))
 

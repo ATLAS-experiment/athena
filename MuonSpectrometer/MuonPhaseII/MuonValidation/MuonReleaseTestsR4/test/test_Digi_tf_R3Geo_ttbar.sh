@@ -31,7 +31,7 @@ validNTuple="MuonDigitNTuple.root"
         --multithreaded True \
         --geometrySQLite True \
 	--geometrySQLiteFullPath "${GEOMODEL_DB_FILE}" \
-        --conditionsTag "default:${ATLAS_CONDDB_TAG} "\
+        --conditionsTag "default:${ATLAS_CONDDB_TAG}" \
         --geometryVersion "default:${ATLAS_GEO_TAG}" \
         --digiSeedOffset1 170 \
         --digiSeedOffset2 170 \

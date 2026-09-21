@@ -8,6 +8,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def IsolationSteeringDerivCfg(flags, name = 'IsolationSteeringDeriv', inType = 'EMPFlow'):
 
+    includeFwdElectrons = "ForwardElectrons" in flags.Input.Collections 
     mlog = logging.getLogger(name)
     mlog.info('Starting Isolation steering')
 
@@ -49,10 +50,11 @@ def IsolationSteeringDerivCfg(flags, name = 'IsolationSteeringDeriv', inType = '
     kwargs['PhIsoTypes'] = isoType
     kwargs['PhCorTypes'] = isoCor
     kwargs['PhCorTypesExtra'] = isoExCor
-    kwargs['FwdElIsoTypes'] = isoType
-    kwargs['FwdElCorTypes'] = isoCor
-    kwargs['FwdElCorTypesExtra'] = isoExCor
-
+    if includeFwdElectrons:
+        kwargs['FwdElIsoTypes'] = isoType
+        kwargs['FwdElCorTypes'] = isoCor
+        kwargs['FwdElCorTypesExtra'] = isoExCor
+        
     kwargs['name'] = suff+'PFlowIsolationBuilder'
     
     acc.addEventAlgo(CompFactory.IsolationBuilder(**kwargs))
@@ -72,10 +74,14 @@ def FwdElectronIsolationSteeringDerivCfg(flags, name = 'FwdElectronIsolationStee
     
     from xAODPrimitives.xAODIso import xAODIso as isoPar
     from IsolationAlgs.IsoToolsConfig import EGammaCaloIsolationToolCfg
-    isoType  = [ [ isoPar.topoetcone20, isoPar.topoetcone30, isoPar.topoetcone40 ] ]
-    isoCor   = [ [ isoPar.coreCone, isoPar.pileupCorrection ] ]
-    isoExCor = [ [ ] ]
-    kwargs['CaloTopoIsolationTool'] = acc.popToolsAndMerge(EGammaCaloIsolationToolCfg(flags))
+    isoType = []
+    isoCor = []
+    isoExCor = []
+    if not flags.HeavyIon.Egamma.doSubtractedClusters:## the substracted cluster does not contain the information needed to compute the calo isolation for the forward electrons
+        isoType.append([isoPar.topoetcone20, isoPar.topoetcone30, isoPar.topoetcone40])
+        isoCor.append([isoPar.coreCone, isoPar.pileupCorrection])
+        isoExCor.append([ ])
+        kwargs['CaloTopoIsolationTool'] = acc.popToolsAndMerge(EGammaCaloIsolationToolCfg(flags))
     
     
     if flags.Detector.EnableITk :

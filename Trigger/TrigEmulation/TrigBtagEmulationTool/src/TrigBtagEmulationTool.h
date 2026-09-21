@@ -22,7 +22,9 @@ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #include <map>
 #include <unordered_map>
 
+
 namespace Trig {
+class EmulContext;
 
 class TrigBtagEmulationTool : 
   public extends<asg::AsgTool, Trig::ITrigBtagEmulationTool> {
@@ -34,10 +36,10 @@ public:
   virtual StatusCode initialize() override;
 
   // Interface
-  virtual const EmulContext& populateJetManagersTriggerObjects() const override;  
+  virtual StatusCode populateJetManagersTriggerObjects(EmulContext&) const override;
   virtual bool isPassed(const std::string& chain) const override;
   virtual bool isPassed(const std::string& chain, const EmulContext&) const override;
-  virtual std::unordered_map<std::string, std::vector<std::pair<const xAOD::Jet*, bool>>> getEmulatedJets(std::string) const override;
+  virtual std::unordered_map<std::string, std::vector<std::pair<const xAOD::Jet*, bool>>> getEmulatedJets(const std::string&) const override;
 
 private:
   bool isPassed(const std::string&, const TrigBtagEmulationChain&, const EmulContext&) const;

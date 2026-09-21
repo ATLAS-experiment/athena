@@ -366,7 +366,11 @@ def getDependencySet(tagger_name: str, override: set[str] | None = None) -> set[
     - ``E`` : Electron inputs associated to the jet.
     - ``M`` : Muon inputs associated to the jet.
     - ``MC``: Muon inputs associated to the jet based on cone-matching
+    - ``P`` : Pflow inputs associated to the jet
     - ``R`` : Jet-calibration decorators for regression inputs
+
+    ``P`` needs no algorithm of its own, the pflow inputs are already
+    there, so it has no entry in ``_addDepsByTagger``.
 
     Parameters
     ----------
@@ -410,7 +414,7 @@ def getDependencySet(tagger_name: str, override: set[str] | None = None) -> set[
         "GN3V02": {"E", "M"},
 
         # Small-R jet regression
-        "bJR4v01": {"E", "MC", "R"},
+        "bJR4v01": {"E", "L", "MC", "R"},
 
         # Run 4 small-R jet taggers
         "GN2HL": {},

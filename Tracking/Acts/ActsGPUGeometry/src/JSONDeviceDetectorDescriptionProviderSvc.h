@@ -82,6 +82,12 @@ private:
     Gaudi::Property<std::string> m_geometryFile{
         this, "GeometryFile", "",
         "Detray geometry JSON file"};
+    Gaudi::Property<std::string> m_materialFile{
+        this, "MaterialFile", "",
+        "Detray material JSON file"};
+    Gaudi::Property<std::string> m_surfaceGridFile{
+        this, "SurfaceGridFile", "",
+        "Detray surface grid JSON file"};        
     Gaudi::Property<std::string> m_digitizationFile{
         this, "DigitizationFile", "",
         "Traccc digitization config JSON file"};

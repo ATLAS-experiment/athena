@@ -5,6 +5,7 @@
 #include "ITkPixelDecodingPhaseIIRDOAlg.h"
 #include "StoreGate/ReadHandle.h"
 #include "eformat/ROBFragment.h"
+#include <fstream>
 
 #define ENABLE_TIMING = true;
 #ifdef ENABLE_TIMING
@@ -34,12 +35,6 @@ StatusCode ITkPixelDecodingPhaseIIRDOAlg::initialize()
 
     //this should go into the cabling likely...
 
-    for (size_t hash = 0; hash < m_idHelper->wafer_hash_max(); hash++){
-        m_sourceIDs.push_back(m_idHelper->wafer_id(hash).get_identifier32().get_compact() | 0b00 );
-        m_sourceIDs.push_back(m_idHelper->wafer_id(hash).get_identifier32().get_compact() | 0b10 );
-        m_sourceIDs.push_back(m_idHelper->wafer_id(hash).get_identifier32().get_compact() | 0b01 );
-        m_sourceIDs.push_back(m_idHelper->wafer_id(hash).get_identifier32().get_compact() | 0b11 );
-    }
 
     return StatusCode::SUCCESS;
 }
@@ -59,6 +54,7 @@ StatusCode ITkPixelDecodingPhaseIIRDOAlg::execute(const EventContext& ctx) const
     //is then called at appropriate places in the decoding. The decoder is configured
     //with data format options. The callback can do whatever with the decoded hits
     //e. g. print them on the screen or put them in a container as RDOs.
+    
     DataFormat fmt;
     fmt.options.en_chip_id = true;
     fmt.options.en_eos = true;
@@ -66,92 +62,103 @@ StatusCode ITkPixelDecodingPhaseIIRDOAlg::execute(const EventContext& ctx) const
 
     auto cont_coll = std::make_unique< PhaseIIPixelRawDataContainerMT>(m_idHelper->wafer_hash_max(), container_list_size);
     PhaseIIPixelRawDataContainerMT::ContainerPtr rdoCont = cont_coll->getNewContainerPtr();
-    PixelCallbacksPhaseIIRDO::PhaseIIRDOCallback cb(cont_coll.get(), rdoCont, m_idHelper, msg());
+    PixelCallbacksPhaseIIRDO::PhaseIIRDOCallback cb(cont_coll.get(), rdoCont, m_idHelper);
 
     // Instantiate the output (PhaseII).
     rdoCont->reserve(m_n_rdos_est);
 
     DecCore<PixelCallbacksPhaseIIRDO::PhaseIIRDOCallback> core(fmt, cb);
-    core.initialize();
     
     //Invoke ROBDataProviderService, fetch the concerned ROBs.
     std::vector<const eformat::ROBFragment<const uint32_t*>*> ROBs;
-    m_robDataProviderSvc->getROBData(ctx, m_sourceIDs, ROBs);
+    m_robDataProviderSvc->getROBData(ctx, cabling->sourceIDs(), ROBs);
     ATH_MSG_DEBUG("Retrieved " << ROBs.size() << " fragments");
 
-    //First, sort the ROBs according to the module offline ID
-    //This can work because we have 1 e-link per ROB for now
-    //A new implementation will be required to do that per e-link in the future
-    // (This is pending the DetectorResourceID implementation)
+    //The ROB/ROD payload contains a chain of [FE header 0] [FE data 0] ... [FE header N] [FE data N]
+    //we need to sort these header-data pairs in each ROB payload according to the module ID to
+    //fill each module exactly once.
+    //from the GBT fragment building algorithm documentation (https://gitlab.cern.ch/atlas-tdaq-software/swrod#gbt-fragment-building-algorithm)
+    // "size: 16-bit value that contains a total size (in 4-byte words) of the data packet including the size of the header itself."
+    //i. e. the first 16 bits of the first word allow us to identify where the next FE starts, etc. We can jump once through
+    //the payload to separate the FE data and store the moduleID, {start idx, size} map, sort according to the key and then
+    //read in that order from the underlying array without copying.
 
-    std::vector<const eformat::ROBFragment<const uint32_t*>*> ROBs_sorted;
-    unsigned int ROBIndex = 0;
-    std::vector<std::pair<uint32_t, uint32_t> > rob_ind_offlineID;
-    for (const auto& ROB : ROBs){
-        ITkPixelCabling::ModuleInfo mi = cabling->offlineModuleInfo(ROB->rob_source_id());
-        rob_ind_offlineID.emplace_back(std::pair<uint32_t, uint32_t> (ROBIndex, mi.id.get_identifier32().get_compact()));
-        ROBIndex++;
-    }
-    //Lambda function to sort the vector of pairs according to the offline ID
-    std::sort(rob_ind_offlineID.begin(), rob_ind_offlineID.end(), [](auto &left, auto &right) {
-        return left.second < right.second;
-    });
-    //fill the sorted vector
-    for (const auto& robID : rob_ind_offlineID){
-        ROBs_sorted.emplace_back(ROBs[robID.first]);
-    }    
-    // End of the sorting of ROBs
 
     //We can now loop over the payloads of the ROB fragments retrieved earlier.
     //There's as of now a little annoyance that the decoder eats 64 bit frames
     //but the ROBs come in 32 bits. At least they have the same endian polarity.
     //Nevertheless, we need to rearrange them.
-    std::vector<uint64_t> payload64;
-    std::array<std::vector<uint64_t>, 4> split_streams;
 
-    for (const auto& ROB : ROBs_sorted){
+    for (const auto& ROB : ROBs){
+        //This loops over ROB fragments identified by sourceID
+
+        //First, get the payload that contains the above-mentioned GBT fragment structure
         const uint32_t* payload = ROB->rod_data();
-        uint32_t length = ROB->rod_ndata();        
+        uint32_t length = ROB->rod_ndata();
 
-        //Translate the data into 64 bits. We know the length, so we can reserve
-        //the space to avoid reallocation. Since the frames are always 64 bits split
-        //into 32, they'll always be divisible by 2 without modulo.
-        payload64.clear();
-        payload64.resize(length / 2);
-        for (uint32_t word = 0; word < length; word += 2){
-            payload64[word / 2] = ((uint64_t)(payload[word]) << 32) | payload[word + 1];
+        //now starting from the 0th word, map out the GBT fragment beginnings
+        //the map needs to be sorted by the low bits of detectorResourceID
+        auto comp = [](const uint32_t& a, const uint32_t& b){
+            uint32_t aLSB = a & 0x00FFFFFF;
+            uint32_t bLSB = b & 0x00FFFFFF;
+            if (aLSB != bLSB) return aLSB < bLSB;
+            return a < b;
+        };
+        
+        std::map<uint32_t, std::pair<size_t, uint16_t>, decltype(comp)> GBTFragments(comp);
+        
+        size_t idx = 0;
+        while (idx < length){
+            uint16_t GBTFragmentSize    = (payload[idx] & 0xFFFF0000) >> 16;
+            uint32_t detectorResourceID = payload[idx + 1];
+            //this is where we want to map detectorResourceID on trueDetectorResourceID
+            GBTFragments.insert({detectorResourceID, {idx, GBTFragmentSize}});
+            idx += GBTFragmentSize;
         }
 
+        //at this point the GBT fragments are sorted by the moduleID, so they can
+        //be added to the EDM (each module can be filled once). Before sorting,
+        //it could in principle happen that two chips from module A would have
+        //a GBT fragment from a chip belonging to module B in between.
 
-        //Need to set the correct offline ID for this ROB
-        ITkPixelCabling::ModuleInfo mi = cabling->offlineModuleInfo(ROB->rob_source_id());
-        cb.setOfflineID(mi.id.get_identifier32().get_compact());
+        //Now we can loop over the sorted chips and fill them, always changing
+        //the module we're currently dealing with
 
-        //Set transform type
-        cb.setTransformType(mi.transform);
-
-        //If this is a merged quad, it has all 4 chips in one ROB
-        //In such case we need to decode them separately. Otherwise
-        //It's a 1:1 correspondence
-
-        if (mi.type != ITkPixelCabling::ModuleType::MergedQuad){
-            cb.setChipID(0);
-            core.decode(payload64);
-        }
-        else {
-            //split according to chip ID, which is always in highest bits 1 and 2
-            for (auto &v : split_streams) v.clear();
-            for (const uint64_t& word64: payload64) split_streams[(word64 >> 61) & 0b11].push_back(word64);
-            for (uint8_t chipID = 0; chipID < 4; chipID++){
-                if (!split_streams[chipID].empty()){
-                    cb.setChipID(chipID);
-                    core.decode(split_streams[chipID]);
-                }
+        uint32_t moduleID = 0xFFFFFFFF;
+        for (const auto& [detectorResourceID, range] : GBTFragments){
+            
+            //are we still filling the same module?
+            uint32_t currentModuleID = ITkPixelCabling::dridToModuleID(detectorResourceID);
+            if (moduleID != currentModuleID){
+                moduleID = currentModuleID;
+                cb.setOfflineID(currentModuleID);
+                cb.setTransformType(cabling->transformType(currentModuleID));
             }
-        }
-    }
-    cb.registerLastModule();
+            cb.setChipID(ITkPixelCabling::dridToChipID(detectorResourceID));
 
+            //Translate the data into 64 bits. We know the length, so we can reserve
+            //the space to avoid reallocation. Since the frames are always 64 bits split
+            //into 32, they'll always be divisible by 2 without modulo. First 2 words are
+            //the GBT fragment header, hence range.first + 2
+            std::vector<uint64_t> payload64;
+            payload64.resize((range.second - 2) / 2);
+            size_t payloadIdx = 0;
+            for (uint32_t word = range.first + 2; word < range.first + range.second; word += 2){
+                payload64[payloadIdx] = ((uint64_t)(payload[word]) << 32) | payload[word + 1];
+                payloadIdx++;
+            }
+
+            //Decode!
+            core.initialize();
+            core.decode(payload64);
+            core.finalize();
+
+        }
+        
+        
+    }
+
+    cb.registerLastModule();
 
     //The container is filled by now. We can write it to SG
     SG::WriteHandle<PhaseIIPixelRawDataContainer> pixelRDOContainerHandle(m_pixelRDOKey, ctx);

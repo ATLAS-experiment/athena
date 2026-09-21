@@ -47,7 +47,7 @@ namespace TrigConf {
   class HLTUtils {
   public:
     /**@brief hash function translating TE names into identifiers*/
-    static HLTHash string2hash( const std::string&, const std::string& category=s_defaultCategory );
+    static HLTHash string2hash( std::string_view, const std::string& category=s_defaultCategory );
     /**@brief hash function translating identifiers into names (via internal dictionary)*/
     static const std::string hash2string( HLTHash, const std::string& category=s_defaultCategory );
     /**@brief debugging output of internal dictionary*/

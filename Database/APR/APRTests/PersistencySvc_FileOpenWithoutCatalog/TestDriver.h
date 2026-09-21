@@ -8,7 +8,7 @@
 #include <vector>
 #include <string>
 #include "SimpleTestClass.h"
-#include "PersistencySvc/IDatabase.h"
+#include "PoolSvc/IDatabase.h"
 
 class Token;
 

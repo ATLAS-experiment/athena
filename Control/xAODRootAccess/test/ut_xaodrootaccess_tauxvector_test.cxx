@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file xAODRootAccess/test/ut_xaodrootaccess_tauxvector_test.cxx
@@ -13,7 +13,6 @@
 #include "xAODRootAccess/tools/TAuxVector.h"
 #include "xAODRootAccess/tools/TAuxVectorFactory.h"
 #include "AthContainers/AuxStoreInternal.h"
-#include "CxxUtils/StrFormat.h"
 #include "TClass.h"
 #include <iostream>
 #include <sstream>
@@ -22,7 +21,7 @@
 
 std::string str (int x)
 {
-  return CxxUtils::strformat ("%d", x);
+  return std::to_string (x);
 }
 
 

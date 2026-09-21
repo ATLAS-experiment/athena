@@ -1,18 +1,21 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// Framework include(s):
-#include "PathResolver/PathResolver.h"
+
 
 // local include(s)
 #include "TauAnalysisTools/CommonEfficiencyTool.h"
 #include "TauAnalysisTools/TauEfficiencyCorrectionsTool.h"
+// Framework include(s):
+#include "PathResolver/PathResolver.h"
 
-// ROOT include(s)
+// ROOT include(s):
+#include "TKey.h"
 #include "TF1.h"
 #include "TH1.h"
 #include "TH2.h"
+#include "TFile.h"
 #include "TROOT.h"
 #include "TClass.h"
 
@@ -217,11 +220,13 @@ CP::CorrectionCode CommonEfficiencyTool::getEfficiencyScaleFactor(columnar::TauJ
   // get uncertainties summed in quadrature
   double dTotalSystematic2 = 0.;
   double dDirection = 0.;
-  for (auto syst : *m_sSystematicSet)
+  for (const auto &  syst : *m_sSystematicSet)
   {
     // check if systematic is available
     auto it = m_mSystematicsHistNames.find(syst.basename());
-
+    if (it == m_mSystematicsHistNames.end())[[unlikely]]{
+      continue;
+    }
     // get uncertainty value
     double dUncertaintySyst = 0.;
 
@@ -366,7 +371,7 @@ StatusCode CommonEfficiencyTool::applySystematicVariation ( const CP::Systematic
   // sanity checks if systematic set is supported
   double dDirection = 0.;
   CP::SystematicSet sSystematicSetAvailable;
-  for (auto sSyst : sSystematicSet)
+  for (const auto & sSyst : sSystematicSet)
   {
     // check if systematic is available
     auto it = m_mSystematicsHistNames.find(sSyst.basename());
@@ -585,7 +590,7 @@ void CommonEfficiencyTool::generateSystematicSets()
   // 3p eVeto, still need this to be measurable in T&P
   if (sEfficiencyType=="ELERNN" || sEfficiencyType=="ELEOLR") m_bNoMultiprong = true;
 
-  for (auto mSF : *m_mSF)
+  for (const auto & mSF : *m_mSF)
   {
     // parse for nuisance parameter in histogram name
     std::vector<std::string> vSplitNP = {};
@@ -640,7 +645,7 @@ CP::CorrectionCode CommonEfficiencyTool::getValue(const std::string& sHistName,
   {
     ATH_MSG_ERROR("Object with name "<<sHistName<<" was not found in input file.");
     ATH_MSG_DEBUG("Content of input file");
-    for (auto eEntry : mSF)
+    for (const auto & eEntry : mSF)
       ATH_MSG_DEBUG("  Entry: "<<eEntry.first);
     return CP::CorrectionCode::Error;
   }

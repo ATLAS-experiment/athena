@@ -29,6 +29,8 @@ atlas_install_joboptions( share/common/*.py )
 atlas_install_python_modules( python/*.py
                               POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
+atlas_install_python_modules( python/*.py )
+
 set( PhotosppEnvironment_DIR ${CMAKE_CURRENT_SOURCE_DIR}
    CACHE PATH "Location of PhotosppEnvironment.cmake" )
 find_package( PhotosppEnvironment )

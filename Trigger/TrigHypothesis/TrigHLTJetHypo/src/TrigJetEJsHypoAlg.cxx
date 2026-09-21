@@ -1,13 +1,13 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <algorithm>
 #include "TrigJetEJsHypoAlg.h"
 #include "TrigJetEJsHypoTool.h"
 #include "TrigCompositeUtils/HLTIdentifier.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 
+#include <algorithm>
 using namespace TrigCompositeUtils;
 
 using xAOD::JetContainer;
@@ -65,7 +65,7 @@ StatusCode TrigJetEJsHypoAlg::execute( const EventContext& context ) const {
     TrigCompositeUtils::decisionIDs(previousDecision, previousDecisionIDs);
     Decision* newDecision = newDecisionIn(outputDecisions, previousDecision, hypoAlgNodeName(), context);
     newDecision->setObjectLink<xAOD::JetContainer>(featureString(), myFeature.link);
-    hypoToolInput.emplace_back(TrigJetEJsHypoTool::JetInfo{newDecision, *(myFeature.link), tracks, PV, previousDecisionIDs});
+    hypoToolInput.emplace_back(TrigJetEJsHypoTool::JetInfo{newDecision, *(myFeature.link), tracks, PV, std::move(previousDecisionIDs)});
   }//end loop on previous decisions
   
 

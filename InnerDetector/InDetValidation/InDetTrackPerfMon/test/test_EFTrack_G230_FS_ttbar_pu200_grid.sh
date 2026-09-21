@@ -18,8 +18,8 @@
 pipelineName='G230'
 SampleName='ttbar_pu200'  # as defined in samplesDict of InDetTrackPerfMon/scripts/getEFTrackSample.py
 OutSampleName="${pipelineName}_FS.${SampleName}"
-TrkCollName='TracccTrackParticles'
-TrkSeedCollName='TracccSeedTrackParticles'
+TrkCollName='InDetTrackParticles'
+TrkSeedCollName='SiSPSeedSegmentsActsPixelTrackParticles'
 referencePath='/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetTrackPerfMon/EFTrackRefereceHistograms/'
 referenceName="C230_FS.${SampleName}"
 referenceName_absPath="${referencePath}/IDTPM.${referenceName}.HIST.root"

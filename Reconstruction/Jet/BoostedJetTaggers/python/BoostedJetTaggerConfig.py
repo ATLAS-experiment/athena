@@ -118,6 +118,13 @@ def WZTagAlgCfg(configFlags, **kwargs):
     sysService = CompFactory.CP.SystematicsSvc("SystematicsSvc")
     acc.addService(sysService)
 
+    # set default values
+    kwargs.setdefault("generation", "ParT")
+    kwargs.setdefault("WP", "50")
+    if "cfg_file" not in kwargs:
+        raise ValueError("Please, provide a Config file")
+
+
     # jet container name
     jets_container = "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"
 
@@ -135,7 +142,7 @@ def WZTagAlgCfg(configFlags, **kwargs):
     algo_args = {}
     algo_args.setdefault("tagger", tool)
     algo_args.setdefault("jets", jets_container)
-    acc.addEventAlgo(CompFactory.BJT.BoostedJetTaggerAlg("WTagAlg", **algo_args))
+    acc.addEventAlgo(CompFactory.BJT.BoostedJetTaggerAlg("WTagAlg_" + kwargs['WP'], **algo_args))
 
     return acc
 
@@ -146,6 +153,12 @@ def TopTagAlgCfg(configFlags, **kwargs):
     # add syst service
     sysService = CompFactory.CP.SystematicsSvc("SystematicsSvc")
     acc.addService(sysService)
+
+    # set default values
+    kwargs.setdefault("generation", "ParT")
+    kwargs.setdefault("WP", "50")
+    if "cfg_file" not in kwargs:
+        raise ValueError("Please, provide a Config file")
 
     # jet container name
     jets_container = "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"
@@ -164,7 +177,7 @@ def TopTagAlgCfg(configFlags, **kwargs):
     algo_args = {}
     algo_args.setdefault("tagger", tool)
     algo_args.setdefault("jets", jets_container)
-    acc.addEventAlgo(CompFactory.BJT.BoostedJetTaggerAlg("TopTagAlg", **algo_args))
+    acc.addEventAlgo(CompFactory.BJT.BoostedJetTaggerAlg("TopTagAlg_" + kwargs['WP'], **algo_args))
 
     return acc
 

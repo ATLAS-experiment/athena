@@ -46,6 +46,7 @@ class PhotonValidationPlots:public PlotBase {
       TH1* convTruthMatchedR;
       TH2* convTruthRvsEta;
       TH2* convTruthMatchedRvsEta;
+      TH2* convTruthRvsRecoR;
       TProfile* res_et;
       TProfile* res_eta;
       TProfile* res_et_cut;

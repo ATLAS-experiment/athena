@@ -69,7 +69,7 @@ private:
 
     /// @name The name of device resident input traccc track parameter collection
     /// {@
-    SG::WriteHandleKey<traccc::bound_track_parameters_collection_types::buffer> m_inputTrkParamKey{
+    SG::ReadHandleKey<traccc::bound_track_parameters_collection_types::buffer> m_inputTrkParamKey{
         this, "InputTracccTrackParameters", "",
         "Input traccc track parameter collection buffer"};
     /// @}
@@ -81,6 +81,36 @@ private:
         "Output traccc tracks collection buffer"};
     /// @}
     
+    /// @name Track finding properties
+    /// {@
+    Gaudi::Property<unsigned int> m_maxNumBranchesPerSeed{this, "maxNumBranchesPerSeed", 3,
+        "maximum number of branches per seed"};
+    Gaudi::Property<unsigned int> m_maxNumBranchesPerSurface{this, "maxNumBranchesPerSurface", 1,
+        "maximum number of branches per surface"};
+    Gaudi::Property<unsigned int> m_minTrackCandidatesPerTrack{this, "minTrackCandidatesPerTrack", 7,
+        "minimum number of measurements per track"};
+    Gaudi::Property<unsigned int> m_maxTrackCandidatesPerTrack{this, "maxTrackCandidatesPerTrack", 20,
+        "maximum number of measurements per track"};
+    Gaudi::Property<unsigned int> m_maxNumSkippingPerCand{this, "maxNumSkippingPerCand", 2,
+        "maximum number of holes per track candidate"};
+    Gaudi::Property<unsigned int> m_maxNumConsecutiveSkipped{this, "maxNumConsecutiveSkipped", 1,
+        "maximum number of consecutive holes per track candidate"};
+    Gaudi::Property<float> m_chi2Max{this, "chi2Max", 30.f,
+        "maximum chi2 for a measurement to be added to a track candidate"};
+    Gaudi::Property<float> m_minPt{this, "minPt", 600.f,
+        "minimum transverse momentum of a track candidate [MeV]"};
+    Gaudi::Property<float> m_minP{this, "minP", 100.f,
+        "minimum momentum of a track candidate [MeV]"};
+    Gaudi::Property<unsigned int> m_maxNumTracksPerMeasurement{this, "maxNumTracksPerMeasurement", 1,
+        "maximum number of tracks sharing a measurement, 0 for no limit"};
+    Gaudi::Property<unsigned int> m_initialLinksPerSeed{this, "initialLinksPerSeed", 20,
+        "initial number of links reserved per seed"};
+    Gaudi::Property<float> m_minStepLengthForNextSurface{this, "minStepLengthForNextSurface", 0.5f,
+        "minimum step length to the next surface [mm]"};
+    Gaudi::Property<unsigned int> m_maxStepCountsForNextSurface{this, "maxStepCountsForNextSurface", 100,
+        "maximum number of steps to the next surface"};
+    /// @}
+
     traccc::finding_config m_finding_cfg;
     const traccc::magnetic_field* m_deviceMagField{nullptr};
     const traccc::detector_buffer* m_deviceDetector{nullptr};

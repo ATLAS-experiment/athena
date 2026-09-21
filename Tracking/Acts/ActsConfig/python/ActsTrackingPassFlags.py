@@ -31,7 +31,8 @@ def setActsDefaultTunings(icf):
     icf.addFlag("isSecondaryPass", False)
     icf.addFlag("isLargeD0", False)
     icf.addFlag("autoReverseSearch", False)
-    icf.addFlag("SeedingStrategy", SeedingStrategy.GridTriplet, type=SeedingStrategy)
+    icf.addFlag("PixelSeedingStrategy", SeedingStrategy.Gbts, type=SeedingStrategy)
+    icf.addFlag("StripSeedingStrategy", SeedingStrategy.GridTriplet, type=SeedingStrategy)
     # Extension used to name the persistified track particle container
     # (InDet{extension}TrackParticles) when storeSeparateContainer is
     # requested. If empty, the pass extension is used.
@@ -49,6 +50,7 @@ def createActsLegacyTrackingPassFlags():
     deactivateAthenaComponents(icf)
     activateActsComponents(icf)
     setActsDefaultTunings(icf)
+    icf.PixelSeedingStrategy = SeedingStrategy.GridTriplet
     return icf
 
 # Main ACTS Tracking pass with Fast Tracking configuration
@@ -62,6 +64,7 @@ def createActsTrackingPassFlags():
     # Override acts default values
     icf.Xi2max = [50]
     icf.Xi2maxNoAdd = [100]
+    icf.useITkStripSeeding = False
     return icf
 
 # Main ACTS Tracking pass with Heavy Ion configuration
@@ -98,6 +101,7 @@ def createActsLargeRadiusTrackingPassFlags():
     deactivateAthenaComponents(icf)
     activateActsComponents(icf)
     setActsDefaultTunings(icf)
+    icf.useITkPixelSeeding = False
     # Store the output track particles in InDetLargeD0TrackParticles
     # (instead of InDetActsLargeRadiusTrackParticles) so that downstream
     # LRT clients can rely on the same container name as in Run 3
@@ -123,6 +127,7 @@ def createActsConversionTrackingPassFlags():
     deactivateAthenaComponents(icf)
     activateActsComponents(icf)
     setActsDefaultTunings(icf)
+    icf.useITkPixelSeeding = False
     # Mark as secondary pass
     icf.isSecondaryPass = True
     # Conversion pass is usually merged with main pass
@@ -159,6 +164,7 @@ def createEFValidateF100TrackingPassFlags():
     # Override acts default values
     icf.Xi2max = [50]
     icf.Xi2maxNoAdd = [100]
+    icf.useITkStripSeeding = False
     return icf
 
 def createEFValidateF150TrackingPassFlags():
@@ -175,7 +181,8 @@ def createEFValidateF150TrackingPassFlags():
     # Override acts default values
     icf.Xi2max = [50]
     icf.Xi2maxNoAdd = [100]
-    icf.SeedingStrategy = SeedingStrategy.F150
+    icf.PixelSeedingStrategy = SeedingStrategy.F150
+    icf.useITkStripSeeding = False
     return icf
 
 # Main Inner Detector ACTS Tracking pass

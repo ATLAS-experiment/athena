@@ -11,6 +11,8 @@
 #include <array>
 #include <cmath>
 #include <iostream>
+#include "TrkVKalVrtCore/Restrict.h"
+#include <algorithm>
 
 namespace Trk {
 
@@ -186,23 +188,46 @@ void setFittedMatrices(const double * COVFIT, long int MATRIXSIZE,
      covarCascade.emplace_back(std::move(Res));
    }
 }
+
 //
 // Symmetrical indexing (I*(I+1)/2+J) is valid ONLY if I>=J
-std::vector<double> transformCovar(int NPar, double **Deriv, const std::vector<double> &covarI )
+std::vector<double> transformCovar(int NPar, double **Deriv, const std::vector<double> &covarI)
 {
-      std::vector<double> covarO(NPar*(NPar+1)/2, 0.);
-      int ii,ij,oi,oj, indexO, indexI;
-      for(oi=0; oi<NPar; oi++){
-        for(oj=0; oj<=oi; oj++){
-            indexO = oi*(oi+1)/2+oj;
-            for(ii=0; ii<NPar; ii++){
-              for(ij=0; ij<NPar; ij++){
-                indexI = ii>=ij ? ii*(ii+1)/2+ij : ij*(ij+1)/2+ii;
-                covarO[indexO] += Deriv[oi][ii]*covarI[indexI]*Deriv[oj][ij];
-      } }   } }
-      return covarO;
-}
+    std::vector<double> covarO(NPar * (NPar + 1) / 2, 0.0);
+    int indexO = 0;
 
+    for (int oi = 0; oi < NPar; ++oi) {
+        const double* der_oi = Deriv[oi];
+
+        for (int oj = 0; oj <= oi; ++oj) {
+            const double* der_oj = Deriv[oj];
+            double sum = 0.0;
+
+            for (int ii = 0; ii < NPar; ++ii) {
+                const double der_oi_ii = der_oi[ii];
+
+                // Segment 1: ij <= ii -> indexI = ii*(ii+1)/2 + ij (contiguous memory walk)
+                int indexI = ii * (ii + 1) / 2;
+                for (int ij = 0; ij <= ii; ++ij) {
+                    sum += der_oi_ii * covarI[indexI++] * der_oj[ij];
+                }
+
+                // Segment 2: ij > ii -> indexI = ij*(ij+1)/2 + ii (strided memory walk)
+                indexI += ii;
+                int stride = ii + 2;
+                for (int ij = ii + 1; ij < NPar; ++ij) {
+                    sum += der_oi_ii * covarI[indexI] * der_oj[ij];
+                    indexI += stride;
+                    ++stride;
+                }
+            }
+
+            covarO[indexO++] = sum;
+        }
+    }
+
+    return covarO;
+}
 
 void addCrossVertexDeriv(CascadeEvent & cascadeEvent_, double * ader, long int MATRIXSIZE, const std::vector<int> & matrixPnt)
 {
@@ -243,36 +268,40 @@ void addCrossVertexDeriv(CascadeEvent & cascadeEvent_, double * ader, long int M
 //  Copy matrix Input with dimension IDIM to predefined place(TStart)
 //   into matrix Target with dimension TDIM
 //
-void copyFullMtx(const double *Input, long int IPar, long int IDIM,
-                 double *Target, long int TStart, long int TDIM)
+void copyFullMtx(const double * Input, long int IPar, long int IDIM,
+                 double * VKAL_RESTRICT Target, long int TStart, long int TDIM) noexcept
 {
-   int i,j,it,jt;
-   for( i=0; i<IPar; i++){
-     for( j=0; j<IPar; j++){
-        it=i+TStart; jt=j+TStart;
-        Target[it*TDIM+jt] = Input[i*IDIM+j];
-     }
-   }
+    for (long int i = 0; i < IPar; ++i) {
+        const double* srcRow = Input + i * IDIM;
+        double* VKAL_RESTRICT dstRow = Target + (i + TStart) * TDIM + TStart;
+        
+        std::copy(srcRow, srcRow + IPar, dstRow);
+    }
 }
 
 //--------------------------------------------------------------------
 //  Make the convolution Cov=D*OldCov*Dt
 //
-void getNewCov(const double *OldCov, const double* Der, double* Cov, long int DIM) noexcept
+void getNewCov(const double *OldCov, const double* Der, double* VKAL_RESTRICT  Cov, long int DIM)
 {
-   int i,j,it,jt;
-   for( i=0; i<DIM; i++){
-     for( j=0; j<DIM; j++){
-       Cov[i*DIM+j]=0.;
-       for( it=0; it<DIM; it++){
-         for( jt=0; jt<DIM; jt++){
-           Cov[i*DIM+j] += Der[i*DIM+it]*OldCov[it*DIM+jt]*Der[j*DIM+jt];
-         }
-       }
-     }
-   }
+for (long int i = 0; i < DIM; ++i) {
+        const double* der_i = Der + i * DIM;
+        for (long int j = 0; j < DIM; ++j) {
+            const double* der_j = Der + j * DIM;
+            double sum = 0.0; // Register accumulation avoids constant memory writes
+            
+            for (long int it = 0; it < DIM; ++it) {
+                const double der_i_it = der_i[it];
+                const double* oldcov_it = OldCov + it * DIM;
+                
+                for (long int jt = 0; jt < DIM; ++jt) {
+                    sum += der_i_it * oldcov_it[jt] * der_j[jt];
+                }
+            }
+            Cov[i * DIM + j] = sum;
+        }
+    }
+
 }
-
-
 
 } /* End of namespace Trk*/

@@ -108,7 +108,7 @@ StatusCode ITkStripsRodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE
       if((nPacket+1) % (packetSize/2)==0) nPacket=-1;
     }
 
-    if(word16 == 0 && noClusterTag){
+    if(word16 == 0 && noClusterTag && nPacket != 0){
       ATH_MSG_DEBUG("Skip empty end of packet 16-bit word: ");
       nPacket++;
     }else if((vecROBData_8bits[i] == 0 || isHCCHeader == 1) && HccHeadFound == 0 && nPacket<2){
@@ -153,14 +153,15 @@ StatusCode ITkStripsRodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE
 
   // Create the last RDO of the last link of the event
   if (data.isStripValid()) {
-     if (not data.isSaved(false) and data.isOldStripValid()) {
-        const int rdoMade{makeRDO(false, data, cache, dataItemsPool)};
+     if (not data.isSaved()) {
+        ATH_MSG_DEBUG("Strip is not saved");
+        const int rdoMade{makeRDO(data, cache, dataItemsPool)};
         if (rdoMade == -1) {
            sc = StatusCode::RECOVERABLE;
            ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
         }
         else {
-           data.setSaved(false, rdoMade);
+           data.setSaved(rdoMade);
         }
      }
   }
@@ -183,17 +184,19 @@ StatusCode ITkStripsRodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE
 
 // makeRDO method
 
-int ITkStripsRodDecoder::makeRDO(const bool isOld,
-                            SharedData& data,
+int ITkStripsRodDecoder::makeRDO(SharedData& data,
                             CacheHelper& cache,
                             DataPool<SCT3_RawData>* dataItemsPool) const
 {
   // If the link is already decoded, RDO will not be created.
   SCT_RDO_Collection* rdoColl{data.rdoCollMap[data.linkIDHash].get()};
-  if (rdoColl==nullptr) return 0;
+  if (rdoColl==nullptr) {
+    ATH_MSG_WARNING("Null rdoCollection pointer found for linkIDHash: " << (uint32_t)data.linkIDHash);
+    return 0;
+  }
 
-  int strip{isOld ? data.oldStrip : data.strip};
-  if (((strip & 0x7F) + (data.groupSize-1) >= N_STRIPS_PER_CHIP) or (strip<0) or (strip>=N_STRIPS_PER_SIDE)) {
+  int strip = data.strip;
+  if (((strip & 0x7F) + (data.groupSize-1) >= 9999) or (strip<0) or (strip>=9999)) {
     ATH_MSG_WARNING("Cluster with " << data.groupSize << " strips, starting at strip " << strip
                     << " in collection " << data.linkIDHash << " out of range. Will not make RDO");
     return -1;
@@ -218,12 +221,6 @@ int ITkStripsRodDecoder::makeRDO(const bool isOld,
         return 0;
       }
     }
-  }
-
-  // See if strips go from 0 to N_STRIPS_PER_SIDE-1(=767) or vice versa
-  if (m_swapPhiReadoutDirection[data.linkIDHash]) {
-    strip = N_STRIPS_PER_SIDE-1 - strip;
-    strip = strip-(data.groupSize-1);
   }
 
   // Get identifier from the hash, this is not nice
@@ -274,11 +271,11 @@ StatusCode ITkStripsRodDecoder::processHccHeader(const uint16_t hccword1,
                                                  const uint8_t word8,
                                                  uint8_t &isHCCHeader,
                                                  const uint32_t /*robID*/,
-                                                 SharedData& /*data*/,
-                                                 SCT_RDO_Container& /*rdoIDCont*/,
-                                                 DataPool<SCT3_RawData>* /*dataItemsPool*/,
+                                                 SharedData& data,
+                                                 SCT_RDO_Container& rdoIDCont,
+                                                 DataPool<SCT3_RawData>* dataItemsPool,
                                                  CacheHelper& /*cache*/,
-                                                 SCT_RodDecoderErrorsHelper& /*errs*/,
+                                                 SCT_RodDecoderErrorsHelper& errs,
                                                  bool& /*hasError*/,
                                                  bool& /*breakNow*/,
                                                  const EventContext& /*ctx*/) const
@@ -316,11 +313,17 @@ StatusCode ITkStripsRodDecoder::processHccHeader(const uint16_t hccword1,
     bool ispetal  = (petal  == 0x1);
     uint8_t hccN  = (hccnum == 0x80) ? 2 : 1;
 
-
     ATH_MSG_DEBUG("isBarrel: " << isbarrel << " isSideA: " << issideA << " disk: " << (uint32_t)disk);
     ATH_MSG_DEBUG("isInOut: " << isinout << " isPetal: " << ispetal << " phimod: " << (uint32_t)phimod);
     ATH_MSG_DEBUG("HCCNum: " << (uint32_t)hccN << " etamod: " << (uint32_t)etamod);
 
+    int barrel_ec = isbarrel ? 0 : (issideA ? 2 : -2);
+
+    const Identifier waferID = m_itkStripsID -> wafer_id(barrel_ec, disk, phimod, etamod, inout);
+    const IdentifierHash offlinehash = m_itkStripsID -> wafer_hash(waferID);
+    data.setCollection(m_itkStripsID, offlinehash, rdoIDCont, dataItemsPool, errs);
+
+    data.side = inout;
     ATH_MSG_DEBUG("hccheader " << isbarrel << " " << issideA << " " << (uint32_t)disk << " " << (uint32_t)inout << " " << (uint32_t)phimod << " " << (uint32_t)etamod << " " << (uint32_t)hccN );
   }  
   else isHCCHeader++;
@@ -332,7 +335,7 @@ StatusCode ITkStripsRodDecoder::processHccHeader(const uint16_t hccword1,
 StatusCode ITkStripsRodDecoder::processHeader(const uint16_t word16,
                                               const uint32_t robID,
                                               SharedData& data,
-                                              SCT_RDO_Container& rdoIDCont,
+                                              SCT_RDO_Container& /*rdoIDCont*/,
                                               DataPool<SCT3_RawData>* dataItemsPool,
                                               CacheHelper& cache,
                                               SCT_RodDecoderErrorsHelper& errs,
@@ -345,15 +348,15 @@ StatusCode ITkStripsRodDecoder::processHeader(const uint16_t word16,
   data.foundHeader = true;
   m_headNumber++;
 
-  uint8_t type      = (word16 >> 11) & 0x1F;
+  uint8_t type      = (word16 >> 12) & 0xF;   // bits [15:12]
   // Useful information
-  uint8_t l0tag     = (word16 >> 7)  & 0xF;
-  uint8_t bcid_low  = (word16 >> 4)  & 0x7;
-  uint8_t bcid_xor  = word16 & 0xF;
+  uint8_t l0tag     = (word16 >> 4)  & 0x7F;  // bits [10:4]
+  uint8_t bcid_low  = (word16 >> 1)  & 0x7;   // bits [3:1]
+  uint8_t bcid_xor  = word16 & 0x1;           // bits [0]
 
   ATH_MSG_DEBUG("l0tag: " << (uint32_t)l0tag << " bcid_low: " << (uint32_t)bcid_low << " bcid_xor: " << (uint32_t)bcid_xor << " type: " << (uint32_t)type << " word16: " << std::bitset<16>(word16));
   
-  if (type == 0x03) {  // PR Header
+  if (type == 0x01) {  // PR Header
     constexpr bool breakHere{false};
     ATH_MSG_DEBUG("PR Packet Found");
     if (hasError) sc = StatusCode::RECOVERABLE;
@@ -365,15 +368,15 @@ StatusCode ITkStripsRodDecoder::processHeader(const uint16_t word16,
 
   // Create the last RDO of the previous link if any
   if (data.isStripValid()) {
-     if (not data.isSaved(false) and data.isOldStripValid()) {
+     if (not data.isSaved()) {
 
-        const int rdoMade{makeRDO(false, data, cache, dataItemsPool)};
+        const int rdoMade{makeRDO(data, cache, dataItemsPool)};
         if (rdoMade == -1) {
            hasError = true;
            ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
         }
         else {
-           data.setSaved(false, rdoMade);
+           data.setSaved(rdoMade);
         }
      }
   }
@@ -401,7 +404,7 @@ StatusCode ITkStripsRodDecoder::processHeader(const uint16_t word16,
     hash = m_cabling->getHashFromOnlineId(onlineID, ctx);
     if (hash.is_valid()) {
        ATH_MSG_DEBUG("setCollectionCall");
-       data.setCollection(m_itkStripsID, hash, rdoIDCont, dataItemsPool, errs);
+       //data.setCollection(m_itkStripsID, hash, rdoIDCont, dataItemsPool, errs);
     }
     else {
        std::stringstream msg;
@@ -423,53 +426,62 @@ StatusCode ITkStripsRodDecoder::processHeader(const uint16_t word16,
 
 StatusCode ITkStripsRodDecoder::processHits(const uint16_t word16,
                                             const uint32_t /*robID*/,
-                                            SharedData& /*data*/,
+                                            SharedData& data,
                                             SCT_RDO_Container& /*rdoIDCont*/,
-                                            DataPool<SCT3_RawData>* /*dataItemsPool*/,
-                                            CacheHelper& /*cache*/,
-                                            SCT_RodDecoderErrorsHelper& /*errs*/,
-                                            bool& /*hasError*/,
+                                            DataPool<SCT3_RawData>* dataItemsPool,
+                                            CacheHelper& cache,
+                                            SCT_RodDecoderErrorsHelper& errs,
+                                            bool& hasError,
                                             const EventContext& /*ctx*/) const
 {
   StatusCode sc = StatusCode::SUCCESS;
 
-  uint8_t stripNumber = 0;
-  uint8_t address  = (word16 >> 3) & 0xFF;
-
-  ATH_MSG_DEBUG("Cluster address: " << std::bitset<8>(address) << " " << (uint32_t)address);
-
-  stripNumber = (address >= 128) ? 2*(address-128)+1 : 2*address;          
+  uint nchip = (word16 >> 11) & 0xF;
+  bool isSecondRow = (word16 >> 10) & 0x01; // Near/Far Strip selector (0 = Near, 1 = Far)
+  uint8_t address = (word16 >> 3) & 0x7F; // Strip local address in the selected row [0,127]
 
   //Get the next three strips in the cluster
-  uint8_t firsthit = (word16 & 0x4);
-  uint8_t secondhit   = (word16 & 0x2);
-  uint8_t thirdhit   = (word16 & 0x1);        
+  uint8_t firsthit = (word16 >> 2) & 0x1;
+  uint8_t secondhit   = (word16 >> 1) & 0x1;
+  uint8_t thirdhit   = (word16) & 0x1;
+
   ATH_MSG_DEBUG("First hit: " << std::bitset<16>(firsthit));
   ATH_MSG_DEBUG("Second hit: " << std::bitset<16>(secondhit));
   ATH_MSG_DEBUG("Third hit: " << std::bitset<16>(thirdhit));
+
   uint8_t stripN1 = 0,stripN2 = 0,stripN3=0;
   uint8_t addr    = 0;
-  if(firsthit != 0x0) {
+
+  if(firsthit) {
     addr = address+1;
-    stripN1 = (addr >= 128) ? 2*(addr-128)+1 : 2*addr;
-    ATH_MSG_DEBUG("Hits: " << (uint32_t)(stripN1));          
+    stripN1 = 2*addr + (isSecondRow ? 1 : 0);
   }
-  if(secondhit != 0x0) {
+  if(secondhit) {
     addr = address+2;
-    stripN2 = (addr >= 128) ? 2*(addr-128)+1 : 2*addr;          
-    ATH_MSG_DEBUG("Hits: " << (uint32_t)(stripN2));
+    stripN2 = 2*addr + (isSecondRow ? 1 : 0);
   }
-  if(thirdhit != 0x0) {
+  if(thirdhit) {
     addr = address+3;
-    stripN3 = (addr >= 128) ? 2*(addr-128)+1 : 2*addr;          
-    ATH_MSG_DEBUG("Hits: " << (uint32_t)(stripN3));
+    stripN3 = 2*addr + (isSecondRow ? 1 : 0);
   }
 
-  uint8_t nchip    = (word16 >> 11) & 0xF;
+  //int strip_logical_channel = 2*address + (isSecondRow ? 1 : 0); // May be needed later
+  data.strip = nchip * 128 + address;
 
-  ATH_MSG_DEBUG("Chip number: " << (int)nchip << " Strip Number: " << (uint32_t)stripNumber);
-  ATH_MSG_DEBUG("abcclusters " << (uint32_t)nchip << " " << (uint32_t)stripNumber << " " << (uint32_t)(stripN1) << " " << (uint32_t)(stripN2) << " " << (uint32_t)(stripN3)); 
-  
+  ATH_MSG_DEBUG("abcclusters " << (uint32_t)nchip << " " << (uint32_t)data.strip << " " << (uint32_t)(stripN1) << " " << (uint32_t)(stripN2) << " " << (uint32_t)(stripN3)); 
+
+  data.groupSize = 1;
+  if (thirdhit) data.groupSize = 4;
+  else if (secondhit) data.groupSize = 3;
+  else if (firsthit) data.groupSize = 2;
+
+  const int rdoMade = makeRDO(data, cache, dataItemsPool);
+  if (rdoMade == -1) {
+      hasError = true;
+      ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
+  } else {
+    data.setSaved(rdoMade);
+  }
   return sc;
 }
 

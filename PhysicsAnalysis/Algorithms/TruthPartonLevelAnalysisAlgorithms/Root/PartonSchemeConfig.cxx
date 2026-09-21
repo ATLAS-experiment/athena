@@ -271,6 +271,48 @@ const PartonSchemeConfig& getSchemeConfig(const std::string& schemeName) {
         {}}},
 
       // ------------------------------------------------------------------ //
+      // Tq
+      // ------------------------------------------------------------------ //
+      {"Tq",
+       {{"TruthTop", "TruthBosonsWithDecayParticles", "TruthBottom"},
+        {DecoratorGroup::Top, DecoratorGroup::Bottom},
+        {},
+        {},
+        {
+            // Top (flavour-agnostic)
+            {{"MC_t_beforeFSR", "MC_tbar_beforeFSR"}, "MC_t_beforeFSR", 0},
+            {{"MC_t_b_beforeFSR", "MC_tbar_bbar_beforeFSR"},
+             "MC_b_beforeFSR_from_t",
+             0},
+            {{"MC_t_afterFSR", "MC_tbar_afterFSR"}, "MC_t_afterFSR", 0},
+            {{"MC_t_b_afterFSR", "MC_tbar_bbar_afterFSR"},
+             "MC_b_afterFSR_from_t",
+             0},
+            // W from top
+            {{"MC_t_W_beforeFSR", "MC_tbar_W_beforeFSR"},
+             "MC_W_beforeFSR_from_t",
+             0},
+            {{"MC_t_W_afterFSR", "MC_tbar_W_afterFSR"},
+             "MC_W_afterFSR_from_t",
+             0},
+            {{"MC_t_WDecay1_beforeFSR", "MC_tbar_WDecay1_beforeFSR"},
+             "MC_Wdecay1_beforeFSR_from_t",
+             0},
+            {{"MC_t_WDecay1_afterFSR", "MC_tbar_WDecay1_afterFSR"},
+             "MC_Wdecay1_afterFSR_from_t",
+             0},
+            {{"MC_t_WDecay2_beforeFSR", "MC_tbar_WDecay2_beforeFSR"},
+             "MC_Wdecay2_beforeFSR_from_t",
+             0},
+            {{"MC_t_WDecay2_afterFSR", "MC_tbar_WDecay2_afterFSR"},
+             "MC_Wdecay2_afterFSR_from_t",
+             0},
+            // Spectator b
+            {{"MC_b_beforeFSR", "MC_bbar_beforeFSR"}, "MC_b_beforeFSR", 0},
+            {{"MC_b_afterFSR", "MC_bbar_afterFSR"}, "MC_b_afterFSR", 0},
+        }}},
+
+      // ------------------------------------------------------------------ //
       // Tzq
       // ------------------------------------------------------------------ //
       {"Tzq",

@@ -2,11 +2,13 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// Framework include(s):
-#include "PathResolver/PathResolver.h"
+
 
 // local include(s)
 #include "TauAnalysisTools/CommonDiTauSmearingTool.h"
+// Framework include(s):
+#include "PathResolver/PathResolver.h"
+#include "xAODEventInfo/EventInfo.h"
 
 // ROOT include(s)
 #include "TROOT.h"
@@ -25,6 +27,7 @@ CommonDiTauSmearingTool::CommonDiTauSmearingTool(const std::string& sName)
   , m_fY(&TruthSubleadPt)
   , m_fZ(&TruthDeltaR)
   , m_bIsData(false)
+  , m_bIsConfigured(false)	
   , m_eCheckTruth(TauAnalysisTools::Unknown)	
 {}
 
@@ -97,7 +100,9 @@ CP::CorrectionCode CommonDiTauSmearingTool::applyCorrection( xAOD::DiTauJet& xDi
     {
       // check if systematic is available
       auto it = m_mSystematicsHistNames.find(syst.basename());
-
+      if (it == m_mSystematicsHistNames.end())[[unlikely]] {
+        continue;
+      }
       // get uncertainty value
       double dUncertaintySyst = 0;
       tmpCorrectionCode = getValue(it->second,
@@ -290,7 +295,7 @@ void CommonDiTauSmearingTool::generateSystematicSets()
   if (sTruthType=="TRUEHADTAU") m_eCheckTruth = TauAnalysisTools::TruthHadronicTau;
   if (sTruthType=="TRUEHADDITAU") m_eCheckTruth = TauAnalysisTools::TruthHadronicDiTau;
 
-  for (auto mSF : m_mDTSF)
+  for (const auto & mSF : m_mDTSF)
   {
     // parse for nuisance parameter in histogram name
     std::vector<std::string> vSplitNP = {};
@@ -354,5 +359,18 @@ CP::CorrectionCode CommonDiTauSmearingTool::getValue(const std::string& sHistNam
   dEfficiencyScaleFactor = hHist->GetBinContent(iBin);
 
   return CP::CorrectionCode::Ok;
+}
+
+StatusCode CommonDiTauSmearingTool::beginEvent()
+{
+  if (m_bIsConfigured)
+    return StatusCode::SUCCESS;
+
+  const xAOD::EventInfo* xEventInfo = nullptr;
+  ATH_CHECK(evtStore()->retrieve(xEventInfo,"EventInfo"));
+  m_bIsData = !(xEventInfo->eventType( xAOD::EventInfo::IS_SIMULATION));
+  m_bIsConfigured = true;
+
+  return StatusCode::SUCCESS;
 }
 

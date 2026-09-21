@@ -40,6 +40,7 @@ set( ATLAS_GEANT4_USE_LTO @ATLAS_GEANT4_USE_LTO@ CACHE BOOL
 # Look for optional languages.
 include( CheckLanguage )
 check_language( CUDA )
+check_language( HIP )
 
 # Figure out whether to use QUIET in the following calls.
 set( _quietFlag )
@@ -59,6 +60,9 @@ find_package( LCG @LCG_VERSION_NUMBER@ REQUIRED EXACT ${_quietFlag} )
 if( CMAKE_CUDA_COMPILER )
    find_package( CUDAToolkit ${_quietFlag} )
 endif()
+if( CMAKE_HIP_COMPILER )
+   find_package( hip ${_quietFlag} )
+endif()
 find_package( Acts ${_quietFlag} )
 if( TARGET Acts::PluginDetray )
    find_package( traccc ${_quietFlag} )
@@ -68,7 +72,7 @@ find_package( Qt5 ${_quietFlag} COMPONENTS Core OpenGL Gui PrintSupport Widgets
    Sql Network )
 find_package( GTest ${_quietFlag} )
 find_package( Geant4 ${_quietFlag} )
-find_package( Boost ${_quietFlag} COMPONENTS ALL )
+find_package( Boost ${_quietFlag} COMPONENTS thread regex ) # See ATEAM-1186 for the component selection.
 
 # Set the versions of the TDAQ projects:
 set( TDAQ_PROJECT_NAME "@TDAQ_PROJECT_NAME@" CACHE STRING

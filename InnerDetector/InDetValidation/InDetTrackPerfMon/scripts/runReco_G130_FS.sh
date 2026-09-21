@@ -61,7 +61,9 @@ fi
 
 ## running reconstruction
 ignore_pattern='ERROR Locating dev file .+ Do not let this propagate to a release'
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 run Reco_tf.py \
+    --conditionsTag "default:${conditionsTag}" \
     --maxEvents ${nEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
     --postInclude 'ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
@@ -70,7 +72,7 @@ run Reco_tf.py \
                flags.Acts.Device.doSeeding=True; \
                flags.Tracking.doPixelDigitalClustering=True; \
                from ActsConfig.ActsConfigFlags import SeedingStrategy; \
-               flags.Tracking.ITkActsPass.SeedingStrategy=SeedingStrategy.Gbts; \
+               flags.Acts.Device.seedingStrategy=SeedingStrategy.Gbts; \
                flags.Tracking.ITkActsPass.storeTrackSeeds=${storeTrackSeeds}; \
                flags.Concurrency.NumThreads=${numThreads}; \
                flags.Concurrency.NumConcurrentEvents=${numThreads};" \

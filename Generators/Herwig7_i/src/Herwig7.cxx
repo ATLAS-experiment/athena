@@ -26,13 +26,13 @@
 #include "Herwig/API/HerwigAPI.h"
 #include "Herwig/Utilities/HerwigStrategy.h"
 
-#include "PathResolver/PathResolver.h"
-
+#include <cstdlib>
 #include <fstream>
 #include <thread>
 #include <chrono>
 #include <filesystem>
 #include <ranges>
+#include <system_error>
 
 void   convert_to_HepMC(const ThePEG::Event & m_event, HepMC::GenEvent & evt, bool nocopies,ThePEG::Energy eunit, ThePEG::Length lunit);
 
@@ -46,6 +46,7 @@ Herwig7::Herwig7(const std::string& name, ISvcLocator* pSvcLocator) :
 {
   declareProperty("RunFile", m_runfile="Herwig7");
   declareProperty("RunSettings", m_runSettings="");
+  declareProperty("Repository", m_repository="");
   declareProperty("SetupFile", m_setupfile="");
 
   declareProperty("UseRandomSeedFromGeneratetf", m_use_seed_from_generatetf);
@@ -123,16 +124,19 @@ StatusCode Herwig7::genInitialize() {
 
   ATH_MSG_DEBUG("Num of library search paths = " << ThePEG::DynamicLoader::allPaths().size());
 
-  // Use PathResolver to find default Hw7 ThePEG repository file.
-  const std::string repopath = PathResolver::find_file_from_list("HerwigDefaults.rpo", datapath);
-  ATH_MSG_DEBUG("Loading Herwig default repo from " << repopath);
-  ThePEG::Repository::load(repopath);
-  ATH_MSG_DEBUG("Successfully loaded Herwig default repository");
-
-  const std::string share_path = std::filesystem::path(std::move(repopath)).parent_path().string();
-
   if (!m_runSettings.empty()) {
-    ATH_CHECK(writeRunFileFromText(share_path));
+    const std::filesystem::path repository_path(m_repository);
+    std::error_code repository_error;
+    if (repository_path.empty() ||
+        !std::filesystem::is_regular_file(repository_path, repository_error)) {
+      ATH_MSG_ERROR("Configured Herwig repository does not exist: '" <<
+                    repository_path.string() << "'");
+      return StatusCode::FAILURE;
+    }
+
+    ATH_MSG_DEBUG("Using Herwig default repo from " << repository_path);
+    m_api.repository(repository_path.string());
+    ATH_CHECK(writeRunFileFromText(repository_path.parent_path().string()));
   }
 
   ATH_MSG_INFO("Setting runfile name '"+m_runfile+"'");
@@ -171,6 +175,7 @@ StatusCode Herwig7::writeRunFileFromText(const std::string& share_path) {
   ATH_MSG_INFO("Writing CA infile text to '"+inputfile_name+"'");
   std::ofstream infile_stream(inputfile_name);
   infile_stream << m_runSettings;
+  infile_stream.close();
   if (!infile_stream) {
     ATH_MSG_ERROR("Failed to write CA infile text to '"+inputfile_name+"'");
     return StatusCode::FAILURE;

@@ -228,9 +228,9 @@ StatusCode TriggerEDMDeserialiserAlg::finalize() {
 }
 
 
-StatusCode TriggerEDMDeserialiserAlg::execute(const EventContext& context) const {
+StatusCode TriggerEDMDeserialiserAlg::execute(const EventContext& ctx) const {
 
-  auto resultHandle = SG::makeHandle( m_resultKey, context );
+  auto resultHandle = SG::makeHandle( m_resultKey, ctx );
   if ( not resultHandle.isValid() ) {
     ATH_MSG_ERROR("Failed to obtain HLTResultMT with key " << m_resultKey.key());
     return StatusCode::FAILURE;
@@ -247,11 +247,12 @@ StatusCode TriggerEDMDeserialiserAlg::execute(const EventContext& context) const
       return StatusCode::FAILURE;
     }
   }
-  ATH_CHECK( deserialise( dataptr ) );
+  ATH_CHECK( deserialise( ctx, dataptr ) );
   return StatusCode::SUCCESS;
 }
 
-StatusCode TriggerEDMDeserialiserAlg::deserialise( const Payload* dataptr ) const {
+StatusCode TriggerEDMDeserialiserAlg::deserialise( const EventContext& ctx,
+                                                   const Payload* dataptr ) const {
 
   size_t buffSize = m_initialSerialisationBufferSize;
   std::unique_ptr<char[]> buff = std::make_unique<char[]>(buffSize);
@@ -269,7 +270,8 @@ StatusCode TriggerEDMDeserialiserAlg::deserialise( const Payload* dataptr ) cons
   // invalid conditions are: invalid interface pointer when decoding Aux store
   //                         invalid aux store and interface when decoding the decoration
   // these pointer should be invalidated when: decoding TP containers, aux store when decoding the xAOD interface 
-  WritableAuxStore* currentAuxStore = nullptr;         // set when decoding Aux
+  std::unique_ptr<WritableAuxStore> currentAuxStoreOwner;         // set when decoding Aux
+  WritableAuxStore* currentAuxStore = nullptr; //need to hang on to an observing ptr
   SG::AuxVectorBase* xAODInterfaceContainer = nullptr; // set when decoding xAOD interface
   
   size_t fragmentCount = 0;
@@ -396,13 +398,15 @@ StatusCode TriggerEDMDeserialiserAlg::deserialise( const Payload* dataptr ) cons
             reinterpret_cast<SG::IAuxStore*>(
                 bib->cast(dataBucket->object(), ClassID_traits<SG::IAuxStore>::ID()));
         ATH_CHECK(auxHolder != nullptr);
+        auxHolder->toTransient(ctx);
         //coverity[FORWARD_NULL:FALSE]
         xAODInterfaceContainer->setStore(auxHolder);
-        currentAuxStore = new WritableAuxStore();
+        currentAuxStoreOwner = std::make_unique<WritableAuxStore>();
+        currentAuxStore = currentAuxStoreOwner.get();
         auto p = dynamic_cast<SG::IAuxStoreHolder*>(auxHolder);
         ATH_CHECK(p != nullptr);
         //coverity[FORWARD_NULL:FALSE]
-        p->setStore( currentAuxStore );
+        p->setStore( currentAuxStoreOwner.release() ); //IAuxStoreHolder takes ownership
       } else {
         currentAuxStore = nullptr;
         xAODInterfaceContainer = nullptr; // invalidate xAOD related pointers
@@ -413,7 +417,8 @@ StatusCode TriggerEDMDeserialiserAlg::deserialise( const Payload* dataptr ) cons
         ATH_MSG_DEBUG("Decoration " << key << " encountered with no active container. Assume this was already handled.");
       } else {
         ATH_CHECK( currentAuxStore != nullptr and xAODInterfaceContainer != nullptr );
-        ATH_CHECK( deserialiseDynAux( transientTypeName, persistentTypeName, key, obj,
+        ATH_CHECK( deserialiseDynAux( ctx,
+                                      transientTypeName, persistentTypeName, key, obj,
                                       currentAuxStore, xAODInterfaceContainer ) );
       }
     }
@@ -424,7 +429,8 @@ StatusCode TriggerEDMDeserialiserAlg::deserialise( const Payload* dataptr ) cons
 
 
 
-StatusCode TriggerEDMDeserialiserAlg::deserialiseDynAux( const std::string& transientTypeName, const std::string& persistentTypeName, const std::string& decorationName,
+StatusCode TriggerEDMDeserialiserAlg::deserialiseDynAux( const EventContext& ctx,
+                                                         const std::string& transientTypeName, const std::string& persistentTypeName, const std::string& decorationName,
 							 void* obj,   WritableAuxStore* currentAuxStore, SG::AuxVectorBase* interfaceContainer ) const {
   const bool isPacked = persistentTypeName.contains("SG::PackedContainer");
 
@@ -454,6 +460,7 @@ StatusCode TriggerEDMDeserialiserAlg::deserialiseDynAux( const std::string& tran
   ATH_MSG_DEBUG("Size for \"" << decorationName << "\" " << vec->size() << " interface " << interfaceContainer->size_v() );
   ATH_CHECK( vec->size() == interfaceContainer->size_v() );
   if ( vec->size() != 0 ) {
+    vec->toTransient( ctx );
     ATH_CHECK( currentAuxStore != nullptr );
     currentAuxStore->addVector(std::move(vec), false);    
     // trigger loading of the dynamic variables

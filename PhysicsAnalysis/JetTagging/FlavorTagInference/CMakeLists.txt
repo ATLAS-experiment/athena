@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # This package is a collection of 'duel-use' tools to calculate
 # high-level flavor tagging discriminants. Because it should work both
@@ -14,6 +14,7 @@ find_package( lwtnn )
 find_package( ROOT COMPONENTS Core MathCore )
 find_package( onnxruntime )
 find_package( nlohmann_json )
+find_package( Boost COMPONENTS unit_test_framework )
 
 set(TRITON_LIBRARIES "")
 
@@ -113,9 +114,10 @@ if (NOT XAOD_STANDALONE)
 
 endif()
 
-atlas_add_dictionary( FlavorTagInferenceDict
-   FlavorTagInference/FlavorTagInferenceDict.h
-   FlavorTagInference/selection.xml
-   LINK_LIBRARIES FlavorTagInference )
+atlas_add_test( FlipVariables
+   SOURCES test/test_flip_variables.cxx
+   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+   LINK_LIBRARIES ${Boost_LIBRARIES} FlavorTagInference
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

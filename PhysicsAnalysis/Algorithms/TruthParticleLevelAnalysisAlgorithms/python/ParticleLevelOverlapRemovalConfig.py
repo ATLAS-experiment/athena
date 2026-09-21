@@ -9,13 +9,17 @@ class ParticleLevelOverlapRemovalBlock(ConfigBlock):
     def __init__(self):
         super(ParticleLevelOverlapRemovalBlock, self).__init__()
         self.addOption('jets', '', type=str,
-                       info ='the name of the input truth jets container, in the format `container` or `container.selection`.')
+                       info ='the name of the input truth jets container, in the format `container` or `container.selection`.',
+                       meta={'role':'containerRef'})
         self.addOption('electrons', '', type=str,
-                       info='the name of the input truth electrons container, in the format `container` or `container.selection`.')
+                       info='the name of the input truth electrons container, in the format `container` or `container.selection`.',
+                       meta={'role':'containerRef'})
         self.addOption('muons', '', type=str,
-                       info='the name of the input truth muons container, in the format `container` or `container.selection`.')
+                       info='the name of the input truth muons container, in the format `container` or `container.selection`.',
+                       meta={'role':'containerRef'})
         self.addOption('photons', '', type=str,
-                       info='the name of the input truth photons container, in the format `container` or `container.selection`.')
+                       info='the name of the input truth photons container, in the format `container` or `container.selection`.',
+                       meta={'role':'containerRef'})
         self.addOption('label', 'passesOR', type=str,
                        info='the name of the decoration to apply to all particles passing OR.')
         self.addOption('useDressedProperties', True, type=bool,

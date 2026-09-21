@@ -23,9 +23,6 @@ namespace pool {
    class ICollection
   {
   public:
-    /// Enumeration of the possible open modes of the collection.
-    typedef enum { CREATE_AND_OVERWRITE, READ } OpenMode;
-
     /// Opens the collection and initializes it if necessary.
     virtual void open() = 0;
 

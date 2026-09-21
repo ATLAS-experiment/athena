@@ -122,7 +122,7 @@ def initConfigFlags():
 
     acf.addFlag('Input.MetadataItems', lambda prevFlags : _metadataItems(prevFlags.Input.Files), help='metadata items in input' )
     acf.addFlag('Input.Release',  lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("AtlasRelease", ""), help='release of input file')
-    acf.addFlag('Input.AODFixesDone', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("AODFixVersion", ""), help='set of already applied AODFixes')
+    acf.addFlag('Input.AODFixesDone', lambda prevFlags : set(GetFileMD(prevFlags.Input.Files).get("AODFixVersion", "").strip().split()), help='set of already applied AODFixes')
 
     acf.addFlag('Concurrency.NumProcs', 0, help='number of concurrent processes')
     acf.addFlag('Concurrency.NumThreads', 0, help='number of threads' )
@@ -363,14 +363,14 @@ def initConfigFlags():
             if flags.Common.Project is Project.AthGeneration:
                 return False
             elif flags.GeoModel.Run > LHCPeriod.Run3:
-                return False #To be set true when we make switch to CREST for Run4
+                return True
             else:
                 return False
-        
+
         acf.addFlag("IOVDb.UseCREST", __useCrest, help='Use CREST for conditions access')
         acf.addFlag("IOVDb.CrestServer", lambda prevFlags: getCrestServer(), help="CREST server URL")
         acf.addFlag("IOVDb.CrestAPI", lambda prevFlags : getCrestAPI(), help="CREST API version")
-        
+
         #For HLT-jobs, the ring-size should be 0 (eg no cleaning at all since there are no IOV-updates during the job)
         acf.addFlag("IOVDb.CleanerRingSize",lambda prevFlags : 0 if prevFlags.Trigger.doHLT else 2*max(1, prevFlags.Concurrency.NumConcurrentEvents), help='size of ring-buffer for conditions cleaner')
         acf.addFlag("IOVDb.SqliteInput","",help="Folders found in this file will be used instead of the production db")
@@ -586,6 +586,12 @@ def initConfigFlags():
         from AthCUDAServices.CUDAConfigFlags import createCUDAConfigFlags
         return createCUDAConfigFlags()
     _addFlagsCategory(acf, "CUDA", __cuda, 'AthCUDAServices')
+
+    # HIP flags.
+    def __hip():
+        from AthHIPComps.HIPConfigFlags import createHIPConfigFlags
+        return createHIPConfigFlags()
+    _addFlagsCategory(acf, "HIP", __hip, 'AthHIPComps')
 
     #EFTracking fpga data prep (F100)
     def _eftracking_f100():

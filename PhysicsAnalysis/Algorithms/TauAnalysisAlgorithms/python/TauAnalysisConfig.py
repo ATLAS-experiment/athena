@@ -22,7 +22,8 @@ class TauCalibrationConfig (ConfigBlock):
             "to `'AnalysisTauJets'` for PHYSLITE and `'TauJets'` otherwise.")
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the output container after calibration.")
+            info="the name of the output container after calibration.",
+            meta={'role':'container'})
         self.addOption ('postfix', '', type=str,
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here since the calibration is common to "
@@ -154,17 +155,20 @@ class TauWorkingPointSelectionConfig (ConfigBlock) :
         self.setBlockName('TauWorkingPointSelection')
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the input container.")
+            info="the name of the input container.",
+            meta={'role':'containerRef'})
         self.addOption ('selectionName', '', type=str,
             noneAction='error',
             info="the name of the tau-jet selection to define (e.g. `tight` or "
-            "`loose`).")
+            "`loose`).",
+            meta={'role':'selection'})
         self.addOption ('postfix', None, type=str,
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as selectionName is used internally.")
         self.addOption ('quality', None, type=str,
             info="the ID WP to use. Supported ID WPs: `Tight`, `Medium`, "
-            "`Loose`, `VeryLoose`, `Baseline`, `BaselineForFakes`.")
+            "`Loose`, `VeryLoose`, `Baseline`, `BaselineForFakes`.",
+            meta={'choices':(['Tight','Medium','Loose','VeryLoose','Baseline','BaselineForFakes'],1)})
         self.addOption ('use_eVeto', False, type=bool,
             info="use selection with or without eVeto combined with TauID. "
             "Recommendations: set it to `True` if electrons mis-reconstructed as tau-jets are a large background for your analysis.")
@@ -352,17 +356,20 @@ class TauWorkingPointEfficiencyConfig (ConfigBlock) :
         self.addDependency('EventSelectionMerger', required=False)
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the input container.")
+            info="the name of the input container.",
+            meta={'role':'containerRef'})
         self.addOption ('selectionName', '', type=str,
             noneAction='error',
             info="the name of the tau-jet selection to define (e.g. `tight` or "
-            "`loose`).")
+            "`loose`).",
+            meta={'role':'selection'})
         self.addOption ('postfix', None, type=str,
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as selectionName is used internally.")
         self.addOption ('quality', None, type=str,
             info="the ID WP to use. Supported ID WPs: `Tight`, `Medium`, "
-            "`Loose`, `VeryLoose`, `Baseline`, `BaselineForFakes`.")
+            "`Loose`, `VeryLoose`, `Baseline`, `BaselineForFakes`.",
+            meta={'choices':(['Tight','Medium','Loose','VeryLoose','Baseline','BaselineForFakes'],1)})
         self.addOption ('use_eVeto', False, type=bool,
             info="use selection with or without eVeto combined with TauID. "
             "Recommendations: set it to `True` if electrons mis-reconstructed as tau-jets are a large background for your analysis.")
@@ -477,20 +484,18 @@ class TauWorkingPointEfficiencyConfig (ConfigBlock) :
 
             # TauEfficiencyCorrectionTool for eVeto both on true tau and fake tau, use only in case eVeto is requested in TauSelectionTool
             if self.use_eVeto:
-                # eVeto correction for fake tau are for RNN ID Run2/Run3, or for GNTau for Run3   
-                if (not self.useGNTau or (self.useGNTau and campaign == "mc23")):
+                #use only in case TauID is requested in TauSelectionTool
+                if self.quality not in ('VeryLoose','Baseline','BaselineForFakes'): 
                     # correction for fake tau
                     alg = config.createAlgorithm( 'CP::TauEfficiencyCorrectionsAlg',
-                                       'TauEfficiencyCorrectionsAlgEvetoFakeTau' )
+                                        'TauEfficiencyCorrectionsAlgEvetoFakeTau' )
                     config.addPrivateTool( 'efficiencyCorrectionsTool',
                                     'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
                     alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [10]
                     # since all TauSelectionTool config files have loose eRNN, code only this option for now
                     alg.efficiencyCorrectionsTool.EleIDLevel = 2
-                    #overwrite decision in case user selects a WP manually
-                    if self.manual_sel_evetowp == "loose":
-                        alg.efficiencyCorrectionsTool.EleIDLevel = 2
-                    elif self.manual_sel_evetowp == "medium":
+                    #overwrite decision in case user selects a WP different than "loose" manually
+                    if self.manual_sel_evetowp == "medium":
                         alg.efficiencyCorrectionsTool.EleIDLevel = 3
 
                     alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
@@ -540,10 +545,8 @@ class TauWorkingPointEfficiencyConfig (ConfigBlock) :
                 alg.scaleFactorDecoration = 'tau_EvetoTrueTau_effSF' + selectionPostfix + '_%SYS%'
                 # since all TauSelectionTool config files have loose eRNN, code only this option for now
                 alg.efficiencyCorrectionsTool.EleIDLevel = 2
-                #overwrite decision in case user selects a WP manually
-                if self.manual_sel_evetowp == "loose":
-                    alg.efficiencyCorrectionsTool.EleIDLevel = 2
-                elif self.manual_sel_evetowp == "medium":
+                #overwrite decision in case user selects a WP different than "loose" manually
+                if self.manual_sel_evetowp == "medium":
                     alg.efficiencyCorrectionsTool.EleIDLevel = 3
                 alg.outOfValidity = 2 #silent
                 alg.outOfValidityDeco = 'bad_EvetoTrueTau_eff' + selectionPostfix
@@ -617,7 +620,8 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
                         info="remove the HLT prefix from trigger chain names.")
         self.addOption ('containerName', '', type=str,
                         info="the input tau-jet container, with a possible selection, in "
-                        "the format `container` or `container.selection`.")
+                        "the format `container` or `container.selection`.",
+                        meta={'role':'containerRef'})
 
     def instanceName (self) :
         """Return the instance name for this block"""

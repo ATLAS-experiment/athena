@@ -10,8 +10,8 @@ def defineMenu():
 
     l1items = L1MenuFlags.items()
 
-    # remove AFP and MBTS items, plus any item which are being remapped and which are in the pp menu
-    discard_list = ["L1_AFP", "L1_MBTS", "L1_eTAU140", "L1_eTAU35", "L1_3jJ90", "L1_MU14FCH_jJ90", "L1_jJ90", "L1_2jJ90_jXE80", "L1_LATE-MU8F_jJ90"]
+    # remove AFP, MBTS, TRT items, plus any item which are being remapped and which are in the pp menu
+    discard_list = ["L1_AFP", "L1_MBTS", "L1_TRT", "L1_eTAU140", "L1_eTAU35", "L1_3jJ90", "L1_MU14FCH_jJ90", "L1_jJ90", "L1_2jJ90_jXE80", "L1_LATE-MU8F_jJ90"]
 
     def match_any(item):
         return any([item.startswith(pattern) for pattern in discard_list])

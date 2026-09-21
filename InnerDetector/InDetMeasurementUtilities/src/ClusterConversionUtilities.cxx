@@ -7,11 +7,16 @@
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "SCT_ReadoutGeometry/StripStereoAnnulusDesign.h"
 
+#include "InDetReadoutGeometry/SiDetectorElement.h"
+
 #include "HGTD_PrepRawData/HGTD_Cluster.h"
 #include "xAODInDetMeasurement/HGTDClusterContainer.h"
 #include "xAODInDetMeasurement/HGTDClusterAuxContainer.h"
 #include "GeoModelKernel/throwExcept.h"
 #include "xAODInDetMeasurement/Utilities.h"
+#include "InDetIdentifier/PixelID.h"
+#include "InDetIdentifier/SCT_ID.h"
+#include "HGTD_Identifier/HGTD_ID.h"
 
 constexpr static double one_over_twelve = 1. / 12.;
 
@@ -146,15 +151,26 @@ namespace TrackingUtilities {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode convertXaodToInDetCluster(const xAOD::PixelCluster& xaodCluster,
-               const InDetDD::SiDetectorElement& element,
-               const PixelID& pixelID,
-               InDet::PixelCluster*& indetCluster)
+  const InDetDD::PixelModuleDesign* pixelModuleDesign(const InDetDD::SiDetectorElement& element)
   {
-    const InDetDD::PixelModuleDesign* design(dynamic_cast<const InDetDD::PixelModuleDesign*>(&element.design()));
-    if (design == nullptr) {
-      return StatusCode::FAILURE;
+    return dynamic_cast<const InDetDD::PixelModuleDesign*>(&element.design());
+  }
+
+  const InDetDD::SCT_ModuleSideDesign* stripModuleSideDesign(const InDetDD::SiDetectorElement& element)
+  {
+    if (not element.isBarrel()) {
+      return dynamic_cast<const InDetDD::StripStereoAnnulusDesign*>(&element.design());
     }
+    return dynamic_cast<const InDetDD::SCT_ModuleSideDesign*>(&element.design());
+  }
+
+  std::unique_ptr<InDet::PixelCluster>
+  convertXaodToInDetCluster(const xAOD::PixelCluster& xaodCluster,
+               const InDetDD::SiDetectorElement& element,
+               const InDetDD::PixelModuleDesign& moduleDesign,
+               const PixelID& pixelID)
+  {
+    const InDetDD::PixelModuleDesign* design = &moduleDesign;
 
     Amg::Vector2D localPosition = xAOD::toEigen(xaodCluster.localPosition<2>());
     
@@ -238,7 +254,7 @@ namespace TrackingUtilities {
     double phiWidth = design->widthFromRowRange(rowmin, rowmax);
     InDet::SiWidth width( Amg::Vector2D(xaodCluster.channelsInPhi(), xaodCluster.channelsInEta()),
                           Amg::Vector2D(phiWidth,etaWidth) );
-    indetCluster = new InDet::PixelCluster(id,
+    return std::make_unique<InDet::PixelCluster>(id,
                                            localPosition,
                                            globalPosition,
                                            std::move(rdo_list_new),
@@ -251,26 +267,15 @@ namespace TrackingUtilities {
                                            omegax, omegay,
                                            false, 0, 0);
 
-    return StatusCode::SUCCESS;
   }
 
-  StatusCode convertXaodToInDetCluster(const xAOD::StripCluster& xaodCluster,
-                                       const InDetDD::SiDetectorElement& element,
-                                       const SCT_ID& stripID,
-                                       InDet::SCT_Cluster*& indetCluster,
-                                       double shift)
+  std::unique_ptr<InDet::SCT_Cluster> 
+  convertXaodToInDetCluster(const xAOD::StripCluster& xaodCluster,
+    const InDetDD::SiDetectorElement& element, const InDetDD::SCT_ModuleSideDesign& moduleDesign,
+    const SCT_ID& stripID, double shift)
   {
     bool isBarrel = element.isBarrel();
-    const InDetDD::SCT_ModuleSideDesign* design = nullptr;
-    if (not isBarrel) {
-      design = dynamic_cast<const InDetDD::StripStereoAnnulusDesign*>(&element.design());
-    } else {
-      design = dynamic_cast<const InDetDD::SCT_ModuleSideDesign*>(&element.design());
-    }
-
-    if (design == nullptr) {
-      return StatusCode::FAILURE;
-    }
+    const InDetDD::SCT_ModuleSideDesign* design = &moduleDesign;
 
     const auto designShape = design->shape();
 
@@ -352,20 +357,16 @@ namespace TrackingUtilities {
        rdo_list_new.emplace_back(rdo_id_value);
     }
 
-    indetCluster = new InDet::SCT_Cluster(id,
+    return  std::make_unique<InDet::SCT_Cluster>(id,
                                           locpos,
                                           std::move(rdo_list_new),
                                           width,
                                           &element,
                                           std::move(errorMatrix));
-
-    return StatusCode::SUCCESS;
   }
 
-  StatusCode convertXaodToInDetCluster(const xAOD::HGTDCluster& xaodCluster,
-                                       const InDetDD::HGTD_DetectorElement& element,
-                                       ::HGTD_Cluster*& indetCluster) {
-
+  std::unique_ptr<::HGTD_Cluster>
+  convertXaodToInDetCluster(const xAOD::HGTDCluster& xaodCluster, const InDetDD::HGTD_DetectorElement& element) {
     const auto& locPos = xaodCluster.localPosition<3>(); 
     Amg::Vector2D localPosition(locPos(0,0), locPos(1,0));
     float time = xAOD::HGTDCluster::time(locPos);
@@ -391,7 +392,7 @@ namespace TrackingUtilities {
        rdo_list.emplace_back(rdo_id_value);
     }
 
-    indetCluster = new ::HGTD_Cluster(id,
+    return std::make_unique<::HGTD_Cluster>(id,
               localPosition,
               std::move(rdo_list),
               width,
@@ -401,7 +402,6 @@ namespace TrackingUtilities {
               time_resolution,
               std::vector<int>(xaodCluster.totList()));              
 
-    return StatusCode::SUCCESS;
   }
   
 } // Namespace

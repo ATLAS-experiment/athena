@@ -21,49 +21,49 @@ class chainString:
     self.extra   = ""
     self.passed  = ""
 
-    if ":" in input:
-        parts = input.split( ":" )
-    else:
-        parts = [ input ]
+    if ":" in input : parts = input.split( ":" )
+    else            : parts = [ input ]
 
-    for part in parts :
-        if part[-4:]==";DTE":
-           self.passed = True
-           part = part[0:-4]
-        if self.head == "":
-            self.head = part
-            continue
-        if "key=" in part:
-            self.tail = part[4:]
-        if "roi=" in part:
-            self.roi = part[4:]
-        if "vtx=" in part:
-            self.vtx = part[4:]
-        if "te=" in part:
-            self.element = part[3:]
-        if "extra=" in part:
-            self.extra = part[6:]
-    
+    if len(parts) == 1 : self.tail = parts[0]
+    else:
+        
+      self.head  = parts[0]
+        
+      for part in parts[1:]: 
+        if part.endswith(";DTE"):
+          self.passed = True
+          part = part[0:-4]
+        if part.startswith("key=")   : self.tail = part[4:]
+        if part.startswith("roi=")   : self.roi  = part[4:]
+        if part.startswith("vtx=")   : self.vtx  = part[4:]
+        if part.startswith("te=")    : self.element = part[3:]
+        if part.startswith("extra=") : self.extra   = part[6:]
+
+      if len(parts)>1 and self.tail==""    : self.tail = parts[1]
+      if len(parts)>2 and self.roi==""     : self.roi  = parts[2]
+      if len(parts)>3 and self.vtx==""     : self.vtx  = parts[3]
+      if len(parts)>4 and self.element=="" : self.element = parts[4]
+      if len(parts)>5 and self.extra==""   : self.extra   = parts[5]
+            
     stuff = [ self.roi, self.vtx, self.element, self.extra ]
 
     sum = self.head
 
     if  self.tail != "" :
-      if  sum == "" :
-        sum = self.tail
-      else:
-        sum += "_" + self.tail 
-
+      if  sum == "" : sum = self.tail
+      else          : sum += "_" + self.tail 
 
     for part in stuff:
         if part != "":
             sum += "_"+part
 
-    if self.passed: 
-        sum += "_DTE"
+    if self.passed: sum += "_DTE"
 
     self.sum = sum
 
+  def __str__(self) :
+    return self.summary()
+    
   # provide the summary    
   def summary( self ):
       return self.sum
@@ -78,7 +78,6 @@ class chainString:
       print( "  extra:  ", self.extra  )
       print( "  passed: ", self.passed )
       print( "  sum:    ", self.sum    )
-      print( "" )
 
 
 # provide the summary without needing the 

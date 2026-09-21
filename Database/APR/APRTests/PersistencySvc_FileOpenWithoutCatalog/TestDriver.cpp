@@ -13,12 +13,11 @@
 
 #include "PersistentDataModel/Placement.h"
 #include "PersistentDataModel/Token.h"
-#include "PersistencySvc/IFileCatalog.h"
-#include "PersistencySvc/ISession.h"
-#include "PersistencySvc/ITransaction.h"
-#include "PersistencySvc/IDatabase.h"
-#include "PersistencySvc/IContainer.h"
-#include "PersistencySvc/ITokenIterator.h"
+
+#include "PoolSvc/IContainer.h"
+#include "PoolSvc/IFileCatalog.h"
+#include "PoolSvc/ISession.h"
+#include "PoolSvc/ITokenIterator.h"
 
 #include "StorageSvc/DbType.h"
 
@@ -88,7 +87,7 @@ pool::TestDriver::write()
 
   // Committing the transaction
   std::cout << "Committing the transaction." << std::endl;
-  if( !dbsession->transaction().commit() ) {
+  if( !dbsession->commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }
 
@@ -159,7 +158,7 @@ pool::TestDriver::read(const std::string& fileName, pool::DatabaseSpecification:
   }
 
   std::cout << "Committing the transaction." << std::endl;
-  if( !dbsession->transaction().commit() ) {
+  if( !dbsession->commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }
 

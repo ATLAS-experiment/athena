@@ -8,6 +8,7 @@
  **/
 
 #include "PoolSvc.h"
+#include "ITechnologySpecificAttributes.h"
 
 #include "GaudiKernel/IIoComponentMgr.h"
 #include "GaudiKernel/ConcurrencyFlags.h"
@@ -17,12 +18,11 @@
 #include "PersistentDataModel/Placement.h"
 #include "PersistentDataModel/Token.h"
 
-#include "PersistencySvc/ISession.h"
-#include "PersistencySvc/IDatabase.h"
-#include "PersistencySvc/IContainer.h"
-#include "PersistencySvc/ITechnologySpecificAttributes.h"
-#include "PersistencySvc/ITokenIterator.h"
-#include "PersistencySvc/IFileCatalog.h"
+#include "PoolSvc/ISession.h"
+#include "PoolSvc/IDatabase.h"
+#include "PoolSvc/IContainer.h"
+#include "PoolSvc/ITokenIterator.h"
+#include "PoolSvc/IFileCatalog.h"
 
 #include "StorageSvc/DbType.h"
 #include "StorageSvc/DbPrint.h"
@@ -201,7 +201,7 @@ StatusCode PoolSvc::finalize() {
 StatusCode PoolSvc::io_finalize() {
    ATH_MSG_INFO("I/O finalization...");
    for (size_t i = 0; i < m_dbSessionVec.size(); i++) {
-      if ((m_dbSessionVec[i]->transaction().type() == Io::WRITE || m_dbSessionVec[i]->transaction().type() == Io::APPEND) &&
+      if ((m_dbSessionVec[i]->type() == Io::WRITE || m_dbSessionVec[i]->type() == Io::APPEND) &&
 	      !disconnect(i).isSuccess()) {
          ATH_MSG_WARNING("Cannot disconnect output Stream " << i);
       }
@@ -498,10 +498,10 @@ StatusCode PoolSvc::connect(Io::IoFlag type, unsigned int contextId) {
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
    auto session = m_dbSessionVec[contextId];
    // Connect to a logical database using the pre-defined technology and dbID
-   if (session->transaction().isActive()) {
+   if (session != nullptr && session->type() != Io::INVALID) {
       return(StatusCode::SUCCESS);
    }
-   if (!session->start(type)) {
+   if (session == nullptr || !session->start(type)) {
       ATH_MSG_ERROR("connect failed session = " << session << " type = " << type);
       return(StatusCode::FAILURE);
    }
@@ -515,12 +515,12 @@ StatusCode PoolSvc::commit(unsigned int contextId) const {
    }
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
    auto session = m_dbSessionVec[contextId];
-   if (session != nullptr && session->transaction().isActive()) {
+   if (session != nullptr && session->type() != Io::INVALID) {
       if (!session->commit()) {
          ATH_MSG_ERROR("POOL commit failed " << session);
          return(StatusCode::FAILURE);
       }
-      if (session->transaction().type() == Io::READ) {
+      if (session->type() == Io::READ) {
          session->disconnectAll();
       }
    }
@@ -533,7 +533,7 @@ StatusCode PoolSvc::commitAndHold(unsigned int contextId) const {
    }
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
    pool::ISession* session = m_dbSessionVec[contextId];
-   if (session != nullptr && session->transaction().isActive()) {
+   if (session != nullptr && session->type() != Io::INVALID) {
       if (!session->commitAndHold()) {
          ATH_MSG_ERROR("POOL commitAndHold failed " << session);
          return(StatusCode::FAILURE);
@@ -549,7 +549,7 @@ StatusCode PoolSvc::disconnect(unsigned int contextId) const {
    }
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
    pool::ISession* session = m_dbSessionVec[contextId];
-   if (session != nullptr && session->transaction().isActive()) {
+   if (session != nullptr && session->type() != Io::INVALID) {
       if (!commit(contextId).isSuccess()) {
          ATH_MSG_ERROR("disconnect failed to commit " << session);
          return(StatusCode::FAILURE);
@@ -618,7 +618,7 @@ StatusCode PoolSvc::getAttribute(const std::string& optName,
       return(StatusCode::FAILURE);
    }
    if (dbH->openMode() == Io::INVALID) {
-      if (m_dbSessionVec[contextId]->transaction().type() == Io::WRITE || m_dbSessionVec[contextId]->transaction().type() == Io::APPEND) {
+      if (m_dbSessionVec[contextId]->type() == Io::WRITE || m_dbSessionVec[contextId]->type() == Io::APPEND) {
          dbH->setTechnology(tech);
          dbH->connectForWrite();
       } else {
@@ -697,7 +697,7 @@ StatusCode PoolSvc::setAttribute(const std::string& optName,
       return(StatusCode::FAILURE);
    }
    if (dbH->openMode() == Io::INVALID) {
-      if (m_dbSessionVec[contextId]->transaction().type() == Io::WRITE || m_dbSessionVec[contextId]->transaction().type() == Io::APPEND) {
+      if (m_dbSessionVec[contextId]->type() == Io::WRITE || m_dbSessionVec[contextId]->type() == Io::APPEND) {
          dbH->setTechnology(tech);
          dbH->connectForWrite();
       } else {
@@ -707,7 +707,7 @@ StatusCode PoolSvc::setAttribute(const std::string& optName,
    bool retError = false;
    std::string objName;
    bool hasTTreeName = contName.starts_with("TTree=");
-   if (contName.empty() || hasTTreeName || m_dbSessionVec[contextId]->transaction().type() == Io::READ) {
+   if (contName.empty() || hasTTreeName || m_dbSessionVec[contextId]->type() == Io::READ) {
       objName = hasTTreeName ? contName.substr(6) : contName;
       if( !isNumber(data) ) {
          retError = dbH->technologySpecificAttributes().setAttribute(optName, data.c_str(), objName);
@@ -801,12 +801,16 @@ std::unique_ptr<pool::IDatabase> PoolSvc::getDbHandle(unsigned int contextId, co
       contextId = IPoolSvc::kInputStream;
    }
    pool::ISession* sesH = m_dbSessionVec[contextId];
-   if (!sesH->transaction().isActive()) {
+   if (!sesH){
+     ATH_MSG_ERROR("Session pointer is null.");
+     return nullptr;
+   }
+   if (sesH->type() == Io::INVALID) {
       Io::IoFlag transMode = Io::READ;
       ATH_MSG_DEBUG("Start transaction, type = " << transMode);
-      if (!sesH->transaction().start(transMode)) {
+      if (!sesH->start(transMode)) {
          ATH_MSG_WARNING("Failed to start transaction, type = " << transMode);
-         return(nullptr);
+         return nullptr;
       }
    }
    if (dbName.starts_with("PFN:")) {

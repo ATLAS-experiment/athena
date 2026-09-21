@@ -60,12 +60,13 @@ class ConfigBlockOption:
     """the information for a single option on a configuration block"""
 
     def __init__ (self, type=None, info='', noneAction='ignore', required=False,
-            default=None) :
+                  default=None, meta=None) :
         self.type = type
         self.info = info
         self.required = required
         self.noneAction = noneAction
         self.default = default
+        self.meta = meta # metadata used only for downstream applications (e.g. docs)
 
 
 
@@ -316,7 +317,8 @@ class ConfigBlock(metaclass=BlockNameProcessorMeta):
         return self._dependencies
 
     def addOption (self, name, defaultValue, *,
-                   type, info='', noneAction='ignore', required=False, expertMode=None) :
+                   type, info='', noneAction='ignore', required=False,
+                   expertMode=None, meta=None) :
         """declare the given option on the configuration block
 
         This should only be called in the constructor of the
@@ -345,9 +347,37 @@ class ConfigBlock(metaclass=BlockNameProcessorMeta):
                 # here we will check against a list of custom values
                 self._expertModeSettings[name] = expertMode
 
+        if meta is not None:
+            if not isinstance(meta, dict):
+                raise TypeError(f'meta must be a dictionary, got {type(meta)}')
+
+            unknown = set(meta) - {'choices', 'role'}
+            if unknown:
+                raise ValueError(f'meta received unknown keys: {unknown}')
+
+            if 'choices' in meta:
+                choices = meta['choices']
+                if (not isinstance(choices, tuple)
+                    or len(choices) != 2
+                    or not isinstance(choices[0], list)
+                    or not all(isinstance(choice, str) for choice in choices[0])
+                    or (choices[1] is not None and not isinstance(choices[1], int))
+                ):
+                    raise TypeError("meta['choices'] must be a (list[str], int | None) tuple")
+
+            if 'role' in meta:
+                role = meta['role']
+                if role not in {'container', 'containerRef', 'selection', 'region'}:
+                    # container: defines a new container name
+                    # containerRef: expects a container and possibly a selection, i.e. 'container' or 'container.selection'
+                    # selection: defines a new selection name
+                    # region: specifically for event selections
+                    raise ValueError(f"meta['role'] must be one of 'container', 'containerRef', 'selection', 'region', got '{role}'")
+
         setattr (self, name, defaultValue)
         self._options[name] = ConfigBlockOption(type=type, info=info,
-            noneAction=noneAction, required=required, default=defaultValue)
+                                                noneAction=noneAction, required=required,
+                                                default=defaultValue, meta=meta)
 
 
     def setOptionValue (self, name, value) :

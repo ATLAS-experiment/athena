@@ -79,6 +79,9 @@ class StructuredChainNames(MenuVerification):
         super(StructuredChainNames, self).__init__(
             description="Chain names are structured in the expected way")
         self._trigger_level = trigger_level
+        self._allowed_prefixes = [trigger_level.value]
+        if trigger_level == TriggerLevel.HLT:
+            self._allowed_prefixes.append("EF")
         self._signature_type_order = \
             self._SIGNATURE_TYPE_ORDER[trigger_level]
 
@@ -179,8 +182,8 @@ class StructuredChainNames(MenuVerification):
         parts = name.split("_")
 
         result= all((len(parts) > 1,
-                    parts[0] == self._trigger_level.value,
-                    are_signatures_in_order(parts[1:])))
+                        parts[0] in self._allowed_prefixes,
+                        are_signatures_in_order(parts[1:])))
         if not result:
             log.error("[StructuredChainNames::_matches_shared_conventions] chain deosn't match convention: parts[0] = %s, value = %s, parts[1:] = %s, signature_types = %s", 
                       parts[0], self._trigger_level.value, parts[1:], signature_types)

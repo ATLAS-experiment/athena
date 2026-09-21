@@ -13,23 +13,19 @@ class GeneratorSettingsKeep(str, Enum):
     """
     Which duplicate setting survives after layers are sorted by precedence.
 
-    Layers are resolved in increasing precedence order: BASE, TUNE, PROCESS,
-    then USER. A duplicate is either a parsed command with the same normalized
-    key, or an unparsed command with the same normalized full text.
+    Layers are resolved in increasing precedence order: BASE, then TUNE, then
+    USER. A duplicate is either a parsed command with the same normalized key,
+    or an unparsed command with the same normalized full text.
 
     FIRST keeps the first duplicate encountered. This preserves lower-precedence
     defaults when later layers repeat the same setting.
 
     LAST keeps the last duplicate encountered. This is the normal generator
-    behavior: each higher-precedence layer overrides the layers below it.
-
-    ALL preserves the command sequence within each layer, including repeated
-    operations such as Pythia's addChannel and onIfAny. Layers still execute
-    in precedence order; the generator interprets the commands itself.
+    behavior: tune settings override base settings, and user settings override
+    both.
     """
     FIRST = "first"
     LAST = "last"
-    ALL = "all"
 
 
 class GeneratorSettingsRecord(str, Enum):
@@ -56,7 +52,8 @@ class GeneratorSettingsPrecedence(IntEnum):
     """
     BASE = 10
     TUNE = 20
-    PROCESS = 25
+    MATCHING = 30
+    WEIGHTS = 40
     USER = 100
 
 
@@ -202,14 +199,6 @@ class GeneratorSettingsValue:
                 f"cannot merge generator settings with different parsing "
                 f"settings: "
                 f"{summary}"
-            )
-
-        if keep == GeneratorSettingsKeep.ALL:
-            # Operation sequences cannot be interpreted as independent settings:
-            # even a repeated identical operation may have a side effect.
-            return (
-                [command for layer in layers for command in layer.values],
-                _build_report([], [], []),
             )
 
         records = _build_records(layers, separators)

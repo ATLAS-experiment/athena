@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigVSIHypoAlg.h"
@@ -116,8 +116,9 @@ StatusCode TrigVSIHypoAlg::execute(const EventContext& context) const
       std::vector<const xAOD::Vertex*> selectedVtx;
       float maxVtxNTrk = 0.;
       float maxVtxMass = 0.;
-
+      //coverity[UNNECESSARY_STRING_COPY:FALSE]
       static const SG::ConstAccessor<float> vsi_massAcc ("vsi_mass");
+      //coverity[UNNECESSARY_STRING_COPY:FALSE]
       static const SG::ConstAccessor<float> vsi_pTAcc ("vsi_pT");
 
       // Loop over all vertices and combine them into the std::vector after preselection and create the input for the hypotool

@@ -89,7 +89,6 @@ def CalibratedJetCopyCfg(
     )
 
     acc = ComponentAccumulator()
-    acc.addPublicTool(jet_calib_tool)
     acc.addEventAlgo(
         CompFactory.CalibratedJetCopyAlg(
             f"CalibratedJetCopyAlg_{sanitizeName(outputCollection)}",

@@ -5,15 +5,17 @@
 #ifndef TRIGINDETEVENT_TRIGVERTEX_H
 #define TRIGINDETEVENT_TRIGVERTEX_H
 
-#include <list>
+
 
 #include "CLHEP/Geometry/Point3D.h"
 #include "TrigInDetEvent/TrigInDetTrack.h"
-#include <math.h>
+#include <cmath>
 #include <map>
-#include <ostream>
 #include <memory>
-#include "GaudiKernel/MsgStream.h"
+#include <vector>
+#include <list>
+
+class MsgStream;
 
 /** @class TrigVertex
     encapsulates LVL2 vertex parameters (in the global reference frame), 
@@ -112,11 +114,9 @@ class TrigVertex{
   // Destructor
   ~TrigVertex() 
     {
-      if (m_ownTracks) {
-        for (TrackInVertexList::iterator i = m_tracks->begin();
-             i != m_tracks->end();
-             ++i)
-          delete *i;
+      if (m_ownTracks && m_tracks) {
+        for (const auto* i : *m_tracks)
+          delete i;
       }
     }
 
@@ -185,7 +185,6 @@ class TrigVertex{
 std::string str( const TrigVertex& v );                      //<! printing helper
 MsgStream& operator<< ( MsgStream& m, const TrigVertex& v ); //<! printing helper (wraps above)
 bool operator== ( const TrigVertex& a, const TrigVertex& b ); 
-inline bool operator!= ( const TrigVertex& a, const TrigVertex& b ) { return !(a==b); }
 
 /** @brief comparison with feedback
  * Function compares two objects and returns "semi verbose" output 

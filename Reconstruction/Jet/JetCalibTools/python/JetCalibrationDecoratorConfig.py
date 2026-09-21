@@ -42,10 +42,10 @@ def JetCalibrationDecoratorCfg(
             f"JetCalibrationDecoratorAlg_{sanitizeName(jet_container)}_{safe_scale}",
             JetCalibrationTool=jet_calib_tool,
             JetContainer=jet_container,
-            ptCalibratedKey=f"{jet_container}.{calibrationScale}_pt",
-            etaCalibratedKey=f"{jet_container}.{calibrationScale}_eta",
-            phiCalibratedKey=f"{jet_container}.{calibrationScale}_phi",
-            massCalibratedKey=f"{jet_container}.{calibrationScale}_mass",
+            ptCalibratedKey=f"{calibrationScale}_pt",
+            etaCalibratedKey=f"{calibrationScale}_eta",
+            phiCalibratedKey=f"{calibrationScale}_phi",
+            massCalibratedKey=f"{calibrationScale}_mass",
         )
     )
 

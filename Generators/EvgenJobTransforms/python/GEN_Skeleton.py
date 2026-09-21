@@ -130,7 +130,7 @@ def setupSample(flags):
 def checkBlackList(cache, generatorName, checkType) :
     isError = None
     fileName = "BlackList_caches.txt" if checkType == "black" else "PurpleList_generators.txt"
-    with open(f"/cvmfs/atlas.cern.ch/repo/sw/Generators/MC16JobOptions/common/{fileName}") as bfile:
+    with open(f"/cvmfs/atlas.cern.ch/repo/sw/Generators/MCJobOptions/common/{fileName}") as bfile:
         for line in bfile.readlines():
             if not line.strip():
                 continue
@@ -178,11 +178,6 @@ def fromRunArgs(runArgs):
 
     # convert arguments to flags
     flags.fillFromArgs()
-
-    # Determine maximum number of events to generate
-    requested_max_events = flags.Exec.MaxEvents
-    # Event generation is not using standard event counting
-    flags.Exec.MaxEvents = -1
 
     # Create an instance of the Sample(EvgenCAConfig) and update global flags accordingly
     sample = setupSample(flags)
@@ -252,6 +247,10 @@ def fromRunArgs(runArgs):
     # Main object
     from AthenaConfiguration.MainServicesConfig import MainEvgenServicesCfg
     cfg = MainEvgenServicesCfg(flags, withSequences=True)
+    # We need to tell athena to continuously generate events until the 
+    # number of requested output events is reached. This is not necessarily
+    # equal to EvtMax (maxEvents) because of filters. 
+    cfg.setAppProperty("EvtMax", -1, overwrite=True)
 
     # Input file handling (if needed)
     if flags.Input.Files and not txt_only_mode:
@@ -340,7 +339,7 @@ def fromRunArgs(runArgs):
     from EvgenProdTools.EvgenProdToolsConfig import CountHepMCCfg
     requested_output = (
         1 if txt_only_mode else
-        (sample.nEventsPerJob if requested_max_events == -1 else requested_max_events)
+        (sample.nEventsPerJob if flags.Exec.MaxEvents == -1 else flags.Exec.MaxEvents)
     )
     count_kwargs = {"RequestedOutput": requested_output}
     if txt_only_mode:

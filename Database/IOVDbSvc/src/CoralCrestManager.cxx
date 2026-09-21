@@ -6,8 +6,8 @@
 // @author Evgeny Alexandrov
 // @date 24 February 2025
 
+#include "CxxUtils/checker_macros.h"
 #include "CoralCrestManager.h"
-#include <memory>
 #include "CrestApi/CrestApi.h"
 #include "CrestApi/CrestApiFs.h"
 #include "CoralBase/AttributeList.h"
@@ -21,34 +21,50 @@
 #include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/SystemOfUnits.h"
-
+#include <chai/Converter.h>
+#include <chai/Types.h>
+#include <typeinfo>
 namespace{
-  const std::map<std::string, cool::StorageType::TypeId> typeCorrespondance={
-      {"Bool", cool::StorageType::Bool},
-      {"UChar",cool::StorageType::UChar},
-      {"Int16", cool::StorageType::Int16},
-      {"UInt16", cool::StorageType::UInt16},
-      {"Int32", cool::StorageType::Int32},
-      {"UInt32", cool::StorageType::UInt32},
-      {"UInt63",cool::StorageType::UInt63},
-      {"Int64", cool::StorageType::Int64},
-      {"Float", cool::StorageType::Float},
-      {"Double", cool::StorageType::Double},
-      {"String255", cool::StorageType::String255},
-      {"String4k", cool::StorageType::String4k},
-      {"String64k", cool::StorageType::String64k},
-      {"String16M", cool::StorageType::String16M},
-      {"String128M", cool::StorageType::String128M},
-      {"String",cool::StorageType::String128M},
-      {"Blob64k", cool::StorageType::Blob64k},
-      {"Blob16M", cool::StorageType::Blob16M},
-      {"Blob128M", cool::StorageType::Blob128M},
-      {"Blob", cool::StorageType::Blob128M}
+  // The COOL storage type whose C++ type CORAL should use for each CHAI payload type.
+  // Going through COOL keeps the CORAL column types identical to those the folder
+  // carried in COOL. Only one representative per CHAI type is needed: an
+  // AttributeListSpecification records the C++ type alone, and every String variant
+  // yields std::string while every Blob variant yields coral::Blob, so the COOL width
+  // never reaches CORAL.
+  const std::map<chai::Type, cool::StorageType::TypeId> coolTypeForChaiType={
+      {chai::Bool, cool::StorageType::Bool},
+      {chai::UInt8, cool::StorageType::UChar},
+      {chai::Int16, cool::StorageType::Int16},
+      {chai::UInt16, cool::StorageType::UInt16},
+      {chai::Int32, cool::StorageType::Int32},
+      {chai::UInt32, cool::StorageType::UInt32},
+      {chai::UInt64, cool::StorageType::UInt63},
+      {chai::Int64, cool::StorageType::Int64},
+      {chai::Float, cool::StorageType::Float},
+      {chai::Double, cool::StorageType::Double},
+      {chai::String, cool::StorageType::String16M},
+      {chai::Blob, cool::StorageType::Blob128M}
     };
-    
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// @brief  Find the C++ type CORAL uses for a payload spec column
+  /// @param  type - CHAI type parsed from the CREST tag's payload spec
+  /// @return Pointer to the type_info an AttributeListSpecification is extended
+  ///         with, or nullptr if the type has no CORAL equivalent.
+  ////////////////////////////////////////////////////////////////////////////////
+  const std::type_info * coralTypeFor(chai::Type type){
+    // Int8 is the one CHAI type COOL cannot express, so it never arrives from a
+    // COOL-migrated tag. Map it directly for the sake of natively created CREST tags.
+    if (type == chai::Int8) return &typeid(char);
+    auto it = coolTypeForChaiType.find(type);
+    if (it == coolTypeForChaiType.end()) return nullptr;
+    return &cool::StorageType::storageType(it->second).cppType();
+  }
+
     const std::string colonDelimiter{" : "};
 }
- CoralCrestManager::CoralCrestManager(const std::string & crest_path, const std::string & crestTag):m_crestTag(crestTag){ //AthMessaging("CoralCrestManager")
+
+ CoralCrestManager::CoralCrestManager(const std::string & crest_path, const std::string & crestTag):m_crestTag(crestTag),m_id(Crest::ModeId::Standard){ //AthMessaging("CoralCrestManager")
     if(crest_path.length()==0)
       return;
     if (crest_path.starts_with(CoralCrestManager::prefix1) || crest_path.starts_with(CoralCrestManager::prefix2)){
@@ -57,7 +73,6 @@ namespace{
     else{
       m_crestCl = std::make_unique<Crest::CrestApiFs>(Crest::CrestApiFs(false,crest_path));
     }
-
   }
 
   std::map<std::string, std::string> CoralCrestManager::getGlobalTagMap(const std::string & crest_path, const std::string& globaltag){
@@ -72,7 +87,7 @@ namespace{
     try{
       Crest::GlobalTagMapSetDto dto = crestCl->findGlobalTagMap(globaltag,"Trace");
       for (const auto &tagMapDto : dto.getResources()){
-	tagmap[tagMapDto.getLabel()]=tagMapDto.getTagName();
+        tagmap[tagMapDto.getLabel()]=tagMapDto.getTagName();
       }
     } catch (std::exception & e){
       MsgStream gLog(Athena::getMessageSvc(), "CoralCrestManager");
@@ -102,7 +117,9 @@ namespace{
     std::vector< std::pair<std::string,std::string> > spec= info.getPayloadSpec().getColumns();
     std::vector< std::pair<std::string,std::string> > chs = info.getChannels().getChannels();
     for (auto &p : spec){
-      if(p.first=="PoolRef" && p.second=="String4k"){
+      // Match on any string width: a POOL reference is String4k in COOL, but a CREST
+      // payload spec may name the type generically as "String".
+      if(p.first=="PoolRef" && chai::typeFromString(p.second)==chai::String){
         int id=std::stoll(chs[0].first);
         if(chs.size()==1 && id==0)
           return IOVDbNamespace::PoolRef;
@@ -175,31 +192,41 @@ namespace{
     std::vector< std::pair<std::string,std::string> > spec_vec= info.getPayloadSpec().getColumns();
     auto * spec = new coral::AttributeListSpecification();
     for (auto &p : spec_vec){
-      auto it = typeCorrespondance.find(p.second);
-      if (it != typeCorrespondance.end()) {
-        spec->extend(p.first,cool::StorageType::storageType(it->second).cppType());
+      const std::type_info * coralType = coralTypeFor(chai::typeFromString(p.second));
+      if (coralType == nullptr){
+        // Skipping the column instead would leave an AttributeList missing a field that
+        // the consuming algorithm looks up by name, which surfaces far downstream as an
+        // opaque CORAL "variable does not exist" error. Fail at the source instead.
+        spec->release();
+        const std::string errorMessage("Unsupported type \"" + p.second + "\" for payload spec column \"" + p.first + "\" of CREST tag " + m_crestTag);
+        MsgStream gLog(Athena::getMessageSvc(), "CoralCrestManager");
+        gLog << MSG::ERROR << "getAttributeListSpec: " << errorMessage << endmsg;
+        throw std::runtime_error(errorMessage);
       }
+      spec->extend(p.first,*coralType);
     }
     return spec;
   }
-
-  void CoralCrestManager::initCrestContainer(){
-    if(m_crest_cont.has_value())
+  void CoralCrestManager::initChaiContainer(){
+    if(m_chai_cont.has_value()){
       return;
+    }
     Crest::TagInfoDto info = getTagInfoDto();
     Crest::TagDto tag = getTagDto();
-    Crest::ModeId mId=Crest::ModeId::Standard;
-    if(tag.getObjectType()=="crest-json-multi-iov")
-      mId=Crest::ModeId::DCS_FULL;
-    Crest::CrestContainer cr_cont(mId);
-    std::vector< std::pair<std::string,std::string> > spec= info.getPayloadSpec().getColumns();
-    for (auto &p : spec){
-      cr_cont.addColumn(p.first,p.second.c_str());
+    const std::string & objectType = tag.getObjectType();
+    if(objectType=="crest-json-multi-iov-sparse"){
+      m_id=Crest::ModeId::DCS_FULL_SPARSE;
     }
-    if(!m_isVectorPayload.has_value()) determineFolderType();
-    cr_cont.setVectorPayload(m_isVectorPayload.value());
-    m_crest_cont.emplace(cr_cont);
-    return;
+    else if(objectType=="crest-json-multi-iov"){
+      // Transitional heuristic, mirroring chai::Tag::initConverterFromObjectType():
+      // a multi-channel block in the unsuffixed format is delta encoded all the same,
+      // so it still needs the sparse converter. Only a single-channel block is dense.
+      // Retire this branch once every such tag in CREST carries the "-sparse" suffix
+      // and the objectType alone is authoritative.
+      const bool multiChannel = info.getChannels().getChannels().size() > 1;
+      m_id = multiChannel ? Crest::ModeId::DCS_FULL_SPARSE : Crest::ModeId::DCS_FULL;
+    }
+    m_chai_cont.emplace();
   }
 
   std::pair<uint64_t,uint64_t>
@@ -240,7 +267,7 @@ namespace{
   }
 
   std::vector<std::pair<cool::ValidityKey,std::string>> CoralCrestManager::getIovsForTag(uint64_t since, uint64_t until){
-    initCrestContainer();
+    initChaiContainer();	  
     int iovNumber = m_crestCl->getSize(m_crestTag);
     std::vector<std::pair<cool::ValidityKey,std::string>> res;
     Crest::IovSetDto dto;
@@ -266,7 +293,7 @@ namespace{
   }
   
   std::vector<uint64_t> CoralCrestManager::loadPayloadForHash(uint64_t since, const std::string & hash){
-    initCrestContainer();
+    initChaiContainer();
     std::string reply;
     try{
 	// get payload from Crest server
@@ -277,10 +304,52 @@ namespace{
         throw std::runtime_error(e.what());
     }
     try{
-      // parse payload according to type of payload  and put it to CrestConteiner. 
-      // Store only one value before 'since'. 
-      // Returns a list of timestamp for which data has been loaded 	    
-      return m_crest_cont.value().fromJson(since,reply);
+      Crest::TagInfoDto info = getTagInfoDto();
+      nlohmann::json j_spec=info.getPayloadSpec().toJson();
+      nlohmann::json j_chs=info.getChannels().toJson();
+      chai::PayloadSpec chaiSpec(j_spec,j_chs);
+      nlohmann::json j = reply;
+      if (j.is_string()){
+         std::istringstream ss(to_string(j));
+         std::string st;
+         ss >> std::quoted(st);
+         j = json::parse(st);
+      }
+      m_since=since;
+      if(m_id==Crest::ModeId::Standard){
+      	if(isVectorPayload()){
+          std::shared_ptr<chai::VectorContainer> cont = std::make_shared<chai::VectorContainer>(chai::VectorContainer::fromJson(j,chaiSpec));
+          m_chai_cont->insert(std::pair<uint64_t,chai::ContainerBasePtr>(since,cont));
+    	}
+	else{
+          std::shared_ptr<chai::Container> cont = std::make_shared<chai::Container>(chai::Container::fromJson(j,chaiSpec));
+          m_chai_cont->insert(std::pair<uint64_t,chai::ContainerBasePtr>(since,cont));
+  	}
+	std::vector<uint64_t> res;
+	res.push_back(m_since);
+	return res;
+      }
+      else{
+        std::unique_ptr<chai::ClobMultiIovConverter> converter;
+        if(m_id==Crest::ModeId::DCS_FULL_SPARSE)
+          converter = std::make_unique<chai::JsonMultiIovSparseConverter>(chaiSpec);
+        else
+          converter = std::make_unique<chai::JsonMultiIovConverter>(chaiSpec);
+        std::unique_ptr<chai::ContainerMapBase> chai_map_cont = converter->deserialize(j.dump());
+        std::vector<uint64_t> res=chai_map_cont->keys();
+        for(auto const& key: res){
+	  chai::ConstContainerPtr const_cont = chai_map_cont->getContainer(key);
+	  // Share the map's control block rather than building a second one over the same
+	  // object: chai_map_cont is destroyed on leaving this scope, and a shared_ptr built
+	  // from the bare pointer would own the Container all over again and free it twice.
+	  // Dropping const is safe because every consumer of m_chai_cont only reads. It has
+	  // to stay read-only: a sparse block shares its Values between sub-IOVs, so writing
+	  // through one Container would silently alter the others.
+	  chai::ContainerPtr cont ATLAS_THREAD_SAFE = std::const_pointer_cast<chai::Container>(const_cont);
+	  m_chai_cont->insert(std::pair<uint64_t,chai::ContainerBasePtr>(key,cont));
+	}
+        return res;
+      }
     } catch (std::exception & e){ 
 	MsgStream gLog(Athena::getMessageSvc(), "CoralCrestManager");
         gLog << MSG::ERROR << "LoadPayloadForHash:"<<e.what()<<" while trying to parse the payload. Since="<<since<<", hash="<<hash<<endmsg;
@@ -290,14 +359,13 @@ namespace{
 
   //put payload for selected since in json string
   std::string CoralCrestManager::dumpPayload(cool::ValidityKey since){
-    m_crest_cont.value().selectIov(since);
+    std::vector<std::string> chIds=channelIds(since);
     IOVDbNamespace::FolderType ftype=determineFolderType();
     std::stringstream res;
     res<<"[";
-    std::vector<std::string> chIds = m_crest_cont.value().channelIds();
     auto* pspec=getAttributeListSpec();
     std::string sep="";
-    for (auto &ch : chIds){
+    for (auto &ch : chIds){	    
       res<<sep;
       res<<IOVDbNamespace::s_openJson<<"\""<<ch<<"\" : ";
       switch  (ftype){
@@ -345,175 +413,170 @@ namespace{
     pspec->release();
     return res.str();
   }
-
   coral::AttributeList CoralCrestManager::getPayload(coral::AttributeListSpecification * pSpec,const std::string & chId){
-    nlohmann::json j=m_crest_cont.value().getPayloadChannel(chId.c_str());
-    return createAttributeList(pSpec,j,m_crest_cont.value().getMPayloadSpec());
+    chai::ContainerBasePtr cont=m_chai_cont->operator[](m_since);
+    if(cont==nullptr){
+       std::string errorMessage("Timestamp not found! timestamp=" + std::to_string(m_since));
+       MsgStream gLog(Athena::getMessageSvc(), "CoralCrestManager");
+       gLog << MSG::ERROR << "getPayload:" <<errorMessage<<endmsg;
+       throw std::runtime_error(errorMessage);
+    }
+    uint64_t id = std::stoul(chId);
+    chai::Container* cont2 = dynamic_cast<chai::Container*>(cont.get());
+    chai::Values& row = cont2->at(id);
+    return createAttributeList(pSpec,row);
+
   }
 
   std::vector<coral::AttributeList> CoralCrestManager::getVectorPayload(coral::AttributeListSpecification*  pSpec,const std::string & chId){
     std::vector<coral::AttributeList> res;
-    nlohmann::json vecJ=m_crest_cont.value().getPayloadChannel(chId.c_str());
-    for (auto &p : vecJ){
-      coral::AttributeList att=createAttributeList(pSpec,p,m_crest_cont.value().getMPayloadSpec());
+    uint64_t id = std::stoul(chId);
+    chai::ContainerBasePtr cont=m_chai_cont->operator[](m_since);
+    if(cont==nullptr){
+      std::string errorMessage("Timestamp not found! timestamp=" + std::to_string(m_since));
+      MsgStream gLog(Athena::getMessageSvc(), "CoralCrestManager");
+      gLog << MSG::ERROR << "getPayload:" <<errorMessage<<endmsg;
+      throw std::runtime_error(errorMessage);
+    }
+    chai::VectorContainer* cont2 = dynamic_cast<chai::VectorContainer*>(cont.get());
+    const std::vector<chai::ValuesPtr>& rows = cont2->rows(id);
+    for (auto &row : rows){
+      chai::Values* val = row.get();
+      coral::AttributeList att=createAttributeList(pSpec,*val);
       res.push_back(att);
     }
     return res;
   }
 
   void CoralCrestManager::selectIov(cool::ValidityKey since){
-    m_crest_cont.value().selectIov(since);
+    m_since=since;
   }
 
   std::vector<std::string> CoralCrestManager::channelIds(cool::ValidityKey since){
     selectIov(since);
-    return m_crest_cont.value().channelIds();
+    std::vector<std::string>	chIds;
+    std::vector<uint64_t> channels;
+    chai::ContainerBasePtr  cont=m_chai_cont->operator[](since);
+    if(cont==nullptr)
+      return chIds;
+    if(chai::Container* v = dynamic_cast<chai::Container*>(cont.get())) 
+      channels=v->channelIds();
+    else if(chai::VectorContainer* v = dynamic_cast<chai::VectorContainer*>(cont.get()))
+      channels=v->channelIds();    
+    //channels=cont->channelSpec().ids();    
+    /*if(isVectorPayload()){
+      ContainerBasePtr  cont=m_chai_cont->getVectorContainer(since);
+      if(cont==nullptr)
+        return chIds;
+      channels = cont->channelIds();     
+    }
+    else{
+      chai::ConstContainerPtr cont=m_chai_cont->getContainer(since);
+      if(cont==nullptr)
+        return chIds;
+      channels = cont->channelIds();		;      
+    }*/
+    for (auto id : channels) {
+      //if(cont.get()->at(id).size()==0)
+	//continue;
+      chIds.push_back(std::to_string(id));
+    }
+    return chIds;
   }
 
-  coral::AttributeList CoralCrestManager::createAttributeList(coral::AttributeListSpecification * pSpec,nlohmann::json& j,const std::vector<std::pair<std::string, Crest::TypeId>> & tSpec){
+  coral::AttributeList CoralCrestManager::createAttributeList(coral::AttributeListSpecification * pSpec, chai::Values& row){
     coral::AttributeList attr(*pSpec,true);
     unsigned int s=attr.size();
-
-    json::const_iterator it = j.begin();
     for (unsigned int i(0);i!=s;++i){
-      // cool::Record does not provide non-const access to AttributeList.
-      // But this is safe because we are filling a local instance.    
-      auto & att = const_cast<coral::Attribute&>(attr[i]);
-      if (it == j.end()){
+      //cool::Record does not provide non-const access to AttributeList.
+      // But this is safe because we are filling a local instance.	    
+      auto & att ATLAS_THREAD_SAFE = const_cast<coral::Attribute&>(attr[i]);
+      if (row.isNull(i)){
+        att.setNull();
         continue;
       }
-      const auto  thisVal = it.value();
-      ++it;
-
-      try{
-        if (thisVal.is_null()){
-          att.setNull();
-          continue;
+      chai::Type type = row.type(att.specification().name());
+      switch (type) {
+        case chai::Bool:
+        {
+          att.setValue<bool>(row.get<bool>(att.specification().name()));
+          break;
         }
-        cool::StorageType::TypeId typespec=cool::StorageType::Bool;
-        for(auto &p : tSpec){
-          if(p.first.compare(att.specification().name())==0){
-            auto pElement = Crest::s_typeToString.find(p.second);
-            if (pElement == Crest::s_typeToString.end()){
-              throw std::runtime_error("CoralCrestManager::createAttributeList: name not found.");
-            }
-            std::string str_spec = pElement ->second;
-            auto pTypespec = typeCorrespondance.find(str_spec);
-            if (pTypespec == typeCorrespondance.end()){
-              throw std::runtime_error("CoralCrestManager::createAttributeList: typespec not found.");
-            }
-            typespec=pTypespec->second;
-            break;
-          }
+        case chai::Int8:
+	{
+	  att.setValue<char>(row.get<int8_t>(att.specification().name()));
+	  break;
+	}
+	case chai::UInt8:
+	{
+	  att.setValue<unsigned char>(row.get<uint8_t>(att.specification().name()));
+	  break;
+	}
+	case chai::UInt16:
+	{
+	  att.setValue<unsigned short>(row.get<uint16_t>(att.specification().name()));
+	  break;
+	}
+	case chai::Int16:
+	{
+	  att.setValue<short>(row.get<int16_t>(att.specification().name()));
+	  break;
+	}
+        case chai::UInt32:
+        {
+          att.setValue<unsigned int>(row.get<uint32_t>(att.specification().name()));
+          break;
         }
-        std::string strVal = to_string(thisVal);
-        if(strVal.size()>2&& strVal[0]=='"'&& strVal[strVal.size()-1]=='"')
-          strVal=strVal.substr(1,strVal.size()-2);
-
-        if((strVal.compare("NULL")==0||strVal.compare("null")==0)&&
-          (typespec==cool::StorageType::Bool || typespec==cool::StorageType::Int16 || typespec==cool::StorageType::UInt16
-          || typespec==cool::StorageType::Int32 || typespec==cool::StorageType::UInt32
-          || typespec==cool::StorageType::Int64 || typespec==cool::StorageType::UInt63
-          || typespec==cool::StorageType::Float || typespec==cool::StorageType::Double)){
-          att.setNull();
-          continue;
+        case chai::Int32:
+        {
+          att.setValue<int>(row.get<int32_t>(att.specification().name()));
+          break;
         }
-        switch (typespec) {
-        case cool::StorageType::Bool:
-          {
-            const bool newVal=(strVal == "true");
-            att.setValue<bool>(newVal);
-            break;
-          }
-        case cool::StorageType::UChar:
-          {
-            const unsigned char newVal=std::stoul(strVal);
-            att.setValue<unsigned char>(newVal);
-            break;
-          }
-        case cool::StorageType::Int16:
-          {
-            const short newVal=std::stol(strVal);
-            att.setValue<short>(newVal);
-            break;
-          }
-        case cool::StorageType::UInt16:
-          {
-            const unsigned short newVal=std::stoul(strVal);
-            att.setValue<unsigned short>(newVal);
-            break;
-          }
-        case cool::StorageType::Int32:
-          {
-            const int newVal=std::stoi(strVal);
-            att.setValue<int>(newVal);
-            break;
-          }
-        case cool::StorageType::UInt32:
-          {
-            const unsigned int newVal=std::stoull(strVal);
-            att.setValue<unsigned int>(newVal);
-            break;
-          }
-        case cool::StorageType::UInt63:
-          {
-            const  unsigned long long newVal=std::stoull(strVal);
-            att.setValue<unsigned long long>(newVal);
-            break;
-          }
-        case cool::StorageType::Int64:
-          {
-            const  long long newVal=std::stoll(strVal);
-            att.setValue< long long>(newVal);
-            break;
-          }
-        case cool::StorageType::Float:
-          {
-            const  float newVal=std::stof(strVal);
-            att.setValue<float>(newVal);
-            break;
-          }
-        case cool::StorageType::Double:
-          {
-            const  double newVal=std::stod(strVal);
-            att.setValue<double>(newVal);
-            break;
-          }
-        case cool::StorageType::String255:
-        case cool::StorageType::String4k:
-        case cool::StorageType::String64k:
-        case cool::StorageType::String16M:
-        case cool::StorageType::String128M:
-          {
-            att.setValue<std::string>(thisVal.get<std::string>());
-            break;
-          }
-        case cool::StorageType::Blob128M:
-        case cool::StorageType::Blob16M:
-        case cool::StorageType::Blob64k:
-          {
-            const auto &charVec = CxxUtils::base64_decode(strVal);
-            coral::Blob blob(charVec.size());
+        case chai::UInt64:
+        {
+          att.setValue<unsigned long long>(row.get<uint64_t>(att.specification().name()));
+          break;
+        }
+        case chai::Int64:
+        {
+          att.setValue<long long>(row.get<int64_t>(att.specification().name()));
+          break;
+        }
+        case chai::Float:
+        {
+          att.setValue<float>(row.get<float>(att.specification().name()));
+          break;
+        }
+        case chai::Double:
+        {
+          att.setValue<double>(row.get<double>(att.specification().name()));
+          break;
+        }
+        case chai::String:
+        {
+          att.setValue<std::string>(row.get<std::string>(att.specification().name()));
+          break;
+        }
+        case chai::Blob:
+        {
+          const auto &charVec = row.get<chai::BlobData>(att.specification().name()).m_bytes;//CxxUtils::base64_decode(strVal);
+          coral::Blob blob(charVec.size());
+          if (!charVec.empty()) {  // Avoid ubsan warning.
             memcpy(blob.startingAddress(), charVec.data(), charVec.size());
-            att.setValue<coral::Blob>(blob);
-            break;
           }
-        default:
-          {
-	    std::string errorMessage("UNTREATED TYPE! " + std::to_string(typespec));  
-            MsgStream gLog(Athena::getMessageSvc(), "CoralCrestManager");
-	    gLog << MSG::ERROR << "LoadPayloadForHash:" <<errorMessage<<endmsg;
-            throw std::runtime_error(errorMessage);
-          }
+          att.setValue<coral::Blob>(blob);		  
+          break;
         }
-      }
-      catch (json::exception& e){
-        MsgStream gLog(Athena::getMessageSvc(), "CoralCrestManager");
-        gLog << MSG::ERROR << "Error CoralCrestManager::createAttributeList: "<<e.what()<<endmsg;
-        throw std::runtime_error(e.what());
+        case chai::Unknown:
+        {
+          std::string errorMessage("UNTREATED TYPE! " + std::to_string(type));
+          MsgStream gLog(Athena::getMessageSvc(), "CoralCrestManager");
+          gLog << MSG::ERROR << "LoadPayloadForHash:" <<errorMessage<<endmsg;
+          throw std::runtime_error(errorMessage);
+        }
       }
     }
-    return attr;
+    return attr; 
   }
 
 

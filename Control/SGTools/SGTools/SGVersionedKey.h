@@ -11,6 +11,7 @@
 #define SGTOOLS_VERSIONEDKEY_H 1
 #include <iostream>
 #include <string>
+#include <format>
 class StoreGateSvc; //our friend
 class SGImplSvc; //our friend
 namespace SG {
@@ -115,8 +116,21 @@ namespace SG {
   inline
     std::ostream& operator <<(std::ostream& ost, const SG::VersionedKey& k) {
     return ost << k.rawVersionKey();
-    //  return ost.write(k.rawVersionKey(), strlen(k.rawVersionKey()));
   }
+}
+
+/// C++20 style formatter.
+namespace std {
+template <>
+struct formatter<SG::VersionedKey>
+  : public formatter<string_view>
+{
+  template <class FmtContext>
+  FmtContext::iterator format(const SG::VersionedKey& k, FmtContext& ctx) const
+  {
+    return formatter<string_view>::format (k.rawVersionKey(), ctx);
+  }
+};
 }
 
 #endif

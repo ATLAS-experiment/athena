@@ -16,7 +16,7 @@ def actsProductionFlags(flags) -> None:
     flags.Tracking.doITkFastTracking = True
     # Configurations
     # - calibration strategy is set centrally
-    # - seeding strategy set by the user: default is GridTriplet
+    # - seeding strategy set by the user: default is GBTS
     flags.Tracking.doPixelDigitalClustering = lambda pcf: pcf.GeoModel.Run >= LHCPeriod.Run4    
     # e-gamma components
     flags.Acts.GsfRefitActs = True
@@ -42,7 +42,6 @@ def actsInnerDetectorWorkflowFlags(flags) -> None:
     flags.Tracking.recoChain = [TrackingComponent.ActsChain]
         
 def actsHeavyIonFlags(flags) -> None:
-    flags.Reco.EnableHGTDExtension = False
     flags.Tracking.recoChain = [TrackingComponent.ActsHeavyIon]
     flags.Tracking.doITkFastTracking = False
 

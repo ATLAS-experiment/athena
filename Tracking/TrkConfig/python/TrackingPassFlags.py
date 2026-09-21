@@ -585,6 +585,7 @@ def createITkConversionTrackingPassFlags():
     icf.minPT                   = lambda pcf: (
         [0.9 * Units.GeV * pcf.BField.configuredSolenoidFieldScale])
     icf.maxPrimaryImpact        = [10.0 * Units.mm]
+    icf.maxPrimaryImpactSeed    = 10.0 * Units.mm
     icf.maxZImpact              = [150.0 * Units.mm]
     icf.minClusters             = [6]
     icf.minSiNotShared          = [6]

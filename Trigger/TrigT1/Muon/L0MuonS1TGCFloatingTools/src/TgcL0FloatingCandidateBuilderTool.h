@@ -5,7 +5,7 @@
 #define L0MUONS1TGCFLOATINGTOOLS_TGCL0FLOATINGCANDIDATEBUILDERTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "L0MuonS1TGCToolInterfaces/ITgcL0CandidateBuilderTool.h"
+#include "L1MuonS1TGCToolInterfaces/ITgcL0CandidateBuilderTool.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonTGC_Cabling/TgcCablingMap.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
@@ -61,7 +61,7 @@ class TgcL0FloatingCandidateBuilderTool final
 
   Gaudi::Property<std::string> m_ptCalibrationFile{
       this, "PtCalibrationFile",
-      "L0MuonS1TGC/Floating/eta18_phi8_poormag0p10_v1/"
+      "L0MuonS1TGC/Floating/eta30_phi20_rel95_physicaldtheta_v2_goodmag_eta20_phi18_slope0p090_v4/"
       "TgcL0PtCalibration.txt",
       "ASCII Floating-pT calibration path relative to the GroupData "
       "development directory"};
@@ -69,7 +69,7 @@ class TgcL0FloatingCandidateBuilderTool final
 
   Gaudi::Property<std::string> m_goodMagMapFile{
       this, "GoodMagMapFile",
-      "L0MuonS1TGC/Floating/eta18_phi8_poormag0p10_v1/"
+      "L0MuonS1TGC/Floating/eta30_phi20_rel95_physicaldtheta_v2_goodmag_eta20_phi18_slope0p090_v4/"
       "TgcL0PoorMagneticFieldMap.txt",
       "ASCII GoodMag map path relative to the GroupData development "
       "directory"};

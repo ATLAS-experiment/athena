@@ -19,7 +19,6 @@
 #include "AthContainers/ConstAccessor.h"
 #include "AthLinks/ElementLink.h"
 #include "AthenaKernel/errorcheck.h"
-#include "CxxUtils/StrFormat.h"
 #include "GaudiKernel/System.h"
 #include <memory>
 #include <sstream>

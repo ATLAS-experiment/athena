@@ -18,14 +18,11 @@
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "Identifier/IdentifierHash.h"
 #include "LArHEC_region.h"
-#include "CxxUtils/StrFormat.h"
 #include "CxxUtils/trapping_fp.h"
 
 #include <cmath>
 #include <set>
 #include <string>
-
-using CxxUtils::strformat;
 
 
 LArHEC_Base_ID::LArHEC_Base_ID (const std::string& name,

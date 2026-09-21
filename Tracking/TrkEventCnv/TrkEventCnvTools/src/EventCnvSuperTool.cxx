@@ -13,31 +13,6 @@
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
 #include "TrkSurfaces/Surface.h"
 
-Trk::EventCnvSuperTool::EventCnvSuperTool(const std::string& t,
-                                          const std::string& n,
-                                          const IInterface* p)
-    : base_class(t, n, p),
-      m_detID(nullptr),
-      m_haveIdCnvTool(false),    // Will be set to true on retrieval
-      m_haveMuonCnvTool(false),  // Will be set to true on retrieval
-      m_doMuons(true),
-      m_doID(true),
-      m_doTrackOverlay(false),
-      m_errCount(0),
-      m_maxErrCount(10) {
-  declareProperty("DoMuons", m_doMuons,
-                  "If true (default), attempt to retrieve Muon helper tool and "
-                  "convert Muon objects.");
-  declareProperty("DoID", m_doID,
-                  "If true (default), attempt to retrieve Inner Detector "
-                  "helper tool and convert ID objects.");
-  declareProperty("DoTrackOverlay", m_doTrackOverlay,
-                  "If true, ID on-track conversion tools will look for "
-                  "background PRD collections");
-  declareProperty("MaxErrorCount", m_maxErrCount,
-                  "Maximum number of errors that will be reported");
-}
-
 Trk::EventCnvSuperTool::~EventCnvSuperTool() {
   if (m_errCount > m_maxErrCount)
     ATH_MSG_WARNING("Suppressed " << (m_errCount - m_maxErrCount)

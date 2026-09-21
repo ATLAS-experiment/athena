@@ -155,7 +155,7 @@ def ActsMainTrackFindingAlgCfg(flags,
     ### kwargs.setdefault("maxSharedHits", tolist(flags.Tracking.ActiveConfig.maxShared))
 
     # GBTS produces much purer seeds, so the branch stopper selections aren't needed with GBTS seeds.
-    if flags.Tracking.ActiveConfig.SeedingStrategy not in [
+    if flags.Tracking.ActiveConfig.PixelSeedingStrategy not in [
             SeedingStrategy.GbtsFtf, SeedingStrategy.Gbts]:
         kwargs.setdefault("ptMinMeasurements", seedOrder(flags, pixel=[3], strip=[6]))
         kwargs.setdefault("absEtaMaxMeasurements", seedOrder(flags, pixel=[3], strip=[999999]))
@@ -182,11 +182,11 @@ def ActsMainTrackFindingAlgCfg(flags,
         from AthenaConfiguration.Enums import BeamType
 
         if flags.Beam.Type is not BeamType.Cosmics and flags.Acts.PixelCalibrationStrategy.usesCalibration():
-            from ActsConfig.ActsMeasurementCalibrationConfig import ActsAnalogueClusteringToolCfg
+            from ActsConfig.ActsMeasurementCalibrationConfig import ActsPixelCalibrationToolCfg
 
             kwargs.setdefault(
                 'PixelCalibrator',
-                acc.popToolsAndMerge(ActsAnalogueClusteringToolCfg(flags))
+                acc.popToolsAndMerge(ActsPixelCalibrationToolCfg(flags))
             )
 
     if 'StripCalibrator' not in kwargs:
@@ -231,12 +231,9 @@ def ActsTrackFindingCfg(flags,
     # Understand what are the seeds we need to consider
     pixelSeedLabels = ['PPP']
     stripSeedLabels = ['SSS']
-    # Conversion and LRT do not process pixel seeds
-    from InDetConfig.ITkActsHelpers import isFastPrimaryPass
-    if flags.Tracking.ActiveConfig.extension == 'ActsConversion' or flags.Tracking.ActiveConfig.isLargeD0:
+    if not flags.Tracking.ActiveConfig.useITkPixelSeeding:
         pixelSeedLabels = None
-    # Main pass does not process strip seeds in the fast tracking configuration
-    elif isFastPrimaryPass(flags):
+    if not flags.Tracking.ActiveConfig.useITkStripSeeding:
         stripSeedLabels = None
 
     # Now set the seed and estimated parameters keys accordingly
@@ -266,6 +263,9 @@ def ActsTrackFindingCfg(flags,
         from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
         if flags.Tracking.ActiveConfig.isLargeD0 and flags.Acts.LrtStripSeedRefit:
             tpe_tool_kwargs["refitSeeds"] = True
+            # Override default in ActsConfigFlags to maintain the original behaviour.
+            # refitErrInflation could be very useful for LRT, but this still needs to be optimised.
+            tpe_tool_kwargs["refitErrInflation"] = [1., 1., 1., 1., 1., 1.]
         stripTpe = [acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags, "StripTrackParamsEstimationTool", **tpe_tool_kwargs))]
 
     kwargs.setdefault("TrackParamsEstimationTool", seedOrder(flags, pixel=pixelTpe, strip=stripTpe))
@@ -326,6 +326,21 @@ def ActsTrackFindingCfg(flags,
     return acc
 
 
+def ActsGnnPipelineToolCfg(flags,
+                           name: str = "GnnPipelineTool",
+                           **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault('moduleMapPath', flags.Acts.GNN.ModuleMapPath)
+    kwargs.setdefault('gnnPath', flags.Acts.GNN.ModelPath)
+    kwargs.setdefault('numTrtContexts', flags.Acts.GNN.NumTrtContexts)
+    kwargs.setdefault('maxGpuInstances', flags.Acts.GNN.MaxGpuInstances)
+    kwargs.setdefault('edgeCut', flags.Acts.GNN.EdgeCut)
+    kwargs.setdefault('minCandidateMeasurements', flags.Acts.GNN.MinCandidateMeasurements)
+
+    acc.setPrivateTools(CompFactory.ActsTrk.GnnPipelineTool(name, **kwargs))
+    return acc
+
 def ActsTrackFindingGNNCfg(flags, **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
@@ -336,15 +351,13 @@ def ActsTrackFindingGNNCfg(flags, **kwargs) -> ComponentAccumulator:
     # Adopt standard convention
     kwargs.setdefault('ACTSTracksLocation', f"{flags.Tracking.ActiveConfig.extension}Tracks")
 
-    kwargs.setdefault("moduleMapPath", flags.Acts.GNN.ModuleMapPath)
-    kwargs.setdefault("gnnPath", flags.Acts.GNN.ModelPath)
-    kwargs.setdefault("numTrtContexts", flags.Acts.GNN.NumTrtContexts)
-    kwargs.setdefault("maxGpuInstances", flags.Acts.GNN.MaxGpuInstances)
+    # The GNN inference (graph construction, edge classification, track building)
+    if 'GnnPipelineTool' not in kwargs:
+        kwargs.setdefault('GnnPipelineTool', acc.popToolsAndMerge(
+            ActsGnnPipelineToolCfg(flags, name="GnnPipeline")))
+
     kwargs.setdefault("varianceInflation", flags.Acts.GNN.VarianceInflation)
     kwargs.setdefault("tightSeeds", flags.Acts.GNN.TightSeeds)
-    kwargs.setdefault("edgeCut", flags.Acts.GNN.EdgeCut)
-    kwargs.setdefault("minCandidateMeasurements", flags.Acts.GNN.MinCandidateMeasurements)
-    kwargs.setdefault("minDeltaR", flags.Acts.GNN.MinDeltaR)
     kwargs.setdefault("relaxCentralHoleSel", flags.Acts.GNN.RelaxCentralHoleSel)
     kwargs.setdefault("relaxMeasurementSel", flags.Acts.GNN.RelaxMeasurementSel)
     kwargs.setdefault("offlineZ0Sel", flags.Acts.GNN.OfflineZ0Sel)

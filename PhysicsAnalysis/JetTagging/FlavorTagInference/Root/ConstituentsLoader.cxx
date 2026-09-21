@@ -49,6 +49,25 @@ namespace {
     return config;
   }
 
+  // Impact parameters whose sign the flip taggers invert. Each quantity is
+  // listed under every name the custom getters accept for it, see
+  // CustomGetterUtils; variances and uncertainties are never flipped.
+  std::regex flip_variable_regex(FlipTagConfig flip_config) {
+    // lifetime sign, referenced to the jet axis
+    const std::string jet_signed =
+      "IP2D_signed_d0|IP3D_signed_[dz]0(_significance)?"
+      "|lifetimeSigned(D0|Z0SinTheta)(Significance)?";
+    // perigee sign, no jet reference
+    const std::string perigee_signed =
+      "(btagIp_)?(d0|z0SinTheta)"
+      "|(d0|z0|z0SinTheta)RelativeToBeamspot(Significance)?";
+    const std::string suffix = "(_MuonPrimaryTrack)?";
+    if (flip_config == FlipTagConfig::SIMPLE_FLIP) {
+      return std::regex("(" + jet_signed + "|" + perigee_signed + ")" + suffix);
+    }
+    return std::regex("(" + jet_signed + ")" + suffix);
+  }
+
   ConstituentsInputConfig get_track_input_config(
     const std::string& name,
     const std::vector<std::string>& input_variables,
@@ -95,10 +114,14 @@ namespace {
     const std::string& name,
     const std::vector<std::string>& input_variables,
     const TypeRegexes& type_regexes,
-    const SelRegexes& select_regexes
+    const SelRegexes& select_regexes,
+    const std::regex& re,
+    const FlipTagConfig& flip_config
     ) {
     ConstituentsInputConfig config;
     config.name = name;
+    // leptons are ordered by pt, so unlike the tracks there is no
+    // ordering to reverse, and NEGATIVE_IP_ONLY does not drop any of them
     config.order = ConstituentsSortOrder::PT_DESCENDING;
     const std::string typeMatchStr{"lepton type matching"};
     config.selection = str::match_first(select_regexes, name,
@@ -107,7 +130,8 @@ namespace {
       InputVariableConfig input;
       input.name = varname;
       input.type = str::match_first(type_regexes, input.name, typeMatchStr);
-      input.flip_sign = false;
+      input.flip_sign = (flip_config != FlipTagConfig::STANDARD)
+        && std::regex_match(varname, re);
       config.inputs.push_back(std::move(input));
     }
     return config;
@@ -132,7 +156,7 @@ namespace FlavorTagInference {
           {"ftagTruth.*"_r, ConstituentsEDMType::INT},
           // custom variables that require special computation
           {"(ftag_et|ftag_deltaPOverP|ftag_energyOverP|ftag_ptVarCone30OverPt|"
-               "ptfrac|ptrel|dr|et|deltaPOverP|ptVarCone30OverPt|energyOverP)"_r, ConstituentsEDMType::CUSTOM_GETTER},
+               "ptfrac|ptrel|dr|deta|dphi|et|deltaPOverP|ptVarCone30OverPt|energyOverP)"_r, ConstituentsEDMType::CUSTOM_GETTER},
           // ftag_ float decorations (SoftElectronDecoratorAlg, ElectronGSFTrackDecoratorAlg)
           {"ftag_.*"_r, ConstituentsEDMType::FLOAT},
           // variables extracted from the corresponding track
@@ -217,18 +241,13 @@ namespace FlavorTagInference {
         {".*_r22bjr.*"_r, ConstituentsSelection::R22_BJR}
       };
       
+      const std::regex flip_variables = flip_variable_regex(flip_config);
+
       if (name.find("tracks") != std::string::npos){
-        std::regex flip_sequences;
-        if (flip_config == FlipTagConfig::FLIP_SIGN || flip_config == FlipTagConfig::NEGATIVE_IP_ONLY){
-          flip_sequences=std::regex(".*signed_[dz]0.*");
-        }
-        if (flip_config == FlipTagConfig::SIMPLE_FLIP){
-          flip_sequences=std::regex("(.*signed_[dz]0.*)|d0|z0SinTheta");
-        }
         config = get_track_input_config(
           name, input_variables,
           trk_type_regexes, trk_sort_regexes, trk_select_regexes,
-          flip_sequences, flip_config);
+          flip_variables, flip_config);
         config.type = ConstituentsType::TRACK;
         config.output_name = "tracks";
       }
@@ -250,7 +269,8 @@ namespace FlavorTagInference {
         config = get_lepton_input_config(
           name, input_variables,
           electron_type_regexes,
-          electron_select_regexes);
+          electron_select_regexes,
+          flip_variables, flip_config);
         config.type = ConstituentsType::ELECTRON;
         config.output_name = "electrons";
       }
@@ -258,7 +278,8 @@ namespace FlavorTagInference {
         config = get_lepton_input_config(
           name, input_variables,
           muon_type_regexes,
-          muon_select_regexes);
+          muon_select_regexes,
+          flip_variables, flip_config);
         config.type = ConstituentsType::MUON;
         config.output_name = "muons";
       }

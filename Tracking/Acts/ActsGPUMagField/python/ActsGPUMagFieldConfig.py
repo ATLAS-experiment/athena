@@ -18,17 +18,29 @@ def CUDAMagFieldProviderToolCfg(flags,
         CompFactory.ActsTrk.CUDAMagFieldProviderTool(name, **kwargs))
     return acc
 
-def DeviceMagFieldProviderToolCfg(flags,
-                                name="CUDAMagFieldProviderTool",
+def HIPMagFieldProviderToolCfg(flags,
+                                name="HIPMagFieldProviderTool",
                                 **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    if flags.Device.Backend is not DeviceBackend.CUDA:
-        raise ValueError(f"Unsupported device backend: {flags.Acts.DeviceBackend}")   
-        
-    else:    
+    kwargs.setdefault("MagFieldStorage","global_memory")
+    acc.setPrivateTools(
+        CompFactory.ActsTrk.HIPMagFieldProviderTool(name, **kwargs))
+    return acc
+
+def DeviceMagFieldProviderToolCfg(flags,
+                                **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    if flags.Device.Backend is DeviceBackend.CUDA:
         acc.setPrivateTools(acc.popToolsAndMerge(CUDAMagFieldProviderToolCfg(flags)))
-        return  acc
+        
+    elif ((flags.Device.Backend is DeviceBackend.HIPAMD) or (flags.Device.Backend is DeviceBackend.HIPNVIDIA)):    
+        acc.setPrivateTools(acc.popToolsAndMerge(HIPMagFieldProviderToolCfg(flags)))
+    else:
+        raise ValueError(f"Unsupported device backend: {flags.Acts.DeviceBackend}")   
+
+    return  acc
 
 def JSONDeviceMagFieldProviderSvcCfg(flags, **kwargs) -> ComponentAccumulator:
 
@@ -43,3 +55,6 @@ def JSONDeviceMagFieldProviderSvcCfg(flags, **kwargs) -> ComponentAccumulator:
     svc = CompFactory.ActsTrk.JSONDeviceMagFieldProviderSvc(**kwargs)
     acc.addService(svc, primary=True, create=True)
     return acc
+
+
+

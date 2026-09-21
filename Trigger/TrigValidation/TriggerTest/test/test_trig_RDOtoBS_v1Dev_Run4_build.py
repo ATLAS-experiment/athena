@@ -23,8 +23,9 @@ rdo2bs = ExecStep.ExecStep('RDOtoBS')
 rdo2bs.type = 'Reco_tf'
 rdo2bs.input = 'ttbar_pu200_Run4'
 rdo2bs.max_events = 1
-rdo2bs.args += ' --outputBSFile=created.BS'
-rdo2bs.args += ' --preExec="flags.Detector.EnableITkStrip=False"'
+rdo2bs.args +=  ' --outputBSFile=created.BS'
+rdo2bs.args += f' --conditionsTag="{defaultConditionsTags.RUN4_MC}"'
+rdo2bs.args +=  ' --preExec="flags.Detector.EnableITkStrip=False;flags.ITk.Conditions.PixelTestCablingFallback=True"'
 
 # BSRDO -> RAW step
 # geotag should match the ttbar_pu200_Run4 input file

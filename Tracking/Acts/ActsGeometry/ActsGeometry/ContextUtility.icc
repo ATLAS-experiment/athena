@@ -1,0 +1,25 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+
+
+#ifndef ACTSGEOMETRY_CONTEXTUTILITY_ICC
+#define ACTSGEOMETRY_CONTEXTUTILITY_ICC
+
+//this file is included at the end of ContextUtility.h
+
+namespace ActsTrk{
+
+   template <class PropOwner> 
+        ContextUtility::ContextUtility(PropOwner* owner):
+            m_geoCtxKey{owner, "GeometryContextKey", "ActsAlignment"},
+            m_magCtxKey{owner, "MagneticContextKey", "fieldCondObj"},
+            m_msgPrinter{[owner](const MSG::Level msg) -> MsgStream& {
+                    return owner->msg(msg);
+            }},
+            m_msgLevel{[owner](const MSG::Level msg) { 
+                return owner->msgLvl(msg);
+            }}{}
+}
+
+#endif

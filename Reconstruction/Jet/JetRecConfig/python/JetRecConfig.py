@@ -413,7 +413,7 @@ def getGhostPJGAlg(ghostdef, parentjetdef = None):
     return pjgalg
 
 
-def getJetRecAlg( jetdef, monTool = None, ftf_suffix = '', extraOutputs = []):
+def getJetRecAlg( jetdef, monTool = None, ftf_suffix = '', extraOutputs = None):
     """Returns the configured JetRecAlg instance corresponding to jetdef
 
     IMPORTANT : jetdef must have its dependencies solved (i.e. it must result from solveDependencies() )
@@ -457,13 +457,14 @@ def getJetRecAlg( jetdef, monTool = None, ftf_suffix = '', extraOutputs = []):
         jra.MonTool = monTool
 
     # Explicitly register (ghost)associated branches for downstream dependency resolution
-    jra.ExtraOutputs = extraOutputs + [
+    _extraOutputs = extraOutputs if extraOutputs is not None else []
+    jra.ExtraOutputs = _extraOutputs + [
         ('xAOD::JetContainer',f'{jetname}.Ghost{ghost}') for ghost in jetdef.ghostdefs
     ]
     return jra
 
 
-def getJetRecGroomAlg(groomdef,monTool=None,extraOutputs=[]):
+def getJetRecGroomAlg(groomdef,monTool=None,extraOutputs=None):
     """Returns a configured JetRecAlg set-up to perform the grooming defined by 'groomdef' 
     ('monTool' is a temporary placeholder, it is expected to be used in the trigger in the future) 
     """
@@ -493,7 +494,8 @@ def getJetRecGroomAlg(groomdef,monTool=None,extraOutputs=[]):
         jra.MonTool = monTool
 
     # Explicitly register (ghost)associated branches for downstream dependency resolution
-    jra.ExtraOutputs = extraOutputs + [
+    _extraOutputs = extraOutputs if extraOutputs is not None else []
+    jra.ExtraOutputs = _extraOutputs + [
         ('xAOD::JetContainer',f'{jetname}.Ghost{ghost}') for ghost in groomdef.ungroomeddef.ghostdefs
     ]
 

@@ -54,8 +54,9 @@ TrigNavigationThinningSvc::TrigNavigationThinningSvc( const std::string& name,
 
 
   std::string possibleActions;
-  for ( auto a: m_actionsMap )
+  for ( const auto & a: m_actionsMap ){
     possibleActions += a.first +" ";
+  }
   declareProperty("Actions", m_actions, "Operations which need to be done on the navigation"+possibleActions);
 }
 
@@ -752,10 +753,13 @@ StatusCode TrigNavigationThinningSvc::syncThinning(const EventContext& ctx, Stat
       ATH_MSG_DEBUG("Skipping feature missing in the store: " << holder->label());
       continue;
     }
-      holder->syncWithSG();
-      const SG::ThinningDecisionBase* dec =
-        SG::getThinningDecision (ctx, holder->label());
-      if ( dec  )  {
+    bool ok = holder->syncWithSG();
+    if (not ok){
+      ATH_MSG_ERROR("syncWithSG returned false, indicating a problem.");
+      return StatusCode::FAILURE;
+    }
+    const SG::ThinningDecisionBase* dec = SG::getThinningDecision (ctx, holder->label());
+    if ( dec  )  {
 	ATH_MSG_DEBUG ( "Thinning occured for this container" << *holder <<", going to ajust the indices" );
 	// ThinningDecisionBase::index method returns the valid new index for unslimmed object and an invalid index ThinningDecisionBase::RemovedIndex for the ones that were removed
 	// The way to calulate new indexes for the ranges describing ROIs (X,Y) is to count the number valid indexes from X to 0 and from Y to 0

@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGGER_DECISION_TOOL_DecisionAccess_H
@@ -19,9 +19,7 @@
  * @author Tomasz Bold     <Tomasz.Bold@cern.ch>    - UC Irvine - AGH Krakow
  *
  ***********************************************************************************/
-#include <string>
-#include <sstream>
-#include <vector>
+
 
 #include "TrigNavStructure/TriggerElement.h"
 #include "TrigDecisionTool/Logger.h"
@@ -32,10 +30,13 @@
 #include "TrigDecisionTool/ChainGroup.h"
 
 #include "TrigAnalysisHelpers/FeatureRequestDescriptor.h"
-
+#include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 
 #include "AsgDataHandles/ReadHandle.h"
+#include <string>
+#include <sstream>
+#include <vector>
 
 namespace HLT {
   class Chain;
@@ -69,10 +70,10 @@ namespace Trig {
      * @see Trig::ChainGroup
      * @see TrigDefs::Conditions
      **/ 
-    bool isPassed(const std::string& chain,
+    bool isPassed(std::string_view chain,
                   unsigned int condition) const;
 
-    bool isPassed(const std::string& chain) const;
+    bool isPassed(std::string_view chain) const;
 
     /**
      * @brief return decision for each chain in group
@@ -162,7 +163,7 @@ namespace Trig {
     std::vector< TrigCompositeUtils::LinkInfo<CONTAINER> > 
     features(const Trig::ChainGroup* group,
              const unsigned int condition = TrigDefs::Physics,
-             const std::string& containerSGKey = "",
+             std::string_view containerSGKey = "",
              const unsigned int featureCollectionMode = TrigDefs::lastFeatureOfType,
              const std::string& navElementLinkKey = TrigCompositeUtils::featureString(),
              const int          restrictToLegIndex = -1) const;
@@ -181,7 +182,7 @@ namespace Trig {
     std::vector< TrigCompositeUtils::LinkInfo<CONTAINER> >
     features(const std::string& chainGroupName,
              const unsigned int condition = TrigDefs::Physics,
-             const std::string& containerSGKey = "",
+             std::string_view containerSGKey = "",
              const unsigned int featureCollectionMode = TrigDefs::lastFeatureOfType,
              const std::string& navElementLinkKey = TrigCompositeUtils::featureString(),
              const int          restrictToLegIndex = -1) const;

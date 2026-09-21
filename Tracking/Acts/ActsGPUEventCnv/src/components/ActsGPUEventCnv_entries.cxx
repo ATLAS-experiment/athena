@@ -7,9 +7,15 @@
 #include "../TracccCellValidationAlg.h"
 #include "../TracccMeasurementConverterAlg.h"
 #include "../TracccSeedConverterAlg.h"
+#include "../TracccTrackConverterAlg.h"
+#include "../xAODToTracccMeasurementConverterAlg.h"
+#include "../xAODToTracccSpacePointConverterAlg.h"
 
 DECLARE_COMPONENT( ActsTrk::RDOtoTracccCellConverterAlg )
 DECLARE_COMPONENT( ActsTrk::PhaseIIRDOtoTracccCellConverterAlg )
 DECLARE_COMPONENT( ActsTrk::TracccCellValidationAlg )
 DECLARE_COMPONENT( ActsTrk::TracccMeasurementConverterAlg )
 DECLARE_COMPONENT( ActsTrk::TracccSeedConverterAlg )
+DECLARE_COMPONENT( ActsTrk::TracccTrackConverterAlg )
+DECLARE_COMPONENT( ActsTrk::xAODToTracccMeasurementConverterAlg )
+DECLARE_COMPONENT( ActsTrk::xAODToTracccSpacePointConverterAlg )

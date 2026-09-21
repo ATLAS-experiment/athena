@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef  TAUANALYSISTOOLS_TAUTRUTHMATCHINGTOOL_H
@@ -16,6 +16,8 @@
 #include "TauAnalysisTools/BuildTruthTaus.h"
 #include "CxxUtils/CachedValue.h"
 #include "AsgTools/PropertyWrapper.h"
+#include <vector>
+#include <string>
 
 namespace TauAnalysisTools
 {

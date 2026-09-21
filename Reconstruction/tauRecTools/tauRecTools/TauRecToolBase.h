@@ -70,7 +70,6 @@ class TauRecToolBase : public asg::AsgTool, virtual public ITauToolBase {
   virtual StatusCode finalize() override;
 
   std::string find_file(const std::string& fname) const;
-  virtual StatusCode readConfig() override;
 
  protected:
   Gaudi::Property<bool>        m_in_trigger     {this, "inTrigger",   false,                     "Indicate if the tool is running on trigger"};

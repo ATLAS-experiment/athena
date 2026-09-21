@@ -6,9 +6,12 @@
 #include "xAODBase/IParticleContainer.h"
 #include "TrigCompositeUtils/Combinations.h"
 #include "TrigCompositeUtils/ChainNameParser.h"
+#include "TrigDecisionTool/Conditions.h"
+#include "TrigAnalysisHelpers/FeatureRequestDescriptor.h"
 #include "xAODEgamma/Egamma.h"
 #include <numeric>
 #include <algorithm>
+
 
 namespace Trig
 {
@@ -63,7 +66,28 @@ namespace Trig
         continue;
       }
       ATH_MSG_DEBUG("Chain " << chainName << " passed");
-      VecLinkInfo_t features = m_trigDecTool->features<xAOD::IParticleContainer>(chainName);
+      // Note: regarding R2-to-R3 converted trigger navigation. We do not pass
+      // TrigDefs::allowResurrectedDecision to the R3 feature request - the R3
+      // navigation has no concept of rerun. The physics objects of
+      // analysis-flagged R2 rerun chains have been copied to the R3 structure as
+      // if they had passed in the initial pass. The rerun status of R2 trigger
+      // chains remains available from the TrigDecisionTool.
+      Trig::FeatureRequestDescriptor frd(chainName);
+      VecLinkInfo_t features = m_trigDecTool->features<xAOD::IParticleContainer>(frd);
+
+      // Note: regarding R2-to-R3 converted trigger navigation. If
+      // IncludeSubfeatures is enabled, also retrieve the subfeature links:
+      // lower-pT objects from within a single R2 RoI, which the standard
+      // DAOD-based trigger matching procedure used prior to this migration did
+      // not consider.
+      if (m_includeSubfeatures) {
+          frd.setLinkName("subfeature");
+          VecLinkInfo_t subfeatures = m_trigDecTool->features<xAOD::IParticleContainer>(frd);
+          features.insert(features.end(), subfeatures.begin(), subfeatures.end());
+          ATH_MSG_DEBUG("Added " << subfeatures.size() << " subfeatures for chain " << chainName);
+      }
+
+
       // See if we have any that have invalid links. This is a sign that the
       // input file does not contain the required information and should be seen
       // as reason for a job failure

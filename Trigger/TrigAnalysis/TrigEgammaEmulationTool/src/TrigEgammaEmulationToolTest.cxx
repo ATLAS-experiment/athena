@@ -178,7 +178,7 @@ asg::AcceptData TrigEgammaEmulationToolTest::setAccept( const EventContext& ctx,
     
     if (dec) {
 
-        auto trigger = info.trigger; 
+        const auto & trigger = info.trigger; 
         // Step 1
         passedL1Calo = m_matchTool->ancestorPassed<TrigRoiDescriptorCollection>(ctx, dec , trigger , "initialRois", condition);
 
@@ -256,7 +256,7 @@ asg::AcceptData TrigEgammaEmulationToolTest::setAccept( const EventContext& ctx,
 //**********************************************************************
 
 
-TrigEgammaEmulationToolTest::TrigInfo TrigEgammaEmulationToolTest::getInfo( std::string trigger ) const
+TrigEgammaEmulationToolTest::TrigInfo TrigEgammaEmulationToolTest::getInfo( const std::string & trigger ) const
 {
     std::string type = "electron"; // default
     std::vector<std::string> strs;
@@ -279,7 +279,7 @@ TrigEgammaEmulationToolTest::TrigInfo TrigEgammaEmulationToolTest::getInfo( std:
 
 
 
-    return TrigEgammaEmulationToolTest::TrigInfo{trigger,type,et,etcut,idperf,gsf,lrt};
+    return TrigEgammaEmulationToolTest::TrigInfo{std::move(trigger),std::move(type),et,etcut,idperf,gsf,lrt};
 }
 
 //**********************************************************************

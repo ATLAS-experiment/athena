@@ -5,7 +5,7 @@
 #define L0MUONS1TGCBITWISETOOLS_TGCL0BITWISEINNERCOINCIDENCETOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "L0MuonS1TGCToolInterfaces/ITgcL0InnerCoincidenceTool.h"
+#include "L1MuonS1TGCToolInterfaces/ITgcL0InnerCoincidenceTool.h"
 
 namespace L0Muon {
 

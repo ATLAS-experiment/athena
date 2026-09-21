@@ -13,10 +13,12 @@
 //   $Id: serialise.cxx, v0.0   Sat 31 Oct 2015 08:20:38 CET sutt $
 
 
-#include <iostream>
+
 
 #include "TrigRoiConversion/RoiSerialise.h"
-
+#include "TrigSteeringEvent/TrigRoiDescriptor.h"
+#include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
+#include <iostream>
 
 
 inline const uint32_t& uconv( const float& x)    { return reinterpret_cast<const uint32_t&>(x); }

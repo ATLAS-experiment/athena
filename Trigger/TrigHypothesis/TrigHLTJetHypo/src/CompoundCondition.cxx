@@ -7,8 +7,6 @@
 #include "TrigHLTJetHypo/TrigHLTJetHypoUtils/IJet.h"
 
 #include <sstream>
-#include <cmath>
-#include <TLorentzVector.h>
 
 CompoundCondition::CompoundCondition(std::vector<Condition>& elements){
 

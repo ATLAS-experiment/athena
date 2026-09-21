@@ -20,7 +20,7 @@ Reco_tf.py \
 --outputAODFile AOD.ttbar.fromBS.pool.root \
 --conditionsTag ${conditions} \
 --geometryVersion ${geometry} \
---preExec "flags.Tracking.doTruth=False;flags.Tracking.doITkFastTracking=True;flags.Reco.PostProcessing.GeantTruthThinning=False;flags.Reco.EnableHGTDExtension=False"
+--preExec "flags.Tracking.doTruth=False;flags.Tracking.doITkFastTracking=True;flags.Reco.PostProcessing.GeantTruthThinning=False;flags.Reco.EnableHGTDExtension=False;flags.Detector.EnableITkStrip=False;flags.ITk.Conditions.PixelTestCablingFallback=True;flags.Detector.EnablePLR=False;flags.Acts.doITkConversion=False;flags.Acts.doLargeRadius=False;flags.Acts.useCache=False;flags.Acts.EDM.PhaseII=True" \
 rc1=$?
 echo "art-result: ${rc1} Reco_tf_rdo_to_bs_to_aod"
 

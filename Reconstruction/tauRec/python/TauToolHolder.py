@@ -577,7 +577,8 @@ def Pi0ClusterScalerCfg(flags):
     _name = flags.Tau.ActiveConfig.prefix + 'Pi0ClusterScaler'
 
     TauPi0ClusterScaler = CompFactory.getComp("TauPi0ClusterScaler")
-    TauPi0ClusterScaler = TauPi0ClusterScaler(name = _name)
+    TauPi0ClusterScaler = TauPi0ClusterScaler(name = _name,
+                                              MinNeutralPFOPt = flags.Tau.MinNeutralPFOPt)
 
     result.setPrivateTools(TauPi0ClusterScaler)
     return result

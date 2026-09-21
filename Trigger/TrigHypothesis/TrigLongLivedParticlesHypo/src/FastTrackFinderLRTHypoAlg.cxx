@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FastTrackFinderLRTHypoAlg.h"
@@ -123,7 +123,7 @@ StatusCode FastTrackFinderLRTHypoAlg::execute(const EventContext& context) const
   TrigCompositeUtils::DecisionIDContainer prev;
   TrigCompositeUtils::decisionIDs( previousDecisionsHandle->at(0), prev );
 
-  FastTrackFinderLRTHypoTool::TrkCountsInfo trkinfo{d, trackCount, prev};
+  FastTrackFinderLRTHypoTool::TrkCountsInfo trkinfo{d, trackCount, std::move(prev)};
 
   for(auto &tool:m_hypoTools)
   {

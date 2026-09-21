@@ -7,6 +7,9 @@
 #include "TauAnalysisTools/DiTauSelectionCuts.h"
 #include "TauAnalysisTools/DiTauSelectionTool.h"
 
+#include "PATCore/AcceptData.h"
+#include "PATCore/AcceptInfo.h"
+
 using namespace TauAnalysisTools;
 
 //______________________________________________________________________________
@@ -65,8 +68,7 @@ void DiTauSelectionCut::setProperty(const std::string& name, const std::string& 
 //______________________________________________________________________________
 void DiTauSelectionCut::declareProperty(const std::string& name, std::string& loc)
 {
-  std::pair<std::string, std::string&> p(name, loc);
-  m_mProperties.insert(p);
+  m_mProperties.try_emplace(name, loc);
 }
 
 //______________________________________________________________________________

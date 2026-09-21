@@ -31,6 +31,7 @@ storeClusters=False
 doSeeds="0"
 skipEvents=0
 writeAdditionalOutputData=False
+conditions_tag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 threads=1
 
 ## parsing flags
@@ -89,6 +90,7 @@ Reco_tf.py --CA \
     --steering 'doRAWtoALL' \
     --inputRDOFile "${inputRDO_arg}" \
     --outputAODFile ${outputAOD} \
+    --conditionsTag "${conditions_tag}" \
     --perfmon fullmonmt
 
 rc=$?

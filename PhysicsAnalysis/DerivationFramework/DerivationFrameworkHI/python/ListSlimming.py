@@ -538,7 +538,9 @@ def makeHIJetBranchList():
         'Width',
         'MaxConstituentET',
         'MaxOverMean',
-        'JvtMatched']
+        'JvtMatched',
+        'JvtMediumPassed',
+        'JvtTightPassed']
     return c
 
 def HION7BasicJetVars(JetColl):

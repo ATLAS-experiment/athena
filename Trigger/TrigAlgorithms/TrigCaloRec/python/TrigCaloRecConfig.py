@@ -432,8 +432,7 @@ def hltCaloTopoClusteringCfg(
     
     clustermakername = clustermakername_nosuffix + nameSuffix
     
-    # TODO - Don't use hasFlag here, use another concrete flag instead
-    if flags.hasFlag("CaloRecGPU.GlobalFlags.UseCaloRecGPU") and flags.CaloRecGPU.GlobalFlags.UseCaloRecGPU and "FS" in clustermakername:
+    if flags.CaloRecGPU.GlobalFlags.UseCaloRecGPU and "FS" in clustermakername:
       flags = flags.cloneAndReplace("CaloRecGPU.ActiveConfig", "Trigger.CaloRecGPU.Default", True)
       from CaloRecGPU.CaloRecGPUConfig import GPUCaloTopoClusterCfg
       

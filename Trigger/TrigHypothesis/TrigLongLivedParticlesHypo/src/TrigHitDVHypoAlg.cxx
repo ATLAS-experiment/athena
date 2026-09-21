@@ -270,7 +270,7 @@ StatusCode TrigHitDVHypoAlg::execute( const EventContext& context ) const
 	 Decision* newDecision = TrigCompositeUtils::newDecisionIn( outputDecisions, previousDecision, TrigCompositeUtils::hypoAlgNodeName(), context);
 	 mapDecIdx.emplace( newDecision, dv->index() );
 	 TrigHitDVHypoTool::HitDVHypoInfo hypoInfo{ newDecision, isSPOverflow, averageMu, dv, previousDecisionIDs };
-	 hitDVHypoInputs.push_back( hypoInfo );
+	 hitDVHypoInputs.push_back( std::move(hypoInfo) );
       }
    }
 
@@ -490,7 +490,8 @@ StatusCode TrigHitDVHypoAlg::doMonitor(const xAOD::TrigCompositeContainer* dvCon
       if( dv->getDetail<int>("hitDV_seed_type") == SeedType::SP ) continue;
 
       // fill the cut mask according to eta range
-      const float abs_eta = std::abs(dv->getDetail<float>("hitDV_seed_eta"));
+      static const std::string seedEtaStr{"hitDV_seed_eta"};
+      const float abs_eta = std::abs(dv->getDetail<float>(seedEtaStr));
       if     ( abs_eta < 1.0 ) mask_eta1[i] = 1;
       else if( abs_eta < 2.0 ) mask_1eta2[i] = 1;
    }

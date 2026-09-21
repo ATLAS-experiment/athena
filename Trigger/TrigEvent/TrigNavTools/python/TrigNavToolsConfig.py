@@ -1,8 +1,7 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-
 
 def _actions(mode):
     options = {
@@ -31,20 +30,25 @@ def _actions(mode):
 
 
 def TrigNavigationThinningSvcCfg(flags, thinningConfig):
+    from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
+
     assert "name" in thinningConfig, "name of the configuration is missing"
     assert "mode" in thinningConfig, "mode of slimming has to be configured"
 
     acc = ComponentAccumulator()
     svc = CompFactory.TrigNavigationThinningSvc(
-        thinningConfig["name"] + "ThinSvc", Actions=_actions(thinningConfig["mode"])
+        thinningConfig["name"] + "ThinSvc",
+        Actions = _actions(thinningConfig["mode"]),
+        TrigDecisionTool = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
     )
+
     if "chains" in thinningConfig:
         svc.ChainsRegex = thinningConfig["chains"]
     if "features" in thinningConfig:
         svc.FeatureInclusionList = thinningConfig["features"]
     if "Print" in svc.Actions:
         from AthenaCommon.Constants import DEBUG
-
         svc.OutputLevel = DEBUG
+
     acc.addService(svc, primary = True)
     return acc

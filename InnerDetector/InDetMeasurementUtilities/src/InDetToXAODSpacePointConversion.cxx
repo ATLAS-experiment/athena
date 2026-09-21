@@ -23,8 +23,6 @@ namespace InDet {
   { 
     ATH_MSG_DEBUG("Initializing " << name() << " ...");
 
-    ATH_CHECK( m_beamSpotKey.initialize() );
-
     ATH_CHECK( m_inSpacepointsPixel.initialize(m_processPixel) );
     ATH_CHECK( m_inSpacepointsStrip.initialize(m_processStrip) );
     ATH_CHECK( m_inSpacepointsOverlap.initialize(m_processStrip) );
@@ -51,11 +49,6 @@ namespace InDet {
   { 
     ATH_MSG_DEBUG("Executing " << name() << " ...");
     
-    // Conds
-    SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey, ctx };
-    const InDet::BeamSpotData* beamSpot = *beamSpotHandle;
-    auto vertex = beamSpot->beamVtx().position();
-
     // Cluster Containers if requested
     std::unique_ptr< xAOD::PixelClusterContainer > pixel_cluster_xaod_container = std::make_unique< xAOD::PixelClusterContainer >();
     std::unique_ptr< xAOD::PixelClusterAuxContainer > pixel_cluster_xaod_aux_container = std::make_unique< xAOD::PixelClusterAuxContainer >();
@@ -72,10 +65,10 @@ namespace InDet {
 
     if (m_processStrip.value()) {
       std::unordered_map<Identifier, std::size_t> mapClusters{};
-      ATH_CHECK( convertStrip(ctx, vertex,
+      ATH_CHECK( convertStrip(ctx,
 			      strip_cluster_xaod_container.get(),
 			      mapClusters) );
-      ATH_CHECK( convertStripOverlap(ctx, vertex,
+      ATH_CHECK( convertStripOverlap(ctx,
 				     strip_cluster_xaod_container.get(),
 				     mapClusters) );
     }
@@ -174,7 +167,6 @@ namespace InDet {
   }
 
   StatusCode InDetToXAODSpacePointConversion::convertStrip(const EventContext& ctx,
-							   const Amg::Vector3D& vertex,
 							   xAOD::StripClusterContainer* cluster_xaod_container,
 							   std::unordered_map<Identifier, std::size_t>& mapClusters) const
   {
@@ -209,7 +201,7 @@ namespace InDet {
 	const InDet::SCT_SpacePoint *indetSP = static_cast<const InDet::SCT_SpacePoint *>(sp);
 
 	strip_xaod_container->push_back( new xAOD::SpacePoint() );	
-	ATH_CHECK( TrackingUtilities::convertTrkToXaodStripSpacePoint(*indetSP, vertex, *strip_xaod_container->back()) );
+	ATH_CHECK( TrackingUtilities::convertTrkToXaodStripSpacePoint(*indetSP, *strip_xaod_container->back()) );
 
 	// Also make cluster object, if requested
         if (m_convertClusters) {
@@ -270,7 +262,6 @@ namespace InDet {
 
 
   StatusCode InDetToXAODSpacePointConversion::convertStripOverlap(const EventContext& ctx,
-								  const Amg::Vector3D& vertex,
 								  xAOD::StripClusterContainer* cluster_xaod_container,
 								  std::unordered_map<Identifier, std::size_t>& mapClusters) const
   {
@@ -306,7 +297,7 @@ namespace InDet {
         continue;
       }
       strip_overlap_xaod_container->push_back( new xAOD::SpacePoint() );
-      ATH_CHECK( TrackingUtilities::convertTrkToXaodStripSpacePoint(*indetSP, vertex, *strip_overlap_xaod_container->back()) );
+      ATH_CHECK( TrackingUtilities::convertTrkToXaodStripSpacePoint(*indetSP, *strip_overlap_xaod_container->back()) );
 
       // Also make cluster object, if requested
       if (m_convertClusters) {

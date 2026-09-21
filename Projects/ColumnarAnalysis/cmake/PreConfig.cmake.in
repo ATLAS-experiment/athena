@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # File setting up imported targets needed by the exported targets of
 # @CMAKE_PROJECT_NAME@.
@@ -40,7 +40,7 @@ find_package( LCG @LCG_VERSION_NUMBER@ REQUIRED ${_quietFlag} )
 # Imported target(s) used by the project.
 find_package( Threads ${_quietFlag} )
 find_package( GTest ${_quietFlag} )
-find_package( Boost ${_quietFlag} COMPONENTS ALL )
+find_package( Boost ${_quietFlag} COMPONENTS thread ) # See ATEAM-1186 for the component selection.
 
 # Clean up.
 unset( _quietFlag )

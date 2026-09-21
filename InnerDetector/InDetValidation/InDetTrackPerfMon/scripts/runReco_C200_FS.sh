@@ -49,21 +49,21 @@ if [ ! -f $inputRDO ]; then
 fi
 
 ## running reconstruction
-Reco_tf.py --CA \
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
+Reco_tf.py \
+    --conditionsTag "default:${conditionsTag}" \
     --maxEvents ${nEvents} \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD} \
-    --steering 'doRAWtoALL' \
-    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
+    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.athenaLegacyTrackingFlags' \
     --postInclude 'ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
     --preExec "flags.Tracking.useITkFTF=True; \
                flags.Tracking.doITkFastTracking=True; \
                flags.Tracking.ITkFTFPass.useTracklets=True; \
                flags.Detector.GeometryHGTD=False; \
-	       flags.Tracking.ITkFTFPass.useTrigRoadPredictor=True; \
-	       flags.Tracking.ITkFTFPass.useTrigTrackFollowing=False; \
-               flags.Trigger.InDetTracking.doGPU=False"
-
+	           flags.Tracking.ITkFTFPass.useTrigRoadPredictor=True; \
+	           flags.Tracking.ITkFTFPass.useTrigTrackFollowing=False; \
+               flags.Trigger.InDetTracking.doGPU=False;" \
 
 rc=$?
 echo "Reco_tf.py result: $rc"

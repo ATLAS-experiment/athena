@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
@@ -76,7 +76,7 @@ StatusCode TauAnalysisToolsExampleAthena::execute(const EventContext& /*ctx*/)
     tau->makePrivateStore( *tau_uncali );
 
     ATH_CHECK (m_effTool->applyEfficiencyScaleFactor(*tau));
-
+    //coverity[UNNECESSARY_STRING_COPY:FALSE]
     static const SG::ConstAccessor<double> accTauScaleFactorJetID ("TauScaleFactorJetIDHadTau");
     ATH_MSG_INFO( "  sf = " << accTauScaleFactorJetID (*tau) );
 

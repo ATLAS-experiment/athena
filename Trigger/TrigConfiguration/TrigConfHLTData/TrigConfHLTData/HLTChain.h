@@ -75,6 +75,7 @@ namespace TrigConf {
       int                                 chain_version         () const { return m_chain_version; }
       const std::string&                  level                 () const { return m_level; }
       HLTLevel                            level_enum            () const { return m_level=="L2"?L2:(m_level=="EF"?EF:HLT); }
+      bool                                has_l2                () const { return m_has_l2; }
       const std::string&                  lower_chain_name      () const { return m_lower_chain_name; }
       int                                 lower_chain_counter   () const { return m_lower_chain_counter; }
       unsigned int                        chain_hash_id         () const { return m_chain_hash_id; }
@@ -85,7 +86,6 @@ namespace TrigConf {
       const std::vector<int>&             lower_chain_counters  () const;
       std::vector<unsigned int>           lower_chain_hash_ids  () const;
 
-
       std::vector<HLTTriggerType*>&       triggerTypeList()       { return m_HLTTriggerTypeList; }
       const std::vector<HLTTriggerType*>& triggerTypeList() const { return m_HLTTriggerTypeList; }
 
@@ -94,6 +94,7 @@ namespace TrigConf {
       HLTChain& set_chain_counter        ( int chain_counter) { m_chain_counter = chain_counter; return *this; }
       HLTChain& set_chain_version        ( int chain_version) { m_chain_version = chain_version; return *this; }
       HLTChain& set_level                ( std::string_view  level) { m_level.assign(level); return *this; }
+      HLTChain& set_has_l2               ( const bool has_l2) { m_has_l2 = has_l2; return *this; }
       HLTChain& set_lower_chain_name     ( const std::string&  lower_chain_name);
       HLTChain& set_lower_chain_counter  ( int lower_chain_counter) { m_lower_chain_counter = lower_chain_counter; return *this; }
       HLTChain& set_lower_chain_counters ( const std::vector<int>& low_ccs) { m_lower_chain_counters = low_ccs; return *this; }
@@ -186,6 +187,9 @@ namespace TrigConf {
       std::vector<HLTStreamTag*>                         m_streams_orig;
       std::vector<HLTStreamTag*>                         m_streams;
       std::unordered_map<std::string, HLTStreamTag*>   m_streams_map;
+      // For EF level chains, has_l2 is true if the chain seeds from a L2 item (Run 1) or false if it seeds from a L1 item (Run 4+).
+      // Added 2026 as the last member to preserve ABI and minimise migration bugs - this class is used by templated feature retrieval code.
+      bool m_has_l2{false};
 
       friend std::ostream & operator<<(std::ostream &, const HLTChain &);
 

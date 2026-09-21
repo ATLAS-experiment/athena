@@ -98,9 +98,8 @@ AntiKt4EMPFlow_deriv = AntiKt4EMPFlow.clone(
 )
 
 AntiKt4EMPFlowML = JetDefinition("AntiKt",0.4,cst.GPFlowML,
-                               infix = "ML",
                                ghostdefs = standardghosts+flavourghosts,
-                               modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:1","JetGhostLabel","JetDeltaRInitialLabel:5000","JetGhostInitialLabel","JetQuarkChargeLabel","LArHVCorr","jetiso"),
+                               modifiers = calibmods_noCut+truthmods+standardmods+("Filter_calibThreshold:1","JetGhostLabel","JetDeltaRInitialLabel:5000","JetGhostInitialLabel","JetQuarkChargeLabel","LArHVCorr","jetiso"),
                                lock = True
 )
 
@@ -151,6 +150,7 @@ AntiKt4EMTopo = JetDefinition("AntiKt",0.4,cst.EMTopoOrigin,
 
 # The following jet collection will be scheduled in derivation production (instead of AntiKt4EMTopo which is used e.g. at Tier-0) 
 AntiKt4EMTopo_deriv = AntiKt4EMTopo.clone(
+    ghostdefs = AntiKt4EMTopo.ghostdefs+["UnAssocMuonSegment"],
     modifiers = AntiKt4EMTopo.modifiers+("JetPtAssociation",)
 )
 

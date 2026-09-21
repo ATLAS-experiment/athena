@@ -1,9 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-/*
- */
-// $Id$
 /**
  * @file DataModelTestDataCommon/src/CondWriterAlg.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -55,7 +52,7 @@ StatusCode CondWriterAlg::initialize()
 StatusCode CondWriterAlg::writeSCond (unsigned int count)
 {
   auto s2 = std::make_unique<DMTest::S2> (count * 50);
-  ATH_CHECK( detStore()->overwrite (std::move (s2), m_s2Key) );
+  ATH_CHECK( detStore()->overwrite (std::move (s2), m_s2Key, true) );
 
   IAthenaOutputStreamTool::TypeKeyPairs typeKeys {{"DMTest::S2", m_s2Key}};
 
@@ -89,7 +86,7 @@ StatusCode CondWriterAlg::writeRLTest (unsigned int count)
     auto attrList = std::make_unique<AthenaAttributeList>();
     attrList->extend ("xint", "int");
     (*attrList)["xint"].setValue(static_cast<int> (niov));
-    ATH_CHECK( detStore()->overwrite (std::move (attrList), m_rltestKey) );
+    ATH_CHECK( detStore()->overwrite (std::move (attrList), m_rltestKey, true) );
 
     ATH_CHECK( m_regSvc->registerIOV ("AthenaAttributeList",
                                       m_rltestKey,
@@ -116,7 +113,7 @@ StatusCode CondWriterAlg::writeTSTest (unsigned int count)
     auto attrList = std::make_unique<AthenaAttributeList>();
     attrList->extend ("xint", "int");
     (*attrList)["xint"].setValue(static_cast<int> (niov * 100));
-    ATH_CHECK( detStore()->overwrite (std::move (attrList), m_tstestKey) );
+    ATH_CHECK( detStore()->overwrite (std::move (attrList), m_tstestKey, true) );
 
     ATH_CHECK( m_regSvc->registerIOV ("AthenaAttributeList",
                                       m_tstestKey,
@@ -141,7 +138,7 @@ StatusCode CondWriterAlg::execute(const EventContext& ctx)
   attrList->extend ("xint", "int");
   (*attrList)["xint"].setValue(static_cast<int> ((count+1)*10));
 
-  ATH_CHECK( detStore()->overwrite (std::move (attrList), m_attrListKey) );
+  ATH_CHECK( detStore()->overwrite (std::move (attrList), m_attrListKey, true) );
 
   ATH_CHECK( m_regSvc->registerIOV ("AthenaAttributeList",
                                     m_attrListKey,

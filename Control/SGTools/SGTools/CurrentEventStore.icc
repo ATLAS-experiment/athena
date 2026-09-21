@@ -20,32 +20,4 @@ IProxyDict* CurrentEventStore::store()
 }
 
 
-/**
- * @brief Temporarily change the current event store.
- */
-inline
-CurrentEventStore::Push::Push (IProxyDict* store)
-  : m_oldStore (setStore (store))
-{
-  // Only need up update the context if we're actually changing the store.
-  if (m_oldStore != store) {
-    storeToCtx (store);
-  }
-}
-
-
-/**
- * @brief Restore the current event store.
- */
-inline
-CurrentEventStore::Push::~Push()
-{
-  // Only need up update the context if we're actually changing the store.
-  if (m_oldStore != m_curStore) {
-    storeToCtx (m_oldStore);
-  }
-  setStore (m_oldStore);
-}
-
-
 } // namespace SG

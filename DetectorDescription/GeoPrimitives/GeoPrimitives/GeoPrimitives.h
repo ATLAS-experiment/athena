@@ -44,6 +44,7 @@ namespace Amg {
     using Translation3D         = Eigen::Translation<double, 3>;
     using AngleAxis3D           = Eigen::AngleAxisd;
     using Transform3D           = Eigen::Affine3d;
+    using Isometry3D            = Eigen::Isometry3d;
     using Vector3D              = Eigen::Matrix<double, 3, 1>;
     using Vector2D              = Eigen::Matrix<double, 2, 1>;
     using RotationMatrix3D      = Eigen::Matrix<double, 3, 3>;
