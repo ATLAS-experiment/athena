@@ -36,6 +36,39 @@ MCTruthClassifier::particleHepMCTruthClassifier(const HepMcParticleLink& theLink
   }
   return std::make_pair(Unknown, NonDefined);
 }
+
+
+std::pair<ParticleType, ParticleOrigin>
+MCTruthClassifier::particleHepMCTruthClassifier(HepMC::ConstGenParticlePtr theGenPart, MCTruthPartClassifier::Info* info /*= nullptr*/) const {
+  ParticleType partType = Unknown;
+  ParticleOrigin partOrig = NonDefined;
+
+  if (!theGenPart) return std::make_pair(partType, partOrig);
+
+  // Retrieve the links between HepMC and xAOD::TruthParticle
+  const EventContext& ctx = info ? info->eventContext : Gaudi::Hive::currentContext();
+
+  SG::ReadHandle<xAODTruthParticleLinkVector> truthParticleLinkVecReadHandle(m_truthLinkVecReadHandleKey, ctx);
+  if (!truthParticleLinkVecReadHandle.isValid()) {
+    ATH_MSG_WARNING( " Invalid ReadHandle for xAODTruthParticleLinkVector with key: " << truthParticleLinkVecReadHandle.key());
+    return std::make_pair(partType, partOrig);
+  }
+  for (const auto *const entry : *truthParticleLinkVecReadHandle) {
+    if (entry->first.isValid() && entry->second.isValid() && HepMC::is_same_particle(entry->first,theGenPart)) {
+      const xAOD::TruthParticle* truthParticle = *entry->second;
+      if (!theGenPart || !truthParticle ||
+          theGenPart->pdg_id() != truthParticle->pdgId() ||
+          HepMC::status(theGenPart) != HepMC::status(truthParticle) ||
+          HepMC::is_same_particle(theGenPart,truthParticle)) {
+        ATH_MSG_DEBUG(
+                      "HepMC::GenParticle and xAOD::TruthParticle do not match");
+        return std::make_pair(partType, partOrig);
+      }
+      return particleTruthClassifier(truthParticle, info);
+    }
+  }
+  return std::make_pair(partType, partOrig);
+}
 #endif
 
 std::pair<ParticleType, ParticleOrigin>
@@ -159,7 +192,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, I
     }
   }
 
-  if (parentPDG == thePart->pdg_id() && parent && parent->status() == 3 && MC::isDecayed(thePart)) return std::make_pair(GenParticle, partOrig);
+  if (parentPDG == thePart->pdg_id() &&  parent && HepMC::status(parent) == 3 && MC::isDecayed(thePart)) return std::make_pair(GenParticle, partOrig);
 
   if (MC::isElectron(thePart)) {
     bool isPrompt = false; // updated by defOrigOfElectron

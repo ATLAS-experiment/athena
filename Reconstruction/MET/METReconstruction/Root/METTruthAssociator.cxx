@@ -236,7 +236,7 @@ namespace met {
       if(!MC::isInteracting(truth->pdgId())) continue;
       if(truth->pt()<1 || fabs(truth->eta())>5) continue;
       ATH_MSG_VERBOSE("Accepted soft truth particle with pt " << truth->pt()
-		      << " status " << truth->status()
+		      << " status " << HepMC::status(truth)
 		      << " pdgId " << truth->pdgId() );
       if(fabs(truth->charge())>1e-6) {
 	// in ID acceptance
@@ -505,7 +505,7 @@ namespace met {
       for(const auto& truthobj : constlist) {
 	const xAOD::TruthParticle *truth = static_cast<const xAOD::TruthParticle*>(truthobj);
 	ATH_MSG_VERBOSE("Matched truth particle with pt " << truth->pt()
-			<< " status " << truth->status()
+			<< " status " << HepMC::status(truth)
 			<< " pdgId " << truth->pdgId()
 			<< " charge " << truth->charge());
 	ATH_MSG_VERBOSE("DeltaR to hard object: " << xAOD::P4Helpers::deltaR(*truth,*obj,m_useRapidity));

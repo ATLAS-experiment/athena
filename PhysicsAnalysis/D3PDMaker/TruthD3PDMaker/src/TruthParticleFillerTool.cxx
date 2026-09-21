@@ -66,7 +66,7 @@ StatusCode TruthParticleFillerTool::book()
  */
 StatusCode TruthParticleFillerTool::fill (const xAOD::TruthParticle& p)
 {
-  *m_status = p.status();
+  *m_status = HepMC::status(p);
   *m_uniqueID = HepMC::uniqueID(p);
   *m_pdgId = p.pdgId();
   *m_charge = static_cast<int>(MC::charge(p.pdgId()));

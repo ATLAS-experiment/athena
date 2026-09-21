@@ -487,7 +487,7 @@ void BuildTruthTaus::printDecay(const xAOD::TruthParticle& xTruthParticle, int d
                     <<" eta "<<xTruthDaughter->p4().Eta()
                     <<" phi "<<xTruthDaughter->p4().Phi()
                     <<" pdgid "<<xTruthDaughter->pdgId()
-                    <<" status "<<xTruthDaughter->status()
+                    <<" status "<<HepMC::status(xTruthDaughter)
                     <<" uniqueID "<<HepMC::uniqueID(xTruthDaughter));
     printDecay(*xTruthDaughter, depth+1);
   }

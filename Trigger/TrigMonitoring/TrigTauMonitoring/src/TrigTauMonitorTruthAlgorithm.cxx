@@ -47,7 +47,7 @@ std::pair<std::vector<std::shared_ptr<xAOD::TruthParticle>>, std::vector<std::sh
     // Fill truth tau containers
     for(const auto xTruthParticle : *truth_cont) {
         if(xTruthParticle->isTau()) {
-            ATH_MSG_DEBUG("Tau with status " << xTruthParticle->status() << " and charge " << xTruthParticle->charge());
+            ATH_MSG_DEBUG("Tau with status " << HepMC::status(xTruthParticle) << " and charge " << xTruthParticle->charge());
 
             // Create a copy of the original TruthParticle, to augment it with tau-specific properties
             std::shared_ptr xTruthTau = std::make_shared<xAOD::TruthParticle>();
@@ -105,7 +105,7 @@ StatusCode TrigTauMonitorTruthAlgorithm::examineTruthTau(const std::shared_ptr<x
             if(child) {
                 if(MC::isSMNeutrino(child)) continue;
                 if(!MC::isPhysical(child)) continue;
-                ATH_MSG_DEBUG("Child " << child->pdgId() << ", status " << child->status() << ", charge " << child->charge());
+                ATH_MSG_DEBUG("Child " << child->pdgId() << ", status " << HepMC::status(child) << ", charge " << child->charge());
                 if(MC::isSMLepton(child)) acc_isleptonic(*xTruthTau) = true; // Just selects charged SM Leptons as we have already skipped SM neutrinos
                 VisSumTLV += child->p4();
                 acc_childChargeSum(*xTruthTau) += child->charge();
@@ -123,7 +123,7 @@ StatusCode TrigTauMonitorTruthAlgorithm::examineTruthTau(const std::shared_ptr<x
         const std::size_t nChildren = decayvtx->nOutgoingParticles();
         for(std::size_t iChild = 0; iChild != nChildren; ++iChild) {
         const xAOD::TruthParticle * child = decayvtx->outgoingParticle(iChild);
-        if(child) ATH_MSG_WARNING("Child "<< child->pdgId() << ", status "<< child->status() << ", charge "<< child->charge());
+        if(child) ATH_MSG_WARNING("Child "<< child->pdgId() << ", status "<< HepMC::status(child) << ", charge "<< child->charge());
         }
     }
 

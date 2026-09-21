@@ -248,7 +248,7 @@ egammaTruthAssociationAlg::getNewTruthParticle(
   auto *truthParticle = egammaTruthContainer.push_back(std::make_unique<xAOD::TruthParticle>());
   truthParticle->setPdgId(truth->pdgId());
   truthParticle->setUid(HepMC::uniqueID(truth));
-  truthParticle->setStatus(truth->status());
+  truthParticle->setStatus(HepMC::status(truth));
   truthParticle->setPx(truth->px());
   truthParticle->setPy(truth->py());
   truthParticle->setPz(truth->pz());

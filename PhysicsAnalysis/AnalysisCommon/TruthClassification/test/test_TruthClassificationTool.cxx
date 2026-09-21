@@ -190,7 +190,7 @@ int test1(int argc, char* argv[])
 
           const xAOD::TruthParticle *truthParticle = xAOD::TruthHelpers::getTruthParticle(*el);
           static const SG::ConstAccessor<int> statusAcc("status");
-          int status = (truthParticle != nullptr && statusAcc.isAvailable(*truthParticle)) ? truthParticle->status() : -1;
+          int status = (truthParticle != nullptr && statusAcc.isAvailable(*truthParticle)) ? HepMC::status(truthParticle) : -1;
           static const SG::ConstAccessor<int> pdgAcc("pdgId");
           int pdgId = truthPdgIdAcc.isAvailable(*el)
             ? truthPdgIdAcc(*el)
@@ -273,7 +273,7 @@ int test1(int argc, char* argv[])
 
           const xAOD::TruthParticle *truthParticle = xAOD::TruthHelpers::getTruthParticle(*mu);
           static const SG::ConstAccessor<int> statusAcc("status");
-          int status = (truthParticle != nullptr && statusAcc.isAvailable(*truthParticle)) ? truthParticle->status() : -1;
+          int status = (truthParticle != nullptr && statusAcc.isAvailable(*truthParticle)) ? HepMC::status(truthParticle) : -1;
           static const SG::ConstAccessor<int> pdgAcc("pdgId");
           int pdgId = truthPdgIdAcc.isAvailable(*mu)
             ? truthPdgIdAcc(*mu)

@@ -99,7 +99,7 @@ xAOD::TruthParticle* DerivationFramework::CollectionMakerHelpers::setupTruthPart
     // Fill with numerical content
     xTruthParticle->setPdgId(oldPart.pdgId());
     xTruthParticle->setUid(HepMC::uniqueID(&oldPart));
-    xTruthParticle->setStatus(oldPart.status());
+    xTruthParticle->setStatus(HepMC::status(oldPart));
     xTruthParticle->setM(oldPart.m());
     xTruthParticle->setPx(oldPart.px());
     xTruthParticle->setPy(oldPart.py());
