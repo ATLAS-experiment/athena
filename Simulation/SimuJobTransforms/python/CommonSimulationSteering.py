@@ -162,4 +162,11 @@ def CommonSimulationCfg(flags, log):
         cfg.merge( OutputStreamCfg(flags,"EVNT_TR", ItemList=getStreamEVNT_TR_ItemList(flags), disableEventTag=True, AcceptAlgs=AcceptAlgNames) )
         cfg.merge(SetupMetaDataForStreamCfg(flags, "EVNT_TR", AcceptAlgs=AcceptAlgNames, createMetadata=[MetadataCategory.IOVMetaData]))
 
+    # Done on the complete configuration: the truth service is merged from
+    # several places, which must all agree before this
+    from SimulationConfig.SimEnums import InDetParameterization
+    if flags.Sim.InDetParameterization is InDetParameterization.FatrasG4:
+        from G4FastSimulation.G4FastSimulationConfig import addFatrasG4TruthVertexType
+        addFatrasG4TruthVertexType(cfg)
+
     return cfg

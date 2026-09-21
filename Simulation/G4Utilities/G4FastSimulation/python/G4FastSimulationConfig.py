@@ -23,6 +23,29 @@ def DeadMaterialShowerCfg(flags, **kwargs):
 FatrasG4RegionName = "InDet"
 
 
+# Geant4 process subtype of G4FastSimulationManagerProcess (FASTSIM_ManagerProcess)
+FastSimulationProcessSubType = 301
+
+# AtlasDetDescr::AtlasRegion of the inner detector
+AtlasRegionID = 1
+
+
+def addFatrasG4TruthVertexType(cfg):
+    """Record the FatrasG4 conversions in the truth.
+
+    A FatrasG4 conversion step ends in G4FastSimulationManagerProcess, so its
+    truth incident has process subtype 301 rather than fGammaConversion (14).
+    Every ID truth strategy that keeps Geant4 conversions is made to keep these
+    as well. Must be called on the complete configuration, as the truth service
+    is merged from several places."""
+    for service in cfg.getServices():
+        for strategy in getattr(service, "TruthStrategies", []):
+            vertexTypes = list(getattr(strategy, "VertexTypes", []))
+            if (AtlasRegionID in getattr(strategy, "Regions", []) and 14 in vertexTypes
+                    and FastSimulationProcessSubType not in vertexTypes):
+                strategy.VertexTypes = vertexTypes + [FastSimulationProcessSubType]
+
+
 def FatrasG4Cfg(flags, **kwargs):
     result = ComponentAccumulator()
     # Name of region where FatrasG4 will be triggered
