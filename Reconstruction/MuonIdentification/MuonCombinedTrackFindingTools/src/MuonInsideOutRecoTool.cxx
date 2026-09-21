@@ -287,13 +287,13 @@ namespace MuonCombined {
         std::unique_ptr<Trk::Track> standaloneRefit{m_trackFitter->standaloneRefit(ctx, *selectedTrack, origin)};
 
         combTracks->push_back(std::move(selectedTrack));
-        ElementLink<TrackCollection> comblink(*combTracks, combTracks->size() - 1);
+        ElementLink<TrackCollection> comblink(*combTracks, combTracks->size() - 1, ctx);
 
         // create tag and set SA refit
         MuGirlTag* tag = new MuGirlTag(comblink, segLinks);
         if (standaloneRefit) {
             meTracks->push_back(std::move(standaloneRefit));
-            ElementLink<TrackCollection> melink(*meTracks, meTracks->size() - 1);
+            ElementLink<TrackCollection> melink(*meTracks, meTracks->size() - 1, ctx);
             tag->setUpdatedExtrapolatedTrack(melink);
         }
 
