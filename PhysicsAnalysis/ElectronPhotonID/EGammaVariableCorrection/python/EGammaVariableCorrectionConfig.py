@@ -26,7 +26,7 @@ def PhotonVariableCorrectionToolCfg(
     acc = ComponentAccumulator()
     log = logging.getLogger("PhotonVariableCorrectionToolCfg")
     # fallback tune file if there is no dedicated tuning
-    defaultTuneFile = "EGammaVariableCorrection/TUNE27E/ElPhVariableNominalCorrection.conf"
+    defaultTuneFile = "EGammaVariableCorrection/TUNE28EG/ElPhVariableNominalCorrection.conf"
     tuneFile = ""
     mcCampaign = flags.Input.MCCampaign
     runPeriod = flags.GeoModel.Run
@@ -35,11 +35,11 @@ def PhotonVariableCorrectionToolCfg(
         tuneFile = "EGammaVariableCorrection/TUNE25/ElPhVariableNominalCorrection.conf"
     elif runPeriod is LHCPeriod.Run3:
         if mcCampaign in [Campaign.MC23a, Campaign.MC23d]:
-            # TUNE27AD: gamma FUDGE FACTORS RUN3 2022-2023 vs MC23a-d, derived with r25
-            tuneFile = "EGammaVariableCorrection/TUNE27AD/ElPhVariableNominalCorrection.conf"
+            # TUNE28AD: gamma FUDGE FACTORS RUN3 2022-2023 vs MC23a-d, derived with r25
+            tuneFile = "EGammaVariableCorrection/TUNE28AD/ElPhVariableNominalCorrection.conf"
         elif mcCampaign is Campaign.MC23e:
-            # TUNE27E: gamma FUDGE FACTORS RUN3 2024 vs MC23e, derived with r25
-            tuneFile = "EGammaVariableCorrection/TUNE27E/ElPhVariableNominalCorrection.conf"
+            # TUNE28EG: gamma FUDGE FACTORS RUN3 2024-2026 vs MC23e-g, derived with r25
+            tuneFile = "EGammaVariableCorrection/TUNE28EG/ElPhVariableNominalCorrection.conf"
         else:
             log.warning("No default FF file centrally provided for mc campaign %s", mcCampaign.value)
             tuneFile = defaultTuneFile

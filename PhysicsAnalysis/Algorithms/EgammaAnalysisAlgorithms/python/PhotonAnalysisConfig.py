@@ -5,6 +5,7 @@ from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigSequence import groupBlocks
 from AthenaCommon.SystemOfUnits	import GeV
 from AthenaConfiguration.Enums import LHCPeriod
+from Campaigns.Utils import Campaign
 from AnalysisAlgorithmsConfig.ConfigAccumulator import (
     DataType, Run4FallbackWarning, TestingOnlyWarning)
 import warnings
@@ -189,8 +190,12 @@ class PhotonCalibrationConfig (ConfigBlock) :
                 alg.showerShapeFudgeTool.ConfigFile = \
               'EGammaVariableCorrection/TUNE25/ElPhVariableNominalCorrection.conf'
             if config.geometry() is LHCPeriod.Run3:
-                alg.showerShapeFudgeTool.ConfigFile = \
-              'EGammaVariableCorrection/TUNE23/ElPhVariableNominalCorrection.conf'
+                if config.campaign() in (Campaign.MC23a, Campaign.MC23d):
+                    alg.showerShapeFudgeTool.ConfigFile = \
+                    'EGammaVariableCorrection/TUNE28AD/ElPhVariableNominalCorrection.conf'
+                else:
+                    alg.showerShapeFudgeTool.ConfigFile = \
+                    'EGammaVariableCorrection/TUNE28EG/ElPhVariableNominalCorrection.conf'
             alg.photons = config.readName (self.containerName)
             alg.photonsOut = config.copyName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
