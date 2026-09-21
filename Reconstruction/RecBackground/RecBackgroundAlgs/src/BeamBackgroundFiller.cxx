@@ -112,7 +112,7 @@ void BeamBackgroundFiller::FillMatchMatrix(const EventContext& ctx,
         if (!m_segmentSelector->select(*seg,false, highestSegQual)) {
              continue;
         }
-        ElementLink<Trk::SegmentCollection> segLink{*ncbSegmentHandle, ncbCounter - 1};
+        ElementLink<Trk::SegmentCollection> segLink{*ncbSegmentHandle, ncbCounter - 1, ctx};
         cache.m_indexSeg.push_back(segLink);
       }
   }
@@ -203,7 +203,7 @@ void BeamBackgroundFiller::FillMatchMatrix(const EventContext& ctx,
             continue;
         }
         ElementLink<xAOD::CaloClusterContainer> clusLink;
-        clusLink.toIndexedElement(*caloClusterContainerReadHandle, caloClusterCounter - 1);
+        clusLink.toIndexedElement(*caloClusterContainerReadHandle, caloClusterCounter - 1, ctx);
         cache.m_indexClus.push_back(std::move(clusLink));
         cache.m_matchMatrix.push_back(std::move(matchedSegmentsPerCluster));
         ++cache.m_numMatched;
@@ -697,7 +697,7 @@ void BeamBackgroundFiller::FindFakeJets(const EventContext& ctx,
 
       if (isFakeJet) {
         ElementLink<xAOD::JetContainer> jetLink;
-        jetLink.toIndexedElement(*jetContainerReadHandle, jetCounter);
+        jetLink.toIndexedElement(*jetContainerReadHandle, jetCounter, ctx);
         cache.m_indexJet.push_back(jetLink);
         cache.m_resultJet.push_back(resultJet);
         cache.m_numJet++;
