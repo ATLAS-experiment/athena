@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Algorithm producing truth info for PrepRawData, keeping all MC particles contributed to a PRD.
@@ -63,7 +63,7 @@ StatusCode MuonDetailedTrackTruthMaker::execute(const EventContext& ctx) const {
         SG::WriteHandle dttc(m_detailedTrackTruthNames.at(i), ctx);
         ATH_MSG_DEBUG("Write detailed collection "<<m_detailedTrackTruthNames.at(i).fullKey());
         ATH_CHECK(dttc.record(std::make_unique<DetailedTrackTruthCollection>()));
-        dttc->setTrackCollection(tcol);
+        dttc->setTrackCollection(DataLink<TrackCollection> (trkKey.key(), ctx));
         m_truthTool->buildDetailedTrackTruth(dttc.ptr(), *tcol, prdCollectionVector, ctx);
         i++;
     }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSegmentTruthAssociationAlg.h"
@@ -89,7 +89,7 @@ namespace Muon {
                 if (mseg) {
                     ATH_MSG_DEBUG(" Reco segment " << m_printer->print(*mseg));
                     muonSegments.push_back(mseg);
-                    muonSegmentLinkMap[mseg] = ElementLink<xAOD::MuonSegmentContainer>(segmentCollectionName, segIndex);
+                    muonSegmentLinkMap[mseg] = ElementLink<xAOD::MuonSegmentContainer>(segmentCollectionName, segIndex, ctx);
                 }
             }
             ++segIndex;

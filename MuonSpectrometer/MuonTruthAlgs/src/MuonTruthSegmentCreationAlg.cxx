@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTruthSegmentCreationAlg.h"
@@ -82,7 +82,7 @@ namespace Muon {
 
             // create segments
             if (goodMuon) {
-                ElementLink<xAOD::TruthParticleContainer> truthLink(*muonTruthContainer, itr);
+              ElementLink<xAOD::TruthParticleContainer> truthLink(*muonTruthContainer, itr, ctx);
                 truthLink.toPersistent();
 
                 ChamberIdMap ids{};

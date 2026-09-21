@@ -64,7 +64,7 @@ namespace Muon {
                 truthParticle->setM(truth->m());
                 if (truth->hasProdVtx()) truthParticle->setProdVtxLink(truth->prodVtxLink());
 
-                TruthLink_t itruthLink(*truthContainer, truth->index());
+                TruthLink_t itruthLink(*truthContainer, truth->index(), ctx);
                 itruthLink.toPersistent();
                 truthLink(*truthParticle) = itruthLink;
                 ATH_MSG_DEBUG("Found stable muon: " << truth->pt() << " eta " << truth->eta() << " phi " << truth->phi() << " mass "
