@@ -100,9 +100,10 @@ def TruthClassificationAugmentationsCfg(flags, **kwargs):
 
     acc = ComponentAccumulator()
 
-    from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthClassificationToolCfg
-    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(name ="MCTruthClassificationKernel",
-                                                                        AugmentationTools = [ acc.addPublicTool(acc.popToolsAndMerge(DFCommonTruthClassificationToolCfg(flags))) ]))
+    from MCTruthClassifier.MCTruthClassifierConfig import DFCommonMCTruthClassifierCfg
+    kwargs.setdefault("ParticlesKey", "TruthParticles")
+    kwargs.setdefault("MCTruthClassifier", acc.addPublicTool(acc.popToolsAndMerge(DFCommonMCTruthClassifierCfg(flags))))
+    acc.addEventAlgo(CompFactory.DerivationFramework.TruthClassificationDecorator(name ="MCTruthClassificationKernel", **kwargs))
 
     return acc
 
