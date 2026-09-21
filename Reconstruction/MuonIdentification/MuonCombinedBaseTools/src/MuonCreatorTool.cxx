@@ -287,7 +287,7 @@ namespace MuonCombined {
                                              outputData);  // CHECK to see what variables are created here.
 
                             ATH_MSG_DEBUG("slowMuon muonContainer size " << outputData.muonContainer->size());
-                            ElementLink<xAOD::MuonContainer> muonLink(*outputData.muonContainer, outputData.muonContainer->size() - 1);
+                            ElementLink<xAOD::MuonContainer> muonLink(*outputData.muonContainer, outputData.muonContainer->size() - 1, ctx);
                             if (slowMuon && muonLink.isValid()) {
                                 ATH_MSG_DEBUG("slowMuon muonLink valid");
                                 slowMuon->setMuonLink(muonLink);
@@ -422,7 +422,7 @@ namespace MuonCombined {
                     tp->setTrackParameterCovarianceMatrix(0, dummy_cov);
 
                     ElementLink<xAOD::TrackParticleContainer> link(*outputData.combinedTrackParticleContainer,
-                                                                   outputData.combinedTrackParticleContainer->size() - 1);
+                                                                   outputData.combinedTrackParticleContainer->size() - 1, ctx);
                     if (link.isValid()) {
                         // link.toPersistent();
                         ATH_MSG_DEBUG("Adding statistical combination: pt " << (*link)->pt() << " eta " << (*link)->eta() << " phi "
@@ -753,7 +753,7 @@ namespace MuonCombined {
         if (trackCollection) {
             trackCollection->push_back(new Trk::Track(**trackLink));
             // want to link the track particle to this track
-            ElementLink<TrackCollection> link(*trackCollection, trackCollection->size() - 1);
+            ElementLink<TrackCollection> link(*trackCollection, trackCollection->size() - 1, ctx);
             if (link.isValid())
                 tp = m_particleCreator->createParticle(ctx, link, &trackParticleContainer, nullptr, xAOD::muon);
             else
@@ -765,7 +765,7 @@ namespace MuonCombined {
         }
 
         if (tp) {
-            ElementLink<xAOD::TrackParticleContainer> link(trackParticleContainer, trackParticleContainer.size() - 1);
+            ElementLink<xAOD::TrackParticleContainer> link(trackParticleContainer, trackParticleContainer.size() - 1, ctx);
             return link;
         }
         return ElementLink<xAOD::TrackParticleContainer>();
