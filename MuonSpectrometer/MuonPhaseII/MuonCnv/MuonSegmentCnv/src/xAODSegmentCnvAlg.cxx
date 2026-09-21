@@ -52,7 +52,7 @@ namespace MuonR4{
                     return StatusCode::FAILURE;
                 }
 
-                dec_parentLink(*convertedSeg) = SegLink_t{segmentContainer, recoSegIdx};
+                dec_parentLink(*convertedSeg) = SegLink_t{key.key(), recoSegIdx, ctx};
                 ++recoSegIdx;
             }
         }  
