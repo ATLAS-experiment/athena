@@ -58,6 +58,9 @@ class ComponentHelper
         TString RegionForSFstr;
         TString ResultName;
 
+        // Flat fractional uncertainty, used when param is Constant
+        double  constantValue{};
+
         // Derived values to parse from the raw values
         // defaults are zero, "UNKNOWN" in the enums
         CompParametrization::TypeEnum parametrization{};

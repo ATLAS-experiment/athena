@@ -34,6 +34,7 @@
 #include "JetUncertainties/ClosebyUncertaintyComponent.h"
 #include "JetUncertainties/CombinedMassUncertaintyComponent.h"
 #include "JetUncertainties/LargeRTopologyUncertaintyComponent.h"
+#include "JetUncertainties/ConstantUncertaintyComponent.h"
 
 // xAOD includes
 #include "xAODTracking/VertexContainer.h"
@@ -98,6 +99,9 @@ JetUncertaintiesTool::JetUncertaintiesTool(const std::string& name)
     , m_rand()
     , m_isData(true)
     , m_resHelper(nullptr)
+    , m_bJetRegressionApplied(false)
+    , m_bJetRegressionPtUncertainty(0)
+    , m_bJetRegressionMassUncertainty(0)
     , m_namePrefix("JET_")
     , m_accTagScaleFactor("temp_SF")
     , m_accEffSF("temp_effSF")
@@ -119,6 +123,11 @@ JetUncertaintiesTool::JetUncertaintiesTool(const std::string& name)
     declareProperty("IsData",m_isData);
     declareProperty("AbsEtaGluonFraction",m_absEtaGluonFraction);
     declareProperty("PseudoDataJERsmearingMode",m_pseudoDataJERsmearingMode);
+    declareProperty("BJetRegressionApplied",m_bJetRegressionApplied);
+    // The b-jet regression is configured entirely through properties: a modified,
+    // non-CVMFS uncertainty config must not be needed to switch it on.
+    declareProperty("BJetRegressionPtUncertainty",m_bJetRegressionPtUncertainty);
+    declareProperty("BJetRegressionMassUncertainty",m_bJetRegressionMassUncertainty);
 
     ATH_MSG_DEBUG("Creating JetUncertaintiesTool named "<<m_name);
 
@@ -165,6 +174,9 @@ JetUncertaintiesTool::JetUncertaintiesTool(const JetUncertaintiesTool& toCopy) A
     , m_rand(toCopy.m_rand)
     , m_isData(toCopy.m_isData)
     , m_resHelper(new ResolutionHelper(*toCopy.m_resHelper))
+    , m_bJetRegressionApplied(toCopy.m_bJetRegressionApplied)
+    , m_bJetRegressionPtUncertainty(toCopy.m_bJetRegressionPtUncertainty)
+    , m_bJetRegressionMassUncertainty(toCopy.m_bJetRegressionMassUncertainty)
     , m_namePrefix(toCopy.m_namePrefix)
     , m_accTagScaleFactor(toCopy.m_accTagScaleFactor)
     , m_accEffSF(toCopy.m_accEffSF)
@@ -278,6 +290,23 @@ StatusCode JetUncertaintiesTool::initialize()
     // Get the uncertainty release
     m_release = settings.GetValue("UncertaintyRelease","UNKNOWN");
     ATH_MSG_INFO(Form("  Uncertainty release: %s",m_release.c_str()));
+
+    // The b-jet regression adds nuisance parameters but changes nothing about how
+    // the existing ones are evaluated, because it is applied after this tool runs.
+    if (m_bJetRegressionApplied)
+    {
+        ATH_MSG_INFO("  b-jet regression applied: adding the flat regression nuisance "
+                     "parameters. Lookups are unaffected -- the regression is applied "
+                     "after this tool runs, so the jet is the standard calibrated one here.");
+
+        // Inject the flat regression nuisance parameters as ordinary component
+        // definitions, then let the existing component loop build them. Writing
+        // them into the settings rather than constructing ConfigHelpers by hand
+        // reuses all of the normal parsing, grouping and name-prefixing, and it
+        // keeps them out of the shipped configuration files.
+        if (addBJetRegressionComponents(settings).isFailure())
+            return StatusCode::FAILURE;
+    }
 
     // Check the jet definition
     TString allowedJetDefStr = settings.GetValue("SupportedJetDefs","");
@@ -793,6 +822,83 @@ StatusCode JetUncertaintiesTool::initialize()
 //                                              //
 //////////////////////////////////////////////////
 
+StatusCode JetUncertaintiesTool::addBJetRegressionComponents(TEnv& settings)
+{
+    // The flat uncertainties covering the regression are written in here as
+    // ordinary JESComponent definitions rather than shipped in the .config files.
+    // Two reasons: the central configs live on CVMFS and are read-only, so
+    // requiring an edit would mean every analysis using the regression needs a
+    // private calibration area; and the values are properties, so they can be
+    // revised without regenerating anything.
+    //
+    // Naming carries the jet radius, because that is what an analyst sees in the
+    // nuisance-parameter list and the R=0.4 and R=1.0 numbers are independent.
+    TString radius = "";
+    if (m_jetDef.find("AntiKt4") != std::string::npos)       radius = "R4";
+    else if (m_jetDef.find("AntiKt10") != std::string::npos) radius = "R10";
+    else
+    {
+        ATH_MSG_ERROR("Cannot tell the jet radius from the jet definition \"" << m_jetDef
+                      << "\", so the b-jet regression nuisance parameters cannot be named");
+        return StatusCode::FAILURE;
+    }
+
+    struct FlatNP { const char* scale; const char* label; double value; };
+    const std::vector<FlatNP> wanted {
+        { "Pt",   "PtScale",   m_bJetRegressionPtUncertainty   },
+        { "Mass", "MassScale", m_bJetRegressionMassUncertainty },
+    };
+
+    // Find a free component index rather than assuming one: the shipped configs
+    // use indices up to ~500 and that ceiling is not ours to rely on.
+    size_t iComp = 0;
+    size_t nAdded = 0;
+    for (const FlatNP& np : wanted)
+    {
+        if (np.value == 0) continue;   // zero means "this radius has no such NP"
+        if (np.value < 0 || np.value > 1)
+        {
+            ATH_MSG_ERROR(Form("Flat b-jet regression %s uncertainty of %f is not a "
+                               "fraction between 0 and 1",np.label,np.value));
+            return StatusCode::FAILURE;
+        }
+        while (iComp < 9999 &&
+               TString(settings.GetValue(Form("JESComponent.%zu.Name",iComp),"")).Length())
+            ++iComp;
+        if (iComp >= 9999)
+        {
+            ATH_MSG_ERROR("Could not find a free JESComponent index for the b-jet "
+                          "regression nuisance parameters");
+            return StatusCode::FAILURE;
+        }
+
+        const TString prefix = Form("JESComponent.%zu.",iComp);
+        const TString name   = Form("BJR_%s_%s",radius.Data(),np.label);
+        settings.SetValue(prefix+"Name",name.Data());
+        settings.SetValue(prefix+"Desc",Form("Flat %.3g%% uncertainty on the b-jet "
+                                             "regressed %s scale",100*np.value,np.scale));
+        settings.SetValue(prefix+"Type","Modelling");
+        settings.SetValue(prefix+"Param","Constant");
+        // Scale, not FourVec: each regression corrects a specific quantity, and a
+        // four-vector scaling would invent an uncertainty on the quantities it
+        // leaves alone.
+        settings.SetValue(prefix+"Scale",np.scale);
+        settings.SetValue(prefix+"Value",Form("%.10g",np.value));
+        ATH_MSG_INFO(Form("  b-jet regression nuisance parameter %s%s: flat %.3g%% on %s "
+                          "(JESComponent.%zu)",m_namePrefix.c_str(),name.Data(),
+                          100*np.value,np.scale,iComp));
+        ++iComp;
+        ++nAdded;
+    }
+
+    if (nAdded == 0)
+        ATH_MSG_WARNING("BJetRegressionApplied is set but both flat regression "
+                        "uncertainties are zero, so no regression nuisance parameter "
+                        "will be built");
+
+    return StatusCode::SUCCESS;
+}
+
 StatusCode JetUncertaintiesTool::addUncertaintyGroup(const ConfigHelper& helper)
 {
     const GroupHelper& group = *helper.getGroupInfo();
@@ -1223,6 +1329,8 @@ UncertaintyComponent* JetUncertaintiesTool::buildUncertaintyComponent(const Comp
             case CompParametrization::eLOGmOeEta:
             case CompParametrization::eLOGmOeAbsEta:
                 return new ELogMassEtaUncertaintyComponent(component);
+            case CompParametrization::Constant:
+                return new ConstantUncertaintyComponent(component);
             default:
                 ATH_MSG_ERROR("Encountered unexpected parameter type: " << component.param.Data());
                 return nullptr;

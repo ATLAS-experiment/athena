@@ -185,9 +185,11 @@ def JETM4Cfg(flags):
 
     # Large-Radius jet regression extra content
     extraListReg = []
-    modelName = "bJR10v00"
-    for score in ["mass", "pt"]:
-        extraListReg.append(f"{modelName}_{score}")
+    # bJR10v00 (without the Ext suffix) has no producer: BTagging.NNs only
+    # schedules bJR10v00Ext and bJR10v01.
+    for modelName in ["bJR10v00Ext", "bJR10v01"]:
+        for score in ["mass", "pt"]:
+            extraListReg.append(f"{modelName}_{score}")
     JETM4SlimmingHelper.ExtraVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets." + ".".join(extraListReg)]
 
     # Truth containers
