@@ -476,11 +476,11 @@ StatusCode InDetV0FinderTool::performSearch(xAOD::VertexContainer* v0Container,
                           ksContainer->push_back(myKshort.release());
 
                           v0Link.setElement(v0Container->back());
-                          v0Link.setStorableObject(*v0Container);
+                          v0Link.setStorableObject(*v0Container, ctx);
                           v0LinksDecorks(*(ksContainer->back())) = v0Link;
 
                           ksLink.setElement(ksContainer->back());
-                          ksLink.setStorableObject(*ksContainer);
+                          ksLink.setStorableObject(*ksContainer, ctx);
                           v0_ksLinksDecor(*(v0Container->back())) = ksLink;
                         } else {
                           v0_ksLinksDecor(*(v0Container->back())) = ksLink;
@@ -495,11 +495,11 @@ StatusCode InDetV0FinderTool::performSearch(xAOD::VertexContainer* v0Container,
                           laContainer->push_back(myLambda.release());
 
                           v0Link.setElement(v0Container->back());
-                          v0Link.setStorableObject(*v0Container);
+                          v0Link.setStorableObject(*v0Container, ctx);
                           v0LinksDecorlb(*(laContainer->back())) = v0Link;
 
                           laLink.setElement(laContainer->back());
-                          laLink.setStorableObject(*laContainer);
+                          laLink.setStorableObject(*laContainer, ctx);
                           v0_laLinksDecor(*(v0Container->back())) = laLink;
                         } else {
                           v0_laLinksDecor(*(v0Container->back())) = laLink;
@@ -514,11 +514,11 @@ StatusCode InDetV0FinderTool::performSearch(xAOD::VertexContainer* v0Container,
                           lbContainer->push_back(myLambdabar.release());
 
                           v0Link.setElement(v0Container->back());
-                          v0Link.setStorableObject(*v0Container);
+                          v0Link.setStorableObject(*v0Container, ctx);
                           v0LinksDecorlbb(*(lbContainer->back())) = v0Link;
 
                           lbLink.setElement(lbContainer->back());
-                          lbLink.setStorableObject(*lbContainer);
+                          lbLink.setStorableObject(*lbContainer, ctx);
                           v0_lbLinksDecor(*(v0Container->back())) = lbLink;
                         } else {
                           v0_lbLinksDecor(*(v0Container->back())) = lbLink;
