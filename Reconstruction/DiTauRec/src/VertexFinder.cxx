@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DiTauRec/VertexFinder.h"
@@ -121,7 +121,7 @@ ElementLink<xAOD::VertexContainer> VertexFinder::getPV_TJVA(const xAOD::DiTauJet
   }
 
   // Set the highest JVF vertex
-  ElementLink<xAOD::VertexContainer> vtxlink = ElementLink<xAOD::VertexContainer>(*vertices,vertices->at(maxIndex)->index());
+  ElementLink<xAOD::VertexContainer> vtxlink = ElementLink<xAOD::VertexContainer>(*vertices,vertices->at(maxIndex)->index(), ctx);
 
   return vtxlink;
 }
