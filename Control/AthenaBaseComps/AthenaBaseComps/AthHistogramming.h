@@ -84,7 +84,7 @@ protected:
   inline TH1* bookGetPointer( TH1* hist, const std::string& tDir="", const std::string& stream="" );
 
   /// Simplify the booking and registering (into THistSvc) of histograms
-  TH1* bookGetPointer( TH1& histRef, std::string tDir="", std::string stream="" );
+  TH1* bookGetPointer( TH1& histRef, const std::string & tDir="", const std::string & stream="" );
 
 
   /// Simplify the booking and registering (into THistSvc) of histograms
@@ -112,7 +112,7 @@ protected:
   // -----------------------
 
   /// Simplify the booking and registering (into THistSvc) of TTrees
-  TTree* bookGetPointer( const TTree& treeRef, std::string tDir="", std::string stream="" );
+  TTree* bookGetPointer( const TTree& treeRef, const std::string & tDir="", const std::string & stream="" );
 
   /// Simplify the booking and registering (into THistSvc) of TTrees
   inline StatusCode book( const TTree& treeRef, const std::string& tDir="", const std::string& stream="" );
@@ -126,7 +126,7 @@ protected:
   // -----------------------
 
   /// Simplify the booking and registering (into THistSvc) of TGraphs
-  TGraph* bookGetPointer( const TGraph& graphRef, std::string tDir="", std::string stream="" );
+  TGraph* bookGetPointer( const TGraph& graphRef, const std::string & tDir="", const std::string & stream="" );
 
   /// Simplify the booking and registering (into THistSvc) of TGraphs
   inline StatusCode book( const TGraph& graphRef, const std::string& tDir="", const std::string& stream="" );
@@ -146,7 +146,7 @@ protected:
   inline TEfficiency* bookGetPointer( TEfficiency* eff, const std::string& tDir="", const std::string& stream="" );
 
   /// Simplify the booking and registering (into THistSvc) of TEfficiency
-  TEfficiency* bookGetPointer( TEfficiency& effRef, std::string tDir="", std::string stream="" );
+  TEfficiency* bookGetPointer( TEfficiency& effRef, const std::string & tDir="", const std::string & stream="" );
 
 
   /// Simplify the booking and registering (into THistSvc) of TEfficiency
@@ -171,18 +171,11 @@ private:
   typedef uint32_t hash_t;
 
   /// Method to build individual booking string
-  std::string buildBookingString( std::string& histName,
-                           std::string& tDir,
-                           std::string& stream,
-			   bool usePrefixPostfix = false);
-
-  /// Helper method to replace sub-string
-  void myReplace( std::string& str,
-                  const std::string& oldStr,
-                  const std::string& newStr);
+  std::string buildBookingString( std::string_view histName, std::string_view tDir,
+   std::string_view stream, bool usePrefixPostfix = false) const;
 
   /// Method to calculate a 32-bit hash from a string
-  hash_t hash( const std::string& histName ) const;
+  hash_t hash( std::string_view histName ) const;
 
 
 
@@ -426,9 +419,9 @@ inline const ServiceHandle<ITHistSvc>& AthHistogramming::histSvc() const
 
 
 // Create a 32-bit hash out of the histogram name
-inline AthHistogramming::hash_t AthHistogramming::hash( const std::string& histName ) const
+inline AthHistogramming::hash_t AthHistogramming::hash( std::string_view histName ) const
 {
-  const uint64_t hash64 = CxxUtils::crc64( histName );
+  const uint64_t hash64 = CxxUtils::crc64( std::string{histName} );
   return (hash_t)(hash64 & 0xFFFFFFFF);
 }
 
