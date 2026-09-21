@@ -192,11 +192,12 @@ def IDTIDEKernelCommonCfg(flags, name='IDTIDEKernel'):
     # ====================================================================
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
         name,
-        AugmentationTools=augmentationTools,
         SkimmingTools=skimmingTools,
         ThinningTools=[],
         RunSkimmingFirst=True,
         OutputLevel=INFO))
+    for tool in augmentationTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
 
     return acc
 

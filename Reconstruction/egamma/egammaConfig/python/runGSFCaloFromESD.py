@@ -52,7 +52,7 @@ def _run(args):
     )
 
     flags.lock()
-    
+
     # Main services
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
@@ -94,11 +94,11 @@ def _run(args):
     from TrkEventCnvTools.TrkEventCnvToolsConfig import TrkEventCnvSuperToolCfg
 
     acc.merge(TrkEventCnvSuperToolCfg(flags))
-    
+
     # GSF + EMCal augmentation
-    
+
     from DerivationFrameworkEGamma.EGammaGSFCalo import EGammaGSFCaloToolsCfg
-    
+
     GSFCaloTool = acc.popToolsAndMerge(
         EGammaGSFCaloToolsCfg(flags, "GSFCaloImprovement")
     )
@@ -106,15 +106,15 @@ def _run(args):
 
     from AthenaConfiguration.ComponentFactory import CompFactory
 
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("GSFRefitAugAlgo", AugmentationTools=[GSFCaloTool]))
     acc.addEventAlgo(
         CompFactory.DerivationFramework.DerivationKernel(
             "GSFRefitAlgo",
-            AugmentationTools=[GSFCaloTool],
             SkimmingTools=None,
             ThinningTools=None,
         )
     )
-    
+
     # Standard egamma output
     from AthenaConfiguration.Utils import setupLoggingLevels
 
@@ -170,7 +170,7 @@ def _run(args):
         onlyComponents=[],
         printDefaults=True,
     )
-   
+
     # Run it
     statusCode = acc.run()
     return statusCode

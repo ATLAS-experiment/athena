@@ -276,8 +276,9 @@ def BPHY18Cfg(flags):
               extraTools):
         acc.addPublicTool(t)
 
+    for tool in augTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY18Kernel",
-                                                    AugmentationTools = augTools,
                                                     #Only skim if not MC
                                                     SkimmingTools     = skimTools,
                                                     ThinningTools     = thinningCollection))

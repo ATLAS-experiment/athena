@@ -123,9 +123,10 @@ def IDTR2Cfg(flags):
         acc.addPublicTool(t)
 
     # Define the main kernel
+    for tool in augmentationTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(DerivationKernel("IDTR2Kernel",
-                                      AugmentationTools=augmentationTools,
                                       SkimmingTools=skimmingTools))
 
     # ============================

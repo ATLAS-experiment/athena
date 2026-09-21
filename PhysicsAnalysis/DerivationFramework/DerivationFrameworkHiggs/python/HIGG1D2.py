@@ -200,11 +200,12 @@ def HIGG1D2KernelCfg(flags, name='HIGG1D2Kernel', **kwargs):
         acc.merge(TruthCategoriesDecoratorCfg(flags, name="TruthCategoriesDecorator"))
 
     # Kernel now
+    for tool in augmentationTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(DerivationKernel(name,
                                       SkimmingTools = [skimmingTool],
-                                      ThinningTools = thinningTools,
-                                      AugmentationTools = augmentationTools))
+                                      ThinningTools = thinningTools))
     return acc
 
 

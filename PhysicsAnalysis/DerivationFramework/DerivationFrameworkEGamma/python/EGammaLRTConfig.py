@@ -123,11 +123,8 @@ def EGammaLRTCfg(flags):
     # CREATE THE DERIVATION KERNEL ALGORITHM
     # =======================================
 
-    acc.addEventAlgo(
-        CompFactory.DerivationFramework.CommonAugmentation(
-            "EGammaLRTKernel", AugmentationTools=LRTEGAugmentationTools
-        )
-    )
+    for i, tool in enumerate(LRTEGAugmentationTools):
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(f"EGammaLRTKernel{i}", AugmentationTools = [tool]))
 
     # =======================================
     # ADD TOOLS : custom electron, photon and muon track isolation

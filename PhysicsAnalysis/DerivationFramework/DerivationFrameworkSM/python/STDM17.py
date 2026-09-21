@@ -152,8 +152,10 @@ def STDM17KernelCfg(flags, name='STDM17Kernel', **kwargs):
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     skimmingTool = acc.getPrimaryAndMerge(STDM17SkimmingToolCfg(flags))
     augmentationToolSkim = acc.getPrimaryAndMerge(STDM17AugmentationToolsForSkimmingCfg(flags))
-    skimmingKernel = DerivationKernel(kwargs["PreselectionName"], SkimmingTools = [skimmingTool], AugmentationTools = [augmentationToolSkim])
-    acc.addEventAlgo( skimmingKernel, sequenceName="STDM17Sequence" ) 
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(kwargs["PreselectionName"]+"Aug", AugmentationTools = [augmentationToolSkim]), sequenceName="STDM17Sequence")
+
+    skimmingKernel = DerivationKernel(kwargs["PreselectionName"], SkimmingTools = [skimmingTool])
+    acc.addEventAlgo( skimmingKernel, sequenceName="STDM17Sequence")
 
     # Thinning tools...
     from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg, MuonTrackParticleThinningCfg, EgammaTrackParticleThinningCfg, TauTrackParticleThinningCfg
@@ -238,11 +240,11 @@ def STDM17KernelCfg(flags, name='STDM17Kernel', **kwargs):
 
     # augmentation tool
     augmentationTool = acc.getPrimaryAndMerge(STDM17AugmentationToolsCfg(flags))
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(kwargs[name+"Aug", AugmentationTools = [augmentationTool]), sequenceName="STDM17Sequence")
 
     # Main kernel
-    acc.addEventAlgo(DerivationKernel(name, 
-                                      ThinningTools = thinningTools,
-                                      AugmentationTools = [augmentationTool]),
+    acc.addEventAlgo(DerivationKernel(name,
+                                      ThinningTools = thinningTools),
                      sequenceName="STDM17Sequence")
     
     return acc

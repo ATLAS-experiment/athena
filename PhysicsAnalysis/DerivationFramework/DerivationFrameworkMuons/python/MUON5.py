@@ -309,11 +309,12 @@ def MUON5KernelCfg(flags, name='MUON5Kernel', **kwargs):
     # --------------------
     # The kernel algorithm
     # --------------------
+    for tool in MUON5AugmentTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(DerivationKernel(name,
-                                      AugmentationTools = MUON5AugmentTools,
-                                      SkimmingTools     = MUON5SkimmingTools, 
-                                      ThinningTools     = MUON5ThinningTools))       
+                                      SkimmingTools     = MUON5SkimmingTools,
+                                      ThinningTools     = MUON5ThinningTools))
     return acc
 
 

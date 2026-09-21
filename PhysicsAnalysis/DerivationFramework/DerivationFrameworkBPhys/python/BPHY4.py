@@ -64,8 +64,10 @@ def BPHY4Cfg(flags):
     BPHY4SlimTools     = [BPHY4_SelectEvent]
     BPHY4AugTools      = [BPHY4_Reco_4mu]
     for t in BPHY4ThinningTools + BPHY4SlimTools + BPHY4AugTools: acc.addPublicTool(t)
+    for tool in BPHY4AugTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY4Kernel", 
-                AugmentationTools= BPHY4AugTools,  SkimmingTools     = BPHY4SlimTools,  ThinningTools     = BPHY4ThinningTools  ))
+                                                                      SkimmingTools     = BPHY4SlimTools,  ThinningTools     = BPHY4ThinningTools  ))
 
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg

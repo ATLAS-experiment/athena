@@ -148,10 +148,11 @@ def BPHY1Kernel(flags):
     BPHY1_SelectEvent = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
         flags, name = "BPHY1_SelectEvent", expression = SelectExpression))
 
+    for tool in augTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY1Kernel",
-                            SkimmingTools = [BPHY1_SelectEvent],
-                            ThinningTools     = BPHY1ThinningTools,
-                            AugmentationTools = augTools))
+                                                                      SkimmingTools = [BPHY1_SelectEvent],
+                                                                      ThinningTools     = BPHY1ThinningTools))
     for tool in BPHY1ThinningTools : acc.addPublicTool(tool)
     return acc
 

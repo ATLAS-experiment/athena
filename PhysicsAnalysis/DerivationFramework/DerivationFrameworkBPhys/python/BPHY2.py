@@ -175,8 +175,9 @@ def BPHY2Cfg(flags):
                      BPHY2_Select_Bs2JpsiKK, BPHY2_AugOriginalCounts]
     for t in  augCollection + thiningCollection : acc.addPublicTool(t)
     
+    for tool in augCollection:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY2Kernel",
-                                                     AugmentationTools = augCollection,
                                                      #Only skim if not MC
                                                      SkimmingTools     = [BPHY2SkimmingOR] if not isSimulation else [],
                                                      ThinningTools     = thiningCollection))

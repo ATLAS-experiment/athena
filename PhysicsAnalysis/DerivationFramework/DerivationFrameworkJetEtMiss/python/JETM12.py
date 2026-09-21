@@ -242,8 +242,9 @@ def JETM12KernelCfg(flags, name='JETM12Kernel', **kwargs):
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     skimmingTool = acc.getPrimaryAndMerge(JETM12SkimmingToolCfg(flags))
     augmentationToolSkim = acc.getPrimaryAndMerge(JETM12AugmentationToolsForSkimmingCfg(flags))
-    skimmingKernel = DerivationKernel(kwargs["PreselectionName"], SkimmingTools = [skimmingTool], AugmentationTools = [augmentationToolSkim])
-    acc.addEventAlgo( skimmingKernel, sequenceName="JETM12Sequence" ) 
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(kwargs["PreselectionName"]+"Aug", AugmentationTools = [augmentationToolSkim]), sequenceName="JETM12Sequence" )
+    skimmingKernel = DerivationKernel(kwargs["PreselectionName"], SkimmingTools = [skimmingTool] )
+    acc.addEventAlgo( skimmingKernel, sequenceName="JETM12Sequence" )
 
     # Thinning tools...
     from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg, MuonTrackParticleThinningCfg, EgammaTrackParticleThinningCfg, TauTrackParticleThinningCfg
@@ -330,9 +331,9 @@ def JETM12KernelCfg(flags, name='JETM12Kernel', **kwargs):
     augmentationTool = acc.getPrimaryAndMerge(JETM12AugmentationToolsCfg(flags))
 
     # Main kernel
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(kwargs["PreselectionName"]+"Aug", AugmentationTools = [augmentationTool]), sequenceName="JETM12Sequence" )
     acc.addEventAlgo(DerivationKernel(name, 
-                                      ThinningTools = thinningTools,
-                                      AugmentationTools = [augmentationTool]),
+                                      ThinningTools = thinningTools),
                      sequenceName="JETM12Sequence")
     
     return acc

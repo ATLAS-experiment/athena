@@ -115,10 +115,11 @@ def PIXELVALIDKernelCommonCfg(flags, name='PIXELVALIDKernelCommon'):
     # ====================================================================
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
         name,
-        AugmentationTools = augmentationTools,
         SkimmingTools     = skimmingTools,
         ThinningTools     = [],
         RunSkimmingFirst  = True))
+    for tool in augmentationTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
 
     return acc
 
@@ -191,9 +192,10 @@ def PIXELVALIDKernelCfg(flags, name="PIXELVALIDKernel", StreamName=""):
         tsos_augmentationTools.append(PixelMonitoringTool)
 
     # shared between IDTIDE and PIXELVALID
+    for tool in tsos_augmentationTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
         name,
-        AugmentationTools=tsos_augmentationTools,
         ThinningTools=[],
         OutputLevel=INFO))
 

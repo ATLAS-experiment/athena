@@ -81,11 +81,11 @@ def HION2KernelCfg(flags, name='HION2Kernel', **kwargs):
 
     skimmingTool = acc.getPrimaryAndMerge(HION2SkimmingToolCfg(flags))
     augmentationTool = acc.getPrimaryAndMerge(HION2AugmentationToolCfg(flags))
-    
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(augmentationTool.name+"Aug", AugmentationTools = [augmentationTool]),
+                                      sequenceName = "HION2Sequence")
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(DerivationKernel(name,
-                                      SkimmingTools     = [skimmingTool],
-                                      AugmentationTools = [augmentationTool]),
+                                      SkimmingTools     = [skimmingTool]),
                                       sequenceName = "HION2Sequence")
       
     return acc

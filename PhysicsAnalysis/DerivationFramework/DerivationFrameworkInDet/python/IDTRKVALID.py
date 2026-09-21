@@ -112,10 +112,11 @@ def IDTRKVALIDKernelCommonCfg(flags, name='IDTRKVALIDKernel'):
 
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
         name,
-        AugmentationTools = augmentationTools,
         SkimmingTools     = skimmingTools,
         ThinningTools     = [],
         RunSkimmingFirst  = True))
+    for tool in augmentationTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
 
     return acc
 
