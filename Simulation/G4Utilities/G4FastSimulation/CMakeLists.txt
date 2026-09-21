@@ -20,7 +20,8 @@ endif()
 # FastCaloSim G4VFastSimulationModel should only be used in Athena builds
 set ( extra_src )
 if( NOT SIMULATIONBASE )
-	set( extra_src src/FastCaloSim.cxx src/FastCaloSimTool.cxx src/FatrasG4.cxx src/FatrasG4Tool.cxx src/AFatrasG4.cxx src/AFatrasG4Tool.cxx src/FatrasG4PhotonConversion.cxx )
+	set( extra_src src/FastCaloSim.cxx src/FastCaloSimTool.cxx src/FatrasG4.cxx src/FatrasG4Tool.cxx src/AFatrasG4.cxx src/AFatrasG4Tool.cxx src/FatrasG4PhotonConversion.cxx
+	               src/FatrasG4PhysicsTool.cxx )
 endif()
 
 # Component(s) in the package:

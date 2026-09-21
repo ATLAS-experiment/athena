@@ -5,7 +5,7 @@ from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 from G4AtlasTools.G4AtlasToolsConfig import FastSimulationConstructorToolCfg
 from ExtraParticles.ExtraParticlesConfig import ExtraParticlesPhysicsToolCfg
-from SimulationConfig.SimEnums import CavernBackground
+from SimulationConfig.SimEnums import CavernBackground, InDetParameterization
 from G4ExtraProcesses.G4ExtraProcessesConfig import G4EMProcessesPhysicsToolCfg
 from G4StepLimitation.G4StepLimitationConfig import G4StepLimitationToolCfg
 from TRT_TR_Process.TRT_TR_ProcessConfig import TRTPhysicsToolCfg
@@ -25,6 +25,13 @@ def PhysicsListSvcCfg(flags, name="PhysicsListSvc", **kwargs):
     if flags.Detector.GeometryLucid or flags.Detector.GeometryAFP or flags.Detector.GeometryZDC:
         from LUCID_OpProcess.LUCID_OpProcessConfig import LucidPhysicsToolCfg
         PhysOptionList +=[result.popToolsAndMerge(LucidPhysicsToolCfg(flags))]
+    if flags.Sim.GammaConversionOnly:
+        from G4FastSimulation.G4FastSimulationConfig import GammaConversionOnlyPhysicsToolCfg
+        PhysOptionList +=[result.popToolsAndMerge(GammaConversionOnlyPhysicsToolCfg(flags))]
+    # The ACTS trigger converts on its own, so Geant4 must not
+    if flags.Sim.InDetParameterization is InDetParameterization.FatrasG4:
+        from G4FastSimulation.G4FastSimulationConfig import FatrasG4PhysicsToolCfg
+        PhysOptionList +=[result.popToolsAndMerge(FatrasG4PhysicsToolCfg(flags))]
     kwargs.setdefault("PhysOption", PhysOptionList)
     PhysDecaysList = []
     kwargs.setdefault("PhysicsDecay", PhysDecaysList)

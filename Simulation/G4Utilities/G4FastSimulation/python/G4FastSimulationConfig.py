@@ -18,21 +18,40 @@ def DeadMaterialShowerCfg(flags, **kwargs):
     return result
 
 
+# Region where FatrasG4 is valid, shared with FatrasG4PhysicsToolCfg so that
+# Geant4 conversion is switched off exactly where the ACTS trigger acts
+FatrasG4RegionName = "InDet"
+
+
 def FatrasG4Cfg(flags, **kwargs):
     result = ComponentAccumulator()
     # Name of region where FatrasG4 will be triggered
-    kwargs.setdefault("RegionName", "InDet")
+    kwargs.setdefault("RegionName", FatrasG4RegionName)
+    # Sensor regions inside InDet: the ACTS trigger only counts the photon steps
+    # there, Geant4 keeps the physics
+    kwargs.setdefault("BookkeepingRegionNames", ["Pixel", "SCT", "TRT", "TRT_Ar"])
 
     # Set the ActsFatrasG4Tool part
     from G4AtlasTools.G4AtlasToolsConfig import ActsFatrasG4ToolCfg
-    if "ActsFatrasG4Tool" not in kwargs:        
+    if "ActsFatrasG4Tool" not in kwargs:
         kwargs.setdefault("ActsFatrasG4Tool", result.addPublicTool(result.popToolsAndMerge(ActsFatrasG4ToolCfg(flags))))
-    
+
     fatrasG4Tool = CompFactory.FatrasG4Tool(name="FatrasG4", **kwargs)
     # declare produced data
     # ExtraOutputs is now declared in SimHitContainerListCfg in G4AtlasToolsConfig.py, and called from G4AtlasAlgConfig.py
     result.setPrivateTools(fatrasG4Tool)
 
+    return result
+
+def FatrasG4PhysicsToolCfg(flags, **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault("RegionNames", [FatrasG4RegionName])
+    result.setPrivateTools(CompFactory.FatrasG4PhysicsTool(name="FatrasG4PhysicsTool", **kwargs))
+    return result
+
+def GammaConversionOnlyPhysicsToolCfg(flags, **kwargs):
+    result = ComponentAccumulator()
+    result.setPrivateTools(CompFactory.GammaConversionOnlyPhysicsTool(name="GammaConversionOnlyPhysicsTool", **kwargs))
     return result
 
 def AFatrasG4Cfg(flags, **kwargs):

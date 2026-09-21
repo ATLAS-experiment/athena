@@ -95,6 +95,10 @@ def enableFatrasG4(flags):
     # Set InDetParametrization to FatrasG4
     flags.Sim.InDetParameterization = InDetParameterization.FatrasG4
 
+def enableGammaConversionOnly(flags):
+    # Remove every Geant4 photon process but gamma conversion
+    flags.Sim.GammaConversionOnly = True
+
 def enableAFatrasG4(flags):
     # Set InDetParametrization to AFatrasG4
     flags.Sim.InDetParameterization = InDetParameterization.AFatrasG4
@@ -120,3 +124,8 @@ def useNystromRK4Stepper(flags):
 def enableFastIDKiller(flags):
     """ """
     flags.Sim.OptionalUserActionList += ['G4UserActions.G4UserActionsConfig.FastIDKillerToolCfg']
+
+
+def enableFastIDKillerAll(flags):
+    """Kill every particle leaving the ID envelope, with no exception."""
+    flags.Sim.OptionalUserActionList += ['G4UserActions.G4UserActionsConfig.FastIDKillerAllToolCfg']

@@ -253,6 +253,9 @@ def createSimConfigFlags():
 
     # ActsFatrasG4
     scf.addFlag("Sim.ActsFatrasG4.DebugInjectParticle", False) 
+
+    # Photons only transported and converted: every other Geant4 photon process removed
+    scf.addFlag("Sim.GammaConversionOnly", False)
        
     # Fatras
     scf.addFlag("Sim.Fatras.RandomStreamName", "FatrasRnd")

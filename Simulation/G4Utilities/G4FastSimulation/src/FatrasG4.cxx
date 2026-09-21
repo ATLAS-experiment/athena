@@ -49,7 +49,8 @@ FatrasG4::FatrasG4(const std::string& name,
 : G4VFastSimulationModel(name, region),
   m_ActsFatrasG4Tool(ActsFatrasG4Tool),
   m_photonConversion(),
-  m_generator(*G4Random::getTheEngine())
+  m_generator(*G4Random::getTheEngine()),
+  m_region(region)
 {
 }
 
@@ -60,15 +61,9 @@ G4bool FatrasG4::IsApplicable(const G4ParticleDefinition& particleType)
   bool isElectron = &particleType == G4Electron::ElectronDefinition();
   bool isPositron = &particleType == G4Positron::PositronDefinition();
 
-  // Check particle energy
-  // for FatrasG4 we use the fast models for 1-100GeV
-  // IsApplicable is handed a particle type without a track, so the energy is
-  // taken from the track Geant4 is currently tracking: that is the very track
-  // this call is about, as Geant4 calls IsApplicable at each of its steps.
-  const G4TrackingManager * trackingManager = G4EventManager::GetEventManager() -> GetTrackingManager();
-  const G4Track * currentTrack = trackingManager ? trackingManager -> GetTrack() : nullptr;
-  const auto particleEnergy = currentTrack ? currentTrack -> GetTotalEnergy() : 0.;
-  if (particleEnergy < s_minEnergy || particleEnergy > s_maxEnergy) return false;
+  // No energy check here: Geant4 calls IsApplicable only when the particle
+  // type changes and caches the answer, even across events, so a check on the
+  // current track would decide for every later photon. ModelTrigger checks it.
 
   // The model only acts on photons. Electrons and positrons are declared
   // applicable so that Geant4 attaches the fast simulation process to them in
@@ -100,6 +95,10 @@ G4bool FatrasG4::ModelTrigger(const G4FastTrack& fastTrack)
   // No conversion until the trigger below fires
   m_doConversion = false;
 
+  // Energy region the fast models are used for; outside it Geant4 converts
+  const double energy = fastTrack.GetPrimaryTrack() -> GetTotalEnergy();
+  if (energy < s_minEnergy || energy > s_maxEnergy) return false;
+
   #ifdef FATRASG4_DEBUG
     G4cout<<"[FatrasG4::ModelTrigger] Got particle with "                                                      <<"\n"
                                     <<" pdg=" <<fastTrack.GetPrimaryTrack() -> GetDefinition()->GetPDGEncoding()  <<"\n"
@@ -122,15 +121,13 @@ G4bool FatrasG4::ModelTrigger(const G4FastTrack& fastTrack)
 bool FatrasG4::ACTSConversionTrigger(const G4FastTrack& fastTrack)
 {
   // The fast model samples the conversion limit in units of radiation length,
-  // so the radiation lengths traversed by the photon are accumulated and
-  // compared against it. No special case is needed for air: its radiation
-  // length suppresses its contribution on its own.
+  // so the radiation lengths traversed by the photon inside the FatrasG4
+  // region are accumulated and compared against it. No special case is needed
+  // for air: its radiation length suppresses its contribution on its own.
   const G4Track * track = fastTrack.GetPrimaryTrack();
   const bool isNewPhoton = isNewPhotonTrack(*track);
-  const double stepLength = isNewPhoton ? 0.0 : track -> GetTrackLength() - m_photonPathLength;
+  const double stepLength = countedStepLength(*track, isNewPhoton);
   m_photonPathLength = track -> GetTrackLength();
-
-  const double radLength = track -> GetVolume() -> GetLogicalVolume() -> GetMaterial() -> GetRadlen();
 
   if (isNewPhoton) {
     m_x0PhotonTraversed = 0.0;
@@ -139,9 +136,10 @@ bool FatrasG4::ACTSConversionTrigger(const G4FastTrack& fastTrack)
   else if (m_photonRadLength > 0.) {
     m_x0PhotonTraversed += stepLength / m_photonRadLength;
   }
-  m_photonRadLength = radLength;
+  m_photonRadLength = track -> GetVolume() -> GetLogicalVolume() -> GetMaterial() -> GetRadlen();
 
-  m_doConversion = m_x0PhotonTraversed >= m_x0Photon;
+  // Outside the region only the step just made in the region can fire it
+  m_doConversion = (m_lastStepInRegion || stepLength > 0.0) && m_x0PhotonTraversed >= m_x0Photon;
 
   #ifdef FATRASG4_DEBUG
     G4cout<<"[FatrasG4::ACTSConversionTrigger] photon trackID="<<track -> GetTrackID()
@@ -149,6 +147,21 @@ bool FatrasG4::ACTSConversionTrigger(const G4FastTrack& fastTrack)
   #endif
 
   return m_doConversion;
+}
+
+double FatrasG4::countedStepLength(const G4Track& track, bool isNewPhoton)
+{
+  // ModelTrigger is called at the start of every step in the FatrasG4 region
+  // and in the bookkeeping regions around it. The previous step is counted
+  // only if it was seen starting in the FatrasG4 region: consecutive step
+  // numbers guarantee that no unseen step came in between.
+  const int stepNumber = track.GetCurrentStepNumber();
+  const bool counted = !isNewPhoton && m_lastStepInRegion && stepNumber == m_lastStepNumber + 1;
+
+  m_lastStepNumber = stepNumber;
+  m_lastStepInRegion = track.GetVolume() -> GetLogicalVolume() -> GetRegion() == m_region;
+
+  return counted ? track.GetStepLength() : 0.0;
 }
 
 bool FatrasG4::isNewPhotonTrack(const G4Track& track)
