@@ -10,3 +10,8 @@ outputFile=${ATLAS_CTEST_TESTNAME}.RAW.data
 rm -f $outputFile
 
 acmd filter-files --selection ${1}/share/${ATLAS_CTEST_TESTNAME}.ref --output "$outputFile" $inputFiles
+
+eventList=${ATLAS_CTEST_TESTNAME}.txt
+
+acmd list-events --output "$eventList" "$outputFile"
+cat "$eventList"
