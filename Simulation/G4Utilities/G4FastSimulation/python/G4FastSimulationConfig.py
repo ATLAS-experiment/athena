@@ -18,8 +18,8 @@ def DeadMaterialShowerCfg(flags, **kwargs):
     return result
 
 
-# Region where FatrasG4 is valid, shared with FatrasG4PhysicsToolCfg so that
-# Geant4 conversion is switched off exactly where the ACTS trigger acts
+# Region the fast simulation owns, shared with NoG4PhysicsToolCfg so that
+# Geant4 physics is switched off exactly where FatrasG4 acts
 FatrasG4RegionName = "InDet"
 
 
@@ -66,15 +66,10 @@ def FatrasG4Cfg(flags, **kwargs):
 
     return result
 
-def FatrasG4PhysicsToolCfg(flags, **kwargs):
+def NoG4PhysicsToolCfg(flags, **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("RegionNames", [FatrasG4RegionName])
-    result.setPrivateTools(CompFactory.FatrasG4PhysicsTool(name="FatrasG4PhysicsTool", **kwargs))
-    return result
-
-def GammaConversionOnlyPhysicsToolCfg(flags, **kwargs):
-    result = ComponentAccumulator()
-    result.setPrivateTools(CompFactory.GammaConversionOnlyPhysicsTool(name="GammaConversionOnlyPhysicsTool", **kwargs))
+    result.setPrivateTools(CompFactory.NoG4PhysicsTool(name="NoG4PhysicsTool", **kwargs))
     return result
 
 def AFatrasG4Cfg(flags, **kwargs):

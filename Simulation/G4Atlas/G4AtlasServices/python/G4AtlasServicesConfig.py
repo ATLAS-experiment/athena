@@ -25,13 +25,10 @@ def PhysicsListSvcCfg(flags, name="PhysicsListSvc", **kwargs):
     if flags.Detector.GeometryLucid or flags.Detector.GeometryAFP or flags.Detector.GeometryZDC:
         from LUCID_OpProcess.LUCID_OpProcessConfig import LucidPhysicsToolCfg
         PhysOptionList +=[result.popToolsAndMerge(LucidPhysicsToolCfg(flags))]
-    if flags.Sim.GammaConversionOnly:
-        from G4FastSimulation.G4FastSimulationConfig import GammaConversionOnlyPhysicsToolCfg
-        PhysOptionList +=[result.popToolsAndMerge(GammaConversionOnlyPhysicsToolCfg(flags))]
-    # The ACTS trigger converts on its own, so Geant4 must not
+    # FatrasG4 owns the InDet, so Geant4 keeps no physics of its own there
     if flags.Sim.InDetParameterization is InDetParameterization.FatrasG4:
-        from G4FastSimulation.G4FastSimulationConfig import FatrasG4PhysicsToolCfg
-        PhysOptionList +=[result.popToolsAndMerge(FatrasG4PhysicsToolCfg(flags))]
+        from G4FastSimulation.G4FastSimulationConfig import NoG4PhysicsToolCfg
+        PhysOptionList +=[result.popToolsAndMerge(NoG4PhysicsToolCfg(flags))]
     kwargs.setdefault("PhysOption", PhysOptionList)
     PhysDecaysList = []
     kwargs.setdefault("PhysicsDecay", PhysDecaysList)

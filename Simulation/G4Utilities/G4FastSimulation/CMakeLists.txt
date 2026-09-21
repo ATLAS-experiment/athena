@@ -21,7 +21,7 @@ endif()
 set ( extra_src )
 if( NOT SIMULATIONBASE )
 	set( extra_src src/FastCaloSim.cxx src/FastCaloSimTool.cxx src/FatrasG4.cxx src/FatrasG4Tool.cxx src/AFatrasG4.cxx src/AFatrasG4Tool.cxx src/FatrasG4PhotonConversion.cxx
-	               src/FatrasG4PhysicsTool.cxx )
+	               src/NoG4PhysicsTool.cxx )
 endif()
 
 # Component(s) in the package:

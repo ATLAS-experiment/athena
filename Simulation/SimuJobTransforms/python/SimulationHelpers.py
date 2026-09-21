@@ -95,10 +95,6 @@ def enableFatrasG4(flags):
     # Set InDetParametrization to FatrasG4
     flags.Sim.InDetParameterization = InDetParameterization.FatrasG4
 
-def enableGammaConversionOnly(flags):
-    # Remove every Geant4 photon process but gamma conversion
-    flags.Sim.GammaConversionOnly = True
-
 def enableAFatrasG4(flags):
     # Set InDetParametrization to AFatrasG4
     flags.Sim.InDetParameterization = InDetParameterization.AFatrasG4

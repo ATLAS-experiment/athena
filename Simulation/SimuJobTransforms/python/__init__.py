@@ -6,7 +6,6 @@ from .SimulationHelpers import enableParticleID as ParticleID
 from .SimulationHelpers import enableFastCaloSim as FastCaloSim
 from .SimulationHelpers import enableFatrasG4 as FatrasG4
 from .SimulationHelpers import enableAFatrasG4 as AFatrasG4
-from .SimulationHelpers import enableGammaConversionOnly as GammaConversionOnly
 from .SimulationHelpers import useVerboseTracking, useSimpleRungeStepper, useClassicalRK4Stepper, useNystromRK4Stepper
 from .SimulationHelpers import enableFastIDKiller as enableFastIDKiller
 from .SimulationHelpers import enableFastIDKillerAll as enableFastIDKillerAll
