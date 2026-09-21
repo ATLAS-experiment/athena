@@ -14,13 +14,16 @@
 
 // Framework include(s):
 #include "xAODTau/DiTauJet.h"
-#include "PATCore/AcceptData.h"
-#include "PATCore/AcceptInfo.h"
 
 // ROOT include(s):
 #include "TH1F.h"
 
 #include <memory>
+
+namespace asg{
+  class AcceptInfo;
+  class AcceptData;
+}
 
 namespace TauAnalysisTools
 {
@@ -55,7 +58,7 @@ protected:
   std::unique_ptr<TH1F> m_hHistCutPre;
   std::unique_ptr<TH1F> m_hHistCut;
 
-  DiTauSelectionTool* m_tDTST;
+  DiTauSelectionTool* m_tDTST{};
 
   void declareProperty(const std::string& name, std::string& loc);
   std::map<std::string, std::string&> m_mProperties;

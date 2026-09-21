@@ -6,7 +6,6 @@
 #define POOLSVC_ISESSION_H
 
 #include "PoolSvc/IDatabase.h"
-#include "PoolSvc/ITransaction.h"
 
 #include "DataModelRoot/RootType.h"
 
@@ -30,20 +29,27 @@ namespace pool {
   /** @class ISession ISession.h PoolSvc/ISession.h
   *
   *  ISession is the interface class for user (macroscopic) sessions
-  *  Every transaction and connection to a database and object reading
-  *  and writing must be performed within a session. 
+  *  Every connection to a database and object reading and writing must be performed within a session.
   *  It also provides access to the file catalog and to the technology specific attributes.
   */
 
-  class ISession : public ITransaction {
+  class ISession {
   public:
     /// Explicitly disconnects all the databases.
     /// If a transaction is active, then all the changes since the last commit are aborted.
     virtual bool disconnectAll() = 0;
 
-    /// Returns the transaction interface
-    virtual ITransaction& transaction() = 0;
-    virtual const ITransaction& transaction() const = 0;
+    /// Starts a new transaction. Returns the success of the operation
+    virtual bool start( Io::IoFlag type = Io::READ ) = 0;
+
+    /// Commits the transaction.
+    virtual bool commit() = 0;
+
+    /// Commits the holds transaction.
+    virtual bool commitAndHold() = 0;
+
+    /// Returns the transaction type
+    virtual Io::IoFlag type() const = 0;
 
     /// Returns a pointer to a database object. The user acquires ownership of that object.
     virtual std::unique_ptr<IDatabase> databaseHandle( const std::string& dbName,
@@ -72,9 +78,6 @@ namespace pool {
     * @return Token*   the token address of the persistent object. I case of failure 0 is returned.
     */
     virtual Token* registerForWrite( const Placement& place, const void* object, const RootType& type ) = 0;
-
-    /// Returns the file catalog in use
-    virtual IFileCatalog& fileCatalog() = 0;
 
     /// Returns the object holding the technology specific attributes for a given technology domain
     virtual ITechnologySpecificAttributes& technologySpecificAttributes( long technology ) = 0;

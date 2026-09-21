@@ -22,6 +22,7 @@
 #include "AthenaKernel/ISecondaryEventSelector.h"
 #include "AthenaKernel/SlotSpecificObj.h"
 #include "AthenaPoolCnvSvc/IAthenaPoolCnvSvc.h"
+#include "PoolSvc/IPoolSvc.h"
 #include "AthenaBaseComps/AthService.h"
 
 #include "AthenaKernel/InputFileIncidentGuard.h"
@@ -39,6 +40,7 @@ class ISvcLocator;
 class EventContextAthenaPool;
 class PoolCollectionConverter;
 class StoreGateSvc;
+class IPoolSvc;
 namespace pool {
    class ICollectionCursor;
 }
@@ -158,6 +160,7 @@ private: // data
    mutable std::optional<InputFileIncidentGuard> m_inputFileGuard ATLAS_THREAD_SAFE;
 
    ServiceHandle<IAthenaPoolCnvSvc> m_athenaPoolCnvSvc{this, "ConversionService", "AthenaPoolCnvSvc", ""};
+   ServiceHandle<IPoolSvc> m_poolSvc{this, "PoolSvc", "PoolSvc", ""};
    ServiceHandle<IIncidentSvc> m_incidentSvc{this, "IncidentSvc", "IncidentSvc", ""};
 
 private: // properties

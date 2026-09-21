@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # This package is a collection of 'dual-use' tools to calculate
 # high-level flavor tagging discriminants. Because it should work both
@@ -23,10 +23,6 @@ set(FTDSource
   Root/DL2Tool.cxx
   Root/VRJetOverlapDecorator.cxx
   Root/VRJetOverlapDecoratorTool.cxx
-  Root/HbbTag.cxx
-  Root/HbbTagTool.cxx
-  Root/HbbTagConfig.cxx
-  Root/HbbGraphConfig.cxx
   Root/VRJetOverlapDecorator.cxx
   Root/TrackClassifier.cxx
 )
@@ -103,11 +99,6 @@ if (NOT XAOD_STANDALONE)
 
 endif()
 
-atlas_add_dictionary( FlavorTagDiscriminantsDict
-   FlavorTagDiscriminants/FlavorTagDiscriminantsDict.h
-   FlavorTagDiscriminants/selection.xml
-   LINK_LIBRARIES FlavorTagDiscriminants )
-
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 atlas_add_executable( testOptionsHash
@@ -124,3 +115,14 @@ atlas_add_executable( get-onnx-metadata
                       util/get-onnx-metadata.cxx
                       INCLUDE_DIRS ${ONNXRUNTIME_INCLUDE_DIRS}
                       LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} )
+
+# Tests in the package:
+# asked for here rather than with the other find_package calls above, so that
+# the unit test framework is linked by the test alone and not by the library
+find_package( Boost COMPONENTS unit_test_framework )
+
+atlas_add_test( JetHitPhiRanges_test
+                SOURCES test/JetHitPhiRanges_test.cxx
+                INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+                LINK_LIBRARIES ${Boost_LIBRARIES}
+                POST_EXEC_SCRIPT noerror.sh )

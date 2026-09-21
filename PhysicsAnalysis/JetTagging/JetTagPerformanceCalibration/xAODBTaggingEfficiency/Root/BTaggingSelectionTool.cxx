@@ -300,7 +300,7 @@ StatusCode BTaggingSelectionTool::ExtractTaggerProperties(taggerproperties &tagg
     double fraction_tau_cTag = 0.;
     TVector* fraction_tau_data = dynamic_cast<TVector*>( m_inf->Get(basePath + "/fraction_tau") );
     TVector* fraction_tau_cTag_data = dynamic_cast<TVector*>( m_inf->Get(basePath + "/fraction_tau_cTag") );
-    if (m_taggerWithTauFractions){
+    if (m_taggerWithTauFractions) {
       if( fraction_tau_data ) {
         fraction_tau = fraction_tau_data[0](0);
       }
@@ -311,10 +311,11 @@ StatusCode BTaggingSelectionTool::ExtractTaggerProperties(taggerproperties &tagg
       fraction_tau_cTag = fraction_tau_cTag_data[0](0);
 
       if (!fraction_tau_data && !fraction_tau_cTag){
-      // For all recent taggers GN2v01 or above, the tau fraction(s) should be saved in the CDI file and retrieved/set within the BTaggingSelectionTool
-      // Hence raising error and failure here as at least one of those fractions should not be a null pointer
-      ATH_MSG_ERROR("Tau-fraction(s) should have been retrieved for taggerName=" << taggerName << " but both fraction_tau_data and fraction_tau_cTag are null pointers");
-      return StatusCode::FAILURE;
+        // For all recent taggers GN2v01 or above, the tau fraction(s) should be saved in the CDI file and retrieved/set within the BTaggingSelectionTool
+        // Hence raising error and failure here as at least one of those fractions should not be a null pointer
+        ATH_MSG_ERROR("Tau-fraction(s) should have been retrieved for taggerName=" << taggerName << " but both fraction_tau_data and fraction_tau_cTag are null pointers");
+        return StatusCode::FAILURE;
+      }
     }
     tagger.fraction_b = fraction_b;
     tagger.fraction_c = fraction_c;
@@ -325,7 +326,6 @@ StatusCode BTaggingSelectionTool::ExtractTaggerProperties(taggerproperties &tagg
     delete fraction_c_data;
     delete fraction_tau_data;
     delete fraction_tau_cTag_data;
-    }
   }
   return StatusCode::SUCCESS;
 }

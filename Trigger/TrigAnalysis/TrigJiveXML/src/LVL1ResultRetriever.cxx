@@ -1,16 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigJiveXML/LVL1ResultRetriever.h"
-
-//#include <string>
 #include "TrigSteeringEvent/Chain.h"
-//#include "TrigSteeringEvent/TrigRoiDescriptor.h"
 
-//#include "TrigDecisionTool/ChainGroup.h"
-//#include "TrigDecisionTool/FeatureContainer.h"
-//#include "TrigDecisionTool/Feature.h"
 
 /// Migrated to new TrigDecisionTool described here
 ///   https://twiki.cern.ch/twiki/bin/view/Atlas/TrigDecisionTool15
@@ -191,22 +185,23 @@ namespace JiveXML {
 
     //Finally create data map and write out results
     DataMap dataMap;
-    dataMap["ctpItemList"] = itemListL1Vec;
-    dataMap["prescaleListL1"] = prescaleListL1Vec;
-    dataMap["itemListL2"] = itemListL2Vec;
-    dataMap["prescaleListL2"] = prescaleListL2Vec;
-    dataMap["itemListEF"] = itemListHLTVec; // temporary. AtlantisJava doesn't know 'HLT' yet. jpt 23Jun15
-    dataMap["prescaleListEF"] = prescaleListHLTVec;
-    dataMap["passedTrigger"] = passedTrigger;
-    dataMap["passedL1"] = passedL1;
+    const std::size_t n = itemListL1Vec.size();
+    dataMap["ctpItemList"] = std::move(itemListL1Vec);
+    dataMap["prescaleListL1"] = std::move(prescaleListL1Vec);
+    dataMap["itemListL2"] = std::move(itemListL2Vec);
+    dataMap["prescaleListL2"] = std::move(prescaleListL2Vec);
+    dataMap["itemListEF"] = std::move(itemListHLTVec); // temporary. AtlantisJava doesn't know 'HLT' yet. jpt 23Jun15
+    dataMap["prescaleListEF"] = std::move(prescaleListHLTVec);
+    dataMap["passedTrigger"] = std::move(passedTrigger);
+    dataMap["passedL1"] = std::move(passedL1);
     dataMap["passedL2"] = passedHLT; // temporary. AtlantisJava doesn't know 'HLT' yet. jpt 23Jun15
-    dataMap["passedEF"] = passedHLT; // temporary. AtlantisJava doesn't know 'HLT' yet. jpt 23Jun15
-    dataMap["energySumEt"] = energySumEt;
-    dataMap["energyEx"] = energyEx;
-    dataMap["energyEy"] = energyEy;
-    dataMap["energyEtMiss"] = energyEtMiss;
+    dataMap["passedEF"] = std::move(passedHLT); // temporary. AtlantisJava doesn't know 'HLT' yet. jpt 23Jun15
+    dataMap["energySumEt"] = std::move(energySumEt);
+    dataMap["energyEx"] = std::move(energyEx);
+    dataMap["energyEy"] = std::move(energyEy);
+    dataMap["energyEtMiss"] = std::move(energyEtMiss);
 
-    ATH_MSG_DEBUG(dataTypeName() << ": "<< itemListL1Vec.size());
+    ATH_MSG_DEBUG(dataTypeName() << ": "<< n);
     //forward data to formating tool
     return FormatTool->AddToEvent(dataTypeName(), "TrigDecision", &dataMap);
   }

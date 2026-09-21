@@ -186,14 +186,12 @@ class MetaDataSvc : public extends<::AthService,
     return StatusCode::SUCCESS;
   }
 
-  /** loads addresses of versioned metadata object.
-   * loops over all versions of the @c DataHeader and adds addresses of objects
-   * from @c DataHeaderElements to the @c tads with a version corresponding to
-   * version number of the DataHeader that contained them.
-   * @see ObjectWithVersion
+  /** loads addresses of metadata object.
+   * loads the @c DataHeader and adds addresses of objects
+   * from @c DataHeaderElements to the @c tads
    * @see DataHeader
    * @param storeID [IN] the identity of the store
-   * @param tads [OUT] list of addresses to objects from versions keys
+   * @param tads [OUT] list of addresses to objects
    * @returns FAILURE the DataHeader could not be retrieved, else SUCCESS
    */
   StatusCode loadAddresses(StoreID::type storeID,

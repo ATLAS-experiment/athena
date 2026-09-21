@@ -276,7 +276,9 @@ StatusCode JetCalibrationTool::getCalibClass(const TString& calibration) {
       str_mcCampaign.resize(4); //Only keep top-level of campaign (e.g. mc20 or mc23)
       mcCampaign = str_mcCampaign;
       mcCampaign.ToUpper();
-      ATH_MSG_INFO("Have loaded metadata mcDSID:" << mcDSID << ", generatorsInfo: " << generatorsInfo << ", mcCampaign: " << mcCampaign << ", simFlavour: " << simFlavour);
+      if(mcDSID){
+	ATH_MSG_INFO("Have loaded metadata mcDSID:" << mcDSID << ", generatorsInfo: " << generatorsInfo << ", mcCampaign: " << mcCampaign << ", simFlavour: " << simFlavour);
+      }
     }
   }
   if (not ok){

@@ -442,6 +442,8 @@ namespace xAOD {
       for (SG::IAuxTypeVector* p : m_dynamicVecs)
          delete p;
       m_dynamicVecs.clear();
+      m_auxids.clear();
+      m_decorations.clear();
 
       SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
 #define ADD_IDS(VAR, TYP) \
@@ -453,6 +455,12 @@ namespace xAOD {
       ADD_IDS(m_vecInt, std::vector<int>);
       ADD_IDS(m_vecFloat, std::vector<float>);
 #undef ADD_IDS
+
+      for (SG::auxid_t id = 0; id < m_staticVecs.size(); ++id) {
+        if (m_staticVecs[id]) {
+          m_auxids.insert (id);
+        }
+      }
 
       return;
    }

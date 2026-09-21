@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Asg wrapper around the MissingMassCalculator
@@ -8,18 +8,17 @@
 #define DITAUMASSTOOLS_HELPERFUNCTIONS_H
 
 // Framework includes
-
-// EDM include(s)
-#include "xAODTau/TauJet.h"
-
-// local include(s)
-#include "TH1F.h"
-#include "TF1.h"
-#include "TKey.h"
-#include "TDirectory.h"
-#include "TROOT.h"
 #include "Math/VectorUtil.h"
 #include "Math/Vector2D.h"
+
+#include <vector>
+
+class TF1;
+class TDirectory;
+
+namespace xAOD{
+  class IParticle;
+}
 
 namespace DiTauMassTools{
   using ROOT::Math::XYVector;

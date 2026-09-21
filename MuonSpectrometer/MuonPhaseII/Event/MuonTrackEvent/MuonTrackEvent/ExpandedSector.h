@@ -83,8 +83,10 @@ namespace MuonR4 {
             /** @brief Returns the vector that is normal to the plane spanned 
              *         by the expanded sector */
             Amg::Vector3D normalDir() const;
-            /** @brief */
+            /** @brief Returns true if the expanded sector is a neighbour of the other */
             bool isNeighbour(const ExpandedSector& other) const;
+            /** @brief Return the expanded sector (half) size */
+            double sectorSize() const;
         private:
             /** @brief Pipe the object to an ostream  */
             std::ostream& toString(std::ostream& ostr)const;

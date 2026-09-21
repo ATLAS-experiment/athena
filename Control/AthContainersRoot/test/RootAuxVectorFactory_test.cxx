@@ -19,7 +19,6 @@
 #include "AthenaKernel/ExtendedEventContext.h"
 #include "SGTools/DataProxy_cast.h"
 #include "SGTools/TestStore.h"
-#include "CxxUtils/StrFormat.h"
 #include "TClass.h"
 #include <iostream>
 #include <cassert>
@@ -58,7 +57,7 @@ using SG::AuxStoreInternal_test;
 
 std::string str (int x)
 {
-  return CxxUtils::strformat ("%d", x);
+  return std::to_string (x);
 }
 
 

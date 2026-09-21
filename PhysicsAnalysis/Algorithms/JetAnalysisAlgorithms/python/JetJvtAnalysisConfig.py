@@ -17,7 +17,8 @@ class JetJvtAnalysisConfig (ConfigBlock) :
         self.addDependency('EventSelectionMerger', required=False)
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the input container.")
+            info="the name of the input container.",
+            meta={'role':'containerRef'})
         self.addOption ('postfix', '', type=str,
             info="a postfix to apply to decorations and algorithm names. Typically "
             "not needed here.")

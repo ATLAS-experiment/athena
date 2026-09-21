@@ -60,8 +60,11 @@ if [ ! -f $inputRDO ]; then
 fi
 
 ## running reconstruction
-ignore_pattern='ERROR Locating dev file .+ Do not let this propagate to a release'
+ignore_pattern1='ERROR Locating dev file .+ Do not let this propagate to a release'
+ignore_pattern2='ActsPriVxFinderAlg.ActsAdaptiveMultiPriVtx.+ERROR'
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 run Reco_tf.py \
+    --conditionsTag "default:${conditionsTag}" \
     --maxEvents ${nEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
     --postInclude 'ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
@@ -71,11 +74,13 @@ run Reco_tf.py \
                flags.Acts.Device.doTrackReconstruction=True; \
                flags.Tracking.doPixelDigitalClustering=True; \
                flags.Tracking.ITkActsPass.storeTrackSeeds=${storeTrackSeeds}; \
+               from ActsConfig.ActsConfigFlags import SeedingStrategy; \
+               flags.Tracking.ITkActsPass.PixelSeedingStrategy=SeedingStrategy.GridTriplet; \
                flags.Concurrency.NumThreads=${numThreads}; \
                flags.Concurrency.NumConcurrentEvents=${numThreads};" \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD} \
-    --ignorePatterns "${ignore_pattern}" \
+    --ignorePatterns "${ignore_pattern1}" "${ignore_pattern2}" \
     --perfmon fullmonmt
 
 rc=$?

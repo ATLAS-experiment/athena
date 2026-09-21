@@ -44,15 +44,19 @@ namespace ActsTrk {
     // knows which layer each module hash belongs to and what it is made of.
     const std::vector<Acts::Experimental::GbtsLayerDescription>& layers =
       m_layerTool->layerDescriptions();
-    const std::vector<GbtsTechnology>& technologies =
-      m_layerTool->layerTechnologies();
 
     m_pixelHashToLayer = &m_layerTool->pixelLayers();
     m_stripHashToLayer = &m_layerTool->stripLayers();
 
+    if (!m_usePixelLayers && !m_useStripLayers) {
+      ATH_MSG_ERROR("Neither pixel nor strip layers are enabled, there is "
+                    "nothing to seed on.");
+      return StatusCode::FAILURE;
+    }
+
     std::vector<Acts::Experimental::GbtsLayerConnection> connections;
     float etaBinWidth = 0.0f;
-    ATH_CHECK(readConnections(layers, technologies, connections, etaBinWidth));
+    ATH_CHECK(readConnections(layers, connections, etaBinWidth));
 
     // option that allows for adding custom eta binning (default is at 0.2)
     if (m_etaBinWidthOverride.value() != 0.0f) {
@@ -104,6 +108,13 @@ namespace ActsTrk {
     // create the node storage and fill it from the xAOD space points
     Acts::Experimental::GbtsNodeStorage nodeStorage = m_finder->makeNodeStorage();
 
+    // node positions are relative to the beam spot in x and y if the correction is on
+    const float offsetX = m_finderCfg.beamSpotCorrection ? beamSpotPos[0] : 0.0f;
+    const float offsetY = m_finderCfg.beamSpotCorrection ? beamSpotPos[1] : 0.0f;
+
+    std::size_t nPixelNodes = 0;
+    std::size_t nStripNodes = 0;
+
     // space points GBTS has no layer for, counted rather than reported per
     // space point: the loop runs over the whole event
     std::size_t nUnmappedHashes = 0;
@@ -115,7 +126,12 @@ namespace ActsTrk {
       const xAOD::SpacePoint* sp = tmpSpacePoints[idx];
       const std::vector<xAOD::DetectorIDHashType>& elementlist = sp->elementIdList();
 
+      // a strip space point is made of one cluster on each side of a stereo pair
       const bool isPixel(elementlist.size() == 1);
+
+      if (isPixel ? !m_usePixelLayers : !m_useStripLayers) {
+        continue;
+      }
 
       const std::vector<short>& hashToLayer =
         isPixel ? *m_pixelHashToLayer : *m_stripHashToLayer;
@@ -141,20 +157,38 @@ namespace ActsTrk {
         localPositionY = pCL->localPosition<2>().y();
       }
 
-      if (m_finderCfg.beamSpotCorrection) {
-        const float new_x = static_cast<float>(sp->x() - beamSpotPos[0]);
-        const float new_y = static_cast<float>(sp->y() - beamSpotPos[1]);
-        nodeStorage.insert(static_cast<Acts::SpacePointIndex>(idx), new_x, new_y, static_cast<float>(sp->z()),
-          std::hypot(new_x, new_y), std::atan2(new_y, new_x),
-          static_cast<std::uint32_t>(layer), clusterWidth, localPositionY);
-      } else {
-        const float new_x = static_cast<float>(sp->x());
-        const float new_y = static_cast<float>(sp->y());
-        nodeStorage.insert(static_cast<Acts::SpacePointIndex>(idx), new_x, new_y, static_cast<float>(sp->z()),
-          std::hypot(new_x, new_y), static_cast<float>(std::atan2(sp->y(), sp->x())),
-          static_cast<std::uint32_t>(layer), clusterWidth, localPositionY);
+      // the stereo pair of a strip space point, for the strip calibration in GBTS
+      Acts::OuterStripSpacePointCalibrationDetails stripDetails{};
+      const Acts::OuterStripSpacePointCalibrationDetails* strip = nullptr;
+      if (!isPixel) {
+        // topStripCenter is global, the node frame shifts only x and y
+        Eigen::Map<Eigen::Vector3f>(stripDetails.outerCenter.data()) =
+          sp->topStripCenter() - Eigen::Vector3f(offsetX, offsetY, 0.0f);
+        Eigen::Map<Eigen::Vector3f>(stripDetails.innerToOuterSeparation.data()) =
+          sp->stripCenterDistance();
+        Eigen::Map<Eigen::Vector3f>(stripDetails.outerHalfVector.data()) =
+          sp->topHalfStripLength() * sp->topStripDirection();
+        Eigen::Map<Eigen::Vector3f>(stripDetails.innerHalfVector.data()) =
+          sp->bottomHalfStripLength() * sp->bottomStripDirection();
+        strip = &stripDetails;
+      }
+
+      const float x = static_cast<float>(sp->x()) - offsetX;
+      const float y = static_cast<float>(sp->y()) - offsetY;
+      const std::optional<std::uint32_t> bin = nodeStorage.insert(
+        static_cast<Acts::SpacePointIndex>(idx), x, y,
+        static_cast<float>(sp->z()), std::hypot(x, y), std::atan2(y, x),
+        static_cast<std::uint32_t>(layer), clusterWidth, localPositionY, strip);
+
+      if (bin.has_value()) {
+        ++(isPixel ? nPixelNodes : nStripNodes);
       }
     }
+
+    ATH_MSG_DEBUG("Inserted " << nPixelNodes << " pixel and " << nStripNodes
+                  << " strip nodes; the graph "
+                  << (nodeStorage.hasStrips() ? "carries" : "does not carry")
+                  << " stereo pairs");
 
     if (nUnmappedHashes != 0) [[unlikely]] {
       ATH_MSG_WARNING(nUnmappedHashes << " space points sit on a wafer hash "
@@ -192,7 +226,6 @@ namespace ActsTrk {
   
   StatusCode GbtsSeedingTool::readConnections(
     const std::vector<Acts::Experimental::GbtsLayerDescription>& layers,
-    const std::vector<GbtsTechnology>& technologies,
     std::vector<Acts::Experimental::GbtsLayerConnection>& connections,
     float& etaBinWidth) const
   {
@@ -213,11 +246,12 @@ namespace ActsTrk {
     }
 
     // the table names a layer by its id, the layer tool by its dense index
-    std::unordered_map<std::uint32_t, GbtsTechnology> layerTechnologies;
+    std::unordered_map<std::uint32_t, Acts::Experimental::GbtsLayerTechnology>
+      layerTechnologies;
     layerTechnologies.reserve(layers.size());
-    for (std::size_t layer = 0; layer < layers.size(); ++layer) {
-      layerTechnologies.emplace(static_cast<std::uint32_t>(layers[layer].id),
-                                technologies[layer]);
+    for (const Acts::Experimental::GbtsLayerDescription& layer : layers) {
+      layerTechnologies.emplace(static_cast<std::uint32_t>(layer.id),
+                                layer.technology);
     }
 
     etaBinWidth = table.etaBinWidth;
@@ -240,7 +274,8 @@ namespace ActsTrk {
 
       // GBTS pairs a layer only with one of its own technology
       const bool wanted = src->second == dst->second &&
-                          (src->second == GbtsTechnology::Pixel
+                          (src->second ==
+                             Acts::Experimental::GbtsLayerTechnology::Pixel
                              ? m_pixelConnections.value()
                              : m_stripConnections.value());
       if (!wanted) {
@@ -354,14 +389,12 @@ namespace ActsTrk {
 
     // The seeder no longer recognises an LRT mode, so spell out the rest of
     // what it used to imply: the whole of maxCurv for the curvature bounds and
-    // the phi window, a triplet with no confirmation, and no added triplets.
-    // Keep this last, it overrides addTriplets.
+    // the phi window, and a triplet with no confirmation.
     if (m_LRTmode) {
       m_finderCfg.oldTuningsCurvatureHighEtaFraction = 1.f;
       m_finderCfg.oldTuningsCurvatureLowEtaFraction = 1.f;
       m_finderCfg.oldTuningsPhiWindowFraction = 1.f;
       m_finderCfg.minSeedLevel = 2;
-      m_finderCfg.addTriplets = false;
     }
 
     m_filterCfg.sigmaMS = m_sigmaMS;

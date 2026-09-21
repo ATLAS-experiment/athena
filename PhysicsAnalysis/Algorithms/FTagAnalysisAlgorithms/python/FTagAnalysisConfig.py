@@ -12,15 +12,18 @@ class FTagConfig (ConfigBlock):
         self.setBlockName('FTag')
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the input container.")
+            info="the name of the input container.",
+            meta={'role':'containerRef'})
         self.addOption ('selectionName', '', type=str,
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as internally the string "
-            "`f'{btagger}_{btagWP}'` is used.")
+            "`f'{btagger}_{btagWP}'` is used.",
+            meta={'role':'selection'})
         self.addOption ('btagWP', "Continuous", type=str,
             info="the flavour tagging WP.")
         self.addOption ('btagger', "GN2v01", type=str,
-            info="the flavour tagging algorithm: `DL1dv01`, `GN2v01`.")
+            info="the flavour tagging algorithm: `DL1dv01`, `GN2v01`.",
+            meta={'choices':(['DL1dv01','GN2v01'],1)})
         self.addOption('useCTagging', False, type=bool,
             info="whether the fixed WP refer to b-tagging or c-tagging. Set to `True` "
             "to make it refer to c-tagging.")
@@ -37,7 +40,8 @@ class FTagConfig (ConfigBlock):
         self.addOption ('saveScores', '', type=str,
             info="whether or not to save the scores from the tagger. Set to `True` "
             "to save only the overall score, or to `All` to save also the per-flavour"
-            "probabilities.")
+            "probabilities.",
+            meta={'choices':(['True','All'],1)})
         self.addOption ('saveCustomVariables', [], type=list,
             info="additional variables to save from the b-tagging object associated "
             "to each jet. E.g. `['pb','pc','pu', 'ptau']` to replicate `saveScores=All`.",

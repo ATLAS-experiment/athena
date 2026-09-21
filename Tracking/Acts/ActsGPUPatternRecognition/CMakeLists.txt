@@ -2,14 +2,6 @@
 
 atlas_subdir( ActsGPUPatternRecognition )
 
-find_package(Acts)
-
-# placeholder for what will eventually be Acts::PluginTraccc
-if (NOT TARGET Acts::PluginDetray)
-   # Without PluginDetray, the traccc code will not be available.
-   return()
-endif()
-
 find_package(traccc)
 find_package(vecmem)
 
@@ -35,11 +27,14 @@ set( _libraries
   ActsGPUInterfacesLib
   ActsToolInterfacesLib
   TrigInDetPattRecoToolsLib
+  BeamSpotConditionsData
+  MagFieldConditions
+  MagFieldElements
 )
 
 
 # CUDA-only sources and libraries
-if( CMAKE_CUDA_COMPILER )
+if (TARGET traccc::cuda)
   list( APPEND _sources
     src/cuda/*.h
     src/cuda/*.cxx
@@ -64,3 +59,13 @@ atlas_add_component( ActsGPUPatternRecognition
 )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+
+
+if (TARGET traccc::cuda)
+atlas_add_test( ActsDeviceTrackingTest
+   PRE_EXEC_SCRIPT "nvidia-check.sh || exit 2"
+   ENVIRONMENT "PATHRESOLVER_DEVAREARESPONSE=WARNING"
+   SCRIPT ActsDeviceTrackingTest.py Device.Backend=DeviceBackend.CUDA
+   POST_EXEC_SCRIPT noerror.sh
+   PROPERTIES SKIP_RETURN_CODE 2 )
+endif()

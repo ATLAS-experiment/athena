@@ -24,11 +24,13 @@ class PhotonCalibrationConfig (ConfigBlock) :
         self.setBlockName('Photons')
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the output container after calibration.")
+            info="the name of the output container after calibration.",
+            meta={'role':'container'})
         self.addOption ('ESModel', '', type=str,
             info="flag for EGamma calibration. If left empty, uses the current recommendations.")
         self.addOption ('decorrelationModel', '1NP_v1', type=str,
-            info="decorrelation model for the EGamma energy scale. Supported choices are: `FULL_v1`, `1NP_v1`.")
+            info="decorrelation model for the EGamma energy scale. Supported choices are: `FULL_v1`, `1NP_v1`.",
+            meta={'choices':(['FULL_v1','1NP_v1'],1)})
         self.addOption ('postfix', '', type=str,
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here since the calibration is common to "
@@ -324,19 +326,23 @@ class PhotonWorkingPointSelectionConfig (ConfigBlock) :
         self.setBlockName('PhotonWorkingPointSelection')
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the input container.")
+            info="the name of the input container.",
+            meta={'role':'containerRef'})
         self.addOption ('selectionName', '', type=str,
             noneAction='error',
             info="the name of the photon selection to define (e.g. `tight` or "
-            "`loose`).")
+            "`loose`).",
+            meta={'role':'selection'})
         self.addOption ('postfix', None, type=str,
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as `selectionName` is used internally.")
         self.addOption ('qualityWP', None, type=str,
-            info="the ID WP to use. Supported ID WPs: `Tight`, `Medium`, `Loose`.")
+            info="the ID WP to use. Supported ID WPs: `Tight`, `Medium`, `Loose`.",
+            meta={'choices':(['Tight','Medium','Loose'],1)})
         self.addOption ('isolationWP', None, type=str,
             info="the isolation WP to use. Supported isolation WPs: "
-            "`FixedCutLoose`, `FixedCutTight`, `TightCaloOnly`, `NonIso`.")
+            "`FixedCutLoose`, `FixedCutTight`, `TightCaloOnly`, `NonIso`.",
+            meta={'choices':(['FixedCutLoose','FixedCutTight','TightCaloOnly','NonIso'],1)})
         self.addOption ('addSelectionToPreselection', True, type=bool,
             info="whether to retain only photons satisfying the working point "
             "requirements.")
@@ -352,7 +358,8 @@ class PhotonWorkingPointSelectionConfig (ConfigBlock) :
         self.addOption ('muonsForFSRSelection', None, type=str,
             info="the name of the muon container to use for the FSR selection. "
             "If not specified, AnalysisMuons is used.",
-            expertMode=True)
+            expertMode=True,
+            meta={'role':'containerRef'})
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -462,19 +469,23 @@ class PhotonWorkingPointEfficiencyConfig (ConfigBlock) :
         self.addDependency('EventSelectionMerger', required=False)
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the input container.")
+            info="the name of the input container.",
+            meta={'role':'containerRef'})
         self.addOption ('selectionName', '', type=str,
             noneAction='error',
             info="the name of the photon selection to define (e.g. `tight` or "
-            "`loose`).")
+            "`loose`).",
+            meta={'role':'selection'})
         self.addOption ('postfix', None, type=str,
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as `selectionName` is used internally.")
         self.addOption ('qualityWP', None, type=str,
-            info="the ID WP to use. Supported ID WPs: `Tight`, `Medium`, `Loose`.")
+            info="the ID WP to use. Supported ID WPs: `Tight`, `Medium`, `Loose`.",
+            meta={'choices':(['Tight','Medium','Loose'],1)})
         self.addOption ('isolationWP', None, type=str,
             info="the isolation WP to use. Supported isolation WPs: "
-            "`FixedCutLoose`, `FixedCutTight`, `TightCaloOnly`, `NonIso`.")
+            "`FixedCutLoose`, `FixedCutTight`, `TightCaloOnly`, `NonIso`.",
+            meta={'choices':(['FixedCutLoose','FixedCutTight','TightCaloOnly','NonIso'],1)})
         self.addOption ('noEffSFForID', False, type=bool,
             info="disables the calculation of ID efficiencies and scale factors. "
             "Experimental! only useful to test a new WP for which scale "

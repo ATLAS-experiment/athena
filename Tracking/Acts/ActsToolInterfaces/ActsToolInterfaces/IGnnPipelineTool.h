@@ -28,7 +28,8 @@ class IGnnPipelineTool : virtual public IAlgTool {
    *         The pipeline performs graph construction, edge classification and
    *         track building to group space points into seed candidates.
    *  @param spacePointCollections: Input space point containers to seed from
-   *  @param seeds: Output container the produced seeds are appended to
+   *  @param seeds: Output container the produced seeds are appended to. The
+   *         space points of each seed are ordered by increasing radius.
    *  @return: StatusCode::SUCCESS on success, StatusCode::FAILURE otherwise */
   virtual StatusCode buildSeed(
       const std::vector<const xAOD::SpacePointContainer*>&

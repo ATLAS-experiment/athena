@@ -5,9 +5,6 @@
 // Gaudi include(s).
 #include "GaudiKernel/EventContext.h"
 
-// CUDA include(s).
-#include <cuda_runtime_api.h>
-
 namespace AthCUDA {
 
 /// Interface for components providing CUDA streams to (reentrant) algorithms
@@ -22,7 +19,7 @@ class IStreamProvider {
   /// @param ctx The event context for which the stream is requested
   /// @returns The CUDA stream to use for the specified event context
   ///
-  virtual cudaStream_t stream(const EventContext& ctx) const = 0;
+  virtual void* stream(const EventContext& ctx) const = 0;
 
 };  // class IStreamProvider
 

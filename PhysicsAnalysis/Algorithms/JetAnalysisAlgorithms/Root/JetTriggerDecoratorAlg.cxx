@@ -90,7 +90,7 @@ inline std::vector<L1LegToken> parseL1LegTokens(const std::string& l1Name) {
       std::string legName_noMultiplicity =
           match[2].str() + match[3].str() + match[4].str();
       int threshold = match[3].str().empty() ? 1 : std::stoi(match[3].str());
-      tokens.push_back({legName_noMultiplicity, threshold});
+      tokens.push_back({std::move(legName_noMultiplicity), threshold});
     }
   }
   return tokens;
@@ -240,7 +240,7 @@ JetTriggerDecoratorAlg::JetTriggerDecoratorAlg(const std::string& name,
     if (m_doHLTMatching) {
       if (m_useEmulationTool)
         ANA_MSG_DEBUG(m_trigger << " isPassed "
-                                << m_emulationTool->isPassed(m_trigger));
+                                << m_emulationTool->isPassed(m_trigger.value()));
       else {
         hltJetsFromCont = SG::makeHandle(m_HLTJetsInKey, ctx);
         ANA_CHECK(hltJetsFromCont.isValid());
@@ -248,14 +248,14 @@ JetTriggerDecoratorAlg::JetTriggerDecoratorAlg(const std::string& name,
     }
 
     Trig::FeatureRequestDescriptor frd;
-    frd.setChainGroup(m_trigger);
+    frd.setChainGroup(m_trigger.value());
     // prepare Run2 emulation results
     std::unordered_map<std::string,
                        std::vector<std::pair<const xAOD::Jet*, bool>>>
         emulatedJets = {};
     if (m_doHLTMatching && m_useEmulationTool)
       emulatedJets = m_emulationTool->getEmulatedJets(m_trigger);
-    bool isTrigPassed = m_trigDecisionTool->isPassed(m_trigger);
+    bool isTrigPassed = m_trigDecisionTool->isPassed(m_trigger.value());
     const TrigConf::HLTChain* hltChain =
         m_trigDecisionTool->ExperimentalAndExpertMethods()
             .getChainConfigurationDetails(m_trigger);

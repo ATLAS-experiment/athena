@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -12,6 +12,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <print>
 #include <string>
 #include <vector>
 
@@ -51,7 +52,7 @@ class ClearFluff
 public:
   static void clear (ClearedFluff* f) {
     f->setPar (1);
-    std::cout << "Fluff::clear\n";
+    std::println ("Fluff::clear");
   }
 };
 
@@ -59,7 +60,7 @@ public:
 // Basic tests
 void test_basic()
 {
-  std::cout << "test_basic\n";
+  std::println ("test_basic");
 
   //test ctors
   {
@@ -110,7 +111,7 @@ void test_basic()
   assert (1024 <= df->capacity());			// should be same
 
   // Now use 1500 of these Fluff's.. should automatically resize
-  //cout << "You should see a message on automatic increase of pool size" << endl;
+  //std::println ("You should see a message on automatic increase of pool size");
 
   for (int j = 0; j < 1500; j++)
   {
@@ -165,7 +166,7 @@ void test_basic()
 
 void test_slots()
 {
-  std::cout << "test_slots\n";
+  std::println ("test_slots");
   SG::ArenaHeader& head = *SG::ArenaHeader::defaultHeader();
   SG::Arena a1 ("1");
   SG::Arena a2 ("2");
@@ -213,7 +214,7 @@ Elts InUse/Free/Total   Bytes InUse/Free/Total  Blocks InUse/Free/Total\n\
 // Test use of clear.
 void test_clear()
 {
-  std::cout << "test_clear\n";
+  std::println ("test_clear");
 
   DataPool<ClearedFluff, ClearFluff> df;
 
@@ -239,23 +240,23 @@ int main ATLAS_NOT_THREAD_SAFE ()
 	ISvcLocator* pSvcLoc;
 	if (!Athena_test::initGaudi("DataPool_test.txt", pSvcLoc))
 	{
-		std::cerr << " This test cannot be run without init Gaudi" << endl;
+          std::println (std::cerr, " This test cannot be run without init Gaudi");
 	}
 	assert(pSvcLoc);
 
 	SmartIF<IChronoStatSvc> p_svc{pSvcLoc->service("ChronoStatSvc")};
 	if (p_svc.isValid())
 	{
-		p_svc->chronoStart("ChronoStatSvc");
+          p_svc->chronoStart("ChronoStatSvc");
 	}
 
-	std::cout << " *** DataPool test in progress: " << std::endl;
+	std::println (" *** DataPool test in progress: ");
 
         test_basic();
         test_slots();
         test_clear();
 
-	cout << " **** DataPool test successfully completed **** " << endl;
+        std::println (" **** DataPool test successfully completed **** ");
 	p_svc->chronoStop("ChronoStatSvc");
 	p_svc->chronoPrint("ChronoStatSvc");
 

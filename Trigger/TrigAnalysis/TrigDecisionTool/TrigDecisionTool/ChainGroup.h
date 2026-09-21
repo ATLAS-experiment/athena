@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGGER_DECISION_TOOL_CHAIN_GROUP_H
@@ -18,9 +18,7 @@
  *
  ***********************************************************************************/
 
-#include <iterator>
-#include <vector>
-#include <string>
+
 
 #include "TrigDecisionInterface/Conditions.h"
 #include "TrigDecisionInterface/GroupProperties.h"
@@ -30,6 +28,11 @@
 #include "TrigAnalysisHelpers/FeatureRequestDescriptor.h"
 #include "TrigSteeringEvent/Enums.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
+
+#include <iterator>
+#include <vector>
+#include <string>
+#include <string_view>
 
 namespace HLT {
   class Chain;
@@ -143,7 +146,7 @@ namespace Trig {
       std::vector< TrigCompositeUtils::LinkInfo<CONTAINER> > features(const asg::EventStoreType* eventStore,
                 const SG::ReadHandleKey<TrigCompositeUtils::DecisionContainer>& HLTSummaryKeyIn,
                 unsigned int condition = TrigDefs::Physics,
-                const std::string& containerSGKey = "",
+                std::string_view containerSGKey = "",
                 const unsigned int featureCollectionMode = TrigDefs::lastFeatureOfType,
                 const std::string& navElementLinkKey = TrigCompositeUtils::featureString(),
                 const int          restrictToLegIndex = -1) const;

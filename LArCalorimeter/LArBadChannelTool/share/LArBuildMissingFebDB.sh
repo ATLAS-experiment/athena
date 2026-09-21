@@ -220,9 +220,6 @@ fi
 
 echo "Tag: " $mytag
 echo "Running athena to build sqlite database file ..."
-#prefix="${prefix}IOVBeginRun=${runnumber};IOVBeginLB=${lbnumber};sqlite=\"${outputSqlite}.tmp\";Folder=\"${Folder}\";GlobalTag=\"${gtag}\";TagPostfix=\"-${upd4TagName}\";"
-#echo "prefix: ${prefix}"
-#athena.py -c $prefix LArBadChannelTool/LArMissingFebDbAlg.py > ascii2sqlite.log 2>&1
 echo "Parameters: -o ${outputSql} -f $Folder -t $mytag -r $runnumber -l $lbnumber ${inputTextFile} $iovEnd"
 python -m LArBadChannelTool.LArMissingFebsDBAlg -o ${outputSqlite}.tmp -t $mytag -r $runnumber -l $lbnumber -f ${Folder} ${inputTextFile} $iovEnd > ascii2sqlite_$mytag.log 2>&1
 

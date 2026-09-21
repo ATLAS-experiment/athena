@@ -87,7 +87,7 @@ pool::TestDriver::write()
 
   // Committing the transaction
   std::cout << "Committing the transaction." << std::endl;
-  if( !dbsession->transaction().commit() ) {
+  if( !dbsession->commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }
 
@@ -158,7 +158,7 @@ pool::TestDriver::read(const std::string& fileName, pool::DatabaseSpecification:
   }
 
   std::cout << "Committing the transaction." << std::endl;
-  if( !dbsession->transaction().commit() ) {
+  if( !dbsession->commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }
 

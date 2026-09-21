@@ -51,7 +51,7 @@ def fromRunArgs(runArgs):
     # However, for other formats, e.g., DAOD_XYZ, we need to create the flags
     try:
         setattr(flags.Output, f'{streamToMerge}FileName', outputFile)
-    except RuntimeError: # If a flag doesn't exist CA throws a runtime error
+    except KeyError: # If a flag doesn't exist CA throws a key error
         flags.addFlag(f'Output.{streamToMerge}FileName', outputFile)
         flags.addFlag(f'Output.doWrite{streamToMerge}', True)
         if 'DAOD' in streamToMerge:

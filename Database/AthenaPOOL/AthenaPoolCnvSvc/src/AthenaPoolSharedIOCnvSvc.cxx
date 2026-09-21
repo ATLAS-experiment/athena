@@ -37,6 +37,7 @@
 //______________________________________________________________________________
 // Initialize the service.
 StatusCode AthenaPoolSharedIOCnvSvc::initialize() {
+   ATH_CHECK(m_poolSvc.retrieve());
    if (!m_inputStreamingTool.empty() || !m_outputStreamingTool.empty()) {
       // Retrieve AthenaSerializeSvc
       ATH_CHECK(m_serializeSvc.retrieve());
@@ -60,7 +61,7 @@ StatusCode AthenaPoolSharedIOCnvSvc::initialize() {
         ATH_CHECK(arswsvc.retrieve());
       }
       // Put PoolSvc into share mode to avoid duplicating catalog.
-      getPoolSvc()->setShareMode(true);
+      m_poolSvc->setShareMode(true);
    }
    ServiceHandle<IIncidentSvc> incSvc("IncidentSvc", name());
    long int pri = 1000;
@@ -542,7 +543,7 @@ Token* AthenaPoolSharedIOCnvSvc::registerForWrite(Placement* placement, const vo
             placement->setTechnology(pool::DbType::getType(m_defaultContainerType).type());
          }
          ATH_MSG_DEBUG("Requested write object for: " << placement->toString());
-         token = getPoolSvc()->registerForWrite(placement, obj, classDesc);
+         token = m_poolSvc->registerForWrite(placement, obj, classDesc);
       } else {
          if (!m_outputStreamingTool.empty() && m_outputStreamingTool->isClient() && m_parallelCompression) {
             placement->setFileName(placement->fileName() + m_streamPortString.value());
@@ -764,8 +765,9 @@ StatusCode AthenaPoolSharedIOCnvSvc::makeClient(int num) {
       if (m_outputStreamingTool->makeClient(num, streamPortSuffix).isFailure()) {
          ATH_MSG_ERROR("makeClient: " << m_outputStreamingTool << " failed");
          return(StatusCode::FAILURE);
-      } else if (m_streamPortString.value().find("localhost:0") != std::string::npos) {
-         // We don't seem to use a dedicated port per stream so doing this for the first client is probably OK
+      } else if (!streamPortSuffix.empty()) {
+         // streamPortSuffix is only filled by the shared memory tool for the first client,
+         // so doing this once is enough (works for both the TCP and UNIX domain socket forms).
          ATH_MSG_DEBUG("makeClient: Setting conversion service port suffix to " << streamPortSuffix);
          m_streamPortString.setValue(streamPortSuffix);
       }
@@ -830,7 +832,7 @@ StatusCode AthenaPoolSharedIOCnvSvc::readData() {
       }
    } else if (token.dbID() != Guid::null()) {
       std::string returnToken;
-      Token* metadataToken = getPoolSvc()->getToken("FID:" + token.dbID().toString(), token.contID(), token.oid().first);
+      Token* metadataToken = m_poolSvc->getToken("FID:" + token.dbID().toString(), token.contID(), token.oid().first);
       if( metadataToken ) {
          returnToken = metadataToken->toString();
          metadataToken->release(); metadataToken = nullptr;
@@ -851,8 +853,8 @@ StatusCode AthenaPoolSharedIOCnvSvc::readData() {
 
 //________________________________________________________________________________
 StatusCode AthenaPoolSharedIOCnvSvc::commitCatalog() {
-   getPoolSvc()->commitCatalog();
-   getPoolSvc()->startCatalog();
+   m_poolSvc->commitCatalog();
+   m_poolSvc->startCatalog();
    return(StatusCode::SUCCESS);
 }
 

@@ -31,8 +31,8 @@ namespace ActsTrk {
 /// seeding does not have to reach into the trigger for its geometry. The
 /// grouping is unchanged - modules are keyed by (side, technology, volume,
 /// layer) and each group becomes one GBTS layer - but the result is handed out
-/// as `Acts::Experimental::GbtsLayerDescription` directly, rather than as a
-/// `TrigInDetSiLayer` the caller has to convert.
+/// as `Acts::Experimental::GbtsLayerDescription` directly, with the layer's
+/// technology filled in rather than left to be decoded from its id.
 class GbtsLayerTool final : public extends<AthAlgTool, IGbtsLayerTool> {
  public:
   GbtsLayerTool(const std::string& type, const std::string& name,
@@ -52,10 +52,6 @@ class GbtsLayerTool final : public extends<AthAlgTool, IGbtsLayerTool> {
 
   virtual const std::vector<short>& stripLayers() const override {
     return m_stripLayers;
-  }
-
-  virtual const std::vector<GbtsTechnology>& layerTechnologies() const override {
-    return m_layerTechnologies;
   }
 
  private:
@@ -84,8 +80,6 @@ class GbtsLayerTool final : public extends<AthAlgTool, IGbtsLayerTool> {
   const InDetDD::SCT_DetectorManager* m_stripManager{nullptr};
 
   std::vector<Acts::Experimental::GbtsLayerDescription> m_layerDescriptions;
-  /// What each layer is made of, parallel to m_layerDescriptions.
-  std::vector<GbtsTechnology> m_layerTechnologies;
   /// Wafer hash addressable dense GBTS layer indices.
   std::vector<short> m_pixelLayers, m_stripLayers;
 };

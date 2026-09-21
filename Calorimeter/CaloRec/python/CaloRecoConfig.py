@@ -1,5 +1,5 @@
 #!/usr/bin/env athena.py
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -42,6 +42,10 @@ def CaloRecoCfg(flags, clustersname=None):
     #Configure cell-building
     from CaloRec.CaloCellMakerConfig import CaloCellMakerCfg
     result.merge(CaloCellMakerCfg(flags))
+
+    #Configure cell-building for DigiHSTruth:
+    if flags.Calo.TopoCluster.doDigiHSTruthMoments:
+        result.merge(CaloCellMakerCfg(flags, doDigiHSTruth=True))
 
     #Configure topo-cluster builder
     from CaloRec.CaloTopoClusterConfig import CaloTopoClusterCfg

@@ -542,7 +542,7 @@ StatusCode MuFastSteering::findMuonSignature(const std::vector<const TrigRoiDesc
             if (!sc.isSuccess()) {
                 ATH_MSG_WARNING("Data preparation failed");
                 TrigL2MuonSA::TrackPattern trackPattern;
-                trackPatterns.push_back(trackPattern);
+                trackPatterns.push_back(std::move(trackPattern));
                     // Update output trigger element
                     updateOutputObjects(*p_roi, *p_roids, muonRoad, mdtRegion, rpcHits, tgcHits,
                                     rpcFitResult, tgcFitResult, mdtHits, cscHits,
@@ -697,11 +697,10 @@ StatusCode MuFastSteering::findMuonSignature(const std::vector<const TrigRoiDesc
 	      ATH_MSG_DEBUG("The size of the TrigCompositeContainer is: " << outputMuonCal->size() );
 	    }else{
 	      ATH_MSG_ERROR("Trying to fill nullptr container.");
+	      delete tc;
 	      return StatusCode::FAILURE;
 	    }
-	    
             tc->setDetail("muCalibDS", localBuffer );
-	      
 	}
         }
 
@@ -972,7 +971,7 @@ StatusCode MuFastSteering::findMuonSignatureIO(const xAOD::TrackParticleContaine
 
     }
 
-    if(outputSAs.size()==0) {
+    if(outputSAs.empty()) {
       ATH_MSG_DEBUG("outputSAs size = 0 -> push_back dummy");
       muonRoad.Clear();
       mdtRegion.Clear();
@@ -990,6 +989,10 @@ StatusCode MuFastSteering::findMuonSignatureIO(const xAOD::TrackParticleContaine
       		  rpcFitResult, tgcFitResult, mdtHits, cscHits,
       		  stgcHits, mmHits,
       		  trackPattern, outputSAs, ctx);
+      if (outputSAs.empty())[[unlikely]]{
+        ATH_MSG_ERROR("outputSAs is still empty after attempted dummy store.");
+        return StatusCode::FAILURE;
+      }
       xAOD::L2CombinedMuon* muonCB = new xAOD::L2CombinedMuon();
       muonCB->makePrivateStore();
       muonCB->setStrategy(-9);
@@ -1191,8 +1194,7 @@ StatusCode MuFastSteering::findMultiTrackSignature(const std::vector<const TrigR
       } // end the clusterRoad loop
       if(trackPatterns.empty()){
 	ATH_MSG_DEBUG("multi-track SA falied to reconstruct muons");
- 	TrigL2MuonSA::TrackPattern trackPattern;
-	trackPatterns.push_back(trackPattern);
+	trackPatterns.emplace_back();
 	storeMuonSA(*p_roi, *p_roids, muonRoad, mdtRegion, rpcHits, tgcHits,
 		    rpcFitResult, tgcFitResult, mdtHits, cscHits,
 		    stgcHits, mmHits, trackPatterns.back(), outputTracks, ctx);
@@ -1220,8 +1222,7 @@ StatusCode MuFastSteering::findMultiTrackSignature(const std::vector<const TrigR
                                            mmHits);
         if (!sc.isSuccess()) {
           ATH_MSG_WARNING("Data preparation failed");
-          TrigL2MuonSA::TrackPattern trackPattern;
-          trackPatterns.push_back(trackPattern);
+          trackPatterns.emplace_back();
           // Update output trigger element
           storeMuonSA(*p_roi, *p_roids, muonRoad, mdtRegion, rpcHits, tgcHits,
                       rpcFitResult, tgcFitResult, mdtHits, cscHits,
@@ -1572,7 +1573,7 @@ bool MuFastSteering::storeMuonSA(const xAOD::MuonRoI*                roi,
     }
   }
   static const SG::Accessor< std::vector<std::string> > accessor_mdthitid( "mdtHitId" );
-  accessor_mdthitid( *muonSA ) = mdtId;
+  accessor_mdthitid( *muonSA ) = std::move(mdtId);
 
   //CSC hits
   std::vector<float> cscResol;
@@ -1606,7 +1607,7 @@ bool MuFastSteering::storeMuonSA(const xAOD::MuonRoI*                roi,
     }
   }
   static const SG::Accessor< std::vector<float> > accessor_cschitresol( "cscHitResolution" );
-  accessor_cschitresol( *muonSA ) = cscResol;
+  accessor_cschitresol( *muonSA ) = std::move(cscResol);
 
   // RPC hits
   float sumbeta[8]={0};

@@ -53,7 +53,7 @@ namespace Trig {
      * Best performance is obtained by the caller using the HLT::Identifier method.
      * Only chains which are included in the trigger navigation payload of the file may be queried in this way.
      **/ 
-    virtual bool isPassed(const std::string& chain, const EventContext& ctx) const final;
+    virtual bool isPassed(std::string_view chain, const EventContext& ctx) const final;
 
     /**
      * @brief true if any of the given HLT chain passed for physics (logical OR)

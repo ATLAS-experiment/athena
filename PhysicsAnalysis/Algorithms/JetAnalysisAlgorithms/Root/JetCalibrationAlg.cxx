@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -39,6 +39,9 @@ namespace CP
   StatusCode JetCalibrationAlg ::
   execute (const EventContext& ctx)
   {
+    const std::string subtractedStr{"JetSubtractedScaleMomentum"};
+    const std::string constitStr{"JetConstitScaleMomentum"};
+    const std::string emScaleStr{"JetEMScaleMomentum"};
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       xAOD::JetContainer *jets = nullptr;
@@ -48,9 +51,9 @@ namespace CP
       {
         for(auto jet : *jets )
 	{
-          xAOD::JetFourMom_t jet_4mom_subtracted = (*jet).jetP4("JetSubtractedScaleMomentum");
-	  (*jet).setJetP4("JetConstitScaleMomentum",jet_4mom_subtracted);
-	  (*jet).setJetP4("JetEMScaleMomentum",jet_4mom_subtracted);
+          xAOD::JetFourMom_t jet_4mom_subtracted = (*jet).jetP4(subtractedStr);
+	  (*jet).setJetP4(constitStr,jet_4mom_subtracted);
+	  (*jet).setJetP4(emScaleStr,jet_4mom_subtracted);
 	}
       }
 

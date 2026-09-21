@@ -46,9 +46,10 @@ StatusCode CondProxyProvider::initialize() {
    }
    // Retrieve AthenaPoolCnvSvc
    ATH_CHECK( m_athenaPoolCnvSvc.retrieve() );
+   ATH_CHECK( m_poolSvc.retrieve() );
 
    // Get PoolSvc and connect as "Conditions"
-   IPoolSvc *poolSvc = m_athenaPoolCnvSvc->getPoolSvc();
+   IPoolSvc *poolSvc = m_poolSvc.get();
    m_contextId = poolSvc->getInputContext("Conditions");
    ATH_CHECK( poolSvc->connect(Io::READ, m_contextId) );
 
@@ -145,7 +146,7 @@ std::unique_ptr<PoolCollectionConverter> CondProxyProvider::getCollectionCnv() {
    auto pCollCnv = std::make_unique<PoolCollectionConverter>(
 	   *m_inputCollectionsIterator,
 	   m_contextId,
-	   m_athenaPoolCnvSvc->getPoolSvc());
+	   m_poolSvc.get());
    if (!pCollCnv->initialize().isSuccess()) {
       // Close previous collection.
       pCollCnv.reset();

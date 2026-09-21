@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( LArROD )
@@ -37,4 +37,4 @@ atlas_add_test( LArRawChannelBuilderAlg
 # Builds the ComponentAccumulator only. No reference output to compare.
 atlas_add_test( LArOFFCConfig
 		SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/test/test_LArOFFCConfig.py
-		POST_EXEC_SCRIPT nopost.sh )
+		POST_EXEC_SCRIPT noerror.sh )

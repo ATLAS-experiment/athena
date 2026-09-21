@@ -21,11 +21,13 @@ atlas_add_library( ActsGeometryLib
                    src/HgtdBlueprintNodeBuilder.cxx
                    src/ItkBlueprintNodeBuilder.cxx
                    src/CaloBlueprintNodeBuilder.cxx
+                   src/ContextUtility.cxx
                    src/util/*.cxx
                    PUBLIC_HEADERS ActsGeometry
                    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS}
                    LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} ${TBB_LIBRARIES}
                    Acts::Core
+                   ActsCalibBase
                    ActsGeometryInterfacesLib
                    ActsGeoUtils
                    ActsInteropLib
@@ -70,7 +72,6 @@ atlas_add_component( ActsGeometry
                      ActsGeometryInterfacesLib
                      ActsGeometryLib
                      ActsInteropLib
-                     ActsEventLib
                      EventPrimitives
                      GeoPrimitives
                      AthenaBaseComps

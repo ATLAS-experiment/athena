@@ -17,7 +17,6 @@
 #include "IdDict/IdDictRegion.h"
 #include "Identifier/IdentifierHash.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
-#include "CxxUtils/StrFormat.h"
 
 #include <algorithm>
 #include <cassert>
@@ -25,7 +24,6 @@
 #include <iostream>
 #include <stdexcept>
 
-using CxxUtils::strformat;
 using namespace LArNeighbours;
 
 

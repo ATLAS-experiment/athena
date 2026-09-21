@@ -31,11 +31,13 @@ class ElectronMomentumCalibrationConfig (ConfigBlock) :
             "to `AnalysisElectrons` for PHYSLITE or `Electrons` otherwise.")
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the output container after calibration.")
+            info="the name of the output container after calibration.",
+            meta={'role':'container'})
         self.addOption ('ESModel', '', type=str,
             info="flag for Egamma calibration. If left empty, use the current recommendations.")
         self.addOption ('decorrelationModel', '1NP_v1', type=str,
-            info="decorrelation model for the EGamma energy scale. Supported choices are: `1NP_v1`, `FULL_v1`.")
+            info="decorrelation model for the EGamma energy scale. Supported choices are: `1NP_v1`, `FULL_v1`.",
+            meta={'choices':(['1NP_v1','FULL_v1'],1)})
         self.addOption ('postfix', '', type=str,
             info="a postfix to apply to decorations and algorithm names. Typically "
             "not needed here since the calibration is common to all electrons.")
@@ -293,7 +295,8 @@ class ElectronIPCalibrationConfig (ConfigBlock) :
         self.addDependency('ElectronWorkingPointSelection', required=False)
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the output container after calibration.")
+            info="the name of the output container after calibration.",
+            meta={'role':'container'})
         self.addOption ('postfix', '', type=str,
             info="a postfix to apply to decorations and algorithm names. Typically "
             "not needed here since the calibration is common to all electrons.")
@@ -334,11 +337,13 @@ class ElectronWorkingPointSelectionConfig (ConfigBlock) :
         self.setBlockName('ElectronWorkingPointSelection')
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the input container.")
+            info="the name of the input container.",
+            meta={'role':'containerRef'})
         self.addOption ('selectionName', '', type=str,
             noneAction='error',
             info="the name of the electron selection to define (e.g. `tight` or "
-            "`loose`).")
+            "`loose`).",
+            meta={'role':'selection'})
         self.addOption ('postfix', None, type=str,
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as `selectionName` is used internally.")
@@ -354,15 +359,20 @@ class ElectronWorkingPointSelectionConfig (ConfigBlock) :
             info="the ID WP to use. Supported ID WPs: `TightLH`, "
             "`MediumLH`, `LooseBLayerLH`, `TightDNN`, `MediumDNN`, `LooseDNN`, "
             "`TightNoCFDNN`, `MediumNoCFDNN`, `VeryLooseNoCF97DNN`, `NoID`.",
-            expertMode=["NoID"])
+            expertMode=["NoID"],
+            meta={'choices':(['MediumLH', 'LooseBLayerLH', 'TightDNN', 'MediumDNN', 'LooseDNN',
+                              'TightNoCFDNN', 'MediumNoCFDNN', 'VeryLooseNoCF97DNN', 'NoID'],1)})
         self.addOption ('isolationWP', None, type=str,
             info="the isolation WP to use. Supported isolation WPs: "
             "`HighPtCaloOnly`, `Loose_VarRad`, `Tight_VarRad`, `TightTrackOnly_"
-            "VarRad`, `TightTrackOnly_FixedRad`, `NonIso`.")
+            "VarRad`, `TightTrackOnly_FixedRad`, `NonIso`.",
+            meta={'choices':(['HighPtCaloOnly', 'Loose_VarRad', 'Tight_VarRad', 'TightTrackOnly_VarRad',
+                              'TightTrackOnly_FixedRad', 'NonIso'],1)})
         self.addOption ('convSelection', None, type=str,
             info="enter additional selection to use for conversions. To be used with "
             "`TightLH` or will crash. Supported keywords:"
-            "`Veto`, `MatConv`, `GammaStar`.")
+            "`Veto`, `MatConv`, `GammaStar`.",
+            meta={'choices':(['Veto', 'MatConv', 'GammaStar'],1)})
         self.addOption ('addSelectionToPreselection', True, type=bool,
             info="whether to retain only electrons satisfying the working point "
             "requirements.")
@@ -641,11 +651,13 @@ class ElectronWorkingPointEfficiencyConfig (ConfigBlock) :
         self.addDependency('EventSelectionMerger', required=False)
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the input container.")
+            info="the name of the input container.",
+            meta={'role':'containerRef'})
         self.addOption ('selectionName', '', type=str,
             noneAction='error',
             info="the name of the electron selection to define (e.g. `tight` or "
-            "`loose`).")
+            "`loose`).",
+            meta={'role':'selection'})
         self.addOption ('postfix', None, type=str,
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as `selectionName` is used internally.")
@@ -653,11 +665,15 @@ class ElectronWorkingPointEfficiencyConfig (ConfigBlock) :
             info="the ID WP to use. Supported ID WPs: `TightLH`, "
             "`MediumLH`, `LooseBLayerLH`, `TightDNN`, `MediumDNN`, `LooseDNN`, "
             "`TightNoCFDNN`, `MediumNoCFDNN`, `VeryLooseNoCF97DNN`, `NoID`.",
-            expertMode=["NoID"])
+            expertMode=["NoID"],
+            meta={'choices':(['MediumLH', 'LooseBLayerLH', 'TightDNN', 'MediumDNN', 'LooseDNN',
+                              'TightNoCFDNN', 'MediumNoCFDNN', 'VeryLooseNoCF97DNN', 'NoID'],1)})
         self.addOption ('isolationWP', None, type=str,
             info="the isolation WP to use. Supported isolation WPs: "
             "`HighPtCaloOnly`, `Loose_VarRad`, `Tight_VarRad`, `TightTrackOnly_"
-            "VarRad`, `TightTrackOnly_FixedRad`, `NonIso`.")
+            "VarRad`, `TightTrackOnly_FixedRad`, `NonIso`.",
+            meta={'choices':(['HighPtCaloOnly', 'Loose_VarRad', 'Tight_VarRad', 'TightTrackOnly_VarRad',
+                              'TightTrackOnly_FixedRad', 'NonIso'],1)})
         self.addOption ('noEffSF', False, type=bool,
             info="disables the calculation of efficiencies and scale factors. "
             "Experimental! only useful to test a new WP for which scale "
@@ -674,13 +690,16 @@ class ElectronWorkingPointEfficiencyConfig (ConfigBlock) :
             "full simulation samples. Only for testing purposes.")
         self.addOption ('correlationModelId', 'SIMPLIFIED', type=str,
             info="the correlation model to use for ID scale factors. "
-            "Supported models: `SIMPLIFIED`, `FULL`, `TOTAL`, `TOYS`.")
+            "Supported models: `SIMPLIFIED`, `FULL`, `TOTAL`, `TOYS`.",
+            meta={'choices':(['SIMPLIFIED','FULL','TOTAL','TOYS'],1)})
         self.addOption ('correlationModelIso', 'SIMPLIFIED', type=str,
             info="the correlation model to use for isolation scale factors, "
-            "Supported models: `SIMPLIFIED`, `FULL`, `TOTAL`, `TOYS`.")
+            "Supported models: `SIMPLIFIED`, `FULL`, `TOTAL`, `TOYS`.",
+            meta={'choices':(['SIMPLIFIED','FULL','TOTAL','TOYS'],1)})
         self.addOption ('correlationModelReco', 'SIMPLIFIED', type=str,
             info="the correlation model to use for reconstruction scale factors. "
-            "Supported models: `SIMPLIFIED`, `FULL`, `TOTAL`, `TOYS`.")
+            "Supported models: `SIMPLIFIED`, `FULL`, `TOTAL`, `TOYS`.",
+            meta={'choices':(['SIMPLIFIED','FULL','TOTAL','TOYS'],1)})
         self.addOption('addChargeMisIDSF', False, type=bool,
             info="adds scale factors for charge-misID.")
 
@@ -714,7 +733,7 @@ class ElectronWorkingPointEfficiencyConfig (ConfigBlock) :
             postfix = '_' + postfix
 
         correlationModels = ["SIMPLIFIED", "FULL", "TOTAL", "TOYS"]
-        map_file = 'ElectronEfficiencyCorrection/2015_2025/rel22.2/2026_Run2Run3_Recommendation_v2/map1.txt'
+        map_file = 'ElectronEfficiencyCorrection/2015_2025/rel22.2/2026_Run2Run3_Recommendation_v3/map1.txt'
         sfList = []
         # Set up the RECO electron efficiency correction algorithm:
         if config.dataType() is not DataType.Data and not self.noEffSF:
@@ -731,7 +750,9 @@ class ElectronWorkingPointEfficiencyConfig (ConfigBlock) :
             if config.geometry() >= LHCPeriod.Run3 and self.correlationModelReco != "TOTAL":
                 warnings.warn_explicit(
                     "Only TOTAL correlation model is currently supported "
-                    "for reconstruction efficiency correction in Run 3.",
+                    "for reconstruction efficiency correction in Run 3."
+                    f"Your choice {self.correlationModelReco} will be "
+                    "overwritten with TOTAL",
                     ElectronEfficiencyCorrelationWarning,
                     filename='', lineno=0)
                 alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL"
@@ -799,7 +820,9 @@ class ElectronWorkingPointEfficiencyConfig (ConfigBlock) :
             if config.geometry() >= LHCPeriod.Run3 and self.correlationModelIso != 'TOTAL':
                 warnings.warn_explicit(
                     "Only TOTAL correlation model is currently supported "
-                    "for isolation efficiency correction in Run 3.",
+                    "for isolation efficiency correction in Run 3."
+                    f"Your choice {self.correlationModelIso} will be "
+                    "overwritten with TOTAL",
                     ElectronEfficiencyCorrelationWarning,
                     filename='', lineno=0)
                 alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL"
@@ -936,7 +959,8 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
                         info="use the tool trigger key as output.")
         self.addOption ('containerName', '', type=str,
                         info="the input electron container, with a possible selection, in "
-                        "the format `container` or `container.selection`.")
+                        "the format `container` or `container.selection`.",
+                        meta={'role':'containerRef'})
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -1078,7 +1102,8 @@ class ElectronLRTMergedConfig (ConfigBlock) :
         self.addOption (
             'inputElectrons', 'Electrons', type=str,
             noneAction='error',
-            info="the name of the input electron container."
+            info="the name of the input electron container.",
+            meta={'role':'containerRef'}
         )
         self.addOption (
             'inputLRTElectrons', 'LRTElectrons', type=str,
@@ -1088,7 +1113,8 @@ class ElectronLRTMergedConfig (ConfigBlock) :
         self.addOption (
             'containerName', 'Electrons_LRTMerged', type=str,
             noneAction='error',
-            info="the name of the output container after LRT merging."
+            info="the name of the output container after LRT merging.",
+            meta={'role':'container'}
         )
 
     def instanceName (self) :

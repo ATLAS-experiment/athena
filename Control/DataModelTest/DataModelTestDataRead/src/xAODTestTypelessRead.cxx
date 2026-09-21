@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  src/xAODTestTypelessRead.cxx
@@ -38,8 +38,8 @@
 #include "AthContainers/JaggedVec.h"
 #include "AthLinks/ElementLink.h"
 #include "AthenaKernel/errorcheck.h"
-#include "CxxUtils/StrFormat.h"
 #include "GaudiKernel/System.h"
+#include <format>
 #include <memory>
 #include <sstream>
 
@@ -112,7 +112,7 @@ void dumpAuxItem (std::ostream& ost,
   else if (ti == &typeid(unsigned int))
     ost << c.getData<unsigned int> (auxid, i) << "; ";
   else if (ti == &typeid(float))
-    ost << CxxUtils::strformat ("%.3f", c.getData<float> (auxid, i)) << "; ";
+    ost << std::format ("{:.3f}", c.getData<float> (auxid, i)) << "; ";
   else if (ti == &typeid(ElementLink<DMTest::CVec>)) {
     const ElementLink<DMTest::CVec>& el =
       c.getData<ElementLink<DMTest::CVec> > (auxid, i);
@@ -141,7 +141,7 @@ void dumpAuxItem (std::ostream& ost,
   {
     ost << "[";
     for (auto ii : c.getData<std::vector<float> > (auxid, i))
-      ost << CxxUtils::strformat ("%.3f", ii) << " ";
+      ost << std::format ("{:.3f}", ii) << " ";
     ost << "]; ";
   }
 #if 0
@@ -160,7 +160,7 @@ void dumpAuxItem (std::ostream& ost,
   else if (ti == &typeid(SG::PackedElement<std::vector<float> >)) {
     ost << "[";
     for (auto ii : c.getData<SG::PackedElement<std::vector<float> > > (auxid, i))
-      ost << CxxUtils::strformat ("%.3f", ii) << " ";
+      ost << std::format ("{:.3f}", ii) << " ";
     ost << "]; ";
   }
 #endif

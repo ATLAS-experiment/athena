@@ -26,7 +26,15 @@ if __name__=='__main__':
     # config file
     config_file = "/eos/atlas/atlascerngroupdisk/perf-jets/LocalStorage/TAGGING/PreliminaryConfigs/WTagger/"
 
+    # algorithm for one WP
     testacc = WZTagAlgCfg(flags, tagger='WZ', generation='ParT', WP='50',
                           cfg_file=config_file)
     cfg.merge(testacc)
+
+    # and for a second WP
+    testacc_2WP = WZTagAlgCfg(flags, tagger='WZ', generation='ParT', WP='80',
+                          cfg_file=config_file)
+    cfg.merge(testacc_2WP)
+
+
     cfg.run(15)

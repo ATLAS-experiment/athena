@@ -116,8 +116,8 @@ def SegmentEdgeInferenceAlgCfg(flags, name="SegmentEdgeInferenceAlg", **kwargs):
     kwargs.setdefault("UseDegreeCappedComponents", False)
     kwargs.setdefault("RequireMutualTopKEdges", True)
     kwargs.setdefault("RecoverOrphanNodes", True)
-    # Every retained segment may start a seed. 
     kwargs.setdefault("SeedAnchorsPerComponent", 0)
+    kwargs.setdefault("AnchorInnermostLayer", True)
     kwargs.setdefault("MinSegmentsPerComponent", 2)
     alg = CompFactory.MuonML.SegmentEdgeInferenceAlg(name=name, **kwargs)
     result.addEventAlgo(alg, primary=True)
