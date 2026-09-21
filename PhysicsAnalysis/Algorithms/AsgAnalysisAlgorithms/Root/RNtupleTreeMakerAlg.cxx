@@ -16,6 +16,9 @@
 // Gaudi/EventLoop include(s):
 #ifdef XAOD_STANDALONE
 #include "EventLoop/Worker.h"
+#else
+#include "GaudiKernel/ITHistSvc.h"
+#include <TH1.h>
 #endif
 
 namespace CP {
@@ -49,10 +52,26 @@ namespace CP {
              return StatusCode::FAILURE;
          }
 #else
-        // naive implementation for AthAnalysis, I don't see any Ath Svc offer getting the output stream easily
-         outputFile = TFile::Open( m_outputStreamName.value().c_str(), "UPDATE" );
+         // The detour design: Output file is handled by THistSvc, including the file name. But THistSvc does not provide a direct way to get the TFile pointer for a given stream. 
+         // So we register a temporary histogram to get the TFile pointer for the output stream.
+         SmartIF<ITHistSvc> tHistSvc{service("THistSvc")};
+         ATH_CHECK(tHistSvc.isValid());
+         const std::string& targetStream = m_outputStreamName.value();
+         const std::string probeId = "/" + targetStream + "/__rntuple_file_probe__";
+         {
+             auto probe = std::make_unique<TH1F>("__rntuple_file_probe__", "", 1, 0., 1.);
+             probe->SetDirectory(nullptr);
+             ATH_CHECK(tHistSvc->regHist(probeId, std::move(probe)));
+         }
+         TH1* probeHist = nullptr;
+         ATH_CHECK(tHistSvc->getHist(probeId, probeHist));
+         if (probeHist && probeHist->GetDirectory()) {
+             outputFile = probeHist->GetDirectory()->GetFile();
+         }
+         ATH_CHECK(tHistSvc->deReg(probeId));
+         delete probeHist;
+         ATH_MSG_INFO("RNTuple found output file: " << (outputFile ? outputFile->GetName() : "nullptr"));
 #endif
-
          if( !outputFile ) {
              ATH_MSG_ERROR( "Could not retrieve file for stream: " << m_outputStreamName.value() );
              return StatusCode::FAILURE;
