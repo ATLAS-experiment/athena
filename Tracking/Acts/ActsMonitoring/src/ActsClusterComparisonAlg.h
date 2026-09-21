@@ -24,6 +24,7 @@
 #include "xAODInDetMeasurement/SpacePointContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
 #include "InDetCondTools/ISiLorentzAngleTool.h"
+#include "ActsEvent/SeedContainer.h"
 
 #include <Gaudi/Accumulators.h>
 
@@ -62,6 +63,7 @@ public:
     private:
         StatusCode validateClusters(const EventContext& eventContext, std::unordered_map<const xAOD::PixelCluster*, const xAOD::PixelCluster*>& pixel_cluster_matches, std::unordered_map<const xAOD::StripCluster*, const xAOD::StripCluster*>& strip_cluster_matches) const;
         StatusCode validatePixelSpacepoints(const EventContext& eventContext, std::unordered_map<const xAOD::PixelCluster*, const xAOD::PixelCluster*>& pixel_cluster_matches) const;
+        StatusCode validateSeeds(const EventContext& eventContext, std::unordered_map<const xAOD::PixelCluster*, const xAOD::PixelCluster*>& pixel_cluster_matches) const;
 
         void matchPixelClusters(
             std::vector<const xAOD::PixelCluster*>& monitored_list,
@@ -80,6 +82,9 @@ public:
         Gaudi::Property<bool> m_checkSpacepoints{
             this, "checkSpacepoints", false,
             "If you also want to validate spacepounts."};
+        Gaudi::Property<bool> m_checkSeeds{
+            this, "checkSeeds", false,
+            "If you also want to validate seeds."};    
         /// @}    
 
         /// @name Names of input monitored and reference pixel/strip/spacepoint collections
@@ -107,6 +112,15 @@ public:
         SG::ReadHandleKey<xAOD::StripClusterContainer> m_referenceStripClustersKey{
             this, "referenceStripClustersKey", "ITkStripClusters",
             "Input reference strip clusters"};
+
+        SG::ReadHandleKey<ActsTrk::SeedContainer> m_referenceSeedsKey{
+            this, "referenceSeedsKey", "ITkTracccPixelSeeds",
+            "Input reference seeds"};
+
+        SG::ReadHandleKey<ActsTrk::SeedContainer> m_monitoredSeedsKey{
+            this, "monitoredSeedsKey", "ITkActsPixelSeeds",
+            "Input monitored seeds"};
+    
         /// @}    
 
 
@@ -136,6 +150,17 @@ public:
         mutable Gaudi::Accumulators::Counter<> m_nSpPosDiff5mm;
         mutable Gaudi::Accumulators::Counter<> m_nSpVarRDiff;
         mutable Gaudi::Accumulators::Counter<> m_nSpVarZDiff;
+
+
+        // pixel seeds summary
+        mutable Gaudi::Accumulators::Counter<> m_exact_match;
+        mutable Gaudi::Accumulators::Counter<> m_partial_match;
+        mutable Gaudi::Accumulators::Counter<> m_unique_monitored;
+        mutable Gaudi::Accumulators::Counter<> m_unique_reference;
+        mutable Gaudi::Accumulators::Counter<> m_partial_beginning;
+        mutable Gaudi::Accumulators::Counter<> m_partial_middle;
+        mutable Gaudi::Accumulators::Counter<> m_partial_end;
+        mutable Gaudi::Accumulators::Counter<> m_partial_mixed;
 
         Gaudi::Property<std::string> m_pixelManagerKey{
             this, "PixelManager", "ITkPixel"};

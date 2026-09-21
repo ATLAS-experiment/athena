@@ -51,6 +51,9 @@ StatusCode ActsClusterComparisonAlg::initialize()
     ATH_CHECK(m_referenceSpacepointsKey.initialize(m_checkSpacepoints));
     ATH_CHECK(m_monitoredSpacepointsKey.initialize(m_checkSpacepoints));
 
+    ATH_CHECK(m_referenceSeedsKey.initialize(m_checkSeeds));
+    ATH_CHECK(m_monitoredSeedsKey.initialize(m_checkSeeds));
+
     ATH_MSG_INFO("ActsClusterComparisonAlg::initialize complete");
     return StatusCode::SUCCESS;
 }
@@ -71,6 +74,8 @@ StatusCode ActsClusterComparisonAlg::execute(const EventContext& ctx) const
 
     if (m_checkSpacepoints)
         ATH_CHECK(validatePixelSpacepoints(ctx, pixel_cluster_matches));
+    if(m_checkSeeds)
+        ATH_CHECK(validateSeeds(ctx, pixel_cluster_matches));
 
     return StatusCode::SUCCESS;
 }
@@ -457,27 +462,27 @@ StatusCode ActsClusterComparisonAlg::validateClusters(
                 std::abs(l_dy / (std::sqrt(monitored_cov(1, 1)))) > 0.25) {
                 pixel_pos_diff_0p25sig++;
 
-                ATH_MSG_DEBUG("Detailed print of cluster discrepancy: ");
-                ATH_MSG_DEBUG("On module: " << monitored_Pixel_ModuleID);
-                ATH_MSG_DEBUG("Lorentz shift: " << std::fixed << std::setprecision(9) << monitored_lorentz_shift);
+                ATH_MSG_VERBOSE("Detailed print of cluster discrepancy: ");
+                ATH_MSG_VERBOSE("On module: " << monitored_Pixel_ModuleID);
+                ATH_MSG_VERBOSE("Lorentz shift: " << std::fixed << std::setprecision(9) << monitored_lorentz_shift);
 
-                ATH_MSG_DEBUG("Local position: ");
-                ATH_MSG_DEBUG(
+                ATH_MSG_VERBOSE("Local position: ");
+                ATH_MSG_VERBOSE(
                     "  Monitored: ("
                     << monitored_cluster->localPosition<2>()[Trk::locX] << ", "
                     << monitored_cluster->localPosition<2>()[Trk::locY] << ")");
-                ATH_MSG_DEBUG("  Reference: ("
+                ATH_MSG_VERBOSE("  Reference: ("
                             << reference_cluster->localPosition<2>()[Trk::locX] << ", "
                             << reference_cluster->localPosition<2>()[Trk::locY]
                             << ")");
-                ATH_MSG_DEBUG("  Δx = " << l_dx << ", Δy = " << l_dy
+                ATH_MSG_VERBOSE("  Δx = " << l_dx << ", Δy = " << l_dy
                                         << ", Δr = " << l_pos_diff);
-                ATH_MSG_DEBUG("Cluster cov: ");
-                ATH_MSG_DEBUG("  Monitored: (" << monitored_cov(0, 0) << ", "
+                ATH_MSG_VERBOSE("Cluster cov: ");
+                ATH_MSG_VERBOSE("  Monitored: (" << monitored_cov(0, 0) << ", "
                                             << monitored_cov(1, 1) << ")");
-                ATH_MSG_DEBUG("  Reference: (" << reference_cov(0, 0) << ", "
+                ATH_MSG_VERBOSE("  Reference: (" << reference_cov(0, 0) << ", "
                                         << reference_cov(1, 1) << ")");
-                ATH_MSG_DEBUG("  Δx = " << monitored_cov(0, 0) - reference_cov(0, 0)
+                ATH_MSG_VERBOSE("  Δx = " << monitored_cov(0, 0) - reference_cov(0, 0)
                                         << ", Δy = "
                                         << monitored_cov(1, 1) - reference_cov(1, 1));
 
@@ -494,24 +499,24 @@ StatusCode ActsClusterComparisonAlg::validateClusters(
 
                     InDetDD::PixelDiodeTree::DiodeProxyWithPosition si_param(
                         design.diodeProxyFromIdxCachePosition(diode_idx));
-                    ATH_MSG_DEBUG("hit id for this cell: "
+                    ATH_MSG_VERBOSE("hit id for this cell: "
                                   << chargeCellId
                                   << ", position: " << si_param.position()[0]
                                   << ", " << si_param.position()[1]);
                 }
 
                 // Calculate width difference
-                ATH_MSG_DEBUG("Cluster width: ");
-                ATH_MSG_DEBUG("  Monitored phi/eta channels, eta width: ("
+                ATH_MSG_VERBOSE("Cluster width: ");
+                ATH_MSG_VERBOSE("  Monitored phi/eta channels, eta width: ("
                             << monitored_cluster->channelsInPhi() << ", "
                             << monitored_cluster->channelsInEta() << ", "
                             << monitored_cluster->widthInEta() << ")");
-                ATH_MSG_DEBUG("  Reference phi/eta channels, eta width: ("
+                ATH_MSG_VERBOSE("  Reference phi/eta channels, eta width: ("
                             << reference_cluster->channelsInPhi() << ", "
                             << reference_cluster->channelsInEta() << ", "
                             << reference_cluster->widthInEta() << ")");
 
-                ATH_MSG_DEBUG(" Δphi = " << monitored_cluster->channelsInPhi() -
+                ATH_MSG_VERBOSE(" Δphi = " << monitored_cluster->channelsInPhi() -
                                                 reference_cluster->channelsInPhi()
                                         << ",  Δeta = "
                                         << monitored_cluster->channelsInEta() -
@@ -606,21 +611,21 @@ StatusCode ActsClusterComparisonAlg::validateClusters(
                 double monitored_lorentz_shift =
                     m_stripLorentzAngleTool->getLorentzShift(Strip_ModuleHash + side, eventContext);
 
-                ATH_MSG_DEBUG("Detailed print of cluster discrepancy: ");
-                ATH_MSG_DEBUG("On module: " << strip_moduleID << ", side: " << m_stripID->side(monitored_element->identify()));
-                ATH_MSG_DEBUG("Lorentz shift: " << std::fixed << std::setprecision(9) << monitored_lorentz_shift);
+                ATH_MSG_VERBOSE("Detailed print of cluster discrepancy: ");
+                ATH_MSG_VERBOSE("On module: " << strip_moduleID << ", side: " << m_stripID->side(monitored_element->identify()));
+                ATH_MSG_VERBOSE("Lorentz shift: " << std::fixed << std::setprecision(9) << monitored_lorentz_shift);
 
-                ATH_MSG_DEBUG("Local position: ");
-                ATH_MSG_DEBUG(
+                ATH_MSG_VERBOSE("Local position: ");
+                ATH_MSG_VERBOSE(
                     "  Monitored: ("
                     << monitored_cluster->localPosition<1>()[Trk::locX] << ")");
-                ATH_MSG_DEBUG("  Reference: ("
+                ATH_MSG_VERBOSE("  Reference: ("
                             << reference_cluster->localPosition<1>()[Trk::locX] <<  ")");
-                ATH_MSG_DEBUG("  Δx = " << pos_diff );
-                ATH_MSG_DEBUG("Cluster cov: ");
-                ATH_MSG_DEBUG("  Monitored: (" << monitored_cov(0, 0) << ")");
-                ATH_MSG_DEBUG("  Reference: (" << reference_cov(0, 0) << ")");
-                ATH_MSG_DEBUG("  Δx = " << monitored_cov(0, 0) - reference_cov(0, 0));
+                ATH_MSG_VERBOSE("  Δx = " << pos_diff );
+                ATH_MSG_VERBOSE("Cluster cov: ");
+                ATH_MSG_VERBOSE("  Monitored: (" << monitored_cov(0, 0) << ")");
+                ATH_MSG_VERBOSE("  Reference: (" << reference_cov(0, 0) << ")");
+                ATH_MSG_VERBOSE("  Δx = " << monitored_cov(0, 0) - reference_cov(0, 0));
 
                 const auto& rdoListRange = monitored_cluster->rdoList();
                 std::vector<Identifier> monitored_rdoList(
@@ -635,7 +640,7 @@ StatusCode ActsClusterComparisonAlg::validateClusters(
                         InDetDD::SiLocalPosition si_pos =
                             s_design->localPositionOfCell(chargeCellId);
                         Amg::Vector2D loc_pos(si_pos.xPhi(), si_pos.xEta());
-                        ATH_MSG_DEBUG("hit id for this cell: "
+                        ATH_MSG_VERBOSE("hit id for this cell: "
                                     << chargeCellId
                                     << ", position: " << loc_pos[0]
                                     << ", " << loc_pos[1]);
@@ -652,7 +657,7 @@ StatusCode ActsClusterComparisonAlg::validateClusters(
                         InDetDD::SiLocalPosition si_pos =
                             annulus_design->localPositionOfCell(chargeCellId);
                         Amg::Vector2D loc_pos(si_pos.xPhi(), si_pos.xEta());
-                        ATH_MSG_DEBUG("hit id for this cell: "
+                        ATH_MSG_VERBOSE("hit id for this cell: "
                                     << chargeCellId
                                     << ", posiiton: " << loc_pos[0]
                                     << ", " << loc_pos[1]);
@@ -661,13 +666,13 @@ StatusCode ActsClusterComparisonAlg::validateClusters(
                 }
 
                 // Calculate width difference
-                ATH_MSG_DEBUG("Cluster width: ");
-                ATH_MSG_DEBUG("  Monitored phi channels: ("
+                ATH_MSG_VERBOSE("Cluster width: ");
+                ATH_MSG_VERBOSE("  Monitored phi channels: ("
                             << monitored_cluster->channelsInPhi() << ")");
-                ATH_MSG_DEBUG("  Reference phi channels: ("
+                ATH_MSG_VERBOSE("  Reference phi channels: ("
                             << reference_cluster->channelsInPhi() << ")");
 
-                ATH_MSG_DEBUG(" Δphi = " << monitored_cluster->channelsInPhi() -
+                ATH_MSG_VERBOSE(" Δphi = " << monitored_cluster->channelsInPhi() -
                                             reference_cluster->channelsInPhi());
 
             }
@@ -865,12 +870,12 @@ StatusCode ActsClusterComparisonAlg::validatePixelSpacepoints(
         double pos_diff = std::sqrt(dx * dx + dy * dy + dz * dz);
 
         // Calculate global position difference
-        ATH_MSG_DEBUG("Spacepoint global position: ");
-        ATH_MSG_DEBUG("  Monitored: (" << monitored_sp->x() << ", " << monitored_sp->y()
+        ATH_MSG_VERBOSE("Spacepoint global position: ");
+        ATH_MSG_VERBOSE("  Monitored: (" << monitored_sp->x() << ", " << monitored_sp->y()
                                     << ", " << monitored_sp->z() << ")");
-        ATH_MSG_DEBUG("  Reference: (" << reference_sp->x() << ", " << reference_sp->y()
+        ATH_MSG_VERBOSE("  Reference: (" << reference_sp->x() << ", " << reference_sp->y()
                                   << ", " << reference_sp->z() << ")");
-        ATH_MSG_DEBUG("  Δx = " << dx << ", Δy = " << dy << ", Δz = " << dz
+        ATH_MSG_VERBOSE("  Δx = " << dx << ", Δy = " << dy << ", Δz = " << dz
                                 << ", Δr = " << pos_diff);
 
         if (pos_diff > 1.0)
@@ -879,15 +884,15 @@ StatusCode ActsClusterComparisonAlg::validatePixelSpacepoints(
             sp_global_pos_diff_5mm++;
 
         // Calculate covariance difference
-        ATH_MSG_DEBUG("Spacepoint cov and radius: ");
-        ATH_MSG_DEBUG("  Monitored r/z and radius: ("
+        ATH_MSG_VERBOSE("Spacepoint cov and radius: ");
+        ATH_MSG_VERBOSE("  Monitored r/z and radius: ("
                       << monitored_sp->varianceR() << ", "
                       << monitored_sp->varianceZ() << ", " << monitored_sp->radius()
                       << ")");
-        ATH_MSG_DEBUG("  Reference r/z and radius: (" << reference_sp->varianceR() << ", "
+        ATH_MSG_VERBOSE("  Reference r/z and radius: (" << reference_sp->varianceR() << ", "
                                                  << reference_sp->varianceZ() << ", "
                                                  << reference_sp->radius() << ")");
-        ATH_MSG_DEBUG("  Δcov_r = "
+        ATH_MSG_VERBOSE("  Δcov_r = "
                       << monitored_sp->varianceR() - reference_sp->varianceR()
                       << ", Δcov_z = "
                       << monitored_sp->varianceZ() - reference_sp->varianceZ()
@@ -955,6 +960,422 @@ StatusCode ActsClusterComparisonAlg::validatePixelSpacepoints(
     m_nSpPosDiff5mm += sp_global_pos_diff_5mm;
     m_nSpVarRDiff += sp_variance_r_diff;
     m_nSpVarZDiff += sp_variance_z_diff;
+
+    return StatusCode::SUCCESS;
+}
+
+StatusCode ActsClusterComparisonAlg::validateSeeds(const EventContext& eventContext, std::unordered_map<const xAOD::PixelCluster*, const xAOD::PixelCluster*>& pixel_cluster_matches) const
+{
+
+    // retrieve the seeds in form of ActsTrk containers
+    ATH_MSG_INFO(
+        "Reading monitored seeds: " << m_monitoredSeedsKey.key());
+    ATH_MSG_INFO("Reading reference seeds: " << m_referenceSeedsKey.key());
+
+    SG::ReadHandle<ActsTrk::SeedContainer> monitoredSeedsHandle =
+        SG::makeHandle(m_monitoredSeedsKey, eventContext);
+    ATH_CHECK(monitoredSeedsHandle.isValid());
+    const ActsTrk::SeedContainer* monitoredSeeds =
+        monitoredSeedsHandle.cptr();
+
+    SG::ReadHandle<ActsTrk::SeedContainer> referenceSeedsHandle =
+        SG::makeHandle(m_referenceSeedsKey, eventContext);
+    ATH_CHECK(referenceSeedsHandle.isValid());
+    const ActsTrk::SeedContainer* referenceSeeds =
+        referenceSeedsHandle.cptr();
+
+    // make a map between seeds and reference clusters
+    std::vector<std::vector<const xAOD::PixelCluster*>> reference_seeds;
+    std::vector<std::vector<const xAOD::PixelCluster*>> monitored_seeds;
+    std::vector<std::vector<const xAOD::PixelCluster*>> monitored_seeds_original;
+
+    ATH_MSG_DEBUG("Seed numbers monitored/reference: "
+                  << monitoredSeeds->size() << " / "
+                  << referenceSeeds->size());
+
+    if (monitoredSeeds->size() != referenceSeeds->size()) {
+        ATH_MSG_DEBUG("Monitored and reference did not create the same amount of seeds!!");
+        ATH_MSG_DEBUG("Monitored created "
+                      << monitoredSeeds->size() << ", reference created "
+                      << referenceSeeds->size() << " seeds.");
+    }
+
+    ATH_MSG_DEBUG("Looping over monitored container seeds.");
+    for (const ActsTrk::Seed& track_seed : *monitoredSeeds) {
+
+        std::vector<const xAOD::PixelCluster*> this_seed;
+        std::vector<const xAOD::PixelCluster*> this_seed_original;
+
+        for (const xAOD::SpacePoint_v1* spacepoint : track_seed.sp()) {
+
+            const auto& measurements = spacepoint->measurements();
+            for (const xAOD::UncalibratedMeasurement* umeas : measurements) {
+
+                auto monitored_pixel =
+                    dynamic_cast<const xAOD::PixelCluster*>(umeas);
+                assert(monitored_pixel);
+
+                auto it = pixel_cluster_matches.find(monitored_pixel);
+                if (it != pixel_cluster_matches.end()) {
+
+                    const auto* referenceCluster = it->second;
+                    this_seed_original.push_back(monitored_pixel);
+                    this_seed.push_back(referenceCluster);
+
+                    ATH_MSG_VERBOSE("Monitored cluster: " << monitored_pixel->globalPosition().x() << "," << monitored_pixel->globalPosition().y()
+                                        << "," << monitored_pixel->globalPosition().z());
+                    ATH_MSG_VERBOSE("Reference cluster: " << referenceCluster->globalPosition().x() << "," << referenceCluster->globalPosition().y()
+                                        << "," << referenceCluster->globalPosition().z());                    
+
+                    break;
+                }
+            }
+        }
+
+        monitored_seeds.push_back(this_seed);
+        monitored_seeds_original.push_back(this_seed_original);
+    }
+
+    ATH_MSG_DEBUG("Looping over reference container seeds.");
+    for (const ActsTrk::Seed& track_seed : *referenceSeeds) {
+
+        std::vector<const xAOD::PixelCluster*> this_seed;
+
+        for (const xAOD::SpacePoint_v1* spacepoint : track_seed.sp()) {
+
+            const auto& measurements = spacepoint->measurements();
+            for (const xAOD::UncalibratedMeasurement* umeas : measurements) {
+
+                auto pixelCluster =
+                    dynamic_cast<const xAOD::PixelCluster*>(umeas);
+                assert(pixelCluster);
+                this_seed.push_back(pixelCluster);
+            }
+        }
+
+        reference_seeds.push_back(this_seed);
+    }
+
+    // Two seeds are "the same" if they cover exactly the same set of clusters
+    auto canonical_key = [](const std::vector<const xAOD::PixelCluster*>& seed) {
+        std::set<const xAOD::PixelCluster*> s(seed.begin(), seed.end());
+        return std::vector<const xAOD::PixelCluster*>(s.begin(), s.end());
+    };
+
+    // Collapse a seed container into unique seeds + duplicates counts
+    auto deduplicate = [&](const std::vector<std::vector<const xAOD::PixelCluster*>>& seeds) {
+        std::vector<std::vector<const xAOD::PixelCluster*>> unique_seeds;
+        std::vector<int> counts;
+        std::map<std::vector<const xAOD::PixelCluster*>, size_t> key_to_index;
+        for (const auto& seed : seeds) {
+            auto key = canonical_key(seed);
+            auto it = key_to_index.find(key);
+            if (it == key_to_index.end()) {
+                key_to_index[key] = unique_seeds.size();
+                unique_seeds.push_back(seed);
+                counts.push_back(1);
+            } else {
+                counts[it->second]++;
+            }
+        }
+        return std::make_pair(unique_seeds, counts);
+    };
+
+    auto [monitored_unique, monitored_counts] = deduplicate(monitored_seeds);
+    auto [reference_unique, reference_counts] = deduplicate(reference_seeds);
+
+    // Compute overlap between two seed cluster vectors, only unique seeds (deduplicated)
+    auto overlap = [](const std::vector<const xAOD::PixelCluster*>& a,
+                  const std::vector<const xAOD::PixelCluster*>& b) {
+        int count = 0;
+        for (const auto* cluster : b) {
+            if (std::find(a.begin(), a.end(), cluster) != a.end())
+                ++count;
+        }
+        return count;
+    };
+
+    // Build overlap matrix
+    std::vector<std::vector<int>> overlap_matrix(
+        monitored_unique.size(), std::vector<int>(reference_unique.size()));
+    for (size_t i = 0; i < monitored_unique.size(); ++i) {
+        for (size_t j = 0; j < reference_unique.size(); ++j) {
+            overlap_matrix[i][j] = overlap(monitored_unique[i], reference_unique[j]);
+        }
+    }
+
+    // Track which seeds have been matched
+    std::vector<bool> monitored_matched(monitored_unique.size(), false);
+    std::vector<bool> reference_matched(reference_unique.size(), false);
+    int exact_match = 0;
+    
+    std::map<int, int> partial_match_histogram;
+    
+    std::vector<std::pair<size_t, size_t>> partial_match_pairs;
+
+    // First pass: exact matches. With dedup done, no representative should be able
+    // to exact-match more than one counterpart
+    for (size_t i = 0; i < monitored_unique.size(); ++i) {
+        if (monitored_matched[i] > 0)
+            continue;
+        for (size_t j = 0; j < reference_unique.size(); ++j) {
+            if (reference_matched[j])
+                continue;
+            if (overlap_matrix[i][j] ==
+                    static_cast<int>(monitored_unique[i].size()) &&
+                overlap_matrix[i][j] ==
+                    static_cast<int>(reference_unique[j].size())) {
+                exact_match++;
+                monitored_matched[i] = 1;
+                reference_matched[j] = 1;
+                break;
+            }
+        }
+    }
+
+    // Second pass: find partial matches
+    while (true) {
+        int best_i = -1, best_j = -1, best_overlap = 0;
+        for (size_t i = 0; i < monitored_unique.size(); ++i) {
+            if (monitored_matched[i] > 0)
+                continue;
+            for (size_t j = 0; j < reference_unique.size(); ++j) {
+                if (reference_matched[j] > 0)
+                    continue;
+                if (overlap_matrix[i][j] > best_overlap) {
+                    best_overlap = overlap_matrix[i][j];
+                    best_i = i;
+                    best_j = j;
+                }
+            }
+        }
+        if (best_overlap == 0)
+            break;
+
+        int n_dup = std::min(monitored_counts[best_i], reference_counts[best_j]);
+        partial_match_histogram[best_overlap] += n_dup;
+        
+        partial_match_pairs.emplace_back(best_i, best_j);
+
+        monitored_matched[best_i] = 1;
+        reference_matched[best_j] = 1;
+    }
+
+    // Unique counts
+    int unique_monitored = 0;
+    for (size_t i = 0; i < monitored_unique.size(); ++i) {
+        if (!monitored_matched[i]) {
+            unique_monitored++;
+        }
+    }
+
+    int unique_reference = 0;
+    for (size_t i = 0; i < reference_unique.size(); ++i) {
+        if (!reference_matched[i]) {
+            unique_reference++;
+        }
+    }
+
+    m_unique_reference += unique_reference; 
+    m_unique_monitored += unique_monitored;
+
+    int partial_match = 0;
+    
+    for (const auto& [clusters, count] : partial_match_histogram) {
+        partial_match += count;
+    }
+   
+    // Print stats
+    ATH_MSG_INFO("============================================================");
+    ATH_MSG_INFO("PIXEL SEED MATCHING STATISTICS:");
+    
+    ATH_MSG_INFO("Same clusters : " << exact_match );
+    ATH_MSG_INFO("Partial match : " << partial_match);
+    for (const auto& [clusters, count] : partial_match_histogram) {
+        
+        ATH_MSG_INFO("    "
+                     << clusters << " cluster" << (clusters > 1 ? "s" : "")
+                     << " overlap: " << count);
+    }
+    ATH_MSG_INFO("Monitored-only   : " << unique_monitored);
+    ATH_MSG_INFO("Reference-only     : " << unique_reference);
+    ATH_MSG_INFO("============================================================");
+
+    m_exact_match += exact_match;
+    m_partial_match += partial_match;
+    m_unique_monitored += unique_monitored;
+
+
+    // Helper to print cluster 3D positions for a seed
+    auto print_seed_positions = [](const std::vector<const xAOD::PixelCluster*>& seed,
+                                    const std::string& label) {
+        std::cout << label << " clusters (" << seed.size() << "):" << std::endl;
+        for (size_t i = 0; i < seed.size(); ++i) {
+            const auto* cluster = seed[i];
+            const auto& globalPos = cluster->globalPosition();
+            std::cout << "  Cluster " << i << ": (" << globalPos.x() << ", "
+                    << globalPos.y() << ", " << globalPos.z() << ")" << std::endl;
+        }
+    };
+
+    // Classify where mismatched positions fall within a seed
+    auto classify_divergence = [](const std::vector<int>& mismatch_positions,
+                                int seed_size) -> std::string {
+        if (mismatch_positions.empty())
+            return "none";
+
+        bool consecutive = true;
+        for (size_t i = 1; i < mismatch_positions.size(); ++i) {
+            if (mismatch_positions[i] != mismatch_positions[i - 1] + 1) {
+                consecutive = false;
+                break;
+            }
+        }
+        if (!consecutive)
+            return "mixed";
+
+        int first = mismatch_positions.front();
+        int last = mismatch_positions.back();
+        if (last < seed_size / 3)
+            return "beginning";
+        if (first > 2 * seed_size / 3)
+            return "end";
+        if (first < seed_size / 3 && last > 2 * seed_size / 3)
+            return "beginning+end";
+        return "middle";
+    };
+
+    // --- Partial matches ---
+    if (!partial_match_pairs.empty()) {
+        std::cout << "\n=== PARTIAL MATCHES (" << partial_match_pairs.size()
+                << ") ===" << std::endl;
+
+        int beginning_divergence = 0, middle_divergence = 0,
+            end_divergence = 0, mixed_divergence = 0;
+
+        for (size_t idx = 0; idx < partial_match_pairs.size(); ++idx) {
+            size_t i = partial_match_pairs[idx].first;   // index into monitored_unique
+            size_t j = partial_match_pairs[idx].second;  // index into reference_unique
+
+            const auto& monitored_seed = monitored_unique[i];
+            const auto& reference_seed = reference_unique[j];
+            int overlap_count = overlap_matrix[i][j];
+            int n_dup = std::min(monitored_counts[i], reference_counts[j]);
+
+            std::cout << "\n--- Partial Match " << idx << " (overlap: " << overlap_count
+                    << " clusters";
+            if (n_dup > 1)
+                std::cout << ", x" << n_dup << " duplicate pairs";
+            std::cout << ") ---" << std::endl;
+            std::cout << "  Monitored idx: " << i << ", Reference idx: " << j << std::endl;
+            std::cout << "  Overlap: " << overlap_count << " / " << reference_seed.size()
+                    << " (reference) vs " << monitored_seed.size() << " (monitored)"
+                    << std::endl;
+
+            print_seed_positions(monitored_seed, "Monitored");
+            print_seed_positions(reference_seed, "Reference");
+
+            // Build sets for cross-checking membership in each direction
+            std::unordered_set<const xAOD::PixelCluster*> monitored_set(
+                monitored_seed.begin(), monitored_seed.end());
+            std::unordered_set<const xAOD::PixelCluster*> reference_set(
+                reference_seed.begin(), reference_seed.end());
+
+            // Which reference-seed positions are NOT covered by the monitored seed
+            std::vector<int> reference_mismatch_positions;
+            for (size_t pos = 0; pos < reference_seed.size(); ++pos) {
+                if (!monitored_set.count(reference_seed[pos]))
+                    reference_mismatch_positions.push_back(pos);
+            }
+
+            // Which monitored-seed positions are NOT covered by the reference seed
+            std::vector<int> monitored_mismatch_positions;
+            for (size_t pos = 0; pos < monitored_seed.size(); ++pos) {
+                if (!reference_set.count(monitored_seed[pos]))
+                    monitored_mismatch_positions.push_back(pos);
+            }
+
+            std::string ref_divergence =
+                classify_divergence(reference_mismatch_positions, reference_seed.size());
+            std::string mon_divergence =
+                classify_divergence(monitored_mismatch_positions, monitored_seed.size());
+
+            std::cout << "  Reference divergence location: " << ref_divergence << std::endl;
+            std::cout << "  Monitored divergence location: " << mon_divergence << std::endl;
+
+            auto print_positions = [](const std::string& label, const std::vector<int>& positions) {
+                if (positions.empty())
+                    return;
+                std::stringstream ss;
+                ss << "  " << label << " (" << positions.size() << "): ";
+                for (size_t i = 0; i < positions.size(); ++i) {
+                    if (i > 0) ss << ", ";
+                    ss << positions[i];
+                    if (i >= 9 && positions.size() > 10) {
+                        ss << "... (" << positions.size() << " total)";
+                        break;
+                    }
+                }
+                std::cout << ss.str() << std::endl;
+            };
+
+            print_positions("Reference mismatched positions", reference_mismatch_positions);
+            print_positions("Monitored mismatched positions", monitored_mismatch_positions);
+
+            // Tally divergence location for the summary (weighted by duplicate count)
+            if (mon_divergence == "beginning") beginning_divergence += n_dup;
+            else if (mon_divergence == "end") end_divergence += n_dup;
+            else if (mon_divergence == "middle") middle_divergence += n_dup;
+            else if (mon_divergence == "mixed" || mon_divergence == "beginning+end") mixed_divergence += n_dup;
+        }
+
+        m_partial_beginning += beginning_divergence;
+        m_partial_middle += middle_divergence;
+        m_partial_end += end_divergence;
+        m_partial_mixed += mixed_divergence;
+
+        std::cout << "\n  Partial match divergence summary: beginning=" << beginning_divergence
+                << ", middle=" << middle_divergence << ", end=" << end_divergence
+                << ", mixed=" << mixed_divergence << std::endl;
+    }
+
+    // --- Monitored-only seeds ---
+    std::vector<size_t> unique_monitored_indices;
+    for (size_t i = 0; i < monitored_unique.size(); ++i)
+        if (!monitored_matched[i])
+            unique_monitored_indices.push_back(i);
+
+    if (!unique_monitored_indices.empty()) {
+        std::cout << "\n=== MONITORED-ONLY SEEDS (" << unique_monitored_indices.size()
+                << ") ===" << std::endl;
+        for (size_t idx = 0; idx < unique_monitored_indices.size(); ++idx) {
+            size_t seed_idx = unique_monitored_indices[idx];
+            std::cout << "\n--- Monitored-only Seed " << idx;
+            if (monitored_counts[seed_idx] > 1)
+                std::cout << " (x" << monitored_counts[seed_idx] << " duplicates)";
+            std::cout << " ---" << std::endl;
+            print_seed_positions(monitored_unique[seed_idx], "Monitored");
+        }
+    }
+
+    // --- Reference-only seeds ---
+    std::vector<size_t> unique_reference_indices;
+    for (size_t j = 0; j < reference_unique.size(); ++j)
+        if (!reference_matched[j])
+            unique_reference_indices.push_back(j);
+
+    if (!unique_reference_indices.empty()) {
+        std::cout << "\n=== REFERENCE-ONLY SEEDS (" << unique_reference_indices.size()
+                << ") ===" << std::endl;
+        for (size_t idx = 0; idx < unique_reference_indices.size(); ++idx) {
+            size_t seed_idx = unique_reference_indices[idx];
+            std::cout << "\n--- Reference-only Seed " << idx;
+            if (reference_counts[seed_idx] > 1)
+                std::cout << " (x" << reference_counts[seed_idx] << " duplicates)";
+            std::cout << " ---" << std::endl;
+            print_seed_positions(reference_unique[seed_idx], "Reference");
+        }
+    }
 
     return StatusCode::SUCCESS;
 }
@@ -1040,6 +1461,24 @@ StatusCode ActsClusterComparisonAlg::finalize()
                     << (m_nMatchedSp.value() > 0 ? 100.0 * m_nSpVarZDiff.value() / m_nMatchedSp.value() : 0.0)
                     << "%)");
         ATH_MSG_INFO("ValSum ============================================================");
+    }
+
+    if(m_checkSeeds){
+        // Print seed statistics
+        ATH_MSG_INFO("ValSum ============================================================");
+        ATH_MSG_INFO("ValSum SEED MATCHING STATISTICS: ");
+        
+        ATH_MSG_INFO("ValSum Same clusters : " << m_exact_match);
+        ATH_MSG_INFO("ValSum  Partial match : " << m_partial_match);
+        ATH_MSG_INFO("ValSum  beginning: " << m_partial_beginning
+                                    << ", middle: " << m_partial_middle
+                                    << ", end: " << m_partial_end
+                                    << ", mixed: " << m_partial_mixed);
+        ATH_MSG_INFO("ValSum monitored-only   : " << m_unique_monitored );
+        ATH_MSG_INFO("ValSum reference-only     : " << m_unique_reference );
+        
+        ATH_MSG_INFO("ValSum ============================================================");
+
     }
 
     return StatusCode::SUCCESS;
