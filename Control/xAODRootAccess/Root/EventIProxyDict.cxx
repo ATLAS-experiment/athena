@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 // File holding the implementation of the xAOD::Event functions that implement
 // the IProxyDict interface.
@@ -13,6 +13,7 @@
 // Project include(s).
 #ifndef XAOD_STANDALONE
 #include "AthenaKernel/DataBucketBase.h"
+#include "AthenaKernel/BaseInfo.h"
 #include "GaudiKernel/Converter.h"
 #include "GaudiKernel/GenericAddress.h"
 #include "SGTools/DataProxy.h"
@@ -27,6 +28,7 @@
 #include <TString.h>
 
 // System include(s):
+#include <format>
 #include <set>
 #include <stdexcept>
 
@@ -78,9 +80,13 @@ class HolderBucket : public DataBucketBase {
   const std::type_info& tinfo() const override { return m_ti; }
 
   /// Return the object, cast to a CLID's type
-  void* cast(CLID, SG::IRegisterTransient*, bool) override {
+  void* cast(CLID clid, SG::IRegisterTransient* irt, bool isConst) override {
 
-    throw std::runtime_error("xAODPrivate::HolderBucket::cast not implemented");
+    const SG::BaseInfoBase* bib = SG::BaseInfoBase::find (clid);
+    if (bib) {
+      return this->cast (bib->typeinfo(), irt, isConst);
+    }
+    throw std::runtime_error(std::format ("xAODPrivate::HolderBucket::cast cannot look up CLID {}", clid));
     return 0;
   }
 
