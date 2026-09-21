@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -94,11 +94,26 @@ struct SiChargedDiodeOrderedSetCompare
     return a->diode().word() < b->diode().word();
   }
 };
+struct SiChargedDiodeOrderedSetCompareWithReadoutIdentifier
+{
+  SiChargedDiodeOrderedSetCompareWithReadoutIdentifier(const InDetDD::SolidStateDetectorElementBase *element)
+    : m_element(element) {}
+  size_t operator() (const SiChargedDiode* a,
+                     const SiChargedDiode* b) const
+  {
+    if (m_element == nullptr) {
+      throw std::runtime_error("SiChargedDiodeOrderedSetCompareWithReadoutIdentifier: m_element is null");
+    }
 
+    return m_element->identifierFromCellId(a->getReadoutCell()) < m_element->identifierFromCellId(b->getReadoutCell());
+  }
 
+  private:
+    const InDetDD::SolidStateDetectorElementBase *m_element;
+};
 
 typedef std::set<SiChargedDiode*,
-                 SiChargedDiodeOrderedSetCompare,
+                 SiChargedDiodeOrderedSetCompareWithReadoutIdentifier,
                  SG::ArenaPoolSTLAllocator<SiChargedDiode*> >
   SiChargedDiodeOrderedSet;
                  
@@ -206,6 +221,7 @@ class SiChargedDiodeCollection : Identifiable {
 // Set the DetectorElement
 inline void SiChargedDiodeCollection::setDetectorElement(const InDetDD::SolidStateDetectorElementBase *SiElement) 
 {
+  m_orderedChargedDiodes = SiChargedDiodeOrderedSet(SiChargedDiodeOrderedSetCompareWithReadoutIdentifier(SiElement));
   m_sielement=SiElement;
 }
 
