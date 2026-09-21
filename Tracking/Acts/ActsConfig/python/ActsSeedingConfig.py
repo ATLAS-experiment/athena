@@ -397,19 +397,6 @@ def ActsGnnSeedingToolCfg(flags,
     acc.setPrivateTools(CompFactory.ActsTrk.GnnSeedingTool(name, **kwargs))
     return acc
 
-def ActsGnnSeedingToolCfg(flags,
-                          name: str = "ActsGnnSeedingTool",
-                          **kwargs) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
-
-    if 'GnnPipelineTool' not in kwargs:
-        from ActsConfig.ActsTrackFindingConfig import ActsGnnPipelineToolCfg
-        kwargs.setdefault('GnnPipelineTool', acc.popToolsAndMerge(
-            ActsGnnPipelineToolCfg(flags, name="GnnSeedingPipeline")))
-
-    acc.setPrivateTools(CompFactory.ActsTrk.GnnSeedingTool(name, **kwargs))
-    return acc
-
 # ACTS algorithm using Athena objects upstream
 def ActsPixelSeedingAlgCfg(flags,
                            name: str = 'PixelSeedingAlg',
