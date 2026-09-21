@@ -37,7 +37,7 @@ def PhotonVariableCorrectionToolCfg(
         if mcCampaign in [Campaign.MC23a, Campaign.MC23d]:
             # TUNE28AD: gamma FUDGE FACTORS RUN3 2022-2023 vs MC23a-d, derived with r25
             tuneFile = "EGammaVariableCorrection/TUNE28AD/ElPhVariableNominalCorrection.conf"
-        elif mcCampaign is Campaign.MC23e:
+        elif mcCampaign in [Campaign.MC23e, Campaign.MC23g]:
             # TUNE28EG: gamma FUDGE FACTORS RUN3 2024-2026 vs MC23e-g, derived with r25
             tuneFile = "EGammaVariableCorrection/TUNE28EG/ElPhVariableNominalCorrection.conf"
         else:
