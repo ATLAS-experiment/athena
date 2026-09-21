@@ -801,12 +801,16 @@ std::unique_ptr<pool::IDatabase> PoolSvc::getDbHandle(unsigned int contextId, co
       contextId = IPoolSvc::kInputStream;
    }
    pool::ISession* sesH = m_dbSessionVec[contextId];
-   if (sesH != nullptr && sesH->type() == Io::INVALID) {
+   if (!sesH){
+     ATH_MSG_ERROR("Session pointer is null.");
+     return nullptr;
+   }
+   if (sesH->type() == Io::INVALID) {
       Io::IoFlag transMode = Io::READ;
       ATH_MSG_DEBUG("Start transaction, type = " << transMode);
       if (!sesH->start(transMode)) {
          ATH_MSG_WARNING("Failed to start transaction, type = " << transMode);
-         return(nullptr);
+         return nullptr;
       }
    }
    if (dbName.starts_with("PFN:")) {
