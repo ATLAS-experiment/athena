@@ -292,7 +292,7 @@ StatusCode JetPFlowSelectionAlg::execute(const EventContext& ctx) const {
 
         std::vector<ElementLink<xAOD::IParticleContainer>> theClusters;
         ElementLink< xAOD::IParticleContainer > theIParticleLink;
-        theIParticleLink.resetWithKeyAndIndex(theOtherLinks_charged[iCluster].persKey(), theOtherLinks_charged[iCluster].persIndex()); 
+        theIParticleLink.resetWithKeyAndIndex(theOtherLinks_charged[iCluster].persKey(), theOtherLinks_charged[iCluster].persIndex(), ctx);
 
         theClusters.push_back(theIParticleLink);
         newFE->setOtherObjectLinks(theClusters);
