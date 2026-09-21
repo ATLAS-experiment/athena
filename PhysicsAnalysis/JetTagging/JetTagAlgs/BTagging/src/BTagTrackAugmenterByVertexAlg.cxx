@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
   Version of the BTagTrackAugmenterAlg but applied to ByVertex jets for the pileup effort
 */
 
@@ -84,7 +84,7 @@ namespace Analysis {
 
     SG::ReadHandle< xAOD::VertexContainer > vertexContainerHandle = SG::makeHandle< xAOD::VertexContainer >( m_VertexContainerKey,ctx );
     CHECK( vertexContainerHandle.isValid() );
-    const xAOD::VertexContainer *verteces = vertexContainerHandle.get();
+    const xAOD::VertexContainer *vertices = vertexContainerHandle.get();
    
     SG::ReadHandle< xAOD::TrackParticleContainer > trackContainerHandle = SG::makeHandle< xAOD::TrackParticleContainer >( m_TrackContainerKey,ctx);
     CHECK( trackContainerHandle.isValid() );
@@ -130,7 +130,7 @@ namespace Analysis {
       std::vector<std::vector<float>> track_out_vec_mom;
       std::vector<char> invalid_vec;
       // loop through vertices
-      for (const xAOD::Vertex *primary: *verteces) {
+      for (const xAOD::Vertex *primary: *vertices) {
         // get IP and extra pars
         std::unique_ptr< const Trk::ImpactParametersAndSigma > ip( m_track_to_vx->estimate(ctx, track, primary) );
         Trk::PerigeeSurface primary_surface( primary->position() );
@@ -146,7 +146,7 @@ namespace Analysis {
             sigmad0.push_back(ip->sigmad0);
             sigmaz0SinTheta.push_back(ip->sigmaz0SinTheta);
             vertex_index.push_back(vtx_i);
-            vertexLink.push_back(ElementLink<xAOD::VertexContainer>(*verteces, vtx_i));
+            vertexLink.emplace_back(*vertices, vtx_i, ctx);
             
           }
         }
