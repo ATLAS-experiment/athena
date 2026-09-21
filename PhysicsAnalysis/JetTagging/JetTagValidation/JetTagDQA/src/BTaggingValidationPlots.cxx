@@ -40,6 +40,7 @@ namespace JetTagDQA{
       {"jet_pt_ttbar", {"jet_pt_", "_ttbar", "jet_pT"}},
       {"jet_pt_Zprime", {"jet_pt_", "_Zprime", "jet_pT_Zprime"}},
       {"jet_eta", {"jet_eta_", "", "jet_eta"}},
+      {"jet_mass", {"jet_mass_", "", "jet_mass"}},
       {"numTracks_perJet", {"numTracks_perJet_", "", "numTracks_perJet"}},
       {"d0", {"d0_", "", "track_d0"}},
       {"z0", {"z0_", "", "track_z0"}},
@@ -765,6 +766,7 @@ namespace JetTagDQA{
       (onZprime ? m_jet_e_Zprime : m_jet_e)->Fill(jet->e()/GeV, event->beamSpotWeight());
       m_jet_eta->Fill(jet->eta(), event->beamSpotWeight());
       fillLargeR("jet_eta", truth_class, jet->eta(), event);
+      fillLargeR("jet_mass", truth_class, jet->m()/GeV, event);
       m_jet_phi->Fill(jet->phi(), event->beamSpotWeight());
       m_truthLabel->Fill(truth_label, event->beamSpotWeight());
       return;

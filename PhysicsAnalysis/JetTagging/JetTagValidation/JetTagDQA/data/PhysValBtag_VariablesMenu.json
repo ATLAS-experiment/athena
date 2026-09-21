@@ -213,6 +213,19 @@
             "forData": "true"
         },
 
+        "jet_mass": {
+            "_comment": "",
+            "title": "jet mass",
+            "xtitle": "m [GeV]",
+            "ytitle": "Jets",
+            "path":  {"PHYSVAL": "jet"},
+            "xbins": 100,
+            "xmin": 0,
+            "xmax": 500,
+            "type": "TH1D",
+            "forData": "true"
+        },
+
         "jet_phi": {
             "_comment": "",
             "title": "#varphi",
