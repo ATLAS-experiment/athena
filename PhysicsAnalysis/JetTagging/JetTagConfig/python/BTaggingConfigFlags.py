@@ -167,7 +167,7 @@ def getNNs(flags):
     # Trained on the poor man's impact parameters, so it needs its own
     # entry below rather than joining gn3_paths
     gn3v03_paths = [
-        "dev/BTagging/20260921/GN3V03/antikt4empflow/network.onnx", # Electrons+Pflow+Charge+Muons
+        "dev/BTagging/20260922/GN3V03/antikt4empflow/network.onnx", # Electrons+Pflow+Charge+Muons
     ] if isRun3Derivation(flags) else []
     # Combine the paths for GN3v00 and GN3v01 models
     gn3_paths = gn3v00_paths + gn3v01_paths
