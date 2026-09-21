@@ -691,7 +691,7 @@ namespace Trk
             dynamic_cast<const xAOD::TrackParticleContainer*>(
               vectorTrk[i]->container());
           if (cont) {
-            if (!linkTT->toIndexedElement(*cont, vectorTrk[i]->index())) {
+            if (!linkTT->toIndexedElement(*cont, vectorTrk[i]->index(), ctx)) {
               msg(MSG::WARNING)
                 << "Failed to set the EL for this particle correctly" << endmsg;
             }
@@ -710,7 +710,7 @@ namespace Trk
             dynamic_cast<const xAOD::NeutralParticleContainer*>(
               vectorNeut[i]->container());
           if (cont) {
-            if (!linkTT->toIndexedElement(*cont, vectorNeut[i]->index())) {
+            if (!linkTT->toIndexedElement(*cont, vectorNeut[i]->index(), ctx)) {
               msg(MSG::WARNING)
                 << "Failed to set the EL for this particle correctly" << endmsg;
             }
@@ -828,7 +828,7 @@ namespace Trk
            const xAOD::TrackParticleContainer* cont = dynamic_cast< const xAOD::TrackParticleContainer* >( vectorTrk[ i ]->container() );
            if(  cont )
            {
-             if( ! linkTT->toIndexedElement( *cont, vectorTrk[ i ]->index() ) )
+             if( ! linkTT->toIndexedElement( *cont, vectorTrk[ i ]->index(), ctx ) )
              {
 	       msg(MSG::WARNING)<<"Failed to set the EL for this particle correctly"<<endmsg;
              }
@@ -847,7 +847,7 @@ namespace Trk
            const xAOD::NeutralParticleContainer* cont = dynamic_cast< const xAOD::NeutralParticleContainer* >( vectorNeut[ i ]->container() );
            if(  cont )
            {
-             if( ! linkTT->toIndexedElement( *cont, vectorNeut[ i ]->index() ) )
+             if( ! linkTT->toIndexedElement( *cont, vectorNeut[ i ]->index(), ctx ) )
              {
 	       msg(MSG::WARNING)<<"Failed to set the EL for this particle correctly"<<endmsg;
 	     }
