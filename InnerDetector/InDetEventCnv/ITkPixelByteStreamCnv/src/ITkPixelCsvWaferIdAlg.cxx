@@ -64,6 +64,7 @@ StatusCode ITkPixelCsvWaferIdAlg::execute(const EventContext& ctx) const {
         const auto w_and_fe_id = waferId(row);
         const Identifier& id = std::get<0>(w_and_fe_id);
         const int fe = std::get<1>(w_and_fe_id);
+        //Keep this in case we need a dedicated function to get the online ID one day
         //std::bitset<32> onlineId = std::get<2>(w_and_fe_id);
         std::bitset<32> onlineId = std::bitset<32>("00001000000000000000000000000000");
         const std::string waferId_str = id.get_identifier32().getString();
@@ -545,9 +546,6 @@ std::bitset<32> ITkPixelCsvWaferIdAlg::onlineId(const std::vector<std::string>& 
     }
     //add the chip ID ON/OFF (1b, set to 1) and BCID (1b, set to 0) bits
     febits |= std::bitset<32>("00000010000000000000000000000000");
-
-    //bitcheck(febits, 26, 29, "DetResID: Online ID");
-
     return febits;
 }
 
@@ -882,7 +880,7 @@ const StatusCode ITkPixelCsvWaferIdAlg::sanityCheck(std::string s, bool legacy) 
 
 
 
-void ITkPixelCsvWaferIdAlg::bitcheck(std::bitset<32> b, uint32_t lsb_lim, uint32_t msb_lim , const std::string& s) const {
+void ITkPixelCsvWaferIdAlg::bitcheck(std::bitset<32> b, uint32_t lsb_lim, uint32_t msb_lim , std::string_view s) const {
 
     uint32_t x = static_cast<uint32_t> (b.to_ulong());
     if(x!=0){

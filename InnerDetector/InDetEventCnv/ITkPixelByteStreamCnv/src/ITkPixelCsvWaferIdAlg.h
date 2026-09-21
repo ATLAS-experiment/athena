@@ -63,7 +63,7 @@ private:
     static std::vector<std::string> splitCsvLine(const std::string& line);
     static std::vector<std::string> parseSPChain(const std::string& spChain);
     const StatusCode sanityCheck(std::string s, bool legacy = false) const;
-    void bitcheck(std::bitset<32> b, uint32_t lsb_lim, uint32_t msb_lim , const std::string& s = "") const;
+    void bitcheck(std::bitset<32> b, uint32_t lsb_lim, uint32_t msb_lim , std::string_view s = "") const;
     std::pair<unsigned int, unsigned int> flxHost(unsigned int card) const ;
 
 

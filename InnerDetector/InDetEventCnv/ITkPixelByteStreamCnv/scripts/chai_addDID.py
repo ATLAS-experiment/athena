@@ -45,8 +45,6 @@ def create_container_with_clob(payload_spec, clob_dataA: str):
     """
     container = chai.Container(payload_spec)
 
-    # Base64 encode the clob data
-    # clob_base64 = base64.b64encode(clob_data).decode('ascii')
     print(f"Type of dataA is {type(clob_dataA)}")
     # Add as string to channel 0
     container[0].push_string(clob_dataA)
@@ -112,8 +110,7 @@ def main(args = None):
     print("    - Column 1: 'cabling' (String)")
 
     fields = [
-        chai.Field("cabling", chai.Type.String),
-#        chai.Field("cabling", chai.Type.String),
+        chai.Field("cabling", chai.Type.String)
     ]
     field_spec = chai.FieldSpec(fields)
     

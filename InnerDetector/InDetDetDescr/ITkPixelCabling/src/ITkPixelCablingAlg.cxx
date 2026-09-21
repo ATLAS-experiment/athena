@@ -207,7 +207,7 @@ StatusCode ITkPixelCablingAlg::generateTestCabling(std::unique_ptr<ITkPixelCabli
 }
 
 StatusCode ITkPixelCablingAlg::fillFromCREST(std::unique_ptr<ITkPixelCablingData>& cabling) const {
-    
+
     chai::Database db(m_crestServer);
     auto tag = db.getTag(m_crestTag);
     auto [payload, since, until] = tag->getPayloadAt(m_crestTime);
