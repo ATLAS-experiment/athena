@@ -71,7 +71,7 @@ StatusCode MuonCombinedInDetCandidateAlg::create(const EventContext& ctx, InDetC
     for (const xAOD::TrackParticle* tp : *output_cache.inDetContainer) {
         if (!isValidTrackParticle(output_cache.trackSelector, tp)) continue;
 
-        ElementLink<xAOD::TrackParticleContainer> link(*output_cache.inDetContainer, tp->index());
+        ElementLink<xAOD::TrackParticleContainer> link(*output_cache.inDetContainer, tp->index(), ctx);
         if (!link.isValid()) {
             ATH_MSG_WARNING("Bad element link ");
             continue;
