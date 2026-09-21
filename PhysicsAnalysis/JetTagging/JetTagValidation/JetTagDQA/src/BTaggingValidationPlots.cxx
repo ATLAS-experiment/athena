@@ -25,6 +25,12 @@
 using CLHEP::GeV;
 namespace JetTagDQA{
   namespace {
+    // the epsilon keeps the discriminant finite, as in get_discriminant of atlas-ftag-tools
+    constexpr double discriminantEpsilon = 1e-10;
+    double logLikelihoodRatio(double signal, double background){
+      return std::log((signal + discriminantEpsilon) / (background + discriminantEpsilon));
+    }
+
     const std::vector<std::string> GN3XPV01Outputs = {"phtautauhad", "phbb", "phcc", "ptop", "pqcdbb", "pqcdbx", "pqcdcx", "pqcdll", "pWqq"};
     // GN3XPV01 training classes, see flavours.yaml in atlas-ftag-tools
     const std::vector<std::string> largeRClasses = {"htautauhad", "hbb", "hcc", "top", "qcdbb", "qcdbx", "qcdcx", "qcdll", "Wqq"};
@@ -1323,7 +1329,7 @@ namespace JetTagDQA{
         if (m_GN2v01SelectionTool->getTaggerWeight(GN2v01_pb, GN2v01_pc, GN2v01_pu, weight_GN2v01, GN2v01_ptau) != CP::CorrectionCode::Ok) weight_GN2v01 = -100;
       }
       else {
-        weight_GN2v01 = log( GN2v01_pb / ( GN2v01_pc * m_GN2v01_fc + GN2v01_pu * (1-m_GN2v01_fc-m_GN2v01_ftau) + GN2v01_ptau * m_GN2v01_ftau ));
+        weight_GN2v01 = logLikelihoodRatio(GN2v01_pb, GN2v01_pc * m_GN2v01_fc + GN2v01_pu * (1-m_GN2v01_fc-m_GN2v01_ftau) + GN2v01_ptau * m_GN2v01_ftau);
       }
       updateNJetsThatPassedWPCutsMap(nJetsThatPassedWPCuts, "GN2v01", weight_GN2v01);
 
@@ -1346,7 +1352,7 @@ namespace JetTagDQA{
       m_GN3EPCLV01_pc->Fill(GN3EPCLV01_pc, event->beamSpotWeight());
       m_GN3EPCLV01_ptau->Fill(GN3EPCLV01_ptau, event->beamSpotWeight());
 
-      double weight_GN3EPCLV01 = log( GN3EPCLV01_pb / ( GN3EPCLV01_pc * m_GN3EPCLV01_fc + GN3EPCLV01_pu * (1-m_GN3EPCLV01_fc-m_GN3EPCLV01_ftau) + GN3EPCLV01_ptau * m_GN3EPCLV01_ftau ));
+      double weight_GN3EPCLV01 = logLikelihoodRatio(GN3EPCLV01_pb, GN3EPCLV01_pc * m_GN3EPCLV01_fc + GN3EPCLV01_pu * (1-m_GN3EPCLV01_fc-m_GN3EPCLV01_ftau) + GN3EPCLV01_ptau * m_GN3EPCLV01_ftau);
       updateNJetsThatPassedWPCutsMap(nJetsThatPassedWPCuts, "GN3EPCLV01", weight_GN3EPCLV01);
 
       for(std::map<std::string, TH1*>::const_iterator hist_iter=m_weight_histos.begin(); hist_iter!=m_weight_histos.end(); ++hist_iter){
@@ -1382,7 +1388,7 @@ namespace JetTagDQA{
       if (fractions->empty()) continue;
       double denominator = 0;
       for (const auto& [output, fraction] : *fractions) denominator += fraction * probs.at(output);
-      const double value = std::log(probs.at(signal) / denominator);
+      const double value = logLikelihoodRatio(probs.at(signal), denominator);
       m_GN3XPV01_discriminants.at(discriminant)->Fill(value, event->beamSpotWeight());
       if (!truth_class.empty()) {
         m_GN3XPV01_discriminants.at(std::string(discriminant) + "_" + truth_class)->Fill(value, event->beamSpotWeight());

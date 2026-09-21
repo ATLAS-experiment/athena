@@ -333,8 +333,8 @@
             "ytitle": "Jets",
             "path":  {"PHYSVAL": "tagger"},
             "xbins": 250,
-            "xmin": -10,
-            "xmax": 40,
+            "xmin": -25,
+            "xmax": 25,
             "type": "TH1D",
             "forData": "false"
         },
