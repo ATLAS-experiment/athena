@@ -1,9 +1,10 @@
-#ifndef HYPERANALYSISALGORITHMS_RUNHYPERALG_H
-#define HYPERANALYSISALGORITHMS_RUNHYPERALG_H
-
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+
+#ifndef HYPERANALYSISALGORITHMS_RUNHYPERALG_H
+#define HYPERANALYSISALGORITHMS_RUNHYPERALG_H
+
 /// @author Diego Baron
 /// @author Zihan Zhang
 
@@ -375,4 +376,4 @@ class RunHyPERAlg final : public EL::AnaAlgorithm {
 
 }  // namespace EventReco
 
-#endif
+#endif  // HYPERANALYSISALGORITHMS_RUNHYPERALG_H

@@ -1,8 +1,9 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef TOPHYPER_HYPER_GRAPH_H
-#define TOPHYPER_HYPER_GRAPH_H
+
+#ifndef HYPERANALYSISALGORITHMS_HYPERGRAPH_H
+#define HYPERANALYSISALGORITHMS_HYPERGRAPH_H
 
 #include <math.h>
 
@@ -51,4 +52,4 @@ class HyPERGraph : public GraphBase {
 };
 }  // namespace EventReco
 
-#endif
+#endif  // HYPERANALYSISALGORITHMS_HYPERGRAPH_H

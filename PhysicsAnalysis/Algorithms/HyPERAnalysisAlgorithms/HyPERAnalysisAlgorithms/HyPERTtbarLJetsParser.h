@@ -1,7 +1,9 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#pragma once
+
+#ifndef HYPERANALYSISALGORITHMS_HYPERTTBARLJETSPARSER_H
+#define HYPERANALYSISALGORITHMS_HYPERTTBARLJETSPARSER_H
 
 #include <string>
 #include <vector>
@@ -79,3 +81,5 @@ class HyPERTtbarLJetsParser : public HyPERParser {
 };
 
 }  // namespace EventReco
+
+#endif  // HYPERANALYSISALGORITHMS_HYPERTTBARLJETSPARSER_H

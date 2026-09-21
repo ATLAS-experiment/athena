@@ -1,9 +1,9 @@
-#ifndef HYPER_TOPORECO_H
-#define HYPER_TOPORECO_H
-
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+
+#ifndef HYPERANALYSISALGORITHMS_HYPERTOPORECO_H
+#define HYPERANALYSISALGORITHMS_HYPERTOPORECO_H
 
 /// @author Zihan Zhang, Diego Baron
 
@@ -46,4 +46,4 @@ bool isAllowedDecay(
 
 }  // namespace EventReco
 
-#endif
+#endif  // HYPERANALYSISALGORITHMS_HYPERTOPORECO_H

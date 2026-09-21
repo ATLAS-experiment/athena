@@ -1,8 +1,9 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef TOPHYPER_HYPER_UTILS_H
-#define TOPHYPER_HYPER_UTILS_H
+
+#ifndef HYPERANALYSISALGORITHMS_HYPERUTILS_H
+#define HYPERANALYSISALGORITHMS_HYPERUTILS_H
 
 #include <algorithm>
 #include <iostream>
@@ -130,4 +131,4 @@ float deltaPhi(float phi1, float phi2);
 
 }  // namespace EventReco
 
-#endif
+#endif  // HYPERANALYSISALGORITHMS_HYPERUTILS_H

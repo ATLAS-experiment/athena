@@ -1,5 +1,9 @@
-// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
-#pragma once
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+
+#ifndef HYPERANALYSISALGORITHMS_HYPERMODEL_H
+#define HYPERANALYSISALGORITHMS_HYPERMODEL_H
 
 #include <AsgTools/MessageCheckAsgTools.h>  // To access ANA_MSG
 #include <math.h>
@@ -314,3 +318,5 @@ class HyPERModel {
   std::vector<std::vector<int64_t>> m_outputsInt64{};
 };
 }  // namespace EventReco
+
+#endif  // HYPERANALYSISALGORITHMS_HYPERMODEL_H

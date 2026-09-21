@@ -1,5 +1,9 @@
-// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
-#pragma once
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+
+#ifndef HYPERANALYSISALGORITHMS_HYPERTTBARDILEPTONMODEL_H
+#define HYPERANALYSISALGORITHMS_HYPERTTBARDILEPTONMODEL_H
 
 #include <string>
 #include <vector>
@@ -45,3 +49,5 @@ class HyPERTtbarDiLeptonModel : public HyPERModel {
   }
 };
 }  // namespace EventReco
+
+#endif  // HYPERANALYSISALGORITHMS_HYPERTTBARDILEPTONMODEL_H

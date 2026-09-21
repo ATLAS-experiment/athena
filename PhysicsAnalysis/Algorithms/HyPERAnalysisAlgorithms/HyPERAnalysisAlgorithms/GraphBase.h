@@ -1,9 +1,9 @@
-#ifndef TOPHYPER_GRAPH_H
-#define TOPHYPER_GRAPH_H
-
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+
+#ifndef HYPERANALYSISALGORITHMS_GRAPHBASE_H
+#define HYPERANALYSISALGORITHMS_GRAPHBASE_H
 
 /// @author Diego Baron
 
@@ -98,4 +98,4 @@ class GraphBase {
 };
 }  // namespace EventReco
 
-#endif
+#endif  // HYPERANALYSISALGORITHMS_GRAPHBASE_H

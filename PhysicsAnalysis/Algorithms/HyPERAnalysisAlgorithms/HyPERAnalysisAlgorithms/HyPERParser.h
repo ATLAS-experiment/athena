@@ -1,7 +1,9 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#pragma once
+
+#ifndef HYPERANALYSISALGORITHMS_HYPERPARSER_H
+#define HYPERANALYSISALGORITHMS_HYPERPARSER_H
 
 #include <memory>
 
@@ -59,3 +61,5 @@ class HyPERParser {
   virtual void printOutputsForValidation() const = 0;
 };
 }  // namespace EventReco
+
+#endif  // HYPERANALYSISALGORITHMS_HYPERPARSER_H

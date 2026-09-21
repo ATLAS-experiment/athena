@@ -1,3 +1,5 @@
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+
 atlas_subdir( HyPERAnalysisAlgorithms )
 
 find_package( onnxruntime )
