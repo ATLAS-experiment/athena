@@ -23,10 +23,6 @@
 #include "AthDeviceInterfaces/IMemoryResourceTool.h"
 #include "GaudiKernel/ToolHandle.h"
 
-#include <ActsPlugins/Detray/DetrayGeometryConverter.hpp>
-#include <detray/core/detector.hpp>
-#include <detray/detectors/itk_metadata.hpp>
-
 // STL
 #include <map>
 
@@ -60,21 +56,10 @@ class BlueprintNode;
 
 
 namespace ActsTrk{
-
-/// @brief Detray metadata used when converting the Acts::TrackingGeometry into
-///        a Detray geometry. detray::itk_metadata is generated for the ATLAS ITk
-///        (see DETRAY_GENERATE_METADATA in the ACTS build) and carries only the
-///        mask shapes and accelerators the ITk actually needs. It supports
-///        grid-based material maps but not homogeneous surface material;
-///        DetrayGeometryConverter::convert() checks the target metadata for
-///        material slab/rod support and skips homogeneous material when it is
-///        absent, so the ITk metadata can be used directly.
-using DetrayMetadata = detray::itk_metadata<detray::array<float>>;
-using DetrayDetector = detray::detector<DetrayMetadata>;
-
 class TrackingGeometrySvc : public extends<AthService, ActsTrk::ITrackingGeometrySvc> {
 public:
 
+  ~TrackingGeometrySvc() override;
   StatusCode initialize() override;
   StatusCode finalize() override;
 
@@ -96,7 +81,9 @@ public:
              geometry is released in finalize(), while the memory resource it
              was allocated from is still around.
              Only populated when the BuildDetrayGeometry property is enabled. */
-  const DetrayDetector* detrayGeometry() const { return m_detrayGeometry.get(); }
+  const traccc::host_detector* detrayGeometry() const override {
+    return m_detrayGeometry.get();
+  }
 
 private:
   /** @brief Creates and popules the DetectorElement -> Acts::Surface geo identifier map from the geometry service */
@@ -104,15 +91,6 @@ private:
 
   /** @brief Converts the built Acts::TrackingGeometry into a Detray geometry and stores it in m_detrayGeometry */
   StatusCode buildDetrayGeometry();
-
-  /** @brief Reports how many portal links of the converted Detray geometry are
-             reciprocal. Detray's own consistency checker only verifies that a
-             portal links to an existing volume, not that the neighbour links
-             back, so a one-directional link passes check_consistency() but
-             makes the navigation a one-way street. */
-  void reportDetrayPortalLinks(const DetrayDetector& detector,
-                               const detray::name_map& names) const;
-
 
   ActsLayerBuilder::Config
   makeLayerBuilderConfig(const InDetDD::InDetDetectorManager* manager);
@@ -230,7 +208,7 @@ private:
   
   std::unique_ptr<const ActsTrk::DetectorElementToActsGeometryIdMap> m_detIdMap{};
 
-  std::shared_ptr<const DetrayDetector> m_detrayGeometry{nullptr};
+  std::unique_ptr<traccc::host_detector> m_detrayGeometry;
 };
 
 }

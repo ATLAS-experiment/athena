@@ -40,12 +40,14 @@
 #include "Acts/Utilities/Logger.hpp"
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/Geometry/PassiveLayerBuilder.hpp"
+#include <ActsPlugins/Detray/DetrayGeometryConverter.hpp>
 #include <ActsPlugins/Json/JsonMaterialDecorator.hpp>
 #include <ActsPlugins/Json/MaterialMapJsonConverter.hpp>
 #include <detray/geometry/surface.hpp>
 #include <detray/geometry/tracking_volume.hpp>
 #include <detray/utils/consistency_checker.hpp>
 #include <detray/utils/invalid_values.hpp>
+#include <traccc/geometry/host_detector.hpp>
 #include <algorithm>
 #include <set>
 #include <utility>
@@ -104,6 +106,8 @@ TrackingGeometrySvc::TrackingGeometrySvc(const std::string &name,
       m_elementStore (std::make_shared<ActsElementVector>())
 {
 }
+
+TrackingGeometrySvc::~TrackingGeometrySvc() = default;
 
 StatusCode TrackingGeometrySvc::initialize() {
   ATH_MSG_INFO(name() << " is initializing");
@@ -1294,6 +1298,8 @@ StatusCode TrackingGeometrySvc::finalize() {
 }
 
 StatusCode TrackingGeometrySvc::buildDetrayGeometry() {
+  using DetrayTraits = traccc::itk_detector;
+  using DetrayMetadata = DetrayTraits::metadata_type;
   using namespace ActsTrk::detail::GeoVolIds;
   // The Detray detector allocates through this memory resource and keeps
   // referring to it for the deallocations, so the tool has to be held for as
@@ -1376,84 +1382,88 @@ StatusCode TrackingGeometrySvc::buildDetrayGeometry() {
       ATH_MSG_ERROR("The converted Detray geometry is not consistent: " << e.what());
       return StatusCode::FAILURE;
     }
+    const auto reportDetrayPortalLinks = [this](
+        const auto& detector, const detray::name_map& names) {
+      const std::size_t nVolumes = detector.volumes().size();
+
+      // Directed portal graph: outgoing[a] holds every volume a portal of
+      // volume a links into. A healthy interface between a and b shows up as
+      // a -> b and b -> a.
+      std::vector<std::set<detray::dindex>> outgoing(nVolumes);
+      std::size_t nPortals{0};
+      std::size_t nEndOfWorld{0};
+
+      for (const auto& volDesc : detector.volumes()) {
+        const auto volume = detray::tracking_volume{detector, volDesc};
+        const detray::dindex volIdx = volume.index();
+
+        for (const auto& sfDesc : volume.portals()) {
+          const auto surface = detray::geometry::surface{detector, sfDesc};
+          ++nPortals;
+
+          for (const auto link : surface.volume_links()) {
+            if (detray::detail::is_invalid_value(link)) {
+              ++nEndOfWorld;
+              continue;
+            }
+            if (link == volIdx || link >= nVolumes) {
+              continue;
+            }
+            outgoing[volIdx].insert(link);
+          }
+        }
+      }
+
+      std::size_t nReciprocal{0};
+      std::vector<std::pair<detray::dindex, detray::dindex>> oneWay;
+      for (detray::dindex a = 0; a < nVolumes; ++a) {
+        for (const detray::dindex b : outgoing[a]) {
+          if (outgoing[b].contains(a)) {
+            ++nReciprocal;
+          } else {
+            oneWay.emplace_back(a, b);
+          }
+        }
+      }
+
+      auto volName = [&names](detray::dindex idx) -> std::string {
+        return names.contains(idx) ? names.at(idx)
+                                   : ("volume " + std::to_string(idx));
+      };
+
+      ATH_MSG_INFO("Detray portal links: " << nPortals
+                   << " portal surfaces, " << nEndOfWorld
+                   << " end-of-world links, " << (nReciprocal / 2)
+                   << " reciprocal volume interfaces, " << oneWay.size()
+                   << " one-directional");
+
+      if (!oneWay.empty()) {
+        ATH_MSG_WARNING(oneWay.size()
+                        << " portal links are one-directional: the neighbour "
+                           "volume has no portal linking back. Detray's "
+                           "check_consistency() does not catch this.");
+        const std::size_t nShow =
+            std::min<std::size_t>(oneWay.size(), 20);
+        for (std::size_t i = 0; i < nShow; ++i) {
+          ATH_MSG_WARNING("  one-way: '" << volName(oneWay[i].first) << "' ("
+                          << oneWay[i].first << ") -> '"
+                          << volName(oneWay[i].second) << "' ("
+                          << oneWay[i].second << ") with no return link");
+        }
+        if (oneWay.size() > nShow) {
+          ATH_MSG_WARNING("  ... and " << (oneWay.size() - nShow) << " more");
+        }
+      }
+    };
     reportDetrayPortalLinks(*detrayGeometry.detector, detrayGeometry.names);
   }
 
-  m_detrayGeometry = std::move(detrayGeometry.detector);
+  auto hostDetector = std::make_unique<traccc::host_detector>();
+  hostDetector->set<DetrayTraits>(std::move(*detrayGeometry.detector));
+  m_detrayGeometry = std::move(hostDetector);
 
   ATH_MSG_INFO("Successfully built the Detray geometry from the Acts::TrackingGeometry");
   return StatusCode::SUCCESS;
-}
-
-void TrackingGeometrySvc::reportDetrayPortalLinks(
-    const DetrayDetector& detector, const detray::name_map& names) const {
-  const std::size_t nVolumes = detector.volumes().size();
-
-  // Directed portal graph: outgoing[a] holds every volume a portal of volume a
-  // links into. Detray stores one portal surface per volume per interface, so a
-  // healthy interface between a and b shows up as a -> b *and* b -> a.
-  std::vector<std::set<detray::dindex>> outgoing(nVolumes);
-  std::size_t nPortals{0};
-  std::size_t nEndOfWorld{0};
-
-  for (const auto& volDesc : detector.volumes()) {
-    const auto volume = detray::tracking_volume{detector, volDesc};
-    const detray::dindex volIdx = volume.index();
-
-    for (const auto& sfDesc : volume.portals()) {
-      const auto surface = detray::geometry::surface{detector, sfDesc};
-      ++nPortals;
-
-      for (const auto link : surface.volume_links()) {
-        if (detray::detail::is_invalid_value(link)) {
-          // Leaving the detector: no neighbour is expected to link back.
-          ++nEndOfWorld;
-          continue;
-        }
-        if (link == volIdx || link >= nVolumes) {
-          continue;
-        }
-        outgoing[volIdx].insert(link);
-      }
-    }
-  }
-
-  std::size_t nReciprocal{0};
-  std::vector<std::pair<detray::dindex, detray::dindex>> oneWay;
-  for (detray::dindex a = 0; a < nVolumes; ++a) {
-    for (const detray::dindex b : outgoing[a]) {
-      if (outgoing[b].contains(a)) {
-        ++nReciprocal;
-      } else {
-        oneWay.emplace_back(a, b);
-      }
-    }
-  }
-
-  auto volName = [&names](detray::dindex idx) -> std::string {
-    return names.contains(idx) ? names.at(idx)
-                               : ("volume " + std::to_string(idx));
-  };
-
-  ATH_MSG_INFO("Detray portal links: " << nPortals << " portal surfaces, "
-               << nEndOfWorld << " end-of-world links, "
-               << (nReciprocal / 2) << " reciprocal volume interfaces, "
-               << oneWay.size() << " one-directional");
-
-  if (!oneWay.empty()) {
-    ATH_MSG_WARNING(oneWay.size() << " portal links are one-directional: the "
-                    "neighbour volume has no portal linking back. Detray's "
-                    "check_consistency() does not catch this.");
-    const std::size_t nShow = std::min<std::size_t>(oneWay.size(), 20);
-    for (std::size_t i = 0; i < nShow; ++i) {
-      ATH_MSG_WARNING("  one-way: '" << volName(oneWay[i].first) << "' (" << oneWay[i].first
-                      << ") -> '" << volName(oneWay[i].second) << "' (" << oneWay[i].second
-                      << ") with no return link");
-    }
-    if (oneWay.size() > nShow) {
-      ATH_MSG_WARNING("  ... and " << (oneWay.size() - nShow) << " more");
-    }
-  }
 }
 
 std::unique_ptr<ActsTrk::DetectorElementToActsGeometryIdMap>

@@ -10,6 +10,7 @@ find_package( CLHEP )
 find_package( GeoModel COMPONENTS GeoModelKernel )
 find_package( ROOT COMPONENTS Core Tree RIO )
 find_package( TBB )
+find_package( traccc )
 
 # Component(s) in the package:
 atlas_add_library( ActsGeometryLib
@@ -68,6 +69,7 @@ atlas_add_component( ActsGeometry
                      INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
                      LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} ${GEOMODEL_LIBRARIES} ${ROOT_LIBRARIES}
                      Acts::PluginDetray
+                     traccc::core
                      AthDeviceInterfacesLib
                      ActsGeometryInterfacesLib
                      ActsGeometryLib

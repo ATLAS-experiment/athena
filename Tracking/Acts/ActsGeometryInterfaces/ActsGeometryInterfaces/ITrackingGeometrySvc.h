@@ -18,6 +18,10 @@ namespace Acts {
     class TrackingVolume;
 }
 
+namespace traccc {
+    class host_detector;
+}
+
 namespace ActsTrk{
     struct DetectorElementToActsGeometryIdMap;
 }
@@ -30,7 +34,7 @@ namespace ActsTrk{
            by the tracking geometry service */
 class ITrackingGeometrySvc : virtual public IService {
 public:
-    DeclareInterfaceID(ActsTrk::ITrackingGeometrySvc, 1, 0);
+    DeclareInterfaceID(ActsTrk::ITrackingGeometrySvc, 1, 1);
 
     virtual ~ITrackingGeometrySvc() = default;
     /// Returns a pointer to the internal ACTS tracking geometry
@@ -46,6 +50,10 @@ public:
     /** @brief Returns the pointer to the identifier mapping between Acts::surface ID
          *         & IdentifierHash of the ITk surfaces */
     virtual const ActsTrk::DetectorElementToActsGeometryIdMap* surfaceIdMap() const= 0;
+
+    /** @brief Returns the type-erased Detray host detector, or nullptr if no
+     *         Detray geometry was built. The service retains ownership. */
+    virtual const traccc::host_detector* detrayGeometry() const = 0;
 };
 }
 
