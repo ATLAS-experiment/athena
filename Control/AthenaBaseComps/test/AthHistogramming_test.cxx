@@ -91,7 +91,6 @@ testBookTH2(TestHistogramming& hist){
 
   TH2* retrieved = hist.hist2d("h2");
   assert(retrieved != nullptr);
-  std::cout << "TH2 name = [" << retrieved->GetName() << "]\n";
   assert(std::string{retrieved->GetName()} == "test_h2_suffix");
 }
 
