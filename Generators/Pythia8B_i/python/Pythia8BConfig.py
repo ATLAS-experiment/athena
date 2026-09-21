@@ -26,19 +26,43 @@ _BASE_COMMANDS = (
 )
 
 _A14_CTEQ6L1_COMMANDS = (
-    "Tune:ee = 7", "Tune:pp = 14", "PDF:pSet = LHAPDF6:cteq6l1",
+    "Tune:ee = 7",
+    "Tune:pp = 14",
+    "PDF:pSet = LHAPDF6:cteq6l1",
     "SpaceShower:rapidityOrder = on",
-    "SigmaProcess:alphaSvalue = 0.144", "SpaceShower:pT0Ref = 1.30",
-    "SpaceShower:pTmaxFudge = 0.95", "SpaceShower:pTdampFudge = 1.21",
-    "SpaceShower:alphaSvalue = 0.125", "TimeShower:alphaSvalue = 0.126",
+    "SigmaProcess:alphaSvalue = 0.144",
+    "SpaceShower:pT0Ref = 1.30",
+    "SpaceShower:pTmaxFudge = 0.95",
+    "SpaceShower:pTdampFudge = 1.21",
+    "SpaceShower:alphaSvalue = 0.125",
+    "TimeShower:alphaSvalue = 0.126",
     "BeamRemnants:primordialKThard = 1.72",
     "MultipartonInteractions:pT0Ref = 1.98",
     "MultipartonInteractions:alphaSvalue = 0.118",
     "ColourReconnection:range = 2.08",
 )
 
+_EXCLUSIVE_B_COMMANDS = (
+    "HardQCD:all = on",
+    "ParticleDecays:mixB = off",
+    "HadronLevel:all = off",
+    "511:onMode = 3",
+    "521:onMode = 3",
+    "531:onMode = 3",
+    "541:onMode = 3",
+    "5122:onMode = 2",
+    "5132:onMode = 2",
+    "5232:onMode = 2",
+    "5332:onMode = 2",
+)
 
-def _commands_cfg(flags, source, commands, precedence, name="Pythia8B"):
+_B_PARTICLE_PDG_CODES = (511, 521, 531, 541, 5122, 5132, 5232, 5332)
+_B_PDG_CODES = _B_PARTICLE_PDG_CODES + tuple(
+    -pdg for pdg in _B_PARTICLE_PDG_CODES
+)
+
+
+def _commands_cfg(flags, source, commands, precedence, name):
     ca = ComponentAccumulator(EvgenSequenceFactory(EvgenSequence.Generator))
     ca.addEventAlgo(CompFactory.Pythia8B_i(
         name,
@@ -50,6 +74,15 @@ def _commands_cfg(flags, source, commands, precedence, name="Pythia8B"):
         ),
     ))
     return ca
+
+
+def _with_process_commands(flags, *, ShowerCfg, commands, **kwargs):
+    pending_commands = tuple(kwargs.pop("_process_commands", ()))
+    return ShowerCfg(
+        flags,
+        _process_commands=tuple(commands) + pending_commands,
+        **kwargs,
+    )
 
 
 def Pythia8BBaseCfg(flags, name="Pythia8B", **kwargs):
@@ -85,11 +118,16 @@ def Pythia8BBaseCfg(flags, name="Pythia8B", **kwargs):
     return ca
 
 
-def _tune_cfg(flags, commands, source, tune, name="Pythia8B", **kwargs):
+def Pythia8B_A14_CTEQ6L1_Common_Cfg(flags, name="Pythia8B", **kwargs):
+    """Configure Pythia8B with the A14 CTEQ6L1 tune."""
     user_commands = kwargs.pop("Commands", ())
     ca = Pythia8BBaseCfg(flags, name=name, **kwargs)
+
+    from Pythia8_i.Pythia8Config import ensureRapidityOrderMPI
+    tune_commands = ensureRapidityOrderMPI(list(_A14_CTEQ6L1_COMMANDS))
     ca.merge(_commands_cfg(
-        flags, source, commands, GeneratorSettingsPrecedence.TUNE, name,
+        flags, "pythia8b_tune_A14_CTEQ6L1", tune_commands,
+        GeneratorSettingsPrecedence.TUNE, name,
     ))
     if user_commands:
         ca.merge(_commands_cfg(
@@ -98,74 +136,30 @@ def _tune_cfg(flags, commands, source, tune, name="Pythia8B", **kwargs):
         ))
 
     from GeneratorConfig.GeneratorInfoSvcConfig import GeneratorInfoSvcCfg
-    ca.merge(GeneratorInfoSvcCfg(flags, Tune=tune),
+    ca.merge(GeneratorInfoSvcCfg(flags, Tune="A14 CTEQ6L1"),
              sequenceName=EvgenSequence.Generator.value)
     return ca
 
 
-def Pythia8B_A14_CTEQ6L1_Common_Cfg(flags, name="Pythia8B", **kwargs):
-    from Pythia8_i.Pythia8Config import ensureRapidityOrderMPI
-    return _tune_cfg(
-        flags, ensureRapidityOrderMPI(list(_A14_CTEQ6L1_COMMANDS)),
-        "pythia8b_tune_A14_CTEQ6L1", "A14 CTEQ6L1", name, **kwargs,
+def Pythia8B_exclusiveB_Common_Cfg(flags, *, ShowerCfg, **kwargs):
+    """Configure exclusive B-hadron production."""
+    kwargs.setdefault("SelectBQuarks", True)
+    kwargs.setdefault("SelectCQuarks", False)
+    kwargs.setdefault("VetoDoubleBEvents", True)
+    kwargs.setdefault("BPDGCodes", list(_B_PDG_CODES))
+    return _with_process_commands(
+        flags, ShowerCfg=ShowerCfg,
+        commands=_EXCLUSIVE_B_COMMANDS, **kwargs,
     )
 
 
-def Pythia8B_A14_NNPDF23LO_Common_Cfg(flags, name="Pythia8B", **kwargs):
-    from Pythia8_i.Pythia8Config import ensureRapidityOrderMPI
-    from Pythia8_i.Pythia8Tunes import a14_nnpdf23lo_tune_cmds
-    return _tune_cfg(
-        flags, ensureRapidityOrderMPI(a14_nnpdf23lo_tune_cmds()),
-        "pythia8b_tune_A14_NNPDF23LO", "A14 NNPDF23LO", name, **kwargs,
-    )
-
-
-def Pythia8BEvtGenCfg(flags, **kwargs):
-    """Configure EvtGen with the Pythia8B particle data table."""
-    pdt_file = kwargs.setdefault("pdtFile", "inclusiveP8DsDPlus.pdt")
-    auxfiles = list(kwargs.pop("auxfiles", ()))
-    if pdt_file not in auxfiles:
-        auxfiles.append(pdt_file)
-    user_decay_file = kwargs.get("userDecayFile")
-    if user_decay_file and user_decay_file not in auxfiles:
-        auxfiles.append(user_decay_file)
-    white_list = list(kwargs.pop("whiteList", ())) + [-5334, 5334]
-
-    from EvtGen_i.EvtGenConfig import EvtGenCfg
-    return EvtGenCfg(
-        flags, whiteList=white_list, auxfiles=auxfiles, **kwargs,
-    )
-
-
-def _evtgen_tune_cfg(tune_cfg, flags, evtgen_options, **kwargs):
-    ca = tune_cfg(flags, **kwargs)
-    ca.merge(Pythia8BEvtGenCfg(flags, **(evtgen_options or {})))
-    return ca
-
-
-def Pythia8B_A14_CTEQ6L1_EvtGen_Common_Cfg(
-        flags, *, EvtGenOptions=None, **kwargs):
-    return _evtgen_tune_cfg(
-        Pythia8B_A14_CTEQ6L1_Common_Cfg, flags, EvtGenOptions, **kwargs,
-    )
-
-
-def Pythia8B_A14_NNPDF23LO_EvtGen_Common_Cfg(
-        flags, *, EvtGenOptions=None, **kwargs):
-    return _evtgen_tune_cfg(
-        Pythia8B_A14_NNPDF23LO_Common_Cfg, flags, EvtGenOptions, **kwargs,
-    )
-
-
-def Pythia8B_Photospp_Cfg(
-        flags, *, ShowerCfg, PhotosppOptions=None, **kwargs):
+def Pythia8B_Photospp_Cfg(flags, *, ShowerCfg, **kwargs):
     """Disable native lepton QED showering and append Photos++."""
-    from Pythia8B_i.Pythia8BProcesses import add_process_commands
-    ca = add_process_commands(
+    ca = _with_process_commands(
         flags, ShowerCfg=ShowerCfg,
         commands=("TimeShower:QEDshowerByL = off",), **kwargs,
     )
 
     from Photospp_i.PhotosppConfig import PhotosppCfg
-    ca.merge(PhotosppCfg(flags, **(PhotosppOptions or {})))
+    ca.merge(PhotosppCfg(flags))
     return ca
