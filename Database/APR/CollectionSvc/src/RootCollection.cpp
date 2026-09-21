@@ -128,6 +128,7 @@ namespace pool {
     // throw all errors as exceptions, because this method is called from the constructor
    void RootCollection::open()
    {
+      ATH_MSG_VERBOSE( "Opening collection '" << m_fileName << "' in mode " << poolOptToRootOpt[m_mode] );
       if( m_fileName.empty() ) {
          ATH_MSG_ERROR( "No database name given" );
          throw std::runtime_error( "No database name (APR: RootCollection::open() )" );
@@ -150,7 +151,17 @@ namespace pool {
       } else {
          m_storageSvc = &m_session->getStorageSvc( m_description.type().type() );
          m_ownStorageSvc = false;
-         m_database = m_session->databaseHandle( m_fileName, DatabaseSpecification::PFN );
+         // if no other qualifier is specified, assume PFN
+         DatabaseSpecification::NameType dbNameType = DatabaseSpecification::PFN;
+         // LFN and FID can only be resolved if there is a session with connected FC
+         if( m_fileName.starts_with("LFN:") ) {
+            dbNameType = DatabaseSpecification::LFN;
+            m_fileName = m_fileName.substr(4);
+         } else if( m_fileName.starts_with("FID:") ) {
+            dbNameType = DatabaseSpecification::FID;
+            m_fileName = m_fileName.substr(4);
+         }
+         m_database = m_session->databaseHandle( m_fileName, dbNameType );
          if( !m_database ) {
             throw std::runtime_error( "Could not retrieve a database handle to '" + m_fileName + "' (APR: RootCollection)" );
          }
