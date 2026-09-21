@@ -40,6 +40,7 @@ class LArLATOMEMapping {
    *
    */
   HWIdentifier getChannelID(const unsigned int sourceID, const unsigned int chan) const;
+  std::vector<HWIdentifier>  getChFromSource(const unsigned int sourceID) const;
 
 
 
@@ -71,7 +72,7 @@ inline HWIdentifier LArLATOMEMapping::getChannelID(const unsigned int sourceID, 
 // Lets make it possible to do this in two stages if needed: Return only the chanVec vector for a given LATOME source ID:
 inline std::vector<HWIdentifier> LArLATOMEMapping::getChFromSource(const unsigned int sourceID) const{
   auto it = m_map.find(sourceID);
-  if (ATH_UNLIKELY(it == m_map.end())) {
+  if (it == m_map.end()) [[unlikely]] {
     return {m_hwidEmpty} ;
   }
 
