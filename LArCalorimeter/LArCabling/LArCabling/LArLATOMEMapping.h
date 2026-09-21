@@ -68,6 +68,17 @@ inline HWIdentifier LArLATOMEMapping::getChannelID(const unsigned int sourceID, 
   return chanVec[chan];
 }
 
+// Lets make it possible to do this in two stages if needed: Return only the chanVec vector for a given LATOME source ID:
+inline std::vector<HWIdentifier> LArLATOMEMapping::getChFromSource(const unsigned int sourceID) const{
+  auto it = m_map.find(sourceID);
+  if (ATH_UNLIKELY(it == m_map.end())) {
+    return {m_hwidEmpty} ;
+  }
+
+  return it->second ;
+}
+
+
 #include "AthenaKernel/CLASS_DEF.h"
 CLASS_DEF( LArLATOMEMapping, 219977637 , 1)
 #include "AthenaKernel/CondCont.h"
