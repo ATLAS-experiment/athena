@@ -667,7 +667,7 @@ BOOST_AUTO_TEST_SUITE(ChaiCoralConverterTest)
     c.add(badId, v);
 
     BOOST_CHECK_EXCEPTION(ChaiCoralConverter::toCondAttrListCollection(c, true), std::runtime_error,
-      [badId](const std::runtime_error& e){
+      [](const std::runtime_error& e){
         return std::string(e.what()).find(std::to_string(badId)) != std::string::npos;
       });
   }
