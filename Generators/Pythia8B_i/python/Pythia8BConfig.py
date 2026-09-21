@@ -77,6 +77,12 @@ def _commands_cfg(flags, source, commands, precedence, name):
 
 
 def _with_process_commands(flags, *, ShowerCfg, commands, **kwargs):
+    """Collect nested fragments into one layer, with inner commands first.
+
+    The resolver accepts only one distinct layer at each precedence. Pass the
+    private _process_commands argument down to the base fragment so production
+    and Photos settings share a layer while Commands remains the user layer.
+    """
     pending_commands = tuple(kwargs.pop("_process_commands", ()))
     return ShowerCfg(
         flags,
@@ -102,6 +108,8 @@ def Pythia8BBaseCfg(flags, name="Pythia8B", **kwargs):
     ca = ComponentAccumulator(EvgenSequenceFactory(EvgenSequence.Generator))
     ca.addEventAlgo(CompFactory.Pythia8B_i(name, **kwargs))
     if process_commands:
+        # MATCHING places process/decay settings above the tune and below user
+        # overrides; the shared resolver has no separate PROCESS precedence.
         ca.merge(_commands_cfg(
             flags, "process_commands", process_commands,
             GeneratorSettingsPrecedence.MATCHING, name,
@@ -120,7 +128,6 @@ def Pythia8BBaseCfg(flags, name="Pythia8B", **kwargs):
 
 def Pythia8B_A14_CTEQ6L1_Common_Cfg(flags, name="Pythia8B", **kwargs):
     """Configure Pythia8B with the A14 CTEQ6L1 tune."""
-    user_commands = kwargs.pop("Commands", ())
     ca = Pythia8BBaseCfg(flags, name=name, **kwargs)
 
     from Pythia8_i.Pythia8Config import ensureRapidityOrderMPI
@@ -129,11 +136,6 @@ def Pythia8B_A14_CTEQ6L1_Common_Cfg(flags, name="Pythia8B", **kwargs):
         flags, "pythia8b_tune_A14_CTEQ6L1", tune_commands,
         GeneratorSettingsPrecedence.TUNE, name,
     ))
-    if user_commands:
-        ca.merge(_commands_cfg(
-            flags, "user_commands", user_commands,
-            GeneratorSettingsPrecedence.USER, name,
-        ))
 
     from GeneratorConfig.GeneratorInfoSvcConfig import GeneratorInfoSvcCfg
     ca.merge(GeneratorInfoSvcCfg(flags, Tune="A14 CTEQ6L1"),
