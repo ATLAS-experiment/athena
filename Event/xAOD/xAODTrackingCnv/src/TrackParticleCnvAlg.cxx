@@ -174,7 +174,7 @@ StatusCode TrackParticleCnvAlg::convert(const EventContext& ctx,
       float probability = -1.0;
       ElementLink<xAOD::TruthParticleContainer> link;
 
-      ElementLink<TrackCollection> tpLink{trackColl, trackCounter -1};
+      ElementLink<TrackCollection> tpLink{trackColl, trackCounter -1, ctx};
       if (!tpLink.isValid()) {
         ATH_MSG_WARNING("Failed to create ElementLink to Track/TrackParticle");
       } else if(assocTruthColl->empty()){
