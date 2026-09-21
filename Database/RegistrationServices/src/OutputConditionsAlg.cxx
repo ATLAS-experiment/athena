@@ -349,7 +349,7 @@ StatusCode OutputConditionsAlg::finalize() {
           chai::Container chaiCont=ChaiCoralConverter::toContainer(*attrListColl);
           ATH_MSG_INFO("Created chai container with " << chaiCont.numChannels() << " channels.");
           const chai::PayloadSpec& chaiSpec=chaiCont.payloadSpec();
-          auto chaiTag=db.createTag(objt.tag, objt.tagDescr, chaiSpec);
+          auto chaiTag=db.createTag(objt.tag, objt.tagDescr, chaiSpec,chaiMD);
           chaiTag->addPayload(chaiCont,since);
 
 
@@ -361,14 +361,14 @@ StatusCode OutputConditionsAlg::finalize() {
           // convert to single-channel chai::container
           chai::Container chaiCont=ChaiCoralConverter::toContainer(*attrList);
           const chai::PayloadSpec& chaiSpec=chaiCont.payloadSpec();
-          auto chaiTag=db.createTag(objt.tag, objt.tagDescr, chaiSpec);
+          auto chaiTag=db.createTag(objt.tag, objt.tagDescr, chaiSpec,chaiMD);
           gt->addTag(objt.folder,objt.tag); 
           chaiTag->addPayload(chaiCont,since);
         } else {
 
           //Single channel pool storage case:
           chai::PayloadSpec spec(chai::FieldSpec({{"PoolRef", chai::Type::String}}), chai::ChannelSpec({{0, ""}}));
-          auto tag = db.createTag(objt.tag, objt.tagDescr, spec);
+          auto tag = db.createTag(objt.tag, objt.tagDescr, spec,chaiMD);
           gt->addTag(objt.folder, objt.tag);
           chai::Container container = tag->buildContainer();
           container[0].push(address_data);
