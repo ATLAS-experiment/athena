@@ -284,17 +284,28 @@ namespace MuonValR4 {
         if (!segment) {
             return; 
         }
+        const xAOD::TruthParticle* truthMuon = getTruthMatchedParticle(*segment);
         m_out_hasTruth = true; 
 
         const Amg::Vector3D segDir{segment->direction()};
         static const SG::ConstAccessor<float> acc_pt{"pt"};
         static const SG::ConstAccessor<float> acc_charge{"charge"};
         // eta is interpreted as the eta-location 
-        m_out_gen_Eta = segDir.eta();
-        m_out_gen_Phi = segDir.phi();
-        m_out_gen_Pt  = acc_pt(*segment);
         m_out_gen_Q = acc_charge(*segment);
-
+       if (truthMuon) {
+            m_out_gen_Pt  = truthMuon->pt();
+            m_out_gen_Eta = truthMuon->eta();
+            m_out_gen_Phi = truthMuon->phi();
+            m_out_gen_truthPdgId = truthMuon->pdgId();
+            m_out_gen_truthBeta = truthMuon->p4().Beta();
+        } else {
+            m_out_gen_Pt  = acc_pt(*segment);
+            m_out_gen_Eta = segDir.eta();
+            m_out_gen_Phi = segDir.phi();
+        }
+        m_out_gen_deflection = Amg::angle(segDir, segment->position());
+        m_out_gen_deflectionEta = segDir.eta() - segment->position().eta();
+      
         const auto [chamberPos, chamberDir] = SegmentFit::makeLine(SegmentFit::localSegmentPars(*segment));
         
         ATH_MSG_DEBUG("Number of precision Hits in the truth segment is "<<segment->nPrecisionHits()<<" and number of phi layers is "
@@ -302,6 +313,15 @@ namespace MuonValR4 {
         m_out_gen_nPrecHits = segment->nPrecisionHits();
         m_out_gen_nTrigEtaHits = segment->nTrigEtaLayers();
         m_out_gen_nTrigPhiHits = segment->nPhiLayers();
+        using namespace Acts::detail::LineHelper;
+        const Acts::Intersection3D bsExtp = lineIntersect<3>(Amg::Vector3D::Zero(),
+                                                             Amg::Vector3D::UnitZ(),
+                                                             segment->position(), 
+                                                             segment->direction());
+        const Amg::Vector3D closePoint = bsExtp.position();
+ 
+        m_out_gen_beamSpotR = closePoint.perp();
+        m_out_gen_beamSpotZ = std::abs(closePoint.z());
         unsigned nMmEtaHits{0}, nMmStereoHits{0}, nStgcHits{0};
         for (const xAOD::MuonSimHit* simHit : getMatchingSimHits(*segment)) {
             if (!m_out_gen_truthBeta.isUpdated()) {
@@ -341,7 +361,7 @@ namespace MuonValR4 {
         m_out_gen_minYhit = minYhit;
         m_out_gen_maxYhit = maxYhit;
 
-        const xAOD::TruthParticle* truthMuon = getTruthMatchedParticle(*segment);
+       
         if (truthMuon) {
             using namespace xAOD::TruthHelpers;
             m_out_gen_truthType   = getParticleTruthType(*truthMuon);
