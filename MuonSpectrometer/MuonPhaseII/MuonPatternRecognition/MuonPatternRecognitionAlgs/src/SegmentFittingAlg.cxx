@@ -3,18 +3,21 @@
 */
 #include "SegmentFittingAlg.h"
 
-#include <GeoPrimitives/GeoPrimitivesHelpers.h>
+#include "GeoPrimitives/GeoPrimitivesHelpers.h"
+#include "EventPrimitives/EventPrimitivesHelpers.h"
 
-#include <MuonPatternHelpers/MdtSegmentSeedGenerator.h>
-#include <MuonSpacePoint/SpacePointPerLayerSplitter.h>
-#include <ActsCalibBase/CalibrationContext.h>
-#include <ActsInterop/Logger.h>
+#include "MuonPatternHelpers/MdtSegmentSeedGenerator.h"
+#include "MuonSpacePoint/SpacePointPerLayerSplitter.h"
+#include "MuonTruthHelpers/MuonSimHitHelpers.h"
+#include "ActsCalibBase/CalibrationContext.h"
+#include "ActsInterop/Logger.h"
 
-#include <MuonVisualizationHelpersR4/VisualizationHelpers.h>
+#include "MuonVisualizationHelpersR4/VisualizationHelpers.h"
 
 #include <format>
 
 using namespace Acts;
+
 namespace MuonR4 {
     using namespace SegmentFit;
     using namespace MuonValR4;
@@ -47,23 +50,24 @@ namespace MuonR4 {
         fitCfg.beamSpotRadius = m_beamSpotR;
         fitCfg.beamSpotLength = m_beamSpotL;
 
+        if (m_doBeamspotConstraint) {
+            for (const auto* prop :{&m_seedMaxBsR, &m_seedMaxBsL}) {
+                if (prop->value().size() != s_stIdxMax || 
+                    std::ranges::min(prop->value()) < 0.) {
+                    ATH_MSG_ERROR("Invalid configuratnon of "<<(prop));
+                    return StatusCode::FAILURE;
+                }
+                ATH_MSG_DEBUG("Configured "<<(*prop));
+            }
+        }
         fitCfg.outlierRemovalCut = m_outlierRemovalCut;
         fitCfg.recoveryPull = m_recoveryPull;
         fitCfg.nPrecHitCut = m_precHitCut;
         fitCfg.maxIter = m_maxIter;
-        ATH_MSG_DEBUG("Fitter configuration: \n - fitT0: "<<m_doT0Fit
-                    <<"\n - recalibInFit: "<<m_recalibInFit
-                    <<"\n - useFastFitter: "<<m_useFastFitter
-                    <<"\n - fastPreFitter: "<<m_fastPreFitter
-                    <<"\n - ignoreFailedPreFit: "<<m_ignoreFailedPreFit
-                    <<"\n - hessianResidual: "<<m_hessianResidual
-                    <<"\n - doBeamSpotConstraint: "<<m_doBeamspotConstraint
-                    <<"\n - beamSpotR: "<<m_beamSpotR
-                    <<"\n - beamSpotL: "<<m_beamSpotL
-                    <<"\n - outlierRemovalCut: "<<m_outlierRemovalCut
-                    <<"\n - recoveryPull: "<<m_recoveryPull
-                    <<"\n - precHitCut: "<<m_precHitCut
-                    <<"\n - maxIter: "<<m_maxIter);
+        ATH_MSG_DEBUG("Fitter configuration: \n -- "<<m_doT0Fit<<"\n -- "<<m_recalibInFit<<"\n -- "<<m_useFastFitter
+                <<"\n -- "<<m_fastPreFitter<<"\n -- "<<m_ignoreFailedPreFit<<"\n -- "<<m_hessianResidual
+                <<"\n -- "<<m_doBeamspotConstraint<<"\n -- "<<m_beamSpotR<<"\n -- "<<m_beamSpotL<<"\n -- "<<m_outlierRemovalCut
+                <<"\n -- "<<m_recoveryPull<<"\n -- "<<m_precHitCut<<"\n -- "<<m_maxIter);
 
         m_fitter = std::make_unique<SegmentFit::SegmentLineFitter>(name(), std::move(fitCfg));
 
@@ -103,11 +107,17 @@ namespace MuonR4 {
                         const auto [pos, dir] = makeLine(pars);
                         segmentLines.emplace_back(drawLine(pars, -Gaudi::Units::m, Gaudi::Units::m, kRed));
                         std::stringstream signStream{};
+                        const auto& cov = seg->covariance();
                         signStream<<std::format("#chi^{{2}}/nDoF: {:.2f} ({:}), ", seg->chi2() / seg->nDoF(), seg->nDoF());
-                        signStream<<std::format("y_{{0}}={:.2f}",pars[toUnderlying(ParamDefs::y0)])<<", ";
-                        signStream<<std::format("#theta={:.2f}^{{#circ}}", pars[toUnderlying(ParamDefs::theta)]/ Gaudi::Units::deg )<<", ";
+                        signStream<<std::format("y_{{0}}={:.2f}#pm{:.2f}",
+                                                pars[toUnderlying(ParamDefs::y0)],
+                                                Amg::error(cov, toUnderlying(ParamDefs::y0)))<<", ";
+                        signStream<<std::format("#theta={:.2f}#pm{:.2f}^{{#circ}}", 
+                                                pars[toUnderlying(ParamDefs::theta)]/ Gaudi::Units::deg,
+                                                Amg::error(cov, toUnderlying(ParamDefs::theta)) / Gaudi::Units::deg )<<", ";
                         for (const Segment::MeasType& m : seg->measurements()) {
-                            if (m->type() == xAOD::UncalibMeasType::MdtDriftCircleType && m->fitState() == CalibratedSpacePoint::State::Valid) {
+                            if (m->type() == xAOD::UncalibMeasType::MdtDriftCircleType && 
+                                m->fitState() == CalibratedSpacePoint::State::Valid) {
                                 signStream<<(SeedingAux::strawSign(pos, dir, *m) == -1 ? "L" : "R");
                             }
                         }
@@ -157,14 +167,42 @@ namespace MuonR4 {
                                 if (!m_doBeamspotConstraint) {
                                     return true;
                                 }
+                                const Amg::Vector3D globPos{locToGlob*tangentSeedPos};
+                                const Amg::Vector3D globDir{locToGlob.linear()*tangentSeedDir};
+                                using namespace Muon::MuonStationIndex;
+                                /** This patch restores the efficiency for muons with pT< 10 GeV in
+                                 *  the middle and outer endcap stations */
+                                const StIndex stIdx = toStationIndex(patternSeed->msSector()->chamberIndex());
+                                switch (stIdx) {
+                                    using enum StIndex;
+                                    case EM:
+                                    case EO: {
+                                        /** Start where the TGCs run slowly out of acceptance */
+                                        if (const double pEta = std::abs(globPos.eta()); pEta > 2.35) {
+                                            const double dEta = std::abs(globDir.eta());
+                                            const double delta = std::abs(dEta -pEta);
+                                            if (delta < 0.25) {
+                                                return true;
+                                            }
+                                            /** Ultra low momentum muons in the endcap have strong
+                                             *  bending */
+                                            if (stIdx == EM && pEta > 2.5 && delta < 0.45) {
+                                                return true;
+                                            }
+                                        }
+                                        break;
+                                    }
+                                    default:
+                                        break;
+                                }
                                 using namespace Acts::detail::LineHelper;
                                 const Acts::Intersection3D bsExtp = lineIntersect<3>(Amg::Vector3D::Zero(),
-                                                                                      Amg::Vector3D::UnitZ(),
-                                                                                      locToGlob*tangentSeedPos, 
-                                                                                      locToGlob.linear()*tangentSeedDir);
+                                                                                     Amg::Vector3D::UnitZ(),
+                                                                                     globPos, globDir);
                                 const Amg::Vector3D closePoint = bsExtp.position();
-                                if (closePoint.perp() > 2.*m_beamSpotR ||
-                                    std::abs(closePoint.z()) > 2.*m_beamSpotL){
+                                const auto rawStIdx = Acts::toUnderlying(stIdx);
+                                if (closePoint.perp() > m_seedMaxBsR.value().at(rawStIdx) * m_beamSpotR ||
+                                    std::abs(closePoint.z()) >  m_seedMaxBsL.value().at(rawStIdx) * m_beamSpotL){
                                     ATH_MSG_DEBUG("fitSegmentSeed() - Reject parameters "<<Amg::toString(tangentSeedPos)
                                                   <<" + "<<Amg::toString(tangentSeedDir)
                                                   <<" as extrapolation to beamspot is too far "<<Amg::toString(closePoint)
@@ -186,7 +224,7 @@ namespace MuonR4 {
             }
             seedLines.push_back(drawLabel(std::format("possible seeds: {:d}",  drawMe.nGenSeeds()), 0.2, 0.85, 14));
             m_visionTool->visualizeSeed(ctx, *patternSeed, std::format("pattern_{:}{:}{:}",
-               Muon::MuonStationIndex::chName(patternSeed->msSector()->chamberIndex()),
+                patternSeed->msSector()->chamberIndex(),
                 patternSeed->msSector()->side() ? 'A' : 'C' ,
                 patternSeed->msSector()->sector()), std::move(seedLines));
         }
