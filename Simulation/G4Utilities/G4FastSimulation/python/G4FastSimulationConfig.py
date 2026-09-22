@@ -18,16 +18,10 @@ def DeadMaterialShowerCfg(flags, **kwargs):
     return result
 
 
-# Region the fast simulation owns, shared with NoG4PhysicsToolCfg so that
-# Geant4 physics is switched off exactly where FatrasG4 acts
-FatrasG4RegionName = "InDet"
-
-
-# Geant4 process subtype of G4FastSimulationManagerProcess (FASTSIM_ManagerProcess)
-FastSimulationProcessSubType = 301
-
-# AtlasDetDescr::AtlasRegion of the inner detector
-AtlasRegionID = 1
+def fatrasG4RegionName():
+    """Region the fast simulation owns, shared with NoG4PhysicsToolCfg so that
+    Geant4 physics is switched off exactly where FatrasG4 acts."""
+    return "InDet"
 
 
 def addFatrasG4TruthVertexType(cfg):
@@ -38,18 +32,23 @@ def addFatrasG4TruthVertexType(cfg):
     Every ID truth strategy that keeps Geant4 conversions is made to keep these
     as well. Must be called on the complete configuration, as the truth service
     is merged from several places."""
+    # Geant4 process subtype of G4FastSimulationManagerProcess (FASTSIM_ManagerProcess)
+    fastSimulationProcessSubType = 301
+    # AtlasDetDescr::AtlasRegion of the inner detector
+    atlasRegionID = 1
+
     for service in cfg.getServices():
         for strategy in getattr(service, "TruthStrategies", []):
             vertexTypes = list(getattr(strategy, "VertexTypes", []))
-            if (AtlasRegionID in getattr(strategy, "Regions", []) and 14 in vertexTypes
-                    and FastSimulationProcessSubType not in vertexTypes):
-                strategy.VertexTypes = vertexTypes + [FastSimulationProcessSubType]
+            if (atlasRegionID in getattr(strategy, "Regions", []) and 14 in vertexTypes
+                    and fastSimulationProcessSubType not in vertexTypes):
+                strategy.VertexTypes = vertexTypes + [fastSimulationProcessSubType]
 
 
 def FatrasG4Cfg(flags, **kwargs):
     result = ComponentAccumulator()
     # Name of region where FatrasG4 will be triggered
-    kwargs.setdefault("RegionName", FatrasG4RegionName)
+    kwargs.setdefault("RegionName", fatrasG4RegionName())
     # Sensor regions inside InDet: the ACTS trigger only counts the photon steps
     # there, Geant4 keeps the physics
     kwargs.setdefault("BookkeepingRegionNames", ["Pixel", "SCT", "TRT", "TRT_Ar"])
@@ -68,7 +67,7 @@ def FatrasG4Cfg(flags, **kwargs):
 
 def NoG4PhysicsToolCfg(flags, **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("RegionNames", [FatrasG4RegionName])
+    kwargs.setdefault("RegionNames", [fatrasG4RegionName()])
     result.setPrivateTools(CompFactory.NoG4PhysicsTool(name="NoG4PhysicsTool", **kwargs))
     return result
 
