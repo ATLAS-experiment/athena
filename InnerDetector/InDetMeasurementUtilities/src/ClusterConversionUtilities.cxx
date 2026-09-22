@@ -6,7 +6,7 @@
 
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "SCT_ReadoutGeometry/StripStereoAnnulusDesign.h"
-
+#include "HGTD_ReadoutGeometry/HGTD_DetectorElement.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 
 #include "HGTD_PrepRawData/HGTD_Cluster.h"
@@ -17,6 +17,7 @@
 #include "InDetIdentifier/PixelID.h"
 #include "InDetIdentifier/SCT_ID.h"
 #include "HGTD_Identifier/HGTD_ID.h"
+
 
 constexpr static double one_over_twelve = 1. / 12.;
 
