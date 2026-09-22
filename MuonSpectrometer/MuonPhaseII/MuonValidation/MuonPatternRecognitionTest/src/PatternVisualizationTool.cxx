@@ -3,6 +3,7 @@
 */
 #include "PatternVisualizationTool.h"
 
+#include "GeoPrimitives/GeoPrimitives.h"
 #include "MuonPatternEvent/SegmentFitterEventData.h"
 #include "MuonPatternEvent/HoughMaximum.h"
 #include "MuonPatternEvent/Segment.h"
@@ -19,6 +20,7 @@
 #include "xAODMuonPrepData/sTgcMeasurement.h"
 
 #include "Acts/Utilities/Helpers.hpp"
+#include "Acts/Definitions/Units.hpp"
 #include "Acts/Surfaces/RectangleBounds.hpp"
 #include "Acts/Surfaces/TrapezoidBounds.hpp"
 #include "Acts/Surfaces/PlaneSurface.hpp"
@@ -43,6 +45,7 @@ namespace {
     using SpacePointSet = std::unordered_set<const MuonR4::SpacePoint*>;
 }
 
+using namespace Acts::UnitLiterals;
 
 namespace MuonValR4 {
     using namespace MuonR4;
@@ -280,9 +283,6 @@ namespace MuonValR4 {
             ATH_MSG_VERBOSE("visualizeSeed skipped: no truth segments found and displayOnlyTruth=true");
             return;
         }
-
-       
-
         for (const int view : {objViewEta, objViewPhi}) {
             if ((view == objViewEta && !m_doEtaBucketViews) ||
                 (view == objViewPhi && !m_doPhiBucketViews)){
@@ -467,19 +467,25 @@ namespace MuonValR4 {
 
             {
                 auto segmentline = drawLine(segPars, canvas->corner(Edges::yLow), canvas->corner(Edges::yHigh), parLineColor, kDashed, view);
-                TLine *line = static_cast<TLine*>(segmentline.get());
+                legend.addOnce(LegendItem::RecoSegmentLine, segmentline.get(), "Reco Segment", "l");
                 canvas->add(std::move(segmentline));
-                legend.addOnce(LegendItem::RecoSegmentLine, line, "Reco Segment", "l");
+
             }
-
-            for (const xAOD::MuonSegment* tru_segment : truthSegs) {
-                if(!tru_segment) continue;
-
-                auto truthLine =  drawLine(localSegmentPars(*tru_segment), canvas->corner(Edges::yLow), canvas->corner(Edges::yHigh), truthColor, kDotted, view);
-                TLine* line = static_cast<TLine*>(truthLine.get());
+            bool drawnTrueLabel{false};
+            for (const xAOD::MuonSegment* segment : truthSegs) {
+                auto truthLine =  drawLine(localSegmentPars(*segment), canvas->corner(Edges::yLow), canvas->corner(Edges::yHigh), truthColor, kDotted, view);
+                legend.addOnce( LegendItem::TruthSegmentLine, truthLine.get(), "Truth Segment", "l" );
                 canvas->add( std::move(truthLine) );
-                legend.addOnce( LegendItem::TruthSegmentLine, line, "Truth Segment", "l" );
-                paintSimHits(ctx,*tru_segment, *canvas, view);
+                using namespace Acts::detail::LineHelper;
+                const Acts::Vector3 bsExtp = lineIntersect<3>(Amg::Vector3D::Zero(), Amg::Vector3D::UnitZ(),
+                                                          segment->position(), segment->direction()).position();
+                if (!drawnTrueLabel) {
+                    canvas->add(drawLabel(std::format("true parameters: {:}, d_{{0}}={:.2f}, z_{{0}}={:.2f}",
+                                          makeLabel(localSegmentPars(*segment)), bsExtp.perp(),
+                                                     std::abs(bsExtp.z()) ) , 0.1, 0.05));
+                    drawnTrueLabel = true;
+                }
+                paintSimHits(ctx,*segment, *canvas, view);
             }
 
             const Identifier canvasId{segment.parent()->getHitsInMax().front()->identify()};

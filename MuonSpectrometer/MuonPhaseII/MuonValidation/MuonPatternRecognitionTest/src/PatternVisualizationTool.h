@@ -1,23 +1,23 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONR4_MUONPATTERNRECOGNITIONTEST_PATTERNVISUALIZATIONTOOL_H
 #define MUONR4_MUONPATTERNRECOGNITIONTEST_PATTERNVISUALIZATIONTOOL_H
 
-#include <MuonRecToolInterfacesR4/IPatternVisualizationTool.h>
-#include <MuonRecToolInterfacesR4/IRootVisualizationService.h>
-#include <AthenaBaseComps/AthAlgTool.h>
+#include "MuonRecToolInterfacesR4/IPatternVisualizationTool.h"
+#include "MuonRecToolInterfacesR4/IRootVisualizationService.h"
+#include "AthenaBaseComps/AthAlgTool.h"
 
-#include <StoreGate/ReadDecorHandleKeyArray.h>
-#include <StoreGate/ReadHandleKeyArray.h>
+#include "StoreGate/ReadDecorHandleKeyArray.h"
+#include "StoreGate/ReadHandleKeyArray.h"
 
-#include <xAODMeasurementBase/UncalibratedMeasurementContainer.h>
-#include <MuonReadoutGeometryR4/MuonDetectorManager.h>
-#include <MuonPatternEvent/Segment.h>
-#include <ActsGeometryInterfaces/GeometryContext.h>
-#include <xAODMuon/MuonSegmentContainer.h>
+#include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
+#include "MuonReadoutGeometryR4/MuonDetectorManager.h"
+#include "MuonPatternEvent/Segment.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
+#include "xAODMuon/MuonSegmentContainer.h"
 
-#include <MuonPatternEvent/HoughEventData.h>
+#include "MuonPatternEvent/HoughEventData.h"
 
 
 #include "TLegend.h"

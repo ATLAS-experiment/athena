@@ -334,6 +334,9 @@ namespace MuonR4{
             if (!startSurface->insideBounds(*locPos)) {
                 const auto* volume = MuonGMR4::highestAlignable(trackingGeo->highestTrackingVolume()->
                                                       lowestTrackingVolume(tgContext, atSurface.position()));
+                if (!volume){
+                    return;
+                }
                 ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Intersection "<<Amg::toString(atSurface.position())
                     <<" is outside surface: "<<startSurface->geometryId()<<", "<<startSurface->bounds()<<". "
                     <<" Switch to volume "<<volume->geometryId()<<", bounds: "<<volume->volumeBounds());
