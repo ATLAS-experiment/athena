@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigL2CaloLayersAlg.h"
@@ -57,7 +57,7 @@ StatusCode TrigL2CaloLayersAlg::execute( const EventContext& context ) const {
 
     // link the cluster
     { 
-      auto clusters = ElementLink<xAOD::TrigEMClusterContainer>( *clustersHandle, 0 );
+      auto clusters = ElementLink<xAOD::TrigEMClusterContainer>( *clustersHandle, 0, context );
       ATH_CHECK( clusters.isValid() );
       d->setObjectLink( featureString(),  clusters );
     }
