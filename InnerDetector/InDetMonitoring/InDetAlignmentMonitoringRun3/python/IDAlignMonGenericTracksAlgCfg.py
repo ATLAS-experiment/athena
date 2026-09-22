@@ -26,19 +26,52 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
     m_d0Range = 2
     m_z0Range = 90.
     m_d0BsRange = 0.05
+    
+    UseITkGeometry = kwargs.get("UseITkGeometry", False)
 
-    m_EtaModulesPix = [20, 13, 13, 13]
-    m_EtaModulesMinPix = [-10.5, -6.5, -6.5, -6.5]
-    m_EtaModulesMaxPix = [9.5, 6.5, 6.5, 6.5]
-    m_PhiModules = [14, 22, 38, 52]
-    m_PhiModulesSCT = [32, 40, 48, 56]
-    m_PhiModulesPerRing = 48
-    m_EtaModulesSCTEC = 3
-    m_PhiModulesSCTEC = 52
-    m_EtaModulesSCT = 13
-    m_EtaModulesMinSCT = -6.5
-    m_EtaModulesMaxSCT = 6.5   
-     
+    if UseITkGeometry:
+        # ITk Pixel barrel
+        # L0 eta -12..12, phi 0..11
+        # L1 eta -6..6,   phi 0..19
+        # L2 eta -9..9,   phi 0..31
+        # L3 eta -9..9,   phi 0..43
+        # L4 eta -9..9,   phi 0..55
+        m_EtaModulesPix = [25, 13, 19, 19, 19]
+        m_EtaModulesMinPix = [-12.5, -6.5, -9.5, -9.5, -9.5]
+        m_EtaModulesMaxPix = [12.5, 6.5, 9.5, 9.5, 9.5]
+        m_PhiModules = [12, 20, 32, 44, 56]
+
+        # ITk Pixel endcap summary: use one common phi range covering all disks
+        # ITk Pixel EC max phi is 55, so 56 bins is enough.
+        m_PhiModulesPerRing = 56
+
+        # ITk Strip barrel
+        # L0 phi 0..27, L1 0..39, L2 0..55, L3 0..71
+        # eta range is wider for L0/L1; use common max range for this generic map.
+        m_PhiModulesSCT = [28, 40, 56, 72]
+        m_EtaModulesSCT = 113
+        m_EtaModulesMinSCT = -56.5
+        m_EtaModulesMaxSCT = 56.5
+
+        # ITk Strip endcap
+        # disks 0..5, eta 0..17, phi 0..63
+        m_EtaModulesSCTEC = 18
+        m_PhiModulesSCTEC = 64
+
+    else:
+        # Run-3 Pixel/SCT
+        m_EtaModulesPix = [20, 13, 13, 13]
+        m_EtaModulesMinPix = [-10.5, -6.5, -6.5, -6.5]
+        m_EtaModulesMaxPix = [9.5, 6.5, 6.5, 6.5]
+        m_PhiModules = [14, 22, 38, 52]
+        m_PhiModulesSCT = [32, 40, 48, 56]
+        m_PhiModulesPerRing = 48
+        m_EtaModulesSCTEC = 3
+        m_PhiModulesSCTEC = 52
+        m_EtaModulesSCT = 13
+        m_EtaModulesMinSCT = -6.5
+        m_EtaModulesMaxSCT = 6.5     
+    
     # Set a folder name from the user options
     folderName = "ExtendedTracks"
     if "TrackName" in kwargs:
@@ -266,8 +299,24 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
 
     ## Eta-ID vs Phi-ID vs hits 
     ### Pixel barrel and endcap
-    layersPix = ['0', '1', '2', '3']
-    layersName = ['IBL','B-layer','1','2']
+
+    if UseITkGeometry:
+        layersPix = ['0', '1', '2', '3', '4']
+        layersName = ['0', '1', '2', '3', '4']
+
+        nPixECLayers = 9
+
+        layersSCTB = ['0', '1', '2', '3']
+        layersSCTEC = ['0', '1', '2', '3', '4', '5']
+    else:
+        layersPix = ['0', '1', '2', '3']
+        layersName = ['IBL', 'B-layer', '1', '2']
+
+        nPixECLayers = 3
+
+        layersSCTB = ['0', '1', '2', '3']
+        layersSCTEC = ['0', '1', '2', '3', '4', '5', '6', '7', '8']
+   
     pixBhitmeasArray = helper.addArray([len(layersPix)], alg, 'measurements_vs_Eta_Phi_pix_b', topPath=pathtrack)
     for postfix, tool in pixBhitmeasArray.Tools.items():
         layer = layersPix[int( postfix.split('_')[1] )]
@@ -282,11 +331,11 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
         layer = endcapsPix[int(postfix.split('_')[1])]
         title = ('Number of hits vs Module Eta-Phi-ID Pixel EndCap %s; Disk; Mod Phi; Pixel hits (PIX+IBL)' %  layer.upper()) 
         name = 'm_layerDisk,m_modPhi;measurements_vs_Eta_Phi_pix_ec' + layer
-        tool.defineHistogram(name, title = title, type = 'TH2F', xbins = 3, xmin = - 0.5, xmax = 3 - 0.5,
+        tool.defineHistogram(name, title = title, type = 'TH2F', xbins = nPixECLayers, xmin = - 0.5, xmax = nPixECLayers - 0.5,
                                                   ybins = m_PhiModulesPerRing, ymin = -0.5, ymax = m_PhiModulesPerRing - 0.5)
     
     ### SCT barrel and endcap
-    layersSCTB = ['0', '1', '2', '3']
+
     sctBhitmeasArray = helper.addArray([len(layersSCTB)], alg, 'measurements_vs_Eta_Phi_sct_b_s0', topPath = pathtrack)
     for postfix, tool in sctBhitmeasArray.Tools.items():
         layer = layersSCTB[int( postfix.split('_')[1] )]
@@ -303,7 +352,6 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
         tool.defineHistogram(name, title = title, type = 'TH2F', xbins = m_EtaModulesSCT, xmin = m_EtaModulesMinSCT, xmax = m_EtaModulesMaxSCT,
                                                    ybins = m_PhiModulesSCT[int(layer)], ymin = -0.5, ymax = m_PhiModulesSCT[int(layer)] - 0.5)
 
-    layersSCTEC = ['0', '1', '2', '3', '4', '5', '6', '7', '8']
     sctECAs0hitmeasArray = helper.addArray([len(layersSCTEC)], alg, 'measurements_vs_Eta_Phi_sct_eca_s0', topPath = pathtrack)
     for postfix, tool in sctECAs0hitmeasArray.Tools.items():
         layer = layersSCTEC[int( postfix.split('_')[1] )]

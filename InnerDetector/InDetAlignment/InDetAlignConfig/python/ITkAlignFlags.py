@@ -12,7 +12,7 @@ def createITkAlignFlags():
     icf.addFlag("useLocalDatabase", False)
     icf.addFlag("writeSilicon", False)
     icf.addFlag("writeAlignNtuple", False)
-    icf.addFlag("doMonitoring", False)
+    icf.addFlag("doMonitoring", True)
     icf.addFlag("inputTFiles", "AlignmentTFile.root")
     icf.addFlag("solveLocal", True)
     icf.addFlag("writeConstantsToPool", True)

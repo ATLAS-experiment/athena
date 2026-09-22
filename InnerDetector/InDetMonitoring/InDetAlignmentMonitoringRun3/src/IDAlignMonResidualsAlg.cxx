@@ -85,36 +85,41 @@ StatusCode IDAlignMonResidualsAlg::initialize()
   
   ATH_CHECK( m_tracksName.initialize() );
   ATH_CHECK( m_tracksKey.initialize() );
+
+  const int nSiBlayers = m_useITkGeometry ? m_nSiBlayers_ITk : m_nSiBlayers;
+  const int nPixEClayers = m_useITkGeometry ? m_nPixEClayers_ITk : m_nPixEClayers;
+  const int nSCTBlayers =  m_useITkGeometry ? m_nSCTBlayers_ITk : m_nSiBlayers;
+  const int nSCTEClayers =  m_useITkGeometry ? m_nSCTEClayers_ITk : m_nSCTEClayers;
   
-  m_pixResidualX = Monitored::buildToolMap<int>(m_tools, "PixResidualX", m_nSiBlayers);
-  m_pixResidualX_2DProf = Monitored::buildToolMap<int>(m_tools, "PixResidualX_2DProf", m_nSiBlayers);
-  m_pixResidualY = Monitored::buildToolMap<int>(m_tools, "PixResidualY", m_nSiBlayers);
-  m_pixResidualY_2DProf = Monitored::buildToolMap<int>(m_tools, "PixResidualY_2DProf", m_nSiBlayers);
-  m_pixPullX = Monitored::buildToolMap<int>(m_tools, "PixPullX", m_nSiBlayers);
-  m_pixPullY = Monitored::buildToolMap<int>(m_tools, "PixPullY", m_nSiBlayers);
-  m_pixResidualXvsEta = Monitored::buildToolMap<int>(m_tools, "PixResidualXvsEta", m_nSiBlayers);
-  m_pixResidualYvsEta = Monitored::buildToolMap<int>(m_tools, "PixResidualYvsEta", m_nSiBlayers);
-  m_pixResidualXvsPhi = Monitored::buildToolMap<int>(m_tools, "PixResidualXvsPhi", m_nSiBlayers);
-  m_pixResidualYvsPhi = Monitored::buildToolMap<int>(m_tools, "PixResidualYvsPhi", m_nSiBlayers);
-  m_pixECAResidualX = Monitored::buildToolMap<int>(m_tools, "PixResidualXECA", m_nPixEClayers);
-  m_pixECAResidualY = Monitored::buildToolMap<int>(m_tools, "PixResidualYECA", m_nPixEClayers);
+  m_pixResidualX = Monitored::buildToolMap<int>(m_tools, "PixResidualX", nSiBlayers);
+  m_pixResidualX_2DProf = Monitored::buildToolMap<int>(m_tools, "PixResidualX_2DProf", nSiBlayers);
+  m_pixResidualY = Monitored::buildToolMap<int>(m_tools, "PixResidualY", nSiBlayers);
+  m_pixResidualY_2DProf = Monitored::buildToolMap<int>(m_tools, "PixResidualY_2DProf", nSiBlayers);
+  m_pixPullX = Monitored::buildToolMap<int>(m_tools, "PixPullX", nSiBlayers);
+  m_pixPullY = Monitored::buildToolMap<int>(m_tools, "PixPullY", nSiBlayers);
+  m_pixResidualXvsEta = Monitored::buildToolMap<int>(m_tools, "PixResidualXvsEta", nSiBlayers);
+  m_pixResidualYvsEta = Monitored::buildToolMap<int>(m_tools, "PixResidualYvsEta", nSiBlayers);
+  m_pixResidualXvsPhi = Monitored::buildToolMap<int>(m_tools, "PixResidualXvsPhi", nSiBlayers);
+  m_pixResidualYvsPhi = Monitored::buildToolMap<int>(m_tools, "PixResidualYvsPhi", nSiBlayers);
+  m_pixECAResidualX = Monitored::buildToolMap<int>(m_tools, "PixResidualXECA", nPixEClayers);
+  m_pixECAResidualY = Monitored::buildToolMap<int>(m_tools, "PixResidualYECA", nPixEClayers);
   m_pixECResidualX_2DProf = Monitored::buildToolMap<int>(m_tools, "PixResidualXEC_2DProf", 2);
   m_pixECResidualY_2DProf = Monitored::buildToolMap<int>(m_tools, "PixResidualYEC_2DProf", 2);
-  m_pixECCResidualX = Monitored::buildToolMap<int>(m_tools, "PixResidualXECC", m_nPixEClayers);
-  m_pixECCResidualY = Monitored::buildToolMap<int>(m_tools, "PixResidualYECC", m_nPixEClayers);
-  m_sctResidualX = Monitored::buildToolMap<int>(m_tools, "SCTResidualX", m_nSiBlayers);
-  m_sctResidualX_2DProf = Monitored::buildToolMap<int>(m_tools, "SCTResidualX_2DProf", m_nSiBlayers);
-  m_sct_s0_ResidualX_2DProf = Monitored::buildToolMap<int>(m_tools, "SCT_s0_ResidualX_2DProf", m_nSiBlayers);
-  m_sct_s1_ResidualX_2DProf = Monitored::buildToolMap<int>(m_tools, "SCT_s1_ResidualX_2DProf", m_nSiBlayers);
+  m_pixECCResidualX = Monitored::buildToolMap<int>(m_tools, "PixResidualXECC", nPixEClayers);
+  m_pixECCResidualY = Monitored::buildToolMap<int>(m_tools, "PixResidualYECC", nPixEClayers);
+  m_sctResidualX = Monitored::buildToolMap<int>(m_tools, "SCTResidualX", nSCTBlayers);
+  m_sctResidualX_2DProf = Monitored::buildToolMap<int>(m_tools, "SCTResidualX_2DProf", nSCTBlayers);
+  m_sct_s0_ResidualX_2DProf = Monitored::buildToolMap<int>(m_tools, "SCT_s0_ResidualX_2DProf", nSCTBlayers);
+  m_sct_s1_ResidualX_2DProf = Monitored::buildToolMap<int>(m_tools, "SCT_s1_ResidualX_2DProf", nSCTBlayers);
   m_sctECAResidualX_2DProf = Monitored::buildToolMap<int>(m_tools, "SCTECAResidualX_2DProf", m_nSCTEClayers);
-  m_sctECA_s0_ResidualX_2DProf = Monitored::buildToolMap<int>(m_tools, "SCTECA_s0_ResidualX_2DProf", m_nSCTEClayers);
-  m_sctECA_s1_ResidualX_2DProf = Monitored::buildToolMap<int>(m_tools, "SCTECA_s1_ResidualX_2DProf", m_nSCTEClayers);
-  m_sctECCResidualX_2DProf = Monitored::buildToolMap<int>(m_tools, "SCTECCResidualX_2DProf", m_nSCTEClayers);
-  m_sctECC_s0_ResidualX_2DProf = Monitored::buildToolMap<int>(m_tools, "SCTECC_s0_ResidualX_2DProf", m_nSCTEClayers);
-  m_sctECC_s1_ResidualX_2DProf = Monitored::buildToolMap<int>(m_tools, "SCTECC_s1_ResidualX_2DProf", m_nSCTEClayers);
-  m_sctPullX = Monitored::buildToolMap<int>(m_tools, "SCTPullX", m_nSiBlayers);
-  m_sctResidualXvsEta = Monitored::buildToolMap<int>(m_tools, "SCTResidualXvsEta", m_nSiBlayers);
-  m_sctResidualXvsPhi = Monitored::buildToolMap<int>(m_tools, "SCTResidualXvsPhi", m_nSiBlayers);
+  m_sctECA_s0_ResidualX_2DProf = Monitored::buildToolMap<int>(m_tools, "SCTECA_s0_ResidualX_2DProf", nSCTEClayers);
+  m_sctECA_s1_ResidualX_2DProf = Monitored::buildToolMap<int>(m_tools, "SCTECA_s1_ResidualX_2DProf", nSCTEClayers);
+  m_sctECCResidualX_2DProf = Monitored::buildToolMap<int>(m_tools, "SCTECCResidualX_2DProf", nSCTEClayers);
+  m_sctECC_s0_ResidualX_2DProf = Monitored::buildToolMap<int>(m_tools, "SCTECC_s0_ResidualX_2DProf", nSCTEClayers);
+  m_sctECC_s1_ResidualX_2DProf = Monitored::buildToolMap<int>(m_tools, "SCTECC_s1_ResidualX_2DProf", nSCTEClayers);
+  m_sctPullX = Monitored::buildToolMap<int>(m_tools, "SCTPullX", nSCTBlayers);
+  m_sctResidualXvsEta = Monitored::buildToolMap<int>(m_tools, "SCTResidualXvsEta", nSCTBlayers);
+  m_sctResidualXvsPhi = Monitored::buildToolMap<int>(m_tools, "SCTResidualXvsPhi", nSCTBlayers);
   m_trtBPredictedR = Monitored::buildToolMap<int>(m_tools, "TRTPredictedRB", m_nTRTBlayers);
   m_trtBMeasuredR = Monitored::buildToolMap<int>(m_tools, "TRTMeasuredRB", m_nTRTBlayers);
   m_trtBResidualR = Monitored::buildToolMap<int>(m_tools, "TRTResidualRB", m_nTRTBlayers);
@@ -231,12 +236,14 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
       
       //Trk::RIO_OnTrack object contains information on the hit used to fit the track at this surface
       const Trk::RIO_OnTrack* hit = dynamic_cast <const Trk::RIO_OnTrack*>(mesh);
+
       ATH_MSG_DEBUG(" --> Going to retrieve the Trk::RIO_OnTrack for hit " << nTSOS);
       if (hit== nullptr) {
 	//for some reason the first tsos has no associated hit - maybe because this contains the defining parameters?
 	if (nHits >0) ATH_MSG_DEBUG("No hit associated with TSOS " << nTSOS);
 	continue;
       }
+     
       
       ATH_MSG_DEBUG(" --> Going to retrieve the track parameters of this TSOS: " << nTSOS);
       const Trk::TrackParameters* trackParameter = tsos->trackParameters();
@@ -275,6 +282,25 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
       int   modPhi = 9999;
       
       const Identifier & hitId = hit->identify();
+
+      if (detType == 0) {
+      const Identifier id = m_pixelID->wafer_id(hitId);
+
+      barrelEC  = m_pixelID->barrel_ec(id);
+      layerDisk = m_pixelID->layer_disk(id);
+      modEta    = m_pixelID->eta_module(id);
+      modPhi    = m_pixelID->phi_module(id);
+      }
+      else {
+      const Identifier id = m_sctID->wafer_id(hitId);
+
+      barrelEC  = m_sctID->barrel_ec(id);
+      layerDisk = m_sctID->layer_disk(id);
+      modEta    = m_sctID->eta_module(id);
+      modPhi    = m_sctID->phi_module(id);
+      sctSide   = m_sctID->side(id);
+      }
+
       if (m_idHelper->is_trt(hitId)) detType = 2;
       else if (m_idHelper->is_sct(hitId)) detType = 1;
       else if (m_idHelper->is_pixel(hitId)) detType = 0;
@@ -432,6 +458,9 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
         }
       }//end-Pixel and SCT hits
       
+      
+            
+      
       //--------------------------------------------
       //
       // Filling Residual Histograms for Pixel and SCT
@@ -461,7 +490,8 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
       auto lb_m    = Monitored::Scalar<int>( "m_lb", lb );
       auto layerDisk_m = Monitored::Scalar<float>("m_layerDisk", layerDisk);
       auto layerDisk_si_m = Monitored::Scalar<float>("m_layerDisk_si", 0);
-
+      
+      
       if (detType==0) {//filling pixel histograms
 	ATH_MSG_DEBUG(" This is a PIXEL hit " << hitId  << " - filling histograms");
 	
@@ -469,9 +499,15 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
 	fill(residualGroup, si_residualx_m);
 	
 	if(barrelEC==0){//filling pixel barrel histograms
-	  int ModEtaShift[4] = {12, 38, 60, 82};
-          int ModPhiShift[4] = {0, 24, 56, 104};
+	 
+          int pixB_ModEtaShift_ID[4] = {12, 38, 60, 82};
+          int pixB_ModPhiShift_ID[4] = {0, 24, 56, 104};
+          int pixB_ModEtaShift_ITk[5] = {12, 31, 47, 66, 85};
+          int pixB_ModPhiShift_ITk[5] = {0, 12, 32, 64, 108};
 	  
+          const auto& ModEtaShift = m_useITkGeometry ? pixB_ModEtaShift_ITk : pixB_ModEtaShift_ID;
+          const auto& ModPhiShift = m_useITkGeometry ? pixB_ModPhiShift_ITk : pixB_ModPhiShift_ID;
+
           //common Si plots
           si_b_residualx_m = residualX;
           fill(residualGroup, si_b_residualx_m);
@@ -514,8 +550,14 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
           fill(residualGroup, modEtaShift_barrel_m, residualX_barrel_m, residualY_barrel_m);
 	}
 	else if(barrelEC==2){//three Pixel endcap disks from 0-2
-	  int ModPhiShift[3] = {0, 55, 110};
+	  int pixEC_ModPhiShift_ID[3] = {0, 55, 110};
+          int pixEC_ModPhiShift_ITk[9] = {0, 18, 48, 68, 100, 132, 176, 220, 276};
+
+          //int pixEC_ModEtaShift_ITk[9] = {0, 15, 21, 44, 50, 61, 69, 77, 86};
 	  
+          //const auto& ModEtaShift = m_useITkGeometry ? pixEC_ModEtaShift_ITk : pixEC_ModEtaShift_ID;
+          const auto& ModPhiShift = m_useITkGeometry ? pixEC_ModPhiShift_ITk : pixEC_ModPhiShift_ID;
+
          //Common Si plots
           layerDisk_si_m = layerDisk;
           si_eca_resX_m = residualX;
@@ -545,7 +587,14 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
           fill(residualGroup, modPhiShift_eca_m, residualX_eca_m, residualY_eca_m);
         }
 	else if(barrelEC==-2){
-	  int ModPhiShift[3] = {0, 55, 110};
+	 
+          int pixEC_ModPhiShift_ID[3] = {0, 55, 110};
+          int pixEC_ModPhiShift_ITk[9] = {0, 18, 48, 68, 100, 132, 176, 220, 276};
+ 
+          //int pixEC_ModEtaShift_ITk[9] = {0, 15, 21, 44, 50, 61, 69, 77, 86};
+
+          //const auto& ModEtaShift = m_useITkGeometry ? pixEC_ModEtaShift_ITk : pixEC_ModEtaShift_ID;
+          const auto& ModPhiShift = m_useITkGeometry ? pixEC_ModPhiShift_ITk : pixEC_ModPhiShift_ID;
 	  
           //Common Si plots
           layerDisk_si_m = layerDisk;

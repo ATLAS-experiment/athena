@@ -126,14 +126,19 @@ def ITkAlignTrackCollSplitterCfg(flags, name="ITkAlignTrackCollSplitter", **kwar
     cfg.addEventAlgo(CompFactory.Trk.AlignTrackCollSplitter(name, **kwargs))
     return cfg
 
-
 def ITkAccumulateCfg(flags, **kwargs):
+
     cfg = ITkAlignAlgCfg(flags)
+
     cfg.merge(ITkAlignTrackCollSplitterCfg(flags))
-    
+
     if flags.ITk.Align.doMonitoring:
-        from InDetAlignmentMonitoringRun3.InDetAlignmentMonitoringRun3Config import (
-            InDetAlignmentMonitoringRun3Config)
-        cfg.merge(InDetAlignmentMonitoringRun3Config(flags))
-    
+        from InDetAlignmentMonitoringRun3.InDetAlignmentMonitoringRun3Config import (InDetAlignmentMonitoringRun3Config)
+
+        monCfg = InDetAlignmentMonitoringRun3Config(
+            flags,
+            TrackName=flags.ConstrainedTrackProvider.InputTracksCollection,
+            UseITkGeometry=flags.Detector.GeometryITk,
+        )
+        cfg.merge(monCfg)
     return cfg

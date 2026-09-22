@@ -45,8 +45,6 @@ def parser():
     ## Local DB File
     parser.add_argument("--localDB", default = "", help='Use local DB file rather than from conditions tag')
 
-    ## Number of threads
-    parser.add_argument("--threads", default = 1, type = int, help='Number of threads')
     
     return parser.parse_args()
 
@@ -77,7 +75,7 @@ flags.Exec.MaxEvents = kwargs["maxEvents"] if not kwargs["solve"] else 1
 flags.IOVDb.GlobalTag = kwargs["globalTag"]
     
 flags.addFlag("ConstrainedTrackProvider.InputTracksCollection", kwargs["inputTracksCollection"])
-
+flags.Output.HISTFileName = "IDAlignMon.root"
 flags.GeoModel.Align.Dynamic = False
 flags.GeoModel.AtlasVersion = kwargs["atlasVersion"]
 
@@ -125,9 +123,6 @@ if flags.ITk.Align.alignITkPixel:
     flags.ITk.Geometry.pixelAlignable = True
 if flags.ITk.Align.alignITkStrip:
     flags.ITk.Geometry.stripAlignable = True
-
-if kwargs["threads"] > 0:
-    flags.Concurrency.NumThreads = kwargs["threads"]
 
 flags.lock()
 

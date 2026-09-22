@@ -62,7 +62,12 @@ class IDAlignMonResidualsAlg :  public AthMonitorAlgorithm {
 	
   StatusCode getSiResiduals(const Trk::Track*, const Trk::TrackStateOnSurface*, bool, double*) const;
   std::unique_ptr <Trk::TrackParameters> getUnbiasedTrackParameters(const Trk::Track*, const Trk::TrackStateOnSurface*) const;
-
+  Gaudi::Property<bool> m_useITkGeometry{
+  this,
+  "UseITkGeometry",
+  false,
+  "Use ITk-specific histogram mapping instead of Run-3 ID Pixel/SCT mapping"
+  };
   bool trackRequiresRefit(const Trk::Track*) const;
 
   //tools
@@ -96,6 +101,10 @@ class IDAlignMonResidualsAlg :  public AthMonitorAlgorithm {
   static const int m_nSCTEClayers{9}; //
   static const int m_nTRTBlayers{3}; //
   static const int m_nTRTEClayers{2}; //
+  static const int m_nSiBlayers_ITk{5};
+  static const int m_nPixEClayers_ITk{9};
+  static const int m_nSCTBlayers_ITk{4};
+  static const int m_nSCTEClayers_ITk{6};
   std::vector<int> m_pixResidualX;
   std::vector<int> m_pixResidualX_2DProf;
   std::vector<int> m_pixResidualY;

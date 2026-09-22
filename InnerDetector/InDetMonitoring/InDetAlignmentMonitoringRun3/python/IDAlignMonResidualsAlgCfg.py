@@ -25,27 +25,70 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
     m_maxPIXResYFillRange = 0.3
     m_FinerBinningFactor = 1
     strawRadius = 2.5
-    m_EtaModulesPix = [20, 13, 13, 13]
-    m_EtaModulesMinPix = [-10.5, -6.5, -6.5, -6.5]
-    m_EtaModulesMaxPix = [9.5, 6.5, 6.5, 6.5]
-    m_PhiModules = [14, 22, 38, 52]
-    m_PhiModulesShift_barrel = 158
-    m_EtaModulesShift_barrel = 96
-    m_PhiModulesPerRing = 48
-    m_PhiModulesShift_ec = 152
-    m_EtaModulesSCT = 13
-    m_EtaModulesSCTEC = 3
-    m_EtaModulesMinSCT = -6.5
-    m_EtaModulesMaxSCT = 6.5
-    m_PhiModulesSCT = [32, 40, 48, 56]
-    m_PhiModulesPerRingSCT = 52
-    m_PhiModulesShift_sct_barrel = 208
-    m_EtaModulesShift_sct_barrel = 90
-    m_PhiModulesShift_sct_ec = 548 #52 mod/disk x 9 disk + 10*8 gaps
     m_minTRTResWindow = -0.6
     m_maxTRTResWindow = 0.6
     m_TRTB_nSectorBins = 32
     m_TRTEC_nPhiBins = 24
+
+    UseITkGeometry = kwargs.get("UseITkGeometry", False)
+
+    if UseITkGeometry:
+        # ITk Pixel barrel
+        m_EtaModulesPix = [25, 13, 19, 19, 19]
+        m_EtaModulesMinPix = [-12.5, -6.5, -9.5, -9.5, -9.5]
+        m_EtaModulesMaxPix = [12.5, 6.5, 9.5, 9.5, 9.5]
+        m_PhiModules = [12, 20, 32, 44, 56]
+
+        # ITk Pixel EC: max phi 55, disk 0..8
+        m_PhiModulesPerRing = 56
+
+        # no-gap total widths from your ITk layout
+        m_PhiModulesShift_barrel = 164   # 12+20+32+44+56
+        m_EtaModulesShift_barrel = 104   # 25+13+19+19+19 plus shifted span total
+        m_PhiModulesShift_ec = 328       # sum pixel EC phi widths: 18+30+20+32+32+44+44+56+52
+
+        # ITk Strip barrel
+        m_EtaModulesSCT = 113
+        m_EtaModulesMinSCT = -56.5
+        m_EtaModulesMaxSCT = 56.5
+        m_PhiModulesSCT = [28, 40, 56, 72]
+
+        # ITk Strip EC: eta 0..17, phi 0..63, disk 0..5
+        m_EtaModulesSCTEC = 18
+        m_PhiModulesPerRingSCT = 64
+
+        m_PhiModulesShift_sct_barrel = 196  # 28+40+56+72
+        m_EtaModulesShift_sct_barrel = 340  # from stripB_ModEtaShift_ITk last start 311 + width 29
+        m_PhiModulesShift_sct_ec = 384      # 64*6
+
+        # combined silicon layer summary axes
+        # barrel: Pixel 5 + Strip 4 = 9
+        # EC: Pixel 9 + Strip 6 = 15
+        m_siliconBarrelLayers = 9
+        m_siliconECLayers = 15
+
+    else:
+        m_siliconBarrelLayers = 12
+        m_siliconECLayers     = 24
+
+        m_EtaModulesPix = [20, 13, 13, 13]
+        m_EtaModulesMinPix = [-10.5, -6.5, -6.5, -6.5]
+        m_EtaModulesMaxPix = [9.5, 6.5, 6.5, 6.5]
+        m_PhiModules = [14, 22, 38, 52]
+        m_PhiModulesShift_barrel = 158
+        m_EtaModulesShift_barrel = 96
+        m_PhiModulesPerRing = 48
+        m_PhiModulesShift_ec = 152
+
+        m_EtaModulesSCT = 13
+        m_EtaModulesSCTEC = 3
+        m_EtaModulesMinSCT = -6.5
+        m_EtaModulesMaxSCT = 6.5
+        m_PhiModulesSCT = [32, 40, 48, 56]
+        m_PhiModulesPerRingSCT = 52
+        m_PhiModulesShift_sct_barrel = 208
+        m_EtaModulesShift_sct_barrel = 90
+        m_PhiModulesShift_sct_ec = 548
      
     # Set a folder name from the user options
     folderName = "ExtendedTracks"
@@ -302,8 +345,13 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
     title = 'Biased Y Residual Pixel Barrel;Residual [mm];Events'
     residualGroup.defineHistogram(varName, type='TH1F', path=pathResiduals, title=title, xbins=100, xmin=m_minPIXResYFillRange, xmax=m_maxPIXResYFillRange)
 
-    layersPix = ['0', '1', '2', '3']
-    layersName = ['IBL','B-layer','1','2']
+    if UseITkGeometry:
+        layersPix = ['0', '1', '2', '3', '4']
+        layersName = ['0', '1', '2', '3', '4']
+    else:
+        layersPix = ['0', '1', '2', '3']
+        layersName = ['IBL', 'B-layer', '1', '2']
+
     residualXArray = helper.addArray([len(layersPix)], alg, 'PixResidualX', topPath = pathResiduals)
     for postfix, tool in residualXArray.Tools.items():
         layer = layersPix[int( postfix.split('_')[1] )]
@@ -424,7 +472,12 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
                                   xbins = m_EtaModulesShift_barrel, xmin = 0, xmax = m_EtaModulesShift_barrel)
        
     #Pixel EndCap A plots
-    layersECPix = ['0', '1', '2']
+    if UseITkGeometry:
+        layersECPix = ['0', '1', '2', '3', '4', '5', '6', '7', '8']
+        nPixECLayers = 9
+    else:
+        layersECPix = ['0', '1', '2']
+        nPixECLayers = 3
     varName = 'm_pix_eca_residualx;pix_eca_residualx'
     title = 'UnBiased X Residual Pixel EndCap A;Residual [mm]'
     residualGroup.defineHistogram(varName, type='TH1F', path=pathResiduals, title=title, xbins=100, xmin=m_minSiResFillRange, xmax=m_maxSiResFillRange)
@@ -464,7 +517,7 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
         layer = endcapsPix[int(postfix.split('_')[1])]
         title = ('Local X Residual vs Module Disk-Phi-ID Pixel Endcap %s; Disk; Mod Phi; Local X Residual [mm]' % layer.upper()) 
         name = 'm_layerDisk,m_modPhi,m_pix_ec_residualx;pix_ec' + layer + '_xresvsmodetaphi_2dprof'
-        tool.defineHistogram(name, title = title, type = 'TProfile2D', xbins = 3, xmin = - 0.5, xmax = 3 - 0.5,
+        tool.defineHistogram(name, title = title, type = 'TProfile2D', xbins = nPixECLayers, xmin = - 0.5, xmax = nPixECLayers - 0.5,
                                                   ybins = m_PhiModulesPerRing, ymin = -0.5, ymax = m_PhiModulesPerRing - 0.5,
                                                   zmin = m_minSiResFillRange, zmax = m_maxSiResFillRange)
 
@@ -473,7 +526,7 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
         layer = endcapsPix[int( postfix.split('_')[1])]
         title = ('Local Y Residual vs Module Eta-Phi-ID Pixel Endcap %s; Disk; Mod Phi; Local Y Residual [mm]' % layer.upper()) 
         name = 'm_layerDisk,m_modPhi,m_pix_ec_residualy;pix_ec' + layer + '_yresvsmodetaphi_2dprof'
-        tool.defineHistogram(name, title = title, type = 'TProfile2D', xbins = 3, xmin = - 0.5, xmax = 3 - 0.5,
+        tool.defineHistogram(name, title = title, type = 'TProfile2D', xbins = nPixECLayers, xmin = - 0.5, xmax = nPixECLayers - 0.5,
                                                   ybins = m_PhiModulesPerRing, ymin = -0.5, ymax = m_PhiModulesPerRing - 0.5,
                                                   zmin = m_minPIXResYFillRange, zmax = m_maxPIXResYFillRange)
 
@@ -563,7 +616,7 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
     title = 'Biased X Residual SCT Barrel;Residual [mm]'
     residualGroup.defineHistogram(varName, type='TH1F', path=pathResiduals, title=title, xbins=100, xmin=m_minSCTResFillRange, xmax=m_maxSCTResFillRange)
 
-    layersSCTB = ['0', '1', '2', '3']
+    layersSCTB = ['0', '1', '2', '3']  # same for ID and ITk 
     residualSCTXArray = helper.addArray([len(layersSCTB)], alg, 'SCTResidualX', topPath = pathResiduals)
     for postfix, tool in residualSCTXArray.Tools.items():
         layer = layersSCTB[int( postfix.split('_')[1] )]
@@ -618,7 +671,7 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
                              xbins = m_EtaModulesSCT, xmin = m_EtaModulesMinSCT, xmax = m_EtaModulesMaxSCT,
                              ybins = 50 * m_FinerBinningFactor, ymin = m_minSCTResFillRange, ymax = m_maxSCTResFillRange)
 
-    resXvsPhiSCTArray = helper.addArray([len(layersPix)], alg, 'SCTResidualXvsPhi', topPath = pathResiduals)
+    resXvsPhiSCTArray = helper.addArray([len(layersSCTB)], alg, 'SCTResidualXvsPhi', topPath = pathResiduals)
     for postfix, tool in resXvsPhiSCTArray.Tools.items():
         layer = layersSCTB[int( postfix.split('_')[1] )]
         layerInd = int(layer)
@@ -645,7 +698,10 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
     residualGroup.defineHistogram(varName, type='TH1F', path=pathResiduals, title=title, xbins=100, xmin=m_minSCTResFillRange, xmax=m_maxSCTResFillRange)
 
     # Define local X 3D histograms (not really 3D histograms but TProfile 2D)
-    layersECsct = ['0', '1', '2', '3', '4', '5', '6', '7', '8']
+    if UseITkGeometry:
+        layersECsct = ['0', '1', '2', '3', '4', '5', '6', '7', '8']
+    else:
+        layersECsct = ['0', '1', '2', '3', '4', '5']
     residualSCTECAX2DProfArray = helper.addArray([len(layersECsct)], alg, 'SCTECAResidualX_2DProf', topPath = pathResiduals)
     for postfix, tool in residualSCTECAX2DProfArray.Tools.items():
         layer = layersECsct[int( postfix.split('_')[1] )]
