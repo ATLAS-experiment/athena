@@ -3,6 +3,7 @@
 */
 #include "AthenaKernel/ClusterMessage.h"
 
+#include <atomic>
 #include <bit>
 #include <cstdint>
 #include <utility>
@@ -169,14 +170,21 @@ ClusterMessage::WireMsg ClusterMessage::wire_msg() const {
   constexpr int max_tag = 16383;
   constexpr std::uint64_t lower32 = 0xFFFFFFFF;
 
-  static thread_local int next_msg =
-      1;  // This is only ever called from one thread per process
+  // Share the tag sequence across sending threads in this process.
+  static std::atomic<int> next_msg{1};
   WireMsgHdr header{};
   header[0] = std::uint32_t(messageType);
   header[1] = source;
+  if (payload.index() == 2 || payload.index() == 3) {
+    int previous = next_msg.load(std::memory_order_relaxed);
+    int tag;
+    do {
+      tag = (previous % max_tag) + 1;
+    } while (!next_msg.compare_exchange_weak(previous, tag,
+                                             std::memory_order_relaxed));
+    header[2] = tag;
+  }
   if (payload.index() == 3) {
-    next_msg = (next_msg % max_tag) + 1;
-    header[2] = next_msg;
     WireMsgBody body{};
     const auto& payload_local = std::get<DataDescr>(payload);
     body[0] = std::uint32_t(std::uint64_t(payload_local.ptr) >> 32);
@@ -197,8 +205,6 @@ ClusterMessage::WireMsg ClusterMessage::wire_msg() const {
     return msg;
   }
   if (payload.index() == 2) {
-    next_msg = (next_msg % max_tag) + 1;
-    header[2] = next_msg;
     WireMsgBody body{};
     const auto& payload_local = std::get<WorkerStatus>(payload);
     body[0] = static_cast<int>(payload_local.status.getCode());

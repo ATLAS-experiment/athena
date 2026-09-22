@@ -78,6 +78,14 @@ class MPIClusterSvc
                                  std::int64_t status) override final;
 
  private:
+  /// Identify the time, rank, OS thread, and communicator of a trace record.
+  std::string tracePrefix(ClusterComm communicator) const;
+
+  /// Enable diagnostic logging around blocking MPI operations.
+  Gaudi::Property<bool> m_traceMessages{
+      this, "TraceMessages", false,
+      "Log MPI transfer entry/completion and wire metadata at INFO level"};
+
   std::unique_ptr<mpi3::environment> m_env;
   mpi3::communicator m_world;
   // Communicator for payload of event data messages

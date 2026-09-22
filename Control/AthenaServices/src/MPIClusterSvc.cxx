@@ -4,8 +4,11 @@
 #include "MPIClusterSvc.h"
 
 #include <mpi.h>
+#include <unistd.h>
 
 #include <bit>
+#include <chrono>
+#include <format>
 
 #include "CxxUtils/XXH.h"
 #include "GaudiKernel/FileIncident.h"
@@ -151,6 +154,15 @@ void MPIClusterSvc::abort() {
   m_world.abort();
 }
 
+std::string MPIClusterSvc::tracePrefix(ClusterComm communicator) const {
+  const auto now = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                       std::chrono::steady_clock::now().time_since_epoch())
+                       .count();
+  return std::format("MPI_TRACE ns={} rank={} thread={} comm={}", now, m_rank,
+                     gettid(),
+                     communicator == ClusterComm::EventData ? "data" : "world");
+}
+
 void MPIClusterSvc::sendMessage(int destRank, ClusterMessage message,
                                 ClusterComm communicator) {
   ATH_MSG_DEBUG("Sending message from rank {} to {}", rank(), destRank);
@@ -175,17 +187,43 @@ void MPIClusterSvc::sendMessage(int destRank, ClusterMessage message,
 
   message.source = m_rank;
   const auto& [header, body] = message.wire_msg();
+  if (m_traceMessages)
+    ATH_MSG_INFO(std::format(
+        "{} send-header.begin peer={} tag=0 type={} source={} header_value={}",
+        tracePrefix(communicator), destRank, header[0], header[1], header[2]));
   comm.send_n(header.begin(), header.size(), destRank, 0);
+  if (m_traceMessages)
+    ATH_MSG_INFO(std::format("{} send-header.end peer={} tag=0 header_value={}",
+                             tracePrefix(communicator), destRank, header[2]));
   if (body.has_value()) {
     const int tag = int(header[2]);
+    if (m_traceMessages)
+      ATH_MSG_INFO(std::format("{} send-body.begin peer={} tag={} bytes={}",
+                               tracePrefix(communicator), destRank, tag,
+                               sizeof(*body)));
     comm.send_n(body->begin(), body->size(), destRank, tag);
+    if (m_traceMessages)
+      ATH_MSG_INFO(std::format("{} send-body.end peer={} tag={}",
+                               tracePrefix(communicator), destRank, tag));
     if (message.messageType == ClusterMessageType::Data) {
       const auto& data = std::get<ClusterMessage::DataDescr>(message.payload);
       // Offset the tag by 16384 to minimize chance of conflict
       // (max tag in MPI spec is 32767)
       constexpr int tag_offset = 16384;
+      if (m_traceMessages)
+        ATH_MSG_INFO(
+            std::format("{} send-payload.begin peer={} tag={} bytes={} "
+                        "buffer={} align={} destination={} event={} request={}",
+                        tracePrefix(communicator), destRank, tag + tag_offset,
+                        data.len, data.ptr, data.align, int(data.dest),
+                        data.evtNumber, data.requestNumber));
       comm.send_n(static_cast<char*>(data.ptr), data.len, destRank,
                   tag + tag_offset);
+      if (m_traceMessages)
+        ATH_MSG_INFO(std::format(
+            "{} send-payload.end peer={} tag={} event={} request={}",
+            tracePrefix(communicator), destRank, tag + tag_offset,
+            data.evtNumber, data.requestNumber));
     }
   }
 }
@@ -202,27 +240,63 @@ ClusterMessage MPIClusterSvc::waitReceiveMessage(
       (communicator == ClusterComm::EventData) ? m_datacom : m_world;
   ClusterMessage::WireMsg msg{};
   auto&& [head, body] = msg;
-  comm.receive_n(head.begin(), head.size());
+  if (m_traceMessages) {
+    ATH_MSG_INFO(std::format("{} recv-header.begin peer=ANY tag=ANY bytes={}",
+                             tracePrefix(communicator), sizeof(head)));
+    // Preserve wildcard matching while retaining the status hidden by
+    // receive_n.
+    MPI_Status status{};
+    const int rc =
+        MPI_Recv(head.data(), head.size(), mpi3::datatype<std::uint32_t>{}(),
+                 MPI_ANY_SOURCE, MPI_ANY_TAG, comm.get(), &status);
+    if (rc != MPI_SUCCESS) {
+      ATH_MSG_ERROR(std::format("{} recv-header.error rc={}",
+                                tracePrefix(communicator), rc));
+      throw std::runtime_error("MPI header receive failed");
+    }
+    int receivedBytes = 0;
+    MPI_Get_count(&status, MPI_BYTE, &receivedBytes);
+    ATH_MSG_INFO(
+        std::format("{} recv-header.end peer={} tag={} bytes={} type={} "
+                    "source={} header_value={}",
+                    tracePrefix(communicator), status.MPI_SOURCE,
+                    status.MPI_TAG, receivedBytes, head[0], head[1], head[2]));
+    if (status.MPI_TAG != 0 || status.MPI_SOURCE != int(head[1]) ||
+        receivedBytes != int(sizeof(head))) {
+      ATH_MSG_WARNING(std::format(
+          "{} unexpected header envelope: source={} tag={} bytes={}",
+          tracePrefix(communicator), status.MPI_SOURCE, status.MPI_TAG,
+          receivedBytes));
+    }
+  } else {
+    comm.receive_n(head.begin(), head.size());
+  }
   std::pmr::memory_resource* memoryResource = std::pmr::new_delete_resource();
   // Only time we need to figure out ourselves whether there's a body
   if (ClusterMessage::has_body(head)) {
     body = ClusterMessage::WireMsgBody{};
+    if (m_traceMessages)
+      ATH_MSG_INFO(std::format("{} recv-body.begin peer={} tag={} bytes={}",
+                               tracePrefix(communicator), head[1], head[2],
+                               sizeof(*body)));
     comm.receive_n(body->begin(), body->size(), head[1], head[2]);
+    if (m_traceMessages)
+      ATH_MSG_INFO(std::format("{} recv-body.end peer={} tag={}",
+                               tracePrefix(communicator), head[1], head[2]));
     if (head[0] == int(ClusterMessageType::Data)) {
       ClusterMessage::WireMsgBody& bdy = *body;
-      // Decode the body to figure out what to recieve
+      // Decode the body to select the destination memory resource.
       std::size_t len = (std::uint64_t(bdy[2]) << 32) + std::uint64_t(bdy[3]);
-      // Codex pointed out (impossible barring corruption) point that bdy[4] >=
-      // 64 is a problem
+      // Reject corrupt alignment exponents before shifting.
       if (bdy[4] >= 64) {
-        throw std::runtime_error("Received invalid alignment > 2^64");
+        throw std::runtime_error("Received alignment exponent out of range");
       }
       std::size_t align = 1ULL << bdy[4];
       if (len % align != 0) {
         ATH_MSG_ERROR("Received invalid alignment " << align << " for length "
                                                     << len);
         // throw an exception, the allocation will fail and with memory
-        // resources we need the correct length later to de-allocate.
+        // resources we need the correct length later to deallocate.
         throw std::runtime_error(
             std::format("Received invalid cluster message. {} is not a valid "
                         "alignment for length {}!",
@@ -249,8 +323,30 @@ ClusterMessage MPIClusterSvc::waitReceiveMessage(
       } else {
         memoryResource = memoryResourceRegistry->at(std::uint32_t(dest));
       }
+      if (m_traceMessages)
+        ATH_MSG_INFO(std::format(
+            "{} allocate.begin peer={} tag={} bytes={} align={} destination={} "
+            "resource={} event={} request={}",
+            tracePrefix(communicator), head[1], head[2] + tag_offset, len,
+            align, int(dest), static_cast<void*>(memoryResource),
+            (std::uint64_t(bdy[6]) << 32) | bdy[7],
+            (std::uint64_t(bdy[8]) << 32) | bdy[9]));
       char* ptr = static_cast<char*>(memoryResource->allocate(len, align));
+      if (m_traceMessages)
+        ATH_MSG_INFO(std::format("{} allocate.end peer={} tag={} buffer={}",
+                                 tracePrefix(communicator), head[1],
+                                 head[2] + tag_offset,
+                                 static_cast<void*>(ptr)));
+      if (m_traceMessages)
+        ATH_MSG_INFO(std::format(
+            "{} recv-payload.begin peer={} tag={} bytes={} buffer={}",
+            tracePrefix(communicator), head[1], head[2] + tag_offset, len,
+            static_cast<void*>(ptr)));
       comm.receive_n(ptr, len, head[1], head[2] + tag_offset);
+      if (m_traceMessages)
+        ATH_MSG_INFO(std::format("{} recv-payload.end peer={} tag={}",
+                                 tracePrefix(communicator), head[1],
+                                 head[2] + tag_offset));
 
       // update the pointer in the WireMsgBody
       bdy[0] = int(std::uint64_t(ptr) >> 32);

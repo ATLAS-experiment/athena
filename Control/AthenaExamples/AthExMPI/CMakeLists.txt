@@ -7,6 +7,18 @@ atlas_subdir(AthExMPI)
 find_package(bmpi3 REQUIRED)
 find_package(TBB REQUIRED)
 
+# Keep CUDA helpers separate from the C++23 RPC templates.
+if(CMAKE_CUDA_COMPILER)
+   find_package(CUDAToolkit REQUIRED)
+   find_package(CCCL CONFIG REQUIRED COMPONENTS CUB)
+   atlas_add_library(AthExMPICUDALib
+      src/cuda/*.h src/cuda/*.cu
+      SHARED NO_PUBLIC_HEADERS
+      PRIVATE_LINK_LIBRARIES CUDA::cudart CCCL::CUB)
+   set_target_properties(AthExMPICUDALib PROPERTIES
+      CUDA_STANDARD 20 CUDA_STANDARD_REQUIRED ON)
+endif()
+
 # Public interface(s) in the package.
 atlas_add_library(AthExMPILib
    INTERFACE
@@ -19,9 +31,15 @@ atlas_add_component(AthExMPI
    LINK_LIBRARIES ${TBB_LIBRARIES} bmpi3::bmpi3 AthExMPILib AthenaBaseComps
                   AthenaKernel CxxUtils GaudiKernel)
 
+if(TARGET AthExMPICUDALib)
+   target_compile_definitions(AthExMPI PRIVATE ATHEXMPI_HAVE_CUDA)
+   target_link_libraries(AthExMPI PRIVATE AthExMPICUDALib)
+endif()
+
 # Install files from the package.
 atlas_install_python_modules(python/*.py)
 
 atlas_add_test(RPCFunctionEntry_test
    SOURCES test/RPCFunctionEntry_test.cxx
-   LINK_LIBRARIES AthenaKernel CxxUtils)
+   LINK_LIBRARIES AthenaKernel CxxUtils
+   POST_EXEC_SCRIPT noerror.sh)

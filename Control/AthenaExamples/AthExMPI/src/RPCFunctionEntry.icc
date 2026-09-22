@@ -74,11 +74,10 @@ inline std::tuple<RPCRet<Host, Rs>...> RPCFunctionEntry::retrieve(
     const auto count = desc.len / sizeof(E);
     return RPCRet<Host, R>(desc.takeOwnership(), count);
   };
-  std::size_t counter = 0;
-  // Braced initialization evaluates left to right, so counter follows result
-  // order.
-  return std::tuple<RPCRet<Host, Rs>...>{
-      makeResult.template operator()<Rs>(counter++)...};
+  return [&makeResult]<std::size_t... I>(std::index_sequence<I...>) {
+    return std::tuple<RPCRet<Host, Rs>...>{
+        makeResult.template operator()<Rs>(I)...};
+  }(std::index_sequence_for<Rs...>{});
 }
 
 inline const RPCFunctionEntry::Wrapper& RPCFunctionEntry::wrapper()
