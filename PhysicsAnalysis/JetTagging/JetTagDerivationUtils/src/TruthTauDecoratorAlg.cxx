@@ -30,8 +30,8 @@ namespace {
 
   // A ghost tau together with the TruthTaus entry holding its visible decay.
   struct Candidate {
-    const xAOD::TruthParticle* tau;
-    const xAOD::TruthParticle* vis;
+    const xAOD::TruthParticle* tau{};
+    const xAOD::TruthParticle* vis{};
   };
 }
 
@@ -175,7 +175,8 @@ namespace ftag {
         if (accPtVis(*vis) < minPt) continue;
         cands.push_back({tau, vis});
       }
-      std::sort(cands.begin(), cands.end(),
+      const auto nRanked = std::min<std::size_t>(2, cands.size());
+      std::ranges::partial_sort(cands, cands.begin() + nRanked,
         [](const Candidate& a, const Candidate& b) {
           return a.tau->pt() > b.tau->pt();
         });
