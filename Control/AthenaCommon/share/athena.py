@@ -92,7 +92,7 @@ ROOTSetup(batch = not opts.interactive)
 ### inspect first script or pickle to determine legacy/CA mode
 if opts.scripts:
    from AthenaCommon.Utils.unixtools import FindFile
-   path_list = ['./'] + os.environ.get('PYTHONPATH', '').split(os.pathsep)
+   path_list = ['./'] + os.environ.get('PYTHONPATH', '').split(os.pathsep) + os.environ.get('JOBOPTSEARCHPATH', '').split(os.pathsep)
    file_path = FindFile( os.path.expanduser( os.path.expandvars(opts.scripts[0]) ),
                          path_list, os.R_OK )
 
