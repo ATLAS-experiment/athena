@@ -170,14 +170,6 @@ def createActsLegacyTrackingPassFlags():
     return icf
 
 
-
-def setActsDefaultTunings(icf):
-    icf.PixelSeedingStrategy = SeedingStrategy.Gbts
-    # Custom values for config flags
-    icf.Xi2max = [25]
-    icf.Xi2maxNoAdd = [25]
-
-
 # Main ACTS Tracking pass with Heavy Ion configuration
 def createActsHeavyIonTrackingPassFlags():
     icf = createActsTrackingPassFlags()
