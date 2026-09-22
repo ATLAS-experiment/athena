@@ -23,7 +23,7 @@ def getfunc():
 @AccumulatorCache
 def FixFromAMITag(flags):
     doFixFromAMITags = []
-
+    ##The pickle were created from the .txt files, and those were done by looping on the AMI info and taking appart the merge reco tag, the part related to the Ambiguity tag (i.e. with release between 24.0.00 to 24.0.83) and the ones that will not need the timing fix (i.e. with release between 23.0.00 to 23.0.12) if anyone need one of those release with a newer tag it would be needed to be applied in the pickle file.
 
     msg=logging.getLogger("listOfRecoReleases")
     from PyUtils.AMITagHelperConfig import inputAMITags
