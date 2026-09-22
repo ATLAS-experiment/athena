@@ -51,9 +51,9 @@ StatusCode AthenaPoolCnvSvc::initialize() {
       ATH_MSG_ERROR(std::format("Invalid PoolContainerNamingScheme: {}, see APRDefaults.h for the full list.", m_containerNamingSchemeProp.value()));
       return StatusCode::FAILURE;
    }
-   // Extracting INPUT POOL ItechnologySpecificAttributes for Domain, Database and Container.
+   // Extracting INPUT POOL attributes for Domain, Database and Container.
    extractPoolAttributes(m_inputPoolAttr, &m_inputAttr, &m_inputAttr, &m_inputAttr);
-   // Extracting the INPUT POOL ItechnologySpecificAttributes which are to be printed for each event
+   // Extracting the INPUT POOL attributes which are to be printed for each event
    extractPoolAttributes(m_inputPoolAttrPerEvent, &m_inputAttrPerEvent, &m_inputAttrPerEvent, &m_inputAttrPerEvent);
    // Setup incident for ProcessEventAttributes to process attributes on each event
    ServiceHandle<IIncidentSvc> incSvc("IncidentSvc", name());
@@ -236,7 +236,7 @@ StatusCode AthenaPoolCnvSvc::connectOutput(const std::string& outputConnectionSp
    }
    std::unique_lock<std::mutex> lock(m_mutex);
    if (m_processedContextIds.insert(contextId).second) {
-      // Extracting OUTPUT POOL ItechnologySpecificAttributes for Domain, Database and Container.
+      // Extracting OUTPUT POOL attributes for Domain, Database and Container.
       extractPoolAttributes(m_poolAttr, &m_containerAttr, &m_databaseAttr, &m_domainAttr);
    }
    if (!processPoolAttributes(m_domainAttr, outputConnection, contextId).isSuccess()) {

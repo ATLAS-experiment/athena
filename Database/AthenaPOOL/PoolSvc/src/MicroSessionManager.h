@@ -8,7 +8,6 @@
 #include <string>
 #include <set>
 
-#include "ITechnologySpecificAttributes.h"
 #include "StorageSvc/pool.h"
 
 namespace pool {
@@ -28,7 +27,7 @@ namespace pool {
    *
    */
 
-  class MicroSessionManager : virtual public ITechnologySpecificAttributes {
+  class MicroSessionManager {
   public:
     /// Constructor
     MicroSessionManager( DatabaseRegistry& registry, long technology );
@@ -52,18 +51,17 @@ namespace pool {
     /// Fetches the FID by trying to temporatily connect to a database.
     std::string fidForPfn( const std::string& pfn );
 
-  protected:
     virtual
     bool attributeOfType( const std::string& attributeName,
                           void* data,
                           const std::type_info& typeInfo,
-                          const std::string& option ) override;
+                          const std::string& option );
 
     virtual
     bool setAttributeOfType( const std::string& attributeName,
                              const void* data,
                              const std::type_info& typeInfo,
-                             const std::string& option ) override;
+                             const std::string& option );
 
   private:
     DatabaseRegistry&          m_registry;

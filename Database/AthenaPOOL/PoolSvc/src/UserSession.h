@@ -89,12 +89,8 @@ namespace pool {
     /// Returns the file catalog in use
     virtual IFileCatalog& fileCatalog();
 
-    /// Returns the object holding the technology specific attributes for a given technology domain
-    virtual  ITechnologySpecificAttributes&
-    technologySpecificAttributes( long technology ) override final;
-
     /// Returns the technology given a technology type.
-    MicroSessionManager& microSessionManager( long technology );
+    MicroSessionManager& microSessionManager( long technology ) override final;
 
   private:
     IFileCatalog*                  m_catalog;
