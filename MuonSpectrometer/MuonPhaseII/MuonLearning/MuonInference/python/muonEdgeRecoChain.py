@@ -96,6 +96,7 @@ def main(args):
             "DropIsolatedNodesBeforeInference": (
                 not args.keepIsolatedNodesBeforeInference
             ),
+            "EnableTruthDiagnostics": args.truthDiagnostics,
         }
         if args.maxDeltaThetaDeg is not None:
             edge_classifier_kwargs["MaxDeltaThetaDeg"] = args.maxDeltaThetaDeg
@@ -111,10 +112,13 @@ def main(args):
             "AnchorInnermostLayer": args.anchorInnermostLayer,
             "MinSegmentsPerComponent": args.minSegmentsPerComponent,
             "KeepBestSegmentPerChamber": not args.keepAllSegmentsPerChamber,
+            "EnableTruthDiagnostics": args.truthDiagnostics,
             "OutputLevel": output_level,
         }
         if filter_segment_container:
             edge_inference_kwargs["FilteredSegmentKey"] = filtered_segment_key
+        if args.truthDiagnostics and not flags.Input.isMC:
+            print("WARNING: --truthDiagnostics requested on non-MC input.")
         cfg.merge(SegmentEdgeInferenceAlgCfg(flags, **edge_inference_kwargs))
 
     if run_ml_seeder and not run_edge_classifier:
@@ -204,6 +208,8 @@ if __name__ == "__main__":
                         help="Override the edge-building opening-angle gate (deg); 180 disables it")
     parser.add_argument("--athenaDebug", action="store_true",
                         help="Enable Athena DEBUG verbosity for inference and seeding components")
+    parser.add_argument("--truthDiagnostics", action="store_true", default=False,
+                        help="MC-only: DEBUG-log a truth-vs-background breakdown of the segment-edge selection.")
     parser.add_argument("--noPerfMon", default=False, action="store_true",
                         help="Disable performance monitoring")
     parser.add_argument("--edgeThreshold", type=float, default=0.975,
@@ -223,9 +229,9 @@ if __name__ == "__main__":
                         help="Restrict seed anchors to inner segment(s)")
     parser.add_argument("--minSegmentsPerComponent", type=int, default=2,
                         help="Require this many retained chambers in an ML component before seeding (default: 2)")
-    parser.add_argument("--maxSegmentsPerBucket", type=int, default=2,
+    parser.add_argument("--maxSegmentsPerBucket", type=int, default=0,
                         help="Keep at most this many best duplicate segments in each "
-                             "(sector,chamber,eta) bucket before ONNX; 0 keeps all")
+                             "(sector,chamber,eta) bucket before ONNX; 0 keeps all.")
     parser.add_argument("--maxEdgesBeforeInference", type=int, default=6,
                         help="Each node nominates this many geometrically best "
                              "undirected edges before ONNX; 0 keeps all")
@@ -242,9 +248,8 @@ if __name__ == "__main__":
                         help="Keep nodes with no retained pre-ONNX edge. Disabled by "
                              "default because isolated nodes cannot contribute to edge scores.")
     chamber_representatives = parser.add_mutually_exclusive_group()
-    chamber_representatives.add_argument(
-        "--keepAllSegmentsPerChamber", dest="keepAllSegmentsPerChamber", action="store_true", default=False,
-        help="Keep all ML component segments from a chamber")
+    chamber_representatives.add_argument("--keepAllSegmentsPerChamber", dest="keepAllSegmentsPerChamber", 
+                        action="store_true", default=True, help="Keep all ML component segments from a chamber")
     chamber_representatives.add_argument(
         "--keepBestSegmentPerChamber", dest="keepAllSegmentsPerChamber", action="store_false",
         help="Keep only the highest-ranked segment per chamber")
