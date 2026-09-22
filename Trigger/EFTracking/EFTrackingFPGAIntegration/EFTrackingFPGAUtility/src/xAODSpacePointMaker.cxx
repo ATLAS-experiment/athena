@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -134,7 +134,7 @@ StatusCode xAODSpacePointMaker::makePixelSpacePointContainer(
 
         // Create ElementLink to the pixel cluster
         if (measIdx >= 0 && static_cast<size_t>(measIdx) < pixelClusters->size()) {
-            ElementLink<xAOD::PixelClusterContainer> link(*pixelClusters, measIdx);
+            ElementLink<xAOD::PixelClusterContainer> link(*pixelClusters, measIdx, ctx);
             static const SG::Decorator<ElementLink<xAOD::PixelClusterContainer>> dec("fpgaPixelClusterLink");
             dec(*sp) = link;
         }
@@ -309,8 +309,8 @@ StatusCode xAODSpacePointMaker::makeStripSpacePointContainer(
             meas_idx2 >= 0 && static_cast<size_t>(meas_idx2) < stripClusters->size()) {
             
             // Create ElementLinks to the strip clusters
-            ElementLink<xAOD::StripClusterContainer> link1(*stripClusters, meas_idx1);
-            ElementLink<xAOD::StripClusterContainer> link2(*stripClusters, meas_idx2);
+            ElementLink<xAOD::StripClusterContainer> link1(*stripClusters, meas_idx1, ctx);
+            ElementLink<xAOD::StripClusterContainer> link2(*stripClusters, meas_idx2, ctx);
             
             // Store the links as auxiliary data
             static const SG::Decorator<ElementLink<xAOD::StripClusterContainer>> dec1("fpgaStripClusterLink1");
