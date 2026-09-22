@@ -6,7 +6,6 @@
 #include "../PFTrackClusterMatchingTool.h"
 #include "../eflowCellEOverPTool_Run2_mc20_JetETMiss.h"
 #include "../PFCellEOverPTool.h"
-#include "../eflowCellEOverPTool_mc12_HLLHC.h"
 #include "../PFLeptonSelector.h"
 #include "../PFTrackSelector.h"
 #include "../PFClusterSelectorTool.h"
@@ -57,7 +56,6 @@ DECLARE_COMPONENT( eflowTrackCaloExtensionTool )
 DECLARE_COMPONENT( PFTrackClusterMatchingTool )
 DECLARE_COMPONENT( PFCellEOverPTool)
 DECLARE_COMPONENT( eflowCellEOverPTool_Run2_mc20_JetETMiss)
-DECLARE_COMPONENT(  eflowCellEOverPTool_mc12_HLLHC)
 DECLARE_COMPONENT( PFMuonFlowElementAssoc )
 DECLARE_COMPONENT( PFEGamFlowElementAssoc )
 DECLARE_COMPONENT( PFTauFlowElementAssoc )

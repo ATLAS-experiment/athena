@@ -85,14 +85,10 @@ def getPFCellLevelSubtractionTool(inputFlags,toolName):
         eflowCellEOverPTool_Run2_mc20_JetETMiss = CompFactory.eflowCellEOverPTool_Run2_mc20_JetETMiss
         PFCellLevelSubtractionTool.eflowCellEOverPTool = eflowCellEOverPTool_Run2_mc20_JetETMiss()
     else:
-        if inputFlags.PF.useLegacyEOverPRun4:
-            eflowCellEOverPTool_mc12_HLLHC = CompFactory.eflowCellEOverPTool_mc12_HLLHC
-            PFCellLevelSubtractionTool.eflowCellEOverPTool = eflowCellEOverPTool_mc12_HLLHC ()
-        else:
-            PFCellEOverPTool = CompFactory.PFCellEOverPTool
-            PFCellLevelSubtractionTool.eflowCellEOverPTool = PFCellEOverPTool("PFCellEOverPTool", referenceFileLocation = inputFlags.PF.EOverP_CellOrdering_ReferenceLocation)
-            #this should always be false for any reference derived, except eflowCellEOverPTool_mc12_HLLHC.h or eflowCellEOverPTool_Run2_mc20_JetETMiss.h
-            PFCellLevelSubtractionTool.useLegacyEBinIndex=False
+        PFCellEOverPTool = CompFactory.PFCellEOverPTool
+        PFCellLevelSubtractionTool.eflowCellEOverPTool = PFCellEOverPTool("PFCellEOverPTool", referenceFileLocation = inputFlags.PF.EOverP_CellOrdering_ReferenceLocation)
+        #this should always be false for any reference derived, except eflowCellEOverPTool_mc12_HLLHC.h or eflowCellEOverPTool_Run2_mc20_JetETMiss.h
+        PFCellLevelSubtractionTool.useLegacyEBinIndex=False
 
     if(inputFlags.PF.EOverPMode):
         PFCellLevelSubtractionTool.CalcEOverP = True
@@ -139,14 +135,10 @@ def getPFUnifiedCellLevelMatchingTool(inputFlags,toolName):
         eflowCellEOverPTool_Run2_mc20_JetETMiss = CompFactory.eflowCellEOverPTool_Run2_mc20_JetETMiss
         PFUnifiedCellLevelMatchingTool.eflowCellEOverPTool = eflowCellEOverPTool_Run2_mc20_JetETMiss()
     else:
-        if inputFlags.PF.useLegacyEOverPRun4:
-            eflowCellEOverPTool_mc12_HLLHC = CompFactory.eflowCellEOverPTool_mc12_HLLHC 
-            PFUnifiedCellLevelMatchingTool.eflowCellEOverPTool = eflowCellEOverPTool_mc12_HLLHC ()
-        else:
-            PFCellEOverPTool = CompFactory.PFCellEOverPTool
-            PFUnifiedCellLevelMatchingTool.eflowCellEOverPTool = PFCellEOverPTool("PFCellEOverPTool", referenceFileLocation = inputFlags.PF.EOverP_CellOrdering_ReferenceLocation)
-            #this should always be false for any reference derived, except eflowCellEOverPTool_mc12_HLLHC.h or eflowCellEOverPTool_Run2_mc20_JetETMiss.h
-            PFUnifiedCellLevelMatchingTool.useLegacyEBinIndex=False
+        PFCellEOverPTool = CompFactory.PFCellEOverPTool
+        PFUnifiedCellLevelMatchingTool.eflowCellEOverPTool = PFCellEOverPTool("PFCellEOverPTool", referenceFileLocation = inputFlags.PF.EOverP_CellOrdering_ReferenceLocation)
+        #this should always be false for any reference derived, except eflowCellEOverPTool_mc12_HLLHC.h or eflowCellEOverPTool_Run2_mc20_JetETMiss.h
+        PFUnifiedCellLevelMatchingTool.useLegacyEBinIndex=False
 
     if(inputFlags.PF.EOverPMode):
         PFUnifiedCellLevelMatchingTool.nClusterMatchesToUse = -1
@@ -179,14 +171,10 @@ def getPFUnifiedCellLevelSubtractionOnlyTool(inputFlags,toolName):
         eflowCellEOverPTool_Run2_mc20_JetETMiss = CompFactory.eflowCellEOverPTool_Run2_mc20_JetETMiss
         PFUnifiedCellLevelSubtractionOnlyTool.eflowCellEOverPTool = eflowCellEOverPTool_Run2_mc20_JetETMiss()
     else:
-        if inputFlags.PF.useLegacyEOverPRun4:
-            eflowCellEOverPTool_mc12_HLLHC = CompFactory.eflowCellEOverPTool_mc12_HLLHC 
-            PFUnifiedCellLevelSubtractionOnlyTool.eflowCellEOverPTool = eflowCellEOverPTool_mc12_HLLHC ()
-        else:
-            PFCellEOverPTool = CompFactory.PFCellEOverPTool
-            PFUnifiedCellLevelSubtractionOnlyTool.eflowCellEOverPTool = PFCellEOverPTool("PFCellEOverPTool", referenceFileLocation = inputFlags.PF.EOverP_CellOrdering_ReferenceLocation)
-            #this should always be false for any reference derived, except eflowCellEOverPTool_mc12_HLLHC.h or eflowCellEOverPTool_Run2_mc20_JetETMiss.h
-            PFUnifiedCellLevelSubtractionOnlyTool.useLegacyEBinIndex=False
+        PFCellEOverPTool = CompFactory.PFCellEOverPTool
+        PFUnifiedCellLevelSubtractionOnlyTool.eflowCellEOverPTool = PFCellEOverPTool("PFCellEOverPTool", referenceFileLocation = inputFlags.PF.EOverP_CellOrdering_ReferenceLocation)
+        #this should always be false for any reference derived, except eflowCellEOverPTool_mc12_HLLHC.h or eflowCellEOverPTool_Run2_mc20_JetETMiss.h
+        PFUnifiedCellLevelSubtractionOnlyTool.useLegacyEBinIndex=False
 
     if(inputFlags.PF.EOverPMode):
         PFUnifiedCellLevelSubtractionOnlyTool.CalcEOverP = True
@@ -211,14 +199,10 @@ def getPFRecoverSplitShowersTool(inputFlags,toolName):
         eflowCellEOverPTool_Run2_mc20_JetETMiss = CompFactory.eflowCellEOverPTool_Run2_mc20_JetETMiss
         PFRecoverSplitShowersTool.eflowCellEOverPTool = eflowCellEOverPTool_Run2_mc20_JetETMiss("eflowCellEOverPTool_Run2_mc20_JetETMiss_Recover")
     else:
-        if inputFlags.PF.useLegacyEOverPRun4:
-            eflowCellEOverPTool_mc12_HLLHC = CompFactory.eflowCellEOverPTool_mc12_HLLHC
-            PFRecoverSplitShowersTool.eflowCellEOverPTool = eflowCellEOverPTool_mc12_HLLHC ()
-        else:
-            PFCellEOverPTool = CompFactory.PFCellEOverPTool
-            PFRecoverSplitShowersTool.eflowCellEOverPTool = PFCellEOverPTool("PFCellEOverPTool_Recover", referenceFileLocation = inputFlags.PF.EOverP_CellOrdering_ReferenceLocation)
-            #this should always be false for any reference derived, except eflowCellEOverPTool_mc12_HLLHC.h or eflowCellEOverPTool_Run2_mc20_JetETMiss.h
-            PFRecoverSplitShowersTool.useLegacyEBinIndex=False
+        PFCellEOverPTool = CompFactory.PFCellEOverPTool
+        PFRecoverSplitShowersTool.eflowCellEOverPTool = PFCellEOverPTool("PFCellEOverPTool_Recover", referenceFileLocation = inputFlags.PF.EOverP_CellOrdering_ReferenceLocation)
+        #this should always be false for any reference derived, except eflowCellEOverPTool_mc12_HLLHC.h or eflowCellEOverPTool_Run2_mc20_JetETMiss.h
+        PFRecoverSplitShowersTool.useLegacyEBinIndex=False
 
     PFRecoverSplitShowersTool.RecoverSplitShowers = True
 
@@ -239,14 +223,10 @@ def getPFUnifiedRecoverSplitShowersMatchingTool(inputFlags,toolName):
         eflowCellEOverPTool_Run2_mc20_JetETMiss = CompFactory.eflowCellEOverPTool_Run2_mc20_JetETMiss
         PFUnifiedRecoverSplitShowersMatchingTool.eflowCellEOverPTool = eflowCellEOverPTool_Run2_mc20_JetETMiss("eflowCellEOverPTool_Run2_mc20_JetETMiss_Recover")
     else:
-        if inputFlags.PF.useLegacyEOverPRun4:
-            eflowCellEOverPTool_mc12_HLLHC = CompFactory.eflowCellEOverPTool_mc12_HLLHC 
-            PFUnifiedRecoverSplitShowersMatchingTool.eflowCellEOverPTool = eflowCellEOverPTool_mc12_HLLHC ()
-        else:
-            PFCellEOverPTool = CompFactory.PFCellEOverPTool
-            PFUnifiedRecoverSplitShowersMatchingTool.eflowCellEOverPTool = PFCellEOverPTool("PFCellEOverPTool_Recover", referenceFileLocation = inputFlags.PF.EOverP_CellOrdering_ReferenceLocation)
-            #this should always be false for any reference derived, except eflowCellEOverPTool_mc12_HLLHC.h or eflowCellEOverPTool_Run2_mc20_JetETMiss.h
-            PFUnifiedRecoverSplitShowersMatchingTool.useLegacyEBinIndex=False
+        PFCellEOverPTool = CompFactory.PFCellEOverPTool
+        PFUnifiedRecoverSplitShowersMatchingTool.eflowCellEOverPTool = PFCellEOverPTool("PFCellEOverPTool_Recover", referenceFileLocation = inputFlags.PF.EOverP_CellOrdering_ReferenceLocation)
+        #this should always be false for any reference derived, except eflowCellEOverPTool_mc12_HLLHC.h or eflowCellEOverPTool_Run2_mc20_JetETMiss.h
+        PFUnifiedRecoverSplitShowersMatchingTool.useLegacyEBinIndex=False
 
     PFUnifiedRecoverSplitShowersMatchingTool.RecoverSplitShowers = True
 
@@ -264,14 +244,10 @@ def getPFUnifiedRecoverSplitShowersSubtractionOnlyTool(inputFlags,toolName):
         eflowCellEOverPTool_Run2_mc20_JetETMiss = CompFactory.eflowCellEOverPTool_Run2_mc20_JetETMiss
         PFUnifiedRecoverSplitShowersSubtractionOnlyTool.eflowCellEOverPTool = eflowCellEOverPTool_Run2_mc20_JetETMiss("eflowCellEOverPTool_Run2_mc20_JetETMiss_Recover")
     else:
-        if inputFlags.PF.useLegacyEOverPRun4:
-            eflowCellEOverPTool_mc12_HLLHC = CompFactory.eflowCellEOverPTool_mc12_HLLHC 
-            PFUnifiedRecoverSplitShowersSubtractionOnlyTool.eflowCellEOverPTool = eflowCellEOverPTool_mc12_HLLHC ()
-        else:
-            PFCellEOverPTool = CompFactory.PFCellEOverPTool
-            PFUnifiedRecoverSplitShowersSubtractionOnlyTool.eflowCellEOverPTool = PFCellEOverPTool("PFCellEOverPTool_Recover", referenceFileLocation = inputFlags.PF.EOverP_CellOrdering_ReferenceLocation)
-            #this should always be false for any reference derived, except eflowCellEOverPTool_mc12_HLLHC.h or eflowCellEOverPTool_Run2_mc20_JetETMiss.h
-            PFUnifiedRecoverSplitShowersSubtractionOnlyTool.useLegacyEBinIndex=False
+        PFCellEOverPTool = CompFactory.PFCellEOverPTool
+        PFUnifiedRecoverSplitShowersSubtractionOnlyTool.eflowCellEOverPTool = PFCellEOverPTool("PFCellEOverPTool_Recover", referenceFileLocation = inputFlags.PF.EOverP_CellOrdering_ReferenceLocation)
+        #this should always be false for any reference derived, except eflowCellEOverPTool_mc12_HLLHC.h or eflowCellEOverPTool_Run2_mc20_JetETMiss.h
+        PFUnifiedRecoverSplitShowersSubtractionOnlyTool.useLegacyEBinIndex=False
 
     PFUnifiedRecoverSplitShowersSubtractionOnlyTool.RecoverSplitShowers = True
 
