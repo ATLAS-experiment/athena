@@ -204,7 +204,7 @@ StatusCode TrackTimeExtensionAlg::decorateTrackParticle(
           trk_state->fitQualityOnSurface().doubleNumberDoF());
 
       const HGTD_ClusterOnTrack* cot =
-          dynamic_cast<const HGTD_ClusterOnTrack*>(trk_state->measurementOnTrack());
+          static_cast<const HGTD_ClusterOnTrack*>(trk_state->measurementOnTrack());
 
       time_vec.emplace_back(cot->time());
 
