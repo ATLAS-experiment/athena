@@ -1,10 +1,11 @@
+
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // PhysValMET.h 
 // Header file for class PhysValMET
-// Author: Daniel Buescher <daniel.buescher@cern.ch>, Philipp Mogg <philipp.mogg@cern.ch>
+// Contact: atlas-cp-jetetmiss-jsv-conveners@cern.ch
 /////////////////////////////////////////////////////////////////// 
 #ifndef MISSINGETDQA_PHYSVALMET_H
 #define MISSINGETDQA_PHYSVALMET_H 1
@@ -102,13 +103,13 @@ class PhysValMET
   bool Accept(const xAOD::Jet* jet, double JvtCut, ToolHandle<IJetUpdateJvt>* jvtTool);
 
   // vector of collections
-  std::vector <std::string> m_types;
+  std::vector <std::string> m_jet_types;
 
   // vector of terms
   std::vector <std::string> m_terms;
 
   // Map for names
-  std::map <std::string,std::string> m_names;
+  std::map <std::string,std::string> m_term_names;
 
   // Hists
   TH1D *m_MET_Track = nullptr, *m_MET_Track_x = nullptr, *m_MET_Track_y = nullptr, *m_MET_Track_phi = nullptr, *m_MET_Track_sum = nullptr;
@@ -117,38 +118,26 @@ class PhysValMET
   TH1D *m_MET_Calo = nullptr, *m_MET_Calo_x = nullptr, *m_MET_Calo_y = nullptr, *m_MET_Calo_phi = nullptr, *m_MET_Calo_sum = nullptr;
 
   //Maps
-  std::map<std::string,std::vector<TH1D*> > m_MET_Ref;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Ref_x;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Ref_y;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Ref_phi;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Ref_sum;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_Ref;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_Ref_x;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_Ref_y;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_Ref_phi;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_Ref_sum;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Cumu_Ref;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Resolution_Ref;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Significance_Ref;
-  std::map<std::string,std::vector<TH1D*> > m_MET_dPhi_Ref;
-  std::map<std::string,std::vector<TH2D*> > m_MET_CorrFinalTrk_Ref;
-  std::map<std::string,std::vector<TH2D*> > m_MET_CorrFinalClus_Ref;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Reb;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Reb_x;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Reb_y;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Reb_phi;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Reb_sum;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_Reb;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_Reb_x;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_Reb_y;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_Reb_phi;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_Reb_sum;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Cumu_Reb;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Resolution_Reb;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Significance_Reb;
-  std::map<std::string,std::vector<TH1D*> > m_MET_dPhi_Reb;
-  std::map<std::string,std::vector<TH2D*> > m_MET_CorrFinalTrk_Reb;
-  std::map<std::string,std::vector<TH2D*> > m_MET_CorrFinalClus_Reb;
+  std::map<std::string,std::vector<TH1D*> > m_MET;
+  std::map<std::string,std::vector<TH1D*> > m_MET_x;
+  std::map<std::string,std::vector<TH1D*> > m_MET_y;
+  std::map<std::string,std::vector<TH1D*> > m_MET_phi;
+  std::map<std::string,std::vector<TH1D*> > m_MET_sum;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Diff;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_x;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_y;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_phi;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_sum;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Cumu;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Resolution;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Significance;
+  std::map<std::string,std::vector<TH1D*> > m_MET_dPhi;
+  std::map<std::string,std::vector<TH2D*> > m_MET_CorrFinalTrk;
+  std::map<std::string,std::vector<TH2D*> > m_MET_CorrFinalClus;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Kinematic_pt;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Kinematic_eta;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Kinematic_phi;
+  std::map<std::string,std::vector<TH1D*> > m_MET_multi;
 
   std::vector<std::string> m_dir_met;
 
@@ -166,3 +155,4 @@ class PhysValMET
 }
 
 #endif //> !MISSINGETDQA_PHYSVALMET_H
+
