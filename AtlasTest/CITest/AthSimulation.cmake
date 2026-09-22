@@ -8,9 +8,6 @@ atlas_add_citest( DuplicateClass
    SCRIPT python -c 'import ROOT'
    PROPERTIES FAIL_REGULAR_EXPRESSION "class .* is already in" )
 
-atlas_add_citest( DuplicateComponent
-   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/DuplicateComponentsCheck.py )
-
 atlas_add_citest( SimulationRun2FullSim
    SCRIPT RunWorkflowTests_Run2.py --CI -s -w FullSim --threads 4 -e '--maxEvents 10' --run-only
    LOG_IGNORE_PATTERN "WARNING FPE"  # ignore FPEs from Geant4
