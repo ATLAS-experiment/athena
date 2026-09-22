@@ -959,7 +959,7 @@ std::unique_ptr<TFile> openRootFile(fbtTestToyMC_config &config) {
   gSystem->mkdir(outputdirname.c_str());
   rootfilename = outputdirname+"/output.root";
   
-  config.outputdirname = outputdirname;
+  config.outputdirname = std::move(outputdirname);
 
   std::unique_ptr<TFile> f_out(TFile::Open(rootfilename.c_str(),"RECREATE"));
 
