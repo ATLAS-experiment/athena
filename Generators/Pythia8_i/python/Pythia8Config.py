@@ -211,7 +211,7 @@ def Pythia8_A2_MSTW2008LO_EvtGen_Common_Cfg(flags, **kwargs):
     ca = Pythia8_A2_MSTW2008LO_Common_Cfg(flags, **kwargs)
 
     # Add EvtGen
-    ca.merge(Pythia8EvtGenBaseCfg(flags, **kwargs))
+    ca.merge(Pythia8EvtGenBaseCfg(flags))
 
     return ca
 
@@ -226,7 +226,7 @@ def Pythia8_A14_NNPDF23LO_EvtGen_Common_Cfg(flags, **kwargs):
     ca = Pythia8_A14_NNPDF23LO_Common_Cfg(flags, **kwargs)
 
     # Add EvtGen
-    ca.merge(Pythia8EvtGenBaseCfg(flags, **kwargs))
+    ca.merge(Pythia8EvtGenBaseCfg(flags))
 
     return ca
 
