@@ -935,11 +935,12 @@ Acts::Result<void> HGTDTrackExtensionAlg::extrapolateTrackToReferenceSurface(
               << distance << " with direction " << options.direction
               << " with starting parameters " << parameters);
 
-  auto state = propagator.makeState<decltype(options), Acts::ForcedSurfaceReached>(referenceSurface, options);
+  auto state = propagator.makeState<decltype(options), Acts::ForcedSurfaceReached>(options);
   ExpectedLayerPattern*& collectorResult = state.get<HGTDTrackExtensionAlg::ExpectedLayerPattern*>();
   collectorResult = &expectedLayerPattern;
 
-  auto initRes = propagator.initialize(state, parameters);
+  auto initRes = propagator.initialize<decltype(state), Acts::ForcedSurfaceReached>(
+      state, parameters, &referenceSurface);
   if(!initRes.ok()) {
     ATH_MSG_WARNING("Failed to initialize propagation state: " << initRes.error().message());
     return initRes.error();

@@ -64,13 +64,13 @@ const Acts::PlaneSurface& SpectrometerSector::surface() const {
 }
 
 
-const Amg::Transform3D& SpectrometerSector::localToGlobalTransform(const Acts::GeometryContext& tgContext) const{
+const Amg::Isometry3D& SpectrometerSector::localToGlobalTransform(const Acts::GeometryContext& tgContext) const{
     return surface().localToGlobalTransform(tgContext); 
 }
 Amg::Transform3D SpectrometerSector::globalToLocalTransform(const Acts::GeometryContext& tgContext) const{
     return localToGlobalTransform(tgContext).inverse(); 
 }
-const Amg::Transform3D& SpectrometerSector::localToGlobalTransform(const ActsTrk::GeometryContext& gctx) const {
+const Amg::Isometry3D& SpectrometerSector::localToGlobalTransform(const ActsTrk::GeometryContext& gctx) const {
     return surface().localToGlobalTransform(gctx.context());
 }            
 Amg::Transform3D SpectrometerSector::globalToLocalTransform(const ActsTrk::GeometryContext& gctx) const {

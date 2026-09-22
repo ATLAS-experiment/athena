@@ -124,7 +124,7 @@ namespace ActsTrk {
         tiltx =  beamspot_data->beamTilt(0);
         tilty =  beamspot_data->beamTilt(1);
      }
-     Amg::Transform3D trf = Amg::getTranslate3D(beamspot) * 
+     Amg::Isometry3D trf = Amg::getTranslate3D(beamspot) * 
                             Amg::getRotateY3D(tilty) *
                             Amg::getRotateX3D(tiltx);
      return Acts::Surface::makeShared<Acts::PerigeeSurface>(trf);

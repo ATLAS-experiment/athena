@@ -265,7 +265,7 @@ MuonBlueprintNodeBuilder::buildMuonNode(const Acts::GeometryContext& gctx,
     ATH_MSG_DEBUG("Inner radius: " << innerRadius<<", outer radius: " << outerRadius
                  <<", max Z: " << maxZ<<", min Z: " << minZ<<", half length Z: " << halfLengthZ);
 
-    Amg::Transform3D trf = Amg::getTranslateZ3D(halfLengthZ + minZ);
+    Amg::Isometry3D trf = Amg::getTranslateZ3D(halfLengthZ + minZ);
 
     auto bounds = boundsFactory.makeBounds<Acts::CylinderVolumeBounds>(innerRadius, outerRadius, halfLengthZ);
     auto volume = std::make_unique<Acts::TrackingVolume>(trf, bounds, name);
@@ -542,7 +542,7 @@ MuonBlueprintNodeBuilder::getPassiveMaterialSurfaces(
       if(rejectBIS78(el->readoutEles().front())){
         continue;
       }
-      const Amg::Transform3D& locToGlobal = el->localToGlobalTransform(*context);
+      const auto& locToGlobal = el->localToGlobalTransform(*context);
       const auto& bounds = el->bounds();
       for(const auto& surface : bounds->orientedSurfaces(locToGlobal)){
         const auto& surfaceRepr = (*surface.surface);
@@ -555,7 +555,7 @@ MuonBlueprintNodeBuilder::getPassiveMaterialSurfaces(
 
     }
     double halfZ = 0.5*std::abs(maxZ-minZ);  
-    Amg::Transform3D trf = Amg::Transform3D::Identity();
+    Amg::Isometry3D trf = Amg::Isometry3D::Identity();
     double zShift{0.};
     // the chambers are groupd per chamber index and detector region(side) - 
     // we can use the first one for the distinction

@@ -8,7 +8,7 @@
 #include <mutex>
 namespace{
     std::mutex s_ticketMutex{};
-    static const Amg::Transform3D dummy{Amg::Transform3D::Identity()};
+    static const Amg::Isometry3D dummy = Amg::Isometry3D::Identity();
 }
 
 namespace ActsTrk::detail {
@@ -37,7 +37,7 @@ namespace ActsTrk::detail {
               LazyStorage_t store(size);
               return store;
             } case Block: {
-               TrfVec_t trfStore(size, Amg::Transform3D::Identity());
+               TrfVec_t trfStore(size, Amg::Isometry3D::Identity());
                CheckVec_t isSet(size, 0);
                return std::make_pair(std::move(trfStore), std::move(isSet));
             }
@@ -53,8 +53,8 @@ namespace ActsTrk::detail {
         m_detType{other.detectorType()} {
         if (mode() == Mode::Block){
             for (std::size_t t = 0; t < size(); ++t) {
-                if (const Amg::Transform3D* copyMe = other.getTransform(t); copyMe != nullptr) {
-                    setTransform(t, Amg::Transform3D{*copyMe});
+                if (const Amg::Isometry3D* copyMe = other.getTransform(t); copyMe != nullptr) {
+                    setTransform(t, Amg::Isometry3D{*copyMe});
                 }
             }
         }
@@ -66,9 +66,9 @@ namespace ActsTrk::detail {
             m_detType = other.detectorType();
             if (mode() == Mode::Block){
               for (std::size_t t = 0; t < size(); ++t) {
-                if (const Amg::Transform3D* copyMe = other.getTransform(t); 
+                if (const Amg::Isometry3D* copyMe = other.getTransform(t); 
                     copyMe != nullptr) {
-                    setTransform(t, Amg::Transform3D{*copyMe});
+                    setTransform(t, Amg::Isometry3D{*copyMe});
                 }
               }
             }
@@ -76,11 +76,11 @@ namespace ActsTrk::detail {
         return (*this);
     }
     DetectorType TransformStore::detectorType() const { return m_detType; }
-    const Amg::Transform3D& TransformStore::setTransform(const unsigned ticketNo, Amg::Transform3D && trf) const {
-      return std::visit([&](auto& store) -> const Amg::Transform3D& {
+    const Amg::Isometry3D& TransformStore::setTransform(const unsigned ticketNo, Amg::Isometry3D && trf) const {
+      return std::visit([&](auto& store) -> const Amg::Isometry3D& {
           using Store_t = std::decay_t<decltype(store)>;
           if constexpr(std::is_same_v<Store_t, LazyStorage_t>){
-              return (*store.at(ticketNo).set(std::make_unique<Amg::Transform3D>(std::move(trf))));
+              return (*store.at(ticketNo).set(std::make_unique<Amg::Isometry3D>(std::move(trf))));
           } else if constexpr( std::is_same_v<Store_t, BlockStorage_t>) {
               THROW_EXCEPTION("The transform store "<<(*this)<<" has been initialized with"
                             <<" block storage caching. Cannot assign "<<ticketNo<<".");
@@ -102,11 +102,11 @@ namespace ActsTrk::detail {
        }, m_storage);
     }
 
-    const Amg::Transform3D& TransformStore::setTransform(const unsigned ticketNo, Amg::Transform3D && trf) {
-        return std::visit([&](auto& store) -> const Amg::Transform3D& {
+    const Amg::Isometry3D& TransformStore::setTransform(const unsigned ticketNo, Amg::Isometry3D && trf) {
+        return std::visit([&](auto& store) -> const Amg::Isometry3D& {
           using Store_t = std::decay_t<decltype(store)>;
           if constexpr(std::is_same_v<Store_t, LazyStorage_t>) {
-              return (*store.at(ticketNo).set(std::make_unique<Amg::Transform3D>(std::move(trf))));
+              return (*store.at(ticketNo).set(std::make_unique<Amg::Isometry3D>(std::move(trf))));
           } else if constexpr(std::is_same_v<Store_t, BlockStorage_t>) {
             store.second.at(ticketNo) = true;
             return (store.first.at(ticketNo) = std::move(trf));

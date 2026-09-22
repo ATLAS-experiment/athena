@@ -423,7 +423,7 @@ bool ISF::ActsFatrasSimTool::checkStartSurface(const Acts::MagneticFieldContext&
               << startParameters.momentum().transpose());
   auto state = chargedPropagator.makeState(options);
   ATH_MSG_VERBOSE(name() << "::" << __FUNCTION__ << " Created propagator state. Now initializing with start parameters.");
-  auto initResult = chargedPropagator.initialize(state, startParameters);
+  auto initResult = chargedPropagator.initialize(state, startParameters, nullptr);
   if (!initResult.ok()) {
     ATH_MSG_WARNING(name() << "::" << __FUNCTION__ << " Failed to initialize propagator state: " 
                 << initResult.error().message());

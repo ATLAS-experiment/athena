@@ -201,8 +201,8 @@ double MdtCalibInput::readOutSide() const {
       }, m_RE);
    return roSide;
 }
-const Amg::Transform3D& MdtCalibInput::localToGlobal() const {
-   return std::visit([this](const auto& re) ->const Amg::Transform3D&{
+Amg::Transform3D MdtCalibInput::localToGlobal() const {
+   return std::visit([this](const auto& re) -> Amg::Transform3D {
          using REType = std::decay_t<decltype(re)>;
          if constexpr(std::is_same_v<REType, const MuonGMR4::MdtReadoutElement*>){
             assert(m_gctx != nullptr);

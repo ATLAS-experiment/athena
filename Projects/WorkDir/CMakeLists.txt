@@ -64,6 +64,11 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/ActsOverride.cmake)
 # Find the project that we depend on:
 find_package( ${ATLAS_PROJECT} REQUIRED )
 
+# The exported CoralUtilitiesLib target links chai::container, but the
+# project configuration does not find chai. Find it here, so that the
+# imported targets resolve.
+find_package( chai QUIET )
+
 # Set up the project with its version and baseline languages.
 project( WorkDir VERSION ${${ATLAS_PROJECT}_VERSION} LANGUAGES C CXX )
 

@@ -430,7 +430,7 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
             chambArgs.detEles = std::move(detEles);
             chambArgs.bounds = chamberBox;
             chambArgs.placement = std::make_unique<ActsTrk::VolumePlacement>(*refEle, chamberCentre);
-            auto surface = Acts::Surface::makeShared<Acts::PlaneSurface>(Amg::Transform3D::Identity(), planeBounds);
+            auto surface = Acts::Surface::makeShared<Acts::PlaneSurface>(Amg::Isometry3D::Identity(), planeBounds);
             chambArgs.placement->connectCenterSurface(surface);
             chambArgs.surface = surface;
             const Chamber* newChamber {sectorArgs.chambers.emplace_back(std::make_unique<Chamber>(std::move(chambArgs))).get()};
@@ -452,7 +452,7 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
                                                                                volBoundSet, surfBoundSet, 2.* Gaudi::Units::cm);
 
          sectorArgs.bounds = envelopeBox;
-         sectorArgs.surface = Acts::Surface::makeShared<Acts::PlaneSurface>(toCenter.inverse() * envelopeCentre, envelopePlane);
+         sectorArgs.surface = Acts::Surface::makeShared<Acts::PlaneSurface>(Amg::toIsometry3D(toCenter.inverse() * envelopeCentre), envelopePlane);
 
          const Amg::Transform3D globalToSector = sectorArgs.surface->localToGlobalTransform(gctx.context()).inverse();
 

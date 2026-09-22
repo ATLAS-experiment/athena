@@ -6,6 +6,7 @@
 
 // ATHENA
 #include "GaudiKernel/IInterface.h"
+#include "GeoPrimitives/GeoPrimitivesHelpers.h"
 #include "TrkParticleBase/LinkToTrackParticleBase.h"
 #include "TrkLinks/LinkToXAODTrackParticle.h"
 #include "xAODTracking/TrackParticleContainer.h"
@@ -227,7 +228,8 @@ ActsTrk::IterativePriVtxFinderTool::findVertex(const EventContext& ctx,
   beamSpotConstraintVtx.setCovariance(beamSpotHandle->beamVtx().covariancePosition());
 
   std::shared_ptr<Acts::PerigeeSurface> perigeeSurface =
-    Acts::Surface::makeShared<Acts::PerigeeSurface>((trackVector[0])->parameters()->associatedSurface().transform());
+    Acts::Surface::makeShared<Acts::PerigeeSurface>(
+      Amg::toIsometry3D((trackVector[0])->parameters()->associatedSurface().transform()));
 
   // Get the magnetic field context
   const Acts::MagneticFieldContext magFieldContext = m_ctxProvider.getMagneticFieldContext(ctx);

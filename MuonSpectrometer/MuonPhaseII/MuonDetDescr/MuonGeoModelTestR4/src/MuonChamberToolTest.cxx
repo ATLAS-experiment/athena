@@ -916,7 +916,7 @@ namespace MuonGMR4 {
 
         });
         std::ranges::for_each(subVols, [&visualHelper, &gctx](const Acts::Volume* subVol) {
-                Acts::GeometryView3D::drawVolume(visualHelper,*subVol, gctx.context(), Amg::Transform3D::Identity(),
+                Acts::GeometryView3D::drawVolume(visualHelper,*subVol, gctx.context(), Amg::Isometry3D::Identity(),
                                                   Acts::s_viewPassive);
         });
         Acts::GeometryView3D::drawVolume(visualHelper, envelopeVol, gctx.context());
