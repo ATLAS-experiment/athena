@@ -1,8 +1,8 @@
 /*
    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef L0MuonS1RPC_RPCSIMULATION_H
-#define L0MuonS1RPC_RPCSIMULATION_H
+#ifndef L1MuonS1RPC_RPCSIMULATION_H
+#define L1MuonS1RPC_RPCSIMULATION_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AthenaMonitoringKernel/Monitored.h"
