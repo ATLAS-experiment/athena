@@ -164,6 +164,8 @@ def createActsLegacyTrackingPassFlags():
     icf.useITkStripSeeding = True
     icf.minPixel = [1]
     icf.maxHoles = [2]
+    icf.nHolesMax = icf.maxHoles
+    icf.nHolesGapMax = icf.maxHoles
     # Chi2 cut used together with 2 max. holes
     icf.Xi2max = [25.]
     icf.Xi2maxNoAdd = [25.]
@@ -174,6 +176,7 @@ def createActsLegacyTrackingPassFlags():
 def createActsHeavyIonTrackingPassFlags():
     icf = createActsTrackingPassFlags()
     icf.extension = "ActsHeavyIon"
+    icf.useITkStripSeeding = True
     icf.maxPrimaryImpact = [5.0 * Units.mm]
     icf.minPT            = lambda pcf : (
         [0.4 *Units.GeV * pcf.BField.configuredSolenoidFieldScale])
@@ -181,10 +184,12 @@ def createActsHeavyIonTrackingPassFlags():
         0.4 * Units.GeV * pcf.BField.configuredSolenoidFieldScale)
     icf.minClusters      = [6]
     icf.minSiNotShared   = [6]
-    icf.maxHoles = [2]
     icf.maxPixelHoles    = [1]
     icf.maxSctHoles      = [1]
     icf.maxDoubleHoles   = [0]
+    icf.maxHoles         = [2]
+    icf.nHolesMax = icf.maxHoles
+    icf.nHolesGapMax = icf.maxHoles
     icf.Xi2max           = [25.]
     icf.Xi2maxNoAdd      = [25.]
     icf.doBremRecoverySi = False
@@ -227,6 +232,8 @@ def createActsLargeRadiusTrackingPassFlags():
     icf.maxShared          = [2]
     icf.minPixel           = [0]
     icf.maxHoles           = [1]
+    icf.nHolesMax          = icf.maxHoles
+    icf.nHolesGapMax       = icf.maxHoles
     icf.maxPixelHoles      = [1]
     icf.maxSctHoles        = [1]
     icf.maxDoubleHoles     = [0]
@@ -237,8 +244,6 @@ def createActsLargeRadiusTrackingPassFlags():
         1000 * Units.MeV * pcf.BField.configuredSolenoidFieldScale)
 
     icf.radMax             = 1100. * Units.mm
-    icf.nHolesMax          = icf.maxHoles
-    icf.nHolesGapMax       = icf.maxHoles
     icf.roadWidth          = 5
 
     # --- seeding
