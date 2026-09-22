@@ -101,8 +101,7 @@ public:
     }
     auto * ptrT = new TEfficiency(hist_name.c_str(), title.c_str(), args...);
     m_histos.emplace(name, ptrT);
-    if (not m_hist_svc->regGraph(m_directory_name + name, reinterpret_cast<TGraph*>(ptrT))
-         .isSuccess()) {
+    if (not m_hist_svc->regEfficiency(m_directory_name + name, ptrT).isSuccess()) {
       ATH_MSG_WARNING("Failed to book " << name);
     }
   }
@@ -118,8 +117,7 @@ public:
     }
     auto * ptrT = new TEfficiency(name.c_str(), title.c_str(), args...);
     m_histos.emplace(name,ptrT);
-    if (not m_hist_svc->regGraph(m_directory_name + name, reinterpret_cast<TGraph*>(ptrT))
-         .isSuccess()) {
+    if (not m_hist_svc->regEfficiency(m_directory_name + name,ptrT).isSuccess()) {
       ATH_MSG_WARNING("Failed to book " << name);
     }
   }
