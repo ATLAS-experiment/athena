@@ -525,7 +525,7 @@ namespace DerivationFramework {
           //Set the det id
           msos->setDetType( Trk::TrackState::TRT );
           //Build the element link to the MSOS
-          ElementLink< xAOD::TrackStateValidationContainer > elink( *msosTRT, nTRT_MSOS );
+          ElementLink< xAOD::TrackStateValidationContainer > elink( *msosTRT, nTRT_MSOS, ctx );
           elink.toPersistent();
           msosLink.push_back(elink);
           ++nTRT_MSOS;
@@ -535,7 +535,7 @@ namespace DerivationFramework {
           //Set the det id
           msos->setDetType( Trk::TrackState::SCT );
           //Build the element link to the MSOS
-          ElementLink< xAOD::TrackStateValidationContainer > elink( *msosSCT, nSCT_MSOS );
+          ElementLink< xAOD::TrackStateValidationContainer > elink( *msosSCT, nSCT_MSOS, ctx );
           elink.toPersistent();
           msosLink.push_back(elink);
           ++nSCT_MSOS;
@@ -545,7 +545,7 @@ namespace DerivationFramework {
           //Set the det id
           msos->setDetType( Trk::TrackState::Pixel );
           //Build the element link to the MSOS
-          ElementLink< xAOD::TrackStateValidationContainer > elink( *msosPixel, nPixelMSOS );
+          ElementLink< xAOD::TrackStateValidationContainer > elink( *msosPixel, nPixelMSOS, ctx );
           elink.toPersistent();
           msosLink.push_back(elink);
           ++nPixelMSOS;
