@@ -901,12 +901,10 @@ asg::AcceptData IsolationSelectionTool::accept(const strObj& x) const {
     asg::AcceptData accept(&m_photonAccept);
     evaluateWP(x, m_phWPs, accept);
     return accept;
-  } else {
-    asg::AcceptData accept(&m_objAccept);
-    evaluateWP(x, m_objWPs, accept);
-    return accept;
   }
-  return asg::AcceptData(&m_objAccept);
+  asg::AcceptData accept(&m_objAccept);
+  evaluateWP(x, m_objWPs, accept);
+  return accept;
 }
 
 const asg::AcceptInfo& IsolationSelectionTool::getPhotonAcceptInfo() const {
