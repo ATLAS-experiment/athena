@@ -3,33 +3,30 @@
 */
 
 #include "Container.h"
+#include "TokenIterator.h"
+
 #include "StorageSvc/FileDescriptor.h"
 #include "StorageSvc/DbOption.h"
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbContainer.h"
 #include "StorageSvc/DbConnection.h"
-#include "TokenIterator.h"
 
-pool::Container::Container( FileDescriptor& fileDescriptor,
-                                            long technology,
-                                            const std::string& name ):
+pool::Container::Container( FileDescriptor& fileDescriptor, const std::string& name ) :
   m_name( name ),
-  m_fileDescriptor( fileDescriptor ),
-  m_technology( technology )
+  m_fileDescriptor( fileDescriptor )
 {}
 
 pool::ITokenIterator*
 pool::Container::tokens()
 {
-  return new pool::TokenIterator( m_fileDescriptor,
-                                                  this->name() );
+  return new pool::TokenIterator( m_fileDescriptor, this->name() );
 }
 
 bool
 pool::Container::attributeOfType( const std::string& attributeName,
-                                                  void* data,
-                                                  const std::type_info& typeInfo,
-                                                  const std::string& option )
+                                  void* data,
+                                  const std::type_info& typeInfo,
+                                  const std::string& option )
 {
   if( !m_fileDescriptor.dbc() ) return false;
 
@@ -37,7 +34,7 @@ pool::Container::attributeOfType( const std::string& attributeName,
   
   DbDatabase  dbH( m_fileDescriptor.dbc()->handle() );
   DbContainer cntH( dbH.find(name()) );
-  if( !cntH.isValid() and !cntH.open(dbH, name(), 0, dbH.type(), Io::READ).isSuccess() ) {
+  if( !cntH.isValid() && !cntH.open(dbH, name(), 0, dbH.type(), Io::READ).isSuccess() ) {
     return false;
   }
   if( !cntH.getOption(containerOption).isSuccess() ) return false;
@@ -47,9 +44,9 @@ pool::Container::attributeOfType( const std::string& attributeName,
 
 bool
 pool::Container::setAttributeOfType( const std::string& attributeName,
-                                                     const void* data,
-                                                     const std::type_info& typeInfo,
-                                                     const std::string& option )
+                                     const void* data,
+                                     const std::type_info& typeInfo,
+                                     const std::string& option )
 {
   if( !m_fileDescriptor.dbc() ) return false;
 
@@ -58,7 +55,7 @@ pool::Container::setAttributeOfType( const std::string& attributeName,
   
   DbDatabase  dbH( m_fileDescriptor.dbc()->handle() );
   DbContainer cntH( dbH.find(name()) );
-  if( !cntH.isValid() and !cntH.open(dbH, name(), 0, dbH.type(), Io::READ).isSuccess() ) {
+  if( !cntH.isValid() && !cntH.open(dbH, name(), 0, dbH.type(), Io::READ).isSuccess() ) {
     return false;
   }
   return cntH.setOption(containerOption).isSuccess();

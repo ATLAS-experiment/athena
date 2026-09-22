@@ -132,7 +132,7 @@ pool::UserDatabase::connectForWrite()
 	  pool::DbType dbType( m_technology );
 	  pool::DbType dbTypeMajor( dbType.majorType() );
 	  m_catalog.registerPFN( m_the_pfn.substr(0, m_the_pfn.find('?')), dbTypeMajor.storageName(), m_the_fid );
-    ATH_MSG_DEBUG("registered PFN: " << m_the_pfn << " with FID:" << m_the_fid);
+          ATH_MSG_DEBUG("registered PFN: " << m_the_pfn << " with FID:" << m_the_fid);
 	  dbRegistered = true;
         }
         break;
@@ -151,8 +151,8 @@ pool::UserDatabase::connectForWrite()
           this->connectForWrite();
           m_registry.registerDatabaseHandler( m_databaseHandler, lfn );
         }
-      return;
-      break;
+        return;
+        break;
       default:
         throw std::runtime_error( "Unknown database name type (APR: \" UserDatabase::connectForWrite \" from \" PersistencySvc \")" );
       };
@@ -174,9 +174,9 @@ pool::UserDatabase::connectForWrite()
 
 Token*
 pool::UserDatabase::writeObject( const std::string& containerName,
-                                                    long minorTechnology,
-                                                    const void* object,
-                                                    const RootType& type )
+                                 long minorTechnology,
+                                 const void* object,
+                                 const RootType& type )
 {
    if( !m_databaseHandler) {
       throw std::runtime_error( "Could not open a database for write object. (APR: \" UserDatabase::connectForWrite \" from \" PersistencySvc \")" );
@@ -208,7 +208,7 @@ pool::UserDatabase::fid()
   if ( m_databaseHandler ) return m_databaseHandler->fid();
   else {
     if ( m_nameType == pool::DatabaseSpecification::FID ) return m_name;
-    else if ( ! m_the_fid.empty() ) return m_the_fid;
+    else if ( !m_the_fid.empty() ) return m_the_fid;
     else {
       if ( m_nameType == pool::DatabaseSpecification::PFN ) {
          std::string technology;
@@ -288,7 +288,6 @@ pool::UserDatabase::pfn()
   return emptyString;
 }
 
-
 bool
 pool::UserDatabase::setTechnology( long technology )
 {
@@ -299,13 +298,6 @@ pool::UserDatabase::setTechnology( long technology )
     m_technologySet = true;
     return true;
   }
-}
-
-
-long
-pool::UserDatabase::technology() const
-{
-  return m_technology;
 }
 
 
@@ -351,15 +343,7 @@ pool::UserDatabase::checkInRegistry()
   if ( m_databaseHandler ) {
     m_alreadyConnected = true;
     m_technology = m_databaseHandler->technology();
-    if ( m_databaseHandler->accessMode() == Io::APPEND ) {
-      m_openMode = Io::APPEND;
-    }
-    else if ( m_databaseHandler->accessMode() == Io::WRITE ) {
-      m_openMode = Io::WRITE;
-    }
-    else {
-      m_openMode = Io::READ;
-    }
+    m_openMode   = m_databaseHandler->accessMode();
     m_the_fid = m_name = m_databaseHandler->fid();
     m_the_pfn = m_databaseHandler->pfn();
     m_nameType = pool::DatabaseSpecification::FID;
@@ -371,9 +355,9 @@ pool::UserDatabase::checkInRegistry()
 
 bool
 pool::UserDatabase::attributeOfType( const std::string& attributeName,
-                                                     void* data,
-                                                     const std::type_info& typeInfo,
-                                                     const std::string& option )
+                                     void* data,
+                                     const std::type_info& typeInfo,
+                                     const std::string& option )
 {
   if ( ! m_databaseHandler ) return false;
   else return m_databaseHandler->attribute( attributeName, data, typeInfo, option );
@@ -382,9 +366,9 @@ pool::UserDatabase::attributeOfType( const std::string& attributeName,
 
 bool
 pool::UserDatabase::setAttributeOfType( const std::string& attributeName,
-                                                        const void* data,
-                                                        const std::type_info& typeInfo,
-                                                        const std::string& option )
+                                        const void* data,
+                                        const std::type_info& typeInfo,
+                                        const std::string& option )
 {
   if ( ! m_databaseHandler ) return false;
   else return m_databaseHandler->setAttribute( attributeName, data, typeInfo, option );

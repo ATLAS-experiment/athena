@@ -21,18 +21,13 @@ namespace pool {
   
   class Container : virtual public IContainer {
   public:
-    Container( FileDescriptor& fileDescriptor,
-               long technology,
-               const std::string& name );
+    Container( FileDescriptor& fileDescriptor, const std::string& name );
     
     /// destructor
     virtual ~Container() = default;
 
     /// Returns the name of this container
     virtual const std::string& name() const override final { return m_name; }
-
-    /// Returns the technology identifier for this container
-    virtual long technology() const override final { return m_technology; }
 
     /** Starts an iteration over the tokens in the container.
      *  Returns a token iterator whose ownership is passed to the user.
@@ -59,9 +54,6 @@ namespace pool {
 
     /// Reference to file descriptor of the parent database
     FileDescriptor& m_fileDescriptor;
-
-    /// The technology identifier
-    long m_technology;
   };
 }
 

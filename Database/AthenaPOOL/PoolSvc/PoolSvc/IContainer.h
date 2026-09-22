@@ -25,9 +25,6 @@ namespace pool {
     /// Returns the name of this container
     virtual const std::string& name() const = 0;
 
-    /// Returns the technology identifier for this container
-    virtual long technology() const = 0;
-
     /** Starts an iteration over the tokens in the container.
      *  Returns a token iterator whose ownership is passed to the user.
      */
