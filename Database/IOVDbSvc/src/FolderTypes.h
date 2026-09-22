@@ -37,10 +37,6 @@ namespace IOVDbNamespace{
    
    ///Determine folder type with optional check using clid service to check clid matches typename
    FolderType
-   determineFolderType(const std::string & folderDescription, const std::string & spec, const std::vector<cool::ChannelId> & chans);
-   
-   ///Determine folder type with optional check using clid service to check clid matches typename
-   FolderType
    determineFolderType(const cool::IFolderPtr & pFolder, IClassIDSvc* clidsvc=nullptr);
    
    ///Give a string name for the folder type
@@ -70,8 +66,6 @@ namespace IOVDbNamespace{
    bool
    poolCompatible(const CondAttrListCollection & pAttrListColl);
    
-   bool
-   poolCompatible(const std::string & specString);
    //@}
 }
 

@@ -132,7 +132,7 @@ PP="$PP"'|^Warning in .* (header|class) .* is already in'
 # Ignore GaudiHive timeline printouts
 PP="$PP"'|^TimelineSvc +INFO'
 # Pathnames / versions / times / hosts
-PP="$PP"'|^IOVDb(Svc|Folder).*INFO (Folder|Connection|Total payload|.*bytes in)'
+PP="$PP"'|^IOVDb(Svc|Folder|CrestTag).*INFO (Folder|Connection|Total payload|.*bytes in)'
 PP="$PP"'|^DBReplicaSvc.*INFO Read replica configuration'
 PP="$PP"'|^EventInfoMgtInit: Got release version'
 PP="$PP"'|^Py:Athena +INFO using release'

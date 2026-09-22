@@ -11,8 +11,9 @@ ClassIDSvc           INFO getRegistryEntries: read 5680 CLIDRegistry entries for
 CondInputLoader      INFO Initializing CondInputLoader...
 IOVDbSvc             INFO Only 5 POOL conditions files will be open at once
 IOVDbSvc             INFO Global tag: TEST-HLT-CREST set from joboptions
-IOVDbFolder          INFO Read from meta data only for folder /TagInfo
-IOVDbFolder          INFO Extensible folder /DMTest/TestAttrList
+IOVDbCrestTag        INFO Read from meta data only for folder /TagInfo
+IOVDbCrestTag        INFO <tag> is ignored on the CREST path for folder /DMTest/TestAttrList. Use <ctag> to override the CREST tag name instead
+IOVDbCrestTag        INFO Extensible folder /DMTest/TestAttrList
 IOVDbSvc             INFO Initialised with 2 connections and 2 folders
 IOVDbSvc             INFO Service IOVDbSvc initialised successfully
 IOVDbSvc             INFO   AlgTool: ToolSvc.IOVDbMetaDataTool
@@ -59,7 +60,6 @@ ApplicationMgr       INFO Application Manager Started successfully
 EventP...stencySvc   INFO Added successfully Conversion service McCnvSvc
 AthenaEventLoopMgr   INFO   ===>>>  start of run 0    <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #0 0 events processed so far  <<<===
-IOVDbFolder          INFO Download tag would be: Test_AttrList_noTag
 IOVDbSvc             INFO Opened read transaction for POOL PersistencySvc
 EventP...stencySvc   INFO Added successfully Conversion service AthenaPoolCnvSvc
 DMTest...terExtAlg   INFO Event 1 LBN 0
@@ -148,7 +148,6 @@ DMTest...ReaderAlg   INFO   xint xint (int) : 20
 DMTest...ReaderAlg   INFO   scond 2000
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #14, run #0 14 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #15, run #0 14 events processed so far  <<<===
-IOVDbFolder          INFO Download tag would be: Test_AttrList_noTag
 DMTest...terExtAlg   INFO Event 15 LBN 7
 DMTest...ReaderAlg   INFO Event 15 LBN 7
 DMTest...ReaderAlg   INFO   xint xint (int) : 20

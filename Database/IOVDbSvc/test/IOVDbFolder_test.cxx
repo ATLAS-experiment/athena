@@ -79,15 +79,20 @@ BOOST_FIXTURE_TEST_SUITE(IOVDbFolderTest , GaudiKernelFixture)
   //need IClassIDSvc
   ServiceHandle<IClassIDSvc> clidSvc("ClassIDSvc","test");
   //tests construction
+  const std::string noGlobalTag("");
   BOOST_AUTO_TEST_CASE(IOVDbFolderConstruction){
     //note:default construction is not explicitly deleted; perhaps it should be.
-    BOOST_CHECK_NO_THROW(IOVDbFolder f(&(connectionFixture.connection), parserFixture.parser, parserFixture.log, clidSvc.get(), nullptr, false));
+    BOOST_CHECK_NO_THROW(IOVDbFolder f(&(connectionFixture.connection), parserFixture.parser,
+                                       parserFixture.log, clidSvc.get(), nullptr, false, 0,
+                                       noGlobalTag, false));
   }
   BOOST_FIXTURE_TEST_SUITE(IOVDbFolderMethods, TestFolderFixture)
     BOOST_AUTO_TEST_CASE(PublicMethods){
       //preload tests
       IOVDbConn connection("sqlite://;schema=IOVDbFolderTest.db;dbname=OFLP200", true, parserFixture.log);
-      IOVDbFolder iovDbFolder(&connection, parserFixture.parser, parserFixture.log, clidSvc.get(), nullptr, false, true);
+      const std::string tag("");
+      IOVDbFolder iovDbFolder(&connection, parserFixture.parser, parserFixture.log, clidSvc.get(),
+                              nullptr, false, 600, tag, true, true);
       BOOST_TEST_CHECKPOINT("After instantiation, but before any loading method call");
       BOOST_TEST(iovDbFolder.folderName() == "/key1");
       BOOST_TEST(iovDbFolder.key() == "/key1");
@@ -110,12 +115,11 @@ BOOST_FIXTURE_TEST_SUITE(IOVDbFolderTest , GaudiKernelFixture)
       BOOST_TEST(iovDbFolder.clid() == 0);
       BOOST_TEST(iovDbFolder.bytesRead() == 0);
       BOOST_TEST(iovDbFolder.readTime() == 0.0);
-      BOOST_TEST(iovDbFolder.cacheValid(cool::ValidityKey(600)) == false );
-      BOOST_TEST_CHECKPOINT("After preLoadFolder method call");
-      const std::string tag("");
-      auto addr=iovDbFolder.preLoadFolder(tagInfoMgr.get(),0,600);
-      BOOST_TEST(iovDbFolder.loadCache(cool::ValidityKey(50),600, tag, true) == true);
-      BOOST_TEST_MESSAGE("After loadCache method call...");
+      BOOST_TEST(iovDbFolder.isResident(cool::ValidityKey(600)) == false );
+      BOOST_TEST_CHECKPOINT("After preload method call");
+      auto addr=iovDbFolder.preload(tagInfoMgr.get(),0,600);
+      BOOST_TEST(iovDbFolder.loadAt(cool::ValidityKey(50)) == true);
+      BOOST_TEST_MESSAGE("After loadAt method call...");
       BOOST_TEST(iovDbFolder.timeStamp() == isEpochTimestamp);//after looking
       BOOST_TEST(iovDbFolder.retrieved() == false);//only changed by getAddress method
       BOOST_TEST(iovDbFolder.bytesRead() == 8);
@@ -126,7 +130,7 @@ BOOST_FIXTURE_TEST_SUITE(IOVDbFolderTest , GaudiKernelFixture)
       IOVRange zeroRange{IOVTime(0),IOVTime(0)};
       IOVRange returnRange{zeroRange};
       BOOST_TEST(iovDbFolder.currentRange() ==  zeroRange);//why?
-      BOOST_TEST(iovDbFolder.cacheValid(cool::ValidityKey(600)) );
+      BOOST_TEST(iovDbFolder.isResident(cool::ValidityKey(600)) );
       std::unique_ptr<IOpaqueAddress> returnedAddress;
       ServiceHandle<IAddressCreator> persistencySvc("EventPersistencySvc", "test");
       bool poolRequested{};
@@ -135,7 +139,7 @@ BOOST_FIXTURE_TEST_SUITE(IOVDbFolderTest , GaudiKernelFixture)
       BOOST_TEST(iovDbFolder.retrieved() == true);
       IOVRange actualRange{IOVTime(100),IOVTime(cool::ValidityKeyMax)};
       BOOST_TEST(returnRange == actualRange);
-      BOOST_CHECK_NO_THROW(iovDbFolder.resetCache());
+      BOOST_CHECK_NO_THROW(iovDbFolder.reset());
     }
   BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()

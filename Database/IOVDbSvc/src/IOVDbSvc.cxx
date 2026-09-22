@@ -9,7 +9,11 @@
 
 #include "IOVDbParser.h"
 #include "IOVDbSvc.h"
-#include "CoralCrestManager.h"
+
+#include <chai/Database.h>
+#include <chai/Errors.h>
+#include <chai/GlobalTag.h>
+#include <chai/Log.h>
 
 #include "Gaudi/Interfaces/IOptionsSvc.h"
 #include "GaudiKernel/GaudiException.h"
@@ -31,7 +35,14 @@
 #include <ranges>
 #include <utility>
 
-#include "CrestApi/CrestLogger.h"
+#include "IOVDbFolder.h"
+#include "IOVDbCrestTag.h"
+#include "IOVDbStringFunctions.h"
+
+// CHAI package version determined at build time by CMake
+#ifndef CHAI_PKG_VERSION
+#define CHAI_PKG_VERSION "unknown"
+#endif
 
 namespace {
 
@@ -101,7 +112,7 @@ public:
 
   virtual void closeDatabase() override
   { return m_dbptr->closeDatabase(); }
-    
+
   virtual const std::string& databaseName() const override
   { return m_dbptr->databaseName(); }
 
@@ -118,6 +129,60 @@ private:
 };
 
 } // anonymous namespace
+
+chai::Database* IOVDbSvc::getCrestDatabase(const std::string& endpoint) {
+  // endpoint -> CHAI connection string ("crest:<url>" or "crest_fs:<path>")
+  const std::string connectStr = IOVDbNamespace::chaiConnectString(endpoint);
+  const auto itr = m_crestDatabases.find(connectStr);
+  if (itr != m_crestDatabases.end()) {
+    return itr->second.get();
+  }
+  // Transfer the IOVDbSvc log level to CHAI, which forwards it to its backend plugin
+  auto mLevel = static_cast<std::underlying_type_t<MSG::Level>>(msg().level());
+  chai::setLogLevel(static_cast<chai::LogLevel>(mLevel));
+  // Open the connection and return the raw DB pointer
+  auto db = std::make_unique<chai::Database>(connectStr);
+  chai::Database* raw = db.get();
+  m_crestDatabases[connectStr] = std::move(db);
+  return raw;
+}
+
+const std::map<std::string, std::string>* IOVDbSvc::getCrestTagMap(const std::string& endpoint) {
+  const std::string connectStr = IOVDbNamespace::chaiConnectString(endpoint);
+  const auto itr = m_cresttagmaps.find(connectStr);
+  if (itr != m_cresttagmaps.end()) {
+    return &itr->second;
+  }
+
+  std::map<std::string, std::string> mapping;
+  try {
+    chai::Database* db = getCrestDatabase(endpoint);
+    // Flatten (label, record) keys to label->tag. A label mapped to two
+    // different tags is an error. The same tag across records is fine.
+    const auto chaiMapping = db->getGlobalTag(m_par_globalTag)->getMapping();
+    for (const auto& [mapKey, tagMapping] : chaiMapping) {
+      const auto& [label, record] = mapKey;
+      const auto [mapItr, inserted] = mapping.try_emplace(label, tagMapping.tagName);
+      if (!inserted && mapItr->second != tagMapping.tagName) {
+        ATH_MSG_FATAL("GlobalTag " << m_par_globalTag.value() << " has duplicate label " << label
+                      << " mapped to different tags (" << mapItr->second << " vs "
+                      << tagMapping.tagName << ") under different records");
+        return nullptr;
+      }
+    }
+  } catch (const std::exception& e) {
+    // A mapping fetch failure shows as chai::BackendError
+    ATH_MSG_FATAL("Failed to fetch the CHAI GlobalTag mapping for " << m_par_globalTag.value()
+                  << " on endpoint " << endpoint << ": " << e.what());
+    return nullptr;
+  }
+  if (mapping.empty()) {
+    ATH_MSG_FATAL("Got empty tag-map. GlobalTag " << m_par_globalTag.value()
+                  << " does not exist on endpoint " << endpoint);
+    return nullptr;
+  }
+  return &m_cresttagmaps.try_emplace(connectStr, std::move(mapping)).first->second;
+}
 
 
 int IOVDbSvc::poolSvcContext()
@@ -149,6 +214,8 @@ StatusCode IOVDbSvc::initialize() {
   incSvc->addListener( this, "StoreCleared", pri );   // for SP Athena
   incSvc->addListener( this, IncidentType::EndProcessing, pri );  // for MT Athena
 
+  ATH_MSG_DEBUG("Using CHAI version " << CHAI_PKG_VERSION);
+
   // Register this service for 'I/O' events
   ServiceHandle<IIoComponentMgr> iomgr("IoComponentMgr", name());
   ATH_CHECK( iomgr.retrieve() );
@@ -170,18 +237,18 @@ StatusCode IOVDbSvc::initialize() {
     ATH_MSG_INFO( "Run-LB data will be cached in groups of " << m_par_cacheRun.value() << " runs" );
   if (m_par_cacheTime > 0)
     ATH_MSG_INFO( "Timestamp data will be cached in groups of " << m_par_cacheTime.value() << " seconds" );
-  if (m_par_cacheAlign > 0) 
+  if (m_par_cacheAlign > 0)
     ATH_MSG_INFO( "Cache alignment will be done in " << m_par_cacheAlign.value() << " slices" );
-  if (m_par_onlineMode) 
+  if (m_par_onlineMode)
     ATH_MSG_INFO(  "Online mode ignoring potential missing channels outside cache" );
   if (m_par_checklock)
     ATH_MSG_INFO( "Tags will be required to be locked");
 
   if (m_par_source == "COOL_DATABASE") {
-    m_source=IOVDbFolder::source_t::COOLDB;
+    m_source=IOVDbConditionsSource::source_t::COOLDB;
     ATH_MSG_INFO("IOVDbSvc configured to use a COOL database");
   } else if (m_par_source == "CREST") {
-    m_source=IOVDbFolder::source_t::CRESTDB;
+    m_source=IOVDbConditionsSource::source_t::CRESTDB;
     ATH_MSG_INFO("IOVDbSvc configured to use a CREST database");
   }
   else {
@@ -216,11 +283,10 @@ StatusCode IOVDbSvc::initialize() {
 
   // Set state to initialize
   m_state=IOVDbSvc::INITIALIZATION;
-  ATH_MSG_INFO( "Initialised with " << m_connections.size() << 
+  ATH_MSG_INFO( "Initialised with " << m_connections.size() <<
                 " connections and " << m_foldermap.size() << " folders" );
 
   if (m_outputToFile)    ATH_MSG_INFO("Db dump to file activated");
-  if (m_crestCoolToFile) ATH_MSG_INFO("Crest or Cool dump to file activated");
 
   ATH_MSG_INFO( "Service IOVDbSvc initialised successfully" );
 
@@ -342,7 +408,7 @@ StatusCode IOVDbSvc::preLoadAddresses(StoreID::type storeID,tadList& tlist) {
       keysToDelete.push_back(name);
     }
   }
-  
+
   for (auto & thisKey : keysToDelete) {
     const auto fitr = m_foldermap.find(thisKey);
     if (fitr != m_foldermap.end()) {
@@ -352,7 +418,7 @@ StatusCode IOVDbSvc::preLoadAddresses(StoreID::type storeID,tadList& tlist) {
       ATH_MSG_ERROR( "preLoadAddresses: Could not find folder " << thisKey << " for removal" );
     }
   }
-  
+
 
   // loop over all folders, grouped by connection
   // do metadata folders on first connection (default connection)
@@ -367,7 +433,7 @@ StatusCode IOVDbSvc::preLoadAddresses(StoreID::type storeID,tadList& tlist) {
       for (const auto & [name, folder] : m_foldermap) {
         if (folder->conn()==pThisConnection.get() || (folder->conn()==nullptr && doMeta)) {
           std::unique_ptr<SG::TransientAddress> tad =
-            folder->preLoadFolder( &(*m_h_tagInfoMgr), m_par_cacheRun, m_par_cacheTime);
+            folder->preload( &(*m_h_tagInfoMgr), m_par_cacheRun, m_par_cacheTime);
           if (oldconn!=pThisConnection.get()) {
             // close old connection if appropriate
             if (m_par_manageConnections && oldconn!=nullptr) oldconn->setInactive();
@@ -440,12 +506,12 @@ StatusCode IOVDbSvc::updateAddress(StoreID::type storeID, SG::TransientAddress* 
   std::unique_ptr<IOpaqueAddress> address;
 
   // first check if this key is managed by IOVDbSvc
-  // return FAILURE if not - this allows other AddressProviders to be 
+  // return FAILURE if not - this allows other AddressProviders to be
   // asked for the TAD
   const std::string& key=tad->name();
   const auto fitr=m_foldermap.find(key);
   if (fitr==m_foldermap.end()) {
-    ATH_MSG_VERBOSE( 
+    ATH_MSG_VERBOSE(
         "updateAddress cannot find description for TAD " << key );
     return StatusCode::FAILURE;
   }
@@ -453,7 +519,7 @@ StatusCode IOVDbSvc::updateAddress(StoreID::type storeID, SG::TransientAddress* 
   if (folder->clid()!=tad->clID()) {
     ATH_MSG_VERBOSE( "CLID for TAD " << key << " is " << tad->clID()
              << " but expecting " << folder->clid() );
-    
+
     return StatusCode::FAILURE;
   }
 
@@ -498,12 +564,13 @@ StatusCode IOVDbSvc::updateAddress(StoreID::type storeID, SG::TransientAddress* 
      // This problem is mitigated by limiting the scope of the dblock here.
      Athena::DBLock dblock;
      ATH_MSG_DEBUG("Validity key "<<vkey);
-     if (folder->source() == IOVDbFolder::source_t::CRESTDB) {
-        if (!folder->readMeta() && !folder->cacheValid((vkey))){
-          fitr->second->loadCache(vkey, m_par_cacheAlign,m_globalTag,m_par_onlineMode);
+     if (folder->source() == IOVDbConditionsSource::source_t::CRESTDB) {
+        if (!folder->readMeta() && !folder->isResident((vkey)) && !folder->loadAt(vkey)) {
+          ATH_MSG_ERROR( "loadAt failed for folder " << folder->folderName() );
+          return StatusCode::FAILURE;
       }
-    } else { //COOL reading 
-     if (!folder->readMeta() && !folder->cacheValid(vkey)) {
+    } else { //COOL reading
+     if (!folder->readMeta() && !folder->isResident(vkey)) {
         // mark this folder as not-dropped so cache-read will succeed
         folder->setDropped(false);
         // reload cache for this folder (and all others sharing this DB connection)
@@ -514,7 +581,7 @@ StatusCode IOVDbSvc::updateAddress(StoreID::type storeID, SG::TransientAddress* 
            return StatusCode::FAILURE;
         }
      }
-    }//end cool part 
+    }//end cool part
      // data should now be in cache
      // setup address and range
      {
@@ -546,7 +613,7 @@ StatusCode IOVDbSvc::updateAddress(StoreID::type storeID, SG::TransientAddress* 
 }
 
 
-StatusCode IOVDbSvc::getRange( const CLID&        clid, 
+StatusCode IOVDbSvc::getRange( const CLID&        clid,
                                const std::string& dbKey,
                                const IOVTime&     time,
                                IOVRange&          range,
@@ -567,7 +634,7 @@ StatusCode IOVDbSvc::getRange( const CLID&        clid,
     ATH_MSG_VERBOSE( "supplied CLID for " << dbKey << " is "
              << clid
              << " but expecting " << folder->clid() );
-    
+
     return StatusCode::FAILURE;
   }
 
@@ -575,12 +642,13 @@ StatusCode IOVDbSvc::getRange( const CLID&        clid,
 
   // obtain the validity key for this folder (includes overrides)
   cool::ValidityKey vkey = folder->iovTime(time);
-  if (folder->source() == IOVDbFolder::source_t::CRESTDB) {
-      if (!folder->readMeta() && !folder->cacheValid((vkey))){
-        fitr->second->loadCache(vkey, m_par_cacheAlign,m_globalTag,m_par_onlineMode);
+  if (folder->source() == IOVDbConditionsSource::source_t::CRESTDB) {
+      if (!folder->readMeta() && !folder->isResident((vkey)) && !folder->loadAt(vkey)) {
+        ATH_MSG_ERROR("loadAt failed for folder " << folder->folderName());
+        return StatusCode::FAILURE;
       }
   } else {
-    if (!folder->readMeta() && !folder->cacheValid(vkey)) {
+    if (!folder->readMeta() && !folder->isResident(vkey)) {
       // mark this folder as not-dropped so cache-read will succeed
       folder->setDropped(false);
       // reload cache for this folder (and all others sharing this DB
@@ -687,6 +755,16 @@ StatusCode IOVDbSvc::signalBeginRun(const IOVTime& beginRunTime,
     // only access connections which are actually in use - avoids waking up
     // the default DB connection if it is not being used
     if (pThisConnection->nFolders()>0) {
+      // Avoid requerying COOL when all folders are CREST-only
+      const bool anyCoolFolder = std::any_of(m_foldermap.begin(), m_foldermap.end(),
+        [&pThisConnection](const auto& entry) {
+          return entry.second->conn()==pThisConnection.get()
+              && entry.second->source()==IOVDbConditionsSource::source_t::COOLDB;
+        });
+      if (!anyCoolFolder) {
+        ATH_MSG_DEBUG( "Connection " << pThisConnection->name() << " carries only CREST folders; between-run reload skipped" );
+        continue;
+      }
       //request for database activates connection
       cool::IDatabasePtr dbconn=pThisConnection->getCoolDb();
       if (dbconn.get()==nullptr) {
@@ -695,16 +773,17 @@ StatusCode IOVDbSvc::signalBeginRun(const IOVTime& beginRunTime,
       }
       for (const auto & [name, folder]: m_foldermap) {
         if (folder->conn()!=pThisConnection.get()) continue;
-        folder->printCache();
+        if (folder->source()!=IOVDbConditionsSource::source_t::COOLDB) continue;
+        folder->printState();
         cool::ValidityKey vkey=folder->iovTime(m_iovTime);
         {
           Gaudi::Guards::AuditorGuard auditor(std::string("FldrCache:")+folder->folderName(), auditorSvc(), preLoadProxyStr);
-          if (!folder->loadCacheIfDbChanged(vkey, m_globalTag, dbconn, m_h_IOVSvc)) {
+          if (!folder->loadCacheIfDbChanged(vkey, dbconn, m_h_IOVSvc)) {
             ATH_MSG_ERROR( "Problem RELOADING: " << folder->folderName());
             return StatusCode::FAILURE;
           }
         }
-        folder->printCache();
+        folder->printState();
       }
     }
     if (m_par_manageConnections) pThisConnection->setInactive();
@@ -773,7 +852,7 @@ StatusCode IOVDbSvc::processTagInfo() {
   // dump out contents of TagInfo
   ATH_MSG_DEBUG( "Tags from input TagInfo:");
   if( msg().level()>=MSG::DEBUG ) m_h_tagInfoMgr->printTags(msg());
-  
+
   // check IOVDbSvc GlobalTag, if not already set
   if (m_globalTag.empty()) {
     m_globalTag = m_h_tagInfoMgr->findTag("IOVDbGlobalTag");
@@ -787,7 +866,11 @@ StatusCode IOVDbSvc::processTagInfo() {
     // assume tags relating to conditions folders start with /
     if (not theTagName.starts_with('/')) continue;
     // check for folder(s) with this name in (key, ptr) pair
-    for (const auto & [name, folder]: m_foldermap) {
+    for (const auto & [name, folderBase]: m_foldermap) {
+      // TagInfo overrides apply only to COOL folders
+      IOVDbFolder* folder = dynamic_cast<IOVDbFolder*>(folderBase.get());
+      if (!folder) continue;
+
       const std::string& ifname=folder->folderName();
       if (ifname!=theTagName) continue;
       // use an override from TagInfo only if there is not an explicit jo tag,
@@ -806,7 +889,7 @@ StatusCode IOVDbSvc::processTagInfo() {
 }
 
 
-std::vector<std::string> 
+std::vector<std::string>
 IOVDbSvc::getKeyList() {
   // return a list of all the StoreGate keys being managed by IOVDbSvc
   auto keys = std::views::keys(m_foldermap);
@@ -819,7 +902,7 @@ bool IOVDbSvc::getKeyInfo(const std::string& key, IIOVDbSvc::KeyInfo& info) {
   // first attempt to find the folder object for this key
   const auto itr = m_foldermap.find(key);
   if (itr!=m_foldermap.end()) {
-    const IOVDbFolder* f = itr->second.get();
+    const IOVDbConditionsSource* f = itr->second.get();
     info.folderName = f->folderName();
     info.tag = f->resolvedTag();
     info.range = f->currentRange();
@@ -839,7 +922,7 @@ bool IOVDbSvc::dropObject(const std::string& key, const bool resetCache) {
   // find the folder corresponding to this object
   const auto itr = m_foldermap.find(key);
   if (itr!=m_foldermap.end()) {
-    IOVDbFolder* folder=itr->second.get();
+    IOVDbConditionsSource* folder=itr->second.get();
     CLID clid=folder->clid();
     SG::DataProxy* proxy=m_h_detStore->proxy(clid,key);
     if (proxy!=nullptr) {
@@ -847,7 +930,7 @@ bool IOVDbSvc::dropObject(const std::string& key, const bool resetCache) {
       ATH_MSG_DEBUG("Dropped payload for key " << key );
       folder->setDropped(true);
       if (resetCache) {
-        folder->resetCache();
+        folder->reset();
         ATH_MSG_DEBUG( "Cache reset done for folder " << folder->folderName() );
       }
       return true;
@@ -928,19 +1011,6 @@ StatusCode IOVDbSvc::setupFolders() {
   // read the Folders joboptions and setup the folder list
   // no wildcards are allowed
 
-  // getting the pairs: folder name - CREST tag name:
-  if (m_source == IOVDbFolder::source_t::CRESTDB){
-    auto mLevel = static_cast<std::underlying_type_t<MSG::Level>>(msg().level());
-    Crest::LogLevel cLevel = static_cast<Crest::LogLevel>(mLevel);
-    Crest::Logger::setLogLevel(cLevel);	  
-    m_cresttagmap.clear();
-    m_cresttagmap = CoralCrestManager::getGlobalTagMap(m_par_defaultConnection,m_par_globalTag);
-    if (m_cresttagmap.empty()) {
-      ATH_MSG_FATAL("Got empty tag-map. GlobalTag "<< m_par_globalTag.value() << " does not exist.");
-      return StatusCode::FAILURE;
-    }
-  }
-  
   //1. Loop through folders
   std::list<IOVDbParser> allFolderdata;
   for (const auto & thisFolder : m_par_folders) {
@@ -950,7 +1020,7 @@ StatusCode IOVDbSvc::setupFolders() {
       ATH_MSG_FATAL("setupFolders: Folder setup string is invalid: " <<thisFolder);
       return StatusCode::FAILURE;
     }
-    
+
     allFolderdata.push_back(std::move(folderdata));
   }
 
@@ -976,15 +1046,15 @@ StatusCode IOVDbSvc::setupFolders() {
       const std::string& ifname=folderdata.folderName();
       if (ifname.starts_with(prefix) &&
           (ifname.size()==prefix.size() || ifname[prefix.size()]=='/')) {
-        //Match! 
+        //Match!
         folderdata.applyOverrides(keys,msg());
       }
     }
   }
 
   //3. Remove any duplicates:
-  std::list<IOVDbParser>::iterator it1=allFolderdata.begin(); 
-  std::list<IOVDbParser>::iterator it_e=allFolderdata.end(); 
+  std::list<IOVDbParser>::iterator it1=allFolderdata.begin();
+  std::list<IOVDbParser>::iterator it_e=allFolderdata.end();
   for (;it1!=it_e;++it1) {
     const IOVDbParser& folder1=*it1;
     std::list<IOVDbParser>::iterator it2=it1;
@@ -1004,6 +1074,34 @@ StatusCode IOVDbSvc::setupFolders() {
       }
     }//end inner loop
   }//end outer loop
+
+  // 3b. The GlobalTag property is required whenever a CREST-sourced folder
+  // resolves its tag by name.
+  bool anyCrestFolderNeedsMap=false;
+  bool anyCrestFolder=false;
+  for (const auto& folderdata : allFolderdata) {
+    std::string dbOverride;
+    std::string ctag;
+    const bool hasDbOverride = folderdata.getKey("db","",dbOverride) && dbOverride.find("crest") != std::string::npos;
+    const bool crestSourced = (m_source == IOVDbConditionsSource::source_t::CRESTDB) || hasDbOverride;
+    if (crestSourced) {
+      anyCrestFolder = true;
+    }
+    const bool hasCtag = folderdata.getKey("ctag","",ctag) && !ctag.empty();
+    if (crestSourced && !hasCtag && !folderdata.onlyReadMetadata()) {
+      anyCrestFolderNeedsMap=true;
+    }
+  }
+
+  // OnlineMode's between-run reload (signalBeginRun) only applies to COOL
+  if (m_par_onlineMode && anyCrestFolder) {
+    ATH_MSG_INFO("OnlineMode: between-run reload applies to COOL folders only. CREST folders reload on their next cache miss");
+  }
+
+  if (anyCrestFolderNeedsMap && m_par_globalTag.empty()) {
+    ATH_MSG_FATAL("Source=CREST requires the GlobalTag property. Input file TagInfo resolution not supported for CREST");
+    return StatusCode::FAILURE;
+  }
 
   //4.Set up folder map with cleaned folder list
 
@@ -1032,36 +1130,71 @@ StatusCode IOVDbSvc::setupFolders() {
       if (!m_par_defaultConnection.empty()) {
         conn=m_connections[0].get();
       } else {
-        ATH_MSG_FATAL( "Folder request " << folderdata.folderName() << 
+        ATH_MSG_FATAL( "Folder request " << folderdata.folderName() <<
           " gives no DB connection information and no default set" );
         return StatusCode::FAILURE;
       }
     }
-    
-    // create the new folder, but only if a folder for this SG key has not
-    // already been requested
 
-    std::string crestTag;
-    if (m_source == IOVDbFolder::source_t::CRESTDB){
-      crestTag = m_cresttagmap[folderdata.folderName()];
-      if(crestTag.empty() && folderdata.folderName() != "/TagInfo") {
-        ATH_MSG_FATAL( "GlobalTag "<< m_par_globalTag.value() << " does not contain folder "
-                       << folderdata.folderName());
-        crestError=true;
+    // create the new folder, but only if a folder for this SG key has not
+    // already been requested. Route on the folder's effective source: a
+    // per-folder <db> crest override wins over the service Source property.
+    std::string dbOverride;
+    const bool hasDbOverride = folderdata.getKey("db","",dbOverride) && dbOverride.find("crest") != std::string::npos;
+    const bool crestSourced = (m_source == IOVDbConditionsSource::source_t::CRESTDB) || hasDbOverride;
+
+    std::unique_ptr<IOVDbConditionsSource> folder;
+    if (crestSourced) {
+      // Resolve the CHAI endpoint. Used for both the global tag mapping
+      // lookup and to open the chai::Database.
+      std::string endpoint = m_par_defaultConnection;
+      if (hasDbOverride) {
+        endpoint = dbOverride;
+        ATH_MSG_INFO("Crest server for folder " << folderdata.folderName() << " overridden to " << endpoint);
+      }
+
+      // A <ctag> override bypasses the GlobalTag mapping. A metadata-only folder needs no name-resolved tag either.
+      std::string crestTag;
+      if ((!folderdata.getKey("ctag","",crestTag) || crestTag.empty()) && !folderdata.onlyReadMetadata()) {
+        // A mapping fetch failure is fatal for the job
+        const std::map<std::string, std::string>* tagMap = getCrestTagMap(endpoint);
+        if (tagMap == nullptr) {
+          return StatusCode::FAILURE;
+        }
+        const auto tagIt = tagMap->find(folderdata.folderName());
+        if (tagIt != tagMap->end()) {
+          crestTag = tagIt->second;
+        }
+        if (crestTag.empty() && folderdata.folderName() != "/TagInfo") {
+          ATH_MSG_FATAL( "GlobalTag "<< m_par_globalTag << " does not contain folder " << folderdata.folderName());
+          crestError = true;
+          continue;
+        }
+      }
+      try {
+        chai::Database* db = getCrestDatabase(endpoint);
+        folder = std::make_unique<IOVDbCrestTag>(conn, folderdata, msg(), &(*m_h_clidSvc),
+                                                  &(*m_h_metaDataTool), *db, crestTag);
+      } catch (const std::exception& e) {
+        ATH_MSG_FATAL("Failed to construct CREST folder " << folderdata.folderName()
+                      << " (endpoint " << endpoint << "): " << e.what());
+        crestError = true;
         continue;
       }
+    } else {
+      folder=std::make_unique<IOVDbFolder>(conn,folderdata,msg(),&(*m_h_clidSvc),
+                                            &(*m_h_metaDataTool),
+                                            m_par_checklock,
+                                            m_par_cacheAlign, m_globalTag, m_par_onlineMode,
+                                            m_outputToFile);
     }
-    
-    auto folder=std::make_unique<IOVDbFolder>(conn,folderdata,msg(),&(*m_h_clidSvc), &(*m_h_metaDataTool),
-                                              m_par_checklock, m_outputToFile, m_source,
-                                              m_par_defaultConnection, crestTag, m_crestCoolToFile);
     const std::string& key=folder->key();
     if (m_foldermap.find(key)==m_foldermap.end()) {  //This check is too weak. For POOL-based folders, the SG key is in the folder description (not known at this point).
       m_foldermap[key]=std::move(folder);
       conn->incUsage();
     } else {
-      ATH_MSG_ERROR( "Duplicate request for folder " << 
-        folder->folderName() << 
+      ATH_MSG_ERROR( "Duplicate request for folder " <<
+        folder->folderName() <<
         " associated to already requested Storegate key " << key );
       // clean up this duplicate request
     }
@@ -1096,10 +1229,11 @@ StatusCode IOVDbSvc::fillTagInfo() {
   }
   // add all explicit tags specified in folders
   // can be from Folders or tagOverrides properties
-  for (const auto & [name, folder] : m_foldermap) {
-    if (!folder->joTag().empty()) {
-      ATH_MSG_DEBUG( "Adding folder " << folder->folderName() <<" tag " << folder->joTag() << " into TagInfo" );
-      if (m_h_tagInfoMgr->addTag(folder->folderName(),folder->joTag()).isFailure())
+  for (const auto & [name, folderBase] : m_foldermap) {
+    const bool joTagSet = !folderBase->joTag().empty();
+    if (joTagSet) {
+      ATH_MSG_DEBUG( "Adding folder " << folderBase->folderName() <<" tag " << folderBase->joTag() << " into TagInfo" );
+      if (m_h_tagInfoMgr->addTag(folderBase->folderName(),folderBase->joTag()).isFailure())
         return StatusCode::FAILURE;
     }
     // check to see if any input TagInfo folder overrides should be removed
@@ -1107,13 +1241,13 @@ StatusCode IOVDbSvc::fillTagInfo() {
     // Here we do not have access to the TagInfo object, but can put remove
     // requests in for all folders if the global tag is set, or if there is
     // an explict joboption tag, nooverride spec, or data comes from metadata
-    if (!m_par_globalTag.empty() || !folder->joTag().empty() || folder->noOverride() ||
-        folder->readMeta()) {
-      if (m_h_tagInfoMgr->removeTagFromInput(folder->folderName()).isFailure()) {
+    if (!m_par_globalTag.empty() || joTagSet || folderBase->noOverride() ||
+        folderBase->readMeta()) {
+      if (m_h_tagInfoMgr->removeTagFromInput(folderBase->folderName()).isFailure()) {
         ATH_MSG_WARNING( "Could not add TagInfo remove request for "
-               << folder->folderName() );
+               << folderBase->folderName() );
       } else {
-        ATH_MSG_INFO( "Added taginfo remove for " << folder->folderName() );
+        ATH_MSG_INFO( "Added taginfo remove for " << folderBase->folderName() );
       }
     }
   }
@@ -1140,11 +1274,11 @@ StatusCode IOVDbSvc::loadCaches(IOVDbConn* conn, const IOVTime* time) {
       ATH_MSG_WARNING( "Requested validity key " << vkey << " is out of range, reset to 0" );
       vkey=0;
     }
-    if (!folder->cacheValid(vkey) && !folder->dropped()) {
+    if (!folder->isResident(vkey) && !folder->dropped()) {
       access=true;
       {
         Gaudi::Guards::AuditorGuard auditor(std::string("FldrCache:")+folder->folderName(), auditorSvc(), "preLoadProxy");
-        if (!folder->loadCache(vkey,m_par_cacheAlign,m_globalTag,m_par_onlineMode)) {
+        if (!folder->loadAt(vkey)) {
           ATH_MSG_ERROR( "Cache load (prefetch) failed for folder " << folder->folderName() );
           // remember the failure, but also load other folders on this connection
           // while it is open
@@ -1172,7 +1306,7 @@ StatusCode IOVDbSvc::checkConfigConsistency() const {
   // this is only done here as need global tag to be set even if read from file
   // @TODO should this not be done during initialize
 
-  if (!m_par_dbinst.empty() && !m_globalTag.empty() && m_source!=IOVDbFolder::source_t::CRESTDB) {
+  if (!m_par_dbinst.empty() && !m_globalTag.empty() && m_source!=IOVDbConditionsSource::source_t::CRESTDB) {
     const std::string_view tagstub = std::string_view(m_globalTag).substr(0,7);
     ATH_MSG_DEBUG( "Checking " << m_par_dbinst << " against " <<tagstub );
 
