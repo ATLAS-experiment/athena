@@ -251,6 +251,7 @@ def createActsLargeRadiusTrackingPassFlags():
 
     # --- seeding
     icf.useITkPixelSeeding       = False
+    icf.useITkStripSeeding       = True
     icf.maxdImpactSSSSeeds       = [300.0 * Units.mm]
 
     icf.doBremRecoverySi = False
@@ -265,13 +266,14 @@ def createActsConversionTrackingPassFlags():
     icf = createActsTrackingPassFlags()
     icf.extension = "ActsConversion"
 
-    icf.useITkPixelSeeding = False
     # Mark as secondary pass
     icf.isSecondaryPass = True
     # Conversion pass is merged with main pass
     icf.storeSeparateContainer = False
 
     icf.usePrdAssociationTool   = True
+    icf.useITkPixelSeeding = False
+    icf.useITkStripSeeding = True
 
     icf.etaBins                 = [-1.0,4.0]
     icf.minPT                   = lambda pcf: (
@@ -296,6 +298,11 @@ def createActsConversionTrackingPassFlags():
     icf.doZBoundary             = False
 
     icf.doBremRecoverySi        = True
+
+    # Backward compatibility, to be removed
+    icf.Xi2max                  = [25.]
+    icf.Xi2maxNoAdd             = [25.]
+    icf.maxZImpactSeed = 200. * Units.mm
     return icf
 
 # Secondary ACTS Tracking pass for Low pT tracking
