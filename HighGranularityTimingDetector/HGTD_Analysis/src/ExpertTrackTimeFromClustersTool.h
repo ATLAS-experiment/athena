@@ -41,9 +41,9 @@ class ExpertTrackTimeFromClustersTool
     : public extends<AthAlgTool, IHGTD_ExpertTrackTimeAccessor> {
 
   struct Hit {
-    float time;
-    float resolution;
-    bool isprime;
+    float time = 0;
+    float resolution = 0;
+    bool isprime = false;
     TVector3 position;
   };
 
