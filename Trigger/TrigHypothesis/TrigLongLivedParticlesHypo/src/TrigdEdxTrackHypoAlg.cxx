@@ -125,7 +125,7 @@ StatusCode TrigdEdxTrackHypoAlg::execute( const EventContext& context ) const
    for ( auto dedx : *dedxContainer ) {
       Decision* newDecision = TrigCompositeUtils::newDecisionIn( outputDecisions, previousDecision, TrigCompositeUtils::hypoAlgNodeName(), context);
 
-      ElementLink<xAOD::TrigCompositeContainer> dedxEL = ElementLink<xAOD::TrigCompositeContainer>(*outputHandle, dedx->index());
+      ElementLink<xAOD::TrigCompositeContainer> dedxEL = ElementLink<xAOD::TrigCompositeContainer>(*outputHandle, dedx->index(), context);
       ATH_CHECK( dedxEL.isValid() );
 
       ATH_CHECK( newDecision->setObjectLink<xAOD::TrigCompositeContainer>(TrigCompositeUtils::featureString(), dedxEL) );

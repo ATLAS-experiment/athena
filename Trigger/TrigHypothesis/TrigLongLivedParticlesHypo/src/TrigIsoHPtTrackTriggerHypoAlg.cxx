@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
   * Trigger Hypo Tool, that is aimed at triggering high pt isolated tracks 
   * author Ismet Siral <ismet.siral@cern.ch> - University of Oregon
@@ -79,7 +79,7 @@ StatusCode TrigIsoHPtTrackTriggerHypoAlg::execute( const EventContext& context )
     //The decision tool has been moved inside the Tool, to save time on CPU. (There are too many tracks to make a dicision object. Instead we only make a decision object for events with tracks. 
 
     auto d = newDecisionIn( decisions , previousDecision, hypoAlgNodeName(), context);
-    d->setObjectLink( featureString(), ElementLink<xAOD::TrackParticleContainer>( *AllTracks, track->index() ) );
+    d->setObjectLink( featureString(), ElementLink<xAOD::TrackParticleContainer>( *AllTracks, track->index(), context ) );
       
     hypoToolInput.emplace_back( TrigIsoHPtTrackTriggerHypoTool::TrackInfo{ d, track, AllTracks, previousDecisionIDs} );
   }

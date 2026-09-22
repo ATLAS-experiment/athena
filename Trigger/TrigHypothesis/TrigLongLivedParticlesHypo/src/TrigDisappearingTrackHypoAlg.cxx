@@ -129,7 +129,7 @@ StatusCode TrigDisappearingTrackHypoAlg::execute( const EventContext& context ) 
    for ( auto distrk : *disTrkContainer ) {
       Decision* newDecision = TrigCompositeUtils::newDecisionIn( outputDecisions, previousDecision, TrigCompositeUtils::hypoAlgNodeName(), context);
 
-      ElementLink<xAOD::TrigCompositeContainer> distrkEL = ElementLink<xAOD::TrigCompositeContainer>(*outputHandle, distrk->index());
+      ElementLink<xAOD::TrigCompositeContainer> distrkEL = ElementLink<xAOD::TrigCompositeContainer>(*outputHandle, distrk->index(), context);
       ATH_CHECK( distrkEL.isValid() );
 
       ATH_CHECK( newDecision->setObjectLink<xAOD::TrigCompositeContainer>(TrigCompositeUtils::featureString(), distrkEL) );
