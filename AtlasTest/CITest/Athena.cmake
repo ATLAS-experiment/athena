@@ -137,19 +137,19 @@ atlas_add_citest( RecoRun4MC
 #################################################################################
 
 atlas_add_citest( DerivationRun2Data_PHYS
-   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag data_PHYS --threads 4
+   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag data_PHYS --threads 4 --detailed-comparison
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun2Data_PHYS_MT
-   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag data_PHYS_MT --threads 4
+   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag data_PHYS_MT --threads 4 --detailed-comparison
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun2Data_PHYSLITE
-   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag data_PHYSLITE --threads 4
+   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag data_PHYSLITE --threads 4 --detailed-comparison
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun2Data_PHYSLITE_MT
-   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag data_PHYSLITE_MT --threads 4
+   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag data_PHYSLITE_MT --threads 4 --detailed-comparison
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun2Data_PHYSLITE_from_PHYS
@@ -158,19 +158,19 @@ atlas_add_citest( DerivationRun2Data_PHYSLITE_from_PHYS
    DEPENDS_SUCCESS DerivationRun2Data_PHYS )
 
 atlas_add_citest( DerivationRun2MC_PHYS
-   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag mc_PHYS --threads 4
+   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag mc_PHYS --threads 4 --detailed-comparison
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun2MC_PHYS_MT
-   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag mc_PHYS_MT --threads 4
+   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag mc_PHYS_MT --threads 4 --detailed-comparison
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun2MC_PHYSLITE
-   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag mc_PHYSLITE --threads 4
+   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag mc_PHYSLITE --threads 4 --detailed-comparison
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun2MC_PHYSLITE_MT
-   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag mc_PHYSLITE_MT --threads 4
+   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag mc_PHYSLITE_MT --threads 4 --detailed-comparison
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun2MC_PHYSLITE_from_PHYS
@@ -179,27 +179,27 @@ atlas_add_citest( DerivationRun2MC_PHYSLITE_from_PHYS
    DEPENDS_SUCCESS DerivationRun2MC_PHYS )
 
 atlas_add_citest( DerivationRun2MCAF3_PHYS
-   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag af3_PHYS --threads 4
+   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag af3_PHYS --threads 4 --detailed-comparison
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun2MCAF3_PHYSLITE
-   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag af3_PHYSLITE --threads 4
+   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag af3_PHYSLITE --threads 4 --detailed-comparison
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun3Data_PHYS
-   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYS --threads 4
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYS --threads 4 --detailed-comparison
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun3Data_PHYS_MT
-   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYS_MT --threads 4
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYS_MT --threads 4 --detailed-comparison
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun3Data_PHYSLITE
-   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYSLITE --threads 4
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYSLITE --threads 4 --detailed-comparison
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun3Data_PHYSLITE_MT
-   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYSLITE_MT --threads 4
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYSLITE_MT --threads 4 --detailed-comparison
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun3Data_PHYSLITE_from_PHYS
@@ -217,19 +217,19 @@ atlas_add_citest( DerivationRun3Data_Train_SharedReader
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun3MC_PHYS
-   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYS --threads 4
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYS --threads 4 --detailed-comparison
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun3MC_PHYS_MT
-   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYS_MT --threads 4
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYS_MT --threads 4 --detailed-comparison
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun3MC_PHYSLITE
-   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYSLITE --threads 4
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYSLITE --threads 4 --detailed-comparison
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun3MC_PHYSLITE_MT
-   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYSLITE_MT --threads 4
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYSLITE_MT --threads 4 --detailed-comparison
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun3MC_PHYSLITE_from_PHYS
@@ -243,11 +243,11 @@ atlas_add_citest( DerivationRun3MC_Train_SharedReader
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun3MCAF3_PHYS
-   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag af3_PHYS --threads 4
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag af3_PHYS --threads 4 --detailed-comparison
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun3MCAF3_PHYSLITE
-   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag af3_PHYSLITE --threads 4
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag af3_PHYSLITE --threads 4 --detailed-comparison
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( RecoRun4MC_DAODPHYS
