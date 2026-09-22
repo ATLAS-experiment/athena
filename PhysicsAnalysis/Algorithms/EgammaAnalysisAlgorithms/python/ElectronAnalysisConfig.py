@@ -252,7 +252,11 @@ class ElectronMomentumCalibrationConfig (ConfigBlock) :
             alg.isolationCorrectionTool.AFII_corr = (
                 0 if self.forceFullSimConfigForIso
                 else config.dataType() is DataType.FastSim)
-            alg.isolationCorrectionTool.FixTimingIssueInCore = True
+            AODfixes = config.flags.Input.AODFixesDone
+            if "egammatopoIsoFix" in AODfixes:
+                alg.isolationCorrectionTool.FixTimingIssueInCore = False
+            else:       
+                alg.isolationCorrectionTool.FixTimingIssueInCore = True
             alg.isolationCorrectionTool.ToolVer = "REL22"
             alg.isolationCorrectionTool.CorrFile = "IsolationCorrections/v6/isolation_ptcorrections_rel22_mc20.root"
             alg.egammas = config.readName (self.containerName)
