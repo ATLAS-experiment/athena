@@ -149,7 +149,7 @@ private:
                         const LArOnOffIdMapping *onoffmap=nullptr, const LArCalibLineMapping *clmap=nullptr);
 
   private:
-    bool compareOrSet(Word& param, Word value, bool compare);
+    inline bool compareOrSet(Word& param, Word value, bool compare);
     unsigned int decodeTrailer(const uint32_t* p, unsigned int offset);
     unsigned int decodeHeader(const uint32_t* p, unsigned int offset);
     unsigned int bytesPerChannel(MonDataType at0, MonDataType at1);
