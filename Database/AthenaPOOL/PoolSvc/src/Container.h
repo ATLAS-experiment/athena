@@ -7,7 +7,6 @@
 
 // includes
 #include "PoolSvc/IContainer.h"
-#include "ITechnologySpecificAttributes.h"
 
 namespace pool {
 
@@ -20,8 +19,7 @@ namespace pool {
    *
    */
   
-  class Container : virtual public IContainer,
-                    virtual public ITechnologySpecificAttributes {
+  class Container : virtual public IContainer {
   public:
     Container( FileDescriptor& fileDescriptor,
                long technology,
@@ -41,18 +39,14 @@ namespace pool {
      */
     virtual ITokenIterator* tokens() override;
 
-    /// Returns the object holding the technology specific attributes for a given technology domain
-    virtual ITechnologySpecificAttributes& technologySpecificAttributes() override final { return *this; }
-
-  protected:
-    /// The actual method returning the attribute data given a name
+    /// The method returning the attribute data given a name
     virtual
     bool attributeOfType( const std::string& attributeName,
                           void* data,
                           const std::type_info& typeInfo,
                           const std::string& option ) override;
 
-    /// The actual method setting the attribute data given a name
+    /// The method setting the attribute data given a name
     virtual
     bool setAttributeOfType( const std::string& attributeName,
                              const void* data,
