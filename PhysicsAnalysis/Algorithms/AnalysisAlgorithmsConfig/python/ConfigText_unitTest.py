@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # @author Joseph Lambert
 
@@ -517,7 +517,7 @@ def compareBlockConfig(yamlPath='', *, checkOrder=False) :
     from AnalysisAlgorithmsConfig.FullCPAlgorithmsTest import makeTestSequenceBlocks
     configSeq = makeTestSequenceBlocks(dataType='fullsim', algSeq=None,
             geometry=LHCPeriod.Run2,
-            isPhyslite=False, forceEGammaFullSimConfig=True,
+            isPhyslite=False,
             returnConfigSeq=True)
 
     # create text config object to build text configurations
