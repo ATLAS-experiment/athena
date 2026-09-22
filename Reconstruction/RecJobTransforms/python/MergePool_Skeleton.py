@@ -87,7 +87,7 @@ def fromRunArgs(runArgs):
 
     # Input reading
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg.merge(PoolReadCfg(flags))
+    cfg.merge(PoolReadCfg(flags,allowAODFix=False))
 
     # Output writing
 
