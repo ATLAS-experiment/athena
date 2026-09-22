@@ -104,7 +104,7 @@ namespace CP {
             CaloClusterPtr assoc_cluster{};
             FlowElementPtr assoc_flow{};
             if (object->type() == xAOD::Type::ObjectType::Muon) {
-                const xAOD::Muon* mu = dynamic_cast<const xAOD::Muon*>(object);
+                const xAOD::Muon* mu = static_cast<const xAOD::Muon*>(object);
                 assoc_track = mu->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
                 if (m_clusters.empty())
                     assoc_cluster = mu->cluster();
@@ -115,7 +115,7 @@ namespace CP {
                     }));
                 }
             } else if (object->type() == xAOD::Type::ObjectType::Electron) {
-                const xAOD::Electron* el = dynamic_cast<const xAOD::Electron*>(object);
+                const xAOD::Electron* el = static_cast<const xAOD::Electron*>(object);
                 assoc_track = xAOD::EgammaHelpers::getOriginalTrackParticle(el);
                 assoc_cluster = el->caloCluster(0);
             }
