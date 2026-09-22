@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_RecAlgs/src/TimeCompatibilityCheckAlg.cxx
  * @author Valentina Raskina <valentina.raskina@cern.ch>
@@ -14,6 +14,7 @@
 #include "StoreGate/ReadDecorHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "xAODTruth/TruthParticleContainer.h"
+#include <cmath>
 
 namespace HGTD {
 
@@ -164,8 +165,8 @@ bool TimeCompatibilityCheckAlg::passesDeltaT(const std::vector<Hit>& hits) const
     return false;
   }
 // pass if the distance in units of the resolution passes the cut
-if (fabs(hits.at(0).m_time - hits.at(1).m_time) <
-    m_delta_cut * hypot(hits.at(0).m_resolution, hits.at(1).m_resolution)) {
+if (std::fabs(hits.at(0).m_time - hits.at(1).m_time) <
+    m_delta_cut * std::hypot(hits.at(0).m_resolution, hits.at(1).m_resolution)) {
         return true;
     }
     return false;
@@ -281,8 +282,8 @@ TimeCompatibilityCheckAlg::getLastHitOnTrack(const Trk::Track& track) const {
 bool TimeCompatibilityCheckAlg::lastHitIsOnLastSurface(const xAOD::TrackParticle& track_particle) const {
   const Trk::Track* track = track_particle.track();
   const Trk::TrackParameters* last_hit_param = getLastHitOnTrack(*track);
-  double radius = hypot(last_hit_param->position().x(), last_hit_param->position().y());
-  double abs_z = fabs(last_hit_param->position().z());
+  double radius = std::hypot(last_hit_param->position().x(), last_hit_param->position().y());
+  double abs_z = std::fabs(last_hit_param->position().z());
 
   if (abs_z > 2700) {
     return true;
