@@ -203,7 +203,7 @@ if (chi2 < m_chi2_threshold) {
     return valid_hits;
 }
 
-std::vector<Hit> time_candidates_copy = valid_hits; // TODO do I need this copy?
+std::vector<Hit> time_candidates_copy = std::move(valid_hits); // TODO do I need this copy?
   bool searching = true;
   while (searching) {
     // calculate chi2 contribution of each value
