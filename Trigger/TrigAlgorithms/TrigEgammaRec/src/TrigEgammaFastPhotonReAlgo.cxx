@@ -67,7 +67,7 @@ StatusCode TrigEgammaFastPhotonReAlgo::execute( const EventContext& ctx ) const
   //JTB Should only be 1 cluster in each RoI 
 
   const xAOD::TrigEMCluster *elink_cluster=(*clusContainer->begin());
-  ElementLink<xAOD::TrigEMClusterContainer> EClus=ElementLink<xAOD::TrigEMClusterContainer> (*clusContainer,0);
+  ElementLink<xAOD::TrigEMClusterContainer> EClus=ElementLink<xAOD::TrigEMClusterContainer> (*clusContainer,0, ctx);
 
 
   // retrieve the TrigEMCluster from the ElementLink
