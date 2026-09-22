@@ -727,7 +727,7 @@ TauChainParts = {
                         # 1-step FTF (LRT) + PT
                         'trackLRT', # RNNLLP triggers
                       ],
-    'jet'           : ['lc', 'pf', 'em'], # Only use LCTopo jets for now
+    'jet'           : ['lc', 'pf', 'em'], # Only lc and em jets are supported for now
     'calohitsPresel': [
                         # CaloHits step preselection
                         'idperfCHP', # No preselection, but still run all inferences

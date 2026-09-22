@@ -12,9 +12,9 @@ log = logging.getLogger(__name__)
 
 def tauCaloRoiUpdaterCfg(flags: AthConfigFlags, inputRoIs: str, clusters: str, jet: str) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    alg = CompFactory.TrigTauCaloRoiUpdater(name='TauCaloRoiUpdater'+jet if jet=='em' else 'TauCaloRoiUpdater',
+    alg = CompFactory.TrigTauCaloRoiUpdater(name='TauCaloEMRoiUpdater' if jet=='em' else 'TauCaloLCRoiUpdater',
                                             RoIInputKey=inputRoIs,
-                                            RoIOutputKey='UpdatedCaloRoI'+jet if jet=='em' else 'UpdatedCaloRoI',
+                                            RoIOutputKey='UpdatedCaloEMRoI' if jet=='em' else 'UpdatedCaloLCRoI',
                                             CaloClustersKey=clusters)
     acc.addEventAlgo(alg)
     return acc

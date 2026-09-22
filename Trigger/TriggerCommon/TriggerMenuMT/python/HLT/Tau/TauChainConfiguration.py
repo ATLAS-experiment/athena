@@ -66,7 +66,7 @@ class TauChainConfiguration(ChainConfigurationBase):
                 is_probe_leg = self.chainPart['tnpInfo']=='probe'
                 jet = self.chainPart['jet']
                 chain_step = getattr(self, step)(flags, is_probe_leg=is_probe_leg, jet=jet)
-
+            
             chain_steps.append(chain_step)
     
         return self.buildChain(chain_steps)
@@ -76,7 +76,7 @@ class TauChainConfiguration(ChainConfigurationBase):
     # Step 1: CaloMVA reconstruction
     #--------------------------------------------------
     def getCaloMVA(self, flags, is_probe_leg=False, jet='lc'):
-        stepName = 'CaloMVA_tau_' + jet if jet=='em' else 'CaloMVA_tau'
+        stepName = f'Calo{jet.upper()}MVA_tau'
         return self.getStep(flags, stepName, [tauCaloMVASequenceGenCfg], is_probe_leg=is_probe_leg, jet=jet)
 
     
@@ -106,7 +106,7 @@ class TauChainConfiguration(ChainConfigurationBase):
     # Step 3: 1st FTF stage (FTFCore/LRT)
     #--------------------------------------------------
     def getFTFCore(self, flags, is_probe_leg=False, jet='lc'):
-        stepName = 'FTFCore_' + jet if jet=='em' else 'FTFCore'
+        stepName = f'FTFCore_{jet.upper()}'
         if calohits_seq_name := getChainCaloHitsSeqName(self.chainPart):
             stepName += f'_fromCaloHits_{calohits_seq_name}'
         stepName += '_tau'
@@ -140,7 +140,7 @@ class TauChainConfiguration(ChainConfigurationBase):
     # Step 4: 2nd FTF stage (FTFIso)
     #--------------------------------------------------
     def getFTFIso(self, flags, is_probe_leg=False, jet='lc'):
-        stepName = 'FTFIso_' + jet if jet=='em' else 'FTFIso'
+        stepName = f'FTFIso_{jet.upper()}'
         if calohits_seq_name := getChainCaloHitsSeqName(self.chainPart):
             stepName += f'_fromCaloHits_{calohits_seq_name}'
         stepName += '_tau'
@@ -163,7 +163,7 @@ class TauChainConfiguration(ChainConfigurationBase):
     # Step 5: Precision tracking
     #--------------------------------------------------
     def getPrecTrackIso(self, flags, is_probe_leg=False, jet='lc'):
-        stepName = 'PrecTrkIso_' + jet if jet=='em' else 'PrecTrkIso'
+        stepName = f'PrecTrkIso_{jet.upper()}'
         if calohits_seq_name := getChainCaloHitsSeqName(self.chainPart):
             stepName += f'_fromCaloHits_{calohits_seq_name}'
         stepName += '_tau'
@@ -198,7 +198,7 @@ class TauChainConfiguration(ChainConfigurationBase):
     #--------------------------------------------------
     def getPrecision(self, flags, is_probe_leg=False, jet='lc'):
         sequenceName = getChainPrecisionSeqName(self.chainPart)
-        stepName = f'Precision_{sequenceName}_' + jet if jet=='em' else f'Precision_{sequenceName}'
+        stepName = f'Precision_{sequenceName}_{jet.upper()}'
         if calohits_seq_name := getChainCaloHitsSeqName(self.chainPart):
             stepName += f'_fromCaloHits_{calohits_seq_name}'
         stepName += '_tau'

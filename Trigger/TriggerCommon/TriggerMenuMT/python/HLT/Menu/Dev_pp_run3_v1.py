@@ -348,9 +348,10 @@ def getDevSignatures():
         ChainProp(name='HLT_tau35_mediumGNTau_HitZ_tau25_mediumGNTau_HitZ_03dRAB_L1cTAU30M_2cTAU20M', l1SeedThresholds=['cTAU30M', 'cTAU20M'], groups=SupportPhIGroup+MultiTauGroup+Topo2Group, monGroups=['tauMon:online', 'tauMon:shifter']),
         
         # tau chain wiht EMTopo seed
-        ChainProp(name='HLT_tau20_mediumGNTau_em_L1eTAU12', groups=SupportPhIGroup+SingleTauGroup+DevGroup+['RATE:CPS_eTAU12'], monGroups=['tauMon:online', 'tauMon:shifter']),
-        ChainProp(name='HLT_tau20_idperf_em_L1eTAU12', groups=SupportPhIGroup+SingleTauGroup+DevGroup+['RATE:CPS_eTAU12'], monGroups=['tauMon:online', 'tauMon:shifter']),
-        ChainProp(name='HLT_tau20_perf_em_L1eTAU12', groups=SupportPhIGroup+SingleTauGroup+DevGroup+['RATE:CPS_eTAU12'], monGroups=['tauMon:online', 'tauMon:shifter']),
+        ChainProp(name='HLT_tau20_mediumGNTau_em_L1eTAU12', groups=SupportPhIGroup+SingleTauGroup+DevGroup, monGroups=['tauMon:online', 'tauMon:shifter']),
+        ChainProp(name='HLT_tau20_perf_em_L1eTAU12', groups=SupportPhIGroup+SingleTauGroup+DevGroup, monGroups=['tauMon:online', 'tauMon:shifter']),
+        ChainProp(name='HLT_tau20_idperf_em_L1eTAU12', groups=SupportPhIGroup+SingleTauGroup+DevGroup, monGroups=['tauMon:online', 'tauMon:shifter']),
+        ChainProp(name='HLT_tau0_ptonly_em_L1eTAU12', groups=SupportPhIGroup+SingleTauGroup+DevGroup, monGroups=['tauMon:online', 'tauMon:shifter']),
         
         # Single tau Loose and Tight variations
         ChainProp(name='HLT_tau20_mediumGNTau_L1cTAU20M', groups=SingleTauGroup+DevGroup, monGroups=['tauMon:t0']),

@@ -750,20 +750,14 @@ TriggerHLTListRun3 = [
 
     # Tau
 
-    ('xAOD::TrackParticleContainer#HLT_IDTrack_TauCore_FTF',                 'BS ESD AODFULL', 'Tau', [InViews('tauFastTrackCoreViews'), InViews('tauFastTrackCore_HitZViews')]),
+    ('xAOD::TrackParticleContainer#HLT_IDTrack_TauCore_FTF',                 'BS ESD AODFULL', 'Tau', [InViews('tauFastTrackCoreViews'), InViews('tauFastTrackCore_HitZViews')], [InViews('tauFastTrackCoreEMViews')]),
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_TauCore_FTFAux.',          'BS ESD AODFULL', 'Tau'),
-
-    ('xAOD::TrackParticleContainer#HLT_IDTrack_TauCoreem_FTF',                 'BS ESD AODFULL', 'Tau', [InViews('tauFastTrackCoreEMViews')]),
-    ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_TauCoreem_FTFAux.',          'BS ESD AODFULL', 'Tau'),
 
     ('xAOD::TrackParticleContainer#HLT_IDTrack_TauLRT_FTF',                 'BS ESD AODFULL', 'Tau', [InViews('tauFastTrackLRTViews')]),
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_TauLRT_FTFAux.',          'BS ESD AODFULL', 'Tau'),
 
-    ('xAOD::TrackParticleContainer#HLT_IDTrack_TauIso_FTF',                 'BS ESD AODFULL', 'Tau', [InViews('tauFastTrackIsoViews'), InViews('tauFastTrackIso_HitZViews')]),
+    ('xAOD::TrackParticleContainer#HLT_IDTrack_TauIso_FTF',                 'BS ESD AODFULL', 'Tau', [InViews('tauFastTrackIsoViews'), InViews('tauFastTrackIso_HitZViews')], [InViews('tauFastTrackIsoEMViews')]),
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_TauIso_FTFAux.',          'BS ESD AODFULL', 'Tau'),
-
-    ('xAOD::TrackParticleContainer#HLT_IDTrack_TauIsoem_FTF',                 'BS ESD AODFULL', 'Tau', [InViews('tauFastTrackIsoEMViews')]),
-    ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_TauIsoem_FTFAux.',          'BS ESD AODFULL', 'Tau'),
 
     ('xAOD::TrackParticleContainer#HLT_IDTrack_Tau_IDTrig',                 'BS ESD AODFULL', 'Tau', [InViews('precIsoTrackViews'), InViews('tauPrecTrackIsoViews'), InViews('tauPrecTrackIso_HitZViews')]),
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_Tau_IDTrigAux.eProbabilityNN',          'BS ESD AODFULL', 'Tau'),
@@ -779,14 +773,14 @@ TriggerHLTListRun3 = [
     ('TrigRoiDescriptorCollection#HLT_Roi_TauHitsHitZ',      'BS ESD AODFULL',  'Tau'),
     ('TrigRoiDescriptorCollection#HLT_Roi_TauHitsHitZ_probe','BS ESD AODFULL',  'Tau'),
     ('TrigRoiDescriptorCollection#HLT_Roi_TauCore',          'BS ESD AODFULL',  'Tau'),
-    ('TrigRoiDescriptorCollection#HLT_Roi_TauCoreem',        'BS ESD AODFULL',  'Tau'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_TauCoreEM',        'BS ESD AODFULL',  'Tau'),
     ('TrigRoiDescriptorCollection#HLT_Roi_TauCore_probe',    'BS ESD AODFULL',  'Tau'),
     ('TrigRoiDescriptorCollection#HLT_Roi_TauCoreHitZ',      'BS ESD AODFULL',  'Tau'),
     ('TrigRoiDescriptorCollection#HLT_Roi_TauCoreHitZ_probe','BS ESD AODFULL',  'Tau'),
     ('TrigRoiDescriptorCollection#HLT_Roi_TauLRT',           'BS ESD AODFULL',  'Tau'),
     ('TrigRoiDescriptorCollection#HLT_Roi_TauLRT_probe',     'BS ESD AODFULL',  'Tau'),
     ('TrigRoiDescriptorCollection#HLT_Roi_TauIso',           'BS ESD AODFULL',  'Tau'),
-    ('TrigRoiDescriptorCollection#HLT_Roi_TauIsoem',         'BS ESD AODFULL',  'Tau'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_TauIsoEM',         'BS ESD AODFULL',  'Tau'),
     ('TrigRoiDescriptorCollection#HLT_Roi_TauIso_probe',     'BS ESD AODFULL',  'Tau'),
     ('TrigRoiDescriptorCollection#HLT_Roi_TauIsoHitZ',       'BS ESD AODFULL',  'Tau'),
     ('TrigRoiDescriptorCollection#HLT_Roi_TauIsoHitZ_probe', 'BS ESD AODFULL',  'Tau'),

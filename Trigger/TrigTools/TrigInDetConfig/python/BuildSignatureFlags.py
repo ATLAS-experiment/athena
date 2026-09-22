@@ -191,9 +191,9 @@ def signatureTrigTrackingFlags(mode : str) -> AthConfigFlags:
     "muonLate"      : muon,
     
     "tauCore"       : tauCore,
-    "tauCoreem"     : tauCoreem,
+    "tauCoreEM"     : tauCoreEM,
     "tauIso"        : tauIso,
-    "tauIsoem"      : tauIsoem,
+    "tauIsoEM"      : tauIsoEM,
     "tauHitsHitZ"   : tauHitsHitZ,
     "tauCoreHitZ"   : tauCoreHitZ,
     "tauIsoHitZ"    : tauIsoHitZ,
@@ -374,14 +374,10 @@ def tauCore(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   return flags
 
 @signatureActions
-def tauCoreem(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
-
-  flags.input_name = instanceName
-  flags.name     = "tauCoreem"
-  flags.suffix   = "TauCoreem"
-  flags.roi      = "HLT_Roi_TauCoreem"
-  flags.minPT    = processEtaDepSettings(flags.minPT,[0.8*Units.GeV])
-  flags.holeSearch_FTF = True
+def tauCoreEM(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
+  flags = tauCore(flags, instanceName, recoMode)
+  flags.name     = "tauCoreEM"
+  flags.roi      = "HLT_Roi_TauCoreEM"
   return flags
 
 @signatureActions
@@ -410,20 +406,10 @@ def tauIso(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfig
   return flags
 
 @signatureActions
-def tauIsoem(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
-
-  flags.input_name = instanceName
-  flags.name     = "tauIsoem"
-  flags.suffix   = "TauIsoem"
-  flags.roi      = "HLT_Roi_TauIsoem"
-  flags.etaHalfWidth   = 0.4
-  flags.phiHalfWidth   = 0.4
-  flags.zedHalfWidth   = 7.0
-  flags.adaptiveVertex = True
-  flags.addSingleTrackVertices = True
-  flags.vertex         = "HLT_IDVertex_Tau"
-  flags.electronPID    = False
-  flags.minPT          = processEtaDepSettings(flags.minPT,[0.8*Units.GeV])
+def tauIsoEM(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
+  flags = tauIso(flags, instanceName, recoMode)
+  flags.name     = "tauIsoEM"
+  flags.roi      = "HLT_Roi_TauIsoEM"
   return flags
 
 @signatureActions
@@ -925,7 +911,7 @@ def collToRecordable(flags,name):
                      "beamSpot"]:
       record = False
   else:
-    if signature in ["tauHitsHitZ","tauCore","tauCoreem","tauCoreHitZ","tauIso","tauIsoem","tauIsoHitZ","tauIsoBDT",
+    if signature in ["tauHitsHitZ","tauCore","tauCoreEM","tauCoreHitZ","tauIso","tauIsoEM","tauIsoHitZ","tauIsoBDT",
                      "jet","fullScan","jetSuper","bhh",
                      "beamSpot","beamSpotFS",
                      "bjetLRT","DJetLRT","DVtxLRT"]:
