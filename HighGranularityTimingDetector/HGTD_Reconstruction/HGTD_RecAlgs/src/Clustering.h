@@ -15,7 +15,6 @@
 #ifndef CLUSTERINGHELPER_H
 #define CLUSTERINGHELPER_H
 
-#include "TMath.h"
 
 #include <algorithm>
 #include <iostream>
@@ -24,6 +23,7 @@
 #include <stdexcept>
 #include <utility>
 #include <vector>
+#include <ranges>
 
 namespace HGTD {
 
@@ -175,28 +175,17 @@ Cluster<T>::Cluster()
 template <typename T>
 Cluster<T>::Cluster(
   const std::vector<double> &v, const std::vector<double> &v_sigma)
-  : m_combined_value_vector(v), m_combined_sigma_vector(v_sigma) {
-
-  for (const auto &s : v_sigma) {
-    if (s < 0) {
-      m_contains_unknowns = true;
-    }
-  }
+  : m_combined_value_vector(v), m_combined_sigma_vector(v_sigma),
+   m_contains_unknowns(std::ranges::any_of(v_sigma, [](double s){return s < 0;})){
+  //
 }
 
 template <typename T>
 Cluster<T>::Cluster(
-  const std::vector<double> &v, const std::vector<double> &v_sigma,
-  const T &entry)
-  : m_combined_value_vector(v), m_combined_sigma_vector(v_sigma) {
-
-  m_entries.push_back(entry);
-
-  for (const auto &s : v_sigma) {
-    if (s < 0) {
-      m_contains_unknowns = true;
-    }
-  }
+  const std::vector<double> &v, const std::vector<double> &v_sigma, const T &entry)
+  : m_entries{entry},m_combined_value_vector(v), m_combined_sigma_vector(v_sigma), 
+   m_contains_unknowns(std::ranges::any_of(v_sigma, [](double s){return s < 0;})){
+  //
 }
 
 template <class T> int Cluster<T>::getNEntries() const {
