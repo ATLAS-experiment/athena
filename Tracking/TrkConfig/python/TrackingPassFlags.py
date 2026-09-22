@@ -147,32 +147,22 @@ def createITkFastTrackingPassFlags():
     icf = createActsTrackingPassFlags()
     deactivateActsComponents(icf)
     activateAthenaComponents(icf)
+    icf.extension = ""
+    cf.Xi2max = [9.]
+    icf.Xi2maxNoAdd = [25.]
     return icf
 
 
 ## Heavyion mode #######################
 def createITkHeavyIonTrackingPassFlags():
-    icf = createITkTrackingPassFlags()
-    icf.extension        = "HeavyIon"
-    icf.maxPrimaryImpact = [5.0 * Units.mm]
-    icf.minPT            = lambda pcf : (
-        [0.4 *Units.GeV * pcf.BField.configuredSolenoidFieldScale])
-    icf.minPTSeed        = lambda pcf : (
-        0.4 * Units.GeV * pcf.BField.configuredSolenoidFieldScale)
-    icf.minClusters      = [6]
-    icf.minSiNotShared   = [6]
-    icf.Xi2max           = [6.]
-    icf.Xi2maxNoAdd      = [9.]
-    icf.maxPixelHoles    = [1] 
-    icf.maxSctHoles      = [1] 
-    icf.maxDoubleHoles   = [0] 
-    icf.doBremRecoverySi = False
+    from ActsConfig.ActsTrackingPassFlags import createActsHeavyIonTrackingPassFlags
+    icf = createActsHeavyIonTrackingPassFlags()
+    icf.extension = "HeavyIon"
     return icf
 
 
 ### ITk with FTF standalone mode ####
 def createITkFTFPassFlags():
-
     icf = createITkFastTrackingPassFlags()
 
     icf.addFlag("doHitDV"            , False)
@@ -211,53 +201,17 @@ def createITkFTFLargeD0PassFlags():
 
 ### ITk LRT mode ####################
 def createITkLargeD0TrackingPassFlags():
-
-    icf = createITkTrackingPassFlags()
+    from ActsConfig.ActsTrackingPassFlags import createActsLargeRadiusTrackingPassFlags
+    icf = createActsLargeRadiusTrackingPassFlags()
+    deactivateActsComponents(icf)
+    activateAthenaComponents(icf)
     icf.extension             = "LargeD0"
-    icf.usePrdAssociationTool = True
-    icf.storeSeparateContainer = lambda pcf : pcf.Tracking.storeSeparateLargeD0Container
-
-    icf.minPT              = lambda pcf : (
-        [1000 * Units.MeV * pcf.BField.configuredSolenoidFieldScale])
-    icf.maxEta             = 4.0
-    icf.etaBins            = [-1.0, 4.0]
-    icf.maxPrimaryImpact   = [300 * Units.mm]
-    icf.maxZImpact         = [500 * Units.mm]
-    icf.minClusters        = [8]
-    icf.minSiNotShared     = [6]
-    icf.maxShared          = [2]
-    icf.minPixel           = [0]
-    icf.maxHoles           = [1]
-    icf.maxPixelHoles      = [1]
-    icf.maxSctHoles        = [1]
-    icf.maxDoubleHoles     = [0]
-
-    icf.maxZImpactSeed     = 500.0 * Units.mm
-    icf.maxPrimaryImpactSeed = 300.0 * Units.mm
-    icf.minPTSeed          = lambda pcf : (
-        1000 * Units.MeV * pcf.BField.configuredSolenoidFieldScale)
-
-    icf.radMax             = 1100. * Units.mm
-    icf.nHolesMax          = icf.maxHoles
-    icf.nHolesGapMax       = icf.maxHoles
-    icf.roadWidth          = 5
-
-    # --- seeding
-    icf.useITkPixelSeeding       = False
-    icf.maxdImpactSSSSeeds       = [300.0 * Units.mm]
-
-    icf.doBremRecoverySi = False
-
     icf.Xi2max                  = [9.0]
     icf.Xi2maxNoAdd             = [25.0]
-    icf.nWeightedClustersMin    = [6]
-
     return icf
 
 def createITkLargeD0FastTrackingPassFlags():
-
     icf = createITkLargeD0TrackingPassFlags()
-
     icf.useITkPixelSeeding = False
     icf.useITkStripSeeding = True
 
@@ -274,20 +228,15 @@ def createITkLargeD0FastTrackingPassFlags():
     icf.maxZImpact         = [200 * Units.mm]
     icf.maxZImpactSeed     = 200. * Units.mm
     icf.radMax             = 400. * Units.mm
-
     return icf
 
 ### ITk LowPt mode ####################
 def createITkLowPtTrackingPassFlags():
-
-    icf = createITkTrackingPassFlags()
+    from ActsConfig.ActsTrackingPassFlags import createActsLowPtTrackingPassFlags
+    icf = createActsLowPtTrackingPassFlags()
+    deactivateActsComponents(icf)
+    activateAthenaComponents(icf)
     icf.extension          = "LowPt"
-    icf.minPT              = lambda pcf : (
-        [0.4 * Units.GeV * pcf.BField.configuredSolenoidFieldScale])
-    icf.minPTSeed          = lambda pcf : (
-        0.4 * Units.GeV * pcf.BField.configuredSolenoidFieldScale)
-    icf.doBremRecoverySi   = False
-
     return icf
 
 ### HighPileUP mode ####################
@@ -473,36 +422,13 @@ def createLowPtTrackingPassFlags():
 
 ## ITkConversion mode ########################
 def createITkConversionTrackingPassFlags():
-    icf = createITkTrackingPassFlags()
+    from ActsConfig.ActsTrackingPassFlags import createActsLegacyTrackingPassFlags
+    icf = createActsConversionTrackingPassFlags()
+    deactivateActsComponents(icf)
+    activateAthenaComponents(icf)
     icf.extension               = "Conversion"
-    icf.usePrdAssociationTool   = True
-
-    icf.etaBins                 = [-1.0,4.0]
-    icf.minPT                   = lambda pcf: (
-        [0.9 * Units.GeV * pcf.BField.configuredSolenoidFieldScale])
-    icf.maxPrimaryImpact        = [10.0 * Units.mm]
-    icf.maxPrimaryImpactSeed    = 10.0 * Units.mm
-    icf.maxZImpact              = [150.0 * Units.mm]
-    icf.minClusters             = [6]
-    icf.minSiNotShared          = [6]
-    icf.maxShared               = [0]
-    icf.minPixel                = [0]
-    icf.maxHoles                = [0]
-    icf.maxPixelHoles           = [1]
-    icf.maxSctHoles             = [2]
-    icf.maxDoubleHoles          = [1]
-
-    icf.nHolesMax               = icf.maxHoles
-    icf.nHolesGapMax            = icf.maxHoles
-    icf.nWeightedClustersMin    = [6]
-    icf.maxdImpactSSSSeeds      = [20.0 * Units.mm]
-    icf.radMax                  = 1100. * Units.mm
-    icf.doZBoundary             = False
-
     icf.Xi2max                  = [9.0]
     icf.Xi2maxNoAdd             = [25.0]
-    icf.doBremRecoverySi        = True
-
     return icf
 
 ## VeryLowPt mode ########################
