@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRACKRECONSTRUCTION_TRACKPARAMSESTIMATIONTOOL_H
@@ -88,7 +88,8 @@ namespace ActsTrk {
         "Inflate refit track errors"};
     Gaudi::Property< int > m_parameterEstimationMode {this, "parameterEstimationMode", 2,
         "0=use 1st 3 SPs, 1=use first,middle,last SPs to improve pT measurement, 2=use for all parameters, "
-        "3=use 1st 3 SPs separated by more than minDeltaR, starting from the innermost SP"};
+        "3=use 1st 3 SPs separated by more than minDeltaR, starting from the innermost SP, "
+        "4=fit all SPs"};
     Gaudi::Property<int> m_bFieldMode{this, "bFieldMode", 0,
         "B-field mode: 0=B-field at first SP in search order; 1=z-component of B-field; 2=B-field at innermost SP, regardless of search direction"};
     Gaudi::Property<std::size_t> m_firstSp{this, "firstSp", 0ul,
@@ -99,6 +100,10 @@ namespace ActsTrk {
         "Use curvilinear parameters when propagation fails instead of returning null"};
     Gaudi::Property<std::size_t> m_stripCalibrationIterations{this, "stripCalibrationIterations", 1ul,
         "Number of strip calibration iterations"};
+    Gaudi::Property<std::size_t> m_geometricRefineIterations{this, "geometricRefineIterations", 0ul,
+        "Number of geometric refinement iterations of the circle fit (parameterEstimationMode=4)"};
+    Gaudi::Property<double> m_spacePointWeightExponent{this, "spacePointWeightExponent", 0.,
+        "Weight each SP in the fit by 1/r^exponent, where 0 gives uniform weights (parameterEstimationMode=4)"};
     Gaudi::Property<bool> m_refitSeeds{this, "refitSeeds", false, "Run KalmanFitter on seeds"};
 
     std::optional<Acts::BoundTrackParameters> doRefit(
