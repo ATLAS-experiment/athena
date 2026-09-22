@@ -121,7 +121,7 @@ TrigJetHypoAlg::decide(const xAOD::JetContainer* jets,
         // We receive a VIEW container with filtered jets, so need to retrieve the original
         const xAOD::JetContainer* jetCont = static_cast<const xAOD::JetContainer*>(jet->container());
         ATH_MSG_VERBOSE("Creating element link to presel jet " << jet->index() << " of " << jetCont->size());
-        newDecision->setObjectLink<xAOD::JetContainer>("LeadingPreselJet",ElementLink<xAOD::JetContainer>(*jetCont, jet->index()));
+        newDecision->setObjectLink<xAOD::JetContainer>("LeadingPreselJet",ElementLink<xAOD::JetContainer>(*jetCont, jet->index(), context));
       }
     }
 
@@ -142,7 +142,7 @@ TrigJetHypoAlg::decide(const xAOD::JetContainer* jets,
       // We receive a VIEW container with filtered jets, so need to retrieve the original
       const xAOD::JetContainer* jetCont = static_cast<const xAOD::JetContainer*>(jet->container());
       ElementLink<xAOD::JetContainer> jetLink =
-        ElementLink<xAOD::JetContainer>(*jetCont, jet->index());
+        ElementLink<xAOD::JetContainer>(*jetCont, jet->index(), context);
 
       // Create a decoration. This is used to comminicate to the following ComboHypo that the
       // DecisionObject should be excluded from downstream multiplicity checks.
