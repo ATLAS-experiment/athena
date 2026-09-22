@@ -45,5 +45,13 @@ namespace IOVDbNamespace{
     return os;
   }
 
+  std::string
+  stripIovBounds(const std::string& json){
+    // Tolerates any whitespace around the separators, so a delimiter change
+    // cannot turn this into a no-op that reports every folder as differing.
+    static const std::regex boundsRe(R"("since"\s*:\s*-?[0-9]+\s*,\s*"until"\s*:\s*-?[0-9]+\s*,\s*)");
+    return std::regex_replace(json, boundsRe, "");
+  }
+
 }
 

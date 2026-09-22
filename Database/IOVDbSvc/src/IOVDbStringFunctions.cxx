@@ -217,5 +217,46 @@ namespace IOVDbNamespace{
     return false;
   }
 
+  std::string
+  chaiConnectString(const std::string & endpoint){
+    static const std::string httpPrefix{"http://"};
+    static const std::string httpsPrefix{"https://"};
+    static const std::string fsPrefix{"crest_fs:"};
+    static const std::string serverPrefix{"crest:"};
+    std::string ep = endpoint;
+    // accept endpoints already carrying a CHAI scheme prefix
+    if (ep.starts_with(fsPrefix)) ep = ep.substr(fsPrefix.size());
+    else if (ep.starts_with(serverPrefix)) ep = ep.substr(serverPrefix.size());
+    // A bare host name (no scheme, no path separator, at least one
+    // dot) is a server, not a directory. Default it to https,
+    // matching IOVDbAutoCfgFlags.getCrestServer, or CHAI treats it as
+    // a nonexistent filesystem path.
+    const bool bareHost = (ep.find('/') == std::string::npos)
+                       && (ep.find('.') != std::string::npos);
+    if (bareHost) ep = httpsPrefix + ep;
+    if (ep.starts_with(httpPrefix) || ep.starts_with(httpsPrefix)) {
+      while (ep.ends_with('/')) ep.pop_back();
+      if (ep.find("api-v") == std::string::npos) ep += "/api-v6.0";
+      return "crest:" + ep;
+    }
+    return "crest_fs:" + ep;
+  }
+
+  TimeStampCorrectionResult
+  correctTimeStampElement(const std::string & description, const std::string & token){
+    const std::string regex=R"delim(<timeStamp>\s*([^<\s]*)\s*</timeStamp>)delim";
+    const std::regex re(regex);
+    std::smatch tsMatch;
+    const std::string newElement = "<timeStamp>" + token + "</timeStamp>";
+    if (!std::regex_search(description, tsMatch, re)) {
+      return {newElement + description, TimeStampCorrection::Inserted};
+    }
+    if (tsMatch[1] == token) {
+      return {description, TimeStampCorrection::Unchanged};
+    }
+    std::string corrected{description};
+    corrected.replace(tsMatch.position(0), tsMatch.length(0), newElement);
+    return {corrected, TimeStampCorrection::Corrected};
+  }
 
 }

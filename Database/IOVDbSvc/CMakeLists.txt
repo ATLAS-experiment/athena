@@ -17,7 +17,7 @@ atlas_add_library( IOVDbSvcLib
    IOVDbSvc/*.h
    INTERFACE
    PUBLIC_HEADERS IOVDbSvc
-   INCLUDE_DIRS ${COOL_INCLUDE_DIRS} 
+   INCLUDE_DIRS ${COOL_INCLUDE_DIRS}
    LINK_LIBRARIES ${COOL_LIBRARIES} GaudiKernel)
 
 
@@ -27,9 +27,9 @@ atlas_add_component( IOVDbSvc
    ${Boost_INCLUDE_DIRS} ${CrestApi_INCLUDE_DIRS} CxxUtils
    LINK_LIBRARIES ${ROOT_LIBRARIES} ${CORAL_LIBRARIES} ${COOL_LIBRARIES}
    ${Boost_LIBRARIES} nlohmann_json::nlohmann_json GaudiKernel
-   AthenaBaseComps AthenaKernel StoreGateLib AthenaPoolUtilities
+   AthenaBaseComps AthenaKernel StoreGateLib AthenaPoolUtilities CoralUtilitiesLib
    CoraCool IOVDbDataModel EventInfoUtils GeoModelInterfaces
-   IOVDbMetaDataToolsLib EventInfoMgtLib PoolSvcLib IOVDbSvcLib 
+   IOVDbMetaDataToolsLib EventInfoMgtLib PoolSvcLib IOVDbSvcLib
    CxxUtils DBLock SGTools CrestApi::CrestApiLib chai::chai chai::container)
 
 
@@ -75,7 +75,7 @@ atlas_add_test( IOVDbConn_test
 atlas_add_test( IOVDbStringFunctions_test
    SOURCES test/IOVDbStringFunctions_test.cxx src/IOVDbStringFunctions.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES 
+   LINK_LIBRARIES
    Boost::unit_test_framework
    POST_EXEC_SCRIPT noerror.sh )
 
@@ -125,8 +125,8 @@ atlas_add_test( IOVDbFolder_test
    src/IOVDbStringFunctions.cxx src/IOVDbParser.cxx src/IOVDbConn.cxx
    src/IOVDbFolder.cxx src/IovStore.cxx
    src/ReadFromFileMetaData.cxx src/IOVDbCoolFunctions.cxx src/TagFunctions.cxx
-   src/Cool2Json.cxx src/Base64Codec.cxx  
-   src/IOVDbJsonStringFunctions.cxx src/CoralCrestManager.cxx 
+   src/Cool2Json.cxx src/Base64Codec.cxx
+   src/IOVDbJsonStringFunctions.cxx src/CoralCrestManager.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
    ${ROOT_INCLUDE_DIRS} ${CrestApi_INCLUDE_DIRS}
    LINK_LIBRARIES ${COOL_LIBRARIES} ${CORAL_LIBRARIES}
@@ -135,6 +135,33 @@ atlas_add_test( IOVDbFolder_test
    TestTools CoraCool AthenaPoolUtilities GeoModelInterfaces
    IOVDbMetaDataToolsLib IOVDbDataModel EventInfoMgtLib CrestApi::CrestApiLib chai::chai chai::container
    Boost::unit_test_framework Boost::timer
+   POST_EXEC_SCRIPT noerror.sh )
+
+atlas_add_test( IOVDbCrestTag_test
+   SOURCES test/IOVDbCrestTag_test.cxx
+   src/IOVDbCrestTag.cxx src/FolderTypes.cxx src/IOVDbStringFunctions.cxx
+   src/IOVDbParser.cxx src/IOVDbConn.cxx src/IovStore.cxx
+   src/FolderAddressResolver.cxx src/ReadFromFileMetaData.cxx
+   src/IOVDbCoolFunctions.cxx src/IOVDbJsonStringFunctions.cxx
+   src/Base64Codec.cxx
+   INCLUDE_DIRS ${CHAI_INCLUDE_DIR} ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
+   ${ROOT_INCLUDE_DIRS}
+   LINK_LIBRARIES ${COOL_LIBRARIES} ${CORAL_LIBRARIES} ${ROOT_LIBRARIES}
+   nlohmann_json::nlohmann_json GaudiKernel AthenaKernel AthenaBaseComps
+   StoreGateLib SGTools CxxUtils TestTools CoraCool AthenaPoolUtilities CoralUtilitiesLib
+   GeoModelInterfaces IOVDbMetaDataToolsLib IOVDbDataModel EventInfoMgtLib
+   chai::chai
+   Boost::unit_test_framework
+   LOG_IGNORE_PATTERN "has no CREST tag and is not read from file metadata|Failed to resolve CHAI tag|No covering IOV for folder|Failed to get tag|No resident payload for folder|disagrees with the tag.s IovType|has unsupported IovType"
+   POST_EXEC_SCRIPT noerror.sh )
+
+atlas_add_test( FolderAddressResolver_test
+   SOURCES test/FolderAddressResolver_test.cxx src/FolderAddressResolver.cxx
+   src/IOVDbParser.cxx src/IOVDbStringFunctions.cxx
+   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+   LINK_LIBRARIES ${ROOT_LIBRARIES} GaudiKernel AthenaKernel CxxUtils TestTools
+   Boost::unit_test_framework
+   LOG_IGNORE_PATTERN "Primary type name is empty|Could not get clid for typeName"
    POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( IovStore_test
@@ -147,12 +174,12 @@ atlas_add_test( IovStore_test
 atlas_add_test( Cool2Json_test
    SOURCES test/Cool2Json_test.cxx src/Cool2Json.cxx src/IOVDbConn.cxx
    src/IOVDbParser.cxx src/IOVDbJsonStringFunctions.cxx src/IOVDbStringFunctions.cxx src/FolderTypes.cxx
-   src/Base64Codec.cxx 
+   src/Base64Codec.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
    ${ROOT_INCLUDE_DIRS} CoralUtilities
-   LINK_LIBRARIES ${COOL_LIBRARIES} ${CORAL_LIBRARIES} 
+   LINK_LIBRARIES ${COOL_LIBRARIES} ${CORAL_LIBRARIES}
    ${ROOT_LIBRARIES} GaudiKernel AthenaKernel StoreGateLib CoraCool
-   AthenaPoolUtilities CxxUtils TestTools 
+   AthenaPoolUtilities CxxUtils TestTools
    Boost::unit_test_framework
    POST_EXEC_SCRIPT noerror.sh )
 
