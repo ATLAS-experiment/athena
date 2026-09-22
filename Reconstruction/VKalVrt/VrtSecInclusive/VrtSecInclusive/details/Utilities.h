@@ -184,7 +184,7 @@ namespace VKalVrtAthena {
 
           if( !linkFlag ) {
 
-            ElementLink<xAOD::VertexContainer> link_SV( *( dynamic_cast<const xAOD::VertexContainer*>( vtx->container() ) ), static_cast<size_t>( vtx->index() ) );
+            ElementLink<xAOD::VertexContainer> link_SV( *( dynamic_cast<const xAOD::VertexContainer*>( vtx->container() ) ), static_cast<size_t>( vtx->index() ), ctx );
             links.emplace_back( link_SV );
 
           }
