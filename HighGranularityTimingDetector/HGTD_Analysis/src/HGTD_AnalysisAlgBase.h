@@ -59,7 +59,7 @@ public:
     const std::string name = trk_sel_name + "/" + time_wp + "/" + hist_name;
     if (m_histos.contains(name)) {
       ATH_MSG_WARNING("You are duplicating histogram: "
-                      << name << ", this is not a good idea\n");
+                      << name << ", this is not a good idea");
       return;
     }
     auto * ptrT = new T(hist_name.c_str(), title.c_str(), args...);
@@ -135,7 +135,7 @@ public:
       ATH_MSG_WARNING(
           "[HistogramHandler::fill] ERROR: you are attempting to fill "
           "a histogram with name "
-          << name << " which doesn't exist!\n");
+          << name << " which doesn't exist!");
       return;
     }
     auto * ptrT = dynamic_cast<T*>(it->second);
@@ -155,7 +155,7 @@ public:
       ATH_MSG_WARNING(
           "[HistogramHandler::fill] ERROR: you are attempting to fill "
           "a histogram with name "
-          << name << " which doesn't exist!\n");
+          << name << " which doesn't exist!");
       return;
     }
     auto * ptrT = dynamic_cast<T*>(it->second);
@@ -194,7 +194,7 @@ public:
       ATH_MSG_WARNING(
           "[HistogramHandler::fill] ERROR: you are attempting to fill "
           "a histogram with name "
-          << name << " which doesn't exist!\n");
+          << name << " which doesn't exist!");
       return;
     }
     auto * ptrT = dynamic_cast<TEfficiency*>(it->second);
