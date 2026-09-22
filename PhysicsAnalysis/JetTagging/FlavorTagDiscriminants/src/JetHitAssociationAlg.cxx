@@ -29,7 +29,13 @@ namespace FlavorTagDiscriminants {
 
 
   StatusCode JetHitAssociationAlg::initialize() {
-    ATH_MSG_INFO("Initializing " << name());
+    ATH_MSG_DEBUG("Initializing " << name());
+
+    if(m_minJetPt > 0 || m_maxAbsJetEta >= 0) {
+      ATH_MSG_INFO("Associating hits only to jets with pt > " << m_minJetPt.value()
+                   << " MeV and |eta| < "
+                   << (m_maxAbsJetEta >= 0 ? m_maxAbsJetEta.value() : INFINITY));
+    }
 
     // Initialize jet keys
     ATH_CHECK(m_jetCollectionKey.initialize());
@@ -112,6 +118,12 @@ namespace FlavorTagDiscriminants {
 
     // Loop over jets
     for(const xAOD::IParticle* jet : *jetReadHandle) {
+
+      if(jet->pt() < m_minJetPt ||
+         (m_maxAbsJetEta >= 0 && std::abs(jet->eta()) > m_maxAbsJetEta)) {
+        hitAssociation(*jet) = {};
+        continue;
+      }
 
       double zed = 0.0;
       if(wedgeZ) {

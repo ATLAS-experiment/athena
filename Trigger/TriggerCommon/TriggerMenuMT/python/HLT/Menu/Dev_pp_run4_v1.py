@@ -10,6 +10,8 @@
 
 import TriggerMenuMT.HLT.Menu.MC_pp_run4_v1 as mc_menu
 from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp
+from TriggerMenuMT.HLT.Menu.Physics_pp_run4_v1 import (MultiJetGroup,
+                                                       MultiBjetGroup)
 
 
 DevGroup = ['Development']
@@ -25,8 +27,23 @@ def setupMenu():
     chains['Muon'] += []
     chains['Egamma'] += []
     chains['Tau'] += []
-    chains['Jet'] += []
-    chains['Bjet'] += []
+    # Hit-based per-jet z regression (HitZ) preselection. Working points from a
+    # likelihood scan on the HitZV01 outputs; larger number = looser cut.
+    # The preselection-only chains measure efficiency and rate, the last one
+    # replaces the calorimeter preselection of an existing multi-b chain.
+    chains['Jet'] += [
+        ChainProp(name='HLT_j0_pf_ftf_preselHZ84XX4c20_L13jJ40', l1SeedThresholds=['FSNOSEED'], groups=MultiJetGroup+DevGroup),
+        ChainProp(name='HLT_j0_pf_ftf_preselHZ120XX4c20_L13jJ40', l1SeedThresholds=['FSNOSEED'], groups=MultiJetGroup+DevGroup),
+        ChainProp(name='HLT_j0_pf_ftf_preselHZ160XX4c20_L13jJ40', l1SeedThresholds=['FSNOSEED'], groups=MultiJetGroup+DevGroup),
+        ChainProp(name='HLT_j0_pf_ftf_preselHZ120MAXMULT5cXX4c20_L13jJ40', l1SeedThresholds=['FSNOSEED'], groups=MultiJetGroup+DevGroup),
+        # the likelihood discriminates much better at high jet multiplicity
+        ChainProp(name='HLT_j0_pf_ftf_preselHZ60XX6c20_L14jJ40', l1SeedThresholds=['FSNOSEED'], groups=MultiJetGroup+DevGroup),
+        ChainProp(name='HLT_j0_pf_ftf_preselHZ84XX6c20_L14jJ40', l1SeedThresholds=['FSNOSEED'], groups=MultiJetGroup+DevGroup),
+        ChainProp(name='HLT_j0_pf_ftf_preselHZ120XX6c20_L14jJ40', l1SeedThresholds=['FSNOSEED'], groups=MultiJetGroup+DevGroup),
+    ]
+    chains['Bjet'] += [
+        ChainProp(name='HLT_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_3j20c_020jvt_bgn282_pf_ftf_preselHZ120XX2c20XX2c20bgtwo85_L13jJ40', l1SeedThresholds=['FSNOSEED']*5, groups=MultiBjetGroup+DevGroup),
+    ]
     chains['MET'] += []
     chains['Bphysics'] += []
     chains['UnconventionalTracking'] += []

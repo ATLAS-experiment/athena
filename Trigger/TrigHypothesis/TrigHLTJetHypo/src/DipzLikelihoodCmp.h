@@ -23,7 +23,11 @@
  *                   The comparator is used in the DIPZ-HT scenario
  *                   to identify which hypoJetVector  taken from
  *                   a collection of hypoJetVectors maximises the likelihood.
- *              
+ *
+ * The per-jet width can be decorated either as the log precision
+ * -2*log(sigma) (DIPZ, sigmaIsStdDev = false) or as the standard
+ * deviation itself (HitZ, sigmaIsStdDev = true). Both are reduced to
+ * the (sigma^2, -2*log(sigma)) pair the likelihood needs.
  * 
  *********************************************************************/
 
@@ -40,7 +44,8 @@ namespace HypoJet{
 class DipzLikelihood {
 public:
   DipzLikelihood(const std::string &decName_z, 
-		    const std::string &decName_negLogSigma2);
+		    const std::string &decName_sigma,
+		    bool sigmaIsStdDev = false);
 
   ~DipzLikelihood() = default;
   double operator()(const HypoJetVector&) const;
@@ -48,7 +53,17 @@ public:
  private:
   
   const std::string m_decName_z;
-  const std::string m_decName_negLogSigma2;
+  const std::string m_decName_sigma;
+  const bool m_sigmaIsStdDev;
+
+  // (sigma^2, -2*log(sigma)) of a jet, whichever way sigma was decorated.
+  // A width that is not a positive finite number gives NaN for both, so
+  // the jet group fails the condition instead of dividing by zero.
+  struct Width {
+    double sigma2;
+    double negLogSigma2;
+  };
+  Width getWidth(const pHypoJet &ip) const;
   
   double getDipzMLPLDecValue(const pHypoJet &ip,
 			     const std::string &decName) const;
@@ -66,7 +81,8 @@ public:
 class DipzLikelihoodCmp {
 public:
   DipzLikelihoodCmp(const std::string &decName_z, 
-		    const std::string &decName_negLogSigma2);
+		    const std::string &decName_sigma,
+		    bool sigmaIsStdDev = false);
 
   bool operator()(const HypoJetVector&, const HypoJetVector&);
 private:

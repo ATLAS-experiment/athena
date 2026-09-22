@@ -610,4 +610,13 @@ def JetRoITrackJetTagSequenceCfg(flags,jetsIn,trkopt,RoIs):
         )
     )
 
+    if flags.Trigger.Jet.doHitZ:
+        from TriggerMenuMT.HLT.Bjet.BjetHitZConfig import hitZTaggingCfg
+        acc.merge(
+            hitZTaggingCfg(
+                flags,
+                jetsIn
+            )
+        )
+
     return acc
