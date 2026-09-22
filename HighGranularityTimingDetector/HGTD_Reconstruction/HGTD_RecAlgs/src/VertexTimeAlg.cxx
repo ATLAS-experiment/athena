@@ -19,6 +19,7 @@
 
 // Standard library includes
 #include <cmath>
+#include <stdexcept>
 
 namespace HGTD {
 
@@ -269,7 +270,9 @@ std::pair<float, float> VertexTimeAlg::getZOfCluster(
     num += z0 / z0_variance;
     denom += 1.0f / z0_variance;
   }
-
+  if (denom == 0.)[[unlikely]]{
+    throw std::runtime_error("VertexTimeAlg::getZOfCluster: denominator is zero");
+  }
   float avg_z0 = num / denom;
   float avg_z0_sigma = std::sqrt(1.0f / denom);
 
@@ -319,7 +322,9 @@ std::pair<float, float> VertexTimeAlg::getDOfCluster(
     num += d0 / d0_variance;
     denom += 1.0f / d0_variance;
   }
-
+  if (denom == 0.)[[unlikely]]{
+    throw std::runtime_error("VertexTimeAlg::getDOfCluster: denominator is zero");
+  }
   float avg_z0 = num / denom;
   float avg_z0_sigma = std::sqrt(1.0f / denom);
 
