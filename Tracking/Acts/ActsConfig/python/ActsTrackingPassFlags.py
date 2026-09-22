@@ -124,7 +124,8 @@ def createActsTrackingPassFlags():
     icf.addFlag("doActsSpacePoint", True)
     icf.addFlag("doActsSeed", True)
     icf.addFlag("doActsTrack", True)
-    icf.addFlag("doActsAmbiguityResolution", True)
+    icf.addFlag("doActsAmbiguityResolution", lambda pcf:
+                pcf.Acts.doAmbiguityResolution)
 
     # Athena -> Acts EDM converters
     icf.addFlag("doAthenaToActsCluster", False)
@@ -170,6 +171,7 @@ def createActsLegacyTrackingPassFlags():
 
 
 def setActsDefaultTunings(icf):
+    icf.PixelSeedingStrategy = SeedingStrategy.Gbts
     # Custom values for config flags
     icf.Xi2max = [25]
     icf.Xi2maxNoAdd = [25]
