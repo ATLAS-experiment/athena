@@ -300,7 +300,6 @@ def createACTSInnerDetectorTrackingPassFlags():
     # flags for ACTS based InnerDetector silicon tracking
     from TrkConfig.TrackingPassFlags import createTrackingPassFlags
     icf = createTrackingPassFlags()
-    setActsDefaultTunings(icf)
     icf.extension               = ""
     icf.Xi2max = 25.0
     icf.Xi2maxNoAdd = 25.0
@@ -314,4 +313,6 @@ def createACTSInnerDetectorTrackingPassFlags():
     # Maximum bin set to 9999 instead of four to prevent out of bounds lookups
     icf.addFlag("etaBins"                   , [-1.0, 3.0, 9999.0])
     icf.addFlag("maxPrimaryImpactList"      , [5.0 * Units.mm, 5.0 * Units.mm, 25.0 * Units.mm])
+    icf.addFlag("PixelSeedingStrategy", SeedingStrategy.GridTriplet, type=SeedingStrategy)
+    icf.addFlag("StripSeedingStrategy", SeedingStrategy.GridTriplet, type=SeedingStrategy)
     return icf
