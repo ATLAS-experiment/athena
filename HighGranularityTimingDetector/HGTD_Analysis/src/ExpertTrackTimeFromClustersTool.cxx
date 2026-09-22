@@ -177,7 +177,7 @@ ExpertTrackTimeFromClustersTool::getTimeCompatibleHits(
     return valid_hits;
   }
 
-  HitVec_t time_candidates_copy = valid_hits; // TODO do I need this copy?
+  HitVec_t time_candidates_copy = std::move(valid_hits); // TODO do I need this copy?
   bool searching = true;
   while (searching) {
     // calculate chi2 contribution of each value
@@ -350,6 +350,9 @@ float ExpertTrackTimeFromClustersTool::calculateTrackResolution(
   float sum = 0;
   for (const Hit& hit : hits) {
     sum += 1. / (hit.resolution * hit.resolution);
+  }
+  if (sum == 0.)[[unlikely]]{
+    return -999.;
   }
   return std::sqrt(1. / sum);
 }
