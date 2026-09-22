@@ -559,6 +559,79 @@ def HION7ExtraContainersTrigger():
     return variables
 
 #################################################################################
+#HION8
+
+def HION8SmartCollections():
+    variables  = []
+    variables += ["EventInfo"]
+    variables += ["Electrons"]
+    variables += ["Photons"]
+    variables += ["InDetTrackParticles"]
+
+    return variables
+
+def HION8AllVarContent():
+    return HION7AllVarContent()
+
+def HION8AllVarTruthContent():
+    variables  = []
+    variables += ["AntiKt2TruthJets"]
+    variables += ["AntiKt4TruthJets"]
+    variables += ["TruthEvents"]
+    variables += ["TruthParticles"]
+    variables += ["TruthElectrons"]
+    variables += ["TruthPhotons"]
+    variables += ["TruthVertices"]
+    variables += ["TruthPrimaryVertices"]
+
+    return variables
+
+def HION8BasicJetVars(JetColl):
+    return HION7BasicJetVars(JetColl)
+
+#################################################################################
+#HION9
+
+def HION9SmartCollections():
+    variables  = []
+    variables += ["EventInfo"]
+    variables += ["Electrons"]
+    variables += ["Photons"]
+    variables += ["InDetTrackParticles"]
+
+    return variables
+
+def HION9AllVarContent():
+    return HION7AllVarContent()
+
+def HION9AllVarTruthContent():
+    variables  = []
+    variables += ["AntiKt2TruthJets"]
+    variables += ["AntiKt3TruthJets"]
+    variables += ["AntiKt4TruthJets"]
+    variables += ["AntiKt5TruthJets"]
+    variables += ["AntiKt6TruthJets"]
+    variables += ["AntiKt8TruthJets"]
+    variables += ["AntiKt10TruthJets"]
+    variables += ["TruthEvents"]
+    variables += ["TruthElectrons"]
+    variables += ["TruthParticles"]
+    variables += ["TruthVertices"]
+    variables += ["TruthPrimaryVertices"]
+
+    return variables
+
+def HION9BasicJetVars(JetColl):
+    #Only basic kinematics for small jets
+    ExtraVars = []
+    HIJetBranches=makeHIJetBranchList()
+    for collection in [JetColl + "AntiKt2HIJets",JetColl + "AntiKt3HIJets",JetColl + "AntiKt4HIJets",JetColl + "AntiKt5HIJets",JetColl + "AntiKt6HIJets",JetColl + "AntiKt8HIJets",JetColl + "AntiKt10HIJets"]:
+        for j in HIJetBranches:
+            ExtraVars.append(collection+'.'+j)
+
+    return ExtraVars
+
+#################################################################################
 #HION12
 
 def HION12SmartCollections():

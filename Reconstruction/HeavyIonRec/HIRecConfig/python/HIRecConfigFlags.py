@@ -22,7 +22,7 @@ def createHIRecConfigFlags():
   flags.addFlag("HeavyIon.Jet.ClusterKey", lambda prevFlags: "DFHIClusters" if prevFlags.HeavyIon.isDerivation else "HIClusters")
   flags.addFlag("HeavyIon.Jet.Internal.ClusterKey", lambda prevFlags: "DFHIClusters_temp" if prevFlags.HeavyIon.isDerivation else "HIClusters_temp")
   flags.addFlag("HeavyIon.Jet.WriteHIClusters", lambda prevFlags: prevFlags.Reco.HIMode is not HIMode.UPC)
-  flags.addFlag("HeavyIon.Jet.RValues", [2,4])#this are the R's we want to reconstruct
+  flags.addFlag("HeavyIon.Jet.RValues", lambda prevFlags: [2,3,4,5,6,8,10] if "Output.DAOD_HION9FileName" in prevFlags else [2,4])#this are the R's we want to reconstruct
   flags.addFlag("HeavyIon.Jet.CaliRValues", ["2","3","4","10"])#this are the R's that are supported for calibration, if not listed then cali R=0.4 is picked
 
   flags.addFlag("HeavyIon.Egamma.doSubtractedClusters", lambda prevFlags: prevFlags.Reco.HIMode is HIMode.HI)

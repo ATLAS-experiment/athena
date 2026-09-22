@@ -707,6 +707,31 @@ def HION7PCCCTriggers2024():
 
     return triggers
 
+def HION7JetTriggers2025():
+    triggers  = {}
+    triggers.update({'HLT_j60_a2_ion_L1jJ55' : 60})
+    triggers.update({'HLT_j75_a2_ion_L1jJ55' : 75})
+    triggers.update({'HLT_j75_ion_L1jJ55' : 75})
+    triggers.update({'HLT_j100_ion_L1jJ55' : 100})
+
+    return triggers
+
+def HION7FwdJetTriggers2025(): # currently not included in HION7
+    triggers  = {}
+    triggers.update({'HLT_j30f_ion_L1jTE20' : 30})
+    triggers.update({'HLT_j50f_ion_L1jTE50' : 50})
+    triggers.update({'HLT_j50f_ion_L1jJ40p30ETA49' : 50})
+    triggers.update({'HLT_j60f_ion_L1jJ40p30ETA49' : 60})
+
+    return triggers
+
+def HION7JetTriggers2026():
+    triggers  = {}
+    triggers.update({'HLT_j60_ion_L1jJ40' : 100})
+    triggers.update({'HLT_j75_ion_L1jJ55' : 75})
+
+    return triggers
+
 def HION7JetTriggersPP():
     triggers  = {}
     triggers.update({'HLT_j20_L1RD0_FILLED' : 20})
@@ -822,28 +847,135 @@ def HION7SkimmingTriggersOO():
     return triggers
 
 def HION7SkimmingTriggers2025():
-    triggers  = HION7SkimmingTriggers2024()
+    triggers  = HION7JetTriggers2025()
+    triggers.update(HION7MuonTriggers())
+    triggers.update(HION7PCCCTriggers2024())
+
+    return triggers
+
+def HION7SkimmingTriggers2026():
+    triggers  = HION7JetTriggers2026()
+    triggers.update(HION7MuonTriggers())
+    triggers.update(HION7PCCCTriggers2024())
+
+    return triggers
+
+## HION8
+
+def HION8SkimmingTriggersPP():
+    triggers  = HION7JetTriggersPP()
+    triggers.update(HION7FwdJetTriggersPP())
+    triggers.update(HION7MinBiasTriggersPP())
+
+    return triggers
+
+def HION8SkimmingTriggers2023():
+    triggers  = HION7JetTriggers2023()
+    triggers.update(HION7FwdJetTriggers2023())
+    triggers.update(HION7PCCCTriggers2023())
+
+    return triggers
+
+def HION8SkimmingTriggers2024():
+    triggers  = HION7JetTriggers2024()
+    triggers.update(HION7FwdJetTriggers2024())
+    triggers.update(HION7PCCCTriggers2024())
+
+    return triggers
+
+def HION8SkimmingTriggers2025():
+    triggers  = HION7JetTriggers2025()
+    triggers.update(HION7FwdJetTriggers2025())
+    triggers.update(HION7PCCCTriggers2024())
+
+    return triggers
+
+def HION8SkimmingTriggers2026():
+    triggers  = HION7JetTriggers2026()
+    triggers.update(HION7FwdJetTriggers2025())
+    triggers.update(HION7PCCCTriggers2024())
+
+    return triggers
+
+## HION9
+
+def HION9SkimmingTriggersPP():
+    triggers  = HION7JetTriggersPP()
+    triggers.update(HION7MinBiasTriggersPP())
+
+    return triggers
+
+def HION9SkimmingTriggers2023():
+    triggers  = HION7JetTriggers2023()
+    triggers.update(HION7PCCCTriggers2023())
+
+    return triggers
+
+def HION9SkimmingTriggers2024():
+    triggers  = HION7JetTriggers2024()
+    triggers.update(HION7PCCCTriggers2024())
+
+    return triggers
+
+def HION9SkimmingTriggers2025():
+    triggers  = HION7JetTriggers2025()
+    triggers.update(HION7PCCCTriggers2024())
+
+    return triggers
+
+def HION9SkimmingTriggers2026():
+    triggers  = HION7JetTriggers2026()
+    triggers.update(HION7PCCCTriggers2024())
 
     return triggers
 
 #################################################################################
-def GetTriggers(project_tag, isSmallSystem):
+def get_small_system_triggers(deriv_format):
+    if deriv_format == "HION7":
+        return HION7SkimmingTriggersPP()
+    elif deriv_format == "HION8":
+        return HION8SkimmingTriggersPP()
+    else:
+        return HION9SkimmingTriggersPP()
+
+def GetTriggers(project_tag, isSmallSystem, deriv_format):
     switcher_HION7 = {
         'data23_hi': HION7SkimmingTriggers2023(),
         'data24_hi': HION7SkimmingTriggers2024(),
         'data25_hi': HION7SkimmingTriggers2025(),
+        'data26_hi': HION7SkimmingTriggers2026(),
         }
 
+    switcher_HION8 = {
+        'data23_hi': HION8SkimmingTriggers2023(),
+        'data24_hi': HION8SkimmingTriggers2024(),
+        'data25_hi': HION8SkimmingTriggers2025(),
+        'data26_hi': HION8SkimmingTriggers2026(),
+        }
+
+    switcher_HION9 = {
+        'data23_hi': HION9SkimmingTriggers2023(),
+        'data24_hi': HION9SkimmingTriggers2024(),
+        'data25_hi': HION9SkimmingTriggers2025(),
+        'data26_hi': HION9SkimmingTriggers2026(),
+        }
+
+
+
     switcher_SmallSystems = {
-        'data24_5p36TeV': HION7SkimmingTriggersPP(),
+        'data24_5p36TeV': get_small_system_triggers(deriv_format),
         'data25_hip': HION7SkimmingTriggerspO(),
         'data25_hi': HION7SkimmingTriggersOO(),
         }
 
     if isSmallSystem:
         return  switcher_SmallSystems.get(project_tag, "Invalid project tag")
-    else:
+    elif deriv_format=="HION7":
         return  switcher_HION7.get(project_tag, "Invalid project tag")
+    elif deriv_format=="HION8":
+        return  switcher_HION8.get(project_tag, "Invalid project tag")
+    else:
+        return  switcher_HION9.get(project_tag, "Invalid project tag")
 
 
 #################################################################################
