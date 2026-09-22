@@ -1,17 +1,14 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef ISOLATIONSELECTION_ISOLATIONCONDITIONHIST_H
 #define ISOLATIONSELECTION_ISOLATIONCONDITIONHIST_H
 
-#include <map>
-#include <memory>
-#include <vector>
-
 #include "IsolationSelection/IsolationCondition.h"
+#include <memory>
 
 // Forward Declaration(s)
 class TF1;
