@@ -203,7 +203,31 @@ def MultifoldGNNCfg(
         electrons='',
         muons='',
         suffix='',
+        dependencies=None,
+        defaultOutputValues=None,
 ):
+    """Schedule a (multifold) GNN tagger on a jet collection.
+
+    Parameters
+    ----------
+    dependencies : set[str] | None, optional
+        Dependency modifiers of the tagger, as returned by
+        getDependencySet. The lepton containers the tagger reads and the
+        cone-matched muon remapping are taken from this set, unless they
+        are given explicitly.
+    defaultOutputValues : dict[str, dict[str, float]] | None, optional
+        Output values to use when the tagger can't run, keyed by NN
+        path. These take precedence over the defaults stored for
+        deployed models, and are the way to set them for a model that
+        isn't deployed yet.
+    """
+
+    remapping = dict(remapping)
+    if dependencies:
+        electrons = electrons or ('Electrons' if 'E' in dependencies else '')
+        muons = muons or ('Muons' if 'M' in dependencies else '')
+        if 'MC' in dependencies:
+            remapping.setdefault('FTagMuons', 'FTagMuonsConeMatched')
 
     common = commonpath(nnFilePaths)
     nn_name = '_'.join(PurePath(common).with_suffix('').parts)
@@ -256,10 +280,11 @@ def MultifoldGNNCfg(
     # everything, but groomed jets currently don't have a jetRankHash,
     # and also don't use multifold (for now). So doing it this way
     # lets us support large-R and small-R jets in the same function.
+    path_defaults = _defaultsFromPaths(nnFilePaths) | (defaultOutputValues or {})
+
     if len(nnFilePaths) == 1:
         nn_filepath = nnFilePaths[0]
         Tool = CompFactory.FlavorTagInference.GNNTool
-        path_defaults = _defaultsFromPaths(nnFilePaths)
 
         bonusargs = dict(
             name='unifold',
@@ -274,7 +299,7 @@ def MultifoldGNNCfg(
             name='multifold',
             nnFiles=nnFilePaths,
             foldHashName=foldHashName,
-            perFoldDefaultOutputValues=_defaultsFromPaths(nnFilePaths),
+            perFoldDefaultOutputValues=path_defaults,
         )
         acc.merge(
             FoldDecoratorCfg(
@@ -370,7 +395,7 @@ def getDependencySet(tagger_name: str, override: set[str] | None = None) -> set[
     - ``R`` : Jet-calibration decorators for regression inputs
 
     ``P`` needs no algorithm of its own, the pflow inputs are already
-    there, so it has no entry in ``_addDepsByTagger``.
+    there, so it has no entry in ``TaggerDependenciesCfg``.
 
     Parameters
     ----------
@@ -395,8 +420,8 @@ def getDependencySet(tagger_name: str, override: set[str] | None = None) -> set[
         tagger dependency registry.
     """
 
-    # Check for override
-    if override:
+    # Check for override, an empty set means "no dependencies"
+    if override is not None:
         return override
 
     # Define the dependencies of each tagger in a dict
@@ -439,6 +464,159 @@ def getDependencySet(tagger_name: str, override: set[str] | None = None) -> set[
             "if it is a newly deployed tagger!"
         )
     return tagger_dep_dict[tagger_name]
+
+
+# Calibration scale decorated by the 'R' tagger dependency.
+REGRESSION_CALIBRATION_SCALE = 'EtaJES_GSC'
+
+_parent_collections = {
+    'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets': 'AntiKt10UFOCSSKJets'
+}
+
+
+def resolveTaggerName(dirname: str, networks: dict) -> str:
+    """
+    Resolve a canonical tagger name for dependency bookkeeping.
+
+    Uses an explicit override from ``networks`` when present, otherwise
+    falls back to path-based inference. For CalibArea regressions this
+    extracts names like ``bJR4v01`` from the model filename.
+    """
+    if tagger_name := networks.get("tagger_name"):
+        return tagger_name
+
+    calibarea_match = re.compile('.*/CalibArea(-[0-9]{2}){3}/.*').match(dirname)
+    if calibarea_match:
+        for fold_path in networks['folds']:
+            match = re.search(r'(bJR\d+v\d+(?:Ext)?)', fold_path)
+            if match:
+                return match.group(1)
+
+    return dirname.split('/')[-2]
+
+
+def getFlipConfigs(nn_path: str) -> list[str]:
+    """
+    Schedule NN-based IP 'flip' taggers.
+
+    FlipConfig is "STANDARD" by default. The flip variants invert the sign
+    of the track impact parameters, and "NEGATIVE_IP_ONLY" additionally
+    keeps only the tracks with a negative one. See FlipTagEnums.h.
+
+    Returns a list of flip configurations, or [] for things we don't flip.
+    """
+    nn_path = nn_path.lower()
+
+    #flipping of DL1r with 2019 taggers does not work at the moment
+    if (('dl1d' in nn_path) or ('dl1r' in nn_path and '201903' not in nn_path)):
+        return ['FLIP_SIGN']
+    if 'rnnip' in nn_path or 'dips' in nn_path:
+        return ['NEGATIVE_IP_ONLY']
+    if 'gn1' in nn_path or 'gn2' in nn_path or 'gn3' in nn_path:
+        return ['SIMPLE_FLIP']
+    else:
+        return []
+
+
+def TaggerDependenciesCfg(
+        flags,
+        taggerName: str,
+        jetCollection: str,
+        dependencies: set[str] | None = None,
+) -> ComponentAccumulator:
+    """
+    Add the algorithms a tagger needs to read all of its inputs.
+
+    Parameters
+    ----------
+    flags : ConfigFlags
+        The configuration flags.
+    taggerName : str
+        Canonical tagger name, used to look up the dependency set.
+    jetCollection : str
+        The name of the jet collection the algorithms are applied to.
+    dependencies : set[str] | None, optional
+        Dependency modifiers to use instead of the ones registered for
+        taggerName, see getDependencySet. Meant for models which aren't
+        deployed yet.
+
+    Returns
+    -------
+    ComponentAccumulator
+        An accumulator containing the algorithms the tagger depends on.
+    """
+    # imported here so that clients which only configure the networks
+    # don't pull in the packages these algorithms live in
+    from FlavorTagDiscriminants.FTagElectronAssociationConfig import (
+        FTagElectronAssociationCfg,
+    )
+    from FlavorTagDiscriminants.FTagMuonAssociationConfig import (
+        FTagMuonAssociationCfg,
+    )
+    from FlavorTagDiscriminants.TrackLeptonConfig import (
+        TrackLeptonDecorationCfg,
+    )
+    from JetCalibTools.JetCalibrationDecoratorConfig import (
+        JetCalibrationDecoratorCfg,
+    )
+    from JetTagDerivationUtils.CopyJetParentInfoConfig import (
+        CopyJetParentInfoCfg,
+    )
+
+    acc = ComponentAccumulator()
+
+    modset = getDependencySet(taggerName, dependencies)
+
+    if "L" in modset:
+        acc.merge(TrackLeptonDecorationCfg(flags))
+    if "E" in modset:
+        acc.merge(FTagElectronAssociationCfg(
+            flags,
+            jetCollection=jetCollection,
+        ))
+    if "M" in modset:
+        acc.merge(FTagMuonAssociationCfg(
+            flags,
+            jetCollection=jetCollection,
+        ))
+    if "MC" in modset:
+        acc.merge(FTagMuonAssociationCfg(
+            flags,
+            jetCollection=jetCollection,
+            doConeMatching=True,
+        ))
+    if "R" in modset:
+        is_data = not flags.Input.isMC
+        calib_sequence = (
+            'JetArea_Residual_EtaJES_GSC_Insitu' if is_data
+            else 'JetArea_Residual_EtaJES_GSC'
+        )
+        config_file = 'PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config'
+        calib_kwargs = {}
+        # Assume CustomVtx jets only used in Hgamma context
+        if 'EMPFlowCustomVtx' in jetCollection:
+            calib_kwargs['calibJetCollection'] = 'AntiKt4EMPFlow'
+            calib_kwargs['rhoKey'] = 'Kt4EMPFlowCustomVtxEventShape'
+            calib_kwargs['pvKey'] = 'HggPrimaryVertices'
+        acc.merge(JetCalibrationDecoratorCfg(
+            flags,
+            jetCollection=jetCollection,
+            configFile=config_file,
+            calibSequence=calib_sequence,
+            calibArea='00-04-83',
+            calibrationScale=REGRESSION_CALIBRATION_SCALE, # For labeling the decorator
+            isData=is_data,
+            **calib_kwargs,
+        ))
+    if "X" in modset:
+        acc.merge(
+            CopyJetParentInfoCfg(
+                flags,
+                jetCollection,
+                parents=_parent_collections[jetCollection]
+            )
+        )
+    return acc
 
 
 def PassThroughModelCfg(flags, JetCollection,
