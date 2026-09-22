@@ -60,6 +60,7 @@ namespace ActsTrk {
                                                                    globalPosition.cast<double>(), localCov);
       } else {
         Acts::RotationMatrix3 rotLocalToGlobal;
+        rotLocalToGlobal.setZero();
         ATH_CHECK( lookupReferenceFrame(rotLocalToGlobal) );
         variance = Acts::PixelSpacePointBuilder::computeVarianceZR(rotLocalToGlobal,
                                                                    globalPosition.cast<double>(), localCov);
