@@ -1149,7 +1149,10 @@ StatusCode doMerge ATLAS_NOT_THREAD_SAFE( const std::vector<std::string> & input
   } else if (name == "fkf") {
     tool = std::make_unique<CP::ApplyFakeFactor>("fkf_tool_merge");
   }
-
+  if (!tool){
+    ANA_MSG_ERROR("tool is nullptr.");
+    return StatusCode::FAILURE;
+  }
   std::string mergeFileName =  config.mergeFileNameBase+"_"+name+"_"+to_string(icase)+".root";
   std::cout << mergeFileName << std::endl;
   ANA_CHECK( tool->setProperty("ProgressFileName", mergeFileName) );
