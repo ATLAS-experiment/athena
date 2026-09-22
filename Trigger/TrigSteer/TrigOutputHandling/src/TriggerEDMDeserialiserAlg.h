@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGOUTPUTHANDLING_TRIGGEREDMDESERIALISERALG_H
 #define TRIGOUTPUTHANDLING_TRIGGEREDMDESERIALISERALG_H
@@ -74,12 +74,13 @@ private:
   /**
    * Performs actual deserialisation loop
    */ 
-  StatusCode deserialise( const Payload* dataptr ) const;
+  StatusCode deserialise( const EventContext& ctx, const Payload* dataptr ) const;
 
   /**
    * Handle decoration
    */
-  StatusCode deserialiseDynAux( const std::string& transientTypeName, const std::string& persistentTypeName,
+  StatusCode deserialiseDynAux( const EventContext& ctx,
+                                const std::string& transientTypeName, const std::string& persistentTypeName,
                                 const std::string& decorationName, void* obj,
                                 WritableAuxStore* currentAuxStore, SG::AuxVectorBase* interface ) const;
 

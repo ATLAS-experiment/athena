@@ -6,7 +6,7 @@
 
 #include <cstddef>
 
-#include "L0MuonS1TGCToolInterfaces/TgcL0Candidate.h"
+#include "L1MuonS1TGCToolInterfaces/TgcL0Candidate.h"
 #include "xAODL0MuonCand/TGCCandDataContainer.h"
 
 namespace L0Muon {

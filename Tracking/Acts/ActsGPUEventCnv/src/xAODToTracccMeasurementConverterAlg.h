@@ -94,10 +94,10 @@ private:
   /// {@
   SG::WriteHandleKey<std::vector<unsigned int>> m_outputMeasToPixelKey{
       this, "OutputMeasToPixelCluster", "TracccMeasToPixelCluster",
-      "Output mapping from traccc measurement index to xAOD pixel cluster index"};
+      "Output mapping from traccc measurement index to the index of the xAOD pixel cluster in its owning container"};
   SG::WriteHandleKey<std::vector<unsigned int>> m_outputMeasToStripKey{
       this, "OutputMeasToStripCluster", "TracccMeasToStripCluster",
-      "Output mapping from traccc measurement index to xAOD strip cluster index"};
+      "Output mapping from traccc measurement index to the index of the xAOD strip cluster in its owning container"};
   /// @}
 
   /// @name The memory resources and copy tools

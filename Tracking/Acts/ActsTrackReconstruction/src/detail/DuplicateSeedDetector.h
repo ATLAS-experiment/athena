@@ -20,7 +20,7 @@ namespace ActsTrk::detail {
   class DuplicateSeedDetector {
   public:
     using index_t = unsigned int;
-    using SpacePointIndicesFun_t = std::function<std::array<std::size_t, 3>(std::size_t)>; // copied from ITrackParamsEstimationTool
+    using SpacePointIndicesFun_t = std::function<std::array<std::size_t, 3>(const ActsTrk::SpacePointRange&, bool)>; // copied from ITrackParamsEstimationTool
     using UseTopSpFun_t = std::function<bool(const ActsTrk::Seed&)>;
 
     DuplicateSeedDetector(std::size_t numSeeds, index_t measOffset, bool enabled);

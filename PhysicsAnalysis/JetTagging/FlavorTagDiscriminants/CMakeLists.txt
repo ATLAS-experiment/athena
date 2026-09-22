@@ -81,8 +81,6 @@ if (NOT XAOD_STANDALONE)
     src/SoftElectronDecoratorAlg.cxx
     src/SoftElectronTruthDecoratorAlg.cxx
     src/GNNAuxTaskDecoratorAlg.cxx
-    src/CountIParticleAlg.cxx
-    src/CountTrackParticleAlg.cxx
     src/FTagGhostLeptonAssociationAlg.cxx
     src/JetLeptonDecayLabelAlg.cxx
     src/CaloChargedFlowDecoratorAlg.cxx

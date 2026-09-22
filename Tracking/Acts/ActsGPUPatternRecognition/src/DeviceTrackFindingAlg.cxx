@@ -43,15 +43,18 @@ StatusCode DeviceTrackFindingAlg::configureTrackFinding()
 
   ATH_MSG_INFO("Setting up configs");
 
-  m_finding_cfg.max_num_branches_per_seed = 3;
-  m_finding_cfg.max_num_branches_per_surface = 1;
-  m_finding_cfg.min_track_candidates_per_track = 7;
-  m_finding_cfg.max_track_candidates_per_track = 20;
+  m_finding_cfg.max_num_branches_per_seed = m_maxNumBranchesPerSeed;
+  m_finding_cfg.max_num_branches_per_surface = m_maxNumBranchesPerSurface;
+  m_finding_cfg.min_track_candidates_per_track = m_minTrackCandidatesPerTrack;
+  m_finding_cfg.max_track_candidates_per_track = m_maxTrackCandidatesPerTrack;
   m_finding_cfg.min_step_length_for_next_surface =
-      0.5f * detray::unit<float>::mm;
-  m_finding_cfg.max_step_counts_for_next_surface = 100;
-  m_finding_cfg.chi2_max = 30.f;
-  m_finding_cfg.max_num_skipping_per_cand = 2;
+      m_minStepLengthForNextSurface * unit<float>::mm;
+  m_finding_cfg.max_step_counts_for_next_surface = m_maxStepCountsForNextSurface;
+  m_finding_cfg.chi2_max = m_chi2Max;
+  m_finding_cfg.max_num_skipping_per_cand = m_maxNumSkippingPerCand;
+  m_finding_cfg.max_num_consecutive_skipped = m_maxNumConsecutiveSkipped;
+  m_finding_cfg.min_pT = m_minPt * unit<float>::MeV;
+  m_finding_cfg.min_p = m_minP * unit<float>::MeV;
 
   m_finding_cfg.propagation.stepping.min_stepsize = 1e-4f * unit<float>::mm;
   m_finding_cfg.propagation.stepping.rk_error_tol = 1e-4f * unit<float>::mm;
@@ -66,8 +69,8 @@ StatusCode DeviceTrackFindingAlg::configureTrackFinding()
   m_finding_cfg.propagation.navigation.intersection.overstep_tolerance =
       -300.f * unit<float>::um;
 
-  m_finding_cfg.max_num_tracks_per_measurement = 1;
-  m_finding_cfg.initial_links_per_seed = 20;
+  m_finding_cfg.max_num_tracks_per_measurement = m_maxNumTracksPerMeasurement;
+  m_finding_cfg.initial_links_per_seed = m_initialLinksPerSeed;
 
   return StatusCode::SUCCESS;
 

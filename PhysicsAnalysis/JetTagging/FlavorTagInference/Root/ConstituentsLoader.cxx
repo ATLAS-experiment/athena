@@ -156,7 +156,7 @@ namespace FlavorTagInference {
           {"ftagTruth.*"_r, ConstituentsEDMType::INT},
           // custom variables that require special computation
           {"(ftag_et|ftag_deltaPOverP|ftag_energyOverP|ftag_ptVarCone30OverPt|"
-               "ptfrac|ptrel|dr|et|deltaPOverP|ptVarCone30OverPt|energyOverP)"_r, ConstituentsEDMType::CUSTOM_GETTER},
+               "ptfrac|ptrel|dr|deta|dphi|et|deltaPOverP|ptVarCone30OverPt|energyOverP)"_r, ConstituentsEDMType::CUSTOM_GETTER},
           // ftag_ float decorations (SoftElectronDecoratorAlg, ElectronGSFTrackDecoratorAlg)
           {"ftag_.*"_r, ConstituentsEDMType::FLOAT},
           // variables extracted from the corresponding track

@@ -400,13 +400,27 @@ StatusCode TrackRNN::calculateVars(const std::vector<xAOD::TauTrack*>& vTracks,
   if(vertexContainer != nullptr && !vertexContainer->empty() && xTau.vertex()!=nullptr) {
     dz0_TV_PV0 = xTau.vertex()->z() - vertexContainer->at(0)->z();
 
+    // Some AODs reconstructed before 22.0.48 contain rare cases of tracks with only dead sensors instead of hits 
+    // due to an edge case in the Si Hit definitions see e.g https://its.cern.ch/jira/browse/ATLIDTRKCP-395
+    // These could be used in the primary vertexing but then were thinned away by the TRT Standalone thinning
+    // this only checked for nHits < 4 rather than the TRT Standalone bit pattern specifically, removing these only dead sensor tracks
+    // we guard against this unresolved track link issue by counting and skipping invalid links
+    // should be extremely rare, but prevents crashes 
+    unsigned int nUnresolved = 0;
     for (const ElementLink<xAOD::TrackParticleContainer>& trk : vertexContainer->at(0)->trackParticleLinks()) {
+      if (!trk.isValid()) { ++nUnresolved; continue; }
       sumpt_PV0 += (*trk)->pt();
       sumpt2_PV0 += pow((*trk)->pt(), 2.);
     }
     for (const ElementLink<xAOD::TrackParticleContainer>& trk : xTau.vertex()->trackParticleLinks()) {
+      if (!trk.isValid()) { ++nUnresolved; continue; }
       sumpt_TV += (*trk)->pt();
       sumpt2_TV += pow((*trk)->pt(), 2.);
+    }
+    if (nUnresolved > 0) {
+      ATH_MSG_WARNING(nUnresolved << " unresolvable track link(s) on the primary or tau "
+                      << "vertex skipped: log_sumpt_PV0 / log_sumpt_TV inputs of "
+                      << "the track RNN computed from remaining tracks");
     }
   }
   //these are false positives

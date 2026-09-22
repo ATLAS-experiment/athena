@@ -36,9 +36,7 @@
 #include <limits>
 
 #include <map>
-#include <vector>
 #include <tuple>
-#include <string>
 #include <cstdio>
 #include <cmath>
 
@@ -49,7 +47,7 @@ using enum xAOD::CaloCluster::MomentType;
 // Known moments
 namespace {
   // name -> enum translator
-  const std::map<std::string,xAOD::CaloCluster::MomentType> momentNameToEnumMap = {
+  const std::map<std::string,xAOD::CaloCluster::MomentType, std::less<>> momentNameToEnumMap = {
     { "AVG_LAR_Q_DigiHSTruth",         AVG_LAR_Q_DigiHSTruth },
     { "AVG_TILE_Q_DigiHSTruth",        AVG_TILE_Q_DigiHSTruth },
     { "BADLARQ_FRAC_DigiHSTruth",      BADLARQ_FRAC_DigiHSTruth },
@@ -246,13 +244,17 @@ StatusCode CaloClusterMomentsMaker_DigiHSTruth::initialize()
         ATH_MSG_ERROR(buffer);
       }
       auto fmom(momentNameToEnumMap.find("SECOND_TIME_DigiHSTruth"));
-      sprintf(buffer, "moment name: %-*.*s - enumerator: %i", (int)nstr,
+      if (fmom != momentNameToEnumMap.end()){
+        sprintf(buffer, "moment name: %-*.*s - enumerator: %i", (int)nstr,
               (int)nstr, fmom->first.c_str(), (int)fmom->second);
-      ATH_MSG_ERROR(buffer);
+        ATH_MSG_ERROR(buffer);
+      }
       fmom = momentNameToEnumMap.find("NCELL_SAMPLING_DigiHSTruth");
-      sprintf(buffer, "moment name: %-*.*s - enumerator: %i", (int)nstr,
+      if (fmom != momentNameToEnumMap.end()){
+        sprintf(buffer, "moment name: %-*.*s - enumerator: %i", (int)nstr,
               (int)nstr, fmom->first.c_str(), (int)fmom->second);
-      ATH_MSG_ERROR(buffer);
+        ATH_MSG_ERROR(buffer);
+      }
       return StatusCode::FAILURE;
     }  // found unknown moment name
   }    // loop configured moment names
@@ -273,9 +275,11 @@ StatusCode CaloClusterMomentsMaker_DigiHSTruth::initialize()
   }
   if (m_secondTime) {
     auto fmom(momentNameToEnumMap.find("SECOND_TIME_DigiHSTruth"));
-    sprintf(buffer, "moment name: %-*.*s - enumerator: %i (save only)",
+    if (fmom != momentNameToEnumMap.end()){
+      sprintf(buffer, "moment name: %-*.*s - enumerator: %i (save only)",
             (int)nstr, (int)nstr, fmom->first.c_str(), (int)fmom->second);
-    ATH_MSG_INFO(buffer);
+      ATH_MSG_INFO(buffer);
+    }
   }
 
   // retrieve CaloCell ID server
@@ -470,7 +474,10 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
 
 	Identifier myId = pCell->ID();
 	const CaloDetDescrElement* myCDDE = pCell->caloDDE();
-
+  if (!myCDDE){
+    ATH_MSG_ERROR("Pointer myCDDE is null.");
+    return StatusCode::FAILURE;
+  }
 	double ene = pCell->e();
         if(m_absOpt) ene = std::abs(ene);
 	double weight = cellIter.weight();
@@ -492,7 +499,7 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
 	  }
 	}
 	else {
-	  if ( myCDDE && ! (myCDDE->is_tile())
+	  if ( !(myCDDE->is_tile())
 	       && ((pCell->provenance() & 0x2000) == 0x2000) 
 	       && !((pCell->provenance() & 0x0800) == 0x0800)) {
 	    if ( pCell->quality() > m_minBadLArQuality ) {
@@ -501,7 +508,7 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
 	    eLAr2  += ene*weight*ene*weight;
 	    eLAr2Q += ene*weight*ene*weight*pCell->quality();
 	  }
-	  if ( myCDDE && myCDDE->is_tile() ) {
+	  if ( myCDDE->is_tile() ) {
 	    uint16_t tq = pCell->quality();
 	    uint8_t tq1 = (0xFF00&tq)>>8; // quality in channel 1
 	    uint8_t tq2 = (0xFF&tq); // quality in channel 2
@@ -585,7 +592,7 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
 	  }
 	}
 
-	if ( myCDDE != nullptr ) {
+
 	  if ( ene > 0. && weight > 0) {
 	    // get all geometric information needed ...
             cellinfo.push_back (CaloClusterMomentsMaker_DigiHSTruth_detail::cellinfo {
@@ -652,7 +659,6 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
 
 	    w  += ci.energy;
 	  } // cell has E>0 and weight != 0
-	} // cell has valid DDE
       } //end of loop over all cells
       if (m_calculateLArHVFraction) {
 	const auto hvFrac=m_larHVFraction->getLArHVFrac(theCluster->getCellLinks(),ctx);

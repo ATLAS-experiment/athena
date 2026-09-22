@@ -1,11 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloIdentifier/CaloID_Exception.h"
-#include "CxxUtils/StrFormat.h"
-
-using CxxUtils::strformat;
+#include <format>
 
 
 CaloID_Exception::CaloID_Exception() : 
@@ -32,7 +30,7 @@ CaloID_Exception::operator std::string () const
 
 {
   return
-    strformat ("CaloID_Exception - Error code: %d  \n ", this->code()) +
-    this->message();
+    std::format ("CaloID_Exception - Error code: {}  \n{} ", this->code(),
+                 this->message());
 }
 

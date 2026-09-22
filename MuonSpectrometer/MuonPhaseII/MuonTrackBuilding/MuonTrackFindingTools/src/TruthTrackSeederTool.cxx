@@ -155,6 +155,7 @@ namespace MuonR4 {
                         continue;
                     }
                     const auto* mMeas = dynamic_cast<const xAOD::MuonMeasurement*>(meas);
+                    if (!mMeas)[[unlikely]] continue;
                     const Acts::Surface& surf{xAOD::muonSurface(meas)};
                     const double dist{surf.intersect(tgContext, result.position(tgContext), segDir, 
                                                       Acts::BoundaryTolerance::Infinite()).closest().pathLength()};
