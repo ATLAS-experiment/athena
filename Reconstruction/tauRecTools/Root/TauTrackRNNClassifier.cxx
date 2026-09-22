@@ -186,17 +186,9 @@ StatusCode TauTrackRNNClassifier::classifyLRTTracks(std::vector<xAOD::TauTrack*>
 
     double d0_weight = (xTrack->d0TJVA() ? xTrack->d0SigTJVA() / xTrack->d0TJVA(): 0);
     double log10_pt_ratio = std::log10(xTrack->pt() / xTau.pt());
-    // double log10_pt = std::log10(xTrack.pt());
     double abs_d0_sig = std::abs(xTrack->d0SigTJVA());
     double dR = xTau.p4().DeltaR(xTrack->p4());
     double log10_rConv = std::log10(xTrack->rConv());
-    // double log10_abs_z0 = std::log10(std::abs(xTrackParticle->z0() + xTrackParticle->vz() - xTau.vertex()->z()));
-
-    // uint8_t nPixelHits = 0; ATH_CHECK( xTrackParticle->summaryValue(nPixelHits, xAOD::numberOfPixelHits) );
-    // uint8_t nPixelDeadSensors = 0; ATH_CHECK( xTrackParticle->summaryValue(nPixelDeadSensors, xAOD::numberOfPixelDeadSensors) );
-    // uint8_t nSCTHits = 0; ATH_CHECK( xTrackParticle->summaryValue(nSCTHits, xAOD::numberOfSCTHits) );
-    // uint8_t nSCTDeadSensors = 0; ATH_CHECK( xTrackParticle->summaryValue(nSCTDeadSensors, xAOD::numberOfSCTDeadSensors) );
-    // uint8_t nSiHits = nPixelHits + nPixelDeadSensors + nSCTHits + nSCTDeadSensors;  
 
     // Cut values taken from a trained decision tree classifier
     bool passed = false;
