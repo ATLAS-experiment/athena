@@ -75,7 +75,7 @@ if __name__ == "__main__":
     if flags.Detector.GeometryMM:
         acc.merge(MM_RdoToDigitCfg(flags, MmRdoContainer="MMRDO", MmDigitContainer="MM_DIGITS"))
 
-    from L0MuonNSW.L0MuonNSWConfig import L0MuonNSWSimCfg
+    from L1MuonNSW.L0MuonNSWConfig import L0MuonNSWSimCfg
     acc.merge(L0MuonNSWSimCfg(flags, name="L0MuonNSWSim", OutputLevel=DEBUG))
 
     print("=== Registered services ===")
