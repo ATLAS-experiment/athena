@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkVKalVrtCore/VtCFitE.h"
@@ -9,6 +9,7 @@
 #include "TrkVKalVrtCore/Derivt.h"
 #include "TrkVKalVrtCore/TrkVKalVrtCoreBase.h"
 #include <cmath>
+//mdspan unavailable in gcc15
 
 namespace Trk {
 
@@ -285,46 +286,52 @@ int getFullVrtCov(VKVertex * vk, double *ader, const double *dcv, double verr[6]
 	      tf0t.push_back( tmpVec );
             }
           }
-// R,RC[ic][i]
-      std::unique_ptr<double[]> R_data(new double[totNC * NVar]);
-      std::unique_ptr<double*[]> R(new double*[totNC]);
-      std::unique_ptr<double[]> RC_data(new double[totNC * NVar]);
-      std::unique_ptr<double*[]> RC(new double*[totNC]);
-      for(ic=0; ic<totNC; ic++) {
-        R[ic] = &R_data[ic * NVar];
-        RC[ic] = &RC_data[ic * NVar];
+      // R,RC[ic][i]
+      const std::size_t nConstraints = totNC;
+      const std::size_t nVar = NVar;
+      std::vector<double> R(nConstraints * nVar);
+      std::vector<double> RC(nConstraints * nVar);
+      std::vector<double> RCRt(nConstraints * nConstraints);
+      const auto index = [nVar](std::size_t row, std::size_t col){
+        return row * nVar + col;
+      };
+      //
+      for(ic=0; ic<totNC; ic++){
+        R[index(ic, 0)]=th0t[ic].X;
+        R[index(ic, 1)]=th0t[ic].Y;
+        R[index(ic, 2)]=th0t[ic].Z;
+        for(int it=1; it<=NTRK; it++){
+          R[index(ic, it*3)]=tf0t[ic][it-1].X;
+          R[index(ic, it*3+1)]=tf0t[ic][it-1].Y;
+          R[index(ic, it*3+2)]=tf0t[ic][it-1].Z;
+        }
       }
-	  std::unique_ptr<double[]> RCRt(new double[totNC*totNC]);
-	  for(ic=0; ic<totNC; ic++){
-	    R[ic][0]=th0t[ic].X;
-	    R[ic][1]=th0t[ic].Y;
-	    R[ic][2]=th0t[ic].Z;
-	    for(it=1; it<=NTRK; it++){
-	      R[ic][it*3+0]=tf0t[ic][it-1].X;
-	      R[ic][it*3+1]=tf0t[ic][it-1].Y;
-	      R[ic][it*3+2]=tf0t[ic][it-1].Z;
-            }
-	  }
-// R*Cov matrix
-          for(ic=0; ic<totNC; ic++){
-	    for(j=0; j<NVar; j++){ RC[ic][j]=0;
-	      for(i=0; i<NVar; i++) RC[ic][j] += R[ic][i]*ader_ref(i+1,j+1);
-            }
+      // R*Cov matrix
+      for(std::size_t ic=0; ic<nConstraints; ic++){
+        for(std::size_t j=0; j<nVar; j++){ 
+          RC[index(ic,j)] = 0;
+          for(std::size_t i=0; i<nVar; i++){
+            RC[index(ic,j)] += R[index(ic, i)]*ader_ref(i+1,j+1);
           }
-// R*Cov*Rt matrix        -  Lagrange multiplyers errors
-          for(ic=0; ic<totNC; ic++){
-            for(jc=0; jc<totNC; jc++){  RCRt[ic*totNC + jc] =0.;
-	      for(i=0; i<NVar; i++) RCRt[ic*totNC + jc] += RC[ic][i]*R[jc][i];
-	    }
+        }
+      }
+      // R*Cov*Rt matrix        -  Lagrange multiplyers errors
+      for(std::size_t ic=0; ic<nConstraints; ic++){
+        for(std::size_t jc=0; jc<nConstraints; jc++){  
+          RCRt[ic*nConstraints + jc] =0.;
+          for(std::size_t i=0; i<nVar; i++){
+            RCRt[ic*nConstraints + jc] += RC[index(ic, i)]*R[index(jc, i)];
           }
-	  dsinv(totNC, RCRt.get(), totNC, &IERR);
+        }
+      }
+	  dsinv(totNC, RCRt.data(), totNC, &IERR);
 	  if ( IERR != 0) return IERR;
-// Correction matrix
-	 for(i=0; i<NVar; i++){
-	   for(j=0; j<NVar; j++){  double COR=0.;
+    // Correction matrix
+	  for(i=0; i<NVar; i++){
+	    for(j=0; j<NVar; j++){  double COR=0.;
              for(ic=0; ic<totNC; ic++){
                for(jc=0; jc<totNC; jc++){
-	         COR += RC[ic][i]*RC[jc][j]*RCRt[ic*totNC +jc];
+	         COR += RC[index(ic,i)]*RC[index(ic,j)]*RCRt[ic*nConstraints+jc];
 	       }
 	     }
 	     ader_ref(i+1, j+1) -= COR;
