@@ -12,9 +12,6 @@
   <class name="IAthenaPoolTestData" />
   <class name="AthenaPoolTestMatrix" id="A9A2387C-2E8B-493C-B1C1-454582347C49"/>
   <class name="std::vector<const CLHEP::HepMatrix*>"/>
-  <class name="FauxTriggerMap" id="17777E94-A2D2-4A80-B321-E3554040EA99" />
-<!--   <class name="TrigPath" id="39E60558-9229-4CAE-AAE7-C42A49CCCFD4" /> -->
-<!--   <class name="std::set<TrigPath>" /> -->
   <class name="std::vector<std::map<unsigned int, CLHEP::HepMatrix> >" />
   <class name="std::map<unsigned int, CLHEP::HepMatrix>" />
 
