@@ -42,13 +42,11 @@
 #include "dqm_core/ParameterConfig.h"
 #include "dqm_core/Region.h"
 #include "dqm_core/RegionConfig.h"
-#include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/join.hpp>
-#include <boost/algorithm/string/trim.hpp>
 #include <utility>
 #include <cctype>
 #include <ranges>
+#include <boost/algorithm/string.hpp>
+#include "CxxUtils/StringUtils.h"
 
 #include "CxxUtils/checker_macros.h"
 
@@ -307,13 +305,12 @@ SplitReference(std::string refPath, const std::string& refName )
   static std::map<std::string, std::string> mappingCache;
 
   //Split comma sepated inputs into individual file names
-  std::vector<std::string> refFileDirList;
-  boost::split(refFileDirList, refPath, boost::is_any_of(","));
+  std::vector<std::string> refFileDirList = CxxUtils::tokenize(refPath, ",");
 
   // construct vector of files (& clean up leading/trailing spaces)
   std::vector<std::string> refFileList;
   for (const auto& dir : refFileDirList ) {
-    refFileList.push_back(boost::algorithm::trim_copy(dir+refName));
+    refFileList.push_back(std::string(CxxUtils::trimWhiteSpaces(dir + refName)));
   }
 
   // Use TFile::Open | syntax to try opening the files in sequence
@@ -588,9 +585,10 @@ GetAlgorithmConfiguration( HanConfigAssessor* dqpar, const std::string& algID,
         std::vector<std::string> sourceMatches;
         if (refID[0] == '[') {
           std::string cleanedRefID = refID;
-          boost::algorithm::trim_if(cleanedRefID, boost::is_any_of("[] "));
+          cleanedRefID.erase(0, cleanedRefID.find_first_not_of("[] "));
+          cleanedRefID.erase(cleanedRefID.find_last_not_of("[] ") + 1);
           isMultiRef = true;
-          boost::split(refIDVec, cleanedRefID, boost::is_any_of(","));
+          refIDVec = CxxUtils::tokenize(cleanedRefID, ",");
           // toarray = new TObjArray();
           // toarray->SetOwner(kTRUE);
         } else {

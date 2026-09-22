@@ -23,6 +23,9 @@
 #include <iostream>
 #include <map>
 #include <sstream>
+#include <algorithm>
+#include <cctype>
+#include "CxxUtils/StringUtils.h"
 
 #include "DataQualityInterfaces/HanConfig.h"
 #include "DataQualityInterfaces/HanUtils.h"
@@ -271,7 +274,8 @@ namespace dqi
               {
                 store_using_path.assign(hcpm->GetValue());
               }
-              boost::algorithm::to_lower(store_using_path);
+              std::transform(store_using_path.begin(), store_using_path.end(), store_using_path.begin(),
+                             [](unsigned char ch) { return static_cast<char>(std::tolower(ch)); });
               if (store_using_path == "1" || store_using_path == "yes" || store_using_path == "true")
               {
                 use_full_name = true;
@@ -455,9 +459,8 @@ namespace dqi
       if (tmpList != 0)
       {
         // Find last directory name
-        std::vector<std::string> dirs;
+        std::vector<std::string> dirs = CxxUtils::tokenize(tmpList->GetName(), "/");
         std::string str;
-        boost::split(dirs, tmpList->GetName(), boost::is_any_of("/"));
         if (!dirs.empty())
         {
           if (dirs.back().empty()) dirs.pop_back();  // empty item if trailing "/"
