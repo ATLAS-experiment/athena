@@ -815,6 +815,8 @@ def TauGNNeVetoEvaluatorCfg(flags, applyLooseTrackSel=False, applyTightTrackSel=
     myTauGNNeVetoEvaluator = TauGNNEvaluator(name = _name,
                                               useTRT = flags.Detector.EnableTRT,
                                               NetworkFileInclusive = flags.Tau.TauGNNeVetoConfig[0],
+                                              OutputDiscriminant = flags.Tau.TauGNNeVetoOutputDiscriminant_NeglogPJet_True,
+                                              #OutputDiscriminant = flags.Tau.TauGNNeVetoOutputDiscriminant_PTau, # See if I need to include a second scheduling of the algorithm to get this output?
                                               OutputVarname = flags.Tau.TauGNNeVetoScoreName,
                                               OutputPTau = "GNNeVetoProbTau",
                                               OutputPJet = "GNNeVetoProbJet",
@@ -849,9 +851,9 @@ def TauGNNeVetoWPDecoratorCfg(flags, tauContainerName=""):
                                       flatteningFile3Prong = WPConf[2],
                                       TauContainerName = tauContainerName,
                                       DecorWPNames = flags.Tau.TauGNNeVetoDecorWPNames,
-                                      DecorWPCutEffs1P = [0.95, 0.85, 0.60],
-                                      DecorWPCutEffs2P = [0.95, 0.75, 0.45],
-                                      DecorWPCutEffs3P = [0.95, 0.75, 0.45],
+                                      DecorWPCutEffs1P = [0.95, 0.85, 0.75],
+                                      DecorWPCutEffs2P = [0.95, 0.85, 0.75],
+                                      DecorWPCutEffs3P = [0.95, 0.85, 0.75],
                                       UseAbsEta = False, # Now for the eVeto algorithm we derive a flattening with respect to mu.
                                       ScoreBounds = [-0.01, 14.01],
                                       ScoreName = flags.Tau.TauGNNeVetoScoreName,
