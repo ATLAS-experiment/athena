@@ -59,7 +59,7 @@ public:
 
        
   /// Default constructor.  Sets the value to invalid.
-  CachedValue();
+  CachedValue() = default;
 
 
   /// Constructor from a value.
@@ -131,13 +131,13 @@ public:
 private:
   /// The cached value.
   /// Do not return a pointer to this to the user unless the state is VALID.
-  mutable T m_val ATLAS_THREAD_SAFE;  //! Transient
+  mutable T m_val ATLAS_THREAD_SAFE {};  //! Transient
 
   /// Current state of the cached value.
   ///   INVALID --- value has not been set.
   ///   VALID --- value has been set.
   ///   UPDATING --- value is in the process of being set by some thread.
-  mutable std::atomic<CacheState> m_cacheValid;  //! Transient
+  mutable std::atomic<CacheState> m_cacheValid{INVALID};  //! Transient
 };
 
 

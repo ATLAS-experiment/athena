@@ -9,23 +9,10 @@
  */
 
 
-#include "CxxUtils/AthUnlikelyMacros.h"
 
 
 namespace CxxUtils {
 
-
-/**
- * @brief Default constructor.  Sets the value to invalid.
- */
-template <class T>
-inline
-//cppcheck-suppress uninitMemberVar
-CachedValue<T>::CachedValue()
-  : m_val (),
-    m_cacheValid (INVALID)
-{
-}
 
 
 /**
@@ -33,7 +20,6 @@ CachedValue<T>::CachedValue()
  */
 template <class T>
 inline
-//cppcheck-suppress uninitMemberVar
 CachedValue<T>::CachedValue (const T& val)
   : m_val (val),
     m_cacheValid (VALID)
@@ -46,7 +32,6 @@ CachedValue<T>::CachedValue (const T& val)
  */
 template <class T>
 inline
-//cppcheck-suppress uninitMemberVar
 CachedValue<T>::CachedValue (T&& val) noexcept
   : m_val (std::move (val)),
     m_cacheValid (VALID)
@@ -60,8 +45,6 @@ CachedValue<T>::CachedValue (T&& val) noexcept
 template <class T>
 inline
 CachedValue<T>::CachedValue (const CachedValue& other)
-  : m_val(),
-    m_cacheValid (INVALID)
 {
   // If the source is in the middle of an update, set this value
   // to invalid.  Don't copy the value itself unless the source is valid.
@@ -79,8 +62,6 @@ CachedValue<T>::CachedValue (const CachedValue& other)
 template <class T>
 inline
 CachedValue<T>::CachedValue (CachedValue&& other) noexcept
-  : m_val(),
-    m_cacheValid (INVALID)
 {
   if (other.m_cacheValid == VALID) {
     // If we get here, m_val should be properly initialized.
@@ -246,7 +227,7 @@ inline
 bool CachedValue<T>::isValid() const
 {
   CacheState stat = m_cacheValid;
-  if (ATH_LIKELY(stat == VALID)) return true;
+  if (stat == VALID)[[likely]] return true;
   // Get the state flag.
   // Spin if another thread is currently updating.
   while ((stat = m_cacheValid) == UPDATING) {
