@@ -1,4 +1,4 @@
-Py:AutoConfigFlags    INFO Obtaining metadata of auto-configuration by peeking into 'SimplePoolFile1.root'
+Py:AutoConfigFlags    INFO Obtaining metadata for auto-configuration by peeking into 'SimplePoolFile1.root'
 Py:MetaReader        INFO Current mode used: lite
 Py:MetaReader        INFO Current filenames: ['SimplePoolFile1.root']
 Py:MetaReader        INFO MetaReader is called with the parameter "unique_tag_info_values" set to True. This is a workaround to remove all duplicate values from "/TagInfo" key

@@ -1,11 +1,18 @@
-Py:AutoConfigFlags    INFO Obtaining metadata of auto-configuration by peeking into 'EmptyPoolFile.root'
+Py:AutoConfigFlags    INFO Obtaining metadata for auto-configuration by peeking into 'EmptyPoolFile.root'
 Py:MetaReader        INFO Current mode used: lite
 Py:MetaReader        INFO Current filenames: ['EmptyPoolFile.root']
 Py:MetaReader        INFO MetaReader is called with the parameter "unique_tag_info_values" set to True. This is a workaround to remove all duplicate values from "/TagInfo" key
-Py:AutoConfigFlags    INFO The file: EmptyPoolFile.root has no entries, going to the next one for harvesting the metadata
-Py:AutoConfigFlags    INFO Obtaining metadata of auto-configuration by peeking into 'SimplePoolFile1.root'
+Py:AutoConfigFlags    INFO Obtaining metadata for auto-configuration by peeking into 'SimplePoolFile1.root'
 Py:MetaReader        INFO Current mode used: lite
 Py:MetaReader        INFO Current filenames: ['SimplePoolFile1.root']
+Py:MetaReader        INFO MetaReader is called with the parameter "unique_tag_info_values" set to True. This is a workaround to remove all duplicate values from "/TagInfo" key
+Py:AutoConfigFlags    INFO Obtaining metadata for auto-configuration by peeking into 'SimplePoolFile2.root'
+Py:MetaReader        INFO Current mode used: lite
+Py:MetaReader        INFO Current filenames: ['SimplePoolFile2.root']
+Py:MetaReader        INFO MetaReader is called with the parameter "unique_tag_info_values" set to True. This is a workaround to remove all duplicate values from "/TagInfo" key
+Py:AutoConfigFlags    INFO Obtaining metadata for auto-configuration by peeking into 'SimplePoolFile3.root'
+Py:MetaReader        INFO Current mode used: lite
+Py:MetaReader        INFO Current filenames: ['SimplePoolFile3.root']
 Py:MetaReader        INFO MetaReader is called with the parameter "unique_tag_info_values" set to True. This is a workaround to remove all duplicate values from "/TagInfo" key
 ApplicationMgr        INFO Application Manager Configured successfully
 AthenaEventLoopMgr                                   INFO Initializing AthenaEventLoopMgr

@@ -1,5 +1,5 @@
 Py:Athena            INFO using release [WorkDir-22.0.19] [x86_64-centos7-gcc8-opt] [atlas-work3h/b64d5586bf6b] -- built on [2020-10-20T1924]
-Py:AutoConfigFlags    INFO Obtaining metadata of auto-configuration by peeking into /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data17_13TeV.00327265.physics_EnhancedBias.merge.RAW._lb0100._SFO-1._0001.1
+Py:AutoConfigFlags    INFO Obtaining metadata for auto-configuration by peeking into /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data17_13TeV.00327265.physics_EnhancedBias.merge.RAW._lb0100._SFO-1._0001.1
 Py:MetaReader        INFO Current mode used: peeker
 Py:MetaReader        INFO Current filenames: ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data17_13TeV.00327265.physics_EnhancedBias.merge.RAW._lb0100._SFO-1._0001.1']
 Py:GaudiHandles   WARNING CaloDummyCorrection('larupdatee-dummy', prefix='e.') with instance name 'larupdatee-dummy' already in PrivateToolHandleArray. Not adding CaloDummyCorrection('larupdatee-dummy', prefix='e.').
