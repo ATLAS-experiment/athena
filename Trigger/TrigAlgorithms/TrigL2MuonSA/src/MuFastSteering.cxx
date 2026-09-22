@@ -8,6 +8,7 @@
 #include "xAODTrigMuon/L2CombinedMuonAuxContainer.h"
 #include "xAODTrigMuon/TrigMuonDefs.h"
 #include "xAODTrigger/MuonRoI.h"
+#include "MuonPrepRawData/MuonPrepDataContainer.h"
 
 #include "CxxUtils/phihelper.h"
 #include "TrigSteeringEvent/TrigRoiDescriptor.h"
@@ -703,7 +704,33 @@ StatusCode MuFastSteering::findMuonSignature(const std::vector<const TrigRoiDesc
 	      return StatusCode::FAILURE;
 	    }
 	    
+	    std::vector<Muon::MdtPrepData> prepDataMDT;
+	    prepDataMDT.reserve(mdtHits.size());
+	    for(const auto &hit : mdtHits){
+	      if (hit.prepDataPtr){
+ 		prepDataMDT.push_back(*hit.prepDataPtr);
+	      }
+	    }
+	    std::vector<Muon::RpcPrepData> prepDataRPC;
+	    prepDataRPC.reserve(rpcHits.size());
+	    for(const auto &hit : rpcHits){
+	      if (hit.prepDataPtr){
+		prepDataRPC.push_back(*hit.prepDataPtr);
+	      }
+	    }
+	    std::vector<Muon::TgcPrepData> prepDataTGC;
+	    prepDataTGC.reserve(tgcHits.size());
+	    for(const auto &hit : tgcHits){
+	      if (hit.prepDataPtr){
+		prepDataTGC.push_back(*hit.prepDataPtr);
+	      }
+	    }
+	    
+	    // Attach to the calibstream
             tc->setDetail("muCalibDS", localBuffer );
+            tc->setDetail("muCalibDS_MDT", prepDataMDT );
+            tc->setDetail("muCalibDS_RPC", prepDataRPC );
+	    tc->setDetail("muCalibDS_TGC", prepDataTGC );	    
 	      
 	}
         }

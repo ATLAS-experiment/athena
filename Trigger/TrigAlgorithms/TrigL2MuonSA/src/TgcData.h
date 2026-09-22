@@ -5,6 +5,8 @@
 #ifndef  TRIGL2MUONSA_TGCDATA_H
 #define  TRIGL2MUONSA_TGCDATA_H
 
+#include "MuonPrepRawData/MuonPrepDataContainer.h"
+
 namespace TrigL2MuonSA {
 
 // --------------------------------------------------------------------------------
@@ -35,6 +37,7 @@ class TgcHitData
       bool   isStrip;
       int    bcTag;
       bool   inRoad;
+      const Muon::TgcPrepData* prepDataPtr{nullptr};
 };
 
 // --------------------------------------------------------------------------------

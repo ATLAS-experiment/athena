@@ -5,6 +5,8 @@
 #ifndef  TRIGL2MUONSA_RPCDATA_H
 #define  TRIGL2MUONSA_RPCDATA_H
 
+#include "MuonPrepRawData/MuonPrepDataContainer.h"
+
 namespace TrigL2MuonSA {
 
   // --------------------------------------------------------------------------------
@@ -49,6 +51,7 @@ namespace TrigL2MuonSA {
       double l;      
       bool measuresPhi;
       std::string stationName;
+      const Muon::RpcPrepData* prepDataPtr{nullptr};
   };
   
   // --------------------------------------------------------------------------------

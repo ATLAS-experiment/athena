@@ -16,6 +16,7 @@
 #include "xAODTracking/VertexContainer.h"
 #include "xAODBTagging/BTagVertexContainer.h"
 #include "xAODTrigger/jFexTauRoIContainer.h"
+#include "MuonPrepRawData/MuonPrepDataContainer.h"
 
 /**
  * @File TriggerEDMCLIDs.h
@@ -32,5 +33,13 @@ CLASS_DEF( std::vector<std::vector<ElementLink<xAOD::VertexContainer>>>, 1164463
 CLASS_DEF( std::vector<std::vector<ElementLink<xAOD::BTagVertexContainer>>>, 1289535397, 1 )
 CLASS_DEF( std::vector<ElementLink<xAOD::jFexTauRoIContainer>>, 1334654121, 1 )
 CLASS_DEF( std::vector<std::vector<ElementLink<xAOD::IParticleContainer>>>, 95910623, 1 )
+
+// from clid -m 'std::vector<Muon::MdtPrepData>'
+CLASS_DEF( std::vector<Muon::MdtPrepData> , 233577723 , 1 )
+CLASS_DEF( std::vector<Muon::RpcPrepData> , 77039015 , 1 )
+CLASS_DEF( std::vector<Muon::TgcPrepData> , 185990434 , 1 )
+CLASS_DEF( std::vector<std::vector<Muon::MdtPrepData>> , 62441460 , 1 )
+CLASS_DEF( std::vector<std::vector<Muon::RpcPrepData>> , 154526848 , 1 )
+CLASS_DEF( std::vector<std::vector<Muon::TgcPrepData>> , 153423931 , 1 )
 
 #endif //> !TRIGOUTPUTHANDLING_TRIGGEREDMCLIDS_H
