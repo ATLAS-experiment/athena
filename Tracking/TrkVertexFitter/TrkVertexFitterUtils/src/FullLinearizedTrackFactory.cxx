@@ -79,7 +79,7 @@ namespace Trk
                     lp.y() << " z " << lp.z() << ". Normal if outside ID acceptance ");
 
       if (dynamic_cast<const Trk::Perigee*>(trackPars) && trackPars->covariance()) {
-        if (parsAtVertex) delete parsAtVertex; // in case extrapolation made other parameters
+        delete parsAtVertex; // in case extrapolation made other parameters
         parsAtVertex = trackPars->clone();
       } else {
         delete parsAtVertex; return nullptr;
@@ -261,7 +261,7 @@ namespace Trk
                     lp.y() << " z " << lp.z() << ". Should not happen. ");
 
       if (dynamic_cast<const Trk::NeutralPerigee*>(neutralPars) && neutralPars->covariance()) {
-        if (parsAtVertex) delete parsAtVertex; // in case extrapolation made other parameters
+        delete parsAtVertex; // in case extrapolation made other parameters
         parsAtVertex = neutralPars->clone();
       } else {
         delete parsAtVertex; return nullptr;
