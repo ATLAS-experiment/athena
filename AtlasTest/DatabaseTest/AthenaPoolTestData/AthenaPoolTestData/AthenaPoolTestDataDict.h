@@ -29,8 +29,6 @@
 #include "AthenaPoolTestData/AthenaPoolTestMatrix.h"
 #include "AthenaPoolTestData/AthenaPoolTestMap.h"
 #include "AthenaPoolTestData/AthenaPoolTestMapData.h"
-#include "AthenaPoolTestData/TrigPath.h"
-#include "AthenaPoolTestData/FauxTriggerMap.h"
 #include "AthenaPoolTestData/dummy_A.h"
 #include "AthenaPoolTestData/dummy_E.h"
 
