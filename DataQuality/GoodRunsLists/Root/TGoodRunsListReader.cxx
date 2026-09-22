@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -15,7 +15,6 @@
 #include <string>
 
 #include "TFormula.h"
-#include "Riostream.h"
 #include "TObjString.h"
 #include "TDOMParser.h"
 #include "TXMLNode.h"
