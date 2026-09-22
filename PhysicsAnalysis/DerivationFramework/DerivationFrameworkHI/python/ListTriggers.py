@@ -685,6 +685,13 @@ def HION7JetTriggers2024():
 
     return triggers
 
+def HION7JetTriggers2025():
+    triggers  = {}
+    triggers.update({'HLT_j60_ion_L1jJ40' : 60})
+    triggers.update({'HLT_j75_ion_L1jJ55' : 75})
+
+    return triggers
+
 def HION7MuonTriggers():
     triggers  = {}
     triggers.update({'HLT_mu4_L1MU3V' : 25}) # accept any event with jet above 25 GeV
@@ -800,6 +807,13 @@ def HION7SkimmingTriggers2024():
 
     return triggers
 
+def HION7SkimmingTriggers2025():
+    triggers  = HION7JetTriggers2025()
+    triggers.update(HION7MuonTriggers())
+    triggers.update(HION7PCCCTriggers2024())
+
+    return triggers
+
 def HION7SkimmingTriggersPP():
     triggers  = HION7JetTriggersPP()
     triggers.update(HION7BJetTriggersPP())
@@ -821,17 +835,13 @@ def HION7SkimmingTriggersOO():
 
     return triggers
 
-def HION7SkimmingTriggers2025():
-    triggers  = HION7SkimmingTriggers2024()
-
-    return triggers
-
 #################################################################################
 def GetTriggers(project_tag, isSmallSystem):
     switcher_HION7 = {
         'data23_hi': HION7SkimmingTriggers2023(),
         'data24_hi': HION7SkimmingTriggers2024(),
         'data25_hi': HION7SkimmingTriggers2025(),
+        'data26_hi': HION7SkimmingTriggers2025(),
         }
 
     switcher_SmallSystems = {
@@ -1172,6 +1182,7 @@ def GetHION12Triggers(project_tag):
         'data23_hi': HION12SkimmingTriggers2023(),
         'data24_hi': HION12SkimmingTriggers2024(),
         'data25_hi': HION12SkimmingTriggers2025(),
+        'data26_hi': HION12SkimmingTriggers2025(),
         }
 
     return  switcher_HION12.get(project_tag, "Invalid project tag")
@@ -1195,15 +1206,17 @@ def HION12nJetCutsRun3():
 
     return nJetCuts
 
-def GetHION12nJetCuts(project_tag):
+def GetHION12nJetCuts(project_tag,isMC):
     switcher_HION12 = {
         'data15_hi': HION12nJetCutsRun2(),
         'data18_hi': HION12nJetCutsRun2(),
         'data23_hi': HION12nJetCutsRun3(),
         'data24_hi': HION12nJetCutsRun3(),
         'data25_hi': HION12nJetCutsRun3(),
+        'data26_hi': HION12nJetCutsRun3(),
         }
-
+    if isMC:
+        return  HION12nJetCutsRun3()
     return  switcher_HION12.get(project_tag, "Invalid project tag")
 
 def HION14SkimmingTriggersOpenData():

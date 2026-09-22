@@ -30,7 +30,7 @@ def HION12SkimmingToolCfg(flags):
     from DerivationFrameworkHI import ListTriggers
     
     objectSelection = '(count(PrimaryVertices.z < 1000) < 10)'
-    nJetCuts    = ListTriggers.GetHION12nJetCuts(flags.Input.ProjectName)
+    nJetCuts    = ListTriggers.GetHION12nJetCuts(flags.Input.ProjectName, flags.Input.isMC)
     triggers    = ListTriggers.GetHION12Triggers(flags.Input.ProjectName)
     filterList = []
 
@@ -43,10 +43,11 @@ def HION12SkimmingToolCfg(flags):
                                   expression = expression)))
     filterList += [HION12StringSkimmingTool]
 
-    HION12TriggerSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool(
-        name = "HION12TriggerSkimmingTool", TriggerListOR = triggers)
-    acc.addPublicTool(HION12TriggerSkimmingTool)
-    filterList += [HION12TriggerSkimmingTool]
+    if not flags.Input.isMC:
+        HION12TriggerSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool(
+            name = "HION12TriggerSkimmingTool", TriggerListOR = triggers)
+        acc.addPublicTool(HION12TriggerSkimmingTool)
+        filterList += [HION12TriggerSkimmingTool]
 
     HION12SkimmingTool  = CompFactory.DerivationFramework.FilterCombinationAND(
         name="HION12SkimmingTool",  FilterList=filterList)
@@ -111,12 +112,28 @@ def HION12Cfg(flags):
 #########################################################################################
 #Slimming
     from DerivationFrameworkHI import ListSlimming
+    from DerivationFrameworkFlavourTag import FtagBaseContent
     
     HION12SlimmingHelper = SlimmingHelper("HION12SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
-    
     HION12SlimmingHelper.SmartCollections = ListSlimming.HION12SmartCollections()
-    HION12SlimmingHelper.AllVariables     = ListSlimming.HION12AllVarContent(flags.Input.ProjectName)
-    HION12SlimmingHelper.ExtraVariables   = ListSlimming.HION12Extra()
+    AllVars = []
+    AllVars += ListSlimming.HION12AllVarContent(flags.Input.ProjectName,flags.Input.isMC)
+    ExtraVars = []
+    ExtraVars += ListSlimming.HION12Extra()
+    if flags.Input.isMC and flags.HeavyIon.doHIBTagging:
+        FtagBaseContent.add_truth_to_slimming_helper(HION12SlimmingHelper)
+    if flags.HeavyIon.doHIBTagging:
+        from DerivationFrameworkFlavourTag.FtagBaseContent import add_common_augmentation
+        add_common_augmentation(flags, acc, HION12SlimmingHelper, "AntiKt4EMPFlowJets")
+        AllVars += ListSlimming.HION7AllVarFromFTAG1()
+        # update AppendToDictionary
+        extra_AppendToDictionary = {}
+        FtagBaseContent.update_append_to_dictionary_in_slimming_helper(flags, HION12SlimmingHelper, extra_AppendToDictionary)
+        # Add ExtraVariables
+        ExtraVars += ListSlimming.HION7ExtraVarForBtag("AntiKt4EMPFlowJets")
+        FtagBaseContent.add_extra_variables_to_slimming_helper(flags, HION12SlimmingHelper)
+    HION12SlimmingHelper.AllVariables     = AllVars
+    HION12SlimmingHelper.ExtraVariables   = ExtraVars
     
     
     HION12ItemList = HION12SlimmingHelper.GetItemList()
