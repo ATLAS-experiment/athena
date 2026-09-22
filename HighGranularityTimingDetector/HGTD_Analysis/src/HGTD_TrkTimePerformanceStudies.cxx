@@ -106,7 +106,6 @@ StatusCode HGTD_TrkTimePerformanceStudies::execute(const EventContext& ctx) {
         bool morethanhalfprimes =
             primes_fraction == PrimesFractions::AllPrimes or
             primes_fraction == PrimesFractions::MoreThanHalfPrimes;
-
         fillEffSubDir(track_tool->name(), time_tool->name(), "m_eff_vs_eta",
                       has_time, std::abs(trk_eta));
 
