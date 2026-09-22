@@ -91,7 +91,8 @@ class TauWPDecorator : public TauRecToolBase {
     Gaudi::Property<std::vector<float>> m_decorWPEffs0p{this, "DecorWPCutEffs0P", {}, "Efficiency of each WP to be docorated for 0-prong taus"};
     Gaudi::Property<std::vector<float>> m_decorWPEffs1p{this, "DecorWPCutEffs1P", {}, "Efficiency of each WP to be docorated for 1-prong taus"};
     Gaudi::Property<std::vector<float>> m_decorWPEffs2p{this, "DecorWPCutEffs2P", {}, "Efficiency of each WP to be docorated for 2-prong taus"};
-    Gaudi::Property<std::vector<float>> m_decorWPEffs3p{this, "DecorWPCutEffs3P", {}, "Efficiency of each WP to be docorated for 3-prong taus"};        
+    Gaudi::Property<std::vector<float>> m_decorWPEffs3p{this, "DecorWPCutEffs3P", {}, "Efficiency of each WP to be docorated for 3-prong taus"};
+    Gaudi::Property<std::vector<float>> m_ScoreBounds{this, "ScoreBounds", {-1.01, 1.01}, "Lower and upper bounds for the score"};
     // for WPs not implemented in the EDM (i.e. not encoded in IsTauFlag)
     // use Accessors unless necessary
     std::vector<SG::Accessor<char>> m_charDecors;

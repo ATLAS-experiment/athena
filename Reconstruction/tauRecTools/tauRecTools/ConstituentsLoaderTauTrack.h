@@ -187,7 +187,11 @@ namespace FlavorTagInference {
             {"nPixelHitsPlusDeadSensors",       TauTrackVars::nPixelHitsPlusDeadSensors},
             {"nSCTHitsPlusDeadSensors",         TauTrackVars::nSCTHitsPlusDeadSensors},
             {"eProbabilityHT",                  TauTrackVars::eProbabilityHT},
-            {"eProbabilityHT_noTRT",            TauTrackVars::eProbabilityHT_noTRT}
+            {"eProbabilityHT_noTRT",            TauTrackVars::eProbabilityHT_noTRT},
+            // Extension - Variables for GNTau-eVeto 
+            {"eProbabilityNN",                  TauTrackVars::eProbabilityNN},
+            {"nTRTHits",                        TauTrackVars::numberOfTRTHits},
+            {"nTRTHighThresholdHits",           TauTrackVars::numberOfTRTHighThresholdHits}
         };
     };
 }
