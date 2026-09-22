@@ -82,11 +82,13 @@ public:
       return;
     }
     m_histos[name] = new T(name.c_str(), title.c_str(), args...);
-    dynamic_cast<T*>(m_histos[name])->Sumw2();
-    if (not m_hist_svc
-                ->regHist(m_directory_name + name,
-                          dynamic_cast<T*>(m_histos[name]))
-                .isSuccess()) {
+    auto ptrT = dynamic_cast<T*>(m_histos[name]);
+    if (!ptrT)[[unlikely]]{
+      ATH_MSG_WARNING("Cast failed for "<< name);
+      return;
+    }
+    ptrT->Sumw2();
+    if (not m_hist_svc->regHist(m_directory_name + name,ptrT.isSuccess()) {
       ATH_MSG_WARNING("Failed to book " << name);
     }
   }
@@ -143,7 +145,12 @@ public:
           << name << " which doesn't exist!\n");
       return;
     }
-    dynamic_cast<T*>(m_histos[name])->Fill(args...);
+    auto ptrT = dynamic_cast<T*>(m_histos[name]);
+    if (!ptrT)[[unlikely]]{
+      ATH_MSG_WARNING("Cast failed for "<< name);
+      return;
+    }
+    ptrT->Fill(args...);
   }
 
   template <typename T, typename... Ts>
@@ -157,7 +164,12 @@ public:
           << name << " which doesn't exist!\n");
       return;
     }
-    dynamic_cast<T*>(m_histos[name])->Fill(args...);
+    auto ptrT = dynamic_cast<T*>(m_histos[name]);
+    if (!ptrT)[[unlikely]]{
+      ATH_MSG_WARNING("Cast failed for "<< name);
+      return;
+    }
+    ptrT->Fill(args...);
   }
 
   template <typename... Ts> void fillEff(const std::string& name, Ts... args) {
@@ -168,7 +180,12 @@ public:
           << name << " which doesn't exist!\n");
       return;
     }
-    dynamic_cast<TEfficiency*>(m_histos[name])->Fill(args...);
+    auto ptrT = dynamic_cast<TEfficiency*>(m_histos[name]);
+    if (!ptrT)[[unlikely]]{
+      ATH_MSG_WARNING("Cast failed for "<< name);
+      return;
+    }
+    ptrT->Fill(args...);
   }
 
   template <typename... Ts>
@@ -183,7 +200,12 @@ public:
           << name << " which doesn't exist!\n");
       return;
     }
-    dynamic_cast<TEfficiency*>(m_histos[name])->Fill(args...);
+    auto ptrT = dynamic_cast<TEfficiency*>(m_histos[name]);
+    if (!ptrT)[[unlikely]]{
+      ATH_MSG_WARNING("Cast failed for "<< name);
+      return;
+    }
+    ptrT->Fill(args...);
   }
 
 protected:
