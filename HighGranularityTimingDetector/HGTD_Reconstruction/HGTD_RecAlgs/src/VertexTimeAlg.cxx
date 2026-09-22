@@ -297,7 +297,9 @@ std::pair<float, float> VertexTimeAlg::getOneOverPOfCluster(
     num += one_over_p / one_over_p_variance;
     denom += 1.0f / one_over_p_variance;
   }
-
+  if (denom == 0.)[[unlikely]]{
+    throw std::runtime_error("VertexTimeAlg::getOneOverPOfCluster: denominator is zero");
+  }
   float avg_oneover_p = num / denom;
   float avg_oneover_p_sigma = std::sqrt(1.0f / denom);
 
