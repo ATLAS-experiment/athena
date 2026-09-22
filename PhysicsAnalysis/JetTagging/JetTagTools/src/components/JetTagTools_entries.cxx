@@ -19,9 +19,6 @@
 
 #include "JetTagTools/MV2Tag.h"
 
-#include "JetTagTools/ClassifiedTrackTaggerTool.h"
-#include "JetTagTools/CTTDecorCheckInTool.h"
-
 DECLARE_COMPONENT( Analysis::IPTag )
 DECLARE_COMPONENT( Analysis::SVTag )
 DECLARE_COMPONENT( Analysis::MultiSVTag )
@@ -37,6 +34,4 @@ DECLARE_COMPONENT( Analysis::SVForIPTool )
 DECLARE_COMPONENT( Analysis::BasicTrackGradeFactory )
 DECLARE_COMPONENT( Analysis::DetailedTrackGradeFactory )
 DECLARE_COMPONENT( Analysis::MV2Tag )
-DECLARE_COMPONENT( Analysis::ClassifiedTrackTaggerTool )
-DECLARE_COMPONENT( CTTDecorCheckInTool )
 

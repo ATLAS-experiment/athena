@@ -14,6 +14,19 @@
 
 // Framework includes
 #include "AthenaKernel/getMessageSvc.h"
+#include <algorithm>
+
+namespace{
+  //split a histogram name which contains a path into the separate path/name components
+  std::pair<std::string_view, std::string_view>
+  splitName(std::string_view name){
+    const auto pos  = name.rfind('/');
+    if (pos == std::string_view::npos){
+      return {{}, name};
+    }
+    return {name.substr(0,pos), name.substr(pos+1)};
+  }
+}
 
 
 
@@ -80,13 +93,18 @@ StatusCode AthHistogramming::configAthHistogramming( const ServiceHandle<ITHistS
 // =============================================================================
 // Simplify the booking and registering (into THistSvc) of histograms
 // =============================================================================
-TH1* AthHistogramming::bookGetPointer( TH1& histRef, std::string tDir, std::string stream )
-{
-  std::string histName(histRef.GetName());
+TH1* 
+AthHistogramming::bookGetPointer( TH1& histRef, const std::string & tDir, const std::string & stream ){
+  
+  const std::string originalName{histRef.GetName()};
+  const auto histName = splitName(originalName).second;
+  
   const std::string histTitle(histRef.GetTitle());
-  std::string bookingString = buildBookingString(histName, tDir, stream);
+  std::string bookingString = buildBookingString(originalName, tDir, stream);
 
-  const std::string finalHistName = m_histNamePrefix + histName + m_histNamePostfix;
+  std::string finalHistName{m_histNamePrefix};
+  finalHistName += histName;
+  finalHistName += m_histNamePostfix;
 
   histRef.SetTitle((m_histTitlePrefix + histTitle + m_histTitlePostfix).c_str());
   histRef.SetName(finalHistName.c_str());
@@ -118,12 +136,15 @@ TH1* AthHistogramming::bookGetPointer( TH1& histRef, std::string tDir, std::stri
 }
 
 TEfficiency*
-AthHistogramming::bookGetPointer(TEfficiency& effRef, std::string tDir, std::string stream)
+AthHistogramming::bookGetPointer(TEfficiency& effRef, const std::string & tDir, const std::string & stream)
 {
-  std::string effName(effRef.GetName());
+  std::string originalName{effRef.GetName()};
+  const auto effName = splitName(originalName).second;
   const std::string effTitle(effRef.GetTitle());
-  std::string bookingString = buildBookingString(effName, tDir, stream);
-  const std::string finalEffName = m_histNamePrefix + effName + m_histNamePostfix;
+  std::string bookingString = buildBookingString(originalName, tDir, stream);
+  std::string finalEffName{m_histNamePrefix};
+  finalEffName += effName;
+  finalEffName += m_histNamePostfix;
   effRef.SetTitle((m_histTitlePrefix + effTitle + m_histTitlePostfix).c_str());
   effRef.SetName(finalEffName.c_str());
 
@@ -158,37 +179,25 @@ AthHistogramming::bookGetPointer(TEfficiency& effRef, std::string tDir, std::str
 // Simplify the retrieval of registered histograms of any type
 // =============================================================================
 TH1*
-AthHistogramming::hist(std::string_view histName,
-                       const std::string& tDir,
-                       const std::string& stream)
-{
-  std::string histNameCopy{histName};
-  std::string tDirCopy     = tDir;
-  std::string streamCopy   = stream;
+AthHistogramming::hist(std::string_view histName, const std::string& tDir,
+ const std::string& stream){
 
-  std::string bookingString = buildBookingString(histNameCopy, tDirCopy, streamCopy, false);
+  const auto histBaseName = splitName(histName).second;
+  std::string bookingString = buildBookingString(histName, tDir, stream, false);
 
-  const hash_t histHash = this->hash(histNameCopy);
+  const hash_t histHash = this->hash(histBaseName);
 
   HistMap_t::const_iterator it = m_histMap.find(histHash);
   if (it == m_histMap.end()) {
     TH1* histPointer(nullptr);
 
     if (!histSvc()->getHist(bookingString, histPointer).isSuccess()) {
-      std::string prefixedHistNameCopy{histName};
-      std::string prefixedTDirCopy     = tDir;
-      std::string prefixedStreamCopy   = stream;
-
-      std::string prefixedBookingString = buildBookingString(prefixedHistNameCopy,
-                               prefixedTDirCopy,
-                               prefixedStreamCopy,
-                               true);
-
+      std::string prefixedBookingString = buildBookingString(histName, tDir, stream, true);
       if (!histSvc()->getHist(prefixedBookingString, histPointer).isSuccess()) {
         m_msg << MSG::WARNING
               << "Problem retrieving the histogram with name (including pre- and post-fixes) "
-              << m_histNamePrefix + histNameCopy + m_histNamePostfix
-              << " or with name " << histNameCopy
+              << prefixedBookingString
+              << " or with name " << histName
               << " in " << m_name << "... it doesn't exist, neither in the cached map nor in the THistSvc!"
               << " Will return an NULL pointer... you have to handle it correctly!" << endmsg;
         return nullptr;
@@ -211,27 +220,21 @@ TEfficiency* AthHistogramming::efficiency( const std::string& effName, const std
   EffMap_t::const_iterator it = m_effMap.find( effHash );
   if ( it == m_effMap.end() ) // It doesn't exist!
     { // Let's see into the THistSvc if somebody else has registered the TEfficiency...
-
-      // Need to copy the strings as we will massage them from here on
-      std::string effNameCopy = effName;
-      std::string tDirCopy     = tDir;
-      std::string streamCopy   = stream;
-
       // Massage the final string to book things
-      std::string bookingString = buildBookingString(effNameCopy, tDirCopy, streamCopy ,false);
+      std::string bookingString = buildBookingString(effName, tDir, stream ,false);
 
-      TEfficiency* effPointer(NULL);
+      TEfficiency* effPointer{};
       if ( !((histSvc()->getEfficiency(bookingString, effPointer)).isSuccess()) )
         {
-          // Massage the final string to book things
-          std::string bookingString = buildBookingString( effNameCopy, tDirCopy, streamCopy, true );
+          // Book things
+          std::string bookingString = buildBookingString( effName, tDir, stream, true );
 
           if ( !((histSvc()->getEfficiency(bookingString, effPointer)).isSuccess()) )
             {
               m_msg << MSG::WARNING
                     << "Problem retrieving the TEfficiency with name (including pre- and post-fixes) "
-                    << m_histNamePrefix + effNameCopy + m_histNamePostfix
-                    << " or with name " << effNameCopy
+                    << bookingString
+                    << " or with name " << effName
                     << " in " << m_name << "... it doesn't exist, neither in the cached map nor in the THistSvc!"
                     << " Will return an NULL pointer... you have to handle it correctly!" << endmsg;
               return NULL;
@@ -262,7 +265,7 @@ TEfficiency* AthHistogramming::efficiency( const std::string& effName, const std
 // =============================================================================
 // Simplify the booking and registering (into THistSvc) of TTrees
 // =============================================================================
-TTree* AthHistogramming::bookGetPointer( const TTree& treeRef, std::string tDir, std::string stream )
+TTree* AthHistogramming::bookGetPointer( const TTree& treeRef, const std::string & tDir, const std::string & stream )
 {
   // Get a pointer
   const TTree* treePointer = &treeRef;
@@ -331,25 +334,18 @@ TTree* AthHistogramming::tree( const std::string& treeName, const std::string& t
 {
   // Build a 32 bit hash out of the name
   const hash_t treeHash = this->hash(treeName);
-
   // See if this entry exists in the map
   TreeMap_t::const_iterator it = m_treeMap.find( treeHash );
   if ( it == m_treeMap.end() ) // It doesn't exist!
     { // Let's see into the THistSvc if somebody else has registered the TTree...
-
-      // Need to copy the strings as we will massage them from here on
-      std::string treeNameCopy = treeName;
-      std::string tDirCopy     = tDir;
-      std::string streamCopy   = stream;
-
       // Massage the final string to book things
-      std::string bookingString = buildBookingString( treeNameCopy, tDirCopy, streamCopy );
+      std::string bookingString = buildBookingString( treeName, tDir, stream);
 
       TTree* treePointer(NULL);
       if ( !((histSvc()->getTree(bookingString, treePointer)).isSuccess()) )
         {
           m_msg << MSG::WARNING
-                << "Problem retrieving the TTree with name " << treeNameCopy
+                << "Problem retrieving the TTree with name " << treeName
                 << " in " << m_name << "... it doesn't exist, neither in the cached map nor in the THistSvc!"
                 << " Will return an NULL pointer... you have to handle it correctly!" << endmsg;
           return NULL;
@@ -375,7 +371,7 @@ TTree* AthHistogramming::tree( const std::string& treeName, const std::string& t
 // =============================================================================
 // Simplify the booking and registering (into THistSvc) of TGraphs
 // =============================================================================
-TGraph* AthHistogramming::bookGetPointer( const TGraph& graphRef, std::string tDir, std::string stream )
+TGraph* AthHistogramming::bookGetPointer( const TGraph& graphRef, const std::string & tDir, const std::string & stream )
 {
   // Get a pointer
   const TGraph* graphPointer = &graphRef;
@@ -449,26 +445,21 @@ TGraph* AthHistogramming::graph( const std::string& graphName, const std::string
   if ( it == m_graphMap.end() ) // It doesn't exist!
     { // Let's see into the THistSvc if somebody else has registered the TGraph...
 
-      // Need to copy the strings as we will massage them from here on
-      std::string graphNameCopy = graphName;
-      std::string tDirCopy      = tDir;
-      std::string streamCopy    = stream;
-
       // Massage the final string to book things
-      std::string bookingString = buildBookingString( graphNameCopy, tDirCopy, streamCopy, false);
+      std::string bookingString = buildBookingString( graphName, tDir, stream, false);
 
       TGraph* graphPointer(nullptr);
       if ( !((histSvc()->getGraph(bookingString, graphPointer)).isSuccess()) )
         {
           // Massage the final string to book things
-          std::string bookingString = buildBookingString( graphNameCopy, tDirCopy, streamCopy, true );
+          std::string bookingString = buildBookingString( graphName, tDir, stream, true );
 
           if ( !((histSvc()->getGraph(bookingString, graphPointer)).isSuccess()) )
             {
               m_msg << MSG::WARNING
                     << "Problem retrieving the TGraph with name (including pre- and post-fixes) "
-                    << m_histNamePrefix + graphNameCopy + m_histNamePostfix
-                    << " or with name " << graphNameCopy
+                    << bookingString
+                    << " or with name " << graphName
                     << " in " << m_name << "... it doesn't exist, neither in the cached map nor in the THistSvc!"
                     << " Will return an NULL pointer... you have to handle it correctly!" << endmsg;
               return nullptr;
@@ -506,42 +497,33 @@ TGraph* AthHistogramming::graph( const std::string& graphName, const std::string
 // Helper method to build the final string to be passed to the THistSvc
 // =============================================================================
 std::string
-AthHistogramming::buildBookingString( std::string& histName, std::string& tDir,
-  std::string& stream, bool usePrefixPostfix)
-{
-  std::string bookingString;
-  // Massage the final string to book things
-  if(tDir.empty()) tDir = m_rootDir;
-  size_t pos = histName.rfind('/');
-  if(pos != std::string::npos){
-    tDir+='/';
-    tDir.append(histName, 0,pos);
-    histName.erase(0,pos+1);
-  };
-  if(stream.empty()) stream = m_streamName;
-
-  if(usePrefixPostfix){
-    bookingString = "/"+stream+"/"+tDir+"/"+m_histNamePrefix+histName+m_histNamePostfix;
-  } else {
-    bookingString = "/"+stream+"/"+tDir+"/"+histName;
+AthHistogramming::buildBookingString(std::string_view histName, std::string_view tDir,
+ std::string_view stream, bool usePrefixPostfix) const {
+  if (tDir.empty()) {
+    tDir = m_rootDir;
   }
-  while(bookingString.find("//") != std::string::npos){
-    this->myReplace(bookingString,"//","/");
+  if (stream.empty()) {
+    stream = m_streamName;
   }
-
+  const auto [histDir, baseName] = splitName(histName);
+  std::string bookingString{"/"};
+  bookingString += stream;
+  bookingString += '/';
+  bookingString += tDir;
+  if (!histDir.empty()) {
+    bookingString += '/';
+    bookingString += histDir;
+  }
+  bookingString += '/';
+  if (usePrefixPostfix) {
+    bookingString += m_histNamePrefix;
+  }
+  bookingString += baseName;
+  if (usePrefixPostfix) {
+    bookingString += m_histNamePostfix;
+  }
+  const auto tail = std::ranges::unique(
+    bookingString, [](char lhs, char rhs) { return lhs == '/' && rhs == '/'; });
+  bookingString.erase(tail.begin(), tail.end());
   return bookingString;
-}
-
-
-// Helper method to replace all sub-strings
-void AthHistogramming::myReplace( std::string& str,
-                                  const std::string& oldStr,
-                                  const std::string& newStr)
-{
-  size_t pos = 0;
-  while((pos = str.find(oldStr, pos)) != std::string::npos)
-    {
-      str.replace(pos, oldStr.length(), newStr);
-      pos += newStr.length();
-    }
 }

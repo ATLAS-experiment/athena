@@ -9,8 +9,10 @@
 #include "Acts/SpacePointFormation/StripSpacePointCalibration.hpp"
 #include "Acts/EventData/StripSpacePointCalibrationDetails.hpp"
 #include "Acts/EventData/TransformationHelpers.hpp"
+#include "Acts/Utilities/MathHelpers.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <ranges>
 
 namespace ActsTrk {
@@ -104,6 +106,7 @@ Acts::FreeVector estimateTrackParamsFromSeed(
     ATH_MSG_DEBUG( "   " << m_refitErrInflation );
     ATH_MSG_DEBUG( "   " << m_bFieldMode );
     ATH_MSG_DEBUG( "   " << m_firstSp );
+    ATH_MSG_DEBUG( "   " << m_minDeltaR );
     ATH_MSG_DEBUG( "   " << m_stripCalibrationIterations );
     ATH_MSG_DEBUG( "   " << m_refitSeeds );
 
@@ -138,6 +141,10 @@ Acts::FreeVector estimateTrackParamsFromSeed(
     const auto& sp_collection = seed.sp();
     if ( sp_collection.size() < 3 ) return {std::nullopt, kNoSeedRefit};
     const xAOD::SpacePoint* bottom_sp = (useTopSp && m_bFieldMode != 2) ? sp_collection.back() : sp_collection.front();
+    if (m_parameterEstimationMode == 3 && useTopSp && m_bFieldMode != 2) {
+      // B-field at the first SP used for the estimate in search order
+      bottom_sp = sp_collection.at(sp_collection.size() - m_spacePointIndicesFun(sp_collection, useTopSp)[0] - 1);
+    }
 
     // Magnetic Field
     ATLASMagneticFieldWrapper magneticField;
@@ -185,9 +192,9 @@ Acts::FreeVector estimateTrackParamsFromSeed(
     });
 
     // Compute free parameters
-    Acts::FreeVector freeParams = estimateTrackParamsFromSeed(m_spacePointIndicesFun(nSp) | sp_collection_extract, bField, m_stripCalibrationIterations);
+    Acts::FreeVector freeParams = estimateTrackParamsFromSeed(m_spacePointIndicesFun(sp_collection, useTopSp) | sp_collection_extract, bField, m_stripCalibrationIterations);
 
-    if (m_useLongSeeds == 1 && nSp > 3ul) {
+    if (m_parameterEstimationMode == 1 && nSp > 3ul) {
       const auto spacePointIndicesFun2 = [](std::size_t nSp) -> std::array<std::size_t, 3> {
         return {0, nSp / 2ul, nSp - 1};
       };
@@ -270,8 +277,38 @@ Acts::FreeVector estimateTrackParamsFromSeed(
 
   // Function to return which 3 SPs of a seed to use
   ITrackParamsEstimationTool::SpacePointIndicesFun_t TrackParamsEstimationTool::spacePointIndicesFun() const {
-    if (m_useLongSeeds == 2) {
-      return [](std::size_t nSp) -> std::array<std::size_t, 3> {
+    // MinDeltaR
+    if (m_parameterEstimationMode == 3) {
+      const double minDeltaR = m_minDeltaR;
+      return [minDeltaR](const ActsTrk::SpacePointRange& spacePoints, bool useTopSp) -> std::array<std::size_t, 3> {
+        const std::size_t nSp = spacePoints.size();
+        std::array<std::size_t, 3> indices{};
+        std::size_t nSelected = 0;
+        double lastDistance = 0.;
+        for (std::size_t i = 0; i < nSp && nSelected < indices.size(); ++i) {
+          const xAOD::SpacePoint* sp = spacePoints[i];
+          const double distance = Acts::fastHypot(sp->x(), sp->y(), sp->z());
+          if (nSelected > 0 && std::abs(distance - lastDistance) <= minDeltaR) {
+            continue;
+          }
+          indices[nSelected++] = i;
+          lastDistance = distance;
+        }
+        if (nSelected < indices.size()) {
+          if (nSp > 3ul)
+            return {0, nSp / 2ul, nSp - 1};
+          else
+            return {0, 1, 2};
+        }
+        if (useTopSp)
+          return {nSp - indices[2] - 1, nSp - indices[1] - 1, nSp - indices[0] - 1};
+        return indices;
+      };
+    }
+    // FirstMiddleLast
+    if (m_parameterEstimationMode == 2) {
+      return [](const ActsTrk::SpacePointRange& spacePoints, bool) -> std::array<std::size_t, 3> {
+        const std::size_t nSp = spacePoints.size();
         if (nSp > 3ul)
           return {0, nSp / 2ul, nSp - 1};
         else
@@ -279,7 +316,8 @@ Acts::FreeVector estimateTrackParamsFromSeed(
       };
     } else if (m_firstSp > 0ul) {
       std::size_t firstSp = m_firstSp;
-      return [firstSp](std::size_t nSp) -> std::array<std::size_t, 3> {
+      return [firstSp](const ActsTrk::SpacePointRange& spacePoints, bool) -> std::array<std::size_t, 3> {
+        const std::size_t nSp = spacePoints.size();
         if (nSp > 3ul) {
           std::size_t first = std::min(firstSp, nSp - 3ul);
           return {first, first + 1, first + 2};
@@ -287,7 +325,7 @@ Acts::FreeVector estimateTrackParamsFromSeed(
           return {0, 1, 2};
       };
     } else {
-      return [](std::size_t) -> std::array<std::size_t, 3> {
+      return [](const ActsTrk::SpacePointRange&, bool) -> std::array<std::size_t, 3> {
         return {0, 1, 2};
       };
     }

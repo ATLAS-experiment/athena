@@ -66,7 +66,7 @@ if (TARGET traccc::cuda)
 atlas_add_test( CUDAGPUMagFieldExample
    PRE_EXEC_SCRIPT "nvidia-check.sh || exit 2"
    ENVIRONMENT "PATHRESOLVER_DEVAREARESPONSE=WARNING"
-   SCRIPT ActsDeviceMagFieldTest.py Device.Backend=DeviceBackend.CUDA
+   SCRIPT athena.py ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsDeviceMagFieldTest.py Device.Backend=DeviceBackend.CUDA
    POST_EXEC_SCRIPT noerror.sh
    PROPERTIES SKIP_RETURN_CODE 2 )
 endif()
@@ -75,8 +75,7 @@ if (TARGET traccc::hip_utils)
 atlas_add_test( HIPGPUMagFieldExample
    PRE_EXEC_SCRIPT "amd-check.sh || exit 2"
    ENVIRONMENT "PATHRESOLVER_DEVAREARESPONSE=WARNING"
-   SCRIPT ActsDeviceMagFieldTest.py Device.Backend=DeviceBackend.HIPAMD
+   SCRIPT athena.py ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsDeviceMagFieldTest.py Device.Backend=DeviceBackend.HIPAMD
    POST_EXEC_SCRIPT noerror.sh
    PROPERTIES SKIP_RETURN_CODE 2 )
 endif()
-

@@ -60,7 +60,7 @@ if (TARGET traccc::cuda)
 atlas_add_test( ActsDeviceClusterizationTest
    PRE_EXEC_SCRIPT "nvidia-check.sh || exit 2"
    ENVIRONMENT "PATHRESOLVER_DEVAREARESPONSE=WARNING"
-   SCRIPT ActsDeviceClusterizationTest.py Device.Backend=DeviceBackend.CUDA
+   SCRIPT athena.py ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsDeviceClusterizationTest.py Device.Backend=DeviceBackend.CUDA
    POST_EXEC_SCRIPT noerror.sh
    PROPERTIES SKIP_RETURN_CODE 2 )
 endif()

@@ -167,6 +167,7 @@ pool::UserSession::microSessionManager( long technology )
   long majorType = dbType.majorType();
   auto iManager = m_technologies.find( majorType );
   if ( iManager != m_technologies.end() ) {
+    iManager->second->connect( m_transactionType, m_ageLimit );
     return *(iManager->second);
   }
   // Technology does not exist. Create the new session.
@@ -174,12 +175,4 @@ pool::UserSession::microSessionManager( long technology )
   m_technologies.insert( std::make_pair( majorType, mgr ) );
   mgr->connect( m_transactionType, m_ageLimit );
   return *mgr;
-}
-
-pool::ITechnologySpecificAttributes&
-pool::UserSession::technologySpecificAttributes( long technology )
-{
-  pool::MicroSessionManager& mgr = microSessionManager( technology );
-  mgr.connect( m_transactionType, m_ageLimit );
-  return mgr;
 }

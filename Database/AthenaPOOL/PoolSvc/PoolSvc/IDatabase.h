@@ -16,7 +16,6 @@ namespace pool {
   // forward declarations
   class IContainer;
   class FileDescriptor;
-  class ITechnologySpecificAttributes;
 
   struct DatabaseSpecification {
     /** Enumeration type specifying the database name field,
@@ -73,11 +72,20 @@ namespace pool {
     /// Returns a pointer to a container object. The user acquires ownership of that object.
     virtual IContainer* containerHandle( const std::string& name ) = 0;
 
-    // expose FileDescriptor object for the technology specific DB implementation
+    /// Expose FileDescriptor object for the technology specific DB implementation
     virtual FileDescriptor* fileDescriptor() = 0;
 
-    /// Returns the object holding the technology specific attributes
-    virtual ITechnologySpecificAttributes& technologySpecificAttributes() = 0;
+    /// The method returning the attribute data given a name
+    virtual bool attributeOfType( const std::string& attributeName,
+                                  void* data,
+                                  const std::type_info& typeInfo,
+                                  const std::string& option ) = 0;
+
+    /// The method setting the attribute data given a name
+    virtual bool setAttributeOfType( const std::string& attributeName,
+                                     const void* data,
+                                     const std::type_info& typeInfo,
+                                     const std::string& option ) = 0;
   };
 
 }

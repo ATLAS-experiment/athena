@@ -5,8 +5,6 @@
 #ifndef POOLSVC_USERDATABASE_H
 #define POOLSVC_USERDATABASE_H
 
-#include "ITechnologySpecificAttributes.h"
-
 #include "PoolSvc/IDatabase.h"
 #include "PoolSvc/ISession.h"
 #include "StorageSvc/DbPrint.h"
@@ -27,7 +25,6 @@ namespace pool {
    *
    */
   class UserDatabase : virtual public IDatabase,
-                       virtual public ITechnologySpecificAttributes,
                        public APRMessaging
   {
   public:
@@ -83,9 +80,6 @@ namespace pool {
 
     // expose FileDescriptor object for the technology specific DB implementation
     virtual FileDescriptor* fileDescriptor() override final;
-
-    /// Returns the object holding the technology specific attributes
-    virtual ITechnologySpecificAttributes& technologySpecificAttributes() override;
 
   protected:
     virtual

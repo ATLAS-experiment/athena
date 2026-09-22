@@ -6,7 +6,7 @@
 
 #include <fstream>
 #include <utility>
-
+#include "GeoModelInterfaces/IGeoDbTagSvc.h"
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 #include "GeoModelKernel/throwExcept.h"
 #include "MuonAlignmentData/ALinePar.h"
@@ -19,6 +19,7 @@
 #include "MuonReadoutGeometry/RpcReadoutElement.h"
 #include "MuonReadoutGeometry/TgcReadoutElement.h"
 #include "MuonReadoutGeometry/sTgcReadoutElement.h"
+#include "AthenaBaseComps/AthCheckMacros.h"
 
 namespace {
     template <typename read_out> void clearCache(std::vector<std::unique_ptr<read_out>>& array) {
@@ -335,6 +336,14 @@ namespace MuonGM {
     }
     
     StatusCode MuonDetectorManager::updateAlignment(const ALineContainer& alineData) {
+
+        ServiceHandle<IGeoDbTagSvc> geoDbTagSvc{"GeoDbTagSvc", "MuonDetectorManager"};
+        ATH_CHECK(geoDbTagSvc.retrieve());
+      
+        bool dd2=geoDbTagSvc->getSqliteReader()!=nullptr;
+        if (dd2) ATH_MSG_INFO("DD2 Detected in MuonDetectorManager. Cancelling BEE 11 cm offset");
+
+	
         if (alineData.empty()) {
             ATH_MSG_DEBUG("Got empty A-line container (expected for MC), not applying A-lines...");
             return StatusCode::SUCCESS;
@@ -410,10 +419,22 @@ namespace MuonGM {
                 }
             }
             if (job == 0) {
-                ATH_MSG_DEBUG( "Setting delta transform for Station " << ALine);
+	        ATH_MSG_DEBUG( "Setting delta transform for Station " << ALine);
                 using Parameter = ALinePar::Parameter;
+		double cancelBEEOffset{0.0};
+		if (dd2){ 
+		  if (thisStation->getStationName()=="BEE") {
+		    double transZ=ALine.getParameter(Parameter::transZ);
+		    if (transZ>0.0) {
+		      cancelBEEOffset=-110.0;
+		    }
+		    else {
+		      cancelBEEOffset=+110.0;
+		    }
+		  }
+		}
                 thisStation->setDelta_fromAline(ALine.getParameter(Parameter::transS), 
-                                                ALine.getParameter(Parameter::transZ), 
+                                                ALine.getParameter(Parameter::transZ)+cancelBEEOffset, 
                                                 ALine.getParameter(Parameter::transT), 
                                                 ALine.getParameter(Parameter::rotS),
                                                 ALine.getParameter(Parameter::rotZ),
