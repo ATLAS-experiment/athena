@@ -110,7 +110,8 @@ def Pythia8EvtGenBaseCfg(flags, **kwargs):
     ca = EvtGenCfg(
         flags,
         whiteList = whiteList,
-        auxfiles = auxfiles
+        auxfiles = auxfiles,
+        **kwargs
     )
 
     return ca
