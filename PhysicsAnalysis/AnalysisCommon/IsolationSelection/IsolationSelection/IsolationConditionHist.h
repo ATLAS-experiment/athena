@@ -25,7 +25,7 @@ namespace CP {
 
         bool accept(const xAOD::IParticle& x) const override;
         bool accept(const strObj& x) const override;
-        void setInterp(std::shared_ptr<Interp3D> interp) { m_interp = interp; }
+        void setInterp(std::shared_ptr<Interp3D> interp) { m_interp = std::move(interp); }
 
     private:
         float getCutValue(const float pt, const float eta) const;
