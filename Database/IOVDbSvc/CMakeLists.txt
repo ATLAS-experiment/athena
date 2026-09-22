@@ -27,7 +27,7 @@ atlas_add_component( IOVDbSvc
    ${Boost_INCLUDE_DIRS} ${CrestApi_INCLUDE_DIRS} CxxUtils
    LINK_LIBRARIES ${ROOT_LIBRARIES} ${CORAL_LIBRARIES} ${COOL_LIBRARIES}
    ${Boost_LIBRARIES} nlohmann_json::nlohmann_json GaudiKernel
-   AthenaBaseComps AthenaKernel StoreGateLib AthenaPoolUtilities
+   AthenaBaseComps AthenaKernel StoreGateLib AthenaPoolUtilities CoralUtilitiesLib
    CoraCool IOVDbDataModel EventInfoUtils GeoModelInterfaces
    IOVDbMetaDataToolsLib EventInfoMgtLib PoolSvcLib IOVDbSvcLib
    CxxUtils DBLock SGTools CrestApi::CrestApiLib chai::chai chai::container)
@@ -135,6 +135,33 @@ atlas_add_test( IOVDbFolder_test
    TestTools CoraCool AthenaPoolUtilities GeoModelInterfaces
    IOVDbMetaDataToolsLib IOVDbDataModel EventInfoMgtLib CrestApi::CrestApiLib chai::chai chai::container
    Boost::unit_test_framework Boost::timer
+   POST_EXEC_SCRIPT noerror.sh )
+
+atlas_add_test( IOVDbCrestTag_test
+   SOURCES test/IOVDbCrestTag_test.cxx
+   src/IOVDbCrestTag.cxx src/FolderTypes.cxx src/IOVDbStringFunctions.cxx
+   src/IOVDbParser.cxx src/IOVDbConn.cxx src/IovStore.cxx
+   src/FolderAddressResolver.cxx src/ReadFromFileMetaData.cxx
+   src/IOVDbCoolFunctions.cxx src/IOVDbJsonStringFunctions.cxx
+   src/Base64Codec.cxx
+   INCLUDE_DIRS ${CHAI_INCLUDE_DIR} ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
+   ${ROOT_INCLUDE_DIRS}
+   LINK_LIBRARIES ${COOL_LIBRARIES} ${CORAL_LIBRARIES} ${ROOT_LIBRARIES}
+   nlohmann_json::nlohmann_json GaudiKernel AthenaKernel AthenaBaseComps
+   StoreGateLib SGTools CxxUtils TestTools CoraCool AthenaPoolUtilities CoralUtilitiesLib
+   GeoModelInterfaces IOVDbMetaDataToolsLib IOVDbDataModel EventInfoMgtLib
+   chai::chai
+   Boost::unit_test_framework
+   LOG_IGNORE_PATTERN "has no CREST tag and is not read from file metadata|Failed to resolve CHAI tag|No covering IOV for folder|Failed to get tag|No resident payload for folder|No channel 0 for single-channel folder|disagrees with the tag.s IovType|has unsupported IovType"
+   POST_EXEC_SCRIPT noerror.sh )
+
+atlas_add_test( FolderAddressResolver_test
+   SOURCES test/FolderAddressResolver_test.cxx src/FolderAddressResolver.cxx
+   src/IOVDbParser.cxx src/IOVDbStringFunctions.cxx
+   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+   LINK_LIBRARIES ${ROOT_LIBRARIES} GaudiKernel AthenaKernel CxxUtils TestTools
+   Boost::unit_test_framework
+   LOG_IGNORE_PATTERN "Primary type name is empty|Could not get clid for typeName"
    POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( IovStore_test
