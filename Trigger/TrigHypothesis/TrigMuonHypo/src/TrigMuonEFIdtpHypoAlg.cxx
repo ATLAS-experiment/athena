@@ -1,5 +1,5 @@
 /*
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigMuonEFIdtpHypoAlg.h"
@@ -104,7 +104,7 @@ StatusCode TrigMuonEFIdtpHypoAlg::execute( const EventContext& context ) const
 	 }
       }
       if( thePTTrack != nullptr ) {
-	 auto idtrackLink = ElementLink<xAOD::TrackParticleContainer>(*ptTracks,thePTTrack->index());
+	 auto idtrackLink = ElementLink<xAOD::TrackParticleContainer>(*ptTracks,thePTTrack->index(), context);
 	 ATH_CHECK( idtrackLink.isValid() );
 	 thePTTrackLinks.push_back(idtrackLink);
 	 ATH_MSG_VERBOSE("... best selected PT track pt / eta / phi / dr = " << thePTTrack->pt()/Gaudi::Units::GeV << " / " << thePTTrack->eta() << " / " << thePTTrack->phi() << " / " << dRmin << ", fitter=" << thePTTrack->trackFitter());
@@ -125,7 +125,7 @@ StatusCode TrigMuonEFIdtpHypoAlg::execute( const EventContext& context ) const
 	 }
       }
       if( theFTFTrack != nullptr ) {
-	 auto idtrackLink = ElementLink<xAOD::TrackParticleContainer>(*ftfTracks,theFTFTrack->index());
+	 auto idtrackLink = ElementLink<xAOD::TrackParticleContainer>(*ftfTracks,theFTFTrack->index(), context);
 	 ATH_CHECK( idtrackLink.isValid() );
 	 theFTFTrackLinks.push_back(idtrackLink);
 	 ATH_MSG_VERBOSE("... best selected FTF track pt / eta / phi / dr = " << theFTFTrack->pt()/Gaudi::Units::GeV << " / " << theFTFTrack->eta() << " / " << theFTFTrack->phi() << " / " << dRmin << ", fitter=" << theFTFTrack->trackFitter());
