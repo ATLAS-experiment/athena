@@ -122,10 +122,14 @@ namespace Gep {
     // up to 3 output LSBs (0.75 GeV) from floor(sqrt(Ex^2 + Ey^2)). That is a property of
     // the firmware algorithm, not an error to correct -- correcting it would put this out
     // of agreement with the hardware, which is the one thing this class exists to prevent.
-    unsigned int sqrt_mantissa_bit_length{9};
-    unsigned int sqrt_frac_bit_length    {13}; // Q1.13 coefficients
-    unsigned int sqrt_coeff_bit_length   {14};
-    unsigned int sqrt_radicand_bit_length{26};
+    //
+    // The radicand is normalized to 2^exponent * f with f in [1, 2); the ROM tabulates
+    // sqrt(f) and is addressed by {exponent parity, index}, where the INDEX is f's
+    // leading fractional bits -- those sitting just below the radicand's leading one.
+    unsigned int sqrt_lut_index_bit_length{9};  // index bits, i.e. the ROM's address width
+    unsigned int sqrt_frac_bit_length     {13}; // Q1.13 coefficients
+    unsigned int sqrt_coeff_bit_length    {14};
+    unsigned int sqrt_radicand_bit_length {26};
 
     // ---------------- GEP JwoJ -------------------------------------
     // Tower blocks above the hard threshold form the hard term; the towers of every block

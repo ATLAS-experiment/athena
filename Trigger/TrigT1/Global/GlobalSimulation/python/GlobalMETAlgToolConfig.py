@@ -13,10 +13,6 @@ def GlobalMETAlgToolCfg(
         # Algorithm parameters. Defaults match TrigGepPerf's GepTotalMETAlgCfg, which
         # drives the same bitwise core from floating point input.
         #
-        # The jet cone radius and the jet multiplicity are NOT settable here: both are
-        # properties of the upstream WTACone/JET1 algorithm that produced the jets, so
-        # MET takes what it is given rather than declaring its own.
-        #
         # The E_T thresholds are left at 0 deliberately: the Et scale of the TOBs on this
         # path is not the 0.25 GeV LSB the digitization assumes (see the note in
         # GlobalMETAlgTool::initialize), so a non-zero threshold would cut at the wrong
@@ -31,7 +27,7 @@ def GlobalMETAlgToolCfg(
     """Configure GlobalMETAlgTool, the bitwise GEP total MET emulation.
 
     Takes TWO inputs -- the cell towers and the Jet1 (WTA cone) jets built from those
-    same towers -- and emits one MET TOB per event in the Table 4.5 format.
+    same towers -- and emits one MET TOB per event
     """
 
     cfg = ComponentAccumulator()

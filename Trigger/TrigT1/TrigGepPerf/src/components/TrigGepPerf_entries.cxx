@@ -14,9 +14,6 @@ DECLARE_COMPONENT( GepJetAlg )
 #include "../GepMETAlg.h"
 DECLARE_COMPONENT( GepMETAlg )
 
-// Only the algorithm is a component. The bitwise MET core (Gep::TotalMETMaker) is a
-// plain helper class it owns -- the same split as GepJetAlg and Gep::JetTaggerLRJMaker,
-// where the maker is likewise not declared here.
 #include "../TotalMETAlg.h"
 DECLARE_COMPONENT( TotalMETAlg )
 

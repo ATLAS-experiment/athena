@@ -44,30 +44,7 @@ namespace Gep {
   }
 
   // sin at every tower center, scaled by 1 << (sin_bit_length - 1) and rounded to
-  // nearest. Generated from the phi grid rather than written out so it cannot drift from
-  // phi_min / phi_granularity / phi_range. Verified bit-for-bit against the firmware
-  // table in trig.v on all 64 indices.
-  //
-  // Entry k is the sine of the CENTER of tower k, which is why no entry is exactly 0 or
-  // exactly full scale: the tower centers straddle 0 and +-pi/2 rather than landing on
-  // them. pi/2 is exactly half_pi_digitized_in_phi indices, so cos is this same table
-  // read that far along.
-  //
-  // The half-index table supplies the positions an even-sized GEP JwoJ block needs: an
-  // NxN block sits at its geometric center, which for even N falls on the corner where
-  // four towers meet, half a tower off every entry of the tower-center table. Its index
-  // h runs over phi_half_range steps of phi_granularity / 2, so a block spanning tower
-  // indices [a, b] sits at h = a + b -- an integer for every block size, whose parity
-  // says whether the center is on a tower (even) or a corner (odd).
-  //
-  // Every EVEN entry of the half table is bit-identical to sinLUT[h / 2] by construction:
-  // same expression, same scale, same rounding, at the same angle. So an odd-sized block
-  // reads what it would have read from the tower-center table, and 1x1 output is
-  // unchanged from before blocks existed.
-  //
-  // Interpolating the tower-center table instead is wrong at a level that matters:
-  // (sin a + sin b) / 2 = sin(midpoint) * cos(pi/64), i.e. 0.12% low on every even-sized
-  // block -- a systematic scale error on the hard term rather than a rounding one.
+  // nearest integer.
   void TotalMETConfig::buildSinLUTs() {
     const double amplitude = static_cast<double>(1u << (sin_bit_length - 1));
 
@@ -90,10 +67,6 @@ namespace Gep {
   // Comparator ladder thresholds, T[k] = round(tan((k + 0.5) * 2*pi / met_phi_range) *
   // 2^met_phi_tan_scale_bit_length): the tangent of the boundary between bin k and bin
   // k+1 within the first octant.
-  //
-  // Generated rather than transcribed. At the 6-bit field width this reproduces the
-  // firmware's {50, 152, 256, 366, 484, 614, 759, 928} exactly; at any other width it
-  // follows the width instead of silently being the wrong table for the field.
   void TotalMETConfig::buildMetPhiThresholds() {
     const double scale = static_cast<double>(1u << met_phi_tan_scale_bit_length);
     metPhiTanThresholds.clear();
@@ -105,26 +78,24 @@ namespace Gep {
     }
   }
 
-  // Normalized square-root ROM, Q1.13 coefficients indexed by
-  // {exponent parity, 9-bit mantissa}. Folding the parity into the address is what
-  // removes the runtime multiply by sqrt(2) for odd exponents.
-  //
+  // Normalized square-root ROM, Q1.13 coefficients.
   // Generated from the closed form
-  //     coeff[addr] = round(sqrt((1 + (m + 0.5) / 2^mantissaBits) * 2^parity) * 2^fracBits)
+  //     coeff[addr] = round(sqrt((1 + (i + 0.5) / 2^indexBits) * 2^parity) * 2^fracBits)
   // which reproduces all 1024 entries of sqrt_rom in MET_LUT_SQRT.v exactly (verified
-  // entry by entry). The + 0.5 is the MIDPOINT of the mantissa bin the address stands for.
+  // entry by entry). The + 0.5 puts the entry at the MIDPOINT of the range of f the index
+  // stands for, rather than at its bottom edge.
   void TotalMETConfig::buildMetSqrtLUT() {
-    const unsigned int mantissaCount = 1u << sqrt_mantissa_bit_length;
-    const unsigned int romSize       = 2u * mantissaCount;
+    const unsigned int lutIndexCount = 1u << sqrt_lut_index_bit_length;
+    const unsigned int romSize       = 2u * lutIndexCount;
     const double       fracScale     = static_cast<double>(1u << sqrt_frac_bit_length);
     const unsigned int coeffMax      = maskN(sqrt_coeff_bit_length);
 
     metSqrtLUT.clear();
     metSqrtLUT.reserve(romSize);
     for (unsigned int addr = 0; addr < romSize; ++addr) {
-      const unsigned int parity   = addr >> sqrt_mantissa_bit_length;
-      const unsigned int mantissa = addr & (mantissaCount - 1);
-      const double normalized = (1.0 + (mantissa + 0.5) / static_cast<double>(mantissaCount))
+      const unsigned int parity   = addr >> sqrt_lut_index_bit_length;
+      const unsigned int lutIndex = addr & (lutIndexCount - 1);
+      const double normalized = (1.0 + (lutIndex + 0.5) / static_cast<double>(lutIndexCount))
                               * (parity ? 2.0 : 1.0);
       unsigned int coeff =
           static_cast<unsigned int>(std::lround(std::sqrt(normalized) * fracScale));
@@ -134,7 +105,7 @@ namespace Gep {
   }
 
   // ------------------------------------------------------------------
-  // MET_PHI_COMPARATOR.v
+  // Port/Emulation of MET_PHI_COMPARATOR.v
   // ------------------------------------------------------------------
   unsigned int TotalMETConfig::metPhiIndex(int ex, int ey) const {
     const bool signX = (ex < 0);
@@ -173,7 +144,7 @@ namespace Gep {
   }
 
   // ------------------------------------------------------------------
-  // MET_LUT_SQRT.v
+  // Port/emulation of MET_LUT_SQRT.v
   // ------------------------------------------------------------------
   unsigned int TotalMETConfig::metLutSqrt(unsigned long long radicand) const {
     if (radicand == 0ull) return 0u;
@@ -182,19 +153,20 @@ namespace Gep {
     unsigned int exponent = 0;
     while ((radicand >> (exponent + 1)) != 0ull) ++exponent;
 
-    // The mantissa bits immediately below the leading one, zero-padded on the right when
-    // the radicand is too small to supply them. Exponent 0 yields 0, matching the RTL's
-    // unlisted case falling through to its default.
-    const unsigned int mantissaCount = 1u << sqrt_mantissa_bit_length;
-    unsigned int mantissa;
-    if (exponent >= sqrt_mantissa_bit_length)
-      mantissa = static_cast<unsigned int>((radicand >> (exponent - sqrt_mantissa_bit_length))
-                                           & (mantissaCount - 1));
+    // The LUT index is the bits immediately below the leading one -- that is, the leading
+    // fractional bits of the radicand once it has been normalized into [1, 2). They are
+    // zero-padded on the right when the radicand is too small to supply them all.
+    // Exponent 0 yields 0, matching the RTL's unlisted case falling through to its default.
+    const unsigned int lutIndexCount = 1u << sqrt_lut_index_bit_length;
+    unsigned int lutIndex;
+    if (exponent >= sqrt_lut_index_bit_length)
+      lutIndex = static_cast<unsigned int>((radicand >> (exponent - sqrt_lut_index_bit_length))
+                                           & (lutIndexCount - 1));
     else
-      mantissa = static_cast<unsigned int>((radicand << (sqrt_mantissa_bit_length - exponent))
-                                           & (mantissaCount - 1));
+      lutIndex = static_cast<unsigned int>((radicand << (sqrt_lut_index_bit_length - exponent))
+                                           & (lutIndexCount - 1));
 
-    const unsigned int romAddr    = ((exponent & 1u) << sqrt_mantissa_bit_length) | mantissa;
+    const unsigned int romAddr    = ((exponent & 1u) << sqrt_lut_index_bit_length) | lutIndex;
     const unsigned int scaleShift = exponent >> 1;
 
     // The RTL's scaled_coeff is sqrt_radicand_bit_length wide, so the shift TRUNCATES
@@ -208,7 +180,7 @@ namespace Gep {
   }
 
   // ------------------------------------------------------------------
-  // MET_SUM_SQUARE.v
+  // Port/emulation MET_SUM_SQUARE.v
   // ------------------------------------------------------------------
   unsigned int TotalMETConfig::metIntegerRoot(int ex, int ey, bool& overflow) const {
     const unsigned long long absX =
@@ -241,11 +213,7 @@ namespace Gep {
 
   // Accumulate one already-digitized collection into a MET term.
   //
-  // The E_T threshold is compared in DIGITIZED units, not in GeV. The standalone event
-  // loop cuts on the raw double before digitizing; the firmware only ever sees digitized
-  // values, so it cannot. The two can therefore disagree by one LSB on an object sitting
-  // within half an LSB of the threshold, and this class deliberately follows the
-  // firmware. Anything reconciling the two has to account for it at the boundary.
+  // The E_T threshold is compared in DIGITIZED units, not in GeV. 
   TotalMETMaker::DigiMETTerm
   TotalMETMaker::accumulate(const std::vector<DigiObj>& objects,
                             double etThresholdGeV,
@@ -296,15 +264,9 @@ namespace Gep {
     // coefficients on the vector terms have no bearing on.
     out.sumEt = a.sumEt + b.sumEt;
 
-    // TOB bit [62] is an OR, which is what MET_Engine.v specifies for it: if either
-    // collection held an object already clipped at the top of its E_T field, every sum
-    // built from it is a lower bound, so the combination has to say so even when the
-    // other collection was clean.
+    // TOB bit [62] is an OR, specifying if either set of input TOBs has a saturated TOB
     out.inputSaturated = a.inputSaturated || b.inputSaturated;
 
-    // Recomputed, never inherited: |a + b| is not a function of |a| and |b|, two terms
-    // that each fit can sum to one that does not, and two that each overflow can cancel
-    // into one that fits.
     out.met = m_cfg.metIntegerRoot(out.metX, out.metY, out.metOverflow);
     out.phi = m_cfg.metPhiIndex(out.metX, out.metY);
     return out;
@@ -315,18 +277,7 @@ namespace Gep {
   // ------------------------------------------------------------------
   // The same towers and the same tower E_T threshold as the tower term, but split into a
   // hard and a soft term at a per-block threshold instead of being summed as one. The
-  // hard term stands in for the jet term -- it is the high-E_T part of the event, reached
-  // without ever building a jet, which is what "jets without jets" means.
-  //
-  // Blocks select, towers carry the remainder: the same division of labour as gFEX, where
-  // gBlocks pick the hard term and the surviving gTowers make up the soft one. That keeps
-  // the diffuse soft term at full tower resolution while the hard term is judged on local
-  // energy density rather than on single towers.
-  //
-  // Deliberately its own pass rather than a branch inside the tower loop, because that
-  // loop applies jet/tower overlap removal: on an OR configuration it would silently
-  // delete exactly the high-E_T towers this term is built from, and this algorithm has no
-  // jets to remove against in the first place.
+  // hard term stands in for the jet term -- it is the high-E_T part of the event
   void TotalMETMaker::computeJwoJ(const std::vector<DigiObj>& towers,
                                   DigiMETTerm& hard, DigiMETTerm& soft) const {
     hard = DigiMETTerm();
@@ -384,6 +335,8 @@ namespace Gep {
     // One multiply per block rather than one per tower is the point of blocking, and it
     // is also a real numerical difference from summing per-tower products: the rounding
     // of the E_T x sin/cos product now happens once, on the block sum.
+    // TODO study whether to - after finding hard/soft term split - use tower OR block centers
+    // for hard term MET computation
     const unsigned int hardThreshold = m_cfg.digitizeEt(m_cfg.jwojHardEtThresholdGeV);
     int hardETxSum = 0, hardETySum = 0;
     for (unsigned int iBlock = 0; iBlock < touchedBlocks.size(); ++iBlock) {
@@ -407,9 +360,7 @@ namespace Gep {
     }
 
     // ---- pass 3: soft term, the towers of every block that did not pass ----------
-    // Per tower and at the tower's own center, not at its block's: the soft term is
-    // diffuse and there is nothing to gain by coarsening it, and this is what gFEX does
-    // with the gTowers its gBlocks did not claim.
+    // Per tower and at the tower's own center
     int softETxSum = 0, softETySum = 0;
     for (const JwoJTower& tower : jwojTowers) {
       if (blockIsHard[tower.blockIdx]) continue;
@@ -455,9 +406,7 @@ namespace Gep {
     // the enables govern what is published, not what is calculated.
     result.jet = accumulate(jetsUsed, m_cfg.jetEtThresholdGeV, {});
 
-    // Jet/tower overlap removal. Built against the jets that SURVIVED the jet E_T
-    // threshold, since a jet that did not contribute to jet MET has no business deleting
-    // a tower from tower MET.
+    // Jet/tower overlap removal. Built against the jets that SURVIVED the jet E_T threshold
     std::vector<bool> towerSkip;
     if (m_cfg.doJetTowerOverlapRemoval) {
       const unsigned int jetEtThreshold = m_cfg.digitizeEt(m_cfg.jetEtThresholdGeV);
@@ -480,7 +429,7 @@ namespace Gep {
 
     if (m_cfg.doGEPJwoJMET) {
       computeJwoJ(towersUsed, result.jwojHard, result.jwojSoft);
-      // Hard and soft are published UNCOEFFICIENTED so the coefficients can be re-derived
+      // Hard and soft are outputted UNCOEFFICIENTED so the coefficients can be re-derived
       // downstream; only the combination applies them.
       result.jwoj = combine(result.jwojHard, m_cfg.jwojHardCoeff,
                             result.jwojSoft, m_cfg.jwojSoftCoeff);

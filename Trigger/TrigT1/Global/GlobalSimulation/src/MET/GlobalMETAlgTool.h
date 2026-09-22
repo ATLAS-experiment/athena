@@ -6,8 +6,7 @@
 #define GLOBALSIM_GLOBALMETALGTOOL_H
 
 /*
-  This algorithm simulates the GEP MET algorithm (Total MET) for the Global Trigger.
-  It uses the same headers from TrigGepPerf.
+  This algorithm simulates the GEP MET algorithm (Total MET), using the same headers from TrigGepPerf.
 
   Total MET is the scale-factor-weighted combination of a tower term, built from the
   cell towers produced by GlobalCellTowerAlgTool, and a jet term, built from the Jet1
@@ -20,7 +19,7 @@
   Unlike every other GlobalSim AlgTool so far, this one takes TWO inputs: it needs the
   towers and the jets built from those same towers.
 
-  Only total MET is emitted, one TOB per event, matching the single word MET_Engine.v
+  Only total MET is emitted, one TOB per event, matching the single word MET_Engine.v in gep-fw
   produces. The jet and tower terms are still computed internally, since total MET is
   their weighted sum; they are simply not written out.
 */
@@ -91,11 +90,6 @@ namespace GlobalSim {
     // Algorithm parameters.
     // Defaults are those of TrigGepPerf's GepTotalMETAlgCfg, which is the same
     // algorithm driven from floating point input.
-    //
-    // The jet cone radius and the jet multiplicity are deliberately NOT properties here.
-    // Both belong to the upstream WTACone/JET1 algorithm that produced the jets -- the
-    // radius is its Jet_dR and the multiplicity is how many jets it emits -- so MET takes
-    // what it is given rather than declaring its own and risking disagreement.
     Gaudi::Property<unsigned int> m_maxTowersConsidered{this, "MaxTowersConsidered", 4096,
         "Towers considered per event."};
     Gaudi::Property<float> m_jetEtThresholdGeV{this, "JetEtThresholdGeV", 0.0,

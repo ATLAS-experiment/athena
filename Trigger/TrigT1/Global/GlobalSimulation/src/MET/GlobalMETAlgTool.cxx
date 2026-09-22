@@ -38,11 +38,6 @@ namespace GlobalSim {
     cfg.towerScaleFactor         = m_towerScaleFactor;
     cfg.jetScaleFactor           = m_jetScaleFactor;
 
-    // maxJetsConsidered and jetConeR are left at the core's defaults on purpose. Both
-    // describe the UPSTREAM jet algorithm -- JET1 emits a fixed 10 jets, and the cone
-    // radius is its Jet_dR -- so they are not MET's to choose. Overriding either here
-    // would let MET disagree with the jets it was handed.
-
     // Only total MET is emitted here. The jet and tower terms are computed either way,
     // since total MET is their weighted sum.
     cfg.doTotalMET   = true;
@@ -69,17 +64,12 @@ namespace GlobalSim {
     // NOTE, carried over from GlobalJet_TagAlgTool: nothing on this path actually
     // defines an Et LSB. CommonTOB stores raw bits, and GlobalCellTowerAlgTool packs
     // cell energies in MeV without scaling, so the Et counts arriving here are not on
-    // the 0.25 GeV scale assumed below. That matters MORE for MET than it does for the
-    // jet tagger: the tagger only uses Et to order and sum objects, whereas the E_T
-    // THRESHOLDS below are compared against digitized counts derived from this range.
-    // With both thresholds at 0.0 that comparison is a no-op and the scale is harmless,
-    // but a non-zero threshold here would cut at the wrong energy until the input scale
-    // is settled.
+    // the 0.25 GeV scale assumed below. 
     cfg.et_min = 0.0;
     cfg.et_max = 2048.0;
 
     // Output azimuth, sized by its own field width rather than by the tower grid: it is
-    // arctan(Ey, Ex), so nothing physical caps its resolution. 6 bits is the Table 4.5
+    // arctan(Ey, Ex), so nothing physical caps its resolution. 
     // phi_miss width.
     cfg.met_phi_bit_length           = 6;
     cfg.met_phi_tan_scale_bit_length = 10;
@@ -158,8 +148,6 @@ namespace GlobalSim {
     const auto result = m_maker.makeMETDigitized(towers, jets);
     const auto& total = result.total;
 
-    // Pack into the Table 4.5 fields. The core keeps full-width accumulators, so the TOB
-    // encoders are what saturate the fields and raise the flags.
     bool exOverflow = false, eyOverflow = false, sumEtOverflow = false;
     const unsigned int exBits    = m_maker.m_cfg.metTobSignedEt(total.metX, exOverflow);
     const unsigned int eyBits    = m_maker.m_cfg.metTobSignedEt(total.metY, eyOverflow);

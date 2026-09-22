@@ -36,12 +36,7 @@ namespace GlobalSim {
           in MET_LUT_SQRT.v, which deviates from the exact integer root by up to 3 counts
           (0.75 GeV).
         * phi_miss is NOT atan2(ey, ex) rounded. It comes from the divider-free comparator
-          ladder in MET_PHI_COMPARATOR.v, good to about half a bin.
-
-      Its index convention is its own, and is NOT the tower phi grid: bin 0 = +x,
-      16 = +y, 32 = -x, 48 = -y, measured over [0, 2*pi). The tower grid instead puts
-      index 0 at phi_min = -pi + pi/64. The two share a bin count at this field width and
-      nothing else, so they must never be mixed.
+          ladder in MET_PHI_COMPARATOR.v, accurate to about half a bin.
 
       The three magnitude fields SATURATE rather than wrap, each raising its flag, which
       is why the flags are part of the word rather than bookkeeping.
@@ -85,8 +80,6 @@ namespace GlobalSim {
         }
 
     public:
-        // syntax is:
-        // BitField<Lo,Hi, AuxType [, ValueType=AuxType]> name{"name","auxvar", "description" [, encoder, decoder]}
         static inline const BitField<0, 12, float> et_miss{
             "et_miss", "et_miss", "Missing transverse energy magnitude",
             et_encoder, et_decoder};

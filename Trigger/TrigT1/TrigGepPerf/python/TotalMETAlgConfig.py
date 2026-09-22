@@ -37,18 +37,14 @@ def GepTotalMETAlgCfg(
         doTowerMET=False,
         doGEPJwoJMET=False,
 
-        # ---- physics thresholds / flow -------------------------------------
-        # The jet cone radius and the jet multiplicity are NOT settable here: both are
-        # properties of the upstream WTACone algorithm that produced gepJetsKey -- the
-        # radius is its WTAJet_dR and the multiplicity is how many jets it emits -- so
-        # MET takes what it is given rather than declaring its own.
+        # ---- physics thresholds -------------------------------------
         jetEtThresholdGeV=0.0,
         towerEtThresholdGeV=0.0,
         doJetTowerOverlapRemoval=False,
         towerScaleFactor=1.0,
         jetScaleFactor=1.0,
 
-        # ---- multiplicities -------------------------------------------------
+        # ---- maximum multiplicities -------------------------------------------------
         maxTowersConsidered=4096,
 
         # ---- digitization: field widths -------------------------------------
@@ -71,15 +67,12 @@ def GepTotalMETAlgCfg(
         inputEtToGeV=1.0e-3,
 
         # ---- MET output azimuth ---------------------------------------------
-        # Unlike the tower grid, the OUTPUT azimuth is sized by its field width: it comes
-        # from arctan(Ey, Ex), so nothing physical caps its resolution and widening the
-        # field resolves more finely. metPhiTanScaleBitLength must grow with it -- roughly
-        # metPhiBitLength + 4 to stay within 0.501 bins of ideal atan2 binning.
+        # Unlike the tower grid, the OUTPUT azimuth is sized by its field width
         metPhiBitLength=6,
         metPhiTanScaleBitLength=10,
 
         # ---- MET magnitude LUT ----------------------------------------------
-        sqrtMantissaBitLength=9,
+        sqrtLutIndexBitLength=9,
         sqrtFracBitLength=13,
         sqrtCoeffBitLength=14,
         sqrtRadicandBitLength=26,
@@ -179,7 +172,7 @@ def GepTotalMETAlgCfg(
         METPhiBitLength=metPhiBitLength,
         METPhiTanScaleBitLength=metPhiTanScaleBitLength,
 
-        SqrtMantissaBitLength=sqrtMantissaBitLength,
+        SqrtLutIndexBitLength=sqrtLutIndexBitLength,
         SqrtFracBitLength=sqrtFracBitLength,
         SqrtCoeffBitLength=sqrtCoeffBitLength,
         SqrtRadicandBitLength=sqrtRadicandBitLength,

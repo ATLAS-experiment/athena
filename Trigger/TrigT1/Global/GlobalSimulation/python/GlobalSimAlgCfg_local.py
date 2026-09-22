@@ -77,9 +77,7 @@ read_handles = {
     'Egamma1BDTAlgTool': {'in0': 'LArNeighborhoodTOBContainerKey'},
     'GlobalCellTowerAlgTool': {'in0': 'GlobalLArCellsKey'},
     'GlobalJet1AlgTool': {'in0': 'GlobalCellTowersKey'},
-    # MET is the first tool here with TWO inputs: it needs the towers and the jets built
-    # from those same towers.
-    'GlobalMETAlgTool': {'in0': 'GlobalCellTowersKey',
+    'GlobalMETAlgTool': {'in0': 'GlobalCellTowersKey', #NOTE MET has two inputs (unlike existing algorithms)
                          'in1': 'GlobalJet1JetsKey'},
     'eEmMultAlgTool': {'in0': 'eEmTOBs'},
     'eEmEg1BDTMultAlgTool': {'in0': 'eEmEg1BDTTOBContainerKey'},

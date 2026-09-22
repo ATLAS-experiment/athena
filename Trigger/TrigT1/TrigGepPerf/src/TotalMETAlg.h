@@ -9,7 +9,7 @@
   TotalMETAlg:
   -----------
   Athena wiring for the bitwise GEP MET core (Gep::TotalMETMaker). A port of the
-  standalone metEmulation.cc, in the same shape the JetTaggerLRJ port takes:
+  standalone metEmulation.cc, in the same format the JetTaggerLRJ/WTACone uses:
 
     TrigGepPerf/TotalMETMaker.h  the bitwise core, digitized in and digitized out
     TotalMETAlg                  this class -- the floating point adapter and the
@@ -18,11 +18,11 @@
   The float adapter lives here rather than in a separate maker (as
   JetTaggerLRJJetMaker is) because this algorithm is the core's only floating point
   client, and MET output is scalars rather than an xAOD object needing conversion back.
-  Clients whose input is already digitized -- GlobalSim, or a memory-print testbench --
+  Clients whose input is already digitized, e.g.  GlobalSim,
   should use Gep::TotalMETMaker directly: going through here would re-quantize values
   already on the grid, which can cost an LSB.
 
-  Four MET flavors are computed in one pass; each is published as its own
+  Four MET flavors are computed in one pass; each is outputted as its own
   xAOD::EnergySumRoI, and each can be enabled independently. Only total MET is on by
   default. Total MET always computes the jet and tower terms internally regardless of
   their flags, since it is their weighted sum -- the flags govern what is recorded.
@@ -56,7 +56,7 @@ private:
   // Which pileup-suppression variant is used is decided purely by WHICH containers these
   // point at -- there is no SK/EtaSK/NoSK switch, unlike the standalone emulation where
   // that choice selects between trees in one file. The default configuration points both
-  // at the EtaSK collections, the same ones the jet tagger runs on.
+  // at the EtaSK collections
   SG::ReadHandleKey<xAOD::CaloClusterContainer> m_caloClustersKey {
     this, "caloClustersKey", "", "GEP cell towers used for the tower MET term"};
 
@@ -65,10 +65,11 @@ private:
 
   // ---------------- outputs ---------------------------------------
   // One EnergySumRoI per flavor. energyX / energyY carry METx / METy and energyT carries
-  // SumET; the magnitude and azimuth ride as the "met" and "metPhi" aux decorations,
+  // SumET; the magnitude and azimuth are the "met" and "metPhi" aux decorations,
   // because EnergySumRoI has no field for them and they are NOT recoverable from the
   // components: the magnitude is a LUT root and the azimuth a comparator ladder, neither
   // of which is the sqrt/atan2 of what is stored.
+  // Note EnergySumRoI was used by previous GEPMET implementations, so is re-used here. 
   SG::WriteHandleKey<xAOD::EnergySumRoI> m_outputTotalMETKey {
     this, "outputTotalMETKey", "", "key to write the total MET object"};
   SG::WriteHandleKey<xAOD::EnergySumRoI> m_outputJetMETKey {
@@ -103,12 +104,6 @@ private:
       "Scalar weight on tower MET in the total. Placeholder for an eta-binned calibration."};
   Gaudi::Property<float> m_jetScaleFactor{this, "JetScaleFactor", 1.0,
       "Scalar weight on jet MET in the total. Placeholder for an eta-binned calibration."};
-
-  // The jet cone radius and the jet multiplicity are deliberately NOT properties. Both
-  // belong to the upstream WTACone jet algorithm that produced gepJetsKey -- the radius
-  // is its WTAJet_dR and the multiplicity is how many jets it emits -- so MET takes what
-  // it is given rather than declaring its own and risking disagreement. They sit on
-  // Gep::TotalMETConfig at the values that algorithm uses.
 
   // ---------------- multiplicities --------------------------------
   Gaudi::Property<unsigned int> m_maxTowersConsidered{this, "MaxTowersConsidered", 4096,
@@ -146,8 +141,9 @@ private:
       "roughly METPhiBitLength + 4 to stay within 0.501 bins of ideal atan2 binning."};
 
   // ---------------- MET magnitude LUT -----------------------------
-  Gaudi::Property<unsigned int> m_sqrtMantissaBitLength{this, "SqrtMantissaBitLength", 9,
-      "Normalized square-root LUT mantissa width."};
+  Gaudi::Property<unsigned int> m_sqrtLutIndexBitLength{this, "SqrtLutIndexBitLength", 9,
+      "Normalized square-root LUT index width: the bits taken from just below the "
+      "radicand's leading one, which address the ROM."};
   Gaudi::Property<unsigned int> m_sqrtFracBitLength{this, "SqrtFracBitLength", 13,
       "Normalized square-root LUT coefficient fractional bits (Q1.13)."};
   Gaudi::Property<unsigned int> m_sqrtCoeffBitLength{this, "SqrtCoeffBitLength", 14,
@@ -173,17 +169,14 @@ private:
   StatusCode configureMETMaker();
 
   // ---- float front end ----
-  // Digitize the input collections onto the configured grid. Eta and phi are digitized
-  // from the FLOAT values, not the doubles: the emulation reads floats from the ntuple,
-  // and a double can differ from that float by enough to land on the other side of a
-  // round-half tie at a tower-grid eta, which is worth exactly one LSB.
+  // Digitize the input collections onto the configured grid. Eta and phi are digitized from floats
   std::vector<Gep::TotalMETMaker::DigiObj>
   digitizeTowers(const xAOD::CaloClusterContainer& clusters) const;
 
   std::vector<Gep::TotalMETMaker::DigiObj>
   digitizeJets(const xAOD::JetContainer& jets) const;
 
-  // Pack one term into an EnergySumRoI and record it. The components and SumET go through
+  // Pack a single term into an EnergySumRoI and record it. The components and SumET go through
   // the TOB encoders first, so what is written is what the firmware would emit
   // (saturated, not wrapped) rather than the full-width accumulator.
   StatusCode recordMET(const SG::WriteHandleKey<xAOD::EnergySumRoI>& key,

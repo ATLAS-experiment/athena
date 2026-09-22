@@ -20,9 +20,8 @@ StatusCode TotalMETAlg::initialize() {
   ATH_CHECK(m_caloClustersKey.initialize());
   ATH_CHECK(m_gepJetsKey.initialize());
 
-  // Only the enabled flavors get a handle. Initializing a WriteHandleKey whose flavor is
-  // off would declare an output nothing ever fills, which the scheduler treats as a
-  // missing data dependency for anything downstream that asks for it.
+  // Only the enabled types get a handle. Initializing a WriteHandleKey whose type is
+  // disabled would declare an output nothing ever fills
   ATH_CHECK(m_outputTotalMETKey.initialize(m_doTotalMET));
   ATH_CHECK(m_outputJetMETKey.initialize(m_doJetMET));
   ATH_CHECK(m_outputTowerMETKey.initialize(m_doTowerMET));
@@ -30,7 +29,7 @@ StatusCode TotalMETAlg::initialize() {
   ATH_CHECK(m_outputJwoJHardMETKey.initialize(m_doGEPJwoJMET));
   ATH_CHECK(m_outputJwoJSoftMETKey.initialize(m_doGEPJwoJMET));
 
-  // An enabled flavor with no key is a configuration error rather than something to work
+  // An enabled type with no key is a configuration error rather than something to work
   // around: the algorithm would run the arithmetic every event and drop it on the floor.
   auto requireKey = [this](bool enabled, const SG::WriteHandleKey<xAOD::EnergySumRoI>& key,
                            const char* flag, const char* keyName) {
@@ -101,7 +100,7 @@ StatusCode TotalMETAlg::configureMETMaker() {
   cfg.met_phi_tan_scale_bit_length = m_metPhiTanScaleBitLength;
 
   // MET magnitude LUT.
-  cfg.sqrt_mantissa_bit_length = m_sqrtMantissaBitLength;
+  cfg.sqrt_lut_index_bit_length = m_sqrtLutIndexBitLength;
   cfg.sqrt_frac_bit_length     = m_sqrtFracBitLength;
   cfg.sqrt_coeff_bit_length    = m_sqrtCoeffBitLength;
   cfg.sqrt_radicand_bit_length = m_sqrtRadicandBitLength;
@@ -134,9 +133,7 @@ StatusCode TotalMETAlg::configureMETMaker() {
     return StatusCode::FAILURE;
   }
 
-  // Rejected rather than silently reset to 1: a block size that does not tile the grid
-  // would leave a ragged block at the phi seam judged against the same threshold as its
-  // full neighbors, i.e. a phi slice pushed systematically into the soft term.
+  // Only accept possible JwoJ block sizes (i.e. that divide the 98x64 tower grid nicely)
   if (cfg.doGEPJwoJMET && !cfg.isSupportedJwoJBlockSize(cfg.jwojBlockSize)) {
     ATH_MSG_ERROR("JwoJBlockSize " << cfg.jwojBlockSize << " does not tile the tower grid ("
                   << cfg.phi_range << " phi x " << cfg.eta_range << " eta).");
@@ -147,7 +144,7 @@ StatusCode TotalMETAlg::configureMETMaker() {
   cfg.computeDerived();
   m_metMaker.m_cfg = cfg;
 
-  ATH_MSG_INFO("Configured TotalMET: E_T LSB " << cfg.et_granularity << " GeV"
+  ATH_MSG_INFO("Configured GEP TotalMET: E_T LSB " << cfg.et_granularity << " GeV"
                << ", grid " << cfg.eta_range << " eta x " << cfg.phi_range << " phi"
                << ", MET phi " << cfg.met_phi_range << " bins (" << cfg.met_phi_bit_length << " bits)"
                << ", jetEt > " << cfg.jetEtThresholdGeV << " GeV"
@@ -169,9 +166,8 @@ StatusCode TotalMETAlg::configureMETMaker() {
 // ------------------------------------------------------------------
 // Float front end
 // ------------------------------------------------------------------
-// Both collections are digitized the same way: E_T scaled from MeV to GeV and put on the
-// E_T grid, eta and phi put on the tower grid. The cast to float before digitizing is
-// deliberate -- see the note on the declaration.
+// Both collections are digitized the same way: E_T scaled from MeV to GeV and digitzed
+// Eta and phi put on the tower grid
 std::vector<Gep::TotalMETMaker::DigiObj>
 TotalMETAlg::digitizeTowers(const xAOD::CaloClusterContainer& clusters) const {
   const Gep::TotalMETConfig& cfg = m_metMaker.m_cfg;
@@ -179,10 +175,8 @@ TotalMETAlg::digitizeTowers(const xAOD::CaloClusterContainer& clusters) const {
   std::vector<Gep::TotalMETMaker::DigiObj> out;
   out.reserve(std::min<size_t>(clusters.size(), cfg.maxTowersConsidered));
 
-  // Towers are taken in container order, matching the standalone emulation, which reads
-  // them in ntuple order. No E_T sort: the cap is far above the tower count, so the order
+  // Towers are taken in container order - no E_T sort: the cap is far above the tower count, so the order
   // does not select which towers are kept, and sorting would only reorder the accumulator
-  // -- which is not free, since integer division truncates at every term.
   for (const auto* cluster : clusters) {
     if (out.size() >= cfg.maxTowersConsidered) break;
     Gep::TotalMETMaker::DigiObj obj;
@@ -199,19 +193,13 @@ std::vector<Gep::TotalMETMaker::DigiObj>
 TotalMETAlg::digitizeJets(const xAOD::JetContainer& jets) const {
   const Gep::TotalMETConfig& cfg = m_metMaker.m_cfg;
 
-  // Sorted E_T-descending before the cap bites, so MaxJetsConsidered keeps the LEADING
-  // jets. The standalone reads an already-sorted jet tree, so this is what reproduces it;
-  // without the sort the cap would keep whichever jets the container happened to list
-  // first.
-  std::vector<const xAOD::Jet*> sorted;
-  sorted.reserve(jets.size());
-  for (const auto* jet : jets) sorted.push_back(jet);
-  std::sort(sorted.begin(), sorted.end(),
-            [](const xAOD::Jet* a, const xAOD::Jet* b) { return a->pt() > b->pt(); });
-
+  // Taken in container order. The upstream WTACone algorithm already emits its jets
+  // E_T-descending, so the multiplicity cap below keeps the leading ones without this
+  // having to sort them -- and re-sorting would only risk reordering jets the upstream
+  // algorithm considered equal.
   std::vector<Gep::TotalMETMaker::DigiObj> out;
-  out.reserve(std::min<size_t>(sorted.size(), cfg.maxJetsConsidered));
-  for (const auto* jet : sorted) {
+  out.reserve(std::min<size_t>(jets.size(), cfg.maxJetsConsidered));
+  for (const auto* jet : jets) {
     if (out.size() >= cfg.maxJetsConsidered) break;
     Gep::TotalMETMaker::DigiObj obj;
     obj.et  = cfg.digitizeEt(jet->pt() * cfg.inputEtToGeV);
