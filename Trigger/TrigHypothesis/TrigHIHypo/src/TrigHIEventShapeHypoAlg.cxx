@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigHIEventShapeHypoAlg.h"
@@ -67,7 +67,7 @@ StatusCode TrigHIEventShapeHypoAlg::decide(const xAOD::HIEventShapeContainer* ev
 
   // Create output Decision object, link it to prevDecision and its "feature"
   auto newDecision = TrigCompositeUtils::newDecisionIn(newDecisions, previousDecision, TrigCompositeUtils::hypoAlgNodeName(), context);
-  ElementLink<xAOD::HIEventShapeContainer> esElementLink = ElementLink<xAOD::HIEventShapeContainer>(*eventShapeContainer, /*index*/ 0);
+  ElementLink<xAOD::HIEventShapeContainer> esElementLink = ElementLink<xAOD::HIEventShapeContainer>(*eventShapeContainer, /*index*/ 0, context);
   newDecision->setObjectLink<xAOD::HIEventShapeContainer>(TrigCompositeUtils::featureString(), esElementLink);
 
   // Get set of active chains
