@@ -20,7 +20,6 @@
 #include "FlavorTagDiscriminants/TruthPVzRelativeToBeamspotAlg.h"
 #include "FlavorTagDiscriminants/JetLeptonDecayLabelAlg.h"
 #include "FlavorTagDiscriminants/CaloChargedFlowDecoratorAlg.h"
-#include "FlavorTagDiscriminants/TruthTauDecoratorAlg.h"
 
 DECLARE_COMPONENT(FlavorTagDiscriminants::VRJetOverlapDecoratorTool)
 DECLARE_COMPONENT(FlavorTagDiscriminants::DL2Tool)
@@ -43,7 +42,6 @@ DECLARE_COMPONENT(FlavorTagDiscriminants::HitsSelectorAlg)
 DECLARE_COMPONENT(FlavorTagDiscriminants::TruthPVzRelativeToBeamspotAlg)
 DECLARE_COMPONENT(FlavorTagDiscriminants::JetLeptonDecayLabelAlg)
 DECLARE_COMPONENT(FlavorTagDiscriminants::CaloChargedFlowDecoratorAlg)
-DECLARE_COMPONENT(FlavorTagDiscriminants::TruthTauDecoratorAlg)
 
 #ifndef XAOD_ANALYSIS
 #include "FlavorTagDiscriminants/HitBeamSpotDataDecoratorAlg.h"

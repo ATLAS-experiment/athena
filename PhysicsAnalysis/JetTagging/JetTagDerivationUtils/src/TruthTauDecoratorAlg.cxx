@@ -9,6 +9,7 @@
 #include "StoreGate/WriteDecorHandle.h"
 #include "AthContainers/ConstAccessor.h"
 #include "FourMomUtils/xAODP4Helpers.h"
+#include "TruthUtils/TruthClasses.h"
 
 #include <algorithm>
 #include <cmath>
@@ -16,86 +17,104 @@
 #include <unordered_map>
 #include <vector>
 
+namespace {
+  const SG::ConstAccessor<double> accPtVis("pt_vis");
+  const SG::ConstAccessor<double> accEtaVis("eta_vis");
+  const SG::ConstAccessor<double> accPhiVis("phi_vis");
+  const SG::ConstAccessor<double> accMVis("m_vis");
+  const SG::ConstAccessor<unsigned int> accType("classifierParticleType");
+  const SG::ConstAccessor<ElementLink<xAOD::TruthParticleContainer>> accOrig(
+    "originalTruthParticle");
+
+  constexpr float kNaN = std::numeric_limits<float>::quiet_NaN();
+
+  // A ghost tau together with the TruthTaus entry holding its visible decay.
+  struct Candidate {
+    const xAOD::TruthParticle* tau;
+    const xAOD::TruthParticle* vis;
+  };
+}
+
 namespace ftag {
 
   // Per-event decoration writer for one tau slot.
-  struct TruthTauDecoratorAlg::TauDecor {
-    using FHandle = SG::WriteDecorHandle<xAOD::JetContainer, float>;
-    using IHandle = SG::WriteDecorHandle<xAOD::JetContainer, int>;
+  struct TruthTauDecoratorAlg::SlotDecor {
+    using FHandle = SG::WriteDecorHandle<JC, float>;
 
-    // Handle-side KinKeys, with the fill written once so a mistake shows up in
-    // all four variables rather than one.
-    struct KinDecor {
-      FHandle pt, deta, dphi, m;
+    SG::WriteDecorHandle<JC, char> matched;
+    FHandle deltaR, deltaPt, dEta, dPhi, pt, m, charge;
 
-      KinDecor(const KinKeys& k, const EventContext& ctx)
-        : pt(k.pt, ctx), deta(k.deta, ctx), dphi(k.dphi, ctx), m(k.m, ctx) {}
+    SlotDecor(const Slot& s, const EventContext& ctx)
+      : matched(s.matched, ctx), deltaR(s.deltaR, ctx), deltaPt(s.deltaPt, ctx),
+        dEta(s.dEta, ctx), dPhi(s.dPhi, ctx), pt(s.pt, ctx), m(s.m, ctx),
+        charge(s.charge, ctx) {}
 
-      // deta/dphi are the tau relative to the jet axis.
-      void fill(const xAOD::Jet& jet, float srcPt, float srcEta, float srcPhi,
-                float srcM, float jetEta, float jetPhi) {
-        pt(jet)   = srcPt;
-        m(jet)    = srcM;
-        deta(jet) = srcEta - jetEta;
-        dphi(jet) = xAOD::P4Helpers::deltaPhi(srcPhi, jetPhi);
+    void set(const xAOD::Jet& jet, const Candidate* cand) {
+      if (!cand) {
+        matched(jet) = 0;
+        deltaR(jet) = kNaN; deltaPt(jet) = kNaN;
+        dEta(jet) = kNaN; dPhi(jet) = kNaN;
+        pt(jet) = kNaN; m(jet) = kNaN; charge(jet) = kNaN;
+        return;
       }
-      void clear(const xAOD::Jet& jet) {
-        const float kNaN = std::numeric_limits<float>::quiet_NaN();
-        pt(jet) = 0.0f; m(jet) = 0.0f; deta(jet) = kNaN; dphi(jet) = kNaN;
-      }
-    };
-
-    KinDecor total, vis;
-    IHandle numCharged, charge, isHadronic;
-
-    TauDecor(const TauKeys& k, const EventContext& ctx)
-      : total(k.total, ctx), vis(k.vis, ctx),
-        numCharged(k.numCharged, ctx), charge(k.charge, ctx),
-        isHadronic(k.isHadronic, ctx) {}
-
-    void set(const xAOD::Jet& jet, const xAOD::TruthParticle* tau,
-             const xAOD::TruthParticle* truthTau, float jetEta, float jetPhi) {
-      if (tau) {
-        total.fill(jet, tau->pt(), tau->eta(), tau->phi(), tau->m(),
-                   jetEta, jetPhi);
-        charge(jet) = static_cast<int>(std::lround(tau->charge()));
-      } else {
-        total.clear(jet);
-        charge(jet) = 0;
-      }
-      if (truthTau) {
-        static const SG::ConstAccessor<double> accPtVis("pt_vis");
-        static const SG::ConstAccessor<double> accEtaVis("eta_vis");
-        static const SG::ConstAccessor<double> accPhiVis("phi_vis");
-        static const SG::ConstAccessor<double> accMVis("m_vis");
-        static const SG::ConstAccessor<std::size_t> accNumCharged("numCharged");
-        static const SG::ConstAccessor<char> accIsHadronic("IsHadronicTau");
-        vis.fill(jet, accPtVis(*truthTau), accEtaVis(*truthTau),
-                 accPhiVis(*truthTau), accMVis(*truthTau), jetEta, jetPhi);
-        numCharged(jet) = static_cast<int>(accNumCharged(*truthTau));
-        isHadronic(jet) = static_cast<int>(accIsHadronic(*truthTau) != 0);
-      } else {
-        vis.clear(jet);
-        numCharged(jet) = -1;
-        isHadronic(jet) = -1;
-      }
+      TLorentzVector vis;
+      vis.SetPtEtaPhiM(accPtVis(*cand->vis), accEtaVis(*cand->vis),
+                       accPhiVis(*cand->vis), accMVis(*cand->vis));
+      matched(jet) = 1;
+      deltaR(jet) = jet.p4().DeltaR(vis);
+      deltaPt(jet) = jet.pt() - vis.Pt();
+      dEta(jet) = vis.Eta() - jet.eta();
+      dPhi(jet) = xAOD::P4Helpers::deltaPhi(vis.Phi(), jet.phi());
+      pt(jet) = cand->tau->pt();
+      m(jet) = cand->tau->m();
+      charge(jet) = cand->tau->charge();
     }
   };
+
+  TruthTauDecoratorAlg::TruthTauDecoratorAlg(const std::string& name,
+                                             ISvcLocator* pSvcLocator)
+    : AthReentrantAlgorithm(name, pSvcLocator)
+  {
+    auto declareSlot = [this](Slot& slot, const std::string& prefix) {
+      declareProperty(prefix + "FloatsToCopy", slot.floats.toCopy);
+      declareProperty(prefix + "DoublesToCopy", slot.doubles.toCopy);
+      declareProperty(prefix + "IntsToCopy", slot.ints.toCopy);
+      declareProperty(prefix + "UintsToCopy", slot.uints.toCopy);
+      declareProperty(prefix + "UlongsToCopy", slot.ulongs.toCopy);
+      declareProperty(prefix + "CharsToCopy", slot.chars.toCopy);
+    };
+    declareSlot(m_lead, "lead");
+    declareSlot(m_sublead, "sublead");
+  }
+
+  StatusCode TruthTauDecoratorAlg::initializeSlot(Slot& slot,
+                                                  const std::string& prefix) {
+    for (auto* key : slot.computed()) ATH_CHECK(key->initialize());
+
+    const std::vector<std::string> froms{m_truthTausKey.key()};
+    const std::string& to = m_jetKey.key();
+    ATH_CHECK(slot.floats.initialize(this, froms, to, prefix));
+    ATH_CHECK(slot.doubles.initialize(this, froms, to, prefix));
+    ATH_CHECK(slot.ints.initialize(this, froms, to, prefix));
+    ATH_CHECK(slot.uints.initialize(this, froms, to, prefix));
+    ATH_CHECK(slot.ulongs.initialize(this, froms, to, prefix));
+    ATH_CHECK(slot.chars.initialize(this, froms, to, prefix));
+    return StatusCode::SUCCESS;
+  }
 
   StatusCode TruthTauDecoratorAlg::initialize() {
     ATH_CHECK(m_jetKey.initialize());
     ATH_CHECK(m_truthTausKey.initialize());
     ATH_CHECK(m_ghostTauKey.initialize());
-    for (auto* k : m_lead.all())    ATH_CHECK(k->initialize());
-    for (auto* k : m_sublead.all()) ATH_CHECK(k->initialize());
+    ATH_CHECK(initializeSlot(m_lead, "lead"));
+    ATH_CHECK(initializeSlot(m_sublead, "sublead"));
     ATH_CHECK(m_nGhostTausKey.initialize());
     return StatusCode::SUCCESS;
   }
 
   StatusCode TruthTauDecoratorAlg::execute(const EventContext& ctx) const {
 
-    // Required input.
-    SG::ReadHandle<xAOD::TruthParticleContainer> truthTaus(m_truthTausKey, ctx);
+    SG::ReadHandle<TPC> truthTaus(m_truthTausKey, ctx);
     if (!truthTaus.isValid()) {
       ATH_MSG_ERROR("Required TruthTaus container '" << m_truthTausKey.key()
                     << "' not found; cannot fill visible-tau decorations.");
@@ -103,9 +122,7 @@ namespace ftag {
     }
 
     // Map each TruthTaus entry to the truth particle it was built from, to
-    // match a ghost tau to its visible momentum.
-    static const SG::ConstAccessor<
-      ElementLink<xAOD::TruthParticleContainer>> accOrig("originalTruthParticle");
+    // match a ghost tau to its visible decay.
     std::unordered_map<const xAOD::TruthParticle*,
                        const xAOD::TruthParticle*> visByOrig;
     visByOrig.reserve(truthTaus->size());
@@ -114,62 +131,77 @@ namespace ftag {
       if (link.isValid()) visByOrig[*link] = truthTau;
     }
 
-    SG::ReadHandle<xAOD::JetContainer> jets(m_jetKey, ctx);
+    SG::ReadHandle<JC> jets(m_jetKey, ctx);
     if (!jets.isValid()) {
       ATH_MSG_ERROR("Failed to retrieve jet container: " << m_jetKey.key());
       return StatusCode::FAILURE;
     }
 
-    SG::ReadDecorHandle<xAOD::JetContainer, GhostLinks> ghostTaus(
-      m_ghostTauKey, ctx);
+    SG::ReadDecorHandle<JC, GhostLinks> ghostTaus(m_ghostTauKey, ctx);
 
-    TauDecor lead(m_lead, ctx);
-    TauDecor sublead(m_sublead, ctx);
-    SG::WriteDecorHandle<xAOD::JetContainer, int> nGhostTausH(m_nGhostTausKey, ctx);
+    SlotDecor lead(m_lead, ctx);
+    SlotDecor sublead(m_sublead, ctx);
+    SG::WriteDecorHandle<JC, int> nGhostTausH(m_nGhostTausKey, ctx);
+
+    std::vector<MatchedPair<MC>> leadPairs, subleadPairs;
+    leadPairs.reserve(jets->size());
+    subleadPairs.reserve(jets->size());
+
+    const float minPt = m_minTruthTauPt.value();
+    const bool isoOnly = m_requireIsolatedTau.value();
 
     for (const xAOD::Jet* jet : *jets) {
 
-      const GhostLinks& links = ghostTaus(*jet);
-      std::vector<const xAOD::TruthParticle*> taus;
-      taus.reserve(links.size());
-      for (const ElementLink<xAOD::IParticleContainer>& link : links) {
+      std::vector<Candidate> cands;
+      for (const ElementLink<MC>& link : ghostTaus(*jet)) {
         if (!link.isValid()) {
           ATH_MSG_ERROR("Invalid ghost-tau link in '" << m_ghostTauKey.key()
                         << "'; the truth particle was thinned away.");
           return StatusCode::FAILURE;
         }
-        const auto* truthPart = dynamic_cast<const xAOD::TruthParticle*>(*link);
-        if (!truthPart) {
+        const auto* tau = dynamic_cast<const xAOD::TruthParticle*>(*link);
+        if (!tau) {
           ATH_MSG_ERROR("Ghost-tau link in '" << m_ghostTauKey.key()
                         << "' does not point to an xAOD::TruthParticle.");
           return StatusCode::FAILURE;
         }
-        taus.push_back(truthPart);
+        auto it = visByOrig.find(tau);
+        if (it == visByOrig.end()) {
+          m_nTausNoVisMatch++;
+          continue;
+        }
+        const xAOD::TruthParticle* vis = it->second;
+        if (isoOnly && accType(*vis) != MCTruthPartClassifier::IsoTau) continue;
+        if (accPtVis(*vis) < minPt) continue;
+        cands.push_back({tau, vis});
       }
-      std::sort(taus.begin(), taus.end(),
-        [](const xAOD::TruthParticle* a, const xAOD::TruthParticle* b) {
-          return a->pt() > b->pt();
+      std::sort(cands.begin(), cands.end(),
+        [](const Candidate& a, const Candidate& b) {
+          return a.tau->pt() > b.tau->pt();
         });
 
-      // Match a ghost tau to its TruthTaus entry.
-      auto visMatch = [&](const xAOD::TruthParticle* tau)
-          -> const xAOD::TruthParticle* {
-        if (!tau) return nullptr;
-        auto it = visByOrig.find(tau);
-        if (it != visByOrig.end()) return it->second;
-        m_nTausNoVisMatch++;
-        return nullptr;
-      };
+      const Candidate* c0 = !cands.empty() ? &cands[0] : nullptr;
+      const Candidate* c1 = cands.size() >= 2 ? &cands[1] : nullptr;
 
-      const xAOD::TruthParticle* leadTau = !taus.empty() ? taus[0] : nullptr;
-      const xAOD::TruthParticle* subTau  = taus.size() >= 2 ? taus[1] : nullptr;
-      const float jetEta = jet->eta();
-      const float jetPhi = jet->phi();
+      lead.set(*jet, c0);
+      sublead.set(*jet, c1);
+      nGhostTausH(*jet) = static_cast<int>(cands.size());
 
-      lead.set(*jet, leadTau, visMatch(leadTau), jetEta, jetPhi);
-      sublead.set(*jet, subTau, visMatch(subTau), jetEta, jetPhi);
-      nGhostTausH(*jet) = static_cast<int>(taus.size());
+      leadPairs.push_back({c0 ? c0->vis : nullptr, jet});
+      subleadPairs.push_back({c1 ? c1->vis : nullptr, jet});
     }
+
+    auto copySlot = [&ctx](const Slot& slot,
+                           const std::vector<MatchedPair<MC>>& pairs) {
+      slot.floats.copy(pairs, ctx);
+      slot.doubles.copy(pairs, ctx);
+      slot.ints.copy(pairs, ctx);
+      slot.uints.copy(pairs, ctx);
+      slot.ulongs.copy(pairs, ctx);
+      slot.chars.copy(pairs, ctx);
+    };
+    copySlot(m_lead, leadPairs);
+    copySlot(m_sublead, subleadPairs);
 
     return StatusCode::SUCCESS;
   }
@@ -177,9 +209,8 @@ namespace ftag {
   StatusCode TruthTauDecoratorAlg::finalize() {
     if (m_nTausNoVisMatch > 0) {
       ATH_MSG_WARNING(
-        m_nTausNoVisMatch << " lead/sublead ghost taus had no matching "
-        << "TruthTaus entry; their visible variables (truthtau_*_*_vis, "
-        << "numCharged) are empty. Check that '" << m_truthTausKey.key()
+        m_nTausNoVisMatch << " ghost taus had no matching TruthTaus entry and "
+        << "were skipped. Check that '" << m_truthTausKey.key()
         << "' is complete.");
     }
     return StatusCode::SUCCESS;
