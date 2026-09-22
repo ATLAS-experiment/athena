@@ -76,7 +76,7 @@ echo "art-result: ${rc4} SimValid_tf"
 asetup AthSimulation,main--simGPU,latest
 
 echo "============ dcube references"
-dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTestsMT/v1/PhaseIISim.HIST.root"
+dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTestsMT/v2/PhaseIISim.HIST.root"
 dcubeXML="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTestsMT/v1/dcube_config_hist_PhaseIISim_25057.xml"
 echo ${dcubeRef}
 echo ${dcubeXML}
