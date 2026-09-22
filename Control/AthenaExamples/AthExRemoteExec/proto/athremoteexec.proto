@@ -1,0 +1,156 @@
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+//
+// Wire contract for driving preconfigured Athena algorithm sequences over gRPC.
+//
+// Design note: there is deliberately no enumeration of payload types here. An
+// earlier version carried a `TypedValue` oneof over int/double/string and
+// vectors of each, which meant every new boundary type touched the schema, the
+// C++ mirror of the schema, the converters, the gate algorithm, the pack
+// algorithm and the configuration -- six places, one of them a wire format that
+// is expensive to change.
+//
+// Instead a payload is bytes plus two strings: how it is encoded, and what type
+// it is. Both are resolved at run time, so adding a payload type costs nothing
+// and adding a whole encoding costs one branch in the codec. The envelope stays
+// provider-neutral: `encoding` is declared, so a client that does not speak an
+// encoding detects that and rejects the payload rather than misinterpreting it.
+
+syntax = "proto3";
+
+package athremoteexec.v1;
+
+service SequenceExecutor {
+  // Execute one preconfigured sequence ("fragment") and return its outputs.
+  rpc Execute (ExecuteRequest) returns (ExecuteReply);
+  // Discover the menu of fragments this server was configured with.
+  rpc ListSequences (ListSequencesRequest) returns (ListSequencesReply);
+}
+
+// The outcome of a request the server actually looked at.
+//
+// Refusals are deliberately NOT here. "Queue full" and "shutting down" mean the
+// server never examined the request, and they are the two cases a client should
+// retry and an intermediary should be able to see -- so they travel as gRPC
+// status codes (RESOURCE_EXHAUSTED and UNAVAILABLE) rather than in this field.
+// Two reasons, one practical and one structural:
+//
+//   - a non-OK gRPC status suppresses the response message entirely
+//     (grpcpp/support/method_handler.h: SendMessagePtr is called only
+//     `if (status.ok())`), so a refusal cannot be carried both ways even if we
+//     wanted it to be;
+//   - a proxy sees an opaque payload. Envoy will not parse an ExecuteReply to
+//     learn that a backend is overloaded, but it acts on grpc-status in the
+//     HTTP/2 trailers as a matter of course.
+//
+// So the rule is: this enum carries what happened to a request, and the
+// transport status carries whether it was accepted at all.
+enum Status {
+  STATUS_UNSPECIFIED = 0;
+  STATUS_OK = 1;
+  STATUS_UNKNOWN_SEQUENCE = 2;  // no fragment by that name
+  STATUS_INVALID_REQUEST = 3;   // payload did not match the fragment's inputs
+  STATUS_ALG_FAILURE = 4;       // a payload algorithm failed
+  STATUS_TIMEOUT = 5;
+
+  // 6 was STATUS_OVERLOADED, 7 was STATUS_SHUTTING_DOWN; both are now
+  // transport statuses. Reserved so the numbers are never reused.
+  reserved 6, 7;
+  reserved "STATUS_OVERLOADED", "STATUS_SHUTTING_DOWN";
+}
+
+// Which event this request is for.
+//
+// Mandatory, and deliberately so. The server builds an EventID from these and
+// conditions are resolved against it, so a missing identity does not fail --
+// it silently resolves whatever IOV the default happens to land in, and
+// returns a confident wrong answer. Every field below that the server needs is
+// marked `optional` purely to get explicit presence: proto3 has no `required`,
+// so the schema provides "was it set?" and the server enforces "it must be".
+// Defaulting to zero would put us back where we started.
+//
+// Note this is event *identity*, not payload typing: nothing here enumerates
+// anything, so the rule that a new boundary type touches no schema still
+// holds.
+message EventId {
+  optional uint32 run_number   = 1;
+  optional uint64 event_number = 2;
+  optional uint32 lumi_block   = 3;  // conditions IOVs are commonly run+lumi
+  optional uint32 time_stamp   = 4;  // seconds; time-keyed IOVs need it
+  uint32 time_stamp_ns_offset  = 5;  // nanosecond part; 0 is a real value
+  uint32 bunch_crossing_id     = 6;  // 0 is a real value
+}
+
+message ExecuteRequest {
+  string sequence = 1;           // fragment name, e.g. "RemoteExecSeqSum"
+  repeated Payload inputs = 2;
+  uint64 request_id = 3;         // client correlation id, echoed back
+  EventId event_id = 4;          // required; see above
+}
+
+message ExecuteReply {
+  Status status = 1;
+  string detail = 2;             // human-readable diagnostics, may be empty
+  repeated Payload outputs = 3;
+  uint64 request_id = 4;
+}
+
+// One value crossing the fragment boundary.
+//
+// `encoding` names the serialisation mechanism and `schema` identifies, within
+// that mechanism, what the bytes are. Neither is interpreted here: a receiver
+// looks the encoding up in its codec registry and hands the schema to it.
+//
+// The one encoding the framework itself defines:
+//
+//   "protobuf"       a nested, per-fragment protobuf message; `schema` is its
+//                    fully qualified name. The framework treats the bytes as
+//                    opaque -- it records them under the payload's key and the
+//                    fragment that published the schema converts them, in an
+//                    ordinary algorithm of its own, into ordinary StoreGate
+//                    objects. So a fragment can offer language-neutral clients
+//                    without the framework knowing anything about its payload.
+//
+// Other encodings are registered by whoever needs them; a codec that carries
+// dictionary-backed C++ objects between two Athena processes, for instance,
+// would put the C++ type name in `schema`. A receiver that does not know an
+// encoding rejects the payload rather than misinterpreting it, which is the
+// property this envelope exists to provide.
+message Payload {
+  string key      = 1;           // StoreGate key at the fragment boundary
+  string encoding = 2;
+  string schema   = 3;           // meaning is the encoding's business
+  bytes  data     = 4;
+  // 3 was `type_name`, which said "C++ type" in a field that also had to hold
+  // a protobuf message name. Renamed rather than reused: same number, same
+  // wire type, and no deployment of this POC predates the change.
+}
+
+message ListSequencesRequest {}
+
+message ListSequencesReply {
+  repeated SequenceInfo sequences = 1;
+}
+
+// What a fragment expects and returns, so that a client can discover what to
+// build rather than being told out of band. All three fields are the wire
+// contract, and nothing else is advertised.
+//
+// Field 4 held an Athena-side StoreGate type; it is reserved so the number is
+// not reused for something a client would read differently.
+//
+// `schema` is empty for an encoding that carries exactly one payload type and
+// is therefore named completely by its encoding tag.
+message BoundaryInfo {
+  reserved 4;
+  reserved "storegate_type";
+
+  string key      = 1;
+  string encoding = 2;
+  string schema   = 3;
+}
+
+message SequenceInfo {
+  string name = 1;
+  repeated BoundaryInfo inputs = 2;
+  repeated BoundaryInfo outputs = 3;
+}
