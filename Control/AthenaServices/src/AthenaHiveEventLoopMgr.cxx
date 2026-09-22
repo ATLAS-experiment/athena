@@ -1205,8 +1205,12 @@ StatusCode AthenaHiveEventLoopMgr::finishEvent(const EventContext& ctx) {
   }
 
   // Result handling may fail; the event has nevertheless left the scheduler
-  // and must relinquish its slot. Batch jobs already cleared at EndAlgorithms.
-  if (!clearStoreOnEndAlgorithms()) {
+  // and must relinquish its slot. Successful batch jobs already cleared at
+  // EndAlgorithms, but a failed/stalled graph may never fire that incident.
+  // Clear failed events here as well so drivers which tolerate failure can
+  // reuse the slot without stale EventInfo or payload objects.
+  if (!clearStoreOnEndAlgorithms() ||
+      m_aess->eventStatus(ctx) != EventStatus::Success) {
     result &= m_whiteboard->clearStore(ctx.slot());
   }
   result &= clearWBSlot(ctx.slot());

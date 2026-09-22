@@ -40,6 +40,8 @@ class MPIHiveEventLoopMgr : public AthenaHiveEventLoopMgr {
 
   /// Drain the local scheduler of any (at least one) completed events
   StatusCode drainLocalScheduler();
+  /// Record completion and apply MPI's tolerated-failure thresholds.
+  StatusCode eventFinished(const EventContext& ctx) override;
   /// Insert an event into the local scheduler
   StatusCode insertEvent(int eventIdx, bool& endOfStream,
                          std::int64_t requestTime_ns);
