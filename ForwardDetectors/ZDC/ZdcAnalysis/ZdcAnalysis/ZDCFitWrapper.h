@@ -318,8 +318,8 @@ protected:
   float m_tau1{0};
   float m_tau2{0};
 
-  float m_tFuncMax;
-  float m_funcMax;
+  float m_tFuncMax{-999};
+  float m_funcMax{-999};
 
   virtual void DoFinalize() override
   {
@@ -888,8 +888,8 @@ private:
   float m_tau2{0};
   float m_timeCorr{0};
 
-  float m_tFuncMax;
-  float m_funcMax;
+  float m_tFuncMax{-999};
+  float m_funcMax{-999};
 
   std::shared_ptr<TF1> m_expFermiInductFunc{0};
   std::shared_ptr<TF1> m_expFermiPreFunc{0};
@@ -1008,8 +1008,8 @@ private:
   float m_tau2{0};
   float m_timeCorr{0};
 
-  float m_tFuncMax;
-  float m_funcMax;
+  float m_tFuncMax{-999};
+  float m_funcMax{-999};
 
   double m_preNorm{1.};
   
