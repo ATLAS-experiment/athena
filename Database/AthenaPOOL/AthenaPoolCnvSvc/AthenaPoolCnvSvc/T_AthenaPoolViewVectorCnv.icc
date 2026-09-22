@@ -12,7 +12,7 @@
 #include "CxxUtils/no_sanitize_undefined.h"
 
 
-/**strformatstrformat
+/**
  * @brief Constructor.
  * @param svcloc The Gaudi service locator.
  */
