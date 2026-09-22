@@ -3,7 +3,7 @@ inputAOD=$1
 maxEvents=1000
 
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
-dcubeShifterXml=${artdata}/InDetPhysValMonitoring/dcube/config/IDPVMPlots_MC_baseline.xml
+dcubeShifterXml=${artdata}/InDetPhysValMonitoring/dcube/config/IDPVMPlots_mc_baseline.xml
 lastref_dir=last_results
 
 run() { (set -x; exec "$@") }
