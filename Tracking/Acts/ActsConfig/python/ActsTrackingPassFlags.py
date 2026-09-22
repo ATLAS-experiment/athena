@@ -280,7 +280,6 @@ def createActsConversionTrackingPassFlags():
         [0.9 * Units.GeV * pcf.BField.configuredSolenoidFieldScale])
     icf.maxPrimaryImpact        = [10.0 * Units.mm]
     icf.maxPrimaryImpactSeed    = 10.0 * Units.mm
-    icf.maxZImpact              = [150.0 * Units.mm]
     icf.minClusters             = [6]
     icf.minSiNotShared          = [6]
     icf.maxShared               = [0]
@@ -302,6 +301,7 @@ def createActsConversionTrackingPassFlags():
     # Backward compatibility, to be removed
     icf.Xi2max                  = [25.]
     icf.Xi2maxNoAdd             = [25.]
+    icf.maxZImpact              = [150.0 * Units.mm]
     icf.maxZImpactSeed = 200. * Units.mm
     return icf
 
@@ -321,6 +321,16 @@ def createActsLowPtTrackingPassFlags():
         0.4 * Units.GeV * pcf.BField.configuredSolenoidFieldScale)
     icf.doBremRecoverySi   = False
 
+    # Backward compatibility, to be removed
+    icf.Xi2max                  = [25.]
+    icf.Xi2maxNoAdd             = [25.]
+    icf.maxZImpact              = [200.0 * Units.mm]
+    icf.maxZImpactSeed = 200. * Units.mm
+    icf.useITkStripSeeding = True
+    icf.minPixel = [1]
+    icf.maxHoles = [2]
+    icf.nHolesMax          = icf.maxHoles
+    icf.nHolesGapMax       = icf.maxHoles
     return icf
 
 

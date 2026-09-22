@@ -148,7 +148,7 @@ def createITkFastTrackingPassFlags():
     deactivateActsComponents(icf)
     activateAthenaComponents(icf)
     icf.extension = ""
-    cf.Xi2max = [9.]
+    icf.Xi2max = [9.]
     icf.Xi2maxNoAdd = [25.]
     return icf
 
@@ -422,7 +422,7 @@ def createLowPtTrackingPassFlags():
 
 ## ITkConversion mode ########################
 def createITkConversionTrackingPassFlags():
-    from ActsConfig.ActsTrackingPassFlags import createActsLegacyTrackingPassFlags
+    from ActsConfig.ActsTrackingPassFlags import createActsConversionTrackingPassFlags
     icf = createActsConversionTrackingPassFlags()
     deactivateActsComponents(icf)
     activateAthenaComponents(icf)
