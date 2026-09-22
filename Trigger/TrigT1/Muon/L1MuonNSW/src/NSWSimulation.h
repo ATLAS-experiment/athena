@@ -1,8 +1,8 @@
 /*
    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef L0MUONNSW_NSWSIMULATION_H
-#define L0MUONNSW_NSWSIMULATION_H 
+#ifndef L1MUONNSW_NSWSIMULATION_H
+#define L1MUONNSW_NSWSIMULATION_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AthenaMonitoringKernel/Monitored.h"
@@ -43,5 +43,5 @@ namespace L0Muon {
 
 }   // end of namespace
 
-#endif  // L0MUONNSW_NSWSIMULATION_H
+#endif  // L1MUONNSW_NSWSIMULATION_H
 
