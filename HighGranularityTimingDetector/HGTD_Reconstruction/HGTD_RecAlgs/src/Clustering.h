@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  *
  * @author Laforge, Bertrand <laforge@lpnhe.in2p3.fr>
  * @author Leopold, Alexander <alexander.leopold@cern.ch>
@@ -436,7 +436,7 @@ void ClusterCollection<T>::doClustering(ClusterAlgo algo) {
       if (m_debug_level > 0) {
         std::cout << "erase done" << std::endl;
       }
-      m_clusters.push_back(new_cluster);
+      m_clusters.push_back(std::move(new_cluster));
       if (m_debug_level > 0) {
         std::cout << "new cluster stored" << std::endl;
       }
