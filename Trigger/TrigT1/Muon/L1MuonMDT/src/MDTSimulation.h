@@ -2,8 +2,8 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef L0MuonMDT_MDTSIMULATION_H
-#define L0MuonMDT_MDTSIMULATION_H
+#ifndef L1MuonMDT_MDTSIMULATION_H
+#define L1MuonMDT_MDTSIMULATION_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
