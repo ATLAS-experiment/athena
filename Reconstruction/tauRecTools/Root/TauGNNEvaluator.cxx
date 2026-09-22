@@ -8,6 +8,7 @@
 #include "PathResolver/PathResolver.h"
 
 #include <algorithm>
+#include <cfenv>
 
 
 TauGNNEvaluator::TauGNNEvaluator(const std::string &name): 
@@ -187,7 +188,16 @@ StatusCode TauGNNEvaluator::execute(xAOD::TauJet &tau) const {
     } else if (m_output_discriminant == Discriminant::PJet) {
         output(tau) = out_f.at(m_outnode_jet);
     } else if (m_output_discriminant == Discriminant::NegLogPJet_True) {
+        const int fpe_before = std::fetestexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW);
+        ATH_MSG_WARNING("FPE before refresh in NegLogPJet_True: "
+                        << fpe_before
+                        << " raw_p_jet=" << out_f.at(m_outnode_jet));
+        std::feclearexcept(FE_ALL_EXCEPT);
         output(tau) = -1.0*std::log10(out_f.at(m_outnode_jet));
+        const int fpe_after = std::fetestexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW);
+        ATH_MSG_WARNING("FPE after refresh in NegLogPJet_True: "
+                        << fpe_after
+                        << " raw_p_jet=" << out_f.at(m_outnode_jet));
     }
 
     out_ptau(tau) = out_f.at(m_outnode_tau);
