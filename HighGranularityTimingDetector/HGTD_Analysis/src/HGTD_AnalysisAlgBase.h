@@ -28,6 +28,8 @@
 // stl includes
 #include <map>
 #include <string>
+#include <string_view>
+#include <format>
 
 class HGTD_AnalysisAlgBase : public AthAlgorithm {
 
@@ -54,18 +56,16 @@ public:
                   Ts... args) {
     // check if hist exists already and warn for duplication
     // doesn't do anything then...
-    std::string name = trk_sel_name + "/" + time_wp + "/" + hist_name;
-    if (m_histos.find(name) != m_histos.end()) {
+    const std::string name = trk_sel_name + "/" + time_wp + "/" + hist_name;
+    if (m_histos.contains(name)) {
       ATH_MSG_WARNING("You are duplicating histogram: "
-                      << name << ", this is not a good idea\n");
+                      << name << ", this is not a good idea");
       return;
     }
-    m_histos[name] = new T(hist_name.c_str(), title.c_str(), args...);
-    dynamic_cast<T*>(m_histos[name])->Sumw2();
-    if (not m_hist_svc
-                ->regHist(m_directory_name + name,
-                          dynamic_cast<T*>(m_histos[name]))
-                .isSuccess()) {
+    auto * ptrT = new T(hist_name.c_str(), title.c_str(), args...);
+    m_histos.emplace(name, ptrT);
+    ptrT->Sumw2();
+    if (not m_hist_svc->regHist(m_directory_name + name, ptrT).isSuccess()) {
       ATH_MSG_WARNING("Failed to book " << name);
     }
   }
@@ -74,17 +74,15 @@ public:
   void book(const std::string& name, const std::string& title, Ts... args) {
     // check if hist exists already and warn for duplication
     // doesn't do anything then...
-    if (m_histos.find(name) != m_histos.end()) {
+    if (m_histos.contains(name)) {
       ATH_MSG_WARNING("You are duplicating histogram: "
-                      << name << ", this is not a good idea\n");
+                      << name << ", this is not a good idea");
       return;
     }
-    m_histos[name] = new T(name.c_str(), title.c_str(), args...);
-    dynamic_cast<T*>(m_histos[name])->Sumw2();
-    if (not m_hist_svc
-                ->regHist(m_directory_name + name,
-                          dynamic_cast<T*>(m_histos[name]))
-                .isSuccess()) {
+    auto * ptrT = new T(name.c_str(), title.c_str(), args...);
+    m_histos.emplace(name, ptrT);
+    ptrT->Sumw2();
+    if (not m_hist_svc->regHist(m_directory_name + name,ptrT).isSuccess()) {
       ATH_MSG_WARNING("Failed to book " << name);
     }
   }
@@ -95,17 +93,15 @@ public:
                      const std::string& title, Ts... args) {
     // check if hist exists already and warn for duplication
     // doesn't do anything then...
-    std::string name = trk_sel_name + "/" + time_wp + "/" + hist_name;
-    if (m_histos.find(name) != m_histos.end()) {
+    const std::string name = trk_sel_name + "/" + time_wp + "/" + hist_name;
+    if (m_histos.contains(name)) {
       ATH_MSG_WARNING("You are duplicating histogram: "
-                      << name << ", this is not a good idea\n");
+                      << name << ", this is not a good idea");
       return;
     }
-    m_histos[name] = new TEfficiency(hist_name.c_str(), title.c_str(), args...);
-    if (not m_hist_svc
-                ->regGraph(m_directory_name + name,
-                           reinterpret_cast<TGraph*>(m_histos[name]))
-                .isSuccess()) {
+    auto * ptrT = new TEfficiency(hist_name.c_str(), title.c_str(), args...);
+    m_histos.emplace(name, ptrT);
+    if (not m_hist_svc->regEfficiency(m_directory_name + name, ptrT).isSuccess()) {
       ATH_MSG_WARNING("Failed to book " << name);
     }
   }
@@ -114,16 +110,14 @@ public:
   void bookEff(const std::string& name, const std::string& title, Ts... args) {
     // check if hist exists already and warn for duplication
     // doesn't do anything then...
-    if (m_histos.find(name) != m_histos.end()) {
+    if (m_histos.contains(name)) {
       ATH_MSG_WARNING("You are duplicating histogram: "
-                      << name << ", this is not a good idea\n");
+                      << name << ", this is not a good idea");
       return;
     }
-    m_histos[name] = new TEfficiency(name.c_str(), title.c_str(), args...);
-    if (not m_hist_svc
-                ->regGraph(m_directory_name + name,
-                           reinterpret_cast<TGraph*>(m_histos[name]))
-                .isSuccess()) {
+    auto * ptrT = new TEfficiency(name.c_str(), title.c_str(), args...);
+    m_histos.emplace(name,ptrT);
+    if (not m_hist_svc->regEfficiency(m_directory_name + name,ptrT).isSuccess()) {
       ATH_MSG_WARNING("Failed to book " << name);
     }
   }
@@ -133,62 +127,87 @@ public:
   ///   The function takes the name (including the path) as well as
   ///     any arguments to be passed to the histogram Fill method
   template <typename T, typename... Ts>
-  void fill(const std::string& name, Ts... args) {
-    if (m_histos[name] == nullptr or m_histos.find(name) == m_histos.end()) {
+  void fill(std::string_view name, Ts... args) {
+    auto it = m_histos.find(name);
+    if (it == m_histos.end() or it->second == nullptr) {
       ATH_MSG_WARNING(
           "[HistogramHandler::fill] ERROR: you are attempting to fill "
           "a histogram with name "
-          << name << " which doesn't exist!\n");
+          << name << " which doesn't exist!");
       return;
     }
-    dynamic_cast<T*>(m_histos[name])->Fill(args...);
+    auto * ptrT = dynamic_cast<T*>(it->second);
+    if (!ptrT)[[unlikely]]{
+      ATH_MSG_WARNING("Cast failed for "<< name);
+      return;
+    }
+    ptrT->Fill(args...);
   }
 
   template <typename T, typename... Ts>
-  void fillSubdir(const std::string& trk_sel_name, const std::string& time_wp,
-                  const std::string& hist_name, Ts... args) {
-    std::string name = trk_sel_name + "/" + time_wp + "/" + hist_name;
-    if (m_histos[name] == nullptr or m_histos.find(name) == m_histos.end()) {
+  void fillSubdir(std::string_view trk_sel_name, std::string_view time_wp,
+                  std::string_view hist_name, Ts... args) {
+    const std::string name = std::format("{}/{}/{}", trk_sel_name, time_wp, hist_name);
+    auto it = m_histos.find(name);
+    if (it == m_histos.end() or it->second == nullptr) {
       ATH_MSG_WARNING(
           "[HistogramHandler::fill] ERROR: you are attempting to fill "
           "a histogram with name "
-          << name << " which doesn't exist!\n");
+          << name << " which doesn't exist!");
       return;
     }
-    dynamic_cast<T*>(m_histos[name])->Fill(args...);
+    auto * ptrT = dynamic_cast<T*>(it->second);
+    if (!ptrT)[[unlikely]]{
+      ATH_MSG_WARNING("Cast failed for "<< name);
+      return;
+    }
+    ptrT->Fill(args...);
   }
 
-  template <typename... Ts> void fillEff(const std::string& name, Ts... args) {
-    if (m_histos[name] == nullptr or m_histos.find(name) == m_histos.end()) {
+  template <typename... Ts> 
+  void fillEff(std::string_view name, Ts... args) {
+    const auto it = m_histos.find(name);
+    if (it == m_histos.end() or it->second == nullptr)[[unlikely]] {
       ATH_MSG_WARNING(
-          "[HistogramHandler::fill] ERROR: you are attempting to fill "
+          "[HistogramHandler::fillEff] ERROR: you are attempting to fill "
           "a histogram with name "
-          << name << " which doesn't exist!\n");
+          << name << " which doesn't exist!");
       return;
     }
-    dynamic_cast<TEfficiency*>(m_histos[name])->Fill(args...);
+    auto * ptrT = dynamic_cast<TEfficiency*>(it->second);
+    if (!ptrT)[[unlikely]]{
+      ATH_MSG_WARNING("Cast failed for "<< name);
+      return;
+    }
+    ptrT->Fill(args...);
   }
 
   template <typename... Ts>
-  void fillEffSubDir(const std::string& trk_sel_name,
-                     const std::string& wp_name, const std::string& hist_name,
+  void fillEffSubDir(std::string_view trk_sel_name,
+                     std::string_view wp_name, std::string_view hist_name,
                      Ts... args) {
-    std::string name = trk_sel_name + "/" + wp_name + "/" + hist_name;
-    if (m_histos[name] == nullptr or m_histos.find(name) == m_histos.end()) {
+    const std::string name = std::format("{}/{}/{}", trk_sel_name, wp_name, hist_name);
+    auto it = m_histos.find(name) ;
+    if (it == m_histos.end() or it->second == nullptr) {
       ATH_MSG_WARNING(
           "[HistogramHandler::fill] ERROR: you are attempting to fill "
           "a histogram with name "
-          << name << " which doesn't exist!\n");
+          << name << " which doesn't exist!");
       return;
     }
-    dynamic_cast<TEfficiency*>(m_histos[name])->Fill(args...);
+    auto * ptrT = dynamic_cast<TEfficiency*>(it->second);
+    if (!ptrT)[[unlikely]]{
+      ATH_MSG_WARNING("Cast failed for "<< name);
+      return;
+    }
+    ptrT->Fill(args...);
   }
 
 protected:
   ServiceHandle<ITHistSvc> m_hist_svc{this, "THistSvc", "THistSvc"};
 
 private:
-  std::map<std::string, TObject*> m_histos;
+  std::map<std::string, TObject*, std::less<>> m_histos;
 };
 
 #endif // HGTD_ANALYSIS_ANALYSISALGBASE_H
