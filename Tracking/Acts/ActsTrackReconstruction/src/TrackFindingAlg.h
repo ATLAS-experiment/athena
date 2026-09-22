@@ -61,15 +61,6 @@ namespace ActsTrk
                                 const ActsTrk::Seed& seed,
                                 bool useTopSp) const;
 
-    void printSeed(unsigned int iseed,
-                   const DetectorContextHolder& detContext,
-                   const ActsTrk::SeedContainer& seeds,
-                   const Acts::BoundTrackParameters &seedParameters,
-                   const detail::MeasurementIndex &measurementIndex,
-                   std::size_t& nPrinted,
-                   const char *seedType,
-                   bool isKF = false) const;
-
     StatusCode addTrack(const DetectorContextHolder& detContext,
                         detail::RecoTrackContainerProxy &track,
                         const Acts::Surface& pSurface,

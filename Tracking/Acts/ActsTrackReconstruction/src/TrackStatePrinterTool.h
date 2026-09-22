@@ -29,6 +29,8 @@
 #include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "xAODInDetMeasurement/SpacePointContainer.h"
 #include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
+
+#include "ITrackFindingMonitorTool.h"
 // Other
 #include <vector>
 #include <memory>
@@ -42,16 +44,58 @@ namespace Acts
 
 namespace ActsTrk
 {
-  class TrackStatePrinterTool : virtual public AthAlgTool
+  class TrackStatePrinterTool : public extends<AthAlgTool, ITrackFindingMonitorTool>
   {
   public:
-   
-    using AthAlgTool::AthAlgTool;
+    using base_class::base_class;
+
     virtual ~TrackStatePrinterTool() = default;
 
     // standard Athena methods
     virtual StatusCode initialize() override;
 
+     virtual void newEvent(const EventContext &, const Acts::GeometryContext &) const override {}
+
+    virtual void measurements(const EventContext &ctx,
+                              const std::vector<const xAOD::UncalibratedMeasurementContainer *> &clusterContainers,
+                              const std::vector<size_t> &offsets) const override {
+       printMeasurements(ctx, clusterContainers, offsets);
+    }
+
+    virtual void
+    newSeed(const Acts::GeometryContext &tgContext,
+            const ActsTrk::Seed &seed,
+            const Acts::BoundTrackParameters &initialParameters,
+            const detail::MeasurementIndex &measurementIndexer,
+            unsigned int iseed,
+            bool isKF,
+            const char *seedType,
+            bool first_seed) const override {
+       printSeed(tgContext, seed, initialParameters, measurementIndexer,  iseed,isKF, seedType, first_seed);
+    }
+
+    virtual void
+    newTrack(const Acts::GeometryContext &tgContext,
+             const detail::RecoTrackContainer &tracks,
+             const typename detail::RecoTrackContainer::TrackProxy &track,
+             const detail::MeasurementIndex &measurementIndexer,
+             bool rejected = false) const override {
+       printTrack(tgContext, tracks,track,measurementIndexer, rejected);
+    }
+
+    virtual bool
+    newTrackState(const Acts::GeometryContext &tgContext,
+                  [[maybe_unused]] const detail::RecoTrackContainer &track_container,
+                  [[maybe_unused]] const typename detail::RecoTrackContainer::TrackProxy &track,
+                  const detail::RecoTrackContainer::TrackStateProxy &state,
+                  const detail::MeasurementIndex &measurementIndexer,
+                  [[maybe_unused]] unsigned int status,
+                  bool useFiltered = false,
+                  bool newLine = true) const override {
+       return printTrackState(tgContext, state, measurementIndexer, useFiltered, newLine);
+    }
+
+    virtual void finalizeEvent([[maybe_unused]] const EventContext &ctx) const override {}
 
     void printMeasurements(const EventContext &ctx,
                            const std::vector<const xAOD::UncalibratedMeasurementContainer *> &clusterContainers,
@@ -63,7 +107,9 @@ namespace ActsTrk
               const Acts::BoundTrackParameters &initialParameters,
               const detail::MeasurementIndex &measurementIndexer,
               unsigned int iseed,
-              bool isKF) const;
+              bool isKF,
+              const char *seedType,
+              bool first_seed) const;
 
     template <typename track_container_t>
     void
