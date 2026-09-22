@@ -1,12 +1,13 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: TestIsolationAthenaAlg.cxx 672993 2015-06-06 16:55:34Z dzhang $
 
 // Local include(s):
 #include "TestIsolationAthenaAlg.h"
-
+#include "PATCore/AcceptData.h"
+#include "PATCore/AcceptInfo.h"
 // EDM include(s):
 #include "xAODEgamma/ElectronContainer.h"
 #include "xAODEgamma/PhotonContainer.h"
