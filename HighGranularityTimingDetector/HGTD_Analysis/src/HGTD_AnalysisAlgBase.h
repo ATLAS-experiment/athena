@@ -56,19 +56,14 @@ public:
                   Ts... args) {
     // check if hist exists already and warn for duplication
     // doesn't do anything then...
-    std::string name = trk_sel_name + "/" + time_wp + "/" + hist_name;
-    auto it = m_histos.find(name);
-    if (it != m_histos.end()) {
+    const std::string name = trk_sel_name + "/" + time_wp + "/" + hist_name;
+    if (m_histos.contains(name)) {
       ATH_MSG_WARNING("You are duplicating histogram: "
                       << name << ", this is not a good idea\n");
       return;
     }
-    it->second = new T(hist_name.c_str(), title.c_str(), args...);
-    auto ptrT = dynamic_cast<T*>(it->second);
-    if (!ptrT){
-      ATH_MSG_WARNING("Cast failed for " << name);
-      return;
-    }
+    auto * ptrT = new T(hist_name.c_str(), title.c_str(), args...);
+    m_histos.emplace(name, ptrT);
     ptrT->Sumw2();
     if (not m_hist_svc->regHist(m_directory_name + name, ptrT).isSuccess()) {
       ATH_MSG_WARNING("Failed to book " << name);
@@ -79,20 +74,15 @@ public:
   void book(const std::string& name, const std::string& title, Ts... args) {
     // check if hist exists already and warn for duplication
     // doesn't do anything then...
-    auto it = m_histos.find(name);
-    if (it != m_histos.end()) {
+    if (m_histos.contains(name)) {
       ATH_MSG_WARNING("You are duplicating histogram: "
                       << name << ", this is not a good idea");
       return;
     }
-    it->second = new T(name.c_str(), title.c_str(), args...);
-    auto ptrT = dynamic_cast<T*>(it->second);
-    if (!ptrT)[[unlikely]]{
-      ATH_MSG_WARNING("Cast failed for "<< name);
-      return;
-    }
+    auto * ptrT = new T(name.c_str(), title.c_str(), args...);
+    m_histos.emplace(name, ptrT);
     ptrT->Sumw2();
-    if (not m_hist_svc->regHist(m_directory_name + name,ptrT.isSuccess()) {
+    if (not m_hist_svc->regHist(m_directory_name + name,ptrT).isSuccess()) {
       ATH_MSG_WARNING("Failed to book " << name);
     }
   }
@@ -103,15 +93,15 @@ public:
                      const std::string& title, Ts... args) {
     // check if hist exists already and warn for duplication
     // doesn't do anything then...
-    std::string name = trk_sel_name + "/" + time_wp + "/" + hist_name;
-    auto it = m_histos.find(name) ;
-    if (it != m_histos.end()) {
+    const std::string name = trk_sel_name + "/" + time_wp + "/" + hist_name;
+    if (m_histos.contains(name)) {
       ATH_MSG_WARNING("You are duplicating histogram: "
                       << name << ", this is not a good idea");
       return;
     }
-    it->second = new TEfficiency(hist_name.c_str(), title.c_str(), args...);
-    if (not m_hist_svc->regGraph(m_directory_name + name, reinterpret_cast<TGraph*>(it->second)
+    auto * ptrT = new TEfficiency(hist_name.c_str(), title.c_str(), args...);
+    m_histos.emplace(name, ptrT);
+    if (not m_hist_svc->regGraph(m_directory_name + name, reinterpret_cast<TGraph*>(ptrT))
          .isSuccess()) {
       ATH_MSG_WARNING("Failed to book " << name);
     }
@@ -121,14 +111,14 @@ public:
   void bookEff(const std::string& name, const std::string& title, Ts... args) {
     // check if hist exists already and warn for duplication
     // doesn't do anything then...
-    auto it = m_histos.find(name);
-    if (it != m_histos.end()) {
+    if (m_histos.contains(name)) {
       ATH_MSG_WARNING("You are duplicating histogram: "
                       << name << ", this is not a good idea");
       return;
     }
-    it->second = new TEfficiency(name.c_str(), title.c_str(), args...);
-    if (not m_hist_svc->regGraph(m_directory_name + name, reinterpret_cast<TGraph*>(it->second))
+    auto * ptrT = new TEfficiency(name.c_str(), title.c_str(), args...);
+    m_histos.emplace(name,ptrT);
+    if (not m_hist_svc->regGraph(m_directory_name + name, reinterpret_cast<TGraph*>(ptrT))
          .isSuccess()) {
       ATH_MSG_WARNING("Failed to book " << name);
     }
@@ -148,7 +138,7 @@ public:
           << name << " which doesn't exist!\n");
       return;
     }
-    auto ptrT = dynamic_cast<T*>(it->second);
+    auto * ptrT = dynamic_cast<T*>(it->second);
     if (!ptrT)[[unlikely]]{
       ATH_MSG_WARNING("Cast failed for "<< name);
       return;
@@ -168,7 +158,7 @@ public:
           << name << " which doesn't exist!\n");
       return;
     }
-    auto ptrT = dynamic_cast<T*>(it->second);
+    auto * ptrT = dynamic_cast<T*>(it->second);
     if (!ptrT)[[unlikely]]{
       ATH_MSG_WARNING("Cast failed for "<< name);
       return;
@@ -207,7 +197,7 @@ public:
           << name << " which doesn't exist!\n");
       return;
     }
-    auto ptrT = dynamic_cast<TEfficiency*>(it->second);
+    auto * ptrT = dynamic_cast<TEfficiency*>(it->second);
     if (!ptrT)[[unlikely]]{
       ATH_MSG_WARNING("Cast failed for "<< name);
       return;
