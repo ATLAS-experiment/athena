@@ -20,6 +20,12 @@
 #include "MuonNSWCommonDecode/VMMChannel.h"
 #include "MuonNSWCommonDecode/NSWResourceId.h"
 
+// ROOT
+#include <TFile.h>
+#include <TTree.h>
+
+#include "test_nsw_common_decoder_aux.h"
+
 // Number of sectors - Module ID, to be checked to avoid confusion with NSW TP
 
 static const uint16_t sectors = 16;
@@ -44,6 +50,7 @@ struct Params
   bool tree_view {true};
   bool flat_view {true};
   bool print_raw {false};
+  bool print_only {false};   // skip ROOT output
   unsigned int printout_level {0};
   unsigned int max_events {0};
   std::vector <std::string> detectors;
@@ -63,8 +70,9 @@ struct Statistics
 void test_nsw_common_decoder_help (char *progname)
 {
   std::cout << "Usage: " << progname
-	    << " [-v] [-r] [-t] [-f] [-d <MMG/STG>] [-n events] [-h] file1, file2, ..." << std::endl;
+	    << " [-v] [-r] [-t] [-f] [-p] [-d <MMG/STG>] [-n events] [-h] file1, file2, ..." << std::endl;
   std::cout << "\t\t[-n events] maximum number of events to read (default = all)" << std::endl;
+  std::cout << "\t\t[-p] print only; do not write ROOT output" << std::endl;
   std::cout << "\t\t[-r] print raw fragments" << std::endl;
   std::cout << "\t\t[-t] only shows hits taken from tree view of decoded data" << std::endl;
   std::cout << "\t\t[-f] only shows hits taken from flat view of decoded data" << std::endl;
@@ -92,6 +100,9 @@ int test_nsw_common_decoder_opt (int argc, char **argv, Params& params)
 	  det = argv[++i];
 	  params.detectors.push_back (det);
 	  break;
+        case 'p':
+          params.print_only = true;
+          break;
         case 'r':
 	  params.print_raw = true;
 	  break;
@@ -162,7 +173,7 @@ int test_nsw_common_decoder_end (const Statistics &statistics)
   return errcode;
 }
 
-int test_nsw_common_decoder_event (const eformat::read::FullEventFragment &f, const Params &params, Statistics &statistics)
+int test_nsw_common_decoder_event (const eformat::read::FullEventFragment &f, const Params &params, Statistics &statistics, outBranches &data)
 {
   int errcode = ERR_NOERR;
   std::vector <eformat::read::ROBFragment> robs;
@@ -174,6 +185,17 @@ int test_nsw_common_decoder_event (const eformat::read::FullEventFragment &f, co
     std::cout << "Entering fragment analysis" << std::endl;
 
   f.robs (robs);
+
+  if (!params.print_only)
+  {
+    data.b_run_number          = f.run_no ();
+    data.b_run_type            = f.run_type ();
+    data.b_lumi_block          = f.lumi_block ();
+    data.b_L1ID                = f.lvl1_id ();
+    data.b_BCID                = f.bc_id ();
+    data.b_BC_time_seconds     = f.bc_time_seconds ();
+    data.b_BC_time_nanoseconds = f.bc_time_nanoseconds ();
+  }
 
   for (auto r = robs.begin (); r != robs.end (); ++r)
   {
@@ -434,6 +456,85 @@ int test_nsw_common_decoder_event (const eformat::read::FullEventFragment &f, co
 	    }
 	  }
 	}
+
+	// TTree data collection: one entry per elink across all ROBs in this fragment
+	if (!params.print_only)
+	{
+	  for (const auto& elink : links)
+	  {
+	    data.b_ROB_sourceID.push_back (sid);
+	    data.b_ROB_status.emplace_back (r->status (), r->status () + r->nstatus ());
+	    data.b_ROD_sourceID.push_back (r->rod_source_id ());
+	    data.b_ROD_subdetID.push_back (static_cast<uint32_t> (s));
+	    data.b_ROD_moduleID.push_back (m);
+	    data.b_ROD_L1ID.push_back (r->rod_lvl1_id ());
+	    data.b_ROD_BCID.push_back (r->rod_bc_id ());
+	    data.b_ROD_n_words.push_back (r->rod_ndata ());
+	    data.b_ROD_status.emplace_back (r->rod_status (), r->rod_status () + r->rod_nstatus ());
+
+	    data.b_elink_word.push_back (elink->elinkWord ());
+	    data.b_elink_status.push_back (elink->status ());
+	    data.b_elink_l1Id.push_back (elink->l1Id ());
+	    data.b_elink_bcId.push_back (elink->bcId ());
+	    data.b_elink_rocId.push_back (elink->rocId ());
+	    data.b_elink_orbit.push_back (elink->orbit ());
+	    data.b_elink_nhits.push_back (elink->nhits ());
+	    data.b_elink_noTdc.push_back (elink->noTdc ());
+	    data.b_elink_isNull.push_back (elink->isNull ());
+	    data.b_elink_tout.push_back (elink->tout ());
+	    data.b_elink_extended.push_back (elink->extended ());
+	    data.b_elink_checksum.push_back (elink->checksum ());
+	    data.b_elink_nhitsTrail.push_back (elink->nhitsTrail ());
+	    data.b_elink_l0Id.push_back (elink->l0Id ());
+	    data.b_elink_flagMiss.push_back (elink->flagMiss ());
+
+	    const Muon::nsw::NSWResourceId *rid = elink->elinkId ();
+	    data.b_rid_elink.push_back (rid->elink ());
+	    data.b_rid_radius.push_back (rid->radius ());
+	    data.b_rid_layer.push_back (rid->layer ());
+	    data.b_rid_sector.push_back (rid->sector ());
+	    data.b_rid_resourceType.push_back (rid->resourceType ());
+	    data.b_rid_dataType.push_back (rid->dataType ());
+	    data.b_rid_version.push_back (rid->version ());
+	    data.b_rid_detId.push_back (rid->detId ());
+	    data.b_rid_is_large_station.push_back (rid->is_large_station ());
+	    data.b_rid_station_eta.push_back (static_cast<int32_t> (rid->station_eta ()));
+	    data.b_rid_station_phi.push_back (rid->station_phi ());
+	    data.b_rid_multi_layer.push_back (rid->multi_layer ());
+	    data.b_rid_gas_gap.push_back (rid->gas_gap ());
+
+	    std::vector<uint32_t> ch_word, ch_roc_vmm, ch_vmm, ch_channel, ch_rel_bcid, ch_pdo, ch_tdo;
+	    std::vector<uint32_t> ch_parity, ch_neighbor, ch_parity_ok;
+	    std::vector<uint32_t> ch_channel_type, ch_channel_number;
+	    for (const auto& ch : elink->get_channels ())
+	    {
+	      ch_word.push_back (ch->vmm_word ());
+	      ch_roc_vmm.push_back (ch->roc_vmm ());
+	      ch_vmm.push_back (ch->vmm ());
+	      ch_channel.push_back (ch->vmm_channel ());
+	      ch_rel_bcid.push_back (ch->rel_bcid ());
+	      ch_pdo.push_back (ch->pdo ());
+	      ch_tdo.push_back (ch->tdo ());
+	      ch_parity.push_back (static_cast<uint32_t> (ch->parity ()));
+	      ch_neighbor.push_back (static_cast<uint32_t> (ch->neighbor ()));
+	      ch_parity_ok.push_back (static_cast<uint32_t> (ch->calculate_parity ()));
+	      ch_channel_type.push_back (ch->channel_type ());
+	      ch_channel_number.push_back (ch->channel_number ());
+	    }
+	    data.b_vmm_word.push_back (std::move (ch_word));
+	    data.b_vmm_roc_vmm.push_back (std::move (ch_roc_vmm));
+	    data.b_vmm_vmm.push_back (std::move (ch_vmm));
+	    data.b_vmm_channel.push_back (std::move (ch_channel));
+	    data.b_vmm_rel_bcid.push_back (std::move (ch_rel_bcid));
+	    data.b_vmm_pdo.push_back (std::move (ch_pdo));
+	    data.b_vmm_tdo.push_back (std::move (ch_tdo));
+	    data.b_vmm_parity.push_back (std::move (ch_parity));
+	    data.b_vmm_neighbor.push_back (std::move (ch_neighbor));
+	    data.b_vmm_parity_ok.push_back (std::move (ch_parity_ok));
+	    data.b_vmm_channel_type.push_back (std::move (ch_channel_type));
+	    data.b_vmm_channel_number.push_back (std::move (ch_channel_number));
+	  }
+	}
       }
     }
   }
@@ -459,9 +560,22 @@ int test_nsw_common_decoder_loop (const Params &params, Statistics &statistics)
 
   for (const std::string &filename : params.file_names)
   {
+    outBranches data;
+    TFile *outfile = nullptr;
+    TTree *outtree = nullptr;
     std::string data_file_name (filename);
+    std::string out_file_name = data_file_name.substr (data_file_name.find_last_of ("/\\") + 1) + ".decoded.root";
 
     std::cout << "Reading file " << data_file_name << std::endl;
+
+    if (!params.print_only)
+    {
+      std::cout << "Saving output to " << out_file_name << std::endl;
+      outfile = new TFile (out_file_name.c_str (), "recreate");
+      outtree = new TTree ("decoded_data", "decoded_data");
+      test_nsw_common_decoder_init_tree (*outtree, data);
+    }
+
     std::unique_ptr <DataReader> reader (pickDataReader (data_file_name));
 
     if (!reader || !reader->good ())
@@ -490,7 +604,8 @@ int test_nsw_common_decoder_loop (const Params &params, Statistics &statistics)
         eformat::read::FullEventFragment f ((unsigned int *) buf);
         f.check ();
 
-        if ((errcode = test_nsw_common_decoder_event (f, params, statistics)) != ERR_NOERR)
+        data = outBranches ();
+        if ((errcode = test_nsw_common_decoder_event (f, params, statistics, data)) != ERR_NOERR)
         {
           ers::error (ers::File (ERS_HERE, data_file_name.c_str ()));
           if (buf) delete [] buf;
@@ -498,6 +613,7 @@ int test_nsw_common_decoder_loop (const Params &params, Statistics &statistics)
         }
 
         ++statistics.nevents;
+        if (!params.print_only) outtree->Fill ();
       }
 
       catch (ers::Issue &ex)
@@ -509,6 +625,12 @@ int test_nsw_common_decoder_loop (const Params &params, Statistics &statistics)
       }
 
       if (buf) delete [] buf;
+    }
+
+    if (!params.print_only)
+    {
+      outtree->Write ();
+      outfile->Close ();
     }
   }
 
