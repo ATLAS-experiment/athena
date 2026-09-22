@@ -161,7 +161,7 @@ StatusCode OutputConditionsAlg::finalize() {
 
   // list out all typename/key pairs to be written and construct TypeKeyPairs for the streamer
   const size_t nObjects = objs.size();
-  IAthenaOutputStreamTool::TypeKeyPairs typeKeys;//(nObjects);
+  IAthenaOutputStreamTool::TypeKeyPairs typeKeys;
   ATH_MSG_INFO("Identified a total of " << nObjects << " objects to write out:");
   // leave now if nothing to write
   if (nObjects == 0)
@@ -234,11 +234,11 @@ StatusCode OutputConditionsAlg::finalize() {
         //no global tag exists, not a problem
       } 
       if (existingGlobalTags.empty()) {
-        gt = db.createGlobalTag("GlobalTestTag", "test", "test");
-        ATH_MSG_INFO("Global Tag for testing (" << globalTagName << ") exists already in " << m_par_crestDir);
+        gt = db.createGlobalTag("GlobalTestTag", "test", "test");    
+        ATH_MSG_INFO("Created Global Tag for testing (" << globalTagName << ") in " << m_par_crestDir);
       } else {
         gt = db.getGlobalTag(globalTagName);
-        ATH_MSG_INFO("Created Global Tag for testing (" << globalTagName << ") in " << m_par_crestDir);
+        ATH_MSG_INFO("Global Tag for testing (" << globalTagName << ") exists already in " << m_par_crestDir);
       }
 
       // Some of the code here is taken from RegistrationSvc. Once we deprecate COOL, we can also delete (I)RegistrationSvc
