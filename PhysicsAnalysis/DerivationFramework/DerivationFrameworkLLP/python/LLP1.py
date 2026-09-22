@@ -276,11 +276,12 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                            
     # Reclustered jets definitions
     from JetRecConfig.JetRecConfig import registerAsInputConstit, JetRecCfg
-    from JetRecConfig.StandardSmallRJets import AntiKt4EMTopo
+    from JetRecConfig.StandardSmallRJets import AntiKt4EMTopo_deriv
     from JetRecConfig.JetDefinition import JetDefinition
     from JetRecConfig.StandardJetConstits import stdConstitDic as cst
 
-    registerAsInputConstit(AntiKt4EMTopo)
+    # Register explicitly the derivation AntiKt4EMTopo, now with unassoc muon segment ghosts
+    registerAsInputConstit(AntiKt4EMTopo_deriv)
     cst.AntiKt4EMTopoJets.label = "EMTopoRC"
     cst.AntiKt4TruthJets.label = "TruthRC"
 
