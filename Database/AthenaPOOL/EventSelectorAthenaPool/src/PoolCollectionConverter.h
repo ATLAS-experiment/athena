@@ -49,11 +49,15 @@ public:
    /// @return ICollectionCursor over all entries
    std::unique_ptr<pool::ICollectionCursor> selectAll();
 
+   const std::string& lastError() const { return m_lastError; }
+
 private: // data
-   std::string m_inputCollection;
-   unsigned int m_contextId;
-   const IPoolSvc* m_poolSvc;
+   std::string       m_inputCollection;
+   unsigned int      m_contextId;
+   const IPoolSvc*   m_poolSvc;
    pool::ICollection* m_poolCollection;
+   // Last error message from Collection open() (if any)
+   std::string       m_lastError;
 
 private: // hide copy and assignment
    PoolCollectionConverter(const PoolCollectionConverter& rhs);

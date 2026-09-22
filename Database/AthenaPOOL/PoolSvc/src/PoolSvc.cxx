@@ -399,23 +399,25 @@ StatusCode PoolSvc::connectCollection(const std::string& connection,
 
    // Check whether Collection Container exists.
    std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, connection);
-   if( dbH ) {
-      try {
-         if (dbH->openMode() == Io::INVALID) {
-            dbH->connectForRead();
-         }
-         std::map<unsigned int, unsigned int>::const_iterator maxFileIter = m_contextMaxFile.find(contextId);
-         if (maxFileIter != m_contextMaxFile.end() && maxFileIter->second > 0 && !dbH->fid().empty()) {
-            const Guid guid(dbH->fid());
-            m_guidLists[contextId].remove(guid);
-            m_guidLists[contextId].push_back(guid);
-            while (m_guidLists[contextId].size() > maxFileIter->second + 1) {
-               this->disconnectDb("FID:" + m_guidLists[contextId].begin()->toString(), contextId).ignore();
-            }
-         }
-      } catch (std::exception& e) {
-         ATH_MSG_INFO("connectCollection() failed to open '" << connection << "' - trying.");
+   if( !dbH ) {
+      ATH_MSG_INFO("connectCollection(): Failed to get Database Handle for: " << connection);
+      return StatusCode::FAILURE;
+   }
+   try {
+      if (dbH->openMode() == Io::INVALID) {
+         dbH->connectForRead();
       }
+      std::map<unsigned int, unsigned int>::const_iterator maxFileIter = m_contextMaxFile.find(contextId);
+      if (maxFileIter != m_contextMaxFile.end() && maxFileIter->second > 0 && !dbH->fid().empty()) {
+         const Guid guid(dbH->fid());
+         m_guidLists[contextId].remove(guid);
+         m_guidLists[contextId].push_back(guid);
+         while (m_guidLists[contextId].size() > maxFileIter->second + 1) {
+            this->disconnectDb("FID:" + m_guidLists[contextId].begin()->toString(), contextId).ignore();
+         }
+      }
+   } catch (std::exception& e) {
+      ATH_MSG_INFO("connectCollection() failed to open '" << connection << "' - trying.");
    }
    // For multithreaded processing (with multiple events in flight),
    // increase virtual tree size to accomodate back reads

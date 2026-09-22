@@ -53,8 +53,9 @@ StatusCode PoolCollectionConverter::initialize() {
    StatusCode sc = m_poolSvc->connectCollection(m_inputCollection, "Input", m_contextId);
    try {
       m_poolCollection = pool::CollectionService::open("Input", m_inputCollection, m_poolSvc->getInputContextSession(m_contextId));
+      m_lastError.clear();
    } catch (std::exception &e) {
-      // MN: we should print the e.what()
+      m_lastError = std::format("Failed to open collection '{}': {}", m_inputCollection, e.what());
    }
    if( sc.isRecoverable() || m_poolCollection == nullptr ) {
       return m_poolSvc->checkCollection(m_inputCollection, m_contextId, m_poolCollection == nullptr);

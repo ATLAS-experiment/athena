@@ -679,6 +679,9 @@ int EventSelectorAthenaPool::findEvent(int evtNum) const {
             std::unique_ptr<pool::ICollectionCursor> hi = pcc.selectAll();
             collection_size = hi->size();
          }
+         else {
+            ATH_MSG_ERROR( pcc.lastError() );
+         }
          if (i > 0) {
             m_firstEvt[i] = m_firstEvt[i - 1] + m_numEvt[i - 1];
          } else {

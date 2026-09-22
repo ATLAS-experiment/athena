@@ -133,9 +133,22 @@ namespace pool {
          ATH_MSG_ERROR( "No database name given" );
          throw std::runtime_error( "No database name (APR: RootCollection::open() )" );
       }
+      DatabaseSpecification::NameType dbNameType = DatabaseSpecification::UNDEFINED;
       if( m_fileName.starts_with("PFN:") ) {
+         dbNameType = DatabaseSpecification::PFN;
+      } else if( m_fileName.starts_with("LFN:") ) {
+         dbNameType = DatabaseSpecification::LFN;
+      } else if( m_fileName.starts_with("FID:") ) {
+         dbNameType = DatabaseSpecification::FID;
+      }
+      if( dbNameType == DatabaseSpecification::UNDEFINED ) {
+         // if no qualifier is specified, assume it's a PFN
+         dbNameType = DatabaseSpecification::PFN;
+      } else {
+         // remove the identified prefix
          m_fileName = m_fileName.substr(4);
       }
+
       if( !m_session ) {
          // not creating a new session to avoid playing with the filecatalog
          // working directly with the StorageSvc
@@ -151,16 +164,6 @@ namespace pool {
       } else {
          m_storageSvc = &m_session->getStorageSvc( m_description.type().type() );
          m_ownStorageSvc = false;
-         // if no other qualifier is specified, assume PFN
-         DatabaseSpecification::NameType dbNameType = DatabaseSpecification::PFN;
-         // LFN and FID can only be resolved if there is a session with connected FC
-         if( m_fileName.starts_with("LFN:") ) {
-            dbNameType = DatabaseSpecification::LFN;
-            m_fileName = m_fileName.substr(4);
-         } else if( m_fileName.starts_with("FID:") ) {
-            dbNameType = DatabaseSpecification::FID;
-            m_fileName = m_fileName.substr(4);
-         }
          m_database = m_session->databaseHandle( m_fileName, dbNameType );
          if( !m_database ) {
             throw std::runtime_error( "Could not retrieve a database handle to '" + m_fileName + "' (APR: RootCollection)" );
@@ -192,10 +195,13 @@ namespace pool {
          const std::string& oldDHContName = std::format("{}_DataHeader",  APRDefaults::ReadConfig::getDataHeaderName( m_fileDescr.FID() ));
          ATH_MSG_DEBUG("Opening RootCollection '" << m_fileName << "' using container prefix: " << m_containerPrefix );
          std::string tagContName = m_containerPrefix + "(";
+         // it seems merged files report multiple instances of the same container - avoid trying to process duplicates
+         std::set<std::string> seenContainers;
          for( const Token *t : containerTokens ) {
             Token token(t);      // need a non-const Token
             const std::string& contName = db.cntName(token);
-            if( contName.starts_with( tagContName ) ) {
+            if( contName.starts_with( tagContName ) and !seenContainers.contains( contName ) ) {
+               seenContainers.insert( contName );
                const std::string& attrName = contName.substr( tagContName.size(), contName.size() - tagContName.size() - 1 );
                const DbTypeInfo* typ_info = db.objectShape( token.classID() );
                ATH_MSG_DEBUG("  :container " << contName << " with attribute " << attrName << " of type: " << typ_info->clazz().Name());

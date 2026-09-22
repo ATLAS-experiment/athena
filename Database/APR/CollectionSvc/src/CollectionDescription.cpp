@@ -102,7 +102,7 @@ insertColumn( const std::string& columnName, const std::string& columnType )
 {
   if( columnType == tokenColumn().type() )  {
 	   std::string errorMsg = "Adding additional Token columns is not supported anymore.";
-      throw std::runtime_error( errorMsg + " (APR: \" CollectionDescription::insertColumn \" from \" CollectionSvc" );
+      throw std::runtime_error( errorMsg + " (APR:CollectionDescription::insertColumn()) " );
 
   }
   // Check if description for column already exists.
@@ -155,7 +155,7 @@ pool::CollectionDescription::attributeColumn( int columnId ) const
       std::ostringstream strm;
       strm << columnId;
       std::string errorMsg = "Attribute column with ID " + strm.str() + " does not exist.";
-      throw std::runtime_error( errorMsg + " (APR: \" CollectionDescription::attributeColumn\" from \" CollectionSvc" );
+      throw std::runtime_error( errorMsg + " (APR:CollectionDescription::attributeColumn()) " );
    }
 }
 
@@ -167,6 +167,6 @@ pool::CollectionDescription::checkNewColumnName( const std::string& name ) const
        ||  name == tokenColumn().name() )
    {
       std::string errorMsg = "Column with name `" + name + "' already exists.";
-      throw std::runtime_error( errorMsg + " (APR: \" CollectionDescription \" from \" CollectionSvc" );
+      throw std::runtime_error( errorMsg + " (APR:CollectionDescription::checkNewColumnName()) " );
    }
 }
