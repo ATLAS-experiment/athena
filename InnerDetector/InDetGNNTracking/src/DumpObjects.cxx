@@ -1158,7 +1158,7 @@ StatusCode InDet::DumpObjects::execute(const EventContext& ctx) {
 
     ElementLink<TrackCollection> tracklink;
     tracklink.setElement(const_cast<Trk::Track *>(*trackIterator));
-    tracklink.setStorableObject(*trackCollection);
+    tracklink.setStorableObject(*trackCollection, ctx);
     const ElementLink<TrackCollection> tracklink2 = tracklink;
     TrackTruthCollection::const_iterator found = trackTruthCollection->find(tracklink2);
 
