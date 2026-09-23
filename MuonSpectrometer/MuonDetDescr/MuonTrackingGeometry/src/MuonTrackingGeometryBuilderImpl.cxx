@@ -272,7 +272,7 @@ MuonTrackingGeometryBuilderImpl::trackingGeometryImpl(DetachedVolVec && stations
                     enclosedDetectorHalfZ = posZ;
                     ATH_MSG_WARNING( " z adjusted ");
                 } else {
-                    ATH_MSG_ERROR("assymetric Z dimensions - cannot recover " << negZ << "," << posZ);
+                    ATH_MSG_ERROR("asymetric Z dimensions - cannot recover " << negZ << "," << posZ);
                     return nullptr;
                 }
             }
@@ -679,12 +679,14 @@ MuonTrackingGeometryBuilderImpl::trackingGeometryImpl(DetachedVolVec && stations
                                                                      std::move(negativeMuonOuterBuffer),
                                                                      Trk::negativeFaceXY,
                                                                      "Container::NegOEndcap");
+    //negativeMuonOuterWheel, negativeMuonOuterBuffer are nullptr now
 
     posNavOEndcap = m_trackingVolumeHelper->glueTrackingVolumeArrays(std::move(positiveMuonOuterBuffer),
                                                                      Trk::positiveFaceXY,
                                                                      std::move(positiveMuonOuterWheel),
                                                                      Trk::negativeFaceXY,
                                                                      "Container::PosOEndcap");
+    //positiveMuonOuterWheel, positiveMuonOuterBuffer are nullptr now
 
 
     negativeMuonOuterEndcap = m_trackingVolumeHelper->glueTrackingVolumeArrays(std::move(negNavOEndcap),
@@ -692,12 +694,14 @@ MuonTrackingGeometryBuilderImpl::trackingGeometryImpl(DetachedVolVec && stations
                                                                                std::move(negativeMuonBigWheel),
                                                                                Trk::negativeFaceXY,
                                                                                "Container::NegOuterEndcap");
+    //negativeMuonBigWheel is nullptr now
 
     positiveMuonOuterEndcap = m_trackingVolumeHelper->glueTrackingVolumeArrays(std::move(positiveMuonBigWheel),
                                                                                Trk::positiveFaceXY,
                                                                                std::move(posNavOEndcap),
                                                                                Trk::negativeFaceXY,
                                                                                "Container::PosOuterEndcap");
+    //positiveMuonBigWheel is nullptr now
 
     // outer shields
     double outerEndcapZHalfSize = 0.5 * (aLVC.m_outerEndcapZ - aLVC.m_innerEndcapZ);
@@ -824,19 +828,15 @@ MuonTrackingGeometryBuilderImpl::trackingGeometryImpl(DetachedVolVec && stations
 
     trackingGeometry->addToGarbage(std::move(stations));
     trackingGeometry->addToGarbage(std::move(inertObjs));
-
-    volumeGarbage.push_back(std::move(negativeMuonOuterWheel));
-    volumeGarbage.push_back(std::move(negativeMuonBigWheel));
-    volumeGarbage.push_back(std::move(negativeMuonOuterBuffer));
-    volumeGarbage.push_back(std::move(positiveMuonOuterWheel));
+    
+    // negativeMuonOuterWheel , negativeMuonBigWheel, negativeMuonOuterBuffer, 
+    // positiveMuonOuterWheel, positiveMuonBigWheel, positiveMuonOuterBuffer are now null
 
     volumeGarbage.push_back(std::move(negativeMuonSmallWheel));
     volumeGarbage.push_back(std::move(positiveMuonSmallWheel));
     volumeGarbage.push_back(std::move(negativeECT));
     volumeGarbage.push_back(std::move(positiveECT));
-    volumeGarbage.push_back(std::move(positiveMuonBigWheel));
 
-    volumeGarbage.push_back(std::move(positiveMuonOuterBuffer));
     volumeGarbage.push_back(std::move(negDiskShield));
     volumeGarbage.push_back(std::move(posDiskShield));
 
