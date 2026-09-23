@@ -470,32 +470,27 @@ void Muon::MuonTrackSummaryHelperTool::calculateRoadHits(Trk::MuonTrackSummary::
     for (; pit != pit_end; ++pit) {
         const Muon::MdtPrepData& mdtPrd = **pit;  // hit
         const Identifier& id = mdtPrd.identify();
-
         bool isFirst = isFirstProjection(id);
         Trk::MuonTrackSummary::ChamberHitSummary::Projection& proj = isFirst ? chamberHitSummary.m_first : chamberHitSummary.m_second;
-
         const Trk::Surface& surf = mdtPrd.detectorElement()->surface(id);
-
-        const Trk::TrackParameters* exPars = nullptr;
-        if (pars.associatedSurface() == surf) {
-            exPars = &pars;
-        } else {
-            exPars = extrapolator->extrapolateDirectly(ctx, 
-                                                       pars, 
-                                                       surf, 
-                                                       Trk::anyDirection, false, Trk::muon).release();
-            if (!exPars) {
-                if (isStraightLine) {
-                    ATH_MSG_DEBUG(" Straight line propagation to prd " << m_idHelperSvc->toString(id) << " failed");
-                } else {
-                    ATH_MSG_DEBUG(" Curved track propagation to prd " << m_idHelperSvc->toString(id) << " failed");
-                }
-                continue;
-            }
+        // extrapolatedPars  owns an extrapolated TrackParameters, if one was created
+        std::unique_ptr<Trk::TrackParameters> extrapolatedPars;
+        //
+        if (pars.associatedSurface() != surf) {
+          extrapolatedPars = extrapolator->extrapolateDirectly(ctx, pars, surf, Trk::anyDirection, false, Trk::muon);
+          if (!extrapolatedPars) {
+              if (isStraightLine) {
+                  ATH_MSG_DEBUG(" Straight line propagation to prd " << m_idHelperSvc->toString(id) << " failed");
+              } else {
+                  ATH_MSG_DEBUG(" Curved track propagation to prd " << m_idHelperSvc->toString(id) << " failed");
+              }
+              continue;
+          }
         }
-
+        //non owning reference which can go out of scope safely
+        const Trk::TrackParameters& exPars = extrapolatedPars ? *extrapolatedPars : pars;
         // use exPars to get distance to wire
-        double distance = exPars->parameters()[Trk::locR];
+        double distance = exPars.parameters()[Trk::locR];
 
         // sometimes there is more than one hit in a tube,
         // which means there are two hits where the distance is the same but the tdc is different
@@ -512,9 +507,7 @@ void Muon::MuonTrackSummaryHelperTool::calculateRoadHits(Trk::MuonTrackSummary::
                                                         << " >= " << m_roadWidth);
             }
         }
-        // to avoid double deleting when track is deleted, only delete
-        // exPars when it's not the TrackParameters which was passed (pars)
-        if (exPars != &pars) delete exPars;
+        
     }
 
     // subtract the hits on the track in both projections:
