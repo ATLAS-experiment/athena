@@ -30,6 +30,7 @@ public:
 private:
 
   Gaudi::Property<bool> m_doVertexCorrection{this, "VertexCorrection", true};
+  Gaudi::Property<std::string> m_seedJet{this, "SeedJet", ""};
 
   SG::ReadDecorHandleKey<xAOD::EventInfo> m_aveIntPerXKey {this, 
       "averageInteractionsPerCrossingKey", 
@@ -45,6 +46,8 @@ private:
       "EventShapeKey",
       "Kt4LCTopoOriginEventShape",
       "EventShape key"};
+
+  xAOD::CaloCluster::State m_clusterState;
 
 };
 
