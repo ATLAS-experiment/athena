@@ -30,7 +30,7 @@ using namespace H5Utils::hist::detail;
 // Attribute read helpers
 // ------------------------------------------------------------------
 std::string read_str_attr(const H5::H5Object& obj,
-                          const std::string& key)
+                          const char * key)
 {
   H5::Attribute attr = obj.openAttribute(key);
   std::string val;
