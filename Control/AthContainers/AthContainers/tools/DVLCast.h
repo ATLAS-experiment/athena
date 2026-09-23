@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-, 20262026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthContainers/tools/DVLCast.h
  * @author scott snyder <snyder@bnl.gov>
@@ -22,6 +19,7 @@
 #include <typeinfo>
 #include <cstdlib>
 #include <cstddef>
+#include <print>
 
 
 namespace DataModel_detail {
@@ -67,17 +65,6 @@ struct DVLCast<DVL, false>
   {
     return static_cast<T*> (b);
   }
-
-
-  /**
-   * @brief Cast @a b to a @c const T*.
-   * @param b Pointer to cast.
-   */
-  template <class U>
-  static const T* cast (const U* b)
-  {
-    return static_cast<const T*> (b);
-  }
 };
 
 
@@ -121,30 +108,6 @@ struct DVLCast<DVL, true>
     }
     else
       return dynamic_cast<T*> (b);
-  }
-
-
-  /**
-   * @brief Cast @a b to a @c const T*.
-   * @param b Pointer to cast.
-   */
-  template <class U>
-  static const T* cast (const U* b)
-  {
-    // See above.
-    if (!b)
-      return 0;
-    if (typeid(*b) == typeid(T)) {
-      static ptrdiff_t offs = LONG_MAX;
-      if (offs == LONG_MAX) {
-        T* ret = dynamic_cast<const T*> (b);
-        offs = reinterpret_cast<char*>(ret) - reinterpret_cast<char*>(b);
-        return ret;
-      }
-      return reinterpret_cast<const T*> (reinterpret_cast<char*>(b) + offs);
-    }
-    else
-      return dynamic_cast<const T*> (b);
   }
 };
 

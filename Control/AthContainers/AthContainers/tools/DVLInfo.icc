@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthContainers/tools/DVLInfo.icc
@@ -231,7 +231,7 @@ void* DVLInfo<T>::clone (void* cont_p) const
 template <class T>
 const std::type_info* DVLInfo<T>::initHelper()
 {
-  static DVLInfo<T> inst;
+  static const DVLInfo<T> inst;
   return &inst.tinfo();
 }
 
