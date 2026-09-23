@@ -7,7 +7,7 @@ atlas_subdir( egammaAlgs )
 
 atlas_add_component( egammaAlgs
 		     src/*.cxx
-             src/components/*.cxx
+		     src/components/*.cxx
              INCLUDE_DIRS
 		     LINK_LIBRARIES AthenaBaseComps EventKernel xAODCaloEvent xAODEgamma xAODTruth GaudiKernel
 		     MCTruthClassifierLib CaloGeoHelpers CaloUtilsLib CaloDetDescrLib AthenaKernel  StoreGateLib
@@ -59,3 +59,4 @@ atlas_add_test( egammaTrackThinnerConfig_test
     SCRIPT python -m egammaAlgs.egammaTrackThinnerConfig
     POST_EXEC_SCRIPT noerror.sh)
 
+atlas_install_data(share/*.pkl)
