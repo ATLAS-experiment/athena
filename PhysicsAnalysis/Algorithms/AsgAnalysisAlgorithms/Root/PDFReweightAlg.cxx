@@ -21,6 +21,9 @@ namespace CP
     ATH_CHECK(m_EventInfoKey.initialize());
     ATH_CHECK(m_TruthEventKey.initialize());
 
+    if(m_additionalPdfPath != "")
+      LHAPDF::pathsAppend(m_additionalPdfPath);
+
     m_p0 = LHAPDF::mkPDF(m_inPDF);
     for (const auto& pdfstring : m_outPDF) {
       m_p1_vars.push_back(LHAPDF::mkPDF(pdfstring));
@@ -34,9 +37,6 @@ namespace CP
 
       ATH_CHECK(m_reweightKeys.back().initialize());
     }
-
-    if(m_additionalPdfPath != "")
-      LHAPDF::pathsAppend(m_additionalPdfPath);
 
     return StatusCode::SUCCESS;
   }
