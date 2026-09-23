@@ -50,7 +50,9 @@ namespace CP {
          }
 #else
         // naive implementation for AthAnalysis, I don't see any Ath Svc offer getting the output stream easily
-         outputFile = TFile::Open( m_outputStreamName.value().c_str(), "UPDATE" );
+         m_outputFile.reset( TFile::Open( m_outputStreamName.value().c_str(), "UPDATE" ) );
+         if (m_outputFile && m_outputFile->IsZombie()) m_outputFile.reset();
+         outputFile = m_outputFile.get();
 #endif
 
          if( !outputFile ) {
@@ -79,6 +81,12 @@ namespace CP {
 
    StatusCode RNtupleTreeMakerAlg::finalize() {
        m_writer.reset();
+#ifndef XAOD_STANDALONE
+       if (m_outputFile) {
+         m_outputFile->Close();
+         m_outputFile.reset();
+       }
+#endif
        return StatusCode::SUCCESS;
    }
 
