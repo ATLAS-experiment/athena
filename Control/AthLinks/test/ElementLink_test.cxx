@@ -774,6 +774,48 @@ void test3 (SGTest::TestStore& store)
   ElementLink<FooCont> el3;
   el3.setElement ((*foocont3a)[2]);
   assert (!el3.toPersistent());
+
+  EventContext ctx;
+  ctx.setExtension (Atlas::ExtendedEventContext (&store));
+
+  {
+    ElementLink<FooCont> el4;
+    ElementLinkBase_test::setLink(el4, sgkey, 2);
+    SG::ToTransient<ElementLink<FooCont> >::toTransient (el4, ctx);
+    assert (*el4.cptr() == (*foocont3)[2]);
+  }
+  {
+    ElementLink<FooCont> el4;
+    ElementLinkBase_test::setLink(el4, sgkey, 2);
+    SG::ToTransient<ElementLink<FooCont> >::toTransient (el4, &store);
+    assert (*el4.cptr() == (*foocont3)[2]);
+  }
+  {
+    std::vector<ElementLink<FooCont> > vel4 (1);
+    ElementLinkBase_test::setLink(vel4[0], sgkey, 2);
+    SG::ToTransient<std::vector<ElementLink<FooCont> > >::toTransient (vel4, ctx);
+    assert (*vel4[0].cptr() == (*foocont3)[2]);
+  }
+  {
+    std::vector<ElementLink<FooCont> > vel4 (1);
+    ElementLinkBase_test::setLink(vel4[0], sgkey, 2);
+    SG::ToTransient<std::vector<ElementLink<FooCont> > >::toTransient (vel4, &store);
+    assert (*vel4[0].cptr() == (*foocont3)[2]);
+  }
+  {
+    std::vector<std::vector<ElementLink<FooCont> > > vvel4 (1);
+    vvel4[0].resize (1);
+    ElementLinkBase_test::setLink(vvel4[0][0], sgkey, 2);
+    SG::ToTransient<std::vector<std::vector<ElementLink<FooCont> > > >::toTransient (vvel4, ctx);
+    assert (*vvel4[0][0].cptr() == (*foocont3)[2]);
+  }
+  {
+    std::vector<std::vector<ElementLink<FooCont> > > vvel4 (1);
+    vvel4[0].resize (1);
+    ElementLinkBase_test::setLink(vvel4[0][0], sgkey, 2);
+    SG::ToTransient<std::vector<std::vector<ElementLink<FooCont> > > >::toTransient (vvel4, &store);
+    assert (*vvel4[0][0].cptr() == (*foocont3)[2]);
+  }
 }
 
 
@@ -789,7 +831,7 @@ void test4 (SGTest::TestStore& store)
   store2.record (foocont4, "foocont4");
 
   EventContext ctx;
-  ctx.setExtension( Atlas::ExtendedEventContext(&store2) );
+  ctx.setExtension (Atlas::ExtendedEventContext (&store2));
 
   ElementLink<FooCont> el1 ("foocont4", 2, &store2);
   assert (*el1.cptr() == (*foocont4)[2]);
