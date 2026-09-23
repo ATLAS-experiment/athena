@@ -256,7 +256,7 @@ StatusCode TrackTimeExtensionAlg::decorateTrackParticle(
 
   } // END LOOP over TrackStateOnSurface
 
-  dh.layerHasExtensionHandle(*track_ptkl) = std::move(std::move(has_cluster_vec));
+  dh.layerHasExtensionHandle(*track_ptkl) = std::move(has_cluster_vec);
   dh.layerExtensionChi2Handle(*track_ptkl) = std::move(chi2_vec);
   dh.layerClusterRawTimeHandle(*track_ptkl) = std::move(raw_time_vec);
   dh.layerClusterTimeHandle(*track_ptkl) = std::move(time_vec);
