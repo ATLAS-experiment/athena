@@ -671,6 +671,13 @@ namespace CP
         // Create the primitive branch.
         br = tree.Branch( outputData.branchName.c_str(), m_data->toPtr(),
                           typeDesc.str().c_str() );
+        // Check that the branch creation succeeded.
+        if( ! br ) {
+          msg << MSG::ERROR << "Failed to create branch: " << outputData.branchName
+              << endmsg;
+          return StatusCode::FAILURE;
+        }
+
         if (branchConfig.basketSize.has_value())
           br->SetBasketSize(branchConfig.basketSize.value());
 
@@ -700,16 +707,16 @@ namespace CP
         // Create the object branch.
         m_dataPtr = m_data->toPtr();
         br = tree.Branch( outputData.branchName.c_str(), cl->GetName(), &m_dataPtr );
+        // Check that the branch creation succeeded.
+        if( ! br ) {
+          msg << MSG::ERROR << "Failed to create branch: " << outputData.branchName
+              << endmsg;
+          return StatusCode::FAILURE;
+        }
+
         if (branchConfig.basketSize.has_value())
           br->SetBasketSize(branchConfig.basketSize.value());
 
-      }
-
-      // Check that the branch creation succeeded.
-      if( ! br ) {
-        msg << MSG::ERROR << "Failed to create branch: " << outputData.branchName
-            << endmsg;
-        return StatusCode::FAILURE;
       }
 
       // Return gracefully.
