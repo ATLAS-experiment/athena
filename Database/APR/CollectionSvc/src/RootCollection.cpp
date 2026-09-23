@@ -129,10 +129,6 @@ namespace pool {
    void RootCollection::open()
    {
       ATH_MSG_VERBOSE( "Opening collection '" << m_fileName << "' in mode " << poolOptToRootOpt[m_mode] );
-      if( m_fileName.empty() ) {
-         ATH_MSG_ERROR( "No database name given" );
-         throw std::runtime_error( "No database name (APR: RootCollection::open() )" );
-      }
       DatabaseSpecification::NameType dbNameType = DatabaseSpecification::UNDEFINED;
       if( m_fileName.starts_with("PFN:") ) {
          dbNameType = DatabaseSpecification::PFN;
