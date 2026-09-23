@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrackParticleAnalysisAlg.h"
 #include "ActsEvent/TrackContainer.h"
 #include "ActsEvent/Decoration.h"
-#include "SGTools/CurrentEventStore.h"
 #include <iostream>
 #include <sstream>
 #include <iomanip>
