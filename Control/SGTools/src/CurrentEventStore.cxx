@@ -40,11 +40,15 @@ CurrentEventStore::Push::Push (IProxyDict* store)
 {
   EventContext ctx = Gaudi::Hive::currentContext();
   m_oldCtx = ctx;
+
   Atlas::ExtendedEventContext* ectx = Atlas::tryGetExtendedEventContext(ctx);
   if (ectx) {
     ectx->setProxy (store);
-    Gaudi::Hive::setCurrentContext (ctx);
   }
+  else {
+    ctx.setExtension (Atlas::ExtendedEventContext (store));
+  }
+  Gaudi::Hive::setCurrentContext (ctx);
 }
 
 
