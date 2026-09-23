@@ -184,14 +184,30 @@ StatusCode TauTrackRNNClassifier::classifyLRTTracks(std::vector<xAOD::TauTrack*>
     idScoreIso(*xTrack) = 0.;
     idScoreFake(*xTrack) = 0.;
 
+    double d0_weight = (xTrack->d0TJVA() ? xTrack->d0SigTJVA() / xTrack->d0TJVA(): 0);
+    double log10_pt_ratio = std::log10(xTrack->pt() / xTau.pt());
+    double abs_d0_sig = std::abs(xTrack->d0SigTJVA());
     double dR = xTau.p4().DeltaR(xTrack->p4());
+    double log10_rConv = std::log10(xTrack->rConv());
 
-    float weight = (xTrack->d0TJVA() ? xTrack->d0SigTJVA() / xTrack->d0TJVA(): 0);
-
-    // Cut values taken from a cut optimisation study
-    bool passed = (xTrack->pt() > 1000.0) && (dR < 0.2) && (weight > 40.);
-
-    ANA_MSG_DEBUG("xTrack: " << xTrack->pt() << " dR: " << dR << " weight: " << weight << " passed: " << passed);
+    // Cut values taken from a trained decision tree classifier
+    bool passed = false;
+    if (dR <= 0.20) {
+        if (d0_weight <= 32.19) {
+            // Captures high d0 tracks
+            if (log10_pt_ratio >= 0.08 && abs_d0_sig >= 5.95) {
+                passed = true;
+            }
+        } else {
+            if (log10_rConv >= 1.41) {
+                passed = true;
+            } else {
+                if (dR <= 0.03) {
+                    passed = true;
+                }
+            }
+        }
+    }
 
     if (passed) {
       xTrack->setFlag(xAOD::TauJetParameters::classifiedCharged, true);
