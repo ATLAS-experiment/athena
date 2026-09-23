@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrackingAnalysisAlgorithms/SecVertexTruthMatchAlg.h"
@@ -562,7 +562,7 @@ namespace CP {
     double maxDR = 0.0;
 
     xAOD::TrackParticle::ConstAccessor< std::vector< float > > accCovMatrixDiag( "definingParametersCovMatrixDiag" );
-
+    const std::string prefix = "RecoVertex/" + originType;
     // Loop over tracks to calculate derived quantities
     for(size_t t = 0; t < ntracks; t++){
       if(!trkParts[t].isValid()){
@@ -609,26 +609,26 @@ namespace CP {
       // Fill track-level histograms
       xAOD::TrackParticle::ConstAccessor<float> Trk_Chi2("chiSquared");
       xAOD::TrackParticle::ConstAccessor<float> Trk_nDoF("numberDoF");
-
+      
       if ( Trk_Chi2.isAvailable(trk) && Trk_Chi2(trk) && Trk_nDoF.isAvailable(trk) && Trk_nDoF(trk) )  {
-        hist("RecoVertex/" + originType + "_Trk_Chi2")->Fill(Trk_Chi2(trk) / Trk_nDoF(trk));
-        hist("RecoVertex/" + originType + "_Trk_nDoF")->Fill(Trk_nDoF(trk));
+        hist(prefix + "_Trk_Chi2")->Fill(Trk_Chi2(trk) / Trk_nDoF(trk));
+        hist(prefix + "_Trk_nDoF")->Fill(Trk_nDoF(trk));
       }
-      hist("RecoVertex/" + originType + "_Trk_D0")->Fill(trk_d0);
-      hist("RecoVertex/" + originType + "_Trk_Z0")->Fill(trk_z0);
-      hist("RecoVertex/" + originType + "_Trk_theta")->Fill(trk.definingParameters()[3]);
-      hist("RecoVertex/" + originType + "_Trk_qOverP")->Fill(trk.definingParameters()[4]);
-      hist("RecoVertex/" + originType + "_Trk_Eta")->Fill(trk.eta());
-      hist("RecoVertex/" + originType + "_Trk_Phi")->Fill(trk.phi0());
-      hist("RecoVertex/" + originType + "_Trk_E")->Fill(trk.e() / GeV);
-      hist("RecoVertex/" + originType + "_Trk_M")->Fill(trk.m() / GeV);
-      hist("RecoVertex/" + originType + "_Trk_Pt")->Fill(trk.pt() / GeV);
-      hist("RecoVertex/" + originType + "_Trk_Px")->Fill(trk.p4().Px() / GeV);
-      hist("RecoVertex/" + originType + "_Trk_Py")->Fill(trk.p4().Py() / GeV);
-      hist("RecoVertex/" + originType + "_Trk_Pz")->Fill(trk.p4().Pz() / GeV);
-      hist("RecoVertex/" + originType + "_Trk_charge")->Fill(trk.charge());
-      hist("RecoVertex/" + originType + "_Trk_errD0")->Fill(trk.definingParametersCovMatrix()(0,0));
-      hist("RecoVertex/" + originType + "_Trk_errZ0")->Fill(trk.definingParametersCovMatrix()(1,1));
+      hist(prefix + "_Trk_D0")->Fill(trk_d0);
+      hist(prefix + "_Trk_Z0")->Fill(trk_z0);
+      hist(prefix + "_Trk_theta")->Fill(trk.definingParameters()[3]);
+      hist(prefix + "_Trk_qOverP")->Fill(trk.definingParameters()[4]);
+      hist(prefix + "_Trk_Eta")->Fill(trk.eta());
+      hist(prefix + "_Trk_Phi")->Fill(trk.phi0());
+      hist(prefix + "_Trk_E")->Fill(trk.e() / GeV);
+      hist(prefix + "_Trk_M")->Fill(trk.m() / GeV);
+      hist(prefix + "_Trk_Pt")->Fill(trk.pt() / GeV);
+      hist(prefix + "_Trk_Px")->Fill(trk.p4().Px() / GeV);
+      hist(prefix + "_Trk_Py")->Fill(trk.p4().Py() / GeV);
+      hist(prefix + "_Trk_Pz")->Fill(trk.p4().Pz() / GeV);
+      hist(prefix + "_Trk_charge")->Fill(trk.charge());
+      hist(prefix + "_Trk_errD0")->Fill(trk.definingParametersCovMatrix()(0,0));
+      hist(prefix + "_Trk_errZ0")->Fill(trk.definingParametersCovMatrix()(1,1));
     }
 
     const double dir = sumP4.Vect().Dot( reco_pos ) / sumP4.Vect().Mag() / reco_pos.Mag();
@@ -637,26 +637,30 @@ namespace CP {
     xAOD::Vertex::ConstAccessor<float> nDoF("numberDoF");
 
     // Fill vertex-level histograms
-    hist("RecoVertex/" + originType + "_x")->Fill(secVtx->x());
-    hist("RecoVertex/" + originType + "_y")->Fill(secVtx->y());
-    hist("RecoVertex/" + originType + "_z")->Fill(secVtx->z());
-    hist("RecoVertex/" + originType + "_Lxy")->Fill(Lxy);
-    hist("RecoVertex/" + originType + "_ntrk")->Fill(ntracks);
-    hist("RecoVertex/" + originType + "_pT")->Fill(sumP4.Pt() / GeV);
-    hist("RecoVertex/" + originType + "_eta")->Fill(sumP4.Eta());
-    hist("RecoVertex/" + originType + "_phi")->Fill(sumP4.Phi());
-    hist("RecoVertex/" + originType + "_mass")->Fill(sumP4.M() / GeV);
-    hist("RecoVertex/" + originType + "_mu")->Fill(sumP4.M()/maxDR / GeV);
-    hist("RecoVertex/" + originType + "_chi2")->Fill(Chi2(*secVtx)/nDoF(*secVtx));
-    hist("RecoVertex/" + originType + "_dir")->Fill(dir);
-    hist("RecoVertex/" + originType + "_charge")->Fill(charge);
-    hist("RecoVertex/" + originType + "_H")->Fill(H / GeV);
-    hist("RecoVertex/" + originType + "_HT")->Fill(HT / GeV);
-    hist("RecoVertex/" + originType + "_minOpAng")->Fill(minOpAng);
-    hist("RecoVertex/" + originType + "_maxOpAng")->Fill(maxOpAng);
-    hist("RecoVertex/" + originType + "_mind0")->Fill(minD0);
-    hist("RecoVertex/" + originType + "_maxd0")->Fill(maxD0);
-    hist("RecoVertex/" + originType + "_maxdR")->Fill(maxDR);
+    hist(prefix + "_x")->Fill(secVtx->x());
+    hist(prefix + "_y")->Fill(secVtx->y());
+    hist(prefix + "_z")->Fill(secVtx->z());
+    hist(prefix + "_Lxy")->Fill(Lxy);
+    hist(prefix + "_ntrk")->Fill(ntracks);
+    hist(prefix + "_pT")->Fill(sumP4.Pt() / GeV);
+    hist(prefix + "_eta")->Fill(sumP4.Eta());
+    hist(prefix + "_phi")->Fill(sumP4.Phi());
+    hist(prefix + "_mass")->Fill(sumP4.M() / GeV);
+    auto mu = std::numeric_limits<double>::max();
+    if (maxDR != 0.)[[likely]]{
+      mu = sumP4.M()/maxDR / GeV;
+    }
+    hist(prefix + "_mu")->Fill(mu);
+    hist(prefix + "_chi2")->Fill(Chi2(*secVtx)/nDoF(*secVtx));
+    hist(prefix + "_dir")->Fill(dir);
+    hist(prefix + "_charge")->Fill(charge);
+    hist(prefix + "_H")->Fill(H / GeV);
+    hist(prefix + "_HT")->Fill(HT / GeV);
+    hist(prefix + "_minOpAng")->Fill(minOpAng);
+    hist(prefix + "_maxOpAng")->Fill(maxOpAng);
+    hist(prefix + "_mind0")->Fill(minD0);
+    hist(prefix + "_maxd0")->Fill(maxD0);
+    hist(prefix + "_maxdR")->Fill(maxDR);
   }
 
 } // namespace CP
