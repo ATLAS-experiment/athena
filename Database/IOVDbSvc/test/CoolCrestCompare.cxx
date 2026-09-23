@@ -100,6 +100,22 @@ public:
       if(result)
 	    std::cout<<"The folder \""<<m_folder<<"\" is the same in COOL and CREST at timestamp: "<< vkey<<std::endl;
       else{
+	    if(!f2.fail()){
+		f2.seekg(0, std::ifstream::beg);    
+		std::string line;
+		while (std::getline(f2, line)) {
+		    if (line.starts_with("\"data_array\"") ) {
+			size_t pos = line.find(":");
+		        if(pos>0){
+			   std::string line2 = line.substr(pos+1);
+			   if(line2.size()<=5){
+			      std::cerr<<"ERROR in Crest. CREST output has no data"<<std::endl;
+			      return;
+			   }
+			}	
+    		    }	
+    		}
+	    }  
 	    std::cout<<"The folder \""<<m_folder<<"\" is different in COOL and CREST at timestamp: "<<vkey<<std::endl;
 	    std::cout<<"To check differences use the following command:"<<std::endl;
 	    std::cout<<"diff "<<p1<<" "<<p2<<std::endl;
@@ -126,6 +142,10 @@ public:
     m_crest_tag = cresttagmap[m_folder];
     if(m_crest_tag.size()==0){
       std::cerr<<"ERROR in Crest. No folder:\""<<m_folder<<"\" in Global tag:\""<<m_gTagCrest<<"\""<<std::endl;
+      exit(1);
+    }
+    if(m_tag.size()>0 && m_tag!=m_crest_tag){
+      std::cerr<<"ERROR in Crest. Global tag for folder :\""<<m_folder<<"\" has following tag: \""<<m_crest_tag<<"\". Input tag is :\""<<m_tag<<"\""<<std::endl;
       exit(1);
     }
     CoralCrestManager mg(m_crest_str,m_crest_tag); 
