@@ -712,6 +712,9 @@ bool container_feature_test(HLT::Navigation* hns) {
 //****************************************************************************************
 bool serialize_test(HLT::Navigation* hns, HLT::Navigation* newhns) {
   BEGIN_TEST("serialize test");
+  if (!hns or !newhns){
+    REPORT_AND_STOP("Input pointer to serialize_test is null.");
+  }
   std::vector<uint32_t> serialized;
   std::vector<unsigned> breaks;
   hns->serialize(serialized, breaks);
