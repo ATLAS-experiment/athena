@@ -83,16 +83,17 @@ StatusCode LArLATOMEDecoder::convert(const RawEvent* re, const LArLATOMEMapping*
     for (const uint32_t* pRob : robs) {
       try {
         ROBFragment robFrag(pRob);
+        uint32_t latomeSourceID = robFrag.rod_source_id();
         if (m_protectSourceId) {
-          uint32_t latomeSourceID = robFrag.rod_source_id();
           if (!(latomeSourceID & 0x1000)) {
             ATH_MSG_DEBUG(" discarding non latome source ID " << std::hex << latomeSourceID);
             continue;
           }
           ATH_MSG_DEBUG(" found latome source ID " << std::hex << latomeSourceID);
         }
+		const std::vector<HWIdentifier> LATOME_Channels = map->getChFromSource(latomeSourceID); // this is a cache for all the channels for a given LATOMEID
         EventProcess ev(this, 0, 0, 0, 0, accdigits, caccdigits, header_coll);
-        ev.fillCollection(&robFrag, map, onoffmap, clmap);
+        ev.fillCollection(&robFrag, &LATOME_Channels, onoffmap, clmap);
       } catch (eformat::Issue& ex) {
         ATH_MSG_WARNING(" exception thrown by ROBFragment, badly corrupted event. Abort decoding ");
         if (accdigits)
@@ -118,8 +119,8 @@ StatusCode LArLATOMEDecoder::convert(const std::vector<const OFFLINE_FRAGMENTS_N
   if (robFrags.size() > 0) {
     for (const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment* pRob : robFrags) {
       try {
+        uint32_t latomeSourceID = pRob->rod_source_id();
         if (m_protectSourceId) {
-          uint32_t latomeSourceID = pRob->rod_source_id();
           if (!(latomeSourceID & 0x1000)) {
             ATH_MSG_DEBUG(" discarding non latome source ID " << std::hex << latomeSourceID);
             continue;
@@ -127,7 +128,8 @@ StatusCode LArLATOMEDecoder::convert(const std::vector<const OFFLINE_FRAGMENTS_N
           ATH_MSG_DEBUG(" found latome source ID " << std::hex << latomeSourceID);
         }
         EventProcess ev(this, adc_coll, adc_bas_coll, et_coll, et_id_coll, 0, 0, header_coll);
-        ev.fillCollection(pRob, map, nullptr, nullptr);
+        const std::vector<HWIdentifier> LATOME_Channels = map->getChFromSource(latomeSourceID); // this is a cache for all the channels for a given LATOMEID
+        ev.fillCollection(pRob, &LATOME_Channels, nullptr, nullptr);
       } catch (eformat::Issue& ex) {
         ATH_MSG_WARNING(" exception thrown by ROBFragment, badly corrupted event. Abort decoding ");
         if (adc_coll)
@@ -215,7 +217,7 @@ LArLATOMEDecoder::EventProcess::EventProcess(const LArLATOMEDecoder* decoderInpu
   }
 }
 
-bool LArLATOMEDecoder::EventProcess::compareOrSet(Word& param, Word value, bool compare) {
+inline bool LArLATOMEDecoder::EventProcess::compareOrSet(Word& param, Word value, bool compare) {
   if (!compare) {
     param = value;
     return true;
@@ -331,7 +333,7 @@ unsigned int LArLATOMEDecoder::EventProcess::decodeHeader(const uint32_t* p, uns
   return m_monHeaderSize + m_nWordsPerPacket + offset;
 }
 
-int LArLATOMEDecoder::EventProcess::signEnergy(unsigned int energy) {
+inline int LArLATOMEDecoder::EventProcess::signEnergy(unsigned int energy) {
 
   if (energy & (1 << 17))
     return energy - pow(2, 18);
@@ -354,7 +356,7 @@ unsigned int LArLATOMEDecoder::EventProcess::bytesPerChannel(MonDataType at0, Mo
   return b;
 }
 
-void LArLATOMEDecoder::EventProcess::increaseWordShift(unsigned int& wordshift) {
+inline void LArLATOMEDecoder::EventProcess::increaseWordShift(unsigned int& wordshift) {
   ++wordshift;
   if (m_packetEnd[m_iPacket] == wordshift) {
     ++m_iPacket;
@@ -363,7 +365,7 @@ void LArLATOMEDecoder::EventProcess::increaseWordShift(unsigned int& wordshift) 
   }
 }
 
-void LArLATOMEDecoder::EventProcess::increaseByteShift(unsigned int& wordshift, unsigned int& byteshift) {
+inline void LArLATOMEDecoder::EventProcess::increaseByteShift(unsigned int& wordshift, unsigned int& byteshift) {
   ++byteshift;
   if (byteshift == 4) {
     increaseWordShift(wordshift);
@@ -371,11 +373,11 @@ void LArLATOMEDecoder::EventProcess::increaseByteShift(unsigned int& wordshift, 
   }
 }
 
-void LArLATOMEDecoder::EventProcess::decodeByte(unsigned int& byte, unsigned int wordshift, unsigned int byteshift, const uint32_t* p) {
+inline void LArLATOMEDecoder::EventProcess::decodeByte(unsigned int& byte, unsigned int wordshift, unsigned int byteshift, const uint32_t* p) {
   byte = ((std::byteswap(p[wordshift])) >> (8 * (4 - 1 - byteshift))) & 0xff;
 }
 
-void LArLATOMEDecoder::EventProcess::decodeWord(unsigned int& word, unsigned int& wordshift, unsigned int& byteshift, const uint32_t* p) {
+inline void LArLATOMEDecoder::EventProcess::decodeWord(unsigned int& word, unsigned int& wordshift, unsigned int& byteshift, const uint32_t* p) {
   unsigned int msb = 0;
   unsigned int lsb = 0;
   decodeByte(msb, wordshift, byteshift, p);
@@ -385,7 +387,7 @@ void LArLATOMEDecoder::EventProcess::decodeWord(unsigned int& word, unsigned int
   word = lsb | (msb << 8);
 }
 
-void LArLATOMEDecoder::EventProcess::decodeChannel(unsigned int& wordshift, unsigned int& byteshift, const uint32_t* p, MonDataType at0, MonDataType at1,
+inline void LArLATOMEDecoder::EventProcess::decodeChannel(unsigned int& wordshift, unsigned int& byteshift, const uint32_t* p, MonDataType at0, MonDataType at1,
                                                    unsigned int& at0Data, unsigned int& at1Data, unsigned int& saturation, bool& at0val, bool& at1val) {
 
   // the structure of data is always consisting of 2,3,4 or 5 bytes depending on the recipe.
@@ -443,7 +445,7 @@ void LArLATOMEDecoder::EventProcess::decodeChannel(unsigned int& wordshift, unsi
   }
 }
 
-void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, const LArLATOMEMapping* map, const LArOnOffIdMapping* onoffmap,
+void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, const std::vector<HWIdentifier>* LATOME_Channels, const LArOnOffIdMapping* onoffmap,
                                                     const LArCalibLineMapping* clmap) {
   /// some of this info should be used in the LatomeHeader class and for cross checks also (same as for the mon header)
   const unsigned int sourceID = robFrag->rob_source_id();
@@ -765,7 +767,7 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
                                       << " at0val " << at0val << " at1val " << at1val << " nsc " << nsc);
 
           /// lets fill now, using the older code structure but this should be change to support having energy.
-          const auto SCID = map ? map->getChannelID(m_nthLATOME, nsc) : hwidEmpty;
+		  const HWIdentifier SCID = nsc < (int) LATOME_Channels->size() ? (*LATOME_Channels)[nsc] : hwidEmpty;
           if (SCID == hwidEmpty) {
             ATH_MSG_DEBUG("No mapping for ch: " << std::dec << nsc);
           }
@@ -892,10 +894,10 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
   }  /// Loop over BC
 
   if (!m_isAveraged && !m_isAutoCorr) {
-    fillRaw(map);
+    fillRaw(LATOME_Channels);
   } else {
     if (onoffmap && clmap) {
-      fillCalib(map, onoffmap, clmap);
+      fillCalib(LATOME_Channels, onoffmap, clmap);
     } else {
       ATH_MSG_ERROR("Do not have mapping !!!");
     }
@@ -903,7 +905,7 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
   fillHeader();
 }
 
-void LArLATOMEDecoder::EventProcess::fillCalib(const LArLATOMEMapping* map, const LArOnOffIdMapping* cablingLeg, const LArCalibLineMapping* clcabling) {
+void LArLATOMEDecoder::EventProcess::fillCalib(const std::vector<HWIdentifier>* LATOME_Channels, const LArOnOffIdMapping* cablingLeg, const LArCalibLineMapping* clcabling) {
 
   CaloGain::CaloGain gain=CaloGain::LARHIGHGAIN;
   uint32_t DAC_value=0;
@@ -959,7 +961,7 @@ void LArLATOMEDecoder::EventProcess::fillCalib(const LArLATOMEMapping* map, cons
   unsigned nWarnings = 0;
   for (SuperCell ch = 0; ch < N_LATOME_CHANNELS; ++ch) {
     LArCalibParams* calibParams = 0;
-    auto SCID = map ? map->getChannelID(m_nthLATOME, ch) : hwidEmpty;
+	HWIdentifier SCID = ch < (int) LATOME_Channels->size() ? (*LATOME_Channels)[ch] : hwidEmpty;
     if (SCID == hwidEmpty) {
       ATH_MSG_DEBUG("No mapping for ch: " << std::dec << ch);
       continue;
@@ -1072,11 +1074,11 @@ void LArLATOMEDecoder::EventProcess::fillCalib(const LArLATOMEMapping* map, cons
 }
 
 // Pass ADC values from an event
-void LArLATOMEDecoder::EventProcess::fillRaw(const LArLATOMEMapping* map) {
+void LArLATOMEDecoder::EventProcess::fillRaw(const std::vector<HWIdentifier>* LATOME_Channels) {
   // const CaloGain::CaloGain dummyGain = CaloGain::LARHIGHGAIN;
   const HWIdentifier hwidEmpty;
   for (SuperCell ch = 0; ch < N_LATOME_CHANNELS; ++ch) {
-    const auto SCID = map ? map->getChannelID(m_nthLATOME, ch) : hwidEmpty;
+	const HWIdentifier SCID = ch < (int) LATOME_Channels->size() ? (*LATOME_Channels)[ch] : hwidEmpty;
     if (SCID == hwidEmpty) {
       ATH_MSG_DEBUG("No mapping for ch: " << std::dec << ch);
       continue;
