@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file AthenaPoolAddressProviderSvc.cxx
@@ -8,7 +8,6 @@
  **/
 
 #include "AthenaPoolAddressProviderSvc.h"
-#include "SGTools/CurrentEventStore.h"
 #include "registerKeys.h"
 
 #include "PersistentDataModel/AthenaAttributeList.h"
