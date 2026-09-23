@@ -31,3 +31,11 @@ atlas_add_component( Pythia8B_i
 # Install files from the package:
 atlas_install_joboptions( share/common/*.py )
 
+atlas_install_python_modules( python/*.py
+                              POST_BUILD_CMD ${ATLAS_FLAKE8} )
+
+if( NOT XAOD_STANDALONE )
+   atlas_add_test( Pythia8BConfig
+                   SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/test/Pythia8BConfigTest.py
+                   POST_EXEC_SCRIPT noerror.sh )
+endif()
