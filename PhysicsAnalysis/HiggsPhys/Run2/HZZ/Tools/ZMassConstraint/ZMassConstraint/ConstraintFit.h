@@ -114,7 +114,7 @@ namespace ZMassConstraint
 
         // Calibration tools
         ToolHandle<CP::IEgammaCalibrationAndSmearingTool>  m_energyRescaler; // electron resolution
-        ToolHandle<CP::IMuonCalibrationAndSmearingTool>    m_mu_resolSFTool; // Muon error rescaling
+        // ToolHandle<CP::IMuonCalibrationAndSmearingTool>    m_mu_resolSFTool; // Muon error rescaling
 
         ConstraintFitInput  m_theInput;
         unsigned int        m_parameters;
