@@ -39,7 +39,7 @@ StatusCode TracccTritonTool::getTracks(
     AthInfer::InputDataMap inputData;
     inputData["CELLS"] = std::make_pair(
         std::vector<int64_t>{static_cast<int64_t>(cellBytes.size())},
-        std::move(cellBytes));
+        cellBytes);
 
     AthInfer::OutputDataMap outputData;
     outputData["TRK_PARAMS"] = std::make_pair(
