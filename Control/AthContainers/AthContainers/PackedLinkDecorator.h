@@ -28,6 +28,7 @@
 #include "AthContainers/tools/AuxElementConcepts.h"
 #include "AthLinks/DataLink.h"
 #include "CxxUtils/checker_macros.h"
+#include <ranges>
 #include <string>
 #include <typeinfo>
 #include <iterator>
@@ -94,8 +95,8 @@ public:
 
 
   /// Transform a span over @c PackedLink to a span over @c ElementLink.
-  using const_span =
-    CxxUtils::transform_view_with_at<const_PackedLink_span, ConstConverter_t>;
+  using const_span = std::ranges::transform_view<const_PackedLink_span,
+                                                 ConstConverter_t>;
 
 
   /// Writable proxy for @c PackedLink appearing like an @c ElementLink.
@@ -104,8 +105,8 @@ public:
 
   /// Transform a non-const span of @c PackedLink to a range
   /// of @c ElementLink proxies.
-  using span = CxxUtils::transform_view_with_at<PackedLink_span,
-                                                detail::ELProxyInSpanConverter<CONT> >;
+  using span = std::ranges::transform_view<PackedLink_span,
+                                           detail::ELProxyInSpanConverter<CONT> >;
 
 
   /// Type the user sees.
@@ -415,8 +416,8 @@ public:
 
   /// Transform a span over vector of @c PackedLink to a
   /// span over span over @c ElementLink.
-  using const_span =
-    CxxUtils::transform_view_with_at<const_PackedLinkVector_span, ConstVectorTransform_t>;
+  using const_span = std::ranges::transform_view<const_PackedLinkVector_span,
+                                                 ConstVectorTransform_t>;
 
 
   /// Presents a vector of @c PackedLink as a range of @c ElementLink proxies.
@@ -426,8 +427,8 @@ public:
   /// Transform a span over vector of @c PackedLink to a
   /// span over span over @c ElementLink proxies.
   using ELSpanConverter = detail::ELSpanConverter<CONT, VALLOC>;
-  using span =
-    CxxUtils::transform_view_with_at<PackedLinkVector_span, ELSpanConverter >;
+  using span = std::ranges::transform_view<PackedLinkVector_span,
+                                           ELSpanConverter >;
 
 
   /// Type the user sees.

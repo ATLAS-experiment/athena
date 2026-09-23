@@ -27,8 +27,8 @@
 #include "AthContainers/tools/JaggedVecConversions.h"
 #include "CxxUtils/ranges.h"
 #include "CxxUtils/checker_macros.h"
-#include "CxxUtils/range_with_at.h"
 #include "CxxUtils/range_with_conv.h"
+#include <ranges>
 #include <string>
 #include <typeinfo>
 #include <iterator>
@@ -104,8 +104,8 @@ public:
   using Payload_span = typename AuxDataTraits<Payload_t, PayloadAlloc_t>::span;
 
   /// Spans over the entire jagged vector, both writable and not.
-  using const_span = CxxUtils::transform_view_with_at<const_Elt_span, ConstConverter_t>;
-  using span = CxxUtils::transform_view_with_at<Elt_span, Converter_t>;
+  using const_span = std::ranges::transform_view<const_Elt_span, ConstConverter_t>;
+  using span = std::ranges::transform_view<Elt_span, Converter_t>;
 
   /// Const span resulting from the conversion.
   using element_type = typename ConstConverter_t::element_type;

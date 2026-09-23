@@ -23,7 +23,7 @@
 #include "AthContainers/AuxTypeRegistry.h"
 #include "CxxUtils/ranges.h"
 #include "CxxUtils/checker_macros.h"
-#include "CxxUtils/range_with_at.h"
+#include <ranges>
 #include <string>
 #include <typeinfo>
 
@@ -102,7 +102,7 @@ public:
   using Payload_span = typename AuxDataTraits<Payload_t, PayloadAlloc_t>::span;
 
   /// Span over the entire jagged vector.
-  using span = CxxUtils::transform_view_with_at<Elt_span, Converter_t>;
+  using span = std::ranges::transform_view<Elt_span, Converter_t>;
 
   /// The writable type we return.
   using reference_type = JVecProxy;
