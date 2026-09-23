@@ -499,6 +499,7 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
 				//coverity[WRAPPER_ESCAPE]
 				//cppcheck-suppress objectIndex
 				edgeStorage[idx].m_n2 = &nodes[node2Idx];
+				//cppcheck-suppress objectIndex
 				edgeStorage[idx].m_level = 1;
 				edgeStorage[idx].m_nNei = nNei;
 				for(int k=0;k<nNei;k++) {
