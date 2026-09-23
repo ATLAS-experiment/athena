@@ -198,8 +198,8 @@ namespace ActsTrk
 
     ATH_CHECK( propagateDetectorElementStatusToMeasurements(*(volumeIdToDetectorElementCollMap.cptr()), det_el_status_arr, measurements) );
 
-    if (m_trackStatePrinter.isSet()) {
-      m_trackStatePrinter->printMeasurements(ctx, uncalibratedMeasurementContainers, measurements.measurementOffsets());
+    if (m_trackFindingMonitor.isEnabled()) {
+      m_trackFindingMonitor->measurements(ctx, uncalibratedMeasurementContainers, measurements.measurementOffsets());
     }
 
     detail::DuplicateSeedDetector duplicateSeedDetector(total_seeds,
@@ -264,6 +264,10 @@ namespace ActsTrk
     std::optional<std::vector<unsigned int>> trackCategories;
     if (m_ambi) trackCategories.emplace();  // only needed if m_ambiStrategy == END_OF_TF
 
+    if ( m_trackFindingMonitor.isEnabled() ) {
+       m_trackFindingMonitor->newEvent(ctx, detContext.geometry);
+    }
+
     // Perform the track finding for all initial parameters.
     for (std::size_t icontainer = 0; icontainer < seedContainers.size(); ++icontainer)
       {
@@ -282,6 +286,10 @@ namespace ActsTrk
                              *pSurface.get(),
                              trackCategories));
       }
+
+    if ( m_trackFindingMonitor.isEnabled() ) {
+       m_trackFindingMonitor->finalizeEvent(ctx);
+    }
 
     ATH_MSG_DEBUG("    \\__ Created " << actsTracksContainer.size() << " tracks");
 
@@ -451,7 +459,7 @@ namespace ActsTrk
     ATH_MSG_DEBUG("Invoke track finding with " << seeds.size() << ' ' << seedType << " seeds.");
 
 
-    std::size_t nPrinted = 0;
+    bool first_seed=true;
 
     // Function for Estimate Track Parameters
     auto retrieveSurfaceFunction =
@@ -492,7 +500,7 @@ namespace ActsTrk
           ++event_stat[category_i][kNTotalSeeds];
           ++event_stat[category_i][kNDuplicateSeeds];
           if (m_storeDestinies) destiny->at(iseed) = DestinyType::DUPLICATE;
-          if (!m_trackStatePrinter.isSet()) continue;  // delay continue to estimate track parms for TrackStatePrinter?
+          if (!m_trackFindingMonitor.isEnabled()) continue;  // delay continue to estimate track parms for TrackStatePrinter?
         }
 
         // Get first estimate of parameters from the seed
@@ -515,7 +523,10 @@ namespace ActsTrk
           continue;
         }
 
-        printSeed(iseed, detContext, seeds, *optTrackParams, measurementIndex, nPrinted, seedType);
+        if (m_trackFindingMonitor.isEnabled()) {
+           m_trackFindingMonitor->newSeed(detContext.geometry, seeds[iseed], *optTrackParams, measurementIndex, iseed, false, seedType, first_seed);
+        }
+        first_seed=false;
         if (isDupSeed) continue;  // skip now if not done before
 
         double etaInitial = -std::log(std::tan(0.5 * optTrackParams->theta()));
@@ -566,8 +577,6 @@ namespace ActsTrk
           continue;
         }
         auto &tracksForSeed = result.value();
-
-
 
         std::size_t ntracks = 0ul;
 
@@ -707,8 +716,6 @@ namespace ActsTrk
           ++event_stat[category_i][kMultipleBranches];
         }
 
-        if (m_trackStatePrinter.isSet())
-          std::cout << std::flush;
       } // loop on seeds
 
     ATH_MSG_DEBUG("Completed " << seedType << " track finding with " << computeStatSum(typeIndex, kNOutputTracks, event_stat) << " track candidates.");
@@ -805,24 +812,6 @@ namespace ActsTrk
     const xAOD::SpacePoint::ConstVectorMap pos = sp->globalPosition();
     double etaSeed = std::atanh(pos[2] / pos.norm());
     return getStatCategory(typeIndex, etaSeed);
-  }
-
-  void TrackFindingAlg::printSeed(unsigned int iseed,
-                                  const DetectorContextHolder& detContext,
-                                  const ActsTrk::SeedContainer& seeds,
-                                  const Acts::BoundTrackParameters &seedParameters,
-                                  const detail::MeasurementIndex &measurementIndex,
-                                  std::size_t& nPrinted,
-                                  const char *seedType,
-                                  bool isKF) const
-  {
-    if (not m_trackStatePrinter.isSet()) return;
-
-    if (nPrinted == 0) {
-      ATH_MSG_INFO("CKF results for " << seeds.size() << ' ' << seedType << " seeds:");
-    }
-    ++nPrinted;
-    m_trackStatePrinter->printSeed(detContext.geometry, seeds[iseed], seedParameters, measurementIndex, iseed, isKF);
   }
 
 namespace {
@@ -987,8 +976,8 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
     if ( not trackFinder().trackSelector.isValidTrack(track) or
          not selectCountsFinal(track)) {
       ATH_MSG_DEBUG("Track " << ntracks << " from " << seedType << " seed " << iseed << " failed track selection");
-      if ( m_trackStatePrinter.isSet() ) {
-        m_trackStatePrinter->printTrack(detContext.geometry, tracksContainerTemp, track, measurementIndex, true);
+      if ( m_trackFindingMonitor.isEnabled() ) {
+        m_trackFindingMonitor->newTrack(detContext.geometry, tracksContainerTemp, track, measurementIndex, true);
       }
       return StatusCode::SUCCESS;
     }
@@ -1012,7 +1001,10 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
     };
 
     if (not m_countSharedHits) {
-      return StatusCode::SUCCESS;
+       if ( m_trackFindingMonitor.isEnabled() ) {
+          m_trackFindingMonitor->newTrack(detContext.geometry, tracksContainerTemp, track, measurementIndex, false);
+       }
+       return StatusCode::SUCCESS;
     }
 
     auto [nShared, nBadTrackMeasurements] = sharedHits.computeSharedHits(actsDestProxy, actsTracksContainer, measurementIndex);
@@ -1025,6 +1017,10 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
 
     event_stat[category_i][kNTotalSharedHits] += nShared;
 
+    if ( m_trackFindingMonitor.isEnabled() ) {
+       m_trackFindingMonitor->newTrack(detContext.geometry, tracksContainerTemp, track, measurementIndex,
+                                       m_ambiStrategy==2u && actsDestProxy.nSharedHits() > m_maximumSharedHits );
+    }
     if (m_ambiStrategy == 2u) { // run the ambiguity during track selection
 
       if (actsDestProxy.nSharedHits() <= m_maximumSharedHits) {
@@ -1060,9 +1056,6 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
     else {
       // run ambi later
       setTrackCategory();
-      if (m_trackStatePrinter.isSet()) {
-        m_trackStatePrinter->printTrack(detContext.geometry, actsTracksContainer, actsDestProxy, measurementIndex);
-      }
     }
 
     return StatusCode::SUCCESS;

@@ -179,8 +179,8 @@ StatusCode HGTDTrackExtensionAlg::execute(const EventContext& ctx) const
   ATH_MSG_DEBUG("measurement index size = " << measurementIndex.size());
 
 
-  if (m_trackStatePrinter.isSet()) {
-    m_trackStatePrinter->printMeasurements(ctx, uncalibratedMeasurementContainers, measurements.measurementOffsets());
+  if (m_trackFindingMonitor.isSet()) {
+    m_trackFindingMonitor->measurements(ctx, uncalibratedMeasurementContainers, measurements.measurementOffsets());
   }
 
   // ================================================== //
@@ -217,6 +217,10 @@ StatusCode HGTDTrackExtensionAlg::execute(const EventContext& ctx) const
   addCountsAndProperties(actsTracksContainer, m_addCounts.value());
 
   detail::ExpectedLayerPatternHelper::add(actsTracksContainer);
+
+  if ( m_trackFindingMonitor.isEnabled() ) {
+     m_trackFindingMonitor->newEvent(ctx, detContext.geometry);
+  }
 
   int extension_index{0};
   // Loop over each track particle and decorate it with various information
@@ -329,6 +333,10 @@ StatusCode HGTDTrackExtensionAlg::execute(const EventContext& ctx) const
       extrapYHandle(*trackParticle) = trackData.extrapY;
       numHGTDHitsHandle(*trackParticle) = trackData.numHGTDHits;
   } // loop on tracks
+
+  if ( m_trackFindingMonitor.isEnabled() ) {
+     m_trackFindingMonitor->finalizeEvent(ctx);
+  }
 
   // ================================================== //
   // ===================== OUTPUTS ==================== //
@@ -892,8 +900,8 @@ bool HGTDTrackExtensionAlg::addTrack(const DetectorContextHolder& detContext,
 
   if ( not trackFinder().trackSelector.isValidTrack(track)) {
     ATH_MSG_WARNING("Track " << track.index() << " failed track selection");
-    if ( m_trackStatePrinter.isSet() ) {
-      m_trackStatePrinter->printTrack(detContext.geometry, tracksContainerTemp, track, measurementIndex, true);
+    if ( m_trackFindingMonitor.isSet() ) {
+      m_trackFindingMonitor->newTrack(detContext.geometry, tracksContainerTemp, track, measurementIndex, true);
     }
     return false;
   }
