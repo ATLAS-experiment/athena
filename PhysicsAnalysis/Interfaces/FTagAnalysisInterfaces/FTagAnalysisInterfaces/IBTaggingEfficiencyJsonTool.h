@@ -25,7 +25,6 @@ class IBTaggingEfficiencyJsonTool : virtual public CP::IReentrantSystematicsTool
   virtual ~IBTaggingEfficiencyJsonTool() {};
 
   virtual CP::CorrectionCode getScaleFactor(const xAOD::Jet& jet, float& sf, const CP::SystematicSet& sys) const = 0;
-  virtual CP::CorrectionCode getScaleFactor(const xAOD::Jet& jet, float& sf, const std::string& mc_gen, const CP::SystematicSet& sys) const = 0;
 
 }; // class IBTaggingEfficiencyJsonTool
 

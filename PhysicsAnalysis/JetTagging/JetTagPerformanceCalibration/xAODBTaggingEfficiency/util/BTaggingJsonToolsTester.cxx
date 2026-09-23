@@ -99,8 +99,9 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
     StatusCode code4 = tool.setProperty( "JetAuthor", JetCollection );
     StatusCode code5 = tool.setProperty( "OperatingPoint", OperatingPoint );
     StatusCode code6 = tool.setProperty( "JsonConfigFile", JsonConfigFile );
-    StatusCode code7 = tool.initialize();
-    std::vector<StatusCode> codes = {code1, code2, code3, code4, code5, code6, code7};
+    StatusCode code7 = tool.setProperty( "MCGenerator", mcGenerator );
+    StatusCode code8 = tool.initialize();
+    std::vector<StatusCode> codes = {code1, code2, code3, code4, code5, code6, code7, code8};
     for(const auto& code : codes) {
       if(code.isFailure()) {
         ANA_MSG_ERROR("Failed to set property or initialize tool");
@@ -142,10 +143,7 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
         for (const auto& var : sysSet) {
           CP::SystematicSet set;
           set.insert(var);
-
-          CP::CorrectionCode code = mcGenerator.empty()
-            ? tool->getScaleFactor(*jet, sf, set)
-            : tool->getScaleFactor(*jet, sf, mcGenerator, set);
+          CP::CorrectionCode code = tool->getScaleFactor(*jet, sf, set);
 
           if (code != CP::CorrectionCode::Ok) {
             ANA_MSG_ERROR("Failed to get scale factor for jet");

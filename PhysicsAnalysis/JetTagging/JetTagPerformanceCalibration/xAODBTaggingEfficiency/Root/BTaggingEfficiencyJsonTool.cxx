@@ -58,6 +58,15 @@ StatusCode BTaggingEfficiencyJsonTool::initialize()
     }
   }
 
+  // map truth labels to categories
+  for (auto& el : meta["labelMappingMCMC"].items()) {
+    std::string label = el.key();
+    for (const auto& num : el.value()) {
+      int key = num; 
+      m_labelMapMCMC[key] = label;
+    }
+  }
+
   // Get mass decorator if specified
   if (meta.contains("Mass")) {
     std::string massDecoratorName = meta["Mass"].get<std::string>();
@@ -76,46 +85,64 @@ StatusCode BTaggingEfficiencyJsonTool::initialize()
   }
   // preload pt bins, systematics and SFs for each category
   auto& json_config_OP = m_json_config[m_outputName][m_jetAuthor][m_OP];
-  for (const auto& label : meta["labelMapping"].items()) {
-    std::string labelString = label.key();;
+  if (json_config_OP.contains("data_mc")) {
+    for (const auto& label : meta["labelMapping"].items()) {
+      std::string labelString = label.key();
+      if (json_config_OP["data_mc"].contains(labelString)) {
+        for (const auto& pt : json_config_OP["data_mc"][labelString]["pt"]) {
+          m_sfPtMap[labelString].push_back(BTaggingToolUtil::getExtendedFloat(pt));
+        }
 
-    if (json_config_OP[labelString].contains("data_mc")) {
-      for (const auto& pt : json_config_OP[labelString]["data_mc"]["pt"]) {
-        m_sfPtMap[labelString].push_back(BTaggingToolUtil::getExtendedFloat(pt));
+        m_sfMap[labelString] = json_config_OP["data_mc"][labelString]["nominal"].get<std::vector<float>>();
+        for (auto& [systematicName, values] : json_config_OP["data_mc"][labelString]["systematics"].items()){
+          m_sfSysMap[labelString][systematicName] = values.get<std::vector<float>>();
+        }
       }
+    }
+  } else {
+    ATH_MSG_INFO("No calibration data-mc scale factors present in json.");
+  }
 
-      m_sfMap[labelString] = json_config_OP[labelString]["data_mc"]["nominal"].get<std::vector<float>>();
-      for (auto& [systematicName, values] : json_config_OP[labelString]["data_mc"]["systematics"].items()){
-        m_sfSysMap[labelString][systematicName] = values.get<std::vector<float>>();
+  if (!m_mcGenerator.value().empty()) {
+    if (json_config_OP.contains("mc_mc")) {
+      for (const auto& label : meta["labelMappingMCMC"].items()) {
+        std::string labelStringMCMC = label.key();
+        if (!json_config_OP["mc_mc"].contains(labelStringMCMC)) continue;
+        auto& mcmcAtLabel = json_config_OP["mc_mc"][labelStringMCMC];
+        if (mcmcAtLabel.contains("reference") && mcmcAtLabel.contains("corrections") && mcmcAtLabel.contains("binsVariables")) {
+          m_mcReference[labelStringMCMC] = mcmcAtLabel["reference"];
+          if (m_mcGenerator.value() == m_mcReference[labelStringMCMC]) continue;
+          const auto varNames = mcmcAtLabel["binsVariables"].get<std::vector<std::string>>();
+          
+          if (!mcmcAtLabel["corrections"].contains(m_mcGenerator.value())) {
+            ATH_MSG_ERROR("No mc-to-mc corrections for generator '" << m_mcGenerator.value() << "' and label " << labelStringMCMC);
+            return StatusCode::FAILURE;
+          }
+
+          auto& handlers = m_mcmcHandlers[labelStringMCMC];
+          for (const auto& entry : mcmcAtLabel["corrections"][m_mcGenerator.value()]) {
+            std::map<std::string, MCMCHandler::varBounds> bounds;
+            for (size_t v = 0; v < varNames.size(); ++v) {
+              const auto& range = entry[v];
+              if (range.size() != 2) {
+                ATH_MSG_ERROR("Bin range incorrect for mc-to-mc corrections");
+                return StatusCode::FAILURE;
+              }
+              bounds[varNames[v]] = {BTaggingToolUtil::getExtendedFloat(range[0]),
+                                      BTaggingToolUtil::getExtendedFloat(range[1])};
+            }
+            handlers.emplace_back(std::move(bounds), entry.back().get<float>());
+          } 
+        } else {
+          ATH_MSG_ERROR("mc-to-mc corrections incomplete for jet with truthLabel: " << labelStringMCMC << ".");
+          return StatusCode::FAILURE;
+        }
       }
     } else {
-      ATH_MSG_INFO("No calibration on jet with truthLabel: " << labelString << ".");
+        ATH_MSG_INFO("No mc-to-mc corrections present in json.");
     }
-
-    if (json_config_OP[labelString].contains("mc_mc")) {
-      if (json_config_OP[labelString].at("mc_mc").contains("reference") && json_config_OP[labelString].at("mc_mc").contains("corrections")) {
-        m_mcReference[labelString] = json_config_OP[labelString]["mc_mc"]["reference"];
-        for (auto& mc_gen : json_config_OP[labelString]["mc_mc"]["corrections"].items()) {
-
-          const std::string& mcGenName = mc_gen.key();
-
-          for (const auto& pt : json_config_OP[labelString]["mc_mc"]["corrections"][mcGenName]["pt"]) {
-            m_corrPtMap[labelString][mcGenName].push_back(BTaggingToolUtil::getExtendedFloat(pt));
-          }
-          
-          for (const auto& mass : json_config_OP[labelString]["mc_mc"]["corrections"][mcGenName]["mass"]) {
-            m_corrMassMap[labelString][mcGenName].push_back(BTaggingToolUtil::getExtendedFloat(mass));
-          }
-          
-          m_corrMap[labelString][mcGenName] = json_config_OP[labelString]["mc_mc"]["corrections"][mcGenName]["nominal"].get<std::vector<std::vector<float>>>();
-          
-        }
-      } else {
-        ATH_MSG_WARNING("mc-to-mc corrections incomplete for jet with truthLabel: " << labelString << ".");
-      }
-    } else{
-      ATH_MSG_INFO("No mc-to-mc corrections on jet with truthLabel: " << labelString << ".");
-    }
+  } else {
+    ATH_MSG_INFO("No mc-generator added by user. No mc-to-mc corrections will be applied.");
   }
   
   m_currentSys = nullptr;
@@ -131,7 +158,7 @@ StatusCode BTaggingEfficiencyJsonTool::initialize()
   return StatusCode::SUCCESS;
 }
 
-CP::CorrectionCode BTaggingEfficiencyJsonTool::getScaleFactor( const xAOD::Jet& jet, float& sf, const std::string& mc_gen, const CP::SystematicSet& sys ) const 
+CP::CorrectionCode BTaggingEfficiencyJsonTool::getScaleFactor( const xAOD::Jet& jet, float& sf, const CP::SystematicSet& sys ) const 
 {
   if (! m_initialised) {
     throw std::runtime_error("BTaggingEfficiencyJsonTool has not been initialised.");
@@ -174,12 +201,10 @@ CP::CorrectionCode BTaggingEfficiencyJsonTool::getScaleFactor( const xAOD::Jet& 
 
   sf = SFs[bin_index];
   
-  if (!mc_gen.empty()) {
-    float corr = 1.f;
-    CP::CorrectionCode cc = getMCToMCCorr(jet, corr, mc_gen);
-    if (cc != CP::CorrectionCode::Ok) return cc;
-    sf *= corr;
-  }
+  float corr = 1.f;
+  CP::CorrectionCode cc = getMCToMCCorr(jet, corr);
+  if (cc != CP::CorrectionCode::Ok) return cc;
+  sf *= corr;
   
   sysData tempSys;
   if (calcSystematicVariation(sys, tempSys) == StatusCode::SUCCESS && tempSys.xbb_syst != 0) {
@@ -189,89 +214,45 @@ CP::CorrectionCode BTaggingEfficiencyJsonTool::getScaleFactor( const xAOD::Jet& 
   return CP::CorrectionCode::Ok;
 }
 
-CP::CorrectionCode BTaggingEfficiencyJsonTool::getScaleFactor( const xAOD::Jet& jet, float& sf, const CP::SystematicSet& sys ) const 
-{
-  ATH_MSG_WARNING("No mc generator of the jet provided. No mc-to-mc corrections will be applied.");
-
-  return getScaleFactor( jet, sf, "", sys);
-}
-
-CP::CorrectionCode BTaggingEfficiencyJsonTool::getMCToMCCorr( const xAOD::Jet& jet, float& corr, const std::string& mc_gen ) const 
+CP::CorrectionCode BTaggingEfficiencyJsonTool::getMCToMCCorr( const xAOD::Jet& jet, float& corr ) const 
 {
   if (! m_initialised) {
     throw std::runtime_error("BTaggingEfficiencyJsonTool has not been initialised.");
   }
 
-  corr = 0.0;
+  corr = 1.0;
+
+  if (m_mcmcHandlers.empty()) { 
+   return CP::CorrectionCode::Ok;
+  }
 
   int truthLabel = (*m_truthLabelAcc)(jet);
-  std::string labelString;
-  auto it = m_labelMap.find(truthLabel);
-  if (it != m_labelMap.end()) {
-    labelString = it->second;
-  } else {
-    ATH_MSG_WARNING("No mc-to-mc corrections on jet with truthLabel: " << truthLabel << ". Returning mc-to-mc correction of 0.");
-    return CP::CorrectionCode::OutOfValidityRange;
+  auto labelIt = m_labelMapMCMC.find(truthLabel);
+  if (labelIt == m_labelMapMCMC.end()) {
+    ATH_MSG_WARNING("No mc-to-mc correction on jet with truthLabel: " << truthLabel << ". Returning scale factor of 1.");
+    return CP::CorrectionCode::Ok;  // this process has no mc-to-mc correction
   }
 
-  if ( !m_corrMap.contains(labelString) || !m_mcReference.contains(labelString) ) {
-    ATH_MSG_WARNING("No mc-to-mc corrections on jet with truthLabel: " << truthLabel << ". Returning mc-to-mc correction of 0.");
-    return CP::CorrectionCode::OutOfValidityRange;    
+  const std::string& label = labelIt->second;
+  auto refIt = m_mcReference.find(label);
+  if (refIt != m_mcReference.end() && refIt->second == m_mcGenerator.value()) {
+    return CP::CorrectionCode::Ok;
   }
 
-  if ( !m_corrMap.at(labelString).contains(mc_gen) && mc_gen != m_mcReference.at(labelString) ) {
-    ATH_MSG_WARNING("No mc-to-mc corrections available for mc generator: " << mc_gen << ". Returning mc-to-mc correction of 0.");
-    return CP::CorrectionCode::OutOfValidityRange;
+  auto handlerIt = m_mcmcHandlers.find(labelIt->second);
+  if (handlerIt == m_mcmcHandlers.end()) {
+    return CP::CorrectionCode::Ok;  // no mc-to-mc corrections defined for this label
   }
 
-  corr = getMCToMCBin(jet, labelString, mc_gen);
-
-  return CP::CorrectionCode::Ok;
-}
-
-float BTaggingEfficiencyJsonTool::getMCToMCBin( const xAOD::Jet& jet, const std::string& labelString, const std::string& mc_gen ) const
-{
-  float corr_gen; 
-  if ( mc_gen == m_mcReference.at(labelString) ) {
-    corr_gen = 1.0;
-  } else {
-    const auto& pts = m_corrPtMap.at(labelString).at(mc_gen);
-    size_t pt_bin_index = pts.size();
-    if (getJetPt(jet)/1000. < pts[0]) {
-      ATH_MSG_WARNING("No mc-to-mc corrections for jet with pt: " << getJetPt(jet)/1000. << ". Returning correction of 0.");
-      return 0.0;  
+  for (const auto& bin : handlerIt->second) {
+    if (bin.isJetWithinBounds(jet, *this)) {
+      corr = bin.getFactor();
+      return CP::CorrectionCode::Ok;
     }
-    for (size_t i = 1; i < pts.size(); i++) {
-      if (getJetPt(jet)/1000. < pts[i]) {
-        pt_bin_index = i-1;
-        break;
-      }
-    }
-    const auto& masses = m_corrMassMap.at(labelString).at(mc_gen);
-    size_t mass_bin_index = masses.size();
-    if (getJetMass(jet)/1000. < masses[0]) {
-      ATH_MSG_WARNING("No mc-to-mc corrections for jet with mass: " << getJetMass(jet)/1000. << ". Returning correction of 0.");
-      return 0.0;  
-    }
-    for (size_t i = 1; i < masses.size(); i++) {
-      if (getJetMass(jet)/1000. < masses[i]) {
-        mass_bin_index = i-1;
-        break;
-      }
-    }
-
-    const auto& Corrections_gen = m_corrMap.at(labelString).at(mc_gen);
-    if ( pt_bin_index >= Corrections_gen.size() ) {
-      ATH_MSG_WARNING("No mc-to-mc corrections for jet with pt: " << getJetPt(jet)/1000. << ". Returning correction of 0.");
-      return 0.0;
-    } else if (mass_bin_index >= Corrections_gen[pt_bin_index].size() ) {
-      ATH_MSG_WARNING("No mc-to-mc corrections for jet with mass: " << getJetMass(jet)/1000. << ". Returning correction of 0.");
-      return 0.0;     
-    }
-    corr_gen = Corrections_gen[pt_bin_index][mass_bin_index] ;  
   }
-  
-  return corr_gen;
+
+  ATH_MSG_WARNING("Jet outside mc-to-mc binning for label " << label << ". Returning correction of 1.");
+  return CP::CorrectionCode::OutOfValidityRange;
 }
 
 float BTaggingEfficiencyJsonTool::getSFSys( const std::string& labelString, size_t bin_index ) const
@@ -307,6 +288,29 @@ float BTaggingEfficiencyJsonTool::getJetPt( const xAOD::Jet& jet ) const
   }
 
   return (*m_ptAcc)(jet);
+}
+
+float BTaggingEfficiencyJsonTool::getJetQuantity(const xAOD::Jet& jet, const std::string &varName) const {
+  if (varName == "pT") { 
+    return getJetPt(jet)/1000.; 
+  } else if (varName == "mass") {
+    return getJetMass(jet)/1000;
+  } else { 
+    ATH_MSG_ERROR("No variable '" << varName << "' defined for mc-to-mc corrections.");
+    throw std::runtime_error("Unknown mc-to-mc variable '" + varName + "'");
+  } 
+}
+
+bool BTaggingEfficiencyJsonTool::MCMCHandler::isJetWithinBounds(
+    const xAOD::Jet& jet, const BTaggingEfficiencyJsonTool& tool) const
+{
+  for (const auto& [varName, bounds] : m_varBinBounds) {
+    const float value = tool.getJetQuantity(jet, varName);
+    if (value < bounds.lowerBound || value >= bounds.upperBound) {
+      return false;
+    }
+  }
+  return true;
 }
 
 StatusCode BTaggingEfficiencyJsonTool::calcSystematicVariation(const CP::SystematicSet& systConfig, sysData& sys) const
