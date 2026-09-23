@@ -38,7 +38,7 @@ if __name__=="__main__":
    # We want to keep the commented code for debugging
    # from AthenaCommon.Constants import DEBUG
    # flags.Exec.OutputLevel=DEBUG
-   flags.ITk.Conditions.PixelTestCablingFallback=True
+   # flags.ITk.Conditions.PixelTestCablingFallback=True
 
    flags.lock()
 
@@ -88,7 +88,7 @@ if __name__=="__main__":
    sg = cfg.getService("StoreGateSvc")
    sg.Dump = True
 
-   cfg.run(1)
+   cfg.run()
 
 
 
