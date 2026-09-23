@@ -1,92 +1,90 @@
 
 
-Initializing Gaudi ApplicationMgr using job opts ../share/AthenaEventLoopMgr_test.txt
-JobOptionsSvc        INFO # =======> /home/sss/nobackup/atlas/build/../tests/../share/AthenaEventLoopMgr_test.txt
-JobOptionsSvc        INFO # (5,1): ApplicationMgr.Dlls += ["AthenaServices"]
-JobOptionsSvc        INFO # (6,1): ApplicationMgr.ExtSvc += ["AthenaEventLoopMgr/AthenaEventLoopMgr1"]
-JobOptionsSvc        INFO # (7,1): ApplicationMgr.ExtSvc += ["AthenaEventLoopMgr/AthenaEventLoopMgr2"]
-JobOptionsSvc        INFO # (8,1): ApplicationMgr.ExtSvc += ["TestEvtSelector"]
-JobOptionsSvc        INFO # (9,1): EventPersistencySvc.CnvServices += ["TestConversionSvc"]
-JobOptionsSvc        INFO # (10,1): AthenaEventLoopMgr1.EvtSel = "TestEvtSelector"
-JobOptionsSvc        INFO # (11,1): AthenaEventLoopMgr1.TopAlg += ["TestAlgorithm"]
-JobOptionsSvc        INFO # (12,1): AthenaEventLoopMgr2.EvtSel = "TestEvtSelector2"
-JobOptionsSvc        INFO # (13,1): AthenaEventLoopMgr2.TopAlg += ["TestAlgorithm/TestAlgorithm2"]
-JobOptionsSvc        INFO Job options successfully read in from ../share/AthenaEventLoopMgr_test.txt
-ApplicationMgr    SUCCESS 
+Initializing Gaudi ApplicationMgr using job opts /home/sss/atlas/dvtest/build/joboptions/AthenaServices/AthenaEventLoopMgr_test.txt
+JobOptionsSvc         INFO # =======> /home/sss/atlas/dvtest/build/joboptions/AthenaServices/AthenaEventLoopMgr_test.txt
+JobOptionsSvc         INFO # (5,1): ApplicationMgr.Dlls += ["AthenaServices"]
+JobOptionsSvc         INFO # (6,1): ApplicationMgr.ExtSvc += ["AthenaEventLoopMgr/AthenaEventLoopMgr1"]
+JobOptionsSvc         INFO # (7,1): ApplicationMgr.ExtSvc += ["AthenaEventLoopMgr/AthenaEventLoopMgr2"]
+JobOptionsSvc         INFO # (8,1): ApplicationMgr.ExtSvc += ["TestEvtSelector"]
+JobOptionsSvc         INFO # (9,1): EventPersistencySvc.CnvServices += ["TestConversionSvc"]
+JobOptionsSvc         INFO # (10,1): AthenaEventLoopMgr1.EvtSel = "TestEvtSelector"
+JobOptionsSvc         INFO # (11,1): AthenaEventLoopMgr1.TopAlg += ["TestAlgorithm"]
+JobOptionsSvc         INFO # (12,1): AthenaEventLoopMgr2.EvtSel = "TestEvtSelector2"
+JobOptionsSvc         INFO # (13,1): AthenaEventLoopMgr2.TopAlg += ["TestAlgorithm/TestAlgorithm2"]
+JobOptionsSvc         INFO Job options successfully read in from /home/sss/atlas/dvtest/build/joboptions/AthenaServices/AthenaEventLoopMgr_test.txt
+ApplicationMgr     SUCCESS 
 ====================================================================================================================================
                                                    Welcome to ApplicationMgr (GaudiCoreSvc v27r1p99)
-                                          running on karma on Wed Jun  8 18:37:39 2016
+                                          running on karma on Thu Aug 13 12:05:56 2026
 ====================================================================================================================================
-ApplicationMgr       INFO Successfully loaded modules : AthenaServices
-ApplicationMgr       INFO Application Manager Configured successfully
-AthenaEventLoop...   INFO Initializing AthenaEventLoopMgr1
+ApplicationMgr        INFO Successfully loaded modules : AthenaServices
+ApplicationMgr        INFO Application Manager Configured successfully
+AthenaEventLoop...    INFO Initializing AthenaEventLoopMgr1
 TestAlgorithm::initialize
-ClassIDSvc           INFO  getRegistryEntries: read 2161 CLIDRegistry entries for module ALL
-HistogramPersis...WARNING Histograms saving not required.
-AthenaEventLoop...   INFO Setup EventSelector service TestEvtSelector
-AthenaEventLoop...   INFO Initializing AthenaEventLoopMgr2
+ClassIDSvc            INFO getRegistryEntries: read 2646 CLIDRegistry entries for module ALL
+AthenaEventLoop...    INFO Setup EventSelector service TestEvtSelector
+AthenaEventLoop...    INFO Initializing AthenaEventLoopMgr2
 TestAlgorithm::initialize
-AthenaEventLoop...   INFO Setup EventSelector service TestEvtSelector2
-EventLoopMgr      WARNING Unable to locate service "EventSelector" 
-EventLoopMgr      WARNING No events will be processed from external input.
-ApplicationMgr       INFO Application Manager Initialized successfully
+AthenaEventLoop...    INFO Setup EventSelector service TestEvtSelector2
+EventLoopMgr          INFO Unable to locate service "EventSelector": No events will be processed from external input.
+ApplicationMgr        INFO Application Manager Initialized successfully
 ApplicationMgr Ready
 test1
 TestEvtSelector::next(Context&)
-EventPersistenc...   INFO Added successfully Conversion service:TestConversionSvc
-AthenaEventLoop...   INFO   ===>>>  start of run 0    <<<===
-AthenaEventLoop...   INFO   ===>>>  start processing event #1, run #0 0 events processed so far  <<<===
+EventPersistenc...    INFO Added successfully Conversion service TestConversionSvc
+AthenaEventLoop...    INFO   ===>>>  start of run 0    <<<===
+AthenaEventLoop...    INFO   ===>>>  start processing event #1, run #0 0 events processed so far  <<<===
 TestAlgorithm::execute 1 0
-AthenaEventLoop...   INFO   ===>>>  done processing event #1, run #0 1 events processed so far  <<<===
+AthenaEventLoop...    INFO   ===>>>  done processing event #1, run #0 1 events processed so far  <<<===
 TestEvtSelector::next(Context&)
-AthenaEventLoop...   INFO   ===>>>  start processing event #2, run #0 1 events processed so far  <<<===
+AthenaEventLoop...    INFO   ===>>>  start processing event #2, run #0 1 events processed so far  <<<===
 TestAlgorithm::execute 2 1
-AthenaEventLoop...   INFO   ===>>>  done processing event #2, run #0 2 events processed so far  <<<===
+AthenaEventLoop...    INFO   ===>>>  done processing event #2, run #0 2 events processed so far  <<<===
 TestEvtSelector::next(Context&)
-AthenaEventLoop...   INFO   ===>>>  start processing event #3, run #0 2 events processed so far  <<<===
+AthenaEventLoop...    INFO   ===>>>  start processing event #3, run #0 2 events processed so far  <<<===
 TestAlgorithm::execute 3 2
-AthenaEventLoop...   INFO   ===>>>  done processing event #3, run #0 3 events processed so far  <<<===
-AthenaEventLoop...  ERROR Collection size unsupported by event selector
+AthenaEventLoop...    INFO   ===>>>  done processing event #3, run #0 3 events processed so far  <<<===
+AthenaEventLoop...   ERROR Collection size unsupported by event selector
 size: -1
-AthenaEventLoop...  ERROR Seek failed; unsupported by event selector
-seek: 0
+AthenaEventLoop...   ERROR Seek failed; unsupported by event selector
+seek: false
 TestEvtSelector::next(Context&)
-AthenaEventLoop...   INFO   ===>>>  start processing event #4, run #0 3 events processed so far  <<<===
+AthenaEventLoop...    INFO   ===>>>  start processing event #4, run #0 3 events processed so far  <<<===
 TestAlgorithm::execute 4 3
-AthenaEventLoop...   INFO   ===>>>  done processing event #4, run #0 4 events processed so far  <<<===
+AthenaEventLoop...    INFO   ===>>>  done processing event #4, run #0 4 events processed so far  <<<===
 TestEvtSelector::next(Context&)
-AthenaEventLoop...   INFO   ===>>>  start processing event #5, run #0 4 events processed so far  <<<===
+AthenaEventLoop...    INFO   ===>>>  start processing event #5, run #0 4 events processed so far  <<<===
 TestAlgorithm::execute 5 4
-AthenaEventLoop...   INFO   ===>>>  done processing event #5, run #0 5 events processed so far  <<<===
+AthenaEventLoop...    INFO   ===>>>  done processing event #5, run #0 5 events processed so far  <<<===
 test2
 TestEvtSelector::next(Context&)
-AthenaEventLoop...   INFO   ===>>>  start of run 0    <<<===
-AthenaEventLoop...   INFO   ===>>>  start processing event #1, run #0 0 events processed so far  <<<===
+AthenaEventLoop...    INFO   ===>>>  start of run 0    <<<===
+AthenaEventLoop...    INFO   ===>>>  start processing event #1, run #0 0 events processed so far  <<<===
 TestAlgorithm::execute 1 0
-AthenaEventLoop...   INFO   ===>>>  done processing event #1, run #0 1 events processed so far  <<<===
+AthenaEventLoop...    INFO   ===>>>  done processing event #1, run #0 1 events processed so far  <<<===
 TestEvtSelector::next(Context&)
-AthenaEventLoop...   INFO   ===>>>  start processing event #2, run #0 1 events processed so far  <<<===
+AthenaEventLoop...    INFO   ===>>>  start processing event #2, run #0 1 events processed so far  <<<===
 TestAlgorithm::execute 2 1
-AthenaEventLoop...   INFO   ===>>>  done processing event #2, run #0 2 events processed so far  <<<===
+AthenaEventLoop...    INFO   ===>>>  done processing event #2, run #0 2 events processed so far  <<<===
 TestEvtSelector::next(Context&)
-AthenaEventLoop...   INFO   ===>>>  start processing event #3, run #0 2 events processed so far  <<<===
+AthenaEventLoop...    INFO   ===>>>  start processing event #3, run #0 2 events processed so far  <<<===
 TestAlgorithm::execute 3 2
-AthenaEventLoop...   INFO   ===>>>  done processing event #3, run #0 3 events processed so far  <<<===
+AthenaEventLoop...    INFO   ===>>>  done processing event #3, run #0 3 events processed so far  <<<===
 size: 123
-seek: 1
+seek: true
 TestEvtSelector::next(Context&)
-AthenaEventLoop...   INFO   ===>>>  start processing event #2, run #0 3 events processed so far  <<<===
+AthenaEventLoop...    INFO   ===>>>  start processing event #2, run #0 3 events processed so far  <<<===
 TestAlgorithm::execute 2 3
-AthenaEventLoop...   INFO   ===>>>  done processing event #2, run #0 4 events processed so far  <<<===
+AthenaEventLoop...    INFO   ===>>>  done processing event #2, run #0 4 events processed so far  <<<===
 TestEvtSelector::next(Context&)
-AthenaEventLoop...   INFO   ===>>>  start processing event #3, run #0 4 events processed so far  <<<===
+AthenaEventLoop...    INFO   ===>>>  start processing event #3, run #0 4 events processed so far  <<<===
 TestAlgorithm::execute 3 4
-AthenaEventLoop...   INFO   ===>>>  done processing event #3, run #0 5 events processed so far  <<<===
+AthenaEventLoop...    INFO   ===>>>  done processing event #3, run #0 5 events processed so far  <<<===
 TestEvtSelector::next(Context&)
-AthenaEventLoop...   INFO   ===>>>  start processing event #4, run #0 5 events processed so far  <<<===
+AthenaEventLoop...    INFO   ===>>>  start processing event #4, run #0 5 events processed so far  <<<===
 TestAlgorithm::execute 4 5
-AthenaEventLoop...   INFO   ===>>>  done processing event #4, run #0 6 events processed so far  <<<===
+AthenaEventLoop...    INFO   ===>>>  done processing event #4, run #0 6 events processed so far  <<<===
 TestEvtSelector::next(Context&)
-AthenaEventLoop...   INFO   ===>>>  start processing event #5, run #0 6 events processed so far  <<<===
+AthenaEventLoop...    INFO   ===>>>  start processing event #5, run #0 6 events processed so far  <<<===
 TestAlgorithm::execute 5 6
-AthenaEventLoop...   INFO   ===>>>  done processing event #5, run #0 7 events processed so far  <<<===
+AthenaEventLoop...    INFO   ===>>>  done processing event #5, run #0 7 events processed so far  <<<===

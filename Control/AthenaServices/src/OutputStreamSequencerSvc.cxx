@@ -16,6 +16,7 @@
 
 #include <charconv>
 #include <format>
+#include <print>
 #include <string_view>
 #include <sstream>
 
@@ -33,7 +34,7 @@ OutputStreamSequencerSvc::~OutputStreamSequencerSvc() {
 }
 //__________________________________________________________________________
 StatusCode OutputStreamSequencerSvc::initialize() {
-   ATH_MSG_DEBUG("Initializing " << name());
+   ATH_MSG_DEBUG("Initializing {}", name());
 
    // Set to be listener for end of event
    ServiceHandle<IIncidentSvc> incsvc("IncidentSvc", this->name());
@@ -44,8 +45,8 @@ StatusCode OutputStreamSequencerSvc::initialize() {
    if( !incidentName().empty() ) {
       incsvc->addListener(this, incidentName(), 100);
       incsvc->addListener(this, IncidentType::BeginProcessing, 100);
-      ATH_MSG_DEBUG("Listening to " << incidentName() << " incidents" );
-      ATH_MSG_DEBUG("Reporting is " << (m_reportingOn.value()? "ON" : "OFF") );
+      ATH_MSG_DEBUG("Listening to {} incidents", incidentName() );
+      ATH_MSG_DEBUG("Reporting is {}", (m_reportingOn.value()? "ON" : "OFF") );
       // Retrieve MetaDataSvc
       if( !m_metaDataSvc.isValid() and !m_metaDataSvc.retrieve().isSuccess() ) {
          ATH_MSG_ERROR("Cannot get MetaDataSvc");
@@ -100,8 +101,8 @@ void OutputStreamSequencerSvc::handle(const Incident& inc)
           rangeID = "INFILE";
         }
         ATH_MSG_DEBUG(
-            "Requested (through incident) Next Event Range filename extension: "
-            << rangeID);
+                      "Requested (through incident) Next Event Range filename extension: {}",
+                      rangeID);
       }
 
       if( rangeID == "dummy" ) {
@@ -125,9 +126,9 @@ void OutputStreamSequencerSvc::handle(const Incident& inc)
          m_fileSequenceNumber++;
          if( rangeID.empty() ) {
             std::ostringstream n;
-            n << "_" << std::setw(4) << std::setfill('0') << m_fileSequenceNumber;
+            std::print (n, "_{:04}", m_fileSequenceNumber);
             rangeID = n.str();
-            ATH_MSG_DEBUG("Default next event range filename extension: " << rangeID);
+            ATH_MSG_DEBUG("Default next event range filename extension: {}", rangeID);
          }
          else if (rangeID == "INFILE") {
              rangeID = std::to_string(m_fileSequenceNumber);
@@ -152,7 +153,8 @@ void OutputStreamSequencerSvc::handle(const Incident& inc)
    else if( inc.type() == IncidentType::BeginProcessing ) {
       // new event start - assing current rangeId to its slot
       std::lock_guard lockg( m_mutex );
-      ATH_MSG_DEBUG("Assigning rangeID = " << m_currentRangeID << " to slot " << ctx.slot());
+      ATH_MSG_DEBUG("Assigning rangeID = {} to slot {}",
+                    m_currentRangeID, ctx.slot());
       *m_rangeIDinSlot.get(ctx) = m_currentRangeID;
    }
 }
@@ -174,9 +176,7 @@ std::string OutputStreamSequencerSvc::buildSequenceFileName(const EventContext& 
        fileNameCore = orgFileName.substr(0, sepPos);
        fileNameExt = orgFileName.substr(sepPos);
      }
-     std::ostringstream n;
-     n << fileNameCore << "." << rangeID << fileNameExt;
-     m_lastFileName = n.str();
+     m_lastFileName = fileNameCore + "." + rangeID + fileNameExt;
    } else {
      std::string_view origFileNameView = orgFileName;
      std::size_t open = origFileNameView.find('[');
@@ -194,12 +194,14 @@ std::string OutputStreamSequencerSvc::buildSequenceFileName(const EventContext& 
             comma < close;
             comma = origFileNameView.find(',', pos)) {
 	 std::string_view item = origFileNameView.substr(pos, comma - pos);
-	 ATH_MSG_DEBUG("(start) pos = " << pos << ", (end) comma = " << comma << ", item = " << item);
+	 ATH_MSG_DEBUG("(start) pos = {}, (end) comma = comma, item = {}",
+                       pos, comma, item);
          elems.push_back(item);
          pos = comma + 1;
        }
        std::string_view last_item = origFileNameView.substr(pos, close - pos);
-       ATH_MSG_DEBUG("(start) pos = " << pos << ", (end) close = " << close << ", item = " << last_item);
+       ATH_MSG_DEBUG("(start) pos = {}, (end) close = {}, item = {}",
+                     pos, close, last_item);
        elems.push_back(last_item);
        // substitute
        std::size_t rangeIdx{};
@@ -223,7 +225,7 @@ std::string OutputStreamSequencerSvc::buildSequenceFileName(const EventContext& 
          m_lastFileName = std::format(
              "{}{}{}", origFileNameView.substr(0, open), elems.at(rangeIdx),
              origFileNameView.substr(close + 1));
-         ATH_MSG_DEBUG("Output file: " << m_lastFileName);
+         ATH_MSG_DEBUG("Output file: {}", m_lastFileName);
        }
      }
    }
@@ -262,7 +264,8 @@ OutputStreamSequencerSvc::RangeReport_ptr OutputStreamSequencerSvc::getRangeRepo
 {
   RangeReport_ptr report;
   if( !m_reportingOn.value() ) {
-     ATH_MSG_WARNING("Reporting not turned on - set " << m_reportingOn.name() << " to True");
+     ATH_MSG_WARNING("Reporting not turned on - set {} to True",
+                     m_reportingOn.name());
   } else {
      std::lock_guard lockg( m_mutex );
      if(m_finishedRange!=m_fnToRangeId.end()) {

@@ -103,7 +103,7 @@ namespace Athena {
 StatusCode ROOTMessageFilterSvc::initialize ATLAS_NOT_THREAD_SAFE() {
 
   // Print the received configuration.
-  ATH_MSG_DEBUG("Using: " << m_suppressionRules);
+  ATH_MSG_DEBUG("Using: {}", m_suppressionRules);
 
   // Extend the global list of suppression rules with the ones configured on
   // this service.

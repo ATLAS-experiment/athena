@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -20,6 +20,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/Service.h"
 #include <iostream>
+#include <print>
 #include <cassert>
 #include <signal.h>
 #include <setjmp.h>
@@ -58,7 +59,7 @@ int main()
   errorcheck::ReportMessage::hideErrorLocus();
   ISvcLocator* svcloc = nullptr;
   if (!Athena_test::initGaudi("AthenaServices/FPEControlSvc_test.txt", svcloc)) {
-    std::cerr << "This test can not be run" << std::endl;
+    std::println (std::cerr, "This test can not be run");
     return 0;
   }  
   assert(svcloc);

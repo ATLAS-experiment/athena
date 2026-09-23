@@ -1,28 +1,26 @@
 ConditionsCleanerSvc_test
 
 
-Initializing Gaudi ApplicationMgr using job opts ../share/ConditionsCleanerSvc_test.txt
-JobOptionsSvc        INFO # =======> /home/sss/atlas/dvtest/build/../tests/../share/ConditionsCleanerSvc_test.txt
-JobOptionsSvc        INFO # (5,1): ApplicationMgr.Dlls += ["AthenaServices"]
-JobOptionsSvc        INFO # (6,1): ApplicationMgr.ExtSvc += ["Athena::ConditionsCleanerSvc/ConditionsCleanerSvc1"]
-JobOptionsSvc        INFO # (7,1): ApplicationMgr.ExtSvc += ["Athena::ConditionsCleanerSvc/ConditionsCleanerSvc2"]
-JobOptionsSvc        INFO # (8,1): ConditionsCleanerSvc2.CleanerSvc = "ConditionsCleanerTest"
-JobOptionsSvc        INFO Job options successfully read in from ../share/ConditionsCleanerSvc_test.txt
-ApplicationMgr    SUCCESS 
+Initializing Gaudi ApplicationMgr using job opts /home/sss/atlas/dvtest/build/joboptions/AthenaServices/ConditionsCleanerSvc_test.txt
+JobOptionsSvc         INFO # =======> /home/sss/atlas/dvtest/build/joboptions/AthenaServices/ConditionsCleanerSvc_test.txt
+JobOptionsSvc         INFO # (5,1): ApplicationMgr.Dlls += ["AthenaServices"]
+JobOptionsSvc         INFO # (6,1): ApplicationMgr.ExtSvc += ["Athena::ConditionsCleanerSvc/ConditionsCleanerSvc1"]
+JobOptionsSvc         INFO # (7,1): ApplicationMgr.ExtSvc += ["Athena::ConditionsCleanerSvc/ConditionsCleanerSvc2"]
+JobOptionsSvc         INFO # (8,1): ConditionsCleanerSvc2.CleanerSvc = "ConditionsCleanerTest"
+JobOptionsSvc         INFO Job options successfully read in from /home/sss/atlas/dvtest/build/joboptions/AthenaServices/ConditionsCleanerSvc_test.txt
+ApplicationMgr     SUCCESS 
 ====================================================================================================================================
                                                    Welcome to ApplicationMgr (GaudiCoreSvc v27r1p99)
-                                          running on karma on Fri Nov  2 13:02:21 2018
+                                          running on karma on Thu Aug 13 12:13:05 2026
 ====================================================================================================================================
-ApplicationMgr       INFO Successfully loaded modules : AthenaServices
-ApplicationMgr       INFO Application Manager Configured successfully
-EventLoopMgr      WARNING Unable to locate service "EventSelector" 
-EventLoopMgr      WARNING No events will be processed from external input.
-HistogramPersis...WARNING Histograms saving not required.
-ApplicationMgr       INFO Application Manager Initialized successfully
+ApplicationMgr        INFO Successfully loaded modules : AthenaServices
+ApplicationMgr        INFO Application Manager Configured successfully
+EventLoopMgr          INFO Unable to locate service "EventSelector": No events will be processed from external input.
+ApplicationMgr        INFO Application Manager Initialized successfully
 ApplicationMgr Ready
 test1
 test2
-ConditionsCleanerTest::event 0 0
+ConditionsCleanerTest::event 0 false
 ConditionsCleanerTest::condObjAdded 0 123
 ConditionsCleanerTest::printStats
 ConditionsCleanerTest::reset
