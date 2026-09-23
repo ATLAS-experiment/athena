@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include <IsolationSelection/Interp3D.h>
@@ -8,6 +8,8 @@
 #include <IsolationSelection/IsolationConditionGraph.h>
 #include <IsolationSelection/IsolationConditionHist.h>
 #include <IsolationSelection/IsolationSelectionTool.h>
+#include "PATCore/AcceptData.h"
+#include "PATCore/AcceptInfo.h"
 #include <TF2.h>
 #include <TFile.h>
 #include <TH3.h>
@@ -75,10 +77,10 @@ StatusCode IsolationSelectionTool::initialize() {
     rangePtNoInt.push_back(apair);
     std::map<std::string, Interp3D::VetoInterp> amap;
     Interp3D::VetoInterp veto;
-    veto.xRange = rangePtNoInt;
+    veto.xRange = std::move(rangePtNoInt);
     veto.yRange = std::vector<std::pair<double, double>>();
     amap.insert(std::make_pair(std::string("el_cutValues_ptvarcone20"), veto));
-    veto.yRange = rangeEtaNoInt;
+    veto.yRange = std::move(rangeEtaNoInt);
     amap.insert(std::make_pair(std::string("el_cutValues_topoetcone20"), veto));
     m_Interp = std::make_unique<Interp3D>(amap);
     m_Interp->debug(false);
@@ -899,12 +901,10 @@ asg::AcceptData IsolationSelectionTool::accept(const strObj& x) const {
     asg::AcceptData accept(&m_photonAccept);
     evaluateWP(x, m_phWPs, accept);
     return accept;
-  } else {
-    asg::AcceptData accept(&m_objAccept);
-    evaluateWP(x, m_objWPs, accept);
-    return accept;
   }
-  return asg::AcceptData(&m_objAccept);
+  asg::AcceptData accept(&m_objAccept);
+  evaluateWP(x, m_objWPs, accept);
+  return accept;
 }
 
 const asg::AcceptInfo& IsolationSelectionTool::getPhotonAcceptInfo() const {
