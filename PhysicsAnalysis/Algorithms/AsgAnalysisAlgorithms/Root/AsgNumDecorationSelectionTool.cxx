@@ -83,18 +83,18 @@ namespace CP
       return accept;
     }
 
-    const T value = (*m_accessor)(*aux);
+    const double value = (*m_accessor)(*particle);
 
     if (m_equalCutIndex >= 0) {
-      accept.setCutResult(m_equalCutIndex, static_cast<float>(value) == m_equal);
+      accept.setCutResult(m_equalCutIndex, value == static_cast<double>(m_equal));
     }
 
     if (m_minCutIndex >= 0) {
-      accept.setCutResult(m_minCutIndex, static_cast<float>(value) >= m_min);
+      accept.setCutResult(m_minCutIndex, value >= static_cast<double>(m_min));
     }
 
     if (m_maxCutIndex >= 0) {
-      accept.setCutResult(m_maxCutIndex, static_cast<float>(value) < m_max);
+      accept.setCutResult(m_maxCutIndex, value < static_cast<double>(m_max));
     }
 
     return accept;
