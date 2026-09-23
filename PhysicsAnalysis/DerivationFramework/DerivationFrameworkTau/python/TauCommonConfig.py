@@ -3,6 +3,27 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+def TauCPContentCfg(flags):
+    """TauJets CP content, extended with the TausRUs heads when they are run."""
+    from DerivationFrameworkTau.TauJetsCPContent import TauJetsCPContent
+    if not flags.Tau.doTausRUs:
+        return TauJetsCPContent
+
+    import tauRec.TauToolHolder as tauTools
+    # The per-track head is decorated on the TauTracks, not on the taus, so the
+    # two lists go on different aux items.
+    extraVars = {
+        "TauJetsAux.": ".".join(tauTools.TausRUsDecorationNames(flags)),
+        "TauTracksAux.": ".".join(tauTools.TausRUsTrackDecorationNames(flags)),
+    }
+    content = []
+    for item in TauJetsCPContent:
+        for prefix, extra in extraVars.items():
+            if item.startswith(prefix):
+                item += "." + extra
+        content.append(item)
+    return content
+
 def AddTauAugmentationCfg(flags, wp="GNTauVeryLoose", **kwargs):
     kwargs.setdefault("TauContainerName", "TauJets")
 
@@ -54,6 +75,9 @@ def AddTauIDDecorationCfg(flags, **kwargs):
     doEvetoWP = False
     scoreNames = []
     WPNames = []
+    # The vertex-corrected clusters are consumed by more than one network below,
+    # but must only be rebuilt once.
+    doVertexedClusters = False
 
     #def cacheToolProperties(tool):
     #    doEvetoWP = tool.UseAbsEta
@@ -72,6 +96,7 @@ def AddTauIDDecorationCfg(flags, **kwargs):
     if kwargs.pop('GNNTauID', True):
         # vertex-corrected clusters must be rebuilt for tau ID
         tools.append( acc.popToolsAndMerge(tauTools.TauVertexedClusterDecoratorCfg(flags)) )
+        doVertexedClusters = True
         # Add in GNTau!
         # evaluate GNTau score for v0prune model
         tools.append( acc.popToolsAndMerge(tauTools.TauGNNEvaluatorCfg(flags,0,applyLooseTrackSel=True)) )
@@ -94,6 +119,21 @@ def AddTauIDDecorationCfg(flags, **kwargs):
         if tools[-1].ScoreName != "RNNEleScore": scoreNames.append(tools[-1].ScoreName)
         scoreNames.append(tools[-1].NewScoreName)
         WPNames += tools[-1].DecorWPNames
+
+    if kwargs.pop('TausRUs', flags.Tau.doTausRUs):
+        if not doVertexedClusters:
+            tools.append( acc.popToolsAndMerge(tauTools.TauVertexedClusterDecoratorCfg(flags)) )
+            doVertexedClusters = True
+        # Give the container a unique name for running
+        tools.append( acc.popToolsAndMerge(tauTools.TausRUsEvaluatorCfg(
+            flags,
+            name=f"{tauContainerKey}_TausRUs",
+            tauTrackContainerName=tauContainerKey.replace("TauJets", "TauTracks"))) )
+        # The tools run on a shallow copy of the taus, so every tau decoration
+        # has to be copied back, which is what the score list is. The per-track
+        # decorations need no copy-back: the tracks the shallow copy links to
+        # are the originals.
+        scoreNames += tauTools.TausRUsDecorationNames(flags)
 
     if tools:
         kwargs.setdefault("DoEvetoWP", doEvetoWP)

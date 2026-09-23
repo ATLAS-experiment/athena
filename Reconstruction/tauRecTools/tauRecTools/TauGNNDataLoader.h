@@ -39,6 +39,8 @@ namespace TauScalarVars{
     bool ptIntermediateAxis(const xAOD::TauJet &tau, float &out);
     bool ptJetSeed(const xAOD::TauJet &tau, float &out);
     bool etaJetSeed(const xAOD::TauJet &tau, float &out);
+    bool phiJetSeed(const xAOD::TauJet &tau, float &out);
+    bool mJetSeed(const xAOD::TauJet &tau, float &out);
     
     //functions to calculate input variables needed for the eVeto RNN
     bool ptJetSeed_log             (const xAOD::TauJet &tau, float &out);

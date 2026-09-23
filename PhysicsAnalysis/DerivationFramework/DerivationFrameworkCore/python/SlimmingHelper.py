@@ -385,8 +385,12 @@ class SlimmingHelper:
                         from DerivationFrameworkMuons.MuonsCommonConfig import MuonCPContentLRTCfg
                         items.extend(MuonCPContentLRTCfg(self.flags))
                 elif collectionName=="TauJets":
-                        from DerivationFrameworkTau.TauJetsCPContent import TauJetsCPContent
-                        items.extend(TauJetsCPContent)
+                        if self.flags:
+                            from DerivationFrameworkTau.TauCommonConfig import TauCPContentCfg
+                            items.extend(TauCPContentCfg(self.flags))
+                        else:
+                            from DerivationFrameworkTau.TauJetsCPContent import TauJetsCPContent
+                            items.extend(TauJetsCPContent)
                 elif collectionName=="DiTauJets":
                         from DerivationFrameworkTau.DiTauJetsCPContent import DiTauJetsCPContent
                         items.extend(DiTauJetsCPContent)
