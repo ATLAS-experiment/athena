@@ -22,38 +22,6 @@ def BTagToolCfg(flags, TaggerList, PrimaryVertexCollectionName="", scheme = '', 
 
       tagToolList = []
 
-      if 'IP2D' in TaggerList:
-          from JetTagTools.IP2DTagConfig import IP2DTagCfg
-          ip2dtool = acc.popToolsAndMerge(IP2DTagCfg(flags, 'IP2DTag', scheme))
-          tagToolList.append(ip2dtool)
- 
-      # Setup for Neg/Flip version of IP2(3)D taggers. 'FlipOption' default value is "STANDARD". Set this value only if want to 'flip' the tagger
-      # Naming of the flip options follows ENUMS here: https://gitlab.cern.ch/atlas/athena/-/blob/master/PhysicsAnalysis/JetTagging/FlavorTagDiscriminants/Root/FlipTagEnums.cxx
-      if 'IP2DNeg' in TaggerList:
-          from JetTagTools.IP2DTagConfig import IP2DTagCfg
-          ip2dnegtool = acc.popToolsAndMerge(IP2DTagCfg(flags, 'IP2DNegTag' ,scheme,FlipOption='NEGATIVE_IP_ONLY'))
-          tagToolList.append(ip2dnegtool)
-
-      if 'IP2DFlip' in TaggerList:
-          from JetTagTools.IP2DTagConfig import IP2DTagCfg
-          ip2dfliptool = acc.popToolsAndMerge(IP2DTagCfg(flags, 'IP2DFlipTag' ,scheme,FlipOption='FLIP_SIGN'))
-          tagToolList.append(ip2dfliptool)
-
-      if 'IP3D' in TaggerList:
-          from JetTagTools.IP3DTagConfig import IP3DTagCfg
-          ip3dtool = acc.popToolsAndMerge(IP3DTagCfg(flags, 'IP3DTag', PrimaryVertexCollectionName, scheme))
-          tagToolList.append(ip3dtool)
-
-      if 'IP3DNeg' in TaggerList:
-          from JetTagTools.IP3DTagConfig import IP3DTagCfg
-          ip3dnegtool = acc.popToolsAndMerge(IP3DTagCfg(flags, 'IP3DNegTag', PrimaryVertexCollectionName, scheme,FlipOption='NEGATIVE_IP_ONLY'))
-          tagToolList.append(ip3dnegtool)
-
-      if 'IP3DFlip' in TaggerList:
-          from JetTagTools.IP3DTagConfig import IP3DTagCfg
-          ip3dfliptool = acc.popToolsAndMerge(IP3DTagCfg(flags, 'IP3DFlipTag', PrimaryVertexCollectionName, scheme,FlipOption='FLIP_SIGN'))
-          tagToolList.append(ip3dfliptool)
-
       if 'SV1' in TaggerList:
           from JetTagTools.SV1TagConfig import SV1TagCfg
           sv1tool = acc.popToolsAndMerge(SV1TagCfg(flags, 'SV1Tag', scheme))
