@@ -474,6 +474,10 @@ class ConfigFactory():
         from AsgAnalysisAlgorithms.OutputAnalysisConfig import OutputAnalysisConfig
         self.addAlgConfigBlock(algName="Output", alg=OutputAnalysisConfig)
 
+        # HyPER hypergraph reconstruction
+        from HyPERAnalysisAlgorithms.HyPERConfig import HyPERBlock
+        self.addAlgConfigBlock(algName="HyPER", alg=HyPERBlock, pos="Output")
+
         # IOStats printouts
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import IOStatsBlock
         self.addAlgConfigBlock(algName="IOStats", alg=IOStatsBlock)
