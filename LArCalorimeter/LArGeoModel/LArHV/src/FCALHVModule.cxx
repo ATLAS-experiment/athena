@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArHV/FCALHVModule.h"
@@ -28,7 +28,9 @@ public:
       delete hvLine[iLine];
     }
   }
-
+  Clockwork(const Clockwork &) = delete;
+  Clockwork & operator =(const Clockwork &) = delete;
+  
   const FCALHVManager *manager;
   unsigned int iSide;
   unsigned int iSector;
