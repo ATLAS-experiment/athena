@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Teng Jian Khoo
@@ -107,8 +107,8 @@ namespace CP
         ATH_MSG_VERBOSE("Writing decoration " << m_syst_link_decor.getName(sys));
         for (const xAOD::IParticle* nom_obj : *nom_cont) {
             const xAOD::IParticle* var_obj = (*var_cont)[nom_obj->index()];
-            dec_nominalObject(*var_obj) = iplink_t(*nom_cont, nom_obj->index());
-            m_syst_link_decor.set(*nom_obj, iplink_t(*var_cont, var_obj->index()), sys);
+            dec_nominalObject(*var_obj) = iplink_t(*nom_cont, nom_obj->index(), ctx);
+            m_syst_link_decor.set(*nom_obj, iplink_t(*var_cont, var_obj->index(), ctx), sys);
             ATH_MSG_VERBOSE("Nominal object with pt " << std::setprecision(3) << nom_obj->pt()/1e3 << " GeV linked to");
             ATH_MSG_VERBOSE("  '" << sys.name() << "' varied object with pt " << std::setprecision(3) << var_obj->pt()/1e3 << " GeV.");
         }
