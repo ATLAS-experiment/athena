@@ -530,8 +530,13 @@ StatusCode FEAssociationTool::buildMapFromPairs(const std::vector<ObjView>& obje
     auto* assoc = new xAOD::MissingETAssociation();
     assocMap->push_back(assoc);
 
+#ifndef XAOD_STANDALONE
+    ElementLink<xAOD::IParticleContainer> linkA(*key.c1, key.i1, ctx);
+    ElementLink<xAOD::IParticleContainer> linkB(*key.c2, key.i2, ctx);
+#else
     ElementLink<xAOD::IParticleContainer> linkA(*key.c1, key.i1);
     ElementLink<xAOD::IParticleContainer> linkB(*key.c2, key.i2);
+#endif
 
     if (!linkA.isValid() || !linkB.isValid())
     {
