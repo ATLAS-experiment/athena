@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthenaServices/test/DelayedConditionsCleanerSvc_test.cxx
@@ -30,6 +30,7 @@
 #include <list>
 #include <algorithm>
 #include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -200,7 +201,7 @@ void test1 (Athena::IConditionsCleanerSvc& svc)
   RCUTest rcu;
   DataObjID id;
 
-  std::cout << "test1\n";
+  std::println ("test1");
   CondContTest cc1 (rcu, id, 10, CondContBase::KeyType::RUNLBN);
   CondContTest cc2 (rcu, id, 10, CondContBase::KeyType::TIMESTAMP);
 
@@ -221,8 +222,8 @@ void test1 (Athena::IConditionsCleanerSvc& svc)
   // 1 1 4 3 201
   assert (cc1.nkeys() == 0);
   assert (cc2.nkeys() == 1);
-  //for (key_type k : cc2.keys()) std::cout << k << " ";
-  //std::cout << "\n";
+  //for (key_type k : cc2.keys()) std::print (" {}", k);
+  //std::println();
   assert (cc2.keys() == (std::vector<key_type> { 0, 2001, 2003, 2004, 2201 }));
 
   assert( svc.event (makeCtx(301), false).isSuccess() );
@@ -264,7 +265,7 @@ void test1 (Athena::IConditionsCleanerSvc& svc)
 // Testing dependency workaround in cleanContainers(). 
 void test2 (Athena::IConditionsCleanerSvc& svc)
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   using key_type = CondContBase::key_type;
   RCUTest rcu;
@@ -651,7 +652,7 @@ void threaded_test (Athena::IConditionsCleanerSvc& cleaner,
   uint32_t seed = 34563;
   shuffle (seed, evnums);
 
-  std::cout << "threaded_test\n";
+  std::println ("threaded_test");
   tbb::global_control (tbb::global_control::max_allowed_parallelism, nthreads + 1);
 
   {
@@ -668,10 +669,10 @@ void threaded_test (Athena::IConditionsCleanerSvc& cleaner,
 int main()
 {
   errorcheck::ReportMessage::hideErrorLocus();
-  std::cout << "DelayedConditionsCleanerSvc_test\n";
+  std::println ("DelayedConditionsCleanerSvc_test");
   ISvcLocator* svcloc = 0;
   if (!Athena_test::initGaudi("AthenaServices/DelayedConditionsCleanerSvc_test.txt", svcloc)) {
-    std::cerr << "This test can not be run" << std::endl;
+    std::println (std::cerr, "This test can not be run");
     return 1;
   }  
   assert(svcloc);
@@ -679,7 +680,7 @@ int main()
   ServiceHandle<Athena::IConditionsCleanerSvc> svc
     ("Athena::DelayedConditionsCleanerSvc/TestConditionsCleanerSvc", "test");
   if (svc.retrieve().isFailure()) {
-    std::cerr << "Can't retrieve service." << std::endl;
+    std::println (std::cerr, "Can't retrieve service.");
     return 1;
   }
 
@@ -689,14 +690,14 @@ int main()
   ServiceHandle<Athena::IConditionsCleanerSvc> facadeSvc
     ("Athena::ConditionsCleanerSvc", "test");
   if (facadeSvc.retrieve().isFailure()) {
-    std::cerr << "Can't retrieve service." << std::endl;
+    std::println (std::cerr, "Can't retrieve service.");
     return 1;
   }
 
   ServiceHandle<Athena::IRCUSvc> rcuSvc
     ("Athena::RCUSvc", "test");
   if (rcuSvc.retrieve().isFailure()) {
-    std::cerr << "Can't retrieve RCU service." << std::endl;
+    std::println (std::cerr, "Can't retrieve RCU service.");
     return 1;
   }
 

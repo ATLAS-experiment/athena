@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthIncFirerAlg.h"
@@ -16,7 +16,7 @@ StatusCode AthIncFirerAlg::initialize() {
   ATH_CHECK( m_incSvc.retrieve() );
 
   if (m_incidents.empty()) {
-    ATH_MSG_ERROR("Need to have at least one incident defined!" <<name());
+    ATH_MSG_ERROR("Need to have at least one incident defined!");
     return StatusCode::FAILURE;
   }
   return StatusCode::SUCCESS;
@@ -26,7 +26,7 @@ StatusCode AthIncFirerAlg::initialize() {
 StatusCode AthIncFirerAlg::execute(const EventContext& ctx) const {
 
   for (const std::string& inc : m_incidents) {
-    ATH_MSG_VERBOSE("Firing incident " << inc);
+    ATH_MSG_VERBOSE("Firing incident {}", inc);
     if (m_serial) {
       m_incSvc->fireIncident(Incident(name(), inc, ctx));
     }

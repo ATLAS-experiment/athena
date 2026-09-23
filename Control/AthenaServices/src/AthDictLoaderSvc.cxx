@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthDictLoaderSvc.cxx 
@@ -83,7 +83,7 @@ AthDictLoaderSvc::has_type (const std::string& type_name)
 
   bool has_type = m_dsodb->has_type(type_name);
   if (!has_type) {
-    ATH_MSG_DEBUG ("no reflex dict. for type [" << type_name << "]");
+    ATH_MSG_DEBUG ("no reflex dict. for type [{}]", type_name);
   }
 
   return has_type;
@@ -130,7 +130,7 @@ const RootType
 AthDictLoaderSvc::load_type (const std::string& type_name,
                              bool recursive /* = false*/)
 {
-  ATH_MSG_DEBUG ("loading [" << type_name << "]...");
+  ATH_MSG_DEBUG ("loading [{}]...", type_name);
 
   // MN: short-cutting all the dance with type names done in DSODB...
   // may need verification
@@ -154,7 +154,7 @@ AthDictLoaderSvc::load_type (const std::type_info& typeinfo,
                              bool recursive /*= false*/)
 {
   ATH_MSG_DEBUG 
-    ("loading [" << System::typeinfoName(typeinfo) << " (from typeinfo)]...");
+    ("loading [{} (from typeinfo)]...", System::typeinfoName(typeinfo));
   return load_type (System::typeinfoName(typeinfo), recursive);
 }
 
@@ -167,7 +167,7 @@ AthDictLoaderSvc::load_type (CLID clid, bool recursive /*= false*/)
 {
   std::string name = "<N/A>";
   if (!m_clidSvc->getTypeNameOfID(clid, name).isSuccess()) {
-    ATH_MSG_INFO ("could not retrieve typename for clid [" << clid << "]");
+    ATH_MSG_INFO ("could not retrieve typename for clid [{}]", clid);
     // try out the bare std::type_info if available...
     const SG::BaseInfoBase* bib = SG::BaseInfoBase::find(clid);
     if (bib) {
@@ -177,7 +177,7 @@ AthDictLoaderSvc::load_type (CLID clid, bool recursive /*= false*/)
     return RootType();
   }
   
-  ATH_MSG_DEBUG("loading [" << name << " (from clid="<<clid<<")]...");
+  ATH_MSG_DEBUG("loading [{} (from clid={})]...", name, clid);
 
   RootType type = load_type(name, recursive);
   if (type) {

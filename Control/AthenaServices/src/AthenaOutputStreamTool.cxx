@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file AthenaOutputStreamTool.cxx
@@ -35,7 +35,7 @@ AthenaOutputStreamTool::AthenaOutputStreamTool(const std::string& type,
 }
 //__________________________________________________________________________
 StatusCode AthenaOutputStreamTool::initialize() {
-   ATH_MSG_INFO("Initializing " << name());
+   ATH_MSG_INFO("Initializing {}", name());
 
    ATH_CHECK( m_clidSvc.retrieve() );
    ATH_CHECK( m_conversionSvc.retrieve() );
@@ -65,7 +65,7 @@ StatusCode AthenaOutputStreamTool::initialize() {
      const std::string keyword = "[AttributeListKey=";
      std::string::size_type pos = m_outputName.value().find(keyword);
      if( (pos != std::string::npos) ) {
-       ATH_MSG_INFO("The AttrListKey will be overwritten/set by the value from the OutputName: " << m_outputName);
+       ATH_MSG_INFO("The AttrListKey will be overwritten/set by the value from the OutputName: {}", m_outputName);
        const std::string attrListKey = m_outputName.value().substr(pos + keyword.size(),
 								   m_outputName.value().find(']', pos + keyword.size()) - pos - keyword.size());
        m_attrListKey = attrListKey;
@@ -106,17 +106,17 @@ StatusCode AthenaOutputStreamTool::connectServices(const std::string& dataStore,
    // Release old data store
    if (m_store.isValid()) {
       if (m_store.release().isFailure()) {
-         ATH_MSG_ERROR("Could not release " << m_store.typeAndName() << " store");
+         ATH_MSG_ERROR("Could not release {} store", m_store.typeAndName());
       }
    }
    m_store = ServiceHandle<StoreGateSvc>(dataStore, this->name());
    if (cnvSvc != m_conversionSvc.type() && cnvSvc != "EventPersistencySvc") {
       if (m_conversionSvc.release().isFailure()) {
-         ATH_MSG_ERROR("Could not release " << m_conversionSvc.type());
+         ATH_MSG_ERROR("Could not release {}", m_conversionSvc.type());
       }
       m_conversionSvc = ServiceHandle<IConversionSvc>(cnvSvc, this->name());
       if (m_conversionSvc.retrieve().isFailure() || m_conversionSvc == 0) {
-         ATH_MSG_ERROR("Could not locate " << m_conversionSvc.type());
+         ATH_MSG_ERROR("Could not locate {}", m_conversionSvc.type());
          return(StatusCode::FAILURE);
       }
    }
@@ -137,14 +137,14 @@ StatusCode AthenaOutputStreamTool::connectServices(const std::string& dataStore,
 StatusCode AthenaOutputStreamTool::connectServices() {
    // Find the data store
    if (m_store.retrieve().isFailure() || m_store == 0) {
-      ATH_MSG_ERROR("Could not locate " << m_store.typeAndName() << " store");
+      ATH_MSG_ERROR("Could not locate {} store", m_store.typeAndName());
       return(StatusCode::FAILURE);
    }
    return(StatusCode::SUCCESS);
 }
 //__________________________________________________________________________
 StatusCode AthenaOutputStreamTool::connectOutput(const std::string& outputName) {
-   ATH_MSG_DEBUG("In connectOutput " << outputName);
+   ATH_MSG_DEBUG("In connectOutput {}", outputName);
 
    // Use arg if not empty, save the output name
    if (!outputName.empty()) {
@@ -160,10 +160,10 @@ StatusCode AthenaOutputStreamTool::connectOutput(const std::string& outputName) 
    }
    // Connect the output file to the service
    if (m_conversionSvc->connectOutput(m_outputName.value()).isFailure()) {
-      ATH_MSG_ERROR("Unable to connect output " << m_outputName.value());
+      ATH_MSG_ERROR("Unable to connect output {}", m_outputName.value());
       return(StatusCode::FAILURE);
    } else {
-      ATH_MSG_DEBUG("Connected to " << m_outputName.value());
+      ATH_MSG_DEBUG("Connected to {}", m_outputName.value());
    }
 
    // Remove DataHeader with same key if it exists
@@ -192,10 +192,10 @@ StatusCode AthenaOutputStreamTool::connectOutput(const std::string& outputName) 
       bool primaryDH = false;
       if (!m_store->transientContains<DataHeader>(dhKey)) {
          if (dhKey == "EventSelector") primaryDH = true;
-         ATH_MSG_DEBUG("No transientContains DataHeader with key " << dhKey);
+         ATH_MSG_DEBUG("No transientContains DataHeader with key {}", dhKey);
       }
       if (m_store->retrieve(dh, dhKey).isFailure()) {
-         ATH_MSG_DEBUG("Unable to retrieve the DataHeader with key " << dhKey);
+         ATH_MSG_DEBUG("Unable to retrieve the DataHeader with key {}", dhKey);
       }
       // Propagate provenance from file inputs and the primary event-selector
       // header. Headers produced earlier in this job are intentionally not
@@ -215,7 +215,7 @@ StatusCode AthenaOutputStreamTool::connectOutput(const std::string& outputName) 
       } else {
          m_dataHeader->setAttributeList(attrListHandle.cptr());
          if (m_extend) {  // Add streaming decisions
-            ATH_MSG_DEBUG("Adding stream decisions to " << m_attrListWrite);
+            ATH_MSG_DEBUG("Adding stream decisions to {}", m_attrListWrite);
             // Look for attribute list created for mini-EventInfo
             const AthenaAttributeList* attlist(attrListHandle.cptr());
 
@@ -235,13 +235,13 @@ StatusCode AthenaOutputStreamTool::connectOutput(const std::string& outputName) 
             const AthenaAttributeList* attrList2 = nullptr;
             if (!m_store->contains<AthenaAttributeList>(m_attrListWrite)) {
                if (m_store->record(newone,m_attrListWrite).isFailure()) {
-                  ATH_MSG_ERROR("Unable to record att list " << m_attrListWrite);
+                  ATH_MSG_ERROR("Unable to record att list {}", m_attrListWrite);
                }
             } else {
                ATH_MSG_DEBUG("Decisions already added by a different stream");
             }
             if (m_store->retrieve(attrList2,m_attrListWrite).isFailure()) {
-               ATH_MSG_ERROR("Unable to record att list " << m_attrListWrite);
+               ATH_MSG_ERROR("Unable to record att list {}", m_attrListWrite);
             } else {
                m_dataHeader->setAttributeList(attrList2);
             }
@@ -323,7 +323,7 @@ StatusCode AthenaOutputStreamTool::commitOutput(bool doCommit) {
    ATH_MSG_DEBUG("In commitOutput");
    // Connect the output file to the service
    if (m_conversionSvc->commitOutput(m_outputName.value(), doCommit).isFailure()) {
-      ATH_MSG_ERROR("Unable to commit output " << m_outputName.value());
+      ATH_MSG_ERROR("Unable to commit output {}", m_outputName.value());
       return(StatusCode::FAILURE);
    }
    // Set flag that connection is closed
@@ -335,7 +335,7 @@ StatusCode AthenaOutputStreamTool::finalizeOutput() {
    AthCnvSvc* athConversionSvc = dynamic_cast<AthCnvSvc*>(m_conversionSvc.get());
    if (athConversionSvc != 0) {
       if (athConversionSvc->disconnectOutput(m_outputName.value()).isFailure()) {
-         ATH_MSG_ERROR("Unable to finalize output " << m_outputName.value());
+         ATH_MSG_ERROR("Unable to finalize output {}", m_outputName.value());
          return(StatusCode::FAILURE);
       }
    }
@@ -366,7 +366,7 @@ StatusCode AthenaOutputStreamTool::streamObjects(const TypeKeyPairs& typeKeys, c
       // Find the clid for type name from the CLIDSvc
       CLID clid;
       if (m_clidSvc->getIDOfTypeName(type, clid).isFailure()) {
-         ATH_MSG_ERROR("Could not get clid for typeName " << type);
+         ATH_MSG_ERROR("Could not get clid for typeName {}", type);
          return(StatusCode::FAILURE);
       }
       DataObject* dObj = 0;
@@ -382,10 +382,10 @@ StatusCode AthenaOutputStreamTool::streamObjects(const TypeKeyPairs& typeKeys, c
       }
       if (dObj == 0) {
          // No object - print warning and return
-         ATH_MSG_DEBUG("No object found for type " << type << " key " << key);
+         ATH_MSG_DEBUG("No object found for type {} key {}", type, key);
          return(StatusCode::SUCCESS);
       } else {
-         ATH_MSG_DEBUG("Found object for type " << type << " key " << key);
+        ATH_MSG_DEBUG("Found object for type {} key {}", type, key);
       }
       // Save the dObj
       dataObjects.push_back(dObj);
@@ -433,11 +433,13 @@ StatusCode AthenaOutputStreamTool::streamObjects(const DataObjectVec& dataObject
    for (DataObject* dobj : dataObjects) {
       // Do not write the DataHeader via the explicit list
       if (dobj->clID() == ClassID_traits<DataHeader>::ID()) {
-         ATH_MSG_DEBUG("Explicit request to write DataHeader: " << dobj->name() << " - skipping it.");
+         ATH_MSG_DEBUG("Explicit request to write DataHeader: {} - skipping it.",
+                       dobj->name());
       // Do not stream out same object twice
       } else if (written.find(dobj) != written.end()) {
          // Print warning and skip
-         ATH_MSG_DEBUG("Trying to write DataObject twice (clid/key): " << dobj->clID() << " " << dobj->name());
+        ATH_MSG_DEBUG("Trying to write DataObject twice (clid/key): {} {}",
+                      dobj->clID(), dobj->name());
          ATH_MSG_DEBUG("    Skipping this one.");
       } else {
          // Write object
@@ -446,7 +448,8 @@ StatusCode AthenaOutputStreamTool::streamObjects(const DataObjectVec& dataObject
          if (m_conversionSvc->createRep(dobj, addr).isSuccess()) {
             written.insert(std::pair<DataObject*, IOpaqueAddress*>(dobj, addr));
          } else {
-            ATH_MSG_ERROR("Could not create Rep for DataObject (clid/key):" << dobj->clID() << " " << dobj->name());
+            ATH_MSG_ERROR("Could not create Rep for DataObject (clid/key):{} {}",
+                          dobj->clID(), dobj->name());
             return(StatusCode::FAILURE);
          }
       }
@@ -480,11 +483,13 @@ StatusCode AthenaOutputStreamTool::streamObjects(const DataObjectVec& dataObject
                addr->release();
             }
          } else {
-            ATH_MSG_ERROR("Could not fill Object Refs for DataObject (clid/key):" << dobj->clID() << " " << dobj->name());
+            ATH_MSG_ERROR("Could not fill Object Refs for DataObject (clid/key):{} {}",
+                          dobj->clID(), dobj->name());
             return(StatusCode::FAILURE);
          }
       } else {
-         ATH_MSG_WARNING("Could cast DataObject " << dobj->clID() << " " << dobj->name());
+         ATH_MSG_WARNING("Could cast DataObject {} {}",
+                         dobj->clID(), dobj->name());
       }
    }
    m_dataHeader->addHash(&*m_store);
@@ -533,12 +538,14 @@ StatusCode AthenaOutputStreamTool::getInputItemList(SG::IFolder* p2BWrittenFromT
                   std::string typeName;
                   if (m_clidSvc->getTypeNameOfID(clid, typeName).isFailure() && it->getKey().find("Aux.") == std::string::npos) {
                      if (m_skippedItems.find(it->getKey()) == m_skippedItems.end()) {
-                        ATH_MSG_WARNING("Skipping " << it->getKey() << " with unknown clid " << clid << " . Further warnings for this item are suppressed" );
+                        ATH_MSG_WARNING("Skipping {} with unknown clid {} . Further warnings for this item are suppressed",
+                                        it->getKey(), clid);
                         m_skippedItems.insert(it->getKey());
                      }
                      continue;
                   }
-                  ATH_MSG_DEBUG("Adding " << typeName << "#" << it->getKey() << " (clid " << clid << ") to itemlist");
+                  ATH_MSG_DEBUG("Adding {}#{} (clid {}) to itemlist",
+                                typeName, it->getKey(), clid);
                   const std::string keyName = it->getKey();
                   if (keyName.size() > 10 && keyName.compare(0, 10,hltKey)==0) {
                      p2BWrittenFromTool->add(clid, hltKey + "*").ignore();
@@ -552,6 +559,6 @@ StatusCode AthenaOutputStreamTool::getInputItemList(SG::IFolder* p2BWrittenFromT
          }
       }
    }
-   ATH_MSG_DEBUG("Adding DataHeader for stream " << name());
+   ATH_MSG_DEBUG("Adding DataHeader for stream {}", name());
    return(StatusCode::SUCCESS);
 }

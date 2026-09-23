@@ -24,23 +24,23 @@ StatusCode MPIClusterSvc::initialize() {
   char version_string[MPI_MAX_LIBRARY_VERSION_STRING];
   int version_string_len;
   MPI_Get_library_version(version_string, &version_string_len);
-  ATH_MSG_INFO("Running on " << version_string);
+  ATH_MSG_INFO("Running on {}", version_string);
   m_world = m_env->world();
 
   if (m_world.size() < 2) {
-    ATH_MSG_ERROR("Only have " << m_world.size()
-                               << " ranks! This is insufficient!");
+    ATH_MSG_ERROR("Only have {} ranks! This is insufficient!",
+                  m_world.size());
     return StatusCode::FAILURE;
   }
   m_datacom =
       m_world.duplicate();  // make a duplicate communicator for event data
   ATH_MSG_DEBUG("Got MPI_COMM_WORLD");
   m_rank = m_world.rank();
-  ATH_MSG_INFO("On MPI rank " << m_rank);
+  ATH_MSG_INFO("On MPI rank {}", m_rank);
   if (std::getenv("RANK") != std::to_string(m_rank)) {
     const char* env_rank = std::getenv("RANK");
-    ATH_MSG_WARNING("MPI rank (" << m_rank
-                                 << ") does not match $RANK = " << env_rank);
+    ATH_MSG_WARNING("MPI rank ({}) does not match $RANK = {}",
+                    m_rank, env_rank);
   }
 
   ATH_CHECK(m_mpiLog.retrieve());
@@ -135,7 +135,7 @@ int MPIClusterSvc::rank() const {
 }
 
 void MPIClusterSvc::barrier() {
-  ATH_MSG_DEBUG("Barrier on rank " << rank() << " of " << numRanks());
+  ATH_MSG_DEBUG("Barrier on rank {} of {}", rank(), numRanks());
   m_world.barrier();
 }
 
@@ -145,7 +145,7 @@ void MPIClusterSvc::abort() {
 
 void MPIClusterSvc::sendMessage(int destRank, ClusterMessage message,
                                 ClusterComm communicator) {
-  ATH_MSG_DEBUG("Sending message from rank " << rank() << " to " << destRank);
+  ATH_MSG_DEBUG("Sending message from rank {} to {}", rank(), destRank);
   // Don't send event request message if we're not the master *and* we have a
   // message waiting.
   // Probably an emergency stop message
@@ -209,12 +209,12 @@ ClusterMessage MPIClusterSvc::waitReceiveMessage(ClusterComm communicator) {
       std::size_t align = (std::uint64_t(bdy[4]) << 32) + std::uint64_t(bdy[5]);
       std::size_t alloc_size = len;
       if (!std::has_single_bit(align)) {
-        ATH_MSG_WARNING("Alignment " << align << " is not a power of two!");
+        ATH_MSG_WARNING("Alignment {} is not a power of two!", align);
         align = std::bit_ceil(align);
       }
       if (len % align != 0) {
-        ATH_MSG_WARNING("Length " << len << " is not a multiple of alignment "
-                                  << align << "!");
+        ATH_MSG_WARNING("Length {} is not a multiple of alignment {}!",
+                        len, align);
         // Convert to next multiple by adding align - 1, then zeroing out those
         // final bits
         alloc_size = (len + align - 1) & ~(align - 1);
@@ -229,8 +229,7 @@ ClusterMessage MPIClusterSvc::waitReceiveMessage(ClusterComm communicator) {
     }
   }
   ClusterMessage message(msg);
-  ATH_MSG_DEBUG("Rank " << rank() << " received message from "
-                        << message.source);
+  ATH_MSG_DEBUG("Rank {} received message from {}", rank(), message.source);
   return message;
 }
 

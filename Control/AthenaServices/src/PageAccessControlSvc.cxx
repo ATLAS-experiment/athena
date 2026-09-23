@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CxxUtils/cPtrAccessSEGVHandler.h"
@@ -39,7 +39,7 @@ bool PageAccessControlSvc::accessed(const void* address) const {
 
 StatusCode PageAccessControlSvc::initialize() {
   StatusCode sc(StatusCode::SUCCESS);
-  msg(MSG::INFO) << "Initializing " << name() << endmsg ;
+  ATH_MSG_INFO ("Initializing {}", name());
   if (m_autoMonitor.value() && !this->startMonitoring()) sc = StatusCode::FAILURE;
   return sc;
 }
@@ -54,17 +54,17 @@ StatusCode PageAccessControlSvc::finalize() {
 }
 
 void PageAccessControlSvc::report() const {
-  msg(MSG::INFO) << "Access monitoring report" << endmsg;
+  ATH_MSG_INFO( "Access monitoring report" );
   PtrAccessSEGVHandler::const_iterator i(m_SEGVHandler.beginAccessedPtrs()),
     e(m_SEGVHandler.endAccessedPtrs());
   while (i != e) {
-    msg(MSG::DEBUG) << "accessed pointer at @" << std::hex << *i++ << endmsg; 
+    ATH_MSG_DEBUG( "accessed pointer at @{}", *i++ );
   }
   PageAccessControl::const_iterator ia(m_accessControl.beginProtectedPtrs()),
     ea(m_accessControl.endProtectedPtrs());
   while (ia != ea) {
-    msg(MSG::DEBUG) << "protected page at @" << std::hex << ia->addr
-		    << " accessed "<< ia->restored << " times" << endmsg; 
+    ATH_MSG_DEBUG( "protected page at @{} accessed {} times",
+                   ia->addr, ia->restored);
     ++ia;
   }
 }

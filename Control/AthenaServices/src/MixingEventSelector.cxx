@@ -33,6 +33,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // non-MT EventSelector
 #include <stdexcept>
 #include <sstream>
 #include <string>
+#include <print>
 
 using namespace std;
 using SG::DataProxy;
@@ -53,7 +54,7 @@ MixingEventSelector::~MixingEventSelector() {
 
 StatusCode
 MixingEventSelector::initialize() {
-  ATH_MSG_INFO ("Initializing " << name());
+  ATH_MSG_INFO ("Initializing {}", name());
 
 // defer this (it triggers a init loop via PPS 
 //   if (!m_pEventStore.retrieve().isSuccess()) 
@@ -62,7 +63,7 @@ MixingEventSelector::initialize() {
   //setup random stream
   CLHEP::HepRandomEngine* collEng(m_atRndmSvc->GetEngine(m_randomStreamName.value()));
   if(nullptr == collEng ) {
-    ATH_MSG_ERROR ("can not get random stream " << m_randomStreamName.value());
+    ATH_MSG_ERROR ("can not get random stream {}", m_randomStreamName.value());
     return StatusCode::FAILURE;
   }
   //flat distribution in [0,1] range
@@ -78,7 +79,7 @@ MixingEventSelector::initialize() {
 
 StatusCode
 MixingEventSelector::finalize() {
-  ATH_MSG_DEBUG ("Finalizing " << name());
+  ATH_MSG_DEBUG ("Finalizing {}", name());
 
   for (ToolHandle<IAthenaSelectorTool>& tool : m_helperTools) {
     tool->preFinalize().ignore();
@@ -91,7 +92,7 @@ MixingEventSelector::finalize() {
     TriggerList::const_iterator iEnd(m_trigList.end());
     while (i != iEnd) outfile << (*i++).toString();
   }  else if (!fname.empty()) {
-    ATH_MSG_WARNING("unable to open trigger list status file " << fname);
+    ATH_MSG_WARNING("unable to open trigger list status file {}", fname);
   }
 
   return StatusCode::SUCCESS;
@@ -127,7 +128,8 @@ MixingEventSelector::decodeTrigger(const std::string & triggDescr) {
         auto [ptr1, ec1] = std::from_chars(string1.data(), string1.data() + string1.size(), firstEvt);
         auto [ptr2, ec2] = std::from_chars(string2.data(), string2.data() + string2.size(), lastEvt);
         if ( ec1 != std::errc() || ec2 != std::errc() ) {
-          ATH_MSG_ERROR("decodeTrigger: Can't cast ["<< string1 << " " << string2  << "] to double(frequency). SKIPPING");
+          ATH_MSG_ERROR("decodeTrigger: Can't cast [{} {}] to double(frequency). SKIPPING",
+                        string1, string2);
         } else {
         if (m_trigList.add(Trigger(pSelector, firstEvt, lastEvt))) {
           if (msgLvl(MSG::DEBUG)) {
@@ -140,21 +142,20 @@ MixingEventSelector::decodeTrigger(const std::string & triggDescr) {
           }
         } else {
           ATH_MSG_ERROR
-            ("decodeTrigger: Selector ["
-             << selTN.type() << '/' << selTN.name()
-             << "] not added");
+            ("decodeTrigger: Selector [{}/{}] not added",
+             selTN.type(), selTN.name());
         } //can add to range
         }
       } else {
         ATH_MSG_ERROR 
-          ("decodeTrigger: Selector ["
-           << selTN.type() << '/' << selTN.name()
-           << "] can not be found or created");
+          ("decodeTrigger: Selector [{}/{}] can not be found or created",
+           selTN.type(), selTN.name());
       } //selector available
   } else {
     ATH_MSG_ERROR
-      ("decodeTrigger: Badly formatted descriptor [" 
-       << triggDescr << "]. SKIPPING");
+      ("decodeTrigger: Badly formatted descriptor [{}]. SKIPPING",
+       triggDescr);
+    
   } //can parse property string
 }
 
@@ -204,9 +205,9 @@ MixingEventSelector::next(IEvtSelector::Context& /*c*/) const {
   while (sc.isSuccess() && (i != iE)) {
     sc =(*i)->postNext();
     if (sc.isRecoverable()) 
-      ATH_MSG_INFO("Request skipping event from: " << (*i)->name());
+      ATH_MSG_INFO("Request skipping event from: {}", (*i)->name());
     else if (sc.isFailure()) 
-      ATH_MSG_WARNING((*i)->name() << ":postNext failed");
+      ATH_MSG_WARNING("{}:postNext failed", (*i)->name());
     ++i;
   }
   return sc;
@@ -284,8 +285,8 @@ MixingEventSelector::setCurrentTrigger() const {
   if (!validTrigger()) {
     ATH_MSG_INFO ("setCurrentTrigger: end of input");
   } else {
-    ATH_MSG_DEBUG ("setCurrentTrigger: now using selector " 
-		   << currentTrigger()->name());
+    ATH_MSG_DEBUG ("setCurrentTrigger: now using selector {}", 
+                   currentTrigger()->name());
   }
 
   return m_pCurrentTrigger;
@@ -352,10 +353,10 @@ MixingEventSelector::TriggerList::toString() const {
   ostringstream os;
   for (unsigned int i=0; i<m_trigs.size(); ++i) {
     //cant do    os << m_trigs[i].toString();
-    os << m_trigs[i].name() << ", already read=" << m_trigs[i].read()
-       << ", to do=" << m_trigs[i].todo() 
-       << (m_trigs[i].done() ? " done " : " ") 
-       << " -  endRange: " << m_rangeEnd[i] << '\n';
+    std::println (os, "{}, already read={}, to do={}{} -  endRange: {}",
+                  m_trigs[i].name(), m_trigs[i].read(), m_trigs[i].todo(),
+                  (m_trigs[i].done() ? " done " : " "),
+                  m_rangeEnd[i]);
   }
   os << endl;
   return string(os.str()); 
@@ -403,8 +404,7 @@ IEvtSelector::Context& MixingEventSelector::Trigger::currentContext() const {
 std::string
 MixingEventSelector::Trigger::toString() const { 
   ostringstream os;
-  os << name() << ", already read=" << m_reads 
-     << ", to do=" << todo() << endl;
+  std::println (os, "{}, already read={}, to do={}", name(), m_reads, todo());
   return string(os.str()); 
 }
 
@@ -416,7 +416,6 @@ MixingEventSelector::Trigger::next() const{
     while (sc.isSuccess() && (++m_reads < m_firstEvent))  
       sc = selector().next(currentContext());// m_reads, m_current are mutable
   }
-  //  cout << "calling next on Trigger " << this << " " << dynamic_cast<IService&>(selector()).name() << endl;
   return sc;
 }
 
@@ -444,10 +443,6 @@ MixingEventSelector::Trigger::createContext(IEvtSelector::Context*& pCtxt) const
 
 bool 
 MixingEventSelector::Trigger::done() const { 
-  //  cout << "calling done on Trigger " << this << " " << dynamic_cast<IService&>(selector()).name() << endl;
-  //  cout << refCtxt << " " << selector().end() << endl;
-  //  cout << toRead() << " " << m_reads << endl;
-  //  cout << "done returns " << ((m_current && (currentContext() == *selector().end())) || (toRead() <= m_reads)) << endl; 
   return  (toRead() <= m_reads);
 }
 

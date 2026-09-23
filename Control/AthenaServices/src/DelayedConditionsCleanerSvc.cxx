@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaServices/src/DelayedConditionsCleanerSvc.cxx
@@ -13,7 +13,6 @@
 #include "AthenaBaseComps/AthProperties.h"
 #include "AthenaKernel/CondCont.h"
 #include "AthenaKernel/IRCUSvc.h"
-#include "CxxUtils/StrFormat.h"
 #include "GaudiKernel/EventContext.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include <algorithm>
@@ -282,12 +281,11 @@ StatusCode DelayedConditionsCleanerSvc::printStats() const
   }
 
   ATH_MSG_INFO( "Conditions container statistics" );
-  ATH_MSG_INFO( CxxUtils::strformat ("  Work q: Max size: %zu  (%zu queries) ",
-                                     m_maxQueue, m_nEvents) );
-  size_t den = std::max (m_nEvents, 1lu);
-  ATH_MSG_INFO( CxxUtils::strformat ("          Avg size: %.2f / Avg removed: %.2f",
-                                     static_cast<float>(m_queueSum)/den,
-                                     static_cast<float>(m_workRemoved)/den) );
+  ATH_MSG_INFO( "  Work q: Max size: {}  ({} queries) ", m_maxQueue, m_nEvents);
+  size_t den = std::max (m_nEvents, 1lu );
+  ATH_MSG_INFO( "          Avg size: {:.2f} / Avg removed: {:.2f}",
+                static_cast<float>(m_queueSum)/den,
+                static_cast<float>(m_workRemoved)/den );
 
   std::vector<const CondContInfo*> infos;
   for (const auto& p : m_ccinfo) {
@@ -298,17 +296,17 @@ StatusCode DelayedConditionsCleanerSvc::printStats() const
              { return a->m_cc.id().key() < b->m_cc.id().key(); });
 
   for (const CondContInfo* ci : infos) {
-    ATH_MSG_INFO( CxxUtils::strformat ("  %-20s nInserts %6zu maxSize %3zu",
-                                       ci->m_cc.id().key().c_str(),
-                                       ci->m_cc.nInserts(),
-                                       ci->m_cc.maxSize()) );
+    ATH_MSG_INFO( "  {:<20} nInserts {:6} maxSize {:3}",
+                  ci->m_cc.id().key().c_str(),
+                  ci->m_cc.nInserts(),
+                  ci->m_cc.maxSize() );
     den = std::max (ci->m_nClean, 1lu);
-    ATH_MSG_INFO( CxxUtils::strformat ("    nClean %zu avgRemoved %.2f 0/1/2+ %zu/%zu/%zu",
-                                       ci->m_nClean,
-                                       static_cast<float> (ci->m_nRemoved) / den,
-                                       ci->m_removed0,
-                                       ci->m_removed1,
-                                       ci->m_removed2plus) );
+    ATH_MSG_INFO( "    nClean {} avgRemoved {:.2f} 0/1/2+ {}/{}/{}",
+                  ci->m_nClean,
+                  static_cast<float> (ci->m_nRemoved) / den,
+                  ci->m_removed0,
+                  ci->m_removed1,
+                  ci->m_removed2plus );
   }
                                      
   return StatusCode::SUCCESS;

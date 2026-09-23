@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaServices/test/ConditionsCleanerSvc_test.cxx
@@ -19,6 +19,7 @@
 #include "GaudiKernel/IService.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include <iostream>
+#include <print>
 #include <cassert>
 #include <cstdlib>
 
@@ -101,8 +102,7 @@ public:
 StatusCode ConditionsCleanerTest::event (const EventContext& ctx,
                                          bool allowAsync)
 {
-  std::cout << "ConditionsCleanerTest::event "
-            << ctx.evt() << " " << allowAsync << "\n";
+  std::println ("ConditionsCleanerTest::event {} {}", ctx.evt(), allowAsync);
   return StatusCode::SUCCESS;
 }
 
@@ -110,22 +110,22 @@ StatusCode ConditionsCleanerTest::event (const EventContext& ctx,
 StatusCode ConditionsCleanerTest::condObjAdded (const EventContext& ctx,
                                                 CondContBase& cc)
 {
-  std::cout << "ConditionsCleanerTest::condObjAdded "
-            << ctx.evt() << " " << cc.clid() << "\n";
+  std::println ("ConditionsCleanerTest::condObjAdded {} {}",
+                ctx.evt(), cc.clid());
   return StatusCode::SUCCESS;
 }
 
 
 StatusCode ConditionsCleanerTest::printStats() const
 {
-  std::cout << "ConditionsCleanerTest::printStats\n";
+  std::println ("ConditionsCleanerTest::printStats");
   return StatusCode::SUCCESS;
 }
 
 
 StatusCode ConditionsCleanerTest::reset()
 {
-  std::cout << "ConditionsCleanerTest::reset\n";
+  std::println ("ConditionsCleanerTest::reset");
   return StatusCode::SUCCESS;
 }
 
@@ -154,7 +154,7 @@ void testit (IService* mgr)
 
 void test1 (ISvcLocator* svcloc)
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   SmartIF<IService> mgr{svcloc->service ("ConditionsCleanerSvc/ConditionsCleanerSvc1")};
   if (!mgr) std::abort();
@@ -165,7 +165,7 @@ void test1 (ISvcLocator* svcloc)
 
 void test2 (ISvcLocator* svcloc)
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   SmartIF<IService> mgr{svcloc->service ("ConditionsCleanerSvc/ConditionsCleanerSvc2")};
   if (!mgr) std::abort();
@@ -176,10 +176,10 @@ void test2 (ISvcLocator* svcloc)
 
 int main()
 {
-  std::cout << "ConditionsCleanerSvc_test\n";
+  std::println ("ConditionsCleanerSvc_test");
   ISvcLocator* svcloc = nullptr;
   if (!Athena_test::initGaudi("AthenaServices/ConditionsCleanerSvc_test.txt", svcloc)) {
-    std::cerr << "This test can not be run" << std::endl;
+    std::println (std::cerr, "This test can not be run");
     return 0;
   }  
   assert(svcloc);
