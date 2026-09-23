@@ -4,6 +4,7 @@
 
 #include "PileUpTools/PileUpMergeSvc.h"
 #include "AthenaKernel/ITriggerTime.h"
+#include "AthenaKernel/proxyDictFromEventContext.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "SGTools/DataProxy.h"
 #include "SGTools/DataStore.h"
@@ -242,6 +243,13 @@ const xAOD::EventInfo* PileUpMergeSvc::getPileUpEvent( StoreGateSvc* sg, const s
       ATH_MSG_DEBUG("Could not find EventInfo '" << einame << "' in store " << sg->name());
    }
    return xAODEventInfo;
+}
+
+
+const xAOD::EventInfo* PileUpMergeSvc::getPileUpEvent( const EventContext& ctx, const std::string& einame )
+{
+  auto* sg = dynamic_cast<StoreGateSvc*> (Atlas::proxyDictFromEventContext(ctx));
+  return getPileUpEvent (sg, einame);
 }
 
 
