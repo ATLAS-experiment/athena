@@ -464,6 +464,10 @@ namespace Muon {
 
     std::vector<std::pair<double, double> > MSVertexTrackletTool::SegSeeds(const std::vector<const Muon::MdtPrepData*>& mdts) const {
         std::vector<std::pair<double, double> > SeedParams;
+        if (mdts.empty())[[unlikely]]{
+          ATH_MSG_DEBUG("SegSeeds called with an empty vector.");
+          return SeedParams;
+        }
         // create seeds by drawing the 4 possible lines tangent to the two outermost drift circles
         // see http://cds.cern.ch/record/620198 (section 4.3) for description of the algorithm
         // keep all seeds which satisfy the criterion: residual(mdt 2) < m_SeedResidual
