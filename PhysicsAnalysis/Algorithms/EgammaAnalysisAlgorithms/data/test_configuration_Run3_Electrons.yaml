@@ -8,14 +8,12 @@ EventCleaning:
 
 Electrons:
 - containerName: AnaElectrons
-  forceFullSimConfigForIso: True
   recalibratePhyslite: False
   decorateTruth: true
   decorateCaloClusterEta: true
   writeTrackD0Z0: True
   WorkingPoint:
   - selectionName: loose
-    forceFullSimConfig: True
     identificationWP: LooseBLayerLH
     isolationWP: Loose_VarRad
   PtEtaSelection:

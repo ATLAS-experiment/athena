@@ -8,13 +8,10 @@ EventCleaning:
 Photons:
 - containerName: AnaPhotons
   recomputeIsEM: False
-  forceFullSimConfigForIso: True
   recalibratePhyslite: False
   decorateTruth: true
   WorkingPoint:
   - selectionName: tight
-    forceFullSimConfigForID: True
-    forceFullSimConfigForIso: True
     qualityWP: Tight
     isolationWP: FixedCutTight
     recomputeIsEM: False
