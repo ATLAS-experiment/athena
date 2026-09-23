@@ -12,7 +12,6 @@ def ActsTrackParamsEstimationToolCfg(ConfigFlags,
 
     # eBoundLoc0, eBoundLoc1, eBoundPhi, eBoundTheta, eBoundQOverP, eBoundTime
     kwargs.setdefault('initialVarInflation', ConfigFlags.Acts.initialVarInflation)
-    kwargs.setdefault('refitErrInflation', ConfigFlags.Acts.refitErrInflation)
 
     kwargs.setdefault('allowPropagatorFailure', False)
 
