@@ -83,8 +83,19 @@ namespace MuonR4 {
             Gaudi::Property<bool> m_hessianResidual{this, "useHessianResidual", false};
             /// Add beamline constraint
             Gaudi::Property<bool> m_doBeamspotConstraint{this, "doBeamspotConstraint", false};
+            /** @brief Radial covariance on th beam spot measurment */
             Gaudi::Property<double> m_beamSpotR{this, "BeamSpotRadius", 30.* Gaudi::Units::cm};
+            /** @brief Longitudinal covariance on the beam spo measurement */
             Gaudi::Property<double> m_beamSpotL{this, "BeamSpotLength", 2. * Gaudi::Units::m};
+            static constexpr auto s_stIdxMax = Acts::toUnderlying(Muon::MuonStationIndex::StIndex::StIndexMax);
+            /** @brief Maximum allowed distance of the segment seed line to the beam spot measurement
+             *         expressed in relative units of the beamspot radius. The threshold may
+             *         be relaxed for particular station indices. */
+            Gaudi::Property<std::vector<double>> m_seedMaxBsR{this, "SeedMaxDistanceBsRadius", 
+                                                              std::vector<double>(s_stIdxMax, 2.)};
+            Gaudi::Property<std::vector<double>> m_seedMaxBsL{this, "SeedMaxDistanceBsLength", 
+                                                              std::vector<double>(s_stIdxMax, 2.)};
+
             /** @brief Two mdt seeds are the same if their defining parameters match wihin */
             Gaudi::Property<double> m_seedHitChi2{this, "ResoSeedHitAssoc", 5. };
             /** @brief Toggle seed recalibration. The two seed circles are recalibrated using 
