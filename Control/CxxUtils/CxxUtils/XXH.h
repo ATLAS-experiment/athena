@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2023-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/XXH.h
@@ -12,6 +12,7 @@
 #define CXXUTILS_XXH_H
 
 #include <cstdint>
+#include <ranges>
 #include <type_traits>
 
 /**
@@ -36,6 +37,7 @@ std::uint64_t hash64(const void* data, std::size_t size);
  * @return 64-bit xxh3 hash of container
  */
 template <typename Cont>
+  requires std::ranges::contiguous_range<Cont> && std::ranges::sized_range<Cont>
 std::uint64_t hash64(const Cont& cont) {
   return hash64(cont.data(), cont.size() * sizeof(typename Cont::value_type));
 }
@@ -46,9 +48,8 @@ std::uint64_t hash64(const Cont& cont) {
  * @param pod Value to be hashed
  * @return 64-bit xxh3 hash of value
  */
-template <typename POD,
-          typename = std::enable_if_t<std::is_standard_layout_v<POD> &&
-                                      std::is_trivial_v<POD>>>
+template <typename POD>
+  requires(std::is_standard_layout_v<POD> && std::is_trivial_v<POD>)
 std::uint64_t hash64(const POD& pod) {
   return hash64(&pod, sizeof(POD));
 }

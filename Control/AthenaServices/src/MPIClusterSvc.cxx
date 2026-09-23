@@ -4,8 +4,11 @@
 #include "MPIClusterSvc.h"
 
 #include <mpi.h>
+#include <unistd.h>
 
 #include <bit>
+#include <chrono>
+#include <format>
 
 #include "CxxUtils/XXH.h"
 #include "GaudiKernel/FileIncident.h"
@@ -37,51 +40,53 @@ StatusCode MPIClusterSvc::initialize() {
   ATH_MSG_DEBUG("Got MPI_COMM_WORLD");
   m_rank = m_world.rank();
   ATH_MSG_INFO("On MPI rank {}", m_rank);
-  if (std::getenv("RANK") != std::to_string(m_rank)) {
-    const char* env_rank = std::getenv("RANK");
-    ATH_MSG_WARNING("MPI rank ({}) does not match $RANK = {}",
-                    m_rank, env_rank);
+  const char* env_rank = std::getenv("RANK");
+  // Could be nullptr if we're not using MPI to manage events
+  if (env_rank != nullptr && env_rank != std::to_string(m_rank)) {
+    ATH_MSG_WARNING("MPI rank ({}) does not match $RANK = {}", m_rank,
+                    env_rank);
   }
 
-  ATH_CHECK(m_mpiLog.retrieve());
-  m_mpiLog->createStatement("PRAGMA foreign_keys = ON").run();
+  if (!m_mpiLog.empty()) {
+    ATH_CHECK(m_mpiLog.retrieve());
+    m_mpiLog->createStatement("PRAGMA foreign_keys = ON").run();
 
-  m_mpiLog
-      ->createStatement(
-          "CREATE TABLE ranks (rank INTEGER PRIMARY KEY, "
-          "node TEXT, start_time FLOAT, end_time FLOAT)")
-      .run();
-  m_mpiLog
-      ->createStatement(
-          "INSERT INTO ranks (rank, node, start_time) "
-          "VALUES(?1, ?2, julianday('now'))")
-      .run(m_rank, m_env->processor_name());
-  m_mpiLog
-      ->createStatement(
-          "CREATE TABLE files (fileId INTEGER PRIMARY KEY, fileName TEXT)")
-      .run();
-  m_mpiLog
-      ->createStatement(
-          "CREATE TABLE event_log (rank INTEGER, id INTEGER UNIQUE,"
-          "inputFileId INTEGER,"
-          "runNumber INTEGER, eventNumber INTEGER, complete INTEGER,"
-          "status INTEGER, request_time_ns INTEGER, start_time FLOAT,"
-          "end_time FLOAT, PRIMARY KEY (runNumber, eventNumber, id), "
-          "FOREIGN KEY (rank) REFERENCES ranks(rank),"
-          "FOREIGN KEY (inputFileId) REFERENCES files(fileId))")
-      .run();
-  m_mpiLog_addEvent = m_mpiLog->createStatement(
-      "INSERT INTO event_log(id, rank, inputFileId, runNumber, eventNumber, "
-      "complete, "
-      "start_time, request_time_ns) "
-      "VALUES(?1, ?4, ?6, ?2, ?3, 0, julianday('now'), ?5)");
-  m_mpiLog_completeEvent = m_mpiLog->createStatement(
-      "UPDATE event_log SET complete = 1, status = ?4, end_time = "
-      "julianday('now') WHERE runNumber = ?2 "
-      "AND eventNumber = ?3 AND id = ?1");
-  m_mpiLog_addFile = m_mpiLog->createStatement(
-      "INSERT INTO files (fileId, fileName) VALUES(?1, ?2)");
-
+    m_mpiLog
+        ->createStatement(
+            "CREATE TABLE ranks (rank INTEGER PRIMARY KEY, "
+            "node TEXT, start_time FLOAT, end_time FLOAT)")
+        .run();
+    m_mpiLog
+        ->createStatement(
+            "INSERT INTO ranks (rank, node, start_time) "
+            "VALUES(?1, ?2, julianday('now'))")
+        .run(m_rank, m_env->processor_name());
+    m_mpiLog
+        ->createStatement(
+            "CREATE TABLE files (fileId INTEGER PRIMARY KEY, fileName TEXT)")
+        .run();
+    m_mpiLog
+        ->createStatement(
+            "CREATE TABLE event_log (rank INTEGER, id INTEGER UNIQUE,"
+            "inputFileId INTEGER,"
+            "runNumber INTEGER, eventNumber INTEGER, complete INTEGER,"
+            "status INTEGER, request_time_ns INTEGER, start_time FLOAT,"
+            "end_time FLOAT, PRIMARY KEY (runNumber, eventNumber, id), "
+            "FOREIGN KEY (rank) REFERENCES ranks(rank),"
+            "FOREIGN KEY (inputFileId) REFERENCES files(fileId))")
+        .run();
+    m_mpiLog_addEvent = m_mpiLog->createStatement(
+        "INSERT INTO event_log(id, rank, inputFileId, runNumber, eventNumber, "
+        "complete, "
+        "start_time, request_time_ns) "
+        "VALUES(?1, ?4, ?6, ?2, ?3, 0, julianday('now'), ?5)");
+    m_mpiLog_completeEvent = m_mpiLog->createStatement(
+        "UPDATE event_log SET complete = 1, status = ?4, end_time = "
+        "julianday('now') WHERE runNumber = ?2 "
+        "AND eventNumber = ?3 AND id = ?1");
+    m_mpiLog_addFile = m_mpiLog->createStatement(
+        "INSERT INTO files (fileId, fileName) VALUES(?1, ?2)");
+  }
   // Set up incident listener
   ServiceHandle<IIncidentSvc> incsvc("IncidentSvc", this->name());
   if (!incsvc.retrieve().isSuccess()) {
@@ -95,6 +100,12 @@ StatusCode MPIClusterSvc::initialize() {
 }
 
 StatusCode MPIClusterSvc::finalize() {
+  m_datacom = mpi3::communicator{};  // Ensure this is disconnected before
+                                     // shutting down MPI
+  m_env.reset(nullptr);
+  if (m_mpiLog.empty()) {
+    return StatusCode::SUCCESS;
+  }
   m_mpiLog
       ->createStatement(
           "UPDATE ranks SET end_time = julianday('now') WHERE rank = ?1")
@@ -143,6 +154,15 @@ void MPIClusterSvc::abort() {
   m_world.abort();
 }
 
+std::string MPIClusterSvc::tracePrefix(ClusterComm communicator) const {
+  const auto now = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                       std::chrono::steady_clock::now().time_since_epoch())
+                       .count();
+  return std::format("MPI_TRACE ns={} rank={} thread={} comm={}", now, m_rank,
+                     gettid(),
+                     communicator == ClusterComm::EventData ? "data" : "world");
+}
+
 void MPIClusterSvc::sendMessage(int destRank, ClusterMessage message,
                                 ClusterComm communicator) {
   ATH_MSG_DEBUG("Sending message from rank {} to {}", rank(), destRank);
@@ -167,68 +187,173 @@ void MPIClusterSvc::sendMessage(int destRank, ClusterMessage message,
 
   message.source = m_rank;
   const auto& [header, body] = message.wire_msg();
+  if (m_traceMessages)
+    ATH_MSG_INFO(std::format(
+        "{} send-header.begin peer={} tag=0 type={} source={} header_value={}",
+        tracePrefix(communicator), destRank, header[0], header[1], header[2]));
   comm.send_n(header.begin(), header.size(), destRank, 0);
+  if (m_traceMessages)
+    ATH_MSG_INFO(std::format("{} send-header.end peer={} tag=0 header_value={}",
+                             tracePrefix(communicator), destRank, header[2]));
   if (body.has_value()) {
-    comm.send_n(body->begin(), body->size(), destRank, header[2]);
+    const int tag = int(header[2]);
+    if (m_traceMessages)
+      ATH_MSG_INFO(std::format("{} send-body.begin peer={} tag={} bytes={}",
+                               tracePrefix(communicator), destRank, tag,
+                               sizeof(*body)));
+    comm.send_n(body->begin(), body->size(), destRank, tag);
+    if (m_traceMessages)
+      ATH_MSG_INFO(std::format("{} send-body.end peer={} tag={}",
+                               tracePrefix(communicator), destRank, tag));
     if (message.messageType == ClusterMessageType::Data) {
-      const ClusterMessage::WireMsgBody& bdy = *body;
-      // Decode the body to figure out what to send
-      char* ptr = reinterpret_cast<char*>((std::uint64_t(bdy[0]) << 32) +
-                                          std::uint64_t(bdy[1]));
-      std::size_t len = (std::uint64_t(bdy[2]) << 32) + std::uint64_t(bdy[3]);
-
+      const auto& data = std::get<ClusterMessage::DataDescr>(message.payload);
       // Offset the tag by 16384 to minimize chance of conflict
       // (max tag in MPI spec is 32767)
       constexpr int tag_offset = 16384;
-      comm.send_n(ptr, len, destRank, header[2] + tag_offset);
+      if (m_traceMessages)
+        ATH_MSG_INFO(
+            std::format("{} send-payload.begin peer={} tag={} bytes={} "
+                        "buffer={} align={} destination={} event={} request={}",
+                        tracePrefix(communicator), destRank, tag + tag_offset,
+                        data.len, data.ptr, data.align, int(data.dest),
+                        data.evtNumber, data.requestNumber));
+      comm.send_n(static_cast<char*>(data.ptr), data.len, destRank,
+                  tag + tag_offset);
+      if (m_traceMessages)
+        ATH_MSG_INFO(std::format(
+            "{} send-payload.end peer={} tag={} event={} request={}",
+            tracePrefix(communicator), destRank, tag + tag_offset,
+            data.evtNumber, data.requestNumber));
     }
   }
 }
 
-ClusterMessage MPIClusterSvc::waitReceiveMessage(ClusterComm communicator) {
+ClusterMessage MPIClusterSvc::waitReceiveMessage(
+    ClusterComm communicator,
+    const MemoryResourceRegistry* memoryResourceRegistry) {
   // Same offset as line 114
   constexpr int tag_offset = 16384;
-  constexpr std::uint64_t thirtytwo_ones = 0xFFFFFFFF;
+  constexpr std::uint64_t last32 = 0xFFFFFFFF;
 
   // Select correct communicator
   mpi3::communicator& comm =
       (communicator == ClusterComm::EventData) ? m_datacom : m_world;
   ClusterMessage::WireMsg msg{};
   auto&& [head, body] = msg;
-  comm.receive_n(head.begin(), head.size());
+  if (m_traceMessages) {
+    ATH_MSG_INFO(std::format("{} recv-header.begin peer=ANY tag=ANY bytes={}",
+                             tracePrefix(communicator), sizeof(head)));
+    // Preserve wildcard matching while retaining the status hidden by
+    // receive_n.
+    MPI_Status status{};
+    const int rc =
+        MPI_Recv(head.data(), head.size(), mpi3::datatype<std::uint32_t>{}(),
+                 MPI_ANY_SOURCE, MPI_ANY_TAG, comm.get(), &status);
+    if (rc != MPI_SUCCESS) {
+      ATH_MSG_ERROR(std::format("{} recv-header.error rc={}",
+                                tracePrefix(communicator), rc));
+      throw std::runtime_error("MPI header receive failed");
+    }
+    int receivedBytes = 0;
+    MPI_Get_count(&status, MPI_BYTE, &receivedBytes);
+    ATH_MSG_INFO(
+        std::format("{} recv-header.end peer={} tag={} bytes={} type={} "
+                    "source={} header_value={}",
+                    tracePrefix(communicator), status.MPI_SOURCE,
+                    status.MPI_TAG, receivedBytes, head[0], head[1], head[2]));
+    if (status.MPI_TAG != 0 || status.MPI_SOURCE != int(head[1]) ||
+        receivedBytes != int(sizeof(head))) {
+      ATH_MSG_WARNING(std::format(
+          "{} unexpected header envelope: source={} tag={} bytes={}",
+          tracePrefix(communicator), status.MPI_SOURCE, status.MPI_TAG,
+          receivedBytes));
+    }
+  } else {
+    comm.receive_n(head.begin(), head.size());
+  }
+  std::pmr::memory_resource* memoryResource = std::pmr::new_delete_resource();
   // Only time we need to figure out ourselves whether there's a body
-  if (head[0] == int(ClusterMessageType::FinalWorkerStatus) ||
-      head[0] == int(ClusterMessageType::WorkerError) ||
-      head[0] == int(ClusterMessageType::Data)) {
+  if (ClusterMessage::has_body(head)) {
     body = ClusterMessage::WireMsgBody{};
+    if (m_traceMessages)
+      ATH_MSG_INFO(std::format("{} recv-body.begin peer={} tag={} bytes={}",
+                               tracePrefix(communicator), head[1], head[2],
+                               sizeof(*body)));
     comm.receive_n(body->begin(), body->size(), head[1], head[2]);
+    if (m_traceMessages)
+      ATH_MSG_INFO(std::format("{} recv-body.end peer={} tag={}",
+                               tracePrefix(communicator), head[1], head[2]));
     if (head[0] == int(ClusterMessageType::Data)) {
       ClusterMessage::WireMsgBody& bdy = *body;
-      // Decode the body to figure out what to recieve
+      // Decode the body to select the destination memory resource.
       std::size_t len = (std::uint64_t(bdy[2]) << 32) + std::uint64_t(bdy[3]);
-      std::size_t align = (std::uint64_t(bdy[4]) << 32) + std::uint64_t(bdy[5]);
-      std::size_t alloc_size = len;
-      if (!std::has_single_bit(align)) {
-        ATH_MSG_WARNING("Alignment {} is not a power of two!", align);
-        align = std::bit_ceil(align);
+      // Reject corrupt alignment exponents before shifting.
+      if (bdy[4] >= 64) {
+        throw std::runtime_error("Received alignment exponent out of range");
       }
+      std::size_t align = 1ULL << bdy[4];
       if (len % align != 0) {
-        ATH_MSG_WARNING("Length {} is not a multiple of alignment {}!",
-                        len, align);
-        // Convert to next multiple by adding align - 1, then zeroing out those
-        // final bits
-        alloc_size = (len + align - 1) & ~(align - 1);
+        ATH_MSG_ERROR("Received invalid alignment " << align << " for length "
+                                                    << len);
+        // throw an exception, the allocation will fail and with memory
+        // resources we need the correct length later to deallocate.
+        throw std::runtime_error(
+            std::format("Received invalid cluster message. {} is not a valid "
+                        "alignment for length {}!",
+                        align, len));
       }
+      auto dest = Destination(bdy[5]);
 
-      char* ptr = static_cast<char*>(std::aligned_alloc(align, alloc_size));
+      if (memoryResourceRegistry == nullptr) {
+        if (dest != Destination::Host) {
+          ATH_MSG_WARNING("Ignoring destination " << int(dest)
+                                                  << " because no memory "
+                                                     "resource registry was "
+                                                     "provided");
+        }
+        dest = Destination::Host;
+        bdy[5] = 0;
+      } else if (int(dest) >= memoryResourceRegistry->size()) {
+        ATH_MSG_ERROR(
+            "Received message for destination "
+            << int(dest)
+            << " which is not valid for this rank. Assuming CPU memory.");
+        dest = Destination::Host;
+        bdy[5] = std::uint32_t(dest);  // So later decode works
+      } else {
+        memoryResource = memoryResourceRegistry->at(std::uint32_t(dest));
+      }
+      if (m_traceMessages)
+        ATH_MSG_INFO(std::format(
+            "{} allocate.begin peer={} tag={} bytes={} align={} destination={} "
+            "resource={} event={} request={}",
+            tracePrefix(communicator), head[1], head[2] + tag_offset, len,
+            align, int(dest), static_cast<void*>(memoryResource),
+            (std::uint64_t(bdy[6]) << 32) | bdy[7],
+            (std::uint64_t(bdy[8]) << 32) | bdy[9]));
+      char* ptr = static_cast<char*>(memoryResource->allocate(len, align));
+      if (m_traceMessages)
+        ATH_MSG_INFO(std::format("{} allocate.end peer={} tag={} buffer={}",
+                                 tracePrefix(communicator), head[1],
+                                 head[2] + tag_offset,
+                                 static_cast<void*>(ptr)));
+      if (m_traceMessages)
+        ATH_MSG_INFO(std::format(
+            "{} recv-payload.begin peer={} tag={} bytes={} buffer={}",
+            tracePrefix(communicator), head[1], head[2] + tag_offset, len,
+            static_cast<void*>(ptr)));
       comm.receive_n(ptr, len, head[1], head[2] + tag_offset);
+      if (m_traceMessages)
+        ATH_MSG_INFO(std::format("{} recv-payload.end peer={} tag={}",
+                                 tracePrefix(communicator), head[1],
+                                 head[2] + tag_offset));
 
       // update the pointer in the WireMsgBody
       bdy[0] = int(std::uint64_t(ptr) >> 32);
-      bdy[1] = int(std::uint64_t(ptr) & thirtytwo_ones);
+      bdy[1] = int(std::uint64_t(ptr) & last32);
     }
   }
-  ClusterMessage message(msg);
+  ClusterMessage message(msg, memoryResource);
   ATH_MSG_DEBUG("Rank {} received message from {}", rank(), message.source);
   return message;
 }
@@ -237,6 +362,9 @@ void MPIClusterSvc::log_addEvent(int eventIdx, std::int64_t run_number,
                                  std::int64_t event_number,
                                  std::int64_t request_time_ns,
                                  std::size_t slot) {
+  if (m_mpiLog.empty()) {
+    ATH_MSG_WARNING("MPI SQLite log service is not setup!");
+  }
   m_mpiLog_addEvent.run(eventIdx, run_number, event_number, m_rank,
                         request_time_ns, m_inputFileSlotMap[slot]);
 }
@@ -244,5 +372,8 @@ void MPIClusterSvc::log_addEvent(int eventIdx, std::int64_t run_number,
 void MPIClusterSvc::log_completeEvent(int eventIdx, std::int64_t run_number,
                                       std::int64_t event_number,
                                       std::int64_t status) {
+  if (m_mpiLog.empty()) {
+    ATH_MSG_WARNING("MPI SQLite log service is not setup!");
+  }
   m_mpiLog_completeEvent.run(eventIdx, run_number, event_number, status);
 }

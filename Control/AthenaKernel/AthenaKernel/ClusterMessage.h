@@ -6,6 +6,8 @@
 
 #include <array>
 #include <cstdint>
+#include <memory>
+#include <memory_resource>
 #include <optional>
 #include <variant>
 
@@ -22,8 +24,15 @@ enum class ClusterMessageType {
   WorkerError,
   EmergencyStop,
   Data,
+
   EMPTY
 };
+
+/** @class Destination
+ *  @brief An enum class denoting whether the data is heading to host or device
+ * memory
+ */
+enum class Destination : std::uint8_t { Host = 0, Device, EMPTY };
 
 /** @class ClusterMessage
  *  @brief A class describing a message sent between nodes in a cluster
@@ -54,24 +63,43 @@ struct ClusterMessage {
     void* ptr = nullptr;
     std::size_t len = 0;
     std::size_t align = 0;
+    Destination dest = Destination::Host;
+    // 0 will always mean CPU memory, but other numbers might depend on the
+    // destination rank
 
-    bool received = false;  // set if this DataDescr was received and therefore
-                            // owns its memory
     std::size_t evtNumber = 0;
-    std::size_t fileNumber = 0;
+    std::size_t requestNumber = 0;
 
+    std::pmr::memory_resource* allocating_memory_resource =
+        nullptr;  // If this was received, we need to keep track of the memory
+                  // resource used to allocate memory in order to free it
+
+    // This enforces the invariant that align is a valid alignment for T
     template <typename T>
-    DataDescr(const T* ptr, std::size_t count = 1)
+    DataDescr(T* ptr, std::size_t count = 1)
         : ptr((void*)ptr), len(count * sizeof(T)), align(alignof(T)) {}
+
+    // This constructor is required to send back void*s
+    DataDescr(void* ptr, std::size_t len, std::size_t align);
 
     DataDescr(DataDescr&& rhs) noexcept;
 
     DataDescr(const DataDescr&) = delete;
     DataDescr& operator=(const DataDescr&) = delete;
 
-    DataDescr(const WireMsgBody& body);
+    DataDescr(const WireMsgBody& body,
+              std::pmr::memory_resource* allocating_memory_resource =
+                  std::pmr::new_delete_resource());
 
     DataDescr& operator=(DataDescr&& rhs) noexcept;
+
+    /// Transfer a received allocation into an owner that retains its
+    /// deallocator. The owner preserves the memory resource, byte count and
+    /// alignment. The descriptor relinquishes ownership and clears ptr, len and
+    /// align.
+    /// @return The owner of the received host or device buffer.
+    /// @throws std::logic_error if this descriptor only borrows the buffer.
+    std::shared_ptr<void> takeOwnership();
 
     ~DataDescr();
   };
@@ -93,9 +121,13 @@ struct ClusterMessage {
 
   ClusterMessage(ClusterMessageType mType, DataDescr&& payload);
 
-  ClusterMessage(const WireMsg&);
+  ClusterMessage(const WireMsg&,
+                 std::pmr::memory_resource* allocatingMemoryResource =
+                     std::pmr::new_delete_resource());
 
   [[nodiscard]] WireMsg wire_msg() const;
+
+  static bool has_body(const WireMsgHdr& header);
 };
 
 #include "ClusterMessage.icc"

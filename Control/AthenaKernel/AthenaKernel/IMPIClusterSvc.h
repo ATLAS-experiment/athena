@@ -5,7 +5,9 @@
 #define ATHENAKERNEL_IMPICLUSTERSVC_H
 
 #include <cstdint>
+#include <memory_resource>
 #include <string>
+#include <vector>
 
 #include "GaudiKernel/IInterface.h"
 
@@ -16,6 +18,8 @@ class communicator;
 }
 
 enum class ClusterComm { Default, EventData };
+
+using MemoryResourceRegistry = std::vector<std::pmr::memory_resource*>;
 
 /// Interface for the MPIClusterSvc, which manages internode communications
 /// in AthenaMPI
@@ -42,7 +46,8 @@ class IMPIClusterSvc : virtual public IInterface {
 
   /// Wait to receive a message
   virtual ClusterMessage waitReceiveMessage(
-      ClusterComm communicator = ClusterComm::Default) = 0;
+      ClusterComm communicator = ClusterComm::Default,
+      const MemoryResourceRegistry* memoryResourceRegistry = nullptr) = 0;
 
   /// Provide the MPI3 data communicator
   virtual boost::mpi3::communicator& data_communicator() = 0;

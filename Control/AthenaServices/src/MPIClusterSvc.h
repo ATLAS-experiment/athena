@@ -5,6 +5,7 @@
 #define ATHENASERVICES_MPICLUSTERSVC_H_
 
 #include <memory>
+#include <memory_resource>
 #include <string>
 
 #include "AthenaBaseComps/AthService.h"
@@ -57,7 +58,9 @@ class MPIClusterSvc
 
   /// Block until we receive an MPI message
   virtual ClusterMessage waitReceiveMessage(
-      ClusterComm communicator = ClusterComm::Default) override final;
+      ClusterComm communicator = ClusterComm::Default,
+      const MemoryResourceRegistry* memoryResourceRegistry =
+          nullptr) override final;
 
   /// Return the data communicator
   virtual mpi3::communicator& data_communicator() override final {
@@ -75,6 +78,14 @@ class MPIClusterSvc
                                  std::int64_t status) override final;
 
  private:
+  /// Identify the time, rank, OS thread, and communicator of a trace record.
+  std::string tracePrefix(ClusterComm communicator) const;
+
+  /// Enable diagnostic logging around blocking MPI operations.
+  Gaudi::Property<bool> m_traceMessages{
+      this, "TraceMessages", false,
+      "Log MPI transfer entry/completion and wire metadata at INFO level"};
+
   std::unique_ptr<mpi3::environment> m_env;
   mpi3::communicator m_world;
   // Communicator for payload of event data messages
@@ -90,6 +101,6 @@ class MPIClusterSvc
 
   // Hold current input filename hash for each slot
   std::int64_t m_lastInputFileHash{};
-  std::map<std::size_t, std::int64_t> m_inputFileSlotMap{};
+  std::map<std::size_t, std::int64_t> m_inputFileSlotMap;
 };
 #endif  // ATHENASERVICES_MPICLUSTERSVC_H_

@@ -3,53 +3,98 @@
 */
 #include "AthenaKernel/ClusterMessage.h"
 
+#include <atomic>
+#include <bit>
 #include <cstdint>
+#include <utility>
+
+ClusterMessage::DataDescr::DataDescr(void* ptr, std::size_t len,
+                                     std::size_t align)
+    : ptr(ptr), len(len), align(align) {
+  if (!std::has_single_bit(align) || len % align != 0) {
+    throw std::logic_error(std::format(
+        "{} is not a valid alignment for a length of {} bytes!", align, len));
+  }
+}
 
 ClusterMessage::DataDescr::DataDescr(DataDescr&& rhs) noexcept
     : ptr(rhs.ptr),
       len(rhs.len),
       align(rhs.align),
-      received(rhs.received),
+      dest(rhs.dest),
       evtNumber(rhs.evtNumber),
-      fileNumber(rhs.fileNumber) {
+      requestNumber(rhs.requestNumber),
+      allocating_memory_resource(rhs.allocating_memory_resource) {
   rhs.ptr = nullptr;
   rhs.len = 0;
   rhs.align = 0;
-  rhs.received = false;
+  rhs.dest = Destination::Host;
+  rhs.allocating_memory_resource = nullptr;
 }
-ClusterMessage::DataDescr::DataDescr(const WireMsgBody& body)
+ClusterMessage::DataDescr::DataDescr(
+    const WireMsgBody& body,
+    std::pmr::memory_resource* allocating_memory_resource)
     : ptr(reinterpret_cast<void*>((std::uint64_t(body[0]) << 32) +
                                   std::uint64_t(body[1]))),
       len((std::uint64_t(body[2]) << 32) + std::uint64_t(body[3])),
-      align((std::uint64_t(body[4]) << 32) + std::uint64_t(body[5])),
-      received(true),
+      align(std::uint64_t(1ULL << body[4])),
+      dest(Destination(body[5])),
       evtNumber((std::uint64_t(body[6]) << 32) + std::uint64_t(body[7])),
-      fileNumber((std::uint64_t(body[8]) << 32) + std::uint64_t(body[9])) {}
+      requestNumber((std::uint64_t(body[8]) << 32) + std::uint64_t(body[9])),
+      allocating_memory_resource(allocating_memory_resource) {
+  if (!std::has_single_bit(align) || len % align != 0) {
+    // Not ideal, but this should be checked and adjusted in MPIClusterSvc
+    // Frankly, it shouldn't even happen in the first place
+    throw std::logic_error(
+        std::format("{} is not a valid alignment for a length of {} bytes! "
+                    "This should be fixed in MPIClusterSvc",
+                    align, len));
+  }
+}
 
 ClusterMessage::DataDescr::~DataDescr() {
-  if (received) {
-    std::free(ptr);
+  if (allocating_memory_resource != nullptr) {
+    allocating_memory_resource->deallocate(ptr, len, align);
   }
 }
 
 ClusterMessage::DataDescr& ClusterMessage::DataDescr::operator=(
     DataDescr&& rhs) noexcept {
-  if (received) {
-    std::free(ptr);  // release the object memory before assigning a new one
+  if (allocating_memory_resource != nullptr) {
+    // release the object memory before assigning a new one
+    allocating_memory_resource->deallocate(ptr, len, align);
   }
   ptr = rhs.ptr;
   len = rhs.len;
   align = rhs.align;
-  received = rhs.received;
+  dest = rhs.dest;
   evtNumber = rhs.evtNumber;
-  fileNumber = rhs.fileNumber;
+  requestNumber = rhs.requestNumber;
+  allocating_memory_resource = rhs.allocating_memory_resource;
   rhs.ptr = nullptr;
   rhs.len = 0;
   rhs.align = 0;
-  rhs.received = false;
+  rhs.dest = Destination::Host;
+  rhs.allocating_memory_resource = nullptr;
   rhs.evtNumber = 0;
-  rhs.fileNumber = 0;
+  rhs.requestNumber = 0;
   return *this;
+}
+
+std::shared_ptr<void> ClusterMessage::DataDescr::takeOwnership() {
+  if (allocating_memory_resource == nullptr) {
+    throw std::logic_error("Cannot take ownership of borrowed cluster data");
+  }
+  auto* resource = std::exchange(allocating_memory_resource, nullptr);
+  void* data = std::exchange(ptr, nullptr);
+  const auto bytes = std::exchange(len, 0);
+  const auto alignment = std::exchange(align, 0);
+  // If shared_ptr cannot allocate its bookkeeping storage, it still calls the
+  // deleter.
+  return {data, [resource, bytes, alignment](void* p) {
+            if (p != nullptr)
+              resource->deallocate(p, bytes, alignment);
+          }};
 }
 
 ClusterMessage::ClusterMessage(ClusterMessageType mType, WorkerStatus payload)
@@ -96,14 +141,16 @@ ClusterMessage::ClusterMessage(ClusterMessageType mType) : messageType(mType) {
 
 ClusterMessage::ClusterMessage() = default;
 
-ClusterMessage::ClusterMessage(const ClusterMessage::WireMsg& wire_msg) {
+ClusterMessage::ClusterMessage(
+    const ClusterMessage::WireMsg& wire_msg,
+    std::pmr::memory_resource* allocatingMemoryResource) {
   const auto& [header, body] = wire_msg;
   messageType = static_cast<ClusterMessageType>(header[0]);
   source = header[1];
   if (body.has_value()) {
     const auto& body_2 = *body;
     if (messageType == ClusterMessageType::Data) {
-      payload = DataDescr(body_2);
+      payload = DataDescr(body_2, allocatingMemoryResource);
     } else {
       WorkerStatus status{};
       status.status = StatusCode(body_2[0]);
@@ -123,32 +170,41 @@ ClusterMessage::WireMsg ClusterMessage::wire_msg() const {
   constexpr int max_tag = 16383;
   constexpr std::uint64_t lower32 = 0xFFFFFFFF;
 
-  static thread_local int next_msg =
-      1;  // This is only ever called from one thread per process
+  // Share the tag sequence across sending threads in this process.
+  static std::atomic<int> next_msg{1};
   WireMsgHdr header{};
   header[0] = std::uint32_t(messageType);
   header[1] = source;
+  if (payload.index() == 2 || payload.index() == 3) {
+    int previous = next_msg.load(std::memory_order_relaxed);
+    int tag;
+    do {
+      tag = (previous % max_tag) + 1;
+    } while (!next_msg.compare_exchange_weak(previous, tag,
+                                             std::memory_order_relaxed));
+    header[2] = tag;
+  }
   if (payload.index() == 3) {
-    next_msg = (next_msg % max_tag) + 1;
-    header[2] = next_msg;
     WireMsgBody body{};
     const auto& payload_local = std::get<DataDescr>(payload);
     body[0] = std::uint32_t(std::uint64_t(payload_local.ptr) >> 32);
     body[1] = std::uint32_t(std::uint64_t(payload_local.ptr) & lower32);
     body[2] = std::uint32_t(std::uint64_t(payload_local.len) >> 32);
     body[3] = std::uint32_t(std::uint64_t(payload_local.len) & lower32);
-    body[4] = std::uint32_t(std::uint64_t(payload_local.align) >> 32);
-    body[5] = std::uint32_t(std::uint64_t(payload_local.align) & lower32);
+    // bit_ceil will technically do nothing, since class invariant should ensure
+    // align is a power of two
+    body[4] =
+        std::uint32_t(std::countr_zero(std::bit_ceil(payload_local.align)));
+    body[5] = std::uint32_t(payload_local.dest);
     body[6] = std::uint32_t(std::uint64_t(payload_local.evtNumber) >> 32);
     body[7] = std::uint32_t(std::uint64_t(payload_local.evtNumber) & lower32);
-    body[8] = std::uint32_t(std::uint64_t(payload_local.fileNumber) >> 32);
-    body[9] = std::uint32_t(std::uint64_t(payload_local.fileNumber) & lower32);
+    body[8] = std::uint32_t(std::uint64_t(payload_local.requestNumber) >> 32);
+    body[9] =
+        std::uint32_t(std::uint64_t(payload_local.requestNumber) & lower32);
     WireMsg msg{header, std::make_optional(body)};
     return msg;
   }
   if (payload.index() == 2) {
-    next_msg = (next_msg % max_tag) + 1;
-    header[2] = next_msg;
     WireMsgBody body{};
     const auto& payload_local = std::get<WorkerStatus>(payload);
     body[0] = static_cast<int>(payload_local.status.getCode());
@@ -167,4 +223,17 @@ ClusterMessage::WireMsg ClusterMessage::wire_msg() const {
   }
   WireMsg msg{header, std::nullopt};
   return msg;
+}
+
+bool ClusterMessage::has_body(const WireMsgHdr& header) {
+  switch (header[0]) {
+    // These three have a body sent as a separate MPI message
+    case int(ClusterMessageType::FinalWorkerStatus):
+    case int(ClusterMessageType::WorkerError):
+    case int(ClusterMessageType::Data):
+      return true;
+      break;
+    default:
+      return false;
+  }
 }
