@@ -5,10 +5,13 @@
 #include <iostream>
 #include <stdexcept>
 #include "TestDriver.h"
+#include "AthenaKernel/getMessageSvc.h"
 
 int main( int, char** ) {
   try {
     
+    // Suppress Athena MessageSvc warnings about not finding Gaudi MessageSvc
+    Athena::getMessageSvcQuiet = true;
     std::cout << "[OVAL] Creating the test driver." << std::endl;
     pool::TestDriver driver;
 

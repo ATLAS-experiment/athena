@@ -13,9 +13,10 @@
 #include <iostream>
 #include <cstdlib>
 #include <filesystem>
-#include "PoolSvc/IFileCatalog.h"
-
-using namespace pool;
+#include "PoolSvc/FileCatalogUtils.h"
+#include "GaudiKernel/Bootstrap.h"
+#include "GaudiKernel/ISvcLocator.h"
+#include "AthenaKernel/getMessageSvc.h"
 
 class FCtest: public CppUnit::TestFixture
 {
@@ -25,26 +26,20 @@ class FCtest: public CppUnit::TestFixture
   CPPUNIT_TEST_SUITE_END();
 
 public:
-  IFileCatalog* mycatalog{}, *source{}, *dest{};
-  std::string sourcecatalogurl;
-  std::string destcatalogurl;
+  SmartIF<Gaudi::IFileCatalogMgr> mycatalogMgr;
+  SmartIF<Gaudi::IFileCatalog> mycatalog;
   std::string mycatalogurl;
   
   std::vector<std::string> names;
-  enum importtype{
-    xml2xml=0,
-    xml2mysql,
-    mysql2xml,
-    mysql2mysql
-  };
   enum singletype{
     xml=0,
     mysql
   };
   void setUp(){
-    mycatalog=new IFileCatalog;
-    source=new IFileCatalog;
-    dest=new IFileCatalog;
+    // Suppress Athena MessageSvc warnings about not finding Gaudi MessageSvc
+    Athena::getMessageSvcQuiet = true;
+    mycatalogMgr = Gaudi::svcLocator()->service<Gaudi::IFileCatalogMgr>( "Gaudi::MultiFileCatalog" );
+    mycatalog = SmartIF<Gaudi::IFileCatalog>( mycatalogMgr );
     names.push_back("test1");
     names.push_back("test2");
     names.push_back("test3");
@@ -59,26 +54,8 @@ public:
       mycatalogurl="mysqlcatalog_mysql://xiezhen@localhost/zhendb";
     }
   }
-  void importsetUp(importtype t) {
-    if(t==xml2xml){
-      sourcecatalogurl="xmlcatalog_file:source.xml";
-      destcatalogurl="xmlcatalog_file:dest.xml";
-    }else if(t==xml2mysql){
-      sourcecatalogurl="xmlcatalog_file:source.xml";
-      destcatalogurl="mysqlcatalog_mysql://xiezhen@localhost/zhendb";
-    }else if(t==mysql2mysql){
-      sourcecatalogurl="mysqlcatalog_mysql://xiezhen@localhost/FCtest";
-      destcatalogurl="mysqlcatalog_mysql://xiezhen@localhost/zhendb";
-    }else if(t==mysql2xml){
-      destcatalogurl="xmlcatalog_file:dest.xml";
-      sourcecatalogurl="mysqlcatalog_mysql://xiezhen@localhost/zhendb";
-    }
-  }
   
   void tearDown() {
-    if(mycatalog!=0) delete mycatalog;
-    if(source!=0) delete source;
-    if(dest!=0) delete dest;
     names.clear();
   }
   
@@ -86,20 +63,20 @@ public:
     try{	   
       singlesetUp(xml);
       std::cout<<"TEST --> testregisterFile"<<std::endl;
-      mycatalog->setWriteCatalog(mycatalogurl);
-      mycatalog->start();
+      FileCatalogUtils::addCatalog( *mycatalogMgr, mycatalogurl, true );
+      mycatalog->init();
       std::set<std::string>     registered_pfns;
       const std::string         new_filetype = "root/tree";
       for(size_t i=0; i<names.size(); i++){
         //register PFN
          std::string new_pfn = std::string("pfn:") + names[i];
          std::string fid;
-         mycatalog->registerPFN( new_pfn, new_filetype, fid );
+         FileCatalogUtils::registerPFN( *mycatalog, new_pfn, new_filetype, fid );
          std::cout << "Registering PFN: " << new_pfn << " of type: " << new_filetype
                    << " FID assigned by the FC: " << fid <<std::endl;
          // read back PFN
          std::string pfn, filetype;
-         mycatalog->getFirstPFN(fid, pfn, filetype);
+         FileCatalogUtils::getFirstPFN( *mycatalog, fid, pfn, filetype);
          CPPUNIT_ASSERT_MESSAGE("wrong pfn", new_pfn==pfn );  
          CPPUNIT_ASSERT_MESSAGE("wrong filetype", new_filetype==filetype );
          registered_pfns.emplace( std::move(new_pfn) );

@@ -8,7 +8,7 @@
 #include "MicroSessionManager.h"
 #include "DatabaseRegistry.h"
 
-#include "PoolSvc/IFileCatalog.h"
+#include "PoolSvc/FileCatalogUtils.h"
 
 #include "StorageSvc/DbType.h"
 #include "StorageSvc/pool.h"
@@ -131,8 +131,8 @@ pool::UserDatabase::connectForWrite()
 	  // register in the catalog 
 	  pool::DbType dbType( m_technology );
 	  pool::DbType dbTypeMajor( dbType.majorType() );
-	  m_catalog.registerPFN( m_the_pfn.substr(0, m_the_pfn.find('?')), dbTypeMajor.storageName(), m_the_fid );
-          ATH_MSG_DEBUG("registered PFN: " << m_the_pfn << " with FID:" << m_the_fid);
+	  FileCatalogUtils::registerPFN( m_catalog, m_the_pfn.substr(0, m_the_pfn.find('?')), dbTypeMajor.storageName(), m_the_fid );
+    ATH_MSG_DEBUG("registered PFN: " << m_the_pfn << " with FID:" << m_the_fid);
 	  dbRegistered = true;
         }
         break;
@@ -212,7 +212,7 @@ pool::UserDatabase::fid()
     else {
       if ( m_nameType == pool::DatabaseSpecification::PFN ) {
          std::string technology;
-         m_catalog.lookupFileByPFN( m_name.substr(0, m_name.find('?')), m_the_fid, technology );
+         FileCatalogUtils::lookupFileByPFN( m_catalog, m_name.substr(0, m_name.find('?')), m_the_fid, technology );
          ATH_MSG_DEBUG("lookupPFN: " << m_name << " returned FID: '" << m_the_fid << "' tech=" << technology);
          if ( ! m_the_fid.empty() ) {
             if( technology.empty() ) {
@@ -235,7 +235,7 @@ pool::UserDatabase::fid()
               if( ! m_the_fid.empty() ) {
                  // sanity check - verify that the FID is not registered in PFC under a different name
                  std::string  pfn, tech;
-                 m_catalog.getFirstPFN( m_the_fid, pfn, tech );
+                 FileCatalogUtils::getFirstPFN( m_catalog, m_the_fid, pfn, tech );
                  if( !pfn.empty() ) {
                     ATH_MSG_WARNING("Opening file '" << m_name << "' which is already registered in the Catalog as '" << pfn 
                                     <<"' (GUID " << m_the_fid << ") - this is not supported and may even lead to a crash!" );
@@ -277,7 +277,7 @@ pool::UserDatabase::pfn()
   }
   if( m_nameType == pool::DatabaseSpecification::FID ) {
      std::string technology;
-     m_catalog.getFirstPFN( m_name, m_the_pfn, technology );
+     FileCatalogUtils::getFirstPFN( m_catalog, m_name, m_the_pfn, technology );
      if( !m_the_pfn.empty() ) {
         m_the_fid = m_name;
         m_technology = pool::DbType::getType( technology ).majorType();

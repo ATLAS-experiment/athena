@@ -15,16 +15,19 @@
 class Placement;
 class Token;
 
+namespace Gaudi {
+  class IFileCatalog;
+}
+
 namespace pool {
 
   // forward declarations
   class MicroSessionManager;
-  class IFileCatalog;
   class IStorageSvc;
 
   /// Factory method to create a session object
   class ISession;
-  std::unique_ptr<ISession> createSession( IFileCatalog& catalog, int ageLimit = -1 );
+  std::unique_ptr<ISession> createSession( Gaudi::IFileCatalog& catalog, int ageLimit = -1 );
 
   /** @class ISession ISession.h PoolSvc/ISession.h
   *

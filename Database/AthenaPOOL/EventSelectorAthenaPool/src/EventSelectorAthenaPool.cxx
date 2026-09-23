@@ -813,10 +813,6 @@ StatusCode EventSelectorAthenaPool::io_reinit() {
          ATH_MSG_FATAL("Could not retrieve new value for [" << fname << "] !");
          return StatusCode::FAILURE;
       }
-      if (savedName != fname) {
-         ATH_MSG_DEBUG("Mapping value for [" << savedName << "] to [" << fname << "]");
-         m_poolSvc->renamePfn(savedName, fname);
-      }
       updatedIndexes.insert(i);
       for (std::size_t j = i + 1; j < imax; j++) {
          if (inputCollections[j] == savedName) {

@@ -84,15 +84,10 @@ public: // Non-static members
    virtual void commitCatalog() = 0;
 
    /// @return void
-   /// @param token [IN] filename/token string to be translated
+   /// @param dbID [IN] database ID to be translated
    /// @param pfn [OUT] string PFN of database
    /// @param type [OUT] string filetype of database
-   virtual void lookupBestPfn(const std::string& token, std::string& pfn, std::string& type) const = 0;
-
-   /// @return void
-   /// @param pf [IN] filename to be renamed
-   /// @param newpf [IN] new filename
-   virtual void renamePfn(const std::string& pf, const std::string& newpf) = 0;
+   virtual void lookupBestPfn(const std::string& dbID, std::string& pfn, std::string& type) const = 0;
 
    /// @return status of connect
    /// @param connection [IN] string containing the connection.

@@ -14,8 +14,10 @@
 #include "PersistentDataModel/Placement.h"
 #include "PersistentDataModel/Token.h"
 
-#include "PoolSvc/IFileCatalog.h"
+#include "PoolSvc/FileCatalogUtils.h"
 #include "PoolSvc/ISession.h"
+#include "GaudiKernel/Bootstrap.h"
+#include "GaudiKernel/ISvcLocator.h"
 
 #include "StorageSvc/DbType.h"
 
@@ -23,22 +25,21 @@
 
 
 pool::TestDriver::TestDriver(const std::string& filename, const std::string& catname):
-   m_fileCatalog( 0 ),
+   m_fileCatalogMgr( Gaudi::svcLocator()->service<Gaudi::IFileCatalogMgr>( "Gaudi::MultiFileCatalog" ) ),
+   m_fileCatalog( m_fileCatalogMgr ),
    m_fileName( filename ),
    m_events( 100 )
 {
   std::cout << "[OVAL] Creating a file catalog" << std::endl;
-  m_fileCatalog = new pool::IFileCatalog;
-  if ( ! m_fileCatalog ) {
+  if ( ! m_fileCatalog.isValid() ) {
     throw std::runtime_error( "Could not create a file catalog" );
   }
   std::filesystem::remove( {catname} );
-  m_fileCatalog->setWriteCatalog( catname );
+  FileCatalogUtils::addCatalog( *m_fileCatalogMgr, catname, true );
 }
 
 pool::TestDriver::~TestDriver()
 {
-  if ( m_fileCatalog ) delete m_fileCatalog;
   std::cout << "[OVAL] Number of floating tokens : " << Token::numInstances() << std::endl;
 }
 
@@ -46,8 +47,8 @@ pool::TestDriver::~TestDriver()
 void
 pool::TestDriver::write()
 {
-  pool::IFileCatalog& catalog = *m_fileCatalog;
-  catalog.start();
+  Gaudi::IFileCatalog& catalog = *m_fileCatalog;
+  catalog.init();
 
   std::cout << "Creating the persistency service" << std::endl;
   auto dbsession = pool::createSession(catalog);
@@ -99,8 +100,8 @@ pool::TestDriver::write()
 void
 pool::TestDriver::read()
 {
-  pool::IFileCatalog& catalog = *m_fileCatalog;
-  catalog.start();
+  Gaudi::IFileCatalog& catalog = *m_fileCatalog;
+  catalog.init();
 
   std::cout << "Creating the persistency service" << std::endl;
   auto dbsession = pool::createSession(catalog);

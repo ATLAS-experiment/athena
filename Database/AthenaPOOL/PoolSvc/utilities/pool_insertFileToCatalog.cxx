@@ -5,7 +5,9 @@
 #include <memory>
 
 #include "CxxUtils/checker_macros.h"
-#include "PoolSvc/IFileCatalog.h"
+#include "PoolSvc/FileCatalogUtils.h"
+#include "GaudiKernel/Bootstrap.h"
+#include "GaudiKernel/ISvcLocator.h"
 #include "StorageSvc/SimpleUtilityBase.h"
 
 using namespace pool;
@@ -67,15 +69,16 @@ InsertFileToCatalogApplication::execute()
    readFileGUIDs();
   
    // Open the file catalog and insert the pfn/fid/technology
-   pool::IFileCatalog   catalog;
-   catalog.setWriteCatalog( m_catalogFN );
-   catalog.start();
+   SmartIF<Gaudi::IFileCatalogMgr> catalogMgr = Gaudi::svcLocator()->service<Gaudi::IFileCatalogMgr>( "Gaudi::MultiFileCatalog" );
+   SmartIF<Gaudi::IFileCatalog> catalog( catalogMgr );
+   FileCatalogUtils::addCatalog( *catalogMgr, m_catalogFN, true );
+   catalog->init();
 
    for( const auto& fp : fidAndPfn ) {
       std::string fid = fp.first; // can't be const
-      catalog.registerPFN(fp.second, technologyName, fid);
+      FileCatalogUtils::registerPFN(*catalog, fp.second, technologyName, fid);
    }    
-   catalog.commit();
+   catalog->commit();
 }
 
 
