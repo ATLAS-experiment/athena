@@ -505,7 +505,12 @@ namespace CP {
 
       const xAOD::MissingETContainer* met = nullptr;
       ANA_CHECK(evtStore.retrieve(met, m_sgName));
-      const SG::AuxElement& element = *(*met)[m_termName];
+      const xAOD::MissingET *term = (*met)[m_termName];
+      if( term == nullptr ) {
+        ANA_MSG_ERROR( "MET term " << m_termName << " not found in container " << m_sgName);
+        return StatusCode::FAILURE;
+      }
+      const SG::AuxElement& element = *term;
       // Process all fields.
       for (auto& p : m_fields) {
         ATH_CHECK(p->process(element, msg()));
