@@ -1,6 +1,6 @@
 //Dear emacs, this is -*-c++-*- 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARBYTESTREAM_LARRAWDATAREADINDINGALG_H
@@ -23,8 +23,9 @@ class LArOnlineID;
 class IROBDataProviderSvc;
 
 class LArRawDataReadingAlg : public  AthReentrantAlgorithm {
- public:
-  LArRawDataReadingAlg(const std::string& name, ISvcLocator* pSvcLocator);
+
+public:
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
   StatusCode initialize() override;
   StatusCode execute(const EventContext& ctx) const override;
