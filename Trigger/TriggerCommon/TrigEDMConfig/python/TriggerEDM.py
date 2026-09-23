@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # ********************* All Tools/Functions for the TriggerEDM **********************
 # Keeping all functions from the original TriggerEDM.py (Run 2 EDM) in this file
@@ -567,6 +567,11 @@ def getPreregistrationList(version=2, doxAODConversion=True):
     else:
         raise RuntimeError("Invalid version=%s supplied to getPreregistrationList" % version)
     return l
+
+
+def getClassesToIgnore(flags):
+    """Get list of classes to ignore during deserialization"""
+    return []
 
 
 def _getL2BSTypeList():
