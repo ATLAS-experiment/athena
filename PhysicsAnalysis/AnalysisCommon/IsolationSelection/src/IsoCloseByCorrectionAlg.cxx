@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "IsoCloseByCorrectionAlg.h"
 
 #include <IsolationSelection/IsolationCloseByCorrectionTool.h>
 
-#include <algorithm>
+
 
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "StoreGate/ReadDecorHandle.h"
@@ -13,7 +13,7 @@
 #include "xAODEgamma/EgammaxAODHelpers.h"
 #include "AsgTools/CurrentContext.h"
 #include "CxxUtils/checker_macros.h"
-
+#include <algorithm>
 namespace CP {
 
     IsoCloseByCorrectionAlg::IsoCloseByCorrectionAlg(const std::string& name, ISvcLocator* svcLoc) :
@@ -118,7 +118,7 @@ namespace CP {
 
     template <class CONT_TYPE>
     StatusCode IsoCloseByCorrectionAlg::selectLeptonsAndPhotons(const EventContext& ctx, 
-                                                                CONT_TYPE particles,
+                                                                CONT_TYPE & particles,
                                                                 const SG::Decorator<char>& isOK) const
     {
 
