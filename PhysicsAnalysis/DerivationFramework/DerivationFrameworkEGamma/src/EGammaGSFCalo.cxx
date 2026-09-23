@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
   Contact: Raphael Haberle <raphael.julien.haberle@cern.ch>
 */
 
@@ -178,12 +178,12 @@ StatusCode EGammaGSFCalo::addBranches( const EventContext& ctx ) const {
 
     // Add link to refitted TP to electron container
     ElementLink<xAOD::TrackParticleContainer> linkToRefittedTrackParticle(
-        electronTPRefit, *cPtrTrkPart);
+        electronTPRefit, *cPtrTrkPart, ctx);
     dec_gsfCaloTrackLink(*electron) = linkToRefittedTrackParticle;
 
     // Add link to initial electron to the refitted TP container
     ElementLink<xAOD::ElectronContainer> linkToElectron;
-    linkToElectron.toIndexedElement(*electronContainer, electron->index());
+    linkToElectron.toIndexedElement(*electronContainer, electron->index(), ctx);
     acc_usedElectronLink(*electronTPRefit) = linkToElectron;
 
     ElementLink<xAOD::TrackParticleContainer> linkToOriginal;
