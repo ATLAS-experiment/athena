@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_EventTPCnv/src/HGTD_ClusterContainerCnv_p1.cxx
  * @author Alexander Leopold <alexander.leopold@cern.ch>
@@ -103,8 +103,8 @@ void HGTD_ClusterContainerCnv_p1::transToPers(
                 .at(clus_i + collection_separator_index_begin));
 
       const HGTD_Cluster* trans_clus =
-          dynamic_cast<const HGTD_Cluster*>(collection.at(clus_i));
-
+          static_cast<const HGTD_Cluster*>(collection[clus_i]);
+      
       cluster_converter.transToPers(trans_clus, pers_clus, log);
     }
     // start next collection at end of previous

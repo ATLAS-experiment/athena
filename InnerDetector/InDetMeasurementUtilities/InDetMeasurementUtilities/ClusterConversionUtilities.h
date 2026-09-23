@@ -23,6 +23,9 @@ class PixelID;
 class SCT_ID;
 class HGTD_ID;
 class SiDetectorElement;
+namespace InDetDD{
+  class HGTD_DetectorElement;
+}
 
 namespace TrackingUtilities {
 
