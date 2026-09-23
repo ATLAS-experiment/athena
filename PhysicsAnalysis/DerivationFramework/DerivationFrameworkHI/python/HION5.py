@@ -128,7 +128,7 @@ def HION5KernelCfg(flags, name="HION5Kernel", **kwargs):
     if flags.HeavyIon.doHIBTagging:
         from BTagging.FlavorTaggingConfig import FlavorTaggingCfg
         acc.merge(FlavorTaggingCfg(flags, JetColl+"AntiKt4HIJets"))
-        from BTagging.TrackLeptonConfig import TrackLeptonDecorationCfg
+        from FlavorTagDiscriminants.TrackLeptonConfig import TrackLeptonDecorationCfg
         acc.merge(TrackLeptonDecorationCfg(flags))
 
     # skimming -- must come BEFORE algOR so HION5Sequence is created first
