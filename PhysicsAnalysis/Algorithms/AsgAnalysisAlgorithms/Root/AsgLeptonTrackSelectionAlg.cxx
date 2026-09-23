@@ -136,26 +136,24 @@ namespace CP
             if (m_maxDeltaZ0SinTheta > 0) acceptData.setCutResult (cutIndex ++, fabs (deltaZ0SinTheta) < m_maxDeltaZ0SinTheta);
 
             if (m_nMinPixelHits != -1 || m_nMaxPixelHits != -1) {
-              uint8_t nPixelHits;
-              track->summaryValue(nPixelHits, xAOD::numberOfPixelHits);
-              bool accept = true;
-              if(m_nMinPixelHits != -1) {
-                accept &= nPixelHits >= m_nMinPixelHits;
+              uint8_t nPixelHits = 0;
+              bool accept = track->summaryValue(nPixelHits, xAOD::numberOfPixelHits);
+              if(accept && m_nMinPixelHits != -1) {
+                accept = nPixelHits >= m_nMinPixelHits;
               }
-              if(m_nMaxPixelHits != -1) {
-                accept &= nPixelHits <= m_nMaxPixelHits;
+              if(accept && m_nMaxPixelHits != -1) {
+                accept = nPixelHits <= m_nMaxPixelHits;
               }
               acceptData.setCutResult (cutIndex++, accept);
             }
             if (m_nMinSCTHits != -1 || m_nMaxSCTHits != -1) {
-              uint8_t nSCTHits;
-              track->summaryValue(nSCTHits, xAOD::numberOfSCTHits);
-              bool accept = true;
-              if(m_nMinSCTHits != -1) {
-                accept &= nSCTHits >= m_nMinSCTHits;
+              uint8_t nSCTHits = 0;
+              bool accept = track->summaryValue(nSCTHits, xAOD::numberOfSCTHits);
+              if(accept && m_nMinSCTHits != -1) {
+                accept = nSCTHits >= m_nMinSCTHits;
               }
-              if(m_nMaxSCTHits != -1) {
-                accept &= nSCTHits <= m_nMaxSCTHits;
+              if(accept && m_nMaxSCTHits != -1) {
+                accept = nSCTHits <= m_nMaxSCTHits;
               }
               acceptData.setCutResult (cutIndex++, accept);
             }
