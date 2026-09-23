@@ -12,7 +12,7 @@ __author__ = "Sebastien Binet"
 import PyUtils.acmdlib as acmdlib
 import re
 from functools import cache, reduce
-from math import isnan
+from math import isnan, isclose
 from numbers import Real
 from os import environ
 
@@ -32,10 +32,7 @@ def _is_summary(args):
 def _is_exit_early(args):
     return args.error_mode == 'bailout'
 
-# Possibly compare two vectors.  If nan_equal, then consider NaNs to be equal.
-# Returns None if we have two matching vectors.
-# If we have two vectors that differ at some element, return that index.
-# Otherwise return -1 (inputs not vectors, etc).
+
 _vectypes = {'std::vector<float>',
              'std::vector<double>',
              'std::vector<int>',
@@ -49,24 +46,29 @@ _vectypes = {'std::vector<float>',
              'std::vector<long long>',
              'std::vector<unsigned long long>'}
 
-def _vecdiff (v1, v2, nan_equal):
+# Compare two values with optional tolerance. If nan_equal, then consider NaNs to be equal.
+def _cmp (r1, r2, nan_equal, rel_tol=None, abs_tol=None):
+    if (nan_equal and isinstance(r1, Real) and isnan(r1) and isinstance(r2, Real) and isnan(r2)):
+        return True
+    if rel_tol is None and abs_tol is None:
+        return r1 == r2
+    else:
+        return isclose(r1, r2, rel_tol=rel_tol or 0.0, abs_tol=abs_tol or 0.0)
+
+# Possibly compare two vectors. If nan_equal, then consider NaNs to be equal.
+# Returns None if we have two matching vectors.
+# If we have two vectors that differ at some element, return that index.
+# Otherwise return -1 (inputs not vectors, etc).
+def _vecdiff (v1, v2, nan_equal, rel_tol=None, abs_tol=None):
     if getattr(type(type(v1)), '__cpp_name__', None) not in _vectypes:
         return -1
     if type(v1) is not type(v2): return -1
     sz = v1.size()
     if sz != v2.size(): return -1
-    if nan_equal:
-        isnan_ = isnan
-        for i in range (sz):
-            val1 = v1[i]
-            val2 = v2[i]
-            if val1 != val2 and not all(
-                    [isinstance(_, Real) and isnan_(_) for _ in (val1, val2)]):
-                return i
-    else:
-        for i in range (sz):
-            if v1[i] != v2[i]:
-                return i
+    for i in range (sz):
+        if not _cmp(v1[i], v2[i], nan_equal, rel_tol, abs_tol):
+            return i
+
     return None
 
 @acmdlib.command(name='diff-root')
@@ -138,6 +140,14 @@ allowed: %(choices)s
                   action='store_true',
                   default=False,
                   help="""Compare nan as equal to nan""")
+@acmdlib.argument('--rel_tol',
+                  metavar='VALUE',
+                  type=float,
+                  help='Relative tolerance to consider values equal (range [0,1) see math.isclose)')
+@acmdlib.argument('--abs_tol',
+                  metavar='VALUE',
+                  type=float,
+                  help='Absolute tolerance to consider values equal (see math.isclose)')
 
 def main(args):
     """diff two ROOT files (containers and sizes)"""
@@ -186,6 +196,10 @@ def main(args):
     msg.info('error mode:           %s', args.error_mode)
     msg.info('order trees:          %s', args.order_trees)
     msg.info('exact branches:       %s', args.exact_branches)
+    msg.info('nan equal:            %s', args.nan_equal)
+    msg.info('rel, abs tolerance:   %s, %s',
+             'None' if args.rel_tol is None else ('%g' % args.rel_tol),
+             'None' if args.abs_tol is None else ('%g' % args.abs_tol))
 
     import PyUtils.Helpers as H
     with H.ShutUp() :
@@ -687,7 +701,7 @@ def main(args):
                 n_bad += 1
                 continue
 
-            idiff = _vecdiff (iold, inew, args.nan_equal)
+            idiff = _vecdiff (iold, inew, args.nan_equal, args.rel_tol, args.abs_tol)
             if idiff is None:
                 n_good += 1
                 continue
@@ -796,15 +810,17 @@ def main(args):
                 n = '.'.join(["%03i"%ientry]+iname)
             else:
                 n = '.'.join(["%03i"%ientry]+iname+["%03i"%jentry]+jname)
-            diff_value = 'N/A'
-            try:
-                diff_value = 50.*(iold-inew)/(iold+inew)
-                diff_value = '%.8f%%' % (diff_value,)
-            except Exception:
-                pass
+
             if _is_detailed(args):
+                diff_value = 'N/A'
+                try:
+                    # difference calculated according to math.isclose
+                    diff_value = 100.* (inew-iold) / max(abs(iold),abs(inew))
+                    diff_value = '%.8f%%' % (diff_value,)
+                except Exception:
+                    pass
                 msg.info('%s %r -> %r => diff= [%s]', n, iold, inew, diff_value)
-                pass
+
             summary[leafname_fromdump(d_old)] += 1
 
             if iname[0] in args.enforce_leaves or jname[0] in args.enforce_leaves:
