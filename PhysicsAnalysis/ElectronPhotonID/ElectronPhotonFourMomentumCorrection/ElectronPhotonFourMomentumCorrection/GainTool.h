@@ -19,6 +19,8 @@ class GainTool {
 
  public:
   GainTool(const std::string& filenameTO, const std::string& filenameVar);
+  GainTool(const GainTool &) = delete;
+  GainTool & operator=(const GainTool &) = delete;
   void Init(const std::string& filenameTO, const std::string& filenameVar);
   virtual ~GainTool();
 
