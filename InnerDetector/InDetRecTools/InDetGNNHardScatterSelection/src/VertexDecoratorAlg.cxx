@@ -249,7 +249,7 @@ namespace InDetGNNHardScatterSelection
           }
           dec_mp_deltaPhi(*mp) = dphi;
           mpLink.setElement(mp);
-          mpLink.setStorableObject(*mpCont, true);
+          mpLink.setStorableObject(*mpCont, true, ctx);
 
           haveMP = true;
         }
@@ -295,7 +295,7 @@ namespace InDetGNNHardScatterSelection
       // add jet to that vertex's vector of links
       ElementLink<xAOD::JetContainer> jetLink;
       jetLink.setElement(jet);
-      jetLink.setStorableObject(*jetsIn.ptr(), true);
+      jetLink.setStorableObject(*jetsIn.ptr(), true, ctx);
       jetsInVertex[uniqueVertexAddress].push_back(jetLink);
     }
 
@@ -441,7 +441,7 @@ namespace InDetGNNHardScatterSelection
         ElementLink<xAOD::ElectronContainer> elLink;
         if(*eleVertex == vertex){
             elLink.setElement(electron);
-            elLink.setStorableObject(*electronsIn.ptr(), true);
+            elLink.setStorableObject(*electronsIn.ptr(), true, ctx);
             electronLinks.push_back(elLink);
         }
       }
@@ -452,7 +452,7 @@ namespace InDetGNNHardScatterSelection
       for(const xAOD::Photon* photon : *photonsIn){
         ElementLink<xAOD::PhotonContainer> phLink;
         phLink.setElement(photon);
-        phLink.setStorableObject(*photonsIn.ptr(), true);
+        phLink.setStorableObject(*photonsIn.ptr(), true, ctx);
         photonLinks.push_back(phLink);
       }
       dec_photonLinks(*vertex) = photonLinks;
@@ -480,7 +480,7 @@ namespace InDetGNNHardScatterSelection
           ElementLink<xAOD::MuonContainer> muonLink;
           if(*muonVertex == vertex){
             muonLink.setElement(muon);
-            muonLink.setStorableObject(*muonsIn.ptr(), true);
+            muonLink.setStorableObject(*muonsIn.ptr(), true, ctx);
             muonLinks.push_back(muonLink);
           }
         }catch(...) {
