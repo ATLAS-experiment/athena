@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ReadxAOD.h"
@@ -28,7 +28,7 @@ StatusCode ReadxAOD::execute(const EventContext& ctx) const {
     // EventContext is for multi-threading
     SG::ReadHandle<xAOD::TrackParticleContainer> tracks{m_trackKey, ctx};
     if( ! tracks.isValid() ) {
-        ATH_MSG_ERROR ("Couldn't retrieve xAOD::TrackParticles with key: " << m_trackKey.key() );
+        ATH_MSG_ERROR ("Couldn't retrieve xAOD::TrackParticles with key: {}", m_trackKey.key() );
         return StatusCode::FAILURE;
     }
 
@@ -50,8 +50,8 @@ StatusCode ReadxAOD::finalize() {
     ATH_MSG_INFO("=======================");
     ATH_MSG_INFO("SUMMARY OF TRACK COUNTS");
     ATH_MSG_INFO("=======================");
-    ATH_MSG_INFO("Number of tracks below the cut: " << std::to_string(m_nTracksBelow));
-    ATH_MSG_INFO("Number of tracks above the cut: " << std::to_string(m_nTracksAbove));
+    ATH_MSG_INFO("Number of tracks below the cut: {}", m_nTracksBelow.load());
+    ATH_MSG_INFO("Number of tracks above the cut: {}", m_nTracksAbove.load());
 
     return StatusCode::SUCCESS;
 }
