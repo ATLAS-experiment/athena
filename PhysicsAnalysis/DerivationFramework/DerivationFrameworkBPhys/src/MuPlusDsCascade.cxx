@@ -271,7 +271,7 @@ namespace DerivationFramework {
             // create element link
             MuonsLink muLink;
             muLink.setElement(*muItr);
-            muLink.setStorableObject(*muonContainer);
+            muLink.setStorableObject(*muonContainer, ctx);
             
             // sanity check : is the link valid?
             if( !muLink.isValid() ) continue;

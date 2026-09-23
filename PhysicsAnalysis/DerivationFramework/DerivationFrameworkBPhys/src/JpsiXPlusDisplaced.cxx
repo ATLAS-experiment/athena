@@ -967,18 +967,18 @@ namespace DerivationFramework {
       VertexLinkVector cascadeVertexLinks;
       VertexLink vertexLink1;
       vertexLink1.setElement(cascadeVertices[0]);
-      vertexLink1.setStorableObject(*VtxWriteHandles[0].ptr());
+      vertexLink1.setStorableObject(*VtxWriteHandles[0].ptr(), ctx);
       if( vertexLink1.isValid() ) cascadeVertexLinks.push_back( vertexLink1 );
       if(topoN>=3) {
 	VertexLink vertexLink2;
 	vertexLink2.setElement(cascadeVertices[1]);
-	vertexLink2.setStorableObject(*VtxWriteHandles[1].ptr());
+	vertexLink2.setStorableObject(*VtxWriteHandles[1].ptr(), ctx);
 	if( vertexLink2.isValid() ) cascadeVertexLinks.push_back( vertexLink2 );
       }
       if(topoN==4) {
 	VertexLink vertexLink3;
 	vertexLink3.setElement(cascadeVertices[2]);
-	vertexLink3.setStorableObject(*VtxWriteHandles[2].ptr());
+	vertexLink3.setStorableObject(*VtxWriteHandles[2].ptr(), ctx);
 	if( vertexLink3.isValid() ) cascadeVertexLinks.push_back( vertexLink3 );
       }
       CascadeLinksDecor(*mainVertex) = cascadeVertexLinks;
@@ -1133,18 +1133,18 @@ namespace DerivationFramework {
 	VertexLinkVector cascadeVertexLinks_mvc;
 	VertexLink vertexLink1_mvc;
 	vertexLink1_mvc.setElement(cascadeVertices_mvc[0]);
-	vertexLink1_mvc.setStorableObject(*VtxWriteHandles_mvc[0].ptr());
+	vertexLink1_mvc.setStorableObject(*VtxWriteHandles_mvc[0].ptr(), ctx);
 	if( vertexLink1_mvc.isValid() ) cascadeVertexLinks_mvc.push_back( vertexLink1_mvc );
 	if(topoN>=3) {
 	  VertexLink vertexLink2_mvc;
 	  vertexLink2_mvc.setElement(cascadeVertices_mvc[1]);
-	  vertexLink2_mvc.setStorableObject(*VtxWriteHandles_mvc[1].ptr());
+	  vertexLink2_mvc.setStorableObject(*VtxWriteHandles_mvc[1].ptr(), ctx);
 	  if( vertexLink2_mvc.isValid() ) cascadeVertexLinks_mvc.push_back( vertexLink2_mvc );
 	}
 	if(topoN==4) {
 	  VertexLink vertexLink3_mvc;
 	  vertexLink3_mvc.setElement(cascadeVertices_mvc[2]);
-	  vertexLink3_mvc.setStorableObject(*VtxWriteHandles_mvc[2].ptr());
+	  vertexLink3_mvc.setStorableObject(*VtxWriteHandles_mvc[2].ptr(), ctx);
 	  if( vertexLink3_mvc.isValid() ) cascadeVertexLinks_mvc.push_back( vertexLink3_mvc );
 	}
 	CascadeLinksDecor(*mainVertex_mvc) = cascadeVertexLinks_mvc;
@@ -1152,7 +1152,7 @@ namespace DerivationFramework {
 	VertexLinkVector precedingVertexLinks_mvc;
 	VertexLink vertexLink_mvc;
 	vertexLink_mvc.setElement(cascadeVertices[topoN-1]);
-	vertexLink_mvc.setStorableObject(*VtxWriteHandles[topoN-1].ptr());
+	vertexLink_mvc.setStorableObject(*VtxWriteHandles[topoN-1].ptr(), ctx);
 	if( vertexLink_mvc.isValid() ) precedingVertexLinks_mvc.push_back( vertexLink_mvc );
 	PrecedingLinksDecor(*mainVertex_mvc) = precedingVertexLinks_mvc;
       } // cascade_info_pair.second!=0

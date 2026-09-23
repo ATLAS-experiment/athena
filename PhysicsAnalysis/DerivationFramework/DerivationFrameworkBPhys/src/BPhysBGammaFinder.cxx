@@ -178,10 +178,10 @@ StatusCode BPhysBGammaFinder::addBranches(const EventContext& ctx) const {
             convVertexCandidate->clearTracks();
             ElementLink<xAOD::TrackParticleContainer> newLink1;
             newLink1.setElement(*tpIt1);
-            newLink1.setStorableObject(*inputTrackParticles);
+            newLink1.setStorableObject(*inputTrackParticles, ctx);
             ElementLink<xAOD::TrackParticleContainer> newLink2;
             newLink2.setElement(*tpIt2);
-            newLink2.setStorableObject(*inputTrackParticles);
+            newLink2.setStorableObject(*inputTrackParticles, ctx);
             convVertexCandidate->addTrackAtVertex(newLink1);
             convVertexCandidate->addTrackAtVertex(newLink2);
 
@@ -287,7 +287,7 @@ StatusCode BPhysBGammaFinder::addBranches(const EventContext& ctx) const {
             // add cross-link to the original Bc+ vertex
             VertexLink BGammaLink;
             BGammaLink.setElement(convVertexCandidate.get());
-            BGammaLink.setStorableObject(*conversionContainer);
+            BGammaLink.setStorableObject(*conversionContainer, ctx);
             conversionContainer->push_back( std::move(convVertexCandidate) );
             vect.push_back(std::move(BGammaLink));
           }
