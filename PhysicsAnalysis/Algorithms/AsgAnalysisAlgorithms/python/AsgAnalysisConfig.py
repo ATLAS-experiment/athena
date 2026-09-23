@@ -128,6 +128,7 @@ class CommonServicesConfig (ConfigBlock) :
                 weightSysDumper = config.createAlgorithm( 'CP::SysListDumperAlg', 'OnlyWeightSystematicsPrinter' )
                 weightSysDumper.histogramName = f"{self.systematicsHistogram}OnlyWeights"
                 weightSysDumper.systematicsRegex = "^(GEN_|EL_EFF_|MUON_EFF_|PH_EFF_|TAUS_TRUEHADTAU_EFF_|FT_EFF_|JET_.*JvtEfficiency_|PRW_).*"
+                weightSysDumper.RootStreamName = streamName
 
         if self.metadataHistogram:
             # add histogram with metadata
