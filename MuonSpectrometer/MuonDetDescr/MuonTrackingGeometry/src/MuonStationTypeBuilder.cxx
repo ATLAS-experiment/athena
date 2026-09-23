@@ -804,7 +804,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processMdtBox
     }
     // create layers //
     double thickness{0.};
-    std::unique_ptr<Trk::OverlapDescriptor> od = nullptr;
+    
     const Trk::CuboidVolumeBounds* volBounds = dynamic_cast<const Trk::CuboidVolumeBounds*>(&(vol.volumeBounds()));
     double minX{0.};
     if (volBounds) {
@@ -823,7 +823,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processMdtBox
             Trk::MaterialProperties matLay = x_mat[iloop] ? *(x_mat[iloop])
                                            : Trk::MaterialProperties(*m_muonMaterial, thickness);
             Trk::HomogeneousLayerMaterial mdtMaterial(matLay, 0.);
-            auto layer = std::make_unique<Trk::PlaneLayer>(cTr, bounds, mdtMaterial, thickness, std::move(od));
+            auto layer = std::make_unique<Trk::PlaneLayer>(cTr, bounds, mdtMaterial, thickness, nullptr);
             layer->setRef(x_ref[iloop] - zShift);
             // make preliminary identification of active layers
             layer->setLayerType(x_active[iloop]);
@@ -940,7 +940,7 @@ std::unique_ptr<Trk::TrackingVolume>
     }
     // create layers //
     double thickness{0.};
-    std::unique_ptr<Trk::OverlapDescriptor> od = nullptr;
+    
     const Trk::TrapezoidVolumeBounds* volBounds = dynamic_cast<const Trk::TrapezoidVolumeBounds*>(&(vol.volumeBounds()));
     if (!volBounds) {
         return nullptr;
@@ -952,6 +952,7 @@ std::unique_ptr<Trk::TrackingVolume>
     // x-y plane -> y-z plane
     auto bounds = std::make_shared<Trk::TrapezoidBounds>(x1v, x2v, yv);
     for (unsigned int iloop = 0; iloop < x_array.size(); iloop++) {
+        
         thickness = x_thickness[iloop];
         if (!x_mat[iloop]) {
             ATH_MSG_WARNING("Undefined MDT layer material");
@@ -960,7 +961,7 @@ std::unique_ptr<Trk::TrackingVolume>
                                         : Trk::MaterialProperties(*m_muonMaterial, thickness);
         Trk::HomogeneousLayerMaterial mdtMaterial(matLay, 0.);
         Amg::Transform3D cTr = transf * Amg::getTranslateZ3D( x_array[iloop]);
-        auto layer = std::make_unique<Trk::PlaneLayer>(cTr, bounds, mdtMaterial, thickness, std::move(od));
+        auto layer = std::make_unique<Trk::PlaneLayer>(cTr, bounds, mdtMaterial, thickness, nullptr);
         // make preliminary identification of active layers
         layer->setLayerType(x_active[iloop]);
         layer->setRef(x_ref[iloop]);
