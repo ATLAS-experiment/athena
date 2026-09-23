@@ -2,6 +2,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaCommon.Utils.unixtools import find_datafile
 from ActsInterop import UnitConstants
 from ActsConfig.ActsUtilities import extractChildKwargs
 
@@ -241,4 +242,48 @@ def ActsTrackFindingValidationAlgCfg(flags,
             InDetRttTruthSelectionToolCfg(flags)))
 
     acc.addEventAlgo( CompFactory.ActsTrk.TrackFindingValidationAlg(name=name, **kwargs) )
+    return acc
+
+def ActsTruthTrackBuilderToolCfg(
+        flags,
+        name: str = "TruthTrackBuilderTool",
+        **kwargs: dict) -> ComponentAccumulator:
+
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault("usePixelClusters", flags.Acts.Gbts.Training.usePixelClusters)
+    kwargs.setdefault("useStripClusters", flags.Acts.Gbts.Training.useStripClusters)
+
+    acc.setPrivateTools(
+        CompFactory.ActsTrk.TruthTrackBuilderTool(
+            name=name,
+            **kwargs
+        )
+    )
+
+    return acc
+
+def ActsGbtsTrainingAlgCfg(flags,
+                           name: str = "ActsGbtsTrainingAlg",
+                           **kwargs: dict) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    if "TruthTrackBuilderTool" not in kwargs:
+        kwargs.setdefault(
+            "TruthTrackBuilderTool",
+            acc.popToolsAndMerge(
+                ActsTruthTrackBuilderToolCfg(flags)
+            )
+        )
+
+    kwargs.setdefault("geometryFile", find_datafile("gbts_layer_geometry.txt"))
+    kwargs.setdefault("outputConnectionTable", flags.Acts.Gbts.Training.outputConnectionTable)
+    kwargs.setdefault("doSymmetrization", flags.Acts.Gbts.Training.doSymmetrization)
+    kwargs.setdefault("useOldFormatting", flags.Acts.Gbts.Training.useOldFormatting)
+    kwargs.setdefault("probThreshold", flags.Acts.Gbts.Training.probThreshold)
+
+    acc.addEventAlgo(
+        CompFactory.ActsTrk.GbtsTrainingAlg(name=name, **kwargs)
+    )
+
     return acc
