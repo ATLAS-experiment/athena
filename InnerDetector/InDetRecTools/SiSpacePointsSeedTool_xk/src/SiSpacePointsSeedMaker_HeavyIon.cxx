@@ -13,11 +13,15 @@
 ///////////////////////////////////////////////////////////////////
 
 #include "SiSpacePointsSeedTool_xk/SiSpacePointsSeedMaker_HeavyIon.h"
+#include "TrkTrack/Track.h"
+#include "TrkParameters/TrackParameters.h"
 
 #include <cmath>
 
 #include <iomanip>
 #include <ostream>
+
+#include <TTree.h>
 
 ///////////////////////////////////////////////////////////////////
 // Constructor
@@ -36,11 +40,11 @@ InDet::SiSpacePointsSeedMaker_HeavyIon::SiSpacePointsSeedMaker_HeavyIon
 StatusCode InDet::SiSpacePointsSeedMaker_HeavyIon::initialize()
 {
   StatusCode sc = AlgTool::initialize();
-
+  ATH_CHECK( m_prdToTrackMap.initialize( !m_prdToTrackMap.key().empty()));
+  
   ATH_CHECK(m_spacepointsPixel.initialize(m_pixel));
   ATH_CHECK(m_spacepointsSCT.initialize(m_sct));
   ATH_CHECK(m_spacepointsOverlap.initialize(m_useOverlap));
-
   // Get beam geometry
   //
   ATH_CHECK(m_beamSpotKey.initialize());
@@ -63,6 +67,45 @@ StatusCode InDet::SiSpacePointsSeedMaker_HeavyIon::initialize()
 
   m_initialized = true;
 
+  if (m_writeNtuple) {
+    ATH_CHECK( m_thistSvc.retrieve() );
+ 
+    m_treeName = (std::string("SeedTree_")+name());
+    std::replace( m_treeName.begin(), m_treeName.end(), '.', '_' );
+ 
+    m_outputTree = new TTree( m_treeName.c_str() , "SeedMakerValTool"); 
+
+    m_outputTree->Branch("eventNumber",    &m_eventNumber); 
+    m_outputTree->Branch("d0",             &m_d0);
+    m_outputTree->Branch("z0",             &m_z0);
+    m_outputTree->Branch("pt",             &m_pt);
+    m_outputTree->Branch("eta",            &m_eta);
+    m_outputTree->Branch("x1",             &m_x1);
+    m_outputTree->Branch("x2",             &m_x2);
+    m_outputTree->Branch("x3",             &m_x3);
+    m_outputTree->Branch("y1",             &m_y1);
+    m_outputTree->Branch("y2",             &m_y2);
+    m_outputTree->Branch("y3",             &m_y3);
+    m_outputTree->Branch("z1",             &m_z1);
+    m_outputTree->Branch("z2",             &m_z2);
+    m_outputTree->Branch("z3",             &m_z3);
+    m_outputTree->Branch("r1",             &m_r1);
+    m_outputTree->Branch("r2",             &m_r2);
+    m_outputTree->Branch("r3",             &m_r3);
+    m_outputTree->Branch("quality",        &m_quality);
+    m_outputTree->Branch("seedType",       &m_type);
+    m_outputTree->Branch("givesTrack",     &m_givesTrack);
+    m_outputTree->Branch("dzdr_b",  	   &m_dzdr_b);
+    m_outputTree->Branch("dzdr_t",         &m_dzdr_t);
+    m_outputTree->Branch("dr_b",           &m_dr_b);
+    m_outputTree->Branch("dr_t",           &m_dr_t);
+    m_outputTree->Branch("track_pt",       &m_trackPt);
+    m_outputTree->Branch("track_eta",      &m_trackEta);
+
+    TString fullTreeName = m_treeFolder + m_treeName;
+    ATH_CHECK(  m_thistSvc->regTree( fullTreeName.Data(), m_outputTree )  );
+  }
+  
   return sc;
 }
 
@@ -114,17 +157,31 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::newEvent(const EventContext& ctx, E
   float irstep = 1./m_r_rstep;
   int   irmax  = m_r_size-1  ;
 
+  /// read the prd to track map, in case we want to use it.
+  const Trk::PRDtoTrackMap *prd_to_track_map_cptr = nullptr;
+  if (not m_prdToTrackMap.key().empty()) {
+    SG::ReadHandle<Trk::PRDtoTrackMap> prd_to_track_map = SG::ReadHandle<Trk::PRDtoTrackMap>(m_prdToTrackMap, ctx);
+    if (!prd_to_track_map.isValid()) {
+      ATH_MSG_ERROR("Failed to read PRD to track association map: " << m_prdToTrackMap.key());
+    }
+    prd_to_track_map_cptr = prd_to_track_map.cptr();
+  }
+
   // Get pixels space points containers from store gate 
   //
   if (m_pixel) {
 
     SG::ReadHandle<SpacePointContainer> spacepointsPixel{m_spacepointsPixel, ctx};
     if (spacepointsPixel.isValid()) {
-
+      std::size_t nOriginalSpacePoints = 0;
+      std::size_t nSpacePoints = 0;
       for (const SpacePointCollection* spc: *spacepointsPixel) {
+	nOriginalSpacePoints += spc->size();
         for (const Trk::SpacePoint* sp: *spc) {	  
 	  float r = sp->r();
-          if (r < 43. || r>=m_r_rmax) continue;
+          if (r<m_r_rmin || r>=m_r_rmax) continue;
+	  if (prd_to_track_map_cptr and isUsed(sp,*prd_to_track_map_cptr)) continue;
+	  ++nSpacePoints;
 	  InDet::SiSpacePointForSeed* sps = newSpacePoint(data, sp);
 	  int ir = static_cast<int>(sps->radius()*irstep);
           if (ir>irmax) ir = irmax;
@@ -134,6 +191,8 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::newEvent(const EventContext& ctx, E
 	  ++data.ns;
 	}
       }
+      // ATH_MSG_INFO("Pixel space Points from SG: " << nOriginalSpacePoints);
+      // ATH_MSG_INFO("  \\_ After selection: " << nSpacePoints);
     }
   }
 
@@ -143,11 +202,11 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::newEvent(const EventContext& ctx, E
 
     SG::ReadHandle<SpacePointContainer> spacepointsSCT{m_spacepointsSCT, ctx};
     if (spacepointsSCT.isValid()) {
-
       for (const SpacePointCollection* spc: *spacepointsSCT) {
         for (const Trk::SpacePoint* sp: *spc) {
 	  float r = sp->r();
-          if (r<0. || r>=m_r_rmax) continue;
+          if (r<m_r_rmin || r>=m_r_rmax) continue;
+	  if (prd_to_track_map_cptr and isUsed(sp,*prd_to_track_map_cptr)) continue;
 	  InDet::SiSpacePointForSeed* sps = newSpacePoint(data, sp);
 	  int ir = static_cast<int>(sps->radius()*irstep);
           if (ir>irmax) ir = irmax;
@@ -159,6 +218,30 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::newEvent(const EventContext& ctx, E
       }
     }
   }
+  
+  if (m_useOverlap && !data.checketa) {
+    SG::ReadHandle<SpacePointOverlapCollection> spacepointsOverlap{m_spacepointsOverlap, ctx};
+    if (spacepointsOverlap.isValid()) {
+      for (const Trk::SpacePoint* sp: *spacepointsOverlap) {
+	/// usual rejection of SP used in previous track finding passes if we run with the PRT to track map + check of the max radius
+	float r = sp->r();
+	if (r<m_r_rmin || r>=m_r_rmax) continue;
+	if (prd_to_track_map_cptr &&  isUsed(sp, *prd_to_track_map_cptr)) continue;
+	
+	/// SP creation, entry into list of the data object
+	InDet::SiSpacePointForSeed* sps = newSpacePoint(data, sp);
+	if (!sps) continue;
+
+	int ir = static_cast<int>(sps->radius()*irstep);
+	if (ir>irmax) ir = irmax;
+	data.r_Sorted[ir].push_back(sps);
+	++data.r_map[ir];
+	if (data.r_map[ir]==1) data.r_index[data.nr++] = ir;
+	++data.ns;
+      }
+    }
+  }
+  
   fillLists(data);
 }
 
@@ -436,6 +519,9 @@ MsgStream& InDet::SiSpacePointsSeedMaker_HeavyIon::dumpConditions(EventData& dat
   out<<"| pTmin  (mev)            | "
      <<std::setw(12)<<std::setprecision(5)<<m_ptmin
      <<"                              |"<<endmsg;
+  out <<"| pTmax  (mev)            | "
+    <<std::setw(12)<<std::setprecision(5)<<m_ptmax
+    <<"                              |"<<endmsg;
   out<<"| |eta|          <=  | " 
      <<std::setw(12)<<std::setprecision(5)<<m_etamax
      <<"                              |"<<endmsg;
@@ -463,8 +549,11 @@ MsgStream& InDet::SiSpacePointsSeedMaker_HeavyIon::dumpConditions(EventData& dat
   out<<"| max radius second SP(2) | "
      <<std::setw(12)<<std::setprecision(5)<<m_r2maxv
      <<"                              |"<<endmsg;
-  out<<"| min space points dR     | "
-     <<std::setw(12)<<std::setprecision(5)<<m_drmin
+  out<<"| min space points dR (b)     | "
+     <<std::setw(12)<<std::setprecision(5)<<m_drmin_b
+     <<"                              |"<<endmsg;
+  out<<"| min space points dR (t)     | "
+     <<std::setw(12)<<std::setprecision(5)<<m_drmin_t
      <<"                              |"<<endmsg;
   out<<"| max space points dR     | "
      <<std::setw(12)<<std::setprecision(5)<<m_drmax
@@ -589,6 +678,9 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::buildFrameWork()
   m_dzdrmin   =-m_dzdrmax                      ;
   m_COF       =  134*.05*9.                    ;
   m_ipt       = 1.f/std::abs(.9f*m_ptmin)            ;
+  m_iptmax  = m_ptmax == std::numeric_limits<float>::max()
+    ? 0.f
+    : 1.f/std::abs(1.1f*m_ptmax);
   m_ipt2      = m_ipt*m_ipt                    ;
 
   // Build radius sorted containers
@@ -751,7 +843,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::buildBeamFrameWork(const EventConte
 ///////////////////////////////////////////////////////////////////
 
 void  InDet::SiSpacePointsSeedMaker_HeavyIon::convertToBeamFrameWork
-(EventData& data, const Trk::SpacePoint*const& sp,float* r) 
+(EventData& data, const Trk::SpacePoint*const& sp,std::array<float, 3> &r) 
 {
   r[0] = static_cast<float>(sp->globalPosition().x())-data.xbeam[0];
   r[1] = static_cast<float>(sp->globalPosition().y())-data.ybeam[0];
@@ -886,6 +978,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production2Sp(EventData& data) cons
 	float X  = (*r0)->x();
 	float Y  = (*r0)->y();
 	float R  = (*r0)->radius();
+
 	if (R<m_r2minv) continue;
         if (R>m_r2maxv) break;
 	float Z  = (*r0)->z();
@@ -931,7 +1024,10 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production2Sp(EventData& data) cons
 	    float UR = Ut*R+1.              ; if (UR == 0.) continue;
 	    float A  = Vt*R/UR              ;
 	    float B  = Vt-A*Ut              ;
+	    // min pt cut
 	    if (std::abs(B*data.K) > m_ipt*std::sqrt(1.f+A*A)) continue;
+	    // max pt cut
+	    if (std::abs(B * data.K) < m_iptmax * std::sqrt(1.f + A * A)) continue;
             ++nseed;
 	    newSeed(data, (*r)->spacepoint, (*r0)->spacepoint,Zo);
 	  }
@@ -960,7 +1056,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3Sp(EventData& data) cons
   std::vector<InDet::SiSpacePointForSeed*>::iterator rt[9],rte[9],rb[9],rbe[9];
   int nseed = 0;
 
-  // Loop thorugh all azimuthal regions
+  // Loop through all azimuthal regions
   //
   for (int f=data.fNmin; f<=m_fNmax; ++f) {    
     // For each azimuthal region loop through all Z regions
@@ -1021,6 +1117,8 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3Sp
     data.mapOneSeeds.erase(data.mapOneSeeds.begin(), data.mapOneSeeds.end());
 	
     float R  = (*r0)->radius();
+    if (R < m_r2minv) continue;
+    if (R > m_r2maxv) break;
 
     const Trk::SpacePoint* SP0 = (*r0)->spacepoint;
     if (SP0->clusterList().second) break;
@@ -1036,9 +1134,15 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3Sp
     for (int i=0; i<NB; ++i) {
       for (r=rb[i]; r!=rbe[i]; ++r) {
 	float Rb =(*r)->radius();
+	if (Rb < m_r1minv) {
+	  rb[i]=r;
+	  continue;
+	}
+	if (Rb > m_r1maxv) break;
+	
 	float dR = R-Rb;
 	if (dR > m_drmax) {rb[i]=r; continue;}
-	if (dR < m_drmin) break;
+	if (dR < m_drmin_b) break;
 	if ((*r)->sur()==sur0) continue;
 
 	float Tz = (Z-(*r)->z())/dR;
@@ -1050,6 +1154,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3Sp
 	float Zo = Z-R*Tz;
         if (!isZCompatible(data, Zo, Rb, Tz)) continue;
 	data.SP[Nb] = (*r);
+	if (m_writeNtuple) data.SP[Nb]->setDZDR(Tz);
         if (++Nb==m_maxsizeSP) goto breakb;
       }
     }
@@ -1062,8 +1167,12 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3Sp
     for (int i=0; i<NT; ++i) {
       for (r=rt[i]; r!=rte[i]; ++r) {
 	float Rt =(*r)->radius();
+	if (Rt < m_r3minv) {
+	  rt[i]=r;
+	  continue;
+	}
 	float dR = Rt-R;
-        if (dR<m_drmin) {
+	if (dR<m_drmin_t) {
           rt[i]=r;
           continue;
         }
@@ -1079,6 +1188,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3Sp
 	float Zo = Z-R*Tz;
         if (!isZCompatible(data, Zo, R ,Tz)) continue;
   	data.SP[Nt] = (*r);
+	if (m_writeNtuple) data.SP[Nt]->setDZDR(Tz);
         if (++Nt==m_maxsizeSP) goto breakt;
       }
     }
@@ -1115,10 +1225,12 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3Sp
  
     float imc   = m_diver   ;
     float ipt2  = m_ipt2    ;
+    float ipt2max = m_iptmax * m_iptmax;
     float K     = data.K       ;
     float K2    = K*K       ;
     float COF   = m_COF     ;
     float ipt2K = ipt2/K2   ;
+    float ipt2Kmax = ipt2max/K2;
     float ipt2C = ipt2*COF  ;
     float COFK  = COF*K2    ;
     covr0      *= 2.        ;
@@ -1145,18 +1257,26 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3Sp
 	float Ts  = .5f*(Tzb+data.Tz[t])                          ;
 	float dt  =     Tzb-data.Tz[t]                           ;
 	float dT  = dt*dt-Erb-data.Er[t]-data.R[t]*(Ts*Ts*Rb2r+Rb2z);
+
 	if ( dT > ICSA) continue;
 	float dU  = data.U[t]-Ub; if (dU == 0.) continue ;
 	float A   = (data.V[t]-Vb)/dU                   ;
 	float S2  = 1.f+A*A                           ;
 	float B   = Vb-A*Ub                          ;
 	float B2  = B*B                              ;
-	if (B2  > ipt2K*S2 || dT*S2 > B2*CSA) continue;
+	if (B2  > ipt2K*S2 || B2 < ipt2Kmax*S2 || dT*S2 > B2*CSA) continue;
 	float Im  = std::abs((A-B*R)*R)                  ;
 
 	if ( Im > imc ) continue;
 	Im = Im*Im+Iz;
 	newOneSeed(data, SPb, SP0, data.SP[t]->spacepoint, Zob, Im);
+
+	if (m_writeNtuple) {
+	  float	theta = std::atan(1.f / Ts);
+	  data.SP[t]->setEta(-std::log(std::tan(0.5f * theta)));
+	  data.SP[t]->setPt(std::sqrt(S2 / B2) / (1000.f * data.K)); 
+	}
+
       }
     }
     nseed += data.mapOneSeeds.size();
@@ -1196,6 +1316,8 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3SpNoVertex
     data.mapOneSeeds.erase(data.mapOneSeeds.begin(), data.mapOneSeeds.end());
 	
     float R  = (*r0)->radius();
+    if (R < m_r2minv) continue;
+    if (R > m_r2maxv) break;
 
     const Trk::SpacePoint* SP0 = (*r0)->spacepoint;
 
@@ -1212,12 +1334,18 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3SpNoVertex
     for (int i=0; i<NB; ++i) {
       for (r=rb[i]; r!=rbe[i]; ++r) {
 	float Rb =(*r)->radius();
+	if (Rb < m_r1minv) {
+          rb[i]=r;
+          continue;
+        }
+        if (Rb > m_r1maxv) break;
+	
 	float dR = R-Rb;
  	if (dR > m_drmax) {
           rb[i]=r;
           continue;
         }
-	if (dR < m_drmin) break;
+	if (dR < m_drmin_b) break;
 	if ((*r)->sur()==sur0) continue;
 	if ( !pix && !(*r)->spacepoint->clusterList().second) continue;
 	float Tz = (Z-(*r)->z())/dR;
@@ -1228,6 +1356,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3SpNoVertex
 	float Zo = Z-R*Tz;
         if (!isZCompatible(data, Zo, Rb, Tz)) continue;
 	data.SP[Nb] = (*r);
+	if (m_writeNtuple) data.SP[Nb]->setDZDR(Tz);
         if (++Nb==m_maxsizeSP) goto breakb;
       }
     }
@@ -1240,8 +1369,12 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3SpNoVertex
     for (int i=0; i<NT; ++i) {
       for (r=rt[i]; r!=rte[i]; ++r) {
 	float Rt =(*r)->radius();
+	if (Rt < m_r3minv) {
+          rt[i]=r;
+          continue;
+        }
 	float dR = Rt-R;
-        if (dR<m_drmin) {
+        if (dR<m_drmin_t) {
           rt[i]=r;
           continue;
         }
@@ -1255,6 +1388,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3SpNoVertex
 	float Zo = Z-R*Tz;
         if (!isZCompatible(data, Zo, R, Tz)) continue;
   	data.SP[Nt] = (*r);
+	if (m_writeNtuple) data.SP[Nt]->setDZDR(Tz);
         if (++Nt==m_maxsizeSP) goto breakt;
       }
     }
@@ -1292,10 +1426,12 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3SpNoVertex
     float imc   = m_diver   ;
     float imcs  = m_diverpps;
     float ipt2  = m_ipt2    ;
+    float ipt2max = m_iptmax * m_iptmax;
     float K     = data.K       ;
     float K2    = K*K       ;
     float COF   = m_COF     ;
     float ipt2K = ipt2/K2   ;
+    float ipt2Kmax = ipt2max/K2;
     float ipt2C = ipt2*COF  ;
     float COFK  = COF*K2    ;
     covr0      *= 2.        ;
@@ -1316,11 +1452,12 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3SpNoVertex
       float  Tzb2 = (1.f+Tzb*Tzb) ;
       float  CSA  = Tzb2*COFK    ;
       float ICSA  = Tzb2*ipt2C   ;
-
+      
       for (int t=Nb; t<Nt; ++t) {
 	float Ts  = .5f*(Tzb+data.Tz[t])                          ;
 	float dt  =     Tzb-data.Tz[t]                           ;
 	float dT  = dt*dt-Erb-data.Er[t]-data.R[t]*(Ts*Ts*Rb2r+Rb2z);
+	
 	if ( dT > ICSA) continue;
 	float dU  = data.U[t]-Ub;
         if (dU == 0.) continue;
@@ -1328,7 +1465,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3SpNoVertex
 	float S2  = 1.f+A*A                           ;
 	float B   = Vb-A*Ub                          ;
 	float B2  = B*B                              ;
-	if (B2  > ipt2K*S2 || dT*S2 > B2*CSA) continue;
+	if (B2  > ipt2K*S2 || B2 < ipt2Kmax*S2 || dT*S2 > B2*CSA) continue;
 	float Im  = std::abs((A-B*R)*R)                  ;
 	
 	if (pix) {
@@ -1338,6 +1475,12 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3SpNoVertex
           continue;
         }
 	newOneSeed(data, SPb, SP0, data.SP[t]->spacepoint, Zob, Im);
+
+	if (m_writeNtuple) {
+	  float theta = std::atan(1.f / Ts);
+	  data.SP[t]->setEta(-std::log(std::tan(0.5f * theta)));
+	  data.SP[t]->setPt(std::sqrt(S2 / B2) / (1000.f * data.K));
+        }
       }
     }
     nseed += data.mapOneSeeds.size();
@@ -1407,7 +1550,12 @@ const InDet::SiSpacePointsSeed* InDet::SiSpacePointsSeedMaker_HeavyIon::next(con
 bool InDet::SiSpacePointsSeedMaker_HeavyIon::isZCompatible  
 (EventData& data, float& Zv, float& R, float& T) const
 {
-  if (Zv < m_zmin || Zv > m_zmax) return false;
+  if (m_useVertexPosition) {
+    if (Zv < data.zCollisionMinimum || Zv > data.zCollisionMaximum) return false;
+  }
+  else {
+    if (Zv < m_zmin || Zv > m_zmax) return false;
+  }
   if (!data.izvertex) return true;
 
   float dZmin = std::numeric_limits<float>::max();
@@ -1437,14 +1585,14 @@ InDet::SiSpacePointForSeed* InDet::SiSpacePointsSeedMaker_HeavyIon::newSpacePoin
 {
   InDet::SiSpacePointForSeed* sps = nullptr;
 
-  float r[3];
+  std::array<float, 3> r{0,0,0};
   convertToBeamFrameWork(data, sp, r);
 
   if (data.i_spforseed!=data.l_spforseed.end()) {
     sps = &(*data.i_spforseed++);
-    sps->set(sp,r);
+    sps->set(sp,&r[0]);
   } else {
-    data.l_spforseed.emplace_back(sp, r);
+    data.l_spforseed.emplace_back(sp, &r[0]);
     sps = &(data.l_spforseed.back());
     data.i_spforseed = data.l_spforseed.end();
   }
@@ -1527,9 +1675,53 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::initializeEventData(EventData& data
                   false); // checkEta not used
 }
 
-void InDet::SiSpacePointsSeedMaker_HeavyIon::writeNtuple(const SiSpacePointsSeed*, const Trk::Track*, int, long) const{
+void InDet::SiSpacePointsSeedMaker_HeavyIon::writeNtuple(const SiSpacePointsSeed* seed,
+							 const Trk::Track* track,
+							 int seedType,
+							 long eventNumber) const
+{
+  if (not m_writeNtuple) return;
+
+  std::lock_guard<std::mutex> lock(m_mutex);
+  
+  if (track != nullptr) {
+    m_trackPt = track->trackParameters()->front()->pT() / 1000.f;
+    m_trackEta = std::abs(track->trackParameters()->front()->eta());
+  } else {
+    m_trackPt = -1.;
+    m_trackEta = -1.; 
+  }
+
+  const std::vector<const Trk::SpacePoint*>& sps = seed->spacePoints();
+  
+  m_d0           =   seed->d0();
+  m_z0           =   seed->zVertex();
+  m_eta          =   sps[0]->globalPosition().eta();
+  m_x1           =   sps[0]->globalPosition().x();
+  m_x2           =   sps[1]->globalPosition().x();
+  m_x3           =   sps[2]->globalPosition().x();
+  m_y1           =   sps[0]->globalPosition().y();
+  m_y2           =   sps[1]->globalPosition().y();
+  m_y3           =   sps[2]->globalPosition().y();
+  m_z1           =   sps[0]->globalPosition().z();
+  m_z2           =   sps[1]->globalPosition().z();
+  m_z3           =   sps[2]->globalPosition().z();
+  m_r1           =   sps[0]->globalPosition().perp();
+  m_r2           =   sps[1]->globalPosition().perp();
+  m_r3           =   sps[2]->globalPosition().perp();
+  m_type         =   seedType;
+  m_dzdr_b       =   ( sps[1]->globalPosition().z() -  sps[0]->globalPosition().z() )/( sps[1]->globalPosition().perp() - sps[0]->globalPosition().perp());
+  m_dzdr_t       =   ( sps[2]->globalPosition().z() - sps[1]->globalPosition().z()) / (sps[2]->globalPosition().perp() - sps[1]->globalPosition().perp());
+  m_dr_b         =   sps[1]->globalPosition().perp() - sps[0]->globalPosition().perp();
+  m_dr_t         =   sps[2]->globalPosition().perp() - sps[1]->globalPosition().perp();
+  m_pt           =   seed->pt();
+  m_givesTrack   =   !(track == nullptr);
+  m_eventNumber  =   eventNumber;
+  
+  TTree* outputTree ATLAS_THREAD_SAFE = m_outputTree;
+  outputTree->Fill();  
 }
 
 bool InDet::SiSpacePointsSeedMaker_HeavyIon::getWriteNtupleBoolProperty() const{
-    return false;
+  return m_writeNtuple;
 }

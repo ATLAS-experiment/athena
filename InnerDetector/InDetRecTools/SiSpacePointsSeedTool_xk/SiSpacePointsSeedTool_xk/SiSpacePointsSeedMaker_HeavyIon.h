@@ -21,6 +21,8 @@
 #include "SiSPSeededTrackFinderData/SiSpacePointsSeedMakerEventData.h"
 #include "TrkSpacePoint/SpacePointContainer.h" 
 #include "TrkSpacePoint/SpacePointOverlapCollection.h"
+#include "TrkEventUtils/PRDtoTrackMap.h"
+#include "GaudiKernel/ITHistSvc.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // MagField cache
@@ -142,8 +144,8 @@ namespace InDet {
     SG::ReadHandleKey<SpacePointOverlapCollection> m_spacepointsOverlap{this, "SpacePointsOverlapName", "OverlapSpacePoints"};
     SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey{this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot"};
     // Read handle for conditions object to get the field cache
-    SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCondObjInputKey {this, "AtlasFieldCacheCondObj", "fieldCondObj",
-                                                                          "Name of the Magnetic Field conditions object key"};
+    SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCondObjInputKey {this, "AtlasFieldCacheCondObj", "fieldCondObj", "Name of the Magnetic Field conditions object key"};
+    SG::ReadHandleKey<Trk::PRDtoTrackMap> m_prdToTrackMap{this,"PRDtoTrackMap","","option PRD-to-track association"};
     //@}
 
     /// @name Properties, which will not be changed after construction
@@ -159,10 +161,13 @@ namespace InDet {
     FloatProperty m_r1maxv{this, "maxVRadius1", 60.};
     FloatProperty m_r2minv{this, "minVRadius2", 70.};
     FloatProperty m_r2maxv{this, "maxVRadius2", 200.};
-    FloatProperty m_drmin{this, "mindRadius", 10.};
+    FloatProperty m_r3minv{this, "minVRadius3", 0.};
+    FloatProperty m_drmin_b{this, "mindRadius", 10.};
+    FloatProperty m_drmin_t{this, "mindRadiusTop", 10.};
     FloatProperty m_drmax{this, "maxdRadius", 270.};
     FloatProperty m_zmin{this, "minZ", -250.};
     FloatProperty m_zmax{this, "maxZ", +250.};
+    FloatProperty m_r_rmin{this, "radMin", 43.};
     FloatProperty m_r_rmax{this, "radMax", 600.};
     FloatProperty m_r_rstep{this, "radStep", 2.};
     FloatProperty m_dzver{this, "maxdZver", 5.};
@@ -170,12 +175,15 @@ namespace InDet {
     FloatProperty m_diver{this, "maxdImpact", 10.};
     FloatProperty m_diverpps{this, "maxdImpactPPS", 1.7};
     FloatProperty m_diversss{this, "maxdImpactSSS", 1000.};
+    BooleanProperty m_useVertexPosition {this, "useVertexPosition", false};
+    BooleanProperty m_writeNtuple {this, "WriteNtuple", false, "Flag to write Validation Ntuples"};
     //@}
 
     /// @name Properties, which can be updated in initialize
     //@{
     FloatProperty m_etamax{this, "etaMax", 2.7};
     FloatProperty m_ptmin{this, "pTmin", 500.};
+    FloatProperty m_ptmax{this, "pTmax", std::numeric_limits<float>::max()};
     FloatProperty m_fieldScale{this, "fieldScale", 1.};
    //@}
 
@@ -200,12 +208,49 @@ namespace InDet {
     float m_dzdrmin{0.};
     float m_dzdrmax{0.};
     float m_ipt{0.};
+    float m_iptmax{0.};
     float m_ipt2{0.};
     float m_COF{0.};
     float m_sF{0.};
     float m_sFv{0.};
     //@}
 
+    ServiceHandle<ITHistSvc> m_thistSvc {this, "THistSvc", "THistSvc", "Histogramming svc"};
+    TTree* m_outputTree {nullptr};
+
+    mutable std::mutex m_mutex;
+
+    std::string m_treeName {""};
+    std::string m_treeFolder {"/valNtuples/"};
+
+    mutable float m_d0 ATLAS_THREAD_SAFE = 0;
+    mutable float m_z0 ATLAS_THREAD_SAFE = 0;
+    mutable float m_pt ATLAS_THREAD_SAFE = 0;
+    mutable float m_eta ATLAS_THREAD_SAFE = 0;
+    mutable double m_x1 ATLAS_THREAD_SAFE = 0;
+    mutable double m_x2 ATLAS_THREAD_SAFE = 0;
+    mutable double m_x3 ATLAS_THREAD_SAFE = 0;
+    mutable double m_y1 ATLAS_THREAD_SAFE = 0;
+    mutable double m_y2 ATLAS_THREAD_SAFE = 0;
+    mutable double m_y3 ATLAS_THREAD_SAFE = 0;
+    mutable double m_z1 ATLAS_THREAD_SAFE = 0;
+    mutable double m_z2 ATLAS_THREAD_SAFE = 0;
+    mutable double m_z3 ATLAS_THREAD_SAFE = 0;
+    mutable double m_r1 ATLAS_THREAD_SAFE = 0;
+    mutable double m_r2 ATLAS_THREAD_SAFE = 0;
+    mutable double m_r3 ATLAS_THREAD_SAFE = 0;
+    mutable float m_quality ATLAS_THREAD_SAFE = 0;
+    mutable int m_type ATLAS_THREAD_SAFE = 0;
+    mutable double m_dzdr_t ATLAS_THREAD_SAFE = 0;
+    mutable double m_dzdr_b ATLAS_THREAD_SAFE = 0;
+    mutable double m_dr_b ATLAS_THREAD_SAFE = 0;
+    mutable double m_dr_t ATLAS_THREAD_SAFE = 0;
+    mutable bool m_givesTrack ATLAS_THREAD_SAFE = 0;
+    mutable float m_trackPt ATLAS_THREAD_SAFE = 0;
+    mutable float m_trackEta ATLAS_THREAD_SAFE = 0;
+    mutable long m_eventNumber ATLAS_THREAD_SAFE = 0;
+
+    
     ///////////////////////////////////////////////////////////////////
     // Private methods
     ///////////////////////////////////////////////////////////////////
@@ -262,11 +307,23 @@ namespace InDet {
     void findNext(EventData& data) const;
     bool isZCompatible(EventData& data, float&,float&,float&) const;
     static float dZVertexMin(EventData& data, float&) ;
-    static void convertToBeamFrameWork(EventData& data, const Trk::SpacePoint*const&,float*) ;
+    static void convertToBeamFrameWork(EventData& data, const Trk::SpacePoint*const&,std::array<float, 3>&) ;
 
     void initializeEventData(EventData& data) const;
+
+    bool isUsed(const Trk::SpacePoint* sp, const Trk::PRDtoTrackMap &prd_to_track_map) const;
   };
 
+  inline
+  bool SiSpacePointsSeedMaker_HeavyIon::isUsed(const Trk::SpacePoint* sp, const Trk::PRDtoTrackMap &prd_to_track_map) const
+  {
+    const Trk::PrepRawData* d = sp->clusterList().first;
+    if (!d || !prd_to_track_map.isUsed(*d)) return false;
+    d = sp->clusterList().second;
+    if (!d || prd_to_track_map.isUsed(*d)) return true;
+    return false;
+  }
+  
 } // end of name space
 
 #endif // SiSpacePointsSeedMaker_HeavyIon_H

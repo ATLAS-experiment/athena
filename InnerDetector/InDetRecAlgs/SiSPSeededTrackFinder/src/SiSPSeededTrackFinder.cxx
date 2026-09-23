@@ -72,12 +72,15 @@ InDet::SiSPSeededTrackFinder::SiSPSeededTrackFinder
 
 StatusCode InDet::SiSPSeededTrackFinder::initialize() 
 {
+  ATH_MSG_INFO("Initializing " << name() << " ...");
   ATH_CHECK(m_evtKey.initialize());
   ATH_CHECK(m_mbtsKey.initialize(m_useMBTS));
   ATH_CHECK(m_SpacePointsPixelKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_SpacePointsSCTKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_outputTracksKey.initialize());
 
+  ATH_CHECK(m_vertices.initialize(m_useVertexPosition));
+  
   /// optional PRD to track association map
   ATH_CHECK( m_prdToTrackMap.initialize( !m_prdToTrackMap.key().empty() ) );
 
@@ -182,6 +185,38 @@ StatusCode InDet::SiSPSeededTrackFinder::oldStrategy(const EventContext& ctx) co
   }
 
   SiSpacePointsSeedMakerEventData seedEventData;
+  if (m_useVertexPosition) {
+    SG::ReadHandle<xAOD::VertexContainer> verticesHandle = SG::makeHandle(m_vertices, ctx);
+    ATH_CHECK( verticesHandle.isValid() );
+    const xAOD::VertexContainer *vertices = verticesHandle.cptr();
+    ATH_CHECK(vertices->size() != 0);
+
+    const xAOD::Vertex* primaryVertex = nullptr;
+    for (const xAOD::Vertex* vtx : *vertices) {
+      if (vtx->vertexType() != xAOD::VxType::PriVtx) continue;
+      primaryVertex = vtx;
+      break;
+    }
+
+    if (primaryVertex == nullptr) {
+      ATH_MSG_ERROR("Could not find the primary vertex");
+      primaryVertex = vertices->front();
+    }
+
+    seedEventData.zCollisionMinimum = primaryVertex->z() - m_collisionTollerance;
+    seedEventData.zCollisionMaximum = primaryVertex->z() + m_collisionTollerance;
+  }
+
+  /// Get the value of the seed maker validation ntuple writing switch
+  bool doWriteNtuple = m_seedsmaker->getWriteNtupleBoolProperty();
+  long EvNumber = 0.;            //Event number variable to be used for the validation ntuple
+
+  if (doWriteNtuple) {
+    SG::ReadHandle<xAOD::EventInfo> eventInfo = SG::makeHandle(m_evtKey, ctx);
+    if(!eventInfo.isValid()) {EvNumber = -1.0;}
+    else {EvNumber = eventInfo->eventNumber();}
+  }
+  
   bool ZVE = false;
   if (m_useZvertexTool) {
     std::list<Trk::Vertex> vertices = m_zvertexmaker->newEvent(ctx, seedEventData);
@@ -202,13 +237,21 @@ StatusCode InDet::SiSPSeededTrackFinder::oldStrategy(const EventContext& ctx) co
   Counter_t counter{};
   const InDet::SiSpacePointsSeed* seed = nullptr;
   std::multimap<double, Trk::Track*> qualitySortedTrackCandidates;
-  // Loop through all seed and reconsrtucted tracks collection preparation
+  // Loop through all seed and reconstructed tracks collection preparation
   //
   while ((seed = m_seedsmaker->next(ctx, seedEventData))) {
     ++counter[kNSeeds];
     std::list<Trk::Track*> trackList = m_trackmaker->getTracks(ctx, trackEventData, seed->spacePoints());
     for (Trk::Track* t: trackList) {
       qualitySortedTrackCandidates.insert(std::make_pair(-trackQuality(t), t));
+    }
+    if(doWriteNtuple) {
+      m_seedsmaker->writeNtuple(seed,
+				!trackList.empty()
+				? trackList.front()
+				: nullptr,
+				ISiSpacePointsSeedMaker::StripSeed,
+				EvNumber);
     }
     if (not ZVE and (counter[kNSeeds] >= m_maxNumberSeeds)) {
       ERR = true;
@@ -271,7 +314,27 @@ StatusCode InDet::SiSPSeededTrackFinder::newStrategy(const EventContext& ctx) co
   Trk::PerigeeSurface beamPosPerigee(beamSpotHandle->beamPos());
 
   SiSpacePointsSeedMakerEventData seedEventData;
-  
+
+  if (m_useVertexPosition) {
+    SG::ReadHandle<xAOD::VertexContainer> verticesHandle = SG::makeHandle(m_vertices, ctx);
+    ATH_CHECK( verticesHandle.isValid() );
+    const xAOD::VertexContainer *vertices = verticesHandle.cptr();
+
+    const xAOD::Vertex* primaryVertex = nullptr;
+    for (const xAOD::Vertex* vtx : *vertices) {
+      if (vtx->vertexType() != xAOD::VxType::PriVtx) continue;
+      primaryVertex = vtx;
+      break;
+    }
+
+    if (primaryVertex == nullptr) {
+      ATH_MSG_ERROR("Could not find the primary vertex");
+      primaryVertex = vertices->front();
+    }
+    
+    seedEventData.zCollisionMinimum = primaryVertex->z() - m_collisionTollerance;
+    seedEventData.zCollisionMaximum = primaryVertex->z() + m_collisionTollerance;
+  }
   /** 
    * We run two passes of seeding & track finding. 
    * 

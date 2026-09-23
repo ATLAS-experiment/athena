@@ -166,6 +166,7 @@ namespace InDet {
     FloatProperty m_dzdrver{this, "maxdZdRver", 0.02};
     FloatProperty m_diver{this, "maxdImpact", 7.};
     FloatProperty m_ptmax{this, "pTmax", 500.};
+    BooleanProperty m_useVertexPosition {this, "useVertexPosition", false};
     //@}
 
     /// @name Properties, which can be updated in initialize

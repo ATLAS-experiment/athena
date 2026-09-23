@@ -29,6 +29,8 @@
 #include "TrkTrack/TrackCollection.h"
 #include "TrkEventUtils/PRDtoTrackMap.h"
 #include "xAODEventInfo/EventInfo.h"
+#include "xAODTracking/VertexContainer.h"
+#include "xAODTracking/VertexAuxContainer.h"
 
 /// Gaudi includes
 #include "GaudiKernel/ToolHandle.h"
@@ -112,6 +114,8 @@ namespace InDet {
     DoubleProperty m_deltaPhi{this, "dPhiCaloRoI", .25};
     DoubleProperty m_deltaZ{this, "dZCaloRoI", 300.};
     StringProperty m_fieldmode{this, "MagneticFieldMode", "MapSolenoid"};
+    BooleanProperty m_useVertexPosition{this, "useVertexPosition", false};
+    FloatProperty m_collisionTollerance{this, "collisionTollerance", 10.};
     //@}
 
     /// @name Data members for new strategy reconstruction
@@ -128,7 +132,8 @@ namespace InDet {
     SG::ReadHandleKey<SpacePointContainer> m_SpacePointsPixelKey{this, "SpacePointsPixelName", "PixelSpacePoints"};
     SG::ReadHandleKey<Trk::PRDtoTrackMap> m_prdToTrackMap{this,"PRDtoTrackMap",""};
     SG::ReadHandleKey<ROIPhiRZContainer> m_caloClusterROIKey{this, "EMROIPhiRZContainer", "InDetCaloClusterROIPhiRZ15GeVUnordered", "Name of the calo cluster ROIs in Phi,R,Z parameterization"};
-
+    SG::ReadHandleKey<xAOD::VertexContainer> m_vertices{this, "Vertices", "PrimaryVertices"};
+    
     SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey{this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot"};
 
     SG::ReadDecorHandleKey<xAOD::EventInfo> m_mbtsKey{this, "MBTSKey", "EventInfo.MBTSBackground"};
