@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # @author Nils Krumnack
 
@@ -105,9 +105,6 @@ else:
                      DataType.FullSim: 'ASG_TEST_FILE_MC',
                      DataType.FastSim: 'ASG_TEST_FILE_MC_FASTSIM'}
 
-# No R24 FastSim recommendations for EGamma yet
-forceEGammaFullSimConfig = True
-
 # Set up the sample handler object. See comments from the C++ macro
 # for the details about these lines.
 import os
@@ -151,8 +148,7 @@ from AnalysisAlgorithmsConfig.FullCPAlgorithmsTest import makeSequence, printSeq
 algSeq = makeSequence (dataType, yamlPath=textConfig,
                        noSystematics = options.no_systematics,
                        isPhyslite=options.physlite,
-                       autoconfigFromFlags=flags, onlyNominalOR=options.onlyNominalOR,
-                       forceEGammaFullSimConfig=forceEGammaFullSimConfig)
+                       autoconfigFromFlags=flags, onlyNominalOR=options.onlyNominalOR)
 
 if options.seq_out_filename:
     from AnalysisAlgorithmsConfig.SaveConfigUtils import save_algs_from_sequence_ELjob

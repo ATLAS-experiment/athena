@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # @author Joseph Lambert
 
@@ -109,7 +109,6 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     # Electrons
     config.addBlock ('Electrons')
     config.setOptions (containerName='AnaElectrons')
-    config.setOptions (forceFullSimConfigForIso=True)
     config.setOptions (recalibratePhyslite=False)
     config.setOptions (decorateTruth=True)
     config.setOptions (decorateCaloClusterEta=True)
@@ -119,7 +118,6 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.addBlock ('Electrons.WorkingPoint')
     config.setOptions (containerName='AnaElectrons')
     config.setOptions (selectionName='loose')
-    config.setOptions (forceFullSimConfig=True)
     config.setOptions (identificationWP='LooseBLayerLH')
     config.setOptions (isolationWP='Tight_VarRad')
     config.setOptions (chargeIDSelectionRun2=True)
@@ -151,7 +149,6 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
 
     # Photons
     config.addBlock ('Photons', containerName='AnaPhotons')
-    config.setOptions (forceFullSimConfigForIso=True)
     config.setOptions (recomputeIsEM=False)
     config.setOptions (recalibratePhyslite=False)
     config.setOptions (decorateTruth=True)
@@ -159,8 +156,6 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.addBlock ('Photons.WorkingPoint')
     config.setOptions (containerName='AnaPhotons')
     config.setOptions (selectionName='tight')
-    config.setOptions (forceFullSimConfigForID=True)
-    config.setOptions (forceFullSimConfigForIso=True)
     config.setOptions (qualityWP='Tight')
     config.setOptions (isolationWP='FixedCutTight')
     config.setOptions (recomputeIsEM=False)
@@ -517,7 +512,7 @@ def compareBlockConfig(yamlPath='', *, checkOrder=False) :
     from AnalysisAlgorithmsConfig.FullCPAlgorithmsTest import makeTestSequenceBlocks
     configSeq = makeTestSequenceBlocks(dataType='fullsim', algSeq=None,
             geometry=LHCPeriod.Run2,
-            isPhyslite=False, forceEGammaFullSimConfig=True,
+            isPhyslite=False,
             returnConfigSeq=True)
 
     # create text config object to build text configurations
