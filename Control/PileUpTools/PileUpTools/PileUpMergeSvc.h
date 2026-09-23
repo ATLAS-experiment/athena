@@ -114,6 +114,10 @@ public:
   const xAOD::EventInfo* getPileUpEvent( StoreGateSvc* sg,
                                          const std::string& einame );
 
+  /// get EventInfo from SG given by ctx
+  const xAOD::EventInfo* getPileUpEvent( const EventContext& ctx,
+                                         const std::string& einame );
+
 private:
   ServiceHandle<StoreGateSvc> p_overStore;      ///< overlaid SG (default)
   ToolHandleArray<IPileUpXingFolder> m_intervals{this, "Intervals", {},
