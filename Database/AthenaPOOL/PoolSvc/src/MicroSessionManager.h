@@ -54,8 +54,6 @@ namespace pool {
     /// Return StorageSvc 
     IStorageSvc& getStorageSvc( ) { return *m_storageSvc; }
 
-
-  protected:
     virtual
     bool attributeOfType( const std::string& attributeName,
                           void* data,
