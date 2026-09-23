@@ -187,6 +187,7 @@ namespace FSR {
 
 
         static const SG::AuxElement::Accessor<char>  DFCommonPhotonsIsEMTight ("DFCommonPhotonsIsEMTight");
+        static const SG::AuxElement::Accessor<char>  DFCommonPhotonsCleaning  ("DFCommonPhotonsCleaning");
         static const SG::AuxElement::Accessor<float> topoetcone20             ("topoetcone20");
 
         /// Set FSR type to far
@@ -203,7 +204,8 @@ namespace FSR {
     
         for (auto ph : *photons_cont) {
 
-            bool oqIsOK = (bool) m_phIsGoodOQSelectionTool->accept(ph);
+            // apply both object quality and photon cleaning
+            bool oqIsOK = (bool) m_phIsGoodOQSelectionTool->accept(ph) && DFCommonPhotonsCleaning(*ph);
                 
             bool is_tight_photon = DFCommonPhotonsIsEMTight(*ph);
             if ( oqIsOK && (ph->p4().Et() > m_far_fsr_etcut) && is_tight_photon) {
@@ -247,6 +249,9 @@ namespace FSR {
     std::vector<FsrCandidate>* FsrPhotonTool::getNearFsrCandidateList(const xAOD::Muon* muon, 
                                                                       const xAOD::PhotonContainer* photons_cont, 
                                                                       const xAOD::ElectronContainer* electrons_cont) {
+
+        static const SG::AuxElement::Accessor<char>  DFCommonPhotonsCleaning  ("DFCommonPhotonsCleaning");
+
         /// Set FSR type to far
         m_fsr_type = FsrCandidate::FsrType::FsrNear;
         /// Start looking for collinar FSR for muons
@@ -261,7 +266,7 @@ namespace FSR {
             float photon_f1;
             photon->showerShapeValue(photon_f1, xAOD::EgammaParameters::f1);
 
-            bool oqIsOK = (bool) m_phIsGoodOQSelectionTool->accept(photon);
+            bool oqIsOK = (bool) m_phIsGoodOQSelectionTool->accept(photon) && DFCommonPhotonsCleaning(*photon);
 
             // Selection is tighter for photons below high_et_min
             bool high_et_photon = (photon->p4().Et() > m_high_et_min);
