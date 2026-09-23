@@ -13,6 +13,7 @@ atlas_add_library( InDetIdentifier
                    src/SCT_ID.cxx
                    src/TRT_ID.cxx
                    src/PLR_ID.cxx
+                   src/BCMPrime_ID.cxx
                    src/SiliconID.cxx
                    PUBLIC_HEADERS InDetIdentifier
                    LINK_LIBRARIES AthenaKernel AtlasDetDescr IdDict Identifier AthenaKernel

@@ -10,10 +10,39 @@
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/GenParticle.h"
+#include "BCMPrimeReadoutGeometry/BCMPrimeDetectorManager.h"
+#include "GeoPrimitives/CLHEPtoEigenConverter.h"
+#include "InDetIdentifier/BCMPrime_ID.h"
+#include "InDetReadoutGeometry/SiDetectorElement.h"
 
 #include "TH1.h"
 #include "TH2.h"
 #include "TTree.h"
+
+namespace {
+int bcmPrimeOfflineEndcap(int hitBarrelEndcap)
+{
+  return (hitBarrelEndcap == 0) ? 4 : -4;
+}
+
+HepGeom::Point3D<double> bcmPrimeGlobalPosition(const SiHit& hit,
+                                                  const BCMPrime_ID* idHelper,
+                                                  const InDetDD::BCMPrimeDetectorManager* mgr)
+{
+  if (!idHelper || !mgr) {
+    return HepGeom::Point3D<double>(0., 0., 0.);
+  }
+  const Identifier id = idHelper->wafer_id(bcmPrimeOfflineEndcap(hit.getBarrelEndcap()),
+                                           hit.getLayerDisk(),
+                                           hit.getPhiModule(),
+                                           hit.getEtaModule());
+  const InDetDD::SiDetectorElement* elem = mgr->getDetectorElement(id);
+  if (!elem) {
+    return HepGeom::Point3D<double>(0., 0., 0.);
+  }
+  return Amg::EigenTransformToCLHEP(elem->transformHit()) * hit.localStartPosition();
+}
+} // namespace
 
 
 StatusCode SiHitAnalysis::initialize()
@@ -34,6 +63,10 @@ StatusCode SiHitAnalysis::initialize()
   else if (m_hitsContainerKey.key()=="PLR_Hits") {
     detName = "PLR";
     ntupName = "SiPLR";
+  }
+  else if (m_hitsContainerKey.key()=="BCMPrimeHits") {
+    detName = "BCMPrime";
+    ntupName = "SiBCMPrime";
   }
   else if (m_hitsContainerKey.key()=="SCT_Hits") {
     detName = "SCT";
@@ -58,6 +91,12 @@ StatusCode SiHitAnalysis::initialize()
   else {
     ATH_MSG_ERROR("SiHitsAnalysis for " << m_hitsContainerKey.key() << " not supported!!!");
     return StatusCode::FAILURE;
+  }
+
+  if (detName == "BCMPrime") {
+    m_isBCMPrime = true;
+    ATH_CHECK(detStore()->retrieve(m_bcmPrimeId, "BCMPrime_ID"));
+    ATH_CHECK(detStore()->retrieve(m_bcmPrimeMgr, "BCMPrime"));
   }
 
   /** Histograms**/
@@ -95,6 +134,12 @@ StatusCode SiHitAnalysis::initialize()
     radius_up = 125;
     radius_down = 0;
     z_max = 3000;
+  } else if (detName == "BCMPrime") {
+    bin_down = -250;
+    bin_up = 250;
+    radius_up = 250;
+    radius_down = 0;
+    z_max = 2500;
   }
   m_h_hits_x = new TH1D(("h_"+detName+"_x").c_str(),("h_"+detName+"_x").c_str(), 100,bin_down, bin_up);
   m_h_hits_x->StatOverflows();
@@ -254,8 +299,9 @@ StatusCode SiHitAnalysis::execute(const EventContext& ctx)
   ATH_CHECK(SG::get(hitCollection, m_hitsContainerKey, ctx));
   ATH_MSG_INFO("Event contains " << hitCollection->size() << " entries in " << m_hitsContainerKey.key());
     for (const SiHit &hit : *hitCollection) {
-      GeoSiHit ghit(hit);
-      HepGeom::Point3D<double> p = ghit.getGlobalPosition();
+      HepGeom::Point3D<double> p = m_isBCMPrime
+        ? bcmPrimeGlobalPosition(hit, m_bcmPrimeId, m_bcmPrimeMgr)
+        : GeoSiHit(hit).getGlobalPosition();
       m_h_hits_x->Fill(p.x());
       m_h_hits_y->Fill(p.y());
       m_h_hits_z->Fill(p.z());

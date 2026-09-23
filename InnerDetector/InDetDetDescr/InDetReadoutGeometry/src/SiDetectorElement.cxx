@@ -105,10 +105,10 @@ namespace InDetDD {
           const SCT_ID* sctIdHelper = static_cast<const SCT_ID*>(pAtlasHelper);
           id = sctIdHelper->strip_id(m_id, cellId.strip());
         }
-      }  else if (isPLR()) {
-        if (pAtlasHelper->helper() ==  AtlasDetectorID::HelperType::PLR) {
-          const PLR_ID* plrIdHelper = static_cast<const PLR_ID*>(pAtlasHelper);
-          id = plrIdHelper->pixel_id(m_id, cellId.phiIndex(), cellId.etaIndex());
+      } else if (isPLR()) {
+        if (pAtlasHelper->helper() == AtlasDetectorID::HelperType::PLR) {
+          const PixelID* pixelLikeIdHelper = static_cast<const PixelID*>(pAtlasHelper);
+          id = pixelLikeIdHelper->pixel_id(m_id, cellId.phiIndex(), cellId.etaIndex());
         }
       }
     }
@@ -145,8 +145,8 @@ namespace InDetDD {
         }
 
       } else if (isPLR() and pAtlasHelper->helper() == AtlasDetectorID::HelperType::PLR) {
-        const PLR_ID* plrIdHelper = static_cast<const PLR_ID*>(pAtlasHelper);
-        cellId = SiCellId(plrIdHelper->phi_index(identifier), plrIdHelper->eta_index(identifier));
+        const PixelID* pixelLikeIdHelper = static_cast<const PixelID*>(pAtlasHelper);
+        cellId = SiCellId(pixelLikeIdHelper->phi_index(identifier), pixelLikeIdHelper->eta_index(identifier));
       }
     }
 
@@ -379,10 +379,10 @@ namespace InDetDD {
         m_idHash = sctId->wafer_hash(m_id);
       }
     } else if (isPLR() and getIdHelper()->helper() == AtlasDetectorID::HelperType::PLR) {
-      const PLR_ID* plrId = static_cast<const PLR_ID*>(getIdHelper());
-      if (plrId) {
-        m_isBarrel = plrId->is_barrel(m_id);
-        m_idHash = plrId->wafer_hash(m_id);
+      const PixelID* pixelLikeId = static_cast<const PixelID*>(getIdHelper());
+      if (pixelLikeId) {
+        m_isBarrel = pixelLikeId->is_barrel(m_id);
+        m_idHash = pixelLikeId->wafer_hash(m_id);
       }
     }
 

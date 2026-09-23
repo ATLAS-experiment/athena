@@ -10,6 +10,6 @@ atlas_add_library( BCMPrimeReadoutGeometry
   src/*.cxx
   PUBLIC_HEADERS BCMPrimeReadoutGeometry
   INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
-  LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaKernel GeoPrimitives
-  PRIVATE_LINK_LIBRARIES AthenaBaseComps AthenaPoolUtilities )
+  LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaKernel GeoPrimitives InDetIdentifier InDetReadoutGeometry TrkDetElementBase TrkSurfaces ReadoutGeometryBase
+  PRIVATE_LINK_LIBRARIES AthenaBaseComps AthenaPoolUtilities Identifier StoreGateLib )
 

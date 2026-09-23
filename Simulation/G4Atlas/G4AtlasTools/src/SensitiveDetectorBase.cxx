@@ -7,11 +7,185 @@
 // Base class
 #include "G4AtlasTools/SensitiveDetectorBase.h"
 // Geant4 includes used in functions
+#include "G4Box.hh"
+#include "G4Event.hh"
+#include "G4EventManager.hh"
 #include "G4LogicalVolumeStore.hh"
 #include "G4MultiSensitiveDetector.hh"
+#include "G4Navigator.hh"
+#include "G4RotationMatrix.hh"
+#include "G4RunManager.hh"
 #include "G4SDManager.hh"
+#include "G4Step.hh"
+#include "G4StepPoint.hh"
+#include "G4ThreeVector.hh"
+#include "G4Track.hh"
+#include "G4TransportationManager.hh"
+#include "G4UserSteppingAction.hh"
+#include "G4VPhysicalVolume.hh"
+#include "G4ios.hh"
 // STL includes
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <limits>
+#include <mutex>
 #include <sstream>
+#include <string>
+#include <unordered_set>
+#include <vector>
+
+namespace {
+
+bool isBCMPrimePadLV(const G4String& name)
+{
+  return name == "BCMPrime::BCMpBigDiamondPad" ||
+         name == "BCMPrime::BCMpSmallDiamondPad";
+}
+
+bool inBCMPrimeSteppingRegion(const G4ThreeVector& pos)
+{
+  return std::abs(pos.z()) > 1700. && pos.perp() < 150.;
+}
+
+class BCMPrimeSteppingChainer : public G4UserSteppingAction
+{
+public:
+  explicit BCMPrimeSteppingChainer(const G4UserSteppingAction* existingAction)
+    : m_existingAction(existingAction)
+    , m_diagnostic()
+  {}
+
+  void UserSteppingAction(const G4Step* step) override
+  {
+    m_diagnostic.UserSteppingAction(step);
+    if (m_existingAction) {
+      // G4 returns a const pointer even though UserSteppingAction is non-const.
+      const_cast<G4UserSteppingAction*>(m_existingAction)->UserSteppingAction(step);
+    }
+  }
+
+private:
+  const G4UserSteppingAction* m_existingAction{nullptr};
+};
+
+void printBCMPrimePlacement(const G4VPhysicalVolume* physVol,
+                            const G4RotationMatrix& worldRot,
+                            const G4ThreeVector& worldTrans,
+                            const std::string& path)
+{
+  const auto* logicalVol = physVol->GetLogicalVolume();
+  const auto* box = dynamic_cast<const G4Box*>(logicalVol->GetSolid());
+
+  G4cout << "BCMPrimeSensorSD diagnostic: G4 placement '" << path
+         << "' LV='" << logicalVol->GetName()
+         << "' PV='" << physVol->GetName()
+         << "' copyNo=" << physVol->GetCopyNo()
+         << " center(mm)=(" << worldTrans.x() << ", "
+         << worldTrans.y() << ", " << worldTrans.z() << ")"
+         << " r(mm)=" << worldTrans.perp()
+         << " phi=" << worldTrans.phi()
+         << " eta=" << (worldTrans.perp() > 0. ? std::asinh(worldTrans.z() / worldTrans.perp()) : 0.)
+         << G4endl;
+
+  if (!box) {
+    G4cout << "BCMPrimeSensorSD diagnostic:   solid is not G4Box, skipping AABB dump"
+           << G4endl;
+    return;
+  }
+
+  const double hx = box->GetXHalfLength();
+  const double hy = box->GetYHalfLength();
+  const double hz = box->GetZHalfLength();
+  const std::array<G4ThreeVector, 8> corners = {{
+    {-hx, -hy, -hz}, {-hx, -hy, hz}, {-hx, hy, -hz}, {-hx, hy, hz},
+    { hx, -hy, -hz}, { hx, -hy, hz}, { hx, hy, -hz}, { hx, hy, hz}
+  }};
+
+  G4ThreeVector minCorner(std::numeric_limits<double>::max(),
+                          std::numeric_limits<double>::max(),
+                          std::numeric_limits<double>::max());
+  G4ThreeVector maxCorner(-std::numeric_limits<double>::max(),
+                          -std::numeric_limits<double>::max(),
+                          -std::numeric_limits<double>::max());
+
+  for (const G4ThreeVector& corner : corners) {
+    const G4ThreeVector worldCorner = worldRot * corner + worldTrans;
+    minCorner.setX(std::min(minCorner.x(), worldCorner.x()));
+    minCorner.setY(std::min(minCorner.y(), worldCorner.y()));
+    minCorner.setZ(std::min(minCorner.z(), worldCorner.z()));
+    maxCorner.setX(std::max(maxCorner.x(), worldCorner.x()));
+    maxCorner.setY(std::max(maxCorner.y(), worldCorner.y()));
+    maxCorner.setZ(std::max(maxCorner.z(), worldCorner.z()));
+  }
+
+  G4cout << "BCMPrimeSensorSD diagnostic:   global AABB min(mm)=("
+         << minCorner.x() << ", " << minCorner.y() << ", " << minCorner.z()
+         << ") max(mm)=(" << maxCorner.x() << ", " << maxCorner.y() << ", "
+         << maxCorner.z() << ")" << G4endl;
+}
+
+void dumpBCMPrimePadPlacements(const G4VPhysicalVolume* physVol,
+                               const G4RotationMatrix& parentRot,
+                               const G4ThreeVector& parentTrans,
+                               const std::string& path,
+                               int& nFound)
+{
+  if (!physVol) {
+    return;
+  }
+
+  const G4RotationMatrix localRot = physVol->GetObjectRotationValue();
+  const G4ThreeVector localTrans = physVol->GetObjectTranslation();
+  const G4RotationMatrix worldRot = parentRot * localRot;
+  const G4ThreeVector worldTrans = parentRot * localTrans + parentTrans;
+
+  const auto* logicalVol = physVol->GetLogicalVolume();
+  const std::string currentPath = path + "/" + physVol->GetName();
+  if (logicalVol && isBCMPrimePadLV(logicalVol->GetName())) {
+    ++nFound;
+    printBCMPrimePlacement(physVol, worldRot, worldTrans, currentPath);
+  }
+
+  if (!logicalVol) {
+    return;
+  }
+
+  const int nDaughters = logicalVol->GetNoDaughters();
+  for (int i = 0; i < nDaughters; ++i) {
+    dumpBCMPrimePadPlacements(logicalVol->GetDaughter(i),
+                              worldRot,
+                              worldTrans,
+                              currentPath,
+                              nFound);
+  }
+}
+
+void dumpBCMPrimePadPlacements()
+{
+  static std::once_flag dumped;
+  std::call_once(dumped, [] {
+
+    const auto* world =
+      G4TransportationManager::GetTransportationManager()->GetNavigatorForTracking()->GetWorldVolume();
+    if (!world) {
+      G4cout << "BCMPrimeSensorSD diagnostic: no G4 world volume available for placement dump"
+             << G4endl;
+      return;
+    }
+
+    int nFound = 0;
+    dumpBCMPrimePadPlacements(world,
+                              G4RotationMatrix(),
+                              G4ThreeVector(),
+                              "",
+                              nFound);
+    G4cout << "BCMPrimeSensorSD diagnostic: dumped " << nFound
+           << " BCMPrime pad physical placements from G4 tree" << G4endl;
+  });
+}
+
+} // namespace
 
 
 SensitiveDetectorBase::SensitiveDetectorBase(const std::string& type,
@@ -70,11 +244,22 @@ assignSD(std::unique_ptr<G4VSensitiveDetector> sd, const std::vector<std::string
 
   if(!volumes.empty()) {
     bool gotOne = false;
+    const bool diagnoseBCMPrime =
+      name().find("BCMPrime") != std::string::npos ||
+      sdName.find("BCMPrime") != std::string::npos ||
+      std::find(m_outputCollectionNames.value().begin(),
+                m_outputCollectionNames.value().end(),
+                "BCMPrimeHits") != m_outputCollectionNames.value().end() ||
+      std::find(m_outputCollectionNames.value().begin(),
+                m_outputCollectionNames.value().end(),
+                "BCMPrimeHits_G4") != m_outputCollectionNames.value().end();
     auto logicalVolumeStore = G4LogicalVolumeStore::GetInstance();
+    
     for(const auto& volumeName : volumes) {
       // Keep track of how many volumes we find with this name string.
       // We allow for multiple matches.
       int numFound = 0;
+      std::vector<std::string> matchedVolumes;
 
       // Find volumes with this name
       for(auto* logVol : *logicalVolumeStore) {
@@ -82,6 +267,9 @@ assignSD(std::unique_ptr<G4VSensitiveDetector> sd, const std::vector<std::string
         ATH_MSG_VERBOSE("Check whether "<<logVol->GetName()<<" belongs to the set of sensitive detectors "<<volumeName);
         if( matchStrings( volumeName.data(), logVol->GetName() ) ){
           ++numFound;
+          if (diagnoseBCMPrime) {
+            matchedVolumes.push_back(logVol->GetName());
+          }
           SetSensitiveDetector(logVol, sdPtr);
         }
         
@@ -95,6 +283,13 @@ assignSD(std::unique_ptr<G4VSensitiveDetector> sd, const std::vector<std::string
         ATH_MSG_VERBOSE("Found " << numFound << " copies of LV " << volumeName <<
                         "; SD " << sdName << " assigned.");
         gotOne = true;
+      }
+      if (diagnoseBCMPrime) {
+        ATH_MSG_INFO("BCMPrimeSensorSD diagnostic: pattern '" << volumeName
+                     << "' matched " << numFound << " G4 logical volumes");
+        for (const std::string& matchedVolume : matchedVolumes) {
+          ATH_MSG_INFO("BCMPrimeSensorSD diagnostic: matched LV '" << matchedVolume << "'");
+        }
       }
 
     }

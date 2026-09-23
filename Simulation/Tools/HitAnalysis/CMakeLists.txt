@@ -16,7 +16,7 @@ atlas_add_component( HitAnalysis
                                     CaloIdentifier CaloSimEvent AthenaBaseComps GeoAdaptors AFP_SimEv ALFA_SimEv LUCID_SimEvent 
                                     ZDC_SimEvent ZdcIdentifier GeneratorObjects InDetSimEvent LArSimEvent MuonSimEvent 
                                     TileDetDescr TileSimEvent TrackRecordLib TRT_ReadoutGeometry xAODMuonSimHit
-                                    MuonReadoutGeometryR4 xAODMuonViews)
+                                    MuonReadoutGeometryR4 xAODMuonViews BCMPrimeReadoutGeometry InDetIdentifier GeoPrimitives)
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

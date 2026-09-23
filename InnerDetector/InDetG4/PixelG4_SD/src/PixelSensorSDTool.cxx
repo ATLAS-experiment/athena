@@ -44,6 +44,15 @@ G4VSensitiveDetector* PixelSensorSDTool::makeSD() const
 {
   // Make sure the job has been set up properly
   ATH_MSG_DEBUG( "Initializing SD" );
+  const bool diagnoseBCMPrime = !m_outputCollectionNames.empty() &&
+                                (m_outputCollectionNames[0] == "BCMPrimeHits" ||
+                                 m_outputCollectionNames[0] == "BCMPrimeHits_G4");
+  if (diagnoseBCMPrime) {
+    ATH_MSG_DEBUG("BCMPrimeSensorSD diagnostic: PixelSensorSDTool::makeSD for tool '" << name()
+                 << "', GmxSensor=" << (m_gmxSensor.value() ? "true" : "false")
+                 << ", outputCollection=" << m_outputCollectionNames[0]
+                 << ", LogicalVolumeNames=" << m_volumeNames.value());
+  }
   GeoModelIO::ReadGeoModel* sqlreader = nullptr;
   StatusCode sc = m_geoDbTagSvc.retrieve();
   if (sc.isFailure()) {
@@ -56,8 +65,15 @@ G4VSensitiveDetector* PixelSensorSDTool::makeSD() const
 
   // Create a fresh SD
   if (!m_gmxSensor){
+    if (diagnoseBCMPrime) {
+      ATH_MSG_DEBUG("BCMPrimeSensorSD diagnostic: creating PixelSensorSD");
+    }
     return new PixelSensorSD(name(), m_outputCollectionNames[0]);
   } else {
+    if (diagnoseBCMPrime) {
+      ATH_MSG_DEBUG("BCMPrimeSensorSD diagnostic: creating PixelSensorGmxSD, sqlreader="
+                   << (sqlreader ? "set" : "null"));
+    }
     return new PixelSensorGmxSD(name(), m_outputCollectionNames[0],sqlreader);
   }
 }

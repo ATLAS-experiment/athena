@@ -6,10 +6,13 @@
 #define BCMPRIMEGEOMODELXML_BCMPRIMEDETECTORTOOL_H
 
 #include <InDetGeoModelUtils/GeoModelXmlTool.h>
+#include <ReadoutGeometryBase/SiCommonItems.h>
+#include <memory>
 
 namespace InDetDD
 {
   class BCMPrimeDetectorManager;
+  class SiCommonItems;
 }
 
 /** @class BCMPrimeDetectorTool
@@ -30,6 +33,11 @@ public:
 
 private:
   const InDetDD::BCMPrimeDetectorManager *m_detManager{};
+  std::unique_ptr<InDetDD::SiCommonItems> m_commonItems{};
+
+  // Attach BCMPrime inside the ITkPixel envelope when pixel is built
+  Gaudi::Property<std::string> m_containingDetectorName{this, "ContainingDetector", "", "Containing detector name"};
+  Gaudi::Property<std::string> m_envelopeVolumeName{this, "EnvelopeVolume", "ITkPixelDetector", "Envelope volume name"};
 };
 
 #endif // BCMPRIMEGEOMODELXML_BCMPRIMEDETECTORTOOL_H

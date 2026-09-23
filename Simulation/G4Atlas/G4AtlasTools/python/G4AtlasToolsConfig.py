@@ -268,6 +268,9 @@ def ITkSensitiveDetectorListCfg(flags):
     if flags.Detector.EnablePLR:
         from PixelG4_SD.PixelG4_SDToolConfig import PLRSensorSDCfg
         tools += [ result.popToolsAndMerge(PLRSensorSDCfg(flags)) ]
+    if flags.Detector.EnableBCMPrime:
+        from PixelG4_SD.PixelG4_SDToolConfig import BCMPrimeSensorSDCfg
+        tools += [ result.popToolsAndMerge(BCMPrimeSensorSDCfg(flags)) ]
     
     result.setPrivateTools(tools)
     return result
@@ -448,6 +451,11 @@ def SimHitContainerListCfg(flags):
             writtenContainers += [("SiHitCollection", "PLR_Hits_G4")]
         else:
             writtenContainers += [("SiHitCollection", "PLR_Hits")]
+    if flags.Detector.EnableBCMPrime:
+        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('ITk', True)):
+            writtenContainers += [("SiHitCollection", "BCMPrimeHits_G4")]
+        else:
+            writtenContainers += [("SiHitCollection", "BCMPrimeHits")]
     if flags.Detector.EnableHGTD:
         if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('ITk', True)):
             writtenContainers += [("SiHitCollection", "HGTDHits_G4")]

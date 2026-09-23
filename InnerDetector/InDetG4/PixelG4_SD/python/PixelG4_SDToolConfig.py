@@ -94,3 +94,29 @@ def PLRSensorSDCfg(ConfigFlags, name="PLRSensorSD", **kwargs):
     result.merge(acc)
     result.setPrivateTools(CompFactory.PixelSensorSDTool(name, **kwargs))
     return result
+
+
+def BCMPrimeSensorSDCfg(ConfigFlags, name="BCMPrimeSensorSD", **kwargs):
+    bare_collection_name = "BCMPrimeHits"
+    mergeable_collection_suffix = "_G4"
+    merger_input_property = "BCMPrimeHits"
+    region = "ITk"
+
+    acc, hits_collection_name = CollectionMergerCfg(ConfigFlags,
+                                                    bare_collection_name,
+                                                    mergeable_collection_suffix,
+                                                    merger_input_property,
+                                                    region)
+    kwargs.setdefault("GmxSensor", True)
+    if ConfigFlags.Detector.GeometryITkPixel:
+        kwargs.setdefault("LogicalVolumeNames", ["ITkPixel::*BCMpBigDiamondPad*",
+                                                 "ITkPixel::*BCMpSmallDiamondPad*"])
+    else:
+        kwargs.setdefault("LogicalVolumeNames", ["*BCMpBigDiamondPad*",
+                                                 "*BCMpSmallDiamondPad*"])
+    kwargs.setdefault("OutputCollectionNames", [hits_collection_name])
+
+    result = ComponentAccumulator()
+    result.merge(acc)
+    result.setPrivateTools(CompFactory.PixelSensorSDTool(name, **kwargs))
+    return result

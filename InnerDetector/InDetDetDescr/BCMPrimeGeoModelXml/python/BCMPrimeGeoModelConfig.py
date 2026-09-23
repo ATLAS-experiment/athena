@@ -10,8 +10,11 @@ def BCMPrimeGeometryCfg(flags):
 
     bcmPrimeDetectorTool = CompFactory.BCMPrimeDetectorTool()
     bcmPrimeDetectorTool.DetectorName = "BCMPrime"
+    if flags.Detector.GeometryITkPixel:
+        # If pixel is present, BCMPrime is placed inside it
+        bcmPrimeDetectorTool.ContainingDetector = "ITkPixel"
     if flags.ITk.Geometry.BCMPrimeLocal:
-      # Setting this filename triggers reading from local file rather than DB
+        # Setting this filename triggers reading from local file rather than DB
       bcmPrimeDetectorTool.GmxFilename = flags.ITk.Geometry.BCMPrimeFilename
     if flags.ITk.Geometry.BCMPrimeClobOutputName:
         bcmPrimeDetectorTool.ClobOutputName = flags.ITk.Geometry.BCMPrimeClobOutputName
