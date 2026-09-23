@@ -15,11 +15,11 @@
 #include "xAODMuonSimHit/MuonSimHitContainer.h"
 #include "xAODMuon/MuonSegmentContainer.h"
 
-#include <MuonPatternEvent/MuonPatternContainer.h>
-#include <MuonReadoutGeometryR4/MuonDetectorManager.h>
+#include "MuonPatternEvent/MuonPatternContainer.h"
+#include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 
 // muon includes
-#include <MuonRecToolInterfacesR4/IPatternVisualizationTool.h>
+#include "MuonRecToolInterfacesR4/IPatternVisualizationTool.h"
 
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonTesterTree/ThreeVectorBranch.h"
@@ -119,7 +119,7 @@ namespace MuonValR4{
     Gaudi::Property<bool> m_writeSpacePoints{this, "writeSpacePoints", false,
                                              "Toggle whether the particular space poitns shall be written"};
     
-  /// ====== Common block: Filled for all entries =========== 
+    /// ====== Common block: Filled for all entries =========== 
 
     /// chamber index field 
     MuonVal::ScalarBranch<int>& m_out_chamberIndex{m_tree.newScalar<int>("chamberIndex")};
@@ -163,17 +163,24 @@ namespace MuonValR4{
     MuonVal::ScalarBranch<float>& m_out_gen_Phi{m_tree.newScalar<float>("gen_phi",-10.)};
     MuonVal::ScalarBranch<float>& m_out_gen_Pt{m_tree.newScalar<float>("gen_pt",-10.)};    
     MuonVal::ScalarBranch<short>& m_out_gen_Q{m_tree.newScalar<short>("gen_q", 0)};
+    MuonVal::ScalarBranch<float>& m_out_gen_truthBeta{m_tree.newScalar<float>("gen_beta", -1)};
+   
     /** @brief Truth - segment parameters  */
     MuonVal::ScalarBranch<float>& m_out_gen_y0{m_tree.newScalar<float>("gen_y0", 0.0)}; 
     MuonVal::ScalarBranch<float>& m_out_gen_tanbeta{m_tree.newScalar<float>("gen_tanBeta", 0.0)}; 
     MuonVal::ScalarBranch<float>& m_out_gen_tanalpha{m_tree.newScalar<float>("gen_tanAlpha", 0.0)}; 
     MuonVal::ScalarBranch<float>& m_out_gen_x0{m_tree.newScalar<float>("gen_x0", 0.0)}; 
     MuonVal::ScalarBranch<float>& m_out_gen_time{m_tree.newScalar<float>("gen_time", 0.0)};
-
+    /** @brief MC truth calssifier definition */
     MuonVal::ScalarBranch<int>& m_out_gen_truthOrigin{m_tree.newScalar<int>("gen_origin", -1)};
     MuonVal::ScalarBranch<int>& m_out_gen_truthType{m_tree.newScalar<int>("gen_type", -1)};
-    MuonVal::ScalarBranch<float>& m_out_gen_truthBeta{m_tree.newScalar<float>("gen_beta", -1)};
     MuonVal::ScalarBranch<int>& m_out_gen_truthPdgId{m_tree.newScalar<int>("gen_pdgId", 0)};
+   
+    /** @brief Beamspot approach */
+    MuonVal::ScalarBranch<float>& m_out_gen_beamSpotR{m_tree.newScalar<float>("gen_beamSpotR", -1.f)};
+    MuonVal::ScalarBranch<float>& m_out_gen_beamSpotZ{m_tree.newScalar<float>("gen_beamSpotZ", -1.f)};
+    MuonVal::ScalarBranch<float>& m_out_gen_deflection{m_tree.newScalar<float>("gen_dThetaPosDir", -1.f)};
+    MuonVal::ScalarBranch<float>& m_out_gen_deflectionEta{m_tree.newScalar<float>("gen_dEtaPosDir", -3.f)};
     
     /** @brief Truth - hit count summary */
     MuonVal::ScalarBranch<unsigned short>& m_out_gen_nPrecHits{m_tree.newScalar<unsigned short>("gen_nPrecHits",0)};

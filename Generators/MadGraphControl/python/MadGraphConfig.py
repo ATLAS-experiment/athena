@@ -3,31 +3,11 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from GeneratorConfig.Sequences import EvgenSequence, EvgenSequenceFactory
 from GeneratorConfig.GeneratorInfoSvcConfig import GeneratorInfoSvcCfg
+from EvgenJobTransforms.EvgenHelpers import _get_nevents
 
 import os
 
 from MadGraphControl.MadGraphPDFSettings import MadGraphPDFSets, get_pdf_set
-
-
-def _get_nevents(flags, safety):
-    """Helper function to determing number of events to be generated
-    in MadGraph, based on MaxEvents or nEventsPerJob and a user-provided 
-    safety factor (the latter defaults to 1.1 to allow for failures 
-    in showering stage)."""
-    try:
-        sf = float(safety)
-    except (TypeError, ValueError) as exc:
-        raise RuntimeError(f"safety must be numeric, got {safety}.") from exc
-    if sf <= 0:
-        raise RuntimeError(f"safety must be > 0, got {safety}.")
-
-    base_events = (
-        flags.Exec.MaxEvents
-        if flags.Exec.MaxEvents > 0
-        else flags.Generator.nEventsPerJob
-    )
-
-    return int(base_events * sf)
 
 
 def _prepare_lhe_for_shower(produced_output, lhe_file):

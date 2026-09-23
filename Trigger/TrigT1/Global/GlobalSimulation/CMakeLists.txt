@@ -76,8 +76,8 @@ atlas_add_test( AllChains
 
 atlas_add_test( Object_test
 		SOURCES test/Object_test.cxx
-		INCLUDE_DIRS ${GMOCK_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS}
-		LINK_LIBRARIES ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} GlobalSimulationLib
+		INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
+		LINK_LIBRARIES ${GTEST_LIBRARIES} GlobalSimulationLib
 		POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( JsonConfig

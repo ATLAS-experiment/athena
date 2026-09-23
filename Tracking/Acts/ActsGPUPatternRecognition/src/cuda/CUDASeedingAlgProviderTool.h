@@ -42,6 +42,7 @@ class CUDASeedingAlgProviderTool
   virtual DeviceAlgorithmT<traccc::device::triplet_seeding_algorithm>
   getTripletSeedingAlgorithm(
       const EventContext& ctx, const traccc::seedfinder_config& seedfinder,
+      const traccc::spacepoint_grid_config& grid,
       const traccc::seedfilter_config& seedfilter) const override;
   /// Get the device specific GBTS seeding algorithm.
   virtual DeviceAlgorithmT<traccc::device::gbts_seeding_algorithm>

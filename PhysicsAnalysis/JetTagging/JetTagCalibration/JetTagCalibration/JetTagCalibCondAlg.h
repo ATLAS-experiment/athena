@@ -67,8 +67,6 @@ class JetTagCalibCondAlg : public AthCondAlgorithm {
   void smoothAndNormalizeHistogram(TH1* h, const std::string& hname) const;
   void smoothASH2D(TH2* input2D, int m1, int m2) const;
   void initializeIPTag();
-  void initializeIP2D();
-  void initializeIP3D();
   void initializeSVEff(const std::string&);
   void initializeSV1();
   void initializeSV2();
@@ -94,12 +92,9 @@ class JetTagCalibCondAlg : public AthCondAlgorithm {
   StringArrayProperty m_channelAliases;
   std::map< std::string, std::vector<std::string> >  m_channelAliasesMultiMap;
 
-  //for IPTag
+  //hypotheses shared by the IP and SV likelihoods
   bool m_IPTag_useCHypo;
   std::vector<std::string> m_IPTag_hypotheses; // hypotheses: b | u
-
-  //for IP2DTag
-  std::vector< std::string > m_IP2D_trackGradePartitions; //could be defined for each tagger
 
   //for SV1Tag
   bool  m_useDRJPVSV;

@@ -15,9 +15,6 @@ def JetTagCalibCfg(ConfigFlags):
     channelAliases = ConfigFlags.BTagging.calibrationChannelAliases
     scheme = ConfigFlags.BTagging.databaseScheme
 
-    #IP2D
-    grades= ConfigFlags.BTagging.Grades
-
     #RNNIP
     RNNIPConfig = {'rnnip':''}
 
@@ -43,6 +40,5 @@ def JetTagCalibCfg(ConfigFlags):
                                           HistosKey = f"JetTag{scheme}CalibHistosKey",
                                           taggers = TaggerList,
                                           channelAliases = channelAliases,
-                                          IP2D_TrackGradePartitions = grades,
                                           RNNIP_NetworkConfig = RNNIPConfig))
     return result

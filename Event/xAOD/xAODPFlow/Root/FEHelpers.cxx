@@ -28,7 +28,7 @@ namespace FEHelpers {
 
     float clusterEta = theFourVector.Eta();
 
-    const static SG::AuxElement::ConstAccessor<float> accCenterMag("CENTER_MAG");
+    const static SG::ConstAccessor<float> accCenterMag("CENTER_MAG");
     float centerMag = accCenterMag(fe);
 
     float radius = centerMag/cosh(clusterEta);
@@ -65,7 +65,7 @@ namespace FEHelpers {
     // Cluster or moment from it was unavailable, try to retrieve from the FE itself instead
     std::string momentName = getClusterMomentName(momentType);
     if(!momentName.empty()){
-      const SG::AuxElement::ConstAccessor<float> acc(momentName);
+      const SG::ConstAccessor<float> acc(momentName);
       if(acc.isAvailable(fe)){
         value = acc(fe);
         return true;
@@ -77,38 +77,38 @@ namespace FEHelpers {
 
   std::vector<float> getEnergiesPerSampling(const xAOD::FlowElement& fe){
 
-    const static SG::AuxElement::ConstAccessor< std::vector<float> > accEPerSampling("ePerSampling");
+    const static SG::ConstAccessor< std::vector<float> > accEPerSampling("ePerSampling");
     if(accEPerSampling.isAvailable(fe)) return accEPerSampling(fe);
 
     // This wasn't stored as a vector, try to retrieve the individual elements
-    const static SG::AuxElement::ConstAccessor<float> accPreSamplerB("LAYERENERGY_PreSamplerB");
-    const static SG::AuxElement::ConstAccessor<float> accEMB1("LAYERENERGY_EMB1");
-    const static SG::AuxElement::ConstAccessor<float> accEMB2("LAYERENERGY_EMB2");
-    const static SG::AuxElement::ConstAccessor<float> accEMB3("LAYERENERGY_EMB3");
-    const static SG::AuxElement::ConstAccessor<float> accPreSamplerE("LAYERENERGY_PreSamplerE");
-    const static SG::AuxElement::ConstAccessor<float> accEME1("LAYERENERGY_EME1");
-    const static SG::AuxElement::ConstAccessor<float> accEME2("LAYERENERGY_EME2");
-    const static SG::AuxElement::ConstAccessor<float> accEME3("LAYERENERGY_EME3");
-    const static SG::AuxElement::ConstAccessor<float> accHEC0("LAYERENERGY_HEC0");
-    const static SG::AuxElement::ConstAccessor<float> accHEC1("LAYERENERGY_HEC1");
-    const static SG::AuxElement::ConstAccessor<float> accHEC2("LAYERENERGY_HEC2");
-    const static SG::AuxElement::ConstAccessor<float> accHEC3("LAYERENERGY_HEC3");
-    const static SG::AuxElement::ConstAccessor<float> accTileBar0("LAYERENERGY_TileBar0");
-    const static SG::AuxElement::ConstAccessor<float> accTileBar1("LAYERENERGY_TileBar1");
-    const static SG::AuxElement::ConstAccessor<float> accTileBar2("LAYERENERGY_TileBar2");
-    const static SG::AuxElement::ConstAccessor<float> accTileGap1("LAYERENERGY_TileGap1");
-    const static SG::AuxElement::ConstAccessor<float> accTileGap2("LAYERENERGY_TileGap2");
-    const static SG::AuxElement::ConstAccessor<float> accTileGap3("LAYERENERGY_TileGap3");
-    const static SG::AuxElement::ConstAccessor<float> accTileExt0("LAYERENERGY_TileExt0");
-    const static SG::AuxElement::ConstAccessor<float> accTileExt1("LAYERENERGY_TileExt1");
-    const static SG::AuxElement::ConstAccessor<float> accTileExt2("LAYERENERGY_TileExt2");
-    const static SG::AuxElement::ConstAccessor<float> accFCAL0("LAYERENERGY_FCAL0");
-    const static SG::AuxElement::ConstAccessor<float> accFCAL1("LAYERENERGY_FCAL1");
-    const static SG::AuxElement::ConstAccessor<float> accFCAL2("LAYERENERGY_FCAL2");
-    const static SG::AuxElement::ConstAccessor<float> accMINIFCAL0("LAYERENERGY_MINIFCAL0");
-    const static SG::AuxElement::ConstAccessor<float> accMINIFCAL1("LAYERENERGY_MINIFCAL1");
-    const static SG::AuxElement::ConstAccessor<float> accMINIFCAL2("LAYERENERGY_MINIFCAL2");
-    const static SG::AuxElement::ConstAccessor<float> accMINIFCAL3("LAYERENERGY_MINIFCAL3");
+    const static SG::ConstAccessor<float> accPreSamplerB("LAYERENERGY_PreSamplerB");
+    const static SG::ConstAccessor<float> accEMB1("LAYERENERGY_EMB1");
+    const static SG::ConstAccessor<float> accEMB2("LAYERENERGY_EMB2");
+    const static SG::ConstAccessor<float> accEMB3("LAYERENERGY_EMB3");
+    const static SG::ConstAccessor<float> accPreSamplerE("LAYERENERGY_PreSamplerE");
+    const static SG::ConstAccessor<float> accEME1("LAYERENERGY_EME1");
+    const static SG::ConstAccessor<float> accEME2("LAYERENERGY_EME2");
+    const static SG::ConstAccessor<float> accEME3("LAYERENERGY_EME3");
+    const static SG::ConstAccessor<float> accHEC0("LAYERENERGY_HEC0");
+    const static SG::ConstAccessor<float> accHEC1("LAYERENERGY_HEC1");
+    const static SG::ConstAccessor<float> accHEC2("LAYERENERGY_HEC2");
+    const static SG::ConstAccessor<float> accHEC3("LAYERENERGY_HEC3");
+    const static SG::ConstAccessor<float> accTileBar0("LAYERENERGY_TileBar0");
+    const static SG::ConstAccessor<float> accTileBar1("LAYERENERGY_TileBar1");
+    const static SG::ConstAccessor<float> accTileBar2("LAYERENERGY_TileBar2");
+    const static SG::ConstAccessor<float> accTileGap1("LAYERENERGY_TileGap1");
+    const static SG::ConstAccessor<float> accTileGap2("LAYERENERGY_TileGap2");
+    const static SG::ConstAccessor<float> accTileGap3("LAYERENERGY_TileGap3");
+    const static SG::ConstAccessor<float> accTileExt0("LAYERENERGY_TileExt0");
+    const static SG::ConstAccessor<float> accTileExt1("LAYERENERGY_TileExt1");
+    const static SG::ConstAccessor<float> accTileExt2("LAYERENERGY_TileExt2");
+    const static SG::ConstAccessor<float> accFCAL0("LAYERENERGY_FCAL0");
+    const static SG::ConstAccessor<float> accFCAL1("LAYERENERGY_FCAL1");
+    const static SG::ConstAccessor<float> accFCAL2("LAYERENERGY_FCAL2");
+    const static SG::ConstAccessor<float> accMINIFCAL0("LAYERENERGY_MINIFCAL0");
+    const static SG::ConstAccessor<float> accMINIFCAL1("LAYERENERGY_MINIFCAL1");
+    const static SG::ConstAccessor<float> accMINIFCAL2("LAYERENERGY_MINIFCAL2");
+    const static SG::ConstAccessor<float> accMINIFCAL3("LAYERENERGY_MINIFCAL3");
 
     // Build the vector up from the individual samplings
     std::vector<float> result(28, 0); 
@@ -193,7 +193,7 @@ namespace FEHelpers {
   const xAOD::CaloCluster& theCluster,
   xAOD::FlowElement& theFE) {
 
-    const SG::AuxElement::Accessor< float > feAttribute(attributeName);
+    const SG::Accessor< float > feAttribute(attributeName);
     double moment = 0.0;      
     if (theCluster.retrieveMoment(momentType, moment)) {
       float float_moment = moment;
@@ -206,7 +206,7 @@ namespace FEHelpers {
     const std::string& attributeName,
     const xAOD::CaloCluster& theCluster,
     xAOD::FlowElement& theFE) {
-      const SG::AuxElement::Accessor< float > feAttribute(attributeName);
+      const SG::Accessor< float > feAttribute(attributeName);
       feAttribute(theFE) = theCluster.eSample(sampling);
     }
 
@@ -245,35 +245,35 @@ namespace FEHelpers {
 
   void FillNeutralFlowElements::addStandardSamplingEnergies(xAOD::FlowElement& theFE,const xAOD::CaloCluster& theCluster){
 
-   static const std::array< std::pair<xAOD::CaloCluster::CaloSample, const SG::AuxElement::Accessor<float>>, 28> samplingAttributePairs{{
-      {xAOD::CaloCluster::CaloSample::PreSamplerB,SG::AuxElement::Accessor<float>("LAYERENERGY_PreSamplerB")},
-      {xAOD::CaloCluster::CaloSample::EMB1,SG::AuxElement::Accessor<float>("LAYERENERGY_EMB1")},
-      {xAOD::CaloCluster::CaloSample::EMB2,SG::AuxElement::Accessor<float>("LAYERENERGY_EMB2")},
-      {xAOD::CaloCluster::CaloSample::EMB3,SG::AuxElement::Accessor<float>("LAYERENERGY_EMB3")},
-      {xAOD::CaloCluster::CaloSample::PreSamplerE,SG::AuxElement::Accessor<float>("LAYERENERGY_PreSamplerE")},
-      {xAOD::CaloCluster::CaloSample::EME1,SG::AuxElement::Accessor<float>("LAYERENERGY_EME1")},
-      {xAOD::CaloCluster::CaloSample::EME2,SG::AuxElement::Accessor<float>("LAYERENERGY_EME2")},
-      {xAOD::CaloCluster::CaloSample::EME3,SG::AuxElement::Accessor<float>("LAYERENERGY_EME3")},
-      {xAOD::CaloCluster::CaloSample::HEC0,SG::AuxElement::Accessor<float>("LAYERENERGY_HEC0")},
-      {xAOD::CaloCluster::CaloSample::HEC1,SG::AuxElement::Accessor<float>("LAYERENERGY_HEC1")},
-      {xAOD::CaloCluster::CaloSample::HEC2,SG::AuxElement::Accessor<float>("LAYERENERGY_HEC2")},
-      {xAOD::CaloCluster::CaloSample::HEC3,SG::AuxElement::Accessor<float>("LAYERENERGY_HEC3")},
-      {xAOD::CaloCluster::CaloSample::TileBar0,SG::AuxElement::Accessor<float>("LAYERENERGY_TileBar0")},
-      {xAOD::CaloCluster::CaloSample::TileBar1,SG::AuxElement::Accessor<float>("LAYERENERGY_TileBar1")},
-      {xAOD::CaloCluster::CaloSample::TileBar2,SG::AuxElement::Accessor<float>("LAYERENERGY_TileBar2")},
-      {xAOD::CaloCluster::CaloSample::TileGap1,SG::AuxElement::Accessor<float>("LAYERENERGY_TileGap1")},
-      {xAOD::CaloCluster::CaloSample::TileGap2,SG::AuxElement::Accessor<float>("LAYERENERGY_TileGap2")},
-      {xAOD::CaloCluster::CaloSample::TileGap3,SG::AuxElement::Accessor<float>("LAYERENERGY_TileGap3")},
-      {xAOD::CaloCluster::CaloSample::TileExt0,SG::AuxElement::Accessor<float>("LAYERENERGY_TileExt0")},
-      {xAOD::CaloCluster::CaloSample::TileExt1,SG::AuxElement::Accessor<float>("LAYERENERGY_TileExt1")},
-      {xAOD::CaloCluster::CaloSample::TileExt2,SG::AuxElement::Accessor<float>("LAYERENERGY_TileExt2")},
-      {xAOD::CaloCluster::CaloSample::FCAL0,SG::AuxElement::Accessor<float>("LAYERENERGY_FCAL0")},
-      {xAOD::CaloCluster::CaloSample::FCAL1,SG::AuxElement::Accessor<float>("LAYERENERGY_FCAL1")},
-      {xAOD::CaloCluster::CaloSample::FCAL2,SG::AuxElement::Accessor<float>("LAYERENERGY_FCAL2")},
-      {xAOD::CaloCluster::CaloSample::MINIFCAL0,SG::AuxElement::Accessor<float>("LAYERENERGY_MINIFCAL0")},
-      {xAOD::CaloCluster::CaloSample::MINIFCAL1,SG::AuxElement::Accessor<float>("LAYERENERGY_MINIFCAL1")},
-      {xAOD::CaloCluster::CaloSample::MINIFCAL2,SG::AuxElement::Accessor<float>("LAYERENERGY_MINIFCAL2")},
-      {xAOD::CaloCluster::CaloSample::MINIFCAL3,SG::AuxElement::Accessor<float>("LAYERENERGY_MINIFCAL3")},
+   static const std::array< std::pair<xAOD::CaloCluster::CaloSample, const SG::Accessor<float>>, 28> samplingAttributePairs{{
+      {xAOD::CaloCluster::CaloSample::PreSamplerB,SG::Accessor<float>("LAYERENERGY_PreSamplerB")},
+      {xAOD::CaloCluster::CaloSample::EMB1,SG::Accessor<float>("LAYERENERGY_EMB1")},
+      {xAOD::CaloCluster::CaloSample::EMB2,SG::Accessor<float>("LAYERENERGY_EMB2")},
+      {xAOD::CaloCluster::CaloSample::EMB3,SG::Accessor<float>("LAYERENERGY_EMB3")},
+      {xAOD::CaloCluster::CaloSample::PreSamplerE,SG::Accessor<float>("LAYERENERGY_PreSamplerE")},
+      {xAOD::CaloCluster::CaloSample::EME1,SG::Accessor<float>("LAYERENERGY_EME1")},
+      {xAOD::CaloCluster::CaloSample::EME2,SG::Accessor<float>("LAYERENERGY_EME2")},
+      {xAOD::CaloCluster::CaloSample::EME3,SG::Accessor<float>("LAYERENERGY_EME3")},
+      {xAOD::CaloCluster::CaloSample::HEC0,SG::Accessor<float>("LAYERENERGY_HEC0")},
+      {xAOD::CaloCluster::CaloSample::HEC1,SG::Accessor<float>("LAYERENERGY_HEC1")},
+      {xAOD::CaloCluster::CaloSample::HEC2,SG::Accessor<float>("LAYERENERGY_HEC2")},
+      {xAOD::CaloCluster::CaloSample::HEC3,SG::Accessor<float>("LAYERENERGY_HEC3")},
+      {xAOD::CaloCluster::CaloSample::TileBar0,SG::Accessor<float>("LAYERENERGY_TileBar0")},
+      {xAOD::CaloCluster::CaloSample::TileBar1,SG::Accessor<float>("LAYERENERGY_TileBar1")},
+      {xAOD::CaloCluster::CaloSample::TileBar2,SG::Accessor<float>("LAYERENERGY_TileBar2")},
+      {xAOD::CaloCluster::CaloSample::TileGap1,SG::Accessor<float>("LAYERENERGY_TileGap1")},
+      {xAOD::CaloCluster::CaloSample::TileGap2,SG::Accessor<float>("LAYERENERGY_TileGap2")},
+      {xAOD::CaloCluster::CaloSample::TileGap3,SG::Accessor<float>("LAYERENERGY_TileGap3")},
+      {xAOD::CaloCluster::CaloSample::TileExt0,SG::Accessor<float>("LAYERENERGY_TileExt0")},
+      {xAOD::CaloCluster::CaloSample::TileExt1,SG::Accessor<float>("LAYERENERGY_TileExt1")},
+      {xAOD::CaloCluster::CaloSample::TileExt2,SG::Accessor<float>("LAYERENERGY_TileExt2")},
+      {xAOD::CaloCluster::CaloSample::FCAL0,SG::Accessor<float>("LAYERENERGY_FCAL0")},
+      {xAOD::CaloCluster::CaloSample::FCAL1,SG::Accessor<float>("LAYERENERGY_FCAL1")},
+      {xAOD::CaloCluster::CaloSample::FCAL2,SG::Accessor<float>("LAYERENERGY_FCAL2")},
+      {xAOD::CaloCluster::CaloSample::MINIFCAL0,SG::Accessor<float>("LAYERENERGY_MINIFCAL0")},
+      {xAOD::CaloCluster::CaloSample::MINIFCAL1,SG::Accessor<float>("LAYERENERGY_MINIFCAL1")},
+      {xAOD::CaloCluster::CaloSample::MINIFCAL2,SG::Accessor<float>("LAYERENERGY_MINIFCAL2")},
+      {xAOD::CaloCluster::CaloSample::MINIFCAL3,SG::Accessor<float>("LAYERENERGY_MINIFCAL3")},
     }};
 
     for (const auto & [sampling,attribute]:samplingAttributePairs) {

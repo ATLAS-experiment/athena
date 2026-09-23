@@ -78,16 +78,16 @@ namespace JiveXML {
       AmgSymMatrix(5) covVert;
 
       const AmgSymMatrix(5)* covariance = perigee->covariance(); //perigee cannot be null here
-      if (perigee && covariance) {
-	// do trafo to old format
-	double measuredTheta = perigee->parameters()[Trk::theta];
-	double measuredQoverp = perigee->parameters()[Trk::qOverP];
-	const Trk::JacobianThetaPToCotThetaPt theJac( measuredTheta, measuredQoverp );
-	covVert = covariance->similarity(theJac);
-      }else{
-	for ( int ii=0; ii<20; ii++){ // placeholder. Do this nicer.
-	  covVert(ii) = 0.;
-	}
+      if (covariance) {
+        // do trafo to old format
+        double measuredTheta = perigee->parameters()[Trk::theta];
+        double measuredQoverp = perigee->parameters()[Trk::qOverP];
+        const Trk::JacobianThetaPToCotThetaPt theJac( measuredTheta, measuredQoverp );
+        covVert = covariance->similarity(theJac);
+            }else{
+        for ( int ii=0; ii<20; ii++){ // placeholder. Do this nicer.
+          covVert(ii) = 0.;
+        }
       }
       //Scale covariance matrix values to get good resolution with fixed
       //precision in JiveXML data

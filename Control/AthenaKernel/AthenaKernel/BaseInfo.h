@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthenaKernel/BaseInfo.h
@@ -117,13 +117,20 @@
  *     Return all the known bases of @a T.
  *     @a T itself will be included in this list.
  *
+ *@code
+ *   static void destroy (T* p)
+ @endcode
+ *     Call delete on the pointer.
+ *     (Not really useful to use this from @c BaseInfo, but can also be
+ *     called with a void* in @c BaseInfoBase.)
+ *
  * It is also possible to get a non-templated version of @c SG::BaseInfo<T>.
  * This is called @c SG::BaseInfoBase.  These objects can be found using
  * @c SG::BaseInfoBase::find, by either class ID or @c std::type_info
  * (in order for this to work, the corresponding @c SG::BaseInfo<T> class
  * must have been used somewhere in the program).  The interface
  * of @c SG::BaseInfoBase is the same as @c SG::BaseInfo<T>, except
- * that @c void* replaces @c T* in the @c cast methods.
+ * that @c void* replaces @c T* in the @c cast and destroy methods.
  *
  * Initialization issues: We don't want to build the @c SG::BaseInfo<T>
  * objects at static initialization time.  But we do need to remember
@@ -456,6 +463,9 @@ public:
   friend struct RegisterAddCopyConversionInit;
 
 
+  using destroy_fn = void (void*);
+
+
   /**
    * @brief Return the CLID for this class.
    */
@@ -516,9 +526,6 @@ public:
   typedef void* castfn_t (void* p);
 
 
-  // gcc 4.3 complains about the code genreflex generates for these.
-  // They're not useful from python anyway, so just suppress them.
-#ifndef __REFLEX__
   /**
    * @brief Return a function for casting to a base pointer.
    * @param clid ID of the class to which to cast.
@@ -560,7 +567,6 @@ public:
    *         0 will also be returned if the @a dynamic_cast fails.
    */
   castfn_t* castfnTo (const std::type_info& tinfo) const;
-#endif
 
 
   /**
@@ -625,6 +631,13 @@ public:
    * Returns the conversion instance or 0.
    */
   const CopyConversionBase* copy_conversion (CLID clid) const;
+
+
+  /**
+   * @brief Delete an instance of the described type.
+   * @param p Pointer to the instance to delete (a @a T* cast to a @a void*).
+   */
+  void destroy (void* p) const;
 
 
   /**
@@ -709,8 +722,9 @@ protected:
   /**
    * @brief Constructor.
    * @param tinfo The @c std::type_info for this class.
+   * @param destroy Destruction function for this class.
    */
-  BaseInfoBase (const std::type_info& tinfo);
+  BaseInfoBase (const std::type_info& tinfo, destroy_fn* destroy);
 
 
   /**
@@ -890,6 +904,13 @@ public:
    * @param tinfo The @a std::type_info of the class to test.
    */
   static bool is_virtual (const std::type_info& tinfo);
+
+
+  /**
+   * @brief Delete an instance of the described type.
+   * @param p Pointer to the instance to delete.
+   */
+  static void destroy (T* p);
 
 
   /**

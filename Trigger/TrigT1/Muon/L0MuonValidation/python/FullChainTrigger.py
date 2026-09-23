@@ -41,7 +41,7 @@ if __name__ == "__main__":
         acc.merge(RpcRdoToRpcDigitCfg(flags))
         ## Create the xAOD::TruthParticles for RPC simulation
 
-        from L0MuonS1RPC.L0MuonS1RPCConfig import L0MuonRPCSimCfg
+        from L1MuonS1RPC.L0MuonS1RPCConfig import L0MuonRPCSimCfg
         acc.merge(L0MuonRPCSimCfg(flags,
             name="L0MuonRPCSim",
             OutputLevel=DEBUG))
@@ -60,7 +60,7 @@ if __name__ == "__main__":
                                          RDOContainer = "MDTCSM" ))
 
         from RegionSelector.RegSelToolConfig import regSelTool_MDT_Cfg
-        from L0MuonMDT.L0MuonMDTConfig import L0MuonMDTSimCfg
+        from L1MuonMDT.L0MuonMDTConfig import L0MuonMDTSimCfg
         acc.merge(L0MuonMDTSimCfg(flags,
                                  name = "L0MuonMDTSim",
                                  OutputLevel = DEBUG,
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     if flags.Detector.GeometryMM:
         acc.merge(MM_RdoToDigitCfg(flags, MmRdoContainer="MMRDO", MmDigitContainer="MM_DIGITS"))
 
-    from L0MuonNSW.L0MuonNSWConfig import L0MuonNSWSimCfg
+    from L1MuonNSW.L0MuonNSWConfig import L0MuonNSWSimCfg
     acc.merge(L0MuonNSWSimCfg(flags, name="L0MuonNSWSim", OutputLevel=DEBUG))
 
     print("=== Registered services ===")

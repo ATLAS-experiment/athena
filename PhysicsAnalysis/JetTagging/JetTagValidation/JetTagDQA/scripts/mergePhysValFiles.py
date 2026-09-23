@@ -41,7 +41,8 @@ categories_with_subcategories_type_2 = ['tagger_GN2v01','tagger_GN3EPCLV01','tag
 
 sub_categories_type_2 = [ '_pt_ttbar',
                    '_pt_Zprime',
-                   '_Lxy'
+                   '_Lxy',
+                   '_SV1Lxy'
                  ]
 
 categories_with_subcategories_type_3 = ['old_taggers']

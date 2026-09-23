@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: ArenaHeader.cxx 470529 2011-11-24 23:54:22Z ssnyder $
 /**
  * @file  AthAllocators/src/ArenaHeader.cxx
  * @author scott snyder
@@ -19,6 +17,7 @@
 #include <algorithm>
 #include <ostream>
 #include <sstream>
+#include <print>
 #include <cassert>
 
 
@@ -117,12 +116,12 @@ void ArenaHeader::report (std::ostream& os) const
   std::lock_guard<std::mutex> lock (m_mutex);
   // All Allocators in the group.
   for (ArenaBase* arena : m_arenas) {
-    os << "=== " << arena->name() << " ===" << std::endl;
+    std::println (os, "=== {} ===", arena->name());
     arena->report (os);
   }
 
   // The default Arena.
-  os << "=== default ===" << std::endl;
+  std::println (os, "=== default ===");
   m_defaultArena.report (os);
 }
 

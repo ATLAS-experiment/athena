@@ -17,8 +17,6 @@ atlas_add_library( AthenaPoolTestData
                    src/AthenaPoolTestMatrix.cxx
                    src/AthenaPoolTestMap.cxx
                    src/AthenaPoolTestMapData.cxx
-                   src/FauxTriggerMap.cxx
-                   src/TestGaudiProperty.cxx
                    PUBLIC_HEADERS AthenaPoolTestData
                    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}

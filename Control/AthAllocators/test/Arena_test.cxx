@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: Arena_test.cxx 470529 2011-11-24 23:54:22Z ssnyder $
 /**
  * @file AthAllocators/test/Arena_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -40,16 +38,12 @@ private:
 };
 
 Alloc::Alloc (int x)
-  : m_x (x)
+  : m_name (std::format ("alloc{}", x)),
+    m_x (x)
 {
   m_stats.bytes.inuse = x;
   m_stats.bytes.free = 2*x;
   m_stats.bytes.total = 3*x;
-
-  std::ostringstream os;
-  os << "alloc" << x;
-  // cppcheck-suppress useInitializationList
-  m_name = os.str();
 }
 
 class Creator

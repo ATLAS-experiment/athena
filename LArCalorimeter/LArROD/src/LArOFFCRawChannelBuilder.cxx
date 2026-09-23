@@ -536,7 +536,7 @@ StatusCode LArOFFCRawChannelBuilder::execute(const EventContext& ctx) const {
     const auto& adc2mev = adc2MeVs->ADC2MEV(id, gain);
     const size_t nOFC = ofca.size();
 
-    if (ATH_UNLIKELY(nOFC == 0)) {
+    if (nOFC == 0) [[unlikely]] {
       if (!connected)
         continue;  // No conditions for disconencted channel, who cares?
       ATH_MSG_ERROR("No valid OFCs for connected channel "

@@ -21,7 +21,6 @@
 #ifndef XAOD_STANDALONE
 # include "SGTools/DataProxy.h"
 #endif
-#include "CxxUtils/StrFormat.h"
 #include <print>
 #include <vector>
 #include <sstream>

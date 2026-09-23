@@ -252,7 +252,11 @@ class ElectronMomentumCalibrationConfig (ConfigBlock) :
             alg.isolationCorrectionTool.AFII_corr = (
                 0 if self.forceFullSimConfigForIso
                 else config.dataType() is DataType.FastSim)
-            alg.isolationCorrectionTool.FixTimingIssueInCore = True
+            AODfixes = config.flags.Input.AODFixesDone
+            if "egammatopoIsoFix" in AODfixes:
+                alg.isolationCorrectionTool.FixTimingIssueInCore = False
+            else:       
+                alg.isolationCorrectionTool.FixTimingIssueInCore = True
             alg.isolationCorrectionTool.ToolVer = "REL22"
             alg.isolationCorrectionTool.CorrFile = "IsolationCorrections/v6/isolation_ptcorrections_rel22_mc20.root"
             alg.egammas = config.readName (self.containerName)
@@ -733,7 +737,7 @@ class ElectronWorkingPointEfficiencyConfig (ConfigBlock) :
             postfix = '_' + postfix
 
         correlationModels = ["SIMPLIFIED", "FULL", "TOTAL", "TOYS"]
-        map_file = 'ElectronEfficiencyCorrection/2015_2025/rel22.2/2026_Run2Run3_Recommendation_v2/map1.txt'
+        map_file = 'ElectronEfficiencyCorrection/2015_2025/rel22.2/2026_Run2Run3_Recommendation_v3/map1.txt'
         sfList = []
         # Set up the RECO electron efficiency correction algorithm:
         if config.dataType() is not DataType.Data and not self.noEffSF:

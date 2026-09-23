@@ -22,10 +22,6 @@
 #include "FlavorTagDiscriminants/CaloChargedFlowDecoratorAlg.h"
 #include "FlavorTagDiscriminants/TruthTauDecoratorAlg.h"
 
-#include "src/CountIParticleAlg.h"
-#include "src/CountTrackParticleAlg.h"
-
-
 DECLARE_COMPONENT(FlavorTagDiscriminants::VRJetOverlapDecoratorTool)
 DECLARE_COMPONENT(FlavorTagDiscriminants::DL2Tool)
 DECLARE_COMPONENT(FlavorTagDiscriminants::PoorMansIpAugmenterAlg)
@@ -38,8 +34,6 @@ DECLARE_COMPONENT(FlavorTagDiscriminants::TrackClassifier)
 
 
 DECLARE_COMPONENT(FlavorTagDiscriminants::GNNAuxTaskDecoratorAlg)
-DECLARE_COMPONENT(FlavorTagDiscriminants::CountIParticleAlg)
-DECLARE_COMPONENT(FlavorTagDiscriminants::CountTrackParticleAlg)
 DECLARE_COMPONENT(FlavorTagDiscriminants::FTagGhostElectronAssociationAlg)
 DECLARE_COMPONENT(FlavorTagDiscriminants::FTagGhostMuonAssociationAlg)
 DECLARE_COMPONENT(FlavorTagDiscriminants::HitDecoratorAlg)

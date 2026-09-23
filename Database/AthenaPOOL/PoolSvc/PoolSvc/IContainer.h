@@ -7,12 +7,12 @@
 
 // includes
 #include <string>
+#include <typeinfo>
 
 namespace pool {
 
   // forward declarations
   class ITokenIterator;
-  class ITechnologySpecificAttributes;
 
   /** @class IContainer IContainer.h PoolSvc/IContainer.h
    *
@@ -33,8 +33,17 @@ namespace pool {
      */
     virtual ITokenIterator* tokens() = 0;
 
-    /// Returns the object holding the technology specific attributes for a given technology domain
-    virtual ITechnologySpecificAttributes& technologySpecificAttributes() = 0;
+    /// The method returning the attribute data given a name
+    virtual bool attributeOfType( const std::string& attributeName,
+                                  void* data,
+                                  const std::type_info& typeInfo,
+                                  const std::string& option ) = 0;
+
+    /// The method setting the attribute data given a name
+    virtual bool setAttributeOfType( const std::string& attributeName,
+                                     const void* data,
+                                     const std::type_info& typeInfo,
+                                     const std::string& option ) = 0;
 
     /// Virtual destructor for the interface
     virtual ~IContainer() = default;

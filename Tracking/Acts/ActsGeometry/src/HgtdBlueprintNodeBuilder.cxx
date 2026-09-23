@@ -225,12 +225,12 @@ void HgtdBlueprintNodeBuilder::addHgtdLayers(
   if (hasMaterial) {
     parent.addMaterial(name + "_Material", [&](auto& mat) {
       if (index != 3) {
-        mat.configureFace(outwardDisc, AxisSpec::DeferredEquidistant(20, AxisR),
-                          AxisSpec::DeferredEquidistant(40, AxisPhi));
+        mat.configureFace(outwardDisc, AxisSpec::DeferredEquidistant(50, AxisR),
+                          AxisSpec::DeferredEquidistant(50, AxisPhi));
       }
       if (isInnermost) {
-        mat.configureFace(inwardDisc, AxisSpec::DeferredEquidistant(20, AxisR),
-                          AxisSpec::DeferredEquidistant(40, AxisPhi));
+        mat.configureFace(inwardDisc, AxisSpec::DeferredEquidistant(50, AxisR),
+                          AxisSpec::DeferredEquidistant(50, AxisPhi));
       }
       configureLayer(mat);
     });

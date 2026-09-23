@@ -71,7 +71,6 @@ private:
   ToolHandle<PFTrackClusterMatchingTool> m_theMatchingTool{this, "PFTrackClusterMatchingTool", "PFTrackClusterMatchingTool/CalObjBldMatchingTool", "The track-cluster matching tool"};
 
   /* Track-cluster matching tools for calculating the pull */
-  ToolHandle<PFTrackClusterMatchingTool> m_theMatchingToolForPull_015{this, "PFTrackClusterMatchingTool_015", "PFTrackClusterMatchingTool/PFPullMatchingTool_015", "The 0.15 track-cluster matching tool to calculate the pull"};
   ToolHandle<PFTrackClusterMatchingTool> m_theMatchingToolForPull_02{this, "PFTrackClusterMatchingTool_02", "PFTrackClusterMatchingTool/PFPullMatchingTool_02", "The 0.2 track-cluster matching tool to calculate the pull"};
 
   /** Toggle whether we are recovering split showers or not */

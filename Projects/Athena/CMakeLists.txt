@@ -7,11 +7,11 @@ string( STRIP ${_version} _version )
 project( Athena VERSION ${_version} LANGUAGES C CXX Fortran )
 unset( _version )
 
-# Use C++20 with HIP.
-set( CMAKE_HIP_STANDARD 20 CACHE STRING "HIP C++ standard to use" )
+# Force CUDA to use C++23. See ATLINFR-6204 for details.
+set( CMAKE_CUDA_STANDARD 23 CACHE STRING "CUDA C++ standard to use" )
 
-# Use C++20 with SYCL.
-set( CMAKE_SYCL_STANDARD 20 CACHE STRING "SYCL C++ standard to use" )
+# Use C++23 with SYCL.
+set( CMAKE_SYCL_STANDARD 23 CACHE STRING "SYCL C++ standard to use" )
 
 # Set the versions of the TDAQ externals to pick up for the build:
 if( NOT LCG_NIGHTLY )

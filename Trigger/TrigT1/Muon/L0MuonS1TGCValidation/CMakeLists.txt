@@ -17,7 +17,7 @@ atlas_add_component( L0MuonS1TGCValidation
     FourMomUtils
     GaudiKernel
     GeneratorObjects
-    L0MuonS1TGCToolInterfaces
+    L1MuonS1TGCToolInterfaces
     L0MuonS1TGCValidationLib
     MuonTesterTreeLib
     StoreGateLib
