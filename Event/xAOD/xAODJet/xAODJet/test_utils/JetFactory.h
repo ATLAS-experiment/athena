@@ -1,6 +1,6 @@
 // this file is -*- C++ -*-
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODJET_TEST_JETFACTORY_H
@@ -35,11 +35,7 @@ namespace xAOD {
     void record ATLAS_NOT_THREAD_SAFE (T* cont, const std::string & name) {
 #ifndef XAOD_STANDALONE
   // *********************** init in Athena 
-# ifdef SGTOOLS_CURRENTEVENTSTORE_H
   initTestStore();
-# else
-  SG::getDataSourcePointerFunc = getTestDataSourcePointer;
-# endif
   store.record(cont, name); 
   store.record((xAOD::IParticleContainer*)cont, name);  // also store the container as an IParticleContainer
 #else
