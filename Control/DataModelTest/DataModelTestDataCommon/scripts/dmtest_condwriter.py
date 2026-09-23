@@ -169,11 +169,14 @@ def store_in_crest(parser):
     }
 
     # Create or find the tag
+    # NOTE: despite its name, payload_spec is the tag's "objectType" (the value
+    # CHAI uses to pick a payload converter), not the column spec, which is
+    # tag_meta_dto.tag_info above. It must be a converter name CHAI knows.
     tag_dto = TagDto(
         name=tag,
         description=description,
         time_type='run-lumi',
-        payload_spec='xint:Int32',
+        payload_spec='crest-json-single-iov',
         status='UNLOCKED',
         synchronization='ALL',
         last_validated_time=-1,

@@ -117,7 +117,7 @@ datamodel_run_test (CondReadWriteCool
 datamodel_run_test (CondReadWriteCrestFS
   COMMAND athena.py
   ARG "CondReadWrite.py --condDB=crestfs"
-  EXTRA_IGNORE "|--host="
+  EXTRA_IGNORE "|--host=|INFO +\\[crest_fs\\]"
 )
 
 datamodel_run_test (xAODTestWriteThinned)
@@ -193,7 +193,7 @@ datamodel_run_test (xAODRootTestRead RNTUPLE
 
 # xAODTestWrite:
 # writes xaoddata.root (cvec, cvecWD, cview, gvec, ctrig, cinfo, hvec, hview, S2)
-#        
+#
 # xAODTestRead:
 # reads xaoddata.root
 # writes xaoddata2.root (cvec, cvecWD, cview, gvec, ctrig, cinfo, hvec, hview,

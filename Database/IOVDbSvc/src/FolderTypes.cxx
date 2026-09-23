@@ -7,29 +7,10 @@
 #include "CoolKernel/IRecordSpecification.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include <vector>
-#include "nlohmann/json.hpp"
 
 namespace IOVDbNamespace{
 
   
-  
-  FolderType
-  determineFolderType(const std::string & folderDescription, const std::string & spec, const std::vector<cool::ChannelId> & chans){
-    //If you find a coracool tag, it is unambiguously a coracool folder
-    if (folderDescription.find("<coracool>") != std::string::npos) return CoraCool;
-    const std::string typeName = parseTypename(folderDescription);
-    //if the type is CondAttrListVec, and yet it is not a CoraCool, it must be a CoolVector
-    if (typeName=="CondAttrListVec") return CoolVector;
-    //check if the payload spec is compatible with a pool ref/pool ref collection
-    if (poolCompatible(spec)){
-      const auto nchans = chans.size();
-      const bool onlyOneSpecialChannel = ((nchans == 1) and (chans[0] == 0));
-      return onlyOneSpecialChannel ? PoolRef : PoolRefColl;
-    }
-    if (typeName == "CondAttrListCollection") return AttrListColl;
-    //defaults to AttrList
-    return AttrList;
-   }
   
   //determine folder type from DB folder ptr
   FolderType
@@ -97,24 +78,6 @@ namespace IOVDbNamespace{
    poolCompatible(const cool::IRecordSpecification& rspec){
      return (rspec.exists("PoolRef") && rspec[0].name()=="PoolRef" &&
       rspec[0].storageType()==cool::StorageType::String4k);
-   }
-   
-   bool
-   poolCompatible(const std::string & specString){
-     nlohmann::json js = nlohmann::json::parse(specString);
-     if(js.is_array()){
-       int n = js.size();
-       for (int i = 0; i <= n; i++) {
-         nlohmann::json j_object = js[i];
-         for (auto& [key, val] : j_object.items()){
-	   if(key=="PoolRef" && val=="String4k")
-	     return true;	   
-         }
-       }
-       return false;
-     }     
-     return (specString.find("PoolRef:String4k") != std::string::npos || specString.find("PoolRef: String4k") != std::string::npos ||
-                    specString.find("PoolRef : String4k") != std::string::npos); 
    }
    
    bool

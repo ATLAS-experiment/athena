@@ -7,7 +7,13 @@
 */
 #include <iostream>
 #include <fstream>
+#include <filesystem>
+#include <cstdio>
+#include <sstream>
 #include <boost/program_options.hpp>
+
+#include <chai/Database.h>
+#include <chai/GlobalTag.h>
 
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/IMessageSvc.h"
@@ -19,8 +25,9 @@
 #include "../src/IOVDbParser.h"
 #include "../src/IOVDbConn.h"
 #include "../src/IOVDbFolder.h"
+#include "../src/IOVDbCrestTag.h"
 #include "../src/IOVDbStringFunctions.h"
-#include "../src/CoralCrestManager.h"
+#include "../src/IOVDbJsonStringFunctions.h"
 //
 #include "GaudiKernelFixtureBase.h"
 #include "TestFolderFixture.h"
@@ -34,6 +41,32 @@
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 // coverity[+UNNECESSARY_STRING_COPY]
 
+namespace {
+// Stands in for a real dump when loadAt() fails. Inalid JSON on purpose.
+const std::string LOAD_FAILED_SENTINEL{"__COOL_CREST_COMPARE_LOAD_FAILED__"};
+
+// Write one folder/vkey's dumpChannelsAsJson() output to <dirName>/<folder>.<vkey>.json
+void writeDump(const std::string& dirName, const std::string& folder, uint64_t vkey, const std::string& json){
+  std::filesystem::create_directory(dirName);
+  const std::string path = dirName+"/"+IOVDbNamespace::sanitiseFilename(folder)+"."+std::to_string(vkey)+".json";
+  //ignore return code; if the file does not exist, we don't care
+  //coverity[CHECKED_RETURN]
+  std::remove(path.c_str());
+  std::ofstream f(path, std::ios::out);
+  if (!f.is_open()){
+    std::cerr<<"File creation for "<<path<<" failed."<<std::endl;
+    exit(1);
+  }
+  f<<json;
+}
+
+std::string readWholeFile(std::ifstream& f){
+  std::ostringstream ss;
+  ss << f.rdbuf();
+  return ss.str();
+}
+}
+
 class CoolCrestCompare{
 private:
   ServiceHandle<IMessageSvc> m_msgSvc;
@@ -45,12 +78,16 @@ private:
   MsgStream m_log;
   ServiceHandle<IClassIDSvc> m_clidSvc;
   std::string m_crest_tag;
-  std::string m_crest_folder_desc;
+  std::string m_crestTagOverride;
   std::vector<uint64_t> m_vList;
+  bool m_strictIov;
   bool m_head;
   std::string m_tag;
 public:
-  CoolCrestCompare(std::string& cool_str,std::string& crest_str,std::string& gTagCrest,std::string& gTagCool, std::string& folder, std::vector<uint64_t>& vList,bool isHead,std::string& tag):m_msgSvc("msgSvc","test"),
+  CoolCrestCompare(std::string& cool_str,std::string& crest_str,std::string& gTagCrest,
+                    std::string& gTagCool, std::string& folder, std::vector<uint64_t>& vList,
+                    bool strictIov, bool isHead, const std::string& tag,
+                    const std::string& crestTagOverride):m_msgSvc("msgSvc","test"),
   m_cool_con_str(cool_str),
   m_crest_str(crest_str),
   m_gTagCrest(gTagCrest),
@@ -59,90 +96,119 @@ public:
   m_log(0, "IOVDbFolder_test"),
   m_clidSvc("ClassIDSvc","test"),
   m_crest_tag(""),
-  m_crest_folder_desc(""),
+  m_crestTagOverride(crestTagOverride),
   m_vList(vList),
+  m_strictIov(strictIov),
   m_head(isHead),
-  m_tag(tag)	
+  m_tag(tag)
   {
   }
-  void compareFiles() {
+  // Returns false if any timestamp had a file problem, a load failure on either
+  // side, or a content mismatch. Continues past a bad timestamp to report every
+  // one in m_vList instead of stopping at the first.
+  bool compareFiles() {
     const std::string fileSuffix{".json"};
     const std::string delimiter{"."};
     std::string fMainCool("cool_dump");
     std::string fMainCrest("crest_dump");
+    bool allOk = true;
     for (uint64_t vkey : m_vList) {
       const std::string p1=fMainCool+"/"+IOVDbNamespace::sanitiseFilename(m_folder)+delimiter+std::to_string(vkey)+fileSuffix;
       const std::string p2=fMainCrest+"/"+IOVDbNamespace::sanitiseFilename(m_folder)+delimiter+std::to_string(vkey)+fileSuffix;
 
-      std::ifstream f1(p1, std::ifstream::binary|std::ifstream::ate);
-      std::ifstream f2(p2, std::ifstream::binary|std::ifstream::ate);
+      std::ifstream f1(p1, std::ifstream::binary);
+      std::ifstream f2(p2, std::ifstream::binary);
 
       if (f1.fail() || f2.fail()) {
         if(f1.fail())
           std::cerr<<"COOL output file problem"<<std::endl;
         else
 	  std::cerr<<"CREST output file problem"<<std::endl;
-        return;
+        allOk = false;
+        continue;
       }
-      bool result=true;
-      if (f1.tellg() != f2.tellg()) {
-        result=false; //size mismatch
+
+      const std::string content1 = readWholeFile(f1);
+      const std::string content2 = readWholeFile(f2);
+      const bool coolLoadFailed = (content1 == LOAD_FAILED_SENTINEL);
+      const bool crestLoadFailed = (content2 == LOAD_FAILED_SENTINEL);
+      if (coolLoadFailed || crestLoadFailed) {
+        if (coolLoadFailed) {
+          std::cerr<<"COOL load failed for folder \""<<m_folder<<"\" at timestamp "<<vkey<<std::endl;
+        }
+        if (crestLoadFailed) {
+          std::cerr<<"CREST load failed for folder \""<<m_folder<<"\" at timestamp "<<vkey<<std::endl;
+        }
+        allOk = false;
+        continue;
       }
-      if(result){
-      //seek back to beginning and use std::equal to compare contents
-        f1.seekg(0, std::ifstream::beg);
-        f2.seekg(0, std::ifstream::beg);
-        result = std::equal(std::istreambuf_iterator<char>(f1.rdbuf()),
-                    std::istreambuf_iterator<char>(),
-                    std::istreambuf_iterator<char>(f2.rdbuf()));
-      }
+
+      // Bounds are stripped before comparing by default, leaving only payload content
+      const bool result = m_strictIov
+        ? (content1 == content2)
+        : (IOVDbNamespace::stripIovBounds(content1) == IOVDbNamespace::stripIovBounds(content2));
       std::cout<<"-----------------------------------------------------------"<<std::endl;
-      if(result)
-	    std::cout<<"The folder \""<<m_folder<<"\" is the same in COOL and CREST at timestamp: "<< vkey<<std::endl;
+      if(result) {
+	      std::cout<<"The folder \""<<m_folder<<"\" is the same in COOL and CREST at timestamp: "<< vkey<<std::endl;
+      }
       else{
-	    std::cout<<"The folder \""<<m_folder<<"\" is different in COOL and CREST at timestamp: "<<vkey<<std::endl;
-	    std::cout<<"To check differences use the following command:"<<std::endl;
-	    std::cout<<"diff "<<p1<<" "<<p2<<std::endl;
+        std::cout<<"The folder \""<<m_folder<<"\" is different in COOL and CREST at timestamp: "<<vkey<<std::endl;
+        std::cout<<"To check differences use the following command:"<<std::endl;
+        std::cout<<"diff "<<p1<<" "<<p2<<std::endl;
+        allOk = false;
      }
     }
+    return allOk;
   }
   void startCool(){
     std::cout<<"Start COOL dump:"<<std::endl;
     ServiceHandle<ITagInfoMgr> tagInfoMgr{"TagInfoMgr","TagInfoMgr"};
-    IOVDbParser parser(m_folder+m_crest_folder_desc,m_log);
+    // --head and --tag reach the COOL folder as a <tag> modifier.
+    // A CREST tag named ...-HEAD implies --head.
+    std::string tagModifier;
+    if (m_head || m_crest_tag.ends_with("-HEAD")) {
+      tagModifier = "<tag>HEAD</tag>";
+    } else if (!m_tag.empty()) {
+      tagModifier = "<tag>" + m_tag + "</tag>";
+    }
+    IOVDbParser parser(m_folder + tagModifier,m_log);
     IOVDbConn connection(m_cool_con_str, true, m_log);
-    IOVDbFolder f(&(connection), parser, m_log, &(*m_clidSvc), nullptr, false, false, IOVDbFolder::source_t::COOLDB,"http://unknown","unknown",true);
-    f.preLoadFolder(tagInfoMgr.get() , 0, 0);
+    IOVDbFolder f(&(connection), parser, m_log, &(*m_clidSvc), nullptr, false, 0, m_gTagCool, true);
+    f.preload(tagInfoMgr.get() , 0, 0);
     for (uint64_t vkey : m_vList) {
-    	f.loadCache(vkey, 0,m_gTagCool, true);
+    	const bool loaded = f.loadAt(vkey);
+    	writeDump("cool_dump", m_folder, vkey, loaded ? f.dumpChannelsAsJson(vkey) : LOAD_FAILED_SENTINEL);
     }
   }
   void startCrest(){
     std::cout<<"Start CREST dump:"<<std::endl;
     ServiceHandle<ITagInfoMgr> tagInfoMgr{"TagInfoMgr","TagInfoMgr"};
-    std::map<std::string, std::string> cresttagmap;
-    cresttagmap.clear();
-    cresttagmap = CoralCrestManager::getGlobalTagMap(m_crest_str,m_gTagCrest);
-    m_crest_tag = cresttagmap[m_folder];
-    if(m_crest_tag.size()==0){
-      std::cerr<<"ERROR in Crest. No folder:\""<<m_folder<<"\" in Global tag:\""<<m_gTagCrest<<"\""<<std::endl;
-      exit(1);
+    const std::string connectStr = IOVDbNamespace::chaiConnectString(m_crest_str);
+    chai::Database db(connectStr);
+    // --crest-tag names the CREST tag directly. Otherwise look up in global tag.
+    if (!m_crestTagOverride.empty()) {
+      m_crest_tag = m_crestTagOverride;
+    } else {
+      const auto mapping = db.getGlobalTag(m_gTagCrest)->getMapping();
+      for (const auto& [mapKey, tagMapping] : mapping) {
+        const auto& [label, record] = mapKey;
+        if (label == m_folder) {
+          m_crest_tag = tagMapping.tagName;
+          break;
+        }
+      }
+      if (m_crest_tag.empty()) {
+        std::cerr<<"ERROR in Crest. No folder:\""<<m_folder<<"\" in Global tag:\""<<m_gTagCrest<<"\""<<std::endl;
+        exit(1);
+      }
     }
-    CoralCrestManager mg(m_crest_str,m_crest_tag); 
-    m_crest_folder_desc=mg.getFolderDescription();
-    if(m_head)
-      m_crest_folder_desc+="<tag>HEAD</tag>";
-    else if(m_crest_tag.ends_with("-HEAD"))
-      m_crest_folder_desc+="<tag>HEAD</tag>";
-    else if(m_tag.size()>0){
-      m_crest_folder_desc+="<tag>"+m_tag+"</tag>";	    
-    }    
-    IOVDbParser parser(m_folder+m_crest_folder_desc,m_log);
+    IOVDbParser parser(m_folder,m_log);
     IOVDbConn connection("", true, m_log);
-    IOVDbFolder f(&(connection), parser, m_log, &(*m_clidSvc), nullptr, false, false, IOVDbFolder::source_t::CRESTDB,m_crest_str,m_crest_tag,true);
-    f.preLoadFolder(tagInfoMgr.get() , 0, 0);
+    IOVDbCrestTag f(&connection, parser, m_log, &(*m_clidSvc), nullptr, db, m_crest_tag);
+    f.preload(tagInfoMgr.get() , 0, 0);
     for (uint64_t vkey : m_vList) {
-      f.loadCache(vkey, 0,m_gTagCrest, true);
+      const bool loaded = f.loadAt(vkey);
+      writeDump("crest_dump", m_folder, vkey, loaded ? f.dumpChannelsAsJson(vkey) : LOAD_FAILED_SENTINEL);
     }
   }
 };
@@ -160,7 +226,11 @@ int main(int argc, char ** argv)
 	( "folder,f", boost::program_options::value<std::string>(), "name of Folder" )
         ( "timestamp,t", boost::program_options::value<std::vector<uint64_t>>()->multitoken(), "Time of data. Support multiple space separated values. Example: -t 1715204691957781740 1725204691957781740" )
 	( "tag,T",  boost::program_options::value<std::string>(), "name of Tag")
-	( "head,H", boost::program_options::bool_switch()->default_value(false), "Use HEAD tag" );
+	( "head,H", boost::program_options::bool_switch()->default_value(false), "Use HEAD tag" )
+        ( "crest-tag", boost::program_options::value<std::string>(),
+          "CREST tag to read, bypassing the global tag mapping" )
+        ( "strict-iov", boost::program_options::bool_switch()->default_value(false),
+          "Compare since/until bounds too (stripped by default)" );
 
     boost::program_options::variables_map arguments;
     try {
@@ -184,8 +254,6 @@ int main(int argc, char ** argv)
     std::string globalTagCool;
     std::string conStr="";
     std::string crestStr="";
-    std::string tag="";
-    bool isHead = false; 
     std::vector<uint64_t> vList;
     if (arguments.count("folder")) {
       folder = arguments["folder"].as<std::string>();
@@ -223,20 +291,28 @@ int main(int argc, char ** argv)
       return -1;
     }
     if (arguments.count("timestamp")) {
-      vList = arguments["timestamp"].as<std::vector<uint64_t>>();	    
+      vList = arguments["timestamp"].as<std::vector<uint64_t>>();
     }
     else{
       std::cerr <<"Error do not define timestamp"<<std::endl;
       return -1;
     }
+
+    std::string tag;
     if (arguments.count("tag")) {
       tag = arguments["tag"].as<std::string>();
     }
+    std::string crestTagOverride;
+    if (arguments.count("crest-tag")) {
+      crestTagOverride = arguments["crest-tag"].as<std::string>();
+    }
 
-    if (arguments.count("head"))
-      isHead=arguments["head"].as<bool>();
-    CoolCrestCompare pr(conStr,crestStr,globalTagCrest,globalTagCool,folder,vList,isHead,tag);
+    const bool isHead = arguments["head"].as<bool>();
+    const bool strictIov = arguments["strict-iov"].as<bool>();
+    CoolCrestCompare pr(conStr,crestStr,globalTagCrest,globalTagCool,folder,vList,
+                        strictIov,isHead,tag,crestTagOverride);
     pr.startCrest();
     pr.startCool();
-    pr.compareFiles();
+    const bool same = pr.compareFiles();
+    return same ? 0 : 1;
 }

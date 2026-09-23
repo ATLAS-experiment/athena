@@ -23,6 +23,8 @@
 #include "SGTools/TransientAddress.h"
 #include "IOVDbParser.h"
 
+#include "IOVDbConditionsSource.h"
+
 #include "CoraCool/CoraCoolObjectIter.h"
 #include "CoraCool/CoraCoolObject.h"
 #include <memory>
@@ -30,10 +32,8 @@
 #include "FolderTypes.h"
 #include "IovStore.h"
 
-#include <map> 
+#include <map>
 #include "nlohmann/json.hpp"
-
-#include "CoralCrestManager.h"
 
 class MsgStream;
 class IOVDbConn;
@@ -48,114 +48,110 @@ namespace IOVDbNamespace {
   class Cool2Json;
 }
 
-class IOVDbFolder : public AthMessaging {
+class IOVDbFolder : public AthMessaging, public IOVDbConditionsSource {
 public:
-
-  enum class source_t {
-    COOLDB=0,
-    CRESTDB,
-   };
-
+  using source_t = IOVDbConditionsSource::source_t;
 
   IOVDbFolder(IOVDbConn* conn, const IOVDbParser& folderprop, MsgStream& msg,
               IClassIDSvc* clidsvc, IIOVDbMetaDataTool* metadatatool,
-              const bool checklock, const bool outputToFile=false,
-              const source_t source=source_t::COOLDB,
-              const std::string & crestServer="",const std::string & crestTag="",const bool crestCoolToFile=false);
+              const bool checklock,
+              const unsigned int cacheAlign, const std::string& globalTag, const bool onlineMode,
+              const bool outputToFile=false);
   ~IOVDbFolder();
- 
-   
 
 
   // access methods to various internal information
-  const std::string& folderName() const;
-  const std::string& key() const;
-  const source_t& source() const;
+  const std::string& key() const override;
+  const source_t& source() const override;
 
-  IOVDbConn* conn();
-  bool multiVersion() const;
-  bool timeStamp() const;
-  bool tagOverride() const;
-  bool retrieved() const;
-  bool noOverride() const;
-  IOVDbNamespace::FolderType folderType() const;
-  bool readMeta() const;
-  bool writeMeta() const;
+  IOVDbConn* conn() override;
+  bool multiVersion() const override;
+  bool timeStamp() const override;
+  bool tagOverride() const override;
+  bool retrieved() const override;
+  bool noOverride() const override;
+  IOVDbNamespace::FolderType folderType() const override;
+  bool readMeta() const override;
+  bool writeMeta() const override;
   // read from meta data only, otherwise ignore folder
-  bool fromMetaDataOnly() const;
+  bool fromMetaDataOnly() const override;
   // If true, then the end time for an open-ended range will be set to just
   // past the current event.  The end time will be automatically updated on accesses
   // in subsequent events.
-  bool extensible() const;
-  bool dropped() const;
-  bool iovOverridden() const;
-  const std::string& joTag() const;
-  const std::string& resolvedTag() const;
-  const std::string& eventStore() const;
-  CLID clid() const;
-  unsigned long long bytesRead() const;
-  float readTime() const;
-  const IOVRange& currentRange() const;
+  bool extensible() const override;
+  bool dropped() const override;
+  bool iovOverridden() const override;
+  const std::string& joTag() const override;
+  const std::string& resolvedTag() const override;
+  const std::string& eventStore() const override;
+  CLID clid() const override;
+  unsigned long long bytesRead() const override;
+  float readTime() const override;
+  const IOVRange& currentRange() const override;
 
   // set methods - used after folder creation to set properties externally
 
   // mark this folder as using metadata from an input file
-  void useFileMetaData();
+  void useFileMetaData() override;
   // set folder description
-  void setFolderDescription(const std::string& description);
+  void setFolderDescription(const std::string& description) override;
   // set tag override, set override flag as well if setFlag is true
   // override flag prevents reading of FLMD for this folder if present
-  void setTagOverride(const std::string& tag,const bool setFlag);
+  void setTagOverride(const std::string& tag,const bool setFlag) override;
   // set writeMeta flag
-  void setWriteMeta();
+  void setWriteMeta() override;
   // set IOV overrides
   void setIOVOverride(const unsigned int run,const unsigned int lumiblock,
-                      const unsigned int time);
+                      const unsigned int time) override;
   // mark object as dropped from Storegate
-  void setDropped(const bool dropped);
+  void setDropped(const bool dropped) override;
 
   // get validityKey for folder, given current time (accounting for overrides)
-  cool::ValidityKey iovTime(const IOVTime& reftime) const;
+  cool::ValidityKey iovTime(const IOVTime& reftime) const override;
 
-  // check cache is valid for current time
-  bool cacheValid(const cool::ValidityKey reftime) const;
+  // check cache is valid (resident) for current time
+  bool isResident(const cool::ValidityKey reftime) const override;
 
-  // load cache for given validitykey and globalTag
-  bool loadCache(const cool::ValidityKey vkey, const unsigned int cacheDiv,
-                 const std::string& globalTag, const bool ignoreMissChan);
+  // load cache for given validitykey. cacheAlign/globalTag/onlineMode are
+  // fixed at construction
+  bool loadAt(const cool::ValidityKey vkey) override;
 
   // reset cache to empty
-  void resetCache();
+  void reset() override;
 
   // fill in object details from cache
   // set poolPayloadRequested flag if a POOL file was referenced
   bool getAddress(const cool::ValidityKey reftime,IAddressCreator* persSvc,
                   const unsigned int poolSvcContext,
                   std::unique_ptr<IOpaqueAddress>& address,
-                  IOVRange& range,bool& poolPayloadRequested);
+                  IOVRange& range,bool& poolPayloadRequested) override;
 
   // make summary of usage
-  void summary();
+  void summary() override;
   // preload address to Storegate (does folder initialisation from COOL)
   std::unique_ptr<SG::TransientAddress>
-  preLoadFolder(ITagInfoMgr *tagInfoMgr,
+  preload(ITagInfoMgr *tagInfoMgr,
                 const unsigned int cacheRun,
-                const unsigned int cacheTime);
+                const unsigned int cacheTime) override;
+
+  // dump the cache entries covering reftime as a JSON array, using the same
+  // serializer as IOVDbCrestTag::dumpChannelsAsJson; debug/tooling only
+  std::string dumpChannelsAsJson(cool::ValidityKey reftime) const;
 
   // print out cache
-  void printCache();
+  void printState() override;
+
   // reload cache in online mode if ValidityKey returns a new object
   // with start > previously used start
   bool loadCacheIfDbChanged(const cool::ValidityKey vkey,
-                            const std::string& globalTag,
                             const cool::IDatabasePtr& dbPtr,
-                            const ServiceHandle<IIOVSvc>& iovSvc);
-        
+                            const ServiceHandle<IIOVSvc>& iovSvc) override;
+
 private:
   // clear cache vectors
   void clearCache();
   // resolve tag in given folder, using global tag if needed
-  bool resolveTag(const cool::IFolderPtr& fptr, const std::string& globalTag);
+  bool resolveTag(const cool::IFolderPtr& fptr);
   // interpret given tag as a magic tag
   bool magicTag(std::string& tag);
   // call metadata writing tool for given list and range
@@ -164,26 +160,26 @@ private:
                        const IOVRange& range);
   // - version for multichannel collection
   bool addMetaAttrListColl(const CondAttrListCollection* coll);
- 
+
   // setup shared AttributeListSpecification cache
   void setSharedSpec(const coral::AttributeList& atrlist);
-  
+
   // add this IOV to cache, including channel counting if over edge of cache
   void addIOVtoCache(cool::ValidityKey since, cool::ValidityKey until);
-  
+
   //override intrinsic (member variable) options from the from a parsed folder description
   bool overrideOptionsFromParsedDescription(const IOVDbParser & parsedDescription);
-  
+
   //create transient address, processing symlinks if given
   std::unique_ptr<SG::TransientAddress>
   createTransientAddress(const std::vector<std::string> & symlinks);
-  
+
   //setup cache length according to whether timestamp==ns of epoch
   void setCacheLength(const bool timeIs_nsOfEpoch, const unsigned int cacheRun, const unsigned int cacheTime);
-  
+
   //update the cache using either a Cool or CoraCool object (templated)
   template<class T>
-  unsigned int 
+  unsigned int
   cacheUpdateImplementation(T & obj, const ServiceHandle<IIOVSvc>& iovSvc){
     const auto & objSince = obj.since();
     const auto & objUntil = obj.until();
@@ -202,7 +198,7 @@ private:
       //find corresponding iov, which we shall modify
       const auto iovIdx = std::distance(m_cachechan.begin(), pCacheChannel);
       const auto & iov = m_iovs.at(iovIdx);
-      if ((iov.first < objSince) and (objSince < iov.second)){ 
+      if ((iov.first < objSince) and (objSince < iov.second)){
         // obj time is larger than cache start (and less than cache stop)
         //   ==> update cache
         ++counter;
@@ -210,7 +206,7 @@ private:
         // just change existing IOVRange
         ATH_MSG_DEBUG("changing "<<iov.second<<"  to "<<objSince-1);
         m_iovs.extendIov(iovIdx, objSince-1);
-        specialCacheUpdate(obj, iovSvc); //  reset proxy, add to cache, addIOV 
+        specialCacheUpdate(obj, iovSvc); //  reset proxy, add to cache, addIOV
         covered = true;
       }
       if ( (objSince>=iov.first and objSince<iov.second) or (objUntil>iov.first and objUntil<=iov.second) ) covered=true;
@@ -220,56 +216,40 @@ private:
       ++counter;
       specialCacheUpdate(obj, iovSvc);
     }
-    return counter;    
+    return counter;
   }
-  
-  
+
+
   bool
   objectIteratorIsValid( cool::IObjectIteratorPtr & objItr){
     return objItr->goToNext();
   }
- 
+
   bool
   objectIteratorIsValid(CoraCoolObjectIterPtr & objItr){
     return objItr->hasNext();
   }
-  
+
 
   // cache update for online mode
-  void 
+  void
   specialCacheUpdate(CoraCoolObject & obj,const ServiceHandle<IIOVSvc>& iovSvc);
 
-  void 
+  void
   specialCacheUpdate(const cool::IObject& obj,const ServiceHandle<IIOVSvc>& iovSvc);
-
-  // _________ Helper functions for the CREST reading _________
-  using IOVHash=std::pair<IOVDbNamespace::IovStore::Iov_t,std::string>;
-  using IOV2Index=std::pair<cool::ValidityKey,size_t>;
-
-  // Function which converts openended CREST IOVs into non-overlapping IOVs
-  // It returns a vector of non-overlapping IOVs + corresponding Hashes
-  std::vector<IOVHash> fetchCrestIOVs(cool::ValidityKey since, cool::ValidityKey until); 
-
-  // Function which reads CREST objects by the cache IOV boundaries
-  std::vector<IOVHash> fetchCrestObjects(cool::ValidityKey since, cool::ValidityKey until, cool::ValidityKey vkey);
-
-  // __________________________________________________________
 
   // Function for generating dump files
   void dumpFile(const std::string& dumpName
 		, const cool::ValidityKey& vkey
-		, IOVDbNamespace::Cool2Json* json          // Argument for dumping COOL data
-		, bool skipCoolIoV                         // Argument for dumping COOL data
-		, CoralCrestManager* mng=NULL              // Argument for dumping CREST data
-		, const cool::ValidityKey crestVkey=0      // Argument for dumping CREST data
-	       ) const;
+		, IOVDbNamespace::Cool2Json* json) const;
 
   ITagInfoMgr*         p_tagInfoMgr{nullptr};   // pointer to TagInfoMgr
   IClassIDSvc*         p_clidSvc{nullptr};      // pointer to CLID service
   IIOVDbMetaDataTool*  p_metaDataTool{nullptr}; // pointer to metadata tool (writing)
   IOVDbConn*           m_conn{nullptr};         // pointer to corresponding IOVDbConn object (=0 FLMD)
-  std::string m_foldername;       // COOL foldername
-  std::string m_key;              // SG key where data is loaded (unique)
+  const unsigned int   m_cacheAlign{0};         // cache alignment, divide cache into N slices (job property)
+  const std::string&   m_globalTag;             // bound to IOVDbSvc::m_globalTag, service outlives folders
+  const bool           m_onlineMode{false};     // ignore missing channels outside cache range (job property)
   std::string m_folderDescription;// folder description
   bool m_multiversion{false};     // is folder multiversion
   bool m_timestamp{false};        // is folder indexed by timestamp (else runLB)
@@ -328,15 +308,9 @@ private:
   std::vector<unsigned int> m_cacheccend;
   IOVDbNamespace::IovStore m_iovs;
   const bool m_outputToFile{false};
-  const bool m_crestCoolToFile{false};
-  source_t m_source;
-  std::string m_crestServer;
-  std::string m_crestTag;
-
-  std::optional<CoralCrestManager> m_crest_mng;
+  const source_t m_source{source_t::COOLDB};
 };
 
-inline const std::string& IOVDbFolder::folderName() const {return m_foldername;}
 inline const std::string& IOVDbFolder::key() const { return m_key;}
 inline const IOVDbFolder::source_t& IOVDbFolder::source() const { return m_source; }
 
@@ -354,7 +328,7 @@ inline bool IOVDbFolder::retrieved() const { return m_retrieved; }
 
 
 
-inline IOVDbNamespace::FolderType IOVDbFolder::folderType() const 
+inline IOVDbNamespace::FolderType IOVDbFolder::folderType() const
 {return m_foldertype;}
 
 inline void IOVDbFolder::setFolderDescription(const std::string& description)
@@ -376,20 +350,20 @@ inline const std::string& IOVDbFolder::joTag() const { return m_jotag; }
 
 inline const std::string& IOVDbFolder::resolvedTag() const { return m_tag; }
 
-inline const std::string& IOVDbFolder::eventStore() const 
+inline const std::string& IOVDbFolder::eventStore() const
 { return m_eventstore; }
 
 inline CLID IOVDbFolder::clid() const { return m_clid; }
 
-inline unsigned long long IOVDbFolder::bytesRead() const 
+inline unsigned long long IOVDbFolder::bytesRead() const
 { return m_nbytesread; }
 
-inline float IOVDbFolder::readTime() const 
+inline float IOVDbFolder::readTime() const
 { return m_readtime; }
 
 inline const IOVRange& IOVDbFolder::currentRange() const { return m_currange; }
 
-inline bool IOVDbFolder::cacheValid(const cool::ValidityKey reftime) const {
+inline bool IOVDbFolder::isResident(const cool::ValidityKey reftime) const {
   const auto & [cacheStart, cacheStop]=m_iovs.getCacheBounds();
   return ((reftime>cacheStart) and (reftime<cacheStop));
 }

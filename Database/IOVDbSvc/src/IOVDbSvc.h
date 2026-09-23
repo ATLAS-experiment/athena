@@ -4,9 +4,9 @@
 
 /**
  * @file   IOVDbSvc.h
- * 
+ *
  * @brief  Athena service for Interval Of Validity database.
- * 
+ *
  * @author Antoine Perus <perus@lal.in2p3.fr>, Richard Hawkings
  * @date   Feb 2003, major update Jan 2009
  *
@@ -17,7 +17,7 @@
 #define IOVDbSvc_IOVDbSvc_h
 
 #include "IOVDbConn.h"
-#include "IOVDbFolder.h"
+#include "IOVDbConditionsSource.h"
 
 #include "GaudiKernel/StatusCode.h"
 #include "GaudiKernel/ClassID.h"
@@ -38,6 +38,7 @@
 #include "IOVDbMetaDataTools/IIOVDbMetaDataTool.h"
 #include "IOVDbSvc/IIOVCondDbSvc.h"
 #include "PoolSvc/IPoolSvc.h"
+#include <chai/Database.h>
 
 #include <string>
 #include <vector>
@@ -45,7 +46,7 @@
 #include <memory>
 
 class IOVRange;
-class StoreGateSvc; 
+class StoreGateSvc;
 class IClassIDSvc;
 class EventID;
 class IOVMetaDataContainer;
@@ -53,15 +54,15 @@ class CondAttrListCollection;
 
 /**
  * @class   IOVDbSvc
- * 
+ *
  * @brief  Athena service for Interval Of Validity database.
  *         The IOVDbSvc may be in one of three time states which
  *         determines from where the IOV time is coming:
  *           initialization  -  IOV time must be set from the EventSelector
  *           begin run       -  IOV time should have been set with signalBeginRun
  *           event loop      -  IOV time is from EventInfo
- *           
- * 
+ *
+ *
  */
 class IOVDbSvc : public extends<AthService,
                                 IIOVCondDbSvc,
@@ -71,7 +72,7 @@ class IOVDbSvc : public extends<AthService,
                                 IIoComponent>
 {
 public:
-  
+
   /// Forward base class ctor
   using base_class::base_class;
 
@@ -112,8 +113,8 @@ public:
   //@{
   /// Get range for a particular data object
   ///  identified by its clid and key and a requested IOVTime
-  virtual StatusCode getRange( const CLID& clid, 
-                               const std::string& dbKey, 
+  virtual StatusCode getRange( const CLID& clid,
+                               const std::string& dbKey,
                                const IOVTime& time,
                                IOVRange& range,
                                std::string& tag,
@@ -153,7 +154,7 @@ public:
   bool getKeyInfo(const std::string& key, IIOVDbSvc::KeyInfo& info) override;
 
   // drop an IOVDbSvc-managed object from Storegate, indicating we will
-  // not read it again and can free up memory 
+  // not read it again and can free up memory
   // If resetCache=True, also drop the corresponding folder cache
   // so any subsequent reads will access the database again
   // returns False if key not known to IOVDbSvc
@@ -168,6 +169,12 @@ private:
   StatusCode setupFolders();
   StatusCode fillTagInfo();
   StatusCode loadCaches(IOVDbConn* conn, const IOVTime* time=nullptr);
+  // Get or create the shared chai::Database for a CREST server endpoint string.
+  // May throw on connection failure.
+  chai::Database* getCrestDatabase(const std::string& endpoint);
+  // Get or fetch the GlobalTag mapping for one CREST endpoint. Returns
+  // nullptr on failure, with an ATH_MSG_FATAL containing the reason.
+  const std::map<std::string, std::string>* getCrestTagMap(const std::string& endpoint);
 
   // job option parameters
   // default database connection
@@ -181,7 +188,7 @@ private:
   //  a list of overriding tags definitions
   Gaudi::Property<std::vector<std::string> >  m_par_overrideTags{this,"overrideTags",{},"List of xml-modifiers for folders like <prefix>/My/Folder</prefix><tag>MyFolderTag</tag>","OrderedSet<std::string>"};
   //  a list of folders to write to file meta data
-  Gaudi::Property<std::vector<std::string> >  m_par_foldersToWrite{this,"FoldersToMetaData",{},"list of folders to write to file meta data","OrderedSet<std::string>"};    
+  Gaudi::Property<std::vector<std::string> >  m_par_foldersToWrite{this,"FoldersToMetaData",{},"list of folders to write to file meta data","OrderedSet<std::string>"};
   //  a flag to trigger the connections management
   BooleanProperty                m_par_manageConnections{this,"ManageConnections",true,"flag to trigger the connections management"};
   //  a flag to manage pool connections
@@ -202,21 +209,21 @@ private:
   IntegerProperty m_par_cacheTime{this,"CacheTime",0,"force larger timeranges to be cached (seconds)"};
   // cache alignment - divide cache into N slices and align queries on slice
   // should be useful to improve Frontier cache hit rate
-  UnsignedIntegerProperty m_par_cacheAlign{this,"CacheAlign",0,"cache alignment - divide cache into N slices and align queries on slice"}; 
+  UnsignedIntegerProperty m_par_cacheAlign{this,"CacheAlign",0,"cache alignment - divide cache into N slices and align queries on slice"};
   // online mode flag to ignore missing channels outside cache range
   BooleanProperty m_par_onlineMode{this,"OnlineMode",false,"online mode flag to ignore missing channels outside cache range"};
   // check to ensure global/HVS tags are locked (for production)
   BooleanProperty m_par_checklock{this,"CheckLock",false,"check to ensure global/HVS tags are locked (for production)"};
   // Source of data as a string; default is "COOL_DATABASE"
   StringProperty m_par_source{this,"Source","COOL_DATABASE","source of data as a string (default COOL_DATABASE)"};
-  // This map contains the pairs: COOL folder - CREST tag name 
-  std::map<std::string, std::string> m_cresttagmap;
+  // GlobalTag mappings (COOL folder -> CREST tag name), one per CREST
+  // endpoint, keyed by chaiConnectString(endpoint); see getCrestTagMap()
+  std::map<std::string, std::map<std::string, std::string>> m_cresttagmaps;
   // Format of data; default is empty string (default for a given source)
   StringProperty m_par_format{this,"Format",{},"Format of data; default is empty string (default for a given source)"};
   // Can output to file for debugging purposes
   BooleanProperty m_outputToFile{this,"OutputToFile",false,"output to file for debugging purposes"};
-  BooleanProperty m_crestCoolToFile{this,"CrestCoolToFile",false,"output to file crest or cool data in the same format for debugging purposes"};
-  // internal parameters  
+  // internal parameters
   // handles to other services and tools
   ServiceHandle<IIOVSvc>         m_h_IOVSvc{this,"IOVSvc","IOVSvc"};
   ServiceHandle<StoreGateSvc>    m_h_sgSvc{this,"StoreGateSvc","StoreGateSvc"};
@@ -227,7 +234,7 @@ private:
   ServiceHandle<IPoolSvc>        m_h_poolSvc{this,"PoolSvc","PoolSvc"};
   PublicToolHandle<IIOVDbMetaDataTool> m_h_metaDataTool{this,"IOVDbMetaDataTool","IOVDbMetaDataTool"};
   ServiceHandle<ITagInfoMgr>     m_h_tagInfoMgr{this,"TagInfoMgr","TagInfoMgr"};
-        
+
   // Flag to signal when a pool payload has been requested. This
   // implies that a pool file has been open during an event, and will
   // allow one to close the pool file and the end of event.
@@ -251,7 +258,7 @@ private:
   };
   IOVDbSvc_state                 m_state{INITIALIZATION};
 
-  IOVDbFolder::source_t m_source=IOVDbFolder::source_t::COOLDB;
+  IOVDbConditionsSource::source_t m_source=IOVDbConditionsSource::source_t::COOLDB;
 
 
   // IOVTime to be set during initialation or begin run
@@ -266,12 +273,17 @@ private:
   // vector of managed connections
   std::vector<std::unique_ptr<IOVDbConn>> m_connections;
 
+  // One shared chai::Database per CREST endpoint, keyed on the CHAI connection
+  // string. Declared before m_foldermap so it outlives the CHAI tag handles
+  // that point into it.
+  std::map<std::string, std::unique_ptr<chai::Database>> m_crestDatabases;
+
   // map of SG keyname to folder objects
-  typedef std::map<std::string, std::unique_ptr<IOVDbFolder>> FolderMap;
+  typedef std::map<std::string, std::unique_ptr<IOVDbConditionsSource>> FolderMap;
   FolderMap m_foldermap;
   // gloal abort flag
   bool m_abort{false};
- 
+
 };
 
 #endif
