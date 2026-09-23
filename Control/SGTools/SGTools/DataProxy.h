@@ -358,10 +358,11 @@ class DataStore;
     
     /**
      * @brief Lock the data object we're holding, if any.
+     * @param dobj The data object.
      *
      * Should be called with the mutex held.
      */
-    void lock (objLock_t&);
+    void lock (objLock_t&, DataObject* dobj);
 
 
     /**

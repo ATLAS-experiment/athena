@@ -178,7 +178,7 @@ void DataProxy::setConst()
   lock_t lock (m_mutex);
   if (!m_const) {
     m_const = true;
-    this->lock (objLock);
+    this->lock (objLock, m_dObject);
   }
 }
 
@@ -354,13 +354,18 @@ bool DataProxy::requestRelease(bool force, bool hard) {
 /// from obj to the proxt.
 void DataProxy::setObject(objLock_t& objLock, DataObject* dObject, bool doreg)
 {
-  DataObject* dobj = m_dObject;
+  DataObject* dobj = m_dObject.exchange (nullptr);
+  std::atomic_thread_fence (std::memory_order_seq_cst);
   setGaudiRef(dObject, dobj);
-  m_dObject = dobj;
   if (0 != dobj) {
     if (doreg) dobj->setRegistry(this);
-    if (m_const) this->lock (objLock);
+    if (m_const) this->lock (objLock, dobj);
   }
+  // Be sure the settings above happen before we set m_dObject.
+  // Otherwise other threads may be able to see the object before those
+  // settings have been made.
+  std::atomic_thread_fence (std::memory_order_seq_cst);
+  m_dObject = dobj;
 }
 
 
@@ -684,9 +689,8 @@ void DataProxy::registerTransient (void* p)
  *
  * Should be called with the mutex held.
  */
-void DataProxy::lock (objLock_t&)
+void DataProxy::lock (objLock_t&, DataObject* dobj)
 {
-  DataObject* dobj = m_dObject;
   DataBucketBase* bucket = dynamic_cast<DataBucketBase*>(dobj);
   if (bucket)
     bucket->lock();
