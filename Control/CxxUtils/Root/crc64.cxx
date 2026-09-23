@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -193,7 +193,6 @@
 
 
 #include "CxxUtils/crc64.h"
-#include "CxxUtils/AthUnlikelyMacros.h"
 #include <stdio.h>
 
 
@@ -611,20 +610,20 @@ uint64_t crc64 (const CRCTable& table,
   uint64_t crc = table.m_initial;
 
   // Early exit if the string is null.
-  if (ATH_UNLIKELY(!data_len)) return crc;
+  if (!data_len) [[unlikely]] return crc;
 
   // The main body assumes that the data are aligned to 128 bits.
   // This should almost always be the case.  But just in case the input
   // string is not, consume the initial unaligned portion byte-by-byte
   // until it is.
-  if (ATH_UNLIKELY (reinterpret_cast<unsigned long>(data) & 15)) {
+  if (reinterpret_cast<unsigned long>(data) & 15) [[unlikely]] {
     // Number of unaligned bytes we need to read from the start of the string.
     size_t leadin = std::min (16 - (reinterpret_cast<unsigned long>(data) & 15), data_len);
     crc = crc64_bytewise (table, data, leadin);
     data += leadin;
     data_len -= leadin;
 
-    if (ATH_UNLIKELY(!data_len)) return crc;
+    if (!data_len) [[unlikely]] return crc;
   }
 
   // Accumulator for CRC value.
@@ -633,7 +632,7 @@ uint64_t crc64 (const CRCTable& table,
   // Constants for the folding step.
   v2di k = table.m_fold_constants;
 
-  if (ATH_UNLIKELY (data_len < 16)) {
+  if (data_len < 16) [[unlikely]] {
     // Special case for less than 128 bits.
     v2di temp2 = load_aligned (data);
     v2di crc0, crc1;
@@ -660,7 +659,7 @@ uint64_t crc64 (const CRCTable& table,
     }
 
     // Handle a partial block at the end of less than 128 bits.
-    if (ATH_LIKELY (n < data_len)) {
+    if (n < data_len) [[likely]] {
       v2di remainder = load_aligned (data + n);
       // Number of remaining bytes.
       size_t nrem = data_len - n;
