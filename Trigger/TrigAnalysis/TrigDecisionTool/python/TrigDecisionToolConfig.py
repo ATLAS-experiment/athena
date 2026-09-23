@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
@@ -44,9 +44,11 @@ def TrigDecisionToolCfg(flags):
     if flags.Common.Project is not Project.AthAnalysis:
         # Full Athena
         # This pre-loads libraries required to read the run 2 trigger navigation
-        from TrigEDMConfig.TriggerEDM import EDMLibraries
+        from TrigEDMConfig.TriggerEDM import EDMLibraries, getClassesToIgnore
         nav = CompFactory.HLT.Navigation('Navigation')
         nav.Dlls = [e for e in  EDMLibraries if 'TPCnv' not in e]
+        nav.ClassesFromPayloadIgnore = getClassesToIgnore(flags)
+
         tdt.Navigation = nav
         acc.addPublicTool(nav)
 
