@@ -84,7 +84,7 @@ def EGAM3SkimmingToolCfg(flags):
                                      expression = expression)
 
 
-def EGAM3eeMassTool1Cfg(flags):
+def EGAM3eeMassAug1Cfg(flags):
     """Configure the EGAM3 ee invariant mass augmentation tool 1"""
     acc = ComponentAccumulator()
 
@@ -103,7 +103,7 @@ def EGAM3eeMassTool1Cfg(flags):
         ["(Electrons.DFCommonElectronsLHMedium)", "(Electrons.pt > 9.5*GeV)"]
     )
 
-    acc.setPrivateTools(
+    EGAM3eeMassTool1 = acc.addPublicTool(
         CompFactory.DerivationFramework.EGInvariantMassTool(
             name="EGAM3_EEMassTool11",
             Object1Requirements=requirementElectrons,
@@ -117,12 +117,13 @@ def EGAM3eeMassTool1Cfg(flags):
             DoTransverseMass=False,
             MinDeltaR=0.0,
         )
-    )
+    ) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("EGAM3_ZEEMassAug1", AugmentationTools = [EGAM3_ZEEMassTool1]), primary=True)
 
     return acc
 
 
-def EGAM3eeMassTool2Cfg(flags):
+def EGAM3eeMassAug2Cfg(flags):
     """Configure the EGAM3 ee invariant mass augmentation tool 2"""
     acc = ComponentAccumulator()
 
@@ -142,7 +143,7 @@ def EGAM3eeMassTool2Cfg(flags):
     )
     requirementElectron2 = "(Electrons.pt > 6.5*GeV)"
 
-    acc.setPrivateTools(
+    EGAM3eeMassTool2 = acc.addPublicTool(
         CompFactory.DerivationFramework.EGInvariantMassTool(
             name="EGAM3_ZEEMassTool2",
             Object1Requirements=requirementElectron1,
@@ -156,12 +157,13 @@ def EGAM3eeMassTool2Cfg(flags):
             DoTransverseMass=False,
             MinDeltaR=0.0,
         )
-    )
+    ) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("EGAM3_ZEEMassAug2", AugmentationTools = [EGAM3_ZEEMassTool2]), primary=True)
 
     return acc
 
 
-def EGAM3eeMassTool3Cfg(flags):
+def EGAM3eeMassAug3Cfg(flags):
     """Configure the EGAM3 ee invariant mass augmentation tool 3"""
     acc = ComponentAccumulator()
 
@@ -177,7 +179,7 @@ def EGAM3eeMassTool3Cfg(flags):
     )
     requirementElectron2 = "(ForwardElectrons.pt > 6.5*GeV)"
 
-    acc.setPrivateTools(
+    EGAM3eeMassTool3 = acc.addPublicTool(
         CompFactory.DerivationFramework.EGInvariantMassTool(
             name="EGAM3_EEMassTool3",
             Object1Requirements=requirementElectron1,
@@ -191,7 +193,8 @@ def EGAM3eeMassTool3Cfg(flags):
             DoTransverseMass=False,
             MinDeltaR=0.0,
         )
-    )
+    ) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("EGAM3_ZEEMassAug3", AugmentationTools = [EGAM3_ZEEMassTool3]), primary=True)
 
     return acc
 
@@ -212,22 +215,13 @@ def EGAM3KernelCfg(flags, name="EGAM3Kernel", **kwargs):
     )
 
     # EGAM3 augmentations
-    augmentationTools = []
 
     # ====================================================================
     # ee and egamma invariant masses
     # ====================================================================
-    EGAM3eeMassTool1 = acc.popToolsAndMerge(EGAM3eeMassTool1Cfg(flags))
-    acc.addPublicTool(EGAM3eeMassTool1)
-    augmentationTools.append(EGAM3eeMassTool1)
-
-    EGAM3eeMassTool2 = acc.popToolsAndMerge(EGAM3eeMassTool2Cfg(flags))
-    acc.addPublicTool(EGAM3eeMassTool2)
-    augmentationTools.append(EGAM3eeMassTool2)
-
-    EGAM3eeMassTool3 = acc.popToolsAndMerge(EGAM3eeMassTool3Cfg(flags))
-    acc.addPublicTool(EGAM3eeMassTool3)
-    augmentationTools.append(EGAM3eeMassTool3)
+    acc.merge(EGAM3eeMassAug1Cfg(flags))
+    acc.merge(EGAM3eeMassAug2Cfg(flags))
+    acc.merge(EGAM3eeMassAug3Cfg(flags))
 
     # ====================================================================
     # Common calo decoration tools
@@ -395,11 +389,12 @@ def EGAM3KernelCfg(flags, name="EGAM3Kernel", **kwargs):
     skimmingTool = acc.getPrimaryAndMerge(EGAM3SkimmingToolCfg(flags))
 
     # setup the kernel
+    for tool in augmentationTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     acc.addEventAlgo(
         CompFactory.DerivationFramework.DerivationKernel(
             name,
             SkimmingTools=[skimmingTool],
-            AugmentationTools=augmentationTools,
             ThinningTools=thinningTools,
         )
     )

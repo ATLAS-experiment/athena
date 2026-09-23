@@ -1,33 +1,34 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORKTAU_DITAUCHARGEDECORATOR_H
 #define DERIVATIONFRAMEWORKTAU_DITAUCHARGEDECORATOR_H
 
-#include <string>
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
-#include "GaudiKernel/ToolHandle.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "xAODTau/DiTauJetContainer.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteDecorHandleKey.h"
+#include "GaudiKernel/ServiceHandle.h"
+#include "GaudiKernel/IChronoStatSvc.h"
 
 //Tool to decorate the charge of boosted ditaus
 
 namespace DerivationFramework {
 
-  class DiTauChargeDecorator : public extends<AthAlgTool, IAugmentationTool> {
+  class DiTauChargeDecorator : public AthReentrantAlgorithm {
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override;
-    virtual StatusCode addBranches(const EventContext& ctx) const override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
 
   private:
     SG::ReadHandleKey<xAOD::DiTauJetContainer> m_ditauContainerKey { this, "DiTauContainerName", "DiTauJets", "Input ditau container key" };
     SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> m_chargeKey{ this, "chargeKey", m_ditauContainerKey, "charge", "Decoration name"};
+
+    ServiceHandle<IChronoStatSvc>      m_chronoSvc{this, "ChronoStatSvc",  "ChronoStatSvc"};
   };
 }
 

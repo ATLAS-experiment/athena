@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
   Contact: Raphael Haberle <raphael.julien.haberle@cern.ch>
 */
 
@@ -43,7 +43,7 @@ StatusCode EGammaGSFCalo::finalize() {
 
 // ========================================================================
 
-StatusCode EGammaGSFCalo::addBranches( const EventContext& ctx ) const {
+StatusCode EGammaGSFCalo::execute( const EventContext& ctx ) const {
 
   // input electron decoration handle
   SG::WriteDecorHandle<xAOD::ElectronContainer,

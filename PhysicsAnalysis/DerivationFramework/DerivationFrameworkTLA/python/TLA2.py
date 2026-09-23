@@ -43,13 +43,11 @@ def TLA2KernelCfg(flags, name='TLA2Kernel', **kwargs):
     acc.merge(TLACommonAugmentationsCfg(flags, prefix="TLA2_", TriggerListsHelper = kwargs['TriggerListsHelper']))
 
     from DerivationFrameworkInDet.InDetToolsConfig import InDetTrackSelectionToolWrapperCfg
-    DFCommonTrackSelection = acc.getPrimaryAndMerge(InDetTrackSelectionToolWrapperCfg(
+    acc.merge(InDetTrackSelectionToolWrapperCfg(
         flags,
-        name           = "DFCommonTrackSelectionLoose",
+        name           = "TLA2CommonKernel",
         CutLevel       = "Loose",
         DecorationName = "DFTLA2Loose"))
-
-    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("TLA2CommonKernel", AugmentationTools = [DFCommonTrackSelection]))
 
     # Thinning tools...
     from DerivationFrameworkInDet.InDetToolsConfig import MuonTrackParticleThinningCfg, EgammaTrackParticleThinningCfg, JetTrackParticleThinningCfg

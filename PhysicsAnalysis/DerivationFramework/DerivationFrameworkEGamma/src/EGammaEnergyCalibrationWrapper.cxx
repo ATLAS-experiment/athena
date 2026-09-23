@@ -20,7 +20,7 @@ StatusCode EGammaEnergyCalibrationWrapper::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode EGammaEnergyCalibrationWrapper::addBranches(const EventContext& ctx) const
+StatusCode EGammaEnergyCalibrationWrapper::execute(const EventContext& ctx) const
 {
   // Process electrons
   SG::ReadHandle<xAOD::EgammaContainer> electrons{m_electronContainerKey, ctx};

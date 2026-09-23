@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // MbtsToVectorsTool.h
@@ -13,12 +13,9 @@
 #include "TileEvent/TileContainer.h"
 
 // FrameWork includes
-#include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaBaseComps/AthReetrantAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
-
-// PhysicsAnalysis/DerivationFramework/DerivationFrameworkInterfaces includes
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 
 // STL includes
 #include <string>
@@ -28,14 +25,14 @@ class TileTBID;
 
 namespace DerivationFramework {
 
-  class MbtsToVectorsTool: public extends<AthAlgTool, IAugmentationTool>
+  class MbtsToVectorsTool: public AthReetrantAlgorithm // FIXME RENAME
   {
 
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
     virtual StatusCode initialize() override final;
 
   private:

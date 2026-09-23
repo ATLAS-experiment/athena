@@ -22,7 +22,7 @@ namespace DerivationFramework {
   typedef ElementLink<xAOD::TrackParticleContainer> TrackParticleLink;
   typedef std::vector<TrackParticleLink> TrackParticleLinkVector;
 
-  PsiPlusPsiSingleVertex::PsiPlusPsiSingleVertex(const std::string& type, const std::string& name, const IInterface* parent) : base_class(type,name,parent),
+  PsiPlusPsiSingleVertex::PsiPlusPsiSingleVertex(const std::string& name, ISvcLocator* svcLoc) : AthReentrantAlgorithm(name, svcLoc),
     m_vertexPsi1ContainerKey(""),
     m_vertexPsi2ContainerKey(""),
     m_outputsKeys({"Psi1Vtx", "Psi2Vtx", "MainVtx"}),
@@ -164,7 +164,7 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode PsiPlusPsiSingleVertex::addBranches(const EventContext& ctx) const {
+  StatusCode PsiPlusPsiSingleVertex::execute(const EventContext& ctx) const {
     if (m_vtx1Daug_num < 2 || m_vtx1Daug_num > 4 || m_vtx2Daug_num < 2 || m_vtx2Daug_num > 4) {
       ATH_MSG_FATAL("Incorrect number of Psi daughters");
       return StatusCode::FAILURE;

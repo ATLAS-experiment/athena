@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #==============================================================================
 # Provides configs for the tools used for building the common truth collections
@@ -19,96 +19,88 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def TruthCollectionMakerCfg(flags, name, **kwargs):
     """Configure the TruthCollectionMaker tool"""
     acc = ComponentAccumulator()
-    acc.addPublicTool(CompFactory.DerivationFramework.TruthCollectionMaker(name = name,**kwargs),
-                      primary = True)
+    tool = acc.addPublicTool(CompFactory.DerivationFramework.TruthCollectionMaker(name = name,**kwargs))) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(name+"Aug1", AugmentationTools = [tool]))
     return acc
 
 
-def DFCommonTruthMuonToolCfg(flags, name = "DFCommonTruthMuonTool", **kwargs):
+def DFCommonTruthMuonCfg(flags, name = "DFCommonTruthMuon", **kwargs):
     """Muon truth collection maker"""
     acc = ComponentAccumulator()
     kwargs.setdefault("OutputCollectionName", "TruthMuons")
     kwargs.setdefault("KeepNavigationInfo", False)
-    acc.addPublicTool(CompFactory.DerivationFramework.TruthCollectionMakerMuon(name = name,**kwargs),
-                      primary = True)
+    acc.addEventAlgo(CompFactory.DerivationFramework.TruthCollectionMakerMuon(name = name,**kwargs))
     return acc
 
 
-def DFCommonTruthCharmToolCfg(flags, name, **kwargs):
+def DFCommonTruthCharmCfg(flags, name = "DFCommonTruthCharm", **kwargs):
     """Charm truth collection maker"""
     acc = ComponentAccumulator()
     kwargs.setdefault("OutputCollectionName", "TruthCharm")
     kwargs.setdefault("KeepNavigationInfo", False)
     kwargs.setdefault("Do_Compress", True)
-    acc.addPublicTool(CompFactory.DerivationFramework.TruthCollectionMakerCharm(name = name,**kwargs),
-                      primary = True)
+    acc.addEventAlgo(CompFactory.DerivationFramework.TruthCollectionMakerCharm(name = name,**kwargs))
     return acc
 
 
-def DFCommonTruthElectronToolCfg(flags, name = "DFCommonTruthElectronTool", **kwargs):
+def DFCommonTruthElectronCfg(flags, name = "DFCommonTruthElectron", **kwargs):
     """Electron truth collection maker"""
     acc = ComponentAccumulator()
     kwargs.setdefault("OutputCollectionName", "TruthElectrons")
     kwargs.setdefault("KeepNavigationInfo", False)
-    acc.addPublicTool(CompFactory.DerivationFramework.TruthCollectionMakerElectron(name = name,**kwargs),
-                      primary = True)
+    acc.addEventAlgo(CompFactory.DerivationFramework.TruthCollectionMakerElectron(name = name,**kwargs))
     return acc
 
 
-def DFCommonTruthPhotonToolCfg(flags, name = "DFCommonTruthPhotonTool", **kwargs):
+def DFCommonTruthPhotonCfg(flags, name = "DFCommonTruthPhoton", **kwargs):
     """Photon truth collection maker (Currently unused?)"""
     acc = ComponentAccumulator()
     kwargs.setdefault("OutputCollectionName", "TruthPhotons")
     kwargs.setdefault("KeepNavigationInfo", False)
-    acc.addPublicTool(CompFactory.DerivationFramework.TruthCollectionMakerPhoton(name = name,**kwargs),
-                      primary = True)
+    acc.addEventAlgo(CompFactory.DerivationFramework.TruthCollectionMakerPhoton(name = name,**kwargs))
     return acc
 
 
 # this tool is needed for making TruthPhotons from sim samples, where extra cuts are needed. Origin 42 (pi0) and 23 (light meson) cut way down uninteresting photons
-def DFCommonTruthPhotonToolSimCfg(flags, name = "DFCommonTruthPhotonToolSim", **kwargs):
+def DFCommonTruthPhotonToolSimCfg(flags, name = "DFCommonTruthPhotonSim", **kwargs):
     """Tool for making TruthPhotons from sim samples"""
     acc = ComponentAccumulator()
     kwargs.setdefault("OutputCollectionName", "TruthPhotons")
     kwargs.setdefault("KeepNavigationInfo", False)
-    acc.addPublicTool(CompFactory.DerivationFramework.TruthCollectionMakerPhotonSim(name = name,**kwargs),
-                      primary = True)
+    acc.addEventAlgo(CompFactory.DerivationFramework.TruthCollectionMakerPhotonSim(name = name,**kwargs))
     return acc
 
 
-def DFCommonTruthNeutrinoToolCfg(flags, name = "DFCommonTruthNeutrinoTool", **kwargs):
+def DFCommonTruthNeutrinoCfg(flags, name = "DFCommonTruthNeutrino", **kwargs):
     """Neutrino truth collection maker"""
     acc = ComponentAccumulator()
     kwargs.setdefault("OutputCollectionName", "TruthNeutrinos")
     kwargs.setdefault("KeepNavigationInfo", False)
-    acc.addPublicTool(CompFactory.DerivationFramework.TruthCollectionMakerNeutrino(name = name,**kwargs),
-                      primary = True)
+    acc.addEventAlgo(CompFactory.DerivationFramework.TruthCollectionMakerNeutrino(name = name,**kwargs))
     return acc
 
 
-def DFCommonTruthBottomToolCfg(flags, name = "DFCommonTruthBottomTool", **kwargs):
+def DFCommonTruthBottomCfg(flags, name = "DFCommonTruthBottom", **kwargs):
     """B-quark truth collection maker"""
     acc = ComponentAccumulator()
     kwargs.setdefault("OutputCollectionName", "TruthBottom")
     kwargs.setdefault("KeepNavigationInfo", False)
     kwargs.setdefault("Do_Compress", True)
-    acc.addPublicTool(CompFactory.DerivationFramework.TruthCollectionMakerBottom(name = name,**kwargs),
-                      primary = True)
+    acc.addEventAlgo(CompFactory.DerivationFramework.TruthCollectionMakerBottom(name = name,**kwargs))
     return acc
 
 
-def DFCommonTruthTopToolCfg(flags, name = "DFCommonTruthTopTool", **kwargs):
+def DFCommonTruthTopCfg(flags, name = "DFCommonTruthTop", **kwargs):
     """Top-quark truth collection maker"""
     acc = ComponentAccumulator()
     kwargs.setdefault("OutputCollectionName", "TruthTop")
     kwargs.setdefault("KeepNavigationInfo", False)
     kwargs.setdefault("Do_Compress", True)
-    acc.addPublicTool(CompFactory.DerivationFramework.TruthCollectionMakerTop(name = name,**kwargs),
-                      primary = True)
+    acc.addEventAlgo(CompFactory.DerivationFramework.TruthCollectionMakerTop(name = name,**kwargs))
     return acc
 
 
-def DFCommonTruthBosonToolCfg(flags, name = "DFCommonTruthBosonTool", **kwargs):
+def DFCommonTruthBosonCfg(flags, name = "DFCommonTruthBoson", **kwargs):
     """Gauge bosons and Higgs truth collection maker"""
     acc = ComponentAccumulator()
     kwargs.setdefault("OutputCollectionName", "TruthBoson")
@@ -117,30 +109,28 @@ def DFCommonTruthBosonToolCfg(flags, name = "DFCommonTruthBosonTool", **kwargs):
     kwargs.setdefault("BuildingZ", True)
     kwargs.setdefault("Do_Compress", True)
     kwargs.setdefault("Do_Sherpa", True)
-    acc.addPublicTool(CompFactory.DerivationFramework.TruthCollectionMakerBoson(name = name,**kwargs),
-                      primary = True)
+    acc.addEventAlgo(CompFactory.DerivationFramework.TruthCollectionMakerBoson(name = name,**kwargs))
     return acc
 
 
-def DFCommonTruthBSMToolCfg(flags, name = "DFCommonTruthBSMTool", **kwargs):
+def DFCommonTruthBSMCfg(flags, name = "DFCommonTruthBSM", **kwargs):
     """BSM particles truth collection maker"""
     acc = ComponentAccumulator()
     kwargs.setdefault("OutputCollectionName", "TruthBSM")
     kwargs.setdefault("KeepNavigationInfo", False)
     kwargs.setdefault("Do_Compress", True)
-    acc.addPublicTool(CompFactory.DerivationFramework.TruthCollectionMakerBSM(name = name,**kwargs),
-                      primary = True)
+    acc.addEventAlgo(CompFactory.DerivationFramework.TruthCollectionMakerBSM(name = name,**kwargs))
     return acc
 
 
-def DFCommonTruthForwardProtonToolCfg(flags, name = "DFCommonTruthForwardProtonTool", **kwargs):
+def DFCommonTruthForwardProtonCfg(flags, name = "DFCommonTruthForwardProton", **kwargs):
     """Forward proton truth collection maker"""
     acc = ComponentAccumulator()
     kwargs.setdefault("BeamEnergy", flags.Beam.Energy)
     kwargs.setdefault("OutputCollectionName", "TruthForwardProtons")
     kwargs.setdefault("KeepNavigationInfo", False)
     kwargs.setdefault("Do_Compress", True)
-    acc.addPublicTool(CompFactory.DerivationFramework.TruthCollectionMakerForwardProton(name, **kwargs), primary = True)
+    acc.addEventAlgo(CompFactory.DerivationFramework.TruthCollectionMakerForwardProton(name, **kwargs))
     return acc
 
 #==============================================================================
@@ -150,18 +140,8 @@ def DFCommonTruthForwardProtonToolCfg(flags, name = "DFCommonTruthForwardProtonT
 def TruthD2DecoratorCfg(flags, name, **kwargs):
     """Configure the truth D2 decorator tool"""
     acc = ComponentAccumulator()
-    TruthD2Decorator = CompFactory.DerivationFramework.TruthD2Decorator
-    acc.addPublicTool(TruthD2Decorator(name, **kwargs), primary = True)
-    return acc
-
-
-def TruthClassificationDecoratorCfg(flags, name, **kwargs):
-    """Configure the TruthClassificationDecorator tool"""
-    acc = ComponentAccumulator()
-    from MCTruthClassifier.MCTruthClassifierConfig import DFCommonMCTruthClassifierCfg
-    kwargs.setdefault("MCTruthClassifier", acc.addPublicTool(acc.popToolsAndMerge(DFCommonMCTruthClassifierCfg(flags))))
-    TruthClassificationDecorator = CompFactory.DerivationFramework.TruthClassificationDecorator
-    acc.setPrivateTools(TruthClassificationDecorator(name = name, **kwargs))
+    acc.addEventAlgo(CompFactory.DerivationFramework.TruthD2Decorator(
+        name, **kwargs))
     return acc
 
 
@@ -181,38 +161,35 @@ def MuonTruthClassifierFallbackCfg(flags, name, **kwargs):
     return acc
 
 
-def TruthDressingToolCfg(flags, name, **kwargs):
-    """Configure the TruthDressingTool"""
+def TruthDressingCfg(flags, name, **kwargs):
+    """Configure the TruthDressingAlg"""
     acc = ComponentAccumulator()
-    TruthDressingTool = CompFactory.DerivationFramework.TruthDressingTool
-    acc.addPublicTool(TruthDressingTool( name = name, **kwargs),
-                      primary = True)
+    acc.addEventAlgo(CompFactory.DerivationFramework.TruthDressingAlg(
+        name = name, **kwargs))
     return acc
 
 
-def TruthIsolationToolCfg(flags, name, **kwargs):
-    """Configure the truth isolation tool"""
+def TruthIsolationCfg(flags, name, **kwargs):
+    """Configure the truth isolation algorithm"""
     acc = ComponentAccumulator()
-    TruthIsolationTool = CompFactory.DerivationFramework.TruthIsolationTool
-    acc.addPublicTool(TruthIsolationTool(name = name, **kwargs),
-                      primary = True)
+    acc.addEventAlgo(CompFactory.DerivationFramework.TruthIsolationAlg(
+        name = name, **kwargs))
     return acc
 
 
 def MuonTruthIsolationDecorAlgCfg(flags, name, **kwargs):
-    """Configure the MuonTruthIsolationTool"""
+    """Configure the MuonTruthIsolationDecorAlg"""
     acc = ComponentAccumulator()
     acc.addEventAlgo(CompFactory.DerivationFramework.MuonTruthIsolationDecorAlg(name = name, **kwargs),
                       primary = True)
     return acc
 
 
-def TruthQGDecorationToolCfg(flags, name, **kwargs):
-    """Configure the quark/gluon decoration tool"""
+def TruthQGDecorationCfg(flags, name, **kwargs):
+    """Configure the quark/gluon decoration algorithm"""
     acc = ComponentAccumulator()
-    TruthQGDecorationTool = CompFactory.DerivationFramework.TruthQGDecorationTool
-    acc.addPublicTool(TruthQGDecorationTool(name = name, **kwargs),
-                      primary = True)
+    acc.addEventAlgo(CompFactory.DerivationFramework.TruthQGDecorationTool(
+        name = name, **kwargs))
     return acc
 
 
@@ -222,27 +199,23 @@ def TruthNavigationDecoratorCfg(flags, name, **kwargs):
     kwargs.setdefault("InputCollections", [])
     kwargs.setdefault("parentDecorKeys", [ key + ".parentLinks" for key in kwargs["InputCollections"] ])
     kwargs.setdefault("childDecorKeys", [ key + ".childLinks" for key in kwargs["InputCollections"] ])
-    TruthNavigationDecorator = CompFactory.DerivationFramework.TruthNavigationDecorator
-    acc.addPublicTool(TruthNavigationDecorator(name = name, **kwargs),
-                      primary = True)
+    acc.addEventAlgo(CompFactory.DerivationFramework.TruthNavigationDecorator
+                     (name = name, **kwargs))
     return acc
 
 
 def TruthDecayCollectionMakerCfg(flags, name, **kwargs):
     """Configure the truth decay collection maker"""
     acc = ComponentAccumulator()
-    TruthDecayCollectionMaker = CompFactory.DerivationFramework.TruthDecayCollectionMaker
-    acc.addPublicTool(TruthDecayCollectionMaker(name = name, **kwargs),
-                      primary = True)
+    acc.addEventAlgo(CompFactory.DerivationFramework.TruthDecayCollectionMaker(
+        name = name, **kwargs))
     return acc
 
 
 def TruthBornLeptonCollectionMakerCfg(flags, name, **kwargs):
     """Configure the truth Born lepton collection tool"""
     acc = ComponentAccumulator()
-    TruthBornLeptonCollectionMaker = CompFactory.DerivationFramework.TruthBornLeptonCollectionMaker
-    acc.addPublicTool(TruthBornLeptonCollectionMaker(name = name, **kwargs),
-                      primary = True)
+    acc.addEventAlgo(CompFactory.DerivationFramework.TruthBornLeptonCollectionMaker(name = name, **kwargs))
     return acc
 
 
@@ -250,14 +223,6 @@ def HardScatterCollectionMakerCfg(flags, name, **kwargs):
     """Add a mini-collection for the hard scatter and N subsequent generations"""
     acc = ComponentAccumulator()
     return acc
-
-
-#add the 'decoration' tool to dress the main truth collection with the classification
-def DFCommonTruthClassificationToolCfg(flags):
-    """dress the main truth collection with the classification"""
-    return TruthClassificationDecoratorCfg(flags,
-                                          name = "DFCommonTruthClassificationTool",
-                                          ParticlesKey = "TruthParticles")
 
 
 # Hadron origin decoration tools
@@ -277,17 +242,16 @@ def HadronOriginDecoratorCfg(flags, name, **kwargs):
     if "ToolName" not in kwargs:
         kwargs.setdefault("ToolName", acc.getPrimaryAndMerge(HadronOriginClassifierCfg(flags,
                                                                                        name="DFCommonHadronOriginClassifier")))
-    acc.addPublicTool(CompFactory.DerivationFramework.HadronOriginDecorator
-                      (name = name, **kwargs),
-                      primary = True)
+    acc.addEventAlgo(CompFactory.DerivationFramework.HadronOriginDecorator
+                      (name = name, **kwargs))
     return acc
 
 
 #add the 'decoration' tools for dressing and isolation
-def DFCommonTruthElectronDressingToolCfg(flags, decorationName = "dressedPhoton"):
+def DFCommonTruthElectronDressingCfg(flags, decorationName = "dressedPhoton"):
     """Configure the electron truth dressing tool"""
-    return TruthDressingToolCfg(flags,
-                                name                  = "DFCommonTruthElectronDressingTool",
+    return TruthDressingCfg(flags,
+                                name                  = "DFCommonTruthElectronDressingAlg",
                                 dressParticlesKey     = "TruthElectrons",
                                 usePhotonsFromHadrons = False,
                                 dressingConeSize      = 0.1,
@@ -295,10 +259,10 @@ def DFCommonTruthElectronDressingToolCfg(flags, decorationName = "dressedPhoton"
                                 decorationName        = decorationName+"_e")
 
 
-def DFCommonTruthMuonDressingToolCfg(flags, decorationName = "dressedPhoton"):
+def DFCommonTruthMuonDressingCfg(flags, decorationName = "dressedPhoton"):
     """Configure the muon truth dressing tool"""
-    return TruthDressingToolCfg(flags,
-                                name                  = "DFCommonTruthMuonDressingTool",
+    return TruthDressingCfg(flags,
+                                name                  = "DFCommonTruthMuonDressingAlg",
                                 dressParticlesKey     = "TruthMuons",
                                 usePhotonsFromHadrons = False,
                                 dressingConeSize      = 0.1,
@@ -306,10 +270,10 @@ def DFCommonTruthMuonDressingToolCfg(flags, decorationName = "dressedPhoton"):
                                 decorationName        = decorationName+"_mu")
 
 
-def DFCommonTruthTauDressingToolCfg(flags):
+def DFCommonTruthTauDressingCfg(flags):
     """Configure the tau truth dressing tool"""
-    return TruthDressingToolCfg(flags,
-                                name                  = "DFCommonTruthTauDressingTool",
+    return TruthDressingCfg(flags,
+                                name                  = "DFCommonTruthTauDressingAlg",
                                 dressParticlesKey     = "TruthTaus",
                                 usePhotonsFromHadrons = False,
                                 dressingConeSize      = 0.2, # Tau special
@@ -317,10 +281,10 @@ def DFCommonTruthTauDressingToolCfg(flags):
                                 decoratePhotons = False)
 
 
-def DFCommonTruthElectronIsolationTool1Cfg(flags):
-    """Configure the electron isolation tool, cone=0.2"""
-    return TruthIsolationToolCfg(flags,
-                                 name                   = "DFCommonTruthElectronIsolationTool1",
+def DFCommonTruthElectronIsolation1Cfg(flags):
+    """Configure the electron isolation algorithm, cone=0.2"""
+    return TruthIsolationCfg(flags,
+                                 name                   = "DFCommonTruthElectronIsolation1",
                                  isoParticlesKey        = "TruthElectrons",
                                  allParticlesKey        = "TruthParticles",
                                  particleIDsToCalculate = [11],
@@ -329,10 +293,10 @@ def DFCommonTruthElectronIsolationTool1Cfg(flags):
                                  ChargedParticlesOnly   = False)
 
 
-def DFCommonTruthElectronIsolationTool2Cfg(flags):
-    """Configure the electron isolation tool, cone=0.3"""
-    return TruthIsolationToolCfg(flags,
-                                 name                   =  "DFCommonTruthElectronIsolationTool2",
+def DFCommonTruthElectronIsolation2Cfg(flags):
+    """Configure the electron isolation algorithm, cone=0.3"""
+    return TruthIsolationCfg(flags,
+                                 name                   =  "DFCommonTruthElectronIsolation2",
                                  isoParticlesKey        = "TruthElectrons",
                                  allParticlesKey        = "TruthParticles",
                                  particleIDsToCalculate = [11],
@@ -341,10 +305,10 @@ def DFCommonTruthElectronIsolationTool2Cfg(flags):
                                  ChargedParticlesOnly   = True)
 
 
-def DFCommonTruthMuonIsolationTool1Cfg(flags):
-    """Configure the muon isolation tool, cone=0.2"""
-    return TruthIsolationToolCfg(flags,
-                                 name                   = "DFCommonTruthMuonIsolationTool1",
+def DFCommonTruthMuonIsolation1Cfg(flags):
+    """Configure the muon isolation algorithm, cone=0.2"""
+    return TruthIsolationCfg(flags,
+                                 name                   = "DFCommonTruthMuonIsolation1",
                                  isoParticlesKey        = "TruthMuons",
                                  allParticlesKey        = "TruthParticles",
                                  particleIDsToCalculate = [13],
@@ -353,10 +317,10 @@ def DFCommonTruthMuonIsolationTool1Cfg(flags):
                                  ChargedParticlesOnly   = False)
 
 
-def DFCommonTruthMuonIsolationTool2Cfg(flags):
-    """Configure the muon isolation tool, cone=0.3"""
-    return TruthIsolationToolCfg(flags,
-                                 name                   = "DFCommonTruthMuonIsolationTool2",
+def DFCommonTruthMuonIsolation2Cfg(flags):
+    """Configure the muon isolation algorithm, cone=0.3"""
+    return TruthIsolationCfg(flags,
+                                 name                   = "DFCommonTruthMuonIsolation2",
                                  isoParticlesKey        = "TruthMuons",
                                  allParticlesKey        = "TruthParticles",
                                  particleIDsToCalculate = [13],
@@ -365,10 +329,10 @@ def DFCommonTruthMuonIsolationTool2Cfg(flags):
                                  ChargedParticlesOnly   = True)
 
 
-def DFCommonTruthPhotonIsolationTool1Cfg(flags):
-    """Configure the photon isolation tool, etcone"""
-    return TruthIsolationToolCfg(flags,
-                                 name                   = "DFCommonTruthPhotonIsolationTool1",
+def DFCommonTruthPhotonIsolation1Cfg(flags):
+    """Configure the photon isolation algorithm, etcone"""
+    return TruthIsolationCfg(flags,
+                                 name                   = "DFCommonTruthPhotonIsolation1",
                                  isoParticlesKey        = "TruthPhotons",
                                  allParticlesKey        = "TruthParticles",
                                  particleIDsToCalculate = [22],
@@ -377,10 +341,10 @@ def DFCommonTruthPhotonIsolationTool1Cfg(flags):
                                  ChargedParticlesOnly   = False)
 
 
-def DFCommonTruthPhotonIsolationTool2Cfg(flags):
-    """Configure the photon isolation tool, ptcone"""
-    return  TruthIsolationToolCfg(flags,
-                                  name                   = "DFCommonTruthPhotonIsolationTool2",
+def DFCommonTruthPhotonIsolation2Cfg(flags):
+    """Configure the photon isolation algorithm, ptcone"""
+    return  TruthIsolationCfg(flags,
+                                  name                   = "DFCommonTruthPhotonIsolation2",
                                   isoParticlesKey        = "TruthPhotons",
                                   allParticlesKey        = "TruthParticles",
                                   particleIDsToCalculate = [22],
@@ -389,10 +353,10 @@ def DFCommonTruthPhotonIsolationTool2Cfg(flags):
                                   ChargedParticlesOnly   = True)
 
 
-def DFCommonTruthPhotonIsolationTool3Cfg(flags):
-   """Configure the photon isolation tool, etcone=0.4"""
-   return  TruthIsolationToolCfg(flags,
-                                 name                   = "DFCommonTruthPhotonIsolationTool3",
+def DFCommonTruthPhotonIsolation3Cfg(flags):
+   """Configure the photon isolation algorithm, etcone=0.4"""
+   return  TruthIsolationCfg(flags,
+                                 name                   = "DFCommonTruthPhotonIsolation3",
                                  isoParticlesKey        = "TruthPhotons",
                                  allParticlesKey        = "TruthParticles",
                                  particleIDsToCalculate = [22],
@@ -402,11 +366,11 @@ def DFCommonTruthPhotonIsolationTool3Cfg(flags):
 
 
 # Quark/gluon decoration for jets
-def DFCommonTruthDressedWZQGLabelToolCfg(flags):
-    """Configure the QG decoration tool for AntiKt4TruthDressedWZJets"""
-    return TruthQGDecorationToolCfg(flags,
-                                    name          = "DFCommonTruthDressedWZQGLabelTool",
-                                    JetCollection = "AntiKt4TruthDressedWZJets")
+def DFCommonTruthDressedWZQGLabelCfg(flags):
+    """Configure the QG decoration algorithm for AntiKt4TruthDressedWZJets"""
+    return TruthQGDecorationCfg(flags,
+                                name          = "DFCommonTruthDressedWZQGLabel",
+                                JetCollection = "AntiKt4TruthDressedWZJets")
 
 #==============================================================================
 # Truth thinning
@@ -427,23 +391,10 @@ def MenuTruthThinningCfg(flags, name, **kwargs):
 #==============================================================================
 # Truth links on some objects point to the main truth particle container.
 # This re-points the links from the old container to the new container
-def TruthLinkRepointToolCfg(flags, name, **kwargs):
-    """Configure the truth link repointing tool"""
+def TruthLinkRepointAlgCfg(flags, name, **kwargs):
+    """Configure the truth link repointing algorithm"""
     acc = ComponentAccumulator()
-    TruthLinkRepointTool = CompFactory.DerivationFramework.TruthLinkRepointTool
-    acc.addPublicTool(TruthLinkRepointTool(name, **kwargs),
-                      primary = True)
-    return acc
-
-
-# Makes a small collection of 'primary' vertices, one per event
-# A bit like a collection of 'reconstructable' vertices
-def TruthPVCollectionMakerCfg(flags, name, **kwargs):
-    """Configure the truth PV collection maker tool"""
-    acc = ComponentAccumulator()
-    TruthPVCollectionMaker = CompFactory.DerivationFramework.TruthPVCollectionMaker
-    acc.addPublicTool(TruthPVCollectionMaker(name, **kwargs),
-                      primary = True)
+    acc.addEventAlgo(CompFactory.DerivationFramework.TruthLinkRepointAlg(name, **kwargs))
     return acc
 
 

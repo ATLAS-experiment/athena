@@ -84,7 +84,7 @@ def EGAM2SkimmingToolCfg(flags):
     return acc
 
 
-def EGAM2JpsieeMassTool1Cfg(flags):
+def EGAM2JpsieeMassAug1Cfg(flags):
     """Configure the EGAM2 ee invariant mass augmentation tool 1"""
     acc = ComponentAccumulator()
 
@@ -101,7 +101,7 @@ def EGAM2JpsieeMassTool1Cfg(flags):
         "(" + electronQualityRequirement + "&&" + electronPtRequirement + ")"
     )
 
-    acc.setPrivateTools(
+    EGAM2_JpsieeMassTool1 = acc.addPublicTool(
         CompFactory.DerivationFramework.EGInvariantMassTool(
             name="EGAM2_JpsieeMassTool1",
             Object1Requirements=requirement_el,
@@ -115,12 +115,12 @@ def EGAM2JpsieeMassTool1Cfg(flags):
             DoTransverseMass=False,
             MinDeltaR=0.0,
         )
-    )
-
+    ) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("EGAM2_JpsieeMassAug1", AugmentationTools = [EGAM2_JpsieeMassTool1]), primary=True)
     return acc
 
 
-def EGAM2JpsieeMassTool2Cfg(flags):
+def EGAM2JpsieeMassAug2Cfg(flags):
     """Configure the EGAM2 ee invariant mass augmentation tool 2"""
     acc = ComponentAccumulator()
 
@@ -140,7 +140,7 @@ def EGAM2JpsieeMassTool2Cfg(flags):
     )
     requirement_el_probe = "Electrons.pt > 4.5*GeV"
 
-    acc.setPrivateTools(
+    EGAM2_JpsieeMassTool2 = acc.addPublicTool(
         CompFactory.DerivationFramework.EGInvariantMassTool(
             name="EGAM2_JpsieeMassTool2",
             Object1Requirements=requirement_el_tag,
@@ -154,7 +154,8 @@ def EGAM2JpsieeMassTool2Cfg(flags):
             DoTransverseMass=False,
             MinDeltaR=0.15,
         )
-    )
+    ) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("EGAM2_JpsieeMassAug2", AugmentationTools = [EGAM2_JpsieeMassTool2]), primary=True)
 
     return acc
 
@@ -174,18 +175,12 @@ def EGAM2KernelCfg(flags, name="EGAM2Kernel", **kwargs):
     )
 
     # EGAM2 augmentations
-    augmentationTools = []
 
     # ====================================================================
     # ee invariant masses
     # ====================================================================
-    EGAM2JpsieeMassTool1 = acc.popToolsAndMerge(EGAM2JpsieeMassTool1Cfg(flags))
-    acc.addPublicTool(EGAM2JpsieeMassTool1)
-    augmentationTools.append(EGAM2JpsieeMassTool1)
-
-    EGAM2JpsieeMassTool2 = acc.popToolsAndMerge(EGAM2JpsieeMassTool2Cfg(flags))
-    acc.addPublicTool(EGAM2JpsieeMassTool2)
-    augmentationTools.append(EGAM2JpsieeMassTool2)
+    acc.merge(EGAM2JpsieeMassAugl1Cfg(flags))
+    acc.merge(EGAM2JpsieeMassAug2Cfg(flags))
 
     # ====================================================================
     # Gain and cluster energies per layer decoration tool
@@ -335,11 +330,12 @@ def EGAM2KernelCfg(flags, name="EGAM2Kernel", **kwargs):
     skimmingTool = acc.getPrimaryAndMerge(EGAM2SkimmingToolCfg(flags))
 
     # setup the kernel
+    for tool in augmentationTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     acc.addEventAlgo(
         CompFactory.DerivationFramework.DerivationKernel(
             name,
             SkimmingTools=[skimmingTool],
-            AugmentationTools=augmentationTools,
             ThinningTools=thinningTools,
         )
     )

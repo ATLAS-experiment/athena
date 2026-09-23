@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -48,7 +48,7 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode PseudoTrackSelector::addBranches(const EventContext& ctx) const
+  StatusCode PseudoTrackSelector::execute(const EventContext& ctx) const
   {
     std::unique_ptr<xAOD::TrackParticleContainer> outputRecoReplacedWithPseudo = std::make_unique<xAOD::TrackParticleContainer>();
     std::unique_ptr<xAOD::TrackParticleAuxContainer> outputRecoReplacedWithPseudoAux = std::make_unique<xAOD::TrackParticleAuxContainer>();

@@ -24,10 +24,8 @@
 
 using namespace DerivationFramework;
 
-ReVertex::ReVertex(const std::string& t,
-                   const std::string& n,
-                   const IInterface* p) :
-    base_class(t,n,p), m_vertexEstimator("InDet::VertexPointEstimator"), m_iVertexFitter("Trk::TrkVKalVrtFitter"),
+ReVertex::ReVertex(const std::string& name, ISvcLocator* svcLoc) :
+    AthReentrantAlgorithm(name, svcLoc), m_vertexEstimator("InDet::VertexPointEstimator"), m_iVertexFitter("Trk::TrkVKalVrtFitter"),
     m_massConst(0.),
     m_totalMassConst(0.),
     m_v0Tools("Trk::V0Tools"),
@@ -107,7 +105,7 @@ StatusCode ReVertex::initialize() {
 }
 
 
-StatusCode ReVertex::addBranches(const EventContext& ctx) const {
+StatusCode ReVertex::execute(const EventContext& ctx) const {
     SG::WriteHandle<xAOD::VertexContainer> vtxContainer(m_OutputContainerName, ctx);
     ATH_CHECK(vtxContainer.record(std::make_unique<xAOD::VertexContainer>(), std::make_unique<xAOD::VertexAuxContainer>()));
 

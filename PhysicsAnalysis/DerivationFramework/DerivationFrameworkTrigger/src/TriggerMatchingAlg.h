@@ -1,13 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef DERIVATIONFRAMEWORKTRIGGER_TRIGGERMATCHINGTOOL_H
-#define DERIVATIONFRAMEWORKTRIGGER_TRIGGERMATCHINGTOOL_H
+#ifndef DERIVATIONFRAMEWORKTRIGGER_TRIGGERMATCHINGALG_H
+#define DERIVATIONFRAMEWORKTRIGGER_TRIGGERMATCHINGALG_H
 
-#include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "CxxUtils/checker_macros.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "TriggerMatchingTool/IIParticleRetrievalTool.h"
 #include "TriggerMatchingTool/IMatchScoringTool.h"
@@ -21,7 +20,7 @@
 namespace DerivationFramework
 {
   /**
-   * @brief Tool to perform trigger matching in the derivation framework.
+   * @brief Algorithm to perform trigger matching in the derivation framework.
    *
    * Trigger matching in the derivation framework has to take the reverse
    * approach to matching in analysis code. There, the matching tool is provided
@@ -35,13 +34,13 @@ namespace DerivationFramework
    *
    * @author Jon Burr
    */
-  class TriggerMatchingTool final : public extends<AthAlgTool, IAugmentationTool>
+  class TriggerMatchingAlg final : public AthReentrantAlgorithm
   {
   public:
     /// Helper typedefs
     using particleVec_t = std::vector<const xAOD::IParticle *>;
     /// Constructor
-    TriggerMatchingTool(
+    TriggerMatchingAlg(
         const std::string &type,
         const std::string &name,
         const IInterface *pSvcLocator);
@@ -50,7 +49,7 @@ namespace DerivationFramework
     virtual StatusCode initialize() override;
 
     /// Calculate the matchings
-    virtual StatusCode addBranches(const EventContext& ctx) const override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
 
   private:
     // Properties
@@ -122,7 +121,7 @@ namespace DerivationFramework
     bool matchParticles(
         const xAOD::IParticle *lhs,
         const xAOD::IParticle *rhs) const;
-  }; //> end class TriggerMatchingTool
+  }; //> end class TriggerMatchingAlg
 } // namespace DerivationFramework
 
-#endif //> ! DERIVATIONFRAMEWORKTRIGGER_TRIGGERMATCHINGTOOL_H
+#endif //> ! DERIVATIONFRAMEWORKTRIGGER_TRIGGERMATCHINGALG_H

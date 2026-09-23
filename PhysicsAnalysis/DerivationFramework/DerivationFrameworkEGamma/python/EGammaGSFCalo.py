@@ -41,7 +41,7 @@ def EGammaGSFCaloToolsCfg(flags, name = "GSFCaloImprovement", **kwargs):
     kwargs.setdefault("useTruth"  , flags.Input.isMC)
     kwargs.setdefault("useTRT"    , flags.Detector.EnableTRT)
 
-    acc.setPrivateTools(CompFactory.DerivationFramework.EGammaGSFCalo(name, **kwargs))
+    acc.addEventAlgo(CompFactory.DerivationFramework.EGammaGSFCalo(name, **kwargs))
     return acc
 
 if __name__ == "__main__":
@@ -54,14 +54,13 @@ if __name__ == "__main__":
     flags.Input.Files = defaultTestFiles.RDO_RUN2
     flags.lock()
     acc = MainServicesCfg(flags)
-    tool = acc.popToolsAndMerge(EGammaGSFCaloToolsCfg(flags, "GSFCaloImprovement"))
-    acc.addPublicTool(tool)
+    tool = acc.merge(EGammaGSFCaloToolsCfg(flags, "GSFCaloImprovement"))
 
     mlog = logging.getLogger("EGammaGSFCaloConfigTest")
     mlog.info("Configuring GSF Calo Tool: ")
     printProperties(
          mlog,
-         acc.getPublicTool(name="GSFCaloImprovement"),
+         acc.getEventAlgo(name="GSFCaloImprovement"),
          nestLevel=1,
          printDefaults=True,
     )

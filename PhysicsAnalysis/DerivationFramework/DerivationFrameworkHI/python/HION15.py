@@ -19,9 +19,8 @@ def HION15KernelCfg(flags, name='HION15Kernel', **kwargs):
     thinningTools = []
     skimmingTool = acc.getPrimaryAndMerge(HION7SkimmingToolCfg(flags, format="HION15"))
     globalAugmentationTool = acc.getPrimaryAndMerge(HION7GlobalAugmentationToolCfg(flags))
-    augmentationTool=[globalAugmentationTool]
-
-    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(name,ThinningTools = thinningTools, SkimmingTools = [skimmingTool], AugmentationTools=augmentationTool),sequenceName="HION15Sequence")
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(globalAugmentationTool.name+"Aug", AugmentationTools = [globalAugmentationTool]),sequenceName="HION15Sequence")
+    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(name,ThinningTools = thinningTools, SkimmingTools = [skimmingTool]),sequenceName="HION15Sequence")
 
     return acc
 

@@ -34,13 +34,11 @@ def STDM6KernelCfg(flags, name='STDM6Kernel', **kwargs):
     ))
 
     from DerivationFrameworkInDet.InDetToolsConfig import InDetTrackSelectionToolWrapperCfg
-    DFCommonTrackSelection = acc.getPrimaryAndMerge(InDetTrackSelectionToolWrapperCfg(
+    acc.merge(InDetTrackSelectionToolWrapperCfg(
         flags,
-        name           = "DFJETM1CommonTrackSelectionLoose",
+        name           = "JETM1CommonKernel",
         CutLevel       = "Loose",
         DecorationName = "DFJETM1Loose"))
-
-    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("JETM1CommonKernel", AugmentationTools = [DFCommonTrackSelection]))
 
     # Thinning tools
     # These are set up in PhysCommonThinningConfig. Only thing needed here the list of tools to schedule 

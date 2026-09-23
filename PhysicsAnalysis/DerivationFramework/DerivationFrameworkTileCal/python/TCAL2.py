@@ -56,8 +56,7 @@ def TCAL2KernelCfg(flags, name='TCAL2Kernel', **kwargs):
     if flags.GeoModel.Run is LHCPeriod.Run2:
         cellsToVectorstools.append ( acc.addPublicTool(acc.popToolsAndMerge(TCAL2E4prToVectorsToolCfg(flags, Prefix=f'{prefix}e4pr_'))) )
 
-    DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
-    acc.addEventAlgo(DerivationKernel(name, AugmentationTools = cellsToVectorstools))
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(name, AugmentationTools = cellsToVectorstools))
 
     return acc
 

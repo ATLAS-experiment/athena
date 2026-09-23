@@ -1,14 +1,14 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Finds the nearest jet and adds its info to the muon.
-#include "MuonJetDrTool.h"
+#include "MuonJetDrAlg.h"
 
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "StoreGate/WriteDecorHandle.h"
 
-StatusCode DerivationFramework::MuonJetDrTool::initialize() {
+StatusCode DerivationFramework::MuonJetDrAlg::initialize() {
   ATH_CHECK(m_muonSGKey.initialize());
   ATH_CHECK(m_jetSGKey.initialize());
   ATH_CHECK(m_jetDR_SGKey.initialize());
@@ -16,7 +16,7 @@ StatusCode DerivationFramework::MuonJetDrTool::initialize() {
 }
 
 
-StatusCode DerivationFramework::MuonJetDrTool::addBranches(const EventContext& ctx) const {
+StatusCode DerivationFramework::MuonJetDrAlg::execute(const EventContext& ctx) const {
 
   // Retrieve main muonicle collection
   SG::ReadHandle<xAOD::MuonContainer> muons{m_muonSGKey, ctx};

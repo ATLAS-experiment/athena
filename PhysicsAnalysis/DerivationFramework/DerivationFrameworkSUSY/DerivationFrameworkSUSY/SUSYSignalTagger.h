@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -15,7 +15,7 @@
 
 #include <string>
 
-#include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
@@ -25,14 +25,14 @@
 
 namespace DerivationFramework {
 
-  class SUSYSignalTagger : public extends<AthAlgTool, IAugmentationTool> {
+  class SUSYSignalTagger : public AthReentrantAlgorithm {
 
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override final;
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
 
   private:
     bool FindSusyHardProc(const xAOD::TruthParticleContainer& truthP, int& pdgid1, int& pdgid2) const;

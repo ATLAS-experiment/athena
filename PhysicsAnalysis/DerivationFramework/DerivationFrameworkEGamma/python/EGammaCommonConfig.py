@@ -23,16 +23,14 @@ def EGammaCommonCfg(flags):
     # ====================================================================
     # PHOTON ETA (=ETA2), ET (=E/COSH(ETA2))
     # ====================================================================
-    from DerivationFrameworkEGamma.EGammaToolsConfig import PhotonsDirectionToolCfg
+    from DerivationFrameworkEGamma.EGammaToolsConfig import PhotonsDirectionAlgCfg
 
-    DFCommonPhotonsDirection = acc.addPublicTool(acc.popToolsAndMerge(
-        PhotonsDirectionToolCfg(
-            flags,
-            name="DFCommonPhotonsDirection",
-            EtaSGEntry="DFCommonPhotons_eta",
-            PhiSGEntry="DFCommonPhotons_phi",
-            EtSGEntry="DFCommonPhotons_et",
-        )
+    acc.merge(PhotonsDirectionAlgCfg(
+        flags,
+        name="DFCommonPhotonsDirection",
+        EtaSGEntry="DFCommonPhotons_eta",
+        PhiSGEntry="DFCommonPhotons_phi",
+        EtSGEntry="DFCommonPhotons_et",
     ))
 
     isMC = flags.Input.isMC
@@ -416,7 +414,7 @@ def EGammaCommonCfg(flags):
     # Note: LH selectors don't need fudging since the LH is tuned to data
 
     # decorate electrons with the output of LH very loose
-    ElectronPassLHVeryLoose = acc.addPublicTool(acc.popToolsAndMerge(
+    acc.merge(
         EGElectronLikelihoodToolWrapperCfg(
             flags,
             name="ElectronPassLHVeryLoose",
@@ -426,10 +424,10 @@ def EGammaCommonCfg(flags):
             ContainerName="Electrons",
             StoreTResult=False,
         )
-    ))
+    )
 
     # decorate electrons with the output of LH loose
-    ElectronPassLHLoose = acc.addPublicTool(acc.popToolsAndMerge(
+    acc.merge(
         EGElectronLikelihoodToolWrapperCfg(
             flags,
             name="ElectronPassLHLoose",
@@ -439,10 +437,10 @@ def EGammaCommonCfg(flags):
             ContainerName="Electrons",
             StoreTResult=False,
         )
-    ))
+    )
 
     # decorate electrons with the output of LH loose+BL
-    ElectronPassLHLooseBL = acc.addPublicTool(acc.popToolsAndMerge(
+    acc.merge(
         EGElectronLikelihoodToolWrapperCfg(
             flags,
             name="ElectronPassLHLooseBL",
@@ -452,10 +450,10 @@ def EGammaCommonCfg(flags):
             ContainerName="Electrons",
             StoreTResult=False,
         )
-    ))
+    )
 
     # decorate electrons with the output of LH medium
-    ElectronPassLHMedium = acc.addPublicTool(acc.popToolsAndMerge(
+    acc.merge(
         EGElectronLikelihoodToolWrapperCfg(
             flags,
             name="ElectronPassLHMedium",
@@ -465,10 +463,10 @@ def EGammaCommonCfg(flags):
             ContainerName="Electrons",
             StoreTResult=False,
         )
-    ))
+    )
 
     # decorate electrons with the output of LH tight
-    ElectronPassLHTight = acc.addPublicTool(acc.popToolsAndMerge(
+    acc.merge(
         EGElectronLikelihoodToolWrapperCfg(
             flags,
             name="ElectronPassLHTight",
@@ -478,10 +476,10 @@ def EGammaCommonCfg(flags):
             ContainerName="Electrons",
             StoreTResult=False,
         )
-    ))
+    )
 
     # decorate electrons with the output of DNN Loose
-    ElectronPassDNNLoose = acc.addPublicTool(acc.popToolsAndMerge(
+    acc.merge(
         EGElectronLikelihoodToolWrapperCfg(
             flags,
             name="ElectronPassDNNLoose",
@@ -501,10 +499,10 @@ def EGammaCommonCfg(flags):
             ],
             StoreMultipleOutputs=True,
         )
-    ))
+    )
 
     # decorate electrons with the output of DNN Medium
-    ElectronPassDNNMedium = acc.addPublicTool(acc.popToolsAndMerge(
+    acc.merge(
         EGElectronLikelihoodToolWrapperCfg(
             flags,
             name="ElectronPassDNNMedium",
@@ -515,10 +513,10 @@ def EGammaCommonCfg(flags):
             FudgedContainerName="FudgedElectrons" if isMC else "",
             StoreTResult=False,
         )
-    ))
+    )
 
     # decorate electrons with the output of DNN Tight
-    ElectronPassDNNTight = acc.addPublicTool(acc.popToolsAndMerge(
+    acc.merge(
         EGElectronLikelihoodToolWrapperCfg(
             flags,
             name="ElectronPassDNNTight",
@@ -529,10 +527,10 @@ def EGammaCommonCfg(flags):
             FudgedContainerName="FudgedElectrons" if isMC else "",
             StoreTResult=False,
         )
-    ))
+    )
 
     # decorate electrons with the output of DNN VeryLoose97 without CF
-    ElectronPassDNNVeryLooseNoCF97 = acc.addPublicTool(acc.popToolsAndMerge(
+    acc.merge(
         EGElectronLikelihoodToolWrapperCfg(
             flags,
             name="ElectronPassDNNVeryLooseNoCF97",
@@ -543,9 +541,9 @@ def EGammaCommonCfg(flags):
             FudgedContainerName="FudgedElectrons" if isMC else "",
             StoreTResult=False,
         )
-    ))
+    )
     # decorate electrons with the output of DNN Loose without CF
-    ElectronPassDNNLooseNoCF = acc.addPublicTool(acc.popToolsAndMerge(
+    acc.merge(
         EGElectronLikelihoodToolWrapperCfg(
             flags,
             name="ElectronPassDNNLooseNoCF",
@@ -556,10 +554,10 @@ def EGammaCommonCfg(flags):
             FudgedContainerName="FudgedElectrons" if isMC else "",
             StoreTResult=False,
         )
-    ))
+    )
 
     # decorate electrons with the output of DNN Medium without CF
-    ElectronPassDNNMediumNoCF = acc.addPublicTool(acc.popToolsAndMerge(
+    acc.merge(
         EGElectronLikelihoodToolWrapperCfg(
             flags,
             name="ElectronPassDNNMediumNoCF",
@@ -570,10 +568,10 @@ def EGammaCommonCfg(flags):
             FudgedContainerName="FudgedElectrons" if isMC else "",
             StoreTResult=False,
         )
-    ))
+    )
 
     # decorate electrons with the output of DNN Tight without CF
-    ElectronPassDNNTightNoCF = acc.addPublicTool(acc.popToolsAndMerge(
+    acc.merge(
         EGElectronLikelihoodToolWrapperCfg(
             flags,
             name="ElectronPassDNNTightNoCF",
@@ -584,63 +582,12 @@ def EGammaCommonCfg(flags):
             FudgedContainerName="FudgedElectrons" if isMC else "",
             StoreTResult=False,
         )
-    ))
-
-    # decorate electrons with the output of ECIDS
-    if flags.Derivation.Egamma.addECIDS:
-        ElectronPassECIDS = acc.addPublicTool(acc.popToolsAndMerge(
-            EGElectronLikelihoodToolWrapperCfg(
-                flags,
-                name="ElectronPassECIDS",
-                EGammaElectronLikelihoodTool=ElectronChargeIDSelector,
-                CutType="",
-                StoreGateEntryName="DFCommonElectronsECIDS",
-                ContainerName="Electrons",
-                StoreTResult=True,
-            )
-        ))
-
-    if includeFwdElectrons:
-        # decorate forward electrons with the output of LH loose
-        ForwardElectronPassLHLoose = acc.addPublicTool(acc.popToolsAndMerge(
-            EGElectronLikelihoodToolWrapperCfg(
-                flags,
-                name="ForwardElectronPassLHLoose",
-                EGammaElectronLikelihoodTool=ForwardElectronLHSelectorLoose,
-                CutType="",
-                StoreGateEntryName="DFCommonForwardElectronsLHLoose",
-                ContainerName="ForwardElectrons",
-            )
-        ))
-
-        # decorate forward electrons with the output of LH medium
-        ForwardElectronPassLHMedium = acc.addPublicTool(acc.popToolsAndMerge(
-            EGElectronLikelihoodToolWrapperCfg(
-                flags,
-                name="ForwardElectronPassLHMedium",
-                EGammaElectronLikelihoodTool=ForwardElectronLHSelectorMedium,
-                CutType="",
-                StoreGateEntryName="DFCommonForwardElectronsLHMedium",
-                ContainerName="ForwardElectrons",
-            )
-        ))
-
-        # decorate forward electrons with the output of LH tight
-        ForwardElectronPassLHTight = acc.addPublicTool(acc.popToolsAndMerge(
-            EGElectronLikelihoodToolWrapperCfg(
-                flags,
-                name="ForwardElectronPassLHTight",
-                EGammaElectronLikelihoodTool=ForwardElectronLHSelectorTight,
-                CutType="",
-                StoreGateEntryName="DFCommonForwardElectronsLHTight",
-                ContainerName="ForwardElectrons",
-            )
-        ))
+    )
 
     # decorate photons with the output of IsEM loose
     # on MC, use fudged shower shapes to compute the ID (but the
     # original shower shapes are not overridden)
-    PhotonPassIsEMLoose = acc.addPublicTool(acc.popToolsAndMerge(
+    acc.merge(
         EGSelectionToolWrapperCfg(
             flags,
             name="PhotonPassIsEMLoose",
@@ -650,12 +597,12 @@ def EGammaCommonCfg(flags):
             ContainerName="Photons",
             FudgedContainerName="FudgedPhotons" if isFullSim else "",
         )
-    ))
+    )
 
     # decorate photons with the output of IsEM medium
     # on MC, use fudged shower shapes to compute the ID (but the
     # original shower shapes are not overridden)
-    PhotonPassIsEMMedium = acc.addPublicTool(acc.popToolsAndMerge(
+    acc.merge(
         EGSelectionToolWrapperCfg(
             flags,
             name="PhotonPassIsEMMedium",
@@ -665,12 +612,12 @@ def EGammaCommonCfg(flags):
             ContainerName="Photons",
             FudgedContainerName="FudgedPhotons" if isFullSim else "",
         )
-    ))
+    )
 
     # decorate photons with the output of IsEM tight
     # on full-sim MC, use fudged shower shapes to compute the ID
     # (but the original shower shapes are not overridden)
-    PhotonPassIsEMTight = acc.addPublicTool(acc.popToolsAndMerge(
+    acc.merge(
         EGSelectionToolWrapperCfg(
             flags,
             name="PhotonPassIsEMTight",
@@ -680,12 +627,12 @@ def EGammaCommonCfg(flags):
             ContainerName="Photons",
             FudgedContainerName="FudgedPhotons" if isFullSim else "",
         )
-    ))
+    )
 
     # decorate photons with the output of BDT tight
     # on full-sim MC, use fudged shower shapes to compute the ID
     # (but the original shower shapes are not overridden)
-    PhotonBDTDecorator = acc.addPublicTool(acc.popToolsAndMerge(
+    acc.merge(
         EGPhotonBDTToolDecoratorCfg(
             flags,
             name="PhotonBDTDecorator",
@@ -694,10 +641,10 @@ def EGammaCommonCfg(flags):
             ContainerName="Photons",
             FudgedContainerName= "FudgedPhotons" if isFullSim else ""
         )
-    ))
+    )
 
     
-    PhotonPassBDTTight = acc.addPublicTool(acc.popToolsAndMerge(
+    acc.merge(
         EGPhotonBDTToolWrapperCfg(
             flags,
             name="PhotonPassBDTTight",
@@ -708,12 +655,12 @@ def EGammaCommonCfg(flags):
             ContainerName="Photons",
             FudgedContainerName= "FudgedPhotons" if isFullSim else ""
         )
-    ))
+    )
 
     # decorate photons with the output of IsEM tight
     # on MC, normalizing flows-based correction used to compute the ID
     # (but the original shower shapes are not overridden)
-    PhotonPassIsEMTightNF = acc.addPublicTool(acc.popToolsAndMerge(
+    acc.merge(
         EGSelectionToolWrapperCfg(
             flags,
             name="PhotonPassIsEMTightNF",
@@ -728,7 +675,7 @@ def EGammaCommonCfg(flags):
     # decorate photons with the output of BDT tight
     # on MC, normalizing flows-based correction used to compute the ID
     # (but the original shower shapes are not overridden)
-    PhotonBDTDecoratorNF = acc.addPublicTool(acc.popToolsAndMerge(
+    acc.merge(
         EGPhotonBDTToolDecoratorCfg(
             flags,
             name="PhotonBDTDecoratorNF",
@@ -737,9 +684,9 @@ def EGammaCommonCfg(flags):
             ContainerName="Photons",
             FudgedContainerName= "NFFudgedPhotons" if (isMC and isRun2orRun3) else ""
         )
-    ))
+    )
 
-    PhotonPassBDTTightNF = acc.addPublicTool(acc.popToolsAndMerge(
+    acc.merge(
         EGPhotonBDTToolWrapperCfg(
             flags,
             name="PhotonPassBDTTightNF",
@@ -750,14 +697,14 @@ def EGammaCommonCfg(flags):
             ContainerName="Photons",
             FudgedContainerName= "NFFudgedPhotons" if (isMC and isRun2orRun3) else ""
         )
-    ))
+    )
 
 
     # decorate photons with the photon cleaning flags
     # on MC, fudge the shower shapes used to compute the flags
     from DerivationFrameworkEGamma.EGammaToolsConfig import EGPhotonCleaningWrapperCfg
 
-    PhotonPassCleaning = acc.addPublicTool(acc.popToolsAndMerge(
+    acc.merge(
         EGPhotonCleaningWrapperCfg(
             flags,
             name="PhotonPassCleaning",
@@ -765,57 +712,67 @@ def EGammaCommonCfg(flags):
             ContainerName="Photons",
             FudgedContainerName= "FudgedPhotons" if isFullSim else ""
         )
-    ))
+    )
 
     # decorate some electrons with an additional ambiguity flag
     # against internal and early material conversion
-    from DerivationFrameworkEGamma.EGammaToolsConfig import EGElectronAmbiguityToolCfg
+    from DerivationFrameworkEGamma.EGammaToolsConfig import EGElectronAmbiguityAlgCfg
 
-    ElectronAmbiguity = acc.addPublicTool(acc.popToolsAndMerge(
-        EGElectronAmbiguityToolCfg(
+    acc.merge(
+        EGElectronAmbiguityAlgCfg(
             flags,
             name="ElectronAdditionnalAmbiguity",
             isMC=flags.Input.isMC,
         )
-    ))
+    )
 
-    # list of all the decorators so far
-    EGAugmentationTools = [
-        DFCommonPhotonsDirection,
-        ElectronPassLHVeryLoose,
-        ElectronPassLHLoose,
-        ElectronPassLHLooseBL,
-        ElectronPassLHMedium,
-        ElectronPassLHTight,
-        ElectronPassDNNLoose,
-        ElectronPassDNNMedium,
-        ElectronPassDNNTight,
-        ElectronPassDNNVeryLooseNoCF97,
-        ElectronPassDNNLooseNoCF,
-        ElectronPassDNNMediumNoCF,
-        ElectronPassDNNTightNoCF,
-        PhotonPassIsEMLoose,
-        PhotonPassIsEMMedium,
-        PhotonPassIsEMTight,
-        PhotonPassIsEMTightNF,
-        PhotonBDTDecorator,
-        PhotonPassBDTTight,
-        PhotonBDTDecoratorNF,
-        PhotonPassBDTTightNF,
-        PhotonPassCleaning,
-        ElectronAmbiguity,
-    ]
-
+    # decorate electrons with the output of ECIDS
     if flags.Derivation.Egamma.addECIDS:
-        EGAugmentationTools.extend([ElectronPassECIDS])
+        acc.merge(EGElectronLikelihoodToolWrapperCfg(
+                flags,
+                name="ElectronPassECIDS",
+                EGammaElectronLikelihoodTool=ElectronChargeIDSelector,
+                CutType="",
+                StoreGateEntryName="DFCommonElectronsECIDS",
+                ContainerName="Electrons",
+                StoreTResult=True,
+            )
+        )
 
     if includeFwdElectrons:
-        EGAugmentationTools.extend(
-            [
-                ForwardElectronPassLHLoose,
-                ForwardElectronPassLHMedium,
-                ForwardElectronPassLHTight,
-            ]
+        # decorate forward electrons with the output of LH loose
+        acc.merge(EGElectronLikelihoodToolWrapperCfg(
+                flags,
+                name="ForwardElectronPassLHLoose",
+                EGammaElectronLikelihoodTool=ForwardElectronLHSelectorLoose,
+                CutType="",
+                StoreGateEntryName="DFCommonForwardElectronsLHLoose",
+                ContainerName="ForwardElectrons",
+            )
+        )
+
+        # decorate forward electrons with the output of LH medium
+        acc.merge(EGElectronLikelihoodToolWrapperCfg(
+                flags,
+                name="ForwardElectronPassLHMedium",
+                EGammaElectronLikelihoodTool=ForwardElectronLHSelectorMedium,
+                CutType="",
+                StoreGateEntryName="DFCommonForwardElectronsLHMedium",
+                ContainerName="ForwardElectrons",
+            )
+        )
+
+        # decorate forward electrons with the output of LH tight
+        acc.merge(EGElectronLikelihoodToolWrapperCfg(
+                flags,
+                name="ForwardElectronPassLHTight",
+                EGammaElectronLikelihoodTool=ForwardElectronLHSelectorTight,
+                CutType="",
+                StoreGateEntryName="DFCommonForwardElectronsLHTight",
+                ContainerName="ForwardElectrons",
+            )
+        )
+
         )
 
     from egammaAlgs.egammaAODFixesConfig import runAODFix
@@ -827,21 +784,18 @@ def EGammaCommonCfg(flags):
                 EgammaCoreCellRecoveryCfg,
             )
 
-            CoreCellRecoveryTool = acc.popToolsAndMerge(
+            acc.merge(
                 EgammaCoreCellRecoveryCfg(flags)
             )
-            acc.addPublicTool(CoreCellRecoveryTool)
-            EGAugmentationTools.append(CoreCellRecoveryTool)
 
     if flags.Derivation.Egamma.addMissingCellInfo:
         from DerivationFrameworkEGamma.EGammaToolsConfig import EGammaEnergyCalibrationWrapperCfg
-        TransformerEnergyCalibration = acc.addPublicTool(acc.popToolsAndMerge(
+        acc.merge(
             EGammaEnergyCalibrationWrapperCfg(
                 flags,
                 name="TransformerEnergyCalibration",
             )
-        ))
-        EGAugmentationTools.append(TransformerEnergyCalibration)
+        )
 
     # ==================================================
     # Truth Related tools
@@ -851,23 +805,21 @@ def EGammaCommonCfg(flags):
             BkgElectronClassificationCfg,
         )
 
-        BkgElectronClassificationTool = acc.addPublicTool(acc.popToolsAndMerge(
-            BkgElectronClassificationCfg(
-                flags,
-                name="BkgElectronClassificationTool"
+        acc.merge(BkgElectronClassificationCfg(
+            flags,
+            name="BkgElectronClassification"
             )
-        ))
-        EGAugmentationTools.append(BkgElectronClassificationTool)
+        )
 
         # Decorate egammaTruthParticles with truth-particle-level etcone20,30,40
         from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import (
-            TruthIsolationToolCfg,
+            TruthIsolationCfg,
         )
 
-        TruthEgetIsolationTool = acc.getPrimaryAndMerge(
-            TruthIsolationToolCfg(
+        acc.merge(
+            TruthIsolationCfg(
                 flags,
-                name="TruthEgetIsolationTool",
+                name="TruthEgetIsolation",
                 isoParticlesKey="egammaTruthParticles",
                 allParticlesKey="TruthParticles",
                 particleIDsToCalculate=[-11, 11, 22],
@@ -877,13 +829,12 @@ def EGammaCommonCfg(flags):
                 ChargedParticlesOnly=False,
             )
         )
-        EGAugmentationTools.append(TruthEgetIsolationTool)
 
         # Decorate egammaTruthParticles with truth-particle-level ptcone20,30,40
-        TruthEgptIsolationTool = acc.getPrimaryAndMerge(
-            TruthIsolationToolCfg(
+        acc.merge(
+            TruthIsolationCfg(
                 flags,
-                name="TruthEgptIsolationTool",
+                name="TruthEgptIsolation",
                 isoParticlesKey="egammaTruthParticles",
                 allParticlesKey="TruthParticles",
                 particleIDsToCalculate=[-11, 11, 22],
@@ -892,7 +843,6 @@ def EGammaCommonCfg(flags):
                 ChargedParticlesOnly=True,
             )
         )
-        EGAugmentationTools.append(TruthEgptIsolationTool)
 
         # Compute the truth-particle-level energy density in the central eta region
         from EventShapeTools.EventDensityConfig import configEventDensityTool
@@ -951,16 +901,6 @@ def EGammaCommonCfg(flags):
             acc.merge(PhotonNFFudgeAlgorithmCfg(flags))
         if isFullSim:
             acc.merge(PhotonFudgeAlgorithmCfg(flags))
-        
-    # =======================================
-    # CREATE THE DERIVATION KERNEL ALGORITHM
-    # =======================================
-
-    acc.addEventAlgo(
-        CompFactory.DerivationFramework.CommonAugmentation(
-            "EGammaCommonKernel", AugmentationTools=EGAugmentationTools
-        )
-    )
 
     # =======================================
     # ADD TOOLS : custom electron, photon and muon track isolation

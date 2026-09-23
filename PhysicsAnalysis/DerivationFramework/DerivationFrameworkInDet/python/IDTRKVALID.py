@@ -79,21 +79,18 @@ def IDTRKVALIDKernelCommonCfg(flags, name='IDTRKVALIDKernel'):
         # Add unbiased track parameters to track particles
         from DerivationFrameworkInDet.InDetToolsConfig import (
             TrackToVertexWrapperCfg)
-        IDTRKVALIDTrackToVertexWrapper = acc.getPrimaryAndMerge(
+        acc.merge(
             TrackToVertexWrapperCfg(
                 flags, name="IDTRKVALIDTrackToVertexWrapper",
                 DecorationPrefix="IDTRKVALID"))
-        augmentationTools.append(IDTRKVALIDTrackToVertexWrapper)
 
         from DerivationFrameworkInDet.InDetToolsConfig import (
             UsedInVertexFitTrackDecoratorCfg)
-        IDTRKVALIDUsedInFitDecorator = acc.getPrimaryAndMerge(
-            UsedInVertexFitTrackDecoratorCfg(flags))
-        augmentationTools.append(IDTRKVALIDUsedInFitDecorator)
+        acc.merge(UsedInVertexFitTrackDecoratorCfg(flags))
 
         # @TODO eventually computed for other extra outputs. Possible to come  up with a solution to use a common Z0AtPV if there is more than one client ?
         from DerivationFrameworkInDet.InDetToolsConfig import TrackParametersAtPVCfg
-        DFCommonZ0AtPV = acc.getPrimaryAndMerge(TrackParametersAtPVCfg(
+        acc.merge(TrackParametersAtPVCfg(
             flags, name="IDTRKVALID_DFCommonZ0AtPV",
             Z0SGEntryName="IDTRKVALIDInDetTrackZ0AtPV"))
         augmentationTools.append(DFCommonZ0AtPV)
@@ -112,7 +109,6 @@ def IDTRKVALIDKernelCommonCfg(flags, name='IDTRKVALIDKernel'):
 
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
         name,
-        AugmentationTools = augmentationTools,
         SkimmingTools     = skimmingTools,
         ThinningTools     = [],
         RunSkimmingFirst  = True))

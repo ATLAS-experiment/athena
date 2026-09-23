@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Author: G. Unal (Guillaume.Unal@cern.ch)
@@ -61,7 +61,7 @@ DerivationFramework::EGammaClusterCoreCellRecovery::initialize()
 
 // The decoration itself
 StatusCode
-DerivationFramework::EGammaClusterCoreCellRecovery::addBranches(const EventContext& ctx) const
+DerivationFramework::EGammaClusterCoreCellRecovery::execute(const EventContext& ctx) const
 {
 
   std::vector<SG::WriteDecorHandle<xAOD::EgammaContainer, char>> decon;

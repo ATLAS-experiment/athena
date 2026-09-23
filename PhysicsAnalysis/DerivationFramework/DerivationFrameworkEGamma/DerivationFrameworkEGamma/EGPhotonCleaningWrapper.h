@@ -5,9 +5,7 @@
 #ifndef DERIVATIONFRAMEWORK_EGPHOTONCLEANINGWRAPPER_H
 #define DERIVATIONFRAMEWORK_EGPHOTONCLEANINGWRAPPER_H
 
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
-//
-#include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 //
 #include "StoreGate/ReadHandle.h"
@@ -19,14 +17,14 @@
 #include <string>
 namespace DerivationFramework {
 
-  class EGPhotonCleaningWrapper : public extends<AthAlgTool, IAugmentationTool>
+  class EGPhotonCleaningWrapper : public AthReentrantAlgorithm
   {
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override final;
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
 
   private:
     SG::ReadHandleKey<xAOD::EgammaContainer> m_containerName{ this,

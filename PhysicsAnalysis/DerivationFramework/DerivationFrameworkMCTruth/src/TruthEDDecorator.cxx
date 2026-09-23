@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Class header file
@@ -17,8 +17,8 @@ namespace DerivationFramework {
   }
 
 
-  StatusCode TruthEDDecorator::addBranches(const EventContext& ctx) const{
-    ATH_MSG_VERBOSE("addBranches()");
+  StatusCode TruthEDDecorator::execute(const EventContext& ctx) const{
+    ATH_MSG_VERBOSE("execute()");
 
 
     SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);

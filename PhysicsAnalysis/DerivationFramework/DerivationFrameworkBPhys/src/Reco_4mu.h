@@ -11,8 +11,7 @@
 
 #include <string>
 
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "FourMuonTool.h"
 #include "JpsiUpsilonTools/PrimaryVertexRefitter.h"
 #include "xAODBPhys/BPhysHelper.h"
@@ -31,13 +30,13 @@ namespace xAOD {
  */
 namespace DerivationFramework {
 
-  class Reco_4mu : public extends<AthAlgTool, IAugmentationTool> {
+  class Reco_4mu : public AthReentrantAlgorithm {
   public:
-    Reco_4mu(const std::string& t, const std::string& n, const IInterface* p);
+    Reco_4mu(const std::string& name, ISvcLocator* svcLoc);
 
     virtual StatusCode initialize() override final;
 
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
 
   private:
     /** tools

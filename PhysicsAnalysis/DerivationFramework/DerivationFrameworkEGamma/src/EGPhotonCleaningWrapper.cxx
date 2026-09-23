@@ -24,7 +24,7 @@ EGPhotonCleaningWrapper::initialize()
 }
 
 StatusCode
-EGPhotonCleaningWrapper::addBranches(const EventContext& ctx) const
+EGPhotonCleaningWrapper::execute(const EventContext& ctx) const
 {
 
   SG::ReadHandle<xAOD::EgammaContainer> particles;

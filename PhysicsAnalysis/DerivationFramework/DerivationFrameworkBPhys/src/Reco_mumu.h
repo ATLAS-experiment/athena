@@ -6,9 +6,8 @@
 
 #include <string>
 
-#include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "JpsiUpsilonTools/ICandidateSearch.h"
 #include "JpsiUpsilonTools/PrimaryVertexRefitter.h"
 #include "xAODEventInfo/EventInfo.h"
@@ -24,13 +23,13 @@ namespace Trk {
  */
 namespace DerivationFramework {
 
-  class Reco_mumu : public extends<AthAlgTool, IAugmentationTool> {
+  class Reco_mumu : public AthReentrantAlgorithm {
     public: 
-      Reco_mumu(const std::string& t, const std::string& n, const IInterface* p);
+      Reco_mumu(const std::string& name, ISvcLocator* svcLoc);
 
       StatusCode initialize() override;
      
-      StatusCode addBranches(const EventContext& ctx) const override;
+      StatusCode execute(const EventContext& ctx) const override;
       
     private:
       /** tools

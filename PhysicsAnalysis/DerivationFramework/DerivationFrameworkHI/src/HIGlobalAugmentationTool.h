@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_HIGLOBALAUGMENTATIONTOOL_H
@@ -9,33 +9,29 @@
 #include<string>
 
 // Gaudi & Athena basics
-#include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ServiceHandle.h"
-#include "AsgTools/ToolHandle.h"
 #include <string>
 #include <vector>
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODHIEvent/HIEventShapeContainer.h"
 
-class IThinningSvc;
-
 namespace DerivationFramework {
 
-  class HIGlobalAugmentationTool : public extends<AthAlgTool, IAugmentationTool> {
+  class HIGlobalAugmentationTool : public AthReentrantAlgorithm { // FIXME RENAME
 
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     // Athena algtool's Hooks
     virtual StatusCode  initialize() override final;
     virtual StatusCode  finalize() override final;
 
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
 
   private:
     Gaudi::Property<int> m_nHarmonic{this, "nHarmonic", 1, "Flow harmonic starting from v2"};

@@ -52,10 +52,11 @@ def DRAW_JETKernelCfg(flags, name='DRAW_JETKernel', **kwargs):
     acc.addPublicTool(combTool,primary = True)
 
     # The main kernel algo
+    for tool in augmentationTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]), sequenceName='DRAW_JETSequence')
     DRAW_JETKernel = CompFactory.DerivationFramework.DerivationKernel(
         name='DRAW_JETKernel',
         doChronoStat=(flags.Concurrency.NumThreads <= 1),
-        AugmentationTools=augmentationTools,
         SkimmingTools=[combTool])
 
     acc.addEventAlgo(DRAW_JETKernel, sequenceName='DRAW_JETSequence')

@@ -65,37 +65,9 @@ def PIXELVALID_ZTAUTAUCfg(flags, name='PIXELVALID_ZTAUTAU'):
     acc.addPublicTool(PIXELVALID_ZTAUTAU, primary=True)
     return acc
 
-    
+
 def PIXELVALIDKernelCommonCfg(flags, name='PIXELVALIDKernelCommon'):
     acc = ComponentAccumulator()
-
-    # ====================================================================
-    # AUGMENTATION TOOLS
-    # ====================================================================
-    augmentationTools = []
-
-    # Add unbiased track parameters to track particles
-    from DerivationFrameworkInDet.InDetToolsConfig import (TrackToVertexWrapperCfg)
-    PIXELVALIDTrackToVertexWrapper = acc.getPrimaryAndMerge(TrackToVertexWrapperCfg(
-        flags,
-        name="PIXELVALIDTrackToVertexWrapper",
-        DecorationPrefix="PIXELVALID"))
-    augmentationTools.append(PIXELVALIDTrackToVertexWrapper)
-
-    from DerivationFrameworkInDet.InDetToolsConfig import (UsedInVertexFitTrackDecoratorCfg)
-    PIXELVALIDUsedInFitDecorator = acc.getPrimaryAndMerge(UsedInVertexFitTrackDecoratorCfg(flags))
-    augmentationTools.append(PIXELVALIDUsedInFitDecorator)
-
-    # @TODO eventually computed for other extra outputs. Possible to come  up with a solution to use a common Z0AtPV if there is more than one client ?
-    from DerivationFrameworkInDet.InDetToolsConfig import TrackParametersAtPVCfg
-    DFCommonZ0AtPV = acc.getPrimaryAndMerge(TrackParametersAtPVCfg(
-        flags, name="PIXELVALID_DFCommonZ0AtPV",
-        Z0SGEntryName="PIXELVALIDInDetTrackZ0AtPV"))
-    augmentationTools.append(DFCommonZ0AtPV)
-
-    from DerivationFrameworkInDet.PixelNtupleMakerConfig import (EventInfoPixelModuleStatusMonitoringCfg)
-    DFEI = acc.getPrimaryAndMerge(EventInfoPixelModuleStatusMonitoringCfg(flags))
-    augmentationTools.append(DFEI)
 
     # ====================================================================
     # SKIMMING TOOLS
@@ -115,10 +87,34 @@ def PIXELVALIDKernelCommonCfg(flags, name='PIXELVALIDKernelCommon'):
     # ====================================================================
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
         name,
-        AugmentationTools = augmentationTools,
         SkimmingTools     = skimmingTools,
         ThinningTools     = [],
         RunSkimmingFirst  = True))
+    for tool in augmentationTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
+
+    # ====================================================================
+    # AUGMENTATION TOOLS
+    # ====================================================================
+
+    # Add unbiased track parameters to track particles
+    from DerivationFrameworkInDet.InDetToolsConfig import (TrackToVertexWrapperCfg)
+    acc.merge(TrackToVertexWrapperCfg(
+        flags,
+        name="PIXELVALIDTrackToVertexWrapper",
+        DecorationPrefix="PIXELVALID"))
+
+    from DerivationFrameworkInDet.InDetToolsConfig import (UsedInVertexFitTrackDecoratorCfg)
+    acc.merge(UsedInVertexFitTrackDecoratorCfg(flags))
+
+    # @TODO eventually computed for other extra outputs. Possible to come  up with a solution to use a common Z0AtPV if there is more than one client ?
+    from DerivationFrameworkInDet.InDetToolsConfig import TrackParametersAtPVCfg
+    acc.merge(TrackParametersAtPVCfg(
+        flags, name="PIXELVALID_DFCommonZ0AtPV",
+        Z0SGEntryName="PIXELVALIDInDetTrackZ0AtPV"))
+
+    from DerivationFrameworkInDet.PixelNtupleMakerConfig import (EventInfoPixelModuleStatusMonitoringCfg)
+    acc.merge(EventInfoPixelModuleStatusMonitoringCfg(flags))
 
     return acc
 
@@ -152,7 +148,7 @@ def PIXELVALIDThinningKernelCfg(flags, name="PIXELVALIDThinningKernel", StreamNa
             AugmentationTools=[],
             ThinningTools=thinningTools,
             OutputLevel=INFO),
-            sequenceName="PixelClusterThinningSequence")        
+            sequenceName="PixelClusterThinningSequence")
 
     return acc
 
@@ -172,11 +168,9 @@ def PIXELVALIDKernelCfg(flags, name="PIXELVALIDKernel", StreamName=""):
     # ====================================================================
     # AUGMENTATION TOOLS
     # ====================================================================
-    tsos_augmentationTools = []
 
     from DerivationFrameworkInDet.InDetToolsConfig import DFTrackStateOnSurfaceDecoratorCfg
-    DFTSOS = acc.getPrimaryAndMerge(DFTrackStateOnSurfaceDecoratorCfg(flags))
-    tsos_augmentationTools.append(DFTSOS)
+    acc.merge(DFTrackStateOnSurfaceDecoratorCfg(flags))
 
     PixelStoreMode = flags.InDet.PixelDumpMode
     if flags.InDet.PixelDumpMode==3:
@@ -185,17 +179,9 @@ def PIXELVALIDKernelCfg(flags, name="PIXELVALIDKernel", StreamName=""):
     ## when using PIXELVALID for ID Lumi, remove this tool which has enormous CPU costs
     if flags.InDet.PixelDumpMode < 4:
         from DerivationFrameworkInDet.PixelNtupleMakerConfig import PixelNtupleMakerCfg
-        PixelMonitoringTool = acc.getPrimaryAndMerge(PixelNtupleMakerCfg(flags,
-                                                                        name          = "PixelMonitoringTool",
-                                                                        StoreMode     = PixelStoreMode))
-        tsos_augmentationTools.append(PixelMonitoringTool)
-
-    # shared between IDTIDE and PIXELVALID
-    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
-        name,
-        AugmentationTools=tsos_augmentationTools,
-        ThinningTools=[],
-        OutputLevel=INFO))
+        acc.merge(PixelNtupleMakerCfg(flags,
+                                      name          = "PixelMonitoringTool",
+                                      StoreMode     = PixelStoreMode))
 
     acc.merge(PIXELVALIDThinningKernelCfg(flags, StreamName=StreamName), sequenceName=PIXELVALIDSequenceName)
 

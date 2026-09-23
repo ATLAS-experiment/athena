@@ -5,13 +5,11 @@
 #ifndef DERIVATIONFRAMEWORK_EGSPHOTONBDTTOOLWRAPPER_H
 #define DERIVATIONFRAMEWORK_EGSPHOTONBDTTOOLWRAPPER_H
 
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 //
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteDecorHandleKey.h"
 //
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
-#include "AthenaBaseComps/AthAlgTool.h"
 #include "EgammaAnalysisInterfaces/IAsgEGammaIsEMSelector.h"
 #include "EgammaAnalysisInterfaces/IPhotonObservableTool.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -21,14 +19,14 @@
 
 namespace DerivationFramework {
 
-  class EGPhotonBDTToolWrapper : public extends<AthAlgTool, IAugmentationTool>
+  class EGPhotonBDTToolWrapper : public AthReentrantAlgorithm
   {
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override final;
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode excute(const EventContext& ctx) const override final;
 
   private:
     // selector tool

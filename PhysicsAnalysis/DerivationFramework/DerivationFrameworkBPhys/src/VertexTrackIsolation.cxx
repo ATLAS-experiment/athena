@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VertexTrackIsolation.h"
@@ -18,37 +18,6 @@
 using namespace std;
 namespace DerivationFramework {
 
-VertexTrackIsolation::VertexTrackIsolation(const std::string& t, const std::string& n, const IInterface* p)
-    : base_class(t, n, p),
-      m_trackIsoTool("xAOD::TrackIsolationTool"),
-      m_trackContainerName("InDetTrackParticles"),
-      m_vertexContainerName("NONE"),
-      m_cones(),
-      m_vertexType(7),
-      m_doIsoPerTrk(false),
-      m_removeDuplicate(2),
-      m_fixElecExclusion(false),
-      m_includeV0(false) {
-  ATH_MSG_DEBUG("in constructor");
-
-  // Declare tools
-  declareProperty("TrackIsoTool", m_trackIsoTool);
-  declareProperty("TrackContainer", m_trackContainerName);
-  declareProperty("InputVertexContainer", m_vertexContainerName);
-  declareProperty("PassFlags", m_passFlags);
-  declareProperty("IsolationTypes", m_cones);
-  declareProperty("DoVertexTypes", m_vertexType);
-
-  declareProperty("DoIsoPerTrk", m_doIsoPerTrk,
-                  "New property to deal with track isolation per track, the default option "
-                  "(m_doIsoPerTrk=false) preserves the old behavior");
-  declareProperty("RemoveDuplicate", m_removeDuplicate, "Used with DoIsoPerTrk");
-  declareProperty("FixElecExclusion", m_fixElecExclusion);
-  declareProperty("IncludeV0", m_includeV0);
-}
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
 StatusCode VertexTrackIsolation::initialize() {
 
   ATH_MSG_DEBUG("in initialize()");
@@ -56,6 +25,7 @@ StatusCode VertexTrackIsolation::initialize() {
   CHECK(m_trackIsoTool.retrieve());
   // Check that flags were given to tag the correct vertices
 
+  // FIXME Configuration should be done in ComponentAccumulator
   // Control the IsolationType sequence
   if (m_cones.empty()) {
     ATH_MSG_INFO("Setting ptcones to default");
@@ -71,11 +41,6 @@ StatusCode VertexTrackIsolation::initialize() {
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-StatusCode VertexTrackIsolation::finalize() {
-  // everything all right
-  return StatusCode::SUCCESS;
-}
 
 // check if the two vertices are composed of the same set of tracks
 bool VertexTrackIsolation::isSame(const xAOD::Vertex* theVtx1, const xAOD::Vertex* theVtx2) const {
@@ -121,7 +86,7 @@ bool VertexTrackIsolation::isContainedIn(const xAOD::Vertex* theVtx,
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-StatusCode VertexTrackIsolation::addBranches(const EventContext&) const {
+StatusCode VertexTrackIsolation::execute(const EventContext&) const {
 
   const xAOD::TrackParticleContainer* idTrackParticleContainer{};
   const xAOD::VertexContainer* vertexContainer{};

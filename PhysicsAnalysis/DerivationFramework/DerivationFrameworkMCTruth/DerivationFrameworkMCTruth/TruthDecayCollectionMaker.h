@@ -1,13 +1,12 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_TRUTHDECAYCOLLECTIONMAKER_H
 #define DERIVATIONFRAMEWORK_TRUTHDECAYCOLLECTIONMAKER_H
 
 // Base classes
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 // EDM -- typedefs so these are includes
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthVertexContainer.h"
@@ -23,13 +22,13 @@
 namespace DerivationFramework {
 
 
-  class TruthDecayCollectionMaker : public extends<AthAlgTool, IAugmentationTool> {
+  class TruthDecayCollectionMaker : public AthReentrantAlgorithm {
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override final;
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
 
   private:
     Gaudi::Property<std::vector<int> > m_pdgIdsToKeep //!< List of PDG IDs to build this collection from

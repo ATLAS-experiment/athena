@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Decorate egamma objects with cluster moments from a cookie-cut cluster
 
-#include "DerivationFrameworkEGamma/EGammaCookieCutClusterTool.h"
+#include "DerivationFrameworkEGamma/EGammaCookieCutClusterAlg.h"
 
 #include "CaloEvent/CaloCellContainer.h"
 #include "CaloUtils/CaloClusterStoreHelper.h"
@@ -18,7 +18,7 @@ namespace {
 
 // Athena initialize
 StatusCode
-DerivationFramework::EGammaCookieCutClusterTool::initialize()
+DerivationFramework::EGammaCookieCutClusterAlg::initialize()
 {
   ATH_MSG_VERBOSE("initialize() ...");
 
@@ -57,7 +57,7 @@ DerivationFramework::EGammaCookieCutClusterTool::initialize()
 
 // The decoration itself
 StatusCode
-DerivationFramework::EGammaCookieCutClusterTool::addBranches(const EventContext& ctx) const
+DerivationFramework::EGammaCookieCutClusterAlg::execute(const EventContext& ctx) const
 {
 
   // For debug

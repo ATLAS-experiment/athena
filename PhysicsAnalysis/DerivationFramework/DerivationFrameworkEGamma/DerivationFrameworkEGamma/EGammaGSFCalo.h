@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
   Contact: Raphael Haberle <raphael.julien.haberle@cern.ch>
 */
 
@@ -8,9 +8,7 @@
 
 #include <atomic>
 
-#include "AthenaBaseComps/AthAlgTool.h"
-
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 #include "TrkToolInterfaces/IExtendedTrackSummaryTool.h"
 #include "TrkToolInterfaces/ITrackParticleCreatorTool.h"
@@ -24,17 +22,17 @@
 
 
 namespace DerivationFramework {
-  class EGammaGSFCalo : public extends<AthAlgTool, IAugmentationTool> {
+  class EGammaGSFCalo : public AthReentrantAlgorithm {
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     /** @brief initialize method **/
     virtual StatusCode initialize() override final;
     /** @brief finalize method **/
     virtual StatusCode finalize() override final;
     /** @brief addBranches method **/
-    virtual StatusCode addBranches( const EventContext& ctx ) const override final;
+    virtual StatusCode execute( const EventContext& ctx ) const override final;
 
   private:
     SG::ReadHandleKey<xAOD::ElectronContainer> m_electronCollectionKey{

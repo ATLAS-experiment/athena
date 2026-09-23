@@ -3,11 +3,11 @@
 */
 
 /////////////////////////////////////////////////////////////////
-// TruthDressingTool.cxx
+// TruthDressingAlg.cxx
 // Author: Kevin Finelli (kevin.finelli@cern.ch)
 // Create dressed (i.e. including FSR photons) 4-vectors of truth objects
 
-#include "DerivationFrameworkMCTruth/TruthDressingTool.h"
+#include "DerivationFrameworkMCTruth/TruthDressingAlg.h"
 #include "MCTruthClassifier/IMCTruthClassifier.h"
 #include "xAODTruth/TruthEventContainer.h"
 #include "StoreGate/WriteDecorHandle.h"
@@ -29,7 +29,7 @@ namespace {
 }
 
 // Athena initialize
-StatusCode DerivationFramework::TruthDressingTool::initialize()
+StatusCode DerivationFramework::TruthDressingAlg::initialize()
 {
     // Initialise handle keys
     ATH_CHECK(m_particlesKey.initialize());
@@ -59,11 +59,9 @@ StatusCode DerivationFramework::TruthDressingTool::initialize()
     return StatusCode::SUCCESS;
 }
 
-// Function to do dressing, implements interface in IAugmentationTool
-StatusCode DerivationFramework::TruthDressingTool::addBranches(const EventContext& ctx) const
+// Function to do dressing
+StatusCode DerivationFramework::TruthDressingAlg::execute(const EventContext& ctx) const
 {
-    // Get the event context
-
     // Retrieve the truth collections
     SG::ReadHandle<xAOD::TruthParticleContainer> truthParticles(m_particlesKey,ctx);
     if (!truthParticles.isValid()) {

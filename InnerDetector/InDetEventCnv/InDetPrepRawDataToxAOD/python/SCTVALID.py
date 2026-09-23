@@ -1,4 +1,4 @@
-## Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+## Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -8,7 +8,7 @@ from AthenaCommon.CFElements import seqAND
 from AthenaCommon.Constants import INFO
 
 def SCTVALIDTriggerSkimmingToolCfg(flags, name, **kwargs):
-    
+
     from TriggerMenuMT.TriggerAPI.TriggerAPI import TriggerAPI
     from TriggerMenuMT.TriggerAPI.TriggerEnums import TriggerPeriod, TriggerType
 
@@ -22,7 +22,7 @@ def SCTVALIDTriggerSkimmingToolCfg(flags, name, **kwargs):
 
     acc = ComponentAccumulator()
     TriggerSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool
-    acc.addPublicTool(TriggerSkimmingTool(name, 
+    acc.addPublicTool(TriggerSkimmingTool(name,
                                           TriggerListAND = [],
                                           TriggerListOR  = triggers,
                                           **kwargs),
@@ -41,7 +41,7 @@ def SCTVALIDKernelCfg(flags, name='SCTVALIDKernel', **kwargs):
     SCTVALIDSequenceName='SCTVALIDSequence'
     acc.addSequence(seqAND(SCTVALIDSequenceName))
 
-    # Applying prescales 
+    # Applying prescales
     # https://twiki.cern.ch/twiki/bin/view/AtlasProtected/DerivationFramework#Applying_prescales
 
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import PrescaleToolCfg
@@ -61,23 +61,22 @@ def SCTVALIDKernelCfg(flags, name='SCTVALIDKernel', **kwargs):
                                          WriteRDOinformation=True, # TO CHECK
                                          WriteSiHits=False,
                                          WriteSDOs=False,
-                                         UseTruthInfo=flags.Input.isMC), 
+                                         UseTruthInfo=flags.Input.isMC),
               sequenceName=SCTVALIDSequenceName)
 
 
     from InDetConfig.InDetPrepRawDataToxAODConfig import InDetSCT_RawDataToxAODCfg
     acc.merge(InDetSCT_RawDataToxAODCfg(flags, name = "xAOD_SCT_RawDataToxAOD"),
-              sequenceName=SCTVALIDSequenceName)    
-    
+              sequenceName=SCTVALIDSequenceName)
+
     # Add the TSOS augmentation tool to the derivation framework
-    augmentationTools=[]
 
     if flags.Reco.EnableTracking is True:
         MSOSThinningSelectionString = ""
         if flags.InDet.SCTxAODZmumuSkimming:
             MSOSThinningSelectionString = "InDetTrackParticles.pt>10*GeV"
         from DerivationFrameworkInDet.InDetToolsConfig import TrackStateOnSurfaceDecoratorCfg
-        DFTSOS = acc.getPrimaryAndMerge(TrackStateOnSurfaceDecoratorCfg(flags, name="SCTVALID_DFTrackStateOnSurfaceDecorator",
+        acc.merge(TrackStateOnSurfaceDecoratorCfg(flags, name="SCTVALID_DFTrackStateOnSurfaceDecorator",
                                                                         DecorationPrefix = "SCTVALID_",
                                                                         StoreTRT=True,
                                                                         StoreSCT=True,
@@ -85,11 +84,9 @@ def SCTVALIDKernelCfg(flags, name='SCTVALIDKernel', **kwargs):
                                                                         PRDtoTrackMap="",
                                                                         SelectionString=MSOSThinningSelectionString)
                                         )
-        augmentationTools.append(DFTSOS)
 
     from DerivationFrameworkInDet.InDetToolsConfig import EventInfoBSErrDecoratorCfg
-    DFEI = acc.getPrimaryAndMerge(EventInfoBSErrDecoratorCfg(flags, name = "SCTxAOD_DFEventInfoBSErrDecorator"))
-    augmentationTools.append(DFEI)
+    acc.merge(EventInfoBSErrDecoratorCfg(flags, name = "SCTxAOD_DFEventInfoBSErrDecorator"))
 
     # track isolation
     from IsolationAlgs.IsoToolsConfig import TrackIsolationToolCfg, CaloIsolationToolCfg
@@ -107,7 +104,7 @@ def SCTVALIDKernelCfg(flags, name='SCTVALIDKernel', **kwargs):
     import ROOT
     isoPar = ROOT.xAOD.Iso.IsolationType
     from DerivationFrameworkInDet.InDetToolsConfig import IsolationTrackDecoratorCfg
-    IsolationTrackDecoratorTool = acc.getPrimaryAndMerge(IsolationTrackDecoratorCfg(flags,
+    acc.merge(IsolationTrackDecoratorCfg(flags,
                                                                                     name               = "SCTVALID_IsolationTrackDecorator",
                                                                                     TrackIsolationTool = TrackIsoToolStd,
                                                                                     CaloIsolationTool  = CaloIsoTool,
@@ -116,7 +113,6 @@ def SCTVALIDKernelCfg(flags, name='SCTVALIDKernel', **kwargs):
                                                                                     iso                = [isoPar.ptcone40, isoPar.ptcone30, isoPar.ptcone20],
                                                                                     isoSuffix          = ["ptcone40", "ptcone30", "ptcone20"],
                                                                                     Prefix             = "SCTVALID_"))
-    augmentationTools.append(IsolationTrackDecoratorTool)
 
     from DerivationFrameworkInDet.InDetToolsConfig import UnassociatedHitsGetterToolCfg
     unassociatedHitsGetterTool = acc.popToolsAndMerge(UnassociatedHitsGetterToolCfg(flags, name="SCTVALID_UnassociatedHitsGetterTool",
@@ -126,21 +122,19 @@ def SCTVALIDKernelCfg(flags, name='SCTVALIDKernel', **kwargs):
                                                                                       TRTDriftCircleContainer = "TRT_DriftCircles"))
 
     from DerivationFrameworkInDet.InDetToolsConfig import UnassociatedHitsDecoratorCfg
-    unassociatedHitsDecorator = acc.getPrimaryAndMerge(UnassociatedHitsDecoratorCfg(flags, 
+    acc.merge(UnassociatedHitsDecoratorCfg(flags,
                                                                                     name='SCTxAOD_unassociatedHitsDecorator',
                                                                                     UnassociatedHitsGetter = unassociatedHitsGetterTool))
-    augmentationTools.append(unassociatedHitsDecorator)
 
-    from DerivationFrameworkJetEtMiss.JetToolConfig import DistanceInTrainToolCfg
-    distanceInTrainTool = acc.getPrimaryAndMerge(DistanceInTrainToolCfg(flags))
-    augmentationTools.append(distanceInTrainTool)
-    
+    from DerivationFrameworkJetEtMiss.JetCommonConfig import AddDistanceInTrainCfg
+    acc.merge(AddDistanceInTrainCfg(flags))
+
     # thinning tools
     thinningTools=[]
 
     if flags.InDet.SCTxAODZmumuSkimming:
         from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg, MuonTrackParticleThinningCfg
-        
+
         # Tag and probe track thinning
         thinning_expression = " && ".join(
             [
@@ -163,7 +157,7 @@ def SCTVALIDKernelCfg(flags, name='SCTVALIDKernel', **kwargs):
                                                                                                SelectionString         = "InDetDisappearingTrackParticles.pt>5*GeV",
                                                                                                InDetTrackParticlesKey  = "InDetDisappearingTrackParticles"))
         thinningTools.append(SCTVALID_DTTrackParticleThinningTool)
-    
+
         # Include inner detector tracks associated with muons
         SCTVALID_MuonTPThinningTool = acc.getPrimaryAndMerge(MuonTrackParticleThinningCfg(flags,
                                                                                           name       = "SCTVALID_MuonTPThinningTool",
@@ -188,7 +182,6 @@ def SCTVALIDKernelCfg(flags, name='SCTVALIDKernel', **kwargs):
 
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
         name,
-        AugmentationTools=augmentationTools,
         SkimmingTools=skimmingTools,
         ThinningTools=thinningTools,
         OutputLevel=INFO), sequenceName=SCTVALIDSequenceName)
@@ -200,7 +193,7 @@ def SCTVALIDCfg(flags):
     acc = ComponentAccumulator()
 
     # Main algorithm (kernel)
-    acc.merge(SCTVALIDKernelCfg(flags, 
+    acc.merge(SCTVALIDKernelCfg(flags,
                                 name = "SCTVALIDKernel",
                                 StreamName = 'StreamDAOD_SCTVALID') )
 
@@ -227,13 +220,13 @@ def SCTVALIDCfg(flags):
         "Electrons": "xAOD::ElectronContainer", "ElectronsAux": "xAOD::ElectronAuxContainer",
         "PrimaryVertices": "xAOD::VertexContainer", "PrimaryVerticesAux": "xAOD::VertexAuxContainer",
         "GSFTrackParticles": "xAOD::TrackParticleContainer",
-        "GSFTrackParticlesAux": "xAOD::TrackParticleAuxContainer", 
+        "GSFTrackParticlesAux": "xAOD::TrackParticleAuxContainer",
         "InDetDisappearingTrackParticles": "xAOD::TrackParticleContainer",
-        "InDetDisappearingTrackParticlesAux": "xAOD::TrackParticleAuxContainer", 
+        "InDetDisappearingTrackParticlesAux": "xAOD::TrackParticleAuxContainer",
         "MuonSpectrometerTrackParticles": "xAOD::TrackParticleContainer",
         "MuonSpectrometerTrackParticlesAux": "xAOD::TrackParticleAuxContainer",
         "AntiKt4EMPFlowJets": "xAOD::JetContainer", "AntiKt4EMPFlowJetsAux": "xAOD::JetAuxContainer",
-    })  
+    })
 
     AllVariables += ["EventInfo",
                      "InDetTrackParticles",
@@ -246,7 +239,7 @@ def SCTVALIDCfg(flags):
     excludedInDetTrackParticlesAuxData = ".-clusterAssociation.-trackParameterCovarianceMatrices.-parameterX.-parameterY.-parameterZ.-parameterPX.-parameterPY.-parameterPZ.-parameterPosition"
     excludedGSFTrackParticlesAuxData = ".-clusterAssociation.-trackParameterCovarianceMatrices.-parameterX.-parameterY.-parameterZ.-parameterPX.-parameterPY.-parameterPZ.-parameterPosition"
     excludedMuonSpectrometerTrackParticlesAuxData = ".-clusterAssociation.-trackParameterCovarianceMatrices.-parameterX.-parameterY.-parameterZ.-parameterPX.-parameterPY.-parameterPZ.-parameterPosition.-btagIp_d0.-btagIp_d0Uncertainty.-btagIp_z0SinTheta.-btagIp_z0SinThetaUncertainty.-eProbabilityNN.-btagIp_trackMomentum.-btagIp_trackDisplacement.-TRTdEdxUsedHits.-TRTdEdx.-TTVA_AMVFVertices_forReco.-TTVA_AMVFWeights_forReco.-JetFilter_TrackCompatibility_antikt4emtopo.-btagIp_invalidIp.-JetFilter_TrackCompatibility_antikt4empflow.-nBC_meas.-AssoClustersUFO"
-    
+
     StaticContent = []
     StaticContent += ["xAOD::TrackParticleContainer#InDetTrackParticles"]
     StaticContent += ["xAOD::TrackParticleAuxContainer#InDetTrackParticlesAux" + excludedInDetTrackParticlesAuxData]
@@ -274,9 +267,9 @@ def SCTVALIDCfg(flags):
         AllVariables += ["SCT_MSOSs"]
     else:
         AllVariables += [
-            "SCT_MSOSs", 
+            "SCT_MSOSs",
             "SCT_Clusters",
-            "SCT_RawHits", 
+            "SCT_RawHits",
             "SCT_RawHitsAux"]
 
 
@@ -289,7 +282,7 @@ def SCTVALIDCfg(flags):
             "TruthParticlesAux": "xAOD::TruthParticleAuxContainer",
             "TruthVertices": "xAOD::TruthVertexContainer",
             "TruthVerticesAux": "xAOD::TruthVertexAuxContainer"})
-        
+
         AllVariables += ["TruthEvents", "TruthParticles", "TruthVertices"]
 
     # Trigger info is actually stored only when running on data...
@@ -308,7 +301,7 @@ def SCTVALIDCfg(flags):
     acc.merge(SetupMetaDataForStreamCfg(
         flags, "DAOD_SCTVALID",
         AcceptAlgs=["SCTVALIDKernel"],
-        createMetadata=[MetadataCategory.CutFlowMetaData, 
+        createMetadata=[MetadataCategory.CutFlowMetaData,
                         MetadataCategory.TriggerMenuMetaData]))
 
     return acc

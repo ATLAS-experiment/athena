@@ -36,7 +36,7 @@ def AddTauAugmentationCfg(flags, wp="GNTauVeryLoose", **kwargs):
     TauAugmentationTools.append(TauWrapper)
 
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-    acc.addEventAlgo(CommonAugmentation(f"Tau{wp}AugmentationKernel", AugmentationTools = TauAugmentationTools))
+    acc.addEventAlgo(CommonAugmentation(f"Tau{wp}AugmentationKernel", AugmentationTools = TauAugmentationTools)) # TODO Migrate to N Algs in second pass
     return acc
 
 def AddTauIDDecorationCfg(flags, **kwargs):
@@ -100,20 +100,12 @@ def AddTauIDDecorationCfg(flags, **kwargs):
         kwargs.setdefault("ScoreDecorationKeys", scoreNames)
         kwargs.setdefault("WPDecorationKeys", WPNames)
 
-        for tool in tools:
-            acc.addPublicTool(tool)
+        #for tool in tools:
+        #    acc.addPublicTool(tool)
         kwargs.setdefault("TauIDTools", tools)
 
-        TauIDDecoratorWrapper = CompFactory.DerivationFramework.TauIDDecoratorWrapper
-        TauIDDecoratorKernel = CompFactory.DerivationFramework.CommonAugmentation
-
         prefix = kwargs.pop('prefix', tauContainerKey)
-        tauIDDecoratorWrapper = TauIDDecoratorWrapper(name = f"{prefix}_TauIDDecoratorWrapper",
-                                                      **kwargs)
-        print("PXQW TauIDDecoratorsWrapper: " + str(tauIDDecoratorWrapper))
-        acc.addPublicTool(tauIDDecoratorWrapper)
-        acc.addEventAlgo(TauIDDecoratorKernel(name = f"{prefix}_TauIDDecorKernel",
-                                              AugmentationTools = [tauIDDecoratorWrapper]))
+        acc.addEventAlgo(CompFactory.DerivationFramework.TauIDDecoratorWrapper(name = f"{prefix}_TauIDDecorKernel", **kwargs))
 
     return acc
 
@@ -132,17 +124,17 @@ def AddTauTESCompatibilityDecorationCfg(flags, **kwargs):
     acc.addPublicTool(tauCombinedTESTool)
     kwargs.setdefault("TauCombinedTESTool", tauCombinedTESTool)
     kwargs.setdefault("TauContainerName", "TauJets")
-    
+
     prefix = kwargs["TauContainerName"]
     TauCombinedTESWrapper = CompFactory.DerivationFramework.TauCombinedTESWrapper
     TauCombinedTESKernel = CompFactory.DerivationFramework.CommonAugmentation
-    
-    TauCombinedTESWrapper = TauCombinedTESWrapper( name = f"{prefix}_TauCombinedTES", **kwargs )                                     
+
+    TauCombinedTESWrapper = TauCombinedTESWrapper( name = f"{prefix}_TauCombinedTES", **kwargs )
     acc.addPublicTool(TauCombinedTESWrapper)
     acc.addEventAlgo(TauCombinedTESKernel(name              = f"{prefix}_TauCombinedTESKernel",
                                           AugmentationTools = [TauCombinedTESWrapper]))
     return acc
-    
+
 
 # Attach displaced Tau ID scores
 def AddTauIDDisplacedDecorationCfg(flags, **kwargs):
@@ -165,24 +157,15 @@ def AddTauIDDisplacedDecorationCfg(flags, **kwargs):
     kwargs.setdefault("ScoreDecorationKeys", scoreNames)
     kwargs.setdefault("WPDecorationKeys", [])
 
-    acc.addPublicTool(tool_prompt)
-    acc.addPublicTool(tool_displaced)
     kwargs.setdefault("TauIDTools", [tool_prompt, tool_displaced])
 
-    tauIDDecoratorWrapper = CompFactory.DerivationFramework.TauIDDecoratorWrapper(
-        name = f"{tauContainerKey}_TauIDDisplacedDecoratorWrapper",
-        **kwargs,
-    )
-    acc.addPublicTool(tauIDDecoratorWrapper)
-
     prefix = kwargs.pop('prefix', tauContainerKey)
-    acc.addEventAlgo(
-        CompFactory.DerivationFramework.CommonAugmentation(
-            name = f"{prefix}_TauDisplacedIDDecorKernel",
-            AugmentationTools = [tauIDDecoratorWrapper],
-        )
-    )
+    acc.addEventAlgo(CompFactory.DerivationFramework.TauIDDecoratorWrapper(
+        name = f"{prefix}_TauDisplacedIDDecorKernel",
+        **kwargs,
+    ))
     return acc
+
 
 # TauJets_MuonRM steering
 def AddMuonRemovalTauAODReRecoAlgCfg(flags, **kwargs):

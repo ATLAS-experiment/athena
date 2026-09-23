@@ -5,8 +5,7 @@
 #ifndef MuonExtrapolationTool_H
 #define MuonExtrapolationTool_H
 
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "xAODTracking/TrackParticle.h"
 #include "xAODMuon/MuonContainer.h"
 #include "xAODMuon/Muon.h"
@@ -15,13 +14,13 @@
 
 
 namespace DerivationFramework {
-  class MuonExtrapolationTool : public extends<AthAlgTool, IAugmentationTool> {
+  class MuonExtrapolationTool : public AthReentrantAlgorithm {
 
   public:
-    MuonExtrapolationTool(const std::string& t, const std::string& n, const IInterface *p);
+    MuonExtrapolationTool(const std::string& name, ISvcLocator* svcLoc);
 
     virtual StatusCode initialize();
-    virtual StatusCode addBranches(const EventContext& ctx) const;
+    virtual StatusCode execute(const EventContext& ctx) const;
 
   private:
 

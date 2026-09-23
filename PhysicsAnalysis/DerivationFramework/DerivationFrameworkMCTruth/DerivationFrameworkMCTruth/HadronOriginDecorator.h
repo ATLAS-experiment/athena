@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -14,23 +14,22 @@
 
 #include <string>
 
-#include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteDecorHandleKey.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "DerivationFrameworkMCTruth/HadronOriginClassifier.h"
 
 namespace DerivationFramework {
 
-  class HadronOriginDecorator : public extends<AthAlgTool, IAugmentationTool> {
+  class HadronOriginDecorator : public AthReentrantAlgorithm {
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override final;
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
 
   private:
     SG::ReadHandleKey<xAOD::TruthParticleContainer> m_particlesKey

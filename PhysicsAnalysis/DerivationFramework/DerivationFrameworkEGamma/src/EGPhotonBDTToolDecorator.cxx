@@ -26,7 +26,7 @@ EGPhotonBDTToolDecorator::initialize()
 }
 
 StatusCode
-EGPhotonBDTToolDecorator::addBranches(const EventContext& ctx) const
+EGPhotonBDTToolDecorator::execute(const EventContext& ctx) const
 {
   // retrieve container
   SG::ReadHandle<xAOD::EgammaContainer> particles;

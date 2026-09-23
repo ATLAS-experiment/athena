@@ -20,9 +20,9 @@ def BPHY1Kernel(flags):
         AugOriginalCountsCfg)
     acc = ComponentAccumulator()
 
-    BPHY1_AugOriginalCounts = acc.popToolsAndMerge(
+    acc.merge(
         AugOriginalCountsCfg(flags, name = "BPHY1_AugOriginalCounts"))
-    
+
     doLRT = flags.Tracking.doLargeD0
     mainMuonInput = "StdWithLRTMuons" if doLRT else "Muons"
     mainIDInput   = "InDetWithLRTTrackParticles" if doLRT else "InDetTrackParticles"
@@ -67,11 +67,12 @@ def BPHY1Kernel(flags):
            TrackSelectorTool           = TrackSelector,
            VertexPointEstimator        = vpest,
            useMCPCuts                  = False )
+    acc.addPublicTool(BPHY1JpsiFinder)
 
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
     acc.addPublicTool(PVrefit)
-    BPHY1_Reco_mumu = CompFactory.DerivationFramework.Reco_Vertex(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Reco_Vertex(
             name                   = "BPHY1_Reco_mumu",
             VertexSearchTool       = BPHY1JpsiFinder,
             OutputVtxContainerName = OniaContainerName,
@@ -83,9 +84,9 @@ def BPHY1Kernel(flags):
             RelinkTracks  =  toRelink,
             RelinkMuons   =  MuonReLink,
             PVRefitter             = PVrefit,
-            DoVertexType           = 7)
+            DoVertexType           = 7))
 
-    BPHY1_Select_Jpsi2mumu =CompFactory.DerivationFramework.Select_onia2mumu(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
             name                  = "BPHY1_Select_Jpsi2mumu",
             HypothesisName        = "Jpsi",
             InputVtxContainerName = "BPHY1OniaCandidates",
@@ -94,8 +95,8 @@ def BPHY1Kernel(flags):
             MassMin               = 2000.0,
             MassMax               = 3600.0,
             Chi2Max               = 200,
-            DoVertexType          = 7)
-    BPHY1_Select_Psi2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
+            DoVertexType          = 7))
+    acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
           name                  = "BPHY1_Select_Psi2mumu",
           HypothesisName        = "Psi",
           InputVtxContainerName = "BPHY1OniaCandidates",
@@ -104,8 +105,8 @@ def BPHY1Kernel(flags):
           MassMin               = 3300.0,
           MassMax               = 4500.0,
           Chi2Max               = 200,
-          DoVertexType          = 7)
-    BPHY1_Select_Upsi2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
+          DoVertexType          = 7))
+    acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
           name                  = "BPHY1_Select_Upsi2mumu",
           HypothesisName        = "Upsi",
           InputVtxContainerName = "BPHY1OniaCandidates",
@@ -114,12 +115,7 @@ def BPHY1Kernel(flags):
           MassMin               = 7000.0,
           MassMax               = 12500.0,
           Chi2Max               = 200,
-          DoVertexType          = 7)
-
-    augTools = [BPHY1_AugOriginalCounts, BPHY1_Reco_mumu,
-                BPHY1_Select_Jpsi2mumu, BPHY1_Select_Psi2mumu,
-                BPHY1_Select_Upsi2mumu]
-    for t in [BPHY1JpsiFinder] + augTools : acc.addPublicTool(t)
+          DoVertexType          = 7))
 
     BPHY1Thin_vtxTrk = CompFactory.DerivationFramework.Thin_vtxTrk(
           name                       = "BPHY1Thin_vtxTrk",
@@ -147,11 +143,9 @@ def BPHY1Kernel(flags):
         xAODStringSkimmingToolCfg)
     BPHY1_SelectEvent = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
         flags, name = "BPHY1_SelectEvent", expression = SelectExpression))
-
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY1Kernel",
-                            SkimmingTools = [BPHY1_SelectEvent],
-                            ThinningTools     = BPHY1ThinningTools,
-                            AugmentationTools = augTools))
+                                                                      SkimmingTools = [BPHY1_SelectEvent],
+                                                                      ThinningTools     = BPHY1ThinningTools))
     for tool in BPHY1ThinningTools : acc.addPublicTool(tool)
     return acc
 

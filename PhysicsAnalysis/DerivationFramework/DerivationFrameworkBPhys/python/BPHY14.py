@@ -72,7 +72,7 @@ def BPHY14Cfg(flags):
         )
        acc.addPublicTool(BPHY14JpsiFinder )
 
-       BPHY14_Reco_mumu = CompFactory.DerivationFramework.Reco_Vertex(
+       acc.addEventAlgo(CompFactory.DerivationFramework.Reco_Vertex(
                                 name                   = "BPHY14_Reco_mumu",
                                 VertexSearchTool       = BPHY14JpsiFinder,
                                 OutputVtxContainerName = "BPHY14OniaCandidates",
@@ -84,11 +84,11 @@ def BPHY14Cfg(flags):
                                 RefPVContainerName     = "BPHY14RefittedPrimaryVertices",
                                 RefitPV                = True,
                                 MaxPVrefit             = 100000,
-                                DoVertexType           = 7)
-        
-       BPHY14_AugOriginalCounts = acc.popToolsAndMerge(AugOriginalCountsCfg(flags, name = "BPHY14_AugOriginalCounts"))
+                                DoVertexType           = 7))
 
-       BPHY14_Select_Jpsi2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
+       acc.merge(AugOriginalCountsCfg(flags, name = "BPHY14_AugOriginalCounts"))
+
+       acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
                                                                 name                  = "BPHY14_Select_Jpsi2mumu",
                                                                 HypothesisName        = "Jpsi",
                                                                 InputVtxContainerName = "BPHY14OniaCandidates",
@@ -97,9 +97,9 @@ def BPHY14Cfg(flags):
                                                                 MassMin               = 2000.0,
                                                                 MassMax               = 4000.0,
                                                                 Chi2Max               = 200,
-                                                                DoVertexType          = 7)
-       
-       BPHY14_Select_Psi2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
+                                                                DoVertexType          = 7))
+
+       acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
                                                                name                  = "BPHY14_Select_Psi2mumu",
                                                                HypothesisName        = "Psi",
                                                                V0Tools               = V0Tools,
@@ -108,9 +108,9 @@ def BPHY14Cfg(flags):
                                                                MassMin               = 3300.0,
                                                                MassMax               = 7500.0,
                                                                Chi2Max               = 200,
-                                                               DoVertexType          = 7)
+                                                               DoVertexType          = 7))
 
-       BPHY14_Select_Upsi2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
+       acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
                                                                 name                  = "BPHY14_Select_Upsi2mumu",
                                                                 HypothesisName        = "Upsi",
                                                                 InputVtxContainerName = "BPHY14OniaCandidates",
@@ -119,7 +119,7 @@ def BPHY14Cfg(flags):
                                                                 MassMin               = 7000.0,
                                                                 MassMax               = 15000.0,
                                                                 Chi2Max               = 200,
-                                                                DoVertexType          = 7)
+                                                                DoVertexType          = 7))
 
        acc.merge(EGammaCommonCfg(flags))
        photonRequirements = 'Photons.Tight'
@@ -165,11 +165,9 @@ def BPHY14Cfg(flags):
        BPHY14ThinningTools += [BPHY14PhotonTPThinningTool,  BPHY14MuonTPThinningTool, BPHY14Thin_vtxTrk]
        from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
        BPHY14SlimTools     = [ BPHY14_SelectEvent ]
-       BPHY14AugTools      = [BPHY14_Reco_mumu, BPHY14_AugOriginalCounts, BPHY14_Select_Jpsi2mumu, BPHY14_Select_Jpsi2mumu,
-                              BPHY14_Select_Psi2mumu, BPHY14_Select_Upsi2mumu]
-       for t in BPHY14ThinningTools + BPHY14SlimTools + BPHY14AugTools: acc.addPublicTool(t)
-       acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY14Kernel", 
-                    AugmentationTools= BPHY14AugTools,  SkimmingTools     = BPHY14SlimTools,  ThinningTools  = BPHY14ThinningTools  ))
+       for t in BPHY14ThinningTools + BPHY14SlimTools: acc.addPublicTool(t)
+       acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY14Kernel",
+                                                                         SkimmingTools     = BPHY14SlimTools,  ThinningTools  = BPHY14ThinningTools  ))
        from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
        from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
        BPHY14SlimmingHelper = SlimmingHelper("BPHY14SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)

@@ -42,24 +42,6 @@
 namespace DerivationFramework {
 
   //--------------------------------------------------------------------------
-  BPhysMetadataBase::BPhysMetadataBase(const std::string& t,
-				       const std::string& n,
-				       const IInterface*  p)
-    : base_class(t,n,p),
-      m_outputMetaStore("StoreGateSvc/MetaDataStore", n) {
-    
-    
-    // Declare derivation format name
-    declareProperty("DerivationName", m_derivationName = "_NOSUCHFORMAT_");
-
-    // Declare metadata folder name (should start with derivation name)
-    declareProperty("MetadataFolderName", m_mdFolderName = "_NONE_");
-
-    // Prefix would typically be the derivation format name
-    declareProperty("Prefix", m_prefix = "");
-    
-  }
-  //--------------------------------------------------------------------------
   StatusCode BPhysMetadataBase::initialize() {
   
     ATH_MSG_DEBUG("BPhysMetaDataBase::initialize() -- begin");
@@ -88,7 +70,7 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
   //--------------------------------------------------------------------------
-  StatusCode BPhysMetadataBase::addBranches(const EventContext&) const {
+  StatusCode BPhysMetadataBase::execute(const EventContext&) const {
 
     // nothing to do here
     return StatusCode::SUCCESS;

@@ -54,8 +54,9 @@ def MuonsCommonCfg(flags, suff=""):
     #  Add tools
     #############
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-    acc.addEventAlgo(CommonAugmentation("DFCommonMuonsKernel"+suff,
-                                        AugmentationTools = DFCommonMuonToolWrapperTools))
+    for i, tool in enumerate(DFCommonMuonToolWrapperTools):
+        acc.addEventAlgo(CommonAugmentation(f"DFCommonMuonsKernel{suff}{i}",
+                                            AugmentationTools = [tool])) # TODO Migrate to N Algs in second pass
 
     if flags.Tracking.doVertexFinding:
         from IsolationAlgs.DerivationTrackIsoConfig import DerivationTrackIsoCfg

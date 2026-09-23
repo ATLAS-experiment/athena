@@ -1,13 +1,13 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
-// TruthIsolationTool.cxx
+// TruthIsolationAlg.cxx
 // Author: Kevin Finelli (kevin.finelli@cern.ch)
 // Calculate isolation at truth level for given lists of truth particles
 
-#include "DerivationFrameworkMCTruth/TruthIsolationTool.h"
+#include "DerivationFrameworkMCTruth/TruthIsolationAlg.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include <vector>
 #include <string>
@@ -15,7 +15,7 @@
 #include <cmath>
 
 // Athena initialize
-StatusCode DerivationFramework::TruthIsolationTool::initialize()
+StatusCode DerivationFramework::TruthIsolationAlg::initialize()
 {
 
     // Initialise input keys
@@ -39,8 +39,8 @@ StatusCode DerivationFramework::TruthIsolationTool::initialize()
     return StatusCode::SUCCESS;
 }
 
-// Function to do isolation calc, implements interface in IAugmentationTool
-StatusCode DerivationFramework::TruthIsolationTool::addBranches(const EventContext& ctx) const
+// Function to do isolation calc
+StatusCode DerivationFramework::TruthIsolationAlg::execute(const EventContext& ctx) const
 {
     // Event context
 
@@ -94,7 +94,7 @@ StatusCode DerivationFramework::TruthIsolationTool::addBranches(const EventConte
     return StatusCode::SUCCESS;
 }
 
-void DerivationFramework::TruthIsolationTool::calcIsos(const xAOD::TruthParticle* particle,
+void DerivationFramework::TruthIsolationAlg::calcIsos(const xAOD::TruthParticle* particle,
         const std::vector<const xAOD::TruthParticle*> &candidateParticlesList,
         std::vector<float> &isoCalcs) const
 {
@@ -132,7 +132,7 @@ void DerivationFramework::TruthIsolationTool::calcIsos(const xAOD::TruthParticle
     return;
 }
 
-float DerivationFramework::TruthIsolationTool::calculateDeltaR2(const xAOD::IParticle *p1, float eta2, float phi2)
+float DerivationFramework::TruthIsolationAlg::calculateDeltaR2(const xAOD::IParticle *p1, float eta2, float phi2)
 {
   //calculate dR^2 this way to hopefully do fewer sqrt and TVector3::Pseudorapidity calls
   float phi1 = p1->phi();

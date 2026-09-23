@@ -71,7 +71,7 @@ def BPHY21Cfg(flags):
                          VertexPointEstimator       = vpest,
                          useMCPCuts                 = False)
     acc.addPublicTool(BPHY21_JpsiFinder)
-    BPHY21_JpsiSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Reco_Vertex(
         name                   = "BPHY21_JpsiSelectAndWrite",
         VertexSearchTool       = BPHY21_JpsiFinder,
         OutputVtxContainerName = "BPHY21_JpsiCandidates",
@@ -79,8 +79,8 @@ def BPHY21Cfg(flags):
         PVRefitter             = PVrefit,
         PVContainerName        = "PrimaryVertices",
         RefPVContainerName     = "SHOULDNOTBEUSED",
-        DoVertexType           = 1)
-    BPHY21_Select_Jpsi2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
+        DoVertexType           = 1))
+    acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
         name                  = "BPHY21_Select_Jpsi2mumu",
         HypothesisName        = "Jpsi",
         InputVtxContainerName = "BPHY21_JpsiCandidates",
@@ -90,9 +90,9 @@ def BPHY21Cfg(flags):
         MassMax               = 3600.0,
         Chi2Max               = 200,
         LxyMin                = 0.1,
-        DoVertexType          = 1)
+        DoVertexType          = 1))
 
-    BPHY21_AugOriginalCounts = acc.popToolsAndMerge(
+    acc.merge(
         AugOriginalCountsCfg(flags, name = "BPHY21_AugOriginalCounts"))
 
     if not isSimulation: #Only Skim Data
@@ -112,12 +112,7 @@ def BPHY21Cfg(flags):
             FilterList = [ BPHY21_TriggerSkim, BPHY21_SelectJpsiEvent] )
         acc.addPublicTool(BPHY21_SkimmingOR)
 
-    augTools = [BPHY21_JpsiSelectAndWrite, BPHY21_Select_Jpsi2mumu,
-                BPHY21_AugOriginalCounts]
-    for t in  augTools : acc.addPublicTool(t)
-
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY21Kernel",
-                                                    AugmentationTools = augTools,
                                                     #Only skim if not MC
                                                     SkimmingTools     = [BPHY21_SkimmingOR] if not isSimulation else [],
                                                     ThinningTools     = []))

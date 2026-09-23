@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ****************************************************************************
@@ -15,11 +15,13 @@
 
 #include <string>
 
-#include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "TrkEventPrimitives/ParticleHypothesis.h" //ParticleMasses struct
 
+#include "TrkVertexAnalysisUtils/V0Tools.h"
+#include "TrkVertexFitterInterfaces/IVertexFitter.h"
+#include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "InDetConversionFinderTools/VertexPointEstimator.h"
 #include "xAODBPhys/BPhysHelper.h"
 #include "StoreGate/WriteHandleKey.h"
@@ -28,50 +30,41 @@
 
 #include "TLorentzVector.h"
 
-namespace Trk
-{
-    class V0Tools;
-    class IVertexFitter;
-    class TrkVKalVrtFitter;
-}
-
 namespace InDet
 {
-    class VertexPointEstimator;
-    class TrackPairsSelector;
+  class TrackPairsSelector;
 }
 
 namespace DerivationFramework {
-	
-class BPhysBGammaFinder : public extends<AthAlgTool, IAugmentationTool> {
 
-    public:
+  class BPhysBGammaFinder : public AthReentrantAlgorithm {
 
-        BPhysBGammaFinder(const std::string& t, const std::string& n, const IInterface* p);
+  public:
 
-        StatusCode initialize() override;
-        StatusCode finalize() override;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
-        virtual StatusCode addBranches(const EventContext& ctx) const override;
-        TVector3 trackMomentum(const xAOD::Vertex & vxCandidate, int trkIndex) const;
+    StatusCode initialize() override;
 
-    private:
+    virtual StatusCode execute(const EventContext& ctx) const override;
+    TVector3 trackMomentum(const xAOD::Vertex & vxCandidate, int trkIndex) const;
 
-        SG::ReadHandleKeyArray<xAOD::VertexContainer> m_BVertexCollectionsToCheck;
-        SG::ReadDecorHandleKeyArray<xAOD::VertexContainer> m_passFlagsToCheck;
+  private:
+    // TODO Configurable property declarations in header
+    SG::ReadHandleKeyArray<xAOD::VertexContainer> m_BVertexCollectionsToCheck{this, "BVertexContainers", {}};
+    SG::ReadDecorHandleKeyArray<xAOD::VertexContainer> m_passFlagsToCheck{this, "PassFlagsToCheck", {}};
 
-        ToolHandle <Trk::V0Tools> m_v0Tools;
-        ToolHandle <Trk::IVertexFitter> m_vertexFitter;
-        ToolHandle <InDet::VertexPointEstimator> m_vertexEstimator;
+    PublicToolHandle <Trk::V0Tools> m_v0Tools{this, "V0Tools", "Trk::V0Tools"};
+    ToolHandle <Trk::IVertexFitter> m_vertexFitter{this, "VertexFitterTool", "Trk::TrkVKalVrtFitter"};
+    ToolHandle <InDet::VertexPointEstimator> m_vertexEstimator{this, "VertexEstimator", "InDet::VertexPointEstimator"};
 
-        SG::ReadHandleKey<xAOD::TrackParticleContainer> m_inputTrackParticleContainerName;
-        SG::ReadHandleKey<xAOD::TrackParticleContainer> m_inputLowPtTrackContainerName;
-        SG::WriteHandleKey<xAOD::VertexContainer> m_conversionContainerName;
+    SG::ReadHandleKey<xAOD::TrackParticleContainer> m_inputTrackParticleContainerName{this, "InputTrackParticleContainerName", "InDetTrackParticles"};
+    SG::ReadHandleKey<xAOD::TrackParticleContainer> m_inputLowPtTrackContainerName{this, "InputLowPtTrackContainerName", "LowPtRoITrackParticles"};
+    SG::WriteHandleKey<xAOD::VertexContainer> m_conversionContainerName{this, "ConversionContainerName", "BPhysConversionCandidates"};
 
-        float m_maxDeltaQ;
-        float m_Chi2Cut;
-        float m_maxGammaMass;
-        
+    Gaudi::Property<float> m_maxDeltaQ{this, "MaxDeltaQ", 700.0}; // Maximum mass difference between di-muon+conversion and di-muon};
+    Gaudi::Property<float> m_Chi2Cut{this, "Chi2Cut", 20.0};
+    Gaudi::Property<float> m_maxGammaMass{this, "MaxGammaMass", 100.0};
+
 
   };
 }

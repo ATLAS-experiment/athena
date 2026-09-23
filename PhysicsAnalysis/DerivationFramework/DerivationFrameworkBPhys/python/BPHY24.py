@@ -14,7 +14,6 @@ streamName = "StreamDAOD_BPHY24"
 def BPHY24Cfg(flags):
 
     # Lists for better code organization
-    augsList          = [] # List of active augmentation tools
     skimList          = [] # List of active skimming algorithms
     thinList          = [] # List of active thinning algorithms
     outVtxList        = [] # List of reconstructed candidates to store
@@ -49,9 +48,8 @@ def BPHY24Cfg(flags):
         flags, name  = "BPHY24_Skim_Bcandidates", expression = bSkim ))
     skimList += [ BPHY24_Skim_Bcandidates ]
 
-    BPHY24_AugOriginalCounts = acc.popToolsAndMerge(
+    acc.merge(
         AugOriginalCountsCfg(flags, name = "BPHY24_AugOriginalCounts"))
-    augsList += [ BPHY24_AugOriginalCounts ]
 
     mainIDInput = "InDetTrackParticles"
     originalTrackCond = ["InDetTrackParticles", "GSFTrackParticles"]
@@ -85,22 +83,21 @@ def BPHY24Cfg(flags):
                                              useMCPCuts                  = False )
 
 
-    BPHY24_SelectAndWrite_DiMuon = CompFactory.DerivationFramework.Reco_mumu( name   = "BPHY24_SelectAndWrite_DiMuon",
+    acc.addEventAlgo(CompFactory.DerivationFramework.Reco_mumu( name   = "BPHY24_SelectAndWrite_DiMuon",
                                         JpsiFinder               = BPHY24_Finder_DiMuon,
                                         V0Tools                  = V0Tools,
                                         PVRefitter               = PVrefit,
                                         OutputVtxContainerName   = "BPHY24_DiMuon_Candidates",
                                         PVContainerName          = "PrimaryVertices",
                                         RefPVContainerName       = "SHOULDNOTBEUSED", # The container would be created if PV refit was requested (not needed at this point)
-                                        DoVertexType             = 7 ) # Vertex type marking our own reconstruced secondary candidates
+                                        DoVertexType             = 7 )) # Vertex type marking our own reconstruced secondary candidates
 
-    augsList += [ BPHY24_SelectAndWrite_DiMuon ]
     # Final selection of the di-muon candidates
     thinTrkVtxList    += [ "BPHY24_DiMuon_Candidates" ]
     outVtxList        += [ "BPHY24_DiMuon_Candidates" ]
     thinPassFlagsList += [ "passed_Jpsi" ] # TODO: is this really needed?
 
-    BPHY24_Select_DiMuons = CompFactory.DerivationFramework.Select_onia2mumu( name    = "BPHY24_Select_DiMuons",
+    acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu( name    = "BPHY24_Select_DiMuons",
                                            HypothesisName        = "Jpsi",
                                            InputVtxContainerName = "BPHY24_DiMuon_Candidates",
                                            V0Tools               = V0Tools,
@@ -108,36 +105,32 @@ def BPHY24Cfg(flags):
                                            MassMax               = 10000., # loose cut to keep selection from BPHY24_Finder_DiMuon
                                            MassMin               = 0.,     # loose cut to keep selection from BPHY24_Finder_DiMuon
                                            Chi2Max               = 1000.,  # loose cut to keep selection from BPHY24_Finder_DiMuon (chi2, not chi2/NDF)
-                                           DoVertexType          = 7 ) # Vertex type marking our own reconstruced secondary candidates   
-
-    augsList += [ BPHY24_Select_DiMuons ]
-
-    ElectronLHSelectorLHvloose = CompFactory.AsgElectronLikelihoodTool("ElectronLHSelectorLHvloose",
-            primaryVertexContainer = "PrimaryVertices",
-            ConfigFile="ElectronPhotonSelectorTools/offline/mc20_20210514/ElectronLikelihoodVeryLooseOfflineConfig2017_Smooth.conf")
-
-    
-
-    ElectronLHSelectorLHvloose_nod0 = CompFactory.AsgElectronLikelihoodTool("ElectronLHSelectorLHvloosenod0", primaryVertexContainer = "PrimaryVertices",
-            ConfigFile="ElectronPhotonSelectorTools/offline/mc16_20190328_nod0/ElectronLikelihoodVeryLooseOfflineConfig2017_Smooth_nod0.conf")   # Still OK to use in Run3?
-
+                                           DoVertexType          = 7 )) # Vertex type marking our own reconstruced secondary candidates   
 
     # decorate electrons with the output of LH vloose (nod0)
     from DerivationFrameworkEGamma.EGammaToolsConfig import EGElectronLikelihoodToolWrapperCfg
-    ElectronPassLHvloose = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(flags, name = "ElectronPassLHvloose",
-                                            EGammaElectronLikelihoodTool = ElectronLHSelectorLHvloose,
-                                            CutType = "",
-                                            StoreGateEntryName = "DFCommonElectronsLHVeryLoose",
-                                            ContainerName = "Electrons",
-                                            StoreTResult=False)))
 
-    ElectronPassLHvloosenod0 = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(flags, name = "ElectronPassLHvloosenod0",
-                                            EGammaElectronLikelihoodTool = ElectronLHSelectorLHvloose_nod0,
-                                            CutType = "",
-                                            StoreGateEntryName = "DFCommonElectronsLHVeryLoosenod0",
-                                            ContainerName = "Electrons",
-                                            StoreTResult=False)))
-    augsList += [ElectronPassLHvloose, ElectronPassLHvloosenod0]
+    ElectronLHSelectorLHvloose = CompFactory.AsgElectronLikelihoodTool("ElectronLHSelectorLHvloose",
+                                                                       primaryVertexContainer = "PrimaryVertices",
+                                                                       ConfigFile="ElectronPhotonSelectorTools/offline/mc20_20210514/ElectronLikelihoodVeryLooseOfflineConfig2017_Smooth.conf")
+
+    acc.merge(EGElectronLikelihoodToolWrapperCfg(flags, name = "ElectronPassLHvloose",
+                                                 EGammaElectronLikelihoodTool = ElectronLHSelectorLHvloose,
+                                                 CutType = "",
+                                                 StoreGateEntryName = "DFCommonElectronsLHVeryLoose",
+                                                 ContainerName = "Electrons",
+                                                 StoreTResult=False))
+
+    ElectronLHSelectorLHvloose_nod0 = CompFactory.AsgElectronLikelihoodTool("ElectronLHSelectorLHvloosenod0",
+                                                                            primaryVertexContainer = "PrimaryVertices",
+                                                                            ConfigFile="ElectronPhotonSelectorTools/offline/mc16_20190328_nod0/ElectronLikelihoodVeryLooseOfflineConfig2017_Smooth_nod0.conf")   # Still OK to use in Run3?
+
+    acc.merge(EGElectronLikelihoodToolWrapperCfg(flags, name = "ElectronPassLHvloosenod0",
+                                                 EGammaElectronLikelihoodTool = ElectronLHSelectorLHvloose_nod0,
+                                                 CutType = "",
+                                                 StoreGateEntryName = "DFCommonElectronsLHVeryLoosenod0",
+                                                 ContainerName = "Electrons",
+                                                 StoreTResult=False))
 
     BPHY24DiElectronFinder = CompFactory.Analysis.JpsiFinder_ee(
         name                        = "BPHY24DiElectronFinder",
@@ -161,7 +154,7 @@ def BPHY24Cfg(flags):
         ElectronSelection             = "d0_or_nod0"
         )
 
-    BPHY24_SelectAndWrite_DiElectron = CompFactory.DerivationFramework.Reco_mumu(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Reco_mumu(
             name                   = "BPHY24_SelectAndWrite_DiElectron",
             JpsiFinder             = BPHY24DiElectronFinder,
             V0Tools                = V0Tools,
@@ -170,11 +163,9 @@ def BPHY24Cfg(flags):
             PVContainerName        = "PrimaryVertices",
             RefPVContainerName     = "SHOULDNOTBEUSED",
             DoVertexType           = 7
-            )
+            ))
 
-    augsList += [ BPHY24_SelectAndWrite_DiElectron ]
-
-    BPHY24_Select_DiElectrons = CompFactory.DerivationFramework.Select_onia2mumu(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
             name                  = "BPHY24_Select_DiElectrons",
             HypothesisName        = "Jpsi",
             InputVtxContainerName = "BPHY24_DiElectron_Candidates",
@@ -184,12 +175,10 @@ def BPHY24Cfg(flags):
             MassMax               = 7000.0,
             Chi2Max               = 30,
             DoVertexType          = 7
-            )
+            ))
 
     thinTrkVtxList    += [ "BPHY24_DiElectron_Candidates" ]
     outVtxList        += [ "BPHY24_DiElectron_Candidates" ]
- 
-    augsList += [ BPHY24_Select_DiElectrons ]
 
     V0ContainerName = "BPHY24RecoV0Candidates"
     KshortContainerName = "BPHY24RecoKshortCandidates"
@@ -226,7 +215,7 @@ def BPHY24Cfg(flags):
         BDTCut                      = 0.1,
         use_TrackSelector           = False))
 
-    BPHY24_Reco_V0Finder = acc.popToolsAndMerge(BPHY_Reco_V0FinderCfg(
+    acc.merge(BPHY_Reco_V0FinderCfg(
         flags, derivation = BPHYDerivationName,
         V0ContainerName = V0ContainerName,
         KshortContainerName = KshortContainerName,
@@ -237,7 +226,6 @@ def BPHY24Cfg(flags):
                                  'BPHY24_DiElectron_Candidates'],
         V0FinderTool = BPHY24_V0FinderTool))
 
-    augsList += [BPHY24_Reco_V0Finder]
     outVtxList += ['BPHY24RecoKshortCandidates']
     outVtxList += ["BPHY24RecoV0Candidates"]
     thinTrkVtxList += ['BPHY24RecoKshortCandidates']
@@ -248,7 +236,7 @@ def BPHY24Cfg(flags):
     JpsiV0VertexFit = acc.popToolsAndMerge(JpsiV0VertexFitCfg(flags))
     acc.addPublicTool(JpsiV0VertexFit)
 
-    BPHY24JpsimmKshort          = CompFactory.DerivationFramework.JpsiPlusV0Cascade(
+    acc.addEventAlgo(CompFactory.DerivationFramework.JpsiPlusV0Cascade(
         name                    = "BPHY24mmKshort",
         V0Tools                 = V0Tools,
         HypothesisName          = "Bd",
@@ -268,15 +256,14 @@ def BPHY24Cfg(flags):
         CascadeVertexCollections= ["BPHY24JpsimmKshortCascadeSV2", "BPHY24JpsimmKshortCascadeSV1"],
         V0Vertices              = "BPHY24RecoV0Candidates",
         V0TrackContainerName    = mainIDInput,
-        RelinkTracks = originalTrackCond)
+        RelinkTracks = originalTrackCond))
 
-    augsList += [BPHY24JpsimmKshort]
-    outVtxList += BPHY24JpsimmKshort.CascadeVertexCollections
+    outVtxList += acc.getEventAlgo("BPHY24JpsimmKshort").CascadeVertexCollections
     outVtxList += ["BPHY24RefittedPrimaryVertices_mm"]
-    thinTrkVtxList += BPHY24JpsimmKshort.CascadeVertexCollections
-    finalCandidateList += BPHY24JpsimmKshort.CascadeVertexCollections
+    thinTrkVtxList += acc.getEventAlgo("BPHY24JpsimmKshort").CascadeVertexCollections
+    finalCandidateList += acc.getEventAlgo("BPHY24JpsimmKshort").CascadeVertexCollections
 
-    BPHY24JpsieeKshort          = CompFactory.DerivationFramework.JpsiPlusV0Cascade(
+    acc.addEventAlgo(CompFactory.DerivationFramework.JpsiPlusV0Cascade(
         name                    = "BPHY24eeKshort",
         V0Tools                 = V0Tools,
         HypothesisName          = "Bd",
@@ -298,13 +285,12 @@ def BPHY24Cfg(flags):
         CascadeVertexCollections= ["BPHY24JpsieeKshortCascadeSV2", "BPHY24JpsieeKshortCascadeSV1"],
         V0Vertices              = "BPHY24RecoV0Candidates",
         V0TrackContainerName    = mainIDInput,
-        RelinkTracks = originalTrackCond)
+        RelinkTracks = originalTrackCond))
 
-    augsList += [BPHY24JpsieeKshort]
-    finalCandidateList += BPHY24JpsieeKshort.CascadeVertexCollections
-    outVtxList += BPHY24JpsieeKshort.CascadeVertexCollections
+    finalCandidateList += acc.getEventAlgo("BPHY24JpsieeKshort").CascadeVertexCollections
+    outVtxList += acc.getEventAlgo("BPHY24JpsieeKshort").CascadeVertexCollections
     outVtxList += ["BPHY24RefittedPrimaryVertices_ee"]
-    thinTrkVtxList += BPHY24JpsieeKshort.CascadeVertexCollections
+    thinTrkVtxList += acc.getEventAlgo("BPHY24JpsieeKshort").CascadeVertexCollections
 
     from TrackVertexAssociationTool.TrackVertexAssociationToolConfig import isoTTVAToolCfg
     TTVATool = acc.popToolsAndMerge(isoTTVAToolCfg(flags,
@@ -328,41 +314,36 @@ def BPHY24Cfg(flags):
                                                               TrackSelectionTool = TrackSelTool,
                                                               TTVATool = TTVATool))
     acc.addPublicTool(TrackIsoTool)
-    BPHY24TrackIsolationDecoratorBtoKee = CompFactory.DerivationFramework.VertexTrackIsolation(
+    acc.addEventAlgo(CompFactory.DerivationFramework.VertexTrackIsolation(
       name                            = "BPHY24TrackIsolationDecoratorBtoKee",
       TrackIsoTool                    = TrackIsoTool,
       TrackContainer                  = "InDetTrackParticles",
       InputVertexContainer            = "BPHY24JpsieeKshortCascadeSV1",
       FixElecExclusion                = True,
-      IncludeV0                       = True)
-    BPHY24TrackIsolationDecoratorBtoKmumu = CompFactory.DerivationFramework.VertexTrackIsolation(
+      IncludeV0                       = True))
+    acc.addEventAlgo(CompFactory.DerivationFramework.VertexTrackIsolation(
       name                            = "BPHY24TrackIsolationDecoratorBtoKmumu ",
       TrackIsoTool                    = TrackIsoTool,
       TrackContainer                  = "InDetTrackParticles",
       InputVertexContainer            = "BPHY24JpsimmKshortCascadeSV1",
       FixElecExclusion                = False,
-      IncludeV0                       = True)
-    
-    BPHY24TrackIsolationDecoratorJpsiee = CompFactory.DerivationFramework.VertexTrackIsolation(
+      IncludeV0                       = True))
+
+    acc.addEventAlgo(CompFactory.DerivationFramework.VertexTrackIsolation(
       name                            = "BPHY24TrackIsolationDecoratorJpsiee",
       TrackIsoTool                    = TrackIsoTool,
       TrackContainer                  = "InDetTrackParticles",
       InputVertexContainer            = "BPHY24_DiElectron_Candidates",
       FixElecExclusion                = True,
-      IncludeV0                       = False)
-    
-    BPHY24TrackIsolationDecoratorJpsimumu = CompFactory.DerivationFramework.VertexTrackIsolation(
+      IncludeV0                       = False))
+
+    acc.addEventAlgo(CompFactory.DerivationFramework.VertexTrackIsolation(
       name                            = "BPHY24TrackIsolationDecoratorJpsimumu",
       TrackIsoTool                    = TrackIsoTool,
       TrackContainer                  = "InDetTrackParticles",
       InputVertexContainer            = "BPHY24_DiMuon_Candidates",
       FixElecExclusion                = False,
-      IncludeV0                       = False)
-
-    augsList += [ BPHY24TrackIsolationDecoratorBtoKee,
-              BPHY24TrackIsolationDecoratorBtoKmumu,
-              BPHY24TrackIsolationDecoratorJpsiee,
-              BPHY24TrackIsolationDecoratorJpsimumu]
+      IncludeV0                       = False))
 
     if flags.Trigger.EDMVersion >= 0:
         trigger_list = [ # Pure muon triggers
@@ -504,9 +485,8 @@ def BPHY24Cfg(flags):
                                                                          PreserveAncestors       = False)
       thinList += [ BPHY24_Thin_TruthQuarks ]
 
-    for t in  augsList + skimList + thinList: acc.addPublicTool(t)
+    for t in  skimList + thinList: acc.addPublicTool(t)
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY24Kernel",
-                                                     AugmentationTools = augsList,
                                                      #OutputLevel = DEBUG,
                                                      #Only skim if not MC
                                                      SkimmingTools     = skimList,

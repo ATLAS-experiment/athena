@@ -5,10 +5,9 @@
 #ifndef JPSIXPLUSDISPLACED_H
 #define JPSIXPLUSDISPLACED_H
 
-#include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "JpsiUpsilonTools/PrimaryVertexRefitter.h"
 #include "xAODTracking/VertexContainer.h"
 #include "ITrackToVertex/ITrackToVertex.h"
@@ -37,7 +36,7 @@ namespace DerivationFramework {
 
 namespace DerivationFramework {
 
-  class JpsiXPlusDisplaced : public extends<AthAlgTool, IAugmentationTool>
+  class JpsiXPlusDisplaced : public AthReentrantAlgorithm
   {
   public:
     enum V0Enum{ UNKNOWN=0, LAMBDA=1, LAMBDABAR=2, KS=3 };
@@ -74,11 +73,11 @@ namespace DerivationFramework {
       std::vector<MesonCandidate> m_vector;
     };
 
-    JpsiXPlusDisplaced(const std::string& type, const std::string& name, const IInterface* parent);
+    JpsiXPlusDisplaced(const std::string& name, ISvcLocator* svcLoc);
     virtual ~JpsiXPlusDisplaced() = default;
     virtual StatusCode initialize() override;
     StatusCode performSearch(std::vector<std::pair<Trk::VxCascadeInfo*,Trk::VxCascadeInfo*> >& cascadeinfoContainer, const std::vector<std::pair<const xAOD::Vertex*,V0Enum> >& selectedV0Candidates, const std::vector<const xAOD::TrackParticle*>& tracksDisplaced, const EventContext& ctx) const;
-    virtual StatusCode addBranches(const EventContext& ctx) const override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
 
   private:
     SG::ReadHandleKey<xAOD::VertexContainer> m_vertexJXContainerKey;

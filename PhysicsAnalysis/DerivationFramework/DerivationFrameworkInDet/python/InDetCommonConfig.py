@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # ********************************************************************
 # InDetCommonConfig.py
@@ -34,22 +34,20 @@ def InDetCommonCfg(flags, **kwargs):
         # ====================================================================
         # LABELLING TRACKS WITH OUTCOME OF SELECTOR TOOL
         # ====================================================================
-        from DerivationFrameworkInDet.InDetToolsConfig import (
-            InDetTrackSelectionToolWrapperCfg)
-        DFCommonTrackSelection = acc.getPrimaryAndMerge(
+        from DerivationFrameworkInDet.InDetToolsConfig import InDetTrackSelectionToolWrapperCfg
+        acc.merge(
             InDetTrackSelectionToolWrapperCfg(
                 flags,
-                name           = "DFCommonTrackSelection",
+                name           = "InDetCommonKernelDFCommonTrackSelection",
                 CutLevel  = "TightPrimary",
                 DecorationName = "DFCommonTightPrimary"))
 
         if kwargs['AddPseudoTracks']:
-            from DerivationFrameworkInDet.InDetToolsConfig import (
-                PseudoTrackSelectorCfg)
-            PseudoTrackSelectorTool = acc.getPrimaryAndMerge(
+            from DerivationFrameworkInDet.InDetToolsConfig import PseudoTrackSelectorCfg
+            acc.merge(
                 PseudoTrackSelectorCfg(
                     flags,
-                    name                                 = "PseudoTrackSelectorTool",
+                    name                                 = "InDetSelectedPseudo",
                     RecoTrackParticleLocation            = "InDetTrackParticles",
                     PseudoTrackParticleLocation          = "InDetPseudoTrackParticles",
                     OutputRecoReplacedWithPseudo         = "InDetReplacedWithPseudoTrackParticles",
@@ -60,11 +58,8 @@ def InDetCommonCfg(flags, **kwargs):
                     OutputRecoPlusPseudoNotFromB         = "InDetPlusPseudoNotFromBTrackParticles",
                     OutputRecoNoFakes                    = "InDetNoFakesTrackParticles",
                     OutputRecoNoFakesFromB               = "InDetNoFakesFromBTrackParticles",
-                    OutputRecoNoFakesNotFromB            = "InDetNoFakesNotFromBTrackParticles"))
-
-            acc.addEventAlgo(CommonAugmentation(
-                "InDetSelectedPseudo",
-                AugmentationTools=[PseudoTrackSelectorTool]))
+                    OutputRecoNoFakesNotFromB            = "InDetNoFakesNotFromBTrackParticles"
+                ))
 
         # ====================================================================
         # EXPRESSION OF Z0 AT THE PRIMARY VERTEX
@@ -172,21 +167,19 @@ def InDetCommonCfg(flags, **kwargs):
             # =======================================
             # CREATE THE DERIVATION KERNEL ALGORITHM
             # =======================================
-            for tool in [DFCommonTrackSelection,
-                                   DFCommonZ0AtPV,
-                                   DFCommonUsedInFitDecorator,
-                                   DFCommonUsedInFitDecoratorLRT]:
+            for tool in [DFCommonZ0AtPV,
+                         DFCommonUsedInFitDecorator,
+                         DFCommonUsedInFitDecoratorLRT]:
                 acc.addEventAlgo(CommonAugmentation("InDetCommonKernel"+tool.name,
-                                 AugmentationTools=[tool]))
+                                 AugmentationTools=[tool])) # TODO Migrate public tool to AthReentrantAlgorithm
         else:
-            AugTools = [DFCommonTrackSelection,
-                        DFCommonZ0AtPV,
+            AugTools = [DFCommonZ0AtPV,
                         DFCommonUsedInFitDecorator]
             if kwargs['AddPseudoTracks']:
                 AugTools += PseudoTrackDecorators
             for tool in AugTools:
                 acc.addEventAlgo(CommonAugmentation("InDetCommonKernel"+tool.name,
-                                                AugmentationTools=[tool]))
+                                                AugmentationTools=[tool])) # TODO Migrate public tool to AthReentrantAlgorithm
 
     # Add LRT merger job to the sequence when the LRT track particle is supposed to be made already
     if (kwargs['MergeLRT'] and kwargs['DoR3LargeD0'] and

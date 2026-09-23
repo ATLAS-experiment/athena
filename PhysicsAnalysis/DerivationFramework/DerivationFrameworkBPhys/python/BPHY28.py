@@ -62,9 +62,8 @@ def BPHY28Kernel(flags):
    toRelink = ["InDetTrackParticles", "InDetLargeD0TrackParticles"] if doLRT else []
    MuonReLink = [ "Muons", "MuonsLRT" ] if doLRT else []
 
-   BPHY28_AugOriginalCounts = acc.popToolsAndMerge(
+   BPHY28_AugOriginalCounts = acc.merge(
       AugOriginalCountsCfg(flags, name = "BPHY28_AugOriginalCounts"))
-   augList += [ BPHY28_AugOriginalCounts ]
 
    BPHY28MuMuFinder = CompFactory.Analysis.JpsiFinder(
        name                        = "BPHY28MuMuFinder",
@@ -86,7 +85,7 @@ def BPHY28Kernel(flags):
        VertexPointEstimator        = vpest,
        useMCPCuts                  = False )
 
-   BPHY28MuMuSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(name = "BPHY28MuMuSelectAndWrite",
+   acc.addEventAlgo(CompFactory.DerivationFramework.Reco_Vertex(name = "BPHY28MuMuSelectAndWrite",
                                                        VertexSearchTool       = BPHY28MuMuFinder,
                                                        OutputVtxContainerName = MuMuContainerName,
                                                        PVContainerName        = "PrimaryVertices",
@@ -95,12 +94,11 @@ def BPHY28Kernel(flags):
                                                        RefPVContainerName     = "SHOULDNOTBEUSED",
                                                        RelinkTracks           =  toRelink,
                                                        RelinkMuons            =  MuonReLink,
-                                                       DoVertexType           = 7)
-   augList += [ BPHY28MuMuSelectAndWrite ]
+                                                       DoVertexType           = 7))
    thinTrkVtxList += [ MuMuContainerName ]
-   
+
    ## a/ augment and select Jpsi->mumu candidates
-   BPHY28_Select_Jpsi2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
+   acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
          name                  = "BPHY28_Select_Jpsi2mumu",
          HypothesisName        = "Jpsi",
          InputVtxContainerName = MuMuContainerName,
@@ -109,9 +107,7 @@ def BPHY28Kernel(flags):
          MassMin               = 2000.0,
          MassMax               = 3600.0,
          Chi2Max               = 50, Do3d = False,  # this is chi2 cut
-         DoVertexType          = 7)
-   augList += [ BPHY28_Select_Jpsi2mumu ]
-
+         DoVertexType          = 7))
 
    BPHY28BsKKMuMu = CompFactory.Analysis.JpsiPlus2Tracks(name = "BPHY28BsKKMuMu",
          kaonkaonHypothesis          = True,
@@ -133,8 +129,8 @@ def BPHY28Kernel(flags):
          TrackSelectorTool           = trackselect,
          UseMassConstraint           = False)
 
-   
-   BPHY28BsKKSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(name = "BPHY28BsKKSelectAndWrite",
+
+   acc.addEventAlgo(CompFactory.DerivationFramework.Reco_Vertex(name = "BPHY28BsKKSelectAndWrite",
                         VertexSearchTool         = BPHY28BsKKMuMu,
                         OutputVtxContainerName   = BsPhiMuMuContainerName,
                         PVContainerName          = "PrimaryVertices",
@@ -143,12 +139,11 @@ def BPHY28Kernel(flags):
                         RefPVContainerName       = "BPHY28RefittedPrimaryVertices",
                         RefitPV                  = True, Do3d = False,
                         RelinkTracks  =  toRelink,
-                        MaxPVrefit               = 10000, DoVertexType = 7)
-   augList += [ BPHY28BsKKSelectAndWrite ]
+                        MaxPVrefit               = 10000, DoVertexType = 7))
    thinTrkVtxList += [ BsPhiMuMuContainerName ]
 
 
-   BPHY28_Select_Bs2KKMuMu = CompFactory.DerivationFramework.Select_onia2mumu(
+   acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
                                  name                       = "BPHY28_Select_Bs2KKMuMu",
                                  HypothesisName             = "Bs",
                                  InputVtxContainerName      = BsPhiMuMuContainerName,
@@ -157,9 +152,7 @@ def BPHY28Kernel(flags):
                                  VtxMassHypo                = 5366.3,
                                  MassMin                    = 4500.0,
                                  MassMax                    = 6500.0, Do3d = False,
-                                 Chi2Max                    = 50)  # this is chi2 cut
-   augList += [ BPHY28_Select_Bs2KKMuMu ]
-
+                                 Chi2Max                    = 50))  # this is chi2 cut
 
    if not isSimulation: #Only Skim Data
       from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
@@ -191,9 +184,8 @@ def BPHY28Kernel(flags):
       thinList += [ BPHY28_Thin_VtxTracks_LRT ]
 
 
-   for t in  augList + skimList + thinList : acc.addPublicTool(t)
+   for t in  skimList + thinList : acc.addPublicTool(t)
    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY28Kernel",
-                                                    AugmentationTools = augList,
                                                     #Only skim if not MC
                                                     SkimmingTools     = skimList,
                                                     ThinningTools     = thinList))

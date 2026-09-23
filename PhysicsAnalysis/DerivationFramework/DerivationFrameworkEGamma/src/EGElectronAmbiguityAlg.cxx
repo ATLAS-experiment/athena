@@ -1,8 +1,8 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "DerivationFrameworkEGamma/EGElectronAmbiguityTool.h"
+#include "DerivationFrameworkEGamma/EGElectronAmbiguityAlg.h"
 
 #include "xAODEgamma/ElectronxAODHelpers.h"
 #include "xAODTruth/xAODTruthHelpers.h"
@@ -44,7 +44,7 @@ helix(const xAOD::TrackParticle* trkP,
 namespace DerivationFramework {
 
 StatusCode
-EGElectronAmbiguityTool::initialize()
+EGElectronAmbiguityAlg::initialize()
 {
 
   ATH_CHECK(m_containerName.initialize());
@@ -65,8 +65,8 @@ EGElectronAmbiguityTool::initialize()
   return StatusCode::SUCCESS;
 }
 
-EGElectronAmbiguityTool::DecorHandles::DecorHandles
-  (const EGElectronAmbiguityTool& tool, const EventContext& ctx)
+EGElectronAmbiguityAlg::DecorHandles::DecorHandles
+  (const EGElectronAmbiguityAlg& tool, const EventContext& ctx)
     : drv     (tool.m_drv, ctx),
       dphiv   (tool.m_dphiv, ctx),
       dmee    (tool.m_dmee, ctx),
@@ -80,7 +80,7 @@ EGElectronAmbiguityTool::DecorHandles::DecorHandles
 }
 
 StatusCode
-EGElectronAmbiguityTool::addBranches(const EventContext& ctx) const
+EGElectronAmbiguityAlg::execute(const EventContext& ctx) const
 {
 
   DecorHandles dh (*this, ctx);
@@ -240,7 +240,7 @@ EGElectronAmbiguityTool::addBranches(const EventContext& ctx) const
 }
 
 StatusCode
-DerivationFramework::EGElectronAmbiguityTool::decorateSimple(
+DerivationFramework::EGElectronAmbiguityAlg::decorateSimple(
   DecorHandles& dh,
   std::unique_ptr<ConstDataVector<xAOD::TrackParticleContainer>>& tpC,
   const xAOD::Electron* ele,

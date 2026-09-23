@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //============================================================================
@@ -34,21 +34,19 @@
 #include <map>
 #include <vector>
 
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 
 namespace DerivationFramework {
 
-  class BPhysMetadataBase : public extends<AthAlgTool, IAugmentationTool> {
+  class BPhysMetadataBase : public AthReentrantAlgorithm {
     public: 
-      BPhysMetadataBase(const std::string& t, const std::string& n,
-			const IInterface* p);
+      using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
       virtual StatusCode initialize();
       virtual StatusCode finalize();
       
-      virtual StatusCode addBranches(const EventContext& ctx) const;
+      virtual StatusCode execute(const EventContext& ctx) const;
 
   protected:
       virtual void recordPropertyI(const std::string& name, int         val);
@@ -74,13 +72,14 @@ namespace DerivationFramework {
       virtual std::string vecToString(const std::vector<std::string>& v) const;
       
   private:
+    // TODO Configurable property declarations
       /// Object accessing the output metadata store
-      ServiceHandle< StoreGateSvc > m_outputMetaStore;
+      ServiceHandle< StoreGateSvc > m_outputMetaStore{this, "MetaStore", "StoreGateSvc/MetaDataStore"};
       
       // job options
-      std::string m_derivationName;
-      std::string m_mdFolderName;
-      std::string m_prefix;
+      Gaudi::Property<std::string> m_derivationName{this, "DerivationName", "_NOSUCHFORMAT_"};
+      Gaudi::Property<std::string> m_mdFolderName{this, "MetadataFolderName", "_NONE_"};
+      Gaudi::Property<std::string> m_prefix{this, "Prefix", ""};
       
       // maps for different types of JOs
       std::map<std::string, int>                       m_propInt;

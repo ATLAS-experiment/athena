@@ -1,18 +1,19 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORKTAU_TAUIDDECORATORWRAPPER_H
 #define DERIVATIONFRAMEWORKTAU_TAUIDDECORATORWRAPPER_H
 
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AsgTools/ToolHandleArray.h"
 #include "tauRecTools/TauRecToolBase.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteDecorHandleKeyArray.h"
 #include "xAODTau/TauJetContainer.h"
 #include "xAODMuon/MuonContainer.h"
+#include "GaudiKernel/ServiceHandle.h"
+#include "GaudiKernel/IChronoStatSvc.h"
 
 #include <string>
 #include <vector>
@@ -23,13 +24,13 @@
 
 namespace DerivationFramework {
 
-  class TauIDDecoratorWrapper : public extends<AthAlgTool, IAugmentationTool> {
+  class TauIDDecoratorWrapper : public AthReentrantAlgorithm {
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override final;
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
 
   private:
     SG::ReadHandleKey<xAOD::TauJetContainer> m_tauContainerKey { this, "TauContainerName", "TauJets", "Input tau container key" };
@@ -41,6 +42,7 @@ namespace DerivationFramework {
 
     ToolHandleArray<TauRecToolBase> m_tauIDTools { this, "TauIDTools", {}, "" };
     Gaudi::Property<bool> m_doEvetoWP{this, "DoEvetoWP", false};
+    ServiceHandle<IChronoStatSvc> m_chronoSvc{this, "ChronoStatSvc",  "ChronoStatSvc"};
   };
 }
 

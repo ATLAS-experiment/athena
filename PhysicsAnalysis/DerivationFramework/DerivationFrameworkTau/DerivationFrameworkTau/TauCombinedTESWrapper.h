@@ -11,8 +11,7 @@
 
 #include <string>
 
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "tauRecTools/TauCombinedTES.h"
 #include "StoreGate/ReadHandleKey.h"
@@ -26,13 +25,13 @@
 
 namespace DerivationFramework {
 
-  class TauCombinedTESWrapper : public extends<AthAlgTool, IAugmentationTool> {
+  class TauCombinedTESWrapper : public AthReentrantAlgorithm {
     public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
       virtual StatusCode initialize() override final;
-      virtual StatusCode addBranches(const EventContext& ctx) const override final;
+      virtual StatusCode execute(const EventContext& ctx) const override final;
 
     private:
       SG::ReadHandleKey<xAOD::TauJetContainer> m_tauKey

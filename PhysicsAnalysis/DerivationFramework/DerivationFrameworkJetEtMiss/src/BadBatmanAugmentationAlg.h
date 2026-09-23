@@ -1,13 +1,13 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
 // Author: Chris Young (christopher.young@cern.ch)
 ///////////////////////////////////////////////////////////////////
 
-#ifndef DERIVATIONFRAMEWORK_BADBATMANAUGMENTATIONTOOL_H
-#define DERIVATIONFRAMEWORK_BADBATMANAUGMENTATIONTOOL_H
+#ifndef DERIVATIONFRAMEWORK_BADBATMANAUGMENTATIONALG_H
+#define DERIVATIONFRAMEWORK_BADBATMANAUGMENTATIONALG_H
 
 #include <string>
 #include <vector>
@@ -16,21 +16,20 @@
 #include "xAODCaloEvent/CaloCluster.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadDecorHandleKey.h"
 #include "StoreGate/WriteDecorHandleKey.h"
 
 namespace DerivationFramework {
 
-  class BadBatmanAugmentationTool : public extends<AthAlgTool, IAugmentationTool> {
+  class BadBatmanAugmentationAlg : public AthReentrantAlgorithm {
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override final;
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
 
   private:
 
@@ -45,4 +44,4 @@ namespace DerivationFramework {
   };
 }
 
-#endif // DERIVATIONFRAMEWORK_PFLOWAUGMENTATIONTOOL_H
+#endif // DERIVATIONFRAMEWORK_PFLOWAUGMENTATIONALG_H

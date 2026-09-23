@@ -94,7 +94,7 @@ def EGAM5SkimmingToolCfg(flags):
     return acc
 
 
-def EGAM5enuTransverseMassToolCfg(flags):
+def EGAM5enuTransverseMassAugCfg(flags):
     """Configure the EGAM5 enu transverse mass augmentation tool"""
     acc = ComponentAccumulator()
 
@@ -109,7 +109,7 @@ def EGAM5enuTransverseMassToolCfg(flags):
         "(" + electronQualityRequirement + "&&" + electronPtRequirement + ")"
     )
 
-    acc.setPrivateTools(
+    EGAM5_enuTransverseMassTool = acc.addPublicTool(
         CompFactory.DerivationFramework.EGTransverseMassTool(
             name="EGAM5_enuTransverseMassTool",
             ObjectRequirements=requirement_el,
@@ -119,7 +119,8 @@ def EGAM5enuTransverseMassToolCfg(flags):
             ObjectContainerName="Electrons",
             METContainerName="MET_Core_AntiKt4EMPFlow",
         )
-    )
+    ) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("EGAM5_enuTransverseMassAug", AugmentationTools = [EGAM5_enuTransverseMassAug]), primary=True)
 
     return acc
 
@@ -144,11 +145,7 @@ def EGAM5KernelCfg(flags, name="EGAM5Kernel", **kwargs):
     # ====================================================================
     # enu transverse mass
     # ====================================================================
-    EGAM5enuTransverseMassTool = acc.popToolsAndMerge(
-        EGAM5enuTransverseMassToolCfg(flags)
-    )
-    acc.addPublicTool(EGAM5enuTransverseMassTool)
-    augmentationTools.append(EGAM5enuTransverseMassTool)
+    acc.merge(EGAM5enuTransverseMassAugCfg(flags))
 
     # ====================================================================
     # Common calo decoration tools
@@ -296,11 +293,12 @@ def EGAM5KernelCfg(flags, name="EGAM5Kernel", **kwargs):
     skimmingTool = acc.getPrimaryAndMerge(EGAM5SkimmingToolCfg(flags))
 
     # setup the kernel
+    for tool in augmentationTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     acc.addEventAlgo(
         CompFactory.DerivationFramework.DerivationKernel(
             name,
             SkimmingTools=[skimmingTool],
-            AugmentationTools=augmentationTools,
             ThinningTools=thinningTools,
         )
     )

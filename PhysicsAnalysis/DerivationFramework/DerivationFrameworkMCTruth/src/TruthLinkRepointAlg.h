@@ -1,13 +1,12 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef DERIVATIONFRAMEWORK_TruthLinkRepointTool_H
-#define DERIVATIONFRAMEWORK_TruthLinkRepointTool_H
+#ifndef DERIVATIONFRAMEWORK_TruthLinkRepointAlg_H
+#define DERIVATIONFRAMEWORK_TruthLinkRepointAlg_H
 
 // Interface classes
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 // Types for functions. Note these are typedefs, so can't forward reference.
 #include "xAODTruth/TruthParticleContainer.h"
@@ -20,13 +19,13 @@
 
 namespace DerivationFramework {
 
-  class TruthLinkRepointTool : public extends<AthAlgTool, IAugmentationTool> {
+  class TruthLinkRepointAlg : public AthReentrantAlgorithm {
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override final;
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
 
   private:
     /// Parameter: input collection key
@@ -42,4 +41,4 @@ namespace DerivationFramework {
   };
 }
 
-#endif // DERIVATIONFRAMEWORK_TruthLinkRepointTool_H
+#endif // DERIVATIONFRAMEWORK_TruthLinkRepointAlg_H

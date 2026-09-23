@@ -8,7 +8,7 @@
 #include<string>
 
 // Gaudi & Athena basics
-#include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/VertexContainer.h"
 #include <vector>
@@ -16,9 +16,6 @@
 #include <StoreGate/ReadHandleKey.h>
 #include <StoreGate/WriteHandleKey.h>
 #include <StoreGate/WriteDecorHandleKey.h>
-
-// DerivationFramework includes
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 
 namespace DerivationFramework {
 
@@ -29,17 +26,17 @@ namespace DerivationFramework {
 
       @author James Catmore -at- cern.ch
   */
-  class TrackParametersAtPV : public extends<AthAlgTool, IAugmentationTool> {
+  class TrackParametersAtPV : public AthReentrantAlgorithm {
 
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     // Athena algtool's Hooks
     virtual StatusCode  initialize() override final;
 
     /** Check that the current event passes this filter */
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
 
   private:
     SG::ReadHandleKey<xAOD::TrackParticleContainer> m_collTrackKey

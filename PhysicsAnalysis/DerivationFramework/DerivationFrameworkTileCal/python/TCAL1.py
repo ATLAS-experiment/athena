@@ -183,7 +183,7 @@ def TCAL1KernelCfg(flags, name='TCAL1Kernel', **kwargs):
 
     deltaRCones = kwargs.pop('DeltaRCones', [0.2, 0.4])
     cellsMuonDecorator = acc.getPrimaryAndMerge( TCAL1TileCellsMuonDecoratorCfg(flags, Prefix=prefix, DeltaRCones=deltaRCones) )
-    kwargs.setdefault('AugmentationTools', [cellsMuonDecorator])
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(name+"Aug", AugmentationTools = [cellsMuonDecorator]))
 
     skimmingTool = acc.getPrimaryAndMerge(TCAL1StringSkimmingToolCfg(flags, Prefix=prefix))
     kwargs.setdefault('SkimmingTools', [skimmingTool])

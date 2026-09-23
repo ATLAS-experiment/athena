@@ -1,21 +1,20 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //==================================================
 // Selection of D*+ -> pi+ + D0
 //==================================================
 
-#ifndef DERIVATIONFRAMEWORK_DStarSelectionTool_H
-#define DERIVATIONFRAMEWORK_DStarSelectionTool_H
+#ifndef DERIVATIONFRAMEWORK_DStarSelectionAlg_H
+#define DERIVATIONFRAMEWORK_DStarSelectionAlg_H
 
 #include <vector>
 #include <string>
 
 #include "TLorentzVector.h"
 
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
@@ -30,14 +29,14 @@
 
 namespace DerivationFramework {
 
-  class DStarSelectionTool : public extends<AthAlgTool,IAugmentationTool> {
+  class DStarSelectionAlg : public AthReentrantAlgorithm {
     
     public: 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
     
     StatusCode initialize() override;
     
-    virtual StatusCode addBranches(const EventContext& ctx) const override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
     
   private:
     SG::ReadHandleKey<xAOD::VertexContainer> m_inputVtxContainerName{this, "InputVtxContainerName", ""};
@@ -52,4 +51,4 @@ namespace DerivationFramework {
   }; 
 }
 
-#endif // DERIVATIONFRAMEWORK_DStarSelectionTool_H
+#endif // DERIVATIONFRAMEWORK_DStarSelectionAlg_H

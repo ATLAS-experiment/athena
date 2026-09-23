@@ -5,9 +5,8 @@
 #ifndef JPSIPLUSPSICASCADE_H
 #define JPSIPLUSPSICASCADE_H
 
-#include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "JpsiUpsilonTools/PrimaryVertexRefitter.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODEventInfo/EventInfo.h"
@@ -29,14 +28,14 @@ namespace DerivationFramework {
 
 namespace DerivationFramework {
 
-  class JpsiPlusPsiCascade : public extends<AthAlgTool, IAugmentationTool>
+  class JpsiPlusPsiCascade : public AthReentrantAlgorithm
   {
   public:
-    JpsiPlusPsiCascade(const std::string& t, const std::string& n, const IInterface* p);
+    JpsiPlusPsiCascade(const std::string& name, ISvcLocator* svcLoc);
     virtual ~JpsiPlusPsiCascade() = default;
     virtual StatusCode initialize() override;
     StatusCode performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer, std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer_noConstr, const EventContext& ctx) const;
-    virtual StatusCode addBranches(const EventContext& ctx) const override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
 
   private:
     SG::ReadHandleKey<xAOD::VertexContainer> m_vertexContainerKey;

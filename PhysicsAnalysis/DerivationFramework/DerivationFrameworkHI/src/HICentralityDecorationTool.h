@@ -1,14 +1,12 @@
 /*
-Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_HICENTRALITYDECORATIONTOOL_H
 #define DERIVATIONFRAMEWORK_HICENTRALITYDECORATIONTOOL_H
 
 // Gaudi & Athena basics
-#include "AthenaBaseComps/AthAlgTool.h"
-#include <AsgTools/PropertyWrapper.h>
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "xAODEventInfo/EventInfo.h"
 #include <vector>
 #include <string>
@@ -16,16 +14,16 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 namespace DerivationFramework {
 
-  class HICentralityDecorationTool : public extends<AthAlgTool, IAugmentationTool> {
+  class HICentralityDecorationTool : public AthReentrantAlgorithm { // FIXME RENAME
 
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     // Athena algtool's Hooks
     virtual StatusCode  initialize() override final;
 
-    virtual StatusCode addBranches(const EventContext& ctx) const override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
 
   private:
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey { this, "EventInfoKey", "EventInfo", "" };

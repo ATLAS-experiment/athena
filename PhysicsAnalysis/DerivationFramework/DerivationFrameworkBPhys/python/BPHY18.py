@@ -51,12 +51,12 @@ def BPHY18Cfg(flags):
 
     # decorate electrons with the output of LH
     from DerivationFrameworkEGamma.EGammaToolsConfig import EGElectronLikelihoodToolWrapperCfg
-    ElectronPassLHvloosenod0 = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(flags, name = "ElectronPassLHvloosenod0",
+    acc.merge(EGElectronLikelihoodToolWrapperCfg(flags, name = "ElectronPassLHvloosenod0",
                                             EGammaElectronLikelihoodTool = ElectronLHSelectorLHvloose_nod0,
                                             CutType = "",
                                             StoreGateEntryName = "DFCommonElectronsLHVeryLoosenod0",
                                             ContainerName = "Electrons",
-                                            StoreTResult=False)))
+                                            StoreTResult=False))
 
     BPHY18DiElectronFinder = CompFactory.Analysis.JpsiFinder_ee(
                              name                        = "BPHY18DiElectronFinder",
@@ -80,7 +80,7 @@ def BPHY18Cfg(flags):
                              ElectronSelection             = "d0_or_nod0"
                              )
     extraTools = [BPHY18DiElectronFinder]
-    BPHY18DiElectronSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Reco_Vertex(
                             name                   = "BPHY18DiElectronSelectAndWrite",
                             VertexSearchTool       = BPHY18DiElectronFinder,
                             OutputVtxContainerName = "BPHY18DiElectronCandidates",
@@ -89,9 +89,9 @@ def BPHY18Cfg(flags):
                             PVRefitter             = PVrefit,
                             RefPVContainerName     = "SHOULDNOTBEUSED",
                             DoVertexType           = 7
-                            )
+                            ))
 
-    BPHY18_Select_DiElectrons = CompFactory.DerivationFramework.Select_onia2mumu(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
                             name                  = "BPHY18_Select_DiElectrons",
                             HypothesisName        = "Jpsi",
                             InputVtxContainerName = "BPHY18DiElectronCandidates",
@@ -101,7 +101,7 @@ def BPHY18Cfg(flags):
                             MassMax               = 7000.0,
                             Chi2Max               = 30,
                             DoVertexType          = 7
-                            )
+                            ))
 
     BPHY18BeeKst = CompFactory.Analysis.JpsiPlus2Tracks(
                             name                    = "BPHY18BeeKstFinder",
@@ -130,7 +130,7 @@ def BPHY18Cfg(flags):
                             FinalDiTrackPt          = 500.,
                             UseGSFTrackIndices      = [0,1]
                             )
-    BPHY18BeeKstSelectAndWrite  = CompFactory.DerivationFramework.Reco_Vertex(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Reco_Vertex(
                             name                   = "BPHY18BeeKstSelectAndWrite",
                             VertexSearchTool       = BPHY18BeeKst,
                             OutputVtxContainerName = "BeeKstCandidates",
@@ -141,9 +141,9 @@ def BPHY18Cfg(flags):
                             PVRefitter             = PVrefit,
                             MaxPVrefit             = 10000,
                             DoVertexType           = 7
-                            )
+                            ))
 
-    BPHY18_Select_BeeKst = CompFactory.DerivationFramework.Select_onia2mumu(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
                            name                  = "BPHY18_Select_BeeKst",
                            HypothesisName        = "Bd",
                            InputVtxContainerName = "BeeKstCandidates",
@@ -153,9 +153,9 @@ def BPHY18Cfg(flags):
                            MassMin               = 1.0,
                            MassMax               = 10000.0,
                            Chi2Max               = 30.0
-                           )
+                           ))
 
-    BPHY18_Select_BeeKstbar = CompFactory.DerivationFramework.Select_onia2mumu(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
                            name                  = "BPHY18_Select_Bd2JpsiKstbar",
                            HypothesisName        = "Bdbar",
                            InputVtxContainerName = "BeeKstCandidates",
@@ -165,10 +165,10 @@ def BPHY18Cfg(flags):
                            MassMin               = 1.0,
                            MassMax               = 10000.0,
                            Chi2Max               = 30.0
-                           )
+                           ))
 
 
-    BPHY18_diMeson_revertex = CompFactory.DerivationFramework.ReVertex(
+    acc.addEventAlgo(CompFactory.DerivationFramework.ReVertex(
                            name                   = "BPHY18_diMeson_revertex",
                            InputVtxContainerName  = "BeeKstCandidates",
                            V0Tools                = V0Tools,
@@ -176,9 +176,9 @@ def BPHY18Cfg(flags):
                            TrackIndices           = [ 2, 3 ],
                            TrkVertexFitterTool    = vkalvrt,
                            OutputVtxContainerName = "BPHY18DiMeson"
-                           )
+                           ))
 
-    BPHY18_Select_Kpi = CompFactory.DerivationFramework.Select_onia2mumu(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
                           name                  = "BPHY18_Select_Kpi",
                           HypothesisName        = "Kpi",
                           InputVtxContainerName = "BPHY18DiMeson",
@@ -188,9 +188,9 @@ def BPHY18Cfg(flags):
                           MassMin               = 1.0,
                           MassMax               = 100000.0,
                           Chi2Max               = 100.0
-                          )
+                          ))
 
-    BPHY18_Select_piK = CompFactory.DerivationFramework.Select_onia2mumu(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
                        name                  = "BPHY18_Select_piK",
                        HypothesisName        = "piK",
                        InputVtxContainerName = "BPHY18DiMeson",
@@ -200,7 +200,7 @@ def BPHY18Cfg(flags):
                        MassMin               = 1.0,
                        MassMax               = 100000.0,
                        Chi2Max               = 100.0
-                       )
+                       ))
 
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
         xAODStringSkimmingToolCfg)
@@ -263,21 +263,18 @@ def BPHY18Cfg(flags):
                      ]
 
 
-    augTools = [ElectronPassLHvloosenod0,
-                BPHY18DiElectronSelectAndWrite, BPHY18_Select_DiElectrons,
-                BPHY18BeeKstSelectAndWrite, BPHY18_Select_BeeKst, BPHY18_Select_BeeKstbar,
-                BPHY18_diMeson_revertex, BPHY18_Select_Kpi, BPHY18_Select_piK]
     skimTools = [BPHY18SkimmingAND]
 
     if isSimulation:
         thinningCollection += [BPHY18TruthThinTool,BPHY18TruthThinNoChainTool]
 
-    for t in (augTools + skimTools + skimmingTools + thinningCollection +
+    for t in (skimTools + skimmingTools + thinningCollection +
               extraTools):
         acc.addPublicTool(t)
 
+    for tool in augTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY18Kernel",
-                                                    AugmentationTools = augTools,
                                                     #Only skim if not MC
                                                     SkimmingTools     = skimTools,
                                                     ThinningTools     = thinningCollection))

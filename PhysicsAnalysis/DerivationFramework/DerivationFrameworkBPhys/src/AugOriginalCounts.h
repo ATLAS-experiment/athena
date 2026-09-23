@@ -11,10 +11,9 @@
 #ifndef DERIVATIONFRAMEWORKBPHYS_AUGORIGINALCOUNTS_H
 #define DERIVATIONFRAMEWORKBPHYS_AUGORIGINALCOUNTS_H
  
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 
 
-#include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/WriteDecorHandleKey.h"
  
 #include "xAODTracking/TrackParticleContainer.h"
@@ -24,8 +23,7 @@
 #include <string>
 
  
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/VertexContainer.h"
 #include <string>
@@ -57,13 +55,12 @@ namespace DerivationFramework {
   /// </td>
   /// </table>
   ///
-  class AugOriginalCounts : public extends<AthAlgTool, IAugmentationTool> {
+  class AugOriginalCounts : public AthReentrantAlgorithm {
   public:
     /// @brief Main constructor
-    AugOriginalCounts(const std::string& t, const std::string& n,
-		      const IInterface* p);
+    AugOriginalCounts(const std::string& name, ISvcLocator* svcLoc);
     /// @brief Main method called for each event
-    virtual StatusCode addBranches(const EventContext& ctx) const override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
     virtual StatusCode initialize() override;
     private:
     ///

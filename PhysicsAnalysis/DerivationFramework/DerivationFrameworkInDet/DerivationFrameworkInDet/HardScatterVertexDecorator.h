@@ -1,15 +1,14 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_HARDSCATTERVERTEXDECORATOR_H
 #define DERIVATIONFRAMEWORK_HARDSCATTERVERTEXDECORATOR_H
 
 // Framework include(s):
-#include "AsgTools/PropertyWrapper.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteDecorHandleKey.h"
-#include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 
 // EDM include(s):
@@ -17,12 +16,11 @@
 #include "xAODEventInfo/EventInfo.h"
 
 // Tool include(s):
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "InDetRecToolInterfaces/IInDetHardScatterSelectionTool.h"
 
 namespace DerivationFramework {
 
-  class HardScatterVertexDecorator : public extends<AthAlgTool, IAugmentationTool>
+  class HardScatterVertexDecorator : public AthReentrantAlgorithm
   {
     ///////////////////////////////////////////////////////////////////
     // Public methods:
@@ -32,7 +30,7 @@ namespace DerivationFramework {
     /// @name Constructor
     /// @{
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     /// @}
 
@@ -43,7 +41,7 @@ namespace DerivationFramework {
     virtual StatusCode initialize() override final;
 
     /// Function decorating the inputs
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
 
     /// @}
 

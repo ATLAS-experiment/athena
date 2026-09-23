@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////
@@ -24,8 +24,7 @@
 // Athena tools headers.
 
 #include "GaudiKernel/ToolHandle.h"
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteDecorHandleKey.h"
 
@@ -53,7 +52,7 @@ namespace DerivationFramework {
 
   // Declare the class that adds the HF classifier in the output derivation file.
 
-  class ClassifyAndCalculateHFAugmentation : public extends<AthAlgTool, IAugmentationTool> {
+  class ClassifyAndCalculateHFAugmentation : public AthReentrantAlgorithm {
 
     /*
       -------------------------------------------------------------------------------------------------------------------------------------
@@ -63,15 +62,15 @@ namespace DerivationFramework {
 
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     // Declare the functions initialize and finalize which are called before and after processing an event respectively.
 
     virtual StatusCode initialize() override final;
 
-    // Declare the function addBranches that adds the HF classifier in the output derivation file.
+    // Declare the function execute that adds the HF classifier in the output derivation file.
 
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
 
     /*
       -------------------------------------------------------------------------------------------------------------------------------------

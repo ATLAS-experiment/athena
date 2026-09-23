@@ -35,7 +35,7 @@ def EGAM8SkimmingToolCfg(flags):
                                      expression = expression)
 
 
-def EGAM8ZeeMassToolCfg(flags):
+def EGAM8ZeeMassAugCfg(flags):
     """Configure the EGAM8 ee invariant mass augmentation tool"""
     acc = ComponentAccumulator()
 
@@ -55,7 +55,7 @@ def EGAM8ZeeMassToolCfg(flags):
     )
     requirement_probe = "ForwardElectrons.pt > 19.5*GeV"
 
-    acc.setPrivateTools(
+    EGAM8_ZEEMassTool = acc.addPublicTool(
         CompFactory.DerivationFramework.EGInvariantMassTool(
             name="EGAM8_ZEEMassTool",
             Object1Requirements=requirement_tag,
@@ -69,7 +69,8 @@ def EGAM8ZeeMassToolCfg(flags):
             DoTransverseMass=False,
             MinDeltaR=0.0,
         )
-    )
+    ) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("EGAM8_ZEEMassAug", AugmentationTools = [EGAM8_ZEEMassTool]), primary=True)
 
     return acc
 
@@ -97,7 +98,7 @@ def EGAM8ZmueMassToolCfg(flags):
     )
     requirement_electron = "ForwardElectrons.pt > 19.5*GeV"
 
-    acc.setPrivateTools(
+    EGAM8_ZMuEMassTool = acc.addPublicTool(
         CompFactory.DerivationFramework.EGInvariantMassTool(
             name="EGAM8_ZMuEMassTool",
             Object1Requirements=requirement_muon,
@@ -111,7 +112,8 @@ def EGAM8ZmueMassToolCfg(flags):
             DoTransverseMass=False,
             MinDeltaR=0.0,
         )
-    )
+    ) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+     acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("EGAM8_ZMuEMassAug", AugmentationTools = [EGAM8_ZMuEMassTool]), primary=True)
 
     return acc
 
@@ -132,18 +134,12 @@ def EGAM8KernelCfg(flags, name="EGAM8Kernel", **kwargs):
     )
 
     # EGAM8 augmentations
-    augmentationTools = []
 
     # ====================================================================
     # ee and mue invariant masses
     # ====================================================================
-    EGAM8ZeeMassTool = acc.popToolsAndMerge(EGAM8ZeeMassToolCfg(flags))
-    acc.addPublicTool(EGAM8ZeeMassTool)
-    augmentationTools.append(EGAM8ZeeMassTool)
-
-    EGAM8ZmueMassTool = acc.popToolsAndMerge(EGAM8ZmueMassToolCfg(flags))
-    acc.addPublicTool(EGAM8ZmueMassTool)
-    augmentationTools.append(EGAM8ZmueMassTool)
+    acc.popToolsAndMerge(EGAM8ZeeMassAugCfg(flags))
+    acc.popToolsAndMerge(EGAM8ZmueMassAugCfg(flags))
 
     # ====================================================================
     # Common calo decoration tools
@@ -153,14 +149,12 @@ def EGAM8KernelCfg(flags, name="EGAM8Kernel", **kwargs):
     acc.merge(CaloDecoratorKernelCfg(flags))
 
     from DerivationFrameworkEGamma.EGammaToolsConfig import (
-        EGammaCookieCutClusterToolCfg)
-    cookieCutTool = acc.popToolsAndMerge(
-        EGammaCookieCutClusterToolCfg(flags,
-                                      name,
-                                      StoreInputMoments=True,
-                                      StoreCookedMoments=True))
-    acc.addPublicTool(cookieCutTool)
-    augmentationTools.append(cookieCutTool)
+        EGammaCookieCutClusterAlgCfg)
+    acc.merge(
+        EGammaCookieCutClusterAlgCfg(flags,
+                                     name,
+                                     StoreInputMoments=True,
+                                     StoreCookedMoments=True))
 
     # thinning tools
     thinningTools = []
@@ -347,11 +341,12 @@ def EGAM8KernelCfg(flags, name="EGAM8Kernel", **kwargs):
     skimmingTool = acc.getPrimaryAndMerge(EGAM8SkimmingToolCfg(flags))
 
     # setup the kernel
+    for tool in augmentationTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     acc.addEventAlgo(
         CompFactory.DerivationFramework.DerivationKernel(
             name,
             SkimmingTools=[skimmingTool],
-            AugmentationTools=augmentationTools,
             ThinningTools=thinningTools,
         )
     )

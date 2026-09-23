@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_TRUTHCLASSIFICATIONDECORATOR_H
@@ -7,25 +7,25 @@
 
 #include <string>
 
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteDecorHandleKey.h"
-#include "GaudiKernel/ToolHandle.h"
+#include "GaudiKernel/ServiceHandle.h"
+#include "GaudiKernel/IChronoStatSvc.h"
 
 class IMCTruthClassifier;
 
 namespace DerivationFramework {
 
-  class TruthClassificationDecorator : public extends<AthAlgTool, IAugmentationTool> {
+  class TruthClassificationDecorator : public AthReentrantAlgorithm {
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
     virtual StatusCode finalize() override final;
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
 
   private:
     mutable std::atomic<unsigned int> m_ntotpart{};
@@ -41,6 +41,7 @@ namespace DerivationFramework {
     SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_classificationDecoratorKey
       {this, "Classification", m_particlesKey, "Classification", "Classification code decorator"};
     PublicToolHandle<IMCTruthClassifier> m_classifier{this, "MCTruthClassifier", "MCTruthClassifier/MCTruthClassifier"};
+    ServiceHandle<IChronoStatSvc>      m_chronoSvc{this, "ChronoStatSvc",  "ChronoStatSvc"};
   };
 }
 

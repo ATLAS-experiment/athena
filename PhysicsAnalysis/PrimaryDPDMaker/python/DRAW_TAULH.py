@@ -44,12 +44,12 @@ def DRAW_TAULHKernelCfg(flags, name='DRAW_TAULHKernel', **kwargs):
     acc.addPublicTool(TauSelectorMedium)
 
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import AsgSelectionToolWrapperCfg
-    TauMediumWrapper = acc.getPrimaryAndMerge(AsgSelectionToolWrapperCfg(flags,
+    TauMediumWrapper = acc.addPublicTool(acc.getPrimaryAndMerge(AsgSelectionToolWrapperCfg(flags,
                                                                          name               = "TauMediumWrapper_TAULH",
                                                                          ContainerName      = "TauJets",
                                                                          StoreGateEntryName = "TauMedium_TAULH",
-                                                                         AsgSelectionTool   = TauSelectorMedium))
-    acc.addPublicTool(TauMediumWrapper)
+                                                                         AsgSelectionTool   = TauSelectorMedium)))
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("TauMediumWrapper_TAULHAug", AugmentationTools = [TauMediumWrapper])
 
     # muon selection tool
     from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
@@ -58,12 +58,12 @@ def DRAW_TAULHKernelCfg(flags, name='DRAW_TAULHKernel', **kwargs):
 
     acc.addPublicTool(MuonSelectorMedium)
 
-    MuonMediumWrapper = acc.getPrimaryAndMerge(AsgSelectionToolWrapperCfg(flags,
+    MuonMediumWrapper = acc.addPublicTool(acc.getPrimaryAndMerge(AsgSelectionToolWrapperCfg(flags,
                                                                           name               = "MuonMediumWrapper_TAULH",
                                                                           ContainerName      = "Muons",
                                                                           StoreGateEntryName = "MuonMedium_TAULH",
-                                                                          AsgSelectionTool   = MuonSelectorMedium))
-    acc.addPublicTool(MuonMediumWrapper)
+                                                                          AsgSelectionTool   = MuonSelectorMedium)))
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("MuonMediumWrapper_TAULHAug", AugmentationTools = [MuonMediumWrapper])
 
     # The Ztautau Lep-Had skimming using AOD string skimming and delta-R tool
     # split into selections and requirements
@@ -72,14 +72,6 @@ def DRAW_TAULHKernelCfg(flags, name='DRAW_TAULHKernel', **kwargs):
     tau_sel = "(TauJets.pt > 20*GeV) && (abs(TauJets.charge)==1)" \
               " && ((TauJets.nChargedTracks == 1) || (TauJets.nChargedTracks == 3)) && (TauJets.TauMedium_TAULH==1)"
 
-    # Add the deltaR tool for electrons
-    tauLH_DeltaRTool = CompFactory.DerivationFramework.DeltaRTool(name            = "TAUEH_DeltaRTool",
-                                                                  ContainerName           = "Electrons",
-                                                                  ObjectRequirements      =  el_sel,
-                                                                  SecondContainerName     = "TauJets",
-                                                                  SecondObjectRequirements= tau_sel,
-                                                                  StoreGateEntryName      = "TAUEH_DeltaR")
-    acc.addPublicTool(tauLH_DeltaRTool)
 
     #
     elRequirement = '( count( ' + el_sel + '  ) == 1 )'
@@ -100,19 +92,28 @@ def DRAW_TAULHKernelCfg(flags, name='DRAW_TAULHKernel', **kwargs):
     acc.addPublicTool(combTool,primary = True)
 
     # The kernel for delta-R tool
+    for tool in [TauMediumWrapper, MuonMediumWrapper]:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]), sequenceName='DRAW_TAULHSequence')
     DRAW_TAULHPreKernel = CompFactory.DerivationFramework.DerivationKernel(
         name='DRAW_TAULHPreKernel',
-        AugmentationTools=[TauMediumWrapper, MuonMediumWrapper],
         SkimmingTools=[])
     acc.addEventAlgo(DRAW_TAULHPreKernel, sequenceName='DRAW_TAULHSequence')
 
+    # Add the deltaR tool for electrons
+    tauLH_DeltaRTool = acc.addPublicTool(CompFactory.DerivationFramework.DeltaRTool(name            = "TAUEH_DeltaRTool",
+                                                                  ContainerName           = "Electrons",
+                                                                  ObjectRequirements      =  el_sel,
+                                                                  SecondContainerName     = "TauJets",
+                                                                  SecondObjectRequirements= tau_sel,
+                                                                  StoreGateEntryName      = "TAUEH_DeltaR"))
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("TAUEH_DeltaRAug", AugmentationTools = [tauLH_DeltaRTool]))
+
     # The main kernel algo
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("DRAW_TAULHKernelAug", AugmentationTools = [tauLH_DeltaRTool]), sequenceName='DRAW_TAULHSequence')
     DRAW_TAULHKernel = CompFactory.DerivationFramework.DerivationKernel(
         name='DRAW_TAULHKernel',
         doChronoStat=(flags.Concurrency.NumThreads <= 1),
-        AugmentationTools=[tauLH_DeltaRTool],
         SkimmingTools=[combTool])
-
     acc.addEventAlgo(DRAW_TAULHKernel, sequenceName='DRAW_TAULHSequence')
 
 

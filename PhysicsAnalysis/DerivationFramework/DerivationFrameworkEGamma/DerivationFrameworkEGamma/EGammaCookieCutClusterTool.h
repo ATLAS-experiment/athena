@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef DERIVATIONFRAMEWORK_EGammaCookieCutClusterTool_H
-#define DERIVATIONFRAMEWORK_EGammaCookieCutClusterTool_H
+#ifndef DERIVATIONFRAMEWORK_EGammaCookieCutClusterAlg_H
+#define DERIVATIONFRAMEWORK_EGammaCookieCutClusterAlg_H
 
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteDecorHandleKeyArray.h"
@@ -18,15 +17,15 @@
 
 namespace DerivationFramework {
 
-  class EGammaCookieCutClusterTool
-    : public extends<AthAlgTool, IAugmentationTool>
+  class EGammaCookieCutClusterAlg
+    : public AthReentrantAlgorithm
   {
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override final;
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
 
   private:
 
@@ -149,4 +148,4 @@ namespace DerivationFramework {
 
 }
 
-#endif // DERIVATIONFRAMEWORK_EGammaCookieCutClusterTool_H
+#endif // DERIVATIONFRAMEWORK_EGammaCookieCutClusterAlg_H

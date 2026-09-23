@@ -17,9 +17,9 @@ def PixelNtupleMakerCfg(flags, name="PixelMonitoringTool", **kwargs):
         InDetTrackSelectionTool_Loose_Cfg(flags))
     acc.addPublicTool(InDetTrackSelectionTool, primary=False)
     kwargs["TrackSelectionTool"] = InDetTrackSelectionTool
-    the_tool = CompFactory.DerivationFramework.PixelNtupleMaker(name,**kwargs)
-    acc.addPublicTool(the_tool, primary = True)
+    acc.addEventAlgo(CompFactory.DerivationFramework.PixelNtupleMaker(name,**kwargs))
     return acc
+
 
 def EventInfoPixelModuleStatusMonitoringCfg(
         flags, name="EventInfoPixelModuleStatusMonitoring", **kwargs):
@@ -39,10 +39,11 @@ def EventInfoPixelModuleStatusMonitoringCfg(
         kwargs.setdefault("PixelConditionsSummaryTool", acc.popToolsAndMerge(
             PixelConditionsSummaryCfg(flags)))
 
-    acc.addPublicTool(
+    acc.addEventAlgo(
         CompFactory.DerivationFramework.EventInfoPixelModuleStatusMonitoring(
-            name,**kwargs), primary = True)
+            name,**kwargs))
     return acc
+
 
 def ITkEventInfoPixelModuleStatusMonitoringCfg(
         flags, name="ITkEventInfoPixelModuleStatusMonitoring", **kwargs):
@@ -75,8 +76,8 @@ def ITkEventInfoPixelModuleStatusMonitoringCfg(
         kwargs.setdefault("PixelConditionsSummaryTool", acc.popToolsAndMerge(
             ITkPixelConditionsSummaryCfg(flags)))
 
-    acc.addPublicTool(
+    acc.addEventAlgo(
         CompFactory.DerivationFramework.EventInfoPixelModuleStatusMonitoring(
-            name,**kwargs), primary = True)
+            name,**kwargs))
     return acc
 

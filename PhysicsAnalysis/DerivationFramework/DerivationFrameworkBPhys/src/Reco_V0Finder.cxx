@@ -11,10 +11,8 @@
 
 namespace DerivationFramework {
 
-  Reco_V0Finder::Reco_V0Finder(const std::string& t,
-      const std::string& n,
-      const IInterface* p) : 
-    base_class(t,n,p),
+  Reco_V0Finder::Reco_V0Finder(const std::string& name, ISvcLocator* svcLoc) :
+    AthReentrantAlgorithm(name, svcLoc),
     m_v0FinderTool("InDet::V0FinderTool", this)
   {
     
@@ -47,7 +45,7 @@ namespace DerivationFramework {
 
   // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
   
-  StatusCode Reco_V0Finder::addBranches(const EventContext& ctx) const
+  StatusCode Reco_V0Finder::execute(const EventContext& ctx) const
   {
 
     bool callV0Finder = false;

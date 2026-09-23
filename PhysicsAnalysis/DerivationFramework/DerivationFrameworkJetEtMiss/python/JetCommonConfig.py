@@ -41,27 +41,22 @@ def StandardJetsInDerivCfg(ConfigFlags):
 
     return acc
 
-def AddBadBatmanCfg(ConfigFlags):
+
+def AddBadBatmanCfg(flags):
     """Add bad batman decoration for events with large EMEC-IW noise"""
 
     acc = ComponentAccumulator()
-
-    CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-    from DerivationFrameworkJetEtMiss.JetToolConfig import BadBatmanToolCfg
-    badBatmanTool = acc.getPrimaryAndMerge(BadBatmanToolCfg(ConfigFlags))
-    acc.addEventAlgo(CommonAugmentation("BadBatmanAugmentation", AugmentationTools = [badBatmanTool]))
+    acc.addEventAlgo(CompFactory.DerivationFramework.BadBatmanAugmentationAlg("BadBatmanAugmentationAlg"))
 
     return acc
 
+
 def AddDistanceInTrainCfg(ConfigFlags):
     """Add distance in train information to EventInfo"""
-    from DerivationFrameworkJetEtMiss.JetToolConfig import DistanceInTrainToolCfg
-
     acc = ComponentAccumulator()
-
-    CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-    distanceInTrainTool = acc.getPrimaryAndMerge(DistanceInTrainToolCfg(ConfigFlags))
-    acc.addEventAlgo(CommonAugmentation("DistanceInTrainAugmentation", AugmentationTools = [distanceInTrainTool]))
+    from LumiBlockComps.BunchCrossingCondAlgConfig import BunchCrossingCondAlgCfg
+    acc.merge(BunchCrossingCondAlgCfg(ConfigFlags))
+    acc.addEventAlgo(CompFactory.DerivationFramework.DistanceInTrainAugmentationAlg("DistanceInTrainAugmentation"))
 
     return acc
 
@@ -131,10 +126,8 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
                                                 BJetLabel=bJetLabel)
     acc.addEventAlgo(algOR)
 
-    CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-    from DerivationFrameworkMuons.MuonsToolsConfig import MuonJetDrToolCfg
-    muonJetDrTool = acc.getPrimaryAndMerge(MuonJetDrToolCfg(ConfigFlags, "MuonJetDrTool"))
-    acc.addEventAlgo(CommonAugmentation("DFCommonMuonsKernel2", AugmentationTools = [muonJetDrTool]))
+    from DerivationFrameworkMuons.MuonsToolsConfig import MuonJetDrAlgCfg
+    acc.merge(MuonJetDrAlgCfg(ConfigFlags, "MuonJetDrTool"))
 
     from JetSelectorTools.JetSelectorToolsConfig import EventCleaningToolCfg,JetCleaningToolCfg
     

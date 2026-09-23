@@ -55,14 +55,14 @@ def BPHY22Cfg(flags):
           doTagAndProbe              = True, #won't work with all/same charges combs
           forceTagAndProbe           = True) #force T&P to work with any charges combs
 
-    BPHY22MuPiSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Reco_Vertex(
               name                   = "BPHY22MuPiSelectAndWrite",
               VertexSearchTool       = BPHY22MuPiFinder,
               OutputVtxContainerName = "BPHY22MuPiCandidates",
               V0Tools                = V0Tools,
               PVRefitter             = PVrefit,
               PVContainerName        = "PrimaryVertices",
-              RefPVContainerName     = "SHOULDNOTBEUSED")
+              RefPVContainerName     = "SHOULDNOTBEUSED"))
 
 
     BPHY22DiTrkFinder = CompFactory.Analysis.JpsiFinder(
@@ -87,7 +87,7 @@ def BPHY22Cfg(flags):
            track1Mass                 = 139.571, # Not very important, only used to calculate inv. mass cut, leave it loose here
            track2Mass                 = 139.571)
 
-    BPHY22DiTrkSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Reco_Vertex(
            name                   = "BPHY22DiTrkSelectAndWrite",
            VertexSearchTool       = BPHY22DiTrkFinder,
            OutputVtxContainerName = "BPHY22DiTrkCandidates",
@@ -96,12 +96,12 @@ def BPHY22Cfg(flags):
            PVRefitter             = PVrefit,
            RefPVContainerName     = "SHOULDNOTBEUSED",
            CheckCollections       = True,
-           CheckVertexContainers  = ['BPHY22MuPiCandidates'])
+           CheckVertexContainers  = ['BPHY22MuPiCandidates']))
 
 
     BMuDstVertexFit = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName, CascadeCnstPrecision = 1e-6))
     
-    BPHY22MuDpst = CompFactory.DerivationFramework.MuPlusDpstCascade(
+    acc.addEventAlgo(CompFactory.DerivationFramework.MuPlusDpstCascade(
         name                     = "BPHY22MuDpst",
         HypothesisName           = "B",
         TrkVertexFitterTool      = BMuDstVertexFit,
@@ -124,7 +124,7 @@ def BPHY22Cfg(flags):
         MuPiVertices             = "BPHY22MuPiCandidates",
         CascadeVertexCollections = ["BMuDpstCascadeSV2", "BMuDpstCascadeSV1"],
         D0Vertices               = "BPHY22DiTrkCandidates",
-        DoVertexType             = 15 )
+        DoVertexType             = 15 ))
 
     BPHY22Dh3Finder = CompFactory.Analysis.JpsiPlus1Track(
         name                    = "BPHY22Dh3Finder",
@@ -148,7 +148,7 @@ def BPHY22Cfg(flags):
         UseMassConstraint       = False,
         Chi2Cut                 = 7) #Cut on chi2/Ndeg_of_freedom 5->7
 
-    BPHY22Dh3SelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Reco_Vertex(
            name                   = "BPHY22Dh3SelectAndWrite",
            VertexSearchTool     = BPHY22Dh3Finder,
            V0Tools                = V0Tools,
@@ -156,11 +156,11 @@ def BPHY22Cfg(flags):
            OutputVtxContainerName = "BPHY22Dh3Candidates",
            PVContainerName        = "PrimaryVertices",
            RefPVContainerName     = "SHOULDNOTBEUSED",
-           MaxPVrefit             = 1000)
+           MaxPVrefit             = 1000))
 
     BMuDxVertexFit = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName+"BMuDxVertexFit", CascadeCnstPrecision = 1e-6))
 
-    BPHY22MuDs = CompFactory.DerivationFramework.MuPlusDsCascade(
+    acc.addEventAlgo(CompFactory.DerivationFramework.MuPlusDsCascade(
            name                        = "BPHY22MuDs",
            HypothesisName              = "B",
            TrkVertexFitterTool         = BMuDxVertexFit,
@@ -182,9 +182,9 @@ def BPHY22Cfg(flags):
            useCombinedMeasurement      = False, # Only takes effect if combOnly=True
            RefPVContainerName          = "BPHY22RefittedPrimaryVertices",
            CascadeVertexCollections    = ["BMuDsCascadeSV2", "BMuDsCascadeSV1"],
-           DxVertices                  = "BPHY22Dh3Candidates")
+           DxVertices                  = "BPHY22Dh3Candidates"))
 
-    BPHY22MuDp = CompFactory.DerivationFramework.MuPlusDsCascade(
+    acc.addEventAlgo(CompFactory.DerivationFramework.MuPlusDsCascade(
           name                        = "BPHY22MuDp",
           HypothesisName              = "B",
           TrkVertexFitterTool         = BMuDxVertexFit,
@@ -206,9 +206,9 @@ def BPHY22Cfg(flags):
           useCombinedMeasurement      = False, # Only takes effect if combOnly=True
           RefPVContainerName          = "BPHY22RefittedPrimaryVertices",
           CascadeVertexCollections    = ["BMuDpCascadeSV2", "BMuDpCascadeSV1"],
-          DxVertices                  = "BPHY22Dh3Candidates")
+          DxVertices                  = "BPHY22Dh3Candidates"))
 
-    BPHY22MuLambdaC = CompFactory.DerivationFramework.MuPlusDsCascade(
+    acc.addEventAlgo(CompFactory.DerivationFramework.MuPlusDsCascade(
           name                        = "BPHY22MuLambdaC",
           HypothesisName              = "B",
           TrkVertexFitterTool         = BMuDxVertexFit,
@@ -230,15 +230,15 @@ def BPHY22Cfg(flags):
           useCombinedMeasurement      = False, # Only takes effect if combOnly=True
           RefPVContainerName          = "BPHY22RefittedPrimaryVertices",
           CascadeVertexCollections    = ["BMuLambdaCCascadeSV2", "BMuLambdaCCascadeSV1"],
-          DxVertices                  = "BPHY22Dh3Candidates")
+          DxVertices                  = "BPHY22Dh3Candidates"))
 
     CascadeCollections = []
-    CascadeCollections += BPHY22MuDpst.CascadeVertexCollections
-    CascadeCollections += BPHY22MuDp.CascadeVertexCollections
-    CascadeCollections += BPHY22MuDs.CascadeVertexCollections
-    CascadeCollections += BPHY22MuLambdaC.CascadeVertexCollections
+    CascadeCollections += acc.getEventAlgo("BPHY22MuDpst").CascadeVertexCollections
+    CascadeCollections += acc.getEventAlgo("BPHY22MuDp").CascadeVertexCollections
+    CascadeCollections += acc.getEventAlgo("BPHY22MuDs").CascadeVertexCollections
+    CascadeCollections += acc.getEventAlgo("BPHY22MuLambdaC").CascadeVertexCollections
 
-    BPHY22_AugOriginalCounts = acc.popToolsAndMerge(
+    BPHY22_AugOriginalCounts = acc.merge(
         AugOriginalCountsCfg(flags, name = "BPHY22_AugOriginalCounts"))
     
     if not isSimulation: #Only Skim Data
@@ -255,17 +255,7 @@ def BPHY22Cfg(flags):
             FilterList = [BPHY22_SelectBMuDxEvent] )
         acc.addPublicTool(BPHY22SkimmingOR)
 
-    augTools = [BPHY22MuPiSelectAndWrite, #BPHY22_Select_MuPi,
-                         BPHY22DiTrkSelectAndWrite, #BPHY22_Select_D0, BPHY22_Select_D0b,
-                         BPHY22Dh3SelectAndWrite, #BPHY22_Select_Ds, BPHY22_Select_Dp, BPHY22_Select_Dm, BPHY22_Select_LambdaCp, BPHY22_Select_LambdaCm,
-                         BPHY22MuDpst,
-                         BPHY22MuDs,
-                         BPHY22MuDp,
-                         BPHY22MuLambdaC,
-                         BPHY22_AugOriginalCounts]
-    for t in  augTools : acc.addPublicTool(t)
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY22Kernel",
-                                                    AugmentationTools = augTools,
                                                     #Only skim if not MC
                                                     SkimmingTools     = [BPHY22SkimmingOR] if not isSimulation else [],
                                                     ThinningTools     = []))

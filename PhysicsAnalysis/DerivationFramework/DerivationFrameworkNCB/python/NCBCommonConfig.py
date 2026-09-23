@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # NCBCommonConfig
 # Contains the configuration for the common physics containers/decorations used in analysis DAODs
@@ -43,12 +43,8 @@ def NCBCommonAugmentationsCfg(flags,**kwargs):
             AddTruthCollectionNavigationDecorationsCfg,
             TruthClassificationAugmentationsCfg)
         acc.merge(TruthClassificationAugmentationsCfg(flags))
-        from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthCharmToolCfg
-        NCBCommonTruthCharmTool = acc.getPrimaryAndMerge(DFCommonTruthCharmToolCfg(
-            flags,
-            name = "NCBCommonTruthCharmTool"))
-        CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-        acc.addEventAlgo(CommonAugmentation("NCBCommonTruthCharmKernel",AugmentationTools=[NCBCommonTruthCharmTool]))
+        from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthCharmCfg
+        acc.merge(DFCommonTruthCharmCfg(flags))
         acc.merge(AddHFAndDownstreamParticlesCfg(flags))
         acc.merge(AddStandardTruthContentsCfg(flags))
         acc.merge(AddTruthCollectionNavigationDecorationsCfg(

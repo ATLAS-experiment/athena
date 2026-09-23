@@ -50,7 +50,7 @@ def BPHY10Cfg(flags):
                               VertexPointEstimator        = vpest,
                               useMCPCuts                  = False)
 
-    BPHY10JpsiSelectAndWrite   = CompFactory.DerivationFramework.Reco_Vertex(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Reco_Vertex(
                               name                   = "BPHY10JpsiSelectAndWrite",
                               VertexSearchTool       = BPHY10JpsiFinder,
                               OutputVtxContainerName = "BPHY10JpsiCandidates",
@@ -58,8 +58,8 @@ def BPHY10Cfg(flags):
                               V0Tools                = V0Tools,
                               PVRefitter             = PVrefit,
                               RefPVContainerName     = "SHOULDNOTBEUSED",
-                              DoVertexType = 1)
-    BPHY10_Select_Jpsi2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
+                              DoVertexType = 1))
+    acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
                               name                  = "BPHY10_Select_Jpsi2mumu",
                               HypothesisName        = "Jpsi",
                               InputVtxContainerName = "BPHY10JpsiCandidates",
@@ -68,7 +68,7 @@ def BPHY10Cfg(flags):
                               MassMin               = 2600.0,
                               MassMax               = 4000.0,
                               Chi2Max               = 200,
-                              DoVertexType =1)
+                              DoVertexType =1))
 
     BPHY10BdJpsiKst = CompFactory.Analysis.JpsiPlus2Tracks(
                              name                    = "BPHY10BdJpsiKst",
@@ -97,7 +97,7 @@ def BPHY10Cfg(flags):
     BPHY10LambdaContainerName = "BPHY10RecoLambdaCandidates"
     BPHY10LambdabarContainerName = "BPHY10RecoLambdabarCandidates"
 
-    BPHY10BdKstSelectAndWrite  = CompFactory.DerivationFramework.Reco_Vertex(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Reco_Vertex(
                                     name                   = "BPHY10BdKstSelectAndWrite",
                                     VertexSearchTool     = BPHY10BdJpsiKst,
                                     OutputVtxContainerName = "BPHY10BdJpsiKstCandidates",
@@ -107,9 +107,9 @@ def BPHY10Cfg(flags):
                                     RefPVContainerName     = "BPHY10RefittedPrimaryVertices1",
                                     RefitPV                = True,
                                     MaxPVrefit             = 10000,
-                                    DoVertexType = 7)
+                                    DoVertexType = 7))
 
-    BPHY10_Select_Bd2JpsiKst = CompFactory.DerivationFramework.Select_onia2mumu(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
                                    name                       = "BPHY10_Select_Bd2JpsiKst",
                                    HypothesisName             = "Bd",
                                    InputVtxContainerName      = "BPHY10BdJpsiKstCandidates",
@@ -118,9 +118,9 @@ def BPHY10Cfg(flags):
                                    VtxMassHypo                = 5279.6,
                                    MassMin                    = 100.0,      #no mass cuts here
                                    MassMax                    = 100000.0,   #no mass cuts here
-                                   Chi2Max                    = 200)
+                                   Chi2Max                    = 200))
 
-    BPHY10_Select_Bd2JpsiKstbar = CompFactory.DerivationFramework.Select_onia2mumu(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
                                    name                       = "BPHY10_Select_Bd2JpsiKstbar",
                                    HypothesisName             = "Bdbar",
                                    InputVtxContainerName      = "BPHY10BdJpsiKstCandidates",
@@ -129,10 +129,10 @@ def BPHY10Cfg(flags):
                                    VtxMassHypo                = 5279.6,
                                    MassMin                    = 100.0,      #no mass cuts here
                                    MassMax                    = 100000.0,   #no mass cuts here
-                                   Chi2Max                    = 200)
+                                   Chi2Max                    = 200))
 
     from DerivationFrameworkBPhys.V0ToolConfig import BPHY_Reco_V0FinderCfg
-    BPHY10_Reco_V0Finder = acc.popToolsAndMerge(BPHY_Reco_V0FinderCfg(
+    acc.merge(BPHY_Reco_V0FinderCfg(
         flags, derivation = BPHYDerivationName,
         V0ContainerName = BPHY10V0ContainerName,
         KshortContainerName = BPHY10KshortContainerName,
@@ -144,7 +144,7 @@ def BPHY10Cfg(flags):
     JpsiV0VertexFit = acc.popToolsAndMerge(JpsiV0VertexFitCfg(flags))
     acc.addPublicTool(JpsiV0VertexFit)
 
-    BPHY10JpsiKshort  = CompFactory.DerivationFramework.JpsiPlusV0Cascade(
+    acc.addEventAlgo(CompFactory.DerivationFramework.JpsiPlusV0Cascade(
                                   name                    = "BPHY10JpsiKshort",
                                   V0Tools                 = V0Tools,
                                   HypothesisName          = "Bd",
@@ -161,9 +161,9 @@ def BPHY10Cfg(flags):
                                   RefPVContainerName      = "BPHY10RefittedPrimaryVertices2",
                                   JpsiVertices            = "BPHY10JpsiCandidates",
                                   CascadeVertexCollections= ["BPHY10JpsiKshortCascadeSV2", "BPHY10JpsiKshortCascadeSV1"],
-                                  V0Vertices              = BPHY10V0ContainerName)
+                                  V0Vertices              = BPHY10V0ContainerName))
 
-    BPHY10JpsiLambda   = CompFactory.DerivationFramework.JpsiPlusV0Cascade(
+    acc.addEventAlgo(CompFactory.DerivationFramework.JpsiPlusV0Cascade(
                                   name                    = "BPHY10JpsiLambda",
                                   V0Tools                 = V0Tools,
                                   HypothesisName          = "Lambda_b",
@@ -180,9 +180,9 @@ def BPHY10Cfg(flags):
                                   RefPVContainerName      = "BPHY10RefittedPrimaryVertices3",
                                   JpsiVertices            = "BPHY10JpsiCandidates",
                                   CascadeVertexCollections= ["BPHY10JpsiLambdaCascadeSV2", "BPHY10JpsiLambdaCascadeSV1"],
-                                  V0Vertices              = BPHY10V0ContainerName)
+                                  V0Vertices              = BPHY10V0ContainerName))
 
-    BPHY10JpsiLambdabar         = CompFactory.DerivationFramework.JpsiPlusV0Cascade(
+    acc.addEventAlgo(CompFactory.DerivationFramework.JpsiPlusV0Cascade(
                                   name                    = "BPHY10JpsiLambdabar",
                                   HypothesisName          = "Lambda_bbar",
                                   V0Tools                 = V0Tools,
@@ -199,16 +199,16 @@ def BPHY10Cfg(flags):
                                   RefPVContainerName      = "BPHY10RefittedPrimaryVertices4",
                                   JpsiVertices            = "BPHY10JpsiCandidates",
                                   CascadeVertexCollections= ["BPHY10JpsiLambdabarCascadeSV2", "BPHY10JpsiLambdabarCascadeSV1"],
-                                  V0Vertices              = BPHY10V0ContainerName)
+                                  V0Vertices              = BPHY10V0ContainerName))
 
     CascadeCollections = []
-    CascadeCollections += BPHY10JpsiKshort.CascadeVertexCollections
-    CascadeCollections += BPHY10JpsiLambda.CascadeVertexCollections
-    CascadeCollections += BPHY10JpsiLambdabar.CascadeVertexCollections
+    CascadeCollections += acc.getEventAlgo("BPHY10JpsiKshort").CascadeVertexCollections
+    CascadeCollections += acc.getEventAlgo("BPHY10JpsiLambda").CascadeVertexCollections
+    CascadeCollections += acc.getEventAlgo("BPHY10JpsiLambdabar").CascadeVertexCollections
 
-    BPHY10_AugOriginalCounts = acc.popToolsAndMerge(
+    acc.merge(
         AugOriginalCountsCfg(flags, name = "BPHY10_AugOriginalCounts"))
-    
+
     if not isSimulation: #Only Skim Data
         from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
             xAODStringSkimmingToolCfg)
@@ -225,14 +225,7 @@ def BPHY10Cfg(flags):
         acc.addPublicTool(BPHY10_cascadeCheck)
         acc.addPublicTool(BPHY10SkimmingOR)
 
-    augTools = [BPHY10JpsiSelectAndWrite,  BPHY10_Select_Jpsi2mumu,
-                BPHY10BdKstSelectAndWrite, BPHY10_Select_Bd2JpsiKst, BPHY10_Select_Bd2JpsiKstbar,
-                BPHY10_Reco_V0Finder, BPHY10JpsiKshort, BPHY10JpsiLambda, BPHY10JpsiLambdabar,
-                BPHY10_AugOriginalCounts]
-    for t in  augTools : acc.addPublicTool(t)
-    #from AthenaCommon.Constants import DEBUG
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY10Kernel",
-                                                     AugmentationTools = augTools,
                                                      #OutputLevel = DEBUG,
                                                      #Only skim if not MC
                                                      SkimmingTools     = [BPHY10SkimmingOR] if not isSimulation else [],

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_HIJETAUGMENTATIONTOOL_H
@@ -10,8 +10,7 @@
 
 // Gaudi & Athena basics
 #include "AsgTools/ToolHandle.h"
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "JetCalibTools/IJetCalibrationTool.h"
 #include "JetInterface/IJetUpdateJvt.h"
@@ -23,17 +22,16 @@ class IThinningSvc;
 
 namespace DerivationFramework {
 
-  class HIJetAugmentationTool : public extends<AthAlgTool, IAugmentationTool> {
+  class HIJetAugmentationTool : public AthReentrantAlgorithm { // FIXME RENAME
 
   public:
-    HIJetAugmentationTool(const std::string& t, const std::string& n, const IInterface* p);
-    ~HIJetAugmentationTool();
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     // Athena algtool's Hooks
     StatusCode  initialize();
     StatusCode  finalize();
 
-    virtual StatusCode addBranches(const EventContext& ctx) const;
+    virtual StatusCode execute(const EventContext& ctx) const;
 
   private:
 

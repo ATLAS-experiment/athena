@@ -72,7 +72,7 @@ def BPHY_Reco_V0FinderCfg(flags, derivation="", suffix="",
                 LambdaContainerName = LambdaContainerName,
                 LambdabarContainerName = LambdabarContainerName)))
 
-    acc.setPrivateTools(CompFactory.DerivationFramework.Reco_V0Finder(
+    acc.addEventAlgo(CompFactory.DerivationFramework.Reco_V0Finder(
         name = derivation + "_Reco_V0Finder" + suffix,
         V0ContainerName        = V0ContainerName,
         KshortContainerName    = KshortContainerName,

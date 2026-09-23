@@ -72,16 +72,13 @@ def TriggerMatchingCommonRun2Cfg(flags, name, **kwargs):
     """Configure the common trigger matching for run 2 DAODs using the run 2 analysis formalism (matching happens during derivation)"""
 
     acc = ComponentAccumulator()
- 
-    # Create trigger matching decorations
-    from DerivationFrameworkTrigger.TriggerMatchingToolConfig import TriggerMatchingToolCfg
-    PhysCommonTriggerMatchingTool = acc.getPrimaryAndMerge(TriggerMatchingToolCfg(flags, name=name, **kwargs))
-    CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-    outputContainerPrefix = kwargs['OutputContainerPrefix']
-    acc.addEventAlgo(CommonAugmentation(f"{outputContainerPrefix}TriggerMatchingKernel",
-                                        AugmentationTools=[PhysCommonTriggerMatchingTool]))
 
-    return(acc)
+    # Create trigger matching decorations
+    from DerivationFrameworkTrigger.TriggerMatchingAlgConfig import TriggerMatchingAlgCfg
+    outputContainerPrefix = kwargs['OutputContainerPrefix']
+    acc.merge(TriggerMatchingAlgCfg(flags, name=f"{outputContainerPrefix}TriggerMatchingKernel", **kwargs))
+    return acc
+
 
 def TriggerMatchingCommonRun2ToRun3Cfg(flags, **kwargs):
     """Covert run 2 trigger navigation data these data into the run 3 formalism (matching happens from DAOD)"""

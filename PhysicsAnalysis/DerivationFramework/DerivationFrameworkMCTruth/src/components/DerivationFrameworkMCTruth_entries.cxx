@@ -1,5 +1,5 @@
-#include "DerivationFrameworkMCTruth/TruthDressingTool.h"
-#include "DerivationFrameworkMCTruth/TruthIsolationTool.h"
+#include "DerivationFrameworkMCTruth/TruthDressingAlg.h"
+#include "DerivationFrameworkMCTruth/TruthIsolationAlg.h"
 #include "DerivationFrameworkMCTruth/MenuTruthThinning.h"
 #include "DerivationFrameworkMCTruth/GenericTruthThinning.h"
 #include "DerivationFrameworkMCTruth/TruthCollectionMakerBase.h"
@@ -23,11 +23,11 @@
 #include "DerivationFrameworkMCTruth/TruthDecayCollectionMaker.h"
 #include "src/TruthNavigationDecorator.h"
 #include "DerivationFrameworkMCTruth/TruthD2Decorator.h"
-#include "DerivationFrameworkMCTruth/TruthQGDecorationTool.h"
+#include "DerivationFrameworkMCTruth/TruthQGDecorationAlg.h"
 #include "src/TruthBornLeptonCollectionMaker.h"
-#include "src/TruthLinkRepointTool.h"
+#include "src/TruthLinkRepointAlg.h"
 #include "DerivationFrameworkMCTruth/TruthPVCollectionMaker.h"
-#include "src/GenFilterTool.h"
+#include "src/GenFilterAlg.h"
 #include "src/TruthEDDecorator.h"
 #include "src/TruthMetaDataWriter.h"
 #include "DerivationFrameworkMCTruth/ClassifyAndCalculateHFAugmentation.h"
@@ -37,8 +37,8 @@
 
 using namespace DerivationFramework;
 
-DECLARE_COMPONENT( TruthDressingTool )
-DECLARE_COMPONENT( TruthIsolationTool )
+DECLARE_COMPONENT( TruthDressingAlg )
+DECLARE_COMPONENT( TruthIsolationAlg )
 DECLARE_COMPONENT( MenuTruthThinning )
 DECLARE_COMPONENT( GenericTruthThinning )
 DECLARE_COMPONENT( TruthCollectionMaker )
@@ -62,11 +62,11 @@ DECLARE_COMPONENT( HadronOriginClassifier )
 DECLARE_COMPONENT( TruthDecayCollectionMaker )
 DECLARE_COMPONENT( TruthNavigationDecorator )
 DECLARE_COMPONENT( TruthD2Decorator )
-DECLARE_COMPONENT( TruthQGDecorationTool )
+DECLARE_COMPONENT( TruthQGDecorationAlg )
 DECLARE_COMPONENT( TruthBornLeptonCollectionMaker )
-DECLARE_COMPONENT( TruthLinkRepointTool )
+DECLARE_COMPONENT( TruthLinkRepointAlg )
 DECLARE_COMPONENT( TruthPVCollectionMaker )
-DECLARE_COMPONENT( GenFilterTool )
+DECLARE_COMPONENT( GenFilterAlg )
 DECLARE_COMPONENT( TruthEDDecorator )
 DECLARE_COMPONENT( TruthMetaDataWriter )
 DECLARE_COMPONENT( ClassifyAndCalculateHFAugmentation )

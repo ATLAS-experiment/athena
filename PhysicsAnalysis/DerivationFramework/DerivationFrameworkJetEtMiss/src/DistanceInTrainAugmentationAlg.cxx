@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -11,12 +11,12 @@
 // are not defined at the abort gap or 4 non-colliding crossings
 // in the 8b4e scheme.
 ///////////////////////////////////////////////////////////////////
-#include "DistanceInTrainAugmentationTool.h"
+#include "DistanceInTrainAugmentationAlg.h"
 
 #include "StoreGate/WriteDecorHandle.h"
 
 
-StatusCode DerivationFramework::DistanceInTrainAugmentationTool::initialize()
+StatusCode DerivationFramework::DistanceInTrainAugmentationAlg::initialize()
 {
 
   ATH_CHECK(m_eventInfo_key.initialize());
@@ -37,7 +37,7 @@ StatusCode DerivationFramework::DistanceInTrainAugmentationTool::initialize()
 }
 
 
-StatusCode DerivationFramework::DistanceInTrainAugmentationTool::addBranches(const EventContext& ctx) const {
+StatusCode DerivationFramework::DistanceInTrainAugmentationAlg::execute(const EventContext& ctx) const {
 
   auto eventInfo = SG::makeHandle (m_eventInfo_key, ctx);
   if (!eventInfo.isValid()){

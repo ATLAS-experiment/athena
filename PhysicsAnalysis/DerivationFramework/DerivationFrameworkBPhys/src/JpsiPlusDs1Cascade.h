@@ -9,9 +9,8 @@
 // Eva Bouhova <e.bouhova@cern.ch>
 // Adam Barton <abarton@cern.ch>
 
-#include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "JpsiUpsilonTools/PrimaryVertexRefitter.h"
 #include "GeneratorModules/GenData.h"
 #include <vector>
@@ -34,14 +33,14 @@ namespace DerivationFramework {
 
 namespace DerivationFramework {
 
-    class JpsiPlusDs1Cascade : public extends<AthAlgTool, IAugmentationTool>
+    class JpsiPlusDs1Cascade : public AthReentrantAlgorithm
     {
       public:
-        JpsiPlusDs1Cascade(const std::string& t, const std::string& n, const IInterface*  p);
+        JpsiPlusDs1Cascade(const std::string& name, ISvcLocator* svcLoc);
         ~JpsiPlusDs1Cascade();
         virtual StatusCode initialize() override;
         StatusCode performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer, const EventContext& ctx ) const;
-        virtual StatusCode addBranches(const EventContext& ctx) const override;
+        virtual StatusCode execute(const EventContext& ctx) const override;
 
       private:
         std::string m_vertexContainerKey; // FIXME Use Handles

@@ -22,10 +22,8 @@ namespace DerivationFramework {
   }
 
 
-  StatusCode TruthD2Decorator::addBranches(const EventContext& ctx) const
+  StatusCode TruthD2Decorator::execute(const EventContext& ctx) const
   {
-    // Event context
-
     // Set up the decorators
     SG::WriteDecorHandle< xAOD::JetContainer, float > decoratorD2(m_decorationName, ctx);
 

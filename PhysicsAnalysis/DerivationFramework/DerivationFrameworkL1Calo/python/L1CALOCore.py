@@ -76,15 +76,24 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
     augmentationTools = []
 
     # Set up the derivation kernel
+    if isNotPool:
+        for tool in augmentationTools:
+            acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
+
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(DerivationKernel(
         name = "DFL1CALO_KERN",
-        AugmentationTools = augmentationTools,
-        ThinningTools = thinningTools,
         SkimmingTools = skimmingTools,
-        RunSkimmingFirst = not isNotPool,
-        doChronoStat=(flags.Concurrency.NumThreads <= 1),
-        OutputLevel = INFO))
+        doChronoStat=(flags.Concurrency.NumThreads <= 1)))
+
+    if not isNotPool:
+        for tool in augmentationTools:
+            acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
+
+    acc.addEventAlgo(DerivationKernel(
+        name = "DFL1CALO_KERN",
+        ThinningTools = thinningTools,
+        doChronoStat=(flags.Concurrency.NumThreads <= 1)))
 
     # Phase 1 setup
     # emulate/decorate the input towers

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -25,11 +25,9 @@
 #include "TruthUtils/HepMCHelpers.h"
 
 // Constructor
-DerivationFramework::TruthBornLeptonCollectionMaker::TruthBornLeptonCollectionMaker(const std::string& t,
-                                const std::string& n,
-                                const IInterface* p)
-  : base_class(t,n,p)
-  , m_metaStore( "MetaDataStore", n )
+DerivationFramework::TruthBornLeptonCollectionMaker::TruthBornLeptonCollectionMaker(const std::string &name,ISvcLocator *pSvcLocator)
+  : AthReentrantAlgorithm(name, pSvcLocator)
+  , m_metaStore( "MetaDataStore", name )
 {
   declareProperty( "MetaDataStore", m_metaStore );
 }
@@ -73,10 +71,8 @@ StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::initialize()
 }
 
 // Selection and collection creation
-StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::addBranches(const EventContext& ctx) const
+StatusCode DerivationFramework::TruthBornLeptonCollectionMaker::execute(const EventContext& ctx) const
 {
-  // Event context
-  
   // Set up for some metadata handling
   static const bool is_sherpa = [this]() {
     bool is_sherpa = false;

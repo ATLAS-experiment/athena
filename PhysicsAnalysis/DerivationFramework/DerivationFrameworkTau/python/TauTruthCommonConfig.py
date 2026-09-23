@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #********************************************************************
 # TauTruthCommonConfig.py
@@ -20,11 +20,11 @@ def TauTruthMatchingWrapperCfg(flags, cont, **kwargs):
     """Configure the tau truth matching wrapper"""
     acc = ComponentAccumulator()
     name = "DFCommon"+cont+"TruthMatchingWrapper"
-    DFCommonTauTruthMatchingTool = acc.addPublicTool(acc.popToolsAndMerge(
-        DFCommonTauTruthMatchingToolCfg(flags)))
-    kwargs.setdefault("TauTruthMatchingTool", DFCommonTauTruthMatchingTool)
+    kwargs.setdefault("TauTruthMatchingTool", acc.addPublicTool(acc.popToolsAndMerge(
+        DFCommonTauTruthMatchingToolCfg(flags))))
     kwargs.setdefault("TauContainerName", cont)
-    acc.setPrivateTools(
+    kwargs.setdefault("ExtraInputs", {( 'xAOD::TruthParticleContainer' , 'StoreGateSvc+TruthTaus' )})
+    acc.addEventAlgo(
         CompFactory.DerivationFramework.TauTruthMatchingWrapper(name = name, **kwargs))
     return acc
 
@@ -45,15 +45,9 @@ def TauTruthToolsCfg(flags):
 
     # tau truth matching, if reconstructed taus are present in the input
     # this should be dropped from derivations and deferred to analysis level (the only use case in derivations is PHYSLITE)
-    TauTruthAugmentationTools2 = []
-    for cont in ["TauJets","TauJets_EleRM"]:
-        if "xAOD::TauJetContainer#"+cont in flags.Input.TypedCollections:
-            TauTruthAugmentationTools2.append(
-                acc.addPublicTool(acc.popToolsAndMerge(TauTruthMatchingWrapperCfg(flags, cont))))
-
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-    acc.addEventAlgo(CommonAugmentation( "TauTruthCommonKernel2",
-                                         AugmentationTools = TauTruthAugmentationTools2,
-                                         ExtraInputs = {( 'xAOD::TruthParticleContainer' , 'StoreGateSvc+TruthTaus' )} ))
+    for i, cont in enumerate(["TauJets","TauJets_EleRM"]):
+        if "xAOD::TauJetContainer#"+cont in flags.Input.TypedCollections:
+            acc.merge(TauTruthMatchingWrapperCfg(flags, cont))
 
     return acc

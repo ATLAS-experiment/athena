@@ -67,7 +67,7 @@ namespace DerivationFramework {
     ---------------------------------------------------------------------------------------------------------------------------------------
   */
 
-  StatusCode ClassifyAndCalculateHFAugmentation::addBranches(const EventContext& ctx) const
+  StatusCode ClassifyAndCalculateHFAugmentation::execute(const EventContext& ctx) const
   {
 
 

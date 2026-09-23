@@ -146,6 +146,7 @@ def TrackParticleCaloCellDecoratorCfg(flags, name, **kwargs):
                       primary = True)
     return acc
 
+
 # high dE/dx and low pT track thinning
 def PixeldEdxTrackParticleThinningCfg(flags, name, **kwargs):
     """Confiure the lowpT + high dE/dx track thinniing tool"""    
@@ -154,6 +155,7 @@ def PixeldEdxTrackParticleThinningCfg(flags, name, **kwargs):
     acc.addPublicTool(PixeldEdxTrackParticleThinning(name, **kwargs),
                       primary = True)
     return acc
+
 
 def LLP1TriggerSkimmingToolCfg(flags, name, TriggerListsHelper, **kwargs):
 
@@ -222,36 +224,34 @@ def LLP1TriggerMatchingToolRun2Cfg(flags, name, **kwargs):
 
     triggerList = kwargs['TriggerList']
     outputContainerPrefix = kwargs['OutputContainerPrefix']
-    
+
     kwargs.setdefault('InputElectrons', 'LRTElectrons')
     kwargs.setdefault('InputMuons', 'MuonsLRT')
-    kwargs.setdefault('DRThreshold', None) 
+    kwargs.setdefault('DRThreshold', None)
 
     acc = ComponentAccumulator()
 
     # Create trigger matching decorations
-    from DerivationFrameworkTrigger.TriggerMatchingToolConfig import TriggerMatchingToolCfg
+    from DerivationFrameworkTrigger.TriggerMatchingAlgConfig import TriggerMatchingAlgCfg
     if kwargs['DRThreshold'] is None:
-        PhysCommonTriggerMatchingTool = acc.getPrimaryAndMerge(TriggerMatchingToolCfg(
+        acc.merge(TriggerMatchingAlgCfg(
             flags,
-            name=name,
+            name=f"{outputContainerPrefix}TriggerMatchingKernel",
             ChainNames = triggerList,
             OutputContainerPrefix = outputContainerPrefix,
             InputElectrons = kwargs['InputElectrons'],
-            InputMuons =  kwargs['InputMuons'])) 
+            InputMuons =  kwargs['InputMuons']))
     else:
-        PhysCommonTriggerMatchingTool = acc.getPrimaryAndMerge(TriggerMatchingToolCfg(
+        acc.merge(TriggerMatchingAlgCfg(
             flags,
-            name=name,
+            name=f"{outputContainerPrefix}TriggerMatchingKernel",
             ChainNames = triggerList,
-            OutputContainerPrefix = outputContainerPrefix,  
+            OutputContainerPrefix = outputContainerPrefix,
             DRThreshold = kwargs['DRThreshold'],
             InputElectrons = kwargs['InputElectrons'],
-            InputMuons =  kwargs['InputMuons'])) 
-    CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-    acc.addEventAlgo(CommonAugmentation(f"{outputContainerPrefix}TriggerMatchingKernel",
-                                        AugmentationTools=[PhysCommonTriggerMatchingTool]))
-    return(acc)
+            InputMuons =  kwargs['InputMuons']))
+    return acc
+
 
 def LRTMuonMergerAlg(flags, name="LLP1_MuonLRTMergingAlg", **kwargs):
     acc = ComponentAccumulator()
@@ -371,96 +371,83 @@ def LRTElectronLHSelectorsCfg(flags):
     from DerivationFrameworkEGamma.EGammaToolsConfig import EGElectronLikelihoodToolWrapperCfg
 
     # decorate electrons with the output of LH very loose
-    ElectronPassLHVeryLooseNoPix = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
+    acc.merge(EGElectronLikelihoodToolWrapperCfg(
         flags,
         name="ElectronPassLHVeryLooseNoPix",
         EGammaElectronLikelihoodTool=ElectronLHSelectorVeryLooseNoPix,
         CutType="",
         StoreGateEntryName="DFCommonElectronsLHVeryLooseNoPix",
         ContainerName="Electrons",
-        StoreTResult=True)))
+        StoreTResult=True))
 
-    ElectronPassLHVeryLooseNoPixLRT = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
+    acc.merge(EGElectronLikelihoodToolWrapperCfg(
         flags,
         name="ElectronPassLHVeryLooseNoPixLRT",
         EGammaElectronLikelihoodTool=ElectronLHSelectorVeryLooseNoPix,
         CutType="",
         StoreGateEntryName="DFCommonElectronsLHVeryLooseNoPix",
         ContainerName="LRTElectrons",
-        StoreTResult=True)))
+        StoreTResult=True))
 
     # decorate electrons with the output of LH loose
-    ElectronPassLHLooseNoPix = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
-        flags,   
+    acc.merge(EGElectronLikelihoodToolWrapperCfg(
+        flags,
         name="ElectronPassLHLooseNoPix",
         EGammaElectronLikelihoodTool=ElectronLHSelectorLooseNoPix,
         CutType="",
         StoreGateEntryName="DFCommonElectronsLHLooseNoPix",
         ContainerName="Electrons",
-        StoreTResult=False)))
+        StoreTResult=False))
 
-    ElectronPassLHLooseNoPixLRT = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
-        flags,   
+    acc.merge(EGElectronLikelihoodToolWrapperCfg(
+        flags,
         name="ElectronPassLHLooseNoPixLRT",
         EGammaElectronLikelihoodTool=ElectronLHSelectorLooseNoPix,
         CutType="",
         StoreGateEntryName="DFCommonElectronsLHLooseNoPix",
         ContainerName="LRTElectrons",
-        StoreTResult=False)))
+        StoreTResult=False))
 
     # decorate electrons with the output of LH medium
-    ElectronPassLHMediumNoPix = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
+    acc.merge(EGElectronLikelihoodToolWrapperCfg(
         flags,
         name="ElectronPassLHMediumNoPix",
         EGammaElectronLikelihoodTool=ElectronLHSelectorMediumNoPix,
         CutType="",
         StoreGateEntryName="DFCommonElectronsLHMediumNoPix",
         ContainerName="Electrons",
-        StoreTResult=False)))
+        StoreTResult=False))
 
-    ElectronPassLHMediumNoPixLRT = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
+    acc.merge(EGElectronLikelihoodToolWrapperCfg(
         flags,
         name="ElectronPassLHMediumNoPixLRT",
         EGammaElectronLikelihoodTool=ElectronLHSelectorMediumNoPix,
         CutType="",
         StoreGateEntryName="DFCommonElectronsLHMediumNoPix",
         ContainerName="LRTElectrons",
-        StoreTResult=False)))
+        StoreTResult=False))
 
     # decorate electrons with the output of LH tight
-    ElectronPassLHTightNoPix = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
+    acc.merge(EGElectronLikelihoodToolWrapperCfg(
         flags,
         name="ElectronPassLHTightNoPix",
         EGammaElectronLikelihoodTool=ElectronLHSelectorTightNoPix,
         CutType="",
         StoreGateEntryName="DFCommonElectronsLHTightNoPix",
         ContainerName="Electrons",
-        StoreTResult=False)))
+        StoreTResult=False))
 
-    ElectronPassLHTightNoPixLRT = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
+    acc.merge(EGElectronLikelihoodToolWrapperCfg(
         flags,
         name="ElectronPassLHTightNoPixLRT",
         EGammaElectronLikelihoodTool=ElectronLHSelectorTightNoPix,
         CutType="",
         StoreGateEntryName="DFCommonElectronsLHTightNoPix",
         ContainerName="LRTElectrons",
-        StoreTResult=False)))
-
-    LRTEGAugmentationTools = [ElectronPassLHVeryLooseNoPix,
-                              ElectronPassLHVeryLooseNoPixLRT,
-                              ElectronPassLHLooseNoPix,
-                              ElectronPassLHLooseNoPixLRT,
-                              ElectronPassLHMediumNoPix,
-                              ElectronPassLHMediumNoPixLRT,
-                              ElectronPassLHTightNoPix,
-                              ElectronPassLHTightNoPixLRT]
-
-    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
-        "LLP1EGammaLRTKernel",
-        AugmentationTools=LRTEGAugmentationTools
-    ))
+        StoreTResult=False))
 
     return acc
+
 
 # RecoverZeroPixelHitMuons setup
 def RecoverZeroPixelHitMuonsCfg(flags):
@@ -469,5 +456,5 @@ def RecoverZeroPixelHitMuonsCfg(flags):
     ExtraInputs = [('xAOD::IParticleContainer', 'Muons.' + v)
                    for v in iso_vars()]
     acc.addEventAlgo(CompFactory.RecoverZeroPixelHitMuons(name="RecoverZeroPixelHitMuons", ExtraInputs=ExtraInputs))
-    
-    return acc 
+
+    return acc

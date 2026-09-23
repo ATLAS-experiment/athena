@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -11,16 +11,16 @@
 // based on counting the number of clusters in this |eta| region
 // of significant pT and bad LAr Quality.
 ///////////////////////////////////////////////////////////////////
-#include "BadBatmanAugmentationTool.h"
+#include "BadBatmanAugmentationAlg.h"
 
 #include "StoreGate/WriteDecorHandle.h"
 
 namespace DerivationFramework {
 
-  StatusCode BadBatmanAugmentationTool::initialize()
+  StatusCode BadBatmanAugmentationAlg::initialize()
   {
 
-    ATH_MSG_INFO("Init BadBatmanAugmentationTool");
+    ATH_MSG_INFO("Init BadBatmanAugmentationAlg");
 
     ATH_CHECK(m_eventInfo_key.initialize());
     ATH_CHECK(m_clusterContainer_key.initialize());
@@ -30,9 +30,9 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode BadBatmanAugmentationTool::addBranches(const EventContext& ctx) const
+  StatusCode BadBatmanAugmentationAlg::execute(const EventContext& ctx) const
   {
-    //Running BadBatmanAugmentationTool
+    //Running BadBatmanAugmentationAlg
 
     //Set the name of the variable to augment
 

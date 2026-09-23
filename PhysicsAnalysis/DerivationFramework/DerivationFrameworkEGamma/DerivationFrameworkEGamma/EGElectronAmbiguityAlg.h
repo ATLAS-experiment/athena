@@ -1,14 +1,12 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef DERIVATIONFRAMEWORK_EGELECTRONAMBIGUITYTOOL_H
-#define DERIVATIONFRAMEWORK_EGELECTRONAMBIGUITYTOOL_H
+#ifndef DERIVATIONFRAMEWORK_EGELECTRONAMBIGUITYALG_H
+#define DERIVATIONFRAMEWORK_EGELECTRONAMBIGUITYALG_H
 
-#include "GaudiKernel/ToolHandle.h"
 
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 #include "GaudiKernel/EventContext.h"
 #include "StoreGate/ReadHandleKey.h"
@@ -26,15 +24,15 @@
 
 namespace DerivationFramework {
 
-  class EGElectronAmbiguityTool : public extends<AthAlgTool, IAugmentationTool>
+  class EGElectronAmbiguityAlg : public AthReentrantAlgorithm
   {
 
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override final;
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
 
   private:
     SG::ReadHandleKey<xAOD::ElectronContainer> m_containerName{
@@ -92,7 +90,7 @@ namespace DerivationFramework {
     m_dtzv{ this, "DFCommonProdTrueZ", m_containerName, "DFCommonProdTrueZ", "" };
 
     struct DecorHandles {
-      DecorHandles (const EGElectronAmbiguityTool& tool, const EventContext& ctx);
+      DecorHandles (const EGElectronAmbiguityAlg& tool, const EventContext& ctx);
       SG::WriteDecorHandle<xAOD::ElectronContainer, float> drv;
       SG::WriteDecorHandle<xAOD::ElectronContainer, float> dphiv;
       SG::WriteDecorHandle<xAOD::ElectronContainer, float> dmee;
@@ -141,4 +139,4 @@ namespace DerivationFramework {
   };
 }
 
-#endif // DERIVATIONFRAMEWORK_EGCONVERSIONINFOTOOL_H
+#endif // DERIVATIONFRAMEWORK_EGELECTRONAMBIGUITYALG_H

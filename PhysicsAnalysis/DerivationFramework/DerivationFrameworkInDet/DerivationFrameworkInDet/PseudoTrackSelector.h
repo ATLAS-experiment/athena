@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -8,11 +8,8 @@
 #ifndef DERIVATIONFRAMEWORK_PseudoTrackSelector_H
 #define DERIVATIONFRAMEWORK_PseudoTrackSelector_H
 
-#include <string>
-#include <map>
-#include "GaudiKernel/ToolHandle.h"
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+
 #include "InDetTrackSystematicsTools/IInDetTrackTruthOriginTool.h"
 
 #include "xAODTracking/TrackParticleContainer.h"
@@ -25,20 +22,22 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/ReadHandleKeyArray.h"
 
+#include "GaudiKernel/ToolHandle.h"
+
 namespace DerivationFramework {
 
   /** @brief Class-algorithm for pseudo track selection */
-  class PseudoTrackSelector : public extends<AthAlgTool, IAugmentationTool>
+  class PseudoTrackSelector : public AthReentrantAlgorithm
     {
     public:
       ///////////////////////////////////////////////////////////////////
       /** @brief Standard Algotithm methods:                           */
       ///////////////////////////////////////////////////////////////////
 
-      using base_class::base_class;
+      using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
       virtual StatusCode initialize() override final;
-      virtual StatusCode addBranches(const EventContext& ctx) const override final;
+      virtual StatusCode execute(const EventContext& ctx) const override final;
 
     protected:
       ///////////////////////////////////////////////////////////////////

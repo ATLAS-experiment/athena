@@ -77,7 +77,7 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
        useMCPCuts                  = False )
    acc.addPublicTool(BPHY5JpsiFinder )
 
-   BPHY5JpsiSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(name = "BPHY5JpsiSelectAndWrite",
+   acc.addEventAlgo(CompFactory.DerivationFramework.Reco_Vertex(name = "BPHY5JpsiSelectAndWrite",
                                                        VertexSearchTool       = BPHY5JpsiFinder,
                                                        OutputVtxContainerName = JpsiContainerName,
                                                        PVContainerName        = "PrimaryVertices",
@@ -86,10 +86,10 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
                                                        RefPVContainerName     = "SHOULDNOTBEUSED",
                                                        RelinkTracks  =  toRelink,
                                                        RelinkMuons   =  MuonReLink,
-                                                       DoVertexType           =1)
-   
+                                                       DoVertexType           =1))
+
    ## a/ augment and select Jpsi->mumu candidates
-   BPHY5_Select_Jpsi2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
+   acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
          name                  = "BPHY5_Select_Jpsi2mumu",
          HypothesisName        = "Jpsi",
          InputVtxContainerName = JpsiContainerName,
@@ -98,32 +98,131 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
          MassMin               = 2000.0,
          MassMax               = 3600.0,
          Chi2Max               = 200, Do3d = False,
-         DoVertexType =1)
+         DoVertexType =1))
 
-   BPHY5_AugOriginalCounts = acc.popToolsAndMerge(
+   acc.merge(
       AugOriginalCountsCfg(flags, name = "BPHY5_AugOriginalCounts"))
 
-   BPHY5BsJpsiKK = CompFactory.Analysis.JpsiPlus2Tracks(name = "BPHY5BsJpsiKK",
-         kaonkaonHypothesis          = True,
-         pionpionHypothesis          = False,
-         kaonpionHypothesis          = False,
-         trkThresholdPt              = 800.0,
-         trkMaxEta                   = 3.0,
-         BMassUpper                  = 5800.0,
-         BMassLower                  = 5000.0,
-         #DiTrackMassUpper = 1019.445 + 100.,
-         #DiTrackMassLower = 1019.445 - 100.,
-         Chi2Cut                     = 15.0,
-         TrkQuadrupletMassUpper      = 6000.0,
-         TrkQuadrupletMassLower      = 4800.0,
-         JpsiContainerKey            = JpsiContainerName,
-         TrackParticleCollection     = mainIDInput,
-         MuonsUsedInJpsi             = mainMuonInput,
-         TrkVertexFitterTool         = vkalvrt,
-         TrackSelectorTool           = trackselect,
-         UseMassConstraint           = True)
-   acc.addPublicTool(BPHY5BsJpsiKK )
-   BPHY5BdJpsiKst = CompFactory.Analysis.JpsiPlus2Tracks(
+   if "Bs" in Decays :
+      BPHY5BsJpsiKK = CompFactory.Analysis.JpsiPlus2Tracks(name = "BPHY5BsJpsiKK",
+                                                           kaonkaonHypothesis          = True,
+                                                           pionpionHypothesis          = False,
+                                                           kaonpionHypothesis          = False,
+                                                           trkThresholdPt              = 800.0,
+                                                           trkMaxEta                   = 3.0,
+                                                           BMassUpper                  = 5800.0,
+                                                           BMassLower                  = 5000.0,
+                                                           #DiTrackMassUpper = 1019.445 + 100.,
+                                                           #DiTrackMassLower = 1019.445 - 100.,
+                                                           Chi2Cut                     = 15.0,
+                                                           TrkQuadrupletMassUpper      = 6000.0,
+                                                           TrkQuadrupletMassLower      = 4800.0,
+                                                           JpsiContainerKey            = JpsiContainerName,
+                                                           TrackParticleCollection     = mainIDInput,
+                                                           MuonsUsedInJpsi             = mainMuonInput,
+                                                           TrkVertexFitterTool         = vkalvrt,
+                                                           TrackSelectorTool           = trackselect,
+                                                           UseMassConstraint           = True)
+      acc.addPublicTool(BPHY5BsJpsiKK )
+      acc.addEventAlgo(CompFactory.DerivationFramework.Reco_Vertex(name = "BPHY5BsKKSelectAndWrite",
+                                                                            VertexSearchTool         = BPHY5BsJpsiKK,
+                                                                            OutputVtxContainerName   = BsJpsiPhiContainerName,
+                                                                            PVContainerName          = "PrimaryVertices",
+                                                                            V0Tools                  = V0Tools,
+                                                                            PVRefitter               = PVrefit,
+                                                                            RefPVContainerName       = "BPHY5RefittedPrimaryVertices",
+                                                                            RefitPV                  = True, Do3d = False,
+                                                                            RelinkTracks  =  toRelink,
+                                                                            MaxPVrefit               = 10000, DoVertexType = 7))
+      acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
+         name                       = "BPHY5_Select_Bs2JpsiKK",
+         HypothesisName             = "Bs",
+         InputVtxContainerName      = BsJpsiPhiContainerName,
+         V0Tools                    = V0Tools,
+         TrkMasses                  = [105.658, 105.658, 493.677, 493.677],
+         VtxMassHypo                = 5366.3,
+         MassMin                    = 5000.0,
+         MassMax                    = 5800.0, Do3d = False,
+         Chi2Max                    = 200))
+
+      #Do vertices without constraint for systematic reference
+      acc.addEventAlgo(CompFactory.DerivationFramework.ReVertex(
+         name                       = "BPHY5_Revertex_Bs_NoMassConst",
+         InputVtxContainerName      = BsJpsiPhiContainerName,
+         TrackIndices               = [ 0, 1, 2, 3 ],
+         RefitPV                    = False,
+         UseMassConstraint          = False,
+         TrackContainerName         = mainIDInput,
+         RelinkTracks  =  toRelink,
+         PVRefitter                 = PVrefit,
+         TrkVertexFitterTool        = vkalvrt,
+         OutputVtxContainerName     = "BPHY5BsJpsiKKCandidatesNoConstraint"))
+
+      acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
+         name                       = "BPHY5_Select_Bs2JpsiKKNoConstraint",
+         HypothesisName             = "Bs",
+         V0Tools                    = V0Tools,
+         InputVtxContainerName      = "BPHY5BsJpsiKKCandidatesNoConstraint",
+         TrkMasses                  = [105.658, 105.658, 493.677, 493.677],
+         VtxMassHypo                = 5366.3,
+         MassMin                    = 5000.0,
+         MassMax                    = 5800.0, Do3d = False,
+         Chi2Max                    = 200))
+
+   if "B+" in Decays :
+      BPHY5BplJpsiKpl = CompFactory.Analysis.JpsiPlus1Track(name = "BPHY5BplJpsiKpl",
+                                                            pionHypothesis          = True,
+                                                            kaonHypothesis          = True,
+                                                            trkThresholdPt          = 750.0,
+                                                            trkMaxEta           = 3.0,
+                                                            BThresholdPt            = 4000.0,
+                                                            BMassUpper          = 7000.0,
+                                                            BMassLower          = 4500.0,
+                                                            Chi2Cut                         = 15.0,
+                                                            TrkTrippletMassUpper            = 8000,
+                                                            TrkTrippletMassLower            = 4000,
+                                                            JpsiContainerKey        = JpsiContainerName,
+                                                            TrackParticleCollection         = mainIDInput,
+                                                            MuonsUsedInJpsi         = mainMuonInput,
+                                                            TrkVertexFitterTool     = vkalvrt,
+                                                            TrackSelectorTool       = trackselect,
+                                                            UseMassConstraint       = True,
+                                                            ExcludeCrossJpsiTracks              = False,
+                                                            ExcludeJpsiMuonsOnly                = True)
+      acc.addPublicTool(BPHY5BplJpsiKpl )
+      acc.addEventAlgo(CompFactory.DerivationFramework.Reco_Vertex(name    = "BPHY5BplKplSelectAndWrite",
+                                                                              VertexSearchTool      =  BPHY5BplJpsiKpl,
+                                                                              OutputVtxContainerName    = BPlusContainerName,
+                                                                              PVContainerName           = "PrimaryVertices",
+                                                                              V0Tools                   = V0Tools,
+                                                                              PVRefitter                = PVrefit,
+                                                                              RefPVContainerName        = "BPHY5RefBplJpsiKplPrimaryVertices",
+                                                                              RefitPV                   = True,
+                                                                              RelinkTracks  =  toRelink,
+                                                                              MaxPVrefit                = 10000 ))
+      acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
+         name                       = "BPHY5_Select_Bpl2JpsiKpl",
+         HypothesisName             = "Bplus",
+         InputVtxContainerName      = BPlusContainerName,
+         V0Tools                    = V0Tools,
+         TrkMasses                  = [105.658, 105.658, 493.677],
+         VtxMassHypo                = 5279.26,
+         MassMin                    = 5279.26 - 500, Do3d = False,
+         MassMax                    = 5279.26 + 500,
+         Chi2Max                    = 200 ))
+      acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
+         name                       = "BPHY5_Select_Bpl2JpsiPi",
+         HypothesisName             = "Bc",
+         InputVtxContainerName      = BPlusContainerName,
+         V0Tools                    = V0Tools,
+         TrkMasses                  = [105.658, 105.658, 139.570],
+         VtxMassHypo                = 6275.1, Do3d = False,
+         MassMin                    = 6275.1 - 500,
+         MassMax                    = 6275.1 + 500,
+         Chi2Max                    = 200 ))
+
+   if "BdKst" in Decays :
+      BPHY5BdJpsiKst = CompFactory.Analysis.JpsiPlus2Tracks(
          name                    = "BPHY5BdJpsiKst",
          kaonkaonHypothesis      = False,
          pionpionHypothesis      = False,
@@ -144,219 +243,114 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
          TrkQuadrupletMassLower  = 3500.0,
          TrkQuadrupletMassUpper  = 6800.0,
          )
-   acc.addPublicTool(BPHY5BdJpsiKst )
-   BPHY5BplJpsiKpl = CompFactory.Analysis.JpsiPlus1Track(name = "BPHY5BplJpsiKpl",
-         pionHypothesis          = True,
-         kaonHypothesis          = True,
-         trkThresholdPt          = 750.0,
-         trkMaxEta           = 3.0,
-         BThresholdPt            = 4000.0,
-         BMassUpper          = 7000.0,
-         BMassLower          = 4500.0,
-         Chi2Cut                         = 15.0,
-         TrkTrippletMassUpper            = 8000,
-         TrkTrippletMassLower            = 4000,
-         JpsiContainerKey        = JpsiContainerName,
-         TrackParticleCollection         = mainIDInput,
-         MuonsUsedInJpsi         = mainMuonInput,
-         TrkVertexFitterTool     = vkalvrt,
-         TrackSelectorTool       = trackselect,
-         UseMassConstraint       = True,
-         ExcludeCrossJpsiTracks              = False,
-         ExcludeJpsiMuonsOnly                = True)
-   acc.addPublicTool(BPHY5BplJpsiKpl )
-   BPHY5BJpsipipiX = CompFactory.Analysis.JpsiPlus2Tracks(name = "BPHY5BJpsipipiX",
-         kaonkaonHypothesis          = False,
-         pionpionHypothesis          = True,
-         kaonpionHypothesis          = False,
-         trkThresholdPt              = 800.0,
-         trkMaxEta                   = 3.0,
-         BMassUpper                  = 5800.0,
-         BMassLower                  = 3400.0,
-         #DiTrackMassUpper = 1019.445 + 100.,
-         #DiTrackMassLower = 1019.445 - 100.,
-         Chi2Cut                     = 15.0,
-         TrkQuadrupletMassUpper      = 5800.0,
-         TrkQuadrupletMassLower      = 3400.0,
-         JpsiContainerKey            = JpsiContainerName,
-         TrackParticleCollection     = mainIDInput,
-         MuonsUsedInJpsi             = mainMuonInput,
-         TrkVertexFitterTool     = vkalvrt,
-         TrackSelectorTool       = trackselect,
-         UseMassConstraint       = True,
-         ExcludeCrossJpsiTracks  = False,
-         ExcludeJpsiMuonsOnly    = True)
-   acc.addPublicTool(BPHY5BJpsipipiX )
-   BPHY5BsKKSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(name = "BPHY5BsKKSelectAndWrite",
-                        VertexSearchTool         = BPHY5BsJpsiKK,
-                        OutputVtxContainerName   = BsJpsiPhiContainerName,
-                        PVContainerName          = "PrimaryVertices",
-                        V0Tools                  = V0Tools,
-                        PVRefitter               = PVrefit,
-                        RefPVContainerName       = "BPHY5RefittedPrimaryVertices",
-                        RefitPV                  = True, Do3d = False,
-                        RelinkTracks  =  toRelink,
-                        MaxPVrefit               = 10000, DoVertexType = 7)
+      acc.addPublicTool(BPHY5BdJpsiKst )
+      acc.addEventAlgo(CompFactory.DerivationFramework.Reco_Vertex(
+         name                   = "BPHY5BdKstSelectAndWrite",
+         VertexSearchTool       = BPHY5BdJpsiKst,
+         OutputVtxContainerName = BdJpsiKstContainerName,
+         V0Tools                = V0Tools,
+         PVRefitter             = PVrefit,
+         PVContainerName        = "PrimaryVertices",
+         RefPVContainerName     = "BPHY5RefittedKstPrimaryVertices",
+         RefitPV                = True,
+         RelinkTracks  =  toRelink,
+         MaxPVrefit             = 10000,
+         DoVertexType = 7))
+      acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
+         name                       = "BPHY5_Select_Bd2JpsiKst",
+         HypothesisName             = "Bd",
+         InputVtxContainerName      = BdJpsiKstContainerName,
+         V0Tools                    = V0Tools,
+         TrkMasses                  = [105.658, 105.658, 493.677, 139.570],
+         VtxMassHypo                = 5279.6,
+         MassMin                    = 100.0,      #no mass cuts here
+         MassMax                    = 100000.0,   #no mass cuts here
+         Chi2Max                    = 200))
+      acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
+         name                       = "BPHY5_Select_Bd2JpsiKstbar",
+         HypothesisName             = "Bdbar",
+         InputVtxContainerName      = BdJpsiKstContainerName,
+         V0Tools                    = V0Tools,
+         TrkMasses                  = [105.658, 105.658, 139.570, 493.677],
+         VtxMassHypo                = 5279.6,
+         MassMin                    = 100.0,      #no mass cuts here
+         MassMax                    = 100000.0,   #no mass cuts here
+         Chi2Max                    = 200))
+      acc.addEventAlgo(CompFactory.DerivationFramework.ReVertex(
+         name                       = "BPHY5_Revertex_Bd_NoMassConst",
+         InputVtxContainerName      = "BPHY5BdJpsiKstCandidates",
+         TrackIndices               = [ 0, 1, 2, 3 ],
+         RefitPV                    = False,
+         UseMassConstraint          = False,
+         TrackContainerName         = mainIDInput,
+         RelinkTracks  =  toRelink,
+         PVRefitter                 = PVrefit,
+         TrkVertexFitterTool        = vkalvrt,
+         OutputVtxContainerName     = "BPHY5BdJpsiKstCandidatesNoConstraint"))
+      acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
+         name                       = "BPHY5_Select_BdBar2JpsiKpiNoConstraint",
+         HypothesisName             = "BdBar",
+         V0Tools                    = V0Tools,
+         InputVtxContainerName      = "BPHY5BdJpsiKstCandidatesNoConstraint",
+         TrkMasses                  = [105.658, 105.658, 139.570, 493.677],
+         VtxMassHypo                = 5279.6,
+         MassMin                    = 100.0,      #no mass cuts here
+         MassMax                    = 100000.0,   #no mass cuts here
+         Chi2Max                    = 200))
+      acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
+         name                       = "BPHY5_Select_Bd2JpsiKpiNoConstraint",
+         HypothesisName             = "Bd",
+         V0Tools                    = V0Tools,
+         InputVtxContainerName      = "BPHY5BdJpsiKstCandidatesNoConstraint",
+         TrkMasses                  = [105.658, 105.658, 493.677, 139.570],
+         VtxMassHypo                = 5279.6,
+         MassMin                    = 100.0,      #no mass cuts here
+         MassMax                    = 100000.0,   #no mass cuts here
+         Chi2Max                    = 200))
 
-   BPHY5BplKplSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(name    = "BPHY5BplKplSelectAndWrite",
-                                                              VertexSearchTool      =  BPHY5BplJpsiKpl,
-                                                              OutputVtxContainerName    = BPlusContainerName,
-                                                              PVContainerName           = "PrimaryVertices",
-                                                              V0Tools                   = V0Tools,
-                                                              PVRefitter                = PVrefit,
-                                                              RefPVContainerName        = "BPHY5RefBplJpsiKplPrimaryVertices",                                                              
-                                                              RefitPV                   = True,
-                                                              RelinkTracks  =  toRelink,
-                                                              MaxPVrefit                = 10000 )
-
-   BPHY5BpipiXSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(name  = "BPHY5BpipiXSelectAndWrite",
-                                                           VertexSearchTool       = BPHY5BJpsipipiX,
-                                                           OutputVtxContainerName   = BpipiContainerName,
-                                                           PVContainerName          = "PrimaryVertices",
-                                                           V0Tools                  = V0Tools,
-                                                           PVRefitter               = PVrefit,
-                                                           RefPVContainerName       = "BPHY5RefittedBPipiPrimaryVertices",
-                                                           RefitPV                  = True, Do3d = False,
-                                                           RelinkTracks  =  toRelink,
-                                                           MaxPVrefit               = 10000, DoVertexType = 7)
-
-   BPHY5BdKstSelectAndWrite  = CompFactory.DerivationFramework.Reco_Vertex(
-                                 name                   = "BPHY5BdKstSelectAndWrite",
-                                 VertexSearchTool       = BPHY5BdJpsiKst,
-                                 OutputVtxContainerName = BdJpsiKstContainerName,
-                                 V0Tools                = V0Tools,
-                                 PVRefitter             = PVrefit,
-                                 PVContainerName        = "PrimaryVertices",
-                                 RefPVContainerName     = "BPHY5RefittedKstPrimaryVertices",
-                                 RefitPV                = True,
-                                 RelinkTracks  =  toRelink,
-                                 MaxPVrefit             = 10000,
-                                 DoVertexType = 7)
-
-   BPHY5_Select_Bd2JpsiKst = CompFactory.DerivationFramework.Select_onia2mumu(
-                                 name                       = "BPHY5_Select_Bd2JpsiKst",
-                                 HypothesisName             = "Bd",
-                                 InputVtxContainerName      = BdJpsiKstContainerName,
-                                 V0Tools                    = V0Tools,
-                                 TrkMasses                  = [105.658, 105.658, 493.677, 139.570],
-                                 VtxMassHypo                = 5279.6,
-                                 MassMin                    = 100.0,      #no mass cuts here
-                                 MassMax                    = 100000.0,   #no mass cuts here
-                                 Chi2Max                    = 200)
-
-   BPHY5_Select_Bd2JpsiKstbar = CompFactory.DerivationFramework.Select_onia2mumu(
-                                 name                       = "BPHY5_Select_Bd2JpsiKstbar",
-                                 HypothesisName             = "Bdbar",
-                                 InputVtxContainerName      = BdJpsiKstContainerName,
-                                 V0Tools                    = V0Tools,
-                                 TrkMasses                  = [105.658, 105.658, 139.570, 493.677],
-                                 VtxMassHypo                = 5279.6,
-                                 MassMin                    = 100.0,      #no mass cuts here
-                                 MassMax                    = 100000.0,   #no mass cuts here
-                                 Chi2Max                    = 200)
-
-   BPHY5_Select_Bs2JpsiKK = CompFactory.DerivationFramework.Select_onia2mumu(
-                                 name                       = "BPHY5_Select_Bs2JpsiKK",
-                                 HypothesisName             = "Bs",
-                                 InputVtxContainerName      = BsJpsiPhiContainerName,
-                                 V0Tools                    = V0Tools,
-                                 TrkMasses                  = [105.658, 105.658, 493.677, 493.677],
-                                 VtxMassHypo                = 5366.3,
-                                 MassMin                    = 5000.0,
-                                 MassMax                    = 5800.0, Do3d = False,
-                                 Chi2Max                    = 200)
-
-   BPHY5_Select_Bpl2JpsiKpl  = CompFactory.DerivationFramework.Select_onia2mumu(
-                                 name                       = "BPHY5_Select_Bpl2JpsiKpl",
-                                 HypothesisName             = "Bplus",
-                                 InputVtxContainerName      = BPlusContainerName,
-                                 V0Tools                    = V0Tools,
-                                 TrkMasses                  = [105.658, 105.658, 493.677],
-                                 VtxMassHypo                = 5279.26,
-                                 MassMin                    = 5279.26 - 500, Do3d = False,
-                                 MassMax                    = 5279.26 + 500,
-                                 Chi2Max                    = 200 )
-
-   BPHY5_Select_Bpl2JpsiPi  = CompFactory.DerivationFramework.Select_onia2mumu(
-                                 name                       = "BPHY5_Select_Bpl2JpsiPi",
-                                 HypothesisName             = "Bc",
-                                 InputVtxContainerName      = BPlusContainerName,
-                                 V0Tools                    = V0Tools,
-                                 TrkMasses                  = [105.658, 105.658, 139.570],
-                                 VtxMassHypo                = 6275.1, Do3d = False,
-                                 MassMin                    = 6275.1 - 500,
-                                 MassMax                    = 6275.1 + 500,
-                                 Chi2Max                    = 200 )
-
-   BPHY5_Select_B2JpsipipiX = CompFactory.DerivationFramework.Select_onia2mumu(
-                                name                       = "BPHY5_Select_B2JpsipipiX",
-                                HypothesisName             = "pipiJpsi",
-                                InputVtxContainerName      = BpipiContainerName,
-                                V0Tools                    = V0Tools,
-                                TrkMasses                  = [105.658, 105.658, 139.570, 139.570],
-                                VtxMassHypo                = 4260,
-                                MassMin                    = 3400.0,
-                                MassMax                    = 5800.0, Do3d = False,
-                                Chi2Max                    = 200)
-
-   #Do vertices without constraint for systematic reference
-   BPHY5_Revertex_Bs_NoMassConst  = CompFactory.DerivationFramework.ReVertex(
-       name                       = "BPHY5_Revertex_Bs_NoMassConst",
-       InputVtxContainerName      = BsJpsiPhiContainerName,
-       TrackIndices               = [ 0, 1, 2, 3 ],
-       RefitPV                    = False,
-       UseMassConstraint          = False,
-       TrackContainerName         = mainIDInput,
-       RelinkTracks  =  toRelink,
-       PVRefitter                 = PVrefit,
-       TrkVertexFitterTool        = vkalvrt,
-       OutputVtxContainerName     = "BPHY5BsJpsiKKCandidatesNoConstraint")
-
-   BPHY5_Revertex_Bd_NoMassConst  = CompFactory.DerivationFramework.ReVertex(
-       name                       = "BPHY5_Revertex_Bd_NoMassConst",
-       InputVtxContainerName      = "BPHY5BdJpsiKstCandidates",
-       TrackIndices               = [ 0, 1, 2, 3 ],
-       RefitPV                    = False,
-       UseMassConstraint          = False,
-       TrackContainerName         = mainIDInput,
-       RelinkTracks  =  toRelink,
-       PVRefitter                 = PVrefit,
-       TrkVertexFitterTool        = vkalvrt,
-       OutputVtxContainerName     = "BPHY5BdJpsiKstCandidatesNoConstraint")
-
-   BPHY5_Select_Bs2JpsiKKNoConstraint = CompFactory.DerivationFramework.Select_onia2mumu(
-     name                       = "BPHY5_Select_Bs2JpsiKKNoConstraint",
-     HypothesisName             = "Bs",
-     V0Tools                    = V0Tools,
-     InputVtxContainerName      = "BPHY5BsJpsiKKCandidatesNoConstraint",
-     TrkMasses                  = [105.658, 105.658, 493.677, 493.677],
-     VtxMassHypo                = 5366.3,
-     MassMin                    = 5000.0,
-     MassMax                    = 5800.0, Do3d = False,
-     Chi2Max                    = 200)
-
-   BPHY5_Select_BdBar2JpsiKpiNoConstraint = CompFactory.DerivationFramework.Select_onia2mumu(
-     name                       = "BPHY5_Select_BdBar2JpsiKpiNoConstraint",
-     HypothesisName             = "BdBar",
-     V0Tools                    = V0Tools,
-     InputVtxContainerName      = "BPHY5BdJpsiKstCandidatesNoConstraint",
-     TrkMasses                  = [105.658, 105.658, 139.570, 493.677],
-     VtxMassHypo                = 5279.6,
-     MassMin                    = 100.0,      #no mass cuts here
-     MassMax                    = 100000.0,   #no mass cuts here
-     Chi2Max                    = 200)
-
-   BPHY5_Select_Bd2JpsiKpiNoConstraint = CompFactory.DerivationFramework.Select_onia2mumu(
-     name                       = "BPHY5_Select_Bd2JpsiKpiNoConstraint",
-     HypothesisName             = "Bd",
-     V0Tools                    = V0Tools,
-     InputVtxContainerName      = "BPHY5BdJpsiKstCandidatesNoConstraint",
-     TrkMasses                  = [105.658, 105.658, 493.677, 139.570],
-     VtxMassHypo                = 5279.6,
-     MassMin                    = 100.0,      #no mass cuts here
-     MassMax                    = 100000.0,   #no mass cuts here
-     Chi2Max                    = 200)
-
+   if "BpipiX" in Decays :
+      BPHY5BJpsipipiX = CompFactory.Analysis.JpsiPlus2Tracks(name = "BPHY5BJpsipipiX",
+                                                             kaonkaonHypothesis          = False,
+                                                             pionpionHypothesis          = True,
+                                                             kaonpionHypothesis          = False,
+                                                             trkThresholdPt              = 800.0,
+                                                             trkMaxEta                   = 3.0,
+                                                             BMassUpper                  = 5800.0,
+                                                             BMassLower                  = 3400.0,
+                                                             #DiTrackMassUpper = 1019.445 + 100.,
+                                                             #DiTrackMassLower = 1019.445 - 100.,
+                                                             Chi2Cut                     = 15.0,
+                                                             TrkQuadrupletMassUpper      = 5800.0,
+                                                             TrkQuadrupletMassLower      = 3400.0,
+                                                             JpsiContainerKey            = JpsiContainerName,
+                                                             TrackParticleCollection     = mainIDInput,
+                                                             MuonsUsedInJpsi             = mainMuonInput,
+                                                             TrkVertexFitterTool     = vkalvrt,
+                                                             TrackSelectorTool       = trackselect,
+                                                             UseMassConstraint       = True,
+                                                             ExcludeCrossJpsiTracks  = False,
+                                                             ExcludeJpsiMuonsOnly    = True)
+      acc.addPublicTool(BPHY5BJpsipipiX )
+      acc.addEventAlgo(CompFactory.DerivationFramework.Reco_Vertex(name  = "BPHY5BpipiXSelectAndWrite",
+                                                                              VertexSearchTool       = BPHY5BJpsipipiX,
+                                                                              OutputVtxContainerName   = BpipiContainerName,
+                                                                              PVContainerName          = "PrimaryVertices",
+                                                                              V0Tools                  = V0Tools,
+                                                                              PVRefitter               = PVrefit,
+                                                                              RefPVContainerName       = "BPHY5RefittedBPipiPrimaryVertices",
+                                                                              RefitPV                  = True, Do3d = False,
+                                                                              RelinkTracks  =  toRelink,
+                                                                              MaxPVrefit               = 10000, DoVertexType = 7))
+      acc.addEventAlgo(CompFactory.DerivationFramework.Select_onia2mumu(
+         name                       = "BPHY5_Select_B2JpsipipiX",
+         HypothesisName             = "pipiJpsi",
+         InputVtxContainerName      = BpipiContainerName,
+         V0Tools                    = V0Tools,
+         TrkMasses                  = [105.658, 105.658, 139.570, 139.570],
+         VtxMassHypo                = 4260,
+         MassMin                    = 3400.0,
+         MassMax                    = 5800.0, Do3d = False,
+         Chi2Max                    = 200))
 
    if not isSimulation: #Only Skim Data
       from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
@@ -394,17 +388,10 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
          "BPHY5SkimmingOR", FilterList = filterlist)
       acc.addPublicTool(BPHY5SkimmingOR)
 
-   augTools =   [BPHY5JpsiSelectAndWrite,  BPHY5_Select_Jpsi2mumu, BPHY5_AugOriginalCounts]
-   if "Bs" in Decays : augTools += [BPHY5BsKKSelectAndWrite,  BPHY5_Select_Bs2JpsiKK, BPHY5_Revertex_Bs_NoMassConst, BPHY5_Select_Bs2JpsiKKNoConstraint]
-   if "B+" in Decays : augTools += [BPHY5BplKplSelectAndWrite, BPHY5_Select_Bpl2JpsiKpl, BPHY5_Select_Bpl2JpsiPi]
-   if "BdKst" in Decays : augTools += [ BPHY5BdKstSelectAndWrite, BPHY5_Select_Bd2JpsiKst, BPHY5_Select_Bd2JpsiKstbar, BPHY5_Revertex_Bd_NoMassConst, BPHY5_Select_BdBar2JpsiKpiNoConstraint, BPHY5_Select_Bd2JpsiKpiNoConstraint]
-   if "BpipiX" in Decays : augTools+= [ BPHY5BpipiXSelectAndWrite, BPHY5_Select_B2JpsipipiX]
    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY5Kernel",
-                                                    AugmentationTools = augTools,
                                                     #Only skim if not MC
                                                     SkimmingTools     = [BPHY5SkimmingOR] if not isSimulation else [],
                                                     ThinningTools     = []))
-   for t in  augTools : acc.addPublicTool(t)
    return acc
 
 

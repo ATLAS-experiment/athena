@@ -1,22 +1,23 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def IParticleRetrievalToolCfg(ConfigFlags):
+def IParticleRetrievalToolCfg(flags):
     """Configure the IParticle retrieval tool, depends on R1/R2 or R3 trigger"""
     acc = ComponentAccumulator()
     from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
-    tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(ConfigFlags))
-    if ConfigFlags.Trigger.EDMVersion == 3:
+    tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
+    if flags.Trigger.EDMVersion == 3:
         IParticleRetrievalTool = CompFactory.Trig.R3IParticleRetrievalTool
     else: 
         IParticleRetrievalTool = CompFactory.Trig.IParticleRetrievalTool
     acc.addPublicTool(IParticleRetrievalTool("OnlineParticleTool", TrigDecisionTool = tdt),
                       primary = True)
-    return(acc)
+    return acc
 
-def TriggerMatchingToolCfg(ConfigFlags, name, UseTypedScoringTool=False, **kwargs):
+
+def TriggerMatchingAlgCfg(flags, name, UseTypedScoringTool=False, **kwargs):
     """Config fragment for the trigger matching tool used in DAOD production"""
     acc = ComponentAccumulator()
 
@@ -33,11 +34,9 @@ def TriggerMatchingToolCfg(ConfigFlags, name, UseTypedScoringTool=False, **kwarg
                               ToolTypes = [xAODType.Electron])
         kwargs["ScoringTool"] = tst
 
-    OnlineParticleTool = acc.getPrimaryAndMerge(IParticleRetrievalToolCfg(ConfigFlags))
+    OnlineParticleTool = acc.getPrimaryAndMerge(IParticleRetrievalToolCfg(flags))
     kwargs['OnlineParticleTool'] = OnlineParticleTool
-    TriggerMatchingTool = CompFactory.DerivationFramework.TriggerMatchingTool
-    acc.addPublicTool(TriggerMatchingTool(name, **kwargs),
-                      primary = True)
-    return(acc)
+    acc.addEventAlgo(CompFactory.DerivationFramework.TriggerMatchingAlg(name, **kwargs))
+    return acc
 
 

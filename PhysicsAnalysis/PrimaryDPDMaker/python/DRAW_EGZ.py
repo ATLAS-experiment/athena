@@ -46,7 +46,6 @@ def DRAW_EGZKernelCfg(flags, name='DRAW_EGZKernel', **kwargs):
         'ForwardElectrons.pt > 20*GeV && ForwardElectrons.Loose']
     # Augmentation tools for the di-lepton mass computations
     EventSels = []
-    augmentationTools = []
     for key, sel in DRAWEGZSel.items():
         if key == 'Zefe':
             tool = CompFactory.DerivationFramework.EGInvariantMassTool(
@@ -58,17 +57,17 @@ def DRAW_EGZKernelCfg(flags, name='DRAW_EGZKernel', **kwargs):
                 Mass1Hypothesis=0.511,
                 Mass2Hypothesis=0.511,
                 CheckCharge=False,
-                StoreGateEntryName=sel[1])
+                StoreGateEntryName=sel[1]) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+            acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(name=f'llmassAugFor{key}', AugmentationTools = [tool]))
         else:
             tool = CompFactory.DerivationFramework.InvariantMassTool(
                 name=f'llmassToolFor{key}',
                 ContainerName='Electrons' if key.find('Zee') >= 0 else 'Muons',
                 ObjectRequirements=sel[0],
                 MassHypothesis=0.511 if key.find('Zee') >= 0 else 105.66,
-                StoreGateEntryName=sel[1])
+                StoreGateEntryName=sel[1]) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+            acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(name=f'llmassAugFor{key}', AugmentationTools = [tool]))
 
-        augmentationTools.append(tool)
-        acc.addPublicTool(tool)
         EventSels.append(sel[2])
     draw_egz = " || ".join(EventSels)
     mlog.info('DRAW_EGZ selection '+draw_egz)
@@ -80,10 +79,11 @@ def DRAW_EGZKernelCfg(flags, name='DRAW_EGZKernel', **kwargs):
         flags, name='DRAW_EGZSkimmingTool', expression=draw_egz))
 
     # The main kernel algo
+    for tool in augmentationTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]), sequenceName='DRAW_EGZSequence')
     DRAW_EGZKernel = CompFactory.DerivationFramework.DerivationKernel(
         name='DRAW_EGZKernel',
         doChronoStat=(flags.Concurrency.NumThreads <= 1),
-        AugmentationTools=augmentationTools,
         SkimmingTools=[skimmingTool])
 
     acc.addEventAlgo(DRAW_EGZKernel, sequenceName='DRAW_EGZSequence')

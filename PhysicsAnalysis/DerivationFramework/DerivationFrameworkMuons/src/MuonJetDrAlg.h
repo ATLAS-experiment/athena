@@ -1,16 +1,15 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
-// MuonJetDrTool.h
+// MuonJetDrAlg.h
 ///////////////////////////////////////////////////////////////////
-#ifndef DERIVATIONFRAMEWORK_MuonJetDrTool_H
-#define DERIVATIONFRAMEWORK_MuonJetDrTool_H
+#ifndef DERIVATIONFRAMEWORK_MuonJetDrAlg_H
+#define DERIVATIONFRAMEWORK_MuonJetDrAlg_H
 
 // Gaudi & Athena basics
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteDecorHandleKey.h"
@@ -18,13 +17,13 @@
 #include "xAODMuon/MuonContainer.h"
 
 namespace DerivationFramework {
-  class MuonJetDrTool : public extends<AthAlgTool, IAugmentationTool> {
+  class MuonJetDrAlg : public AthReentrantAlgorithm {
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override final;
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
 
   private:
     SG::ReadHandleKey<xAOD::MuonContainer> m_muonSGKey{this, "ContainerKey", "Muons"};

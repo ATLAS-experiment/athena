@@ -9,9 +9,8 @@
 // Eva Bouhova <e.bouhova@cern.ch>
 // Adam Barton <abarton@cern.ch>
 
-#include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "JpsiUpsilonTools/PrimaryVertexRefitter.h"
 #include <vector>
 #include "xAODMuon/MuonContainer.h"
@@ -36,14 +35,14 @@ namespace DerivationFramework {
 
 namespace DerivationFramework {
 
-    class MuPlusDsCascade : public extends<AthAlgTool, IAugmentationTool>
+    class MuPlusDsCascade : public AthReentrantAlgorithm
     {
       public:
-        MuPlusDsCascade(const std::string& t, const std::string& n, const IInterface*  p);
+        MuPlusDsCascade(const std::string& name, ISvcLocator* svcLoc);
         ~MuPlusDsCascade();
         virtual StatusCode initialize() override;
         StatusCode performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer, const EventContext& ctx) const;
-        virtual StatusCode addBranches(const EventContext& ctx) const override;
+        virtual StatusCode execute(const EventContext& ctx) const override;
 
         static xAOD::Vertex* FindVertexTrack(const xAOD::MuonContainer* c,  xAOD::Vertex* v);
 

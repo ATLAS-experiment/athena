@@ -34,7 +34,7 @@ namespace DerivationFramework {
   }
 
   StatusCode
-  EGElectronLikelihoodToolWrapper::addBranches(const EventContext& ctx) const
+  EGElectronLikelihoodToolWrapper::execute(const EventContext& ctx) const
   {
     // retrieve container
     SG::ReadHandle<xAOD::EgammaContainer> particles;

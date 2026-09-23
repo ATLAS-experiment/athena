@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -14,12 +14,10 @@
 #include <algorithm>
 
 // Gaudi & Athena basics
-#include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
-// DerivationFramework includes
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 // xAOD header files
 #include "xAODEgamma/PhotonContainer.h"
 #include "xAODTracking/VertexContainer.h"
@@ -35,16 +33,16 @@ namespace DerivationFramework {
       @author Leo Cerda
       @author magdac@cern.ch
   */
-  class DiphotonVertexDecorator : public extends<AthAlgTool, IAugmentationTool> {
+  class DiphotonVertexDecorator : public AthReentrantAlgorithm {
 
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     // Athena algtool's Hooks
     virtual StatusCode  initialize() override final;
 
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
 
   private:
 

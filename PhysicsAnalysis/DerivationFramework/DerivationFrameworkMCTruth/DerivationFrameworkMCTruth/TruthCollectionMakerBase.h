@@ -7,9 +7,8 @@
 
 #include <string>
 
-#include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "Gaudi/Property.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "xAODTruth/TruthParticleContainer.h"
@@ -24,14 +23,14 @@ class StoreGateSvc;
 
 namespace DerivationFramework {
 
-  class TruthCollectionMakerBase : public extends<AthAlgTool, IAugmentationTool> {
+  class TruthCollectionMakerBase : public AthReentrantAlgorithm {
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override final;
     virtual StatusCode finalize() override final;
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
   protected:
     virtual std::vector<int> updateMask(const xAOD::TruthParticleContainer*) const;
   private:

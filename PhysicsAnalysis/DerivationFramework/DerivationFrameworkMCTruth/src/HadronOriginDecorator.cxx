@@ -15,7 +15,7 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode HadronOriginDecorator::addBranches(const EventContext& ctx) const{
+  StatusCode HadronOriginDecorator::execute(const EventContext& ctx) const{
     // Retrieve truth collections
     SG::ReadHandle<xAOD::TruthParticleContainer> truthParticles(m_particlesKey,ctx);
     if (!truthParticles.isValid()) {

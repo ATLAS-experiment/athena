@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TriggerMatchingTool.h"
+#include "TriggerMatchingAlg.h"
 #include "BuildCombinations.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/IIncidentSvc.h"
@@ -38,7 +38,7 @@ namespace {
 
 namespace DerivationFramework {
 
-  TriggerMatchingTool::TriggerMatchingTool(
+  TriggerMatchingAlg::TriggerMatchingAlg(
       const std::string& type,
       const std::string& name,
       const IInterface* pSvcLocator) :
@@ -75,7 +75,7 @@ namespace DerivationFramework {
         "on the inputs, removal is not expected).");
   }
 
-  StatusCode TriggerMatchingTool::initialize()
+  StatusCode TriggerMatchingAlg::initialize()
   {
     ATH_MSG_INFO( "Initializing " << name() );
 
@@ -92,7 +92,7 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode TriggerMatchingTool::addBranches(const EventContext& ctx) const
+  StatusCode TriggerMatchingAlg::execute(const EventContext& ctx) const
   {
     [[maybe_unused]] static const bool firstEvent = [&](){
       auto itr = m_chainNames.begin();
@@ -237,7 +237,7 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode TriggerMatchingTool::createOutputContainer(
+  StatusCode TriggerMatchingAlg::createOutputContainer(
       xAOD::TrigCompositeContainer*& container,
       const std::string& chain) const
   {
@@ -254,7 +254,7 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  const TriggerMatchingTool::particleVec_t& TriggerMatchingTool::getCandidateMatchesFor(
+  const TriggerMatchingAlg::particleVec_t& TriggerMatchingAlg::getCandidateMatchesFor(
       const xAOD::IParticle* part,
       std::map<xAOD::Type::ObjectType, particleVec_t>& offlineParticles,
       std::map<const xAOD::IParticle*, particleVec_t>& cache) const
@@ -292,7 +292,7 @@ namespace DerivationFramework {
     return cacheItr->second;
   }
 
-  bool TriggerMatchingTool::matchParticles(
+  bool TriggerMatchingAlg::matchParticles(
       const xAOD::IParticle* lhs,
       const xAOD::IParticle* rhs) const
   {

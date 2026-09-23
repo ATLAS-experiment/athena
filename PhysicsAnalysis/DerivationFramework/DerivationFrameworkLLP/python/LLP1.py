@@ -78,23 +78,6 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
     # Default configuration
     acc.merge(MaxCellDecoratorKernelCfg(flags))
 
-    # Specific for LRTElectrons
-    if flags.Tracking.doLargeD0:
-        LLP1LRTMaxCellDecoratorTool = acc.popToolsAndMerge(MaxCellDecoratorCfg(
-            flags, name = "LLP1LRTMaxCellDecoratorTool",
-            SGKey_electrons = "LRTElectrons",
-            SGKey_egammaClusters = ("" if flags.GeoModel.Run >= LHCPeriod.Run3
-                                    else "egammaClusters"),
-            SGKey_photons = ''))
-        acc.addPublicTool(LLP1LRTMaxCellDecoratorTool)
-
-    # Vertex constraint tools
-    if flags.Tracking.doTrackSegmentsDisappearing:
-        from DerivationFrameworkLLP.LLPToolsConfig import TrackParametersKVUCfg
-        LLP1TrackParametersKVUTool = acc.popToolsAndMerge(TrackParametersKVUCfg(
-            flags, name = "LLP1TrackParametersKVU"))
-        acc.addPublicTool(LLP1TrackParametersKVUTool)
-
     # Track isolation tools
     import ROOT
     isoPar = ROOT.xAOD.Iso.IsolationType
@@ -156,10 +139,57 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                                                                         SelectionString    = "InDetTrackParticles.pt>10*GeV",
                                                                                         iso                = [isoPar.ptcone40, isoPar.ptcone30, isoPar.ptcone20, isoPar.ptvarcone40, isoPar.ptvarcone30, isoPar.ptvarcone20, isoPar.topoetcone40, isoPar.topoetcone30, isoPar.topoetcone20],
                                                                                         isoSuffix          = ["ptcone40", "ptcone30", "ptcone20", "ptvarcone40", "ptvarcone30", "ptvarcone20", "topoetcone40", "topoetcone30", "topoetcone20"],
-                                                                                        Prefix             = deco_prefix))
-    acc.addPublicTool(LLP1IsolationTrackDecoratorTool)
+                                                                                        Prefix             = deco_prefix)) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("LLP1IsolationTrackDecoratorAug", AugmentationTools = [ LLP1IsolationTrackDecoratorTool]))
 
+
+    LLP1IsolationTrackDecoratorPdEdxTool = acc.getPrimaryAndMerge(IsolationTrackDecoratorCfg(flags,
+                                                                                             name               = "LLP1IsolationTrackDecoratorPdEdx",
+                                                                                             TrackIsolationTool = TrackIsoToolPdEdx,
+                                                                                             CaloIsolationTool  = CaloIsoTool,
+                                                                                             TargetContainer    = "InDetTrackParticles",
+                                                                                             iso                = deco_ptcones,
+                                                                                             Prefix             = 'TrkIsoPtPdEdx_',
+                                                                                             isoSuffix          = deco_ptcones_suffix)) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("LLP1IsolationTrackDecoratorPdEdxAug", AugmentationTools = [ LLP1IsolationTrackDecoratorPdEdxTool]))
+
+    
+
+
+    LLP1IsolationTrackDecoratorPdEdxTightTool = acc.getPrimaryAndMerge(IsolationTrackDecoratorCfg(flags,
+                                                                                                  name               = "LLP1IsolationTrackDecoratorPdEdxTight",
+                                                                                                  TrackIsolationTool = TrackIsoToolPdEdxTight,
+                                                                                                  CaloIsolationTool  = CaloIsoTool,
+                                                                                                  TargetContainer    = "InDetTrackParticles",
+                                                                                                  iso                = deco_ptcones,
+                                                                                                  Prefix             = 'TrkIsoPtTightPdEdx_',
+                                                                                                  isoSuffix          = deco_ptcones_suffix)) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("LLP1IsolationTrackDecoratorPdEdxTightAug", AugmentationTools = [ LLP1IsolationTrackDecoratorPdEdxTightTool]))
+
+    from DerivationFrameworkLLP.LLPToolsConfig import TrackParticleCaloCellDecoratorCfg
+    LLP1TrackParticleCaloCellDecoratorTool = acc.getPrimaryAndMerge(TrackParticleCaloCellDecoratorCfg(flags,
+                                                                                                      name               = "LLP1TrackParticleCaloCellDecorator",
+                                                                                                      DecorationPrefix   = "LLP1",
+                                                                                                      ContainerName      = "InDetTrackParticles")) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("LLP1TrackParticleCaloCellDecoratorAug", AugmentationTools = [LLP1TrackParticleCaloCellDecoratorTool]))
+
+    # Specific for LRTElectrons
+    if flags.Tracking.doLargeD0:
+        LLP1LRTMaxCellDecoratorTool = acc.popToolsAndMerge(MaxCellDecoratorCfg(
+            flags, name = "LLP1LRTMaxCellDecoratorTool",
+            SGKey_electrons = "LRTElectrons",
+            SGKey_egammaClusters = ("" if flags.GeoModel.Run >= LHCPeriod.Run3
+                                    else "egammaClusters"),
+            SGKey_photons = '')) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("LLP1LRTMaxCellDecoratorAug", AugmentationTools = [LLP1LRTMaxCellDecoratorTool]))
+
+    # Vertex constraint tools
     if flags.Tracking.doTrackSegmentsDisappearing:
+        from DerivationFrameworkLLP.LLPToolsConfig import TrackParametersKVUCfg
+        LLP1TrackParametersKVUTool = acc.popToolsAndMerge(TrackParametersKVUCfg(
+            flags, name = "LLP1TrackParametersKVU")) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("LLP1TrackParametersKVUAug", AugmentationTools = [LLP1TrackParametersKVUTool]))
+
         LLP1IsolationTrackDecoratorDTTool = acc.getPrimaryAndMerge(
             IsolationTrackDecoratorCfg(
                 flags, name = "LLP1IsolationTrackDecoratorDT",
@@ -173,20 +203,9 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                 isoSuffix          = ["ptcone40", "ptcone30", "ptcone20",
                                       "ptvarcone40", "ptvarcone30", "ptvarcone20",
                                       "topoetcone40", "topoetcone30", "topoetcone20"],
-                Prefix             = deco_prefix))
-        acc.addPublicTool(LLP1IsolationTrackDecoratorDTTool)
+                Prefix             = deco_prefix)) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("LLP1IsolationTrackDecoratorDTAug", AugmentationTools = [LLP1IsolationTrackDecoratorDTTool]))
 
-    LLP1IsolationTrackDecoratorPdEdxTool = acc.getPrimaryAndMerge(IsolationTrackDecoratorCfg(flags,
-                                                                                             name               = "LLP1IsolationTrackDecoratorPdEdx",
-                                                                                             TrackIsolationTool = TrackIsoToolPdEdx,
-                                                                                             CaloIsolationTool  = CaloIsoTool,
-                                                                                             TargetContainer    = "InDetTrackParticles",
-                                                                                             iso                = deco_ptcones,
-                                                                                             Prefix             = 'TrkIsoPtPdEdx_',
-                                                                                             isoSuffix          = deco_ptcones_suffix))
-    acc.addPublicTool(LLP1IsolationTrackDecoratorPdEdxTool)
-
-    if flags.Tracking.doTrackSegmentsDisappearing:
         LLP1IsolationTrackDecoratorPdEdxDTTool = acc.getPrimaryAndMerge(
             IsolationTrackDecoratorCfg(
                 flags, name = "LLP1IsolationTrackDecoratorPdEdxDT",
@@ -195,20 +214,9 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                 TargetContainer    = "InDetDisappearingTrackParticles",
                 iso                = deco_ptcones,
                 Prefix             = 'TrkIsoPtPdEdx_',
-                isoSuffix          = deco_ptcones_suffix))
-        acc.addPublicTool(LLP1IsolationTrackDecoratorPdEdxDTTool)
+                isoSuffix          = deco_ptcones_suffix)) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("LLP1IsolationTrackDecoratorPdEdxDTAug", AugmentationTools = [LLP1IsolationTrackDecoratorPdEdxDTTool]))
 
-    LLP1IsolationTrackDecoratorPdEdxTightTool = acc.getPrimaryAndMerge(IsolationTrackDecoratorCfg(flags,
-                                                                                                  name               = "LLP1IsolationTrackDecoratorPdEdxTight",
-                                                                                                  TrackIsolationTool = TrackIsoToolPdEdxTight,
-                                                                                                  CaloIsolationTool  = CaloIsoTool,
-                                                                                                  TargetContainer    = "InDetTrackParticles",
-                                                                                                  iso                = deco_ptcones,
-                                                                                                  Prefix             = 'TrkIsoPtTightPdEdx_',
-                                                                                                  isoSuffix          = deco_ptcones_suffix))
-    acc.addPublicTool(LLP1IsolationTrackDecoratorPdEdxTightTool)
-
-    if flags.Tracking.doTrackSegmentsDisappearing:
         LLP1IsolationTrackDecoratorPdEdxTightDTTool = acc.getPrimaryAndMerge(
             IsolationTrackDecoratorCfg(
                 flags, name = "LLP1IsolationTrackDecoratorPdEdxTightDT",
@@ -217,63 +225,38 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                 TargetContainer    = "InDetDisappearingTrackParticles",
                 iso                = deco_ptcones,
                 Prefix             = 'TrkIsoPtTightPdEdx_',
-                isoSuffix          = deco_ptcones_suffix))
-        acc.addPublicTool(LLP1IsolationTrackDecoratorPdEdxTightDTTool)
-
-    from DerivationFrameworkLLP.LLPToolsConfig import TrackParticleCaloCellDecoratorCfg
-    LLP1TrackParticleCaloCellDecoratorTool = acc.getPrimaryAndMerge(TrackParticleCaloCellDecoratorCfg(flags,
-                                                                                                      name               = "LLP1TrackParticleCaloCellDecorator",
-                                                                                                      DecorationPrefix   = "LLP1",
-                                                                                                      ContainerName      = "InDetTrackParticles"))
-    acc.addPublicTool(LLP1TrackParticleCaloCellDecoratorTool)
-
-    augmentationTools = [ LLP1IsolationTrackDecoratorTool,
-                          LLP1IsolationTrackDecoratorPdEdxTool,
-                          LLP1IsolationTrackDecoratorPdEdxTightTool,
-                          LLP1TrackParticleCaloCellDecoratorTool ]
-    if flags.Tracking.doLargeD0:
-        augmentationTools += [ LLP1LRTMaxCellDecoratorTool ]
-    if flags.Tracking.doTrackSegmentsDisappearing:
-        augmentationTools += [ LLP1TrackParametersKVUTool,
-                               LLP1IsolationTrackDecoratorDTTool,
-                               LLP1IsolationTrackDecoratorPdEdxDTTool,
-                               LLP1IsolationTrackDecoratorPdEdxTightDTTool ]
+                isoSuffix          = deco_ptcones_suffix)) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("LLP1IsolationTrackDecoratorPdEdxTightDTAug", AugmentationTools = [LLP1IsolationTrackDecoratorPdEdxTightDTTool]))
 
     # Specific for Taus
-    LLP1TauMaxCellDecoratorTool = acc.popToolsAndMerge(MaxCellDecoratorCfg(
+    LLP1TauMaxCellDecoratorTool = acc.addPublicTool(acc.popToolsAndMerge(MaxCellDecoratorCfg(
         flags,
         name = "LLP1TauMaxCellDecoratorTool",
         SGKey_taus = 'TauJets',
         SGKey_electrons = '',
-        SGKey_photons = ''))
-    acc.addPublicTool(LLP1TauMaxCellDecoratorTool)
-
-    augmentationTools += [ LLP1TauMaxCellDecoratorTool ]
+        SGKey_photons = ''))) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("LLP1TauMaxCellDecoratorAug", AugmentationTools = [LLP1TauMaxCellDecoratorTool]))
 
     # Specific for Jets: AntiKt4EMTopoJets
-    LLP1AntiKt4EMTopoJetMaxCellDecoratorTool = acc.popToolsAndMerge(MaxCellDecoratorCfg(
+    LLP1AntiKt4EMTopoJetMaxCellDecoratorTool = acc.addPublicTool(acc.popToolsAndMerge(MaxCellDecoratorCfg(
         flags,
         name = "LLP1AntiKt4EMTopoJetMaxCellDecoratorTool",
         SGKey_jets = 'AntiKt4EMTopoJets',
         SGKey_taus = '',
         SGKey_electrons = '',
-        SGKey_photons = ''))
-    acc.addPublicTool(LLP1AntiKt4EMTopoJetMaxCellDecoratorTool)
-
-    augmentationTools += [ LLP1AntiKt4EMTopoJetMaxCellDecoratorTool ]
+        SGKey_photons = ''))) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("LLP1AntiKt4EMTopoJetMaxCellDecoratorAug", AugmentationTools = [LLP1AntiKt4EMTopoJetMaxCellDecoratorTool]))
 
     # Specific for Jets: AntiKt4EMPFlowJets
-    LLP1AntiKt4EMPFlowJetMaxCellDecoratorTool = acc.popToolsAndMerge(MaxCellDecoratorCfg(
+    LLP1AntiKt4EMPFlowJetMaxCellDecoratorTool = acc.addPublicTool(acc.popToolsAndMerge(MaxCellDecoratorCfg(
         flags,
         name = "LLP1AntiKt4EMPFlowJetMaxCellDecoratorTool",
         SGKey_jets = 'AntiKt4EMPFlowJets',
         SGKey_taus = '',
         SGKey_electrons = '',
-        SGKey_photons = ''))
-    acc.addPublicTool(LLP1AntiKt4EMPFlowJetMaxCellDecoratorTool)
+        SGKey_photons = ''))) # TODO Migrate to AthReentrantAlgorithm (uses Expression parser)
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("LLP1AntiKt4EMPFlowJetMaxCellDecoratorAug", AugmentationTools = [LLP1AntiKt4EMPFlowJetMaxCellDecoratorTool]))
 
-    augmentationTools += [ LLP1AntiKt4EMPFlowJetMaxCellDecoratorTool ]
-                                           
     # Reclustered jets definitions
     from JetRecConfig.JetRecConfig import registerAsInputConstit, JetRecCfg
     from JetRecConfig.StandardSmallRJets import AntiKt4EMTopo_deriv
@@ -585,7 +568,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
 
     from DerivationFrameworkLLP.LLPToolsConfig import AugmentationToolLeadingJetsCfg
     augmentationToolLeadingJets = acc.getPrimaryAndMerge(AugmentationToolLeadingJetsCfg(flags))
-    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(name, AugmentationTools = [augmentationToolLeadingJets]))
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(name, AugmentationTools = [augmentationToolLeadingJets]))
 
     # Thinning tools...
     from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg, EgammaTrackParticleThinningCfg, MuonTrackParticleThinningCfg, TauTrackParticleThinningCfg, DiTauTrackParticleThinningCfg 
@@ -865,7 +848,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                                                                     RClusTrim                         = 0.2,
                                                                                     PtFracTrim                        = 0.05
                                                                                     ))
-    RCSubstructureClusterTrimAug = CompFactory.DerivationFramework.CommonAugmentation("RCSubstructureClusterTrimAug", AugmentationTools = [LLP1RCJetSubstructureClustTrimAugTool])
+    RCSubstructureClusterTrimAug = CompFactory.DerivationFramework.CommonAugmentation("RCSubstructureClusterTrimAug", AugmentationTools = [LLP1RCJetSubstructureClustTrimAugTool]) # TODO Migrate public tool to AthReentrantAlgorithm (Uses ExpressionParser)
     acc.addEventAlgo(RCSubstructureClusterTrimAug)
 
     LLP1RCJetSubstructureClustSDAugTool = acc.getPrimaryAndMerge(RCJetSubstructureAugCfg(flags,
@@ -879,7 +862,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                                                                     BetaSoft                          = 1.0,
                                                                                     ZcutSoft                          = 0.1
                                                                                     ))
-    RCSubstructureClusterSDAug = CompFactory.DerivationFramework.CommonAugmentation("RCSubstructureClusterSDAug", AugmentationTools = [LLP1RCJetSubstructureClustSDAugTool])
+    RCSubstructureClusterSDAug = CompFactory.DerivationFramework.CommonAugmentation("RCSubstructureClusterSDAug", AugmentationTools = [LLP1RCJetSubstructureClustSDAugTool]) # TODO Migrate public tool to AthReentrantAlgorithm (Uses ExpressionParser)
     acc.addEventAlgo(RCSubstructureClusterSDAug)
 
     # Compute RC substructure variables from tracks
@@ -899,7 +882,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                                                                         RClusTrim                         = 0.2,
                                                                                         PtFracTrim                        = 0.05
                                                                                         ))
-    RCSubstructureTrackTrimAug = CompFactory.DerivationFramework.CommonAugmentation("RCSubstructureTrackTrimAug", AugmentationTools = [LLP1RCJetSubstructureTrackTrimAugTool])
+    RCSubstructureTrackTrimAug = CompFactory.DerivationFramework.CommonAugmentation("RCSubstructureTrackTrimAug", AugmentationTools = [LLP1RCJetSubstructureTrackTrimAugTool]) # TODO Migrate public tool to AthReentrantAlgorithm (Uses ExpressionParser)
     acc.addEventAlgo(RCSubstructureTrackTrimAug)
 
     from DerivationFrameworkLLP.LLPToolsConfig import RCJetSubstructureAugCfg
@@ -914,7 +897,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                                                                         BetaSoft                          = 1.0,
                                                                                         ZcutSoft                          = 0.1
                                                                                         ))
-    RCSubstructureTrackSDAug = CompFactory.DerivationFramework.CommonAugmentation("RCSubstructureTrackSDAug", AugmentationTools = [LLP1RCJetSubstructureTrackSDAugTool])
+    RCSubstructureTrackSDAug = CompFactory.DerivationFramework.CommonAugmentation("RCSubstructureTrackSDAug", AugmentationTools = [LLP1RCJetSubstructureTrackSDAugTool]) # TODO Migrate public tool to AthReentrantAlgorithm (Uses ExpressionParser)
     acc.addEventAlgo(RCSubstructureTrackSDAug)
 
 
@@ -930,17 +913,14 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
 
         skimmingTools.append(LLP1TriggerSkimmingTool)
 
+    for tool in augmentationTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(DerivationKernel(name,
                                       SkimmingTools = skimmingTools,
-                                      ThinningTools = thinningTools,
-                                      AugmentationTools = augmentationTools))
+                                      ThinningTools = thinningTools))
 
     return acc
-
-
-
-
 
 
 def LLP1Cfg(flags):

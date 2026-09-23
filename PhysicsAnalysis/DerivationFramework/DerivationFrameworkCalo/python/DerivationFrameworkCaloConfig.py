@@ -72,7 +72,7 @@ def EgammaCoreCellRecoveryCfg(flags, **kwargs):
     from TileGeoModel.TileGMConfig import TileGMCfg
     acc.merge(TileGMCfg(flags))
     #
-    acc.setPrivateTools(
+    acc.addEventAlgo(
         CompFactory.DerivationFramework.EGammaClusterCoreCellRecovery(**kwargs)
     )
     return acc

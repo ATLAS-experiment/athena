@@ -1,37 +1,40 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def MuonJetDrToolCfg(ConfigFlags, name):
+def MuonJetDrAlgCfg(flags, name):
     acc = ComponentAccumulator()
-    muonJetDrTool = CompFactory.DerivationFramework.MuonJetDrTool(name)
-    acc.addPublicTool(muonJetDrTool, primary=True)
+    acc.addEventAlgo(CompFactory.DerivationFramework.MuonJetDrAlg(name))
     return acc
 
+
 ### Configuration for the MuonTPExtrapolation tool
-def MuonTPExtrapolationAlgCfg(ConfigFlags, name = "MuonTPExtrapolationAlg", **kwargs):
+def MuonTPExtrapolationAlgCfg(flags, name = "MuonTPExtrapolationAlg", **kwargs):
     acc= ComponentAccumulator()
     from TrkConfig.AtlasExtrapolatorConfig import MuonExtrapolatorCfg
-    kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(MuonExtrapolatorCfg(ConfigFlags)))
+    kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(MuonExtrapolatorCfg(flags)))
     the_alg = CompFactory.DerivationFramework.MuonTPExtrapolationAlg(name = name,**kwargs)
     acc.addEventAlgo(the_alg, primary = True)
     return acc
+
+
 ### Algorithm that decorates the calorimeter deposits in form of 3 vectors to the
 ### muon. The deposits are used to identify the track as CT muon
-def MuonCaloDepositAlgCfg(ConfigFlags, name= "MuonCaloDepositAlg", **kwargs):
+def MuonCaloDepositAlgCfg(flags, name= "MuonCaloDepositAlg", **kwargs):
     acc = ComponentAccumulator()
     from MuonCombinedConfig.MuonCombinedRecToolsConfig import TrackDepositInCaloToolCfg
-    kwargs.setdefault("TrackDepositInCaloTool", acc.popToolsAndMerge(TrackDepositInCaloToolCfg(ConfigFlags)))
+    kwargs.setdefault("TrackDepositInCaloTool", acc.popToolsAndMerge(TrackDepositInCaloToolCfg(flags)))
     the_alg = CompFactory.DerivationFramework.IDTrackCaloDepositsDecoratorAlg(name, **kwargs)
     acc.addEventAlgo(the_alg, primary = True)
     return acc
 
+
 ### Algorithm used to thin bad muons from the analysis stream
-def AnalysisMuonThinningAlgCfg(ConfigFlags, name="AnalysisMuonThinningAlg", **kwargs):
+def AnalysisMuonThinningAlgCfg(flags, name="AnalysisMuonThinningAlg", **kwargs):
     acc = ComponentAccumulator()
     from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
-    kwargs.setdefault("SelectionTool", acc.popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(ConfigFlags,
+    kwargs.setdefault("SelectionTool", acc.popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(flags,
                                                             name="MuonSelThinningTool")))
     the_alg = CompFactory.DerivationFramework.AnalysisMuonThinningAlg(name, **kwargs)
     acc.addEventAlgo(the_alg, primary = True)
@@ -39,18 +42,18 @@ def AnalysisMuonThinningAlgCfg(ConfigFlags, name="AnalysisMuonThinningAlg", **kw
 
 
 ### Di-muon tagging tool, for T&P studies
-def DiMuonTaggingAlgCfg(ConfigFlags, name="DiMuonTaggingTool", **kwargs): 
+def DiMuonTaggingAlgCfg(flags, name="DiMuonTaggingTool", **kwargs):
     acc = ComponentAccumulator()
 
     kwargs.setdefault("applyTrigger",True)
     if kwargs["applyTrigger"]:
         from TriggerMatchingTool.TriggerMatchingToolConfig import TriggerMatchingToolCfg
         kwargs.setdefault("TrigMatchingTool",  acc.popToolsAndMerge(
-            TriggerMatchingToolCfg(ConfigFlags)))
+            TriggerMatchingToolCfg(flags)))
 
     from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
-    kwargs.setdefault("SelectionTool", acc.popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(ConfigFlags)))
-    kwargs.setdefault("isMC", ConfigFlags.Input.isMC)
+    kwargs.setdefault("SelectionTool", acc.popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(flags)))
+    kwargs.setdefault("isMC", flags.Input.isMC)
     the_alg = CompFactory.DerivationFramework.DiMuonTaggingAlg(name, **kwargs)
     acc.addEventAlgo(the_alg, primary = True)
     return acc

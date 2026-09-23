@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Author: Matthew Basso (matthew.joseph.basso@cern.ch)
@@ -46,9 +46,9 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode HardScatterVertexDecorator::addBranches(const EventContext& ctx) const
+  StatusCode HardScatterVertexDecorator::execute(const EventContext& ctx) const
   {
-    ATH_MSG_DEBUG("In addBranches(...) for " << name() <<  "...");
+    ATH_MSG_DEBUG("In execute(...) for " << name() <<  "...");
 
 
     // Open our vertex container

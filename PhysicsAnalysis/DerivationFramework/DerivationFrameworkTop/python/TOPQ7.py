@@ -65,7 +65,6 @@ def TOPQ7KernelCfg(flags, name='TOPQ7Kernel', **kwargs):
 
     #Skimming tool and augmentation - boosted ttbar semilep selection and building parton jets
     skimmingTools = []
-    augmentationTools = []
 
     if flags.Input.isMC:
         # Skimming
@@ -75,18 +74,19 @@ def TOPQ7KernelCfg(flags, name='TOPQ7Kernel', **kwargs):
         # Parton jet augmentation
         partonTool = CompFactory.DerivationFramework.PartonJetAugmentationTool("TOPQ7PartonJetTool")
         acc.addPublicTool(partonTool)
-        augmentationTools.append(partonTool)
-    
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("TOPQ7PartonJetAug",
+                                                                            AugmentationTools = [partonTool])) # TODO Migrate public tool to AthReentrantAlgorithm
 
     # The kernel algorithm itself
+    for tool in augmentationTools:
+        acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(tool.name+"Aug", AugmentationTools = [tool]))
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(
         DerivationKernel(
-            name, 
+            name,
             ThinningTools = thinningTools,
-            SkimmingTools=skimmingTools,
-            AugmentationTools=augmentationTools
-            ))       
+            SkimmingTools=skimmingTools
+            ))
     return acc
 
 
