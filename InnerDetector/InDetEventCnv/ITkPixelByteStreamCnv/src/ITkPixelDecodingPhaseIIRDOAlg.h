@@ -5,6 +5,12 @@
 #ifndef ITKPIXEL_DECODINGPHASEIIRDOALG_H
 #define ITKPIXEL_DECODINGPHASEIIRDOALG_H
 
+/**
+  * @file ITkPixelByteStreamCnv/ITkPixelDecodingPhaseIIRDOAlg.h
+  * @author Ondra Kovanda, Goetz Gaycken, Fabrice Balli
+  * @date June 2026
+  * @brief Bytestream decoding class for phase-2 pixel RDO EDM
+  */
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AthenaBaseComps/AthMessaging.h"
