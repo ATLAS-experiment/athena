@@ -140,6 +140,10 @@ StatusCode NSWGeoPlottingAlg::execute(const EventContext& ctx) {
         design = mm_roe->getDesign(id);
       else if (st_roe)
         design = st_roe->getDesign(id);
+      if (!design)[[unlikely]]{
+        ATH_MSG_ERROR("'design' is a nullptr");
+        return StatusCode::FAILURE;
+      }
       const int chan = id_helper.channel(id);
       design->leftEdge(chan, l_left);
       design->center(chan, l_cen);
