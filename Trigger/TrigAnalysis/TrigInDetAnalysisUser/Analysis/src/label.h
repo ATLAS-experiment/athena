@@ -46,11 +46,21 @@ inline std::string label( const std::string& format, double d, double e ) {
   return c;
 }
 
+inline std::string label( const std::string& format, double d, double e, double f, int i ) { 
+  char c[256];
+  std::sprintf( c, format.c_str(), d, e, f, i );
+
+  std::cout << "\tf: " << f << " :: " << c << std::endl;
+
+  return c;
+}
+
 inline std::string label( const std::string& format, double d, double e, int i ) { 
   char c[256];
   std::sprintf( c, format.c_str(), d, e, i );
   return c;
 }
+
 
 
 

@@ -12,6 +12,8 @@
 
 #include <FTagAnalysisAlgorithms/BTaggingTriggerEfficiencyAlg.h>
 
+#include <algorithm>
+
 //
 // method implementations
 //
@@ -72,68 +74,96 @@ namespace CP
         if (m_preselection.getBool (*jet, sys))
         {
           float sf = 1.;
-          CP::CorrectionCode valid;
-
-          // For non-bjet, just get offline scale factor
-          if(m_truthFlav.get(*jet, sys)!=5){
-            valid = m_offlineEfficiencyTool->getScaleFactor(*jet, sf);
-            ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
-          }
-
-          else {
-            float trigSF = 0;
-            valid = m_triggerEfficiencyTool->getScaleFactor(*jet, trigSF);
-            ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
-            float condSF = 0;
-            valid = m_conditionalEfficiencyTool->getScaleFactor(*jet, condSF);
-            ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
-
-            if(static_cast<bool>(m_matchingDecoration.get(*jet, sys))){
-              if(static_cast<bool>(m_bTagMatchingDecoration.get(*jet,sys))){
-                sf = condSF * trigSF;
-              }
-              else{
-		float trigEff_data = 0;
-		valid = m_triggerEfficiencyTool->getEfficiency(*jet, trigEff_data);
-                ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
-                float trigEff_MC = trigEff_data / trigSF;
-
-                float condEff_data = 0;
-                valid = m_conditionalEfficiencyTool->getEfficiency(*jet, condEff_data);
-                ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
-                float condEff_MC = condEff_data / condSF;
-
-                float offlEff_data = 0;
-                valid = m_offlineEfficiencyTool->getEfficiency(*jet, offlEff_data);
-                ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
-                float offlSF = 0;
-                valid = m_offlineEfficiencyTool->getScaleFactor(*jet, offlSF);
-                ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
-                float offlEff_MC = offlEff_data / offlSF;
-
-                float num = offlEff_data - condEff_data * trigEff_data;
-                float denom = offlEff_MC - condEff_MC * trigEff_MC;
-                if(num>0 && denom>0) sf = num / denom;
-                else{
-		  sf = invalidScaleFactor();
-		  ANA_MSG_WARNING ("SF computed with negative efficiency num="<<num<<" denom="<<denom);
-		  ANA_MSG_WARNING ("Setting SF="<<sf);
-		}
-              }
-            } else {
-              valid = m_offlineEfficiencyTool->getScaleFactor(*jet, sf);
-              ANA_CHECK_CORRECTION (m_outOfValidity, *jet, valid);
-            }
-          }
-
-          if (m_outOfValidity.get(*jet))
-            m_scaleFactorDecoration.set (*jet, sf, sys);
-          else
-            m_scaleFactorDecoration.set (*jet, invalidScaleFactor(), sys);
+          ANA_CHECK_CORRECTION (m_outOfValidity, *jet, triggerScaleFactor (*jet, sys, sf));
+          m_scaleFactorDecoration.set (*jet, m_outOfValidity.get (*jet) ? sf : invalidScaleFactor(), sys);
         } else {
           m_scaleFactorDecoration.set (*jet, invalidScaleFactor(), sys);
         }
       }
+    }
+    return StatusCode::SUCCESS;
+  }
+
+
+
+  CP::CorrectionCode BTaggingTriggerEfficiencyAlg ::
+  triggerScaleFactor (const xAOD::Jet& jet, const CP::SystematicSet& sys, float& sf)
+  {
+    // the trigger did not look at this jet: offline scale factor only
+    if (m_truthFlav.get (jet, sys) != 5 || !static_cast<bool> (m_matchingDecoration.get (jet, sys)))
+      return m_offlineEfficiencyTool->getScaleFactor (jet, sf);
+
+    // inputs shared by both trigger-matched cases
+    float trigSF = 0, condSF = 0;
+    CP::CorrectionCode code = std::min (m_triggerEfficiencyTool->getScaleFactor (jet, trigSF),
+                                        m_conditionalEfficiencyTool->getScaleFactor (jet, condSF));
+    if (code == CP::CorrectionCode::Error) return code;
+    // the trigger calibration does not cover this jet: fall back to the offline scale factor
+    if (code == CP::CorrectionCode::OutOfValidityRange)
+      return outsideTriggerCalibration (jet, sys, sf);
+
+    // online b-tag passed: p(trig) * p(off | trig)
+    if (static_cast<bool> (m_bTagMatchingDecoration.get (jet, sys)))
+    {
+      sf = condSF * trigSF;
+      return CP::CorrectionCode::Ok;
+    }
+
+    // online b-tag failed, offline passed: p(off) - p(trig) * p(off | trig)
+    float trigEff_data = 0, condEff_data = 0, offlEff_data = 0, offlSF = 0;
+    code = std::min ({m_triggerEfficiencyTool->getEfficiency (jet, trigEff_data),
+                      m_conditionalEfficiencyTool->getEfficiency (jet, condEff_data),
+                      m_offlineEfficiencyTool->getEfficiency (jet, offlEff_data),
+                      m_offlineEfficiencyTool->getScaleFactor (jet, offlSF)});
+    if (code == CP::CorrectionCode::Error) return code;
+    if (code == CP::CorrectionCode::OutOfValidityRange)
+      return outsideTriggerCalibration (jet, sys, sf);
+
+    const float trigEff_MC = trigEff_data / trigSF;
+    const float condEff_MC = condEff_data / condSF;
+    const float offlEff_MC = offlEff_data / offlSF;
+    const float num   = offlEff_data - condEff_data * trigEff_data;
+    const float denom = offlEff_MC   - condEff_MC   * trigEff_MC;
+    if (!(num > 0 && denom > 0))
+    {
+      ANA_MSG_WARNING ("SF computed with negative efficiency num=" << num << " denom=" << denom);
+      // no scale factor can be given for this jet; the caller decorates it as invalid
+      return CP::CorrectionCode::OutOfValidityRange;
+    }
+    sf = num / denom;
+    return CP::CorrectionCode::Ok;
+  }
+
+
+
+  CP::CorrectionCode BTaggingTriggerEfficiencyAlg ::
+  outsideTriggerCalibration (const xAOD::Jet& jet, const CP::SystematicSet& sys, float& sf)
+  {
+    CP::CorrectionCode code = m_offlineEfficiencyTool->getScaleFactor (jet, sf);
+    // The offline calibration does not cover this jet either (e.g. |eta| >= 2.5): return the code without reporting.
+    if (code != CP::CorrectionCode::Ok) return code;
+    if (sys.empty()) ++m_nOutsideTriggerCalibration;
+    if (!m_reportedOutsideTriggerCalibration)
+    {
+      m_reportedOutsideTriggerCalibration = true;
+      ANA_MSG_WARNING ("trigger-matched b-jet with pt=" << jet.pt() << " MeV, eta=" << jet.eta()
+                       << " is outside the calibration range of the b-jet trigger scale factor inputs;"
+                       << " using the offline scale factor for it. Further such jets are counted and"
+                       << " reported at the end of the job.");
+    }
+    return code;
+  }
+
+
+
+  StatusCode BTaggingTriggerEfficiencyAlg ::
+  finalize ()
+  {
+    if (m_nOutsideTriggerCalibration > 0)
+    {
+      ANA_MSG_WARNING (m_nOutsideTriggerCalibration << " trigger-matched b-jets (nominal) were outside"
+                       << " the calibration range of the b-jet trigger scale factor inputs and"
+                       << " received the offline scale factor");
     }
     return StatusCode::SUCCESS;
   }

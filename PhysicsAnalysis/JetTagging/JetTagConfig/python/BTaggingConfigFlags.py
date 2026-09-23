@@ -5,16 +5,6 @@ from AthenaConfiguration.Enums import LHCPeriod, ProductionStep
 # For using GeV units
 import AthenaCommon.SystemOfUnits as Units
 
-Run1Grades = [ "Good", "BlaShared", "PixShared", "SctShared", "0HitBLayer" ]
-Run2Grades = [ "0HitIn0HitNInExp2","0HitIn0HitNInExpIn","0HitIn0HitNInExpNIn","0HitIn0HitNIn",
-               "0HitInExp", "0HitIn",
-               "0HitNInExp", "0HitNIn",
-               "InANDNInShared", "PixShared", "SctShared",
-               "InANDNInSplit", "PixSplit",
-               "Good" ]
-Run4Grades = [ "A01","A02","A03","A04","A05","A06","A07","A08","A14_1","A14_2","A14_3","A14_4",
-               "B01","B02","B03","B04","B05","B06","B07","B08","B14_1","B14_2","B14_3","B14_4",
-               "C01","C02030405","C06","C07","C08","C14_1","C14_2","C14_3","C14_4" ]
 calibrationChannelAliases = [
     "AntiKt4EMTopo->AntiKt4EMTopo,AntiKt4EMPFlow",
     "AntiKt4EMPFlow->AntiKt4EMPFlow,AntiKt4EMTopo",
@@ -25,22 +15,13 @@ calibrationChannelAliases = [
 
 ]
 
-def getGrades(flags):
-    if flags.GeoModel.Run is LHCPeriod.Run1:
-        return Run1Grades
-    elif flags.GeoModel.Run in [LHCPeriod.Run2, LHCPeriod.Run3]:
-        return Run2Grades
-    else:
-        return Run4Grades
-
-
 def getTaggerList(flags):
-    base = ['IP2D','IP3D','SV1','JetFitterNN']
+    base = ['SV1','JetFitterNN']
     if flags.Trigger.doHLT:
         base = []
     elif flags.GeoModel.Run >= LHCPeriod.Run4:
         base += ['MV2c10']
-    flip = ['IP2DNeg', 'IP3DNeg','IP2DFlip', 'IP3DFlip','SV1Flip']
+    flip = ['SV1Flip']
     if flags.BTagging.RunFlipTaggers:
         return base + flip
     return base
@@ -242,11 +223,10 @@ def createBTaggingConfigFlags():
     btagcf.addFlag("BTagging.minimumJetPtForTrackAssociation",
                    minimumJetPtForTrackAssociation)
 
-    # these are only used for IPxD and SV1 likelihoods
+    # these are only used for the SV1 likelihood
     btagcf.addFlag("BTagging.RunModus", "analysis") # reference mode used in FlavourTagPerformanceFramework (RetagFragment.py)
-    btagcf.addFlag("BTagging.ReferenceType", "ALL") # reference type for IP and SV taggers (B, UDSG, ALL)
+    btagcf.addFlag("BTagging.ReferenceType", "ALL") # reference type for the SV tagger (B, UDSG, ALL)
     btagcf.addFlag("BTagging.JetPtMinRef", 15e3) # in MeV for uncalibrated pt
-    btagcf.addFlag("BTagging.Grades", getGrades)
 
 
     # Taggers for validation

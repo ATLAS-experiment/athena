@@ -26,14 +26,6 @@ class CounterChain : public CounterBase {
     CounterChain(const std::string& name, const MonitorBase* parent);
 
     /**
-     * @brief Construct counter.
-     * @param[in] name Counter's name
-     * @param[in] nRos Number of possible ROSes
-     * @param[in] parent Counter's parent monitor, cached non-owning pointer.
-     */
-    CounterChain(const std::string& name, unsigned nRos, const MonitorBase* parent);
-
-    /**
      * @brief Default destructor.
      */
     virtual ~CounterChain() = default;
@@ -55,9 +47,6 @@ class CounterChain : public CounterBase {
      * @param[in] weight Global event weight
      */
     virtual StatusCode newEvent(const CostData& data, size_t index, const float weight = 1.) override;
-
-  private:
-    bool m_isInitialized{};
 };
 
 #endif // TRIGCOSTANALYSIS_COUNTERALGORITHM_H

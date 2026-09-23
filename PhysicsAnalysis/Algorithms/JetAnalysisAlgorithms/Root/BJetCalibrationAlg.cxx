@@ -1,5 +1,5 @@
-/*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ /*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Thomas Strebler
@@ -48,6 +48,8 @@ namespace CP
   StatusCode BJetCalibrationAlg ::
   execute (const EventContext& ctx)
   {
+  
+    
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       xAOD::JetContainer *jets = nullptr;
@@ -71,28 +73,31 @@ namespace CP
 
       for (xAOD::Jet* jet : *jets)
       {
-        jet->setJetP4("NoBJetCalibMomentum", jet->jetP4());
-        jet->setJetP4("MuonCorrMomentum", jet->jetP4());
+        static const std::string noCalib{"NoBJetCalibMomentum"};
+        static const std::string muonCorr{"MuonCorrMomentum"};
+        static const std::string calib{"BJetCalibMomentum"};
+        jet->setJetP4(noCalib, jet->jetP4());
+        jet->setJetP4(muonCorr, jet->jetP4());
         if (!m_bJetTool.empty())
         {
-          jet->setJetP4("BJetCalibMomentum", jet->jetP4());
+          jet->setJetP4(calib, jet->jetP4());
         }
 
         int nmuons = 0;
         if (m_jetPreselection.getBool(*jet, sys))
         {
           ANA_CHECK (m_muonInJetTool->applyMuonInJetCorrection(*jet, muons_for_correction, nmuons));
-          jet->setJetP4("MuonCorrMomentum", jet->jetP4());
+          jet->setJetP4(muonCorr, jet->jetP4());
           if (!m_bJetTool.empty())
           {
             ANA_CHECK (m_bJetTool->applyBJetCorrection(*jet, nmuons>0));
-            jet->setJetP4("BJetCalibMomentum", jet->jetP4());
+            jet->setJetP4(calib, jet->jetP4());
           }
 
           if (m_onlyDecorate)
           {
             // Reset the jet 4-vector to the original one
-            jet->setJetP4(jet->jetP4("NoBJetCalibMomentum"));
+            jet->setJetP4(jet->jetP4(noCalib));
           }
         }
 

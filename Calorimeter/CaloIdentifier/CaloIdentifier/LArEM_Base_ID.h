@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CaloIdentifier/LArEM_Base_ID.h
@@ -21,6 +21,7 @@
 #include "CaloIdentifier/LArNeighbours.h"
 #include "CaloIdentifier/CaloIDHelper.h"
 #include "CaloIdentifier/LArID_Exception.h"
+#include "AthenaKernel/CLASS_DEF.h"
 #include <ranges>
 
 
@@ -455,6 +456,7 @@ private:
   LArEM_Base_ID (const LArEM_Base_ID&);
   LArEM_Base_ID& operator= (const LArEM_Base_ID&);
 };
+CLASS_DEF( LArEM_Base_ID , 166227018 , 1 )
 
 
 #include "CaloIdentifier/LArEM_Base_ID.icc"

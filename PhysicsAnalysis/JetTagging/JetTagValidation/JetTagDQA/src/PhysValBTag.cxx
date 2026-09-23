@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // PhysValBTag.cxx
@@ -21,12 +21,30 @@
 #include "xAODMuon/MuonContainer.h"
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/Vertex.h"
+#include "xAODTruth/TruthVertexContainer.h"
 #include "xAODBTagging/BTagging.h"
 #include "xAODBTagging/BTaggingUtilities.h"
 #include "AthContainers/ConstAccessor.h"
 
 #include "AthenaBaseComps/AthCheckMacros.h"
 #include "ParticleJetTools/JetFlavourInfo.h"
+
+namespace {
+  // same truth jet matching as in the FTAG training dataset dumper
+  bool passTruthJetMatching(const xAOD::Jet& jet, const xAOD::JetContainer& truthJets) {
+    double minDR = 0.3;
+    const xAOD::Jet* match = nullptr;
+    for (const xAOD::Jet* truthJet : truthJets) {
+      if (truthJet->pt() < 10e3) continue;
+      const double dR = jet.p4().DeltaR(truthJet->p4());
+      if (dR < minDR) {
+        minDR = dR;
+        match = truthJet;
+      }
+    }
+    return match && match->pt() > 20e3;
+  }
+}
 
 namespace JetTagDQA {
 
@@ -56,14 +74,15 @@ namespace JetTagDQA {
 
     declareProperty( "TrackContainerName", m_trackName = "InDetTrackParticles" );
     declareProperty( "VertexContainerName", m_vertexName = "PrimaryVertices" );
+    declareProperty( "TruthPrimaryVertexContainerName", m_truthVertexName = "TruthPrimaryVertices" );
+    declareProperty( "TruthJetContainerName", m_truthJetName = "AntiKt4TruthJets" );
 
+    declareProperty( "OnZprime", m_onZprime );
     declareProperty( "JetPtCutTtbar", m_jetPtCutTtbar = 20000);
-    declareProperty( "JetPtCutZprime", m_jetPtCutZprime = 500000);
+    declareProperty( "JetPtCutZprime", m_jetPtCutZprime = 400000);
     declareProperty( "JetPtCutR10", m_jetPtCutR10 = 200000); //pT>200 GeV for large-R jets
     declareProperty( "JetEtaCut", m_jetEtaCut = 2.5);
-    declareProperty( "JVTCutAntiKt4EMTopoJets", m_JVTCutAntiKt4EMTopoJets = 0.59);
-    declareProperty( "JVTCutLargerEtaAntiKt4EMTopoJets", m_JVTCutLargerEtaAntiKt4EMTopoJets = 0.11);
-    declareProperty( "JVTCutAntiKt4EMPFlowJets", m_JVTCutAntiKt4EMPFlowJets = 0.2);
+    declareProperty( "UseJvtProxy", m_useJvtProxy = false);
     declareProperty( "truthMatchProbabilityCut", m_truthMatchProbabilityCut = 0.75);
 
     declareProperty( "GN2v01TaggerName", m_GN2v01Name = "GN2v01");
@@ -86,6 +105,24 @@ namespace JetTagDQA {
     // initialize the truth-track-assoiation tool
     ATH_CHECK(m_trackTruthOriginTool.retrieve( EnableTool {true} ));
 
+    m_jetPtCut = m_onZprime ? m_jetPtCutZprime : m_jetPtCutTtbar;
+
+    ATH_CHECK(m_GN2v01SelectionTools.retrieve());
+    if (m_GN2v01SelectionTools.size() != m_GN2v01WorkingPoints.size()) {
+      ATH_MSG_ERROR("GN2v01SelectionTools and GN2v01WorkingPoints need to have the same length");
+      return StatusCode::FAILURE;
+    }
+    std::map<std::string, double> GN2v01WorkingPoints;
+    for (std::size_t i = 0; i < m_GN2v01SelectionTools.size(); ++i) {
+      double cut = 0;
+      if (m_GN2v01SelectionTools[i]->getCutValue(0., cut) != CP::CorrectionCode::Ok) {
+        ATH_MSG_ERROR("Cannot get the GN2v01 cut value for working point " << m_GN2v01WorkingPoints[i]);
+        return StatusCode::FAILURE;
+      }
+      GN2v01WorkingPoints.emplace(m_GN2v01WorkingPoints[i], cut);
+    }
+    const IBTaggingSelectionTool* GN2v01SelectionTool = m_GN2v01SelectionTools.empty() ? nullptr : m_GN2v01SelectionTools[0].get();
+
     // convert the HistogramDefinitions vector to a map 
     for(unsigned int i = 0; i < m_HistogramDefinitionsVector.size(); i++){
       std::string name = m_HistogramDefinitionsVector[i][0];
@@ -100,12 +137,12 @@ namespace JetTagDQA {
     for(const auto& [name, plot]: m_btagplots){
       plot->setDetailLevel(m_detailLevel);
       plot->setHistogramDefinitions(m_HistogramDefinitionsMap);
-      plot->setIsDataJVTCutsAndTMPCut(m_isData,
-				      m_JVTCutAntiKt4EMTopoJets,
-				      m_JVTCutLargerEtaAntiKt4EMTopoJets,
-				      m_JVTCutAntiKt4EMPFlowJets,
-				      m_truthMatchProbabilityCut);
-      plot->setTaggerNames(m_GN2v01Name, m_GN3XPV01Name);
+      plot->setIsDataAndTMPCut(m_isData, m_truthMatchProbabilityCut);
+      plot->setTaggerNames(m_GN2v01Name, m_GN3EPCLV01Name, m_GN3XPV01Name);
+      plot->setGN2v01Config(GN2v01SelectionTool, GN2v01WorkingPoints, m_GN2v01FractionC, m_GN2v01FractionTau);
+      plot->setGN3EPCLV01Config(m_GN3EPCLV01WorkingPoints, m_GN3EPCLV01FractionC, m_GN3EPCLV01FractionTau);
+      if (!plot->setGN3XPV01Fractions(m_GN3XPV01HbbFractions, m_GN3XPV01HccFractions)) return StatusCode::FAILURE;
+      plot->setIsLargeR(name == m_jetNameR10);
     }
    
     return StatusCode::SUCCESS;
@@ -149,34 +186,9 @@ namespace JetTagDQA {
     const xAOD::EventInfo* event(0);
     ATH_CHECK(evtStore()->retrieve(event, "EventInfo"));
 
-    // determine if the sample is ttbar or Zprime (on the first event, where the jetPtCut is still initial -1)
-    if(m_jetPtCut < 0){
-      // get the DSID
-      int dsid = event->mcChannelNumber();
-
-      // check if it is a ttbar or Zprime sample
-      if(dsid == 410000 || dsid == 601229){
-        m_jetPtCut = m_jetPtCutTtbar;
-      }
-      else if(dsid == 427080 || dsid == 427081 ||dsid == 801271 || dsid == 800030) {
-        m_jetPtCut = m_jetPtCutZprime;
-        m_onZprime = true;
-      }
-      // if none applies give a warning and use the default cut
-      else {
-        ATH_MSG_WARNING("It is checked if the sample is ttbar (has dsid 410000) or Zprime (has dsid 427080). None applies (read dsid is " << dsid << "). Applying default pT cut of 20000 MeV now.");
-        m_jetPtCut = 20000;
-      }
-
-      // do not do the track-truth association on this Sherpa Z' sample
-      if(dsid == 361405){
-        m_doTrackTruth = false;
-      }
-    }
-
     // get the primary vertex
     const xAOD::VertexContainer *vertices = 0;
-    CHECK( evtStore()->retrieve(vertices, "PrimaryVertices") );
+    CHECK( evtStore()->retrieve(vertices, m_vertexName) );
     int npv(0);
     size_t indexPV = 0;
     bool has_pv = false;
@@ -209,9 +221,28 @@ namespace JetTagDQA {
     const xAOD::Vertex *myVertex = vertices->at(indexPV); // the (reco?) primary vertex
     //std::cout<<"z coordinate of PV: "<< myVertex->z() <<std::endl;
 
+    const xAOD::TruthVertex* truthPV = nullptr;
+    if (!m_isData) {
+      const xAOD::TruthVertexContainer* truthVertices = nullptr;
+      if (m_useJvtProxy || evtStore()->contains<xAOD::TruthVertexContainer>(m_truthVertexName)) ATH_CHECK(evtStore()->retrieve(truthVertices, m_truthVertexName));
+      if (truthVertices && !truthVertices->empty()) truthPV = truthVertices->at(0);
+      else if (!m_warnedMissingTruthPV) {
+        ATH_MSG_WARNING("No " << m_truthVertexName << ", truth Lxy is measured from the detector origin");
+        m_warnedMissingTruthPV = true;
+      }
+    }
+
     // get the tracks
     const xAOD::TrackParticleContainer* tracks(0);
     ATH_CHECK(evtStore()->retrieve(tracks, m_trackName));
+
+    // truth based JVT proxy: reconstructed PV close to the truth PV and jets matched to truth jets
+    bool passTruthPV = true;
+    const xAOD::JetContainer* truthJets = nullptr;
+    if (m_useJvtProxy) {
+      ATH_CHECK(evtStore()->retrieve(truthJets, m_truthJetName));
+      passTruthPV = truthPV && std::abs(myVertex->z() - truthPV->z()) < 0.1;
+    }
 
     // loop over the jet collections
     for(const auto& [name, plot] : m_btagplots){
@@ -237,14 +268,21 @@ namespace JetTagDQA {
         // apply the jet pT eta and jvt cuts
         if(jet->pt() <= ptCut) continue;
         if(std::abs(jet->eta()) >= m_jetEtaCut) continue;
-        //Arnaud: JVT cut to remove horns in jet eta 
-        if(name!=m_jetNameR10){//we don't apply JVT cuts on large-R jets
-            if (plot->m_JVT_defined && jet->getAttribute<float>("Jvt") < plot->m_JVT_cut
-                    && jet->pt() > 20e3 && jet->pt() < 60e3
-                    && std::abs(jet->eta()) < 2.4 ) continue;
-            if (plot->m_JVTLargerEta_defined && jet->getAttribute<float>("Jvt") < plot->m_JVTLargerEta_cut
-                    && jet->pt() > 20e3 && jet->pt() < 60e3
-                    && std::abs(jet->eta()) > 2.4 && std::abs(jet->eta()) < m_jetEtaCut ) continue;
+        // JVT selection, not applied to large-R jets
+        if(name!=m_jetNameR10){
+          if (m_useJvtProxy) {
+            if (!passTruthPV || !passTruthJetMatching(*jet, *truthJets)) continue;
+          }
+          else if (name == m_jetNamePFlow) {
+            static const SG::ConstAccessor<char> NNJvtPassAcc("NNJvtPass");
+            if (!NNJvtPassAcc.isAvailable(*jet)) {
+              if (!m_warnedMissingNNJvt) {
+                ATH_MSG_WARNING("No NNJvtPass on " << name << ", no JVT cut applied");
+                m_warnedMissingNNJvt = true;
+              }
+            }
+            else if (!NNJvtPassAcc(*jet)) continue;
+          }
         }
 
         // count the jets that pass the cuts
@@ -266,8 +304,17 @@ namespace JetTagDQA {
           // fill other variables
           bool contains_muon;
           double jet_Lxy = -1;
-          plot->fillOther(jet, contains_muon, jet_Lxy, truth_label, event);
+          plot->fillOther(jet, contains_muon, jet_Lxy, truth_label, truthPV, event);
           if(contains_muon) nJets_containing_muon++;
+
+          static const SG::ConstAccessor<std::vector<ElementLink<xAOD::IParticleContainer> > >
+            trackLinksAcc("TracksForBTagging");
+          if (!trackLinksAcc.isAvailable(*jet)) {
+            if (m_collectionsWithoutTrackLinks.insert(name).second) {
+              ATH_MSG_WARNING("No TracksForBTagging on " << name << ", skipping track, SV and tagger histograms");
+            }
+            continue;
+          }
 
           // get the track to truth associations
           std::map<const xAOD::TrackParticle*, int> track_truth_associations = getTrackTruthAssociations(jet);
@@ -286,7 +333,7 @@ namespace JetTagDQA {
           //fill track and hit information
           plot->fillTrackVariables_for_largeRjet(jet, myVertex, truth_label, event);
           // fill discriminant related vars
-          plot->fillDiscriminantVariables_for_largeRjet(jet, truth_label, m_onZprime, nJetsThatPassedWPCuts, event);
+          plot->fillDiscriminantVariables_for_largeRjet(jet, truth_label, event);
         }
         else{
           ATH_MSG_WARNING("jet is a null pointer.");
@@ -338,7 +385,7 @@ namespace JetTagDQA {
 
       // only try accessing the truth values if not on data
       int origin = 0;
-      if(!m_isData && m_doTrackTruth){
+      if(!m_isData){
         origin = m_trackTruthOriginTool->getTrackOrigin(track);
       }
 

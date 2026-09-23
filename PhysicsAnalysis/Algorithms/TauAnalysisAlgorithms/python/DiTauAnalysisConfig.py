@@ -16,13 +16,15 @@ class DiTauCalibrationConfig (ConfigBlock):
             info="the name of the input ditau-jet container.")
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the output container after calibration.")
+            info="the name of the output container after calibration.",
+            meta={'role':'container'})
         self.addOption ('postfix', '', type=str,
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here since the calibration is common to "
             "all ditau-jets.")
         self.addOption ('quality', None, type=str,
-            info="the ID WP to use. Supported ID WPs: `Tight`, `Medium`,`Loose`,`NoID`.")
+            info="the ID WP to use. Supported ID WPs: `Tight`, `Medium`,`Loose`,`NoID`.",
+            meta={'choices':(['Tight','Medium','Loose','NoID'],1)})
         self.addOption ('rerunTruthMatching', True, type=bool,
             info="whether to rerun truth matching (sets up an instance of "
             "`CP::DiTauTruthMatchingAlg`).")
@@ -119,11 +121,13 @@ class DiTauWorkingPointSelectionConfig (ConfigBlock) :
         self.setBlockName('DiTauWorkingPointSelection')
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the input container.")
+            info="the name of the input container.",
+            meta={'role':'containerRef'})
         self.addOption ('selectionName', '', type=str,
             noneAction='error',
             info="the name of the ditau-jet selection to define (e.g. `tight` or "
-            "`loose`).")
+            "`loose`).",
+            meta={'role':'selection'})
         self.addOption ('postfix', None, type=str,
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as `selectionName` is used internally.")
@@ -180,11 +184,13 @@ class DiTauWorkingPointEfficiencyConfig (ConfigBlock) :
         self.addDependency('EventSelectionMerger', required=False)
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the input container.")
+            info="the name of the input container.",
+            meta={'role':'containerRef'})
         self.addOption ('selectionName', '', type=str,
             noneAction='error',
             info="the name of the ditau-jet selection to define (e.g. `tight` or "
-            "`loose`).")
+            "`loose`).",
+            meta={'role':'selection'})
         self.addOption ('postfix', None, type=str,
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as `selectionName` is used internally.")

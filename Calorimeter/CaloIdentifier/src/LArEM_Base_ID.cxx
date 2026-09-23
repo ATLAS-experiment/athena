@@ -17,10 +17,7 @@
 #include "IdDict/IdDictMgr.h"
 #include "IdDict/IdDictRegion.h"
 #include "LArEM_region.h"
-#include "CxxUtils/StrFormat.h"
 #include "CxxUtils/trapping_fp.h"
-
-using CxxUtils::strformat;
 
 
 LArEM_Base_ID::LArEM_Base_ID (const std::string& name,

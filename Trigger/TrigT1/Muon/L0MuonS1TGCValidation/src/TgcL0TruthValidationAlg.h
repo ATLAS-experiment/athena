@@ -6,8 +6,8 @@
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GeneratorObjects/McEventCollection.h"
-#include "L0MuonS1TGCToolInterfaces/TgcL0Candidate.h"
-#include "L0MuonS1TGCToolInterfaces/TgcL0Segment.h"
+#include "L1MuonS1TGCToolInterfaces/TgcL0Candidate.h"
+#include "L1MuonS1TGCToolInterfaces/TgcL0Segment.h"
 #include "L0MuonS1TGCValidation/TgcL0ValidationEvent.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"

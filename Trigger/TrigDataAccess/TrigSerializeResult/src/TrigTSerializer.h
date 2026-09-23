@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -18,7 +18,6 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "CxxUtils/checker_macros.h"
 #include "TrigSerializeResult/ITrigSerializerToolBase.h"
-#include "RVersion.h"
 #include "Rtypes.h"
 #include "TError.h"
 #include <string>
@@ -55,7 +54,7 @@ public:
   void reset();
 
   StatusCode peekCLID(const std::vector<uint32_t>& v, uint32_t *guid) const;
-  
+
   void setCLID(const uint32_t *guid);
 
 private:
@@ -63,7 +62,7 @@ private:
   void do_persistify_obj(const std::string& nameOfClass, void* instance);
   void do_follow_ptr(const std::string& nameOfClass, void* instance);
   void add_previous_streamerinfos();
-  
+
   static bool streamerErrorHandler(Int_t level, Bool_t abort_bool,
 				   const char* location, const char *msg);
   static bool bsDictWarningFilter(Int_t level, Bool_t abort_bool,
@@ -73,7 +72,7 @@ private:
   void restoreAfterTBuffer(const std::string &nameOfClass);
 
   bool      m_onlineMode;
-  uint32_t  m_guid[4];  
+  uint32_t  m_guid[4];
 
   // for error handling
   static   bool       s_decodingError;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Class handling the output of the MissingMassCalculator
@@ -7,6 +7,8 @@
 
 // Local include(s):
 #include "DiTauMassTools/MissingMassOutput.h"
+
+
 
 using namespace DiTauMassTools;
 using ROOT::Math::PtEtaPhiMVector;

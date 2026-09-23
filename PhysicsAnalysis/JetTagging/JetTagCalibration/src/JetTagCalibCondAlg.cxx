@@ -37,7 +37,6 @@ namespace Analysis {
       declareProperty("channels", m_originalChannels);
       declareProperty("channelAliases", m_channelAliases);
       declareProperty("IPTag_UseCHypo"            , m_IPTag_useCHypo = true);
-      declareProperty("IP2D_TrackGradePartitions", m_IP2D_trackGradePartitions);
       declareProperty("SV_useDRJPV", m_useDRJPVSV=true);
       declareProperty("SV2_usePt", m_usePtSV2=false);
       declareProperty("Likelihood_smoothNTimes",m_Likelihood_smoothNTimes);
@@ -111,21 +110,9 @@ namespace Analysis {
 
     m_directoryMap.clear();
 
-    //IP taggers
-    if (std::find(m_taggers.begin(), m_taggers.end(), "IP2D") != m_taggers.end() or
-      std::find(m_taggers.begin(), m_taggers.end(), "IP3D") != m_taggers.end() or
-      std::find(m_taggers.begin(), m_taggers.end(), "SV1") != m_taggers.end()) {
+    //SV1 likelihood hypotheses
+    if (std::find(m_taggers.begin(), m_taggers.end(), "SV1") != m_taggers.end()) {
         initializeIPTag();
-    }
-
-    //IP2D tagger
-    if (std::find(m_taggers.begin(), m_taggers.end(), "IP2D") != m_taggers.end()) {
-      initializeIP2D();
-    }
-
-    //IP3D tagger
-    if (std::find(m_taggers.begin(), m_taggers.end(), "IP3D") != m_taggers.end()) {
-      initializeIP3D();
     }
 
     //SV1 tagger
@@ -207,7 +194,7 @@ namespace Analysis {
 
  
   void JetTagCalibCondAlg::initializeIPTag() {
-    ATH_MSG_DEBUG("initialize IPTag paths of the calibration file");
+    ATH_MSG_DEBUG("initialize the likelihood hypotheses");
      m_IPTag_hypotheses.push_back("B");
      m_IPTag_hypotheses.push_back("U");
      if(m_IPTag_useCHypo){
@@ -215,35 +202,6 @@ namespace Analysis {
      }
   }
  
-  void JetTagCalibCondAlg::initializeIP2D() {
-    ATH_MSG_DEBUG("initialize IP2D paths of the calibration file");
-
-    //check that hypotheses for likelihood tool are defined
-    std::string hName;
-    const std::string histoTagStr{"IP2D"};
-    for(unsigned int i=0;i<m_IP2D_trackGradePartitions.size();i++) {
-      for(unsigned int ih=0;ih<m_IPTag_hypotheses.size();ih++) {
-        hName = m_IPTag_hypotheses[ih]+"/"+m_IP2D_trackGradePartitions[i]+"/SipA0";
-        registerHistogram(histoTagStr, hName);          
-      }
-    }
-  }
- 
- 
-  void JetTagCalibCondAlg::initializeIP3D() {
-    ATH_MSG_DEBUG("initialize IP3D paths of the calibration file");
-    //check that hypotheses for likelihood tool are defined
-    std::string hName;
-    //construct const string out of loop
-    const std::string taggerStr{"IP3D"};
-    for(unsigned int i=0;i<m_IP2D_trackGradePartitions.size();i++) {
-      for(unsigned int ih=0;ih<m_IPTag_hypotheses.size();ih++) {
-        hName = m_IPTag_hypotheses[ih]+"/"+m_IP2D_trackGradePartitions[i]+"/Sip3D";
-        registerHistogram(taggerStr, hName);          
-      }
-    }
-  }
-
   void JetTagCalibCondAlg::initializeSVEff(const std::string& SVmode) {
     // for SV efficiencies, add a few histograms:
     std::string hName;
@@ -554,7 +512,7 @@ namespace Analysis {
                 h->SetDirectory(nullptr);
                 //coverity[RESOURCE_LEAK]
                 (void)hPointer.release();
-                if (tagger == "IP2D" || tagger == "IP3D" || tagger == "SV1") {
+                if (tagger == "SV1") {
                   ATH_MSG_VERBOSE("#BTAG# Smoothing histogram " << hname << " ...");
                   smoothAndNormalizeHistogram(h, hname);
                 }

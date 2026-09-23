@@ -22,29 +22,23 @@ StatusCode HGTD_TrkTimePerformanceStudies::initialize() {
 
   ATH_CHECK(m_track_sel_tools.retrieve());
   ATH_CHECK(m_track_time_tools.retrieve());
-
+  const std::string titleStr{";|#eta| ;frequency"};
   for (const auto& track_tool : m_track_sel_tools) {
+    const auto & tname = track_tool->name();
     for (const auto& time_tool : m_track_time_tools) {
-
-      bookEffSubdir(track_tool->name(), time_tool->name(), "m_eff_vs_eta",
-                    ";|#eta| ;frequency", 32, 2.4, 4.0);
-      bookEffSubdir(track_tool->name(), time_tool->name(),
-                    "m_eff_gt50pcprimes_vs_eta", ";|#eta| ;frequency", 32, 2.4,
-                    4.0);
-      bookEffSubdir(track_tool->name(), time_tool->name(),
-                    "m_eff_gt50pcprimes_vs_eta_mistag", ";|#eta| ;frequency",
-                    32, 2.4, 4.0);
-
+      const auto & timetoolName = time_tool->name();
+      static const std::string effVsEta{"m_eff_vs_eta"};
+      bookEffSubdir(tname, timetoolName, effVsEta, titleStr, 32, 2.4, 4.0);
+      static const std::string primesVsEta{"m_eff_gt50pcprimes_vs_eta"};
+      bookEffSubdir(tname, timetoolName, primesVsEta, titleStr, 32, 2.4, 4.0);
+      static const std::string primesVsEtaMistag{"m_eff_gt50pcprimes_vs_eta_mistag"};
+      bookEffSubdir(tname, timetoolName, primesVsEtaMistag, titleStr, 32, 2.4, 4.0);
       for (const auto& primes_fraction_i : m_primes_fractions) {
         std::string name = "m_eff_vs_eta_primesfrac" + primes_fraction_i;
-        bookEffSubdir(track_tool->name(), time_tool->name(), name,
-                      ";|#eta| ;frequency", 32, 2.4, 4.0);
-
-        std::string name_res =
-            "m_hist_timeres_outlier_cases" + primes_fraction_i;
-        bookSubdir<TH1F>(track_tool->name(), time_tool->name(), name_res,
-                         ";t_{reco} - t_{truth} [ns]; number of tracks", 200,
-                         -.4, 0.4);
+        bookEffSubdir(tname, timetoolName, name, titleStr, 32, 2.4, 4.0);
+        std::string name_res = "m_hist_timeres_outlier_cases" + primes_fraction_i;
+        static const std::string thisTitle{";t_{reco} - t_{truth} [ns]; number of tracks"};
+        bookSubdir<TH1F>(tname, timetoolName, name_res, thisTitle, 200, -.4, 0.4);
       }
     }
   }
@@ -112,7 +106,6 @@ StatusCode HGTD_TrkTimePerformanceStudies::execute(const EventContext& ctx) {
         bool morethanhalfprimes =
             primes_fraction == PrimesFractions::AllPrimes or
             primes_fraction == PrimesFractions::MoreThanHalfPrimes;
-
         fillEffSubDir(track_tool->name(), time_tool->name(), "m_eff_vs_eta",
                       has_time, std::abs(trk_eta));
 

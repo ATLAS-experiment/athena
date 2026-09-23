@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: ArenaBase_test.cxx 470529 2011-11-24 23:54:22Z ssnyder $
 /**
  * @file AthAllocators/test/ArenaBase_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -15,7 +13,9 @@
 #include "AthAllocators/ArenaAllocatorBase.h"
 #include "AthAllocators/ArenaAllocatorCreator.h"
 #include "AthAllocators/ArenaAllocatorRegistry.h"
+#include <format>
 #include <iostream>
+#include <print>
 #include <sstream>
 #include <atomic>
 #include <thread>
@@ -43,16 +43,12 @@ private:
 };
 
 Alloc::Alloc (int x)
-  : m_x (x)
+  : m_name (std::format ("alloc{}", x)),
+    m_x (x)
 {
   m_stats.bytes.inuse = x;
   m_stats.bytes.free = 2*x;
   m_stats.bytes.total = 3*x;
-
-  std::ostringstream os;
-  os << "alloc" << x;
-  // cppcheck-suppress useInitializationList
-  m_name = os.str();
 }
 
 class Creator
@@ -69,7 +65,7 @@ private:
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   SG::ArenaBase a ("a");
 
   assert (a.name() == "a");
@@ -167,7 +163,7 @@ void test_threading1 (SG::ArenaBase& b, size_t ialloc1, size_t ialloc2)
 // Test for a deadlock.
 void test_threading()
 {
-  std::cout << "test_threading\n";
+  std::println ("test_threading");
 
   SG::ArenaBase b ("b");
 
@@ -184,7 +180,7 @@ void test_threading()
 
 int main()
 {
-  std::cout << "ArenaBase_test\n";
+  std::println ("ArenaBase_test");
   test1();
   test_threading();
   return 0;

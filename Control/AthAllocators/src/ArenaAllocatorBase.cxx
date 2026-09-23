@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: ArenaAllocatorBase.cxx 470529 2011-11-24 23:54:22Z ssnyder $
 /**
  * @file  AthAllocators/src/ArenaAllocatorBase.cxx
  * @author scott snyder
@@ -61,9 +59,7 @@ ArenaAllocatorBase::Stats::Stat::operator+= (const Stat& other)
 std::ostream& operator<< (std::ostream& os,
                           const ArenaAllocatorBase::Stats::Stat& stat)
 {
-  os << std::setw(7) << stat.inuse << "/"
-     << std::setw(7) << stat.free << "/" 
-     << std::setw(7) << stat.total;
+  std::print (os, "{}", stat);
   return os;
 }
 
@@ -104,7 +100,7 @@ ArenaAllocatorBase::Stats::operator+= (const Stats& other)
 std::ostream& operator<< (std::ostream& os,
                           const ArenaAllocatorBase::Stats& stats)
 {
-  os << stats.elts << " " << stats.bytes << " " << stats.blocks;
+  std::print (os, "{}", stats);
   return os;
 }
 
@@ -115,8 +111,8 @@ std::ostream& operator<< (std::ostream& os,
  */
 void ArenaAllocatorBase::Stats::header (std::ostream& os)
 {
-  os << "Elts InUse/Free/Total"
-     << "   Bytes InUse/Free/Total  Blocks InUse/Free/Total";
+  std::print (os, "Elts InUse/Free/Total"
+              "   Bytes InUse/Free/Total  Blocks InUse/Free/Total");
 }
 
 
@@ -129,8 +125,26 @@ void ArenaAllocatorBase::Stats::header (std::ostream& os)
  */
 void ArenaAllocatorBase::report (std::ostream& os) const
 {
-  os << " " << stats() << "  " << name() << std::endl;
+  std::println (os, " {}  {}", stats(), name());
 }
 
 
 } // namespace SG
+
+
+/// C++20 style formatters.
+template <class FmtContext>
+typename FmtContext::iterator
+std::formatter<SG::ArenaAllocatorBase::Stats::Stat>::format (const SG::ArenaAllocatorBase::Stats::Stat& stat, FmtContext& ctx) const
+{
+  return std::format_to (ctx.out(), "{:7}/{:7}/{:7}", stat.inuse, stat.free, stat.total);
+}
+
+
+/// C++20 style formatters.
+template <class FmtContext>
+typename FmtContext::iterator
+std::formatter<SG::ArenaAllocatorBase::Stats>::format (const SG::ArenaAllocatorBase::Stats& stats, FmtContext& ctx) const
+{
+  return std::format_to (ctx.out(), "{} {} {}", stats.elts, stats.bytes, stats.blocks);
+}

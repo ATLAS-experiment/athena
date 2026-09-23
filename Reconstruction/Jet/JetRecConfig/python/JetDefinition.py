@@ -72,9 +72,9 @@ class JetDefinition(object):
                  radius,              # The jet radius specifier (clustering cutoff)
                  inputdef,            # The input JetConstit
                  ptmin=5e3*MeV,       # The pt cutoff for fastjet in MeV
-                 ghostdefs=[],        # The list of alias to JetGhosts to ghost-associate
-                 modifiers=[],        # The list of alias to JetModifiers to execute after jet finding
-                 extrainputs=[],      # The list of additional input types needed for jet finding
+                 ghostdefs=None,      # The list of alias to JetGhosts to ghost-associate
+                 modifiers=None,      # The list of alias to JetModifiers to execute after jet finding
+                 extrainputs=None,    # The list of additional input types needed for jet finding
                  standardRecoMode = False, # 
                  prefix = "",         # allows to tune the full JetContainer name
                  suffix = "",         # allows to tune the full JetContainer name
@@ -111,9 +111,10 @@ class JetDefinition(object):
         
         self.ptmin = ptmin # The pt down to which FastJet is run
 
-        self.ghostdefs = ghostdefs     # Objects to ghost-associate
-        self.modifiers = modifiers     # Tools to modify the jet
-        self.extrainputs = extrainputs # Any extra input dependencies
+        # Avoid modifying default args
+        self.ghostdefs = ghostdefs if ghostdefs is not None else []       # Objects to ghost-associate
+        self.modifiers = modifiers if modifiers is not None else []       # Tools to modify the jet
+        self.extrainputs = extrainputs if extrainputs is not None else [] # Any extra input dependencies
 
         self.standardRecoMode = standardRecoMode
 
@@ -261,7 +262,7 @@ class JetModifier(object):
     def __init__(self,tooltype,toolname,
                  createfn=None,
                  filterfn=_condAlwaysPass,                 
-                 prereqs=[],modspec=None,
+                 prereqs=None,modspec=None,
                  **properties
                  ):
         # For the easy cases where no helper function is needed.
@@ -289,7 +290,7 @@ class JetModifier(object):
         # However, in special cases, the prereqs may
         # depend on either or both of modspec and jetdef,
         # in which case a helper function can be defined.
-        self.prereqs = prereqs
+        self.prereqs = prereqs if prereqs is not None else []
 
         # a function taking a CondFlags as argument and deciding if this JetModifier is compatible
         # with the conditions.
@@ -374,7 +375,7 @@ class JetInputExternal(object):
                   The function must return a tuple : (bool, "reason of failure")
      - prereqs : a list of prerequisites (str) for this input definition. If any, these str must match the name of other existing JetInputExternal instances. 
     """
-    def __init__(self, name, objtype, algoBuilder=None, specs=None, containername=None, filterfn= _condAlwaysPass, prereqs=[]):
+    def __init__(self, name, objtype, algoBuilder=None, specs=None, containername=None, filterfn= _condAlwaysPass, prereqs=None):
         self.name = name
         self.basetype = objtype
         
@@ -391,7 +392,7 @@ class JetInputExternal(object):
 
         self.specs = specs
         self.filterfn = filterfn 
-        self.prereqs = prereqs
+        self.prereqs = prereqs if prereqs is not None else []
 
     @make_lproperty
     def name(self): pass
@@ -511,7 +512,7 @@ class JetInputConstit(object):
         name,               # identifies this constit source, must be unique.
         objtype,            # The type of xAOD object from which to build the jets
         containername,      # The key of the source container in the event store.
-        prereqs=[],         # will contain references to JetInputExternal
+        prereqs=None,       # will contain references to JetInputExternal
         label=None,         # used to describe a category for these constits. if None, will default to name
         jetinputtype=None,  # The JetInputType category. Can be passed as a string.
                             #    if None, set according to objtype.
@@ -522,7 +523,7 @@ class JetInputConstit(object):
 
         self.name = name
         self.containername = containername
-        self.prereqs = prereqs
+        self.prereqs = prereqs if prereqs is not None else []
         self.label = label or name
 
         self.basetype = objtype
@@ -582,21 +583,22 @@ class JetInputConstitSeq(JetInputConstit):
     """
     def __init__(self,
                  name,
-                 objtype,         # The type of xAOD object from which to build the jets
-                 modifiers=[],    # Modifications to be applied to constituents prior to jet finding
-                 inputname=None,    # input collection which will be transformed into the source constituents
+                 objtype,          # The type of xAOD object from which to build the jets
+                 modifiers=None,   # Modifications to be applied to constituents prior to jet finding
+                 inputname=None,   # input collection which will be transformed into the source constituents
                  outputname=None,  #  output collection, will be set to self.containername
-                 prereqs = [],     # will contain references to JetInputExternal 
+                 prereqs = None,   # will contain references to JetInputExternal 
                  label = None,
                  jetinputtype=None,
                  filterfn=_condAlwaysPass,
                  byVertex=False,
                  lock = False,    # lock all properties of this instance
     ):    
-        
-        JetInputConstit.__init__(self,name, objtype, outputname, prereqs=prereqs, jetinputtype=jetinputtype, filterfn=filterfn,label=label,lock=False, finalinit=False, byVertex=byVertex)
+
+        _prereqs = prereqs if prereqs is not None else []
+        JetInputConstit.__init__(self,name, objtype, outputname, prereqs=_prereqs, jetinputtype=jetinputtype, filterfn=filterfn,label=label,lock=False, finalinit=False, byVertex=byVertex)
         self.inputname  = inputname or name
-        self.modifiers = modifiers
+        self.modifiers = modifiers if modifiers is not None else []
 
         
         self._locked = lock
@@ -643,13 +645,13 @@ class JetConstitModifier(object):
     def __init__(self,
                  name,
                  tooltype,
-                 prereqs= [],                 
-                 properties={},
+                 prereqs=None,                 
+                 properties=None,
                  ):
         self.name = name
         self.tooltype = tooltype
-        self.properties = properties
-        self.prereqs = prereqs
+        self.properties = properties if properties is not None else {}
+        self.prereqs = prereqs if prereqs is not None else []
         self.filterfn = _condAlwaysPass # we might want to make this a proper attribute in the future
         
     @make_lproperty

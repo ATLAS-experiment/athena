@@ -53,8 +53,12 @@ def get_input_years(config: ConfigAccumulator) -> list[int]:
         years = [2023]
     elif config.campaign() is Campaign.MC23e or is_data_from(config, 2024):
         years = [2024]
-    elif config.campaign() is Campaign.MC23g or is_data_from(config, 2025):
+    elif config.campaign() is Campaign.MC23g:
+        years = [2025, 2026]
+    elif is_data_from(config, 2025):
         years = [2025]
+    elif is_data_from(config, 2026):
+        years = [2026]
     else:
         raise ValueError('TriggerAnalysisConfig: unable to deduce data taking year for input file')
 
@@ -107,16 +111,20 @@ class TriggerAnalysisSFBlock(ConfigBlock):
             info="the muon quality WP to use.")
         self.addOption ('electrons', '', type=str,
             info="the input electron container, with a possible selection, in "
-            "the format `container` or `container.selection`.")
+            "the format `container` or `container.selection`.",
+            meta={'role':'containerRef'})
         self.addOption ('muons', '', type=str,
             info="the input muon container, with a possible selection, in the "
-            "format `container` or `container.selection`.")
+            "format `container` or `container.selection`.",
+            meta={'role':'containerRef'})
         self.addOption ('photons', '', type=str,
             info="the input photon container, with a possible selection, in "
-            "the format `container` or `container.selection`.")
+            "the format `container` or `container.selection`.",
+            meta={'role':'containerRef'})
         self.addOption ('taus', '', type=str,
             info="the input tau-jet container, with a possible selection, in "
-            "the format `container` or `container.selection`.")
+            "the format `container` or `container.selection`.",
+            meta={'role':'containerRef'})
         self.addOption ('numberOfToys', 0, type=int,
             info="the number of toy experiments to run to estimate the trigger efficiencies, "
             "instead of using explicit formulas. Set it to 0 to not use toys.")

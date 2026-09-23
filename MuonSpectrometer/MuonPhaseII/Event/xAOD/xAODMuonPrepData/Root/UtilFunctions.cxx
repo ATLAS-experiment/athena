@@ -30,19 +30,6 @@
 #include "Acts/Utilities/MathHelpers.hpp"
 #include "Acts/Definitions/Units.hpp"
 
-namespace {
-    template <class MeasType> const Acts::Surface& fetchSurface(const xAOD::UncalibratedMeasurement* meas) {
-        auto castedM = static_cast<const MeasType*>(meas);
-        IdentifierHash hash{};
-        if constexpr(std::is_same_v<xAOD::MdtDriftCircle, MeasType>) {
-            hash = castedM->measurementHash();
-        } else {
-            hash = castedM->layerHash();
-        }
-        return castedM->readoutElement()->surface(hash);
-    }
-}
-
 namespace xAOD{
     
 
@@ -65,15 +52,15 @@ namespace xAOD{
         switch (meas->type()) {
             using enum UncalibMeasType;
             case MdtDriftCircleType: {
-                return fetchSurface<MdtDriftCircle>(meas);
+                return static_cast<const MdtDriftCircle*>(meas)->surface();
             } case RpcStripType: {
-                return fetchSurface<RpcMeasurement>(meas);
+                return static_cast<const RpcMeasurement*>(meas)->surface();
             } case TgcStripType:{
-                return fetchSurface<TgcStrip>(meas);
+                return static_cast<const TgcStrip*>(meas)->surface();
             } case sTgcStripType: {
-                return fetchSurface<sTgcMeasurement>(meas);
+                return static_cast<const sTgcMeasurement*>(meas)->surface();
             } case MMClusterType:{
-                return fetchSurface<MMCluster>(meas);
+                return static_cast<const MMCluster*>(meas)->surface();
             } default:
                 THROW_EXCEPTION("Unsupported measurement given "<<typeid(*meas).name());
                 break;

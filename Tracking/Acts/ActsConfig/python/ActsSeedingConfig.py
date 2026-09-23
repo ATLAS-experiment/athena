@@ -24,6 +24,7 @@ def ActsGbtsFtfSeedingTrigToolCfg(flags,name: str = "GbtsFtfActsSeedingTool", **
   kwargs.setdefault("UseBeamTilt", False)
   kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minPTSeed)
   kwargs.setdefault("MaxGraphEdges", 3000000)
+  kwargs.setdefault("AddTriplets", False)
 
   isLargeD0 = flags.Tracking.ActiveConfig.isLargeD0
   kwargs.setdefault("ConnectionFileName",
@@ -325,6 +326,7 @@ def ActsPixelGbtsSeedingToolCfg(flags,
                       ActsUnits.GeV / GaudiUnits.GeV)
     kwargs.setdefault("d0Max", flags.Tracking.ActiveConfig.maxPrimaryImpactSeed *
                       ActsUnits.mm / GaudiUnits.mm)
+    kwargs.setdefault("addTriplets", False)
 
     acc.setPrivateTools(CompFactory.ActsTrk.GbtsSeedingTool(name, **kwargs))
     return acc
@@ -332,6 +334,7 @@ def ActsPixelGbtsSeedingToolCfg(flags,
 def ActsStripGbtsSeedingToolCfg(flags,
                                 name: str = "ActsStripGbtsSeedingTool",
                                 **kwargs) -> ComponentAccumulator:
+    """GBTS strip seeding for the primary pass. ActsLargeRadiusStripGbtsSeedingToolCfg is the LRT one."""
     acc = ComponentAccumulator()
     if "layerTool" not in kwargs:
         kwargs.setdefault(
@@ -339,19 +342,34 @@ def ActsStripGbtsSeedingToolCfg(flags,
             acc.popToolsAndMerge(ActsGbtsLayerToolCfg(flags))
         )
 
-    ## For ITkStrip LRT, enable LRT mode and use the LRT connector file
     kwargs.setdefault("usePixelLayers", False)
     kwargs.setdefault("useStripLayers", True)
-    kwargs.setdefault("LRTmode", True)
     kwargs.setdefault("usePixelConnections", False)
     kwargs.setdefault("useStripConnections", True)
+    ## the z0 range comes from the RoI
+    kwargs.setdefault("LRTmode", False)
+    ## the cluster width cuts are pixel-only
     kwargs.setdefault("useML", False)
-    kwargs.setdefault("connectorInputFile", find_datafile(flags.Acts.Gbts.connectionTableLrt))
+    kwargs.setdefault("connectorInputFile", find_datafile(flags.Acts.Gbts.connectionTable))
 
     kwargs.setdefault("minPt", flags.Tracking.ActiveConfig.minPTSeed *
                       ActsUnits.GeV / GaudiUnits.GeV)
     kwargs.setdefault("d0Max", flags.Tracking.ActiveConfig.maxPrimaryImpactSeed *
                       ActsUnits.mm / GaudiUnits.mm)
+    ## the strips have few layers, so also keep the seeds with three space points
+    kwargs.setdefault("addTriplets", True)
+    ## the strips reach far beyond the pixel default of 550 mm
+    kwargs.setdefault("maxOuterRadius", 1100.0)
+
+    acc.setPrivateTools(CompFactory.ActsTrk.GbtsSeedingTool(name, **kwargs))
+    return acc
+
+def ActsLargeRadiusStripGbtsSeedingToolCfg(flags,
+                                           name: str = "ActsLargeRadiusStripGbtsSeedingTool",
+                                           **kwargs) -> ComponentAccumulator:
+    ## For ITkStrip LRT, enable LRT mode and use the LRT connector file
+    kwargs.setdefault("LRTmode", True)
+    kwargs.setdefault("connectorInputFile", find_datafile(flags.Acts.Gbts.connectionTableLrt))
     kwargs.setdefault("filterMaxZ0", 500. * ActsUnits.mm)
     kwargs.setdefault("cutDPhiMax", 0.07)
     kwargs.setdefault("cutDCurvMax", 0.015)
@@ -362,9 +380,22 @@ def ActsStripGbtsSeedingToolCfg(flags,
                       ActsUnits.mm / GaudiUnits.mm)
     kwargs.setdefault("minDeltaPhi", 0.01)
     kwargs.setdefault("maxOuterRadius", 1050.0)
-    acc.setPrivateTools(CompFactory.ActsTrk.GbtsSeedingTool(name, **kwargs))
-    return acc
 
+    return ActsStripGbtsSeedingToolCfg(flags, name, **kwargs)
+
+
+def ActsGnnSeedingToolCfg(flags,
+                          name: str = "ActsGnnSeedingTool",
+                          **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    if 'GnnPipelineTool' not in kwargs:
+        from ActsConfig.ActsTrackFindingConfig import ActsGnnPipelineToolCfg
+        kwargs.setdefault('GnnPipelineTool', acc.popToolsAndMerge(
+            ActsGnnPipelineToolCfg(flags, name="GnnSeedingPipeline")))
+
+    acc.setPrivateTools(CompFactory.ActsTrk.GnnSeedingTool(name, **kwargs))
+    return acc
 
 # ACTS algorithm using Athena objects upstream
 def ActsPixelSeedingAlgCfg(flags,
@@ -392,6 +423,9 @@ def ActsPixelSeedingAlgCfg(flags,
         elif flags.Tracking.ActiveConfig.PixelSeedingStrategy is SeedingStrategy.GbtsFtf:
             kwargs.setdefault('SeedTool', acc.popToolsAndMerge(
               ActsGbtsFtfSeedingTrigToolCfg(flags)))
+        elif flags.Tracking.ActiveConfig.PixelSeedingStrategy is SeedingStrategy.Gnn:
+            kwargs.setdefault('SeedTool', acc.popToolsAndMerge(
+              ActsGnnSeedingToolCfg(flags)))
         elif flags.Tracking.ActiveConfig.PixelSeedingStrategy is SeedingStrategy.GridTriplet:
             if useFastTracking:
                 kwargs.setdefault('SeedTool', acc.popToolsAndMerge(
@@ -440,9 +474,12 @@ def ActsStripSeedingAlgCfg(flags,
     acc.merge(ITkStripReadoutGeometryCfg(flags))
 
     if "SeedTool" not in kwargs:
-        if flags.Tracking.ActiveConfig.StripSeedingStrategy in [
-            SeedingStrategy.Gbts, SeedingStrategy.GbtsFtf]:
-            kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsStripGbtsSeedingToolCfg(flags)))
+        if flags.Tracking.ActiveConfig.StripSeedingStrategy is SeedingStrategy.Gbts:
+            kwargs.setdefault('SeedTool', acc.popToolsAndMerge(
+              ActsLargeRadiusStripGbtsSeedingToolCfg(flags) if flags.Tracking.ActiveConfig.isLargeD0
+              else ActsStripGbtsSeedingToolCfg(flags)))
+        elif flags.Tracking.ActiveConfig.StripSeedingStrategy is SeedingStrategy.GbtsFtf:
+            kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsLargeRadiusStripGbtsSeedingToolCfg(flags)))
         elif flags.Tracking.ActiveConfig.StripSeedingStrategy is SeedingStrategy.GridTriplet:
             if flags.Tracking.ActiveConfig.isLargeD0:
                 kwargs.setdefault('SeedTool', acc.popToolsAndMerge(

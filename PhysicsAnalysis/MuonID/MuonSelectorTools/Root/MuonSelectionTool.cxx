@@ -1971,7 +1971,7 @@ namespace CP {
         std::vector<int64_t> inputShape = {1, static_cast<int64_t>(input_features.size())};
 
         AthInfer::InputDataMap inputData;
-        inputData["flatten_input"] = std::make_pair(
+        inputData["args_0"] = std::make_pair(
             inputShape, std::move(input_features)
         );
 

@@ -6,7 +6,7 @@ atlas_subdir( AthenaPoolTestAthenaPool )
 # Component(s) in the package:
 atlas_add_poolcnv_library( AthenaPoolTestAthenaPoolPoolCnv
                            src/*.cxx
-                           FILES AthenaPoolTestData/IAthenaPoolTestCollection.h AthenaPoolTestData/AthenaPoolTestMatrix.h AthenaPoolTestData/AthenaPoolTestMap.h AthenaPoolTestData/FauxTriggerMap.h AthenaPoolTestData/dummy_A.h AthenaPoolTestData/dummy_E.h AthenaPoolTestData/TrigPath.h AthenaPoolTestData/TestGaudiProperty.h AthenaPoolTestData/PixelRDOElemLinkVec.h
+                           FILES AthenaPoolTestData/IAthenaPoolTestCollection.h AthenaPoolTestData/AthenaPoolTestMatrix.h AthenaPoolTestData/AthenaPoolTestMap.h AthenaPoolTestData/dummy_A.h AthenaPoolTestData/dummy_E.h AthenaPoolTestData/PixelRDOElemLinkVec.h
                            LINK_LIBRARIES AthenaPoolCnvSvcLib AthenaPoolTestData DataModelAthenaPoolLib )
 
 atlas_add_dictionary( AthenaPoolTestAthenaPoolCnvDict

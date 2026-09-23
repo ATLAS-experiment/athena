@@ -8,6 +8,7 @@ class SeedingStrategy(FlagEnum):
     Gbts = "Gbts"
     GbtsFtf = "GbtsFtf"
     F150 = "F150"
+    Gnn = "Gnn"
 
 class AmbiguitySolverStrategy(FlagEnum):
     Greedy = "GreedySolver"
@@ -107,6 +108,17 @@ class StripCalibrationStrategy(FlagEnum):
         """whether only the selected measurements are calibrated"""
         return self is StripCalibrationStrategy.DigitalCalibrationBeforeSelection
 
+# Define which space points of a seed are used for the track parameter estimation
+# FirstThree             : the first 3 SPs
+# FirstThreeLongMomentum : the first 3 SPs, with q/p from the first, middle and last SPs
+# FirstMiddleLast        : the first, middle and last SPs
+# MinDeltaR              : the first 3 SPs, that are separated by more than Acts.minDeltaRParameterEstimation
+class ParameterEstimationMode(FlagEnum):
+    FirstThree = 0
+    FirstThreeLongMomentum = 1
+    FirstMiddleLast = 2
+    MinDeltaR = 3
+
 
 def createActsConfigFlags():
     actscf = AthConfigFlags()
@@ -140,6 +152,12 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.TrackingGeometry.UseBlueprint', False)
     actscf.addFlag('Acts.TrackingGeometry.ObjDebugOutput', False)
     actscf.addFlag('Acts.TrackingGeometry.KeepGoingOnMaterialMergeFailure', False)
+    # ITkMaterialSource can be:
+    # a path to a local file
+    # 'Default' : material map source is evaluated from the geometry tag
+    # 'None'    : no material map is provided
+    actscf.addFlag('Acts.TrackingGeometry.ITkHgtdMaterialSource', 'Default')
+    actscf.addFlag('Acts.TrackingGeometry.ITkHgtdMaterialMapPath', 'ACTS/MaterialMaps/gen3')
 
     ## Enable Tracking geometry with additional passive layers
     actscf.addFlag('Acts.TrackingGeometry.InsertITkPassiveMaterialLayers', False)
@@ -204,11 +222,17 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.SeedRefitOutlierChi2Cut', float('inf'))  # OutlierChi2Cut for the seed refit Kalman fitter, applied whenever a seed refit is scheduled. inf == disabled.
     actscf.addFlag('Acts.LrtStripSeedRefit', True)  # Toggle the LRT strip-seed refit (KF on strip seeds before CKF). 
     actscf.addFlag('Acts.stripCalibrationIterations', 1)  # Strip-SP calibration iterations in TrackParamsEstimationTool (all passes). 
+    actscf.addFlag('Acts.parameterEstimationMode', lambda pcf:
+            ParameterEstimationMode.MinDeltaR if pcf.Acts.GNN.Enable else ParameterEstimationMode.FirstMiddleLast,
+            type=ParameterEstimationMode)  # SPs of a seed used in TrackParamsEstimationTool (MinDeltaR for the full GNN chain)
+    actscf.addFlag('Acts.minDeltaRParameterEstimation', 15.0)  # Minimum separation (mm) of the SPs used in TrackParamsEstimationTool for ParameterEstimationMode.MinDeltaR
     actscf.addFlag('Acts.forceTrackOnSeed', True) # force track to use the seed measurements; steer from the outside if a setup needs it disabled
     actscf.addFlag('Acts.PixelNNCalibrationModelsFolder', 'ITkPixelClusterization/nn-01-01-01/') # location of models for pixel ONNX files, extpected content of the foder are: number.onnx, pos1.onnx, pos2.onnx, pos3.onnx
                                                                        # the files are located in /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/
                                                                        # this flag is used only if PixelCalibrationStrategy is one of the NN strategies
     actscf.addFlag('Acts.refitSeeds', False) # refit seeds for CKF initial parameters
+    actscf.addFlag('Acts.initialVarInflation', [1., 1., 1., 1., 1., 1.]) # inflate variances after track parameter estimation
+    actscf.addFlag('Acts.refitErrInflation', [75., 75., 5., 15., 40., 1.]) # inflate errors after seed refit to suitable input for CKF
 
     # Ambiguity resolution    
     actscf.addFlag('Acts.doAmbiguityResolution', False)
@@ -245,6 +269,7 @@ def createActsConfigFlags():
     actscf.addFlag("Acts.Device.doSeeding", False)
     actscf.addFlag("Acts.Device.seedingStrategy", SeedingStrategy.GridTriplet, type=SeedingStrategy)
     actscf.addFlag("Acts.Device.doTrackReconstruction", False)
+    actscf.addFlag("Acts.Device.doLargeRadiusPass", False)
 
     # GNN specific flags (scoped)
     actscf.addFlag("Acts.GNN.Enable", False)
@@ -255,7 +280,6 @@ def createActsConfigFlags():
     actscf.addFlag("Acts.GNN.VarianceInflation", 1.0)
     actscf.addFlag("Acts.GNN.TightSeeds", False)
     actscf.addFlag("Acts.GNN.MinCandidateMeasurements", 7)
-    actscf.addFlag("Acts.GNN.MinDeltaR", 15.0)
     actscf.addFlag("Acts.GNN.EdgeCut", 0.5)
     actscf.addFlag("Acts.GNN.RelaxCentralHoleSel", False)
     actscf.addFlag("Acts.GNN.RelaxMeasurementSel", True)

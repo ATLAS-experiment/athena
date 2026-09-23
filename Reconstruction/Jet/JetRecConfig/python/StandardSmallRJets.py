@@ -150,6 +150,7 @@ AntiKt4EMTopo = JetDefinition("AntiKt",0.4,cst.EMTopoOrigin,
 
 # The following jet collection will be scheduled in derivation production (instead of AntiKt4EMTopo which is used e.g. at Tier-0) 
 AntiKt4EMTopo_deriv = AntiKt4EMTopo.clone(
+    ghostdefs = AntiKt4EMTopo.ghostdefs+["UnAssocMuonSegment"],
     modifiers = AntiKt4EMTopo.modifiers+("JetPtAssociation",)
 )
 

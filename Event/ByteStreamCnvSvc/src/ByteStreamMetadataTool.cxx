@@ -58,24 +58,16 @@ ByteStreamMetadataTool::beginInputFile(const SG::SourceID&)
     copy.clear();
 
     if(m_inputStore->contains<ByteStreamMetadata>(key)) {
-
-      std::list<SG::ObjectWithVersion<ByteStreamMetadata> > allVersions;
-      ATH_CHECK(m_inputStore->retrieveAllVersions(allVersions, key));
-
-      for(SG::ObjectWithVersion<ByteStreamMetadata>& obj : allVersions)
-        copy.push_back(std::make_unique<ByteStreamMetadata>(*obj.dataObject));
-
+      const ByteStreamMetadata* obj = nullptr;
+      ATH_CHECK(m_inputStore->retrieve(obj, key));
+      copy.push_back(std::make_unique<ByteStreamMetadata>(*obj));
     }
 
-
     if(m_inputStore->contains<ByteStreamMetadataContainer>(key)) {
-
-      std::list<SG::ObjectWithVersion<ByteStreamMetadataContainer> > allVersions;
-      ATH_CHECK(m_inputStore->retrieveAllVersions(allVersions, key));
-
-      for(SG::ObjectWithVersion<ByteStreamMetadataContainer>& obj : allVersions)
-        for(const ByteStreamMetadata* md : *obj.dataObject)
-          copy.push_back(std::make_unique<ByteStreamMetadata>(*md));
+      const ByteStreamMetadataContainer* obj = nullptr;
+      ATH_CHECK(m_inputStore->retrieve(obj, key));
+      for(const ByteStreamMetadata* md : *obj)
+        copy.push_back(std::make_unique<ByteStreamMetadata>(*md));
     }
 
 

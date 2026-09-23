@@ -1,6 +1,6 @@
 // this is -*- C++ -*-
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef HDF_TUPLE_HH
 #define HDF_TUPLE_HH
@@ -27,6 +27,7 @@
 #include <cassert>
 #include <set>
 #include <mutex>
+#include <utility>
 
 namespace H5Utils {
 
@@ -358,7 +359,7 @@ namespace H5Utils {
            const Consumers<I>& consumers,
            const WriterConfiguration<N>& = WriterConfiguration<N>());
     Writer(const Writer&) = delete;
-    Writer(Writer&&) = default;
+    Writer(Writer&&) noexcept;
     Writer& operator=(Writer&) = delete;
     ~Writer();
     template <typename T>
@@ -371,6 +372,7 @@ namespace H5Utils {
     using function_type = typename consumer_type::template function_type<T>;
     using configuration_type = WriterConfiguration<N>;
   private:
+    Writer(Writer&& other, std::unique_lock<std::recursive_mutex> other_lock) noexcept;
     const internal::DSParameters<I,N> m_par;
     hsize_t m_offset;
     hsize_t m_buffer_rows;
@@ -428,6 +430,25 @@ namespace H5Utils {
     m_ds = group.createDataSet(cfg.name, packed_type, space, params);
     m_file_space = m_ds.getSpace();
     m_file_space.selectNone();
+  }
+
+  // the mutex isn't movable, the moved-from writer is left empty; don't move a writer other threads still use
+  template <size_t N, typename I>
+  Writer<N, I>::Writer(Writer&& other) noexcept:
+    Writer(std::move(other), std::unique_lock(other.m_mutex))
+  {
+  }
+
+  template <size_t N, typename I>
+  Writer<N, I>::Writer(Writer&& other, std::unique_lock<std::recursive_mutex>) noexcept:
+    m_par(other.m_par),
+    m_offset(std::exchange(other.m_offset, 0)),
+    m_buffer_rows(std::exchange(other.m_buffer_rows, 0)),
+    m_buffer(std::exchange(other.m_buffer, {})),
+    m_consumers(std::move(other.m_consumers)),
+    m_ds(std::move(other.m_ds)),
+    m_file_space(std::move(other.m_file_space))
+  {
   }
 
   template <size_t N, typename I>

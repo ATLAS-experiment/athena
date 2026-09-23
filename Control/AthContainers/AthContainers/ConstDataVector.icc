@@ -12,8 +12,8 @@
 
 #include "CxxUtils/checker_macros.h"
 #include "CxxUtils/throw_out_of_range.h"
-#include <boost/iterator/transform_iterator.hpp>
 #include <functional>
+#include <ranges>
 
 
 namespace ConstDataVector_detail {
@@ -552,13 +552,9 @@ void ConstDataVector<DV>::insert (iterator position,
                                   InputIterator first,
                                   InputIterator last)
 {
-  typedef boost::transform_iterator
-    <ConstDataVector_detail::remove_const<typename DV::base_value_type>,
-     InputIterator>
-  iterator_t;
-  DV::insert (to_base_iterator(position),
-              iterator_t (first),
-              iterator_t (last));
+  ConstDataVector_detail::remove_const<typename DV::base_value_type> cast;
+  auto view = std::ranges::subrange(first, last) | std::views::transform(cast);
+  DV::insert(to_base_iterator(position), view.begin(), view.end());
 }
 
 

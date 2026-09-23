@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TGCPatchPanelOut_hh
@@ -7,19 +7,25 @@
 
 #include "TrigT1TGC/TGCHitPattern.h"
 #include "MuonDigitContainer/TgcDigit.h"
+#include <memory>
+#include <array>
 
 namespace LVL1TGCTrigger {
 
-const int NumberOfConnectorPerPPOut = 2;
+constexpr int NumberOfConnectorPerPPOut = 2;
 
 class TGCPatchPanel;
 
 class TGCPatchPanelOut {
  public:
-  TGCPatchPanelOut();
-  ~TGCPatchPanelOut();
-  TGCPatchPanelOut(const TGCPatchPanelOut& right) = default;
+  TGCPatchPanelOut() = default;
+  ~TGCPatchPanelOut() = default;
+  void swap(TGCPatchPanelOut& other) noexcept;
+  TGCPatchPanelOut(const TGCPatchPanelOut& right);
   TGCPatchPanelOut& operator=(const TGCPatchPanelOut& right);
+  
+  TGCPatchPanelOut(TGCPatchPanelOut&&) noexcept = default;
+  TGCPatchPanelOut& operator=(TGCPatchPanelOut&&) noexcept = default;
 
   const TGCHitPattern* getHitPattern(int connector) const;
   TGCHitPattern* getHitPattern(int connector);
@@ -33,25 +39,24 @@ class TGCPatchPanelOut {
   
   void print() const;
   void deleteHitPattern(int i);
-  void clear();
 
  private:
   int m_bid{TgcDigit::BC_UNDEFINED};        ///< bunch ID number
   const TGCPatchPanel* m_origin{nullptr};   ///< pointer to Patch Panel generate this PatchPanelOut
-  TGCHitPattern* m_signalPattern[NumberOfConnectorPerPPOut];
+  std::array<std::unique_ptr<TGCHitPattern>, NumberOfConnectorPerPPOut> m_signalPattern{};
 };
 
 
 inline
 const TGCHitPattern* TGCPatchPanelOut::getHitPattern(int connector) const
 {
-  return m_signalPattern[connector];
+  return m_signalPattern[connector].get();
 }
 
 inline
 TGCHitPattern* TGCPatchPanelOut::getHitPattern(int connector)
 {
-  return m_signalPattern[connector];
+  return m_signalPattern[connector].get();
 }
 
 inline
@@ -69,8 +74,7 @@ void TGCPatchPanelOut::setBid(const int bidIn)
 inline
 void TGCPatchPanelOut::setHitPattern(int connector, int nCh)
 {
-  if(m_signalPattern[connector]!=0) delete m_signalPattern[connector];
-  m_signalPattern[connector] = new TGCHitPattern(nCh);
+  m_signalPattern[connector] = std::make_unique<TGCHitPattern>(nCh);
 }
 
 inline

@@ -27,7 +27,7 @@ StatusCode CUDASeedingAlgProviderTool::initialize()
 }
 
 DeviceAlgorithmT<traccc::device::triplet_seeding_algorithm>
-CUDASeedingAlgProviderTool::getTripletSeedingAlgorithm(const EventContext& ctx, const traccc::seedfinder_config& seedfinder, const traccc::seedfilter_config& seedfilter) const
+CUDASeedingAlgProviderTool::getTripletSeedingAlgorithm(const EventContext& ctx, const traccc::seedfinder_config& seedfinder, const traccc::spacepoint_grid_config& grid, const traccc::seedfilter_config& seedfilter) const
 {
 
   ATH_MSG_VERBOSE("Constructing CUDA traccc pixel triplet seeding algorithm");
@@ -35,7 +35,7 @@ CUDASeedingAlgProviderTool::getTripletSeedingAlgorithm(const EventContext& ctx, 
 
   return {copy, std::make_shared<traccc::cuda::triplet_seeding_algorithm>(
     seedfinder,
-    seedfinder,
+    grid,
     seedfilter,
     traccc::memory_resource{m_MRs->mainMR(), m_MRs->hostMR()},
     *copy,

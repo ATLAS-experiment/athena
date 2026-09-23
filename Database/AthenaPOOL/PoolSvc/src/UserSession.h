@@ -70,10 +70,6 @@ namespace pool {
      */
     virtual bool disconnectAll() override final;
 
-    /// Returns the transaction interface
-    virtual ITransaction& transaction() override final { return *this; }
-    virtual const ITransaction& transaction() const override final { return *this; }
-
     /// Starts a new transaction. Returns the success of the operation
     virtual bool start( Io::IoFlag type = Io::READ ) override final;
 
@@ -83,39 +79,25 @@ namespace pool {
     /// Commits and holds the transaction.
     virtual bool commitAndHold() override final;
 
-    /// Checks if the transaction is active
-    virtual bool isActive() const override final { return m_transactionType != Io::INVALID; }
-
     /// Returns the transaction type
     virtual Io::IoFlag type() const override final { return m_transactionType; }
-
-    /// Returns the transaction type
-    Io::IoFlag transactionType() const { return transaction().type(); }
 
     /// Creates and returns a new database handle object
     virtual std::unique_ptr<IDatabase>
     databaseHandle( const std::string& dbName, DatabaseSpecification::NameType dbNameType ) override final;
 
     /// Returns the file catalog in use
-    virtual IFileCatalog& fileCatalog() override final;
-
-    /// Set the file catalog to be used
-    void setFileCatalog(IFileCatalog& catalog);
-
-    /// Returns the object holding the technology specific attributes for a given technology domain
-    virtual  ITechnologySpecificAttributes&
-    technologySpecificAttributes( long technology ) override final;
+    virtual IFileCatalog& fileCatalog();
 
     /// Returns the technology given a technology type.
-    MicroSessionManager& microSessionManager( long technology );
+    MicroSessionManager& microSessionManager( long technology ) override final;
 
   private:
     IFileCatalog*                  m_catalog;
     int                            m_ageLimit;
     DatabaseRegistry*              m_registry;
-    Io::IoFlag               m_transactionType;
+    Io::IoFlag                     m_transactionType;
     std::map< long, std::unique_ptr<MicroSessionManager> >    m_technologies;
-
   };
 }
 

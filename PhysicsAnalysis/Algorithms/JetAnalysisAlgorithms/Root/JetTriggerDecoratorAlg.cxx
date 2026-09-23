@@ -90,7 +90,7 @@ inline std::vector<L1LegToken> parseL1LegTokens(const std::string& l1Name) {
       std::string legName_noMultiplicity =
           match[2].str() + match[3].str() + match[4].str();
       int threshold = match[3].str().empty() ? 1 : std::stoi(match[3].str());
-      tokens.push_back({legName_noMultiplicity, threshold});
+      tokens.push_back({std::move(legName_noMultiplicity), threshold});
     }
   }
   return tokens;
@@ -248,7 +248,7 @@ JetTriggerDecoratorAlg::JetTriggerDecoratorAlg(const std::string& name,
     }
 
     Trig::FeatureRequestDescriptor frd;
-    frd.setChainGroup(m_trigger);
+    frd.setChainGroup(m_trigger.value());
     // prepare Run2 emulation results
     std::unordered_map<std::string,
                        std::vector<std::pair<const xAOD::Jet*, bool>>>

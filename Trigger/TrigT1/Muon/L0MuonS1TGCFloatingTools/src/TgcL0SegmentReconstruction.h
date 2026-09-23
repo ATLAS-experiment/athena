@@ -5,8 +5,8 @@
 #define L0MUONS1TGCFLOATINGTOOLS_TGCL0SEGMENTRECONSTRUCTION_H
 
 #include "GaudiKernel/StatusCode.h"
-#include "L0MuonS1TGCToolInterfaces/TgcL0Candidate.h"
-#include "L0MuonS1TGCToolInterfaces/TgcL0Segment.h"
+#include "L1MuonS1TGCToolInterfaces/TgcL0Candidate.h"
+#include "L1MuonS1TGCToolInterfaces/TgcL0Segment.h"
 #include "TgcL0FloatingData.h"
 
 #include <cstddef>

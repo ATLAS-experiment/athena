@@ -5,10 +5,7 @@
 #ifndef TrigCompositeUtils_TrigCompositeUtils_h
 #define TrigCompositeUtils_TrigCompositeUtils_h
 
-#include <set>
-#include <memory>
-#include <functional>
-#include <regex>
+
 
 #include "AthLinks/ElementLink.h"
 #include "AsgDataHandles/WriteHandle.h"
@@ -38,6 +35,13 @@
 #include "TrigCompositeUtils/Combinations.h"
 #include "TrigConfHLTData/HLTChain.h"
 #include "SGCore/sgkey_t.h"
+
+#include <set>
+#include <memory>
+#include <functional>
+#include <string>
+#include <string_view>
+
 
 #define TRIGCOMPUTILS_ENABLE_EARLY_EXIT 1
 
@@ -440,7 +444,7 @@ namespace TrigCompositeUtils {
    * @param[in,out] vector Mutable vector of ElementLinks on which to filter.
    **/
   template<class CONTAINER>
-  void filterLinkVectorByContainerKey(const std::string& containerSGKey, std::vector<ElementLink<CONTAINER>>& vector);
+  void filterLinkVectorByContainerKey(std::string_view containerSGKey, std::vector<ElementLink<CONTAINER>>& vector);
 
 
   /**
@@ -458,7 +462,7 @@ namespace TrigCompositeUtils {
   template<class CONTAINER>
   const std::vector< LinkInfo<CONTAINER> > recursiveGetFeaturesOfType(
     const NavGraph& navGraph,
-    const std::string& containerSGKey = "",
+    std::string_view containerSGKey = "",
     const unsigned int behaviour = TrigDefs::lastFeatureOfType,
     const std::string& navElementLinkKey = featureString(),
     const DecisionIDContainer& chainIDs = DecisionIDContainer());
@@ -476,7 +480,7 @@ namespace TrigCompositeUtils {
     std::vector< LinkInfo<CONTAINER> >& features,
     std::set<const NavGraphNode*>& fullyExploredFrom,
     const NavGraphNode* navGraphNode,
-    const std::string& containerSGKey,
+    std::string_view containerSGKey,
     const unsigned int behaviour,
     const std::string& navElementLinkKey,
     const DecisionIDContainer& chainIDs);

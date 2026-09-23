@@ -2,8 +2,8 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "AsgMessaging/MessageCheck.h"
 #include <regex>
+
 
 namespace TrigCompositeUtils {
 
@@ -145,22 +145,22 @@ namespace TrigCompositeUtils {
 
   // DEPRECATED
   template<class CONTAINER>
-  void filterLinkVectorByContainerKey(const std::string& containerSGKey, std::vector<ElementLink<CONTAINER>>& vector) {
+  void filterLinkVectorByContainerKey(std::string_view containerSGKey, std::vector<ElementLink<CONTAINER>>& vector) {
     if (containerSGKey.empty()) {
       return;
     }
-    auto it = std::remove_if(vector.begin(), vector.end(), [&](const ElementLink<CONTAINER>& el) {
- 	return  !std::regex_match( el.dataID(), std::regex(containerSGKey) );
-      });
-    // Collection has been re-ordered to put the bad elements at the end
-    vector.erase(it, vector.end());
+    //note: if this is simple text, then plain equality will be much quicker
+    const std::regex pattern(containerSGKey.begin(), containerSGKey.end());
+    std::erase_if(vector, [&pattern](const auto& el) {
+ 	    return  !std::regex_match( el.dataID(), pattern );
+    });
   }
 
   // DEPRECATED
   template<class CONTAINER>
   const std::vector< LinkInfo<CONTAINER> > recursiveGetFeaturesOfType(
     const NavGraph& navGraph,
-    const std::string& containerSGKey,
+    std::string_view containerSGKey,
     const unsigned int behaviour,
     const std::string& navElementLinkKey,
     const DecisionIDContainer& chainIDs) {
@@ -188,7 +188,7 @@ namespace TrigCompositeUtils {
     std::vector< LinkInfo<CONTAINER> >& features, 
     std::set<const NavGraphNode*>& fullyExploredFrom,
     const NavGraphNode* navGraphNode, 
-    const std::string& containerSGKey,
+    std::string_view containerSGKey,
     const unsigned int behaviour,
     const std::string& navElementLinkKey,
     const DecisionIDContainer& chainIDs) {
@@ -200,7 +200,7 @@ namespace TrigCompositeUtils {
 
     // Look up what named links are available in the Decision Object
     std::vector<std::string> availableLinkNames;
-    if (navElementLinkKey == "") { 
+    if (navElementLinkKey.empty()) { 
       const std::vector<std::string> getSingleLinkNames = decisionObj->getObjectNames<CONTAINER>();
       const std::vector<std::string> getCollectionLinkNames = decisionObj->getObjectCollectionNames<CONTAINER>();
       std::copy(getSingleLinkNames.begin(), getSingleLinkNames.end(), std::back_inserter(availableLinkNames));

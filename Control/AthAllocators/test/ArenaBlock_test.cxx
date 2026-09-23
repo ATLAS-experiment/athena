@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthAllocators/test/ArenaBlock_test.cxx
@@ -14,7 +14,7 @@
 #include "CxxUtils/checker_macros.h"
 #include <cassert>
 #include <vector>
-#include <iostream>
+#include <print>
 #include <setjmp.h>
 #include <signal.h>
 
@@ -83,7 +83,7 @@ Payload& payload (SG::ArenaBlock* bl, size_t i=0)
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   assert (SG::ArenaBlock::nactive() == 0);
   SG::ArenaBlock* bl = SG::ArenaBlock::newBlock (20, elt_size, nullptr);
   assert (SG::ArenaBlock::nactive() == 1);
@@ -104,7 +104,7 @@ void test1()
 
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
   SG::ArenaBlock* b1 = SG::ArenaBlock::newBlock (20, elt_size,
                                                  Payload::constructor);
   SG::ArenaBlock* b2 = SG::ArenaBlock::newBlock (20, elt_size,
@@ -196,7 +196,7 @@ void expect_signal (CALLABLE code)
 // Test protect().
 void test3()
 {
-  std::cout << "test3\n";
+  std::println ("test3");
   SG::ArenaBlock* b1 = SG::ArenaBlock::newBlock (20, elt_size, nullptr);
   word(b1, 10) = 42;
   assert (word(b1, 10) == 42);
@@ -214,7 +214,7 @@ void test3()
 // Test protectList().
 void test4()
 {
-  std::cout << "test4\n";
+  std::println ("test4");
   SG::ArenaBlock* b1 = SG::ArenaBlock::newBlock (20, elt_size, nullptr);
   SG::ArenaBlock* b2 = SG::ArenaBlock::newBlock (20, elt_size, nullptr);
   b1->link() = b2;
@@ -240,7 +240,7 @@ void test4()
 
 int main()
 {
-  std::cout << "AthAllocators/ArenaBlock_test\n";
+  std::println ("AthAllocators/ArenaBlock_test");
   test1();
   test2();
   test3();

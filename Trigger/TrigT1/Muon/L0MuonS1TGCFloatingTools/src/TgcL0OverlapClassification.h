@@ -4,7 +4,7 @@
 #ifndef L0MUONS1TGCFLOATINGTOOLS_TGCL0OVERLAPCLASSIFICATION_H
 #define L0MUONS1TGCFLOATINGTOOLS_TGCL0OVERLAPCLASSIFICATION_H
 
-#include "L0MuonS1TGCToolInterfaces/TgcL0Candidate.h"
+#include "L1MuonS1TGCToolInterfaces/TgcL0Candidate.h"
 
 #include <cstddef>
 

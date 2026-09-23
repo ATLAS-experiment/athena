@@ -132,10 +132,12 @@ public:
   /// Create a proxy object using an IOpaqueAddress and a transient key
   StatusCode recordAddress(const std::string& skey,
                            CxxUtils::RefCountedPtr<IOpaqueAddress> pAddress,
-                           bool clearAddressFlag=true);
+                           bool clearAddressFlag=true,
+                           const std::vector<CLID>& bases = {});
   /// Create a proxy object using an IOpaqueAddress
   StatusCode recordAddress(CxxUtils::RefCountedPtr<IOpaqueAddress> pAddress,
-                           bool clearAddressFlag=true);
+                           bool clearAddressFlag=true,
+                           const std::vector<CLID>& bases = {});
 
   /// make a soft link to the object T* already registered
   StatusCode symLink (const void* p2BRegistered, CLID linkID );

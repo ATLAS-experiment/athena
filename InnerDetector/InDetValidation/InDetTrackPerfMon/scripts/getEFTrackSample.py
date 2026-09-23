@@ -27,6 +27,12 @@ samplesDict = {
     "Zmumu_pu200" : [
         "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetTrackPerfMon/input_RDOs/mc21_14TeV.601190.PhPy8EG_AZNLO_Zmumu.recon.RDO.e8557_s4422_r16130_tid41929981_00/RDO.41929981._000001.pool.root.1",
     ],
+    "singleMu_10GeV" : [
+        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetTrackPerfMon/input_RDOs/mc21_14TeV.900495.PG_single_muonpm_Pt10_etaFlatnp0_43.recon.RDO.e8557_s4422_r16128_tid41864947_00/RDO.41864947._000103.pool.root.1",
+    ],
+    "singleMu_100GeV" : [
+        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetTrackPerfMon/input_RDOs/mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8557_s4422_r16128_tid41864949_00/RDO.41864949._000001.pool.root.1",
+    ]
 }
 
 if sampleName in samplesDict:

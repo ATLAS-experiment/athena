@@ -32,7 +32,6 @@ StatusCode FPGAClusterConverter::initialize() {
   ATH_CHECK(m_lorentzAngleToolStrip.retrieve());
 
   ATH_CHECK( m_FPGAClusterKey.initialize() );
-  ATH_CHECK(m_beamSpotKey.initialize());
 
   return StatusCode::SUCCESS;
 
@@ -706,10 +705,6 @@ StatusCode FPGAClusterConverter::createPixelSPs(xAOD::SpacePointContainer& pixel
 
 StatusCode FPGAClusterConverter::createSP(const FPGATrackSimCluster& cl, xAOD::SpacePoint& sp , xAOD::StripClusterContainer& clustersCont ) const {
 
-  SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey };
-  const InDet::BeamSpotData* beamSpot = *beamSpotHandle;
-  Amg::Vector3D vertex = beamSpot->beamVtx().position();
-
   const FPGATrackSimHit& clEq = cl.getClusterEquiv();
 
   const IdentifierHash& hash = clEq.getIdentifierHash();
@@ -757,8 +752,7 @@ StatusCode FPGAClusterConverter::createSP(const FPGATrackSimCluster& cl, xAOD::S
     }
   }
 
-  Amg::Vector3D topTrajDir = 2. * ( stripCenter1 - vertex);
-  Amg::Vector3D topStripCenter = 0.5 * topTrajDir;
+  Amg::Vector3D topStripCenter = stripCenter1;
   Amg::Vector3D stripCenterDistance = stripCenter1 - stripCenter2;
 
   ATH_MSG_DEBUG("topHalfStripLength = " << topHalfStripLength << " bottomHalfStripLength = " << bottomHalfStripLength);

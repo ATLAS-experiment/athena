@@ -13,8 +13,6 @@
 #include <TFile.h>
 #include <TH2F.h>
 #include <TH3.h>
-#include <string>
-#include <vector>
 #include <regex>
 #include <stdexcept>
 #include "PathResolver/PathResolver.h"
@@ -531,10 +529,7 @@ std::string BaseFakeBkgTool::getUncertaintyDescription(const CP::SystematicVaria
         return "";
     }
     
-    if(UID == 0)
-    {
-        return "Total statistical uncertainty in the event yield";
-    }
+    //UID cannot be zero here
     std::string info;
     auto stat = m_database->findStat(UID);
     if(stat)

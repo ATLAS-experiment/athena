@@ -24,10 +24,6 @@ def createPFConfigFlags():
     pfConfigFlags.addFlag("PF.useTrackClusterTruthMatching",False)
     pfConfigFlags.addFlag("PF.useTruthForChargedShowerSubtraction",False)
 
-    #Toggle whether to use the legacy EOverP (eflowCellEOverPTool_mc12_HLLHC.h) or not. Off by default so we use the new reference - this toggle is so we can compare old/new in the production system
-    #before eventually removing the old tool entirely.
-    pfConfigFlags.addFlag("PF.useLegacyEOverPRun4",False)
-
     #Toggle whether to use topoclusters or combined topoclusters + topotowers container
     pfConfigFlags.addFlag("PF.useTopoTowers",False)
 

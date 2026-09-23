@@ -12,7 +12,7 @@
 #undef NDEBUG
 #include "AthContainersInterfaces/IAuxTypeVector.h"
 #include "CxxUtils/checker_macros.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -45,7 +45,7 @@ public:
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   TestAuxVector tav;
   tav.storeDataSpan (&xx, 10);
 
@@ -66,6 +66,6 @@ void test1()
 
 int main()
 {
-  std::cout << "AthContainersInterfaces/IAuxTypeVector_test\n";
+  std::println ("AthContainersInterfaces/IAuxTypeVector_test");
   test1();
 }

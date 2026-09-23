@@ -25,13 +25,10 @@ def CustomJetsCfg(flags):
 
     acc = ComponentAccumulator()
 
-    CustomJetContainerName = "AntiKt4EMTopoCustomVtxGNNJets"
-
     from JetRecConfig.StandardJetConstits import stdInputExtDic, JetInputExternal, JetInputConstitSeq, JetConstitModifier, xAODType
     from JetRecConfig.JetDefinition import JetDefinition 
     from JetRecConfig.StandardSmallRJets import AntiKt4EMTopo
     from JetRecTools import JetRecToolsConfig as jrtcfg
-    from JetMomentTools import JetMomentToolsConfig
     from JetRecConfig.StandardJetConstits import stdConstitDic, stdContitModifDic
     from JetRecConfig.StandardJetContext import inputsFromContext
     from JetRecConfig.JetInputConfig import buildEventShapeAlg
@@ -75,28 +72,27 @@ def CustomJetsCfg(flags):
     # Create modifier list and JetDefinition 
     modsCustomVtxGNN = AntiKt4EMTopo.modifiers
     modsCustomVtxGNN = updateCalibSequence(modsCustomVtxGNN)
-    modsCustomVtxGNN = replaceItems(modsCustomVtxGNN,"TrackMoments","TrackMomentsCustomVtxGNN")
-    modsCustomVtxGNN = replaceItems(modsCustomVtxGNN,"TrackSumMoments","TrackSumMomentsCustomVtxGNN")
-    modsCustomVtxGNN = replaceItems(modsCustomVtxGNN,"JVF","JVFCustomVtxGNN")
-    modsCustomVtxGNN = replaceItems(modsCustomVtxGNN,"JVT","JVTCustomVtxGNN")
-    modsCustomVtxGNN = replaceItems(modsCustomVtxGNN,"Charge","ChargeCustomVtxGNN")
-    modsCustomVtxGNN = replaceItems(modsCustomVtxGNN,"jetiso","jetisoCustomVtxGNN")
-
     ghostCustomVtxGNN = AntiKt4EMTopo.ghostdefs
 
     # TODO: check this
-    stdConstitDic["EMTopoOriginCustomVtxGNN"]  = JetInputConstitSeq("EMTopoOriginCustomVtxGNN", xAODType.CaloCluster, ["EMCustomVtxGNN","OriginCustomVtxGNN"],
-                                                    "CaloCalTopoClusters", "EMOriginCustomVtxGNNTopoClusters", label="EMTopo")
-    stdContitModifDic["OriginCustomVtxGNN"] = JetConstitModifier("OriginCustomVtxGNN", "CaloClusterConstituentsOrigin", prereqs=[inputsFromContext("Vertices")], 
-                                                properties=dict(VertexContainer="PrimaryVertices_initial"))
-    stdContitModifDic["EMCustomVtxGNN"] = JetConstitModifier("EMCustomVtxGNN",     "ClusterAtEMScaleTool", )
+    stdConstitDic["EMTopoOriginCustomVtxGNN"]  = JetInputConstitSeq(
+        "EMTopoOriginCustomVtxGNN", xAODType.CaloCluster,
+        ["EMCustomVtxGNN", "OriginCustomVtxGNN"],
+        "CaloCalTopoClusters", "EMOriginCustomVtxGNNTopoClusters",
+        label="EMTopoCustomVtxGNN")
+    stdContitModifDic["OriginCustomVtxGNN"] = JetConstitModifier(
+        "OriginCustomVtxGNN", "CaloClusterConstituentsOrigin",
+        prereqs=[inputsFromContext("Vertices")],
+        properties=dict(VertexContainer="PrimaryVertices_initial"))
+    stdContitModifDic["EMCustomVtxGNN"] = JetConstitModifier(
+        "EMCustomVtxGNN", "ClusterAtEMScaleTool")
 
-    AntiKt4EMTopoCustomVtxGNN = JetDefinition("AntiKt",0.4,stdConstitDic.EMTopoOriginCustomVtxGNN,
-                                           infix = "CustomVtxGNN",
-                                           context = jetContextName,
-                                           ghostdefs = ghostCustomVtxGNN,
-                                           modifiers = modsCustomVtxGNN,
-                                           lock = True,
+    AntiKt4EMTopoCustomVtxGNN = JetDefinition(
+        "AntiKt",0.4,stdConstitDic.EMTopoOriginCustomVtxGNN,
+        context = jetContextName,
+        ghostdefs = ghostCustomVtxGNN,
+        modifiers = modsCustomVtxGNN,
+        lock = True,
     )
 
     def getUsedInVertexFitTrackDecoratorAlgCustomVtxGNN(jetdef, jetmod):
@@ -118,24 +114,26 @@ def CustomJetsCfg(flags):
                                                                                                                                               DecorDeps=["TTVA_AMVFWeights_forGNN", "TTVA_AMVFVertices_forGNN"] )
                                                                                  )
 
-    stdInputExtDic["JetTrackUsedInFitDecoCustomVtxGNN"] = JetInputExternal("JetTrackUsedInFitDecoCustomVtxGNN", xAODType.TrackParticle,
-                                                                        prereqs= [ f"input:{context['Tracks']}" , # in std context, this is InDetTrackParticles (see StandardJetContext)
-                                                                                  f"input:{context['Vertices']}"],
-                                                                        algoBuilder = getUsedInVertexFitTrackDecoratorAlgCustomVtxGNN
-                                                                        )
+    stdInputExtDic["JetTrackUsedInFitDecoCustomVtxGNN"] = JetInputExternal(
+        "JetTrackUsedInFitDecoCustomVtxGNN", xAODType.TrackParticle,
+        prereqs= [ f"input:{context['Tracks']}" , # in std context, this is InDetTrackParticles (see StandardJetContext)
+                   f"input:{context['Vertices']}"],
+        algoBuilder = getUsedInVertexFitTrackDecoratorAlgCustomVtxGNN )
 
-    stdInputExtDic["JetTrackVtxAssocCustomVtxGNN"] = JetInputExternal("JetTrackVtxAssocCustomVtxGNN",  xAODType.TrackParticle,
-                                              algoBuilder = lambda jdef,_ : jrtcfg.getJetTrackVtxAlg(jdef._contextDic, algname="jetTVACustomVtxGNN",
-                                                                                                                       WorkingPoint="Nonprompt_All_MaxWeight",
-                                                                                                                       AMVFVerticesDeco='TTVA_AMVFVertices_forGNN',
-                                                                                                                       AMVFWeightsDeco='TTVA_AMVFWeights_forGNN'),
-                                              prereqs = [ "input:JetTrackUsedInFitDecoCustomVtxGNN", f"input:{context['Vertices']}" ] )
+    stdInputExtDic["JetTrackVtxAssocCustomVtxGNN"] = JetInputExternal(
+        "JetTrackVtxAssocCustomVtxGNN",  xAODType.TrackParticle,
+        algoBuilder = lambda jdef,_ : jrtcfg.getJetTrackVtxAlg(
+            jdef._contextDic, algname="jetTVACustomVtxGNN",
+            WorkingPoint="Nonprompt_All_MaxWeight",
+            AMVFVerticesDeco='TTVA_AMVFVertices_forGNN',
+            AMVFWeightsDeco='TTVA_AMVFWeights_forGNN'),
+        prereqs = [ "input:JetTrackUsedInFitDecoCustomVtxGNN",
+                    f"input:{context['Vertices']}" ] )
 
-    stdInputExtDic["EventDensityCustomVtxGNN"] =     JetInputExternal("EventDensity", "EventShape", algoBuilder = buildEventShapeAlg,
-                      containername = lambda jetdef, _ : "Kt4"+jetdef.inputdef.label+"EventShape",
-                      prereqs = lambda jetdef : ["input:"+jetdef.inputdef.name] )
-
-
+    stdInputExtDic["EventDensityCustomVtxGNN"] = JetInputExternal(
+        "EventDensity", "EventShape", algoBuilder = buildEventShapeAlg,
+        containername = lambda jetdef, _ : "Kt4"+jetdef.inputdef.label+"EventShape",
+        prereqs = lambda jetdef : ["input:"+jetdef.inputdef.name] )
 
     from JetRecConfig.StandardJetMods import stdJetModifiers
     from JetRecConfig.JetDefinition import JetModifier
@@ -146,64 +144,7 @@ def CustomJetsCfg(flags):
       CalibCustomVtxGNN = JetModifier("JetCalibrationTool","jetcalib_jetcoll_calibseqCustomVtxGNN",
                                         createfn=JetCalibToolsConfig.getJetCalibToolFromString,
                                         prereqs=lambda mod,jetdef : JetCalibToolsConfig.getJetCalibToolPrereqs(mod,jetdef)+[f"input:{context['Vertices']}"]),
-
-
-      JVFCustomVtxGNN =             JetModifier("JetVertexFractionTool", "jvfCustomVtxGNN",
-                                        createfn= lambda jdef,_ : JetMomentToolsConfig.getJVFTool(jdef,"CustomVtxGNN"),
-                                        modspec = "CustomVtxGNN",
-                                        prereqs = ["input:JetTrackVtxAssocCustomVtxGNN", "mod:TrackMomentsCustomVtxGNN", f"input:{context['Vertices']}"] ,
-                                             JetContainer = CustomJetContainerName),
-
-      JVTCustomVtxGNN =             JetModifier("JetVertexTaggerTool", "jvtCustomVtxGNN",
-                                        createfn= lambda jdef,_ : JetMomentToolsConfig.getJVTTool(jdef,"CustomVtxGNN"),
-                                        modspec = "CustomVtxGNN",
-                                        prereqs = [ "mod:JVFCustomVtxGNN" ],JetContainer = CustomJetContainerName),
-
-      NNJVTCustomVtxGNN =           JetModifier("JetVertexNNTagger", "nnjvtCustomVtxGNN",
-                                              createfn=lambda jdef,_ :JetMomentToolsConfig.getNNJvtTool(jdef,"CustomVtxGNN"),
-                                              prereqs = [ "mod:JVFCustomVtxGNN" ],JetContainer = CustomJetContainerName),
-
-      OriginSetPVCustomVtxGNN =     JetModifier("JetOriginCorrectionTool", "origin_setpvCustomVtxGNN",
-                                        modspec = "CustomVtxGNN",
-                                        prereqs = [ "mod:JVFCustomVtxGNN" ],JetContainer = CustomJetContainerName, OnlyAssignPV=True),
-
-      TrackMomentsCustomVtxGNN =    JetModifier("JetTrackMomentsTool", "trkmomsCustomVtxGNN",
-                                        createfn= lambda jdef,_ : JetMomentToolsConfig.getTrackMomentsTool(jdef,"CustomVtxGNN"),
-                                        modspec = "CustomVtxGNN",
-                                        prereqs = [ "input:JetTrackVtxAssocCustomVtxGNN","ghost:Track" ],JetContainer = CustomJetContainerName),
-
-      TrackSumMomentsCustomVtxGNN = JetModifier("JetTrackSumMomentsTool", "trksummomsCustomVtxGNN",
-                                        createfn=lambda jdef,_ :JetMomentToolsConfig.getTrackSumMomentsTool(jdef,"CustomVtxGNN"),
-                                        modspec = "CustomVtxGNN",
-                                        prereqs = [ "input:JetTrackVtxAssocCustomVtxGNN","ghost:Track" ],JetContainer = CustomJetContainerName),
-
-      ChargeCustomVtxGNN =          JetModifier("JetChargeTool", "jetchargeCustomVtxGNN", 
-                                        prereqs = [ "ghost:Track" ]),
-
-
-      QGTaggingCustomVtxGNN =       JetModifier("JetQGTaggerVariableTool", "qgtaggingCustomVtxGNN",
-                                        createfn=lambda jdef,_ :JetMomentToolsConfig.getQGTaggingTool(jdef,"CustomVtxGNN"),
-                                        modspec = "CustomVtxGNN",
-                                        prereqs = lambda _,jdef :
-                                             ["input:JetTrackVtxAssocCustomVtxGNN","mod:TrackMomentsCustomVtxGNN"] +
-                                             (["mod:JetPtAssociation"] if not jdef._cflags.Input.isMC else []),
-                                        JetContainer = CustomJetContainerName),
-
-      fJVTCustomVtxGNN =            JetModifier("JetForwardPFlowJvtTool", "fJVTCustomVtxGNN",
-                                        createfn=lambda jdef,_ :JetMomentToolsConfig.getPFlowfJVTTool(jdef,"CustomVtxGNN"),
-                                        modspec = "CustomVtxGNN",
-                                        prereqs = ["input:JetTrackVtxAssocCustomVtxGNN","input:EventDensityCustomVtxGNN",f"input:{context['Vertices']}","mod:NNJVTCustomVtxGNN"],
-                                        JetContainer = CustomJetContainerName),
-      jetisoCustomVtxGNN = JetModifier("JetIsolationTool","isoCustomVtxGNN",
-                           JetContainer=CustomJetContainerName,
-                           InputConstitContainer = "EMOriginCustomVtxGNNTopoClusters",
-                           IsolationCalculations = ["IsoFixedCone:5:Pt",   "IsoFixedCone:5:PtPUsub",],
-                           RhoKey = lambda jetdef, specs : "Kt4"+jetdef.inputdef.label+"CustomVtxGNNEventShape" ,
-                           prereqs= ["input:EventDensityCustomVtxGNN"], #lambda spec,jetdef : ["input:Kt4"+jetdef.inputdef.label+"EventShape",],
-                           ),
-
     )
-
 
     from JetRecConfig.JetRecConfig import JetRecCfg
 

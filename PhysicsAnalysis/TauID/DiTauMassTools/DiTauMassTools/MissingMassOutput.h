@@ -10,6 +10,7 @@
 
 // local include(s):
 #include "DiTauMassTools/HelperFunctions.h"
+#include "Math/Vector4D.h"
 
 // ROOT include(s):
 #include <TH1.h>

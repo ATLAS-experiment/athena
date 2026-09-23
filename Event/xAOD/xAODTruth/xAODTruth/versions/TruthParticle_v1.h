@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODTRUTH_VERSIONS_TRUTHPARTICLE_V1_H
@@ -20,7 +20,6 @@
 // ROOT include(s):
 #include "Math/Vector4D.h"
 #include "xAODTruth/TruthParticleContainerFwd.h"
-template struct DataVector_detail::DVLEltBaseInit< xAOD::TruthParticle_v1>;
 
 namespace xAOD {
 
@@ -417,5 +416,6 @@ namespace xAOD {
     return os;
   }
 } // namespace xAOD
+DATAVECTOR_BASE_FIN(xAOD::TruthParticle, xAOD::IParticle);
 
 #endif // XAODTRUTH_VERSIONS_TRUTHPARTICLE_V1_H

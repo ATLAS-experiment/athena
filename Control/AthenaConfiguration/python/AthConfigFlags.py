@@ -166,10 +166,16 @@ class FlagAddress:
         raise TypeError( f"cannot convert flags category '{self._name}' to a boolean" )
 
     def __getitem__(self, name):
-        return getattr(self, name)
+        try:
+            return getattr(self, name)
+        except AttributeError as e:
+            raise KeyError(e)  # convert exception to follow Python convention for [] operator
 
     def __setitem__(self, name, value):
-        setattr(self, name, value)
+        try:
+            setattr(self, name, value)
+        except AttributeError as e:
+            raise KeyError(e)  # convert exception to follow Python convention for [] operator
 
     def __delitem__(self, name):
         del self._flags[f"{self._name}.{name}"]
@@ -288,10 +294,16 @@ class AthConfigFlags(object):
         del self[name]
 
     def __getitem__(self, name):
-        return getattr(self, name)
+        try:
+            return getattr(self, name)
+        except AttributeError as e:
+            raise KeyError(e)  # convert exception to follow Python convention for [] operator
 
     def __setitem__(self, name, value):
-        setattr(self, name, value)
+        try:
+            setattr(self, name, value)
+        except AttributeError as e:
+            raise KeyError(e)  # convert exception to follow Python convention for [] operator
 
     def __delitem__(self, name):
         self._tryModify()

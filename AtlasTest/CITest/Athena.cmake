@@ -11,9 +11,6 @@ atlas_add_citest( DuplicateClass
    SCRIPT python -c 'import ROOT'
    PROPERTIES FAIL_REGULAR_EXPRESSION "class .* is already in" )
 
-atlas_add_citest( DuplicateComponent
-   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/DuplicateComponentsCheck.py )
-
 #################################################################################
 # Digitization/Simulation
 #################################################################################

@@ -13,26 +13,29 @@
 //#define SMOOTH
 
 #include "DiTauMassTools/MissingMassCalculator.h" // this is for RootCore package
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <sstream>
-// #include "MissingMassCalculator.h" // this is for standalone
-// package
+#include "DiTauMassTools/MissingMassProb.h"
+#include "xAODMissingET/MissingET.h"
+#include "xAODTau/TauJet.h"
 
 #include <TObject.h>
 // SpeedUp committed from revision 163876
 #include <TF1.h>
+#include <TFile.h>
 #include <TFitResult.h>
 #include <TFitResultPtr.h>
 #include <TMatrixDSym.h>
-#include "TMatrixT.h"
+#include <TMatrixT.h>
 #include <TObject.h>
 #include <TVectorD.h>
 #include "Math/VectorUtil.h"
 
 #include "TruthUtils/ParticleConstants.h"
 
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
 namespace {
   constexpr double GEV = 1000.0;
 }
@@ -1409,7 +1412,7 @@ int MissingMassCalculator::DitauMassCalculatorV9lfv(bool refit) {
              .c_str());
   }
 
-  if (m_fMfit_all->GetEntries() > 0 && m_iter3 > 0) {
+  if (m_fMfit_all && m_fMfit_all->GetEntries() > 0 && m_iter3 > 0) {
 #ifdef SMOOTH
     m_fMfit_all->Smooth();
     m_fMfit_allNoWeight->Smooth();
@@ -1515,6 +1518,9 @@ MissingMassCalculator::maxFromHist(TH1F *theHist, std::vector<double> &histInfo,
   // enum e {
   // PROB=0,INTEGRAL,CHI2,DISCRI,TANTHETA,TANTHETAW,FITLENGTH,RMS,RMSVSDISCRI,MAXHISTINFO
   // };
+  if (!theHist)[[unlikely]]{
+    throw std::runtime_error("MissingMassCalculator::maxFromHist: histogram pointer is null.");
+  }
   double maxPos = 0.;
   double prob = 0.;
 
@@ -1561,7 +1567,7 @@ MissingMassCalculator::maxFromHist(TH1F *theHist, std::vector<double> &histInfo,
       sumw += weight;
       sumx += weight * theHist->GetBinCenter(iBin);
     }
-    maxPos = sumx / sumw;
+    maxPos = (sumw != 0.) ? (sumx / sumw) : 0.;
 
     // FIXME GetEntries is unweighted
     prob = sumw / theHist->GetEntries();
@@ -1954,18 +1960,19 @@ int MissingMassCalculator::refineSolutions(const double &M_nu1, const double &M_
           --m_nsol; // overwrite last solution. However this should really never
                     // happen
         }
-
+        
+        if ((m_nsol) < 0 or (m_nsol >= m_nsolfinalmax))[[unlikely]]{
+          throw std::out_of_range("refineSolutions: index m_nsol out of range.");
+        }
         // good solution found, copy in vector
         m_mtautauFinalSolVec[m_nsol] = mtautau;
         m_probFinalSolVec[m_nsol] = totalProb;
 
         PtEtaPhiMVector &nu1Final = m_nu1FinalSolVec[m_nsol];
         PtEtaPhiMVector &nu2Final = m_nu2FinalSolVec[m_nsol];
-        //      for (int iv=0;iv<4;++iv){
 
         nu1Final.SetPxPyPzE(nuvec1_tmpj.Px(), nuvec1_tmpj.Py(), nuvec1_tmpj.Pz(), nuvec1_tmpj.E());
         nu2Final.SetPxPyPzE(nuvec2_tmpj.Px(), nuvec2_tmpj.Py(), nuvec2_tmpj.Pz(), nuvec2_tmpj.E());
-        // }
 
         ++m_nsol;
       } // else totalProb<=0
@@ -2183,22 +2190,17 @@ void MissingMassCalculator::handleSolutions()
 
   for (int isol = 0; isol < m_nsol; ++isol) {
     ++m_iter5;
-    double totalProb;
-    double mtautau;
+    double totalProb{};
+    double mtautau{};
     const PtEtaPhiMVector *pnuvec1_tmpj;
     const PtEtaPhiMVector *pnuvec2_tmpj;
 
-    if (oldToBeUsed) {
-      totalProb = m_probFinalSolOldVec[isol];
-      mtautau = m_mtautauFinalSolOldVec[isol];
-      pnuvec1_tmpj = &m_nu1FinalSolOldVec[isol];
-      pnuvec2_tmpj = &m_nu2FinalSolOldVec[isol];
-    } else {
-      totalProb = m_probFinalSolVec[isol];
-      mtautau = m_mtautauFinalSolVec[isol];
-      pnuvec1_tmpj = &m_nu1FinalSolVec[isol];
-      pnuvec2_tmpj = &m_nu2FinalSolVec[isol];
-    }
+    //oldToBeUsed must be true at this point
+    totalProb = m_probFinalSolOldVec[isol];
+    mtautau = m_mtautauFinalSolOldVec[isol];
+    pnuvec1_tmpj = &m_nu1FinalSolOldVec[isol];
+    pnuvec2_tmpj = &m_nu2FinalSolOldVec[isol];
+    
     const PtEtaPhiMVector &nuvec1_tmpj = *pnuvec1_tmpj;
     const PtEtaPhiMVector &nuvec2_tmpj = *pnuvec2_tmpj;
 
@@ -2297,7 +2299,10 @@ void MissingMassCalculator::handleSolutions()
       m_nu2FinalSolOldVec[isol] = m_nu2FinalSolVec[isol];
     }
   }
-
+  if (m_nsol == 0) [[unlikely]]{
+    //throw'ing here causes a ctest to fail; should be investigated
+    return;
+  }
   // compute rms of solutions
   const double solRMS = sqrt(solSum2 / m_nsol - std::pow(solSum / m_nsol, 2));
   OutputInfo.m_AveSolRMS += solRMS;

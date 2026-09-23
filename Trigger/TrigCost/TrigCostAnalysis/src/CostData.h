@@ -48,17 +48,12 @@ class CostData {
     /**
      * @brief Cache the cost and ros collections, after formally requesting it from storegate.
      */
-    StatusCode set(const xAOD::TrigCompositeContainer* costCollection, const xAOD::TrigCompositeContainer* rosCollection, uint32_t onlineSlot);
+    StatusCode set(const xAOD::TrigCompositeContainer* costCollection, uint32_t onlineSlot);
 
     /**
      * @brief Getter of the cached algorithm cost collection pointer.
      */
     const xAOD::TrigCompositeContainer& costCollection() const;
-
-    /**
-     * @brief Getter of the cached ros cost collection pointer.
-     */
-    const xAOD::TrigCompositeContainer& rosCollection() const;
 
     /**
      * @brief Getter of the ROS to ROB map.
@@ -185,7 +180,6 @@ class CostData {
     StatusCode cache();
 
     const xAOD::TrigCompositeContainer* m_costCollection; //!< Cached non-owning pointer to main algorithm cost collection.
-    const xAOD::TrigCompositeContainer* m_rosCollection = nullptr; //!< Cached non-owning pointer to ros cost collection.
     uint64_t m_algTotalTime; //!< Integrated CPU time of all algorithms in the event. Stored in discrete microseconds.
     float m_liveTime; //!< Effective walltime of either the event or the LB, in seconds (@see m_liveTimeIsPerEvent).
     uint32_t m_lb; //!< Current luminosity block number
@@ -193,7 +187,6 @@ class CostData {
     bool m_liveTimeIsPerEvent; //!< If the livetime represents a single event or all of the current LB
     const std::unordered_map<uint32_t, std::string>* m_typeMapPtr; //!< Cached non-owning pointer mapping algorithm instance names to types
     std::map<size_t, std::vector<size_t>> m_algToRos; //!< Mapping of indexes from m_costCollection to corresponding ROS requests made by algorithm
-    const CostROSData* m_costROSData = nullptr; //!< Helper class to store ROS to ROB mapping
     const std::map<std::string, std::set<size_t>>* m_chainToAlgIdx = nullptr; //!<Mapping of chain to algorithms idx
     const std::map<std::string, std::set<size_t>>* m_chainToUniqAlgIdx = nullptr; //!<Mapping of chain name to its unique algorithms
     const std::map<std::string, std::map<int16_t, std::set<size_t>>>* m_sequencers = nullptr; //!<Mapping of sequence to algorithms

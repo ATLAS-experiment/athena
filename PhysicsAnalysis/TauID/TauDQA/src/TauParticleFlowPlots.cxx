@@ -47,12 +47,14 @@ namespace Tau{
     //Neutral Pions
     const std::vector< ElementLink< xAOD::PFOContainer > >& cellBased_neutralPFO = thisTau.protoNeutralPFOLinks();
     for(const auto& link : cellBased_neutralPFO) {
-      const xAOD::PFO* PFO = *link;
-      m_cellBased_neuPFO_Pt->Fill(PFO->pt(), weight);
-      m_cellBased_neuPFO_Eta->Fill(PFO->eta(), weight);
-      m_cellBased_neuPFO_Phi->Fill(PFO->phi(), weight);
-      m_cellBased_neuPFO_E->Fill(PFO->e(), weight);
-      m_cellBased_neuPFO_bdtPi0Score->Fill(PFO->bdtPi0Score(), weight);
+      if(link.isValid()){
+      	const xAOD::PFO* PFO = *link;
+        m_cellBased_neuPFO_Pt->Fill(PFO->pt(), weight);
+        m_cellBased_neuPFO_Eta->Fill(PFO->eta(), weight);
+        m_cellBased_neuPFO_Phi->Fill(PFO->phi(), weight);
+        m_cellBased_neuPFO_E->Fill(PFO->e(), weight);
+        m_cellBased_neuPFO_bdtPi0Score->Fill(PFO->bdtPi0Score(), weight);
+      }
     }
 
     int panTauInteger = 0;

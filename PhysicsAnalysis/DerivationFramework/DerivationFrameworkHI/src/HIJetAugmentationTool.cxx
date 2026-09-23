@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HIJetAugmentationTool.h"
@@ -29,6 +29,10 @@ namespace DerivationFramework
     
     m_jvtMatchedKey = m_hiJet_key.key() + "." + m_jvtMatchedKey.key();
     ATH_CHECK(m_jvtMatchedKey.initialize());
+    m_jvtMediumPassedKey = m_hiJet_key.key() + "." + m_jvtMediumPassedKey.key();
+    ATH_CHECK(m_jvtMediumPassedKey.initialize());
+    m_jvtTightPassedKey = m_hiJet_key.key() + "." + m_jvtTightPassedKey.key();
+    ATH_CHECK(m_jvtTightPassedKey.initialize());
     
     ATH_MSG_INFO("DeltaRJetMatching = "<< m_deltaR.value());
     
@@ -66,12 +70,22 @@ namespace DerivationFramework
       return StatusCode::FAILURE;
     }
 
+    // calibrate topo jets
+    //
+
+
     SG::WriteDecorHandle<xAOD::JetContainer, float> jvtMatchedHandle(m_jvtMatchedKey,ctx);
+    SG::WriteDecorHandle<xAOD::JetContainer, bool>  jvtMediumPassedHandle(m_jvtMediumPassedKey,ctx);
+    SG::WriteDecorHandle<xAOD::JetContainer, bool>  jvtTightPassedHandle(m_jvtTightPassedKey,ctx);
 
     // first loop over calibrated HI jets
     for (const auto *hjet : *hiJets) {
       float mindR = 999.;
+      float matchedEta = 999.;
       float matchedJvt = -1;
+      // temporary HI jvt selection
+      bool passJvtMedium = false;
+      bool passJvtTight  = false;
       // second loop over topo jets
       for (const auto *tjet : *caloJets) {
         float newjvt = m_jvtUpdateTool->updateJvt(*tjet);
@@ -83,15 +97,33 @@ namespace DerivationFramework
         if (dR < m_deltaR.value() && dR < mindR) {
           mindR = dR;
           matchedJvt = newjvt;
+	  matchedEta = tjet->eta();
         }
       }
     
       if (mindR < m_deltaR.value()) {
         (jvtMatchedHandle)(*hjet) = matchedJvt;
+	// HI jet sub-group pre-recommendation for JVT: https://atlas-heavy-ions.docs.cern.ch/Jets/jetselection/
+	// applying JVT selection on EMTopo jet matched to HI jet
+	// using selections from: https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/PileupJetRecommendations#JVT
+      	if (std::abs(matchedEta) < 2.4) {
+        	passJvtMedium = matchedJvt > 0.59;
+        	passJvtTight  = matchedJvt > 0.91;
+      	} else if (std::abs(matchedEta) < 2.5) {
+        	passJvtMedium = matchedJvt > 0.11;
+        	passJvtTight  = true; // no tight JVT in this region
+      	} else {
+        	passJvtMedium = true;
+        	passJvtTight  = true;
+      	}
+        (jvtMediumPassedHandle)(*hjet) = passJvtMedium;
+        (jvtTightPassedHandle)(*hjet)  = passJvtTight;
+
       } else {
-        (jvtMatchedHandle)(*hjet) = -1; 
+        (jvtMatchedHandle)(*hjet) = -1;
+        (jvtMediumPassedHandle)(*hjet) = false;
+        (jvtTightPassedHandle)(*hjet)  = false;
       }
-      
     }
 
     return StatusCode::SUCCESS;
