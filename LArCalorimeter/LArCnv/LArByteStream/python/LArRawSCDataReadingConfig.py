@@ -1,3 +1,4 @@
+#!/usr/bin/env athena.py
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -38,15 +39,20 @@ if __name__=="__main__":
     from AthenaCommon.Constants import DEBUG
     log.setLevel(DEBUG)
 
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultConditionsTags,defaultGeometryTags
+
     flags.LAr.doAlign=False
     flags.Exec.OutputLevel=DEBUG
-    flags.Input.Files = defaultTestFiles.RAW_RUN2
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+    flags.Input.Files = defaultTestFiles.RAW_RUN3
+    flags.Exec.MaxEvents=10
+    flags.fillFromArgs()
     flags.lock()
 
     acc = MainServicesCfg( flags )
     acc.merge(ByteStreamReadCfg(flags))
     acc.merge(LArRawSCDataReadingCfg(flags))
     
-    acc.run(2)
+    acc.run()
 

@@ -79,7 +79,7 @@ namespace JetTagDQA {
 
     declareProperty( "OnZprime", m_onZprime );
     declareProperty( "JetPtCutTtbar", m_jetPtCutTtbar = 20000);
-    declareProperty( "JetPtCutZprime", m_jetPtCutZprime = 500000);
+    declareProperty( "JetPtCutZprime", m_jetPtCutZprime = 400000);
     declareProperty( "JetPtCutR10", m_jetPtCutR10 = 200000); //pT>200 GeV for large-R jets
     declareProperty( "JetEtaCut", m_jetEtaCut = 2.5);
     declareProperty( "UseJvtProxy", m_useJvtProxy = false);
@@ -141,6 +141,8 @@ namespace JetTagDQA {
       plot->setTaggerNames(m_GN2v01Name, m_GN3EPCLV01Name, m_GN3XPV01Name);
       plot->setGN2v01Config(GN2v01SelectionTool, GN2v01WorkingPoints, m_GN2v01FractionC, m_GN2v01FractionTau);
       plot->setGN3EPCLV01Config(m_GN3EPCLV01WorkingPoints, m_GN3EPCLV01FractionC, m_GN3EPCLV01FractionTau);
+      if (!plot->setGN3XPV01Fractions(m_GN3XPV01HbbFractions, m_GN3XPV01HccFractions)) return StatusCode::FAILURE;
+      plot->setIsLargeR(name == m_jetNameR10);
     }
    
     return StatusCode::SUCCESS;
@@ -219,6 +221,17 @@ namespace JetTagDQA {
     const xAOD::Vertex *myVertex = vertices->at(indexPV); // the (reco?) primary vertex
     //std::cout<<"z coordinate of PV: "<< myVertex->z() <<std::endl;
 
+    const xAOD::TruthVertex* truthPV = nullptr;
+    if (!m_isData) {
+      const xAOD::TruthVertexContainer* truthVertices = nullptr;
+      if (m_useJvtProxy || evtStore()->contains<xAOD::TruthVertexContainer>(m_truthVertexName)) ATH_CHECK(evtStore()->retrieve(truthVertices, m_truthVertexName));
+      if (truthVertices && !truthVertices->empty()) truthPV = truthVertices->at(0);
+      else if (!m_warnedMissingTruthPV) {
+        ATH_MSG_WARNING("No " << m_truthVertexName << ", truth Lxy is measured from the detector origin");
+        m_warnedMissingTruthPV = true;
+      }
+    }
+
     // get the tracks
     const xAOD::TrackParticleContainer* tracks(0);
     ATH_CHECK(evtStore()->retrieve(tracks, m_trackName));
@@ -227,10 +240,8 @@ namespace JetTagDQA {
     bool passTruthPV = true;
     const xAOD::JetContainer* truthJets = nullptr;
     if (m_useJvtProxy) {
-      const xAOD::TruthVertexContainer* truthVertices = nullptr;
-      ATH_CHECK(evtStore()->retrieve(truthVertices, m_truthVertexName));
       ATH_CHECK(evtStore()->retrieve(truthJets, m_truthJetName));
-      passTruthPV = !truthVertices->empty() && std::abs(myVertex->z() - truthVertices->at(0)->z()) < 0.1;
+      passTruthPV = truthPV && std::abs(myVertex->z() - truthPV->z()) < 0.1;
     }
 
     // loop over the jet collections
@@ -293,7 +304,7 @@ namespace JetTagDQA {
           // fill other variables
           bool contains_muon;
           double jet_Lxy = -1;
-          plot->fillOther(jet, contains_muon, jet_Lxy, truth_label, event);
+          plot->fillOther(jet, contains_muon, jet_Lxy, truth_label, truthPV, event);
           if(contains_muon) nJets_containing_muon++;
 
           static const SG::ConstAccessor<std::vector<ElementLink<xAOD::IParticleContainer> > >
@@ -322,7 +333,7 @@ namespace JetTagDQA {
           //fill track and hit information
           plot->fillTrackVariables_for_largeRjet(jet, myVertex, truth_label, event);
           // fill discriminant related vars
-          plot->fillDiscriminantVariables_for_largeRjet(jet, truth_label, m_onZprime, nJetsThatPassedWPCuts, event);
+          plot->fillDiscriminantVariables_for_largeRjet(jet, truth_label, event);
         }
         else{
           ATH_MSG_WARNING("jet is a null pointer.");

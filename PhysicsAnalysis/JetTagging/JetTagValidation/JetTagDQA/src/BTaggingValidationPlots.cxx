@@ -17,11 +17,52 @@
 #include "AthContainers/ConstAccessor.h"
 
 #include <algorithm>
+#include <cmath>
 #include <stdexcept>
+#include <tuple>
 #include <utility>
 
 using CLHEP::GeV;
 namespace JetTagDQA{
+  namespace {
+    // the epsilon keeps the discriminant finite, as in get_discriminant of atlas-ftag-tools
+    constexpr double discriminantEpsilon = 1e-10;
+    double logLikelihoodRatio(double signal, double background){
+      return std::log((signal + discriminantEpsilon) / (background + discriminantEpsilon));
+    }
+
+    const std::vector<std::string> GN3XPV01Outputs = {"phtautauhad", "phbb", "phcc", "ptop", "pqcdbb", "pqcdbx", "pqcdcx", "pqcdll", "pWqq"};
+    // GN3XPV01 training classes, see flavours.yaml in atlas-ftag-tools
+    const std::vector<std::string> largeRClasses = {"htautauhad", "hbb", "hcc", "top", "qcdbb", "qcdbx", "qcdcx", "qcdll", "Wqq"};
+    // histogram name prefix and suffix, and histogram definition, for the large-R histograms per class
+    struct LargeRVariable { std::string prefix; std::string suffix; std::string definition; };
+    const std::map<std::string, LargeRVariable> largeRVariables = {
+      {"jet_pt_ttbar", {"jet_pt_", "_ttbar", "jet_pT"}},
+      {"jet_pt_Zprime", {"jet_pt_", "_Zprime", "jet_pT_Zprime"}},
+      {"jet_eta", {"jet_eta_", "", "jet_eta"}},
+      {"jet_mass", {"jet_mass_", "", "jet_mass"}},
+      {"numTracks_perJet", {"numTracks_perJet_", "", "numTracks_perJet"}},
+      {"d0", {"d0_", "", "track_d0"}},
+      {"z0", {"z0_", "", "track_z0"}},
+      {"sigd0", {"sigd0_", "", "track_sigd0"}},
+      {"sigz0", {"sigz0_", "", "track_sigz0"}},
+      {"track_pT_frac", {"track_pT_frac_", "", "track_pT_frac"}},
+      {"DeltaR_jet_track", {"DeltaR_jet_track_", "", "DeltaR_jet_track"}},
+      {"nInnHits", {"nInnHits_", "", "nInnHits"}},
+      {"nNextToInnHits", {"nNextToInnHits_", "", "nNextToInnHits"}},
+      {"nBLHits", {"nBLHits_", "", "nBLHits"}},
+      {"nsharedBLHits", {"nsharedBLHits_", "", "nsharedBLHits"}},
+      {"nsplitBLHits", {"nsplitBLHits_", "", "nsplitBLHits"}},
+      {"nPixHits", {"nPixHits_", "", "nPixHits"}},
+      {"nPixHoles", {"nPixHoles_", "", "nPixHoles"}},
+      {"nsharedPixHits", {"nsharedPixHits_", "", "nsharedPixHits"}},
+      {"nsplitPixHits", {"nsplitPixHits_", "", "nsplitPixHits"}},
+      {"nSCTHits", {"nSCTHits_", "", "nSCTHits"}},
+      {"nSCTHoles", {"nSCTHoles_", "", "nSCTHoles"}},
+      {"nsharedSCTHits", {"nsharedSCTHits_", "", "nsharedSCTHits"}},
+    };
+  }
+
   BTaggingValidationPlots::BTaggingValidationPlots(PlotBase* pParent, 
                                                    const std::string& sDir, 
                                                    std::string sParticleType) :
@@ -67,11 +108,67 @@ namespace JetTagDQA{
     m_GN3EPCLV01_ftau = ftau;
   }
 
+  bool BTaggingValidationPlots::setGN3XPV01Fractions(const std::map<std::string, double>& HbbFractions, const std::map<std::string, double>& HccFractions){
+    for (const auto* fractions : {&HbbFractions, &HccFractions}) {
+      for (const auto& [output, fraction] : *fractions) {
+        if (std::find(GN3XPV01Outputs.begin(), GN3XPV01Outputs.end(), output) == GN3XPV01Outputs.end()) {
+          ATH_MSG_ERROR("Unknown GN3XPV01 output " << output << " in the discriminant fractions");
+          return false;
+        }
+      }
+    }
+    m_GN3XPV01_HbbFractions = HbbFractions;
+    m_GN3XPV01_HccFractions = HccFractions;
+    return true;
+  }
+
+  void BTaggingValidationPlots::setIsLargeR(bool isLargeR){
+    m_isLargeR = isLargeR;
+  }
+
+  std::string BTaggingValidationPlots::largeRClass(const xAOD::Jet& jet, int truth_label) const {
+    if (m_isData) return "";
+    static const SG::ConstAccessor<int> nBAcc("GhostBHadronsFinalCount");
+    static const SG::ConstAccessor<int> nCAcc("GhostCHadronsFinalCount");
+    const int nB = nBAcc.withDefault(jet, 0);
+    const int nC = nCAcc.withDefault(jet, 0);
+    switch (truth_label) {
+      case 11: return "hbb";
+      case 12: return "hcc";
+      case 16: return "htautauhad";
+      case 1: case 6: case 7: return "top";
+      case 2: return (nB < 2 && nC < 2) ? "Wqq" : "";
+      case 10:
+        if (nB >= 2) return "qcdbb";
+        if (nB == 1) return "qcdbx";
+        return nC >= 1 ? "qcdcx" : "qcdll";
+      default: return "";
+    }
+  }
+
+  void BTaggingValidationPlots::bookLargeRHistograms(){
+    for (const std::string& truth_class : largeRClasses) {
+      for (const auto& [variable, def] : largeRVariables) {
+        m_largeRHistos[truth_class][variable] = bookHistogram(def.prefix + truth_class + def.suffix, def.definition, m_sParticleType, truth_class + " jets - ");
+      }
+    }
+    for (const std::string discriminant : {"Hbb", "Hcc"}) {
+      m_GN3XPV01_discriminants[discriminant] = bookHistogram("GN3XPV01_" + discriminant, "llr", m_sParticleType, "GN3XPV01 " + discriminant);
+      for (const std::string& truth_class : largeRClasses) {
+        m_GN3XPV01_discriminants[discriminant + "_" + truth_class] = bookHistogram("GN3XPV01_" + discriminant + "_" + truth_class, "llr", m_sParticleType, truth_class + " jets, GN3XPV01 " + discriminant);
+      }
+    }
+  }
+
+  void BTaggingValidationPlots::fillLargeR(const std::string& variable, const std::string& truth_class, double value, const xAOD::EventInfo* event){
+    if (truth_class.empty()) return;
+    m_largeRHistos.at(truth_class).at(variable)->Fill(value, event->beamSpotWeight());
+  }
+
   const std::map<std::string, double>& BTaggingValidationPlots::workingPoints(const std::string& tagger) const {
     static const std::map<std::string, double> none;
     if (tagger == "GN2v01") return m_GN2v01_workingPoints;
     if (tagger == "GN3EPCLV01") return m_GN3EPCLV01_workingPoints;
-    if (tagger == "GN3XPV01") return m_GN3XPV01_workingPoints;
     return none;
   }
 
@@ -120,12 +217,7 @@ namespace JetTagDQA{
   }
 
   // util function to fill the tagger discriminant related histograms
-  void BTaggingValidationPlots::fillDiscriminantHistograms(const std::string& tagger_name, const double& discriminant_value, const std::map<std::string, double>& working_points, const int& truth_label, std::map<std::string, TH1*>::const_iterator hist_iter, std::map<std::string, int>::const_iterator label_iter, const double& jet_pT, const double& jet_Lxy, const bool& onZprime, const xAOD::EventInfo* event){
-    // TODO: GN3XPV01 will not fill any WPs for now. This need to be adapted when WPs as a function of pT and mass are defined.
-    if (tagger_name == "GN3XPV01_") {
-      ATH_MSG_DEBUG("GN3XPV01 has no WPs defined. Not filling any WP-related histograms.");
-      return;
-    }
+  void BTaggingValidationPlots::fillDiscriminantHistograms(const std::string& tagger_name, const double& discriminant_value, const std::map<std::string, double>& working_points, const int& truth_label, std::map<std::string, TH1*>::const_iterator hist_iter, std::map<std::string, int>::const_iterator label_iter, const double& jet_pT, const double& jet_Lxy, const double& jet_SV1_Lxy, const bool& onZprime, const xAOD::EventInfo* event){
     // check if the current histogram is to be filled with this tagger discriminant
     if((hist_iter->first).find(tagger_name) < 1 && (hist_iter->first).find("matched") < (hist_iter->first).length()){                        
       // check if the current histograms is to be filled with the discrinimant and the current truth label
@@ -152,12 +244,20 @@ namespace JetTagDQA{
         for(std::map<std::string, double>::const_iterator working_points_iter = working_points.begin(); working_points_iter != working_points.end(); ++working_points_iter){
           // check if the current histogram is the right one
           if((hist_iter->first).find(working_points_iter->first) < (hist_iter->first).length() && (hist_iter->first).find("_"+label_iter->first+"_") < (hist_iter->first).length()){
-            if(truth_label == label_iter->second && discriminant_value > working_points_iter->second){
+            if(truth_label == label_iter->second && discriminant_value > working_points_iter->second && jet_Lxy >= 0){
               (hist_iter->second)->Fill(jet_Lxy, event->beamSpotWeight());
             }
           }
         }
       }    
+      else if((hist_iter->first).find("_matched_SV1Lxy") < (hist_iter->first).length()){
+        for(const auto& [wp, cut] : working_points){
+          if((hist_iter->first).find("_" + label_iter->first + "_" + wp + "_") < (hist_iter->first).length()
+             && truth_label == label_iter->second && discriminant_value > cut){
+            (hist_iter->second)->Fill(jet_SV1_Lxy, event->beamSpotWeight());
+          }
+        }
+      }
     }
   }
    
@@ -179,7 +279,13 @@ namespace JetTagDQA{
       TH1* histo_matched_Zprime = bookHistogram(histo_name_matched_Zprime, var_name_Zprime, sParticleType, label_iter->first + "-jets" + ", for " + tagger_name + " llr > "+ std::to_string(working_points_iter->second) + ": " );    
       m_weight_histos.insert(std::make_pair(histo_name_matched_Zprime, histo_matched_Zprime));
 
-      // book Lxy histogram
+      // light jets have no truth Lxy, their mistag rate is monitored vs the SV1 Lxy instead
+      if(label_iter->first == "u"){
+        std::string histo_name_matched_SV1Lxy = tagger_name + "_u_" + working_points_iter->first + "_matched_SV1Lxy";
+        TH1* histo_matched_SV1Lxy = bookHistogram(histo_name_matched_SV1Lxy, "Lxy_llrCut", sParticleType, "u-jets, for " + tagger_name + " llr > " + std::to_string(working_points_iter->second) + ", SV1 Lxy: ");
+        m_weight_histos.insert(std::make_pair(histo_name_matched_SV1Lxy, histo_matched_SV1Lxy));
+      }
+      if(label_iter->first != "b" && label_iter->first != "c") continue;
       std::string histo_name_matched_Lxy = tagger_name + "_" + label_iter->first + "_" + working_points_iter->first + "_matched_Lxy";
       std::string var_name_Lxy = "Lxy_llrCut";  
       if(isOldTagger) var_name_Lxy += "_old_taggers";
@@ -213,32 +319,11 @@ namespace JetTagDQA{
       }
   }
 
-  template <class T>
-  void BTaggingValidationPlots::fillHistoWithTruthCases_for_largeRjet(T value, TH1* histo_incl, TH1* histo_bb, TH1* histo_cc, TH1* histo_uu, TH1* histo_top, const int& truth_label, const xAOD::EventInfo* event){
-
-      // the inclusive ones in any case
-      histo_incl -> Fill( value, event->beamSpotWeight() );
-
-      // truth cases
-      //see definitions in https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/AnalysisCommon/ParticleJetTools/ParticleJetTools/LargeRJetLabelEnum.h
-      if(!m_isData && (truth_label == 3 || truth_label == 11)) { // H or Z->bb
-        histo_bb -> Fill( value, event->beamSpotWeight() );
-      }
-      else if(!m_isData && (truth_label == 4 || truth_label == 12)) {// H or Z->cc
-        histo_cc -> Fill( value, event->beamSpotWeight() );
-      }
-      else if(!m_isData && (truth_label == 5 || truth_label == 2 || truth_label == 6 || truth_label == 10)) { // Z or W -> qq or QCD
-        histo_uu -> Fill( value, event->beamSpotWeight() );
-      }
-      else if(!m_isData && (truth_label == 1)) { // t -> bqq
-        histo_top -> Fill( value, event->beamSpotWeight() );
-      }
-  }
-
    
   void BTaggingValidationPlots::initializePlots(){
 
     bookEffHistos();        
+    if (m_isLargeR) bookLargeRHistograms();
 
     // multiplicities
     m_nJets = bookHistogram("nJets", "nJets", m_sParticleType);
@@ -463,7 +548,6 @@ namespace JetTagDQA{
     m_numTracks_perJet_b = bookHistogram("numTracks_perJet_b", "numTracks_perJet", m_sParticleType, "b-jets -"); 
     m_numTracks_perJet_c = bookHistogram("numTracks_perJet_c", "numTracks_perJet", m_sParticleType, "c-jets -"); 
     m_numTracks_perJet_u = bookHistogram("numTracks_perJet_l", "numTracks_perJet", m_sParticleType, "l-jets -"); 
-    m_numTracks_perJet_top = bookHistogram("numTracks_perJet_top", "numTracks_perJet", m_sParticleType, "top-jets -"); 
     m_numTracks_perJet_muon = bookHistogram("numTracks_perJet_muon", "numTracks_perJet", m_sParticleType, "jets with muon -"); 
 
     // number of tracks from different origins
@@ -611,28 +695,6 @@ namespace JetTagDQA{
     m_nSCTHits_muon = bookHistogram("nSCTHits_muon", "nSCTHits", m_sParticleType, "jets with muon -");
     m_nSCTHoles_muon = bookHistogram("nSCTHoles_muon", "nSCTHoles", m_sParticleType, "jets with muon -");
     m_nsharedSCTHits_muon = bookHistogram("nsharedSCTHits_muon", "nsharedSCTHits", m_sParticleType, "jets with muon -");
-    //features largeRjet tagger
-    m_track_d0_top = bookHistogram("d0_top", "track_d0", m_sParticleType, "top-like jets -");
-    m_track_z0_top = bookHistogram("z0_top", "track_z0", m_sParticleType, "top-like jets -"); 
-    m_track_sigd0_top = bookHistogram("sigd0_top", "track_sigd0", m_sParticleType, "top-like jets -");
-    m_track_sigz0_top = bookHistogram("sigz0_top", "track_sigz0", m_sParticleType, "top-like jets -"); 
-    // pT_frac
-    m_track_pT_frac_top = bookHistogram("track_pT_frac_top", "track_pT_frac", m_sParticleType, "top-like jets -"); 
-    // DeltaR_jet_track
-    m_DeltaR_jet_track_top = bookHistogram("DeltaR_jet_track_top", "DeltaR_jet_track", m_sParticleType, "top-like jets -"); 
-    // tracker hits
-    m_nInnHits_top = bookHistogram("nInnHits_top", "nInnHits", m_sParticleType, "top-like jets -"); 
-    m_nNextToInnHits_top = bookHistogram("nNextToInnHits_top", "nNextToInnHits", m_sParticleType, "top-like jets -");
-    m_nBLHits_top = bookHistogram("nBLHits_top", "nBLHits", m_sParticleType, "top-like jets -");
-    m_nsharedBLHits_top = bookHistogram("nsharedBLHits_top", "nsharedBLHits", m_sParticleType, "top-like jets -");
-    m_nsplitBLHits_top = bookHistogram("nsplitBLHits_top", "nsplitBLHits", m_sParticleType, "top-like jets -");
-    m_nPixHits_top = bookHistogram("nPixHits_top", "nPixHits", m_sParticleType, "top-like jets -");
-    m_nPixHoles_top = bookHistogram("nPixHoles_top", "nPixHoles", m_sParticleType, "top-like jets -");
-    m_nsharedPixHits_top = bookHistogram("nsharedPixHits_top", "nsharedPixHits", m_sParticleType, "top-like jets -");
-    m_nsplitPixHits_top = bookHistogram("nsplitPixHits_top", "nsplitPixHits", m_sParticleType, "top-like jets -");
-    m_nSCTHits_top = bookHistogram("nSCTHits_top", "nSCTHits", m_sParticleType, "top-like jets -");
-    m_nSCTHoles_top = bookHistogram("nSCTHoles_top", "nSCTHoles", m_sParticleType, "top-like jets -");
-    m_nsharedSCTHits_top = bookHistogram("nsharedSCTHits_top", "nsharedSCTHits", m_sParticleType, "top-like jets -");
 
     // tagger
     m_GN2v01_pb = bookHistogram("GN2v01_pb", "GN2v01_pb", m_sParticleType);
@@ -697,6 +759,18 @@ namespace JetTagDQA{
 
   // a fill method for the jet kinematic vars
   void BTaggingValidationPlots::fillJetKinVars(const xAOD::Jet* jet, const int& truth_label, const bool& onZprime, const xAOD::EventInfo* event){
+    if (m_isLargeR) {
+      const std::string truth_class = largeRClass(*jet, truth_label);
+      (onZprime ? m_jet_pt_Zprime : m_jet_pt)->Fill(jet->pt()/GeV, event->beamSpotWeight());
+      fillLargeR(onZprime ? "jet_pt_Zprime" : "jet_pt_ttbar", truth_class, jet->pt()/GeV, event);
+      (onZprime ? m_jet_e_Zprime : m_jet_e)->Fill(jet->e()/GeV, event->beamSpotWeight());
+      m_jet_eta->Fill(jet->eta(), event->beamSpotWeight());
+      fillLargeR("jet_eta", truth_class, jet->eta(), event);
+      fillLargeR("jet_mass", truth_class, jet->m()/GeV, event);
+      m_jet_phi->Fill(jet->phi(), event->beamSpotWeight());
+      m_truthLabel->Fill(truth_label, event->beamSpotWeight());
+      return;
+    }
     TH1* dummy = nullptr;
     // jet kin vars
     // pT
@@ -716,9 +790,12 @@ namespace JetTagDQA{
   }
 
   // a fill method for variables that have no other home
-  void BTaggingValidationPlots::fillOther(const xAOD::Jet* jet, bool& contains_muon, double& jet_Lxy, const int& truth_label, const xAOD::EventInfo* event){
+  void BTaggingValidationPlots::fillOther(const xAOD::Jet* jet, bool& contains_muon, double& jet_Lxy, const int& truth_label, const xAOD::TruthVertex* truthPV, const xAOD::EventInfo* event){
 
-    // Lxy: take value of B hadron for b jets, of C hadron for c jets and the SV1 Lxy value for light jets
+    // truth Lxy of the B hadron for b-jets and of the C hadron for c-jets, measured from the truth primary vertex
+    auto truthLxy = [truthPV](const xAOD::TruthVertex& decay) {
+      return truthPV ? std::hypot(decay.x() - truthPV->x(), decay.y() - truthPV->y()) : decay.perp();
+    };
     double Lxy(-1);
     if(!m_isData){
 
@@ -739,7 +816,7 @@ namespace JetTagDQA{
           }
           else{
             // get the Lxy
-            Lxy = BHadrons[0]->decayVtx()->perp();
+            Lxy = truthLxy(*BHadrons[0]->decayVtx());
             m_Truth_Lxy_b ->Fill(Lxy, event->beamSpotWeight());
             // get the deltaR wrt to the jet axis
             double dR = jet->p4().DeltaR(BHadrons[0]->p4());
@@ -765,19 +842,13 @@ namespace JetTagDQA{
           }
           else{
             // get the Lxy
-            Lxy = CHadrons[0]->decayVtx()->perp();
+            Lxy = truthLxy(*CHadrons[0]->decayVtx());
             m_Truth_Lxy_c ->Fill(Lxy, event->beamSpotWeight());
             // get the deltaR wrt to the jet axis
             double dR = jet->p4().DeltaR(CHadrons[0]->p4());
             m_deltaR_truthCHadron_jet_c->Fill(dR, event->beamSpotWeight());
           }
         }
-      }
-
-      // SV1 Lxy for light jets
-      else if(truth_label == 0){
-        static const SG::ConstAccessor<float> SV1_LxyAcc("SV1_Lxy");
-        if (SV1_LxyAcc.isAvailable(*jet)) Lxy = SV1_LxyAcc(*jet);
       }
     }
 
@@ -970,6 +1041,7 @@ namespace JetTagDQA{
 
   // a fill method for track related vars
   void BTaggingValidationPlots::fillTrackVariables_for_largeRjet(const xAOD::Jet* jet, const xAOD::Vertex *myVertex, const int& truth_label, const xAOD::EventInfo* event){
+    const std::string truth_class = largeRClass(*jet, truth_label);
 
     // get the jet TLorentzVector
     TLorentzVector jet_tlv;
@@ -1027,30 +1099,36 @@ namespace JetTagDQA{
       int nSCTHoles = getTrackHits(*track, xAOD::numberOfSCTHoles);
       int nsharedSCTHits = getTrackHits(*track, xAOD::numberOfSCTSharedHits);
 
-      // fill the histogram
-      BTaggingValidationPlots::fillHistoWithTruthCases_for_largeRjet(d0, m_track_d0_incl, m_track_d0_b, m_track_d0_c, m_track_d0_u, m_track_d0_top, truth_label, event);
-      BTaggingValidationPlots::fillHistoWithTruthCases_for_largeRjet(z0, m_track_z0_incl, m_track_z0_b, m_track_z0_c, m_track_z0_u, m_track_z0_top, truth_label, event);
-      BTaggingValidationPlots::fillHistoWithTruthCases_for_largeRjet(d0/sigma_d0, m_track_sigd0_incl, m_track_sigd0_b, m_track_sigd0_c, m_track_sigd0_u, m_track_sigd0_top, truth_label, event);
-      BTaggingValidationPlots::fillHistoWithTruthCases_for_largeRjet(z0/sigma_z0, m_track_sigz0_incl, m_track_sigz0_b, m_track_sigz0_c, m_track_sigz0_u, m_track_sigz0_top, truth_label, event);
-      BTaggingValidationPlots::fillHistoWithTruthCases_for_largeRjet(pT_frac, m_track_pT_frac_incl, m_track_pT_frac_b, m_track_pT_frac_c, m_track_pT_frac_u, m_track_pT_frac_top, truth_label, event);
-      BTaggingValidationPlots::fillHistoWithTruthCases_for_largeRjet(DeltaR_jet_track, m_DeltaR_jet_track_incl, m_DeltaR_jet_track_b, m_DeltaR_jet_track_c, m_DeltaR_jet_track_u, m_DeltaR_jet_track_top, truth_label, event);
-      BTaggingValidationPlots::fillHistoWithTruthCases_for_largeRjet(nInnHits, m_nInnHits_incl, m_nInnHits_b, m_nInnHits_c, m_nInnHits_u, m_nInnHits_top, truth_label, event);
-      BTaggingValidationPlots::fillHistoWithTruthCases_for_largeRjet(nNextToInnHits, m_nNextToInnHits_incl, m_nNextToInnHits_b, m_nNextToInnHits_c, m_nNextToInnHits_u, m_nNextToInnHits_top, truth_label, event);
-      BTaggingValidationPlots::fillHistoWithTruthCases_for_largeRjet(nBLHits, m_nBLHits_incl, m_nBLHits_b, m_nBLHits_c, m_nBLHits_u, m_nBLHits_top, truth_label, event);
-      BTaggingValidationPlots::fillHistoWithTruthCases_for_largeRjet(nsharedBLHits, m_nsharedBLHits_incl, m_nsharedBLHits_b, m_nsharedBLHits_c, m_nsharedBLHits_u, m_nsharedBLHits_top, truth_label, event);
-      BTaggingValidationPlots::fillHistoWithTruthCases_for_largeRjet(nsplitBLHits, m_nsplitBLHits_incl, m_nsplitBLHits_b, m_nsplitBLHits_c, m_nsplitBLHits_u, m_nsplitBLHits_top, truth_label, event);
-      BTaggingValidationPlots::fillHistoWithTruthCases_for_largeRjet(nPixHits, m_nPixHits_incl, m_nPixHits_b, m_nPixHits_c, m_nPixHits_u, m_nPixHits_top, truth_label, event);
-      BTaggingValidationPlots::fillHistoWithTruthCases_for_largeRjet(nPixHoles, m_nPixHoles_incl, m_nPixHoles_b, m_nPixHoles_c, m_nPixHoles_u, m_nPixHoles_top, truth_label, event);
-      BTaggingValidationPlots::fillHistoWithTruthCases_for_largeRjet(nsharedPixHits, m_nsharedPixHits_incl, m_nsharedPixHits_b, m_nsharedPixHits_c, m_nsharedPixHits_u, m_nsharedPixHits_top, truth_label, event);
-      BTaggingValidationPlots::fillHistoWithTruthCases_for_largeRjet(nsplitPixHits, m_nsplitPixHits_incl, m_nsplitPixHits_b, m_nsplitPixHits_c, m_nsplitPixHits_u, m_nsplitPixHits_top, truth_label, event);
-      BTaggingValidationPlots::fillHistoWithTruthCases_for_largeRjet(nSCTHits, m_nSCTHits_incl, m_nSCTHits_b, m_nSCTHits_c, m_nSCTHits_u, m_nSCTHits_top, truth_label, event);
-      BTaggingValidationPlots::fillHistoWithTruthCases_for_largeRjet(nSCTHoles, m_nSCTHoles_incl, m_nSCTHoles_b, m_nSCTHoles_c, m_nSCTHoles_u, m_nSCTHoles_top, truth_label, event);
-      BTaggingValidationPlots::fillHistoWithTruthCases_for_largeRjet(nsharedSCTHits, m_nsharedSCTHits_incl, m_nsharedSCTHits_b, m_nsharedSCTHits_c, m_nsharedSCTHits_u, m_nsharedSCTHits_top, truth_label, event);
+      const std::vector<std::pair<std::string, std::pair<TH1*, double>>> track_values = {
+        {"d0", {m_track_d0_incl, d0}},
+        {"z0", {m_track_z0_incl, z0}},
+        {"sigd0", {m_track_sigd0_incl, d0/sigma_d0}},
+        {"sigz0", {m_track_sigz0_incl, z0/sigma_z0}},
+        {"track_pT_frac", {m_track_pT_frac_incl, pT_frac}},
+        {"DeltaR_jet_track", {m_DeltaR_jet_track_incl, DeltaR_jet_track}},
+        {"nInnHits", {m_nInnHits_incl, nInnHits}},
+        {"nNextToInnHits", {m_nNextToInnHits_incl, nNextToInnHits}},
+        {"nBLHits", {m_nBLHits_incl, nBLHits}},
+        {"nsharedBLHits", {m_nsharedBLHits_incl, nsharedBLHits}},
+        {"nsplitBLHits", {m_nsplitBLHits_incl, nsplitBLHits}},
+        {"nPixHits", {m_nPixHits_incl, nPixHits}},
+        {"nPixHoles", {m_nPixHoles_incl, nPixHoles}},
+        {"nsharedPixHits", {m_nsharedPixHits_incl, nsharedPixHits}},
+        {"nsplitPixHits", {m_nsplitPixHits_incl, nsplitPixHits}},
+        {"nSCTHits", {m_nSCTHits_incl, nSCTHits}},
+        {"nSCTHoles", {m_nSCTHoles_incl, nSCTHoles}},
+        {"nsharedSCTHits", {m_nsharedSCTHits_incl, nsharedSCTHits}},
+      };
+      for (const auto& [variable, histo_and_value] : track_values) {
+        histo_and_value.first->Fill(histo_and_value.second, event->beamSpotWeight());
+        fillLargeR(variable, truth_class, histo_and_value.second, event);
+      }
 
     }    // end loop over tracks
 
     // store the number of tracks var
-    BTaggingValidationPlots::fillHistoWithTruthCases_for_largeRjet(numTracks_perJet, m_numTracks_perJet_incl, m_numTracks_perJet_b, m_numTracks_perJet_c, m_numTracks_perJet_u, m_numTracks_perJet_top, truth_label, event);
+    m_numTracks_perJet_incl->Fill(numTracks_perJet, event->beamSpotWeight());
+    fillLargeR("numTracks_perJet", truth_class, numTracks_perJet, event);
 
   }
 
@@ -1233,6 +1311,9 @@ namespace JetTagDQA{
   // a fill method for discriminant related vars
   void BTaggingValidationPlots::fillDiscriminantVariables(const xAOD::Jet* jet, const double& jet_Lxy, const int& truth_label, const bool& onZprime, std::map<std::string, int>& nJetsThatPassedWPCuts, const xAOD::EventInfo* event){
 
+    static const SG::ConstAccessor<float> SV1_LxyAcc("SV1_Lxy");
+    const double jet_SV1_Lxy = SV1_LxyAcc.withDefault(*jet, -1);
+
     // GN2v01
     if (hasTaggerOutputs(*jet, m_GN2v01Name, {"pb", "pu", "pc", "ptau"})) {
       double GN2v01_pb = SG::ConstAccessor<float>(m_GN2v01Name + "_pb")(*jet);
@@ -1250,13 +1331,13 @@ namespace JetTagDQA{
         if (m_GN2v01SelectionTool->getTaggerWeight(GN2v01_pb, GN2v01_pc, GN2v01_pu, weight_GN2v01, GN2v01_ptau) != CP::CorrectionCode::Ok) weight_GN2v01 = -100;
       }
       else {
-        weight_GN2v01 = log( GN2v01_pb / ( GN2v01_pc * m_GN2v01_fc + GN2v01_pu * (1-m_GN2v01_fc-m_GN2v01_ftau) + GN2v01_ptau * m_GN2v01_ftau ));
+        weight_GN2v01 = logLikelihoodRatio(GN2v01_pb, GN2v01_pc * m_GN2v01_fc + GN2v01_pu * (1-m_GN2v01_fc-m_GN2v01_ftau) + GN2v01_ptau * m_GN2v01_ftau);
       }
       updateNJetsThatPassedWPCutsMap(nJetsThatPassedWPCuts, "GN2v01", weight_GN2v01);
 
       for(std::map<std::string, TH1*>::const_iterator hist_iter=m_weight_histos.begin(); hist_iter!=m_weight_histos.end(); ++hist_iter){
         for(std::map<std::string, int>::const_iterator label_iter = m_truthLabels.begin(); label_iter != m_truthLabels.end(); ++label_iter){
-          BTaggingValidationPlots::fillDiscriminantHistograms("GN2v01_", weight_GN2v01, m_GN2v01_workingPoints, truth_label, hist_iter, label_iter, jet->pt(), jet_Lxy, onZprime, event);
+          BTaggingValidationPlots::fillDiscriminantHistograms("GN2v01_", weight_GN2v01, m_GN2v01_workingPoints, truth_label, hist_iter, label_iter, jet->pt(), jet_Lxy, jet_SV1_Lxy, onZprime, event);
         }
       }
     }
@@ -1273,62 +1354,46 @@ namespace JetTagDQA{
       m_GN3EPCLV01_pc->Fill(GN3EPCLV01_pc, event->beamSpotWeight());
       m_GN3EPCLV01_ptau->Fill(GN3EPCLV01_ptau, event->beamSpotWeight());
 
-      double weight_GN3EPCLV01 = log( GN3EPCLV01_pb / ( GN3EPCLV01_pc * m_GN3EPCLV01_fc + GN3EPCLV01_pu * (1-m_GN3EPCLV01_fc-m_GN3EPCLV01_ftau) + GN3EPCLV01_ptau * m_GN3EPCLV01_ftau ));
+      double weight_GN3EPCLV01 = logLikelihoodRatio(GN3EPCLV01_pb, GN3EPCLV01_pc * m_GN3EPCLV01_fc + GN3EPCLV01_pu * (1-m_GN3EPCLV01_fc-m_GN3EPCLV01_ftau) + GN3EPCLV01_ptau * m_GN3EPCLV01_ftau);
       updateNJetsThatPassedWPCutsMap(nJetsThatPassedWPCuts, "GN3EPCLV01", weight_GN3EPCLV01);
 
       for(std::map<std::string, TH1*>::const_iterator hist_iter=m_weight_histos.begin(); hist_iter!=m_weight_histos.end(); ++hist_iter){
         for(std::map<std::string, int>::const_iterator label_iter = m_truthLabels.begin(); label_iter != m_truthLabels.end(); ++label_iter){
-          BTaggingValidationPlots::fillDiscriminantHistograms("GN3EPCLV01_", weight_GN3EPCLV01, m_GN3EPCLV01_workingPoints, truth_label, hist_iter, label_iter, jet->pt(), jet_Lxy, onZprime, event);
+          BTaggingValidationPlots::fillDiscriminantHistograms("GN3EPCLV01_", weight_GN3EPCLV01, m_GN3EPCLV01_workingPoints, truth_label, hist_iter, label_iter, jet->pt(), jet_Lxy, jet_SV1_Lxy, onZprime, event);
         }
       }
     }
   }
 
   // a fill method for discriminant related vars
-  void BTaggingValidationPlots::fillDiscriminantVariables_for_largeRjet(const xAOD::Jet* jet, const int& truth_label, const bool& onZprime, std::map<std::string, int>& nJetsThatPassedWPCuts, const xAOD::EventInfo* event){
-    // get the GN3XPV01 vars
-    if (!hasTaggerOutputs(*jet, m_GN3XPV01Name, {"phtautauhad", "phbb", "phcc", "ptop", "pqcdbb", "pqcdbx", "pqcdcx", "pqcdll", "pWqq"})) return;
-    SG::ConstAccessor<float> GN3XPV01_phtautauhadAcc(m_GN3XPV01Name + "_phtautauhad");
-    SG::ConstAccessor<float> GN3XPV01phbbAcc(m_GN3XPV01Name + "_phbb");
-    SG::ConstAccessor<float> GN3XPV01phccAcc(m_GN3XPV01Name + "_phcc");
-    SG::ConstAccessor<float> GN3XPV01ptopAcc(m_GN3XPV01Name + "_ptop");
-    SG::ConstAccessor<float> GN3XPV01pqcdbbAcc(m_GN3XPV01Name + "_pqcdbb");
-    SG::ConstAccessor<float> GN3XPV01pqcdbxAcc(m_GN3XPV01Name + "_pqcdbx");
-    SG::ConstAccessor<float> GN3XPV01pqcdcxAcc(m_GN3XPV01Name + "_pqcdcx");
-    SG::ConstAccessor<float> GN3XPV01pqcdllAcc(m_GN3XPV01Name + "_pqcdll");
-    SG::ConstAccessor<float> GN3XPV01pwqqAcc(m_GN3XPV01Name + "_pWqq");
-    double GN3XPV01_phtautauhad = GN3XPV01_phtautauhadAcc(*jet);
-    double GN3XPV01_phbb = GN3XPV01phbbAcc(*jet);
-    double GN3XPV01_phcc = GN3XPV01phccAcc(*jet);
-    double GN3XPV01_ptop = GN3XPV01ptopAcc(*jet);
-    double GN3XPV01_pqcdbb = GN3XPV01pqcdbbAcc(*jet);
-    double GN3XPV01_pqcdbx = GN3XPV01pqcdbxAcc(*jet);
-    double GN3XPV01_pqcdcx = GN3XPV01pqcdcxAcc(*jet);
-    double GN3XPV01_pqcdll = GN3XPV01pqcdllAcc(*jet);
-    double GN3XPV01_pwqq = GN3XPV01pwqqAcc(*jet);
+  void BTaggingValidationPlots::fillDiscriminantVariables_for_largeRjet(const xAOD::Jet* jet, const int& truth_label, const xAOD::EventInfo* event){
+    if (!hasTaggerOutputs(*jet, m_GN3XPV01Name, GN3XPV01Outputs)) return;
+    std::map<std::string, double> probs;
+    for (const std::string& output : GN3XPV01Outputs) {
+      probs[output] = SG::ConstAccessor<float>(m_GN3XPV01Name + "_" + output)(*jet);
+    }
 
-    m_GN3XPV01_phtautauhad->Fill(GN3XPV01_phtautauhad, event->beamSpotWeight());
-    m_GN3XPV01_phbb->Fill(GN3XPV01_phbb, event->beamSpotWeight());
-    m_GN3XPV01_phcc->Fill(GN3XPV01_phcc, event->beamSpotWeight());
-    m_GN3XPV01_ptop->Fill(GN3XPV01_ptop, event->beamSpotWeight());
-    m_GN3XPV01_pqcdbb->Fill(GN3XPV01_pqcdbb, event->beamSpotWeight());
-    m_GN3XPV01_pqcdbx->Fill(GN3XPV01_pqcdbx, event->beamSpotWeight());
-    m_GN3XPV01_pqcdcx->Fill(GN3XPV01_pqcdcx, event->beamSpotWeight());
-    m_GN3XPV01_pqcdll->Fill(GN3XPV01_pqcdll, event->beamSpotWeight());
-    m_GN3XPV01_pwqq->Fill(GN3XPV01_pwqq, event->beamSpotWeight());
-    
-    // TODO: This is a dummy WP, need to define proper WPs for large-R jets as a function of pT and mass.
-    double weight_GN3XPV01 = log( GN3XPV01_phbb / ( ( GN3XPV01_phcc * m_GN3XPV01_hcc_fc ) + ( GN3XPV01_ptop * m_GN3XPV01_top_fc )  + GN3XPV01_pqcdbb * (1-m_GN3XPV01_top_fc - m_GN3XPV01_hcc_fc ) ) );
-    updateNJetsThatPassedWPCutsMap(nJetsThatPassedWPCuts, "GN3XPV01", weight_GN3XPV01);
+    m_GN3XPV01_phtautauhad->Fill(probs.at("phtautauhad"), event->beamSpotWeight());
+    m_GN3XPV01_phbb->Fill(probs.at("phbb"), event->beamSpotWeight());
+    m_GN3XPV01_phcc->Fill(probs.at("phcc"), event->beamSpotWeight());
+    m_GN3XPV01_ptop->Fill(probs.at("ptop"), event->beamSpotWeight());
+    m_GN3XPV01_pqcdbb->Fill(probs.at("pqcdbb"), event->beamSpotWeight());
+    m_GN3XPV01_pqcdbx->Fill(probs.at("pqcdbx"), event->beamSpotWeight());
+    m_GN3XPV01_pqcdcx->Fill(probs.at("pqcdcx"), event->beamSpotWeight());
+    m_GN3XPV01_pqcdll->Fill(probs.at("pqcdll"), event->beamSpotWeight());
+    m_GN3XPV01_pwqq->Fill(probs.at("pWqq"), event->beamSpotWeight());
 
-    // TODO: Fill the different WPs as a function of pT and mass.
-    // fill the histograms with the tagger discriminants 
-    for(std::map<std::string, TH1*>::const_iterator hist_iter=m_weight_histos.begin(); hist_iter!=m_weight_histos.end(); ++hist_iter){
-      for(std::map<std::string, int>::const_iterator label_iter = m_truthLabels.begin(); label_iter != m_truthLabels.end(); ++label_iter){
-
-        // GN3XPV01 taggers
-        BTaggingValidationPlots::fillDiscriminantHistograms("GN3XPV01_", weight_GN3XPV01, m_GN3XPV01_workingPoints, truth_label, hist_iter, label_iter, jet->pt(), -1, onZprime, event);
-
+    const std::string truth_class = largeRClass(*jet, truth_label);
+    for (const auto& [discriminant, signal, fractions] : {
+        std::tuple{"Hbb", "phbb", &m_GN3XPV01_HbbFractions},
+        std::tuple{"Hcc", "phcc", &m_GN3XPV01_HccFractions}}) {
+      if (fractions->empty()) continue;
+      double denominator = 0;
+      for (const auto& [output, fraction] : *fractions) denominator += fraction * probs.at(output);
+      const double value = logLikelihoodRatio(probs.at(signal), denominator);
+      m_GN3XPV01_discriminants.at(discriminant)->Fill(value, event->beamSpotWeight());
+      if (!truth_class.empty()) {
+        m_GN3XPV01_discriminants.at(std::string(discriminant) + "_" + truth_class)->Fill(value, event->beamSpotWeight());
       }
     }
   }
@@ -1393,19 +1458,12 @@ namespace JetTagDQA{
     // list of all taggers
     m_taggers.push_back("GN2v01");
     if (!m_GN3EPCLV01Name.empty()) m_taggers.push_back("GN3EPCLV01");
-    m_taggers.push_back("GN3XPV01");
 
     // list of all truth labels
     m_truthLabels.insert(std::make_pair("b", 5));
     m_truthLabels.insert(std::make_pair("c", 4));
     m_truthLabels.insert(std::make_pair("u", 0));
     m_truthLabels.insert(std::make_pair("tau", 15));
-
-    // GN3XPV01 // TODO: update WPs in the future as a function of pT and mass.
-    m_GN3XPV01_hcc_fc = 0.02;
-    m_GN3XPV01_top_fc = 0.25;
-    m_GN3XPV01_workingPoints.insert(std::make_pair("60", 3.818)); // Dummy WP
-    // if(m_detailLevel > 10) Add more WPs here in future. 
   }
  
  
