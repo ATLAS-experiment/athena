@@ -11,11 +11,8 @@ find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread
 # Component(s) in the package:
 atlas_add_library( JetTagToolsLib
     JetTagTools/*.h
-    src/TrackSelector.cxx
     src/HistoHelperRoot.cxx src/NewLikelihoodTool.cxx
-    src/BasicTrackGradeFactory.cxx src/DetailedTrackGradeFactory.cxx
-    src/GradedTrack.cxx src/IPTag.cxx
-    src/SVForIPTool.cxx src/SVTag.cxx 
+    src/SVTag.cxx
     src/JetFitterInputWriter.cxx src/JetFitterDummyClassifier.cxx
     src/MV2Tag.cxx
     src/JetFitterVariablesFactory.cxx src/MSVVariablesFactory.cxx
@@ -28,7 +25,7 @@ atlas_add_library( JetTagToolsLib
     PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
     PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
     LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel CxxUtils GaudiKernel
-    GeoPrimitives ITrackToVertex InDetRecToolInterfaces JetTagCalibrationLib JetTagInfo
+    GeoPrimitives ITrackToVertex InDetRecToolInterfaces JetTagCalibrationLib
     MVAUtils StoreGateLib xAODBTagging xAODJet xAODTracking
     PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES}
     AthContainers PathResolver Particle ParticleJetToolsLib TrkEventPrimitives
