@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetPrepRawData/PixelGangedClusterAmbiguities.h"
@@ -100,8 +100,10 @@ void PixelGangedClusterAmbiguitiesCnv_p1::transToPers
       previous_itr = itr;
       
     }
-    // pushback the last one!
-    persObj->m_ambiguityMap.emplace_back(keyPixelCluster->getHashAndIndex().hashAndIndex(), uintvector);
+    if (keyPixelCluster)[[likely]]{
+      // pushback the last one!
+      persObj->m_ambiguityMap.emplace_back(keyPixelCluster->getHashAndIndex().hashAndIndex(), uintvector);
+    }
   }
 }
 
