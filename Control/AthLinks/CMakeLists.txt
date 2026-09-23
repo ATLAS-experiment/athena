@@ -13,7 +13,7 @@ atlas_add_library( AthLinks
                    PUBLIC_HEADERS AthLinks
                    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
                    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${Boost_LIBRARIES} AthenaKernel CxxUtils SGTools SGCoreLib GaudiKernel
+                   LINK_LIBRARIES ${Boost_LIBRARIES} AthContainersInterfaces AthenaKernel CxxUtils SGTools SGCoreLib GaudiKernel
                    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} )
 
 atlas_add_dictionary( AthLinksDict

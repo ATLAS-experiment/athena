@@ -17,7 +17,10 @@
 
 #include "AthLinks/DataLinkBase.h"
 #include "AthenaKernel/ClassID_traits.h"
+#include "AthContainersInterfaces/ToTransient.h"
+#include "AthenaKernel/proxyDictFromEventContext.h"
 #include "AthenaKernel/DefaultKey.h"
+#include <vector>
 class EventContext;
 class IProxyDict;
 
@@ -438,6 +441,57 @@ private:
    */
   void* storableNonConst();
 };
+
+
+namespace SG {
+
+
+/**
+ * @brief Declare ToTransient hook for DataLink.
+ */
+template <class STORABLE>
+class ToTransient<DataLink<STORABLE> >
+{
+public:
+  static void toTransient (DataLink<STORABLE>& dl,
+                           IProxyDict* sg = nullptr);
+  static void toTransient (DataLink<STORABLE>& dl,
+                           const EventContext& ctx);
+};
+
+
+/**
+ * @brief Declare ToTransient hook for a vector of DataLink
+ *        (with arbitrary allocator).
+ */
+template <class STORABLE, class ALLOC>
+class ToTransient<std::vector<DataLink<STORABLE>, ALLOC> >
+{
+public:
+  static void toTransient (std::vector<DataLink<STORABLE>, ALLOC>& dlv,
+                           IProxyDict* sg = nullptr);
+  static void toTransient (std::vector<DataLink<STORABLE>, ALLOC>& dlv,
+                           const EventContext& ctx);
+};
+
+
+/**
+ * @brief Declare ToTransient hook for a vector of vectors of DataLink
+ *        (with arbitrary allocators).
+ */
+template <class STORABLE, class ALLOC1, class ALLOC2>
+class ToTransient<std::vector<std::vector<DataLink<STORABLE>, ALLOC1>, ALLOC2> >
+{
+public:
+  static void toTransient (std::vector<std::vector<DataLink<STORABLE>, ALLOC1>, ALLOC2>& dlvv,
+                           IProxyDict* sg = nullptr);
+  static void toTransient (std::vector<std::vector<DataLink<STORABLE>, ALLOC1>, ALLOC2>& dlvv,
+                           const EventContext& ctx);
+};
+
+
+
+} // namespace SG
 
 
 #include "AthLinks/DataLink.icc"
