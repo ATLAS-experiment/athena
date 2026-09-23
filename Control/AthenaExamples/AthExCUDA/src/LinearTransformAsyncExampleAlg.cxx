@@ -1,9 +1,12 @@
 //
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 
 // Local include(s).
 #include "LinearTransformAsyncExampleAlg.h"
+
+// Gaudi include(s).
+#include <Gaudi/CUDA/CUDAStream.h>
 
 namespace AthCUDAExamples {
 
@@ -19,7 +22,9 @@ StatusCode LinearTransformAsyncExampleAlg::execute(const EventContext&) const {
   // Run calculation. See LinearTransformAsyncExampleAlg.cu.
   static const float MULTIPLIER = 1.23f;
   ATH_MSG_INFO("Starting linearTransform");
-  ATH_CHECK(linearTransform(dummyArray, MULTIPLIER));
+  Gaudi::CUDA::Stream stream(this);
+  linearTransform(stream, dummyArray, MULTIPLIER);
+  ATH_CHECK(stream.await());
 
   // Check if the operation succeeded.
   static const float EXPECTED_RESULT = ARRAY_ELEMENT * MULTIPLIER;
