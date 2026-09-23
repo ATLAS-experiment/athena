@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HGTD_ReadoutGeometry/HGTD_DetectorElement.h"
@@ -22,8 +22,8 @@ HGTD_DetectorElement::HGTD_DetectorElement(const Identifier &id,
   SolidStateDetectorElementBase(id, design, geophysvol, commonItems, geoAlignStore)
 {
     const HGTD_ID* hgtdId = dynamic_cast<const HGTD_ID *>(getIdHelper());
+    if (!hgtdId)[[unlikely]] throw std::runtime_error("HGTD_DetectorElement: Unable to get HGTD_ID");
     m_idHash = hgtdId->wafer_hash(m_id);
-
     if (!m_idHash.is_valid()) throw std::runtime_error("HGTD_DetectorElement: Unable to set IdentifierHash");
 }
 
