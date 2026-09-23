@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <utility>
 
 // Local include(s):
 #include "FsrUtils/FsrPhotonTool.h"
@@ -15,6 +14,7 @@
 #include "AsgTools/AsgToolConfig.h"
 #include "AthContainers/ConstDataVector.h"
 
+#include <utility>
 
 namespace FSR {
 
@@ -451,6 +451,7 @@ bool oqIsOK = (bool) m_elIsGoodOQSelectionTool->accept(electron);
                                   unsigned int nofPhFsr) {
         for (unsigned int indx=0; indx < nofPhFsr; indx++ ) {
                 const xAOD::Photon* ph = dynamic_cast<const xAOD::Photon*>(phfsr.at(indx).first);
+                if (!ph) continue;
                 const xAOD::CaloCluster* ph_cl = ph->caloCluster();
                 const xAOD::CaloCluster* el_cl = electron->caloCluster();
                 double dr = deltaR(el_cl->eta(), el_cl->phi(),
