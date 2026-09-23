@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_RecAlgs/src/VertexTimeAlg.cxx
  *
@@ -19,6 +19,7 @@
 
 // Standard library includes
 #include <cmath>
+#include <stdexcept>
 
 namespace HGTD {
 
@@ -36,7 +37,9 @@ StatusCode VertexTimeAlg::initialize() {
   ATH_CHECK(m_trackValidTime_key.initialize());
   ATH_CHECK(m_trackTime_key.initialize());
   ATH_CHECK(m_trackTimeRes_key.initialize());
-
+  const std::string weightFile {
+      PathResolver::find_file("TMVA.VBFinv.mu200.Step3p1.8var.weights.xml", "DATAPATH")
+  };
   // Initialize the BDT
   for (auto& bdt : m_BDT) {
 
@@ -50,11 +53,6 @@ StatusCode VertexTimeAlg::initialize() {
     bdt.reader->AddVariable("m_cluster_sumpt2",   &bdt.cluster_sumpt2);
     bdt.reader->AddVariable("m_d0",               &bdt.d0);
     bdt.reader->AddVariable("m_d0_sigma",         &bdt.d0_sigma);
-
-    const std::string weightFile {
-      PathResolver::find_file("TMVA.VBFinv.mu200.Step3p1.8var.weights.xml", "DATAPATH")
-    };
-
     bdt.reader->BookMVA("BDT", weightFile);
   }
 
@@ -272,7 +270,9 @@ std::pair<float, float> VertexTimeAlg::getZOfCluster(
     num += z0 / z0_variance;
     denom += 1.0f / z0_variance;
   }
-
+  if (denom == 0.)[[unlikely]]{
+    throw std::runtime_error("VertexTimeAlg::getZOfCluster: denominator is zero");
+  }
   float avg_z0 = num / denom;
   float avg_z0_sigma = std::sqrt(1.0f / denom);
 
@@ -297,7 +297,9 @@ std::pair<float, float> VertexTimeAlg::getOneOverPOfCluster(
     num += one_over_p / one_over_p_variance;
     denom += 1.0f / one_over_p_variance;
   }
-
+  if (denom == 0.)[[unlikely]]{
+    throw std::runtime_error("VertexTimeAlg::getOneOverPOfCluster: denominator is zero");
+  }
   float avg_oneover_p = num / denom;
   float avg_oneover_p_sigma = std::sqrt(1.0f / denom);
 
@@ -322,7 +324,9 @@ std::pair<float, float> VertexTimeAlg::getDOfCluster(
     num += d0 / d0_variance;
     denom += 1.0f / d0_variance;
   }
-
+  if (denom == 0.)[[unlikely]]{
+    throw std::runtime_error("VertexTimeAlg::getDOfCluster: denominator is zero");
+  }
   float avg_z0 = num / denom;
   float avg_z0_sigma = std::sqrt(1.0f / denom);
 
