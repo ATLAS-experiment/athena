@@ -20,7 +20,6 @@ namespace CxxUtils {
  */
 template <class T>
 inline
-//cppcheck-suppress uninitMemberVar
 CachedValue<T>::CachedValue()
   : m_val (),
     m_cacheValid (INVALID)
@@ -33,7 +32,6 @@ CachedValue<T>::CachedValue()
  */
 template <class T>
 inline
-//cppcheck-suppress uninitMemberVar
 CachedValue<T>::CachedValue (const T& val)
   : m_val (val),
     m_cacheValid (VALID)
@@ -46,7 +44,6 @@ CachedValue<T>::CachedValue (const T& val)
  */
 template <class T>
 inline
-//cppcheck-suppress uninitMemberVar
 CachedValue<T>::CachedValue (T&& val) noexcept
   : m_val (std::move (val)),
     m_cacheValid (VALID)
