@@ -1,13 +1,17 @@
 /*
-Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TestTools_expect_h
 #define TestTools_expect_h
 
 #undef NDEBUG
+#ifndef XAOD_STANDALONE
+# include "GaudiKernel/StatusCode.h"
+#endif
 #include <cassert>
 #include <iostream>
+#include <print>
 #include <cmath>
 namespace Athena_test {
 
@@ -21,6 +25,18 @@ namespace Athena_test {
   template<>
   bool cmp_eq<double>( double a, double b ) { return std::abs(a - b) < 1.e-6; }
 
+  /// Helpers for error message formatting.
+  /// std::format doesn't accept arbitrary pointers, so decay them to void*.
+  template <class U>
+  const U& val_form (const U& x) { return x; }
+  template <class U>
+  const void* val_form (const U* x) { return x; }
+  template <class U>
+  const void* val_form (U* x) { return x; }
+#ifndef XAOD_STANDALONE
+  std::string val_form (const StatusCode& x) { return x.message(); }
+#endif
+
   /*
    * Helper class, offering method to compare for equality to the value captured during construction.
    * In case of a difference the message of what is the value captured and what was expected 
@@ -31,21 +47,24 @@ namespace Athena_test {
   template <typename T>
   class TestedValue {
   public:
+
     TestedValue( const T & v, std::string&& f, int l)
       : m_value(v),
 	m_file(std::move(f)),
 	m_line(l) {}
     void EXPECTED( const T& e ) {
       if ( not cmp_eq(e, m_value) ) {
-	std::cerr << m_file << ":" << m_line << ": error: Test failed, " 
-		  << "expected: " << e << " obtained: " << m_value << "\n";
+        std::println (std::cerr, "{}:{}: error: Test failed, " 
+                      "expected: {} obtained: {}",
+                      m_file, m_line, val_form(e), val_form(m_value));
 	assert( cmp_eq(e, m_value) );
       }
     }
     void NOT_EXPECTED( const T& e ) {
       if ( cmp_eq(e, m_value) ) {
-	std::cerr << m_file << ":" << m_line << ": error: Test failed, " 
-		  << "NOT expected: " << e << " obtained: " << m_value << "\n";
+        std::println (std::cerr, "{}:{}: error: Test failed, " 
+                      "NOT expected: {} obtained: {}",
+                      m_file, m_line, val_form(e), val_form(m_value));
 	assert( not cmp_eq(e, m_value) );
       }
     }

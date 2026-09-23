@@ -1,8 +1,9 @@
 /*
-Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include <mutex>
 #include <map>
+#include <print>
 
 #include "tbb/global_control.h"
 #include "TestTools/expect.h"
@@ -91,9 +92,9 @@ int main() {
   sleep(1);
 
   if ( status == false ) {
-    std::cerr << "ERROR in the test" << std::endl;
+    std::println (std::cerr, "ERROR in the test");
     return -1;
   }
-  std::cout << "Test passed OK" << std::endl;
+  std::println ("Test passed OK");
   return 0;
 }
