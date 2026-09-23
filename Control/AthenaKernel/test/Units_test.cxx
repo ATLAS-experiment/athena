@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  Units_test.cxx
@@ -16,6 +16,7 @@
 #include "GaudiKernel/SystemOfUnits.h"
 #include "TestTools/FLOATassert.h"
 #include <cassert>
+#include <iostream>
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
