@@ -42,7 +42,6 @@ Jets:
 
 Electrons:
   - containerName: AnaElectrons
-    forceFullSimConfigForIso: True
     recalibratePhyslite: False
     decorateTruth: true
     decorateCaloClusterEta: true
@@ -50,7 +49,6 @@ Electrons:
     minPt: 10000.0
     WorkingPoint:
       - selectionName: loose
-        forceFullSimConfig: True
         identificationWP: LooseBLayerLH
         isolationWP: Tight_VarRad
         chargeIDSelectionRun2: True
@@ -84,13 +82,10 @@ Electrons:
 Photons:
   - containerName: AnaPhotons
     recomputeIsEM: False
-    forceFullSimConfigForIso: True
     recalibratePhyslite: False
     decorateTruth: true
     WorkingPoint:
       - selectionName: tight
-        forceFullSimConfigForID: True
-        forceFullSimConfigForIso: True
         qualityWP: Tight
         isolationWP: FixedCutTight
         recomputeIsEM: False

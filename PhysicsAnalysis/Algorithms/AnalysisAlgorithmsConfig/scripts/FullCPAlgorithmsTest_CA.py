@@ -1,5 +1,5 @@
 #! /bin/env python3
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # @author Tadej Novak
 # @author Teng Jian Khoo
@@ -101,7 +101,6 @@ cp_cfg = makeSequence(dataType, yamlPath=textConfig,
                       noSystematics=athArgs.no_systematics,
                       isPhyslite=athArgs.physlite,
                       autoconfigFromFlags=flags, onlyNominalOR=athArgs.onlyNominalOR,
-                      forceEGammaFullSimConfig=True,
                       bleedingEdge=athArgs.bleeding_edge)
 # Add all algorithms from the sequence to the job.
 cfg.merge(cp_cfg)

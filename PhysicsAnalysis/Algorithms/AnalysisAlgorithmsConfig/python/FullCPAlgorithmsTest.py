@@ -64,7 +64,7 @@ photonMinPt = 10*GeV
 
 def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
                         geometry=None, autoconfigFromFlags=None, noSystematics=None,
-                        onlyNominalOR=False,  forceEGammaFullSimConfig=False,
+                        onlyNominalOR=False,
                         returnConfigSeq=False,
                         bleedingEdge=False # Enabled for CI tests running on new derivations from derivation CI output
                         ) :
@@ -196,13 +196,11 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     configSeq.setOptionValue ('.decorateTruth', True)
     configSeq.setOptionValue ('.decorateCaloClusterEta', True)
     configSeq.setOptionValue ('.writeTrackD0Z0', True)
-    configSeq.setOptionValue ('.forceFullSimConfigForIso', forceEGammaFullSimConfig)
     configSeq.setOptionValue ('.recalibratePhyslite', False)
     configSeq.setOptionValue ('.minPt', electronMinPt)
     configSeq += config.makeConfig ('Electrons.WorkingPoint')
     configSeq.setOptionValue ('.containerName', 'AnaElectrons')
     configSeq.setOptionValue ('.selectionName', 'loose')
-    configSeq.setOptionValue ('.forceFullSimConfig', forceEGammaFullSimConfig)
     if likelihood:
         configSeq.setOptionValue ('.identificationWP', 'LooseBLayerLH')
     else:
@@ -231,14 +229,11 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     configSeq += config.makeConfig ('Photons')
     configSeq.setOptionValue ('.containerName', 'AnaPhotons')
     configSeq.setOptionValue ('.decorateTruth', True)
-    configSeq.setOptionValue ('.forceFullSimConfigForIso', forceEGammaFullSimConfig)
     configSeq.setOptionValue ('.recomputeIsEM', False)
     configSeq.setOptionValue ('.recalibratePhyslite', False)
     configSeq += config.makeConfig ('Photons.WorkingPoint')
     configSeq.setOptionValue ('.containerName', 'AnaPhotons')
     configSeq.setOptionValue ('.selectionName', 'tight')
-    configSeq.setOptionValue ('.forceFullSimConfigForID', forceEGammaFullSimConfig)
-    configSeq.setOptionValue ('.forceFullSimConfigForIso', forceEGammaFullSimConfig)
     configSeq.setOptionValue ('.qualityWP', 'Tight')
     configSeq.setOptionValue ('.isolationWP', 'FixedCutTight')
     configSeq.setOptionValue ('.recomputeIsEM', False)
@@ -552,7 +547,6 @@ def makeSequence (dataType, noSystematics,
         yamlPath=None,
         isPhyslite = False, geometry = None,
         autoconfigFromFlags = None, onlyNominalOR = False,
-        forceEGammaFullSimConfig = False,
         bleedingEdge = False) :
 
     algSeq = AlgSequence('AnalysisSequence')
@@ -564,7 +558,6 @@ def makeSequence (dataType, noSystematics,
                                  geometry=geometry, onlyNominalOR=onlyNominalOR,
                                  autoconfigFromFlags=autoconfigFromFlags,
                                  noSystematics=noSystematics,
-                                 forceEGammaFullSimConfig=forceEGammaFullSimConfig,
                                  bleedingEdge=bleedingEdge)
     else:
         from AnalysisAlgorithmsConfig.ConfigText import makeSequence as makeSequenceText

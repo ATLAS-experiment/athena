@@ -21,11 +21,6 @@ def CPAlgorithmsCfg(flags):
     logPLCPAlgCfg = logging.getLogger('PLCPAlgCfg')
     logPLCPAlgCfg.info('****************** STARTING PHYSLITE CPAlgorithmsCfg *****************')
 
-    forceEGammaFullSimConfig = False
-    if not flags.Sim.ISF.Simulator.isFullSim():
-        logPLCPAlgCfg.warning("Forcing full simulation configuration for EGamma algorithms. This is not recommended for fast simulation but no recommendations available yet.")
-        forceEGammaFullSimConfig = True
-
     FixedElDict = {}
     FixedPhDict = {}
     from egammaAlgs.egammaAODFixesConfig import runAODFix
@@ -96,7 +91,6 @@ def CPAlgorithmsCfg(flags):
 
     subConfig = factory.makeConfig ('Electrons')
     subConfig.setOptionValue ('.containerName', 'AnalysisElectrons')
-    subConfig.setOptionValue ('.forceFullSimConfigForIso', forceEGammaFullSimConfig)
     subConfig.setOptionValue ('.isolationCorrection', True)
     subConfig.setOptionValue ('.minPt', 0.)
     subConfig.setOptionValue ('.decorateSamplingPattern', True)
@@ -137,7 +131,6 @@ def CPAlgorithmsCfg(flags):
     # So SiHit electrons - should come after the standard selection in order to avoid keeping the same electrons twice
     subConfig = factory.makeConfig ('Electrons')
     subConfig.setOptionValue ('.containerName', 'AnalysisSiHitElectrons')
-    subConfig.setOptionValue ('.forceFullSimConfigForIso', forceEGammaFullSimConfig)
     subConfig.setOptionValue ('.isolationCorrection', True)
     subConfig.setOptionValue ('.minPt', 0.)
     subConfig.setOptionValue ('.postfix', 'SiHit')
@@ -171,7 +164,6 @@ def CPAlgorithmsCfg(flags):
 
     subConfig = factory.makeConfig ('Photons')
     subConfig.setOptionValue ('.containerName', 'AnalysisPhotons')
-    subConfig.setOptionValue ('.forceFullSimConfigForIso', forceEGammaFullSimConfig)
     subConfig.setOptionValue ('.recomputeIsEM', False)
     subConfig.setOptionValue ('.minPt', 0.)
     subConfig.setOptionValue ('.decorateEmva', True)
