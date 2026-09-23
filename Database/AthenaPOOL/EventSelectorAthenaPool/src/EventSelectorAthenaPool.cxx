@@ -40,7 +40,6 @@
 #include <format>
 #include <vector>
 
-
 //________________________________________________________________________________
 EventSelectorAthenaPool::EventSelectorAthenaPool(const std::string& name, ISvcLocator* pSvcLocator) :
 	base_class(name, pSvcLocator)
@@ -479,18 +478,11 @@ StatusCode EventSelectorAthenaPool::nextHandleFileTransition(IEvtSelector::Conte
          ATH_MSG_ERROR("Failed to set input attributes.");
          return StatusCode::FAILURE;
       }
-      if (m_processMetadata.value()) {
+      if( m_poolCollectionConverter->isDirectCollection() && m_processMetadata.value()) {
          InputFileIncidentGuard::transition(m_inputFileGuard, *m_incidentSvc, name(),
                                             *m_inputCollectionsIterator, m_guid.toString(),
                                             /*endFileName=*/{});
       }
-      // MN: not sure what to do with this fragment:
-      //if( headRef.technology() != 0x00001000 && m_processMetadata.value() ) {
-      //   InputFileIncidentGuard::transition( m_inputFileGuard, *m_incidentSvc, name(),
-      //                                       "FID:" + m_guid.toString(), m_guid.toString(),
-      //                                       /*endFileName=*/{} );
-      //}
-
    }  // end if (guid != m_guid)
    return StatusCode::SUCCESS;
 }

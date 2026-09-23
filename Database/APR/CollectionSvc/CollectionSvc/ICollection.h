@@ -43,6 +43,9 @@ namespace pool {
 
     /// Returns an cursor for the collection.
     virtual std::unique_ptr<ICollectionCursor> cursor() = 0;
+
+    /// Returns true if the collection contains data directly
+    virtual bool hasPayload() const = 0;
     
     /// Empty destructor.
     virtual ~ICollection() = default;

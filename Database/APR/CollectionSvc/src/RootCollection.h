@@ -69,6 +69,9 @@ namespace pool {
         /// Initialize a new RowBuffer by adding all Attributes and Tokens of this collection to it
         virtual void initNewRow( CollectionRowBuffer& rowBuffer ) const final override;
 
+        /// Returns true if the collection contains data directly
+        virtual bool hasPayload() const final override { return m_dhCont != nullptr; }
+
      private:
 
         /// copying unimplemented in this class.

@@ -46,6 +46,9 @@ public:
    /// Check whether has valid pool::ICollection*
    StatusCode isValid() const;
 
+   /// @return true if the collection contains data directly
+   bool isDirectCollection() const;
+
    /// @return ICollectionCursor over all entries
    std::unique_ptr<pool::ICollectionCursor> selectAll();
 

@@ -81,3 +81,7 @@ std::unique_ptr<pool::ICollectionCursor> PoolCollectionConverter::selectAll() {
    }
    return m_poolCollection->cursor();
 }
+
+bool PoolCollectionConverter::isDirectCollection() const {
+   return m_poolCollection && m_poolCollection->hasPayload();
+}
