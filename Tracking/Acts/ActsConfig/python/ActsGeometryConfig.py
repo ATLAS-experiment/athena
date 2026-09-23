@@ -162,7 +162,9 @@ def ITkMaterialDecoratorToolCfg(flags, name="ITkMaterialDecorator", **kwargs) ->
         extension = "itk"
         if flags.Detector.GeometryHGTD:
             extension += "-hgtd"
-        filename = "material-maps-"+extension+"-" + flags.GeoModel.AtlasVersion + ".root"
+        # ITkMaterialDecoratorTool picks its reader (Json or Root) from the file
+        # extension, so this is what selects the default format read back in.
+        filename = "material-maps-"+extension+"-" + flags.GeoModel.AtlasVersion + ".json"
     kwargs.setdefault("MaterialDbFile", filename)
     kwargs.setdefault("MaterialDbFolder", folder)
     the_tool = CompFactory.ActsTrk.ITkMaterialDecoratorTool(name, **kwargs)
