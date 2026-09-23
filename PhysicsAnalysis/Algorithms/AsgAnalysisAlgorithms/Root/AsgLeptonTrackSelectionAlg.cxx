@@ -122,12 +122,13 @@ namespace CP
           acceptData.setCutResult (cutIndex ++, track != nullptr);
 
           if (track != nullptr) {
-            try {
-              d0sig = xAOD::TrackingHelpers::d0significance(track, eventInfo->beamPosSigmaX(), eventInfo->beamPosSigmaY(), eventInfo->beamPosSigmaXY());
-              if (m_maxD0Significance > 0) acceptData.setCutResult (cutIndex ++, fabs( d0sig ) < m_maxD0Significance);
-
-            } catch (const std::runtime_error &) {
-              acceptData.setCutResult (cutIndex ++, false);
+            if (m_maxD0Significance > 0) {
+              try {
+                d0sig = xAOD::TrackingHelpers::d0significance(track, eventInfo->beamPosSigmaX(), eventInfo->beamPosSigmaY(), eventInfo->beamPosSigmaXY());
+                acceptData.setCutResult (cutIndex ++, fabs( d0sig ) < m_maxD0Significance);
+              } catch (const std::runtime_error &) {
+                acceptData.setCutResult (cutIndex ++, false);
+              }
             }
 
             const double vertex_z = primaryVertex ? primaryVertex->z() : 0;
