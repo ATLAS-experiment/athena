@@ -30,7 +30,7 @@ The initializer `TracccTritonInitializer::initialize()` at server intialization:
    `TracccTritonBootstrap.bootstrap()`, which builds the same
    `ComponentAccumulator` a normal athena job would get from
    `TracccTritonDeviceRecoCfg`, then drives it through
-   `ApplicationMgr.configure()` + `initialize()`;
+   `ApplicationMgr.configure()` + `initialize()` + `start()`;
 2. fetches the resulting application manager from C++ via
    `Gaudi::createApplicationMgr()`, again returning the same process-wide
    singleton Python just configured,

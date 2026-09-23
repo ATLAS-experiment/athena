@@ -61,12 +61,18 @@ def bootstrap(nSlots: int = 1,
     )
     acc.merge(TracccTritonDeviceRecoCfg(flags, sequenceName=sequenceName))
 
-    # Equivalent to ComponentAccumulator.run() 
+    # Equivalent to ComponentAccumulator.run() without the the event loop
     app = acc.createApp()
     sc = app.initialize()
     if not sc.isSuccess():
         raise RuntimeError(
             "TracccTritonBootstrap.bootstrap: ApplicationMgr.initialize() failed"
+        )
+
+    sc = app.start()
+    if not sc.isSuccess():
+        raise RuntimeError(
+            "TracccTritonBootstrap.bootstrap: ApplicationMgr.start() failed"
         )
 
     return dict(STOREGATE_KEYS)

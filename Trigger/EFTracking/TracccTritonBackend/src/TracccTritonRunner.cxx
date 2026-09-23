@@ -150,8 +150,7 @@ TracccTritonRunner::TracccTritonRunner(TracccTritonInitializer& initializer,
 
 TracccTritonRunner::~TracccTritonRunner() = default;
 
-TracccTritonRunner::Output
-TracccTritonRunner::run(const uint8_t* buffer,
+TracccTritonRunner::Output TracccTritonRunner::run(const uint8_t* buffer,
                         std::size_t byteSize,
                         bool printStats) {
     const auto& keys = m_impl->initializer.config();

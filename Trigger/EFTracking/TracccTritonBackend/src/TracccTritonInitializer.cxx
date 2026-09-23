@@ -28,7 +28,6 @@
 #include "GaudiKernel/IAppMgrUI.h"
 #include "GaudiKernel/IAlgManager.h"
 #include "GaudiKernel/IAlgorithm.h"
-#include "GaudiKernel/IService.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/SmartIF.h"
 #include "GaudiKernel/StateMachine.h"
@@ -185,8 +184,7 @@ TracccTritonInitializer::~TracccTritonInitializer() {
     }
 }
 
-TracccTritonInitializer&
-TracccTritonInitializer::instance() {
+TracccTritonInitializer& TracccTritonInitializer::instance() {
     // The singleton is mutable, but every method that touches its state
     // serialises on its own mutex, so sharing it between Triton's worker
     // threads is safe.
@@ -194,8 +192,7 @@ TracccTritonInitializer::instance() {
     return theInstance;
 }
 
-void
-TracccTritonInitializer::initialize(const Config& config) {
+void TracccTritonInitializer::initialize(const Config& config) {
     static std::mutex initMutex;
     std::lock_guard<std::mutex> lock(initMutex);
 
@@ -227,17 +224,18 @@ TracccTritonInitializer::initialize(const Config& config) {
     // Fills in the StoreGate keys on m_impl->config from the python configuration
     m_impl->bootstrapPython();
 
-    // Fetch the (already-initialized) singleton ApplicationMgr
+    // Fetch the ApplicationMgr
     m_impl->app = Gaudi::createApplicationMgr();
     if (!m_impl->app) {
         throw std::runtime_error(
             "TracccTritonInitializer: Gaudi::createApplicationMgr() "
             "returned null after the Python bootstrap");
     }
-    if (m_impl->app->FSMState() != Gaudi::StateMachine::INITIALIZED) {
+    // bootstrap() takes the application all the way to RUNNING
+    if (m_impl->app->FSMState() != Gaudi::StateMachine::RUNNING) {
         throw std::runtime_error(
             "TracccTritonInitializer: application manager is not "
-            "INITIALIZED after the Python bootstrap (FSM state " +
+            "RUNNING after the Python bootstrap (FSM state " +
             std::to_string(static_cast<int>(m_impl->app->FSMState())) + ")");
     }
 
@@ -245,15 +243,6 @@ TracccTritonInitializer::initialize(const Config& config) {
     if (!m_impl->svcLocator) {
         throw std::runtime_error(
             "TracccTritonInitializer: could not obtain ISvcLocator");
-    }
-
-    // The bootstrap stops at ApplicationMgr::initialize(), so nothing here
-    // ever gets sysStart(). CoreDumpSvc requires its record vectors to be
-    // sized in start(). So we must manually started here and manually stop in finalize().
-    if (SmartIF<IService> coreDumpSvc =
-            m_impl->svcLocator->service<IService>("CoreDumpSvc",
-                                                  /*createIf*/ false)) {
-        coreDumpSvc->sysStart().ignore();
     }
 
     // Fetch the surface id mapping from the DetectorStore.
@@ -278,19 +267,13 @@ TracccTritonInitializer::initialize(const Config& config) {
     m_impl->ready = true;
 }
 
-void
-TracccTritonInitializer::finalize() {
+void TracccTritonInitializer::finalize() {
     if (!m_impl->ready) return;
 
-    if (m_impl->svcLocator) {
-        if (SmartIF<IService> coreDumpSvc =
-                m_impl->svcLocator->service<IService>("CoreDumpSvc",
-                                                      /*createIf*/ false)) {
-            coreDumpSvc->sysStop().ignore();
-        }
-    }
-
     if (m_impl->app) {
+        // finalize() expects the INITIALIZED state, so the RUNNING state the
+        // bootstrap left the application in has to be unwound first.
+        m_impl->app->stop().ignore();
         m_impl->app->finalize().ignore();
         m_impl->app->terminate().ignore();
     }
@@ -301,8 +284,7 @@ TracccTritonInitializer::finalize() {
     m_impl->ready = false;
 }
 
-bool
-TracccTritonInitializer::isReady() const {
+bool TracccTritonInitializer::isReady() const {
     return m_impl->ready;
 }
 
@@ -327,13 +309,11 @@ TracccTritonInitializer::acquireSlot() {
     return slot;
 }
 
-int
-TracccTritonInitializer::deviceId() const {
+int TracccTritonInitializer::deviceId() const {
     return m_impl->config.deviceId;
 }
 
-ISvcLocator&
-TracccTritonInitializer::serviceLocator() const {
+ISvcLocator& TracccTritonInitializer::serviceLocator() const {
     if (!m_impl->svcLocator) {
         throw std::runtime_error(
             "TracccTritonInitializer::serviceLocator: not initialized");
