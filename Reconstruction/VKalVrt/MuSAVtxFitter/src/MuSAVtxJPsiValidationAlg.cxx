@@ -130,7 +130,7 @@ StatusCode MuSAVtxJPsiValidationAlg::execute(const EventContext& ctx) {
       xAOD::TrackParticle* newTrack = new xAOD::TrackParticle();
       newTrack->makePrivateStore(*oldTrack);
       JPsiTrackParticleContainer->push_back(newTrack);
-      ElementLink<xAOD::TrackParticleContainer> newLink(*JPsiTrackParticleContainer, newTrack->index());
+      ElementLink<xAOD::TrackParticleContainer> newLink(*JPsiTrackParticleContainer, newTrack->index(), ctx);
       newVtx->addTrackAtVertex(newLink, 1.0); // weight is set to 1.0 for simplicity
     }
 
