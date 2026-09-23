@@ -102,7 +102,7 @@ std::unique_ptr<TFile> openRootFile(fbtTestToyMC_config &config);
 
 StatusCode doMerge ATLAS_NOT_THREAD_SAFE( const std::vector<std::string> & input, const std::string & name, fbtTestToyMC_config &config, TH1F* h_lep_pt, float &lep_pt, TH1F* h_lep_eta, float &lep_eta, TH2F* h_lep_pt_eta, float &fakes, float &poserr, float &negerr, int icase);
   
-StatusCode Loop ATLAS_NOT_THREAD_SAFE(fbtTestToyMC_config config);
+StatusCode Loop ATLAS_NOT_THREAD_SAFE(fbtTestToyMC_config && config);
 
 double comboProb(const vector<FakeBkgTools::ParticleData> & leptons_data, const std::bitset<64> & tights, const std::bitset<64> &reals) ;
 
@@ -159,10 +159,10 @@ int main ATLAS_NOT_THREAD_SAFE(int argc, char *argv[]){
 
   ANA_CHECK( parseArguments(argc, argv, config) );
 
-  ANA_CHECK( Loop(config) );
+  ANA_CHECK( Loop(std::move(config)) );
 }
 
-StatusCode Loop ATLAS_NOT_THREAD_SAFE(fbtTestToyMC_config config){
+StatusCode Loop ATLAS_NOT_THREAD_SAFE(fbtTestToyMC_config && config){
 
   //Open an output file
   if (config.verbose) cout << "maxnbaseline = " << config.maxnbaseline << endl;
@@ -959,7 +959,7 @@ std::unique_ptr<TFile> openRootFile(fbtTestToyMC_config &config) {
   gSystem->mkdir(outputdirname.c_str());
   rootfilename = outputdirname+"/output.root";
   
-  config.outputdirname = outputdirname;
+  config.outputdirname = std::move(outputdirname);
 
   std::unique_ptr<TFile> f_out(TFile::Open(rootfilename.c_str(),"RECREATE"));
 
@@ -1149,7 +1149,10 @@ StatusCode doMerge ATLAS_NOT_THREAD_SAFE( const std::vector<std::string> & input
   } else if (name == "fkf") {
     tool = std::make_unique<CP::ApplyFakeFactor>("fkf_tool_merge");
   }
-
+  if (!tool){
+    ANA_MSG_ERROR("tool is nullptr.");
+    return StatusCode::FAILURE;
+  }
   std::string mergeFileName =  config.mergeFileNameBase+"_"+name+"_"+to_string(icase)+".root";
   std::cout << mergeFileName << std::endl;
   ANA_CHECK( tool->setProperty("ProgressFileName", mergeFileName) );
