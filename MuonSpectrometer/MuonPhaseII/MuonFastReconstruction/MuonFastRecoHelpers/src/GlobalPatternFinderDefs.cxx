@@ -114,7 +114,7 @@ namespace MuonR4::FastReco {
         if (spacePoint->isStraw()) {
             const double discCov {stripAngle};
             if (!isProjected) {
-                assert(sp->measuresPhi());
+                assert(spacePoint->measuresPhi());
                 const double vDotRsq {Acts::square(sensorDir(gctx).dot(contractionVector))};
                 return discCov * (1 - vDotRsq) + 
                        vDotRsq * spacePoint->covariance()[Acts::toUnderlying(CovIdx::phiCov)];
