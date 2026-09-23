@@ -52,7 +52,7 @@ std::shared_ptr<BlueprintNode> ActsTrk::CaloBlueprintNodeBuilder::buildBlueprint
   std::map<caloRegion, caloSampleDDEElementsMap_t> caloRegionSampleDDEElementsMap;
   std::map<std::string, double> caloDimensions;
 
-  fillMaps(caloRegionSampleSurfaceMap, caloRegionSampleDDEElementsMap, caloDimensions);
+  fillMaps(caloRegionSampleDDEElementsMap, caloDimensions);
 
   ATH_MSG_DEBUG("Have filled first two maps");
 
@@ -169,8 +169,8 @@ StatusCode ActsTrk::CaloBlueprintNodeBuilder::finalize() {
   return StatusCode::SUCCESS;
 }
 
-void ActsTrk::CaloBlueprintNodeBuilder::fillMaps(std::map<caloRegion, caloSampleSurfaceMap_t>& caloRegionSampleSurfaceMap,
-                      std::map<caloRegion, caloSampleDDEElementsMap_t>& caloRegionSampleDDEElementsMap, std::map<std::string, double>& caloDimensions) const {
+void ActsTrk::CaloBlueprintNodeBuilder::fillMaps(
+            std::map<caloRegion, caloSampleDDEElementsMap_t>& caloRegionSampleDDEElementsMap, std::map<std::string, double>& caloDimensions) const {
 
 
   //loop over all possible calo sampling layers

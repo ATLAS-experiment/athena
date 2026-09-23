@@ -50,8 +50,8 @@ namespace ActsTrk {
         ** The second map is filled by looping over all DDE in the CaloDetDescrManager
         ** and adding each DDE to the vector corresponding to its sampling in the map
         */
-        void fillMaps(std::map<caloRegion, caloSampleSurfaceMap_t>& caloRegionSampleSurfaceMap,
-                      std::map<caloRegion, caloSampleDDEElementsMap_t>& caloRegionSampleDDEElementsMap, std::map<std::string, double>& caloDimensions) const;
+        void fillMaps(std::map<caloRegion, caloSampleDDEElementsMap_t>& caloRegionSampleDDEElementsMap, 
+                      std::map<std::string, double>& caloDimensions) const;
 
         /** generateCylinderSurfaces generates cylindrical surfaces for each calo sampling.
         ** It does this for cylindrical layers by scanning in Z, for each Z finding the average radius of the cells in a phi ring

@@ -80,7 +80,7 @@ namespace ActsTrk{
      std::vector<Amg::Vector3D> GeometryEnvelopeTest::edges(const Acts::GeometryContext& tgContext,
                                                             const Acts::TrackingVolume& volume) const {
         std::vector<Amg::Vector3D> result{};
-        for (const auto oriented :  volume.volumeBounds().orientedSurfaces(volume.localToGlobalTransform(tgContext))) {
+        for (const auto& oriented :  volume.volumeBounds().orientedSurfaces(volume.localToGlobalTransform(tgContext))) {
             Acts:: Polyhedron polyhedron = oriented.surface->polyhedronRepresentation(tgContext, 10);
             result.insert(result.end(), 
                           std::make_move_iterator(polyhedron.vertices.begin()),
