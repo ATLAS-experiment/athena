@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( SGTools )
@@ -53,6 +53,11 @@ atlas_add_test( TransientAddress_test
 atlas_add_test( CurrentEventStore_test
                 SOURCES
                 test/CurrentEventStore_test.cxx
+                LINK_LIBRARIES SGTools )
+
+atlas_add_test( WithEventContext_test
+                SOURCES
+                test/WithEventContext_test.cxx
                 LINK_LIBRARIES SGTools )
 
 atlas_add_test( SGFolderItem_test
