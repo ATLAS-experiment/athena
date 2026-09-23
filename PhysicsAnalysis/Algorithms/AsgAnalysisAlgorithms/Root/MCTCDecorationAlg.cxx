@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -10,6 +10,7 @@
 
 #include <AsgAnalysisAlgorithms/MCTCDecorationAlg.h>
 
+#include <bitset>
 
 namespace CP
 {
@@ -61,6 +62,11 @@ namespace CP
   StatusCode MCTCDecorationAlg ::
   execute (const EventContext& ctx)
   {
+    // bit of a hack, a set to hold particles that have already been classified
+    // so we don't overwrite them with the default -1 if a systematic variation
+    // doesn't pass the selection...
+    std::unordered_set<const xAOD::IParticle *> classified;
+
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       const xAOD::IParticleContainer *particles{};
@@ -109,10 +115,12 @@ namespace CP
             {
               (*m_fromTauDecorator)(*particle) = bitset.test(MCTruthPartClassifier::MCTC_bits::Tau);
             }
+            classified.insert(particle);
             continue;   
           }
         }
 
+        if (classified.count(particle)) continue;
         // defaults
         if (m_isPromptDecorator != nullptr)
         {
