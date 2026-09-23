@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -57,7 +57,7 @@ StatusCode DerivationFramework::TruthLinkRepointTool::addBranches(const EventCon
     for (const xAOD::TruthParticleContainer* target : targets) {
         int index = find_match(truthPart, target);
 
-        if (index >=0) output_decorator(*input) = ElementLink<xAOD::TruthParticleContainer>(*target, index);
+        if (index >=0) output_decorator(*input) = ElementLink<xAOD::TruthParticleContainer>(*target, index, ctx);
 
     }
   }
