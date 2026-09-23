@@ -1578,6 +1578,7 @@ public:
 
   HistDetails( const std::string* vp ) : m_extra(""), m_xinfo(vp[2]), m_yinfo(vp[4]) { 
     m_details.reserve(6);
+    //cppcheck-suppress objectIndex
     for ( size_t i=0 ; i<6 ; i++ ) m_details.push_back(vp[i]); 
     getextra();
   }
