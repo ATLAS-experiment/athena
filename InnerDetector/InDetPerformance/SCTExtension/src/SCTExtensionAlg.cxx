@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCTExtension/SCTExtensionAlg.h"
@@ -122,7 +122,7 @@ StatusCode SCTExtensionAlg::execute(const EventContext& ctx) const {
           if (n_corr>0)
             {
               nSharedHits=n_corr;
-              ElementLink< xAOD:: TrackParticleContainer > eLink( *trks, trackParticle->index());
+              ElementLink< xAOD:: TrackParticleContainer > eLink( *trks, trackParticle->index(), ctx );
               eLink.toPersistent();
               MatchedTrackLinkDec(*trackletParticle) = eLink;
 	
