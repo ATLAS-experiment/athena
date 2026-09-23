@@ -23,7 +23,7 @@
 #include <stdexcept>
 #include <string>
 
-// Gaudi kernel embedding.
+// Embedded Athena application.
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/IAppMgrUI.h"
 #include "GaudiKernel/IAlgManager.h"
@@ -38,8 +38,9 @@
 
 namespace triton { namespace backend { namespace traccc {
 
-// TracccTritonBootstrap.bootstrap() brings up the Gaudi kernel with the device
-// chain configured by TracccTritonDeviceRecoCfg, scheduled inside an AthSequencer
+// TracccTritonBootstrap.bootstrap() brings up the embedded Athena application
+// with the device chain configured by TracccTritonDeviceRecoCfg, scheduled
+// inside an AthSequencer
 namespace {
     void promoteSelfToGlobal() {
         Dl_info info{};
@@ -78,7 +79,7 @@ struct TracccTritonInitializer::Impl {
         if (!alg) {
             throw std::runtime_error(
                 "TracccTritonInitializer: could not retrieve algorithm '" +
-                name + "' from the embedded Gaudi kernel");
+                name + "' from the embedded Athena application");
         }
         return alg;
     }
@@ -226,7 +227,7 @@ TracccTritonInitializer::initialize(const Config& config) {
     // Fills in the StoreGate keys on m_impl->config from the python configuration
     m_impl->bootstrapPython();
 
-    // Fetch the (already-initialized) singleton kernel
+    // Fetch the (already-initialized) singleton ApplicationMgr
     m_impl->app = Gaudi::createApplicationMgr();
     if (!m_impl->app) {
         throw std::runtime_error(
@@ -246,7 +247,9 @@ TracccTritonInitializer::initialize(const Config& config) {
             "TracccTritonInitializer: could not obtain ISvcLocator");
     }
 
-    // Start CoreDumpSvc, the one service that needs it.
+    // The bootstrap stops at ApplicationMgr::initialize(), so nothing here
+    // ever gets sysStart(). CoreDumpSvc requires its record vectors to be
+    // sized in start(). So we must manually started here and manually stop in finalize().
     if (SmartIF<IService> coreDumpSvc =
             m_impl->svcLocator->service<IService>("CoreDumpSvc",
                                                   /*createIf*/ false)) {
@@ -319,7 +322,7 @@ TracccTritonInitializer::acquireSlot() {
         throw std::runtime_error(
             "TracccTritonInitializer: Triton created more model instances "
             "than the " + std::to_string(m_impl->config.nSlots) +
-            " event slot(s) the kernel was brought up with");
+            " event slot(s) the application was configured with");
     }
     return slot;
 }

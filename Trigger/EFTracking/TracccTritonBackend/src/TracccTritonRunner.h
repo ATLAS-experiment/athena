@@ -54,7 +54,7 @@ public:
 
     /// @c TracccTritonInitializer::acquireSlot().
     /// @throws std::runtime_error if the initializer is not ready or @p slot
-    ///         is not one of the slots the kernel was brought up with.
+    ///         is not one of the slots the application was configured with.
     TracccTritonRunner(TracccTritonInitializer& initializer, std::size_t slot);
 
     ~TracccTritonRunner();

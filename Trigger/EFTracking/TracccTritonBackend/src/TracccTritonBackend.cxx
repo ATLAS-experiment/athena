@@ -319,8 +319,8 @@ ModelState::ValidateModelConfig()
             std::string("model configuration is missing output '") + expected + "'");
     }
 
-    // Count the instances Triton is going to create, so the embedded Gaudi
-    // kernel can be brought up with one event-store slot per instance.
+    // Count the instances Triton is going to create, so the embedded Athena
+    // application can be brought up with one event-store slot per instance.
     m_totalInstanceCount = 0;
     common::TritonJson::Value instance_groups;
     if (ModelConfig().Find("instance_group", &instance_groups)) {
@@ -490,8 +490,9 @@ TRITONBACKEND_ModelInstanceInitialize(TRITONBACKEND_ModelInstance* instance)
             ("Failed to set CUDA device: " + std::string(cudaGetErrorString(err))).c_str());
     }
 
-    // Bring up the embedded Gaudi kernel (process-wide singleton, idempotent)
-    // and construct the per-instance runner that drives the device chain.
+    // Bring up the embedded Athena application (process-wide singleton,
+    // idempotent) and construct the per-instance runner that drives the
+    // device chain.
     try
     {
         TracccTritonInitializer::Config config;

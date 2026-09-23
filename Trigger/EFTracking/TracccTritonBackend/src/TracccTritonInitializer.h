@@ -24,13 +24,14 @@ namespace triton { namespace backend { namespace traccc {
 
 /// @class TracccTritonInitializer
 ///
-/// @brief Owns the embedded Gaudi/Athena kernel that backs the Traccc Triton
+/// @brief Owns the embedded Athena application that backs the Traccc Triton
 ///        backend, plus the process-wide device infrastructure it brings up.
 ///
 /// The device reconstruction algorithms are ordinary Gaudi
 /// @c AthReentrantAlgorithm components: they read/write StoreGate and depend
 /// on provider tools and DetectorStore services. They therefore cannot be
-/// constructed as plain C++ objects; a Gaudi kernel has to be running.
+/// constructed as plain C++ objects; an initialized Athena application
+/// has to exist.
 ///
 /// The python configuration schedules them inside a single @c AthSequencer
 /// named @c Config::sequenceName, which is what @c TracccTritonRunner
@@ -60,31 +61,31 @@ public:
     /// Get the process-wide singleton.
     static TracccTritonInitializer& instance();
 
-    /// Boot the Gaudi kernel and resolve all cached handles.
-    /// @throws std::runtime_error on any failure to bring the kernel up.
+    /// Boot the embedded Athena application and resolve all cached handles.
+    /// @throws std::runtime_error on any failure to bring it up.
     void initialize(const Config& config);
 
-    /// Tear the kernel down. Safe to call when not initialized.
+    /// Tear the application down. Safe to call when not initialized.
     void finalize();
 
     /// Whether @c initialize has completed successfully.
     bool isReady() const;
 
-    /// The construction parameters the kernel was brought up with.
+    /// The construction parameters the application was configured with.
     const Config& config() const;
 
     /// The CUDA device id this instance is pinned to.
     int deviceId() const;
 
-    /// The service locator of the embedded Gaudi kernel (never null once
-    /// ready). Used by @c TracccTritonRunner to look up the device chain.
+    /// The service locator of the embedded Athena application (never null
+    /// once ready). Used by @c TracccTritonRunner to look up the device chain.
     ISvcLocator& serviceLocator() const;
 
     const ActsTrk::GeometryIdMapping& geometryIdMapping() const;
 
     /// Claim the next free event-store slot for a Triton model instance.
-    /// @throws std::runtime_error if more slots are claimed than the kernel
-    ///         was brought up with.
+    /// @throws std::runtime_error if more slots are claimed than the
+    ///         application was configured with.
     std::size_t acquireSlot();
 
     ~TracccTritonInitializer();

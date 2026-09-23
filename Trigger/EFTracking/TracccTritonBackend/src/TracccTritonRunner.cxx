@@ -126,7 +126,7 @@ TracccTritonRunner::TracccTritonRunner(TracccTritonInitializer& initializer,
     IAlgManager* algMgr = svcLocator.as<IAlgManager>();
     if (!algMgr) {
         throw std::runtime_error(
-            "TracccTritonRunner: no IAlgManager in the embedded kernel");
+            "TracccTritonRunner: no IAlgManager in the embedded application");
     }
     m_impl->chain = algMgr->algorithm(initializer.config().sequenceName,
                                       /*createIf*/ false);
@@ -134,7 +134,7 @@ TracccTritonRunner::TracccTritonRunner(TracccTritonInitializer& initializer,
         throw std::runtime_error(
             "TracccTritonRunner: could not retrieve the device chain '" +
             initializer.config().sequenceName +
-            "' from the embedded Gaudi kernel");
+            "' from the embedded Athena application");
     }
 
     // AthSequencer::execute() skips itself if its AlgExecState for this

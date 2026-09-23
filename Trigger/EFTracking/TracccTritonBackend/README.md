@@ -4,7 +4,7 @@ A [Triton Inference Server](https://docs.nvidia.com/deeplearning/triton-inferenc
 custom backend that serves the Traccc GPU track-reconstruction chain.
 
 Instead of embedding a self-contained traccc pipeline, this backend embeds a
-Gaudi/Athena kernel and drives the same device algorithms that the offline /
+full Athena application and drives the same device algorithms that the offline /
 HLT-athena GPU chain uses:
 
 ```
@@ -31,8 +31,9 @@ The initializer `TracccTritonInitializer::initialize()` at server intialization:
    `ComponentAccumulator` a normal athena job would get from
    `TracccTritonDeviceRecoCfg`, then drives it through
    `ApplicationMgr.configure()` + `initialize()`;
-2. fetches the resulting kernel from C++ via `Gaudi::createApplicationMgr()`
-   again returning the same process-wide singleton Python just configured,
+2. fetches the resulting application manager from C++ via
+   `Gaudi::createApplicationMgr()`, again returning the same process-wide
+   singleton Python just configured,
    rather than creating a second one;
 3. resolves `IDeviceDetectorDescriptionProviderSvc` and the algorithms through
    `IAlgManager`.

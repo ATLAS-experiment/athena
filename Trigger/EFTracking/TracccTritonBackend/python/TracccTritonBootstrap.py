@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
-Entry point the embedded Gaudi kernel uses to configure itself.
+Entry point the embedded Athena application uses to configure itself.
 """
 
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -16,7 +16,9 @@ from TracccTritonBackend.TracccTritonBackendConfig import (
 
 def bootstrap(nSlots: int = 1,
               sequenceName: str = DEFAULT_SEQUENCE_NAME) -> dict:
-    """Configure and initialize the embedded Gaudi kernel. Raises on failure.
+    """Configure and initialize the embedded Athena application.
+
+    Raises on failure.
 
     @param nSlots number of event-store slots to create, one per Triton model instance
     @param sequenceName name of the AthSequencer holding the device chain; the
