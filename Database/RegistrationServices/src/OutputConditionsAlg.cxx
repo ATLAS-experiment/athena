@@ -8,30 +8,22 @@
 // Richard Hawkings, started 1/9/05, from skeleton by Walter Lampl
 // Added Crest output, September 2026, Walter Lampl 
 
-
-#include "AthenaBaseComps/AthMsgStreamMacros.h"
-#include "GaudiKernel/IClassIDSvc.h"
-#include "AthenaKernel/IAthenaOutputStreamTool.h"
-#include "PersistentDataModel/AthenaAttributeList.h"
-#include "RegistrationServices/IIOVRegistrationSvc.h"
-
-#include "CoralUtilities/ChaiCoralConverter.h"  
-
-#include "SGTools/DataProxy.h"
 #include "OutputConditionsAlg.h"
-#include <GaudiKernel/StatusCode.h>
-#include "GaudiKernel/IAddressCreator.h"
+
+
+#include "PersistentDataModel/AthenaAttributeList.h"
+#include "AthenaPoolUtilities/CondAttrListCollAddress.h"
+#include "CoralUtilities/ChaiCoralConverter.h"  
+#include "SGTools/DataProxy.h"
 
 #include <chai/Container.h>
 #include <chai/Database.h>
 #include <chai/GlobalTag.h>
 #include <chai/PayloadSpec.h>
 
-
 #include <exception>
 #include <ranges>
 
-#include "AthenaPoolUtilities/CondAttrListCollAddress.h"
 
 OutputConditionsAlg::~OutputConditionsAlg() 
 {}
@@ -62,7 +54,6 @@ StatusCode OutputConditionsAlg::initialize() {
   }  
 
   if (!m_par_crestDir.empty()) {
-    ATH_MSG_INFO(m_objectList.size() << "," << m_par_iovtags.size());
      //CREST mode:
      ATH_CHECK(m_persSvc.retrieve()); 
     //Sanity check of properties, m_object list and m_par_iovtags need to be index parallel
