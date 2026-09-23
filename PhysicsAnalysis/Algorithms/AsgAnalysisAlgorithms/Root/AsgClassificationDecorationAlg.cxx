@@ -20,7 +20,7 @@ StatusCode AsgClassificationDecorationAlg::initialize()
   ANA_CHECK (m_classificationDecorator.initialize (m_systematicsList, m_particlesHandle));
   ANA_CHECK (m_systematicsList.initialize());
 
-  ANA_CHECK(m_tool->initialize());
+  ANA_CHECK (m_tool.retrieve());
 
   return StatusCode::SUCCESS;
 }
