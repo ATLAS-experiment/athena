@@ -1,63 +1,143 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
-
-## @package PyJobTransforms.trfMPTools
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
-# @brief Utilities for handling AthenaMP jobs
-# @author atlas-comp-transforms-dev@cern.ch
-#
-
-__version__ = '$Revision'
+# @brief Utilities for handling MT and MP Athena jobs
+# 
 
 import os
 import os.path as path
 
+from xml.etree import ElementTree
+
 import logging
 msg = logging.getLogger(__name__)
-
-from xml.etree import ElementTree
 
 from PyJobTransforms.trfExeStepTools import commonExecutorStepName
 from PyJobTransforms.trfExitCodes import trfExit
 
 import PyJobTransforms.trfExceptions as trfExceptions
 
-## @brief Detect if AthenaMP has been requested
+
+## @brief Get athenaopts for step
+def _athenaopts(argdict={}, currentName=''):
+    # argument not present
+    if 'athenaopts' not in argdict:
+        return []
+
+    # argument present but non -> not expected
+    if argdict['athenaopts'] is None:
+        raise ValueError("athenaopts argument is None")
+
+    # argument present and not None -> return value
+    return argdict['athenaopts'].returnMyValue(name='all'), argdict['athenaopts'].returnMyValue(name=currentName, withoutAll=True)
+
+
+## @brief Get threads per process for step
+def _threadsPerProcess(argdict={}, currentName=''):
+    # argument not present
+    if 'threadsPerProcess' not in argdict:
+        return 0
+
+    # argument present but non -> not expected
+    if argdict['threadsPerProcess'] is None:
+        raise ValueError("threadsPerProcess argument is None")
+
+    # argument present and not None -> return value
+    value = argdict['threadsPerProcess'].returnMyValue(name=currentName)
+    if value is None:
+        return 0
+    return value
+
+
+## @brief Detect how many threads and processes have been requested for Athena
 #  @param argdict Argument dictionary, used to access athenaopts for the job
-#  @return Integer with the number of processes, N.B. 0 means non-MP serial mode
-def detectAthenaMPProcs(argdict = {}, currentSubstep = '', legacyThreadingRelease = False):
-    athenaMPProcs = 0
-    currentSubstep = commonExecutorStepName(currentSubstep)
-    
-    # Try and detect if any AthenaMP has been enabled 
+#  @param currentName Name of the current step
+#  @param legacyThreadingRelease If true, then MP is used unconditionally
+#  @return Three integers with the number of threads, number of processes and number of concurrent events, N.B. 0 means non-MT serial mode
+def detectAthenaThreadsProcesses(argdict={}, currentName='', legacyThreadingRelease=False):
+    athenaThreads = 0
+    athenaConcurrentEvents = 0
+    athenaProcs = 0
+    currentName = commonExecutorStepName(currentName)
+
+    # Try and detect if any AthenaMT has been enabled 
     try:
-        if 'athenaopts' in argdict:
-            for substep in argdict['athenaopts'].value:
-                if substep == 'all' or substep == currentSubstep:
-                    procArg = [opt.replace("--nprocs=", "") for opt in argdict['athenaopts'].value[substep] if '--nprocs' in opt]
-                    if len(procArg) == 0:
-                        athenaMPProcs = 0
-                    elif len(procArg) == 1:
-                        if 'multiprocess' in argdict and substep == 'all':
-                            raise ValueError("Detected conflicting methods to configure AthenaMP: --multiprocess and --nprocs=N (via athenaopts). Only one method must be used")
-                        athenaMPProcs = int(procArg[0])
-                        if athenaMPProcs < -1:
-                            raise ValueError("--nprocs was set to a value less than -1")
-                    else:
-                        raise ValueError("--nprocs was set more than once in 'athenaopts'")
-                    if athenaMPProcs > 0:
-                        msg.info('AthenaMP detected from "nprocs" setting with {0} workers for substep {1}'.format(athenaMPProcs,substep))
-        if (athenaMPProcs == 0 and
-            'ATHENA_CORE_NUMBER' in os.environ and
-            (('multiprocess' in argdict and argdict['multiprocess'].value) or legacyThreadingRelease)):
-            athenaMPProcs = int(os.environ['ATHENA_CORE_NUMBER'])
-            if athenaMPProcs < -1:
+        athenaOptsList = _athenaopts(argdict, currentName)
+        for i in range(len(athenaOptsList)):
+            athenaOpts = athenaOptsList[i]
+            if not athenaOpts:
+                continue
+            procArg = [opt.replace("--nprocs=", "") for opt in athenaOpts if '--nprocs' in opt]
+            if not procArg:
+                athenaProcs = 0
+            elif len(procArg) == 1:
+                if 'multiprocess' in argdict and i == 0:
+                    raise ValueError("Detected conflicting methods to configure AthenaMP: --multiprocess and --nprocs=N (via athenaopts). Only one method must be used")
+                athenaProcs = int(procArg[0])
+                if athenaProcs < -1:
+                    raise ValueError("--nprocs was set to a value less than -1")
+            else:
+                raise ValueError("--nprocs was set more than once in 'athenaopts'")
+
+            threadArg = [opt.replace("--threads=", "") for opt in athenaOpts if '--threads' in opt]
+            if not threadArg:
+                athenaThreads = 0
+            elif len(threadArg) == 1:
+                if 'multithreaded' in argdict and i == 0:
+                    raise ValueError("Detected conflicting methods to configure AthenaMT: --multithreaded and --threads=N (via athenaopts). Only one method must be used")
+                athenaThreads = int(threadArg[0])
+                if athenaThreads < -1:
+                    raise ValueError("--threads was set to a value less than -1")
+            else:
+                raise ValueError("--threads was set more than once in 'athenaopts'")
+
+            concurrentEventsArg = [opt.replace("--concurrent-events=", "") for opt in athenaOpts if '--concurrent-events' in opt]
+            if len(concurrentEventsArg) == 1:
+                athenaConcurrentEvents = int(concurrentEventsArg[0])
+                if athenaConcurrentEvents < -1:
+                    raise ValueError("--concurrent-events was set to a value less than -1")
+                
+            else:
+                athenaConcurrentEvents = athenaThreads
+
+        if athenaProcs > 0 or athenaThreads > 0 or 'ATHENA_CORE_NUMBER' not in os.environ:
+            if athenaProcs > 0:
+                msg.info('AthenaMP detected from "nprocs" setting with {0} workers for step {1}'.format(athenaProcs, currentName))
+            if athenaThreads > 0:
+                msg.info('AthenaMT detected from "threads" setting with {0} threads for step {1}'.format(athenaThreads, currentName))
+            if athenaConcurrentEvents != athenaThreads:
+                msg.info('AthenaMT detected from "concurrent-events" setting with {0} concurrent events for step {1}'.format(athenaConcurrentEvents, currentName))
+
+            return athenaThreads, athenaConcurrentEvents, athenaProcs
+
+        threadsPerProcess = _threadsPerProcess(argdict, currentName)
+        if ('multiprocess' in argdict and argdict['multiprocess'].value) or legacyThreadingRelease:
+            if 'threadsPerProcess' in argdict and threadsPerProcess:
+                raise ValueError("Detected conflicting methods to configure AthenaMP: --multiprocess and --threadsPerProcess=N. Only one method must be used")
+            athenaProcs = int(os.environ['ATHENA_CORE_NUMBER'])
+            if athenaProcs < -1:
                 raise ValueError("ATHENA_CORE_NUMBER value was less than -1")
-            msg.info('AthenaMP detected from ATHENA_CORE_NUMBER with {0} workers'.format(athenaMPProcs))
+            msg.info('AthenaMP detected from ATHENA_CORE_NUMBER with {0} workers'.format(athenaProcs))
+
+        elif 'multithreaded' in argdict and argdict['multithreaded'].value:
+            athenaThreads = int(os.environ['ATHENA_CORE_NUMBER'])
+            if athenaThreads < -1:
+                raise ValueError("ATHENA_CORE_NUMBER value was less than -1")
+            if 'threadsPerProcess' in argdict and threadsPerProcess:
+                athenaProcs = athenaThreads // threadsPerProcess
+                athenaThreads = threadsPerProcess
+                msg.info('Hybrid Athena MT+MP detected from ATHENA_CORE_NUMBER with {0} threads per process and {1} processes for substep {2}'.format(athenaThreads, athenaProcs, currentName))
+            else:
+                msg.info('AthenaMT detected from ATHENA_CORE_NUMBER with {0} threads'.format(athenaThreads))
+            if athenaConcurrentEvents > 0 and athenaConcurrentEvents != athenaThreads:
+                msg.info('AthenaMT detected from "concurrent-events" setting with {0} concurrent events for step {1}'.format(athenaConcurrentEvents, currentName))
+            else:
+                athenaConcurrentEvents = athenaThreads
     except ValueError as errMsg:
-        myError = 'Problem discovering AthenaMP setup: {0}'.format(errMsg)
+        myError = 'Problem discovering Athena threading setup: {0}'.format(errMsg)
         raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_EXEC_SETUP_FAIL'), myError)
 
-    return athenaMPProcs
+    return athenaThreads, athenaConcurrentEvents, athenaProcs
+
 
 ## @brief Handle AthenaMP outputs, updating argFile instances to real 
 #  @param athenaMPFileReport XML file with outputs that AthenaMP knew about
@@ -182,4 +262,3 @@ def athenaMPoutputsLinkAndUpdate(newFullFilenames, fileArg):
     fileArg.multipleOK = True
     fileArg.value = newFilenameValue
     msg.debug('MP output argument updated to {0}'.format(fileArg))
-    

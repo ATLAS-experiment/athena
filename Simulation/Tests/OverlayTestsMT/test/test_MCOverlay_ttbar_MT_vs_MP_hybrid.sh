@@ -21,7 +21,7 @@ RDO_BKG_File="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/OverlayTests/Pre
 
 Overlay_tf.py \
 --CA \
---athenaopts="--nprocs=4 --threads=4" \
+--multithreaded --threadsPerProcess Overlay:4 \
 --inputHITSFile ${HITS_File} \
 --inputRDO_BKGFile ${RDO_BKG_File} \
 --outputRDOFile MC_plus_MC.MPMT.RDO.pool.root \
