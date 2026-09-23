@@ -1,10 +1,10 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
-atlas_subdir( L0MuonS1TGCFloatingTools )
+atlas_subdir( L1MuonS1TGCFloatingTools )
 
 find_package( Boost COMPONENTS unit_test_framework )
 
-atlas_add_component( L0MuonS1TGCFloatingTools
+atlas_add_component( L1MuonS1TGCFloatingTools
                      src/*.cxx
                      src/components/*.cxx
                      LINK_LIBRARIES AthenaBaseComps CxxUtils L1MuonS1TGCToolInterfaces
