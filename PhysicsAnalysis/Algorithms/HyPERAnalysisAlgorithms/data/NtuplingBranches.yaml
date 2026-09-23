@@ -1,0 +1,93 @@
+HyPERBlock:
+  # Names assume the default `outputName: HyPER`; branches are written as
+  # `<topology>_<outputName>_<name>`, e.g. `TtbarLJets_HyPER_TopHad_Score`.
+  #
+  # Indices give the position of each particle within its container in the
+  # ntuple. Since a hyperedge can mix particle types, the accompanying `IDs`
+  # vector gives the type of each entry, by the convention
+  # `jet=1 e=2 mu=3 met=4 tau=5`. For example `TopLep_Indices = [0,0,0]` with
+  # `TopLep_IDs = [1,3,4]` means the jet at position 0, the muon at position 0,
+  # and the MET (always reported at position 0).
+  #
+  # For `TtbarAllHadronic`, Top1 and Top2 are the two highest-score hyperedges.
+  # For `TtbarLJets` and `TtbarLJetsNoBTag`, TopHad and TopLep are the two
+  # highest-score hyperedges for a hadronically and a semi-leptonically
+  # decaying top respectively.
+
+  # --- ttbar all-hadronic ---
+  - name: HyPER_Top1_Indices
+    description: the three jet indices matched to top1 (`TtbarAllHadronic`), or the two particle indices matched to Top1 (`TtbarDiLepton`)
+  - name: HyPER_Top2_Indices
+    description: the three jet indices matched to top2 (`TtbarAllHadronic`), or the two particle indices matched to Top2 (`TtbarDiLepton`)
+  - name: HyPER_Top1_Score
+    description: the score assigned to the top1 hyperedge
+  - name: HyPER_Top2_Score
+    description: the score assigned to the top2 hyperedge
+  - name: HyPER_W1_Indices
+    description: the two jet indices matched to W1
+  - name: HyPER_W2_Indices
+    description: the two jet indices matched to W2
+  - name: HyPER_W1_Score
+    description: the score assigned to the W1 edge
+  - name: HyPER_W2_Score
+    description: the score assigned to the W2 edge
+
+  # --- ttbar single lepton ---
+  - name: HyPER_Classification_Score
+    description: the S/B classification score, discriminating the ttbar single-lepton process from other SM backgrounds
+  - name: HyPER_TopHad_Indices
+    description: the three particle indices matched to topHad
+  - name: HyPER_TopLep_Indices
+    description: the three particle indices matched to topLep
+  - name: HyPER_TopHad_Score
+    description: the score assigned to the topHad hyperedge
+  - name: HyPER_TopLep_Score
+    description: the score assigned to the topLep hyperedge
+  - name: HyPER_TopHad_IDs
+    description: the three particle IDs matched to topHad
+  - name: HyPER_TopLep_IDs
+    description: the three particle IDs matched to topLep
+  - name: HyPER_WHad_Indices
+    description: the two particle indices matched to WHad
+  - name: HyPER_WLep_Indices
+    description: the two particle indices matched to WLep
+  - name: HyPER_WHad_Score
+    description: the score assigned to the WHad edge
+  - name: HyPER_WLep_Score
+    description: the score assigned to the WLep edge
+
+  # --- ttbar di-lepton ---
+  - name: HyPER_Top1_IDs
+    description: the two particle IDs matched to Top1
+  - name: HyPER_Top2_IDs
+    description: the two particle IDs matched to Top2
+  - name: HyPER_HE_Score
+    description: the score assigned to the hyperedge containing the constituents of both reconstructed tops, i.e. the ttbar system. Set to -1 if either top could not be reconstructed.
+
+  # --- reconstructed parton four-vectors, written when `writeRecoPartonsKinematics` is True ---
+  - name: HyPER_Top_b_p4
+    description: four-vector of the visible b-jet assigned to the top quark; in `TtbarDiLepton` this is the positive-charge lepton branch
+  - name: HyPER_Topbar_bbar_p4
+    description: four-vector of the visible b-jet assigned to the anti-top quark; in `TtbarDiLepton` this is the negative-charge lepton branch
+  - name: HyPER_Top_Wplus_decay0_p4
+    description: four-vector of the leading visible decay product of the W+ associated with the top quark
+  - name: HyPER_Top_Wplus_decay1_p4
+    description: four-vector of the subleading visible decay product of the W+ associated with the top quark
+  - name: HyPER_Topbar_Wminus_decay0_p4
+    description: four-vector of the leading visible decay product of the W- associated with the anti-top quark
+  - name: HyPER_Topbar_Wminus_decay1_p4
+    description: four-vector of the subleading visible decay product of the W- associated with the anti-top quark
+  - name: HyPER_Top_lep_p4
+    description: four-vector of the lepton assigned to the top quark, for the positive-charge lepton branch
+  - name: HyPER_Topbar_lepbar_p4
+    description: four-vector of the lepton assigned to the anti-top quark, for the negative-charge lepton branch
+  - name: HyPER_TopHad_b_p4
+    description: four-vector of the visible b-jet assigned to the hadronic top quark
+  - name: HyPER_TopHad_W_decay0_p4
+    description: four-vector of the leading visible decay product of the W from the hadronic top quark
+  - name: HyPER_TopHad_W_decay1_p4
+    description: four-vector of the subleading visible decay product of the W from the hadronic top quark
+  - name: HyPER_TopLep_b_p4
+    description: four-vector of the visible b-jet assigned to the leptonic top quark
+  - name: HyPER_TopLep_lep_p4
+    description: four-vector of the lepton assigned to the leptonic top quark
