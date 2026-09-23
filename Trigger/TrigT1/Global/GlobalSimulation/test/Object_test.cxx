@@ -42,8 +42,8 @@ TEST( GlobalSimObjectTest, test1 ) {
     using namespace GlobalSim;
 
     // The BitSpec can be interrogated in a static manner:
-    ASSERT_EQ( TestSpec::width, 64 );
-    ASSERT_EQ( TestSpec::numFields() , 4);
+    ASSERT_EQ( TestSpec::width, 64u );
+    ASSERT_EQ( TestSpec::numFields() , 4u);
     ASSERT_EQ( TestSpec::field<0>().name(), "f1"); // access field by index
     ASSERT_EQ( TestSpec::field<1>().description(), "Description 2");
     ASSERT_EQ( TestSpec::f3.name(), "f3"); // or if know it, access by name
