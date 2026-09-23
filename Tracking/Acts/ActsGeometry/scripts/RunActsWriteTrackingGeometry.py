@@ -46,12 +46,15 @@ flags.Detector.GeometryHGTD = True
 flags.Detector.GeometryITkPixel = True
 flags.Detector.GeometryITkStrip = True
 flags.Detector.GeometryCalo = False
+from MuonGeoModelTestR4.testGeoModel import MuonPhaseIITestDefaults
+flags.GeoModel.SQLiteDBFullPath = MuonPhaseIITestDefaults.GEODB_R4
+flags.GeoModel.SQLiteDB = False
 flags.Detector.GeometryMuon = False
 
 flags.GeoModel.Align.Dynamic = False
 flags.Acts.TrackingGeometry.UseBlueprint = True
 flags.Acts.TrackingGeometry.KeepGoingOnMaterialMergeFailure = True
-flags.Acts.TrackingGeometry.MaterialSource = "None"
+flags.Acts.TrackingGeometry.ITkHgtdMaterialSource = "Default"
 
 # Geometry dump runs serially
 flags.Concurrency.NumThreads = 1

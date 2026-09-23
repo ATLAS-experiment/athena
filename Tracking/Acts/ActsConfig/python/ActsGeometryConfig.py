@@ -68,8 +68,8 @@ def ActsTrackingGeometrySvcCfg(flags,
 
   #first add the itk builder and then the muon system - this is the correct order
   if flags.Acts.TrackingGeometry.UseBlueprint:
-    if False: ### Disable the ITk material allocation until it's finalized
-        refineTools += [acc.popToolsAndMerge(ITkMaterialDecoratorToolCfg(flags))]
+    if flags.Acts.TrackingGeometry.ITkHgtdMaterialSource != "None":
+      refineTools += [acc.popToolsAndMerge(ITkMaterialDecoratorToolCfg(flags))]
     blueprintTools += [acc.popToolsAndMerge(BeamPipeBlueprintNodeBuilderCfg(flags))]
     if flags.Detector.GeometryITkPixel or flags.Detector.GeometryITkStrip:
       blueprintTools += [acc.popToolsAndMerge(ItkBlueprintNodeBuilderCfg(flags))]
@@ -156,6 +156,15 @@ def ActsTrackingGeometrySvcCfg(flags,
 
 def ITkMaterialDecoratorToolCfg(flags, name="ITkMaterialDecorator", **kwargs) -> ComponentAccumulator:
     result = ComponentAccumulator()
+    filename = flags.Acts.TrackingGeometry.ITkHgtdMaterialSource
+    folder = flags.Acts.TrackingGeometry.ITkHgtdMaterialMapPath
+    if flags.Acts.TrackingGeometry.ITkHgtdMaterialSource == "Default":
+        extension = "itk"
+        if flags.Detector.GeometryHGTD:
+            extension += "-hgtd"
+        filename = "material-maps-"+extension+"-" + flags.GeoModel.AtlasVersion + ".root"
+    kwargs.setdefault("MaterialDbFile", filename)
+    kwargs.setdefault("MaterialDbFolder", folder)
     the_tool = CompFactory.ActsTrk.ITkMaterialDecoratorTool(name, **kwargs)
     result.setPrivateTools(the_tool)
     return result
