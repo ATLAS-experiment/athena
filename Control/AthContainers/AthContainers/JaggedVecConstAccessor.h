@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/JaggedVecConstAccessor.h
@@ -24,9 +24,9 @@
 #include "AthContainers/tools/AuxElementConcepts.h"
 #include "AthContainers/tools/LinkedVarAccessorBase.h"
 #include "AthContainers/tools/JaggedVecConversions.h"
-#include "CxxUtils/range_with_at.h"
 #include "CxxUtils/range_with_conv.h"
 #include <iterator>
+#include <ranges>
 
 
 namespace SG {
@@ -97,7 +97,7 @@ public:
 
   /// Transform a span over elements to a span of spans.
   using const_span =
-    CxxUtils::transform_view_with_at<const_Elt_span, ConstConverter_t>;
+    std::ranges::transform_view<const_Elt_span, ConstConverter_t>;
 
 
   /**
