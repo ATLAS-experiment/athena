@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "METRemappingAlg.h"
@@ -54,7 +54,7 @@ namespace DerivationFramework {
         return StatusCode::FAILURE;
       }
       const xAOD::IParticle *orig = *m_accOriginalObject(*j);
-      ElementLink<xAOD::JetContainer> link(*jetContHandle, j->index());
+      ElementLink<xAOD::JetContainer> link(*jetContHandle, j->index(), ctx);
       jetLinkMap.try_emplace(
         static_cast<const xAOD::Jet*>(orig),
         link
