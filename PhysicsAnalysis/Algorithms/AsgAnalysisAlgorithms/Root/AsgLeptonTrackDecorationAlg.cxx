@@ -49,6 +49,11 @@ namespace CP
   {
     SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
     SG::ReadHandle<xAOD::VertexContainer> vertices(m_primaryVerticesKey, ctx);
+    if (!vertices.isValid())
+      {
+        ANA_MSG_ERROR ("Cannot retrieve primary vertex container " << m_primaryVerticesKey.key());
+        return StatusCode::FAILURE;
+      }
     const xAOD::Vertex *primaryVertex {nullptr};
 
     for (const xAOD::Vertex *vertex : *vertices)
