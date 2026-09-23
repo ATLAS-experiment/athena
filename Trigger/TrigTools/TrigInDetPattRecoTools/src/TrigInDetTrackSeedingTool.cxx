@@ -487,11 +487,17 @@ TrigInDetTrackSeedingResult TrigInDetTrackSeedingTool::findSeeds(const IRoiDescr
 				int node1Idx = pGraph->m_graphArray[pos + TrigAccel::ITk::node1];
 				int node2Idx = pGraph->m_graphArray[pos + TrigAccel::ITk::node2];
 				int nNei     = pGraph->m_graphArray[pos + TrigAccel::ITk::nNei];
-
+				if (node1Idx < 0 || std::cmp_greater_equal(node1Idx, nodes.size()) ||
+          node2Idx < 0 || std::cmp_greater_equal(node2Idx, nodes.size())) {
+          // corrupted/invalid graph output
+         continue;
+        }
 				if(nNei > N_SEG_CONNS) nNei = N_SEG_CONNS;
 				//coverity[WRAPPER_ESCAPE]
+				//cppcheck-suppress objectIndex
 				edgeStorage[idx].m_n1 = &nodes[node1Idx];
 				//coverity[WRAPPER_ESCAPE]
+				//cppcheck-suppress objectIndex
 				edgeStorage[idx].m_n2 = &nodes[node2Idx];
 				edgeStorage[idx].m_level = 1;
 				edgeStorage[idx].m_nNei = nNei;
