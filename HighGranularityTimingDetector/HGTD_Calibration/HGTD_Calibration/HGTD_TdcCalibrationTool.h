@@ -1,20 +1,24 @@
 /**
-* Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
-*
-* @file HGTD_Calibration/src/HGTD_TdcCalibrationTool.h
-*
-* @author Rodrigo Estevam de Paula <rodrigo.estevam.de.paula@cern.ch>
-*
-* @date May, 2025
-*
-* @brief Simulation of ALTIROC Phase Shifter
-*/
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
+ *
+ * @file HGTD_Calibration/HGTD_Calibration/HGTD_TdcCalibrationTool.h
+ *
+ * @author Rodrigo Estevam de Paula <rodrigo.estevam.de.paula@cern.ch>
+ * @author Yuriy Volkotrub <yuriy.volkotrub@cern.ch> (CREST integration)
+ *
+ * @date May, 2025
+ *
+ * @brief Simulation of ALTIROC Phase Shifter.
+ *        Modified to read TDC calibration from conditions database.
+ */
 
 #ifndef HGTD_TDCCALIBRATIONTOOL_H
 #define HGTD_TDCCALIBRATIONTOOL_H
 
 #include <array>
+#include <memory>
 #include <map>
+#include <mutex>
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -22,6 +26,8 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "AthenaKernel/Units.h"
+#include "AthenaKernel/SlotSpecificObj.h"
+#include "AthenaPoolUtilities/CondAttrListCollection.h"
 
 #include "CLHEP/Random/RandomEngine.h"
 
@@ -31,8 +37,10 @@
 #include "InDetSimEvent/SiHit.h"
 #include "SiDigitization/SiSurfaceCharge.h"
 
+#include "StoreGate/ReadCondHandleKey.h"
+
 namespace HGTD {
-  constexpr unsigned int TOA_OVERLFLOW_MASK = 0x80; 
+  constexpr unsigned int TOA_OVERLFLOW_MASK = 0x80;
 }
 
 class HGTD_ID;
@@ -51,8 +59,7 @@ HGTD_TdcCalibrationTool(const std::string& type, const std::string& name,
                         const IInterface* parent);
 
   /** AlgTool initialize */
-  // Not overriding for now
-  // virtual StatusCode initialize() override final;
+  virtual StatusCode initialize() override final;
 
   /**
    * @brief Retrieves the TDC measurment window upper bound based on the sensor placement.
@@ -98,22 +105,49 @@ HGTD_TdcCalibrationTool(const std::string& type, const std::string& name,
 
   private:
 
+  using ToaBinSizes = std::vector<float>;
+
+  struct CalibrationCache {
+    const CondAttrListCollection* source{nullptr};
+    std::shared_ptr<const ToaBinSizes> toaBinSizes;
+  };
+
+  /** @brief Get the effective TOA bin sizes for the current conditions IOV. */
+  std::shared_ptr<const ToaBinSizes> getToaBinSizes() const;
+
+  /** @brief Read one TOA bin width per consecutive conditions channel. */
+  ToaBinSizes readToaBinSizes(const CondAttrListCollection& attrListColl) const;
+
+  /** @brief Convert a TOA code using an already-loaded calibration vector. */
+  float toa2Time(const InDetDD::SolidStateDetectorElementBase* element,
+                 uint8_t toa, const ToaBinSizes& toaBinSizes) const;
+
   FloatProperty m_active_window{this, "PS_ActiveRange", 2.5 * Athena::Units::nanosecond,
     "ALTIROC PS active range" };
 
   FloatProperty m_lhc_rise_edge{this, "LHC_RiseEdge",12.5 * Athena::Units::nanosecond,
     "LHC clock rise edge time" };
-    
+
   FloatProperty m_ps_large_step{this, "PS_LargeStep", 1.562 * Athena::Units::nanosecond,
     "ALTIROC PS large step"};
-    
+
   FloatProperty m_ps_small_step{this, "PS_SmallStep", 9.7 * Athena::Units::picosecond,
     "ALTIROC PS small step"};
 
-  FloatProperty m_toa_bin_size {this, "TOABinSize", 20 * Athena::Units::picosecond, 
-    "Nominal TDC TOA bin size"};
+  FloatProperty m_toa_bin_size {this, "TOABinSize", 20 * Athena::Units::picosecond,
+    "Nominal TDC TOA bin size (fallback when conditions DB not available)"};
+
+  SG::ReadCondHandleKey<CondAttrListCollection> m_calibDataKey{
+      this, "TdcCalibKey", "/HGTD/Calibration/TdcBinSize",
+      "Key of the TDC calibration conditions folder"};
+
+  BooleanProperty m_useCondDB{this, "UseCondDB", false,
+      "If true, read toa_bin_size from conditions DB instead of property"};
+
+  std::shared_ptr<const ToaBinSizes> m_fallbackBinSizes;
+  mutable SG::SlotSpecificObj<std::mutex> m_cacheMutex ATLAS_THREAD_SAFE;
+  mutable SG::SlotSpecificObj<CalibrationCache> m_cache ATLAS_THREAD_SAFE;
 
 };
 
 #endif // HGTD_TDCCALIBRATIONTOOL_H
- 

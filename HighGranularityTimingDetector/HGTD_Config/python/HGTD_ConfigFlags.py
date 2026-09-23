@@ -15,6 +15,10 @@ def createHGTD_ConfigFlags():
   hgtdcf.addFlag('HGTD.outputAltirocRDO', False)
   hgtdcf.addFlag('HGTD.Acts.ClusteringStrategy', ClusteringStrategy.SinglePad, type=ClusteringStrategy)
   hgtdcf.addFlag('HGTD.useALTIROC_RDO',False)
+
+  hgtdcf.addFlag("HGTD.Calibration.UseTdcConditions", False)
+  hgtdcf.addFlag("HGTD.Calibration.TdcCalibDb", "INDET_OFL")
+  hgtdcf.addFlag("HGTD.Calibration.TdcCalibTag", "")
   
   hgtdcf.addFlag("HGTD.Geometry.useGeoModelXml", True)
   hgtdcf.addFlag("HGTD.Geometry.isLocal", False)
