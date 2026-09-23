@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // TruthParticleContainer.h 
@@ -169,6 +169,13 @@ class TruthParticleContainer : public DataVector<TruthParticle>
 		    const std::size_t genEventIdx,
                     IProxyDict* sg = nullptr); 
 
+  /** Setup the persistent pointer toward the @c HepMC::GenEvent
+   *  this @c TruthParticleContainer is proxying.
+   */
+  void setGenEvent( const McEventCollection* mcColl, 
+		    const std::size_t genEventIdx,
+                    const EventContext& ctx ); 
+
   /** Setup the persistent pointer toward the @c TruthEtIsolations
    */
   void setEtIsolations( const ElementLink<TruthEtIsolationsContainer>& etIsolations ); 
@@ -300,6 +307,16 @@ TruthParticleContainer::setGenEvent( const McEventCollection* mcColl,
 {
   if ( 0 != mcColl && mcColl->size() > genEvtIdx ) {
     m_genEvent.toIndexedElement( *mcColl, genEvtIdx, sg );
+  }
+}
+
+inline void
+TruthParticleContainer::setGenEvent( const McEventCollection* mcColl,
+				     const std::size_t genEvtIdx,
+                                     const EventContext& ctx )
+{
+  if ( 0 != mcColl && mcColl->size() > genEvtIdx ) {
+    m_genEvent.toIndexedElement( *mcColl, genEvtIdx, ctx );
   }
 }
 
