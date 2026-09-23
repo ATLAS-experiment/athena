@@ -172,7 +172,7 @@ atlas_add_test( FloatCompressor_test
 # Set up the "simple" tests:
 foreach( test sincos_test ArrayScanner_test Arrayrep_test
       Array_test PackedArray_test pointer_list_test FloatPacker_test
-      fpcompare_test StrFormat_test phihelper_test
+      fpcompare_test phihelper_test
       prefetch_test ClassName_test ones_test
       exctrace1_test ConcurrentRangeMap_test
       CachedValue_test CachedPointer_test CachedUniquePtr_test

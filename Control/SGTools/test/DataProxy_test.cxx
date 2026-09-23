@@ -21,6 +21,7 @@
 #include "AthenaKernel/BaseInfo.h"
 #include "SGCore/ILockable.h"
 #include "GaudiKernel/IConversionSvc.h"
+#include <format>
 #include "GaudiKernel/IOpaqueAddress.h"
 #include <vector>
 #include <algorithm>

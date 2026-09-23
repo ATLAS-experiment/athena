@@ -17,7 +17,6 @@
 #undef NDEBUG
 
 #include "CxxUtils/ConcurrentStrMap.h"
-#include "CxxUtils/StrFormat.h"
 #include "CxxUtils/MurmurHash2.h"
 #include "CxxUtils/checker_macros.h"
 #include "TestTools/expect_exception.h"
@@ -1110,7 +1109,7 @@ Tester<CONT>::Tester()
 {
   for (size_t j=0; j < NCONT; j++) {
     for (size_t i = 0; i < NENT; i++) {
-      m_keys[j].push_back (CxxUtils::strformat ("key%03lu%08lu", j, i));
+      m_keys[j].push_back (std::format("key{:03d}{:08d}", j, i));
     }
     for (size_t i = 0; i < NENT; i++) {
       m_cont[j].emplace (m_keys[j][i],
