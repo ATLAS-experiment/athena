@@ -8,18 +8,17 @@ from AthenaConfiguration.Enums import LHCPeriod
 
 from BTagging.JetParticleAssociationAlgConfig import JetParticleAssociationAlgCfg, JetParticleAssociationByVertexAlgCfg
 from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg, BTagTrackAugmenterByVertexAlgCfg
-from BTagging.TrackLeptonConfig import TrackLeptonDecorationCfg
 from FlavorTagInference.FlavorTagNNConfig import MultifoldGNNCfg
-from FlavorTagInference.FlavorTagNNConfig import getDependencySet
+from FlavorTagInference.FlavorTagNNConfig import (
+    REGRESSION_CALIBRATION_SCALE,
+    TaggerDependenciesCfg,
+    getDependencySet,
+    getFlipConfigs,
+    resolveTaggerName,
+)
 from JetTagTools.JetFitterVariablesFactoryConfig import JetFitterVariablesFactoryCfg
 from BTagging.JetSecVtxFindingAlgConfig import JetSecVtxFindingAlgCfg
 from BTagging.JetSecVertexingAlgConfig import JetSecVertexingAlgCfg
-from FlavorTagDiscriminants.FTagElectronAssociationConfig import FTagElectronAssociationCfg
-from FlavorTagDiscriminants.FTagMuonAssociationConfig import FTagMuonAssociationCfg
-from JetCalibTools.JetCalibrationDecoratorConfig import JetCalibrationDecoratorCfg
-from JetTagDerivationUtils.CopyJetParentInfoConfig import (
-    CopyJetParentInfoCfg
-)
 from JetTagDerivationUtils.CalibratedCopyTaggingConfig import (
     CalibratedCopyCfg,
     FtagScoreCopyCfg,
@@ -29,10 +28,6 @@ from JetTagDerivationUtils.CalibratedCopyTaggingConfig import (
 from pathlib import Path
 import re
 
-
-_parent_collections = {
-    'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets': 'AntiKt10UFOCSSKJets'
-}
 
 # Poor man's impact parameter definitions a tagger can ask for, keyed by
 # the prefix its decorations are written under. The prefix names the
@@ -49,109 +44,11 @@ _default_ip_prefix = 'btagIp_'
 # Constituent groups that can override the general ip_prefix.
 _ip_prefix_groups = ('tracks', 'electrons', 'muons')
 
-# Calibration scale decorated by the 'R' tagger dependency.
-_regression_calibration_scale = 'EtaJES_GSC'
-
 # The lepton associations declare their jet decorations on the base
 # container, the other support algorithms on the jet container. The
 # scheduler only connects a read to a write of the same type.
 _iparticle_decorations = frozenset(
     {'FTagElectrons', 'FTagMuons', 'FTagMuonsConeMatched'})
-
-
-def _resolve_tagger_name(dirname: str, networks: dict) -> str:
-    """
-    Resolve a canonical tagger name for dependency bookkeeping.
-
-    Uses an explicit override from ``networks`` when present, otherwise
-    falls back to path-based inference. For CalibArea regressions this
-    extracts names like ``bJR4v01`` from the model filename.
-    """
-    if tagger_name := networks.get("tagger_name"):
-        return tagger_name
-
-    calibarea_match = re.compile('.*/CalibArea(-[0-9]{2}){3}/.*').match(dirname)
-    if calibarea_match:
-        for fold_path in networks['folds']:
-            match = re.search(r'(bJR\d+v\d+(?:Ext)?)', fold_path)
-            if match:
-                return match.group(1)
-
-    return dirname.split('/')[-2]
-
-
-def _addDepsByTagger(flags, tagger_name: str, jetCollection: str) -> ComponentAccumulator:
-    """
-    Add additional algorithms based on the resolved tagger name.
-
-    Parameters
-    ----------
-    flags : ConfigFlags
-        The configuration flags for.
-    tagger_name : str
-        Canonical tagger name used by ``getDependencySet``.
-    jetCollection : str
-        The name of the jet collection to which the additional algorithms will be applied.
-
-    Returns
-    -------
-    ComponentAccumulator
-        An accumulator containing the additional algorithms based on the dirname.
-    """
-    acc = ComponentAccumulator()
-
-    modset = getDependencySet(tagger_name)
-
-    if "L" in modset:
-        acc.merge(TrackLeptonDecorationCfg(flags))
-    if "E" in modset:
-        acc.merge(FTagElectronAssociationCfg(
-            flags,
-            jetCollection=jetCollection,
-        ))
-    if "M" in modset:
-        acc.merge(FTagMuonAssociationCfg(
-            flags,
-            jetCollection=jetCollection,
-        ))
-    if "MC" in modset:
-        acc.merge(FTagMuonAssociationCfg(
-            flags,
-            jetCollection=jetCollection,
-            doConeMatching=True,
-        ))
-    if "R" in modset:
-        is_data = not flags.Input.isMC
-        calib_sequence = (
-            'JetArea_Residual_EtaJES_GSC_Insitu' if is_data
-            else 'JetArea_Residual_EtaJES_GSC'
-        )
-        config_file = 'PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config'
-        calib_kwargs = {}
-        # Assume CustomVtx jets only used in Hgamma context
-        if 'EMPFlowCustomVtx' in jetCollection:
-            calib_kwargs['calibJetCollection'] = 'AntiKt4EMPFlow'
-            calib_kwargs['rhoKey'] = 'Kt4EMPFlowCustomVtxEventShape'
-            calib_kwargs['pvKey'] = 'HggPrimaryVertices'
-        acc.merge(JetCalibrationDecoratorCfg(
-            flags,
-            jetCollection=jetCollection,
-            configFile=config_file,
-            calibSequence=calib_sequence,
-            calibArea='00-04-83',
-            calibrationScale=_regression_calibration_scale, # For labeling the decorator
-            isData=is_data,
-            **calib_kwargs,
-        ))
-    if "X" in modset:
-        acc.merge(
-            CopyJetParentInfoCfg(
-                flags,
-                jetCollection,
-                parents=_parent_collections[jetCollection]
-            )
-        )
-    return acc
 
 
 def _supportDecorations(nns, jetTrackAssociator: str, fast: bool) -> dict:
@@ -160,14 +57,14 @@ def _supportDecorations(nns, jetTrackAssociator: str, fast: bool) -> dict:
     keyed by the container type they are declared on.
 
     Follows the algorithms scheduled by ``_FlavorTaggingChainCfg`` and
-    ``_addDepsByTagger``, so it has to be kept in sync with them. Taggers
+    ``TaggerDependenciesCfg``, so it has to be kept in sync with them. Taggers
     on a calibrated copy read these through the copy's parent store,
     where the scheduler cannot connect them to their producers.
     """
     decorations = set() if fast else {'SecVtx'}
     for networks in nns:
         dirname = str(Path(networks['folds'][0]).parent)
-        modset = getDependencySet(_resolve_tagger_name(dirname, networks))
+        modset = getDependencySet(resolveTaggerName(dirname, networks))
         decorations.add(
             jetTrackAssociator if networks.get('cone_association')
             else 'GhostTrack'
@@ -179,7 +76,7 @@ def _supportDecorations(nns, jetTrackAssociator: str, fast: bool) -> dict:
         if 'MC' in modset:
             decorations.add('FTagMuonsConeMatched')
         if 'R' in modset:
-            decorations.add(f'{_regression_calibration_scale}_pt')
+            decorations.add(f'{REGRESSION_CALIBRATION_SCALE}_pt')
         if 'X' in modset:
             decorations.add('jetRank')
     return {
@@ -187,29 +84,6 @@ def _supportDecorations(nns, jetTrackAssociator: str, fast: bool) -> dict:
                else 'xAOD::JetContainer')
         for name in decorations
     }
-
-
-def _get_flip_config(nn_path):
-    """
-    Schedule NN-based IP 'flip' taggers.
-
-    FlipConfig is "STANDARD" by default. The flip variants invert the sign
-    of the track impact parameters, and "NEGATIVE_IP_ONLY" additionally
-    keeps only the tracks with a negative one. See FlipTagEnums.h.
-
-    Returns a list of flip configurations, or [] for things we don't flip.
-    """
-    nn_path = nn_path.lower()
-
-    #flipping of DL1r with 2019 taggers does not work at the moment
-    if (('dl1d' in nn_path) or ('dl1r' in nn_path and '201903' not in nn_path)):
-        return ['FLIP_SIGN']
-    if 'rnnip' in nn_path or 'dips' in nn_path:
-        return ['NEGATIVE_IP_ONLY']
-    if 'gn1' in nn_path or 'gn2' in nn_path or 'gn3' in nn_path:
-        return ['SIMPLE_FLIP']
-    else:
-        return []
 
 
 def FlavorTaggingCfg(
@@ -232,7 +106,7 @@ def FlavorTaggingCfg(
     frozen, direct = [], []
     for networks in flags.BTagging.NNs.get(JetCollection, []):
         dirname = str(Path(networks['folds'][0]).parent)
-        tagger = _resolve_tagger_name(dirname, networks)
+        tagger = resolveTaggerName(dirname, networks)
         (frozen if tagger in copy_taggers else direct).append(networks)
 
     acc = _FlavorTaggingChainCfg(
@@ -315,7 +189,7 @@ def _FlavorTaggingChainCfg(
         dirnames = [Path(path).parent for path in networks['folds']]
         assert len(set(dirnames)) == 1, 'Different folds should be located in the same dir'
         dirname = str(dirnames[0])
-        tagger_name = _resolve_tagger_name(dirname, networks)
+        tagger_name = resolveTaggerName(dirname, networks)
 
         # Keep the no-dependency shortcut only for bJR10 large-R regression.
         # bJR4 regression requires lepton inputs and must resolve deps.
@@ -324,7 +198,7 @@ def _FlavorTaggingChainCfg(
         if is_calibarea and is_bjr10:
             modset = set()
         else:
-            acc.merge(_addDepsByTagger(flags, tagger_name, support))
+            acc.merge(TaggerDependenciesCfg(flags, tagger_name, support))
             modset = getDependencySet(tagger_name)
 
         args = dict(
@@ -333,8 +207,7 @@ def _FlavorTaggingChainCfg(
              TrackCollection=trackCollection,
              nnFilePaths=networks['folds'],
              remapping=dict(networks.get('remapping', {})),
-             electrons=('Electrons' if 'E' in modset else ''),
-             muons=('Muons' if 'M' in modset else ''),
+             dependencies=modset,
         )
 
         # Taggers trained on the poor man's impact parameters read their
@@ -366,16 +239,13 @@ def _FlavorTaggingChainCfg(
         else:
             args['remapping'].setdefault('BTagTrackToJetAssociator', 'GhostTrack')
 
-        if 'MC' in modset:
-            args['remapping'].setdefault('FTagMuons', 'FTagMuonsConeMatched')
-
         if any(tag in dirname for tag in ['/GN2v01/', '/GN2HL/']):
             args['tag_requirements'] = {'nonzeroTracks'}
         acc.merge(MultifoldGNNCfg(**args))
 
         # add flip taggers
         if flags.BTagging.RunFlipTaggers and networks.get('flip', True):
-            for flip_config in _get_flip_config(dirname):
+            for flip_config in getFlipConfigs(dirname):
                 acc.merge(MultifoldGNNCfg(**args, FlipConfig=flip_config))
 
     return acc
@@ -410,8 +280,8 @@ def JetBTagginglessByVertexAlgCfg(
         dirnames = [Path(path).parent for path in networks['folds']]
         assert len(set(dirnames)) == 1, 'Different folds should be located in the same dir'
         dirname = str(dirnames[0])
-        tagger_name = _resolve_tagger_name(dirname, networks)
-        acc.merge(_addDepsByTagger(flags, tagger_name, JetCollection))
+        tagger_name = resolveTaggerName(dirname, networks)
+        acc.merge(TaggerDependenciesCfg(flags, tagger_name, JetCollection))
 
         args = dict(
              flags=flags,
