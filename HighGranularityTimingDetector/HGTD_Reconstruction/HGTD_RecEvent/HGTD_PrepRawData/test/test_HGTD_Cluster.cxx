@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_PrepRawData/test/test_HGTD_Cluster.cxx
  * @author Alexander Leopold <alexander.leopold@cern.ch>
@@ -91,6 +91,7 @@ void testAssignment(const HGTD_Cluster& cluster) {
   std::cout << "testAssignment done\n";
 }
 
+//coverity[PASS_BY_VALUE]
 void testMoveCtor(HGTD_Cluster cluster) {
   std::cout << "testMoveCtor\n";
   HGTD_Cluster copied_cluster(std::move(cluster));
@@ -99,7 +100,7 @@ void testMoveCtor(HGTD_Cluster cluster) {
   BOOST_CHECK(copied_cluster.time() == dummy_toa);
   std::cout << "testMoveCtor done\n";
 }
-
+//coverity[PASS_BY_VALUE]
 void testMoveAssignment(HGTD_Cluster cluster) {
   std::cout << "testMoveAssignment\n";
   HGTD_Cluster move_assign_cluster;
@@ -128,7 +129,7 @@ BOOST_AUTO_TEST_CASE(HGTD_Cluster_test) {
   testAssignment(cluster);
 
   testMoveCtor(cluster);
-
+  //coverity[COPY_INSTEAD_OF_MOVE]
   testMoveAssignment(cluster);
 
   std::cout << "running test_HGTD_Cluster done\n";

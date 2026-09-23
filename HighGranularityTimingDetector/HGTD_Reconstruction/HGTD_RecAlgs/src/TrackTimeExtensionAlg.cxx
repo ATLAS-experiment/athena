@@ -204,7 +204,7 @@ StatusCode TrackTimeExtensionAlg::decorateTrackParticle(
           trk_state->fitQualityOnSurface().doubleNumberDoF());
 
       const HGTD_ClusterOnTrack* cot =
-          dynamic_cast<const HGTD_ClusterOnTrack*>(trk_state->measurementOnTrack());
+          static_cast<const HGTD_ClusterOnTrack*>(trk_state->measurementOnTrack());
 
       time_vec.emplace_back(cot->time());
 
@@ -256,14 +256,14 @@ StatusCode TrackTimeExtensionAlg::decorateTrackParticle(
 
   } // END LOOP over TrackStateOnSurface
 
-  dh.layerHasExtensionHandle(*track_ptkl) = has_cluster_vec;
-  dh.layerExtensionChi2Handle(*track_ptkl) = chi2_vec;
-  dh.layerClusterRawTimeHandle(*track_ptkl) = raw_time_vec;
-  dh.layerClusterTimeHandle(*track_ptkl) = time_vec;
-  dh.layerClusterTruthClassHandle(*track_ptkl) = truth_vec;
-  dh.layerClusterShadowedHandle(*track_ptkl) = is_shadowed_vec;
-  dh.layerClusterMergedHandle(*track_ptkl) = is_merged_vec;
-  dh.layerPrimaryExpectedHandle(*track_ptkl) = primary_exists_vec;
+  dh.layerHasExtensionHandle(*track_ptkl) = std::move(has_cluster_vec);
+  dh.layerExtensionChi2Handle(*track_ptkl) = std::move(chi2_vec);
+  dh.layerClusterRawTimeHandle(*track_ptkl) = std::move(raw_time_vec);
+  dh.layerClusterTimeHandle(*track_ptkl) = std::move(time_vec);
+  dh.layerClusterTruthClassHandle(*track_ptkl) = std::move(truth_vec);
+  dh.layerClusterShadowedHandle(*track_ptkl) = std::move(is_shadowed_vec);
+  dh.layerClusterMergedHandle(*track_ptkl) = std::move(is_merged_vec);
+  dh.layerPrimaryExpectedHandle(*track_ptkl) = std::move(primary_exists_vec);
   dh.extrapXHandle(*track_ptkl) = extension.m_extrap_x;
   dh.extrapYHandle(*track_ptkl) = extension.m_extrap_y;
   dh.holesHGTDHandle(*track_ptkl) = extension.m_holes_hgtd;
