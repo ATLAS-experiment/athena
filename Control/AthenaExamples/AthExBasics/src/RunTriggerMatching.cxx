@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RunTriggerMatching.h"
@@ -27,7 +27,7 @@ StatusCode RunTriggerMatching::execute(const EventContext& ctx) const {
     // Get the particle containers requested
     SG::ReadHandle<xAOD::IParticleContainer> particles{m_containerKey, ctx};
     if( ! particles.isValid() ) {
-        ATH_MSG_ERROR ("Couldn't retrieve IParticles with key: " << m_containerKey.key() );
+        ATH_MSG_ERROR ("Couldn't retrieve IParticles with key: {}", m_containerKey.key() );
         return StatusCode::FAILURE;
     }
 
@@ -58,7 +58,8 @@ StatusCode RunTriggerMatching::finalize() {
     ATH_MSG_INFO("SUMMARY OF TRIGGER COUNTS");
     ATH_MSG_INFO("=========================");
     ATH_MSG_INFO("Number of events where a trigger matching the user string");
-    ATH_MSG_INFO("fired and is matched to at least one offline object in " << m_containerKey.key() << " : " << std::to_string(m_matchCounter));
+    ATH_MSG_INFO("fired and is matched to at least one offline object in {}: {}",
+                 m_containerKey.key(), m_matchCounter.load());
     
     return StatusCode::SUCCESS;
 }
