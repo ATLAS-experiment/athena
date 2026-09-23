@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -25,6 +25,7 @@
 #include <assert.h>
 #include <cxxabi.h>
 #include <iostream>
+#include <print>
 using namespace std;
 
    
@@ -164,12 +165,9 @@ TTypeAdapter TMemberAdapter::TypeOf() const
    if ( dataMember ) {
       // MN: the only way to get the type is through the type name
       TClass *tc = TClass::GetClass( dataMember->GetTypeName() );
-      //cout << "---  TMemberAdapter  name=" << Name() << endl;
       if( tc ) {
-         //cout << "      type = " << tc->GetName() << endl;
          return TTypeAdapter(tc);
       } else {
-         //cout << "      typename = " << dataMember->GetTypeName() << endl;
          return TTypeAdapter(dataMember->GetTypeName());
       }
    }
@@ -491,7 +489,7 @@ const std::type_info& fundamental_type(const std::string& name)
        if ( strcmp(typname,"void")           ==0 ) return typeid(void);
        break;
    }
-   cerr << "WARNING!  RootType getting typeinfo failed for: " << typname << endl;
+   std::println (cerr, "WARNING!  RootType getting typeinfo failed for: {}", typname);
    return typeid(void);
 }
 
@@ -887,7 +885,6 @@ TScopeAdapter::operator Bool_t() const
    if( !klass )  return false;
    if( klass->HasDictionary() )  return true;
 
-   // cout << "RootType: (Debug warning)  Type " << fName << " has no dictionary!" << endl;
    return false;
 }
 
