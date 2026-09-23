@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonDQAUtils/MuonChamberNameConverter.h"
@@ -94,8 +94,12 @@ std::string convertChamberName(int ChamberName , int ChamberEta , int ChamberPhi
       case 10 : Name_string = "BOG"; limits.push_back(4); limits.push_back(-100); limits.push_back(100); limits.push_back(-100); limits.push_back(6); limits.push_back(7); limits.push_back(-1); break;	 	    
       default : Name_string = "WrongName"; limits.push_back(-100); limits.push_back(-100); limits.push_back(-100); limits.push_back(-100); limits.push_back(-100); limits.push_back(-100); 
       }
-  } else {Name_string = "WrongName";}
-
+  } else {
+    Name_string = "WrongName"; 
+    limits.insert(limits.end(), 6, -100);
+  }
+  //if its a "WrongName", 'limits' has to have at least six entries 
+  //in the following statements (for eta, then phi checks)
   //Convert ATHENA int eta to correct side and eta Hardware index
   if (Eta_int>=-limits[0] && Eta_int<=limits[0] && Eta_int!=limits[1]){
     if(Eta_int>0){
