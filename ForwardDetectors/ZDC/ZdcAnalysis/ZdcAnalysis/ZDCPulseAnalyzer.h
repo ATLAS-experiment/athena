@@ -181,6 +181,10 @@ private:
 
   // Enable or not post-pulse detection and associated parameters
   //
+  bool m_doPrePulseCheck{false};
+
+  // Enable or not post-pulse detection and associated parameters
+  //
   bool m_doPostPulseCheck{false};
   unsigned int m_postPulseDelta{0};
   float m_postPulseDerivMinSig{};
