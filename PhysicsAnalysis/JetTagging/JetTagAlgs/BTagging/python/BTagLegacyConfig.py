@@ -13,7 +13,7 @@ from BTagging.JetParticleAssociationAlgConfig import JetParticleAssociationAlgCf
 from BTagging.JetSecVertexingAlgConfig import JetSecVertexingAlgCfg
 from BTagging.JetSecVtxFindingAlgConfig import JetSecVtxFindingAlgCfg
 from FlavorTagInference.FlavorTagNNConfig import FlavorTagNNCfg
-from BTagging.FlavorTaggingConfig import _get_flip_config
+from FlavorTagInference.FlavorTagNNConfig import getFlipConfigs
 
 
 def BTagAlgsCfg(
@@ -127,7 +127,7 @@ def BTagAlgsCfg(
         )
         # add flip taggers if requested
         if inputFlags.BTagging.RunFlipTaggers:
-            for flip_config in _get_flip_config(nn_path):
+            for flip_config in getFlipConfigs(nn_path):
                 result.merge(
                     FlavorTagNNCfg(
                         inputFlags,
