@@ -7,7 +7,6 @@
 
 
 
-#include "Riostream.h"
 #include "TROOT.h"
 
 #include "AthenaBaseComps/AthAlgorithm.h"

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ElectronPhotonFourMomentumCorrection/e1hg_systematics.h"
@@ -8,7 +8,6 @@
 #include <cstdlib>
 
 #include "PathResolver/PathResolver.h"
-#include "Riostream.h"
 #include "TAxis.h"
 
 e1hg_systematics::e1hg_systematics(const std::string& filename) {
