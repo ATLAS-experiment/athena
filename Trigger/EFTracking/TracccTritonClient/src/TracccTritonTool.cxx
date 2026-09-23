@@ -149,7 +149,7 @@ StatusCode TracccTritonTool::getTracks(
     // Push the last track (no trailing separator in GEOMETRY_IDS)
     if (!measurement.athena_id.empty())
     {
-        TracccMeasurementInfoInTracks.push_back(measurement);
+        TracccMeasurementInfoInTracks.push_back(std::move(measurement));
 
         TracccTrackParameters params;
         params.chi2 = trkParamsVec.at(track * numTrkFeatures + 0);
