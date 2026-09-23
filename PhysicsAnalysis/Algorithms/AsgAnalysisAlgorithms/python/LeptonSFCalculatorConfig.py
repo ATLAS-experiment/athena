@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
@@ -36,9 +36,9 @@ class LeptonSFCalculatorBlock(ConfigBlock):
                        info='list of decorated tau-jet SFs to use in the computation. If not set, will use reconstruction x ID x eVeto.')
         self.addOption('lepton_postfix', None, type=str,
                        info='the name of the common lepton SF, e.g. `tight`.')
-        self.addOption('includeElectronChargeMisID', False, type=str,
+        self.addOption('includeElectronChargeMisID', False, type=bool,
                        info='whether to include the electron charge mis-ID SFs in the computation. The user is responsible for determining whether these are available.')
-        self.addOption('includeMuonBadVeto', False, type=str,
+        self.addOption('includeMuonBadVeto', False, type=bool,
                        info='whether to include the muon bad veto SFs in the computation. The user is responsible for determining whether these are available.')
 
     def instanceName (self) :
