@@ -1,6 +1,6 @@
 // Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #undef NDEBUG
-#include "../src/RPCFunctionEntry.h"
+#include "AthenaMPIGPU/RPCFunctionEntry.h"
 
 #include <array>
 #include <cassert>

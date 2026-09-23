@@ -1,6 +1,6 @@
 // Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
-#ifndef ATHEXMPI_REMOTEGPUSVC_H
-#define ATHEXMPI_REMOTEGPUSVC_H
+#ifndef ATHENAMPIGPU_REMOTEGPUSVC_H
+#define ATHENAMPIGPU_REMOTEGPUSVC_H
 
 // Local include(s)
 #include "HostDevicePtr.h"
@@ -186,8 +186,8 @@ class RemoteGPUSvc : public AthService {
 
 }  // namespace RemoteCall
 
-#ifndef ATHEXMPI_REMOTEGPUSVC_ICC
+#ifndef ATHENAMPIGPU_REMOTEGPUSVC_ICC
 #include "RemoteGPUSvc.icc"
 #endif
 
-#endif  // ATHEXMPI_REMOTEGPUSVC_H
+#endif  // ATHENAMPIGPU_REMOTEGPUSVC_H

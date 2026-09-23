@@ -1,6 +1,6 @@
 // Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
-#ifndef ATHEXMPI_REMOTEGPUSVC_ICC
-#define ATHEXMPI_REMOTEGPUSVC_ICC
+#ifndef ATHENAMPIGPU_REMOTEGPUSVC_ICC
+#define ATHENAMPIGPU_REMOTEGPUSVC_ICC
 
 // Local include(s)
 #include "RemoteGPUSvc.h"
@@ -110,4 +110,4 @@ ClusterMessage::DataDescr RemoteGPUSvc::describeArg(const T* arg) {
 }
 }  // namespace RemoteCall
 
-#endif  // ATHEXMPI_REMOTEGPUSVC_ICC
+#endif  // ATHENAMPIGPU_REMOTEGPUSVC_ICC

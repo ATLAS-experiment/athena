@@ -1,7 +1,7 @@
 // Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
-#ifndef ATHEXMPI_RPCFUNCTIONENTRY_H
-#define ATHEXMPI_RPCFUNCTIONENTRY_H
+#ifndef ATHENAMPIGPU_RPCFUNCTIONENTRY_H
+#define ATHENAMPIGPU_RPCFUNCTIONENTRY_H
 
 // Local include(s)
 #include "AthenaKernel/ClusterMessage.h"
@@ -126,8 +126,8 @@ class RPCFunctionEntryHash {
 
 }  // namespace RemoteCall
 
-#ifndef ATHEXMPI_RPCFUNCTIONENTRY_ICC
+#ifndef ATHENAMPIGPU_RPCFUNCTIONENTRY_ICC
 #include "RPCFunctionEntry.icc"
 #endif
 
-#endif  // ATHEXMPI_RPCFUNCTIONENTRY_H
+#endif  // ATHENAMPIGPU_RPCFUNCTIONENTRY_H

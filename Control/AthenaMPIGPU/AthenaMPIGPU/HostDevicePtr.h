@@ -2,8 +2,8 @@
 //
 /// @file
 /// Wrappers for RPC arguments and results in host or device memory.
-#ifndef ATHEXMPI_HOSTDEVICEPTR_H
-#define ATHEXMPI_HOSTDEVICEPTR_H
+#ifndef ATHENAMPIGPU_HOSTDEVICEPTR_H
+#define ATHENAMPIGPU_HOSTDEVICEPTR_H
 
 // Boost include(s)
 #include <boost/callable_traits.hpp>
@@ -234,4 +234,4 @@ concept RPCCallable =
       !boost::mp11::mp_empty<boost::callable_traits::return_type_t<C>>::value));
 
 }  // namespace RemoteCall
-#endif  // ATHEXMPI_HOSTDEVICEPTR_H
+#endif  // ATHENAMPIGPU_HOSTDEVICEPTR_H

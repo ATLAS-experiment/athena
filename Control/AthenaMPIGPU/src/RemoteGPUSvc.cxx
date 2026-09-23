@@ -1,7 +1,7 @@
 // Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 // Local include(s)
-#include "RemoteGPUSvc.h"
+#include "AthenaMPIGPU/RemoteGPUSvc.h"
 
 // Athena include(s)
 #include "AthenaKernel/ClusterMessage.h"

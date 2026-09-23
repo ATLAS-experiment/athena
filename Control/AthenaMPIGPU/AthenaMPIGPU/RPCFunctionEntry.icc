@@ -1,6 +1,6 @@
 // Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
-#ifndef ATHEXMPI_RPCFUNCTIONENTRY_ICC
-#define ATHEXMPI_RPCFUNCTIONENTRY_ICC
+#ifndef ATHENAMPIGPU_RPCFUNCTIONENTRY_ICC
+#define ATHENAMPIGPU_RPCFUNCTIONENTRY_ICC
 
 // Local include(s)
 #include "RPCFunctionEntry.h"
@@ -208,4 +208,4 @@ RPCFunctionEntry::RPCFunctionEntry(F&& f, std::string name)
 
 }  // namespace RemoteCall
 
-#endif  // ATHEXMPI_RPCFUNCTIONENTRY_ICC
+#endif  // ATHENAMPIGPU_RPCFUNCTIONENTRY_ICC

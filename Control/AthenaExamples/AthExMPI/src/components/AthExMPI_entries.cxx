@@ -2,7 +2,5 @@
 
 // Local include(s)
 #include "../RemoteGPUExampleAlg.h"
-#include "../RemoteGPUSvc.h"
 
 DECLARE_COMPONENT(RemoteCall::RemoteGPUExampleAlg)
-DECLARE_COMPONENT(RemoteCall::RemoteGPUSvc)

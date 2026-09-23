@@ -3,8 +3,8 @@
 #define ATHEXMPI_REMOTEGPUEXAMPLEALG_H
 
 // Local include(s)
-#include "HostDevicePtr.h"
-#include "RemoteGPUSvc.h"
+#include "AthenaMPIGPU/HostDevicePtr.h"
+#include "AthenaMPIGPU/RemoteGPUSvc.h"
 #include "cuda/RPCGPU.h"
 
 // Athena include(s)
