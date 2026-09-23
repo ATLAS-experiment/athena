@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArRawDataReadingAlg.h"
@@ -20,10 +20,8 @@
 #include "LArFebHeaderReader.h"
 #include "LArElecCalib/LArProvenance.h"
 
-LArRawDataReadingAlg::LArRawDataReadingAlg(const std::string& name, ISvcLocator* pSvcLocator) :  
-  AthReentrantAlgorithm(name, pSvcLocator) {}
 
-  StatusCode LArRawDataReadingAlg::initialize() {
+StatusCode LArRawDataReadingAlg::initialize() {
   m_doRawChannels = !m_rawChannelKey.empty();
   ATH_CHECK(m_rawChannelKey.initialize(m_doRawChannels));
 
@@ -96,7 +94,7 @@ LArRawDataReadingAlg::LArRawDataReadingAlg(const std::string& name, ISvcLocator*
       ATH_MSG_ERROR("Configuration problem, property 'SubCaloPreselection' set to " << m_subCaloPreselection.value() << ", expect 'EM', 'HEC' or 'FCAL'");
       return StatusCode::FAILURE;
     }
-    std::cout << "set sizes:" << subcaloFTs.size() << ", " << m_vFinalPreselection.size() << std::endl;
+    ATH_MSG_INFO("set sizes:" << subcaloFTs.size() << ", " << m_vFinalPreselection.size());
     if (m_vFinalPreselection.size()>0) {
       //Form the intersection of the preselection give as subdet and side/FT/slot
       for(auto it = m_vFinalPreselection.begin(); it != m_vFinalPreselection.end(); ) {
