@@ -809,7 +809,7 @@ class ElectronWorkingPointEfficiencyConfig (ConfigBlock) :
             sfList += [alg.scaleFactorDecoration]
 
         # Set up the ISO electron efficiency correction algorithm:
-        if config.dataType() is not DataType.Data and self.isolationWP != 'NonIso' and not self.noEffSF:
+        if config.dataType() is not DataType.Data and self.isolationWP != 'NonIso' and 'PLIT' not in self.isolationWP and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
                                           'ElectronEfficiencyCorrectionAlgIsol' )
             config.addPrivateTool( 'efficiencyCorrectionTool',

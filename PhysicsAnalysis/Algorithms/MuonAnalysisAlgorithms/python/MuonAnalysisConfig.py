@@ -467,7 +467,7 @@ class MuonWorkingPointEfficiencyConfig (ConfigBlock) :
             sfList += [alg.scaleFactorDecoration]
 
         # Set up the isolation efficiency scale factor calculation algorithm:
-        if config.dataType() is not DataType.Data and self.isolation != 'NonIso' and not self.noEffSF:
+        if config.dataType() is not DataType.Data and self.isolation != 'NonIso' and 'PLIT' not in self.isolation and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::MuonEfficiencyScaleFactorAlg',
                                    'MuonEfficiencyScaleFactorAlgIsol' )
             config.addPrivateTool( 'efficiencyScaleFactorTool',
