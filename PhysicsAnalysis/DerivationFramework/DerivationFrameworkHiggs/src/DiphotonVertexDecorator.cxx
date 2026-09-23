@@ -125,8 +125,8 @@ StatusCode DerivationFramework::DiphotonVertexDecorator::addBranches(const Event
           vertexScoreAcc(*yyvx) = vxR.second;
           vertexFailTypeAcc(*yyvx) = vertexFailType;
           vertexCaseAcc(*yyvx) = yyvertexVtxType;
-          leadingPhotonLinkAcc(*yyvx) = phlink_t(*photons, ph1->index());
-          subleadingPhotonLinkAcc(*yyvx) = phlink_t(*photons, ph2->index());
+          leadingPhotonLinkAcc(*yyvx) = phlink_t(*photons, ph1->index(), ctx);
+          subleadingPhotonLinkAcc(*yyvx) = phlink_t(*photons, ph2->index(), ctx);
           break;
         }
       }
