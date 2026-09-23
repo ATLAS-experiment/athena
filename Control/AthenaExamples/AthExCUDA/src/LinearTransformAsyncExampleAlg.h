@@ -9,6 +9,9 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "AthenaBaseComps/AthAsynchronousAlgorithm.h"
 
+// CUDA include(s).
+#include <cuda_runtime_api.h>
+
 // STL
 #include <vector>
 
@@ -29,11 +32,10 @@ namespace AthCUDAExamples {
       /// Function executing the algorithm
       virtual StatusCode execute( const EventContext& ctx ) const override;
 
-   private:
-         /// GPU kernel launcher
-         StatusCode linearTransform(std::vector<float>& arr, float multiplier) const;
-
    }; // class LinearTransformAsyncExampleAlg
+
+   /// GPU kernel launcher
+   void linearTransform(cudaStream_t stream, std::vector<float>& arr, float multiplier);
 
 } // namespace AthCUDAExamples
 
