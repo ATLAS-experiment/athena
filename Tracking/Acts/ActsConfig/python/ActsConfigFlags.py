@@ -152,6 +152,12 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.TrackingGeometry.UseBlueprint', False)
     actscf.addFlag('Acts.TrackingGeometry.ObjDebugOutput', False)
     actscf.addFlag('Acts.TrackingGeometry.KeepGoingOnMaterialMergeFailure', False)
+    # ITkMaterialSource can be:
+    # a path to a local file
+    # 'Default' : material map source is evaluated from the geometry tag
+    # 'None'    : no material map is provided
+    actscf.addFlag('Acts.TrackingGeometry.ITkHgtdMaterialSource', 'Default')
+    actscf.addFlag('Acts.TrackingGeometry.ITkHgtdMaterialMapPath', 'ACTS/MaterialMaps/gen3')
 
     ## Enable Tracking geometry with additional passive layers
     actscf.addFlag('Acts.TrackingGeometry.InsertITkPassiveMaterialLayers', False)
@@ -202,6 +208,18 @@ def createActsConfigFlags():
     actscf.addFlag("Acts.Gbts.connectionTableLrt", 'binTables_ITK_RUN4_LRT.txt')
     actscf.addFlag("Acts.Gbts.dumpGbtsGeometry", False)
     actscf.addFlag("Acts.Gbts.geometryDump", 'gbts_layer_geometry.txt') # for gbts training tool
+
+    # GBTS Training 
+    ## Connection table settings
+    actscf.addFlag("Acts.Gbts.Training.enable", False) 
+    actscf.addFlag("Acts.Gbts.Training.outputConnectionTable", "gbts_connection_table.txt") 
+    actscf.addFlag("Acts.Gbts.Training.doSymmetrization", False) 
+    actscf.addFlag("Acts.Gbts.Training.useOldFormatting", False) 
+    actscf.addFlag("Acts.Gbts.Training.probThreshold", -1.0) 
+    ## truth track builder tool
+    actscf.addFlag("Acts.Gbts.Training.usePixelClusters", True) 
+    actscf.addFlag("Acts.Gbts.Training.useStripClusters", True) 
+
     # Track finding
     actscf.addFlag('Acts.PixelCalibrationStrategy', PixelCalibrationStrategy.Uncalibrated, type=PixelCalibrationStrategy)
     actscf.addFlag('Acts.StripCalibrationStrategy', StripCalibrationStrategy.Uncalibrated, type=StripCalibrationStrategy)

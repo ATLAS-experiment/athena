@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration 
 
-from TrkConfig.TrackingPassFlags import createTrackingPassFlags, createITkTrackingPassFlags, createITkFastTrackingPassFlags, createITkConversionTrackingPassFlags, createITkHeavyIonTrackingPassFlags, createITkLargeD0TrackingPassFlags, createITkLowPtTrackingPassFlags
+from TrkConfig.TrackingPassFlags import createITkConversionTrackingPassFlags, createITkHeavyIonTrackingPassFlags, createITkLargeD0TrackingPassFlags, createITkLowPtTrackingPassFlags
 from ActsConfig.ActsConfigFlags import SeedingStrategy
 import AthenaCommon.SystemOfUnits as Units
 
@@ -26,7 +26,81 @@ def activateActsComponents(icf):
     # the flag: Acts.doAmbiguityResolution
     icf.doActsAmbiguityResolution = lambda pcf: pcf.Acts.doAmbiguityResolution
 
-def setActsDefaultTunings(icf):
+# Main ACTS Tracking pass with Fast Tracking configuration
+def createActsTrackingPassFlags():
+    from AthenaConfiguration.AthConfigFlags import AthConfigFlags
+    icf = AthConfigFlags()
+
+    icf.addFlag("extension", "Acts" )
+
+    icf.addFlag("useITkPixel", lambda pcf : pcf.Detector.EnableITkPixel )
+    icf.addFlag("useITkStrip", lambda pcf : pcf.Detector.EnableITkStrip )
+    icf.addFlag("useITkPixelSeeding", True )
+    icf.addFlag("useITkStripSeeding", False )
+
+    icf.addFlag("usePrdAssociationTool"     , False)
+    icf.addFlag("storeSeparateContainer"    , False)
+    icf.addFlag("doZBoundary"               , True)
+    icf.addFlag("doAmbiguityProcessorTrackFit", True)
+
+    icf.addFlag("useTIDE_Ambi", lambda pcf: pcf.Tracking.doTIDE_Ambi)
+
+    # Maximum bin set to 9999 instead of four to prevent out of bounds lookups
+    icf.addFlag("etaBins"                   , [-1.0, 2.0, 2.6, 9999.0])
+    icf.addFlag("maxEta"                    , 4.0)
+    icf.addFlag("minPT"                     , lambda pcf :
+                [0.2 * Units.GeV * pcf.BField.configuredSolenoidFieldScale]
+                if pcf.Tracking.doLowMu else
+                [0.9 * Units.GeV * pcf.BField.configuredSolenoidFieldScale,
+                 0.4 * Units.GeV * pcf.BField.configuredSolenoidFieldScale,
+                 0.4 * Units.GeV * pcf.BField.configuredSolenoidFieldScale])
+
+    icf.addFlag("minPTSeed"                 , lambda pcf : (
+        pcf.BField.configuredSolenoidFieldScale *
+        (0.2 * Units.GeV if pcf.Tracking.doLowMu
+         else 0.9 * Units.GeV)))
+    icf.addFlag("maxPrimaryImpactSeed"      , 5.0 * Units.mm)
+    icf.addFlag("maxZImpactSeed"            , 150.0 * Units.mm)
+    icf.addFlag("useSeedFilter"             , True)
+    icf.addFlag("useHoughVertexFilter"      , False) # experimental, keep False
+
+    # --- cluster cuts
+    icf.addFlag("minClusters"             , lambda pcf :
+                [6, 5, 4] if pcf.Tracking.doLowMu else [9, 8, 7])
+    icf.addFlag("minSiNotShared"          , lambda pcf :
+                [6, 5, 4] if pcf.Tracking.doLowMu else [7, 6, 5])
+    icf.addFlag("maxShared"               , [2])
+    icf.addFlag("minPixel"                , [3])
+    icf.addFlag("maxHoles"                , [1])
+    icf.addFlag("maxPixelHoles"           , [2])
+    icf.addFlag("maxSctHoles"             , [2])
+    icf.addFlag("maxDoubleHoles"          , [1])
+    icf.addFlag("maxPrimaryImpact"        , [5.0 * Units.mm, 5.0 * Units.mm, 10.0 * Units.mm])
+    icf.addFlag("maxEMImpact"             , [50.0 * Units.mm])
+    icf.addFlag("maxZImpact"              , [150.0 * Units.mm])
+
+    # --- general pattern cuts for NewTracking
+    icf.addFlag("roadWidth"               , 20.)
+    icf.addFlag("nHolesMax"               , icf.maxHoles)
+    icf.addFlag("nHolesGapMax"            , icf.maxHoles)
+
+    icf.addFlag("Xi2max"                  , [50.])
+    icf.addFlag("Xi2maxNoAdd"             , [100.])
+    icf.addFlag("nWeightedClustersMin"    , [6])
+
+    # --- seeding
+    icf.addFlag("maxdImpactSSSSeeds"      , [20.0 * Units.mm])
+    icf.addFlag("radMax"                  , 1100. * Units.mm)
+
+    # --- min pt cut for brem
+    icf.addFlag("doBremRecoverySi", lambda pcf: pcf.Tracking.doBremRecovery)
+    icf.addFlag("minPTBrem", lambda pcf: (
+        [1. * Units.GeV * pcf.BField.configuredSolenoidFieldScale]))
+
+    # -- use of calo information
+    icf.addFlag("doCaloSeededBremSi", lambda pcf: pcf.Tracking.doCaloSeededBrem)
+    icf.addFlag("doCaloSeededAmbiSi", lambda pcf: pcf.Tracking.doCaloSeededAmbi)
+
     # ACTS specifc config flags
     icf.addFlag("isSecondaryPass", False)
     icf.addFlag("isLargeD0", False)
@@ -37,35 +111,71 @@ def setActsDefaultTunings(icf):
     # (InDet{extension}TrackParticles) when storeSeparateContainer is
     # requested. If empty, the pass extension is used.
     icf.addFlag("storedTrackParticlesExtension", "")
-    
+
+    # --- handle ACTS workflow coexistence
+    # Athena components
+    icf.addFlag("doAthenaCluster", False)
+    icf.addFlag("doAthenaSpacePoint", False)
+    icf.addFlag("doAthenaSeed", False)
+    icf.addFlag("doAthenaTrack", False)
+    icf.addFlag("doAthenaAmbiguityResolution", False)
+    # Acts components
+    icf.addFlag("doActsCluster", True)
+    icf.addFlag("doActsSpacePoint", True)
+    icf.addFlag("doActsSeed", True)
+    icf.addFlag("doActsTrack", True)
+    icf.addFlag("doActsAmbiguityResolution", lambda pcf:
+                pcf.Acts.doAmbiguityResolution)
+
+    # Athena -> Acts EDM converters
+    icf.addFlag("doAthenaToActsCluster", False)
+    icf.addFlag("doAthenaToActsSpacePoint", False)
+    icf.addFlag("doAthenaToActsTrack", False)
+    # Acts -> Athena EDM converters
+    icf.addFlag("doActsToAthenaCluster", False)
+    icf.addFlag("doActsToAthenaSpacePoint", False)
+    icf.addFlag("doActsToAthenaTrack", False)
+    icf.addFlag("doActsToAthenaResolvedTrack", False)
+
+    # --- flags for GNN tracking
+    icf.addFlag("doGNNTrack", False)
+
+    # ---flag for FPGA tracking
+    icf.addFlag("doFPGASpacePoint", False)
+    icf.addFlag("doFPGACluster", False)
+    icf.addFlag("doFPGASeed", False)
+    icf.addFlag("doFPGATrackSim", False)
+
+    # --- Flags for detailed information. 
+    #     Ignored for Primary Pass (always active); 
+    #     Enable for other passes with dedicated output container, if desired.
+    icf.addFlag("storeTrackSeeds", False)
+    icf.addFlag("storeSiSPSeededTracks", False)
+
+    return icf
+
+
+def createActsLegacyTrackingPassFlags():
+    icf = createActsTrackingPassFlags()
+    icf.extension = "ActsLegacy"
+    icf.maxZImpact = [200. * Units.mm]
+    icf.maxZImpactSeed = 200. * Units.mm
+    icf.Xi2max = [25.]
+    icf.Xi2maxNoAdd = [25.]
+    icf.PixelSeedingStrategy = SeedingStrategy.GridTriplet
+    icf.useITkStripSeeding = True
+    icf.minPixel = [1]
+    icf.maxHoles = [2]
+    return icf
+
+
+
+def setActsDefaultTunings(icf):
+    icf.PixelSeedingStrategy = SeedingStrategy.Gbts
     # Custom values for config flags
     icf.Xi2max = [25]
     icf.Xi2maxNoAdd = [25]
 
-
-# Main ACTS Tracking pass    
-def createActsLegacyTrackingPassFlags():
-    icf = createITkTrackingPassFlags()
-    icf.extension = "ActsLegacy"
-    deactivateAthenaComponents(icf)
-    activateActsComponents(icf)
-    setActsDefaultTunings(icf)
-    icf.PixelSeedingStrategy = SeedingStrategy.GridTriplet
-    return icf
-
-# Main ACTS Tracking pass with Fast Tracking configuration
-def createActsTrackingPassFlags():
-    icf = createITkFastTrackingPassFlags()
-    icf.extension = "Acts"
-    deactivateAthenaComponents(icf)
-    activateActsComponents(icf)
-    setActsDefaultTunings(icf)
-    
-    # Override acts default values
-    icf.Xi2max = [50]
-    icf.Xi2maxNoAdd = [100]
-    icf.useITkStripSeeding = False
-    return icf
 
 # Main ACTS Tracking pass with Heavy Ion configuration
 # For the current time this is still an hybrid configuration
@@ -188,8 +298,8 @@ def createEFValidateF150TrackingPassFlags():
 # Main Inner Detector ACTS Tracking pass
 def createACTSInnerDetectorTrackingPassFlags():
     # flags for ACTS based InnerDetector silicon tracking
+    from TrkConfig.TrackingPassFlags import createTrackingPassFlags
     icf = createTrackingPassFlags()
-    setActsDefaultTunings(icf)
     icf.extension               = ""
     icf.Xi2max = 25.0
     icf.Xi2maxNoAdd = 25.0
@@ -203,4 +313,6 @@ def createACTSInnerDetectorTrackingPassFlags():
     # Maximum bin set to 9999 instead of four to prevent out of bounds lookups
     icf.addFlag("etaBins"                   , [-1.0, 3.0, 9999.0])
     icf.addFlag("maxPrimaryImpactList"      , [5.0 * Units.mm, 5.0 * Units.mm, 25.0 * Units.mm])
+    icf.addFlag("PixelSeedingStrategy", SeedingStrategy.GridTriplet, type=SeedingStrategy)
+    icf.addFlag("StripSeedingStrategy", SeedingStrategy.GridTriplet, type=SeedingStrategy)
     return icf

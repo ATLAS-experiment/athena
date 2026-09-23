@@ -1,8 +1,10 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HDF5Utils/Writer.h"
+
+#include <type_traits>
 
 //-------------------------------------------------------------------------
 // output data structure
@@ -23,6 +25,11 @@ struct out_t
   bool btype;
 };
 using consumer_t = H5Utils::Consumers<const out_t&>;
+
+// a non-movable member silently deletes a defaulted move constructor
+static_assert(
+  std::is_nothrow_move_constructible_v<H5Utils::Writer<0, consumer_t::input_type>>,
+  "H5Utils::Writer must stay nothrow move constructible");
 
 consumer_t getConsumers() {
   consumer_t consumers;
@@ -102,8 +109,14 @@ void fill(H5::Group& out_file, size_t iterations) {
   scalar_config.name = "scalar";
   scalar_config.deflate = deflate;
   consumer_t consumers = getConsumers();
-  scalar_writer_t scalar(out_file, consumers, scalar_config);
-  for (size_t n = 0; n < iterations; n++) {
+  // the moved-from writer holds buffered rows and is destroyed while
+  // the new one still writes to the dataset
+  scalar_writer_t scalar = [&] {
+    scalar_writer_t source(out_file, consumers, scalar_config);
+    source.fill(getOutputs(1, 1, 0.5).at(0));
+    return scalar_writer_t(std::move(source));
+  }();
+  for (size_t n = 1; n < iterations; n++) {
     scalar.fill(getOutputs(1 + n, 1, 0.5).at(0));
   }
 

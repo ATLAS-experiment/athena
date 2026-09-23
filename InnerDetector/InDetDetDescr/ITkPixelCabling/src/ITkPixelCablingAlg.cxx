@@ -37,6 +37,9 @@
 #include <iostream>
 #include <fstream>
 
+// CREST
+#include <chai/Database.h>
+
 //json
 #include <nlohmann/json.hpp>
 
@@ -51,12 +54,6 @@ ITkPixelCablingAlg::ITkPixelCablingAlg(const std::string& name, ISvcLocator* pSv
 //
 StatusCode
 ITkPixelCablingAlg::initialize() {
-  m_source = PathResolver::find_file(m_source.value(), "DATAPATH");
-  if (m_source.empty()) {
-    ATH_MSG_FATAL("The ITkPixel data file for cabling, " << m_source.value() << ", was not found.");
-    return StatusCode::FAILURE;
-  }
-  ATH_MSG_INFO("Reading cabling from " << m_source.value());
   // ITkPixelID
   ATH_CHECK(detStore()->retrieve(m_idHelper, "PixelID"));
   // det manager
@@ -101,16 +98,7 @@ ITkPixelCablingAlg::execute(const EventContext& ctx) const {
     return StatusCode::SUCCESS;
   }
 
-  
-  
-  auto inputFile = std::ifstream(m_source.value());
-  if (not inputFile.good()){
-    ATH_MSG_ERROR("The itk cabling file "<<m_source.value()<<" could not be opened.");
-    return StatusCode::FAILURE;
-  }
-
-
-  ATH_CHECK(fillFromFile(inputFile, pCabling));
+  ATH_CHECK(fillFromCREST(pCabling));
   const int numEntries = pCabling->size();
   ATH_MSG_DEBUG(numEntries << " entries were made to the identifier map.");
 
@@ -218,11 +206,33 @@ StatusCode ITkPixelCablingAlg::generateTestCabling(std::unique_ptr<ITkPixelCabli
     return StatusCode::SUCCESS;
 }
 
-StatusCode ITkPixelCablingAlg::fillFromFile(std::ifstream& file, std::unique_ptr<ITkPixelCablingData>& cabling) const {
-    
-    nlohmann::json config;
-    file >> config;
+StatusCode ITkPixelCablingAlg::fillFromCREST(std::unique_ptr<ITkPixelCablingData>& cabling) const {
 
+    chai::Database db(m_crestServer);
+    auto tag = db.getTag(m_crestTag);
+    auto [payload, since, until] = tag->getPayloadAt(m_crestTime);
+    auto config = payload.toJson();
+    //format the json file correctly, need to decode utf8 by hand...
+    if (config.contains("0")) {
+        config["sideAC"] = std::move(config["0"]);
+        config.erase("0");
+    }
+    //Clean and parse string elements inside 'sideAC'
+    if (config.contains("sideAC") && config["sideAC"].is_array()) {
+        for (auto& item : config["sideAC"]) {
+            if (item.is_string()) {
+                std::string str = item.get<std::string>();
+                // Strip leading b' and trailing '
+                if (str.rfind("b'", 0) == 0) {
+                    str = str.substr(2, str.length() - 3);
+                }
+                // Remove backslashes
+                str.erase(std::remove(str.begin(), str.end(), '\\'), str.end());
+                // Parse cleaned string back using nlohmann::json
+                item = nlohmann::json::parse(str);
+            }
+        }
+    }
     std::unordered_set<uint32_t> seen;
 
     for (const auto& [side, groups] : config.items()) {
@@ -245,7 +255,7 @@ StatusCode ITkPixelCablingAlg::fillFromFile(std::ifstream& file, std::unique_ptr
 
                 Identifier id(static_cast<Identifier::value_type>(moduleID));
                 if      (m_idHelper->barrel_ec(id) == 0 && m_idHelper->layer_disk(id) == 0) cabling->addTransformType(ITkPixelCabling::dridToModuleID(trueDetectorResourceID), ITkPixelCabling::TransformType::NominalIBTriplet);
-                else if (m_idHelper->barrel_ec(id) != 0 && m_idHelper->layer_disk(id) == 0) cabling->addTransformType(ITkPixelCabling::dridToModuleID(trueDetectorResourceID), ITkPixelCabling::TransformType::NominalIECTriplet);
+                else if (m_idHelper->barrel_ec(id) != 0 && (m_idHelper->layer_disk(id) == 0 || m_idHelper->layer_disk(id) == 1) ) cabling->addTransformType(ITkPixelCabling::dridToModuleID(trueDetectorResourceID), ITkPixelCabling::TransformType::NominalIECTriplet);
                 else cabling->addTransformType(ITkPixelCabling::dridToModuleID(trueDetectorResourceID), ITkPixelCabling::TransformType::NominalQuad);
 
                 ATH_MSG_DEBUG(std::hex << " key " << (detectorResourceID & ITkPixelCabling::OFFLINE_DRID_MASK) << " detectorResourceID " << detectorResourceID << " trueDetectorResourceID " << trueDetectorResourceID << " sourceID " << sourceID);

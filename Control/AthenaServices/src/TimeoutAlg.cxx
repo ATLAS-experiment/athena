@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 /**
@@ -58,7 +58,7 @@ StatusCode TimeoutAlg::execute (const EventContext& ctx) const
 void TimeoutAlg::handle(const Incident& inc)
 {
   if (inc.type() == "EndAlgorithms") {
-    ATH_MSG_DEBUG("Resetting event timeout for slot " << inc.context().slot());
+    ATH_MSG_DEBUG("Resetting event timeout for slot {}", inc.context().slot());
     // Reset start time for slot to zero
     *m_eventStartTime.get(inc.context()) = {};
   }
@@ -80,8 +80,8 @@ StatusCode TimeoutAlg::stop()
 
 void TimeoutAlg::timeoutThread()
 {
-  ATH_MSG_INFO(std::format("Setting per-event timeout of {}",
-                           std::chrono::duration<double>(m_timeout)));
+  ATH_MSG_INFO("Setting per-event timeout of {}",
+               std::chrono::duration<double>(m_timeout));
 
   // Wakeup at regular intervals (with a minimum frequency, useful for long timeouts)
   const std::chrono::nanoseconds wakeup_interval =

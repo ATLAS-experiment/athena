@@ -5,7 +5,7 @@
 #define ITkPixelCablingData_h
 /**
   * @file ITkPixelCablingData/ITkPixelCablingData.h
-  * @author Ondra Kovanda, Shaun Roe
+  * @author Ondra Kovanda, Shaun Roe, Fabrice Balli
   * @date June 2024
   * @brief Data object containing the offline-online mapping for ITkPixels
   */
@@ -16,6 +16,7 @@
 #include "Identifier/Identifier.h"
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/CondCont.h"
+
 //STL
 #include <unordered_map>
 #include <iosfwd>
@@ -106,6 +107,26 @@ namespace ITkPixelCabling {
             std::swap(col, row);
         };
     
+    static constexpr TransformFn nominalQuadInverseTable[4] = {
+        []([[maybe_unused]] uint16_t& col, uint16_t& row){row = 383 - row;},
+        []([[maybe_unused]] uint16_t& col, uint16_t& row){row = 383 - row; col -= 400;},
+        []([[maybe_unused]] uint16_t& col, uint16_t& row){row = 767 - row;},
+        []([[maybe_unused]] uint16_t& col, uint16_t& row){row = 767 - row; col -= 400;}
+    };
+
+    static constexpr TransformFn ibInverseTransformFn =
+        [](uint16_t& col, uint16_t& row) {
+            const uint16_t parity = row & 1;
+            row = 383 - (row >> 1);
+            col = (col << 1) | parity;
+        };
+
+    static constexpr TransformFn iecInverseTransformFn =
+        [](uint16_t& col, uint16_t& row) {
+            std::swap(col, row);
+        };
+
+
     static inline void chipToModuleTransform(const TransformType& transform, const uint8_t& chipID, uint16_t& col, uint16_t& row){
         switch (transform){
             case TransformType::NominalQuad:
@@ -116,6 +137,22 @@ namespace ITkPixelCabling {
                 break;
             case TransformType::NominalIECTriplet:
                 iecTransformFn(col, row);
+                break;
+            case TransformType::UndefinedTransform:
+                break;
+        }
+    }
+
+    static inline void chipToModuleInverseTransform(const TransformType& transform, const uint8_t& chipID, uint16_t& col, uint16_t& row){
+        switch (transform){
+            case TransformType::NominalQuad:
+                nominalQuadInverseTable[chipID](col, row);
+                break;
+            case TransformType::NominalIBTriplet:
+                ibInverseTransformFn(col, row);
+                break;
+            case TransformType::NominalIECTriplet:
+                iecInverseTransformFn(col, row);
                 break;
             case TransformType::UndefinedTransform:
                 break;
@@ -148,7 +185,10 @@ public:
         f(key, val);
     }
   }
-  
+
+  // chip ID number from 0 to 3
+  static uint8_t chipID(const ITkPixelCabling::TransformType& t, const uint16_t& col, const uint16_t& row) ;
+
   //Add entry to the offline->online map. This is only for producing test streams,
   //from MC, and needs to propagate the type of the module. We also can at most map
   //with 4-fold degeneracy due to non-merged quads, which have 4 online IDs mapped to

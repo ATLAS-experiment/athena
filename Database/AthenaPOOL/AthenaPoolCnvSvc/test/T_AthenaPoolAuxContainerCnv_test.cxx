@@ -194,7 +194,7 @@ void test1 (ISvcLocator* svcloc,
                      std::vector<SG::sgkey_t> { sgkey_vec },
                      &dec_vec);
   EventContext ctx;
-  Atlas::ExtendedEventContext ectx;
+  Atlas::ExtendedEventContext ectx (&store);
   ectx.setThinningCache (&cache);
   Atlas::setExtendedEventContext (ctx, std::move (ectx));
   Gaudi::Hive::setCurrentContext (ctx);

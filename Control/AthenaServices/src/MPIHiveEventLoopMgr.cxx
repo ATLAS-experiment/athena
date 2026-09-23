@@ -14,6 +14,7 @@
 #include <chrono>
 #include <fstream>
 #include <string>
+#include <print>
 
 using Clock = std::chrono::high_resolution_clock;
 
@@ -125,9 +126,8 @@ StatusCode MPIHiveEventLoopMgr::masterEventLoop(int maxEvt) {
     }
 
     // Other message types are an error
-    ATH_MSG_ERROR("Received unexpected message "
-                  << std::format("{}", msg.messageType) << " from "
-                  << msg.source);
+    ATH_MSG_ERROR("Received unexpected message {} from {}",
+                  msg.messageType, msg.source);
   }
   auto all_provided = Clock::now() - start;
   ATH_MSG_INFO("Provided all events to workers, waiting for them to complete.");
@@ -142,7 +142,7 @@ StatusCode MPIHiveEventLoopMgr::masterEventLoop(int maxEvt) {
     }
 
     if (msg.messageType == ClusterMessageType::WorkerError) {
-      ATH_MSG_ERROR("Received WorkerError message from " << msg.source);
+      ATH_MSG_ERROR("Received WorkerError message from {}", msg.source);
       statuses.at(msg.source) = get<ClusterMessage::WorkerStatus>(msg.payload);
       workers_done.at(msg.source) =
           true;  // If a worker hits an error, it's done
@@ -160,7 +160,7 @@ StatusCode MPIHiveEventLoopMgr::masterEventLoop(int maxEvt) {
     }
 
     if (msg.messageType == ClusterMessageType::FinalWorkerStatus) {
-      ATH_MSG_INFO("Received FinalWorkerStatus from " << msg.source);
+      ATH_MSG_INFO("Received FinalWorkerStatus from {}", msg.source);
       statuses.at(msg.source) = get<ClusterMessage::WorkerStatus>(msg.payload);
       workers_done.at(msg.source) = true;  // Told worker we're done
       ++num_workers_done;
@@ -168,9 +168,8 @@ StatusCode MPIHiveEventLoopMgr::masterEventLoop(int maxEvt) {
     }
 
     // Other message types are an error
-    ATH_MSG_ERROR("Received unexpected message "
-                  << std::format("{}", msg.messageType) << " from "
-                  << msg.source);
+    ATH_MSG_ERROR("Received unexpected message {} from {}",
+                  msg.messageType, msg.source);
   }
   auto all_done = Clock::now() - start;
   // Collate status
@@ -199,10 +198,10 @@ StatusCode MPIHiveEventLoopMgr::masterEventLoop(int maxEvt) {
 
   ATH_MSG_INFO("Overall: SC " << sc << ", created " << n_created << ", skipped "
                               << n_skipped << ", finished " << n_finished);
-  ATH_MSG_INFO("MASTER: Took " << std::chrono::hh_mm_ss(all_provided)
-                               << " to provide all events.");
-  ATH_MSG_INFO("MASTER: Took " << std::chrono::hh_mm_ss(all_done)
-                               << " to complete all events.");
+  ATH_MSG_INFO("MASTER: Took {} to provide all events.",
+               std::chrono::hh_mm_ss(all_provided));
+  ATH_MSG_INFO("MASTER: Took {} to complete all events.",
+               std::chrono::hh_mm_ss(all_done));
   return sc;
 }
 
@@ -254,10 +253,10 @@ StatusCode MPIHiveEventLoopMgr::workerEventLoop() {
 
     if (msg.messageType == ClusterMessageType::EventsDone) {
       auto loop_time = Clock::now() - start;
-      ATH_MSG_INFO("Worker " << m_clusterSvc->rank() << " DONE. Loop took "
-                             << std::chrono::hh_mm_ss(loop_time)
-                             << " to process " << m_nLocalCreatedEvts
-                             << " events.");
+      ATH_MSG_INFO("Worker {} DONE. Loop took {} to process {} events.",
+                   m_clusterSvc->rank(),
+                   std::chrono::hh_mm_ss(loop_time),
+                   m_nLocalCreatedEvts);
       // Been told we've reached end
       // Provide status to master
       ClusterMessage::WorkerStatus status{};
@@ -279,9 +278,8 @@ StatusCode MPIHiveEventLoopMgr::workerEventLoop() {
     // Any other message other than ProvideEvent would now be an error
     if (msg.messageType != ClusterMessageType::ProvideEvent ||
         msg.source != 0) {
-      ATH_MSG_ERROR("Received unexpected message "
-                    << std::format("{}", msg.messageType) << " from "
-                    << msg.source);
+      ATH_MSG_ERROR("Received unexpected message {} from {}",
+                    msg.messageType, msg.source);
       ClusterMessage::WorkerStatus status{};
       status.status = StatusCode::FAILURE;
       status.createdEvents = m_nLocalCreatedEvts;
@@ -293,7 +291,7 @@ StatusCode MPIHiveEventLoopMgr::workerEventLoop() {
     }
 
     int evt = get<int>(msg.payload);
-    ATH_MSG_INFO("Starting event " << evt);
+    ATH_MSG_INFO("Starting event {}", evt);
     StatusCode sc = insertEvent(
         evt, end_of_stream,
         std::chrono::duration_cast<std::chrono::nanoseconds>(request_time)
@@ -310,10 +308,10 @@ StatusCode MPIHiveEventLoopMgr::workerEventLoop() {
     }
     if (end_of_stream || m_terminateLoop) {
       auto loop_time = Clock::now() - start;
-      ATH_MSG_INFO("Worker " << m_clusterSvc->rank() << " DONE. Loop took "
-                             << std::chrono::hh_mm_ss(loop_time)
-                             << " to process " << m_nLocalCreatedEvts
-                             << " events.");
+      ATH_MSG_INFO("Worker {} DONE. Loop took  to process  events.",
+                   m_clusterSvc->rank(),
+                   std::chrono::hh_mm_ss(loop_time),
+                   m_nLocalCreatedEvts);
       // reached end of stream, drain scheduler
       ClusterMessage::WorkerStatus status{};
       // At end of stream, we need to *fully* drain the scheduler
@@ -356,7 +354,7 @@ StatusCode MPIHiveEventLoopMgr::insertEvent(int eventIdx, bool& endOfStream,
   if (m_evtSelector != nullptr) {
     const int nToJump = (eventIdx - 1) - m_evtSelectorCurrentPos;
     if (nToJump < 0) {
-      ATH_MSG_ERROR("Cannot jump backwards by " << nToJump << " events");
+      ATH_MSG_ERROR("Cannot jump backwards by {} events", nToJump);
       return StatusCode::FAILURE;
     }
     if (nToJump > 0) {
@@ -391,8 +389,8 @@ StatusCode MPIHiveEventLoopMgr::drainLocalScheduler() {
   EventContext* finishedEvtContext(nullptr);
 
   // Here we wait not to loose cpu resources
-  ATH_MSG_DEBUG("drainLocalScheduler: [" << m_nLocalFinishedEvts
-                                         << "] Waiting for a context");
+  ATH_MSG_DEBUG("drainLocalScheduler: [{}] Waiting for a context",
+                m_nLocalFinishedEvts);
   sc = m_schedulerSvc->popFinishedEvent(finishedEvtContext);
 
   // We got past it: cache the pointer
@@ -450,8 +448,8 @@ StatusCode MPIHiveEventLoopMgr::drainLocalScheduler() {
       n_run = thisFinishedEvtContext->eventID().run_number();
       n_evt = thisFinishedEvtContext->eventID().event_number();
     } else {
-      ATH_MSG_ERROR("DrainSched: unable to select store "
-                    << thisFinishedEvtContext->slot());
+      ATH_MSG_ERROR("DrainSched: unable to select store {}",
+                    thisFinishedEvtContext->slot());
       thisFinishedEvtContext.reset();
       fail = StatusCode::FAILURE;
       continue;
@@ -463,14 +461,14 @@ StatusCode MPIHiveEventLoopMgr::drainLocalScheduler() {
     m_incidentSvc->fireIncident(
         Incident(name(), IncidentType::EndProcessing, *thisFinishedEvtContext));
 
-    ATH_MSG_DEBUG("Clearing slot "
-                  << thisFinishedEvtContext->slot() << " (event "
-                  << thisFinishedEvtContext->evt() << ") of the whiteboard");
+    ATH_MSG_DEBUG("Clearing slot {} (event {}) of the whiteboard",
+                  thisFinishedEvtContext->slot(),
+                  thisFinishedEvtContext->evt());
 
     StatusCode sc = clearWBSlot(thisFinishedEvtContext->slot());
     if (!sc.isSuccess()) {
-      ATH_MSG_ERROR("Whiteboard slot " << thisFinishedEvtContext->slot()
-                                       << " could not be properly cleared");
+      ATH_MSG_ERROR("Whiteboard slot {} could not be properly cleared",
+                    thisFinishedEvtContext->slot());
       if (fail != StatusCode::FAILURE) {
         fail = sc;
       }
@@ -485,16 +483,12 @@ StatusCode MPIHiveEventLoopMgr::drainLocalScheduler() {
 
     if (m_doEvtHeartbeat) {
       if (!m_useTools) {
-        ATH_MSG_INFO("  ===>>>  done processing event #"
-                     << n_evt << ", run #" << n_run << " on slot "
-                     << thisFinishedEvtContext->slot() << ",  " << m_proc
-                     << " events processed so far <<<===");
+        ATH_MSG_INFO("  ===>>>  done processing event #{}, run #{} on slot {},  {} events processed so far <<<===",
+                     n_evt, n_run, thisFinishedEvtContext->slot(), m_proc);
       } else {
-        ATH_MSG_INFO("  ===>>>  done processing event #"
-                     << n_evt << ", run #" << n_run << " on slot "
-                     << thisFinishedEvtContext->slot() << ",  " << m_nev
-                     << " events read and " << m_proc
-                     << " events processed so far <<<===");
+        ATH_MSG_INFO("  ===>>>  done processing event #{}, run #{} on slot {},  {} events read and {} events processed so far <<<===",
+                     n_evt, n_run, thisFinishedEvtContext->slot(), m_nev, m_proc);
+                     
       }
       std::ofstream outfile("eventLoopHeartBeat.txt");
       if (!outfile) {
@@ -503,8 +497,8 @@ StatusCode MPIHiveEventLoopMgr::drainLocalScheduler() {
         thisFinishedEvtContext.reset();
         continue;
       }
-      outfile << "  done processing event #" << n_evt << ", run #" << n_run
-              << " " << m_nev << " events read so far <<<===" << std::endl;
+      std::println (outfile, "  done processing event #{}, run #{} {} events read so far <<<===",
+                    n_evt, n_run, m_nev);
       outfile.close();
     }
 

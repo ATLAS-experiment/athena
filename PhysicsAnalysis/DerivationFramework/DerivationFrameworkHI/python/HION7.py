@@ -71,7 +71,7 @@ def getDFJets(flags):
     if flags.HeavyIon.doHIBTagging:
         from BTagging.FlavorTaggingConfig import FlavorTaggingCfg
         acc.merge(FlavorTaggingCfg(flags, JetColl+"AntiKt4HIJets"))
-        from BTagging.TrackLeptonConfig import TrackLeptonDecorationCfg
+        from FlavorTagDiscriminants.TrackLeptonConfig import TrackLeptonDecorationCfg
         acc.merge(TrackLeptonDecorationCfg(flags))
 
     return acc

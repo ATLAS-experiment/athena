@@ -7,21 +7,12 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def addITkPixelCabling(flags):
     from ITkPixelCabling.ITkPixelCablingAlgConfig import ITkPixelCablingAlgCfg
-    from ITkPixelCabling.ITkPixelCablingFromDB import ITkPixelCablingFromCREST
-    import os
-    import sys
-
     acc = ComponentAccumulator()
-
-   
+    
     if flags.ITk.Conditions.PixelTestCablingFallback:
         acc.merge(ITkPixelCablingAlgCfg(flags, name="ITkPixelCablingAlg", UseTestCabling=True))
     else:
-        ITkPixelCablingFromCREST(output_file='cabling.json')
-        if os.path.isfile("cabling.json"):
-            acc.merge(ITkPixelCablingAlgCfg(flags, name="ITkPixelCablingAlg", UseTestCabling=False, DataSource='cabling.json'))
-        else:
-            sys.exit("Error: cabling couldn't be fetched from CREST. Provide a cabling.json file in the run directory, or explicitly allow flags.ITk.Conditions.PixelTestCablingFallback=True")
+        acc.merge(ITkPixelCablingAlgCfg(flags, name="ITkPixelCablingAlg", UseTestCabling=False))
     return acc
 
 

@@ -19,6 +19,7 @@
 #include "AthLinks/tools/DataProxyHolder.h"
 #include "AthLinks/DataLinkBase.h"
 #include "AthenaKernel/getThinningCache.h"
+#include "AthenaKernel/proxyDictFromEventContext.h"
 #include "CxxUtils/CachedValue.h"
 #include "CxxUtils/checker_macros.h"
 #include <concepts>
@@ -569,6 +570,28 @@ struct GenericElementLinkBase : SelectNoInstance {
 
 
 #include "AthLinks/GenericElementLinkBase.icc"
+namespace SG {
+
+
+template <class INDEXING_POLICY>
+bool toTransient (GenericElementLinkBase<INDEXING_POLICY>& el, IProxyDict* sg)
+{
+  el.toTransient (sg);
+  return true;
+}
+
+
+template <class INDEXING_POLICY>
+bool toTransient (GenericElementLinkBase<INDEXING_POLICY>& el, const EventContext& ctx)
+{
+  el.toTransient (Atlas::proxyDictFromEventContext (ctx));
+  return true;
+}
+
+
+} // namespace SG
+
+
 
 
 #endif // not ATHLINKS_GENERICELEMENTLINKBASE_H

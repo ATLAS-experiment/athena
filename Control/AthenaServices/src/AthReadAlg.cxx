@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthenaServices/src/AthReadAlg.cxx
@@ -49,18 +49,16 @@ StatusCode AthReadAlg::execute (const EventContext& ctx) const
   // Look up the proxy for the original object.
   SG::DataProxy* proxy = evtStore()->proxy_exact (m_sgkey);
   if (!proxy) {
-    ATH_MSG_ERROR( "Cannot find proxy for original object: " <<
-                   m_key.clid() << "/" << m_key.key() << "_DELETED [" <<
-                   m_sgkey << "]" );
+    ATH_MSG_ERROR( "Cannot find proxy for original object: {}/{}_DELETED [{}]",
+                   m_key.clid(), m_key.key(), m_sgkey);
     return StatusCode::FAILURE;
   }
 
   // Read the object.
   std::unique_ptr<DataObject> ptr (proxy->readData());
   if (!ptr) {
-    ATH_MSG_ERROR( "Object read failed: " <<
-                   m_key.clid() << "/" << m_key.key() << "_DELETED [" <<
-                   m_sgkey << "]" );
+    ATH_MSG_ERROR( "Object read failed: {}/{}_DELETED [{}]",
+                   m_key.clid(), m_key.key(), m_sgkey);
     return StatusCode::FAILURE;
   }
 
@@ -80,8 +78,8 @@ StatusCode AthReadAlg::execute (const EventContext& ctx) const
   if (!proxy->alias().empty() || !extraAliases.empty()) {
     SG::DataProxy* newprox = evtStore()->proxy (m_key.clid(), m_key.key());
     if (!newprox) {
-      ATH_MSG_ERROR( "Can't find proxy for just-recorded object " << 
-                     m_key.clid() << "/" << m_key.key());
+      ATH_MSG_ERROR( "Can't find proxy for just-recorded object {}/{}",
+                     m_key.clid(), m_key.key());
       return StatusCode::FAILURE;
     }
     SG::DataObjectSharedPtr<DataObject> dobj (newprox->accessData());
@@ -90,8 +88,8 @@ StatusCode AthReadAlg::execute (const EventContext& ctx) const
       if (a.ends_with ("_DELETED")) {
         a.erase (a.size() - 8, 8);
         if (!evtStore()->recordObject (dobj, a, false, true)) {
-          ATH_MSG_ERROR( "Can't make alias " << a << " for " <<
-                         m_key.clid() << "/" << m_key.key());
+          ATH_MSG_ERROR( "Can't make alias {} for {}/{}",
+                         a, m_key.clid(), m_key.key());
           return StatusCode::FAILURE;
         }
       }
@@ -99,8 +97,8 @@ StatusCode AthReadAlg::execute (const EventContext& ctx) const
 
     for (const std::string& a : extraAliases) {
       if (!evtStore()->recordObject (dobj, a, false, true)) {
-        ATH_MSG_ERROR( "Can't make alias " << a << " for " <<
-                       m_key.clid() << "/" << m_key.key());
+        ATH_MSG_ERROR( "Can't make alias {} for {}/{}",
+                       a, m_key.clid(), m_key.key());
         return StatusCode::FAILURE;
       }
     }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthLinks/test/DataLink_test.cxx
@@ -157,7 +157,7 @@ void test1 (SGTest::TestStore& store)
   store2.record (foo3, "foo2");
 
   EventContext ctx;
-  ctx.setExtension( Atlas::ExtendedEventContext(&store2) );
+  ctx.setExtension (Atlas::ExtendedEventContext (&store2));
 
   DataLink<Foo> dl8 (foo3, &store2);
   assert (dl8.cptr() == foo3);
@@ -288,6 +288,48 @@ void test2 (SGTest::TestStore& store)
   assert (dl2.cptr() == foo6);
   dl2.toPersistent();
   assert (dl2.cptr() == foo7);
+
+  EventContext ctx;
+  ctx.setExtension (Atlas::ExtendedEventContext (&store));
+
+  {
+    DataLink<Foo> dl4;
+    DataLinkBase_test::setLink (dl4, sgkey);
+    SG::ToTransient<DataLink<Foo> >::toTransient (dl4, ctx);
+    assert (dl4.cptr() == foo5);
+  }
+  {
+    DataLink<Foo> dl4;
+    DataLinkBase_test::setLink (dl4, sgkey);
+    SG::ToTransient<DataLink<Foo> >::toTransient (dl4, &store);
+    assert (dl4.cptr() == foo5);
+  }
+  {
+    std::vector<DataLink<Foo> > vdl4 (1);
+    DataLinkBase_test::setLink (vdl4[0], sgkey);
+    SG::ToTransient<std::vector<DataLink<Foo> > >::toTransient (vdl4, ctx);
+    assert (vdl4[0].cptr() == foo5);
+  }
+  {
+    std::vector<DataLink<Foo> > vdl4 (1);
+    DataLinkBase_test::setLink (vdl4[0], sgkey);
+    SG::ToTransient<std::vector<DataLink<Foo> > >::toTransient (vdl4, &store);
+    assert (vdl4[0].cptr() == foo5);
+  }
+  {
+    std::vector<std::vector<DataLink<Foo> > > vvdl4 (1);
+    vvdl4[0].resize (1);
+    DataLinkBase_test::setLink (vvdl4[0][0], sgkey);
+    SG::ToTransient<std::vector<std::vector<DataLink<Foo> > > >::toTransient (vvdl4, ctx);
+    assert (vvdl4[0][0].cptr() == foo5);
+  }
+  {
+    std::vector<std::vector<DataLink<Foo> > > vvdl4 (1);
+    vvdl4[0].resize (1);
+    DataLinkBase_test::setLink (vvdl4[0][0], sgkey);
+    SG::ToTransient<std::vector<std::vector<DataLink<Foo> > > >::toTransient (vvdl4, &store);
+    assert (vvdl4[0][0].cptr() == foo5);
+  }
 }
 
 

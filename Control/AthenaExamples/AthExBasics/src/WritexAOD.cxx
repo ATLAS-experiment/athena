@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "WritexAOD.h"
@@ -21,8 +21,8 @@ StatusCode WritexAOD::execute(const EventContext &ctx) const {
   // EventContext is for multi-threading
   SG::ReadHandle<xAOD::TrackParticleContainer> tracksIn{m_trackKey, ctx};
   if (!tracksIn.isValid()) {
-    ATH_MSG_ERROR("Couldn't retrieve xAOD::TrackParticles with key: "
-                  << m_trackKey.key());
+    ATH_MSG_ERROR("Couldn't retrieve xAOD::TrackParticles with key: {}",
+                  m_trackKey.key());
     return StatusCode::FAILURE;
   }
 

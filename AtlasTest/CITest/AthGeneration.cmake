@@ -57,6 +57,9 @@ atlas_add_citest( Generation_CA_Py8_13p6TeV
 atlas_add_citest( Generation_CA_PhPy8_13p6TeV
    SCRIPT RunWorkflowTests_Run3.py --CI -g --dsid Test950070 -e '--CA True' )
 
+atlas_add_citest( Generation_CA_P8B_13p6TeV
+   SCRIPT RunWorkflowTests_Run3.py --CI -g --dsid Test801918 -e '--CA True' )
+
 atlas_add_citest( Generation_CA_ParticleGun_13p6TeV
    SCRIPT RunWorkflowTests_Run3.py --CI -g --dsid Test950555 -e '--CA True' )
 

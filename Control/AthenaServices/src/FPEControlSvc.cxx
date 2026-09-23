@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthenaServices/src/FPEControlSvc.cxx
@@ -52,34 +52,34 @@ StatusCode FPEControlSvc::initialize()
   prophand (m_exceptions);
 
   // Add ourself as an observer.
-  CHECK( m_toolSvc.retrieve() );
+  ATH_CHECK( m_toolSvc.retrieve() );
   m_toolSvc->registerObserver (this);
   
   if(m_feSetRounding!="")
     {
-      REPORT_MESSAGE (MSG::INFO) << "FE Rounding mode " << m_feSetRounding << " requested";
+      ATH_MSG_INFO( "FE Rounding mode {} requested", m_feSetRounding);
       if(m_feSetRounding=="FE_TONEAREST")
 	{
 	  if ( fesetround(FE_TONEAREST) )
-	      REPORT_MESSAGE (MSG::WARNING) << "Couldn't change FE Rounding to mode FE_TONEAREST !";
+            ATH_MSG_WARNING( "Couldn't change FE Rounding to mode FE_TONEAREST !" );
 	}
       else if(m_feSetRounding=="FE_UPWARD")
 	{
 	  if ( fesetround(FE_UPWARD) )
-	    REPORT_MESSAGE (MSG::WARNING) << "Couldn't change FE Rounding to mode FE_UPWARD !";
+	    ATH_MSG_WARNING( "Couldn't change FE Rounding to mode FE_UPWARD !" );
 	}
       else if(m_feSetRounding=="FE_DOWNWARD")
 	{
 	  if ( fesetround(FE_DOWNWARD) )
-	    REPORT_MESSAGE (MSG::WARNING) << "Couldn't change FE Rounding to mode FE_DOWNWARD !";
+	    ATH_MSG_WARNING( "Couldn't change FE Rounding to mode FE_DOWNWARD !" );
 	}
       else if(m_feSetRounding=="FE_TOWARDZERO")
 	{
 	  if ( fesetround(FE_TOWARDZERO) )
-	    REPORT_MESSAGE (MSG::WARNING) << "Couldn't change FE Rounding to mode FE_TOWARDZERO !";
+	    ATH_MSG_WARNING( "Couldn't change FE Rounding to mode FE_TOWARDZERO !" );
 	}
       else
-	REPORT_MESSAGE (MSG::WARNING) << "Don't know FE Rounding to mode " << m_feSetRounding;
+	ATH_MSG_WARNING( "Don't know FE Rounding to mode {}", m_feSetRounding );
     }
   
   return StatusCode::SUCCESS;
@@ -186,8 +186,7 @@ void FPEControlSvc::prophand (Gaudi::Details::PropertyBase& /*prop*/)
     else if (strcasecmp (s, "invalid") == 0)
       thisexc = FE_INVALID;
     else {
-      REPORT_MESSAGE (MSG::INFO)
-        << "Unknown exception name: " << v[i];
+      ATH_MSG_INFO( "Unknown exception name: {}", v[i] );
       continue;
     }
 

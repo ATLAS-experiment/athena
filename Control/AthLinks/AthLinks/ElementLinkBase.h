@@ -18,7 +18,9 @@
 #include "AthLinks/tools/DataProxyHolder.h"
 #include "AthLinks/tools/ForwardIndexingPolicy.h"
 #include "AthLinks/DataLinkBase.h"
+#include "AthContainersInterfaces/ToTransient.h"
 #include "AthenaKernel/getThinningCache.h"
+#include "AthenaKernel/proxyDictFromEventContext.h"
 #include "SGCore/sgkey_t.h"
 #include "CxxUtils/CachedPointer.h"
 #include <cstdlib>
@@ -508,6 +510,28 @@ private:
 
   CxxUtils::CachedPointer<void>  m_element;    //! Transient
 };
+
+
+namespace SG {
+
+
+inline
+bool toTransient (ElementLinkBase& el, IProxyDict* sg)
+{
+  el.toTransient (sg);
+  return true;
+}
+
+
+inline
+bool toTransient (ElementLinkBase& el, const EventContext& ctx)
+{
+  el.toTransient (Atlas::proxyDictFromEventContext (ctx));
+  return true;
+}
+
+
+} // namespace SG
 
 
 #include "AthLinks/ElementLinkBase.icc"

@@ -42,7 +42,6 @@ StatusCode PFUnifiedMatchingTruthTool::initialize()
 
   //Retrieve track-cluster matching tools
   ATH_CHECK(m_theMatchingTool.retrieve());
-  ATH_CHECK(m_theMatchingToolForPull_015.retrieve());
   ATH_CHECK(m_theMatchingToolForPull_02.retrieve());
 
 

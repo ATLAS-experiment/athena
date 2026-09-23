@@ -435,7 +435,8 @@ HGTD_ID::init_neighbors()
             }
 
             // index for the subsequent arrays
-            unsigned short index = hash_id;
+            // note: default value of hashId is 0xFFFFFFFF (= invalid)
+            IdentifierHash::value_type index = hash_id.value();
             assert (hash_id < m_prev_phi_wafer_vec.size());
             assert (hash_id < m_next_phi_wafer_vec.size());
             assert (hash_id < m_prev_eta_wafer_vec.size());

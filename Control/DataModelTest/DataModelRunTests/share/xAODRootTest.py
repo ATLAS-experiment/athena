@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
 #
 # File: share/xAODRootTest.py
 # Author: snyder@bnl.gov
@@ -326,7 +326,7 @@ class xAODTestDecor:
             self.decor.set(c, self.offset + c.anInt())
 
         ctrig = event[self.readPrefix + 'ctrig']
-        for c in cvec:
+        for c in ctrig:
             self.decor.set(c, self.offset + c.anInt())
 
         cinfo = event[self.readPrefix + 'cinfo']

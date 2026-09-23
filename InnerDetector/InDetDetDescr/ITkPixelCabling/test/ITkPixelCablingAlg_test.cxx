@@ -83,8 +83,6 @@ BOOST_FIXTURE_TEST_SUITE( ITkPixelCablingAlgTest, TestFixture )
     }//Now the ITkPixelID is in StoreGate, ready to be used by the cabling
     ITkPixelCablingAlg a("MyAlg", svcLoc);
     a.addRef();
-    //add property definitions for later (normally in job opts)
-    BOOST_TEST(a.setProperty("DataSource","ITkPixelTestCabling.json").isSuccess());
     //
     BOOST_TEST(a.sysInitialize().isSuccess() );
     ServiceHandle<StoreGateSvc> conditionStore ("ConditionStore", "ITkPixelCablingAlgTest");

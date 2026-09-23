@@ -7,6 +7,9 @@ string( STRIP ${_version} _version )
 project( Athena VERSION ${_version} LANGUAGES C CXX Fortran )
 unset( _version )
 
+# Force CUDA to use C++23. See ATLINFR-6204 for details.
+set( CMAKE_CUDA_STANDARD 23 CACHE STRING "CUDA C++ standard to use" )
+
 # Use C++23 with SYCL.
 set( CMAKE_SYCL_STANDARD 23 CACHE STRING "SYCL C++ standard to use" )
 

@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthTPCnvSvc.cxx 
@@ -55,8 +55,7 @@ AthTPCnvSvc::load_tpcnv(const std::string& cls)
 {
   ITPCnvBase* cnv = ITPCnvBase::Factory::create (cls).release();
   if (cnv == nullptr) {
-    ATH_MSG_INFO("could not load class [" << cls
-                 << "] via Reflex::PluginService");
+    ATH_MSG_INFO("could not load class [{}] via Reflex::PluginService", cls);
   }
   else {
     std::scoped_lock lock (m_mutex);
@@ -77,8 +76,8 @@ AthTPCnvSvc::t2p_cnv(const std::string& transClassName,
   if (cnv == nullptr && type != Athena::TPCnvType::Athena)
     return t2p_cnv (transClassName);
   if (cnv == nullptr) {
-    ATH_MSG_WARNING("Could not load converter for transient class ["
-                    << transClassName << "]");
+    ATH_MSG_WARNING("Could not load converter for transient class [{}]",
+                    transClassName);
   }
   else {
     std::scoped_lock lock (m_mutex);
@@ -96,7 +95,7 @@ AthTPCnvSvc::t2p_cnv(const CLID& transClid,
 {
   std::string trans_type;
   if (!m_clidSvc->getTypeNameOfID(transClid, trans_type).isSuccess()) {
-    ATH_MSG_INFO("could not get a type-name for clid [" << transClid << "]");
+    ATH_MSG_INFO("could not get a type-name for clid [{}]", transClid);
     return nullptr;
   }
 
@@ -104,8 +103,7 @@ AthTPCnvSvc::t2p_cnv(const CLID& transClid,
   if (cnv == nullptr) {
     // try a typeinfo-name before bailing out...
     if (!m_clidSvc->getTypeInfoNameOfID(transClid, trans_type).isSuccess()) {
-      ATH_MSG_INFO("could not get a typeinfo-name for clid ["
-                   << transClid << "]");
+      ATH_MSG_INFO("could not get a typeinfo-name for clid [{}]", transClid);
       return nullptr;
     }
     cnv = ITPCnvBase::Factory::create (prefix(type) + "_TRANS_" + trans_type).release();
@@ -113,8 +111,8 @@ AthTPCnvSvc::t2p_cnv(const CLID& transClid,
   if (cnv == nullptr && type != Athena::TPCnvType::Athena)
     return t2p_cnv (transClid);
   if (cnv == nullptr) {
-    ATH_MSG_WARNING("could not load converter for transient CLID ["
-                    << transClid << "] (" << trans_type << ")");
+    ATH_MSG_WARNING("could not load converter for transient CLID [{}] ({})",
+                    transClid, trans_type);
   }
   else {
     std::scoped_lock lock (m_mutex);
@@ -134,8 +132,8 @@ AthTPCnvSvc::p2t_cnv(const std::string& persClassName,
   if (cnv == nullptr && type != Athena::TPCnvType::Athena)
     return p2t_cnv (persClassName);
   if (cnv == nullptr) {
-    ATH_MSG_WARNING("Could not load converter for persistent class ["
-                    << persClassName << "]");
+    ATH_MSG_WARNING("Could not load converter for persistent class [{}]",
+                    persClassName);
   }
   else {
     std::scoped_lock lock (m_mutex);

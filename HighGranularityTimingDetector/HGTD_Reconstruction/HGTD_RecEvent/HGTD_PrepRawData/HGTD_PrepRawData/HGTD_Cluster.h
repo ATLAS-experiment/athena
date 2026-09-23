@@ -23,14 +23,17 @@
 #ifndef HGTD_PREPRAWDATA_HGTD_CLUSTER_H
 #define HGTD_PREPRAWDATA_HGTD_CLUSTER_H
 
-#include "HGTD_ReadoutGeometry/HGTD_DetectorElement.h"
-#include "Identifier/IdentifierHash.h"
-#include "InDetPrepRawData/SiWidth.h"
 #include "TrkPrepRawData/PrepRawData.h"
+#include "InDetPrepRawData/SiWidth.h"
 #include "TrkSurfaces/Surface.h"
+#include "ReadoutGeometryBase/SolidStateDetectorElementBase.h"
+#include "EventPrimitives/EventPrimitives.h" //Amg::MatrixX etc
 #include "CxxUtils/CachedValue.h"
-#include <memory>
-#include <numeric>
+#include <vector>
+
+class Identifier;
+
+
 
 class HGTD_Cluster final: public Trk::PrepRawData {
 
@@ -74,11 +77,11 @@ public:
   const std::vector<int>& totList() const;
 
 private:
-  InDet::SiWidth m_width; // col, row, and width in mm
+  InDet::SiWidth m_width{}; // col, row, and width in mm
 
   CxxUtils::CachedValue<Amg::Vector3D> m_glob_pos;
 
-  const InDetDD::SolidStateDetectorElementBase* m_det_el;
+  const InDetDD::SolidStateDetectorElementBase* m_det_el{};
 
   float m_time{};
   float m_time_resolution{};
