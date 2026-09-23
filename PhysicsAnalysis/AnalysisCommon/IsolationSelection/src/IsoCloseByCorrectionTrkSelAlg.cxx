@@ -1,12 +1,12 @@
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "IsoCloseByCorrectionTrkSelAlg.h"
 
 #include <IsolationSelection/IsolationCloseByCorrectionTool.h>
 
-#include <algorithm>
+
 
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "StoreGate/ReadDecorHandle.h"
@@ -15,7 +15,7 @@
 #include "StoreGate/WriteDecorHandle.h"
 #include "StoreGate/WriteHandle.h"
 #include "xAODEgamma/EgammaxAODHelpers.h"
-
+#include <algorithm>
 namespace CP {
 
     IsoCloseByCorrectionTrkSelAlg::IsoCloseByCorrectionTrkSelAlg(const std::string& name, ISvcLocator* svcLoc) :
@@ -106,7 +106,7 @@ namespace CP {
                                  ret_code = true;
                                  if (trk_idx != -1) break;
                              }
-                             if (ret_code) ++m_accepted_trks[trk_idx];
+                             if (ret_code) ++m_accepted_trks.at(trk_idx);
                              return ret_code;
                          });
             assoc_trks = std::move(pruned_trks);

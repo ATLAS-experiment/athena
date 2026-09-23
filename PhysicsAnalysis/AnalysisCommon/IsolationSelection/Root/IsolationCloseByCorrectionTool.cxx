@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include <AsgDataHandles/ReadHandle.h>
@@ -955,10 +955,12 @@ namespace CP {
             return m_selectorTool->accept(x);
         }
         for (unsigned int i = 0; i < iso_types.size(); ++i) {
-            strPar.isolationValues[iso_types[i]] = corrections[i];
-            const SG::AuxElement::Accessor<float>* acc = xAOD::getIsolationAccessor(iso_types.at(i));
-            float old = (*acc)(x);
-            ATH_MSG_DEBUG("Correcting " << toString(iso_types.at(i)) << " from " << old << " to " << corrections[i]);
+            strPar.isolationValues.at(iso_types[i]) = corrections.at(i);
+            const SG::AuxElement::Accessor<float>* acc = xAOD::getIsolationAccessor(iso_types[i]);
+            if (acc)[[likely]]{
+              float old = (*acc)(x);
+              ATH_MSG_DEBUG("Correcting " << toString(iso_types[i]) << " from " << old << " to " << corrections[i]);
+            }
         }
         auto accept = m_selectorTool->accept(strPar);
         if (m_dec_isoselection) (*m_dec_isoselection)(x) = bool(accept);
