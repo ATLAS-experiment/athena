@@ -295,11 +295,6 @@ def createActsConversionTrackingPassFlags():
 
     icf.doBremRecoverySi        = True
 
-    # Backward compatibility, to be removed
-    icf.Xi2max                  = [25.]
-    icf.Xi2maxNoAdd             = [25.]
-    icf.maxZImpact              = [150.0 * Units.mm]
-    icf.maxZImpactSeed = 200. * Units.mm
     return icf
 
 # Secondary ACTS Tracking pass for Low pT tracking
@@ -318,16 +313,6 @@ def createActsLowPtTrackingPassFlags():
         0.4 * Units.GeV * pcf.BField.configuredSolenoidFieldScale)
     icf.doBremRecoverySi   = False
 
-    # Backward compatibility, to be removed
-    icf.Xi2max                  = [25.]
-    icf.Xi2maxNoAdd             = [25.]
-    icf.maxZImpact              = [200.0 * Units.mm]
-    icf.maxZImpactSeed = 200. * Units.mm
-    icf.useITkStripSeeding = True
-    icf.minPixel = [1]
-    icf.maxHoles = [2]
-    icf.nHolesMax          = icf.maxHoles
-    icf.nHolesGapMax       = icf.maxHoles
     return icf
 
 
