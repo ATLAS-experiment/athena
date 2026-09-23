@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONEVENTATHENAPOOL_CSCSIMDATACOLLECTIONCNV_H
@@ -12,7 +12,7 @@
 #include "MuonEventTPCnv/MuonDigitContainer/CscSimDataCollectionCnv_p3.h"
 
 // the latest persistent representation type of DataCollection:
-typedef  Muon::CscSimDataCollection_p2  CscSimDataCollection_PERS;
+typedef  Muon::CscSimDataCollection_p3  CscSimDataCollection_PERS;
 typedef  T_AthenaPoolCustomCnv<CscSimDataCollection,CscSimDataCollection_PERS >  CscSimDataCollectionCnvBase;
 
 /**

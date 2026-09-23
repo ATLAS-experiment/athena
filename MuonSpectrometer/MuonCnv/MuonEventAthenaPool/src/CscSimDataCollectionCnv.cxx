@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CscSimDataCollectionCnv.h"
@@ -24,7 +24,7 @@ CscSimDataCollectionCnv::~CscSimDataCollectionCnv() = default;
 CscSimDataCollection_PERS*    CscSimDataCollectionCnv::createPersistent (CscSimDataCollection* transCont) {
     MsgStream log(msgSvc(), "CscSimDataCollectionCnv" );
     ATH_MSG_DEBUG("createPersistent(): main converter");
-    CscSimDataCollection_PERS *pixdc_p= m_TPConverter_p2.createPersistent( transCont, log );
+    CscSimDataCollection_PERS *pixdc_p= m_TPConverter_p3.createPersistent( transCont, log );
     return pixdc_p;
 }
 

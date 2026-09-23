@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETEVENTATHENAPOOL_INDETSIMDATACOLLECTIONCNV_H
@@ -16,8 +16,8 @@
 // Gaudi
 #include "GaudiKernel/MsgStream.h"
 // typedef to the latest persistent version
-typedef  InDetSimDataCollection_p3     InDetSimDataCollection_PERS;
-typedef  InDetSimDataCollectionCnv_p3  InDetSimDataCollectionCnv_PERS;
+typedef  InDetSimDataCollection_p4 InDetSimDataCollection_PERS;
+typedef  InDetSimDataCollectionCnv_p4 InDetSimDataCollectionCnv_PERS;
 
 // base class
 typedef  T_AthenaPoolCustomCnv<InDetSimDataCollection, InDetSimDataCollection_PERS >   InDetSimDataCollectionCnvBase;
