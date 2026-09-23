@@ -19,10 +19,8 @@
 StatusCode AthEnvironmentSvc::initialize()
 {
   if (m_eigenL1CacheSize > 0 || m_eigenL2CacheSize > 0 || m_eigenL3CacheSize > 0) {
-    ATH_MSG_VERBOSE("Setting Eigen cache sizes to" <<
-                    " L1: " << m_eigenL1CacheSize <<
-                    " L2: " << m_eigenL2CacheSize <<
-                    " L3: " << m_eigenL3CacheSize);
+    ATH_MSG_VERBOSE("Setting Eigen cache sizes to L1: {} L2: {} L3: {}",
+                    m_eigenL1CacheSize.value(), m_eigenL2CacheSize.value(), m_eigenL3CacheSize.value());
     Eigen::setCpuCacheSizes (m_eigenL1CacheSize, m_eigenL2CacheSize, m_eigenL3CacheSize);
   }
   return StatusCode::SUCCESS;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthenaServices/test/ThinningCacheTool_test.cxx
@@ -27,6 +27,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 #include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -75,7 +76,7 @@ unsigned int thinning (const SG::ThinningDecisionBase& dec)
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   ToolHandle<IAthenaOutputTool> tool ("Athena::ThinningCacheTool/TestCacheTool");
   assert (tool.retrieve().isSuccess());
@@ -203,7 +204,7 @@ void test1()
 
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   ToolHandle<IAthenaOutputTool> tool ("Athena::ThinningCacheTool/TestCacheTool2");
   assert (tool.retrieve().isSuccess());
@@ -222,10 +223,10 @@ void test2()
 
 int main()
 {
-  std::cout << "AthenaServices/ThinningCacheTool_test\n";
+  std::println ("AthenaServices/ThinningCacheTool_test");
   ISvcLocator* svcloc = nullptr;
   if (!Athena_test::initGaudi("AthenaServices/ThinningCacheTool_test.txt", svcloc)) {
-    std::cerr << "This test can not be run" << std::endl;
+    std::println (std::cerr, "This test can not be run");
     return 1;
   }  
   assert(svcloc);

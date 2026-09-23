@@ -13,6 +13,7 @@
 #include <fstream> /* ofstream */
 #include <iomanip>
 #include <memory>
+#include <print>
 
 // Athena includes
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
@@ -136,7 +137,7 @@ AthenaHiveEventLoopMgr::~AthenaHiveEventLoopMgr()
 StatusCode AthenaHiveEventLoopMgr::initialize()    
 {
 
-  ATH_MSG_INFO ( "Initializing " << name() );
+  ATH_MSG_INFO ( "Initializing {}", name() );
  
 
   StatusCode sc = MinimalEventLoopMgr::initialize();
@@ -152,7 +153,7 @@ StatusCode AthenaHiveEventLoopMgr::initialize()
 
   m_whiteboard = serviceLocator()->service(m_whiteboardName);
   if( !m_whiteboard.isValid() )  {
-    ATH_MSG_FATAL ( "Error retrieving " << m_whiteboardName << " interface IHiveWhiteBoard." );
+    ATH_MSG_FATAL ( "Error retrieving {} interface IHiveWhiteBoard.", m_whiteboardName );
     return StatusCode::FAILURE;
   }
   
@@ -241,7 +242,7 @@ StatusCode AthenaHiveEventLoopMgr::initialize()
         val = sprop.value();
       } catch (...) {
         ATH_MSG_VERBOSE ( "could not dcast OutputFile property to a StringProperty."
-                          << " Need to fix Gaudi." );
+                          " Need to fix Gaudi." );
         val = prop.toString();
       }
 
@@ -290,11 +291,11 @@ StatusCode AthenaHiveEventLoopMgr::initialize()
       if (msgLevel(MSG::INFO)) {
         SmartIF<INamedInterface> named(theEvtSel);
         if (named) {
-          ATH_MSG_INFO ( "Setup EventSelector service " << named->name( ) );
+          ATH_MSG_INFO ( "Setup EventSelector service {}", named->name( ) );
         }
       }
     } else if (sc.isFailure()) {
-      ATH_MSG_FATAL ( "No valid event selector called " << selName );
+      ATH_MSG_FATAL ( "No valid event selector called {}", selName );
       return StatusCode::FAILURE;
     }
   }  
@@ -393,21 +394,12 @@ StatusCode AthenaHiveEventLoopMgr::finalize()
     ATH_MSG_INFO ( "-----------------------------------------------------" );
 
     for ( ; firstTool != lastTool; ++firstTool ) {
-      ATH_MSG_INFO ( std::setw(2)     << std::setiosflags(std::ios_base::right)
-             << toolCtr+1 << ".) " << std::resetiosflags(std::ios_base::right)
-             << std::setw(48) << std::setfill('.')
-             << std::setiosflags(std::ios_base::left)
-             << (*firstTool)->name() << std::resetiosflags(std::ios_base::left)
-             << std::setfill(' ')
-             << " ("
-             << std::setw(6) << std::setiosflags(std::ios_base::right)
-             << m_toolInvoke[toolCtr]
-             << "/"
-             << m_toolAccept[toolCtr]
-             << "/"
-             << m_toolReject[toolCtr]
-             << ")"
-             );
+      ATH_MSG_INFO ( "{:>2}.) {:.<48} ({:>6}/{:>6}/{:>6})",
+                     toolCtr+1,
+                     (*firstTool)->name(),
+                     m_toolInvoke[toolCtr],
+                     m_toolAccept[toolCtr],
+                     m_toolReject[toolCtr]);
       toolCtr++;
     }
   }
@@ -498,7 +490,7 @@ StatusCode AthenaHiveEventLoopMgr::executeEvent( EventContext &&ctx )
   // An incident may schedule a stop, in which case is better to exit before the actual execution.
   if ( m_scheduledStop ) {
     ATH_MSG_ALWAYS ( "A stopRun was requested by an incidentListener. "
-             << "Do not process this event." );
+                     "Do not process this event." );
     m_terminateLoop = true;
     return (StatusCode::SUCCESS);
   }
@@ -513,6 +505,7 @@ StatusCode AthenaHiveEventLoopMgr::executeEvent( EventContext &&ctx )
     m_terminateLoop = true;  // we have finished!
     return StatusCode::SUCCESS;
   } else if ( declEvtRootSc == -1) {
+    // No std::format for EventContext
     ATH_MSG_ERROR ( "declareEventRootAddress for context " << ctx << " failed" );
     return StatusCode::FAILURE;
   }
@@ -549,7 +542,7 @@ StatusCode AthenaHiveEventLoopMgr::executeEvent( EventContext &&ctx )
     m_firstRun=false;
     m_currentRun = ctx.eventID().run_number();
 
-    ATH_MSG_INFO ( "  ===>>>  start of run " << m_currentRun << "    <<<===" );
+    ATH_MSG_INFO ( "  ===>>>  start of run {}    <<<===", m_currentRun);
 
     // FIXME!!! Fire BeginRun "Incident"
     m_incidentSvc->fireIncident(Incident(name(),IncidentType::BeginRun,ctx));
@@ -579,15 +572,12 @@ StatusCode AthenaHiveEventLoopMgr::executeEvent( EventContext &&ctx )
 		 0 == (m_nev % m_eventPrintoutInterval.value()));
   if (m_doEvtHeartbeat)  {
     if(!m_useTools) {
-      ATH_MSG_INFO ( "  ===>>>  start processing event #" << evtNumber << ", run #" << m_currentRun
-                     << " on slot " << ctx.slot() << ",  " << m_proc
-                     << " events processed so far  <<<===" );
+      ATH_MSG_INFO ( "  ===>>>  start processing event #{}, run #{} on slot {},  {} events processed so far  <<<===",
+                     evtNumber, m_currentRun, ctx.slot(), m_proc);
     }
     else {
-      ATH_MSG_INFO ( "  ===>>>  start processing event #" << evtNumber << ", run #" << m_currentRun
-                     << " on slot " << ctx.slot() << ",  "
-                     << m_nev << " events read and " << m_proc
-                     << " events processed so far  <<<===" );
+      ATH_MSG_INFO ( "  ===>>>  start processing event #{}, run #{} on slot {},  {} events read and {} events processed so far  <<<===",
+                     evtNumber, m_currentRun, ctx.slot(), m_nev, m_proc);
     }
   }
 
@@ -601,9 +591,8 @@ StatusCode AthenaHiveEventLoopMgr::executeEvent( EventContext &&ctx )
     m_lastEventContext = ctx;
     
     // Now add event to the scheduler 
-    ATH_MSG_DEBUG ( "Adding event " << ctx.evt()
-            << ", slot " << ctx.slot()
-            << " to the scheduler" );
+    ATH_MSG_DEBUG ( "Adding event {}, slot {} to the scheduler",
+                    ctx.evt(), ctx.slot());
     
     m_incidentSvc->fireIncident(Incident(name(), IncidentType::BeginProcessing, 
 					 ctx));
@@ -654,8 +643,8 @@ StatusCode AthenaHiveEventLoopMgr::stopRun() {
   // Set the application return code
   SmartIF<IProperty> appmgr(serviceLocator());
   if(Gaudi::setAppReturnCode(appmgr, Gaudi::ReturnCode::ScheduledStop, true).isFailure()) {
-    ATH_MSG_ERROR ( "Could not set return code of the application ("
-            << Gaudi::ReturnCode::ScheduledStop << ")" );
+    ATH_MSG_ERROR ( "Could not set return code of the application ({})",
+                    Gaudi::ReturnCode::ScheduledStop);
   }
   m_scheduledStop = true;
   return StatusCode::SUCCESS;
@@ -721,14 +710,15 @@ StatusCode AthenaHiveEventLoopMgr::nextEvent(int maxevt)
 
   while ( !loop_ended and ( (maxevt < 0) or (finishedEvts < maxevt) ) ){
 
-    ATH_MSG_DEBUG ( " -> createdEvts: " << createdEvts );
+    ATH_MSG_DEBUG ( " -> createdEvts: {}", createdEvts );
     
     if ( ( !m_terminateLoop ) && // The events are not finished with an unlimited number of events
          (newEvtAllowed || createdEvts == 0) &&       // Launch first event alone
 	 ( (createdEvts < maxevt) or (maxevt<0) ) &&  // The events are not finished with a limited number of events
 	 (m_schedulerSvc->freeSlots()>0) ){ // There are still free slots in the scheduler
       
-      ATH_MSG_DEBUG ( "createdEvts: " << createdEvts << ", freeslots: " << m_schedulerSvc->freeSlots() );
+      ATH_MSG_DEBUG ( "createdEvts: {}, freeslots: {}",
+                      createdEvts, m_schedulerSvc->freeSlots());
       
       auto ctx = createEventContext();
       
@@ -751,7 +741,7 @@ StatusCode AthenaHiveEventLoopMgr::nextEvent(int maxevt)
       // all the events were created but not all finished or the slots were 
       // all busy: the scheduler should finish its job
 
-        ATH_MSG_DEBUG ( "Draining the scheduler" );
+      ATH_MSG_DEBUG ( "Draining the scheduler" );
 
       // Pull out of the scheduler the finished events
       int ir = drainScheduler(finishedEvts);
@@ -771,7 +761,7 @@ StatusCode AthenaHiveEventLoopMgr::nextEvent(int maxevt)
     }
   } // end main loop on finished events  
 
-  ATH_MSG_INFO ( "---> Loop Finished (seconds): " << secsFromStart() );
+  ATH_MSG_INFO ( "---> Loop Finished (seconds): {}", secsFromStart() );
 
 
   return sc;
@@ -1005,7 +995,7 @@ int AthenaHiveEventLoopMgr::declareEventRootAddress(EventContext& ctx){
         unsigned int lumiBlock = (*pAttrList)["LumiBlockN"].data<unsigned int>();
         unsigned int bunchId = (*pAttrList)["BunchId"].data<unsigned int>();
 
-        ATH_MSG_DEBUG ( "use TAG with runNumber=" << runNumber );
+        ATH_MSG_DEBUG ( "use TAG with runNumber={}", runNumber );
         consume_modifier_stream = true;
         // an option to override primary eventNumber with the secondary one in case of DoubleEventSelector
         if ( m_useSecondaryEventNumber ) {
@@ -1033,7 +1023,8 @@ int AthenaHiveEventLoopMgr::declareEventRootAddress(EventContext& ctx){
                 m_doEvtHeartbeat = (m_eventPrintoutInterval.value() > 0 && 
                   0 == (m_nev % m_eventPrintoutInterval.value()));
                 if (m_doEvtHeartbeat) {
-                    ATH_MSG_INFO ( "  ===>>>  using secondary event #" << eventNumberSecondary << " instead of #" << eventNumber << "  <<<===" );
+                    ATH_MSG_INFO ( "  ===>>>  using secondary event #{} instead of #{}  <<<===",
+                                   eventNumberSecondary, eventNumber);
                 }
                 eventNumber = eventNumberSecondary;
             }
@@ -1069,7 +1060,7 @@ int AthenaHiveEventLoopMgr::declareEventRootAddress(EventContext& ctx){
           return -1;
         }
         consume_modifier_stream = true;
-        ATH_MSG_DEBUG ( "use xAOD::EventInfo with runNumber=" << pXEvent->runNumber() );
+        ATH_MSG_DEBUG ( "use xAOD::EventInfo with runNumber={}", pXEvent->runNumber() );
         // Build the old-style Event Info object for those clients that still need it
         pEvent = std::make_unique<EventInfo>(
             std::make_unique<EventID>(eventIDFromxAOD(pXEvent)),
@@ -1113,10 +1104,11 @@ int AthenaHiveEventLoopMgr::declareEventRootAddress(EventContext& ctx){
     // EvtIdModifierSvc.
     modifyEventContext(ctx,*(pEvent->event_ID()), consume_modifier_stream);
 
-    ATH_MSG_DEBUG ( "selecting store: " << ctx.slot() );
+    ATH_MSG_DEBUG ( "selecting store: {}", ctx.slot() );
 
     m_whiteboard->selectStore( ctx.slot() ).ignore();
 
+    // EventInfo not working with format
     ATH_MSG_DEBUG ( "recording EventInfo " << *pEvent->event_ID() << " in "
             << m_eventStore->name() );
 
@@ -1144,10 +1136,14 @@ void AthenaHiveEventLoopMgr::modifyEventContext(EventContext& ctx, const EventID
       unsigned int oldLB=eID.lumi_block();
       unsigned int oldTS=eID.time_stamp();
       unsigned int oldTSno=eID.time_stamp_ns_offset();
-      ATH_MSG_DEBUG ( "modifyEventContext: use evtIdModSvc runnr=" << oldrunnr << " -> " << new_eID.run_number() );
-      ATH_MSG_DEBUG ( "modifyEventContext: use evtIdModSvc LB=" << oldLB << " -> " << new_eID.lumi_block() );
-      ATH_MSG_DEBUG ( "modifyEventContext: use evtIdModSvc TimeStamp=" << oldTS << " -> " << new_eID.time_stamp() );
-      ATH_MSG_DEBUG ( "modifyEventContext: use evtIdModSvc TimeStamp ns Offset=" << oldTSno << " -> " << new_eID.time_stamp_ns_offset() );
+      ATH_MSG_DEBUG ( "modifyEventContext: use evtIdModSvc runnr={} -> {}",
+                      oldrunnr, new_eID.run_number());
+      ATH_MSG_DEBUG ( "modifyEventContext: use evtIdModSvc LB={} -> {}",
+                      oldLB, new_eID.lumi_block());
+      ATH_MSG_DEBUG ( "modifyEventContext: use evtIdModSvc TimeStamp={} -> {}",
+                      oldTS, new_eID.time_stamp());
+      ATH_MSG_DEBUG ( "modifyEventContext: use evtIdModSvc TimeStamp ns Offset={} -> {}",
+                      oldTSno, new_eID.time_stamp_ns_offset());
     }
     ctx.setEventID( new_eID );
     Atlas::getExtendedEventContext(ctx).setConditionsRun( ctx.eventID().run_number() );
@@ -1164,15 +1160,15 @@ EventContext AthenaHiveEventLoopMgr::createEventContext() {
 
   StatusCode sc = m_whiteboard->selectStore( ctx.slot() );
   if (sc.isFailure()) {
-    ATH_MSG_FATAL ( "Slot " << ctx.slot()
-            << " could not be selected for the WhiteBoard" );
+    ATH_MSG_FATAL ( "Slot {} could not be selected for the WhiteBoard",
+                    ctx.slot());
     return EventContext{};       // invalid EventContext
   } else {
     Atlas::setExtendedEventContext(ctx,
                                    Atlas::ExtendedEventContext( m_eventStore->hiveProxyDict() ) );
 
-    ATH_MSG_DEBUG ( "created EventContext, num: " << ctx.evt()  << "  in slot: "
-            << ctx.slot() );
+    ATH_MSG_DEBUG ( "created EventContext, num: {}  in slot: {}",
+                    ctx.evt(), ctx.slot());
   }
 
   return ctx;
@@ -1191,11 +1187,12 @@ AthenaHiveEventLoopMgr::drainScheduler(int& finishedEvts){
   EventContext* finishedEvtContext(nullptr);
 
   // Here we wait not to loose cpu resources
-  ATH_MSG_DEBUG ( "drainScheduler: [" << finishedEvts << "] Waiting for a context" );
+  ATH_MSG_DEBUG ( "drainScheduler: [{}] Waiting for a context", finishedEvts);
   sc = m_schedulerSvc->popFinishedEvent(finishedEvtContext);
 
   // We got past it: cache the pointer
   if (sc.isSuccess()){
+    // EventContext not working with std::format
     ATH_MSG_DEBUG ( "drainScheduler: scheduler not empty: Context " 
             << finishedEvtContext );
     finishedEvtContexts.emplace_back(finishedEvtContext);
@@ -1220,6 +1217,7 @@ AthenaHiveEventLoopMgr::drainScheduler(int& finishedEvts){
     }
 
     if (m_aess->eventStatus(*thisFinishedEvtContext) != EventStatus::Success) {
+      // EventContext not working with std::format
       ATH_MSG_FATAL ( "Failed event detected on " << thisFinishedEvtContext 
               << " w/ fail mode: "
               << m_aess->eventStatus(*thisFinishedEvtContext) );
@@ -1234,8 +1232,8 @@ AthenaHiveEventLoopMgr::drainScheduler(int& finishedEvts){
       n_run = thisFinishedEvtContext->eventID().run_number();
       n_evt = thisFinishedEvtContext->eventID().event_number();
     } else {
-      ATH_MSG_ERROR ( "DrainSched: unable to select store "
-	      << thisFinishedEvtContext->slot() );
+      ATH_MSG_ERROR ( "DrainSched: unable to select store {}",
+                      thisFinishedEvtContext->slot() );
       fail = true;
       continue;
     }
@@ -1247,14 +1245,14 @@ AthenaHiveEventLoopMgr::drainScheduler(int& finishedEvts){
     Gaudi::Hive::setCurrentContext( *thisFinishedEvtContext );
     m_incidentSvc->fireIncident(Incident(name(), IncidentType::EndProcessing, *thisFinishedEvtContext ));
 
-    ATH_MSG_DEBUG ( "Clearing slot " << thisFinishedEvtContext->slot() 
-            << " (event " << thisFinishedEvtContext->evt()
-            << ") of the whiteboard" );
+    ATH_MSG_DEBUG( "Clearing slot {} (event {}) of the whiteboard",
+                   thisFinishedEvtContext->slot(),
+                   thisFinishedEvtContext->evt() );
     
     StatusCode sc = clearWBSlot(thisFinishedEvtContext->slot());
     if (!sc.isSuccess()) {
-      ATH_MSG_ERROR ( "Whiteboard slot " << thisFinishedEvtContext->slot() 
-                      << " could not be properly cleared" );
+      ATH_MSG_ERROR ( "Whiteboard slot {} could not be properly cleared",
+                      thisFinishedEvtContext->slot() );
       fail = true;
       continue;
     }
@@ -1266,26 +1264,24 @@ AthenaHiveEventLoopMgr::drainScheduler(int& finishedEvts){
 
     if (m_doEvtHeartbeat) {
       if(!m_useTools) 
-        ATH_MSG_INFO ( "  ===>>>  done processing event #" << n_evt << ", run #" << n_run 
-               << " on slot " << thisFinishedEvtContext->slot() << ",  "
-               << m_proc << " events processed so far  <<<===" );
+        ATH_MSG_INFO ( "  ===>>>  done processing event #{}, run #{} on slot {},  {} events processed so far  <<<===",
+                       n_evt, n_run, thisFinishedEvtContext->slot(), m_proc);
       else 
-	ATH_MSG_INFO ( "  ===>>>  done processing event #" << n_evt << ", run #" << n_run 
-	       << " on slot " << thisFinishedEvtContext->slot() << ",  "          
-	       << m_nev << " events read and " << m_proc 
-	       << " events processed so far <<<===" );
+	ATH_MSG_INFO ( "  ===>>>  done processing event #{}, run #{} on slot {},  {} events read and {} events processed so far <<<===",
+                       n_evt, n_run, thisFinishedEvtContext->slot(), m_nev, m_proc);
       std::ofstream outfile( "eventLoopHeartBeat.txt");
       if ( !outfile ) {
 	ATH_MSG_ERROR ( " unable to open: eventLoopHeartBeat.txt" );
 	fail = true;
 	continue;
       } else {
-	outfile << "  done processing event #" << n_evt << ", run #" << n_run 
-		<< " " << m_nev << " events read so far  <<<===" << std::endl;
+        std::print (outfile, "  done processing event #{}, run # {} events read so far  <<<===",
+                    n_evt, n_run, m_nev);
 	outfile.close();
       }  
     }
 
+    // EventContext not working with format.
     ATH_MSG_DEBUG ( "drainScheduler thisFinishedEvtContext: " << thisFinishedEvtContext );
   }
 

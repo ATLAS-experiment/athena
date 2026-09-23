@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // EvtIdModifierSvc.cxx
@@ -15,6 +15,7 @@
 // STL includes
 #include <algorithm>
 #include <set>
+#include <print>
 
 // FrameWork includes
 #include "StoreGate/StoreGateSvc.h"
@@ -63,14 +64,14 @@ EvtIdModifierSvc::EvtIdModifierSvc(const std::string& name,
 // Athena Service's Hooks
 ////////////////////////////
 StatusCode EvtIdModifierSvc::initialize() {
-  ATH_MSG_INFO("Initializing " << name() << "...");
+  ATH_MSG_INFO("Initializing {}...", name());
 
   if (const auto nplets_prop_count = m_evtNpletsProp.size();
       nplets_prop_count > 0) {
     // they should be Nplets...
     if (nplets_prop_count % prop_per_nplet != 0) {
-      ATH_MSG_ERROR("invalid list of n-plets (not divisible by "
-                    << prop_per_nplet << ")" << endmsg << "check your joboptions !");
+      ATH_MSG_ERROR("invalid list of n-plets (not divisible by {})\ncheck your joboptions !",
+                    prop_per_nplet);
       return StatusCode::FAILURE;
     }
 
@@ -98,15 +99,14 @@ StatusCode EvtIdModifierSvc::initialize() {
   }
 
   if (msgLvl(MSG::DEBUG)) {
-    msg(MSG::DEBUG) << "store being modified: [" << m_evtStoreName << "]"
-                    << endmsg << "evtid-modifiers: [ ";
+    ATH_MSG_DEBUG( "store being modified: [{}]", m_evtStoreName);
+    std::ostringstream mods;
     for (const ItemModifier& elem : m_evtNplets) {
-      msg(MSG::DEBUG) << "[" << elem.runnbr << ", " << elem.evtnbr << ", "
-                      << elem.timestamp << ", " << elem.lbknbr << ", "
-                      << elem.nevts << ", flags=0x" << std::hex << elem.flags
-                      << std::dec << "], ";
+      std::print (mods, "[{}, {}, {}, {}, {}, flags={:#x}], ",
+                  elem.runnbr, elem.evtnbr, elem.timestamp, elem.lbknbr,
+                  elem.nevts, elem.flags);
     }
-    msg(MSG::DEBUG) << "]" << endmsg;
+    ATH_MSG_DEBUG( "evtid-modifiers: [ {} ]", mods.str() );
   }
 
   return StatusCode::SUCCESS;
@@ -149,24 +149,22 @@ void EvtIdModifierSvc::modify_evtid(EventID& evt_id, event_number_t evt_index,
     }
 
     const std::string& evtStoreName = active->name();
-    ATH_MSG_DEBUG("active store: [" << evtStoreName << "]");
+    ATH_MSG_DEBUG("active store: [{}]", evtStoreName);
     if (evtStoreName != m_evtStoreName) {
       return;
     }
   }
 
-  ATH_MSG_DEBUG("evtid before massaging: " << "(" << evt_id.run_number() << ", "
-                                           << evt_id.event_number() << ", "
-                                           << evt_id.time_stamp() << ", "
-                                           << evt_id.lumi_block() << ")");
+  ATH_MSG_DEBUG("evtid before massaging: ({}, {}, {}, {})",
+                evt_id.run_number(), evt_id.event_number(), evt_id.time_stamp(),
+                evt_id.lumi_block());
 
   // event skipping
   std::int64_t idx =
       std::int64_t(evt_index) + m_skippedEvents - std::int64_t(m_firstEvtIdx);
   std::int64_t idx_looped = idx % m_numEvtTotals.back();
-  ATH_MSG_DEBUG("Got event idx " << evt_index << " --(account for skipping)--> "
-                                 << idx << " --(modulo #modifiers)--> "
-                                 << idx_looped);
+  ATH_MSG_DEBUG("Got event idx {} --(account for skipping)--> {} --(modulo #modifiers)--> {}",
+                evt_index, idx, idx_looped);
   if (idx < 0) {
     ATH_MSG_DEBUG("skip event");
     return;
@@ -177,8 +175,7 @@ void EvtIdModifierSvc::modify_evtid(EventID& evt_id, event_number_t evt_index,
                                          m_numEvtTotals.cend(), idx_looped) -
                         m_numEvtTotals.cbegin();
   ItemModifier current = m_evtNplets[mod_idx];
-  ATH_MSG_DEBUG("Unique modifier index " << mod_idx
-                                         << " (LB: " << current.lbknbr << ")");
+  ATH_MSG_DEBUG("Unique modifier index {} (LB: {})", mod_idx, current.lbknbr);
   if (mod_idx >= m_numEvtTotals.size()) {
     // Shouldn't happen
     ATH_MSG_ERROR("Somehow run out of modifiers");
@@ -198,8 +195,7 @@ void EvtIdModifierSvc::modify_evtid(EventID& evt_id, event_number_t evt_index,
     evt_id.set_lumi_block(current.lbknbr);
   }
 
-  ATH_MSG_DEBUG("evtid after  massaging: " << "(" << evt_id.run_number() << ", "
-                                           << evt_id.event_number() << ", "
-                                           << evt_id.time_stamp() << ", "
-                                           << evt_id.lumi_block() << ")");
+  ATH_MSG_DEBUG("evtid after massaging: ({}, {}, {}, {})",
+                evt_id.run_number(), evt_id.event_number(), evt_id.time_stamp(),
+                evt_id.lumi_block());
 }

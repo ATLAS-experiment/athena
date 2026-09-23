@@ -11,6 +11,7 @@
 #include <iomanip>
 #include <memory>
 #include <stdexcept>
+#include <print>
 
 // Athena includes
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
@@ -123,7 +124,7 @@ AthenaEventLoopMgr::~AthenaEventLoopMgr()
 //=========================================================================
 StatusCode AthenaEventLoopMgr::initialize()    
 {
-  ATH_MSG_INFO ( "Initializing " << name() ) ;
+  ATH_MSG_INFO ( "Initializing {}", name() ) ;
 
   m_autoRetrieveTools = false;
   m_checkToolDeps = false;
@@ -212,7 +213,7 @@ StatusCode AthenaEventLoopMgr::initialize()
 
         } catch (...) {
           ATH_MSG_VERBOSE ( "could not dcast OutputFile property to a StringProperty."
-                            << " Need to fix Gaudi." );
+                            " Need to fix Gaudi." );
 
           val = prop.toString();
 
@@ -265,12 +266,12 @@ StatusCode AthenaEventLoopMgr::initialize()
       if (msgLevel(MSG::INFO)) {
         SmartIF<INamedInterface> named(theEvtSel);
         if (named) {
-          ATH_MSG_INFO ( "Setup EventSelector service " << named->name( )
+          ATH_MSG_INFO ( "Setup EventSelector service {}", named->name( )
                          );
         }
       }
     } else if (sc.isFailure()) {
-      ATH_MSG_FATAL ( "No valid event selector called " << selName 
+      ATH_MSG_FATAL ( "No valid event selector called {}", selName 
               );
       return StatusCode::FAILURE;
     }
@@ -316,10 +317,9 @@ AthenaEventLoopMgr::setClearStorePolicy(Gaudi::Details::PropertyBase&) {
   if ( policyName != "BeginEvent" &&
        policyName != "EndEvent" ) {
 
-    ATH_MSG_FATAL ( "Unknown policy [" << policyName 
-            << "] for the 'ClearStore-policy !"
-            << endmsg
-            << "Valid values are: BeginEvent, EndEvent"
+    ATH_MSG_FATAL ( "Unknown policy [{}] for the 'ClearStore-policy !\n"
+                    "Valid values are: BeginEvent, EndEvent",
+                    policyName
             );
     throw GaudiException("Can not setup 'ClearStore'-policy",
 			 name(),
@@ -406,21 +406,12 @@ StatusCode AthenaEventLoopMgr::finalize()
     ATH_MSG_INFO ( "-----------------------------------------------------" );
 
     for ( ; firstTool != lastTool; ++firstTool ) {
-      ATH_MSG_INFO ( std::setw(2)     << std::setiosflags(std::ios_base::right)
-             << toolCtr+1 << ".) " << std::resetiosflags(std::ios_base::right)
-             << std::setw(48) << std::setfill('.')
-             << std::setiosflags(std::ios_base::left)
-             << (*firstTool)->name() << std::resetiosflags(std::ios_base::left)
-             << std::setfill(' ')
-             << " ("
-             << std::setw(6) << std::setiosflags(std::ios_base::right)
-             << m_toolInvoke[toolCtr]
-             << "/"
-             << m_toolAccept[toolCtr]
-             << "/"
-             << m_toolReject[toolCtr]
-             << ")"
-             );
+      ATH_MSG_INFO ( "{:>2}.) {:.<48} ({:>6}/{:>6}/{:>6})",
+                     toolCtr+1,
+                     (*firstTool)->name(),
+                     m_toolInvoke[toolCtr],
+                     m_toolAccept[toolCtr],
+                     m_toolReject[toolCtr]);
       toolCtr++;
     }
   }
@@ -498,8 +489,7 @@ StatusCode AthenaEventLoopMgr::initializeAlgorithms() {
       StatusCode sc = (*ita)->sysInitialize();
       if( sc.isFailure() )
 	{
-	  ATH_MSG_ERROR ( "Unable to initialize Algorithm: "
-		<< (*ita)->name() );
+	  ATH_MSG_ERROR( "Unable to initialize Algorithm: {}", (*ita)->name()) ;
 	  return sc;
 	}
     }
@@ -510,8 +500,7 @@ StatusCode AthenaEventLoopMgr::initializeAlgorithms() {
     {
       StatusCode sc = (*ita)->sysInitialize();
       if( sc.isFailure() ) {
-	ATH_MSG_ERROR ( "Unable to initialize Output Stream: "
-	      << (*ita)->name() );
+	ATH_MSG_ERROR ( "Unable to initialize Output Stream: {}", (*ita)->name() );
 	return sc;
       }
 
@@ -536,6 +525,7 @@ StatusCode AthenaEventLoopMgr::executeAlgorithms(const EventContext& ctx) {
     // function
     m_aess->algExecState(*ita,ctx).setState(AlgExecState::State::Done, sc);
     if ( !sc.isSuccess() ) {
+      // StatusCode doesn't work with std::format
       ATH_MSG_INFO ( "Execution of algorithm "
               << (*ita)->name() << " failed with StatusCode::" << sc );
       return sc;
@@ -572,7 +562,7 @@ StatusCode AthenaEventLoopMgr::executeEvent(EventContext&& ctx)
     m_firstRun=false;
     m_currentRun = ctx.eventID().run_number();
 
-    ATH_MSG_INFO ( "  ===>>>  start of run " << m_currentRun << "    <<<===" );
+    ATH_MSG_INFO ( "  ===>>>  start of run {}    <<<===", m_currentRun );
 
     m_incidentSvc->fireIncident(Incident(name(),IncidentType::BeginRun,ctx));
   }
@@ -602,16 +592,17 @@ StatusCode AthenaEventLoopMgr::executeEvent(EventContext&& ctx)
                                 (m_intervalInSeconds && (time(nullptr)-m_lastTime)>m_intervalInSeconds) ));
   if (doEvtHeartbeat)  {
     if(!m_useTools) {
-        ATH_MSG_INFO ( "  ===>>>  start processing event #" << evtNumber << ", run #" << m_currentRun << " " << m_nev << " events processed so far  <<<===" );
+        ATH_MSG_INFO ( "  ===>>>  start processing event #{}, run #{} {} events processed so far  <<<===",
+                       evtNumber, m_currentRun, m_nev);
         if(m_intervalInSeconds) {
-            ATH_MSG_INFO(" ===>>> Event processing rate = " << double(m_nev-m_lastNev)/(time(nullptr)-m_lastTime) << " Hz <<<===");
+            ATH_MSG_INFO(" ===>>> Event processing rate = {} Hz <<<===",
+                         double(m_nev-m_lastNev)/(time(nullptr)-m_lastTime));
             m_lastNev = m_nev; m_lastTime = time(nullptr);
         }
     }
 
-   else ATH_MSG_INFO ( "  ===>>>  start processing event #" << evtNumber << ", run #" << m_currentRun 
-	<< " " << m_nev << " events read and " << m_proc 
-        << " events processed so far  <<<===" );   
+   else ATH_MSG_INFO ( "  ===>>>  start processing event #{}, run #{} {} events read and {} events processed so far  <<<===",
+                       evtNumber, m_currentRun, m_nev, m_proc);
   }
 
   // Reset the timeout singleton
@@ -623,7 +614,7 @@ StatusCode AthenaEventLoopMgr::executeEvent(EventContext&& ctx)
   // An incident may schedule a stop, in which case is better to exit before the actual execution.
   if ( m_scheduledStop ) {
     ATH_MSG_ALWAYS ( "A stopRun was requested by an incidentListener. "
-             << "Do not process this event." );
+                     "Do not process this event." );
     return (StatusCode::SUCCESS);
   }
 
@@ -641,17 +632,17 @@ StatusCode AthenaEventLoopMgr::executeEvent(EventContext&& ctx)
  ///    FAILURE: terminate job 
     if (m_failureMode == 1 && sc.isRecoverable() ) {
       ATH_MSG_WARNING ( "RECOVERABLE error returned by algorithm. "
-                << "Skipping remaining algorithms." << std::endl
-                << "\tNo output will be written for this event, "
-                << "but job will continue to next event" );
+                        "Skipping remaining algorithms.\n"
+                        "\tNo output will be written for this event, "
+                        "but job will continue to next event" );
       eventFailed = false;
     }
 
  /// m_failureMode 2: skip algorithms, but do not terminate job
     if (m_failureMode >= 2) {
-      ATH_MSG_INFO ( "Skipping remaining algorithms." << std::endl
-             << "\tNo output will be written for this event, "
-             << "but job will continue to next event" );
+      ATH_MSG_INFO ( "Skipping remaining algorithms.\n"
+                     "\tNo output will be written for this event, "
+                     "but job will continue to next event" );
       eventFailed = false;
     }
 
@@ -680,19 +671,18 @@ StatusCode AthenaEventLoopMgr::executeEvent(EventContext&& ctx)
   if (doEvtHeartbeat) {
       if(!m_intervalInSeconds) {
           if (!m_useTools)
-              ATH_MSG_INFO("  ===>>>  done processing event #" << evtNumber << ", run #" << m_currentRun
-                                                               << " " << m_nev << " events processed so far  <<<===");
+              ATH_MSG_INFO("  ===>>>  done processing event #{}, run #{} {} events processed so far  <<<===",
+                           evtNumber, m_currentRun, m_nev);
           else
-              ATH_MSG_INFO("  ===>>>  done processing event #" << evtNumber << ", run #" << m_currentRun
-                                                               << " " << m_nev << " events read and " << m_proc
-                                                               << " events processed so far <<<===");
+              ATH_MSG_INFO("  ===>>>  done processing event #{}, run #{} {} events read and {} events processed so far <<<===",
+                           evtNumber, m_currentRun, m_nev, m_proc);
       }
    std::ofstream outfile( "eventLoopHeartBeat.txt");
    if ( !outfile ) {
      ATH_MSG_ERROR ( " unable to open: eventLoopHeartBeat.txt" );
    } else {
-     outfile << "  done processing event #" << evtNumber << ", run #" << m_currentRun 
-	     << " " << m_nev << " events read so far  <<<===" << std::endl;
+     std::println (outfile, "  done processing event #{}, run #{} {} events read so far  <<<===",
+                   evtNumber, m_currentRun, m_nev);
      outfile.close();
    }  
 
@@ -1011,10 +1001,10 @@ StatusCode AthenaEventLoopMgr::execAtPreFork(const EventContext& ctx) const {
   for (const std::string& name : m_execAtPreFork) {
     SmartIF<IAlgorithm>& alg = algMgr->algorithm(name, /*createIf*/false);
     if ( alg ) {
-      ATH_MSG_INFO("Executing " << alg->name() << "...");
+      ATH_MSG_INFO("Executing {}...", alg->name());
       sc &= alg->sysExecute(ctx);
     }
-    else ATH_MSG_WARNING("Cannot find algorithm or sequence " << name);
+    else ATH_MSG_WARNING("Cannot find algorithm or sequence {}", name);
   }
   return sc;
 }
@@ -1051,7 +1041,7 @@ StatusCode AthenaEventLoopMgr::installEventContext(EventContext& ctx) {
         unsigned int lumiBlock = (*pAttrList)["LumiBlockN"].data<unsigned int>();
         unsigned int bunchId = (*pAttrList)["BunchId"].data<unsigned int>();
 
-        ATH_MSG_DEBUG("use TAG with runNumber=" << runNumber);
+        ATH_MSG_DEBUG("use TAG with runNumber={}", runNumber);
         consume_modifier_stream = true;
         // an option to override primary eventNumber with the secondary one in
         // case of DoubleEventSelector
@@ -1079,9 +1069,8 @@ StatusCode AthenaEventLoopMgr::installEventContext(EventContext& ctx) {
             bool doEvtHeartbeat(m_eventPrintoutInterval.value() > 0 &&
                                 0 == (m_nev % m_eventPrintoutInterval.value()));
             if (doEvtHeartbeat) {
-              ATH_MSG_INFO("  ===>>>  using secondary event #"
-                           << eventNumberSecondary << " instead of #"
-                           << eventNumber << "  <<<===");
+              ATH_MSG_INFO("  ===>>>  using secondary event #{} instead of #{}  <<<===",
+                           eventNumberSecondary, eventNumber);
             }
             eventNumber = eventNumberSecondary;
           }
@@ -1132,7 +1121,7 @@ StatusCode AthenaEventLoopMgr::installEventContext(EventContext& ctx) {
           ATH_MSG_ERROR("Failed to get EventID from input. Tried old-style and xAOD::EventInfo");
           return StatusCode::FAILURE;
         }
-        ATH_MSG_DEBUG("use xAOD::EventInfo with runNumber=" << xAODEvent->runNumber());
+        ATH_MSG_DEBUG("use xAOD::EventInfo with runNumber={}", xAODEvent->runNumber());
         // Record the old-style object for those clients that still need it
         eventInfo = std::make_unique<EventInfo>(
             std::make_unique<EventID>(eventIDFromxAOD(xAODEvent)),
@@ -1189,10 +1178,14 @@ void AthenaEventLoopMgr::modifyEventContext(EventContext& ctx, const EventID& eI
       unsigned int oldLB=eID.lumi_block();
       unsigned int oldTS=eID.time_stamp();
       unsigned int oldTSno=eID.time_stamp_ns_offset();
-      ATH_MSG_DEBUG ( "modifyEventContext: use evtIdModSvc runnr=" << oldrunnr << " -> " << new_eID.run_number() );
-      ATH_MSG_DEBUG ( "modifyEventContext: use evtIdModSvc LB=" << oldLB << " -> " << new_eID.lumi_block() );
-      ATH_MSG_DEBUG ( "modifyEventContext: use evtIdModSvc TimeStamp=" << oldTS << " -> " << new_eID.time_stamp() );
-      ATH_MSG_DEBUG ( "modifyEventContext: use evtIdModSvc TimeStamp ns Offset=" << oldTSno << " -> " << new_eID.time_stamp_ns_offset() );
+      ATH_MSG_DEBUG ( "modifyEventContext: use evtIdModSvc runnr={} -> {}",
+                      oldrunnr, new_eID.run_number());
+      ATH_MSG_DEBUG ( "modifyEventContext: use evtIdModSvc LB={} -> {}",
+                      oldLB, new_eID.lumi_block());
+      ATH_MSG_DEBUG ( "modifyEventContext: use evtIdModSvc TimeStamp={} -> {}",
+                      oldTS, new_eID.time_stamp());
+      ATH_MSG_DEBUG ( "modifyEventContext: use evtIdModSvc TimeStamp ns Offset={} -> {}",
+                      oldTSno, new_eID.time_stamp_ns_offset());
     }
     ctx.setEventID( new_eID );
     Atlas::getExtendedEventContext(ctx).setConditionsRun( ctx.eventID().run_number() );

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DecisionSvc.h"
@@ -103,13 +103,13 @@ DecisionSvc::addStream(const std::string& stream)
     auto it = m_stream_accept.find(stream);
     if(it != m_stream_accept.end()){
       // ok, it exists, then do nothing
-      ATH_MSG_WARNING("Stream name : " << stream << " already been registered!");
+      ATH_MSG_WARNING("Stream name : {} already been registered!", stream);
       status = StatusCode::FAILURE;
     }else{
       //if the stream doesn't exist yet, then insert it to the accept list with an empty vector of Algs
       std::vector<std::string> tmpvec;
       tmpvec.clear();
-      ATH_MSG_INFO("Inserting stream: "<< stream  << " with no Algs");
+      ATH_MSG_INFO("Inserting stream: {} with no Algs", stream);
       m_stream_accept.insert(std::make_pair(stream, tmpvec));
       status = StatusCode::SUCCESS;
     }
@@ -134,9 +134,8 @@ DecisionSvc::fillMap(std::map<std::string, std::vector<std::string> >& streamsMo
       if((*vit) == name){
         algexist = true;
         // it seems the alg was already inserted, warn the user
-        ATH_MSG_ERROR("Alg name : " << name
-                       << " of stream " << stream
-                       << " has already been registered!");
+        ATH_MSG_ERROR("Alg name : {} of stream {} has already been registered!",
+                      name, stream);
         return StatusCode::FAILURE;
       }
     }
@@ -245,7 +244,7 @@ DecisionSvc::isEventAccepted( const std::string& stream,
                               const EventContext& ectx) const
 {
 
-  ATH_MSG_DEBUG("In DecisionSvc::isEventAccepted( " << stream << " )");
+  ATH_MSG_DEBUG("In DecisionSvc::isEventAccepted( {} )", stream);
 
   // By construction a stream is accepted
   bool result = true;
@@ -325,7 +324,7 @@ DecisionSvc::isEventAccepted( const std::string& stream,
   }
 
   if(found_accept == false && found_require == false && found_veto == false){
-    ATH_MSG_DEBUG("Stream: " << stream << " not found registered in DecisionSvc -- accepting event by default ");
+    ATH_MSG_DEBUG("Stream: {} not found registered in DecisionSvc -- accepting event by default ", stream);
   }
 
   return result;
@@ -428,12 +427,12 @@ StatusCode DecisionSvc::DeclareToCutFlowSvc ATLAS_NOT_THREAD_SAFE ()
     }
     // If no filters, mark as PasThru
     if (logicalKey.empty()) logicalKey="PassThru";
-    ATH_MSG_DEBUG("stream " << streamName << " uses logic " << logicalKey);
+    ATH_MSG_DEBUG("stream {} uses logic {}", streamName, logicalKey);
 
     // Now actually declare to the cutflowsvc
     for(auto vec  = totFilt.begin();
              vec != totFilt.end(); ++vec) {
-      ATH_MSG_DEBUG("Declaring logic " << logicalKey << " for " << streamName);
+      ATH_MSG_DEBUG("Declaring logic {} for {}", logicalKey, streamName);
       for (auto filter  = (*vec)->begin();
                 filter != (*vec)->end(); ++filter) {
         if(!m_cutflowSvc.empty()) {m_cutflowSvc->registerTopFilter( (*filter), logicalKey, 2, streamName, true ); } // TODO: validate
