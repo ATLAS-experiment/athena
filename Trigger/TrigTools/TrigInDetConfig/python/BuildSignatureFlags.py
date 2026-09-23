@@ -190,9 +190,9 @@ def signatureTrigTrackingFlags(mode : str) -> AthConfigFlags:
     "muonFS"        : muon,
     "muonLate"      : muon,
     
-    "tauCore"       : tauCore,
+    "tauCoreLC"     : tauCoreLC,
     "tauCoreEM"     : tauCoreEM,
-    "tauIso"        : tauIso,
+    "tauIsoLC"      : tauIsoLC,
     "tauIsoEM"      : tauIsoEM,
     "tauHitsHitZ"   : tauHitsHitZ,
     "tauCoreHitZ"   : tauCoreHitZ,
@@ -363,38 +363,38 @@ def tauHitsHitZ(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthC
   return flags
   
 @signatureActions
-def tauCore(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
+def tauCoreLC(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
 
   flags.input_name = instanceName
-  flags.name     = "tauCore"
+  flags.name     = "tauCoreLC"
   flags.suffix   = "TauCore"
-  flags.roi      = "HLT_Roi_TauCore"
+  flags.roi      = "HLT_Roi_TauCoreLC"
   flags.minPT    = processEtaDepSettings(flags.minPT,[0.8*Units.GeV])
   flags.holeSearch_FTF = True
   return flags
 
 @signatureActions
 def tauCoreEM(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
-  flags = tauCore(flags, instanceName, recoMode)
+  flags = tauCoreLC(flags, instanceName, recoMode)
   flags.name     = "tauCoreEM"
   flags.roi      = "HLT_Roi_TauCoreEM"
   return flags
 
 @signatureActions
 def tauCoreHitZ(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
-  flags = tauCore(flags, instanceName, recoMode)
+  flags = tauCoreLC(flags, instanceName, recoMode)
   flags.name     = "tauCoreHitZ"
   flags.roi      = "HLT_Roi_TauCoreHitZ"
   flags.zedHalfWidth   = 30.0
   return flags
   
 @signatureActions
-def tauIso(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
+def tauIsoLC(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
 
   flags.input_name = instanceName
-  flags.name     = "tauIso"
+  flags.name     = "tauIsoLC"
   flags.suffix   = "TauIso"
-  flags.roi      = "HLT_Roi_TauIso"
+  flags.roi      = "HLT_Roi_TauIsoLC"
   flags.etaHalfWidth   = 0.4
   flags.phiHalfWidth   = 0.4
   flags.zedHalfWidth   = 7.0
@@ -407,14 +407,14 @@ def tauIso(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfig
 
 @signatureActions
 def tauIsoEM(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
-  flags = tauIso(flags, instanceName, recoMode)
+  flags = tauIsoLC(flags, instanceName, recoMode)
   flags.name     = "tauIsoEM"
   flags.roi      = "HLT_Roi_TauIsoEM"
   return flags
 
 @signatureActions
 def tauIsoHitZ(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
-  flags = tauIso(flags, instanceName, recoMode)
+  flags = tauIsoLC(flags, instanceName, recoMode)
   flags.name     = "tauIsoHitZ"
   flags.roi      = "HLT_Roi_TauIsoHitZ"
   return flags
@@ -911,7 +911,7 @@ def collToRecordable(flags,name):
                      "beamSpot"]:
       record = False
   else:
-    if signature in ["tauHitsHitZ","tauCore","tauCoreEM","tauCoreHitZ","tauIso","tauIsoEM","tauIsoHitZ","tauIsoBDT",
+    if signature in ["tauHitsHitZ","tauCoreLC","tauCoreEM","tauCoreHitZ","tauIsoLC","tauIsoEM","tauIsoHitZ","tauIsoBDT",
                      "jet","fullScan","jetSuper","bhh",
                      "beamSpot","beamSpotFS",
                      "bjetLRT","DJetLRT","DVtxLRT"]:

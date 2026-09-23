@@ -225,29 +225,23 @@ def tauFTFCoreSequenceGenCfg(orig_flags: AthConfigFlags, calohits_seq_name: str 
         tracking_cfg = next_tracking_cfg = 'tauLRT'
         output_rois = 'UpdatedTrackLRTRoI'
     else:
-        if jet=='em':
-            name = 'CoreEM'
-            tracking_cfg = 'tauCoreEM'
-            next_tracking_cfg = 'tauIsoEM'
-            output_rois = 'UpdatedTrackEMRoI'
-        else:
-            name = 'Core'
-            tracking_cfg = 'tauCore'
-            next_tracking_cfg = 'tauIso'
-            output_rois = 'UpdatedTrackRoI'
+        name = f'Core{jet.upper()}'
+        tracking_cfg = f'tauCore{jet.upper()}'
+        next_tracking_cfg = f'tauIso{jet.upper()}'
+        output_rois = f'UpdatedTrack{jet.upper()}RoI'
 
     if calohits_seq_name:
-        tracking_cfg += calohits_seq_name
-        next_tracking_cfg += calohits_seq_name
+        tracking_cfg = f'tauCore{calohits_seq_name}'
+        next_tracking_cfg = f'tauIso{calohits_seq_name}'
 
     # Retrieve tracking configuration
     flags = getFlagsForActiveConfig(orig_flags, tracking_cfg, log)
 
     # Source-dependent configuration
     if calohits_seq_name:
-        name += f'_{calohits_seq_name}'
+        name = f'Core_{calohits_seq_name}'
         input_rois = f'UpdatedCaloHits{calohits_seq_name}RoI'
-        output_rois = f'{output_rois[:-3]}{calohits_seq_name}RoI'
+        output_rois = f'UpdatedTrack{calohits_seq_name}RoI'
     else:
         input_rois = f'UpdatedCalo{jet.upper()}RoI'
 
@@ -342,29 +336,25 @@ def tauFTFCoreSequenceGenCfg(orig_flags: AthConfigFlags, calohits_seq_name: str 
 def tauFTFIsoSequenceGenCfg(orig_flags: AthConfigFlags, calohits_seq_name: str | None = None, is_probe_leg: bool = False, jet: str = 'lc'):
     '''2nd FTF step sequence, for the tauIso RoI'''
 
-    name = 'Iso'
-
+    name = f'Iso{jet.upper()}'
+    
     # Retrieve tracking configuration
-    if jet =='em':
-        name = 'IsoEM'
-        previous_tracking_cfg = 'tauCoreEM'
-        tracking_cfg = 'tauIsoEM'
-    else:
-        previous_tracking_cfg = 'tauCore'
-        tracking_cfg = 'tauIso'
+    previous_tracking_cfg = f'tauCore{jet.upper()}'
+    tracking_cfg = f'tauIso{jet.upper()}'
+
     if calohits_seq_name:
-        tracking_cfg += calohits_seq_name
-        previous_tracking_cfg += calohits_seq_name
+        tracking_cfg = f'tauIso{calohits_seq_name}'
+        previous_tracking_cfg = f'tauCore{calohits_seq_name}'
 
     flags = getFlagsForActiveConfig(orig_flags, tracking_cfg, log)
 
 
     # Source-dependent configuration
     if calohits_seq_name:
-        name += f'_{calohits_seq_name}'
+        name = f'Iso_{calohits_seq_name}'
         input_rois = f'UpdatedTrack{calohits_seq_name}RoI'
     else:
-        input_rois = 'UpdatedTrackEMRoI' if jet=='em' else 'UpdatedTrackRoI'
+        input_rois = f'UpdatedTrack{jet.upper()}RoI'
 
 
     # Create new RoIs from , resized to 'tauCore/LRT' before running the FTF algorithms
@@ -439,17 +429,14 @@ def tauPrecTrackSequenceGenCfg(orig_flags: AthConfigFlags, calohits_seq_name: st
     if do_lrt:
         name = 'LRT'
         tracking_cfg = 'tauLRT'
-    elif jet=='em':
-        name = 'IsoEM'
-        tracking_cfg = 'tauIsoEM'
     else:
-        name = 'Iso'
-        tracking_cfg = 'tauIso'
+        name = f'Iso{jet.upper()}'
+        tracking_cfg = f'tauIso{jet.upper()}'
 
     if calohits_seq_name:
-        name += f'_{calohits_seq_name}'
-        tracking_cfg += calohits_seq_name
-        input_rois = f'tauFastTrack{name}_{calohits_seq_name}'
+        name = f'Iso_{calohits_seq_name}'
+        tracking_cfg = f'tauIso{calohits_seq_name}'
+        input_rois = f'tauFastTrackIso_{calohits_seq_name}'
     else:
         input_rois = f'tauFastTrack{name}'
 
@@ -534,17 +521,14 @@ def tauPrecisionSequenceGenCfg(orig_flags: AthConfigFlags, seq_name: str, calohi
     if do_lrt:
         tracking_cfg = 'tauLRT'
         input_rois = 'tauFastTrackLRT'
-    elif jet=='em':
-        tracking_cfg = 'tauIsoEM'
-        input_rois = 'tauFastTrackIsoEM'
     else:
-        tracking_cfg = 'tauIso'
-        input_rois = 'tauFastTrackIso'
+        tracking_cfg = f'tauIso{jet.upper()}'
+        input_rois = f'tauFastTrackIso{jet.upper()}'
 
     if calohits_seq_name:
-        seq_name += f'_{calohits_seq_name}'
-        tracking_cfg += calohits_seq_name
-        input_rois += f'_{calohits_seq_name}'
+        seq_name = f'MVA_{calohits_seq_name}'
+        tracking_cfg = f'tauIso{calohits_seq_name}'
+        input_rois = f'tauFastTrackIso{calohits_seq_name}'
         input_taus = 'HLT_TrigTauRecMerged_CaloHits'
         input_tau_tracks = 'HLT_tautrack_CaloHits_dummy'
     else:
