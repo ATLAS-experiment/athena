@@ -733,9 +733,6 @@ namespace CP
         return StatusCode::FAILURE;
       }
 
-      // Get the data out of the xAOD object.
-      //const void* auxData = ( *m_acc )( element );
-
       // Copy it into the output variable.
       TempInterface dstiface (m_data->size(), m_acc->auxid(), m_data->toPtr());
       m_factory->copy( m_acc->auxid(), dstiface, 0,
@@ -826,9 +823,6 @@ namespace CP
         msg << MSG::FATAL << "Internal logic error detected" << endmsg;
         return StatusCode::FAILURE;
       }
-
-      // Get the data out of the xAOD object.
-      //const void* auxData = ( *m_acc )( element );
 
       // Copy it into the output variable.
       TempInterface dstiface (m_data->size(), m_acc->auxid(), m_data->toPtr());
