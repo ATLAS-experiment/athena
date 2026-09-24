@@ -1241,6 +1241,10 @@
   <x title="Number of interactions" n="&NBINSNINTERACTIONS;" lo="0.0" hi="&NINTERACTIONSMAX;"/>
   <y title="HS vertex reconstruction efficiency" lo="0.8" hi="1.2"/>
 </h>
+<h id="vx_hs_reco_eff_mu" type="TEfficiency" title="HS vertex reconstruction efficiency">
+  <x title="#mu"  n="&EXPMU;" lo="0" hi="&EXPMU;"/>
+  <y title="HS vertex reconstruction efficiency" lo="0.0" hi="1.2"/>
+</h>
 <h id="vx_hs_sel_eff_vs_ntruth" type="TEfficiency" title="HS vertex selection efficiency (sum[pt,track^2])">
   <x title="Number of interactions" n="&NBINSNINTERACTIONS;" lo="0.0" hi="&NINTERACTIONSMAX;"/>
   <y title="HS vertex selection efficiency" lo="0.6" hi="1.2"/>
@@ -1251,11 +1255,11 @@
 </h>
 <h id="vx_hs_reco_long_reso" type="TProfile" title="Reco Longitudinal Resolution">
   <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
-  <y title="Reco longitudinal resolution [mm]" lo="0.0" hi="1.0"/>
+  <y title="Reco longitudinal uncertainty [mm]" lo="0.0" hi="1.0"/>
 </h>
 <h id="vx_hs_reco_trans_reso" type="TProfile" title="Reco Transverse Resolution">
   <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
-  <y title="Reco transverse resolution [mm]" lo="0.0" hi="1.0"/>
+  <y title="Reco transverse uncertainty [mm]" lo="0.0" hi="1.0"/>
 </h>
 <h id="resHelper_PUdensity_hsVxTruthLong" type="TH2F" title="residual vs PU density for hs vtx z">
   <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
@@ -1263,22 +1267,34 @@
 </h>
 <h id="resolution_vs_PUdensity_hsVxTruthLong" type="TH1F" title="resolution vs PU density for hs vtx z">
   <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
-  <y title="width of resolution for z_{0}"/>
+  <y title="width of resolution for z vtx"/>
 </h>
-<h id="resmean_vs_PUdensity_hsVxTruthLong" type="TH1F" title="mean of resolution vs hs vtx z">
+<h id="resmean_vs_PUdensity_hsVxTruthLong" type="TH1F" title="mean of residual vs PU density for hs vtx z">
   <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
   <y title="mean of resolution for z vtx"/>
 </h>
 <h id="resHelper_PUdensity_hsVxTruthTransv" type="TH2F" title="residual vs PU density for hs vtx r">
   <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
-  <y title="|Reco-truth| longitudinal resolution [mm]" n="20" lo="-0.08" hi="0.08"/>
+  <y title="|Reco-truth| transverse resolution [mm]" n="20" lo="-0.08" hi="0.08"/>
 </h>
 <h id="resolution_vs_PUdensity_hsVxTruthTransv" type="TH1F" title="resolution vs PU density for hs vtx r">
   <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
-  <y title="width of resolution for z_{0}"/>
+  <y title="width of resolution for r vtx"/>
 </h>
-<h id="resmean_vs_PUdensity_hsVxTruthTransv" type="TH1F" title="mean of resolution vs hs vtx r">
+<h id="resmean_vs_PUdensity_hsVxTruthTransv" type="TH1F" title="mean of residual vs hs vtx r">
   <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>
+  <y title="mean of resolution for r vtx"/>
+</h>
+<h id="resHelper_mu_hsVxTruthLong" type="TH2F" title="residual vs #mu for hs vtx z">
+  <x title="#mu"  n="&EXPMU;" lo="0" hi="&EXPMU;"/>
+  <y title="|Reco-truth| longitudinal resolution [mm]" n="20" lo="-0.08" hi="0.08"/>
+</h>
+<h id="resolution_vs_mu_hsVxTruthLong" type="TH1F" title="resolution vs #mu for hs vtx z">
+  <x title="#mu"  n="&EXPMU;" lo="0" hi="&EXPMU;"/>
+  <y title="width of resolution for z vtx"/>
+</h>
+<h id="resmean_vs_mu_hsVxTruthLong" type="TH1F" title="mean of residual vs #mu for hs vtx z">
+  <x title="#mu"  n="&EXPMU;" lo="0" hi="&EXPMU;"/>
   <y title="mean of resolution for z vtx"/>
 </h>
 <h id="vx_hs_truth_trans_reso_vs_PU" type="TH2" title="Truth Transverse Resolution vs. PU (2D)">
