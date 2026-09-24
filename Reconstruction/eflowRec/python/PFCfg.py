@@ -77,50 +77,6 @@ def getPFTrackClusterMatchingTool(inputFlags,matchCut,distanceType,clusterPositi
     return MatchingTool
 
 
-def getPFCellLevelSubtractionTool(inputFlags,toolName):
-    PFCellLevelSubtractionToolFactory = CompFactory.PFSubtractionTool
-    PFCellLevelSubtractionTool = PFCellLevelSubtractionToolFactory(toolName,useNNEnergy = inputFlags.PF.useMLEOverP)
-
-    if inputFlags.GeoModel.Run <= LHCPeriod.Run3:
-        eflowCellEOverPTool_Run2_mc20_JetETMiss = CompFactory.eflowCellEOverPTool_Run2_mc20_JetETMiss
-        PFCellLevelSubtractionTool.eflowCellEOverPTool = eflowCellEOverPTool_Run2_mc20_JetETMiss()
-    else:
-        PFCellEOverPTool = CompFactory.PFCellEOverPTool
-        PFCellLevelSubtractionTool.eflowCellEOverPTool = PFCellEOverPTool("PFCellEOverPTool", referenceFileLocation = inputFlags.PF.EOverP_CellOrdering_ReferenceLocation)
-        #this should always be false for any reference derived, except eflowCellEOverPTool_mc12_HLLHC.h or eflowCellEOverPTool_Run2_mc20_JetETMiss.h
-        PFCellLevelSubtractionTool.useLegacyEBinIndex=False
-
-    if(inputFlags.PF.EOverPMode):
-        PFCellLevelSubtractionTool.CalcEOverP = True
-        PFCellLevelSubtractionTool.nClusterMatchesToUse = -1
-    else:
-        PFCellLevelSubtractionTool.nClusterMatchesToUse = 1
-
-    if(inputFlags.PF.EOverPMode):
-        PFCellLevelSubtractionTool.PFTrackClusterMatchingTool = getPFTrackClusterMatchingTool(inputFlags,0.2,"EtaPhiSquareDistance","PlainEtaPhi","CalObjBldMatchingTool")
-    else:
-        PFCellLevelSubtractionTool.PFTrackClusterMatchingTool = getPFTrackClusterMatchingTool(inputFlags,1.64,"EtaPhiSquareSignificance","GeomCenterEtaPhi","CalObjBldMatchingTool")
-
-    PFCellLevelSubtractionTool.PFTrackClusterMatchingTool_02 = getPFTrackClusterMatchingTool(inputFlags,0.2,"EtaPhiSquareDistance","PlainEtaPhi","MatchingTool_Pull_02")
-
-    if inputFlags.PF.useMLEOverP:
-        PFEnergyPredictorTool = CompFactory.PFEnergyPredictorTool("PFCellLevelEnergyPredcictorTool",ModelPath = inputFlags.PF.EOverP_NN_Model)
-        PFCellLevelSubtractionTool.NNEnergyPredictorTool = PFEnergyPredictorTool
-    PFCellLevelSubtractionTool.addCPData = inputFlags.PF.addCPData
-
-    if inputFlags.PF.useTruthCheating:
-        if inputFlags.PF.useTrackClusterTruthMatching:
-            PFCellLevelSubtractionTool.CaloClusterReadDecorHandleKey_NLeadingTruthParticles = "CaloTopoClusters." + inputFlags.Calo.TopoCluster.CalibrationHitDecorationName
-            PFCellLevelSubtractionTool.useTrackClusterTruthMatching=True
-
-        if inputFlags.PF.useTruthForChargedShowerSubtraction:
-            PFCellLevelSubtractionTool.useTruthForChargedShowerSubtraction = True
-            PFCellLevelSubtractionTool.PFSimulateTruthShowerTool = CompFactory.PFSimulateTruthShowerTool("PFSimulateTruthShowerTool")
-
-    return PFCellLevelSubtractionTool
-
-
-
 def getPFUnifiedCellLevelMatchingTool(inputFlags,toolName):
     if inputFlags.PF.useTruthCheating and inputFlags.PF.useTrackClusterTruthMatching:
         PFUnifiedCellLevelMatchingToolFactory = CompFactory.PFUnifiedMatchingTruthTool
@@ -189,28 +145,6 @@ def getPFUnifiedCellLevelSubtractionOnlyTool(inputFlags,toolName):
 
 
 
-def getPFRecoverSplitShowersTool(inputFlags,toolName):
-    PFRecoverSplitShowersToolFactory = CompFactory.PFSubtractionTool
-    PFRecoverSplitShowersTool = PFRecoverSplitShowersToolFactory(toolName,useNNEnergy = inputFlags.PF.useMLEOverP)
-
-    if inputFlags.GeoModel.Run <= LHCPeriod.Run3:
-        eflowCellEOverPTool_Run2_mc20_JetETMiss = CompFactory.eflowCellEOverPTool_Run2_mc20_JetETMiss
-        PFRecoverSplitShowersTool.eflowCellEOverPTool = eflowCellEOverPTool_Run2_mc20_JetETMiss("eflowCellEOverPTool_Run2_mc20_JetETMiss_Recover")
-    else:
-        PFCellEOverPTool = CompFactory.PFCellEOverPTool
-        PFRecoverSplitShowersTool.eflowCellEOverPTool = PFCellEOverPTool("PFCellEOverPTool_Recover", referenceFileLocation = inputFlags.PF.EOverP_CellOrdering_ReferenceLocation)
-        #this should always be false for any reference derived, except eflowCellEOverPTool_mc12_HLLHC.h or eflowCellEOverPTool_Run2_mc20_JetETMiss.h
-        PFRecoverSplitShowersTool.useLegacyEBinIndex=False
-
-    PFRecoverSplitShowersTool.RecoverSplitShowers = True
-
-    if inputFlags.PF.useMLEOverP:
-        PFEnergyPredictorTool = CompFactory.PFEnergyPredictorTool("PFRecoverSplitShowersEnergyPredcictorTool",ModelPath = inputFlags.PF.EOverP_NN_Model)
-        PFRecoverSplitShowersTool.NNEnergyPredictorTool = PFEnergyPredictorTool
-
-    return PFRecoverSplitShowersTool
-
-
 def getPFUnifiedRecoverSplitShowersMatchingTool(inputFlags,toolName):
     # RecoverSplitShowers is gated off when useTruthCheating is set (see getOfflinePFAlgorithm),
     # so the truth-matching variant of this factory is unreachable by construction.
@@ -257,19 +191,14 @@ def getPFUnifiedRecoverSplitShowersSubtractionOnlyTool(inputFlags,toolName):
 
 
 
-def getPFMomentCalculatorTool(inputFlags, momentsToCalculateList, use_unified = False):
+def getPFUnifiedMomentCalculatorTool(inputFlags):
     result=ComponentAccumulator()
-    if use_unified:
-        PFMomentCalculatorToolFactory = CompFactory.PFUnifiedMomentCalculatorTool
-    else:
-        PFMomentCalculatorToolFactory = CompFactory.PFMomentCalculatorTool
+    PFMomentCalculatorToolFactory = CompFactory.PFUnifiedMomentCalculatorTool
 
     PFMomentCalculatorTool = PFMomentCalculatorToolFactory("PFMomentCalculatorTool")
 
     from CaloRec.CaloTopoClusterConfig import getTopoMoments
     PFClusterMomentsMaker = result.popToolsAndMerge(getTopoMoments(inputFlags))
-    if (len(momentsToCalculateList) > 0):
-        PFClusterMomentsMaker.MomentsNames = momentsToCalculateList
     PFMomentCalculatorTool.CaloClusterMomentsMaker = PFClusterMomentsMaker
 
     PFClusterCollectionTool = CompFactory.PFClusterCollectionTool
@@ -283,14 +212,9 @@ def getPFMomentCalculatorTool(inputFlags, momentsToCalculateList, use_unified = 
     result.setPrivateTools(PFMomentCalculatorTool)
     return result
 
-def getPFLCCalibTool(inputFlags,use_unified = False):
+def getPFUnifiedLCCalibTool(inputFlags):
 
-    if use_unified:
-        PFLCCalibTool = CompFactory.PFUnifiedLCCalibTool
-    else:
-        PFLCCalibTool = CompFactory.PFLCCalibTool
-
-    PFLCCalibTool = PFLCCalibTool("PFLCCalibTool")
+    PFLCCalibTool = CompFactory.PFUnifiedLCCalibTool("PFLCCalibTool")
 
     PFClusterCollectionTool = CompFactory.PFClusterCollectionTool
     PFLCCalibTool.eflowRecClusterCollectionTool = PFClusterCollectionTool("PFClusterCollectionTool_LCCalib")
@@ -609,31 +533,18 @@ def getOfflinePFAlgorithm(inputFlags, **kwargs):
         topoClustersName="CaloTopoClusters"
         PFAlgorithm.PFClusterSelectorTool = getPFClusterSelectorTool(inputFlags,topoClustersName,"CaloCalTopoClusters","PFClusterSelectorTool")
 
-    if inputFlags.PF.useUnified:
-        PFAlgorithm.useUnified = True
-        PFAlgorithm.UnifiedBaseTools  = [getPFUnifiedCellLevelMatchingTool(inputFlags, "PFUnifiedCellLevelMatchingTool")]
-        PFAlgorithm.UnifiedBaseTools += [getPFUnifiedCellLevelSubtractionOnlyTool(inputFlags, "PFUnifiedCellLevelSubtractionOnlyTool")]
-        if not inputFlags.PF.EOverPMode and not inputFlags.PF.useTruthCheating:
-            PFAlgorithm.UnifiedBaseTools += [getPFUnifiedRecoverSplitShowersMatchingTool(inputFlags, "PFUnifiedRecoverSplitShowersMatchingTool")]
-            PFAlgorithm.UnifiedBaseTools += [getPFUnifiedRecoverSplitShowersSubtractionOnlyTool(inputFlags, "PFUnifiedRecoverSplitShowersSubtractionOnlyTool")]
+    PFAlgorithm.useUnified = True
+    PFAlgorithm.UnifiedBaseTools  = [getPFUnifiedCellLevelMatchingTool(inputFlags, "PFUnifiedCellLevelMatchingTool")]
+    PFAlgorithm.UnifiedBaseTools += [getPFUnifiedCellLevelSubtractionOnlyTool(inputFlags, "PFUnifiedCellLevelSubtractionOnlyTool")]
+    if not inputFlags.PF.EOverPMode and not inputFlags.PF.useTruthCheating:
+        PFAlgorithm.UnifiedBaseTools += [getPFUnifiedRecoverSplitShowersMatchingTool(inputFlags, "PFUnifiedRecoverSplitShowersMatchingTool")]
+        PFAlgorithm.UnifiedBaseTools += [getPFUnifiedRecoverSplitShowersSubtractionOnlyTool(inputFlags, "PFUnifiedRecoverSplitShowersSubtractionOnlyTool")]
 
-        PFUnifiedMomentCalculatorTools=result.popToolsAndMerge(getPFMomentCalculatorTool(inputFlags,[], use_unified = True))
-        PFAlgorithm.UnifiedBaseTools += [PFUnifiedMomentCalculatorTools]
-        PFAlgorithm.UnifiedBaseTools += [getPFLCCalibTool(inputFlags, use_unified = True)]
-        if inputFlags.PF.EOverPMode:
-            PFAlgorithm.UnifiedBaseTools += [CompFactory.PFUnifiedRadialEnergyCalculatorTool()]
-
-    else:
-        PFAlgorithm.SubtractionToolList = [getPFCellLevelSubtractionTool(inputFlags,"PFCellLevelSubtractionTool")]
-
-        if not inputFlags.PF.EOverPMode and not inputFlags.PF.useTruthCheating:
-            PFAlgorithm.SubtractionToolList += [getPFRecoverSplitShowersTool(inputFlags,"PFRecoverSplitShowersTool")]
-
-        PFMomentCalculatorTools=result.popToolsAndMerge(getPFMomentCalculatorTool(inputFlags,[]))
-        PFAlgorithm.BaseToolList = [PFMomentCalculatorTools]
-        PFAlgorithm.BaseToolList += [getPFLCCalibTool(inputFlags)]
-        if inputFlags.PF.EOverPMode:
-            PFAlgorithm.BaseToolList += [CompFactory.PFRadialEnergyCalculatorTool()]
+    PFUnifiedMomentCalculatorTools=result.popToolsAndMerge(getPFUnifiedMomentCalculatorTool(inputFlags))
+    PFAlgorithm.UnifiedBaseTools += [PFUnifiedMomentCalculatorTools]
+    PFAlgorithm.UnifiedBaseTools += [getPFUnifiedLCCalibTool(inputFlags)]
+    if inputFlags.PF.EOverPMode:
+        PFAlgorithm.UnifiedBaseTools += [CompFactory.PFUnifiedRadialEnergyCalculatorTool()]
 
     result.addEventAlgo(PFAlgorithm)
     return result
