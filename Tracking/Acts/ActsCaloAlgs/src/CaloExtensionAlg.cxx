@@ -122,7 +122,7 @@ namespace ActsTrk{
                                                                          const xAOD::TrackParticle* track) const{
   
         
-        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Extrapolate track with pT: "<<(track->pt() * 1.e-3)
+        ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Extrapolate track with pT: "<<(track->pt() * 1.e-3)
             <<" [GeV], eta: "<<track->eta()<<", phi: "<<(track->phi() / 1._degree)<<", q: "<<track->charge());
         const Acts::TrackingVolume* caloExit = m_trackingGeometrySvc->getEnvelope(SystemEnvelope::CaloExit);
         const Acts::TrackingVolume* itkExit = m_trackingGeometrySvc->getEnvelope(SystemEnvelope::ITkExit);
@@ -139,7 +139,7 @@ namespace ActsTrk{
         propOpts.recordMaterial = true;
         propOpts.recordPassive = true;
         propOpts.recordSensitive = true;
-        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Start to propagate \n"<<(*lastTrackPars)<<"\n, position: "
+        ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Start to propagate \n"<<(*lastTrackPars)<<"\n, position: "
                         <<Amg::toString(lastTrackPars->position(tgContext))<< " through the calorimeter.");
         auto surfaceRecord = m_extrapolationTool->propagateAndRecord(ctx, *lastTrackPars, propOpts);
         if (!surfaceRecord.ok()) {
