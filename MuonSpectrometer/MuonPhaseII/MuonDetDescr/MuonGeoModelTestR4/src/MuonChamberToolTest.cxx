@@ -283,118 +283,24 @@ namespace MuonGMR4 {
     std::vector<Amg::Vector3D> MuonChamberToolTest::cornerPoints(const ActsTrk::GeometryContext& gctx, 
                                                                  const Acts::Volume& volume) const {
         
-        const auto& bounds = volume.volumeBounds();
-        unsigned int edgeIdx{0};
-        //diamond volume bounds case - there are 12 edges
-        if(bounds.type() == Acts::VolumeBounds::BoundsType::eDiamond){
-            const auto& diamondBounds = static_cast<const Acts::DiamondVolumeBounds&>(bounds);
-            using BoundEnum = Acts::DiamondVolumeBounds::BoundValues;        
-            std::vector<Amg::Vector3D> edges(12, Amg::Vector3D::Zero());
-            double xCord{0.}, yCord{0};
-            for(double signX : {-1.,1.}){
-                for(double signY : {-1., 0., 1.}){
-                    for(double signZ : {-1.,1.}){
-                        if(signY == 0){
-                            xCord = diamondBounds.get(BoundEnum::eHalfLengthX2);
-                        }else if(signY < 0){
-                            xCord = diamondBounds.get(BoundEnum::eHalfLengthX1);
-                            yCord = diamondBounds.get(BoundEnum::eLengthY1);
-                        } else{
-                            xCord = diamondBounds.get(BoundEnum::eHalfLengthX3);
-                            yCord = diamondBounds.get(BoundEnum::eLengthY2);
-                        }
-
-                        const Amg::Vector3D edge{signX*xCord, 
-                                                 signY*yCord, 
-                                                 signZ*diamondBounds.get(BoundEnum::eHalfLengthZ)};
-                        edges[edgeIdx] = volume.localToGlobalTransform(gctx.context())*edge;
-                        ++edgeIdx;
-                    }
-                }
-            }
-            return edges;
-        }
-
-        //trapezoid or rectangular bounds case
         std::vector<Amg::Vector3D> edges{};
-        ATH_MSG_VERBOSE("Fetch volume bounds "<<Amg::toString(volume.localToGlobalTransform(gctx.context())));
-        for (const double signX : {-1., 1.}) {
-            for (const double signY : { -1., 1.}) {
-                for (const double signZ: {-1., 1.}) {
-                    const Amg::Vector3D edge{signX* (signY>0 ? MuonGMR4::halfXhighY(bounds) : MuonGMR4::halfXlowY(bounds)), 
-                                             signY*MuonGMR4::halfY(bounds), 
-                                             signZ*MuonGMR4::halfZ(bounds)};
-                    edges.push_back(volume.localToGlobalTransform(gctx.context()) * edge);
-                    ATH_MSG_VERBOSE("Local edge "<<Amg::toString(edge)<<", global edge: "<<Amg::toString(edges[edgeIdx]));
-                    ++edgeIdx;
-                }
-            }
+        const Acts::VolumeBounds& bounds{volume.volumeBounds()};
+        const Acts::Transform3& trf{volume.localToGlobalTransform(gctx.context())};
+        for (const Acts::OrientedSurface& boundary : bounds.orientedSurfaces(trf)) {
+            std::vector<Amg::Vector3D> corners = cornerPoints(gctx, *boundary.surface);
+            edges.insert(edges.end(), std::make_move_iterator(corners.begin()), 
+                                      std::make_move_iterator(corners.end()));
         }
+        auto [begin, end] = std::ranges::unique(edges, [](const Amg::Vector3D& a, const Amg::Vector3D& b) {
+                                                        return (a - b).mag2() < 1._mm;
+        });
+        edges.erase(begin, end);
         return edges;
     }
-
-    std::array<Amg::Vector3D, 8> MuonChamberToolTest::cornerPoints(const ActsTrk::GeometryContext& gctx, const Acts::StrawSurface& surface) const {
-        std::array<Amg::Vector3D, 8> edges{make_array<Amg::Vector3D,8>(Amg::Vector3D::Zero())};
-        using BoundEnum = Acts::LineBounds::BoundValues;
-        const auto& bounds = static_cast<const Acts::LineBounds&>(surface.bounds());
-        unsigned int edgeIdx{0};
-        
-        ATH_MSG_VERBOSE("Fetch volume bounds "<<Amg::toString(surface.localToGlobalTransform(gctx.context())));
-        for (const double signX : {-1., 1.}) {
-            for (const double signY : { -1., 1.}) {
-                for (const double signZ: {-1., 1.}) {
-                    const Amg::Vector3D edge{signX*bounds.get(BoundEnum::eR),
-                                             signY*bounds.get(BoundEnum::eR),
-                                             signZ*bounds.get(BoundEnum::eHalfLengthZ)};
-                    edges[edgeIdx] = surface.localToGlobalTransform(gctx.context()) * edge;
-                    ++edgeIdx;
-                }
-            }
-        }
-        return edges;
+    std::vector<Amg::Vector3D> MuonChamberToolTest::cornerPoints(const ActsTrk::GeometryContext& gctx, 
+                                                                 const Acts::Surface& surface) const {
+        return surface.polyhedronRepresentation(gctx.context(), 10).vertices;
     }
-    
-    std::array<Amg::Vector3D, 4> MuonChamberToolTest::cornerPoints(const ActsTrk::GeometryContext& gctx, const Acts::PlaneSurface& surface) const {
-        std::array<Amg::Vector3D, 4> edges{make_array<Amg::Vector3D,4>(Amg::Vector3D::Zero())};
-        if(surface.bounds().type() == Acts::SurfaceBounds::BoundsType::eRectangle) { //RPC surfaces are rectangles
-            const Acts::RectangleBounds& bounds = static_cast<const Acts::RectangleBounds&>(surface.bounds());
-            using BoundEnum = Acts::RectangleBounds::BoundValues;
-            
-            unsigned int edgeIdx{0};
-            for(const double signX : {-1., 1.}) {
-                for (const double signY : { -1., 1.}) {
-                    const Amg::Vector3D edge{signX < 0 ? bounds.get(BoundEnum::eMinX) : bounds.get(BoundEnum::eMaxX), 
-                                             signY < 0 ? bounds.get(BoundEnum::eMinY) : bounds.get(BoundEnum::eMaxY), 0.};
-                    edges[edgeIdx] = surface.localToGlobalTransform(gctx.context()) * edge;
-                    ++edgeIdx;  
-                }
-            } 
-            return edges;
-        } else if(surface.bounds().type() == Acts::SurfaceBounds::BoundsType::eTrapezoid) {
-            using BoundEnum = Acts::TrapezoidBounds::BoundValues;
-            const auto& bounds = static_cast<const Acts::TrapezoidBounds&>(surface.bounds());
-            unsigned int edgeIdx{0};
-
-            ATH_MSG_VERBOSE("Fetch volume bounds "<<Amg::toString(surface.localToGlobalTransform(gctx.context())));
-            for (const double signX : {-1., 1.}) {
-                for (const double signY : { -1., 1.}) {
-                        const Amg::Vector3D edge{Amg::getRotateZ3D(-1.*bounds.get(BoundEnum::eRotationAngle)) * /// Account for the stereo angle of the micromega geometry
-                                                 Amg::Vector3D(signX*bounds.get(signY < 0 ? BoundEnum::eHalfLengthXnegY : BoundEnum::eHalfLengthXposY),
-                                                               signY*bounds.get(BoundEnum::eHalfLengthY), 0.)};
-                    
-                        edges[edgeIdx] = surface.localToGlobalTransform(gctx.context()) * edge;
-                        ++edgeIdx;
-                }
-            }
-        
-            return edges;
-        } else {
-                ATH_MSG_ERROR("The surface bounds are neither a rectangle nor a trapezoid, this is not supported yet");
-                return edges;
-        }
-    }
-
-
 #if defined(FLATTEN) && defined(__GNUC__)
 // We compile this function with optimization, even in debug builds; otherwise,
 // the heavy use of Eigen makes it too slow.  However, from here we may call
@@ -661,28 +567,10 @@ namespace MuonGMR4 {
             const std::vector<Amg::Vector3D> edges = cornerPoints(gctx, *testVol);
            
             for(const auto& surface : testVol->surfaces()) {
-                //only plane or straw surfaces expected
-                std::vector<Amg::Vector3D> surfEdges = {};
-                if(surface.type() == Acts::Surface::SurfaceType::Straw){
-                   ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<" Checking "<<surface.type()<<" surface "<<identify(surface)
+
+                ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<" Checking "<<surface.type()<<" surface "<<identify(surface)
                                 <<" /  "<<surface.geometryId() <<" in volume "<<testVol->volumeName());
-                   
-                  auto edges = cornerPoints(gctx, dynamic_cast<const Acts::StrawSurface&>(surface));
-                  surfEdges.insert(surfEdges.end() , edges.begin(), edges.end());
-                } else if(surface.type() == Acts::Surface::SurfaceType::Plane){
-                   ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<" Checking "<<surface.type()<<" surface "<<identify(surface)
-                                <<" /  "<<surface.geometryId() <<" in volume "<<testVol->volumeName());
-                   
-                  auto edges = cornerPoints(gctx, dynamic_cast<const Acts::PlaneSurface&>(surface));
-                  surfEdges.insert(surfEdges.end() , edges.begin(), edges.end());
-                } else {
-                    ATH_MSG_ERROR(__func__<<"() "<<__LINE__<<" - The "<<surface.type()<<"-surface "
-                                << m_idHelperSvc->toString(identify(surface))<<" / "
-                                <<surface.geometryId() <<" is neither a straw nor a plane surface");
-                    return StatusCode::FAILURE;
-                }
-               
-                for(const auto& edge : surfEdges) {
+                for(const Amg::Vector3D& edge : cornerPoints(gctx, surface)) {
                     if(!testVol->inside(gctx.context(), edge, 0.01)) {
                         ATH_MSG_ERROR(__func__<<"() "<<__LINE__<<" - The "<<surface.type()<<"-surface "
                             << m_idHelperSvc->toString(identify(surface))<<" / "
