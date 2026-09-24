@@ -5,6 +5,7 @@
 
 #include "GlobalSimulation/Object.h"
 #include "GlobalSimulation/JET1Jet.h"
+#include "GlobalSimulation/jet_tag_output.h"
 #include "GlobalSimulation/topoc_pu_type.h"
 
 #include "Utilities/binStrToHexStr.h"
@@ -41,6 +42,7 @@ namespace GlobalSim {
     // ---- Adding a TOB type: one line here, and nothing else. ----
     static const std::map<std::string, SpecEntry> specs = {
         {"topoc_pu_type", entryFor<topoc_pu_type>()},
+        {"jet_tag_output_type", entryFor<jet_tag_output_type>()},
         {"JET1Jet", entryFor<JET1Jet>()},
     };
     return specs;

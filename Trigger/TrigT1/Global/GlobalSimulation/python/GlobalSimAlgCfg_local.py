@@ -77,6 +77,8 @@ read_handles = {
     'Egamma1BDTAlgTool': {'in0': 'LArNeighborhoodTOBContainerKey'},
     'GlobalCellTowerAlgTool': {'in0': 'GlobalLArCellsKey'},
     'GlobalJet1AlgTool': {'in0': 'GlobalCellTowersKey'},
+    'GlobalMETAlgTool': {'in0': 'GlobalCellTowersKey', #NOTE MET has two inputs (unlike existing algorithms)
+                         'in1': 'GlobalJet1JetsKey'},
     'eEmMultAlgTool': {'in0': 'eEmTOBs'},
     'eEmEg1BDTMultAlgTool': {'in0': 'eEmEg1BDTTOBContainerKey'},
     'CommonMultAlgTool': {'in0': 'CommonTOBsKey'},
@@ -88,6 +90,7 @@ write_handles = {
     'Egamma1BDTAlgTool': 'eEmEg1BDTTOBContainerKey',
     'GlobalCellTowerAlgTool': 'GlobalCellTowersKey',
     'GlobalJet1AlgTool': 'GlobalJet1JetsKey',
+    'GlobalMETAlgTool': 'GlobalMETKey',
 }
 
 def GlobalSimulationAlgCfg(flags,

@@ -8,14 +8,21 @@
 /*
   JetTaggerLRJMaker:
   -----------------
-  GEP modified-seeded-cone large-R jet algorithm with substructure quantitiess
-  (psi_R, tau_1, tau_2, mass approx, n subjets). A port of existing standalone emulation
-  into TrigGepPerf. The algorithm runs with configurable digitization so it input-output matches the HLS algorithm.
-*/
+  GEP modified-seeded-cone large-R jet algorithm with substructure quantities
+  (psi_R, tau_1, tau_2, mass approx, n subjets). A port of the existing
+  standalone emulation into TrigGepPerf. The digitization scheme is
+  configurable so that the input-output behaviour matches the HLS algorithm.
 
-#include "Jet.h"
-#include "Cluster.h"
-#include "JetTaggerLargeRJet.h"
+  This is the bitwise core: integer arithmetic throughout, with no dependency
+  on ROOT or on the Gep float object model, in the same way WTAConeMaker is the
+  core of the WTA cone jet algorithm. Clients whose input is already digitized
+  - GlobalSimulation, whose TOBs carry integer codes - use it directly.
+
+  Gep::JetTaggerLRJJetMaker (TrigGepPerf/src) is the floating point adapter
+  around it, used by GepJetAlg: it digitizes xAOD jets/clusters on the way in
+  and converts back to physical units on the way out, exactly as
+  Gep::WTAConeJetMaker adapts WTAConeMaker.
+*/
 
 #include <cmath>
 #include <cstdint>
@@ -26,14 +33,8 @@
 namespace Gep {
 
   // ------------------------------------------------------------------
-  // Source enums - which input objects feed seeds / constituents.
+  // Which input objects feed the constituents.
   // ------------------------------------------------------------------
-  enum class JetTaggerSeedSource {
-    WTACone   = 0, // WTA-cone small-R jets (TrigGepPerf output)
-    jFexSRJ   = 1, // (re-simulated) jFEX small-R jets
-    gFexSRJ   = 2  // (re-simulated) gFEX small-R jets
-  };
-
   enum class JetTaggerConstSource {
     Towers   = 0, // GEP cell towers / clusters (constituent objects)
     WTACone  = 1  // WTA-cone small-R jets used as constituents (subjet-aware)
@@ -59,7 +60,7 @@ namespace Gep {
 
     // Geometry (undigitized)
     double r2Cut      {1.21};  // jet radius^2 (rCut = sqrt(r2Cut))
-    double rMergeCut  {2.0};   // seed-position-optimization search distance
+    double midpointSearchDistance  {2.0};   // seed-position-optimization search distance
 
     // Digitization: field bit lengths
     unsigned int et_bit_length            {13};
@@ -71,18 +72,35 @@ namespace Gep {
     unsigned int psi_R_bit_length         {8};  // substruct 4
     unsigned int deltaR_lut_length        {8};
 
-    // Digitization: physical ranges
-    double phi_min {-3.2};
-    double phi_max {3.2};
+    // Number of phi codes on the GEP tower grid. This is a property of the
+    // grid, not of the output format, so it is the same for every algorithm
+    // version and is not configurable. The eta axis has always had its own
+    // code count (eta_range, derived below); phi did not, and its granularity
+    // was taken from the *field width* (1 << phi_bit_length) instead. That is
+    // only correct when the codes happen to fill the field, which they do not
+    // for the basic (v2) format: there the 64-code grid sits in a 9b TOB field.
+    static constexpr unsigned int phi_range {64};
+
+    // Digitization: physical ranges.
+    // eta_min/phi_min are the *centre* of the first tower, one half-tower
+    // inside the edge of the covered range, and *_max is one granularity past
+    // the last centre. Matching CaloTowerContainer::configureGrid(98, -4.9,
+    // 4.9, 64) and GlobalCellTowerAlgTool's floor(x*10) binning.
+    double phi_min {-3.15};
+    double phi_max {3.25};
     double eta_min {-4.85};
     double eta_max {4.95};
     double et_min  {0.0};
-    double et_max  {1024.0};      // GeV
+    double et_max  {2048.0};      // GeV; over the 13b field this is the 0.25 GeV TOB LSB
     double massApprox_max {512.0}; // GeV
 
     // Physics thresholds / flow toggles (undigitized, GeV)
     double subjetEtThresholdGeV       {25.0};
     double minEtSeedPosOptCutGeV      {25.0};
+    // Minimum constituent E_T. Applied by loadConstituents() on the float path
+    // only: callers of makeLargeRJetsDigitized() have already selected their
+    // input (the basic algorithm applies no input energy cut at all)
+    double constEtCutGeV              {2.0};
     bool   enableOverlapRemoval       {true};
     bool   enableEtWeightedMidpoint   {true};
     bool   minEtSeedPosOptimization   {true};
@@ -113,6 +131,9 @@ namespace Gep {
     unsigned int digitized_delta_R2Cut    {0};
     unsigned int digitized_d_search_squared{0};
     unsigned int massApproxDivisor        {1};
+    // constEtCutGeV in digitized units. Derived rather than hard-coded so the
+    // cut stays at the intended energy if et_max (and so et_granularity) moves.
+    unsigned int constEtCutDigi           {0};
 
     // On-the-fly deltaR LUT (lutR_8b_ in the emulation), size = max_R_8b_lut_size.
     std::vector<unsigned int> lutR_8b;
@@ -140,7 +161,7 @@ namespace Gep {
 
     unsigned int digitizeEt (double etGeV) const { return digitize(etGeV, et_bit_length,  et_min,  et_max); }
     unsigned int digitizeEta(double eta)   const { return digitize(eta,   eta_bit_length, eta_min, eta_max, eta_range); }
-    unsigned int digitizePhi(double phi)   const { return digitize(phi,   phi_bit_length, phi_min, phi_max); }
+    unsigned int digitizePhi(double phi)   const { return digitize(phi,   phi_bit_length, phi_min, phi_max, phi_range); }
 
     double undigitizeEt (unsigned int v) const { return (v & maskN(et_bit_length))  * et_granularity; }
     double undigitizeEta(unsigned int v) const { return eta_min + (v & maskN(eta_bit_length)) * eta_granularity; }
@@ -166,8 +187,16 @@ namespace Gep {
     }
 
     // LUT index from wrapped absolute (deltaEta, deltaPhi) integer components.
+    // The row stride is the number of phi codes below pi, which is
+    // pi_digitized_in_phi == phi_range/2. When the codes fill the field this is
+    // 1 << (phi_bit_length - 1), the value used before phi_range existed.
     unsigned int calcLutIndex(unsigned int dEta, unsigned int dPhi) const {
-      return dEta * (1u << (phi_bit_length - 1)) + dPhi;
+      // A wrapped |dPhi| runs over [0, phi_range/2] == [0, 32]. That is 33
+      // distinct values, while the LUT only has rows for [0, 31]: dPhi == 32
+      if (pi_digitized_in_phi > 0 && dPhi >= pi_digitized_in_phi) {
+        dPhi = pi_digitized_in_phi - 1;
+      }
+      return dEta * pi_digitized_in_phi + dPhi;
     }
 
     // deltaR LUT lookup (digitized deltaR), bounds-guarded.
@@ -179,9 +208,13 @@ namespace Gep {
 
   private:
     // Ports of the standalone LUT-sizing / building routines.
+    // Sized over the code grid actually used (etaRange x phiHalfRange), which
+    // is also how buildDeltaRLut() fills and calcLutIndex() addresses it. It
+    // previously iterated the full field widths with a different row stride,
+    // so the bound it returned did not correspond to the entries being written.
     static unsigned int calculateLutMaxSize(double cut,
-                                             unsigned int etaBitLength,
-                                             unsigned int phiBitLength,
+                                             unsigned int etaRange,
+                                             unsigned int phiHalfRange,
                                              double etaGranularity,
                                              double phiGranularity,
                                              bool deltaR2orDeltaR);
@@ -196,45 +229,56 @@ namespace Gep {
 
   // ==================================================================
   // JetTaggerLRJMaker
+  // ------------------------------------------------------------------
+  // The algorithm on digitized input. Integer arithmetic only.
   // ==================================================================
   class JetTaggerLRJMaker {
   public:
     JetTaggerLRJMaker() = default;
+    virtual ~JetTaggerLRJMaker() = default;
 
     std::string toString() const { return "JetTaggerLRJ"; }
-
-    // Seeds: undigitized Gep::Jet (WTACone, or jFEX/gFEX SRJ converted to
-    // Gep::Jet inside GepJetAlg). Constituents: undigitized Gep::Cluster.
-    // Et in both is taken from the TLorentzVector in MeV and converted to
-    // GeV via m_cfg.inputEtToGeV.
-    std::vector<Gep::LargeRJet>
-    makeLargeRJets(const std::vector<Gep::Jet>& seeds,
-                   const std::vector<Gep::Cluster>& constituents) const;
-
-    // Configuration access. Set m_cfg (or its fields) then call
-    // m_cfg.computeDerived() once before makeLargeRJets.
-    JetTaggerLRJConfig m_cfg;
-
-    void SetSeedSource(JetTaggerSeedSource s)   { m_seedSource = s; }
-    JetTaggerSeedSource GetSeedSource() const   { return m_seedSource; }
-    void SetConstSource(JetTaggerConstSource c) { m_constSource = c; }
-    JetTaggerConstSource GetConstSource() const { return m_constSource; }
-
-  private:
-    JetTaggerSeedSource  m_seedSource  {JetTaggerSeedSource::WTACone};
-    JetTaggerConstSource m_constSource {JetTaggerConstSource::Towers};
 
     // Digitized (et, eta, phi) triplet - the emulation's inputObject/outputJet.
     struct DigiObj { unsigned int et{0}; unsigned int eta{0}; unsigned int phi{0}; };
 
-    // ---- algorithm stages (mirror jetTaggerEmulation.cc::eventLoop) ----
-    std::vector<DigiObj> loadSeeds(const std::vector<Gep::Jet>& seeds) const;
-    // Returns the digitized constituents (E_T-descending, > 2 GeV); fills
-    // originalIndices with each one's index into `constituents`, so a digitized
-    // slot can be mapped back to its source cluster.
-    std::vector<DigiObj> loadConstituents(const std::vector<Gep::Cluster>& constituents,
-                                          std::vector<int>& originalIndices) const;
+    // Digitized result of the algorithm: exactly the integer quantities the
+    // firmware produces, before any conversion back to physical units.
+    struct DigiLRJ {
+      unsigned int et {0};
+      unsigned int eta{0};
+      unsigned int phi{0};
+      unsigned int numSubjets{0};
+      unsigned int psi_R     {0};
+      unsigned int tau_1     {0};
+      unsigned int tau_2     {0};
+      unsigned int massApprox{0};
+      std::vector<DigiObj>      subjets;      // first numSubjets entries are valid
+      std::vector<unsigned int> mergedIndices;// slots in the constituent vector
+    };
 
+    // The algorithm proper. This is the firmware-equivalent block.
+    //
+    // `seeds` must be ordered leading-first; a short event is zero-padded up to
+    // cfg.nSeedsInput internally (the jet maker upstream already bounds how
+    // many there can be). `constituents` must be E_T-descending and already
+    // cut to cfg.maxObjectsConsidered: the association loop stops at the first
+    // zero-E_T entry.
+    std::vector<DigiLRJ>
+    makeLargeRJetsDigitized(const std::vector<DigiObj>& seeds,
+                            const std::vector<DigiObj>& constituents) const;
+
+    // Configuration access. Set m_cfg (or its fields) then call
+    // m_cfg.computeDerived() once before running the algorithm.
+    JetTaggerLRJConfig m_cfg;
+
+    void SetConstSource(JetTaggerConstSource c) { m_constSource = c; }
+    JetTaggerConstSource GetConstSource() const { return m_constSource; }
+
+  protected:
+    JetTaggerConstSource m_constSource {JetTaggerConstSource::Towers};
+
+    // ---- algorithm stages (mirror jetTaggerEmulation.cc::eventLoop) ----
     void overlapRemoval(std::vector<DigiObj>& seeds) const;
     void seedPositionOptimization(std::vector<DigiObj>& seeds) const;
   };

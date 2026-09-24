@@ -24,7 +24,7 @@
 #include "xAODTrigger/gFexJetRoIContainer.h"
 
 // JetTaggerLRJ maker (owns the runtime config + on-the-fly deltaR LUT)
-#include "./JetTaggerLRJMaker.h"
+#include "./JetTaggerLRJJetMaker.h"
 
 //Athena::Units::GeV
 #include "AthenaKernel/Units.h"
@@ -84,7 +84,7 @@ class GepJetAlg: public ::AthReentrantAlgorithm {
 
 // ------------------------------------------------------------------
 // JetTaggerLRJ (modified seeded-cone large-R jet) algorithm wiring.
-// The algorithm body (JetTaggerLRJMaker) currently emits a placeholder
+// The algorithm body (JetTaggerLRJJetMaker) currently emits a placeholder
 // LRJ per seed; the substructure stages are still being filled in.
 // ------------------------------------------------------------------
   SG::ReadHandleKey<xAOD::JetContainer> m_lrjWTAConeSeedsKey {
@@ -112,7 +112,7 @@ class GepJetAlg: public ::AthReentrantAlgorithm {
       "Large-R jet cone radius; r2Cut = LRJJetR^2. Default 1.1 (r2Cut=1.21). <=0 inherits the preset."};
 
   Gaudi::Property<float> m_LRJDSearch{this, "LRJDSearch", 2.0,
-      "Seed-position-optimization search distance (rMergeCut); ignored when v2 (basic). "
+      "Seed-position-optimization search distance (midpointSearchDistance); ignored when v2 (basic). "
       "Default 2.0. <0 inherits the preset (which is 0.001/disabled for basic)."};
 
   // ---- multiplicity overrides (0 : inherit from preset) ----
@@ -163,11 +163,12 @@ class GepJetAlg: public ::AthReentrantAlgorithm {
   Gaudi::Property<float> m_LRJMinEtSeedPosOptCutGeV{this, "LRJMinEtSeedPosOptCutGeV", -1.0,
       "Minimum proto-seed Et (GeV) for seed-position optimization. <0 inherits the preset."};
 
-  // ---- reserved (per-object Et cuts not yet applied, matching the emulation) ----
+  // ---- per-object Et cuts ----
   Gaudi::Property<float> m_LRJSeedEtCutGeV{this, "LRJSeedEtCutGeV", 5.0,
       "Minimum seed Et in GeV (reserved; not yet applied)."};
   Gaudi::Property<float> m_LRJConstEtCutGeV{this, "LRJConstEtCutGeV", 2.0,
-      "Minimum constituent Et in GeV (reserved; not yet applied)."};
+      "Minimum constituent Et in GeV. Applied when loading constituents; the "
+      "threshold is converted to digitized units using et_granularity."};
 
   // ---- flow toggles (always applied; v2 ignores OR / seed-opt) ----
   Gaudi::Property<bool> m_LRJEnableOverlapRemoval{this, "LRJEnableOverlapRemoval", true,
@@ -186,7 +187,7 @@ class GepJetAlg: public ::AthReentrantAlgorithm {
       "Fill constituentsIndices / mergedIndices on the output LRJ."};
 
   // Configured once in initialize() (builds the deltaR LUT); used read-only in execute().
-  Gep::JetTaggerLRJMaker m_lrjMaker;
+  Gep::JetTaggerLRJJetMaker m_lrjMaker;
 
   StatusCode configureLRJMaker();
 
