@@ -38,7 +38,7 @@ class CommonServicesConfig (ConfigBlock) :
     """
 
     def __init__ (self) :
-        super (CommonServicesConfig, self).__init__ ()
+        super().__init__ ()
         self.addOption ('runSystematics', None, type=bool,
             info="whether to turn on the computation of systematic variations. "
             "The default is to run them on MC.")
@@ -183,7 +183,7 @@ class IOStatsBlock(ConfigBlock):
     """Print what branches are used in analysis"""
 
     def __init__(self):
-        super(IOStatsBlock, self).__init__()
+        super().__init__()
         self.addOption("printOption", "Summary", type=str,
                        info='option to pass the standard ROOT printing function. Can be `Summary`, `ByEntries` or `ByBytes`.',
                        meta={'choices':(['Summary','ByEntries','ByBytes'],1)})
@@ -201,7 +201,7 @@ class PileupReweightingBlock (ConfigBlock):
     """the ConfigBlock for pileup reweighting"""
 
     def __init__ (self) :
-        super (PileupReweightingBlock, self).__init__ ()
+        super().__init__ ()
         self.addOption ('campaign', None, type=None,
             info="the MC campaign for the PRW auto-configuration.")
         self.addOption ('files', None, type=list,
@@ -407,7 +407,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
     """the ConfigBlock for generator algorithms"""
 
     def __init__ (self) :
-        super (GeneratorAnalysisBlock, self).__init__ ()
+        super().__init__ ()
         self.addOption ('saveCutBookkeepers', True, type=bool,
             info="whether to save the cut bookkeepers information into the "
             "output file.")
@@ -598,7 +598,7 @@ class PtEtaSelectionBlock (ConfigBlock):
     """the ConfigBlock for a pt-eta selection"""
 
     def __init__ (self) :
-        super (PtEtaSelectionBlock, self).__init__ ()
+        super().__init__ ()
         self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.",
@@ -671,7 +671,7 @@ class ObjectCutFlowBlock (ConfigBlock):
     """the ConfigBlock for an object cutflow"""
 
     def __init__ (self) :
-        super (ObjectCutFlowBlock, self).__init__ ()
+        super().__init__ ()
         self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.",
@@ -710,7 +710,7 @@ class EventCutFlowBlock (ConfigBlock):
     """the ConfigBlock for an event-level cutflow"""
 
     def __init__(self):
-        super(EventCutFlowBlock, self).__init__()
+        super().__init__()
         self.addOption('selectionName', '', type=str,
             noneAction='error',
             info="the name of the event selection to generate cutflow histograms for. "
@@ -764,7 +764,7 @@ class OutputThinningBlock (ConfigBlock):
     """the ConfigBlock for output thinning"""
 
     def __init__ (self) :
-        super (OutputThinningBlock, self).__init__ ()
+        super().__init__ ()
         self.setBlockName('Thinning')
         self.addOption ('containerName', '', type=str,
             noneAction='error',
@@ -841,7 +841,7 @@ class IFFLeptonDecorationBlock (ConfigBlock):
     """the ConfigBlock for the IFF classification of leptons"""
 
     def __init__ (self) :
-        super (IFFLeptonDecorationBlock, self).__init__()
+        super().__init__()
         self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input electron or muon container.",
@@ -876,7 +876,7 @@ class IFFLeptonDecorationBlock (ConfigBlock):
 class MCTCLeptonDecorationBlock (ConfigBlock):
 
     def __init__ (self) :
-        super (MCTCLeptonDecorationBlock, self).__init__ ()
+        super().__init__ ()
 
         self.addOption ("containerName", '', type=str,
                         noneAction='error',
@@ -910,7 +910,7 @@ class PerEventSFBlock (ConfigBlock):
     """the ConfigBlock for the AsgEventScaleFactorAlg"""
 
     def __init__ (self):
-        super(PerEventSFBlock, self).__init__()
+        super().__init__()
         self.addOption('algoName', None, type=str,
             info="unique name given to the underlying algorithm computing the "
             "per-event scale factors.")
@@ -945,7 +945,7 @@ class SelectionDecorationBlock (ConfigBlock):
     """the ConfigBlock to add selection decoration to a container"""
 
     def __init__ (self) :
-        super (SelectionDecorationBlock, self).__init__ ()
+        super().__init__ ()
         # TODO: add info string
         self.addOption('containers', [], type=list,
             noneAction='error',

@@ -8,7 +8,7 @@ class BootstrapGeneratorConfig(ConfigBlock):
     '''ConfigBlock for the bootstrap generator'''
 
     def __init__(self):
-        super(BootstrapGeneratorConfig, self).__init__()
+        super().__init__()
         self.addOption ('nReplicas', 1000, type=int,
             info="the number of bootstrap replicas to generate.")
         self.addOption ('decoration', None, type=str,

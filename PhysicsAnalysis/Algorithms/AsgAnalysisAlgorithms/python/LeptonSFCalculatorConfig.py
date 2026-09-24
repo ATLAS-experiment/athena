@@ -9,7 +9,7 @@ class LeptonSFCalculatorBlock(ConfigBlock):
     """--> combine all the per-object SFs into a single per-event SF"""
 
     def __init__(self):
-        super(LeptonSFCalculatorBlock, self).__init__()
+        super().__init__()
         self.addDependency("ElectronWorkingPointEfficiency", required=False)
         self.addDependency("PhotonWorkingPointEfficiency", required=False)
         self.addDependency("MuonWorkingPointEfficiency", required=False)

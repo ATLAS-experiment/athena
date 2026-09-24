@@ -9,7 +9,7 @@ class EventCleaningBlock (ConfigBlock):
     """the ConfigBlock for event cleaning"""
 
     def __init__ (self) :
-        super (EventCleaningBlock, self).__init__ ()
+        super().__init__ ()
         self.addOption ('runPrimaryVertexSelection', True, type=bool,
             info="whether to run primary vertex selection.")
         self.addOption ('runEventCleaning', False, type=bool,

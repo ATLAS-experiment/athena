@@ -8,7 +8,7 @@ import warnings
 class VGammaORBlock(ConfigBlock):
 
     def __init__(self):
-        super(VGammaORBlock, self).__init__()
+        super().__init__()
         self.addOption("dR_lepton_photon_cuts", [0.0, 0.05, 0.075, 0.1, 0.125, 0.15, 0.2], type=list,
                        info=r"list of cuts on $\Delta R$ between the leptons and the photon.")
         self.addOption("photon_pT_cuts", [10e3], type=list,

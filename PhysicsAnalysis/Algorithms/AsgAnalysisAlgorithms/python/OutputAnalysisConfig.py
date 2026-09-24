@@ -11,7 +11,7 @@ class OutputAnalysisConfig (ConfigBlock):
     """the ConfigBlock for the output ntuple configuration"""
 
     def __init__ (self) :
-        super (OutputAnalysisConfig, self).__init__ ()
+        super().__init__ ()
         self.addOption ('postfix', '', type=str,
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here.")

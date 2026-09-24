@@ -8,7 +8,7 @@ class OverlapAnalysisConfig (ConfigBlock):
     """the ConfigBlock for the OverlapRemoval configuration"""
 
     def __init__ (self) :
-        super (OverlapAnalysisConfig, self).__init__ ()
+        super().__init__ ()
         self.setBlockName('OverlapRemoval')
         self.addOption ('inputLabel', '', type=str,
             info="any possible label used to pick up the selected objects with. This should not be a label already used elsewhere; try e.g. `preselectOR`.")
