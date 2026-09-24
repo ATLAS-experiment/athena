@@ -154,7 +154,8 @@ StatusCode CaloTopoClusterTowerMerger::execute(const EventContext& ctx) const
 
   // finalize the clusters/towers
   lhandle_t linkHandle(m_cellLinkContainerKey,ctx);
-  ATH_CHECK(CaloClusterStoreHelper::finalizeClusters (linkHandle,signalHandle.ptr()));
+  ATH_CHECK( linkHandle.record (std::make_unique<CaloClusterCellLinkContainer>()) );
+  CaloClusterStoreHelper::finalizeClusters (ctx, signalHandle, linkHandle);
 
   return StatusCode::SUCCESS;
 }

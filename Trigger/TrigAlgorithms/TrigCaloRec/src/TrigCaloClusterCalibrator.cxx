@@ -92,7 +92,8 @@ StatusCode TrigCaloClusterCalibrator::execute(const EventContext& ctx) const
 
   // Now we also have to make the cell links persistent
   SG::WriteHandle<CaloClusterCellLinkContainer> cellLinks(m_outputCellLinksKey, ctx);
-  ATH_CHECK(CaloClusterStoreHelper::finalizeClusters(cellLinks, outputClusters.ptr()));
+  ATH_CHECK( cellLinks.record (std::make_unique<CaloClusterCellLinkContainer>()) );
+  CaloClusterStoreHelper::finalizeClusters(ctx, outputClusters, cellLinks);
   // After this is done, the non-const cell iteration functions will segfault!
   // This means we really shouldn't let anyone retrieve this as a non-const
   // container...

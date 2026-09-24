@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
 //-----------------------------------------------------------------------
 // File and Version Information:
-// $Id: CaloTopoTowerMaker.cxx,v 1.26 2009-04-18 02:56:18 ssnyder Exp $
 //
 // Description: see CaloTopoTowerMaker.h
 // 
@@ -206,8 +205,8 @@ StatusCode CaloTopoTowerMaker::execute (const EventContext& ctx) const
 
   ATH_MSG_DEBUG("Created tower container (of type xAOD::CaloClusterContainer) with " << clusColl->size() << " towers");
   SG::WriteHandle<CaloClusterCellLinkContainer> cellLinks (m_towerCellLinkOutput, ctx);
-  ATH_CHECK(CaloClusterStoreHelper::finalizeClusters (cellLinks,
-                                                      clusColl.ptr()));
+  ATH_CHECK( cellLinks.record (std::make_unique<CaloClusterCellLinkContainer>()) );
+  CaloClusterStoreHelper::finalizeClusters (ctx, clusColl, cellLinks);
   return StatusCode::SUCCESS;
 }
 

@@ -95,8 +95,8 @@ StatusCode TrackParticleCellAssociationAlg::execute(const EventContext& ctx) con
   ATH_MSG_DEBUG(" Total number of selected tracks: " << ntracks );
 
   SG::WriteHandle<CaloClusterCellLinkContainer> cellLinks (m_clusterCellLinkName , ctx);
-  ATH_CHECK(CaloClusterStoreHelper::finalizeClusters (cellLinks,
-                                                      clusColl.ptr()));
+  ATH_CHECK( cellLinks.record (std::make_unique<CaloClusterCellLinkContainer>()) );
+  CaloClusterStoreHelper::finalizeClusters (ctx, clusColl, cellLinks);
   return StatusCode::SUCCESS;
 }
 
