@@ -197,7 +197,6 @@ namespace CP {
          StatusCode process( StoreType& evtStore );
          
          TreeBranchHelpers::IObjectProcessor& getObjectProcessor( const BranchConfig& branchConfig, const std::string& sgName );
-         std::optional<int> defaultBasketSize;
          std::unordered_set<std::string> m_nonContainers;
          std::unordered_map< std::string, std::unique_ptr<TreeBranchHelpers::IObjectProcessor> > m_processors;
       };

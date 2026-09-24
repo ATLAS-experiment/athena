@@ -541,8 +541,6 @@ namespace CP {
         for ( const std::string& branchDecl : branches ) {
             branchConfigs.emplace_back();
             ATH_CHECK( branchConfigs.back().parse( branchDecl, msg() ) );
-            if (!branchConfigs.back().basketSize.has_value())
-            branchConfigs.back().basketSize = defaultBasketSize;
         }
 
         // This will loop over all branches, collect the name of any
