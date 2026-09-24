@@ -18,14 +18,6 @@
 
 namespace CP
 {
-  CopyNominalSelectionAlg ::
-  CopyNominalSelectionAlg (const std::string& name,
-                     ISvcLocator* pSvcLocator)
-    : AnaAlgorithm (name, pSvcLocator)
-  {}
-
-
-
   StatusCode CopyNominalSelectionAlg ::
   initialize ()
   {

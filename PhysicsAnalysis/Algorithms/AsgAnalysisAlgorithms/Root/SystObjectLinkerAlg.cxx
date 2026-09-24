@@ -15,13 +15,6 @@ static const SG::Decorator< iplink_t  > dec_nominalObject("nominalObjectLink");
 
 namespace CP
 {
-  SystObjectLinkerAlg ::SystObjectLinkerAlg(const std::string &name,
-                                  ISvcLocator *pSvcLocator)
-      : EL::AnaReentrantAlgorithm(name, pSvcLocator)
-  {
-
-  }
-
   StatusCode SystObjectLinkerAlg ::initialize()
   {
 

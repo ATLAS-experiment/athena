@@ -56,8 +56,7 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    BootstrapGeneratorAlg(const std::string &name,
-                          ISvcLocator *pSvcLocator);
+    using EL::AnaAlgorithm::AnaAlgorithm;
 
   public:
     StatusCode initialize() override;

@@ -15,14 +15,6 @@
 namespace CP
 {
 
-  MCTCDecorationAlg ::
-  MCTCDecorationAlg (const std::string& name, 
-                                  ISvcLocator* pSvcLocator)
-    : AnaAlgorithm (name, pSvcLocator)
-  {
-  }
-
-
   StatusCode MCTCDecorationAlg ::
   initialize ()
   {

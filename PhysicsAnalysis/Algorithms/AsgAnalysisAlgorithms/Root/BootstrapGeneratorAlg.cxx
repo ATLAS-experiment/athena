@@ -6,12 +6,6 @@
 
 #include <AsgAnalysisAlgorithms/BootstrapGeneratorAlg.h>
 
-CP::BootstrapGeneratorAlg::BootstrapGeneratorAlg(const std::string &name,
-                                                 ISvcLocator *pSvcLocator)
-  : EL::AnaAlgorithm(name, pSvcLocator)
-{
-}
-
 std::uint64_t CP::BootstrapGenerator::fnv1a_64(const void *buffer, size_t size, std::uint64_t offset_basis) {
   std::uint64_t h = offset_basis;
   const unsigned char *p = static_cast<const unsigned char *>(buffer);
