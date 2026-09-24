@@ -562,6 +562,7 @@ void ByteStreamEmonInputSvc::check_publish()
                     }
                     // might throw...
                     auto name_tag = detail::extract_histogram_tag(name);
+                    if (!p)[[unlikely]] continue;
                     m_provider->publish(*p, name_tag.first, name_tag.second);
                     //m_provider->publish(*h, name_tag.first, name_tag.second);
                 } // tdaq doesn't currently support publishing efficiencies, will change in the future
