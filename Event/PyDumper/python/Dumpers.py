@@ -3437,24 +3437,6 @@ def dump_TrigL2Bphys (j, f):
     return
 
 
-def dump_TrigMissingET (m, f):
-    fprint (f, '  ', m.ex(), m.ey(), m.ez(), m.sumEt(), m.sumE(), 
-            m.RoIword(), m.getFlag(), m.getNumOfComponents())
-    for ic in range(m.getNumOfComponents()):
-        fprint (f, '\n   ', m.getNameOfComponent(ic),
-                m.getExComponent(ic), m.getEyComponent(ic),
-                m.getEzComponent(ic), m.getSumEtComponent(ic),
-                m.getSumEComponent(ic), m.getComponentCalib0(ic),
-                m.getComponentCalib1(ic), m.getSumOfSigns(ic),
-                m.getUsedChannels(ic), m.getStatus(ic))
-    fprintln (f, ' ')
-    return
-@nolist
-def dump_TrigMissingET_nolist (m, f):
-    dump_TrigMissingET (m, f)
-    return
-
-
 def dump_RoiDescriptor (d, f):
     fprint (f, '  ',
             d.version(), d.isFullscan(),
@@ -5388,7 +5370,6 @@ dumpspecs = [
     ["DataVector<TrigL2Bphys>",              dump_TrigL2Bphys],
     ["TrigCaloClusterContainer",             dump_TrigCaloCluster],
     ["TrigTauClusterDetailsContainer",       dump_TrigTauClusterDetails],
-    ["TrigMissingET",                        dump_TrigMissingET_nolist],
     ["TrigRoiDescriptor",                    dump_TrigRoiDescriptor_nolist],
     ["TrigT2Jet",                            dump_TrigT2Jet_nolist],
     ["TrigTauCluster",                       dump_TrigTauCluster_nolist],
@@ -5423,7 +5404,6 @@ dumpspecs = [
     ["TrigElectronContainer",                dump_TrigElectron],
     ["TrigL2BjetContainer",                  dump_TrigL2Bjet],
     ["TrigL2BphysContainer",                 dump_TrigL2Bphys],
-    ["TrigMissingETContainer",               dump_TrigMissingET],
     ["TrigPhotonContainer",                  dump_TrigPhoton],
     ["TrigT2JetContainer",                   dump_TrigT2Jet],
     ["TrigTauClusterContainer",              dump_TrigTauCluster],

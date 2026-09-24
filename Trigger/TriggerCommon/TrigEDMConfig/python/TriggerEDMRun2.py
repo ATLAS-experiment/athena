@@ -740,9 +740,9 @@ TriggerHLTList = [
     ('TrigT2MbtsBits#HLT_T2Mbts',                                         'BS ESD AODFULL AODSLIM', 'MinBias'),
     ('TrigSpacePointCounts#HLT_spacepoints',                              'BS ESD AODFULL AODSLIM', 'MinBias'), # ? do we realy need it!
     ('TrigTrtHitCounts#HLT_TrtHitCount',                                  '',                       'MinBias'),
-    ('TrigMissingET#HLT_T2MissingET',                                     'BS ESD', 'MET'),
-    ('TrigMissingET#HLT_L2JetEtSum',                                      'BS ESD', 'MET'),
-    ('TrigMissingET#HLT_L2MissingET_FEB',                                 'BS ESD', 'MET'),
+    ('TrigMissingET#HLT_T2MissingET',                                     '', 'MET'),
+    ('TrigMissingET#HLT_L2JetEtSum',                                      '', 'MET'),
+    ('TrigMissingET#HLT_L2MissingET_FEB',                                 '', 'MET'),
     ('ElectronMuonTopoInfo#HLT_EgMuTopoFEX',                              '',                       'Combined'),        # Muon? Egamma? Combined?
     ('ElectronMuonTopoInfo#HLT_L2_PhotonMuonTopoFEX',                     '',                       'Combined'),        # Muon? Egamma? Combined?
 
@@ -846,12 +846,12 @@ TriggerHLTList = [
    ('egammaContainer#HLT_egamma',                                        '',                                      'Egamma'),
    ('egammaContainer#HLT_egamma_Photons',                                '',                                      'Egamma'),
    ('egammaContainer#HLT_egamma_SC_Photons',                                '',                                      'Egamma'),
-   ('TrigMissingET#HLT_TrigEFMissingET',                                 'BS ESD AODFULL AODSLIM',                'MET'),
-   ('TrigMissingET#HLT_TrigEFMissingET_noiseSupp',                       '',                                      'MET'),
-   ('TrigMissingET#HLT_TrigEFMissingET_FEB',                             'BS ESD',                'MET'),
-   ('TrigMissingET#HLT_TrigEFMissingET_topocl',                          'BS ESD',                'MET'),
-   ('TrigMissingET#HLT_TrigEFMissingET_topocl_PS',                       'BS ESD',                'MET'),
-   ('TrigMissingET#HLT_EFJetEtSum',                                      'BS ESD',                'MET'),
+   ('TrigMissingET#HLT_TrigEFMissingET',                                 '',                'MET'),
+   ('TrigMissingET#HLT_TrigEFMissingET_noiseSupp',                       '',                'MET'),
+   ('TrigMissingET#HLT_TrigEFMissingET_FEB',                             '',                'MET'),
+   ('TrigMissingET#HLT_TrigEFMissingET_topocl',                          '',                'MET'),
+   ('TrigMissingET#HLT_TrigEFMissingET_topocl_PS',                       '',                'MET'),
+   ('TrigMissingET#HLT_EFJetEtSum',                                      '',                'MET'),
    ('ElectronMuonTopoInfo#HLT_EF_PhotonMuonTopoFEX',                     '',               			  'Combined'),    #   Combined?
    ('ElectronMuonTopoInfo#HLT_EF_EgMuTopoFEX',                           '',             		          'Combined'),     #  Combined?
    ('Rec::TrackParticleContainer#HLT_InDetTrigParticleCreation_Bjet_EFID',             '',           'Bjet'),
@@ -1532,13 +1532,13 @@ EDMDetails['xAOD::CMXRoIAuxContainer']                    = {'persistent': "", '
 EDMLibraries = [ 'TrigSteeringEvent', 'TrigMuonEvent',
                  'TrigCaloEvent',
                  'TrigInDetEvent',
-                 'TrigParticle',      'TrigMissingEtEvent',
+                 'TrigParticle',
                  'TrigDecisionEvent', 'TrigMonitoringEvent',
                  'TrigTopoEvent',
                  'TrigMonitoringEventTPCnv',   'RecTPCnv',
                  'TrigCaloEventTPCnv',
                  'TrigDecisionEventTPCnv',     'TrigInDetEventTPCnv',
-                 'TrigMissingEtEventTPCnv',    'TrigMuonEventTPCnv',
+                 'TrigMuonEventTPCnv',
                  'TrigParticleTPCnv',          'TrigSteeringEventTPCnv',
                  'TrigTopoEventTPCnv',
                  'RecTPCnvDict',
