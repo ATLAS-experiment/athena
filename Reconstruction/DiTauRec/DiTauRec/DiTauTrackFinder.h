@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DITAUREC_DITAUTRACKFINDER_H
@@ -11,7 +11,7 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "xAODTracking/Vertex.h"
 #include "xAODTracking/TrackParticleContainer.h"
-#include "TrkToolInterfaces/ITrackSelectorTool.h"
+#include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
 
 class DiTauTrackFinder : public DiTauToolBase {
  public:
@@ -67,7 +67,7 @@ class DiTauTrackFinder : public DiTauToolBase {
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_TrackParticleContainerName
     { this, "TrackParticleContainer", "InDetTrackParticles", "" };
 
-  ToolHandle<Trk::ITrackSelectorTool> m_TrackSelectorTool{this, "TrackSelectorTool", ""};
+  ToolHandle<InDet::IInDetTrackSelectionTool> m_TrackSelectorTool{this, "TrackSelectorTool", ""}; 
 
 };
 

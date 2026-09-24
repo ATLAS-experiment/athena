@@ -394,11 +394,12 @@ def TauConfigTest(flags=None):
 
         flags = initConfigFlags()
 
-        flags.Input.Files = defaultTestFiles.RDO_RUN3
+        #flags.Input.Files = defaultTestFiles.RDO_RUN3
+        flags.Input.Files = ["/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/TrigInDetValidation/valid1.601191.PhPy8EG_AZNLO_Ztautau.recon.RDO.e8514_e8528_s4369_s4370_r16083_tid42134185_00/RDO.42134185._000001.pool.root.1","/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/TrigInDetValidation/valid1.601191.PhPy8EG_AZNLO_Ztautau.recon.RDO.e8514_e8528_s4369_s4370_r16083_tid42134185_00/RDO.42134185._000002.pool.root.1"] 
         flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
 
         flags.Output.AODFileName = "AOD.pool.root"
-        flags.Exec.MaxEvents = 50
+        flags.Exec.MaxEvents = 500
         
         flags.Scheduler.ShowDataDeps = True
         flags.Scheduler.ShowDataFlow = True

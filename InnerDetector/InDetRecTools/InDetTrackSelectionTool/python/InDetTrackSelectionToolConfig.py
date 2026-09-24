@@ -156,6 +156,65 @@ def Tau_InDetTrackSelectionToolForTJVACfg(flags, name="tauRec_InDetTrackSelectio
     acc.setPrivateTools(CompFactory.InDet.InDetTrackSelectionTool(name, **kwargs))
     return acc
 
+def TauRecInDetTrackSelectorToolCfg(flags, name='tauRec_InDetTrackSelectorTool', **kwargs):
+
+    import AthenaCommon.SystemOfUnits as Units
+
+    acc = ComponentAccumulator() 
+    kwargs.setdefault("minPt",    1000.0)
+    kwargs.setdefault("maxD0",    1*Units.mm)
+    kwargs.setdefault("maxSigmaD0", 999*Units.mm) 
+    kwargs.setdefault("maxZ0",    9999.*Units.mm)
+    kwargs.setdefault("maxZ0SinTheta", 1.5*Units.mm)
+    kwargs.setdefault("maxSigmaZ0SinTheta", 999*Units.mm)
+    kwargs.setdefault("minNNextToInnermostLayerHits", 0)
+    kwargs.setdefault("minNPixelHits",  2) 
+    kwargs.setdefault("minNPixelHitsPhysical",  0)
+    kwargs.setdefault("minNSctHits",    0)
+    kwargs.setdefault("minNSiHits",     7)
+    kwargs.setdefault("minNSiHitsPhysical",   3) 
+    kwargs.setdefault("minNTrtHits",    0)
+    kwargs.setdefault("minNTrtHitsPlusOutliers",  0)
+    kwargs.setdefault("maxChiSq", 99999)
+    kwargs.setdefault("maxChiSqperNdf", 99999) 
+    acc.setPrivateTools(CompFactory.InDet.InDetTrackSelectionTool(name, **kwargs))
+    return acc
+
+def TrigTauInDetTrackSelectionToolCfg(
+        flags, name="TrigTau_InDetTrackSelectionTool", **kwargs):
+    acc = ComponentAccumulator()
+
+    #if flags.Tracking.ActiveConfig.doTRT and "TrtDCCutTool" not in kwargs:
+    #from InDetConfig.InDetTrackSelectorToolConfig import InDetTrigTRTDriftCircleCutToolCfg
+    #kwargs.setdefault("TrtDCCutTool", acc.popToolsAndMerge(
+    #    InDetTrigTRTDriftCircleCutToolCfg(flags)))
+
+    #if "Extrapolator" not in kwargs:
+    #    from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
+    #    kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(
+    #        AtlasExtrapolatorCfg(flags)))
+
+    import AthenaCommon.SystemOfUnits as Units
+    kwargs.setdefault("minPt",    1000.0)
+    kwargs.setdefault("maxD0",    2*Units.mm)
+    kwargs.setdefault("maxSigmaD0", 999*Units.mm)
+    kwargs.setdefault("maxZ0",    9999.*Units.mm)
+    kwargs.setdefault("maxZ0SinTheta", 9999*Units.mm)
+    kwargs.setdefault("maxSigmaZ0SinTheta", 999*Units.mm)
+    kwargs.setdefault("minNNextToInnermostLayerHits", 0)
+    kwargs.setdefault("minNPixelHits",  2)
+    kwargs.setdefault("minNPixelHitsPhysical",  0)
+    kwargs.setdefault("minNSctHits",    0)
+    kwargs.setdefault("minNSiHits",     7)
+    kwargs.setdefault("minNSiHitsPhysical",   3)
+    kwargs.setdefault("minNTrtHits",    0)
+    kwargs.setdefault("minNTrtHitsPlusOutliers",  0)
+    kwargs.setdefault("maxChiSq", 99999)
+    kwargs.setdefault("maxChiSqperNdf", 99999)
+ 
+    acc.setPrivateTools(CompFactory.InDet.InDetTrackSelectionTool(name, **kwargs))
+    return acc
+
 def InDetGlobalLRTMonAlg_TrackSelectionToolCfg(flags, name="InDetGlobalLRTMonAlg_TrackSelectionTool", **kwargs):
     kwargs.setdefault("minPt", 1000.)
     kwargs.setdefault("maxNPixelHoles", 1)
