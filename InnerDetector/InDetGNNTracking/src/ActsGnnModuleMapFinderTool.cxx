@@ -2,6 +2,8 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
+#ifdef ACTS_GNN_WITH_MODULEMAP
+
 #include "ActsGnnModuleMapFinderTool.h"
 
 #include "ActsInterop/Logger.h"
@@ -145,7 +147,7 @@ StatusCode InDet::ActsGnnModuleMapFinderTool::getTracks(
   auto candidates = [&] {
     std::unique_lock<std::mutex> lock;
     if (m_runMutex) lock = std::unique_lock<std::mutex>(*m_runMutex);
-    
+
     if (edgeMap != nullptr) {
       ScoredGraphHook hook;
       auto result = m_gnnPipeline->run(features, moduleIds, ids, ActsPlugins::Device::Cuda(0), hook);
@@ -204,3 +206,5 @@ MsgStream& InDet::ActsGnnModuleMapFinderTool::dump(MsgStream& out) const {
 std::ostream& InDet::ActsGnnModuleMapFinderTool::dump(std::ostream& out) const {
   return out;
 }
+
+#endif  // ACTS_GNN_WITH_MODULEMAP
