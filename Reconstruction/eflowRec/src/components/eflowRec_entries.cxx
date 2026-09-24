@@ -18,7 +18,6 @@
 #include "../PFSubtractionTool.h"
 #include "../PFMomentCalculatorTool.h"
 #include "../PFClusterCollectionTool.h"
-#include "../PFLCCalibTool.h"
 #include "../PFMuonFlowElementAssoc.h"
 #include "../PFEGamFlowElementAssoc.h"
 #include "../PFTauFlowElementAssoc.h"
@@ -28,7 +27,6 @@
 #include "../PFEnergyPredictorTool.h"
 #include "../PFClusterWidthDecorator.h"
 #include "../PFSimulateTruthShowerTool.h"
-#include "../PFRadialEnergyCalculatorTool.h"
 
 #include "../PFUnifiedMatchingTool.h"
 #include "../PFUnifiedSubtractionOnlyTool.h"
@@ -51,7 +49,6 @@ DECLARE_COMPONENT( NeutralPFOClusterMLCorrectionTool )
 DECLARE_COMPONENT( PFSubtractionTool )
 DECLARE_COMPONENT( PFMomentCalculatorTool )
 DECLARE_COMPONENT( PFClusterCollectionTool )
-DECLARE_COMPONENT( PFLCCalibTool )
 DECLARE_COMPONENT( eflowTrackCaloExtensionTool )
 DECLARE_COMPONENT( PFTrackClusterMatchingTool )
 DECLARE_COMPONENT( PFCellEOverPTool)
@@ -65,7 +62,6 @@ DECLARE_COMPONENT( PFTrackMuonIsoTaggingAlg )
 DECLARE_COMPONENT( PFEnergyPredictorTool )
 DECLARE_COMPONENT( PFSimulateTruthShowerTool)
 DECLARE_COMPONENT( PFClusterWidthDecorator )
-DECLARE_COMPONENT( PFRadialEnergyCalculatorTool )
 
 DECLARE_COMPONENT( PFUnifiedMatchingTool )
 DECLARE_COMPONENT( PFUnifiedSubtractionOnlyTool )

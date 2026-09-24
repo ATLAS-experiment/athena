@@ -43,10 +43,12 @@ private:
     "eflowRecCluster to be used"
   };
 
-  /** List of IPFSubtractionTool, which will be executed by this algorithm */
+  /** List of IPFSubtractionTool, which will be executed by this algorithm.
+      Legacy chain, configured by the HLT only - see m_useUnified */
   ToolHandleArray<IPFSubtractionTool> m_IPFSubtractionTools{this, "SubtractionToolList", {}, "List of Private Subtraction IPFSubtractionTools"};
 
-  /** List of PFBaseAlgTool, which will be executed by this algorithm */
+  /** List of PFBaseAlgTool, which will be executed by this algorithm.
+      Legacy chain, configured by the HLT only - see m_useUnified */
   ToolHandleArray<IPFBaseTool> m_IPFBaseTools{this, "BaseToolList", {}, "List of Private IPFBaseTools"};
 
   /** List of IPFUnifiedBaseTool, which will be executed by this algorithm */
@@ -93,6 +95,12 @@ private:
   /** Funciton to print out list of tools if in VERBOSE mode */
   void printTools();
 
+  /** Selects the unified tool chain (m_IPFUnifiedBaseTools) over the legacy one
+      (m_IPFSubtractionTools + m_IPFBaseTools). Offline reconstruction always
+      sets this true; only the HLT configuration (PFHLTConfig) still leaves it
+      false. Once the HLT is ported this property and the two legacy tool lists
+      above can be removed, along with PFSubtractionTool and
+      PFMomentCalculatorTool. */
   Gaudi::Property<bool> m_useUnified{this, "useUnified", false, "Toggle to use standard PFA or unified PFA setup"};
 
 };
