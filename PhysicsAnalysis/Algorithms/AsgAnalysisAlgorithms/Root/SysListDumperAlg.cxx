@@ -29,6 +29,15 @@ namespace CP
       return StatusCode::FAILURE;
     }
 
+    try
+    {
+      std::regex expr (m_regex.value());
+    } catch (const std::regex_error& e)
+    {
+      ANA_MSG_ERROR ("invalid systematics regex '" << m_regex.value() << "': " << e.what());
+      return StatusCode::FAILURE;
+    }
+
     ANA_CHECK (m_systematicsService.retrieve());
 
     return StatusCode::SUCCESS;
