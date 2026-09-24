@@ -41,6 +41,13 @@ def PLR_OverlayAlgCfg(flags, name="PLR_Overlay", **kwargs):
             f"PixelRDO_Container#{flags.Overlay.SigPrefix}PLR_RDOs"
         ]))
 
+    # for track overlay, write out the signal RDOs because reco tracking will only run on them
+    if flags.Overlay.doTrackOverlay:
+        from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+        acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
+            f"PixelRDO_Container#{flags.Overlay.SigPrefix}PLR_RDOs"
+        ]))
+
     return acc
 
 
