@@ -383,9 +383,8 @@ namespace CP
       /// Note that when we set up a branch, we tell @c TTree to remember a
       /// physical address in memory. To make sure that the address of the
       /// object held by the branch processors are not moved in memory after
-      /// their construction, we have to use an @c std::list container here.
-      /// @c std::vector would not work. (As it can relocate objects when
-      /// increasing the size of the container.)
+      /// their construction, they are held through @c std::unique_ptr, so
+      /// that growing the @c std::vector does not relocate them.
       ///
       std::vector<std::unique_ptr<ElementBranchProcessor>> m_branches;
 
@@ -449,9 +448,8 @@ namespace CP
       /// Note that when we set up a branch, we tell @c TTree to remember a
       /// physical address in memory. To make sure that the address of the
       /// object held by the branch processors are not moved in memory after
-      /// their construction, we have to use an @c std::list container here.
-      /// @c std::vector would not work. (As it can relocate objects when
-      /// increasing the size of the container.)
+      /// their construction, they are held through @c std::unique_ptr, so
+      /// that growing the @c std::vector does not relocate them.
       ///
       std::vector<std::unique_ptr<ContainerBranchProcessor>> m_branches;
       /// Collection proxy used for iterating over the container
@@ -516,9 +514,8 @@ namespace CP
       /// Note that when we set up a branch, we tell @c TTree to remember a
       /// physical address in memory. To make sure that the address of the
       /// object held by the branch processors are not moved in memory after
-      /// their construction, we have to use an @c std::list container here.
-      /// @c std::vector would not work. (As it can relocate objects when
-      /// increasing the size of the container.)
+      /// their construction, they are held through @c std::unique_ptr, so
+      /// that growing the @c std::vector does not relocate them.
       ///
       std::vector<std::unique_ptr<ElementBranchProcessor>> m_branches;
 
