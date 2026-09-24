@@ -173,6 +173,9 @@ private:
   /// Special treatment for the innermost pixel layer to have more control on bin size to account for shallow angle tracks.
   Gaudi::Property<double> m_numberOfInnermostLayerBinsFactor{this, "NumberOfInnermostLayerBinsFactor",2.0};
   
+  /// Special treatment for hgtd layers as well.
+  Gaudi::Property<double> m_numberOfHgtdBinsFactor{this, "NumberOfHgtdBinsFactor", 1.0};
+
   std::unique_ptr<const ActsTrk::DetectorElementToActsGeometryIdMap> m_detIdMap{};
 };
 

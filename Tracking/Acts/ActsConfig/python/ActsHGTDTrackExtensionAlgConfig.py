@@ -21,16 +21,17 @@ def ActsHGTDTrackExtensionAlgCfg(flags,
         kwargs.setdefault("TrackStatePrinter", acc.popToolsAndMerge(ActsTrackStatePrinterToolCfg(flags)))
 
     kwargs.setdefault('ACTSTracksLocation', 'HgtdTracks')
-    kwargs.setdefault("etaBins", [0])
+    kwargs.setdefault("etaBins", [2.0,2.6,2.8,3.0,3.2,3.4,3.6,3.8,3.9,999.0])
 
     #Measurement selector
-    kwargs.setdefault("chi2CutOff", [30])
-    kwargs.setdefault("chi2OutlierCutOff", [15])
+    kwargs.setdefault("chi2CutOff", [15, 15, 15, 20, 10, 20, 20, 20, 50])
+    kwargs.setdefault("chi2OutlierCutOff", [15, 15, 15, 10, 20, 20, 20, 20, 50])
     kwargs.setdefault("numMeasurementsCutOff", [3])
 
     #Track selector
-    kwargs.setdefault('maxChi2', [30])
-    kwargs.setdefault('maxOutliers', [2])
+    #kwargs.setdefault('maxChi2', [25,25,25,25,25,70,70,70])
+    kwargs.setdefault('maxChi2', [500])
+    kwargs.setdefault('maxOutliers', [20])
         
     acc.addEventAlgo(CompFactory.ActsTrk.HGTDTrackExtensionAlg(name, **kwargs))
     return acc
