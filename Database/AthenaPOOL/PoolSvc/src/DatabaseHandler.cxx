@@ -88,9 +88,7 @@ pool::DatabaseHandler::container( const std::string& containerName )
    for ( std::vector< std::string >::const_iterator iName = allContainers.begin();
          iName != allContainers.end(); ++iName ) {
       if ( *iName == containerName ) {
-         return new pool::Container( m_fileDescriptor,
-                                                     m_technology,
-                                                     containerName );
+         return new pool::Container( m_fileDescriptor, containerName );
       }
    }
    return 0;

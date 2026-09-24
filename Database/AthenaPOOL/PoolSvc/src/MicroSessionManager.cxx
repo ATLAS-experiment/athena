@@ -12,10 +12,10 @@
 #include "StorageSvc/DbOption.h"
 
 #include "GaudiKernel/StatusCode.h"
+
 #include <exception>
 
-pool::MicroSessionManager::MicroSessionManager( pool::DatabaseRegistry& registry,
-                                                                long technology ):
+pool::MicroSessionManager::MicroSessionManager(pool::DatabaseRegistry& registry, long technology) :
   m_registry( registry ),
   m_storageSvc( 0 ),
   m_inSession( false ),
@@ -48,8 +48,8 @@ pool::MicroSessionManager::connect( Io::IoFlag mode, int ageLimit )
 
 pool::DatabaseHandler*
 pool::MicroSessionManager::connect( Io::IoFlag mode,
-                                                     const std::string& fid,
-                                                     const std::string& pfn )
+                                    const std::string& fid,
+                                    const std::string& pfn )
 {
   if( mode == Io::INVALID ) return 0;
   if( m_databaseHandlers.empty() ) {
@@ -63,11 +63,7 @@ pool::MicroSessionManager::connect( Io::IoFlag mode,
 
   pool::DatabaseHandler* db = 0;
   try {
-    db = new pool::DatabaseHandler( *m_storageSvc,
-                                    m_technology,
-                                    fid,
-                                    pfn,
-                                    mode );
+    db = new pool::DatabaseHandler( *m_storageSvc, m_technology, fid, pfn, mode );
     m_registry.registerDatabaseHandler( db );
     m_databaseHandlers.insert( db );
   } catch( const std::runtime_error& /* error */) {
