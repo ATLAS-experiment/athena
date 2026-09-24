@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Yi Yu <yiyu@cern.ch>, Xinzhe Liu, Thomas Strebler <thomas.strebler@cern.ch>
@@ -36,6 +36,10 @@ namespace CP
       m_reweightKeys.emplace_back(m_EventInfoKey, "PDFReweightSF_"+temp_name);
 
       ATH_CHECK(m_reweightKeys.back().initialize());
+#ifndef XAOD_STANDALONE
+      // declare the output dependency for MT scheduling
+      addDependency(m_reweightKeys.back().fullKey(), m_reweightKeys.back().mode());
+#endif
     }
 
     return StatusCode::SUCCESS;
