@@ -50,8 +50,8 @@ namespace ActsTrk {
         ** The second map is filled by looping over all DDE in the CaloDetDescrManager
         ** and adding each DDE to the vector corresponding to its sampling in the map
         */
-        void fillMaps(std::map<caloRegion, caloSampleSurfaceMap_t>& caloRegionSampleSurfaceMap,
-                      std::map<caloRegion, caloSampleDDEElementsMap_t>& caloRegionSampleDDEElementsMap, std::map<std::string, double>& caloDimensions) const;
+        void fillMaps(std::map<caloRegion, caloSampleDDEElementsMap_t>& caloRegionSampleDDEElementsMap, 
+                      std::map<std::string, double>& caloDimensions) const;
 
         /** generateCylinderSurfaces generates cylindrical surfaces for each calo sampling.
         ** It does this for cylindrical layers by scanning in Z, for each Z finding the average radius of the cells in a phi ring
@@ -64,7 +64,10 @@ namespace ActsTrk {
         ** To do this it calculates the radius and length of the cylinder, then shifts it in Z to the midpoint of the Z values used to build it.
         ** It then creates the Acts::CylinderSurface and returns it via a shared pointer.
         */
-        std::shared_ptr<Acts::CylinderSurface> generateCylinderSurface(const double& maxLArBRadius, const double& minLArBRadius, const double& lowZLarB, const double& highZLarB) const;
+        std::shared_ptr<Acts::CylinderSurface> generateCylinderSurface(const double maxLArBRadius, 
+                                                                       const double minLArBRadius, 
+                                                                       const double lowZLarB,
+                                                                       const double highZLarB) const;
 
         /** addCylindricalTrackingVolumeToCaloNode adds a cylindrical tracking volume to the calo node.
         ** It takes as input the container node, the calo dimensions map, the name of the volume and the vector of surfaces to be added to the volume.
