@@ -14,7 +14,6 @@
 #include <SystematicsHandles/SysReadHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
 #include <xAODEventInfo/EventInfo.h>
-#include <AsgTools/PropertyWrapper.h>
 
 namespace CP
 {

@@ -12,8 +12,6 @@
 
 #include <AsgAnalysisAlgorithms/CopyNominalSelectionAlg.h>
 
-#include <PATInterfaces/ISystematicsTool.h>
-
 //
 // method implementations
 //

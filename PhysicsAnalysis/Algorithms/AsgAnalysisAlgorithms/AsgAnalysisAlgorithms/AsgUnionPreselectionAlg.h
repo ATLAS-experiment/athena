@@ -10,7 +10,6 @@
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <AthContainers/AuxElement.h>
 #include <SelectionHelpers/SysReadSelectionHandle.h>
-#include <SelectionHelpers/ISelectionWriteAccessor.h>
 #include <SystematicsHandles/SysReadHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
 #include <xAODBase/IParticleContainer.h>

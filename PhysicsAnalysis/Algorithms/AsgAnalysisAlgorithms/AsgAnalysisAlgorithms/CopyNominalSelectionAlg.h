@@ -10,7 +10,6 @@
 #define ASG_ANALYSIS_ALGORITHMS__COPY_NOMINAL_SELECTION_ALG_H
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
-#include <PATCore/IAsgSelectionTool.h>
 #include <SelectionHelpers/ISelectionNameSvc.h>
 #include <SelectionHelpers/SysReadSelectionHandle.h>
 #include <SelectionHelpers/SysWriteSelectionHandle.h>

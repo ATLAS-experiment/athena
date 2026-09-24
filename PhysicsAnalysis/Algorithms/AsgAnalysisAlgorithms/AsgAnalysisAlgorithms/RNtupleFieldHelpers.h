@@ -16,7 +16,6 @@
 // EDM include(s):
 #include "AthContainers/AuxElement.h"
 #include "AthContainers/AuxVectorBase.h"
-#include "TreeBranchHelpers.h"
 
 // ROOT include(s):
 #include <ROOT/RNTupleModel.hxx>
