@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -167,7 +167,9 @@ namespace CP
     // Check if dressed properties exist if needed
     if (m_useDressedProperties) {
        if (!m_dressedPtAccessor->isAvailable(*particle)) {
-         ANA_MSG_WARNING ("dressed decorations not available");
+         if (m_shouldPrintDressedWarning)
+           ANA_MSG_WARNING ("dressed decorations not available");
+         m_shouldPrintDressedWarning = false;
          return accept;
        }
        accept.setCutResult (m_dressedPropertiesIndex, true);
@@ -184,7 +186,9 @@ namespace CP
       if (m_minPtCutIndex >= 0) {
         if (!std::isfinite(pt) || pt < 0.)
         {
-          ANA_MSG_WARNING ("invalid pt value, setting object to fail pt-cut: " << pt);
+          if (m_shouldPrintPtWarning)
+            ANA_MSG_WARNING ("invalid pt value, setting object to fail pt-cut: " << pt);
+          m_shouldPrintPtWarning = false;
           accept.setCutResult (m_minPtCutIndex, false);
         } else
         {
