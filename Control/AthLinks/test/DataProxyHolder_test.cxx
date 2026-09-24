@@ -315,6 +315,10 @@ void test6 (SGTest::TestStore& store)
   assert (sgkey == sgkey_foo);
   assert (index == 10);
 
+  h1.clear();
+  h1.toTransient (999999999, nullptr, true);
+  assert (h1.proxy() == nullptr);
+
   SG::ThinningDecisionBase dec (20);
   dec.thin (7);
   dec.thin (8);
