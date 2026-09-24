@@ -6,11 +6,12 @@
 #define ASGANALYSISALGORITHMS_TREEBRANCHHELPERS_H
 // System include(s):
 #include <unordered_map>
+#include <unordered_set>
+#include <set>
+#include <optional>
 #include <string>
 #include <vector>
 #include <memory>
-#include <list>
-#include <iostream>
 
 // Framework include(s):
 #include "AsgMessaging/AsgMessaging.h"
