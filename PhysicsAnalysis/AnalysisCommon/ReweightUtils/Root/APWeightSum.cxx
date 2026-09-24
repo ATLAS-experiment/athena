@@ -1,9 +1,11 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #define APWeightSum_cxx
+
 #include "ReweightUtils/APWeightSum.h"
+#include "ReweightUtils/APEvtWeight.h"
 #include "ReweightUtils/APWeightEntry.h"
 #include "ReweightUtils/APEvtWeight.h"
 #include "ReweightUtils/APReweightBase.h"
@@ -414,7 +416,7 @@ void APWeightSum::AddEvt(APEvtWeight* evt_weight, double ext_weight) {
           }
           weight_uncert *= weight_derivative;
           for( unsigned int l = 0; l < 4; ++l ) {
-            if( l == j ) continue;
+            // l cannot be equal to j at this point
             if( evt_weight->GetType() == APEvtWeight::kMOANDed ) weight_uncert *= temp_weight_rel[l];
             else if( evt_weight->GetType() == APEvtWeight::kORed || evt_weight->GetType() == APEvtWeight::kMOORed ) weight_uncert *= (1.0 - temp_weight_rel[l]);
             else cout << "WARNING: handling for this weight type is unknown! uncertainties will be incorrect" << endl;
@@ -429,8 +431,7 @@ void APWeightSum::AddEvt(APEvtWeight* evt_weight, double ext_weight) {
           else if( evt_weight->GetType() == APEvtWeight::kORed || evt_weight->GetType() == APEvtWeight::kMOORed ) weight_uncert *= (1.0 - temp_weight_MO);
           else cout << "WARNING: handling for this weight type is unknown! uncertainties will be incorrect" << endl;
           
-          if( j >= 4 && j <= 7 && temp_weight_rel[j] > numeric_limits<double>::epsilon() ) weight_uncert /= temp_weight_rel[j];
-          
+          //j is equal or greater than 8 in this loop   
           m_linear_uncert[temp_vec_all[j][i]->GetID()]->SetBinContent(&coord.front(), m_linear_uncert[temp_vec_all[j][i]->GetID()]->GetBinContent(&coord.front())+weight_uncert);
           m_variance_nocorr += weight_uncert*weight_uncert; 
         }

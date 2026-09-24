@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ThinGeantTruthAlg.cxx
@@ -24,18 +24,16 @@
 #include "ThinGeantTruthAlg.h"
 #include "TruthUtils/TruthClasses.h"
 #include "xAODTruth/xAODTruthHelpers.h"
-// STL includes
-#include <algorithm>
 
 // FrameWork includes
 #include "Gaudi/Property.h"
 #include "StoreGate/ThinningHandle.h"
 
-// Standard includes
-#include <cstdlib>
-
 #include "TruthUtils/MagicNumbers.h"
 #include "TruthUtils/HepMCHelpers.h"
+
+#include <algorithm>
+#include <cstdlib>
 
 StatusCode
 ThinGeantTruthAlg::initialize()
@@ -164,7 +162,7 @@ ThinGeantTruthAlg::execute(const EventContext& ctx) const
     ATH_CHECK(SG::get(egammaTruthParticles, m_egammaTruthKey, ctx));
 
     for (const xAOD::TruthParticle* egTruthParticle : *egammaTruthParticles) {
-
+      //coverity[UNNECESSARY_STRING_COPY:FALSE]
       static const SG::AuxElement::ConstAccessor<int> accType("truthType");
 
       if (!accType.isAvailable(*egTruthParticle) ||

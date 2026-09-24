@@ -311,15 +311,16 @@ void ThinInDetClustersAlg::selectTrackHits(const xAOD::TrackParticleContainer& i
                         << ", trackState index: " << trkState_el.index());
         continue; //not a valid link
       }
-      if (*trkMeasurement_el == nullptr) {
-        ATH_MSG_VERBOSE("Invalid pointer to TrackMeasurementValidation object from track state for track index: " << trkIndex
-                        << ", trackState index: " << trkState_el.index());
-        continue; //not linking to a valid object -- is it necessary?
+      const auto index = trkMeasurement_el.index();
+      if (index >= outputMeasurementsMask.max_size())[[unlikely]] {
+        ATH_MSG_WARNING("Track measurement index exceeds mask capacity: " << index);
+        continue;
       }
-      if (trkMeasurement_el.index() >= outputMeasurementsMask.size()) {
-        outputMeasurementsMask.resize (trkMeasurement_el.index()+1);
+      const auto pos = static_cast<std::size_t>(index);
+      if (pos >= outputMeasurementsMask.size()) {
+        outputMeasurementsMask.resize(pos + 1);
       }
-      outputMeasurementsMask[trkMeasurement_el.index()] = true;
+      outputMeasurementsMask[pos] = true;
     }
   } // end loop over xAOD::TrackParticle container
 }

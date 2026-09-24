@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <set>
 
 #include "TruthUtils/TruthClasses.h"
 #include <xAODTruth/TruthParticle.h>
@@ -11,6 +10,8 @@
 
 #include "TruthClassification/TruthClassificationTool.h"
 #include "TruthUtils/HepMCHelpers.h"
+
+#include <set>
 
 namespace
 {
@@ -691,14 +692,14 @@ bool TruthClassificationTool::isChargeFlipElectron(const xAOD::IParticle &electr
 
   if (isTruthParticle)
   {
-    if (truthParticle->charge() != 0)
+    if (truthParticle && truthParticle->charge() != 0)
     {
       return (firstMotherPdgId * truthParticle->charge()) > 0;
     }
   }
   else
   {
-    const xAOD::Electron &xAODElectron = *dynamic_cast<const xAOD::Electron *> (&electron);
+    const xAOD::Electron &xAODElectron = *static_cast<const xAOD::Electron *> (&electron);
     if (xAODElectron.charge() != 0)
     {
       return (firstMotherPdgId * xAODElectron.charge()) > 0;
@@ -720,7 +721,7 @@ bool TruthClassificationTool::isChargeFlipMuon(const xAOD::IParticle &muon,
 
   if (truthParticle != nullptr && xAOD::P4Helpers::isInDeltaR(*truthParticle, muon, 0.025))
   {
-    const xAOD::Muon &xAODMuon = *dynamic_cast<const xAOD::Muon *> (&muon);
+    const xAOD::Muon &xAODMuon = *static_cast<const xAOD::Muon *> (&muon);
     return (truthParticle->charge() * xAODMuon.charge()) < 0;
   }
 
@@ -736,7 +737,7 @@ bool TruthClassificationTool::hasBHadronOrigin(int origin) const
     MCTruthPartClassifier::BBbarMeson,
     MCTruthPartClassifier::BottomBaryon,
   });
-  return isInSet(origin, b_hadrons);
+  return b_hadrons.contains(origin);
 }
 
 
@@ -746,7 +747,7 @@ bool TruthClassificationTool::hasCHadronOrigin(int origin) const {
     MCTruthPartClassifier::CCbarMeson,
     MCTruthPartClassifier::CharmedBaryon,
   });
-  return isInSet(origin, c_hadrons);
+  return c_hadrons.contains(origin);
 }
 
 
@@ -760,5 +761,5 @@ bool TruthClassificationTool::hasLightHadronOrigin(int origin) const {
     MCTruthPartClassifier::PionDecay,
     MCTruthPartClassifier::KaonDecay,
   });
-  return isInSet(origin, light_source);
+  return light_source.contains(origin);
 }
