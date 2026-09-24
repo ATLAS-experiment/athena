@@ -40,13 +40,21 @@ namespace CP
     ANA_CHECK (m_systematicsList.initialize());
     if (!m_useRun3TriggerEDM.value()) {
         ANA_MSG_INFO("Using Run-2 trigger EDM for b-tagging trigger matching");
+        ANA_CHECK(m_emulationTool.retrieve());
     } else {
         ANA_MSG_INFO("Using Run-3 trigger EDM for b-tagging trigger matching");
+
+#ifndef XAOD_STANDALONE
+        ANA_MSG_DEBUG("Disabling unused emulation tool");
+        ATH_CHECK(m_emulationTool.retrieve( DisableTool{true} ));
+#endif
+
         m_ftagRun3TriggerDecorAccessors.clear();
         m_ftagRun3TriggerDecorAccessors.reserve(m_ftagRun3TriggerDecoNames.value().size());
         for (const auto& decoName : m_ftagRun3TriggerDecoNames.value()) {
             m_ftagRun3TriggerDecorAccessors.emplace_back(decoName);
         }
+
     }
 
     return StatusCode::SUCCESS;
@@ -62,34 +70,114 @@ namespace CP
       const xAOD::JetContainer *jets = nullptr;
       ANA_CHECK (m_jetHandle.retrieve (jets, sys, ctx));
 
-      std::map<const xAOD::Jet*, const xAOD::Jet*> matchedOfflineOnlineJets;
-      SG::ReadHandle<xAOD::JetContainer> hlt_bjets(m_bjetInput, ctx);
+      if(m_useRun3TriggerEDM){
+        std::map<const xAOD::Jet*, const xAOD::Jet*> matchedOfflineOnlineJets;
+        SG::ReadHandle<xAOD::JetContainer> hlt_bjets(m_bjetInput, ctx);
 
-      for (const xAOD::Jet* jet : *jets) {
-        if (m_preselection.getBool(*jet, sys)) {
-          float minDR = 0.4;
-          const xAOD::Jet* bestHLTJet = nullptr;
-          for (const xAOD::Jet* hlt_bjet : *hlt_bjets) {
-            float dR = jet->p4().DeltaR(hlt_bjet->p4());
-            if (dR < minDR) {
-                minDR = dR;
-                bestHLTJet = hlt_bjet;
+        for (const xAOD::Jet* jet : *jets) {
+          if (m_preselection.getBool(*jet, sys)) {
+            float minDR = 0.4;
+            const xAOD::Jet* bestHLTJet = nullptr;
+            for (const xAOD::Jet* hlt_bjet : *hlt_bjets) {
+              float dR = jet->p4().DeltaR(hlt_bjet->p4());
+              if (dR < minDR) {
+                  minDR = dR;
+                  bestHLTJet = hlt_bjet;
+              }
+            }
+            matchedOfflineOnlineJets[jet] = bestHLTJet;
+          }
+        }
+
+        for (const xAOD::Jet *jet : *jets)
+        {
+          bool matched = false;
+          bool passTrigger = false;
+
+          if (m_preselection.getBool (*jet, sys))
+            ATH_CHECK(passTriggerBtag(jet, matchedOfflineOnlineJets, passTrigger, matched));
+
+          m_matchingDecoration.set (*jet, matched, sys);
+          m_bTagMatchingDecoration.set (*jet, passTrigger, sys);
+        }
+      } else {
+        std::unordered_map<std::string, std::vector<std::pair<const xAOD::Jet*, bool>>> emulatedJets = m_emulationTool->getEmulatedJets(m_trigger);
+
+        std::vector<std::tuple<const xAOD::Jet *, bool, bool>>  hlt_bjets;
+
+        ATH_MSG_VERBOSE("Preparing HLT-jets "
+            << m_trigDecTool << " trigger -> " << m_trigger);
+
+        int ileg = 0;
+        for (const ChainNameParser::LegInfo &legInfo :
+            ChainNameParser::HLTChainInfo(m_trigger))
+        {
+          if (legInfo.signature == "j")
+          {
+            ATH_MSG_VERBOSE(" Leg" << ileg++ << ": "
+                << " " << legInfo.legName() << " "
+                << legInfo.type() << " " << legInfo.signature
+                << " " << legInfo.threshold);
+            auto hlt_emulated_jets = emulatedJets[legInfo.legName()]; // use pre-fetched emulation results
+            ATH_MSG_DEBUG(" Emulated jets for " << legInfo.legName() << ": " << hlt_emulated_jets.size());
+
+            for (const auto& [hlt_jet, passBtag]: hlt_emulated_jets) {
+              bool matched = false;
+              if (hlt_jet->pt() > legInfo.threshold &&  abs( hlt_jet->eta()) < m_etamax.value())
+                matched = true;
+              ATH_MSG_VERBOSE("  pt: " << hlt_jet->pt()
+                  << " eta: " << hlt_jet->eta()
+                  << " phi: " << hlt_jet->phi()
+                  << " passBtag: " << passBtag
+                  << " matched: " << matched);
+              bool btag = false;
+              if(legInfo.legName().find("mv2c10") != std::string::npos)
+                btag = passBtag;
+
+              int dupe = -1;
+              bool passBtag_dupe = btag;
+              bool matched_dupe = matched;
+              for (size_t i = 0; i < hlt_bjets.size(); i++){
+                const auto& [hlt_bjet_1, passBtag_1, matched_1] = hlt_bjets.at(i);
+                if( isSameJet(hlt_jet, hlt_bjet_1)) {
+                  dupe = i;
+                  passBtag_dupe = passBtag_dupe | passBtag_1;
+                  matched_dupe = matched_dupe | matched_1;
+                }
+              }
+              if( dupe >= 0)
+                hlt_bjets[dupe] = std::make_tuple(hlt_jet, passBtag_dupe, matched_dupe);
+              else
+                hlt_bjets.push_back(std::make_tuple(hlt_jet, btag, matched));
             }
           }
-          matchedOfflineOnlineJets[jet] = bestHLTJet;
         }
-      }
+        ATH_MSG_VERBOSE("Num HLT-jets : " << hlt_bjets.size());
 
-      for (const xAOD::Jet *jet : *jets)
-      {
-        bool matched = false;
-        bool passTrigger = false;
+        for (const xAOD::Jet* jet : *jets) {
+          bool bestHLTJetBTagPass = false;
+          bool bestHLTJetMatched = false;
+          float minDR = 0.4;
+          const xAOD::Jet* bestHLTJet = nullptr;
+          if (m_preselection.getBool(*jet, sys)) {
+            for (const auto& [hlt_bjet, passBtag, matched]: hlt_bjets) {
+              float dR = jet->p4().DeltaR(hlt_bjet->p4());
+              if (dR < minDR) {
+                minDR = dR;
+                bestHLTJet = hlt_bjet;
+                bestHLTJetBTagPass = passBtag;
+                bestHLTJetMatched = matched;
+              }
+            }
+          }
+          ATH_MSG_VERBOSE(" =dRHLT: " << minDR << " bestHLT pT: "
+              << (bestHLTJet ? bestHLTJet->pt() : -99.)
+              << " btag: " << bestHLTJetBTagPass << " matched: " << bestHLTJetMatched);
 
-        if (m_preselection.getBool (*jet, sys))
-          ATH_CHECK(passTriggerBtag(jet, matchedOfflineOnlineJets, passTrigger, matched));
-        
-        m_matchingDecoration.set (*jet, matched, sys);
-        m_bTagMatchingDecoration.set (*jet, passTrigger, sys);
+          m_matchingDecoration.set (*jet, bestHLTJetMatched, sys);
+          m_bTagMatchingDecoration.set (*jet, bestHLTJetBTagPass, sys);
+
+        }
       }
     }
     return StatusCode::SUCCESS;
@@ -171,7 +259,7 @@ namespace CP
 
       ATH_MSG_VERBOSE(" =dRHLT: " << minDRHLT << " bestHLT pT: "
 		      << (bestHLT ? bestHLT->pt() : -99.)
-		      << " btag: " << btag);
+		      << " btag: " << btag << " matched: " << matched);
 
       ileg++;
     }
