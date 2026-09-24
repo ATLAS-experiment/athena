@@ -196,6 +196,7 @@ def trigTauRecMergedCaloHitsCfg(
     hitz_algs: list[str] | None = None, 
     presel_algs: list[str] | None = None, 
     input_rois: str = '', 
+    jet='lc'
 ) -> ComponentAccumulator:
     '''
     Reconstruct the precision TauJet, from the first-step CaloMVA TauJet and precision-refitted tracks.
@@ -322,6 +323,7 @@ def trigTauRecMergedCaloHitsCfg(
             f'CaloHits_{name}', 
             hitz_algs=hitz_monitoring.keys(), 
             tau_ids=id_score_monitoring.keys(), 
+            jet=jet
         ),
         MonitoredHitZRegressions=hitz_monitoring,
         MonitoredIDScores=id_score_monitoring,
@@ -336,12 +338,11 @@ def trigTauRecMergedCaloHitsCfg(
     return acc
 
 
-
-def trigTauRecMergedCaloMVACfg(flags: AthConfigFlags) -> ComponentAccumulator:
+def trigTauRecMergedCaloMVACfg(flags: AthConfigFlags, jet: str = 'lc') -> ComponentAccumulator:
     '''
     Reconstruct the CaloMVA TauJet from the calo-clusters.
 
-    :param flags: Config flags.
+    :param flags: Config flags, jet: 'lc' or 'em' depending on seed
     :return: CA with the TauJet CaloMVA reconstruction sequence.
     '''
     # Main CA
@@ -370,28 +371,38 @@ def trigTauRecMergedCaloMVACfg(flags: AthConfigFlags) -> ComponentAccumulator:
     tools.append(CompFactory.MvaTESEvaluator(WeightFileName=flags.Trigger.Offline.Tau.MvaTESConfig))
     acc.addPublicTool(tools[-1])
 
-
     # Set trigger-specific configuration for all the reconstruction tools
     for tool in tools:
         tool.inTrigger = True
         tool.calibFolder = flags.Trigger.Offline.Tau.tauRecToolsCVMFSPath
 
-
     from TrigEDMConfig.TriggerEDM import recordable
     from TrigTauRec.TrigTauRecMonitoring import tauMonitoringCaloOnlyMVA
-    acc.addEventAlgo(CompFactory.TrigTauRecMerged(
-        name='TrigTauRecMerged_TauCaloOnlyMVA',
-        CommonTools=tools,
-        MonTool=tauMonitoringCaloOnlyMVA(flags),
-        InputRoIs='UpdatedCaloRoI',
-        InputCaloClusterContainer='HLT_TopoCaloClustersLC',
-        OutputTauTrackContainer='HLT_tautrack_dummy',
-        OutputTauJetContainer='HLT_TrigTauRecMerged_CaloMVAOnly',
-        OutputJetSeed=recordable('HLT_jet_seed'),
-    ))
+
+    if jet=='lc':
+        acc.addEventAlgo(CompFactory.TrigTauRecMerged(
+            name='TrigTauRecMerged_TauCaloOnlyMVA',
+            CommonTools=tools,
+            MonTool=tauMonitoringCaloOnlyMVA(flags, jet=jet),
+            InputRoIs='UpdatedCaloLCRoI',
+            InputCaloClusterContainer='HLT_TopoCaloClustersLC',
+            OutputTauTrackContainer='HLT_tautrack_dummy',
+            OutputTauJetContainer='HLT_TrigTauRecMerged_CaloMVAOnly',
+            OutputJetSeed=recordable('HLT_jet_seed'),
+        ))
+    else:
+        acc.addEventAlgo(CompFactory.TrigTauRecMerged(
+            name='TrigTauRecMerged_TauCaloOnlyEM',
+            CommonTools=tools,
+            MonTool=tauMonitoringCaloOnlyMVA(flags, jet=jet),
+            InputRoIs='UpdatedCaloEMRoI',
+            InputCaloClusterContainer='HLT_TopoCaloClustersRoI',
+            OutputTauTrackContainer='HLT_tautrack_dummy',
+            OutputTauJetContainer='HLT_TrigTauRecMerged_CaloEMOnly',
+            OutputJetSeed=recordable('HLT_jet_seed'),
+        ))
 
     return acc
-
 
 
 if __name__ == '__main__':

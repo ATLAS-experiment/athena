@@ -19,13 +19,13 @@ log = logging.getLogger(__name__)
 # CaloMVA sequences
 #================================================================
 @AccumulatorCache
-def tauCaloMVASequenceGenCfg(flags: AthConfigFlags, is_probe_leg: bool = False) -> MenuSequence:
+def tauCaloMVASequenceGenCfg(flags: AthConfigFlags, is_probe_leg: bool = False, jet: str = 'lc') -> MenuSequence:
     '''Calorimeter-only reconstruction and hypothesis (BRT-calibrated pT cut)'''
 
     # Reconstruction sequence CA (parOR), executting all reco algorithms within the View (from the RoI)
     # in parallel whenever possible, according to their data dependencies.
     # Create the EventViews based on the HLTSeeding RoIs (from the input L1 TOBs)
-    recoAcc = InViewRecoCA(name='tauCaloMVA', InViewRoIs='CaloMVA_RoIs', isProbe=is_probe_leg)
+    recoAcc = InViewRecoCA(name=f'tauCalo{jet.upper()}MVA', InViewRoIs='CaloMVA_RoIs', isProbe=is_probe_leg)
     RoIs = recoAcc.inputMaker().InViewRoIs
 
 
@@ -47,29 +47,37 @@ def tauCaloMVASequenceGenCfg(flags: AthConfigFlags, is_probe_leg: bool = False) 
 
 
     # Reconstruction tools/algorithms:
-
-    # Topo-clustering
-    from TrigCaloRec.TrigCaloRecConfig import tauTopoClusteringCfg
-    recoAcc.mergeReco(tauTopoClusteringCfg(flags, RoIs=RoIs))
-
-    # Create new RoIs with an updated position, based on the central axis of the clusters
-    from TrigTauRec.TrigTauRoIToolsConfig import tauCaloRoiUpdaterCfg
-    recoAcc.mergeReco(tauCaloRoiUpdaterCfg(flags, inputRoIs=RoIs, clusters='HLT_TopoCaloClustersLC'))
-
-    # Construct the calo-only TauJet (with BRT calibration)
+    
+    if jet == 'lc':
+        # Topo-clustering
+        from TrigCaloRec.TrigCaloRecConfig import tauLCTopoClusteringCfg
+        recoAcc.mergeReco(tauLCTopoClusteringCfg(flags, RoIs=RoIs))
+        # Create new RoIs with an updated position, based on the central axis of the clusters
+        from TrigTauRec.TrigTauRoIToolsConfig import tauCaloRoiUpdaterCfg
+        recoAcc.mergeReco(tauCaloRoiUpdaterCfg(flags, inputRoIs=RoIs, clusters='HLT_TopoCaloClustersLC', jet='lc'))
+    else:
+        # Topo-clustering
+        from TrigCaloRec.TrigCaloRecConfig import tauEMTopoClusteringCfg
+        recoAcc.mergeReco(tauEMTopoClusteringCfg(flags, RoIs=RoIs))
+        # Create new RoIs with an updated position, based on the central axis of the clusters
+        from TrigTauRec.TrigTauRoIToolsConfig import tauCaloRoiUpdaterCfg
+        recoAcc.mergeReco(tauCaloRoiUpdaterCfg(flags, inputRoIs=RoIs, clusters='HLT_TopoCaloClustersRoI', jet=jet))
+       
+     # Construct the calo-only TauJet (with BRT calibration)  
     from TrigTauRec.TrigTauRecConfig import trigTauRecMergedCaloMVACfg
-    recoAcc.mergeReco(trigTauRecMergedCaloMVACfg(flags))
+    recoAcc.mergeReco(trigTauRecMergedCaloMVACfg(flags, jet=jet))
 
-    # Selection sequence CA (seqAND), executing the recoAcc view creation alg. first,
-    # the reco CA (with all the reco algs) second, and the Hypo alg. at last
-    selAcc = SelectionCA('tauCalo', isProbe=is_probe_leg)
+    # Selection sequence CA (seqAND), executing the recoAcc view creation alg. first, the rob prefetching alg. second, 
+    # the reco CA (with all the reco algs) after, and the Hypo alg. at last
+    selAcc = SelectionCA(f'tauCalo{jet.upper()}', isProbe=is_probe_leg)
     selAcc.mergeReco(recoAcc)
-
-
+    
     # Hypothesis:
     # The Hypotools in the Hypo algorithm will execute the BRT-calibrated Tau pT cut
-    selAcc.addHypoAlgo(CompFactory.TrigTauJetHypoAlg('TauCaloMVAHypoAlg', TauJetsKey='HLT_TrigTauRecMerged_CaloMVAOnly'))
-
+    if jet == 'lc':
+        selAcc.addHypoAlgo(CompFactory.TrigTauJetHypoAlg('TauCaloMVAHypoAlg', TauJetsKey='HLT_TrigTauRecMerged_CaloMVAOnly'))
+    else:
+        selAcc.addHypoAlgo(CompFactory.TrigTauJetHypoAlg('TauCaloEMHypoAlg', TauJetsKey='HLT_TrigTauRecMerged_CaloEMOnly'))
 
     # Menu sequence, connecting everything internally for the step, and configuring the tools for the Hypo alg.
     # based on the partDict for each chain tau leg
@@ -84,7 +92,7 @@ def tauCaloMVASequenceGenCfg(flags: AthConfigFlags, is_probe_leg: bool = False) 
 # Calo + Hits step: HitZ + Calo+Hits preselection
 #================================================================
 @AccumulatorCache
-def tauCaloHitsSequenceGenCfg(orig_flags: AthConfigFlags, seq_name: str, precision_seq_name: str, hitz_config: tuple[str, float] | None = None, is_probe_leg: bool = False) -> MenuSequence:
+def tauCaloHitsSequenceGenCfg(orig_flags: AthConfigFlags, seq_name: str, precision_seq_name: str, hitz_config: tuple[str, float] | None = None, is_probe_leg: bool = False, jet: str = 'lc') -> MenuSequence:
     '''Calorimeter+Hits RoI updating and preselection hypothesis'''
 
     tracking_cfg = f'tauHits{seq_name}'
@@ -92,10 +100,10 @@ def tauCaloHitsSequenceGenCfg(orig_flags: AthConfigFlags, seq_name: str, precisi
 
     flags = getFlagsForActiveConfig(orig_flags, tracking_cfg, log)
 
-    # Create new RoIs from 'UpdatedCaloRoI', resized to the HitZ RoI before running the HitZ and other inference algorithms
+    # Create new RoIs from 'UpdatedCaloLCRoI', resized to the HitZ RoI before running the HitZ and other inference algorithms
     newRoITool = CompFactory.ViewCreatorFetchFromViewROITool(
         RoisWriteHandleKey=recordable(flags.Tracking.ActiveConfig.roi),
-        InViewRoIs='UpdatedCaloRoI',
+        InViewRoIs='UpdatedCaloLCRoI',
         doResize=True,
         RoIEtaWidth=flags.Tracking.ActiveConfig.etaHalfWidth,
         RoIPhiWidth=flags.Tracking.ActiveConfig.phiHalfWidth,
@@ -105,7 +113,7 @@ def tauCaloHitsSequenceGenCfg(orig_flags: AthConfigFlags, seq_name: str, precisi
 
     # Reconstruction sequence CA (parOR), executting all reco algorithms within the View (from the RoI)
     # in parallel whenever possible, according to their data dependencies.
-    # Create the EventViews from the resized RoIs, based on the 'UpdatedCaloRoI' created in the CaloMVA step
+    # Create the EventViews from the resized RoIs, based on the 'UpdatedCaloLCRoI' created in the CaloMVA step
     recoAcc = InViewRecoCA(
         name=f'tauCaloHits_{seq_name}',
         RoITool=newRoITool,
@@ -165,6 +173,7 @@ def tauCaloHitsSequenceGenCfg(orig_flags: AthConfigFlags, seq_name: str, precisi
         hitz_algs=getHitZAlgs(flags, f'{precision_seq_name}_{seq_name}', precision_seq_name),
         presel_algs=getCaloHitsPreselAlgs(flags, f'{precision_seq_name}_{seq_name}', precision_seq_name),
         input_rois=RoIs,
+        jet=jet
     ))
 
 
@@ -208,7 +217,7 @@ def tauCaloHitsSequenceGenCfg(orig_flags: AthConfigFlags, seq_name: str, precisi
 #================================================================
 
 @AccumulatorCache
-def tauFTFCoreSequenceGenCfg(orig_flags: AthConfigFlags, calohits_seq_name: str | None = None, do_lrt: bool = False, is_probe_leg: bool = False) -> MenuSequence:
+def tauFTFCoreSequenceGenCfg(orig_flags: AthConfigFlags, calohits_seq_name: str | None = None, do_lrt: bool = False, is_probe_leg: bool = False, jet: str = 'lc') -> MenuSequence:
     '''1st FTF step sequence, for both the tauCore(Hits) and tauLRT RoIs'''
 
     if do_lrt:
@@ -216,28 +225,28 @@ def tauFTFCoreSequenceGenCfg(orig_flags: AthConfigFlags, calohits_seq_name: str 
         tracking_cfg = next_tracking_cfg = 'tauLRT'
         output_rois = 'UpdatedTrackLRTRoI'
     else:
-        name = 'Core'
-        tracking_cfg = 'tauCore'
-        next_tracking_cfg = 'tauIso'
-        output_rois = 'UpdatedTrackRoI'
+        name = f'Core{jet.upper()}'
+        tracking_cfg = f'tauCore{jet.upper()}'
+        next_tracking_cfg = f'tauIso{jet.upper()}'
+        output_rois = f'UpdatedTrack{jet.upper()}RoI'
 
     if calohits_seq_name:
-        tracking_cfg += calohits_seq_name
-        next_tracking_cfg += calohits_seq_name
+        tracking_cfg = f'tauCore{calohits_seq_name}'
+        next_tracking_cfg = f'tauIso{calohits_seq_name}'
 
     # Retrieve tracking configuration
     flags = getFlagsForActiveConfig(orig_flags, tracking_cfg, log)
 
     # Source-dependent configuration
     if calohits_seq_name:
-        name += f'_{calohits_seq_name}'
+        name = f'Core_{calohits_seq_name}'
         input_rois = f'UpdatedCaloHits{calohits_seq_name}RoI'
-        output_rois = f'{output_rois[:-3]}{calohits_seq_name}RoI'
+        output_rois = f'UpdatedTrack{calohits_seq_name}RoI'
     else:
-        input_rois = 'UpdatedCaloRoI'
+        input_rois = f'UpdatedCalo{jet.upper()}RoI'
 
 
-    # Create new RoIs from 'UpdatedCaloRoI' or 'UpdatedCaloHitsRoI, resized to 'tauCore/LRT' 
+    # Create new RoIs from 'UpdatedCaloLC/EMRoI' or 'UpdatedCaloHitsRoI, resized to 'tauCore/LRT' 
     # before running the FTF algorithms.
     newRoITool = CompFactory.ViewCreatorFetchFromViewROITool(
         RoisWriteHandleKey=recordable(flags.Tracking.ActiveConfig.roi),
@@ -324,27 +333,28 @@ def tauFTFCoreSequenceGenCfg(orig_flags: AthConfigFlags, calohits_seq_name: str 
 #================================================================
 
 @AccumulatorCache
-def tauFTFIsoSequenceGenCfg(orig_flags: AthConfigFlags, calohits_seq_name: str | None = None, is_probe_leg: bool = False):
+def tauFTFIsoSequenceGenCfg(orig_flags: AthConfigFlags, calohits_seq_name: str | None = None, is_probe_leg: bool = False, jet: str = 'lc'):
     '''2nd FTF step sequence, for the tauIso RoI'''
 
-    name = 'Iso'
-
+    name = f'Iso{jet.upper()}'
+    
     # Retrieve tracking configuration
-    previous_tracking_cfg = 'tauCore'
-    tracking_cfg = 'tauIso'
+    previous_tracking_cfg = f'tauCore{jet.upper()}'
+    tracking_cfg = f'tauIso{jet.upper()}'
+
     if calohits_seq_name:
-        tracking_cfg += calohits_seq_name
-        previous_tracking_cfg += calohits_seq_name
+        tracking_cfg = f'tauIso{calohits_seq_name}'
+        previous_tracking_cfg = f'tauCore{calohits_seq_name}'
 
     flags = getFlagsForActiveConfig(orig_flags, tracking_cfg, log)
 
 
     # Source-dependent configuration
     if calohits_seq_name:
-        name += f'_{calohits_seq_name}'
+        name = f'Iso_{calohits_seq_name}'
         input_rois = f'UpdatedTrack{calohits_seq_name}RoI'
     else:
-        input_rois = 'UpdatedTrackRoI'
+        input_rois = f'UpdatedTrack{jet.upper()}RoI'
 
 
     # Create new RoIs from , resized to 'tauCore/LRT' before running the FTF algorithms
@@ -413,20 +423,20 @@ def tauFTFIsoSequenceGenCfg(orig_flags: AthConfigFlags, calohits_seq_name: str |
 #================================================================
 
 @AccumulatorCache
-def tauPrecTrackSequenceGenCfg(orig_flags: AthConfigFlags, calohits_seq_name: str | None = None, do_lrt: bool = False, is_probe_leg: bool = False) -> MenuSequence:
+def tauPrecTrackSequenceGenCfg(orig_flags: AthConfigFlags, calohits_seq_name: str | None = None, do_lrt: bool = False, is_probe_leg: bool = False, jet: str = 'lc') -> MenuSequence:
     '''Precision Tracking step sequence, for both the tauIso and tauLRT RoIs'''
 
     if do_lrt:
         name = 'LRT'
         tracking_cfg = 'tauLRT'
     else:
-        name = 'Iso'
-        tracking_cfg = 'tauIso'
+        name = f'Iso{jet.upper()}'
+        tracking_cfg = f'tauIso{jet.upper()}'
 
     if calohits_seq_name:
-        name += f'_{calohits_seq_name}'
-        tracking_cfg += calohits_seq_name
-        input_rois = f'tauFastTrack{name}_{calohits_seq_name}'
+        name = f'Iso_{calohits_seq_name}'
+        tracking_cfg = f'tauIso{calohits_seq_name}'
+        input_rois = f'tauFastTrackIso_{calohits_seq_name}'
     else:
         input_rois = f'tauFastTrack{name}'
 
@@ -498,9 +508,13 @@ def tauPrecTrackSequenceGenCfg(orig_flags: AthConfigFlags, calohits_seq_name: st
 #================================================================
 
 @AccumulatorCache
-def tauPrecisionSequenceGenCfg(orig_flags: AthConfigFlags, seq_name: str, calohits_seq_name: str | None = None, output_name: str | None = None, do_lrt: bool = False, is_probe_leg: bool = False) -> MenuSequence:
+def tauPrecisionSequenceGenCfg(orig_flags: AthConfigFlags, seq_name: str, calohits_seq_name: str | None = None, output_name: str | None = None, do_lrt: bool = False, is_probe_leg: bool = False, jet: str = 'lc') -> MenuSequence:
     '''Precision Tau step sequence, for all ID and reconstruction settings'''
 
+    if jet=='em': 
+        seq_name="EM"
+        output_name='EM'
+        orig_seq_name='EM'
     orig_seq_name = seq_name
     if output_name is None: output_name = orig_seq_name
 
@@ -508,17 +522,20 @@ def tauPrecisionSequenceGenCfg(orig_flags: AthConfigFlags, seq_name: str, calohi
         tracking_cfg = 'tauLRT'
         input_rois = 'tauFastTrackLRT'
     else:
-        tracking_cfg = 'tauIso'
-        input_rois = 'tauFastTrackIso'
+        tracking_cfg = f'tauIso{jet.upper()}'
+        input_rois = f'tauFastTrackIso{jet.upper()}'
 
     if calohits_seq_name:
-        seq_name += f'_{calohits_seq_name}'
-        tracking_cfg += calohits_seq_name
-        input_rois += f'_{calohits_seq_name}'
+        seq_name = f'MVA_{calohits_seq_name}'
+        tracking_cfg = f'tauIso{calohits_seq_name}'
+        input_rois = f'tauFastTrackIso{calohits_seq_name}'
         input_taus = 'HLT_TrigTauRecMerged_CaloHits'
         input_tau_tracks = 'HLT_tautrack_CaloHits_dummy'
     else:
-        input_taus = 'HLT_TrigTauRecMerged_CaloMVAOnly'
+        if jet=='lc':
+            input_taus = 'HLT_TrigTauRecMerged_CaloMVAOnly'
+        else:
+            input_taus = 'HLT_TrigTauRecMerged_CaloEMOnly'
         input_tau_tracks = 'HLT_tautrack_dummy'
 
     # Retrieve tracking configuration

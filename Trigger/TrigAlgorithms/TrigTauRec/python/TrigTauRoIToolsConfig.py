@@ -10,11 +10,11 @@ from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
 
-def tauCaloRoiUpdaterCfg(flags: AthConfigFlags, inputRoIs: str, clusters: str) -> ComponentAccumulator:
+def tauCaloRoiUpdaterCfg(flags: AthConfigFlags, inputRoIs: str, clusters: str, jet: str) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    alg = CompFactory.TrigTauCaloRoiUpdater(name='TauCaloRoiUpdater',
+    alg = CompFactory.TrigTauCaloRoiUpdater(name='TauCaloEMRoiUpdater' if jet=='em' else 'TauCaloLCRoiUpdater',
                                             RoIInputKey=inputRoIs,
-                                            RoIOutputKey='UpdatedCaloRoI',
+                                            RoIOutputKey='UpdatedCaloEMRoI' if jet=='em' else 'UpdatedCaloLCRoI',
                                             CaloClustersKey=clusters)
     acc.addEventAlgo(alg)
     return acc
