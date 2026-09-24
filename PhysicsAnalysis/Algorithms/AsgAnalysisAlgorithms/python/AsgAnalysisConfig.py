@@ -345,6 +345,10 @@ class PileupReweightingBlock (ConfigBlock):
                 raise ValueError('Both userLumicalcFiles and userLumicalcFilesPerCampaign specified, '
                                 'use only one of the options!')
             if self.userLumicalcFilesPerCampaign is not None:
+                if not campaign:
+                    raise Exception('userLumicalcFilesPerCampaign requires campaign to be configured!')
+                if campaign is Campaign.Unknown:
+                    raise Exception('userLumicalcFilesPerCampaign used, but campaign = Unknown!')
                 try:
                     toolLumicalcFiles = self.userLumicalcFilesPerCampaign[campaign.value][:]
                     log.info('Using user-provided per-campaign lumicalc files')
