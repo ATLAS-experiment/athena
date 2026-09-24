@@ -54,7 +54,7 @@ void RD53SimTool::process(const EventContext& ctx,
     // Add thermal noise
     thermalNoise(m_thermalNoise, chargedDiodes, rndmEngine);
     // Add random noise
-    randomNoise(chargedDiodes, m_chipSim, m_numberOfBcid, calibData, rndmEngine, m_pixelReadout.get());
+    ITkRandomNoise(chargedDiodes, m_chipSim, m_numberOfBcid, calibData, rndmEngine, m_pixelReadout.get());
   }
 
   // Add random diabled pixels

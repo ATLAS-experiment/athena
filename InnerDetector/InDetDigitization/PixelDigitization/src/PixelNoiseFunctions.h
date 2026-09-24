@@ -30,7 +30,12 @@ namespace PixelDigitization{
     int nBcid,
     const PixelChargeCalibCondData *chargeCalibData, CLHEP::HepRandomEngine* rndmEngine, 
     InDetDD::IPixelReadoutManager * pixelReadout);
-    
+
+  // void ITkrandomNoise(SiChargedDiodeCollection& chargedDiodes, const PixelModuleData *moduleData,
+  //   int nBcid,
+  //   const PixelChargeCalibCondData *chargeCalibData, CLHEP::HepRandomEngine* rndmEngine, 
+  //   InDetDD::IPixelReadoutManager * pixelReadout);
+  
   void 
   randomNoise(SiChargedDiodeCollection& chargedDiodes, const double totalNoiseOccupancy, 
     const std::vector<float> &noiseShape, float overflowToT,
@@ -38,7 +43,13 @@ namespace PixelDigitization{
     InDetDD::IPixelReadoutManager * pixelReadout);
     
   void 
-  randomNoise(SiChargedDiodeCollection& chargedDiodes, const ITkPixSimulationParameters & chipData,
+  ITkRandomNoise(SiChargedDiodeCollection& chargedDiodes, const double totalNoiseOccupancy, 
+    const std::vector<float> &noiseShape, float overflowToT,
+    const PixelChargeCalibCondData *chargeCalibData, CLHEP::HepRandomEngine* rndmEngine, 
+    InDetDD::IPixelReadoutManager * pixelReadout);
+
+  void 
+  ITkRandomNoise(SiChargedDiodeCollection& chargedDiodes, const ITkPixSimulationParameters & chipData,
     int nBcid,
     const PixelChargeCalibCondData *chargeCalibData, CLHEP::HepRandomEngine* rndmEngine, 
     InDetDD::IPixelReadoutManager * pixelReadout);
