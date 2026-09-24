@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODJiveXML/xAODTauRetriever.h"
@@ -135,35 +135,33 @@ namespace JiveXML {
     } // end TauIterator
 
     // four-vectors
-    DataMap["phi"] = phi;
-    DataMap["eta"] = eta;
-    DataMap["pt"] = pt;
-    DataMap["mass"] = mass;
-    DataMap["energy"] = energy;
-
-    DataMap["numTracks"] = numTracks;
-    DataMap["isolFrac"] = isolFrac;
-    DataMap["logLhRatio"] = logLhRatio;
-    DataMap["label"] = label;
-    DataMap["charge"] = charge;
-    DataMap["trackLinkCount"] = trackLinkCount;
-    DataMap["isTauString"] = isTauString;
+    std::size_t nEntries = phi.size();
+    DataMap["phi"] = std::move(phi);
+    DataMap["eta"] = std::move(eta);
+    DataMap["pt"] = std::move(pt);
+    DataMap["mass"] = std::move(mass);
+    DataMap["energy"] = std::move(energy);
+    std::size_t nTracks = numTracks.size();
+    DataMap["numTracks"] = std::move(numTracks);
+    DataMap["isolFrac"] = std::move(isolFrac);
+    DataMap["logLhRatio"] = std::move(logLhRatio);
+    DataMap["label"] = std::move(label);
+    DataMap["charge"] = std::move(charge);
+    DataMap["trackLinkCount"] = std::move(trackLinkCount);
+    DataMap["isTauString"] = std::move(isTauString);
 
     //This is needed once we know numTracks and associations:
     //If there had been any tracks, add a tag
     if ((numTracks.size()) != 0){
       //Calculate average number of tracks per vertex
-      double NTracksPerVertex = tracks.size()*1./numTracks.size();
+      double NTracksPerVertex = tracks.size()*1./nTracks;
       std::string tag = "trackIndex multiple=\"" +DataType(NTracksPerVertex).toString()+"\"";
-      DataMap[tag] = tracks;
+      DataMap[tag] = std::move(tracks);
       tag = "trackKey multiple=\"" +DataType(NTracksPerVertex).toString()+"\"";
-      DataMap[tag] = sgKey;
+      DataMap[tag] = std::move(sgKey);
     }
 
-    //    DataMap["energy"] = energy;
-    //    DataMap["mass"] = mass;
-
-    ATH_MSG_DEBUG(dataTypeName() << " retrieved with " << phi.size() << " entries");
+    ATH_MSG_DEBUG(dataTypeName() << " retrieved with " << nEntries << " entries");
 
     return DataMap;
 

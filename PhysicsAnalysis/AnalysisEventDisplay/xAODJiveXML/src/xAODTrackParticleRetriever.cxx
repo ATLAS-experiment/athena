@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODJiveXML/xAODTrackParticleRetriever.h"
@@ -155,18 +155,19 @@ namespace JiveXML {
     } // end TrackParticleIterator
 
       // four-vectors
-    DataMap["d0"] = d0;
-    DataMap["z0"] = z0;
-    DataMap["pt"] = pt;
-    DataMap["phi0"] = phi0;
-    DataMap["cotTheta"] = cotTheta;
-    DataMap["label"] = label;
-    DataMap["nBLayerHits"] = nBLayerHits;
-    DataMap["nPixHits"] = nPixHits;
-    DataMap["nSCTHits"] = nSCTHits;
-    DataMap["nTRTHits"] = nTRTHits;
+    const std::size_t nEntries = d0.size();
+    DataMap["d0"] = std::move(d0);
+    DataMap["z0"] = std::move(z0);
+    DataMap["pt"] = std::move(pt);
+    DataMap["phi0"] = std::move(phi0);
+    DataMap["cotTheta"] = std::move(cotTheta);
+    DataMap["label"] = std::move(label);
+    DataMap["nBLayerHits"] = std::move(nBLayerHits);
+    DataMap["nPixHits"] = std::move(nPixHits);
+    DataMap["nSCTHits"] = std::move(nSCTHits);
+    DataMap["nTRTHits"] = std::move(nTRTHits);
 
-    ATH_MSG_DEBUG(dataTypeName() << " retrieved with " << d0.size() << " entries");
+    ATH_MSG_DEBUG(dataTypeName() << " retrieved with " << nEntries << " entries");
 
     //All collections retrieved okay
     return DataMap;
