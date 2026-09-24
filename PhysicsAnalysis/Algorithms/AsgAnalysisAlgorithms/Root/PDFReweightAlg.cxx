@@ -15,6 +15,11 @@
 
 namespace CP
 { 
+  void PDFReweightAlg::PDFDeleter::operator() (const LHAPDF::PDF *pdf) const
+  {
+    delete pdf;
+  }
+
   StatusCode PDFReweightAlg::initialize()
   { 
 
@@ -24,9 +29,9 @@ namespace CP
     if(m_additionalPdfPath != "")
       LHAPDF::pathsAppend(m_additionalPdfPath);
 
-    m_p0 = LHAPDF::mkPDF(m_inPDF);
+    m_p0.reset(LHAPDF::mkPDF(m_inPDF));
     for (const auto& pdfstring : m_outPDF) {
-      m_p1_vars.push_back(LHAPDF::mkPDF(pdfstring));
+      m_p1_vars.emplace_back(LHAPDF::mkPDF(pdfstring));
     }
 
     for(auto temp_name : m_outPDF){
@@ -76,8 +81,7 @@ namespace CP
     for (size_t i = 0; i<m_outPDF.size(); ++i) {
 
       float reweight = LHAPDF::weightxxQ(pdgid1, pdgid2, X1, X2, Q,
-                        static_cast<const LHAPDF::PDF*>(m_p0),
-                        static_cast<const LHAPDF::PDF*>(m_p1_vars[i])); // reweight is the scale factor around 1
+                        m_p0.get(), m_p1_vars[i].get()); // reweight is the scale factor around 1
 
       SG::WriteDecorHandle<xAOD::EventInfo, float> handle(m_reweightKeys[i], ctx);
       handle(*eventInfo) = reweight;
