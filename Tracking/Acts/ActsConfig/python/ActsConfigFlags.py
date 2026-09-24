@@ -156,7 +156,7 @@ def createActsConfigFlags():
     # a path to a local file
     # 'Default' : material map source is evaluated from the geometry tag
     # 'None'    : no material map is provided
-    actscf.addFlag('Acts.TrackingGeometry.ITkHgtdMaterialSource', 'Default')
+    actscf.addFlag('Acts.TrackingGeometry.ITkHgtdMaterialSource', 'None')
     actscf.addFlag('Acts.TrackingGeometry.ITkHgtdMaterialMapPath', 'ACTS/MaterialMaps/gen3')
 
     ## Enable Tracking geometry with additional passive layers

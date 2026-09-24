@@ -8,11 +8,14 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 
 #include "Acts/Surfaces/Surface.hpp"
-#include "ActsPlugins/Root/RootMaterialDecorator.hpp"
+#include "Acts/Material/IMaterialDecorator.hpp"
 
 namespace ActsTrk {
     /** @brief Mutable tracking geometry visitor to load the material on the tracking surfaces
-     *         inside the ITk */
+     *         inside the ITk.
+     *         The material map is read from either a Json (or Cbor) file or a Root file,
+     *         chosen automatically from the extension of "MaterialDbFile" ('.root' selects the
+     *         Root reader, anything else - notably '.json' / '.cbor' - selects the Json reader). */
     class ITkMaterialDecoratorTool : public extends<AthAlgTool, IRefineTrackingGeoTool> {
         public:
             using base_class::base_class;
@@ -23,7 +26,7 @@ namespace ActsTrk {
         private:
             Gaudi::Property<std::string> m_materialMapFile{this, "MaterialDbFile", "", ""};
             Gaudi::Property<std::string> m_materialMapFolder{this, "MaterialDbFolder", "", ""};
-            std::unique_ptr<ActsPlugins::RootMaterialDecorator> m_matDecorator{};
+            std::unique_ptr<Acts::IMaterialDecorator> m_matDecorator{};
     };
 }
 #endif

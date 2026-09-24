@@ -67,10 +67,19 @@ def RootMaterialWriterToolCfg(configFlags, name="RootMaterialWriterTool", **kwar
   acc.setPrivateTools(CompFactory.ActsTrk.RootMaterialWriterTool(name, **kwargs))
   return acc
 
+def JsonMaterialWriterToolCfg(configFlags, name="JsonMaterialWriterTool", **kwargs):
+  from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+  from AthenaConfiguration.ComponentFactory import CompFactory
+  acc = ComponentAccumulator()
+  acc.setPrivateTools(CompFactory.ActsTrk.JsonMaterialWriterTool(name, **kwargs))
+  return acc
+
 def MaterialMappingCfg(configFlags,
                        name="MaterialMapping",
                        StoreTracks=False,
                        StoreSurfInfo=False,
+                       WriteJsonMaterialMap=True,
+                       WriteRootMaterialMap=False,
                        OutputMappedMaterialTracks="OuputMappedMaterialTracks",
                        OutputUnmappedMaterialTracks="OutputUnmappedMaterialTracks",
                        **kwargs) :
@@ -87,7 +96,11 @@ def MaterialMappingCfg(configFlags,
   from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
   acc.merge(ActsGeometryContextAlgCfg(configFlags))
 
-  mapwriters = [acc.popToolsAndMerge(RootMaterialWriterToolCfg(configFlags))]
+  mapwriters = []
+  if WriteRootMaterialMap:
+      mapwriters += [acc.popToolsAndMerge(RootMaterialWriterToolCfg(configFlags))]
+  if WriteJsonMaterialMap:
+      mapwriters += [acc.popToolsAndMerge(JsonMaterialWriterToolCfg(configFlags))]
   kwargs.setdefault("MaterialMapWriters", mapwriters)
 
   kwargs.setdefault("MappedMaterialTrackCollectionKey", OutputMappedMaterialTracks)
