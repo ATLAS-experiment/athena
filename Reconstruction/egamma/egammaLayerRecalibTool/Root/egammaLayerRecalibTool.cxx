@@ -529,7 +529,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
     add_scale(new ScaleE1(InputModifier::ZEROBASED), new GetAmountFixed(0.01));
   }
   else if ("acc_zee_run3_gnn_v0" == tune){
-    const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v14/egammaLayerRecalibTunes_transformerTune.root");
+    const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v15/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
     TH2F* histo_acc = static_cast<TH2F*>(f.Get("hACC_Zee_rel23_gnn"));
     assert(histo_acc);
