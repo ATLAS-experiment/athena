@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -21,7 +21,7 @@
 
 class MuonMDT_CablingAlg : public AthCondAlgorithm {
 public:
-    MuonMDT_CablingAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthCondAlgorithm::AthCondAlgorithm;
     virtual ~MuonMDT_CablingAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;

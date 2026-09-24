@@ -79,9 +79,7 @@ def MDTCablingConfigCfg(flags, name = "MuonMDT_CablingAlg", **kwargs):
     if not flags.Detector.GeometryMDT: return acc
     from AthenaConfiguration.Enums import LHCPeriod
     
-    kwargs.setdefault("UseJSONFormat", flags.Muon.usePhaseIIGeoSetup and \
-                                       flags.GeoModel.Run >= LHCPeriod.Run4)
-
+    kwargs.setdefault("UseJSONFormat", True)
     kwargs.setdefault("MezzanineJSON", "")
     kwargs.setdefault("CablingJSON", "")
 
@@ -91,13 +89,10 @@ def MDTCablingConfigCfg(flags, name = "MuonMDT_CablingAlg", **kwargs):
         if flags.Input.isMC is True:
             dbTagMezz = None 
             dbTagSchema = None
-            if flags.Muon.usePhaseIIGeoSetup and \
-               flags.GeoModel.Run >= LHCPeriod.Run4: 
-                dbTagMezz = "MDTMezMapSchemaJSON_RUN4BestKnowledge_v1"
-                dbTagSchema = "MDTCablingMapSchemaJSON_RUN4BestKnowledge_v1"
-            elif flags.GeoModel.Run >= LHCPeriod.Run4:
-                dbTagSchema = "MDTOflCablingMapSchema_RUN124_MC15_02"
-                dbTagMezz = "MDTOflCablingMezzanineSchema_RUN124_MC15_02"
+            #In DD1 the phase II geometry actually uses the R3 muon geometry. So until DD2 is deployed we need to override the cabling map for phase II geometry to use the R3 cabling map.
+            if not flags.Muon.usePhaseIIGeoSetup and flags.GeoModel.Run >= LHCPeriod.Run3:
+                dbTagSchema = "MDTCablingMapSchemaJSON_RUN3BestKnowledge"
+                dbTagMezz = "MDTMezMapSchemaJSON_RUN3BestKnowledge"
             if kwargs["UseJSONFormat"]:
                 kwargs.setdefault("MapFolders", "/MDT/CABLING/MAP_SCHEMA_JSON")
                 kwargs.setdefault("MezzanineFolders", "/MDT/CABLING/MEZZANINE_SCHEMA_JSON")
