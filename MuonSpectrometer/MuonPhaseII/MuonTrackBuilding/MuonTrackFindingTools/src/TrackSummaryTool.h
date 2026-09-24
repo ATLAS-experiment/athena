@@ -25,24 +25,30 @@ namespace MuonR4 {
             /** @copydoc AthAlgTool::initialize */
             virtual StatusCode initialize() override final;
 
-            /** @copydoc MuoNR4::ITrackSummaryTool::makeSummary */
+            /** @copydoc MuonR4::ITrackSummaryTool::makeSummary */
             virtual HitSummary makeSummary(const EventContext& ctx,
                                            const ConstTrack_t trackProxy) const override final;
             
-            /** @copydoc MuoNR4::ITrackSummaryTool::makeSummary */
+            /** @copydoc MuonR4::ITrackSummaryTool::makeSummary */
             virtual HitSummary makeSummary(const EventContext& ctx,
                                            const Track_t trackProxy) const override final;
 
-            /** @copydoc MuoNR4::ITrackSummaryTool::makeSummary */
+            /** @copydoc MuonR4::ITrackSummaryTool::makeSummary */
             virtual HitSummary makeSummary(const EventContext& ctx,
                                            std::span<const xAOD::MuonSegment* const> segments) const override final;
-            /** @copydoc MuoNR4::ITrackSummaryTool::makeSummary */
+            /** @copydoc MuonR4::ITrackSummaryTool::makeSummary */
             virtual HitSummary makeSummary(const EventContext& ctx,
                                            const Trk::Track& track) const override final;
 
-            /** @copydoc MuoNR4::ITrackSummaryTool::copySummary */
+            /** @copydoc MuonR4::ITrackSummaryTool::copySummary */
             virtual void copySummary(const HitSummary& summary,
                                      const xAOD::IParticle& track) const override final;
+            /** @copydoc MuonR4::ITrackSummaryTool::countMuonStations */
+            virtual std::uint8_t countMuonStations(const EventContext& ctx,
+                                                    const Track_t trackProxy) const override final;
+            /** @copydoc MuonR4::ITrackSummaryTool::countMuonStations */
+            virtual std::uint8_t countMuonStations(const EventContext& ctx,
+                                                   const ConstTrack_t trackProxy) const override final;
         private:
             using Stat_t = HitSummary::Status;
             /** @brief Increments the hit summary based on the identifier extracted from the measurement
@@ -55,9 +61,17 @@ namespace MuonR4 {
                                   const unsigned prdDim,
                                   HitSummary& summary) const;
             
-            /** @brief Implementation for making a hit summary */
-            template <Acts::TrackProxyConcept T>
-            HitSummary makeSummaryImpl(const EventContext& ctx, const T& track) const;
+            /** @brief Implementation to create a muon hit summary object
+              * @tparam Trk_t: Type specification of the track proxy
+              * @param ctx: EventContext to access conditions to ignore potential holes
+              * @param track: Reference to the track proxy implementation of interest */
+            template <Acts::TrackProxyConcept Trk_t>
+            HitSummary makeSummaryImpl(const EventContext& ctx, const Trk_t& track) const;
+
+            /** @brief  */
+            template <Acts::TrackProxyConcept Trk_t>
+            std::uint8_t countMuonStationsImpl(const EventContext& ctx,
+                                                    const Trk_t trackProxy) const;
 
             /** @brief Checks whether a measurement state is expected for the complementary
              *         readout plane for a given gasGapId. (E.g. in case of phi gasGap, the 

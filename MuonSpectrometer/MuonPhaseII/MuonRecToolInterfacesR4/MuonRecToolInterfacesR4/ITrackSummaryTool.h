@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONRECTOOLINTERFACESR4_ITRACKSUMMARYTOOL_H
 #define MUONRECTOOLINTERFACESR4_ITRACKSUMMARYTOOL_H
@@ -37,6 +37,9 @@ namespace MuonR4{
            
             /** @brief Abrivation of the const Track proxy */
             using ConstTrack_t = ActsTrk::TrackContainer::ConstTrackProxy;
+            /** @brief Abrivation of the Track proxy */
+            using Track_t = ActsTrk::MutableTrackContainer::TrackProxy;
+
             /** @brief Creates a summary from the passed track
              *  @param ctx: EventContext to fetch conditions such that holes
              *              associated to dead modules are ignored
@@ -44,8 +47,22 @@ namespace MuonR4{
              *                    shall be made. */
             virtual HitSummary makeSummary(const EventContext& ctx,
                                            const ConstTrack_t trackProxy) const = 0;
-            /** @brief Abrivation of the Track proxy */
-            using Track_t = ActsTrk::MutableTrackContainer::TrackProxy;
+
+            /** @brief Count how many stations (BI/ BM / BO) contain enough precision hits.
+             *         The precision hit requirement may be station specific and also depend
+             *         on the chi2 contribution of the individual hits
+             *  @param ctx: EventContext to fetch potentially needed conditions
+             *  @param trackProxy: The mutable refernce to the track of interest */
+            virtual std::uint8_t countMuonStations(const EventContext& ctx,
+                                                    const Track_t trackProxy) const = 0;
+            /** @brief Count how many stations (BI/ BM / BO) contain enough precision hits.
+             *         The precision hit requirement may be station specific and also depend
+             *         on the chi2 contribution of the individual hits
+             *  @param ctx: EventContext to fetch potentially needed conditions
+             *  @param trackProxy: The mutable refernce to the track of interest */
+            virtual std::uint8_t countMuonStations(const EventContext& ctx,
+                                                   const ConstTrack_t trackProxy) const = 0;
+            
             /** @brief Creates a summary from the passed track
              *  @param ctx: EventContext to fetch conditions such that holes
              *              associated to dead modules are ignored
@@ -53,6 +70,7 @@ namespace MuonR4{
              *                    shall be made. */
             virtual HitSummary makeSummary(const EventContext& ctx,
                                            const Track_t trackProxy) const = 0;
+
             /** @brief Creates a summary from a list of passed segments that are associated
              *         to a track seed, a truth particle or a reconstructed track
              *  @param ctx: EventContext to fetch conditions such that holes
@@ -60,6 +78,7 @@ namespace MuonR4{
              *  @param segments: List of segments from which the summary shall be created*/
             virtual HitSummary makeSummary(const EventContext& ctx,
                                            std::span<const xAOD::MuonSegment* const> segments) const = 0;
+
             /** @brief Creates a summary from a Trk::Track object produced by the legacy reconstruction software.
              *         The associated hits are categorized the same way as for the ActsTrk::Tracks 
              *         (Serves purely validation purposes)
@@ -68,6 +87,7 @@ namespace MuonR4{
              * @param trk: Reference to the MS track for which the summary shall be produced */
             virtual HitSummary makeSummary(const EventContext& ctx,
                                            const Trk::Track& trk) const = 0;
+
             /** @brief Decorates the hit summary to the parsed track (xAOD::TrackParticle, xAOD::Muon or xAOD::TruthParticle)
              *         using the categories defined in the xAOD::MuonSummaryType enum */
             virtual void copySummary(const HitSummary& summary,

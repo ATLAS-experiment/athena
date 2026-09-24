@@ -355,5 +355,32 @@ namespace MuonR4 {
             acc(outerTriggerPhiHoles) = summary.value(Cat_t::TriggerPhi, Stat_t::Hole, LayerIndex::Outer, true)
                                       + summary.value(Cat_t::TriggerPhi, Stat_t::Hole, LayerIndex::Outer, false);
         }
-    }     
+    }
+    template <Acts::TrackProxyConcept Trk_t>
+        std::uint8_t TrackSummaryTool::countMuonStationsImpl(const EventContext& /*ctx*/,
+                                                             const Trk_t trackProxy) const {
+        std::array<std::uint8_t, Acts::toUnderlying(Muon::MuonStationIndex::StIndex::StIndexMax)> counts{};
+        for (const auto state : trackProxy.trackStates()) {
+            if (!state.hasUncalibratedSourceLink()) {
+                continue;
+            }
+            const auto* meas = ActsTrk::detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());
+            if(!isPrecisionHit(meas)) {
+                continue;
+            }
+            ++counts[Acts::toUnderlying(m_idHelperSvc->stationIndex(xAOD::identify(meas)))];
+        }
+        return std::ranges::count_if(counts,[](const std::uint8_t c){
+            return c > 2;
+        });
+    }
+    std::uint8_t TrackSummaryTool::countMuonStations(const EventContext& ctx,
+                                                     const Track_t trackProxy) const {
+        return countMuonStationsImpl(ctx, trackProxy);
+    }
+    std::uint8_t TrackSummaryTool::countMuonStations(const EventContext& ctx,
+                                                     const ConstTrack_t trackProxy) const {
+        return countMuonStationsImpl(ctx, trackProxy);
+    }
+
 }
