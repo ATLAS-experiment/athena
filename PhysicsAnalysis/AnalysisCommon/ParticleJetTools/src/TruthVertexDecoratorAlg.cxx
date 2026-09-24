@@ -80,7 +80,7 @@ std::vector<const xAOD::TruthVertex*> get_matched_primary_vertices(
       if (r < closest_distance) {
         closest_distance = r;
         closest_vertex = vert;
-      }else if (r == closest_distance) {
+      }else if ((r == closest_distance) && closest_vertex) {
         // If we have two vertices at the same distance, we'll take the one with the lowest
         // barcode as it *should* be the case that this is the actual PV.
         if ( std::abs(acc_uid(*vert)) < std::abs(acc_uid(*closest_vertex)) ) {

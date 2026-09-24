@@ -370,6 +370,7 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
     int nMatchedOOTJets = 0;
     int nMatchedITJets = 0;
     int pileupTag = SmallRJetPileupLabel::enumToInt(SmallRJetPileupLabel::Unknown);
+    //coverity[UNNECESSARY_STRING_COPY:FALSE]
     static const SG::ConstAccessor<float> accGhostTruthPt("GhostTruthPt");
 
     // Ensure that the reco jet has at least one constituent

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////// 
@@ -8,13 +8,13 @@
 // Author: C.Anastopoulos
 /////////////////////////////////////////////////////////////////// 
 
-// STL includes
-#include <algorithm>
+
 
 #include "ParticleEvent/TrackParticleAssocs.h"
 #include "EventKernel/IParticle.h"
 #include "AthContainers/DataVector.h"
-
+// STL includes
+#include <algorithm>
 /////////////////////////////////////////////////////////////////// 
 // Public methods: 
 /////////////////////////////////////////////////////////////////// 
@@ -36,6 +36,16 @@ TrackParticleAssocs& TrackParticleAssocs::operator=(const TrackParticleAssocs& r
   if ( this != &rhs ) {
     AssociationMap< Rec::TrackParticleContainer,Rec::TrackParticleContainer >::operator=(rhs);
     m_assocStores = rhs.m_assocStores;
+  }
+  return *this;
+}
+
+TrackParticleAssocs&
+TrackParticleAssocs::operator=(TrackParticleAssocs&& rhs)
+{
+  if (this != &rhs) {
+    m_associationMap = std::move(rhs.m_associationMap);
+    m_assocStores   = std::move(rhs.m_assocStores);
   }
   return *this;
 }

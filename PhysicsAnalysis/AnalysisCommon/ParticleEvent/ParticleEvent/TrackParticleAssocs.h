@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // TrackParticleAssocs.h 
@@ -41,6 +41,7 @@ public:
 
   /** Assignment operator:     */
   TrackParticleAssocs& operator=( const TrackParticleAssocs& rhs ); 
+  TrackParticleAssocs& operator=(TrackParticleAssocs&& rhs);
   
   /** Constructor with parameters:     */
   /** Destructor: */
