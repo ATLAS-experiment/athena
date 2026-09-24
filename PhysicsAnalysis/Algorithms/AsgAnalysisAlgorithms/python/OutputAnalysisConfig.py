@@ -8,7 +8,7 @@ from AthenaCommon.Logging import logging
 import copy, re
 
 class OutputAnalysisConfig (ConfigBlock):
-    """the ConfigBlock for the MET configuration"""
+    """the ConfigBlock for the output ntuple configuration"""
 
     def __init__ (self) :
         super (OutputAnalysisConfig, self).__init__ ()
