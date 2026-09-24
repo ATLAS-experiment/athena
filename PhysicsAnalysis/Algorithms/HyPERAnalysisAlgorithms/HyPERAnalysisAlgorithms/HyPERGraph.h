@@ -23,6 +23,7 @@ class HyPERGraph : public GraphBase {
 
  public:
   HyPERGraph() : GraphBase() {};
+  virtual ~HyPERGraph() = default;
 
   virtual void addNode(const Features& attributes) override;
   virtual void addEdge(int64_t source, int64_t target,
