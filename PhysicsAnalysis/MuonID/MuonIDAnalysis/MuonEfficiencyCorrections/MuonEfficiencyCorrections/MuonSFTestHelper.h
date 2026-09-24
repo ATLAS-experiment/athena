@@ -66,7 +66,7 @@ namespace TestMuonSF {
     };
     //###################################################################
     //      Helper class to write the scale-factor ntuples to test the  #
-    //      MuonReconstruction/ Isolation/ TTVA scalefactors            #
+    //      MuonReconstruction/ Isolation/ TTVA / PLIT scalefactors            #
     //###################################################################
     class MuonSFBranches: public MuonVal::MuonTesterBranch, public MuonEffiBranch {
         public:
