@@ -58,6 +58,8 @@ class LeptonSFCalculatorBlock(ConfigBlock):
             if self.electronSFs:
                 alg.electronSFs = self.electronSFs
             else:
+                if '.' not in self.electrons:
+                    raise ValueError(f'electrons={self.electrons} has no selection: either use the format `container.selection` or set electronSFs explicitly.')
                 alg.electronSFs = [ f'el_reco_effSF_{self.electrons.split(".")[1]}_%SYS%',
                                     f'el_id_effSF_{self.electrons.split(".")[1]}_%SYS%' ]
                 if 'isolated' in alg.electronSelection:
@@ -74,6 +76,8 @@ class LeptonSFCalculatorBlock(ConfigBlock):
             if self.muonSFs:
                 alg.muonSFs = self.muonSFs
             else:
+                if '.' not in self.muons:
+                    raise ValueError(f'muons={self.muons} has no selection: either use the format `container.selection` or set muonSFs explicitly.')
                 alg.muonSFs = [ f'muon_reco_effSF_{self.muons.split(".")[1]}_%SYS%']
                 if 'trackSelection' in alg.muonSelection:
                     alg.muonSFs += [ f'muon_TTVA_effSF_{self.muons.split(".")[1]}_%SYS%' ]
@@ -89,6 +93,8 @@ class LeptonSFCalculatorBlock(ConfigBlock):
             if self.photonSFs:
                 alg.photonSFs = self.photonSFs
             else:
+                if '.' not in self.photons:
+                    raise ValueError(f'photons={self.photons} has no selection: either use the format `container.selection` or set photonSFs explicitly.')
                 alg.photonSFs = [ f'ph_id_effSF_{self.photons.split(".")[1]}_%SYS%' ]
                 if 'isolated' in alg.photonSelection:
                     alg.photonSFs += [ f'ph_isol_effSF_{self.photons.split(".")[1]}_%SYS%' ]
@@ -100,6 +106,8 @@ class LeptonSFCalculatorBlock(ConfigBlock):
             if self.tauSFs:
                 alg.tauSFs = self.tauSFs
             else:
+                if '.' not in self.taus:
+                    raise ValueError(f'taus={self.taus} has no selection: either use the format `container.selection` or set tauSFs explicitly.')
                 alg.tauSFs = [ f'tau_Reco_effSF_{self.taus.split(".")[1]}_%SYS%',
                                f'tau_ID_effSF_{self.taus.split(".")[1]}_%SYS%']
                 if 'eVeto' in alg.tauSelection:
