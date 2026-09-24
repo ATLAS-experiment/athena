@@ -10,6 +10,8 @@
 #include <xAODMuon/Muon.h>
 #include <xAODTracking/TrackParticlexAODHelpers.h>
 
+#include <optional>
+
 
 namespace CP
 {
@@ -95,11 +97,14 @@ namespace CP
         }
 
         // This deep-copy is not optimal and it would be more efficient to work with shallow-copies of the track container(s)
-        xAOD::TrackParticle copyTrack {*track};
+        std::optional<xAOD::TrackParticle> correctedTrack;
+        if (!m_biasingTool.empty() || !m_smearingTool.empty())
+          correctedTrack.emplace (*track);
         if (!m_biasingTool.empty())
-          ANA_CHECK_CORRECTION (m_outOfValidity, copyTrack, m_biasingTool->applyCorrection (copyTrack));
+          ANA_CHECK_CORRECTION (m_outOfValidity, *correctedTrack, m_biasingTool->applyCorrection (*correctedTrack));
         if (!m_smearingTool.empty())
-          ANA_CHECK_CORRECTION (m_outOfValidity, copyTrack, m_smearingTool->applyCorrection (copyTrack));
+          ANA_CHECK_CORRECTION (m_outOfValidity, *correctedTrack, m_smearingTool->applyCorrection (*correctedTrack));
+        const xAOD::TrackParticle &copyTrack = correctedTrack ? *correctedTrack : *track;
         d0 = copyTrack.d0();
         try {
           d0sig = xAOD::TrackingHelpers::d0significance(&copyTrack,
