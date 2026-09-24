@@ -98,19 +98,18 @@ namespace CP
       decHash(*evtInfo) = m_pileupReweightingTool->getPRWHash(*evtInfo);
 
     // Take care of the weight (which is the only thing depending on systematics)
-    for (const auto& sys : m_systematicsList.systematicsVector())
-    {
-      const xAOD::EventInfo* systEvtInfo = nullptr;
-      ANA_CHECK( m_eventInfoHandle.retrieve(systEvtInfo, sys, ctx));
-      ANA_CHECK (m_pileupReweightingTool->applySystematicVariation (sys));
-      if (m_weightDecorator) {
+    if (m_weightDecorator) {
+      for (const auto& sys : m_systematicsList.systematicsVector())
+      {
+        const xAOD::EventInfo* systEvtInfo = nullptr;
+        ANA_CHECK( m_eventInfoHandle.retrieve(systEvtInfo, sys, ctx));
+        ANA_CHECK (m_pileupReweightingTool->applySystematicVariation (sys));
         // calculate and set the weight. The 'true' argument makes the tool treat unrepresented data
         // correctly if the corresponding property is set
         m_weightDecorator.set(*systEvtInfo, m_pileupReweightingTool->getCombinedWeight(*evtInfo, true), sys);
         m_weightDecorator.lock(*systEvtInfo, sys);
       }
-
-    };
+    }
     return StatusCode::SUCCESS;
   }
 }
