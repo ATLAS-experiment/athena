@@ -722,7 +722,7 @@ class EventCutFlowBlock (ConfigBlock):
         self.addOption('cutFlowHistograms', True, type=bool,
             info="whether to generate cutflow histograms for the selection cuts.")
         self.addOption('cutFlowHistogramsWithSystematics', True, type=bool,
-            info="whether to generate cutflow histograms for the selection cuts"
+            info="whether to generate cutflow histograms for the selection cuts "
                 "when running with systematics.")
         self.addOption ('streamName', None, type=str,
             info="name of the output stream to save the cut bookkeeper in.")
