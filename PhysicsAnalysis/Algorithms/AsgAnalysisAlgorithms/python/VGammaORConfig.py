@@ -44,10 +44,8 @@ class VGammaORBlock(ConfigBlock):
             return
 
         alg = config.createAlgorithm('CP::VGammaORAlg', 'VGammaORAlg')
-        alg.affectingSystematicsFilter = '.*'
         alg.noFilter = self.noFilter
         alg.FilterDescription = 'events passing V/VGamma overlap removal'
-        alg.eventDecisionOutputDecoration = 'ignore_vgammaor_%SYS%'
 
         if config.dsid() in self.keepInOverlap:
             alg.keepOverlap = True
@@ -60,4 +58,4 @@ class VGammaORBlock(ConfigBlock):
 
         if self.noFilter:
             # if we don't apply the filter, we still want to study the output of the tool!
-            config.addOutputVar('EventInfo', 'in_vgamma_overlap_%SYS%', 'in_vgamma_overlap', noSys=True)
+            config.addOutputVar('EventInfo', 'in_vgamma_overlap', 'in_vgamma_overlap', noSys=True)
