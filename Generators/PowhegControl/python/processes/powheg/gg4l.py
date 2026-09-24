@@ -248,6 +248,17 @@ class gg4l(PowhegRES):
             self.vdecaymodeV2 = 13
             self.parameters_by_keyword("vdecaymodeV1")[0].value = self.vdecaymodeV1
             self.parameters_by_keyword("vdecaymodeV2")[0].value = self.vdecaymodeV2
+        
+        # inclusive nunu decay
+        elif (self.proc == "'ZZ'" and (self.vdecaymodeV1 == "nunu" or self.vdecaymodeV2 == "nunu")): 
+            if((self.vdecaymodeV1 == 'll' and self.vdecaymodeV2 == 'nunu') or (self.vdecaymodeV1 == 'nunu' and self.vdecaymodeV2 == 'll')):
+                logger.warning("Ask to generate 2mu2nue decays and hack the LHE files to have inclusive 2l2nu decays - make sure to validate!")
+                self.add_algorithm("gg4l_munue2all")
+            
+            self.vdecaymodeV1 = 13
+            self.vdecaymodeV2 = 12
+            self.parameters_by_keyword("vdecaymodeV1")[0].value = self.vdecaymodeV1
+            self.parameters_by_keyword("vdecaymodeV2")[0].value = self.vdecaymodeV2
 
         #check if the setting is allowed
         if self.proc not in self.allowed_process_modes:
