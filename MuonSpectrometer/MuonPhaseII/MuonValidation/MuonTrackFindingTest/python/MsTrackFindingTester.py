@@ -72,9 +72,8 @@ if __name__=="__main__":
 
     flags, cfg = setupGeoR4TestCfg(args,flags)
 
-    cfg.getService("MessageSvc").setVerbose= []
-
- 
+    cfg.getService("MessageSvc").setVerbose = ["MSTrackFinderAlg"]
+    cfg.getService("MessageSvc").setVerbose = []
     from MuonConfig.ReconstructionConfigR4 import MuonReconstructionConfig
     cfg.merge(MuonReconstructionConfig(flags))
 
@@ -95,7 +94,7 @@ if __name__=="__main__":
 
     
     cfg.merge(MuonHoughTransformTesterCfg(flags,
-                                            VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, CanvasLimits =0))))
+                                          VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, CanvasLimits =0))))
 
     
     if not args.noMonitorPlots:
@@ -108,7 +107,16 @@ if __name__=="__main__":
                                                                                             CanvasPreFix="NswSegmentFitPlotValid", outSubDir="SegmentValidPlots",
                                                                                             doPhiBucketViews = False, saveSinglePDFs = False, 
                                                                                             saveSummaryPDF= True,CanvasLimits=10000))
+        
+        cfg.getEventAlgo("MuonEtaHoughTransformAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
+                                                                                                CanvasPreFix="EtaHoughPlotValid", doPhiBucketViews = False,
+                                                                                                outSubDir="EtaHoughiDiPuffPlots", displayTruthOnly = True, 
+                                                                                                saveSinglePDFs = True, saveSummaryPDF= True))
 
+        cfg.getEventAlgo("MuonSegmentFittingAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, 
+                                                                                                CanvasPreFix="SegmentPlotValid", outSubDir="SegmentValidPlots", 
+                                                                                                displayTruthOnly = True, saveSinglePDFs = True, saveSummaryPDF= True))
+ 
     
 
 # 
