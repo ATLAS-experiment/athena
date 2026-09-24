@@ -39,7 +39,7 @@ StatusCode TracccTritonTool::getTracks(
     AthInfer::InputDataMap inputData;
     inputData["CELLS"] = std::make_pair(
         std::vector<int64_t>{static_cast<int64_t>(cellBytes.size())},
-        std::move(cellBytes));
+        cellBytes);
 
     AthInfer::OutputDataMap outputData;
     outputData["TRK_PARAMS"] = std::make_pair(
@@ -149,7 +149,7 @@ StatusCode TracccTritonTool::getTracks(
     // Push the last track (no trailing separator in GEOMETRY_IDS)
     if (!measurement.athena_id.empty())
     {
-        TracccMeasurementInfoInTracks.push_back(measurement);
+        TracccMeasurementInfoInTracks.push_back(std::move(measurement));
 
         TracccTrackParameters params;
         params.chi2 = trkParamsVec.at(track * numTrkFeatures + 0);
