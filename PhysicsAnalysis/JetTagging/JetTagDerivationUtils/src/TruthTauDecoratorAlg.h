@@ -5,6 +5,8 @@
 #ifndef TRUTH_TAU_DECORATOR_ALG_H
 #define TRUTH_TAU_DECORATOR_ALG_H
 
+#include "JetTagDerivationUtils/VariableMule.h"
+
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/ReadDecorHandleKey.h"
@@ -23,77 +25,90 @@
 
 namespace ftag {
 
-  /// Decorate jets with the kinematics of their leading and subleading
-  /// ghost-associated truth taus, total and visible.
+  /// Match jets to their ghost-associated truth taus and decorate the jets
+  /// with the tau properties.
+  ///
+  /// The ghost association defines the match, the leading and subleading tau
+  /// fill one decoration slot each, and the visible quantities are taken from
+  /// the matching TruthTaus entry.
   class TruthTauDecoratorAlg final : public AthReentrantAlgorithm {
 
   public:
-    using AthReentrantAlgorithm::AthReentrantAlgorithm;
+    TruthTauDecoratorAlg(const std::string& name, ISvcLocator* pSvcLocator);
 
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
     virtual StatusCode finalize() override;
 
   private:
-    using JetDecorKey = SG::WriteDecorHandleKey<xAOD::JetContainer>;
+    using JC = xAOD::JetContainer;
+    using TPC = xAOD::TruthParticleContainer;
+    using JetDecorKey = SG::WriteDecorHandleKey<JC>;
 
-    // The four kinematic keys for one interpretation, so both share a single
-    // description and a single fill (see KinDecor in the .cxx).
-    struct KinKeys {
-      JetDecorKey pt, deta, dphi, m;
+    // Copied variables go truth tau -> jet, so the mules work through the
+    // generic IParticle interface, as do the ghost links.
+    using MC = xAOD::IParticleContainer;
+    using GhostLinks = std::vector<ElementLink<MC>>;
+
+    // One ranked tau: the quantities this algorithm computes itself, plus the
+    // variables copied straight off the matched TruthTaus entry. The slot name
+    // is the decoration suffix, so lead and sublead never collide.
+    struct Slot {
+      JetDecorKey matched, deltaR, deltaPt, dEta, dPhi, pt, m, charge;
+
+      VariableMule<float, MC> floats{NAN};
+      VariableMule<double, MC> doubles{NAN};
+      VariableMule<int, MC> ints{-1};
+      VariableMule<uint, MC> uints{0};
+      VariableMule<ulong, MC> ulongs{0};
+      VariableMule<char, MC> chars{-1};
 
       template <class OWNER>
-      KinKeys(OWNER* owner, const SG::VarHandleKey& jets,
-              const std::string& slot, const std::string& propTag,
-              const std::string& decTag, const std::string& docPrefix)
-        : pt   {owner, slot + "Pt"   + propTag, jets, "truthtau_" + slot + "_pt"   + decTag, docPrefix + "tau pT"},
-          deta {owner, slot + "Deta" + propTag, jets, "truthtau_" + slot + "_deta" + decTag, docPrefix + "tau eta wrt jet axis"},
-          dphi {owner, slot + "Dphi" + propTag, jets, "truthtau_" + slot + "_dphi" + decTag, docPrefix + "tau phi wrt jet axis"},
-          m    {owner, slot + "M"    + propTag, jets, "truthtau_" + slot + "_m"    + decTag, docPrefix + "tau mass"} {}
-    };
+      Slot(OWNER* owner, const SG::VarHandleKey& jets, const std::string& slot)
+        : matched {owner, slot + "MatchedKey", jets, "matchedTo"  + slot, "Whether the jet is matched to a truth tau"},
+          deltaR  {owner, slot + "DeltaRKey",  jets, "deltaRTo"   + slot, "Delta R between the jet axis and the visible tau"},
+          deltaPt {owner, slot + "DeltaPtKey", jets, "deltaPtTo"  + slot, "Jet pT minus the visible tau pT"},
+          dEta    {owner, slot + "DEtaKey",    jets, "dEtaTo"     + slot, "Visible tau eta wrt the jet axis"},
+          dPhi    {owner, slot + "DPhiKey",    jets, "dPhiTo"     + slot, "Visible tau phi wrt the jet axis"},
+          pt      {owner, slot + "PtKey",      jets, "ptFrom"     + slot, "Total (neutrino-inclusive) tau pT"},
+          m       {owner, slot + "MKey",       jets, "mFrom"      + slot, "Total (neutrino-inclusive) tau mass"},
+          charge  {owner, slot + "ChargeKey",  jets, "chargeFrom" + slot, "Tau charge"} {}
 
-    // All keys for one tau slot.
-    struct TauKeys {
-      KinKeys total, vis;
-      JetDecorKey numCharged, charge, isHadronic;
-
-      template <class OWNER>
-      TauKeys(OWNER* owner, const SG::VarHandleKey& jets,
-              const std::string& slot)
-        : total {owner, jets, slot, "",    "",     ""},
-          vis   {owner, jets, slot, "Vis", "_vis", "visible "},
-          numCharged {owner, slot + "NumCharged", jets, "truthtau_" + slot + "_numCharged", "tau prongness (numCharged)"},
-          charge     {owner, slot + "Charge",     jets, "truthtau_" + slot + "_charge",     "tau charge (+-1)"},
-          isHadronic {owner, slot + "IsHadronic", jets, "truthtau_" + slot + "_isHadronic", "1 for a hadronic tau decay, 0 for leptonic"} {}
-
-      std::array<JetDecorKey*, 11> all() {
-        return {&total.pt, &total.deta, &total.dphi, &total.m,
-                &vis.pt,   &vis.deta,   &vis.dphi,   &vis.m,
-                &numCharged, &charge, &isHadronic};
+      std::array<JetDecorKey*, 8> computed() {
+        return {&matched, &deltaR, &deltaPt, &dEta, &dPhi, &pt, &m, &charge};
       }
     };
 
     // Per-event writer; defined in the .cxx.
-    struct TauDecor;
+    struct SlotDecor;
 
-    // Read through the generic IParticle interface.
-    using GhostLinks = std::vector<ElementLink<xAOD::IParticleContainer>>;
+    StatusCode initializeSlot(Slot& slot, const std::string& prefix);
 
     // Declared first: the decoration keys below reference it.
-    SG::ReadHandleKey<xAOD::JetContainer> m_jetKey {
+    SG::ReadHandleKey<JC> m_jetKey {
       this, "jets", "", "Jet container to decorate"};
-    SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthTausKey {
+    SG::ReadHandleKey<TPC> m_truthTausKey {
       this, "truthTaus", "TruthTaus",
-      "TruthTaus container providing the visible-tau 4-momenta and numCharged"};
-    SG::ReadDecorHandleKey<xAOD::JetContainer> m_ghostTauKey {
+      "TruthTaus container providing the visible tau 4-momenta"};
+    SG::ReadDecorHandleKey<JC> m_ghostTauKey {
       this, "ghostTauAssocName", m_jetKey, "GhostTausFinal",
       "Ghost-associated tau links on the jets"};
 
-    TauKeys m_lead{this, m_jetKey, "lead"};
-    TauKeys m_sublead{this, m_jetKey, "sublead"};
+    Gaudi::Property<bool> m_requireIsolatedTau {
+      this, "requireIsolatedTau", true,
+      "Only consider taus with classifierParticleType == IsoTau, i.e. drop "
+      "taus from b- and c-hadron decays"};
+    Gaudi::Property<float> m_minTruthTauPt {
+      this, "minTruthTauPt", 0.0f,
+      "Minimum visible tau pT in MeV. The ghost association already applies a "
+      "5 GeV cut on the total tau pT, so this can only tighten it"};
+
+    Slot m_lead{this, m_jetKey, "TruthTaus"};
+    Slot m_sublead{this, m_jetKey, "SubleadTruthTaus"};
+
     JetDecorKey m_nGhostTausKey {
       this, "nGhostTaus", m_jetKey, "nGhostTaus",
-      "Number of ghost-associated truth taus found on this jet"};
+      "Number of ghost-associated truth taus considered for this jet"};
 
     // Ghost taus with no TruthTaus match, reported in finalize().
     mutable std::atomic<unsigned long long> m_nTausNoVisMatch{0};
