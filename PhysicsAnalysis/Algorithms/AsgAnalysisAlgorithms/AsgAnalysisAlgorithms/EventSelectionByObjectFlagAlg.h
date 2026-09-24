@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Miha Muskinja
@@ -48,7 +48,7 @@ class EventSelectionByObjectFlagAlg final : public EL::AnaAlgorithm {
   private:
     SysReadSelectionHandle m_preselection{this, "preselection", "", "the preselection to apply"};
 
-    /// \brief the preselection we apply to our input
+    /// \brief the selection upon which events are vetoed
   private:
     SysReadSelectionHandle m_veto{this, "veto", "", "selection upon which events are vetoed"};
 };
