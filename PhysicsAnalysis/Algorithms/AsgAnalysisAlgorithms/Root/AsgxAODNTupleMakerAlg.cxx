@@ -3,27 +3,6 @@
 // Local include(s):
 #include "AsgAnalysisAlgorithms/AsgxAODNTupleMakerAlg.h"
 
-// EDM include(s):
-#include "AthContainersInterfaces/IAuxStoreIO.h"
-#include "AthContainersInterfaces/IAuxTypeVectorFactory.h"
-#include "AthContainers/AuxElement.h"
-#include "AthContainers/AuxVectorBase.h"
-#include "AthContainers/normalizedTypeinfoName.h"
-#include "xAODRootAccess/tools/THolder.h"
-
-// ROOT include(s):
-#include <TClass.h>
-#include <TTree.h>
-#include <TBranch.h>
-#include <TVirtualCollectionProxy.h>
-
-// System include(s):
-#include <regex>
-#include <algorithm>
-#include <functional>
-#include <sstream>
-
-
 namespace CP {
 
    StatusCode AsgxAODNTupleMakerAlg::initialize() {

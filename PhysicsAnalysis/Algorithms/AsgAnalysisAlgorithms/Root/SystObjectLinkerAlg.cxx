@@ -15,13 +15,6 @@ static const SG::Decorator< iplink_t  > dec_nominalObject("nominalObjectLink");
 
 namespace CP
 {
-  SystObjectLinkerAlg ::SystObjectLinkerAlg(const std::string &name,
-                                  ISvcLocator *pSvcLocator)
-      : EL::AnaReentrantAlgorithm(name, pSvcLocator)
-  {
-
-  }
-
   StatusCode SystObjectLinkerAlg ::initialize()
   {
 
@@ -91,23 +84,30 @@ namespace CP
     // Then apply the bidirectional links as decorations
     const xAOD::IParticleContainer* nom_cont = systhash_to_container[nominal_hash];
     if(nom_cont==nullptr) {
+        for (const auto& sys : m_systematicsList.systematicsVector()) {
+            if(sys.hash()!=nominal_hash && systhash_to_container[sys.hash()]!=nullptr) {
+                ATH_MSG_WARNING("Nominal container is empty but the container for systematic variation '" << sys.name() << "' is not."
+                                << " No nominal/systematic links will be written, so e.g. SystObjectUnioniserAlg will fail on this event.");
+                break;
+            }
+        }
         ATH_MSG_DEBUG("Unable to retrieve the nominal container, will have to assume there are no relevant objects");
         return StatusCode::SUCCESS;
     }
 
-    for (const xAOD::IParticle* nom_obj : *nom_cont) {
-        for (const auto& sys : m_systematicsList.systematicsVector()) {
-            if(sys.hash()==nominal_hash) {continue;}
-            const xAOD::IParticleContainer *var_cont = systhash_to_container[sys.hash()];
-            if(var_cont==nullptr) {
-                ATH_MSG_ERROR("Cannot decorate syst '" << sys.name() << "' for obj " << nom_obj->index());
-                ATH_MSG_ERROR("Likely the systematics input container was empty after filtering.");
-                //must return here, the var_cont pointer is dereferenced in the next line
-                return StatusCode::FAILURE;
-            }
+    for (const auto& sys : m_systematicsList.systematicsVector()) {
+        if(sys.hash()==nominal_hash) {continue;}
+        const xAOD::IParticleContainer *var_cont = systhash_to_container[sys.hash()];
+        if(var_cont==nullptr) {
+            ATH_MSG_ERROR("Cannot decorate syst '" << sys.name() << "'");
+            ATH_MSG_ERROR("Likely the systematics input container was empty after filtering.");
+            //must return here, the var_cont pointer is dereferenced below
+            return StatusCode::FAILURE;
+        }
+        ATH_MSG_VERBOSE("Writing decoration " << m_syst_link_decor.getName(sys));
+        for (const xAOD::IParticle* nom_obj : *nom_cont) {
             const xAOD::IParticle* var_obj = (*var_cont)[nom_obj->index()];
             dec_nominalObject(*var_obj) = iplink_t(*nom_cont, nom_obj->index());
-            ATH_MSG_VERBOSE("Writing decoration " << m_syst_link_decor.getName(sys) << " from object " << nom_obj->index());
             m_syst_link_decor.set(*nom_obj, iplink_t(*var_cont, var_obj->index()), sys);
             ATH_MSG_VERBOSE("Nominal object with pt " << std::setprecision(3) << nom_obj->pt()/1e3 << " GeV linked to");
             ATH_MSG_VERBOSE("  '" << sys.name() << "' varied object with pt " << std::setprecision(3) << var_obj->pt()/1e3 << " GeV.");

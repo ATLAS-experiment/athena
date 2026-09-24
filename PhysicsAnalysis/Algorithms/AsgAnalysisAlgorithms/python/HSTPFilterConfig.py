@@ -7,7 +7,7 @@ class HSTPFilterBlock(ConfigBlock):
     """Config Block for the HSTPFilter algorithm"""
 
     def __init__(self):
-        super(HSTPFilterBlock, self).__init__()
+        super().__init__()
         self.addOption(
             "truthHSCollection",
             "AntiKt4TruthDressedWZJets",

@@ -14,7 +14,7 @@ class PrintToolConfigAlgBlock(ConfigBlock):
     """
 
     def __init__(self):
-        super (PrintToolConfigAlgBlock, self).__init__ ()
+        super().__init__ ()
 
         self.addOption('OutputFile', 'tool_config.txt', type=str,
                        info="name of the file where the tool configuration will be written.")

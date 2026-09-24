@@ -33,8 +33,8 @@ namespace {
             setCache( auxid, ptr );
         }
         using AuxVectorData::setStore;
-        virtual size_t size_v() const { return m_size; }
-        virtual size_t capacity_v() const { return m_size; }
+        size_t size_v() const override { return m_size; }
+        size_t capacity_v() const override { return m_size; }
     private:
         size_t m_size;
     };
@@ -267,7 +267,7 @@ namespace CP {
                                                OutputBranchData& outputData,
                                                MsgStream& msg ) {
         m_fieldName = outputData.branchName;
-        m_acc.reset( new SG::TypelessConstAccessor( *branchConfig.auxType, outputData.auxName ) );
+        m_acc = std::make_unique<SG::TypelessConstAccessor>( *branchConfig.auxType, outputData.auxName );
         
         if( branchConfig.auxFactory && branchConfig.auxType ) {
             m_factory = branchConfig.auxFactory;
@@ -309,11 +309,16 @@ namespace CP {
                                                 OutputBranchData& outputData,
                                                 MsgStream& msg ) {
         m_fieldName = outputData.branchName;
-        m_acc.reset( new SG::TypelessConstAccessor( *branchConfig.auxType, outputData.auxName ) );
+        m_acc = std::make_unique<SG::TypelessConstAccessor>( *branchConfig.auxType, outputData.auxName );
         
         if( branchConfig.auxFactory && branchConfig.auxVecType ) {
             m_factory = branchConfig.auxFactory;
             const std::type_info* type_info = branchConfig.auxVecType;
+            if( *type_info == typeid(std::vector<bool>) ) {
+                // std::vector<bool> provides no contiguous storage to copy into
+                msg << MSG::ERROR << "std::vector<bool> is not supported for container field " << m_fieldName << endmsg;
+                return StatusCode::FAILURE;
+            }
             
             m_field = makeField( model, m_fieldName, *type_info, m_dataPtr, m_ops, msg );
         } else {
@@ -348,7 +353,10 @@ namespace CP {
 
     StatusCode ContainerFieldProcessor::process( const SG::AuxElement& element, size_t index, MsgStream& msg ) {
         void* rawDataPtr = getData();
-        if( !rawDataPtr && index > 0 ) return StatusCode::FAILURE;
+        if( !rawDataPtr ) {
+            msg << MSG::ERROR << "No data available for " << m_fieldName << endmsg;
+            return StatusCode::FAILURE;
+        }
 
         try {
             TempInterface dstiface( index + 1, m_acc->auxid(), rawDataPtr );
@@ -505,7 +513,12 @@ namespace CP {
 
       const xAOD::MissingETContainer* met = nullptr;
       ANA_CHECK(evtStore.retrieve(met, m_sgName));
-      const SG::AuxElement& element = *(*met)[m_termName];
+      const xAOD::MissingET *term = (*met)[m_termName];
+      if( term == nullptr ) {
+        ANA_MSG_ERROR( "MET term " << m_termName << " not found in container " << m_sgName);
+        return StatusCode::FAILURE;
+      }
+      const SG::AuxElement& element = *term;
       // Process all fields.
       for (auto& p : m_fields) {
         ATH_CHECK(p->process(element, msg()));
@@ -528,8 +541,6 @@ namespace CP {
         for ( const std::string& branchDecl : branches ) {
             branchConfigs.emplace_back();
             ATH_CHECK( branchConfigs.back().parse( branchDecl, msg() ) );
-            if (!branchConfigs.back().basketSize.has_value())
-            branchConfigs.back().basketSize = defaultBasketSize;
         }
 
         // This will loop over all branches, collect the name of any

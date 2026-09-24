@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -123,25 +123,25 @@ namespace CP
        m_jetCastCutIndex = m_accept.addCut ("castJet", "cast to jet");
     }
     if (m_minEta > 0) {
-       ATH_MSG_DEBUG( "Performing |eta| >= " << m_minEta << " selection");
+       ATH_MSG_DEBUG( "Performing |eta| > " << m_minEta << " selection");
        m_minEtaCutIndex = m_accept.addCut ("minEta", "minimum eta cut");
     }
     if (m_maxEta > 0) {
-       ATH_MSG_DEBUG( "Performing |eta| < " << m_maxEta << " selection" );
+       ATH_MSG_DEBUG( "Performing |eta| <= " << m_maxEta << " selection" );
        m_maxEtaCutIndex = m_accept.addCut ("maxEta", "maximum eta cut");
     }
     if (m_etaGapHigh > 0) {
-       ATH_MSG_DEBUG( "Performing !( " << m_etaGapLow << " < |eta| < "
+       ATH_MSG_DEBUG( "Performing !( " << m_etaGapLow << " <= |eta| <= "
                       << m_etaGapHigh << " ) selection" );
        m_etaGapCutIndex = m_accept.addCut ("etaGap", "eta gap cut");
     }
     if (m_minRapidity > 0) {
-       ATH_MSG_DEBUG( "Performing |rapidity| >= " << m_minRapidity << " selection");
-       m_minRapidityCutIndex = m_accept.addCut ("minRapidity", "minimum eta cut");
+       ATH_MSG_DEBUG( "Performing |rapidity| > " << m_minRapidity << " selection");
+       m_minRapidityCutIndex = m_accept.addCut ("minRapidity", "minimum rapidity cut");
     }
     if (m_maxRapidity > 0) {
-       ATH_MSG_DEBUG( "Performing |rapidity| < " << m_maxRapidity << " selection" );
-       m_maxRapidityCutIndex = m_accept.addCut ("maxRapidity", "maximum eta cut");
+       ATH_MSG_DEBUG( "Performing |rapidity| <= " << m_maxRapidity << " selection" );
+       m_maxRapidityCutIndex = m_accept.addCut ("maxRapidity", "maximum rapidity cut");
     }
     m_shouldPrintCastWarning = m_printCastWarning;
     m_shouldPrintClusterWarning = m_printClusterWarning;
@@ -167,7 +167,9 @@ namespace CP
     // Check if dressed properties exist if needed
     if (m_useDressedProperties) {
        if (!m_dressedPtAccessor->isAvailable(*particle)) {
-         ANA_MSG_WARNING ("dressed decorations not available");
+         if (m_shouldPrintDressedWarning)
+           ANA_MSG_WARNING ("dressed decorations not available");
+         m_shouldPrintDressedWarning = false;
          return accept;
        }
        accept.setCutResult (m_dressedPropertiesIndex, true);
@@ -184,7 +186,9 @@ namespace CP
       if (m_minPtCutIndex >= 0) {
         if (!std::isfinite(pt) || pt < 0.)
         {
-          ANA_MSG_WARNING ("invalid pt value, setting object to fail pt-cut: " << pt);
+          if (m_shouldPrintPtWarning)
+            ANA_MSG_WARNING ("invalid pt value, setting object to fail pt-cut: " << pt);
+          m_shouldPrintPtWarning = false;
           accept.setCutResult (m_minPtCutIndex, false);
         } else
         {

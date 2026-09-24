@@ -58,8 +58,8 @@ namespace CP
       asg::AcceptData accept (&m_accept);
       for(std::size_t cutIndex=0; cutIndex<m_accept.getNCuts(); ++cutIndex) {
           // Apply mask and test
-          int mask = m_selMasks[cutIndex];
-          ATH_MSG_VERBOSE("Now testing var \"" << m_selVars[cutIndex] << "\" requiring value " << mask);
+          unsigned int mask = m_selMasks[cutIndex];
+          ATH_MSG_VERBOSE("Now testing var \"" << m_selVars[cutIndex] << "\" requiring zero bits in mask " << mask);
           accept.setCutResult (cutIndex, ((m_acc_selVars[cutIndex]->getBits (*particle) & mask ) == 0 ));
       }
 

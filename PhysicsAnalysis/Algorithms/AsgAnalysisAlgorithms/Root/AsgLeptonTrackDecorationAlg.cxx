@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -9,6 +9,8 @@
 #include <xAODEgamma/Electron.h>
 #include <xAODMuon/Muon.h>
 #include <xAODTracking/TrackParticlexAODHelpers.h>
+
+#include <optional>
 
 
 namespace CP
@@ -49,17 +51,19 @@ namespace CP
   {
     SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
     SG::ReadHandle<xAOD::VertexContainer> vertices(m_primaryVerticesKey, ctx);
+    if (!vertices.isValid())
+      {
+        ANA_MSG_ERROR ("Cannot retrieve primary vertex container " << m_primaryVerticesKey.key());
+        return StatusCode::FAILURE;
+      }
     const xAOD::Vertex *primaryVertex {nullptr};
 
     for (const xAOD::Vertex *vertex : *vertices)
     {
       if (vertex->vertexType() == xAOD::VxType::PriVtx)
       {
-        if (primaryVertex == nullptr)
-        {
-          primaryVertex = vertex;
-          break;
-        }
+        primaryVertex = vertex;
+        break;
       }
     }
 
@@ -89,23 +93,31 @@ namespace CP
           return StatusCode::FAILURE;
         }
 
-        if (track != nullptr) {
-          // This deep-copy is not optimal and it would be more efficient to work with shallow-copies of the track container(s)
-          xAOD::TrackParticle copyTrack {*track};
-          if (!m_biasingTool.empty())
-            ANA_CHECK_CORRECTION (m_outOfValidity, copyTrack, m_biasingTool->applyCorrection (copyTrack));
-          if (!m_smearingTool.empty())
-            ANA_CHECK_CORRECTION (m_outOfValidity, copyTrack, m_smearingTool->applyCorrection (copyTrack));
-          d0 = copyTrack.d0();
+        // This deep-copy is not optimal and it would be more efficient to work with shallow-copies of the track container(s)
+        std::optional<xAOD::TrackParticle> correctedTrack;
+        if (!m_biasingTool.empty() || !m_smearingTool.empty())
+          correctedTrack.emplace (*track);
+        if (!m_biasingTool.empty())
+          ANA_CHECK_CORRECTION (m_outOfValidity, *correctedTrack, m_biasingTool->applyCorrection (*correctedTrack));
+        if (!m_smearingTool.empty())
+          ANA_CHECK_CORRECTION (m_outOfValidity, *correctedTrack, m_smearingTool->applyCorrection (*correctedTrack));
+        const xAOD::TrackParticle &copyTrack = correctedTrack ? *correctedTrack : *track;
+        d0 = copyTrack.d0();
+        try {
           d0sig = xAOD::TrackingHelpers::d0significance(&copyTrack,
-							eventInfo->beamPosSigmaX(),
-							eventInfo->beamPosSigmaY(),
-							eventInfo->beamPosSigmaXY());
-
-          z0 = copyTrack.z0();
-          const double vertex_z = primaryVertex ? primaryVertex->z() : 0;
-          deltaZ0SinTheta = (z0 + copyTrack.vz() - vertex_z) * sin (particle->p4().Theta());
+                                                        eventInfo->beamPosSigmaX(),
+                                                        eventInfo->beamPosSigmaY(),
+                                                        eventInfo->beamPosSigmaXY());
+        } catch (const std::runtime_error &) {
+          d0sig = -999;
+        }
+        z0 = copyTrack.z0();
+        const double vertex_z = primaryVertex ? primaryVertex->z() : 0;
+        deltaZ0SinTheta = (z0 + copyTrack.vz() - vertex_z) * sin (particle->p4().Theta());
+        try {
           deltaZ0SinThetasig = xAOD::TrackingHelpers::z0sinthetasignificance(&copyTrack,primaryVertex);
+        } catch (const std::runtime_error &) {
+          deltaZ0SinThetasig = -999;
         }
 
         m_d0Handle.set(*particle,d0,sys);

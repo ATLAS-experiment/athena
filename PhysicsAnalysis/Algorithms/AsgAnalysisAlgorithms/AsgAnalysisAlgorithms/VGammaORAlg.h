@@ -7,12 +7,11 @@
 #ifndef ASG_VGAMMAORALG_H
 #define ASG_VGAMMAORALG_H
 
-#include <AnaAlgorithm/AnaAlgorithm.h>
+#include <AnaAlgorithm/AnaReentrantAlgorithm.h>
+#include <AsgDataHandles/ReadHandleKey.h>
+#include <AsgDataHandles/WriteDecorHandleKey.h>
 #include <AsgTools/PropertyWrapper.h>
-#include <SystematicsHandles/SysReadHandle.h>
-#include <SystematicsHandles/SysListHandle.h>
-#include <SystematicsHandles/SysWriteDecorHandle.h>
-#include <SystematicsHandles/SysFilterReporterParams.h>
+#include <EventBookkeeperTools/FilterReporterParams.h>
 
 #include <xAODEventInfo/EventInfo.h>
 
@@ -20,36 +19,33 @@
 
 namespace CP {
 
-  class VGammaORAlg final : public EL::AnaAlgorithm {
+  class VGammaORAlg final : public EL::AnaReentrantAlgorithm {
 
   public:
-    using EL::AnaAlgorithm::AnaAlgorithm;
+    using EL::AnaReentrantAlgorithm::AnaReentrantAlgorithm;
     virtual StatusCode initialize() override;
-    virtual StatusCode execute(const EventContext& ctx) override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
     virtual StatusCode finalize() override;
 
   private:
-    /// \brief the systematics
-    CP::SysListHandle m_systematicsList {this};
-
     /// \brief the overlap removal tool
     ToolHandle<IVGammaORTool> m_vgammaORTool {
       this, "VGammaORTool", "", "the VGammaORTool"
     };
 
-    /// \brief the event info handle
-    CP::SysReadHandle<xAOD::EventInfo> m_eventInfoHandle {
+    /// \brief the event info key
+    SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey {
       this, "eventInfoContainer", "EventInfo", "the input EventInfo container"
     };
 
     /// \brief the decoration for the tool decision
-    CP::SysWriteDecorHandle<bool> m_inOverlapHandle {
-      this, "in_vgamma_overlap", "in_vgamma_overlap_%SYS%", "decoration name for the VGammaORTool overlap flag"
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_inOverlapKey {
+      this, "in_vgamma_overlap", m_eventInfoKey, "in_vgamma_overlap", "decoration name for the VGammaORTool overlap flag"
     };
 
     /// \brief the event filter for the tool decision
-    CP::SysFilterReporterParams m_filterParams {
-      this, "VGamma overlap filter"
+    FilterReporterParams m_filterParams {
+      this, "VGammaORFilter", "VGamma overlap filter"
     };
 
     /// \brief whether to not apply an event filter

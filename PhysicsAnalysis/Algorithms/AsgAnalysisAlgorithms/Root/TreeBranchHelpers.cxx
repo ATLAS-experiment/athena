@@ -56,8 +56,8 @@ public:
 
   using AuxVectorData::setStore;
 
-  virtual size_t size_v() const { return m_size; }
-  virtual size_t capacity_v() const { return m_size; }
+  size_t size_v() const override { return m_size; }
+  size_t capacity_v() const override { return m_size; }
 
 private:
   size_t m_size;
@@ -640,7 +640,7 @@ namespace CP
       m_branchName = outputData.branchName;
 
       // Create the accessor.
-      m_acc.reset( new SG::TypelessConstAccessor( *branchConfig.auxType, outputData.auxName ) );
+      m_acc = std::make_unique<SG::TypelessConstAccessor>( *branchConfig.auxType, outputData.auxName );
 
       // Get a pointer to the vector factory.
       m_factory = branchConfig.auxFactory;
@@ -671,6 +671,13 @@ namespace CP
         // Create the primitive branch.
         br = tree.Branch( outputData.branchName.c_str(), m_data->toPtr(),
                           typeDesc.str().c_str() );
+        // Check that the branch creation succeeded.
+        if( ! br ) {
+          msg << MSG::ERROR << "Failed to create branch: " << outputData.branchName
+              << endmsg;
+          return StatusCode::FAILURE;
+        }
+
         if (branchConfig.basketSize.has_value())
           br->SetBasketSize(branchConfig.basketSize.value());
 
@@ -700,16 +707,16 @@ namespace CP
         // Create the object branch.
         m_dataPtr = m_data->toPtr();
         br = tree.Branch( outputData.branchName.c_str(), cl->GetName(), &m_dataPtr );
+        // Check that the branch creation succeeded.
+        if( ! br ) {
+          msg << MSG::ERROR << "Failed to create branch: " << outputData.branchName
+              << endmsg;
+          return StatusCode::FAILURE;
+        }
+
         if (branchConfig.basketSize.has_value())
           br->SetBasketSize(branchConfig.basketSize.value());
 
-      }
-
-      // Check that the branch creation succeeded.
-      if( ! br ) {
-        msg << MSG::ERROR << "Failed to create branch: " << outputData.branchName
-            << endmsg;
-        return StatusCode::FAILURE;
       }
 
       // Return gracefully.
@@ -725,9 +732,6 @@ namespace CP
         msg << MSG::FATAL << "Internal logic error detected" << endmsg;
         return StatusCode::FAILURE;
       }
-
-      // Get the data out of the xAOD object.
-      //const void* auxData = ( *m_acc )( element );
 
       // Copy it into the output variable.
       TempInterface dstiface (m_data->size(), m_acc->auxid(), m_data->toPtr());
@@ -751,7 +755,7 @@ namespace CP
       m_branchName = outputData.branchName;
 
       // Create the accessor.
-      m_acc.reset( new SG::TypelessConstAccessor( *branchConfig.auxType, outputData.auxName ) );
+      m_acc = std::make_unique<SG::TypelessConstAccessor>( *branchConfig.auxType, outputData.auxName );
 
       // Get a pointer to the vector factory.
       m_factory = branchConfig.auxFactory;
@@ -819,9 +823,6 @@ namespace CP
         msg << MSG::FATAL << "Internal logic error detected" << endmsg;
         return StatusCode::FAILURE;
       }
-
-      // Get the data out of the xAOD object.
-      //const void* auxData = ( *m_acc )( element );
 
       // Copy it into the output variable.
       TempInterface dstiface (m_data->size(), m_acc->auxid(), m_data->toPtr());
@@ -999,7 +1000,12 @@ namespace CP
 
         const xAOD::MissingETContainer *met = nullptr;
         ANA_CHECK (evtStore.retrieve (met, m_sgName));
-        const SG::AuxElement& element = *(*met)[m_termName];
+        const xAOD::MissingET *term = (*met)[m_termName];
+        if( term == nullptr ) {
+            ANA_MSG_ERROR( "MET term " << m_termName << " not found in container " << m_sgName);
+            return StatusCode::FAILURE;
+        }
+        const SG::AuxElement& element = *term;
         // Process all branches.
         for( auto& p : m_branches ) {
           ATH_CHECK( p->process( element, msg() ) );

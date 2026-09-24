@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -25,8 +25,7 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    MCTCDecorationAlg (const std::string& name, 
-                       ISvcLocator* pSvcLocator);
+    using EL::AnaAlgorithm::AnaAlgorithm;
 
 
   public:
@@ -71,7 +70,7 @@ namespace CP
   private:
     Gaudi::Property<std::string> m_fromHadronDecoration{this, "fromHadronDecoration", "MCTC_fromHadron", "the decoration for the hadronic origin"};
 
-    /// \brief the decorator for \ref m_fromHadDecoration
+    /// \brief the decorator for \ref m_fromHadronDecoration
   private:
     std::unique_ptr<const SG::Decorator<int> > m_fromHadronDecorator{};
 

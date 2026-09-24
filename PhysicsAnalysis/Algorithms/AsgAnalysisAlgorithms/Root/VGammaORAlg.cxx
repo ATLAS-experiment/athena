@@ -5,43 +5,40 @@
 /// @author Lucas Cremer
 
 #include "AsgAnalysisAlgorithms/VGammaORAlg.h"
-#include <SystematicsHandles/SysFilterReporter.h>
-#include <SystematicsHandles/SysFilterReporterCombiner.h>
+#include <AsgDataHandles/ReadHandle.h>
+#include <AsgDataHandles/WriteDecorHandle.h>
+#include <EventBookkeeperTools/FilterReporter.h>
 
 namespace CP {
 
   StatusCode VGammaORAlg::initialize() {
 
-    ANA_CHECK(m_filterParams.initialize(m_systematicsList));
-    ANA_CHECK(m_eventInfoHandle.initialize(m_systematicsList));
-    ANA_CHECK(m_inOverlapHandle.initialize(m_systematicsList, m_eventInfoHandle));
-    ANA_CHECK(m_systematicsList.initialize());
+    ANA_CHECK(m_vgammaORTool.retrieve());
+    ANA_CHECK(m_filterParams.initialize());
+    ANA_CHECK(m_eventInfoKey.initialize());
+    ANA_CHECK(m_inOverlapKey.initialize());
 
     return StatusCode::SUCCESS;
   }
 
-  StatusCode VGammaORAlg::execute(const EventContext& ctx) {
+  StatusCode VGammaORAlg::execute(const EventContext& ctx) const {
 
-    // the event-level filter
-    CP::SysFilterReporterCombiner filterCombiner(m_filterParams, m_noFilter.value());
+    FilterReporter filter(m_filterParams, m_noFilter.value(), ctx);
 
-    for (const auto &sys : m_systematicsList.systematicsVector()) {
-      // the per-systematic filter
-      CP::SysFilterReporter filter(filterCombiner, sys);
+    SG::ReadHandle<xAOD::EventInfo> evtInfo(m_eventInfoKey, ctx);
+    ANA_CHECK(evtInfo.isValid());
 
-      const xAOD::EventInfo *evtInfo = nullptr;
-      ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys, ctx));
+    bool in_vgamma_overlap;
+    ANA_CHECK(m_vgammaORTool->inOverlap(in_vgamma_overlap));
 
-      bool in_vgamma_overlap;
-      ANA_CHECK(m_vgammaORTool->inOverlap(in_vgamma_overlap));
-      m_inOverlapHandle.set(*evtInfo, in_vgamma_overlap, sys);
+    SG::WriteDecorHandle<xAOD::EventInfo, bool> dec(m_inOverlapKey, ctx);
+    dec(*evtInfo) = in_vgamma_overlap;
 
-      if (!m_noFilter.value()) {
-        if (m_keepOverlap)
-          filter.setPassed(  in_vgamma_overlap );
-        else
-          filter.setPassed( !in_vgamma_overlap );
-      }
+    if (!m_noFilter.value()) {
+      if (m_keepOverlap)
+        filter.setPassed(  in_vgamma_overlap );
+      else
+        filter.setPassed( !in_vgamma_overlap );
     }
 
     return StatusCode::SUCCESS;
@@ -49,7 +46,7 @@ namespace CP {
 
   StatusCode VGammaORAlg::finalize() {
 
-    ANA_CHECK(m_filterParams.finalize());
+    ANA_MSG_INFO(m_filterParams.summary());
     return StatusCode::SUCCESS;
   }
 } // namespace

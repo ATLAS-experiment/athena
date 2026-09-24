@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina
@@ -10,12 +10,10 @@
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <AsgTools/PropertyWrapper.h>
-#include <SelectionHelpers/ISelectionNameSvc.h>
 #include <SelectionHelpers/SysReadSelectionHandle.h>
 #include <SystematicsHandles/SysReadHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
 #include <xAODEventInfo/EventInfo.h>
-#include <AsgTools/PropertyWrapper.h>
 
 namespace CP
 {
@@ -47,10 +45,6 @@ namespace CP
     /// \brief the pattern for histogram names
   private:
     Gaudi::Property<std::string> m_histPattern {this, "histPattern", "cutflow_%SYS%", "the pattern for histogram names"};
-
-    /// \brief the selection name service
-  private:
-    ServiceHandle<ISelectionNameSvc> m_selectionNameSvc {"SelectionNameSvc", "EventCutFlowHistAlg"};
 
     /// \brief the histogram title to use
   private:

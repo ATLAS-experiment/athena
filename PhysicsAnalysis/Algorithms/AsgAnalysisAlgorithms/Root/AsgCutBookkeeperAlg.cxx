@@ -236,7 +236,15 @@ namespace CP
         break;
       }
 
-      const WeightsGroup &weights = m_weights.at (m_truthWeightTool->getSysWeightIndex(sys));
+      const size_t index = m_truthWeightTool->getSysWeightIndex(sys);
+      const auto weightsIt = m_weights.find (index);
+      if (weightsIt == m_weights.end())
+      {
+        ANA_MSG_ERROR ("No CutBookkeeper weights available for systematic " << sys.name() << " with index " << index);
+        return StatusCode::FAILURE;
+      }
+
+      const WeightsGroup &weights = weightsIt->second;
       h->SetBinContent (1, weights.nEventsProcessed);
       h->SetBinContent (2, weights.sumOfWeights);
       h->SetBinContent (3, weights.sumOfWeightsSquared);

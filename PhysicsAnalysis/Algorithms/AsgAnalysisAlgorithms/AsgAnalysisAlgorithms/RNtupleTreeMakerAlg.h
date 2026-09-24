@@ -12,6 +12,7 @@
 // RNTuple include(s):
 #include <ROOT/RNTupleModel.hxx>
 #include <ROOT/RNTupleWriter.hxx>
+#include <TFile.h>
 
 // Local include(s):
 #include "AsgAnalysisAlgorithms/RNtupleFieldHelpers.h"
@@ -73,6 +74,10 @@ namespace CP {
       CP::RNtupleFieldHelpers::ProcessorList m_processorList{this};
 
       bool m_isInitialized = false;
+
+#ifndef XAOD_STANDALONE
+      std::unique_ptr<TFile> m_outputFile;
+#endif
 
       /// @}
 

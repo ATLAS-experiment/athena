@@ -38,16 +38,21 @@ namespace CP
   StatusCode AsgOriginalObjectLinkAlg ::
   execute (const EventContext &ctx) const
   {
+    SG::ReadHandle<xAOD::IParticleContainer> baseParticles(m_baseContainerName, ctx);
+    if (!baseParticles.isValid())
+    {
+      ANA_MSG_ERROR ("Cannot retrieve base container " << m_baseContainerName.key());
+      return StatusCode::FAILURE;
+    }
+
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       xAOD::IParticleContainer *particles = nullptr;
       ANA_CHECK (m_particleHandle.getCopy (particles, sys, ctx));
 
-      SG::ReadHandle<xAOD::IParticleContainer> baseParticles(m_baseContainerName, ctx);
-
       if (!xAOD::setOriginalObjectLink (*baseParticles, *particles))
       {
-        ATH_MSG_ERROR ("Cannot set original object links for container named " << m_baseContainerName);
+        ANA_MSG_ERROR ("Cannot set original object links for container named " << m_baseContainerName);
         return StatusCode::FAILURE;
       }
     }

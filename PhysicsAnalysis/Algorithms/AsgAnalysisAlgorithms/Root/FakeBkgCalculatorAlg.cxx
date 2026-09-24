@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nello Bruscino
@@ -12,17 +12,18 @@ namespace CP {
   StatusCode FakeBkgCalculatorAlg::initialize() {
 
     ANA_CHECK(m_electronsHandle.initialize(m_systematicsList));
-    ANA_CHECK(m_electronSelection.initialize(m_systematicsList, m_electronsHandle));
+    ANA_CHECK(m_electronSelection.initialize(m_systematicsList, m_electronsHandle, SG::AllowEmpty));
     ANA_CHECK(m_electronSelectionTarget.initialize(m_systematicsList, m_electronsHandle));
 
     ANA_CHECK(m_muonsHandle.initialize(m_systematicsList));
-    ANA_CHECK(m_muonSelection.initialize(m_systematicsList, m_muonsHandle));
+    ANA_CHECK(m_muonSelection.initialize(m_systematicsList, m_muonsHandle, SG::AllowEmpty));
     ANA_CHECK(m_muonSelectionTarget.initialize(m_systematicsList, m_muonsHandle));
 
     ANA_CHECK(m_eventInfoHandle.initialize(m_systematicsList));
     ANA_CHECK(m_preselection.initialize(m_systematicsList, m_eventInfoHandle, SG::AllowEmpty));
 
     ANA_CHECK(m_fakeTool.retrieve());
+    ANA_CHECK(m_fakeTool->applySystematicVariation({})); // the nominal MM weight is computed
     ANA_CHECK(m_fakeToolOutput.initialize(m_systematicsList, m_eventInfoHandle));
 
     ANA_CHECK(m_systematicsList.initialize());
@@ -66,7 +67,6 @@ namespace CP {
 
       ANA_CHECK(m_fakeTool->addEvent(leptons));
       float asmWgt = 0.;
-      ANA_CHECK(m_fakeTool->applySystematicVariation({})); // the nominal MM weight is computed
       ANA_CHECK(m_fakeTool->getEventWeight(asmWgt, m_definition, m_process));
       ANA_MSG_DEBUG(" ----> asmWgt = "<<asmWgt);
 

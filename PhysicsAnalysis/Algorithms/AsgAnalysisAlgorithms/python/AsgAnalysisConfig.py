@@ -38,7 +38,7 @@ class CommonServicesConfig (ConfigBlock) :
     """
 
     def __init__ (self) :
-        super (CommonServicesConfig, self).__init__ ()
+        super().__init__ ()
         self.addOption ('runSystematics', None, type=bool,
             info="whether to turn on the computation of systematic variations. "
             "The default is to run them on MC.")
@@ -112,7 +112,7 @@ class CommonServicesConfig (ConfigBlock) :
                         raise ValueError(f"Invalid systematics category passed to option 'onlySystematicsCategories': {category_str}. Must be one of {', '.join(category.name for category in SystematicsCategories)}")
                 # Construct regex pattern as logical-OR of category names
                 if len(requested_categories):
-                    sysService.systematicsRegex = "^(?=.*(" + "|".join(requested_categories) + ")|$).*"
+                    sysService.systematicsRegex = "^(?=.*(" + "|".join(sorted(requested_categories)) + ")|$).*"
             if self.filterSystematics is not None:
                 sysService.systematicsRegex = self.filterSystematics
         config.createService( 'CP::SelectionNameSvc', 'SelectionNameSvc')
@@ -128,6 +128,7 @@ class CommonServicesConfig (ConfigBlock) :
                 weightSysDumper = config.createAlgorithm( 'CP::SysListDumperAlg', 'OnlyWeightSystematicsPrinter' )
                 weightSysDumper.histogramName = f"{self.systematicsHistogram}OnlyWeights"
                 weightSysDumper.systematicsRegex = "^(GEN_|EL_EFF_|MUON_EFF_|PH_EFF_|TAUS_TRUEHADTAU_EFF_|FT_EFF_|JET_.*JvtEfficiency_|PRW_).*"
+                weightSysDumper.RootStreamName = streamName
 
         if self.metadataHistogram:
             # add histogram with metadata
@@ -182,7 +183,7 @@ class IOStatsBlock(ConfigBlock):
     """Print what branches are used in analysis"""
 
     def __init__(self):
-        super(IOStatsBlock, self).__init__()
+        super().__init__()
         self.addOption("printOption", "Summary", type=str,
                        info='option to pass the standard ROOT printing function. Can be `Summary`, `ByEntries` or `ByBytes`.',
                        meta={'choices':(['Summary','ByEntries','ByBytes'],1)})
@@ -200,7 +201,7 @@ class PileupReweightingBlock (ConfigBlock):
     """the ConfigBlock for pileup reweighting"""
 
     def __init__ (self) :
-        super (PileupReweightingBlock, self).__init__ ()
+        super().__init__ ()
         self.addOption ('campaign', None, type=None,
             info="the MC campaign for the PRW auto-configuration.")
         self.addOption ('files', None, type=list,
@@ -261,7 +262,7 @@ class PileupReweightingBlock (ConfigBlock):
 
         if config.isPhyslite() and not self.alternativeConfig:
             # PHYSLITE already has these variables defined, just need to copy them to the output
-            log.info(f'Physlite does not need pileup reweighting. Variables will be copied from input instead. {config.isPhyslite}')
+            log.info(f'Physlite does not need pileup reweighting. Variables will be copied from input instead. {config.isPhyslite()}')
             for var_name,var_type in eventInfoVar:
                 config.addOutputVar ('EventInfo', var_name, var_name, noSys=True, auxType=var_type)
 
@@ -341,9 +342,13 @@ class PileupReweightingBlock (ConfigBlock):
 
             # check if user provides per-campaign lumical config list
             if self.userLumicalcFilesPerCampaign is not None and self.userLumicalcFiles is not None:
-                raise ValueError('Both userLumicalcFiles and userLumicalcFilesYear specified, '
+                raise ValueError('Both userLumicalcFiles and userLumicalcFilesPerCampaign specified, '
                                 'use only one of the options!')
             if self.userLumicalcFilesPerCampaign is not None:
+                if not campaign:
+                    raise Exception('userLumicalcFilesPerCampaign requires campaign to be configured!')
+                if campaign is Campaign.Unknown:
+                    raise Exception('userLumicalcFilesPerCampaign used, but campaign = Unknown!')
                 try:
                     toolLumicalcFiles = self.userLumicalcFilesPerCampaign[campaign.value][:]
                     log.info('Using user-provided per-campaign lumicalc files')
@@ -402,7 +407,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
     """the ConfigBlock for generator algorithms"""
 
     def __init__ (self) :
-        super (GeneratorAnalysisBlock, self).__init__ ()
+        super().__init__ ()
         self.addOption ('saveCutBookkeepers', True, type=bool,
             info="whether to save the cut bookkeepers information into the "
             "output file.")
@@ -593,7 +598,7 @@ class PtEtaSelectionBlock (ConfigBlock):
     """the ConfigBlock for a pt-eta selection"""
 
     def __init__ (self) :
-        super (PtEtaSelectionBlock, self).__init__ ()
+        super().__init__ ()
         self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.",
@@ -666,7 +671,7 @@ class ObjectCutFlowBlock (ConfigBlock):
     """the ConfigBlock for an object cutflow"""
 
     def __init__ (self) :
-        super (ObjectCutFlowBlock, self).__init__ ()
+        super().__init__ ()
         self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.",
@@ -705,7 +710,7 @@ class EventCutFlowBlock (ConfigBlock):
     """the ConfigBlock for an event-level cutflow"""
 
     def __init__(self):
-        super(EventCutFlowBlock, self).__init__()
+        super().__init__()
         self.addOption('selectionName', '', type=str,
             noneAction='error',
             info="the name of the event selection to generate cutflow histograms for. "
@@ -717,7 +722,7 @@ class EventCutFlowBlock (ConfigBlock):
         self.addOption('cutFlowHistograms', True, type=bool,
             info="whether to generate cutflow histograms for the selection cuts.")
         self.addOption('cutFlowHistogramsWithSystematics', True, type=bool,
-            info="whether to generate cutflow histograms for the selection cuts"
+            info="whether to generate cutflow histograms for the selection cuts "
                 "when running with systematics.")
         self.addOption ('streamName', None, type=str,
             info="name of the output stream to save the cut bookkeeper in.")
@@ -759,7 +764,7 @@ class OutputThinningBlock (ConfigBlock):
     """the ConfigBlock for output thinning"""
 
     def __init__ (self) :
-        super (OutputThinningBlock, self).__init__ ()
+        super().__init__ ()
         self.setBlockName('Thinning')
         self.addOption ('containerName', '', type=str,
             noneAction='error',
@@ -836,7 +841,7 @@ class IFFLeptonDecorationBlock (ConfigBlock):
     """the ConfigBlock for the IFF classification of leptons"""
 
     def __init__ (self) :
-        super (IFFLeptonDecorationBlock, self).__init__()
+        super().__init__()
         self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input electron or muon container.",
@@ -871,7 +876,7 @@ class IFFLeptonDecorationBlock (ConfigBlock):
 class MCTCLeptonDecorationBlock (ConfigBlock):
 
     def __init__ (self) :
-        super (MCTCLeptonDecorationBlock, self).__init__ ()
+        super().__init__ ()
 
         self.addOption ("containerName", '', type=str,
                         noneAction='error',
@@ -905,7 +910,7 @@ class PerEventSFBlock (ConfigBlock):
     """the ConfigBlock for the AsgEventScaleFactorAlg"""
 
     def __init__ (self):
-        super(PerEventSFBlock, self).__init__()
+        super().__init__()
         self.addOption('algoName', None, type=str,
             info="unique name given to the underlying algorithm computing the "
             "per-event scale factors.")
@@ -940,7 +945,7 @@ class SelectionDecorationBlock (ConfigBlock):
     """the ConfigBlock to add selection decoration to a container"""
 
     def __init__ (self) :
-        super (SelectionDecorationBlock, self).__init__ ()
+        super().__init__ ()
         # TODO: add info string
         self.addOption('containers', [], type=list,
             noneAction='error',

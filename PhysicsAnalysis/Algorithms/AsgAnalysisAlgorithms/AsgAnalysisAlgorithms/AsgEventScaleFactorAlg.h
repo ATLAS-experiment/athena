@@ -25,8 +25,7 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    AsgEventScaleFactorAlg (const std::string& name,
-                            ISvcLocator* pSvcLocator);
+    using EL::AnaAlgorithm::AnaAlgorithm;
 
 
   public:

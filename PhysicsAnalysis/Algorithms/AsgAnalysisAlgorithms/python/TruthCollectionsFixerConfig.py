@@ -12,7 +12,7 @@ class TruthCollectionsFixerBlock(ConfigBlock):
     """
 
     def __init__(self):
-        super(TruthCollectionsFixerBlock, self).__init__()
+        super().__init__()
         self.addOption(
             "truthParticleContainersToFix",
             None,
