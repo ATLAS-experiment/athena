@@ -3,7 +3,7 @@
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AthenaConfiguration.Enums import LHCPeriod
 
-from HyPERAnalysisAlgorithms.ReconstructionAlgorithmsUtils import _resolve_reco_partons_prefix
+from ReconstructionUtils.ReconstructionAlgorithmsUtils import _resolve_reco_partons_prefix
 
 
 class HyPERBlock(ConfigBlock):
