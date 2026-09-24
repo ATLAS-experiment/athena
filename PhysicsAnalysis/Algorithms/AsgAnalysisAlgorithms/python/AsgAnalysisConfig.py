@@ -262,7 +262,7 @@ class PileupReweightingBlock (ConfigBlock):
 
         if config.isPhyslite() and not self.alternativeConfig:
             # PHYSLITE already has these variables defined, just need to copy them to the output
-            log.info(f'Physlite does not need pileup reweighting. Variables will be copied from input instead. {config.isPhyslite}')
+            log.info(f'Physlite does not need pileup reweighting. Variables will be copied from input instead. {config.isPhyslite()}')
             for var_name,var_type in eventInfoVar:
                 config.addOutputVar ('EventInfo', var_name, var_name, noSys=True, auxType=var_type)
 
