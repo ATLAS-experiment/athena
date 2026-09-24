@@ -235,13 +235,13 @@ namespace JiveXML {
 
       // bjet tagger values
       if (jetkey!="AntiKt4EMPFlowJets" || (m_nTaggers==0)){
-	for (auto taggerName : m_bTaggerNames) {
+	for (std::size_t i{}; i!= m_bTaggerNames.size();++i) {
 	  bTagName.emplace_back(DataType("None"));
 	  bTagValue.emplace_back(DataType(0.));
 	}
       }else{
 	double btagValue;
-	for (auto taggerName : m_bTaggerNames) {
+	for (const auto & taggerName : m_bTaggerNames) {
 	  CP::CorrectionCode code = m_btagSelTools[taggerName]->getTaggerWeight(*jet, btagValue);
 	  if (code != CP::CorrectionCode::Ok) {
 	    ATH_MSG_DEBUG("Failed to get btagging weight for tagger " << taggerName);

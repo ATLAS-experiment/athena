@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODJiveXML/xAODPhotonRetriever.h"
@@ -77,7 +77,12 @@ namespace JiveXML {
     xAOD::PhotonContainer::const_iterator phItrE = phCont->end();
 
     int counter = 0;
-
+    const std::string mediumStr{"Medium"};
+    const std::string tightStr{"Tight"};
+    const std::string looseStr{"Loose"};
+    auto prefix = [](const std::string & root)->std::string{
+      return '_'+root;
+    };
     for (; phItr != phItrE; ++phItr) {
       ATH_MSG_DEBUG("  Photon #" << counter++ << " : eta = "  << (*phItr)->eta() << ", phi = "
 		    << (*phItr)->phi());
@@ -93,13 +98,13 @@ namespace JiveXML {
       bool passesTight(false);
       bool passesMedium(false);
       bool passesLoose(false);
-      const bool tightSelectionExists = (*phItr)->passSelection(passesTight, "Tight");
+      const bool tightSelectionExists = (*phItr)->passSelection(passesTight, tightStr);
       ATH_MSG_VERBOSE("tight exists " << tightSelectionExists
 		      << " and passes? " << passesTight);
-      const bool mediumSelectionExists = (*phItr)->passSelection(passesMedium, "Medium");
+      const bool mediumSelectionExists = (*phItr)->passSelection(passesMedium, mediumStr);
       ATH_MSG_VERBOSE("medium exists " << mediumSelectionExists
 		      << " and passes? " << passesMedium);
-      const bool looseSelectionExists = (*phItr)->passSelection(passesLoose, "Loose");
+      const bool looseSelectionExists = (*phItr)->passSelection(passesLoose, looseStr);
       ATH_MSG_VERBOSE("loose exists " << looseSelectionExists
 		      << " and passes? " << passesLoose);
 
@@ -111,16 +116,16 @@ namespace JiveXML {
       if (( (*phItr)->author()) == 1){ photonAuthor = "egamma"; photonLabel += "_egamma"; }
 
       if ( passesLoose ){
-	photonLabel += "_Loose";
-	photonIsEMString = "Loose"; // assume that hierarchy is obeyed !
+	photonLabel += prefix(looseStr);
+	photonIsEMString = looseStr; // assume that hierarchy is obeyed !
       }
       if ( passesMedium ){
-	photonLabel += "_Medium";
-	photonIsEMString = "Medium"; // assume that hierarchy is obeyed !
+	photonLabel += prefix(mediumStr);
+	photonIsEMString = mediumStr; // assume that hierarchy is obeyed !
       }
       if ( passesTight ){
-	photonLabel += "_Tight";
-	photonIsEMString = "Tight"; // assume that hierarchy is obeyed !
+	photonLabel += prefix(tightStr);
+	photonIsEMString = tightStr; // assume that hierarchy is obeyed !
       }
       author.emplace_back( DataType( photonAuthor ) );
       label.emplace_back( DataType( photonLabel ) );
@@ -131,16 +136,17 @@ namespace JiveXML {
     } // end PhotonIterator
 
     // four-vectors
-    DataMap["phi"] = phi;
-    DataMap["eta"] = eta;
-    DataMap["pt"] = pt;
-    DataMap["energy"] = energy;
-    DataMap["mass"] = mass;
-    DataMap["isEMString"] = isEMString;
-    DataMap["label"] = label;
-    DataMap["author"] = author;
+    std::size_t nEntries  = phi.size();
+    DataMap["phi"] = std::move(phi);
+    DataMap["eta"] = std::move(eta);
+    DataMap["pt"] = std::move(pt);
+    DataMap["energy"] = std::move(energy);
+    DataMap["mass"] = std::move(mass);
+    DataMap["isEMString"] = std::move(isEMString);
+    DataMap["label"] = std::move(label);
+    DataMap["author"] = std::move(author);
 
-    ATH_MSG_DEBUG(dataTypeName() << " retrieved with " << phi.size() << " entries");
+    ATH_MSG_DEBUG(dataTypeName() << " retrieved with " << nEntries << " entries");
     return DataMap;
 
   }

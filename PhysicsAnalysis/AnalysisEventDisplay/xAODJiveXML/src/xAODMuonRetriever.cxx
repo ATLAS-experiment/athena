@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODJiveXML/xAODMuonRetriever.h"
@@ -92,15 +92,16 @@ namespace JiveXML {
     } // end MuonIterator
 
     // four-vectors
-    DataMap["phi"] = phi;
-    DataMap["eta"] = eta;
-    DataMap["pt"] = pt;
-    DataMap["energy"] = energy;
-    DataMap["mass"] = mass;
-    DataMap["chi2"] = chi2;
-    DataMap["pdgId"] = pdgId;
+    const std::size_t nEntries = phi.size();
+    DataMap["phi"] = std::move(phi);
+    DataMap["eta"] = std::move(eta);
+    DataMap["pt"] = std::move(pt);
+    DataMap["energy"] = std::move(energy);
+    DataMap["mass"] = std::move(mass);
+    DataMap["chi2"] = std::move(chi2);
+    DataMap["pdgId"] = std::move(pdgId);
 
-    ATH_MSG_DEBUG(" retrieved with " << phi.size() << " entries");
+    ATH_MSG_DEBUG(" retrieved with " << nEntries << " entries");
     return DataMap;
   }
 } // JiveXML namespace

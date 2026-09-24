@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODJiveXML/xAODVertexRetriever.h"
@@ -80,19 +80,6 @@ namespace JiveXML {
     DataVect tracks;
     DataVect sgkey;
 
-    //Get size of current container
-    xAOD::VertexContainer::size_type NVtx = cont->size();
-
-    x.reserve(x.size()+NVtx);
-    y.reserve(y.size()+NVtx);
-    z.reserve(z.size()+NVtx);
-    chi2.reserve(chi2.size()+NVtx);
-    vertexType.reserve(vertexType.size()+NVtx);
-    primVxCand.reserve(primVxCand.size()+NVtx);
-    covMatrix.reserve(covMatrix.size()+NVtx);
-    numTracks.reserve(numTracks.size()+NVtx);
-    tracks.reserve(tracks.size()+NVtx);
-    sgkey.reserve(sgkey.size()+NVtx);
 
     int counter = 0;
 
@@ -159,26 +146,28 @@ namespace JiveXML {
     } // end VertexIterator
 
       // four-vectors
-    DataMap["x"] = x;
-    DataMap["y"] = y;
-    DataMap["z"] = z;
-    DataMap["chi2"] = chi2;
-    DataMap["vertexType"] = vertexType;
-    DataMap["primVxCand"] = primVxCand;
-    DataMap["covMatrix multiple=\"6\""] = covMatrix;
-    DataMap["numTracks"] = numTracks;
-    DataMap["sgkey"] = sgkey;
+    const std::size_t nEntries = x.size();
+    DataMap["x"] = std::move(x);
+    DataMap["y"] = std::move(y);
+    DataMap["z"] = std::move(z);
+    DataMap["chi2"] = std::move(chi2);
+    DataMap["vertexType"] = std::move(vertexType);
+    DataMap["primVxCand"] = std::move(primVxCand);
+    DataMap["covMatrix multiple=\"6\""] = std::move(covMatrix);
+    const std::size_t nTracks = numTracks.size();
+    DataMap["numTracks"] = std::move(numTracks);
+    DataMap["sgkey"] = std::move(sgkey);
 
     //This is needed once we know numTracks and associations:
     //If there had been any tracks, add a tag
-    if ((numTracks.size()) != 0){
+    if (nTracks != 0){
       //Calculate average number of tracks per vertex
-      double NTracksPerVertex = tracks.size()*1./numTracks.size();
+      double NTracksPerVertex = tracks.size()*1./nTracks;
       std::string tag = "tracks multiple=\"" +DataType(NTracksPerVertex).toString()+"\"";
-      DataMap[tag] = tracks;
+      DataMap[tag] = std::move(tracks);
     }
 
-    ATH_MSG_DEBUG(dataTypeName() << " retrieved with " << x.size() << " entries");
+    ATH_MSG_DEBUG(dataTypeName() << " retrieved with " << nEntries << " entries");
 
     return DataMap;
 

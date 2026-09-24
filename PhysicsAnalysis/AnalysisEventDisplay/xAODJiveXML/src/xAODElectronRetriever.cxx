@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODJiveXML/xAODElectronRetriever.h"
@@ -77,7 +77,9 @@ namespace JiveXML {
     xAOD::ElectronContainer::const_iterator elItrE = elCont->end();
 
     int counter = 0;
-
+    auto prefix = [](const std::string & root)->std::string {
+      return '_' + root;
+    };
     for (; elItr != elItrE; ++elItr) {
 
       std::string electronAuthor = "";
@@ -109,13 +111,16 @@ namespace JiveXML {
       bool passesTight(false);
       bool passesMedium(false);
       bool passesLoose(false);
-      const bool tightSelectionExists = (*elItr)->passSelection(passesTight, "Tight");
+      static const std::string tightStr{"Tight"};
+      const bool tightSelectionExists = (*elItr)->passSelection(passesTight, tightStr);
       ATH_MSG_VERBOSE("tight exists " << tightSelectionExists
 		      << " and passes? " << passesTight);
-      const bool mediumSelectionExists = (*elItr)->passSelection(passesMedium, "Medium");
+		  static const std::string mediumStr{"Medium"};
+      const bool mediumSelectionExists = (*elItr)->passSelection(passesMedium, mediumStr);
       ATH_MSG_VERBOSE("medium exists " << mediumSelectionExists
 		      << " and passes? " << passesMedium);
-      const bool looseSelectionExists = (*elItr)->passSelection(passesLoose, "Loose");
+		  static const std::string looseStr{"Loose"};
+      const bool looseSelectionExists = (*elItr)->passSelection(passesLoose, looseStr);
       ATH_MSG_VERBOSE("loose exists " << looseSelectionExists
 		      << " and passes? " << passesLoose);
 
@@ -127,16 +132,16 @@ namespace JiveXML {
       if (( (*elItr)->author()) == 1){ electronAuthor = "egamma"; electronLabel += "_egamma"; }
 
       if ( passesLoose ){
-	electronLabel += "_Loose";
-	electronIsEMString = "Loose"; // assume that hierarchy is obeyed !
+	electronLabel += prefix(looseStr);
+	electronIsEMString = looseStr; // assume that hierarchy is obeyed !
       }
       if ( passesMedium ){
-	electronLabel += "_Medium";
-	electronIsEMString = "Medium"; // assume that hierarchy is obeyed !
+	electronLabel += prefix(mediumStr);
+	electronIsEMString = mediumStr; // assume that hierarchy is obeyed !
       }
       if ( passesTight ){
-	electronLabel += "_Tight";
-	electronIsEMString = "Tight"; // assume that hierarchy is obeyed !
+	electronLabel += prefix(tightStr);
+	electronIsEMString = tightStr; // assume that hierarchy is obeyed !
       }
       author.emplace_back( DataType( electronAuthor ) );
       label.emplace_back( DataType( electronLabel ) );
@@ -145,17 +150,18 @@ namespace JiveXML {
     } // end ElectronIterator
 
     // four-vectors
-    DataMap["phi"] = phi;
-    DataMap["eta"] = eta;
-    DataMap["pt"] = pt;
-    DataMap["energy"] = energy;
-    DataMap["mass"] = mass;
-    DataMap["pdgId"] = pdgId;
-    DataMap["isEMString"] = isEMString;
-    DataMap["label"] = label;
-    DataMap["author"] = author;
+    std::size_t nEntries = phi.size();
+    DataMap["phi"] = std::move(phi);
+    DataMap["eta"] = std::move(eta);
+    DataMap["pt"] = std::move(pt);
+    DataMap["energy"] = std::move(energy);
+    DataMap["mass"] = std::move(mass);
+    DataMap["pdgId"] = std::move(pdgId);
+    DataMap["isEMString"] = std::move(isEMString);
+    DataMap["label"] = std::move(label);
+    DataMap["author"] = std::move(author);
 
-    ATH_MSG_DEBUG(dataTypeName() << " retrieved with " << phi.size() << " entries");
+    ATH_MSG_DEBUG(dataTypeName() << " retrieved with " << nEntries << " entries");
 
     return DataMap;
   }
