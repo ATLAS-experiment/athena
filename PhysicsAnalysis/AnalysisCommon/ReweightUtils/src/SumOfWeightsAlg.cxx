@@ -23,6 +23,7 @@ StatusCode SumOfWeightsAlg::initialize ATLAS_NOT_THREAD_SAFE () {
   ATH_MSG_DEBUG("Tool retrieval completed.");
   unsigned int ntool = m_weightTools.size();
   ATH_MSG_DEBUG("  Tool count: " << ntool);
+  const std::string allStreamsStr{"AllStreams"};
   for (size_t itool = 0; itool < ntool; ++itool ) {
     ATH_MSG_DEBUG("    " << m_weightTools[itool]->name());
     if(msgLvl(MSG::DEBUG)) m_weightTools[itool]->print();
@@ -38,7 +39,7 @@ StatusCode SumOfWeightsAlg::initialize ATLAS_NOT_THREAD_SAFE () {
     CutIdentifier cID = m_cutFlowSvc->registerTopFilter( toolName,
                                                          toolName, // description (can be improved FIXME)
                                                          xAOD::CutBookkeeper::CutLogic::ALLEVENTSPROCESSED,
-                                                         "AllStreams",
+                                                         allStreamsStr,
                                                          true);
     m_cutIDs.push_back(cID);
   }
