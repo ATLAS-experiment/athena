@@ -21,7 +21,7 @@ namespace columnar
   /// `nullptr` taking the empty value.  This is its own type both for
   /// compactness and to allow a slightly more efficient representation
   /// internally.
-  template<ContainerIdConcept CI, typename CM> class OptObjectId;
+  template<ContainerIdConcept CI, ColumnarMode CM> class OptObjectId;
 
 
 

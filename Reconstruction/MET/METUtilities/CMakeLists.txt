@@ -34,7 +34,7 @@ atlas_add_library( METUtilitiesLib
    LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} AsgTools xAODEgamma ColumnarJetLib xAODMissingET
    xAODJet xAODMuon xAODTau xAODTracking InDetTrackSelectionToolLib PATInterfaces
    EgammaAnalysisInterfacesLib MuonAnalysisInterfacesLib JetCalibToolsLib ElectronPhotonFourMomentumCorrectionLib tauRecToolsLib
-   METInterface AsgDataHandlesLib JetAnalysisInterfacesLib ColumnarMetLib
+   METInterface AsgDataHandlesLib JetAnalysisInterfacesLib ColumnarMetLib ColumnarModeDefaultLib
    PRIVATE_LINK_LIBRARIES EventPrimitives FourMomUtils xAODCore PathResolver )
 
 if( NOT XAOD_STANDALONE )

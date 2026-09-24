@@ -201,7 +201,7 @@ namespace ORUtils
       return;
 
     auto tool = std::make_unique<DeltaROverlapTool> (makeUniqueName());
-    if (!columnar::ColumnarModeDefault::isXAOD)
+    if (!CMode::isXAOD)
     {
       ASSERT_SUCCESS (tool->setProperty ("ObjectType1", xAODType::ObjectType::Jet));
       ASSERT_SUCCESS (tool->setProperty ("ObjectType2", xAODType::ObjectType::Photon));
@@ -255,7 +255,7 @@ namespace ORUtils
       return;
 
     auto tool = std::make_unique<DeltaROverlapTool> (makeUniqueName());
-    if (!columnar::ColumnarModeDefault::isXAOD)
+    if (!CMode::isXAOD)
     {
       ASSERT_SUCCESS (tool->setProperty ("ObjectType1", xAODType::ObjectType::Jet));
       ASSERT_SUCCESS (tool->setProperty ("ObjectType2", xAODType::ObjectType::Electron));
@@ -285,8 +285,8 @@ namespace ORUtils
     // these dummy accessors are needed to make sure we have an offset
     // map for the track containers (that's a limitation in the test,
     // not in actual use)
-    columnar::Track0Accessor<float> dummy0Acc {*tool, "phi"};
-    columnar::Track1Accessor<float> dummy1Acc {*tool, "phi"};
+    columnar::Track0Accessor<float,CMode> dummy0Acc {*tool, "phi"};
+    columnar::Track1Accessor<float,CMode> dummy1Acc {*tool, "phi"};
     ASSERT_SUCCESS (tool->initialize ());
 
     std::string particles1 = "AnalysisMuons";
@@ -310,8 +310,8 @@ namespace ORUtils
     // these dummy accessors are needed to make sure we have an offset
     // map for the track containers (that's a limitation in the test,
     // not in actual use)
-    columnar::Track0Accessor<float> dummy0Acc {*tool, "phi"};
-    columnar::Track1Accessor<float> dummy1Acc {*tool, "phi"};
+    columnar::Track0Accessor<float,CMode> dummy0Acc {*tool, "phi"};
+    columnar::Track1Accessor<float,CMode> dummy1Acc {*tool, "phi"};
     ASSERT_SUCCESS (tool->initialize ());
 
     std::string particles1 = "AnalysisMuons";
@@ -335,7 +335,7 @@ namespace ORUtils
     // these dummy accessors are needed to make sure we have an offset
     // map for the track containers (that's a limitation in the test,
     // not in actual use)
-    columnar::TrackAccessor<float> dummy0Acc {*tool, "phi"};
+    columnar::TrackAccessor<float,CMode> dummy0Acc {*tool, "phi"};
     ASSERT_SUCCESS (tool->initialize ());
 
     std::string particles1 = "AnalysisElectrons";
@@ -379,10 +379,10 @@ namespace ORUtils
     // these dummy accessors are needed to make sure we have an offset
     // map for the track containers (that's a limitation in the test,
     // not in actual use)
-    columnar::Particle1Accessor<float> dummyEleAcc {*tool, "phi"};
-    columnar::Track0Accessor<float> dummy0Acc {*tool, "phi"};
-    columnar::Track1Accessor<float> dummy1Acc {*tool, "phi"};
-    columnar::Track2Accessor<float> dummy2Acc {*tool, "phi"};
+    columnar::Particle1Accessor<float,CMode> dummyEleAcc {*tool, "phi"};
+    columnar::Track0Accessor<float,CMode> dummy0Acc {*tool, "phi"};
+    columnar::Track1Accessor<float,CMode> dummy1Acc {*tool, "phi"};
+    columnar::Track2Accessor<float,CMode> dummy2Acc {*tool, "phi"};
     ASSERT_SUCCESS (tool->initialize ());
 
     std::string particles1 = "AnalysisElectrons";

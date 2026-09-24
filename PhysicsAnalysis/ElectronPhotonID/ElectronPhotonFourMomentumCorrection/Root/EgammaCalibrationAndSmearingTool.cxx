@@ -298,8 +298,8 @@ EgammaCalibrationAndSmearingTool::EgammaCalibrationAndSmearingTool(
       m_currentResolutionVariation_MC(egEnergyCorr::Resolution::Nominal),
       m_currentResolutionVariation_data(egEnergyCorr::Resolution::None),
       m_set_seed_function([](const EgammaCalibrationAndSmearingTool& tool,
-                             columnar::EgammaId egamma,
-                             columnar::EventInfoId ei) {
+                             columnar::EgammaId<CMode> egamma,
+                             columnar::EventInfoId<CMode> ei) {
         const Accessors& acc = *tool.m_accessors;
         // avoid 0 as result, see
         // https://root.cern.ch/root/html/TRandom3.html#TRandom3:SetSeed
@@ -907,7 +907,7 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
 }
 
 
-PATCore::ParticleType::Type EgammaCalibrationAndSmearingTool::xAOD2ptype(columnar::EgammaId particle) const
+PATCore::ParticleType::Type EgammaCalibrationAndSmearingTool::xAOD2ptype(columnar::EgammaId<CMode> particle) const
 {
   const Accessors& acc = *m_accessors;
 
@@ -1021,13 +1021,13 @@ double EgammaCalibrationAndSmearingTool::getEnergy(
 }
 
 CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
-    columnar::MutableEgammaId input, columnar::EventInfoId event_info) const {
+    columnar::MutableEgammaId<CMode> input, columnar::EventInfoId<CMode> event_info) const {
   const Accessors& acc = *m_accessors;
 
   // only used in simulation (for the smearing)
   RandomNumber seed = m_set_seed_function(*this, input, event_info);
 
-  columnar::ClusterId inputCluster = acc.caloClusterAcc (input)[0].value();
+  columnar::ClusterId<CMode> inputCluster = acc.caloClusterAcc (input)[0].value();
 
   if (m_layer_recalibration_tool && acc.authorAcc (input) !=
 	xAOD::EgammaParameters::AuthorFwdElectron) {
@@ -1274,7 +1274,7 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
   return CP::CorrectionCode::Ok;
 }
 
-void EgammaCalibrationAndSmearingTool::setPt(columnar::MutableEgammaId input, double energy) const {
+void EgammaCalibrationAndSmearingTool::setPt(columnar::MutableEgammaId<CMode> input, double energy) const {
   const double new_energy2 = energy * energy;
   const auto ptype = xAOD2ptype(input);
   const double m = ptype == PATCore::ParticleType::Electron ? ParticleConstants::electronMassInMeV : ParticleConstants::photonMassInMeV;
@@ -1293,7 +1293,7 @@ double EgammaCalibrationAndSmearingTool::getEnergy(
 
 egEnergyCorr::Scale::Variation
 EgammaCalibrationAndSmearingTool::oldtool_scale_flag_this_event(
-    columnar::EgammaId p, columnar::EventInfoId event_info) const {
+    columnar::EgammaId<CMode> p, columnar::EventInfoId<CMode> event_info) const {
   const Accessors& acc = *m_accessors;
   if (!acc.eventTypeAcc (event_info, xAOD::EventInfo::IS_SIMULATION))
     return m_currentScaleVariation_data;
@@ -1305,7 +1305,7 @@ EgammaCalibrationAndSmearingTool::oldtool_scale_flag_this_event(
 
 egEnergyCorr::Resolution::Variation
 EgammaCalibrationAndSmearingTool::oldtool_resolution_flag_this_event(
-    columnar::EgammaId, columnar::EventInfoId event_info) const {
+    columnar::EgammaId<CMode>, columnar::EventInfoId<CMode> event_info) const {
   const Accessors& acc = *m_accessors;
   return acc.eventTypeAcc (event_info, xAOD::EventInfo::IS_SIMULATION)
              ? m_currentResolutionVariation_MC
@@ -1350,7 +1350,7 @@ CP::SystematicSet EgammaCalibrationAndSmearingTool::affectingSystematics()
 }
 
 void EgammaCalibrationAndSmearingTool::setupSystematics() {
-  const EgammaPredicate always = [](const EgammaCalibrationAndSmearingTool&, columnar::EgammaId) { return true; };
+  const EgammaPredicate always = [](const EgammaCalibrationAndSmearingTool&, columnar::EgammaId<CMode>) { return true; };
 
   // Try to simplify a bit for the ones that are fully correlate in eta,
   // whatever the model and that are not included in the macros including
@@ -2199,7 +2199,7 @@ StatusCode EgammaCalibrationAndSmearingTool::applySystematicVariation(
                                         ? egEnergyCorr::Resolution::Nominal
                                         : egEnergyCorr::Resolution::None;
   m_currentResolutionVariation_data = egEnergyCorr::Resolution::None;
-  m_currentScalePredicate = [](const EgammaCalibrationAndSmearingTool&, columnar::EgammaId) { return true; };
+  m_currentScalePredicate = [](const EgammaCalibrationAndSmearingTool&, columnar::EgammaId<CMode>) { return true; };
 
   if (systConfig.empty())
     return StatusCode::SUCCESS;
@@ -2592,7 +2592,7 @@ double EgammaCalibrationAndSmearingTool::correction_phi_unif(double eta,
 }
 
 void EgammaCalibrationAndSmearingTool ::
-callSingleEvent (columnar::MutableEgammaRange egammas, columnar::EventInfoId event) const
+callSingleEvent (columnar::MutableEgammaRange<CMode> egammas, columnar::EventInfoId<CMode> event) const
 {
   for (auto egamma : egammas) {
     if (applyCorrection (egamma, event) != CP::CorrectionCode::Ok)
@@ -2601,7 +2601,7 @@ callSingleEvent (columnar::MutableEgammaRange egammas, columnar::EventInfoId eve
 }
 
 void EgammaCalibrationAndSmearingTool ::
-callEvents (columnar::EventContextRange events) const
+callEvents (columnar::EventContextRange<CMode> events) const
 {
   const Accessors& acc = *m_accessors;
   for (auto event : events) {

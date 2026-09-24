@@ -485,7 +485,7 @@ TEST_F (ColumnarPhysLiteTest, METMaker_muon)
   ASSERT_SUCCESS (tool->setProperty ("JetConstitScaleMom", ""));
   ASSERT_SUCCESS (tool->setProperty ("columnarTermName", "Muons"));
   ASSERT_SUCCESS (tool->setProperty ("columnarParticleType", unsigned(xAOD::Type::Muon)));
-  columnar::PhotonAccessor<float> photonPtAcc (*tool, "pt"); // this works around a limitation in the test fixture
+  columnar::PhotonAccessor<float,CMode> photonPtAcc (*tool, "pt"); // this works around a limitation in the test fixture
   ASSERT_SUCCESS (tool->initialize ());
 
   XAODToolData toolData;
@@ -551,8 +551,8 @@ TEST_F (ColumnarPhysLiteTest, METMaker_jet)
   ASSERT_SUCCESS (tool->setProperty ("columnarJetKey", "RefJet"));
   ASSERT_SUCCESS (tool->setProperty ("columnarSoftClusKey", "PVSoftTrk"));
   ASSERT_SUCCESS (tool->setProperty ("columnarTermName", "RefJet"));
-  columnar::MuonAccessor<float> muonPtAcc (*tool, "pt"); // this works around a limitation in the test fixture
-  columnar::PhotonAccessor<float> photonPtAcc (*tool, "pt"); // this works around a limitation in the test fixture
+  columnar::MuonAccessor<float,CMode> muonPtAcc (*tool, "pt"); // this works around a limitation in the test fixture
+  columnar::PhotonAccessor<float,CMode> photonPtAcc (*tool, "pt"); // this works around a limitation in the test fixture
   ASSERT_SUCCESS (tool->initialize ());
 
   XAODToolData toolData;
@@ -567,7 +567,7 @@ TEST_F (ColumnarPhysLiteTest, METMaker_combined)
     return;
 
   // FIX ME: currently the combined test only works in xAOD mode
-  if (columnar::columnarAccessMode != 0)
+  if (!std::is_same_v<CMode,columnar::ColumnarModeXAOD>)
     return;
 
   // Create muon tool
@@ -580,7 +580,7 @@ TEST_F (ColumnarPhysLiteTest, METMaker_combined)
   ASSERT_SUCCESS (muonTool->setProperty ("JetConstitScaleMom", ""));
   ASSERT_SUCCESS (muonTool->setProperty ("columnarTermName", "Muons"));
   ASSERT_SUCCESS (muonTool->setProperty ("columnarParticleType", unsigned(xAOD::Type::Muon)));
-  columnar::PhotonAccessor<float> photonPtAcc1 (*muonTool, "pt");
+  columnar::PhotonAccessor<float,CMode> photonPtAcc1 (*muonTool, "pt");
   ASSERT_SUCCESS (muonTool->initialize ());
 
   // Create jet tool
@@ -594,8 +594,8 @@ TEST_F (ColumnarPhysLiteTest, METMaker_combined)
   ASSERT_SUCCESS (jetTool->setProperty ("columnarJetKey", "RefJet"));
   ASSERT_SUCCESS (jetTool->setProperty ("columnarSoftClusKey", "PVSoftTrk"));
   ASSERT_SUCCESS (jetTool->setProperty ("columnarTermName", "RefJet"));
-  columnar::MuonAccessor<float> muonPtAcc (*jetTool, "pt");
-  columnar::PhotonAccessor<float> photonPtAcc2 (*jetTool, "pt");
+  columnar::MuonAccessor<float,CMode> muonPtAcc (*jetTool, "pt");
+  columnar::PhotonAccessor<float,CMode> photonPtAcc2 (*jetTool, "pt");
   ASSERT_SUCCESS (jetTool->initialize ());
 
   // Create shared tool data and callers

@@ -40,9 +40,9 @@ namespace ORUtils
       /// @brief Identify overlaps by ElementLink.
       /// Flags objects in cont1 which are linked to objects in cont2.
       virtual StatusCode
-      findOverlaps(columnar::Particle1Range cont1,
-                   columnar::Particle2Range cont2,
-                   columnar::EventContextId eventContext) const override;
+      findOverlaps(columnar::Particle1Range<CMode> cont1,
+                   columnar::Particle2Range<CMode> cont2,
+                   columnar::EventContextId<CMode> eventContext) const override;
 
     protected:
 

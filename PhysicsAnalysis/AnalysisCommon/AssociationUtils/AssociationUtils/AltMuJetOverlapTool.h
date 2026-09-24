@@ -69,16 +69,16 @@ namespace ORUtils
       /// muons. Second, muons are flagged if they overlap with the remaining
       /// jets.
       virtual StatusCode
-      findOverlaps(columnar::Particle1Range cont1,
-                   columnar::Particle2Range cont2,
-                   columnar::EventContextId eventContext) const override;
+      findOverlaps(columnar::Particle1Range<CMode> cont1,
+                   columnar::Particle2Range<CMode> cont2,
+                   columnar::EventContextId<CMode> eventContext) const override;
 
       /// @brief Identify overlapping muons and jets.
       /// The above method calls this one.
       virtual StatusCode
-      internalFindOverlaps(columnar::Particle1Range muons,
-                           columnar::Particle2Range jets,
-                           columnar::EventContextId eventContext) const;
+      internalFindOverlaps(columnar::Particle1Range<CMode> muons,
+                           columnar::Particle2Range<CMode> jets,
+                           columnar::EventContextId<CMode> eventContext) const;
 
     protected:
 
@@ -87,12 +87,12 @@ namespace ORUtils
 
       /// Retrieve the primary vertex used to count jet tracks.
       /// TODO: reduce duplication with MuJetOverlapTool.
-      int getPrimVtxIndex(columnar::EventContextId eventContext) const;
+      int getPrimVtxIndex(columnar::EventContextId<CMode> eventContext) const;
 
       /// Helper method to get the number of tracks in a jet w.r.t.
       /// the primary vertex. Returns -1 if no primary vertex is found.
       /// TODO: reduce duplication with MuJetOverlapTool.
-      int getNumTracks(columnar::Particle2Id jet, columnar::EventContextId eventContext) const;
+      int getNumTracks(columnar::Particle2Id<CMode> jet, columnar::EventContextId<CMode> eventContext) const;
 
     private:
 
@@ -122,17 +122,17 @@ namespace ORUtils
       std::string m_PVContName;
 
       /// Columnar accessors
-      struct Accessors final : columnar::ColumnarTool<>
+      struct Accessors final : columnar::ColumnarTool<CMode>
       {
-        columnar::Track0Accessor<columnar::ObjectColumn> m_track0Acc {*this, "InDetTrackParticles"};
-        columnar::Track1Accessor<columnar::ObjectColumn> m_track1Acc {*this, "InDetForwardTrackParticles"};
-        columnar::VertexAccessor<columnar::ObjectColumn> m_vtxContainerAcc;
-        columnar::VertexAccessor<columnar::RetypeColumn<xAOD::VxType::VertexType,short>> m_vertexTypeAcc {*this, "vertexType"};
-        columnar::Particle1Accessor<float> m_muonPtAcc {*this, "pt"};
-        columnar::Particle2Accessor<float> m_jetPtAcc {*this, "pt"};
-        columnar::Particle2Accessor< std::vector<int> > m_numTrkPt500Acc {*this, "NumTrkPt500"};
+        columnar::Track0Accessor<columnar::ObjectColumn,CMode> m_track0Acc {*this, "InDetTrackParticles"};
+        columnar::Track1Accessor<columnar::ObjectColumn,CMode> m_track1Acc {*this, "InDetForwardTrackParticles"};
+        columnar::VertexAccessor<columnar::ObjectColumn,CMode> m_vtxContainerAcc;
+        columnar::VertexAccessor<columnar::RetypeColumn<xAOD::VxType::VertexType,short>,CMode> m_vertexTypeAcc {*this, "vertexType"};
+        columnar::Particle1Accessor<float,CMode> m_muonPtAcc {*this, "pt"};
+        columnar::Particle2Accessor<float,CMode> m_jetPtAcc {*this, "pt"};
+        columnar::Particle2Accessor< std::vector<int>,CMode > m_numTrkPt500Acc {*this, "NumTrkPt500"};
         /// BJet helper
-        columnar::Particle2Accessor<char> m_bJetAcc;
+        columnar::Particle2Accessor<char,CMode> m_bJetAcc;
         using ColumnarTool::ColumnarTool;
       };
       std::unique_ptr<Accessors> m_accessors {std::make_unique<Accessors> (this)};

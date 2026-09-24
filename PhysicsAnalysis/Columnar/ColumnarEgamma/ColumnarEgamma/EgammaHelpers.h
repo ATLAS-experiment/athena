@@ -28,7 +28,7 @@ namespace columnar
 
     // not sure if this should live here, since it draws in a dependency
     // on ColumnarTracking/xAODTracking, but let's keep it here for now
-    template<ContainerIdConcept CI = EgammaDef,typename CM=ColumnarModeDefault>
+    template<ColumnarMode CM, ContainerIdConcept CI = EgammaDef>
     class IsConvertedPhotonAccessor final
     {
       ColumnAccessor<CI,float,CM> m_etaAcc;

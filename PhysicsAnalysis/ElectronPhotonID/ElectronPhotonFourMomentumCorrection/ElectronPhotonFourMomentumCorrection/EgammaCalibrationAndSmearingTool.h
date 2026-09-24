@@ -23,6 +23,7 @@
 #include "ColumnarCore/LinkColumn.h"
 #include "ColumnarCore/MomentumAccessors.h"
 #include "ColumnarCore/VectorColumn.h"
+#include "ColumnarModeDefault/ColumnarModeDefault.h"
 #include "ColumnarEgamma/EgammaHelpers.h"
 #include "ColumnarEventInfo/EventInfoHelpers.h"
 #include "ColumnarTracking/TrackDef.h"
@@ -100,7 +101,7 @@ inline float get_eta_calo(const xAOD::CaloCluster& cluster, int author,
 namespace columnar {
   namespace ClusterHelpers {
 
-    template<ContainerIdConcept CI = ClusterDef,typename CM=ColumnarModeDefault>
+    template<ColumnarMode CM, ContainerIdConcept CI = ClusterDef>
     class PhiCaloAccessor final
     {
       ColumnAccessor<CI,float,CM> m_phiCaloAcc;
@@ -115,7 +116,7 @@ namespace columnar {
           m_phicaloframeAcc (columnarTool, "PHICALOFRAME", {.isOptional = true})
       {}
   
-      float operator () (ClusterId cluster, int author, bool do_throw=false) const
+      float operator () (ObjectId<CI,CM> cluster, int author, bool do_throw=false) const
       {
         double phi_calo;
         if(author== xAOD::EgammaParameters::AuthorFwdElectron){
@@ -138,7 +139,7 @@ namespace columnar {
       }
     };
 
-    template<ContainerIdConcept CI = ClusterDef,typename CM=ColumnarModeDefault>
+    template<ColumnarMode CM, ContainerIdConcept CI = ClusterDef>
     class EtaCaloAccessor final
     {
       ColumnAccessor<CI,float,CM> m_etaCaloAcc;
@@ -153,7 +154,7 @@ namespace columnar {
           m_etacaloframeAcc (columnarTool, "ETACALOFRAME", {.isOptional = true})
       {}
 
-      float operator () (ClusterId cluster, int author, bool do_throw=false) const
+      float operator () (ObjectId<CI,CM> cluster, int author, bool do_throw=false) const
       {
         double eta_calo;
         if(author== xAOD::EgammaParameters::AuthorFwdElectron){
@@ -182,7 +183,7 @@ namespace CP {
 
 class EgammaCalibrationAndSmearingTool
     : virtual public IEgammaCalibrationAndSmearingTool,
-      public asg::AsgMetadataTool, public columnar::ColumnarTool<> {
+      public asg::AsgMetadataTool, public columnar::ColumnarTool<CMode> {
   // Create a proper constructor for Athena
   ASG_TOOL_CLASS3(EgammaCalibrationAndSmearingTool,
                   IEgammaCalibrationAndSmearingTool, CP::ISystematicsTool,
@@ -200,9 +201,9 @@ class EgammaCalibrationAndSmearingTool
                               // properties (true/false/automatic)
   typedef unsigned int RandomNumber;
   typedef std::function<int(const EgammaCalibrationAndSmearingTool&,
-                            columnar::EgammaId, columnar::EventInfoId)>
+                            columnar::EgammaId<CMode>, columnar::EventInfoId<CMode>)>
       IdFunction;
-  typedef std::function<bool(const EgammaCalibrationAndSmearingTool&, columnar::EgammaId)> EgammaPredicate;
+  typedef std::function<bool(const EgammaCalibrationAndSmearingTool&, columnar::EgammaId<CMode>)> EgammaPredicate;
 
   EgammaCalibrationAndSmearingTool(const std::string& name);
   ~EgammaCalibrationAndSmearingTool();
@@ -211,8 +212,8 @@ class EgammaCalibrationAndSmearingTool
 
   // Apply the correction on a modifyable egamma object
   virtual CP::CorrectionCode applyCorrection(xAOD::Egamma&) const override;
-  CP::CorrectionCode applyCorrection(columnar::MutableEgammaId input, columnar::EventInfoId event_info) const;
-  void setPt(columnar::MutableEgammaId input, double energy) const;
+  CP::CorrectionCode applyCorrection(columnar::MutableEgammaId<CMode> input, columnar::EventInfoId<CMode> event_info) const;
+  void setPt(columnar::MutableEgammaId<CMode> input, double energy) const;
 
   // Create a corrected copy from a constant egamma object
   //  virtual CP::CorrectionCode correctedCopy(const xAOD::Egamma&,
@@ -308,7 +309,7 @@ class EgammaCalibrationAndSmearingTool
   struct EtaCaloPredicate
   {
     EtaCaloPredicate(double eta_min, double eta_max) : m_eta_min(eta_min), m_eta_max(eta_max) {}
-    bool operator()(const EgammaCalibrationAndSmearingTool& tool, columnar::EgammaId p) {
+    bool operator()(const EgammaCalibrationAndSmearingTool& tool, columnar::EgammaId<CMode> p) {
       const Accessors& acc = *tool.m_accessors;
       const double eta = acc.etaCaloAcc(acc.caloClusterAcc(p)[0].value(),acc.authorAcc (p));
       return (eta >= m_eta_min and eta < m_eta_max);
@@ -327,7 +328,7 @@ class EgammaCalibrationAndSmearingTool
   struct AbsEtaCaloPredicate {
     AbsEtaCaloPredicate(double eta_min, double eta_max)
         : m_eta_min(eta_min), m_eta_max(eta_max) {}
-    bool operator()(const EgammaCalibrationAndSmearingTool& tool, columnar::EgammaId p) {
+    bool operator()(const EgammaCalibrationAndSmearingTool& tool, columnar::EgammaId<CMode> p) {
       const Accessors& acc = *tool.m_accessors;
       const double aeta =
           std::abs(acc.etaCaloAcc(acc.caloClusterAcc(p)[0].value(),acc.authorAcc (p)));
@@ -381,7 +382,7 @@ class EgammaCalibrationAndSmearingTool
           m_eta2_min(eta2_min),
           m_eta2_max(eta2_max) {}
 
-    bool operator()(const EgammaCalibrationAndSmearingTool& tool, columnar::EgammaId p) {
+    bool operator()(const EgammaCalibrationAndSmearingTool& tool, columnar::EgammaId<CMode> p) {
       const Accessors& acc = *tool.m_accessors;
       const double aeta =
           std::abs(acc.etaCaloAcc(acc.caloClusterAcc(p)[0].value(),acc.authorAcc (p)));
@@ -399,7 +400,7 @@ class EgammaCalibrationAndSmearingTool
     return DoubleOrAbsEtaCaloPredicate(eta1_min, eta1_max, eta2_min, eta2_max);
   }
 
-  PATCore::ParticleType::Type xAOD2ptype(columnar::EgammaId particle) const;
+  PATCore::ParticleType::Type xAOD2ptype(columnar::EgammaId<CMode> particle) const;
 
  public:
   virtual double getEnergy(xAOD::Egamma*, const xAOD::EventInfo*);
@@ -443,53 +444,53 @@ class EgammaCalibrationAndSmearingTool
   IdFunction m_set_seed_function;
 
   inline egEnergyCorr::Scale::Variation oldtool_scale_flag_this_event(
-      columnar::EgammaId p, columnar::EventInfoId event_info) const;
+      columnar::EgammaId<CMode> p, columnar::EventInfoId<CMode> event_info) const;
   inline egEnergyCorr::Resolution::Variation oldtool_resolution_flag_this_event(
-      columnar::EgammaId p, columnar::EventInfoId event_info) const;
+      columnar::EgammaId<CMode> p, columnar::EventInfoId<CMode> event_info) const;
 
   // columnar data handles
 public:
   Gaudi::Property<bool> m_onlyElectrons {this, "onlyElectrons", false, "the tool will only be applied to electrons"};
   Gaudi::Property<bool> m_onlyPhotons {this, "onlyPhotons", false, "the tool will only be applied to photons"};
-  struct Accessors : public columnar::ColumnarTool<>
+  struct Accessors : public columnar::ColumnarTool<CMode>
   {
-    Accessors(columnar::ColumnarTool<>& tool) : columnar::ColumnarTool<>(&tool) {}
+    Accessors(columnar::ColumnarTool<CMode>& tool) : columnar::ColumnarTool<CMode>(&tool) {}
 
-    columnar::MutableEgammaAccessor<columnar::ObjectColumn> m_egammaHandle {*this, "EGamma"};
-    columnar::MomentumAccessors<columnar::EgammaDef> momAcc;
-    columnar::EgammaAccessor<columnar::RetypeColumn<double,float>> ptAcc {*this, "pt"};
-    columnar::EgammaDecorator<float> ptOutDec {*this, "ptOut", {.replacesColumn = "pt"}};
-    columnar::EgammaDecorator<float> decEmva;
-    columnar::EgammaAccessor<columnar::RetypeColumn<double,float>> etaAcc {*this, "eta"};
-    columnar::EgammaAccessor<columnar::RetypeColumn<double,float>> phiAcc {*this, "phi"};
+    columnar::MutableEgammaAccessor<columnar::ObjectColumn,CMode> m_egammaHandle {*this, "EGamma"};
+    columnar::MomentumAccessors<columnar::EgammaDef,CMode> momAcc;
+    columnar::EgammaAccessor<columnar::RetypeColumn<double,float>,CMode> ptAcc {*this, "pt"};
+    columnar::EgammaDecorator<float,CMode> ptOutDec {*this, "ptOut", {.replacesColumn = "pt"}};
+    columnar::EgammaDecorator<float,CMode> decEmva;
+    columnar::EgammaAccessor<columnar::RetypeColumn<double,float>,CMode> etaAcc {*this, "eta"};
+    columnar::EgammaAccessor<columnar::RetypeColumn<double,float>,CMode> phiAcc {*this, "phi"};
     // test GNN
-    columnar::EgammaAccessor<columnar::RetypeColumn<double,float>> gnn_energy_Acc;
-    columnar::EgammaAccessor<uint16_t> authorAcc {*this, "author"};
-    columnar::EgammaAccessor<std::vector<columnar::OptTrackId>> electronTrackAcc;
-    columnar::EgammaAccessor<std::vector<columnar::OptVertexId>> photonVertexAcc;
-    columnar::ClusterAccessor<columnar::ObjectColumn> m_clusterHandle {*this, "egammaClusters"};
-    columnar::EgammaAccessor<std::vector<columnar::OptClusterId>> caloClusterAcc {*this, "caloClusterLinks"};
-    columnar::ClusterAccessor<double> Es0Acc {*this, "correctedcl_Es0", {.isOptional = true}};
-    columnar::ClusterAccessor<double> Es1Acc {*this, "correctedcl_Es1", {.isOptional = true}};
-    columnar::ClusterAccessor<double> Es2Acc {*this, "correctedcl_Es2", {.isOptional = true}};
-    columnar::ClusterAccessor<double> Es3Acc {*this, "correctedcl_Es3", {.isOptional = true}};
-    columnar::ClusterAccessor<columnar::RetypeColumn<double,float>> clusterEtaAcc {*this, "calEta"};
-    columnar::ClusterAccessor<columnar::RetypeColumn<double,float>> clusterPhiAcc {*this, "calPhi"};
-    columnar::ClusterHelpers::EnergyBEAccessor<> energyBEAcc {*this};
-    columnar::ClusterHelpers::EtaBEAccessor<> clusterEtaBEAcc {*this};
-    columnar::ClusterHelpers::EtaCaloAccessor<> etaCaloAcc {*this};
-    columnar::ClusterHelpers::PhiCaloAccessor<> phiCaloAcc {*this};
-    columnar::EventInfoAccessor<columnar::ObjectColumn> m_eventHandle {*this, "EventInfo", {.addMTDependency=true}};
-    columnar::EventInfoHelpers::EventTypeAccessor<> eventTypeAcc {*this};
-    columnar::EventInfoAccessor<uint32_t> runNumberAcc {*this, "runNumber"};
-    columnar::EventInfoAccessor<uint64_t> eventNumberAcc {*this, "eventNumber"};
-    columnar::EventInfoAccessor<unsigned int> randomrunnumber_getter {*this, "RandomRunNumber"};
-    columnar::EventInfoAccessor<float> actIntPerXingAcc {*this, "actualInteractionsPerCrossing"};
+    columnar::EgammaAccessor<columnar::RetypeColumn<double,float>,CMode> gnn_energy_Acc;
+    columnar::EgammaAccessor<uint16_t,CMode> authorAcc {*this, "author"};
+    columnar::EgammaAccessor<std::vector<columnar::OptTrackId<CMode>>,CMode> electronTrackAcc;
+    columnar::EgammaAccessor<std::vector<columnar::OptVertexId<CMode>>,CMode> photonVertexAcc;
+    columnar::ClusterAccessor<columnar::ObjectColumn,CMode> m_clusterHandle {*this, "egammaClusters"};
+    columnar::EgammaAccessor<std::vector<columnar::OptClusterId<CMode>>,CMode> caloClusterAcc {*this, "caloClusterLinks"};
+    columnar::ClusterAccessor<double,CMode> Es0Acc {*this, "correctedcl_Es0", {.isOptional = true}};
+    columnar::ClusterAccessor<double,CMode> Es1Acc {*this, "correctedcl_Es1", {.isOptional = true}};
+    columnar::ClusterAccessor<double,CMode> Es2Acc {*this, "correctedcl_Es2", {.isOptional = true}};
+    columnar::ClusterAccessor<double,CMode> Es3Acc {*this, "correctedcl_Es3", {.isOptional = true}};
+    columnar::ClusterAccessor<columnar::RetypeColumn<double,float>,CMode> clusterEtaAcc {*this, "calEta"};
+    columnar::ClusterAccessor<columnar::RetypeColumn<double,float>,CMode> clusterPhiAcc {*this, "calPhi"};
+    columnar::ClusterHelpers::EnergyBEAccessor<CMode> energyBEAcc {*this};
+    columnar::ClusterHelpers::EtaBEAccessor<CMode> clusterEtaBEAcc {*this};
+    columnar::ClusterHelpers::EtaCaloAccessor<CMode> etaCaloAcc {*this};
+    columnar::ClusterHelpers::PhiCaloAccessor<CMode> phiCaloAcc {*this};
+    columnar::EventInfoAccessor<columnar::ObjectColumn,CMode> m_eventHandle {*this, "EventInfo", {.addMTDependency=true}};
+    columnar::EventInfoHelpers::EventTypeAccessor<CMode> eventTypeAcc {*this};
+    columnar::EventInfoAccessor<uint32_t,CMode> runNumberAcc {*this, "runNumber"};
+    columnar::EventInfoAccessor<uint64_t,CMode> eventNumberAcc {*this, "eventNumber"};
+    columnar::EventInfoAccessor<unsigned int,CMode> randomrunnumber_getter {*this, "RandomRunNumber"};
+    columnar::EventInfoAccessor<float,CMode> actIntPerXingAcc {*this, "actualInteractionsPerCrossing"};
   };
   std::unique_ptr<Accessors> m_accessors;
 
-  void callSingleEvent (columnar::MutableEgammaRange egammas, columnar::EventInfoId event) const;
-  void callEvents (columnar::EventContextRange events) const override;
+  void callSingleEvent (columnar::MutableEgammaRange<CMode> egammas, columnar::EventInfoId<CMode> event) const;
+  void callEvents (columnar::EventContextRange<CMode> events) const override;
 };
 
 }  // namespace CP

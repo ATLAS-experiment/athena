@@ -43,7 +43,7 @@ namespace columnar
   TEST (PythonToolHandleTest, baseUse)
   {
     // this test is only used in Array mode
-    if (columnarAccessMode != 2)
+    if (!std::is_same_v<CMode,columnar::ColumnarModeArray>)
       GTEST_SKIP() << "Skipping as not in Columnar mode";
 
     // at some point we need to have a better handling of tool factories

@@ -71,16 +71,16 @@ namespace ORUtils
 
       /// @brief Identify overlapping taus and jets.
       virtual StatusCode
-      findOverlaps(columnar::Particle1Range cont1,
-                   columnar::Particle2Range cont2,
-                   columnar::EventContextId eventContext) const override;
+      findOverlaps(columnar::Particle1Range<CMode> cont1,
+                   columnar::Particle2Range<CMode> cont2,
+                   columnar::EventContextId<CMode> eventContext) const override;
 
       /// @brief Identify overlapping taus and jets.
       /// The above method calls this one.
       virtual StatusCode
-      internalFindOverlaps(columnar::Particle1Range jets,
-                           columnar::Particle2Range taus,
-                           columnar::EventContextId eventContext) const;
+      internalFindOverlaps(columnar::Particle1Range<CMode> jets,
+                           columnar::Particle2Range<CMode> taus,
+                           columnar::EventContextId<CMode> eventContext) const;
 
     protected:
       /// @name Helper methods
@@ -93,15 +93,15 @@ namespace ORUtils
 
       /// Is this jet a b-jet? Returns false if bjet ID not configured.
       /// Does not check if the jet is "surviving" OR.
-      bool isBJet(columnar::Particle1Id jet) const;
+      bool isBJet(columnar::Particle1Id<CMode> jet) const;
 
       /// Is this an ID tau? Returns false if tau ID not configured.
       /// This one does check if the tau is "surviving" OR.
-      bool isSurvivingTau(columnar::Particle2Id tau) const;
+      bool isSurvivingTau(columnar::Particle2Id<CMode> tau) const;
 
       /// Is this an anti-tau? Returns false if anti-tau ID not configured.
       /// This one does check if the tau is "surviving" OR.
-      bool isSurvivingAntiTau(columnar::Particle2Id tau) const;
+      bool isSurvivingAntiTau(columnar::Particle2Id<CMode> tau) const;
 
     private:
       /// @name Configurable properties
@@ -128,16 +128,16 @@ namespace ORUtils
       /// @{
 
       /// Columnar accessors
-      struct Accessors final : columnar::ColumnarTool<>
+      struct Accessors final : columnar::ColumnarTool<CMode>
       {
-        columnar::EventInfoAccessor<std::uint64_t> m_eventNumberAcc {*this, "eventNumber"};
-        columnar::Particle2Accessor<int> m_categoryAcc;
+        columnar::EventInfoAccessor<std::uint64_t,CMode> m_eventNumberAcc {*this, "eventNumber"};
+        columnar::Particle2Accessor<int,CMode> m_categoryAcc;
 
         /// Columnar accessors
-        columnar::EventInfoAccessor<columnar::ObjectColumn> m_evtAcc;
+        columnar::EventInfoAccessor<columnar::ObjectColumn,CMode> m_evtAcc;
 
         /// BJet helper
-        columnar::Particle1Accessor<char> m_bJetAcc;
+        columnar::Particle1Accessor<char,CMode> m_bJetAcc;
 
         using ColumnarTool::ColumnarTool;
       };

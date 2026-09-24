@@ -47,15 +47,15 @@ namespace ORUtils
       /// @brief Identify overlapping taus and loose muons.
       /// TODO: add description of the method.
       virtual StatusCode
-      findOverlaps(columnar::Particle1Range cont1,
-                   columnar::Particle2Range cont2,
-                   columnar::EventContextId eventContext) const override;
+      findOverlaps(columnar::Particle1Range<CMode> cont1,
+                   columnar::Particle2Range<CMode> cont2,
+                   columnar::EventContextId<CMode> eventContext) const override;
 
       /// @brief Identify overlapping taus and loose muons.
       /// See the documentation in the above method.
       virtual StatusCode
-      internalFindOverlaps(columnar::Particle1Range taus,
-                           columnar::Particle2Range muons) const;
+      internalFindOverlaps(columnar::Particle1Range<CMode> taus,
+                           columnar::Particle2Range<CMode> muons) const;
 
     protected:
 
@@ -79,11 +79,11 @@ namespace ORUtils
       float m_minTauPtMuComb;
 
       /// Columnar accessors
-      struct Accessors final : columnar::ColumnarTool<>
+      struct Accessors final : columnar::ColumnarTool<CMode>
       {
-        columnar::Particle1Accessor<float> m_tauPtAcc {*this, "pt"};
-        columnar::Particle2Accessor<float> m_muPtAcc {*this, "pt"};
-        columnar::Particle2Accessor<columnar::RetypeColumn<xAOD::Muon::MuonType,std::uint16_t>> m_muonTypeAcc {*this, "muonType"};
+        columnar::Particle1Accessor<float,CMode> m_tauPtAcc {*this, "pt"};
+        columnar::Particle2Accessor<float,CMode> m_muPtAcc {*this, "pt"};
+        columnar::Particle2Accessor<columnar::RetypeColumn<xAOD::Muon::MuonType,std::uint16_t>,CMode> m_muonTypeAcc {*this, "muonType"};
         using ColumnarTool::ColumnarTool;
       };
       std::unique_ptr<Accessors> m_accessors {std::make_unique<Accessors> (this)};

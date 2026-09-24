@@ -14,7 +14,7 @@
 
 namespace columnar
 {
-  template<typename CM> class ColumnarTool;
+  template<ColumnarMode CM> class ColumnarTool;
   struct ColumnDataArray;
 
   /// @brief all the data about a column accessor that the ColumnarTool

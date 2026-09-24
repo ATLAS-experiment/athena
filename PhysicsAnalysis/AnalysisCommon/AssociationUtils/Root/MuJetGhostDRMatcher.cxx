@@ -48,8 +48,8 @@ namespace ORUtils
   //---------------------------------------------------------------------------
   // Check for a match via ghost association or delta-R
   //---------------------------------------------------------------------------
-  bool MuJetGhostDRMatcher::objectsMatch(columnar::Particle1Id mu,
-                                         columnar::Particle2Id jet,
+  bool MuJetGhostDRMatcher::objectsMatch(columnar::Particle1Id<CMode> mu,
+                                         columnar::Particle2Id<CMode> jet,
                                          bool swapArgs) const
   {
     if (swapArgs) {
@@ -59,7 +59,7 @@ namespace ORUtils
 
     // Check the particle types. First particle should be the muon,
     // and the second particle should be the jet.
-    if constexpr (columnar::ColumnarModeDefault::isXAOD)
+    if constexpr (CMode::isXAOD)
     {
       if(mu.getXAODObject().type() != xAOD::Type::Muon) {
         ATH_MSG_WARNING("First particle arg to objectsMatch is not a muon!");

@@ -34,9 +34,9 @@ namespace ORUtils
   // Identify overlaps
   //---------------------------------------------------------------------------
   StatusCode ObjLinkOverlapTool::
-  findOverlaps(columnar::Particle1Range cont1,
-               columnar::Particle2Range cont2,
-               columnar::EventContextId /*eventContext*/) const
+  findOverlaps(columnar::Particle1Range<CMode> cont1,
+               columnar::Particle2Range<CMode> cont2,
+               columnar::EventContextId<CMode> /*eventContext*/) const
   {
     ATH_MSG_DEBUG("Removing overlaps");
 
@@ -56,7 +56,7 @@ namespace ORUtils
           // above call will have already checked that it is in the
           // right container
           if(isSurvivingObject(*linkParticle)){
-            if constexpr (columnar::ColumnarModeDefault::isXAOD) {
+            if constexpr (CMode::isXAOD) {
               ATH_MSG_DEBUG("  Found overlap " << p1.getXAODObject().type() <<
                           " pt " << p1.getXAODObject().pt()*invGeV);
             } else {

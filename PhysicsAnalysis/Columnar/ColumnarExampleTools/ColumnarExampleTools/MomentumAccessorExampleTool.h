@@ -16,8 +16,9 @@
 #include <ColumnarCore/ObjectColumn.h>
 #include <ColumnarCore/ObjectTypeAccessor.h>
 #include <ColumnarCore/ParticleDef.h>
+#include <ColumnarModeDefault/ColumnarModeDefault.h>
 
-namespace columnar
+namespace ADD_CMODE(columnar)
 {
   /// @brief an example of a columnar tool that uses momentum accessors
   ///
@@ -28,7 +29,7 @@ namespace columnar
 
   class MomentumAccessorExampleTool final
     : public asg::AsgTool,
-      public ColumnarTool<>
+      public columnar::ColumnarTool<CMode>
   {
   public:
 
@@ -39,9 +40,9 @@ namespace columnar
 
     virtual StatusCode initialize () override;
 
-    void callSingleEvent (ParticleRange particles) const;
+    void callSingleEvent (columnar::ParticleRange<CMode> particles) const;
 
-    virtual void callEvents (EventContextRange events) const override;
+    virtual void callEvents (columnar::EventContextRange<CMode> events) const override;
 
 
     /// @brief the energy cut to apply
@@ -53,7 +54,7 @@ namespace columnar
     /// This is equivalent to a `ReadHandleKey` in the xAOD world.  It
     /// is used to access the particle range/container for a given
     /// event.
-    ParticleAccessor<ObjectColumn> particlesHandle {*this, "Particles"};
+    columnar::ParticleAccessor<columnar::ObjectColumn,CMode> particlesHandle {*this, "Particles"};
 
 
     /// @brief the momentum accessors for the particle container
@@ -61,7 +62,7 @@ namespace columnar
     /// This is an accessor that provides access to all the available
     /// momentum variables and can be reconfigured at configuration time
     /// to different momentum accessors.
-    MomentumAccessors<ParticleDef> momAcc;
+    columnar::MomentumAccessors<columnar::ParticleDef,CMode> momAcc;
 
     /// @brief the object type accessor for the particle container
     ///
@@ -69,13 +70,13 @@ namespace columnar
     /// column accessor, as it needs to be able to access the property
     /// type at configuration time (to set the correct momentum
     /// accessor).
-    ObjectTypeAccessor<ParticleDef> objectTypeAcc {*this, "ObjectType", "the object type of the particles"};
+    columnar::ObjectTypeAccessor<columnar::ParticleDef,CMode> objectTypeAcc {*this, "ObjectType", "the object type of the particles"};
 
     // If you want to use a statically configured momentum accessor,
     // this would be the basic way to do it. For now (24 Jul 25) I don't
     // think this is worth the effort, as the dynamic momentum accessors
     // seem to be working pretty well.
-    // Detail::FullMomentumAccessorsPtEtaPhiM<Detail::CoreMomentumAccessorsPtEtaPhiReadM<ParticleDef,ColumnarModeDefault>> momAcc {*this};
+    // Detail::FullMomentumAccessorsPtEtaPhiM<Detail::CoreMomentumAccessorsPtEtaPhiReadM<ParticleDef,CMode>> momAcc {*this};
 
 
     /// @brief the selection decorator for the particles
@@ -86,7 +87,7 @@ namespace columnar
     /// the option to return individual output values.  Instead it needs
     /// to provide an output value per object, which in the columnar
     /// world is done by filling a column.
-    ParticleDecorator<char> selectionDec {*this, "selection"};
+    columnar::ParticleDecorator<char,CMode> selectionDec {*this, "selection"};
   };
 }
 

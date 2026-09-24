@@ -18,11 +18,11 @@ namespace columnar
     static constexpr std::string_view idName = "tauJet";
   };
 
-  using TauJetRange = ObjectRange<TauJetDef>;
-  using TauJetId = ObjectId<TauJetDef>;
-  using OptTauJetId = OptObjectId<TauJetDef>;
-  template<typename CT,typename CM=ColumnarModeDefault> using TauJetAccessor  = AccessorTemplate<TauJetDef,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using TauJetDecorator = AccessorTemplate<TauJetDef,CT,ColumnAccessMode::output,CM>;
+  template<ColumnarMode CM> using TauJetRange = ObjectRange<TauJetDef,CM>;
+  template<ColumnarMode CM> using TauJetId = ObjectId<TauJetDef,CM>;
+  template<ColumnarMode CM> using OptTauJetId = OptObjectId<TauJetDef,CM>;
+  template<typename CT,ColumnarMode CM> using TauJetAccessor  = AccessorTemplate<TauJetDef,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,ColumnarMode CM> using TauJetDecorator = AccessorTemplate<TauJetDef,CT,ColumnAccessMode::output,CM>;
 }
 
 #endif

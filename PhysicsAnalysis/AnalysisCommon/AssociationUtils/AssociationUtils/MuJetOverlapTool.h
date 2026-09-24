@@ -80,16 +80,16 @@ namespace ORUtils
       /// muons. Second, muons are flagged if they overlap with the remaining
       /// jets.
       virtual StatusCode
-      findOverlaps(columnar::Particle1Range cont1,
-                   columnar::Particle2Range cont2,
-                   columnar::EventContextId eventContext) const override;
+      findOverlaps(columnar::Particle1Range<CMode> cont1,
+                   columnar::Particle2Range<CMode> cont2,
+                   columnar::EventContextId<CMode> eventContext) const override;
 
       /// @brief Identify overlapping muons and jets.
       /// The above method calls this one.
       virtual StatusCode
-      internalFindOverlaps(columnar::Particle1Range muons,
-                           columnar::Particle2Range jets,
-                           columnar::EventContextId eventContext) const;
+      internalFindOverlaps(columnar::Particle1Range<CMode> muons,
+                           columnar::Particle2Range<CMode> jets,
+                           columnar::EventContextId<CMode> eventContext) const;
 
     protected:
 
@@ -99,13 +99,13 @@ namespace ORUtils
     protected:
 
       /// Retrieve the primary vertex used to count jet tracks
-      std::optional<std::size_t> getPrimVtxIdx(columnar::EventContextId eventContext) const;
+      std::optional<std::size_t> getPrimVtxIdx(columnar::EventContextId<CMode> eventContext) const;
 
       /// Get the number of tracks in a jet w.r.t. requested vertex
-      int getNumTracks(columnar::Particle2Id jet, size_t vtxIdx) const;
+      int getNumTracks(columnar::Particle2Id<CMode> jet, size_t vtxIdx) const;
 
       /// Get the sum trk pt in a jet w.r.t. requested vertex
-      float getSumTrackPt(columnar::Particle2Id jet, size_t vtxIdx) const;
+      float getSumTrackPt(columnar::Particle2Id<CMode> jet, size_t vtxIdx) const;
 
     private:
 
@@ -158,18 +158,18 @@ namespace ORUtils
       bool m_allowNoPV;
 
       /// Columnar accessors
-      struct Accessors final : columnar::ColumnarTool<>
+      struct Accessors final : columnar::ColumnarTool<CMode>
       {
-        columnar::Track0Accessor<columnar::ObjectColumn> m_track0Acc {*this, "InDetTrackParticles"};
-        columnar::Track1Accessor<columnar::ObjectColumn> m_track1Acc {*this, "InDetForwardTrackParticles"};
-        columnar::Particle1Accessor<float> m_muonPtAcc {*this, "pt"};
-        columnar::Particle2Accessor<float> m_jetPtAcc {*this, "pt"};
-        columnar::Particle2Accessor<int> m_jetNumTrkAcc;
-        columnar::Particle2Accessor< std::vector<int> > m_jetNumTrkPt500Acc;
-        columnar::Particle2Accessor<int> m_jetSumTrkPtAcc;
-        columnar::Particle2Accessor< std::vector<float> > m_jetSumTrkPt500Acc;
-        columnar::VertexAccessor<columnar::ObjectColumn> m_vtxContainerAcc;
-        columnar::VertexAccessor<columnar::RetypeColumn<xAOD::VxType::VertexType,short>> m_vertexTypeAcc {*this, "vertexType"};
+        columnar::Track0Accessor<columnar::ObjectColumn,CMode> m_track0Acc {*this, "InDetTrackParticles"};
+        columnar::Track1Accessor<columnar::ObjectColumn,CMode> m_track1Acc {*this, "InDetForwardTrackParticles"};
+        columnar::Particle1Accessor<float,CMode> m_muonPtAcc {*this, "pt"};
+        columnar::Particle2Accessor<float,CMode> m_jetPtAcc {*this, "pt"};
+        columnar::Particle2Accessor<int,CMode> m_jetNumTrkAcc;
+        columnar::Particle2Accessor<std::vector<int>,CMode> m_jetNumTrkPt500Acc;
+        columnar::Particle2Accessor<int,CMode> m_jetSumTrkPtAcc;
+        columnar::Particle2Accessor<std::vector<float>,CMode> m_jetSumTrkPt500Acc;
+        columnar::VertexAccessor<columnar::ObjectColumn,CMode> m_vtxContainerAcc;
+        columnar::VertexAccessor<columnar::RetypeColumn<xAOD::VxType::VertexType,short>,CMode> m_vertexTypeAcc {*this, "vertexType"};
         using ColumnarTool::ColumnarTool;
       };
       std::unique_ptr<Accessors> m_accessors {std::make_unique<Accessors> (this)};
@@ -180,7 +180,7 @@ namespace ORUtils
       /// @{
 
       /// BJet helper
-      columnar::Particle2Accessor<char> m_bJetAcc;
+      columnar::Particle2Accessor<char,CMode> m_bJetAcc;
 
       /// Delta-R matcher for the inner cone
       std::unique_ptr<IParticleAssociator> m_dRMatchCone1;

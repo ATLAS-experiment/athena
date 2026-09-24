@@ -340,14 +340,14 @@ AsgElectronEfficiencyCorrectionTool::getEfficiencyScaleFactor(
     ATH_MSG_ERROR("Could not retrieve EventInfo object!");
     return CP::CorrectionCode::Error;
   }
-  return getEfficiencyScaleFactor(columnar::ElectronId(inputObject), efficiencyScaleFactor, columnar::EventInfoId (*eventInfo));
+  return getEfficiencyScaleFactor(columnar::ElectronId<CMode>(inputObject), efficiencyScaleFactor, columnar::EventInfoId<CMode> (*eventInfo));
 }
 
 CP::CorrectionCode
 AsgElectronEfficiencyCorrectionTool::getEfficiencyScaleFactor(
-  columnar::ElectronId inputObject,
+  columnar::ElectronId<CMode> inputObject,
   double& efficiencyScaleFactor,
-  columnar::EventInfoId eventInfo) const
+  columnar::EventInfoId<CMode> eventInfo) const
 {
   const Accessors& acc = *m_accessors;
 
@@ -808,12 +808,12 @@ int
 AsgElectronEfficiencyCorrectionTool::systUncorrVariationIndex(
   const xAOD::Electron& inputObject) const
 {
-  return systUncorrVariationIndex (columnar::ElectronId (inputObject));
+  return systUncorrVariationIndex (columnar::ElectronId<CMode> (inputObject));
 }
 
 int
 AsgElectronEfficiencyCorrectionTool::systUncorrVariationIndex(
-  columnar::ElectronId inputObject) const
+  columnar::ElectronId<CMode> inputObject) const
 {
   const Accessors& acc = *m_accessors;
   int currentSystRegion = -999;
@@ -1001,10 +1001,10 @@ AsgElectronEfficiencyCorrectionTool::get_simType_from_metadata(
 
 
 
-void AsgElectronEfficiencyCorrectionTool::callSingleEvent (columnar::ElectronRange electrons, columnar::EventInfoId event) const
+void AsgElectronEfficiencyCorrectionTool::callSingleEvent (columnar::ElectronRange<CMode> electrons, columnar::EventInfoId<CMode> event) const
 {
   const Accessors& acc = *m_accessors;
-  for (columnar::ElectronId electron : electrons)
+  for (columnar::ElectronId<CMode> electron : electrons)
   {
     double sf = 0;
     switch (getEfficiencyScaleFactor(electron, sf, event).code())
@@ -1023,10 +1023,10 @@ void AsgElectronEfficiencyCorrectionTool::callSingleEvent (columnar::ElectronRan
   }
 }
 
-void AsgElectronEfficiencyCorrectionTool::callEvents (columnar::EventContextRange events) const
+void AsgElectronEfficiencyCorrectionTool::callEvents (columnar::EventContextRange<CMode> events) const
 {
   const Accessors& acc = *m_accessors;
-  for (columnar::EventContextId event : events)
+  for (columnar::EventContextId<CMode> event : events)
   {
     auto eventInfo = acc.m_eventInfo(event);
     callSingleEvent (acc.m_electrons(event), eventInfo);

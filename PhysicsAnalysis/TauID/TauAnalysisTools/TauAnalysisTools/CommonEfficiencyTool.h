@@ -44,7 +44,7 @@ class TauEfficiencyCorrectionsTool;
 class CommonEfficiencyTool
   : public virtual ITauEfficiencyCorrectionsTool
   , public asg::AsgTool
-  , public columnar::ColumnarTool<>	
+  , public columnar::ColumnarTool<CMode>	
 {
   /// Create a proper constructor for Athena
   ASG_TOOL_CLASS( CommonEfficiencyTool, TauAnalysisTools::ITauEfficiencyCorrectionsTool )
@@ -63,7 +63,7 @@ public:
   virtual CP::CorrectionCode getEfficiencyScaleFactor(const xAOD::TauJet& tau, double& dEfficiencyScaleFactor, 
     unsigned int iRunNumber = 0 ) override;
 
-  CP::CorrectionCode getEfficiencyScaleFactor( columnar::TauJetId tau, double& dEfficiencyScaleFactor,
+  CP::CorrectionCode getEfficiencyScaleFactor( columnar::TauJetId<CMode> tau, double& dEfficiencyScaleFactor,
     unsigned int iRunNumber) const;
 
   virtual CP::CorrectionCode applyEfficiencyScaleFactor(const xAOD::TauJet& xTau, 
@@ -118,7 +118,7 @@ protected:
   void addHistogramToSFMap(TKey* kKey, const std::string& sKeyName);
 
   virtual CP::CorrectionCode getValue(const std::string& sHistName,
-                                      columnar::TauJetId tau,
+                                      columnar::TauJetId<CMode> tau,
                                       double& dEfficiencyScaleFactor) const;
 
   static CP::CorrectionCode getValueTH1(const TObject* oObject,
@@ -163,31 +163,31 @@ protected:
 
 public:
 
-  struct Accessors : public columnar::ColumnarTool<>
+  struct Accessors : public columnar::ColumnarTool<CMode>
   {
-    Accessors(CommonEfficiencyTool& tool) : columnar::ColumnarTool<>(&tool) {}
+    Accessors(CommonEfficiencyTool& tool) : columnar::ColumnarTool<CMode>(&tool) {}
 
-    columnar::EventInfoAccessor<columnar::ObjectColumn> m_eventInfo {*this, "EventInfo", {.addMTDependency=true}};
-    columnar::EventInfoAccessor<uint32_t> randomrunnumber;
+    columnar::EventInfoAccessor<columnar::ObjectColumn,CMode> m_eventInfo {*this, "EventInfo", {.addMTDependency=true}};
+    columnar::EventInfoAccessor<uint32_t,CMode> randomrunnumber;
 
     // Associated truth particles and jets. These are picked up by truth
     // links on the tau itself.
-    columnar::TruthParticleAccessor<columnar::ObjectColumn> m_truthParticles {*this, "TruthTaus"};
-    columnar::JetAccessor<columnar::ObjectColumn> m_jets {*this, "AntiKt4TruthDressedWZJets"};
+    columnar::TruthParticleAccessor<columnar::ObjectColumn,CMode> m_truthParticles {*this, "TruthTaus"};
+    columnar::JetAccessor<columnar::ObjectColumn,CMode> m_jets {*this, "AntiKt4TruthDressedWZJets"};
 
-    columnar::TauJetAccessor<columnar::ObjectColumn> m_taus {*this, "TauJets"};
-    //columnar::TauJetAccessor<int> m_nTracks{*this, "nChargedTracks", {.isOptional=true}}; to be used when 'nChargedTracks' will be in physlite
-    //columnar::TauJetAccessor<float> m_eta{*this,"eta"};
-    //columnar::TauJetAccessor<float> m_pt{*this,"pt"};
-    columnar::TauJetAccessor<int> m_decayMode{*this,"PanTau_DecayMode"};
+    columnar::TauJetAccessor<columnar::ObjectColumn,CMode> m_taus {*this, "TauJets"};
+    //columnar::TauJetAccessor<int,CMode> m_nTracks{*this, "nChargedTracks", {.isOptional=true}}; to be used when 'nChargedTracks' will be in physlite
+    //columnar::TauJetAccessor<float,CMode> m_eta{*this,"eta"};
+    //columnar::TauJetAccessor<float,CMode> m_pt{*this,"pt"};
+    columnar::TauJetAccessor<int,CMode> m_decayMode{*this,"PanTau_DecayMode"};
     TruthParticleTypeAccessor<> m_truthParticleType{*this};
-    columnar::TauJetDecorator<float> m_sfDec{*this,"sfOut"};
-    columnar::TauJetDecorator<char> m_validDec{*this,"validOut"};
+    columnar::TauJetDecorator<float,CMode> m_sfDec{*this,"sfOut"};
+    columnar::TauJetDecorator<char,CMode> m_validDec{*this,"validOut"};
   };
   std::unique_ptr<Accessors> m_accessors;
 
-  void callSingleEvent (columnar::TauJetRange taus, columnar::EventInfoId event) const;
-  void callEvents (columnar::EventContextRange events) const override;
+  void callSingleEvent (columnar::TauJetRange<CMode> taus, columnar::EventInfoId<CMode> event) const;
+  void callEvents (columnar::EventContextRange<CMode> events) const override;
 
 
 };

@@ -16,8 +16,9 @@
 #include <ColumnarCore/LinkColumn.h>
 #include <ColumnarMuon/MuonDef.h>
 #include <ColumnarTracking/TrackDef.h>
+#include <ColumnarModeDefault/ColumnarModeDefault.h>
 
-namespace columnar
+namespace ADD_CMODE(columnar)
 {
   /// @brief an example of a tool reading an element link
   ///
@@ -27,7 +28,7 @@ namespace columnar
 
   class LinkColumnExampleTool final
     : public asg::AsgTool,
-      public ColumnarTool<>
+      public columnar::ColumnarTool<CMode>
   {
   public:
 
@@ -38,7 +39,7 @@ namespace columnar
 
     virtual StatusCode initialize () override;
 
-    virtual void callEvents (EventContextRange events) const override;
+    virtual void callEvents (columnar::EventContextRange<CMode> events) const override;
 
 
     /// @brief the pt cut to apply
@@ -50,7 +51,7 @@ namespace columnar
     /// This is equivalent to a `ReadHandleKey` in the xAOD world.  It
     /// is used to access the particle range/container for a given
     /// event.
-    MuonAccessor<ObjectColumn> muonsHandle {*this, "AnalysisMuons"};
+    columnar::MuonAccessor<columnar::ObjectColumn,CMode> muonsHandle {*this, "AnalysisMuons"};
 
 
     /// @brief the object accessor for the linked track container
@@ -59,7 +60,7 @@ namespace columnar
     /// essentially we need to know what the linked container is, both
     /// for doing the link itself, and for declaring all the associated
     /// accessors.
-    TrackAccessor<ObjectColumn> trackHandle {*this, "InDetTrackParticles"};
+    columnar::TrackAccessor<columnar::ObjectColumn,CMode> trackHandle {*this, "InDetTrackParticles"};
 
 
     /// @brief the link accessor for the particles
@@ -67,7 +68,7 @@ namespace columnar
     /// This accessor reads the link from one container to another.  In
     /// xAOD land this is done with `ElementLink`, while in columnar
     /// land this is just a simple integer index.
-    MuonAccessor<OptTrackId> trackLinkAcc {*this, "inDetTrackParticleLink"};
+    columnar::MuonAccessor<columnar::OptTrackId<CMode>,CMode> trackLinkAcc {*this, "inDetTrackParticleLink"};
 
 
 
@@ -76,7 +77,7 @@ namespace columnar
     /// Tracks use their own way of representing momentum.  In an actual
     /// tool we'd use a custom momentum accessor for tracks, but here we
     /// just read the q/p and handle it directly.
-    TrackAccessor<float> trackQOverPAcc {*this, "qOverP"};
+    columnar::TrackAccessor<float,CMode> trackQOverPAcc {*this, "qOverP"};
 
 
     /// @brief the selection decorator for the particles
@@ -87,7 +88,7 @@ namespace columnar
     /// the option to return individual output values.  Instead it needs
     /// to provide an output value per object, which in the columnar
     /// world is done by filling a column.
-    MuonDecorator<char> selectionDec {*this, "selection"};
+    columnar::MuonDecorator<char,CMode> selectionDec {*this, "selection"};
   };
 }
 

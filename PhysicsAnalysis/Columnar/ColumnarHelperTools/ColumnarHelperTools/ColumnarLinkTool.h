@@ -43,7 +43,7 @@ namespace columnar
 
   class ColumnarLinkTool final
     : public asg::AsgTool,
-      public ColumnarTool<>
+      public ColumnarTool<CMode>
   {
   public:
 
@@ -54,7 +54,7 @@ namespace columnar
 
     virtual StatusCode initialize () override;
 
-    virtual void callEvents (EventContextRange events) const override;
+    virtual void callEvents (EventContextRange<CMode> events) const override;
 
 
     Gaudi::Property<std::vector<std::string>> m_targetContainerNames {

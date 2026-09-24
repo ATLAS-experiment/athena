@@ -28,7 +28,7 @@ namespace columnar
     /// but with MET being the only user (so far) it is a specialized
     /// helper for the MET tools.
 
-    template<ContainerIdConcept CI = ParticleDef,typename CM=ColumnarModeDefault>
+    template<ContainerIdConcept CI,ColumnarMode CM>
     struct InputMomentumAccessors final
     {
       InputMomentumAccessors (ColumnarTool<CM>& columnarBase)
@@ -68,8 +68,8 @@ namespace columnar
 
 
 
-    template<ContainerIdConcept CI = ParticleDef,typename CM = ColumnarModeDefault> class OriginalObjectHandle;
-    template<ContainerIdConcept CI,typename CM> OriginalObjectHandle (const asg::AsgTool&,ObjectRange<CI,CM>) -> OriginalObjectHandle<CI,CM>;
+    template<ContainerIdConcept CI,ColumnarMode CM> class OriginalObjectHandle;
+    template<ContainerIdConcept CI,ColumnarMode CM> OriginalObjectHandle (const asg::AsgTool&,ObjectRange<CI,CM>) -> OriginalObjectHandle<CI,CM>;
 
     template<ContainerIdConcept CI> class OriginalObjectHandle<CI,ColumnarModeXAOD> final
     {
@@ -165,7 +165,7 @@ namespace columnar
 
     /// @brief an accessor that allows to access the xAOD object type of
     /// an input object
-    template<ContainerIdConcept CI,typename CM=ColumnarModeDefault>
+    template<ContainerIdConcept CI,ColumnarMode CM>
     struct ObjectTypeAccessor;
 
     template<ContainerIdConcept CI>

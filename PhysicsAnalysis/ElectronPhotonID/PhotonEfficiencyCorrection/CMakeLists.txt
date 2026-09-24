@@ -12,7 +12,7 @@ atlas_add_library( PhotonEfficiencyCorrectionLib
    PUBLIC_HEADERS PhotonEfficiencyCorrection
    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES EgammaAnalysisInterfacesLib AsgTools xAODEgamma
-   PATCoreAcceptLib PATInterfaces AsgMessagingLib ElectronEfficiencyCorrectionLib
+   PATCoreAcceptLib PATInterfaces AsgMessagingLib ElectronEfficiencyCorrectionLib ColumnarModeDefaultLib
    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} xAODEventInfo PathResolver AsgMessagingLib )
 
 if( NOT XAOD_STANDALONE )

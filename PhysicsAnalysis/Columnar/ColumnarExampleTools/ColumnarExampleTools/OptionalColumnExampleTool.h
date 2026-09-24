@@ -14,8 +14,9 @@
 #include <ColumnarCore/ColumnarTool.h>
 #include <ColumnarCore/ObjectColumn.h>
 #include <ColumnarCore/ParticleDef.h>
+#include <ColumnarModeDefault/ColumnarModeDefault.h>
 
-namespace columnar
+namespace ADD_CMODE(columnar)
 {
   /// @brief example of a columnar tool with optional columns
   ///
@@ -24,7 +25,7 @@ namespace columnar
 
   class OptionalColumnExampleTool final
     : public asg::AsgTool,
-      public ColumnarTool<>
+      public columnar::ColumnarTool<CMode>
   {
   public:
 
@@ -35,7 +36,7 @@ namespace columnar
 
     virtual StatusCode initialize () override;
 
-    virtual void callEvents (EventContextRange events) const override;
+    virtual void callEvents (columnar::EventContextRange<CMode> events) const override;
 
 
     /// @brief the pt cut to apply
@@ -47,7 +48,7 @@ namespace columnar
     /// This is equivalent to a `ReadHandleKey` in the xAOD world.  It
     /// is used to access the particle range/container for a given
     /// event.
-    ParticleAccessor<ObjectColumn> particlesHandle {*this, "Particles"};
+    columnar::ParticleAccessor<columnar::ObjectColumn,CMode> particlesHandle {*this, "Particles"};
 
 
     /// @brief the pt accessor for the particle container
@@ -55,7 +56,7 @@ namespace columnar
     /// This is the equivalent to an `AuxElement::Accessor` in the xAOD
     /// world.  Note that this accessor is not initialized here, but
     /// will be initialized in the `initialize` method.
-    ParticleAccessor<float> ptAcc {*this, "pt"};
+    columnar::ParticleAccessor<float,CMode> ptAcc {*this, "pt"};
 
 
     /// @brief an accessor for an optional corrected pt
@@ -64,7 +65,7 @@ namespace columnar
     /// is a model of that.  This does have some concerns about
     /// reproducability as the output will depend on whether this column
     /// is available, but the pattern is common within the CP tools.
-    ParticleAccessor<float> ptCorrAcc {*this, "ptCorr", {.isOptional = true}};
+    columnar::ParticleAccessor<float,CMode> ptCorrAcc {*this, "ptCorr", {.isOptional = true}};
 
 
     /// @brief the selection decorator for the particles
@@ -75,7 +76,7 @@ namespace columnar
     /// the option to return individual output values.  Instead it needs
     /// to provide an output value per object, which in the columnar
     /// world is done by filling a column.
-    ParticleDecorator<char> selectionDec {*this, "selection"};
+    columnar::ParticleDecorator<char,CMode> selectionDec {*this, "selection"};
   };
 }
 

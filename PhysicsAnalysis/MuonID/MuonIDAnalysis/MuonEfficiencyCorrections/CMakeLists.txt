@@ -18,7 +18,7 @@ atlas_add_library( MuonEfficiencyCorrectionsLib
    PUBLIC_HEADERS MuonEfficiencyCorrections
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} ${extra_libs} AsgTools ColumnarMuonLib ColumnarEventInfoLib MuonAnalysisInterfacesLib 
-                  PATInterfaces AsgDataHandlesLib ColumnarCoreLib
+                  PATInterfaces AsgDataHandlesLib ColumnarCoreLib ColumnarModeDefaultLib
    PRIVATE_LINK_LIBRARIES FourMomUtils xAODTrigger PathResolver )
 
 if( CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16 )

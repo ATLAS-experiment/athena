@@ -71,12 +71,12 @@ namespace columnar
     // behavior is exactly the same. Note that this is only for regular
     // container IDs, as e.g. VariantContainerId needs special handling.
     template<RegularContainerIdConcept LT,typename ELT,ColumnarMode CM>
-      requires (CM::hasTypedLinks == false && MemoryAccessor<OptObjectId<LT>,CM>::isDefined)
+      requires (CM::hasTypedLinks == false && MemoryAccessor<OptObjectId<LT,CM>,CM>::isDefined)
     class MemoryAccessor<LinkCastColumn<LT,ELT>,CM>
     {
     public:
 
-      using BaseAccessor = MemoryAccessor<OptObjectId<LT>,CM>;
+      using BaseAccessor = MemoryAccessor<OptObjectId<LT,CM>,CM>;
 
       static constexpr bool isDefined = true;
       static constexpr bool viewIsReference = BaseAccessor::viewIsReference;
@@ -134,7 +134,7 @@ namespace columnar
     // combine it with the data vector from the input to get the new
     // OptObjectId
     template<ContainerIdConcept LT>
-    class MemoryAccessor<OptObjectId<LT>,ColumnarModeArray> final
+    class MemoryAccessor<OptObjectId<LT,ColumnarModeArray>,ColumnarModeArray> final
     {
     public:
 

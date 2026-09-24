@@ -14,8 +14,9 @@
 #include <ColumnarCore/ColumnarTool.h>
 #include <ColumnarCore/ObjectColumn.h>
 #include <ColumnarCore/ParticleDef.h>
+#include <ColumnarModeDefault/ColumnarModeDefault.h>
 
-namespace columnar
+namespace ADD_CMODE(columnar)
 {
   /// @brief an example of a columnar tool with a modular structure
   ///
@@ -33,7 +34,7 @@ namespace columnar
 
   class ModularExampleTool final
     : public asg::AsgTool,
-      public ColumnarTool<>
+      public columnar::ColumnarTool<CMode>
   {
   public:
 
@@ -44,7 +45,7 @@ namespace columnar
 
     virtual StatusCode initialize () override;
 
-    virtual void callEvents (EventContextRange events) const override;
+    virtual void callEvents (columnar::EventContextRange<CMode> events) const override;
 
 
     /// @brief the pt cut to apply
@@ -59,7 +60,7 @@ namespace columnar
     /// This is equivalent to a `ReadHandleKey` in the xAOD world.  It
     /// is used to access the particle range/container for a given
     /// event.
-    ParticleAccessor<ObjectColumn> particlesHandle {*this, "Particles"};
+    columnar::ParticleAccessor<columnar::ObjectColumn,CMode> particlesHandle {*this, "Particles"};
 
 
     /// @brief the selection decorator for the particles
@@ -70,19 +71,19 @@ namespace columnar
     /// the option to return individual output values.  Instead it needs
     /// to provide an output value per object, which in the columnar
     /// world is done by filling a column.
-    ParticleDecorator<char> selectionDec {*this, "selection"};
+    columnar::ParticleDecorator<char,CMode> selectionDec {*this, "selection"};
 
 
     /// @brief a simple subobject that does a selection on the pt
     ///
     /// This is a bit of a silly example, but many tools will have some
     /// subobjects that need accessors.
-    struct SubtoolPt : public ColumnarTool<>
+    struct SubtoolPt : public columnar::ColumnarTool<CMode>
     {
       SubtoolPt (float val_cutValue);
-      bool select (ParticleId particle) const;
+      bool select (columnar::ParticleId<CMode> particle) const;
 
-      ParticleAccessor<float> ptAcc {*this, "pt"};
+      columnar::ParticleAccessor<float,CMode> ptAcc {*this, "pt"};
       float m_cutValue = 0;
     };
     std::unique_ptr<SubtoolPt> m_subtoolPt;
@@ -98,12 +99,12 @@ namespace columnar
     /// This class demonstrates taking the parent tool in the
     /// constructor, to avoid having to declare containers the parent
     /// tool already declared.
-    struct SubtoolEta : public ColumnarTool<>
+    struct SubtoolEta : public columnar::ColumnarTool<CMode>
     {
-      SubtoolEta (ColumnarTool<>* parent, float val_cutValue);
-      bool select (ParticleId particle) const;
+      SubtoolEta (columnar::ColumnarTool<CMode>* parent, float val_cutValue);
+      bool select (columnar::ParticleId<CMode> particle) const;
 
-      ParticleAccessor<float> etaAcc {*this, "eta"};
+      columnar::ParticleAccessor<float,CMode> etaAcc {*this, "eta"};
       float m_cutValue = 0;
     };
     std::unique_ptr<SubtoolEta> m_subtoolEta;

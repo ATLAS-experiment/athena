@@ -43,33 +43,33 @@ namespace columnar
     static constexpr std::string_view idName = "metAssociation";
   };
 
-  using MetRange = ObjectRange<MetDef>;
-  using MetId = ObjectId<MetDef>;
-  using OptMetId = OptObjectId<MetDef>;
-  template<typename CT,typename CM=ColumnarModeDefault> using MetAccessor  = AccessorTemplate<MetDef,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using MetDecorator = AccessorTemplate<MetDef,CT,ColumnAccessMode::output,CM>;
+  template<ColumnarMode CM> using MetRange = ObjectRange<MetDef,CM>;
+  template<ColumnarMode CM> using MetId = ObjectId<MetDef,CM>;
+  template<ColumnarMode CM> using OptMetId = OptObjectId<MetDef,CM>;
+  template<typename CT,ColumnarMode CM> using MetAccessor  = AccessorTemplate<MetDef,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,ColumnarMode CM> using MetDecorator = AccessorTemplate<MetDef,CT,ColumnAccessMode::output,CM>;
 
-  using Met0Range = ObjectRange<Met0Def>;
-  using Met0Id = ObjectId<Met0Def>;
-  using OptMet0Id = OptObjectId<Met0Def>;
-  template<typename CT,typename CM=ColumnarModeDefault> using Met0Accessor  = AccessorTemplate<Met0Def,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using Met0Decorator = AccessorTemplate<Met0Def,CT,ColumnAccessMode::output,CM>;
+  template<ColumnarMode CM> using Met0Range = ObjectRange<Met0Def,CM>;
+  template<ColumnarMode CM> using Met0Id = ObjectId<Met0Def,CM>;
+  template<ColumnarMode CM> using OptMet0Id = OptObjectId<Met0Def,CM>;
+  template<typename CT,ColumnarMode CM> using Met0Accessor  = AccessorTemplate<Met0Def,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,ColumnarMode CM> using Met0Decorator = AccessorTemplate<Met0Def,CT,ColumnAccessMode::output,CM>;
 
-  using Met1Range = ObjectRange<Met1Def>;
-  using Met1Id = ObjectId<Met1Def>;
-  using OptMet1Id = OptObjectId<Met1Def>;
-  template<typename CT,typename CM=ColumnarModeDefault> using Met1Accessor  = AccessorTemplate<Met1Def,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using Met1Decorator = AccessorTemplate<Met1Def,CT,ColumnAccessMode::output,CM>;
+  template<ColumnarMode CM> using Met1Range = ObjectRange<Met1Def,CM>;
+  template<ColumnarMode CM> using Met1Id = ObjectId<Met1Def,CM>;
+  template<ColumnarMode CM> using OptMet1Id = OptObjectId<Met1Def,CM>;
+  template<typename CT,ColumnarMode CM> using Met1Accessor  = AccessorTemplate<Met1Def,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,ColumnarMode CM> using Met1Decorator = AccessorTemplate<Met1Def,CT,ColumnAccessMode::output,CM>;
 
-  using MutableMetRange = ObjectRange<MutableMetDef>;
-  using MutableMetId = ObjectId<MutableMetDef>;
-  using OptMutableMetId = OptObjectId<MutableMetDef>;
-  template<typename CT,typename CM=ColumnarModeDefault> using MutableMetAccessor  = AccessorTemplate<MutableMetDef,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using MutableMetDecorator = AccessorTemplate<MutableMetDef,CT,ColumnAccessMode::output,CM>;
+  template<ColumnarMode CM> using MutableMetRange = ObjectRange<MutableMetDef,CM>;
+  template<ColumnarMode CM> using MutableMetId = ObjectId<MutableMetDef,CM>;
+  template<ColumnarMode CM> using OptMutableMetId = OptObjectId<MutableMetDef,CM>;
+  template<typename CT,ColumnarMode CM> using MutableMetAccessor  = AccessorTemplate<MutableMetDef,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,ColumnarMode CM> using MutableMetDecorator = AccessorTemplate<MutableMetDef,CT,ColumnAccessMode::output,CM>;
 
-  using MetAssociationRange = ObjectRange<MetAssociationDef>;
-  using MetAssociationId = ObjectId<MetAssociationDef>;
-  using OptMetAssociationId = OptObjectId<MetAssociationDef>;
+  template<ColumnarMode CM> using MetAssociationRange = ObjectRange<MetAssociationDef,CM>;
+  template<ColumnarMode CM> using MetAssociationId = ObjectId<MetAssociationDef,CM>;
+  template<ColumnarMode CM> using OptMetAssociationId = OptObjectId<MetAssociationDef,CM>;
 }
 
 #endif

@@ -136,7 +136,7 @@ TEST_F (ColumnarPhysLiteTest, AsgPhotonEfficiencyCorrectionTool)
   ASSERT_SUCCESS (tool->setProperty ("ForceDataType", unsigned (PATCore::ParticleDataType::Full)));
 
   // add a dummy column for the test
-  columnar::VertexAccessor<float> dummyColumn (*tool, "x");
+  columnar::VertexAccessor<float,CMode> dummyColumn (*tool, "x");
 
   ASSERT_SUCCESS (tool->initialize ());
 

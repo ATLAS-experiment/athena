@@ -51,15 +51,15 @@ namespace ORUtils
 
       /// @brief Identify overlapping taus and jets.
       virtual StatusCode
-      findOverlaps(columnar::Particle1Range cont1,
-                   columnar::Particle2Range cont2,
-                   columnar::EventContextId eventContext) const override;
+      findOverlaps(columnar::Particle1Range<CMode> cont1,
+                   columnar::Particle2Range<CMode> cont2,
+                   columnar::EventContextId<CMode> eventContext) const override;
 
       /// @brief Identify overlapping taus and jets.
       /// The above method calls this one.
       virtual StatusCode
-      internalFindOverlaps(columnar::Particle1Range jets,
-                           columnar::Particle2Range taus) const;
+      internalFindOverlaps(columnar::Particle1Range<CMode> jets,
+                           columnar::Particle2Range<CMode> taus) const;
 
     protected:
 
@@ -85,10 +85,10 @@ namespace ORUtils
       /// @{
 
       /// Columnar accessors
-      struct Accessors final : columnar::ColumnarTool<>
+      struct Accessors final : columnar::ColumnarTool<CMode>
       {
         /// BJet helper
-        columnar::Particle1Accessor<char> m_bJetAcc;
+        columnar::Particle1Accessor<char,CMode> m_bJetAcc;
         using ColumnarTool::ColumnarTool;
       };
       std::unique_ptr<Accessors> m_accessors {std::make_unique<Accessors> (this)};

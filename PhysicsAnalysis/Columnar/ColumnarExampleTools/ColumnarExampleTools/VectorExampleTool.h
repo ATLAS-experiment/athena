@@ -15,8 +15,9 @@
 #include <ColumnarCore/ObjectColumn.h>
 #include <ColumnarCore/ParticleDef.h>
 #include <ColumnarCore/VectorColumn.h>
+#include <ColumnarModeDefault/ColumnarModeDefault.h>
 
-namespace columnar
+namespace ADD_CMODE(columnar)
 {
   /// @brief an example of a columnar tool that reads a vector column
   ///
@@ -26,7 +27,7 @@ namespace columnar
 
   class VectorExampleTool final
     : public asg::AsgTool,
-      public ColumnarTool<>
+      public columnar::ColumnarTool<CMode>
   {
   public:
 
@@ -37,9 +38,9 @@ namespace columnar
 
     virtual StatusCode initialize () override;
 
-    void callSingleEvent (ParticleRange particles) const;
+    void callSingleEvent (columnar::ParticleRange<CMode> particles) const;
 
-    virtual void callEvents (EventContextRange events) const override;
+    virtual void callEvents (columnar::EventContextRange<CMode> events) const override;
 
 
     /// @brief the pt cut to apply
@@ -51,7 +52,7 @@ namespace columnar
     /// This is equivalent to a `ReadHandleKey` in the xAOD world.  It
     /// is used to access the particle range/container for a given
     /// event.
-    ParticleAccessor<ObjectColumn> particlesHandle {*this, "Particles"};
+    columnar::ParticleAccessor<columnar::ObjectColumn,CMode> particlesHandle {*this, "Particles"};
 
 
     /// @brief the pt accessor for the particle container
@@ -60,7 +61,7 @@ namespace columnar
     /// world.  The main difference is that it registers with the tool,
     /// as that is needed for column accessors.  Also, it is specific to
     /// the container, and can't be used with other containers.
-    ParticleAccessor<float> ptAcc {*this, "pt"};
+    columnar::ParticleAccessor<float,CMode> ptAcc {*this, "pt"};
 
 
     /// @brief a vector column accessor
@@ -68,7 +69,7 @@ namespace columnar
     /// There aren't a lot of cases in which there is a simple
     /// POD-vector column in PHYSLITE, so I picked up this rather
     /// obscure one.
-    ParticleAccessor<std::vector<int>> trknumAcc {*this, "NumTrkPt500"};
+    columnar::ParticleAccessor<std::vector<int>,CMode> trknumAcc {*this, "NumTrkPt500"};
 
 
     /// @brief a vector accessor involving retyping
@@ -78,7 +79,7 @@ namespace columnar
     /// PHYSLITE this mostly happens for ElementLink columns, and maybe
     /// enum columns, but for a simple example I'm changing from `float`
     /// to `double`.
-    ParticleAccessor<std::vector<RetypeColumn<double,float>>> trksumptAcc {*this, "SumPtTrkPt500"};
+    columnar::ParticleAccessor<std::vector<columnar::RetypeColumn<double,float>>,CMode> trksumptAcc {*this, "SumPtTrkPt500"};
 
 
     /// @brief the selection decorator for the particles
@@ -89,7 +90,7 @@ namespace columnar
     /// the option to return individual output values.  Instead it needs
     /// to provide an output value per object, which in the columnar
     /// world is done by filling a column.
-    ParticleDecorator<char> selectionDec {*this, "selection"};
+    columnar::ParticleDecorator<char,CMode> selectionDec {*this, "selection"};
   };
 }
 

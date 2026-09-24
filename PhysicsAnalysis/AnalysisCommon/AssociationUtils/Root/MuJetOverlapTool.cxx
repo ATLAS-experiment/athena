@@ -136,9 +136,9 @@ namespace ORUtils
   // Identify overlaps
   //---------------------------------------------------------------------------
   StatusCode MuJetOverlapTool::
-  findOverlaps(columnar::Particle1Range cont1,
-               columnar::Particle2Range cont2,
-               columnar::EventContextId eventContext) const
+  findOverlaps(columnar::Particle1Range<CMode> cont1,
+               columnar::Particle2Range<CMode> cont2,
+               columnar::EventContextId<CMode> eventContext) const
   {
     // Check the container types
     ATH_CHECK( checkForXAODContainer<xAOD::MuonContainer>(cont1, "First container arg is not of type MuonContainer!") );
@@ -152,9 +152,9 @@ namespace ORUtils
   // Identify overlaps
   //---------------------------------------------------------------------------
   StatusCode MuJetOverlapTool::
-  internalFindOverlaps(columnar::Particle1Range muons,
-                       columnar::Particle2Range jets,
-                       columnar::EventContextId eventContext) const
+  internalFindOverlaps(columnar::Particle1Range<CMode> muons,
+                       columnar::Particle2Range<CMode> jets,
+                       columnar::EventContextId<CMode> eventContext) const
   {
     ATH_MSG_DEBUG("Removing overlapping muons and jets");
     auto& acc = *m_accessors;
@@ -233,7 +233,7 @@ namespace ORUtils
   //---------------------------------------------------------------------------
   // Retrieve the primary vertex
   //---------------------------------------------------------------------------
-  std::optional<std::size_t> MuJetOverlapTool::getPrimVtxIdx(columnar::EventContextId eventContext) const
+  std::optional<std::size_t> MuJetOverlapTool::getPrimVtxIdx(columnar::EventContextId<CMode> eventContext) const
   {
     auto& acc = *m_accessors;
     // the old version of this code would allow for a missing PV
@@ -254,7 +254,7 @@ namespace ORUtils
   //---------------------------------------------------------------------------
   // Get the number of tracks in a jet
   //---------------------------------------------------------------------------
-  int MuJetOverlapTool::getNumTracks(columnar::Particle2Id jet, size_t vtxIdx) const
+  int MuJetOverlapTool::getNumTracks(columnar::Particle2Id<CMode> jet, size_t vtxIdx) const
   {
     auto& acc = *m_accessors;
     // Use the user decoration if configured
@@ -267,7 +267,7 @@ namespace ORUtils
   //---------------------------------------------------------------------------
   // Get the sum track pt of a jet
   //---------------------------------------------------------------------------
-  float MuJetOverlapTool::getSumTrackPt(columnar::Particle2Id jet, size_t vtxIdx) const
+  float MuJetOverlapTool::getSumTrackPt(columnar::Particle2Id<CMode> jet, size_t vtxIdx) const
   {
     auto& acc = *m_accessors;
     // Use the user decoration if configured

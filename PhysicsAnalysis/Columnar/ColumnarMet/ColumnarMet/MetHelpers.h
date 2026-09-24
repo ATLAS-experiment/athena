@@ -34,7 +34,7 @@ namespace columnar
     /// avoided.  This creates a slightly different behavior for
     /// `fillMET` in that in array mode it fails if the term does not
     /// exist.
-    template<ContainerIdConcept CI = MetDef,typename CM=ColumnarModeDefault>
+    template<ContainerIdConcept CI,ColumnarMode CM>
     class MapLookupAccessor;
 
     template<ContainerIdConcept CI>
@@ -58,11 +58,11 @@ namespace columnar
         return *result;
       }
 
-      ObjectId<CI> fillMET(ObjectRange<CI,CM> metMap, const std::string& metKey, const MissingETBase::Types::bitmask_t metSource) const {
+      ObjectId<CI,CM> fillMET(ObjectRange<CI,CM> metMap, const std::string& metKey, const MissingETBase::Types::bitmask_t metSource) const {
         xAOD::MissingET *metPtr = nullptr;
         if (met::fillMET(metPtr, &metMap.getXAODObject(), metKey, metSource).isFailure())
           throw std::runtime_error ("failed to fill MET term \"" + metKey + "\"");
-        return ObjectId<CI> (*metPtr);}
+        return ObjectId<CI,CM> (*metPtr);}
 
       StatusCode tryCreateIfMissing (ObjectRange<CI,CM> metMap, const std::string& metKey, const MissingETBase::Types::bitmask_t metSource) const
       {
@@ -124,7 +124,7 @@ namespace columnar
         return result.value();
       }
 
-      ObjectId<CI> fillMET(ObjectRange<CI,CM> metMap, const std::string& metKey, const MissingETBase::Types::bitmask_t metSource) const {
+      ObjectId<CI,CM> fillMET(ObjectRange<CI,CM> metMap, const std::string& metKey, const MissingETBase::Types::bitmask_t metSource) const {
         auto hash = std::hash<std::string>()(metKey);
         for (auto metObj : metMap)
         {
@@ -163,7 +163,7 @@ namespace columnar
     /// tool also needs to add to the momentum in a special way.  So
     /// this class tries to provide a somewhat convenient and robust
     /// interface for that.
-    template<ContainerIdConcept CI = MetDef,typename CM=ColumnarModeDefault>
+    template<ContainerIdConcept CI,ColumnarMode CM>
     struct MetMomentumAccessors final
     {
       static constexpr bool isMutable = CI::isMutable;

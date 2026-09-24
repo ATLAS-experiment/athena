@@ -54,14 +54,14 @@ namespace ORUtils
       /// @brief Identify overlapping electrons.
       /// Note that in this tool, the two containers should be the same.
       virtual StatusCode
-      findOverlaps(columnar::Particle1Range cont1,
-                   columnar::Particle2Range cont2,
-                   columnar::EventContextId eventContext) const override;
+      findOverlaps(columnar::Particle1Range<CMode> cont1,
+                   columnar::Particle2Range<CMode> cont2,
+                   columnar::EventContextId<CMode> eventContext) const override;
 
       /// @brief Identify overlapping electrons and jets.
       /// The above method calls this one.
       virtual StatusCode
-      internalFindOverlaps(columnar::Particle1Range electrons) const;
+      internalFindOverlaps(columnar::Particle1Range<CMode> electrons) const;
 
     protected:
 
@@ -71,10 +71,10 @@ namespace ORUtils
     private:
 
       /// Helper method for matching electrons
-      bool electronsMatch(columnar::Particle1Id el1, columnar::Particle1Id el2) const;
+      bool electronsMatch(columnar::Particle1Id<CMode> el1, columnar::Particle1Id<CMode> el2) const;
 
       /// Helper method to decide which electron to reject
-      bool rejectFirst(columnar::Particle1Id el1, columnar::Particle1Id el2) const;
+      bool rejectFirst(columnar::Particle1Id<CMode> el1, columnar::Particle1Id<CMode> el2) const;
 
       /// @name Configurable properties
       /// @{
@@ -95,16 +95,16 @@ namespace ORUtils
 
       /// Columnar accessors
       using MyTrackDef = columnar::VariantContainerId<columnar::Track0Def,columnar::Track0Def>;
-      struct Accessors final : columnar::ColumnarTool<>
+      struct Accessors final : columnar::ColumnarTool<CMode>
       {
-        columnar::ClusterAccessor<columnar::ObjectColumn> m_clusterContainerAcc;
-        columnar::Track0Accessor<columnar::ObjectColumn> m_track0Acc;
-        columnar::Particle1Accessor<float> m_ptAcc {*this, "pt"};
-        columnar::Particle1Accessor<std::uint16_t> m_authorAcc {*this, "author"};
-        columnar::Particle1Accessor<std::vector<columnar::OptClusterId>> m_caloClusterAcc;
-        columnar::Particle1Accessor<std::vector<columnar::OptTrackId>> m_trackAcc;
-        std::optional<columnar::ClusterHelpers::EtaBEAccessor<>> m_etaBEAcc;
-        std::optional<columnar::ClusterHelpers::PhiBEAccessor<>> m_phiBEAcc;
+        columnar::ClusterAccessor<columnar::ObjectColumn,CMode> m_clusterContainerAcc;
+        columnar::Track0Accessor<columnar::ObjectColumn,CMode> m_track0Acc;
+        columnar::Particle1Accessor<float,CMode> m_ptAcc {*this, "pt"};
+        columnar::Particle1Accessor<std::uint16_t,CMode> m_authorAcc {*this, "author"};
+        columnar::Particle1Accessor<std::vector<columnar::OptClusterId<CMode>>,CMode> m_caloClusterAcc;
+        columnar::Particle1Accessor<std::vector<columnar::OptTrackId<CMode>>,CMode> m_trackAcc;
+        std::optional<columnar::ClusterHelpers::EtaBEAccessor<CMode>> m_etaBEAcc;
+        std::optional<columnar::ClusterHelpers::PhiBEAccessor<CMode>> m_phiBEAcc;
         using ColumnarTool::ColumnarTool;
       };
       std::unique_ptr<Accessors> m_accessors {std::make_unique<Accessors> (this)};

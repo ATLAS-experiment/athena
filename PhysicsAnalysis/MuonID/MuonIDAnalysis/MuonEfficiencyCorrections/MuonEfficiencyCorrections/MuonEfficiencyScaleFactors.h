@@ -26,7 +26,7 @@
 #include <map>
 #include <unordered_map>
 namespace CP {
-    class MuonEfficiencyScaleFactors: virtual public CP::IMuonEfficiencyScaleFactors, public asg::AsgTool, public columnar::ColumnarTool<>{
+    class MuonEfficiencyScaleFactors: virtual public CP::IMuonEfficiencyScaleFactors, public asg::AsgTool, public columnar::ColumnarTool<CMode>{
 
         public:
             MuonEfficiencyScaleFactors(const std::string& name);
@@ -40,7 +40,7 @@ namespace CP {
 
             /// Retrieve the Scale factor and decorate the muon
             virtual CorrectionCode getEfficiencyScaleFactor(const xAOD::Muon& mu, float& sf, const xAOD::EventInfo* info = 0) const override;
-            CorrectionCode getEfficiencyScaleFactor(columnar::MuonId mu, float& sf, columnar::EventInfoId info) const;
+            CorrectionCode getEfficiencyScaleFactor(columnar::MuonId<CMode> mu, float& sf, columnar::EventInfoId<CMode> info) const;
             virtual CorrectionCode applyEfficiencyScaleFactor(const xAOD::Muon& mu, const xAOD::EventInfo* info = 0) const override;
             /// replica generation
             virtual CorrectionCode getEfficiencyScaleFactorReplicas(const xAOD::Muon& mu, std::vector<float> & sf_err, const xAOD::EventInfo* info = 0) const override;
@@ -78,7 +78,7 @@ namespace CP {
 
         private:
             unsigned int getRandomRunNumber(const xAOD::EventInfo* info) const;
-            unsigned int getRandomRunNumber(columnar::EventInfoId info) const;
+            unsigned int getRandomRunNumber(columnar::EventInfoId<CMode> info) const;
             /// load the SF histos
             StatusCode LoadInputs();
 
@@ -218,8 +218,8 @@ namespace CP {
 
     public:
 
-            void callSingleEvent (columnar::MuonRange muons, columnar::EventInfoId event) const;
-            virtual void callEvents (columnar::EventContextRange events) const override;
+            void callSingleEvent (columnar::MuonRange<CMode> muons, columnar::EventInfoId<CMode> event) const;
+            virtual void callEvents (columnar::EventContextRange<CMode> events) const override;
     };
 
 } /* namespace CP */

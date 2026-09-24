@@ -14,7 +14,7 @@
 // method implementations
 //
 
-namespace columnar
+namespace ADD_CMODE(columnar)
 {
   ModularExampleTool ::
   ModularExampleTool (const std::string& name)
@@ -45,7 +45,7 @@ namespace columnar
 
 
   void ModularExampleTool ::
-  callEvents (EventContextRange events) const
+  callEvents (columnar::EventContextRange<CMode> events) const
   {
     // loop over all events and particles.  note that this is
     // deliberately looping by value, as the ID classes are very small
@@ -53,9 +53,9 @@ namespace columnar
     // a single loop over all particles in the event range, but I chose
     // to split it up into two loops as most tools will need to do some
     // per-event things, e.g. retrieve `EventInfo`.
-    for (columnar::EventContextId event : events)
+    for (columnar::EventContextId<CMode> event : events)
     {
-      for (columnar::ParticleId particle : particlesHandle(event))
+      for (columnar::ParticleId<CMode> particle : particlesHandle(event))
       {
         selectionDec(particle) = m_subtoolPt->select (particle) && m_subtoolEta->select (particle);
       }
@@ -72,7 +72,7 @@ namespace columnar
 
 
   bool ModularExampleTool::SubtoolPt ::
-  select (ParticleId particle) const
+  select (columnar::ParticleId<CMode> particle) const
   {
     return ptAcc(particle) > m_cutValue;
   }
@@ -80,14 +80,14 @@ namespace columnar
 
 
   ModularExampleTool::SubtoolEta ::
-  SubtoolEta (ColumnarTool<> *val_parent, float val_cutValue)
-    : ColumnarTool<> (val_parent), m_cutValue (val_cutValue)
+  SubtoolEta (columnar::ColumnarTool<CMode> *val_parent, float val_cutValue)
+    : columnar::ColumnarTool<CMode> (val_parent), m_cutValue (val_cutValue)
   {}
 
 
 
   bool ModularExampleTool::SubtoolEta ::
-  select (ParticleId particle) const
+  select (columnar::ParticleId<CMode> particle) const
   {
     return std::abs(etaAcc(particle)) < m_cutValue;
   }

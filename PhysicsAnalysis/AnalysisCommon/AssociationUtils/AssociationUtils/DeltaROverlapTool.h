@@ -39,9 +39,9 @@ namespace ORUtils
       /// Flags all objects in cont1 which are found to overlap
       /// with any object in cont2 within the configured dR window.
       virtual StatusCode
-      findOverlaps(columnar::Particle1Range cont1,
-                   columnar::Particle2Range cont2,
-                   columnar::EventContextId eventContext) const override;
+      findOverlaps(columnar::Particle1Range<CMode> cont1,
+                   columnar::Particle2Range<CMode> cont2,
+                   columnar::EventContextId<CMode> eventContext) const override;
       using IOverlapTool::findOverlaps;
 
     protected:

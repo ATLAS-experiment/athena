@@ -17,7 +17,7 @@ namespace CP {
     //###########################################################################################################
     //                                                   AxisHandlerProvider
     //###########################################################################################################
-    std::unique_ptr<AxisHandler> AxisHandlerProvider::GetAxisHandler(columnar::ColumnarTool<> * parent, const TAxis * axisptr) {
+    std::unique_ptr<AxisHandler> AxisHandlerProvider::GetAxisHandler(columnar::ColumnarTool<CMode> * parent, const TAxis * axisptr) {
         if (axisptr != nullptr) {
             std::string axis = axisptr->GetTitle();
             axis = EraseWhiteSpaces(axis);
@@ -46,23 +46,23 @@ namespace CP {
     }
   
   
-    CorrectionCode PtAxisHandler::GetBinningParameter(columnar::MuonId mu, float & value) const {
+    CorrectionCode PtAxisHandler::GetBinningParameter(columnar::MuonId<CMode> mu, float & value) const {
         value = ptAcc(mu) / 1000.;
         return CorrectionCode::Ok;
     }
-    CorrectionCode ChargeAxisHandler::GetBinningParameter(columnar::MuonId mu, float & value) const {
+    CorrectionCode ChargeAxisHandler::GetBinningParameter(columnar::MuonId<CMode> mu, float & value) const {
         value = chargeAcc (mu);
         return CorrectionCode::Ok;
     }
-    CorrectionCode EtaAxisHandler::GetBinningParameter(columnar::MuonId mu, float & value) const {
+    CorrectionCode EtaAxisHandler::GetBinningParameter(columnar::MuonId<CMode> mu, float & value) const {
         value = etaAcc(mu);
         return CorrectionCode::Ok;
     }
-    CorrectionCode AbsEtaAxisHandler::GetBinningParameter(columnar::MuonId mu, float & value) const {
+    CorrectionCode AbsEtaAxisHandler::GetBinningParameter(columnar::MuonId<CMode> mu, float & value) const {
         value = std::abs(etaAcc(mu));
         return CorrectionCode::Ok;
     }
-    CorrectionCode PhiAxisHandler::GetBinningParameter(columnar::MuonId mu, float & value) const {
+    CorrectionCode PhiAxisHandler::GetBinningParameter(columnar::MuonId<CMode> mu, float & value) const {
         value = phiAcc(mu);
         return CorrectionCode::Ok;
     }
@@ -77,12 +77,12 @@ namespace CP {
     
     std::string dRJetAxisHandler::s_close_jet_decor = "dRJet";
     bool dRJetAxisHandler::s_use_2D_sf = false;
-    dRJetAxisHandler::dRJetAxisHandler(columnar::ColumnarTool<> * parent):
+    dRJetAxisHandler::dRJetAxisHandler(columnar::ColumnarTool<CMode> * parent):
             AxisHandler(parent),
             m_use_2D_sf(s_use_2D_sf),
             m_acc(*this,s_close_jet_decor){}
     
-    CorrectionCode dRJetAxisHandler::GetBinningParameter(columnar::MuonId mu, float & value) const {
+    CorrectionCode dRJetAxisHandler::GetBinningParameter(columnar::MuonId<CMode> mu, float & value) const {
         
         static std::atomic<unsigned int> warned = {0};
         
@@ -113,13 +113,13 @@ namespace CP {
         return CorrectionCode::Ok;
     }
     
-    CorrectionCode UndefinedAxisHandler::GetBinningParameter(columnar::MuonId, float &) const  {
+    CorrectionCode UndefinedAxisHandler::GetBinningParameter(columnar::MuonId<CMode>, float &) const  {
         return CorrectionCode::Error;
     }
     //###########################################################################################################
     //                                                   HistHandler
     //###########################################################################################################
-    HistHandler::HistHandler(columnar::ColumnarTool<>* /*parent*/, TH1* Hist) :
+    HistHandler::HistHandler(columnar::ColumnarTool<CMode>* /*parent*/, TH1* Hist) :
                 m_H(clone(Hist)) {       
 
     }
@@ -150,7 +150,7 @@ namespace CP {
     //###########################################################################################################
     //                                                   HistHandler_TH1
     //###########################################################################################################
-    HistHandler_TH1::HistHandler_TH1(columnar::ColumnarTool<>* parent, TH1* h) :
+    HistHandler_TH1::HistHandler_TH1(columnar::ColumnarTool<CMode>* parent, TH1* h) :
                 HistHandler(parent, h),
                 m_x_handler(h == nullptr ? 0 : AxisHandlerProvider::GetAxisHandler(parent, h->GetXaxis())) {
     }
@@ -164,7 +164,7 @@ namespace CP {
         TAxis* xAx = GetHist()->GetXaxis();
         return Form("%s_%.2f_to_%.2f", xAx->GetTitle(), xAx->GetBinLowEdge(bin), xAx->GetBinUpEdge(bin));
     }
-    CorrectionCode HistHandler_TH1::FindBin(columnar::MuonId muon, int & bin) const {
+    CorrectionCode HistHandler_TH1::FindBin(columnar::MuonId<CMode> muon, int & bin) const {
         if (!GetHist()) {
             bin = -1;
             return CorrectionCode::Error;
@@ -184,7 +184,7 @@ namespace CP {
     //###########################################################################################################
     //                                                   HistHandler_TH2
     //###########################################################################################################
-    HistHandler_TH2::HistHandler_TH2(columnar::ColumnarTool<>* parent, TH1*  h) :
+    HistHandler_TH2::HistHandler_TH2(columnar::ColumnarTool<CMode>* parent, TH1*  h) :
                 HistHandler(parent, h),
                 m_x_handler(h == nullptr ? 0 : AxisHandlerProvider::GetAxisHandler(parent, h->GetXaxis())),
                 m_y_handler(h == nullptr ? 0 : AxisHandlerProvider::GetAxisHandler(parent, h->GetYaxis())) {
@@ -199,7 +199,7 @@ namespace CP {
         GetHist()->GetBinXYZ(b,x,y,z);
         return  x == 0 ||  x == GetHist()->GetXaxis()->GetNbins() + 1 ||  y == 0 ||  y == GetHist()->GetYaxis()->GetNbins() + 1; 
     }
-    CorrectionCode HistHandler_TH2::FindBin(columnar::MuonId muon, int & bin) const {
+    CorrectionCode HistHandler_TH2::FindBin(columnar::MuonId<CMode> muon, int & bin) const {
         if (!GetHist()) return CorrectionCode::Error;
         float parx = 0;
         float pary = 0;
@@ -233,7 +233,7 @@ namespace CP {
     //                                                   HistHandler_TH3
     //###########################################################################################################
 
-    HistHandler_TH3::HistHandler_TH3(columnar::ColumnarTool<>* parent, TH1* h) :
+    HistHandler_TH3::HistHandler_TH3(columnar::ColumnarTool<CMode>* parent, TH1* h) :
                 HistHandler(parent,h),
                 m_x_handler(GetHist() == nullptr ? 0 : AxisHandlerProvider::GetAxisHandler(parent, h->GetXaxis())),
                 m_y_handler(GetHist() == nullptr ? 0 : AxisHandlerProvider::GetAxisHandler(parent, h->GetYaxis())),
@@ -255,7 +255,7 @@ namespace CP {
                 y == 0 ||  y == GetHist()->GetYaxis()->GetNbins() + 1 || 
                 z == 0 ||  z == GetHist()->GetZaxis()->GetNbins() + 1; 
     }   
-    CorrectionCode HistHandler_TH3::FindBin(columnar::MuonId muon, int & bin) const {
+    CorrectionCode HistHandler_TH3::FindBin(columnar::MuonId<CMode> muon, int & bin) const {
         if (!GetHist()) return CorrectionCode::Error;
         float parx = 0;
         float pary = 0;
@@ -294,7 +294,7 @@ namespace CP {
     //                                                   HistHandler_TH2Poly
     //###########################################################################################################
 
-    HistHandler_TH2Poly::HistHandler_TH2Poly(columnar::ColumnarTool<>* parent, TH2Poly * h) :
+    HistHandler_TH2Poly::HistHandler_TH2Poly(columnar::ColumnarTool<CMode>* parent, TH2Poly * h) :
                 HistHandler(parent, h),
                 m_h(h),
                 m_x_handler(GetHist() == nullptr ? 0 : AxisHandlerProvider::GetAxisHandler(parent, h->GetXaxis())),
@@ -311,7 +311,7 @@ namespace CP {
     int HistHandler_TH2Poly::nOverFlowBins() const {return 10;}
     bool HistHandler_TH2Poly::isOverFlowBin(int b) const {return b < 1;}
 
-    CorrectionCode HistHandler_TH2Poly::FindBin(columnar::MuonId muon, int & bin) const {
+    CorrectionCode HistHandler_TH2Poly::FindBin(columnar::MuonId<CMode> muon, int & bin) const {
         if (!m_h) return CorrectionCode::Error;
         float parx = 0;
         float pary = 0;

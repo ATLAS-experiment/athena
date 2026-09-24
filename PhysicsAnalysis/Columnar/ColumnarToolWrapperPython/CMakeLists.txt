@@ -16,7 +16,7 @@ atlas_add_library (ColumnarToolWrapperPythonLib
 ColumnarToolWrapperPython/*.h
   INTERFACE
   PUBLIC_HEADERS ColumnarToolWrapperPython
-  LINK_LIBRARIES ColumnarToolWrapperLib PATInterfaces)
+  LINK_LIBRARIES ColumnarToolWrapperLib PATInterfaces ColumnarModeDefaultLib)
 
 find_package( GTest )
 

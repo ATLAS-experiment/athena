@@ -40,7 +40,7 @@ namespace ORUtils
   ///
   /// @author Steve Farrell <Steven.Farrell@cern.ch>
   ///
-  class BaseOverlapTool : public asg::AsgTool, public columnar::ColumnarTool<>, virtual public IOverlapTool
+  class BaseOverlapTool : public asg::AsgTool, public columnar::ColumnarTool<CMode>, virtual public IOverlapTool
   {
 
       /// Create proper constructor for Athena
@@ -57,7 +57,7 @@ namespace ORUtils
       StatusCode initialize() override final;
 
       /// The callEvents() for columnar tools
-      virtual void callEvents (columnar::EventContextRange events) const override;
+      virtual void callEvents (columnar::EventContextRange<CMode> events) const override;
 
     protected:
 
@@ -116,10 +116,10 @@ namespace ORUtils
       /// @name Utilities
       /// @{
 
-      struct BaseAccessors final : columnar::ColumnarTool<>
+      struct BaseAccessors final : columnar::ColumnarTool<CMode>
       {
-        columnar::Particle1Accessor<columnar::ObjectColumn> m_particles1Acc {*this, ""};
-        columnar::Particle2Accessor<columnar::ObjectColumn> m_particles2Acc {*this, ""};
+        columnar::Particle1Accessor<columnar::ObjectColumn,CMode> m_particles1Acc {*this, ""};
+        columnar::Particle2Accessor<columnar::ObjectColumn,CMode> m_particles2Acc {*this, ""};
         using ColumnarTool::ColumnarTool;
       };
       std::unique_ptr<BaseAccessors> m_baseAccessors {std::make_unique<BaseAccessors> (this)};
@@ -139,31 +139,31 @@ namespace ORUtils
       /// @name Helper Functions
       /// @{
 
-      void initializeDecorations(columnar::Particle1Range container) const {
+      void initializeDecorations(columnar::Particle1Range<CMode> container) const {
         m_decHelper1->initializeDecorations (container); }
-      void initializeDecorations(columnar::Particle2Range container) const {
+      void initializeDecorations(columnar::Particle2Range<CMode> container) const {
         m_decHelper2->initializeDecorations (container); }
-      [[nodiscard]] char getObjectPriority(columnar::Particle1Id obj) const {
+      [[nodiscard]] char getObjectPriority(columnar::Particle1Id<CMode> obj) const {
         return m_decHelper1->getObjectPriority (obj); }
-      [[nodiscard]] char getObjectPriority(columnar::Particle2Id obj) const {
+      [[nodiscard]] char getObjectPriority(columnar::Particle2Id<CMode> obj) const {
         return m_decHelper2->getObjectPriority (obj); }
-      [[nodiscard]] bool isSurvivingObject(columnar::Particle1Id obj) const {
+      [[nodiscard]] bool isSurvivingObject(columnar::Particle1Id<CMode> obj) const {
         return m_decHelper1->isSurvivingObject (obj);}
-      [[nodiscard]] bool isSurvivingObject(columnar::Particle2Id obj) const {
+      [[nodiscard]] bool isSurvivingObject(columnar::Particle2Id<CMode> obj) const {
         return m_decHelper2->isSurvivingObject (obj);}
-      [[nodiscard]] bool isRejectedObject(columnar::Particle1Id obj) const {
+      [[nodiscard]] bool isRejectedObject(columnar::Particle1Id<CMode> obj) const {
         return m_decHelper1->isRejectedObject (obj); }
-      [[nodiscard]] bool isRejectedObject(columnar::Particle2Id obj) const {
+      [[nodiscard]] bool isRejectedObject(columnar::Particle2Id<CMode> obj) const {
         return m_decHelper2->isRejectedObject (obj); }
-      void setObjectFail(columnar::Particle1Id obj) const {
+      void setObjectFail(columnar::Particle1Id<CMode> obj) const {
         m_decHelper1->setObjectFail (obj); }
-      void setObjectFail(columnar::Particle2Id obj) const {
+      void setObjectFail(columnar::Particle2Id<CMode> obj) const {
         m_decHelper2->setObjectFail (obj); }
       template<columnar::ContainerIdConcept CI>
-      StatusCode addObjectLink (columnar::Particle1Id p1, columnar::ObjectId<CI> p2) const {
+      StatusCode addObjectLink (columnar::Particle1Id<CMode> p1, columnar::ObjectId<CI,CMode> p2) const {
         return m_objLinkHelper1->addObjectLink (p1, p2); }
       template<columnar::ContainerIdConcept CI>
-      StatusCode addObjectLink (columnar::Particle2Id p1, columnar::ObjectId<CI> p2) const {
+      StatusCode addObjectLink (columnar::Particle2Id<CMode> p1, columnar::ObjectId<CI,CMode> p2) const {
         return m_objLinkHelper2->addObjectLink (p1, p2); }
 
       /// @}

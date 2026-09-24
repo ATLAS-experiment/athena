@@ -26,7 +26,7 @@ namespace columnar
     /// class.
 
 
-    template<ContainerIdConcept CI = TrackDef,typename CM=ColumnarModeDefault>
+    template<ColumnarMode CM, ContainerIdConcept CI = TrackDef>
     class ChargeAccessor final
     {
       ColumnAccessor<CI,float,CM> m_qOverPAcc;
@@ -59,7 +59,7 @@ namespace columnar
     /// that class, or otherwise it could potentially be set up as some
     /// parallel mechanism.
 
-    template<ContainerIdConcept CI = TrackDef,typename CM=ColumnarModeDefault>
+    template<ColumnarMode CM, ContainerIdConcept CI = TrackDef>
     class TrackMomentumAccessors final
     {
       ColumnAccessor<CI,float,CM> m_qOverPAcc;
@@ -89,7 +89,7 @@ namespace columnar
 
 
 
-    template<ContainerIdConcept CI = TrackDef,typename CM=ColumnarModeDefault>
+    template<ColumnarMode CM, ContainerIdConcept CI = TrackDef>
     class DefiningParametersAccessor final
     {
       ColumnAccessor<CI,float,CM> m_d0Acc;
@@ -117,7 +117,7 @@ namespace columnar
 
 
 
-    template<ContainerIdConcept CI = TrackDef,typename CM=ColumnarModeDefault>
+    template<ColumnarMode CM, ContainerIdConcept CI = TrackDef>
     class DefiningParametersCovAccessor final
     {
       ColumnAccessor<CI,std::vector<float>,CM> m_accCovMatrixDiag;

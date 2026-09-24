@@ -36,7 +36,7 @@ namespace columnar
 
     /// @brief register a single column via the low-level
     /// `ColumnAccessorDataArray` mechanism
-    void registerColumn (ColumnarTool<>& tool,
+    void registerColumn (ColumnarTool<CMode>& tool,
                          ColumnarLinkTool::ColumnSlot& slot,
                          const std::string& name,
                          const std::type_info* type,
@@ -153,11 +153,11 @@ namespace columnar
 
 
   void ColumnarLinkTool ::
-  callEvents (EventContextRange events) const
+  callEvents (EventContextRange<CMode> events) const
   {
     using CM = ColumnarModeArray;
 
-    for (EventContextId event : events)
+    for (EventContextId<CMode> event : events)
     {
       void** dataArea = event.getDataArea();
       const std::size_t eventIdx = event.getIndex();

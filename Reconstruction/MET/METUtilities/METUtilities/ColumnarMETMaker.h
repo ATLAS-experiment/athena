@@ -38,6 +38,7 @@
 #include <ColumnarMet/MetAssociation.h>
 #include <ColumnarMet/MetHelpers.h>
 #include <ColumnarMet/MetOutput.h>
+#include <ColumnarModeDefault/ColumnarModeDefault.h>
 
 // Forward declaration
 
@@ -47,7 +48,7 @@ namespace met {
   typedef ElementLink<xAOD::IParticleContainer> obj_link_t;
 
   class ColumnarMETMaker
-  : public asg::AsgTool, public columnar::ColumnarTool<>,
+  : public asg::AsgTool, public columnar::ColumnarTool<CMode>,
   virtual public IMETMaker
 
   {
@@ -80,9 +81,9 @@ namespace met {
     StatusCode rebuildMET(
       const std::string& metKey,
       xAOD::Type::ObjectType metType,
-      columnar::MutableMetRange metCont,
-      columnar::ParticleRange collection,
-      columnar::MetAssociationHelper<> helper,
+      columnar::MutableMetRange<CMode> metCont,
+      columnar::ParticleRange<CMode> collection,
+      columnar::MetAssociationHelper<CMode> helper,
       MissingETBase::UsageHandler::Policy objScale) const;
     //
     virtual StatusCode rebuildMET(
@@ -91,9 +92,9 @@ namespace met {
       xAOD::MissingETAssociationHelper& helper,
       MissingETBase::UsageHandler::Policy objScale) const override final;
     StatusCode rebuildMET(
-      columnar::MutableMetId met,
-      columnar::ParticleRange collection,
-      columnar::MetAssociationHelper<> helper,
+      columnar::MutableMetId<CMode> met,
+      columnar::ParticleRange<CMode> collection,
+      columnar::MetAssociationHelper<CMode> helper,
       MissingETBase::UsageHandler::Policy objScale) const;
     //
     virtual StatusCode rebuildMET(
@@ -104,9 +105,9 @@ namespace met {
       bool removeOverlap,
       MissingETBase::UsageHandler::Policy objScale) const override final;
     StatusCode rebuildMET(
-      columnar::MutableMetId met,
-      columnar::ParticleRange collection,
-      columnar::MetAssociationHelper<> helper,
+      columnar::MutableMetId<CMode> met,
+      columnar::ParticleRange<CMode> collection,
+      columnar::MetAssociationHelper<CMode> helper,
       MissingETBase::UsageHandler::Policy p,
       bool removeOverlap,
       MissingETBase::UsageHandler::Policy objScale) const;
@@ -124,10 +125,10 @@ namespace met {
       const std::string& metJetKey,
       const std::string& softClusKey,
       const std::string& softTrkKey,
-      columnar::MutableMetRange metCont,
-      columnar::JetRange jets,
-      columnar::Met1Range metCoreCont,
-      columnar::MetAssociationHelper<> helper,
+      columnar::MutableMetRange<CMode> metCont,
+      columnar::JetRange<CMode> jets,
+      columnar::Met1Range<CMode> metCoreCont,
+      columnar::MetAssociationHelper<CMode> helper,
       bool doJetJVT) const;
 
     virtual StatusCode rebuildJetMET(
@@ -141,10 +142,10 @@ namespace met {
     StatusCode rebuildJetMET(
       const std::string& metJetKey,
       const std::string& metSoftKey,
-      columnar::MutableMetRange metCont,
-      columnar::JetRange jets,
-      columnar::Met1Range metCoreCont,
-      columnar::MetAssociationHelper<> helper,
+      columnar::MutableMetRange<CMode> metCont,
+      columnar::JetRange<CMode> jets,
+      columnar::Met1Range<CMode> metCoreCont,
+      columnar::MetAssociationHelper<CMode> helper,
       bool doJetJVT) const;
 
     virtual StatusCode rebuildJetMET(
@@ -159,14 +160,14 @@ namespace met {
       bool tracksForHardJets = false,
       std::vector<const xAOD::IParticle*>* softConst = 0) const override final;
     StatusCode rebuildJetMET(
-      columnar::MutableMetId metJet,
-      columnar::MutableMetRange metCont,
-      columnar::JetRange jets,
-      columnar::MetAssociationHelper<> helper,
-      columnar::OptMutableMetId metSoftClus,
-      columnar::OptMet1Id coreSoftClus,
-      columnar::OptMutableMetId metSoftTrk,
-      columnar::OptMet1Id coreSoftTrk,
+      columnar::MutableMetId<CMode> metJet,
+      columnar::MutableMetRange<CMode> metCont,
+      columnar::JetRange<CMode> jets,
+      columnar::MetAssociationHelper<CMode> helper,
+      columnar::OptMutableMetId<CMode> metSoftClus,
+      columnar::OptMet1Id<CMode> coreSoftClus,
+      columnar::OptMutableMetId<CMode> metSoftTrk,
+      columnar::OptMet1Id<CMode> coreSoftTrk,
       bool doJetJVT,
       bool tracksForHardJets = false,
       std::vector<const xAOD::IParticle*>* softConst = 0) const;
@@ -182,10 +183,10 @@ namespace met {
     StatusCode rebuildTrackMET(
       const std::string& metJetKey,
       const std::string& softTrkKey,
-      columnar::MutableMetRange metCont,
-      columnar::JetRange jets,
-      columnar::Met1Range metCoreCont,
-      columnar::MetAssociationHelper<> helper,
+      columnar::MutableMetRange<CMode> metCont,
+      columnar::JetRange<CMode> jets,
+      columnar::Met1Range<CMode> metCoreCont,
+      columnar::MetAssociationHelper<CMode> helper,
       bool doJetJVT) const;
 
     virtual StatusCode rebuildTrackMET(xAOD::MissingET* metJet,
@@ -194,12 +195,12 @@ namespace met {
                                        xAOD::MissingET* metSoftTrk,
                                        const xAOD::MissingET* coreSoftTrk,
                                        bool doJetJVT) const override final;
-    StatusCode rebuildTrackMET(columnar::MutableMetId metJet,
-                                       columnar::MutableMetRange metCont,
-                                       columnar::JetRange jets,
-                                       columnar::MetAssociationHelper<> helper,
-                                       columnar::MutableMetId metSoftTrk,
-                                       columnar::Met1Id coreSoftTrk,
+    StatusCode rebuildTrackMET(columnar::MutableMetId<CMode> metJet,
+                                       columnar::MutableMetRange<CMode> metCont,
+                                       columnar::JetRange<CMode> jets,
+                                       columnar::MetAssociationHelper<CMode> helper,
+                                       columnar::MutableMetId<CMode> metSoftTrk,
+                                       columnar::Met1Id<CMode> coreSoftTrk,
                                        bool doJetJVT) const;
 
     virtual StatusCode markInvisible(
@@ -207,9 +208,9 @@ namespace met {
       xAOD::MissingETAssociationHelper& helper,
       xAOD::MissingETContainer* metCont) const override final;
     StatusCode markInvisible(
-      columnar::ParticleRange collection,
-      columnar::MetAssociationHelper<> helper,
-      columnar::MutableMetRange metCont) const;
+      columnar::ParticleRange<CMode> collection,
+      columnar::MetAssociationHelper<CMode> helper,
+      columnar::MutableMetRange<CMode> metCont) const;
 
     ///////////////////////////////////////////////////////////////////
     // Private data:
@@ -277,50 +278,50 @@ namespace met {
     /// Default constructor:
     ColumnarMETMaker();
 
-    columnar::MutableMetAccessor<columnar::ObjectColumn> m_outputMetHandle {*this, "OutputMET"};
-    columnar::Met1Accessor<columnar::ObjectColumn> m_inputMetHandle {*this, "METCore", {.addMTDependency=true}};
-    columnar::ColumnAccessor<columnar::MetAssociationDef,columnar::ObjectColumn> m_metAssocHandle {*this, "MetAssoc", {.addMTDependency=true}};
-    columnar::ParticleAccessor<columnar::ObjectColumn> m_particlesHandle {*this, "Particles"};
-    columnar::JetAccessor<columnar::ObjectColumn> m_jetsHandle {*this, "Jets"};
-    columnar::ElectronAccessor<columnar::ObjectColumn> m_electronsHandle {*this, "Electrons"};
-    columnar::PhotonAccessor<columnar::ObjectColumn> m_photonsHandle {*this, "Photons"};
-    columnar::MuonAccessor<columnar::ObjectColumn> m_muonsHandle {*this, "Muons"};
+    columnar::MutableMetAccessor<columnar::ObjectColumn,CMode> m_outputMetHandle {*this, "OutputMET"};
+    columnar::Met1Accessor<columnar::ObjectColumn,CMode> m_inputMetHandle {*this, "METCore", {.addMTDependency=true}};
+    columnar::ColumnAccessor<columnar::MetAssociationDef,columnar::ObjectColumn,CMode> m_metAssocHandle {*this, "MetAssoc", {.addMTDependency=true}};
+    columnar::ParticleAccessor<columnar::ObjectColumn,CMode> m_particlesHandle {*this, "Particles"};
+    columnar::JetAccessor<columnar::ObjectColumn,CMode> m_jetsHandle {*this, "Jets"};
+    columnar::ElectronAccessor<columnar::ObjectColumn,CMode> m_electronsHandle {*this, "Electrons"};
+    columnar::PhotonAccessor<columnar::ObjectColumn,CMode> m_photonsHandle {*this, "Photons"};
+    columnar::MuonAccessor<columnar::ObjectColumn,CMode> m_muonsHandle {*this, "Muons"};
 
-    columnar::MutableMetAccessor<std::string> m_outputMetNameAcc {*this, "name"};
-    columnar::MetHelpers::MapLookupAccessor<columnar::MutableMetDef> m_outputMetMapAcc {*this};
-    columnar::MetHelpers::MetMomentumAccessors<columnar::MutableMetDef> m_outputMetMomAcc {*this};
+    columnar::MutableMetAccessor<std::string,CMode> m_outputMetNameAcc {*this, "name"};
+    columnar::MetHelpers::MapLookupAccessor<columnar::MutableMetDef,CMode> m_outputMetMapAcc {*this};
+    columnar::MetHelpers::MetMomentumAccessors<columnar::MutableMetDef,CMode> m_outputMetMomAcc {*this};
 
-    columnar::Met1Accessor<std::string> m_inputMetNameAcc {*this, "name"};
-    columnar::MetHelpers::MapLookupAccessor<columnar::Met1Def> m_inputMetMapAcc {*this};
-    columnar::MetHelpers::MetMomentumAccessors<columnar::Met1Def> m_inputMetMomAcc {*this};
-    columnar::Met1Accessor<MissingETBase::Types::bitmask_t> m_inputMetSourceAcc {*this, "source"};
+    columnar::Met1Accessor<std::string,CMode> m_inputMetNameAcc {*this, "name"};
+    columnar::MetHelpers::MapLookupAccessor<columnar::Met1Def,CMode> m_inputMetMapAcc {*this};
+    columnar::MetHelpers::MetMomentumAccessors<columnar::Met1Def,CMode> m_inputMetMomAcc {*this};
+    columnar::Met1Accessor<MissingETBase::Types::bitmask_t,CMode> m_inputMetSourceAcc {*this, "source"};
 
-    columnar::MetAssocationAccessors<> m_assocAcc {*this};
+    columnar::MetAssocationAccessors<CMode> m_assocAcc {*this};
 
-    columnar::MetHelpers::InputMomentumAccessors<> m_inputMomAcc {*this};
+    columnar::MetHelpers::InputMomentumAccessors<columnar::ParticleDef,CMode> m_inputMomAcc {*this};
     Gaudi::Property<std::string> m_inputPreselectionName {this, "inputPreselection", ""};
-    std::optional<columnar::ParticleAccessor<char>> m_inputPreselectionAcc;
-    columnar::ParticleAccessor<columnar::RetypeColumn<xAOD::Muon::MuonType,std::uint16_t>> m_inputMuonTypeAcc {*this, "muonType", {.isOptional = true}};
-    columnar::MetHelpers::ObjectTypeAccessor<columnar::ParticleDef> m_inputObjTypeAcc {*this, "objectType"};
+    std::optional<columnar::ParticleAccessor<char,CMode>> m_inputPreselectionAcc;
+    columnar::ParticleAccessor<columnar::RetypeColumn<xAOD::Muon::MuonType,std::uint16_t>,CMode> m_inputMuonTypeAcc {*this, "muonType", {.isOptional = true}};
+    columnar::MetHelpers::ObjectTypeAccessor<columnar::ParticleDef,CMode> m_inputObjTypeAcc {*this, "objectType"};
 
-    columnar::MetHelpers::ObjectWeightDecorator<> m_outputMetWeightDecRegular {*this, "", true};
+    columnar::MetHelpers::ObjectWeightDecorator<CMode> m_outputMetWeightDecRegular {*this, "", true};
 
-    columnar::MetHelpers::InputMomentumAccessors<columnar::JetDef> m_jetMomAcc {*this};
-    columnar::JetAccessor<float> m_acc_emf {*this, "EMFrac"};
-    columnar::JetAccessor<float> m_acc_psf {*this, "PSFrac"};
-    columnar::JetAccessor<float> m_acc_width {*this, "Width"};
-    columnar::JetAccessor<std::vector<int>> m_acc_trkN {*this, "NumTrkPt500"};
-    columnar::JetAccessor<std::vector<float>> m_acc_trksumpt {*this, "SumPtTrkPt500"};
-    columnar::JetAccessor<std::vector<float>> m_acc_sampleE {*this, "EnergyPerSampling"};
+    columnar::MetHelpers::InputMomentumAccessors<columnar::JetDef,CMode> m_jetMomAcc {*this};
+    columnar::JetAccessor<float,CMode> m_acc_emf {*this, "EMFrac"};
+    columnar::JetAccessor<float,CMode> m_acc_psf {*this, "PSFrac"};
+    columnar::JetAccessor<float,CMode> m_acc_width {*this, "Width"};
+    columnar::JetAccessor<std::vector<int>,CMode> m_acc_trkN {*this, "NumTrkPt500"};
+    columnar::JetAccessor<std::vector<float>,CMode> m_acc_trksumpt {*this, "SumPtTrkPt500"};
+    columnar::JetAccessor<std::vector<float>,CMode> m_acc_sampleE {*this, "EnergyPerSampling"};
         
-    std::optional<columnar::MetHelpers::InputMomentumAccessors<columnar::JetDef>> m_jetConstitScaleMomAcc;
-    std::optional<columnar::MetHelpers::InputMomentumAccessors<columnar::JetDef>> m_jetConstitScaleMomFixedAcc;
-    std::optional<columnar::JetAccessor<char>> m_acc_jetRejectionDec;
+    std::optional<columnar::MetHelpers::InputMomentumAccessors<columnar::JetDef,CMode>> m_jetConstitScaleMomAcc;
+    std::optional<columnar::MetHelpers::InputMomentumAccessors<columnar::JetDef,CMode>> m_jetConstitScaleMomFixedAcc;
+    std::optional<columnar::JetAccessor<char,CMode>> m_acc_jetRejectionDec;
 
-    columnar::MetHelpers::ObjectWeightDecorator<columnar::MutableMetDef,columnar::JetDef> m_jetOutputMetWeightDecRegular {*this, "", true};
-    columnar::MetHelpers::ObjectWeightDecorator<columnar::MutableMetDef,columnar::JetDef> m_jetOutputMetWeightDecSoft {*this, "Soft", false};
+    columnar::MetHelpers::ObjectWeightDecorator<CMode,columnar::MutableMetDef,columnar::JetDef> m_jetOutputMetWeightDecRegular {*this, "", true};
+    columnar::MetHelpers::ObjectWeightDecorator<CMode,columnar::MutableMetDef,columnar::JetDef> m_jetOutputMetWeightDecSoft {*this, "Soft", false};
 
-    columnar::ElectronAccessor<columnar::RetypeColumn<double,float>> m_electronPtAcc {*this, "pt"};
+    columnar::ElectronAccessor<columnar::RetypeColumn<double,float>,CMode> m_electronPtAcc {*this, "pt"};
 
     Gaudi::Property<unsigned> m_columnarOperation {this, "columnarOperation", 0};
     Gaudi::Property<std::string> m_columnarTermName {this, "columnarTermName", ""};
@@ -328,7 +329,7 @@ namespace met {
     Gaudi::Property<std::string> m_columnarJetKey {this, "columnarJetKey", ""};
     Gaudi::Property<std::string> m_columnarSoftClusKey {this, "columnarSoftClusKey", ""};
     Gaudi::Property<bool> m_columnarDoJetJVT {this, "columnarDoJetJVT", false};
-    void callEvents (columnar::EventContextRange events) const override;
+    void callEvents (columnar::EventContextRange<CMode> events) const override;
   };
 
 } //> end namespace met

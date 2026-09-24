@@ -25,7 +25,7 @@ namespace columnar
   ///
   /// As such this accessor has multiple means of retrieving the object
   /// type.
-  template<ContainerIdConcept CI, typename CM = ColumnarModeDefault>
+  template<ContainerIdConcept CI, ColumnarMode CM>
   class ObjectTypeAccessor final
   {
   public:

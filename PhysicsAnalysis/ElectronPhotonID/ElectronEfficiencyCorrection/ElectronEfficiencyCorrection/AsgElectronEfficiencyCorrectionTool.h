@@ -37,11 +37,12 @@ class TH2F;
 #include <ColumnarCore/ObjectColumn.h>
 #include <ColumnarCore/VectorColumn.h>
 #include <ColumnarEgamma/EgammaDef.h>
+#include <ColumnarModeDefault/ColumnarModeDefault.h>
 
 class AsgElectronEfficiencyCorrectionTool final
   : virtual public IAsgElectronEfficiencyCorrectionTool
   , public asg::AsgMetadataTool
-  , public columnar::ColumnarTool<>
+  , public columnar::ColumnarTool<CMode>
 {
   ASG_TOOL_CLASS(AsgElectronEfficiencyCorrectionTool,
                  IAsgElectronEfficiencyCorrectionTool)
@@ -81,9 +82,9 @@ public:
     const xAOD::Electron& inputObject,
     double& efficiencyScaleFactor) const override final;
   CP::CorrectionCode getEfficiencyScaleFactor(
-    columnar::ElectronId inputObject,
+    columnar::ElectronId<CMode> inputObject,
     double& efficiencyScaleFactor,
-    columnar::EventInfoId info) const;
+    columnar::EventInfoId<CMode> info) const;
   //
   virtual CP::CorrectionCode getEfficiencyScaleFactor(
     const double et,  /*in MeV*/
@@ -120,7 +121,7 @@ public:
   virtual int systUncorrVariationIndex(
     const xAOD::Electron& inputObject) const override final;
   int systUncorrVariationIndex(
-    columnar::ElectronId inputObject) const;
+    columnar::ElectronId<CMode> inputObject) const;
 
 private:
   StatusCode registerSystematics();
@@ -233,30 +234,30 @@ private:
 
 public:
 
-  struct Accessors : public columnar::ColumnarTool<>
+  struct Accessors : public columnar::ColumnarTool<CMode>
   {
-    Accessors(AsgElectronEfficiencyCorrectionTool& tool) : columnar::ColumnarTool<>(&tool) {}
+    Accessors(AsgElectronEfficiencyCorrectionTool& tool) : columnar::ColumnarTool<CMode>(&tool) {}
 
-    columnar::EventInfoAccessor<columnar::ObjectColumn> m_eventInfo {*this, "EventInfo", {.addMTDependency=true}};
-    columnar::EventInfoAccessor<uint32_t> randomrunnumber;
+    columnar::EventInfoAccessor<columnar::ObjectColumn,CMode> m_eventInfo {*this, "EventInfo", {.addMTDependency=true}};
+    columnar::EventInfoAccessor<uint32_t,CMode> randomrunnumber;
   
-    columnar::ElectronAccessor<columnar::ObjectColumn> m_electrons {*this, "Electrons"};
-    columnar::ElectronAccessor<float> m_eta{*this,"eta"};
-    columnar::ElectronAccessor<float> m_pt{*this,"pt"};
-    columnar::ElectronAccessor<uint16_t> accAuthor{*this,"author"};
-    columnar::ElectronDecorator<float> m_sfDec{*this,"sfOut"};
-    columnar::ElectronDecorator<char> m_validDec{*this,"validOut"};
+    columnar::ElectronAccessor<columnar::ObjectColumn,CMode> m_electrons {*this, "Electrons"};
+    columnar::ElectronAccessor<float,CMode> m_eta{*this,"eta"};
+    columnar::ElectronAccessor<float,CMode> m_pt{*this,"pt"};
+    columnar::ElectronAccessor<uint16_t,CMode> accAuthor{*this,"author"};
+    columnar::ElectronDecorator<float,CMode> m_sfDec{*this,"sfOut"};
+    columnar::ElectronDecorator<char,CMode> m_validDec{*this,"validOut"};
   
-    columnar::ClusterAccessor<columnar::ObjectColumn> m_clusterHandle {*this, "egammaClusters"};
-    columnar::ElectronAccessor<std::vector<columnar::OptClusterId>> caloClusterAcc {*this, "caloClusterLinks"};
-    columnar::ClusterAccessor<float> clusterEAcc {*this, "calE"};
-    columnar::ClusterAccessor<float> clusterEtaAcc {*this, "calEta"};
-    columnar::ClusterHelpers::EtaBEAccessor<> clusterEtaBEAcc {*this};
+    columnar::ClusterAccessor<columnar::ObjectColumn,CMode> m_clusterHandle {*this, "egammaClusters"};
+    columnar::ElectronAccessor<std::vector<columnar::OptClusterId<CMode>>,CMode> caloClusterAcc {*this, "caloClusterLinks"};
+    columnar::ClusterAccessor<float,CMode> clusterEAcc {*this, "calE"};
+    columnar::ClusterAccessor<float,CMode> clusterEtaAcc {*this, "calEta"};
+    columnar::ClusterHelpers::EtaBEAccessor<CMode> clusterEtaBEAcc {*this};
   };
   std::unique_ptr<Accessors> m_accessors;
 
-  void callSingleEvent (columnar::ElectronRange electrons, columnar::EventInfoId event) const;
-  void callEvents (columnar::EventContextRange events) const override;
+  void callSingleEvent (columnar::ElectronRange<CMode> electrons, columnar::EventInfoId<CMode> event) const;
+  void callEvents (columnar::EventContextRange<CMode> events) const override;
 
 }; // End: class definition
 

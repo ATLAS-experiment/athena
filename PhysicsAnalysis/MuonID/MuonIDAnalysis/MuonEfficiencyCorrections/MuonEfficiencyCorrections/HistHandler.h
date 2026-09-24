@@ -24,6 +24,7 @@
 #include <ColumnarCore/ColumnarTool.h>
 #include <ColumnarMuon/MuonDef.h>
 #include <ColumnarCore/ObjectColumn.h>
+#include <ColumnarModeDefault/ColumnarModeDefault.h>
 
 // STL includes
 #include <string>
@@ -67,7 +68,7 @@ namespace CP {
             void SetBinError(int bin, float val);
             
             ///Function that changes from Implementation to implementation
-            virtual CorrectionCode FindBin(columnar::MuonId muon, int & bin) const = 0;
+            virtual CorrectionCode FindBin(columnar::MuonId<CMode> muon, int & bin) const = 0;
             /// Return the total number of bins in the histogram -> (GetNbins() +2)**n
             virtual int nBins() const = 0;
             /// Return the number of overflow bins 
@@ -79,7 +80,7 @@ namespace CP {
 
             virtual ~HistHandler();
         protected:
-            HistHandler(columnar::ColumnarTool<>* parent, TH1* Hist);
+            HistHandler(columnar::ColumnarTool<CMode>* parent, TH1* Hist);
             HistHandler(const HistHandler & other) = delete;
             HistHandler& operator =(const HistHandler & other) = delete;
         private:
@@ -93,7 +94,7 @@ namespace CP {
 
         public:
 
-            HistHandler_TH1(columnar::ColumnarTool<>* parent, TH1* hist);
+            HistHandler_TH1(columnar::ColumnarTool<CMode>* parent, TH1* hist);
             virtual ~HistHandler_TH1();
 
              int nBins() const override;
@@ -103,7 +104,7 @@ namespace CP {
 
 
              std::string GetBinName(unsigned int bin) const override;
-             CorrectionCode FindBin(columnar::MuonId muon, int & bin) const override;
+             CorrectionCode FindBin(columnar::MuonId<CMode> muon, int & bin) const override;
 
         private:
             std::unique_ptr<AxisHandler> m_x_handler;
@@ -116,7 +117,7 @@ namespace CP {
             /// a TH1* object is parsed avoiding the dynamic cast. Via the GetDimension() method of the TH1 
             /// the class ensures that the histogram has actual dimension 2. No specific TH2 method is required 
             /// in all considered usecases of TH1.
-            HistHandler_TH2(columnar::ColumnarTool<>* parent, TH1* hist);
+            HistHandler_TH2(columnar::ColumnarTool<CMode>* parent, TH1* hist);
             virtual ~HistHandler_TH2();
 
              int nBins() const override;
@@ -126,7 +127,7 @@ namespace CP {
            
              std::string GetBinName(unsigned int bin) const override;
 
-             CorrectionCode FindBin(columnar::MuonId muon, int & bin) const override;
+             CorrectionCode FindBin(columnar::MuonId<CMode> muon, int & bin) const override;
 
         private:
             std::unique_ptr<AxisHandler> m_x_handler;
@@ -140,7 +141,7 @@ namespace CP {
             /// Via the GetDimension() method of the TH1 the class ensures that the histogram has actual dimension 3. No specific TH3 method
             /// is required in all use-caes of the class.
             
-            HistHandler_TH3(columnar::ColumnarTool<>* parent, TH1* hist);
+            HistHandler_TH3(columnar::ColumnarTool<CMode>* parent, TH1* hist);
             virtual ~HistHandler_TH3();
 
              int nBins() const override;
@@ -151,7 +152,7 @@ namespace CP {
 
              std::string GetBinName(unsigned int bin) const override;
 
-             CorrectionCode FindBin(columnar::MuonId muon, int & bin) const override;
+             CorrectionCode FindBin(columnar::MuonId<CMode> muon, int & bin) const override;
 
         private:
             std::unique_ptr<AxisHandler> m_x_handler;
@@ -165,7 +166,7 @@ namespace CP {
             /// The HistHandler_TH2Poly handles the TH2Poly histograms of the scale-factor maps. Since the bin-finding,
             /// algoritihms of the TH2Poly differ from the ones of TH1, TH2 & TH3 explicit methods of TH2Poly are needed
             /// to pick-up the proper bin.
-            HistHandler_TH2Poly(columnar::ColumnarTool<>* parent, TH2Poly* hist);
+            HistHandler_TH2Poly(columnar::ColumnarTool<CMode>* parent, TH2Poly* hist);
             virtual ~HistHandler_TH2Poly();
 
              int nOverFlowBins() const override;
@@ -173,7 +174,7 @@ namespace CP {
 
              int nBins() const override;
              std::string GetBinName(unsigned int bin) const override;
-             CorrectionCode FindBin(columnar::MuonId muon, int & bin) const override;
+             CorrectionCode FindBin(columnar::MuonId<CMode> muon, int & bin) const override;
 
         private:
             TH2Poly* m_h;
@@ -181,59 +182,59 @@ namespace CP {
             std::unique_ptr<AxisHandler> m_y_handler;
     };
 
-    class AxisHandler : public columnar::ColumnarTool<> {
+    class AxisHandler : public columnar::ColumnarTool<CMode> {
         public:
-            virtual CorrectionCode GetBinningParameter(columnar::MuonId mu, float & value) const =0;
-            AxisHandler (columnar::ColumnarTool<> * parent) : columnar::ColumnarTool<>(parent) {}
+            virtual CorrectionCode GetBinningParameter(columnar::MuonId<CMode> mu, float & value) const =0;
+            AxisHandler (columnar::ColumnarTool<CMode> * parent) : columnar::ColumnarTool<CMode>(parent) {}
             virtual ~AxisHandler()= default;
     };
     class AxisHandlerProvider {
         public:
-            static std::unique_ptr<AxisHandler> GetAxisHandler(columnar::ColumnarTool<> * parent, const TAxis* axis);
+            static std::unique_ptr<AxisHandler> GetAxisHandler(columnar::ColumnarTool<CMode> * parent, const TAxis* axis);
     };
 
     class PtAxisHandler: public AxisHandler {
         public:
-            CorrectionCode GetBinningParameter(columnar::MuonId mu, float & value) const override;
-            PtAxisHandler (columnar::ColumnarTool<> * parent) : AxisHandler(parent) {}
+            CorrectionCode GetBinningParameter(columnar::MuonId<CMode> mu, float & value) const override;
+            PtAxisHandler (columnar::ColumnarTool<CMode> * parent) : AxisHandler(parent) {}
             virtual ~PtAxisHandler() = default;
-            columnar::MuonAccessor<float> ptAcc {*this, "pt"};
+            columnar::MuonAccessor<float,CMode> ptAcc {*this, "pt"};
     };
 
     class ChargeAxisHandler: public AxisHandler {
         public:
-            CorrectionCode GetBinningParameter(columnar::MuonId mu, float & value) const override;
-            ChargeAxisHandler (columnar::ColumnarTool<> * parent) : AxisHandler(parent) {}
+            CorrectionCode GetBinningParameter(columnar::MuonId<CMode> mu, float & value) const override;
+            ChargeAxisHandler (columnar::ColumnarTool<CMode> * parent) : AxisHandler(parent) {}
             virtual ~ChargeAxisHandler() = default;
-            columnar::MuonAccessor<float> chargeAcc {*this, "charge"};
+            columnar::MuonAccessor<float,CMode> chargeAcc {*this, "charge"};
     };
     
     class EtaAxisHandler: public AxisHandler {
         public:
-            CorrectionCode GetBinningParameter(columnar::MuonId mu, float & value) const override;
-            EtaAxisHandler (columnar::ColumnarTool<> * parent) : AxisHandler(parent) {}
+            CorrectionCode GetBinningParameter(columnar::MuonId<CMode> mu, float & value) const override;
+            EtaAxisHandler (columnar::ColumnarTool<CMode> * parent) : AxisHandler(parent) {}
             virtual ~EtaAxisHandler() = default;
-            columnar::MuonAccessor<float> etaAcc {*this, "eta"};
+            columnar::MuonAccessor<float,CMode> etaAcc {*this, "eta"};
     };
     class AbsEtaAxisHandler: public AxisHandler {
         public:
-            CorrectionCode GetBinningParameter(columnar::MuonId mu, float & value) const override; 
-            AbsEtaAxisHandler (columnar::ColumnarTool<> * parent) : AxisHandler(parent) {}
+            CorrectionCode GetBinningParameter(columnar::MuonId<CMode> mu, float & value) const override; 
+            AbsEtaAxisHandler (columnar::ColumnarTool<CMode> * parent) : AxisHandler(parent) {}
             virtual ~AbsEtaAxisHandler() = default;
-            columnar::MuonAccessor<float> etaAcc {*this, "eta"};
+            columnar::MuonAccessor<float,CMode> etaAcc {*this, "eta"};
     };
     class PhiAxisHandler: public AxisHandler {
         public:
-            CorrectionCode GetBinningParameter(columnar::MuonId mu, float & value) const override;
-            PhiAxisHandler (columnar::ColumnarTool<> * parent) : AxisHandler(parent) {}
+            CorrectionCode GetBinningParameter(columnar::MuonId<CMode> mu, float & value) const override;
+            PhiAxisHandler (columnar::ColumnarTool<CMode> * parent) : AxisHandler(parent) {}
             virtual ~PhiAxisHandler() = default;
-            columnar::MuonAccessor<float> phiAcc {*this, "phi"};
+            columnar::MuonAccessor<float,CMode> phiAcc {*this, "phi"};
     };
     class dRJetAxisHandler: public AxisHandler {
         public:
-            dRJetAxisHandler(columnar::ColumnarTool<> * parent);
+            dRJetAxisHandler(columnar::ColumnarTool<CMode> * parent);
             
-            CorrectionCode GetBinningParameter(columnar::MuonId mu, float & value) const override;
+            CorrectionCode GetBinningParameter(columnar::MuonId<CMode> mu, float & value) const override;
             virtual ~dRJetAxisHandler() = default;
             
             //this method must be called only before any object creation, since it sets the static variable s_close_jet_decor, that is used only to initialize the m_acc member variable, and for nothing else; using it after object creation will not change the behaviour of the class
@@ -250,13 +251,13 @@ namespace CP {
             bool m_use_2D_sf;
 
         public:
-            columnar::MuonAccessor<float> m_acc;
-            columnar::MuonAccessor<float> acc_dR_deriv {*this, "DFCommonJetDr"};
+            columnar::MuonAccessor<float,CMode> m_acc;
+            columnar::MuonAccessor<float,CMode> acc_dR_deriv {*this, "DFCommonJetDr"};
     };
     class UndefinedAxisHandler: public AxisHandler {
         public:
-            CorrectionCode GetBinningParameter(columnar::MuonId, float &) const override;
-            UndefinedAxisHandler (columnar::ColumnarTool<> * parent) : AxisHandler(parent) {}
+            CorrectionCode GetBinningParameter(columnar::MuonId<CMode>, float &) const override;
+            UndefinedAxisHandler (columnar::ColumnarTool<CMode> * parent) : AxisHandler(parent) {}
             virtual ~UndefinedAxisHandler() = default;
     };
 

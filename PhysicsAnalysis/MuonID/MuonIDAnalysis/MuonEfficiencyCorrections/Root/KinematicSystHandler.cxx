@@ -5,16 +5,16 @@
 #include <MuonEfficiencyCorrections/KinematicSystHandler.h>
 namespace CP {
 
-    float IKinematicSystHandler::Eta(columnar::MuonId mu) const {
+    float IKinematicSystHandler::Eta(columnar::MuonId<CMode> mu) const {
         return mu(etaAcc);
     }
-    float IKinematicSystHandler::Pt(columnar::MuonId mu) const {
+    float IKinematicSystHandler::Pt(columnar::MuonId<CMode> mu) const {
         return mu(ptAcc);
     }
-    float IKinematicSystHandler::PtGeV(columnar::MuonId mu) const {
+    float IKinematicSystHandler::PtGeV(columnar::MuonId<CMode> mu) const {
         return mu(ptAcc) / 1.e3;
     }
-    float IKinematicSystHandler::AbsEta(columnar::MuonId mu) const {
+    float IKinematicSystHandler::AbsEta(columnar::MuonId<CMode> mu) const {
         return std::abs(mu(etaAcc));
     }
     
@@ -37,7 +37,7 @@ namespace CP {
         m_loss.swap(energy_loss);
     }
    
-    CorrectionCode PtKinematicSystHandler::GetKineDependent(columnar::MuonId mu, float& eff) const {
+    CorrectionCode PtKinematicSystHandler::GetKineDependent(columnar::MuonId<CMode> mu, float& eff) const {
         int bin_flat(-1), bin_loss(-1);
         float syst = 0;
         CorrectionCode cc_flat = m_flatness->FindBin(mu, bin_flat);
@@ -83,7 +83,7 @@ namespace CP {
     }
     void TTVAClosureSysHandler::SetSystematicWeight( float SystWeight){m_SystWeight = SystWeight;}
     bool TTVAClosureSysHandler::initialize() { return m_Handler.get() != nullptr; }
-    CorrectionCode TTVAClosureSysHandler::GetKineDependent(columnar::MuonId mu, float& Eff) const{
+    CorrectionCode TTVAClosureSysHandler::GetKineDependent(columnar::MuonId<CMode> mu, float& Eff) const{
         int binsys = -1;
         CorrectionCode cc = m_Handler->FindBin(mu, binsys);
         if (cc != CorrectionCode::Ok) {
@@ -100,7 +100,7 @@ namespace CP {
                     m_SystWeight(0) {
         m_Handler.swap(Handler);
     }
-    CorrectionCode PrimodialPtSystematic::GetKineDependent(columnar::MuonId mu, float& Eff) const {
+    CorrectionCode PrimodialPtSystematic::GetKineDependent(columnar::MuonId<CMode> mu, float& Eff) const {
         // Account for catastrophic energy loss for  very high
         // pt's
         if (mu(ptAcc) <= 200.e3) return CorrectionCode::Ok;
@@ -171,7 +171,7 @@ namespace CP {
         }
 
     }
-    CorrectionCode BadMuonVetoSystHandler::GetKineDependent(columnar::MuonId mu, float& Eff) const {
+    CorrectionCode BadMuonVetoSystHandler::GetKineDependent(columnar::MuonId<CMode> mu, float& Eff) const {
         if (m_SystWeight == 0.) {           
             return CorrectionCode::Ok;
         }

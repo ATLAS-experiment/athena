@@ -12,6 +12,7 @@
 #include <ColumnarTestFixtures/ColumnarMemoryTest.h>
 
 #include <ColumnarCore/ColumnarDef.h>
+#include <ColumnarModeDefault/ColumnarModeDefault.h>
 #include <ColumnarTestFixtures/ExpectationCompare.h>
 #include <ColumnarToolWrapper/ColumnarToolHelpers.h>
 #include <PATInterfaces/SystematicsUtil.h>
@@ -41,7 +42,7 @@ namespace columnar
   bool ColumnarMemoryTest ::
   checkMode ()
   {
-    return std::is_same_v<ColumnarModeDefault,ColumnarModeArray>;
+    return std::is_same_v<CMode,ColumnarModeArray>;
   }
 
 

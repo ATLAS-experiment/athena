@@ -18,11 +18,11 @@ namespace columnar
     static constexpr std::string_view idName = "truthparticle";
   };
 
-  using TruthParticleRange = ObjectRange<TruthParticleDef>;
-  using TruthParticleId = ObjectId<TruthParticleDef>;
-  using OptTruthParticleId = OptObjectId<TruthParticleDef>;
-  template<typename CT,typename CM=ColumnarModeDefault> using TruthParticleAccessor  = AccessorTemplate<TruthParticleDef,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using TruthParticleDecorator = AccessorTemplate<TruthParticleDef,CT,ColumnAccessMode::output,CM>;
+  template<ColumnarMode CM> using TruthParticleRange = ObjectRange<TruthParticleDef,CM>;
+  template<ColumnarMode CM> using TruthParticleId = ObjectId<TruthParticleDef,CM>;
+  template<ColumnarMode CM> using OptTruthParticleId = OptObjectId<TruthParticleDef,CM>;
+  template<typename CT,ColumnarMode CM> using TruthParticleAccessor  = AccessorTemplate<TruthParticleDef,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,ColumnarMode CM> using TruthParticleDecorator = AccessorTemplate<TruthParticleDef,CT,ColumnAccessMode::output,CM>;
 }
 
 #endif

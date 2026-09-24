@@ -60,7 +60,7 @@ TEST_F (ColumnarMemoryTest, SimpleSelectorExampleTool)
     return;
 
   // set up the tool
-  auto tool = std::make_unique<columnar::SimpleSelectorExampleTool> (makeUniqueName());
+  auto tool = std::make_unique<ADD_CMODE(columnar)::SimpleSelectorExampleTool> (makeUniqueName());
   ASSERT_SUCCESS (tool->initialize ());
 
   // this is a wrapper around the tool for this test
@@ -102,7 +102,7 @@ TEST_F (ColumnarMemoryTest, SimpleSelectorExampleTool)
 class XAODSimpleSelectorExampleToolCaller final : public IXAODToolCaller, public asg::AsgMessaging
 {
 public:
-  XAODSimpleSelectorExampleToolCaller (const columnar::SimpleSelectorExampleTool& tool, const std::string& name)
+  XAODSimpleSelectorExampleToolCaller (const ADD_CMODE(columnar)::SimpleSelectorExampleTool& tool, const std::string& name)
     : AsgMessaging ("XAODSimpleSelectorExampleToolCaller"), m_tool (tool), m_name (name)
   {}
 
@@ -128,7 +128,7 @@ public:
   }
 
 private:
-  const columnar::SimpleSelectorExampleTool& m_tool;
+  const ADD_CMODE(columnar)::SimpleSelectorExampleTool& m_tool;
   std::string m_name;
 
   const xAOD::JetContainer *m_jets = nullptr;
@@ -145,7 +145,7 @@ TEST_F (ColumnarPhysLiteTest, SimpleSelectorExampleTool)
   if (!checkMode())
     return;
 
-  auto tool = std::make_unique<columnar::SimpleSelectorExampleTool> (makeUniqueName());
+  auto tool = std::make_unique<ADD_CMODE(columnar)::SimpleSelectorExampleTool> (makeUniqueName());
   ASSERT_SUCCESS (tool->initialize ());
 
   XAODSimpleSelectorExampleToolCaller xAODToolCaller (*tool, "AnalysisJets");
@@ -161,7 +161,7 @@ TEST_F (ColumnarMemoryTest, OptionalColumnExampleTool_present)
   if (!checkMode())
     return;
 
-  auto tool = std::make_unique<columnar::OptionalColumnExampleTool> (makeUniqueName());
+  auto tool = std::make_unique<ADD_CMODE(columnar)::OptionalColumnExampleTool> (makeUniqueName());
   ASSERT_SUCCESS (tool->initialize ());
 
   ColumnarTestToolHandle toolHandle (*tool);
@@ -195,7 +195,7 @@ TEST_F (ColumnarMemoryTest, OptionalColumnExampleTool_absent)
   if (!checkMode())
     return;
 
-  auto tool = std::make_unique<columnar::OptionalColumnExampleTool> (makeUniqueName());
+  auto tool = std::make_unique<ADD_CMODE(columnar)::OptionalColumnExampleTool> (makeUniqueName());
   ASSERT_SUCCESS (tool->initialize ());
 
   ColumnarTestToolHandle toolHandle (*tool);
@@ -228,7 +228,7 @@ TEST_F (ColumnarMemoryTest, ConfigurableColumnExampleTool)
   if (!checkMode())
     return;
 
-  auto tool = std::make_unique<columnar::ConfigurableColumnExampleTool> (makeUniqueName());
+  auto tool = std::make_unique<ADD_CMODE(columnar)::ConfigurableColumnExampleTool> (makeUniqueName());
   ASSERT_SUCCESS (tool->setProperty ("ptVar", "ptCorr"));
   ASSERT_SUCCESS (tool->initialize ());
 
@@ -265,7 +265,7 @@ TEST_F (ColumnarMemoryTest, MomentumAccessorExampleTool)
     return;
 
   // set up the tool
-  auto tool = std::make_unique<columnar::MomentumAccessorExampleTool> (makeUniqueName());
+  auto tool = std::make_unique<ADD_CMODE(columnar)::MomentumAccessorExampleTool> (makeUniqueName());
   ASSERT_SUCCESS (tool->setProperty ("ObjectType", static_cast<unsigned>(xAODType::ObjectType::Jet)));
   ASSERT_SUCCESS (tool->initialize ());
 
@@ -312,7 +312,7 @@ template<typename ContainerType>
 class XAODMomentumAccessorExampleToolCaller final : public IXAODToolCaller, public asg::AsgMessaging
 {
 public:
-  XAODMomentumAccessorExampleToolCaller (const columnar::MomentumAccessorExampleTool& tool, const std::string& name)
+  XAODMomentumAccessorExampleToolCaller (const ADD_CMODE(columnar)::MomentumAccessorExampleTool& tool, const std::string& name)
     : AsgMessaging ("XAODMomentumAccessorExampleToolCaller"), m_tool (tool), m_name (name)
   {}
 
@@ -338,7 +338,7 @@ public:
   }
 
 private:
-  const columnar::MomentumAccessorExampleTool& m_tool;
+  const ADD_CMODE(columnar)::MomentumAccessorExampleTool& m_tool;
   std::string m_name;
 
   const ContainerType *m_jets = nullptr;
@@ -353,7 +353,7 @@ TEST_F (ColumnarPhysLiteTest, MomentumAccessorExampleTool)
   if (!checkMode())
     return;
 
-  auto tool = std::make_unique<columnar::MomentumAccessorExampleTool> (makeUniqueName());
+  auto tool = std::make_unique<ADD_CMODE(columnar)::MomentumAccessorExampleTool> (makeUniqueName());
   ASSERT_SUCCESS (tool->setProperty ("ObjectType", static_cast<unsigned>(xAODType::ObjectType::Jet)));
   ASSERT_SUCCESS (tool->initialize ());
 
@@ -375,7 +375,7 @@ TEST_F (ColumnarPhysLiteTest, MomentumAccessorExampleTool_photons)
   if (!checkMode())
     return;
 
-  auto tool = std::make_unique<columnar::MomentumAccessorExampleTool> (makeUniqueName());
+  auto tool = std::make_unique<ADD_CMODE(columnar)::MomentumAccessorExampleTool> (makeUniqueName());
   ASSERT_SUCCESS (tool->setProperty ("ObjectType", static_cast<unsigned>(xAODType::ObjectType::Photon)));
   ASSERT_SUCCESS (tool->initialize ());
 
@@ -392,7 +392,7 @@ TEST_F (ColumnarMemoryTest, ModularExampleTool)
   if (!checkMode())
     return;
 
-  auto tool = std::make_unique<columnar::ModularExampleTool> (makeUniqueName());
+  auto tool = std::make_unique<ADD_CMODE(columnar)::ModularExampleTool> (makeUniqueName());
   ASSERT_SUCCESS (tool->initialize ());
 
   ColumnarTestToolHandle toolHandle (*tool);
@@ -427,7 +427,7 @@ TEST_F (ColumnarMemoryTest, StringExampleTool)
   if (!checkMode())
     return;
 
-  auto tool = std::make_unique<columnar::StringExampleTool> (makeUniqueName());
+  auto tool = std::make_unique<ADD_CMODE(columnar)::StringExampleTool> (makeUniqueName());
   ASSERT_SUCCESS (tool->initialize ());
 
   ColumnarTestToolHandle toolHandle (*tool);
@@ -460,7 +460,7 @@ TEST_F (ColumnarMemoryTest, VariantExampleTool)
   if (!checkMode())
     return;
 
-  auto tool = std::make_unique<columnar::VariantExampleTool> (makeUniqueName());
+  auto tool = std::make_unique<ADD_CMODE(columnar)::VariantExampleTool> (makeUniqueName());
   ASSERT_SUCCESS (tool->initialize ());
 
   ColumnarTestToolHandle toolHandle (*tool);
@@ -503,7 +503,7 @@ TEST_F (ColumnarMemoryTest, VariantExampleTool)
 class XAODVariantExampleToolCaller final : public IXAODToolCaller, public asg::AsgMessaging
 {
 public:
-  XAODVariantExampleToolCaller (const columnar::VariantExampleTool& tool, const std::string& electronName, const std::string& muonName)
+  XAODVariantExampleToolCaller (const ADD_CMODE(columnar)::VariantExampleTool& tool, const std::string& electronName, const std::string& muonName)
     : AsgMessaging("XAODVariantExampleToolCaller"), m_tool (tool), m_electronName (electronName), m_muonName (muonName)
   {}
 
@@ -534,7 +534,7 @@ public:
   }
 
 private:
-  const columnar::VariantExampleTool& m_tool;
+  const ADD_CMODE(columnar)::VariantExampleTool& m_tool;
   std::string m_electronName;
   std::string m_muonName;
 
@@ -552,7 +552,7 @@ TEST_F (ColumnarPhysLiteTest, VariantExampleTool)
   if (!checkMode())
     return;
 
-  auto tool = std::make_unique<columnar::VariantExampleTool> (makeUniqueName());
+  auto tool = std::make_unique<ADD_CMODE(columnar)::VariantExampleTool> (makeUniqueName());
   ASSERT_SUCCESS (tool->initialize ());
 
   XAODVariantExampleToolCaller xAODToolCaller (*tool, "AnalysisElectrons", "AnalysisMuons");
@@ -569,7 +569,7 @@ TEST_F (ColumnarMemoryTest, VectorExampleTool)
   if (!checkMode())
     return;
 
-  auto tool = std::make_unique<columnar::VectorExampleTool> (makeUniqueName());
+  auto tool = std::make_unique<ADD_CMODE(columnar)::VectorExampleTool> (makeUniqueName());
   ASSERT_SUCCESS (tool->initialize ());
 
   ColumnarTestToolHandle toolHandle (*tool);
@@ -606,7 +606,7 @@ TEST_F (ColumnarMemoryTest, VectorExampleTool)
 class XAODVectorExampleToolCaller final : public IXAODToolCaller, public asg::AsgMessaging
 {
 public:
-  XAODVectorExampleToolCaller (const columnar::VectorExampleTool& tool, const std::string& jetName)
+  XAODVectorExampleToolCaller (const ADD_CMODE(columnar)::VectorExampleTool& tool, const std::string& jetName)
     : AsgMessaging("XAODVectorExampleToolCaller"), m_tool (tool), m_jetName (jetName)
   {}
 
@@ -632,7 +632,7 @@ public:
   }
 
 private:
-  const columnar::VectorExampleTool& m_tool;
+  const ADD_CMODE(columnar)::VectorExampleTool& m_tool;
   std::string m_jetName;
 
   const xAOD::JetContainer *m_jets = nullptr;
@@ -648,7 +648,7 @@ TEST_F (ColumnarPhysLiteTest, VectorExampleTool)
   if (!checkMode())
     return;
 
-  auto tool = std::make_unique<columnar::VectorExampleTool> (makeUniqueName());
+  auto tool = std::make_unique<ADD_CMODE(columnar)::VectorExampleTool> (makeUniqueName());
   ASSERT_SUCCESS (tool->initialize ());
 
   XAODVectorExampleToolCaller xAODToolCaller (*tool, "AnalysisJets");
