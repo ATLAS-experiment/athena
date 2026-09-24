@@ -99,6 +99,12 @@ StatusCode MPIClusterSvc::finalize() {
       ->createStatement(
           "UPDATE ranks SET end_time = julianday('now') WHERE rank = ?1")
       .run(m_rank);
+  // Gaudi/Python references can keep this service alive past finalization.
+  // Release communicators and mpi3's attributes before finalizing MPI, while
+  // all ranks are still here, rather than relying on process-exit destruction.
+  m_datacom = mpi3::communicator{};
+  m_world = mpi3::communicator{};
+  m_env.reset();
   return StatusCode::SUCCESS;
 }
 

@@ -16,14 +16,25 @@ find_package( yampl )
 find_package( valgrind ) # Note that there is no VALGRIND_LIBRARIES variable.
 
 # Component(s) in the package:
+atlas_add_library( AthenaHiveEventLoopMgrLib
+   AthenaServices/*.h src/AthenaHiveEventLoopMgr.cxx
+   PUBLIC_HEADERS AthenaServices
+   INCLUDE_DIRS ${TBB_INCLUDE_DIRS}
+   LINK_LIBRARIES AthenaBaseComps AthenaKernel EventInfo GaudiKernel ${TBB_LIBRARIES}
+   PRIVATE_LINK_LIBRARIES StoreGateLib PersistentDataModel xAODEventInfo
+                          EventInfoUtils )
+
+file( GLOB _serviceSources CONFIGURE_DEPENDS src/*.cxx )
+list( REMOVE_ITEM _serviceSources
+   "${CMAKE_CURRENT_SOURCE_DIR}/src/AthenaHiveEventLoopMgr.cxx" )
 atlas_add_component( AthenaServices
-   src/*.h src/*.cxx src/components/*.cxx
+   src/*.h ${_serviceSources} src/components/*.cxx
    INCLUDE_DIRS  ${Python_INCLUDE_DIRS}
    ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS} ${UUID_INCLUDE_DIRS} ${YAMPL_INCLUDE_DIRS}
    ${VALGRIND_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS}
    LINK_LIBRARIES ${Python_LIBRARIES} ${ROOT_LIBRARIES} ${TBB_LIBRARIES} ${UUID_LIBRARIES}
    ${YAMPL_LIBRARIES} bmpi3::bmpi3 ${CLHEP_LIBRARIES} ${EIGEN_LIBRARIES}
-   AthenaBaseComps AthenaKernel RootUtilsPyROOT CxxUtils SQLiteDBSvcLib
+   AthenaHiveEventLoopMgrLib AthenaBaseComps AthenaKernel RootUtilsPyROOT CxxUtils SQLiteDBSvcLib
    AthContainers AthContainersInterfaces DataModelRoot SGTools SGCoreLib
    StoreGateLib PersistentDataModel EventInfo xAODCore
    xAODEventInfo EventInfoUtils GaudiKernel RootAuxDynIOHeaders )
@@ -34,6 +45,16 @@ atlas_add_tpcnv_library( AthenaServicesTest src/test/*.cxx
    PRIVATE_LINK_LIBRARIES AthenaKernel)
 
 # The test(s) of the package:
+atlas_add_component( AthenaServicesMPITest
+   test/MPIHiveLifecycleTestAlg.cxx
+   LINK_LIBRARIES AthenaBaseComps AthenaKernel GaudiKernel bmpi3::bmpi3 )
+
+atlas_add_test( MPIHiveLifecycle
+   SCRIPT test/MPIHiveLifecycle_test.py
+   POST_EXEC_SCRIPT nopost.sh
+   PRIVATE_WORKING_DIRECTORY
+   PROPERTIES TIMEOUT 400 PROCESSORS 4 )
+
 atlas_add_test( AthenaOutputStream_test
    SOURCES test/AthenaOutputStream_test.cxx src/AthenaOutputStream.cxx
    src/OutputStreamSequencerSvc.cxx src/MetaDataSvc.cxx

@@ -22,7 +22,7 @@
 #include "../TestRandomSeqAlg.h"
 #include "../MetaDataSvc.h"
 #include "../OutputStreamSequencerSvc.h"
-#include "../AthenaHiveEventLoopMgr.h"
+#include "AthenaServices/AthenaHiveEventLoopMgr.h"
 #include "../AthenaMtesEventLoopMgr.h"
 #include "../AthIncFirerAlg.h"
 #include "../ConditionsCleanerSvc.h"

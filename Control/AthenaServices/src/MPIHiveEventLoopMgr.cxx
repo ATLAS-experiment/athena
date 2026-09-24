@@ -12,9 +12,7 @@
 
 // Standard Library
 #include <chrono>
-#include <fstream>
 #include <string>
-#include <print>
 
 using Clock = std::chrono::high_resolution_clock;
 
@@ -377,136 +375,32 @@ StatusCode MPIHiveEventLoopMgr::insertEvent(int eventIdx, bool& endOfStream,
   return sc;
 }
 
-/// drainLocalScheduler
-/// Drain the local scheduler on this MPI rank
+/// Wait for completions using Hive's shared lifecycle. The result hook below
+/// supplies MPI's logging and failure policy; Hive owns incidents and cleanup.
 StatusCode MPIHiveEventLoopMgr::drainLocalScheduler() {
+  return drainScheduler(m_nLocalFinishedEvts) < 0
+             ? StatusCode::FAILURE : StatusCode::SUCCESS;
+}
 
-  StatusCode sc(StatusCode::SUCCESS);
+StatusCode MPIHiveEventLoopMgr::eventFinished(const EventContext& ctx) {
+  const auto status = m_aess->eventStatus(ctx);
+  m_clusterSvc->log_completeEvent(ctx.evt(), ctx.eventID().run_number(),
+                                 ctx.eventID().event_number(), status);
 
-  // maybe we can do better
-  std::vector<std::unique_ptr<EventContext>> finishedEvtContexts;
-
-  EventContext* finishedEvtContext(nullptr);
-
-  // Here we wait not to loose cpu resources
-  ATH_MSG_DEBUG("drainLocalScheduler: [{}] Waiting for a context",
-                m_nLocalFinishedEvts);
-  sc = m_schedulerSvc->popFinishedEvent(finishedEvtContext);
-
-  // We got past it: cache the pointer
-  if (sc.isSuccess()) {
-    ATH_MSG_DEBUG("drainLocalScheduler: scheduler not empty: Context "
-                  << finishedEvtContext);
-    finishedEvtContexts.emplace_back(finishedEvtContext);
-  } else {
-    // no more events left in scheduler to be drained
-    ATH_MSG_DEBUG("drainLocalScheduler: scheduler empty");
+  if (status == EventStatus::Success) {
+    m_contiguousFailedEvts = 0;
     return StatusCode::SUCCESS;
   }
 
-  // Let's see if we can pop other event contexts
-  while (m_schedulerSvc->tryPopFinishedEvent(finishedEvtContext).isSuccess()) {
-    finishedEvtContexts.emplace_back(finishedEvtContext);
+  ATH_MSG_ERROR("Failed event detected on " << ctx
+                << " w/ fail mode: " << status);
+  ++m_contiguousFailedEvts;
+  ++m_totalFailedEvts;
+  // Preserve the MPI policy: tolerate isolated failures, stop after three
+  // consecutive failures or ten in total. Even at the threshold, finishEvent()
+  // still balances EndProcessing and releases this completed event's slot.
+  if (m_contiguousFailedEvts >= 3 || m_totalFailedEvts >= 10) {
+    return StatusCode::FAILURE;
   }
-
-  // Now we flush them
-  StatusCode fail(StatusCode::SUCCESS);
-  for (auto& thisFinishedEvtContext : finishedEvtContexts) {
-    if (!thisFinishedEvtContext) {
-      ATH_MSG_FATAL("Detected nullptr ctxt while clearing WB!");
-      fail = StatusCode::FAILURE;
-      continue;
-    }
-
-    // Update event log
-    m_clusterSvc->log_completeEvent(
-        thisFinishedEvtContext->evt(),
-        thisFinishedEvtContext->eventID().run_number(),
-        thisFinishedEvtContext->eventID().event_number(),
-        m_aess->eventStatus(*thisFinishedEvtContext));
-
-    if (m_aess->eventStatus(*thisFinishedEvtContext) != EventStatus::Success) {
-      ATH_MSG_ERROR("Failed event detected on "
-                    << thisFinishedEvtContext << " w/ fail mode: "
-                    << m_aess->eventStatus(*thisFinishedEvtContext));
-      ++m_contiguousFailedEvts;
-      ++m_totalFailedEvts;
-      if (m_contiguousFailedEvts >= 3 || m_totalFailedEvts >= 10) {
-        // If we have 3 contiguous failed events or 10 total, end the job
-        fail = StatusCode::FAILURE;
-        continue;
-      }
-    } else {
-      // Event succeeded, reset contiguous failed events
-      m_contiguousFailedEvts = 0;
-    }
-
-    EventID::number_type n_run(0);
-    EventID::event_number_t n_evt(0);
-
-    if (m_whiteboard->selectStore(thisFinishedEvtContext->slot()).isSuccess()) {
-      n_run = thisFinishedEvtContext->eventID().run_number();
-      n_evt = thisFinishedEvtContext->eventID().event_number();
-    } else {
-      ATH_MSG_ERROR("DrainSched: unable to select store {}",
-                    thisFinishedEvtContext->slot());
-      thisFinishedEvtContext.reset();
-      fail = StatusCode::FAILURE;
-      continue;
-    }
-
-    // Some code still needs global context in addition to that passed in the
-    // incident
-    Gaudi::Hive::setCurrentContext(*thisFinishedEvtContext);
-    m_incidentSvc->fireIncident(
-        Incident(name(), IncidentType::EndProcessing, *thisFinishedEvtContext));
-
-    ATH_MSG_DEBUG("Clearing slot {} (event {}) of the whiteboard",
-                  thisFinishedEvtContext->slot(),
-                  thisFinishedEvtContext->evt());
-
-    StatusCode sc = clearWBSlot(thisFinishedEvtContext->slot());
-    if (!sc.isSuccess()) {
-      ATH_MSG_ERROR("Whiteboard slot {} could not be properly cleared",
-                    thisFinishedEvtContext->slot());
-      if (fail != StatusCode::FAILURE) {
-        fail = sc;
-      }
-      thisFinishedEvtContext.reset();
-      continue;
-    }
-
-    ++m_nLocalFinishedEvts;
-
-    writeHistograms().ignore();
-    ++m_proc;
-
-    if (m_doEvtHeartbeat) {
-      if (!m_useTools) {
-        ATH_MSG_INFO("  ===>>>  done processing event #{}, run #{} on slot {},  {} events processed so far <<<===",
-                     n_evt, n_run, thisFinishedEvtContext->slot(), m_proc);
-      } else {
-        ATH_MSG_INFO("  ===>>>  done processing event #{}, run #{} on slot {},  {} events read and {} events processed so far <<<===",
-                     n_evt, n_run, thisFinishedEvtContext->slot(), m_nev, m_proc);
-                     
-      }
-      std::ofstream outfile("eventLoopHeartBeat.txt");
-      if (!outfile) {
-        ATH_MSG_ERROR(" unable to open: eventLoopHeartBeat.txt");
-        fail = StatusCode::FAILURE;
-        thisFinishedEvtContext.reset();
-        continue;
-      }
-      std::println (outfile, "  done processing event #{}, run #{} {} events read so far <<<===",
-                    n_evt, n_run, m_nev);
-      outfile.close();
-    }
-
-    ATH_MSG_DEBUG("drainLocalScheduler thisFinishedEvtContext: "
-                  << thisFinishedEvtContext);
-
-    thisFinishedEvtContext.reset();
-  }
-
-  return fail;
+  return StatusCode::SUCCESS;
 }

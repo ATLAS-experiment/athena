@@ -170,6 +170,20 @@ protected:
   int declareEventRootAddress(EventContext&);
   /// Create event context
   virtual EventContext createEventContext() override;
+  /// Allocate/select a slot, with an index supplied by the driving loop.
+  EventContext allocateEventContext(size_t eventNumber);
+  /// Submit a prepared, recorded context. On failure the caller still owns
+  /// the slot; no scheduler context is leaked and BeginProcessing is balanced.
+  StatusCode submitEvent(EventContext&& ctx);
+  /// Finish one scheduler-returned event on the driving thread. Calls the
+  /// result hook with its store selected, then releases the slot even if the
+  /// hook reports failure. Does not wait for or delete the context.
+  StatusCode finishEvent(const EventContext& ctx);
+  /// Process an event's result and decide whether the driving loop may continue.
+  virtual StatusCode eventFinished(const EventContext& ctx);
+  /// Batch jobs clear in the algorithm context; external drivers can retain
+  /// the store until eventFinished() has consumed their result.
+  virtual bool clearStoreOnEndAlgorithms() const { return true; }
   /// Drain the scheduler from all actions that may be queued
   int drainScheduler(int& finishedEvents);
   /// Instance of the incident listener waiting for AbortEvent. 
