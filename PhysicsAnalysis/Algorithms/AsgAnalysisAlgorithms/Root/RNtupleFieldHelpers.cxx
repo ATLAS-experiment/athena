@@ -267,7 +267,7 @@ namespace CP {
                                                OutputBranchData& outputData,
                                                MsgStream& msg ) {
         m_fieldName = outputData.branchName;
-        m_acc.reset( new SG::TypelessConstAccessor( *branchConfig.auxType, outputData.auxName ) );
+        m_acc = std::make_unique<SG::TypelessConstAccessor>( *branchConfig.auxType, outputData.auxName );
         
         if( branchConfig.auxFactory && branchConfig.auxType ) {
             m_factory = branchConfig.auxFactory;
@@ -309,7 +309,7 @@ namespace CP {
                                                 OutputBranchData& outputData,
                                                 MsgStream& msg ) {
         m_fieldName = outputData.branchName;
-        m_acc.reset( new SG::TypelessConstAccessor( *branchConfig.auxType, outputData.auxName ) );
+        m_acc = std::make_unique<SG::TypelessConstAccessor>( *branchConfig.auxType, outputData.auxName );
         
         if( branchConfig.auxFactory && branchConfig.auxVecType ) {
             m_factory = branchConfig.auxFactory;

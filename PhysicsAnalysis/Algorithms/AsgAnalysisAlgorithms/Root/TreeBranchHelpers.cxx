@@ -640,7 +640,7 @@ namespace CP
       m_branchName = outputData.branchName;
 
       // Create the accessor.
-      m_acc.reset( new SG::TypelessConstAccessor( *branchConfig.auxType, outputData.auxName ) );
+      m_acc = std::make_unique<SG::TypelessConstAccessor>( *branchConfig.auxType, outputData.auxName );
 
       // Get a pointer to the vector factory.
       m_factory = branchConfig.auxFactory;
@@ -755,7 +755,7 @@ namespace CP
       m_branchName = outputData.branchName;
 
       // Create the accessor.
-      m_acc.reset( new SG::TypelessConstAccessor( *branchConfig.auxType, outputData.auxName ) );
+      m_acc = std::make_unique<SG::TypelessConstAccessor>( *branchConfig.auxType, outputData.auxName );
 
       // Get a pointer to the vector factory.
       m_factory = branchConfig.auxFactory;
