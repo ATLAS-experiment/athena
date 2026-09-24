@@ -34,6 +34,8 @@
 #include "Acts/Surfaces/StrawSurface.hpp"
 #include "Acts/Utilities/AngleHelpers.hpp"
 
+#include <chrono>
+
 namespace {
 using SegLink_t = std::vector<ElementLink<xAOD::MuonSegmentContainer>>;
 static const SG::ConstAccessor<SegLink_t> segAcc{"truthSegmentLinks"};
@@ -204,6 +206,8 @@ namespace ActsTrk {
             const auto& particle = truthParticle->p4();
             m_truthPt = particle.Pt();
             m_truthP = particle.P();
+            m_eta = particle.Eta();
+            m_phi = particle.Phi();
         
             const xAOD::TruthVertex* prodVertex = truthParticle->prodVtx();
             Amg::Vector3D prodPos = prodVertex ? Amg::Vector3D(prodVertex->x(), prodVertex->y(), prodVertex->z()) 
@@ -267,12 +271,19 @@ namespace ActsTrk {
             actsParticleHypothesis);
 
             ATH_MSG_DEBUG("start propagating here");
+            //measure the propagation time and save it to the ntuple for performance validation
+            //start the clock
+            const auto propagationStart = std::chrono::steady_clock::now();
             auto result = propagator.propagate(start, options);
+            const auto propagationEnd = std::chrono::steady_clock::now(); //stop the clock
+
             const Acts::detail::SteppingLogger::result_type state = result.value().get<Acts::detail::SteppingLogger::result_type>();
             const Acts::MaterialInteractor::result_type material = result.value().get<Acts::MaterialInteractor::result_type>();
 
             m_propSteps = state.steps.size();
-            ATH_MSG_DEBUG("Number of propagated steps : " << m_propSteps);
+            m_propTime = (std::chrono::duration<double>(propagationEnd - propagationStart).count()) * 1000;
+           
+            ATH_MSG_DEBUG("Number of propagated steps : " << m_propSteps<< "in [clock time]: "<< m_propTime<<" ms");
             m_propLength = result.value().pathLength;
             std::vector<PropagatorRecorder> propagatedHits;
 
