@@ -51,10 +51,8 @@ def CPAlgorithmsCfg(flags):
     from AnalysisAlgorithmsConfig.ConfigAccumulator import ExpertModeWarning
     warnings.simplefilter('ignore', ExpertModeWarning)
 
-    # Create a pile-up analysis config
-    if flags.Input.isMC:
-        # setup config and lumicalc files for pile-up tool
-        configSeq += factory.makeConfig ('PileupReweighting')
+    # setup config and lumicalc files for pile-up tool
+    configSeq += factory.makeConfig ('PileupReweighting')
 
     # Set up the GRL decoration analysis config
     configSeq += factory.makeConfig ('EventCleaning')
@@ -504,7 +502,7 @@ def PHYSLITECfg(flags):
         'MET_Core_AnalysisMET.name.mpx.mpy.sumet.source',
         'METAssoc_AnalysisMET.',
         'InDetTrackParticles.numberOfTRTHits.numberOfTRTOutliers',
-        'EventInfo.RandomRunNumber.PileupWeight_NOSYS.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ.HF_Classification.HF_SimpleClassification.{GRL_Deco_names}'.format(GRL_Deco_names='.'.join(str(key) for key in (getGoodRunsLists()).keys())),
+        'EventInfo.RandomRunNumber.PileupWeight_NOSYS.correctedScaledInteractionsPerCrossing.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ.HF_Classification.HF_SimpleClassification.{GRL_Deco_names}'.format(GRL_Deco_names='.'.join(str(key) for key in (getGoodRunsLists()).keys())),
         'Kt4EMPFlowEventShape.Density',
         'Kt4EMPFlowNeutEventShape.Density',
         'TauTracks.flagSet.trackLinks',

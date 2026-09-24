@@ -27,6 +27,7 @@ namespace CP
   StatusCode PileupReweightingAlg ::
   initialize ()
   {
+    ANA_CHECK( m_correctedAverageMuDecorator.initialize(SG::AllowEmpty) );
     ANA_CHECK( m_correctedScaledAverageMuDecorator.initialize(SG::AllowEmpty) );
     ANA_CHECK( m_correctedActualMuDecorator.initialize(SG::AllowEmpty) );
     ANA_CHECK( m_correctedScaledActualMuDecorator.initialize(SG::AllowEmpty) );
@@ -37,7 +38,7 @@ namespace CP
     ANA_CHECK (m_systematicsList.addSystematics (*m_pileupReweightingTool));
     ANA_CHECK (m_systematicsList.initialize());
     ANA_CHECK (m_outOfValidity.initialize());
-    ANA_CHECK (m_baseEventInfoName.initialize());
+    ANA_CHECK (m_baseEventInfoKey.initialize());
     ANA_CHECK (m_decRRNKey.initialize());
     ANA_CHECK (m_decRLBNKey.initialize());
     ANA_CHECK (m_decHashKey.initialize());
@@ -49,10 +50,17 @@ namespace CP
   StatusCode PileupReweightingAlg ::
   execute (const EventContext& ctx)
   {
-    SG::ReadHandle<xAOD::EventInfo> evtInfo(m_baseEventInfoName, ctx);
+    SG::ReadHandle<xAOD::EventInfo> evtInfo(m_baseEventInfoKey, ctx);
 
     // Add additional decorations - these apply to data (and on MC just redecorate the same value as
     // before)
+    if (!m_correctedAverageMuDecorator.empty())
+    {
+      SG::WriteDecorHandle<xAOD::EventInfo, float> dec (m_correctedAverageMuDecorator, ctx);
+      dec (*evtInfo)
+        = m_pileupReweightingTool->getCorrectedAverageInteractionsPerCrossing (*evtInfo);
+    }
+
     if (!m_correctedScaledAverageMuDecorator.empty())
     {
       SG::WriteDecorHandle<xAOD::EventInfo, float> dec (m_correctedScaledAverageMuDecorator, ctx);
