@@ -40,8 +40,7 @@ class MuonChamberToolTest: public AthReentrantAlgorithm {
     private:
         /** @brief Returns the  edge points from a trapezoidal / cuboid /diamond volume */
         std::vector<Amg::Vector3D> cornerPoints(const ActsTrk::GeometryContext& gctx, const Acts::Volume& volume) const;
-        std::array<Amg::Vector3D, 8> cornerPoints(const ActsTrk::GeometryContext& gctx, const Acts::StrawSurface& surface) const;
-        std::array<Amg::Vector3D, 4> cornerPoints(const ActsTrk::GeometryContext& gctx, const Acts::PlaneSurface& surface) const;        
+        std::vector<Amg::Vector3D> cornerPoints(const ActsTrk::GeometryContext& gctx, const Acts::Surface& surface) const;
         
         void saveEnvelope(const ActsTrk::GeometryContext& gctx,
                           const std::string& envName,
