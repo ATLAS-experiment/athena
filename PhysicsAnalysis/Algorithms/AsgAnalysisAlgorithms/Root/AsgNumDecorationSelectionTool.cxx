@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AsgAnalysisAlgorithms/AsgNumDecorationSelectionTool.h"
@@ -69,13 +69,7 @@ namespace CP
   {
     asg::AcceptData accept(&m_accept);
 
-    const SG::AuxElement* aux = dynamic_cast<const SG::AuxElement*>(particle);
-    if (!aux) {
-      ATH_MSG_ERROR("Particle is not derived from AuxElement, cannot read decoration. Cut considered as failed.");
-      return accept; // reject all cuts by default
-    }
-
-    if (!m_accessor->isAvailable(*aux)) {
+    if (!m_accessor->isAvailable(*particle)) {
       ATH_MSG_WARNING("Decoration \"" << m_name << "\" not available; setting all cuts as passed.");
       if (m_equalCutIndex >= 0) accept.setCutResult(m_equalCutIndex, true);
       if (m_minCutIndex >= 0)   accept.setCutResult(m_minCutIndex, true);
