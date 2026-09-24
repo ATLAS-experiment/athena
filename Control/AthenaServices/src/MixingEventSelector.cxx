@@ -532,7 +532,7 @@ StatusCode MixingEventSelector::setConversionSvc(IConversionSvc* /*pService*/)
 {
   std::abort();
 }
-SmartIF<IConversionSvc>& MixingEventSelector::conversionSvc()    const
+SmartIF<IConversionSvc> MixingEventSelector::conversionSvc()
 {
   std::abort();
 }

@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthCnvSvc.cxx 
@@ -67,10 +67,6 @@ AthCnvSvc::~AthCnvSvc()
   //
   // "temporary hack" ha ha! (CGL 5/2014)
   //
-  if (m_cnvSvc) {
-    m_cnvSvc->addRef();
-    m_cnvSvc = 0;
-  }
   if (m_addressCreator) {
     m_addressCreator->addRef();
     m_addressCreator = 0;
@@ -103,7 +99,6 @@ AthCnvSvc::~AthCnvSvc()
 ////////////////////////////
 StatusCode AthCnvSvc::initialize()
 {
-  m_cnvSvc = this;  // needed for conversionSvc()
   ATH_CHECK( AthCnvSvc::setAddressCreator(this) );
 
   return StatusCode::SUCCESS;
@@ -127,11 +122,9 @@ StatusCode AthCnvSvc::finalize()
 
   if (m_addressCreator) m_addressCreator->addRef();
   if (m_dataSvc) m_dataSvc->addRef();
-  if (m_cnvSvc) m_cnvSvc->addRef();
 
   m_addressCreator = 0;
   m_dataSvc = 0;
-  m_cnvSvc = 0;
 
   return StatusCode::SUCCESS;
 }
@@ -199,14 +192,10 @@ AthCnvSvc::setConversionSvc(IConversionSvc* /*svc*/)
 
 /// Implementation of IConverter:
 /// Get conversion service the converter is connected to
-SmartIF<IConversionSvc>&
-AthCnvSvc::conversionSvc() const
+SmartIF<IConversionSvc>
+AthCnvSvc::conversionSvc()
 {
-  // FIXME: Ideally the return type should be const, but that would require
-  //        changes in the Gaudi IConverter base class.
-  SmartIF<IConversionSvc>& svc ATLAS_THREAD_SAFE =
-    const_cast<SmartIF<IConversionSvc>&>(m_cnvSvc);
-  return svc;
+  return SmartIF<IConversionSvc>(this);
 }
 
 /// Set address creator facility
