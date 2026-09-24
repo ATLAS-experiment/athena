@@ -23,26 +23,11 @@
 
 namespace {
     using namespace Acts::UnitLiterals;
-    /** @brief Check if the charges of two PtimesQ estimates agree */
-    constexpr bool chargeAgree(double PtimesQ1, double PtimesQ2) {
-        return PtimesQ1 * PtimesQ2 > 0;
-    };
     /** @brief Calculate the momentum deviation between two PtimesQ estimates. The function is symmetric. */
     inline double momentumDev(double PtimesQ1, double PtimesQ2) {
         const double denom {std::max(std::abs(PtimesQ1) + std::abs(PtimesQ2), Acts::s_epsilon)};
         return std::abs(PtimesQ1 - PtimesQ2) / denom;
     };
-    /** @brief Calculate the reduced chi-squared of a segment. */
-    float reducedChi2(const xAOD::MuonSegment& seg) {
-        // Tell clang to optimize assuming that FP operations may trap.
-        CXXUTILS_TRAPPING_FP;
-        return seg.chiSquared() / std::max(1.f, seg.numberDoF());
-    }
-    /** @brief Print brief segment information. */
-    std::string print(const xAOD::MuonSegment& seg) {
-        return std::format("{:}, nPrecHits: {:}, nPhiHits: {:}", MuonR4::printID(seg),
-                           seg.nPrecisionHits(), seg.nPhiLayers());
-    }
     /** @brief Check if a segment is an NSW segment. */
     bool isNswSegment(const xAOD::MuonSegment& seg) {
         using namespace Muon::MuonStationIndex;
@@ -50,26 +35,6 @@ namespace {
                seg.technology() == TechnologyIndex::MM ||
                toStationIndex(seg.chamberIndex()) == StIndex::EE;
     }
-
-    /// A seed whose segments can't fill at least two slots crashes it. Check the topology before calling.
-    bool canEstimateQtimesP(const MuonR4::MsTrackSeed& seed) {
-        using namespace Muon::MuonStationIndex;
-        bool hasInner{false}, hasMiddle{false}, hasOuter{false};
-        unsigned int nExtended{0};
-        for (const xAOD::MuonSegment* seg : seed.segments()) {
-            switch (toLayerIndex(seg->chamberIndex())) {
-                case LayerIndex::Inner:  hasInner = true; break;
-                case LayerIndex::Middle: hasMiddle = true; break;
-                case LayerIndex::Outer:  hasOuter = true; break;
-                case LayerIndex::Extended:
-                case LayerIndex::BarrelExtended: ++nExtended; break;
-                default: break;
-            }
-        }
-        const unsigned int nIMO = hasInner + hasMiddle + hasOuter;
-        return nIMO + nExtended >= 2u;
-    }
-
     /** @brief Convert rad to deg. */
     double inDeg(double angle) {
         return angle / Gaudi::Units::deg;
@@ -78,6 +43,7 @@ namespace {
 
 namespace MuonR4{
     using SearchTree_t = MsTrackSeederTool::SearchTree_t;
+    using SegVec_t = MsTrackSeederTool::SegVec_t;
 
     StatusCode MsTrackSeederTool::initialize() {
         ATH_CHECK(m_ctxProvider.initialize());
@@ -85,7 +51,6 @@ namespace MuonR4{
         ATH_CHECK(m_trackingGeometrySvc.retrieve());
         ATH_CHECK(m_segmentKey.initialize(!m_segmentKey.empty()));
         ATH_CHECK(detStore()->retrieve(m_detMgr));
-
         if (m_nFieldSteps == 0) {
             ATH_MSG_ERROR("The number of field steps must not be zero "<<m_nFieldSteps);
             return StatusCode::FAILURE;
@@ -118,7 +83,7 @@ namespace MuonR4{
                 if (!refSeg && !isNswSegment(*segment) &&  
                     m_segSelector->passSeedingQuality(ctx, *segment)) {
                     refSeg = segment;
-                    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Set reference segment to "<<::print(*segment));
+                    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Set reference segment to "<<printSegment(*segment));
                 }
                 Acts::BoundTrackParameters boundPars = SegmentFit::boundSegmentPars(tgContext, *m_detMgr, *segment);
                 if (!boundPars.covariance()) {
@@ -142,8 +107,8 @@ namespace MuonR4{
             }
 
             if (!refSeg) {
-                ATH_MSG_DEBUG(__func__<<"() "<<__LINE__
-                                <<" - No reference segment passing seeding quality was found.");
+                ATH_MSG_WARNING(__func__<<"() "<<__LINE__
+                    <<" - No reference segment passing the seeding quality was found.");
                 return Acts::Result<Acts::BoundTrackParameters>::failure(std::make_error_code(std::errc::invalid_argument));
             }
             Amg::Vector3D seedPos{atFirstSurface(tgContext, *refSeg)};
@@ -179,7 +144,7 @@ namespace MuonR4{
                 const Amg::Transform3D toFirstTrf = firstSurf.localToGlobalTransform(tgContext).inverse();
                 const Amg::Vector3D locFrontSegPos = toFirstTrf * frontSegPos;
                 if (!volume->inside(tgContext, frontSegPos)) {
-                    ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - Segment "<<::print(*frontSegment)
+                    ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - Segment "<<printSegment(*frontSegment)
                                     <<" not inside mother volume: "<<volume->volumeName()<<", "
                                     <<Amg::toString(volume->globalToLocalTransform(tgContext)*frontSegPos)
                                     <<", bounds: "<<volume->volumeBounds()<<", "
@@ -306,12 +271,7 @@ namespace MuonR4{
                 }
             }
             if (!pIsect.ok()) {
-                ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" Cannot create valid start parameters from seed "<<seed<<".");
-                return Acts::Result<Acts::BoundTrackParameters>::failure(std::make_error_code(std::errc::invalid_argument));
-            }
-            if (!canEstimateQtimesP(seed)) {
-                ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" Cannot estimate q*p from seed "<<seed
-                                <<" - insufficient inner/middle/outer layer coverage.");
+                ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - Cannot create valid start parameters from seed "<<seed<<".");
                 return Acts::Result<Acts::BoundTrackParameters>::failure(std::make_error_code(std::errc::invalid_argument));
             }
             ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Extrapolated seed position: "<<Amg::toString(*pIsect)
@@ -435,7 +395,7 @@ namespace MuonR4{
             Estimate& est1 {estimates[i]};
             for (std::size_t j {i+1}; j < estimates.size(); ++j) {
                 Estimate& est2 {estimates[j]};
-                double agreementScore {(chargeAgree(est1.PtimesQ, est2.PtimesQ) ? 1. : -1.) - 
+                double agreementScore {std::copysign(1., est1.PtimesQ*est2.PtimesQ) - 
                                         momentumDev(est1.PtimesQ, est2.PtimesQ)};
                 /** Update the scores, encoding how well this estimate agrees 
                  *  with the other estimates, weighted by their reliability. */
@@ -471,7 +431,7 @@ namespace MuonR4{
             if (&est == &estimates.back()) {
                 continue;
             }
-            if (chargeAgree(est.PtimesQ, charge)) {
+            if (est.PtimesQ * charge > 0.) {
                 totalSum += est.PtimesQ * est.weight;
                 totalWeight += est.weight;
             }
@@ -531,13 +491,6 @@ namespace MuonR4{
                                               const MsTrackSeed& seed,
                                               MagField::AtlasFieldCache& magField) const {
         using namespace Muon::MuonStationIndex;
-
-        // Guard canEstimateQtimesP here, not only at call sites.
-        if (!canEstimateQtimesP(seed)) {
-            ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" Cannot estimate q*p from seed "<<seed
-                            <<" - insufficient inner/middle/outer layer coverage.");
-            return 0.;
-        }
 
         /** Calculate the averaged phi from the segments */
         double deltaPhiAcc {0.};
@@ -642,9 +595,16 @@ namespace MuonR4{
 
             return std::make_pair(projSegPos, newDir);
         };
-        return nSegments == 3 
-            ? estimateQtimesP(planeNorm, point(segmentsToUse[0]), point(segmentsToUse[1]), point(segmentsToUse[2]), magField)
-            : estimateQtimesP(planeNorm, point(segmentsToUse[0]), point(segmentsToUse[1]), magField);
+        switch (nSegments) {
+            case 3:
+                return estimateQtimesP(planeNorm, point(segmentsToUse[0]), 
+                                       point(segmentsToUse[1]), point(segmentsToUse[2]), magField);
+            case 2:
+                return estimateQtimesP(planeNorm, point(segmentsToUse[0]), point(segmentsToUse[1]), magField);
+            default:
+                break;
+        }
+        return 6.*Gaudi::Units::TeV;
     }
     void MsTrackSeederTool::appendSegment(const Acts::GeometryContext& tgContext,
                                           const xAOD::MuonSegment* segment,
@@ -675,7 +635,7 @@ namespace MuonR4{
             coords[Acts::toUnderlying(eDetSection)] =  Acts::copySign(Acts::toUnderlying(loc), refPoint[1]);
             /** Coordinate on the cylinder */
             coords[Acts::toUnderlying(ePosOnCylinder)] = refPoint[Location::Barrel == loc];
-            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Add segment "<<::print(*segment)
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Add segment "<<printSegment(*segment)
                             <<" with "<<coords<<" to the search tree");
             outContainer.emplace_back(std::move(coords), segment);
         }
@@ -700,11 +660,12 @@ namespace MuonR4{
         SearchTree_t orderedSegs{constructTree(tgContext, *segments)};
         MsTrackSeedContainer trackSeeds{};
         using enum SeedCoords;
-        for (const auto& [coords, seedCandidate] : orderedSegs) {
+        for (const auto& [coords, seedingSeg] : orderedSegs) {
             /** Bad segment not suitable for track seeding or the segment coordinates are
              *  just mirrored at the overlap between sector 1 -> 16 */
-             if (!m_segSelector->passSeedingQuality(ctx, *seedCandidate)){
-                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Segment "<<::print(*seedCandidate)<<" does not pass the seeding quality.");
+             if (!m_segSelector->passSeedingQuality(ctx, *seedingSeg)) {
+                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Segment "<<printSegment(*seedingSeg)
+                                               <<" does not pass the seeding quality.");
                 continue;
             }
             /** Define the search range. */    
@@ -722,47 +683,26 @@ namespace MuonR4{
             
             MsTrackSeed newSeed{static_cast<Location>(std::abs(coords[Acts::toUnderlying(eDetSection)])),
                                 ExpandedSector{static_cast<std::int8_t>(coords[Acts::toUnderlying(eSector)])}};
+            /** Append the seeding candidate segment -> used to sort the other segments in seed */
+            newSeed.addSegment(seedingSeg);
             /** Using the cube above, let the tree search for all compatible segments */
-            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Search for compatible segments to "<<::print(*seedCandidate)<<".");
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Search for compatible segments to "<<printSegment(*seedingSeg)<<".");
             orderedSegs.rangeSearchMapDiscard(selectRange, [&](
                     const SearchTree_t::coordinate_t& /*coords*/,
                     const xAOD::MuonSegment* extendWithMe) {
                         /** Ensure that the sector overlap and momentum vectors are compatible with a MS trajectory */
-                        if (!m_segSelector->compatibleForTrack(ctx, *seedCandidate, *extendWithMe)) {
-                            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Segment "<<::print(*extendWithMe)<<" is not compatible.");
+                        if (!m_segSelector->compatibleForTrack(ctx, *seedingSeg, *extendWithMe)) {
+                            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Segment "<<printSegment(*extendWithMe)<<" is not compatible.");
                             return;
                         }
-                        auto itr = std::ranges::find_if(newSeed.segments(), [extendWithMe](const xAOD::MuonSegment* onSeed){
-                            return extendWithMe->chamberIndex() == onSeed->chamberIndex();
-                        });
-                        if (itr == newSeed.segments().end()){
-                            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Add segment "<<::print(*extendWithMe)<<" to seed.");
-                            newSeed.addSegment(extendWithMe);
-                        }
-                        else if (reducedChi2(**itr) > reducedChi2(*extendWithMe) &&
-                                     (*itr)->nPhiLayers() <= extendWithMe->nPhiLayers()) {
-
-                             ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Replace segment "<<::print(**itr)<<" with "
-                                             <<::print(*extendWithMe)<<" on seed due to better chi2.");
-                            newSeed.replaceSegment(*itr, extendWithMe);
-                        }
+                        newSeed.addSegment(extendWithMe);
             });
-            /** No segments were combined */
-            if (newSeed.segments().empty()) {
+            /** No compatible segment within the second station was found */
+            if (newSeed.stations().size() < 2) {
+                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Reject seed with segments only "<<newSeed.stations().size()
+                                        <<" stations");
                 continue;
             }
-
-            newSeed.addSegment(seedCandidate);
-
-            // Let's check if we build a single station seed and if yes reject it.
-            using namespace Muon::MuonStationIndex;
-            if(toLayerIndex(newSeed.segments().front()->chamberIndex()) == toLayerIndex(newSeed.segments().back()->chamberIndex())){
-                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Reject seed with segments in the same station.");
-                continue;
-            }
-
-            //Check if we have multiple segments from the same station, if so split the seed and create duplicate seeds
-
             /** Calculate the seed's position */
             const double r = newSeed.location() == Location::Barrel ? 1.*m_barrelRadius 
                                                                     : coords[Acts::toUnderlying(ePosOnCylinder)];
@@ -771,7 +711,7 @@ namespace MuonR4{
 
             Amg::Vector3D pos = r * newSeed.sector().radialDir()
                               + z * Amg::Vector3D::UnitZ();
-            
+            /** The seed position is mainly for visualization */
             newSeed.setPosition(std::move(pos));
             ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Add new seed "<<newSeed);
             trackSeeds.emplace_back(std::move(newSeed));
@@ -783,33 +723,208 @@ namespace MuonR4{
                                               std::make_move_iterator(trackSeeds.end()));
         return StatusCode::SUCCESS;
     }
+
+    bool MsTrackSeederTool::splitSeed(const MsTrackSeed& seedCand) const {
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Check whether \n"<<seedCand
+                               <<"\n has two segments on the same station");
+        const auto seedSegments = seedCand.segments();
+        /// there exists exactly one segment on each station
+        if (seedSegments.size() == seedCand.stations().size()) {
+            return false;
+        }
+        for (std::size_t seg = 1 ; seg < seedSegments.size(); ++seg) {
+            for (std::size_t seg1 = 0 ; seg1 < seg; ++seg1) {
+                if (seedSegments[seg]->chamberIndex() == seedSegments[seg1]->chamberIndex()) {
+                    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Found two segments in the same station on the seed \n"
+                        <<" --- "<<printSegment(*seedSegments[seg])<<"\n"
+                        <<" --- "<<printSegment(*seedSegments[seg1]));
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+   
+    MsTrackSeedContainer MsTrackSeederTool::splitSeeds(MsTrackSeedContainer&& unsplitted) const {
+        MsTrackSeedContainer seedsToSplit{};
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Select the seeds amongst "
+                                <<unsplitted.size()<<" seed candidates which can be split");
+        /// Copy all splitable seed candidates to a second vector
+        std::ranges::copy_if(unsplitted, std::back_inserter(seedsToSplit), 
+                             [this](const MsTrackSeed& seedCand){
+                                 return splitSeed(seedCand);
+                             });
+        // No splittable candidte found
+        if (seedsToSplit.empty()) {
+            return unsplitted;
+        }
+        // Remove first the seed candidates to be split
+        auto [begin , end] = std::ranges::remove_if(unsplitted, [this](const MsTrackSeed& seedCand){
+            return splitSeed(seedCand);
+        });
+        unsplitted.erase(begin, end);
+        using namespace Muon::MuonStationIndex;
+        /// Sort the segments per station
+        std::array<SegVec_t, Acts::toUnderlying(ChIndex::ChIndexMax)> segsPerStation{};
+        std::vector<SegVec_t> splitSeedSegs{};
+        for (const MsTrackSeed& splitMe : seedsToSplit) {
+            for (const xAOD::MuonSegment* seg : splitMe.segments()) {
+                segsPerStation[Acts::toUnderlying(seg->chamberIndex())].push_back(seg);
+            }
+            for (SegVec_t& vec : segsPerStation) {
+                if (vec.empty()) {
+                    continue;
+                }
+                /// Start the chain by splitting the content
+                /// into single element vectors 
+                if (splitSeedSegs.empty()) {
+                    for (const xAOD::MuonSegment* seg : vec) {
+                        splitSeedSegs.emplace_back(std::vector{seg});
+                    }
+                } 
+                /// Stations with just one segment are quite easy.
+                /// Add the element to all the splitSeedSegs vectors
+                else if (vec.size() == 1) {
+                   for (SegVec_t& appendMe : splitSeedSegs) {
+                        appendMe.push_back(vec.front());
+                   }
+                } else {
+                   /// Sort the segment by precision hits
+                   std::ranges::sort(vec, [](const xAOD::MuonSegment* a,
+                                             const xAOD::MuonSegment* b){
+                       if (a->nPrecisionHits() != b->nPrecisionHits()) {
+                           return a->nPrecisionHits() > b->nPrecisionHits();
+                       }
+                       return a->nPhiLayers() > b->nPhiLayers();
+                   });
+                   /// Copy the existing unique segments over
+                   std::vector<SegVec_t> expandMe{std::move(splitSeedSegs)};
+                   splitSeedSegs.reserve(expandMe.size() * vec.size());
+                   for (const xAOD::MuonSegment* seg : vec) {
+                        for (const SegVec_t& expand : expandMe) {
+                            splitSeedSegs.emplace_back(expand).push_back(seg);
+                        }
+                   }
+                }
+                // Do not to forget to clear at the end
+                vec.clear();
+            }
+            /// Create the new seeed
+            ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Split the "
+                <<splitMe<<"\n into "<<splitSeedSegs.size()<<" seeds.");
+            for (SegVec_t splitted :  splitSeedSegs){
+                unsplitted.push_back(MsTrackSeed{splitMe.location(), splitMe.sector()});
+                for (const xAOD::MuonSegment* seg: splitted) {
+                    unsplitted.back().addSegment(seg);
+                }
+                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Created new "<<unsplitted.back());
+            }
+            splitSeedSegs.clear();
+        }
+        return unsplitted;
+    }
+
+    std::uint8_t MsTrackSeederTool::countShared(const MsTrackSeed& seedA,
+                                                const MsTrackSeed& seedB) const {
+        /// Count how many segments are shared amongst
+        using namespace Muon::MuonStationIndex;
+        std::array<std::uint8_t, Acts::toUnderlying(StIndex::StIndexMax)> sharedCounter{};
+
+        for (std::size_t a{0}; a < seedA.segments().size(); ++a){
+            const xAOD::MuonSegment* segA = seedA.segments()[a];
+            std::uint8_t& shared = sharedCounter[Acts::toUnderlying(toStationIndex(segA->chamberIndex()))];
+
+            for(std::size_t b{0}; shared == 0 && b< seedB.segments().size(); ++b){
+                const xAOD::MuonSegment* segB = seedB.segments()[b];               
+                shared += (countShared(*segA, *segB) >= m_nHitsShareSeg);
+            }
+        }
+        std::uint8_t shared{0};
+        for (std::uint8_t n : sharedCounter) {
+            shared+=n;
+        }
+        return shared;
+    }
+
+    inline std::uint8_t 
+        MsTrackSeederTool::countShared(const xAOD::MuonSegment& a, 
+                                       const xAOD::MuonSegment& b) const {
+        /// Segment are identical 
+        if (a.index() == b.index()) {
+            return a.nPrecisionHits();
+        }
+        if (a.chamberIndex() != b.chamberIndex() || a.sector() != b.sector() ||
+            a.etaIndex() != b.etaIndex()) {
+            return 0u;
+        }
+        if (a.nPrecisionHits() > b.nPrecisionHits()) {
+            return countShared(b, a);
+        }
+        unsigned shared{0};
+        for (std::size_t hitA =0; hitA < nMeasurements(a); ++hitA) {
+            if (isOutlierMeasurement(a, hitA)) {
+                continue;
+            }
+            /// Just count the precision hits on track
+            const xAOD::UncalibratedMeasurement* measA = getMeasurement(a, hitA);
+            if (!xAOD::isPrecisionHit(measA)) {
+                continue;
+            }
+            for (std::size_t hitB = 0 ; hitB < nMeasurements(b); ++hitB) {
+                if (getMeasurement(b, hitB) == measA) {
+                    ++shared;
+                    break;
+                }
+            }
+        }
+        return shared;
+    }
+
     MsTrackSeedContainer
         MsTrackSeederTool::resolveOverlaps(MsTrackSeedContainer&& unresolved) const {
-
         /** Resort the seeds starting from the ones with the most segments to the lowest  */
         std::ranges::sort(unresolved, [](const MsTrackSeed& a, const MsTrackSeed&b) {
             return a.segments().size() > b.segments().size();
         });
-        MsTrackSeedContainer outputSeeds{};
-        outputSeeds.reserve(unresolved.size());
-        std::ranges::copy_if(std::move(unresolved), std::back_inserter(outputSeeds),
-            [&outputSeeds](const MsTrackSeed& testMe) {
-                for (const MsTrackSeed&  good : outputSeeds){
-                    if (!testMe.sector().isNeighbour(good.sector())) {
-                        continue;
-                    }
-                    const std::size_t sharedSegs = std::ranges::count_if(testMe.segments(),
-                                                                      [&good](const xAOD::MuonSegment* segInTest){
-                                                                          return Acts::rangeContainsValue(good.segments(), segInTest);
-                                                                      });
-                    if (sharedSegs == testMe.segments().size()) {
+        auto [begin, end] = std::ranges::unique(unresolved, 
+            [](const MsTrackSeed& a, const MsTrackSeed& b) {
+            const auto segsA = a.segments();
+            const auto segsB = b.segments();
+            if (segsA.size() == segsB.size()) {
+                for (std::size_t s = 0 ; s < segsA.size(); ++s) {
+                    if (segsA[s] != segsB[s]) {
                         return false;
                     }
                 }
                 return true;
+            } else if (segsA.size() < segsB.size()) {
+                return std::ranges::all_of(segsA, [&segsB](const xAOD::MuonSegment* seg) {
+                    return Acts::rangeContainsValue(segsB, seg); 
+                });
+            }
+            return std::ranges::all_of(segsB, [&segsA]( const xAOD::MuonSegment* seg) {
+                return Acts::rangeContainsValue(segsA, seg);
             });
-
-        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Found in total "<<outputSeeds.size()<<" after overlap removal");
+        });
+        unresolved.erase(begin, end);
+        MsTrackSeedContainer outputSeeds{splitSeeds(std::move(unresolved))};
+        std::shared_ptr<std::uint8_t> overlapMarker{};
+        for (std::size_t seed = 0; seed < outputSeeds.size(); ++seed) {
+            /// We create an overlap marker
+            for (std::size_t seed1 = seed +1 ;seed1 < outputSeeds.size(); ++seed1) {
+                unsigned shared = countShared(outputSeeds.at(seed), 
+                                              outputSeeds.at(seed1));
+                if (shared >= m_nSegShareSeed) {
+                    if(!overlapMarker) {
+                        overlapMarker = std::make_shared<std::uint8_t>(0);
+                        outputSeeds.at(seed).prepareOverlap(overlapMarker);
+                    }
+                    outputSeeds.at(seed1).prepareOverlap(overlapMarker);
+                }
+            }
+            overlapMarker.reset();
+        }
         return outputSeeds;
     } 
     const MuonGMR4::SpectrometerSector* 

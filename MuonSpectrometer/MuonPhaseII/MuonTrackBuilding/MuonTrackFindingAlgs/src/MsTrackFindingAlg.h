@@ -21,6 +21,7 @@
 
 #include "ActsEvent/TrackContainer.h"
 #include "ActsEvent/ContextUtility.h"
+#include "ActsEvent/AuxiliaryMeasurementHandler.h"
 
 #include "ActsToolInterfaces/IFitterTool.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
@@ -49,6 +50,7 @@ namespace MuonR4{
 
             using OptBoundPars_t = Acts::Result<Acts::BoundTrackParameters>;
             using MeasVec_t = std::vector<const xAOD::UncalibratedMeasurement*>;
+            using PseudoMeasHandle_t = ActsTrk::AuxiliaryMeasurementHandler::MeasurementProvider;
         private:
             /** @brief Attempts to fit the track seed candidate to a full track and returns whether the
              *         fit succeeded.
@@ -57,22 +59,27 @@ namespace MuonR4{
              *  @param calContext: Calibration context to access the calibration constants from Store gate
              *               during the track state filling
              *  @param seed: The seed of interest to fit
-             *  @param outContainer: Mutable track container to which the output track is written */
+             *  @param outContainer: Mutable track container to which the output track is written
+             *  @param auxMeasContainer: Write handle to create auxiliary measurements for each fit if
+             *                           needed.  */
             bool fitSeedCandidate(const Acts::GeometryContext& tgContext,
                                   const Acts::MagneticFieldContext& mfContext,
                                   const Acts::CalibrationContext& calContext,
                                   const MsTrackSeed& seed,
-                                  ActsTrk::MutableTrackContainer& outContainer) const;
-
-            /** @brief Prepares the input to the fit by collecting the measurements on the segment & 
-             *  @param tgContext: Geometry context to access the alignment of the surfaces
-             *  @param calContext: Calibration context to access the calibration constants from Store gate
-             *               during the track state filling
-             *  @param seed: The seed of interest to fit */
-            std::pair<OptBoundPars_t, MeasVec_t> prepareFit(const Acts::GeometryContext& tgContext,
-                                                            const Acts::CalibrationContext& calContext,
-                                                            const MsTrackSeed& seed) const;
-
+                                  ActsTrk::MutableTrackContainer& outContainer,
+                                  PseudoMeasHandle_t& auxMeasContainer) const;
+            
+            
+            MeasVec_t collectMeasurements(const Acts::GeometryContext& tgContext,
+                                          const Acts::BoundTrackParameters& startPars,
+                                          const MsTrackSeed& seed,
+                                          const std::size_t nStations,
+                                          PseudoMeasHandle_t& auxMeasContainer) const;
+            /** @brief T */
+            bool goodFit(const EventContext& ctx,
+                         std::unique_ptr<ActsTrk::MutableTrackContainer>& fitResult,
+                         const std::size_t reqStations) const;
+                         
             bool expressAtCaloExit(const EventContext& ctx,
                                    ActsTrk::MutableTrackContainer::TrackProxy track) const;
             /** @brief IdHelperSvc to decode the Identifiers */
@@ -97,6 +104,8 @@ namespace MuonR4{
             Gaudi::Property<bool> m_ignoreFailedMsEntrance{this, "ignoreFailedExtpMsEntrance", true};
             /** @brief Utility to fetch the geometry, magnetic field and calibration context in the event */
             ActsTrk::ContextUtility m_ctxProvider{this};
+            /** @brief Utility to impose external constraints in the fit  */
+            ActsTrk::AuxiliaryMeasurementHandler m_pseudoMeasuremntCreator{this};
             /** @brief Visualization tool to debug the track finding */
             ToolHandle<MuonValR4::ITrackVisualizationTool> m_visualizationTool{this, "VisualizationTool", ""};
             /** @brief Handle to the muon summary tool */

@@ -14,9 +14,12 @@
 
 #include "MuonVisualizationHelpersR4/VisualizationHelpers.h"
 
+#include "Acts/Definitions/Units.hpp"
+
 #include <format>
 
 using namespace Acts;
+using namespace Acts::UnitLiterals;
 
 namespace MuonR4 {
     using namespace SegmentFit;
@@ -113,8 +116,8 @@ namespace MuonR4 {
                                                 pars[toUnderlying(ParamDefs::y0)],
                                                 Amg::error(cov, toUnderlying(ParamDefs::y0)))<<", ";
                         signStream<<std::format("#theta={:.2f}#pm{:.2f}^{{#circ}}", 
-                                                pars[toUnderlying(ParamDefs::theta)]/ Gaudi::Units::deg,
-                                                Amg::error(cov, toUnderlying(ParamDefs::theta)) / Gaudi::Units::deg )<<", ";
+                                                pars[toUnderlying(ParamDefs::theta)]/ 1._degree,
+                                                Amg::error(cov, toUnderlying(ParamDefs::theta)) / 1._degree )<<", ";
                         for (const Segment::MeasType& m : seg->measurements()) {
                             if (m->type() == xAOD::UncalibMeasType::MdtDriftCircleType && 
                                 m->fitState() == CalibratedSpacePoint::State::Valid) {
@@ -158,8 +161,9 @@ namespace MuonR4 {
         const Amg::Transform3D& locToGlob{patternSeed->msSector()->localToGlobalTransform(gctx)};
         std::vector<std::unique_ptr<Segment>> segments{};
 
-        Acts::CalibrationContext cctx = ActsTrk::getCalibrationContext(ctx);
+        const Acts::CalibrationContext cctx = ActsTrk::getCalibrationContext(ctx);
 
+        using namespace Muon::MuonStationIndex;
         using State_t = MdtSegmentSeedGenerator::State_t;
         // Make sure patternSeed->parameters() are in ACTS units!
         State_t seedState{patternSeed->parameters(), patternSeed, m_calibTool.get(), m_recalibSeed,
@@ -169,26 +173,23 @@ namespace MuonR4 {
                                 }
                                 const Amg::Vector3D globPos{locToGlob*tangentSeedPos};
                                 const Amg::Vector3D globDir{locToGlob.linear()*tangentSeedDir};
-                                using namespace Muon::MuonStationIndex;
+
                                 /** This patch restores the efficiency for muons with pT< 10 GeV in
                                  *  the middle and outer endcap stations */
                                 const StIndex stIdx = toStationIndex(patternSeed->msSector()->chamberIndex());
                                 switch (stIdx) {
                                     using enum StIndex;
-                                    case EM:
+                                    case EM: {
+                                        if (std::abs(globPos.eta()) > 2.35 && 
+                                            std::abs(globPos.theta() - globDir.theta()) < 5.8_degree) {
+                                            return true;
+                                        }
+                                        break;
+                                    }
                                     case EO: {
-                                        /** Start where the TGCs run slowly out of acceptance */
-                                        if (const double pEta = std::abs(globPos.eta()); pEta > 2.35) {
-                                            const double dEta = std::abs(globDir.eta());
-                                            const double delta = std::abs(dEta -pEta);
-                                            if (delta < 0.25) {
-                                                return true;
-                                            }
-                                            /** Ultra low momentum muons in the endcap have strong
-                                             *  bending */
-                                            if (stIdx == EM && pEta > 2.5 && delta < 0.45) {
-                                                return true;
-                                            }
+                                         if (std::abs(globPos.eta()) > 2.35 && 
+                                            std::abs(globPos.theta() - globDir.theta()) < 3._degree) {
+                                            return true;
                                         }
                                         break;
                                     }
@@ -212,7 +213,7 @@ namespace MuonR4 {
                                 return true;
                           }};
 
-        const auto* seeder = patternSeed->parameters()[toUnderlying(ParamDefs::theta)] > 50 * Gaudi::Units::deg ?
+        const auto* seeder = patternSeed->msSector()->chamberIndex() == ChIndex::BEE ?
                              m_seederBEE.get() : m_seeder.get();
    
         /** Draw the pattern with all possible seeds */
