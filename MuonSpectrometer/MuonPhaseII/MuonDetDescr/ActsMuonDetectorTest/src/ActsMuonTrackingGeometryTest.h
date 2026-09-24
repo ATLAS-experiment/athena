@@ -97,6 +97,8 @@ namespace ActsTrk {
         MuonVal::ThreeVectorBranch m_truthDir{m_tree, "truthDir"};
         MuonVal::ScalarBranch<float>& m_truthPt{m_tree.newScalar<float>("truthPt")};
         MuonVal::ScalarBranch<float>& m_truthP{m_tree.newScalar<float>("truthP")};
+        MuonVal::ScalarBranch<float>& m_eta{m_tree.newScalar<float>("eta")};
+        MuonVal::ScalarBranch<float>& m_phi{m_tree.newScalar<float>("phi")};
         MuonVal::ThreeVectorBranch m_startGlob{m_tree, "startGlob"};
         MuonVal::VectorBranch<float>& m_actsPropabsMomentum{m_tree.newVector<float>("actsPropabsMomentum")};
         MuonVal::ThreeVectorBranch m_actsPropLoc{m_tree, "actsPropLoc"};
@@ -106,7 +108,8 @@ namespace ActsTrk {
         MuonVal::VectorBranch<float>& m_actsStepSize{m_tree.newVector<float>("actsStepSize")};
         MuonVal::ScalarBranch<float>& m_propLength{m_tree.newScalar<float>("propLength")};
         MuonVal::VectorBranch<unsigned short>& m_isPropagated{m_tree.newVector<unsigned short>("isPropagated")};
-        MuonVal::ScalarBranch<unsigned int>& m_propSteps{m_tree.newScalar<unsigned int>("propSteps")};   
+        MuonVal::ScalarBranch<unsigned int>& m_propSteps{m_tree.newScalar<unsigned int>("propSteps")};  
+        MuonVal::ScalarBranch<float>& m_propTime{m_tree.newScalar<float>("propTime")};
         MuonVal::ScalarBranch<unsigned int>& m_event{m_tree.newScalar<unsigned int>("event")};   
 
 
