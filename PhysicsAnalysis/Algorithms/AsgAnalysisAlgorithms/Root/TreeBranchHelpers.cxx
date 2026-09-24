@@ -56,8 +56,8 @@ public:
 
   using AuxVectorData::setStore;
 
-  virtual size_t size_v() const { return m_size; }
-  virtual size_t capacity_v() const { return m_size; }
+  size_t size_v() const override { return m_size; }
+  size_t capacity_v() const override { return m_size; }
 
 private:
   size_t m_size;
