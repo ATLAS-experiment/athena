@@ -22,28 +22,10 @@
   <class name="DataLinkBase" >
     <field name="m_proxy" transient="true" />
   </class>
-  <read sourceClass="DataLinkBase" version="[1-]"
-        targetClass="DataLinkBase" source=""
-        target=""
-        >
-    <![CDATA[
-       // Let the object prepare for being used:
-       newObj->toTransient();
-    ]]>
-  </read>
 
   <class name="ElementLinkBase">
     <field name="m_proxy" transient="true"/>
     <field name="m_element" transient="true"/>
   </class>
-  <read sourceClass="ElementLinkBase" version="[1-]"
-        targetClass="ElementLinkBase" source=""
-        target=""
-        >
-    <![CDATA[
-       // Let the object prepare for being used:
-       if (newObj) newObj->toTransient();
-    ]]>
-  </read>
 
 </lcgdict>

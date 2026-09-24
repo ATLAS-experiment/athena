@@ -1,8 +1,9 @@
 # Steering script for IDPVM ART jobs with Data Reco config
 inputAOD=$1
+maxEvents=1000
 
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
-dcubeShifterXml=${artdata}/InDetPhysValMonitoring/dcube/config/IDPVMPlots_MC_baseline.xml
+dcubeShifterXml=${artdata}/InDetPhysValMonitoring/dcube/config/IDPVMPlots_mc_baseline.xml
 lastref_dir=last_results
 
 run() { (set -x; exec "$@") }
@@ -10,6 +11,7 @@ run() { (set -x; exec "$@") }
 run  Derivation_tf.py \
      --inputAODFile "$inputAOD" \
      --outputDAODFile sumpt2.root \
+     --maxEvents $maxEvents \
      --formats PHYSVAL \
      --preExec "from TrkConfig.VertexFindingFlags import VertexSortingSetup; flags.Tracking.PriVertex.sortingSetup=VertexSortingSetup.SumPt2Sorting"
 
@@ -27,6 +29,7 @@ echo "art-result: $idpvm_tf_exit_code idpvm sumpt2"
 run  Derivation_tf.py \
      --inputAODFile "$inputAOD" \
      --outputDAODFile hsgnn.root \
+     --maxEvents $maxEvents \
      --formats PHYSVAL \
      --preExec "from TrkConfig.VertexFindingFlags import VertexSortingSetup; flags.Tracking.PriVertex.sortingSetup=VertexSortingSetup.GNNSorting"
 
@@ -51,16 +54,16 @@ if [ $idpvm_tf_exit_code -eq 0 ]  ;then
   $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_sumpt2 \
     -c ${dcubeShifterXml} \
-    -r physval.sumpt2 \
-    physval.hsgnn.root
+    -r idpvm.sumpt2.root \
+    idpvm.hsgnn.root
   echo "art-result: $? sumpt2_plots"
 
   echo "compare with last build"
   $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_shifter_last \
     -c ${dcubeShifterXml} \
-    -r ${lastref_dir}/physval.hsgnn.root \
-    physval.ntuple.root
+    -r ${lastref_dir}/idpvm.hsgnn.root \
+    idpvm.hsgnn.root
   echo "art-result: $? shifter_plots_last"
 
 fi

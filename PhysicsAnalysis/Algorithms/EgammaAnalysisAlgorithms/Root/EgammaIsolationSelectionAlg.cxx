@@ -11,7 +11,7 @@
 //
 
 #include <EgammaAnalysisAlgorithms/EgammaIsolationSelectionAlg.h>
-
+#include "PATCore/AcceptData.h"
 //
 // method implementations
 //

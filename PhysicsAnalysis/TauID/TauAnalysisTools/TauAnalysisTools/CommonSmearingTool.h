@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUANALYSISTOOLS_COMMONSMEARINGTOOL_H
@@ -28,12 +28,11 @@
 #include "TauAnalysisTools/ITauSmearingTool.h"
 #include "TauAnalysisTools/HelperFunctions.h"
 
-// ROOT include(s):
-#include "TFile.h"
-#include "TH1.h"
-
 // tauRecTools include(s)
 #include "tauRecTools/ITauToolBase.h"
+#include <map>
+
+class TFile;
 
 namespace TauAnalysisTools
 {

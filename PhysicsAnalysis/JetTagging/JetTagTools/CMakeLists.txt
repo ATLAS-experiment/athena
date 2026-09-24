@@ -11,46 +11,30 @@ find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread
 # Component(s) in the package:
 atlas_add_library( JetTagToolsLib
     JetTagTools/*.h
-    src/TrackSelector.cxx
     src/HistoHelperRoot.cxx src/NewLikelihoodTool.cxx
-    src/BasicTrackGradeFactory.cxx src/DetailedTrackGradeFactory.cxx
-    src/GradedTrack.cxx src/IPTag.cxx
-    src/SVForIPTool.cxx src/SVTag.cxx 
+    src/SVTag.cxx
     src/JetFitterInputWriter.cxx src/JetFitterDummyClassifier.cxx
     src/MV2Tag.cxx
     src/JetFitterVariablesFactory.cxx src/MSVVariablesFactory.cxx
     src/MultiSVTag.cxx
     src/MultivariateTagManager.cxx
     src/TagNtupleDumper.cxx
-    src/ClassifiedTrackTaggerTool.cxx
-    src/CTTDecorCheckInTool.cxx
 
     PUBLIC_HEADERS JetTagTools
     INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
     PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
     PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
     LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel CxxUtils GaudiKernel
-    GeoPrimitives ITrackToVertex InDetRecToolInterfaces JetTagCalibrationLib JetTagInfo
-    MVAUtils StoreGateLib xAODBTagging xAODJet xAODTracking InDetVKalVxInJetToolLib
+    GeoPrimitives ITrackToVertex InDetRecToolInterfaces JetTagCalibrationLib
+    MVAUtils StoreGateLib xAODBTagging xAODJet xAODTracking
     PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES}
     AthContainers PathResolver Particle ParticleJetToolsLib TrkEventPrimitives
     TrkParameters TrkTrack TrkTrackLink TrkTrackSummary TrkVertexFitterInterfaces VxJetVertex
-    VxSecVertex VxVertex TestTools)
+    VxSecVertex VxVertex)
 
 atlas_add_component( JetTagTools
     src/components/*.cxx
     LINK_LIBRARIES JetTagToolsLib )
 
 # Install files from the package:
-atlas_install_runtime( share/*.root share/*.txt )
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-
-
-# Test(s) in the package:
-atlas_add_test( ClassifiedTrackTaggerTool_test
-                SOURCES test/ClassifiedTrackTaggerTool_test.cxx
-                INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-                LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthenaKernel CxxUtils EventPrimitives
-                GaudiKernel JetTagToolsLib MagFieldConditions TestTools TrkEventPrimitives xAODTracking
-                LOG_IGNORE_PATTERN "Booking|ClassIDSvc|weight file|create data set info" )
-atlas_install_joboptions( share/*.txt )

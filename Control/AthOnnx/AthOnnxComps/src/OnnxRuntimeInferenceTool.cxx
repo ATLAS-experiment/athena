@@ -170,13 +170,19 @@ void AthOnnx::OnnxRuntimeInferenceTool::printModelInfo() const
 
 StatusCode AthOnnx::OnnxRuntimeInferenceTool::inference(AthInfer::InputDataMap& inputData, AthInfer::OutputDataMap& outputData) const
 {
-    // Create input tensors.
+    // Create input tensors, in the order the model declares its inputs.
     std::vector<Ort::Value> inputTensors;
-    for (auto& [inputName, inputInfo] : inputData) {
-        const std::vector<int64_t>& shape = inputInfo.first;
+    inputTensors.reserve(m_inputNodeNames.size());
+    for (const auto& inName : m_inputNodeNames) {
+        auto itr = inputData.find(inName);
+        if (itr == inputData.end()) {
+            ATH_MSG_ERROR("Input name " << inName << " not found in input data map");
+            return StatusCode::FAILURE;
+        }
+        const std::vector<int64_t>& shape = itr->second.first;
         std::visit([&](auto& data){
             inputTensors.emplace_back(AthOnnxUtils::createTensor(data, shape));
-        }, inputInfo.second);
+        }, itr->second.second);
     }
 
     // Create output tensors.

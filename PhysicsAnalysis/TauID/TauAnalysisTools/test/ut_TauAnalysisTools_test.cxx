@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUANALYSISTOOLS_UT_TAUANALYSISTOOLS_TEST_H
@@ -111,7 +111,7 @@ int main ATLAS_NOT_THREAD_SAFE ( int argc, char* argv[] )
   //loop over input file with POOL
   POOL::TEvent evt;
   ANA_CHECK(evt.readFrom( fileName ));
-
+  const std::string contName{"TauJets"};
   // for(int i=0;i < evt.getEntries(); i++) {
   for(int i=0; i < 100; i++)
   {
@@ -120,8 +120,8 @@ int main ATLAS_NOT_THREAD_SAFE ( int argc, char* argv[] )
       ANA_MSG_ERROR("Failed to read event " << i);
       continue;
     }
-
-    ANA_CHECK(evt.retrieve( xTauJetContainer, "TauJets" ));
+    
+    ANA_CHECK(evt.retrieve( xTauJetContainer, contName ));
 
     for ( auto xTau : *xTauJetContainer )
     {
@@ -144,6 +144,7 @@ int main ATLAS_NOT_THREAD_SAFE ( int argc, char* argv[] )
       {
         if (xTruthTau->isTau())
         {
+          //coverity[UNNECESSARY_STRING_COPY:FALSE]
           static const SG::ConstAccessor<char> accIsHadronicTau ("IsHadronicTau");
           if (static_cast<bool>(accIsHadronicTau(*xTruthTau))) {
             static const SG::ConstAccessor<size_t> accNumCharged ("numCharged");
@@ -162,12 +163,14 @@ int main ATLAS_NOT_THREAD_SAFE ( int argc, char* argv[] )
         ANA_MSG_INFO( "Tau was not matched to truth" );
 
       typedef ElementLink< xAOD::TruthParticleContainer > Link_t;
+      //coverity[UNNECESSARY_STRING_COPY:FALSE]
       static const SG::ConstAccessor< Link_t > accTruthParticleLink("truthParticleLink");
       if (!accTruthParticleLink.isAvailable(*xTau))
       {
         ANA_MSG_WARNING("link truthParticleLink is not available");
         continue;
       }
+      //coverity[UNNECESSARY_STRING_COPY:FALSE]
       static const SG::ConstAccessor< ElementLink< xAOD::JetContainer > > accTruthJetLink("truthJetLink");
       auto xTruthJetLink = accTruthJetLink(*xTau);
       if (xTruthJetLink.isValid())

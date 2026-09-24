@@ -21,7 +21,7 @@ if (NOT XAOD_ANALYSIS)
   # Install files from the package:
   atlas_install_python_modules( python/*.py )
   atlas_install_joboptions( share/*.py )
-  atlas_install_scripts( test/*.sh test/*.py )
+  atlas_install_scripts( test/*.sh )
   atlas_install_scripts( share/test_*.sh )
 endif()
 

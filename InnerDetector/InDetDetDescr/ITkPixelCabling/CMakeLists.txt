@@ -6,16 +6,21 @@ atlas_subdir( ITkPixelCabling )
 # External dependencies:
 find_package(Boost COMPONENTS unit_test_framework)
 
+find_package(chai REQUIRED)
+
 # Component(s) in the package:
 atlas_add_library( ITkPixelCablingLib
                    src/ITkPixelOnlineId.cxx src/ITkPixelCablingData.cxx
                    PUBLIC_HEADERS ITkPixelCabling
-                   LINK_LIBRARIES AthenaKernel Identifier InDetReadoutGeometry PixelReadoutGeometryLib)
+                   LINK_LIBRARIES AthenaKernel Identifier InDetReadoutGeometry PixelReadoutGeometryLib
+                   PRIVATE_LINK_LIBRARIES chai::chai)
+
+
 
 atlas_add_component( ITkPixelCabling
                      src/ITkPixelCablingAlg.cxx src/components/*.cxx 
                      LINK_LIBRARIES ITkPixelCablingLib InDetReadoutGeometry PixelReadoutGeometryLib
-                     PRIVATE_LINK_LIBRARIES AthenaBaseComps GaudiKernel Identifier InDetIdentifier PathResolver StoreGateLib InDetReadoutGeometry PixelReadoutGeometryLib)
+                     PRIVATE_LINK_LIBRARIES chai::chai AthenaBaseComps GaudiKernel Identifier InDetIdentifier PathResolver StoreGateLib InDetReadoutGeometry PixelReadoutGeometryLib)
 
 atlas_install_joboptions(share/*.txt)
 atlas_install_runtime(share/*.json)
@@ -44,6 +49,6 @@ atlas_add_test( ITkPixelCablingAlg_test
   INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}  
   LINK_LIBRARIES ${Boost_LIBRARIES} TestTools AthenaBaseComps GaudiKernel
     PathResolver StoreGateLib Identifier IdDictParser ITkPixelCablingLib
-    InDetIdentifier
+    InDetIdentifier chai::chai 
   POST_EXEC_SCRIPT noerror.sh
 )

@@ -29,8 +29,7 @@ StatusCode PerEventAndComponentStreamTool::initialize() {
   return StatusCode::SUCCESS;
 }
 
-cudaStream_t PerEventAndComponentStreamTool::stream(
-    const EventContext& ctx) const {
+void* PerEventAndComponentStreamTool::stream(const EventContext& ctx) const {
 
   // Get the stream corresponding to the current slot.
   assert(m_streams);

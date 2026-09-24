@@ -12,9 +12,29 @@
 
 
 #include <type_traits>
+#include <concepts>
 
 
 namespace SG {
+
+
+/**
+ * @brief Destruction functionals.
+ *
+ * Note that in the case of a forward declarations, it may be necessary
+ * to specialize this and separate the declaration and definition.
+ * See the DATAVECTOR_BASE_FWD macros.
+ */
+template <class T>
+struct bi_destroy {
+  inline
+  static void destroy (void* p) { delete reinterpret_cast<T*> (p); }
+};
+template <>
+struct bi_destroy<void> {
+  inline
+  static void destroy (void*) {  }
+};
 
 
 //===========================================================================
@@ -157,7 +177,7 @@ struct BaseInfo_init
  */
 template <class T>
 BaseInfoImpl<T>::BaseInfoImpl ()
-  : BaseInfoBase (typeid(T))
+  : BaseInfoBase (typeid(T), bi_destroy<T>::destroy)
 {
   // This starts the walk over the bases.
   // We start with @a T itself.
@@ -359,6 +379,17 @@ template <class T>
 bool BaseInfo<T>::is_virtual (CLID clid)
 {
   return instance().is_virtual (clid);
+}
+
+
+/**
+ * @brief Delete an instance of the described type.
+ * @param p Pointer to the instance to delete.
+ */
+template <class T>
+void BaseInfo<T>::destroy (T* p)
+{
+  return instance().destroy (p);
 }
 
 

@@ -27,5 +27,19 @@
         "plotVertexParameters" : false,
         "OfflineVtxKey" : "",
         "TruthVtxKey" : ""
+    },
+    "TrackSeeds" : {
+        "enabled" : false,
+        "TestType"  : "Offline",
+        "RefType"   : "Truth",
+        "OfflineTrkKey" : "_TRKSEEDCOLLNAME_",
+        "MatchingType"  : "TruthMatch",
+        "plotTechnicalEfficiencies" : true,
+        "useActsSiMeasurements" : true,
+        "SelectTruthObject"  : "Muon",
+        "plotFakeRates" : false,
+        "plotVertexParameters" : false,
+        "OfflineVtxKey" : "",
+        "TruthVtxKey" : ""
     }
 }

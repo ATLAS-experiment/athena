@@ -4,6 +4,8 @@
  * by Simon Knapen.
  */
 #include "suep_shower.h"
+#include <functional> // for bind() 
+#include <boost/math/tools/roots.hpp>
 
 using namespace boost::math::tools;           // For bracket_and_solve_root.
 // using namespace std;

@@ -259,13 +259,14 @@ def Run2BSExtractionCfg( flags ):
     extr.ExtraOutputs.add(("TrigBSExtractionOutput", "StoreGateSvc+TrigBSExtractionOutput"))
 
     if flags.Trigger.decodeHLT:
+        from TrigEDMConfig.TriggerEDM import getEDMLibraries, getPreregistrationList, getClassesToIgnore
         serialiserTool = CompFactory.TrigTSerializer()
         acc.addPublicTool(serialiserTool)
         extr.Navigation = CompFactory.HLT.Navigation("Navigation")
-        from TrigEDMConfig.TriggerEDM import getEDMLibraries
         extr.Navigation.Dlls = getEDMLibraries()            
-        from TrigEDMConfig.TriggerEDM import getPreregistrationList
         extr.Navigation.ClassesToPreregister = getPreregistrationList(flags.Trigger.EDMVersion, flags.Trigger.doxAODConversion)
+        extr.Navigation.ClassesFromPayloadIgnore = getClassesToIgnore(flags)
+
         from eformat import helper as efh
  
         if flags.Trigger.EDMVersion == 1:

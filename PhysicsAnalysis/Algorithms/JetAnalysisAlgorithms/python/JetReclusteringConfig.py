@@ -15,11 +15,14 @@ class JetReclusteringBlock(ConfigBlock):
     def __init__(self):
         super(JetReclusteringBlock, self).__init__()
         self.addOption ('containerName', None, type=str,
-                        info='name of the output reclustered jets container.')
+                        info='name of the output reclustered jets container.',
+                        meta={'role':'container'})
         self.addOption ('jets', None, type=str,
-                        info='the input jet collection to recluster, with a possible selection, in the format `container` or `container.selection`.')
+                        info='the input jet collection to recluster, with a possible selection, in the format `container` or `container.selection`.',
+                        meta={'role':'containerRef'})
         self.addOption ('clusteringAlgorithm', 'AntiKt', type=str,
-                        info='algorithm to use to recluster the jets: `AntiKt`, `Kt`, `CamKt`.')
+                        info='algorithm to use to recluster the jets: `AntiKt`, `Kt`, `CamKt`.',
+                        meta={'choices':(['AntiKt','Kt','CamKt'],1)})
         self.addOption ('reclusteredJetsRadius', 1.0, type=float,
                         info='radius parameter of the reclustering algorithm.')
         self.addOption ('minPt', 200*GeV, type=float,

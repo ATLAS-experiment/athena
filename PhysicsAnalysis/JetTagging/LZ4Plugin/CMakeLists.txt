@@ -18,4 +18,4 @@ atlas_add_test( LZ4PluginTest
   SOURCES test/LZ4PluginTest.cxx
   INCLUDE_DIRS ${HDF5_INCLUDE_DIRS}
   LINK_LIBRARIES LZ4PluginLib ${HDF5_LIBRARIES} CxxUtils
-  POST_EXEC_SCRIPT nopost.sh )
+  POST_EXEC_SCRIPT noerror.sh )

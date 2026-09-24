@@ -898,3 +898,97 @@ bool checkForRemap (IProxyDict* sg,
 
 
 } // namespace SG_detail
+
+
+namespace SG {
+
+
+/*
+ * @brief Do post-read processing for ElementLink el.
+ * @param el The ElementLink that was just read.
+ * @param sg The current event store.
+ */
+template <class STORABLE>
+inline
+void ToTransient<ElementLink<STORABLE> >::toTransient
+  (ElementLink<STORABLE>& el, IProxyDict* sg /*= nullptr*/)
+{
+  el.toTransient (sg);
+}
+
+
+/*
+ * @brief Do post-read processing for ElementLink el.
+ * @param el The ElementLink that was just read.
+ * @param ctx The current event context.
+ */
+template <class STORABLE>
+inline
+void ToTransient<ElementLink<STORABLE> >::toTransient
+  (ElementLink<STORABLE>& el, const EventContext& ctx)
+{
+  toTransient (el, Atlas::proxyDictFromEventContext (ctx));
+}
+
+
+/*
+ * @brief Do post-read processing for vector of ElementLinks elv.
+ * @param elv The vector of ElementLinks that was just read.
+ * @param sg The current event store.
+ */
+template <class STORABLE, class ALLOC>
+void ToTransient<std::vector<ElementLink<STORABLE>, ALLOC> >::toTransient
+  (std::vector<ElementLink<STORABLE>, ALLOC>& elv, IProxyDict* sg /*= nullptr*/)
+{
+  for (auto& el : elv) {
+    el.toTransient (sg);
+  }
+}
+
+
+/*
+ * @brief Do post-read processing for vector of ElementLinks elv.
+ * @param elv The vector of ElementLinks that was just read.
+ * @param ctx The current event context.
+ */
+template <class STORABLE, class ALLOC>
+inline
+void ToTransient<std::vector<ElementLink<STORABLE>, ALLOC> >::toTransient
+ (std::vector<ElementLink<STORABLE>, ALLOC>& elv, const EventContext& ctx)
+{
+  toTransient (elv, Atlas::proxyDictFromEventContext (ctx));
+}
+
+
+/*
+ * @brief Do post-read processing for vector of vector of ElementLinks elvv.
+ * @param elvv The vector of vectors of ElementLinks that was just read.
+ * @param sg The current event store.
+ */
+template <class STORABLE, class ALLOC1, class ALLOC2>
+void ToTransient<std::vector<std::vector<ElementLink<STORABLE>, ALLOC1>, ALLOC2> >::toTransient
+  (std::vector<std::vector<ElementLink<STORABLE>, ALLOC1>, ALLOC2>& elvv,
+   IProxyDict* sg /*= nullptr*/)
+{
+  for (auto& elv : elvv) {
+    ToTransient<std::vector<ElementLink<STORABLE>, ALLOC1> >::toTransient (elv, sg);
+  }
+}
+
+
+/*
+ * @brief Do post-read processing for vector of vector of ElementLinks elvv.
+ * @param elvv The vector of vectors of ElementLinks that was just read.
+ * @param ctx The current event context.
+ */
+template <class STORABLE, class ALLOC1, class ALLOC2>
+inline
+void ToTransient<std::vector<std::vector<ElementLink<STORABLE>, ALLOC1>, ALLOC2> >::toTransient
+  (std::vector<std::vector<ElementLink<STORABLE>, ALLOC1>, ALLOC2>& elvv,
+   const EventContext& ctx)
+{
+  toTransient (elvv, Atlas::proxyDictFromEventContext (ctx));
+}
+
+
+} // namespace SG

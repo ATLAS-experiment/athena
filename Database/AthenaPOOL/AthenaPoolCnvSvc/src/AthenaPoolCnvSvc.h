@@ -148,7 +148,7 @@ public:
    virtual ~AthenaPoolCnvSvc() = default;
 
 private: // member functions
-   /// Extract POOL ItechnologySpecificAttributes for Domain, Database and Container from property.
+   /// Extract POOL attributes for Domain, Database and Container from property.
    void extractPoolAttributes(const Gaudi::Property<std::vector<std::string>>& property,
 	   std::vector<std::vector<std::string> >* contAttr,
 	   std::vector<std::vector<std::string> >* dbAttr,

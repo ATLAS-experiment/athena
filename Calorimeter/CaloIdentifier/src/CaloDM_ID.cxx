@@ -8,7 +8,6 @@
 #include "IdDict/IdDictRegion.h"
 #include "IdDict/IdDictDictionary.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
-#include "CxxUtils/StrFormat.h"
 #include "Identifier/IdentifierHash.h"
 #include "Identifier/RangeIterator.h"
 #include <algorithm>
@@ -18,9 +17,6 @@
 #include <iostream>
 #include <set>
 #include <string>
-
-
-using CxxUtils::strformat;
 
 
 CaloDM_ID::CaloDM_ID() :

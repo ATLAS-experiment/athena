@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef XAOD_STANDALONE
@@ -35,19 +35,19 @@ namespace CP {
                                                      const std::vector<std::unique_ptr<IsolationWP>>& WPs) :
         MuonTesterBranch(outTree, ContainerName),
         m_cont_name{ContainerName} {
-        // Retrieve the isolaiton accessors directly from the WP
-        for (const std::unique_ptr<IsolationWP>& W : WPs) {
+        // Retrieve the isolation accessors directly from the WP
+        if (!WPs.empty()){
+          const auto & W = WPs.front(); // Assume only 1 WP
             for (const auto& C : W->conditions()) {
                 for (unsigned int t = 0; t < C->num_types(); ++t) {
                     const IsoType iso_type = C->type(t);
-                    bool add = std::find_if(m_iso_branches.begin(), m_iso_branches.end(), [iso_type](const IsolationBranches& known) {
-                                   return known.Accessor->isotype() == iso_type;
-                               }) == m_iso_branches.end();
+                    bool add = std::ranges::none_of(m_iso_branches, 
+                      [iso_type](const IsolationBranches& known) {
+                        return known.Accessor->isotype() == iso_type;
+                    });
                     if (add) m_iso_branches.emplace_back(*this, iso_type, "");
                 }
             }
-            // Assume only 1 WP
-            break;
         }
     }
     void IsoCorrectionTestHelper::SetClusters(const ClusterSet& clusters) { m_clusters = clusters; }
@@ -104,7 +104,7 @@ namespace CP {
             CaloClusterPtr assoc_cluster{};
             FlowElementPtr assoc_flow{};
             if (object->type() == xAOD::Type::ObjectType::Muon) {
-                const xAOD::Muon* mu = dynamic_cast<const xAOD::Muon*>(object);
+                const xAOD::Muon* mu = static_cast<const xAOD::Muon*>(object);
                 assoc_track = mu->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
                 if (m_clusters.empty())
                     assoc_cluster = mu->cluster();
@@ -115,7 +115,7 @@ namespace CP {
                     }));
                 }
             } else if (object->type() == xAOD::Type::ObjectType::Electron) {
-                const xAOD::Electron* el = dynamic_cast<const xAOD::Electron*>(object);
+                const xAOD::Electron* el = static_cast<const xAOD::Electron*>(object);
                 assoc_track = xAOD::EgammaHelpers::getOriginalTrackParticle(el);
                 assoc_cluster = el->caloCluster(0);
             }

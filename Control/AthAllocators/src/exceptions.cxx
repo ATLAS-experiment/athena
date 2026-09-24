@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthAllocators/src/exceptions.cxx
@@ -9,7 +9,7 @@
  */
 
 #include "AthAllocators/exceptions.h"
-#include <sstream>
+#include <format>
 #include <string.h>
 
 
@@ -33,16 +33,15 @@ ExcDifferentArenas::ExcDifferentArenas()
 
 std::string excProtection_format (int errnum)
 {
-  std::ostringstream os;
-  os << "SG::ExcProtection: Attempt to change memory protection failed: ";
+  char* errstr = nullptr;
   char errbuf[256];
 #ifdef _GNU_SOURCE
-  os << strerror_r (errnum, errbuf, sizeof(errbuf));
+  errstr = strerror_r (errnum, errbuf, sizeof(errbuf));
 #else
   strerror_r (errnum, errbuf, sizeof(errbuf));
-  os << errbuf;
+  errstr = errbuf;
 #endif
-  return os.str();
+  return std::format ("SG::ExcProtection: Attempt to change memory protection failed: {}", errstr);
 }
 
 

@@ -8,7 +8,7 @@
  **/
 
 #include "PoolSvc.h"
-#include "ITechnologySpecificAttributes.h"
+#include "MicroSessionManager.h"
 
 #include "GaudiKernel/IIoComponentMgr.h"
 #include "GaudiKernel/ConcurrencyFlags.h"
@@ -133,7 +133,8 @@ StatusCode PoolSvc::setupPersistencySvc() {
    // Setup a persistency services
    m_dbSessionVec.push_back(pool::createSession(*m_catalog).release()); // Read Service
    m_pers_mut.push_back(new CallMutex);
-   if (!m_dbSessionVec[IPoolSvc::kInputStream]->technologySpecificAttributes(pool::ROOT_StorageType.type()).setAttribute<bool>("ENABLE_THREADSAFETY", true)) {
+   const bool& atttibuteValue = true;
+   if (!m_dbSessionVec[IPoolSvc::kInputStream]->microSessionManager(pool::ROOT_StorageType.type()).setAttributeOfType("ENABLE_THREADSAFETY", static_cast<const void*>(&atttibuteValue), typeid(bool), "")) {
       ATH_MSG_FATAL("Failed to enable thread safety in ROOT via PersistencySvc.");
       return(StatusCode::FAILURE);
    }
@@ -151,7 +152,8 @@ StatusCode PoolSvc::setupPersistencySvc() {
 StatusCode PoolSvc::start() {
    // Switiching on ROOT implicit multi threading for AthenaMT
    if (m_useROOTIMT && Gaudi::Concurrency::ConcurrencyFlags::numThreads() > 1) {
-      if (!m_dbSessionVec[IPoolSvc::kInputStream]->technologySpecificAttributes(pool::ROOT_StorageType.type()).setAttribute<int>("ENABLE_IMPLICITMT", Gaudi::Concurrency::ConcurrencyFlags::numThreads() - 1)) {
+      const int& atttibuteValue = Gaudi::Concurrency::ConcurrencyFlags::numThreads() - 1;
+      if (!m_dbSessionVec[IPoolSvc::kInputStream]->microSessionManager(pool::ROOT_StorageType.type()).setAttributeOfType("ENABLE_IMPLICITMT", static_cast<const void*>(&atttibuteValue), typeid(int), "")) {
          ATH_MSG_FATAL("Failed to enable implicit multithreading in ROOT via PersistencySvc.");
          return(StatusCode::FAILURE);
       }
@@ -201,7 +203,7 @@ StatusCode PoolSvc::finalize() {
 StatusCode PoolSvc::io_finalize() {
    ATH_MSG_INFO("I/O finalization...");
    for (size_t i = 0; i < m_dbSessionVec.size(); i++) {
-      if ((m_dbSessionVec[i]->transaction().type() == Io::WRITE || m_dbSessionVec[i]->transaction().type() == Io::APPEND) &&
+      if ((m_dbSessionVec[i]->type() == Io::WRITE || m_dbSessionVec[i]->type() == Io::APPEND) &&
 	      !disconnect(i).isSuccess()) {
          ATH_MSG_WARNING("Cannot disconnect output Stream " << i);
       }
@@ -498,10 +500,10 @@ StatusCode PoolSvc::connect(Io::IoFlag type, unsigned int contextId) {
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
    auto session = m_dbSessionVec[contextId];
    // Connect to a logical database using the pre-defined technology and dbID
-   if (session->transaction().isActive()) {
+   if (session != nullptr && session->type() != Io::INVALID) {
       return(StatusCode::SUCCESS);
    }
-   if (!session->start(type)) {
+   if (session == nullptr || !session->start(type)) {
       ATH_MSG_ERROR("connect failed session = " << session << " type = " << type);
       return(StatusCode::FAILURE);
    }
@@ -515,12 +517,12 @@ StatusCode PoolSvc::commit(unsigned int contextId) const {
    }
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
    auto session = m_dbSessionVec[contextId];
-   if (session != nullptr && session->transaction().isActive()) {
+   if (session != nullptr && session->type() != Io::INVALID) {
       if (!session->commit()) {
          ATH_MSG_ERROR("POOL commit failed " << session);
          return(StatusCode::FAILURE);
       }
-      if (session->transaction().type() == Io::READ) {
+      if (session->type() == Io::READ) {
          session->disconnectAll();
       }
    }
@@ -533,7 +535,7 @@ StatusCode PoolSvc::commitAndHold(unsigned int contextId) const {
    }
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
    pool::ISession* session = m_dbSessionVec[contextId];
-   if (session != nullptr && session->transaction().isActive()) {
+   if (session != nullptr && session->type() != Io::INVALID) {
       if (!session->commitAndHold()) {
          ATH_MSG_ERROR("POOL commitAndHold failed " << session);
          return(StatusCode::FAILURE);
@@ -549,7 +551,7 @@ StatusCode PoolSvc::disconnect(unsigned int contextId) const {
    }
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
    pool::ISession* session = m_dbSessionVec[contextId];
-   if (session != nullptr && session->transaction().isActive()) {
+   if (session != nullptr && session->type() != Io::INVALID) {
       if (!commit(contextId).isSuccess()) {
          ATH_MSG_ERROR("disconnect failed to commit " << session);
          return(StatusCode::FAILURE);
@@ -594,11 +596,14 @@ StatusCode PoolSvc::getAttribute(const std::string& optName,
    pool::ISession* sesH = m_dbSessionVec[contextId];
    std::ostringstream oss;
    if (data == "DbLonglong") {
-      oss << std::dec << sesH->technologySpecificAttributes(tech).attribute<long long int>(optName);
+      long long int attr_data;
+      oss << std::dec << sesH->microSessionManager(tech).attributeOfType(optName, static_cast<void*>(&attr_data), typeid(long long int), "");
    } else if (data == "double") {
-      oss << std::dec << sesH->technologySpecificAttributes(tech).attribute<double>(optName);
+      double attr_data;
+      oss << std::dec << sesH->microSessionManager(tech).attributeOfType(optName, static_cast<void*>(&attr_data), typeid(double), "");
    } else {
-      oss << std::dec << sesH->technologySpecificAttributes(tech).attribute<int>(optName);
+      int attr_data;
+      oss << std::dec << sesH->microSessionManager(tech).attributeOfType(optName, static_cast<void*>(&attr_data), typeid(int), "");
    }
    data = oss.str();
    ATH_MSG_INFO("Domain attribute [" << optName << "]" << ": " << data);
@@ -618,7 +623,7 @@ StatusCode PoolSvc::getAttribute(const std::string& optName,
       return(StatusCode::FAILURE);
    }
    if (dbH->openMode() == Io::INVALID) {
-      if (m_dbSessionVec[contextId]->transaction().type() == Io::WRITE || m_dbSessionVec[contextId]->transaction().type() == Io::APPEND) {
+      if (m_dbSessionVec[contextId]->type() == Io::WRITE || m_dbSessionVec[contextId]->type() == Io::APPEND) {
          dbH->setTechnology(tech);
          dbH->connectForWrite();
       } else {
@@ -628,13 +633,17 @@ StatusCode PoolSvc::getAttribute(const std::string& optName,
    std::ostringstream oss;
    if (contName.empty()) {
       if (data == "DbLonglong") {
-         oss << std::dec << dbH->technologySpecificAttributes().attribute<long long int>(optName);
+         long long int attr_data;
+         oss << std::dec << dbH->attributeOfType(optName, static_cast<void*>(&attr_data), typeid(long long int), "");
       } else if (data == "double") {
-         oss << std::dec << dbH->technologySpecificAttributes().attribute<double>(optName);
+         double attr_data;
+         oss << std::dec << dbH->attributeOfType(optName, static_cast<void*>(&attr_data), typeid(double), "");
       } else if (data == "string") {
-         oss << dbH->technologySpecificAttributes().attribute<char*>(optName);
+         char* attr_data;
+         oss << std::dec << dbH->attributeOfType(optName, static_cast<void*>(&attr_data), typeid(char*), "");
       } else {
-         oss << std::dec << dbH->technologySpecificAttributes().attribute<int>(optName);
+         int attr_data;
+         oss << std::dec << dbH->attributeOfType(optName, static_cast<void*>(&attr_data), typeid(int), "");
       }
       ATH_MSG_INFO("Database (" << dbH->pfn() << ") attribute [" << optName << "]" << ": " << oss.str());
    } else {
@@ -644,11 +653,14 @@ StatusCode PoolSvc::getAttribute(const std::string& optName,
          return(StatusCode::FAILURE);
       }
       if (data == "DbLonglong") {
-         oss << std::dec << contH->technologySpecificAttributes().attribute<long long int>(optName);
+         long long int attr_data;
+         oss << std::dec << contH->attributeOfType(optName, static_cast<void*>(&attr_data), typeid(long long int), "");
       } else if (data == "double") {
-         oss << std::dec << contH->technologySpecificAttributes().attribute<double>(optName);
+         double attr_data;
+         oss << std::dec << contH->attributeOfType(optName, static_cast<void*>(&attr_data), typeid(double), "");
       } else {
-         oss << std::dec << contH->technologySpecificAttributes().attribute<int>(optName);
+         int attr_data;
+         oss << std::dec << contH->attributeOfType(optName, static_cast<void*>(&attr_data), typeid(int), "");
       }
       ATH_MSG_INFO("Container attribute [" << contName << "." << optName << "]: " << oss.str());
    }
@@ -667,12 +679,14 @@ StatusCode PoolSvc::setAttribute(const std::string& optName,
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
    pool::ISession* sesH = m_dbSessionVec[contextId];
    if (data[data.size() - 1] == 'L') {
-      if (!sesH->technologySpecificAttributes(tech).setAttribute<long long int>(optName, atoll(data.c_str()))) {
+      const long long int& atttibuteValue = atoll(data.c_str());
+      if (!sesH->microSessionManager(tech).setAttributeOfType(optName, static_cast<const void*>(&atttibuteValue), typeid(long long int), "")) {
          ATH_MSG_DEBUG("Failed to set POOL property, " << optName << " to " << data);
          return(StatusCode::FAILURE);
       }
    } else {
-      if (!sesH->technologySpecificAttributes(tech).setAttribute<int>(optName, atoi(data.c_str()))) {
+      const int& atttibuteValue = atoi(data.c_str());
+      if (!sesH->microSessionManager(tech).setAttributeOfType(optName, static_cast<const void*>(&atttibuteValue), typeid(int), "")) {
          ATH_MSG_DEBUG("Failed to set POOL property, " << optName << " to " << data);
          return(StatusCode::FAILURE);
       }
@@ -697,7 +711,7 @@ StatusCode PoolSvc::setAttribute(const std::string& optName,
       return(StatusCode::FAILURE);
    }
    if (dbH->openMode() == Io::INVALID) {
-      if (m_dbSessionVec[contextId]->transaction().type() == Io::WRITE || m_dbSessionVec[contextId]->transaction().type() == Io::APPEND) {
+      if (m_dbSessionVec[contextId]->type() == Io::WRITE || m_dbSessionVec[contextId]->type() == Io::APPEND) {
          dbH->setTechnology(tech);
          dbH->connectForWrite();
       } else {
@@ -707,14 +721,17 @@ StatusCode PoolSvc::setAttribute(const std::string& optName,
    bool retError = false;
    std::string objName;
    bool hasTTreeName = contName.starts_with("TTree=");
-   if (contName.empty() || hasTTreeName || m_dbSessionVec[contextId]->transaction().type() == Io::READ) {
+   if (contName.empty() || hasTTreeName || m_dbSessionVec[contextId]->type() == Io::READ) {
       objName = hasTTreeName ? contName.substr(6) : contName;
       if( !isNumber(data) ) {
-         retError = dbH->technologySpecificAttributes().setAttribute(optName, data.c_str(), objName);
+         const char* atttibuteValue = data.c_str();
+         retError = dbH->setAttributeOfType(optName, static_cast<const void*>(&atttibuteValue), typeid(char*), objName);
       } else if( data[data.size() - 1] == 'L' ) {
-         retError = dbH->technologySpecificAttributes().setAttribute<long long int>(optName, atoll(data.c_str()), objName);
+         const long long int& atttibuteValue = atoll(data.c_str());
+         retError = dbH->setAttributeOfType(optName, static_cast<const void*>(&atttibuteValue), typeid(long long int), objName);
       } else {
-         retError = dbH->technologySpecificAttributes().setAttribute<int>(optName, atoi(data.c_str()), objName);
+         const int& atttibuteValue = atoi(data.c_str());
+         retError = dbH->setAttributeOfType(optName, static_cast<const void*>(&atttibuteValue), typeid(int), objName);
       }
       if (!retError) {
          ATH_MSG_DEBUG("Failed to set POOL property, " << optName << " to " << data);
@@ -740,9 +757,11 @@ StatusCode PoolSvc::setAttribute(const std::string& optName,
          objName[off] = '_'; // Replace special chars (e.g. templates)
       }
       if (data[data.size() - 1] == 'L') {
-         retError = contH->technologySpecificAttributes().setAttribute<long long int>(optName, atoll(data.c_str()), objName);
+         const long long int& atttibuteValue = atoll(data.c_str());
+         retError = contH->setAttributeOfType(optName, static_cast<const void*>(&atttibuteValue), typeid(long long int), objName);
       } else {
-         retError = contH->technologySpecificAttributes().setAttribute<int>(optName, atoi(data.c_str()), objName);
+         const int& atttibuteValue = atoi(data.c_str());
+         retError = contH->setAttributeOfType(optName, static_cast<const void*>(&atttibuteValue), typeid(int), objName);
       }
       if (!retError) {
          ATH_MSG_DEBUG("Failed to set POOL container property, " << optName << " for " << contName << " : " << objName << " to " << data);
@@ -801,12 +820,16 @@ std::unique_ptr<pool::IDatabase> PoolSvc::getDbHandle(unsigned int contextId, co
       contextId = IPoolSvc::kInputStream;
    }
    pool::ISession* sesH = m_dbSessionVec[contextId];
-   if (!sesH->transaction().isActive()) {
+   if (!sesH){
+     ATH_MSG_ERROR("Session pointer is null.");
+     return nullptr;
+   }
+   if (sesH->type() == Io::INVALID) {
       Io::IoFlag transMode = Io::READ;
       ATH_MSG_DEBUG("Start transaction, type = " << transMode);
-      if (!sesH->transaction().start(transMode)) {
+      if (!sesH->start(transMode)) {
          ATH_MSG_WARNING("Failed to start transaction, type = " << transMode);
-         return(nullptr);
+         return nullptr;
       }
    }
    if (dbName.starts_with("PFN:")) {

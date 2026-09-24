@@ -393,7 +393,7 @@ namespace ActsTrk {
         // evaluation of measurement details
         double topHalfStripLength = 0.5*firstInfo.stripDirection().norm();
         Eigen::Matrix<double, 3, 1> topStripDirection = -firstInfo.stripDirection()/(2.*topHalfStripLength);
-        Eigen::Matrix<double, 3, 1> topStripCenter = 0.5*firstInfo.trajDirection();
+        Eigen::Matrix<double, 3, 1> topStripCenter = firstInfo.stripCenter();
 
         double bottomHalfStripLength = 0.5*secondInfo.stripDirection().norm();
         Eigen::Matrix<double, 3, 1> bottomStripDirection = -secondInfo.stripDirection()/(2.*bottomHalfStripLength);

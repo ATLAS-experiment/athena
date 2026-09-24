@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -13,6 +13,7 @@
 #include <fstream>
 #include <utility>
 #include <cstdlib>
+#include <print>
 
 using namespace std;
 
@@ -210,8 +211,7 @@ void LoggedMessageSvc::setupColors(Gaudi::Details::PropertyBase& prop) {
   } else if (prop.name() == "alwaysColorCode") {
     ic = MSG::ALWAYS;
   } else {
-    cout << "ERROR: Unknown message color parameter: " << prop.name()
-         << endl;
+    std::println ("ERROR: Unknown message color parameter: {}", prop.name());
     return;
   }
 
@@ -260,7 +260,7 @@ void LoggedMessageSvc::setupLimits(Gaudi::Details::PropertyBase& prop) {
   } else if (prop.name() == "alwaysLimit") {
     IntegerProperty *p = dynamic_cast<IntegerProperty*>(&prop);
     if (p && p->value() != 0) {
-      cout << "LoggedMessageSvc ERROR: cannot suppress ALWAYS messages" << endl;
+      std::println ("LoggedMessageSvc ERROR: cannot suppress ALWAYS messages");
       p->setValue(0);
     }
     //ic = MSG::ALWAYS;
@@ -271,8 +271,8 @@ void LoggedMessageSvc::setupLimits(Gaudi::Details::PropertyBase& prop) {
       }
     }
   } else {
-    cout << "LoggedMessageSvc ERROR: Unknown message limit parameter: "
-         << prop.name() << endl;
+    std::println ("LoggedMessageSvc ERROR: Unknown message limit parameter: {}",
+                  prop.name());
     return;
   }
 
@@ -310,15 +310,15 @@ void LoggedMessageSvc::setupThreshold(Gaudi::Details::PropertyBase& prop) {
     }
     return;
   } else {
-    cerr << "LoggedMessageSvc ERROR: Unknown message theshold parameter: "
-         << prop.name() << endl;
+    std::println (cerr, "LoggedMessageSvc ERROR: Unknown message theshold parameter: {}",
+                  prop.name());
     return;
   }
 
   StringArrayProperty *sap = dynamic_cast<StringArrayProperty*>( &prop);
   if (sap == nullptr) {
-    std::cerr << "could not dcast " << prop.name()
-              << " to a StringArrayProperty (which it should be!)" << endl;
+    std::println (std::cerr, "could not dcast {} to a StringArrayProperty (which it should be!)",
+                  prop.name());
     return;
   } else {
     std::vector<std::string>::const_iterator itr;
@@ -349,53 +349,42 @@ StatusCode LoggedMessageSvc::finalize() {
 
   m_suppress = false;
 
-  std::ostringstream os;
+#define PR(FMT, ...) std::println(os, FMT __VA_OPT__(,) __VA_ARGS__)
 
-  if (m_stats) {
-    os << "Summarizing all message counts" << endl;
-  } else {
-    os << "Listing sources of suppressed message: " << endl;
-  }
+  {
+    std::ostringstream os;
 
-  os << "=====================================================" << endl;
-  os << " Message Source              |   Level |    Count" << endl;
-  os << "-----------------------------+---------+-------------" << endl;
+    if (m_stats) {
+      PR ("Summarizing all message counts");
+    } else {
+      PR ("Listing sources of suppressed message: ");
+    }
+
+    PR ("=====================================================");
+    PR (" Message Source              |   Level |    Count");
+    PR ("-----------------------------+---------+-------------");
 
 
-  bool found(false);
+    bool found(false);
 
-  std::lock_guard<std::mutex> lock(m_reportMutex);
-  std::map<std::string,MsgAry>::const_iterator itr;
-  for (itr=m_sourceMap.begin(); itr!=m_sourceMap.end(); ++itr) {
-    for (unsigned int ic = 0; ic < MSG::NUM_LEVELS; ++ic) {
-      if ( (itr->second.msg[ic] >= m_msgLimit[ic] && m_msgLimit[ic] != 0 ) ||
-           (m_stats && itr->second.msg[ic] > 0 && ic >= m_statLevel.value()) ) {
-        os << " ";
-        os.width(28);
-        os.setf(ios_base::left,ios_base::adjustfield);
-        os << itr->first;
+    std::lock_guard<std::mutex> lock(m_reportMutex);
+    std::map<std::string,MsgAry>::const_iterator itr;
+    for (itr=m_sourceMap.begin(); itr!=m_sourceMap.end(); ++itr) {
+      for (unsigned int ic = 0; ic < MSG::NUM_LEVELS; ++ic) {
+        if ( (itr->second.msg[ic] >= m_msgLimit[ic] && m_msgLimit[ic] != 0 ) ||
+             (m_stats && itr->second.msg[ic] > 0 && ic >= m_statLevel.value()) ) {
+          PR (" {:<28}|{:>8}|{:>9}",
+              itr->first, levelNames[ic], itr->second.msg[ic]);
 
-        os << "|";
-
-        os.width(8);
-        os.setf(ios_base::right,ios_base::adjustfield);
-        os << levelNames[ic];
-
-        os << " |";
-
-        os.width(9);
-        os << itr->second.msg[ic];
-
-        os << endl;
-
-        found = true;
+            found = true;
+        }
       }
     }
-  }
-  os << "=====================================================" << endl;
+    PR ("=====================================================");
 
-  if (found || m_stats) {
-    cout << os.str();
+    if (found || m_stats) {
+      cout << os.str();
+    }
   }
 
 
@@ -403,7 +392,7 @@ StatusCode LoggedMessageSvc::finalize() {
   if (m_inactCount.value()) {
 
     std::ostringstream os;
-    os << "Listing sources of Unprotected and Unseen messages\n";
+    PR ("Listing sources of Unprotected and Unseen messages");
 
     bool found(false);
 
@@ -421,40 +410,20 @@ StatusCode LoggedMessageSvc::finalize() {
       os << "=";
     }
 
-    os << endl << " ";
-    os.width(ml+2);
-    os.setf(ios_base::left,ios_base::adjustfield);
-    os << "Message Source";
-    os.width(1);
-    os << "|   Level |    Count" << endl;
+    PR("");
+    PR(" {:<{}}|   Level |    Count", "MessageSource", ml+2);
 
     for (unsigned int i=0; i<ml+3; ++i) {
       os << "-";
     }
-    os << "+---------+-----------" << endl;
+    PR ("+---------+-----------");
 
 
     for (itr=m_inactiveMap.begin(); itr!=m_inactiveMap.end(); ++itr) {
       for (unsigned int ic = 0; ic < MSG::NUM_LEVELS; ++ic) {
 	if (itr->second.msg[ic] != 0) {
-	  os << " ";
-	  os.width(ml+2);
-	  os.setf(ios_base::left,ios_base::adjustfield);
-	  os << itr->first;
-
-	  os << "|";
-
-	  os.width(8);
-	  os.setf(ios_base::right,ios_base::adjustfield);
-	  os << levelNames[ic];
-
-	  os << " |";
-
-	  os.width(9);
-	  os << itr->second.msg[ic];
-
-	  os << endl;
-
+          PR (" {:<{}}|{:>8}|{:>9}",
+              itr->first, ml+2, levelNames[ic], itr->second.msg[ic]);
 	  found = true;
 	}
       }
@@ -462,13 +431,14 @@ StatusCode LoggedMessageSvc::finalize() {
     for (unsigned int i=0; i<ml+25; ++i) {
       os << "=";
     }
-    os << endl;
+    PR("");
 
     if (found) {
       cout << os.str();
     }
   }
 #endif
+#undef PR
 
   return StatusCode::SUCCESS;
 }
@@ -482,11 +452,7 @@ std::string LoggedMessageSvc::colTrans(const std::string &col, int offset) {
   } else {
     icol = offset + 8;
   }
-  std::ostringstream os1;
-
-  os1 << icol;
-
-  return os1.str();
+  return std::to_string (icol);
 
 }
 

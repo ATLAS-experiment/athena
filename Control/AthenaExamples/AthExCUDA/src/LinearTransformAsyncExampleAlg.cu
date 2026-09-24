@@ -1,11 +1,10 @@
-// Copyright (c) 2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
-// Local include
-#include "LinearTransformAsyncExampleAlg.h"
+// CUDA include(s).
+#include <cuda_runtime.h>
 
-// Gaudi
-#include <Gaudi/CUDA/CUDAStream.h>
-
+// System include(s).
+#include <vector>
 
 /// CUDA kernel implementing computation
 __global__ void linearTransform_kernel(float* arr, std::size_t size,
@@ -18,13 +17,9 @@ __global__ void linearTransform_kernel(float* arr, std::size_t size,
 }
 
 namespace AthCUDAExamples {
-StatusCode LinearTransformAsyncExampleAlg::linearTransform(std::vector<float>& arr, float multiplier) const {
-   // Create stream
-   ATH_MSG_INFO("Creating stream");
-   Gaudi::CUDA::Stream stream(this);
+void linearTransform(cudaStream_t stream, std::vector<float>& arr, float multiplier) {
 
    // Allocate array on device
-   ATH_MSG_INFO("Allocating device memory");
    float* d_arr;
    std::size_t size = sizeof(float) * arr.size();
    cudaMallocAsync(&d_arr, size, stream);
@@ -36,15 +31,12 @@ StatusCode LinearTransformAsyncExampleAlg::linearTransform(std::vector<float>& a
    static const int blockSize = 256;
    const int numBlocks = ( arr.size() + blockSize - 1 ) / blockSize;
    static const std::size_t sharedMemPerBlock = 0;
-   ATH_MSG_INFO("Kernel Launch");
    linearTransform_kernel<<<numBlocks, blockSize, sharedMemPerBlock, stream>>>(d_arr, arr.size(), multiplier);
 
    // Copy output back
    cudaMemcpyAsync(arr.data(), d_arr, size, cudaMemcpyDeviceToHost, stream);
 
-   // Explicit wait
-   ATH_CHECK(stream.await());
-   
-   return StatusCode::SUCCESS;
+   // Free device memory
+   cudaFreeAsync(d_arr, stream);
 }
 }

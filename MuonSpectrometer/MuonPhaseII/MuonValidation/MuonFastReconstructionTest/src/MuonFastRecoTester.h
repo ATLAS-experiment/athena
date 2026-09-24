@@ -108,10 +108,10 @@ namespace MuonValR4{
     SG::ReadHandleKey<MuonR4::SpacePointContainer> m_NSWspKey{this, "NswSpacePointKey", "NswSpacePoints"};
 
     // Global patterns
-    SG::ReadHandleKey<MuonR4::GlobalPatternContainer> m_patternKey{this, "PatternKey", "R4MuonGlobalPatterns", "global pattern container"};
+    SG::ReadHandleKey<MuonR4::GlobalPatternContainer> m_patternKey{this, "PatternKey", "MuonR4GlobalPatterns", "global pattern container"};
 
     // Fast reco muons
-    SG::ReadHandleKey<xAOD::MuonContainer> m_fastMuonKey{this, "FastMuonKey", "R4FastRecoSAMuons", "fast reco muon container"};
+    SG::ReadHandleKey<xAOD::MuonContainer> m_fastMuonKey{this, "FastMuonKey", "FastRecoSAMuons", "fast reco muon container"};
     
     // Truth segments
     SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_truthSegmentKey {this, "TruthSegmentKey","MuonTruthSegments", "truth segment container"};
@@ -233,4 +233,4 @@ namespace MuonValR4{
   };
 }
 
-#endif // MUONFASTDIGITEST_MUONVALR4_MuonHoughTransformTester_H
+#endif

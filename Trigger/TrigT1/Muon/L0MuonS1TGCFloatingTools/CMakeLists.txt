@@ -7,7 +7,7 @@ find_package( Boost COMPONENTS unit_test_framework )
 atlas_add_component( L0MuonS1TGCFloatingTools
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES AthenaBaseComps CxxUtils L0MuonS1TGCToolInterfaces
+                     LINK_LIBRARIES AthenaBaseComps CxxUtils L1MuonS1TGCToolInterfaces
                                     FourMomUtils MuonIdHelpersLib MuonReadoutGeometry
                                     MuonRDO MuonTGC_CablingLib PathResolver StoreGateLib )
 
@@ -16,7 +16,7 @@ atlas_add_test( TgcL0FloatingPtLut_test
           src/TgcL0FloatingPtLut.cxx
   INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src
   LINK_LIBRARIES CxxUtils
-  POST_EXEC_SCRIPT nopost.sh )
+  POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( TgcL0GoodMagMap_test
   SOURCES test/TgcL0GoodMagMap_test.cxx
@@ -30,7 +30,7 @@ atlas_add_test( TgcL0SegmentReconstruction_test
           src/TgcL0FloatingData.cxx
           src/TgcL0SegmentReconstruction.cxx
   INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src ${Boost_INCLUDE_DIRS}
-  LINK_LIBRARIES ${Boost_LIBRARIES} FourMomUtils L0MuonS1TGCToolInterfaces
+  LINK_LIBRARIES ${Boost_LIBRARIES} FourMomUtils L1MuonS1TGCToolInterfaces
   POST_EXEC_SCRIPT nopost.sh )
 
 atlas_add_test( TgcL0TrackSelector_test
@@ -38,14 +38,14 @@ atlas_add_test( TgcL0TrackSelector_test
           src/TgcL0TrackSelector.cxx
   INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} AthContainers
-                 L0MuonS1TGCToolInterfaces xAODL0MuonCand
-  POST_EXEC_SCRIPT nopost.sh )
+                 L1MuonS1TGCToolInterfaces xAODL0MuonCand
+  POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( TgcL0InnerCoincidence_test
   SOURCES test/TgcL0InnerCoincidence_test.cxx
           src/TgcL0InnerCoincidence.cxx
   INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src ${Boost_INCLUDE_DIRS}
-  LINK_LIBRARIES ${Boost_LIBRARIES} L0MuonS1TGCToolInterfaces
-  POST_EXEC_SCRIPT nopost.sh )
+  LINK_LIBRARIES ${Boost_LIBRARIES} L1MuonS1TGCToolInterfaces
+  POST_EXEC_SCRIPT noerror.sh )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

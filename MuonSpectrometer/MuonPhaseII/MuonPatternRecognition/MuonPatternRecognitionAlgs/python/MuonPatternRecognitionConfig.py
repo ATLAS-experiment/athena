@@ -17,7 +17,8 @@ def MuonNSWSegmentFinderAlgCfg(flags, name = "MuonNswSegmentFinderAlg", **kwargs
     from MuonSpacePointCalibrator.CalibrationConfig import MuonSpacePointCalibratorCfg
     calibrator_kwargs = {}
     if flags.Input.isMC:
-        #See !90511, possibility to adjust precision strips with sTgcPrecCoordErrorScale and both eta and stereo MMG with mmStripErrorScale
+        #See !90511, possibility to adjust precision strips with sTgcPrecCoordErrorScale and both eta and 
+        #stereo MMG with mmStripErrorScale
         calibrator_kwargs["sTgcNonPrecCoordErrorScale"] = 4.
 
     kwargs.setdefault("Calibrator", result.popToolsAndMerge(MuonSpacePointCalibratorCfg(flags, **calibrator_kwargs)))
@@ -39,9 +40,20 @@ def MuonSegmentFittingAlgCfg(flags, name = "MuonSegmentFittingAlg", **kwargs):
     kwargs.setdefault("Calibrator", result.popToolsAndMerge(MuonSpacePointCalibratorCfg(flags)))
     kwargs.setdefault("ResoSeedHitAssoc", 5. )
     kwargs.setdefault("RecoveryPull", 3.)
+    from ROOT.Muon.MuonStationIndex import StIndex
+    bsCutL = [2.] * StIndex.StIndexMax
+    bsCutR = [2.] * StIndex.StIndexMax
+    
+    bsCutL[StIndex.BI] = bsCutR[StIndex.BI] = 1.5
+    bsCutL[StIndex.BM] = bsCutR[StIndex.BM] = 1.75 
+    ### Optimization to gain segments below 10 GeV   
+    bsCutL[StIndex.EM] = bsCutL[StIndex.EO] = 2.75    
+    bsCutR[StIndex.EM] = bsCutR[StIndex.EO] = 2.75
+    kwargs.setdefault("SeedMaxDistanceBsRadius" , bsCutR)
+    kwargs.setdefault("SeedMaxDistanceBsLength" , bsCutL)
     # Configure T0 fitting, disabled by default
     kwargs.setdefault("fitSegmentT0", False)
-    if kwargs.get("fitSegmentT0"):
+    if kwargs["fitSegmentT0"]:
         kwargs.setdefault("useHessianResidual", True)
         kwargs.setdefault("recalibInFit", True)
         kwargs.setdefault("maxIterations", 400)

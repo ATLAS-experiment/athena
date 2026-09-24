@@ -184,14 +184,30 @@ StatusCode TauTrackRNNClassifier::classifyLRTTracks(std::vector<xAOD::TauTrack*>
     idScoreIso(*xTrack) = 0.;
     idScoreFake(*xTrack) = 0.;
 
+    double d0_weight = (xTrack->d0TJVA() ? xTrack->d0SigTJVA() / xTrack->d0TJVA(): 0);
+    double log10_pt_ratio = std::log10(xTrack->pt() / xTau.pt());
+    double abs_d0_sig = std::abs(xTrack->d0SigTJVA());
     double dR = xTau.p4().DeltaR(xTrack->p4());
+    double log10_rConv = std::log10(xTrack->rConv());
 
-    float weight = (xTrack->d0TJVA() ? xTrack->d0SigTJVA() / xTrack->d0TJVA(): 0);
-
-    // Cut values taken from a cut optimisation study
-    bool passed = (xTrack->pt() > 1000.0) && (dR < 0.2) && (weight > 40.);
-
-    ANA_MSG_DEBUG("xTrack: " << xTrack->pt() << " dR: " << dR << " weight: " << weight << " passed: " << passed);
+    // Cut values taken from a trained decision tree classifier
+    bool passed = false;
+    if (dR <= 0.20) {
+        if (d0_weight <= 32.19) {
+            // Captures high d0 tracks
+            if (log10_pt_ratio >= 0.08 && abs_d0_sig >= 5.95) {
+                passed = true;
+            }
+        } else {
+            if (log10_rConv >= 1.41) {
+                passed = true;
+            } else {
+                if (dR <= 0.03) {
+                    passed = true;
+                }
+            }
+        }
+    }
 
     if (passed) {
       xTrack->setFlag(xAOD::TauJetParameters::classifiedCharged, true);
@@ -400,13 +416,27 @@ StatusCode TrackRNN::calculateVars(const std::vector<xAOD::TauTrack*>& vTracks,
   if(vertexContainer != nullptr && !vertexContainer->empty() && xTau.vertex()!=nullptr) {
     dz0_TV_PV0 = xTau.vertex()->z() - vertexContainer->at(0)->z();
 
+    // Some AODs reconstructed before 22.0.48 contain rare cases of tracks with only dead sensors instead of hits 
+    // due to an edge case in the Si Hit definitions see e.g https://its.cern.ch/jira/browse/ATLIDTRKCP-395
+    // These could be used in the primary vertexing but then were thinned away by the TRT Standalone thinning
+    // this only checked for nHits < 4 rather than the TRT Standalone bit pattern specifically, removing these only dead sensor tracks
+    // we guard against this unresolved track link issue by counting and skipping invalid links
+    // should be extremely rare, but prevents crashes 
+    unsigned int nUnresolved = 0;
     for (const ElementLink<xAOD::TrackParticleContainer>& trk : vertexContainer->at(0)->trackParticleLinks()) {
+      if (!trk.isValid()) { ++nUnresolved; continue; }
       sumpt_PV0 += (*trk)->pt();
       sumpt2_PV0 += pow((*trk)->pt(), 2.);
     }
     for (const ElementLink<xAOD::TrackParticleContainer>& trk : xTau.vertex()->trackParticleLinks()) {
+      if (!trk.isValid()) { ++nUnresolved; continue; }
       sumpt_TV += (*trk)->pt();
       sumpt2_TV += pow((*trk)->pt(), 2.);
+    }
+    if (nUnresolved > 0) {
+      ATH_MSG_WARNING(nUnresolved << " unresolvable track link(s) on the primary or tau "
+                      << "vertex skipped: log_sumpt_PV0 / log_sumpt_TV inputs of "
+                      << "the track RNN computed from remaining tracks");
     }
   }
   //these are false positives

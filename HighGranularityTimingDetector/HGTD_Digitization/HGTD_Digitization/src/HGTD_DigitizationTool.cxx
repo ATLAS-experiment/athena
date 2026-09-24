@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_Digitization/src/HGTD_DigitizationTool.cxx
  *
@@ -19,6 +19,7 @@
 #include "SiDigitization/ISiChargedDiodesProcessorTool.h"
 #include "SiDigitization/SiChargedDiodeCollection.h"
 #include "HGTD_Calibration/HGTD_TdcCalibrationTool.h"
+#include <ranges>
 
 HGTD_DigitizationTool::HGTD_DigitizationTool(const std::string& type,
                                              const std::string& name,
@@ -452,86 +453,43 @@ StatusCode HGTD_DigitizationTool::createAndStoreRDO(SiChargedDiodeCollection* ch
   return StatusCode::SUCCESS;
 }
 
-void HGTD_DigitizationTool::createAndStoreSDO(
-    SiChargedDiodeCollection *charged_diodes) {
+void 
+HGTD_DigitizationTool::createAndStoreSDO(SiChargedDiodeCollection *charged_diodes) {
   using list_t = SiTotalCharge::list_t;
   std::vector<InDetSimData::Deposit> deposits;
-  deposits.reserve(5); // no idea what a reasonable number for this would be
-                       // with pileup
-
+  deposits.reserve(5); // no idea what a reasonable number for this would be with pileup
   // loop over the charged diodes
   SiChargedDiodeIterator i_chargedDiode = charged_diodes->begin();
   SiChargedDiodeIterator i_chargedDiode_end = charged_diodes->end();
-
   for (; i_chargedDiode != i_chargedDiode_end; ++i_chargedDiode) {
     deposits.clear();
-    const list_t &charges =
-        (*i_chargedDiode).second.totalCharge().chargeComposition();
-
+    const list_t &charges = i_chargedDiode->second.totalCharge().chargeComposition();
     bool real_particle_hit = false;
-
-    // loop over the list of elements inside the charged diode
-    list_t::const_iterator charge_list_itr_end = charges.end();
-    list_t::const_iterator charge_list_itr = charges.begin();
-
-    for (; charge_list_itr != charge_list_itr_end; ++charge_list_itr) {
-
-      const HepMcParticleLink &trkLink = charge_list_itr->particleLink();
+    for (const auto& charge : charges) {
+      const HepMcParticleLink& trkLink = charge.particleLink();
       if (HepMC::ignoreTruthLink(trkLink, m_vetoPileUpTruthLinks)) {
         continue;
       }
-      if (!real_particle_hit) {
-        // Types of SiCharges expected from HGTD
-        // Noise:                        barcode==0 &&
-        // processType()==SiCharge::noise
-        // Delta Rays:                   barcode==0 &&
-        // processType()==SiCharge::track
-        // Pile Up Tracks With No Truth: barcode!=0 &&
-        // processType()==SiCharge::cut_track
-        // Tracks With Truth:            barcode!=0 &&
-        // processType()==SiCharge::track
-        if (!HepMC::no_truth_link(trkLink) && charge_list_itr->processType() == SiCharge::track) {
-          real_particle_hit = true;
-        }
-        // real_particle_hit = trkLink.isValid();
+      if (!real_particle_hit && !HepMC::no_truth_link(trkLink) && charge.processType() == SiCharge::track) {
+        real_particle_hit = true;
       }
-
-      // check if this track number has been already used.
-      std::vector<InDetSimData::Deposit>::reverse_iterator theDeposit =
-          deposits.rend(); // dummy value
-      std::vector<InDetSimData::Deposit>::reverse_iterator depositsR_end =
-          deposits.rend();
-      std::vector<InDetSimData::Deposit>::reverse_iterator i_Deposit =
-          deposits.rbegin();
-      for (; i_Deposit != depositsR_end; ++i_Deposit) {
-        if ((*i_Deposit).first == trkLink) {
-          theDeposit = i_Deposit;
-          break;
-        }
+      auto reverseDeposits = deposits | std::views::reverse; //is a reverse search necessary?
+      const auto deposit = std::ranges::find(reverseDeposits, trkLink, &InDetSimData::Deposit::first);
+      if (deposit != reverseDeposits.end()) {
+        //deposit->second is a float, charge.time() is  a double
+        deposit->second = std::min(deposit->second, static_cast<float>(charge.time()));
+      } else {
+        deposits.emplace_back(trkLink, charge.time());
       }
-
-      // Diode has already a hit, check which one that arrived first.
-      if (theDeposit != depositsR_end) {
-        if((*theDeposit).second > charge_list_itr->time()){
-          (*theDeposit).first = trkLink;
-          (*theDeposit).second = charge_list_itr->time();
-        }
-      } else { // create a new deposit with the track lick and the ToA
-        deposits.emplace_back(trkLink, charge_list_itr->time());
-      }
-    } // END LOOP charges within diode
-
+    }
     // add the simdata object to the map if the deposit originated from a
     // particle to which the truth information was kept. Can be HS and PU.
     if (real_particle_hit) {
 
-      InDetDD::SiReadoutCellId readout_cell =
-          (*i_chargedDiode).second.getReadoutCell();
+      InDetDD::SiReadoutCellId readout_cell = i_chargedDiode->second.getReadoutCell();
       int eta_index = readout_cell.etaIndex();
       int phi_index = readout_cell.phiIndex();
-      const Identifier id_readout = m_id_helper->pixel_id(
-          charged_diodes->identify(), phi_index, eta_index);
-
+      const Identifier id_readout = m_id_helper->pixel_id(charged_diodes->identify(), phi_index, eta_index);
       m_sdo_collection_map->try_emplace(id_readout, std::move(deposits), (*i_chargedDiode).second.flag());
     }
   } // END LOOP charged diodes

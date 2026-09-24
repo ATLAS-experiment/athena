@@ -254,6 +254,17 @@ public:
   bool m_inTestMode { false };
    
 private:
+  // Allow use of ATH_MSG macros.
+  using CommonMessaging::msg;
+  MsgStream& msg (const MSG::Level lvl) const { return msgStream(lvl); }
+  bool msgLvl (const MSG::Level lvl) const {
+    if (msgLevel (lvl)) {
+      msg() << lvl;
+      return true;
+    }
+    return false;
+  }
+
   void modifyEventContext(EventContext& ctx, const EventID& eID, bool consume_modifier_stream, long evtModIdx);
 
   ServiceHandle<Athena::IConditionsCleanerSvc> m_conditionsCleaner;

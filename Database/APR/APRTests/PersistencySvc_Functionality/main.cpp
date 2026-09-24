@@ -1,15 +1,14 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
 #include <stdexcept>
 #include "TestDriver.h"
 #include "StorageSvc/DbType.h"
-#include "RVersion.h"
 
 void runTestForStorageType(const pool::DbType& storageType, pool::TestDriver& driver)
-{   
+{
    std::cout << "[OVAL] Writing objects in the database using " << storageType.storageName() << " storage type." << std::endl;
     driver.write(storageType);
     std::cout << "[OVAL] ...done" << std::endl;

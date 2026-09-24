@@ -209,10 +209,7 @@ StatusCode PyAthenaEventLoopMgr::executeAlgorithms(const EventContext& ctx)
       }
 
    // FIXME: allow python result to be a statuscode
-      MsgStream log( msgSvc(), name() );
-      log << MSG::ERROR
-	  << "result from python event loop manager has unexpected type."
-	  << endmsg;
+      ATH_MSG_ERROR( "result from python event loop manager has unexpected type." );
       Py_DECREF( result );
       return StatusCode::FAILURE;
    }

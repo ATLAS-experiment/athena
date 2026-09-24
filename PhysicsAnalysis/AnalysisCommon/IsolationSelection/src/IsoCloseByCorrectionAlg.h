@@ -44,7 +44,7 @@ namespace CP {
                                   const xAOD::Muon* muon,
                                   const SG::Decorator<char>& isOK) const;
         template <class CONT_TYPE>
-        StatusCode selectLeptonsAndPhotons(const EventContext& ctx, CONT_TYPE particles, const SG::Decorator<char>& isOK) const;
+        StatusCode selectLeptonsAndPhotons(const EventContext& ctx, CONT_TYPE & particles, const SG::Decorator<char>& isOK) const;
 
         /// Input containers to retrieve from the storegate
         SG::ReadHandleKeyArray<xAOD::IParticleContainer>     m_contKeys{this, "ParticleContainerKeys", {} };

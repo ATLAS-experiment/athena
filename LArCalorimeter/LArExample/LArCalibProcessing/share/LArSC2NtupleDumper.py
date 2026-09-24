@@ -26,7 +26,6 @@ if __name__=='__main__':
   parser.add_argument('-s','--addSamples', dest='samples', default=False, help='Add Samples to output ntuple', action="store_true")
   parser.add_argument('-a','--addSampBas', dest='samplesBas', default=False, help='Add ADC_BAS to output ntuple', action="store_true")
   parser.add_argument(     '--addAccSamples', dest='accsamples', default=False, help='work on accumulated samples', action="store_true")
-  parser.add_argument(     '--addAccCalibSamples', dest='acccalibsamples', default=False, help='work on accumulated samples', action="store_true")
   parser.add_argument('-z','--addEt', dest='Et', default=False, help='Add ET to output ntuple', action="store_true")
   parser.add_argument('-g','--addEtId', dest='EtId', default=False, help='Add ET_ID to output ntuple', action="store_true")
   parser.add_argument('-l','--noLatHeader', dest='lheader', default=True, help='Add LATOME Header to output ntuple', action='store_false')
@@ -45,13 +44,7 @@ if __name__=='__main__':
   parser.add_argument('--addTT', dest='TT', default=False, help='Add info from LArTriggerTowers to output ntuple', action='store_true')
   parser.add_argument('--EMF', dest='emf', default=False, help='Is it for EMF', action='store_true')
   parser.add_argument('--FW6', dest='fw6', default=False, help='Is it for fw v. 6', action='store_true')
-  parser.add_argument('--FTs', dest='ft', default=[], nargs="+", type=int, help='list of FT which will be read out (space separated).')
-  parser.add_argument('--posneg', dest='posneg', default=[], nargs="+", help='side to read out (-1 means both), can give multiple arguments (space separated). Default %(default)s.', type=int,choices=range(-1,2))
-  parser.add_argument('--barrel_ec', dest='be', default=[], nargs="+", help='subdet to read out (-1 means both), can give multiple arguments (space separated) Default %(default)s.', type=int,choices=range(-1,2))
-  parser.add_argument('--ETThresh', dest='etthresh', default=-1., help='ET threshold to dump info', type=float)
-  parser.add_argument('--ETThreshMain', dest='etthreshmain', default=-1., help='ET threshold from Main to dump info', type=float)
-  parser.add_argument('--ADCThresh', dest='adcthresh', default=-1, help='ADC threshold to dump info', type=int)
-  parser.add_argument('--doPEBStream', dest='peb', default=False, help='Is it for PEB stream', action='store_true')
+  parser.add_argument('--Profile',  default=False, help='Sets up the Valgrind profiler with Callgrind', action='store_true')
 
   args = parser.parse_args()
   if help in args and args.help is not None and args.help:
@@ -65,25 +58,17 @@ if __name__=='__main__':
   #Import the flag-container that is the arguemnt to the configuration methods
   from AthenaConfiguration.AllConfigFlags import initConfigFlags
   flags=initConfigFlags()
-  if args.accsamples or args.acccalibsamples:
+  #flags.PerfMon.doFullMonMT = True
+  if args.accsamples:
     from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
     addLArCalibFlags(flags, True)
-    if len(args.posneg) >= 0:
-       flags.LArCalib.Preselection.Side = args.posneg
-    if len(args.be) >=0:
-       flags.LArCalib.Preselection.BEC = args.be
-    if len(args.ft) > 0:
-       flags.LArCalib.Preselection.FT = args.ft   
   #add SC dumping specific flags
   from LArCafJobs.LArSCDumperFlags import addSCDumpFlags
   addSCDumpFlags(flags)
 
   # check samples combination:
-  if (args.accsamples or args.acccalibsamples) and (args.samples or args.samplesBas):
+  if args.accsamples and (args.samples or args.samplesBas):
      log.error('Could not dump both samples and accumulated calib samples')
-     sys.exit(1)
-  if args.accsamples and args.acccalibsamples:
-     log.error('Could not dump both accsamples and acc calib samples')
      sys.exit(1)
 
   if len(args.infile) > 0:
@@ -102,23 +87,7 @@ if __name__=='__main__':
   from AthenaConfiguration.TestDefaults import defaultGeometryTags
   flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
 
-  if args.accsamples:
-     flags.LArSCDump.accdigitsKey="accSC"
-  else:   
-     flags.LArSCDump.accdigitsKey=""
-  if args.acccalibsamples:
-     flags.LArSCDump.acccalibdigitsKey="acccalibSC"
-  else:   
-     flags.LArSCDump.acccalibdigitsKey=""
-
-  flags.LArSCDump.doBC = args.bc
-  bckey='LArBadChannel'
-
-  flags.LArSCDump.digitsKey=""
-  CKeys=[]
-  fwversion=5
-
-  #  autoconfig
+  # first autoconfig
   from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
   try:
      runinfo=getLArDTInfoForRun(flags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
@@ -128,76 +97,59 @@ if __name__=='__main__':
      if args.nsamp > 0:
         flags.LArSCDump.nSamples=args.nsamp
      else:   
-        flags.LArSCDump.nSamples=5
+        flags.LArSCDump.nSamples=6
      flags.LArSCDump.nEt=1
      if args.samples:
         flags.LArSCDump.digitsKey="SC"
+     else:   
+        flags.LArSCDump.digitsKey=""
+     if args.accsamples:
+        flags.LArSCDump.accdigitsKey="accSC"
+     else:   
+        flags.LArSCDump.accdigitsKey=""
      CKeys=["SC_ET"]
   else:
-     fwversion=runinfo.FWversion()   
-     if not (args.accsamples or args.acccalibsamples):   
-        flags.LArSCDump.digitsKey=""
-        if args.peb:
-            for i in range(0,len(runinfo.streamTypesPEB())):
-               if args.EtId and runinfo.streamTypesPEB()[i] ==  "SelectedEnergy":
-                     CKeys += ["SC_ET_ID"]
-                     flags.LArSCDump.doEt=True
-                     flags.LArSCDump.nEt=runinfo.streamLengthsPEB()[i]
-               elif args.Et and runinfo.streamTypesPEB()[i] ==  "Energy":
-                     CKeys += ["SC_ET"]
-                     flags.LArSCDump.doEt=True
-                     flags.LArSCDump.nEt=runinfo.streamLengthsPEB()[i]
-               elif args.samples and runinfo.streamTypesPEB()[i] ==  "RawADC":
-                     flags.LArSCDump.digitsKey="SC"
-                     if args.nsamp > 0:
-                        flags.LArSCDump.nSamples=args.nsamp
-                     else:
-                        flags.LArSCDump.nSamples=runinfo.streamLengthsPEB()[i]
-               elif args.samplesBas and runinfo.streamTypesPEB()[i] ==  "ADC":
-                     CKeys += ["SC_ADC_BAS"]
-                     if args.nsamp > 0:
-                        flags.LArSCDump.nSamples=args.nsamp
-                     else:
-                        flags.LArSCDump.nSamples=runinfo.streamLengthsPEB()[i]
-
-        else:
-            for i in range(0,len(runinfo.streamTypes())):
-               if args.EtId and runinfo.streamTypes()[i] ==  "SelectedEnergy":
-                     CKeys += ["SC_ET_ID"]
-                     flags.LArSCDump.doEt=True
-                     flags.LArSCDump.nEt=runinfo.streamLengths()[i]
-               elif args.Et and runinfo.streamTypes()[i] ==  "Energy":
-                     CKeys += ["SC_ET"]
-                     flags.LArSCDump.doEt=True
-                     flags.LArSCDump.nEt=runinfo.streamLengths()[i]
-               elif args.samples and runinfo.streamTypes()[i] ==  "RawADC":
-                     flags.LArSCDump.digitsKey="SC"
-                     if args.nsamp > 0:
-                        flags.LArSCDump.nSamples=args.nsamp
-                     else:
-                        flags.LArSCDump.nSamples=runinfo.streamLengths()[i]
-               elif args.samplesBas and runinfo.streamTypes()[i] ==  "ADC":
-                     CKeys += ["SC_ADC_BAS"]
-                     if args.nsamp > 0:
-                        flags.LArSCDump.nSamples=args.nsamp
-                     else:
-                        flags.LArSCDump.nSamples=runinfo.streamLengths()[i]
-        if  args.nsamp > 0 and args.nsamp < flags.LArSCDump.nSamples:
-           flags.LArSCDump.nSamples=args.nsamp
+     CKeys=[]
+     flags.LArSCDump.digitsKey=""
+     for i in range(0,len(runinfo.streamTypes())):
+        if args.EtId and runinfo.streamTypes()[i] ==  "SelectedEnergy":
+              CKeys += ["SC_ET_ID"]
+              flags.LArSCDump.doEt=True
+              flags.LArSCDump.nEt=runinfo.streamLengths()[i]
+        elif args.Et and runinfo.streamTypes()[i] ==  "Energy":
+              CKeys += ["SC_ET"]
+              flags.LArSCDump.doEt=True
+              flags.LArSCDump.nEt=runinfo.streamLengths()[i]
+        elif args.samples and runinfo.streamTypes()[i] ==  "RawADC":
+              flags.LArSCDump.digitsKey="SC"
+              if args.nsamp > 0:
+                 flags.LArSCDump.nSamples=args.nsamp
+              else:
+                 flags.LArSCDump.nSamples=runinfo.streamLengths()[i]
+        elif args.samplesBas and runinfo.streamTypes()[i] ==  "ADC":
+              CKeys += ["SC_ADC_BAS"]
+              if args.nsamp > 0:
+                 flags.LArSCDump.nSamples=args.nsamp
+              else:
+                 flags.LArSCDump.nSamples=runinfo.streamLengths()[i]
+     if  args.nsamp > 0 and args.nsamp < flags.LArSCDump.nSamples:
+        flags.LArSCDump.nSamples=args.nsamp
   
   # calib runs do not have info about accumulation
-  if args.accsamples or args.acccalibsamples:
+  if args.accsamples:
+     flags.LArSCDump.accdigitsKey = "accSC"
      flags.Input.OverrideRunNumber = True
+
+  log.info("Autoconfigured: ")
+  log.info("nSamples: %d nEt: %d digitsKey %s accdigitsKey %s",flags.LArSCDump.nSamples, flags.LArSCDump.nEt, flags.LArSCDump.digitsKey, flags.LArSCDump.accdigitsKey)
+  log.info(CKeys)
 
   # now set flags according parsed options
   #if args.samples and not ("SC" in CKeys or flags.LArSCDump.digitsKey=="SC"):
   #   log.warning("Samples asked, but they are not in RunLogger, no output !!!!")
 
-  if args.samples and not ("SC" in flags.LArSCDump.digitsKey):
-     flags.LArSCDump.digitsKey="SC" 
   if args.samplesBas and "SC_ADC_BAS" not in CKeys:
      CKeys += ["SC_ADC_BAS"]
-     flags.LArSCDump.doSamplesBas=True
   if args.Et and "SC_ET" not in CKeys:
      CKeys += ["SC_ET"]
   if args.EtId and "SC_ET_ID" not in CKeys:
@@ -209,10 +161,6 @@ if __name__=='__main__':
      flags.LArSCDump.doRawChan=True  
      CKeys += ["LArRawChannels"]
      log.info("Adding ROD energies")
-
-  log.info("Autoconfigured: ")
-  log.info("nSamples: %d nEt: %d digitsKey %s accdigitsKey %s acccalibdigitsKey %s",flags.LArSCDump.nSamples, flags.LArSCDump.nEt, flags.LArSCDump.digitsKey, flags.LArSCDump.accdigitsKey, flags.LArSCDump.acccalibdigitsKey)
-  log.info(CKeys)
 
   # now construct the job
   flags.LAr.doAlign=False
@@ -243,12 +191,15 @@ if __name__=='__main__':
      # additions for EMF
      flags.IOVDb.SqliteInput="/afs/cern.ch/user/p/pavol/public/EMF_otherCond.db"
      flags.IOVDb.SqliteFolders = ("/LAR/BadChannelsOfl/BadChannelsSC","/LAR/BadChannels/BadChannelsSC","/LAR/Identifier/OnOffIdMap",)
-    
-  if args.etthresh > 0.:
-     flags.LArSCDump.ETThresh = args.etthresh
-
-  if args.etthreshmain > 0.:
-     flags.LArSCDump.ETThreshMain = args.etthreshmain
+  
+  # if Profile with Valgrind!
+  if args.Profile:
+    #flags.PerfMon.Valgrind.ProfiledAlgs=["LArLATOMEDecoder"]
+    flags.PerfMon.Valgrind.ProfiledAlgs=["LArRawSCDataReadingAlg"]
+  
+  from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags
+  flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA
+  flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
 
   flags.lock()
   flags.dump('LArSCDump.*')
@@ -277,32 +228,31 @@ if __name__=='__main__':
      tdt = None
 
 
-  if args.fw6 or fwversion==6:
+  if args.fw6:
      # addition for new firmware
      from IOVDbSvc.IOVDbSvcConfig import addOverride
-     if args.emf:
-        acc.merge(addOverride(flags,"/LAR/Identifier/LatomeMapping","LARIdentifierLatomeMapping-emf-fw6"))
-     else:   
-        acc.merge(addOverride(flags,"/LAR/Identifier/LatomeMapping","LARIdentifierLatomeMapping-fw6"))
+     acc.merge(addOverride(flags,"/LAR/Identifier/LatomeMapping","LARIdentifierLatomeMapping-fw6"))
   if args.bc:
      from LArBadChannelTool.LArBadChannelConfig import  LArBadFebCfg, LArBadChannelCfg
      acc.merge(LArBadChannelCfg(flags,None,True))
      acc.merge(LArBadFebCfg(flags))
-     bckey+='SC'
 
   if args.geom:
      acc.addCondAlgo(CompFactory.CaloAlignCondAlg(LArAlignmentStore="",CaloCellPositionShiftFolder=""))
      acc.addCondAlgo(CompFactory.CaloSuperCellAlignCondAlg())
-     args.offline=True
+
+  # If profiling with callgrind:
+  if args.Profile:
+    from Valkyrie.ValkyrieConfig import ValgrindServiceCfg
+    acc.merge(ValgrindServiceCfg(flags))
 
   from LArCalibTools.LArSC2NtupleConfig import LArSC2NtupleCfg
   acc.merge(LArSC2NtupleCfg(flags, isEmf = args.emf, AddBadChannelInfo=args.bc, AddFEBTempInfo=False, isSC=True, isFlat=False, 
-                            OffId=args.offline, AddHash=args.ahash, AddCalib=args.calib, RealGeometry=args.geom, ExpandId=args.expid, BadChanKey=bckey, # from LArCond2NtupleBase 
-                            NSamples=flags.LArSCDump.nSamples, FTlist=[], FillBCID=args.bcid, ContainerKey=flags.LArSCDump.digitsKey, AccContainerKey=flags.LArSCDump.accdigitsKey, AccCalibContainerKey=flags.LArSCDump.acccalibdigitsKey,# from LArDigits2Ntuple
+                            OffId=args.offline, AddHash=args.ahash, AddCalib=args.calib, RealGeometry=args.geom, ExpandId=args.expid, # from LArCond2NtupleBase 
+                            NSamples=flags.LArSCDump.nSamples, FTlist=[], FillBCID=args.bcid, ContainerKey=flags.LArSCDump.digitsKey, AccContainerKey=flags.LArSCDump.accdigitsKey, # from LArDigits2Ntuple
                             SCContainerKeys=CKeys, OverwriteEventNumber = args.overEvN,                        # from LArSC2Ntuple
                             FillRODEnergy = flags.LArSCDump.doRawChan,
                             FillLB=args.evtree, FillTriggerType = args.evtree,
-                            ETThreshold = flags.LArSCDump.ETThresh, ETThresholdMain = flags.LArSCDump.ETThreshMain, ADCThreshold=args.adcthresh,
                             TrigNames=["L1_EM3","L1_EM7","L1_EM15","L1_EM22VHI","L1_eEM5","L1_eEM15","L1_eEM22M"],
                             TrigDecisionTool=tdt, FillTriggerTowers = args.TT,
                             OutputLevel=args.olevel
@@ -314,13 +264,9 @@ if __name__=='__main__':
   acc.setAppProperty("HistogramPersistency","ROOT")
 
   # calib runs do not have proper run number in metadata
-  if args.accsamples or  args.acccalibsamples:
+  if args.accsamples:
      acc.getService("IOVDbSvc").forceRunNumber=int(args.run) 
-  
-  acc.getService("MessageSvc").defaultLimit=999999
-
   # some logging
-  acc.getService("MessageSvc").defaultLimit=99999999 
   log.info("Input files to be processed:")
   for f in flags.Input.Files:
       log.info(f)
@@ -328,4 +274,5 @@ if __name__=='__main__':
   log.info(args.outfile)
 
   # and run
+  acc.getService("MessageSvc").defaultLimit=9999999
   acc.run(args.maxev)

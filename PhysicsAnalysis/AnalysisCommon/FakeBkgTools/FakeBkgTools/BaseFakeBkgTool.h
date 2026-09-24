@@ -92,7 +92,7 @@ class ATLAS_NOT_THREAD_SAFE BaseFakeBkgTool: virtual public CP::IFakeBkgTool, pu
   #else
 	std::unique_ptr<int> m_database; //!
   #endif
-    float m_externalWeight; //! comes from Event passed to addEvent()
+    float m_externalWeight{}; //! comes from Event passed to addEvent()
   
     std::hash<std::string> m_hasher; //!
   #ifndef __CLING__

@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef ISOLATIONSELECTION_IISOLATIONSELECTIONTOOL_H
@@ -7,19 +7,21 @@
 
 // Framework include(s):
 #include "AsgTools/IAsgTool.h"
-#include "PATCore/AcceptData.h"
-#include "PATCore/AcceptInfo.h"
+
 
 // EDM include(s):
 #include "xAODEgamma/Electron.h"
 #include "xAODEgamma/Photon.h"
 #include "xAODMuon/Muon.h"
 #include "xAODPrimitives/IsolationType.h"
-// #include "IsolationSelection/strMuon.h"
 
 // std include(s):
-#include <map>
+#include <vector>
 #include <memory>
+namespace asg{
+  class AcceptData;
+  class AcceptInfo;
+}
 
 ///
 /// @author John Morris <john.morris@cern.ch>

@@ -68,7 +68,7 @@ def HION12KernelCfg(flags, name='HION12Kernel', **kwargs):
         acc.merge(JetCommonCfg(flags))
         from BTagging.FlavorTaggingConfig import FlavorTaggingCfg
         acc.merge(FlavorTaggingCfg(flags, "AntiKt4EMPFlowJets"))
-        from BTagging.TrackLeptonConfig import TrackLeptonDecorationCfg
+        from FlavorTagDiscriminants.TrackLeptonConfig import TrackLeptonDecorationCfg
         acc.merge(TrackLeptonDecorationCfg(flags))
 
     

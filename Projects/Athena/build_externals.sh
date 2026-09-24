@@ -11,6 +11,7 @@ ATLAS_EXT_PROJECT_NAME="AthenaExternals"
 ATLAS_BUILDTYPE="Release"
 ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=110
                         -DLCG_VERSION_POSTFIX="_ATLAS_5"
+                        -DCMAKE_CUDA_STANDARD=20 # See: ATLINFR-6204
                         -DATLAS_GAUDI_SOURCE="URL;https://gitlab.cern.ch/atlas/Gaudi/-/archive/v40r4.002/Gaudi-v40r4.002.tar.gz;URL_MD5;72a2fa2008f37c0dc88fb1e5b039f295"
                         -DATLAS_ACTS_SOURCE="URL;https://github.com/acts-project/acts/releases/download/v47.7.0/acts-v47.7.0.tar.gz;URL_HASH;SHA256=1b0484698715c38cf32055d0a2ff6ea50771d541b728dc58b2e9a086d4c858e9"
                         -DATLAS_ACTS_BUILD_TRACCC=TRUE

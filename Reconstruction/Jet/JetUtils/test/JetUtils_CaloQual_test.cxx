@@ -20,9 +20,7 @@
 // Done like this so that this will compile in both releases 20 and 21.
 # include "AthLinks/ElementLink.h"
 # include "AthenaKernel/CLASS_DEF.h"
-# ifdef SGTOOLS_CURRENTEVENTSTORE_H
-#  include "SGTools/TestStore.h"
-# endif
+# include "SGTools/TestStore.h"
 #endif
 
 template< class T>
@@ -43,12 +41,7 @@ int main ATLAS_NOT_THREAD_SAFE () {
 
 #ifndef XAOD_STANDALONE
   // *********************** init in Athena
-# ifdef SGTOOLS_CURRENTEVENTSTORE_H
   SGTest::initTestStore();
-# else
-  SG::getDataSourcePointerFunc = getTestDataSourcePointer;
-# endif
-
 #else
   // *********************** init in standalone
 

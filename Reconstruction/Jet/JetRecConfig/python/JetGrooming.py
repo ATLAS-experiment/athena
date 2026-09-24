@@ -24,12 +24,12 @@ class GroomingDefinition(object):
     tooltype = None
     groomalg = None
     def __init__(self, 
-                 ungroomeddef,  # Ungroomed JetDefinition
-                 modifiers=[],  # JetModifiers to run after grooming
-                 suffix = '',   # allows to tune the full JetContainer name
-                 lock=False,    # lock the properties of this instance to avoid accidental overwrite after __init__
+                 ungroomeddef,   # Ungroomed JetDefinition
+                 modifiers=None, # JetModifiers to run after grooming
+                 suffix = '',    # allows to tune the full JetContainer name
+                 lock=False,     # lock the properties of this instance to avoid accidental overwrite after __init__
                  context = None, # describe a context for which this definition will be used. See StandardJetContext
-                 **properties   # any other argument is expected a grooming tool property
+                 **properties    # any other argument is expected a grooming tool property
                  ): 
 
         self._ungroomeddef = ungroomeddef.clone() # clone to avoid messing with external jetdef
@@ -42,7 +42,7 @@ class GroomingDefinition(object):
         self.suffix = suffix
         self._defineName()
 
-        self.modifiers = modifiers 
+        self.modifiers = modifiers if modifiers is not None else [] 
         
         
         # used internally to resolve dependencies

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <string>
@@ -62,9 +62,8 @@ MultipleEventLoopMgr::nextPassFilter() {
   }
   if (nullptr == pFilter) {
     Gaudi::Utils::TypeNameString theFilter(filterName);
-    MsgStream log(msgSvc(), name());
-    log << MSG::WARNING << "Could not locate filter " 
-	<< theFilter.type() << '/' << theFilter.name() << endmsg;
+    ATH_MSG_WARNING( "Could not locate filter {}/{}",
+                     theFilter.type(), theFilter.name());
   }
   return pFilter;
 }
@@ -90,12 +89,11 @@ StatusCode
 MultipleEventLoopMgr::nextEvent(int maxevt) {
   StatusCode sc;
   do {
-    MsgStream log(msgSvc(), name());
-    log << MSG::INFO << "nextEvent: starting pass #" << m_passDone << endmsg;
+    ATH_MSG_INFO( "nextEvent: starting pass #{}", m_passDone );
     // Reset run number to assure BeginRun each rewind
     m_currentRun = 0;
     sc = AthenaEventLoopMgr::nextEvent(maxevt);
-    log << MSG::INFO << "nextEvent: finished pass #" << m_passDone << endmsg;
+    ATH_MSG_INFO( "nextEvent: finished pass #{}", m_passDone);
     m_passDone++;
   } while ( sc.isSuccess() &&                    //pass ok
 	    doNextPass() &&                      //another one?

@@ -19,6 +19,7 @@ categories = ['jet',
               'tracks',
               'SV',
               'tagger_GN2v01',
+              'tagger_GN3EPCLV01',
               'tagger_GN3XPV01',
               'old_taggers',
              ]
@@ -36,11 +37,12 @@ sub_categories_type_1 = [ '_incl',
                    '_muon',
                  ]
 
-categories_with_subcategories_type_2 = ['tagger_GN2v01','tagger_GN3XPV01']
+categories_with_subcategories_type_2 = ['tagger_GN2v01','tagger_GN3EPCLV01','tagger_GN3XPV01']
 
 sub_categories_type_2 = [ '_pt_ttbar',
                    '_pt_Zprime',
-                   '_Lxy'
+                   '_Lxy',
+                   '_SV1Lxy'
                  ]
 
 categories_with_subcategories_type_3 = ['old_taggers']

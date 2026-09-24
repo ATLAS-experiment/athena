@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainersInterfaces/test/AuxDataSpan_test.cxx
@@ -12,13 +12,13 @@
 #undef NDEBUG
 #include "AthContainersInterfaces/AuxDataSpan.h"
 #include "TestTools/expect_exception.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   int ii[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
   SG::AuxDataSpanBase sb1;
   SG::AuxDataSpanBase sb2 (ii, std::size(ii));
@@ -74,6 +74,6 @@ void test1()
 //coverity[root_function]
 int main()
 {
-  std::cout << "AthContainersInterfaces/AuxDataSpan_test\n";
+  std::println ("AthContainersInterfaces/AuxDataSpan_test");
   test1();
 }

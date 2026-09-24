@@ -11,30 +11,35 @@ class KLFitterBlock(ConfigBlock):
         super(KLFitterBlock, self).__init__()
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the input container.")
+            info="the name of the input container.",
+            meta={'role':'container'})
         self.addOption(
             "electrons",
             "",
             type=str,
             info="the input electron container, with a possible selection, in the format `container` or `container.selection`.",
+            meta={'role':'containerRef'},
         )
         self.addOption(
             "muons",
             "",
             type=str,
             info="the input muon container, with a possible selection, in the format `container` or `container.selection`.",
+            meta={'role':'containerRef'},
         )
         self.addOption(
             "jets",
             "",
             type=str,
             info="the input jet container, with a possible selection, in the format `container` or `container.selection`.",
+            meta={'role':'containerRef'},
         )
         self.addOption(
             "met",
             "",
             type=str,
             info="the input MET container.",
+            meta={'role':'containerRef'},
         )
         self.addOption(
             "likelihoodType",

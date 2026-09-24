@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthenaKernel/test/BaseInfo_test.cxx
@@ -13,9 +13,10 @@
 
 #include "AthenaKernel/BaseInfo.h"
 #include "AthenaKernel/CLASS_DEF.h"
-#include <iostream>
 #include <algorithm>
+#include <atomic>
 #include <cassert>
+#include <iostream>
 
 using std::cout;
 struct AA
@@ -340,10 +341,38 @@ void test2()
 }
 
 
+struct DTest
+{
+  DTest() { ++s_count; }
+  ~DTest() { --s_count; }
+  static std::atomic<int> s_count;
+};
+std::atomic<int> DTest::s_count = 0;
+CLASS_DEF (DTest, 1121, 1)
+
+
+void test_destroy()
+{
+  std::cout << "test_destroy\n";
+
+  DTest* d = new DTest;
+  assert (DTest::s_count == 1);
+  SG::BaseInfo<DTest>::destroy (d);
+  assert (DTest::s_count == 0);
+
+  d = new DTest;
+  assert (DTest::s_count == 1);
+  const SG::BaseInfoBase& bib = SG::BaseInfo<DTest>::baseinfo();
+  bib.destroy (d);
+  assert (DTest::s_count == 0);
+}
+
+
 int main()
 {
   test1();
   test2();
+  test_destroy();
   return 0;
 }
 

@@ -10,11 +10,13 @@ class ReclusteredJetCalibrationBlock(ConfigBlock):
     def __init__(self):
         super(ReclusteredJetCalibrationBlock, self).__init__()
         self.addOption ('containerName', '', type=str,
-            info='the name of the output container after calibration.')
+            info='the name of the output container after calibration.',
+            meta={'role':'container'})
         self.addOption ('jetCollection', '', type=str,
             info="the reclustered Large-R jet container to run on.")
         self.addOption ('jetInput', '', type=str,
-            info='the input calibrated small-R jet collection to use.')
+            info='the input calibrated small-R jet collection to use.',
+            meta={'role':'containerRef'})
 
     def instanceName (self) :
         """Return the instance name for this block"""

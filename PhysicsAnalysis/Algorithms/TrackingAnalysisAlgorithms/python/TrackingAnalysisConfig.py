@@ -19,7 +19,8 @@ class InDetTrackCalibrationConfig (ConfigBlock):
             info="the name of the input track container.")
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the output container after calibration.")
+            info="the name of the output container after calibration.",
+            meta={'role':'container'})
         self.addOption ('postfix', '', type=str,
             info="a postfix to apply to decorations and algorithm names. Typically "
             "not needed here since the calibration is common to all tracks.")
@@ -131,6 +132,10 @@ class InDetTrackCalibrationConfig (ConfigBlock):
                 elif config.campaign() is Campaign.MC23e:
                     # 2024 recommendations (MC23e)
                     alg.smearingTool.calibFileIP_CTIDE = "InDetTrackSystematicsTools/CalibData_25.2_2025-v00/2024_d0z0_smearing_factors.root"
+                elif config.campaign() is Campaign.MC23g:
+                    # 2025 recommendations (MC23g)
+                    alg.smearingTool.calibFileIP_CTIDE = "InDetTrackSystematicsTools/CalibData_25.2_2025-v00/2025_d0z0_smearing_factors.root"
+
                 else:
                     raise ValueError ('No recommendations found for campaign \"'
                                       + config.campaign().value + '\" in Run 3. '
@@ -239,11 +244,13 @@ class InDetTrackWorkingPointConfig (ConfigBlock):
         super (InDetTrackWorkingPointConfig, self).__init__ ()
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the input container.")
+            info="the name of the input container.",
+            meta={'role':'containerRef'})
         self.addOption ('selectionName', '', type=str,
             noneAction='error',
             info="the name of the track selection to define (e.g. `tightPrimary` "
-            "or `loose`).")
+            "or `loose`).",
+            meta={'role':'selection'})
         self.addOption ('postfix', None, type=str,
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as `selectionName` is used internally.")
@@ -256,7 +263,8 @@ class InDetTrackWorkingPointConfig (ConfigBlock):
             "`HILooseOptimized`, `HITightOptimized`.",
             expertMode=["NoCut", "LoosePrimary", "LooseElectron",
             "LooseMuon", "LooseTau", "MinBias", "HILoose", "HITight",
-            "HILooseOptimized", "HITightOptimized"])
+            "HILooseOptimized", "HITightOptimized"],
+            meta={'choices':(['Loose','TightPrimary','NoCut','LoosePrimary','LooseElectron','LooseMuon','LooseTau','MinBias','HILoose','HITight','HILooseOptimized','HITightOptimized'],1)})
         self.addOption ('additionalCuts', None, type=dict,
             info="additional cuts to modify the selection WP. Only meant for "
             "expert studies of track selection. Passed as pairs of `cutName: value`. "
@@ -367,8 +375,8 @@ class InDetTrackWorkingPointConfig (ConfigBlock):
                         alg.filterTool.fFakeLoose = 0.10
                         alg.filterTool.fFakeTight = 1.00
                     elif config.geometry() is LHCPeriod.Run3:
-                        if config.campaign() in [Campaign.MC23a, Campaign.MC23d, Campaign.MC23e]:
-                            # 2022/23/24 recommendations (MC23a/d/e)
+                        if config.campaign() in [Campaign.MC23a, Campaign.MC23d, Campaign.MC23e, Campaign.MC23g]:
+                            # 2022/23/24/25/26 recommendations (MC23a/d/e/g)
                             alg.filterTool.calibFileNomEff = "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/TrackingRecommendations_prelim_rel22.root"
                             alg.filterTool.fFakeLoose = 0.40
                             alg.filterTool.fFakeTight = 1.00

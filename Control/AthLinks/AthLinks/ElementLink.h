@@ -18,7 +18,10 @@
 
 #include "AthLinks/tools/ElementLinkTraits.h"
 #include "AthLinks/DataLink.h"
+#include "AthContainersInterfaces/ToTransient.h"
+#include "AthenaKernel/proxyDictFromEventContext.h"
 #include <utility>
+#include <vector>
 
 
 class IProxyDict;
@@ -785,6 +788,58 @@ bool checkForRemap (IProxyDict* sg,
 
 
 } // namespace SG_detail
+
+
+namespace SG {
+
+
+/**
+ * @brief Declare ToTransient hook for ElementLink.
+ */
+template <class STORABLE>
+class ToTransient<ElementLink<STORABLE> >
+{
+public:
+  static void toTransient (ElementLink<STORABLE>& el,
+                           IProxyDict* sg = nullptr);
+  static void toTransient (ElementLink<STORABLE>& el,
+                           const EventContext& ctx);
+};
+
+
+/**
+ * @brief Declare ToTransient hook for a vector of ElementLink
+ *        (with arbitrary allocator).
+ */
+template <class STORABLE, class ALLOC>
+class ToTransient<std::vector<ElementLink<STORABLE>, ALLOC> >
+{
+public:
+  static void toTransient (std::vector<ElementLink<STORABLE>, ALLOC>& elv,
+                           IProxyDict* sg = nullptr);
+  static void toTransient (std::vector<ElementLink<STORABLE>, ALLOC>& elv,
+                           const EventContext& ctx);
+};
+
+
+
+/**
+ * @brief Declare ToTransient hook for a vector of vectors of ElementLink
+ *        (with arbitrary allocators).
+ */
+template <class STORABLE, class ALLOC1, class ALLOC2>
+class ToTransient<std::vector<std::vector<ElementLink<STORABLE>, ALLOC1>, ALLOC2> >
+{
+public:
+  static void toTransient (std::vector<std::vector<ElementLink<STORABLE>, ALLOC1>, ALLOC2>& elvv,
+                           IProxyDict* sg = nullptr);
+  static void toTransient (std::vector<std::vector<ElementLink<STORABLE>, ALLOC1>, ALLOC2>& elvv,
+                           const EventContext& ctx);
+};
+
+
+
+} // namespace SG
 
 
 #include "AthLinks/ElementLink.icc"

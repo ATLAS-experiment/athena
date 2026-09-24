@@ -11,9 +11,13 @@ def ActsTrackParamsEstimationToolCfg(ConfigFlags,
     acc = ComponentAccumulator()
 
     # eBoundLoc0, eBoundLoc1, eBoundPhi, eBoundTheta, eBoundQOverP, eBoundTime
-    kwargs.setdefault('initialVarInflation', [1., 1., 1., 1., 1., 1.])
+    kwargs.setdefault('initialVarInflation', ConfigFlags.Acts.initialVarInflation)
+    kwargs.setdefault('refitErrInflation', ConfigFlags.Acts.refitErrInflation)
 
     kwargs.setdefault('allowPropagatorFailure', False)
+
+    kwargs.setdefault('parameterEstimationMode', ConfigFlags.Acts.parameterEstimationMode.value)
+    kwargs.setdefault('minDeltaR', ConfigFlags.Acts.minDeltaRParameterEstimation)
 
     kwargs.setdefault("refitSeeds", ConfigFlags.Acts.refitSeeds)
 

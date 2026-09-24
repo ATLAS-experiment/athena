@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthLinks/DataLinkBase.h
@@ -16,6 +16,7 @@
 
 #include "AthLinks/tools/DataProxyHolder.h"
 #include "AthLinks/exceptions.h"
+#include "AthContainersInterfaces/ToTransient.h"
 
 
 class EventContext;
@@ -345,6 +346,28 @@ private:
   /// SG proxy for this link.
   SG::DataProxyHolder m_proxy;  //! Transient.
 };
+
+
+namespace SG {
+
+
+inline
+bool toTransient (DataLinkBase& dl, IProxyDict* sg)
+{
+  dl.toTransient (sg);
+  return true;
+}
+
+
+inline
+bool toTransient (DataLinkBase& dl, const EventContext& ctx)
+{
+  dl.toTransient (ctx);
+  return true;
+}
+
+
+} // namespace SG
 
 
 #include "AthLinks/DataLinkBase.icc"

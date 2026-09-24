@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -64,6 +64,7 @@ namespace CP
           const xAOD::IParticle *particle = particles->at (index);
           if (m_preselection.getBool (*particle, sys))
           {
+            //coverity[FORWARD_NULL]
             bool passedNominal = m_readAccessor->getBool (*nominal->at(index), &emptySys);
             m_selectionHandle.setBool (*particle, passedNominal, sys);
           }

@@ -66,6 +66,8 @@ StatusCode CaloClusterMLCalibToolLite::inference(const xAOD::CaloClusterContaine
     double cluster_ISOLATION = 0;
 
     std::vector<float> transformedFeatures;
+    std::vector<bool> clusterInputsValid;
+    clusterInputsValid.reserve(clusters.size());
     bool ok{}; // for checking return value of cluster->retrieveMoment
 
     for (const xAOD::CaloCluster *cluster : clusters)
@@ -119,13 +121,21 @@ StatusCode CaloClusterMLCalibToolLite::inference(const xAOD::CaloClusterContaine
 	  avgMu
 	};
 
+        bool inputsValid = true;
         for (int i = 0; i < m_numFeatures; i++)
         {
             const PreprocessTransform &transform = m_featurePreprocessingTransforms.at(i);
             const float raw = rawValues.at(i);
             float transformed = transform.processor(raw, transform.parameters);
+            if (!std::isfinite(transformed)) {
+                inputsValid = false;
+                // Keep the batched ONNX input finite.  Its output is ignored for
+                // this cluster below.
+                transformed = 0.0F;
+            }
             transformedFeatures.push_back(transformed);
         }
+        clusterInputsValid.push_back(inputsValid);
     }
 
     int numClusters = clusters.size();
@@ -184,7 +194,7 @@ StatusCode CaloClusterMLCalibToolLite::inference(const xAOD::CaloClusterContaine
 
     for (int i = 0; i < numClusters; ++i)
       {
-	bool calibrateCluster = true;
+	bool calibrateCluster = clusterInputsValid.at(i);
 	for (size_t j=0; j<3; ++j) {
 	  if (std::isnan(onnx_mus[i*3+j]) || std::isnan(onnx_sigma2s[i*3+j]) || std::isnan(onnx_alphas[i*3+j])) {
 	    calibrateCluster = false;

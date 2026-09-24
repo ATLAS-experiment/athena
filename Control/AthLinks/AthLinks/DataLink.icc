@@ -503,5 +503,89 @@ void* DataLink<STORABLE>::storableNonConst()
 }
 
 
+namespace SG {
 
 
+/*
+ * @brief Do post-read processing for DataLink dl.
+ * @param dl The DataLink that was just read.
+ * @param sg The current event store.
+ */
+template <class STORABLE>
+void ToTransient<DataLink<STORABLE> >::toTransient (DataLink<STORABLE>& dl, IProxyDict* sg /*= nullptr*/)
+{
+  dl.toTransient (sg);
+}
+
+
+/*
+ * @brief Do post-read processing for DataLink dl.
+ * @param dl The DataLink that was just read.
+ * @param ctx The current event context.
+ */
+template <class STORABLE>
+inline
+void ToTransient<DataLink<STORABLE> >::toTransient (DataLink<STORABLE>& dl,
+                                                    const EventContext& ctx)
+{
+  toTransient (dl, Atlas::proxyDictFromEventContext (ctx));
+}
+
+
+/*
+ * @brief Do post-read processing for vector of DataLinks dlv.
+ * @param dlv The vector of DataLinks that was just read.
+ * @param sg The current event store.
+ */
+template <class STORABLE, class ALLOC>
+void ToTransient<std::vector<DataLink<STORABLE>, ALLOC> >::toTransient
+  (std::vector<DataLink<STORABLE>, ALLOC>& dlv, IProxyDict* sg /*= nullptr*/)
+{
+  for (auto& dl : dlv) {
+    dl.toTransient (sg);
+  }
+}
+
+
+/*
+ * @brief Do post-read processing for vector of DataLinks dlv.
+ * @param dlv The vector of DataLinks that was just read.
+ * @param ctx The current event context.
+ */
+template <class STORABLE, class ALLOC>
+void ToTransient<std::vector<DataLink<STORABLE>, ALLOC> >::toTransient
+  (std::vector<DataLink<STORABLE>, ALLOC>& dlv, const EventContext& ctx)
+{
+  toTransient (dlv, Atlas::proxyDictFromEventContext (ctx));
+}
+
+
+/*
+ * @brief Do post-read processing for vector of vectors of DataLinks dlvv.
+ * @param dlvv The vector of vectors of DataLinks that was just read.
+ * @param sg The current event store.
+ */
+template <class STORABLE, class ALLOC1, class ALLOC2>
+void ToTransient<std::vector<std::vector<DataLink<STORABLE>, ALLOC1>, ALLOC2> >::toTransient
+  (std::vector<std::vector<DataLink<STORABLE>, ALLOC1>, ALLOC2>& dlvv, IProxyDict* sg /*= nullptr*/)
+{
+  for (auto& dlv : dlvv) {
+    ToTransient<std::vector<DataLink<STORABLE>, ALLOC1> >::toTransient (dlv, sg);
+  }
+}
+
+
+/*
+ * @brief Do post-read processing for vector of vectors of DataLinks dlvv.
+ * @param dlvv The vector of vectors of DataLinks that was just read.
+ * @param ctx The current event context.
+ */
+template <class STORABLE, class ALLOC1, class ALLOC2>
+void ToTransient<std::vector<std::vector<DataLink<STORABLE>, ALLOC1>, ALLOC2> >::toTransient
+  (std::vector<std::vector<DataLink<STORABLE>, ALLOC1>, ALLOC2 >& dlvv, const EventContext& ctx)
+{
+  toTransient (dlvv, Atlas::proxyDictFromEventContext (ctx));
+}
+
+
+} // namespace SG

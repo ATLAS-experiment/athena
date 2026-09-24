@@ -6,31 +6,10 @@ transform the raw outputs from vertex finding into flavor tagging
 outputs. It is meant as "stand-alone" code: it should be usable in
 Athena, AthAnalysis, and AnalysisBase.
 
-This package uses C++17 features and as such is no longer comparable
-with upgrade physics (21.9), which uses C++11 and [LCG_88][lcg88].
-
-[lcg88]: http://lcginfo.cern.ch/release/88/
-
 Package Overview
 ----------------
 
 There are several user-level tools here:
-
-   - `BTagJetAugmenter`: adds jet-wise flavor-tagging inputs.
-
-   - `BTagAugmenterTool`: ASG Tool interface around `BTagJetAugmenter`.
-
-   - `BTagMuonAugmenter`: Class for adding muon information for the
-     soft muon tagger.
-
-   - `BTagMuonAugmenterTool`: ASG Tool wrapper around
-     `BTagMuonAugmenter`.
-
-   - `BTagTrackAugmenter`: add track-wise inputs. These include signed
-      impact parameters and track grades. Note that the signed impact
-      parameters **should not be added** in derivations: they are
-      specific to one jet and if tracks are used in multiple jet
-      collections they will be invalid!
 
    - `DL2`: low-level implementation of the DL2 tagger. Allows
      lower-level manipulation, for example reading in the
@@ -42,31 +21,14 @@ There are several user-level tools here:
      expressions to determine properties of the inputs. It also uses
      `PathResolver` to find the input file.
 
-   - `DL2HighLevelTools`: Utilities for `DL2HighLevel`. The intention
-     is to keep the files included in the `DL2.h` header minimal.
-
    - `DL2Tool`: ASG Tool interface around `DL2HighLevel`.
 
-   - `FlipTagEnums`: List of enums to keep track of the tag flip
-     configuration. These change some selection and inputs in in
-     DL2. Specifically:
-
-       - `NEGATIVE_IP_ONLY`: Save only the negative IP tracks and flip
-         the sign of z0 and d0. Also use the standard Flip/Neg version
-         of the other taggers.
-
-       - `FLIP_SIGN`: Save all IP, flip sign of z0 and d0. Use
-         Flip/Neg versions of other taggers (as above).
+The flip tagger configurations used by `DL2` are defined in
+`FlavorTagInference/FlipTagEnums.h`.
 
 ### Hbb Tagging ###
 
 Some components of Hbb tagging also live here. These include:
-
-   - `HbbTag`: Similar to DL2, but for large-R jets. Uses high-level
-     flavor tagging inputs. It also uses `HbbGraphConfig` and
-     `HbbConstants`.
-
-   - `HbbTagTool`: ASG Tool interface around `HbbTag`.
 
    - `VRJetOverlapDecorator`: Adds decorations which quantify the
      degree of overlap between VR subjets. The validity of flavor

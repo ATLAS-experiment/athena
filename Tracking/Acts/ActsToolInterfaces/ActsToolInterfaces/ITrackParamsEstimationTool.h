@@ -53,7 +53,7 @@ namespace ActsTrk {
             const Acts::Surface& surface,
             const Acts::Vector3& bField) const = 0;
 
-    using SpacePointIndicesFun_t = std::function<std::array<std::size_t, 3>(std::size_t)>;
+    using SpacePointIndicesFun_t = std::function<std::array<std::size_t, 3>(const ActsTrk::SpacePointRange&, bool)>;
     virtual SpacePointIndicesFun_t spacePointIndicesFun() const = 0;
     virtual bool estimateFromTopSp(bool reverseSearch) const = 0;
 

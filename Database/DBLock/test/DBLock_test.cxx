@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file DBLock/test/DBLock_test.xcx
@@ -11,7 +11,7 @@
 
 #undef NDEBUG
 #include "DBLock/DBLock.h"
-#include <iostream>
+#include <print>
 #include <thread>
 #include <atomic>
 #include <cassert>
@@ -35,7 +35,7 @@ void Thread::operator()()
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   std::thread th;
   std::atomic<int> x = 0;
   std::unique_ptr<Athena::DBLock> lockptr;
@@ -60,7 +60,7 @@ void test1()
 
 int main()
 {
-  std::cout << "DBLock/DBLock_test\n";
+  std::println ("DBLock/DBLock_test");
   test1();
   return 0;
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainersRoot/src/getDynamicAuxID.h
@@ -100,9 +100,9 @@ SG::auxid_t getDynamicAuxID (const std::type_info& ti,
       if (offs >= 0) {
         void* fac_vp = fac_class->New();
         if (fac_vp) {
-          SG::IAuxTypeVectorFactory* fac = reinterpret_cast<SG::IAuxTypeVectorFactory*> (reinterpret_cast<unsigned long>(fac_vp) + offs);
+          const SG::IAuxTypeVectorFactory* fac = reinterpret_cast<SG::IAuxTypeVectorFactory*> (reinterpret_cast<unsigned long>(fac_vp) + offs);
           const std::type_info* tiAlloc = fac->tiAlloc();
-          r.addFactory (ti, *tiAlloc, std::unique_ptr<SG::IAuxTypeVectorFactory> (fac));
+          fac = r.addFactory (ti, *tiAlloc, std::unique_ptr<const SG::IAuxTypeVectorFactory> (fac));
           auxid = r.getAuxID(*fac->tiAlloc(), ti, name, "", flags, linked_auxid);
         }
       }

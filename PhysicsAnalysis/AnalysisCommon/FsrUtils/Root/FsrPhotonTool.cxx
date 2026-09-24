@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <utility>
 
 // Local include(s):
 #include "FsrUtils/FsrPhotonTool.h"
@@ -15,6 +14,7 @@
 #include "AsgTools/AsgToolConfig.h"
 #include "AthContainers/ConstDataVector.h"
 
+#include <utility>
 
 namespace FSR {
 
@@ -187,6 +187,7 @@ namespace FSR {
 
 
         static const SG::AuxElement::Accessor<char>  DFCommonPhotonsIsEMTight ("DFCommonPhotonsIsEMTight");
+        static const SG::AuxElement::Accessor<char>  DFCommonPhotonsCleaning  ("DFCommonPhotonsCleaning");
         static const SG::AuxElement::Accessor<float> topoetcone20             ("topoetcone20");
 
         /// Set FSR type to far
@@ -203,7 +204,8 @@ namespace FSR {
     
         for (auto ph : *photons_cont) {
 
-            bool oqIsOK = (bool) m_phIsGoodOQSelectionTool->accept(ph);
+            // apply both object quality and photon cleaning
+            bool oqIsOK = (bool) m_phIsGoodOQSelectionTool->accept(ph) && DFCommonPhotonsCleaning(*ph);
                 
             bool is_tight_photon = DFCommonPhotonsIsEMTight(*ph);
             if ( oqIsOK && (ph->p4().Et() > m_far_fsr_etcut) && is_tight_photon) {
@@ -247,6 +249,9 @@ namespace FSR {
     std::vector<FsrCandidate>* FsrPhotonTool::getNearFsrCandidateList(const xAOD::Muon* muon, 
                                                                       const xAOD::PhotonContainer* photons_cont, 
                                                                       const xAOD::ElectronContainer* electrons_cont) {
+
+        static const SG::AuxElement::Accessor<char>  DFCommonPhotonsCleaning  ("DFCommonPhotonsCleaning");
+
         /// Set FSR type to far
         m_fsr_type = FsrCandidate::FsrType::FsrNear;
         /// Start looking for collinar FSR for muons
@@ -261,7 +266,7 @@ namespace FSR {
             float photon_f1;
             photon->showerShapeValue(photon_f1, xAOD::EgammaParameters::f1);
 
-            bool oqIsOK = (bool) m_phIsGoodOQSelectionTool->accept(photon);
+            bool oqIsOK = (bool) m_phIsGoodOQSelectionTool->accept(photon) && DFCommonPhotonsCleaning(*photon);
 
             // Selection is tighter for photons below high_et_min
             bool high_et_photon = (photon->p4().Et() > m_high_et_min);
@@ -451,6 +456,7 @@ bool oqIsOK = (bool) m_elIsGoodOQSelectionTool->accept(electron);
                                   unsigned int nofPhFsr) {
         for (unsigned int indx=0; indx < nofPhFsr; indx++ ) {
                 const xAOD::Photon* ph = dynamic_cast<const xAOD::Photon*>(phfsr.at(indx).first);
+                if (!ph) continue;
                 const xAOD::CaloCluster* ph_cl = ph->caloCluster();
                 const xAOD::CaloCluster* el_cl = electron->caloCluster();
                 double dr = deltaR(el_cl->eta(), el_cl->phi(),

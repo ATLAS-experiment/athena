@@ -6,6 +6,8 @@
 #include "../TruthParticleHitCountAlg.h"
 #include "../TrackFindingValidationAlg.h"
 #include "../TrackParticleTruthDecorationAlg.h"
+#include "../GbtsTrainingAlg.h"
+#include "../TruthTrackBuilderTool.h"
 
 // Algorithms
 DECLARE_COMPONENT( ActsTrk::PixelClusterToTruthAssociationAlg )
@@ -15,3 +17,5 @@ DECLARE_COMPONENT( ActsTrk::TrackToTruthAssociationAlg )
 DECLARE_COMPONENT( ActsTrk::TruthParticleHitCountAlg )
 DECLARE_COMPONENT( ActsTrk::TrackFindingValidationAlg )
 DECLARE_COMPONENT( ActsTrk::TrackParticleTruthDecorationAlg )
+DECLARE_COMPONENT( ActsTrk::GbtsTrainingAlg )
+DECLARE_COMPONENT( ActsTrk::TruthTrackBuilderTool)

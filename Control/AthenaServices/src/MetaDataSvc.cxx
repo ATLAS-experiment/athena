@@ -20,7 +20,6 @@
 
 #include "AthenaBaseComps/AthCnvSvc.h"
 #include "StoreGate/StoreGateSvc.h"
-#include "SGTools/SGVersionedKey.h"
 #include "PersistentDataModel/DataHeader.h"
 #include "RootAuxDynIO/RootAuxDynDefs.h"
 
@@ -86,7 +85,7 @@ MetaDataSvc::~MetaDataSvc() = default;
 
 //__________________________________________________________________________
 StatusCode MetaDataSvc::initialize() {
-   ATH_MSG_INFO("Initializing " << name());
+   ATH_MSG_INFO("Initializing {}", name());
 
    // Retrieve InputMetaDataStore
    ATH_CHECK( m_inputDataStore.retrieve() );
@@ -180,31 +179,12 @@ StatusCode MetaDataSvc::loadAddresses(StoreID::type storeID, IAddressProvider::t
    if (storeID != StoreID::METADATA_STORE) { // should this (also) run in the INPUT_METADATA_STORE?
       return(StatusCode::SUCCESS);
    }
-   // Put Additional MetaData objects into Input MetaData Store using VersionedKey
-   std::list<SG::ObjectWithVersion<DataHeader> > allVersions;
-   StatusCode sc = m_inputDataStore->retrieveAllVersions(allVersions, name());
-   if (!sc.isSuccess()) {
-      ATH_MSG_WARNING("Could not retrieve all versions for DataHeader, will not read Metadata");
-   } else {
-      int verNumber = -1;
-      for (SG::ObjectWithVersion<DataHeader>& obj : allVersions) {
-         ++verNumber;
-         const DataHeader* dataHeader = obj.dataObject.cptr();
-         if (dataHeader == nullptr) {
-            ATH_MSG_ERROR("Could not get DataHeader, will not read Metadata");
-            return(StatusCode::FAILURE);
-         }
-         for (const DataHeaderElement& dhe : *dataHeader) {
-            const CLID clid = dhe.getPrimaryClassID();
-            if (clid != ClassID_traits<DataHeader>::ID()) {
-               SG::VersionedKey myVersObjKey(dhe.getKey(), verNumber);
-               std::string key = dhe.getKey();
-               if (verNumber != 0) {
-                  key = myVersObjKey;
-               }
-               tads.push_back(dhe.getAddress(m_storageType, key));
-            }
-         }
+   const DataHeader* dataHeader = nullptr;
+   ATH_CHECK( m_inputDataStore->retrieve(dataHeader, name()) );
+   for (const DataHeaderElement& dhe : *dataHeader) {
+      const CLID clid = dhe.getPrimaryClassID();
+      if (clid != ClassID_traits<DataHeader>::ID()) {
+         tads.push_back(dhe.getAddress(m_storageType, dhe.getKey()));
       }
    }
    return(StatusCode::SUCCESS);
@@ -233,9 +213,10 @@ StatusCode MetaDataSvc::newMetadataSource(const Incident& inc)
    }
    StatusCode rc{StatusCode::SUCCESS};
    for (auto& tool : m_metaDataTools) {
-      ATH_MSG_DEBUG(" calling beginInputFile on " << tool->name() << " for GUID \"" << guid << "\"");
+      ATH_MSG_DEBUG(" calling beginInputFile on {} for GUID \"{}\"",
+                    tool->name(), guid);
       if (tool->beginInputFile(guid).isFailure()) {
-         ATH_MSG_ERROR("Unable to call beginInputFile for " << tool->name());
+         ATH_MSG_ERROR("Unable to call beginInputFile for {}", tool->name());
          rc = StatusCode::FAILURE;
       }
    }
@@ -250,9 +231,10 @@ StatusCode MetaDataSvc::retireMetadataSource(const Incident& inc)
       return StatusCode::FAILURE;
    }
    const std::string guid = fileInc->fileGuid();
-   ATH_MSG_DEBUG("retireMetadataSource: " << fileInc->fileName());
+   ATH_MSG_DEBUG("retireMetadataSource: {}", fileInc->fileName());
    for (auto& tool : m_metaDataTools) {
-      ATH_MSG_DEBUG(" calling endInputFile on " << tool->name() << " for GUID \"" << guid << "\"");
+      ATH_MSG_DEBUG(" calling endInputFile on {} for GUID \"{}\"",
+                    tool->name(), guid);
       ATH_CHECK(tool->endInputFile(guid));
    }
    m_allowMetaDataStop = true;
@@ -267,9 +249,9 @@ StatusCode MetaDataSvc::prepareOutput()
 
    StatusCode rc{StatusCode::SUCCESS};
    for (auto& tool : m_metaDataTools) {
-      ATH_MSG_DEBUG(" calling metaDataStop for " << tool->name());
+      ATH_MSG_DEBUG(" calling metaDataStop for {}", tool->name());
       if (tool->metaDataStop().isFailure()) {
-         ATH_MSG_ERROR("Unable to call metaDataStop for " << tool->name());
+         ATH_MSG_ERROR("Unable to call metaDataStop for {}", tool->name());
          rc = StatusCode::FAILURE;
       }
    }
@@ -288,14 +270,14 @@ StatusCode MetaDataSvc::prepareOutput(const std::string& outputName)
    if( outputName.empty() ) {
        return prepareOutput();
    }
-   ATH_MSG_DEBUG( "prepareOutput('" << outputName << "')" );
+   ATH_MSG_DEBUG( "prepareOutput('{}')", outputName );
 
    StatusCode rc{StatusCode::SUCCESS};
    for (auto& tool : m_metaDataTools) {
-      ATH_MSG_DEBUG("  calling metaDataStop for " << tool->name());
+      ATH_MSG_DEBUG("  calling metaDataStop for {}", tool->name());
       // planning to replace the call below with  (*it)->prepareOutput(outputName)
       if (tool->metaDataStop().isFailure()) {
-         ATH_MSG_ERROR("Unable to call metaDataStop for " << tool->name());
+         ATH_MSG_ERROR("Unable to call metaDataStop for {}", tool->name());
          rc = StatusCode::FAILURE;
       }
    }
@@ -332,7 +314,7 @@ void MetaDataSvc::handle(const Incident& inc) {
       return;
    }
    const std::string fileName = fileInc->fileName();
-   ATH_MSG_DEBUG("handle() " << inc.type() << " for " << fileName);
+   ATH_MSG_DEBUG("handle() {} for {}", inc.type(), fileName);
 
    if (inc.type() == "FirstInputFile") {
       // Register open/close callback actions
@@ -346,11 +328,11 @@ void MetaDataSvc::handle(const Incident& inc) {
       }
    } else if (inc.type() == "BeginInputFile" || inc.type() == "BeginInputMemFile") {
       if(newMetadataSource(inc).isFailure()) {
-         ATH_MSG_ERROR("Could not process new metadata source " << fileName);
+         ATH_MSG_ERROR("Could not process new metadata source {}", fileName);
       }
    } else if (inc.type() == "EndInputFile" || inc.type() == "EndInputMemFile") {
       if(retireMetadataSource(inc).isFailure()) {
-         ATH_MSG_ERROR("Could not retire metadata source " << fileName);
+         ATH_MSG_ERROR("Could not retire metadata source {}", fileName);
       }
    }
 }
@@ -359,7 +341,7 @@ void MetaDataSvc::handle(const Incident& inc) {
 // This method is currently called only from OutputStreamSequencerSvc
 StatusCode MetaDataSvc::transitionMetaDataFile(const std::string& outputConn, bool disconnect)
 {
-   ATH_MSG_DEBUG("transitionMetaDataFile: " << outputConn );
+   ATH_MSG_DEBUG("transitionMetaDataFile: {}", outputConn );
 
    // this is normally called through EndInputFile inc, simulate it for EvSvc
    FileIncident inc("transitionMetaDataFile", "EndInputFile", "dummyMetaInputFileName", "");
@@ -386,10 +368,10 @@ StatusCode MetaDataSvc::transitionMetaDataFile(const std::string& outputConn, bo
 //__________________________________________________________________________
 StatusCode MetaDataSvc::io_reinit() {
    ATH_MSG_INFO("I/O reinitialization...");
-   ATH_MSG_DEBUG("Dumping InputMetaDataStore: " << m_inputDataStore->dump());
-   ATH_MSG_DEBUG("Dumping OutputMetaDataStore: " << m_outputDataStore->dump());
+   ATH_MSG_DEBUG("Dumping InputMetaDataStore: {}", m_inputDataStore->dump());
+   ATH_MSG_DEBUG("Dumping OutputMetaDataStore: {}", m_outputDataStore->dump());
    for (const auto& tool : m_metaDataTools) {
-      ATH_MSG_INFO("Attached MetaDataTool: " << tool->name());
+      ATH_MSG_INFO("Attached MetaDataTool: {}", tool->name());
    }
    m_outputPrepared = false;
    return(StatusCode::SUCCESS);
@@ -443,7 +425,7 @@ StatusCode MetaDataSvc::addProxyToInputMetaDataStore(const std::string& tokenStr
    // AthenaOutputStream will use this to distribute objects to the right stream (and restore the original key)
    if( clid == 178309087 ) {  // FileMetaData
       std::string newName = std::format("{}{}{}{}", keyName, m_streamInKeyMark, fileName, "]");
-      ATH_MSG_DEBUG("Recording " << keyName << " as " << newName);
+      ATH_MSG_DEBUG("Recording {} as {}", keyName, newName);
       m_streamKeys[keyName].insert(newName);
       keyName = std::move(newName);
    }
@@ -453,7 +435,7 @@ StatusCode MetaDataSvc::addProxyToInputMetaDataStore(const std::string& tokenStr
                                        m_streamInKeyMark,
                                        fileName,
                                        RootAuxDynIO::AUX_POSTFIX);
-      ATH_MSG_DEBUG("Recording " << keyName << " as " << newName);
+      ATH_MSG_DEBUG("Recording {} as {}", keyName, newName);
       m_streamKeys[keyName].insert(newName);
       keyName = std::move(newName);
    }
@@ -462,30 +444,31 @@ StatusCode MetaDataSvc::addProxyToInputMetaDataStore(const std::string& tokenStr
    IOpaqueAddress* opqAddr = nullptr;
    SG::DataProxy* dp = m_inputDataStore->proxy(clid, keyName);
    if (dp != nullptr) {
-      ATH_MSG_DEBUG("Resetting duplicate proxy for: " << clid << "#" << keyName << " from file: " << fileName);
+      ATH_MSG_DEBUG("Resetting duplicate proxy for: {}#{} from file: {}",
+                    clid, keyName, fileName);
       dp->reset();
    }
    if (!m_addrCrtr->createAddress(m_storageType, clid, par, ipar, opqAddr).isSuccess()) {
-      ATH_MSG_FATAL("addProxyToInputMetaDataStore: Cannot create address for " << tokenStr);
+      ATH_MSG_FATAL("addProxyToInputMetaDataStore: Cannot create address for {}", tokenStr);
       return(StatusCode::FAILURE);
    }
    if (m_inputDataStore->recordAddress(keyName, opqAddr).isFailure()) {
-      ATH_MSG_FATAL("addProxyToInputMetaDataStore: Cannot create proxy for " << tokenStr);
+      ATH_MSG_FATAL("addProxyToInputMetaDataStore: Cannot create proxy for {}", tokenStr);
       return(StatusCode::FAILURE);
    }
    if (m_inputDataStore->accessData(clid, keyName) == nullptr) {
-      ATH_MSG_FATAL("addProxyToInputMetaDataStore: Cannot access data for " << tokenStr);
+      ATH_MSG_FATAL("addProxyToInputMetaDataStore: Cannot access data for {}", tokenStr);
       return(StatusCode::FAILURE);
    }
    if (keyName.find(RootAuxDynIO::AUX_POSTFIX) != std::string::npos
        && m_inputDataStore->symLink(clid, keyName, 187169987).isFailure()) {
-      ATH_MSG_WARNING("addProxyToInputMetaDataStore: Cannot symlink to AuxStore for " << tokenStr);
+      ATH_MSG_WARNING("addProxyToInputMetaDataStore: Cannot symlink to AuxStore for {}", tokenStr);
    }
    return(StatusCode::SUCCESS);
 }
 //__________________________________________________________________________
 StatusCode MetaDataSvc::initInputMetaDataStore(const std::string& fileName) {
-   ATH_MSG_DEBUG("initInputMetaDataStore: file name " << fileName);
+   ATH_MSG_DEBUG("initInputMetaDataStore: file name {}", fileName);
    m_clearedInputDataStore = false;
    // Load proxies for InputMetaDataStore
    if (m_metaDataCont.value().empty()) {
@@ -505,20 +488,15 @@ StatusCode MetaDataSvc::initInputMetaDataStore(const std::string& fileName) {
          fileName,
          std::format("{}{}", m_metaDataCont.value(), "DataHeader")
       };
-      for (int verNumber = 0; verNumber < 100; verNumber++) {
-         SG::VersionedKey myVersKey(name(), verNumber);
-         if (m_inputDataStore->contains<DataHeader>(myVersKey)) {
-            ATH_MSG_DEBUG("initInputMetaDataStore: MetaData Store already contains DataHeader, key = " << myVersKey);
-         } else {
-            const unsigned long ipar[2] = { (unsigned long)verNumber , 0 };
-            IOpaqueAddress* opqAddr = nullptr;
-            if (!m_addrCrtr->createAddress(m_storageType, ClassID_traits<DataHeader>::ID(), par, ipar, opqAddr).isSuccess()) {
-               if (!m_addrCrtr->createAddress(m_storageType, ClassID_traits<DataHeader>::ID(), parOld, ipar, opqAddr).isSuccess()) {
-                  break;
-               }
-            }
-            if (m_inputDataStore->recordAddress(myVersKey, opqAddr).isFailure()) {
-               ATH_MSG_WARNING("initInputMetaDataStore: Cannot create proxy for DataHeader, key = " << myVersKey);
+      if (m_inputDataStore->contains<DataHeader>(name())) {
+         ATH_MSG_DEBUG("initInputMetaDataStore: MetaData Store already contains DataHeader, key = {}", name());
+      } else {
+         const unsigned long ipar[2] = { 0 , 0 };
+         IOpaqueAddress* opqAddr = nullptr;
+         if (m_addrCrtr->createAddress(m_storageType, ClassID_traits<DataHeader>::ID(), par, ipar, opqAddr).isSuccess()
+          || m_addrCrtr->createAddress(m_storageType, ClassID_traits<DataHeader>::ID(), parOld, ipar, opqAddr).isSuccess()) {
+            if (m_inputDataStore->recordAddress(name(), opqAddr).isFailure()) {
+               ATH_MSG_WARNING("initInputMetaDataStore: Cannot create proxy for DataHeader, key = {}", name());
             }
          }
       }
@@ -526,23 +504,26 @@ StatusCode MetaDataSvc::initInputMetaDataStore(const std::string& fileName) {
       ATH_CHECK(loadAddresses(StoreID::METADATA_STORE, tList));
       for (SG::TransientAddress* tad : tList) {
          CLID clid = tad->clID();
-          ATH_MSG_VERBOSE("initInputMetaDataStore: add proxy for clid = " << clid << ", key = " << tad->name());
+         ATH_MSG_VERBOSE("initInputMetaDataStore: add proxy for clid = {}, key = {}",
+                         clid, tad->name());
          if (m_inputDataStore->contains(tad->clID(), tad->name())) {
-            ATH_MSG_DEBUG("initInputMetaDataStore: MetaData Store already contains clid = " << clid << ", key = " << tad->name());
+            ATH_MSG_DEBUG("initInputMetaDataStore: MetaData Store already contains clid = {}, key = {}",
+                          clid, tad->name());
          } else {
             if (!m_inputDataStore->recordAddress(tad->name(), tad->address())) {
-               ATH_MSG_ERROR("initInputMetaDataStore: Cannot create proxy for clid = " << clid << ", key = " << tad->name());
+               ATH_MSG_ERROR("initInputMetaDataStore: Cannot create proxy for clid = {}, key = {}",
+                             clid, tad->name());
                return StatusCode::FAILURE;
             }
          }
 
          for (CLID tclid : tad->transientID()) {
-           if (tclid != clid) {
-             if (m_inputDataStore->symLink (clid, tad->name(), tclid).isFailure()) {
-               ATH_MSG_WARNING("Cannot make autosymlink from " <<
-                               clid << "/" << tad->name() << " to " << tclid);
-             }
-           }
+            if (tclid != clid) {
+               if (m_inputDataStore->symLink (clid, tad->name(), tclid).isFailure()) {
+                  ATH_MSG_WARNING("Cannot make autosymlink from {}/{} to {}",
+                                  clid, tad->name(), tclid);
+               }
+            }
          }
          delete tad;
       }
@@ -563,7 +544,7 @@ const std::string MetaDataSvc::currentRangeID() const
 CLID MetaDataSvc::remapMetaContCLID( const CLID& itemID ) const
 {
    if (!m_handledClasses.contains(itemID)) {
-      ATH_MSG_DEBUG("Not translating metadata item ID #" << itemID);
+      ATH_MSG_DEBUG("Not translating metadata item ID #{}", itemID);
       return itemID;
    }
 
@@ -571,8 +552,8 @@ CLID MetaDataSvc::remapMetaContCLID( const CLID& itemID ) const
    CLID contID = 0;
    if (m_classIDSvc->getTypeNameOfID(itemID, itemName).isSuccess()) {
      const std::string contName = std::format("MetaCont<{}>", itemName);
-     ATH_MSG_DEBUG("Transforming " << contName << " to " << itemName
-                   << " for output");
+     ATH_MSG_DEBUG("Transforming {} to {} for output",
+                   contName, itemName);
      if (m_classIDSvc->getIDOfTypeName(contName, contID).isSuccess())
        return contID;
    }
@@ -582,26 +563,25 @@ CLID MetaDataSvc::remapMetaContCLID( const CLID& itemID ) const
 
 void MetaDataSvc::recordHook(const std::type_info& typeInfo) {
   const std::string& typeName = System::typeinfoName(typeInfo);
-  ATH_MSG_VERBOSE("Handling record event of type " << typeName);
+  ATH_MSG_VERBOSE("Handling record event of type {}", typeName);
 
   CLID itemID = 0;
   if (m_classIDSvc->getIDOfTypeInfoName(typeName, itemID).isSuccess()) {
     auto result = m_handledClasses.insert(itemID);
     if (result.second)
-      ATH_MSG_DEBUG("MetaDataSvc will handle " << typeName
-                    << " ClassID: " << itemID);
+      ATH_MSG_DEBUG("MetaDataSvc will handle {} ClassID: {}", typeName, itemID);
   }
 }
 
 void MetaDataSvc::removeHook(const std::type_info& typeInfo) {
   const std::string& typeName = System::typeinfoName(typeInfo);
-  ATH_MSG_VERBOSE("Handling removal event of type " << typeName);
+  ATH_MSG_VERBOSE("Handling removal event of type {}", typeName);
 
   CLID itemID = 0;
   if (m_classIDSvc->getIDOfTypeInfoName(typeName, itemID).isSuccess()) {
     if (0 < m_handledClasses.erase(itemID))
-      ATH_MSG_DEBUG("MetaDataSvc will no longer handle " << typeName
-                    << " ClassID: " << itemID);
+      ATH_MSG_DEBUG("MetaDataSvc will no longer handle {} ClassID: {}",
+                    typeName, itemID);
   }
 }
 

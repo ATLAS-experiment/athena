@@ -21,11 +21,6 @@ def CPAlgorithmsCfg(flags):
     logPLCPAlgCfg = logging.getLogger('PLCPAlgCfg')
     logPLCPAlgCfg.info('****************** STARTING PHYSLITE CPAlgorithmsCfg *****************')
 
-    forceEGammaFullSimConfig = False
-    if not flags.Sim.ISF.Simulator.isFullSim():
-        logPLCPAlgCfg.warning("Forcing full simulation configuration for EGamma algorithms. This is not recommended for fast simulation but no recommendations available yet.")
-        forceEGammaFullSimConfig = True
-
     FixedElDict = {}
     FixedPhDict = {}
     from egammaAlgs.egammaAODFixesConfig import runAODFix
@@ -96,7 +91,6 @@ def CPAlgorithmsCfg(flags):
 
     subConfig = factory.makeConfig ('Electrons')
     subConfig.setOptionValue ('.containerName', 'AnalysisElectrons')
-    subConfig.setOptionValue ('.forceFullSimConfigForIso', forceEGammaFullSimConfig)
     subConfig.setOptionValue ('.isolationCorrection', True)
     subConfig.setOptionValue ('.minPt', 0.)
     subConfig.setOptionValue ('.decorateSamplingPattern', True)
@@ -137,7 +131,6 @@ def CPAlgorithmsCfg(flags):
     # So SiHit electrons - should come after the standard selection in order to avoid keeping the same electrons twice
     subConfig = factory.makeConfig ('Electrons')
     subConfig.setOptionValue ('.containerName', 'AnalysisSiHitElectrons')
-    subConfig.setOptionValue ('.forceFullSimConfigForIso', forceEGammaFullSimConfig)
     subConfig.setOptionValue ('.isolationCorrection', True)
     subConfig.setOptionValue ('.minPt', 0.)
     subConfig.setOptionValue ('.postfix', 'SiHit')
@@ -171,7 +164,6 @@ def CPAlgorithmsCfg(flags):
 
     subConfig = factory.makeConfig ('Photons')
     subConfig.setOptionValue ('.containerName', 'AnalysisPhotons')
-    subConfig.setOptionValue ('.forceFullSimConfigForIso', forceEGammaFullSimConfig)
     subConfig.setOptionValue ('.recomputeIsEM', False)
     subConfig.setOptionValue ('.minPt', 0.)
     subConfig.setOptionValue ('.decorateEmva', True)
@@ -507,7 +499,7 @@ def PHYSLITECfg(flags):
         'MuonSpectrometerTrackParticles.phi.d0.z0.vz.definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag.vertexLink.theta.qOverP',
         'InDetForwardTrackParticles.vz.truthType.truthOrigin.numberDoF.numberOfTRTHits.numberOfSCTHoles.theta.numberOfTRTOutliers.numberOfPrecisionLayers.numberOfSCTDeadSensors.numberOfPixelHoles.numberOfSCTHits.numberOfPrecisionHoleLayers.numberOfPixelDeadSensors.phi.numberOfPixelHits.z0.d0.qOverP.chiSquared.definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag',
         'AnalysisTauJets.pt.eta.phi.m.ptFinalCalib.etaFinalCalib.ptTauEnergyScale.etaTauEnergyScale.charge.nChargedTracks.isTauFlags.PanTau_DecayMode.NNDecayMode.RNNJetScoreSigTrans.GNTauScoreSigTrans_v0prune.GNTauVL_v0prune.GNTauL_v0prune.GNTauM_v0prune.GNTauT_v0prune.RNNEleScoreSigTrans_v1.EleRNNLoose_v1.EleRNNMedium_v1.EleRNNTight_v1.trackWidth.passTATTauMuonOLR.tauTrackLinks.vertexLink.truthParticleLink.truthJetLink.IsTruthMatched.truthOrigin.truthType.TESCompatibility',
-        'AnalysisJets.pt.eta.phi.m.numConstit.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m.NumTrkPt500.SumPtTrkPt500.DetectorEta.DetectorY.JVFCorr.NNJvtPass.NumTrkPt1000.TrackWidthPt1000.GhostMuonSegmentCount.PartonTruthLabelID.HadronConeExclExtendedTruthLabelID.HadronConeExclTruthLabelID.TrueFlavor.DFCommonJets_jetClean_LooseBad.DFCommonJets_jetClean_TightBad.Timing.btagging.btaggingLink.GhostTrack.DFCommonJets_fJvt.PSFrac.JetAccessorMap.EMFrac.Width.ActiveArea4vec_pt.ActiveArea4vec_eta.ActiveArea4vec_m.ActiveArea4vec_phi.EnergyPerSampling.SumPtChargedPFOPt500.isJvtHS.QGTransformer_ConstScore.{btag_var_string}'.format(btag_var_string = ".".join(btag_variables)),
+        'AnalysisJets.pt.eta.phi.m.numConstit.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m.NumTrkPt500.SumPtTrkPt500.DetectorEta.DetectorY.JVFCorr.NNJvtPass.NumTrkPt1000.TrackWidthPt1000.GhostMuonSegmentCount.GhostUnAssocMuonSegmentCount.PartonTruthLabelID.HadronConeExclExtendedTruthLabelID.HadronConeExclTruthLabelID.TrueFlavor.DFCommonJets_jetClean_LooseBad.DFCommonJets_jetClean_TightBad.Timing.btagging.btaggingLink.GhostTrack.DFCommonJets_fJvt.PSFrac.JetAccessorMap.EMFrac.Width.ActiveArea4vec_pt.ActiveArea4vec_eta.ActiveArea4vec_m.ActiveArea4vec_phi.EnergyPerSampling.SumPtChargedPFOPt500.isJvtHS.QGTransformer_ConstScore.{btag_var_string}'.format(btag_var_string = ".".join(btag_variables)),
         'TruthPrimaryVertices.t.x.y.z',
         'MET_Core_AnalysisMET.name.mpx.mpy.sumet.source',
         'METAssoc_AnalysisMET.',

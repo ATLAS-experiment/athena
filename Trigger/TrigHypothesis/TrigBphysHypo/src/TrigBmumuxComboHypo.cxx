@@ -259,6 +259,7 @@ StatusCode TrigBmumuxComboHypo::findDimuonCandidates(TrigBmumuxState& state) con
     for (size_t itrk2 = itrk1 + 1; itrk2 < muons.size(); ++itrk2) {
       const xAOD::Muon* mu2 = *muons[itrk2].link;
       trackParticleLinks[1] = ::linkTrack(mu2->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle));
+      //cppcheck-suppress objectIndex
       previousDecisionIDs[1] = &muons[itrk2].decisionIDs;
       const xAOD::TrackParticle* trk2 = *trackParticleLinks[1];
       auto p2 = trk2->genvecP4();

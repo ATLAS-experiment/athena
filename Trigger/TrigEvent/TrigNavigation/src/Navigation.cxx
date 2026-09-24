@@ -12,6 +12,7 @@
 #include <sstream>
 #include <iostream>
 #include <algorithm>
+#include <charconv>
 #include <ranges>
 #include <string_view>
 
@@ -33,7 +34,8 @@ Navigation::Navigation(  const std::string& type, const std::string& name,
                   "List of classes which need to be serialized together with the Navigation (Only in DataScouting collection).");
 
   declareProperty("ClassesFromPayloadIgnore", m_classesFromPayloadIgnoreProperty,
-                  "List of classes (Type[#Key]) to ignore on deserialization of the Navigation.");
+                  "List of classes (Type[#Key]) to ignore on deserialization of the Navigation. "
+                  "Type can be an actual type name or CLID (useful for deleted classes).");
 
   declareProperty("ClassesToPreregister", m_classesToPreregisterProperty,
                   "List of classes which need to be put in SG independently if they appear in event.");
@@ -130,9 +132,15 @@ Navigation::classKey2CLIDKey(const std::vector<std::string>& property,
       key = "";
     }
 
-    if ( m_clidSvc->getIDOfTypeName(type, clid).isFailure() ) {
-      ATH_MSG_ERROR("Unable to get CLID for class: " << cname);
-      return StatusCode::FAILURE;
+    // First check if type is already a CLID
+    auto result = std::from_chars(type.data(), type.data() + type.size(), clid);
+
+    // If not, convert type name to CLID
+    if (result.ec != std::errc()) {
+      if ( m_clidSvc->getIDOfTypeName(type, clid).isFailure() ) {
+        ATH_MSG_ERROR("Unable to get CLID for class: " << cname);
+        return StatusCode::FAILURE;
+      }
     }
 
     ATH_MSG_DEBUG("Recognized CLID : " << type << " and key: " << key);

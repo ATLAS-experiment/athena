@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGGER_DECISION_TOOL_Combination_H
@@ -78,7 +78,7 @@ namespace Trig {
      * @param teName to get features from TEs of specific TEs (it is to be used in combination with switch alsoDeactivateTEs or composite triggers) super-expert usecase
      **/
      template<class T>
-     std::vector<Trig::Feature<T> > get(const std::string& label = "", unsigned int condition=TrigDefs::Physics, const std::string& teName = "") const;
+     std::vector<Trig::Feature<T> > get(std::string_view label = "", unsigned int condition=TrigDefs::Physics, const std::string& teName = "") const;
 
     
     template<typename CONTAINER> using ELEMENT_OF = typename CONTAINER::base_value_type;
@@ -167,7 +167,7 @@ namespace Trig {
 
 
 template <class T>
-std::vector<Trig::Feature<T> > Trig::Combination::get(const std::string& label, unsigned int condition, const std::string& teName) const
+std::vector<Trig::Feature<T> > Trig::Combination::get(std::string_view label, unsigned int condition, const std::string& teName) const
 {
   std::vector<Feature<T> > data;
 
