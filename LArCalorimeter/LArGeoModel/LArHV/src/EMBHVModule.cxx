@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArHV/EMBHVModule.h"
@@ -29,6 +29,8 @@ public:
       delete electrodes[i];
     }    
   }
+  Clockwork(const Clockwork &) = delete;
+  Clockwork & operator =(const Clockwork &) = delete;
   const EMBHVManager* manager;
   unsigned int iSide;
   unsigned int iEta;
