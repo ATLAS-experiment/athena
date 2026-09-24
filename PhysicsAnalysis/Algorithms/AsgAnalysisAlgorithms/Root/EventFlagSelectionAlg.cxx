@@ -39,7 +39,7 @@ StatusCode CP::EventFlagSelectionAlg::execute(const EventContext& /*ctx*/)
 {
   FilterReporter filter (m_filterParams, false);
 
-  const xAOD::EventInfo *evtInfo = 0;
+  const xAOD::EventInfo *evtInfo = nullptr;
   ANA_CHECK(evtStore()->retrieve(evtInfo, "EventInfo"));
 
   for (size_t index = 0; index < m_selFlags.size(); ++index) {
