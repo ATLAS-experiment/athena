@@ -123,25 +123,25 @@ namespace CP
        m_jetCastCutIndex = m_accept.addCut ("castJet", "cast to jet");
     }
     if (m_minEta > 0) {
-       ATH_MSG_DEBUG( "Performing |eta| >= " << m_minEta << " selection");
+       ATH_MSG_DEBUG( "Performing |eta| > " << m_minEta << " selection");
        m_minEtaCutIndex = m_accept.addCut ("minEta", "minimum eta cut");
     }
     if (m_maxEta > 0) {
-       ATH_MSG_DEBUG( "Performing |eta| < " << m_maxEta << " selection" );
+       ATH_MSG_DEBUG( "Performing |eta| <= " << m_maxEta << " selection" );
        m_maxEtaCutIndex = m_accept.addCut ("maxEta", "maximum eta cut");
     }
     if (m_etaGapHigh > 0) {
-       ATH_MSG_DEBUG( "Performing !( " << m_etaGapLow << " < |eta| < "
+       ATH_MSG_DEBUG( "Performing !( " << m_etaGapLow << " <= |eta| <= "
                       << m_etaGapHigh << " ) selection" );
        m_etaGapCutIndex = m_accept.addCut ("etaGap", "eta gap cut");
     }
     if (m_minRapidity > 0) {
-       ATH_MSG_DEBUG( "Performing |rapidity| >= " << m_minRapidity << " selection");
-       m_minRapidityCutIndex = m_accept.addCut ("minRapidity", "minimum eta cut");
+       ATH_MSG_DEBUG( "Performing |rapidity| > " << m_minRapidity << " selection");
+       m_minRapidityCutIndex = m_accept.addCut ("minRapidity", "minimum rapidity cut");
     }
     if (m_maxRapidity > 0) {
-       ATH_MSG_DEBUG( "Performing |rapidity| < " << m_maxRapidity << " selection" );
-       m_maxRapidityCutIndex = m_accept.addCut ("maxRapidity", "maximum eta cut");
+       ATH_MSG_DEBUG( "Performing |rapidity| <= " << m_maxRapidity << " selection" );
+       m_maxRapidityCutIndex = m_accept.addCut ("maxRapidity", "maximum rapidity cut");
     }
     m_shouldPrintCastWarning = m_printCastWarning;
     m_shouldPrintClusterWarning = m_printClusterWarning;
