@@ -22,6 +22,7 @@
 #include <Acts/Geometry/VolumeAttachmentStrategy.hpp>
 #include <Acts/Geometry/TrackingVolume.hpp>
 #include <Acts/Geometry/CylinderVolumeBounds.hpp>
+#include <Acts/Utilities/Helpers.hpp>
 
 #include "CaloDetDescrUtils/CaloDetDescrBuilder.h"
 
@@ -51,7 +52,7 @@ std::shared_ptr<BlueprintNode> ActsTrk::CaloBlueprintNodeBuilder::buildBlueprint
   std::map<caloRegion, caloSampleDDEElementsMap_t> caloRegionSampleDDEElementsMap;
   std::map<std::string, double> caloDimensions;
 
-  fillMaps(caloRegionSampleSurfaceMap, caloRegionSampleDDEElementsMap, caloDimensions);
+  fillMaps(caloRegionSampleDDEElementsMap, caloDimensions);
 
   ATH_MSG_DEBUG("Have filled first two maps");
 
@@ -69,8 +70,8 @@ std::shared_ptr<BlueprintNode> ActsTrk::CaloBlueprintNodeBuilder::buildBlueprint
   // The envelope of the calo node is set to the maximum radius and half length in z of the calorimeter, 
   // which is via a loop over all CaloDetDescrElements in the CaloDetDescrManager in the fillMaps function.
 
-  double caloEvelopeMaxR = caloDimensions.at("maxR");
-  double caloEnvelopeHalfLenghtZ = (caloDimensions.at("maxPosZ") - caloDimensions.at("minNegZ"))/2.0;
+  double caloEvelopeMaxR = caloDimensions.at("maxR") + 5._mm;
+  double caloEnvelopeHalfLenghtZ = (caloDimensions.at("maxPosZ") - caloDimensions.at("minNegZ"))/2.0  + 5._mm;
 
   ATH_MSG_INFO("Calo envelope dimensions: maxR = " << caloEvelopeMaxR << ", halfLengthZ = " << caloEnvelopeHalfLenghtZ);
   std::shared_ptr<StaticBlueprintNode> itkCaloNode{};
@@ -108,14 +109,14 @@ std::shared_ptr<BlueprintNode> ActsTrk::CaloBlueprintNodeBuilder::buildBlueprint
     //The tile extended barrel and gap must be added to top level node directly because they always overlap in R
     //or Z with other calorimeter surfaces, volumes etc.
     //Note there is a speed penalty to do it this way.
-    itkCaloNode->addLayer(sampleName+"NegZ" + "_Layer", [&](auto& layer) {
+    itkCaloNode->addLayer(sampleName+"NegZ_Layer", [&](auto& layer) {
       layer.setSurfaces(caloRegionSampleSurfaceMap[caloRegion::CylinderNegativeZ].at({sampleName, getSampleEnum(sampleName)}));
       layer.setEnvelope(Acts::ExtentEnvelope{{
           .z = {0.1_mm, 0.1_mm},
           .r = {2_mm, 2_mm},
       }});
     });
-    itkCaloNode->addLayer(sampleName+"PosZ" + "_Layer", [&](auto& layer) {
+    itkCaloNode->addLayer(sampleName+"PosZ_Layer", [&](auto& layer) {
       layer.setSurfaces(caloRegionSampleSurfaceMap[caloRegion::CylinderPositiveZ].at({sampleName, getSampleEnum(sampleName)}));
       layer.setEnvelope(Acts::ExtentEnvelope{{
           .z = {0.1_mm, 0.1_mm},
@@ -168,8 +169,8 @@ StatusCode ActsTrk::CaloBlueprintNodeBuilder::finalize() {
   return StatusCode::SUCCESS;
 }
 
-void ActsTrk::CaloBlueprintNodeBuilder::fillMaps(std::map<caloRegion, caloSampleSurfaceMap_t>& caloRegionSampleSurfaceMap,
-                      std::map<caloRegion, caloSampleDDEElementsMap_t>& caloRegionSampleDDEElementsMap, std::map<std::string, double>& caloDimensions) const {
+void ActsTrk::CaloBlueprintNodeBuilder::fillMaps(
+            std::map<caloRegion, caloSampleDDEElementsMap_t>& caloRegionSampleDDEElementsMap, std::map<std::string, double>& caloDimensions) const {
 
 
   //loop over all possible calo sampling layers
@@ -181,29 +182,7 @@ void ActsTrk::CaloBlueprintNodeBuilder::fillMaps(std::map<caloRegion, caloSample
   //calculated for a given phi ring, at fixed Z, changes by more than 
   //a tolerance value
 
-  //Use the same loop to create map bwteeen sampling and vectors of DDE
-  for (const auto & currentSample : m_caloCylinderSymmetricSampleList) {
-    caloRegionSampleSurfaceMap[caloRegion::CylinderSymmetricZZero][currentSample] = std::vector<std::shared_ptr<Surface> >();
-    caloRegionSampleDDEElementsMap[caloRegion::CylinderSymmetricZZero][currentSample] = std::vector<const CaloDetDescrElement*>();
-  }
-
-  for (const auto & currentSample : m_caloCylinderAsymmetricSampleList) {
-    caloRegionSampleSurfaceMap[caloRegion::CylinderNegativeZ][currentSample] = std::vector<std::shared_ptr<Surface> >();
-    caloRegionSampleDDEElementsMap[caloRegion::CylinderNegativeZ][currentSample] = std::vector<const CaloDetDescrElement*>();
-    caloRegionSampleSurfaceMap[caloRegion::CylinderPositiveZ][currentSample] = std::vector<std::shared_ptr<Surface> >();
-    caloRegionSampleDDEElementsMap[caloRegion::CylinderPositiveZ][currentSample] = std::vector<const CaloDetDescrElement*>();
-  }
-
-  for (const auto & currentSample : m_caloDiscSampleList) {
-    caloRegionSampleSurfaceMap[caloRegion::DiscNegativeZ][currentSample] = std::vector<std::shared_ptr<Surface> >();
-    caloRegionSampleDDEElementsMap[caloRegion::DiscNegativeZ][currentSample] = std::vector<const CaloDetDescrElement*>();
-    caloRegionSampleSurfaceMap[caloRegion::DiscPositiveZ][currentSample] = std::vector<std::shared_ptr<Surface> >();
-    caloRegionSampleDDEElementsMap[caloRegion::DiscPositiveZ][currentSample] = std::vector<const CaloDetDescrElement*>();
-  }
-
-  double maxR = 0.0;
-  double maxPosZ = 0.0;
-  double minNegZ = 0.0;
+  float maxR{0.}, maxPosZ{-std::numeric_limits<float>::max()}, minNegZ{std::numeric_limits<float>::max()};
 
   //for each calo sampling collect all the DDE in a vector    
   for (const CaloDetDescrElement* theDDE : m_caloDetSecrMgr->element_range()){
@@ -212,39 +191,37 @@ void ActsTrk::CaloBlueprintNodeBuilder::fillMaps(std::map<caloRegion, caloSample
       continue;
     }
 
-    if (theDDE->r() > maxR) maxR = theDDE->r();
-    if (theDDE->z() > maxPosZ) maxPosZ = theDDE->z();
-    if (theDDE->z() < minNegZ) minNegZ = theDDE->z();
+    maxR = std::max(theDDE->r(), maxR);
+    maxPosZ = std::max(maxPosZ, theDDE->z());
+    minNegZ = std::min(minNegZ, theDDE->z());
 
     CaloCell_ID::CaloSample currentSample=theDDE->getSampling();
     std::pair <std::string, CaloCell_ID::CaloSample> samplePair = std::make_pair(getSampleName(currentSample), currentSample);
     
     //check if have cylinder symmetric about z = 0
-    if (std::find(m_caloCylinderSymmetricSampleList.begin(), m_caloCylinderSymmetricSampleList.end(), samplePair) != m_caloCylinderSymmetricSampleList.end()){
-      caloRegionSampleDDEElementsMap[caloRegion::CylinderSymmetricZZero][{samplePair.first,samplePair.second}].push_back(theDDE);
+    if (Acts::rangeContainsValue(m_caloCylinderSymmetricSampleList, samplePair)){
+      caloRegionSampleDDEElementsMap[caloRegion::CylinderSymmetricZZero][samplePair].push_back(theDDE);
     }
     
     //check if have cylinder asymmetric about z = 0, if so check if in negative or positive z
-    if (std::find(m_caloCylinderAsymmetricSampleList.begin(), m_caloCylinderAsymmetricSampleList.end(), samplePair) != m_caloCylinderAsymmetricSampleList.end()){
+    if (Acts::rangeContainsValue(m_caloCylinderAsymmetricSampleList, samplePair)){
       if (theDDE->z() < 0.0) {
-        caloRegionSampleDDEElementsMap[caloRegion::CylinderNegativeZ][{samplePair.first,samplePair.second}].push_back(theDDE);
+        caloRegionSampleDDEElementsMap[caloRegion::CylinderNegativeZ][samplePair].push_back(theDDE);
       }
       else {
-        caloRegionSampleDDEElementsMap[caloRegion::CylinderPositiveZ][{samplePair.first,samplePair.second}].push_back(theDDE);
+        caloRegionSampleDDEElementsMap[caloRegion::CylinderPositiveZ][samplePair].push_back(theDDE);
       }
     }
 
     //check if sampling is in disc list
-    if (std::find(m_caloDiscSampleList.begin(), m_caloDiscSampleList.end(), std::make_pair(samplePair.first,samplePair.second)) != m_caloDiscSampleList.end()) {
+    if (Acts::rangeContainsValue(m_caloDiscSampleList, samplePair)) {
       //check if in negative or positive z
       if (theDDE->z() < 0.0) {
-        caloRegionSampleDDEElementsMap[caloRegion::DiscNegativeZ][{getSampleName(currentSample), currentSample}].push_back(theDDE);
-      }
-      else {
-        caloRegionSampleDDEElementsMap[caloRegion::DiscPositiveZ][{getSampleName(currentSample), currentSample}].push_back(theDDE);
+        caloRegionSampleDDEElementsMap[caloRegion::DiscNegativeZ][samplePair].push_back(theDDE);
+      } else {
+        caloRegionSampleDDEElementsMap[caloRegion::DiscPositiveZ][samplePair].push_back(theDDE);
       }
     }
-
   }
 
   caloDimensions["maxR"] = maxR;
@@ -253,9 +230,12 @@ void ActsTrk::CaloBlueprintNodeBuilder::fillMaps(std::map<caloRegion, caloSample
 
   auto sortAllLayersInZ = [&caloRegionSampleDDEElementsMap](const std::vector<std::pair<std::string, CaloCell_ID::CaloSample>>& caloSampleList, const caloRegion& region) {
     for (const auto & currentSample : caloSampleList) {
-      std::vector<const CaloDetDescrElement*> currentElements = caloRegionSampleDDEElementsMap[region][currentSample];
-      std::sort(currentElements.begin(), currentElements.end(), [](const CaloDetDescrElement* a, const CaloDetDescrElement* b) {return a->z() < b->z();});
-      caloRegionSampleDDEElementsMap[region][currentSample] = std::move(currentElements);
+      std::vector<const CaloDetDescrElement*>& currentElements = caloRegionSampleDDEElementsMap[region][currentSample];
+      std::ranges::sort(currentElements, 
+                        [](const CaloDetDescrElement* a, 
+                           const CaloDetDescrElement* b) {
+                            return a->z() < b->z();
+                        });
     }
   };
 
@@ -266,9 +246,12 @@ void ActsTrk::CaloBlueprintNodeBuilder::fillMaps(std::map<caloRegion, caloSample
 
   auto sortAllLayersInR = [&caloRegionSampleDDEElementsMap](const std::vector<std::pair<std::string, CaloCell_ID::CaloSample>>& caloSampleList, const caloRegion& region) {
     for (const auto& currentSample : caloSampleList) {
-      std::vector<const CaloDetDescrElement*> currentElements = caloRegionSampleDDEElementsMap[region][currentSample];
-      std::sort(currentElements.begin(), currentElements.end(), [](const CaloDetDescrElement* a, const CaloDetDescrElement* b) {return a->r() < b->r();});
-      caloRegionSampleDDEElementsMap[region][currentSample] = std::move(currentElements);
+      std::vector<const CaloDetDescrElement*>& currentElements = caloRegionSampleDDEElementsMap[region][currentSample];
+      std::ranges::sort(currentElements, 
+                        [](const CaloDetDescrElement* a, 
+                           const CaloDetDescrElement* b) {
+                            return a->r() < b->r();
+                        });
     }
   };
 
@@ -280,16 +263,16 @@ void ActsTrk::CaloBlueprintNodeBuilder::fillMaps(std::map<caloRegion, caloSample
 
 void ActsTrk::CaloBlueprintNodeBuilder::generateCylinderSurfaces(caloSampleSurfaceMap_t& caloSampleSurfaceMap, caloSampleDDEElementsMap_t& caloSampleDDEElementsMap, bool asymmetricZ) const{
 
-  std::vector<std::pair<std::string, CaloCell_ID::CaloSample>> sampleList;
-  if (asymmetricZ) sampleList = m_caloCylinderAsymmetricSampleList;
-  else sampleList = m_caloCylinderSymmetricSampleList;
-
+  const std::vector<std::pair<std::string, CaloCell_ID::CaloSample>>& sampleList{asymmetricZ ?
+      m_caloCylinderAsymmetricSampleList : m_caloCylinderSymmetricSampleList};
+ 
   for (const auto & currentSample : sampleList) {
 
-    std::vector<const CaloDetDescrElement*> currentElements = caloSampleDDEElementsMap[currentSample];
+    const std::vector<const CaloDetDescrElement*>& currentElements = caloSampleDDEElementsMap[currentSample];
 
     double maxLArBRadius = 0.0, minLArBRadius = std::numeric_limits<double>::max();
-    double lowZLarB = 0.0, highZLarB = 0.0;
+    double lowZLarB = std::numeric_limits<double>::max(), 
+          highZLarB = -std::numeric_limits<double>::max();
 
     //loop over cells runs from -z to +z in a given sampling layer
     //There are many cells with the same z value, but different phi values
@@ -345,14 +328,15 @@ void ActsTrk::CaloBlueprintNodeBuilder::generateCylinderSurfaces(caloSampleSurfa
           totalRadiusFixedPhi = 0.0;
           phiCounter = 0;
 
-          if (cellRingRadius > maxLArBRadius) maxLArBRadius = radius;
-          if (cellRingRadius < minLArBRadius) minLArBRadius = radius;
+          maxLArBRadius = std::max(maxLArBRadius, cellRingRadius);
+          minLArBRadius = std::min(minLArBRadius, cellRingRadius);
 
           //if radius changes by more than tolerance, then we will create a cylinder
           //with the average cell radius and length from neg to pos z
           highZLarB = z;
           ATH_MSG_DEBUG("Values of cellRingRadius, initialRadius, highZLarB and lowZLarB are " << cellRingRadius << ", " << initialRadius << ", " << highZLarB << " and " << lowZLarB);
-          if (std::abs(cellRingRadius - initialRadius) > m_radiusTolerance && highZLarB - lowZLarB > 0.0) {
+          if (std::abs(cellRingRadius - initialRadius) > m_radiusTolerance && 
+              highZLarB - lowZLarB > 0.0) {
             ATH_MSG_DEBUG("CYLINDER: Create cylinder for layer " << currentSample.first);                
             ATH_MSG_DEBUG("CYLINDER: Create Cylinder: Min and Max LAr B radius are " << minLArBRadius << " " << maxLArBRadius);
             ATH_MSG_DEBUG("CYLINDER: Create Cylinder: Min and Max LAr B z are " << lowZLarB << " " << highZLarB);
@@ -392,18 +376,19 @@ void ActsTrk::CaloBlueprintNodeBuilder::generateCylinderSurfaces(caloSampleSurfa
   }   
 }
 
-std::shared_ptr<CylinderSurface> ActsTrk::CaloBlueprintNodeBuilder::generateCylinderSurface(const double& maxLArBRadius, const double& minLArBRadius, const double& lowZLarB, const double& highZLarB) const{
+std::shared_ptr<CylinderSurface> ActsTrk::CaloBlueprintNodeBuilder::generateCylinderSurface(const double maxLArBRadius, 
+                                                                                            const double minLArBRadius, 
+                                                                                            const double lowZLarB, 
+                                                                                            const double highZLarB) const{
 
   //Characterise the dimensions of the  cylinder
   double LArBRadius = (maxLArBRadius + minLArBRadius) / 2.0;
   double LArBLength = std::abs(highZLarB - lowZLarB);
 
   double zShift = (highZLarB + lowZLarB) / 2.0;
-
-  if (highZLarB > 0 && lowZLarB < 0) zShift = highZLarB-zShift;
-
-  ATH_MSG_DEBUG("Cylinder radius and length are " << LArBRadius << " and " << LArBLength << " with shift of " << zShift);
-  return Surface::makeShared<CylinderSurface>(Transform3(Translation3(0.0, 0.0, zShift)), LArBRadius, LArBLength/2);
+  ATH_MSG_DEBUG("Cylinder radius and length are " << LArBRadius << " and " << 0.5*(LArBLength) << " with shift of " << zShift
+            <<"lowZLarB: "<<lowZLarB<<", highZLarB: "<<highZLarB);
+  return Surface::makeShared<CylinderSurface>(Amg::getTranslateZ3D(zShift), LArBRadius, LArBLength/2);
 
 }
 
@@ -425,8 +410,8 @@ void ActsTrk::CaloBlueprintNodeBuilder::generateDiscSurfaces(caloSampleSurfaceMa
 
           for (const CaloDetDescrElement*  theDDE : currentElements) {
             double r = theDDE->r();
-            if (r < fcalRMin) fcalRMin = r;
-            if (r > fcalRMax) fcalRMax = r;
+            fcalRMin = std::min(fcalRMin,r);
+            fcalRMax = std::max(fcalRMax,r);
             fcalZSum += theDDE->z();
             cellCount++;
           }

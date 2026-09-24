@@ -65,6 +65,7 @@ atlas_add_component( ActsGeometry
                      src/ITkMaterialDecoratorTool.cxx
                      src/TrackingGeometrySvc.cxx
                      src/TrackingGeoAlignVisitor.cxx
+                     src/GeometryEnvelopeTest.cxx
                      src/ActsVolumeIdToDetectorElementCollectionMappingAlg.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
@@ -100,5 +101,10 @@ if ( NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
                   PROPERTIES TIMEOUT 2000
                   PRIVATE_WORKING_DIRECTORY
                   SCRIPT ActsITkMuonCaloTest.py
+                  POST_EXEC_SCRIPT noerror.sh)
+  atlas_add_test( GeometryEnvelopeTest
+                  PROPERTIES TIMEOUT 2000
+                  PRIVATE_WORKING_DIRECTORY
+                  SCRIPT ActsEnvelopeTest.py
                   POST_EXEC_SCRIPT noerror.sh)
 endif()
