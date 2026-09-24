@@ -522,13 +522,15 @@ Root::TElectronEfficiencyCorrectionTool::buildToyMCTable(
     }
   } else {
     std::vector<std::vector<TH2*>> tmpVec2;
-    for (int i = 0; i < stat_entries; ++i) {
-      nSys = (eig.at(i))->GetNbinsX() - 1;
-      tmpVec2.push_back(buildSingleToyMC(sf.at(i),
-                                         stat.at(i),
-                                         uncorr.at(i),
-                                         corr.at(i),
-                                         randomCounter));
+    if (!eig.empty() and !uncorr.empty())[[likely]]{
+      for (int i = 0; i < stat_entries; ++i) {
+        nSys = (eig.at(i))->GetNbinsX() - 1;
+        tmpVec2.push_back(buildSingleToyMC(sf.at(i),
+                                           stat.at(i),
+                                           uncorr.at(i),
+                                           corr.at(i),
+                                           randomCounter));
+      }
     }
     for (int toy = 0; toy < m_nToyMC; toy++) {
       HistArray tmpArray;

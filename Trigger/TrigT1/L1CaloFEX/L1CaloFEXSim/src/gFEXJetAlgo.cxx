@@ -1285,7 +1285,8 @@ void gFEXJetAlgo::addRemoteRin(gTowersType &jets, const gTowersPartialSums &part
       } else {
         truncPart = partial[irow][ipartial];
       }
-      // change LSB from 200 MeV to 1600  MeV and then back to 200 MeV.   
+      // change LSB from 200 MeV to 1600  MeV and then back to 200 MeV.
+      //cppcheck-suppress shiftNegativeLHS  
       truncPart = (truncPart >> ps_shift );
       truncPart = (truncPart << ps_shift );
 
@@ -1311,7 +1312,8 @@ void gFEXJetAlgo::addRemoteLin(gTowersType &jets, const gTowersPartialSums &part
       } else {
           truncPart = partial[irow][ipartial];
       }
-      // change LSB from 200 MeV to 1600  MeV and then back to 200 MeV. 
+      // change LSB from 200 MeV to 1600  MeV and then back to 200 MeV.
+      //cppcheck-suppress shiftNegativeLHS
       truncPart = (truncPart >> ps_shift );
       truncPart = (truncPart << ps_shift );
 
@@ -1338,7 +1340,7 @@ void gFEXJetAlgo::addRemoteCNin(gTowersType & jets, const gTowersPartialSums & p
       } else {
           truncPart = partial[irow][ipartial];
       }
-
+      //cppcheck-suppress shiftNegativeLHS
       truncPart = (truncPart >> ps_shift );
       truncPart = (truncPart << ps_shift );
 
@@ -1364,7 +1366,7 @@ void gFEXJetAlgo::addRemoteCPin(gTowersType & jets, const gTowersPartialSums & p
       } else {
           truncPart = partial[irow][ipartial];
       }
-
+      //cppcheck-suppress shiftNegativeLHS
       truncPart = (truncPart >> ps_shift );
       truncPart = (truncPart << ps_shift );
       

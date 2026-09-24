@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArSC2NtupleEB.h"
@@ -235,7 +235,10 @@ StatusCode LArSC2NtupleEB::execute(const EventContext& ctx)
   } else {
      if(recocontainer) itercont = recocontainer;
   }
-
+  if (!itercont)[[unlikely]]{
+    ATH_MSG_ERROR( "Container pointer is null." );
+    return StatusCode::FAILURE;
+  }
 
   auto cbsciter=itercont->cbegin();
   auto cesciter=itercont->cend();
