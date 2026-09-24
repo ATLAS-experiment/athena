@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef REGISTRATIONSVC_OUTPUTCONDALG_H
@@ -40,11 +40,9 @@ private:
   ServiceHandle<IAddressCreator> m_persSvc{this,"EventPersistencySvc","EventPersistencySvc"};
 
 
-  typedef ToolHandle<IAthenaOutputStreamTool> IAthenaOutputStreamTool_t;
-  IAthenaOutputStreamTool_t m_streamer;
+  ToolHandle<IAthenaOutputStreamTool> m_streamer{this,"StreamName","AthenaOutputStreamTool/ConditionsAlgStream"};
 
   Gaudi::Property<std::vector<std::string> >  m_objectList{this,"ObjectList",{},"List of object to be written","OrderedSet<std::string>"};
-  Gaudi::Property<std::string> m_streamName{this,"StreamName","ConditionsAlgStream"};
   Gaudi::Property<bool> m_par_writeIOV{this,"WriteIOV",true};
   Gaudi::Property<std::string> m_par_crestDir{this,"CrestDir",""};
   Gaudi::Property<unsigned int> m_par_run1 {this,"Run1",IOVTime::MINRUN,"IOV start (run-number)"};
