@@ -9,14 +9,6 @@
 # art-output: log.*
 # art-athena-mt: 8
 
-##################################################################################
-# KNOWN ISSUES TRACKED BY THIS TEST:
-#
-# 1. FileMetaData fields have empty values if the first merging input is eventless
-#    - data23: amiTag, beamEnergy, beamType, geometryVersion, productionRelease
-# 2. dataYear field is absent after merging with eventless file
-##################################################################################
-
 NEVENTS="2"
 INPUTAODFILE="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data23/AOD/data23_13p6TeV.00453713.physics_Main.recon.AOD.f1357/2012events.data23_13p6TeV.00453713.physics_Main.recon.AOD.f1357._lb1416._0006.1"
 
@@ -68,7 +60,7 @@ Derivation_tf.py \
   --inputAODFile="${INPUTAODFILE}" \
   --outputDAODFile="ttree_EventlessWorker.pool.root" \
   --formats "PHYS" "PHYSLITE" \
-  --preExec="flags.MP.ChunkSize=${NEVENTS};flags.Output.TreeAutoFlush={\"DAOD_PHYS\": 100, \"DAOD_PHYSLITE\": 100};";\
+  --preExec="flags.MP.EnsureEventsForWorkers=False;flags.MP.ChunkSize=${NEVENTS};flags.Output.TreeAutoFlush={\"DAOD_PHYS\": 100, \"DAOD_PHYSLITE\": 100};";\
 
 echo "art-result: $? ttree MP True SW False EventlessWorker";
 
@@ -168,13 +160,6 @@ echo "art-result: $? diff PHYSLITE EventlessWorker FirstNoEvents";
 METADATA_FIELDS_TO_IGNORE="file_size file_guid auto_flush .*eventTypes"
 METADATA_FIELDS_TO_IGNORE_FIRST_HAS_EVENTS="file_size file_guid auto_flush .*eventTypes"
 METADATA_FIELDS_TO_IGNORE_FIRST_NO_EVENTS="file_size file_guid auto_flush .*eventTypes"
-
-### Ignore FileMetaData fields that are not set correctly when eventless worker is involved (to be removed when fixed)
-### For the case of when merging where the first input has no events, FileMetaData fields will have empty values
-### dataYear is missing completely so we ignore entire FileMetaData and metadata_items 
-FILEMETADATA_FIELDS_TO_IGNORE="FileMetaData metadata_items"
-echo "WARNING These FileMetaData fields will be ignored in diff for EventlessWorker FirstNoEvents: $FILEMETADATA_FIELDS_TO_IGNORE"
-METADATA_FIELDS_TO_IGNORE_FIRST_NO_EVENTS="$METADATA_FIELDS_TO_IGNORE_FIRST_NO_EVENTS $FILEMETADATA_FIELDS_TO_IGNORE"
 
 meta-diff -d $METADATA_FIELDS_TO_IGNORE --regex -m full -x diff -s \
   DAOD_PHYS.ttree.pool.root DAOD_PHYS.ttree_AllWorkersHaveEvent.pool.root;
