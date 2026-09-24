@@ -65,10 +65,12 @@ StatusCode PEBInfoWriterToolBase::decide(const EventContext& ctx, std::vector<In
     // Create new PEB Info for this input (empty if max RoIs limit is reached)
     PEBInfo pebInfo = maxRoIsReached ? PEBInfo{} : createPEBInfo(ctx, input);
 
+
     // Merge with previous ROBs    
     std::vector<uint32_t> previousRobs;
     ATH_CHECK(input.decision->getDetail(robListKey(), previousRobs));
     pebInfo.robs.insert(previousRobs.begin(), previousRobs.end());
+
 
     // Merge with previous SubDets
     std::vector<uint32_t> previousSubDets;
@@ -81,6 +83,7 @@ StatusCode PEBInfoWriterToolBase::decide(const EventContext& ctx, std::vector<In
       ATH_MSG_ERROR("Failed to attach the detail " << robListKey() << " to the decision");
       return StatusCode::FAILURE;
     }
+
     std::vector<uint32_t> subDetVec(pebInfo.subdets.begin(), pebInfo.subdets.end());
     if (not input.decision->setDetail(subDetListKey(), subDetVec)) {
       ATH_MSG_ERROR("Failed to attach the detail " << subDetListKey() << " to the decision");

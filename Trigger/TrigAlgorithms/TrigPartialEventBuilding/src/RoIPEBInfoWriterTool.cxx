@@ -65,7 +65,7 @@ PEBInfoWriterToolBase::PEBInfo RoIPEBInfoWriterTool::createPEBInfo(const EventCo
   float phiMax = CxxUtils::wrapToPi(phi + m_phiWidth); // range (-pi, pi)
 
   TrigRoiDescriptor roiForPEB(eta, etaMin, etaMax, phi, phiMin, phiMax);
-
+  input.decision->setDetail("outputRoIs", roiForPEB);
   for (const auto& tool : m_regionSelectorTools) {
     std::vector<uint32_t> detROBs;
     tool->lookup(ctx)->ROBIDList(roiForPEB, detROBs);

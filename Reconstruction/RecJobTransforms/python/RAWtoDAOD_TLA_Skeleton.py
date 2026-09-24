@@ -19,21 +19,28 @@ def configureFlags(runArgs):
         log.warning("Enters the inputBSFile if")
         flags.Input.Files = runArgs.inputBSFile
 
+    if hasattr(runArgs, 'inputRDOFile'):
+        log.warning("Enters the inputRDOFile if")
+        flags.Input.Files = runArgs.inputRDOFile
+
     from TrigEDMConfig.DataScoutingInfo import getDataScoutingTypeFromStream, getDataScoutingStreams
     if flags.Input.TriggerStream in getDataScoutingStreams():
        dstype = getDataScoutingTypeFromStream(flags.Input.TriggerStream)
+
 
     # Output
     if hasattr(runArgs, 'outputDAOD_TLAFile'):
         flags.Output.AODFileName = runArgs.outputDAOD_TLAFile
         log.info("---------- Configured DAOD_TLA output")
-        flags.Trigger.AODEDMSet=dstype
+        if not flags.Input.isMC:
+            flags.Trigger.AODEDMSet=dstype
         from AthenaConfiguration.DetectorConfigFlags import allDetectors
         disabled_detectors = allDetectors
     elif hasattr(runArgs, 'outputDAOD_TLAFTAGPEBFile'):
         flags.Output.AODFileName = runArgs.outputDAOD_TLAFTAGPEBFile
         log.info("---------- Configured DAOD_TLAFTAGPEB output")
-        flags.Trigger.AODEDMSet=dstype
+        if not flags.Input.isMC:
+            flags.Trigger.AODEDMSet=dstype
         disabled_detectors = [
             'TRT',
             'LAr', 'Tile', 'MBTS',
@@ -44,7 +51,8 @@ def configureFlags(runArgs):
     elif hasattr(runArgs, 'outputDAOD_TLADJETPEBFile'):
         flags.Output.AODFileName = runArgs.outputDAOD_TLADJETPEBFile
         log.info("---------- Configured DAOD_TLADJETPEB output")
-        flags.Trigger.AODEDMSet=dstype
+        if not flags.Input.isMC:
+            flags.Trigger.AODEDMSet=dstype
         disabled_detectors = [
             'MBTS',
             'Lucid', 'ZDC', 'ALFA', 'AFP',
@@ -52,7 +60,8 @@ def configureFlags(runArgs):
     elif hasattr(runArgs, 'outputDAOD_TLAEGAMPEBFile'):
         flags.Output.AODFileName = runArgs.outputDAOD_TLAEGAMPEBFile
         log.info("---------- Configured DAOD_TLAEGAMPEB output")
-        flags.Trigger.AODEDMSet=dstype
+        if not flags.Input.isMC:
+            flags.Trigger.AODEDMSet=dstype
         disabled_detectors = [
             'MBTS',
             'CSC', 'MDT', 'RPC', 'TGC',
@@ -96,6 +105,10 @@ def configureFlags(runArgs):
     # process pre-include/exec
     processPreInclude(runArgs, flags)
     processPreExec(runArgs, flags)
+
+    if flags.Input.isMC and "TLA" not in flags.Trigger.AODEDMSet:
+        log.error("Need to specify EDM type explicitly for MC!")
+        return
 
     # To respect --athenaopts 
     flags.fillFromArgs()
@@ -143,6 +156,51 @@ def fromRunArgs(runArgs):
     if flags.Trigger.AODEDMSet == 'FTagPEBTLA':
         from TLARecoConfig.FTagPEBRecoConfig import FTagPEBJetTagConfig
         cfg.merge(FTagPEBJetTagConfig(flags))
+
+    #For MC, set up seeded decoding + online CaloCellMaker
+    ebType=flags.Trigger.AODEDMSet
+    if flags.Input.isMC:
+        if flags.Detector.GeometryMDT:
+            cfg.getEventAlgo('MuonMdtRdoToPrdConv').DoSeededDecoding=True
+            cfg.getEventAlgo('MuonMdtRdoToPrdConv').RoIs='HLT_Roi_Selected_'+ebType
+        if flags.Detector.GeometryRPC:
+            cfg.getEventAlgo('MuonRpcRdoToPrdConv').DoSeededDecoding=True
+            cfg.getEventAlgo('MuonRpcRdoToPrdConv').RoIs='HLT_Roi_Selected_'+ebType
+        if flags.Detector.GeometryTGC:
+            cfg.getEventAlgo('MuonTgcRdoToPrdConv').DoSeededDecoding=True
+            cfg.getEventAlgo('MuonTgcRdoToPrdConv').RoIs='HLT_Roi_Selected_'+ebType
+        if flags.Detector.GeometryMM:
+            cfg.getEventAlgo('MuonMmRdoToPrdConv').DoSeededDecoding=True
+            cfg.getEventAlgo('MuonMmRdoToPrdConv').RoIs='HLT_Roi_Selected_'+ebType
+        if flags.Detector.GeometrysTGC:
+            cfg.getEventAlgo('MuonStgcRdoToPrdConv').DoSeededDecoding=True
+            cfg.getEventAlgo('MuonStgcRdoToPrdConv').RoIs='HLT_Roi_Selected_'+ebType
+
+        if flags.Detector.GeometryPixel:
+            cfg.getEventAlgo('InDetPixelClusterization').isRoI_Seeded=True
+            cfg.getEventAlgo('InDetPixelClusterization').RoIs='HLT_Roi_Selected_'+ebType
+            from RegionSelector.RegSelToolConfig import regSelTool_Pixel_Cfg
+            cfg.getEventAlgo('InDetPixelClusterization').RegSelTool=cfg.popToolsAndMerge(regSelTool_Pixel_Cfg(flags))
+        if flags.Detector.GeometrySCT:
+            cfg.getEventAlgo('InDetSCT_Clusterization').isRoI_Seeded=True
+            cfg.getEventAlgo('InDetSCT_Clusterization').RoIs='HLT_Roi_Selected_'+ebType
+            from RegionSelector.RegSelToolConfig import regSelTool_SCT_Cfg
+            cfg.getEventAlgo('InDetSCT_Clusterization').RegSelTool=cfg.popToolsAndMerge(regSelTool_SCT_Cfg(flags))
+        if flags.Detector.GeometryTRT:
+            cfg.getEventAlgo('InDetTRT_RIO_Maker').isRoI_Seeded=True
+            cfg.getEventAlgo('InDetTRT_RIO_Maker').RoIs='HLT_Roi_Selected_'+ebType
+            from RegionSelector.RegSelToolConfig import regSelTool_TRT_Cfg
+            cfg.getEventAlgo('InDetTRT_RIO_Maker').RegSelTool=cfg.popToolsAndMerge(regSelTool_TRT_Cfg(flags))
+
+        if flags.Detector.GeometryCalo:
+            from TriggerJobOpts.TriggerTransBSConfig import triggerTransBSCfg_Calo
+            cfg.merge(triggerTransBSCfg_Calo(flags))
+            from TrigCaloRec.TrigCaloRecConfig import hltCaloCellMakerCfg
+            cfg.merge(hltCaloCellMakerCfg(flags,name='RoICaloCellmaker', roisKey='HLT_Roi_Selected_'+ebType, CellsName='AllCalo', doTau=True))
+        else:
+            #needed to read SCell container in RDO files (maybe could get away with a more minimal set of algorithms)
+            from TrigT2CaloCommon.TrigCaloDataAccessConfig import trigCaloDataAccessSvcCfg
+            cfg.merge(trigCaloDataAccessSvcCfg(flags))
 
     # setup Metadata writer
     from AthenaConfiguration.Enums import MetadataCategory

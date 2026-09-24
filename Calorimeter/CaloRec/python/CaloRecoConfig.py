@@ -40,8 +40,10 @@ def CaloRecoCfg(flags, clustersname=None):
 
 
     #Configure cell-building
-    from CaloRec.CaloCellMakerConfig import CaloCellMakerCfg
-    result.merge(CaloCellMakerCfg(flags))
+    #For MC Partial Event Building we use the HLT Cell Making instead
+    if not (flags.Trigger.AODEDMSet=="DarkJetPEBTLA" or flags.Trigger.AODEDMSet=="FTagPEBTLA" or flags.Trigger.AODEDMSet=="EgammaPEBTLA") or not flags.Input.isMC:
+        from CaloRec.CaloCellMakerConfig import CaloCellMakerCfg
+        result.merge(CaloCellMakerCfg(flags))
 
     #Configure cell-building for DigiHSTruth:
     if flags.Calo.TopoCluster.doDigiHSTruthMoments:
