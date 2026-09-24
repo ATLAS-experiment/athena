@@ -85,9 +85,25 @@ StatusCode TracccSeedConverterAlg::execute(const EventContext& ctx) const
     ATH_CHECK(seedHandle.record(std::make_unique<ActsTrk::SeedContainer>()));
     ActsTrk::SeedContainer* seedPtrs = seedHandle.ptr();    
 
+    std::vector<unsigned int> seed_qual_ordering;
+    if (m_sort_seeds) {
+        const auto& qual_vector = traccc_seeds.quality();
+        seed_qual_ordering = std::vector<unsigned int>(traccc_seeds.size());
+        std::iota(seed_qual_ordering.begin(), seed_qual_ordering.end(), 0);
+        std::ranges::sort(
+            seed_qual_ordering,
+            [&qual_vector](const unsigned int a, const unsigned int b) {
+                return qual_vector[a] > qual_vector[b];
+            });
+    }
+
     for (size_t st = 0; st < traccc_seeds.size(); ++st) {
-        
-        const auto& seed = traccc_seeds.at(st);
+        size_t pos = st;
+        if (m_sort_seeds) {
+            pos = seed_qual_ordering.at(st);
+        }
+        ATH_MSG_VERBOSE("gpu-side seed " << pos << " placed at " << st);
+        const auto& seed = traccc_seeds.at(pos);
         std::vector<unsigned int> sp_traccc_index{
             seed.bottom_index(), seed.middle_index(), seed.top_index()}; 
 
@@ -116,7 +132,7 @@ StatusCode TracccSeedConverterAlg::execute(const EventContext& ctx) const
             std::array{spacepoints->at(sp_host_index[0]),
                         spacepoints->at(sp_host_index[1]),
                         spacepoints->at(sp_host_index[2])},
-            0.f, 0.f);
+            seed.quality(), 0.f);
     }
 
     ATH_MSG_DEBUG(" Seed Container " << m_outputSeedsKey.key()

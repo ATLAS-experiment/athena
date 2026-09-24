@@ -79,6 +79,10 @@ private:
   ToolHandle<AthDevice::ICopyTool> m_copy{
       this, "CopyProviderTool", "", "Vecmem copy provider tool"};
 
+  /// @name Whether to sort seeds by quality provided by the seeder
+  Gaudi::Property<bool> m_sort_seeds{
+	    this, "sortSeeds", true, "Whether to sort seeds by quality"};
+
   /// The object counters for debug prints in finalize method
   /// {@
   mutable std::atomic<int> m_nSP = 0;
