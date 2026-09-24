@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @file	 AFPSiDLinRegTool.cxx
@@ -196,7 +196,7 @@ StatusCode AFPSiDLinRegTool::reconstructTracks(std::unique_ptr<xAOD::AFPTrackCon
 		// Add links to clusters
 		for (const auto *const cluster : clusterOfClusters) {
 			ElementLink<xAOD::AFPSiHitsClusterContainer> clusterLink;
-			clusterLink.toContainedElement(*clusters, cluster);
+			clusterLink.toContainedElement(*clusters, cluster, ctx);
 			track->addCluster(clusterLink);
 		}
 
