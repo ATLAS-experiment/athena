@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -31,7 +31,7 @@ namespace CP
   StatusCode NJetDecoratorAlg ::
   execute (const EventContext& ctx)
   {
-    // Take care of the weight (which is the only thing depending on systematics)
+    // count the selected jets for each systematic
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       const xAOD::EventInfo* systEvtInfo = nullptr;
@@ -47,7 +47,7 @@ namespace CP
 	}
       }
       m_Njet_decor.set(*systEvtInfo, jet_n, sys);
-    };
+    }
     return StatusCode::SUCCESS;
   }
 }
