@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <ElectronPhotonFourMomentumCorrection/GainUncertainty.h>
@@ -177,7 +177,10 @@ double GainUncertainty::getUncertainty(double etaCalo_input, double et_input,
       return 0;
     }
   }
-
+  if (!hImpact)[[unlikely]]{
+    ATH_MSG_WARNING("hImpact is null");
+    return 0;
+  }
   double max_et = hImpact->GetXaxis()->GetBinUpEdge(hImpact->GetNbinsX());
   // Protection needed to match maximum Et in the histogram
   if (0.001 * et_input > max_et) {

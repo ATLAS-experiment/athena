@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimHoughTransformTool.cxx
@@ -225,16 +225,16 @@ StatusCode FPGATrackSimHoughTransformTool::getRoads(const std::vector<std::share
         }
         if (!mergedRoadListXY.empty()){
           ATH_MSG_DEBUG( mergedRoadListXY.size() -1 <<" roads are merged to road(" << mergedRoadListXY[0].first << "," << mergedRoadListXY[0].second << ")");
+          for (const auto & roadXY : mergedRoadListXY){
+            unsigned x = roadXY.first;
+            unsigned y = roadXY.second;
+            merged_image.insert(m_image(y, x).second.begin(), m_image(y, x).second.end());
+          }
+          addRoad(merged_image, mergedRoadListXY[0].first, mergedRoadListXY[0].second);
+          mergedRoadListXY.clear();
+          merged_image.clear();
+          roadCounter++;
         }
-	for (const auto & roadXY : mergedRoadListXY){
-	  unsigned x = roadXY.first;
-	  unsigned y = roadXY.second;
-          merged_image.insert(m_image(y, x).second.begin(), m_image(y, x).second.end());
-	}
-        addRoad(merged_image, mergedRoadListXY[0].first, mergedRoadListXY[0].second);
-        mergedRoadListXY.clear();
-        merged_image.clear();
-        roadCounter++;
       }
       ATH_MSG_DEBUG("There is/are " << roadCounter << " roads after road merge");
     }
