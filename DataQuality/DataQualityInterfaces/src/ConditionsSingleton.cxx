@@ -10,13 +10,7 @@
 #include <sstream>
 #include <iomanip>
 #include <set>
-#include "boost/tokenizer.hpp"
-#include <boost/algorithm/string.hpp>
-#include "boost/algorithm/string/split.hpp"
-
-namespace{
-  const std::string equalStr{"="};
-}
+#include "CxxUtils/StringUtils.h"
 
 namespace dqi{
 
@@ -73,17 +67,13 @@ namespace dqi{
     std::vector<std::string> refs;
 
     if(inp.find('=')!=std::string::npos){//we have conditions defined on reference
-      typedef boost::tokenizer<boost::char_separator<char> >  tokenizer;
-      boost::char_separator<char> refSep(";");//field seperator for conditional references
-      boost::char_separator<char> condSep(",:"); //filed seperator for conditions and respective reference
-      tokenizer referenceConditionPairs(inp, refSep);
+      auto referenceConditionPairs = CxxUtils::tokenize(inp, ";");
       std::string defaultRef("");
-      for(tokenizer::iterator tok_iter=referenceConditionPairs.begin();
+      for(auto tok_iter=referenceConditionPairs.begin();
 	  tok_iter!=referenceConditionPairs.end();++tok_iter){//look at each condition reference pair
 	if(std::string((*tok_iter)).find('=')!=std::string::npos){//have conditions defined 
 	  if(std::string(*tok_iter).find(':')!=std::string::npos){//do a reference split
-	    std::vector<std::string> conds;
-	    boost::split(conds,*tok_iter,boost::is_any_of(std::string(":")));
+	    std::vector<std::string> conds = CxxUtils::tokenize(*tok_iter,":");
 	    if(conds.size()>2){
 	      std::cerr<<"Warning malformed reference \""<<inp<<"\""<<std::endl;
 	    }else if(conds.size()<2){
@@ -121,16 +111,13 @@ namespace dqi{
 					     const std::string& condition){
     if (condition.empty()) return;
 
-    typedef boost::tokenizer<boost::char_separator<char> >  tokenizer;
     std::string cleanCond(condition);
     std::erase(cleanCond,' ');//delete all spaces
-    boost::char_separator<char> condSep(","); //filed seperator for conditions and respective reference
-    tokenizer conditionPairs(condition, condSep);
+    auto conditionPairs = CxxUtils::tokenize(condition, ",");
     
-    for (tokenizer::const_iterator tok_iter = conditionPairs.begin();
+    for (auto tok_iter = conditionPairs.begin();
 	     tok_iter != conditionPairs.end(); ++tok_iter) {
-      std::vector<std::string> splitpairs;
-      boost::split(splitpairs, *tok_iter, boost::is_any_of(equalStr));
+      std::vector<std::string> splitpairs = CxxUtils::tokenize(*tok_iter,"=");
       if (splitpairs.size() != 2) {
 	std::cerr << "WARNING: malformed condition \"" << *tok_iter << "\"" << std::endl;
 	continue;
@@ -163,18 +150,14 @@ namespace dqi{
     std::erase(inp,' ');
     //    if(cleanCond.empty())return inp;
     if(inp.find('=')!=std::string::npos){//we have conditions defined on reference
-      typedef boost::tokenizer<boost::char_separator<char> >  tokenizer;
-      boost::char_separator<char> refSep(";");//field seperator for conditional references
-      boost::char_separator<char> condSep(",:"); //filed seperator for conditions and respective reference
-      tokenizer referenceConditionPairs(inp, refSep);
+      auto referenceConditionPairs = CxxUtils::tokenize(inp, ";");
       std::string defaultRef("");
       std::map<std::string,std::string> conditionalReferences;
-      for(tokenizer::iterator tok_iter=referenceConditionPairs.begin();
+      for(auto tok_iter=referenceConditionPairs.begin();
 	  tok_iter!=referenceConditionPairs.end();++tok_iter){//look at each condition reference pair
 	if(std::string((*tok_iter)).find('=')!=std::string::npos){//have conditions defined 
 	  if(std::string(*tok_iter).find(':')!=std::string::npos){//do a reference split
-	    std::vector<std::string> conds;
-	    boost::split(conds,*tok_iter,boost::is_any_of(std::string(":")));
+	    std::vector<std::string> conds = CxxUtils::tokenize(*tok_iter,":");
 	    if(conds.size()>2){
 	      std::cerr<<"Warning malformed reference \""<<inp<<"\""<<std::endl;
 	    }else if(conds.size()<2){
@@ -224,17 +207,13 @@ namespace dqi{
     std::erase(inp,' ');
     std::string defaultRef("");
     if(inp.find('=')!=std::string::npos){//we have conditions defined on reference
-      typedef boost::tokenizer<boost::char_separator<char> >  tokenizer;
-      boost::char_separator<char> refSep(";");//field seperator for conditional references
-      boost::char_separator<char> condSep(",:"); //filed seperator for conditions and respective reference
-      tokenizer referenceConditionPairs(inp, refSep);
+      auto referenceConditionPairs = CxxUtils::tokenize(inp, ";");
       std::map<std::string,std::string> conditionalReferences;
-      for(tokenizer::iterator tok_iter=referenceConditionPairs.begin();
+      for(auto tok_iter=referenceConditionPairs.begin();
 	  tok_iter!=referenceConditionPairs.end();++tok_iter){//look at each condition reference pair
 	if(std::string((*tok_iter)).find('=')!=std::string::npos){//have conditions defined 
 	  if(std::string(*tok_iter).find(':')!=std::string::npos){//do a reference split
-	    std::vector<std::string> conds;
-	    boost::split(conds,*tok_iter,boost::is_any_of(std::string(":")));
+	    std::vector<std::string> conds = CxxUtils::tokenize(*tok_iter,":");
 	    if(conds.size()>2){
 	      std::cerr<<"Warning malformed reference \""<<inp<<"\""<<std::endl;
 	    }else if(conds.size()<2){
