@@ -9,11 +9,11 @@
 #ifndef EVENTPRIMITIVESTOSTRINGCONVERTER_H_
 #define EVENTPRIMITIVESTOSTRINGCONVERTER_H_
 
+#include "EventPrimitives/EventPrimitives.h"
 #include <iomanip>
 #include <iostream>
 #include <string>
-
-#include "EventPrimitives/EventPrimitives.h"
+#include <cmath>
 
 namespace Amg {
 
