@@ -8,6 +8,9 @@
 #include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "AthenaBaseComps/AthAlgorithm.h"
 
+namespace Acts{
+    class Surface;
+}
 
 namespace ActsTrk{
     class GeometryEnvelopeTest: public AthAlgorithm {
@@ -28,6 +31,11 @@ namespace ActsTrk{
              *  @param volume: The envelope from which the vertex points shall be extracted */
             std::vector<Amg::Vector3D> edges(const Acts::GeometryContext& tgContext,
                                              const Acts::TrackingVolume& volume) const;
+            /** @brief Extracts the vertices from a surface
+              * @param tgContext: The geometry context to position the surface
+              * @param volume: The surface from which the edge vertices are to be extracted */
+            std::vector<Amg::Vector3D> vertices(const Acts::GeometryContext& tgContext,
+                                                const Acts::Surface& surface) const;
             /** @brief The handle to the tracking geometry service */
             ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
 
