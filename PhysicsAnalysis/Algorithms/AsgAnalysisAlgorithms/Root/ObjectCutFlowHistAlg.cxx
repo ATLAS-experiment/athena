@@ -82,7 +82,7 @@ namespace CP
           histIter->second->Fill (0);
           bool selected{true};
           for (size_t i{}; i < m_selections.size(); i++) {
-            if ((!m_forceCutSequence.value() || selected) && m_selections.at(i).getBool (*particle, sys) > 0) {
+            if ((!m_forceCutSequence.value() || selected) && m_selections.at(i).getBool (*particle, sys)) {
               histIter->second->Fill (cutIndex);
             } else {
               selected = false;

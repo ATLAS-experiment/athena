@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina
@@ -79,7 +79,7 @@ namespace CP
 	unsigned cutIndex = 1;
 	histIter->second->Fill (0);
 	for (size_t i{}; i < m_selections.size(); i++) {
-	  if (m_selections.at(i).getBool (*evtInfo, sys) > 0) {
+	  if (m_selections.at(i).getBool (*evtInfo, sys)) {
 	    histIter->second->Fill (cutIndex);
 	  }
 	  cutIndex++;
