@@ -314,6 +314,11 @@ namespace CP {
         if( branchConfig.auxFactory && branchConfig.auxVecType ) {
             m_factory = branchConfig.auxFactory;
             const std::type_info* type_info = branchConfig.auxVecType;
+            if( *type_info == typeid(std::vector<bool>) ) {
+                // std::vector<bool> provides no contiguous storage to copy into
+                msg << MSG::ERROR << "std::vector<bool> is not supported for container field " << m_fieldName << endmsg;
+                return StatusCode::FAILURE;
+            }
             
             m_field = makeField( model, m_fieldName, *type_info, m_dataPtr, m_ops, msg );
         } else {
@@ -348,7 +353,10 @@ namespace CP {
 
     StatusCode ContainerFieldProcessor::process( const SG::AuxElement& element, size_t index, MsgStream& msg ) {
         void* rawDataPtr = getData();
-        if( !rawDataPtr && index > 0 ) return StatusCode::FAILURE;
+        if( !rawDataPtr ) {
+            msg << MSG::ERROR << "No data available for " << m_fieldName << endmsg;
+            return StatusCode::FAILURE;
+        }
 
         try {
             TempInterface dstiface( index + 1, m_acc->auxid(), rawDataPtr );
