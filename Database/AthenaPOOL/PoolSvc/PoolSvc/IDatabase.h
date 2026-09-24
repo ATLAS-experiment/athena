@@ -62,9 +62,6 @@ namespace pool {
      */
     virtual bool setTechnology( long technology ) = 0;
 
-    /// Returns the technology identifier for this database
-    virtual long technology() const = 0;
-
     /// Returns the names of the containers in this database
     virtual std::vector< std::string > containers() = 0;
 
