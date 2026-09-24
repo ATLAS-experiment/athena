@@ -32,5 +32,11 @@ atlas_add_test( test_AmgDefs
 atlas_add_test( test_CovarianceHelpers
    SOURCES test/test_CovarianceHelpers.cxx
    LINK_LIBRARIES EventPrimitives )
+   
+atlas_add_test( test_EventPrimitivesToStringConverter
+   SOURCES test/test_EventPrimitivesToStringConverter.cxx
+   LINK_LIBRARIES EventPrimitives 
+   POST_EXEC_SCRIPT noerror.sh
+   )
 
 
