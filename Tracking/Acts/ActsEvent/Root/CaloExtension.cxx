@@ -9,6 +9,8 @@
 
 #include "GeoModelKernel/throwExcept.h"
 
+using namespace Acts::UnitLiterals;
+
 namespace ActsTrk{
     const CaloExtension* getCaloExtension(const xAOD::TrackParticle& track) {
         static const SG::ConstAccessor<ElementLink<CaloExtensionContainer>> acc{"caloExtensionLink"};
@@ -50,6 +52,14 @@ namespace ActsTrk{
                                     m_idTrack->parameterPY(lastMeasIdx),
                                     m_idTrack->parameterPZ(lastMeasIdx)};
         Acts::BoundMatrix cov{Acts::BoundMatrix::Identity()};
+        
+        cov.block<5,5>(0,0) = m_idTrack->trackParameterCovarianceMatrix(lastMeasIdx);
+        for (int i = 0; i < cov.rows(); ++i) {
+            cov(i, 4) = cov(i, 4) / 1_MeV;
+        }
+        for (int i = 0; i < cov.cols(); ++i) {
+            cov(4, i) = cov(4, i) / 1_MeV;
+        }
 
         return Acts::BoundTrackParameters::createCurvilinear(
                     convertPosToActs(lastPos, m_idTrack->hasValidTime() ? m_idTrack->time() : 0.), 

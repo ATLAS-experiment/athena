@@ -8,6 +8,8 @@
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
 
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
+
 #include "ActsInterop/Logger.h"
 
 #include "Acts/Definitions/Units.hpp"
@@ -75,7 +77,8 @@ namespace ActsTrk{
         const Acts::TrackingVolume* caloExit = m_trackingGeometrySvc->getEnvelope(SystemEnvelope::CaloExit);
         
         caloExit->visitVolumes([&](const Acts::TrackingVolume *vol) {
-            ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Check volume: "<<vol->volumeName()<<".");
+            ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Check volume: "
+                                         <<vol->volumeName()<<", "<<vol->geometryId()<<".");
             auto smpItr = std::ranges::find_if(volIndexNames, [&](const auto& sampleID) {
                 return vol->volumeName().starts_with(sampleID.first);
             });
@@ -118,8 +121,12 @@ namespace ActsTrk{
     std::unique_ptr<CaloExtension> CaloExtensionAlg::propagateToCaloExit(const EventContext& ctx,
                                                                          const xAOD::TrackParticle* track) const{
   
+        
+        ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Extrapolate track with pT: "<<(track->pt() * 1.e-3)
+            <<" [GeV], eta: "<<track->eta()<<", phi: "<<(track->phi() / 1._degree)<<", q: "<<track->charge());
         const Acts::TrackingVolume* caloExit = m_trackingGeometrySvc->getEnvelope(SystemEnvelope::CaloExit);
-       
+        const Acts::TrackingVolume* itkExit = m_trackingGeometrySvc->getEnvelope(SystemEnvelope::ITkExit);
+        const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
         auto extension = std::make_unique<CaloExtension>(track);
         /// Retrieve the last track parameters with a measurement state
         auto lastTrackPars = extension->lastParameters();
@@ -132,7 +139,8 @@ namespace ActsTrk{
         propOpts.recordMaterial = true;
         propOpts.recordPassive = true;
         propOpts.recordSensitive = true;
-
+        ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Start to propagate \n"<<(*lastTrackPars)<<"\n, position: "
+                        <<Amg::toString(lastTrackPars->position(tgContext))<< " through the calorimeter.");
         auto surfaceRecord = m_extrapolationTool->propagateAndRecord(ctx, *lastTrackPars, propOpts);
         if (!surfaceRecord.ok()) {
             ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - Propagation through calorimeter did not succeed");
@@ -140,11 +148,15 @@ namespace ActsTrk{
         }
         /// Loop over the recorded bound track parameters to append them onto the surface
         for (Acts::BoundTrackParameters& record : *surfaceRecord) {
-            if (&record.referenceSurface()  == &(lastTrackPars->referenceSurface())) {
+            /// Skip the states that are inside the ITk envelope volume
+            if (itkExit->inside(tgContext, record.position(tgContext))) {
                 continue;
             }
-            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Append calorimeter parameters: "
-                <<record<<",\n surface: "<<record.referenceSurface().bounds()<<".");
+            const Acts::GeometryIdentifier volId{record.referenceSurface().geometryId().withBoundary(0).withSensitive(0)};
+            const Acts::TrackingVolume* vol = m_trackingGeometrySvc->trackingGeometry()->findVolume(volId);
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Append calorimeter parameters:\n"
+                <<record<<",\n position:"<< Amg::toString(record.position(tgContext))
+                <<", surface: "<<record.referenceSurface().bounds()<<", volume: "<<vol->volumeName()<<".");
             extension->appendParameters(std::move(record));
         }
         if (extension->empty()){
