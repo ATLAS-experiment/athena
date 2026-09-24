@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 /// @author Teng Jian Khoo
@@ -28,6 +28,9 @@ namespace CP
       }
       // Could also warn if there are fewer values, but we don't have to force users to set where irrelevant.
       // Maybe warn unless the size is 0, in which case assume all default?
+      if (m_invertFlags.empty()) {
+          m_invertFlags = std::vector<bool>(m_selFlags.size(), false);
+      }
 
       for(size_t index=0; index<m_selFlags.size(); ++index) {
           const std::string& thisflag = m_selFlags[index];
@@ -35,13 +38,6 @@ namespace CP
               ATH_MSG_ERROR("Empty string passed as selection flag!");
               return StatusCode::FAILURE;
           } else {
-              // Extend m_invertFlags until the size matches m_selectionFlags
-              // Only done in the case that m_invert was empty
-              if(m_invertFlags.size()<index+1) {
-		std::vector<bool> flags = m_invertFlags.value();
-		flags.resize(index + 1, false);
-		m_invertFlags = flags;
-	      }
               std::string doInvertStr = m_invertFlags[index] ? "!" : "";
               m_accept.addCut (doInvertStr + thisflag, doInvertStr + thisflag);
               std::unique_ptr<ISelectionReadAccessor> accessor;
