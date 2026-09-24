@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -23,7 +23,7 @@
 
 namespace CP
 {
-  /// \brief an algorithm for calling \ref IPileupReweightingTool
+  /// \brief an algorithm for calling \ref ORUtils::IOverlapRemovalTool
 
   class OverlapRemovalAlg final : public EL::AnaAlgorithm
   {
