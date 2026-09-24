@@ -40,8 +40,18 @@
 #include "Acts/Utilities/Logger.hpp"
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/Geometry/PassiveLayerBuilder.hpp"
+#include <ActsPlugins/Detray/DetrayGeometryConverter.hpp>
 #include <ActsPlugins/Json/JsonMaterialDecorator.hpp>
 #include <ActsPlugins/Json/MaterialMapJsonConverter.hpp>
+#include <detray/geometry/surface.hpp>
+#include <detray/geometry/tracking_volume.hpp>
+#include <detray/utils/consistency_checker.hpp>
+#include <detray/utils/invalid_values.hpp>
+#include <traccc/geometry/host_detector.hpp>
+#include <algorithm>
+#include <set>
+#include <utility>
+#include <vector>
 #include <Acts/Surfaces/PlanarBounds.hpp>
 #include <Acts/Surfaces/AnnulusBounds.hpp>
 #include <Acts/Surfaces/DiscSurface.hpp>
@@ -96,6 +106,8 @@ TrackingGeometrySvc::TrackingGeometrySvc(const std::string &name,
       m_elementStore (std::make_shared<ActsElementVector>())
 {
 }
+
+TrackingGeometrySvc::~TrackingGeometrySvc() = default;
 
 StatusCode TrackingGeometrySvc::initialize() {
   ATH_MSG_INFO(name() << " is initializing");
@@ -246,6 +258,10 @@ StatusCode TrackingGeometrySvc::initialize() {
     m_detIdMap = createDetectorElementToGeoIdMap();
     if (!m_detIdMap) {
         return StatusCode::FAILURE;
+    }
+
+    if (m_buildDetrayGeometry) {
+      ATH_CHECK(buildDetrayGeometry());
     }
 
     return StatusCode::SUCCESS;
@@ -553,6 +569,9 @@ StatusCode TrackingGeometrySvc::initialize() {
       return StatusCode::FAILURE;
   }
 
+  if (m_buildDetrayGeometry) {
+    ATH_CHECK(buildDetrayGeometry());
+  }
 
   ATH_MSG_INFO("Acts TrackingGeometry construction completed");
 
@@ -1270,7 +1289,184 @@ const Acts::TrackingVolume*
       return retVol;
 }
 
-std::unique_ptr<ActsTrk::DetectorElementToActsGeometryIdMap> 
+StatusCode TrackingGeometrySvc::finalize() {
+  // Release the Detray geometry while the memory resource tool it allocated
+  // from is still around, which is not guaranteed any more once the service
+  // itself is destroyed.
+  m_detrayGeometry.reset();
+  return AthService::finalize();
+}
+
+StatusCode TrackingGeometrySvc::buildDetrayGeometry() {
+  using DetrayTraits = traccc::itk_detector;
+  using DetrayMetadata = DetrayTraits::metadata_type;
+  using namespace ActsTrk::detail::GeoVolIds;
+  // The Detray detector allocates through this memory resource and keeps
+  // referring to it for the deallocations, so the tool has to be held for as
+  // long as m_detrayGeometry lives.
+  if (m_hostMR.empty()) {
+    ATH_MSG_ERROR("BuildDetrayGeometry was requested, but no host memory "
+                  "resource tool was configured (HostMR)");
+    return StatusCode::FAILURE;
+  }
+  ATH_CHECK(m_hostMR.retrieve());
+
+  // Detray puts the beam pipe volume at detector index 0 and requires it to
+  // contain the origin, so resolve it by position instead of by GeometryIdentifier.
+  // An id-based lookup would not work anyway: BeamPipeBlueprintNodeBuilder assigns
+  // s_beamPipeVolumeId to *every* volume of the beam pipe subtree (the static
+  // cylinder plus whatever gap volumes the container spawned) and hands out layer
+  // ids incrementally starting at 1, so findVolume() on volume=s_beamPipeVolumeId
+  // -- which implies layer == 0 -- never matches.
+  auto beamPipeResult = m_trackingGeometry->resolveLowestTrackingVolume(
+      getNominalContext().context(), Acts::Vector3::Zero());
+  if (!beamPipeResult.ok()) {
+    ATH_MSG_ERROR("BuildDetrayGeometry was requested, but the tracking volume "
+                  "containing the origin could not be resolved: "
+                  << beamPipeResult.error().message());
+    return StatusCode::FAILURE;
+  }
+
+  const Acts::TrackingVolume* beamPipeVolume = *beamPipeResult;
+  if (beamPipeVolume == nullptr) {
+    ATH_MSG_ERROR("BuildDetrayGeometry was requested, but no tracking volume "
+                  "contains the origin. Detray requires a beam pipe volume "
+                  "covering (0, 0, 0).");
+    return StatusCode::FAILURE;
+  }
+  if (beamPipeVolume->geometryId().volume() != s_beamPipeVolumeId) {
+    ATH_MSG_WARNING("The tracking volume containing the origin, '"
+                    << beamPipeVolume->volumeName() << "' ("
+                    << beamPipeVolume->geometryId()
+                    << "), is not part of the beam pipe subtree (expected "
+                       "GeometryIdentifier volume=" << s_beamPipeVolumeId
+                    << "). Using it as the Detray beam pipe volume regardless.");
+  }
+  ATH_MSG_INFO("Using '" << beamPipeVolume->volumeName() << "' ("
+               << beamPipeVolume->geometryId() << ") as the Detray beam pipe volume");
+
+  ActsPlugins::DetrayPayloadConverter::Config payloadConfig{};
+  payloadConfig.beampipeVolume = beamPipeVolume;
+
+  auto payloadConverter = std::make_shared<const ActsPlugins::DetrayPayloadConverter>(
+      payloadConfig,
+      makeActsAthenaLogger(this, "DetrayPayloadCnv", std::string("ActsTGSvc")));
+
+  ActsPlugins::DetrayGeometryConverter::Config converterConfig{};
+  converterConfig.payloadConverter = std::move(payloadConverter);
+
+  ActsPlugins::DetrayGeometryConverter converter(
+      converterConfig,
+      makeActsAthenaLogger(this, "DetrayGeomCnv", std::string("ActsTGSvc")));
+
+  ActsPlugins::DetrayGeometryConverter::DetrayGeometry<DetrayMetadata> detrayGeometry{};
+  try {
+    detrayGeometry = converter.convert<DetrayMetadata>(
+        m_hostMR->mr(), getNominalContext().context(), m_trackingGeometry, name());
+  } catch (const std::exception& e) {
+    ATH_MSG_ERROR("Failed to convert the Acts::TrackingGeometry into a Detray geometry: " << e.what());
+    return StatusCode::FAILURE;
+  }
+
+  if (!detrayGeometry.detector) {
+    ATH_MSG_ERROR("Detray geometry conversion did not produce a detector");
+    return StatusCode::FAILURE;
+  }
+
+  if (m_checkDetrayGeometry) {
+    ATH_MSG_INFO("Checking the consistency of the converted Detray geometry");
+    try {
+      detray::detail::check_consistency(*detrayGeometry.detector, true,
+                                        detrayGeometry.names);
+    } catch (const std::exception& e) {
+      ATH_MSG_ERROR("The converted Detray geometry is not consistent: " << e.what());
+      return StatusCode::FAILURE;
+    }
+    const auto reportDetrayPortalLinks = [this](
+        const auto& detector, const detray::name_map& names) {
+      const std::size_t nVolumes = detector.volumes().size();
+
+      // Directed portal graph: outgoing[a] holds every volume a portal of
+      // volume a links into. A healthy interface between a and b shows up as
+      // a -> b and b -> a.
+      std::vector<std::set<detray::dindex>> outgoing(nVolumes);
+      std::size_t nPortals{0};
+      std::size_t nEndOfWorld{0};
+
+      for (const auto& volDesc : detector.volumes()) {
+        const auto volume = detray::tracking_volume{detector, volDesc};
+        const detray::dindex volIdx = volume.index();
+
+        for (const auto& sfDesc : volume.portals()) {
+          const auto surface = detray::geometry::surface{detector, sfDesc};
+          ++nPortals;
+
+          for (const auto link : surface.volume_links()) {
+            if (detray::detail::is_invalid_value(link)) {
+              ++nEndOfWorld;
+              continue;
+            }
+            if (link == volIdx || link >= nVolumes) {
+              continue;
+            }
+            outgoing[volIdx].insert(link);
+          }
+        }
+      }
+
+      std::size_t nReciprocal{0};
+      std::vector<std::pair<detray::dindex, detray::dindex>> oneWay;
+      for (detray::dindex a = 0; a < nVolumes; ++a) {
+        for (const detray::dindex b : outgoing[a]) {
+          if (outgoing[b].contains(a)) {
+            ++nReciprocal;
+          } else {
+            oneWay.emplace_back(a, b);
+          }
+        }
+      }
+
+      auto volName = [&names](detray::dindex idx) -> std::string {
+        return names.contains(idx) ? names.at(idx)
+                                   : ("volume " + std::to_string(idx));
+      };
+
+      ATH_MSG_INFO("Detray portal links: " << nPortals
+                   << " portal surfaces, " << nEndOfWorld
+                   << " end-of-world links, " << (nReciprocal / 2)
+                   << " reciprocal volume interfaces, " << oneWay.size()
+                   << " one-directional");
+
+      if (!oneWay.empty()) {
+        ATH_MSG_WARNING(oneWay.size()
+                        << " portal links are one-directional: the neighbour "
+                           "volume has no portal linking back. Detray's "
+                           "check_consistency() does not catch this.");
+        const std::size_t nShow =
+            std::min<std::size_t>(oneWay.size(), 20);
+        for (std::size_t i = 0; i < nShow; ++i) {
+          ATH_MSG_WARNING("  one-way: '" << volName(oneWay[i].first) << "' ("
+                          << oneWay[i].first << ") -> '"
+                          << volName(oneWay[i].second) << "' ("
+                          << oneWay[i].second << ") with no return link");
+        }
+        if (oneWay.size() > nShow) {
+          ATH_MSG_WARNING("  ... and " << (oneWay.size() - nShow) << " more");
+        }
+      }
+    };
+    reportDetrayPortalLinks(*detrayGeometry.detector, detrayGeometry.names);
+  }
+
+  auto hostDetector = std::make_unique<traccc::host_detector>();
+  hostDetector->set<DetrayTraits>(std::move(*detrayGeometry.detector));
+  m_detrayGeometry = std::move(hostDetector);
+
+  ATH_MSG_INFO("Successfully built the Detray geometry from the Acts::TrackingGeometry");
+  return StatusCode::SUCCESS;
+}
+
+std::unique_ptr<ActsTrk::DetectorElementToActsGeometryIdMap>
     TrackingGeometrySvc::createDetectorElementToGeoIdMap() const {
     // create map from
     auto detector_element_to_geoid = std::make_unique<DetectorElementToActsGeometryIdMap>();
