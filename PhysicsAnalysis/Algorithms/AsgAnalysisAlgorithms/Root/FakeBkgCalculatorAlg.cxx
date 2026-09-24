@@ -23,6 +23,7 @@ namespace CP {
     ANA_CHECK(m_preselection.initialize(m_systematicsList, m_eventInfoHandle, SG::AllowEmpty));
 
     ANA_CHECK(m_fakeTool.retrieve());
+    ANA_CHECK(m_fakeTool->applySystematicVariation({})); // the nominal MM weight is computed
     ANA_CHECK(m_fakeToolOutput.initialize(m_systematicsList, m_eventInfoHandle));
 
     ANA_CHECK(m_systematicsList.initialize());
@@ -66,7 +67,6 @@ namespace CP {
 
       ANA_CHECK(m_fakeTool->addEvent(leptons));
       float asmWgt = 0.;
-      ANA_CHECK(m_fakeTool->applySystematicVariation({})); // the nominal MM weight is computed
       ANA_CHECK(m_fakeTool->getEventWeight(asmWgt, m_definition, m_process));
       ANA_MSG_DEBUG(" ----> asmWgt = "<<asmWgt);
 
