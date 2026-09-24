@@ -5,6 +5,8 @@
 /// @author Baptiste Ravina
 
 #include <AsgAnalysisAlgorithms/BootstrapGeneratorAlg.h>
+#include <AsgDataHandles/ReadHandle.h>
+#include <AsgDataHandles/WriteDecorHandle.h>
 
 std::uint64_t CP::BootstrapGenerator::fnv1a_64(const void *buffer, size_t size, std::uint64_t offset_basis) {
   std::uint64_t h = offset_basis;
@@ -38,34 +40,31 @@ StatusCode CP::BootstrapGeneratorAlg::initialize()
       return StatusCode::FAILURE;
     }
 
-  ANA_CHECK(m_eventInfoHandle.initialize(m_systematicsList));
-  ANA_CHECK(m_decoration.initialize(m_systematicsList, m_eventInfoHandle));
-  ANA_CHECK(m_systematicsList.initialize());
+  ANA_CHECK(m_eventInfoKey.initialize());
+  ANA_CHECK(m_decorationKey.initialize());
 
   return StatusCode::SUCCESS;
 }
 
-StatusCode CP::BootstrapGeneratorAlg::execute(const EventContext& ctx)
+StatusCode CP::BootstrapGeneratorAlg::execute(const EventContext& ctx) const
 {
-  for (const auto &sys : m_systematicsList.systematicsVector())
+  SG::ReadHandle<xAOD::EventInfo> evtInfo(m_eventInfoKey, ctx);
+  ANA_CHECK(evtInfo.isValid());
+
+  // generate a unique seed from runNumber, eventNumber and DSID!
+  BootstrapGenerator bootstrap;
+  bootstrap.setSeed(evtInfo->eventNumber(), evtInfo->runNumber(), m_data ? 0 : evtInfo->mcChannelNumber());
+
+  // and fill it with Poisson(1)
+  std::vector<std::uint8_t> weights(m_nReplicas);
+  for (std::uint8_t& weight : weights)
     {
-      // retrieve the EventInfo
-      const xAOD::EventInfo *evtInfo = nullptr;
-      ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys, ctx));
-
-      // generate a unique seed from runNumber, eventNumber and DSID!
-      m_bootstrap.setSeed(evtInfo->eventNumber(), evtInfo->runNumber(), m_data ? 0 : evtInfo->mcChannelNumber());
-
-      m_weights.resize(m_nReplicas);
-      // and fill it with Poisson(1)
-      for (int i = 0; i < m_nReplicas; i++)
-	{
-	  m_weights.at(i) = m_bootstrap.getBootstrap();
-	}
-
-      // decorate weights onto EventInfo
-      m_decoration.set(*evtInfo, m_weights, sys);
+      weight = bootstrap.getBootstrap();
     }
+
+  // decorate weights onto EventInfo
+  SG::WriteDecorHandle<xAOD::EventInfo, std::vector<std::uint8_t>> dec(m_decorationKey, ctx);
+  dec(*evtInfo) = std::move(weights);
 
   return StatusCode::SUCCESS;
 }

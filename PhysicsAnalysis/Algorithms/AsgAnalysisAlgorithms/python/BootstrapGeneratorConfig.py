@@ -25,11 +25,9 @@ class BootstrapGeneratorConfig(ConfigBlock):
         alg = config.createAlgorithm( 'CP::BootstrapGeneratorAlg', 'BootstrapGenerator')
         alg.nReplicas = self.nReplicas
         alg.isData = config.dataType() is DataType.Data
-        if self.decoration:
-            alg.decorationName = self.decoration
-        else:
-            alg.decorationName = "bootstrapWeights_%SYS%"
+        decorationName = (self.decoration or "bootstrapWeights").replace("_%SYS%", "")
+        alg.decorationName = f"EventInfo.{decorationName}"
 
-        config.addOutputVar ('EventInfo', alg.decorationName, alg.decorationName.split("_%SYS%")[0], noSys=True)
+        config.addOutputVar ('EventInfo', decorationName, decorationName, noSys=True)
 
         return
