@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Miha Muskinja
@@ -8,11 +8,13 @@
 #define ASG_ANALYSIS_ALGORITHMS__SYS_TRUTH_WEIGHT_ALG_H
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
+#include <AsgDataHandles/ReadHandleKey.h>
 #include <PMGAnalysisInterfaces/ISysTruthWeightTool.h>
 #include <SystematicsHandles/SysListHandle.h>
 #include <SystematicsHandles/SysReadHandle.h>
 #include <SystematicsHandles/SysWriteDecorHandle.h>
 #include <xAODEventInfo/EventInfo.h>
+#include <xAODTruth/TruthParticleContainer.h>
 
 namespace CP
 {
@@ -21,7 +23,7 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    SysTruthWeightAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    using EL::AnaAlgorithm::AnaAlgorithm;
 
   public:
     StatusCode initialize() override;
@@ -31,11 +33,13 @@ namespace CP
 
     /// \brief the truth particle container to use for the calculation
   private:
-    std::string m_truthParticleContainer;
+    SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthParticleContainer{
+      this, "TruthParticleContainer", "TruthParticles", "the truth particle container to use for the calculation"};
 
     /// \brief the tool
   private:
-    ToolHandle<PMGTools::ISysTruthWeightTool> m_sysTruthWeightTool;
+    ToolHandle<PMGTools::ISysTruthWeightTool> m_sysTruthWeightTool{
+      this, "sysTruthWeightTool", "PMGTools::PMGHFProductionFractionTool", "the systematic truth weight tool"};
 
     /// \brief the systematics list we run
   private:
