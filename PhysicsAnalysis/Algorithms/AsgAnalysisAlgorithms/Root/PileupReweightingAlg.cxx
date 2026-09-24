@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -10,12 +10,6 @@
 //
 #include "AsgAnalysisAlgorithms/PileupReweightingAlg.h"
 #include "AsgDataHandles/WriteDecorHandle.h"
-#include "AthContainers/ConstAccessor.h"
-
-/// Anonymous namespace for helpers
-namespace {
-  const static SG::ConstAccessor<unsigned int> accRRN("RandomRunNumber");
-}
 
 //
 // method implementations
@@ -39,6 +33,8 @@ namespace CP
     ANA_CHECK (m_outOfValidity.initialize());
     ANA_CHECK (m_baseEventInfoName.initialize());
     ANA_CHECK (m_decRRNKey.initialize());
+    const std::string& rrnKey = m_decRRNKey.key();
+    m_accRRN.emplace (rrnKey.substr (rrnKey.rfind ('.') + 1));
     ANA_CHECK (m_decRLBNKey.initialize());
     ANA_CHECK (m_decHashKey.initialize());
     return StatusCode::SUCCESS;
@@ -83,7 +79,7 @@ namespace CP
     SG::WriteDecorHandle<xAOD::EventInfo, unsigned int> decRRN (m_decRRNKey, ctx);
     unsigned int rrn = 0;
     if(decRRN.isAvailable())
-      rrn = accRRN(*evtInfo);
+      rrn = (*m_accRRN)(*evtInfo);
     else{
       rrn = m_pileupReweightingTool->getRandomRunNumber(*evtInfo, true);
       // If it returns 0, try again without the mu dependence
