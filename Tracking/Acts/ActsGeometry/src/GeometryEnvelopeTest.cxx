@@ -87,6 +87,9 @@ namespace ActsTrk{
                 }
             }
         }
+        if (!allGood) {
+            return StatusCode::FAILURE;
+        }
         for (const Acts::TrackingVolume& childVolume : volume.volumes()) {
             ATH_CHECK(checkVolume(tgContext, childVolume));
         }
