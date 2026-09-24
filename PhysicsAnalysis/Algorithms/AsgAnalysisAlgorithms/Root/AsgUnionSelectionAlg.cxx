@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -11,6 +11,8 @@
 #include <AsgAnalysisAlgorithms/AsgUnionSelectionAlg.h>
 
 #include <xAODBase/IParticle.h>
+
+#include <algorithm>
 
 //
 // method implementations
@@ -62,20 +64,25 @@ namespace CP
 
       for (size_t i{}; i < particles->size(); i++)
       {
-        selections[i] = selections[i] || m_preselection.getBool (*particles->at(i), sys);
+        selections[i] = selections[i] || m_preselection.getBool (*(*particles)[i], sys);
       }
     }
 
     // Now decorate the selection decoration
     // Looping over systematics is needed to ensure all containers are processed
+    std::vector<const xAOD::IParticleContainer*> decorated;
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       const xAOD::IParticleContainer *particles{};
       ANA_CHECK (m_particlesHandle.retrieve (particles, sys, ctx));
 
+      if (std::find (decorated.begin(), decorated.end(), particles) != decorated.end())
+        continue;
+      decorated.push_back (particles);
+
       for (size_t i{}; i < particles->size(); i++)
       {
-        m_selectionAccessor->setBool (*particles->at(i), selections[i]);
+        m_selectionAccessor->setBool (*(*particles)[i], selections[i]);
       }
     }
 
