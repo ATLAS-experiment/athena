@@ -413,7 +413,7 @@ class PhotonWorkingPointSelectionConfig (ConfigBlock) :
                     alg.selectionTool.ConfigFile = 'ElectronPhotonSelectorTools/offline/mc20_20240510/PhotonIsEMMediumSelectorCutDefs_pTdep_smooth.conf'
             if config.geometry() is LHCPeriod.Run3:
                 if self.qualityWP == 'Tight':
-                    alg.selectionTool.ConfigFile = 'ElectronPhotonSelectorTools/offline/20180825/PhotonIsEMTightSelectorCutDefs.conf'
+                    alg.selectionTool.ConfigFile = 'ElectronPhotonSelectorTools/offline/mc23_20260924/PhotonIsEMTightSelectorCutDefs.conf'
                 elif self.qualityWP == 'Loose':
                     alg.selectionTool.ConfigFile = 'ElectronPhotonSelectorTools/offline/mc15_20150712/PhotonIsEMLooseSelectorCutDefs.conf'
                 elif self.qualityWP == 'Medium':
