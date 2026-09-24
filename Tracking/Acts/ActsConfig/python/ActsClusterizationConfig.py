@@ -6,6 +6,18 @@ from AthenaConfiguration.Enums import BeamType,Format
 from ActsConfig.ActsUtilities import extractChildKwargs
 from HGTD_Calibration.HGTD_CalibrationConfig import HGTD_TdcCalibrationToolCfg
 from ActsConfig.ActsPhaseIIRawDataEdmConfig import PhaseIIPixelRawDataContainerCfg
+from AthenaConfiguration.Enums import ProductionStep
+
+def ActsClusterizationInputPrefix(flags):
+    """Return clusterization input prefix based on the production step and tracking config"""
+    doTrackOverlay = flags.TrackOverlay.isTrackOverlaySeq
+    if doTrackOverlay:
+        prefix = flags.Overlay.SigPrefix
+    elif flags.Common.ProductionStep in [ProductionStep.PileUpPretracking, ProductionStep.MinbiasPreprocessing]:
+        prefix = flags.Overlay.BkgPrefix
+    else:
+        prefix = ''
+    return prefix
 
 def ActsHgtdClusteringToolCfg(flags,
                               name: str = "ActsHgtdClusteringTool",
@@ -36,15 +48,16 @@ def ActsHgtdClusterizationAlgCfg(flags,
                                  name: str = "ActsHgtdClusterizationAlg",
                                  **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-
+    
+    prefix = ActsClusterizationInputPrefix(flags)
     if flags.HGTD.Geometry.useGeoModelXml:
         from HGTD_GeoModelXml.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
     else:
         from HGTD_GeoModel.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
     acc.merge(HGTD_ReadoutGeometryCfg(flags))
 
-    kwargs.setdefault('RDOContainerName', 'HGTD_RDOs')
-    kwargs.setdefault('AltirocRDOContainerName', 'HGTD_ALTIROC_RDOs')
+    kwargs.setdefault('RDOContainerName', prefix+'HGTD_RDOs')
+    kwargs.setdefault('AltirocRDOContainerName', prefix+'HGTD_ALTIROC_RDOs')
     kwargs.setdefault('ClusterContainerName', 'HGTD_Clusters')
 
     if 'ClusteringTool' not in kwargs:
@@ -63,7 +76,7 @@ def ActsHgtdClusterizationAlgCfg(flags,
     else:
         kwargs.setdefault("useALTIROC_RDO", False)
        
-    acc.addEventAlgo(CompFactory.ActsTrk.HgtdClusterizationAlg(name, **kwargs))
+    acc.addEventAlgo(CompFactory.ActsTrk.HgtdClusterizationAlg(prefix+name, **kwargs))
     return acc
 
 
@@ -159,12 +172,13 @@ def ActsPixelClusterizationAlgCfg(flags,
                                   useCache: bool = False,
                                   **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-
+    
+    prefix = ActsClusterizationInputPrefix(flags)
     kwargs.setdefault("IDHelper", "PixelID")
     if flags.Acts.EDM.PhaseII and flags.Input.Format is not Format.BS:
         # convert persistent to PhaseIIPixelRawDataContainer instead
-        acc.merge(PhaseIIPixelRawDataContainerCfg(flags, RDOKey="ITkPixelRDOs"))
-    kwargs.setdefault("RDOContainerKey", "ITkPixelRDOs")
+        acc.merge(PhaseIIPixelRawDataContainerCfg(flags, RDOKey=prefix+"ITkPixelRDOs"))
+    kwargs.setdefault("RDOContainerKey", prefix+"ITkPixelRDOs")
     kwargs.setdefault("ClustersKey", "ITkPixelClusters")
     kwargs.setdefault("DetEleCollKey", "ITkPixelDetectorElementCollection")
     # Regional selection
@@ -191,14 +205,14 @@ def ActsPixelClusterizationAlgCfg(flags,
 
     if flags.Acts.EDM.PhaseII :
         if not useCache:
-            acc.addEventAlgo(CompFactory.ActsTrk.PhaseIIPixelClusterizationAlg(name, **kwargs))
+            acc.addEventAlgo(CompFactory.ActsTrk.PhaseIIPixelClusterizationAlg(prefix+name, **kwargs))
         else:
-            acc.addEventAlgo(CompFactory.ActsTrk.PhaseIIPixelCacheClusterizationAlg(name, **kwargs))
+            acc.addEventAlgo(CompFactory.ActsTrk.PhaseIIPixelCacheClusterizationAlg(prefix+name, **kwargs))
     else :
         if not useCache:
-            acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterizationAlg(name, **kwargs))
+            acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterizationAlg(prefix+name, **kwargs))
         else:
-            acc.addEventAlgo(CompFactory.ActsTrk.PixelCacheClusterizationAlg(name, **kwargs))
+            acc.addEventAlgo(CompFactory.ActsTrk.PixelCacheClusterizationAlg(prefix+name, **kwargs))
     return acc
 
 
@@ -209,11 +223,12 @@ def ActsPLRClusterizationAlgCfg(flags,
                                 **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
+    prefix = ActsClusterizationInputPrefix(flags)
     kwargs.setdefault("IDHelper", "PLR_ID")
     if flags.Acts.EDM.PhaseII and flags.Input.Format is not Format.BS:
         # convert persistent to PhaseIIPixelRawDataContainer instead
-        acc.merge(PhaseIIPixelRawDataContainerCfg(flags,RDOKey="PLR_RDOs"))
-    kwargs.setdefault("RDOContainerKey", "PLR_RDOs")
+        acc.merge(PhaseIIPixelRawDataContainerCfg(flags,RDOKey=prefix+"PLR_RDOs"))
+    kwargs.setdefault("RDOContainerKey", prefix+"PLR_RDOs")
     kwargs.setdefault("ClustersKey", "PLR_Clusters")
     kwargs.setdefault("DetEleCollKey", "PLR_DetectorElementCollection")
     kwargs.setdefault("RoIs", "ActsRegionOfInterest")
@@ -243,14 +258,14 @@ def ActsPLRClusterizationAlgCfg(flags,
     # @TODO just call ActsPixelClusterizationAlgCfg ?
     if flags.Acts.EDM.PhaseII :
         if not useCache:
-            acc.addEventAlgo(CompFactory.ActsTrk.PhaseIIPixelClusterizationAlg(name, **kwargs))
+            acc.addEventAlgo(CompFactory.ActsTrk.PhaseIIPixelClusterizationAlg(prefix+name, **kwargs))
         else:
-            acc.addEventAlgo(CompFactory.ActsTrk.PhaseIIPixelCacheClusterizationAlg(name, **kwargs))
+            acc.addEventAlgo(CompFactory.ActsTrk.PhaseIIPixelCacheClusterizationAlg(prefix+name, **kwargs))
     else :
         if not useCache:
-            acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterizationAlg(name, **kwargs))
+            acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterizationAlg(prefix+name, **kwargs))
         else:
-            acc.addEventAlgo(CompFactory.ActsTrk.PixelCacheClusterizationAlg(name, **kwargs))
+            acc.addEventAlgo(CompFactory.ActsTrk.PixelCacheClusterizationAlg(prefix+name, **kwargs))
     return acc
 
 def ActsStripClusterizationAlgCfg(flags, 
@@ -259,7 +274,8 @@ def ActsStripClusterizationAlgCfg(flags,
                                   **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("RDOContainerKey", "ITkStripRDOs")
+    prefix = ActsClusterizationInputPrefix(flags)
+    kwargs.setdefault("RDOContainerKey", prefix+"ITkStripRDOs")
     kwargs.setdefault("ClustersKey", "ITkStripClusters")
     kwargs.setdefault("IDHelper", "SCT_ID")
     kwargs.setdefault("DetEleCollKey", "ITkStripDetectorElementCollection")
@@ -286,9 +302,9 @@ def ActsStripClusterizationAlgCfg(flags,
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsITkStripClusterizationMonitoringToolCfg(flags)))
 
     if not useCache:
-        acc.addEventAlgo(CompFactory.ActsTrk.StripClusterizationAlg(name, **kwargs))
+        acc.addEventAlgo(CompFactory.ActsTrk.StripClusterizationAlg(prefix+name, **kwargs))
     else:
-        acc.addEventAlgo(CompFactory.ActsTrk.StripCacheClusterizationAlg(name, **kwargs))
+        acc.addEventAlgo(CompFactory.ActsTrk.StripCacheClusterizationAlg(prefix+name, **kwargs))
     return acc
 
 def ActsClusterCacheCreatorAlgCfg(flags,
