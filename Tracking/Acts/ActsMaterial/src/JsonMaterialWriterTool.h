@@ -19,9 +19,7 @@ namespace ActsTrk {
     /// file can be read back in e.g. by Acts::JsonMaterialDecorator.
     class JsonMaterialWriterTool : public extends<AthAlgTool, IMaterialWriterTool> {
         public:
-            JsonMaterialWriterTool(const std::string& type,
-                                   const std::string& name,
-                                   const IInterface* parent);
+            using base_class::base_class;
             ~JsonMaterialWriterTool() override = default;
             virtual void writeMaterial(const ActsTrk::GeometryContext& gctx,
                                        const Acts::TrackingGeometryMaterial& detMaterial) const override;

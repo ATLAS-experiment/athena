@@ -13,13 +13,6 @@
 
 #include <nlohmann/json.hpp>
 
-ActsTrk::JsonMaterialWriterTool::JsonMaterialWriterTool(const std::string& type,
-                                                         const std::string& name,
-                                                         const IInterface* parent)
-    : base_class(type, name, parent)
-{
-}
-
 void ActsTrk::JsonMaterialWriterTool::writeMaterial(const ActsTrk::GeometryContext& gctx,
                                                      const Acts::TrackingGeometryMaterial& detMaterial) const
 {
