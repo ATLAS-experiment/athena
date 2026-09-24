@@ -92,11 +92,8 @@ namespace CP
         // this algorithm to it.  Currently there is no central
         // algorithm to do that, so users will have to write their
         // own (15 Aug 18).
-        if (primaryVertex == nullptr)
-        {
-          primaryVertex = vertex;
-          break;
-        }
+        primaryVertex = vertex;
+        break;
       }
     }
 

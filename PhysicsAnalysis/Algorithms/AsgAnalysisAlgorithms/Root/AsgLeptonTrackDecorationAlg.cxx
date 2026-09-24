@@ -62,11 +62,8 @@ namespace CP
     {
       if (vertex->vertexType() == xAOD::VxType::PriVtx)
       {
-        if (primaryVertex == nullptr)
-        {
-          primaryVertex = vertex;
-          break;
-        }
+        primaryVertex = vertex;
+        break;
       }
     }
 
