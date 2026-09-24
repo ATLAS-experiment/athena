@@ -940,6 +940,14 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             alg.jetsOut = config.copyName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
 
+        # Note on ordering: these cuts constrain the jet as the calibration
+        # sequence left it. If the b-jet regression is also being applied it runs
+        # later, in its own block, so a jet selected here can end up stored
+        # outside the window. That is deliberate: the mass window in particular is
+        # tied to the JMS and large-R tagger calibrations, which are derived on the
+        # standard mass, so selecting on the standard jet keeps the accepted sample
+        # the one those calibrations apply to. Divide out bjrPtRatio /
+        # bjrMassRatio to recover the quantity that was cut on.
         if self.minPt > 0 or self.maxPt > 0 or self.maxEta > 0 or self.maxRapidity > 0:
             # Set up the the pt-eta selection
             alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'JetPtEtaCutAlg' )

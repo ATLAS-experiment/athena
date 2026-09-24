@@ -33,6 +33,7 @@ namespace jet
 
 class TFile;
 class TH2D;
+class TEnv;
 
 namespace xAOD
 {
@@ -238,6 +239,26 @@ class JetUncertaintiesTool : virtual public ICPJetUncertaintiesTool,
         bool m_isData;
         jet::ResolutionHelper* m_resHelper;
 
+        // Set when the b-jet energy regression is being folded into the jet
+        // four-momentum by CP::BJetRegressionAlg. Its only effect is to build the
+        // flat regression nuisance parameters below.
+        //
+        // Nothing about the uncertainty LOOKUPS changes. BJetRegressionAlg runs
+        // after this tool, so every lookup here already sees the standard
+        // calibrated jet, exactly as in an un-regressed analysis. No scale-momentum
+        // redirection is needed and none is implemented.
+        //
+        // These are properties and none of them lives in a configuration file.
+        // Switching the regression on must not require a modified (and therefore
+        // non-CVMFS) uncertainty config: the toggle is the whole interface.
+        bool m_bJetRegressionApplied;
+        // Flat fractional uncertainties covering the regression itself, e.g. 0.03
+        // for 3%. Zero means the corresponding nuisance parameter is not built.
+        // Kept as properties rather than hard-coded because they are physics
+        // numbers that will be revised.
+        double m_bJetRegressionPtUncertainty;
+        double m_bJetRegressionMassUncertainty;
+
         // Default prefix for each component name
         const std::string m_namePrefix;
 
@@ -247,6 +268,10 @@ class JetUncertaintiesTool : virtual public ICPJetUncertaintiesTool,
         // Helper methods for this tool's functions
         StatusCode addUncertaintyGroup    (const jet::ConfigHelper& helper);
         StatusCode addUncertaintyComponent(const jet::ConfigHelper& helper);
+        /// Write the flat b-jet regression nuisance parameters into @p settings as
+        /// ordinary JESComponent definitions, so the normal component loop builds
+        /// them. Keeps them out of the shipped configuration files.
+        StatusCode addBJetRegressionComponents(TEnv& settings);
         jet::UncertaintyComponent* buildUncertaintyComponent(const jet::ComponentHelper& component) const;
         const xAOD::EventInfo* getDefaultEventInfo ATLAS_NOT_THREAD_SAFE () const;
         StatusCode checkIndexInput(const size_t index) const;

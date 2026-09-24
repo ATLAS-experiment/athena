@@ -57,12 +57,15 @@ namespace CompParametrization
         eLOGmOeEta,     // 3D, (E,log(m/E),eta) dependence
         eLOGmOeAbsEta,  // 3D, (E,log(m/E),|eta|) dependence
         PtLOGPtMassForTagSF,// 2D, (pt,log(m/pT)) dependence, only for tagging SF
+        Constant,       // 0D, a flat fractional uncertainty read from the config file
     };
 
     TString enumToString(const TypeEnum type);
     TypeEnum stringToEnum(const TString& type);
     bool isAbsEta(const TypeEnum type);
     bool includesMass(const TypeEnum type);
+    /// True for parametrisations that carry no histogram at all.
+    bool isConstant(const TypeEnum type);
 }
 
 namespace CompMassDef

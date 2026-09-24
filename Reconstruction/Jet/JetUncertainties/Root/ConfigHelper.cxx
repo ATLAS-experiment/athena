@@ -36,6 +36,7 @@ ComponentHelper::ComponentHelper(TEnv& settings, const TString& compPrefix, cons
     //      - VHist: validity histogram name (optional)
     //      - SubComp: sub-components for simple groups
     //      - Group: the number of the group this component belongs to (0 == single-component group)
+    //      - Value: flat fractional uncertainty, for Param: Constant components
     // Overwrite MCTYPE with the specified type if applicable
       name        (TString(settings.GetValue(compPrefix+"Name","")).ReplaceAll("MCTYPE",MCtype)),
       param       (settings.GetValue(compPrefix+"Param","")),
@@ -61,6 +62,9 @@ ComponentHelper::ComponentHelper(TEnv& settings, const TString& compPrefix, cons
       LargeRJetTruthLabelsForSFstr (settings.GetValue(compPrefix+"LargeRJetTruthLabelForSF","")),
       RegionForSFstr (settings.GetValue(compPrefix+"RegionForSF","")),
       ResultName (settings.GetValue(compPrefix+"ResultName","")),
+
+      // Flat fractional uncertainty for Constant components, e.g. 0.01 for 1%
+      constantValue (settings.GetValue(compPrefix+"Value",0.0)),
 
       // Get enums where appropriate
       // Leave interpreting/checking the enums to others
@@ -312,6 +316,14 @@ void ConfigHelper::setComponentJetDefSuffix(const TString& suffix)
       ATH_MSG_WARNING("ConfigHelper::setComponentJetDefSuffix: 'm_cInfo' is nullptr.");
       return;
     }
+
+    // A Constant component reads its value from the config file and has no histogram,
+    // so there is no name to invent or suffix here. Without this, the block below
+    // would fabricate one from the component name and the component would then fail
+    // to find it in the uncertainty file.
+    if (CompParametrization::isConstant(m_cInfo->parametrization))
+        return;
+
     if (m_cInfo->uncNames.empty() && m_cInfo->subComps.empty())
         m_cInfo->uncNames.push_back(m_cInfo->name+"_"+suffix);
     else if (!m_cInfo->uncNames.empty())

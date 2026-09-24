@@ -41,6 +41,11 @@ if( XAOD_STANDALONE )
       util/testTool.cxx
       LINK_LIBRARIES xAODJet xAODEventInfo PATInterfaces xAODRootAccess
       JetUncertaintiesLib )
+
+   atlas_add_executable( JetUncertainties_testBJetRegression
+      util/testBJetRegression.cxx
+      LINK_LIBRARIES xAODJet xAODEventInfo PATInterfaces xAODRootAccess
+      JetUncertaintiesLib )
    
    atlas_add_executable( JetUncertainties_testResolution
       util/testResolution.cxx

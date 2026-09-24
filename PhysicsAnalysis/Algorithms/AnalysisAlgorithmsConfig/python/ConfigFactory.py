@@ -267,6 +267,9 @@ class ConfigFactory():
         from JetAnalysisAlgorithms.BJetCalibAnalysisConfig import BJetCalibAnalysisConfig
         self.addAlgConfigBlock(algName="BJetCalib", alg=BJetCalibAnalysisConfig,
                                superBlocks="Jets")
+        from JetAnalysisAlgorithms.BJetRegressionAnalysisConfig import BJetRegressionAnalysisConfig
+        self.addAlgConfigBlock(algName="BJetRegression", alg=BJetRegressionAnalysisConfig,
+                               superBlocks="Jets")
         from JetAnalysisAlgorithms.JetTriggerAnalysisConfig import JetTriggerMatchingBlock
         self.addAlgConfigBlock(algName="TriggerMatching", alg=JetTriggerMatchingBlock,
                                superBlocks="Jets")

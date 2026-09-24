@@ -105,6 +105,7 @@ namespace CompParametrization
             case eLOGmOeEta:    return "eLOGmOeEta";
             case eLOGmOeAbsEta: return "eLOGmOeAbsEta";
 	    case PtLOGPtMassForTagSF: return "PtLOGPtMassForTagSF";
+            case Constant:      return "Constant";
             default:            return "UNKNOWN";
         }
     }
@@ -137,6 +138,8 @@ namespace CompParametrization
             return eLOGmOeAbsEta;
         if (!type.CompareTo("PtLOGPtMassForTagSF",TString::kIgnoreCase))
             return PtLOGPtMassForTagSF;
+        if (!type.CompareTo("Constant",TString::kIgnoreCase))
+            return Constant;
         return UNKNOWN;
     }
 
@@ -151,6 +154,11 @@ namespace CompParametrization
             
             default:            return false;
         }
+    }
+
+    bool isConstant(const TypeEnum type)
+    {
+        return type == Constant;
     }
 
     bool includesMass(const TypeEnum type)
