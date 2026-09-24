@@ -5,12 +5,7 @@
 // Local include(s):
 #include "AsgAnalysisAlgorithms/RNtupleTreeMakerAlg.h"
 
-// EDM include(s):
-#include "AthContainers/AuxElement.h"
-#include "AthContainers/AuxVectorBase.h"
-
 // ROOT include(s):
-#include <TClass.h>
 #include <TFile.h>
 
 // Gaudi/EventLoop include(s):
