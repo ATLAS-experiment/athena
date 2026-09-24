@@ -103,7 +103,7 @@ void
 VarHandleKeyArrayProperty::toStream(std::ostream& out) const
 {
   useReadHandler();
-  out << this->toString();
+  std::print (out, "{}", this->toString());
 }
 
 

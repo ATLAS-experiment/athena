@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/VarHandleBase.h
@@ -85,7 +85,6 @@ namespace SG {
     friend void Athena_test::varHandleTest(SGTest::TestStore&);
     friend void Athena_test::resetableTest(void);
     friend void Athena_test::refCountTest(void);
-    friend std::ostream& operator<<( std::ostream&, const VarHandleBase&);
  
   public: 
     /**
@@ -359,6 +358,12 @@ namespace SG {
      */
     StatusCode assign (const std::string& sgkey);
 
+
+    /**
+     * @brief Convert to a string representation.
+     */
+    std::string toString() const;
+
     
   protected: 
     //*************************************************************************
@@ -594,6 +599,20 @@ namespace SG {
 
 
 } /* namespace SG */
+
+
+namespace std {
+
+// C++23 compatible formatter.
+template <std::derived_from<SG::VarHandleBase> T>
+struct formatter<T>
+  : public formatter<string_view>
+{
+  template <class FmtContext>
+  FmtContext::iterator format(const T& k, FmtContext& ctx) const;
+};
+
+} // namespace std
 
 
 #include "StoreGate/VarHandleBase.icc"

@@ -1,30 +1,29 @@
 
 
 Initializing Gaudi ApplicationMgr using job opts /home/sss/atlas/dvtest/build/joboptions/StoreGate/WriteCondHandle_test.txt
-JobOptionsSvc        INFO # =======> /home/sss/atlas/dvtest/build/joboptions/StoreGate/WriteCondHandle_test.txt
-JobOptionsSvc        INFO # (1,1): ApplicationMgr.ExtSvc = ["StoreGateSvc/ConditionStore"]
-JobOptionsSvc        INFO # (2,1): ConditionStore.ProxyProviderSvc = ""
-JobOptionsSvc        INFO Job options successfully read in from /home/sss/atlas/dvtest/build/joboptions/StoreGate/WriteCondHandle_test.txt
-ApplicationMgr    SUCCESS 
+JobOptionsSvc         INFO # =======> /home/sss/atlas/dvtest/build/joboptions/StoreGate/WriteCondHandle_test.txt
+JobOptionsSvc         INFO # (1,1): ApplicationMgr.ExtSvc = ["StoreGateSvc/ConditionStore"]
+JobOptionsSvc         INFO # (2,1): ConditionStore.ProxyProviderSvc = ""
+JobOptionsSvc         INFO Job options successfully read in from /home/sss/atlas/dvtest/build/joboptions/StoreGate/WriteCondHandle_test.txt
+ApplicationMgr     SUCCESS 
 ====================================================================================================================================
                                                    Welcome to ApplicationMgr (GaudiCoreSvc v27r1p99)
-                                          running on karma on Thu Jun 30 11:53:12 2022
+                                          running on karma on Sun Aug 23 12:44:36 2026
 ====================================================================================================================================
-ApplicationMgr       INFO Application Manager Configured successfully
-ClassIDSvc           INFO getRegistryEntries: read 828 CLIDRegistry entries for module ALL
-EventLoopMgr      WARNING Unable to locate service "EventSelector" 
-EventLoopMgr      WARNING No events will be processed from external input.
-ApplicationMgr       INFO Application Manager Initialized successfully
+ApplicationMgr        INFO Application Manager Configured successfully
+ClassIDSvc            INFO getRegistryEntries: read 506 CLIDRegistry entries for module ALL
+EventLoopMgr          INFO Unable to locate service "EventSelector": No events will be processed from external input.
+ApplicationMgr        INFO Application Manager Initialized successfully
 ApplicationMgr Ready
 test2
 r1: {[0,t:0] - [0,t:3]} {[0,t:3] - [0,t:7]} {[0,t:7] - [0,t:10]}
 r2: {[0,t:0] - [0,t:5]} {[0,t:5] - [0,t:10]}
 r3: {[0,t:0] - [0,t:2]} {[0,t:2] - [0,t:6]} {[0,t:6] - [0,t:10]}
-ClassIDSvc           INFO getRegistryEntries: read 2393 CLIDRegistry entries for module ALL
 expected ERROR follows:
-WriteCondHandle     ERROR WriteCondHandle::record() : no range defined for key  ( 'MyDObj' , 'ConditionStore+MyObjD_err' ) 
+ClassIDSvc            INFO getRegistryEntries: read 2214 CLIDRegistry entries for module ALL
+WriteCondHandle      ERROR WriteCondHandle::record() : no range defined for key  ( 'MyDObj' , 'ConditionStore+MyObjD_err' ) 
 expected ERROR follows:
-WriteCondHandle     ERROR WriteCondHandle::record(EventIDRange, T*): for key  ( 'MyDObj' , 'ConditionStore+MyObjD_err' )  cannot use this method if range has already been set via dependencies
+WriteCondHandle      ERROR WriteCondHandle::record(EventIDRange, T*): for key  ( 'MyDObj' , 'ConditionStore+MyObjD_err' )  cannot use this method if range has already been set via dependencies
 test EventID: [0,t:1]
 o1: 1  {[0,t:0] - [0,t:3]} {[0,t:0] - [0,t:3]}
 o2: 21  {[0,t:0] - [0,t:5]}
@@ -46,7 +45,7 @@ o2: 22  {[0,t:5] - [0,t:10]}
 o3: 133  {[0,t:6] - [0,t:10]}
 rD: {[0,t:7] - [0,t:10]}  ==  {[0,t:7] - [0,t:10]}
 test3
-ConditionStore    WARNING retrieve(non-const): No valid proxy for object nonExistent  of type CondContBase(CLID 34480459)
+ConditionStore     WARNING retrieve(non-const): No valid proxy for object nonExistent of type CondContBase (CLID 34480459)
  Try to use a const retrieve
-ConditionStore    WARNING retrieve(non-const): No valid proxy for object nonExistent  of type CondContBase(CLID 34480459)
+ConditionStore     WARNING retrieve(non-const): No valid proxy for object nonExistent of type CondContBase (CLID 34480459)
  Try to use a const retrieve

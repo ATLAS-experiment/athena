@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StoreGate/ActiveStoreSvc.h"
 #include "StoreGate/StoreGateSvc.h"
+#include "StoreGate/tools/SGMsgStreamMacros.h"
 #include "AthenaKernel/errorcheck.h"
 
 #include "GaudiKernel/MsgStream.h"
@@ -18,7 +19,7 @@ StatusCode ActiveStoreSvc::initialize()    {
 
   CHECK( Service::initialize() );
 
-  msg() << MSG::VERBOSE << "Initializing " << name() << endmsg;
+  SG_MSG_VERBOSE ("Initializing {}", name());
 
   SmartIF<StoreGateSvc> storeGate{service(m_storeName, /*createIf*/true)};
   CHECK( storeGate.isValid() );

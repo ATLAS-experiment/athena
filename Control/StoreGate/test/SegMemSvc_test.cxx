@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -7,7 +7,7 @@
 #include "StoreGate/SegMemSvc.h"
 
 #include <cassert>
-#include <iostream>
+#include <print>
 
 
 void segmem_test () {
@@ -26,6 +26,6 @@ int main() {
   ISvcLocator* svcLoc;
   Athena_test::initGaudi(svcLoc);
   segmem_test();
-  std::cout << "*** SegMemSvc_test OK ***" << std::endl;
+  std::println ("*** SegMemSvc_test OK ***");
   return 0; 
 }

@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "CxxUtils/checker_macros.h"
+#include <print>
 
 
 namespace SG {
@@ -66,9 +67,9 @@ namespace SG {
     itr = this->begin();
     size_t sz = this->size();
     for ( size_t i=0; i < sz; ++i, ++itr) {
-      ost << "'" << itr->objKey() << "'";
+      std::print (ost, "'{}'", itr->objKey());
       if (i != sz-1) {
-        ost << ",";
+        std::print (ost, ",");
       }
     }
     return ost.str();      
@@ -137,3 +138,17 @@ namespace SG {
     return Base (s);
   }
 }
+
+
+namespace std {
+
+template <std::derived_from<SG::VarHandleKeyArray> T>
+template <class FmtContext>
+FmtContext::iterator
+formatter<T>::format(const T& k, FmtContext& ctx) const
+{
+  return std::format_to (ctx.out(), "[{}]", k.toString());
+}
+
+} // namespace std
+

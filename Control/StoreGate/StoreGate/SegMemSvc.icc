@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthAllocators/ArenaCachingHandle.h"
 #include "AthAllocators/ArenaHandle.h"
 #include "AthAllocators/ArenaPoolAllocator.h"
+#include "StoreGate/tools/SGMsgStreamMacros.h"
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -35,9 +36,9 @@ SegMemSvc::allocate(SegMemSvc::LIFETIME life, bool cache) {
   }
 
   if (msgStream().level() <= MSG::DEBUG) {
-    debug() << "allocating object size " << sizeof(T) 
-            << " with lifetime/cache " << cvt(life) << "/" << cache << " at " 
-            << ptr  << endmsg;
+    SG_MSG_DEBUG ("allocating object size {} with lifetime/cache {}/{} at {}",
+                  sizeof(T), cvt(life), cache,
+                  static_cast<void*>(ptr));
   }
 
 
@@ -52,7 +53,7 @@ bool
 SegMemSvc::del(T* ptr) {
 
   if (msgStream().level() <= MSG::DEBUG) {
-    debug() << "deleting object at " << ptr << endmsg;
+    SG_MSG_DEBUG ("deleting object at {}", static_cast<void*>(ptr));
   }
   
 

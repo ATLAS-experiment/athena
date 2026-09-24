@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file StoreGate/test/TypelessWriteHandle_test.cxx
@@ -16,7 +16,7 @@
 #include "AthenaKernel/ExtendedEventContext.h"
 #include "AthenaKernel/CLASS_DEF.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 
 
 class MyObj
@@ -37,7 +37,7 @@ CLASS_DEF (MyObj, 293847295, 1)
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   SGTest::TestStore testStore;
   EventContext ctx;
   ctx.setExtension( Atlas::ExtendedEventContext(&testStore) );
@@ -58,12 +58,18 @@ void test1()
   auto obj2 = std::make_unique<MyObj>(2);
   std::unique_ptr<DataObject> dobj2 (SG::asStorable (std::move (obj2)));
   assert( h.typelessPut (std::move (dobj2)).isFailure() );
+
+  std::ostringstream s1;
+  s1 << h;
+  std::ostringstream s2;
+  std::print (s2, "{}", h);
+  assert (s1.str() == s2.str());
 }
 
 
 int main()
 {
-  std::cout << "StoreGate/TypelessWriteHandle_test\n";
+  std::println ("StoreGate/TypelessWriteHandle_test");
   ISvcLocator* pDum;
   Athena_test::initGaudi(pDum); //need MessageSvc
 

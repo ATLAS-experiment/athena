@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StoreGate/VarHandleKeyArray.h"
@@ -46,7 +46,7 @@ namespace Gaudi {
     std::ostream&
     toStream(const SG::VarHandleKeyArray& v, std::ostream& o)
     {
-      o << "[" << v.toString() << "]";      
+      std::print (o, "[{}]", v.toString());
       return o;
     }
     
@@ -54,11 +54,13 @@ namespace Gaudi {
 } //> ns Gaudi
 
 
+namespace SG {
 
 
-namespace std {
-  ostream& operator<<(ostream& s, const SG::VarHandleKeyArray& m) {
-    s << "[" <<  m.toString() << "]";
-    return s;
-  }
+std::ostream& operator<<(std::ostream& s, const SG::VarHandleKeyArray& m) {
+  std::print (s, "{}", m);
+  return s;
 }
+
+
+} //namespace SG

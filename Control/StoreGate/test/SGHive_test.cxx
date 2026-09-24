@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -10,6 +10,7 @@
 
 
 #undef NDEBUG
+#include <print>
 #include <string>
 #include "TestTools/initGaudi.h"
 #include "TestTools/SGassert.h"
@@ -94,17 +95,17 @@ public:
       rSG.commitNewDataObjects();
     }
     void testNoSlot() {
-      cout << "\n*** SGHive_test noSlot BEGINS ***" << endl;
+      std::println ("\n*** SGHive_test noSlot BEGINS ***");
       StoreGateSvc::setSlot(0);
       testNewDataObjects(m_rHSG);
-      cout << "\n*** SGHive_test noSlot ENDS ***" << endl;
+      std::println ("\n*** SGHive_test noSlot ENDS ***");
     }
     void testWithSlot(SG::HiveEventSlot* pSlot=0) {
-      cout << "\n*** SGHive_test withSlot BEGINS ***" << endl;
+      std::println ("\n*** SGHive_test withSlot BEGINS ***");
       if (pSlot) m_pSlot=pSlot;
       StoreGateSvc::setSlot(m_pSlot);
       testNewDataObjects(m_rHSG);
-      cout << "\n*** SGHive_test withSlot ENDS ***" << endl;
+      std::println ("\n*** SGHive_test withSlot ENDS ***");
     }
   };
 
@@ -112,7 +113,7 @@ public:
 } //ns SG
 
 int main() {
-  cout << "*** SGHiveTest BEGINS ***" << endl;
+  std::println ("*** SGHiveTest BEGINS ***");
   ISvcLocator* pSvcLoc;
   if (!initGaudi("StoreGate/SGHive_test.txt", pSvcLoc)) {
     return 1;
@@ -151,7 +152,7 @@ int main() {
 
   assert( pHSG->finalize().isSuccess() );
   assert( pSGHM->finalize().isSuccess() );
-  cout << "*** SGHiveTest OK ***\n\n" <<endl;
+  std::println ("*** SGHiveTest OK ***\n\n");
 
   return 0;
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/test/VarHandleKey_test.cxx
@@ -17,7 +17,7 @@
 #include "TestTools/initGaudi.h"
 #include "TestTools/expect_exception.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 
 
 namespace SG {
@@ -31,7 +31,7 @@ public:
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   SG::StringPool pool;
 
@@ -48,6 +48,15 @@ void test1()
   assert (!k1.isCondition());
   assert (!k1.empty());
   assert (k1.hashedKey() == pool.stringToKey ("aaa", 1234));
+
+  {
+    std::ostringstream s1;
+    s1 << k1;
+    assert (s1.str() == "'StoreGateSvc+aaa'");
+    std::ostringstream s2;
+    std::print (s2, "{}", k1);
+    assert (s2.str() == "'StoreGateSvc+aaa'");
+  }
 
   k1 = "aab";
   assert (k1.clid() == 1234);

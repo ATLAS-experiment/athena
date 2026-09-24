@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StoreGate/SegMemSvc.h"
@@ -61,21 +61,19 @@ SegMemSvc::handle(const Incident& inc) {
     if (msgStream().level() <= MSG::DEBUG) {
       std::ostringstream ost;
       m_ahead_evt.report(ost);
-      debug() << "Running report for " << m_arena_evt.name()
-              << ost.str() << endmsg;
+      SG_MSG_DEBUG ("Running report for {}{}", m_arena_evt.name(), ost.str());
     }
 
-    debug() << "freeing all memory allocated for Event" << endmsg;
+    SG_MSG_DEBUG ("freeing all memory allocated for Event");
     m_arena_evt.reset();
     m_ahead_evt.reset();
 
   } else if ( inc.type() == "DefragMemory") {
 
     if (msgStream().level() <= MSG::DEBUG) {
-      debug() << "defragmenting memory" << endmsg;
+      SG_MSG_DEBUG("defragmenting memory");
     }
-    debug() << "freeing all memory allocated associated with "
-            << "DefragMemory incident" << endmsg;
+    SG_MSG_DEBUG ("freeing all memory allocated associated with DefragMemory incident");
     m_arena_inc.reset();
     m_ahead_inc.reset();
   }

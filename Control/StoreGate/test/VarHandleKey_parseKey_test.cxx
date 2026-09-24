@@ -1,7 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
 /**
  * @file StoreGate/test/VarHandleKey_parseKey_test.cxx
  * @author Charles Leggett
@@ -17,30 +16,29 @@
 #include "TestTools/initGaudi.h"
 #include "TestTools/expect_exception.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 
 
 void test(const std::string& key, const std::string& store, bool b,
           const std::string& fkey) {
   try {
     SG::VarHandleKey h(1234,key,Gaudi::DataHandle::Reader,store);
-    std::cout << "   key: \"" << key << "\" store: \"" << store 
-              << "\"   DataObjID: \"" << h.objKey() << "\"  sg: \"" << h.key() 
-              << "\"" << std::endl;
+    std::println ("   key: \"{}\" store: \"{}\"   DataObjID: \"{}\"  sg: \"{}\"",
+                  key, store, h.objKey(), h.key());
 
     if (fkey != h.objKey()) {
-      std::cout << "  Key mismatch. expected \"" << fkey << "\" got \""
-                << h.objKey() << "\"\n";
+      std::println ("  Key mismatch. expected \"{}\" got \"{}\"",
+                    fkey, h.objKey());
     }
     assert( fkey == h.objKey() );
 
   } catch (std::exception &e) {
       
-    std::cout << "   key: \"" << key << "\" store: \"" << store << "\"";
+    std::print ("   key: \"{}\" store: \"{}\"", key, store);
     if ( b ) {
-      std::cout << "  -> UNEXPECTED: " << e.what() << std::endl;
+      std::println ("  -> UNEXPECTED: {}", e.what());
     } else {
-      std::cout << "  -> expected failure: " << e.what() << std::endl;
+      std::println ("  -> expected failure: {}", e.what());
     }
 
     assert( !b );
@@ -52,23 +50,22 @@ void test(const std::string& key, const std::string& store, bool b,
 void test(const std::string& key, bool b, const std::string& fkey) {
   try {
     SG::VarHandleKey h(1234,key,Gaudi::DataHandle::Reader);
-    std::cout << "   key: \"" << key << "\" store: DEFAULT"
-              << "   DataObjID: \"" << h.objKey() << "\"  sg: \"" << h.key() 
-              << "\"" << std::endl;
+    std::println ("   key: \"{}\" store: DEFAULT   DataObjID: \"{}\"  sg: \"{}\"",
+                  key, h.objKey(), h.key());
 
     if (fkey != h.objKey()) {
-      std::cout << "  Key mismatch. expected \"" << fkey << "\" got \""
-                << h.objKey() << "\"\n";
+      std::println ("  Key mismatch. expected \"{}\" got \"{}\"\n",
+                    fkey, h.objKey());
     }
     assert( fkey == h.objKey() );
 
   } catch (std::exception &e) {
       
-    std::cout << "   key: \"" << key << "\" store: DEFAULT";
+    std::print ("   key: \"{}\" store: DEFAULT", key);
     if ( b ) {
-      std::cout << "  -> UNEXPECTED: " << e.what() << std::endl;
+      std::println ("  -> UNEXPECTED: {}", e.what());
     } else {
-      std::cout << "  -> excpected failure: " << e.what() << std::endl;
+      std::println ("  -> expected failure: {}", e.what());
     }
 
     assert( !b );

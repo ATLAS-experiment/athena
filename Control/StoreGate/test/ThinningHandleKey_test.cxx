@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/test/ThinningHandleKey_test.cxx
@@ -13,7 +13,7 @@
 #include "StoreGate/ThinningHandleKey.h"
 #include "TestOwner.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 
 
 class MyObj {};
@@ -22,7 +22,7 @@ CLASS_DEF (MyObj, 293847295, 1)
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   {
     TestOwner owner;
@@ -38,6 +38,13 @@ void test1()
     assert (k1.decisionHandleKey().key() == "aaa_THINNED_stream.TestOwner");
     assert (owner.m_deps == std::vector<DataObjID> { k1.decisionHandleKey().fullKey() });
     assert (owner.m_modes == std::vector<Gaudi::DataHandle::Mode> { Gaudi::DataHandle::Writer });
+
+    std::ostringstream s1;
+    s1 << k1;
+    assert (s1.str() == "'StoreGateSvc+aaa'");
+    std::ostringstream s2;
+    std::print (s2, "{}", k1);
+    assert (s2.str() == "'StoreGateSvc+aaa'");
   }
 
   {
@@ -86,6 +93,6 @@ void test1()
 
 int main()
 {
-  std::cout << "StoreGate/ThinningHandleKey_test\n";
+  std::println ("StoreGate/ThinningHandleKey_test");
   test1();
 }

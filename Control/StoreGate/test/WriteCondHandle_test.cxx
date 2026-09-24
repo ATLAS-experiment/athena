@@ -26,6 +26,7 @@
 #include "StoreGate/StoreGateSvc.h"
 #include <cassert>
 #include <iostream>
+#include <print>
 
 #define DEBUG_VHB 1
 
@@ -140,7 +141,7 @@ EventIDRange tsrange (int beg, int end)
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   SG::WriteCondHandleKey<MyObj> k1 {"MyObj1"};
   SG::WriteCondHandleKey<MyObj> k2 {"MyObj2"};
@@ -181,7 +182,7 @@ void test1()
   EventIDBase e3(0, EventIDBase::UNDEFEVT, 15);
   EventIDRange r3 (s3,e3);
 
-  
+
   std::cout << "r1: " << r1 << std::endl;
   std::cout << "r2: " << r2 << std::endl;
   std::cout << "r3: " << r3 << std::endl;
@@ -229,12 +230,11 @@ void test1()
   assert( rr1 == r1 );
   assert( rr2 == r2 );
   assert( rr3 == r3 );
-  
+
   std::cout << "o1: " << o1->x << "  " << rr1 << std::endl;
   std::cout << "o2: " << o2->x << "  " << rr2 << std::endl;
   std::cout << "o3: " << o3->x << "  " << rr3 << std::endl;
   
-
   SG::WriteCondHandle<MyDObj> wchD(kD);
   // can't record without a range
   assert ( wchD.record( std::make_unique<MyDObj>( MyDObj(11) ) ).isFailure() );
@@ -253,7 +253,6 @@ void test1()
   std::cout << "rI: " << rI << std::endl;
 
   assert (rI == rD);
-  
 }
 
 void testDep (int timeVal,
@@ -288,7 +287,7 @@ void testDep (int timeVal,
     assert( rr1 == r1 );
     assert( rr2 == r2 );
     assert( rr3 == r3 );
-    
+
     std::cout << "o1: " << o1->x << "  " << rr1 << " " << rch1.getRange() << std::endl;
     std::cout << "o2: " << o2->x << "  " << rr2 << std::endl;
     std::cout << "o3: " << o3->x << "  " << rr3 << std::endl;
@@ -313,7 +312,7 @@ void testDep (int timeVal,
 
 void test2( StoreGateSvc* cs )
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   EventContext ctx(1, 1);
 
@@ -375,7 +374,7 @@ void test2( StoreGateSvc* cs )
   EventIDBase s3_3(0, EventIDBase::UNDEFEVT, 6);
   EventIDBase e3_3(0, EventIDBase::UNDEFEVT, 10);
   EventIDRange r3_3 (s3_3,e3_3);
-  
+
   std::cout << "r1: " << r1_1 << " " << r1_2 << " " << r1_3 << std::endl;
   std::cout << "r2: " << r2_1 << " " << r2_2 << std::endl;
   std::cout << "r3: " << r3_1 << " " << r3_2 << " " << r3_3 << std::endl;
@@ -426,7 +425,7 @@ void test2( StoreGateSvc* cs )
     Gaudi::Hive::setCurrentContext(ctx);
     
     // can't record without a range
-    std::cout << "expected ERROR follows:" << std::endl;
+    std::println ("expected ERROR follows:");
     assert ( we1.record( std::make_unique<MyDObj>( MyDObj(0) ) ).isFailure() );
 
     SG::ReadCondHandle<MyObj>  rerr(rk1);
@@ -434,7 +433,7 @@ void test2( StoreGateSvc* cs )
     assert ( we1.getRange() == r1_1 );
     
     // can't record with a range, when dep already set
-    std::cout << "expected ERROR follows:" << std::endl;
+    std::println ("expected ERROR follows:");
     assert ( we1.record( r2_1, std::make_unique<MyDObj>( MyDObj(0) ) ).isFailure() );
   }
     
@@ -451,7 +450,7 @@ void test2( StoreGateSvc* cs )
 // Test dependency tracking.
 void test3( StoreGateSvc* cs )
 {
-  std::cout << "test3\n";
+  std::println ("test3");
 
   SGTest::TestStore dumstore;
   EventContext ctx (0, 0);
@@ -588,14 +587,14 @@ int main()
   assert (cs.isValid());
 
   // test1();
-  // std::cout << "clearing ConditionStore\n";
+  // std::println ("clearing ConditionStore");
   // cs->clearStore();
   
   try {
     test2(cs);
     test3(cs);
   } catch (const std::exception& e) {
-    std::cerr << "exception: " << e.what() << "\n";
+    std::println (std::cerr, "exception: {}", e.what());
     return 1;
   }
   return 0;

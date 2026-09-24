@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/test/VarHandleBase_test.cxx
@@ -21,7 +21,7 @@
 #include "AthenaKernel/ExtendedEventContext.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 
 
 class MyObj {};
@@ -56,7 +56,7 @@ public:
 // Ctors.
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   TestHandle h1 (1234, Gaudi::DataHandle::Reader);
   assert (h1.clid() == 1234);
@@ -134,7 +134,7 @@ void test1()
 // Setting, copy, reset
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   auto obj = std::make_unique<MyObj>();
   MyObj* objptr = obj.get();
@@ -274,7 +274,7 @@ void test2()
 // isPresent, isInitialized, isSet, isConst
 void test3()
 {
-  std::cout << "test3\n";
+  std::println ("test3");
 
   SGTest::TestStore store;
 
@@ -310,7 +310,7 @@ void test3()
 // initialize(), setStore()
 void test4()
 {
-  std::cout << "test4\n";
+  std::println ("test4");
 
   TestHandle h1 (293847295, "foo", Gaudi::DataHandle::Writer, "FooSvc", nullptr);
   assert (h1.initialize().isFailure());
@@ -351,7 +351,7 @@ void test4()
 // setConst
 void test5()
 {
-  std::cout << "test5\n";
+  std::println ("test5");
   SGTest::TestStore testStore;
 
   TestHandle h1 (293847295, "foo", Gaudi::DataHandle::Writer, "FooSvc", nullptr);
@@ -377,7 +377,7 @@ void test5()
 // setState
 void test6()
 {
-  std::cout << "test6\n";
+  std::println ("test6");
   SGTest::TestStore testStore;
 
   TestHandle h1 (293847295, "foo", Gaudi::DataHandle::Writer, "FooSvc", nullptr);
@@ -435,7 +435,7 @@ void test6()
 // record_impl
 void test7()
 {
-  std::cout << "test7\n";
+  std::println ("test7");
 
   SGTest::TestStore testStore;
 
@@ -500,7 +500,7 @@ void test7()
 // typeless_dataPointer_impl, etc
 void test8()
 {
-  std::cout << "test8\n";
+  std::println ("test8");
   SGTest::TestStore testStore;
 
   TestHandle h1 (293847295, "foo", Gaudi::DataHandle::Writer, "FooSvc", nullptr);
@@ -556,10 +556,14 @@ void test8()
 // free functions
 void test9()
 {
-  std::cout << "test9\n";
+  std::println ("test9");
 
   TestHandle h1 (293847295, "foo", Gaudi::DataHandle::Writer, "FooSvc", nullptr);
-  std::cout << h1 << "\n";
+  std::ostringstream s1;
+  s1 << h1;
+  std::ostringstream s2;
+  std::print (s2, "{}", h1);
+  assert (s1.str() == s2.str());
 
   assert (h1 == h1);
   TestHandle h2 (293847295, "foe", Gaudi::DataHandle::Writer, "FooSvc", nullptr);
@@ -570,7 +574,7 @@ void test9()
 // put_impl
 void test10()
 {
-  std::cout << "test10\n";
+  std::println ("test10");
 
   SGTest::TestStore testStore;
   IProxyDict* store = nullptr;
@@ -655,7 +659,7 @@ void test10()
 // get_impl
 void test11()
 {
-  std::cout << "test11\n";
+  std::println ("test11");
 
   SGTest::TestStore store;
 
@@ -697,7 +701,7 @@ void test11()
 // symLink_impl
 void test12()
 {
-  std::cout << "test12\n";
+  std::println ("test12");
 
   SGTest::TestStore testStore;
   TestHandle h1 (293847295, "foo", Gaudi::DataHandle::Writer, "FooSvc", nullptr);
@@ -726,7 +730,7 @@ void test12()
 // ctor from proxy
 void test13()
 {
-  std::cout << "test13\n";
+  std::println ("test13");
 
   auto obj = std::make_unique<MyObj>();
   MyObj* objptr = obj.get();

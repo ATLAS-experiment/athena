@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/test/exceptions_test.cxx
@@ -12,34 +12,34 @@
 #undef NDEBUG
 #include "StoreGate/exceptions.h"
 #include "GaudiKernel/EventContext.h"
-#include <iostream>
+#include <print>
 
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   EventContext ctx;
 
-  std::cout << SG::ExcNullHandleKey().what() << "\n";
-  std::cout << SG::ExcBadHandleKey("xkey").what() << "\n";
-  std::cout << SG::ExcForbiddenMethod("meth").what() << "\n";
-  std::cout << SG::ExcHandleInitError(123, "foo", "FooSvc").what() << "\n";
-  std::cout << SG::ExcUninitKey (123, "foo", "FooSvc").what() << "\n";
-  std::cout << SG::ExcUninitKey (123, "foo", "FooSvc", "holder", "Flooby").what() << "\n";
-  std::cout << SG::ExcConstObject(123, "foo", "FooSvc").what() << "\n";
-  std::cout << SG::ExcNullWriteHandle(123, "foo", "FooSvc").what() << "\n";
-  std::cout << SG::ExcNullReadHandle(123, "foo", "FooSvc").what() << "\n";
-  std::cout << SG::ExcNullUpdateHandle(123, "foo", "FooSvc").what() << "\n";
-  std::cout << SG::ExcNonConstHandleKey (123, "foo", "FooSvc").what() << "\n";
-  std::cout << SG::ExcInvalidIterator().what() << "\n";
-  std::cout << SG::ExcBadInitializedReadHandleKey().what() << "\n";
-  std::cout << SG::ExcBadContext(ctx, "foo").what() << "\n";
-  std::cout << SG::ExcNoCondCont("foo", "because").what() << "\n";
-  std::cout << SG::ExcBadReadCondHandleInit().what() << "\n";
-  std::cout << SG::ExcNoRange().what() << "\n";
-  std::cout << SG::ExcBadDecorElement(Gaudi::DataHandle::Writer,
-                                      1234, "foo.bar").what() << "\n";
+  std::println ("{}", SG::ExcNullHandleKey().what());
+  std::println ("{}", SG::ExcBadHandleKey("xkey").what());
+  std::println ("{}", SG::ExcForbiddenMethod("meth").what());
+  std::println ("{}", SG::ExcHandleInitError(123, "foo", "FooSvc").what());
+  std::println ("{}", SG::ExcUninitKey (123, "foo", "FooSvc").what());
+  std::println ("{}", SG::ExcUninitKey (123, "foo", "FooSvc", "holder", "Flooby").what());
+  std::println ("{}", SG::ExcConstObject(123, "foo", "FooSvc").what());
+  std::println ("{}", SG::ExcNullWriteHandle(123, "foo", "FooSvc").what());
+  std::println ("{}", SG::ExcNullReadHandle(123, "foo", "FooSvc").what());
+  std::println ("{}", SG::ExcNullUpdateHandle(123, "foo", "FooSvc").what());
+  std::println ("{}", SG::ExcNonConstHandleKey (123, "foo", "FooSvc").what());
+  std::println ("{}", SG::ExcInvalidIterator().what());
+  std::println ("{}", SG::ExcBadInitializedReadHandleKey().what());
+  std::println ("{}", SG::ExcBadContext(ctx, "foo").what());
+  std::println ("{}", SG::ExcNoCondCont("foo", "because").what());
+  std::println ("{}", SG::ExcBadReadCondHandleInit().what());
+  std::println ("{}", SG::ExcNoRange().what());
+  std::println ("{}", SG::ExcBadDecorElement(Gaudi::DataHandle::Writer,
+                                             1234, "foo.bar").what());
 }
 
 

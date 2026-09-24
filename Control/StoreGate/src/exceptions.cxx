@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/src/exceptions.cxx
@@ -10,7 +10,7 @@
 
 
 #include "StoreGate/exceptions.h"
-#include <sstream>
+#include <format>
 
 
 namespace SG {
@@ -70,11 +70,9 @@ std::string excHandleInitError_format (CLID clid,
                                        const std::string& storename)
                                        
 {
-  std::ostringstream os;
-  os << "SG::ExcHandleInitError: "
-     << "Error initializing VarHandle from VarHandleKey: "
-     << storename << "+" << sgkey << "[" << clid << "]";
-  return os.str();
+  return std::format ("SG::ExcHandleInitError: "
+                      "Error initializing VarHandle from VarHandleKey: {}+{}[{}]",
+                      storename, sgkey, clid);
 }
 
 
@@ -103,13 +101,14 @@ std::string excUninitKey_format (CLID clid,
                                  const std::string& htype)
                                        
 {
-  std::ostringstream os;
-  os << "SG::ExcUninitKey: "
-     << "Error initializing " << htype << " from uninitialized " << htype << "Key: "
-     << storename << "+" << sgkey << "[" << clid << "]; "
-     << "keys should be initialized in your initialize().";
-  if ( holdername.size() ) os << " Key held by " << holdername << ".";
-  return os.str();
+  std::string s =
+    std::format ("SG::ExcUninitKey: "
+                 "Error initializing {} from uninitialized {}Key: {}+{}[{}]; "
+                 "keys should be initialized in your initialize().",
+                 htype, htype, storename, sgkey, clid);
+  if ( holdername.size() )
+    s += std::format (" Key held by {}.", holdername);
+  return s;
 }
 
 
@@ -140,11 +139,9 @@ std::string excConstObject_format (CLID clid,
                                    const std::string& storename)
   
 {
-  std::ostringstream os;
-  os << "SG::ExcConstObject: "
-     << "Tried to retrieve non-const pointer to const object via VarHandleKey: "
-     << storename << "+" << sgkey << "[" << clid << "]";
-  return os.str();
+  return std::format ("SG::ExcConstObject: "
+                      "Tried to retrieve non-const pointer to const object via VarHandleKey: {}+{}[{}]",
+                      storename, sgkey, clid);
 }
 
 
@@ -171,11 +168,9 @@ std::string excNullWriteHandle_format (CLID clid,
                                        const std::string& storename)
   
 {
-  std::ostringstream os;
-  os << "SG::ExcNullWriteHandle: "
-     << "Attempt to dereference write handle before record: "
-     << storename << "+" << sgkey << "[" << clid << "]";
-  return os.str();
+  return std::format ("SG::ExcNullWriteHandle: "
+                      "Attempt to dereference write handle before record: {}+{}[{}]",
+                      storename, sgkey, clid);
 }
 
 
@@ -216,11 +211,9 @@ std::string excNullReadHandle_format (CLID clid,
                                       const std::string& storename)
   
 {
-  std::ostringstream os;
-  os << "SG::ExcNullReadHandle: "
-     << "Dereference of read handle failed: "
-     << storename << "+" << sgkey << "[" << clid << "]";
-  return os.str();
+  return std::format ("SG::ExcNullReadHandle: "
+                      "Dereference of read handle failed: {}+{}[{}]",
+                      storename, sgkey, clid);
 }
 
 
@@ -261,11 +254,9 @@ std::string excNullUpdateHandle_format (CLID clid,
                                         const std::string& storename)
   
 {
-  std::ostringstream os;
-  os << "SG::ExcNullUpdateHandle: "
-     << "Dereference of update handle failed: "
-     << storename << "+" << sgkey << "[" << clid << "]";
-  return os.str();
+  return std::format ("SG::ExcNullUpdateHandle: "
+                      "Dereference of update handle failed: {}+{}[{}]",
+                      storename, sgkey, clid);
 }
 
 
@@ -306,11 +297,9 @@ std::string excNonConstHandleKey_format (CLID clid,
                                          const std::string& storename)
   
 {
-  std::ostringstream os;
-  os << "SG::ExcNonConstHandleKey: "
-     << "Attempt to get non-const VarHandleKey from non-owning VarHandle: "
-     << storename << "+" << sgkey << "[" << clid << "]";
-  return os.str();
+  return std::format ("SG::ExcNonConstHandleKey: "
+                      "Attempt to get non-const VarHandleKey from non-owning VarHandle: {}+{}[{}]",
+                      storename, sgkey, clid);
 }
 
 
@@ -374,12 +363,11 @@ std::string excBadContext_format (const EventContext& ctx,
                                   const std::string& key)
   
 {
-  std::ostringstream os;
-  os << "SG::ExcBadContext: Bad EventContext extension while building ReadCondHandle. "
-     << "The EventContext extension is not "
-     << (ctx.hasExtension() ? "of type Atlas::ExtendedEventContext" : "set")
-     << " for key " << key << ".";
-  return os.str();
+  return std::format ("SG::ExcBadContext: "
+                      "Bad EventContext extension while building ReadCondHandle. "
+                      "The EventContext extension is not {} for key {}.",
+                      (ctx.hasExtension() ? "of type Atlas::ExtendedEventContext" : "set"),
+                      key);
 }
 
 
@@ -402,10 +390,9 @@ std::string excNoCondCont_format (const std::string& key,
                                   const std::string& why)
   
 {
-  std::ostringstream os;
-  os << "SG::ExcNoCondCont: Can't retrieve CondCont from ReadCondHandle for key "
-     << key << ". " << why;
-  return os.str();
+  return std::format ("SG::ExcNoCondCont: "
+                      "Can't retrieve CondCont from ReadCondHandle for key {}. {}",
+                      key, why);
 }
 
 
@@ -452,18 +439,15 @@ std::string excBadDecorElement_format (Gaudi::DataHandle::Mode mode,
                                        CLID clid,
                                        const std::string& decorKey)
 {
-  std::ostringstream os;
-  os << "SG::ExcBadDecorElement: ";
+  std::string modestr = "???";
   if (mode == Gaudi::DataHandle::Writer)
-    os << "Write";
+    modestr = "Write";
   else if (mode == Gaudi::DataHandle::Reader)
-    os << "Read";
-  else
-    os << "???";
-  os << "DecorHandle " << decorKey
-     << "[" << clid << "]"
-     << " given an element not in the requested container.";
-  return os.str();
+    modestr = "Read";
+  return std::format ("SG::ExcBadDecorElement: "
+                      "{}DecorHandle {}[{}]"
+                      " given an element not in the requested container.",
+                      modestr, decorKey, clid);
 }
 
 
