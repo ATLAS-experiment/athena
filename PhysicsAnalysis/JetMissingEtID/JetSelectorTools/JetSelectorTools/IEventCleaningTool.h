@@ -35,6 +35,9 @@ namespace ECUtils
       acceptEvent(const xAOD::JetContainer* jets) const = 0;
   
       virtual int keepJet(const xAOD::Jet& jet) const =0; 
+      
+      virtual bool passHSTPFilter(const xAOD::JetContainer* jets, const xAOD::JetContainer* puJets, const double jetThreshold = 5000) const = 0;
+
   
 }; // class IEventCleaningTool
 

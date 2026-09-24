@@ -55,6 +55,8 @@ class EventCleaningTool : public virtual IEventCleaningTool,
     virtual bool acceptEvent(const xAOD::JetContainer* jets) const override;
 
     virtual int keepJet(const xAOD::Jet& jet) const override; 
+
+    virtual bool passHSTPFilter(const xAOD::JetContainer* jets, const xAOD::JetContainer* puJets, const double jetThreshold = 5000) const override; 
     
   private:
     Gaudi::Property<double>      m_pt               {this, "PtCut" ,                  20000.,     "Jet pt cut"};
@@ -70,7 +72,7 @@ class EventCleaningTool : public virtual IEventCleaningTool,
     Gaudi::Property<std::string> m_jetContainerName          {this, "JetContainer", "",        "Input jet container key"};
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_passJvtKey  {this, "JvtDecorator", "passJvt", "JVT decision decoration key"};
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_passORKey   {this, "OrDecorator" , "passOR",  "Overlap removal decision decoration key"};
-    SG::WriteDecorHandleKey<xAOD::JetContainer> m_jetCleanKey{this, "JetCleanKey" , "",        "Jet-level cleaning decoration key (autoconfigured)"};
+    SG::WriteDecorHandleKey<xAOD::JetContainer> m_jetCleanKey{this, "JetCleanKey" , "",        "Jet-level cleaning decoration key (autoconfigured)"}; 
 
 }; // End: class definition
 }//ECUtils

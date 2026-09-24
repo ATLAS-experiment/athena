@@ -70,12 +70,14 @@ StatusCode EventCleaningTool::initialize()
     return StatusCode::FAILURE;
   }
 
-  //initialize jet cleaning tool
-  ATH_CHECK(m_jetCleaningTool.setProperty("JetContainer", m_jetContainerName ));
-  ATH_CHECK(m_jetCleaningTool.setProperty("CutLevel", m_cleaningLevel ));
-  ATH_CHECK(m_jetCleaningTool.setProperty("UseDecorations", m_useDecorations ));  //for AODs we can't use decorations
-  ATH_CHECK(m_jetCleaningTool.retrieve());
-  ATH_MSG_INFO( "Event cleaning tool configured with cut level " << m_cleaningLevel  );
+  // initialize jet cleaning tool if not empty.
+  if (!m_jetCleaningTool.empty()) {
+    ATH_CHECK(m_jetCleaningTool.setProperty("JetContainer", m_jetContainerName ));
+    ATH_CHECK(m_jetCleaningTool.setProperty("CutLevel", m_cleaningLevel ));
+    ATH_CHECK(m_jetCleaningTool.setProperty("UseDecorations", m_useDecorations ));  //for AODs we can't use decorations
+    ATH_CHECK(m_jetCleaningTool.retrieve());
+    ATH_MSG_INFO( "Event cleaning tool configured with cut level " << m_cleaningLevel  );
+  }
 
   m_passJvtKey = m_jetContainerName + "." + m_prefix + m_passJvtKey.key();
   m_passORKey = m_jetContainerName + "." + m_prefix + m_passORKey.key();
@@ -139,6 +141,38 @@ int EventCleaningTool::keepJet(const xAOD::Jet& jet) const
 	return m_jetCleaningTool->keep(jet);
 }
 
+bool EventCleaningTool::passHSTPFilter(const xAOD::JetContainer* jets, const xAOD::JetContainer* puJets, const double jetThreshold) const
+{
+  /*
+    QCD multijet (dijet) simulations face an ambiguity between HS and pileup jets, 
+    since both originate from the same physics process. Combined with JZ sample slicing, 
+    large in-time pileup in low-pT slices can cause events to leak into higher kinematic regimes, 
+    leading to unphysical normalization in the detector-level jet spectrum. 
+    The Hard-Scatter Softer Than Pile-up filter requires the HS jet to have higher pT than all pileup jets, 
+    restoring a physical reconstructed jet pT spectrum.
+    See: https://atlas-jetetmiss.docs.cern.ch/users/QCD-samples/#hard-scatter-softer-than-pileup-hstp-filter
+  */
+
+  // In the rare case of no HS truth jets in the event, assume it is close to the jetThreshold (default 5000 MeV)
+  double maxHsJetPt = jetThreshold; 
+
+  // Assume unsorted jetContainer, find leading jet
+  for (const auto thisJet : *jets){
+    if (thisJet->pt() > maxHsJetPt){
+      maxHsJetPt = thisJet->pt();
+    }
+  }
+
+  // Reject the event if any PU jet has a larger pT.
+  // Assume unsorted jetContainer, compare if leading jet 
+  for (const auto thisPUJet : *puJets){ 
+    if (thisPUJet->pt() > maxHsJetPt){
+      return false;
+    }
+  } 
+
+  return true;
+}
 }//ECUtils
 
 

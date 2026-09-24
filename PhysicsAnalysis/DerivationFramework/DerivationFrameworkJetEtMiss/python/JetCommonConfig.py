@@ -91,6 +91,66 @@ def AddJvtDecorationAlgCfg(ConfigFlags, algName = "JvtPassDecorAlg", jetContaine
     acc.addEventAlgo(CompFactory.JetDecorationAlg(algName, **kwargs), primary = True)
     return acc
 
+def DecorateHSTP(ConfigFlags):
+    """ Determine if the process is Dijet and would therefore need HSTP filtering.
+
+        QCD multijet (dijet) simulations face an ambiguity between HS and pileup jets, 
+        since both originate from the same physics process. Combined with JZ sample slicing, 
+        large in-time pileup in low-pT slices can cause events to leak into higher kinematic regimes, 
+        leading to unphysical normalization in the detector-level jet spectrum. 
+        The Hard-Scatter Softer Than Pile-up filter requires the HS jet to have higher pT than all pileup jets, 
+        restoring a physical reconstructed jet pT spectrum.
+        See: https://atlas-jetetmiss.docs.cern.ch/users/QCD-samples/#hard-scatter-softer-than-pileup-hstp-filter
+    """
+
+    from AthenaConfiguration.AutoConfigFlags import GetFileMD
+    from AthenaCommon.Utils.unixtools import find_datafile
+    from AthenaCommon.Logging import logging
+    import os
+    import re
+
+    log           = logging.getLogger('DecorateHSTP')
+    dsid          = GetFileMD(ConfigFlags.Input.Files).get("mc_channel_number", 0)
+    mc_campaign   = str(ConfigFlags.Input.MCCampaign)
+    pmgxsec_files = []
+ 
+    # First try database search via MC campaign
+    mc_match = re.search(r"MC(\d+(?:_14TeV)?)", mc_campaign)
+    if mc_match:
+      mc_number = mc_match.group(1)
+      file_name = find_datafile( f"JetSelectorTools/DijetMCsamples/PMGxsecDB_mc{mc_number}.txt" )
+      if file_name and os.path.isfile(file_name):
+        pmgxsec_files.append(file_name)
+    # If MC campaign is undefined, or mc_number doesnt correespond with a file searching all available databases
+    if not pmgxsec_files:
+      print("here")
+      dijet_samples_dir = os.path.dirname( find_datafile( "JetSelectorTools/DijetMCsamples/PMGxsecDB_mc23.txt" ) )
+      pmgxsec_files = [
+        os.path.join(dijet_samples_dir, file_name)
+        for file_name in os.listdir(dijet_samples_dir)
+        if file_name.endswith(".txt")
+      ]
+
+    # Search all selected xSecDB files for the DSID
+    is_jz_sample = False
+    for candidate in pmgxsec_files:
+      with open(candidate, 'r', encoding="utf-8") as xsec_file:
+        for line in xsec_file:
+          fields = line.split()
+          if fields and fields[0] == str(dsid):
+            is_jz_sample = True
+            break
+      if is_jz_sample:
+        break
+
+    if is_jz_sample:
+      log.info("DSID %s is a Dijet (JZ) process. Decorating passHSTPFilter", dsid)
+    else:
+      log.info("DSID %s is not a Dijet (JZ) process.", dsid)
+
+    return is_jz_sample
+
+
 def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'LooseLLP']):
     """Add event cleaning flags"""
 
@@ -138,10 +198,14 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
 
     from JetSelectorTools.JetSelectorToolsConfig import EventCleaningToolCfg,JetCleaningToolCfg
     
-    supportedWPs = ['Loose', 'Tight', 'LooseLLP', 'VeryLooseLLP', 'SuperLooseLLP']
+    supportedWPs = ['Loose', 'Tight', 'LooseLLP', 'VeryLooseLLP', 'SuperLooseLLP', 'HSTP']
     prefix = "DFCommonJets_"
     evt_lvl_suppWPs_PFlow = ['LooseBad', 'TightBad']
 
+    # Add support for passHSTPFilter event flag
+    if DecorateHSTP(ConfigFlags):
+        workingPoints.append('HSTP')
+    
     for wp in workingPoints:
         if wp not in supportedWPs:
             continue
@@ -205,6 +269,23 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
                                                              CleaningLevel=cleaningLevel,
                                                              doEvent=True) # for PFlow we use Loose and Tight
             acc.addEventAlgo(eventCleanAlg)
+
+        ## for passHSTPFilter
+        if 'HSTP' in wp:
+
+            # Decorates the decision of the Hard-Scatter Softer Than Pile-up filter, relevent ONLY for Dijet samples.
+            # see: https://atlas-jetetmiss.docs.cern.ch/users/QCD-samples/#hard-scatter-softer-than-pileup-hstp-filter
+            # We are forced to instatiate a jetcleaning tool to make an eventcleaning tool. This does not get used.
+            ecTool = acc.popToolsAndMerge(EventCleaningToolCfg(ConfigFlags,'EventCleaningTool_' + wp, cleaningLevel))
+            ecTool.JetContainer  = "AntiKt4EMPFlowJets"  # Must provide a JetContainer name.  The HSTP is a truth level only filter and wont use this.
+            ecTool.DoDecorations = False
+            acc.addPublicTool(ecTool)
+
+            eventCleanAlg = CompFactory.EventCleaningTestAlg('EventCleaningTestAlg_'+wp,
+                                                             EventCleaningTool=ecTool,
+                                                             doEvent=False, 
+                                                             doHSTPFiltering=True)
+            acc.addEventAlgo(eventCleanAlg) 
 
     return acc
 

@@ -51,7 +51,20 @@ class EventCleaningTestAlg : public AthAlgorithm
                                                 "Input cleaning level"};
     Gaudi::Property<bool> m_doEvent{this, "doEvent" , true, "Decorate the EventInfo"};
 
-    SG::WriteDecorHandleKey<xAOD::EventInfo> m_evtInfoDecor{this, "EvtDecorKey", "" , "Will be overwritten in initialze"};    
+    Gaudi::Property<bool> m_doHSTPFiltering{this, "doHSTPFiltering" , false, "Perform HSTP filtering and decorate the event"};
+
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_evtInfoDecor{this, "EvtDecorKey", "" , "Will be overwritten in initialze"};   
+
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_evtInfoDecorHSTP{this, "EvtDecorKeyHSTP", "" , "Will be overwritten in initialze"};  
+
+    SG::ReadHandleKey<xAOD::JetContainer> m_truthJetDressedWZKey{ this, "TruthJetDressedWZCollectionName", "AntiKt4TruthDressedWZJets", "Default truth jet collection" };
+
+    SG::ReadHandleKey<xAOD::JetContainer> m_truthJetWZKey{ this, "TruthJetWZCollectionName", "AntiKt4TruthWZJets", "Alternative truth jet collection"};
+
+    SG::ReadHandleKey<xAOD::JetContainer> m_truthJetKey{ this, "TruthJetCollectionName", "AntiKt4TruthJets", "Alternative truth jet collection"};
+
+    SG::ReadHandleKey<xAOD::JetContainer> m_truthPUJetKey{ this, "TruthPUJetCollectionName", "InTimeAntiKt4TruthJets", "Truth pile-up jet collection"};
+
 };
 
 #endif
