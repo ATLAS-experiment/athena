@@ -47,8 +47,8 @@ atlas_add_poolcnv_library( TrigEventAthenaPoolPoolCnv
          TrigCaloEvent/TrigT2MbtsBits.h TrigCaloEvent/TrigT2MbtsBitsContainer.h
          TrigCaloEvent/TrigT2ZdcSignals.h
          TrigCaloEvent/TrigT2ZdcSignalsContainer.h TrigCaloEvent/TrigT2Jet.h
-         TrigCaloEvent/TrigT2JetContainer.h TrigMissingEtEvent/TrigMissingET.h
-         TrigMissingEtEvent/TrigMissingETContainer.h TrigCaloEvent/RingerRings.h
+         TrigCaloEvent/TrigT2JetContainer.h
+         TrigCaloEvent/RingerRings.h
          TrigCaloEvent/RingerRingsContainer.h TrigCaloEvent/TrigRNNOutput.h
          TrigCaloEvent/TrigRNNOutputContainer.h TrigCaloEvent/TrigCaloCluster.h
          TrigCaloEvent/TrigCaloClusterContainer.h
@@ -63,7 +63,7 @@ atlas_add_poolcnv_library( TrigEventAthenaPoolPoolCnv
                   RootConversions TrigCaloEvent
                   TrigCaloEventTPCnv
                   TrigDecisionEvent TrigDecisionEventTPCnv TrigInDetEvent
-                  TrigInDetEventTPCnv TrigMissingEtEvent TrigMissingEtEventTPCnv
+                  TrigInDetEventTPCnv
                   TrigMonitoringEvent TrigMonitoringEventTPCnv TrigMuonEvent
                   TrigMuonEventTPCnv TrigParticle TrigParticleTPCnv
                   TrigTopoEvent TrigTopoEventTPCnv )

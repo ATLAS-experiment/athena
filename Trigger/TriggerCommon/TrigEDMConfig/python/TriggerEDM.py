@@ -571,7 +571,12 @@ def getPreregistrationList(version=2, doxAODConversion=True):
 
 def getClassesToIgnore(flags):
     """Get list of classes to ignore during deserialization"""
-    return []
+    l = []
+
+    if flags.Trigger.EDMVersion == 2:
+        l.append("145610168")  # TrigMissingET (Run-1 class, ATR-32944)
+
+    return l
 
 
 def _getL2BSTypeList():
