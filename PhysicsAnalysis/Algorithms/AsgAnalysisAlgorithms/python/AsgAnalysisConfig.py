@@ -112,7 +112,7 @@ class CommonServicesConfig (ConfigBlock) :
                         raise ValueError(f"Invalid systematics category passed to option 'onlySystematicsCategories': {category_str}. Must be one of {', '.join(category.name for category in SystematicsCategories)}")
                 # Construct regex pattern as logical-OR of category names
                 if len(requested_categories):
-                    sysService.systematicsRegex = "^(?=.*(" + "|".join(requested_categories) + ")|$).*"
+                    sysService.systematicsRegex = "^(?=.*(" + "|".join(sorted(requested_categories)) + ")|$).*"
             if self.filterSystematics is not None:
                 sysService.systematicsRegex = self.filterSystematics
         config.createService( 'CP::SelectionNameSvc', 'SelectionNameSvc')
