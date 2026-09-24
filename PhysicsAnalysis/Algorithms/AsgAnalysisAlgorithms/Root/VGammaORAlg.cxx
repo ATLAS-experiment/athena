@@ -12,6 +12,7 @@ namespace CP {
 
   StatusCode VGammaORAlg::initialize() {
 
+    ANA_CHECK(m_vgammaORTool.retrieve());
     ANA_CHECK(m_filterParams.initialize(m_systematicsList));
     ANA_CHECK(m_eventInfoHandle.initialize(m_systematicsList));
     ANA_CHECK(m_inOverlapHandle.initialize(m_systematicsList, m_eventInfoHandle));
@@ -21,6 +22,10 @@ namespace CP {
   }
 
   StatusCode VGammaORAlg::execute(const EventContext& ctx) {
+
+    // the tool decision does not depend on systematics
+    bool in_vgamma_overlap;
+    ANA_CHECK(m_vgammaORTool->inOverlap(in_vgamma_overlap));
 
     // the event-level filter
     CP::SysFilterReporterCombiner filterCombiner(m_filterParams, m_noFilter.value());
@@ -32,8 +37,6 @@ namespace CP {
       const xAOD::EventInfo *evtInfo = nullptr;
       ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys, ctx));
 
-      bool in_vgamma_overlap;
-      ANA_CHECK(m_vgammaORTool->inOverlap(in_vgamma_overlap));
       m_inOverlapHandle.set(*evtInfo, in_vgamma_overlap, sys);
 
       if (!m_noFilter.value()) {
