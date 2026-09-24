@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef THINNINGUTILS_ThinGeantTruthAlg_H
@@ -98,6 +98,13 @@ private:
     "Name of the input forward electron container"
   };
 
+  SG::ReadHandleKey<xAOD::ElectronContainer> m_lrtElectronsKey{
+    this,
+    "LRTElectronsKey",
+    "",
+    "Name of the input LRT electron container"
+  };
+
   SG::ReadHandleKey<xAOD::PhotonContainer> m_photonsKey{
     this,
     "PhotonsKey",
@@ -107,6 +114,13 @@ private:
 
   SG::ReadHandleKey<xAOD::MuonContainer>
     m_muonsKey{ this, "MuonsKey", "Muons", "Name of the input muon container" };
+
+  SG::ReadHandleKey<xAOD::MuonContainer> m_lrtMuonsKey{
+    this,
+    "LRTMuonsKey",
+    "",
+    "Name of the input LRT muon container"
+  };
 
   SG::ReadHandleKey<xAOD::TruthParticleContainer> m_egammaTruthKey{
     this,

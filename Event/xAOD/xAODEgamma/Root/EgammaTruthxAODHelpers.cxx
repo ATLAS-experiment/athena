@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODEgamma/EgammaTruthxAODHelpers.h"
@@ -108,8 +108,11 @@ xAOD::EgammaHelpers::getBkgElectronLineage(const xAOD::TruthParticle* truthel,
   //And has to be a photon or electron
   const xAOD::TruthParticle* parent = nullptr;
   for (size_t p = 0; p < truthel->nParents(); ++p) {
-    if ( !MC::isPhoton(truthel->parent(p)) && !MC::isElectron(truthel->parent(p)) )  return vec;
-    parent = truthel->parent(p); //AV: note, here is an ambiguity for the case of multiple parents.
+    // the parent is absent when it was removed by truth thinning
+    const xAOD::TruthParticle* thisParent = truthel->parent(p);
+    if (!thisParent) return vec;
+    if ( !MC::isPhoton(thisParent) && !MC::isElectron(thisParent) )  return vec;
+    parent = thisParent; //AV: note, here is an ambiguity for the case of multiple parents.
   }
 
   if (!parent)  return vec;
@@ -122,7 +125,8 @@ xAOD::EgammaHelpers::getBkgElectronLineage(const xAOD::TruthParticle* truthel,
     const xAOD::TruthParticle* tmp = nullptr; 
     //You want to see an electron or a photon
     for (size_t p = 0; p < parent->nParents(); ++p) {
-      if (MC::isPhoton(parent->parent(p)) || MC::isElectron(parent->parent(p))) tmp = parent->parent(p); //AV: note some ambiguity for multiple parents passing the selection
+      const xAOD::TruthParticle* thisParent = parent->parent(p); // absent if thinned
+      if (thisParent && (MC::isPhoton(thisParent) || MC::isElectron(thisParent))) tmp = thisParent; //AV: note some ambiguity for multiple parents passing the selection
     }
     if (tmp) {
       parent = tmp;
