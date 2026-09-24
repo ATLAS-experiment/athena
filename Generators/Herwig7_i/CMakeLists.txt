@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( Herwig7_i )
@@ -8,6 +8,7 @@ find_package( Herwig3 COMPONENTS HerwigAPI )
 find_package( ThePEG COMPONENTS "ThePEG" "LesHouches${CMAKE_SHARED_LIBRARY_SUFFIX}" )
 find_package( GSL )
 find_package( OpenLoops )
+find_package( ZLIB )
 
 # Remove the --as-needed linker flags:
 atlas_disable_as_needed()
@@ -70,7 +71,7 @@ if(EXISTS "${POWHEG_BB4L_LIBRARY}" AND EXISTS "${POWHEG_BB4L_INCLUDE}")
     BB4LHerwig/powhegAnalysis.h
     NO_PUBLIC_HEADERS
     SHARED
-    INCLUDE_DIRS ${THEPEG_INCLUDE_DIRS} ${GSL_INCLUDE_DIRS} ${HERWIG3_INCLUDE_DIRS} BB4LHerwig ${POWHEG_BB4L_INCLUDE}
+    INCLUDE_DIRS ${THEPEG_INCLUDE_DIRS} ${GSL_INCLUDE_DIRS} ${HERWIG3_INCLUDE_DIRS} ${POWHEG_BB4L_INCLUDE} ${ZLIB_INCLUDE_DIRS} BB4LHerwig
     LINK_LIBRARIES ${THEPEG_LIBRARIES} ${GSL_LIBRARIES} ${HERWIG3_LIBRARIES} ${ZLIB_LIBRARIES} CxxUtils HwShower powhegSOforHerwig )
 endif()
 
