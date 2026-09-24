@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // INav4MomToTrackParticleAssocs.h 
@@ -11,7 +11,6 @@
 #ifndef PARTICLEEVENT_INAV4MOMTOTRACKPARTICLEASSOCS_H 
 #define PARTICLEEVENT_INAV4MOMTOTRACKPARTICLEASSOCS_H 
 
-// STL includes
  
 #include "AthLinks/AssociationMap.h"
 #include "AthLinks/DataLink.h"
@@ -26,7 +25,6 @@
 // TrackParticleIncludes
 #include "Particle/TrackParticleContainer.h"
 #include "Particle/TrackParticle.h"
-// Forward declaration
 
 
 
@@ -47,8 +45,7 @@ public:
 
   /** Assignment operator:     */
   INav4MomToTrackParticleAssocs& operator=( const INav4MomToTrackParticleAssocs& rhs ); 
-  
-  /** Constructor with parameters:     */
+  INav4MomToTrackParticleAssocs& operator=(INav4MomToTrackParticleAssocs&& rhs);
   /** Destructor: */
   ~INav4MomToTrackParticleAssocs(); 
 

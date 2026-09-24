@@ -73,7 +73,8 @@ std::unique_ptr<fastjet::JetDefinition> makeJetDefWithPlugin(Args&&... args) {
   auto plugin = std::make_unique<PluginT>(std::forward<Args>(args)...);
   auto jetDef = std::make_unique<fastjet::JetDefinition>(plugin.get());
   jetDef->delete_plugin_when_unused();
-  plugin.release(); 
+  //coverity[RESOURCE_LEAK]
+  plugin.release(); // FastJet now owns the plugin.
   return jetDef;
 }
 
@@ -278,7 +279,7 @@ std::vector< std::vector<PseudoJet> > JetIRCSafeLabelTool::getJetInputs(
 
   if (doAKT) {
     // Copy base_jets instead of moving, as it may be used by GHS and SDF
-    all_pseudojets_array[static_cast<std::size_t>(Algo::AKT)] = base_jets;
+    all_pseudojets_array[static_cast<std::size_t>(Algo::AKT)] = std::move(base_jets);
   }
 
   std::vector<std::vector<PseudoJet>> all_pseudojets;

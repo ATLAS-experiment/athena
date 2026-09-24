@@ -281,7 +281,7 @@ std::vector<TLorentzVector> VGammaORTool::getLeptonP4s(const xAOD::TruthParticle
     return p1->pt() > p2->pt();
   });
   // put taus before other leptons in a vector
-  std::vector<const xAOD::TruthParticle*> lepton_candidates(tau_candidates);
+  std::vector<const xAOD::TruthParticle*> lepton_candidates(std::move(tau_candidates));
   lepton_candidates.insert(lepton_candidates.end(), elmu_candidates.begin(), elmu_candidates.end());
   // determine lepton origins
   std::vector<TLorentzVector> lepton_p4s;

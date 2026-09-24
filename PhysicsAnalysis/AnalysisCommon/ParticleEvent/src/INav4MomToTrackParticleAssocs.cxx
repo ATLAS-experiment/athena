@@ -15,6 +15,7 @@
 #include "AthContainers/DataVector.h"
 #include "EventKernel/INavigable4Momentum.h"
 #include "NavFourMom/INavigable4MomentumCollection.h"
+#include <utility>
 
 
 /////////////////////////////////////////////////////////////////// 
@@ -38,6 +39,18 @@ INav4MomToTrackParticleAssocs& INav4MomToTrackParticleAssocs::operator=(const IN
   if ( this != &rhs ) {
     AssociationMap< INavigable4MomentumCollection, Rec::TrackParticleContainer >::operator=(rhs);
     m_assocStores = rhs.m_assocStores;
+  }
+  return *this;
+}
+
+
+
+INav4MomToTrackParticleAssocs&
+INav4MomToTrackParticleAssocs::operator=(INav4MomToTrackParticleAssocs&& rhs)
+{
+  if (this != &rhs) {
+    m_associationMap = std::move(rhs.m_associationMap);
+    m_assocStores   = std::move(rhs.m_assocStores);
   }
   return *this;
 }
