@@ -11,7 +11,6 @@ log = logging.getLogger('RunTrigCostAnalysis.py')
 
 # Configure Cost Analysis algorithm
 def trigCostAnalysisCfg(flags, args):
-  from TrigCostAnalysis.ROSToROB import ROSToROBMap
 
   acc = ComponentAccumulator()
 
@@ -39,7 +38,6 @@ def trigCostAnalysisCfg(flags, args):
   trigCostAnalysis.MaxFullEventDumps = 100
   trigCostAnalysis.FullEventDumpProbability = 1 # X. Where probability is 1 in X
   trigCostAnalysis.UseSingleTimeRange = flags.Input.isMC or args.useEBWeights
-  trigCostAnalysis.ROSToROBMap = ROSToROBMap().get_mapping()
   trigCostAnalysis.DoMonitorChainAlgorithm = args.monitorChainAlgorithm
   if args.excludeAlgsFromChainTime:
     trigCostAnalysis.ExcludeAlgsFromChainTime = args.excludeAlgsFromChainTime.split(',')
