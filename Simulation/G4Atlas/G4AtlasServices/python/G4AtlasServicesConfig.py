@@ -5,7 +5,7 @@ from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 from G4AtlasTools.G4AtlasToolsConfig import FastSimulationConstructorToolCfg
 from ExtraParticles.ExtraParticlesConfig import ExtraParticlesPhysicsToolCfg
-from SimulationConfig.SimEnums import CavernBackground
+from SimulationConfig.SimEnums import CavernBackground, InDetParameterization
 from G4ExtraProcesses.G4ExtraProcessesConfig import G4EMProcessesPhysicsToolCfg
 from G4StepLimitation.G4StepLimitationConfig import G4StepLimitationToolCfg
 from TRT_TR_Process.TRT_TR_ProcessConfig import TRTPhysicsToolCfg
@@ -25,6 +25,10 @@ def PhysicsListSvcCfg(flags, name="PhysicsListSvc", **kwargs):
     if flags.Detector.GeometryLucid or flags.Detector.GeometryAFP or flags.Detector.GeometryZDC:
         from LUCID_OpProcess.LUCID_OpProcessConfig import LucidPhysicsToolCfg
         PhysOptionList +=[result.popToolsAndMerge(LucidPhysicsToolCfg(flags))]
+    # FatrasG4 owns the InDet, so Geant4 keeps no physics of its own there
+    if flags.Sim.InDetParameterization is InDetParameterization.FatrasG4:
+        from G4FastSimulation.G4FastSimulationConfig import NoG4PhysicsToolCfg
+        PhysOptionList +=[result.popToolsAndMerge(NoG4PhysicsToolCfg(flags))]
     kwargs.setdefault("PhysOption", PhysOptionList)
     PhysDecaysList = []
     kwargs.setdefault("PhysicsDecay", PhysDecaysList)

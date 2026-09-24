@@ -18,6 +18,9 @@
 #include "InDetSimEvent/SiHitCollection.h"
 #include "InDetSimEvent/SiHit.h"
 
+#include <string>
+#include <vector>
+
 class G4VFastSimulationModel;
 class FatrasG4Tool: public FastSimulationBase
 {
@@ -42,6 +45,8 @@ protected:
  private:
   // Geant4 ACTSFatras G4 Tool
   PublicToolHandle<IActsFatrasG4Tool> m_ActsFatrasG4Tool{this, "ActsFatrasG4Tool", "ActsFatrasG4Tool", ""};
+
+  Gaudi::Property<std::vector<std::string>> m_bookkeepingRegionNames{this, "BookkeepingRegionNames", {}, "Regions next to RegionName where FatrasG4 only counts the photon steps and leaves the physics to Geant4."};
 
   // ==============================
   // Write handles owned by this tool

@@ -5,6 +5,10 @@
 #include "FatrasG4Tool.h"
 #include "FatrasG4.h"
 
+#include "G4FastSimulationManager.hh"
+#include "G4Region.hh"
+#include "G4RegionStore.hh"
+
 
 StatusCode FatrasG4Tool::initializeFastSim()
 {
@@ -32,7 +36,22 @@ G4VFastSimulationModel* FatrasG4Tool::makeFastSimModel()
 {
   ATH_MSG_INFO("Initializing Fast Simulation Model FatrasG4");
   // Create the FatrasG4 fast simulation model
-  return new FatrasG4(name(), getRegion(), m_ActsFatrasG4Tool, this);
+  G4VFastSimulationModel* model = new FatrasG4(name(), getRegion(), m_ActsFatrasG4Tool, this);
+
+  // Attach it to the bookkeeping regions as well, so that it sees every step
+  // of the photon and counts only those made in its own region
+  for (const std::string& regionName : m_bookkeepingRegionNames.value()) {
+    G4Region* region = G4RegionStore::GetInstance()->GetRegion(regionName, false);
+    if (!region) {
+      ATH_MSG_WARNING("Bookkeeping region " << regionName << " not found");
+      continue;
+    }
+    G4FastSimulationManager* manager = region->GetFastSimulationManager();
+    if (!manager) manager = new G4FastSimulationManager(region);
+    manager->AddFastSimulationModel(model);
+  }
+
+  return model;
 }
 
 StatusCode FatrasG4Tool::EndOfAthenaEvent(HitCollectionMap& hcm)
