@@ -8,10 +8,12 @@
 import os
 from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags, defaultTestFiles
 
+
 def parser():
     from argparse import ArgumentParser
-    parser = ArgumentParser(description='Script for the ITk Alignment')
-    
+
+    parser = ArgumentParser(description="Script for ITk alignment")
+
     ## Type of running mode
     parser.add_argument("-a", '--accumulate', action="store_true", help='Run accumulation step')
     parser.add_argument("-s", '--solve', action="store_true", help='Run solve step')
@@ -48,9 +50,48 @@ def parser():
     ## Number of threads
     parser.add_argument("--threads", default = 1, type = int, help='Number of threads')
     
+
     return parser.parse_args()
 
+
+def stageLocalDBFiles(db_file):
+    """
+    Stage the local SQLite database, POOL payload file and POOL catalogue
+    in the current accumulation/solve working directory.
+    """
+
+    db_file = os.path.abspath(db_file)
+    db_dir = os.path.dirname(db_file)
+    db_basename = os.path.basename(db_file)
+    db_stem = os.path.splitext(db_basename)[0]
+
+    files_to_stage = (
+        db_basename,
+        f"{db_stem}.pool.root",
+        "PoolFileCatalog.xml",
+    )
+
+    for filename in files_to_stage:
+        source = os.path.join(db_dir, filename)
+        destination = os.path.join(os.getcwd(), filename)
+
+        if not os.path.exists(source):
+            raise FileNotFoundError(
+                f"Required local conditions file does not exist: {source}"
+            )
+
+        if os.path.lexists(destination):
+            os.remove(destination)
+
+        os.symlink(source, destination)
+
+
 kwargs = vars(parser())
+
+if kwargs["accumulate"] == kwargs["solve"]:
+    raise RuntimeError(
+        "Select exactly one running mode: either --accumulate or --solve"
+    )
 
 ## Create flags and set alignment specific parameter
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -111,16 +152,6 @@ else:
 if kwargs["localgeo"]:
     flags.ITk.Geometry.AllLocal = True
 
-DBFile = ""
-DBName="OFLCOND"
-tag="InDetSi_MisalignmentMode_random misalignment"
-
-if kwargs["localDB"]:
-    flags.ITk.Align.useLocalDatabase = True
-    DBFile = kwargs["localDB"]
-    flags.IOVDb.DBConnection ="sqlite://;schema="+DBFile+";dbname="+DBName
-    flags.ITk.Geometry.alignmentFolder = "/Indet/AlignITk"
-
 if flags.ITk.Align.alignITkPixel:
     flags.ITk.Geometry.pixelAlignable = True
 if flags.ITk.Align.alignITkStrip:
@@ -129,33 +160,91 @@ if flags.ITk.Align.alignITkStrip:
 if kwargs["threads"] > 0:
     flags.Concurrency.NumThreads = kwargs["threads"]
 
+
+# Uncomment for ATLAS-P2-RUN4-04-00-00 / ATLAS-P2-RUN4-05-00-00.
+# flags.DQ.useTrigger = False
+
+# Uncomment when running the monitoring configuration to produce IDAlignMon.root.
+# flags.Output.HISTFileName = "IDAlignMon.root"
+
+
+DBFile = ""
+DBName = "OFLCOND"
+misalignModeMap = {0:'InDetSi_MisalignmentMode_no Misalignment',
+                   1: 'InDetSi_MisalignmentMode_misalignment by 6 parameters',
+                   2: 'InDetSi_MisalignmentMode_random misalignment',
+                   3: 'InDetSi_MisalignmentMode_IBL-stave temperature dependent bowing',
+                   7: 'InDetSi_MisalignmentMode_misalignment according to module indices',
+                   41: 'InDetSi_MisalignmentMode_ITk endcap beam-pipe z shift',
+                   42: 'InDetSi_MisalignmentMode_ITk pixel barrel layer bowing',
+                   43: 'InDetSi_MisalignmentMode_ITk barrel radial expansion',
+                   11: 'InDetSi_MisalignmentMode_R deltaR (radial expansion)', 12: 'Phi deltaR (ellipse)',13: 'Z deltaR (funnel)',
+                   21: 'InDetSi_MisalignmentMode_R deltaPhi (curl)', 22: 'Phi deltaPhi (clamshell) ',23:'Z deltaPhi (twist)',
+                   31: 'InDetSi_MisalignmentMode_R deltaZ (telescope)',32:'Phi deltaZ (skew)',33:'Z deltaZ (z-expansion)'}
+
+get_db_name = os.path.basename(kwargs["localDB"])
+
+misalign_mode = int(get_db_name.removeprefix("MisalignmentSet").removesuffix(".db"))
+alignment_tag = misalignModeMap.get(int(misalign_mode),'unknown')
+if kwargs["localDB"]:
+    flags.ITk.Align.useLocalDatabase = True
+
+    if os.path.isabs(kwargs["localDB"]):
+        DBFile = os.path.abspath(kwargs["localDB"])
+    else:
+        DBFile = os.path.abspath(os.path.join(flags.ITk.Align.baseDir,kwargs["localDB"],))
+
+    if not os.path.exists(DBFile):
+        raise FileNotFoundError(f"Local alignment database does not exist: {DBFile}")
+
+    flags.IOVDb.DBConnection = (f"sqlite://;schema={DBFile};dbname={DBName}")
+
+    flags.ITk.Geometry.alignmentFolder = "/Indet/AlignITk"
+
+
 flags.lock()
+
 
 from RecJobTransforms.RecoSteering import RecoSteering
 cfg = RecoSteering(flags)
 
 if flags.ITk.Align.useLocalDatabase:
-    from IOVDbSvc.IOVDbSvcConfig import addFolders, getSqliteContent
+    from IOVDbSvc.IOVDbSvcConfig import addFolders
     print("Adding Align Folder "+flags.ITk.Geometry.alignmentFolder+" from local "+DBName+" Database in file "+DBFile)
-    cfg.merge(addFolders(flags,flags.ITk.Geometry.alignmentFolder,db=DBName,detDb=DBFile,tag=tag, className="AlignableTransformContainer"))     
+    cfg.merge(addFolders(flags,flags.ITk.Geometry.alignmentFolder,detDb=os.path.basename(DBFile),db=DBName,tag=alignment_tag,className="AlignableTransformContainer",))
 
 from MuonConfig.MuonGeometryConfig import MuonIdHelperSvcCfg
 cfg.getPrimaryAndMerge(MuonIdHelperSvcCfg(flags))
 
 ## Accumulate step
-if kwargs["accumulate"] and not kwargs["solve"]:
-    os.makedirs(f"{flags.ITk.Align.baseDir}/Accumulate", exist_ok = True)
-    os.chdir("Accumulate")
+if kwargs["accumulate"]:
+
+    # First configure the accumulation workflow.
     from InDetAlignConfig.AccumulateITkConfig import ITkAccumulateCfg
     cfg.merge(ITkAccumulateCfg(flags))
+    work_dir = os.path.join(flags.ITk.Align.baseDir,"Accumulate",)
+    os.makedirs(work_dir,exist_ok=True,)
+    os.chdir(work_dir)
+
+    # Make SQLite, POOL payload and POOL catalogue visible from the runtime working directory.
+    if flags.ITk.Align.useLocalDatabase:
+        stageLocalDBFiles(DBFile)
 
 ## Solve step
 elif kwargs["solve"] and not kwargs["accumulate"]:
-    os.makedirs(f"{flags.ITk.Align.baseDir}/Solve", exist_ok = True)
-    os.chdir("Solve")
+
+    # First configure the solve workflow.
     from InDetAlignConfig.SolveITkConfig import ITkSolveCfg
     cfg.merge(ITkSolveCfg(flags))
-       
+
+    # Then move to the solve directory.
+    work_dir = os.path.join(flags.ITk.Align.baseDir,"Solve",)
+    os.makedirs(work_dir,exist_ok=True,)
+    os.chdir(work_dir)
+
+    if flags.ITk.Align.useLocalDatabase:
+        stageLocalDBFiles(DBFile)
+
 else:
     raise Exception("You can run either the acculumation step or the solve step, but not both or neither at the same time!")
 
@@ -166,3 +255,4 @@ if kwargs["dryRun"]:
    
 else:
     cfg.run()
+
