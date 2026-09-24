@@ -27,6 +27,7 @@ import os
 os.environ["PATHRESOLVER_DEVAREARESPONSE"] = "WARNING"
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
+from AthenaConfiguration.TestDefaults import defaultConditionsTags
 
 ex = ExecStep.ExecStep()
 ex.type = 'athena'
@@ -34,6 +35,7 @@ ex.input = 'ttbar_pu200_Run4'
 ex.max_events = 1
 ex.threads = 8
 ex.job_options = 'ActsGPUDataPreparation/ActsDeviceClusterizationTest.py'
+ex.flags = [f'IOVDb.GlobalTag="{defaultConditionsTags.RUN4_MC}"']
 test = Test.Test()
 test.art_type = 'grid'
 test.exec_steps = [ex]
