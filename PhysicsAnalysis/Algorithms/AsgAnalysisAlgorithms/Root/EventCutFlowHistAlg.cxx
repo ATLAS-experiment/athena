@@ -27,7 +27,6 @@ namespace CP
     ANA_CHECK (m_preselection.initialize (m_systematicsList, m_eventInfoHandle, SG::AllowEmpty));
     ANA_CHECK (m_selections.initialize (m_systematicsList, m_eventInfoHandle));
     ANA_CHECK (m_systematicsList.initialize());
-    ANA_CHECK (m_selectionNameSvc.retrieve());
 
     // Total label
     m_labels.push_back ("total");

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -28,7 +28,6 @@ namespace CP
     ANA_CHECK (m_preselection.initialize (m_systematicsList, m_inputHandle, SG::AllowEmpty));
     ANA_CHECK (m_selections.initialize (m_systematicsList, m_inputHandle));
     ANA_CHECK (m_systematicsList.initialize());
-    ANA_CHECK (m_selectionNameSvc.retrieve());
 
     // Total label
     m_labels.push_back ("total");
