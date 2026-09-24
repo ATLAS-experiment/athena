@@ -140,7 +140,7 @@ class OverlapAnalysisConfig (ConfigBlock):
 
     def makeAlgs (self, config) :
 
-        import logging, sys
+        import logging
         log = logging.getLogger('OverlapRemovalConfig')
 
         if self.addToAllSelections is None:
@@ -185,28 +185,22 @@ class OverlapAnalysisConfig (ConfigBlock):
                 log.warning("More than one OverlapRemoval config scheduled but 'addToAllSelections' is set to True. This is probably not what you want.")
 
             if self.electrons and not self.electronsSelectionName:
-                log.error("More than one OverlapRemoval config scheduled: please explicitly specify the selection name of the OR decision for electrons with 'electronsSelectionName'.")
-                sys.exit(1)
+                raise ValueError("More than one OverlapRemoval config scheduled: please explicitly specify the selection name of the OR decision for electrons with 'electronsSelectionName'.")
 
             if self.muons and not self.muonsSelectionName:
-                log.error("More than one OverlapRemoval config scheduled: please explicitly specify the selection name of the OR decision for muons with 'muonsSelectionName'.")
-                sys.exit(1)
+                raise ValueError("More than one OverlapRemoval config scheduled: please explicitly specify the selection name of the OR decision for muons with 'muonsSelectionName'.")
 
             if self.photons and not self.photonsSelectionName:
-                log.error("More than one OverlapRemoval config scheduled: please explicitly specify the selection name of the OR decision for photons with 'photonsSelectionName'.")
-                sys.exit(1)
+                raise ValueError("More than one OverlapRemoval config scheduled: please explicitly specify the selection name of the OR decision for photons with 'photonsSelectionName'.")
 
             if self.taus and not self.tausSelectionName:
-                log.error("More than one OverlapRemoval config scheduled: please explicitly specify the selection name of the OR decision for tau-jets with 'tausSelectionName'.")
-                sys.exit(1)
+                raise ValueError("More than one OverlapRemoval config scheduled: please explicitly specify the selection name of the OR decision for tau-jets with 'tausSelectionName'.")
 
             if self.jets and not self.jetsSelectionName:
-                log.error("More than one OverlapRemoval config scheduled: please explicitly specify the selection name of the OR decision for jets with 'jetsSelectionName'.")
-                sys.exit(1)
+                raise ValueError("More than one OverlapRemoval config scheduled: please explicitly specify the selection name of the OR decision for jets with 'jetsSelectionName'.")
 
             if self.fatJets and not self.fatJetsSelectionName:
-                log.error("More than one OverlapRemoval config scheduled: please explicitly specify the selection name of the OR decision for large-R jets with 'fatJetsSelectionName'.")
-                sys.exit(1)
+                raise ValueError("More than one OverlapRemoval config scheduled: please explicitly specify the selection name of the OR decision for large-R jets with 'fatJetsSelectionName'.")
 
         # here the logic is:
         # - either the user has provided a specific selection name for the object, and we use that one
