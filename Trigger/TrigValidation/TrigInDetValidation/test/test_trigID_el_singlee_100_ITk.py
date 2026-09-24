@@ -37,7 +37,7 @@ Input   = 'Single_el_Run4'    # defined in TrigValTools/share/TrigValInputs.json
 # by default, all MC tests override the global conditions tag and force defaultConditionsTags.RUN3_MC, which is not suitable for Run4
 conditionsOverride = 'Run4'
 
-preexec_trig = "flags.Tracking.doTruth=False;"
+preexec_trig = "flags.Tracking.doTruth=False;flags.Trigger.useHLTPrefixForRun4=True;"
 
 Jobs = [ ( "Truth",       " TIDAdata-run4.dat                    -o data-hists.root -p 11" ),
          ( "Offline",     " TIDAdata-run4-offline.dat -r Offline -o data-hists-offline.root" ) ]

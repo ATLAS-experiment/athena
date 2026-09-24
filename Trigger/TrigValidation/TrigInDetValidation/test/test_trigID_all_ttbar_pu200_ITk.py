@@ -37,7 +37,7 @@ Input   = 'ttbar_pu200_Run4'    # defined in TrigValTools/share/TrigValInputs.js
 # by default, all MC tests override the global conditions tag and force defaultConditionsTags.RUN3_MC, which is not suitable for Run4
 conditionsOverride = 'Run4'
 
-preexec_trig = "flags.Tracking.doTruth=False;"
+preexec_trig = "flags.Tracking.doTruth=False;flags.Trigger.useHLTPrefixForRun4=True;"
 
 Jobs = [ ( "Offline",     " TIDAdata-run4-offline.dat      -r Offline -o data-hists-offline.root" ),
          ( "OfflineVtx",  " TIDAdata-run4-offline-vtx.dat  -r Offline -o data-hists-offline-vtx.root" ) ]
