@@ -169,8 +169,13 @@ StatusCode TauCalibrateLC::execute(xAOD::TauJet& tau) const
 
   // tau.m() is 0 by convention in tauRecTools
   // while mDetectorAxis and mIntermediateAxis are not forced to 0, mTauEnergyScale is
-  tau.setP4( energyFinal * GeV, tau_p4.Eta(), tau_p4.Phi(), tau.m());
-  tau.setP4(xAOD::TauJetParameters::TauEnergyScale, tau.pt(), tau.eta(), tau.phi(), tau.m());
+  if(m_doForceZeroMass){ 
+    tau.setP4( energyFinal * GeV, tau_p4.Eta(), tau_p4.Phi(), 0.0);
+    tau.setP4(xAOD::TauJetParameters::TauEnergyScale, tau.pt(), tau.eta(), tau.phi(), 0.0);
+  } else {
+    tau.setP4( energyFinal * GeV, tau_p4.Eta(), tau_p4.Phi(), tau.m());
+    tau.setP4(xAOD::TauJetParameters::TauEnergyScale, tau.pt(), tau.eta(), tau.phi(), tau.m());
+  }
   ATH_MSG_DEBUG("Energy at LC scale = " << energyLC << " pile-up offset " << offset << " calib. const. = " << calibConst << " final energy = " << energyFinal);
 
   return StatusCode::SUCCESS;
