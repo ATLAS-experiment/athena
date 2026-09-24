@@ -6,7 +6,7 @@
 
 #ifndef __ASGELECTRONSELECTORTOOL__
 #define __ASGELECTRONSELECTORTOOL__
-
+#include "TEnv.h"
 // This include is needed at the top before any includes regarding Eigen
 // since it includes Eigen in a specific way which causes compilation errors
 // if not included before Eigen
@@ -35,6 +35,12 @@ public:
   /** Standard destructor */
   virtual ~AsgElectronSelectorTool();
 public:
+
+   struct SelectorOutputs {
+
+    std::vector<std::vector<float>> layerOutputs;
+    
+  };
   /** Gaudi Service Interface method implementations */
   virtual StatusCode initialize() override;
 
@@ -86,13 +92,27 @@ public:
 
   /** The main result method: the actual mva score is calculated here */
   double calculate( const EventContext &ctx, const xAOD::Egamma* eg, double mu ) const override;
-
-  /** Computes discrimiant value from mva output based on whether multiclass is true or false */
-  double getDiscriminant(std::vector<float>& mvaOutputs, const xAOD::Electron* egu ) const;
-
+  
+  std::vector<double> buildInputVector(
+    const std::vector<int>& varIDs,
+    double eta, double et,
+    float f3, float Rhad, float Rhad1, float Reta, float w2, float f1, float Eratio,
+    float deltaEta1, float d0, float qd0, float d0significance,
+    float Rphi, double dPOverP, float deltaPhiRescaled2,
+    double trans_TRTPID, float wtots1, float EoverP,
+    uint8_t nPixHitsPlusDeadSensors,
+    uint8_t nSCTHitsPlusDeadSensors,
+    double SCTWeightedCharge
+  ) const;
+  
   /** The result method for multiple outputs: can return multiple outputs of the MVA */
-  std::vector<float> calculateMultipleOutputs( const EventContext &ctx, const xAOD::Electron *eg, double mu = -99) const override;
+  SelectorOutputs runSelections(const EventContext &ctx,const xAOD::Electron *eg, double mu) const;
 
+  virtual std::vector<float> calculateMultipleOutputs( const EventContext &ctx, const xAOD::Electron *eg, double mu = -99) const override;
+  
+  /** Computes discrimiant value from mva output based on whether multiclass is true or false */
+  std::vector<double> getDiscriminant(const SelectorOutputs& mvaOutputs, const xAOD::Electron* egu ) const;
+   
   virtual std::string getOperatingPointName() const override;
 
   // Private methods
@@ -107,7 +127,7 @@ private:
   double transformMLOutput( float score ) const;
 
   /** Combines the six output nodes of a multiclass model into one discriminant. */
-  double combineOutputs(const std::vector<float>& mvaScores, double eta) const;
+  double combineOutputs(const std::vector<float>& mvaScores, double eta, const std::vector<double>& fractions, bool m_cfSignal = false ) const;
   static double combineOutputsCF(const std::vector<float>& mvaScores) ;
 
   /** Gets the Discriminant Eta bin [0,s_fnDiscEtaBins-1] given the eta*/
@@ -126,57 +146,71 @@ private:
   // Private member variables
 private:
 
-  /// Working Point
+    struct SelectionLayer {
+    std::string name;             // e.g. "FirstSelection" or "SecondSelection"
+    std::string prefix;           // e.g. "" for Layer 0, "SecondSelection." for Layer 1
+    
+    /** Pointer to the class that calculates the MVA score. const for thread safety */
+    std::unique_ptr<const ElectronDNNCalculator> m_mvaTool;
+        
+    /// Variables used in the MVA Tool
+    std::vector<std::string> m_variables;
+    
+    /// Enum version of used variables
+    std::vector<int> m_enum_variables;
+    
+    unsigned int m_nOutputs;                  
+    
+    /// Multiclass model or not
+    bool m_multiClass{};
+    /// Run CF rejection or not
+    bool m_CFReject{};
+    /// Use the CF output node in the numerator or the denominator
+    bool m_cfSignal{};
+    /// Fractions to combine the output nodes of a multiclass model into one discriminant.
+    std::vector<double> m_fractions;
+    /// do cut on ambiguity bit
+    std::vector<int> m_cutAmbiguity;
+    /// cut min on b-layer hits
+    std::vector<int> m_cutBL;
+    /// cut min on pixel hits
+    std::vector<int> m_cutPi;
+    /// cut min on precision hits
+    std::vector<int> m_cutSCT;
+    /// cut on mva output
+    std::vector<double> m_cutSelector;
+    std::vector<double> m_cutSelectorCF;
+    /// Default vector to return if calculation fails
+    std::vector<float> m_defaultOutputs;
+    
+    bool initialize(TEnv& env,
+                    const std::string& prefixName,
+                    const std::string& layerName,
+                    const std::string& m_modelFileName,
+                    const std::string& m_quantileFileName,
+                    asg::AsgTool* parentTool); 
+    std::vector<float> evaluate(const std::vector<double>& inputs) const;  
+  };
+    /// Working Point
   std::string m_workingPoint;
 
   /// The input config file.
   std::string m_configFile;
-
-  /** Pointer to the class that calculates the MVA score. const for thread safety */
-  std::unique_ptr<const ElectronDNNCalculator> m_mvaTool;
-
   /// The input file name that holds the model
   std::string m_modelFileName;
-
+    
   /// The input file name that holds the QuantileTransformer
   std::string m_quantileFileName;
-
-  /// Variables used in the MVA Tool
-  std::vector<std::string> m_variables;
-
-  /// Enum version of used variables
-  std::vector<int> m_enum_variables;
-
   /// Flag for skip the use of deltaPoverP in dnn calculation (like at HLT)
   bool m_skipDeltaPoverP;
-
   bool m_skipAmbiguityCut;
+  bool m_doSmoothBinInterpolation
+  ;
+  static const unsigned int s_fnDiscEtBins = 10;
+  static const unsigned int s_fnDiscEtaBins = 10;
 
-  /// Multiclass model or not
-  bool m_multiClass{};
-  /// Run CF rejection or not
-  bool m_CFReject{};
-  /// Use the CF output node in the numerator or the denominator
-  bool m_cfSignal{};
-  /// Fractions to combine the output nodes of a multiclass model into one discriminant.
-  std::vector<double> m_fractions;
-
-  /// do cut on ambiguity bit
-  std::vector<int> m_cutAmbiguity;
-  /// cut min on b-layer hits
-  std::vector<int> m_cutBL;
-  /// cut min on pixel hits
-  std::vector<int> m_cutPi;
-  /// cut min on precision hits
-  std::vector<int> m_cutSCT;
-  /// do smooth interpolation between bins
-  bool m_doSmoothBinInterpolation{};
-  /// cut on mva output
-  std::vector<double> m_cutSelector;
-  std::vector<double> m_cutSelectorCF;
-
-
-  /// The position of the kinematic cut bit in the AcceptInfo return object
+  std::vector<SelectionLayer> m_layers;
+    /// The position of the kinematic cut bit in the AcceptInfo return object
   int m_cutPosition_kinematic{};
   /// The position of the NSilicon cut bit in the AcceptInfo return object
   int m_cutPosition_NSilicon{};
@@ -187,16 +221,7 @@ private:
   /// The position of the ambiguity cut bit in the AcceptInfo return object
   int m_cutPosition_ambiguity{};
   /// The position of the MVA cut bit in the AcceptInfo return object
-  int m_cutPosition_MVA{};
-
-  /// Default vector to return if calculation fails
-  std::vector<float> m_defaultVector;
-
-  /// number of discrimintants vs Et
-  static const unsigned int s_fnDiscEtBins = 10;
-  /// number of discriminants vs |eta|
-  static const unsigned int s_fnDiscEtaBins = 10;
-
+  int m_cutPosition_MVA{};  
 
 }; // End: class definition
 
