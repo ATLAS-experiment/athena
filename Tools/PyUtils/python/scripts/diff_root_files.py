@@ -798,7 +798,7 @@ def main(args):
                 n = '.'.join(["%03i"%ientry]+iname+["%03i"%jentry]+jname)
             diff_value = 'N/A'
             try:
-                diff_value = 50.*(iold-inew)/(iold+inew)
+                diff_value = 200.*(iold-inew)/(iold+inew)  # 100*(old-new)/avg(old,new)
                 diff_value = '%.8f%%' % (diff_value,)
             except Exception:
                 pass
