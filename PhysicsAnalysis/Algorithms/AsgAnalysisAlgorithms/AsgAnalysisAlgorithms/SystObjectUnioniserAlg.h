@@ -100,13 +100,14 @@ private:
       m_syst_link_acc;
   };
 
-  // Define the following classes concretely for source code configuration.
-  template class SystObjectUnioniserAlg<xAOD::Jet,xAOD::JetContainer>;
-  template class SystObjectUnioniserAlg<xAOD::Electron,xAOD::ElectronContainer>;
-  template class SystObjectUnioniserAlg<xAOD::Photon,xAOD::PhotonContainer>;
-  template class SystObjectUnioniserAlg<xAOD::Muon,xAOD::MuonContainer>;
-  template class SystObjectUnioniserAlg<xAOD::TauJet,xAOD::TauJetContainer>;
-  template class SystObjectUnioniserAlg<xAOD::DiTauJet,xAOD::DiTauJetContainer>;
+  // The following classes are instantiated concretely for source code
+  // configuration in Root/SystObjectUnioniserAlg.cxx.
+  extern template class SystObjectUnioniserAlg<xAOD::Jet,xAOD::JetContainer>;
+  extern template class SystObjectUnioniserAlg<xAOD::Electron,xAOD::ElectronContainer>;
+  extern template class SystObjectUnioniserAlg<xAOD::Photon,xAOD::PhotonContainer>;
+  extern template class SystObjectUnioniserAlg<xAOD::Muon,xAOD::MuonContainer>;
+  extern template class SystObjectUnioniserAlg<xAOD::TauJet,xAOD::TauJetContainer>;
+  extern template class SystObjectUnioniserAlg<xAOD::DiTauJet,xAOD::DiTauJetContainer>;
 
   // Trivial subclassing for more convenient python configuration
   // Otherwise genConf creates a horribly mangled templated name
