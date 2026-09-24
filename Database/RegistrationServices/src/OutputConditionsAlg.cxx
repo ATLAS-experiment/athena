@@ -44,12 +44,10 @@ StatusCode OutputConditionsAlg::initialize() {
       return StatusCode::FAILURE;
     }
   }
-  m_streamer = IAthenaOutputStreamTool_t("AthenaOutputStreamTool/"+
-					 m_streamName);
+
   StatusCode sc = m_streamer.retrieve();
   if (sc.isFailure()) {
-    ATH_MSG_ERROR ("Unable to find AthenaOutputStreamTool with name " << 
-                   m_streamName);
+    ATH_MSG_ERROR ("Unable to retrieve AthenaOutputStreamTool " << m_streamer); 
     return StatusCode::FAILURE;
   }  
 
@@ -130,7 +128,7 @@ StatusCode OutputConditionsAlg::finalize() {
       //Try to get Key from proxy:
       objt.proxy = detStore()->proxy(clid);
       if (!objt.proxy) {
-        ATH_MSG_ERROR("Could not get default proxy for CLID " << clid << " typename " << objt.type);
+        ATH_MSG_ERROR(std::format("Could not get default proxy for CLID {}, typename {}",clid,objt.type));
         return StatusCode::FAILURE;
       }
       objt.key = objt.proxy->name();
@@ -138,7 +136,7 @@ StatusCode OutputConditionsAlg::finalize() {
     else {
       objt.proxy = detStore()->proxy(clid, objt.key);
       if (!objt.proxy) {
-        ATH_MSG_ERROR("Could not get proxy for CLID " << clid << " typename " << objt.type << ", key " << objt.key);
+        ATH_MSG_ERROR(std::format("Could not get proxy for CLID {}, typename {}, key {}",clid,objt.type,objt.key));
         return StatusCode::FAILURE;
       }
 
@@ -158,9 +156,9 @@ StatusCode OutputConditionsAlg::finalize() {
   if (nObjects == 0)
     return StatusCode::SUCCESS;
 
-  for (unsigned i=0;const auto& objt : objs) {
+  for (unsigned i=0;const obj_t& objt : objs) {
     typeKeys.emplace_back(std::make_pair(objt.type, objt.key));
-    ATH_MSG_INFO(i++ << ": " << objt.type << "#" << objt.key << "#" << objt.folder);
+    ATH_MSG_INFO(std::format("{}:: {}#{}#{}",i++,objt.type,objt.key,objt.folder));
   }
    
 
@@ -184,19 +182,14 @@ StatusCode OutputConditionsAlg::finalize() {
     if (m_par_crestDir.empty()) {
       msg() << MSG::INFO << "Register objects in IOV database, interval of validity ";
       if (m_par_timestamp) {
-        msg() << "[time] from [" << m_par_time1.value() << "] to [" << m_par_time2.value() << "]" << endmsg;
+        msg() << std::format("[time] from [ {} ] to [ {} ]", m_par_time1.value(), m_par_time2.value()) << endmsg;
       } else {
-        msg() << "[run,LB] from [" << m_par_run1.value() << "," << m_par_lumib1.value() << "] to [" << m_par_run2.value() << "," << m_par_lumib2.value() << "]"
-              << endmsg;
+        msg() << std::format("[run,LB] from [ {}, {} ] to [ {}, {} ]",m_par_run1.value(),m_par_lumib1.value(),m_par_run2.value(), m_par_lumib2.value()) << endmsg;
       }
       int nreg = 0;
-      for (const auto& objt : objs) {
-        msg() << MSG::INFO << "Register object " << objt.type << "#" << objt.key << " in IOV database folder " << objt.folder << " ";
-        if (objt.tag == "") {
-          msg() << MSG::INFO << "without tagging" << endmsg;
-        } else {
-          msg() << MSG::INFO << "with tag " << objt.tag << endmsg;
-        }
+      for (const obj_t& objt : objs) {
+        ATH_MSG_INFO(std::format("Register object {}#{} in IOV database folder {} {}", objt.type, objt.key, objt.folder,
+                                 objt.tag.size() ? "with tag " + objt.tag : "without tagging"));
         if (m_par_timestamp) {
           sc = p_regsvc->registerIOV(objt.type, objt.key, objt.folder, objt.tag, timeToNano(m_par_time1), timeToNano(m_par_time2));
         } else {
@@ -235,7 +228,7 @@ StatusCode OutputConditionsAlg::finalize() {
       // Some of the code here is taken from RegistrationSvc. Once we deprecate COOL, we can also delete (I)RegistrationSvc
       std::string address_data;
       // Loop over objects  ....
-      for (const auto& objt : objs) {
+      for (const obj_t& objt : objs) {
         chai::TagIovType iovType;
         uint64_t since;
         if (m_par_timestamp) {
@@ -247,8 +240,8 @@ StatusCode OutputConditionsAlg::finalize() {
         }
         const CLID clid = objt.proxy->clID();
 
-        ATH_MSG_INFO("Working on object clid " << clid << ", " << objt.folder << " " << objt.type << " " << objt.key);
-
+        //ATH_MSG_INFO("Working on object clid " << clid << ", " << objt.folder << " " << objt.type << " " << objt.key);
+        ATH_MSG_INFO(std::format("Working on object clid {}, type {}, folder {}",clid, objt.type, objt.folder));
         // First, deal with teh folder description:
         std::string description;
         if (clid == 40774348 || clid == 1238547719) {
@@ -258,7 +251,7 @@ StatusCode OutputConditionsAlg::finalize() {
           // Pool referenced storage, need to build the node description by ourselves
           IOpaqueAddress* addr = objt.proxy->address();
           if (!addr) {
-            ATH_MSG_ERROR("No IOpaqueAddress from Type/Key [" << objt.type << "/" << objt.key << "]");
+            ATH_MSG_ERROR(std::format("No IOpaqueAddress from Type/Key [{}/{}]",objt.type,objt.key));
             return StatusCode::FAILURE;
           }
           std::string saddr;
@@ -267,12 +260,10 @@ StatusCode OutputConditionsAlg::finalize() {
           std::string address_header;
 
           if (splitAddress(saddr, address_header, address_data).isFailure()) {
-            ATH_MSG_ERROR("Could not split address: " << "addr: " << saddr << "\n"
-                                                      << "hdr:  " << address_header << "\n"
-                                                      << "data  " << address_data);
+            ATH_MSG_ERROR(std::format("Could not split address: {}\n  hdr:  {}\n  data: {}",saddr,address_header,address_data));
             return StatusCode::FAILURE;
           }
-          ATH_MSG_DEBUG("split address: " << saddr << endmsg << "  hdr:  " << address_header << endmsg << "  data: " << address_data);
+          ATH_MSG_DEBUG(std::format("split address: {}\n  hdr:  {}\n  data: {}",saddr,address_header,address_data));
           // We store extra information in the folder description.
           // This info is:
           //   typeName       - required information
@@ -394,18 +385,15 @@ void OutputConditionsAlg::buildDescription(const std::string& identifier, const 
   return;  
 }
 
-
-StatusCode OutputConditionsAlg::splitAddress(const std::string& address,
-                                  std::string& address_header,
-                                  std::string& address_data ) const {
+StatusCode OutputConditionsAlg::splitAddress(const std::string& address, std::string& address_header, std::string& address_data) const {
   // Deals with address of form
   // <address_header service_type="256" clid="1238547719" /> POOLContainer_CondAttrListCollection][CLID=x
   // return header as part up to and including />, trailer as rest
 
-  std::string::size_type p1=address.find(" />");
-  if (p1!=std::string::npos) {
-    address_header=address.substr(0,p1+3);
-    address_data=address.substr(p1+4);
+  std::string::size_type p1 = address.find(" />");
+  if (p1 != std::string::npos) {
+    address_header = address.substr(0, p1 + 3);
+    address_data = address.substr(p1 + 4);
     return StatusCode::SUCCESS;
   } else {
     return StatusCode::FAILURE;
