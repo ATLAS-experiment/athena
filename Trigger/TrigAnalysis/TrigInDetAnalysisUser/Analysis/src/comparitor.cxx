@@ -7,7 +7,7 @@
  **     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
  
-// cppcheck-suppress-file stlIfStrFind; cannot use C++20 starts_with in this standalone code
+// cppcheck-suppress-file stlIfStrFind; cannot use later than C++17 for this standalone code
 
 
 #include <cstdio>
@@ -59,8 +59,10 @@
 
 
 const std::string reset  = "\033[0m";
+const std::string black  = "\033[0;30m";
 const std::string red    = "\033[0;31m";
 const std::string green  = "\033[0;32m";
+const std::string blue   = "\033[0;34m";
 
 bool fulldbg = false;
 
@@ -125,11 +127,23 @@ void testfit( TH1* htest, const std::string& s ) {
     finv.SetParameter(6, 1);
 
     finv.SetLineWidth(1);
+
+    finv.SetParLimits(1, 89, 93 );
+    finv.SetParLimits(2, 5, 50 );
     
-    htest->Fit( &finv, "", "", 55, 130 );
+    std::vector<double> errors(htest->GetNbinsX());
+    for ( size_t i=0 ; i<errors.size() ; i++ ) {
+      errors[i] = htest->GetBinError(i+1);
+      htest->SetBinError(i+1, 20);
+      if (htest->GetBinContent(i+1)==0 ) htest->SetBinError(i+1, 0);
+    }
+
+    htest->Fit( &finv, "", "", 75, 105 );
 
     static int i = 0;
 
+    for ( size_t i=0 ; i<errors.size() ; i++ ) htest->SetBinError(i+1, errors[i] );
+    
     htest->GetXaxis()->SetRangeUser(55,125);
     htest->DrawCopy("e1");
     
@@ -568,8 +582,9 @@ int usage(const std::string& name, int status, const std::string& err_msg="" ) {
   s << "    -us, --usechainref        \t use the histograms from chain definied in the \"Chain\" histogram as reference\n\n";
   s << "         --lumi               \t scale pile-up mu values down by 5.4%\n";
   s << "         --lumitest           \t scale pile-up mu values down by 5.4% for test histograms\n";
-  s << "         --lumiref            \t ecale pile-up mu values down by 5.4% for reference histograms\n\n";
-
+  s << "         --lumiref            \t ecale pile-up mu values down by 5.4% for reference histograms\n";
+  s << "    -rb, --refbands           \t draw the reference as an error band, rather than a histogram\n\n";
+  
   s << "    -ns, --nostats            \t do not show stats for mean and rms\n";
   s << "    -nm, --nomeans            \t do not show stats for the means\n";
   s << "         --means              \t show stats for the means\n";
@@ -819,6 +834,7 @@ int main(int argc, char** argv) {
 
   gErrorIgnoreLevel = kError;
 
+  std::cout << black;
   std::cout << "\n---------------------------------\n";
   std::cout << "\n comparitor is off ...\n";
 
@@ -928,7 +944,8 @@ int main(int argc, char** argv) {
 
   std::string runnumber = "";
 
-   
+  bool refbands = false;
+  
   for(int i=1; i<argc; i++){
     std::string arg  = argv[i];
 
@@ -1027,6 +1044,10 @@ int main(int argc, char** argv) {
     else if ( arg=="--lumiref" ) { 
       lumiref_trans = true;
       ifdbg("--lumiref");
+    }
+    else if ( arg=="-rb" || arg=="--refbands" ) { 
+      refbands = true;
+      ifdbg("--refbands");
     }
     else if ( arg=="-b" || arg=="--bdir" ) { 
       if ( ++i<argc ) basedir=argv[i];
@@ -1412,10 +1433,7 @@ int main(int argc, char** argv) {
       }
     }
 
-    std::cout << "\n\n\n\n\n" << std::endl; 
-    
-    std::cout << "\n\nrd size " << release_data.size() << std::endl;
-
+    std::cout << "release data size " << release_data.size() << std::endl;
 
     if ( release_data.size()>0 ) { 
       if ( release_data.size()>1 ) std::cerr << "main() more than one release - using only the first" << std::endl;  
@@ -1635,7 +1653,7 @@ int main(int argc, char** argv) {
 	std::cout << "name:         " << name << std::endl;
 
 	if ( contains( name, ":" ) )  chain_name[j] = name.substr( 0, name.find(':') ) + " : ";
-	else                           chain_name[j] = name;
+	else                          chain_name[j] = name;
 
 	if  ( chain_name[j] == " : "  )  chain_name[j] = "";
 	
@@ -1683,7 +1701,7 @@ int main(int argc, char** argv) {
 
   bool use_file_config = false;
  
-  if ( configfile!="" ) { 
+  if ( !configfile.empty() ) { 
 
     if ( exists(configfile) ) { 
 
@@ -1691,25 +1709,7 @@ int main(int argc, char** argv) {
     
       ReadCards rc(configfile);
 
-
       /// read the histos - 1 panel per histo
-      
-      if ( rc.isTagDefined( "histos" ) ) { 
-	
-	std::cout << argv[0] << ":\treading histogram configuration from file " << configfile << std::endl; 
-
-	use_file_config = true;
-
-	std::vector<std::string> raw_input = rc.GetStringVector( "histos" );
-	
-	for ( size_t iraw=0 ; iraw<raw_input.size() ; iraw += 6) {
-	  HistDetails h( &(raw_input[iraw]) );	
-	  Panel p( h.name(), 1 ); 
-	  p.push_back( h );
-	  panels.push_back( p );
-	}
-	
-      }
       
       std::cout << "searching for panels" << std::endl;
 
@@ -1737,7 +1737,7 @@ int main(int argc, char** argv) {
 
 	  int tncols = ncols;
 	  
-	  if ( panel_columns.size() ) { 
+	  if ( panel_columns.size() ) {
 	    std::vector<string>::iterator itr = find( panel_columns.begin(), panel_columns.end(), panel_config[ipanel] );
 	    if ( itr!=panel_columns.end() ) tncols = std::atoi( (++itr)->c_str() );
 	  }
@@ -1748,15 +1748,31 @@ int main(int argc, char** argv) {
 	    std::cerr << "no plots provided" << std::endl;
 	    return 1;
 	  }
-	  
-	  for ( size_t iraw=0 ; iraw<raw_input.size() ; iraw += 6 ) p.push_back( HistDetails( &(raw_input[iraw]) ) );
+
+	  for ( size_t iraw=0 ; iraw+6<=raw_input.size() ; iraw += 6 ) p.push_back( raw_input.begin()+iraw, raw_input.begin()+iraw+6 );
 	  	  
 	  panels.push_back( p ); 
 
 	}
 
-      }	  
-  
+      }
+      else if ( rc.isTagDefined( "histos" ) ) { 
+	
+	std::cout << argv[0] << ":\treading histogram configuration from file " << configfile << std::endl; 
+	
+	use_file_config = true;
+	
+	std::vector<std::string> raw_input = rc.GetStringVector( "histos" );
+	
+	for ( size_t iraw=0 ; iraw+6<=raw_input.size() ; iraw += 6) {
+	  HistDetails h( raw_input.begin()+iraw, raw_input.begin()+iraw+6 );
+	  Panel p( h.name(), 1 ); 
+	  p.push_back( h );
+	  panels.push_back( p );
+	}
+	      
+      }
+      
       if ( rc.isTagDefined( "Bands" ) && rc.isTagDefined( "Labels" ) ) { 
 	bnd = bands( rc.GetVector( "Bands"), rc.GetStringVector( "Labels" ) );
       }
@@ -1804,9 +1820,9 @@ int main(int argc, char** argv) {
 	for ( int i=6 ; i-- ; ) std::cout << "\tmarkers[" << i << "] = " << markers[i] << std::endl;
       }
 
-      if ( rc.isTagDefined("Tags") )    ctags     = rc.GetStringVector("Tags");
+      if ( rc.isTagDefined("Tags") )      ctags      = rc.GetStringVector("Tags");
       if ( rc.isTagDefined("TagLabels") ) ctaglabels = rc.GetStringVector("TagLabels");
-      if ( rc.isTagDefined("TagLabels") ) usrlabels = rc.GetStringVector("TagLabels");
+      if ( rc.isTagDefined("TagLabels") ) usrlabels  = rc.GetStringVector("TagLabels");
     
 
       if ( rc.isTagDefined("Styles") )  { 
@@ -1821,9 +1837,7 @@ int main(int argc, char** argv) {
 
       std::cout << argv[0] << "\tuserlabels :" << usrlabels << ":" << std::endl;
 
-
-
-      if ( rc.isTagDefined("RANGEMAP") )    RANGEMAP = true;
+      if ( rc.isTagDefined("RANGEMAP") )    RANGEMAP    = true;
       if ( rc.isTagDefined("ALLRANGEMAP") ) ALLRANGEMAP = true;
 
       std::cout << "Extra: " << rc.isTagDefined("Extra") << std::endl;
@@ -1845,7 +1859,7 @@ int main(int argc, char** argv) {
 
     /// use the default values as single histogram panels
 
-    // for ( size_t iraw=0 ; iraw<Nhistos ; iraw++ ) { 
+    // for ( size_t iraw=0 ; iraw<histos_default.size() ; iraw++ ) { 
     //    Panel p( histos_default[iraw][0], 1 );
     //    p.push_back( histos_default[iraw] );
     //    panels.push_back( p );
@@ -1854,26 +1868,24 @@ int main(int argc, char** argv) {
     // default panel efficiencies plotted from 0 to 100, 
     // so scale efficiencies no matter what
 
-    scale_eff     = 100;
-    scale_eff_ref = 100;
+    scale_eff     = 1;
+    scale_eff_ref = 1;
 
     /// use the default panels
 
-    std::string (*inpanels[3])[6] = { eff_panel, res_panel, diff_panel };
-
-    size_t nphist[3] = { 4, 4, 10 }; 
+    std::vector<panel_type> inpanels = { eff_panel, res_panel, diff_panel };
 
     std::string pnames[3] = { "eff", "res", "diff" };
 
-    for ( size_t ip=0 ; ip<3 ; ip++ ) { 
+    for ( size_t ip=0 ; ip<inpanels.size() ; ip++ ) { 
       Panel p( pnames[ip]+"_panel", 2 );
-      for ( size_t iraw=0 ; iraw<nphist[ip] ; iraw++ ) p.push_back( HistDetails( inpanels[ip][iraw] ) );
+      for ( size_t ih=0 ; ih<inpanels[ip].size() ; ih++ ) p.push_back( inpanels[ip][ih] );
       panels.push_back( p );
     }
 
   }
 
-
+ 
   std::cout << "taglabels" << std::endl;
 
   for ( size_t it=0 ; it<taglabels.size()  ; it++ ) std::cout << taglabels[it]  << std::endl;
@@ -1892,13 +1904,14 @@ int main(int argc, char** argv) {
     gStyle->SetPadRightMargin(0.05);
     gStyle->SetPadTopMargin(0.05);
 
+    /// pointless root data types ... 
     const Int_t Number = 3;
-    Double_t Red[Number] = { 0.00, 0.00, 1.00};
-    Double_t Green[Number] = { 0.00, 5.00, 1.00};
-    Double_t Blue[Number] = { 0.00, 0.50, 0.00};
+    Double_t Red[Number]    = { 0.00, 0.00, 1.00 };
+    Double_t Green[Number]  = { 0.00, 5.00, 1.00 };
+    Double_t Blue[Number]   = { 0.00, 0.50, 0.00 };
     Double_t Length[Number] = { 0.00, 0.50, 1.00 };
-    Int_t nb=50;
-    TColor::CreateGradientColorTable(Number,Length,Red,Green,Blue,nb);
+    Int_t nb = 50;
+    TColor::CreateGradientColorTable( Number, Length, Red, Green, Blue, nb );
   }
   else gStyle->SetPalette(1);
 
@@ -1917,7 +1930,7 @@ int main(int argc, char** argv) {
 
     Panel& panel = panels[ipanel]; 
 
-    std::cout << "\n\n---------------------------------------------\n";
+    std::cout << blue << "\n\n---------------------------------------------\n" << reset;
 
     std::cout << panel << "\n" << std::endl;
 
@@ -2265,7 +2278,10 @@ int main(int argc, char** argv) {
 	}
 	else if ( refit_resplots && ( contains(histo.name(),"/sigma") || contains(histo.name(),"/mean") ) ) { 
 
-	  std::cout << "\n\n2d: " << histo.name() << "\n\n" << std::endl;
+	  Resplot::setoldrms95(oldrms);
+	  Resplot::setscalerms95(true);
+	    
+	  std::cout << red << "fetch 2d: " << histo.name() << reset << std::endl;
 	  
 	  bool bsigma = false;
 	  if ( contains(histo.name(),"/sigma") ) bsigma = true;
@@ -2273,31 +2289,29 @@ int main(int argc, char** argv) {
 	  bool bmean = false;
 	  if ( contains(histo.name(),"/mean") ) bmean = true;
 
-	  std::cout << "\trefitting:  " << histo.name() << std::endl;
-	    
-	  Resplot::setoldrms95(oldrms);
-	  Resplot::setscalerms95(true);
-	    
 	  std::string tmp_  = histo.name();
 	  std::string base;
 	    
 	  if ( bsigma ) base = chop( tmp_, "/sigma" );
 	  if ( bmean )  base = chop( tmp_, "/mean" );
+
+	  std::cout << "refitting:  " << histo.name() << "\tbase: " << base << "\tbsigma: " << bsigma << "\tbmean: " << bmean << std::endl;
 	    
-	  TH2D* htest2d_ = Get<TH2D>( *fftest, chains[j]+"/"+base+"/2d", testrun, 0, &savedhistos );
+	  TH2D* htest2d = Get<TH2D>( *fftest, chains[j]+"/"+base+"/2d", testrun, 0, &savedhistos );
+
+	  if ( htest2d==0 ) htest2d = Get<TH2D>( *fftest, chains[j]+"/"+base+"/2D", testrun, 0, &savedhistos );
 	  
-	  std::cout << "ffref " << ffref << "   :: " << base << std::endl;
 
-	  TH2D* href2d_  = 0;
+	  TH2D* href2d = 0;
 
-	  if ( ffref ) href2d_ = Get<TH2D>( *ffref,  chains[j]+"/"+base+"/2d", testrun, chainmap  );
+	  if ( ffref )     href2d = Get<TH2D>( *ffref,  chains[j]+"/"+base+"/2d", testrun, chainmap  );
 
-	  std::cout << "htest2d_ : " << htest2d_ << std::endl; 
+	  if ( href2d==0 ) href2d = Get<TH2D>( *ffref,  chains[j]+"/"+base+"/2D", testrun, chainmap  );
 	  
-	  if ( htest2d_==0 ) continue;
-	  if ( !noreftmp && href2d_==0 )  noreftmp = true;
+	  if ( htest2d==0 ) continue;
+	  if ( !noreftmp && href2d==0 )  noreftmp = true;
 
-	  std::cout << "href2d_ : " << href2d_ << std::endl; 
+	  std::cout << "href2d : " << href2d << std::endl; 
 
 	  Plotter::setplotref(!noreftmp);
 	  
@@ -2305,9 +2319,9 @@ int main(int argc, char** argv) {
 	  
 	  /// get the test histogram
 	    
-	  Resplot rtest("tmp", htest2d_ );
+	  Resplot rtest("tmp", htest2d );
 
-	  std::cout << "Resplot rtest" << std::endl;
+	  std::cout << "Resplot rtest\t" << rtest.finalised() << std::endl;
 
 	  if ( rtest.finalised() ) { 
 	    std::cout << "refitting ..." << std::endl;
@@ -2329,6 +2343,8 @@ int main(int argc, char** argv) {
 	  if ( bsigma ) { htest = (TH1F*)rtest.Sigma()->Clone("rtest_sigma"); htest->SetDirectory(0); }
 	  if ( bmean  ) { htest = (TH1F*)rtest.Mean()->Clone("rtest_mean");   htest->SetDirectory(0); }
 
+	  std::cout << reset << std::endl;
+	  
 	  if ( htest==0 ) { 
 	    std::cerr << red << "missing test histogram: " << (refchain[j]+" / "+histo.name()) << " " << htest
 		      << "(test)" << reset <<  std::endl; 
@@ -2340,6 +2356,7 @@ int main(int argc, char** argv) {
 
 	  std::cout << "\nhisto.name(): " << histo.name() << std::endl;
 
+	  std::cout << reset << std::endl;
 	  
 	  if ( true && histo.name().find("d0_vs_phi")!=std::string::npos ) {
 	    
@@ -2464,20 +2481,16 @@ int main(int argc, char** argv) {
 
 	  TH1F* hreft  = 0;
 
-	  std::cout << "Resplot hreft " << noreftmp << " ... " << std::endl;
+	  std::cout << "Resplot noreftmp " << noreftmp << " ... " << std::endl;
 
 	  if ( !noreftmp ) {
 	    if ( refitref_resplots ) { 
-
 	      
-	      std::cout << "Resplot rref:  " << href2d_ << std::endl;
+	      std::cout << "Resplot rref:  " << href2d << std::endl;
 
+	      Resplot rref("tmp", href2d );
 
-	      Resplot rref("tmp", href2d_ );
-
-
-	      std::cout << "Resplot rref:  " << href2d_ << " (2)" << std::endl;
-
+	      std::cout << "Resplot rref:  " << href2d << " (2)" << std::endl;
 
 	      if ( rref.finalised() ) {
 		std::cout << "refitting (2) ..." << std::endl;
@@ -2490,20 +2503,17 @@ int main(int argc, char** argv) {
 		else  rref.Finalise(Resplot::FitNull95);
 	      }
 
-	      std::cout << "Resplot rref:  " << href2d_ << " (3)" << std::endl;
-	      
-	      
+	      std::cout << "Resplot rref:  " << href2d << " (3)" << std::endl;
+	      	      
 	      if ( bsigma ) { hreft = (TH1F*)rref.Sigma()->Clone("rref_sigma"); hreft->SetDirectory(0); }
-	      if ( bmean )  { hreft = (TH1F*)rref.Mean()->Clone("rref_mean"); hreft->SetDirectory(0); }
+	      if ( bmean )  { hreft = (TH1F*)rref.Mean()->Clone("rref_mean");   hreft->SetDirectory(0); }
 
-	      std::cout << "Resplot rref:  " << href2d_ << " (4)" << std::endl;
-
+	      std::cout << "Resplot rref:  " << href2d << " (4)" << std::endl;
 		
 	    }
 	    else { 
 
-	      std::cout << "Resplot rref:  " << href2d_ << " (5)" << std::endl;
-
+	      std::cout << "Resplot rref:  " << href2d << " (5)" << reset << std::endl;
 	      
 	      hreft = Get( *ffref, refchain[j]+"/"+histo.name(), rawrefrun, chainmap );
 	      if ( hreft==0 ) {
@@ -2514,7 +2524,7 @@ int main(int argc, char** argv) {
 	    }
 	  }
 	      
-	  std::cout << "Resplot rref:  " << href2d_ << " (6)" << std::endl;
+	  std::cout << "Resplot rref:  " << href2d << " (6)" << std::endl;
 
 
 	  if ( !noreftmp && hreft==0 ) { 
@@ -2531,7 +2541,7 @@ int main(int argc, char** argv) {
 	      
 	  if ( !noreftmp ) { 
 
-	    std::cout << "Resplot rref:  " << href2d_ << " (7)" << std::endl;
+	    std::cout << "Resplot rref:  " << href2d << " (7)" << std::endl;
 
 	    href = (TH1F*)hreft->Clone();
 	    href->SetDirectory(0);
@@ -2540,7 +2550,7 @@ int main(int argc, char** argv) {
 
 	  }
 	    	      
-	  std::cout << "Resplot rref:  " << href2d_ << " (8)" << std::endl;
+	  std::cout << "Resplot rref:  " << href2d << " (8)" << std::endl;
 
 
 	  /// useful test for debugging ...
@@ -2548,7 +2558,7 @@ int main(int argc, char** argv) {
 	    
 	  savedhistos.push_back( refchain[j]+"/"+histo.name() );
 
-	  std::cout << "Resplot rref:  " << href2d_ << " (9)" << std::endl;
+	  std::cout << "Resplot rref:  " << href2d << " (9)" << std::endl;
    	   
 	}
 	else { 
@@ -2567,8 +2577,8 @@ int main(int argc, char** argv) {
 
 	  std::cout << "fftest: " << fftest->GetName() << std::endl;
 
-	  
-	  if ( contains( fftest->GetName(), "-mc" ) ) translate_x = false;
+	  /// do we still need to prevent the x transaltion ? need to check ...
+	  // if ( contains( fftest->GetName(), "-mc" ) ) translate_x = false;
 
 	  if ( lumitest_trans && translate_x && !contains( cc, "-mc" ) ) htest = trans( htest, translate_x );
 	  
@@ -2580,12 +2590,8 @@ int main(int argc, char** argv) {
 	  }
 
 	  testfit( htest, htest->GetName() );
-
 	  
 	  TH1F* hreft = 0;
-
-	  //	  std::cout << "hreft: " << hreft << std::endl;
-	  
 
 	  if ( ffref ) hreft = Get( *ffref, refchain[j]+"/"+reghist, rawrefrun, chainmap );
 	  else noreftmp = true;
@@ -2600,8 +2606,6 @@ int main(int argc, char** argv) {
 	  }
 
 
-	  //	  std::cout << "\n\n\n\n\n!! " << __LINE__ << std::endl; 
-	  
 	  if ( std::string(htest->ClassName()).find("TH1")!=std::string::npos ) { 
 	    std::cout << "Class TH1: " << htest->GetName() << std::endl; 
 	  }
@@ -2629,7 +2633,6 @@ int main(int argc, char** argv) {
 	  }
 
 	  std::cout << "Resplot hreft:  " << hreft << " (10)" << std::endl;
-
           	  
 	  if ( hreft!=0 ) {
 
@@ -2700,7 +2703,6 @@ int main(int argc, char** argv) {
 
 	}
 
-
 	std::cout << "done else" << std::endl;
 
 	if ( do2D ) continue;
@@ -2743,15 +2745,10 @@ int main(int argc, char** argv) {
 
 	}      
 
-	
-	//	std::cout << "done effs ? " << bayes << "\t" << htest->GetName() << std::endl;
-	std::cout << "done effs ? " << bayes << "\thtest: " << htest << std::endl;
-
-	std::cout << "done effs ? " << bayes << "\t" << htest << " :: " << htest->GetName() << std::endl;
+	std::cout << "done effs ? " << bayes << "\thtest: " << htest << " :: " << htest->GetName() << std::endl;
 
 	if ( bayes ) { 
 
-	  std::cout << "make ref efficiencies" << std::endl; 
 	  std::cout << "make ref efficiencies " << htest->GetName() << std::endl; 
 
 	  if ( make_efficiencies && htest && contains( std::string(htest->GetName()), "eff" ) && !contains( std::string(htest->GetName()), "_d" ) ) {
@@ -2971,20 +2968,11 @@ int main(int argc, char** argv) {
 	
 	if ( !noreftmp ) { 
 
-	  std::cout << "cck: " << -1 << std::endl;
-
 	  href->GetYaxis()->SetTitleOffset(1.5);
-
 	  href->GetXaxis()->SetTitleOffset(1.5);
-
-	  std::cout << "xaxis: " << xaxis << std::endl;
-
 	  std::cout << "xaxis: " << href->GetXaxis()->GetTitle() << std::endl;
 
 	}	
-
-	std::cout << "cck: " << htest << " CNT" << std::endl;
-
 
 	if ( fulldbg ) std::cout << __LINE__ << std::endl;
 
@@ -3067,7 +3055,6 @@ int main(int argc, char** argv) {
 	
 
 	std::cout << "raw:              " << chains[j]    << std::endl;
-
 	std::cout << "track collection: " << collection   << std::endl;
 	std::cout << "actual chain:     " << actual_chain << std::endl;
 
@@ -3095,34 +3082,45 @@ int main(int argc, char** argv) {
         collection = std::regex_replace(  collection, std::regex("IDTrack "), "" );
 	collection = std::regex_replace(  std::regex_replace( collection, rx, "" ), rx1, "" );
 
-	if ( actual_chain.find("HLT_IDTrack_")!=std::string::npos )    actual_chain.erase( actual_chain.find("HLT_IDTrack_"), 12 );
-	if ( actual_chain.find("_IDTrack_")!=std::string::npos )    actual_chain.erase( actual_chain.find("_IDTrack_"), 9 );
-	if ( actual_chain.find("IDTrack")!=std::string::npos )    actual_chain.erase( actual_chain.find("IDTrack"), 7 );
-	if ( actual_chain.find("_idperf")!=std::string::npos )    actual_chain.erase( actual_chain.find("_idperf"), 7 );
-	if ( actual_chain.find("_bperf")!=std::string::npos )     actual_chain.erase( actual_chain.find("_bperf"), 6 );
-	if ( actual_chain.find("_boffperf")!=std::string::npos )  actual_chain.erase( actual_chain.find("_boffperf"), 9 );
-	if ( actual_chain.find("_HLT_")!=std::string::npos )      actual_chain.replace( actual_chain.find("_HLT_"), 5, " " );
-	if ( actual_chain.find("HLT_")!=std::string::npos )       actual_chain.erase( actual_chain.find("HLT_"), 4 );
+	if ( actual_chain.find("HLT_IDTrack_")!=std::string::npos ) actual_chain.erase( actual_chain.find("HLT_IDTrack_"), 12 );
+	if ( actual_chain.find("_IDTrack_")!=std::string::npos    ) actual_chain.erase( actual_chain.find("_IDTrack_"), 9 );
+	if ( actual_chain.find("IDTrack")!=std::string::npos )   actual_chain.erase( actual_chain.find("IDTrack"), 7 );
+	if ( actual_chain.find("_idperf")!=std::string::npos )   actual_chain.erase( actual_chain.find("_idperf"), 7 );
+	if ( actual_chain.find("_bperf")!=std::string::npos  )   actual_chain.erase( actual_chain.find("_bperf"), 6 );
+	if ( actual_chain.find("_boffperf")!=std::string::npos ) actual_chain.erase( actual_chain.find("_boffperf"), 9 );
+	if ( actual_chain.find("_HLT_")!=std::string::npos )     actual_chain.replace( actual_chain.find("_HLT_"), 5, " " );
+	if ( actual_chain.find("HLT_")!=std::string::npos  )     actual_chain.erase( actual_chain.find("HLT_"), 4 );
 
 
 
-	if ( collection.find("_IDTrkNoCut")!=std::string::npos )  collection.erase( collection.find("_IDTrkNoCut"), 11 );
-	if ( collection.find("xAODCnv")!=std::string::npos )      collection.erase( collection.find("xAODCnv"), 7 );
-	if ( collection.find("HLT_IDTrack_")!=std::string::npos ) collection.erase( collection.find("HLT_IDTrack_"), 12 );
-	if ( collection.find("HLT_IDTrack")!=std::string::npos )  collection.erase( collection.find("HLT_IDTrack"), 11 );
-	if ( collection.find("Tracking")!=std::string::npos )     collection.replace( collection.find("Tracking"), 8, "Trk" );    
-	if ( collection.find("InDetTrigTrk_")!=std::string::npos ) collection.erase( collection.find("InDetTrigTrk_"), 13 );    
+	if ( collection.find("_IDTrkNoCut")!=std::string::npos  )    collection.erase( collection.find("_IDTrkNoCut"), 11 );
+	if ( collection.find("xAODCnv")!=std::string::npos      )    collection.erase( collection.find("xAODCnv"), 7 );
+	if ( collection.find("HLT_IDTrack_")!=std::string::npos )    collection.erase( collection.find("HLT_IDTrack_"), 12 );
+	if ( collection.find("HLT_IDTrack")!=std::string::npos  )    collection.erase( collection.find("HLT_IDTrack"), 11 );
+	if ( collection.find("Tracking")!=std::string::npos     )    collection.replace( collection.find("Tracking"), 8, "Trk" );    
+	if ( collection.find("InDetTrigTrk_")!=std::string::npos   ) collection.erase( collection.find("InDetTrigTrk_"), 13 );    
 	if ( collection.find("HLT_xAODTracks_")!=std::string::npos ) collection.erase( collection.find("HLT_xAODTracks_"), 15 );    
-	if ( collection.find("_HLT_")!=std::string::npos ) collection.replace( collection.find("_HLT_"), 5, " " );    
-	if ( collection.find("HLT_")!=std::string::npos )  collection.erase( collection.find("HLT_"), 4 );    
+	if ( collection.find("_HLT_")!=std::string::npos  )  collection.replace( collection.find("_HLT_"), 5, " " );    
+	if ( collection.find("HLT_")!=std::string::npos   )  collection.erase( collection.find("HLT_"), 4 );    
+	if ( collection.find("_extra")!=std::string::npos )  collection.resize( collection.find("_extra") );
 
+	if ( actual_chain.size()>25 ) {
+	  size_t pos = actual_chain.find_last_of("_");
+	  while ( pos!=std::string::npos && actual_chain.size()>25 ) {
+	    actual_chain.resize(pos);
+	    pos = actual_chain.find_last_of("_");
+	  }
+	}
+
+	std::cout << blue << "actual chain: " << actual_chain << "\tcollection:   " << collection   << reset << std::endl; 
+	
 	std::string c = actual_chain + " : " + collection;
 
 	std::cout << "track collection: " << collection   << "   <-" << std::endl;
 	std::cout << "actual chain:     " << actual_chain << "   <-" << std::endl;
        
 	replace( c, "_In", " :  " );
-
+	
 	c = "  " + c;
 
 	std::cout << "use label: " << c << "\tchains size " << chains.size() << "\t" << usrlabels.size() << std::endl;
@@ -3143,15 +3141,9 @@ int main(int argc, char** argv) {
 
 	/// calculate and set axis limits
 
-	//      std::cout << "adding plot " << histos[i] << " " << htest->GetName() << std::endl;
-
 	if ( fulldbg ) std::cout << __LINE__ << std::endl;
-
-      
-      
-	std::cout << "\n\n\n\nxaxis: " << xaxis << std::endl;
-
-	
+            
+	std::cout << blue << "xaxis: " << xaxis << reset << std::endl;
 
 	if ( ALLRANGEMAP || xaxis.find("p_{T}")!=std::string::npos || xaxis.find("E_{T}")!=std::string::npos ) {
 
@@ -3167,8 +3159,6 @@ int main(int argc, char** argv) {
 	    std::cout << "\n\n\nctags " << ctags.size() << "\n\n" << std::endl;
 
 	    for ( size_t ic=0 ; ic<ctags.size() ; ic++ ) { 
-	      
-	      //	    std::cout << "\tctags[" << ic << "] =  " << ctags[ic] << std::endl; 
 	      
 	      std::cout << "\n\nic: " << ic << " " << ctags[ic] << " " << ccolours[ic] << "\n\n" << std::endl;
 
@@ -3194,18 +3184,13 @@ int main(int argc, char** argv) {
 	} 
 
     
-      
 	std::cout << "movin' on ..." << std::endl;
 
 	std::cout << "chain: " << chains[j] << " \t marker colour: " << htest->GetMarkerColor() << std::endl;
 
-	//	std::exit(0);
-	
 	std::cout << "Plotter marker : " << htest->GetMarkerColor() << " " << htest->GetMarkerStyle() << std::endl;
 
-	std::cout << "SHT CNT " << htest << std::endl;
-	
-	//      if ( uselabels )  plots.push_back( Plotter( htest, href, chain_name+usrlabels[j], tgtest ) );
+        // do we really want ...  chain_name+usrlabels[j] ?
 	if ( uselabels )  plots.push_back( Plotter( htest, href, " " + chain_name[j] + c, tgtest ) );
 	else {
 	  std::cout << "using label: " << c << std::endl;
@@ -3219,12 +3204,11 @@ int main(int argc, char** argv) {
 	
 	std::cout << "c: " << c << "\t" << ftest->GetName() << std::endl;
 
-	if ( contains( c, "MC" ) || contains( ftest->GetName(), "-mc") ) {
+	if ( refbands ) { 
+	  std::cout << "refbands: " << refbands << std::endl;
 	  plots.back().mc( true ); 
 	  translate_x = false;
 	}
-
-	
 
 	if ( ALLRANGEMAP || ( RANGEMAP && xaxis.find("p_{T}")!=std::string::npos )  ) plots.back().max_entries( ccolours.size() );
 	
@@ -3282,7 +3266,6 @@ int main(int argc, char** argv) {
           double   drms_95 = htest->GetRMSError();
           
           Mean.push_back(label("     mean = %4.2lf #pm %4.2lf", mean_95, dmean_95) );
-	  //          MeanLF.push_back(label("     mean = %6.4lf #pm %6.4lf", mean_95, dmean_95) );
           MeanLF.push_back(label("mean = %6.4lf #pm %6.4lf", mean_95, dmean_95) );
           RMS.push_back(label( "     rms   = %4.2lf #pm %4.2lf", rms_95,  drms_95 ) );
           
@@ -3681,7 +3664,6 @@ int main(int argc, char** argv) {
 
 	useplotname.erase( std::remove( useplotname.begin(), useplotname.end(), '+' ), useplotname.end() );
 
-	// std::string printbase = dir+"HLT_"+ppanelname+tag;
 	std::string printbase = dir + useplotname + tag;
 
 	tc->Update();
@@ -3739,16 +3721,13 @@ int main(int argc, char** argv) {
 	}
 	
 
-			
-	//	TH1* href  = (TH1*)fref->Get( savedhistos[i].c_str() );
 	TH1* href  = Get( *fref, savedhistos[i].c_str(), "", chainmap );
 	if ( !noreftmp && href ) {
 	  std::cout << i << " " << savedhistos[i] << " 0x" << href << std::endl;
 	  href->Write( dirs.back().c_str() );
 	}
       
-		
-	
+			
 	base->cd();
       }
     
@@ -3781,7 +3760,7 @@ int main(int argc, char** argv) {
     }
   }  
  
-  //  std::cout << "deleting " << __LINE__ << std::endl;
+  std::cout << "deleting at " << __LINE__ << std::endl;
 
   if ( fref_ && !files_duplicated ) delete fref_;
   if ( ftest_ ) delete ftest_;
