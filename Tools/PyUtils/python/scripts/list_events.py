@@ -1,160 +1,244 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
-# @file PyUtils.scripts.list-events
-# @purpose list event numbers in a given file
-# @author Marcin Nowak
-# @date April 2025
+'''
+@author ATLAS Computing Activity
+@file PyUtils.python.scripts.list_events.py
+'''
+__doc__ = "output run number, event number of events in POOL/BS file(s)"
 
-__doc__ = "Print out event numbers of the events in a file. Format: (run#, event#)"
-__author__ = "Marcin Nowak"
-
-### imports -------------------------------------------------------------------
 import PyUtils.acmdlib as acmdlib
 
-### options  -------------------------------------------------------------------
-@acmdlib.command(name='list-events')
-@acmdlib.argument('-f', '--file',
-                  help='Athena file to scan')
-@acmdlib.argument('-t', '--tree-name',
-                  default='CollectionTree',
-                  help='name of the TTree to scan')
-@acmdlib.argument('--entries',
-                  default='',
-                  help='a list of entries (indices, not event numbers) or an expression (like 0:3) leading to such a list, to inspect')
-@acmdlib.argument('-v', '--verbose',
-                  action='store_true',
-                  default=False,
-                  help="""Enable verbose printout""")
-
-### functions -----------------------------------------------------------------
-def getEventsFromTree(tree, msg):
-
-    eiNames = ['EventInfoAuxDyn.eventNumber',
-               'EventInfoAux.',
-               'Bkg_EventInfoAux.',
-               'xAOD::EventAuxInfo_v3_EventInfoAux.',
-               'xAOD::EventAuxInfo_v2_EventInfoAux.',
-               'xAOD::EventAuxInfo_v1_EventInfoAux.',
-               'xAOD::EventAuxInfo_v3_Bkg_EventInfoAux.',
-               'xAOD::EventAuxInfo_v2_Bkg_EventInfoAux.',
-               'xAOD::EventAuxInfo_v1_Bkg_EventInfoAux.',
-               'McEventInfo',
-               'ByteStreamEventInfo',
-               'EventInfo_p4_McEventInfo',
-               'EventInfo_p4_ByteStreamEventInfo']
-    runName = 'EventInfoAuxDyn.runNumber'
-
-    tree.GetEntry(0)
-    einame = None
-    for n in eiNames:
-        if hasattr(tree, n):
-            einame = n
-            break
-    if einame is None:
-        msg.error('Cannot find event info, aborting.')
-        return []
-    msg.info("Using branch: %s", einame)
-    
-    tree.SetBranchStatus ('*', 0)
-    tree.SetBranchStatus (einame, 1)
-    if 'AuxDyn' in einame:
-        tree.SetBranchStatus (runName, 1)
-
-    eventList = []
-    for idx in range(tree.GetEntriesFast()):
-        tree.GetEntry(idx)
-        if einame.endswith('Aux.'):
-            ei = getattr(tree, einame)
-            eventList.append((ei.runNumber, ei.eventNumber))
-        elif einame.endswith('Info'):
-            eid = getattr(tree, einame).m_event_ID
-            eventList.append((eid.m_run_number, eid.m_event_number))
-        elif 'AuxDyn' in einame:
-            eventList.append(( getattr(tree, runName),  getattr(tree, einame)))
-            
-    tree.SetBranchStatus ('*', 1)
-
-    # Write out the ordered index and event number pairs
-    return eventList
-
-
-def getEventList(file, tree_name="CollectionTree", entries='', verbose=False):
-    """Get list of event+run numbers for given entries in a file/tree"""
-
-    import PyUtils.Logging as L
-    msg = L.logging.getLogger('list-events')
-    if verbose:
-        msg.setLevel(L.logging.VERBOSE)
-    else:
-        msg.setLevel(L.logging.WARNING)
-
-    msg.info('file:    [%s]', file)
-    msg.info('tree:    [%s]', tree_name)
-    msg.info('entries: %s',   entries)
-    
-    def get_event_range(entry):
-            smin, smax = 0, None
-            # Parse user input
-            if isinstance(entry, str):
-                # We support three main cases in this format: 5:10 (5th to 10th),
-                # 5: (5th to the end), and :5 (from the start to 5th)
-                if ':' in entry:
-                    vals = entry.split(':')
-                    smin = int(vals[0]) if len(vals) > 0 and vals[0].isdigit() else 0
-                    smax = int(vals[1]) if len(vals) > 1 and vals[1].isdigit() else None
-                # This is the case where the user inputs the total number of events
-                elif entry.isdigit():
-                    smin = 0
-                    smax = int(entry) if int(entry) > 0 else None
-            # Handle the case where the input is a number (i.e. default)
-            elif isinstance(entry, int):
-                smin = 0
-                smax = entry if entry > 0 else None
-            # If we come across an unhandled case, bail out
-            else:
-                msg.warning(f"Unknown entries argument {entry}, will list all events...")
-            return smin, smax
-
-    import PyUtils.RootUtils as ru
-    ru.import_root()  # noqa: F841
-    try:
-        dumper = ru.RootFileDumper(file, tree_name)
-    except AttributeError as e:
-        msg.error( *e.args )
-        return []
-
-    smin, smax = 0, None
-    if entries in (-1,'','-1'):
-        smax = dumper.tree.GetEntries()
-    else:
-        smin, smax = get_event_range(entries)
-    msg.debug(f"Getting Event numbers for entries [{smin},{smax}]")
-    
-    return getEventsFromTree(dumper.tree, msg)[smin:smax]
-
-
+@acmdlib.command(
+    name='list-events'
+    )
+@acmdlib.argument(
+    'files',
+    nargs='+',
+    help='input (POOL/BS) file(s)'
+    )
+@acmdlib.argument(
+    '-o', '--output',
+    default='-',
+    help='output text file containing <run number> <event number> record(s) (one per line);'
+    ' if is -, write output on standard output'
+    )
+@acmdlib.argument(
+    '--prefix',
+    default='',
+    help='prefix to print in front of each line of output'
+    )
 def main(args):
-    """Print event numbers of events in a file. Format: (run#, event#)"""
+    """Output run number (mc channel number in case of Monte Carlo), event number of events in input (POOL/BS) file(s).
+    """
 
-    eventList = getEventList(args.file, args.tree_name, args.entries, args.verbose)
-    # print the output here to get the desired format (event per line)
-    for ent in eventList:
-        print(ent)
-    # return nothing to avoid printing the output again
-    return
-
-
-# example of direct use
-if __name__ == "__main__":
     import sys
-    if len(sys.argv) < 2:
-        print("no filename given")
-        sys.exit(1)
-    eventList = getEventList(sys.argv[1])
-    for ent in eventList:
-        print(ent)
+    if args.output == "-":
+        output = sys.stdout
+        opened = False
+    else:
+        output = open(args.output, 'w', encoding="utf-8")
+        opened = True
 
+    # Setup configuration logging
+    from AthenaCommon.Logging import logging
+    log = logging.getLogger('list-events')
 
+    from os.path import expandvars, expanduser
+    args.files = [expandvars(expanduser(fn)) for fn in args.files]
 
+    log.info(f"input files: {" ".join(repr(fn) for fn in args.files)}")
+    log.info(f"output file: {args.output!r}")
+    log.info(f"prefix: {args.prefix!r}")
 
+    from PyUtils.MetaReader import read_metadata
+    logging.getLogger('MetaReader').setLevel(logging.WARNING)
+    metadata = read_metadata(args.files[0], mode='tiny')[args.files[0]]
+
+    if metadata['file_type'] == 'BS':
+        # run directly AtlListBSEvents
+        import subprocess
+        cmd = ["AtlListBSEvents", "-l"]
+        cmd.extend(args.files)
+        try:
+            log.info("running")
+            log.debug(f"... {cmd=}")
+            log.info("   ...")
+            proc = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        except OSError as err:
+            log.error(err)
+            return err.errno
+        except subprocess.CalledProcessError as err:
+            log.error(f"{err}\nstderr={err.stderr!r}\nstdout={err.stdout!r}")
+            return err.returncode
+        else:
+            from collections import defaultdict
+            info = defaultdict(list)
+
+            indexprefix = "Index="
+            runprefix = "Run="
+            runoff = len(runprefix)
+            eventprefix = "Event="
+            eventoff = len(eventprefix)
+            for line in proc.stdout.splitlines():
+                match line.split():
+                    case [Index, Run, Event, _, _, *_] if Index.startswith(indexprefix):
+                        if Run.startswith(runprefix) and Event.startswith(eventprefix):
+                            try:
+                                run = int(Run[runoff:])
+                                event = int(Event[eventoff:])
+                            except ValueError:
+                                log.warning(f"could not parse {line=}")
+                            else:
+                                log.debug(f"parsed {run=} {event=}")
+                                info['run_number'].append(run)
+                                info['event_number'].append(event)
+                        else:
+                            log.warning(f"could not parse {line=}")
+
+            for run, event in zip(info['run_number'], info['event_number'], strict=True):
+                # Changed in version 3.10: Added the strict argument.
+                print(f"{args.prefix}{run:d} {event:d}",
+                      file=output)
+        finally:
+            if opened: output.close()
+
+        return 0
+
+    log.info('== Listing <run number> <event number> for events from POOL files (the CA Configuration)')
+
+    # Set the configuration flags
+    log.info('== Setting ConfigFlags')
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Input.Files = args.files
+
+    import AthenaCommon.Constants as Lvl
+    flags.Exec.OutputLevel=Lvl.WARNING
+
+    # Lock and dump the configuration flags
+    flags.lock()
+    log.info('== ConfigFlags Locked')
+
+    # Setup the main services
+    log.info('== Configuring Main Services')
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+    cfg = MainServicesCfg(flags)
+
+    # Setup the input reading
+    log.info('== Configuring Input Reading')
+    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+    cfg.merge(PoolReadCfg(flags))
+
+    # add event listing algorithm
+    cfg.addEventAlgo(PyEventInfo('EventInfoAlg',
+                                 # the store-gate key
+                                 evt_info='EventInfo',
+                                 is_mc=flags.Input.isMC,
+                                 output=output,
+                                 prefix=args.prefix,
+                                 OutputLevel=Lvl.WARNING),
+                     sequenceName='AthAlgSeq')
+
+    for item in flags.Input.TypedCollections:
+        ctype, cname = item.split('#')
+        if ctype.startswith(('Trk', 'InDet')):
+            from TrkEventCnvTools.TrkEventCnvToolsConfig import TrkEventCnvSuperToolCfg
+            cfg.merge(TrkEventCnvSuperToolCfg(flags))
+        if ctype.startswith(('Calo', 'LAr')):
+            from LArGeoAlgsNV.LArGMConfig import LArGMCfg
+            cfg.merge(LArGMCfg(flags))
+        if ctype.startswith(('Calo', 'Tile')):
+            from TileGeoModel.TileGMConfig import TileGMCfg
+            cfg.merge(TileGMCfg(flags))
+        if ctype.startswith('Muon'):
+            from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
+            cfg.merge(MuonGeoModelCfg(flags))
+
+    # Now run the job
+    log.info('== Running...')
+    sc = cfg.run()
+
+    if opened: output.close()
+
+    # Exit accordingly
+    return sc.isFailure()
+
+### PyEventInfo algorithm
+from AthenaPython.PyAthena import Alg, py_svc, StatusCode
+
+class PyEventInfo(Alg):
+
+    # Constructor
+    def __init__(self, name='PyEventInfo', **kwargs):
+        kwargs['name'] = name
+        super().__init__(**kwargs)
+        # location of EventInfo
+        self.evt_info = kwargs.get('evt_info', None)
+        self.is_mc  = kwargs.get('is_mc', False) # default value
+        self.output = kwargs.get('output')
+        self.prefix = kwargs.get('prefix', '')
+
+    # Initialize the algorithm
+    def initialize(self):
+        _info  = self.msg.info
+        _error = self.msg.error
+        _info('==> initialize...')
+
+        _info ('EventInfo name:  %s',
+               self.evt_info
+               if self.evt_info else '<any>')
+
+        self.sg = py_svc('StoreGateSvc')
+        # if self.sg is None:
+        if not self.sg:
+            _error ('could not retrieve event store')
+            return StatusCode.Failure
+        _info (f'retrieved {self.sg=} service')
+
+        from collections import defaultdict
+        self.info = defaultdict(list)
+        return StatusCode.Success
+
+    # Execute the algorithm
+    def execute(self):
+        _info = self.msg.info
+        _error= self.msg.error
+
+        for evtinfocls in ('xAOD::EventInfo', 'EventInfo'):
+            try:
+                 evtinfo = self.sg.retrieve (evtinfocls, self.evt_info)
+            except Exception as e:
+                _info ('could not retrieve %r at [%s]\n    caught exception:\n%r', evtinfocls, self.evt_info, e)
+            else:
+                if evtinfo is None:
+                    _info ('retrieved \'None\' for %r at [%s]', evtinfocls, self.evt_info)
+                    continue
+                break
+        else:
+            _error ("could not retrieve 'EventInfo' or 'xAOD::EventInfo' at [%s]", self.evt_info)
+            return StatusCode.Failure
+
+        if evtinfocls == 'EventInfo':
+            evtid = evtinfo.event_ID()
+            runnbr = evtid.run_number()
+            evtnbr = evtid.event_number()
+        elif evtinfocls == 'xAOD::EventInfo':
+            if not self.is_mc:
+                runnbr = evtinfo.runNumber()
+            else:
+                runnbr = evtinfo.mcChannelNumber()
+            evtnbr = evtinfo.eventNumber()
+
+        self.info['run_number'].append(runnbr)
+        self.info['event_number'].append(evtnbr)
+
+        return StatusCode.Success
+
+    # Finalize the algorithm
+    def finalize(self):
+        for run, event in zip(self.info['run_number'], self.info['event_number'], strict=True):
+            # Changed in version 3.10: Added the strict argument.
+            print(f"{self.prefix}{run:d} {event:d}",
+                  file=self.output)
+        return StatusCode.Success
 
