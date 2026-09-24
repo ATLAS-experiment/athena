@@ -161,8 +161,11 @@ if kwargs["threads"] > 0:
     flags.Concurrency.NumThreads = kwargs["threads"]
 
 
-#flags.DQ.useTrigger = False
-#flags.Output.HISTFileName = "IDAlignMon.root"
+# Uncomment for ATLAS-P2-RUN4-04-00-00 / ATLAS-P2-RUN4-05-00-00.
+# flags.DQ.useTrigger = False
+
+# Uncomment when running the monitoring configuration to produce IDAlignMon.root.
+# flags.Output.HISTFileName = "IDAlignMon.root"
 
 
 DBFile = ""
