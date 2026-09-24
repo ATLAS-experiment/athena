@@ -342,7 +342,7 @@ class PileupReweightingBlock (ConfigBlock):
 
             # check if user provides per-campaign lumical config list
             if self.userLumicalcFilesPerCampaign is not None and self.userLumicalcFiles is not None:
-                raise ValueError('Both userLumicalcFiles and userLumicalcFilesYear specified, '
+                raise ValueError('Both userLumicalcFiles and userLumicalcFilesPerCampaign specified, '
                                 'use only one of the options!')
             if self.userLumicalcFilesPerCampaign is not None:
                 try:
