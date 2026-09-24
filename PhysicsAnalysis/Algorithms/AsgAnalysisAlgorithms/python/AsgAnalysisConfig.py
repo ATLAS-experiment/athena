@@ -1,14 +1,18 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
+import warnings
+from enum import Enum
+
+from AnalysisAlgorithmsConfig.ConfigAccumulator import (
+    DataType,
+    ExpertModeWarning,
+    GeneratorWeightWarning,
+    Run4FallbackWarning,
+)
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigSequence import groupBlocks
 from AthenaConfiguration.Enums import LHCPeriod
-from AnalysisAlgorithmsConfig.ConfigAccumulator import (
-    DataType, ExpertModeWarning,
-    Run4FallbackWarning, GeneratorWeightWarning)
-from enum import Enum
-import warnings
 
 try:
     from AthenaCommon.Logging import logging
@@ -236,6 +240,8 @@ class PileupReweightingBlock (ConfigBlock):
         self.addOption ('writeColumnarToolVariables', False, type=bool,
             info="whether to add `EventInfo` variables needed for running the columnar tool(s) on the output n-tuple. (EXPERIMENTAL).",
             expertMode=True)
+        self.addOption ('writeDetailedPileupValues', False, type=bool,
+            info="whether to write the average and actual pileup values with and without data scale factor.")
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -245,30 +251,45 @@ class PileupReweightingBlock (ConfigBlock):
 
         from Campaigns.Utils import Campaign
 
-        log = logging.getLogger('makePileupAnalysisSequence')
+        log = logging.getLogger("makePileupAnalysisSequence")
 
-        eventInfoVar = [('runNumber','unsigned'),
-                        ('eventNumber','unsigned_long'),
-                        ('actualInteractionsPerCrossing','float'),
-                        ('averageInteractionsPerCrossing','float')]
+        eventInfoVar = [
+            ("runNumber", "unsigned"),
+            ("eventNumber", "unsigned_long"),
+        ]
         if config.dataType() is not DataType.Data:
-            eventInfoVar += [('mcChannelNumber','unsigned')]
+            eventInfoVar.extend([
+                ("mcChannelNumber", "unsigned"),
+            ])
+        # for now still write the average and actual pileup values until the new p-tag is available
+        eventInfoVar.extend([
+            ("averageInteractionsPerCrossing", "float"),
+            ("actualInteractionsPerCrossing", "float"),
+        ])
         if self.writeColumnarToolVariables:
             # This is not strictly necessary, as the columnar users
             # could recreate this, but it is also a single constant int,
             # that should compress exceedingly well.
-            eventInfoVar += [('eventTypeBitmask','int')]
+            eventInfoVar.extend([
+                ("eventTypeBitmask", "int"),
+            ])
 
         if config.isPhyslite() and not self.alternativeConfig:
             # PHYSLITE already has these variables defined, just need to copy them to the output
-            log.info(f'Physlite does not need pileup reweighting. Variables will be copied from input instead. {config.isPhyslite}')
-            for var_name,var_type in eventInfoVar:
-                config.addOutputVar ('EventInfo', var_name, var_name, noSys=True, auxType=var_type)
+            log.info("Physlite does not need pileup reweighting. Variables will be copied from input instead.")
+            if self.writeDetailedPileupValues:
+                log.warning("writeDetailedPileupValues is set to True, but Physlite does not have these variables. They will not be written to the output.")
+
+            eventInfoVar.extend([
+                ("correctedScaledInteractionsPerCrossing", "float"),
+            ])
+            for var_name, var_type in eventInfoVar:
+                config.addOutputVar("EventInfo", var_name, var_name, noSys=True, auxType=var_type)
 
             if config.dataType() is not DataType.Data:
-                config.addOutputVar ('EventInfo', 'PileupWeight_%SYS%', 'weight_pileup', auxType='float')
+                config.addOutputVar("EventInfo", "PileupWeight_%SYS%", "weight_pileup", auxType="float")
                 if config.geometry() is LHCPeriod.Run2:
-                    config.addOutputVar ('EventInfo', 'beamSpotWeight', 'weight_beamspot', noSys=True, auxType='float')
+                    config.addOutputVar("EventInfo", "beamSpotWeight", "weight_beamspot", noSys=True, auxType="float")
             return
 
         # check files from flags
@@ -277,21 +298,33 @@ class PileupReweightingBlock (ConfigBlock):
 
         campaign = self.campaign
         # if user didn't explicitly configure campaign, let's try setting it from metadata
-        # only needed on MC
-        if config.dataType() is not DataType.Data and self.campaign is None:
+        if self.campaign is None:
             # if we used flags, campaign is auto-determined
             if config.campaign() is not None and config.campaign() is not Campaign.Unknown:
                 campaign = config.campaign()
-                log.info(f'Auto-configuring campaign for PRW from flags: {campaign.value}')
+                log.info("Auto-configuring campaign for PRW from flags: %s", campaign.value)
+            elif config.dataType() is DataType.Data:
+                log.info("Inferring campaign from data year: %d", config.dataYear())
+                campaign = {
+                    2015: Campaign.MC20a,
+                    2016: Campaign.MC20a,
+                    2017: Campaign.MC20d,
+                    2018: Campaign.MC20e,
+                    2022: Campaign.MC23a,
+                    2023: Campaign.MC23d,
+                    2024: Campaign.MC23e,
+                    2025: Campaign.MC23g,
+                    2026: Campaign.MC23g,
+                }.get(config.dataYear(), Campaign.Unknown)
             else:
                 # we try to determine campaign from files if above failed
                 if self.files is not None:
                     from Campaigns.Utils import getMCCampaign
                     campaign = getMCCampaign(self.files)
                     if campaign and campaign is not Campaign.Unknown:
-                        log.info(f'Auto-configuring campaign for PRW from files: {campaign.value}')
+                        log.info("Auto-configuring campaign for PRW from files: %s", campaign.value)
                     else:
-                        log.info('Campaign could not be determined.')
+                        log.info("Campaign could not be determined.")
 
 
         toolConfigFiles = []
@@ -303,27 +336,27 @@ class PileupReweightingBlock (ConfigBlock):
             config.geometry() is not LHCPeriod.Run4):
             # check if user provides per-campaign pileup config list
             if self.userPileupConfigs is not None and self.userPileupConfigsPerCampaign is not None:
-                raise ValueError('Both userPileupConfigs and userPileupConfigsPerCampaign specified, '
-                                 'use only one of the options!')
+                raise ValueError("Both userPileupConfigs and userPileupConfigsPerCampaign specified,"
+                                 " use only one of the options!")
             if self.userPileupConfigsPerCampaign is not None:
                 if not campaign:
-                    raise Exception('userPileupConfigsPerCampaign requires campaign to be configured!')
+                    raise Exception("userPileupConfigsPerCampaign requires campaign to be configured!")
                 if campaign is Campaign.Unknown:
-                    raise Exception('userPileupConfigsPerCampaign used, but campaign = Unknown!')
+                    raise Exception("userPileupConfigsPerCampaign used, but campaign = Unknown!")
                 try:
                     toolConfigFiles = self.userPileupConfigsPerCampaign[campaign.value][:]
-                    log.info('Using user provided per-campaign PRW configuration')
+                    log.info("Using user provided per-campaign PRW configuration")
                 except KeyError as e:
-                    raise KeyError(f'Unconfigured campaign {e} for userPileupConfigsPerCampaign!')
+                    raise KeyError(f"Unconfigured campaign {e} for userPileupConfigsPerCampaign!")
 
             elif self.userPileupConfigs is not None:
                 toolConfigFiles = self.userPileupConfigs[:]
-                log.info('Using user provided PRW configuration')
+                log.info("Using user provided PRW configuration")
 
             else:
                 if self.useDefaultConfig and self.files is None:
-                    raise ValueError('useDefaultConfig requires files to be configured! '
-                                    'Either pass them as an option or use flags.')
+                    raise ValueError("useDefaultConfig requires files to be configured!"
+                                     " Either pass them as an option or use flags.")
 
                 from PileupReweighting.AutoconfigurePRW import getConfigurationFiles
                 if campaign and campaign is not Campaign.Unknown:
@@ -333,69 +366,96 @@ class PileupReweightingBlock (ConfigBlock):
                                                             data_type=config.dataType(),
                                                             GRLSuffixDict=self.GRLSuffixDict)
                     if self.useDefaultConfig:
-                        log.info('Auto-configuring universal/default PRW config')
+                        log.info("Auto-configuring universal/default PRW config")
                     else:
-                        log.info('Auto-configuring per-sample PRW config files based on input files')
+                        log.info("Auto-configuring per-sample PRW config files based on input files")
                 else:
-                    log.info('No campaign specified, no PRW config files configured')
+                    log.info("No campaign specified, no PRW config files configured")
 
-            # check if user provides per-campaign lumical config list
-            if self.userLumicalcFilesPerCampaign is not None and self.userLumicalcFiles is not None:
-                raise ValueError('Both userLumicalcFiles and userLumicalcFilesYear specified, '
-                                'use only one of the options!')
-            if self.userLumicalcFilesPerCampaign is not None:
-                try:
-                    toolLumicalcFiles = self.userLumicalcFilesPerCampaign[campaign.value][:]
-                    log.info('Using user-provided per-campaign lumicalc files')
-                except KeyError as e:
-                    raise KeyError(f'Unconfigured campaign {e} for userLumicalcFilesPerCampaign!')
-            elif self.userLumicalcFiles is not None:
-                toolLumicalcFiles = self.userLumicalcFiles[:]
-                log.info('Using user-provided lumicalc files')
-            else:
-                if campaign and campaign is not Campaign.Unknown:
-                    from PileupReweighting.AutoconfigurePRW import getLumicalcFiles
-                    toolLumicalcFiles = getLumicalcFiles(campaign, self.GRLSuffixDict)
-                    log.info('Using auto-configured lumicalc files')
-                else:
-                    log.info('No campaign specified, no lumicalc files configured for PRW')
+
+        # check if user provides per-campaign lumical config list
+        if self.userLumicalcFilesPerCampaign is not None and self.userLumicalcFiles is not None:
+            raise ValueError("Both userLumicalcFiles and userLumicalcFilesYear specified,"
+                             " use only one of the options!")
+        if self.userLumicalcFilesPerCampaign is not None:
+            try:
+                toolLumicalcFiles = self.userLumicalcFilesPerCampaign[campaign.value][:]
+                log.info("Using user-provided per-campaign lumicalc files")
+            except KeyError as e:
+                raise KeyError(f"Unconfigured campaign {e} for userLumicalcFilesPerCampaign!")
+        elif self.userLumicalcFiles is not None:
+            toolLumicalcFiles = self.userLumicalcFiles[:]
+            log.info("Using user-provided lumicalc files")
         else:
-            log.info('Data needs no lumicalc and PRW configuration files')
+            if campaign and campaign is not Campaign.Unknown:
+                from PileupReweighting.AutoconfigurePRW import getLumicalcFiles
+                toolLumicalcFiles = getLumicalcFiles(campaign, self.GRLSuffixDict)
+                log.info("Using auto-configured lumicalc files")
+            else:
+                log.info("No campaign specified, no lumicalc files configured for PRW")
 
         # Set up the only algorithm of the sequence:
         if config.geometry() is LHCPeriod.Run4:
             warnings.warn_explicit(
-                'Pileup reweighting is not yet supported for Run 4 geometry',
-                Run4FallbackWarning, filename='', lineno=0)
-            alg = config.createAlgorithm( 'CP::EventDecoratorAlg', 'EventDecoratorAlg' )
-            alg.uint32Decorations = { 'RandomRunNumber' :
-                                      config.flags.Input.RunNumbers[0] }
+                "Pileup reweighting is not yet supported for Run 4 geometry",
+                Run4FallbackWarning, filename="", lineno=0)
+            alg = config.createAlgorithm("CP::EventDecoratorAlg", "EventDecoratorAlg")
+            alg.uint32Decorations = {
+                "RandomRunNumber": config.flags.Input.RunNumbers[0]
+            }
 
         else:
-            alg = config.createAlgorithm( 'CP::PileupReweightingAlg',
-                                        'PileupReweightingAlg' )
-            config.addPrivateTool( 'pileupReweightingTool', 'CP::PileupReweightingTool' )
+            alg = config.createAlgorithm("CP::PileupReweightingAlg", "PileupReweightingAlg")
+            config.addPrivateTool("pileupReweightingTool", "CP::PileupReweightingTool")
             alg.pileupReweightingTool.ConfigFiles = toolConfigFiles
             if not toolConfigFiles and config.dataType() is not DataType.Data:
                 log.info("No PRW config files provided. Disabling reweighting")
                 # Setting the weight decoration to the empty string disables the reweighting
                 alg.pileupWeightDecoration = ""
             else:
-                alg.pileupWeightDecoration = "PileupWeight" + self.postfix + "_%SYS%"
+                alg.pileupWeightDecoration = f"PileupWeight{self.postfix}_%SYS%"
             alg.pileupReweightingTool.LumiCalcFiles = toolLumicalcFiles
             alg.pileupReweightingTool.UnrepresentedDataWarningThreshold = (
                 self.unrepresentedDataWarningThreshold)
 
+            # pile-up values
+            if not self.alternativeConfig:
+                if self.writeDetailedPileupValues:
+                    alg.correctedScaledAverageMuDecoration = "correctedScaledAverageInteractionsPerCrossing"
+                    alg.correctedScaledActualMuDecoration = "correctedScaledActualInteractionsPerCrossing"
+                    alg.correctedAverageMuDecoration = "correctedUnscaledAverageInteractionsPerCrossing"
+                    alg.correctedActualMuDecoration = "correctedUnscaledActualInteractionsPerCrossing"
+
+                    eventInfoVar.extend([
+                        ("correctedScaledAverageInteractionsPerCrossing", "float"),
+                        ("correctedScaledActualInteractionsPerCrossing", "float"),
+                        ("correctedUnscaledAverageInteractionsPerCrossing", "float"),
+                        ("correctedUnscaledActualInteractionsPerCrossing", "float"),
+                    ])
+
+                    if campaign is Campaign.MC20a:
+                        config.addOutputVar("EventInfo", "correctedScaledAverageInteractionsPerCrossing", "correctedScaledInteractionsPerCrossing", noSys=True, auxType="float")
+                    elif campaign >= Campaign.MC20d and config.geometry() is not LHCPeriod.Run4:
+                        config.addOutputVar("EventInfo", "correctedScaledActualInteractionsPerCrossing", "correctedScaledInteractionsPerCrossing", noSys=True, auxType="float")
+                else:
+                    if campaign is Campaign.MC20a:
+                        alg.correctedScaledAverageMuDecoration = "correctedScaledInteractionsPerCrossing"
+                    elif campaign >= Campaign.MC20d:
+                        alg.correctedScaledActualMuDecoration = "correctedScaledInteractionsPerCrossing"
+                    eventInfoVar.extend([
+                        ("correctedScaledInteractionsPerCrossing", "float"),
+                    ])
+
         if not self.alternativeConfig:
-            for var_name,var_type in eventInfoVar:
-                config.addOutputVar ('EventInfo', var_name, var_name, noSys=True, auxType=var_type)
+            for var_name, var_type in eventInfoVar:
+                config.addOutputVar("EventInfo", var_name, var_name, noSys=True, auxType=var_type)
 
             if config.dataType() is not DataType.Data and config.geometry() is LHCPeriod.Run2:
-                config.addOutputVar ('EventInfo', 'beamSpotWeight', 'weight_beamspot', noSys=True, auxType='float')
+                config.addOutputVar("EventInfo", "beamSpotWeight", "weight_beamspot", noSys=True, auxType="float")
 
         if config.dataType() is not DataType.Data and toolConfigFiles:
-            config.addOutputVar ('EventInfo', 'PileupWeight' + self.postfix + '_%SYS%',
-                                 'weight_pileup'+self.postfix, auxType='float')
+            config.addOutputVar("EventInfo", f"PileupWeight{self.postfix}_%SYS%",
+                                f"weight_pileup{self.postfix}", auxType="float")
 
 
 class GeneratorAnalysisBlock (ConfigBlock):
@@ -422,15 +482,15 @@ class GeneratorAnalysisBlock (ConfigBlock):
             info="perform the PDF reweighting to do the PDF sensitivity studies with the existing sample, intrinsic charm PDFs as the default here. WARNING: the reweighting closure should be validated within analysis (it has been proved to be good for Madgraph, aMC@NLO, Pythia8, Herwig, and Alpgen, but not good for Sherpa and Powheg).")
         self.addOption ('inPDFName', None, type=str, info="PDF set the input sample was produced with, for use in PDF reweighting")
         self.addOption ('outPDFName', [
-            "CT14nnloIC/0", "CT14nnloIC/1", "CT14nnloIC/2", 
-            "CT18FC/0", "CT18FC/3", "CT18FC/6", "CT18FC/9", 
-            "CT18NNLO/0", "CT18XNNLO/0", 
+            "CT14nnloIC/0", "CT14nnloIC/1", "CT14nnloIC/2",
+            "CT18FC/0", "CT18FC/3", "CT18FC/6", "CT18FC/9",
+            "CT18NNLO/0", "CT18XNNLO/0",
             "NNPDF40_nnlo_pch_as_01180/0", "NNPDF40_nnlo_as_01180/0"
         ], type=list, info="list of PDF sets to use for PDF reweighting.")
         self.addOption ('doHFProdFracReweighting', False, type=bool,
             info="whether to apply HF production fraction reweighting.")
         self.addOption ('truthParticleContainer', 'TruthParticles', type=str,
-            info="the name of the truth particle container to use for HF production fraction reweighting.")       
+            info="the name of the truth particle container to use for HF production fraction reweighting.")
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -507,12 +567,11 @@ class GeneratorAnalysisBlock (ConfigBlock):
                 alg.inPDFName = self.inPDFName
 
             alg.outPDFName = self.outPDFName
-        
-            for pdf_set in self.outPDFName:
-                config.addOutputVar('EventInfo', f'PDFReweightSF_{pdf_set.replace("/", "_")}', 
-                                    f'PDFReweightSF_{pdf_set.replace("/", "_")}', noSys=True, auxType='float') 
 
-        
+            for pdf_set in self.outPDFName:
+                config.addOutputVar('EventInfo', f'PDFReweightSF_{pdf_set.replace("/", "_")}',
+                                    f'PDFReweightSF_{pdf_set.replace("/", "_")}', noSys=True, auxType='float')
+
         if self.doHFProdFracReweighting:
             generatorInfo = config.flags.Input.GeneratorsInfo
             log.info(f"Loaded generator info: {generatorInfo}")
