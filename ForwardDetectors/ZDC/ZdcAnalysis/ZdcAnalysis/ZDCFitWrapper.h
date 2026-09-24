@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDCANALYSIS_ZDCFITWRAPPER_H
@@ -1006,7 +1006,6 @@ class ATLAS_NOT_THREAD_SAFE ZDCFitExpFermiInductPrePulse : public ZDCPrePulseFit
 private:
   float m_tau1{0};
   float m_tau2{0};
-  float m_timeCorr{0};
 
   float m_tFuncMax{-999};
   float m_funcMax{-999};
