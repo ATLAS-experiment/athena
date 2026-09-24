@@ -17,6 +17,7 @@
 #include <Acts/Geometry/MaterialDesignatorBlueprintNode.hpp>
 #include <Acts/Geometry/ProtoLayer.hpp>
 #include <Acts/Geometry/VolumeAttachmentStrategy.hpp>
+#include <Acts/Geometry/PadBlueprintNode.hpp>
 #include <Acts/Navigation/SurfaceArrayNavigationPolicy.hpp>
 #include <Acts/Navigation/CylinderNavigationPolicy.hpp>
 #include <Acts/Navigation/TryAllNavigationPolicy.hpp>
@@ -259,8 +260,13 @@ ItkBlueprintNodeBuilder::buildBlueprintNode(
       buildItkStripBlueprintNode(gctx, innerContainer);
     }
   });
-
-  return itkNode;
+  /// Wrap the ITk into a separate volume
+  Acts::ExtentEnvelope envelope{};
+  envelope[AxisDirection::AxisZ] = {20_mm, 20_mm};
+  envelope[AxisDirection::AxisR] = {1_mm, 2_mm};
+  auto padNode = std::make_shared<Acts::PadBlueprintNode>("ITkEnvelope", envelope);
+  padNode->addChild(itkNode);
+  return padNode;
 }
 
 void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(

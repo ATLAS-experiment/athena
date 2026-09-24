@@ -1257,6 +1257,7 @@ const Acts::TrackingVolume*
       switch (envType) {
           using enum ActsTrk::SystemEnvelope;
           case ITkExit:
+              retVol = m_trackingGeometry->findVolumeByName("ITkEnvelope");
               break;
           case CaloExit:
               retVol = m_trackingGeometry->findVolume(Acts::GeometryIdentifier{}.withVolume(s_caloEnvelopeID));
@@ -1265,7 +1266,7 @@ const Acts::TrackingVolume*
               break;
       }
       if(!retVol) {
-        THROW_EXCEPTION("There is no system envelope "<<envType);
+        ATH_MSG_WARNING("There is no system envelope "<<envType);
       }
       return retVol;
 }
