@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Miha Muskinja
@@ -39,8 +39,8 @@ StatusCode SysTruthWeightAlg::initialize()
   }
 
   ANA_CHECK(m_sysTruthWeightTool.retrieve());
-  ANA_CHECK(m_eventInfoHandle.initialize(m_systematicsList, SG::AllowEmpty));
-  ANA_CHECK(m_decoration.initialize(m_systematicsList, m_eventInfoHandle, SG::AllowEmpty));
+  ANA_CHECK(m_eventInfoHandle.initialize(m_systematicsList));
+  ANA_CHECK(m_decoration.initialize(m_systematicsList, m_eventInfoHandle));
   ANA_CHECK(m_systematicsList.addSystematics(*m_sysTruthWeightTool));
   ANA_CHECK(m_systematicsList.initialize());
 
