@@ -18,7 +18,9 @@
 
 const int Nhistos = 48;
 
-std::string histos_default[Nhistos][6] = { 
+using panel_type = std::vector<std::vector<string>>;
+
+panel_type histos_default = { 
 
     /// distributions - 4
     { "pT",      "p_{T}",     "xaxis:lin:auto:1:100",   "Offline p_{T} [GeV]", "yaxis:log:auto",  ""  },
@@ -94,8 +96,23 @@ std::string histos_default[Nhistos][6] = {
 };
   
 
+#ifdef IDTPM2 
+panel_type  eff_panel = { 
 
-std::string eff_panel[4][6] = { 
+  { "Efficiencies/eff_vs_pt",      "Efficiency p_{T}", "xaxis:log:auto:1:100",  "Offline track p_{T} [GeV]",    "yaxis:lin:auto:0.90:1.02",  "Efficiency" },       
+  { "Efficiencies/eff_vs_eta",     "Efficiency #eta",  "xaxis:lin",             "Offline track #eta",           "yaxis:lin:auto:0.90:1.02",  "Efficiency" },
+  
+  { "Efficiencies/eff_vs_phi",     "Efficiency #phi",  "xaxis:lin",             "Offline track #phi",           "yaxis:lin:0.90:1.02",       "Efficiency" },    
+  { "Efficiencies/eff_vs_actualMu", "Efficiency nVtx", "xaxis:lin:auto",                "Pile-up <#mu>",        "yaxis:lin:0.90:1.02",       "Efficiency" },       
+
+  { "Efficiencies/eff_vs_d0",       "Efficiency d0",   "xaxis:lin:autosym",             "Offline track d_{0} [mm]",    "yaxis:lin:0.90:1.02",   "Efficiency [%]" },       
+  { "Efficiencies/eff_vs_z0",       "Efficiency z0",   "xaxis:lin:autosym:-180:180",    "Offline track z_{0} [mm]",    "yaxis:lin:0.90:1.02",   "Efficiency [%]" }
+
+};     
+#endif
+
+
+panel_type  eff_panel = { 
 
   { "eta_eff",      "Efficiency #eta",  "xaxis:lin",             "Offline track #eta",           "yaxis:lin:auto:90:102",  "Efficiency [%]" },       
   { "pT_eff",       "Efficiency p_{T}", "xaxis:log:auto:1:100",  "Offline track p_{T} [GeV]",    "yaxis:lin:auto:90:102",  "Efficiency [%]" },       
@@ -105,8 +122,9 @@ std::string eff_panel[4][6] = {
 };     
 
 
-std::string res_panel[4][6] = { 
 
+panel_type  res_panel = {
+  
   { "eta_res",    "Residual #eta",     "xaxis:lin:-0.05:0.05",    "#Delta#eta",                   "yaxis:log:auto",    "Normalised entries" },        
   { "ipT_res",    "Residual 1/p_{T}",  "xaxis:lin:-0.15:0.2",     "#Delta 1/p_{T} [GeV^{-1}]",    "yaxis:log:auto",    "Normalised entries" },       
   { "phi_res",    "Residual #phi",     "xaxis:lin:-0.05:0.05",    "#Delta#phi",                   "yaxis:log:auto",    "Normalised entries" },
@@ -115,7 +133,7 @@ std::string res_panel[4][6] = {
 };
 
 
-std::string diff_panel[10][6] = { 
+panel_type diff_panel = { 
 
     { "reta_vs_eta/sigma",        "Residual #eta vs #eta",        "xaxis:lin",          "Offline #eta",          "yaxis:lin:auto",  "#eta resolution" },            
     { "reta_vs_pt/sigma",         "Residual #eta p_{T}",          "xaxis:log:auto",     "Offline p_{T} [GeV]",   "yaxis:lin:auto",  "#eta resolution" },            
@@ -136,13 +154,7 @@ std::string diff_panel[10][6] = {
 
 
 
-
-// std::string vxeff[][6] = { 
-//  
-// };
-
-
-std::string unwanted[8][6] = { 
+panel_type unwanted = { 
 
     { "ript_vs_eta/sigma",        "Residual 1/p_{T} vs #eta",     "xaxis:lin",          "Offline #eta",          "yaxis:lin:auto",  "1/p_{T} resolution [GeV^{-1}]" },
     { "rphi_vs_pt/sigma",         "Residual #phi vs p_{T}",       "xaxis:lin:1:100",    "p_{T} [GeV]",           "yaxis:lin:auto", "#phi resolution" },

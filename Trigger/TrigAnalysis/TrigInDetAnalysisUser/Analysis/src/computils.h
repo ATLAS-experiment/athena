@@ -8,7 +8,7 @@
  **     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
-// cppcheck-suppress-file stlIfStrFind; cannot use C++20 starts_with in this standalone code
+// cppcheck-suppress-file stlIfStrFind; cannot use later than C++17 for this code
 
 #ifndef COMPUTILS_H
 #define COMPUTILS_H
@@ -154,6 +154,10 @@ private:
 class AxisInfo { 
 
 public:
+
+  AxisInfo() = default; 
+
+  AxisInfo(const AxisInfo& a ) = default; 
 
   AxisInfo( const std::string& s ) : 
     m_info(s), 
@@ -306,22 +310,22 @@ public:
   
   std::string m_tag;
 
-  bool   m_log;
-  bool   m_autoset;
-  bool   m_symmetric;
+  bool   m_log       = false;
+  bool   m_autoset   = false;
+  bool   m_symmetric = false;;
 
-  bool   m_rangeset;
-  double m_lo; 
-  double m_hi;
+  bool   m_rangeset  = false;
+  double m_lo = 0; 
+  double m_hi = 0;
 
-  bool   m_norm;
-  bool   m_refnorm;
+  bool   m_norm     = false;
+  bool   m_refnorm  = false;
   
-  bool   m_binwidth;
+  bool   m_binwidth = false;
   
-  double m_offset;
+  double m_offset = 0;
 
-  bool   m_trim;
+  bool   m_trim   = false;
 
 };
 
@@ -548,9 +552,9 @@ public:
 
 
 	if ( m_xaxis ) {
-	  std::cout << "ase: " << *m_xaxis << std::endl;
-	  std::cout << "ase: " <<  m_xaxis->m_lo << std::endl;
-	  std::cout << "ase: " <<  m_xaxis->m_hi << std::endl;
+	  std::cout << "xaxis:     " << *m_xaxis << std::endl;
+	  std::cout << "xaxis: lo; " <<  m_xaxis->m_lo << std::endl;
+	  std::cout << "xaxis: hi: " <<  m_xaxis->m_hi << std::endl;
 	  
 	  if ( m_xaxis->m_lo!=0 || m_xaxis->m_hi!=0 ) {
 	    // hnull->GetXaxis()->SetRangeUser( m_xaxis->m_lo, m_xaxis->m_hi!=0 );
@@ -570,9 +574,9 @@ public:
 	}
 
 	
-	std::cout << "fck lo: " << lo << std::endl;
-	std::cout << "fck hi: " << hi << std::endl;
-	
+	std::cout << "hist lo: " << lo << std::endl;
+	std::cout << "hist hi: " << hi << std::endl;
+
 	TH1D* hnull = new TH1D("hnull", htest()->GetTitle(), 100, lo, hi );  // htest()->GetBinLowEdge(1),  htest()->GetBinLowEdge(htest()->GetNbinsX()+1) );  
 	hnull->SetDirectory(0);
 	
@@ -582,8 +586,6 @@ public:
 
 	hnull->GetXaxis()->SetTitle(htest()->GetXaxis()->GetTitle());
 	hnull->GetYaxis()->SetTitle(htest()->GetYaxis()->GetTitle());
-
-
 
 	for ( int ib=1 ; ib<101 ; ib++ ) hnull->SetBinContent(ib, hnull->GetMinimum()-1e10);
 	
@@ -629,10 +631,10 @@ public:
       if ( first )  {
 
 	if ( !mc() ) { 
-	if ( tgtest() ) { 
+	  if ( tgtest() ) { 
 
 #if 0	   
-	  TH1F* h = (TH1F*)htest()->Clone("h"); h->SetDirectory(0);
+	    TH1F* h = (TH1F*)htest()->Clone("h"); h->SetDirectory(0);
 
 	    zeroErrors(h);
 	    h->GetXaxis()->SetMoreLogLabels(true);
@@ -673,17 +675,17 @@ public:
 
 
 #endif
-	}
-	else {
-
-	  std::cout << "cck lo: " << m_lo << std::endl;
-	  std::cout << "cck hi: " << m_hi << std::endl;
-	  
-	  htest()->GetXaxis()->SetMoreLogLabels(true);
-	  htest()->Draw("ep");
-	  first = false;
-	  if ( LINES ) htest()->Draw("lhistsame");
-	}
+	  }
+	  else {
+	    
+	    std::cout << "cck lo: " << m_lo << std::endl;
+	    std::cout << "cck hi: " << m_hi << std::endl;
+	    
+	    htest()->GetXaxis()->SetMoreLogLabels(true);
+	    htest()->Draw("ep");
+	    first = false;
+	    if ( LINES ) htest()->Draw("lhistsame");
+	  }
 	}
        
       }
@@ -784,15 +786,10 @@ public:
 	  }
 	}
 
-	std::cout << "SHTE" << std::endl;
-	
 	htest()->Draw("ep same");
 	if ( LINES ) htest()->Draw("lhist same");
       }
       else {
-
-	std::cout << "SHTE" << std::endl;
-
 
 #if 1 
 	std::cout << "colour: " << htest()->GetMarkerColor() << std::endl; 
@@ -821,17 +818,12 @@ public:
 	}
 
 	htest()->Draw("e3lhistsame");
-	// htest()->Draw("e1same");
-
-	//	std::cout << "band plot: " << m_lo << " " << m_hi << std::endl;
 	
 	band_plot( htest(), m_lo, m_hi, htest()->GetMinimum(), htest()->GetMaximum()  );
+
 	if ( LINES ) htest()->Draw("e3lhist same");
 #endif
       }
-
-      // href()->Draw("lhistsame");
-      // htest()->Draw("lhistsame");
 
       std::string key = m_plotfilename;
 
@@ -1569,16 +1561,18 @@ class HistDetails {
 
 public:
 
-  HistDetails( const std::vector<std::string>& v ) : m_extra(""), m_xinfo(v[2]), m_yinfo(v[4]) { 
-    if ( v.size() < 6 ) throw std::exception();
-    m_details.reserve(6);
-    for ( size_t i=0 ; i<6 ; i++ ) m_details.push_back(v[i]); 
+  HistDetails( const std::vector<std::string>& v ) : m_details(v), m_extra("") {
+    if ( v.size()!=6 ) throw std::exception();
+    m_xinfo = m_details[2];
+    m_yinfo = m_details[4];
     getextra();
   }
 
-  HistDetails( const std::string* vp ) : m_extra(""), m_xinfo(vp[2]), m_yinfo(vp[4]) { 
-    m_details.reserve(6);
-    for ( size_t i=0 ; i<6 ; i++ ) m_details.push_back(vp[i]); 
+  template<typename Iterator>
+  HistDetails( Iterator first, Iterator last ) : m_details( first, last ), m_extra("") {  
+    if ( m_details.size()!=6 ) throw std::exception();    
+    m_xinfo = m_details[2];
+    m_yinfo = m_details[4];
     getextra();
   }
 
@@ -1651,6 +1645,20 @@ public:
     m_nrows = m_nhist/m_ncols + (m_nhist%m_ncols ? 1 : 0 );
   }
 
+  void push_back( const std::vector<std::string>& s ) {
+    m_hist.emplace_back( s );
+    m_nhist = m_hist.size();
+    m_nrows = m_nhist/m_ncols + (m_nhist%m_ncols ? 1 : 0 );
+  }
+
+  template<typename Iterator>
+  void push_back( Iterator first, Iterator last ) { 
+    m_hist.emplace_back( first, last );
+    m_nhist = m_hist.size();
+    m_nrows = m_nhist/m_ncols + (m_nhist%m_ncols ? 1 : 0 );
+  }
+
+  
   const std::string& name() const { return m_name; }
 
   size_t size() const { return m_hist.size(); }
