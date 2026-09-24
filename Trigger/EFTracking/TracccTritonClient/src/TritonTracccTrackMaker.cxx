@@ -488,7 +488,7 @@ std::optional<Acts::BoundTrackParameters>
 
     Acts::ParticleHypothesis hypothesis{Acts::ParticleHypothesis::pion()};
     
-    return Acts::BoundTrackParameters(actsSurface, params, cov, hypothesis);
+    return Acts::BoundTrackParameters(std::move(actsSurface), params, cov, hypothesis);
 }
 
 StatusCode TritonTracccTrackMaker::convertTracks(
