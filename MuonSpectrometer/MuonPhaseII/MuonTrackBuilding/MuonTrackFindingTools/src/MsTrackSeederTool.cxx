@@ -837,7 +837,6 @@ namespace MuonR4{
 
             for(std::size_t b{0}; shared == 0 && b< seedB.segments().size(); ++b){
                 const xAOD::MuonSegment* segB = seedB.segments()[b];               
-                if (countShared(*segA, *segB) )
                 shared += (countShared(*segA, *segB) >= m_nHitsShareSeg);
             }
         }
