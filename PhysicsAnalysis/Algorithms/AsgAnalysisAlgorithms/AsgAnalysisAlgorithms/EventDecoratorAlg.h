@@ -40,7 +40,7 @@ namespace CP
     Gaudi::Property<std::map<std::string, uint32_t>> m_uint32Decorations {this, "uint32Decorations", {}, "the uint32_t decorations to add"};
 
     /// \brief the functions to add decorations
-    std::vector<std::function<void(const xAOD::EventInfo&)>> m_decFunctions {};
+    std::vector<std::function<void(const xAOD::EventInfo&, const EventContext&)>> m_decFunctions {};
   };
 }
 
