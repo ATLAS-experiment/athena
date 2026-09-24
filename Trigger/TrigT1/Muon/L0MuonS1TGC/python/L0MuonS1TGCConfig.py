@@ -12,7 +12,7 @@ def L0MuonTGCSimCfg(
     result = ComponentAccumulator()
 
     if "CandidateBuilderTool" not in kwargs:
-        from L0MuonS1TGCFloatingTools.L0MuonS1TGCFloatingToolsConfig import (
+        from L1MuonS1TGCFloatingTools.L0MuonS1TGCFloatingToolsConfig import (
             TgcL0FloatingCandidateBuilderToolCfg,
         )
         kwargs["CandidateBuilderTool"] = result.popToolsAndMerge(
@@ -20,7 +20,7 @@ def L0MuonTGCSimCfg(
         )
 
     if "InnerCoincidenceTool" not in kwargs:
-        from L0MuonS1TGCFloatingTools.L0MuonS1TGCFloatingToolsConfig import (
+        from L1MuonS1TGCFloatingTools.L0MuonS1TGCFloatingToolsConfig import (
             TgcL0FloatingInnerCoincidenceToolCfg,
         )
         kwargs["InnerCoincidenceTool"] = result.popToolsAndMerge(
@@ -28,7 +28,7 @@ def L0MuonTGCSimCfg(
         )
 
     if "TrackSelectorTool" not in kwargs:
-        from L0MuonS1TGCFloatingTools.L0MuonS1TGCFloatingToolsConfig import (
+        from L1MuonS1TGCFloatingTools.L0MuonS1TGCFloatingToolsConfig import (
             TgcL0FloatingTrackSelectorToolCfg,
         )
         kwargs["TrackSelectorTool"] = result.popToolsAndMerge(
@@ -79,7 +79,7 @@ if __name__ == "__main__":
 
     flags, acc = setupGeoR4TestCfg(args, flags)
     from AthenaCommon.Constants import DEBUG
-    from L0MuonS1TGCFloatingTools.L0MuonS1TGCFloatingToolsConfig import (
+    from L1MuonS1TGCFloatingTools.L0MuonS1TGCFloatingToolsConfig import (
         TgcL0FloatingCandidateBuilderToolCfg,
     )
 
