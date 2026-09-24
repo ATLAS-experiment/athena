@@ -43,14 +43,13 @@ class SortedCollectionCreator:
 
    def readInputCollections(self, inputCollections):
       """read all input collections into memory"""
-      from PyUtils import PoolFile
       self.collDescription = None
       self.allRows = []
       self.attrNames = []
       self.attrTypes = {}
       for inFileName in inputCollections:
          self.debug("Opening {}".format(inFileName))
-         iColl = self.collSvc.open( "Input", PoolFile.PoolOpts.CollectionType.RootCollection, inFileName)
+         iColl = self.collSvc.open( "Input", inFileName)
          self.debug("{} opened".format(inFileName))
          if self.collDescription is None:
             self.readCollectionDescription(iColl)

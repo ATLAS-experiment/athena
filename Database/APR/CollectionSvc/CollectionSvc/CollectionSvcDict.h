@@ -8,5 +8,3 @@
 #include "CollectionSvc/CollectionDescription.h"
 #include "CollectionSvc/CollectionColumn.h"
 #include "CollectionSvc/CollectionRowBuffer.h"
-
-

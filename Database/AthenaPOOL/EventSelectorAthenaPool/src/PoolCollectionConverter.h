@@ -18,7 +18,6 @@ class IPoolSvc;
 namespace pool {
    class ICollection;
    class ICollectionCursor;
-   class DbType;
 }
 class StatusCode;
 
@@ -29,14 +28,11 @@ class PoolCollectionConverter {
 
 public:
    /// Constructor
-   /// @param collectionType [IN] type of the collection
-   /// ("RootCollection", or "ImplicitCollection").
    /// @param svc [IN] pointer to the PoolSvc.
    /// @param contextId [IN] id for PoolSvc persistency service to use for input.
-   PoolCollectionConverter(const std::string& collectionType,
-		   const std::string& inputCollection,
-		   unsigned int contextId,
-		   const IPoolSvc* svc);
+   PoolCollectionConverter( const std::string& inputCollection,
+                            unsigned int contextId,
+                            const IPoolSvc* svc);
 
    /// Destructor
    virtual ~PoolCollectionConverter();
@@ -44,31 +40,27 @@ public:
    /// Required by all Gaudi Services
    StatusCode initialize();
 
-   /// @return a pointer to a Pool Collection.
-   /// @param collectionType [IN] string containing the collection type.
-   /// @param connection [IN] string containing the connection.
-   /// @param collectionName [IN] string containing the persistent name of the collection.
-   /// @param contextId [IN] id for PoolSvc persistency service to use for input.
-   pool::ICollection* createCollection(const std::string& connection,
-           const std::string& collectionName,
-           const pool::DbType& collectionType,
-           unsigned int contextId) const;
-
    /// Disconnect Database
    StatusCode disconnectDb();
 
    /// Check whether has valid pool::ICollection*
    StatusCode isValid() const;
 
+   /// @return true if the collection contains data directly
+   bool isDirectCollection() const;
+
    /// @return ICollectionCursor over all entries
    std::unique_ptr<pool::ICollectionCursor> selectAll();
 
+   const std::string& lastError() const { return m_lastError; }
+
 private: // data
-   std::string m_collectionType;
-   std::string m_inputCollection;
-   unsigned int m_contextId;
-   const IPoolSvc* m_poolSvc;
+   std::string       m_inputCollection;
+   unsigned int      m_contextId;
+   const IPoolSvc*   m_poolSvc;
    pool::ICollection* m_poolCollection;
+   // Last error message from Collection open() (if any)
+   std::string       m_lastError;
 
 private: // hide copy and assignment
    PoolCollectionConverter(const PoolCollectionConverter& rhs);

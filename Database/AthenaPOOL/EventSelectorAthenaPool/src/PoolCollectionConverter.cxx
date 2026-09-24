@@ -9,14 +9,12 @@
 
 #include "PoolCollectionConverter.h"
 #include "PoolSvc/IPoolSvc.h"
-#include "PoolSvc/ISession.h"
 #include "PersistentDataModel/Token.h"
 
 // Pool
 #include "CollectionSvc/ICollection.h"
 #include "CollectionSvc/ICollectionCursor.h"
 #include "CollectionSvc/CollectionService.h"
-#include "StorageSvc/DbType.h"
 
 // Gaudi
 #include "GaudiKernel/StatusCode.h"
@@ -27,11 +25,10 @@
 #include <stdexcept>
 
 //______________________________________________________________________________
-PoolCollectionConverter::PoolCollectionConverter(const std::string& collectionType,
+PoolCollectionConverter::PoolCollectionConverter(
 	const std::string& inputCollection,
 	unsigned int contextId,
 	const IPoolSvc* svc) :
-	m_collectionType(collectionType),
 	m_inputCollection(inputCollection),
 	m_contextId(contextId),
 	m_poolSvc(svc),
@@ -53,47 +50,19 @@ StatusCode PoolCollectionConverter::initialize() {
       // Prefix with PFN:
       m_inputCollection = std::format("PFN:{}", m_inputCollection);
    }
-   StatusCode sc = StatusCode::SUCCESS;
+   StatusCode sc = m_poolSvc->connectCollection(m_inputCollection, "Input", m_contextId);
    try {
-      if (m_collectionType == "RootCollection") {
-         sc = m_poolSvc->connectCollection(m_inputCollection, "Input", pool::ROOT_StorageType.type(), m_contextId);
-         m_poolCollection = createCollection(m_inputCollection, "Input", pool::ROOT_StorageType.type(), m_contextId);
-      }
-      if (m_poolCollection == nullptr) { // Open as ImplicitCollection if technologies fail, or none was specified
-         sc = m_poolSvc->connectCollection(m_inputCollection, "Input", pool::POOL_StorageType.type(), m_contextId);
-         m_poolCollection = createCollection(m_inputCollection, "Input", pool::POOL_StorageType.type(), m_contextId);
-      }
+      m_poolCollection = pool::CollectionService::open("Input", m_inputCollection, m_poolSvc->getInputContextSession(m_contextId));
+      m_lastError.clear();
    } catch (std::exception &e) {
-      if (m_poolCollection == nullptr) return StatusCode::RECOVERABLE;
+      m_lastError = std::format("Failed to open collection '{}': {}", m_inputCollection, e.what());
    }
-   bool insertFile = false;
-   if (sc.isRecoverable()) {
-      insertFile = true;
-   } else if (sc.isFailure()) {
-      return StatusCode::FAILURE;
-   }
-   if (m_poolCollection == nullptr || insertFile) {
+   if( sc.isRecoverable() || m_poolCollection == nullptr ) {
       return m_poolSvc->checkCollection(m_inputCollection, m_contextId, m_poolCollection == nullptr);
    }
    return StatusCode::SUCCESS;
 }
-//______________________________________________________________________________
-pool::ICollection* PoolCollectionConverter::createCollection(const std::string& connection,
-                const std::string& collectionName,
-                const pool::DbType& collectionType,
-                unsigned int contextId) const {
-   // access to these variables is serial, since this is called by event selector only
-   pool::CollectionService collSvc ATLAS_THREAD_SAFE = pool::CollectionService();
-   pool::ICollection* collPtr ATLAS_THREAD_SAFE = nullptr;
 
-   // Try to open EventTags Collection in the input file
-   try {
-      collPtr = collSvc.open(collectionName, collectionType, connection, m_poolSvc->getInputContextSession(contextId));
-   } catch (std::exception &e) {
-      collPtr = nullptr;
-   }
-   return(collPtr);
-}
 //______________________________________________________________________________
 StatusCode PoolCollectionConverter::disconnectDb() {
    if (m_poolCollection == nullptr) {
@@ -111,4 +80,8 @@ std::unique_ptr<pool::ICollectionCursor> PoolCollectionConverter::selectAll() {
      throw std::runtime_error("PoolCollectionConverter::selectAll: m_poolCollection is nullptr.");
    }
    return m_poolCollection->cursor();
+}
+
+bool PoolCollectionConverter::isDirectCollection() const {
+   return m_poolCollection && m_poolCollection->hasPayload();
 }

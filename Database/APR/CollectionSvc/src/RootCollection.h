@@ -21,6 +21,8 @@ namespace pool {
 
    class ISession;
    class IStorageSvc;
+   class IDatabase;
+   class IContainer;
 
    class Attribute;
 
@@ -38,8 +40,9 @@ namespace pool {
         /// @param description The description of the collection, including name and connection
         /// @param mode The open mode of the collection
         /// @param session If you want to access the referenced objects you have to provide an ISession
-        RootCollection( const pool::CollectionDescription* description,
-                        Io::IoFlag mode );
+        RootCollection( const pool::CollectionDescription& description,
+                        Io::IoFlag mode,
+                        ISession* session );
 
         /// Destructor
         ~RootCollection();
@@ -63,6 +66,12 @@ namespace pool {
         /// Returns a cursor for the collection.
         virtual std::unique_ptr<ICollectionCursor> cursor() final override;
 
+        /// Initialize a new RowBuffer by adding all Attributes and Tokens of this collection to it
+        virtual void initNewRow( CollectionRowBuffer& rowBuffer ) const final override;
+
+        /// Returns true if the collection contains data directly
+        virtual bool hasPayload() const final override { return m_dhCont != nullptr; }
+
      private:
 
         /// copying unimplemented in this class.
@@ -78,13 +87,19 @@ namespace pool {
         std::string                          m_fileName;
         /// The common prefix for branch container names for attributes
         std::string                          m_containerPrefix;
-        Io::IoFlag                m_mode;
+        Io::IoFlag                           m_mode;
 
         bool                                 m_open;
 
-        std::unique_ptr<IStorageSvc>         m_storageSvc;
+        ISession*                            m_session = nullptr;
+        IStorageSvc*                         m_storageSvc = nullptr;
+        bool                                 m_ownStorageSvc;
         pool::FileDescriptor                 m_fileDescr;
+        /// Map of container names to container handles for all EventTag attrikbutes in the file
         ContainerMap                         m_containerMap;
+        /// The DataHeader container, if present, in the file
+        IContainer*                          m_dhCont = nullptr;
+        std::unique_ptr<pool::IDatabase>     m_database;
    };
 }
 #endif

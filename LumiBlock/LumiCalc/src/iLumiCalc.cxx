@@ -10,13 +10,10 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include "CollectionSvc/CollectionService.h"
 #include "CollectionSvc/ICollection.h"
 
-#include "DataModelRoot/RootType.h"
-
 #include "TTree.h"
 #include "TList.h"
 #include "TObjString.h"
 #include "TString.h"
-#include <TKey.h>
 
 #include <typeinfo>
 #include <list>
@@ -462,8 +459,7 @@ int main(int argc, char * argv[]){
       std::string tagfilename =  (*it).substr(0,n);
 
       // get Value for a Key
-      pool::CollectionService collectionService;
-      pool::ICollection* collection = collectionService.open(tagfilename, pool::ROOT_StorageType.type(), tagfilename);
+      pool::ICollection* collection = pool::CollectionService::open(tagfilename, tagfilename);
       if(collection == NULL) {
          logger << Root::kERROR << "ICollection is NULL, exiting... " << Root::GEndl;
          exit(-1);
