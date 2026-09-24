@@ -11,20 +11,10 @@
 
 #include <format>
 
-using namespace Muon::MuonStationIndex;
-     
+
 
 namespace MuonR4 {
-    std::ostream& MsTrackSeed::print(std::ostream& ostr) const {
-      ostr<<"MS Track seed @"<<Amg::toString(position())<<", sector: "<<sector() << ", location: "
-          << location()<<", stations: ";
-      for (const auto st : m_stations) { ostr<<st<<", "; }
-      ostr<<std::endl;
-      for (const xAOD::MuonSegment* seg : segments()) {
-        ostr<<"  **** "<< printSegment(*seg) <<std::endl;
-      }
-      return ostr;
-    }
+
     std::string MsTrackSeed::toString(const Location loc) {
         switch (loc) {
           using enum Location;
@@ -33,6 +23,21 @@ namespace MuonR4 {
           case Endcap: return "Endcap";
         }
         return "";
+    }
+    std::ostream& operator<<(std::ostream& ostr, const MuonR4::MsTrackSeed& seed) {
+        ostr<<"MS Track seed @"<<Amg::toString(seed.position())<<", sector: "<<seed.sector() << ", location: "<< MsTrackSeed::toString(seed.location())<< std::endl;
+        using namespace Muon::MuonStationIndex;
+        for (const xAOD::MuonSegment* seg : seed.segments()) {
+            ostr<<"  **** "<< printSegment(*seg);
+
+            const xAOD::MuonSegment* truthSeg{getMatchedTruthSegment(*seg)};
+            if(truthSeg){
+                ostr << " truth theta " << (truthSeg->direction().theta() / Gaudi::Units::degree)
+                    << " truth phi " << (truthSeg->direction().phi() / Gaudi::Units::degree);
+            }
+            ostr <<std::endl;
+        }
+        return ostr;
     }
     MsTrackSeed::MsTrackSeed(const Location loc, const ExpandedSector sector): 
           m_loc{loc}, m_sector{sector}{}
@@ -57,45 +62,16 @@ namespace MuonR4 {
         }
         (*itr) = updated;
     }
-    std::span<const Muon::MuonStationIndex::StIndex> MsTrackSeed::stations() const {
-        return m_stations;
-    }
     void MsTrackSeed::addSegment(const xAOD::MuonSegment* seg) {
-        const float path = pathLength(*seg);
+        const float r2 = Acts::hypotSquare(seg->x(), seg->y(), seg->z());
         auto insert_itr = std::ranges::find_if(m_segments, 
-              [&](const xAOD::MuonSegment* added){
-                return path < pathLength(*added);
+              [&r2](const xAOD::MuonSegment* added){
+                return r2 < Acts::hypotSquare(added->x(), added->y(), added->z());
               });
         m_segments.insert(insert_itr, seg);
-        m_nMeasurements += MuonR4::nMeasurements(*seg);
-        if (!Acts::rangeContainsValue(m_stations, toStationIndex(seg->chamberIndex()))) {
-            m_stations.push_back(toStationIndex(seg->chamberIndex()));
-        }
     }
-    std::size_t MsTrackSeed::nStations() const { return m_stations.size(); }
-    std::size_t MsTrackSeed::nMeasurements() const { return m_nMeasurements; }
     const Amg::Vector3D& MsTrackSeed::position() const { return m_pos; }
     void MsTrackSeed::setPosition(Amg::Vector3D&& pos) { m_pos = std::move(pos); }
-    float MsTrackSeed::pathLength(const xAOD::MuonSegment& segment) const {
-        if (m_segments.empty()) {
-          return 0.;
-        }
-        const xAOD::MuonSegment& ref{*m_segments.front()};
-        return (segment.x() - ref.x())* ref.px() +
-               (segment.y() - ref.y())* ref.py() +
-               (segment.z() - ref.z())* ref.pz();
-    }
-
-    void MsTrackSeed::prepareOverlap(std::shared_ptr<std::uint8_t> marker) {
-       m_overlapMarker.emplace_back(std::move(marker));
-    }
-           
-    void MsTrackSeed::triggerOverlapMarker() {
-      std::ranges::for_each(m_overlapMarker, [](const auto& m){ (*m) = 1;});
-      m_overlapMarker.clear();
-    }     
-    bool MsTrackSeed::hasOverlap() const {
-      return std::ranges::any_of(m_overlapMarker, [](const auto& m ){ return (*m); });
-    }
+  
 }
  

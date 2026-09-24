@@ -28,7 +28,6 @@ namespace MuonR4{
     }
     std::string printSegment(const xAOD::MuonSegment& seg) {
         std::ostringstream oss;
-        using namespace SegmentFit;
         oss <<"Segment "<<printID(seg)
             <<", Dir theta/phi: "<<(seg.direction().theta() /Gaudi::Units::degree)
             <<" / "<<(seg.direction().phi() /Gaudi::Units::degree)
@@ -36,7 +35,6 @@ namespace MuonR4{
             <<" / "<<(seg.position().phi() / Gaudi::Units::degree)
             <<", R: "<<Acts::fastHypot(seg.x(), seg.y()) <<", Z: "<<seg.z()
             <<", chi2: "<<(seg.chiSquared() / std::max(seg.numberDoF(), 1.f))
-            <<", localPars: "<<toString(localSegmentPars(seg))
             <<", nPrec: "<<static_cast<int>(seg.nPrecisionHits())
             <<", nPhi: "<<static_cast<int>(seg.nPhiLayers())
             <<", nTrigEta: "<<static_cast<int>(seg.nTrigEtaLayers());
@@ -113,7 +111,7 @@ namespace MuonR4{
                                                                 segment.position(),
                                                                 segment.direction(),
                                                                 Acts::BoundaryTolerance::Infinite());
-        return isect.closest().position();
+        return isect.at(0).position();
     }
 
     bool ParticleSorter::operator()(const xAOD::IParticle* a,
