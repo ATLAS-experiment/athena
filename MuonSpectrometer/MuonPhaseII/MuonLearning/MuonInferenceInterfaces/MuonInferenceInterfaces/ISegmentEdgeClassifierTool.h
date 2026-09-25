@@ -50,6 +50,10 @@ namespace MuonML {
     virtual StatusCode classifyEdges(const EventContext& ctx,
                                      const SegmentEdgeGraph& graph,
                                      std::vector<SegmentEdgeScore>& scores) const = 0;
+
+    /// Whether this tool was configured to fill SegmentEdgeGraph's truth diagnostics 
+    // and schedule the truthParticleLink dependency.
+    virtual bool enableTruthDiagnostics() const = 0;
   };
 }
 #endif

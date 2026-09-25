@@ -8,11 +8,14 @@
 #include "MuonInferenceInterfaces/ISegmentEdgeClassifierTool.h"
 #include "MuonMLEvent.h"
 #include "Gaudi/Property.h"
+#include "StoreGate/ReadDecorHandleKey.h"
+#include "xAODMuon/MuonSegmentContainer.h"
 
 #include <atomic>
 #include <cstdint>
 #include <mutex>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 namespace MuonML {
@@ -66,6 +69,9 @@ namespace MuonML {
     /// Retrieve the ONNX model and resolve node feature ordering from metadata.
     StatusCode initialize() override;
 
+    /// Log a pre-ONNX candidate-edge pruning.
+    StatusCode finalize() override;
+
     /// Not supported by this tool; returns FAILURE.
     /// Use SegmentEdgeInferenceAlg + buildGraph() + classifyEdges() instead.
     StatusCode runGraphInference(const EventContext& ctx,
@@ -83,10 +89,21 @@ namespace MuonML {
                              const SegmentEdgeGraph& graph,
                              std::vector<SegmentEdgeScore>& scores) const override;
 
+    /// @copydoc ISegmentEdgeClassifierTool::enableTruthDiagnostics
+    bool enableTruthDiagnostics() const override { return m_enableTruthDiagnostics; }
+
   private:
     StatusCode dumpDebugEvent(const EventContext& ctx,
                               const SegmentEdgeGraph& graph,
                               const std::vector<SegmentEdgeScore>& scores) const;
+
+    /// MC-only diagnostics: record, for every input segment and every pair of
+    /// input segments sharing a truth particle, why it did or did not reach
+    /// ONNX. Only called when EnableTruthDiagnostics and DEBUG output are set.
+    void fillTruthDiagnostics(
+        const xAOD::MuonSegmentContainer& segments,
+        const std::unordered_set<const xAOD::MuonSegment*>& bucketRetained,
+        SegmentEdgeGraph& graph) const;
 
     Gaudi::Property<float> m_maxDeltaThetaDeg{this, "MaxDeltaThetaDeg", 35.f};
     Gaudi::Property<int> m_maxDeltaSector{this, "MaxDeltaSector", 1};
@@ -109,6 +126,11 @@ namespace MuonML {
     Gaudi::Property<std::string> m_outputName{this, "OutputName", "logits"};
     Gaudi::Property<std::string> m_debugDumpFile{this, "DebugDumpFile", ""};
     Gaudi::Property<unsigned int> m_debugDumpMaxEvents{this, "DebugDumpMaxEvents", 0};
+    Gaudi::Property<bool> m_enableTruthDiagnostics{
+        this, "EnableTruthDiagnostics", false,
+        "MC-only: fill SegmentEdgeGraph's truth diagnostics."};
+    SG::ReadDecorHandleKey<xAOD::MuonSegmentContainer> m_truthLinkKey{
+        this, "TruthLinkKey", "MuonSegmentsFromR4.truthParticleLink"};
     float m_cosMin{0.f};
 
     /// Node feature order expected by the model metadata (resolved at initialize).
@@ -116,6 +138,13 @@ namespace MuonML {
     std::vector<SegmentNodeFeatureId> m_nodeFeatureIds{};
     mutable std::mutex m_debugDumpMutex;
     mutable std::atomic<unsigned int> m_debugDumpEvents{0};
+
+    /// Job-summed pre-ONNX pruning counters (see buildGraph()).
+    mutable std::atomic<std::size_t> m_sumInputSegments{0};
+    mutable std::atomic<std::size_t> m_sumCandidatePairs{0};
+    mutable std::atomic<std::size_t> m_sumRetainedPairs{0};
+    mutable std::atomic<std::size_t> m_sumNodesBeforeIsolatedDrop{0};
+    mutable std::atomic<std::size_t> m_sumNodesAfterIsolatedDrop{0};
   };
 }
 #endif
