@@ -44,7 +44,7 @@ EGPhotonCleaningWrapper::addBranches(const EventContext& ctx) const
   };
 
   // Write mask for each element and record to SG for subsequent selection
-  for (const auto& egamma : *particles) {
+  for (const xAOD::Egamma* egamma : *particles) {
     // decorate the original object
     const xAOD::IParticle* original = m_fudgedContainerName.empty() ?
 	egamma : xAOD::getOriginalObject(*egamma);

@@ -67,7 +67,7 @@ namespace DerivationFramework {
     }
 
     // Write mask for each element and record to SG for subsequent selection
-    for (const auto& egamma : *particles) {
+    for (const xAOD::Egamma* egamma : *particles) {
       // compute the output of the selector
       asg::AcceptData theAccept(m_tool->accept(ctx, egamma));
       // this should work for both the

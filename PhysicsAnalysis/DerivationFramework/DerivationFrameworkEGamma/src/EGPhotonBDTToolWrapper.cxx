@@ -47,7 +47,7 @@ EGPhotonBDTToolWrapper::addBranches(const EventContext& ctx) const
     m_decoratorIsEM, ctx
   };
 
-  for (const auto& photon : *particles) {
+  for (const xAOD::Egamma* photon : *particles) {
     // compute the output of the selector with the fudged photon
     asg::AcceptData theAccept(m_selectorTool->accept(ctx, photon));
     // compute the is EM word

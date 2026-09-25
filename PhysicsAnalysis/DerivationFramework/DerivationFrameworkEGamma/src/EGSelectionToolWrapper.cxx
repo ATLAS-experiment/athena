@@ -50,7 +50,7 @@ EGSelectionToolWrapper::addBranches(const EventContext& ctx) const
     m_decoratorIsEM, ctx
   };
 
-  for (const auto& egamma : *particles) {
+  for (const xAOD::Egamma* egamma : *particles) {
     // compute the output of the selector with the fudged object
     asg::AcceptData theAccept(m_tool->accept(ctx, egamma));
     // this should work for both the
