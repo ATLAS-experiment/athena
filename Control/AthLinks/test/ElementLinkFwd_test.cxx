@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -7,7 +7,7 @@
 #include "ELFCont.h"
 #include "SGTools/CurrentEventStore.h"
 #include "AthenaKernel/getMessageSvc.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -29,7 +29,7 @@ const ELFElt* ELFElt::ptr() const
 
 void test1 (SGTest::TestStore& store)
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   const int nelt = 5;
   ELFCont* cont = new ELFCont;

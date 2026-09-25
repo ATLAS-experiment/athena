@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHLINKS_ELEMENTLINKVECTOR_H
@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <exception>
 #include <functional>
+#include <print>
 #include <vector>
 #include <boost/iterator/transform_iterator.hpp>
 #include <RootMetaSelection.h>
@@ -360,8 +361,8 @@ private:
 #endif    
     ) {
 #ifdef __ELVDEBUG
-      std::cout << "DUMMY removeHostDObj called for link  " 
-		<< link.dataID() << "/" << link.index() << std::endl;
+     std::println ("DUMMY removeHostDObj called for link  {}/{}" ,
+                   link.dataID(), link.index());
 #endif    
       //FIXME this is a dummy until we find how to remove an host w/o
       //FIXME screwing up the otherElemLinkRefs
@@ -377,10 +378,10 @@ private:
     typename RefVector::const_iterator ret(m_shortRefs.begin());
     advance(ret, distance(begin(), longIter));
 #ifdef __ELVDEBUG
-    std::cout << "shortIterFromLong(const version) called for " 
-	      << longIter->dataID() << "/" << longIter->index() 
-	      << " 	advance by  " << distance(begin(), longIter) 
-	      << " result is 	" << ret->dataID() << "/" << ret->index() << std::endl;
+    std::println ("shortIterFromLong(const version) called for {}/{} 	"
+                  "advance by  {} result is 	{}/{}",
+                  longIter->dataID(), longIter->index(),
+                  distance(begin(), longIter), ret->dataID(), ret->index());
 #endif	
     return ret;
   }
@@ -391,10 +392,10 @@ private:
     typename RefVector::iterator ret(m_shortRefs.begin());
     advance(ret, distance(begin(), longIter));
 #ifdef __ELVDEBUG
-    std::cout << "shortIterFromLong called for " 
-	      << longIter->dataID() << "/" << longIter->index() 
-	      << " advance by  " << distance(begin(), longIter) 
-	      << " result is " << ret->dataID() << "/" << ret->index() << std::endl;
+    std::println ("shortIterFromLong called for {}/{} "
+                  "advance by  {} ""result is {}/{}",
+                  longIter->dataID(), longIter->index(),
+                  distance(begin(), longIter), ret->dataID(), ret->index());
 #endif
     return ret;
   }
@@ -484,8 +485,8 @@ void
 swap(ElementLinkVector<DOBJ>& lhs,
 	  ElementLinkVector<DOBJ>& rhs) {
 #ifdef __ELVDEBUG
-  std::cout << "std::swap called for lhs " << std::hex << &lhs 
-	    << " rhs " << &rhs << std::dec << std::endl;  
+  std::println ("std::swap called for lhs {:x} rhs {:x}",
+                static_cast<void*>(&lhs), static_cast<void*>(&rhs));
 #endif
   lhs.swap(rhs);
 }

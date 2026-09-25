@@ -7,3 +7,4 @@ SG::DataProxy_castWARNING this proxy 0x24cd8d0 [23423556/foo20] is in an invalid
 SG::DataProxy_castWARNING this proxy 0x24cdc10 [0/] is in an invalid state
 SG::DataProxy_castWARNING this proxy 0x24cdff0 [23423556/foo22] is in an invalid state
 test5
+test_format

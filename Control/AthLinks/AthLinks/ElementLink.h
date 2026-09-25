@@ -1,9 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
 /**
  * @file AthLinks/ElementLink.h
  * @author scott snyder <snyder@bnl.gov>
@@ -20,6 +18,7 @@
 #include "AthLinks/DataLink.h"
 #include "AthContainersInterfaces/ToTransient.h"
 #include "AthenaKernel/proxyDictFromEventContext.h"
+#include <format>
 #include <utility>
 #include <vector>
 
@@ -840,6 +839,28 @@ public:
 
 
 } // namespace SG
+
+
+namespace std {
+
+
+// C++20 compatible formatter.
+template <class T>
+struct formatter<ElementLink<T> >
+  : public formatter<string_view>
+{
+  template <class FmtContext>
+  FmtContext::iterator format(const ElementLink<T>& k, FmtContext& ctx) const
+  {
+    if (k.isDefault()) {
+      return formatter<string_view>::format ("(nullLink)", ctx);
+    }
+    return format_to (ctx.out(), "@{}[{}]", k.dataID(), k.index());
+  }
+};
+
+
+} // namespace std
 
 
 #include "AthLinks/ElementLink.icc"

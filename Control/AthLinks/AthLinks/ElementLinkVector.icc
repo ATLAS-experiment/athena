@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/System.h"
@@ -20,10 +20,8 @@ ElementLinkVector<DOBJ>::findHostDObj(const ElemLink& link) const
   typename DataLinkVector::const_iterator iHost(beginHostDObjs()), eHost(endHostDObjs());
   while ((eHost != iHost) && (*iHost != dl)) ++iHost;
 #ifdef __ELVDEBUG
-  std::cout << "findHostDObj (const version) called for link  "  
-	    << link.dataID() << "/" << link.index() 
-	    << " - which is " << ((iHost != eHost) ? "" : " NOT ") 
-	    << " in ELV host dobjs list " << std::endl;
+  std::println ("findHostDObj (const version) called for link  {}/{} - which is {} in ELV host dobjs list ",
+                link.dataID(), link.index(), ((iHost != eHost) ? "" : " NOT "));
 #endif
   return iHost;
 }
@@ -37,10 +35,8 @@ ElementLinkVector<DOBJ>::findHostDObj(const ElemLink& link)
   typename DataLinkVector::iterator iHost(beginHostDObjs()), eHost(endHostDObjs());
   while ((eHost != iHost) && (*iHost != dl)) ++iHost;
 #ifdef __ELVDEBUG
-  std::cout << "findHostDObj (non-const version) called for link  "  
-	    << link.dataID() << "/" << link.index() 
-	    << " - which is " << ((iHost != eHost) ? "" : " NOT ") 
-	    << " in ELV host dobjs list " << std::endl;
+  std::println ("findHostDObj (non-const version) called for link  {}/{} - which is {} in ELV host dobjs list ",
+                link.dataID(), link.index(), ((iHost != eHost) ? "" : " NOT "));
 #endif
   return iHost;
 }
@@ -51,9 +47,9 @@ typename ElementLinkVector<DOBJ>::iterator
 ElementLinkVector<DOBJ>::insert(iterator position, const ElemLink& link) 
 {
 #ifdef __ELVDEBUG
-  std::cout << "insert of link " 
-	    << link.dataID() << "/" << link.index() << " after  " 
-	    << position->dataID() << "/" << position->index() <<endl;
+  std::println ("insert of link {}/{} after  {}/{}" ,
+                link.dataID(), link.index(),
+                position->dataID(), position->index());
 #endif
   addHostDObj(link);
   return iterator(m_shortRefs.insert(shortIterFromLong(position), ElemLinkRef( link)), 
@@ -311,8 +307,8 @@ addHostDObj( const ElemLink& link ) {
    if( ! dl.isDefault() ) {
       m_hostDObjs.push_back( dl );
 #ifdef __ELVDEBUG
-      std::cout << "addHostDObj added link  " 
-                << link.dataID() << "/" << link.index() << std::endl;
+      std::println ("addHostDObj added link  {}/{}",
+                    link.dataID(), link.index());
 #endif
    }
 

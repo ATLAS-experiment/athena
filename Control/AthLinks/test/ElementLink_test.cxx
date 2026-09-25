@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -18,7 +18,7 @@
 #include "GaudiKernel/EventContext.h"
 #include <vector>
 #include <set>
-#include <iostream>
+#include <print>
 #include <cstdlib>
 #include <cassert>
 
@@ -192,7 +192,7 @@ void IdentTest::fill (const std::string& prefix)
     IDENTIFIABLE* v = new IDENTIFIABLE;
     for (int j=0; j<4; j++) {
       std::ostringstream os;
-      os << prefix << (i*4+j);
+      std::print (os, "{}{}", prefix, (i*4+j));
       v->push_back (os.str());
     }
     v->m_hash = i;
@@ -643,7 +643,7 @@ void testit (SGTest::TestStore& store,
 
 void test1 (SGTest::TestStore& store)
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   FooCont* foocont = new FooCont;
   foocont->push_back (new Foo(1));
@@ -669,7 +669,7 @@ void test1 (SGTest::TestStore& store)
 // Testing references to objects not in SG.
 void test2 (SGTest::TestStore& store)
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   TestStore::sgkey_t fookey = store.stringToKey ("foocont_t2", fooclid);
   Foo* foo1 = new Foo(101);
@@ -729,7 +729,7 @@ void test2 (SGTest::TestStore& store)
 // toTransient, toPersistent
 void test3 (SGTest::TestStore& store)
 {
-  std::cout << "test3\n";
+  std::println ("test3");
 
   TestStore::sgkey_t sgkey = store.stringToKey ("foocont3", fooclid);
 
@@ -822,7 +822,7 @@ void test3 (SGTest::TestStore& store)
 // test alt store
 void test4 (SGTest::TestStore& store)
 {
-  std::cout << "test4\n";
+  std::println ("test4");
 
   TestStore store2;
   FooCont* foocont4 = new FooCont;
@@ -853,7 +853,7 @@ void test4 (SGTest::TestStore& store)
 // dummy proxy creation
 void test5 (SGTest::TestStore& store)
 {
-  std::cout << "test5\n";
+  std::println ("test5");
 
   ElementLink<FooCont> el1 ("foocont20", 2);
   assert (!el1.isDefault());
@@ -875,7 +875,7 @@ void test5 (SGTest::TestStore& store)
 // comparison ops
 void test6 (SGTest::TestStore& /*store*/)
 {
-  std::cout << "test6\n";
+  std::println ("test6");
 
   ElementLink<FooCont> el1 ("foocont20", 2);
   ElementLink<FooCont> el2 ("foocont21", 1);
@@ -920,7 +920,7 @@ public:
 // tests from ControlTest
 void test7 (SGTest::TestStore& store)
 {
-  std::cout << "test7\n";
+  std::println ("test7");
 
   FooCont* fooVec = new FooCont();
   Foo* f1 = new Foo(1);
@@ -1070,7 +1070,7 @@ void test7 (SGTest::TestStore& store)
 // Test for vector with non-pointer payload
 void test8 (SGTest::TestStore& store)
 {
-  std::cout << "test8\n";
+  std::println ("test8");
 
   StrVec* strvec = new StrVec;
   strvec->push_back ("1");
@@ -1099,7 +1099,7 @@ void test8 (SGTest::TestStore& store)
 // Test for set
 void test9 (SGTest::TestStore& store)
 {
-  std::cout << "test9\n";
+  std::println ("test9");
 
   StrSet* strset = new StrSet;
   strset->insert ("1");
@@ -1128,7 +1128,7 @@ void test9 (SGTest::TestStore& store)
 // Test for map
 void test10 (SGTest::TestStore& store)
 {
-  std::cout << "test10\n";
+  std::println ("test10");
 
   StrMap* strmap = new StrMap;
   (*strmap)["1"] = 1;
@@ -1154,7 +1154,7 @@ void test10 (SGTest::TestStore& store)
 // Test for identcont
 void test11 (SGTest::TestStore& store)
 {
-  std::cout << "test11\n";
+  std::println ("test11");
 
   IdentTest* imap = new IdentTest;
   imap->fill ("a");
@@ -1179,7 +1179,7 @@ void test11 (SGTest::TestStore& store)
 // default store setting
 void test12 (SGTest::TestStore& store)
 {
-  std::cout << "test12\n";
+  std::println ("test12");
   TestStore store2;
 
   assert (SG::CurrentEventStore::setStore(&store2) == &store);
@@ -1190,7 +1190,7 @@ void test12 (SGTest::TestStore& store)
 // Converting ctor.
 void test13 (SGTest::TestStore& store)
 {
-  std::cout << "test13\n";
+  std::println ("test13");
 
   // Pointer, raw element.
   BarCont* bar = new BarCont;
@@ -1299,6 +1299,21 @@ void test13 (SGTest::TestStore& store)
 }
 
 
+// C++20 formatting.
+void test_format (SGTest::TestStore& /*store*/)
+{
+  std::println ("test_format");
+
+  ElementLink<FooCont> el0;
+  ElementLink<FooCont> el1 ("fooCont", 1);
+  ElementLink<FooCont> el2 ("fooCont", 2);
+
+  assert (std::format ("{}", el0) == "(nullLink)");
+  assert (std::format ("{}", el1) == "@fooCont[1]");
+  assert (std::format ("{}", el2) == "@fooCont[2]");
+}
+
+
 int main()
 {
   Athena::getMessageSvcQuiet = true;
@@ -1317,5 +1332,6 @@ int main()
   test11 (*store);
   test12 (*store);
   test13 (*store);
+  test_format (*store);
   return 0;
 }

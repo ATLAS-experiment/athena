@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthLinks/src/exceptions.cxx
@@ -27,11 +27,9 @@ void AthLinks_error() {}
 /// Helper: format exception error string.
 std::string excPointerNotInSG_format (const void* pointer)
 {
-  std::ostringstream os;
-  os << "SG::ExcPointerNotInSG: "
-     << "The object referenced by a DataLink / ElementLink is not registered "
-     << "in StoreGate: " << pointer << ".";
-  return os.str();
+  return std::format ("SG::ExcPointerNotInSG: "
+                      "The object referenced by a DataLink / ElementLink is not registered "
+                      "in StoreGate: {}.", pointer);
 }
 
 
@@ -52,11 +50,9 @@ ExcPointerNotInSG::ExcPointerNotInSG (const void* pointer)
 /// Helper: format exception error string.
 std::string excCLIDMismatch_format (CLID obj_clid, CLID link_clid)
 {
-  std::ostringstream os;
-  os << "SG::ExcCLIDMismatch: "
-     << "Attempt to set DataLink / ElementLink with CLID " << link_clid
-     << " to object with CLID " << obj_clid;
-  return os.str();
+  return std::format ("SG::ExcCLIDMismatch: "
+                      "Attempt to set DataLink / ElementLink with CLID {} to object with CLID {}",
+                      link_clid, obj_clid);
 }
 
 
@@ -79,11 +75,10 @@ ExcCLIDMismatch::ExcCLIDMismatch (CLID obj_clid, CLID link_clid)
 std::string
 excInvalidLink_format (CLID clid, const std::string& key, SG::sgkey_t sgkey)
 {
-  std::ostringstream os;
-  os << "SG::ExcInvalidLink: "
-     << "Attempt to dereference invalid DataLink / ElementLink "
-     << "[" << clid << "/" << key << "] (" << sgkey << ")";
-  return os.str();
+  return std::format ("SG::ExcInvalidLink: "
+                      "Attempt to dereference invalid DataLink / ElementLink "
+                      "[{}/{}] ({})",
+                      clid, key, sgkey);
 }
 
 
@@ -121,15 +116,13 @@ void throwExcInvalidLink (CLID clid, const std::string& key, SG::sgkey_t sgkey)
 std::string
 excBadForwardLink_format (size_t index, size_t size, const std::string& name)
 {
-  std::ostringstream os;
-  os << "SG::ExcBadForwardLink: "
-     << "ForwardIndexingPolicy: internal link state of '" << name << "' is invalid";
+  std::string s = std::format ("SG::ExcBadForwardLink: "
+                               "ForwardIndexingPolicy: internal link state of '{}' is invalid", name);
   if (index != static_cast<size_t>(-1)) {
-    os << ": m_index = " << index
-       << " is >= data container size = "
-       << size << std::ends;
+    s += std::format (": m_index = {} is >= data container size = {}",
+                      index, size);
   } 
-  return os.str();
+  return s;
 }
 
 
@@ -282,11 +275,10 @@ void throwExcBadToTransient()
 std::string
 excConstStorable_format (CLID clid, const std::string& key, SG::sgkey_t sgkey)
 {
-  std::ostringstream os;
-  os << "SG::ExcConstStorable: "
-     << "Tried to retrieve const storable as a non-const pointer "
-     << "[" << clid << "/" << key << "] (" << sgkey << ")";
-  return os.str();
+  return std::format ("SG::ExcConstStorable: "
+                      "Tried to retrieve const storable as a non-const pointer "
+                      "[{}/{}] ({})",
+                      clid, key, sgkey);
 }
 
 
@@ -312,11 +304,8 @@ ExcConstStorable::ExcConstStorable (CLID clid,
 std::string
 excBadThinning_format (CLID clid, const std::string& key, SG::sgkey_t sgkey)
 {
-  std::ostringstream os;
-  os << "SG::ExcBadThinning: "
-     << "Bad thinning request "
-     << "[" << clid << "/" << key << "] (" << sgkey << ")";
-  return os.str();
+  return std::format ("SG::ExcBadThinning: Bad thinning request [{}/{}] ({})",
+                      clid, key, sgkey);
 }
 
 

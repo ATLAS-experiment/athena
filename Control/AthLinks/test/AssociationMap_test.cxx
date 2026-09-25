@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -7,7 +7,7 @@
 #include "AthLinks/AssociationMap.h"
 #include "SGTools/CurrentEventStore.h"
 #include "AthenaKernel/CLASS_DEF.h"
-#include <iostream>
+#include <print>
 #include <vector>
 
 
@@ -84,23 +84,23 @@ CLASS_DEF( TTAss, 67890, 1 )
 
 void test1 (SGTest::TestStore& store)
 {
-  std::cout << " *** AssociationMap test in progress: " << std::endl;
+  std::println (" *** AssociationMap test in progress: ");
 
-  std::cout << "Build fake data and associations:" << std::endl;
+  std::println ("Build fake data and associations:");
 
   ClusterContainer* cCont = new ClusterContainer();
   cCont->push_back(new Cluster(1.));
   cCont->push_back(new Cluster(2.));
   cCont->push_back(new Cluster(3.));
-  std::cout << "Cluster Container...............: " << cCont->size() 
-	    << " clusters" << std::endl;
+  std::println ("Cluster Container...............: {} clusters",
+                cCont->size());
 
   TrackContainer* tCont = new TrackContainer();
   tCont->push_back(new Track(-1.));
   tCont->push_back(new Track(-2.));
   tCont->push_back(new Track(-3.));
-  std::cout << "Track Container.................: " << tCont->size() 
-	    << " tracks" << std::endl;
+  std::println ("Track Container.................: {} tracks",
+                tCont->size());
 
   store.record (cCont, "cCont");
   store.record (tCont, "tCont");
@@ -120,14 +120,8 @@ void test1 (SGTest::TestStore& store)
 	++cIter ) {
     for ( tCtr=0; tCtr<tCont->size(); ++tCtr ) {
       const Track* aTrack = (*tCont)[tCtr];
-      std::cout << "Associate Clusters and Tracks...: [" << cCtr 
-		<< "," << tCtr
-		<< "] with data ["
-		<< (*cIter)->getE()
-		<< ","
-		<< aTrack->getP()
-		<< "]"
-		<< std::endl;
+      std::println ("Associate Clusters and Tracks...: [{},{}] with data [{},{}]",
+                    cCtr, tCtr, (*cIter)->getE(), aTrack->getP());
       try {
 	if ( 0 == tCtr ) {
 	  aMap.addAssociation(cCont,(*cCont)[cCtr],tCont,(*tCont)[tCtr]);
@@ -140,9 +134,7 @@ void test1 (SGTest::TestStore& store)
 	  aMap.addAssociation(cCont,cCtr,tCont,tCtr);
 	}
       } catch(std::exception& error) {
-	std::cerr << "Caught std::exception:" << std::endl
-		  << error.what()
-		  << std::endl;
+        std::println (std::cerr, "Caught std::exception:\n{}", error.what());
       }
     }
     ++cCtr;
@@ -156,7 +148,7 @@ void test1 (SGTest::TestStore& store)
   const Cluster * const myCluster = (*cCont)[0];
   const Track   * const myTrack   = (*tCont)[0];
 
-  std::cout << "List of objects in AssociationMap:" << std::endl;
+  std::println ("List of objects in AssociationMap:");
   {
     PTAss::object_iterator cEnd = cstMap->endObject();
     for ( PTAss::object_iterator cIter = cstMap->beginObject();
@@ -164,16 +156,14 @@ void test1 (SGTest::TestStore& store)
 	  ++cIter ) {
       const Cluster * const theCluster = (*cIter).getObject();
       assert (*(cIter.getObjectLink()) == theCluster);
-      std::cout << "\tCluster "
-		<< ": " /*<< theCluster->getE()*/ << std::endl;
+      std::println ("\tCluster : ");
       PTAss::asso_iterator tEnd = cstMap->endAssociation(theCluster);
       for ( PTAss::asso_iterator tIter = cstMap->beginAssociation(theCluster);
 	    tIter != tEnd;
 	    ++tIter ) {
 	const Track * const theTrack = *tIter;
         assert (*(tIter.getLink()) == theTrack);
-	std::cout << "\t\tTrack "
-		  << ": " << theTrack->getP() << std::endl;
+	std::println ("\t\tTrack : {}", theTrack->getP());
 	const Track * const assoTrack = cstMap->getAssociation( tIter );
 	assert( theTrack == assoTrack );
 
@@ -202,13 +192,11 @@ void test1 (SGTest::TestStore& store)
     }
   }
 
-  std::cout << "Check that AssociationMap contains myCluster : "
-	    << ( cstMap->containsObject( myCluster ) ? "true" : "false" )
-	    << std::endl;
+  std::println ("Check that AssociationMap contains myCluster : {}",
+                ( cstMap->containsObject( myCluster ) ? "true" : "false" ));
 
-  std::cout << "Number of associations for myCluster"
-	    << "= " << cstMap->size( myCluster )
-	    << std::endl;
+  std::println ("Number of associations for myCluster= {}",
+                cstMap->size( myCluster));
   assert( tCont->size() == cstMap->size( myCluster ) );
 
   {
@@ -222,7 +210,7 @@ void test1 (SGTest::TestStore& store)
     assert( tCont->size() == myTracks.size() );
   }
 
-  std::cout << "Number of association objects:" << cstMap->size() << std::endl;
+  std::println ("Number of association objects:{}", cstMap->size());
   assert( cCtr == cstMap->size() );
 
 
@@ -230,9 +218,7 @@ void test1 (SGTest::TestStore& store)
   ///  Exploring AssociationMap with OBJCONT=ASSOCONT
   ///
 
-  std::cout << std::endl
-	    << " *** Test AssociationMap<TrackContainer,TrackContainer> :" 
-	    << std::endl;
+  std::println ("\n *** Test AssociationMap<TrackContainer,TrackContainer> :");
   TTAss ttAsso;
 
   /////////////////////////////////////////////////
@@ -249,14 +235,8 @@ void test1 (SGTest::TestStore& store)
 	  assItr != tEnd; 
 	  ++assItr,++assoIdx ) {
       if ( *tIter != *assItr ) {
-	std::cout << "Associate Tracks and Tracks...: [" << tIdx 
-		  << "," << assoIdx
-		  << "] with data ["
-		  << (*tIter)->getP()
-		  << ","
-		  << (*assItr)->getP()
-		  << "]"
-		  << std::endl;
+	std::println ("Associate Tracks and Tracks...: [{},{}] with data [{},{}]",
+                      tIdx, assoIdx, (*tIter)->getP(),  (*assItr)->getP());
 	if ( assoIdx == tIdx + 1 ) {
 	  ttAsso.addAssociation( tCont, *tIter, tCont, *assItr );
 	} else {

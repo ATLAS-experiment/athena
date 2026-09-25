@@ -1,5 +1,4 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
@@ -20,6 +19,7 @@
 #include "AthContainersInterfaces/ToTransient.h"
 #include "AthenaKernel/proxyDictFromEventContext.h"
 #include "AthenaKernel/DefaultKey.h"
+#include <format>
 #include <vector>
 class EventContext;
 class IProxyDict;
@@ -492,6 +492,28 @@ public:
 
 
 } // namespace SG
+
+
+namespace std {
+
+
+// C++20 compatible formatter.
+template <class T>
+struct formatter<DataLink<T> >
+  : public formatter<string_view>
+{
+  template <class FmtContext>
+  FmtContext::iterator format(const DataLink<T>& k, FmtContext& ctx) const
+  {
+    if (k.isDefault()) {
+      return formatter<string_view>::format ("(nullLink)", ctx);
+    }
+    return std::format_to (ctx.out(), "@{}", k.dataID());
+  }
+};
+
+
+} // namespace std
 
 
 #include "AthLinks/DataLink.icc"

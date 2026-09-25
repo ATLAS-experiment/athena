@@ -1,7 +1,6 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
 /**
  * @file AthLinks/test/GenericElementLinkBase_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -22,7 +21,7 @@
 #include "AthenaKernel/getMessageSvc.h"
 #include "AthenaKernel/ThinningCache.h" 
 #include <map>
-#include <iostream>
+#include <print>
 #include <cstdlib>
 #include <cassert>
 
@@ -177,7 +176,7 @@ public:
 
 void test1 (SGTest::TestStore& store)
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   typedef ElementLinkBase_test Link;
   CLID clid = strmapclid;
@@ -416,7 +415,7 @@ void test1 (SGTest::TestStore& store)
 // toTransient, toPersistent
 void test2 (SGTest::TestStore& store)
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   typedef ElementLinkBase_test Link;
   CLID clid = strmapclid;
@@ -470,7 +469,7 @@ void test2 (SGTest::TestStore& store)
 // default store setting
 void test3 (SGTest::TestStore& store)
 {
-  std::cout << "test3\n";
+  std::println ("test3");
   TestStore store2;
 
   assert (SG::CurrentEventStore::setStore(&store2) == &store);
@@ -481,7 +480,7 @@ void test3 (SGTest::TestStore& store)
 // Converting constructor
 void test4 (SGTest::TestStore& store)
 {
-  std::cout << "test4\n";
+  std::println ("test4");
 
   BarCont* bar = new BarCont;
   bar->insert ("1");
@@ -539,7 +538,7 @@ void test4 (SGTest::TestStore& store)
 // Thinning
 void test5 (SGTest::TestStore& store)
 {
-  std::cout << "test5\n";
+  std::println ("test5");
 
   SG::ThinningCache cache;
 
