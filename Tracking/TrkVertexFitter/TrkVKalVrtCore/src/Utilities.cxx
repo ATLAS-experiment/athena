@@ -45,8 +45,10 @@ double cfchi2(double *xyzt, const long int ich, double *part,
     d3 = par0[2] - part[1];
     d4 = par0[3] - phif;
     d5 = par0[4] - part[3];
-    while(d4 >  M_PI)d4-=2.*M_PI;
-    while(d4 < -M_PI)d4+=2.*M_PI;
+    // bound dphi wrapping iterations so it can't run away
+    int nPhiWrap = 0;
+    while(d4 >  M_PI && nPhiWrap < 1000){ d4-=2.*M_PI; ++nPhiWrap; }
+    while(d4 < -M_PI && nPhiWrap < 1000){ d4+=2.*M_PI; ++nPhiWrap; }
 // -----------------------Check of propagation
 //    double paro[5],parn[5],s,ref[3],peri[3];
 //    paro[0]=0.; paro[1]=0.; paro[2]=part[1]; paro[3]=part[2]; paro[4]=part[3];
