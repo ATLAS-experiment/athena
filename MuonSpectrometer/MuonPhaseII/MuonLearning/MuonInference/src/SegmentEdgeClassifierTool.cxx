@@ -7,6 +7,7 @@
 #include "MuonSpacePoint/SpacePointContainer.h"
 #include "MuonSpacePoint/SpacePointPerLayerSorter.h"
 #include "MuonTrackEvent/TrackingHelpers.h"
+#include "MuonTruthHelpers/MuonSimHitHelpers.h"
 #include "Acts/Utilities/Helpers.hpp"
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/SystemOfUnits.h"
@@ -220,6 +221,8 @@ StatusCode SegmentEdgeClassifierTool::initialize() {
                  << m_debugDumpMaxEvents.value() << ")");
   }
 
+  ATH_CHECK(m_truthLinkKey.initialize(m_enableTruthDiagnostics.value()));
+
   return StatusCode::SUCCESS;
 }
 
@@ -234,6 +237,9 @@ StatusCode SegmentEdgeClassifierTool::buildGraph(
   graph = SegmentEdgeGraph{};
   graph.segments.reserve(segments.size());
   graph.nodeFeatures.reserve(segments.size() * kNodeFeatureCount);
+  // Evaluated once per event; short-circuits without touching the message
+  // service unless the property was explicitly enabled.
+  const bool truthDiag = m_enableTruthDiagnostics.value() && msgLvl(MSG::DEBUG);
 
   /*
    * Keep the original bucket multiplicity in the node feature even when the
@@ -307,6 +313,7 @@ StatusCode SegmentEdgeClassifierTool::buildGraph(
 
   if (graph.nNodes < 2) {
     graph.nEdges = 0;
+    if (truthDiag) fillTruthDiagnostics(segments, retainedSegments, graph);
     return StatusCode::SUCCESS;
   }
 
@@ -576,6 +583,7 @@ StatusCode SegmentEdgeClassifierTool::buildGraph(
       graph.nNodes = activeNodes;
     }
   }
+  if (truthDiag) fillTruthDiagnostics(segments, retainedSegments, graph);
   ATH_MSG_DEBUG("buildGraph: input segments=" << segments.size()
                 << ", kept nodes=" << graph.nNodes
                 << ", nodes before isolated-node drop=" << nodesBeforeIsolatedNodeDrop
@@ -588,6 +596,114 @@ StatusCode SegmentEdgeClassifierTool::buildGraph(
                 << ", drop same chamber=" << m_dropSameChamberEdgesBeforeInference.value()
                 << ", drop isolated nodes=" << m_dropIsolatedNodesBeforeInference.value()
                 << ", sector-local reserve=" << sectorLocalEdgeUpperBound);
+
+  // Job-summed diagnostics 
+  if (msgLvl(MSG::DEBUG)) {
+    m_sumInputSegments += segments.size();
+    m_sumCandidatePairs += candidatePairs;
+    m_sumRetainedPairs += retainedPairs;
+    m_sumNodesBeforeIsolatedDrop += nodesBeforeIsolatedNodeDrop;
+    m_sumNodesAfterIsolatedDrop += graph.nNodes;
+  }
+  return StatusCode::SUCCESS;
+}
+
+void SegmentEdgeClassifierTool::fillTruthDiagnostics(
+    const xAOD::MuonSegmentContainer& segments,
+    const std::unordered_set<const xAOD::MuonSegment*>& bucketRetained,
+    SegmentEdgeGraph& graph) const {
+  std::unordered_map<const xAOD::MuonSegment*, std::int32_t> nodeOf;
+  nodeOf.reserve(graph.segments.size());
+  for (std::size_t node = 0; node < graph.segments.size(); ++node) {
+    nodeOf.emplace(graph.segments[node], static_cast<std::int32_t>(node));
+  }
+
+  graph.inputNodeIndex.assign(segments.size(), kDroppedAsIsolated);
+  std::unordered_map<std::int32_t, std::vector<std::uint32_t>> byTruth;
+  std::uint32_t inputIndex = 0;
+  for (const xAOD::MuonSegment* segment : segments) {
+    const auto found = nodeOf.find(segment);
+    if (found != nodeOf.end()) {
+      graph.inputNodeIndex[inputIndex] = found->second;
+    } else if (!bucketRetained.contains(segment)) {
+      graph.inputNodeIndex[inputIndex] = kDroppedByBucketCap;
+    }
+    if (const xAOD::TruthParticle* truthPart =
+            MuonR4::getTruthMatchedParticle(*segment)) {
+      byTruth[static_cast<std::int32_t>(truthPart->index())].push_back(inputIndex);
+    }
+    ++inputIndex;
+  }
+
+  const auto pairKey = [](std::uint64_t first, std::uint64_t second) {
+    return first < second ? (first << 32) | second : (second << 32) | first;
+  };
+  std::unordered_set<std::uint64_t> scoredPairs;
+  scoredPairs.reserve(graph.nEdges);
+  for (std::size_t edge = 0; edge < graph.nEdges; ++edge) {
+    scoredPairs.insert(
+        pairKey(static_cast<std::uint64_t>(graph.edgeIndex[2 * edge]),
+                static_cast<std::uint64_t>(graph.edgeIndex[2 * edge + 1])));
+  }
+
+  // Same order as the pair loop in buildGraph(): bucket cap (node level),
+  // sector window, same-chamber drop, angle window; a pair that clears all of
+  // them but was not scored can only have been evicted by the edge caps.
+  for (const auto& entry : byTruth) {
+    const std::vector<std::uint32_t>& members = entry.second;
+    for (std::size_t x = 0; x < members.size(); ++x) {
+      for (std::size_t y = x + 1; y < members.size(); ++y) {
+        const std::uint32_t i = members[x];
+        const std::uint32_t j = members[y];
+        const xAOD::MuonSegment* first = segments[i];
+        const xAOD::MuonSegment* second = segments[j];
+        PairFate fate{i, j, PairGate::Scored, 0};
+        const int sectorDelta = sectorDistance(first->sector(), second->sector(),
+                                               m_sectorModulo.value());
+        fate.sectorDelta = static_cast<std::uint8_t>(std::min(sectorDelta, 255));
+        if (!bucketRetained.contains(first) || !bucketRetained.contains(second)) {
+          fate.gate = PairGate::BucketCap;
+        } else if (sectorDelta > m_maxDeltaSector.value()) {
+          fate.gate = PairGate::SectorWindow;
+        } else if (m_dropSameChamberEdgesBeforeInference.value() &&
+                   first->chamberIndex() == second->chamberIndex()) {
+          fate.gate = PairGate::SameChamber;
+        } else if (static_cast<float>(first->direction().dot(second->direction())) <
+                   m_cosMin) {
+          fate.gate = PairGate::AngleWindow;
+        } else {
+          const std::int32_t firstNode = graph.inputNodeIndex[i];
+          const std::int32_t secondNode = graph.inputNodeIndex[j];
+          const bool scored =
+              firstNode >= 0 && secondNode >= 0 &&
+              scoredPairs.contains(pairKey(static_cast<std::uint64_t>(firstNode),
+                                           static_cast<std::uint64_t>(secondNode)));
+          if (!scored) fate.gate = PairGate::EdgeCaps;
+        }
+        graph.truthPairFates.push_back(fate);
+      }
+    }
+  }
+}
+
+StatusCode SegmentEdgeClassifierTool::finalize() {
+  ATH_MSG_DEBUG(
+      "SegmentEdgeClassifierTool pre-ONNX pruning summary (job-summed, "
+      "independent of PairGateThreshold): "
+      << "inputSegments=" << m_sumInputSegments
+      << ", candidatePairs=" << m_sumCandidatePairs
+      << " (geometric pairs before MaxEdgesPerNodeBeforeInference/"
+         "MaxEdgesPerTargetChamberBeforeInference caps)"
+      << ", retainedPairs=" << m_sumRetainedPairs
+      << " (pairs actually sent to ONNX; MaxEdgesPerNodeBeforeInference="
+      << m_maxEdgesPerNodeBeforeInference.value()
+      << ", MaxEdgesPerTargetChamberBeforeInference="
+      << m_maxEdgesPerTargetChamberBeforeInference.value() << ")"
+      << ", nodesBeforeIsolatedDrop=" << m_sumNodesBeforeIsolatedDrop
+      << ", nodesAfterIsolatedDrop=" << m_sumNodesAfterIsolatedDrop
+      << " (DropIsolatedNodesBeforeInference="
+      << m_dropIsolatedNodesBeforeInference.value()
+      << "; nodes dropped here never reached ONNX or the pair-gate threshold)");
   return StatusCode::SUCCESS;
 }
 

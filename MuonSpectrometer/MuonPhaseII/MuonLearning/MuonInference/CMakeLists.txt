@@ -16,6 +16,7 @@ atlas_add_component(    MuonInference
                                         MuonPatternEvent MuonTrackEvent MuonPatternHelpers MuonPatternHelpers
                                         CaloEvent FourMomUtils xAODEventInfo
                                         MuonInferenceInterfaces  xAODMuonViews
+                                        MuonTruthHelpers
                                         AthOnnxInterfaces AthOnnxCompsLib  ${ONNXRUNTIME_LIBRARIES}
                     )
 
