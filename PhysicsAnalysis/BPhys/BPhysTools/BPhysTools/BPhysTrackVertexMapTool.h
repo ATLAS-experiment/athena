@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: $
@@ -12,12 +12,13 @@
 #include "BPhysTools/IBPhysTrackVertexMapTool.h"
 #include "AsgTools/AsgTool.h"
 
-// System include(s):
-#include <memory>
-
 // EDM includes
 #include "xAODTracking/TrackParticleAuxContainer.h"
 #include "xAODTracking/VertexAuxContainer.h"
+// System include(s):
+#include <vector>
+#include <string>
+#include <map>
 
 namespace xAOD {
   ///

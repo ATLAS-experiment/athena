@@ -1,17 +1,18 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// system include:
-#include <format>
-#include "CxxUtils/StringUtils.h"
+// Local include(s):
+#include "BPhysTools/BPhysTrackVertexMapTool.h"
+
 
 // EDM includes:
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODBPhys/BPhysHypoHelper.h"
 
-// Local include(s):
-#include "BPhysTools/BPhysTrackVertexMapTool.h"
+#include "CxxUtils/StringUtils.h"
+// system include:
+#include <format>
 
 namespace xAOD {
   
@@ -339,7 +340,7 @@ namespace xAOD {
     
     if ( m_pvNameMap.find(vtx) == m_pvNameMap.end() ) {
       std::string f = std::format("PV{:03d}", m_pvNameMap.size());
-      m_pvNameMap[vtx] = f;
+      m_pvNameMap[vtx] = std::move(f);
     }
     return m_pvNameMap[vtx];
   }
@@ -350,7 +351,7 @@ namespace xAOD {
     
     if ( m_refPVNameMap.find(vtx) == m_refPVNameMap.end() ) {
       std::string f = std::format("RV{:03d}", m_refPVNameMap.size());
-      m_refPVNameMap[vtx] = f;
+      m_refPVNameMap[vtx] = std::move(f);
     }
     return m_refPVNameMap[vtx];
   }
@@ -361,7 +362,7 @@ namespace xAOD {
     
     if ( m_svNameMap.find(vtx) == m_svNameMap.end() ) {
       std::string f = std::format("SV{:03d}", m_svNameMap.size());
-      m_svNameMap[vtx] = f;
+      m_svNameMap[vtx] = std::move(f);
     }
     return m_svNameMap[vtx];
   }
@@ -373,7 +374,7 @@ namespace xAOD {
     
     if ( m_idTrackNameMap.find(track) == m_idTrackNameMap.end() ) {
       std::string f = std::format("T{:04d}", m_idTrackNameMap.size());
-      m_idTrackNameMap[track] = f;
+      m_idTrackNameMap[track] = std::move(f);
     }
     return m_idTrackNameMap[track];
   }
