@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # File: AthenaCommon/python/ConfigurableDb.py
 # Author: Sebastien Binet (binet@cern.ch)
@@ -138,11 +138,11 @@ def loadConfigurableDb():
 
    import os
    from os.path import join as path_join
+   import GaudiPluginService.cpluginsvc
 
    cfgDb.msg.debug( "loading confDb files..." )
    nFiles = 0
-   pathlist = os.getenv("LD_LIBRARY_PATH", "").split(os.pathsep)
-   for path in pathlist:
+   for path in GaudiPluginService.cpluginsvc.GAUDI_DEFAULT_PLUGIN_PATH:
       if not os.path.isdir(path):
          continue
       cfgDb.msg.verbose( "walking in [%s]..." % path )
