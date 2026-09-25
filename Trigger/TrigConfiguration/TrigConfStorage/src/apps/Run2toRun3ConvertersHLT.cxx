@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <numeric>
@@ -36,7 +36,7 @@ std::vector<int> legMult(const TrigConf::HLTChain* cptr) {
 
 std::vector<std::string> l1thresholds(const TrigConf::HLTFrame* frame, const TrigConf::HLTChain* cptr) {
    std::set<std::string> names;
-   for ( const auto sig: cptr->signatures() ) {
+   for ( const auto sig: cptr->signatureList() ) {
       for ( const auto te: sig->outputTEs() ) {
          auto sequence = frame->getHLTSequenceList().getSequence(te->name());
          for ( const auto inTE: sequence->inputTEs() ) {
