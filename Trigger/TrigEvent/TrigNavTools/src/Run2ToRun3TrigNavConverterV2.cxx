@@ -370,10 +370,10 @@ size_t Run2ToRun3TrigNavConverterV2::is2LegTopoChain(const TrigConf::HLTChain* p
   //  D
   if ( not std::regex_match(ptrChain->name(), SpecialCases::isTopo) ) return 0;
   size_t stepToConsider = 0;
-  const size_t sigsSize = ptrChain->signatures().size();
+  const size_t sigsSize = ptrChain->signatureList().size();
   if ( sigsSize < 2 ) return 0;
   for ( size_t step = sigsSize-1; step > 1; step --) {
-    if ( (ptrChain->signatures()[step-1])->outputTEs().size() == 2 and (ptrChain->signatures()[step])->outputTEs().size() == 1 )  {
+    if ( (ptrChain->signatureList()[step-1])->outputTEs().size() == 2 and (ptrChain->signatureList()[step])->outputTEs().size() == 1 )  {
       stepToConsider = step;
       break;
     }
@@ -381,8 +381,8 @@ size_t Run2ToRun3TrigNavConverterV2::is2LegTopoChain(const TrigConf::HLTChain* p
   if ( stepToConsider == 0 ) return 0; // not a topo
 
   //counting is right, need to see now if TEs are connected
-  auto finalTE = (ptrChain->signatures()[stepToConsider])->outputTEs()[0];
-  auto preFinalTEs = (ptrChain->signatures()[stepToConsider-1])->outputTEs();
+  auto finalTE = (ptrChain->signatureList()[stepToConsider])->outputTEs()[0];
+  auto preFinalTEs = (ptrChain->signatureList()[stepToConsider-1])->outputTEs();
 
   auto finalSeq =  m_configSvc->sequences().getSequence(finalTE->id());
   std::set<HLT::te_id_type> tesInSeq;
@@ -446,7 +446,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMa
 
       // pilot pass to fill the replacement map
       std::map<size_t, HLT::te_id_type> positionToDesiredIDmap;
-      for (auto ptrHLTSignature : ptrChain->signatures()) {
+      for (auto ptrHLTSignature : ptrChain->signatureList()) {
         size_t position = 0;
         for (auto ptrHLTTE : ptrHLTSignature->outputTEs()) {
           if (positionsOfEtCutLegs.count(position) and positionToDesiredIDmap.find(position) != positionToDesiredIDmap.end() ) {
@@ -465,11 +465,11 @@ StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMa
     // chains with a single leg
     HLT::Identifier chainId = HLT::Identifier(chainName);
     ATH_MSG_DEBUG(" CHAIN name " << chainName << " CHAIN Id " << chainId);
-    for (auto ptrHLTSignature : ptrChain->signatures()) {
+    for (auto ptrHLTSignature : ptrChain->signatureList()) {
       for (auto ptrHLTTE : ptrHLTSignature->outputTEs()) {
         unsigned int teId = etcutReplacement(ptrHLTTE->id());
         allTEs[teId].insert(chainId);
-        if (ptrHLTSignature == ptrChain->signatures().back()) {
+        if (ptrHLTSignature == ptrChain->signatureList().back()) {
             finalTEs[teId].insert(chainId);
             ATH_MSG_DEBUG("TE will be used to mark final chain decision " << ptrHLTTE->name() << " chain " << chainName );
         }
@@ -624,7 +624,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMa
       // anchors) is the LAST TE assigned to that leg over the signature steps.
       std::map<int, unsigned int> lastTEofLeg;
 
-      for (auto ptrHLTSignature : ptrChain->signatures())
+      for (auto ptrHLTSignature : ptrChain->signatureList())
         {
           std::vector<int> teCounts;
           std::vector<unsigned int> teIds;
@@ -689,7 +689,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::bjetMuChainConfigDecoder(TEIdToChainsMa
   std::vector<unsigned int> muons;
   std::vector<unsigned int> jets;
   bool switchedTojets =false;
-  for (auto ptrHLTSignature : ptrChain->signatures()) {
+  for (auto ptrHLTSignature : ptrChain->signatureList()) {
     for (auto ptrHLTTE : ptrHLTSignature->outputTEs()) {
       if ( ptrHLTTE->name().find("_mu") == std::string::npos )  {
         switchedTojets = true; 
