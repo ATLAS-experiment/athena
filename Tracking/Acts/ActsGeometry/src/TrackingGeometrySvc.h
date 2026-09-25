@@ -20,6 +20,9 @@
 // ACTS
 #include "Acts/Geometry/CylinderVolumeBuilder.hpp"
 
+#include "AthDeviceInterfaces/IMemoryResourceTool.h"
+#include "GaudiKernel/ToolHandle.h"
+
 // STL
 #include <map>
 
@@ -56,7 +59,9 @@ namespace ActsTrk{
 class TrackingGeometrySvc : public extends<AthService, ActsTrk::ITrackingGeometrySvc> {
 public:
 
+  ~TrackingGeometrySvc() override;
   StatusCode initialize() override;
+  StatusCode finalize() override;
 
   TrackingGeometrySvc( const std::string& name, ISvcLocator* pSvcLocator );
     /** @copydoc ActsTrk::ITrackingGeometrySvc::trackingGeometry */
@@ -70,10 +75,22 @@ public:
   const Acts::TrackingVolume* getEnvelope(const ActsTrk::SystemEnvelope envType) const override;
   /** @copydoc ActsTrk::ITrackingGeometrySvc::surfaceIdMap */
   virtual const ActsTrk::DetectorElementToActsGeometryIdMap* surfaceIdMap() const override;
+
+  /** @brief Returns the Detray geometry converted from the Acts::TrackingGeometry,
+             or nullptr if none was built. The service stays the owner: the
+             geometry is released in finalize(), while the memory resource it
+             was allocated from is still around.
+             Only populated when the BuildDetrayGeometry property is enabled. */
+  const traccc::host_detector* detrayGeometry() const override {
+    return m_detrayGeometry.get();
+  }
+
 private:
   /** @brief Creates and popules the DetectorElement -> Acts::Surface geo identifier map from the geometry service */
   std::unique_ptr<ActsTrk::DetectorElementToActsGeometryIdMap> createDetectorElementToGeoIdMap() const;
 
+  /** @brief Converts the built Acts::TrackingGeometry into a Detray geometry and stores it in m_detrayGeometry */
+  StatusCode buildDetrayGeometry();
 
   ActsLayerBuilder::Config
   makeLayerBuilderConfig(const InDetDD::InDetDetectorManager* manager);
@@ -160,6 +177,22 @@ private:
   std::set<ActsTrk::DetectorType> m_subDetNoAlign{};
 
   Gaudi::Property<bool> m_useBlueprint{this, "UseBlueprint", false, "Use the new Blueprint API for geometry construction"};
+
+  Gaudi::Property<bool> m_buildDetrayGeometry{this, "BuildDetrayGeometry", false,
+      "Convert the constructed Acts::TrackingGeometry into a Detray geometry."};
+
+  Gaudi::Property<bool> m_checkDetrayGeometry{this, "CheckDetrayGeometry", true,
+      "Run the Detray consistency check on the converted geometry. "
+      "Only used when BuildDetrayGeometry is enabled."};
+
+  /// Tool providing the memory resource that the Detray geometry is allocated
+  /// from. The detector keeps referring to that resource for its deallocations,
+  /// so the tool has to outlive m_detrayGeometry. Only used, and only required
+  /// to be set, when BuildDetrayGeometry is enabled.
+  ToolHandle<AthDevice::IMemoryResourceTool> m_hostMR{this, "HostMR", "",
+      "Host memory resource tool used for the Detray geometry allocations. The "
+      "conversion runs entirely on the host, so the resource has to be host "
+      "accessible: a plain host or a managed/shared one, not a device one."};
   
   Gaudi::Property<std::string> m_blueprintGraphviz{this, "BlueprintGraphviz", 
                                                    "", "Write the blueprint graph to a file. No file will be written if empty"};
@@ -174,6 +207,8 @@ private:
   Gaudi::Property<double> m_numberOfInnermostLayerBinsFactor{this, "NumberOfInnermostLayerBinsFactor",2.0};
   
   std::unique_ptr<const ActsTrk::DetectorElementToActsGeometryIdMap> m_detIdMap{};
+
+  std::unique_ptr<traccc::host_detector> m_detrayGeometry;
 };
 
 }
