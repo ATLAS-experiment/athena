@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -106,7 +106,7 @@ def MuonAlignmentCondAlgCfg(flags, name="MuonAlignmentCondAlg", **kwargs):
     if flags.Muon.Align.UseAsBuilt:
         acc.merge(MdtAsBuiltCondAlgCfg(flags))
         acc.merge(NswAsBuiltCondAlgCfg(flags))
-        if(flags.Muon.Align.UsesTGCAsBuild):
+        if(flags.Muon.Align.UsesTGCAsBuilt):
             acc.merge(sTGCAsBuiltCondAlgCfg(flags))
 
     if not flags.Muon.Align.UseALines and not flags.Muon.Align.UseBLines:
@@ -160,7 +160,7 @@ def NswAsBuiltCondAlgCfg(flags, name = "NswAsBuiltCondAlg", **kwargs):
 def sTGCAsBuiltCondAlgCfg(flags, name = "sTGCAsBuiltCondAlg", **kwargs):
     result = ComponentAccumulator()
     #### Do not apply the as-built correction if not activated
-    if flags.GeoModel.Run < LHCPeriod.Run3 or not flags.Muon.Align.UsesTGCAsBuild:
+    if flags.GeoModel.Run < LHCPeriod.Run3 or not flags.Muon.Align.UsesTGCAsBuilt:
         return result
     kwargs.setdefault("readFromJSON","")
     if not kwargs["readFromJSON"]:
