@@ -5,12 +5,13 @@
 #ifndef HYPERANALYSISALGORITHMS_HYPERUTILS_H
 #define HYPERANALYSISALGORITHMS_HYPERUTILS_H
 
+#include "HyPERAnalysisAlgorithms/HyPERModel.h"
+#include <AsgMessaging/MsgLevel.h>
+#include <cstdint>
 #include <algorithm>
-#include <iostream>
 #include <vector>
 
-#include <AsgMessaging/MsgLevel.h>
-#include "HyPERAnalysisAlgorithms/HyPERModel.h"
+
 
 namespace EventReco {
 
@@ -74,7 +75,7 @@ std::vector<std::vector<T>> vector2DTypeConverter(
   for (const auto& row : input) {  // Each of the rows is a vector<V>
     std::vector<T> newRow;  // Use the previous function to convert each row.
     newRow = vector1DTypeConverter<T, V>(row);
-    out.push_back(newRow);
+    out.push_back(std::move(newRow));
   }
 
   return out;
@@ -91,7 +92,7 @@ std::vector<std::vector<T>> convertONNXOutput(
     for (std::size_t j = 0; j < static_cast<std::size_t>(shape[1]); j++) {
       row.push_back(onnxOutput[i * shape[1] + j]);
     }
-    toSave.push_back(row);
+    toSave.push_back(std::move(row));
   }
   return toSave;
 }

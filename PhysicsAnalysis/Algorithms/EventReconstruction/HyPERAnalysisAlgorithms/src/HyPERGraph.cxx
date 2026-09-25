@@ -12,15 +12,13 @@
 
 namespace EventReco {
 void HyPERGraph::addNode(const Features& attributes) {
-  EventReco::Node newNode(attributes, m_nNodes);
-  m_nodes.push_back(newNode);
+  m_nodes.emplace_back(attributes, m_nNodes);
   m_nNodes += 1;
 }
 
 void HyPERGraph::addEdge(int64_t source, int64_t target,
                          const Features& attributes) {
-  EventReco::Edge newEdge(source, target, attributes);
-  m_edges.push_back(newEdge);
+  m_edges.emplace_back(source, target, attributes);
   m_nEdges += 1;
 }
 

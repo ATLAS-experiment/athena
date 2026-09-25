@@ -323,8 +323,8 @@ void RecoTop(
         continue;
 
       top_reco_score = hyperedge_scores.at(i).at(0);
-      top_reco_ids = top_candidate_ids;
-      top_reco_indices = top_candidate_indices;
+      top_reco_ids = std::move(top_candidate_ids);
+      top_reco_indices = std::move(top_candidate_indices);
       w_reco_score = 0.0;  // Reset the Ws if a new best top is found.
       w_reco_indices = {-1, -1};
 
@@ -403,17 +403,17 @@ void RecoTtbarAllHadronic(const HyPERGraph& hyperGraph,
 
   // Check if reco top1 is successful
   if (top1_reco_indices == std::vector<int64_t>(3, -1)) {
-    reco_labels.push_back("HyPER_Reco_Top1");
-    reco_indices.push_back(top1_reco_indices);
+    reco_labels.emplace_back("HyPER_Reco_Top1");
+    reco_indices.push_back(std::move(top1_reco_indices));
     reco_scores.push_back(top1_reco_score);
-    reco_labels.push_back("HyPER_Reco_Top2");
-    reco_indices.push_back(top2_reco_indices);
+    reco_labels.emplace_back("HyPER_Reco_Top2");
+    reco_indices.push_back(std::move(top2_reco_indices));
     reco_scores.push_back(top2_reco_score);
-    reco_labels.push_back("HyPER_Reco_W1");
-    reco_indices.push_back(w1_reco_indices);
+    reco_labels.emplace_back("HyPER_Reco_W1");
+    reco_indices.push_back(std::move(w1_reco_indices));
     reco_scores.push_back(w1_reco_score);
-    reco_labels.push_back("HyPER_Reco_W2");
-    reco_indices.push_back(w2_reco_indices);
+    reco_labels.emplace_back("HyPER_Reco_W2");
+    reco_indices.push_back(std::move(w2_reco_indices));
     reco_scores.push_back(w2_reco_score);
     return;  // No point in continuing if top1 is not reconstructed.
   }
@@ -435,16 +435,16 @@ void RecoTtbarAllHadronic(const HyPERGraph& hyperGraph,
 
   // Save results
   reco_labels.push_back("HyPER_Reco_Top1");
-  reco_indices.push_back(top1_reco_indices);
+  reco_indices.push_back(std::move(top1_reco_indices));
   reco_scores.push_back(top1_reco_score);
   reco_labels.push_back("HyPER_Reco_Top2");
-  reco_indices.push_back(top2_reco_indices);
+  reco_indices.push_back(std::move(top2_reco_indices));
   reco_scores.push_back(top2_reco_score);
   reco_labels.push_back("HyPER_Reco_W1");
-  reco_indices.push_back(w1_reco_indices);
+  reco_indices.push_back(std::move(w1_reco_indices));
   reco_scores.push_back(w1_reco_score);
   reco_labels.push_back("HyPER_Reco_W2");
-  reco_indices.push_back(w2_reco_indices);
+  reco_indices.push_back(std::move(w2_reco_indices));
   reco_scores.push_back(w2_reco_score);
 }
 
@@ -519,18 +519,18 @@ void RecoTtbarLJets(const HyPERGraph& hyperGraph, const scores& edge_scores,
   if (top1_reco_indices == std::vector<int64_t>(3, -1)) {
     // If not, return the default values for both tops.
     reco_labels.push_back("HyPER_Reco_TopHad");
-    reco_indices.push_back(top1_reco_indices);
+    reco_indices.push_back(std::move(top1_reco_indices));
     reco_scores.push_back(top1_reco_score);
-    reco_ids.push_back(top1_reco_ids);
+    reco_ids.push_back(std::move(top1_reco_ids));
     reco_labels.push_back("HyPER_Reco_TopLep");
-    reco_indices.push_back(top2_reco_indices);
+    reco_indices.push_back(std::move(top2_reco_indices));
     reco_scores.push_back(top2_reco_score);
-    reco_ids.push_back(top2_reco_ids);
+    reco_ids.push_back(std::move(top2_reco_ids));
     reco_labels.push_back("HyPER_Reco_WHad");
-    reco_indices.push_back(w1_reco_indices);
+    reco_indices.push_back(std::move(w1_reco_indices));
     reco_scores.push_back(w1_reco_score);
     reco_labels.push_back("HyPER_Reco_WLep");
-    reco_indices.push_back(w2_reco_indices);
+    reco_indices.push_back(std::move(w2_reco_indices));
     reco_scores.push_back(w2_reco_score);
     return;
   }
@@ -621,33 +621,33 @@ void RecoTtbarLJets(const HyPERGraph& hyperGraph, const scores& edge_scores,
   // Save results
   if (top1_is_hadronic) {
     reco_labels.push_back("HyPER_Reco_TopHad");
-    reco_indices.push_back(top1_reco_indices);
+    reco_indices.push_back(std::move(top1_reco_indices));
     reco_scores.push_back(top1_reco_score);
-    reco_ids.push_back(top1_reco_ids);
+    reco_ids.push_back(std::move(top1_reco_ids));
     reco_labels.push_back("HyPER_Reco_TopLep");
-    reco_indices.push_back(top2_reco_indices);
+    reco_indices.push_back(std::move(top2_reco_indices));
     reco_scores.push_back(top2_reco_score);
-    reco_ids.push_back(top2_reco_ids);
+    reco_ids.push_back(std::move(top2_reco_ids));
     reco_labels.push_back("HyPER_Reco_WHad");
-    reco_indices.push_back(w1_reco_indices);
+    reco_indices.push_back(std::move(w1_reco_indices));
     reco_scores.push_back(w1_reco_score);
     reco_labels.push_back("HyPER_Reco_WLep");
-    reco_indices.push_back(w2_reco_indices);
+    reco_indices.push_back(std::move(w2_reco_indices));
     reco_scores.push_back(w2_reco_score);
   } else {
     reco_labels.push_back("HyPER_Reco_TopHad");
-    reco_indices.push_back(top2_reco_indices);
+    reco_indices.push_back(std::move(top2_reco_indices));
     reco_scores.push_back(top2_reco_score);
-    reco_ids.push_back(top2_reco_ids);
+    reco_ids.push_back(std::move(top2_reco_ids));
     reco_labels.push_back("HyPER_Reco_TopLep");
-    reco_indices.push_back(top1_reco_indices);
+    reco_indices.push_back(std::move(top1_reco_indices));
     reco_scores.push_back(top1_reco_score);
-    reco_ids.push_back(top1_reco_ids);
+    reco_ids.push_back(std::move(top1_reco_ids));
     reco_labels.push_back("HyPER_Reco_WHad");
-    reco_indices.push_back(w2_reco_indices);
+    reco_indices.push_back(std::move(w2_reco_indices));
     reco_scores.push_back(w2_reco_score);
     reco_labels.push_back("HyPER_Reco_WLep");
-    reco_indices.push_back(w1_reco_indices);
+    reco_indices.push_back(std::move(w1_reco_indices));
     reco_scores.push_back(w1_reco_score);
   }
 }
@@ -717,8 +717,8 @@ void RecoTopForDiLepton(
 
     if (edge_scores.at(i).at(0) > top_reco_score) {
       top_reco_score = edge_scores.at(i).at(0);
-      top_reco_indices = top_candidate_indices;
-      top_reco_ids = top_candidate_ids;
+      top_reco_indices = std::move(top_candidate_indices);
+      top_reco_ids = std::move(top_candidate_ids);
     }
   }
 }
@@ -783,13 +783,13 @@ void RecoTtbarDiLepton(const HyPERGraph& hyperGraph, const scores& edge_scores,
   if (top1_reco_indices == std::vector<int64_t>(2, -1)) {
     ANA_MSG_INFO("Top1 reco failed.");
     reco_labels.push_back("HyPER_Reco_Top1");
-    reco_indices.push_back(top1_reco_indices);
+    reco_indices.push_back(std::move(top1_reco_indices));
     reco_scores.push_back(top1_reco_score);
-    reco_ids.push_back(top1_reco_ids);
+    reco_ids.push_back(std::move(top1_reco_ids));
     reco_labels.push_back("HyPER_Reco_Top2");
-    reco_indices.push_back(top2_reco_indices);
+    reco_indices.push_back(std::move(top2_reco_indices));
     reco_scores.push_back(top2_reco_score);
-    reco_ids.push_back(top2_reco_ids);
+    reco_ids.push_back(std::move(top2_reco_ids));
     reco_labels.push_back("HyPER_Reco_HE");
     reco_scores.push_back(-1.0);
     return;
@@ -864,13 +864,13 @@ void RecoTtbarDiLepton(const HyPERGraph& hyperGraph, const scores& edge_scores,
 
   // Save results
   reco_labels.push_back("HyPER_Reco_Top1");
-  reco_indices.push_back(top1_reco_indices);
+  reco_indices.push_back(std::move(top1_reco_indices));
   reco_scores.push_back(top1_reco_score);
-  reco_ids.push_back(top1_reco_ids);
+  reco_ids.push_back(std::move(top1_reco_ids));
   reco_labels.push_back("HyPER_Reco_Top2");
-  reco_indices.push_back(top2_reco_indices);
+  reco_indices.push_back(std::move(top2_reco_indices));
   reco_scores.push_back(top2_reco_score);
-  reco_ids.push_back(top2_reco_ids);
+  reco_ids.push_back(std::move(top2_reco_ids));
   reco_labels.push_back("HyPER_Reco_HE");
   reco_scores.push_back(HE_reco_score);
 }

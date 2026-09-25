@@ -614,9 +614,9 @@ StatusCode RunHyPERAlg::execute(const EventContext& ctx) {
     }
 
     // Build the HyPER graph
-    m_hyperInputs.m_electrons = selected_electrons;
-    m_hyperInputs.m_muons = selected_muons;
-    m_hyperInputs.m_jets = selected_jets;
+    m_hyperInputs.m_electrons = std::move(selected_electrons);
+    m_hyperInputs.m_muons = std::move(selected_muons);
+    m_hyperInputs.m_jets = std::move(selected_jets);
     m_hyperInputs.m_met = met;
     ANA_MSG_DEBUG("Building graph.");
     ANA_CHECK(this->buildGraph());
@@ -946,7 +946,7 @@ StatusCode RunHyPERAlg::buildTtbarLJetsGraph() {
                1.f};  // TODO: This is needed because the training was
                       // done with new HyPER dataset.
     }
-    particles.push_back(feats);
+    particles.push_back(std::move(feats));
   }
   for (const xAOD::Electron* el : m_hyperInputs.m_electrons) {
     Features feats;
@@ -969,7 +969,7 @@ StatusCode RunHyPERAlg::buildTtbarLJetsGraph() {
                2.f};  // TODO: This is needed because the training was
                       // done with new HyPER dataset.
     }
-    particles.push_back(feats);
+    particles.push_back(std::move(feats));
   }
   for (const xAOD::Muon* mu : m_hyperInputs.m_muons) {
     Features feats;
@@ -992,7 +992,7 @@ StatusCode RunHyPERAlg::buildTtbarLJetsGraph() {
                2.f};  // TODO: This is needed because the training was
                       // done with new HyPER dataset.
     }
-    particles.push_back(feats);
+    particles.push_back(std::move(feats));
   }
   Features metFeats;
   if (m_ljetsUseBTag) {
@@ -1013,7 +1013,7 @@ StatusCode RunHyPERAlg::buildTtbarLJetsGraph() {
                 float(EventReco::HyPERParticleID::met),
                 3.f};
   }
-  particles.push_back(metFeats);
+  particles.push_back(std::move(metFeats));
 
   // Add the nodes
   for (std::size_t i = 0; i < particles.size(); i++) {
@@ -1109,7 +1109,7 @@ StatusCode RunHyPERAlg::buildTtbarAllHadronicGraph() {
     Features feats = {float(jet->e() / 1000), float(jet->eta()),
                       float(jet->phi()),      float(jet->pt() / 1000),
                       float(bTagQuantile),    float(EventReco::HyPERParticleID::jet)};
-    particles.push_back(feats);
+    particles.push_back(std::move(feats));
   }
 
   // Add the nodes
@@ -1209,7 +1209,7 @@ StatusCode RunHyPERAlg::buildTtbarDiLeptonGraph() {
                       float(EventReco::HyPERParticleID::jet),
                       1.f};  // TODO: This is needed because the training was
                              // done with new HyPER dataset.
-    particles.push_back(feats);
+    particles.push_back(std::move(feats));
   }
 
   for (const xAOD::Electron* el : m_hyperInputs.m_electrons) {
@@ -1222,7 +1222,7 @@ StatusCode RunHyPERAlg::buildTtbarDiLeptonGraph() {
                       float(el->charge()),
                       float(EventReco::HyPERParticleID::e),
                       2.f};
-    particles.push_back(feats);
+    particles.push_back(std::move(feats));
   }
 
   for (const xAOD::Muon* mu : m_hyperInputs.m_muons) {
@@ -1237,7 +1237,7 @@ StatusCode RunHyPERAlg::buildTtbarDiLeptonGraph() {
                       2.f};  // TODO: This is needed because the
                              // training was done with new HyPER
                              // dataset.
-    particles.push_back(feats);
+    particles.push_back(std::move(feats));
   }
 
   // MET features
@@ -1248,7 +1248,7 @@ StatusCode RunHyPERAlg::buildTtbarDiLeptonGraph() {
       met_pt, 0.f, met_phi, met_pt, 0.f, 0.f, float(EventReco::HyPERParticleID::met),
       3.f};  // TODO: This is needed because the training was
              // done with new HyPER dataset.
-  particles.push_back(metFeats);
+  particles.push_back(std::move(metFeats));
 
   // Add the nodes
   for (std::size_t i = 0; i < particles.size(); i++) {
