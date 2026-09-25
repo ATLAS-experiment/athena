@@ -10,13 +10,14 @@
 #undef NDEBUG
 #include <cassert>
 #include <iostream>
+#include <print>
 #include <string>
 #include <unordered_set>
 #include "PersistentDataModel/Token.h"
 #include "PersistentDataModel/Guid.h"
 
 void test_legacy_oid_format_ffffffff() {
-    std::cout << "Testing legacy OID format with FFFFFFFF values...\n";
+    std::println ("Testing legacy OID format with FFFFFFFF values...");
 
     // Test legacy 8-digit OID format parsing with FFFFFFFF values
     std::string legacyTokenStr = "[DB=12345678-1234-1234-1234-123456789012][CNT=TestContainer][CLID=87654321-4321-4321-4321-210987654321][TECH=12345678][OID=FFFFFFFF-FFFFFFFF]";
@@ -28,11 +29,11 @@ void test_legacy_oid_format_ffffffff() {
     assert(legacyToken.oid().first == static_cast<long long int>(~0x0ULL));
     assert(legacyToken.oid().second == static_cast<long long int>(~0x0ULL));
 
-    std::cout << "  Legacy FFFFFFFF test passed\n";
+    std::println ("  Legacy FFFFFFFF test passed");
 }
 
 void test_modern_oid_format() {
-    std::cout << "Testing modern OID format...\n";
+    std::println ("Testing modern OID format...");
 
     // Test modern 16-digit OID format parsing
     std::string modernTokenStr = "[DB=12345678-1234-1234-1234-123456789012][CNT=TestContainer][CLID=87654321-4321-4321-4321-210987654321][TECH=12345678][OID=FEDCBA9876543210-0123456789ABCDEF]";
@@ -43,11 +44,11 @@ void test_modern_oid_format() {
     assert(modernToken.oid().first == static_cast<long long int>(0xFEDCBA9876543210ULL));
     assert(modernToken.oid().second == static_cast<long long int>(0x0123456789ABCDEFULL));
 
-    std::cout << "  Modern OID format test passed\n";
+    std::println ("  Modern OID format test passed");
 }
 
 void test_legacy_oid_format_regular_values() {
-    std::cout << "Testing legacy OID format with regular values...\n";
+    std::println ("Testing legacy OID format with regular values...");
 
     // Test legacy format with non-FFFFFFFF values
     std::string legacyTokenStr = "[DB=12345678-1234-1234-1234-123456789012][CNT=TestContainer][CLID=87654321-4321-4321-4321-210987654321][TECH=12345678][OID=12345678-87654321]";
@@ -58,11 +59,11 @@ void test_legacy_oid_format_regular_values() {
     assert(legacyToken.oid().first == 0x12345678LL);
     assert(legacyToken.oid().second == 0x87654321LL);
 
-    std::cout << "  Legacy regular values test passed\n";
+    std::println ("  Legacy regular values test passed");
 }
 
 void test_roundtrip_serialization() {
-    std::cout << "Testing round-trip serialization...\n";
+    std::println ("Testing round-trip serialization...");
 
     // Test round-trip serialization preserves format
     Token originalToken;
@@ -90,11 +91,11 @@ void test_roundtrip_serialization() {
     assert(originalToken.oid().second == parsedToken.oid().second);
     assert(originalToken.toString() == parsedToken.toString());
 
-    std::cout << "  Round-trip serialization test passed\n";
+    std::println ("  Round-trip serialization test passed");
 }
 
 void test_oid_format_detection() {
-    std::cout << "Testing OID format detection...\n";
+    std::println ("Testing OID format detection...");
 
     // Test that legacy and modern formats are correctly detected
 
@@ -106,7 +107,7 @@ void test_oid_format_detection() {
     std::string modernOid = "[OID=FEDCBA9876543210-0123456789ABCDEF]";
     assert(modernOid.length() == 39);
 
-    std::cout << "  OID format detection test passed\n";
+    std::println ("  OID format detection test passed");
 }
 
 // coverity[root_function]
@@ -116,7 +117,7 @@ int main() {
     //Check hash function compiles
     std::unordered_set<Guid> dfgfg;
 
-    std::cout << "Running Token legacy OID format tests...\n\n";
+    std::println ("Running Token legacy OID format tests...\n");
 
     try {
       test_legacy_oid_format_ffffffff();
@@ -125,10 +126,10 @@ int main() {
       test_roundtrip_serialization();
       test_oid_format_detection();
     } catch (const std::exception& e) {
-      std::cerr << "exception: " << e.what() << "\n";
+      std::println (std::cerr, "exception: {}", e.what());
       return 1;
     }
 
-    std::cout << "\nAll Token legacy OID format tests passed!\n";
+    std::println ("\nAll Token legacy OID format tests passed!");
     return 0;
 }

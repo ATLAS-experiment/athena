@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file DataHeader.cxx
@@ -14,6 +14,7 @@
 #include "SGTools/DataProxy.h"
 #include "AthenaKernel/IStringPool.h"
 #include "CxxUtils/ranges.h"
+#include <print>
 
 //______________________________________________________________________________
 DataHeaderElement::DataHeaderElement() : m_pClid(0), m_clids(), m_key(), m_alias(), m_hashes() {
@@ -172,23 +173,23 @@ SG::TransientAddress* DataHeaderElement::getAddress(long storageType, const std:
 void DataHeaderElement::dump(std::ostream& ostr) const
 {
    using namespace std;
-   ostr << "SGKey: " << getKey() << endl;
-   ostr << "CLID: " << getPrimaryClassID();
+   std::println (ostr, "SGKey: {}", getKey());
+   std::print (ostr, "CLID: {}", getPrimaryClassID());
    if( getClassIDs().size() > 1 ) {
-      ostr << " ||";
-      for( auto& c : getClassIDs() ) ostr << " " << c;
+      std::print (ostr, " ||");
+      for( auto& c : getClassIDs() ) std::print (ostr, " {}", c);
    }
-   ostr << std::endl;
+   std::println();
    if( getAlias().size() > 0 ) {
-      ostr << "Alias: ";
-      for( const std::string& a : getAlias() ) ostr << " " << a;
-      ostr << endl;
+      std::print (ostr, "Alias: ");
+      for( const std::string& a : getAlias() ) std::print (ostr, " {}", a);
+      std::println();
    }
-   ostr << "Token: " << m_token.toString() << endl;
+   std::println (ostr, "Token: {}", m_token.toString());
    if( m_hashes.size() ) {
-      ostr << "Hashes:";
-      for( auto h : m_hashes ) ostr <<  " " << h;
-      ostr << endl;
+      std::print (ostr, "Hashes:");
+      for( auto h : m_hashes ) std::print (ostr,  " {}", h);
+      std::println();
    }
 }
 
@@ -331,19 +332,19 @@ const std::string& DataHeader::getEvtRefTokenStr() {
 void DataHeader::dump(std::ostream& ostr) const
 {
    using namespace std;
-   ostr << "--- DataHeader Dump ---" << endl;
+   std::println (ostr, "--- DataHeader Dump ---");
    for( auto& el : m_dataHeader ) {
       el.dump(ostr);
    }
    for( auto& el : m_inputDataHeader ) {
       el.dump(ostr);
    }
-   ostr << "Status: " << m_status << endl;
-   ostr << "Proc tag: " << m_processTag << endl;
-   ostr << "evtRef: " << m_evtRefTokenStr << endl;
-   ostr << "attrListPtr: " << m_attrList << endl;
-   if( m_attrList ) ostr << "attrListSize: " << m_attrList->size() << endl;
-   ostr << "--- DataHeader End ---" << endl;   
+   std::println (ostr, "Status: {}", static_cast<int>(m_status));
+   std::println (ostr, "Proc tag: {}", m_processTag);
+   std::println (ostr, "evtRef: {}", m_evtRefTokenStr);
+   std::println (ostr, "attrListPtr: {}", static_cast<const void*>(m_attrList));
+   if( m_attrList ) std::println (ostr, "attrListSize: {}", m_attrList->size());
+   std::println (ostr, "--- DataHeader End ---");
 }
 //______________________________________________________________________________
 void DataHeader::recycle()

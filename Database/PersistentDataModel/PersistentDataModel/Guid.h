@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PERSISTENTDATAMODEL_GUID_H
@@ -118,7 +118,6 @@ private:
 };
 
 //This piece of code allows std::format to deal with Guid::string without additional boilerplate
-//This may be able to be removed in C++23
 template <>
 struct std::formatter<Guid::string> : std::formatter<std::string_view> {
     constexpr auto format(const Guid::string& guid, auto& ctx) const {
@@ -127,7 +126,6 @@ struct std::formatter<Guid::string> : std::formatter<std::string_view> {
 };
 
 //This piece of code allows it to be piped into std::ostream without additional boilerplate
-//This may be able to be removed in C++23
 inline std::ostream& operator<<(std::ostream& os, const Guid::string& guid) {
     return os << static_cast<std::string_view>(guid);
 }
