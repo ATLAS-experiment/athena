@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloUtils/CaloClusterStoreHelper.h"
@@ -85,8 +85,8 @@ CaloClusterSnapshot::execute(const EventContext& ctx,
 
   
   SG::WriteHandle<CaloClusterCellLinkContainer> cellLinks (m_cellLinkOutputKey, ctx);
-  ATH_CHECK(CaloClusterStoreHelper::finalizeClusters (cellLinks,
-                                                      outputColl.ptr()));
+  ATH_CHECK( cellLinks.record (std::make_unique<CaloClusterCellLinkContainer>()) );
+  CaloClusterStoreHelper::finalizeClusters (ctx, outputColl, cellLinks);
   
   return StatusCode::SUCCESS;
 }

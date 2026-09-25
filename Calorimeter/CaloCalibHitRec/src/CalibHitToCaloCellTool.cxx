@@ -58,11 +58,11 @@ StatusCode CalibHitToCaloCellTool::initialize()
 }
 
 
-StatusCode CalibHitToCaloCellTool::processCalibHitsFromParticle() const
+StatusCode CalibHitToCaloCellTool::processCalibHitsFromParticle(const EventContext& ctx) const
 {
   ATH_MSG_DEBUG("in calibHitToCaloCellTool");
 
-  SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey};
+  SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey, ctx};
   ATH_CHECK(caloMgrHandle.isValid());
   const CaloDetDescrManager* caloDDMgr = *caloMgrHandle;
   
@@ -74,13 +74,13 @@ StatusCode CalibHitToCaloCellTool::processCalibHitsFromParticle() const
   // register containers for cells and clusters
   for (unsigned int i=0; i<CalibHitUtils::nEnergyTypes; i++) {
 
-    truthCells.emplace_back(m_cellContKeys[i]);
+    truthCells.emplace_back(m_cellContKeys[i], ctx);
     ATH_CHECK(truthCells.back().record(std::make_unique<CaloCellContainer>())); 
 
-    truthClusters.emplace_back(m_clusterContKeys[i]);
+    truthClusters.emplace_back(m_clusterContKeys[i], ctx);
     ATH_CHECK(CaloClusterStoreHelper::AddContainerWriteHandle(truthClusters.back()));
 
-    truthLinks.emplace_back(m_cellLinkKeys[i]);
+    truthLinks.emplace_back(m_cellLinkKeys[i], ctx);
     ATH_CHECK(truthLinks.back().record(std::make_unique<CaloClusterCellLinkContainer>()));
   }    
  
@@ -250,8 +250,8 @@ StatusCode CalibHitToCaloCellTool::processCalibHitsFromParticle() const
     
     truthCluster[i]->setClusterSize(xAOD::CaloCluster::CSize_Unknown);
     CaloClusterKineHelper::calculateKine(truthCluster[i], true, true);
-    ATH_CHECK(CaloClusterStoreHelper::finalizeClusters (truthLinks[i],
-							truthClusters[i].ptr()));
+    ATH_CHECK( truthLinks[i].record (std::make_unique<CaloClusterCellLinkContainer>()) );
+    CaloClusterStoreHelper::finalizeClusters (ctx, truthClusters[i], truthLinks[i]);
     
     ATH_MSG_INFO("Created truth cluster with " << m_energyTypeToStr[i] <<" " << truthCluster[i]->e());
   }

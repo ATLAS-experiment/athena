@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
 //-----------------------------------------------------------------------
 // File and Version Information:
-// $Id: CaloClusterMaker.cxx,v 1.26 2009-04-18 02:56:18 ssnyder Exp $
 //
 // Description: see CaloClusterMaker.h
 // 
@@ -208,8 +207,8 @@ StatusCode CaloClusterMaker::execute (const EventContext& ctx) const
 
   ATH_MSG_DEBUG("Created cluster container with " << clusColl->size() << " clusters");
   SG::WriteHandle<CaloClusterCellLinkContainer> cellLinks (m_clusterCellLinkOutput, ctx);
-  ATH_CHECK(CaloClusterStoreHelper::finalizeClusters (cellLinks,
-                                                      clusColl.ptr()));
+  ATH_CHECK( cellLinks.record (std::make_unique<CaloClusterCellLinkContainer>()) );
+  CaloClusterStoreHelper::finalizeClusters (ctx, clusColl, cellLinks);
 
   return StatusCode::SUCCESS;
 }
