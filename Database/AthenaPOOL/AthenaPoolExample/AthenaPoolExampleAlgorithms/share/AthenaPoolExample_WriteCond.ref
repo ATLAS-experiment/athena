@@ -71,7 +71,10 @@ StreamExampleCond.StreamExampleCondTool              INFO Initializing StreamExa
 StreamExampleCond                                    INFO Data output: SimplePoolFile4.root
 StreamExampleCond                                    INFO ../O reinitialization...
 ExampleCond                                         DEBUG in initialize()
-ToolSvc.ExampleCondTool                              INFO Initializing ToolSvc.ExampleCondTool
+ExampleCond.ExampleCondTool                          INFO Initializing ExampleCond.ExampleCondTool
+ExampleCond                                         DEBUG Adding private ToolHandle tool ExampleCond.ExampleCondTool (AthenaOutputStreamTool)
+ExampleCond                                         DEBUG data dependencies:
+  + INPUT IGNORED  ( 'AthenaAttributeList' , '' )  [ExampleCond.ExampleCondTool]
 AthenaEventLoopMgr                                   INFO Setup EventSelector service EventSelector
 ApplicationMgr                                       INFO Application Manager Initialized successfully
 RootDatabase                                        DEBUG Closing DB SimplePoolFile1.root
@@ -1179,8 +1182,14 @@ PoolSvc                                             DEBUG Disconnected Persisten
 ApplicationMgr                                       INFO Application Manager Stopped successfully
 ReadData                                             INFO in finalize()
 PoolSvc                                             DEBUG Disconnect request for contextId=1
+ExampleCond.ExampleCondTool                         DEBUG In connectOutput 
+ExampleCond.ExampleCondTool                         DEBUG Connected to SimplePoolFile4.root
+ExampleCond.ExampleCondTool                         DEBUG Recorded DataHeader with key  'DataHeaderKey':'ExampleCond'
 ExampleCond                                          INFO Identified a total of 1 objects to write out:
-ExampleCond                                          INFO 0: ExampleHitContainer#PedestalWriteData#PedestalWriteData
+ExampleCond                                          INFO 0:: ExampleHitContainer#PedestalWriteData#PedestalWriteData
+ExampleCond.ExampleCondTool                         DEBUG In streamObjects
+ExampleCond.ExampleCondTool                         DEBUG Get data object with key
+ExampleCond.ExampleCondTool                         DEBUG Found object for type ExampleHitContainer key PedestalWriteData
 SimplePoolFile4.root                                DEBUG --> Access   DbContainer  WRITE     [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
 ##Shapes                                            DEBUG    attributes# = 1
@@ -1217,6 +1226,7 @@ POOLContainerForm(DataHeaderForm)                   DEBUG Branch container 'Data
 POOLContainerForm(DataHeaderForm)                   DEBUG Opened container POOLContainerForm(DataHeaderForm) of type ROOT_Tree
 SimplePoolFile4.root                                DEBUG ---->Class:DataHeaderForm_p6
 SimplePoolFile4.root                                DEBUG ---->[0]:DataHeaderForm_p6 Typ:DataHeaderForm_p6 [21] Size:0 Offset:0 #Elements:1
+ExampleCond.ExampleCondTool                         DEBUG In commitOutput
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
 ExampleCond                                          INFO Written 1 objects to output stream
 ExampleCond                                          INFO Objects NOT registered in IOV database
