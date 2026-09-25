@@ -159,6 +159,8 @@ public:
 
   AxisInfo(const AxisInfo& a ) = default; 
 
+  AxisInfo& operator=(const AxisInfo& a ) = default; 
+
   AxisInfo( const std::string& s ) : 
     m_info(s), 
     m_log(false),
@@ -312,7 +314,7 @@ public:
 
   bool   m_log       = false;
   bool   m_autoset   = false;
-  bool   m_symmetric = false;;
+  bool   m_symmetric = false;
 
   bool   m_rangeset  = false;
   double m_lo = 0; 
