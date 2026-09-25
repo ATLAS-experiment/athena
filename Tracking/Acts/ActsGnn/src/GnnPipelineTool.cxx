@@ -36,6 +36,11 @@ GnnPipelineTool::~GnnPipelineTool() = default;
 StatusCode GnnPipelineTool::initialize() {
   m_logger = makeActsAthenaLogger(this, "ActsGnn");
 
+  if (m_numFeatures.value() != 4 && m_numFeatures.value() != 12) {
+    ATH_MSG_ERROR("numFeatures must be 4 or 12, got " << m_numFeatures.value());
+    return StatusCode::FAILURE;
+  }
+
   ATH_CHECK(m_chronoSvc.retrieve());
   ATH_CHECK(detStore()->retrieve(m_pixelIdHelper, "PixelID"));
   ATH_CHECK(detStore()->retrieve(m_stripIdHelper, "SCT_ID"));
@@ -116,7 +121,7 @@ StatusCode GnnPipelineTool::buildSeed(
   std::vector<int> ids;
   std::vector<const xAOD::SpacePoint*> allSPPtrs;
   ATH_CHECK(buildFeatures(spacePointCollections, features, moduleIds, ids,
-                          allSPPtrs));
+                          allSPPtrs, m_numFeatures.value()));
 
   std::optional<Athena::Chrono> timer;
   timer.emplace("GNN inference", m_chronoSvc.get());
