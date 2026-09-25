@@ -132,7 +132,7 @@ StatusCode NSWGeoPlottingAlg::execute(const EventContext& ctx) {
     };
     const MmIdHelper& id_helper = m_idHelperSvc->mmIdHelper();
     auto global_points = [&](const Identifier& id, Amg::Vector3D& left,
-                             Amg::Vector3D& center, Amg::Vector3D& right) {
+			     Amg::Vector3D& center, Amg::Vector3D& right) {
       Amg::Vector2D l_cen{Amg::Vector2D::Zero()}, l_left{Amg::Vector2D::Zero()},
           l_right{Amg::Vector2D::Zero()};
       const MuonGM::MuonChannelDesign* design = nullptr;
@@ -152,6 +152,7 @@ StatusCode NSWGeoPlottingAlg::execute(const EventContext& ctx) {
       roe->surface(id).localToGlobal(l_left, Amg::Vector3D::Zero(), left);
       roe->surface(id).localToGlobal(l_cen, Amg::Vector3D::Zero(), center);
       roe->surface(id).localToGlobal(l_right, Amg::Vector3D::Zero(), right);
+      return StatusCode::SUCCESS;
     };
 
     const int n_strips =
@@ -204,9 +205,12 @@ StatusCode NSWGeoPlottingAlg::execute(const EventContext& ctx) {
         Amg::Vector3D x_right{Amg::Vector3D::Zero()},
             u_right{Amg::Vector3D::Zero()}, v_right{Amg::Vector3D::Zero()};
 
-        global_points(x_id, x_left, x_center, x_right);
-        global_points(u_id, u_left, u_center, u_right);
-        global_points(v_id, v_left, v_center, v_right);
+	StatusCode sc = global_points(x_id, x_left, x_center, x_right);
+	if(sc.isFailure()) return StatusCode::FAILURE;
+	sc = global_points(u_id, u_left, u_center, u_right);
+	if(sc.isFailure()) return StatusCode::FAILURE;
+	sc = global_points(v_id, v_left, v_center, v_right);
+	if(sc.isFailure()) return StatusCode::FAILURE;
 
         const Amg::Vector3D x_dir = (x_right - x_left).unit();
         const Amg::Vector3D v_dir = (v_left - v_right).unit();
