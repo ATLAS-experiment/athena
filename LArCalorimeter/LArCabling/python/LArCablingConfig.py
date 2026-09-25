@@ -34,19 +34,6 @@ def _larCablingCfg(configFlags,algo,folder,algName=None):
     result.merge(addFolders(configFlags,folderwithtag,className="AthenaAttributeList",detDb=db))
     return result
 
-def _larLatomeCfg(configFlags,algo,folder,outkey):
-    result=ComponentAccumulator()
-
-    result.merge(IOVDbSvcCfg(configFlags))
-
-    if configFlags.Input.isMC:
-        result.merge(addFolders(configFlags,folder,tag="CONDBR2-BLKPA-2026-01-02",detDb="LAR_ONL",db="CONDBR2",className="CondAttrListCollection"))
-    else:
-        result.merge(addFolders(configFlags,folder,className="CondAttrListCollection",detDb='LAR_ONL'))
-
-    result.addCondAlgo(algo(ReadKey=folder,WriteKey=outkey),primary=True)
-    return result
-
 def LArOnOffIdMappingCfg(configFlags):
     return _larCablingCfg(configFlags,LArOnOffMappingAlg,"/LAR/Identifier/OnOffIdMap")
 
@@ -81,8 +68,18 @@ def LArCalibIdMappingSCCfg(configFlags):
     return result
 
 def LArLATOMEMappingCfg(configFlags):
-    result = ComponentAccumulator()
-    result.merge(_larLatomeCfg(configFlags,LArLATOMEMappingAlg,"/LAR/Identifier/LatomeMapping","LArLATOMEMap"))
+    result=IOVDbSvcCfg(configFlags)
+    folder="/LAR/Identifier/LatomeMapping"
+    fTag=None
+    if not configFlags.IOVDb.UseCREST: fTag="CONDBR2-BLKPA-2026-01-02"
+    
+    if configFlags.Input.isMC:
+        #HACK ALERT: Force-reading from CONDBR2 (Real-data DB) even in the MC case
+        result.merge(addFolders(configFlags,folder,tag=fTag, detDb="LAR_ONL",db="CONDBR2",className="CondAttrListCollection"))
+    else:
+        result.merge(addFolders(configFlags,folder,className="CondAttrListCollection",detDb='LAR_ONL'))
+    result.addCondAlgo(LArLATOMEMappingAlg(ReadKey=folder,WriteKey="LArLATOMEMap"))
+    
     return result
 
 def LArIdMapCfg(configFlags):
