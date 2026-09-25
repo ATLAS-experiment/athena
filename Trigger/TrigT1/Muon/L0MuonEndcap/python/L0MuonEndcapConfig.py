@@ -15,7 +15,7 @@ def L0MuonTGCChainCfg(flags, **kwargs):
     """Configure the minimal S1TGC-to-Endcap data-flow chain."""
     result = ComponentAccumulator()
 
-    from L0MuonS1TGC.L0MuonS1TGCConfig import L0MuonTGCSimCfg
+    from L1MuonS1TGC.L0MuonS1TGCConfig import L0MuonTGCSimCfg
 
     result.merge(L0MuonTGCSimCfg(flags, **kwargs.pop("S1TGC", {})))
     result.merge(L0MuonEndcapAlgCfg(flags, **kwargs.pop("Endcap", {})))
