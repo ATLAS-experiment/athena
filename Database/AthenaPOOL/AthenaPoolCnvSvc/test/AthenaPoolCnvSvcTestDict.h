@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaPoolCnvSvcTestDict.h
@@ -122,7 +122,8 @@ typedef std::vector<ElementLink<DataVector<Y_v2> > > YCont_v2_pers2;
 namespace SG {
 template <> class ToTransient<DataVector<AthenaPoolCnvSvcTest::Y_v2> > {
 public:
-  static void toTransient (DataVector<AthenaPoolCnvSvcTest::Y_v2>& v)
+  static void toTransient (DataVector<AthenaPoolCnvSvcTest::Y_v2>& v,
+                           const EventContext&)
   {
     for (AthenaPoolCnvSvcTest::Y_v2* y : v) {
       y->m_yy = 1234;

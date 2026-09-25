@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaPoolCnvSvc/T_AthenaPoolxAODCnv.icc
@@ -78,10 +78,11 @@ T_AthenaPoolxAODCnv<XAOD, TPCNVS...>::createTransientWithKey (const Token* token
 
   if (c) {
     // Call toTransient on the object we just read, if needed.
-    SG::ToTransient<XAOD>::toTransient (*c);
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+    SG::ToTransient<XAOD>::toTransient (*c, ctx);
     if (c->trackIndices()) {
       DataLink< SG::IConstAuxStore > dl;
-      dl.toTransient (key + "Aux.");
+      dl.toTransient (key + "Aux.", ctx);
       c->setStore( dl );
     }
     return c;
