@@ -5,9 +5,6 @@
 #ifndef ManagedMonitorToolBase_H
 #define ManagedMonitorToolBase_H
 
-#define ManagedMonitorToolBase_Uses_API_201401
-#define ManagedMonitorToolBase_Uses_API_201704
-
 #include <string>
 #include <vector>
 #include <map>
@@ -52,7 +49,6 @@ class IDQFilterTool;
 #include "TH2.h"
 #include "TTree.h"
 #include "TEfficiency.h"
-//#include "../src/AthMonBench.h"
 
 #include "GaudiKernel/IHistogramSvc.h"
 #include "GaudiKernel/IMessageSvc.h"
@@ -796,26 +792,6 @@ class ManagedMonitorToolBase : public AthAlgTool, virtual public IMonitorToolBas
       bool endOfLowStatFlag() const { return m_endOfLowStat; }
       bool endOfLumiBlockFlag() const { return m_endOfLumiBlock; }
       bool endOfRunFlag() const { return m_endOfRun; }
-
-public:
-      // Old-style access via variables.
-      // Make these public to avoid triggering naming convention warnings.
-#ifdef ManagedMonitorToolBase_CXX
-#define MMTB_DEPRECATED(v) bool v
-#else
-#define MMTB_DEPRECATED(v) bool v __attribute__((deprecated("Use " #v "Flag() instead")))
-#endif
-      MMTB_DEPRECATED(newLowStatInterval);
-      MMTB_DEPRECATED(newMedStatInterval);
-      MMTB_DEPRECATED(newHigStatInterval);
-      MMTB_DEPRECATED(newLowStat);
-      MMTB_DEPRECATED(newLumiBlock);
-      MMTB_DEPRECATED(newRun);
-      MMTB_DEPRECATED(newEventsBlock);
-      MMTB_DEPRECATED(endOfEventsBlock);
-      MMTB_DEPRECATED(endOfLowStat);
-      MMTB_DEPRECATED(endOfLumiBlock);
-      MMTB_DEPRECATED(endOfRun);
 
 private:
       bool m_newLowStatInterval, m_newMedStatInterval, m_newHigStatInterval;

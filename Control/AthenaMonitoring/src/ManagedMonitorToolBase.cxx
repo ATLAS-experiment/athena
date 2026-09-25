@@ -406,18 +406,6 @@ ManagedMonitorToolBase( const std::string & type, const std::string & name,
      m_supportedIntervalsForRebooking.insert(interval);
    }
 
-   newLowStatInterval = false;
-   newMedStatInterval = false;
-   newHigStatInterval = false;
-   newLowStat = false;
-   newLumiBlock = false;
-   newRun = false;
-   newEventsBlock = false;
-   endOfEventsBlock = false;
-   endOfLowStat = false;
-   endOfLumiBlock = false;
-   endOfRun = false;
-
    m_newLowStatInterval = false;
    m_newMedStatInterval = false;
    m_newHigStatInterval = false;
@@ -753,33 +741,23 @@ fillHists(const EventContext& ctx)
    m_newLowStat = false;
    m_newLumiBlock = false;
    m_newRun = false;
-   newLowStat = false;
-   newLumiBlock = false;
-   newRun = false;
 
    m_newLowStatInterval = false;
    m_newMedStatInterval = false;
    m_newHigStatInterval = false;
-   newLowStatInterval = false;
-   newMedStatInterval = false;
-   newHigStatInterval = false;
-   
+
    m_useTrigger = ( (m_triggerChainProp != "" || m_triggerGroupProp != "")  && (!m_trigDecTool.empty()) );
 
    if( m_manager != 0 ) {
      m_newLumiBlock = ( (m_lastLumiBlock != m_manager->lumiBlockNumber()) || m_manager->forkedProcess());
       m_newRun = ( m_lastRun != m_manager->runNumber() );
-      newLumiBlock = m_newLumiBlock;
-      newRun = m_newRun;
 
       if(m_newRun) {
          m_newLumiBlock = true;
-         newLumiBlock = m_newLumiBlock;
          isNewEventsBlock = true;
       }
 
       m_newEventsBlock = isNewEventsBlock;
-      newEventsBlock = m_newEventsBlock;
 
       if( m_newLumiBlock ) {
          // check if a new LB interval has started
@@ -797,9 +775,6 @@ fillHists(const EventContext& ctx)
             if( ((currentLB-1)/LBsLowStat) != m_lastLowStatInterval ) m_newLowStatInterval = true;
             if( ((currentLB-1)/LBsMedStat) != m_lastMedStatInterval ) m_newMedStatInterval = true;
             if( ((currentLB-1)/LBsHigStat) != m_lastHigStatInterval ) m_newHigStatInterval = true;
-            newLowStatInterval = m_newLowStatInterval;
-            newMedStatInterval = m_newHigStatInterval;
-            newHigStatInterval = m_newHigStatInterval;
          }
       }
 
@@ -819,14 +794,9 @@ fillHists(const EventContext& ctx)
    m_endOfLowStat = m_newLowStatInterval;
    m_endOfLumiBlock = m_newLumiBlock;
    m_endOfRun = m_newRun;
-   endOfEventsBlock = m_newEventsBlock;
-   endOfLowStat = m_newLowStatInterval;
-   endOfLumiBlock = m_newLumiBlock;
-   endOfRun = m_newRun;
 
    // just duplicates m_newLowStatInterval
    m_newLowStat = m_newLowStatInterval; 
-   newLowStat = m_newLowStatInterval; 
 
    if( m_newEventsBlock || m_newLumiBlock || m_newRun ) {
      ATH_MSG_DEBUG("Interval transition processing");
@@ -1267,10 +1237,6 @@ finalHists()
      m_endOfLowStat = true;
      m_endOfLumiBlock = true;
      m_endOfRun = true;
-     endOfEventsBlock = true;
-     endOfLowStat = true;
-     endOfLumiBlock = true;
-     endOfRun = true;
 
      StatusCode sc = procHistograms();
 
