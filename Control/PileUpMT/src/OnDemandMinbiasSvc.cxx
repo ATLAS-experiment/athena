@@ -174,7 +174,7 @@ std::size_t OnDemandMinbiasSvc::calcMBRequired(std::int64_t hs_id,
   if (m_usePoisson) {
     std::transform(avg_num_mb_by_bunch.begin(), avg_num_mb_by_bunch.end(),
                    num_mb_by_bunch.begin(), [&prng](float avg) {
-                     return std::poisson_distribution<std::uint64_t>(avg)(prng);
+                     return avg > 0 ? std::poisson_distribution<std::uint64_t>(avg)(prng) : 0;
                    });
   } else {
     std::transform(avg_num_mb_by_bunch.begin(), avg_num_mb_by_bunch.end(),
