@@ -31,7 +31,7 @@ case $ArtProcess in
         echo "Unsetting ATHENA_NUM_PROC=${ATHENA_NUM_PROC}"
         unset  ATHENA_NUM_PROC
 
-	AODMerge_tf.py --CA --inputAODFile=art_core_*/Nightly_AOD.pool.root --outputAOD_MRGFile=Nightly_AOD.pool.root
+	AODMerge_tf.py --inputAODFile=art_core_*/Nightly_AOD.pool.root --outputAOD_MRGFile=Nightly_AOD.pool.root
 
 	echo  "art-result: $? AODMerge"
 
@@ -68,7 +68,7 @@ case $ArtProcess in
 	echo "Unsetting ATHENA_NUM_PROC=${ATHENA_NUM_PROC}"
 	unset  ATHENA_NUM_PROC
 
-	Reco_tf.py --CA --inputRDOFile=$x --outputAODFile=Nightly_AOD.pool.root --maxEvents=200 --autoConfiguration="everything" --conditionsTag="${conditions}" --preInclude egammaConfig.ConfigurationHelpers.egammaOnlyFromRaw --postInclude egammaValidation.egammaArtSpecialContent.egammaArtSpecialContent
+	Reco_tf.py --inputRDOFile=$x --outputAODFile=Nightly_AOD.pool.root --maxEvents=200 --autoConfiguration="everything" --conditionsTag="${conditions}" --preInclude egammaConfig.ConfigurationHelpers.egammaOnlyFromRaw --postInclude egammaValidation.egammaArtSpecialContent.egammaArtSpecialContent
 
 	echo  "art-result: $? reconstruction"
 
