@@ -1,7 +1,8 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
+#include <format>
 #include <fstream>
 #include <iostream>
 #include <iterator>
@@ -30,23 +31,25 @@ namespace {
   
 
 // HACK LIFTED FROM AthenaBaseComps/AthMsgStreamMacros.h to remove dep loop
-#define ATH_MSG_LVL(lvl, x) \
+#define ATH_MSG_OPEN (
+#define ATH_MSG_CLOSE )
+#define ATH_MSG_LVL(lvl, x, ...)             \
    do {                                      \
      if (msgLevel(lvl)) {                    \
-       msgStream(lvl) << x  << endmsg;	     \
+       msgStream(lvl) << __VA_OPT__(std::format ATH_MSG_OPEN ) x  __VA_OPT__ (, __VA_ARGS__ ATH_MSG_CLOSE) << endmsg; \
      }                                       \
    } while (0)
  
-#define ATH_MSG_VERBOSE(x) ATH_MSG_LVL(MSG::VERBOSE, x)
-#define ATH_MSG_DEBUG(x)   ATH_MSG_LVL(MSG::DEBUG, x)
-#define ATH_MSG_INFO(x)    ATH_MSG_LVL(MSG::INFO, x)
-#define ATH_MSG_WARNING(x) ATH_MSG_LVL(MSG::WARNING, x)
-#define ATH_MSG_ERROR(x)   ATH_MSG_LVL(MSG::ERROR, x)
+#define ATH_MSG_VERBOSE(x, ...) ATH_MSG_LVL(MSG::VERBOSE, x __VA_OPT__(, __VA_ARGS__))
+#define ATH_MSG_DEBUG(x, ...)   ATH_MSG_LVL(MSG::DEBUG, x __VA_OPT__(, __VA_ARGS__))
+#define ATH_MSG_INFO(x, ...)    ATH_MSG_LVL(MSG::INFO, x __VA_OPT__(, __VA_ARGS__))
+#define ATH_MSG_WARNING(x, ...) ATH_MSG_LVL(MSG::WARNING, x __VA_OPT__(, __VA_ARGS__))
+#define ATH_MSG_ERROR(x, ...)   ATH_MSG_LVL(MSG::ERROR, x __VA_OPT__(, __VA_ARGS__))
 
-#define ATH_CONST_MSG_VERBOSE(x)                  \
+#define ATH_CONST_MSG_VERBOSE(x, ...)             \
   do {                                            \
     if (msgLevel(MSG::VERBOSE)) {                 \
-      verbose() << x << endmsg;                   \
+      verbose() << __VA_OPT__(std::format ATH_MSG_OPEN ) x  __VA_OPT__ (, __VA_ARGS__ ATH_MSG_CLOSE) << endmsg; \
     }                                             \
   } while (0)
 
@@ -100,11 +103,11 @@ ClassIDSvc::getTypeNameOfID(const CLID& id, std::string& typeName) const
   CLIDMap::const_iterator iID = m_clidMap.find(id);
   if (iID != m_clidMap.end()) {
     typeName = iID->second.first;
-    ATH_CONST_MSG_VERBOSE( "getTypeNameOfID(" << id << ") type name is " << typeName );
+    ATH_CONST_MSG_VERBOSE( "getTypeNameOfID({}) type name is {}", id, typeName );
     return StatusCode::SUCCESS;
   }
   else {
-    ATH_CONST_MSG_VERBOSE( "getTypeNameOfID(" << id << ") no associated type name found" );
+    ATH_CONST_MSG_VERBOSE( "getTypeNameOfID({}) no associated type name found", id );
     return StatusCode::FAILURE;
   }
 }
@@ -120,13 +123,12 @@ ClassIDSvc::getTypeInfoNameOfID(const CLID& id, std::string& typeInfoName) const
   CLIDMap::const_iterator iID = m_clidMap.find(id);
   if (iID != m_clidMap.end()) {
     typeInfoName = iID->second.second;
-    ATH_CONST_MSG_VERBOSE( "getTypeInfoNameOfID(" << id <<
-                           ") type-info name is " << typeInfoName );
+    ATH_CONST_MSG_VERBOSE( "getTypeInfoNameOfID({}) type-info name is {}",
+                           id, typeInfoName );
     return StatusCode::SUCCESS;
   }
   else {
-    ATH_CONST_MSG_VERBOSE( "getTypeInfoNameOfID(" << id <<
-                           ") no associated type-info name found" );
+    ATH_CONST_MSG_VERBOSE( "getTypeInfoNameOfID({}) no associated type-info name found", id );
     return StatusCode::FAILURE;
   }
 }
@@ -142,15 +144,15 @@ ClassIDSvc::getIDOfTypeName(const std::string& typeName, CLID& id) const
   NameMap::const_iterator iID = m_nameMap.find(typeName);
   if (iID != m_nameMap.end()) {
     id = iID->second;
-    ATH_CONST_MSG_VERBOSE( "getIDOfTypeName(" << typeName << ") CLID is " << id );
+    ATH_CONST_MSG_VERBOSE( "getIDOfTypeName({}) CLID is {}", typeName, id );
     return StatusCode::SUCCESS;
   }
   else if (tryNumeric (typeName, id)) {
-    ATH_CONST_MSG_VERBOSE( "getIDOfTypeName(" << typeName << ") is a numeric CLID" );
+    ATH_CONST_MSG_VERBOSE( "getIDOfTypeName({}) is a numeric CLID", typeName );
     return StatusCode::SUCCESS;
   }
   else {
-    ATH_CONST_MSG_VERBOSE( "getIDOfTypeName(" << typeName << ") no associated CLID found" );
+    ATH_CONST_MSG_VERBOSE( "getIDOfTypeName({}) no associated CLID found", typeName );
     return StatusCode::FAILURE;
   }
 }
@@ -166,11 +168,11 @@ ClassIDSvc::getIDOfTypeInfoName(const std::string& typeInfoName,
   NameMap::const_iterator iID = m_tiNameMap.find(typeInfoName);
   if (iID != m_tiNameMap.end()) {
     id = iID->second;
-    ATH_CONST_MSG_VERBOSE( "getIDOfTypeInfoName(" << typeInfoName << ") CLID is " << id );
+    ATH_CONST_MSG_VERBOSE( "getIDOfTypeInfoName({}) CLID is {}", typeInfoName, id );
     return StatusCode::SUCCESS;
   }
   else {
-    ATH_CONST_MSG_VERBOSE( "getIDOfTypeInfoName(" << typeInfoName << ") no associated CLID found" );
+    ATH_CONST_MSG_VERBOSE( "getIDOfTypeInfoName({}) no associated CLID found", typeInfoName );
     return StatusCode::FAILURE;
   }
 }
@@ -184,9 +186,8 @@ ClassIDSvc::setTypeForID(const CLID& id,
 {
   lock_t lock (m_mutex);
   if (id < CLIDdetail::MINCLID || id > CLIDdetail::MAXCLID) {
-    ATH_MSG_ERROR( "setTypeNameForID: input id " << id
-                   << " is out of allowed range " << CLIDdetail::MINCLID 
-                   << " : " << CLIDdetail::MAXCLID );
+    ATH_MSG_ERROR( "setTypeNameForID: input id {} is out of allowed range {} : {}",
+                   id, CLIDdetail::MINCLID, CLIDdetail::MAXCLID );
     return StatusCode::FAILURE;
   }
   return uncheckedSetTypePackageForID(id, typeName, typeInfoName);
@@ -202,10 +203,10 @@ ClassIDSvc::dump() const
   for (CLID clid : sortedIDs()) {
     auto it = m_clidMap.find (clid);
     if (it == m_clidMap.end()) {
-      ATH_MSG_INFO( "CLID: "<< clid << " - type name: NOT FOUND" );
+      ATH_MSG_INFO( "CLID: {} - type name: NOT FOUND", clid );
     }
     else {
-      ATH_MSG_INFO( "CLID: "<< clid << " - type name: " << it->second.first );
+      ATH_MSG_INFO( "CLID: {} - type name: ", clid, it->second.first );
     }
   }
   ATH_MSG_INFO( "------------------------------" );
@@ -215,7 +216,7 @@ ClassIDSvc::dump() const
 StatusCode 
 ClassIDSvc::initialize()
 {
-  ATH_MSG_VERBOSE( "Initializing " << name() ) ;
+  ATH_MSG_VERBOSE( "Initializing {}", name() ) ;
 
   CHECK( Service::initialize() );
 
@@ -234,7 +235,7 @@ ClassIDSvc::initialize()
 
 StatusCode
 ClassIDSvc::reinitialize() {
-  ATH_MSG_INFO( "RE-initializing " << name() ) ;
+  ATH_MSG_INFO( "RE-initializing {}", name() ) ;
   CHECK( fillDB() );
   return StatusCode::SUCCESS;
 }
@@ -246,16 +247,16 @@ ClassIDSvc::finalize()
   if (m_outputFileName != "NULL") {
     std::ofstream outfile( m_outputFileName );
     if ( !outfile ) {
-      ATH_MSG_ERROR( "unable to open output CLIDDB file: " << m_outputFileName );
+      ATH_MSG_ERROR( "unable to open output CLIDDB file: {}", m_outputFileName.value() );
       return StatusCode::RECOVERABLE;
     } else {
       for (CLID clid : sortedIDs()) {
         const std::string& typeName = m_clidMap[clid].first;
         const std::string& tiName   = m_clidMap[clid].second;
-        outfile << clid << "; " << typeName << "; " << tiName << std::endl;
+        std::println (outfile, "{}; {}; {}", clid, typeName, tiName);
       }
-      ATH_MSG_INFO( "finalize: wrote " << m_clidMap.size()  <<
-                    " entries to output CLIDDB file: " << m_outputFileName );
+      ATH_MSG_INFO( "finalize: wrote {} entries to output CLIDDB file: {}",
+                    m_clidMap.size(), m_outputFileName.value() );
     }
   }
   return Service::finalize();
@@ -322,7 +323,7 @@ ClassIDSvc::processCLIDDB(const std::string& fileName)
 {
   std::ifstream ifile(fileName);
   if (!ifile) {
-    ATH_MSG_WARNING( "processCLIDDB: unable to open " << fileName );
+    ATH_MSG_WARNING( "processCLIDDB: unable to open {}", fileName );
     return true;
   }
 
@@ -338,7 +339,8 @@ ClassIDSvc::processCLIDDB(const std::string& fileName)
       try {
         id = std::stol(columns[0]);
       } catch (const std::logic_error& e) {
-        ATH_MSG_ERROR( "processCLIDDB: Can't cast ["<< columns[0] << "] to long (clid): " << e.what() );
+        ATH_MSG_ERROR( "processCLIDDB: Can't cast [{}] to long (clid): {}",
+                       columns[0], e.what() );
         allOK = false;
       }
 
@@ -350,11 +352,11 @@ ClassIDSvc::processCLIDDB(const std::string& fileName)
   }
 
   if (!allOK) {
-    ATH_MSG_ERROR( "processCLIDDB: processing record '" << line
-                   << "' from CLIDDB file: " << fileName );
+    ATH_MSG_ERROR( "processCLIDDB: processing record '{}' from CLIDDB file: {}",
+                   line, fileName );
   } else {
-    ATH_MSG_DEBUG( "processCLIDDB: read " << newEntries <<
-                   " entries from CLIDDB file: " << fileName );
+    ATH_MSG_DEBUG( "processCLIDDB: read {} entries from CLIDDB file: {}",
+                   newEntries, fileName );
   }
 
   return allOK;
@@ -371,7 +373,7 @@ bool ClassIDSvc::getRegistryEntries(const std::string& moduleName)
   //to speed up processing we only take entries added to CLIDRegistry
   //since last call (thanks Niels!)
   for (const auto& [clid, typeName, typeInfoName] : CLIDRegistry::newEntries()) {
-    ATH_MSG_VERBOSE( "reading [" << clid << ", " << typeName << ", " << typeInfoName << "]" );
+    ATH_MSG_VERBOSE( "reading [{}, {}, {}]", clid, typeName, typeInfoName);
     if (uncheckedSetTypePackageForID(clid, typeName, typeInfoName)) {
       ++newEntries;
     }
@@ -381,11 +383,11 @@ bool ClassIDSvc::getRegistryEntries(const std::string& moduleName)
   }
   
   if (allOK) {
-    ATH_MSG_INFO( "getRegistryEntries: read " << newEntries
-                  << " CLIDRegistry entries for module " << moduleName );
+    ATH_MSG_INFO( "getRegistryEntries: read {} CLIDRegistry entries for module {}",
+                  newEntries, moduleName );
   } else {
-    ATH_MSG_ERROR("getRegistryEntries: can not read  CLIDRegistry entries for module "
-                  << moduleName );
+    ATH_MSG_ERROR("getRegistryEntries: can not read  CLIDRegistry entries for module {}",
+                  moduleName );
   }
 
   return allOK;
@@ -402,7 +404,7 @@ ClassIDSvc::uncheckedSetTypePackageForID(const CLID& id,
   procName = CxxUtils::trimWhiteSpaces(procName);
 
   if (procName.empty()) {
-    ATH_MSG_ERROR( "Empty type name for CLID " << id );
+    ATH_MSG_ERROR( "Empty type name for CLID {}", id );
     return StatusCode::FAILURE;
   }
 
@@ -419,30 +421,29 @@ ClassIDSvc::uncheckedSetTypePackageForID(const CLID& id,
   // insert into CLID map
   const auto& [clid_it, clid_success] = m_clidMap.try_emplace(id, procName, procTiName);
   if (!clid_success && clid_it->second!=std::make_pair(procName,procTiName)) {
-    ATH_MSG_ERROR( "Cannot set type " << std::make_pair(procName,procTiName) << " for CLID " <<
-                   id << ": known type for this ID " << clid_it->second );
+    ATH_MSG_ERROR( "Cannot set type {} for CLID {}: known type for this ID {}", 
+                   std::make_pair(procName,procTiName), id, clid_it->second);
     return StatusCode::FAILURE;
   }
 
   // insert into type name map
   const auto& [name_it, name_success] = m_nameMap.try_emplace(procName, id);
   if (!name_success && name_it->second!=id) {
-    ATH_MSG_ERROR( "Cannot set CLID " << id << " for type name '"
-                   << procName << "': known CLID for this name " << name_it->second );
+    ATH_MSG_ERROR( "Cannot set CLID {} for type name '{}': known CLID for this name {}",
+                   id, procName, name_it->second);
     return StatusCode::FAILURE;
   }
 
   // insert into typeInfo map
   const auto& [info_it, info_success] = m_tiNameMap.try_emplace(procTiName, id);
   if (!info_success && info_it->second!=id) {
-    ATH_MSG_ERROR( "Cannot set CLID " << id << " for type-info name '"
-                   << procTiName << "' and type '" << procName
-                   << "': known CLID for this type-info name " << info_it->second );
+    ATH_MSG_ERROR( "Cannot set CLID {} for type-info name '{}' and type '{}': known CLID for this type-info name {}",
+                   id, procTiName, procName, info_it->second);
     return StatusCode::FAILURE;
   }
 
-  ATH_MSG_VERBOSE( "Set type name '" << procName << "' for CLID " << id <<
-                   " with type-info name '" << procTiName << "'" );
+  ATH_MSG_VERBOSE( "Set type name '{}' for CLID {} with type-info name '{}'",
+                   procName, id, procTiName);
 
   return StatusCode::SUCCESS;
 }

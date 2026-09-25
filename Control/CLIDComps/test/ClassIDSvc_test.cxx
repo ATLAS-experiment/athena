@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file ClassIDSvc_test.cxx  
@@ -13,6 +13,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <print>
 #include "TestTools/initGaudi.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/ModuleIncident.h"
@@ -34,17 +35,17 @@ struct Bla {
 CLASS_DEF( Bla<unsigned int>, 8108, 0)
 
 #define ASSERTERROR( FALSEEXPR )   \
-    std::cerr << "Now we expect to see an error message:" << std::endl \
-              << "----Error Message Starts--->>" << std::endl; \
-    assert(!FALSEEXPR); \
-    std::cerr<< "<<---Error Message Ends-------" << std::endl
+    std::println (std::cerr, "Now we expect to see an error message:\n" \
+                  "----Error Message Starts--->>");                     \
+    assert(!FALSEEXPR);                                                 \
+    std::println (std::cerr, "<<---Error Message Ends-------");
 
 using namespace std;
 using namespace Athena_test;
 // If you see ubsan warnings re: ModuleIncident, see referenceGaudiSymbols
 // in TestTools/src/initGaudi.cxx
 void incident_test(ISvcLocator* pSvcLoc) {
-  cout << "*** ClassIDSvc incident test starts ***" <<endl;
+  std::println ("*** ClassIDSvc incident test starts ***");
   assert(pSvcLoc);
 
   SmartIF<IClassIDSvc> pClassIDSvc{pSvcLoc->service("ClassIDSvc")};
@@ -55,10 +56,10 @@ void incident_test(ISvcLocator* pSvcLoc) {
   il->handle(fooInc);
   ModuleLoadedIncident barInc("test", "Bar");
   il->handle(barInc);
-  cout << "*** ClassIDSvc incident test OK ***" <<endl;
+  std::println ("*** ClassIDSvc incident test OK ***");
 }
 void basic_test(ISvcLocator* pSvcLoc) {
-  cout << "*** ClassIDSvc basic test starts ***" <<endl;
+  std::println ("*** ClassIDSvc basic test starts ***");
   assert(pSvcLoc);
 
   SmartIF<IClassIDSvc> pClassIDSvc{pSvcLoc->service("ClassIDSvc")};
@@ -120,13 +121,13 @@ void basic_test(ISvcLocator* pSvcLoc) {
   //  dynamic_cast<ClassIDSvc*>(pClassIDSvc)->dump();
 
   assert(pClassIDSvc->finalize().isSuccess());
-  cout << "*** ClassIDSvc basic test OK ***" <<endl;
+  std::println ("*** ClassIDSvc basic test OK ***");
 }
 
 int main() {
   ISvcLocator* pSvcLoc(0);
   if (!initGaudi("ClassIDSvc_test.txt", pSvcLoc)) {
-    cerr << "ClassIDSvc_test can not be run" << endl;
+    std::print (std::cerr, "ClassIDSvc_test can not be run");
     return 0;
   }  
   basic_test(pSvcLoc);

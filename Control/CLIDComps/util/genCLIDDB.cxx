@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
+#include <print>
 #include <string>
 
 #include "GaudiKernel/IClassManager.h"
@@ -98,7 +99,7 @@ int main(int argc, char* argv[]) {
     jobopts = vm["jobopts"].as<std::string>();
   }
   if (!initGaudi(jobopts, verbose, pSvcLoc)) {
-    std::cerr << "cannot initialize Gaudi" << std::endl;
+    std::println (std::cerr, "cannot initialize Gaudi");
     return 2;
   }
 
