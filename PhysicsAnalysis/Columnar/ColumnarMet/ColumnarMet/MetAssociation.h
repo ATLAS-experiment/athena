@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -176,9 +176,11 @@ namespace columnar
     /// Public Members from MissingETAssociation
     /// ========================================
 
-    [[nodiscard]] static bitmask_t getObjMask(size_t objIndex) { 
-      if(objIndex==invalidIndex) return 0;
-      return 1<<objIndex;
+    [[nodiscard]] static bitmask_t getObjMask(size_t objIndex) {
+      if (objIndex == invalidIndex || objIndex >= 64) {
+        return bitmask_t{0};
+      }
+        return bitmask_t{1} << objIndex;
     }
 
     [[nodiscard]] std::size_t sizeCal(AssocId assoc) const {
