@@ -8,6 +8,7 @@ import argparse
 
 parser = argparse.ArgumentParser(description="Run ACTS geometry construction for ITk + HGTD")
 parser.add_argument("--gen3", action="store_true", help="Use Gen3 geometry + construction")
+parser.add_argument("--build-detray", action="store_true", help="Convert the built Acts::TrackingGeometry into a Detray geometry")
 args = parser.parse_args()
 
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -47,7 +48,8 @@ acc.merge(ActsTrackingGeometrySvcCfg(flags,
                                      OutputLevel=INFO,
                                      RunConsistencyChecks=True,
                                      BlueprintGraphviz=str(Path.cwd() / "blueprint.dot"),
-                                     ObjDebugOutput=False))
+                                     ObjDebugOutput=False,
+                                     BuildDetrayGeometry=args.build_detray))
 
 acc.merge(ActsExtrapolationAlgCfg(flags,
                                   OutputLevel=INFO,
