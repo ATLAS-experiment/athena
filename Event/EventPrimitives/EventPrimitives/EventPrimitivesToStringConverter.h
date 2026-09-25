@@ -13,6 +13,7 @@
 #include <iomanip>
 #include <iostream>
 #include <string>
+#include <string_view>
 #include <cmath>
 
 namespace Amg {
@@ -39,7 +40,7 @@ inline double roundWithPrecision(double val, int precision) {
 }
 
 inline std::string toString(const MatrixX& matrix, int precision = 4,
-                            const std::string& offset = "") {
+                            std::string_view offset = "") {
   std::ostringstream sout;
 
   sout << std::setiosflags(std::ios::fixed) << std::setprecision(precision);
@@ -64,8 +65,7 @@ inline std::string toString(const MatrixX& matrix, int precision = 4,
         else
           sout << ", ";
       }
-      if (i != matrix.rows() -
-                   1) {  // make the end line and the offset in the next line
+      if (i != matrix.rows() - 1) {  // make the end line and the offset in the next line
         sout << std::endl;
         sout << offset;
       }
