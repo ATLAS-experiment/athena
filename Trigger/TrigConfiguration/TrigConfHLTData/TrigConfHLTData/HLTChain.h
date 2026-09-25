@@ -36,7 +36,7 @@ namespace TrigConf {
    public:
 
       /**@brief default constructor*/
-      HLTChain( void );
+      HLTChain() = default;
 
       /**@brief constructor with configuration data
        *
@@ -117,18 +117,12 @@ namespace TrigConf {
       void addStream(HLTStreamTag*);
       void clearStreams();
       const std::vector<HLTStreamTag*>& streams() const { return m_streams; }
-      #ifndef __GCCXML__
-      const std::vector<HLTStreamTag*>& streamTagList() const __attribute__ ((deprecated)) { return m_streams; }  //deprecated
-      #endif
       const std::vector<HLTStreamTag*>& streams_orig() const { return m_streams_orig; }
       std::pair<bool, float> stream_prescale(const std::string& streamName) const;
 
 
       // groups
       const std::set<std::string>& groups() const { return m_groups; }
-      #ifndef __GCCXML__
-      const std::set<std::string>& groupList() const __attribute__ ((deprecated)) { return m_groups; }
-      #endif
       void addGroup(const std::string& group) { m_groups.insert(group); }
       void clearGroups() { m_groups.clear(); }
 
@@ -143,9 +137,6 @@ namespace TrigConf {
       float                  prescale() const { return prescales().prescale(); }
       float                  pass_through() const { return prescales().pass_through(); }
       std::pair<bool, float> rerun_prescale(const std::string& targetName) const { return prescales().getRerunPrescale(targetName); }
-      #ifndef __GCCXML__
-      float                  rerun_prescale() const __attribute__ ((deprecated)) { return prescales().getRerunPrescale("").second; }
-      #endif
 
       inline bool operator<(const HLTChain& e) const {
          return m_level[0]>e.m_level[0] || 
@@ -169,15 +160,15 @@ namespace TrigConf {
    private:
 
 
-      unsigned int      m_chain_hash_id{};       //!< hash value from m_chain_name, this is used to identify the chain in the HLTResult
-      int               m_chain_counter{};       //!< chain counter
-      int               m_chain_version{};       //!< chain version
+      unsigned int      m_chain_hash_id{0};       //!< hash value from m_chain_name, this is used to identify the chain in the HLTResult
+      int               m_chain_counter{0};       //!< chain counter
+      int               m_chain_version{0};       //!< chain version
       std::string       m_level;               //!< trigger level
       std::string       m_lower_chain_name;    //!< name of the lower trigger chain (or the LVL1 trigger item)
-      int               m_lower_chain_counter{}; //!< counter of the lower trigger chain (or the ID of the LVL1 trigger item)
+      int               m_lower_chain_counter{0}; //!< counter of the lower trigger chain (or the ID of the LVL1 trigger item)
       std::vector<int>  m_lower_chain_counters;//!< counters of the lower trigger items if more than 1
-      unsigned int      m_lower_chain_hash_id{}; //!< hash value from m_lower_chain_name, this is used to match to a chain from the previous trigger level
-      int               m_EB_after_step{};       //!< EB_after_step flag 
+      unsigned int      m_lower_chain_hash_id{0}; //!< hash value from m_lower_chain_name, this is used to match to a chain from the previous trigger level
+      int               m_EB_after_step{-1};       //!< EB_after_step flag
       std::vector<size_t> m_leg_multiplicities;//!< Number of objects required per leg. NOTE: Run3 only quantity
       HLTPrescale       m_prescales;
 

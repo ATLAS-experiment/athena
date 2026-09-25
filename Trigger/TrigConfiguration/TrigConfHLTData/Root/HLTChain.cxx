@@ -25,18 +25,6 @@ bool HLTChain_lt(const TrigConf::HLTChain* ch1, const TrigConf::HLTChain* ch2) {
    else { return ch1==0; }
 }
 
-TrigConf::HLTChain::HLTChain() :
-   TrigConfData(),
-   m_chain_hash_id(0),
-   m_chain_counter(0),
-   m_chain_version(0),
-   m_level(""),
-   m_lower_chain_name(""),
-   m_lower_chain_counter(0),
-   m_lower_chain_hash_id(0),
-   m_EB_after_step(-1)
-{}
-
 HLTChain::HLTChain( const string& chain_name,
                     int chain_counter,
                     int chain_version,
