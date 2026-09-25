@@ -17,7 +17,7 @@ For more details please refer to [the manual](https://twiki.cern.ch/twiki/bin/vi
 This package defines a special format called SKIM, which allows skimming of PHYS and PHYSLITE to be done on the command line, rather than having to define a new format with its own config file. The usage is as follows:
 
 ```
-Derivation_tf.py --CA --inputDAOD_PHYSLITEFile DAOD_PHYSLITE.pool.root --outputD2AODFile output.pool.root --formats SKIM --skimmingExpression "count(AnalysisMuons.pt > (1 * GeV)) >= 1" --skimmingContainers xAOD::MuonContainer/AnalysisMuons
+Derivation_tf.py --inputDAOD_PHYSLITEFile DAOD_PHYSLITE.pool.root --outputD2AODFile output.pool.root --formats SKIM --skimmingExpression "count(AnalysisMuons.pt > (1 * GeV)) >= 1" --skimmingContainers xAOD::MuonContainer/AnalysisMuons
 ``` 
 
 The skimming expression, which must be enclosed in quote marks, uses exactly the same synatx as the other DAOD formats (e.g. it is read by the same ExpressionEvaluation tool). This means that, should a user wish to apply the same skimming to PHYS/PHYSLITE as was applied to their old DAOD, they can use the same selection string, as long as they change the container names in the case of PHYSLITE.  

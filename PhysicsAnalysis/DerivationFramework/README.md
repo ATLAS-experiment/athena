@@ -72,7 +72,7 @@ To run a format that is already defined you need to do the following:
 
 ```bash
 export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase
-Derivation_tf.py --CA --inputAODFile input.AOD.pool.root --outputDAODFile output.pool.root --formats PHYS
+Derivation_tf.py --inputAODFile input.AOD.pool.root --outputDAODFile output.pool.root --formats PHYS
 ```
 
 `PHYS` can be replaced with any of the format names. In particular you can experiment with the test formats `TEST{1-6}` defined and described in the [DerivationFrameworkExamples](https://gitlab.cern.ch/atlas/athena/-/tree/main/PhysicsAnalysis/DerivationFramework/DerivationFrameworkExamples) package.
@@ -399,7 +399,7 @@ You can add as many triggers as you like to the list, and as the name suggests i
 The framework has a special format `SKIM`, which allows skimming of PHYS and PHYSLITE input to be done on the command line, rather than having to define a new format with its own config file. The usage is as follows:
 
 ```bash
-Derivation_tf.py --CA --inputDAOD_PHYSLITEFile DAOD_PHYSLITE.pool.root --outputD2AODFile output.pool.root --formats SKIM --skimmingExpression "count(AnalysisMuons.pt > (1 * GeV)) >= 1" --skimmingContainers xAOD::MuonContainer/AnalysisMuons
+Derivation_tf.py --inputDAOD_PHYSLITEFile DAOD_PHYSLITE.pool.root --outputD2AODFile output.pool.root --formats SKIM --skimmingExpression "count(AnalysisMuons.pt > (1 * GeV)) >= 1" --skimmingContainers xAOD::MuonContainer/AnalysisMuons
 ```
 
 The skimming expression, which must be enclosed in quote marks, uses exactly the same synatx as the other DAOD formats (e.g. it is processe by the same [ExpressionEvaluation](https://indico.cern.ch/getFile.py/access?contribId`4&resId`0&materialId`slides&confId`273466) tool). This means that, should a user wish to apply the same skimming to PHYS/PHYSLITE as was applied to their old DAOD, they can use the same selection string, as long as they change the container names in the case of PHYSLITE.
@@ -584,17 +584,17 @@ Refer to the class definitions for further information.
 
 You can run the derivation framework on the Grid, via the following pAthena command:
 
-`pathena --trf "Derivation_tf.py --CA --inputAODFile=%IN --outputDAODFile=%OUT.pool.root --maxEvents=5000 --skipEvents=0 --formats=PHYSLITE" --inDS INPUTDATASET --outDS OUTPUTDATASET`
+`pathena --trf "Derivation_tf.py --inputAODFile=%IN --outputDAODFile=%OUT.pool.root --maxEvents=5000 --skipEvents=0 --formats=PHYSLITE" --inDS INPUTDATASET --outDS OUTPUTDATASET`
 
 e.g.
 
-`pathena --trf "Derivation_tf.py --CA --inputAODFile=%IN --outputDAODFile=%OUT.pool.root --maxEvents=5000 --skipEvents=0 --formats=PHYSLITE" --inDS mc20_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.merge.AOD.e6337_s3681_r12960_r12963 --outDS user.username.410470.PHYSLITE_CA_v2`
+`pathena --trf "Derivation_tf.py --inputAODFile=%IN --outputDAODFile=%OUT.pool.root --maxEvents=5000 --skipEvents=0 --formats=PHYSLITE" --inDS mc20_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.merge.AOD.e6337_s3681_r12960_r12963 --outDS user.username.410470.PHYSLITE_CA_v2`
 
 ## Special instructions for running from EVNT
 
 Running the truth derivations (TRUTH0, TRUTH1, TRUTH3) from EVNT requires the use of the flag `--inputEVNTFile`, as follows:
 
-`Derivation_tf.py --CA --inputEVNTFile evnt.pool.root --outputDAODFile test.pool.root --formats TRUTH3`
+`Derivation_tf.py --inputEVNTFile evnt.pool.root --outputDAODFile test.pool.root --formats TRUTH3`
 
 See [TruthDAOD](https://twiki.cern.ch/twiki/bin/view/AtlasProtected/TruthDAOD) for more information.
 
