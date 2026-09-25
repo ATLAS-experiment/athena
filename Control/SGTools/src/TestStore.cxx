@@ -22,6 +22,18 @@ namespace SGTest {
 TestStore store;
 
 
+TestStore::TestStore (StoreID::type id /*= StoreID::EVENT_CONTEXT*/)
+  : m_id (id)
+{
+}
+
+
+StoreID::type TestStore::storeID() const
+{
+  return m_id;
+}
+
+
 std::vector<const SG::DataProxy*> TestStore::proxies() const
 {
   std::cout << "proxies\n"; std::abort();
