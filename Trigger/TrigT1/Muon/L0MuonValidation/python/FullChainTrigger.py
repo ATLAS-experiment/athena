@@ -46,7 +46,7 @@ if __name__ == "__main__":
             name="L0MuonRPCSim",
             OutputLevel=DEBUG))
 
-    from L0MuonS1TGC.L0MuonS1TGCConfig import L0MuonTGCSimCfg
+    from L1MuonS1TGC.L0MuonS1TGCConfig import L0MuonTGCSimCfg
     acc.merge(L0MuonTGCSimCfg(flags,
         configureHistSvc=False,
         OutputLevel=DEBUG))

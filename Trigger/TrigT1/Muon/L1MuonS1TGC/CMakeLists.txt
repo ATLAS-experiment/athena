@@ -1,10 +1,10 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
-atlas_subdir( L0MuonS1TGC )
+atlas_subdir( L1MuonS1TGC )
 
 find_package( Boost COMPONENTS unit_test_framework )
 
-atlas_add_component( L0MuonS1TGC
+atlas_add_component( L1MuonS1TGC
                      src/*.cxx
                      src/components/*.cxx
                      LINK_LIBRARIES AthenaBaseComps AthenaMonitoringKernelLib
@@ -21,5 +21,5 @@ atlas_add_test( TgcL0MdtCandidateSelector_test
   POST_EXEC_SCRIPT nopost.sh )
 
 atlas_add_test( L0MuonS1TGCConfig
-                SCRIPT python -m L0MuonS1TGC.L0MuonS1TGCConfig
+                SCRIPT python -m L1MuonS1TGC.L0MuonS1TGCConfig
                 POST_EXEC_SCRIPT nopost.sh )
