@@ -293,6 +293,7 @@ def createActsConfigFlags():
     actscf.addFlag("Acts.GNN.TightSeeds", False)
     actscf.addFlag("Acts.GNN.MinCandidateMeasurements", 7)
     actscf.addFlag("Acts.GNN.EdgeCut", 0.5)
+    actscf.addFlag("Acts.GNN.NumFeatures", 12)  # input features per spacepoint, 4 for pixel-only models
     actscf.addFlag("Acts.GNN.RelaxCentralHoleSel", False)
     actscf.addFlag("Acts.GNN.RelaxMeasurementSel", True)
     actscf.addFlag("Acts.GNN.OfflineZ0Sel", False)

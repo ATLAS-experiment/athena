@@ -337,6 +337,7 @@ def ActsGnnPipelineToolCfg(flags,
     kwargs.setdefault('maxGpuInstances', flags.Acts.GNN.MaxGpuInstances)
     kwargs.setdefault('edgeCut', flags.Acts.GNN.EdgeCut)
     kwargs.setdefault('minCandidateMeasurements', flags.Acts.GNN.MinCandidateMeasurements)
+    kwargs.setdefault('numFeatures', flags.Acts.GNN.NumFeatures)
 
     acc.setPrivateTools(CompFactory.ActsTrk.GnnPipelineTool(name, **kwargs))
     return acc

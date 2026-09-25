@@ -64,6 +64,10 @@ class GnnPipelineTool : public extends<AthAlgTool, IGnnPipelineTool> {
       "Minimum number of spacepoints to cut for in the GNN candidates"};
   Gaudi::Property<int> m_cudaDeviceIndex{this, "cudaDeviceIndex", 0,
                                          "CUDA device index for GNN inference"};
+  Gaudi::Property<unsigned int> m_numFeatures{
+      this, "numFeatures", 12,
+      "Number of input features per spacepoint: 12 (spacepoint and both strip "
+      "clusters) or 4 (spacepoint only, pixel-only models)"};
 
   const Acts::Logger& logger() const { return *m_logger; }
   std::unique_ptr<const Acts::Logger> m_logger;
