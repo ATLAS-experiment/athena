@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCONFDATA_L1CONNECTOR_H
@@ -92,9 +92,6 @@ namespace TrigConf {
       const TrigConf::TriggerLine & triggerLine( const std::string & lineName ) const;
 
       bool legacy() const { return m_isLegacy; }
-      
-      [[deprecated("Use legacy() instead.")]]
-      bool isLegacy() const { return m_isLegacy; }
       
       std::size_t maxFpga() const { return m_maxFpga; }
 
