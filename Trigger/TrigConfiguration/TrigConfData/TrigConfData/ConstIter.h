@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCONFDATA_CONSTITER_H
@@ -95,8 +95,6 @@ namespace TrigConf {
 
 /**
  * @brief Iterator traits for the above iterator
- * 
- * note that the @c std::iterator will be deprecated in C++17
  */
 namespace std {
     template<typename V, typename T>
