@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PersistentDataModel/AthenaAttributeList.h"
+#include <print>
 
 AthenaAttributeList::AthenaAttributeList() : coral::AttributeList()
 {}
@@ -14,11 +15,11 @@ AthenaAttributeList::AthenaAttributeList(const coral::AttributeListSpecification
 {}
 
 void AthenaAttributeList::print(std::ostream& os) const {
-  os << "{";
+  std::print (os, "{{");
   for (coral::AttributeList::const_iterator itr=this->begin();
       itr!=this->end();++itr) {
-    if (itr!=this->begin()) os << ",";
+    if (itr!=this->begin()) std::print (os, ",");
     itr->toOutputStream(os);
   }
-  os << "}";
+  std::print (os, "}}");
 }
