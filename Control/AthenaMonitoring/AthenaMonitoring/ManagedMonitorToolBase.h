@@ -10,39 +10,21 @@
 #include <map>
 #include <set>
 
-#include "AthenaBaseComps/AthAlgTool.h"
+#include "GaudiKernel/ITHistSvc.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/StatusCode.h"
 
+#include "AthenaBaseComps/AthAlgTool.h"
 #include "AthenaMonitoring/AthenaMonManager.h"
+#include "AthenaMonitoring/IDQFilterTool.h"
 #include "AthenaMonitoring/IMonitorToolBase.h"
 #include "AthenaMonitoring/ITriggerTranslatorTool.h"
-#include "StoreGate/ReadCondHandleKey.h"
-
 #include "LumiBlockData/LuminosityCondData.h"
 #include "LumiBlockData/LBDurationCondData.h"
 #include "LumiBlockData/TrigLiveFractionCondData.h"
-
+#include "StoreGate/ReadCondHandleKey.h"
 #include "TrigDecisionInterface/ITrigDecisionTool.h"
-
-class EventContext;
-class IInterface;
-class ISvcLocator;//not needed
-class TGraph;
-class TH1;
-class TH2;
-class TTree;
-class ITHistSvc;
-class TEfficiency;
-namespace Trig {
-   class ITrigDecisionTool;
-}
-class IDQFilterTool;
-
-#include <cctype>
-#include <ctime>
-#include <sstream>
 
 #include "TGraph.h"
 #include "TH1.h"
@@ -50,14 +32,10 @@ class IDQFilterTool;
 #include "TTree.h"
 #include "TEfficiency.h"
 
-#include "GaudiKernel/IHistogramSvc.h"
-#include "GaudiKernel/IMessageSvc.h"
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/MsgStream.h"
-
-#include "AthenaMonitoring/IDQFilterTool.h"
-#include "GaudiKernel/ITHistSvc.h"
-
+class EventContext;
+namespace Trig {
+   class ITrigDecisionTool;
+}
 
 /**
  * Provides functionality for users to implement
@@ -70,28 +48,6 @@ class ManagedMonitorToolBase : public AthAlgTool, virtual public IMonitorToolBas
 {
    public:
 
-
-      /**
-       * An enumeration describing how detailed a particular monitoring object is.
-       *
-       *  summary:   used to summarize the state of the system
-       *
-       *  runstat:   same as summary
-       *
-       *  shift:     used to flag potential problems
-       *
-       *  expert:    essential for diagnosing problems identified by shift-level objects
-       *
-       *  debug:     useful for standalone debugging, but not for routine monitoring;
-       *             not essential for diagnosing problems during normal running
-       *
-       *  transient: too detailed to ever be written; always summarized by the user
-       *             by means of another object
-       */
-
-      // enum LevelOfDetail_t { summary = 0, runstat = 0, shift, expert, debug, transient };
-
-
       /**
        * An enumeration describing the interval over which a particular monitoring object
        * is filled (i.e., interval over which the method Fill(...) is called).
@@ -102,17 +58,9 @@ class ManagedMonitorToolBase : public AthAlgTool, virtual public IMonitorToolBas
        * to all available data.  The 'lumiBlock' and 'fill' intervals are only valid for
        * the 'collisions' DataType_t.
        */
-        
-       
-      // Old version of Interval_t.
-      // Must be removed after testing is done, 
-       
       enum Interval_t { file = 0, eventsBlock, lumiBlock,
          lowStat, medStat, higStat,
          run, fill, all };
-      
-         
-      //enum Interval_t { lowStat, lumiBlock, run};
 
       /**
        * An enumeration describing how the class handles the histogram.
@@ -239,7 +187,6 @@ class ManagedMonitorToolBase : public AthAlgTool, virtual public IMonitorToolBas
 
 
             inline const std::string&  system()   const { return m_system; }
-            //inline LevelOfDetail_t     level()    const { return m_level; }
             inline Interval_t          interval() const { return m_interval; }
             inline MgmtAttr_t          histo_mgmt() const { return m_histo_mgmt; }
             inline const std::string&  chain()    const { return m_chain; }
@@ -292,7 +239,6 @@ class ManagedMonitorToolBase : public AthAlgTool, virtual public IMonitorToolBas
             inline MonGroup() { }
             ManagedMonitorToolBase*  m_tool;
             std::string              m_system;
-            //LevelOfDetail_t          m_level;
             Interval_t               m_interval;
             MgmtAttr_t               m_histo_mgmt;
             std::string              m_chain;
@@ -352,21 +298,6 @@ class ManagedMonitorToolBase : public AthAlgTool, virtual public IMonitorToolBas
              */ 
             static void parseString(const std::string& streamName, std::string& root, std::string& rem); 
       };
-
-
-      /**
-       * Converts a LevelOfDetail_t to a string of the same name.
-       */
-
-      //static std::string levelOfDetailEnumToString( LevelOfDetail_t level, bool useOnlineConventions = false );
-
-
-      /**
-       * Converts a string to the corresponding LevelOfDetail_t.
-       */
-
-      //static LevelOfDetail_t levelOfDetailStringToEnum( const std::string& str );
-
 
       /**
        * Converts a Interval_t to a string of the same name.
@@ -702,7 +633,6 @@ class ManagedMonitorToolBase : public AthAlgTool, virtual public IMonitorToolBas
             OutputMetadata& operator= (const OutputMetadata&) = delete;
 
             virtual void fill( const std::string& name,
-                  //LevelOfDetail_t level,
                   Interval_t interval,
                   std::string trigger,
                   std::string merge );
