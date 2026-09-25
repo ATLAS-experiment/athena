@@ -38,7 +38,7 @@ Hist::~Hist()
 ////////////////////////////
 StatusCode Hist::initialize()
 {
-  ATH_MSG_INFO ("Initializing " << name() << "...");
+  ATH_MSG_INFO ("Initializing {}...", name());
   ATH_CHECK( m_histSvc.retrieve() );
   ATH_CHECK( m_evt.initialize() );
 
@@ -55,14 +55,14 @@ StatusCode Hist::initialize()
 
 StatusCode Hist::finalize()
 {
-  ATH_MSG_INFO ("Finalizing " << name() << "...");
+  ATH_MSG_INFO ("Finalizing {}...", name());
 
   return StatusCode::SUCCESS;
 }
 
 StatusCode Hist::execute(const EventContext& ctx)
 {  
-  ATH_MSG_DEBUG ("Executing " << name() << "...");
+  ATH_MSG_DEBUG ("Executing {}...", name());
 
   // get event data...
   SG::ReadHandle<xAOD::EventInfo> evt( m_evt , ctx);
@@ -72,7 +72,7 @@ StatusCode Hist::execute(const EventContext& ctx)
   } 
   
   int event = evt->eventNumber();
-  ATH_MSG_INFO("   EventInfo:  r: " << event << " e: " << evt->eventNumber() );
+  ATH_MSG_INFO("   EventInfo:  r: {} e: {}", event, evt->eventNumber() );
 
   // fill the histogram
   m_hist->Fill( float(event), 1.);

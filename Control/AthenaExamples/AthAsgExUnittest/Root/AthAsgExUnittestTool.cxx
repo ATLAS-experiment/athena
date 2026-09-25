@@ -5,13 +5,14 @@
 
 // AthAsgExUnittest includes
 #include "AthAsgExUnittestTool.h"
+#include "Gaudi/PropertyFmt.h"
 
 AthAsgExUnittestTool::AthAsgExUnittestTool( const std::string& name ) : asg::AsgTool( name ) {
 }
 
 StatusCode AthAsgExUnittestTool::initialize() {
-  ATH_MSG_INFO( "Initializing " << name() << "..." );
-  ATH_MSG_INFO( "Property = " << m_nProperty );
+  ATH_MSG_INFO( "Initializing {}...", name() );
+  ATH_MSG_INFO( "Property = {}", m_nProperty );
   //
   //Make use of the property values to configure the tool
   //Tools should be designed so that no method other than setProperty is called before initialize
