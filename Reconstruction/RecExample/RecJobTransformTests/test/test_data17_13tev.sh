@@ -11,7 +11,7 @@ INPUTFILE=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestF
 CONDTAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN2_DATA)")
 GEOTAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN2)")
 
-Reco_tf.py  --CA --multithreaded --maxEvents 300 \
+Reco_tf.py --multithreaded --maxEvents 300 \
 --inputBSFile="${INPUTFILE}" --conditionsTag="${CONDTAG}" --geometryVersion="${GEOTAG}" \
 --preExec="flags.DQ.Steering.doHLTMon=False" --ignoreErrors 'False' \
 --ignorePatterns 'LArRawDataReadingAlg.+ERROR.+Found.+unsupported.+Rod.+block.+type.+0|LArRawDataReadingAlg.+\|.+ERROR.+\|.|ERROR.+message.+limit.+LArRawDataReadingAlg.' \

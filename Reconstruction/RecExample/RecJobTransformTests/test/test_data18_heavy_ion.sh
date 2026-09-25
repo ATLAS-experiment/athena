@@ -12,7 +12,7 @@ INPUTFILE=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestF
 CONDTAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN2_DATA)")
 GEOTAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN2)")
 
-Reco_tf.py --CA --multithreaded --maxEvents=20 \
+Reco_tf.py --multithreaded --maxEvents=20 \
 --inputBSFile="${INPUTFILE}" --conditionsTag="${CONDTAG}" --geometryVersion="${GEOTAG}" \
 --steering='doRAWtoALL' \
 --preInclude="all:HIRecConfig.HIModeFlags.HImode" \

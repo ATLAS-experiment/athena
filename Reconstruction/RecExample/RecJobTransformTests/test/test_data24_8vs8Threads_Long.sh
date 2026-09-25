@@ -15,7 +15,7 @@ CONDTAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditi
 GEOTAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
 
 mkdir runOne; cd runOne
-Reco_tf.py --CA --athenaopts="--threads=8"  --preExec "${preExecString}" \
+Reco_tf.py --athenaopts="--threads=8"  --preExec "${preExecString}" \
 --conditionsTag="${CONDTAG}" --geometryVersion="${GEOTAG}" --inputBSFile="${INPUTFILE}" \
 --outputAODFile=myAOD.pool.root --maxEvents=1627 | tee athenarunOne.log
 rc1=${PIPESTATUS[0]}
@@ -24,7 +24,7 @@ echo "art-result: $rc1 runOne"
 
 cd ../
 mkdir runTwo; cd runTwo
-Reco_tf.py --CA --athenaopts="--threads=8" --preExec "${preExecString}" \
+Reco_tf.py --athenaopts="--threads=8" --preExec "${preExecString}" \
 --conditionsTag="${CONDTAG}" --geometryVersion="${GEOTAG}" --inputBSFile="${INPUTFILE}" \
 --outputAODFile=myAOD.pool.root --maxEvents=1627 | tee athenarunTwo.log
 rc2=${PIPESTATUS[0]}
