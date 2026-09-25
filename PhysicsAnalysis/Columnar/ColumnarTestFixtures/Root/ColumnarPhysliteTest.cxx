@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -931,7 +931,7 @@ namespace columnar
 
         // WARNING: absolutely do not switch the next line to a
         // reference, the pointed to element gets deleted below.
-        const auto offsetName = iter->second.offsetName;
+        const auto & offsetName = iter->second.offsetName;
         if (offsetName.empty())
           throw std::runtime_error ("missing offset column for: " + outputColumns.at(0).name);
 
@@ -1094,7 +1094,7 @@ namespace columnar
 
         if (iter->second.offsetName != outputColumns.at(1).name)
           throw std::runtime_error ("offset name mismatch: " + iter->second.offsetName + " != " + outputColumns.at(1).name);
-        for (auto keyColumn : columnData.connect (iter->second, offsetColumns, requestedColumns))
+        for (const auto & keyColumn : columnData.connect (iter->second, offsetColumns, requestedColumns))
         {
           outputColumns.push_back ({.name = keyColumn, .primary = false, .enabled = true});
           requestedColumns.erase (keyColumn);
@@ -1320,7 +1320,7 @@ namespace columnar
 
         if (iter->second.offsetName != outputColumns.at(1).name)
           throw std::runtime_error ("offset name mismatch: " + iter->second.offsetName + " != " + outputColumns.at(1).name);
-        for (auto keyColumn : columnData.connect (iter->second, offsetColumns, requestedColumns))
+        for (const auto & keyColumn : columnData.connect (iter->second, offsetColumns, requestedColumns))
         {
           outputColumns.push_back ({.name = keyColumn, .primary = false, .enabled = true});
           requestedColumns.erase (keyColumn);
@@ -1441,7 +1441,7 @@ namespace columnar
         if (iter->second.offsetName != outputColumns.at(1).name)
           throw std::runtime_error ("offset name mismatch: " + iter->second.offsetName + " != " + outputColumns.at(1).name);
 
-        for (auto keyColumn : columnData.connect (iter->second, offsetColumns, requestedColumns))
+        for (const auto & keyColumn : columnData.connect (iter->second, offsetColumns, requestedColumns))
         {
           outputColumns.push_back ({.name = keyColumn, .primary = false, .enabled = true});
           requestedColumns.erase (keyColumn);
@@ -1580,7 +1580,7 @@ namespace columnar
         if (iter->second.offsetName != outputColumns.at(1).name)
           throw std::runtime_error ("offset name mismatch: " + iter->second.offsetName + " != " + outputColumns.at(1).name);
 
-        for (auto keyColumn : columnData.connect (iter->second, offsetColumns, requestedColumns))
+        for (const auto & keyColumn : columnData.connect (iter->second, offsetColumns, requestedColumns))
         {
           outputColumns.push_back ({.name = keyColumn, .primary = false, .enabled = true});
           requestedColumns.erase (keyColumn);
@@ -1708,7 +1708,7 @@ namespace columnar
        if (iter->second.offsetName != outputColumns.at(1).name)
           throw std::runtime_error ("offset name mismatch: " + iter->second.offsetName + " != " + outputColumns.at(1).name);
 
-        for (auto keyColumn : columnData.connect (iter->second, offsetColumns, requestedColumns))
+        for (const auto & keyColumn : columnData.connect (iter->second, offsetColumns, requestedColumns))
         {
           outputColumns.push_back ({.name = keyColumn, .primary = false, .enabled = true});
           requestedColumns.erase (keyColumn);
@@ -2344,7 +2344,6 @@ namespace columnar
 
        for (const auto& field : desc.GetTopLevelFields()) 
        {
-          auto fieldName = field.GetFieldName();
           fields.emplace(desc.GetQualifiedFieldName(field.GetId()), field.GetId());
 
          std::vector<ROOT::DescriptorId_t> subFieldIds{field.GetId()};
@@ -2612,7 +2611,7 @@ namespace columnar
           return false;
         }
       }
-      usedColumns.push_back(myColumn);
+      usedColumns.push_back(std::move(myColumn));
       return true;
     });
     if (!unclaimedColumns.empty()) 
