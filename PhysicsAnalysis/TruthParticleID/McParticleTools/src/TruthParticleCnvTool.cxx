@@ -34,8 +34,6 @@
 // GeneratorObjects includes
 #include "GeneratorObjects/HepMcParticleLink.h"
 
-#include "SGTools/CurrentEventStore.h"
-
 
 /////////////////////////////////////////////////////////////////// 
 /// Public methods: 
@@ -224,12 +222,12 @@ TruthParticleCnvTool::convert( const McEventCollection * mcCollection,
     return StatusCode::RECOVERABLE;
   }
 
-  IProxyDict* sg = SG::CurrentEventStore::store();
+  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   /// Get GenEvent from McEventCollection
   ATH_MSG_DEBUG("Retrieve the GenEvent from given McEventCollection");
   const HepMC::GenEvent * evt = (*mcCollection)[genEventIndex];
-  container->setGenEvent( mcCollection, genEventIndex, sg );
+  container->setGenEvent( mcCollection, genEventIndex, ctx );
 
   // reserve enough space for the container so we don't have to relocate it
   container->reserve( container->size() + evt->particles_size() );
@@ -261,7 +259,7 @@ TruthParticleCnvTool::convert( const McEventCollection * mcCollection,
       ATH_MSG_ERROR("TruthParticle is not wrapping the GenParticle : " 
 		    << hepMcPart << " !!");
     }
-    HepMcParticleLink mcLink( bc, genEventIndex, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE, sg ); // FIXME barcode-based
+    HepMcParticleLink mcLink( bc, genEventIndex, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE, ctx ); // FIXME barcode-based
     bcToMcPart[ mcLink.compress() ] = mcPart;
 
   }//> end loop over particles
