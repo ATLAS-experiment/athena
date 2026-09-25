@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetSimEvent/TRTUncompressedHit.h"
@@ -15,6 +15,7 @@
 
 // Gaudi
 #include "GaudiKernel/MsgStream.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 
 // Athena
 #include "TruthUtils/MagicNumbers.h"
@@ -296,8 +297,8 @@ void TRT_HitCollectionCnv_p3::persToTrans(const TRT_HitCollection_p3* persCont, 
   unsigned int idxBC=0, idxId=0, endHit=0, endBC=0, endId=0;
 
   // Assume that all Hits should be linked to the hard-scatter GenEvent
-  IProxyDict *sg = SG::CurrentEventStore::store();
-  const int event_number = HepMcParticleLink::getEventNumberAtPosition (0, sg);
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  const int event_number = HepMcParticleLink::getEventNumberAtPosition (0, ctx);
 
   //
   // loop over strings - index [i]
@@ -483,7 +484,7 @@ void TRT_HitCollectionCnv_p3::persToTrans(const TRT_HitCollection_p3* persCont, 
         // - For charged particles kinEne is *zero*!
         //
 
-        HepMcParticleLink partLink(persCont->m_barcode[idxBC], event_number, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE, sg);
+        HepMcParticleLink partLink(persCont->m_barcode[idxBC], event_number, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE, ctx);
         if ( HepMC::BarcodeBased::is_truth_suppressed_pileup(static_cast<int>(persCont->m_barcode[idxBC])) ) {
           partLink.setTruthSuppressionType(EBC_PU_SUPPRESSED);
         }
