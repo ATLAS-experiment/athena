@@ -18,7 +18,7 @@ Reco_tf.py \
     --geometrySQLite True \
     --geometrySQLiteFullPath "${GEOMODEL_DB_FILE}" \
     --conditionsTag "default:${ATLAS_CONDDB_TAG}" \
-    --preExec "all:flags.Scheduler.CheckDependencies=True;flags.Scheduler.ShowDataDeps=True;flags.Scheduler.ShowDataFlow=True;flags.Scheduler.ShowControlFlow = True;flags.Detector.EnablePLR=False;flags.Detector.EnableBCMPrime=False;flags.Acts.TrackingGeometry.UseBlueprint = True;flags.Acts.doLargeRadius=False;flags.Muon.scheduleActsReco = True;" \
+    --preExec "all:flags.Common.MsgSuppression=True;flags.Scheduler.CheckDependencies=True;flags.Scheduler.ShowDataDeps=True;flags.Scheduler.ShowDataFlow=True;flags.Scheduler.ShowControlFlow = True;flags.Detector.EnablePLR=False;flags.Detector.EnableBCMPrime=False;flags.Acts.TrackingGeometry.UseBlueprint = True;flags.Acts.doLargeRadius=False;flags.Muon.scheduleActsReco = True;" \
     --postExec "default:flags.dump(evaluate=True);cfg.printConfig(withDetails=True, summariseProps=True);" \
     --postInclude 'all:PyJobTransforms.UseFrontier' \
     --outputESDFile myESD.pool.root \
