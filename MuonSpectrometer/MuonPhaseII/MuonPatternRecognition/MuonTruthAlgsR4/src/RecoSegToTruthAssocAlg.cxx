@@ -57,13 +57,13 @@ namespace MuonR4 {
         for (const SegmentWithTruth& matchMe : recoSegMatches) {
             const xAOD::MuonSegment* bestMatch{nullptr};
             unsigned int bestCount{0};
-            ATH_MSG_DEBUG("Try to match segment in "<<Muon::MuonStationIndex::chName(matchMe.segment->chamberIndex())
+            ATH_MSG_DEBUG("Try to match segment in "<<matchMe.segment->chamberIndex()
                         <<", eta: "<<matchMe.segment->etaIndex()<<", sector: "<<matchMe.segment->sector());
             for (const SegmentWithTruth& truthCand :  truthSegMatches) {
-                unsigned int candCount = countMatches(matchMe.hits, truthCand.hits);
+                const unsigned candCount = countMatches(matchMe.hits, truthCand.hits);
                 if (candCount > bestCount) {
                     ATH_MSG_VERBOSE("Found new candidate with better matches "<<bestCount<<" vs. "<<candCount);
-                    candCount = bestCount;
+                    bestCount = candCount;
                     bestMatch = truthCand.segment;
                 }
             }
