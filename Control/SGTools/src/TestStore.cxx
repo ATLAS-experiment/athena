@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file SGTools/src.TestStore.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -13,8 +11,9 @@
 
 #include "SGTools/TestStore.h"
 #include "AthenaKernel/DataBucketBase.h"
-#include <iostream>
+#include "AthenaKernel/proxyDictFromEventContext.h"
 #include <algorithm>
+#include <iostream>
 
 
 namespace SGTest {
@@ -247,6 +246,7 @@ void TestStore::alias (SG::DataProxy* proxy,
 void initTestStore ATLAS_NOT_THREAD_SAFE ()
 {
   SG::CurrentEventStore::setStore (&store);
+  Atlas::setProxyDictInEventContext (&store);
 }
 
 
@@ -254,6 +254,7 @@ std::unique_ptr<TestStore> getTestStore()
 {
   auto store = std::make_unique<TestStore>();
   SG::CurrentEventStore::setStore (store.get());
+  Atlas::setProxyDictInEventContext (store.get());
   return store;
 }
 
