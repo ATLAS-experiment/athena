@@ -416,8 +416,10 @@ int vtcfit( VKVertex * vk) {
     dphi[kt] = trk->phi()   - phi_ini;     // Precision
     dphi[kt]-= phip;
     drho[kt] = trk->invR()  - invR_ini;
-    while(dphi[kt] >  M_PI)dphi[kt]-=2.*M_PI;
-    while(dphi[kt] < -M_PI)dphi[kt]+=2.*M_PI;
+    // protection against very rare divergent Newton step
+    int nPhiWrap = 0;
+    while(dphi[kt] >  M_PI){ dphi[kt]-=2.*M_PI; if(++nPhiWrap > 1000) return -21; }
+    while(dphi[kt] < -M_PI){ dphi[kt]+=2.*M_PI; if(++nPhiWrap > 1000) return -21; }
 
 
     /*   derivatives (deriv1) of perigee param. w.r.t. X,Y,Z (vertex) uu=Q, vv=R */
