@@ -1186,7 +1186,7 @@ ExampleCond.ExampleCondTool                         DEBUG In connectOutput
 ExampleCond.ExampleCondTool                         DEBUG Connected to SimplePoolFile4.root
 ExampleCond.ExampleCondTool                         DEBUG Recorded DataHeader with key  'DataHeaderKey':'ExampleCond'
 ExampleCond                                          INFO Identified a total of 1 objects to write out:
-ExampleCond                                          INFO 0:: ExampleHitContainer#PedestalWriteData#PedestalWriteData
+ExampleCond                                          INFO 1: ExampleHitContainer#PedestalWriteData#PedestalWriteData
 ExampleCond.ExampleCondTool                         DEBUG In streamObjects
 ExampleCond.ExampleCondTool                         DEBUG Get data object with key
 ExampleCond.ExampleCondTool                         DEBUG Found object for type ExampleHitContainer key PedestalWriteData
