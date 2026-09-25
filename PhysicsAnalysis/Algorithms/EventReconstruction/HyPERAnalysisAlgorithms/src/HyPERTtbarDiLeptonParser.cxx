@@ -54,7 +54,7 @@ void HyPERTtbarDiLeptonParser::buildONNXInputs(const HyPERGraph& hyperGraph,
   hyperModel.setInputs<float>(m_l_x_s_name, m_l_x_s_, m_l_x_s_shape);
   // Batch tensor
   m_l_batch_shape = std::vector<int64_t>{static_cast<int64_t>(l_batch_.size())};
-  m_l_batch_ = l_batch_;
+  m_l_batch_ = std::move(l_batch_);
   hyperModel.setInputs<int64_t>(m_l_batch_name, m_l_batch_, m_l_batch_shape);
 
   // Build global input tensor
@@ -76,7 +76,7 @@ void HyPERTtbarDiLeptonParser::buildONNXInputs(const HyPERGraph& hyperGraph,
       }
       e_m.push_back(hyperGraph.getHyperEdgeIndices(j)[i]);
     }
-    l_edge_index_h_.push_back(e_m);
+    l_edge_index_h_.push_back(std::move(e_m));
     h_batch_filled = true;
   }
 
@@ -92,7 +92,7 @@ void HyPERTtbarDiLeptonParser::buildONNXInputs(const HyPERGraph& hyperGraph,
   // Hyperedge batch tensor
   m_l_edge_index_h_batch_shape =
       std::vector<int64_t>{static_cast<int64_t>(l_edge_index_h_batch_.size())};
-  m_l_edge_index_h_batch_ = l_edge_index_h_batch_;
+  m_l_edge_index_h_batch_ = std::move(l_edge_index_h_batch_);
   hyperModel.setInputs<int64_t>(m_l_edge_index_h_batch_name,
                                 m_l_edge_index_h_batch_,
                                 m_l_edge_index_h_batch_shape);

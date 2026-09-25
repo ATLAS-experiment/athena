@@ -154,7 +154,7 @@ namespace MuonR4 {
                     if (meas->type() == xAOD::UncalibMeasType::Other) {
                         continue;
                     }
-                    const auto* mMeas = dynamic_cast<const xAOD::MuonMeasurement*>(meas);
+                    const auto* mMeas = static_cast<const xAOD::MuonMeasurement*>(meas);
                     const Acts::Surface& surf{xAOD::muonSurface(meas)};
                     const double dist{surf.intersect(tgContext, result.position(tgContext), segDir, 
                                                       Acts::BoundaryTolerance::Infinite()).closest().pathLength()};

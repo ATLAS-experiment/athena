@@ -202,6 +202,7 @@ namespace MuonR4 {
                                                                                      globPos, globDir);
                                 const Amg::Vector3D closePoint = bsExtp.position();
                                 const auto rawStIdx = Acts::toUnderlying(stIdx);
+                                //coverity[NEGATIVE_RETURNS]
                                 if (closePoint.perp() > m_seedMaxBsR.value().at(rawStIdx) * m_beamSpotR ||
                                     std::abs(closePoint.z()) >  m_seedMaxBsL.value().at(rawStIdx) * m_beamSpotL){
                                     ATH_MSG_DEBUG("fitSegmentSeed() - Reject parameters "<<Amg::toString(tangentSeedPos)

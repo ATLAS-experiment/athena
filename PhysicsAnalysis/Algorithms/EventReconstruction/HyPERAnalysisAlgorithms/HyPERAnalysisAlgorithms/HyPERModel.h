@@ -6,18 +6,17 @@
 #define HYPERANALYSISALGORITHMS_HYPERMODEL_H
 
 #include <AsgTools/MessageCheckAsgTools.h>  // To access ANA_MSG
-#include <math.h>
+#include "AthOnnxInterfaces/IOnnxRuntimeInferenceTool.h"
+#include "AthOnnxUtils/OnnxUtils.h"
 
 #include <cstddef>
-#include <iostream>
 #include <map>
 #include <string>
 #include <type_traits>
 #include <variant>
 #include <vector>
 
-#include "AthOnnxInterfaces/IOnnxRuntimeInferenceTool.h"
-#include "AthOnnxUtils/OnnxUtils.h"
+
 
 namespace EventReco {
 // @brief The enum class that holds the different topologies that the HyPER
@@ -309,7 +308,7 @@ class HyPERModel {
   const AthOnnx::IOnnxRuntimeInferenceTool* m_toolTrainedOnEven{nullptr};
   const AthOnnx::IOnnxRuntimeInferenceTool* m_toolTrainedOnOdd{nullptr};
 
-  std::map<std::string, std::size_t> m_inputIndex{};
+  std::map<std::string, std::size_t, std::less<>> m_inputIndex{};
   std::vector<BoundInput> m_boundInputs{};
 
   std::vector<HyPEROutputNode> m_outputNodes{};
