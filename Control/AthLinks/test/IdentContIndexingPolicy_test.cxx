@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthLinks/test/IdentContIndexingPolicy_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -16,7 +14,7 @@
 #include <map>
 #include <vector>
 #include <string>
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -73,7 +71,7 @@ private:
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   typedef SG::IdentContIndexingPolicy<Cont> Pol;
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthLinks/test/DataLinkBase_test.cxx
@@ -16,7 +16,7 @@
 #include "AthenaKernel/getMessageSvc.h"
 #include "AthenaKernel/ExtendedEventContext.h"
 #include "GaudiKernel/EventContext.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -75,7 +75,7 @@ void* foocast (SG::DataProxy*)
 
 void test1 (SGTest::TestStore& store)
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   DataLinkBase_test l1;
   assert (l1.isDefault());
@@ -202,7 +202,7 @@ void test1 (SGTest::TestStore& store)
 // toPersistent / toTransient
 void test2 (SGTest::TestStore& store)
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   Foo* foo4 = new Foo(4);
   store.record (foo4, "foo4");
@@ -267,7 +267,7 @@ void test2 (SGTest::TestStore& store)
 // alt store
 void test3 (SGTest::TestStore& store)
 {
-  std::cout << "test3\n";
+  std::println ("test3");
 
   TestStore store2;
 
@@ -279,7 +279,7 @@ void test3 (SGTest::TestStore& store)
 // equality
 void test4 (SGTest::TestStore& store)
 {
-  std::cout << "test4\n";
+  std::println ("test4");
 
   Foo* foo5 = new Foo(5);
 
@@ -307,7 +307,7 @@ void test4 (SGTest::TestStore& store)
 // other
 void test5 (SGTest::TestStore&)
 {
-  std::cout << "test5\n";
+  std::println ("test5");
 
   DataLinkBase_test l1;
   l1.toIdentifiedObject ("foo6", fooclid, 0);

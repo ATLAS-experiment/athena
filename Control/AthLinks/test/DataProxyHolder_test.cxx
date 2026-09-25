@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthLinks/test/DataProxyHolder_test.cxx
@@ -18,7 +18,7 @@
 #include "AthenaKernel/errorcheck.h"
 #include "AthenaKernel/ThinningDecisionBase.h"
 #include "AthenaKernel/ThinningCache.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -57,7 +57,7 @@ void* foocast (SG::DataProxy*)
 
 void test1 (SGTest::TestStore& store)
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   SG::DataProxyHolder h1;
   assert (h1.isDefault());
@@ -160,7 +160,7 @@ void test1 (SGTest::TestStore& store)
 // toPersistent / toTransient
 void test2 (SGTest::TestStore& store)
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   Foo* foo4 = new Foo(4);
   store.record (foo4, "foo4");
@@ -242,7 +242,7 @@ void test2 (SGTest::TestStore& store)
 // alt store
 void test3 (SGTest::TestStore& store)
 {
-  std::cout << "test3\n";
+  std::println ("test3");
 
   TestStore store2;
 
@@ -254,7 +254,7 @@ void test3 (SGTest::TestStore& store)
 // equality
 void test4 (SGTest::TestStore& store)
 {
-  std::cout << "test4\n";
+  std::println ("test4");
 
   Foo* foo5 = new Foo(5);
 
@@ -277,7 +277,7 @@ void test4 (SGTest::TestStore& store)
 // other
 void test5 (SGTest::TestStore& store)
 {
-  std::cout << "test5\n";
+  std::println ("test5");
 
   SG::DataProxyHolder h1;
   TestStore::sgkey_t sgkey6 = store.stringToKey ("foo6", fooclid);
@@ -290,7 +290,7 @@ void test5 (SGTest::TestStore& store)
 // thinning (MT)
 void test6 (SGTest::TestStore& store)
 {
-  std::cout << "test6\n";
+  std::println ("test6");
 
   SG::ThinningCache cache;
 
@@ -335,7 +335,7 @@ void test6 (SGTest::TestStore& store)
 // converting ctor
 void test7 (SGTest::TestStore& store)
 {
-  std::cout << "test7\n";
+  std::println ("test7");
 
   SG::DataProxyHolder dp1;
 

@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthLinks/test/IndexHolder_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -12,13 +10,13 @@
 
 #undef NDEBUG
 #include "AthLinks/tools/IndexHolder.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   SG::IndexHolder<std::string> h;
   assert (!h.isValid());

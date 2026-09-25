@@ -1,10 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
- * @file  AthLinks/test/IsSTLSequence_test.cxx
+ * @file AthLinks/test/IsSTLSequence_test.cxx
  * @author scott snyder
  * @date Aug, 2013
  * @brief Regression test for @c IsSTLSequence.
@@ -18,7 +16,7 @@
 #include <type_traits>
 #include <set>
 #include <cassert>
-#include <iostream>
+#include <print>
 
 
 class V1 : public std::vector<float> {};
@@ -61,7 +59,7 @@ struct Y1
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   assert (SG::IsSTLSequence<std::vector<int> >::value);
   assert (SG::IsSTLSequence<V1>::value);
   assert (SG::IsSTLSequence<std::list<int> >::value);

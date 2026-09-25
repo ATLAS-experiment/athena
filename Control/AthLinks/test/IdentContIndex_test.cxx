@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthLinks/test/IdentContIndex_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -14,13 +12,13 @@
 #undef NDEBUG
 #include "AthLinks/tools/IdentContIndex.h"
 #include <vector>
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   IdentContIndex i1;
   assert (!i1.isValid());

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthLinks/test/DataLink_test.cxx
@@ -19,7 +19,7 @@
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/IProxyDict.h"
 #include "AthenaKernel/getMessageSvc.h"
-#include <iostream>
+#include <print>
 #include <cstdlib>
 #include <cassert>
 
@@ -53,7 +53,7 @@ CLASS_DEF (Bar, barclid, 1)
 
 void test1 (SGTest::TestStore& store)
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   DataLink<Foo> dl1;
   assert (dl1.isDefault());
@@ -247,7 +247,7 @@ public:
 // toTransient, toPersistent
 void test2 (SGTest::TestStore& store)
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   TestStore::sgkey_t sgkey = store.stringToKey ("foo5", fooclid);
   TestStore::sgkey_t sgkeyz = store.stringToKey ("fooz", fooclid);
@@ -336,7 +336,7 @@ void test2 (SGTest::TestStore& store)
 // default store setting
 void test3 (SGTest::TestStore& store)
 {
-  std::cout << "test3\n";
+  std::println ("test3");
 
   TestStore store2;
 
@@ -348,7 +348,7 @@ void test3 (SGTest::TestStore& store)
 // dummy proxy creation.
 void test4 (SGTest::TestStore& store)
 {
-  std::cout << "test4\n";
+  std::println ("test4");
 
   DataLink<Foo> dl1;
   dl1.toIdentifiedObject ("foo20");
@@ -404,7 +404,7 @@ void test4 (SGTest::TestStore& store)
 // references to pointers not in SG.
 void test5 (SGTest::TestStore& store)
 {
-  std::cout << "test5\n";
+  std::println ("test5");
 
   Foo* foo1 = new Foo(101);
   DataLink<Foo> dl1 (foo1);
@@ -436,6 +436,19 @@ void test5 (SGTest::TestStore& store)
 }
 
 
+// C++20 formatting.
+void test_format (SGTest::TestStore& /*store*/)
+{
+  std::println ("test_format");
+
+  DataLink<Foo> dl0;
+  DataLink<Foo> dl2 ("foo2");
+
+  assert (std::format ("{}", dl0) == "(nullLink)");
+  assert (std::format ("{}", dl2) == "@foo2");
+}
+
+
 int main()
 {
   Athena::getMessageSvcQuiet = true;
@@ -446,5 +459,6 @@ int main()
   test3 (*store);
   test4 (*store);
   test5 (*store);
+  test_format (*store);
   return 0;
 }

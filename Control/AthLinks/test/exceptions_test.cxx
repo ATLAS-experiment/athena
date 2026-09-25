@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthLinks/test/exceptions_test.cxx
@@ -11,24 +11,24 @@
 
 #undef NDEBUG
 #include "AthLinks/exceptions.h"
-#include <iostream>
+#include <print>
 
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
-  std::cout << SG::ExcPointerNotInSG((char*)0x1234).what() << "\n";
-  std::cout << SG::ExcCLIDMismatch(123, 456).what() << "\n";
-  std::cout << SG::ExcInvalidLink (123, "key", 765).what() << "\n";
-  std::cout << SG::ExcBadForwardLink (123, 345, "Foo").what() << "\n";
-  std::cout << SG::ExcElementNotFound ("test").what() << "\n";
-  std::cout << SG::ExcInvalidIndex ("test").what() << "\n";
-  std::cout << SG::ExcIndexNotFound ("test").what() << "\n";
-  std::cout << SG::ExcIncomparableEL().what() << "\n";
-  std::cout << SG::ExcBadToTransient().what() << "\n";
-  std::cout << SG::ExcConstStorable (123, "key", 765).what() << "\n";
-  std::cout << SG::ExcBadThinning (123, "key", 765).what() << "\n";
+  std::println ("{}", SG::ExcPointerNotInSG((char*)0x1234).what());
+  std::println ("{}", SG::ExcCLIDMismatch(123, 456).what());
+  std::println ("{}", SG::ExcInvalidLink (123, "key", 765).what());
+  std::println ("{}", SG::ExcBadForwardLink (123, 345, "Foo").what());
+  std::println ("{}", SG::ExcElementNotFound ("test").what());
+  std::println ("{}", SG::ExcInvalidIndex ("test").what());
+  std::println ("{}", SG::ExcIndexNotFound ("test").what());
+  std::println ("{}", SG::ExcIncomparableEL().what());
+  std::println ("{}", SG::ExcBadToTransient().what());
+  std::println ("{}", SG::ExcConstStorable (123, "key", 765).what());
+  std::println ("{}", SG::ExcBadThinning (123, "key", 765).what());
 }
 
 
