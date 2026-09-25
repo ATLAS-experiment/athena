@@ -502,17 +502,6 @@ namespace TrigCompositeUtils {
     const bool suppressMultipleLinksWarning = false);
 
   /**
-   * @deprecated Use the version taking an EventContext as first argument.
-   */
-  template<typename T>
-  [[deprecated("pass EventContext as first argument")]]
-  LinkInfo<T>
-  findLink(const Decision* start,
-    const std::string& linkName,
-    const bool suppressMultipleLinksWarning = false)
-  { return findLink<T>(Gaudi::Hive::currentContext(), start, linkName, suppressMultipleLinksWarning); }
-
-  /**
    * @brief search back the TC links for the object of type T linked to the one of TC (recursively)
    * Populates provided vector with all located links to T of the corresponding linkName.
    * @param[in] ctx EventContext
@@ -535,19 +524,6 @@ namespace TrigCompositeUtils {
     std::set<const xAOD::TrigComposite*>* fullyExploredFrom = nullptr);
 
   /**
-   * @deprecated Use the version taking an EventContext as first argument.
-   */
-  template<typename T>
-  [[deprecated("pass EventContext as first argument")]]
-  void
-  findLinks(const Decision* start,
-    const std::string& linkName,
-    std::vector<LinkInfo<T>>& links,
-    unsigned int behaviour = TrigDefs::allFeaturesOfType,
-    std::set<const xAOD::TrigComposite*>* fullyExploredFrom = nullptr)
-  { return findLinks<T>(Gaudi::Hive::currentContext(), start, linkName, links, behaviour, fullyExploredFrom); }
-
-  /**
    * @brief search back the TC links for the object of type T linked to the one of TC (recursively)
    * This version returns a vector rather than requiring that one be passed to it.
    * @param[in] ctx EventContext
@@ -565,17 +541,6 @@ namespace TrigCompositeUtils {
     const Decision* start,
     const std::string& linkName,
     unsigned int behaviour = TrigDefs::allFeaturesOfType);
-
-  /**
-   * @deprecated Use the version taking an EventContext as first argument.
-   */
-  template<typename T>
-  [[deprecated("pass EventContext as first argument")]]
-  std::vector<LinkInfo<T>>
-  findLinks(const Decision* start,
-    const std::string& linkName,
-    unsigned int behaviour = TrigDefs::allFeaturesOfType)
-  { return findLinks<T>(Gaudi::Hive::currentContext(), start, linkName, behaviour); }
 
   /**
    * @brief Perform a recursive search for ElementLinks of any time and name 'linkName', starting from Decision object 'start'
