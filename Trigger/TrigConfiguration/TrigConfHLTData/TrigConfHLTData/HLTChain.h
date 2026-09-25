@@ -108,7 +108,6 @@ namespace TrigConf {
       // signatures
       std::vector<HLTSignature*>&         signatureList()       { return m_HLTSignatureList; }
       const std::vector<HLTSignature*>&   signatureList() const { return m_HLTSignatureList; }
-      const std::vector<HLTSignature*>&   signatures()    const { return m_HLTSignatureList; }
       unsigned int                        lastStep() const;
       void                                shiftStepCounter(int shift);
 

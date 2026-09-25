@@ -609,7 +609,7 @@ TrigConf::HLTTEUtils::mergeHLTChainList2( HLTFrame& frame) {
          // insert l2 steps at the beginning
          // first need to create a deep copy
          vector<HLTSignature*> l2sig_deepcopy;
-         for(HLTSignature* sig : l2Chain->signatures())
+         for(HLTSignature* sig : l2Chain->signatureList())
             l2sig_deepcopy.push_back(new HLTSignature(*sig));
 
          hltChain->signatureList().insert( hltChain->signatureList().begin(),
