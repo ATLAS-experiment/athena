@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/WriteHandle.icc
@@ -61,9 +61,21 @@ WriteHandle<T>::WriteHandle (const std::string& sgkey,
  */
 template <class T>
 inline
-WriteHandle<T>::WriteHandle(const std::string& sgkey,
-                            const EventContext& ctx)
+WriteHandle<T>::WriteHandle(const std::string& sgkey, const EventContext& ctx)
   : WriteHandle(sgkey, StoreID::storeName(StoreID::EVENT_STORE), ctx)
+{
+}
+
+
+/**
+ * @brief Constructor specifying the key as a string, with data store.
+ * @param sgkey StoreGate key of the referenced object.
+ * @param sg Data store.
+ */
+template <class T>
+inline
+WriteHandle<T>::WriteHandle(const std::string& sgkey, IProxyDict* sg)
+  : VarHandleBase(ClassID_traits<T>::ID(), sgkey, Gaudi::DataHandle::Writer, sg)
 {
 }
 
