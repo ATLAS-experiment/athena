@@ -57,7 +57,7 @@ StatusCode AthenaPoolAddressProviderSvc::preLoadAddresses(StoreID::type storeID,
    ServiceHandle<StoreGateSvc> detectorStoreSvc("DetectorStore", name());
    ATH_CHECK( detectorStoreSvc.retrieve() );
 
-   SG::ReadHandle<DataHeader> dataHeader("CondProxyProvider", detectorStoreSvc->name());
+   SG::ReadHandle<DataHeader> dataHeader("CondProxyProvider", detectorStoreSvc.get());
    if (!dataHeader.isValid()) {
       ATH_MSG_DEBUG("Cannot retrieve DataHeader from DetectorStore.");
       return StatusCode::SUCCESS;
@@ -86,7 +86,7 @@ StatusCode AthenaPoolAddressProviderSvc::loadAddresses(StoreID::type storeID,
    Guid thisFile = Guid::null();
    const DataHeader* dataHeader = nullptr;
    if (dataHeader == nullptr) { // New file (or reading DataHeader)
-      SG::ReadHandle<DataHeader> eventDataHeader(m_dataHeaderKey.value(), eventStore()->name());
+      SG::ReadHandle<DataHeader> eventDataHeader(m_dataHeaderKey.value(), eventStore());
       if (!eventDataHeader.isValid()) {
          ATH_MSG_ERROR("Cannot retrieve DataHeader from StoreGate: " << m_dataHeaderKey);
          return StatusCode::FAILURE;
