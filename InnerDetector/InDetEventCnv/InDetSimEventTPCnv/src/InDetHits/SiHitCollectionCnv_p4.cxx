@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetSimEvent/SiHit.h"
@@ -17,7 +17,7 @@
 #include "GaudiKernel/ThreadLocalContext.h"
 
 // Athena
-#include "AthenaKernel/ExtendedEventContext.h"
+#include "AthenaKernel/proxyDictFromEventContext.h"
 #include "StoreGate/StoreGateSvc.h"
 
 //  * * *  stolen from eflowRec  * * *  //
@@ -80,8 +80,7 @@ void SiHitCollectionCnv_p4::transToPers(const SiHitCollection* transCont, SiHitC
   static const double dRcut = 1.0e-7;
   static const double dTcut = 1.0;
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
-  const IProxyDict* proxy = Atlas::getExtendedEventContext(ctx).proxy();
+  IProxyDict* proxy = Atlas::proxyDictFromEventContext();
   int lastIndex{-1};
   int lastTruthId{-1};
   int lastId = -1;

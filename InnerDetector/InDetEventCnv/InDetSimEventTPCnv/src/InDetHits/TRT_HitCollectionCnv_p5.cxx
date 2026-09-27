@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetSimEvent/TRTUncompressedHit.h"
@@ -18,7 +18,7 @@
 #include "GaudiKernel/ThreadLocalContext.h"
 
 // Athena
-#include "AthenaKernel/ExtendedEventContext.h"
+#include "AthenaKernel/proxyDictFromEventContext.h"
 #include "StoreGate/StoreGateSvc.h"
 
 // Transient(Geant) to Persistent(Disk)
@@ -52,8 +52,7 @@ void TRT_HitCollectionCnv_p5::transToPers(const TRTUncompressedHitCollection* tr
 
   //    if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "In TRT_HitCollectionCnv_p5::transToPers()" << endmsg;
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
-  const IProxyDict* proxy = Atlas::getExtendedEventContext(ctx).proxy();
+  IProxyDict* proxy = Atlas::proxyDictFromEventContext();
   int lastIndex{-1};
   int lastTruthId{-1};
   int lastId = -1;
