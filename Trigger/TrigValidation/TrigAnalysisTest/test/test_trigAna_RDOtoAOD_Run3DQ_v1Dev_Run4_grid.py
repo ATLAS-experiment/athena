@@ -5,8 +5,8 @@
 # art-type: grid
 # art-include: main/Athena/x86_64-el9-gcc15-opt
 # art-include: 24.0/Athena
-# art-input: valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8528_s4369_s4370_r16083_tid42189392_00
-# art-input-nfiles: 1
+# art-input: group.trig-hlt.mc23_valid.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8586_s4680_r17821
+# art-input-nfiles: 2
 # art-athena-mt: 8
 # art-memory: 4096
 # art-output: *.txt
@@ -26,22 +26,22 @@
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 preExec = ';'.join([
-  'flags.Trigger.triggerMenuSetup=\'Dev_pp_run3_v1_TriggerValidation_prescale\'',
+  'flags.Trigger.triggerMenuSetup=\'Dev_pp_run4_v1_TriggerValidation_prescale\'',
   'flags.Trigger.AODEDMSet=\'ESD\'',
 ])
 
 from AthenaConfiguration.TestDefaults import defaultConditionsTags
-conditions = defaultConditionsTags.RUN3_MC
+conditions = defaultConditionsTags.RUN4_MC
 
 rdo2aod = ExecStep.ExecStep('RDOtoAOD')
 rdo2aod.type = 'Reco_tf'
-rdo2aod.input = 'ttbar'
+rdo2aod.input = 'ttbar_pu200_Run4'
 rdo2aod.max_events = 800
 rdo2aod.threads = 8
 rdo2aod.concurrent_events = 8
 rdo2aod.args = '--outputAODFile=AOD.pool.root --steering "doRDO_TRIG"'
 rdo2aod.args += ' --preExec="all:{:s};"'.format(preExec)
-rdo2aod.args += ' --preInclude "all:Campaigns.MC23e"'
+rdo2aod.args += ' --preInclude "all:Campaigns.MC23PhaseIIPileUp200"'
 rdo2aod.args += ' --conditionsTag "default:' + conditions + '"'
 
 dq = ExecStep.ExecStep('Run3DQ')
@@ -51,7 +51,7 @@ dq.input = ''
 # very bad scaling vs number of threads, the more threads, the slower... (ATR-29610)
 dq.args = '--threads=2'
 dq.args += ' --dqOffByDefault'
-dq.args += ' Input.Files="[\'AOD.pool.root\']" DQ.Steering.doHLTMon=True Trigger.triggerMenuSetup=\'Dev_pp_run3_v1_TriggerValidation_prescale\''
+dq.args += ' Input.Files="[\'AOD.pool.root\']" DQ.Steering.doHLTMon=True Trigger.triggerMenuSetup=\'Dev_pp_run4_v1_TriggerValidation_prescale\''
 
 test = Test.Test()
 test.art_type = 'grid'
