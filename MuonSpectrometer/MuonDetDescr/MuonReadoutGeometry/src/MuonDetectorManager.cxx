@@ -426,10 +426,10 @@ namespace MuonGM {
 		  if (thisStation->getStationName()=="BEE") {
 		    double transZ=ALine.getParameter(Parameter::transZ);
 		    if (transZ>0.0) {
-		      cancelBEEOffset=-110.0;
+		      cancelBEEOffset=-111.0;
 		    }
 		    else {
-		      cancelBEEOffset=+110.0;
+		      cancelBEEOffset=+111.0;
 		    }
 		  }
 		}
