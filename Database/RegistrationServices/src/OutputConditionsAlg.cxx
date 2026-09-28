@@ -156,9 +156,9 @@ StatusCode OutputConditionsAlg::finalize() {
   if (nObjects == 0)
     return StatusCode::SUCCESS;
 
-  for (unsigned i=0;const obj_t& objt : objs) {
+  for (unsigned i=1;const obj_t& objt : objs) {
     typeKeys.emplace_back(std::make_pair(objt.type, objt.key));
-    ATH_MSG_INFO(std::format("{}:: {}#{}#{}",i++,objt.type,objt.key,objt.folder));
+    ATH_MSG_INFO(std::format("{}: {}#{}#{}",i++,objt.type,objt.key,objt.folder));
   }
    
 
@@ -354,6 +354,8 @@ StatusCode OutputConditionsAlg::finalize() {
           gt->addTag(objt.folder, objt.tag);
           chai::Container container = tag->buildContainer();
           container[0].push(address_data);
+          //With chai 3.0.0 the line above becomes: 
+          //container.set(0,"PoolRef",address_data);
           tag->addPayload(container, since);
 
         }  // end else single-channel pool storage
