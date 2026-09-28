@@ -46,6 +46,9 @@ if __name__=="__main__":
     flags.IOVDb.GlobalTag="CONDBR2-ES1PA-2023-02"
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
     flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
+    if args.loglevel:
+        from AthenaCommon import Constants
+        flags.Exec.OutputLevel = getattr(Constants, args.loglevel) 
     flags.lock()
 
     isSC=args.SC 
