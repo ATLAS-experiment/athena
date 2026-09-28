@@ -6,7 +6,8 @@
 # art-include: main/Athena/x86_64-el9-gcc15-opt
 # Skipping art-output which has no effect for build tests.
 
-from TrigValTools.TrigValSteering import Test, ExecStep, PyStep, CheckSteps
+from TrigValTools.TrigValSteering import Test, ExecStep, PyStep, CheckSteps, Input
+from AthenaConfiguration.AutoConfigFlags import GetFileMD
 from AthenaConfiguration.TestDefaults import defaultConditionsTags
 import os
 from contextlib import suppress
@@ -25,12 +26,11 @@ rdo2bs.input = 'ttbar_pu200_Run4'
 rdo2bs.max_events = 1
 rdo2bs.args +=  ' --outputBSFile=created.BS'
 rdo2bs.args += f' --conditionsTag="{defaultConditionsTags.RUN4_MC}"'
-rdo2bs.args +=  ' --preExec="flags.Detector.EnableITkStrip=False;flags.ITk.Conditions.PixelTestCablingFallback=True"'
 
 # BSRDO -> RAW step
-# geotag should match the ttbar_pu200_Run4 input file
-# https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigValidation/TrigValTools/share/TrigValInputs.json#L115
-geotag = 'ATLAS-P2-RUN4-04-00-00'
+# geotag must match the ttbar_pu200_Run4 input file
+inputFile = Input.get_input(rdo2bs.input).paths[0]
+geotag = GetFileMD(inputFile).get("GeoAtlas", None)
 
 ex = ExecStep.ExecStep('BSRDOtoRAW')
 ex.type = 'athena'
