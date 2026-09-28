@@ -1369,7 +1369,7 @@ StatusCode TrackingGeometrySvc::buildDetrayGeometry() {
   converterConfig.payloadConverter = std::move(payloadConverter);
 
   ActsPlugins::DetrayGeometryConverter converter(
-      converterConfig,
+      std::move(converterConfig),
       makeActsAthenaLogger(this, "DetrayGeomCnv", std::string("ActsTGSvc")));
 
   ActsPlugins::DetrayGeometryConverter::DetrayGeometry<DetrayMetadata> detrayGeometry{};
