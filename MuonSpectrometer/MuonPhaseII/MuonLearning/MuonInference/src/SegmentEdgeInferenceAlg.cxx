@@ -1,3 +1,6 @@
+/*
+    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 #include "SegmentEdgeInferenceAlg.h"
 #include "InferenceUtils.h"
 #include "AthContainers/ConstDataVector.h"
@@ -9,35 +12,30 @@
 #include "Acts/Utilities/Helpers.hpp"
 #include <algorithm>
 #include <cmath>
-#include <cstdint>
 #include <limits>
 #include <memory>
 #include <numeric>
-#include <unordered_map>
 #include <unordered_set>
 #include <utility>
-#include <vector>
 
 namespace MuonML {
 
 namespace {
 
-// Packs two node indices into one uint64_t map/set key.
-union PairKey {
-  std::uint64_t packed;
-  struct { std::uint32_t second; std::uint32_t first; } node;
-};
-
-std::uint64_t undirectedPairKey(std::size_t first, std::size_t second) {
+std::uint64_t 
+undirectedPairKey(std::size_t first, std::size_t second) {
   if (first > second) std::swap(first, second);
-  const PairKey key{.node = {static_cast<std::uint32_t>(second),
-                              static_cast<std::uint32_t>(first)}};
-  return key.packed;
+  const auto first32 = static_cast<std::uint32_t>(first);
+  const auto second32 = static_cast<std::uint32_t>(second);
+
+  return (static_cast<std::uint64_t>(first32) << 32) | static_cast<std::uint64_t>(second32);
 }
 
-std::pair<std::size_t, std::size_t> unpackPairKey(std::uint64_t key) {
-  const PairKey unpacked{.packed = key};
-  return {unpacked.node.first, unpacked.node.second};
+std::pair<std::size_t, std::size_t>
+unpackPairKey(std::uint64_t key) {
+  const auto first = static_cast<std::uint32_t>(key >> 32);
+  const auto second = static_cast<std::uint32_t>(key);
+  return {first, second};
 }
 
 class DisjointSet {
