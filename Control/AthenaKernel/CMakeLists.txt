@@ -99,6 +99,12 @@ atlas_add_test( DataBucket_test
    LINK_LIBRARIES AthenaKernel SGCoreLib TestTools
    LOG_IGNORE_PATTERN "DataObject 0x" )
 
+atlas_add_test( TypelessDataBucket_test
+   SOURCES
+   test/TypelessDataBucket_test.cxx
+   LINK_LIBRARIES AthenaKernel
+   POST_EXEC_SCRIPT noerror.sh )
+
 atlas_add_test( RCUUpdater_test
    SOURCES test/RCUUpdater_test.cxx
    LINK_LIBRARIES AthenaKernel TestTools )
