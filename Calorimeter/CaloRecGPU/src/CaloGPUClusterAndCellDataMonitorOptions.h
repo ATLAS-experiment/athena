@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -136,6 +136,7 @@ namespace impl
     static T t2s(const TupleT &, T &) { }
   };
   //cppcheck-suppress unknownMacro
+  //cppcheck-suppress syntaxError
   CRGPU_RECURSIVE_MACRO(CRGPU_MACRO_EXPANSION(CALORECGPU_VARSB_EXPANDER, _, 9, 8, 7, 6, 5, 4, 3, 2, 1))
   //If we needed structs with more than 9 elements, just add more numbers to the left in descending order...
 
