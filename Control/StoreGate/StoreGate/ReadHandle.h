@@ -163,7 +163,7 @@ public:
   /**
    * @brief Move constructor.
    */
-  ReadHandle( ReadHandle&& rhs );
+  ReadHandle( ReadHandle&& rhs ) noexcept;
 
 
   /**
@@ -175,7 +175,7 @@ public:
   /**
    * @brief Move operator.
    */
-  ReadHandle& operator=( ReadHandle&& rhs ); 
+  ReadHandle& operator=( ReadHandle&& rhs ) noexcept;
 
 
   //************************************************************************

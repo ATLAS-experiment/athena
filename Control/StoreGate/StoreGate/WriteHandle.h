@@ -159,7 +159,7 @@ public:
   /**
    * @brief Move constructor.
    */
-  WriteHandle( WriteHandle&& rhs );
+  WriteHandle( WriteHandle&& rhs ) noexcept;
 
 
   /**
@@ -171,7 +171,7 @@ public:
   /**
    * @brief Move operator.
    */
-  WriteHandle& operator=( WriteHandle&& rhs );
+  WriteHandle& operator=( WriteHandle&& rhs ) noexcept;
 
 
   /**

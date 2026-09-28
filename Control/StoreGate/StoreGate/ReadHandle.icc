@@ -152,7 +152,7 @@ ReadHandle<T>::ReadHandle(const ReadHandle& h)
  */
 template <class T>
 inline
-ReadHandle<T>::ReadHandle(ReadHandle&& h)
+ReadHandle<T>::ReadHandle(ReadHandle&& h) noexcept
   : VarHandleBase(std::move(h))
 {
 }
@@ -176,7 +176,7 @@ ReadHandle<T>::ReadHandle::operator= (const ReadHandle& h)
 template <class T>
 inline
 ReadHandle<T>& 
-ReadHandle<T>::ReadHandle::operator= (ReadHandle&& h)
+ReadHandle<T>::ReadHandle::operator= (ReadHandle&& h) noexcept
 {
   if (this != &h)
     this->VarHandleBase::operator=(std::move(h));
