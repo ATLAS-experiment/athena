@@ -8,7 +8,6 @@
 #include "AthenaMonitoring/ManagedMonitorToolBase.h"
 
 #include <cctype>
-#include <ctime>
 #include <sstream>
 
 #include "TGraph.h"
@@ -23,7 +22,6 @@
 
 #include "Gaudi/Interfaces/IOptionsSvc.h"
 #include "GaudiKernel/EventContext.h"
-#include "GaudiKernel/IHistogramSvc.h"
 #include "GaudiKernel/IMessageSvc.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/MsgStream.h"
@@ -406,18 +404,6 @@ ManagedMonitorToolBase( const std::string & type, const std::string & name,
      m_supportedIntervalsForRebooking.insert(interval);
    }
 
-   newLowStatInterval = false;
-   newMedStatInterval = false;
-   newHigStatInterval = false;
-   newLowStat = false;
-   newLumiBlock = false;
-   newRun = false;
-   newEventsBlock = false;
-   endOfEventsBlock = false;
-   endOfLowStat = false;
-   endOfLumiBlock = false;
-   endOfRun = false;
-
    m_newLowStatInterval = false;
    m_newMedStatInterval = false;
    m_newHigStatInterval = false;
@@ -460,76 +446,6 @@ streamNameFunction()
    }
    return m_streamNameFcn;
 }
-
-
-/*
-std::string
-ManagedMonitorToolBase::
-levelOfDetailEnumToString( LevelOfDetail_t level, bool useOnlineConventions )
-{
-   std::string str("summary");
-
-   switch( level ) {
-      case transient:
-         str = "transient";
-         break;
-      case debug:
-         str = "debug";
-         break;
-      case expert:
-         str = "expert";
-         break;
-      case shift:
-         str = "shift";
-         break;
-      case summary:
-      default:
-         if(useOnlineConventions)
-            str = "runstat";
-         else
-            str = "summary";
-   }
-
-   if(useOnlineConventions)
-      str = strToUpper( str );
-
-   return str;
-}
-*/
-
-/*
-ManagedMonitorToolBase::LevelOfDetail_t
-ManagedMonitorToolBase::
-levelOfDetailStringToEnum( const std::string& str )
-{
-   std::string lcstr( strToLower(str) );
-
-   if( lcstr == "summary" || lcstr == "runstat" )
-      return summary;
-   else if( lcstr == "shift" )
-      return shift;
-   else if( lcstr == "expert" )
-      return expert;
-   else if( lcstr == "debug" )
-      return debug;
-   else if( lcstr == "transient" )
-      return transient;
-
-   // This is a static method (shared by all instances), so no "this" pointer
-   // is available (needed for msg). Have to use message service directly.
-   if( Imp::s_svcLocator!=0 ) {
-      IMessageSvc* ms(0);
-      StatusCode sc = Imp::s_svcLocator->service( "MessageSvc", ms, true );
-      if( sc.isSuccess() ) {
-         MsgStream log( ms, "ManagedMonitorToolBase::levelOfDetailStringToEnum()" );
-         log << MSG::WARNING << "Unknown ManagedMonitorToolBase::LevelOfDetail_t \""
-            << str << "\", returning \"transient\"" << endmsg;
-      }
-   }
-
-   return transient;
-}
-*/
 
 
 std::string
@@ -753,33 +669,23 @@ fillHists(const EventContext& ctx)
    m_newLowStat = false;
    m_newLumiBlock = false;
    m_newRun = false;
-   newLowStat = false;
-   newLumiBlock = false;
-   newRun = false;
 
    m_newLowStatInterval = false;
    m_newMedStatInterval = false;
    m_newHigStatInterval = false;
-   newLowStatInterval = false;
-   newMedStatInterval = false;
-   newHigStatInterval = false;
-   
+
    m_useTrigger = ( (m_triggerChainProp != "" || m_triggerGroupProp != "")  && (!m_trigDecTool.empty()) );
 
    if( m_manager != 0 ) {
      m_newLumiBlock = ( (m_lastLumiBlock != m_manager->lumiBlockNumber()) || m_manager->forkedProcess());
       m_newRun = ( m_lastRun != m_manager->runNumber() );
-      newLumiBlock = m_newLumiBlock;
-      newRun = m_newRun;
 
       if(m_newRun) {
          m_newLumiBlock = true;
-         newLumiBlock = m_newLumiBlock;
          isNewEventsBlock = true;
       }
 
       m_newEventsBlock = isNewEventsBlock;
-      newEventsBlock = m_newEventsBlock;
 
       if( m_newLumiBlock ) {
          // check if a new LB interval has started
@@ -797,9 +703,6 @@ fillHists(const EventContext& ctx)
             if( ((currentLB-1)/LBsLowStat) != m_lastLowStatInterval ) m_newLowStatInterval = true;
             if( ((currentLB-1)/LBsMedStat) != m_lastMedStatInterval ) m_newMedStatInterval = true;
             if( ((currentLB-1)/LBsHigStat) != m_lastHigStatInterval ) m_newHigStatInterval = true;
-            newLowStatInterval = m_newLowStatInterval;
-            newMedStatInterval = m_newHigStatInterval;
-            newHigStatInterval = m_newHigStatInterval;
          }
       }
 
@@ -819,14 +722,9 @@ fillHists(const EventContext& ctx)
    m_endOfLowStat = m_newLowStatInterval;
    m_endOfLumiBlock = m_newLumiBlock;
    m_endOfRun = m_newRun;
-   endOfEventsBlock = m_newEventsBlock;
-   endOfLowStat = m_newLowStatInterval;
-   endOfLumiBlock = m_newLumiBlock;
-   endOfRun = m_newRun;
 
    // just duplicates m_newLowStatInterval
    m_newLowStat = m_newLowStatInterval; 
-   newLowStat = m_newLowStatInterval; 
 
    if( m_newEventsBlock || m_newLumiBlock || m_newRun ) {
      ATH_MSG_DEBUG("Interval transition processing");
@@ -1267,10 +1165,6 @@ finalHists()
      m_endOfLowStat = true;
      m_endOfLumiBlock = true;
      m_endOfRun = true;
-     endOfEventsBlock = true;
-     endOfLowStat = true;
-     endOfLumiBlock = true;
-     endOfRun = true;
 
      StatusCode sc = procHistograms();
 
@@ -1353,8 +1247,6 @@ StatusCode
 ManagedMonitorToolBase::
 regHist( TH1* h, const MonGroup& group )
 {
-//   ManagedMonitorToolBase_addHistStatistics(this,h);
-
   if (!h)
     return StatusCode::FAILURE;
   
@@ -1520,8 +1412,7 @@ regGraph( TGraph* g, const MonGroup& group )
        std::string streamName = streamNameFunction()->getStreamName( this, group_unmanaged, name, false );
        registerMetadata(streamName, name, group).ignore();
        return m_THistSvc->regGraph( streamName, g );
-       //return m_THistSvc->regGraph( streamName );
-   } 
+   }
 
    // This part of the code deals with UNMANAGED type
    std::string gName = g->GetName();
@@ -1696,7 +1587,6 @@ lbAverageInteractionsPerCrossing (const EventContext& ctx) const
         SG::ReadCondHandle<LuminosityCondData> lumi (m_lumiDataKey, ctx);
         return lumi->lbAverageInteractionsPerCrossing();
     } else {
-        //ATH_MSG_FATAL("! Luminosity tool has been disabled ! lbAverageInteractionsPerCrossing() can't work properly! ");
         ATH_MSG_DEBUG("Warning: lbAverageInteractionsPerCrossing() - luminosity tools are not retrieved or turned on (i.e. EnableLumi = False)");
         return -1.0;
     }
@@ -1716,7 +1606,6 @@ lbInteractionsPerCrossing (const EventContext& ctx) const
         }
         return 0;
     } else {
-        //ATH_MSG_FATAL("! Luminosity tool has been disabled ! lbInteractionsPerCrossing() can't work properly! ");
         ATH_MSG_DEBUG("Warning: lbInteractionsPerCrossing() - luminosity tools are not retrieved or turned on (i.e. EnableLumi = False)");
         return -1.0;
     }
@@ -1732,7 +1621,6 @@ lbAverageLuminosity (const EventContext& ctx) const
         SG::ReadCondHandle<LuminosityCondData> lumi (m_lumiDataKey, ctx);
         return lumi->lbAverageLuminosity();
     } else {
-        //ATH_MSG_FATAL("! Luminosity tool has been disabled ! lbAverageLuminosity() can't work properly! ");
         ATH_MSG_DEBUG("Warning: lbAverageLuminosity() - luminosity tools are not retrieved or turned on (i.e. EnableLumi = False)");
         return -1.0;
     }
@@ -1748,7 +1636,6 @@ lbLuminosityPerBCID (const EventContext& ctx) const
         SG::ReadCondHandle<LuminosityCondData> lumi (m_lumiDataKey, ctx);
         return lumi->lbLuminosityPerBCIDVector().at (ctx.eventID().bunch_crossing_id());
     } else {
-        //ATH_MSG_FATAL("! Luminosity tool has been disabled ! lbLuminosityPerBCID() can't work properly! ");
         ATH_MSG_DEBUG("Warning: lbLuminosityPerBCID() - luminosity tools are not retrieved or turned on (i.e. EnableLumi = False)");
         return -1.0;
     }
@@ -1768,7 +1655,6 @@ lbAverageLivefraction (const EventContext& ctx) const
         SG::ReadCondHandle<TrigLiveFractionCondData> live (m_trigLiveFractionDataKey, ctx);
         return live->lbAverageLiveFraction();
     } else {
-        //ATH_MSG_FATAL("! Luminosity tool has been disabled ! lbAverageLivefraction() can't work properly! ");
         ATH_MSG_DEBUG("Warning: lbAverageLivefraction() - luminosity not availble (i.e. EnableLumi = False)");
         return -1.0;
     }
@@ -1787,7 +1673,6 @@ livefractionPerBCID (const EventContext& ctx) const
         SG::ReadCondHandle<TrigLiveFractionCondData> live (m_trigLiveFractionDataKey, ctx);
         return live->l1LiveFractionVector().at (ctx.eventID().bunch_crossing_id());
     } else {
-        //ATH_MSG_FATAL("! Luminosity tool has been disabled ! livefractionPerBCID() can't work properly! ");
         ATH_MSG_DEBUG("Warning: livefractionPerBCID() - luminosity retrieved available (i.e. EnableLumi = False)");
         return -1.0;
     }
@@ -1802,7 +1687,6 @@ lbLumiWeight (const EventContext& ctx) const
     if (!m_lumiDataKey.empty()) {
         return (lbAverageLuminosity(ctx)*lbDuration(ctx))*lbAverageLivefraction(ctx);
     } else{
-        //ATH_MSG_FATAL("! Luminosity tool has been disabled ! lbLumiWeight() can't work properly! ");
         ATH_MSG_DEBUG("Warning: lbLumiWeight() - luminosity tools are not retrieved or turned on (i.e. EnableLumi = False)");
         return -1.0;
     }
@@ -1822,7 +1706,6 @@ lbDuration (const EventContext& ctx) const
         SG::ReadCondHandle<LBDurationCondData> dur (m_lbDurationDataKey, ctx);
         return dur->lbDuration();
     } else {
-        //ATH_MSG_FATAL("! Luminosity tool has been disabled ! lbDuration() can't work properly! ");
         ATH_MSG_DEBUG("Warning: lbDuration() - luminosity tools are not retrieved or turned on (i.e. EnableLumi = False)");
         return m_defaultLBDuration;
     }
@@ -1839,18 +1722,15 @@ ManagedMonitorToolBase::OutputMetadata::
    : m_charArrSize(100)
    , m_metadata(metadata)
    , m_nameData(0)
-   //, m_levelData(0)
    , m_intervalData(0)
    , m_triggerData(0)
    , m_mergeData(0)
 {
    m_nameData = new char[m_charArrSize];
-   //m_levelData = new char[m_charArrSize];
    m_intervalData = new char[m_charArrSize];
    m_triggerData = new char[m_charArrSize];
    m_mergeData = new char[m_charArrSize];
    m_metadata->Branch( "Name", m_nameData, "Name/C" );
-   //m_metadata->Branch( "LevelOfDetail", m_levelData, "LevelOfDetail/C" );
    m_metadata->Branch( "Interval", m_intervalData, "Interval/C" );
    m_metadata->Branch( "TriggerChain", m_triggerData, "TriggerChain/C" );
    m_metadata->Branch( "MergeMethod", m_mergeData, "MergeMethod/C" );
@@ -1863,7 +1743,6 @@ ManagedMonitorToolBase::OutputMetadata::
    delete [] m_mergeData;
    delete [] m_triggerData;
    delete [] m_intervalData;
-   //delete [] m_levelData;
    delete [] m_nameData;
 }
 
@@ -1871,7 +1750,6 @@ ManagedMonitorToolBase::OutputMetadata::
 void
 ManagedMonitorToolBase::OutputMetadata::
 fill( const std::string& name,
-      //LevelOfDetail_t level,
       Interval_t interval,
       std::string trigger,
       std::string merge )
@@ -1886,7 +1764,6 @@ fill( const std::string& name,
       merge = "<default>";
 
    copyString( m_nameData, name );
-   //copyString( m_levelData, ManagedMonitorToolBase::levelOfDetailEnumToString( level ) );
    copyString( m_intervalData, ManagedMonitorToolBase::intervalEnumToString( interval ) );
    copyString( m_triggerData, trigger );
    copyString( m_mergeData, merge );
@@ -1955,10 +1832,7 @@ ManagedMonitorToolBase::OnlineStream::
 getStreamName( const ManagedMonitorToolBase*, const MonGroup& group, const std::string& objName, bool )
 {
    std::ostringstream streamName;
-   //if( group.level() != ManagedMonitorToolBase::transient ) {
-   //   streamName << "/" << ManagedMonitorToolBase::levelOfDetailEnumToString( group.level(), true ) << "/";
-   //}
-   streamName << "/";   // slash is required for online environment; 
+   streamName << "/";   // slash is required for online environment;
                         // otherwise the output histograms are placed in 'temp' subdirectory
 
    streamName << group.system() << "/" << objName;
@@ -1987,7 +1861,6 @@ getStreamName( const ManagedMonitorToolBase* tool, const MonGroup& group, const 
 {
    std::ostringstream streamName;
 
-   //bool isTemp =    ( group.level() == ManagedMonitorToolBase::transient );
    bool isTemp = false;
 
    bool useRunFolders = group.interval() != all;
@@ -2233,21 +2106,6 @@ namespace {
       }
       return lstr;
    }
-
-
-#if 0
-   std::string strToUpper( const std::string& str )
-   {
-      std::string ustr(str);
-      std::string::const_iterator  from   = str.begin();
-      std::string::const_iterator  strend = str.end();
-      std::string::iterator        to     = ustr.begin();
-      while( from != strend ) {
-         *to++ = toupper(*from++);
-      }
-      return ustr;
-   }
-#endif
 
 } // unnamed namespace
 
