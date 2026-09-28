@@ -5,7 +5,7 @@ atlas_subdir( CoralUtilities )
 
 # External dependencies:
 find_package( CORAL COMPONENTS CoralBase )
-find_package( chai REQUIRED )
+find_package( chai )
 find_package( nlohmann_json )
 find_package( ROOT COMPONENTS Core RIO Tree )
 find_package( ZLIB )

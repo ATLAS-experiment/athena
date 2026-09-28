@@ -9,7 +9,7 @@ find_package( CORAL COMPONENTS CoralBase RelationalAccess )
 find_package( ROOT COMPONENTS Core )
 find_package( nlohmann_json )
 find_package( CrestApi COMPONENTS CrestApi)
-find_package( chai COMPONENTS chai container)
+find_package( chai )
 find_package( Boost COMPONENTS regex timer program_options thread)
 
 # Component(s) in the package:
@@ -17,7 +17,7 @@ atlas_add_library( IOVDbSvcLib
    IOVDbSvc/*.h
    INTERFACE
    PUBLIC_HEADERS IOVDbSvc
-   INCLUDE_DIRS ${COOL_INCLUDE_DIRS} 
+   INCLUDE_DIRS ${COOL_INCLUDE_DIRS}
    LINK_LIBRARIES ${COOL_LIBRARIES} GaudiKernel)
 
 
@@ -29,7 +29,7 @@ atlas_add_component( IOVDbSvc
    ${Boost_LIBRARIES} nlohmann_json::nlohmann_json GaudiKernel
    AthenaBaseComps AthenaKernel StoreGateLib AthenaPoolUtilities
    CoraCool IOVDbDataModel EventInfoUtils GeoModelInterfaces
-   IOVDbMetaDataToolsLib EventInfoMgtLib PoolSvcLib IOVDbSvcLib 
+   IOVDbMetaDataToolsLib EventInfoMgtLib PoolSvcLib IOVDbSvcLib
    CxxUtils DBLock SGTools CrestApi::CrestApiLib chai::chai chai::container)
 
 
@@ -75,7 +75,7 @@ atlas_add_test( IOVDbConn_test
 atlas_add_test( IOVDbStringFunctions_test
    SOURCES test/IOVDbStringFunctions_test.cxx src/IOVDbStringFunctions.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES 
+   LINK_LIBRARIES
    Boost::unit_test_framework
    POST_EXEC_SCRIPT noerror.sh )
 
@@ -125,8 +125,8 @@ atlas_add_test( IOVDbFolder_test
    src/IOVDbStringFunctions.cxx src/IOVDbParser.cxx src/IOVDbConn.cxx
    src/IOVDbFolder.cxx src/IovStore.cxx
    src/ReadFromFileMetaData.cxx src/IOVDbCoolFunctions.cxx src/TagFunctions.cxx
-   src/Cool2Json.cxx src/Base64Codec.cxx  
-   src/IOVDbJsonStringFunctions.cxx src/CoralCrestManager.cxx 
+   src/Cool2Json.cxx src/Base64Codec.cxx
+   src/IOVDbJsonStringFunctions.cxx src/CoralCrestManager.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
    ${ROOT_INCLUDE_DIRS} ${CrestApi_INCLUDE_DIRS}
    LINK_LIBRARIES ${COOL_LIBRARIES} ${CORAL_LIBRARIES}
@@ -147,12 +147,12 @@ atlas_add_test( IovStore_test
 atlas_add_test( Cool2Json_test
    SOURCES test/Cool2Json_test.cxx src/Cool2Json.cxx src/IOVDbConn.cxx
    src/IOVDbParser.cxx src/IOVDbJsonStringFunctions.cxx src/IOVDbStringFunctions.cxx src/FolderTypes.cxx
-   src/Base64Codec.cxx 
+   src/Base64Codec.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
    ${ROOT_INCLUDE_DIRS} CoralUtilities
-   LINK_LIBRARIES ${COOL_LIBRARIES} ${CORAL_LIBRARIES} 
+   LINK_LIBRARIES ${COOL_LIBRARIES} ${CORAL_LIBRARIES}
    ${ROOT_LIBRARIES} GaudiKernel AthenaKernel StoreGateLib CoraCool
-   AthenaPoolUtilities CxxUtils TestTools 
+   AthenaPoolUtilities CxxUtils TestTools
    Boost::unit_test_framework
    POST_EXEC_SCRIPT noerror.sh )
 
@@ -196,4 +196,3 @@ atlas_add_executable( cool_crest_compare
    )
 
 endif()
-

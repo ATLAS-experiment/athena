@@ -6,7 +6,7 @@ atlas_subdir( ITkPixelCabling )
 # External dependencies:
 find_package(Boost COMPONENTS unit_test_framework)
 
-find_package(chai REQUIRED)
+find_package(chai)
 
 # Component(s) in the package:
 atlas_add_library( ITkPixelCablingLib
@@ -18,7 +18,7 @@ atlas_add_library( ITkPixelCablingLib
 
 
 atlas_add_component( ITkPixelCabling
-                     src/ITkPixelCablingAlg.cxx src/components/*.cxx 
+                     src/ITkPixelCablingAlg.cxx src/components/*.cxx
                      LINK_LIBRARIES ITkPixelCablingLib InDetReadoutGeometry PixelReadoutGeometryLib
                      PRIVATE_LINK_LIBRARIES chai::chai AthenaBaseComps GaudiKernel Identifier InDetIdentifier PathResolver StoreGateLib InDetReadoutGeometry PixelReadoutGeometryLib)
 
@@ -27,28 +27,28 @@ atlas_install_runtime(share/*.json)
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 # Tests in the package:
-atlas_add_test( ITkPixelOnlineId_test	
-  SOURCES 
-  test/ITkPixelOnlineId_test.cxx 
-  INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}  
+atlas_add_test( ITkPixelOnlineId_test
+  SOURCES
+  test/ITkPixelOnlineId_test.cxx
+  INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} ITkPixelCablingLib
   POST_EXEC_SCRIPT noerror.sh
 )
 
-atlas_add_test( ITkPixelCablingData_test	
-  SOURCES 
-  test/ITkPixelCablingData_test.cxx 
-  INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}  
+atlas_add_test( ITkPixelCablingData_test
+  SOURCES
+  test/ITkPixelCablingData_test.cxx
+  INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} ITkPixelCablingLib
   POST_EXEC_SCRIPT noerror.sh
 )
 
-atlas_add_test( ITkPixelCablingAlg_test	
-  SOURCES 
-  src/ITkPixelCablingAlg.cxx src/components/*.cxx test/ITkPixelCablingAlg_test.cxx 
-  INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}  
+atlas_add_test( ITkPixelCablingAlg_test
+  SOURCES
+  src/ITkPixelCablingAlg.cxx src/components/*.cxx test/ITkPixelCablingAlg_test.cxx
+  INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} TestTools AthenaBaseComps GaudiKernel
     PathResolver StoreGateLib Identifier IdDictParser ITkPixelCablingLib
-    InDetIdentifier chai::chai 
+    InDetIdentifier chai::chai
   POST_EXEC_SCRIPT noerror.sh
 )
