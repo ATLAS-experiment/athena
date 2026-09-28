@@ -75,9 +75,7 @@ activate_all_collections="\"InDet\" \
         \"InDetActsLowPt\" \
         \"SiSPSeedSegmentsActsConversionStrip\" \
         \"SiSPSeedSegmentsActsLargeRadiusStrip\" \
-	\"SiSPSeedSegmentsActsLowPt\" \
         \"SiSPSeedSegmentsActsLowPtPixel\" \
-        \"SiSPSeedSegmentsActsLowPtStrip\" \
         \"SiSPSeededTracksActsLargeRadius\" \
         \"SiSPSeededTracksActsConversion\" \
         \"SiSPSeededTracksActsLowPt\" \
