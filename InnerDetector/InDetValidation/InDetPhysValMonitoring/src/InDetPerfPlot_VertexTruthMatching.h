@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETPHYSVALMONITORING_INDETPERFPLOT_VERTEXTRUTHMATCHING
@@ -26,6 +26,8 @@
 // Vertex validation:
 #include "InDetTruthVertexValidation/InDetVertexTruthMatchTool.h"
 #include "InDetTruthVertexValidation/InDetVertexTruthMatchUtils.h"
+
+#include "InDetPhysValMonitoring/ResolutionHelper.h"
 
 // std includes
 #include <string>
@@ -90,21 +92,31 @@ private:
     TEfficiency* m_vx_hs_sel_eff_dist_vs_nReco;
     // HS vertex reconstruction efficiency vs n truth vertices
     TEfficiency* m_vx_hs_reco_eff_vs_ntruth;
+    // HS vertex selection efficiency vs PU (actualInteractionsPerCrossing)
+    TEfficiency* m_vx_hs_reco_eff_mu;
     // HS vertex selection efficiency vs n truth vertices
     TEfficiency* m_vx_hs_sel_eff_vs_ntruth;
     // HS vertex reconstruction and selection efficiency vs n truth vertices
     TEfficiency* m_vx_hs_reco_sel_eff_vs_ntruth;
+
+
     // For reco (covariance) resolutions:
     TProfile* m_vx_hs_reco_long_reso;
     TProfile* m_vx_hs_reco_trans_reso;
+
     // For reco-truth resolutions:
+    IDPVM::ResolutionHelper m_resolutionHelper{};
+    IDPVM::ResolutionHelper::methods m_resolutionMethod = IDPVM::ResolutionHelper::iterRMS_convergence;
+
     TH2* m_resHelper_PUdensity_hsVxTruthLong;
     TH1* m_resolution_vs_PUdensity_hsVxTruthLong;
     TH1* m_resmean_vs_PUdensity_hsVxTruthLong;
     TH2* m_resHelper_PUdensity_hsVxTruthTransv;
     TH1* m_resolution_vs_PUdensity_hsVxTruthTransv;
     TH1* m_resmean_vs_PUdensity_hsVxTruthTransv;
-
+    TH2* m_resHelper_mu_hsVxTruthLong;
+    TH1* m_resolution_vs_mu_hsVxTruthLong;
+    TH1* m_resmean_vs_mu_hsVxTruthLong;
 
     TH1* m_vx_hs_z_pull;
     TH1* m_vx_hs_y_pull;
@@ -272,7 +284,6 @@ private:
     static float getRecoLongitudinalReso(const xAOD::Vertex* recoVtx) ;
     static float getRecoTransverseReso(const xAOD::Vertex* recoVtx) ;
     const xAOD::TruthVertex* getTruthVertex(const xAOD::Vertex* recoVtx) const;
-    static void fillResoHist(TH1* resoHist, const TH2* resoHist2D);
     void finalizePlots();
 };
 

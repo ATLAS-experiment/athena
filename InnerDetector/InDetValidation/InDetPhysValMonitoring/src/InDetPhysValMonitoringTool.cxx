@@ -293,7 +293,6 @@ InDetRttPlotConfig InDetPhysValMonitoringTool::getFilledPlotConfig() const{
     rttConfig.doResolutionPlotSecd = false;
     rttConfig.doHitsMatchedTracksPlots = false;
     rttConfig.doHitsFakeTracksPlots = false; 
-    rttConfig.doVertexTruthMatchingPlots = false; 
     rttConfig.doFakesPerAuthor = false;
     rttConfig.doTrackParametersPerAuthor = false;
     rttConfig.doEfficienciesPerAuthor = false;
