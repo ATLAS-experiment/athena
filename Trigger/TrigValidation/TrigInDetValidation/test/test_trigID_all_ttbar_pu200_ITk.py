@@ -4,8 +4,8 @@
 # art-description: art job for all_ttbar_pu200_ITk
 # art-type: grid
 # art-include: main/Athena/x86_64-el9-gcc15-opt
-# art-input: group.trig-hlt.mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4494_r16635
-# art-input-nfiles: 10
+# art-input: group.trig-hlt.mc23_valid.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8586_s4680_r17821
+# art-input-nfiles: 4
 # art-athena-mt: 8
 # art-html: https://idtrigger-val.web.cern.ch/idtrigger-val/TIDAWeb/TIDAart/?jobdir=
 # art-output: *.txt

@@ -112,7 +112,7 @@
         "source": "mc",
         "format": "RDO",
         "paths": [
-            "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/PhaseIIUpgrade/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4494_r16635_tid46493535_00/RDO.46493535._000001.pool.root.1"
+            "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/PhaseIIUpgrade/mc23_valid.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8586_s4680_r17821_tid52143629_00/RDO.52143629._000001.pool.root.1"
         ]
     },
     "bphysics_mumu": {
