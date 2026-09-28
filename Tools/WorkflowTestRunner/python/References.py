@@ -31,7 +31,7 @@ references_map = {
     "q449": "v187",
     "q452": "v90",
     "q454": "v114",
-    "q447": "v20",
+    "q447": "v21",
     # Derivations
     "data_PHYS_Run2": "v98",
     "data_PHYSLITE_Run2": "v56",
