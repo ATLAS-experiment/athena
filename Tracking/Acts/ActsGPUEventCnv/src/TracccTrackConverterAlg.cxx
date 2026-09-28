@@ -31,7 +31,6 @@ StatusCode TracccTrackConverterAlg::initialize()
     ATH_CHECK(m_inputTracksKey.initialize());
     ATH_CHECK(m_outputTracksKey.initialize());
 
-    ATH_CHECK(detStore()->retrieve(m_idMapping, m_geoIdMappingObjectName.value()));
     ATH_CHECK(detStore()->retrieve(m_hostDetector, m_hostDetectorObjectName.value()));
 
     // Build the ACTS-surface <-> ACTS-id lookup map once,
