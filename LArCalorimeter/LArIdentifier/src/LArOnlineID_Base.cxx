@@ -222,25 +222,8 @@ std::string LArOnlineID_Base::feedthrough_name( const HWIdentifier id )const{
 //==================================================================
 std::string LArOnlineID_Base::channel_name( const HWIdentifier id )const{
 //==================================================================
-  std::ostringstream s1;
-  int Nchan = channel(id);
-  int Nslot = slot(id);
-  int Nft   = feedthrough(id);
-  std::string det_barrel_endcap = "NODETE";
-  std::string det_side = "/X-SIDE";
-
-  if( barrel_ec(id) == 0 ) det_barrel_endcap = "BARREL";
-  if( barrel_ec(id) == 1 ) det_barrel_endcap = "ENDCAP";
-  if( pos_neg(id)   == 1 ) det_side = "/A-SIDE";
-  if( pos_neg(id)   == 0 ) det_side = "/C-SIDE";
-
-  s1 << det_barrel_endcap
-     << det_side
-     << "/FT-" << Nft 
-     << "/SLOT-" << Nslot 
-     << "/CHAN-" << Nchan; 
-  return s1.str();
-  //return s2;
+  return std::format("{}/{}-SIDE/FT-{}/SLOT-{}/CHAN-{}",
+      barrel_ec(id)==0 ? "BARREL" : "ENDCAP", pos_neg(id)==1 ? "A" : "C",feedthrough(id),slot(id),channel(id));
 }
 
 

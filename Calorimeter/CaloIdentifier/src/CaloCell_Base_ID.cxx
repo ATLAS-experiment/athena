@@ -251,19 +251,18 @@ CaloCell_Base_ID::get_neighbours(const IdentifierHash caloHashId,
 }
 
 std::string CaloCell_Base_ID::cell_name(const Identifier id) const {
-  std::ostringstream s1;
-  s1 << CaloSampling::getSamplingName(this->calo_sample(id));
-  s1 << (this->pos_neg(id) == 0 ? "/C-SIDE" : "/A-SIDE");
-  if (this->is_tile(id)) {
-    s1 << "/SECTION " << this->section(id) << "/SIDE " << this->side(id)
-       << "/MODULE " << this->module(id) << "/TOWER " << this->tower(id)
-       << "/SAMPLE " << this->sample(id);
 
-  } else {
-    s1 << "/REGION " << this->region(id) << "/IETA " << this->eta(id)
-       << "/iPHI " << this->phi(id);
+  if (this->is_tile(id)) {
+    return std::format("{}/{}-SIDE/SECTION {}/SIDE {}/MODULE {}/TOWER {}/SAMPLE {}",
+        CaloSampling::getSamplingName(this->calo_sample(id)),
+        this->pos_neg(id) == 0 ? "C" : "A", this->section(id), this->side(id),
+        this->module(id), this->tower(id), this->sample(id));
+  } else {  // LAR
+    return std::format("{}/{}-SIDE/REGION {}/IETA {}/IPHI {}",
+                       CaloSampling::getSamplingName(this->calo_sample(id)),
+                       this->pos_neg(id) == 0 ? "C" : "A", this->region(id),
+                       this->eta(id), this->phi(id));
   }
-  return s1.str();
 }
 
 std::string
