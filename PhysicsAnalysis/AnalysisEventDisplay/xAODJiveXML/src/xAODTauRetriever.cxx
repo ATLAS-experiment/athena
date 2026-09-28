@@ -152,7 +152,7 @@ namespace JiveXML {
 
     //This is needed once we know numTracks and associations:
     //If there had been any tracks, add a tag
-    if ((numTracks.size()) != 0){
+    if (nTracks != 0){
       //Calculate average number of tracks per vertex
       double NTracksPerVertex = tracks.size()*1./nTracks;
       std::string tag = "trackIndex multiple=\"" +DataType(NTracksPerVertex).toString()+"\"";

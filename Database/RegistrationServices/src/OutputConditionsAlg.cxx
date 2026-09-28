@@ -236,7 +236,7 @@ StatusCode OutputConditionsAlg::finalize() {
           since = timeToNano(m_par_time1);
         } else {
           iovType = chai::Tag::IovType::RunNumberLumiBlock;
-          since = m_par_run1 << 32 + m_par_lumib1;
+          since = (static_cast<std::uint64_t>(m_par_run1.value()) << 32 )+ m_par_lumib1;
         }
         const CLID clid = objt.proxy->clID();
 
@@ -310,12 +310,12 @@ StatusCode OutputConditionsAlg::finalize() {
             buildDescription("key", objt.key, description);
           }
         }  // end if POOL referenced storage
-
+        static const std::string crestObjTypeStr{"crest-json-single-iov"};
         chai::Tag::Metadata chaiMD{.iovType = iovType,
-                                   .objectType = "crest-json-single-iov",
+                                   .objectType = crestObjTypeStr,
                                    .synchronization = chai::Tag::Synchronization::All,
                                    .status = chai::Tag::Status::Unlocked,
-                                   .nodeDescription = description};
+                                   .nodeDescription = std::move(description)};
 
         
 
