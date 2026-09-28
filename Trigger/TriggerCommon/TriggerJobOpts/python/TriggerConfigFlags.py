@@ -211,6 +211,9 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.doxAODConversion', True,
                   help=('convert Run-1 EDM to xAOD'))
 
+    flags.addFlag('Trigger.useHLTPrefixForRun4', False,
+                  help=('Temporarily re-applies HLT_ as the common chain prefix in Run 4 menus, instead of EF_. For use in transition period.'))
+
     flags.addFlag('Trigger.doOnlineNavigationCompactification', True,
                   help='enable trigger Navigation compactification into a single collection')
 

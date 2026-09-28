@@ -339,6 +339,15 @@ class GenerateMenuMT(metaclass=Singleton):
         # Load Menu
         self.chainsInMenu = menu_module.setupMenu()
 
+        # Temporary HLT->EF migration helper block.
+        # Replaces EF_ with HLT_ just after the menu is read, before it is processed any further.
+        if flags.Trigger.useHLTPrefixForRun4:
+            import dataclasses
+            for grp in self.chainsInMenu:
+                for i, chn in enumerate(self.chainsInMenu[grp]):
+                    if chn.name.startswith("EF_"):
+                        self.chainsInMenu[grp][i] = dataclasses.replace(chn, name="HLT_" + chn.name[3:])
+
         # Filter chains if requested
         if self.chainFilter is not None:
             self.signaturesOverwritten = True
