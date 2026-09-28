@@ -51,7 +51,7 @@ if __name__ == "__main__":
         configureHistSvc=False,
         OutputLevel=DEBUG))
 
-    from L0MuonEndcap.L0MuonEndcapConfig import L0MuonEndcapAlgCfg
+    from L1MuonEndcap.L0MuonEndcapConfig import L0MuonEndcapAlgCfg
     acc.merge(L0MuonEndcapAlgCfg(flags))
 
     if run_mdt_chain:

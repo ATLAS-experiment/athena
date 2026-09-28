@@ -2,8 +2,8 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef L0MUONENDCAP_L0MUONENDCAPALG_H
-#define L0MUONENDCAP_L0MUONENDCAPALG_H
+#ifndef L1MUONENDCAP_L0MUONENDCAPALG_H
+#define L1MUONENDCAP_L0MUONENDCAPALG_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
@@ -40,4 +40,4 @@ class L0MuonEndcapAlg final : public AthReentrantAlgorithm {
 
 }  // namespace L0Muon
 
-#endif  // L0MUONENDCAP_L0MUONENDCAPALG_H
+#endif  // L1MUONENDCAP_L0MUONENDCAPALG_H
