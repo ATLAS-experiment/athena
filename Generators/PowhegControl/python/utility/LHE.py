@@ -362,6 +362,64 @@ def gg4l_emu2all(input_event):
         event_lines += output_line if output_line is not None else input_line
     return (is_event_changed, event_lines)
     
+def gg4l_munue2all(input_event):
+    """!
+    Algorithm specific to gg4l Powheg process, to obtain an inclusive
+    sample starting from the only supported decay mode, 2mu2nue.
+    """
+    is_event_changed = False
+    event_lines = ""
+
+    channels_pdgIds = {}
+    channels_pdgIds["2e2nue"]     = [11,12]
+    channels_pdgIds["2e2numu"]    = [11,14]
+    channels_pdgIds["2e2nutau"]   = [11,16]
+    channels_pdgIds["2mu2nue"]    = [13,12]
+    channels_pdgIds["2mu2numu"]   = [13,14]
+    channels_pdgIds["2mu2nutau"]  = [13,16]
+    channels_pdgIds["2tau2nue"]   = [15,12]
+    channels_pdgIds["2tau2numu"]  = [15,14]
+    channels_pdgIds["2tau2nutau"] = [15,16]
+    
+    channels = ["2e2nue", "2e2numu", "2e2nutau",
+                "2mu2nue", "2mu2numu", "2mu2nutau",
+                "2tau2nue", "2tau2numu", "2tau2nutau"]
+    #probs = [xsec 2e2nue, .., .., xsec 2tau2nutau]
+    probs = np.array([1/9, 1/9, 1/9,
+                      1/9, 1/9, 1/9,
+                      1/9, 1/9, 1/9])
+    cumulative=np.cumsum(probs)
+        
+    for input_line in input_event.splitlines(True):
+        output_line = None
+        try:  # interpret line as a particle
+            tokens = re.split(r"(\s+)", input_line)
+            if len(tokens) < 25: raise ValueError
+            IDUP = int(tokens[2])
+
+            if abs(IDUP) == 13: #this is the muon part
+                if not is_event_changed:
+                    idx = np.searchsorted(cumulative, np.random.uniform())
+                    is_event_changed = True
+                if IDUP > 0:
+                    IDUP = channels_pdgIds[channels[idx]][0]
+                else:
+                    IDUP = -channels_pdgIds[channels[idx]][0]
+                output_line = "".join("".join(tokens[:2])+str(IDUP)+"".join(tokens[3:]))            
+                
+            if abs(IDUP) == 12: #this is the electron neutrino part
+                if not is_event_changed:
+                    idx = np.searchsorted(cumulative, np.random.uniform())
+                    is_event_changed = True
+                if IDUP > 0:
+                    IDUP = channels_pdgIds[channels[idx]][1]
+                else:
+                    IDUP = -channels_pdgIds[channels[idx]][1]
+                output_line = "".join("".join(tokens[:2])+str(IDUP)+"".join(tokens[3:]))
+        except ValueError:  # this is not a particle line
+            pass
+        event_lines += output_line if output_line is not None else input_line
+    return (is_event_changed, event_lines)
 
 def update_XWGTUP_with_reweighted_nominal(input_event, wgtid_for_old_XWGTUP_value = None):
     """! Ensure that XWGTUP is equal to the reweighted nominal."""
