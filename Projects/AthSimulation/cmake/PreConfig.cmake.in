@@ -42,6 +42,7 @@ find_package( nlohmann_json ${_quietFlag} )
 find_package( GTest ${_quietFlag} )
 find_package( Geant4 ${_quietFlag} )
 find_package( Boost ${_quietFlag} COMPONENTS thread regex ) # See ATEAM-1186 for the component selection.
+find_package( chai ${_quietFlag} )
 
 # Clean up.
 unset( _quietFlag )

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CaloCondPhysAlgs )
@@ -8,15 +8,15 @@ find_package( CLHEP )
 find_package( COOL COMPONENTS CoolKernel )
 find_package( CORAL COMPONENTS CoralBase )
 find_package( ROOT COMPONENTS Core Tree )
-find_package(Boost REQUIRED COMPONENTS program_options)
-find_package(chai REQUIRED)
+find_package(Boost COMPONENTS program_options)
+find_package(chai)
 
 # Component(s) in the package:
 atlas_add_component( CaloCondPhysAlgs
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${ROOT_LIBRARIES} ${CORAL_LIBRARIES} ${COOL_LIBRARIES} ${CLHEP_LIBRARIES} CaloCondBlobObjs CaloDetDescrLib CaloGeoHelpers 
+                     LINK_LIBRARIES ${ROOT_LIBRARIES} ${CORAL_LIBRARIES} ${COOL_LIBRARIES} ${CLHEP_LIBRARIES} CaloCondBlobObjs CaloDetDescrLib CaloGeoHelpers
 		             CaloIdentifier AthenaBaseComps AthenaKernel StoreGateLib GaudiKernel LArCablingLib LArElecCalib LArIdentifier TrigDecisionToolLib LArRawConditions LArRecConditions
 		             CaloConditions TileConditionsLib CaloEvent LArRecEvent TileEvent CaloInterfaceLib CaloUtilsLib AthenaPoolUtilities Identifier xAODEventInfo LArHV LArReadoutGeometry LArSimEvent CxxUtils)
 
