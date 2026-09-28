@@ -32,7 +32,7 @@ StatusCode ITkMaterialDecoratorTool::initialize() {
   // (in particular '.json' and '.cbor') is handled by the Json reader.
   if (fullPath.ends_with(".root")) {
     ActsPlugins::RootMaterialDecorator::Config decoratorConfig;
-    decoratorConfig.fileName = fullPath;
+    decoratorConfig.fileName = std::move(fullPath);
     m_matDecorator = std::make_unique<ActsPlugins::RootMaterialDecorator>(
         decoratorConfig, level);
   } else {
