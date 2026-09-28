@@ -67,7 +67,7 @@ public:
   ///////////////////////////////////////////////////////////////////
 protected:
 
-  /// To be called by the derived classes to fill the internal configuration
+  /// To be called to fill the internal configuration
   StatusCode configAthHistogramming ( const ServiceHandle<ITHistSvc>& histSvc,
                                       const std::string& prefix,          const std::string& rootDir,
                                       const std::string& histNamePrefix,  const std::string& histNamePostfix,
@@ -78,33 +78,33 @@ protected:
   // -----------------------
 
   /// Simplify the booking and registering (into THistSvc) of histograms
-  inline TH1* bookGetPointer( const TH1& hist, const std::string& tDir="", const std::string& stream="" );
+  inline TH1* bookGetPointer( const TH1& hist, std::string_view tDir="", std::string_view stream="" );
 
   /// Simplify the booking and registering (into THistSvc) of histograms
-  inline TH1* bookGetPointer( TH1* hist, const std::string& tDir="", const std::string& stream="" );
+  inline TH1* bookGetPointer( TH1* hist, std::string_view tDir="", std::string_view stream="" );
 
   /// Simplify the booking and registering (into THistSvc) of histograms
-  TH1* bookGetPointer( TH1& histRef, const std::string & tDir="", const std::string & stream="" );
+  TH1* bookGetPointer( TH1& histRef, std::string_view tDir="", std::string_view stream="" );
 
 
   /// Simplify the booking and registering (into THistSvc) of histograms
-  inline StatusCode book( const TH1& hist, const std::string& tDir="", const std::string& stream="" );
+  inline StatusCode book( const TH1& hist, std::string_view tDir="", std::string_view stream="" );
 
   /// Simplify the booking and registering (into THistSvc) of histograms
-  inline StatusCode book( TH1* hist, const std::string& tDir="", const std::string& stream="" );
+  inline StatusCode book( TH1* hist, std::string_view tDir="", std::string_view stream="" );
 
   /// Simplify the booking and registering (into THistSvc) of histograms
-  inline StatusCode book( TH1& histRef, const std::string& tDir="", const std::string& stream="" );
+  inline StatusCode book( TH1& histRef, std::string_view tDir="", std::string_view stream="" );
 
 
   ///Simplify the retrieval of registered histograms of any type
-  TH1* hist( std::string_view  histName, const std::string& tDir="", const std::string& stream="" );
+  TH1* hist( std::string_view  histName, std::string_view tDir="", std::string_view stream="" );
 
   ///Simplify the retrieval of registered 2-d histograms
-  inline TH2* hist2d( std::string_view histName, const std::string& tDir="", const std::string& stream="" );
+  inline TH2* hist2d( std::string_view histName, std::string_view tDir="", std::string_view stream="" );
 
   ///Simplify the retrieval of registered 3-d histograms
-  inline TH3* hist3d( std::string_view histName, const std::string& tDir="", const std::string& stream="" );
+  inline TH3* hist3d( std::string_view histName, std::string_view tDir="", std::string_view stream="" );
 
 
   // -----------------------
@@ -112,13 +112,13 @@ protected:
   // -----------------------
 
   /// Simplify the booking and registering (into THistSvc) of TTrees
-  TTree* bookGetPointer( const TTree& treeRef, const std::string & tDir="", const std::string & stream="" );
+  TTree* bookGetPointer( const TTree& treeRef, std::string_view tDir="", std::string_view stream="" );
 
   /// Simplify the booking and registering (into THistSvc) of TTrees
-  inline StatusCode book( const TTree& treeRef, const std::string& tDir="", const std::string& stream="" );
+  inline StatusCode book( const TTree& treeRef, std::string_view tDir="", std::string_view stream="" );
 
   ///Simplify the retrieval of registered TTrees
-  TTree* tree( const std::string& treeName, const std::string& tDir="", const std::string& stream="" );
+  TTree* tree( std::string_view treeName, std::string_view tDir="", std::string_view stream="" );
 
 
   // -----------------------
@@ -126,13 +126,13 @@ protected:
   // -----------------------
 
   /// Simplify the booking and registering (into THistSvc) of TGraphs
-  TGraph* bookGetPointer( const TGraph& graphRef, const std::string & tDir="", const std::string & stream="" );
+  TGraph* bookGetPointer( const TGraph& graphRef, std::string_view tDir="", std::string_view stream="" );
 
   /// Simplify the booking and registering (into THistSvc) of TGraphs
-  inline StatusCode book( const TGraph& graphRef, const std::string& tDir="", const std::string& stream="" );
+  inline StatusCode book( const TGraph& graphRef, std::string_view tDir="", std::string_view stream="" );
 
   ///Simplify the retrieval of registered TGraphs
-  TGraph* graph( const std::string& graphName, const std::string& tDir="", const std::string& stream="" );
+  TGraph* graph( std::string_view graphName, std::string_view tDir="", std::string_view stream="" );
 
 
   // -----------------------
@@ -140,27 +140,27 @@ protected:
   // -----------------------
 
   /// Simplify the booking and registering (into THistSvc) of TEfficiency
-  inline TEfficiency* bookGetPointer( const TEfficiency& eff, const std::string& tDir="", const std::string& stream="" );
+  inline TEfficiency* bookGetPointer( const TEfficiency& eff, std::string_view tDir="", std::string_view stream="" );
 
   /// Simplify the booking and registering (into THistSvc) of TEfficiency
-  inline TEfficiency* bookGetPointer( TEfficiency* eff, const std::string& tDir="", const std::string& stream="" );
+  inline TEfficiency* bookGetPointer( TEfficiency* eff, std::string_view tDir="", std::string_view stream="" );
 
   /// Simplify the booking and registering (into THistSvc) of TEfficiency
-  TEfficiency* bookGetPointer( TEfficiency& effRef, const std::string & tDir="", const std::string & stream="" );
+  TEfficiency* bookGetPointer( TEfficiency& effRef, std::string_view tDir="", std::string_view stream="" );
 
 
   /// Simplify the booking and registering (into THistSvc) of TEfficiency
-  inline StatusCode book( const TEfficiency& eff, const std::string& tDir="", const std::string& stream="" );
+  inline StatusCode book( const TEfficiency& eff, std::string_view tDir="", std::string_view stream="" );
 
   /// Simplify the booking and registering (into THistSvc) of TEfficiency
-  inline StatusCode book( TEfficiency* eff, const std::string& tDir="", const std::string& stream="" );
+  inline StatusCode book( TEfficiency* eff, std::string_view tDir="", std::string_view stream="" );
 
   /// Simplify the booking and registering (into THistSvc) of TEfficiency
-  inline StatusCode book( TEfficiency& effRef, const std::string& tDir="", const std::string& stream="" );
+  inline StatusCode book( TEfficiency& effRef, std::string_view tDir="", std::string_view stream="" );
 
 
   ///Simplify the retrieval of registered TEfficiency
-  TEfficiency* efficiency( const std::string& effName, const std::string& tDir="", const std::string& stream="" );
+  TEfficiency* efficiency( std::string_view effName, std::string_view tDir="", std::string_view stream="" );
 
 
   ///////////////////////////////////////////////////////////////////
@@ -251,7 +251,7 @@ private:
 // Inline methods:
 ///////////////////////////////////////////////////////////////////
 
-inline TH1* AthHistogramming::bookGetPointer( const TH1& hist, const std::string& tDir, const std::string& stream )
+inline TH1* AthHistogramming::bookGetPointer( const TH1& hist, std::string_view tDir, std::string_view stream )
 {
   // We need to create a non-const clone
   TH1* histClone = dynamic_cast< TH1* >( hist.Clone() );
@@ -263,7 +263,7 @@ inline TH1* AthHistogramming::bookGetPointer( const TH1& hist, const std::string
 
 }
 
-inline TH1* AthHistogramming::bookGetPointer( TH1* hist, const std::string& tDir, const std::string& stream )
+inline TH1* AthHistogramming::bookGetPointer( TH1* hist, std::string_view tDir, std::string_view stream )
 {
   if ( !hist ) {
     m_msg << MSG::ERROR << "Got a zero pointer to a TH1 in bookGetPointer" << endmsg;
@@ -272,7 +272,7 @@ inline TH1* AthHistogramming::bookGetPointer( TH1* hist, const std::string& tDir
   return this->bookGetPointer( *hist, tDir, stream );
 }
 
-inline TEfficiency* AthHistogramming::bookGetPointer( const TEfficiency& hist, const std::string& tDir, const std::string& stream )
+inline TEfficiency* AthHistogramming::bookGetPointer( const TEfficiency& hist, std::string_view tDir, std::string_view stream )
 {
   // We need to create a non-const clone
   TEfficiency* histClone = dynamic_cast< TEfficiency* >( hist.Clone() );
@@ -284,7 +284,7 @@ inline TEfficiency* AthHistogramming::bookGetPointer( const TEfficiency& hist, c
 
 }
 
-inline TEfficiency* AthHistogramming::bookGetPointer( TEfficiency* hist, const std::string& tDir, const std::string& stream )
+inline TEfficiency* AthHistogramming::bookGetPointer( TEfficiency* hist, std::string_view tDir, std::string_view stream )
 {
   if ( !hist ) {
     m_msg << MSG::ERROR << "Got a zero pointer to a TEfficiency in bookGetPointer" << endmsg;
@@ -294,7 +294,7 @@ inline TEfficiency* AthHistogramming::bookGetPointer( TEfficiency* hist, const s
 }
 
 
-inline StatusCode AthHistogramming::book( const TH1& hist, const std::string& tDir, const std::string& stream )
+inline StatusCode AthHistogramming::book( const TH1& hist, std::string_view tDir, std::string_view stream )
 {
   // We need to create a non-const clone
   TH1* histClone = dynamic_cast< TH1* >( hist.Clone() );
@@ -305,7 +305,7 @@ inline StatusCode AthHistogramming::book( const TH1& hist, const std::string& tD
   return this->book( *histClone, tDir, stream );
 }
 
-inline StatusCode AthHistogramming::book( TH1* hist, const std::string& tDir, const std::string& stream )
+inline StatusCode AthHistogramming::book( TH1* hist, std::string_view tDir, std::string_view stream )
 {
   if ( !hist ) {
     m_msg << MSG::ERROR << "Got a zero pointer to a TH1" << endmsg;
@@ -315,7 +315,7 @@ inline StatusCode AthHistogramming::book( TH1* hist, const std::string& tDir, co
 }
 
 // Simplify the booking and registering (into THistSvc) of histograms
-inline StatusCode AthHistogramming::book( TH1& histRef, const std::string& tDir, const std::string& stream )
+inline StatusCode AthHistogramming::book( TH1& histRef, std::string_view tDir, std::string_view stream )
 {
   // Call the other Book method and see if it returns a valid pointer
   TH1* histPointer = this->bookGetPointer( histRef, tDir, stream );
@@ -326,7 +326,7 @@ inline StatusCode AthHistogramming::book( TH1& histRef, const std::string& tDir,
   return StatusCode::SUCCESS;
 }
 
-inline StatusCode AthHistogramming::book( const TEfficiency& eff, const std::string& tDir, const std::string& stream )
+inline StatusCode AthHistogramming::book( const TEfficiency& eff, std::string_view tDir, std::string_view stream )
 {
   // We need to create a non-const clone
   TEfficiency* effClone = dynamic_cast< TEfficiency* >( eff.Clone() );
@@ -337,7 +337,7 @@ inline StatusCode AthHistogramming::book( const TEfficiency& eff, const std::str
   return this->book( *effClone, tDir, stream );
 }
 
-inline StatusCode AthHistogramming::book( TEfficiency* eff, const std::string& tDir, const std::string& stream )
+inline StatusCode AthHistogramming::book( TEfficiency* eff, std::string_view tDir, std::string_view stream )
 {
   if ( !eff ) {
     m_msg << MSG::ERROR << "Got a zero pointer to a TEfficiency" << endmsg;
@@ -347,7 +347,7 @@ inline StatusCode AthHistogramming::book( TEfficiency* eff, const std::string& t
 }
 
 // Simplify the booking and registering (into THistSvc) of TEfficiency
-inline StatusCode AthHistogramming::book( TEfficiency& effRef, const std::string& tDir, const std::string& stream )
+inline StatusCode AthHistogramming::book( TEfficiency& effRef, std::string_view tDir, std::string_view stream )
 {
   // Call the other Book method and see if it returns a valid pointer
   TEfficiency* effPointer = this->bookGetPointer( effRef, tDir, stream );
@@ -360,7 +360,7 @@ inline StatusCode AthHistogramming::book( TEfficiency& effRef, const std::string
 
 
 // Simplify the retrieval of registered 2-d histograms
-inline TH2* AthHistogramming::hist2d( std::string_view histName, const std::string& tDir, const std::string& stream )
+inline TH2* AthHistogramming::hist2d( std::string_view histName, std::string_view tDir, std::string_view stream )
 {
   // Get the TH1 pointer
   TH1* th1Pointer = this->hist(histName, tDir, stream);
@@ -377,7 +377,7 @@ inline TH2* AthHistogramming::hist2d( std::string_view histName, const std::stri
 
 
 // Simplify the retrieval of registered 3-d histograms
-inline TH3* AthHistogramming::hist3d( std::string_view histName, const std::string& tDir, const std::string& stream )
+inline TH3* AthHistogramming::hist3d( std::string_view histName, std::string_view tDir, std::string_view stream )
 {
   // Get the TH1 pointer
   TH1* th1Pointer = this->hist(histName, tDir, stream);
@@ -394,7 +394,7 @@ inline TH3* AthHistogramming::hist3d( std::string_view histName, const std::stri
 
 
 // Simplify the booking and registering (into THistSvc) of TTrees
-inline StatusCode AthHistogramming::book( const TTree& treeRef, const std::string& tDir, const std::string& stream )
+inline StatusCode AthHistogramming::book( const TTree& treeRef, std::string_view tDir, std::string_view stream )
 {
   // Call the other Book method and see if it returns a valid pointer
   TTree* treePointer = this->bookGetPointer( treeRef, tDir, stream );

@@ -94,7 +94,7 @@ StatusCode AthHistogramming::configAthHistogramming( const ServiceHandle<ITHistS
 // Simplify the booking and registering (into THistSvc) of histograms
 // =============================================================================
 TH1* 
-AthHistogramming::bookGetPointer( TH1& histRef, const std::string & tDir, const std::string & stream ){
+AthHistogramming::bookGetPointer( TH1& histRef, std::string_view tDir, std::string_view stream ){
   
   const std::string originalName{histRef.GetName()};
   const auto histName = splitName(originalName).second;
@@ -136,7 +136,7 @@ AthHistogramming::bookGetPointer( TH1& histRef, const std::string & tDir, const 
 }
 
 TEfficiency*
-AthHistogramming::bookGetPointer(TEfficiency& effRef, const std::string & tDir, const std::string & stream)
+AthHistogramming::bookGetPointer(TEfficiency& effRef, std::string_view tDir, std::string_view stream)
 {
   std::string originalName{effRef.GetName()};
   const auto effName = splitName(originalName).second;
@@ -179,8 +179,8 @@ AthHistogramming::bookGetPointer(TEfficiency& effRef, const std::string & tDir, 
 // Simplify the retrieval of registered histograms of any type
 // =============================================================================
 TH1*
-AthHistogramming::hist(std::string_view histName, const std::string& tDir,
- const std::string& stream){
+AthHistogramming::hist(std::string_view histName, std::string_view tDir,
+ std::string_view stream){
 
   const auto histBaseName = splitName(histName).second;
   std::string bookingString = buildBookingString(histName, tDir, stream, false);
@@ -211,7 +211,7 @@ AthHistogramming::hist(std::string_view histName, const std::string& tDir,
   return it->second;
 }
 
-TEfficiency* AthHistogramming::efficiency( const std::string& effName, const std::string& tDir, const std::string& stream )
+TEfficiency* AthHistogramming::efficiency( std::string_view effName, std::string_view tDir, std::string_view stream )
 {
   // Build a 32 bit hash out of the name
   const hash_t effHash = this->hash(effName);
@@ -265,7 +265,7 @@ TEfficiency* AthHistogramming::efficiency( const std::string& effName, const std
 // =============================================================================
 // Simplify the booking and registering (into THistSvc) of TTrees
 // =============================================================================
-TTree* AthHistogramming::bookGetPointer( const TTree& treeRef, const std::string & tDir, const std::string & stream )
+TTree* AthHistogramming::bookGetPointer( const TTree& treeRef, std::string_view tDir, std::string_view stream )
 {
   // Get a pointer
   const TTree* treePointer = &treeRef;
@@ -330,7 +330,7 @@ TTree* AthHistogramming::bookGetPointer( const TTree& treeRef, const std::string
 // =============================================================================
 // Simplify the retrieval of registered TTrees
 // =============================================================================
-TTree* AthHistogramming::tree( const std::string& treeName, const std::string& tDir, const std::string& stream )
+TTree* AthHistogramming::tree( std::string_view treeName, std::string_view tDir, std::string_view stream )
 {
   // Build a 32 bit hash out of the name
   const hash_t treeHash = this->hash(treeName);
@@ -371,7 +371,7 @@ TTree* AthHistogramming::tree( const std::string& treeName, const std::string& t
 // =============================================================================
 // Simplify the booking and registering (into THistSvc) of TGraphs
 // =============================================================================
-TGraph* AthHistogramming::bookGetPointer( const TGraph& graphRef, const std::string & tDir, const std::string & stream )
+TGraph* AthHistogramming::bookGetPointer( const TGraph& graphRef, std::string_view tDir, std::string_view stream )
 {
   // Get a pointer
   const TGraph* graphPointer = &graphRef;
@@ -435,7 +435,7 @@ TGraph* AthHistogramming::bookGetPointer( const TGraph& graphRef, const std::str
 // =============================================================================
 // Simplify the retrieval of registered TGraphs
 // =============================================================================
-TGraph* AthHistogramming::graph( const std::string& graphName, const std::string& tDir, const std::string& stream )
+TGraph* AthHistogramming::graph( std::string_view graphName, std::string_view tDir, std::string_view stream )
 {
   // Build a 32 bit hash out of the name
   const hash_t graphHash = this->hash(graphName);
