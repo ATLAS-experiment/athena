@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETSIMDATACNV_P1_H
@@ -17,19 +17,18 @@ Author: Davide Costanzo
 #include "GeneratorObjectsTPCnv/HepMcParticleLinkCnv_p1.h"
 
 class MsgStream;
-class IProxyDict;
+class EventContext;
 
 class InDetSimDataCnv_p1  : public T_AthenaPoolTPCnvBase<InDetSimData, InDetSimData_p1>
 {
 public:
 
-  InDetSimDataCnv_p1();
+  InDetSimDataCnv_p1 (const EventContext& ctx);
   virtual void          persToTrans(const InDetSimData_p1* persObj, InDetSimData* transObj, MsgStream &log);
   virtual void          transToPers(const InDetSimData* transObj, InDetSimData_p1* persObj, MsgStream &log);
-  void setCurrentStore (IProxyDict* store);
 
 private:
-  IProxyDict* m_sg;
+  const EventContext& m_ctx;
   HepMcParticleLinkCnv_p1 HepMcPLCnv;
 };
 

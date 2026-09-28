@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetSimData/InDetSimData.h"
@@ -8,12 +8,12 @@
 #include "InDetSimDataCollectionCnv_p4.h"
 #include "InDetSimDataCnv_p3.h"
 #include "Identifier/Identifier.h"
-#include "SGTools/CurrentEventStore.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 #include "MsgUtil.h"
 
 void InDetSimDataCollectionCnv_p4::transToPers(const InDetSimDataCollection* transCont, InDetSimDataCollection_p4* persCont, MsgStream &log)
 {
-  InDetSimDataCnv_p3  simDataCnv;
+  InDetSimDataCnv_p3  simDataCnv (Gaudi::Hive::currentContext());;
   persCont->m_simdata.resize(transCont->size());
   MSG_DEBUG(log," Preparing " << persCont->m_simdata.size() << "Collections");
   unsigned int collIndex(0);
@@ -30,9 +30,8 @@ void InDetSimDataCollectionCnv_p4::transToPers(const InDetSimDataCollection* tra
 
 void  InDetSimDataCollectionCnv_p4::persToTrans(const InDetSimDataCollection_p4* persCont, InDetSimDataCollection* transCont, MsgStream &log)
 {
-  InDetSimDataCnv_p3  simDataCnv;
+  InDetSimDataCnv_p3  simDataCnv (Gaudi::Hive::currentContext());;
   MSG_DEBUG(log," Preparing " << persCont->m_simdata.size() << "Collections");
-  simDataCnv.setCurrentStore (SG::CurrentEventStore::store());
   for (const auto& persSimDataPair : persCont->m_simdata) {
     // Add in new collection
     const InDetSimData_p3& psimData = persSimDataPair.second;

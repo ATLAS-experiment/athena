@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetSimData/InDetSimData.h"
@@ -13,8 +13,8 @@
 
 using depositIterator = std::vector<InDetSimData::Deposit>::const_iterator;
 
-InDetSimDataCnv_p2::InDetSimDataCnv_p2()
-  : m_sg(nullptr)
+InDetSimDataCnv_p2::InDetSimDataCnv_p2 (const EventContext& ctx)
+  : m_ctx(ctx)
 {
 }
 
@@ -27,7 +27,7 @@ InDetSimDataCnv_p2::persToTrans(const InDetSimData_p2* persObj, InDetSimData* tr
   const unsigned int ndeposits = persObj->m_enDeposits.size();
   deposits.reserve( ndeposits );
   for (unsigned int icount=0; icount < ndeposits; icount++) {
-    HepMcParticleLink mcLink (m_sg);
+    HepMcParticleLink mcLink (m_ctx);
     HepMcPLCnv.persToTrans(&(persObj->m_links[icount]),&mcLink, log);
     deposits.emplace_back (mcLink, persObj->m_enDeposits[icount]);
   }
@@ -51,9 +51,4 @@ InDetSimDataCnv_p2::transToPers(const InDetSimData* transObj, InDetSimData_p2* p
     HepMcPLCnv.transToPers(&(dep[icount].first), &(persObj->m_links[icount]), log);
     persObj->m_enDeposits[icount] = dep[icount].second;
   }
-}
-
-void InDetSimDataCnv_p2::setCurrentStore (IProxyDict* store)
-{
-  m_sg = store;
 }
