@@ -97,12 +97,9 @@ def getPFUnifiedCellLevelMatchingTool(inputFlags,toolName):
 
     if(inputFlags.PF.EOverPMode):
         PFUnifiedCellLevelMatchingTool.nClusterMatchesToUse = -1
-    else:
-        PFUnifiedCellLevelMatchingTool.nClusterMatchesToUse = 1
-
-    if(inputFlags.PF.EOverPMode):
         PFUnifiedCellLevelMatchingTool.PFTrackClusterMatchingTool = getPFTrackClusterMatchingTool(inputFlags,0.2,"EtaPhiSquareDistance","PlainEtaPhi","CalObjBldMatchingTool")
     else:
+        PFUnifiedCellLevelMatchingTool.nClusterMatchesToUse = 1
         PFUnifiedCellLevelMatchingTool.PFTrackClusterMatchingTool = getPFTrackClusterMatchingTool(inputFlags,1.64,"EtaPhiSquareSignificance","GeomCenterEtaPhi","CalObjBldMatchingTool")
 
     PFUnifiedCellLevelMatchingTool.PFTrackClusterMatchingTool_02 = getPFTrackClusterMatchingTool(inputFlags,0.2,"EtaPhiSquareDistance","PlainEtaPhi","MatchingTool_Pull_02")
