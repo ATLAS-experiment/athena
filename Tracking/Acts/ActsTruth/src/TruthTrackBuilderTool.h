@@ -24,8 +24,8 @@ class TruthTrackBuilderTool final : public AthAlgTool {
 
   struct TruthHit {
 
-    const xAOD::UncalibratedMeasurement* hit;
-    Vector3 globalPosition;
+    const xAOD::UncalibratedMeasurement* hit{};
+    Vector3 globalPosition{0., 0., 0.};
   };
 
   using TruthHits = std::vector<TruthHit>;
