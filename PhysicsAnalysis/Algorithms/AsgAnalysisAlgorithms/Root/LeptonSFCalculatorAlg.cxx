@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina <baptiste.ravina@cern.ch>
@@ -38,55 +38,26 @@ namespace CP {
       const xAOD::EventInfo *evtInfo {nullptr};
       ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, syst, ctx));
 
-      const xAOD::ElectronContainer *electrons {nullptr};
-      if (m_electronsHandle) ANA_CHECK(m_electronsHandle.retrieve(electrons, syst, ctx));
-
-      const xAOD::MuonContainer *muons {nullptr};
-      if (m_muonsHandle) ANA_CHECK(m_muonsHandle.retrieve(muons, syst, ctx));
-
-      const xAOD::PhotonContainer *photons {nullptr};
-      if (m_photonsHandle) ANA_CHECK(m_photonsHandle.retrieve(photons, syst, ctx));
-
-      const xAOD::TauJetContainer *taus {nullptr};
-      if (m_tausHandle) ANA_CHECK(m_tausHandle.retrieve(taus, syst, ctx));
-
       double leptonSF {1.};
-      if (m_electronsHandle){
-	for (const xAOD::Electron *el : *electrons) {
-	  if (m_electronSelection.getBool(*el, syst)) {
-	    for (size_t i{}; i < m_electronSFs.size(); i++) {
-	      leptonSF *= m_electronSFs.at(i).get(*el, syst);
-	    }
-	  }
-	}
-      }
-      if (m_muonsHandle){
-        for (const xAOD::Muon *mu : *muons) {
-          if (m_muonSelection.getBool(*mu, syst)) {
-            for (size_t i{}; i < m_muonSFs.size(); i++) {
-              leptonSF *= m_muonSFs.at(i).get(*mu, syst);
+      auto accumulateSFs = [&]<typename T>(CP::SysReadHandle<T>& handle,
+                                           CP::SysReadSelectionHandle& selection,
+                                           CP::SysReadDecorHandleArray<float>& sfs) -> StatusCode {
+        if (!handle) return StatusCode::SUCCESS;
+        const T *particles {nullptr};
+        ANA_CHECK(handle.retrieve(particles, syst, ctx));
+        for (const auto *particle : *particles) {
+          if (selection.getBool(*particle, syst)) {
+            for (size_t i{}; i < sfs.size(); i++) {
+              leptonSF *= sfs.at(i).get(*particle, syst);
             }
           }
         }
-      }
-      if (m_photonsHandle){
-        for (const xAOD::Photon *ph : *photons) {
-          if (m_photonSelection.getBool(*ph, syst)) {
-            for (size_t i{}; i < m_photonSFs.size(); i++) {
-              leptonSF *= m_photonSFs.at(i).get(*ph, syst);
-            }
-          }
-        }
-      }
-      if (m_tausHandle){
-        for (const xAOD::TauJet *tau : *taus) {
-          if (m_tauSelection.getBool(*tau, syst)) {
-            for (size_t i{}; i < m_tauSFs.size(); i++) {
-              leptonSF *= m_tauSFs.at(i).get(*tau, syst);
-            }
-          }
-        }
-      }
+        return StatusCode::SUCCESS;
+      };
+      ANA_CHECK(accumulateSFs(m_electronsHandle, m_electronSelection, m_electronSFs));
+      ANA_CHECK(accumulateSFs(m_muonsHandle, m_muonSelection, m_muonSFs));
+      ANA_CHECK(accumulateSFs(m_photonsHandle, m_photonSelection, m_photonSFs));
+      ANA_CHECK(accumulateSFs(m_tausHandle, m_tauSelection, m_tauSFs));
 
       m_event_leptonSF.set(*evtInfo, leptonSF, syst);
     }

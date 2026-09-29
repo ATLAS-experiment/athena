@@ -16,6 +16,7 @@
 #include <xAODEventInfo/EventInfo.h>
 #include "xAODTruth/TruthEventContainer.h"
 
+#include <memory>
 #include <vector>
 
 namespace LHAPDF{
@@ -34,15 +35,22 @@ namespace CP
         virtual StatusCode execute(const EventContext &ctx) const final; 
 
     private:
-      
+
+      /// \brief deleter for the LHAPDF::PDF objects, defined where the type is complete
+      struct PDFDeleter
+      {
+        void operator() (const LHAPDF::PDF *pdf) const;
+      };
+      using PDFPtr = std::unique_ptr<const LHAPDF::PDF, PDFDeleter>;
+
       SG::ReadHandleKey<xAOD::EventInfo> m_EventInfoKey{
           this, "EventInfoKey", "EventInfo", "EventInfo container to dump"};
 
       SG::ReadHandleKey<xAOD::TruthEventContainer> m_TruthEventKey{
           this, "TruthEvents", "TruthEvents", "TruthEvent container to read"};
 
-      LHAPDF::PDF* m_p0=nullptr; //!
-      std::vector<LHAPDF::PDF*> m_p1_vars;
+      PDFPtr m_p0; //!
+      std::vector<PDFPtr> m_p1_vars;
       Gaudi::Property<std::string> m_inPDF {this, "inPDFName", ""};
       Gaudi::Property<std::vector<std::string>> m_outPDF {this, "outPDFName", {}};
       Gaudi::Property<std::string> m_additionalPdfPath {this, "additionalPdfPath", ""};

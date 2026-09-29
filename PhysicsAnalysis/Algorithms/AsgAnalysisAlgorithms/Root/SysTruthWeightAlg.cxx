@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Miha Muskinja
@@ -8,11 +8,9 @@
 // includes
 //
 
-// EDM include(s):
-#include "xAODTruth/TruthParticleContainer.h"
-
 // Local include(s):
 #include <AsgAnalysisAlgorithms/SysTruthWeightAlg.h>
+#include <AsgDataHandles/ReadHandle.h>
 
 //
 // method implementations
@@ -20,16 +18,6 @@
 
 namespace CP
 {
-SysTruthWeightAlg::SysTruthWeightAlg(const std::string &name, ISvcLocator *pSvcLocator)
-  : AnaAlgorithm(name, pSvcLocator), m_sysTruthWeightTool("PMGTools::PMGHFProductionFractionTool", this)
-{
-  // The truth particle container
-  declareProperty("TruthParticleContainer", m_truthParticleContainer = "TruthParticles");
-
-  // The production fraction rw tool
-  declareProperty("sysTruthWeightTool", m_sysTruthWeightTool);
-}
-
 StatusCode SysTruthWeightAlg::initialize()
 {
   if (m_decoration.empty())
@@ -38,9 +26,10 @@ StatusCode SysTruthWeightAlg::initialize()
       return StatusCode::FAILURE;
   }
 
+  ANA_CHECK(m_truthParticleContainer.initialize());
   ANA_CHECK(m_sysTruthWeightTool.retrieve());
-  ANA_CHECK(m_eventInfoHandle.initialize(m_systematicsList, SG::AllowEmpty));
-  ANA_CHECK(m_decoration.initialize(m_systematicsList, m_eventInfoHandle, SG::AllowEmpty));
+  ANA_CHECK(m_eventInfoHandle.initialize(m_systematicsList));
+  ANA_CHECK(m_decoration.initialize(m_systematicsList, m_eventInfoHandle));
   ANA_CHECK(m_systematicsList.addSystematics(*m_sysTruthWeightTool));
   ANA_CHECK(m_systematicsList.initialize());
 
@@ -51,15 +40,15 @@ StatusCode SysTruthWeightAlg::execute(const EventContext& ctx)
 {
 
   // Retreive the truth particles container
-  const xAOD::TruthParticleContainer *truthParticles = nullptr;
-  ANA_CHECK(evtStore()->retrieve(truthParticles, m_truthParticleContainer));
+  SG::ReadHandle<xAOD::TruthParticleContainer> truthParticles(m_truthParticleContainer, ctx);
+  ANA_CHECK(truthParticles.isValid());
 
   for (const auto &sys : m_systematicsList.systematicsVector())
   {
     const xAOD::EventInfo *eventInfo = nullptr;
     ANA_CHECK(m_eventInfoHandle.retrieve(eventInfo, sys, ctx));
 
-    m_decoration.set(*eventInfo, m_sysTruthWeightTool->getSysWeight(truthParticles, sys), sys);
+    m_decoration.set(*eventInfo, m_sysTruthWeightTool->getSysWeight(truthParticles.cptr(), sys), sys);
   }
 
   // return
