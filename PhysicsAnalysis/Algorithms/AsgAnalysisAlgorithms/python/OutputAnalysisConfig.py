@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -8,10 +8,10 @@ from AthenaCommon.Logging import logging
 import copy, re
 
 class OutputAnalysisConfig (ConfigBlock):
-    """the ConfigBlock for the MET configuration"""
+    """the ConfigBlock for the output ntuple configuration"""
 
     def __init__ (self) :
-        super (OutputAnalysisConfig, self).__init__ ()
+        super().__init__ ()
         self.addOption ('postfix', '', type=str,
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here.")
@@ -95,12 +95,12 @@ class OutputAnalysisConfig (ConfigBlock):
     def branchSortOrder (rule):
         return rule.split('->')[1].strip()
 
-    def createOutputAlgs (self, config, name, vars):
+    def createOutputAlgs (self, config, name, vars, nonContainers):
         """A helper function to create output algorithm"""
         alg = config.createAlgorithm('CP::AsgxAODNTupleMakerAlg', name)
         alg.TreeName = self.treeName
         alg.RootStreamName = self.streamName
-        alg.NonContainers = list(self.nonContainers)
+        alg.NonContainers = list(nonContainers)
         branchList = list(vars)
         branchList.sort(key=self.branchSortOrder)
         branchList_nosys = [branch for branch in branchList if "%SYS%" not in branch]
@@ -114,96 +114,97 @@ class OutputAnalysisConfig (ConfigBlock):
 
         log = logging.getLogger('OutputAnalysisConfig')
 
-        self.containers = dict(self.containers)
-        self.vars = set(self.vars)
-        self.varsOnlyForMC = set(self.varsOnlyForMC)
-        self.varsOnlyForDSIDs = dict(self.varsOnlyForDSIDs)
-        self.metVars = set(self.metVars)
-        self.truthMetVars = set(self.truthMetVars)
+        containers = dict(self.containers)
+        branchVars = set(self.vars)
+        metVars = set(self.metVars)
+        truthMetVars = set(self.truthMetVars)
+        nonContainers = list(self.nonContainers)
+        commands = list(self.commands)
 
         # check for overlaps between containers and containersFullMET
-        overlapping_keys = set(self.containers.keys()).intersection(self.containersFullMET.keys())
+        overlapping_keys = set(containers.keys()).intersection(self.containersFullMET.keys())
         if overlapping_keys:
             # convert the set of overlapping keys to a list of strings for the message (represents the empty string too!)
             keys_message = [repr(key) for key in overlapping_keys]
             raise KeyError(f"containersFullMET would overwrite the following container keys: {', '.join(keys_message)}")
         # move items in self.containersFullMET to containers
-        self.containers.update(self.containersFullMET)
+        containers.update(self.containersFullMET)
 
         # merge the MC-specific branches and containers into the main list/dictionary only if we are not running on data
         if config.dataType() is not DataType.Data:
-            self.vars |= self.varsOnlyForMC
+            branchVars |= set(self.varsOnlyForMC)
 
             # protect 'containers' against being overwritten
             # find overlapping keys
-            overlapping_keys = set(self.containers.keys()).intersection(self.containersOnlyForMC.keys())
+            overlapping_keys = set(containers.keys()).intersection(self.containersOnlyForMC.keys())
             if overlapping_keys:
                 # convert the set of overlapping keys to a list of strings for the message (represents the empty string too!)
                 keys_message = [repr(key) for key in overlapping_keys]
                 raise KeyError(f"containersOnlyForMC would overwrite the following container keys: {', '.join(keys_message)}")
 
-            # move items in self.containersOnlyForMC to self.containers
-            self.containers.update(self.containersOnlyForMC)
+            # move items in self.containersOnlyForMC to containers
+            containers.update(self.containersOnlyForMC)
 
             # now filter the containers depending on DSIDs
             if self.containersOnlyForDSIDs:
                 for container, dsid_filters in self.containersOnlyForDSIDs.items():
-                    if container not in self.containers:
+                    if container not in containers:
                         log.warning("Skipping unrecognised container prefix '%s' for DSID-filtering in OutputAnalysisConfig...", container)
                         continue
                     if not filter_dsids (dsid_filters, config):
                         # if current DSID is not allowed for this container, remove it
                         log.info("Skipping container prefix '%s' due to DSID filtering...", container)
                         # filter branches for validated containers
-                        for var in set(self.vars):  # make a copy of the list to avoid modifying it while iterating
+                        for var in set(branchVars):  # make a copy of the list to avoid modifying it while iterating
                             var_container = var.split('.')[0].replace('_NOSYS', '').replace('_%SYS%', '')
-                            if var_container == self.containers[container]:
-                                self.vars.remove(var)
+                            if var_container == containers[container]:
+                                branchVars.remove(var)
                                 log.info("Skipping branch definition '%s' for excluded container %s...", var, var_container)
                         # filter branches for MET variables
-                        for var in set(self.metVars):  # make a copy of the list to avoid modifying it while iterating
+                        for var in set(metVars):  # make a copy of the list to avoid modifying it while iterating
                             var_container = var.split('.')[0].replace('_NOSYS', '').replace('_%SYS%', '')
-                            if var_container == self.containers[container]:
-                                self.metVars.remove(var)
+                            if var_container == containers[container]:
+                                metVars.remove(var)
                                 log.info("Skipping MET branch definition '%s' for excluded container %s...", var, var_container)
                         # filter branches for truth MET variables
-                        for var in set(self.truthMetVars):  # make a copy of the list to    avoid modifying it while iterating
+                        for var in set(truthMetVars):  # make a copy of the list to    avoid modifying it while iterating
                             var_container = var.split('.')[0].replace('_NOSYS', '').replace('_%SYS%', '')
-                            if var_container == self.containers[container]:
-                                self.truthMetVars.remove(var)
+                            if var_container == containers[container]:
+                                truthMetVars.remove(var)
                                 log.info("Skipping truth MET branch definition '%s' for excluded container %s...", var, var_container)
                         # remove the container from the list at the end
-                        self.containers.pop (container)
+                        containers.pop (container)
             # Filter individual variables depending on DSIDs
             if self.varsOnlyForDSIDs:
                 for var_pattern, dsid_filters in self.varsOnlyForDSIDs.items():
                     if not filter_dsids(dsid_filters, config):
                         # Remove matching variables from user-defined vars collections
-                        for var in set(self.vars):
+                        for var in set(branchVars):
                             if var_pattern in var:
-                                self.vars.remove(var)
+                                branchVars.remove(var)
                                 log.info("Skipping branch definition '%s' due to variable-level DSID filtering...", var)
-                        for var in set(self.metVars):
+                        for var in set(metVars):
                             if var_pattern in var:
-                                self.metVars.remove(var)
+                                metVars.remove(var)
                                 log.info("Skipping MET branch definition '%s' due to variable-level DSID filtering...", var)
-                        for var in set(self.truthMetVars):
+                        for var in set(truthMetVars):
                             if var_pattern in var:
-                                self.truthMetVars.remove(var)
+                                truthMetVars.remove(var)
                                 log.info("Skipping truth MET branch definition '%s' due to variable-level DSID filtering...", var)
 
 
-        for prefix, container in self.containers.items():
+        for prefix, container in containers.items():
             origName = config.getOutputContainerOrigin(container)
             if config.getContainerMeta(origName, "nonContainer", False):
-                self.nonContainers.append(origName)
+                if origName not in nonContainers:
+                    nonContainers.append(origName)
 
         if self.storeSelectionFlags:
-            self.createSelectionFlagBranches(config)
+            self.createSelectionFlagBranches(config, containers)
 
         outputConfigs = {}
-        for prefix in self.containers.keys() :
-            containerName = self.containers[prefix]
+        for prefix in containers.keys() :
+            containerName = containers[prefix]
             outputDict = config.getOutputVars (containerName)
             for outputName in outputDict :
                 outputConfig = copy.deepcopy (outputDict[outputName])
@@ -218,10 +219,10 @@ class OutputAnalysisConfig (ConfigBlock):
         # check for DSID-specific commands
         for dsid, dsid_commands in self.commandsOnlyForDSIDs.items():
             if filter_dsids([dsid], config):
-                self.commands += dsid_commands
+                commands += dsid_commands
 
         outputConfigsRename = {}
-        for command in self.commands :
+        for command in commands :
             words = command.split (' ')
             if len (words) == 0 :
                 raise ValueError ('received empty command for "commands" option')
@@ -297,20 +298,20 @@ class OutputAnalysisConfig (ConfigBlock):
 
         # Unified branch collection for all output formats
         allBranches = set()
-        allBranches |= self.vars
+        allBranches |= branchVars
         allBranches |= autoVars
         # Add MET branches
         userMetVars = set()
-        if self.metVars:
-            for var in self.metVars:
+        if metVars:
+            for var in metVars:
                 userMetVars.add(var + " metTerm=" + self.metTermName)
         allBranches |= userMetVars
         allBranches |= autoMetVars
         # Add truth MET branches (for MC)
         userTruthMetVars = set()
         if config.dataType() is not DataType.Data:
-            if self.truthMetVars:
-                for var in self.truthMetVars:
+            if truthMetVars:
+                for var in truthMetVars:
                     userTruthMetVars.add(var + " metTerm=" + self.truthMetTermName)
             allBranches |= userTruthMetVars
             allBranches |= autoTruthMetVars
@@ -321,7 +322,7 @@ class OutputAnalysisConfig (ConfigBlock):
             alg.TreeName = self.treeName
             alg.RootStreamName = self.streamName
             alg.OutputStreamName = self.streamName
-            alg.NonContainers = list(self.nonContainers)
+            alg.NonContainers = list(nonContainers)
 
             branchList = list(allBranches)
             branchList.sort(key=self.branchSortOrder)
@@ -336,14 +337,14 @@ class OutputAnalysisConfig (ConfigBlock):
         # the auto-flush setting still needs to be figured out
         #treeMaker.TreeAutoFlush = 0
 
-        if self.vars or autoVars:
-            self.createOutputAlgs(config, 'NTupleMaker', self.vars | autoVars)
+        if branchVars or autoVars:
+            self.createOutputAlgs(config, 'NTupleMaker', branchVars | autoVars, nonContainers)
 
-        if self.metVars or autoMetVars:
-            self.createOutputAlgs(config, 'MetNTupleMaker', userMetVars | autoMetVars)
+        if metVars or autoMetVars:
+            self.createOutputAlgs(config, 'MetNTupleMaker', userMetVars | autoMetVars, nonContainers)
 
-        if config.dataType() is not DataType.Data and (self.truthMetVars or autoTruthMetVars):
-            self.createOutputAlgs(config, 'TruthMetNTupleMaker', userTruthMetVars | autoTruthMetVars)
+        if config.dataType() is not DataType.Data and (truthMetVars or autoTruthMetVars):
+            self.createOutputAlgs(config, 'TruthMetNTupleMaker', userTruthMetVars | autoTruthMetVars, nonContainers)
 
         treeFiller = config.createAlgorithm( 'CP::TreeFillerAlg', 'TreeFiller' )
         treeFiller.TreeName = self.treeName
@@ -351,7 +352,7 @@ class OutputAnalysisConfig (ConfigBlock):
 
 
 
-    def createSelectionFlagBranches(self, config):
+    def createSelectionFlagBranches(self, config, containers):
         """
         For each container and for each selection, create a single pass variable in output NTuple,
         which aggregates all the selections flag of the given selection. For example, this can include
@@ -359,8 +360,8 @@ class OutputAnalysisConfig (ConfigBlock):
         The goal is to have only one flag per object and working point in the output NTuple.
         """
         originalContainersSeen = []
-        for prefix in self.containers.keys() :
-            outputContainerName = self.containers[prefix]
+        for prefix in containers.keys() :
+            outputContainerName = containers[prefix]
             containerName = config.getOutputContainerOrigin(outputContainerName)
             if containerName in originalContainersSeen:
                 continue

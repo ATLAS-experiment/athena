@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
@@ -9,7 +9,7 @@ class LeptonSFCalculatorBlock(ConfigBlock):
     """--> combine all the per-object SFs into a single per-event SF"""
 
     def __init__(self):
-        super(LeptonSFCalculatorBlock, self).__init__()
+        super().__init__()
         self.addDependency("ElectronWorkingPointEfficiency", required=False)
         self.addDependency("PhotonWorkingPointEfficiency", required=False)
         self.addDependency("MuonWorkingPointEfficiency", required=False)
@@ -36,9 +36,9 @@ class LeptonSFCalculatorBlock(ConfigBlock):
                        info='list of decorated tau-jet SFs to use in the computation. If not set, will use reconstruction x ID x eVeto.')
         self.addOption('lepton_postfix', None, type=str,
                        info='the name of the common lepton SF, e.g. `tight`.')
-        self.addOption('includeElectronChargeMisID', False, type=str,
+        self.addOption('includeElectronChargeMisID', False, type=bool,
                        info='whether to include the electron charge mis-ID SFs in the computation. The user is responsible for determining whether these are available.')
-        self.addOption('includeMuonBadVeto', False, type=str,
+        self.addOption('includeMuonBadVeto', False, type=bool,
                        info='whether to include the muon bad veto SFs in the computation. The user is responsible for determining whether these are available.')
 
     def instanceName (self) :
@@ -58,6 +58,8 @@ class LeptonSFCalculatorBlock(ConfigBlock):
             if self.electronSFs:
                 alg.electronSFs = self.electronSFs
             else:
+                if '.' not in self.electrons:
+                    raise ValueError(f'electrons={self.electrons} has no selection: either use the format `container.selection` or set electronSFs explicitly.')
                 alg.electronSFs = [ f'el_reco_effSF_{self.electrons.split(".")[1]}_%SYS%',
                                     f'el_id_effSF_{self.electrons.split(".")[1]}_%SYS%' ]
                 if 'isolated' in alg.electronSelection:
@@ -74,6 +76,8 @@ class LeptonSFCalculatorBlock(ConfigBlock):
             if self.muonSFs:
                 alg.muonSFs = self.muonSFs
             else:
+                if '.' not in self.muons:
+                    raise ValueError(f'muons={self.muons} has no selection: either use the format `container.selection` or set muonSFs explicitly.')
                 alg.muonSFs = [ f'muon_reco_effSF_{self.muons.split(".")[1]}_%SYS%']
                 if 'trackSelection' in alg.muonSelection:
                     alg.muonSFs += [ f'muon_TTVA_effSF_{self.muons.split(".")[1]}_%SYS%' ]
@@ -89,6 +93,8 @@ class LeptonSFCalculatorBlock(ConfigBlock):
             if self.photonSFs:
                 alg.photonSFs = self.photonSFs
             else:
+                if '.' not in self.photons:
+                    raise ValueError(f'photons={self.photons} has no selection: either use the format `container.selection` or set photonSFs explicitly.')
                 alg.photonSFs = [ f'ph_id_effSF_{self.photons.split(".")[1]}_%SYS%' ]
                 if 'isolated' in alg.photonSelection:
                     alg.photonSFs += [ f'ph_isol_effSF_{self.photons.split(".")[1]}_%SYS%' ]
@@ -100,6 +106,8 @@ class LeptonSFCalculatorBlock(ConfigBlock):
             if self.tauSFs:
                 alg.tauSFs = self.tauSFs
             else:
+                if '.' not in self.taus:
+                    raise ValueError(f'taus={self.taus} has no selection: either use the format `container.selection` or set tauSFs explicitly.')
                 alg.tauSFs = [ f'tau_Reco_effSF_{self.taus.split(".")[1]}_%SYS%',
                                f'tau_ID_effSF_{self.taus.split(".")[1]}_%SYS%']
                 if 'eVeto' in alg.tauSelection:

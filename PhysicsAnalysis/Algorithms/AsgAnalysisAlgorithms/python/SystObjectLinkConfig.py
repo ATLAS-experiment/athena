@@ -8,7 +8,7 @@ class SystObjectLinkBlock (ConfigBlock):
     """the ConfigBlock for linking systematic variation and nominal objects"""
 
     def __init__ (self) :
-        super (SystObjectLinkBlock, self).__init__ ()
+        super().__init__ ()
         self.addOption('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.",

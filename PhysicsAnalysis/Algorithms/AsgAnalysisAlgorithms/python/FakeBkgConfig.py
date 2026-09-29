@@ -10,7 +10,7 @@ class FakeBkgBlock(ConfigBlock):
     """
 
     def __init__(self):
-        super(FakeBkgBlock, self).__init__()
+        super().__init__()
         self.addOption('setupName', '', type=str,
                        info='unique name for this instance of the algorithm and tool.')
         self.addOption('electrons', None, type=str,
