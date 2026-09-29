@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_SPECTROMETERSECTOR_H
 #define MUONREADOUTGEOMETRYR4_SPECTROMETERSECTOR_H
@@ -7,10 +7,11 @@
 #include "AthenaBaseComps/AthMessaging.h"
 #ifndef SIMULATIONBASE
 
-#include <MuonReadoutGeometryR4/MuonReadoutElement.h>
-#include <MuonReadoutGeometryR4/Chamber.h>
-#include <ActsGeometryInterfaces/GeometryDefs.h>
-#include <Acts/Geometry/VolumeBounds.hpp>
+#include "MuonReadoutGeometryR4/MuonReadoutElement.h"
+#include "MuonReadoutGeometryR4/Chamber.h"
+#include "ActsGeometryInterfaces/GeometryDefs.h"
+#include "ActsGeoUtils/VolumePlacement.h"
+#include "Acts/Geometry/VolumeBounds.hpp"
 
 namespace Acts {
     class Volume;
@@ -104,6 +105,10 @@ namespace MuonGMR4 {
             struct defineArgs{
                 /// List of readout elements in the chamber
                 ChamberSet chambers{};
+                /** @brief The Transform packed into an alignable node */
+                ActsTrk::VolumePlacement::AlignableNode_t localToGlobalTrf{};
+                /** @brief The volume placement used to artifically align the envelope */
+                std::unique_ptr<ActsTrk::VolumePlacement> placement{};
                 /** @brief Surrouding box chamber bounds */
                 std::shared_ptr<Acts::VolumeBounds> bounds{};
                 /// @brief Surface in the centre of the chamber plane
@@ -140,14 +145,14 @@ namespace MuonGMR4 {
             bool barrel() const;
             /** @brief  Returns the local -> global tarnsformation from the sector
               * @param gctx: Geometry context carrrying the alignment transformations */
-            const Amg::Transform3D& localToGlobalTransform(const ActsTrk::GeometryContext& gctx) const;
+            const Acts::Transform3& localToGlobalTransform(const ActsTrk::GeometryContext& gctx) const;
             /** @brief Returns the global -> local transformation from the ATLAS global */
-            Amg::Transform3D globalToLocalTransform(const ActsTrk::GeometryContext& gctx) const;
+            const Acts::Transform3& globalToLocalTransform(const ActsTrk::GeometryContext& gctx) const;
             /** @brief  Returns the local -> global tarnsformation from the sector
               * @param gctx: Geometry context carrrying the alignment transformations */
-            const Amg::Transform3D& localToGlobalTransform(const Acts::GeometryContext& tgContext) const;
+            const Acts::Transform3& localToGlobalTransform(const Acts::GeometryContext& tgContext) const;
             /** @brief Returns the global -> local transformation from the ATLAS global */
-            Amg::Transform3D globalToLocalTransform(const Acts::GeometryContext& tgContext) const;
+            const Acts::Transform3& globalToLocalTransform(const Acts::GeometryContext& tgContext) const;
             /** @brief Returns the associated surface */
             const Acts::PlaneSurface& surface() const;
             /** @brief Returns the associated chambers with this sector */
@@ -164,7 +169,7 @@ namespace MuonGMR4 {
             const defineArgs& parameters() const;
             /** @brief Returns the Acts::Volume representation of the sector.
               * @param gctx: Geometry context carrrying the alignment transformations */
-            std::shared_ptr<Acts::Volume> boundingVolume(const ActsTrk::GeometryContext& gctx) const;
+            std::shared_ptr<Acts::Volume> boundingVolume() const;
             /** @brief Returns the volume bounds */
             std::shared_ptr<Acts::VolumeBounds> bounds() const;
             /** @brief Returns the list of all associated readout elements */
@@ -178,7 +183,6 @@ namespace MuonGMR4 {
 
         private:
             defineArgs m_args{};
-
             /** @brief Function filling the map mapping the readout elements to layer numbers */
             std::unordered_map<const MuonReadoutElement*, std::vector<unsigned int>> fillDetLayIdCache() const;
             /** @brief Map mapping each Readout Element to the layer numbering in the sector frame*/ 

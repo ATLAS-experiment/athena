@@ -44,11 +44,10 @@ using namespace Muon::MuonStationIndex;
 namespace{
     constexpr double tolerance = 10. *Gaudi::Units::micrometer;
 
-    std::vector<std::shared_ptr<const Acts::Volume>> chamberVolumes(const ActsTrk::GeometryContext& gctx,
-                                                                    const MuonGMR4::SpectrometerSector& sector) {
+    std::vector<std::shared_ptr<const Acts::Volume>> chamberVolumes(const MuonGMR4::SpectrometerSector& sector) {
         std::vector<std::shared_ptr<const Acts::Volume>> vols{};
         std::ranges::transform(sector.chambers(),std::back_inserter(vols), 
-                              [&gctx](const auto& ch){ return ch->boundingVolume(gctx); });
+                                [](const auto& ch){ return ch->boundingVolume(); });
         return vols;
     }
     std::vector<const Acts::Volume*> chamberVolumes(const Acts::TrackingVolume& vol) {
@@ -233,7 +232,7 @@ namespace MuonGMR4 {
     template <class EnvelopeType>
     StatusCode MuonChamberToolTest::allReadoutInEnvelope(const ActsTrk::GeometryContext& gctx,
                                                          const EnvelopeType& envelope) const {
-        std::shared_ptr<Acts::Volume> boundVol = envelope.boundingVolume(gctx);
+        std::shared_ptr<Acts::Volume> boundVol = envelope.boundingVolume();
         const Chamber::ReadoutSet reEles = envelope.readoutEles();
         for(const MuonReadoutElement* readOut : reEles) {
             if constexpr (std::is_same_v<EnvelopeType, SpectrometerSector>) {
@@ -366,9 +365,9 @@ namespace MuonGMR4 {
         // so we only need to do it O(N) rather than O(N^2) times.
         std::vector<std::shared_ptr<Acts::Volume> > chamberBoundsVec;
         chamberBoundsVec.reserve (chamberVec.size());
-        for (const Chamber* ch : chamberVec)
-          chamberBoundsVec.push_back (ch->boundingVolume(gctx));
-
+        for (const Chamber* ch : chamberVec) {
+          chamberBoundsVec.push_back(ch->boundingVolume());
+        }
         std::set<const Chamber*> overlapChambers{};
         std::stringstream overlapstream{};
         for (std::size_t chIdx = 0; chIdx< chamberVec.size(); ++chIdx) {
@@ -410,7 +409,7 @@ namespace MuonGMR4 {
         if (!overlapChambers.empty()) {
             Acts::ObjVisualization3D visualHelper{};
             for (const Chamber* hasOverlap: overlapChambers) {
-                Acts::GeometryView3D::drawVolume(visualHelper, *hasOverlap->boundingVolume(gctx), gctx.context());
+                Acts::GeometryView3D::drawVolume(visualHelper, *hasOverlap->boundingVolume(), gctx.context());
                 visualHelper.write(m_overlapChambObj.value());
             }
             if (m_ignoreOverlapCh) {
@@ -446,19 +445,19 @@ namespace MuonGMR4 {
         ATH_MSG_INFO(__func__<<"() "<<__LINE__<<" - Fetched "<<sectors.size()<<" sectors. ");
         for (const SpectrometerSector* sector : sectors) {
             if (m_dumpObjs) {
-                const auto subVols = chamberVolumes(gctx, *sector);
+                const auto subVols = chamberVolumes(*sector);
                 saveEnvelope(gctx, std::format("Sector_{:}{:}{:}",
                                                chName(sector->chamberIndex()),
                                                sector->side()  >0? 'A' :'C', 
                                                sector->stationPhi()  ), 
-                            *sector->boundingVolume(gctx), 
+                            *sector->boundingVolume(), 
                             extractSurfaces(sector->readoutEles()),
                             Acts::unpackSmartPointers(subVols));
             }
             ATH_CHECK(allReadoutInEnvelope(gctx, *sector));
-            const std::shared_ptr<Acts::Volume> secVolume = sector->boundingVolume(gctx);
+            const std::shared_ptr<Acts::Volume> secVolume = sector->boundingVolume();
             for (const SpectrometerSector::ChamberPtr& chamber : sector->chambers()){
-                const std::vector<Amg::Vector3D> edges = cornerPoints(gctx, *chamber->boundingVolume(gctx));
+                const std::vector<Amg::Vector3D> edges = cornerPoints(gctx, *chamber->boundingVolume());
                 unsigned int edgeCount{0};
                 for (const Amg::Vector3D& edge : edges) {
                     ATH_CHECK(pointInside(gctx, *sector, *secVolume, edge, std::format("Edge {:}", ++edgeCount),

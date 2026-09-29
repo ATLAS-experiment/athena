@@ -90,7 +90,7 @@ namespace MuonGMR4 {
           const defineArgs& parameters() const;
           /** @brief Returns the Acts::Volume representation of the chamber.
             * @param gctx: Geometry context carrrying the alignment transformations */
-          std::shared_ptr<Acts::Volume> boundingVolume(const ActsTrk::GeometryContext& gctx) const;
+          std::shared_ptr<Acts::Volume> boundingVolume() const;
           /** @brief Returns the volume bounds */
           std::shared_ptr<Acts::VolumeBounds> bounds() const;
           /** @brief Returns the pointer to the MS sector enclosing the chamber */

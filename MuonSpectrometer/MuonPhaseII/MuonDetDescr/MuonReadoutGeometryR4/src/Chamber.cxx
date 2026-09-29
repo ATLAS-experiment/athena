@@ -79,7 +79,7 @@ namespace MuonGMR4{
     double Chamber::halfY() const { return MuonGMR4::halfY(* m_args.bounds); }
     double Chamber::halfZ() const { return MuonGMR4::halfZ(*m_args.bounds);}
 
-    std::shared_ptr<Acts::Volume> Chamber::boundingVolume(const ActsTrk::GeometryContext& /*gctx*/) const {
+    std::shared_ptr<Acts::Volume> Chamber::boundingVolume() const {
         Acts::VolumePlacementBase* ATLAS_THREAD_SAFE placement = m_args.placement.get();
         return std::make_shared<Acts::Volume>(*placement, bounds());
     }
