@@ -45,9 +45,9 @@ enum class HyPEROutputDim { HyperEdges, Edges, Single };
  */
 struct HyPEROutputNode {
   std::string name;
-  bool isFloat;        ///< false means int64
-  HyPEROutputDim dim;  ///< which dynamic dimension the tensor scales with
-  bool trailingOne;    ///< shape is {N, 1} rather than {N}
+  bool isFloat{};        ///< false means int64
+  HyPEROutputDim dim{};  ///< which dynamic dimension the tensor scales with
+  bool trailingOne{};    ///< shape is {N, 1} rather than {N}
 };
 
 // @class HyPERModel
