@@ -1,60 +1,131 @@
 *** ClearStore_test BEGINS ***
 
 
-ApplicationMgr       INFO Application Manager Configured successfully
-ApplicationMgr       INFO Application Manager Initialized successfully
+Initializing Gaudi ApplicationMgr using job opts /home/sss/atlas/dvtest/build/joboptions/StoreGate/StoreGate_jobOptions.txt
+JobOptionsSvc         INFO # =======> /home/sss/atlas/dvtest/build/joboptions/StoreGate/StoreGate_jobOptions.txt
+JobOptionsSvc         INFO # (1,1): ApplicationMgr.ExtSvc += ["StoreGateSvc/DetectorStore", "StoreGateSvc/HistoryStore"]
+JobOptionsSvc         INFO # (4,1): AuditorSvc.Auditors += ["AlgContextAuditor"]
+JobOptionsSvc         INFO # (5,1): StoreGateSvc.OutputLevel = 1
+JobOptionsSvc         INFO Job options successfully read in from /home/sss/atlas/dvtest/build/joboptions/StoreGate/StoreGate_jobOptions.txt
+ApplicationMgr     SUCCESS 
+====================================================================================================================================
+                                                   Welcome to ApplicationMgr (GaudiCoreSvc v27r1p99)
+                                          running on karma on Sun Aug 23 14:18:46 2026
+====================================================================================================================================
+ApplicationMgr        INFO Application Manager Configured successfully
+ClassIDSvc            INFO getRegistryEntries: read 444 CLIDRegistry entries for module ALL
+EventLoopMgr          INFO Unable to locate service "EventSelector": No events will be processed from external input.
+ApplicationMgr        INFO Application Manager Initialized successfully
 ApplicationMgr Ready
-StoreGateSvc      VERBOSE Initializing StoreGateSvc
-StoreGateSvc_Impl VERBOSE Initializing StoreGateSvc_Impl
+StoreGateSvc         DEBUG Property update for OutputLevel : new value = 1
+StoreGateSvc         DEBUG Service base class initialized successfully
+StoreGateSvc       VERBOSE Initializing StoreGateSvc
+StoreGateSvc         DEBUG trying to create store SGImplSvc/StoreGateSvc_Impl
+StoreGateSvc_Impl    DEBUG Property update for OutputLevel : new value = 1
+StoreGateSvc_Impl  VERBOSE Initializing StoreGateSvc_Impl
+StoreGateSvc_Impl    DEBUG Service base class initialized successfully
 *** ClearStore_test run standard testRecord a first time ***
 *** StoreGateSvcClient_test record BEGINS ***
+StoreGateSvc         DEBUG Recorded object @0x1c9f37b0 with key pFoo1 of type Foo (CLID 8101)
+ in DataObject @0x1c9f3e70
  object modifiable when retrieved
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc_Impl WARNING  setupProxy:: error setting up proxy for key pFoo1 and clid 8101
+StoreGateSvc_Impl  WARNING  setupProxy:: error setting up proxy for key pFoo1 and clid 8101
+ Pre-existing valid DataProxy @0x1baef990 found in Store for key pFoo1 with clid 8101
+ClassIDSvc            INFO getRegistryEntries: read 952 CLIDRegistry entries for module ALL
+StoreGateSvc_Impl  WARNING record_impl: Problem setting up the proxy for object @0x1c9f42b0
+ recorded with key pFoo1 of type Foo (CLID 8101) in DataObject @0x1c9f4810
 <<---Error Message Ends-------
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc_Impl WARNING record_impl: failed for key=pFoo2, type Foo (CLID 8101)
+StoreGateSvc_Impl  WARNING record_impl: failed for key=pFoo2, type Foo (CLID 8101)
+ object @0x1c9f37b0 already in store with key=pFoo1. Will not record a duplicate!
 <<---Error Message Ends-------
+StoreGateSvc         DEBUG Recorded object @0x1ca05770 with key pFoo2 of type Foo (CLID 8101)
+ in DataObject @0x1ca0a650
  object modifiable when retrieved
+StoreGateSvc         DEBUG Recorded object @0x1ca056d0 with key cpFoo of type Foo (CLID 8101)
+ in DataObject @0x1ca0a4e0
  object not modifiable when retrieved
+StoreGateSvc         DEBUG Recorded object @0x1c9f4040 with key silly of type Foo (CLID 8101)
+ in DataObject @0x1ca08af0
  object modifiable when retrieved
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc_Impl WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
+StoreGateSvc_Impl  WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
+ Pre-existing valid DataProxy @0x1ca0b5e0 found in Store for key silly with clid 8101
+StoreGateSvc_Impl  WARNING record_impl: Problem setting up the proxy for object @0x1c9f4090
+ recorded with key silly of type Foo (CLID 8101) in DataObject @0x1ca07200
 <<---Error Message Ends-------
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc_Impl WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
+StoreGateSvc_Impl  WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
+ Pre-existing valid DataProxy @0x1ca0b5e0 found in Store for key silly with clid 8101
+StoreGateSvc_Impl  WARNING record_impl: Problem setting up the proxy for object @0x1ca20da0
+ recorded with key silly of type Foo (CLID 8101) in DataObject @0x1ca06070
 <<---Error Message Ends-------
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc_Impl WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
+StoreGateSvc_Impl  WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
+ Pre-existing valid DataProxy @0x1ca0b5e0 found in Store for key silly with clid 8101
+StoreGateSvc_Impl  WARNING record_impl: Problem setting up the proxy for object @0x1ca09a10
+ recorded with key silly of type Foo (CLID 8101) in DataObject @0x1ca06020
 <<---Error Message Ends-------
+StoreGateSvc         DEBUG Recorded object @0x1ca08020 with key UnLocked of type Foo (CLID 8101)
+ in DataObject @0x1ca05f90
  object modifiable when retrieved
+StoreGateSvc         DEBUG Recorded object @0x1ca06830 with key Locked of type Foo (CLID 8101)
+ in DataObject @0x1ca08330
  object not modifiable when retrieved
+StoreGateSvc         DEBUG Recorded object @0x1ca05f70 with key LockedReset of type Foo (CLID 8101)
+ in DataObject @0x1ca0b710
  object not modifiable when retrieved
+StoreGateSvc         DEBUG Recorded object @0x1ca20dc0 with key UnLockedReset of type Foo (CLID 8101)
+ in DataObject @0x1ca07d00
  object modifiable when retrieved
+StoreGateSvc         DEBUG Recorded object @0x1ca07160 with key LockedDelete of type Foo (CLID 8101)
+ in DataObject @0x1ca07180
  object not modifiable when retrieved
+StoreGateSvc         DEBUG Recorded object @0x1ca09520 with key UnLockedDelete of type Foo (CLID 8101)
+ in DataObject @0x1ca072a0
  object modifiable when retrieved
+StoreGateSvc         DEBUG Recorded object @0x1ca0af60 with key Const of type Foo (CLID 8101)
+ in DataObject @0x1ca0af80
  object not modifiable when retrieved
+StoreGateSvc         DEBUG Recorded object @0x1ca0c950 with key Const2 of type Foo (CLID 8101)
+ in DataObject @0x1ca08b40
  object not modifiable when retrieved
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc_Impl WARNING  setupProxy:: error setting up proxy for key Const and clid 8101
+StoreGateSvc_Impl  WARNING  setupProxy:: error setting up proxy for key Const and clid 8101
+ Pre-existing valid DataProxy @0x1ca0c790 found in Store for key Const with clid 8101
+StoreGateSvc_Impl  WARNING record_impl: Problem setting up the proxy for object @0x1ca0e380
+ recorded with key Const of type Foo (CLID 8101) in DataObject @0x1ca0e3a0
 <<---Error Message Ends-------
+StoreGateSvc         DEBUG Recorded object @0x1ca07470 with key ow of type Foo (CLID 8101)
+ in DataObject @0x1ca0a530
  object modifiable when retrieved
+StoreGateSvc         DEBUG overwrite: Recorded object @0x1ca0fd00 with key ow of type Foo (CLID 8101)
+ in DataObject @0x1ca0fd20
  object modifiable when retrieved
+StoreGateSvc         DEBUG overwrite: Recorded object @0x1ca116b0 with key ow of type Foo (CLID 8101)
+ in DataObject @0x1ca0a530
  object modifiable when retrieved
+StoreGateSvc         DEBUG Recorded object @0x1ca0fd00 with key ow2 of type Foo (CLID 8101)
+ in DataObject @0x1ca0fd20
  object not modifiable when retrieved
+StoreGateSvc         DEBUG overwrite: Recorded object @0x1ca11690 with key ow2 of type Foo (CLID 8101)
+ in DataObject @0x1ca0fd70
  object not modifiable when retrieved
+StoreGateSvc         DEBUG overwrite: Recorded object @0x1ca0fd00 with key ow2 of type Foo (CLID 8101)
+ in DataObject @0x1ca0fd20
  object not modifiable when retrieved
 *** StoreGateSvcClient_test records OK ***
 
 
 *** ClearStore_test clear the store ***
-StoreGateSvc_Impl   DEBUG Clearing store with forceRemove=0
+StoreGateSvc_Impl    DEBUG Clearing store with forceRemove=false
 Testing dump: store should contain no data now 
  -------->>
 StoreGateSvc_Impl: <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
@@ -78,53 +149,105 @@ StoreGateSvc_Impl: <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>
 
 *** ClearStore_test run standard testRecord a second time ***
 *** StoreGateSvcClient_test record BEGINS ***
+StoreGateSvc         DEBUG Recorded object @0x1ca09520 with key pFoo1 of type Foo (CLID 8101)
+ in DataObject @0x1ca07180
  object modifiable when retrieved
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc_Impl WARNING  setupProxy:: error setting up proxy for key pFoo1 and clid 8101
+StoreGateSvc_Impl  WARNING  setupProxy:: error setting up proxy for key pFoo1 and clid 8101
+ Pre-existing valid DataProxy @0x1baef990 found in Store for key pFoo1 with clid 8101
+StoreGateSvc_Impl  WARNING record_impl: Problem setting up the proxy for object @0x1c9f4090
+ recorded with key pFoo1 of type Foo (CLID 8101) in DataObject @0x1ca20f40
 <<---Error Message Ends-------
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc_Impl WARNING record_impl: failed for key=pFoo2, type Foo (CLID 8101)
+StoreGateSvc_Impl  WARNING record_impl: failed for key=pFoo2, type Foo (CLID 8101)
+ object @0x1ca09520 already in store with key=pFoo1. Will not record a duplicate!
 <<---Error Message Ends-------
+StoreGateSvc         DEBUG Recorded object @0x1c9f42b0 with key pFoo2 of type Foo (CLID 8101)
+ in DataObject @0x1ca06020
  object modifiable when retrieved
+StoreGateSvc         DEBUG Recorded object @0x1ca11690 with key cpFoo of type Foo (CLID 8101)
+ in DataObject @0x1ca05f90
  object not modifiable when retrieved
+StoreGateSvc         DEBUG Recorded object @0x1ca0fdc0 with key silly of type Foo (CLID 8101)
+ in DataObject @0x1ca08af0
  object modifiable when retrieved
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc_Impl WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
+StoreGateSvc_Impl  WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
+ Pre-existing valid DataProxy @0x1ca0b5e0 found in Store for key silly with clid 8101
+StoreGateSvc_Impl  WARNING record_impl: Problem setting up the proxy for object @0x1ca116d0
+ recorded with key silly of type Foo (CLID 8101) in DataObject @0x1ca0a4e0
 <<---Error Message Ends-------
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc_Impl WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
+StoreGateSvc_Impl  WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
+ Pre-existing valid DataProxy @0x1ca0b5e0 found in Store for key silly with clid 8101
+StoreGateSvc_Impl  WARNING record_impl: Problem setting up the proxy for object @0x1ca067b0
+ recorded with key silly of type Foo (CLID 8101) in DataObject @0x1ca0a650
 <<---Error Message Ends-------
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc_Impl WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
+StoreGateSvc_Impl  WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
+ Pre-existing valid DataProxy @0x1ca0b5e0 found in Store for key silly with clid 8101
+StoreGateSvc_Impl  WARNING record_impl: Problem setting up the proxy for object @0x1ca06830
+ recorded with key silly of type Foo (CLID 8101) in DataObject @0x1c9f3e70
 <<---Error Message Ends-------
+StoreGateSvc         DEBUG Recorded object @0x1ca05710 with key UnLocked of type Foo (CLID 8101)
+ in DataObject @0x1ca0e3a0
  object modifiable when retrieved
+StoreGateSvc         DEBUG Recorded object @0x1ca05770 with key Locked of type Foo (CLID 8101)
+ in DataObject @0x1ca06070
  object not modifiable when retrieved
+StoreGateSvc         DEBUG Recorded object @0x1ca09990 with key LockedReset of type Foo (CLID 8101)
+ in DataObject @0x1ca07200
  object not modifiable when retrieved
+StoreGateSvc         DEBUG Recorded object @0x1ca09a10 with key UnLockedReset of type Foo (CLID 8101)
+ in DataObject @0x1ca0bfc0
  object modifiable when retrieved
+StoreGateSvc         DEBUG Recorded object @0x1ca130e0 with key LockedDelete of type Foo (CLID 8101)
+ in DataObject @0x1c9f4810
  object not modifiable when retrieved
+StoreGateSvc         DEBUG Recorded object @0x1ca0b400 with key UnLockedDelete of type Foo (CLID 8101)
+ in DataObject @0x1ca0bf70
  object modifiable when retrieved
+StoreGateSvc         DEBUG Recorded object @0x1ca071d0 with key Const of type Foo (CLID 8101)
+ in DataObject @0x1ca072a0
  object not modifiable when retrieved
+StoreGateSvc         DEBUG Recorded object @0x1ca07520 with key Const2 of type Foo (CLID 8101)
+ in DataObject @0x1ca08b40
  object not modifiable when retrieved
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc_Impl WARNING  setupProxy:: error setting up proxy for key Const and clid 8101
+StoreGateSvc_Impl  WARNING  setupProxy:: error setting up proxy for key Const and clid 8101
+ Pre-existing valid DataProxy @0x1ca0c790 found in Store for key Const with clid 8101
+StoreGateSvc_Impl  WARNING record_impl: Problem setting up the proxy for object @0x1ca07470
+ recorded with key Const of type Foo (CLID 8101) in DataObject @0x1ca08330
 <<---Error Message Ends-------
+StoreGateSvc         DEBUG Recorded object @0x1ca07820 with key ow of type Foo (CLID 8101)
+ in DataObject @0x1ca0b710
  object modifiable when retrieved
+StoreGateSvc         DEBUG overwrite: Recorded object @0x1ca07ae0 with key ow of type Foo (CLID 8101)
+ in DataObject @0x1c9f4250
  object modifiable when retrieved
+StoreGateSvc         DEBUG overwrite: Recorded object @0x1ca07820 with key ow of type Foo (CLID 8101)
+ in DataObject @0x1c9f3fb0
  object modifiable when retrieved
+StoreGateSvc         DEBUG Recorded object @0x1ca07ae0 with key ow2 of type Foo (CLID 8101)
+ in DataObject @0x1ca0e340
  object not modifiable when retrieved
+StoreGateSvc         DEBUG overwrite: Recorded object @0x1ca08560 with key ow2 of type Foo (CLID 8101)
+ in DataObject @0x1c9ef540
  object not modifiable when retrieved
+StoreGateSvc         DEBUG overwrite: Recorded object @0x1ca07ae0 with key ow2 of type Foo (CLID 8101)
+ in DataObject @0x1ca0e340
  object not modifiable when retrieved
 *** StoreGateSvcClient_test records OK ***
 
 
 *** ClearStore_test clear the store again ***
-StoreGateSvc_Impl   DEBUG Clearing store with forceRemove=0
+StoreGateSvc_Impl    DEBUG Clearing store with forceRemove=false
 Testing dump: store should contain no data now 
  -------->>
 StoreGateSvc_Impl: <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
@@ -144,7 +267,7 @@ StoreGateSvc_Impl: <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>
 
 <<--------
 *** ClearStore_test clear the store one last time forcing proxy removal (the way we do in finalize()) ***
-StoreGateSvc_Impl   DEBUG Clearing store with forceRemove=1
+StoreGateSvc_Impl    DEBUG Clearing store with forceRemove=true
 Testing dump: store should contain no proxy now 
  -------->>
 StoreGateSvc_Impl: <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 

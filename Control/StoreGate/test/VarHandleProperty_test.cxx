@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/test/VarHandleProperty_test.cxx
@@ -19,7 +19,7 @@
 #include "GaudiKernel/IProperty.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 #include <sstream>
 
 
@@ -68,7 +68,7 @@ public:
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   PropTest ptest;
   std::vector<Gaudi::Details::PropertyBase*> props;

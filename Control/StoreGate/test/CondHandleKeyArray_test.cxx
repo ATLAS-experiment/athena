@@ -24,7 +24,7 @@
 #include "AthenaKernel/ExtendedEventContext.h"
 #include "CxxUtils/checker_macros.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 
 #define DEBUG_VHB 1
 
@@ -110,7 +110,7 @@ makeWithAux (int x=0)
 // Ctors.
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   SG::WriteCondHandleKeyArray<MyObj> k1 {"MyObj"};
 
@@ -119,6 +119,15 @@ void test1()
   assert ( k1[0].key() == "MyObj");
   // need to setup conditions store
   /* assert ( */ k1[0].initialize().ignore() /* .isSuccess())*/ ;
+
+  {
+    std::ostringstream s1;
+    s1 << k1;
+    assert (s1.str() == "['ConditionStore+MyObj']");
+    std::ostringstream s2;
+    std::print (s2, "{}", k1);
+    assert (s2.str() == "['ConditionStore+MyObj']");
+  }
 
   try {
     std::vector<SG::WriteCondHandle<MyObj> > h1( k1.makeHandles() );

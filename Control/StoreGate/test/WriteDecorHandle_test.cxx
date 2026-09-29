@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/test/WriteDecorHandle_test.cxx
@@ -22,7 +22,7 @@
 #include "TestTools/initGaudi.h"
 #include "TestTools/expect_exception.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 #include "AthContainers/debug.h"
 
 
@@ -43,7 +43,7 @@ CLASS_DEF (MyObjCont, 293847296, 1)
 // Ctors
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   SG::auxid_t ityp = r.getAuxID<int> ("aaa");
@@ -59,6 +59,14 @@ void test1()
   assert (h1.mode() == Gaudi::DataHandle::Writer);
   assert (h1.auxid() == ityp);
   assert (!h1.isPresent());
+
+  {
+    std::ostringstream s1;
+    s1 << h1;
+    std::ostringstream s2;
+    std::print (s2, "{}", h1);
+    assert (s1.str() == s2.str());
+  }
 
   SGTest::TestStore dumstore;
   EventContext ctx5;
@@ -96,7 +104,7 @@ void test1()
 // Copy.
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
   SGTest::TestStore testStore;
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
@@ -199,7 +207,7 @@ void test2()
 // Decorate, for container.
 void test3()
 {
-  std::cout << "test3\n";
+  std::println ("test3");
   SGTest::TestStore testStore;
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
@@ -260,7 +268,7 @@ void test3()
 // Decorate, standalone.
 void test4()
 {
-  std::cout << "test4\n";
+  std::println ("test4");
   SGTest::TestStore testStore;
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
@@ -290,7 +298,7 @@ void test4()
 // makeHandle
 void test5()
 {
-  std::cout << "test5\n";
+  std::println ("test5");
   SGTest::TestStore testStore;
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
@@ -342,7 +350,7 @@ void test5()
 // renounce
 void test6()
 {
-  std::cout << "test6\n";
+  std::println ("test6");
 
   SGTest::TestStore testStore;
 
@@ -403,7 +411,7 @@ void test6()
 // locking
 void test7()
 {
-  std::cout << "test7\n";
+  std::println ("test7");
 
   SGTest::TestStore testStore;
 

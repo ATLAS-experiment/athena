@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file SGImplSvc.icc
@@ -10,22 +10,8 @@
 #ifndef STOREGATE_SGIMPLSVC_ICC
 #define STOREGATE_SGIMPLSVC_ICC
 
-#include "GaudiKernel/MsgStream.h"
 
-
-
-// HACK LIFTED FROM AthenaBaseComps/AthMsgStreamMacros.h to remove dep loop
-#define SG_MSG_LVL(lvl, x)                      \
-  do {                                          \
-    if (msgLevel(lvl)) {                        \
-      msgStream(lvl) << x  << endmsg;           \
-    }                                           \
-  } while (0)
- 
-#define SG_MSG_VERBOSE(x) SG_MSG_LVL(MSG::VERBOSE, x)
-#define SG_MSG_DEBUG(x)   SG_MSG_LVL(MSG::DEBUG, x)
-#define SG_MSG_INFO(x)    SG_MSG_LVL(MSG::INFO, x)
-#define SG_MSG_WARNING(x) SG_MSG_LVL(MSG::WARNING, x)
+#include "StoreGate/tools/SGMsgStreamMacros.h"
 
 
 inline

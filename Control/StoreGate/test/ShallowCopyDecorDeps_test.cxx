@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/test/ShallowCopyDecorDeps_test.cxx
@@ -18,7 +18,7 @@
 #include "TestTools/initGaudi.h"
 #include "TestOwner.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 
 
 class MyObj {};
@@ -27,7 +27,7 @@ CLASS_DEF (MyObj, 293847295, 1)
 
 void test1 (ISvcLocator* svcloc)
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   TestOwner owner;
   SG::ShallowCopyDecorDeps<MyObj> scdd (&owner, "SCDD", {"d1", "d2"}, "doc string");
@@ -73,7 +73,7 @@ void test1 (ISvcLocator* svcloc)
 
 int main()
 {
-  std::cout << "StoreGate/ShallowCopyDecorDeps_test\n";
+  std::println ("StoreGate/ShallowCopyDecorDeps_test");
 
   ISvcLocator* svcloc = nullptr;
   if (!Athena_test::initGaudi("StoreGate/VarHandleBase_test.txt", svcloc)) {

@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
 
+#include <print>
 #include <string>
 #include <vector>
 #include <chrono>
@@ -18,7 +19,7 @@
 #include "SGTiming_test_def.inc"
 
 int main() {
-  std::cout << "**** SGTimingTest BEGINS ****" << std::endl;
+  std::println ("**** SGTimingTest BEGINS ****");
 
   ISvcLocator* pSvcLoc;
   if (!Athena_test::initGaudi("StoreGate/SGTiming_test.txt", pSvcLoc)) {
@@ -53,15 +54,10 @@ int main() {
     end = std::chrono::high_resolution_clock::now();
     vd_clr.push_back(end-start);
 
-    std::cout << "rec: " << std::setw(8) 
-              << std::chrono::duration_cast<std::chrono::microseconds>(vd_rec[i]).count() 
-              << "  ret: " << std::setw(8) 
-              << std::chrono::duration_cast<std::chrono::microseconds>(vd_ret[i]).count() 
-              << "  clr: " << std::setw(8)
-              << std::chrono::duration_cast<std::chrono::microseconds>(vd_clr[i]).count() 
-              << std::endl;
-
-    
+    std::println ("rec: {:8}  ret: {:8}  clr: {:8}",
+                  std::chrono::duration_cast<std::chrono::microseconds>(vd_rec[i]).count(),
+                  std::chrono::duration_cast<std::chrono::microseconds>(vd_ret[i]).count(),
+                  std::chrono::duration_cast<std::chrono::microseconds>(vd_clr[i]).count());
   }
 
   unsigned int a_ret{0}, a_rec{0}, a_clr{0};
@@ -71,19 +67,16 @@ int main() {
     a_clr += std::chrono::duration_cast<std::chrono::microseconds>(vd_clr[i]).count();
   }
   
-  std::cout << "===== averages  TYPES: " << NTYPES << "  KEYS: " << NKEYS << "  iter: " 
-            << NITER << " ===============\n";
+  std::println ("===== averages  TYPES: {}  KEYS: {}  iter: {} ===============",
+                NTYPES, NKEYS, NITER);
 
-  std::cout << NTYPES << "/" << NKEYS << " ";
-  std::cout << "rec: " << std::setw(6) << std::setprecision(2) << std::fixed
-            << float(a_rec) / ((NITER-1) * NTYPES * NKEYS)
-            << "  ret: " << std::setw(6)  
-            << float(a_ret) / ((NITER-1) * NTYPES * NKEYS)
-            << "  clr: " << std::setw(6)  
-            << float(a_clr) / ((NITER-1) * NTYPES * NKEYS)
-            << std::endl;
+  std::print ("{}/{} ", NTYPES, NKEYS);
+  std::println ("rec: {:6.2f}  ret: {:6.2f}  clr: {:6.2f}",
+                float(a_rec) / ((NITER-1) * NTYPES * NKEYS),
+                float(a_ret) / ((NITER-1) * NTYPES * NKEYS),
+                float(a_clr) / ((NITER-1) * NTYPES * NKEYS));
  
-  std::cout << "**** SGTimingTest ENDS ****" << std::endl;
+  std::println ("**** SGTimingTest ENDS ****");
 
   return 0;
 

@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/VarHandleKey.h
@@ -18,6 +18,8 @@
 #include "AthenaKernel/StoreID.h"
 #include "GaudiKernel/DataHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
+#include <format>
+#include <concepts>
 
 
 namespace SG {
@@ -256,11 +258,26 @@ private:
 };
 
 
+std::ostream& operator<<(std::ostream& s, const SG::VarHandleKey& m);
+
+
 } // namespace SG
 
+
 namespace std {
-  ostream& operator<<(ostream& s, const SG::VarHandleKey& m);
-}
+
+
+// C++23 compatible formatter.
+template <std::derived_from<SG::VarHandleKey> T>
+struct formatter<T>
+  : public formatter<string_view>
+{
+  template <class FmtContext>
+  FmtContext::iterator format(const T& k, FmtContext& ctx) const;
+};
+
+
+} // namespace std
 
 
 #include "StoreGate/VarHandleKey.icc"

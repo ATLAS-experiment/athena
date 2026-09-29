@@ -26,7 +26,7 @@
 #include "AthenaKernel/ExtendedEventContext.h"
 #include "CxxUtils/checker_macros.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 
 #define DEBUG_VHB 1
 
@@ -118,7 +118,7 @@ public:
 // Ctors.
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   SG::WriteHandle<MyObj> h1;
   assert (h1.clid() == MyCLID);
@@ -140,6 +140,14 @@ void test1()
   assert (h3.key() == "asd");
   assert (h3.storeHandle().name() == "StoreGateSvc");
   assert (h3.mode() == Gaudi::DataHandle::Writer);
+
+  {
+    std::ostringstream s1;
+    s1 << h3;
+    std::ostringstream s2;
+    std::print (s2, "{}", h3);
+    assert (s1.str() == s2.str());
+  }
 
   {
     SG::WriteHandleKey<MyObj> k4 ("asd", "BazSvc");
@@ -191,7 +199,7 @@ void test1()
 // Copy
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
   SGTest::TestStore testStore;
 
   SG::WriteHandle<MyObj> h1 ("foo", "FooSvc");
@@ -269,7 +277,7 @@ void test2()
 // Retrieve
 void test3()
 {
-  std::cout << "test3\n";
+  std::println ("test3");
 
   SGTest::TestStore testStore;
   SG::WriteHandle<MyObj> h1 ("foo", "FooSvc");
@@ -300,7 +308,7 @@ void test3()
 // record (unique_ptr)
 void test4()
 {
-  std::cout << "test4\n";
+  std::println ("test4");
   SGTest::TestStore testStore;
 
   SG::WriteHandle<MyObj> h1 ("foo1", "FooSvc");
@@ -345,7 +353,7 @@ SG::WriteHandle<MyObj> test5a (IProxyDict& testStore, MyObjAux*& paux)
 }
 void test5()
 {
-  std::cout << "test5\n";
+  std::println ("test5");
   SGTest::TestStore testStore;
 
   SG::WriteHandle<MyObj> h1 ("foo1", "FooSvc");
@@ -443,7 +451,7 @@ void test5()
 // record (shared ptr)
 void test6()
 {
-  std::cout << "test6\n";
+  std::println ("test6");
   SGTest::TestStore testStore;
 
   SG::DataObjectSharedPtr<MyDObj> p1 (new MyDObj (300));
@@ -481,7 +489,7 @@ void test6()
 // makeHandle
 void test8()
 {
-  std::cout << "test8\n";
+  std::println ("test8");
   SGTest::TestStore testStore;
 
   SG::WriteHandleKey<MyObj> k1 ("asd");
@@ -524,7 +532,7 @@ void test8()
 // put (unique_ptr)
 void test9()
 {
-  std::cout << "test9\n";
+  std::println ("test9");
   SGTest::TestStore testStore;
 
   SG::WriteHandle<MyObj> h4 ("foo4");
@@ -579,7 +587,7 @@ void test9()
 // put (with aux store)
 void test10()
 {
-  std::cout << "test10\n";
+  std::println ("test10");
   SGTest::TestStore testStore;
 
   SG::WriteHandle<MyObj> h1 ("foo1", "FooSvc");
@@ -662,7 +670,7 @@ void test10()
 // put (with shared pointer)
 void test11()
 {
-  std::cout << "test11\n";
+  std::println ("test11");
 
   SGTest::TestStore testStore;
 
@@ -700,7 +708,7 @@ void test11()
 // symlink/alias.
 void test12()
 {
-  std::cout << "test12\n";
+  std::println ("test12");
 
   SGTest::TestStore testStore;
 

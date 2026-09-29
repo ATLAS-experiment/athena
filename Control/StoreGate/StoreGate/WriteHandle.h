@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/WriteHandle.h
@@ -54,11 +54,9 @@ namespace SG {
  *   StatusCode MyAlg::execute()
  *   {
  *     ATH_CHECK( m_int.record (std::make_unique<int>(42)) );
- *     ATH_MSG_INFO("int value @[" << m_int.name() << "]="
- *                  << *m_int);
+ *     ATH_MSG_INFO("int value @[{}]={}", m_int.name(), *m_int);
  *     *m_int += 10;
- *     ATH_MSG_INFO("int value @[" << m_int.name() << "]="
- *                  << *m_int);
+ *     ATH_MSG_INFO("int value @[{}]={}", m_int.name(), *m_int);
  *     return StatusCode::SUCCESS;
  *   }
  * @endcode

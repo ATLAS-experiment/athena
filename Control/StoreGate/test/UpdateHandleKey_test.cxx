@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file StoreGate/test/UpdateHandleKey_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -17,7 +15,7 @@
 #include "TestTools/initGaudi.h"
 #include "TestTools/expect_exception.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 
 
 class MyObj {};
@@ -26,7 +24,7 @@ CLASS_DEF (MyObj, 293847295, 1)
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   SG::UpdateHandleKey<MyObj> k1 ("aaa");
   assert (k1.clid() == 293847295);
@@ -36,6 +34,15 @@ void test1()
   assert (!k1.storeHandle().isSet());
   assert (k1.initialize().isSuccess());
   assert (k1.storeHandle().isSet());
+
+  {
+    std::ostringstream s1;
+    s1 << k1;
+    assert (s1.str() == "'StoreGateSvc+aaa'");
+    std::ostringstream s2;
+    std::print (s2, "{}", k1);
+    assert (s2.str() == "'StoreGateSvc+aaa'");
+  }
 
   k1 = "aab";
   assert (k1.clid() == 293847295);

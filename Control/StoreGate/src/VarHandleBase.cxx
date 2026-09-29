@@ -27,6 +27,7 @@
 #include "AthenaKernel/getMessageSvc.h"
 #include "AthenaKernel/errorcheck.h"
 #include "AthenaKernel/ExtendedEventContext.h"
+#include "CxxUtils/as_const_ptr.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 
 #include <algorithm>
@@ -651,6 +652,24 @@ namespace SG {
   }
 
 
+  /**
+   * @brief Convert to a string representation.
+   */
+  std::string VarHandleBase::toString() const
+  {
+    std::string s =
+      std::format ("VarHandleBase @{} store={}, clid={}, key{}----------- ptr@{}, proxy@{}",
+                   static_cast<const void*>(this),
+                   store(), clid(), key(),
+                   CxxUtils::as_const_ptr (m_ptr),
+                   static_cast<const void*>(m_proxy));
+    if (m_proxy)
+      s += std::format (", DataObject@{}",
+                        static_cast<const void*>(m_proxy->object()));
+    return s;
+  }
+
+
   //*************************************************************************
   // Protected methods.
   //
@@ -699,7 +718,6 @@ namespace SG {
 #endif
     CLID cid = this->clid();
     SG::DataProxy* proxy = store->proxy(cid, key);
-    // std::cerr << "::VHB:: -- clid=[" << cid << "] proxy=[" << proxy << "]\n";
     return this->setState(proxy);
   }
 
@@ -1140,14 +1158,7 @@ namespace SG {
    */
   std::ostream& operator<<( std::ostream& out, const VarHandleBase& o )
   {
-    out << "VarHandleBase @" << &o
-        << " store=" <<o.store()
-        << ", clid=" <<o.clid()
-        << ", key=" <<o.key()
-        << "----------- ptr@" << o.m_ptr 
-        << ", proxy@" << o.m_proxy ;
-    if (o.m_proxy)
-      out << ", DataObject@" << o.m_proxy->object();
+    std::print (out, "{}", o.toString());
     return out;
   }
 

@@ -126,7 +126,7 @@ foreach $c (sort keys %objs) {
     if ($DO_ASSERT) {
         print OUT "      assert (CVEC_" . $s . "[i]->val() == i);\n";
     } else {
-        print OUT "     if (CVEC_" . $s . "[i]->val() != i) { cerr <<  \"ERROR with val check obj $c key \" << Keys[i] << endl; }\n";
+        print OUT "     if (CVEC_" . $s . "[i]->val() != i) { std::println (std::cerr, \"ERROR with val check obj $c key {}\", Keys[i]); }\n";
     }
 }
 print OUT "   }\n";

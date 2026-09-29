@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/test/ThinningHandle_test.cxx
@@ -21,7 +21,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 
 
 class MyObj {};
@@ -42,7 +42,7 @@ unsigned int thinning (const SG::ThinningDecisionBase& dec)
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   ServiceHandle<StoreGateSvc> sg ("StoreGateSvc", "test");
   assert( sg.retrieve().isSuccess() );
@@ -65,6 +65,12 @@ void test1()
     h.thin (5);
     h.thin (10);
     assert (thinning (h.decision()) == 0x428);
+
+    std::ostringstream s1;
+    s1 << h;
+    std::ostringstream s2;
+    std::print (s2, "{}", h);
+    assert (s1.str() == s2.str());
   }
 
   const SG::ThinningDecision* dout = nullptr;
@@ -78,7 +84,7 @@ void test1()
 // makeHandle
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   ServiceHandle<StoreGateSvc> sg ("StoreGateSvc", "test");
   assert( sg.retrieve().isSuccess() );
@@ -118,7 +124,7 @@ void test2()
 
 int main()
 {
-  std::cout << "StoreGate/ThinningHandle_test\n";
+  std::println ("StoreGate/ThinningHandle_test");
   errorcheck::ReportMessage::hideErrorLocus();
   errorcheck::ReportMessage::hideFunctionNames();
   ISvcLocator* svcloc;
