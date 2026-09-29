@@ -15,6 +15,7 @@
 #include <xAODEventInfo/EventInfo.h>
 
 #include "AsgTools/AsgTool.h"
+#include <AsgTools/PropertyWrapper.h>
 #include "PartonHistory/PartonHistoryUtils.h"
 #include "PartonHistory/PartonSchemeConfig.h"
 #include "VectorHelpers/DecoratorHelpers.h"
@@ -119,7 +120,7 @@ class CalcPartonHistory : public asg::AsgTool {
   void FillWPartonHistory(const std::string& parent, int nWs = 1,
                           const std::string& mode = "resonant");
   void FillXPartonHistory(const std::string& parent,            // for FCNC t -> qX, where X can be W
-                          const std::string& symbolX = "H");    // the default FCNC is Higgs
+                          const std::string& symbolX);
   void FillTopPartonHistory(bool fcnc = false);
   void FillAntiTopPartonHistory(bool fcnc = false);
   void FillHiggsPartonHistory(const std::string& mode);
@@ -159,8 +160,11 @@ class CalcPartonHistory : public asg::AsgTool {
   PartonDecorator m_dec;
 
   const std::vector<std::string> m_truthCollections;
-  std::string
-      m_prefix;  ///< prefix applied to all decorator and m_particleMap names
+  Gaudi::Property<std::string> m_prefix{
+      this, "prefix", "", "Prefix to apply to all names to avoid overwriting"};
+  Gaudi::Property<std::string> m_symbolFCNC{
+      this, "symbolFCNC", "",
+      "Symbol for FCNC, valid only for 'TtbarFCNC' history"};
 
   // this method is used to perform the linking of various TRUTH3 particle
   // containers for Partons to work

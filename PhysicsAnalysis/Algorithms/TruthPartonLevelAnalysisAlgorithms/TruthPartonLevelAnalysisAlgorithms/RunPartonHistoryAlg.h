@@ -8,6 +8,7 @@
 #define PARTONS_RUNPARTONHISTORYALG_H
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
+#include <AsgTools/PropertyWrapper.h>
 
 #include "PartonHistory/CalcPartonHistory.h"
 
@@ -21,7 +22,8 @@ class RunPartonHistoryAlg final : public EL::AnaAlgorithm {
   virtual StatusCode execute(const EventContext& ctx) override;
 
  private:
-  std::string m_PartonScheme;
+  Gaudi::Property<std::string> m_PartonScheme{this, "partonScheme", "Ttbar"};
+  Gaudi::Property<std::string> m_SymbolFCNC{this, "symbolFCNC", ""};
   std::unique_ptr<CalcPartonHistory> m_PartonHistory;
 };
 

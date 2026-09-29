@@ -35,10 +35,7 @@ using ROOT::Math::PtEtaPhiMVector;
 
 CalcPartonHistory::CalcPartonHistory(
     const std::string& name, const std::vector<std::string>& truthCollection)
-    : asg::AsgTool(name), m_truthCollections(truthCollection) {
-  declareProperty("prefix", m_prefix = "",
-                  "Prefix to apply to all names to avoid overwriting");
-}
+    : asg::AsgTool(name), m_truthCollections(truthCollection) {}
 
 bool CalcPartonHistory::ExistsInMap(const std::string& key) const {
   // Checks whether a given key exists in the particle map.

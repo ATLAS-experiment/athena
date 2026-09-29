@@ -215,6 +215,13 @@ class PartonHistoryBlock(ConfigBlock):
             + ".",
             meta={'choices':(sorted(TRUTH_BRANCHES),1)},
         )
+        self.addOption(
+            "symbolFCNC",
+            "H",
+            type=str,
+            required=False,
+            info="The symbol for FCNC, valid only for 'TtbarFCNC' history. Default is 'H', can be set to 'pdg_id' for exotic candidates.",
+        )
         # Always skip on data
         self.setOptionValue("skipOnData", True)
 
@@ -229,6 +236,7 @@ class PartonHistoryBlock(ConfigBlock):
             "CP::RunPartonHistoryAlg", f"PartonHistory{self.history}"
         )
         alg.partonScheme = self.history
+        alg.symbolFCNC = self.symbolFCNC
 
         for branch in TRUTH_BRANCHES[self.history]:
             config.addOutputVar(
