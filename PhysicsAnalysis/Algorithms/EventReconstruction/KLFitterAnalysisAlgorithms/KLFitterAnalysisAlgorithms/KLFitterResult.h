@@ -1,12 +1,12 @@
 /*
-    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Oliver Majersky
 /// @author Baptiste Ravina
 
-#ifndef KLFITTERNANALYSISALGORITHMS_KLFITTERRESULT_H_
-#define KLFITTERNANALYSISALGORITHMS_KLFITTERRESULT_H_
+#ifndef KLFITTERANALYSISALGORITHMS_KLFITTERRESULT_H_
+#define KLFITTERANALYSISALGORITHMS_KLFITTERRESULT_H_
 
 // EDM include(s).
 #include "AthContainers/AuxElement.h"
@@ -21,11 +21,9 @@ namespace xAOD {
  * @author John Morris <john.morris@cern.ch>
  *
  * @brief KLFitterResult
- *   A simple xAOD class which we can persist into a mini-xAOD
- *   The xAOD EDM is way too complex, so let's simplify it
- *   It's not like ROOT can do schema evolution......
- *
- *   This class contains the result of the KLFitter algorithm
+ *   Auxiliary-store-backed xAOD object holding the result of one
+ *   KLFitter permutation: fit status flags, likelihood and event
+ *   probability, and the fitted model parameters and jet/lepton indices
  **/
 class KLFitterResult : public SG::AuxElement {
  public:
