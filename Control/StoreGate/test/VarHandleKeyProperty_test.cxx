@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/test/VarHandleKeyProperty_test.cxx
@@ -19,7 +19,7 @@
 #include "GaudiKernel/IProperty.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 #include <sstream>
 
 
@@ -39,7 +39,7 @@ namespace
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   SG::VarHandleKey k (1234, "", Gaudi::DataHandle::Reader);
   assert (Gaudi::Parsers::parse (k, "aaa").isSuccess());
@@ -60,7 +60,7 @@ void test1()
 
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   SG::VarHandleKey k (1234, "", Gaudi::DataHandle::Reader);
   SG::VarHandleKeyProperty p ("prop", k);
@@ -117,7 +117,7 @@ void test2()
 
 void test3()
 {
-  std::cout << "test3\n";
+  std::println ("test3");
 
   SG::VarHandleKey k1 (1234, "", Gaudi::DataHandle::Reader);
   SimplePropertyRef<SG::VarHandleKey > p1 ("p1", k1);
@@ -219,7 +219,7 @@ public:
 
 void test4()
 {
-  std::cout << "test4\n";
+  std::println ("test4");
 
   PropTest ptest;
   std::vector<Gaudi::Details::PropertyBase*> props;
@@ -292,7 +292,7 @@ void test4()
 
 void test5()
 {
-  std::cout << "test5\n";
+  std::println ("test5");
 
   PropTest ptest;
 

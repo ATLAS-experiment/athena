@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -9,6 +9,7 @@
  ***************************************************************************/
 
 #include <string>
+#include <print>
 #include "TestTools/initGaudi.h"
 #include "TestTools/SGassert.h"
 #include "StoreGate/ActiveStoreSvc.h"
@@ -36,7 +37,7 @@ public:
 CLASS_DEF(Foo, 8101, 1)
 
 int main() {
-  cout << "*** ActiveStoreTest BEGINS ***" << endl;
+  std::println ("*** ActiveStoreTest BEGINS ***");
   ISvcLocator* pSvcLoc;
   if (!initGaudi("StoreGate/ActiveStore_test.txt", pSvcLoc)) {
     return 1;
@@ -51,7 +52,7 @@ int main() {
   pASS->setStore(pE2);
   assert( pASS->activeStore()->name() == "E2" ); 
   assert( pASS->finalize().isSuccess() );
-  cout << "*** ActiveStoreTest OK ***\n\n" <<endl;
+  std::println ("*** ActiveStoreTest OK ***\n\n");
 
   return 0;
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/VarHandleKey.icc
@@ -101,5 +101,18 @@ inline bool VarHandleKey::empty() const
 }
 
 
-
 } // namespace SG
+
+
+namespace std {
+
+template <std::derived_from<SG::VarHandleKey> T>
+template <class FmtContext>
+FmtContext::iterator
+formatter<T>::format(const T& k, FmtContext& ctx) const
+{
+  return std::format_to (ctx.out(), "'{}'", k.objKey());
+}
+
+} // namespace std
+

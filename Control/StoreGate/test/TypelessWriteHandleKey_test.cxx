@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file StoreGate/test/TypelessWriteHandleKey_test.cxx
@@ -16,12 +16,12 @@
 #include "TestTools/expect_exception.h"
 #include "TestOwner.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   SG::TypelessWriteHandleKey k1;
   assert (k1.clid() == CLID_NULL);
@@ -34,6 +34,15 @@ void test1()
   assert (k2.key() == "aaa");
   assert (k1.mode() == Gaudi::DataHandle::Writer);
   assert (k2.storeHandle().name() == "FooSvc");
+
+  {
+    std::ostringstream s1;
+    s1 << k2;
+    assert (s1.str() == "'FooSvc+aaa'");
+    std::ostringstream s2;
+    std::print (s2, "{}", k2);
+    assert (s2.str() == "'FooSvc+aaa'");
+  }
 
   k2 = "FeeSvc+bbb";
   assert (k2.clid() == 123);
@@ -66,7 +75,7 @@ void test1()
 
 int main()
 {
-  std::cout << "StoreGateSvc/TypelessWriteHandleKey_test\n";
+  std::println ("StoreGateSvc/TypelessWriteHandleKey_test");
 
   ISvcLocator* pDum;
   Athena_test::initGaudi(pDum); //need MessageSvc

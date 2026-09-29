@@ -72,8 +72,8 @@ SG::WPtr<T>
 StoreGateSvc::create(const TKEY& key, ARGS... constructorArgs) {
   T* pT = new T(constructorArgs...);
   if(!(this->record(pT, key).isSuccess())) {
-    error() << "create: problem recording created object @" 
-            << pT << " using key " << key << endmsg;
+    SG_MSG_ERROR ("create: problem recording created object @{} using key {}",
+                  static_cast<void*>(pT), key);
     pT=0; //record will take care of deleting pT even if it fails
   }
   return pT;
@@ -135,13 +135,15 @@ requires KeyConcept<TKEY>
 #ifndef NDEBUG
   if (sc.isSuccess()) {
     SG_MSG_DEBUG( 
-                 "Recorded object @" << pObject 
-                 << " with key " << (std::string)key 
-                 << " of type "  << ClassID_traits<T>::typeName()
-                 << "(CLID " << ClassID_traits<T>::ID() 
-                 << ")\n in DataObject @" << obj 
-                 << "\n object " << (allowMods ? "" : "not ")
-                 << "modifiable when retrieved");
+                 "Recorded object @{} with key {} of type {} (CLID {})\n"
+                 " in DataObject @{}\n"
+                 " object {}modifiable when retrieved",
+                 static_cast<void*>(pObject),
+                 static_cast<std::string>(key),
+                 ClassID_traits<T>::typeName(),
+                 ClassID_traits<T>::ID(),
+                 static_cast<void*>(obj),
+                 (allowMods ? "" : "not "));
   }
 #endif
 
@@ -175,14 +177,15 @@ requires KeyConcept<TKEY>
                                                            &typeid(T));
 #ifndef NDEBUG
   if (sc.isSuccess()) {
-    SG_MSG_DEBUG( 
-                 "overwrite: Recorded object @" << pObject 
-                 << " with key " << (std::string)key 
-                 << " of type "  << ClassID_traits<T>::typeName()
-                 << "(CLID " << ClassID_traits<T>::ID() 
-                 << ")\n in DataObject @" << obj 
-                 << "\n object " << (allowMods ? "" : "not ")
-                 << "modifiable when retrieved");
+    SG_MSG_DEBUG("overwrite: Recorded object @{} with key {} of type {} (CLID {})\n"
+                 " in DataObject @{}\n"
+                 " object {}modifiable when retrieved",
+                 static_cast<void*>(pObject),
+                 static_cast<std::string>(key),
+                 ClassID_traits<T>::typeName(),
+                 ClassID_traits<T>::ID() ,
+                 static_cast<void*>(obj),
+                 (allowMods ? "" : "not "));
   }
 #endif
   return sc;
@@ -200,10 +203,10 @@ StatusCode StoreGateSvc::retrieve(const T*& ptr) const
 
   SG::DataProxy* dp =proxy(ClassID_traits<T>::ID());
   if (!dp || !dp->isValid()) {
-    warning() 
-          << "retrieve(default): No valid proxy for default object \n" 
-          << " of type "  << ClassID_traits<T>::typeName() << "(CLID " 
-          << ClassID_traits<T>::ID() << ')' << endmsg;
+    SG_MSG_WARNING ("retrieve(default): No valid proxy for default object \n" 
+                    " of type {} (CLID {})",
+                    ClassID_traits<T>::typeName(),
+                    ClassID_traits<T>::ID());
     return StatusCode::FAILURE;
   }
   ptr = SG::DataProxy_cast<T> (dp);
@@ -214,9 +217,10 @@ StatusCode StoreGateSvc::retrieve(const T*& ptr) const
   //for types with an associated store, try to retrieve it and associate it
   this->associateAux (ptr, SG::DEFAULTKEY);
 #ifndef NDEBUG
-  SG_MSG_DEBUG("retrieve(default): Retrieved const pointer to default object \n" 
-               << " of type "  << ClassID_traits<T>::typeName() 
-               << "(CLID " << ClassID_traits<T>::ID() << ')');
+  SG_MSG_DEBUG("retrieve(default): Retrieved const pointer to default object \n"
+               " of type {} (CLID {})",
+               ClassID_traits<T>::typeName() ,
+               ClassID_traits<T>::ID());
 #endif
 
   return StatusCode::SUCCESS;
@@ -234,11 +238,10 @@ StatusCode StoreGateSvc::retrieve(T*& ptr) const
 
   SG::DataProxy* dp =proxy(ClassID_traits<T>::ID());
   if (!dp || !dp->isValid() || dp->isConst()) {
-    warning() 
-          << "retrieve(default): No valid proxy for default object " 
-          << " of type "  << ClassID_traits<T>::typeName() << "(CLID "
-          << ClassID_traits<T>::ID() << ")\n Try to use a const retrieve " 
-          << endmsg;
+    SG_MSG_WARNING ("retrieve(default): No valid proxy for default object " 
+                    " of type {} (CLID {})\n Try to use a const retrieve ",
+                    ClassID_traits<T>::typeName(),
+                    ClassID_traits<T>::ID());
     return StatusCode::FAILURE;
   }
   ptr = SG::DataProxy_cast<T> (dp);
@@ -250,8 +253,9 @@ StatusCode StoreGateSvc::retrieve(T*& ptr) const
   this->associateAux (ptr, SG::DEFAULTKEY);
 #ifndef NDEBUG
   SG_MSG_DEBUG("retrieve(default): Retrieved non-const pointer to default object \n" 
-               << " of type "  << ClassID_traits<T>::typeName() 
-               << "(CLID " << ClassID_traits<T>::ID() << ')');
+               " of type {} (CLID {})",
+               ClassID_traits<T>::typeName() ,
+               ClassID_traits<T>::ID());
 #endif
 
   return StatusCode::SUCCESS;
@@ -272,10 +276,11 @@ StatusCode StoreGateSvc::retrieve(const T*& ptr, const std::string& key) const
                             key,
                             false);
   if (!dp || !dp->isValid()) {
-    warning() 
-          << "retrieve(const): No valid proxy for object " << key  << ' ' 
-          << " of type "  << ClassID_traits<T>::typeName() << "(CLID "
-          << ClassID_traits<T>::ID() << ')' << endmsg;
+    SG_MSG_WARNING ("retrieve(const): "
+                    "No valid proxy for object {} of type {} (CLID {})",
+                    key,
+                    ClassID_traits<T>::typeName(),
+                    ClassID_traits<T>::ID());
     return StatusCode::FAILURE;
   }
   ptr = SG::DataProxy_cast<T> (dp);
@@ -286,9 +291,10 @@ StatusCode StoreGateSvc::retrieve(const T*& ptr, const std::string& key) const
   //for types with an associated store, try to retrieve it and associate it
   this->associateAux (ptr, key);
 #ifndef NDEBUG
-  SG_MSG_DEBUG( "Retrieved const pointer to object " << key  << ' '
-                << " of type "  << ClassID_traits<T>::typeName() 
-                << "(CLID " << ClassID_traits<T>::ID() << ')');
+  SG_MSG_DEBUG ("Retrieved const pointer to object {} of type {} (CLID {})",
+                key,
+                ClassID_traits<T>::typeName(),
+                ClassID_traits<T>::ID());
 #endif
 
   return StatusCode::SUCCESS;
@@ -319,11 +325,11 @@ StatusCode StoreGateSvc::retrieve(T*& ptr, const std::string& key) const
                             key,
                             false);
   if (!dp || !dp->isValid() || dp->isConst()) {
-    SG_MSG_WARNING("retrieve(non-const): No valid proxy for object "
-                   << key  << ' '
-                   << " of type "  << ClassID_traits<T>::typeName() << "(CLID "
-                   << ClassID_traits<T>::ID() 
-                   << ") \n Try to use a const retrieve" );
+    SG_MSG_WARNING("retrieve(non-const): No valid proxy for object {} of type {} (CLID {})\n"
+                   " Try to use a const retrieve",
+                   key,
+                   ClassID_traits<T>::typeName(),
+                   ClassID_traits<T>::ID());
     return StatusCode::FAILURE;
   }
   ptr = SG::DataProxy_cast<T> (dp);
@@ -334,9 +340,10 @@ StatusCode StoreGateSvc::retrieve(T*& ptr, const std::string& key) const
   //for types with an associated store, try to retrieve it and associate it
   this->associateAux (ptr, key);
 #ifndef NDEBUG
-  SG_MSG_DEBUG("Retrieved non-const pointer to object " << (std::string)key  
-               << ' ' << " of type "  << ClassID_traits<T>::typeName() 
-               << "(CLID " << ClassID_traits<T>::ID() << ')');
+  SG_MSG_DEBUG("Retrieved non-const pointer to object {} of type {} (CLID {})",
+               static_cast<std::string>(key),
+               ClassID_traits<T>::typeName(),
+               ClassID_traits<T>::ID());
 #endif
 
   return StatusCode::SUCCESS;
@@ -821,10 +828,14 @@ bool StoreGateSvc::associateAux (DOBJ* ptr,
 {
   typename SG::AuxStore_traits<DOBJ>::type* pDummy(0); //used to pass down auxstore type
   bool hasAux=associateAux_impl(ptr, key, pDummy) || ignoreMissing;
-  if (!hasAux) SG_MSG_WARNING("associateAux const: Could not associate AuxStore of type "  
-                              << SG::AuxStore_traits<DOBJ>::const_typeName()
-                              << "\n to object of type "  << ClassID_traits<DOBJ>::typeName() << "(CLID " 
-                              << ClassID_traits<DOBJ>::ID() << ") with key " << key << endmsg);
+  if (!hasAux) {
+    SG_MSG_WARNING("associateAux const: Could not associate AuxStore of type {}\n"
+                   " to object of type {} (CLID {}) with key {}",
+                   SG::AuxStore_traits<DOBJ>::const_typeName(),
+                   ClassID_traits<DOBJ>::typeName(),
+                   ClassID_traits<DOBJ>::ID(),
+                   key);
+  }
   return hasAux;
 }
 
@@ -839,10 +850,14 @@ bool StoreGateSvc::associateAux (const DOBJ* ptr,
   // inside the store lock.  Still kind of a wart that we still do this, though.
   DOBJ* ptr_nc ATLAS_THREAD_SAFE = const_cast<DOBJ*> (ptr);
   bool hasAux=associateAux_impl(ptr_nc, key, pDummy) || ignoreMissing;
-  if (!hasAux) SG_MSG_WARNING("associateAux const: Could not associate AuxStore of type "  
-                              << SG::AuxStore_traits<DOBJ>::const_typeName()
-                              << "\n to object of type "  << ClassID_traits<DOBJ>::typeName() << "(CLID " 
-                              << ClassID_traits<DOBJ>::ID() << ") with key " << key << endmsg);
+  if (!hasAux) {
+    SG_MSG_WARNING("associateAux const: Could not associate AuxStore of type {}\n"
+                   " to object of type {} (CLID {}) with key {}",
+                   SG::AuxStore_traits<DOBJ>::const_typeName(),
+                   ClassID_traits<DOBJ>::typeName(),
+                   ClassID_traits<DOBJ>::ID(),
+                   key);
+  }
   return hasAux;
 }
 

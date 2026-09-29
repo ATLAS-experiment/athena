@@ -66,9 +66,6 @@ namespace SG {
           m_cc = 0;
           return StatusCode::FAILURE;
         }
-        // std::cout << "recorded " << Gaudi::DataHandle::fullKey() 
-        //           << " with key "
-        //           << SG::VarHandleKey::key() << std::endl;
       }
     } else {
       // lets see if we get lucky and the Write alg already created the

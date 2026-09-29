@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -10,6 +10,7 @@
 
 
 #include <iostream>
+#include <print>
 
 #undef NDEBUG
 
@@ -19,10 +20,10 @@
 using namespace std;
 
 int main() {
-  cout << "*** StoreID_test BEGINS ***" <<endl;
+  std::println ("*** StoreID_test BEGINS ***");
   ISvcLocator* pSvcLoc;
   if (!Athena_test::initGaudi("StoreGate/StoreID_test.txt", pSvcLoc)) {
-    cerr << "This test can not be run" << endl;
+    std::println (std::cerr, "This test can not be run");
     return 0;
   }  
   assert(pSvcLoc);
@@ -39,6 +40,6 @@ int main() {
   assert(pStore);
   assert(pStore->storeID() == StoreID::CONDITION_STORE);
   
-  cout << "*** StoreID_test OK ***" <<endl;
+  std::println ("*** StoreID_test OK ***");
   return 0;
 }

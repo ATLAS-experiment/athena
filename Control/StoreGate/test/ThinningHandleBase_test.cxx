@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/test/ThinningHandleBase_test.cxx
@@ -20,7 +20,7 @@
 #include "AthenaKernel/ExtendedEventContext.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 
 
 class MyObj {};
@@ -41,7 +41,7 @@ unsigned int thinning (const SG::ThinningDecisionBase& dec)
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   ServiceHandle<StoreGateSvc> sg ("StoreGateSvc", "test");
   assert( sg.retrieve().isSuccess() );
@@ -110,7 +110,7 @@ void test1()
 
 int main()
 {
-  std::cout << "StoreGate/ThinningHandleBase_test\n";
+  std::println ("StoreGate/ThinningHandleBase_test");
   errorcheck::ReportMessage::hideErrorLocus();
   errorcheck::ReportMessage::hideFunctionNames();
   ISvcLocator* svcloc;

@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file StoreGate/src/setupStoreGate.cxx
  * @author scott snyder <snyder@bnl.gov>, after S. Binet's code from TestPolicy.
@@ -18,6 +16,7 @@
 #include "GaudiKernel/Bootstrap.h"
 #include <fstream>
 #include <iostream>
+#include <print>
 #include <list>
 #include <cassert>
 
@@ -59,7 +58,7 @@ bool setupStoreGate (std::string progname,
       for ( std::list<std::string>::const_iterator iopt=opts.begin();
             iopt!=opts.end(); ++iopt ) 
       {
-        jobopt << *iopt << std::endl;
+        std::println (jobopt, "{}", *iopt);
       }
     }
     jobopt.close();
@@ -69,7 +68,7 @@ bool setupStoreGate (std::string progname,
     /// Get StoreGateSvc
     ISvcLocator* svcLoc = 0;
     if (!Athena_test::initGaudi(options_file, svcLoc)) {
-      std::cerr << "This test can not be run" << std::endl;
+      std::println (std::cerr, "This test can not be run");
       return false;
     }  
     assert( 0 != svcLoc);
@@ -79,13 +78,13 @@ bool setupStoreGate (std::string progname,
     
     if ( !storeGate ) {
       std::string error = "No valid pointer to StoreGateSvc !!";
-      std::cerr << error << std::endl;
+      std::println (std::cerr, "{}", error);
       return false;
     } else {
       return true;
     }
   } catch ( std::exception& e ) {
-    std::cerr << "Caught : " << e.what() << std::endl;
+    std::println (std::cerr, "Caught : {}", e.what());
     return false;
   }
 }

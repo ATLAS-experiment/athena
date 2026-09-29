@@ -1,7 +1,6 @@
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
-
 /**
  * @file StoreGate/test/DecorKeyHelpers_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -16,12 +15,12 @@
 #include "StoreGate/exceptions.h"
 #include "TestTools/expect_exception.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   assert (SG::contKeyFromKey ("a.b") == "a");
   assert (SG::contKeyFromKey ("S+a.b") == "S+a");
   assert (SG::contKeyFromKey ("a") == "a");
@@ -46,7 +45,7 @@ void test1()
 
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
   SG::VarHandleKey vhk(123, "a", Gaudi::DataHandle::Reader);
 
   assert (SG::makeContDecorKey(vhk, "b") == "StoreGateSvc+a.b");

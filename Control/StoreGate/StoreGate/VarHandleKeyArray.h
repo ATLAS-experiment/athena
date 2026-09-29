@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_VARHANDLEKEYARRAY_H
@@ -194,12 +194,28 @@ namespace SG {
     const VarHandleKey* m_contKey = nullptr;
 
   };
-  
+
+
+std::ostream& operator<<(std::ostream& s, const SG::VarHandleKeyArray& m);
+
+
 } // namespace SG
 
+
 namespace std {
-  ostream& operator<<(ostream& s, const SG::VarHandleKeyArray& m);
-}
+
+
+// C++23 compatible formatter.
+template <std::derived_from<SG::VarHandleKeyArray> T>
+struct formatter<T>
+  : public formatter<string_view>
+{
+  template <class FmtContext>
+  FmtContext::iterator format(const T& k, FmtContext& ctx) const;
+};
+
+
+} // namespace std
 
 
 #include "StoreGate/VarHandleKeyArray.icc"

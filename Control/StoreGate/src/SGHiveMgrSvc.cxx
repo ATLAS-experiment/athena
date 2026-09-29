@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/ConcurrencyFlags.h"
@@ -8,6 +8,7 @@
 #include "AthenaKernel/StoreID.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "StoreGate/tools/SGImplSvc.h"
+#include "StoreGate/tools/SGMsgStreamMacros.h"
 #include "StoreGate/SGHiveMgrSvc.h"
 
 using namespace SG;
@@ -58,9 +59,13 @@ StatusCode HiveMgrSvc::clearStore(size_t slotIndex) {
   StatusCode rc(StatusCode::FAILURE);
   if (slotIndex < m_nSlots) {
     rc=m_slots[slotIndex].pEvtStore->clearStore();
-    if (rc.isSuccess()) debug() << "cleared store " << slotIndex << endmsg;
+    if (rc.isSuccess()) {
+      SG_MSG_DEBUG ("cleared store {}", slotIndex);
+    }
   }    
-  if (!rc.isSuccess()) error() << "could not clear store " << slotIndex << endmsg;
+  if (!rc.isSuccess()) {
+    SG_MSG_ERROR ("could not clear store {}", slotIndex);
+  }
   return rc;
 }
   
@@ -72,7 +77,7 @@ StatusCode HiveMgrSvc::clearStore(size_t slotIndex) {
 StatusCode HiveMgrSvc::setNumberOfStores(size_t slots) {
   //FIXME what if running?
   if(FSMState() ==  Gaudi::StateMachine::INITIALIZED) {
-    fatal() << "Too late to change the number of slots!" << endmsg;
+    SG_MSG_FATAL ("Too late to change the number of slots!");
     return StatusCode::FAILURE;
   } else {
     m_slots.resize(slots);
@@ -97,23 +102,22 @@ size_t HiveMgrSvc::getNumberOfStores() const {
  */
 size_t HiveMgrSvc::allocateStore( int evtNumber ) {
   if (m_freeSlots == 0) {
-    error() << "No slots available for event number " << evtNumber << endmsg;
+    SG_MSG_ERROR ("No slots available for event number {}", evtNumber);
     return std::string::npos;
   }
   std::scoped_lock lock{m_mutex};
   for (size_t index=0; index<m_nSlots; ++index) {
     if( m_slots[index].eventNumber == evtNumber) {
-      error() << "Attempt to allocate an event slot for an event that is still active: event number " << evtNumber << endmsg;
+      SG_MSG_ERROR ("Attempt to allocate an event slot for an event that is still active: event number {}", evtNumber);
       return std::string::npos;
     } else if (m_slots[index].eventNumber == -1) {
       m_slots[index].eventNumber = evtNumber;
-      debug() << "Slot " << index 
-              << " allocated to event number "<< evtNumber << endmsg;
+      SG_MSG_DEBUG ("Slot {} allocated to event number {}", index, evtNumber);
       m_freeSlots--;
       return index;
     }
   }
-  error() << "No slots available for event number " << evtNumber << endmsg;
+  SG_MSG_ERROR ("No slots available for event number {}", evtNumber);
   return std::string::npos;
 }
   
@@ -126,16 +130,16 @@ StatusCode HiveMgrSvc::freeStore( size_t slotIndex ) {
   if (slotIndex < m_nSlots) {
     std::scoped_lock lock{m_mutex};
     if (m_slots[slotIndex].eventNumber == -1) {
-      debug() << "Slot " << slotIndex << " is already free" << endmsg;
+      SG_MSG_DEBUG ("Slot {} is already free", slotIndex);
     }
     else {
       m_slots[slotIndex].eventNumber = -1;
       m_freeSlots++;
-      debug() << "Freed slot " << slotIndex << endmsg;
+      SG_MSG_DEBUG ("Freed slot {}", slotIndex);
     }
     return StatusCode::SUCCESS;
   } else {
-    error() << "no slot at " << slotIndex << endmsg;
+    SG_MSG_ERROR ("no slot at {}", slotIndex);
     return StatusCode::FAILURE;
   }
 }
@@ -180,15 +184,15 @@ bool HiveMgrSvc::exists( const DataObjID& id) {
 } 
 
 StatusCode HiveMgrSvc::initialize() {
-  verbose() << "Initializing " << name() << endmsg;
+  SG_MSG_VERBOSE ("Initializing {}", name());
 
   if ( !(Service::initialize().isSuccess()) )  {
-    fatal() << "Unable to initialize base class" << endmsg;
+    SG_MSG_FATAL ("Unable to initialize base class");
     return StatusCode::FAILURE;
   }
   //this sets the hiveStore pointer to StoreGateSvc.defaultStore
   if (!(m_hiveStore.retrieve()).isSuccess()) {
-    fatal() << "Unable to get hive event store" << endmsg;
+    SG_MSG_FATAL ("Unable to get hive event store");
     return StatusCode::FAILURE;
   }
 
@@ -198,7 +202,7 @@ StatusCode HiveMgrSvc::initialize() {
 
   for( size_t i = 0; i< m_nSlots; ++i) {
     std::ostringstream oss;
-    oss << i << '_' << m_hiveStore->currentStore()->name();
+    std::print (oss, "{}_{}", i, m_hiveStore->currentStore()->name());
     if (CloneService::clone(m_hiveStore->currentStore(), oss.str(), child).isSuccess() &&
         child->initialize().isSuccess() &&
         0 != (pSG = dynamic_cast<SGImplSvc*>(child)) )
@@ -206,7 +210,7 @@ StatusCode HiveMgrSvc::initialize() {
         pSG->setSlotNumber (i, m_nSlots);
         m_slots.push_back(SG::HiveEventSlot(pSG));
       } else {
-      fatal() << "Unable to clone event store " << oss.str() << endmsg;
+      SG_MSG_FATAL ("Unable to clone event store {}", oss.str());
       return StatusCode::FAILURE;
     }
   }
@@ -218,7 +222,7 @@ StatusCode HiveMgrSvc::initialize() {
 }
 
 StatusCode HiveMgrSvc::finalize() {
-  info() <<  "Finalizing " << name() << endmsg;
+  SG_MSG_INFO ("Finalizing {}", name());
 
   for (SG::HiveEventSlot& s : m_slots) {
     // The impl services are not set to active, so ServiceManager

@@ -1,17 +1,14 @@
-ApplicationMgr    SUCCESS 
+ApplicationMgr     SUCCESS 
 ====================================================================================================================================
-                                                   Welcome to ApplicationMgr (GaudiCoreSvc v28r2)
-                                          running on p05614910w96644.cern.ch on Wed Jun 28 19:29:39 2017
+                                                   Welcome to ApplicationMgr (GaudiCoreSvc v27r1p99)
+                                          running on karma on Sat Aug 22 21:48:56 2026
 ====================================================================================================================================
-ApplicationMgr       INFO Application Manager Configured successfully
-EventLoopMgr      WARNING Unable to locate service "EventSelector" 
-EventLoopMgr      WARNING No events will be processed from external input.
-HistogramPersis...WARNING Histograms saving not required.
-ApplicationMgr       INFO Application Manager Initialized successfully
+ApplicationMgr        INFO Application Manager Configured successfully
+EventLoopMgr          INFO Unable to locate service "EventSelector": No events will be processed from external input.
+ApplicationMgr        INFO Application Manager Initialized successfully
 ApplicationMgr Ready
-ClassIDSvc           INFO  getRegistryEntries: read 166 CLIDRegistry entries for module ALL
    key: "foo" store: DEFAULT   DataObjID: "StoreGateSvc+foo"  sg: "foo"
-   key: "/foo" store: DEFAULT  -> excpected failure: SG::ExcBadHandleKey: Bad key format for VarHandleKey: `key "/foo": keys with "/" only allowed for ConditionStore - store is "StoreGateSvc"'
+   key: "/foo" store: DEFAULT  -> expected failure: SG::ExcBadHandleKey: Bad key format for VarHandleKey: `key "/foo": keys with "/" only allowed for ConditionStore - store is "StoreGateSvc"'
    key: "foo" store: "StoreGateSvc"   DataObjID: "StoreGateSvc+foo"  sg: "foo"
    key: "foo" store: "StoreGateSvc/StoreGateSvc"   DataObjID: "StoreGateSvc+foo"  sg: "foo"
    key: "StoreGateSvc+foo" store: DEFAULT   DataObjID: "StoreGateSvc+foo"  sg: "foo"
@@ -21,9 +18,9 @@ ClassIDSvc           INFO  getRegistryEntries: read 166 CLIDRegistry entries for
    key: "foo/bar/aaa" store: "ConditionStore"   DataObjID: "ConditionStore+foo/bar/aaa"  sg: "foo/bar/aaa"
    key: "foo/bar/aaa" store: "StoreGateSvc/ConditionStore"   DataObjID: "ConditionStore+foo/bar/aaa"  sg: "foo/bar/aaa"
    key: "ConditionStore+foo/bar/aaa" store: "ConditionStore"   DataObjID: "ConditionStore+foo/bar/aaa"  sg: "foo/bar/aaa"
-   key: "/foo/bar" store: DEFAULT  -> excpected failure: SG::ExcBadHandleKey: Bad key format for VarHandleKey: `key "/foo/bar": keys with "/" only allowed for ConditionStore - store is "StoreGateSvc"'
-   key: "StoreGateSvc+foo/bar" store: DEFAULT  -> excpected failure: SG::ExcBadHandleKey: Bad key format for VarHandleKey: `key "StoreGateSvc+foo/bar": keys with "/" only allowed for ConditionStore - store is "StoreGateSvc"'
-   key: "foo/bar" store: DEFAULT  -> excpected failure: SG::ExcBadHandleKey: Bad key format for VarHandleKey: `key "foo/bar": keys with "/" only allowed for ConditionStore - store is "StoreGateSvc"'
+   key: "/foo/bar" store: DEFAULT  -> expected failure: SG::ExcBadHandleKey: Bad key format for VarHandleKey: `key "/foo/bar": keys with "/" only allowed for ConditionStore - store is "StoreGateSvc"'
+   key: "StoreGateSvc+foo/bar" store: DEFAULT  -> expected failure: SG::ExcBadHandleKey: Bad key format for VarHandleKey: `key "StoreGateSvc+foo/bar": keys with "/" only allowed for ConditionStore - store is "StoreGateSvc"'
+   key: "foo/bar" store: DEFAULT  -> expected failure: SG::ExcBadHandleKey: Bad key format for VarHandleKey: `key "foo/bar": keys with "/" only allowed for ConditionStore - store is "StoreGateSvc"'
    key: "/foo/bar" store: "OtherStore"  -> expected failure: SG::ExcBadHandleKey: Bad key format for VarHandleKey: `key "/foo/bar": keys with "/" only allowed for ConditionStore - store is "OtherStore"'
    key: "OtherStore+foo/bar" store: "OtherStore"  -> expected failure: SG::ExcBadHandleKey: Bad key format for VarHandleKey: `key "OtherStore+foo/bar": keys with "/" only allowed for ConditionStore - store is "OtherStore"'
    key: "foo/bar/aaa" store: "OtherStore"  -> expected failure: SG::ExcBadHandleKey: Bad key format for VarHandleKey: `key "foo/bar/aaa": keys with "/" only allowed for ConditionStore - store is "OtherStore"'
@@ -31,12 +28,12 @@ ClassIDSvc           INFO  getRegistryEntries: read 166 CLIDRegistry entries for
    key: "" store: "StoreGateSvc"   DataObjID: ""  sg: ""
    key: "/" store: "StoreGateSvc"  -> expected failure: SG::ExcBadHandleKey: Bad key format for VarHandleKey: `key "/": keys with "/" only allowed for ConditionStore - store is "StoreGateSvc"'
    key: "" store: DEFAULT   DataObjID: ""  sg: ""
-   key: "/" store: DEFAULT  -> excpected failure: SG::ExcBadHandleKey: Bad key format for VarHandleKey: `key "/": keys with "/" only allowed for ConditionStore - store is "StoreGateSvc"'
+   key: "/" store: DEFAULT  -> expected failure: SG::ExcBadHandleKey: Bad key format for VarHandleKey: `key "/": keys with "/" only allowed for ConditionStore - store is "StoreGateSvc"'
    key: "" store: "ConditionStore"   DataObjID: ""  sg: ""
    key: "/" store: "ConditionStore"   DataObjID: ""  sg: ""
    key: "" store: "OtherStore"   DataObjID: ""  sg: ""
    key: "OtherStore+" store: "OtherStore"   DataObjID: ""  sg: ""
    key: "OtherStore+" store: "StoreGateSvc/OtherStore"   DataObjID: ""  sg: ""
-   key: "ConditonStore+foo/" store: DEFAULT  -> excpected failure: SG::ExcBadHandleKey: Bad key format for VarHandleKey: `key "ConditonStore+foo/": must not end with a "/"'
+   key: "ConditonStore+foo/" store: DEFAULT  -> expected failure: SG::ExcBadHandleKey: Bad key format for VarHandleKey: `key "ConditonStore+foo/": must not end with a "/"'
    key: "foo/" store: "ConditonStore"  -> expected failure: SG::ExcBadHandleKey: Bad key format for VarHandleKey: `key "foo/": must not end with a "/"'
    key: "foo/bar/" store: "ConditionStore"  -> expected failure: SG::ExcBadHandleKey: Bad key format for VarHandleKey: `key "foo/bar/": must not end with a "/"'

@@ -58,7 +58,7 @@ namespace Utils {
 std::ostream& 
 toStream(const SG::VarHandleKey& v, std::ostream& o)
 {
-  o << "'" << v.storeHandle().name() << storeSeparator << v.key() << "'";
+  std::print (o, "'{}{}{}'", v.storeHandle().name(), storeSeparator, v.key());
   return o;
 }
     
@@ -161,7 +161,7 @@ void
 VarHandleKeyProperty::toStream(std::ostream& out) const
 {
   useReadHandler();
-  out << this->toString();
+  std::print (out, "{}", this->toString());
 }
 
 

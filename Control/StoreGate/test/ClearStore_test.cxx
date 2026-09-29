@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -10,6 +10,7 @@
 
 
 #include <iostream>
+#include <print>
 
 #undef NDEBUG
 
@@ -20,10 +21,10 @@
 using namespace std;
 
 int main() {
-  cout << "*** ClearStore_test BEGINS ***" <<endl;
+  std::println ("*** ClearStore_test BEGINS ***");
   ISvcLocator* pSvcLoc;
   if (!Athena_test::initGaudi("StoreGate/StoreGate_jobOptions.txt", pSvcLoc)) {
-    cerr << "This test can not be run" << endl;
+    std::println (std::cerr, "This test can not be run");
     return 0;
   }  
   assert(pSvcLoc);
@@ -31,32 +32,29 @@ int main() {
   SmartIF<StoreGateSvc> pStore(pSvcLoc->service("StoreGateSvc"));
   assert(pStore);
   
-  cout << "*** ClearStore_test run standard testRecord a first time ***" << endl;
+  std::println ("*** ClearStore_test run standard testRecord a first time ***");
   Athena_test::testRecord(*pStore);
-  cout << "*** ClearStore_test clear the store ***" << endl;
+  std::println ("*** ClearStore_test clear the store ***");
   assert(pStore->clearStore().isSuccess());
-  cout << "Testing dump: store should contain no data now \n -------->>\n" 
-       << pStore->dump() 
-       << "\n<<--------" << endl;
+  std::println ("Testing dump: store should contain no data now \n -------->>\n{}\n<<--------",
+                pStore->dump());
 
-  cout << "\n\n\n*** ClearStore_test run standard testRecord a second time ***" << endl;
+  std::println ("\n\n\n*** ClearStore_test run standard testRecord a second time ***");
   Athena_test::testRecord(*pStore);
-  cout << "*** ClearStore_test clear the store again ***" << endl;
+  std::println ("*** ClearStore_test clear the store again ***");
   assert(pStore->clearStore().isSuccess());
 
-  cout << "Testing dump: store should contain no data now \n -------->>\n" 
-       << pStore->dump() 
-       << "\n<<--------" << endl;
+  std::println ("Testing dump: store should contain no data now \n -------->>\n{}\n<<--------",
+                pStore->dump());
 
-  cout << "*** ClearStore_test clear the store one last time forcing proxy removal (the way we do in finalize()) ***" << endl;
+  std::println ("*** ClearStore_test clear the store one last time forcing proxy removal (the way we do in finalize()) ***");
   const bool FORCEREMOVE(true);
   assert(pStore->clearStore(FORCEREMOVE).isSuccess());
 
-  cout << "Testing dump: store should contain no proxy now \n -------->>\n" 
-       << pStore->dump() 
-       << "\n<<--------" << endl;
+  std::println ("Testing dump: store should contain no proxy now \n -------->>\n{}\n<<--------",
+                pStore->dump());
 
 
-  cout << "*** ClearStore_test OK ***" <<endl;
+  std::println ("*** ClearStore_test OK ***");
   return 0;
 }

@@ -1,55 +1,89 @@
 
 
+Initializing Gaudi ApplicationMgr using job opts /home/sss/atlas/dvtest/../share/ProxyProviderSvc_test.txt
+JobOptionsSvc         INFO # =======> /home/sss/atlas/dvtest/build/joboptions/ControlTest/StoreGateTestCommon.txt
+JobOptionsSvc         INFO # (3,1): ApplicationMgr.ExtSvc += ["StoreGateSvc/DetectorStore", "StoreGateSvc/HistoryStore", "StoreGateSvc/ConditionStore"]
+JobOptionsSvc         INFO # (4,1): AuditorSvc.Auditors += ["AlgContextAuditor"]
+JobOptionsSvc         INFO # (5,1): StoreGateSvc.OutputLevel = 1
+JobOptionsSvc         INFO # (6,1): StoreGateSvc.ActivateHistory = 0
+JobOptionsSvc         INFO # (7,1): ClassIDSvc.CLIDDBFiles = {}
+JobOptionsSvc         INFO # =======> /home/sss/atlas/dvtest/build/joboptions/ToyConversion/ToyConversionOpts.txt
+JobOptionsSvc         INFO # (5,1): EventPersistencySvc.CnvServices += ["ToyConversionSvc"]
+JobOptionsSvc         INFO # =======> /home/sss/atlas/dvtest/../share/ProxyProviderSvc_test.txt
+JobOptionsSvc         INFO # (6,1): MessageSvc.setVerbose = ["ToyConversionSvc", "StoreGateSvc"]
+JobOptionsSvc         INFO Job options successfully read in from /home/sss/atlas/dvtest/../share/ProxyProviderSvc_test.txt
+ApplicationMgr     SUCCESS 
+====================================================================================================================================
+                                                   Welcome to ApplicationMgr (GaudiCoreSvc v27r1p99)
+                                          running on karma on Mon Aug 24 19:39:23 2026
+====================================================================================================================================
 ApplicationMgr        INFO Application Manager Configured successfully
+ClassIDSvc            INFO getRegistryEntries: read 433 CLIDRegistry entries for module ALL
+EventLoopMgr          INFO Unable to locate service "EventSelector": No events will be processed from external input.
 ApplicationMgr        INFO Application Manager Initialized successfully
 ApplicationMgr Ready
+StoreGateSvc         DEBUG Service base class initialized successfully
 StoreGateSvc       VERBOSE Initializing StoreGateSvc
+StoreGateSvc         DEBUG trying to create store SGImplSvc/StoreGateSvc_Impl
+StoreGateSvc_Impl    DEBUG Property update for OutputLevel : new value = 1
 StoreGateSvc_Impl  VERBOSE Initializing StoreGateSvc_Impl
+StoreGateSvc_Impl    DEBUG Service base class initialized successfully
+ToyConversionSvc     DEBUG Service base class initialized successfully
 EventPersistenc...    INFO Added successfully Conversion service ToyConversionSvc
-StoreGateSvc         DEBUG Retrieved const pointer to object aFoo  of type Foo(CLID 8101)
+StoreGateSvc         DEBUG Retrieved const pointer to object aFoo of type Foo (CLID 8101)
 Now we expect to see an error message:
 ----Error Message Starts--->>
 ToyConversionSvc      INFO No converter for object   CLID= 8109
 DataProxy          WARNING accessData: conversion failed for data object 8109/aFooBar
  Returning NULL DataObject pointer  
+SG::DataProxy_cast WARNING this proxy 0x2707c6f0 has a NULL data object ptr
 <<---Error Message Ends-------
 *** ProxyProviderSvc_test OK ***
 *** ProxyProviderSvc_test RecordBeforeRead BEGINS ***
-StoreGateSvc_Impl    DEBUG Clearing store with forceRemove=0
+StoreGateSvc_Impl    DEBUG Clearing store with forceRemove=false
+ClassIDSvc            INFO getRegistryEntries: read 905 CLIDRegistry entries for module ALL
 StoreGateSvc_Impl  WARNING record_impl: you are recording an object with key existingFoo, type Foo (CLID 8101)
  There is already a persistent version of this object. Recording a duplicate may lead to unreproducible results and it is deprecated.
+StoreGateSvc         DEBUG Recorded object @0x27079cb0 with key existingFoo of type Foo (CLID 8101)
+ in DataObject @0x2707c510
  object modifiable when retrieved
-StoreGateSvc         DEBUG Retrieved const pointer to object existingFoo  of type Foo(CLID 8101)
+StoreGateSvc         DEBUG Retrieved const pointer to object existingFoo of type Foo (CLID 8101)
 6.28
 *** ProxyProviderSvc_test RecordBeforeRead OK ***
 
 
 *** ProxyProviderSvc_test HLTAutoKeyReset BEGINS ***
-StoreGateSvc_Impl    DEBUG Clearing store with forceRemove=1
-StoreGateSvc_Impl    DEBUG Clearing store with forceRemove=0
+StoreGateSvc_Impl    DEBUG Clearing store with forceRemove=true
+StoreGateSvc_Impl    DEBUG Clearing store with forceRemove=false
 *** ProxyProviderSvc_test HLTAutoKeyReset OK ***
 
 
 *** ProxyProviderSvc_test Overwrite starts ***
 
 
-StoreGateSvc_Impl    DEBUG Clearing store with forceRemove=1
+StoreGateSvc_Impl    DEBUG Clearing store with forceRemove=true
 =============Event #0 starts
+StoreGateSvc         DEBUG overwrite: Recorded object @0x2708ca50 with key toOverwrite of type FooBar (CLID 8109)
+ in DataObject @0x270903b0
  object modifiable when retrieved
 Overwritten FooBar i=0
-StoreGateSvc_Impl    DEBUG Clearing store with forceRemove=0
+StoreGateSvc_Impl    DEBUG Clearing store with forceRemove=false
 FooBar i=0 deleted
 =============Event #1 starts
+StoreGateSvc         DEBUG overwrite: Recorded object @0x2707c8b0 with key toOverwrite of type FooBar (CLID 8109)
+ in DataObject @0x270903b0
  object modifiable when retrieved
 Overwritten FooBar i=1
-StoreGateSvc_Impl    DEBUG Clearing store with forceRemove=0
+StoreGateSvc_Impl    DEBUG Clearing store with forceRemove=false
 FooBar i=1 deleted
 =============Event #2 starts
+StoreGateSvc         DEBUG overwrite: Recorded object @0x2707a000 with key toOverwrite of type FooBar (CLID 8109)
+ in DataObject @0x270903b0
  object modifiable when retrieved
 Overwritten FooBar i=2
-StoreGateSvc_Impl    DEBUG Clearing store with forceRemove=0
+StoreGateSvc_Impl    DEBUG Clearing store with forceRemove=false
 FooBar i=2 deleted
 *** ProxyProviderSvc_test Overwrite OK ***
 
 
-StoreGateSvc_Impl    DEBUG Clearing store with forceRemove=1
+StoreGateSvc_Impl    DEBUG Clearing store with forceRemove=true
