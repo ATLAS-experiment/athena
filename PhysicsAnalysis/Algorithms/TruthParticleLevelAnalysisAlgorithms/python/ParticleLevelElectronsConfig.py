@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 
@@ -55,7 +55,7 @@ class ParticleLevelElectronsBlock(ConfigBlock):
             config.addSelection (self.containerName, self.selectionName, alg.notTauOrigin+',as_char')
 
         # output branches to be scheduled only once
-        if ParticleLevelElectronsBlock.get_instance_count() == 1 or 'pt' not in config.getOutputVars(self.containerName):
+        if 'pt' not in config.getOutputVars(self.containerName):
             outputVars = [
                 ['pt_dressed', 'pt', 'float'],
                 ['eta_dressed', 'eta', 'float'],

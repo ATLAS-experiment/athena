@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 
@@ -49,7 +49,7 @@ class ParticleLevelPhotonsBlock(ConfigBlock):
         alg.isolation    = 'isIsolated' + self.selectionName if self.isolated else 'isIsolatedButNotRequired' + self.selectionName
         alg.notTauOrigin = 'notFromTauButNotRequired' + self.selectionName
         alg.checkType    = 'IsoPhoton'
-        if self.isolationVariable != '':
+        if self.isolationVariable:
             alg.isoVar       = self.isolationVariable
             alg.isoCut       = self.isolationCut
 
@@ -57,7 +57,7 @@ class ParticleLevelPhotonsBlock(ConfigBlock):
             config.addSelection (self.containerName, self.selectionName, alg.isolation+',as_char')
 
         # output branches to be scheduled only once
-        if ParticleLevelPhotonsBlock.get_instance_count() == 1 or 'pt' not in config.getOutputVars(self.containerName):
+        if 'pt' not in config.getOutputVars(self.containerName):
             outputVars = [
                 ['pt', 'pt', 'float'],
                 ['eta', 'eta', 'float'],
