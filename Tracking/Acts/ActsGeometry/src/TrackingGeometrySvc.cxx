@@ -237,18 +237,19 @@ StatusCode TrackingGeometrySvc::initialize() {
     if (m_objDebugOutput) {
       Acts::ObjVisualization3D vis;
       m_trackingGeometry->visualize(vis, getNominalContext().context(),
-                                  viewConfigFunc({.visible = false}, {.visible = false}, {.visible = true}));
-      vis.write("blueprint_sensitive.obj");
-      vis.clear();
-
-      m_trackingGeometry->visualize(vis, getNominalContext().context(),
                                   viewConfigFunc({.visible = true}, {.visible = false}, {.visible = false}));
-      vis.write("blueprint_volume.obj");
+      vis.write("blueprint_envelopes.obj");
       vis.clear();
 
       m_trackingGeometry->visualize(vis, getNominalContext().context(),
                                   viewConfigFunc({.visible = false}, {.visible = true}, {.visible = false}));
       vis.write("blueprint_portals.obj");
+
+      m_trackingGeometry->visualize(vis, getNominalContext().context(),
+                                  viewConfigFunc({.visible = false}, {.visible = false}, {.visible = true}));
+      vis.write("blueprint_sensitive.obj");
+      vis.clear();
+
     }
     if (m_printGeo) {
         Acts::detail::TrackingGeometryPrintVisitor printer{m_nominalContext.context()};
