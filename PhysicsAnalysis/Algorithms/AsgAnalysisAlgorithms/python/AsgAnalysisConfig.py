@@ -392,7 +392,7 @@ class PileupReweightingBlock (ConfigBlock):
             toolLumicalcFiles = self.userLumicalcFiles[:]
             log.info("Using user-provided lumicalc files")
         else:
-            if campaign and campaign is not Campaign.Unknown:
+            if campaign and campaign not in {Campaign.Unknown, Campaign.PhaseII}:
                 from PileupReweighting.AutoconfigurePRW import getLumicalcFiles
                 toolLumicalcFiles = getLumicalcFiles(campaign, self.GRLSuffixDict)
                 log.info("Using auto-configured lumicalc files")
