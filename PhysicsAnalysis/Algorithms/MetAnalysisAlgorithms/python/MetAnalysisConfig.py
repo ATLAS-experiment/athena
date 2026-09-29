@@ -9,7 +9,7 @@ class MetAnalysisConfig (ConfigBlock):
     """the ConfigBlock for the MET configuration"""
 
     def __init__ (self) :
-        super (MetAnalysisConfig, self).__init__ ()
+        super().__init__ ()
         self.addOption('containerName', '', type=str,
             noneAction='error',
             info="the name of the output container.",
@@ -105,14 +105,14 @@ class MetAnalysisConfig (ConfigBlock):
             metSuffix = 'AnalysisMET'
         else :
             jetContainer = config.originalName (self.jets)
+            btIndex = jetContainer.find('_BTagging')
+            if btIndex != -1:
+                jetContainer = jetContainer[:btIndex]
+            if not jetContainer.endswith('Jets'):
+                raise ValueError(f"MissingET: jet container name \"{jetContainer}\" does not end in \"Jets\", cannot determine MET suffix.")
             metSuffix = jetContainer.removesuffix('Jets')
         if self.useLRT:
             metSuffix += "_LRT"
-
-        # Remove b-tagging calibration from the MET suffix name
-        btIndex = metSuffix.find('_BTagging')
-        if btIndex != -1:
-            metSuffix = metSuffix[:btIndex]
 
         # Set up the met maker algorithm:
         alg = config.createAlgorithm( 'CP::MetMakerAlg', 'MetMakerAlg' )
@@ -165,9 +165,8 @@ class MetAnalysisConfig (ConfigBlock):
         if self.taus != "" :
             alg.taus, alg.tausSelection = config.readNameAndSelection (self.taus, excludeFrom={'or'})
         if self.invisible:
-            if isinstance(self.invisible, str):
-                self.invisible = [self.invisible]
-            invisibleContainers, invisibleSelections = zip(*[config.readNameAndSelection (container, excludeFrom={'or'}) for container in self.invisible])
+            invisible = [self.invisible] if isinstance(self.invisible, str) else self.invisible
+            invisibleContainers, invisibleSelections = zip(*[config.readNameAndSelection (container, excludeFrom={'or'}) for container in invisible])
             alg.invisible = list(invisibleContainers)
             alg.invisibleSelection = list(invisibleSelections)
         alg.met = config.writeName (self.containerName, isMet = True)
@@ -204,31 +203,36 @@ class MetAnalysisConfig (ConfigBlock):
 
             # Preliminary R22 recommendation is to use R21 jet resolutions from 2018 for MET significance.
             # See Jet/Etmiss recommendation documentation for details.
-            if self.jetCalibConfig == "":
-                self.jetCalibConfig = "JES_data2017_2016_2015_Recommendation_PFlow_Aug2018_rel21.config"
-                self.jetCalibArea = "00-04-81"
+            jetCalibConfig = self.jetCalibConfig
+            jetCalibSequence = self.jetCalibSequence
+            jetCalibArea = self.jetCalibArea
+            if jetCalibConfig == "":
+                jetCalibConfig = "JES_data2017_2016_2015_Recommendation_PFlow_Aug2018_rel21.config"
+                jetCalibArea = "00-04-81"
                 # Include Smear and not InSitu, even when running on data.
                 # This is for technical reasons and allows access to the correct resolutions for both data and MC.
-                self.jetCalibSequence = 'JetArea_Residual_EtaJES_GSC_Smear'
+                jetCalibSequence = 'JetArea_Residual_EtaJES_GSC_Smear'
 
             # Standard e/gamma calibration. Must be kept in agreement with ElectronAnalysisConfig.py
+            egammaESModel = self.egammaESModel
+            egammaDecorrelationModel = self.egammaDecorrelationModel
             if self.electrons != "" :
-                if self.egammaESModel == "":
-                    self.egammaESModel = (
+                if egammaESModel == "":
+                    egammaESModel = (
                         config.getContainerMeta(self.electrons.split(".")[0], 'ESModel', failOnMiss=True))
-                if self.egammaDecorrelationModel == "":
-                    self.egammaDecorrelationModel = (
+                if egammaDecorrelationModel == "":
+                    egammaDecorrelationModel = (
                         config.getContainerMeta(self.electrons.split(".")[0], 'decorrelationModel', failOnMiss=True))
 
             alg.significanceTool.SoftTermParam = 0
             if self.softTermResolution > 0:
                 alg.significanceTool.SoftTermReso = self.softTermResolution
             alg.significanceTool.TreatPUJets = self.treatPUJets
-            alg.significanceTool.JetCalibConfig = self.jetCalibConfig
-            alg.significanceTool.JetCalibSequence = self.jetCalibSequence
-            alg.significanceTool.JetCalibArea = self.jetCalibArea
-            alg.significanceTool.EgammaESModel = self.egammaESModel
-            alg.significanceTool.EgammaDecorrelationModel = self.egammaDecorrelationModel
+            alg.significanceTool.JetCalibConfig = jetCalibConfig
+            alg.significanceTool.JetCalibSequence = jetCalibSequence
+            alg.significanceTool.JetCalibArea = jetCalibArea
+            alg.significanceTool.EgammaESModel = egammaESModel
+            alg.significanceTool.EgammaDecorrelationModel = egammaDecorrelationModel
             alg.significanceTool.EgammaUseFastsim = (config.dataType() is DataType.FastSim)
             alg.significanceTool.TauTESConfig = self.tauTESConfig
             alg.significanceTool.TauUseMVAResolution = self.tauUseMVAResolution
