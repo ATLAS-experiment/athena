@@ -409,10 +409,6 @@ if __name__=="__main__":
 
     if dumpgeo_empty_input:
         from Campaigns.Utils import Campaign
-        from AthenaConfiguration.TestDefaults import (
-            defaultConditionsTags,
-            defaultGeometryTags
-        )
 
         # NB Must set e.g. ConfigFlags.Input.Runparse_args() Number and
         # ConfigFlags.Input.TimeStamp before calling the 
@@ -425,9 +421,6 @@ if __name__=="__main__":
         flags.Input.RunNumbers = [330000]  
         flags.Input.TimeStamps = [1]  
         flags.Input.TypedCollections = []
-
-        # set default CondDB and Geometry version
-        flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
         flags.Input.isMC = True
         flags.Input.MCCampaign = Campaign.Unknown
 
