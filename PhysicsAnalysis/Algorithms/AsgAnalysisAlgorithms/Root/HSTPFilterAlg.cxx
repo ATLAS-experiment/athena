@@ -27,7 +27,9 @@ StatusCode HSTPFilterAlg::execute(const EventContext &ctx) const {
   FilterReporter filter(m_filterParams, false, ctx);
 
   SG::ReadHandle<xAOD::JetContainer> truthHS_jets(m_truthHSCollection, ctx);
+  ANA_CHECK(truthHS_jets.isValid());
   SG::ReadHandle<xAOD::JetContainer> truthPU_jets(m_truthPUCollection, ctx);
+  ANA_CHECK(truthPU_jets.isValid());
 
   double pT_j1_truthHS = 5000.; // In the rare case of no truth HS jets, set to 5 GeV
   double pT_j1_truthPU = 0.;

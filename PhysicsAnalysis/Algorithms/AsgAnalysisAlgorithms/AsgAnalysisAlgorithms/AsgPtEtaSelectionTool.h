@@ -115,11 +115,6 @@ namespace CP
     ///
     /// I don't like modifying property values in the tool itself, so
     /// I copy it over here and then modify once I print out.
-    ///
-    /// Technically this tool isn't thread-safe due to the use of
-    /// TAccept, but once we move to master this will be fixed, so
-    /// this member is already made thread-safe so that we don't trip
-    /// up on that later.
   private:
     mutable std::atomic<bool> m_shouldPrintCastWarning {true};
 
@@ -128,13 +123,18 @@ namespace CP
     ///
     /// I don't like modifying property values in the tool itself, so
     /// I copy it over here and then modify once I print out.
-    ///
-    /// Technically this tool isn't thread-safe due to the use of
-    /// TAccept, but once we move to master this will be fixed, so
-    /// this member is already made thread-safe so that we don't trip
-    /// up on that later.
   private:
     mutable std::atomic<bool> m_shouldPrintClusterWarning {true};
+
+    /// \brief whether we still need to print the warning about missing
+    /// dressed decorations
+  private:
+    mutable std::atomic<bool> m_shouldPrintDressedWarning {true};
+
+    /// \brief whether we still need to print the warning about an
+    /// invalid pt value
+  private:
+    mutable std::atomic<bool> m_shouldPrintPtWarning {true};
 
     /// \brief the \ref asg::AcceptInfo we are using
   private:

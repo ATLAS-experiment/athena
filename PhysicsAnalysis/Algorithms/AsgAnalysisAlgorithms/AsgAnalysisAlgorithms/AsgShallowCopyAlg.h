@@ -28,8 +28,7 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    AsgShallowCopyAlg (const std::string& name,
-                       ISvcLocator* pSvcLocator);
+    using EL::AnaAlgorithm::AnaAlgorithm;
 
 
   public:

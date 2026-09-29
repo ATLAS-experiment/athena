@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina
@@ -27,7 +27,6 @@ namespace CP
     ANA_CHECK (m_preselection.initialize (m_systematicsList, m_eventInfoHandle, SG::AllowEmpty));
     ANA_CHECK (m_selections.initialize (m_systematicsList, m_eventInfoHandle));
     ANA_CHECK (m_systematicsList.initialize());
-    ANA_CHECK (m_selectionNameSvc.retrieve());
 
     // Total label
     m_labels.push_back ("total");
@@ -80,7 +79,7 @@ namespace CP
 	unsigned cutIndex = 1;
 	histIter->second->Fill (0);
 	for (size_t i{}; i < m_selections.size(); i++) {
-	  if (m_selections.at(i).getBool (*evtInfo, sys) > 0) {
+	  if (m_selections.at(i).getBool (*evtInfo, sys)) {
 	    histIter->second->Fill (cutIndex);
 	  }
 	  cutIndex++;
