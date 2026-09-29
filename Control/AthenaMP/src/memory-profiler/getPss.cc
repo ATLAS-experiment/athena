@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -34,28 +34,24 @@ namespace athenaMP_MemHelper
     // NB! These will include 3 short-lived processes related to pstree
     char buffer[256];
     std::string result = "";
-    while(!feof(pipe)) {
-      if(fgets(buffer, 256, pipe) != NULL) {
-	result += buffer;
-	int pos(0);
-	while(pos<256 && buffer[pos] != '\n' && buffer[pos] != '(') {
-	  pos++;
-	}
-
-	if(pos<256 && buffer[pos] == '(' && pos>1 && buffer[pos-1] != '}') {
-	  pos++;
-	  pid_t pt(0);
-	  while(pos<256 && buffer[pos] != '\n' && buffer[pos] != ')') {
-	    pt=10*pt+buffer[pos]-'0';
-	    pos++;
-	  }
-	  cpids.push_back(pt);
-	  if(verbose) std::cout << "AthenaMP getPss. Collected PID="<< pt << std::endl;
-	} // if(buffer[pos] == '(' && pos>1 && buffer[pos-1] != '}') 
-      } // if(fgets(buffer, 256, pipe) != NULL)
-    } // while(!feof(pipe))
+    while(fgets(buffer, 256, pipe) != nullptr) {
+      result += buffer;
+      int pos(0);
+      while(pos<256 && buffer[pos] != '\n' && buffer[pos] != '(') {
+        pos++;
+      }
+      if(pos<256 && buffer[pos] == '(' && pos>1 && buffer[pos-1] != '}') {
+        pos++;
+        pid_t pt(0);
+        while(pos<256 && buffer[pos] != '\n' && buffer[pos] != ')') {
+          pt=10*pt+buffer[pos]-'0';
+          pos++;
+        }
+        cpids.push_back(pt);
+        if(verbose) std::cout << "AthenaMP getPss. Collected PID="<< pt << std::endl;
+      } // if(buffer[pos] == '(' && pos>1 && buffer[pos-1] != '}') 
+    } // fgets(buffer, 256, pipe) != nullptr
     pclose(pipe);
-    
     // Collect sum of Size/Pss/Rss/Swap for all of the processes
     long tsize(0);
     long trss(0);
