@@ -1,5 +1,7 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
+from typing import Optional
+
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 
 
@@ -27,7 +29,7 @@ def _make_particle_branches(
     prefix: str,
     *,
     include_pdgid: bool = True,
-    stages: tuple = None,
+    stages: Optional[tuple] = None,
     extra: tuple = (),
 ) -> list:
     """Generate standard kinematic branch names for a particle.
@@ -80,9 +82,9 @@ def _t_branches(suffix: str = "t") -> list:
 
     Sub-particles carry the FSR stage in their prefix so we pass ``stages=()``
     to avoid appending a spurious stage token to the variable name.
-    For tbar, the b-quark is named 'bbar'.
+    For antitops (suffix starting with 'tbar'), the b-quark is named 'bbar'.
     """
-    b_name = "bbar" if suffix == "tbar" else "b"
+    b_name = "bbar" if suffix.startswith("tbar") else "b"
     sub_particles = ("W", b_name, "Wdecay1", "Wdecay2")
     result = _make_particle_branches(suffix)
     for particle in sub_particles:
@@ -179,10 +181,10 @@ TRUTH_BRANCHES: dict[str, list[str]] = {
     "Tqgamma": BRANCHES["t"] + BRANCHES["Photon"] + BRANCHES["b"],
     "Wtb": BRANCHES["t"] + BRANCHES["W"] + BRANCHES["b"],
     "FourTop": (
-        _replace_in_list(BRANCHES["t"], "t_", "t1_")
-        + _replace_in_list(BRANCHES["t"], "t_", "t2_")
-        + _replace_in_list(BRANCHES["tbar"], "tbar_", "tbar1_")
-        + _replace_in_list(BRANCHES["tbar"], "tbar_", "tbar2_")
+        _t_branches("t1")
+        + _t_branches("t2")
+        + _t_branches("tbar1")
+        + _t_branches("tbar2")
     ),
     "HWW": BRANCHES["Higgs"],
     "WW_nonresonant": (
