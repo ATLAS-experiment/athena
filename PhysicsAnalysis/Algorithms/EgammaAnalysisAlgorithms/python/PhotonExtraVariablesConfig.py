@@ -1,11 +1,12 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 
 class PhotonExtraVariablesBlock(ConfigBlock):
-    """a ConfigBlock for additional photon output variables"""
-    """Decorates the output photons with the conversion type and calorimeter eta"""
-    """and writes them to the output. Useful e.g. for photon-fake studies."""
+    """a ConfigBlock for additional photon output variables
+
+    Decorates the output photons with the conversion type and calorimeter eta
+    and writes them to the output. Useful e.g. for photon-fake studies."""
 
     def __init__(self):
         super(PhotonExtraVariablesBlock, self).__init__()
