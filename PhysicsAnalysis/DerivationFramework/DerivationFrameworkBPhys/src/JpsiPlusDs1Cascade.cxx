@@ -707,11 +707,10 @@ namespace DerivationFramework {
 
         // Select the D0/D0b candidates before calling cascade fit
         std::vector<const xAOD::Vertex*> selectedK0Candidates;
+        const SG::AuxElement::Accessor<Char_t> flagAcc1("passed_K0");
         for(auto vxcItr=k0Container->cbegin(); vxcItr!=k0Container->cend(); ++vxcItr) {
-
            // Check the passed flag first
            const xAOD::Vertex* vtx = *vxcItr;
-           SG::AuxElement::Accessor<Char_t> flagAcc1("passed_K0");
            if(flagAcc1.isAvailable(*vtx)){
               if(!flagAcc1(*vtx)) continue;
            }
@@ -731,48 +730,47 @@ namespace DerivationFramework {
 
         // Select J/psi D*+ candidates
         // Iterate over Jpsi+pi vertices
-        for(auto jpsipiItr=selectedJpsipiCandidates.cbegin(); jpsipiItr!=selectedJpsipiCandidates.cend(); ++jpsipiItr) {
+        for(const auto & jpsipi:selectedJpsipiCandidates) {
 
-           size_t jpsipiTrkNum = (*jpsipiItr)->nTrackParticles();
-           tracksJpsipi.clear();
-           tracksJpsi.clear();
-           for( unsigned int it=0; it<jpsipiTrkNum; it++) tracksJpsipi.push_back((*jpsipiItr)->trackParticle(it));
-           for( unsigned int it=0; it<jpsipiTrkNum-1; it++) tracksJpsi.push_back((*jpsipiItr)->trackParticle(it));
-
-           if (tracksJpsipi.size() != 3 || massesJpsipi.size() != 3 ) {
+           size_t jpsipiTrkNum = jpsipi->nTrackParticles();
+           if (jpsipiTrkNum != 3 ) {
              ATH_MSG_INFO("problems with Jpsi+pi input");
            }
+           tracksJpsipi.clear();
+           tracksJpsi.clear();
+           for( unsigned int it=0; it<jpsipiTrkNum; it++) tracksJpsipi.push_back(jpsipi->trackParticle(it));
+           for( unsigned int it=0; it<jpsipiTrkNum-1; it++) tracksJpsi.push_back(jpsipi->trackParticle(it));
 
            bool tagD0(true);
-           if(abs(m_Dx_pid)==421 && (*jpsipiItr)->trackParticle(2)->charge()==-1) tagD0 = false;
+           if(abs(m_Dx_pid)==421 && jpsipi->trackParticle(2)->charge()==-1) tagD0 = false;
 
            TLorentzVector p4_pi1; // Momentum of soft pion
-           p4_pi1.SetPtEtaPhiM((*jpsipiItr)->trackParticle(2)->pt(), 
-                               (*jpsipiItr)->trackParticle(2)->eta(),
-                               (*jpsipiItr)->trackParticle(2)->phi(), m_vtx0Daug3MassHypo); 
+           p4_pi1.SetPtEtaPhiM(jpsipi->trackParticle(2)->pt(), 
+                               jpsipi->trackParticle(2)->eta(),
+                               jpsipi->trackParticle(2)->phi(), m_vtx0Daug3MassHypo); 
 
            // Iterate over D0/D0bar vertices
-           for(auto d0Itr=selectedD0Candidates.cbegin(); d0Itr!=selectedD0Candidates.cend(); ++d0Itr) {
+           for(const auto & pD0 : selectedD0Candidates) {
 
               // Check identical tracks in input
-              if(std::find(tracksJpsipi.cbegin(), tracksJpsipi.cend(), (*d0Itr)->trackParticle(0)) != tracksJpsipi.cend()) continue; 
-              if(std::find(tracksJpsipi.cbegin(), tracksJpsipi.cend(), (*d0Itr)->trackParticle(1)) != tracksJpsipi.cend()) continue; 
+              if(std::find(tracksJpsipi.cbegin(), tracksJpsipi.cend(), pD0->trackParticle(0)) != tracksJpsipi.cend()) continue; 
+              if(std::find(tracksJpsipi.cbegin(), tracksJpsipi.cend(), pD0->trackParticle(1)) != tracksJpsipi.cend()) continue; 
 
               TLorentzVector p4_ka, p4_pi2;
               if(tagD0){ // for D*+
-                p4_pi2.SetPtEtaPhiM((*d0Itr)->trackParticle(0)->pt(), 
-                                    (*d0Itr)->trackParticle(0)->eta(),
-                                    (*d0Itr)->trackParticle(0)->phi(), m_vtx1Daug1MassHypo); 
-                p4_ka.SetPtEtaPhiM( (*d0Itr)->trackParticle(1)->pt(), 
-                                    (*d0Itr)->trackParticle(1)->eta(),
-                                    (*d0Itr)->trackParticle(1)->phi(), m_vtx1Daug2MassHypo); 
+                p4_pi2.SetPtEtaPhiM(pD0->trackParticle(0)->pt(), 
+                                    pD0->trackParticle(0)->eta(),
+                                    pD0->trackParticle(0)->phi(), m_vtx1Daug1MassHypo); 
+                p4_ka.SetPtEtaPhiM( pD0->trackParticle(1)->pt(), 
+                                    pD0->trackParticle(1)->eta(),
+                                    pD0->trackParticle(1)->phi(), m_vtx1Daug2MassHypo); 
               }else{ // change the order in the case of D*-
-                p4_pi2.SetPtEtaPhiM((*d0Itr)->trackParticle(1)->pt(), 
-                                    (*d0Itr)->trackParticle(1)->eta(),
-                                    (*d0Itr)->trackParticle(1)->phi(), m_vtx1Daug1MassHypo); 
-                p4_ka.SetPtEtaPhiM( (*d0Itr)->trackParticle(0)->pt(), 
-                                    (*d0Itr)->trackParticle(0)->eta(),
-                                    (*d0Itr)->trackParticle(0)->phi(), m_vtx1Daug2MassHypo); 
+                p4_pi2.SetPtEtaPhiM(pD0->trackParticle(1)->pt(), 
+                                    pD0->trackParticle(1)->eta(),
+                                    pD0->trackParticle(1)->phi(), m_vtx1Daug1MassHypo); 
+                p4_ka.SetPtEtaPhiM( pD0->trackParticle(0)->pt(), 
+                                    pD0->trackParticle(0)->eta(),
+                                    pD0->trackParticle(0)->phi(), m_vtx1Daug2MassHypo); 
               }
               // Check D*+/- candidate invariant mass and skip if need be
               double mass_Dst= (p4_pi1 + p4_ka + p4_pi2).M();
@@ -783,25 +781,25 @@ namespace DerivationFramework {
                 continue;
               }
 
-              size_t d0TrkNum = (*d0Itr)->nTrackParticles();
+              size_t d0TrkNum = pD0->nTrackParticles();
               tracksD0.clear();
-              for( unsigned int it=0; it<d0TrkNum; it++) tracksD0.push_back((*d0Itr)->trackParticle(it));
+              for( unsigned int it=0; it<d0TrkNum; it++) tracksD0.push_back(pD0->trackParticle(it));
               if (tracksD0.size() != 2 || massesD0.size() != 2 ) {
                 ATH_MSG_INFO("problems with D0 input");
               }
              
               // Iterate over K0 vertices
-              for(auto k0Itr=selectedK0Candidates.cbegin(); k0Itr!=selectedK0Candidates.cend(); ++k0Itr) {
+              for(const auto & k0 : selectedK0Candidates) {
               
                  // Check identical tracks in input
-                 if(std::find(tracksJpsipi.cbegin(), tracksJpsipi.cend(), (*k0Itr)->trackParticle(0)) != tracksJpsipi.cend()) continue; 
-                 if(std::find(tracksJpsipi.cbegin(), tracksJpsipi.cend(), (*k0Itr)->trackParticle(1)) != tracksJpsipi.cend()) continue; 
-                 if(std::find(tracksD0.cbegin(), tracksD0.cend(), (*k0Itr)->trackParticle(0)) != tracksD0.cend()) continue; 
-                 if(std::find(tracksD0.cbegin(), tracksD0.cend(), (*k0Itr)->trackParticle(1)) != tracksD0.cend()) continue; 
+                 if(std::find(tracksJpsipi.cbegin(), tracksJpsipi.cend(), k0->trackParticle(0)) != tracksJpsipi.cend()) continue; 
+                 if(std::find(tracksJpsipi.cbegin(), tracksJpsipi.cend(), k0->trackParticle(1)) != tracksJpsipi.cend()) continue; 
+                 if(std::find(tracksD0.cbegin(), tracksD0.cend(), k0->trackParticle(0)) != tracksD0.cend()) continue; 
+                 if(std::find(tracksD0.cbegin(), tracksD0.cend(), k0->trackParticle(1)) != tracksD0.cend()) continue; 
              
-                 size_t k0TrkNum = (*k0Itr)->nTrackParticles();
+                 size_t k0TrkNum = k0->nTrackParticles();
                  tracksK0.clear();
-                 for( unsigned int it=0; it<k0TrkNum; it++) tracksK0.push_back((*k0Itr)->trackParticle(it));
+                 for( unsigned int it=0; it<k0TrkNum; it++) tracksK0.push_back(k0->trackParticle(it));
                  if (tracksK0.size() != 2 || massesK0.size() != 2 ) {
                    ATH_MSG_INFO("problems with K0 input");
                  }
@@ -809,9 +807,9 @@ namespace DerivationFramework {
                  ATH_MSG_DEBUG("using tracks" << tracksJpsipi[0] << ", " << tracksJpsipi[1] << ", " << tracksJpsipi[2] << ", " << tracksD0[0] << ", " << tracksD0[1] << ", " << tracksK0[0] << ", " << tracksK0[1]);
 
                  tracksBc.clear();
-                 for( unsigned int it=0; it<jpsipiTrkNum; it++) tracksBc.push_back((*jpsipiItr)->trackParticle(it));
-                 for( unsigned int it=0; it<d0TrkNum; it++) tracksBc.push_back((*d0Itr)->trackParticle(it));
-                 for( unsigned int it=0; it<k0TrkNum; it++) tracksBc.push_back((*k0Itr)->trackParticle(it));
+                 for( unsigned int it=0; it<jpsipiTrkNum; it++) tracksBc.push_back(jpsipi->trackParticle(it));
+                 for( unsigned int it=0; it<d0TrkNum; it++) tracksBc.push_back(pD0->trackParticle(it));
+                 for( unsigned int it=0; it<k0TrkNum; it++) tracksBc.push_back(k0->trackParticle(it));
                  
              
                  // Apply the user's settings to the fitter

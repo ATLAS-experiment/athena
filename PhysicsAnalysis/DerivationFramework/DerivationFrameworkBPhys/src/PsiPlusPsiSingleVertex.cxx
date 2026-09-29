@@ -478,7 +478,7 @@ namespace DerivationFramework {
 	  if( vertexLink2.isValid() ) precedingVertexLinks.push_back( vertexLink2 );
 
 	  SG::AuxElement::Decorator<VertexLinkVector> PrecedingLinksDecor("PrecedingVertexLinks");
-	  PrecedingLinksDecor(*theResult.get()) = precedingVertexLinks;
+	  PrecedingLinksDecor(*theResult.get()) = std::move(precedingVertexLinks);
 
 	  xAOD::BPhysHypoHelper vtx(m_hypoName, theResult.get());
 	  vtx.setRefTrks();

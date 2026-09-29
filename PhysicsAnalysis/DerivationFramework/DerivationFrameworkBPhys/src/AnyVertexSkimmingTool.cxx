@@ -4,7 +4,7 @@
 
 #include "AnyVertexSkimmingTool.h"
 #include "xAODTracking/VertexContainer.h"
-#include "Gaudi/Property.h"
+#include <stdexcept>
 namespace DerivationFramework {
 
 
@@ -20,7 +20,7 @@ StatusCode AnyVertexSkimmingTool::initialize(){
 
 bool AnyVertexSkimmingTool::eventPassesFilter(const EventContext& ctx) const{
        bool pass = false;
-       for(auto key : m_keyArray){
+       for(const auto & key : m_keyArray){
           ATH_MSG_DEBUG("Key Checking: " << key.key());
           SG::ReadHandle<xAOD::VertexContainer> read(key, ctx);
           if(!read.isValid()){

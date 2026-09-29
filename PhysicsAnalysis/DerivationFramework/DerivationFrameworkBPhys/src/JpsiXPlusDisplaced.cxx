@@ -737,7 +737,10 @@ namespace DerivationFramework {
     } 
 
     // sort and chop the V0 candidates
-    std::sort( selectedV0Candidates.begin(), selectedV0Candidates.end(), [](std::pair<const xAOD::Vertex*,V0Enum>& a, std::pair<const xAOD::Vertex*,V0Enum>& b) { return a.first->chiSquared()/a.first->numberDoF() < b.first->chiSquared()/b.first->numberDoF(); } );
+    std::sort( selectedV0Candidates.begin(), selectedV0Candidates.end(), 
+      [](std::pair<const xAOD::Vertex*,V0Enum>& a, std::pair<const xAOD::Vertex*,V0Enum>& b) 
+      { return a.first->chiSquared()/a.first->numberDoF() < b.first->chiSquared()/b.first->numberDoF(); } );
+    //
     if(m_maxV0Candidates>0 && selectedV0Candidates.size()>m_maxV0Candidates) {
       selectedV0Candidates.erase(selectedV0Candidates.begin()+m_maxV0Candidates, selectedV0Candidates.end());
     }
@@ -747,11 +750,13 @@ namespace DerivationFramework {
     ATH_CHECK( performSearch(cascadeinfoContainer, selectedV0Candidates, tracksDisplaced, ctx) );
 
     // sort and chop the main candidates
-    std::sort( cascadeinfoContainer.begin(), cascadeinfoContainer.end(), [](std::pair<Trk::VxCascadeInfo*, Trk::VxCascadeInfo*> a, std::pair<Trk::VxCascadeInfo*, Trk::VxCascadeInfo*> b) { return a.first->fitChi2()/a.first->nDoF() < b.first->fitChi2()/b.first->nDoF(); } );
+    std::sort( cascadeinfoContainer.begin(), cascadeinfoContainer.end(), 
+      [](std::pair<Trk::VxCascadeInfo*, Trk::VxCascadeInfo*> a, std::pair<Trk::VxCascadeInfo*, Trk::VxCascadeInfo*> b) 
+        { return a.first->fitChi2()/a.first->nDoF() < b.first->fitChi2()/b.first->nDoF(); } );
     if(m_maxMainVCandidates>0 && cascadeinfoContainer.size()>m_maxMainVCandidates) {
       for(auto it=cascadeinfoContainer.begin()+m_maxMainVCandidates; it!=cascadeinfoContainer.end(); it++) {
-	if(it->first) delete it->first;
-	if(it->second) delete it->second;
+	      delete it->first;
+	      delete it->second;
       }
       cascadeinfoContainer.erase(cascadeinfoContainer.begin()+m_maxMainVCandidates, cascadeinfoContainer.end());
     }
@@ -1155,8 +1160,8 @@ namespace DerivationFramework {
 
     // Deleting cascadeinfo since this won't be stored.
     for (auto cascade_info_pair : cascadeinfoContainer) {
-      if(cascade_info_pair.first) delete cascade_info_pair.first;
-      if(cascade_info_pair.second) delete cascade_info_pair.second;
+      delete cascade_info_pair.first;
+      delete cascade_info_pair.second;
     }
 
     return StatusCode::SUCCESS;
@@ -1508,9 +1513,9 @@ namespace DerivationFramework {
 	    trk_py.push_back( vec3.Py() );
 	    trk_pz.push_back( vec3.Pz() );
 	  }
-	  trk_pxDeco(*cascadeVertices[0]) = trk_px;
-	  trk_pyDeco(*cascadeVertices[0]) = trk_py;
-	  trk_pzDeco(*cascadeVertices[0]) = trk_pz;
+	  trk_pxDeco(*cascadeVertices[0]) = std::move(trk_px);
+	  trk_pyDeco(*cascadeVertices[0]) = std::move(trk_py);
+	  trk_pzDeco(*cascadeVertices[0]) = std::move(trk_pz);
 
 	  result.push_back( std::make_pair(fit_result.release(),nullptr) );
 	}
@@ -2505,9 +2510,9 @@ namespace DerivationFramework {
 	  trk_px.push_back( disVtx.p4_V0track1.Px() ); trk_px.push_back( disVtx.p4_V0track2.Px() );
 	  trk_py.push_back( disVtx.p4_V0track1.Py() ); trk_py.push_back( disVtx.p4_V0track2.Py() );
 	  trk_pz.push_back( disVtx.p4_V0track1.Pz() ); trk_pz.push_back( disVtx.p4_V0track2.Pz() );
-	  trk_pxDeco(*cascadeVertices[0]) = trk_px;
-	  trk_pyDeco(*cascadeVertices[0]) = trk_py;
-	  trk_pzDeco(*cascadeVertices[0]) = trk_pz;
+	  trk_pxDeco(*cascadeVertices[0]) = std::move(trk_px);
+	  trk_pyDeco(*cascadeVertices[0]) = std::move(trk_py);
+	  trk_pzDeco(*cascadeVertices[0]) = std::move(trk_pz);
 	  trk_px_deco(*cascadeVertices[1]) = disVtx.p4_disVtrack.Px();
 	  trk_py_deco(*cascadeVertices[1]) = disVtx.p4_disVtrack.Py();
 	  trk_pz_deco(*cascadeVertices[1]) = disVtx.p4_disVtrack.Pz();

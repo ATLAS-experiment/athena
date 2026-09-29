@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BPhysBGammaFinder.h"
@@ -266,19 +266,19 @@ StatusCode BPhysBGammaFinder::addBranches(const EventContext& ctx) const {
             static const SG::Accessor< std::vector<float> > RefTrackEAcc("RefTrackE");
             deltaQAcc(*convVertexCandidate) = deltaQ;
             gamma_massAcc(*convVertexCandidate) = mass;
-            RefTrackPxAcc(*convVertexCandidate) = RefTrackPx;
-            RefTrackPyAcc(*convVertexCandidate) = RefTrackPy;
-            RefTrackPzAcc(*convVertexCandidate) = RefTrackPz;
-            RefTrackEAcc(*convVertexCandidate) = RefTrackE;
+            RefTrackPxAcc(*convVertexCandidate) = std::move(RefTrackPx);
+            RefTrackPyAcc(*convVertexCandidate) = std::move(RefTrackPy);
+            RefTrackPzAcc(*convVertexCandidate) = std::move(RefTrackPz);
+            RefTrackEAcc(*convVertexCandidate) = std::move(RefTrackE);
 
             static const SG::Accessor< std::vector<float> > OrigTrackPxAcc("OrigTrackPx");
             static const SG::Accessor< std::vector<float> > OrigTrackPyAcc("OrigTrackPy");
             static const SG::Accessor< std::vector<float> > OrigTrackPzAcc("OrigTrackPz");
             static const SG::Accessor< std::vector<float> > OrigTrackEAcc("OrigTrackE");
-            OrigTrackPxAcc(*convVertexCandidate) = OrigTrackPx;
-            OrigTrackPyAcc(*convVertexCandidate) = OrigTrackPy;
-            OrigTrackPzAcc(*convVertexCandidate) = OrigTrackPz;
-            OrigTrackEAcc(*convVertexCandidate) = OrigTrackE;
+            OrigTrackPxAcc(*convVertexCandidate) = std::move(OrigTrackPx);
+            OrigTrackPyAcc(*convVertexCandidate) = std::move(OrigTrackPy);
+            OrigTrackPzAcc(*convVertexCandidate) = std::move(OrigTrackPz);
+            OrigTrackEAcc(*convVertexCandidate) = std::move(OrigTrackE);
 
             static const SG::Accessor<Char_t> passed_GammaAcc("passed_Gamma");
             passed_GammaAcc(*convVertexCandidate) = true; // Used in event skimming

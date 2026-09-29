@@ -566,7 +566,8 @@ namespace DerivationFramework {
 	double gamma_mass  = mAcc_gmass.isAvailable(*vtx) ? mAcc_gmass(*vtx) : -1;
 	double gamma_chisq = mAcc_gchisq.isAvailable(*vtx) ? mAcc_gchisq(*vtx) : 999999;
 	double gamma_ndof  = mAcc_gndof.isAvailable(*vtx) ? mAcc_gndof(*vtx) : 0;
-	if(gamma_fit==1 && gamma_mass<m_minMass_gamma && gamma_chisq/gamma_ndof<m_chi2cut_gamma) continue;
+	double chisqPerNdof = (gamma_ndof > 0.) ? gamma_chisq/gamma_ndof : -999999.;
+	if(gamma_fit==1 && (gamma_mass < m_minMass_gamma) && (chisqPerNdof < m_chi2cut_gamma)) continue;
 
 	selectedV0Candidates.push_back(std::pair<const xAOD::Vertex*,V0Enum>{vtx,opt});
       }
@@ -769,7 +770,7 @@ namespace DerivationFramework {
 	vertexLink3.setStorableObject(*VtxWriteHandles[2].ptr());
 	if( vertexLink3.isValid() ) cascadeVertexLinks.push_back( vertexLink3 );
       }
-      CascadeLinksDecor(*mainVertex) = cascadeVertexLinks;
+      CascadeLinksDecor(*mainVertex) = std::move(cascadeVertexLinks);
     } // loop over cascadeinfoContainer
 
     // Deleting cascadeinfo since this won't be stored.
@@ -1056,9 +1057,9 @@ namespace DerivationFramework {
 	  trk_py.push_back( V02_helper.refTrk(it).Py() );
 	  trk_pz.push_back( V02_helper.refTrk(it).Pz() );
 	}
-	trk_pxDeco(*cascadeVertices[1]) = trk_px;
-	trk_pyDeco(*cascadeVertices[1]) = trk_py;
-	trk_pzDeco(*cascadeVertices[1]) = trk_pz;
+	trk_pxDeco(*cascadeVertices[1]) = std::move(trk_px);
+	trk_pyDeco(*cascadeVertices[1]) = std::move(trk_py);
+	trk_pzDeco(*cascadeVertices[1]) = std::move(trk_pz);
 
 	result = fit_result.release();
       }
