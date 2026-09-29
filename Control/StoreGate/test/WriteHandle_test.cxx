@@ -740,6 +740,8 @@ void test12()
 
 int main()
 {
+
+  static_assert(std::is_nothrow_move_constructible<SG::WriteHandle<MyObj>>::value);
   errorcheck::ReportMessage::hideErrorLocus();
   errorcheck::ReportMessage::hideFunctionNames();
   ISvcLocator* svcloc;

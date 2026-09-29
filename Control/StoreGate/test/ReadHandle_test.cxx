@@ -423,6 +423,7 @@ unsigned int perftest (ISvcLocator* svcloc, unsigned int ntry)
 
 int main (int argc, char** argv)
 {
+  static_assert(std::is_nothrow_move_constructible<SG::ReadHandle<MyObj>>::value);
   errorcheck::ReportMessage::hideErrorLocus();
   ISvcLocator* svcloc;
   //need MessageSvc

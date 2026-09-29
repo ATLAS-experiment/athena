@@ -136,7 +136,7 @@ WriteHandle<T>::WriteHandle(const WriteHandle& h)
  * @brief Move constructor.
  */
 template <class T> 
-WriteHandle<T>::WriteHandle(WriteHandle&& h)
+WriteHandle<T>::WriteHandle(WriteHandle&& h) noexcept
   : VarHandleBase(std::move(h))
 {
   m_lockAuxPending = h.m_lockAuxPending;
@@ -167,7 +167,7 @@ WriteHandle<T>::operator= (const WriteHandle& h)
 template <class T>
 inline
 WriteHandle<T>& 
-WriteHandle<T>::operator= (WriteHandle&& h)
+WriteHandle<T>::operator= (WriteHandle&& h) noexcept
 {
   if (this != &h) {
     this->VarHandleBase::operator=(std::move(h));
