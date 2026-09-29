@@ -6,30 +6,14 @@
 #define ASGANALYSISALGORITHMS_TREEFILLERALG_H
 
 // System include(s):
-#include <unordered_map>
 #include <string>
-#include <vector>
-#include <memory>
-#include <list>
 
 // Framework include(s):
-#include "AsgMessaging/AsgMessaging.h"
 #include "AnaAlgorithm/AnaAlgorithm.h"
-#include "SystematicsHandles/SysListHandle.h"
 #include <AsgTools/PropertyWrapper.h>
 
-// EDM include(s):
-#include "AthContainersInterfaces/IAuxTypeVector.h"
-#include "AthContainers/AuxElement.h"
-
 // Forward declaration(s):
-class TClass;
 class TTree;
-class TVirtualCollectionProxy;
-namespace SG {
-   class AuxVectorBase;
-   class IAuxTypeVectorFactory;
-}
 
 namespace CP {
 
