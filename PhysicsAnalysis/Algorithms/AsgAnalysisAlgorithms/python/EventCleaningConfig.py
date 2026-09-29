@@ -9,7 +9,7 @@ class EventCleaningBlock (ConfigBlock):
     """the ConfigBlock for event cleaning"""
 
     def __init__ (self) :
-        super (EventCleaningBlock, self).__init__ ()
+        super().__init__ ()
         self.addOption ('runPrimaryVertexSelection', True, type=bool,
             info="whether to run primary vertex selection.")
         self.addOption ('runEventCleaning', False, type=bool,
@@ -35,9 +35,6 @@ class EventCleaningBlock (ConfigBlock):
         self.addOption ('useRandomRunNumber', False, type=bool,
             info="use `RandomRunNumber` to compute GRL info. Only supported for MC.")
 
-        if self.runGRL and self.userGRLFiles:
-            raise ValueError("No userGRLFiles should be specified if runGRL=False")
-
     def instanceName (self) :
         """Return the instance name for this block"""
         return '' # no instance name needed for singleton block
@@ -55,7 +52,10 @@ class EventCleaningBlock (ConfigBlock):
         return GRLDict[GRLKey]
 
     def makeAlgs (self, config) :
-        
+
+        if not self.runGRL and self.userGRLFiles:
+            raise ValueError("No userGRLFiles should be specified if runGRL=False")
+
         # Apply GRL
         if self.runGRL and (config.dataType() is DataType.Data or self.useRandomRunNumber):
             if config.dataType() is DataType.Data and self.useRandomRunNumber:

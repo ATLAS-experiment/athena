@@ -83,6 +83,6 @@ VGammaORBlock:
   - name: in_vgamma_overlap
     description: can either be 0 or 1 for an event (no systematics). An event should be kept if it is 0 for V+jets samples or if it is 1 for V$\gamma$+jets samples.
 
-EventShapeDensityBlock:
+EventShapeDensityDumperBlock:
   - name: <event_shape>_density
     description: event shape density (no systematics)

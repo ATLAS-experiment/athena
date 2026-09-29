@@ -7,7 +7,7 @@ class EventShapeDensityDumperBlock(ConfigBlock):
     """ConfigBlock for adding EventShape"""
 
     def __init__(self):
-        super(EventShapeDensityDumperBlock, self).__init__()
+        super().__init__()
         self.addOption(
             "eventShape",
             "Kt4EMPFlowNeutEventShape",
