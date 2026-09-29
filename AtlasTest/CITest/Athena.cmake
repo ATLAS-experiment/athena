@@ -32,6 +32,14 @@ atlas_add_citest( SimulationRun4FullSim
    SCRIPT RunWorkflowTests_Run4.py --CI -s -w FullSim -e '--maxEvents 5 --preInclude="Campaigns.MC23PhaseIISimulation"' --no-output-checks
    LOG_IGNORE_PATTERN "WARNING FPE" )  # ignore FPEs from Geant4
 
+atlas_add_citest( Generation_CA_ParticleGun_13p6TeV
+   SCRIPT RunWorkflowTests_Run3.py --CI -g --dsid Test950555 -e '--CA True' )
+
+atlas_add_citest( SimulationRun3FullSim_CAEvgen
+   SCRIPT RunWorkflowTests_Run3.py --CI -s -w FullSim --no-output-checks -e '--inputEVNTFile ../../Generation_CA_ParticleGun_13p6TeV/run_genTest950555/myEVNT.pool.root'
+   LOG_IGNORE_PATTERN "WARNING FPE"  # ignore FPEs from Geant4
+   DEPENDS_SUCCESS Generation_CA_ParticleGun_13p6TeV )
+
 atlas_add_citest( PileUpPresamplingRun2
    SCRIPT RunWorkflowTests_Run2.py --CI -p -w PileUpPresampling -e '--maxEvents 5 --conditionsTag OFLCOND-MC16-SDR-RUN2-12' --no-output-checks )
 
