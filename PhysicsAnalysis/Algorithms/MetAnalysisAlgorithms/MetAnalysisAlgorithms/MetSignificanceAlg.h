@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -15,6 +15,8 @@
 #include <SystematicsHandles/SysWriteDecorHandle.h>
 #include <METInterface/IMETSignificance.h>
 #include <xAODMissingET/MissingETContainer.h>
+#include <xAODEventInfo/EventInfo.h>
+#include <AsgDataHandles/ReadHandleKey.h>
 #include <AsgTools/PropertyWrapper.h>
 
 namespace CP
@@ -33,11 +35,15 @@ namespace CP
 
     /// \brief the smearing tool
   private:
-    ToolHandle<IMETSignificance> m_significanceTool {this, "significanceTool", "METMaker", "the significance tool we apply"};
+    ToolHandle<IMETSignificance> m_significanceTool {this, "significanceTool", "met::METSignificance", "the significance tool we apply"};
 
     /// \brief the systematics list we run
   private:
     SysListHandle m_systematicsList {this};
+
+    /// \brief the EventInfo key
+  private:
+    SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey {this, "eventInfo", "EventInfo", "the name of the EventInfo object to retrieve"};
 
     /// \brief the met collection we run on
   private:

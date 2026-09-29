@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -16,6 +16,7 @@
 #include <xAODMissingET/MissingETAssociationHelper.h>
 
 #include "AthContainers/ConstDataVector.h"
+#include <AsgDataHandles/ReadHandle.h>
 #include "AthContainers/Decorator.h"
 
 //
@@ -29,6 +30,8 @@ namespace CP
   initialize ()
   {
     ANA_CHECK (m_makerTool.retrieve());
+    ANA_CHECK (m_metCoreKey.initialize());
+    ANA_CHECK (m_metAssociationKey.initialize());
 
     for (auto* handle : {&m_electronsHandle, &m_photonsHandle,
                          &m_muonsHandle, &m_tausHandle}) {
@@ -72,14 +75,16 @@ namespace CP
   StatusCode MetMakerAlg ::
   execute (const EventContext& ctx)
   {
-    const xAOD::MissingETContainer* metcore {nullptr};
-    ANA_CHECK (evtStore()->retrieve(metcore, m_metCoreName));
+    SG::ReadHandle<xAOD::MissingETContainer> metcoreHandle (m_metCoreKey, ctx);
+    ANA_CHECK (metcoreHandle.isValid());
+    const xAOD::MissingETContainer* metcore = metcoreHandle.cptr();
 
-    const xAOD::MissingETAssociationMap* metMap {nullptr};
-    ANA_CHECK (evtStore()->retrieve(metMap, m_metAssociationName));
+    SG::ReadHandle<xAOD::MissingETAssociationMap> metMapHandle (m_metAssociationKey, ctx);
+    ANA_CHECK (metMapHandle.isValid());
+    const xAOD::MissingETAssociationMap* metMap = metMapHandle.cptr();
 
     // Helper keeps track of object selection flags for this map
-    xAOD::MissingETAssociationHelper metHelper(&(*metMap));
+    xAOD::MissingETAssociationHelper metHelper(metMap);
 
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
@@ -98,7 +103,7 @@ namespace CP
             invisSelected.push_back(invisParticle);
         }
       }
-      if (invisSelected.size() > 0)
+      if (!invisSelected.empty())
         ANA_CHECK (m_makerTool->markInvisible (invisSelected.asDataVector(), metHelper, met.get() ) );
 
       // Lambda helping with calculating the MET terms coming from the leptons
@@ -120,7 +125,7 @@ namespace CP
             return StatusCode::SUCCESS;
           }
           const xAOD::IParticleContainer* particles = nullptr;
-          ANA_CHECK (handle.retrieve (particles, sys));
+          ANA_CHECK (handle.retrieve (particles, sys, ctx));
           ConstDataVector<xAOD::IParticleContainer> selected(SG::VIEW_ELEMENTS);
           for (const xAOD::IParticle *particle : *particles)
               if (selection.getBool(*particle, sys))
@@ -136,17 +141,17 @@ namespace CP
       ANA_CHECK (processParticles (m_photonsHandle, m_photonsSelection,
                                    xAOD::Type::Photon, m_photonsKey));
       // a muon overlapping with tau is not removed. So if a true muon passes an (extremely loose) tau ID selection, it is double-counted. # https://its.cern.ch/jira/browse/ATLHMBS-651 
-      if(!m_switchTauMuonOrder)
+      if (!m_switchTauMuonOrder)
       {
-      ANA_CHECK (processParticles (m_tausHandle, m_tausSelection,
-                                   xAOD::Type::Tau, m_tausKey));
+        ANA_CHECK (processParticles (m_tausHandle, m_tausSelection,
+                                     xAOD::Type::Tau, m_tausKey));
       }
       ANA_CHECK (processParticles (m_muonsHandle, m_muonsSelection,
                                    xAOD::Type::Muon, m_muonsKey));
-      if(m_switchTauMuonOrder)
+      if (m_switchTauMuonOrder)
       {
-      ANA_CHECK (processParticles (m_tausHandle, m_tausSelection,
-                                   xAOD::Type::Tau, m_tausKey));
+        ANA_CHECK (processParticles (m_tausHandle, m_tausSelection,
+                                     xAOD::Type::Tau, m_tausKey));
       }
 
 
