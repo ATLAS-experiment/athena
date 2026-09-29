@@ -61,7 +61,7 @@ class KLFitterBlock(ConfigBlock):
         )
         self.addOption(
             "btaggingMethod",
-            "kNoTag",
+            "kNotag",
             type=str,
             info="strategy to handle b-jets, if only one is needed. See `KLFitterEnums.h` for possible values.",
         )
@@ -109,29 +109,34 @@ class KLFitterBlock(ConfigBlock):
         return self.containerName
 
     def parseSelectionRegionsConfig(self):
+        if not self.selectionRegionsConfig.strip():
+            raise ValueError(
+                "KLFitterConfig: Could not determine any regions in your selectionRegionsConfig (empty string)"
+            )
         regions = self.selectionRegionsConfig.split(";")
-        if len(regions) == 0:
-            raise Exception(
-                "KLFitterConfig: Could not determine any regions in your SelectionRegionsConfig"
-            )
         for reg in regions:
-            regstrip = reg.replace(" ", "")
-            regionopts = dict(
-                tuple(option.split(":")) for option in regstrip.split(",")
-            )
+            regionopts = {}
+            for option in reg.replace(" ", "").split(","):
+                keyval = option.split(":")
+                if len(keyval) != 2 or not keyval[0] or not keyval[1]:
+                    raise ValueError(
+                        f"KLFitterConfig: malformed option '{option}' in selectionRegionsConfig region '{reg}', expected 'key: value'"
+                    )
+                regionopts[keyval[0]] = keyval[1]
             if "selectionName" not in regionopts:
-                raise Exception(
-                    "KLFitterConfig: Could not parse SelectionRegionsConfig selectionName for region ",
-                    reg,
+                raise ValueError(
+                    f"KLFitterConfig: Could not parse selectionRegionsConfig selectionName for region '{reg}'"
                 )
             if "likelihoodType" in regionopts:
-                raise Exception(
+                raise ValueError(
                     "KLFitterConfig: likelihoodType cannot be overriden per region. Create a separate instance of KLFitter block with different likelihoodType instead."
                 )
 
             self.perRegionConfiguration.append(regionopts)
 
     def makeAlgs(self, config):
+        if not self.likelihoodType:
+            raise ValueError("KLFitterConfig: the likelihoodType option must be set")
         self.parseSelectionRegionsConfig()
         for perRegionConfig in self.perRegionConfiguration:
             selectionName = perRegionConfig["selectionName"]
@@ -167,12 +172,12 @@ class KLFitterBlock(ConfigBlock):
             )
             if alg.BTaggingMethod == "kWorkingPoint":
                 config.addPrivateTool("btagEffTool", "BTaggingEfficiencyTool")
-                alg.btagEffTool.TaggerName = self.btagger
-                alg.btagEffTool.OperatingPoint = self.btagWP
+                alg.btagEffTool.TaggerName = btagAlgo
+                alg.btagEffTool.OperatingPoint = btagWP
                 jetCollection = config.originalName(self.jets.split(".")[0])
                 alg.btagEffTool.JetAuthor = jetCollection
                 alg.btagEffTool.ScaleFactorFileName = (
-                    getRecommendedBTagCalib(config.geometry(), self.btagWP)
+                    getRecommendedBTagCalib(config.geometry(), btagWP)
                     if self.bTagCDIFile is None
                     else self.bTagCDIFile
                 )
@@ -197,7 +202,7 @@ class KLFitterBlock(ConfigBlock):
         config.addOutputVar(self.containerName, "eventProbability", "eventProbability", auxType="float")
         config.addOutputVar(self.containerName, "logLikelihood", "logLikelihood", auxType="float")
         if self.saveAllPermutations:
-            config.addOutputVar(self.containerName, "selected", "selected", auxType="char")
+            config.addOutputVar(self.containerName, "bestPermutation", "bestPermutation", auxType="unsigned_int")
 
         if self.likelihoodType != "ttbar_AllHad":
             config.addOutputVar(
