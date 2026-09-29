@@ -30,7 +30,7 @@ StatusCode TracccMeasurementConverterAlg::initialize()
     ATH_CHECK(m_outputPixelKey.initialize());
     ATH_CHECK(m_outputPixelSpacePointsKey.initialize());
     ATH_CHECK(m_outputMeasToPixelSPKey.initialize());
-     ATH_CHECK(m_outputMeasToStripClKey.initialize());
+    ATH_CHECK(m_outputMeasToStripClKey.initialize());
     ATH_CHECK(m_outputStripKey.initialize());
 
     ATH_CHECK(detStore()->retrieve(m_pixelID, m_idHelperName) );
@@ -38,7 +38,7 @@ StatusCode TracccMeasurementConverterAlg::initialize()
     ATH_CHECK(detStore()->retrieve(m_pixelManager, "ITkPixel"));
     ATH_CHECK(detStore()->retrieve(m_stripManager, "ITkStrip"));
 
-     ATH_CHECK(detStore()->retrieve(m_idMapping, m_geoIdMappingObjectName.value()));
+    ATH_CHECK(detStore()->retrieve(m_idMapping, m_geoIdMappingObjectName.value()));
 
     ATH_MSG_DEBUG("Successfully initialized");
     return StatusCode::SUCCESS;
@@ -319,11 +319,17 @@ StatusCode TracccMeasurementConverterAlg::execute(const EventContext& ctx) const
         float width_phiRZ = static_cast<float>(siWidth.widthPhiRZ()[1]);
         xaod_pcl->setWidthInEta(width_phiRZ);
 
+        // using width to scale the cluster covariance for space points
+        float covTerm = width_phiRZ * width_phiRZ * (1/12.0f);
+        if( covTerm < localCovariance(1, 1) )
+            covTerm = localCovariance(1, 1);
+
+
         const Amg::Transform3D& Tp = pDE->surface().transform();
         float const cov_z =
-            6.f * localCovariance(1, 1) *
+            6.f * covTerm *
             static_cast<float>(Tp(0, 2) * Tp(0, 2) + Tp(1, 2) * Tp(1, 2));
-        float const cov_r = 6.f * localCovariance(1, 1) *
+        float const cov_r = 6.f * covTerm *
                             static_cast<float>(Tp(2, 2) * Tp(2, 2));
         xaod_sp->setSpacePoint(xaod_pcl->identifierHash(),
                                xaod_pcl->globalPosition(), cov_r, cov_z,
