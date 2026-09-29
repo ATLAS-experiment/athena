@@ -60,8 +60,8 @@ if [ ! -f $inputRDO ]; then
 fi
 
 ## running reconstruction
-ignore_pattern1='ERROR Locating dev file .+ Do not let this propagate to a release'
-ignore_pattern2='ActsPriVxFinderAlg.ActsAdaptiveMultiPriVtx.+ERROR'
+export PATHRESOLVER_DEVAREARESPONSE="WARNING"
+ignore_pattern='ActsPriVxFinderAlg.ActsAdaptiveMultiPriVtx.+ERROR'
 conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 run Reco_tf.py \
     --conditionsTag "default:${conditionsTag}" \
@@ -80,7 +80,7 @@ run Reco_tf.py \
                flags.Concurrency.NumConcurrentEvents=${numThreads};" \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD} \
-    --ignorePatterns "${ignore_pattern1}" "${ignore_pattern2}" \
+    --ignorePatterns "${ignore_pattern}" \
     --perfmon fullmonmt
 
 rc=$?

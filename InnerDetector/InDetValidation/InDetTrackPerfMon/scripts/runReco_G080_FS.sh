@@ -58,7 +58,7 @@ if [ ! -f $inputRDO ]; then
 fi
 
 ## running reconstruction
-ignore_pattern='ERROR Locating dev file .+ Do not let this propagate to a release'
+export PATHRESOLVER_DEVAREARESPONSE="WARNING"
 conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 run Reco_tf.py \
     --conditionsTag "default:${conditionsTag}" \
@@ -74,7 +74,6 @@ run Reco_tf.py \
                flags.Tracking.ITkActsPass.PixelSeedingStrategy=SeedingStrategy.Gbts;" \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD} \
-    --ignorePatterns "${ignore_pattern}" \
     --perfmon fullmonmt
 
 rc=$?
