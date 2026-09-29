@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -73,6 +73,11 @@ namespace CP
   {
     SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
     SG::ReadHandle<xAOD::VertexContainer> vertices(m_primaryVerticesKey, ctx);
+    if (!vertices.isValid())
+      {
+        ANA_MSG_ERROR ("Cannot retrieve primary vertex container " << m_primaryVerticesKey.key());
+        return StatusCode::FAILURE;
+      }
     const xAOD::Vertex *primaryVertex {nullptr};
 
     for (const xAOD::Vertex *vertex : *vertices)
@@ -87,11 +92,8 @@ namespace CP
         // this algorithm to it.  Currently there is no central
         // algorithm to do that, so users will have to write their
         // own (15 Aug 18).
-        if (primaryVertex == nullptr)
-        {
-          primaryVertex = vertex;
-          break;
-        }
+        primaryVertex = vertex;
+        break;
       }
     }
 
@@ -122,12 +124,13 @@ namespace CP
           acceptData.setCutResult (cutIndex ++, track != nullptr);
 
           if (track != nullptr) {
-            try {
-              d0sig = xAOD::TrackingHelpers::d0significance(track, eventInfo->beamPosSigmaX(), eventInfo->beamPosSigmaY(), eventInfo->beamPosSigmaXY());
-              if (m_maxD0Significance > 0) acceptData.setCutResult (cutIndex ++, fabs( d0sig ) < m_maxD0Significance);
-
-            } catch (const std::runtime_error &) {
-              acceptData.setCutResult (cutIndex ++, false);
+            if (m_maxD0Significance > 0) {
+              try {
+                d0sig = xAOD::TrackingHelpers::d0significance(track, eventInfo->beamPosSigmaX(), eventInfo->beamPosSigmaY(), eventInfo->beamPosSigmaXY());
+                acceptData.setCutResult (cutIndex ++, fabs( d0sig ) < m_maxD0Significance);
+              } catch (const std::runtime_error &) {
+                acceptData.setCutResult (cutIndex ++, false);
+              }
             }
 
             const double vertex_z = primaryVertex ? primaryVertex->z() : 0;
@@ -135,26 +138,24 @@ namespace CP
             if (m_maxDeltaZ0SinTheta > 0) acceptData.setCutResult (cutIndex ++, fabs (deltaZ0SinTheta) < m_maxDeltaZ0SinTheta);
 
             if (m_nMinPixelHits != -1 || m_nMaxPixelHits != -1) {
-              uint8_t nPixelHits;
-              track->summaryValue(nPixelHits, xAOD::numberOfPixelHits);
-              bool accept = true;
-              if(m_nMinPixelHits != -1) {
-                accept &= nPixelHits >= m_nMinPixelHits;
+              uint8_t nPixelHits = 0;
+              bool accept = track->summaryValue(nPixelHits, xAOD::numberOfPixelHits);
+              if(accept && m_nMinPixelHits != -1) {
+                accept = nPixelHits >= m_nMinPixelHits;
               }
-              if(m_nMaxPixelHits != -1) {
-                accept &= nPixelHits <= m_nMaxPixelHits;
+              if(accept && m_nMaxPixelHits != -1) {
+                accept = nPixelHits <= m_nMaxPixelHits;
               }
               acceptData.setCutResult (cutIndex++, accept);
             }
             if (m_nMinSCTHits != -1 || m_nMaxSCTHits != -1) {
-              uint8_t nSCTHits;
-              track->summaryValue(nSCTHits, xAOD::numberOfSCTHits);
-              bool accept = true;
-              if(m_nMinSCTHits != -1) {
-                accept &= nSCTHits >= m_nMinSCTHits;
+              uint8_t nSCTHits = 0;
+              bool accept = track->summaryValue(nSCTHits, xAOD::numberOfSCTHits);
+              if(accept && m_nMinSCTHits != -1) {
+                accept = nSCTHits >= m_nMinSCTHits;
               }
-              if(m_nMaxSCTHits != -1) {
-                accept &= nSCTHits <= m_nMaxSCTHits;
+              if(accept && m_nMaxSCTHits != -1) {
+                accept = nSCTHits <= m_nMaxSCTHits;
               }
               acceptData.setCutResult (cutIndex++, accept);
             }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -68,9 +68,9 @@ namespace CP
   private:
     struct WeightsGroup
     {
-      float nEventsProcessed {};
-      float sumOfWeights {};
-      float sumOfWeightsSquared {};
+      uint64_t nEventsProcessed {};
+      double sumOfWeights {};
+      double sumOfWeightsSquared {};
     };
 
     /// \brief input streams that we can run the CutBookkeepers against
