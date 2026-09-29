@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 
@@ -34,6 +34,9 @@ class ParticleLevelOverlapRemovalBlock(ConfigBlock):
         return self.label
 
     def makeAlgs(self, config):
+        if not self.jets:
+            raise ValueError('Particle-level overlap removal needs the jet container to be run!')
+
         alg = config.createAlgorithm('CP::ParticleLevelOverlapRemovalAlg',
                                      'ParticleLevelOverlapRemoval',
                                      reentrant=True)
@@ -43,21 +46,18 @@ class ParticleLevelOverlapRemovalBlock(ConfigBlock):
         if self.electrons:
             alg.electrons, alg.electronSelection = config.readNameAndSelection (self.electrons)
             alg.doJetElectronOR = True
-            selection = self.electrons.split(".")[1] if len(self.electrons.split(".")) == 2 else ''
-            config.addSelection (self.electrons.split(".")[0], selection, alg.labelOR + ',as_char')
+            container, _, selection = self.electrons.partition(".")
+            config.addSelection (container, selection, alg.labelOR + ',as_char')
         if self.muons:
             alg.muons, alg.muonSelection = config.readNameAndSelection (self.muons)
             alg.doJetMuonOR = True
-            selection = self.muons.split(".")[1] if len(self.muons.split(".")) == 2 else ''
-            config.addSelection (self.muons.split(".")[0], selection, alg.labelOR + ',as_char')
+            container, _, selection = self.muons.partition(".")
+            config.addSelection (container, selection, alg.labelOR + ',as_char')
         if self.photons:
             alg.photons, alg.photonSelection = config.readNameAndSelection (self.photons)
             alg.doJetPhotonOR = True
-            selection = self.photons.split(".")[1] if len(self.photons.split(".")) == 2 else ''
-            config.addSelection (self.photons.split(".")[0], selection, alg.labelOR + ',as_char')
-        if self.jets:
-            alg.jets, alg.jetSelection = config.readNameAndSelection (self.jets)
-            selection = self.jets.split(".")[1] if len(self.jets.split(".")) == 2 else ''
-            config.addSelection (self.jets.split(".")[0], selection, alg.labelOR + ',as_char')
-        else:
-            raise ValueError('Particle-level overlap removal needs the jet container to be run!')
+            container, _, selection = self.photons.partition(".")
+            config.addSelection (container, selection, alg.labelOR + ',as_char')
+        alg.jets, alg.jetSelection = config.readNameAndSelection (self.jets)
+        container, _, selection = self.jets.partition(".")
+        config.addSelection (container, selection, alg.labelOR + ',as_char')
