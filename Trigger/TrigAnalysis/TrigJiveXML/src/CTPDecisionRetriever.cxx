@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigJiveXML/CTPDecisionRetriever.h"
@@ -62,7 +62,7 @@ namespace JiveXML {
 //// according to Twiki page LevelOneCentralTriggerData (David Berge)
 //// comments taken from there
 
-     const CTP_Decision * ctpDecision;
+     const CTP_Decision * ctpDecision = nullptr;
 
      // L1JetObject -not- available
      if ( evtStore()->retrieve(ctpDecision,"CTP_Decision").isFailure() ) {

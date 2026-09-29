@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigJiveXML/xAODTriggerTowerRetriever.h"
@@ -25,7 +25,7 @@ namespace JiveXML {
   StatusCode xAODTriggerTowerRetriever::retrieve(ToolHandle<IFormatTool> &FormatTool) {
 
     //Retrieve trigger towers
-    const DataVector<xAOD::TriggerTower>* TTVector;
+    const DataVector<xAOD::TriggerTower>* TTVector = nullptr;
         
     if ( evtStore()->retrieve(TTVector,m_sgKey).isFailure() ) {
       if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) <<  "No Level-1 Trigger Towers found in SG at "
