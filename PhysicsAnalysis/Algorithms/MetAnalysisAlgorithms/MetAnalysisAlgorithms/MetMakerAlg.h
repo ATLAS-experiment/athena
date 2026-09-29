@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -20,6 +20,8 @@
 #include <xAODBase/IParticleContainer.h>
 #include <xAODMissingET/MissingETContainer.h>
 #include <xAODMissingET/MissingETAuxContainer.h>
+#include <xAODMissingET/MissingETAssociationMap.h>
+#include <AsgDataHandles/ReadHandleKey.h>
 #include <AsgTools/PropertyWrapper.h>
 
 namespace CP
@@ -54,11 +56,11 @@ namespace CP
 
     /// \brief the name of the core MissingETContainer
   private:
-    Gaudi::Property<std::string> m_metCoreName {this, "metCore", "",  "the name of the core MissingETContainer"};
+    SG::ReadHandleKey<xAOD::MissingETContainer> m_metCoreKey {this, "metCore", "",  "the name of the core MissingETContainer"};
 
     /// \brief the name of the MissingETAssociationMap
   private:
-    Gaudi::Property<std::string> m_metAssociationName {this, "metAssociation", "", "the name of the MissingETAssociationMap"};
+    SG::ReadHandleKey<xAOD::MissingETAssociationMap> m_metAssociationKey {this, "metAssociation", "", "the name of the MissingETAssociationMap"};
 
     /// \brief the systematics list we run
   private:
@@ -106,7 +108,7 @@ namespace CP
   private:
     Gaudi::Property<std::string> m_muonsKey {this, "muonsKey", "Muons", "the key for the muons"};
 
-    /// \brief the electron container to use
+    /// \brief the tau container to use
   private:
     SysReadHandle<xAOD::IParticleContainer> m_tausHandle {
       this, "taus", "", "the tau container to use" };

@@ -1,4 +1,4 @@
-// AsgExampleTools_entries.cxx
+// MetAnalysisAlgorithms_entries.cxx
 
 #include <MetAnalysisAlgorithms/MetBuilderAlg.h>
 #include <MetAnalysisAlgorithms/MetMakerAlg.h>

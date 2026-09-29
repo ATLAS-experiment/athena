@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # The name of the package:
 atlas_subdir( MetAnalysisAlgorithms )
@@ -6,8 +6,8 @@ atlas_subdir( MetAnalysisAlgorithms )
 atlas_add_library( MetAnalysisAlgorithmsLib
    MetAnalysisAlgorithms/*.h MetAnalysisAlgorithms/*.icc Root/*.cxx
    PUBLIC_HEADERS MetAnalysisAlgorithms
-   LINK_LIBRARIES AnaAlgorithmLib METInterface SystematicsHandlesLib SelectionHelpersLib xAODBase xAODMissingET
-   PRIVATE_LINK_LIBRARIES METUtilitiesLib xAODEventInfo )
+   LINK_LIBRARIES AnaAlgorithmLib METInterface SystematicsHandlesLib SelectionHelpersLib xAODBase xAODEventInfo xAODMissingET
+   PRIVATE_LINK_LIBRARIES METUtilitiesLib )
 
 atlas_add_component( MetAnalysisAlgorithms
    src/*.h src/*.cxx src/components/*.cxx
