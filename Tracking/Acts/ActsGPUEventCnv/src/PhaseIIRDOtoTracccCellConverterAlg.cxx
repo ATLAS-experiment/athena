@@ -2,9 +2,14 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "PhaseIIRDOtoTracccCellConverterAlg.h"
+#include "ActsGPUEvent/GeometryIdMapping.h"
 #include "StoreGate/ReadHandle.h"
+#include <cstdint>
+#include <optional>
 
 namespace ActsTrk {
+
+using detray_id_type = GeometryIdMapping::detray_id_type;
 
 StatusCode PhaseIIRDOtoTracccCellConverterAlg::initialize()
 {
@@ -81,7 +86,7 @@ StatusCode PhaseIIRDOtoTracccCellConverterAlg::execute(const EventContext& ctx) 
   // The traccc buffers are not default initialized: all members must be set.
 
   size_type cell_index = 0;
-  uint64_t current_geometry_id = detray::geometry::identifier{}.value();
+  detray_id_type current_geometry_id = detray::geometry::identifier{}.value();
   unsigned int current_det_cond_idx = -1;
 
   // Convert Pixel RDOs
@@ -91,10 +96,21 @@ StatusCode PhaseIIRDOtoTracccCellConverterAlg::execute(const EventContext& ctx) 
     }
     IdentifierHash const module_id_hash(module_rdo_container_proxy.identifyHash());
     Identifier const module_id = m_common.m_pixelID->wafer_id(module_id_hash);
-    uint64_t const detray_geometry_id = m_common.m_athenaToDetray->at(module_id);
+    std::optional<detray_id_type> const detray_geometry_id_opt = m_common.m_geoIdMapping->athenaToDetray(module_id);
+    if (!detray_geometry_id_opt.has_value()) {
+      ATH_MSG_FATAL("No detray id found for Athena identifier " << module_id);
+      return StatusCode::FAILURE;
+    }
+    const detray_id_type detray_geometry_id{detray_geometry_id_opt.value()};
     if (detray_geometry_id != current_geometry_id) {
       current_geometry_id = detray_geometry_id;
-      current_det_cond_idx = m_common.m_DetrayIdToDetDescrIndexMap.at(current_geometry_id);
+      std::optional<unsigned int> det_cond_idx_opt =
+        m_common.m_geoIdMapping->detrayToDetDescIndex(current_geometry_id);
+      if (!det_cond_idx_opt.has_value()) {
+        ATH_MSG_FATAL("No detector conditions index found for detray identifier " << current_geometry_id);
+        return StatusCode::FAILURE;
+      }
+      current_det_cond_idx = det_cond_idx_opt.value();
     }
 
     for (PixelRawDataProxy pixel_rdo: module_rdo_container_proxy) {
@@ -123,10 +139,21 @@ StatusCode PhaseIIRDOtoTracccCellConverterAlg::execute(const EventContext& ctx) 
     }
     IdentifierHash const module_id_hash(module_rdo_container_proxy.identifyHash());
     Identifier const module_id = m_common.m_stripID->wafer_id(module_id_hash);
-    uint64_t const detray_geometry_id = m_common.m_athenaToDetray->at(module_id);
+    std::optional<detray_id_type> const detray_geometry_id_opt = m_common.m_geoIdMapping->athenaToDetray(module_id);
+    if (!detray_geometry_id_opt.has_value()) {
+      ATH_MSG_FATAL("No detray id found for Athena identifier " << module_id);
+      return StatusCode::FAILURE;
+    }
+    const detray_id_type detray_geometry_id{detray_geometry_id_opt.value()};
     if (detray_geometry_id != current_geometry_id) {
       current_geometry_id = detray_geometry_id;
-      current_det_cond_idx = m_common.m_DetrayIdToDetDescrIndexMap.at(current_geometry_id);
+      std::optional<unsigned int> det_cond_idx_opt =
+        m_common.m_geoIdMapping->detrayToDetDescIndex(current_geometry_id);
+      if (!det_cond_idx_opt.has_value()) {
+        ATH_MSG_FATAL("No detector conditions index found for detray identifier " << current_geometry_id);
+        return StatusCode::FAILURE;
+      }
+      current_det_cond_idx = det_cond_idx_opt.value();
     }
 
     for (StripRawDataProxy strip_rdo: module_rdo_container_proxy) {

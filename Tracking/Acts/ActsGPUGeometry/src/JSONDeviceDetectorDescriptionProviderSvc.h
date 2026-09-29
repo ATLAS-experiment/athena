@@ -125,7 +125,8 @@ private:
     /// @}
 
     /// Helper function to load Athena<->detray ID maps from csv
-    StatusCode loadIdMaps(const std::unique_ptr<traccc::host_detector>& hostDetector);
+    StatusCode loadIdMaps(const std::unique_ptr<traccc::host_detector>& hostDetector,
+        const std::unique_ptr<traccc::detector_conditions_description::host>& hostCond);
     std::unique_ptr<ActsTrk::GeometryIdMapping> m_idMapping;
 
 };
