@@ -1,0 +1,102 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+#ifndef TRUTHCLUSTERSPLITTINGTOOLIMPL_ICC
+#define TRUTHCLUSTERSPLITTINGTOOLIMPL_ICC
+
+#include <limits>
+#include <cassert>
+#include <format>
+#include "ActsGeometry/ActsDetectorElement.h"
+#include <PixelReadoutGeometry/PixelModuleDesign.h>
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
+#include "InDetReadoutGeometry/SiDetectorElement.h"
+#include "InDetMeasurementUtilities/Helpers.h"
+
+#include <stdexcept>
+
+namespace ActsTrk::detail {
+
+template <typename traj_t>
+StatusCode TruthClusterSplittingToolImpl<traj_t>::initialize()
+{
+    ATH_MSG_DEBUG("Initializing " << AthAlgTool::name() << " ...");
+
+    ATH_CHECK( BASE::initialize() );
+    ATH_CHECK(m_associationMap_key.initialize());
+    ATH_CHECK( m_truthSelectionTool.retrieve() );
+    ATH_MSG_DEBUG(AthAlgTool::name() << " successfully initialized");
+
+    ATH_MSG_DEBUG( this->calibrateAfterMeasurementSelection() );
+
+    return StatusCode::SUCCESS;
+}
+
+template <typename traj_t>
+const ActsTrk::MeasurementToTruthParticleAssociation*
+TruthClusterSplittingToolImpl<traj_t>::getAssociationMap(const EventContext &ctx) const
+{
+    const MeasurementToTruthParticleAssociation* measToTruth(nullptr);
+    if (!SG::get(measToTruth,m_associationMap_key,ctx).isSuccess()) {
+      throw std::runtime_error(std::format("No truth association map {:}.", m_associationMap_key.key()));
+    }
+
+    return measToTruth;
+}
+
+template <typename traj_t>
+const IAthSelectionTool*
+TruthClusterSplittingToolImpl<traj_t>::getTruthSelectionTool() const
+{
+    assert(m_truthSelectionTool.isValid());
+    return m_truthSelectionTool.get();
+}
+
+
+template <typename traj_t>
+std::tuple<typename TruthClusterSplittingCalibrator<traj_t>::BASE::Pos,
+           typename TruthClusterSplittingCalibrator<traj_t>::BASE::Cov,
+           unsigned int>
+TruthClusterSplittingCalibrator<traj_t>::calibrate(
+    const EventContext& /*ctx*/,
+    const Acts::GeometryContext& /*gctx*/,
+    const Acts::CalibrationContext& /*cctx*/,
+    const xAOD::PixelCluster& cluster,
+    const InDetDD::SiDetectorElement& /*sdectx*/,
+    const std::pair<float, float>& /*tan_incidence_angles*/,
+    const Acts::Vector2& /*predicted_local_position*/) const
+{
+    typename BASE::Pos pos = cluster.template localPosition<2>();
+    typename BASE::Cov cov = cluster.template localCovariance<2>();
+    assert(!cluster.rdoList().empty());
+
+    if (! m_options.m_measToTruth->isCompatibleWith(dynamic_cast<const xAOD::UncalibratedMeasurementContainer *>(cluster.container())) ){ // check compatibility of association map with cluster
+      throw std::runtime_error(std::format("AssociationMap and pixel cluster (index {:}) are not compatible.", cluster.index()));
+    }
+    if (cluster.index() >= m_options.m_measToTruth->size()) { // if cluster index inside container is bigger than number of cluster in container
+      throw std::runtime_error(std::format("PRD index {:} not present in the measurement to truth vector with size {:}", cluster.index(), m_options.m_measToTruth->size()));
+    }
+
+    const auto & tps = m_options.m_measToTruth->at(cluster.index()); // returns truth particles
+
+    int num_truth_particles = 0;
+    for (const auto& tp : tps) {
+      // Apply same cuts on truth particles as for efficiency plots, see `athena/InnerDetector/InDetValidation/InDetPhysValMonitoring/python/InDetPhysValMonitoringConfig.py#L47-L87`
+      const IAthSelectionTool::CutResult accept = m_options.m_truthSelectionTool->accept(tp);
+      if (!accept) continue;
+      num_truth_particles += 1;
+    }
+    // TO-DO: use position truth information of truth particle update "pos" (there are multiple ways how to do so)
+
+    // check whether cluster created by multiple truth particles
+    unsigned int splitFlag = num_truth_particles > 1
+        ? detail::setTrackStateFlag(Acts::TrackStateFlag::IsSplitHit)
+        : 0;
+
+    return std::make_tuple(std::move(pos), std::move(cov), splitFlag);
+}
+
+
+} // namespace ActsTrk
+
+#endif

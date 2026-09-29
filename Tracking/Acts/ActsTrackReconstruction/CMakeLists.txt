@@ -48,11 +48,13 @@ atlas_add_component( ActsTrackReconstruction
                TrkTrack
                TrkTrackSummary
                TrkTruthData
+               TrkTruthTrackInterfaces
                TruthUtils
                xAODEventInfo
                xAODInDetMeasurement
                xAODMeasurementBase
                xAODTracking
+               xAODTruth
                PathResolver
                InDetMeasurementUtilitiesLib
                SiClusterizationToolLib)
