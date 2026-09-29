@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BPhysPVCascadeTools.h"
@@ -330,19 +330,19 @@ StatusCode DerivationFramework::BPhysPVCascadeTools::FillCandwithRefittedVertice
 
          for(size_t i =0 ; i<indexestoProcess.size(); i++){
              //if refitted add to refitted container
-             auto index  = indexestoProcess[i].first;
+             auto thisIndex  = indexestoProcess[i].first;
              auto pvtype = indexestoProcess[i].second;
              const xAOD::VertexContainer* ParentContainer =
-                 (refPVvertexes_toDelete.at(index)) ? refPvContainer : pvContainer;
+                 (refPVvertexes_toDelete.at(thisIndex)) ? refPvContainer : pvContainer;
              if(ParentContainer == refPvContainer && std::find(indexesUsed.begin(),
-                                      indexesUsed.end(), index) == indexesUsed.end()) {
+                                      indexesUsed.end(), thisIndex) == indexesUsed.end()) {
                  // store the new vertex
-                 refPvContainer->push_back(refPVvertexes_toDelete.at(index));
-                 indexesUsed.push_back(index);
+                 refPvContainer->push_back(refPVvertexes_toDelete.at(thisIndex));
+                 indexesUsed.push_back(thisIndex);
              }
-             FillBPhysHelper(mom, cov, vtx, refPVvertexes[index],
-                  ParentContainer, pvtype, exitCode[index]);
-             vtx.setOrigPv(GoodPVs[index], pvContainer, pvtype);               
+             FillBPhysHelper(mom, cov, vtx, refPVvertexes[thisIndex],
+                  ParentContainer, pvtype, exitCode[thisIndex]);
+             vtx.setOrigPv(GoodPVs[thisIndex], pvContainer, pvtype);               
          }
           //nullify ptrs we want to keep so these won't get deleted
          //"delete null" is valid in C++ and does nothing so this is quicker than a lot of if statements
@@ -483,7 +483,7 @@ bool DerivationFramework::BPhysPVCascadeTools::LinkVertices(SG::AuxElement::Deco
   } // end of loop over preceding vertices
   
     // all OK: store preceding vertex links in the aux store
-   decor(*vert) = precedingVertexLinks;
+   decor(*vert) = std::move(precedingVertexLinks);
    return true;
 }
 

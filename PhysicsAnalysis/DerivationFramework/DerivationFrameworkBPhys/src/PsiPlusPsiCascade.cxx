@@ -170,7 +170,7 @@ namespace DerivationFramework {
       vertexLink2.setElement(cascadeVertices[1]);
       vertexLink2.setStorableObject(*VtxWriteHandles[1].ptr());
       if( vertexLink2.isValid() ) precedingVertexLinks.push_back( vertexLink2 );
-      CascadeLinksDecor(*mainVertex) = precedingVertexLinks;
+      CascadeLinksDecor(*mainVertex) = std::move(precedingVertexLinks);
 
       // Identify the input Psi2
       const xAOD::Vertex* psi2Vertex(0);
@@ -217,8 +217,12 @@ namespace DerivationFramework {
       // decorate the Psi1 vertex
       chi2_SV1_decor(*cascadeVertices[0])    = m_V0Tools->chisq(cascadeVertices[0]);
       chi2_nc_SV1_decor(*cascadeVertices[0]) = cascade_info_noConstr ? m_V0Tools->chisq(cascade_info_noConstr->vertices()[0]) : -999999.;
-      chi2_V1_decor(*cascadeVertices[0])     = m_V0Tools->chisq(psi1Vertex);
-      ndof_V1_decor(*cascadeVertices[0])     = m_V0Tools->ndof(psi1Vertex);
+      //
+      auto ndof = psi1Vertex ? m_V0Tools->ndof(psi1Vertex) : -999999.;
+      auto chisq = psi1Vertex ? m_V0Tools->chisq(psi1Vertex) : 999999.;
+      chi2_V1_decor(*cascadeVertices[0])     = chisq;
+      ndof_V1_decor(*cascadeVertices[0])     = ndof;
+      //
       lxy_SV1_decor(*cascadeVertices[0])     = m_CascadeTools->lxy(moms[0],cascadeVertices[0],mainVertex);
       lxyErr_SV1_decor(*cascadeVertices[0])  = m_CascadeTools->lxyError(moms[0],cascade_info->getCovariance()[0],cascadeVertices[0],mainVertex);
       a0z_SV1_decor(*cascadeVertices[0])     = m_CascadeTools->a0z(moms[0],cascadeVertices[0],mainVertex);
@@ -229,8 +233,12 @@ namespace DerivationFramework {
       // decorate the Psi2 vertex
       chi2_SV2_decor(*cascadeVertices[1])    = m_V0Tools->chisq(cascadeVertices[1]);
       chi2_nc_SV2_decor(*cascadeVertices[1]) = cascade_info_noConstr ? m_V0Tools->chisq(cascade_info_noConstr->vertices()[1]) : -999999.;
-      chi2_V2_decor(*cascadeVertices[1])     = m_V0Tools->chisq(psi2Vertex);
-      ndof_V2_decor(*cascadeVertices[1])     = m_V0Tools->ndof(psi2Vertex);
+      //
+      ndof = psi2Vertex ? m_V0Tools->ndof(psi1Vertex) : -999999.;
+      chisq = psi2Vertex ? m_V0Tools->chisq(psi1Vertex) : 999999.;
+      chi2_V2_decor(*cascadeVertices[1])     = chisq;
+      ndof_V2_decor(*cascadeVertices[1])     = ndof;
+      //
       lxy_SV2_decor(*cascadeVertices[1])     = m_CascadeTools->lxy(moms[1],cascadeVertices[1],mainVertex);
       lxyErr_SV2_decor(*cascadeVertices[1])  = m_CascadeTools->lxyError(moms[1],cascade_info->getCovariance()[1],cascadeVertices[1],mainVertex);
       a0z_SV2_decor(*cascadeVertices[1])     = m_CascadeTools->a0z(moms[1],cascadeVertices[1],mainVertex);

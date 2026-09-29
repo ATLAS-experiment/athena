@@ -282,7 +282,7 @@ namespace DerivationFramework {
         } // end of loop over preceding vertices
            
         // all OK: store preceding vertex links in the aux store
-        MuonsLinksDecor(*cascadeVertices[1]) = preMuLinks;
+        MuonsLinksDecor(*cascadeVertices[1]) = std::move(preMuLinks);
         //-----------------------------------
         //----------------------------------- mu
 

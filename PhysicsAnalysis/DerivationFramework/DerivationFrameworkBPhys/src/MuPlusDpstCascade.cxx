@@ -551,11 +551,12 @@ namespace DerivationFramework {
 
         // Select the D0/D0b candidates before calling cascade fit
         std::vector<const xAOD::Vertex*> selectedD0Candidates;
+        SG::AuxElement::Accessor<Char_t> flagAcc1("passed_D0");
+        SG::AuxElement::Accessor<Char_t> flagAcc2("passed_D0b");
         for(auto vxcItr : *d0Container){
            // Check the passed flag first
            const xAOD::Vertex* vtx = vxcItr;
-           SG::AuxElement::Accessor<Char_t> flagAcc1("passed_D0");
-           SG::AuxElement::Accessor<Char_t> flagAcc2("passed_D0b");
+           
            bool isD0(true);
            bool isD0b(true);
            if(flagAcc1.isAvailable(*vtx)){

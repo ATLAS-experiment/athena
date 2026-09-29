@@ -137,8 +137,9 @@ namespace DerivationFramework {
 
     // fit pairs
     ATH_MSG_DEBUG("Successful pairs.....");
+    const std::string pairStr{"pair1"};
     for (std::vector<Combination>::iterator pairItr = pairs.begin(); pairItr!=pairs.end(); ++pairItr) {
-      std::vector<const xAOD::TrackParticle*> theTracks = (*pairItr).trackParticles("pair1");
+      std::vector<const xAOD::TrackParticle*> theTracks = (*pairItr).trackParticles(pairStr);
       std::unique_ptr<xAOD::Vertex> pairVxCandidate = fit(ctx,theTracks,importedTrackCollection.get(),beamSpot); // This line actually does the fitting and object making
       if (pairVxCandidate) {
         // decorate the candidate with its codes
@@ -163,9 +164,10 @@ namespace DerivationFramework {
 
     // fit quadruplets
     ATH_MSG_DEBUG("Successful quadruplets.....");
+    const std::string dcStr{"DC"};
     for (std::vector<Combination>::iterator quadItr = quadruplets.begin(); quadItr!=quadruplets.end(); ++quadItr) {
       std::vector<const xAOD::TrackParticle*> theDCTracks; theDCTracks.clear();
-      theDCTracks = (*quadItr).trackParticles("DC");
+      theDCTracks = (*quadItr).trackParticles(dcStr);
       std::unique_ptr<xAOD::Vertex> dcVxCandidate = fit(ctx,theDCTracks,importedTrackCollection.get(), beamSpot);
       if (dcVxCandidate != 0) {
         // decorate the candidate with its codes

@@ -506,11 +506,12 @@ namespace DerivationFramework {
 
         // Select the J/psi candidates before calling cascade fit
         std::vector<const xAOD::Vertex*> selectedJpsiCandidates;
+        SG::AuxElement::Accessor<Char_t> flagAcc1("passed_Jpsi");
         for(auto vxcItr=jpsiContainer->cbegin(); vxcItr!=jpsiContainer->cend(); ++vxcItr) {
 
            // Check the passed flag first
            const xAOD::Vertex* vtx = *vxcItr;
-           SG::AuxElement::Accessor<Char_t> flagAcc1("passed_Jpsi");
+           
            if(flagAcc1.isAvailable(*vtx)){
               if(!flagAcc1(*vtx)) continue;
            }

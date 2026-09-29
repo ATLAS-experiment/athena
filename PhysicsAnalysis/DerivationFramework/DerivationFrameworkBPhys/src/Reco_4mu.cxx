@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -146,9 +146,10 @@ namespace DerivationFramework {
 
     // loop over quadruplets
     ATH_MSG_DEBUG("Indices/masses of quadruplets follows....");
+    const std::string quadStr{"QUAD"};
     for (xAOD::Vertex* quadVtx: *quadContainer) {
       // create BPhysHypoHelper
-      xAOD::BPhysHypoHelper quadHelper("QUAD", quadVtx);
+      xAOD::BPhysHypoHelper quadHelper(quadStr, quadVtx);
 
       //----------------------------------------------------
       // decorate the vertex
