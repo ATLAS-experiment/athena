@@ -1,4 +1,5 @@
 <lcgdict>
     <class name="GlobalSim::topoc_pu_type" />
-    <class name="GlobalSim::Object<GlobalSim::topoc_pu_type>" />
+    <class name="GlobalSim::GenericTOB" />
+    <class name="GlobalSim::JET1Jet" />
 </lcgdict>

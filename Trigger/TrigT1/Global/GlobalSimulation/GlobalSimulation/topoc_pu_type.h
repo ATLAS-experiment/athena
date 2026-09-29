@@ -17,8 +17,9 @@ namespace GlobalSim {
         static std::bitset<13> et_encoder(float value) {
             return static_cast<unsigned long long>(value / s_ET_UNIT);
         }
-        static float et_decoder(std::bitset<13> bits) {
-            return (bits.to_ullong() * s_ET_UNIT);
+        static std::pair<float,float> et_decoder(std::bitset<13> bits) {
+            const double v = bits.to_ullong() * s_ET_UNIT;
+            return {v-0.5*s_ET_UNIT,v+0.5*s_ET_UNIT};
         }
 
     public:
