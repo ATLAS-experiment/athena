@@ -9,6 +9,10 @@
 
 #include <xAODEventInfo/EventInfo.h>
 
+#include <memory>
+#include <unordered_map>
+#include <unordered_set>
+
 #include "AthContainers/ConstDataVector.h"
 #include "VectorHelpers/LorentzHelper.h"
 
@@ -57,28 +61,23 @@ bool CalcPartonHistory::Retrievep4(const std::string& key,
 }
 
 bool CalcPartonHistory::Retrievep4(const std::string& key, PtEtaPhiMVector& p4,
-                                   const int& idx) {
+                                   std::size_t idx) {
   const auto* v = findVector(m_particleMap, key);
-  if (!v || idx < 0)
+  if (!v || idx >= v->size())
     return false;
-  const auto uidx = static_cast<std::size_t>(idx);
-  if (uidx >= v->size())
-    return false;
-  p4 = GetPtEtaPhiMfromTruth(v->at(uidx));
+  p4 = GetPtEtaPhiMfromTruth(v->at(idx));
   return true;
 }
 
 bool CalcPartonHistory::Retrievep4Gamma(PtEtaPhiMVector& p4, int& parentpdgId) {
-  // Finds the highest-pT photon from any 'GammaRad' key in the m_particleMap.
+  // Finds the highest-pT photon among all m_particleMap entries. Photons are
+  // stored either under "..._gamma_<beforeFSR|afterFSR>" keys or, when they
+  // come from a W/Z/H decay vertex, under "...Decay<N>_<beforeFSR|afterFSR>".
   const xAOD::TruthParticle* bestPhoton = nullptr;
-  for (const auto& [key, particles] : m_particleMap) {
-    if (key.find("GammaRad") != std::string::npos) {
-      auto it = std::max_element(
-          particles.begin(), particles.end(),
-          [](const auto* a, const auto* b) { return a->pt() < b->pt(); });
-      if (it != particles.end() &&
-          (!bestPhoton || (*it)->pt() > bestPhoton->pt()))
-        bestPhoton = *it;
+  for (const auto& entry : m_particleMap) {
+    for (const auto* p : entry.second) {
+      if (p && p->pdgId() == 22 && (!bestPhoton || p->pt() > bestPhoton->pt()))
+        bestPhoton = p;
     }
   }
   if (!bestPhoton) {
@@ -86,7 +85,12 @@ bool CalcPartonHistory::Retrievep4Gamma(PtEtaPhiMVector& p4, int& parentpdgId) {
     return false;
   }
   p4 = GetPtEtaPhiMfromTruth(bestPhoton);
-  parentpdgId = bestPhoton->nParents() > 0 ? bestPhoton->parent(0)->pdgId() : 0;
+  // Skip identical-photon copies to find the particle that emitted it.
+  const xAOD::TruthParticle* parent =
+      bestPhoton->nParents() > 0 ? bestPhoton->parent(0) : nullptr;
+  while (parent && parent->pdgId() == 22)
+    parent = parent->nParents() > 0 ? parent->parent(0) : nullptr;
+  parentpdgId = parent ? parent->pdgId() : 0;
   return true;
 }
 
@@ -107,14 +111,11 @@ bool CalcPartonHistory::RetrievepdgId(const std::string& key,
 }
 
 bool CalcPartonHistory::RetrievepdgId(const std::string& key, int& pdgId,
-                                      const int& idx) {
+                                      std::size_t idx) {
   const auto* v = findVector(m_particleMap, key);
-  if (!v || idx < 0)
+  if (!v || idx >= v->size())
     return false;
-  const auto uidx = static_cast<std::size_t>(idx);
-  if (uidx >= v->size())
-    return false;
-  pdgId = v->at(uidx)->pdgId();
+  pdgId = v->at(idx)->pdgId();
   return true;
 }
 
@@ -150,7 +151,7 @@ bool CalcPartonHistory::RetrieveParticleInfo(const std::string& prefix,
 
 bool CalcPartonHistory::RetrieveParticleInfo(const std::string& prefix,
                                              PtEtaPhiMVector& particle,
-                                             int& pdgId, const int& idx) {
+                                             int& pdgId, std::size_t idx) {
   return Retrievep4(prefix, particle, idx) && RetrievepdgId(prefix, pdgId, idx);
 }
 
@@ -248,37 +249,26 @@ void CalcPartonHistory::AddToParticleMap(const xAOD::TruthParticle* p,
     m_particleMap[key].push_back(p);
 }
 
-bool CalcPartonHistory::handleFSR(const xAOD::TruthParticle* p,
+void CalcPartonHistory::handleFSR(const xAOD::TruthParticle* p,
                                   const std::string& newKey, std::string& key) {
-  if (!PartonHistoryUtils::hasParentPdgId(p))
-    key += newKey;
-
-  if (p->nParents() == 0) {
-    AddToParticleMap(p, key + kBeforeFSR);
-    if (!PartonHistoryUtils::hasIdenticalChild(p))
-      AddToParticleMap(p, key + kAfterFSR);
-    return true;
-  }
-
+  // Last copy of an FSR chain: stored under the key of its first copy.
   if (PartonHistoryUtils::hasParentPdgId(p)) {
     AddToParticleMap(p, key + kAfterFSR);
-  } else {
-    AddToParticleMap(p, key + kBeforeFSR);
-    if (!PartonHistoryUtils::hasIdenticalChild(p))
-      AddToParticleMap(p, key + kAfterFSR);
+    return;
   }
-  return true;
+  key += newKey;
+  AddToParticleMap(p, key + kBeforeFSR);
+  if (!PartonHistoryUtils::hasIdenticalChild(p))
+    AddToParticleMap(p, key + kAfterFSR);
 }
 
 bool CalcPartonHistory::handleDecay(const xAOD::TruthParticle* p,
                                     std::string& key, int decayID) {
-  const bool fromH = PartonHistoryUtils::hasParentAbsPdgId(p, 25) &&
-                     !PartonHistoryUtils::hasParentPdgId(p);
-  const bool fromW = PartonHistoryUtils::hasParentAbsPdgId(p, 24) &&
-                     !PartonHistoryUtils::hasParentPdgId(p);
-  const bool fromZ = PartonHistoryUtils::hasParentAbsPdgId(p, 23) &&
-                     !PartonHistoryUtils::hasParentPdgId(p);
-  if (!fromH && !fromW && !fromZ)
+  // Only daughters of a W/Z/H (not FSR copies of the boson itself).
+  if (PartonHistoryUtils::hasParentPdgId(p) ||
+      !(PartonHistoryUtils::hasParentAbsPdgId(p, 23) ||
+        PartonHistoryUtils::hasParentAbsPdgId(p, 24) ||
+        PartonHistoryUtils::hasParentAbsPdgId(p, 25)))
     return false;
 
   const std::string decayStr = "Decay" + std::to_string(decayID);
@@ -287,18 +277,6 @@ bool CalcPartonHistory::handleDecay(const xAOD::TruthParticle* p,
   if (!PartonHistoryUtils::hasIdenticalChild(p))
     AddToParticleMap(p, key + kAfterFSR);
   return true;
-}
-
-void CalcPartonHistory::handleSameAsParent(const xAOD::TruthParticle* particle,
-                                           std::string& key) {
-  AddToParticleMap(particle, key);
-}
-
-void CalcPartonHistory::handleDefault(const xAOD::TruthParticle* particle,
-                                      const std::string& newKey,
-                                      std::string& key) {
-  AddToParticleMap(particle, key + newKey);
-  key += newKey;
 }
 
 void CalcPartonHistory::FillParticleMap(
@@ -313,19 +291,14 @@ void CalcPartonHistory::FillParticleMap(
   // get an additional "Decay<N>" segment to distinguish the two daughters, e.g.
   // "MySch_MC_t_WDecay1_beforeFSR".
   //
-  // Handler priority (first match wins for each particle in the path):
-  //   handleDecay      — daughters of W/Z/H: appends "Decay<N>" and records
-  //   beforeFSR/afterFSR handleFSR        — the radiating particle itself:
-  //   records both before and after FSR copies handleSameAsParent —
-  //   intermediate FSR copies (same PDG as parent): stored under current key
-  //   handleDefault    — all other particles: appends the type suffix and
-  //   advances the key
+  // Handlers (first match wins for each particle in the path):
+  //   handleDecay — daughters of W/Z/H: appends "Decay<N>" and records
+  //                 beforeFSR/afterFSR
+  //   handleFSR   — all other particles: the first copy of an FSR chain
+  //                 appends the type suffix and records beforeFSR (and
+  //                 afterFSR if it does not radiate); the last copy (same PDG
+  //                 as parent) records afterFSR under the current key
   m_particleMap.clear();
-  static const SG::Accessor<unsigned int> acc_classification("Classification");
-  static const SG::Accessor<unsigned int> acc_classifierParticleOrigin(
-      "classifierParticleOrigin");
-  static const SG::Accessor<unsigned int> acc_classifierParticleType(
-      "classifierParticleType");
 
   for (const auto& path : allPaths) {
     // m_particleMap keys always include the prefix, built once here.
@@ -360,14 +333,7 @@ void CalcPartonHistory::FillParticleMap(
         continue;
       if (handleDecay(p, key, decayID))
         continue;
-      if (handleFSR(p, new_key, key))
-        continue;
-      if (PartonHistoryUtils::hasParentPdgId(p)) {
-        handleSameAsParent(p, key);
-        continue;
-      }
-      if (!new_key.empty())
-        handleDefault(p, new_key, key);
+      handleFSR(p, new_key, key);
     }
   }
 }
@@ -417,36 +383,57 @@ StatusCode CalcPartonHistory::buildContainerFromMultipleCollections(
   // a descendant of any other candidate in the merged pool. TraceParticles then
   // walks down from these roots, naturally visiting all descendants regardless
   // of which original collection they came from.
-  ConstDataVector<DataVector<xAOD::TruthParticle_v1>>* out_cont =
-      new ConstDataVector<DataVector<xAOD::TruthParticle_v1>>(
+  auto out_cont =
+      std::make_unique<ConstDataVector<DataVector<xAOD::TruthParticle_v1>>>(
           SG::VIEW_ELEMENTS);
   std::vector<const xAOD::TruthParticle*> p_candidates;
   std::vector<const xAOD::TruthParticle*> p_parents;
+  std::unordered_set<int> candidateUids;
 
   for (const std::string& collection : collections) {
     const xAOD::TruthParticleContainer* cont = nullptr;
     ANA_CHECK(evtStore()->retrieve(cont, collection));
-    p_candidates.insert(p_candidates.end(), cont->begin(), cont->end());
+    for (const xAOD::TruthParticle* p : *cont) {
+      if (p) {
+        p_candidates.push_back(p);
+        candidateUids.insert(p->uid());
+      }
+    }
+  }
+  // Collect the uids of all candidates that descend from another (non-PDF)
+  // candidate, walking the decay tree of each candidate once. All copies of
+  // duplicated particles are walked, as their navigation links may differ.
+  std::unordered_set<int> descendantUids;
+  std::vector<const xAOD::TruthParticle*> stack;
+  for (const xAOD::TruthParticle* ancestor : p_candidates) {
+    if (PartonHistoryUtils::isQuarkFromPDF(ancestor))
+      continue;
+    stack.assign(1, ancestor);
+    while (!stack.empty()) {
+      const xAOD::TruthParticle* p = stack.back();
+      stack.pop_back();
+      for (std::size_t i = 0; i < p->nChildren(); ++i) {
+        const xAOD::TruthParticle* child = p->child(i);
+        if (!child)
+          continue;
+        if (candidateUids.count(child->uid()))
+          descendantUids.insert(child->uid());
+        stack.push_back(child);
+      }
+    }
   }
   // Retain only particles that have no ancestor among the other candidates.
+  // Particles present in several collections (same uid) are kept only once,
+  // using the copy from the first collection that contains them.
+  std::unordered_set<int> rootUids;
   for (const xAOD::TruthParticle* potential_parent : p_candidates) {
-    if (PartonHistoryUtils::isQuarkFromPDF(potential_parent)) {
-      continue;
-    }
-
-    if (std::none_of(p_candidates.begin(), p_candidates.end(),
-                     [&](const xAOD::TruthParticle* other_candidate) {
-                       return other_candidate != potential_parent &&
-                              !PartonHistoryUtils::isQuarkFromPDF(
-                                  other_candidate) &&
-                              PartonHistoryUtils::isChildOf(other_candidate,
-
-                                                            potential_parent);
-                     }))
+    if (!PartonHistoryUtils::isQuarkFromPDF(potential_parent) &&
+        !descendantUids.count(potential_parent->uid()) &&
+        rootUids.insert(potential_parent->uid()).second)
       p_parents.push_back(potential_parent);
   }
   out_cont->insert(out_cont->end(), p_parents.begin(), p_parents.end());
-  StatusCode save = TDS()->record(out_cont, out_contName);
+  StatusCode save = TDS()->record(std::move(out_cont), out_contName);
   if (!save)
     return StatusCode::FAILURE;
   return StatusCode::SUCCESS;
@@ -466,14 +453,15 @@ StatusCode CalcPartonHistory::decorateCollectionWithLinksToAnotherCollection(
   const xAOD::TruthParticleContainer* cont2 = nullptr;
   ANA_CHECK(evtStore()->retrieve(cont1, collectionToDecorate));
   ANA_CHECK(evtStore()->retrieve(cont2, collectionToLink));
+  std::unordered_map<int, const xAOD::TruthParticle*> byUid;
+  byUid.reserve(cont2->size());
+  for (const auto* q : *cont2)
+    byUid.emplace(q->uid(), q);
   for (const auto* p : *cont1) {
     const xAOD::TruthParticle* link = nullptr;
-    for (const auto* q : *cont2) {
-      if (p->pdgId() == q->pdgId() && p->uid() == q->uid()) {
-        link = q;
-        break;
-      }
-    }
+    auto it = byUid.find(p->uid());
+    if (it != byUid.end() && it->second->pdgId() == p->pdgId())
+      link = it->second;
     dec(*p) = link;
   }
   return StatusCode::SUCCESS;
@@ -582,6 +570,9 @@ void CalcPartonHistory::initializeDecorators() {
       m_dec.initializeIntDecorator(fill.decorationKey + "_pdgId");
     }
   }
+
+  for (const auto& fill : m_config.isOnShellFills)
+    m_dec.initializeIntDecorator(fill.decorationKey);
 }
 
 StatusCode CalcPartonHistory::runHistorySaver(
@@ -627,7 +618,7 @@ StatusCode CalcPartonHistory::runHistorySaver(
         FillHiggsPartonHistory(op.mode);
         break;
       case SpecialFillType::Gamma:
-        FillGammaPartonHistory(op.parent);
+        FillGammaPartonHistory();
         break;
     }
   }
@@ -643,6 +634,17 @@ StatusCode CalcPartonHistory::runHistorySaver(
       FillGenericPartonHistory(fill.retrievalKeys, fill.decorationKey,
                                fill.idx);
     }
+  }
+
+  for (const auto& fill : m_config.isOnShellFills) {
+    bool onShell = false;
+    for (const auto& key : fill.retrievalKeys) {
+      if (ExistsInMap(m_prefix + "_" + key)) {
+        onShell = true;
+        break;
+      }
+    }
+    m_dec.decorateCustom(fill.decorationKey, onShell ? 1 : 0);
   }
 
   return StatusCode::SUCCESS;

@@ -10,6 +10,9 @@
 #include "VectorHelpers/LorentzHelper.h"
 #include "xAODTruth/TruthParticleContainer.h"
 
+#include <array>
+#include <utility>
+
 namespace CP {
 using ROOT::Math::PtEtaPhiMVector;
 
@@ -51,116 +54,41 @@ void CalcPartonHistory::setHiggs(const std::string& fsr) {
 }
 
 void CalcPartonHistory::FillHiggsPartonHistory(const std::string& mode) {
-  PtEtaPhiMVector v;
-  int pdgId = 0;
+  // {particle map key, decoration name}, both without the "MC_" prefix and
+  // the FSR-stage suffix.
+  static constexpr std::array<std::pair<const char*, const char*>, 7>
+      higgsParticles{{{"H", "H"},
+                      {"HDecay1", "Hdecay1"},
+                      {"HDecay2", "Hdecay2"},
+                      {"HDecay1Decay1", "Hdecay1_decay1"},
+                      {"HDecay1Decay2", "Hdecay1_decay2"},
+                      {"HDecay2Decay1", "Hdecay2_decay1"},
+                      {"HDecay2Decay2", "Hdecay2_decay2"}}};
+  static constexpr std::array<const char*, 2> fsrStages{
+      {"_beforeFSR", "_afterFSR"}};
 
   // Defaults for all branches regardless of mode.
-  m_dec.decorateDefault("MC_H_beforeFSR");
-  m_dec.decorateDefault("MC_Hdecay1_beforeFSR");
-  m_dec.decorateDefault("MC_Hdecay2_beforeFSR");
-  m_dec.decorateDefault("MC_Hdecay1_decay1_beforeFSR");
-  m_dec.decorateDefault("MC_Hdecay1_decay2_beforeFSR");
-  m_dec.decorateDefault("MC_Hdecay2_decay1_beforeFSR");
-  m_dec.decorateDefault("MC_Hdecay2_decay2_beforeFSR");
-  m_dec.decorateDefault("MC_H_afterFSR");
-  m_dec.decorateDefault("MC_Hdecay1_afterFSR");
-  m_dec.decorateDefault("MC_Hdecay2_afterFSR");
-  m_dec.decorateDefault("MC_Hdecay1_decay1_afterFSR");
-  m_dec.decorateDefault("MC_Hdecay1_decay2_afterFSR");
-  m_dec.decorateDefault("MC_Hdecay2_decay1_afterFSR");
-  m_dec.decorateDefault("MC_Hdecay2_decay2_afterFSR");
+  for (const char* fsr : fsrStages)
+    for (const auto& [key, decoration] : higgsParticles)
+      m_dec.decorateDefault("MC_" + std::string(decoration) + fsr);
 
-  if (mode == "resonant") {
-    // RetrieveParticleInfo uses full m_particleMap keys (with m_prefix).
-    // m_dec.decorateParticle uses bare names.
-    if (RetrieveParticleInfo(m_prefix + "_" + "MC_H_beforeFSR", v, pdgId))
-      m_dec.decorateParticle("MC_H_beforeFSR", v, pdgId);
-    if (RetrieveParticleInfo(m_prefix + "_" + "MC_HDecay1_beforeFSR", v, pdgId))
-      m_dec.decorateParticle("MC_Hdecay1_beforeFSR", v, pdgId);
-    if (RetrieveParticleInfo(m_prefix + "_" + "MC_HDecay2_beforeFSR", v, pdgId))
-      m_dec.decorateParticle("MC_Hdecay2_beforeFSR", v, pdgId);
-    if (RetrieveParticleInfo(m_prefix + "_" + "MC_HDecay1Decay1_beforeFSR", v,
-                             pdgId))
-      m_dec.decorateParticle("MC_Hdecay1_decay1_beforeFSR", v, pdgId);
-    if (RetrieveParticleInfo(m_prefix + "_" + "MC_HDecay1Decay2_beforeFSR", v,
-                             pdgId))
-      m_dec.decorateParticle("MC_Hdecay1_decay2_beforeFSR", v, pdgId);
-    if (RetrieveParticleInfo(m_prefix + "_" + "MC_HDecay2Decay1_beforeFSR", v,
-                             pdgId))
-      m_dec.decorateParticle("MC_Hdecay2_decay1_beforeFSR", v, pdgId);
-    if (RetrieveParticleInfo(m_prefix + "_" + "MC_HDecay2Decay2_beforeFSR", v,
-                             pdgId))
-      m_dec.decorateParticle("MC_Hdecay2_decay2_beforeFSR", v, pdgId);
-    if (RetrieveParticleInfo(m_prefix + "_" + "MC_H_afterFSR", v, pdgId))
-      m_dec.decorateParticle("MC_H_afterFSR", v, pdgId);
-    if (RetrieveParticleInfo(m_prefix + "_" + "MC_HDecay1_afterFSR", v, pdgId))
-      m_dec.decorateParticle("MC_Hdecay1_afterFSR", v, pdgId);
-    if (RetrieveParticleInfo(m_prefix + "_" + "MC_HDecay2_afterFSR", v, pdgId))
-      m_dec.decorateParticle("MC_Hdecay2_afterFSR", v, pdgId);
-    if (RetrieveParticleInfo(m_prefix + "_" + "MC_HDecay1Decay1_afterFSR", v,
-                             pdgId))
-      m_dec.decorateParticle("MC_Hdecay1_decay1_afterFSR", v, pdgId);
-    if (RetrieveParticleInfo(m_prefix + "_" + "MC_HDecay1Decay2_afterFSR", v,
-                             pdgId))
-      m_dec.decorateParticle("MC_Hdecay1_decay2_afterFSR", v, pdgId);
-    if (RetrieveParticleInfo(m_prefix + "_" + "MC_HDecay2Decay1_afterFSR", v,
-                             pdgId))
-      m_dec.decorateParticle("MC_Hdecay2_decay1_afterFSR", v, pdgId);
-    if (RetrieveParticleInfo(m_prefix + "_" + "MC_HDecay2Decay2_afterFSR", v,
-                             pdgId))
-      m_dec.decorateParticle("MC_Hdecay2_decay2_afterFSR", v, pdgId);
-  } else if (mode == "single_top") {
+  if (mode == "resonant" || mode == "single_top") {
     // FillGenericPartonHistory retrieval strings are bare suffixes.
-    FillGenericPartonHistory(
-        {"MC_H_beforeFSR", "MC_b_H_beforeFSR", "MC_bbar_H_beforeFSR"},
-        "MC_H_beforeFSR", 0);
-    FillGenericPartonHistory({"MC_HDecay1_beforeFSR", "MC_b_HDecay1_beforeFSR",
-                              "MC_bbar_HDecay1_beforeFSR"},
-                             "MC_Hdecay1_beforeFSR", 0);
-    FillGenericPartonHistory({"MC_HDecay2_beforeFSR", "MC_b_HDecay2_beforeFSR",
-                              "MC_bbar_HDecay2_beforeFSR"},
-                             "MC_Hdecay2_beforeFSR", 0);
-    FillGenericPartonHistory(
-        {"MC_HDecay1Decay1_beforeFSR", "MC_b_HDecay1Decay1_beforeFSR",
-         "MC_bbar_HDecay1Decay1_beforeFSR"},
-        "MC_Hdecay1_decay1_beforeFSR", 0);
-    FillGenericPartonHistory(
-        {"MC_HDecay1Decay2_beforeFSR", "MC_b_HDecay1Decay2_beforeFSR",
-         "MC_bbar_HDecay1Decay2_beforeFSR"},
-        "MC_Hdecay1_decay2_beforeFSR", 0);
-    FillGenericPartonHistory(
-        {"MC_HDecay2Decay1_beforeFSR", "MC_b_HDecay2Decay1_beforeFSR",
-         "MC_bbar_HDecay2Decay1_beforeFSR"},
-        "MC_Hdecay2_decay1_beforeFSR", 0);
-    FillGenericPartonHistory(
-        {"MC_HDecay2Decay2_beforeFSR", "MC_b_HDecay2Decay2_beforeFSR",
-         "MC_bbar_HDecay2Decay2_beforeFSR"},
-        "MC_Hdecay2_decay2_beforeFSR", 0);
-    FillGenericPartonHistory(
-        {"MC_H_afterFSR", "MC_b_H_afterFSR", "MC_bbar_H_afterFSR"},
-        "MC_H_afterFSR", 0);
-    FillGenericPartonHistory({"MC_HDecay1_afterFSR", "MC_b_HDecay1_afterFSR",
-                              "MC_bbar_HDecay1_afterFSR"},
-                             "MC_Hdecay1_afterFSR", 0);
-    FillGenericPartonHistory({"MC_HDecay2_afterFSR", "MC_b_HDecay2_afterFSR",
-                              "MC_bbar_HDecay2_afterFSR"},
-                             "MC_Hdecay2_afterFSR", 0);
-    FillGenericPartonHistory(
-        {"MC_HDecay1Decay1_afterFSR", "MC_b_HDecay1Decay1_afterFSR",
-         "MC_bbar_HDecay1Decay1_afterFSR"},
-        "MC_Hdecay1_decay1_afterFSR", 0);
-    FillGenericPartonHistory(
-        {"MC_HDecay1Decay2_afterFSR", "MC_b_HDecay1Decay2_afterFSR",
-         "MC_bbar_HDecay1Decay2_afterFSR"},
-        "MC_Hdecay1_decay2_afterFSR", 0);
-    FillGenericPartonHistory(
-        {"MC_HDecay2Decay1_afterFSR", "MC_b_HDecay2Decay1_afterFSR",
-         "MC_bbar_HDecay2Decay1_afterFSR"},
-        "MC_Hdecay2_decay1_afterFSR", 0);
-    FillGenericPartonHistory(
-        {"MC_HDecay2Decay2_afterFSR", "MC_b_HDecay2Decay2_afterFSR",
-         "MC_bbar_HDecay2Decay2_afterFSR"},
-        "MC_Hdecay2_decay2_afterFSR", 0);
+    for (const char* fsr : fsrStages) {
+      for (const auto& [key, decoration] : higgsParticles) {
+        const std::string decorationName =
+            "MC_" + std::string(decoration) + fsr;
+        if (mode == "resonant") {
+          FillGenericPartonHistory("MC_" + std::string(key) + fsr,
+                                   decorationName, 0);
+        } else {
+          FillGenericPartonHistory({"MC_" + std::string(key) + fsr,
+                                    "MC_b_" + std::string(key) + fsr,
+                                    "MC_bbar_" + std::string(key) + fsr},
+                                   decorationName, 0);
+        }
+      }
+    }
   } else if (mode == "non_resonant_WW") {
     setHiggs("beforeFSR");
     setHiggs("afterFSR");

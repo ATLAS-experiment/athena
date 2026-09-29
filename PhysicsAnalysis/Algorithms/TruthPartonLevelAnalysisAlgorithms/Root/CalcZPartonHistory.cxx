@@ -9,6 +9,11 @@
 #include "VectorHelpers/DecoratorHelpers.h"
 #include "VectorHelpers/LorentzHelper.h"
 
+#include "AthContainers/ConstAccessor.h"
+#include "MCTruthClassifier/IMCTruthClassifier.h"
+
+#include <array>
+
 namespace CP {
 using ROOT::Math::PtEtaPhiMVector;
 
@@ -20,10 +25,11 @@ bool CalcPartonHistory::getZ(const std::string& str_lep1,
   // (classifierParticleOrigin, classifierParticleType) to restrict to
   // prompt, isolated leptons from a Z decay, rejecting fakes and non-prompt
   // background. Only electrons and muons are considered (not taus); for
-  // Z→ττ use getZFromTaus instead.
-  static const SG::Accessor<unsigned int> acc_classifierParticleOrigin(
+  // Z→ττ use getZFromTaus instead. Returns the first pair that passes all
+  // conditions (same convention as getW).
+  static const SG::ConstAccessor<unsigned int> acc_classifierParticleOrigin(
       "classifierParticleOrigin");
-  static const SG::Accessor<unsigned int> acc_classifierParticleType(
+  static const SG::ConstAccessor<unsigned int> acc_classifierParticleType(
       "classifierParticleType");
   std::vector<const xAOD::TruthParticle*> Z_offshell_decay1_candidates;
   std::vector<const xAOD::TruthParticle*> Z_offshell_decay2_candidates;
@@ -32,14 +38,8 @@ bool CalcPartonHistory::getZ(const std::string& str_lep1,
       (RetrieveParticleInfo(str_lep1, Z_offshell_decay1_candidates) &&
        RetrieveParticleInfo(str_lep2, Z_offshell_decay2_candidates));
   if (has_candidates) {
-    const xAOD::TruthParticle* bp1 = nullptr;
-    const xAOD::TruthParticle* bp2 = nullptr;
     for (const auto* pDecay1 : Z_offshell_decay1_candidates) {
       for (const auto* pDecay2 : Z_offshell_decay2_candidates) {
-        unsigned int o1 = acc_classifierParticleOrigin(*pDecay1);
-        unsigned int o2 = acc_classifierParticleOrigin(*pDecay2);
-        unsigned int t1 = acc_classifierParticleType(*pDecay1);
-        unsigned int t2 = acc_classifierParticleType(*pDecay2);
         // Condition 1: Opposite charge — pdgId product must be negative
         // (e.g. e-=11, e+=−11 → product −121 < 0).
         if ((pDecay1->pdgId() * pDecay2->pdgId()) > 0)
@@ -48,104 +48,79 @@ bool CalcPartonHistory::getZ(const std::string& str_lep1,
         // (e.g. both electrons or both muons).
         if (pDecay1->absPdgId() != pDecay2->absPdgId())
           continue;
-        // Condition 3: Origin == 13 (ZBoson) from MCTruthClassifier
-        // (see TruthUtils/TruthClasses.h). Ensures both leptons are
-        // truth-matched to a Z decay and not to backgrounds such as photon
-        // conversions or heavy-flavour semileptonic decays.
-        if (!(o1 == 13 && o2 == 13))
+        // Leptons without MCTruthClassifier decorations cannot be classified
+        // and are skipped.
+        if (!acc_classifierParticleOrigin.isAvailable(*pDecay1) ||
+            !acc_classifierParticleOrigin.isAvailable(*pDecay2) ||
+            !acc_classifierParticleType.isAvailable(*pDecay1) ||
+            !acc_classifierParticleType.isAvailable(*pDecay2))
           continue;
-        // Condition 4: Type == 2 (IsoElectron) or 4 (IsoMuon) from
-        // MCTruthClassifier. Selects prompt isolated leptons, rejecting
-        // non-isolated or non-prompt contributions.
-        if (!((t1 == 2 && t2 == 2) || (t1 == 4 && t2 == 4)))
+        const unsigned int o1 = acc_classifierParticleOrigin(*pDecay1);
+        const unsigned int o2 = acc_classifierParticleOrigin(*pDecay2);
+        const unsigned int t1 = acc_classifierParticleType(*pDecay1);
+        const unsigned int t2 = acc_classifierParticleType(*pDecay2);
+        // Condition 3: Origin ZBoson from MCTruthClassifier. Ensures both
+        // leptons are truth-matched to a Z decay and not to backgrounds such
+        // as photon conversions or heavy-flavour semileptonic decays.
+        if (!(o1 == MCTruthPartClassifier::ZBoson &&
+              o2 == MCTruthPartClassifier::ZBoson))
           continue;
-        bp1 = pDecay1;
-        bp2 = pDecay2;
+        // Condition 4: Type IsoElectron or IsoMuon from MCTruthClassifier.
+        // Selects prompt isolated leptons, rejecting non-isolated or
+        // non-prompt contributions.
+        if (!((t1 == MCTruthPartClassifier::IsoElectron &&
+               t2 == MCTruthPartClassifier::IsoElectron) ||
+              (t1 == MCTruthPartClassifier::IsoMuon &&
+               t2 == MCTruthPartClassifier::IsoMuon)))
+          continue;
+
+        p1 = GetPtEtaPhiMfromTruth(pDecay1);
+        pdgId1 = pDecay1->pdgId();
+        p2 = GetPtEtaPhiMfromTruth(pDecay2);
+        pdgId2 = pDecay2->pdgId();
+        return true;
       }
-    }
-    if (bp1 && bp2) {
-      p1 = GetPtEtaPhiMfromTruth(bp1);
-      pdgId1 = bp1->pdgId();
-      p2 = GetPtEtaPhiMfromTruth(bp2);
-      pdgId2 = bp2->pdgId();
-      return true;
     }
   }
   return false;
 }
 
-bool CalcPartonHistory::getZFromTaus(
-    const std::string& fsr, PtEtaPhiMVector& Zdecay1, int& Zdecay1_pdgId,
-    PtEtaPhiMVector& Zdecay2, int& Zdecay2_pdgId,
-    PtEtaPhiMVector& Zdecay1_decay1, int& Zdecay1_decay1_pdgId,
-    PtEtaPhiMVector& Zdecay1_decay2, int& Zdecay1_decay2_pdgId,
-    PtEtaPhiMVector& Zdecay1_decay3, int& Zdecay1_decay3_pdgId,
-    PtEtaPhiMVector& Zdecay2_decay1, int& Zdecay2_decay1_pdgId,
-    PtEtaPhiMVector& Zdecay2_decay2, int& Zdecay2_decay2_pdgId,
-    PtEtaPhiMVector& Zdecay2_decay3, int& Zdecay2_decay3_pdgId) {
+CalcPartonHistory::ZTauTauDecay CalcPartonHistory::getZFromTaus(
+    const std::string& fsr) {
+  // taus[0] is the tau- ("l"), taus[1] the tau+ ("lbar"). Their decay
+  // products decay1..3 are the charged lepton followed by the two neutrinos.
+  // All keys are full m_particleMap keys once the prefix is prepended.
+  static constexpr std::array<const char*, 2> tauKeys{{"MC_l_", "MC_lbar_"}};
+  static constexpr std::array<std::array<const char*, 3>, 2> tauDecayKeys{
+      {{{"MC_l_l_", "MC_l_nubar_", "MC_l_nu_"}},
+       {{"MC_lbar_lbar_", "MC_lbar_nu_", "MC_lbar_nubar_"}}}};
 
-  std::vector<const xAOD::TruthParticle*> Z_offshell_l_candidates;  // tau
-  std::vector<const xAOD::TruthParticle*>
-      Z_offshell_l_l_candidates;  // l from tau
-  std::vector<const xAOD::TruthParticle*>
-      Z_offshell_l_nubar_candidates;  // anti-nu from tau
-  std::vector<const xAOD::TruthParticle*>
-      Z_offshell_l_nu_candidates;  // nu from tau
-  std::vector<const xAOD::TruthParticle*> Z_offshell_lbar_candidates;  // taubar
-  std::vector<const xAOD::TruthParticle*>
-      Z_offshell_lbar_lbar_candidates;  // lbar from taubar
-  std::vector<const xAOD::TruthParticle*>
-      Z_offshell_lbar_nu_candidates;  // nu from taubar
-  std::vector<const xAOD::TruthParticle*>
-      Z_offshell_lbar_nubar_candidates;  // anti-nu from taubar
-
-  // All RetrieveParticleInfo calls use full m_particleMap keys (with prefix).
-  bool has_taum_candidates = RetrieveParticleInfo(
-      m_prefix + "_" + "MC_l_" + fsr, Z_offshell_l_candidates);
-  bool has_taum_decay_candidates =
-      (RetrieveParticleInfo(m_prefix + "_" + "MC_l_l_" + fsr,
-                            Z_offshell_l_l_candidates) &&
-       RetrieveParticleInfo(m_prefix + "_" + "MC_l_nubar_" + fsr,
-                            Z_offshell_l_nubar_candidates) &&
-       RetrieveParticleInfo(m_prefix + "_" + "MC_l_nu_" + fsr,
-                            Z_offshell_l_nu_candidates));
-  bool has_taup_candidates = RetrieveParticleInfo(
-      m_prefix + "_" + "MC_lbar_" + fsr, Z_offshell_lbar_candidates);
-  bool has_taup_decay_candidates =
-      (RetrieveParticleInfo(m_prefix + "_" + "MC_lbar_lbar_" + fsr,
-                            Z_offshell_lbar_lbar_candidates) &&
-       RetrieveParticleInfo(m_prefix + "_" + "MC_lbar_nu_" + fsr,
-                            Z_offshell_lbar_nu_candidates) &&
-       RetrieveParticleInfo(m_prefix + "_" + "MC_lbar_nubar_" + fsr,
-                            Z_offshell_lbar_nubar_candidates));
-
-  if (has_taum_candidates) {
-    Zdecay1 = GetPtEtaPhiMfromTruth(Z_offshell_l_candidates.at(0));
-    Zdecay1_pdgId = Z_offshell_l_candidates.at(0)->pdgId();
+  ZTauTauDecay result;
+  for (std::size_t i = 0; i < tauKeys.size(); ++i) {
+    std::vector<const xAOD::TruthParticle*> tau_candidates;
+    if (RetrieveParticleInfo(m_prefix + "_" + tauKeys[i] + fsr,
+                             tau_candidates)) {
+      result.taus[i] = {GetPtEtaPhiMfromTruth(tau_candidates.at(0)),
+                        tau_candidates.at(0)->pdgId(), true};
+    }
+    // The tau decay products are only used if all three are found.
+    std::array<std::vector<const xAOD::TruthParticle*>, 3> decay_candidates;
+    bool has_decay_candidates = true;
+    for (std::size_t j = 0; j < decay_candidates.size(); ++j) {
+      has_decay_candidates =
+          has_decay_candidates &&
+          RetrieveParticleInfo(m_prefix + "_" + tauDecayKeys[i][j] + fsr,
+                               decay_candidates[j]);
+    }
+    if (has_decay_candidates) {
+      for (std::size_t j = 0; j < decay_candidates.size(); ++j) {
+        result.tauDecays[i][j] = {
+            GetPtEtaPhiMfromTruth(decay_candidates[j].at(0)),
+            decay_candidates[j].at(0)->pdgId(), true};
+      }
+    }
   }
-  if (has_taum_decay_candidates) {
-    Zdecay1_decay1 = GetPtEtaPhiMfromTruth(Z_offshell_l_l_candidates.at(0));
-    Zdecay1_decay1_pdgId = Z_offshell_l_l_candidates.at(0)->pdgId();
-    Zdecay1_decay2 = GetPtEtaPhiMfromTruth(Z_offshell_l_nubar_candidates.at(0));
-    Zdecay1_decay2_pdgId = Z_offshell_l_nubar_candidates.at(0)->pdgId();
-    Zdecay1_decay3 = GetPtEtaPhiMfromTruth(Z_offshell_l_nu_candidates.at(0));
-    Zdecay1_decay3_pdgId = Z_offshell_l_nu_candidates.at(0)->pdgId();
-  }
-  if (has_taup_candidates) {
-    Zdecay2 = GetPtEtaPhiMfromTruth(Z_offshell_lbar_candidates.at(0));
-    Zdecay2_pdgId = Z_offshell_lbar_candidates.at(0)->pdgId();
-  }
-  if (has_taup_decay_candidates) {
-    Zdecay2_decay1 =
-        GetPtEtaPhiMfromTruth(Z_offshell_lbar_lbar_candidates.at(0));
-    Zdecay2_decay1_pdgId = Z_offshell_lbar_lbar_candidates.at(0)->pdgId();
-    Zdecay2_decay2 = GetPtEtaPhiMfromTruth(Z_offshell_lbar_nu_candidates.at(0));
-    Zdecay2_decay2_pdgId = Z_offshell_lbar_nu_candidates.at(0)->pdgId();
-    Zdecay2_decay3 =
-        GetPtEtaPhiMfromTruth(Z_offshell_lbar_nubar_candidates.at(0));
-    Zdecay2_decay3_pdgId = Z_offshell_lbar_nubar_candidates.at(0)->pdgId();
-  }
-  return has_taum_candidates && has_taup_candidates;
+  return result;
 }
 
 // For filling Z->ee,mumu
@@ -170,39 +145,28 @@ void CalcPartonHistory::setZ(const std::string& fsr, int nZs) {
 
 // For filling Z->tautau
 void CalcPartonHistory::setZtautau(const std::string& fsr, int nZs) {
-  PtEtaPhiMVector Z, Zdecay1, Zdecay2;
-  PtEtaPhiMVector Zdecay1_decay1, Zdecay1_decay2, Zdecay1_decay3;
-  PtEtaPhiMVector Zdecay2_decay1, Zdecay2_decay2, Zdecay2_decay3;
-  int Zdecay1_pdgId = 0, Zdecay2_pdgId = 0;
-  int Zdecay1_decay1_pdgId = 0, Zdecay1_decay2_pdgId = 0,
-      Zdecay1_decay3_pdgId = 0;
-  int Zdecay2_decay1_pdgId = 0, Zdecay2_decay2_pdgId = 0,
-      Zdecay2_decay3_pdgId = 0;
-
-  bool has_Z =
-      getZFromTaus(fsr, Zdecay1, Zdecay1_pdgId, Zdecay2, Zdecay2_pdgId,
-                   Zdecay1_decay1, Zdecay1_decay1_pdgId, Zdecay1_decay2,
-                   Zdecay1_decay2_pdgId, Zdecay1_decay3, Zdecay1_decay3_pdgId,
-                   Zdecay2_decay1, Zdecay2_decay1_pdgId, Zdecay2_decay2,
-                   Zdecay2_decay2_pdgId, Zdecay2_decay3, Zdecay2_decay3_pdgId);
+  const ZTauTauDecay decay = getZFromTaus(fsr);
+  const bool has_Z = decay.taus[0].found && decay.taus[1].found;
   if (nZs == 1) {
     if (has_Z) {
-      Z = Zdecay1 + Zdecay2;
-      m_dec.decorateParticle("MC_Z_" + fsr, Z, 23);
-      m_dec.decorateParticle("MC_Zdecay1_" + fsr, Zdecay1, Zdecay1_pdgId);
-      m_dec.decorateParticle("MC_Zdecay2_" + fsr, Zdecay2, Zdecay2_pdgId);
-      m_dec.decorateParticle("MC_Zdecay1_decay1_" + fsr, Zdecay1_decay1,
-                             Zdecay1_decay1_pdgId);
-      m_dec.decorateParticle("MC_Zdecay2_decay1_" + fsr, Zdecay2_decay1,
-                             Zdecay2_decay1_pdgId);
-      m_dec.decorateParticle("MC_Zdecay1_decay2_" + fsr, Zdecay1_decay2,
-                             Zdecay1_decay2_pdgId);
-      m_dec.decorateParticle("MC_Zdecay2_decay2_" + fsr, Zdecay2_decay2,
-                             Zdecay2_decay2_pdgId);
-      m_dec.decorateParticle("MC_Zdecay1_decay3_" + fsr, Zdecay1_decay3,
-                             Zdecay1_decay3_pdgId);
-      m_dec.decorateParticle("MC_Zdecay2_decay3_" + fsr, Zdecay2_decay3,
-                             Zdecay2_decay3_pdgId);
+      m_dec.decorateParticle("MC_Z_" + fsr,
+                             decay.taus[0].p4 + decay.taus[1].p4, 23);
+      for (std::size_t i = 0; i < decay.taus.size(); ++i) {
+        const std::string zDecay = "MC_Zdecay" + std::to_string(i + 1);
+        m_dec.decorateParticle(zDecay + "_" + fsr, decay.taus[i].p4,
+                               decay.taus[i].pdgId);
+        for (std::size_t j = 0; j < decay.tauDecays[i].size(); ++j) {
+          const std::string name =
+              zDecay + "_decay" + std::to_string(j + 1) + "_" + fsr;
+          const ZTauTauProduct& product = decay.tauDecays[i][j];
+          // Tau decay products that were not found (e.g. hadronic tau
+          // decays) get the sentinel defaults rather than a zero vector.
+          if (product.found)
+            m_dec.decorateParticle(name, product.p4, product.pdgId);
+          else
+            m_dec.decorateDefault(name);
+        }
+      }
     }
   } else
     ANA_MSG_ERROR("Reconstruction of multiple Zs is not supported yet!");
@@ -274,10 +238,6 @@ void CalcPartonHistory::FillZtautauPartonHistory(const std::string& parent,
                                                  int nZs,
                                                  const std::string& mode) {
   std::string parentstring = parent.empty() ? "" : "_from_" + parent;
-  // mapPrefix: full key for ExistsInMap (used indirectly via
-  // FillZPartonHistory).
-  std::string mapPrefix =
-      m_prefix + "_" + "MC_" + (parent.empty() ? "Z" : parent + "_Z");
   // decPrefix: bare suffix for FillGenericPartonHistory retrieval strings.
   std::string decPrefix = "MC_" + (parent.empty() ? "Z" : parent + "_Z");
 

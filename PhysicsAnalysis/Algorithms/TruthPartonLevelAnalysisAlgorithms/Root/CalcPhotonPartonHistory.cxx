@@ -11,16 +11,14 @@
 namespace CP {
 using ROOT::Math::PtEtaPhiMVector;
 
-void CalcPartonHistory::FillGammaPartonHistory(const std::string& parent) {
-  std::string parentstring = parent.empty() ? "" : "_from_" + parent;
+void CalcPartonHistory::FillGammaPartonHistory() {
   PtEtaPhiMVector gamma;
-  int gamma_origin = -1;
+  int gamma_origin = 0;
 
-  m_dec.decorateDefault("MC_gamma" + parentstring);
-  m_dec.decorateCustom("MC_gamma_origin", 0);
+  m_dec.decorateDefault("MC_gamma");
 
   if (Retrievep4Gamma(gamma, gamma_origin))
-    m_dec.decorateParticle("MC_gamma" + parentstring, gamma);
+    m_dec.decorateParticle("MC_gamma", gamma);
 
   m_dec.decorateCustom("MC_gamma_origin", gamma_origin);
 }

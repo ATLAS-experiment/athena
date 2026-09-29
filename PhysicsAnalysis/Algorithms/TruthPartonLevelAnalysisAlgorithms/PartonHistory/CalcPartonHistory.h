@@ -9,6 +9,7 @@
 #define PARTONS_CALCPARTONHISTORY_H
 
 // system include(s):
+#include <array>
 #include <vector>
 
 // Framework include(s):
@@ -30,11 +31,12 @@ class CalcPartonHistory : public asg::AsgTool {
   explicit CalcPartonHistory(
       const std::string& name,
       const std::vector<std::string>& truthCollections = {"TruthTop"});
-  virtual ~CalcPartonHistory() {};
+  virtual ~CalcPartonHistory() = default;
 
   CalcPartonHistory(const CalcPartonHistory& rhs) = delete;
   CalcPartonHistory(CalcPartonHistory&& rhs) = delete;
   CalcPartonHistory& operator=(const CalcPartonHistory& rhs) = delete;
+  CalcPartonHistory& operator=(CalcPartonHistory&& rhs) = delete;
 
   void AddToParticleMap(const xAOD::TruthParticle* particle,
                         const std::string& key);
@@ -42,18 +44,18 @@ class CalcPartonHistory : public asg::AsgTool {
   bool ExistsInKey(const std::string& key,
                    const xAOD::TruthParticle* particle) const;
   bool Retrievep4(const std::string& key, PtEtaPhiMVector& p4);
-  bool Retrievep4(const std::string& key, PtEtaPhiMVector& p4, const int& idx);
+  bool Retrievep4(const std::string& key, PtEtaPhiMVector& p4, std::size_t idx);
   bool Retrievep4Gamma(PtEtaPhiMVector& p4, int& parentpdgId);
   bool RetrievepdgId(const std::string& key, std::vector<int>& pdgIds);
   bool RetrievepdgId(const std::string& key, int& pdgId);
-  bool RetrievepdgId(const std::string& key, int& pdgId, const int& idx);
+  bool RetrievepdgId(const std::string& key, int& pdgId, std::size_t idx);
   bool RetrieveParticleInfo(const std::string& prefix,
                             std::vector<const xAOD::TruthParticle*>& particles);
   bool RetrieveParticleInfo(const std::string& prefix,
                             PtEtaPhiMVector& particle, int& pdgId);
   bool RetrieveParticleInfo(const std::string& prefix,
                             PtEtaPhiMVector& particle, int& pdgId,
-                            const int& idx);
+                            std::size_t idx);
   bool RetrieveParticleInfo(const std::string& prefix,
                             const std::string& alt_prefix,
                             PtEtaPhiMVector& particle, int& pdgId);
@@ -86,14 +88,10 @@ class CalcPartonHistory : public asg::AsgTool {
       std::vector<std::vector<const xAOD::TruthParticle*>>& allPaths);
   void TraceParticles(const xAOD::TruthParticleContainer* truthParticles);
 
-  bool handleFSR(const xAOD::TruthParticle* particle, const std::string& newKey,
+  void handleFSR(const xAOD::TruthParticle* particle, const std::string& newKey,
                  std::string& key);
   bool handleDecay(const xAOD::TruthParticle* particle, std::string& key,
                    int decayID);
-  void handleSameAsParent(const xAOD::TruthParticle* particle,
-                          std::string& key);
-  void handleDefault(const xAOD::TruthParticle* particle,
-                     const std::string& newKey, std::string& key);
 
   void FillParticleMap(
       std::vector<std::vector<const xAOD::TruthParticle*>>& allPaths);
@@ -112,7 +110,7 @@ class CalcPartonHistory : public asg::AsgTool {
                                       const std::string& decorationstring);
 
   // Specialised history fillers
-  void FillGammaPartonHistory(const std::string& parent);
+  void FillGammaPartonHistory();
   void FillZPartonHistory(const std::string& parent, int nZs = 1,
                           const std::string& mode = "resonant");
   void FillZtautauPartonHistory(const std::string& parent, int nZs = 1,
@@ -135,15 +133,19 @@ class CalcPartonHistory : public asg::AsgTool {
   void setZtautau(const std::string& fsr, int nZs);
   bool getZ(const std::string& str_lep1, const std::string& str_lep2,
             PtEtaPhiMVector& p1, int& pdgId1, PtEtaPhiMVector& p2, int& pdgId2);
-  bool getZFromTaus(const std::string& fsr, PtEtaPhiMVector& Zdecay1,
-                    int& Zdecay1_pdgId, PtEtaPhiMVector& Zdecay2,
-                    int& Zdecay2_pdgId, PtEtaPhiMVector& Zdecay1_decay1,
-                    int& Zdecay1_decay1_pdgId, PtEtaPhiMVector& Zdecay1_decay2,
-                    int& Zdecay1_decay2_pdgId, PtEtaPhiMVector& Zdecay1_decay3,
-                    int& Zdecay1_decay3_pdgId, PtEtaPhiMVector& Zdecay2_decay1,
-                    int& Zdecay2_decay1_pdgId, PtEtaPhiMVector& Zdecay2_decay2,
-                    int& Zdecay2_decay2_pdgId, PtEtaPhiMVector& Zdecay2_decay3,
-                    int& Zdecay2_decay3_pdgId);
+  /// One Z->tautau decay product: kinematics, PDG ID and whether it was found.
+  struct ZTauTauProduct {
+    PtEtaPhiMVector p4;
+    int pdgId = 0;
+    bool found = false;
+  };
+  /// Z->tautau decay chain: taus[0] = tau- (Zdecay1), taus[1] = tau+
+  /// (Zdecay2); tauDecays[i][j] = decay product j+1 of taus[i].
+  struct ZTauTauDecay {
+    std::array<ZTauTauProduct, 2> taus;
+    std::array<std::array<ZTauTauProduct, 3>, 2> tauDecays;
+  };
+  ZTauTauDecay getZFromTaus(const std::string& fsr);
 
   /// Configure this instance with a scheme configuration.
   /// Must be called before initialize().
@@ -153,7 +155,7 @@ class CalcPartonHistory : public asg::AsgTool {
   void configure(const PartonSchemeConfig& config);
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute();
+  StatusCode execute();
 
  protected:
   std::map<std::string, std::vector<const xAOD::TruthParticle*>> m_particleMap;
