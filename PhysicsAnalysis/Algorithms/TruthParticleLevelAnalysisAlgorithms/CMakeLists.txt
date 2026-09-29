@@ -10,8 +10,8 @@ atlas_add_library( TruthParticleLevelAnalysisAlgorithmsLib
   TruthParticleLevelAnalysisAlgorithms/*.h Root/*.cxx
   PUBLIC_HEADERS TruthParticleLevelAnalysisAlgorithms
   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-  LINK_LIBRARIES AsgTools AsgMessagingLib xAODBase xAODEventInfo xAODJet xAODMissingET PATCoreLib AnaAlgorithmLib AsgDataHandlesLib MCTruthClassifierLib FourMomUtils SelectionHelpersLib
-  PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} PATInterfaces xAODCore xAODTruth RootCoreUtils )
+  LINK_LIBRARIES AsgTools AsgMessagingLib xAODBase xAODEventInfo xAODJet xAODMissingET xAODTruth PATCoreLib AnaAlgorithmLib AsgDataHandlesLib MCTruthClassifierLib FourMomUtils SelectionHelpersLib
+  PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} PATInterfaces xAODCore RootCoreUtils )
 
 atlas_add_component( TruthParticleLevelAnalysisAlgorithms
   src/*.h src/*.cxx src/components/*.cxx

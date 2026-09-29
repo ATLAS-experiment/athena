@@ -1,26 +1,24 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina <baptiste.ravina@cern.ch>
 
 #include "TruthParticleLevelAnalysisAlgorithms/ParticleLevelJetsAlg.h"
 
-namespace CP {
+#include <AsgDataHandles/ReadDecorHandle.h>
+#include <AsgDataHandles/ReadHandle.h>
+#include <AsgDataHandles/WriteDecorHandle.h>
 
-// accessors and decorators
-// these are done at file-level to register types with output algorithms
-static const SG::ConstAccessor<int> acc_flav(
-    "HadronConeExclTruthLabelID");
-static const SG::Decorator<int> dec_nBJets(
-    "num_truth_bjets_nocuts");
-static const SG::Decorator<int> dec_nCJets(
-    "num_truth_cjets_nocuts");
+namespace CP {
 
 StatusCode ParticleLevelJetsAlg::initialize() {
 
   ANA_CHECK(m_jetsKey.initialize());
   ANA_CHECK(m_eventInfoKey.initialize());
+  ANA_CHECK(m_truthLabelKey.initialize());
+  ANA_CHECK(m_decNumTruthBJetsKey.initialize());
+  ANA_CHECK(m_decNumTruthCJetsKey.initialize());
 
   return StatusCode::SUCCESS;
 }
@@ -30,22 +28,34 @@ StatusCode ParticleLevelJetsAlg::execute(const EventContext &ctx) const {
   SG::ReadHandle<xAOD::JetContainer> jets(m_jetsKey, ctx);
   SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
 
+  // accessors and decorators
+  SG::ReadDecorHandle<xAOD::JetContainer, int> acc_flav(m_truthLabelKey, ctx);
+  SG::WriteDecorHandle<xAOD::EventInfo, int> dec_nBJets(
+      m_decNumTruthBJetsKey, ctx);
+  SG::WriteDecorHandle<xAOD::EventInfo, int> dec_nCJets(
+      m_decNumTruthCJetsKey, ctx);
+
+  // decoration availability is a property of the whole container
+  const bool hasFlav = acc_flav.isAvailable();
+
   // the number of b- and c-jets without any event cuts applied
   int num_bjets(0), num_cjets(0);
 
   for (const auto* jet : *jets) {
 
     // check the flavour label of the jet
-    if (acc_flav.isAvailable(*jet)) {
+    if (hasFlav) {
       int flavourLabel = acc_flav(*jet);
       if (flavourLabel == 5)
         num_bjets++;
       if (flavourLabel == 4)
         num_cjets++;
     } else {
-      ANA_MSG_WARNING(
-          "Truth jet is missing the decoration: HadronConeExclTruthLabelID.");
+      if (!m_warnedMissingLabel.exchange(true))
+        ANA_MSG_WARNING(
+            "Truth jet is missing the decoration: HadronConeExclTruthLabelID.");
       num_bjets = num_cjets = -999;
+      break;
     }
   }
 
