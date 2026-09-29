@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # @author Oliver Majersky
 # @author Baptiste Ravina
@@ -17,8 +17,8 @@ if(XAOD_ANALYSIS)
     INCLUDE_DIRS ${KLFITTER_INCLUDE_DIRS}
     PUBLIC_HEADERS KLFitterAnalysisAlgorithms
     LINK_LIBRARIES ${KLFITTER_LIBRARIES}
-    AnaAlgorithmLib FourMomUtils SystematicsHandlesLib SelectionHelpersLib xAODJet xAODMuon xAODTau xAODEgamma xAODMissingET xAODCore
-    FTagAnalysisInterfacesLib PathResolver )
+    AnaAlgorithmLib SystematicsHandlesLib SelectionHelpersLib xAODJet xAODMuon xAODEgamma xAODMissingET xAODCore
+    FTagAnalysisInterfacesLib PathResolver xAODEventInfo )
 
   if(XAOD_STANDALONE)
     target_include_directories(KLFitterAnalysisAlgorithmsLib PUBLIC ${ROOT_INCLUDE_DIRS})

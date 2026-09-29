@@ -1,12 +1,12 @@
 /*
-    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Oliver Majersky
 /// @author Baptiste Ravina
 
-#ifndef KLFITTERNANALYSISALGORITHMS_KLFITTERFINALIZEOUTPUTALG_H_
-#define KLFITTERNANALYSISALGORITHMS_KLFITTERFINALIZEOUTPUTALG_H_
+#ifndef KLFITTERANALYSISALGORITHMS_KLFITTERFINALIZEOUTPUTALG_H_
+#define KLFITTERANALYSISALGORITHMS_KLFITTERFINALIZEOUTPUTALG_H_
 
 // Algorithm includes
 #include <AnaAlgorithm/AnaAlgorithm.h>

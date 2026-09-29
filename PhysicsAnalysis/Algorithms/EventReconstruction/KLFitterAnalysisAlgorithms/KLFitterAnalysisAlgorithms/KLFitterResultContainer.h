@@ -1,12 +1,12 @@
 /*
-    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Oliver Majersky
 /// @author Baptiste Ravina
 
-#ifndef KLFITTERNANALYSISALGORITHMS_KLFITTERRESULTCONTAINER_H_
-#define KLFITTERNANALYSISALGORITHMS_KLFITTERRESULTCONTAINER_H_
+#ifndef KLFITTERANALYSISALGORITHMS_KLFITTERRESULTCONTAINER_H_
+#define KLFITTERANALYSISALGORITHMS_KLFITTERRESULTCONTAINER_H_
 
 // EDM include(s).
 #include "AthContainers/DataVector.h"
