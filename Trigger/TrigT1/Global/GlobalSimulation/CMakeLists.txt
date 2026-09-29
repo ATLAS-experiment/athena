@@ -74,9 +74,16 @@ atlas_add_test( AllChains
         POST_EXEC_SCRIPT noerror.sh )
 
 
+# need to copy the TestSpec into a file that can then be read by the test, to avoid needing a dictionary for TestSpec
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/test/TestSpec.h" TESTSPEC_SOURCE)
+configure_file(
+		"${CMAKE_CURRENT_SOURCE_DIR}/test/TestSpec_source.h.in"
+		"${CMAKE_CURRENT_BINARY_DIR}/TestSpec_source.h"
+		@ONLY
+)
 atlas_add_test( Object_test
 		SOURCES test/Object_test.cxx
-		INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
+		INCLUDE_DIRS ${GTEST_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}
 		LINK_LIBRARIES ${GTEST_LIBRARIES} GlobalSimulationLib
 		POST_EXEC_SCRIPT noerror.sh )
 

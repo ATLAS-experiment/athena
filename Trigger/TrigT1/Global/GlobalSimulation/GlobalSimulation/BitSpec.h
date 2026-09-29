@@ -118,10 +118,11 @@ namespace GlobalSim {
 
     //struct NoMask {};
 
-    template<unsigned Lo, unsigned Hi, typename AuxValue, typename Value=AuxValue/*, auto Mask = NoMask{}*/>
+    template<unsigned Lo, unsigned Hi, typename AuxValue, typename Value=AuxValue, bool Signed=false/*, auto Mask = NoMask{}*/>
     class BitField {
     public:
         static_assert(Hi >= Lo,"BitField: Hi must be >= Lo");
+        static_assert(!Signed || (Hi-Lo)<64,"Signed BitFields have max width of 64");
         // next line makes it required that AuxValue type is big enough for this bitfield
         static_assert(sizeof(AuxValue) * CHAR_BIT >= Hi - Lo + 1,"AuxType is too small for BitField");
     public:
@@ -141,23 +142,48 @@ namespace GlobalSim {
         using value_type = Value;
         using bits_type = std::bitset<width>;
 
-        using encoder_type = bits_type (*)(Value);
-        using decoder_type = Value (*)(bits_type);
+        using encoder_type = std::function<bits_type(Value)>;
+        using decoder_type = std::function<std::pair<Value,Value>(bits_type)>; // pair is {lower,upper} boundaries
 
         constexpr BitField(
                 std::string_view name,
                 std::string_view auxvar,
                 std::string_view description,
                 encoder_type encoder = nullptr,
-                decoder_type decoder = nullptr)
+                decoder_type decoder = nullptr,
+                Value scale = 0, Value offset = 0)
                 : auxspec(AuxSpec::parse(auxvar)),
                   m_name(name),
                   m_description(description),
                   m_encoder(encoder),
                   m_decoder(decoder),
                   m_acc(std::string{auxspec.name}), m_wacc(std::string{auxspec.name}) {
-
+                if(!m_encoder && !m_decoder && scale) {
+                    m_encoder = [scale,offset](Value v) {
+                        return bits_type{ static_cast<uint64_t>(std::round((v-offset)/scale)) };
+                    };
+                    m_decoder = [scale,offset](bits_type bits) -> std::pair<Value,Value> {
+                            const double c = static_cast<double>(code(bits));
+                            return {static_cast<Value>(offset + (c-0.5)*scale),
+                                    static_cast<Value>(offset + (c+0.5)*scale) };
+                    };
+                }
         }
+
+        // Named-parameter aggregate for constructing a BitField.
+        // Designated initializers must follow declaration order, but any
+        // subset may be skipped -- skipped members just take their default.
+        struct Params {
+            std::string_view name;
+            std::string_view auxvar{};        // empty => defaults to `name`
+            std::string_view description{};
+            encoder_type encoder{};
+            decoder_type decoder{};
+            Value scale{};
+            Value offset{};
+        };
+
+        constexpr BitField(const Params& p) : BitField(p.name,p.auxvar,p.description,p.encoder,p.decoder,p.scale,p.offset) { }
 
         // ------------------------------------------------------------------------
         // Metadata
@@ -179,7 +205,7 @@ namespace GlobalSim {
                 /*if constexpr(has_mask) {
                     return (m_acc(obj) & Mask) >> shift;*/
                 if (auxspec.has_mask) {
-                    return (m_acc(obj) & auxspec.mask) >> auxspec.shift;
+                    return decode((m_acc(obj) & auxspec.mask) >> auxspec.shift);
                 }
             }
 
@@ -232,6 +258,39 @@ namespace GlobalSim {
             };
         }
 
+
+        // version of encode that accepts a variant
+        template<typename... Args>
+        bits_type encode(const std::variant<Args...>& value) const {
+            return std::visit(
+                    [this](const auto& v) -> bits_type {
+                        using T = std::decay_t<decltype(v)>;
+
+                        if constexpr (std::is_convertible_v<T, Value>) {
+                        return encode(
+                                static_cast<Value>(v));
+                    }
+                        else {
+                        throw std::invalid_argument(
+                                "Variant alternative cannot be converted "
+                                "to BitField value type");
+                    }
+                    },
+                    value);
+        }
+
+        // get the "code" of the encoding, i.e. converts the bitset to int64_t
+        // respecting if this BitField is signed or not
+        static std::int64_t code(bits_type bits) {
+            auto value = bits.to_ullong();
+            if constexpr (Signed) {
+                if (bits[width - 1]) {
+                    value -= (std::uint64_t{1} << width);
+                }
+            }
+            return static_cast<std::int64_t>(value);
+        }
+
         // ------------------------------------------------------------------------
         // Get and encode the value from an AOD object.
         // ------------------------------------------------------------------------
@@ -240,15 +299,35 @@ namespace GlobalSim {
             return encode(value(obj));
         }
 
+        // Bucket bounds [lower, upper] for the code represented by `bits`,
+        // as produced by this field's decoder (custom or built-in linear).
+        // Falls back to a degenerate {v, v} when no encoding was configured
+        // at all (plain integral pass-through field).
+        std::pair<Value, Value> range(bits_type bits) const {
+            if (m_decoder)
+                return m_decoder(bits);
+            const Value v = static_cast<Value>(code(bits));
+            return { v, v };
+        }
+
         // ------------------------------------------------------------------------
-        // Decode this field's bits into a Value.
+        // Decode this field's bits into a Value ... uses the midpoint of the range
         // ------------------------------------------------------------------------
 
         Value decode(bits_type bits) const {
-            if (m_decoder)
-                return m_decoder(bits);
+            const auto [lo,hi] = range(bits);
+            if (lo == hi) {
+                return lo;
+            }
 
-            return static_cast<Value>(bits.to_ullong());
+            if constexpr (std::is_arithmetic_v<Value> && !std::is_same_v<Value, bool>) {
+                return static_cast<Value>(
+                        (static_cast<double>(lo) + static_cast<double>(hi)) / 2.0);
+            } else {
+                // No well-defined midpoint for this Value type -- fall back to
+                // the lower bound rather than attempting arithmetic on it.
+                return lo;
+            }
         }
 
         // ------------------------------------------------------------------------
@@ -312,6 +391,10 @@ namespace GlobalSim {
         SG::Accessor <AuxValue> m_wacc;
     };
 
+    // alias for setting the Signed bool
+    template<unsigned Lo, unsigned Hi, typename AuxValue, typename Value = AuxValue>
+    using SignedBitField = BitField<Lo, Hi, AuxValue, Value, true>;
+
 
     template<typename Field>
     class BitFieldAccessor : public Field {
@@ -343,6 +426,14 @@ namespace GlobalSim {
             // Decode bits and set the value in m_obj
             // ...
             return operator=(m_field.decode(bits));
+        }
+
+        // Integer -> raw bits, only for non-integer and non-bool Value types
+        template <typename T>
+        requires (std::is_integral_v<T> && !std::is_same_v<std::remove_cvref_t<T>, bool> && !std::is_integral_v<typename Field::value_type>)
+        BitFieldAccessor& operator=(T code)
+        {
+            return operator=(m_field.decode(code));
         }
 
         // ------------------------------------------------------------------------
@@ -383,6 +474,18 @@ namespace GlobalSim {
     };
 
 
+
+    struct NoBase {
+    public:
+        /*class ObjectAcc {
+        public:
+            ObjectAcc(const SG::AuxElement &) {}
+        }; -- commented out because only needed when we were making the ObjectAcc classes inherit*/
+        static constexpr auto allFields()
+        {
+            return std::tuple{};
+        }
+    };
 // ============================================================================
 // BitSpec<N>
 //
@@ -392,29 +495,30 @@ namespace GlobalSim {
 //
 // ============================================================================
 
-    template<typename Derived, std::size_t N>
-    class BitSpec {
+    template<typename Derived, std::size_t N, typename Base = NoBase>
+    class BitSpec : public Base {
     public:
         static constexpr std::size_t width = N;
         using bitset_type = std::bitset<N>;
-
+        template<typename> friend class Object; // lets Object class access allFields() protected method
+        using BaseSpec = Base;
 
 
         // example use: MySpec::field<0>().name()
         template<std::size_t I> static constexpr decltype(auto) field() {
-            return *std::get<I>(Derived::fields);
+            return *std::get<I>(Derived::allFields());
         }
 
         // example use: MySpec::numFields()
         static constexpr std::size_t
 
         numFields() {
-            return std::tuple_size_v < std::remove_cvref_t < decltype(Derived::fields) >> ;
+            return std::tuple_size_v < std::remove_cvref_t < decltype(Derived::allFields()) >> ;
         }
 
         // example use: MySpec::forEachField( [](const auto& field) { std::cout << field.name() << std::endl; } );
         static constexpr void forEachField(auto &&func) {
-            std::apply([&](const auto *... field) { (func(*field), ...); }, Derived::fields);
+            std::apply([&](const auto *... field) { (func(*field), ...); }, Derived::allFields());
         }
 
         // example use: MySpec::json()
@@ -439,6 +543,15 @@ namespace GlobalSim {
         template<typename... Fields>
         static constexpr auto makeFields(Fields &... fields) {
             return std::tuple{&fields...};
+        }
+
+
+        static constexpr auto allFields()
+        {
+            return std::tuple_cat(
+                    Base::allFields(),
+                    Derived::fields
+            );
         }
 
 
@@ -578,11 +691,11 @@ namespace GlobalSim {
                                                                   \
     static_assert(validateFields(),"Invalid spec: overlapping fields or fields beyond spec");                        \
                             \
-    class ObjectAcc                                              \
+    class ObjectAcc/* : public BaseSpec::ObjectAcc*/                   \
     {                                                             \
     public:                                                       \
             explicit ObjectAcc(const SG::AuxElement& obj)         \
-            : m_obj(obj)                                          \
+            : /*BaseSpec::ObjectAcc(obj),*/ m_obj(obj)                                          \
         {}                  \
     protected:                \
         const SG::AuxElement& m_obj;          \
