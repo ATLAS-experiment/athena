@@ -95,9 +95,7 @@ class MuonChainConfiguration(ChainConfigurationBase):
     # --------------------
     def getmuFast(self, flags, is_probe_leg=False):
 
-        # useNewFast only if we are using PhaseII software & ACTS reco
-        isPhaseII = flags.Trigger.Offline.SA.Muon.usePhaseIIGeoSetup and flags.Trigger.Offline.SA.Muon.scheduleActsReco
-        useNewFast = isPhaseII and 'newFast' in self.chainPart['l2AlgInfo']
+        useNewFast = 'newFast' in self.chainPart['l2AlgInfo']
 
         if 'muoncalib' in self.chainPart['extra']:
            return self.getStep(flags, "mufastcalib", [muFastCalibSequenceGenCfg], is_probe_leg=is_probe_leg )
@@ -144,9 +142,8 @@ class MuonChainConfiguration(ChainConfigurationBase):
 
     # --------------------
     def getmuEFSA(self, flags, is_probe_leg=False):
-        isPhaseII = flags.Trigger.Offline.SA.Muon.usePhaseIIGeoSetup and flags.Trigger.Offline.SA.Muon.scheduleActsReco
-        useBucketFilter = isPhaseII and 'mlbkt' in self.chainPart['addInfo'] 
-        useNewFast = isPhaseII and 'newFast' in self.chainPart['l2AlgInfo']
+        useBucketFilter = 'mlbkt' in self.chainPart['addInfo'] 
+        useNewFast = 'newFast' in self.chainPart['l2AlgInfo']
 
         step_name = f'muEFSA{"_newFast" if useNewFast else ""}{"_mlbkt" if useBucketFilter else ""}'
         return self.getStep(flags, step_name, [muEFSASequenceGenCfg], is_probe_leg=is_probe_leg, useBucketFilter=useBucketFilter, useNewFast=useNewFast)
@@ -177,8 +174,7 @@ class MuonChainConfiguration(ChainConfigurationBase):
 
     # --------------------
     def getFSmuEFSA(self, flags, is_probe_leg=False):
-        isPhaseII = flags.Trigger.Offline.SA.Muon.usePhaseIIGeoSetup and flags.Trigger.Offline.SA.Muon.scheduleActsReco
-        useBucketFilter = isPhaseII and 'mlbkt' in self.chainPart['addInfo']
+        useBucketFilter = 'mlbkt' in self.chainPart['addInfo']
 
         step_name = f'FSmuEFSA{"_mlbkt" if useBucketFilter else ""}'
         return self.getStep(flags, step_name, [muEFSAFSSequenceGenCfg], useBucketFilter=useBucketFilter)

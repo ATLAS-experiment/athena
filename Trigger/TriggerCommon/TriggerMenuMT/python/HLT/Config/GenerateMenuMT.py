@@ -36,16 +36,39 @@ def allSignatures():
 class FilterChainsToGenerate(object):
     """Standard chain filter"""
     def __init__(self, flags):
-        for f in ("enabledSignatures", "disabledSignatures", "selectChains", "disableChains"):
+        for f in ("enabledSignatures", "disabledSignatures", "selectChains", "disableChains", "selectGroups", "disableGroups"):
             # Ensure flag values have correct type
             value = getattr(flags.Trigger, f)
             assert isinstance(value, list), f"Flag Trigger.{f}={value!r} is not of type list"
             # Store flag
             setattr(self, f, value)
 
-    def __call__(self, signame, chain):            
-        return ((signame in self.enabledSignatures and signame not in self.disabledSignatures) and \
-            (not self.selectChains or chain in self.selectChains) and chain not in self.disableChains)
+        if self.selectGroups and self.disableGroups:
+            raise RuntimeError("Cannot set both selectGroups and disableGroups.")
+
+        if not flags.Trigger.Offline.SA.Muon.usePhaseIIGeoSetup or \
+           not flags.Trigger.Offline.SA.Muon.scheduleActsReco:
+            if self.selectGroups:
+                if 'MuonPhaseIIReco' in self.selectGroups:
+                    raise RuntimeError("Muon Phase-II reconstruction software is not scheduled to run, but selectGroups includes 'MuonPhaseIIReco'.")
+            elif 'MuonPhaseIIReco' not in self.disableGroups:
+                log.info("Muon Phase-II reconstruction software is not scheduled to run, disabling Muon chains that require it.")
+                self.disableGroups.append('MuonPhaseIIReco')
+
+    def __call__(self, signame, chain):
+        # Check if the signature is enabled and not disabled
+        if signame not in self.enabledSignatures or signame in self.disabledSignatures:
+            return False
+        # Check if the chain is explicitly selected or disabled
+        if (self.selectChains and chain.name not in self.selectChains) or \
+           chain.name in self.disableChains:
+            return False
+        # Check if the chain's groups are selected or disabled
+        if self.selectGroups:
+            return any(g in self.selectGroups for g in chain.groups)
+        if self.disableGroups:
+            return not any(g in self.disableGroups for g in chain.groups)
+        return True 
 
     def __str__(self) -> str:
         return f'FilterChainsToGenerate(enabledSignatures={self.enabledSignatures!r}, disabledSignatures={self.disabledSignatures!r}, selectChains={self.selectChains!r}, disableChains={self.disableChains!r})'
@@ -107,7 +130,7 @@ class GenerateMenuMT(metaclass=Singleton):
         """Set chain filter for menu generation.
 
            This can be any callable object taking two
-           arguments for signature and chain name and returning a boolean.
+           arguments for signature and chain object and returning a boolean.
            E.g. to only generate Egamma chains:
                 menu.setChainFilter(lambda slice,chain : slice=='Egamma').
 
@@ -370,7 +393,7 @@ class GenerateMenuMT(metaclass=Singleton):
 
             for signame in self.chainsInMenu:
                 self.chainsInMenu[signame] = [c for c in self.chainsInMenu[signame]
-                                              if self.chainFilter(signame, c.name)]
+                                              if self.chainFilter(signame, c)]
 
         if not self.chainsInMenu:
             log.warning("There seem to be no chains in the menu - please check")

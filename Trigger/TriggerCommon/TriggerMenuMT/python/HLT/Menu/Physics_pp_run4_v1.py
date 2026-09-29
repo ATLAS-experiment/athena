@@ -86,6 +86,8 @@ LowMuGroup = ['LowMu']
 Topo2Group = ['Topo2']
 Topo3Group = ['Topo3']
 LegacyTopoGroup = ['LegacyTopo']
+# Muon Phase-II reconstruction software
+MuonPhaseIIRecoGroup = ['MuonPhaseIIReco']
 
 def setupMenu():
 
