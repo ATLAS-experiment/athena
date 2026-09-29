@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -19,13 +19,13 @@
 #include "xAODTracking/VertexContainer.h"
 
 namespace CP {
-/// \brief an algorithm for correctiong the origin of a photon
+/// @brief an algorithm for correctiong the origin of a photon
 /// wrt the Primary Vertex
 
 class PhotonOriginCorrectionAlg final : public EL::AnaReentrantAlgorithm {
-  /// \brief the standard constructor
+  /// @brief the standard constructor
  public:
-  PhotonOriginCorrectionAlg(const std::string& name, ISvcLocator* pSvcLocator);
+  using EL::AnaReentrantAlgorithm::AnaReentrantAlgorithm;
 
  public:
   StatusCode initialize() override;
@@ -33,21 +33,21 @@ class PhotonOriginCorrectionAlg final : public EL::AnaReentrantAlgorithm {
  public:
   StatusCode execute(const EventContext &ctx) const override;
 
-  /// \brief the egamma collection we run on
+  /// @brief the egamma collection we run on
  private:
   SysCopyHandle<xAOD::PhotonContainer> m_PhotonHandle{
       this, "photons", "Photons", "the egamma collection to run on"};
 
-  /// \brief the systematics list we run
+  /// @brief the systematics list we run
  private:
   SysListHandle m_systematicsList{this};
 
-  /// \brief the preselection we apply to our input
+  /// @brief the preselection we apply to our input
  private:
   SysReadSelectionHandle m_preselection{this, "preselection", "",
                                         "the preselection to apply"};
 
-  /// \brief the vertices to loop over to select the Primary
+  /// @brief the vertices to loop over to select the Primary
   SG::ReadHandleKey<xAOD::VertexContainer> m_primVertices{
       this, "Vertices", "PrimaryVertices", "Collection of Primary Vertices"};
 };

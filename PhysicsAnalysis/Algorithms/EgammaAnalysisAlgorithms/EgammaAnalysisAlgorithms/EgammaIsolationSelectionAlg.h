@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -22,11 +22,11 @@
 
 namespace CP
 {
-  /// \brief an algorithm for calling \ref IIsolationSelectionTool
+  /// @brief an algorithm for calling @ref IIsolationSelectionTool
 
   class EgammaIsolationSelectionAlg final : public EL::AnaAlgorithm
   {
-    /// \brief the standard constructor
+    /// @brief the standard constructor
   public:
     using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
@@ -34,39 +34,39 @@ namespace CP
 
 
 
-    /// \brief the selection tool
+    /// @brief the selection tool
   private:
     ToolHandle<IIsolationSelectionTool> m_selectionTool {this, "selectionTool", "", "the selection tool we apply"};
 
-    /// \brief the systematics list we run
+    /// @brief the systematics list we run
   private:
     SysListHandle m_systematicsList {this};
 
-    /// \brief the preselection we apply to our input
+    /// @brief the preselection we apply to our input
   private:
     SysReadSelectionHandle m_preselection {
       this, "preselection", "", "the preselection to apply"};
 
-    /// \brief the particle continer we run on
+    /// @brief the particle continer we run on
   private:
     SysReadHandle<xAOD::EgammaContainer> m_egammasHandle {
       this, "egammas", "Electrons", "the egamma collection to run on"};
 
-    /// \brief the decoration for the asg selection
+    /// @brief the decoration for the asg selection
   private:
     SysWriteSelectionHandle m_selectionHandle {
       this, "selectionDecoration", "isolated", "the decoration for the asg selection"};
 
-    /// \brief the ISelectionNameSvc
+    /// @brief the ISelectionNameSvc
   private:
     ServiceHandle<ISelectionNameSvc> m_nameSvc {"SelectionNameSvc", "EgammaIsolationSelectionAlg"};
 
-    /// \brief whether this is running on photons
+    /// @brief whether this is running on photons
   private:
     Gaudi::Property<bool> m_isPhoton {this, "isPhoton", false,
         "whether this is running on photons"};
 
-    /// \brief the bits to set for an object failing the preselection
+    /// @brief the bits to set for an object failing the preselection
   private:
     SelectionType m_setOnFail;
   };

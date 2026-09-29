@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -19,11 +19,11 @@
 
 namespace CP
 {
-  /// \brief an algorithm for calling \ref IPhotonEfficiencyCorrectionTool
+  /// @brief an algorithm for calling @ref IPhotonEfficiencyCorrectionTool
 
   class PhotonEfficiencyCorrectionAlg final : public EL::AnaAlgorithm
   {
-    /// \brief the standard constructor
+    /// @brief the standard constructor
   public:
     using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
@@ -31,29 +31,29 @@ namespace CP
 
 
 
-    /// \brief the smearing tool
+    /// @brief the smearing tool
   private:
     ToolHandle<IAsgPhotonEfficiencyCorrectionTool> m_efficiencyCorrectionTool {this, "efficiencyCorrectionTool", "AsgPhotonEfficiencyCorrectionTool", "the efficiency correction tool we apply"};
 
-    /// \brief the systematics list we run
+    /// @brief the systematics list we run
   private:
     SysListHandle m_systematicsList {this};
 
-    /// \brief the photon collection we run on
+    /// @brief the photon collection we run on
   private:
     SysReadHandle<xAOD::PhotonContainer> m_photonHandle {
       this, "photons", "Photons", "the photon collection to run on"};
 
-    /// \brief the preselection we apply to our input
+    /// @brief the preselection we apply to our input
   private:
     SysReadSelectionHandle m_preselection {
       this, "preselection", "", "the preselection to apply"};
 
-    /// \brief the helper for OutOfValidity results
+    /// @brief the helper for OutOfValidity results
   private:
     OutOfValidityHelper m_outOfValidity {this};
 
-    /// \brief the decoration for the photon scale factor
+    /// @brief the decoration for the photon scale factor
   private:
     SysWriteDecorHandle<float> m_scaleFactorDecoration {
       this, "scaleFactorDecoration", "", "the decoration for the photon efficiency scale factor"};

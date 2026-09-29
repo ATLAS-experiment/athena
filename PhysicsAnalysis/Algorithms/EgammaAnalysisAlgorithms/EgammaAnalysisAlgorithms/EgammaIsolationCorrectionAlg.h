@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -19,12 +19,12 @@
 
 namespace CP
 {
-  /// \brief an algorithm for calling \ref
+  /// @brief an algorithm for calling @ref
   /// CP::IIsolationCorrectionTool
 
   class EgammaIsolationCorrectionAlg final : public EL::AnaAlgorithm
   {
-    /// \brief the standard constructor
+    /// @brief the standard constructor
   public:
     using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
@@ -32,25 +32,25 @@ namespace CP
 
 
 
-    /// \brief the smearing tool
+    /// @brief the smearing tool
   private:
     ToolHandle<CP::IIsolationCorrectionTool> m_isolationCorrectionTool {this, "isolationCorrectionTool", "IsolationCorrectionTool", "the smearing tool we apply"};
 
-    /// \brief the systematics list we run
+    /// @brief the systematics list we run
   private:
     SysListHandle m_systematicsList {this};
 
-    /// \brief the egamma collection we run on
+    /// @brief the egamma collection we run on
   private:
     SysCopyHandle<xAOD::EgammaContainer> m_egammaHandle {
       this, "egammas", "Electrons", "the egamma collection to run on"};
 
-    /// \brief the preselection we apply to our input
+    /// @brief the preselection we apply to our input
   private:
     SysReadSelectionHandle m_preselection {
       this, "preselection", "", "the preselection to apply"};
 
-    /// \brief the helper for OutOfValidity results
+    /// @brief the helper for OutOfValidity results
   private:
     OutOfValidityHelper m_outOfValidity {this};
   };

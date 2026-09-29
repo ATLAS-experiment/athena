@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -21,12 +21,12 @@
 
 namespace CP
 {
-  /// \brief an algorithm for calling \ref
+  /// @brief an algorithm for calling @ref
   /// CP::IEgammaCalibrationAndSmearingTool
 
   class EgammaCalibrationAndSmearingAlg final : public EL::AnaAlgorithm
   {
-    /// \brief the standard constructor
+    /// @brief the standard constructor
   public:
     using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
@@ -34,11 +34,11 @@ namespace CP
 
 
 
-    /// \brief the smearing tool
+    /// @brief the smearing tool
   private:
     ToolHandle<CP::IEgammaCalibrationAndSmearingTool> m_calibrationAndSmearingTool {this, "calibrationAndSmearingTool", "EgammaCalibrationAndSmearingTool", "the smearing tool  we apply"};
 
-    /// \brief whether to ignore all tool systematics
+    /// @brief whether to ignore all tool systematics
     ///
     /// The tool can be configured only to run the non-systematics or
     /// only the systematics part of the corrections.  That means this
@@ -51,31 +51,31 @@ namespace CP
     Gaudi::Property<bool> m_noToolSystematics {
       this, "noToolSystematics", false, "whether to ignore all tool systematics"};
 
-    /// \brief whether to skip the nominal correction (for PHYSLITE)
+    /// @brief whether to skip the nominal correction (for PHYSLITE)
   private:
     Gaudi::Property<bool> m_skipNominal {
       this, "skipNominal", false, "whether to skip the nominal correction (for PHYSLITE)"};
 
-    /// \brief the systematics list we run
+    /// @brief the systematics list we run
   private:
     SysListHandle m_systematicsList {this};
 
-    /// \brief the egamma collection we run on
+    /// @brief the egamma collection we run on
   private:
     SysCopyHandle<xAOD::EgammaContainer> m_egammaHandle {
       this, "egammas", "Electrons", "the egamma collection to run on"};
 
-    /// \brief the preselection we apply to our input
+    /// @brief the preselection we apply to our input
   private:
     SysReadSelectionHandle m_preselection {
       this, "preselection", "", "the preselection to apply"};
 
-    /// \brief decoration for calorimeter cluster energy resolution
+    /// @brief decoration for calorimeter cluster energy resolution
   private:
     SysWriteDecorHandle<float> m_caloClusterEnergyResoHandle {
       this, "caloClusterEnergyReso", "caloClusterEnergyReso_%SYS%", "decoration for calorimeter cluster energy resolution" };
 
-    /// \brief the helper for OutOfValidity results
+    /// @brief the helper for OutOfValidity results
   private:
     OutOfValidityHelper m_outOfValidity {this};
   };

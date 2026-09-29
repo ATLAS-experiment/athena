@@ -11,7 +11,9 @@ atlas_add_library( EgammaAnalysisAlgorithmsLib
    PUBLIC_HEADERS EgammaAnalysisAlgorithms
    LINK_LIBRARIES xAODEgamma SelectionHelpersLib SystematicsHandlesLib
    IsolationSelectionLib AnaAlgorithmLib IsolationCorrectionsLib FourMomUtils
-   EgammaAnalysisInterfacesLib egammaUtils CxxUtils )
+   EgammaAnalysisInterfacesLib egammaUtils CxxUtils xAODBase xAODCaloEvent
+   xAODEventInfo xAODMuon xAODTracking AthContainers AsgDataHandlesLib AsgTools
+   PATCoreLib PATCoreAcceptLib )
 
 atlas_add_dictionary( EgammaAnalysisAlgorithmsDict
    EgammaAnalysisAlgorithms/EgammaAnalysisAlgorithmsDict.h

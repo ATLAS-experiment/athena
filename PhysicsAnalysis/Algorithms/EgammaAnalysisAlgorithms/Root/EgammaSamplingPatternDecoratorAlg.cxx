@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -36,10 +36,10 @@ namespace CP
   {
     auto clusters = makeHandle (m_clusterContainer, ctx);
     SG::WriteDecorHandle<xAOD::CaloClusterContainer,std::uint32_t> samplingPattern (m_samplingPattern, ctx);
-    for (auto cluster : *clusters)
+    for (const auto *cluster : *clusters)
     {
       samplingPattern (*cluster) = cluster->samplingPattern();
-    } 
+    }
     return StatusCode::SUCCESS;
   }
 }

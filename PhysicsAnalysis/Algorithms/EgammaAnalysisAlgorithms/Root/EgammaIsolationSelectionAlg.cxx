@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -29,14 +29,15 @@ namespace CP
     ANA_CHECK (m_selectionHandle.initialize (m_systematicsList, m_egammasHandle));
     ANA_CHECK (m_systematicsList.initialize());
 
+    const asg::AcceptInfo& acceptInfo = m_isPhoton.value() ? m_selectionTool->getPhotonAcceptInfo() : m_selectionTool->getElectronAcceptInfo();
+
     if (!m_nameSvc.empty())
     {
       ANA_CHECK (m_nameSvc.retrieve());
-      ANA_CHECK (m_nameSvc->addAcceptInfo (m_egammasHandle.getNamePattern(), m_selectionHandle.getLabel(),
-          m_isPhoton.value() ? m_selectionTool->getPhotonAcceptInfo() : m_selectionTool->getElectronAcceptInfo()));
+      ANA_CHECK (m_nameSvc->addAcceptInfo (m_egammasHandle.getNamePattern(), m_selectionHandle.getLabel(), acceptInfo));
     }
 
-    asg::AcceptData blankAccept {&(m_isPhoton.value() ? m_selectionTool->getPhotonAcceptInfo() : m_selectionTool->getElectronAcceptInfo())};
+    asg::AcceptData blankAccept {&acceptInfo};
     m_setOnFail = selectionFromAccept(blankAccept);
 
     return StatusCode::SUCCESS;
