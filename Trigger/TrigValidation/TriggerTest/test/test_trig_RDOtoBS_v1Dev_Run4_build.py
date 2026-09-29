@@ -44,8 +44,7 @@ ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run4_v1"', 'Trigger.doLVL1=True', 
             'Input.isMC=True',
             'Trigger.L1.doGlobal=False',
             'Trigger.L1.dogFex=False',
-            'Trigger.L1.doMuon=False',
-            'Trigger.enableL1MuonPhase1=False',
+            'Trigger.enableL0Muon=True',
             'Trigger.enableL1CaloLegacy=False',
             ]
 
