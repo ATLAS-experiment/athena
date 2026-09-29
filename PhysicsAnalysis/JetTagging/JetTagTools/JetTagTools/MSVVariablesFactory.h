@@ -40,12 +40,6 @@ namespace Analysis {
     (const xAOD::Jet &, const Trk::VxSecVKalVertexInfo* myInfoVKal,
      xAOD::VertexContainer* btagVertex, const xAOD::Vertex& PV) const override;
    
-  private:
-    double get3DSignificance(const xAOD::Vertex* priVertex,
-                             std::vector<const xAOD::Vertex*>& secVertex,
-                             const Amg::Vector3D jetDirection) const;
-   
-    
   };
   
 }//end Analysis namespace

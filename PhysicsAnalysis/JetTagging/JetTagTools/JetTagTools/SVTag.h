@@ -36,14 +36,6 @@ namespace Analysis
                                 xAOD::BTagging& BTag,
                                 const std::string &jetName) const override;
       virtual void finalizeHistos() override {};
-      //GP: calculate the 3d significance on the fly
-      double get3DSignificance(const xAOD::Vertex& priVertex,
-        std::vector<const xAOD::Vertex*>& secVertex,
-        const Amg::Vector3D jetDirection) const;
-
-      double get3DSignificanceCorr(const xAOD::Vertex& priVertex,
-        std::vector<const xAOD::Vertex*>& secVertex,
-        const Amg::Vector3D jetDirection) const;
 
     private:      
       

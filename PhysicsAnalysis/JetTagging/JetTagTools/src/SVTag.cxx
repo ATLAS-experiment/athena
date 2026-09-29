@@ -8,6 +8,7 @@
 #include "JetTagTools/SVTag.h"
 
 #include "JetTagTools/NewLikelihoodTool.h"
+#include "JetTagTools/VertexSignificance.h"
 #include "GaudiKernel/ITHistSvc.h"
 #include "JetTagTools/HistoHelperRoot.h"
 #include "JetTagTools/LikelihoodComponents.h"
@@ -460,101 +461,6 @@ namespace Analysis
     if (m_runModus == "reference") ATH_MSG_INFO("#BTAG# Preparing "<< m_refType<< "-jet probability density functions...");
   }
 
-  double SVTag::get3DSignificance(const xAOD::Vertex& priVertex,
-          std::vector<const xAOD::Vertex*>& secVertex,
-          const Amg::Vector3D jetDirection) const {
-
-    std::vector<Amg::Vector3D> positions;
-    std::vector<AmgSymMatrix(3)> weightMatrices;
-    // If multiple secondary vertices were reconstructed, then a common (weighted) position will be used
-    // in the signed decay length significance calculation
-    Amg::Vector3D weightTimesPosition(0.,0.,0.);
-    AmgSymMatrix(3) sumWeights;
-    sumWeights.setZero();
-
-    for (const auto& vtx : secVertex) {
-      positions.push_back(vtx->position());
-      weightMatrices.push_back(vtx->covariancePosition().inverse());
-      weightTimesPosition += weightMatrices.back()*positions.back();
-      sumWeights += weightMatrices.back();
-    }
-
-    // now we have the sum of the weights, let's invert this matrix to get the mean covariance matrix
-    bool invertible;
-    AmgSymMatrix(3) meanCovariance;
-    meanCovariance.setZero();
-    sumWeights.computeInverseWithCheck(meanCovariance, invertible);
-    if (!invertible) {
-       ATH_MSG_WARNING("#BTAG# Could not invert sum of sec vtx matrices");
-    return 0.;
-    }
-
-    // calculate the weighted mean secondary vertex position
-    Amg::Vector3D meanPosition = meanCovariance*weightTimesPosition;
-
-    // add the mean covariance matrix of the secondary vertices to that of the primary vertex
-    // this is the covariance matrix for the decay length
-    AmgSymMatrix(3) covariance = meanCovariance + priVertex.covariancePosition();
-
-    // ********
-    // Calculate the signed decay length significance
-    // ********
-
-    double Lx = meanPosition[0]-priVertex.position().x();
-    double Ly = meanPosition[1]-priVertex.position().y();
-    double Lz = meanPosition[2]-priVertex.position().z();
-
-    const double decaylength = sqrt(Lx*Lx + Ly*Ly + Lz*Lz);
-    if(decaylength==0.) return 0.;  //Safety
-    const double inv_decaylength = 1. / decaylength;
-
-    double dLdLx = Lx * inv_decaylength;
-    double dLdLy = Ly * inv_decaylength;
-    double dLdLz = Lz * inv_decaylength;
-    double decaylength_err2 = (dLdLx*dLdLx*covariance(0,0) +
-			       dLdLy*dLdLy*covariance(1,1) +
-			       dLdLz*dLdLz*covariance(2,2) +
-			       2.*dLdLx*dLdLy*covariance(0,1) +
-			       2.*dLdLx*dLdLz*covariance(0,2) +
-			       2.*dLdLy*dLdLz*covariance(1,2));
-    if(decaylength_err2<=0.) return 0.;  //Something is wrong
-    double decaylength_err = sqrt(decaylength_err2);
-
-    double decaylength_significance = 0.;
-    if (decaylength_err != 0.) decaylength_significance = decaylength/decaylength_err;
-
-    // get sign from projection on jet axis
-    double L_proj_jetDir = jetDirection.x()*Lx + jetDirection.y()*Ly + jetDirection.z()*Lz;
-    if (L_proj_jetDir < 0.) decaylength_significance *= -1.;
-
-    return decaylength_significance;
-  }
-
-  double SVTag::get3DSignificanceCorr(const xAOD::Vertex& priVertex,
-          std::vector<const xAOD::Vertex*>& secVertex,
-          const Amg::Vector3D jetDirection) const {
-
-    std::vector<double> Sig3D(0);
-    bool success=true;
-    AmgSymMatrix(3) Wgt;
-
-    for (const auto & svrt : secVertex)
-      {
-         Amg::Vector3D SVmPV = svrt->position()-priVertex.position();
-         AmgSymMatrix(3) SVmPVCov = svrt->covariancePosition()+priVertex.covariancePosition();
-         SVmPVCov.computeInverseWithCheck(Wgt, success);
-         if( !success || Wgt(0,0)<=0. || Wgt(1,1)<=0. || Wgt(2,2)<=0. )continue;     //Inversion failure
-         double significance = SVmPV.transpose()*Wgt*SVmPV;
-         if(significance <= 0.) continue;                          //Something is still wrong!
-         significance = std::sqrt(significance);
-         if(SVmPV.dot(jetDirection)<0.) significance *= -1.;
-         Sig3D.push_back(significance);
-      }
-
-    if(Sig3D.size()==0) return 0.;
-
-    return *std::max_element(Sig3D.begin(),Sig3D.end());
-  }
 
 }
 

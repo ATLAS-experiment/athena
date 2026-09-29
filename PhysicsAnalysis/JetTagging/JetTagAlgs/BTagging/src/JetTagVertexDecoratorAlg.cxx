@@ -3,6 +3,8 @@
 */
 
 #include "BTagging/JetTagVertexDecoratorAlg.h"
+
+#include "JetTagTools/VertexSignificance.h"
 #include <cmath>
 
 #include "VxJetVertex/RecVertexPositions.h"
@@ -26,7 +28,6 @@
 
 #include "xAODBase/IParticle.h"
 
-
 namespace Analysis {
 
   /// @brief The JetTagVertexDecoratorAlg algorithm decorates jets with additional vertex-based features.
@@ -48,9 +49,9 @@ namespace Analysis {
 
   StatusCode JetTagVertexDecoratorAlg::initialize()
   {
-    ATH_CHECK( m_svTag.retrieve() );
     ATH_CHECK( m_JetCollectionName.initialize() );
     ATH_CHECK( m_VertexCollectionName.initialize() );
+    ATH_CHECK( m_TrackCollectionName.initialize() );
     ATH_CHECK( m_jetSVLinkName.initialize() );
     ATH_CHECK( m_jetSVFlipLinkName.initialize(!m_jetSVFlipLinkName.empty()) );
     ATH_CHECK( m_jetJFVtxLinkName.initialize(!m_jetJFVtxLinkName.empty()) );
@@ -146,6 +147,12 @@ namespace Analysis {
     SG::ReadHandle<xAOD::VertexContainer> h_VertexCollectionName (m_VertexCollectionName, ctx);
     if (!h_VertexCollectionName.isValid()) {
       ATH_MSG_ERROR( " cannot retrieve primary vertex container with key " << m_VertexCollectionName.key()  );
+      return StatusCode::FAILURE;
+    }
+
+    SG::ReadHandle<xAOD::TrackParticleContainer> h_TrackCollectionName (m_TrackCollectionName, ctx);
+    if (!h_TrackCollectionName.isValid()) {
+      ATH_MSG_ERROR( " cannot retrieve track container with key " << m_TrackCollectionName.key()  );
       return StatusCode::FAILURE;
     }
 
@@ -270,8 +277,8 @@ namespace Analysis {
 
             Lxy = std::hypot(PvSvDir(0,0), PvSvDir(1,0));
             L3d = std::hypot(PvSvDir(0,0), PvSvDir(1,0), PvSvDir(2,0));
-            distnrm = m_svTag->get3DSignificance(*primaryVertex, vecVertices, jetDir);
-            distnrmCorr = m_svTag->get3DSignificanceCorr(*primaryVertex, vecVertices, jetDir);
+            distnrm = get3DSignificance(*primaryVertex, vecVertices, jetDir);
+            distnrmCorr = get3DSignificanceCorr(*primaryVertex, vecVertices, jetDir);
             sv1mass = myVertexInfoVKal->mass();
             energyfrc = myVertexInfoVKal->energyFraction();
             energyTrk =  myVertexInfoVKal->energyTrkInJet();
@@ -311,6 +318,7 @@ namespace Analysis {
                 continue;
               }
               ElementLink<xAOD::TrackParticleContainer> tpel;
+              tpel.toContainedElement(*h_TrackCollectionName, tp);
               badtrackEL.push_back(tpel);
             }
   
@@ -469,8 +477,9 @@ namespace Analysis {
                 ATH_MSG_WARNING("#JetTagVertexDecoratorAlg# bad ITrackLink is not a LinkToXAODTrackParticle");
                 continue;
               }
-              // Prepare an empty ElementLink for each track.
+              const xAOD::TrackParticle* trackAtPV = **trkLinkTPxAOD;
               ElementLink<xAOD::TrackParticleContainer> tpel;
+              tpel.toContainedElement(*h_TrackCollectionName, trackAtPV);
               tracksAtPVlinks.push_back(tpel);
             }
           }

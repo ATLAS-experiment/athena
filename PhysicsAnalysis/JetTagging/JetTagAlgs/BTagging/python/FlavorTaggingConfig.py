@@ -433,6 +433,7 @@ def JetTagVertexDecoratorCfg(flags, pv_col, jet, trackCollection, JetTrackAssoci
     options.setdefault('JetFitterVariableFactory', jetFitterVF)
     options['JetSecVtxLinkName'] = jet + '.' + OutputFilesSVname
     options['JetCollectionName'] = jet
+    options['TrackCollectionName'] = trackCollection
     options['BTagVxSecVertexInfoNames'] = []
     for sv in SecVertexers:
         options['BTagVxSecVertexInfoNames'].append(sv + 'VxSecVertexInfo_' + jetcol_no_suffix)
