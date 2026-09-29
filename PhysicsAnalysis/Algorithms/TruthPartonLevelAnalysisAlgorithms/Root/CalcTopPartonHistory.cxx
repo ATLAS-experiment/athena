@@ -62,7 +62,7 @@ void CalcPartonHistory::FillTopPartonHistory(bool fcnc) {
       }
       if (!found) m_dec.decorateDefault(outputTag);
     }
-    FillXPartonHistory("t");
+    FillXPartonHistory("t", m_symbolFCNC);
   } else {
     FillGenericPartonHistory("MC_t_b_beforeFSR", "MC_b_beforeFSR_from_t", 0);
     FillGenericPartonHistory("MC_t_b_afterFSR", "MC_b_afterFSR_from_t", 0);
@@ -92,7 +92,7 @@ void CalcPartonHistory::FillAntiTopPartonHistory(bool fcnc) {
       }
       if (!found) m_dec.decorateDefault(outputTag);
     }
-    FillXPartonHistory("tbar");
+    FillXPartonHistory("tbar", m_symbolFCNC);
   } else {
     FillGenericPartonHistory("MC_tbar_bbar_beforeFSR",
                              "MC_bbar_beforeFSR_from_tbar", 0);

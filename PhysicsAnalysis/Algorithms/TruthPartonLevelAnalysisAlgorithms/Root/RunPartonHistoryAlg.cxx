@@ -11,8 +11,7 @@
 namespace CP {
 RunPartonHistoryAlg::RunPartonHistoryAlg(const std::string& name,
                                          ISvcLocator* pSvcLocator)
-    : EL::AnaAlgorithm(name, pSvcLocator), m_PartonScheme("Ttbar") {
-  declareProperty("partonScheme", m_PartonScheme, "the parton history to run");
+    : EL::AnaAlgorithm(name, pSvcLocator) {
 }
 
 StatusCode RunPartonHistoryAlg::initialize() {
@@ -31,6 +30,7 @@ StatusCode RunPartonHistoryAlg::initialize() {
     return StatusCode::FAILURE;
   }
   ANA_CHECK(m_PartonHistory->setProperty("prefix", m_PartonScheme));
+  ANA_CHECK(m_PartonHistory->setProperty("symbolFCNC", m_SymbolFCNC));
   ANA_CHECK(m_PartonHistory->initialize());
   return StatusCode::SUCCESS;
 }
