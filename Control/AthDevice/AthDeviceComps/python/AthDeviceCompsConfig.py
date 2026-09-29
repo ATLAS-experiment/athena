@@ -35,6 +35,12 @@ def HostMemoryResourceToolCfg(flags, **kwargs):
             import HostMemoryResourceToolCfg as CUDAHostMemoryResourceToolCfg
         result.setPrivateTools(result.popToolsAndMerge(
             CUDAHostMemoryResourceToolCfg(flags, **kwargs)))
+    elif flags.Device.Backend == DeviceBackend.HIPAMD or \
+            flags.Device.Backend == DeviceBackend.HIPNVIDIA:
+        from AthHIPComps.AthHIPCompsConfig \
+            import HostMemoryResourceToolCfg as HIPHostMemoryResourceToolCfg
+        result.setPrivateTools(result.popToolsAndMerge(
+            HIPHostMemoryResourceToolCfg(flags, **kwargs)))
     else:
         # For an unknown backend, we just fall back on the generic host memory
         # resource tool.
@@ -60,6 +66,12 @@ def DeviceMemoryResourceToolCfg(flags, **kwargs):
             CUDADeviceMemoryResourceToolCfg
         result.setPrivateTools(result.popToolsAndMerge(
             CUDADeviceMemoryResourceToolCfg(flags, **kwargs)))
+    elif flags.Device.Backend == DeviceBackend.HIPAMD or \
+            flags.Device.Backend == DeviceBackend.HIPNVIDIA:
+        from AthHIPComps.AthHIPCompsConfig \
+            import DeviceMemoryResourceToolCfg as HIPDeviceMemoryResourceToolCfg
+        result.setPrivateTools(result.popToolsAndMerge(
+            HIPDeviceMemoryResourceToolCfg(flags, **kwargs)))
     else:
         raise RuntimeError('No device memory resource tool is available for '
                            'the selected backend: {}'.format(
@@ -83,6 +95,13 @@ def SharedMemoryResourceToolCfg(flags, **kwargs):
             CUDAManagedMemoryResourceToolCfg
         result.setPrivateTools(result.popToolsAndMerge(
             CUDAManagedMemoryResourceToolCfg(flags, **kwargs)))
+    elif flags.Device.Backend == DeviceBackend.HIPAMD or \
+            flags.Device.Backend == DeviceBackend.HIPNVIDIA:
+        from AthHIPComps.AthHIPCompsConfig \
+            import ManagedMemoryResourceToolCfg as \
+            HIPManagedMemoryResourceToolCfg
+        result.setPrivateTools(result.popToolsAndMerge(
+            HIPManagedMemoryResourceToolCfg(flags, **kwargs)))
     else:
         raise RuntimeError('No shared memory resource tool is available for '
                            'the selected backend: {}'.format(
@@ -106,6 +125,12 @@ def MemoryResourcesToolCfg(flags, **kwargs):
             import MemoryResourcesToolCfg as CUDAMemoryResourcesToolCfg
         result.setPrivateTools(result.popToolsAndMerge(
             CUDAMemoryResourcesToolCfg(flags, **kwargs)))
+    elif flags.Device.Backend == DeviceBackend.HIPAMD or \
+            flags.Device.Backend == DeviceBackend.HIPNVIDIA:
+        from AthHIPComps.AthHIPCompsConfig \
+            import MemoryResourcesToolCfg as HIPMemoryResourcesToolCfg
+        result.setPrivateTools(result.popToolsAndMerge(
+            HIPMemoryResourcesToolCfg(flags, **kwargs)))
     else:
         raise RuntimeError('No memory resources tool is available for the '
                            'selected backend: {}'.format(flags.Device.Backend))
@@ -127,6 +152,12 @@ def CopyToolCfg(flags, **kwargs):
             import CopyToolCfg as CUDACopyToolCfg
         result.setPrivateTools(result.popToolsAndMerge(
             CUDACopyToolCfg(flags, **kwargs)))
+    elif flags.Device.Backend == DeviceBackend.HIPAMD or \
+            flags.Device.Backend == DeviceBackend.HIPNVIDIA:
+        from AthHIPComps.AthHIPCompsConfig \
+            import CopyToolCfg as HIPCopyToolCfg
+        result.setPrivateTools(result.popToolsAndMerge(
+            HIPCopyToolCfg(flags, **kwargs)))
     else:
         raise RuntimeError('No copy tool is available for the selected '
                            'backend: {}'.format(flags.Device.Backend))
@@ -148,6 +179,12 @@ def CopiesToolCfg(flags, **kwargs):
             import CopiesToolCfg as CUDACopiesToolCfg
         result.setPrivateTools(result.popToolsAndMerge(
             CUDACopiesToolCfg(flags, **kwargs)))
+    elif flags.Device.Backend == DeviceBackend.HIPAMD or \
+            flags.Device.Backend == DeviceBackend.HIPNVIDIA:
+        from AthHIPComps.AthHIPCompsConfig \
+            import CopiesToolCfg as HIPCopiesToolCfg
+        result.setPrivateTools(result.popToolsAndMerge(
+            HIPCopiesToolCfg(flags, **kwargs)))
     else:
         raise RuntimeError('No copies tool is available for the selected '
                            'backend: {}'.format(flags.Device.Backend))
