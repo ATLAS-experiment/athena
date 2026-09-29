@@ -46,7 +46,6 @@ namespace JetTagDQA{
       void updateNJetsThatPassedWPCutsMap(std::map<std::string, int>& nJetsThatPassedWPCuts, const std::string& tagger, double discriminant);
       void fillNJetsThatPassedWPCutsHistos(std::map<std::string, int>& nJetsThatPassedWPCuts, const xAOD::EventInfo* event);
 
-      void setTaggerInfos();    
       void bookEffHistos();
 
       // Reco only information
@@ -411,28 +410,6 @@ namespace JetTagDQA{
       TH1* m_numTracks_OtherOrigin_u = nullptr; 
       TH1* m_numTracks_OtherOrigin_muon = nullptr; 
 
-      // tagger
-      TH1* m_GN2v01_pb = nullptr;
-      TH1* m_GN2v01_pc = nullptr;
-      TH1* m_GN2v01_pu = nullptr;
-      TH1* m_GN2v01_ptau = nullptr;
-
-      TH1* m_GN3EPCLV01_pb = nullptr;
-      TH1* m_GN3EPCLV01_pc = nullptr;
-      TH1* m_GN3EPCLV01_pu = nullptr;
-      TH1* m_GN3EPCLV01_ptau = nullptr;
-      
-      TH1* m_GN3XPV01_phtautauhad = nullptr;
-      TH1* m_GN3XPV01_phbb = nullptr;
-      TH1* m_GN3XPV01_phcc = nullptr;
-      TH1* m_GN3XPV01_ptop = nullptr;
-      TH1* m_GN3XPV01_pqcdbb = nullptr;
-      TH1* m_GN3XPV01_pqcdbx = nullptr;
-      TH1* m_GN3XPV01_pqcdcx = nullptr;
-      TH1* m_GN3XPV01_pqcdll = nullptr;
-      TH1* m_GN3XPV01_pwqq = nullptr;
-
-
       // B hadron Lxy
       TH1* m_Truth_Lxy_b = nullptr;
       TH1* m_Truth_Lxy_c = nullptr;
@@ -441,18 +418,23 @@ namespace JetTagDQA{
       TH1* m_deltaR_truthBHadron_jet_b = nullptr;
       TH1* m_deltaR_truthCHadron_jet_c = nullptr;
       
-      std::vector<std::string> m_taggers;
-      std::map<std::string, int> m_truthLabels;
-      std::map<std::string, double> m_GN2v01_workingPoints;
-      std::map<std::string, double> m_GN3EPCLV01_workingPoints;
+      // one entry per small-R tagger. The label names the histograms and stays fixed, while
+      // the decoration prefix follows the tagger that ran in the derivation.
+      struct SmallRTagger {
+        std::string label;
+        std::string decoration;
+        double fc = 0.0;
+        double ftau = 0.0;
+        std::map<std::string, double> workingPoints;
+        const IBTaggingSelectionTool* selectionTool = nullptr;
+        std::map<std::string, TH1*> probabilities;
+      };
+      std::vector<SmallRTagger> m_smallRTaggers;
+      std::map<std::string, int> m_truthLabels{{"b", 5}, {"c", 4}, {"u", 0}, {"tau", 15}};
 
-      double m_GN2v01_fc = 0.0;
-      double m_GN2v01_ftau = 0.0;
-      double m_GN3EPCLV01_fc = 0.0;
-      double m_GN3EPCLV01_ftau = 0.0;
-      const IBTaggingSelectionTool* m_GN2v01SelectionTool = nullptr;
       std::map<std::string, double> m_GN3XPV01_HbbFractions;
       std::map<std::string, double> m_GN3XPV01_HccFractions;
+      std::map<std::string, TH1*> m_GN3XPV01_probabilities;
       std::map<std::string, TH1*> m_GN3XPV01_discriminants;
       // large-R histograms per GN3XPV01 truth class and variable
       std::map<std::string, std::map<std::string, TH1*>> m_largeRHistos;
@@ -466,10 +448,8 @@ namespace JetTagDQA{
       // a setter for the HistogramDefinitions and the TMP cut
       void setHistogramDefinitions( std::map< std::string, std::vector< std::string > > HistogramDefinitions);
       void setIsDataAndTMPCut(bool isData, float truthMatchProbabilityCut);
-      void setTaggerNames(const std::string& GN2v01Name, const std::string& GN3EPCLV01Name, const std::string& GN3XPV01Name);
-      void setGN2v01Config(const IBTaggingSelectionTool* selectionTool, const std::map<std::string, double>& workingPoints, double fc, double ftau);
-      void setGN3EPCLV01Config(const std::map<std::string, double>& workingPoints, double fc, double ftau);
-      bool setGN3XPV01Fractions(const std::map<std::string, double>& HbbFractions, const std::map<std::string, double>& HccFractions);
+      void addSmallRTagger(const std::string& label, const std::string& decoration, double fc, double ftau, const std::map<std::string, double>& workingPoints, const IBTaggingSelectionTool* selectionTool = nullptr);
+      bool setGN3XPV01Config(const std::string& name, const std::map<std::string, double>& HbbFractions, const std::map<std::string, double>& HccFractions);
       void setIsLargeR(bool isLargeR);
 
     private:
@@ -493,15 +473,11 @@ namespace JetTagDQA{
       std::string largeRClass(const xAOD::Jet& jet, int truth_label) const;
       void bookLargeRHistograms();
       void fillLargeR(const std::string& variable, const std::string& truth_class, double value, const xAOD::EventInfo* event);
-      const std::map<std::string, double>& workingPoints(const std::string& tagger) const;
       void fillDiscriminantHistograms(const std::string& tagger_name, const double& discriminant_value, const std::map<std::string, double>& working_points, const int& truth_label, std::map<std::string, TH1*>::const_iterator hist_iter, std::map<std::string, int>::const_iterator label_iter, const double& jet_pT, const double& jet_Lxy, const double& jet_SV1_Lxy, const bool& onZprime, const xAOD::EventInfo* event);
-      void bookDiscriminantVsPTAndLxyHistograms(const std::string& tagger_name, const std::map<std::string, double>& workingPoints, const bool& isOldTagger, std::map<std::string, int>::const_iterator label_iter, const std::string& m_sParticleType);
+      void bookDiscriminantVsPTAndLxyHistograms(const std::string& tagger_name, const std::map<std::string, double>& workingPoints, std::map<std::string, int>::const_iterator label_iter, const std::string& m_sParticleType);
       template <class T>
       void fillHistoWithTruthCases(T value, TH1* histo_incl, TH1* histo_b, TH1* histo_c, TH1* histo_l, TH1* histo_muon, const int& truth_label, const bool& has_muon, const xAOD::EventInfo* event);
 
-      // tagger names
-      std::string m_GN2v01Name;
-      std::string m_GN3EPCLV01Name;
       std::string m_GN3XPV01Name;
   
   };

@@ -113,15 +113,12 @@ namespace JetTagDQA {
     bool m_warnedMissingNNJvt = false;
     float m_truthMatchProbabilityCut;
 
-    std::string m_GN2v01Name;
     std::string m_GN3XPV01Name;
+    Gaudi::Property<std::map<std::string, std::string>> m_taggerDecorations{this, "TaggerDecorations", {}, "Decoration prefix of each small-R tagger, keyed by the name its histograms carry"};
+    Gaudi::Property<std::map<std::string, double>> m_taggerFractionC{this, "TaggerFractionC", {}, "c-fraction of each small-R discriminant, unused where a selection tool provides it"};
+    Gaudi::Property<std::map<std::string, double>> m_taggerFractionTau{this, "TaggerFractionTau", {}, "tau-fraction of each small-R discriminant, unused where a selection tool provides it"};
+    Gaudi::Property<std::map<std::string, double>> m_taggerWorkingPoints{this, "TaggerWorkingPoints", {}, "Cut value of each working point, keyed by tagger and working point label as <tagger>_<wp>"};
     Gaudi::Property<std::vector<std::string>> m_GN2v01WorkingPoints{this, "GN2v01WorkingPoints", {}, "Working point labels of GN2v01SelectionTools"};
-    Gaudi::Property<double> m_GN2v01FractionC{this, "GN2v01FractionC", 0.2, "GN2v01 c-fraction, used without GN2v01SelectionTools"};
-    Gaudi::Property<double> m_GN2v01FractionTau{this, "GN2v01FractionTau", 0.01, "GN2v01 tau-fraction, used without GN2v01SelectionTools"};
-    Gaudi::Property<std::string> m_GN3EPCLV01Name{this, "GN3EPCLV01TaggerName", "", "GN3EPCLV01 decoration prefix, empty to disable"};
-    Gaudi::Property<std::map<std::string, double>> m_GN3EPCLV01WorkingPoints{this, "GN3EPCLV01WorkingPoints", {}, "GN3EPCLV01 working point labels and cut values"};
-    Gaudi::Property<double> m_GN3EPCLV01FractionC{this, "GN3EPCLV01FractionC", 0., "GN3EPCLV01 c-fraction"};
-    Gaudi::Property<double> m_GN3EPCLV01FractionTau{this, "GN3EPCLV01FractionTau", 0., "GN3EPCLV01 tau-fraction"};
     Gaudi::Property<std::map<std::string, double>> m_GN3XPV01HbbFractions{this, "GN3XPV01HbbFractions", {}, "Background fractions of the GN3XPV01 Hbb discriminant, empty to disable"};
     Gaudi::Property<std::map<std::string, double>> m_GN3XPV01HccFractions{this, "GN3XPV01HccFractions", {}, "Background fractions of the GN3XPV01 Hcc discriminant, empty to disable"};
 

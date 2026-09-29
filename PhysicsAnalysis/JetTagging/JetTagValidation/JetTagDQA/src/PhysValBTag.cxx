@@ -85,7 +85,6 @@ namespace JetTagDQA {
     declareProperty( "UseJvtProxy", m_useJvtProxy = false);
     declareProperty( "truthMatchProbabilityCut", m_truthMatchProbabilityCut = 0.75);
 
-    declareProperty( "GN2v01TaggerName", m_GN2v01Name = "GN2v01");
     declareProperty( "GN3XPV01TaggerName", m_GN3XPV01Name = "GN3XPV01");
 
   }
@@ -121,7 +120,6 @@ namespace JetTagDQA {
       }
       GN2v01WorkingPoints.emplace(m_GN2v01WorkingPoints[i], cut);
     }
-    const IBTaggingSelectionTool* GN2v01SelectionTool = m_GN2v01SelectionTools.empty() ? nullptr : m_GN2v01SelectionTools[0].get();
 
     // convert the HistogramDefinitions vector to a map 
     for(unsigned int i = 0; i < m_HistogramDefinitionsVector.size(); i++){
@@ -134,14 +132,30 @@ namespace JetTagDQA {
     m_btagplots.insert(std::make_pair(m_jetNamePFlow, &m_antiKt4EMPFlowJetsPlots));
     m_btagplots.insert(std::make_pair(m_jetNameR10, &m_antiKt10UFOCSSKSoftDropBeta100Zcut10Jets));
 
+    std::map<std::string, std::map<std::string, double>> workingPoints;
+    for (const auto& [key, cut] : m_taggerWorkingPoints) {
+      const std::size_t split = key.rfind('_');
+      if (split == std::string::npos) {
+        ATH_MSG_ERROR("TaggerWorkingPoints key " << key << " is not of the form <tagger>_<working point>");
+        return StatusCode::FAILURE;
+      }
+      workingPoints[key.substr(0, split)].emplace(key.substr(split + 1), cut);
+    }
+    workingPoints["GN2v01"] = GN2v01WorkingPoints;
+
     for(const auto& [name, plot]: m_btagplots){
       plot->setDetailLevel(m_detailLevel);
       plot->setHistogramDefinitions(m_HistogramDefinitionsMap);
       plot->setIsDataAndTMPCut(m_isData, m_truthMatchProbabilityCut);
-      plot->setTaggerNames(m_GN2v01Name, m_GN3EPCLV01Name, m_GN3XPV01Name);
-      plot->setGN2v01Config(GN2v01SelectionTool, GN2v01WorkingPoints, m_GN2v01FractionC, m_GN2v01FractionTau);
-      plot->setGN3EPCLV01Config(m_GN3EPCLV01WorkingPoints, m_GN3EPCLV01FractionC, m_GN3EPCLV01FractionTau);
-      if (!plot->setGN3XPV01Fractions(m_GN3XPV01HbbFractions, m_GN3XPV01HccFractions)) return StatusCode::FAILURE;
+      for (const auto& [tagger, decoration] : m_taggerDecorations) {
+        const bool fromCDI = tagger == "GN2v01" && !m_GN2v01SelectionTools.empty();
+        plot->addSmallRTagger(tagger, decoration,
+                              m_taggerFractionC.value().count(tagger) ? m_taggerFractionC.value().at(tagger) : 0.,
+                              m_taggerFractionTau.value().count(tagger) ? m_taggerFractionTau.value().at(tagger) : 0.,
+                              workingPoints.count(tagger) ? workingPoints.at(tagger) : std::map<std::string, double>{},
+                              fromCDI ? m_GN2v01SelectionTools[0].get() : nullptr);
+      }
+      if (!plot->setGN3XPV01Config(m_GN3XPV01Name, m_GN3XPV01HbbFractions, m_GN3XPV01HccFractions)) return StatusCode::FAILURE;
       plot->setIsLargeR(name == m_jetNameR10);
     }
    
