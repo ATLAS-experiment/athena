@@ -6,35 +6,21 @@
 #define ASGANALYSISALGORITHMS_ASGXAODNTUPLEMAKERALG_H
 
 // System include(s):
-#include <unordered_map>
 #include <string>
 #include <vector>
-#include <memory>
-#include <list>
 
 // Framework include(s):
-#include "AsgMessaging/AsgMessaging.h"
 #include "AsgServices/ServiceHandle.h"
 #include "AnaAlgorithm/AnaAlgorithm.h"
 #include "CxxUtils/checker_macros.h"
 #include "SystematicsHandles/SysListHandle.h"
 #include <AsgTools/PropertyWrapper.h>
 
-// EDM include(s):
-#include "AthContainersInterfaces/IAuxTypeVector.h"
-#include "AthContainers/AuxElement.h"
-
 // local include(s):
 #include "AsgAnalysisAlgorithms/TreeBranchHelpers.h"
 
 // Forward declaration(s):
-class TClass;
 class TTree;
-class TVirtualCollectionProxy;
-namespace SG {
-   class AuxVectorBase;
-   class IAuxTypeVectorFactory;
-}
 
 namespace CP {
 

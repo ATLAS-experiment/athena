@@ -16,7 +16,6 @@
 // EDM include(s):
 #include "AthContainers/AuxElement.h"
 #include "AthContainers/AuxVectorBase.h"
-#include "TreeBranchHelpers.h"
 
 // ROOT include(s):
 #include <ROOT/RNTupleModel.hxx>
@@ -198,7 +197,6 @@ namespace CP {
          StatusCode process( StoreType& evtStore );
          
          TreeBranchHelpers::IObjectProcessor& getObjectProcessor( const BranchConfig& branchConfig, const std::string& sgName );
-         std::optional<int> defaultBasketSize;
          std::unordered_set<std::string> m_nonContainers;
          std::unordered_map< std::string, std::unique_ptr<TreeBranchHelpers::IObjectProcessor> > m_processors;
       };
