@@ -456,14 +456,6 @@ EF_2mu10_msonly_L12MU8F:
     0: 2
     1: 2
   eventCount: 1
-EF_2mu10_msonly_newFast_L12MU8F:
-  stepCounts:
-    0: 1
-    1: 1
-  stepFeatures:
-    0: 2
-    1: 2
-  eventCount: 1
 EF_2mu12_L12MU12FCH:
   stepCounts:
     0: 1
@@ -483,12 +475,6 @@ EF_2mu12_L12MU8F:
     0: 2
   eventCount: 0
 EF_2mu14_L12MU8F:
-  stepCounts:
-    0: 1
-  stepFeatures:
-    0: 2
-  eventCount: 0
-EF_2mu14_mlbkt_L12MU8F:
   stepCounts:
     0: 1
   stepFeatures:
@@ -6646,14 +6632,6 @@ EF_mu10_msonly_L1MU8F:
     0: 11
     1: 9
   eventCount: 9
-EF_mu10_msonly_newFast_L1MU8F:
-  stepCounts:
-    0: 10
-    1: 9
-  stepFeatures:
-    0: 11
-    1: 9
-  eventCount: 9
 EF_mu11_mu6_bBmumux_Bidperf_L1MU8VF_2MU5VF:
   stepCounts:
     0: 2
@@ -7234,18 +7212,6 @@ EF_mu20_ivarperf_L1MU12FCH:
     3: 5
     4: 5
   eventCount: 5
-EF_mu20_mlbkt_L1MU14FCH:
-  stepCounts:
-    0: 6
-    1: 6
-    2: 6
-    3: 5
-  stepFeatures:
-    0: 7
-    1: 7
-    2: 7
-    3: 5
-  eventCount: 5
 EF_mu22_ivarmedium_L1MU14FCH:
   stepCounts:
     0: 6
@@ -7260,48 +7226,6 @@ EF_mu22_ivarmedium_L1MU14FCH:
     3: 4
     4: 4
   eventCount: 4
-EF_mu22_mlbkt_mu8noL1_mlbkt_L1MU14FCH:
-  stepCounts:
-    0: 6
-    1: 5
-    2: 4
-    3: 4
-    4: 1
-  stepFeatures:
-    0: 13
-    1: 11
-    2: 9
-    3: 8
-    4: 4
-  eventCount: 0
-leg000_EF_mu22_mlbkt_mu8noL1_mlbkt_L1MU14FCH:
-  stepCounts:
-    0: 6
-    1: 5
-    2: 4
-    3: 4
-    4: 1
-  stepFeatures:
-    0: 7
-    1: 6
-    2: 5
-    3: 4
-    4: 1
-  eventCount: 0
-leg001_EF_mu22_mlbkt_mu8noL1_mlbkt_L1MU14FCH:
-  stepCounts:
-    0: 6
-    1: 5
-    2: 4
-    3: 4
-    4: 1
-  stepFeatures:
-    0: 6
-    1: 5
-    2: 4
-    3: 4
-    4: 3
-  eventCount: 0
 EF_mu22_mu8noL1_L1MU14FCH:
   stepCounts:
     0: 6
@@ -7357,20 +7281,6 @@ EF_mu24_idperf_L1MU14FCH:
     3: 4
   eventCount: 4
 EF_mu24_ivarmedium_L1MU14FCH:
-  stepCounts:
-    0: 6
-    1: 6
-    2: 4
-    3: 4
-    4: 4
-  stepFeatures:
-    0: 7
-    1: 7
-    2: 5
-    3: 4
-    4: 4
-  eventCount: 4
-EF_mu24_ivarmedium_mlbkt_L1MU14FCH:
   stepCounts:
     0: 6
     1: 6
@@ -7456,27 +7366,7 @@ leg001_EF_mu24_ivarmedium_tau25_idperf_tracktwoMVA_probe_L1cTAU20M_03dRAB_L1MU14
     8: 9
     9: 8
   eventCount: 0
-EF_mu24_mlbkt_L1MU14FCH:
-  stepCounts:
-    0: 6
-    1: 6
-    2: 4
-    3: 4
-  stepFeatures:
-    0: 7
-    1: 7
-    2: 5
-    3: 4
-  eventCount: 4
 EF_mu24_msonly_L1MU14FCH:
-  stepCounts:
-    0: 6
-    1: 4
-  stepFeatures:
-    0: 7
-    1: 4
-  eventCount: 4
-EF_mu24_msonly_newFast_L1MU14FCH:
   stepCounts:
     0: 6
     1: 4
@@ -7597,14 +7487,6 @@ leg004_EF_mu4_j70_j50a_j0_DJMASS1000j50_xe50_tcpufit_L1jMJJ-500-NFF:
     4: 2
   eventCount: 0
 EF_mu4_msonly_L1MU3V:
-  stepCounts:
-    0: 11
-    1: 11
-  stepFeatures:
-    0: 16
-    1: 13
-  eventCount: 11
-EF_mu4_msonly_newFast_L1MU3V:
   stepCounts:
     0: 11
     1: 11
@@ -10897,8 +10779,6 @@ EF_2mu10_l2mt_L1MU10BOM:
 EF_3j190_pf_ftf_presel3j150_L1jJ160:
   eventCount: 0
 EF_3mu6_L13MU5VF:
-  eventCount: 0
-EF_3mu6_mlbkt_L13MU5VF:
   eventCount: 0
 EF_3mu6_msonly_L13MU5VF:
   eventCount: 0

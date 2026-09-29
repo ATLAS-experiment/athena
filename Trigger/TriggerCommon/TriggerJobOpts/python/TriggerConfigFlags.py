@@ -464,6 +464,8 @@ def createTriggerRecoFlags():
     flags.addFlag("Trigger.disabledSignatures", [], help='list of disabled trigger signatures')
     flags.addFlag("Trigger.selectChains", [], help='list of enabled chains')
     flags.addFlag("Trigger.disableChains", [], help='list of disabled chains')
+    flags.addFlag("Trigger.disableGroups", [], help='list of disabled groups of chains')
+    flags.addFlag("Trigger.selectGroups", [], help='list of enabled groups of chains')
 
     def __egamma():
         from TriggerMenuMT.HLT.Egamma.TrigEgammaConfigFlags import createTrigEgammaConfigFlags

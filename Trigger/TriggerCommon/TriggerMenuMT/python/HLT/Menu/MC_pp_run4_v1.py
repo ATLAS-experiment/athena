@@ -50,7 +50,8 @@ from TriggerMenuMT.HLT.Menu.Physics_pp_run4_v1 import (
     MuonJetGroup,
     TauJetGroup,
     TauBJetGroup,
-    TauPhotonGroup
+    TauPhotonGroup,
+    MuonPhaseIIRecoGroup
 )
 
 # For NGT-related studies
@@ -120,18 +121,18 @@ def addMCSignatures(chains):
         ChainProp(name='EF_mu20_ivarperf_L1MU12FCH', groups=SupportGroup+SingleMuonGroup, monGroups=['idMon:shifter']),
 
         # ML bucket filter test chains
-        ChainProp(name='EF_mu20_mlbkt_L1MU14FCH', l1SeedThresholds=['MU14FCH'], groups=SupportPhIGroup+SingleMuonGroup),
-        ChainProp(name='EF_mu24_mlbkt_L1MU14FCH', l1SeedThresholds=['MU14FCH'], groups=SupportPhIGroup+SingleMuonGroup),
-        ChainProp(name='EF_mu24_ivarmedium_mlbkt_L1MU14FCH', l1SeedThresholds=['MU14FCH'], groups=SupportPhIGroup+SingleMuonGroup, monGroups=['muonMon:shifter','muonMon:online']),
-        ChainProp(name='EF_mu22_mlbkt_mu8noL1_mlbkt_L1MU14FCH', l1SeedThresholds=['MU14FCH','FSNOSEED'], groups=SupportPhIGroup+MultiMuonGroup, monGroups=['muonMon:online','muonMon:shifter']),
-        ChainProp(name='EF_2mu14_mlbkt_L12MU8F', groups=SupportPhIGroup+MultiMuonGroup, monGroups=['muonMon:online','muonMon:shifter']),
-        ChainProp(name='EF_3mu6_mlbkt_L13MU5VF', l1SeedThresholds=['MU5VF'], groups=SupportPhIGroup+MultiMuonGroup, monGroups=['muonMon:online']),
+        ChainProp(name='EF_mu20_mlbkt_L1MU14FCH', l1SeedThresholds=['MU14FCH'], groups=SupportPhIGroup+SingleMuonGroup+MuonPhaseIIRecoGroup),
+        ChainProp(name='EF_mu24_mlbkt_L1MU14FCH', l1SeedThresholds=['MU14FCH'], groups=SupportPhIGroup+SingleMuonGroup+MuonPhaseIIRecoGroup),
+        ChainProp(name='EF_mu24_ivarmedium_mlbkt_L1MU14FCH', l1SeedThresholds=['MU14FCH'], groups=SupportPhIGroup+SingleMuonGroup+MuonPhaseIIRecoGroup, monGroups=['muonMon:shifter','muonMon:online']),
+        ChainProp(name='EF_mu22_mlbkt_mu8noL1_mlbkt_L1MU14FCH', l1SeedThresholds=['MU14FCH','FSNOSEED'], groups=SupportPhIGroup+MultiMuonGroup+MuonPhaseIIRecoGroup, monGroups=['muonMon:online','muonMon:shifter']),
+        ChainProp(name='EF_2mu14_mlbkt_L12MU8F', groups=SupportPhIGroup+MultiMuonGroup+MuonPhaseIIRecoGroup, monGroups=['muonMon:online','muonMon:shifter']),
+        ChainProp(name='EF_3mu6_mlbkt_L13MU5VF', l1SeedThresholds=['MU5VF'], groups=SupportPhIGroup+MultiMuonGroup+MuonPhaseIIRecoGroup, monGroups=['muonMon:online']),
 
         # Chains implementing the new fast reconstruction for Phase-II
-        ChainProp(name='EF_mu24_msonly_newFast_L1MU14FCH', groups=SupportGroup+SingleMuonGroup, monGroups=['muonMon:shifter']),
-        ChainProp(name='EF_mu10_msonly_newFast_L1MU8F', groups=SupportGroup+SingleMuonGroup, monGroups=['muonMon:shifter']),
-        ChainProp(name='EF_2mu10_msonly_newFast_L12MU8F', groups=SupportGroup+MultiMuonGroup, monGroups=['muonMon:shifter']),
-        ChainProp(name='EF_mu4_msonly_newFast_L1MU3V', groups=SupportGroup+SingleMuonGroup, monGroups=['muonMon:shifter']),
+        ChainProp(name='EF_mu24_msonly_newFast_L1MU14FCH', groups=SupportGroup+SingleMuonGroup+MuonPhaseIIRecoGroup, monGroups=['muonMon:shifter']),
+        ChainProp(name='EF_mu10_msonly_newFast_L1MU8F', groups=SupportGroup+SingleMuonGroup+MuonPhaseIIRecoGroup, monGroups=['muonMon:shifter']),
+        ChainProp(name='EF_2mu10_msonly_newFast_L12MU8F', groups=SupportGroup+MultiMuonGroup+MuonPhaseIIRecoGroup, monGroups=['muonMon:shifter']),
+        ChainProp(name='EF_mu4_msonly_newFast_L1MU3V', groups=SupportGroup+SingleMuonGroup+MuonPhaseIIRecoGroup, monGroups=['muonMon:shifter']),
 
         # HL-LHC TDR inspired chains
         ChainProp(name="EF_mu3vtx_L12MU8F", groups=PrimaryPhIGroup+SingleTauGroup),
