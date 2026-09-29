@@ -7,6 +7,8 @@
 #include "ExpressionEvaluation/ExpressionParser.h"
 #include "ExpressionParserUser.h"
 #include <cassert>
+#include <stdexcept>
+#include <array>
 
 namespace ExpressionParsing {
    template <unsigned short NUM_PARSER>
@@ -89,6 +91,7 @@ bool ExpressionParserUserBase<T_Base,NUM_PARSER>::updateDataNeeds(const std::vec
                                                                   std::vector<Gaudi::DataHandle *> &new_input_handles,
                                                                   std::vector<Gaudi::DataHandle *> &new_output_handles) {
    if (!m_xAODProxyLoader) return false;
+   //coverity[NULL_FIELD]
    std::vector<std::string> var_names = ExpressionParsing::ParserHelper<NUM_PARSER>::getVariables(m_parser);
 
    auto parent = ExpressionParsing::SGxAODProxyLoader::wrapParent(this);
@@ -98,6 +101,7 @@ bool ExpressionParserUserBase<T_Base,NUM_PARSER>::updateDataNeeds(const std::vec
 template <class T_Base, unsigned short const NUM_PARSER>
 bool ExpressionParserUserBase<T_Base,NUM_PARSER>::renounceInput( const DataObjID& output_data_id) {
    if (m_xAODProxyLoader) {
+     //coverity[NULL_FIELD]
       std::vector<std::string> var_names = ExpressionParsing::ParserHelper<NUM_PARSER>::getVariables(m_parser);
 
       for (const std::string &var : var_names) {
