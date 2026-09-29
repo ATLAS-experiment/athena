@@ -277,7 +277,8 @@ class ElectronMomentumCalibrationConfig (ConfigBlock) :
         config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
         config.addOutputVar (self.containerName, 'e_%SYS%', 'e')
         config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
-        config.addOutputVar (self.containerName, 'caloClusterEnergyReso_%SYS%', 'caloClusterEnergyReso', noSys=True)
+        if self.splitCalibrationAndSmearing or not (config.isPhyslite() and not self.recalibratePhyslite) :
+            config.addOutputVar (self.containerName, 'caloClusterEnergyReso_%SYS%', 'caloClusterEnergyReso', noSys=True)
 
         # decorate truth information on the reconstructed object:
         if self.decorateTruth and config.dataType() is not DataType.Data:
@@ -418,6 +419,12 @@ class ElectronWorkingPointSelectionConfig (ConfigBlock) :
         if config.geometry() is LHCPeriod.Run1:
             raise ValueError ("Can't set up the ElectronWorkingPointSelectionConfig with %s, there must be something wrong!" % config.geometry().value)
 
+        if self.identificationWP is None:
+            raise ValueError ("ElectronWorkingPointSelectionConfig: the identificationWP option must be set")
+        if self.identificationWP == 'NoID' and self.doFSRSelection:
+            raise ValueError ("ElectronWorkingPointSelectionConfig: doFSRSelection requires an ID working point, "
+                              "it can't be used with identificationWP='NoID'")
+
         postfix = self.postfix
         if postfix is None :
             postfix = self.selectionName
@@ -434,9 +441,8 @@ class ElectronWorkingPointSelectionConfig (ConfigBlock) :
             alg.maxDeltaZ0SinTheta = self.maxDeltaZ0SinTheta
             alg.particles = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
-            if self.trackSelection :
-                config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
-                                     preselection=self.addSelectionToPreselection)
+            config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
+                                 preselection=self.addSelectionToPreselection)
 
         if 'LH' in self.identificationWP:
             # Set up the likelihood ID selection algorithm
@@ -482,7 +488,7 @@ class ElectronWorkingPointSelectionConfig (ConfigBlock) :
             config.addPrivateTool( 'selectionTool', 'CP::AsgMaskSelectionTool' )
             dfVar = "DFCommonElectronsLHLooseBLIsEMValue"
             alg.selectionTool.selectionVars = [dfVar]
-            mask = int( 0 | 0x1 << 1 | 0x1 << 2)
+            mask = 0x6  # IsEM bits 1 and 2
             alg.selectionTool.selectionMasks = [mask]
         elif 'DNN' in self.identificationWP:
             if self.chargeIDSelectionRun2:
@@ -507,7 +513,9 @@ class ElectronWorkingPointSelectionConfig (ConfigBlock) :
         else:
             raise ValueError (f"Electron ID working point '{self.identificationWP}' is not recognised!")
 
+        wpDecoration = None
         if alg is not None:
+            wpDecoration = alg.selectionDecoration
             alg.particles = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
             # Don't register WP selection here if FSR enabled - FSR algorithm will create combined selection
@@ -578,10 +586,11 @@ class ElectronWorkingPointSelectionConfig (ConfigBlock) :
         if self.doFSRSelection :
             # wpSelection needs the type suffix so SysReadSelectionHandle knows the type
             # selectionDecoration needs name only for SysWriteDecorHandle
-            wpDecoration = alg.selectionDecoration
             wpDecorationName = wpDecoration.split(',')[0]
             # Insert FSR before the postfix (e.g., selectSiHit_SiHits -> selectSiHitFSR_SiHits)
-            underscorePos = wpDecorationName.index('_')
+            underscorePos = wpDecorationName.find('_')
+            if underscorePos < 0:
+                underscorePos = len(wpDecorationName)
             outputDecorationName = wpDecorationName[:underscorePos] + 'FSR' + wpDecorationName[underscorePos:]
             alg = config.createAlgorithm( 'CP::EgammaFSRForMuonsCollectorAlg', 'EgammaFSRForMuonsCollectorAlg' )
             alg.wpSelection = wpDecoration  # Input: read the WP selection (with type suffix)
@@ -729,6 +738,9 @@ class ElectronWorkingPointEfficiencyConfig (ConfigBlock) :
         # The setup below is inappropriate for Run 1
         if config.geometry() is LHCPeriod.Run1:
             raise ValueError ("Can't set up the ElectronWorkingPointSelectionConfig with %s, there must be something wrong!" % config.geometry().value)
+
+        if self.identificationWP is None:
+            raise ValueError ("ElectronWorkingPointEfficiencyConfig: the identificationWP option must be set")
 
         postfix = self.postfix
         if postfix is None :
@@ -1057,13 +1069,13 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
                     chain_out = chain_noHLT if self.removeHLTPrefix else chain
                     legs = triggerDict[chain_noHLT]
                     if not legs:
-                        if chain_noHLT[0] == 'e' and chain_noHLT[1].isdigit:
+                        if chain_noHLT[0] == 'e' and chain_noHLT[1].isdigit():
                             chain_key = f"{year}_{chain_noHLT}"
                             chain_conf = mapKeysDict[chain_key][0]
                             triggerConfigs[chain_conf if self.useToolKeyAsOutput else chain_out] = chain_conf
                     else:
                         for leg in legs:
-                            if leg[0] == 'e' and leg[1].isdigit:
+                            if leg[0] == 'e' and leg[1].isdigit():
                                 leg_out = leg if self.removeHLTPrefix else f"HLT_{leg}"
                                 leg_key = f"{year}_{leg}"
                                 leg_conf = filterConfFromMap(mapKeysDict[leg_key], electronMapKeys)

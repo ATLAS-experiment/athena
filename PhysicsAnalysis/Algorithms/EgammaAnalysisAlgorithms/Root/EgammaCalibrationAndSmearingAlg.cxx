@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -57,6 +57,8 @@ namespace CP
           ANA_CHECK_CORRECTION (m_outOfValidity, *egamma, m_calibrationAndSmearingTool->applyCorrection (*egamma));
           float caloClusterEnergyReso = m_calibrationAndSmearingTool->getResolution (*egamma);
           m_caloClusterEnergyResoHandle.set(*egamma, caloClusterEnergyReso, sys);
+        } else {
+          m_caloClusterEnergyResoHandle.set(*egamma, -1, sys);
         }
       }
     }

@@ -109,7 +109,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
                     Run4FallbackWarning, filename='', lineno=0)
                 alg.calibrationAndSmearingTool.ESModel = 'es2024_Run3_v0'
             else:
-                raise ValueError (f"Can't set up the ElectronCalibrationConfig with {config.geometry().value}, "
+                raise ValueError (f"Can't set up the PhotonCalibrationConfig with {config.geometry().value}, "
                                   "there must be something wrong!")
 
         alg.calibrationAndSmearingTool.decorrelationModel = self.decorrelationModel
@@ -120,6 +120,10 @@ class PhotonCalibrationConfig (ConfigBlock) :
         alg.egammas = config.readName (self.containerName)
         alg.egammasOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
+
+        config.setContainerMeta (self.containerName, 'ESModel', alg.calibrationAndSmearingTool.ESModel, allowOverwrite=True)
+        config.setContainerMeta (self.containerName, 'decorrelationModel', alg.calibrationAndSmearingTool.decorrelationModel, allowOverwrite=True)
+
         return alg
 
 
@@ -146,7 +150,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
         # Decorate calo cluster eta if required
         if self.decorateCaloClusterEta:
             alg = config.createAlgorithm( 'CP::EgammaCaloClusterEtaAlg',
-                                          'ElectronEgammaCaloClusterEtaAlg',
+                                          'PhotonEgammaCaloClusterEtaAlg',
                                            reentrant=True )
             alg.particles = config.readName(self.containerName)
             config.addOutputVar (self.containerName, 'caloEta2', 'caloEta2', noSys=True)
@@ -203,7 +207,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
         # Select photons only with good object quality.
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'PhotonObjectQualityAlg' )
         config.setExtraInputs ({('xAOD::EventInfo', 'EventInfo.RandomRunNumber')})
-        alg.selectionDecoration = 'goodOQ,as_bits'
+        alg.selectionDecoration = 'goodOQ' + postfix + ',as_bits'
         config.addPrivateTool( 'selectionTool', 'CP::EgammaIsGoodOQSelectionTool' )
         alg.selectionTool.Mask = xAOD.EgammaParameters.BADCLUSPHOTON
         alg.particles = config.readName (self.containerName)
@@ -214,7 +218,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
         if self.enableCleaning:
             alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'PhotonCleaningAlg' )
             config.addPrivateTool( 'selectionTool', 'CP::AsgFlagSelectionTool' )
-            alg.selectionDecoration = 'isClean,as_bits'
+            alg.selectionDecoration = 'isClean' + postfix + ',as_bits'
             alg.selectionTool.selectionFlags = ['DFCommonPhotonsCleaning' + cleaningWP]
             alg.particles = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
@@ -319,7 +323,8 @@ class PhotonCalibrationConfig (ConfigBlock) :
         config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
         config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
         config.addOutputVar (self.containerName, 'e_%SYS%', 'e')
-        config.addOutputVar (self.containerName, 'caloClusterEnergyReso_%SYS%', 'caloClusterEnergyReso', noSys=True)
+        if self.splitCalibrationAndSmearing or not (config.isPhyslite() and not self.recalibratePhyslite) :
+            config.addOutputVar (self.containerName, 'caloClusterEnergyReso_%SYS%', 'caloClusterEnergyReso', noSys=True)
 
         # decorate truth information on the reconstructed object:
         if self.decorateTruth and config.dataType() is not DataType.Data:
@@ -395,7 +400,7 @@ class PhotonWorkingPointSelectionConfig (ConfigBlock) :
         elif self.qualityWP == 'Loose' :
             quality = ROOT.egammaPID.PhotonLoose
         else :
-            raise Exception ('unknown photon quality working point "' + self.qualityWP + '" should be Tight, Medium or Loose')
+            raise Exception (f'unknown photon quality working point "{self.qualityWP}" should be Tight, Medium or Loose')
 
         # Set up the photon selection algorithm:
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'PhotonIsEMSelectorAlg' )
@@ -432,7 +437,9 @@ class PhotonWorkingPointSelectionConfig (ConfigBlock) :
             wpDecoration = alg.selectionDecoration
             wpDecorationName = wpDecoration.split(',')[0]
             # Insert FSR before the postfix (e.g., selectEM_loose -> selectEMFSR_loose)
-            underscorePos = wpDecorationName.index('_')
+            underscorePos = wpDecorationName.find('_')
+            if underscorePos < 0:
+                underscorePos = len(wpDecorationName)
             outputDecorationName = wpDecorationName[:underscorePos] + 'FSR' + wpDecorationName[underscorePos:]
 
             alg = config.createAlgorithm( 'CP::EgammaFSRForMuonsCollectorAlg', 'EgammaFSRForMuonsCollectorAlg')
@@ -563,8 +570,7 @@ class PhotonWorkingPointEfficiencyConfig (ConfigBlock) :
             elif config.dataType() is DataType.FullSim:
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
-            if config.geometry() >= LHCPeriod.Run2:
-                alg.efficiencyCorrectionTool.MapFilePath = 'PhotonEfficiencyCorrection/2015_2025/rel22.2/2026_Run3Consolidated_Recommendation_v1/map0.txt'
+            alg.efficiencyCorrectionTool.MapFilePath = 'PhotonEfficiencyCorrection/2015_2025/rel22.2/2026_Run3Consolidated_Recommendation_v1/map0.txt'
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'ph_id_bad_eff' + postfix
             alg.photons = config.readName (self.containerName)
@@ -589,8 +595,7 @@ class PhotonWorkingPointEfficiencyConfig (ConfigBlock) :
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
             alg.efficiencyCorrectionTool.IsoKey = self.isolationWP.replace("FixedCut","")
-            if config.geometry() >= LHCPeriod.Run2:
-                alg.efficiencyCorrectionTool.MapFilePath = 'PhotonEfficiencyCorrection/2015_2025/rel22.2/2022_Summer_Prerecom_v1/map1.txt'
+            alg.efficiencyCorrectionTool.MapFilePath = 'PhotonEfficiencyCorrection/2015_2025/rel22.2/2022_Summer_Prerecom_v1/map1.txt'
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'ph_isol_bad_eff' + postfix
             alg.photons = config.readName (self.containerName)
