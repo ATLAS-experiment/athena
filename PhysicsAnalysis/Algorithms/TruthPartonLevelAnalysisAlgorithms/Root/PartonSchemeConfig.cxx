@@ -20,7 +20,7 @@ const PartonSchemeConfig& getSchemeConfig(const std::string& schemeName) {
       // ================================================================== //
       //
       // Copy the template below, uncomment it, fill in the fields, and add
-      // a corresponding entry to truth_branches{} in truthConfig.py.
+      // a corresponding entry to TRUTH_BRANCHES in python/PartonHistoryConfig.py.
       //
       // {"MySchemeName", {
       //
@@ -73,7 +73,7 @@ const PartonSchemeConfig& getSchemeConfig(const std::string& schemeName) {
       //   //    executed in order. Each entry is a SpecialFillOp with fields:
       //   //      type  :
       //   SpecialFillType::{Top,AntiTop,Ttbar,Z,Ztautau,W,Higgs,Gamma}
-      //   //      parent: (Z/W/Gamma) parent particle string, e.g. "t", "tbar",
+      //   //      parent: (Z/W) parent particle string, e.g. "t", "tbar",
       //   //              or "" for a standalone boson
       //   //      mode  : (Z/W/H) "resonant"       — boson present in truth
       //   record
@@ -134,6 +134,7 @@ const PartonSchemeConfig& getSchemeConfig(const std::string& schemeName) {
             {SpecialFillType::AntiTop},
             {SpecialFillType::Ttbar},
         },
+        {},
         {}}},
 
       // ------------------------------------------------------------------ //
@@ -148,6 +149,7 @@ const PartonSchemeConfig& getSchemeConfig(const std::string& schemeName) {
             {SpecialFillType::AntiTopFCNC},
             {SpecialFillType::TtbarFCNC},
         },
+        {},
         {}}},
 
       // ------------------------------------------------------------------ //
@@ -169,7 +171,8 @@ const PartonSchemeConfig& getSchemeConfig(const std::string& schemeName) {
             {{"MC_bbar_beforeFSR"}, "MC_bbar_beforeFSR", 0, true},
             {{"MC_b_afterFSR"}, "MC_b_afterFSR", 0, true},
             {{"MC_bbar_afterFSR"}, "MC_bbar_afterFSR", 0, true},
-        }}},
+        },
+        {}}},
 
       // ------------------------------------------------------------------ //
       // Ttbarccbar
@@ -190,7 +193,8 @@ const PartonSchemeConfig& getSchemeConfig(const std::string& schemeName) {
             {{"MC_cbar_beforeFSR"}, "MC_cbar_beforeFSR", 0, true},
             {{"MC_c_afterFSR"}, "MC_c_afterFSR", 0, true},
             {{"MC_cbar_afterFSR"}, "MC_cbar_afterFSR", 0, true},
-        }}},
+        },
+        {}}},
 
       // ------------------------------------------------------------------ //
       // Ttz
@@ -206,6 +210,7 @@ const PartonSchemeConfig& getSchemeConfig(const std::string& schemeName) {
             {SpecialFillType::Ttbar},
             {SpecialFillType::Z, "", "resonant", 1},
         },
+        {},
         {}}},
 
       // ------------------------------------------------------------------ //
@@ -219,24 +224,11 @@ const PartonSchemeConfig& getSchemeConfig(const std::string& schemeName) {
             {SpecialFillType::Top},
             {SpecialFillType::AntiTop},
             {SpecialFillType::Ttbar},
+            // Associated W (either charge: both map to the MC_W_* keys)
+            {SpecialFillType::W, "", "resonant", 1},
         },
-        {
-            // Associated W (charge-ambiguous: try W- then W+)
-            {{"MC_Wm_beforeFSR", "MC_Wp_beforeFSR"}, "MC_W_beforeFSR", 0},
-            {{"MC_WmDecay1_beforeFSR", "MC_WpDecay1_beforeFSR"},
-             "MC_Wdecay1_beforeFSR",
-             0},
-            {{"MC_WmDecay2_beforeFSR", "MC_WpDecay2_beforeFSR"},
-             "MC_Wdecay2_beforeFSR",
-             0},
-            {{"MC_Wm_afterFSR", "MC_Wp_afterFSR"}, "MC_W_afterFSR", 0},
-            {{"MC_WmDecay1_afterFSR", "MC_WpDecay1_afterFSR"},
-             "MC_Wdecay1_afterFSR",
-             0},
-            {{"MC_WmDecay2_afterFSR", "MC_WpDecay2_afterFSR"},
-             "MC_Wdecay2_afterFSR",
-             0},
-        }}},
+        {},
+        {}}},
 
       // ------------------------------------------------------------------ //
       // Tth
@@ -252,6 +244,7 @@ const PartonSchemeConfig& getSchemeConfig(const std::string& schemeName) {
             {SpecialFillType::Ttbar},
             {SpecialFillType::Higgs, "", "resonant"},
         },
+        {},
         {}}},
 
       // ------------------------------------------------------------------ //
@@ -268,6 +261,7 @@ const PartonSchemeConfig& getSchemeConfig(const std::string& schemeName) {
             {SpecialFillType::Ttbar},
             {SpecialFillType::Gamma, ""},
         },
+        {},
         {}}},
 
       // ------------------------------------------------------------------ //
@@ -310,7 +304,8 @@ const PartonSchemeConfig& getSchemeConfig(const std::string& schemeName) {
             // Spectator b
             {{"MC_b_beforeFSR", "MC_bbar_beforeFSR"}, "MC_b_beforeFSR", 0},
             {{"MC_b_afterFSR", "MC_bbar_afterFSR"}, "MC_b_afterFSR", 0},
-        }}},
+        },
+        {}}},
 
       // ------------------------------------------------------------------ //
       // Tzq
@@ -354,7 +349,8 @@ const PartonSchemeConfig& getSchemeConfig(const std::string& schemeName) {
             // Spectator b (flavour-agnostic)
             {{"MC_b_beforeFSR", "MC_bbar_beforeFSR"}, "MC_b_beforeFSR", 0},
             {{"MC_b_afterFSR", "MC_bbar_afterFSR"}, "MC_b_afterFSR", 0},
-        }}},
+        },
+        {}}},
 
       // ------------------------------------------------------------------ //
       // Thq
@@ -434,6 +430,10 @@ const PartonSchemeConfig& getSchemeConfig(const std::string& schemeName) {
               "MC_WDecay2_afterFSR"},
              "MC_Wdecay2_afterFSR",
              0},
+        },
+        {
+            {{"MC_b_W_beforeFSR", "MC_bbar_W_beforeFSR", "MC_W_beforeFSR"},
+             "MC_W_IsOnShell"},
         }}},
 
       // ------------------------------------------------------------------ //
@@ -479,7 +479,8 @@ const PartonSchemeConfig& getSchemeConfig(const std::string& schemeName) {
             // Spectator b
             {{"MC_b_beforeFSR", "MC_bbar_beforeFSR"}, "MC_b_beforeFSR", 0},
             {{"MC_b_afterFSR", "MC_bbar_afterFSR"}, "MC_b_afterFSR", 0},
-        }}},
+        },
+        {}}},
 
       // ------------------------------------------------------------------ //
       // Wtb
@@ -488,7 +489,10 @@ const PartonSchemeConfig& getSchemeConfig(const std::string& schemeName) {
        {{"TruthTop", "TruthBosonsWithDecayParticles", "TruthBottom"},
         {DecoratorGroup::Top, DecoratorGroup::Bottom},
         {{DecoratorZW::W, 1}},
-        {},  // no special fills
+        {
+            // Spectator W (associated, not from top decay)
+            {SpecialFillType::W, "", "resonant", 1},
+        },
         {
             // Top — 4-key alternatives
             {{"MC_t_beforeFSR", "MC_tbar_beforeFSR", "MC_b_t_beforeFSR",
@@ -534,22 +538,8 @@ const PartonSchemeConfig& getSchemeConfig(const std::string& schemeName) {
             // Spectator b
             {{"MC_b_beforeFSR", "MC_bbar_beforeFSR"}, "MC_b_beforeFSR", 0},
             {{"MC_b_afterFSR", "MC_bbar_afterFSR"}, "MC_b_afterFSR", 0},
-            // Spectator W (associated, not from top decay)
-            {{"MC_W_beforeFSR"}, "MC_W_beforeFSR", 0},
-            {{"MC_W_afterFSR"}, "MC_W_afterFSR", 0},
-            {{"MC_WDecay1_beforeFSR"},
-             "MC_Wdecay1_beforeFSR",
-             0},
-            {{"MC_WDecay2_beforeFSR"},
-             "MC_Wdecay2_beforeFSR",
-             0},
-            {{"MC_WDecay1_afterFSR"},
-             "MC_Wdecay1_afterFSR",
-             0},
-            {{"MC_WDecay2_afterFSR"},
-             "MC_Wdecay2_afterFSR",
-             0},
-        }}},
+        },
+        {}}},
 
       // ------------------------------------------------------------------ //
       // FourTop
@@ -612,11 +602,12 @@ const PartonSchemeConfig& getSchemeConfig(const std::string& schemeName) {
             {{"MC_tbar_W_afterFSR"}, "MC_W_afterFSR_from_tbar2", 1},
             {{"MC_tbar_WDecay1_afterFSR"}, "MC_Wdecay1_afterFSR_from_tbar2", 1},
             {{"MC_tbar_WDecay2_afterFSR"}, "MC_Wdecay2_afterFSR_from_tbar2", 1},
-        }}},
+        },
+        {}}},
 
       // ------------------------------------------------------------------ //
       // WW_nonresonant
-      // NOTE: truthCollections may need verification (see plan Known Issues)
+      // NOTE: the truthCollections list of this scheme has not been validated
       // ------------------------------------------------------------------ //
       {"WW_nonresonant",
        {{"TruthBosonsWithDecayParticles", "TruthElectrons", "TruthMuons",
@@ -626,11 +617,12 @@ const PartonSchemeConfig& getSchemeConfig(const std::string& schemeName) {
         {
             {SpecialFillType::W, "", "non_resonant", 2},
         },
+        {},
         {}}},
 
       // ------------------------------------------------------------------ //
       // HWW
-      // NOTE: truthCollections may need verification (see plan Known Issues)
+      // NOTE: the truthCollections list of this scheme has not been validated
       // ------------------------------------------------------------------ //
       {"HWW",
        {{"TruthBosonsWithDecayParticles"},
@@ -639,6 +631,7 @@ const PartonSchemeConfig& getSchemeConfig(const std::string& schemeName) {
         {
             {SpecialFillType::Higgs, "", "resonant"},
         },
+        {},
         {}}},
 
       // ------------------------------------------------------------------ //
@@ -652,11 +645,12 @@ const PartonSchemeConfig& getSchemeConfig(const std::string& schemeName) {
         {
             {SpecialFillType::Higgs, "", "non_resonant_WW"},
         },
+        {},
         {}}},
 
       // ------------------------------------------------------------------ //
       // HZZ
-      // NOTE: truthCollections may need verification (see plan Known Issues)
+      // NOTE: the truthCollections list of this scheme has not been validated
       // ------------------------------------------------------------------ //
       {"HZZ",
        {{"TruthBosonsWithDecayParticles"},
@@ -665,6 +659,7 @@ const PartonSchemeConfig& getSchemeConfig(const std::string& schemeName) {
         {
             {SpecialFillType::Higgs, "", "resonant"},
         },
+        {},
         {}}},
 
       // ------------------------------------------------------------------ //
@@ -682,7 +677,10 @@ const PartonSchemeConfig& getSchemeConfig(const std::string& schemeName) {
         {
             {{"MC_b_beforeFSR", "MC_bbar_beforeFSR"}, "MC_b_beforeFSR", 2},
             {{"MC_b_afterFSR", "MC_bbar_afterFSR"}, "MC_b_afterFSR", 1},
-        }}},
+            {{"MC_bbar_beforeFSR"}, "MC_bbar_beforeFSR", 0},
+            {{"MC_bbar_afterFSR"}, "MC_bbar_afterFSR", 0},
+        },
+        {}}},
 
       // ------------------------------------------------------------------ //
       // Ztautau
@@ -694,6 +692,7 @@ const PartonSchemeConfig& getSchemeConfig(const std::string& schemeName) {
         {
             {SpecialFillType::Ztautau, "", "non_resonant", 1},
         },
+        {},
         {}}},
 
   };  // end registry

@@ -36,9 +36,10 @@ bool CalcPartonHistory::getW(const std::string& str_lep,
         // decay pair).
         if ((particle_1->pdgId() * particle_2->pdgId()) > 0)
           continue;
-        // Condition 2: Same lepton generation — |pdgId| of lepton and neutrino
-        // must differ by exactly 1 (e.g. 11 & 12, 13 & 14, 15 & 16).
-        if (std::abs(particle_1->absPdgId() - particle_2->absPdgId()) != 1)
+        // Condition 2: Same lepton generation — |pdgId| of the neutrino must
+        // be that of the lepton plus 1 (11 & 12, 13 & 14, 15 & 16); a
+        // symmetric difference would also accept e.g. (mu, nu_e).
+        if (particle_2->absPdgId() - particle_1->absPdgId() != 1)
           continue;
         // Condition 3: Reject shower particles — particles produced during
         // parton showering are assigned UIDs above 10100 by the generator.
@@ -119,6 +120,10 @@ void CalcPartonHistory::FillWPartonHistory(const std::string& parent, int nWs,
 
   if (mode == "resonant") {
     if (nWs == 1) {
+      if (parent.empty())
+        m_dec.decorateCustom(
+            "MC_W_IsOnShell",
+            ExistsInMap(m_prefix + "_" + prefix + "_beforeFSR") ? 1 : 0);
       FillGenericPartonHistory(prefix + "_beforeFSR",
                                "MC_W_beforeFSR" + parentstring, 0);
       FillGenericPartonHistory(prefix + "Decay1_beforeFSR",
@@ -134,6 +139,8 @@ void CalcPartonHistory::FillWPartonHistory(const std::string& parent, int nWs,
     } else {
       for (int idx = 0; idx < nWs; idx++) {
         const std::string idxStr = std::to_string(idx + 1);
+        if (parent.empty())
+          m_dec.decorateCustom("MC_W" + idxStr + "_IsOnShell", 1);
         FillGenericPartonHistory(prefix + "_beforeFSR",
                                  "MC_W" + idxStr + "_beforeFSR" + parentstring,
                                  0);
@@ -155,6 +162,15 @@ void CalcPartonHistory::FillWPartonHistory(const std::string& parent, int nWs,
       }
     }
   } else if (mode == "non_resonant") {
+    if (parent.empty()) {
+      if (nWs == 1) {
+        m_dec.decorateCustom("MC_W_IsOnShell", 0);
+      } else {
+        for (int idx = 0; idx < nWs; idx++)
+          m_dec.decorateCustom("MC_W" + std::to_string(idx + 1) + "_IsOnShell",
+                               0);
+      }
+    }
     setW("beforeFSR", nWs);
     setW("afterFSR", nWs);
   }

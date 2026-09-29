@@ -21,6 +21,14 @@ struct GenericFillOp {
   bool isVector = false;      ///< true → use FillGenericVectorPartonHistory
 };
 
+/// Decorates a 0/1 flag from key existence: 1 if any of retrievalKeys is
+/// present in the particle map, 0 otherwise. No kinematic values are set.
+struct IsOnShellFillOp {
+  std::vector<std::string>
+      retrievalKeys;          ///< particle map keys to check (any match)
+  std::string decorationKey;  ///< output decoration name (without prefix)
+};
+
 /// Maps to an existing Fill*PartonHistory method on CalcPartonHistory.
 enum class SpecialFillType {
   Top,          ///< FillTopPartonHistory
@@ -39,10 +47,9 @@ enum class SpecialFillType {
 /// Parameterizes one special fill call.
 struct SpecialFillOp {
   SpecialFillType type {};
-  std::string parent = "";        ///< for Z/W/Gamma: parent string arg
+  std::string parent = "";        ///< for Z/W: parent string arg
   std::string mode = "resonant";  ///< for Z/W/H: mode string arg
   int count = 1;                  ///< for Z/W: nZs or nWs
-  bool extended = false;  ///< for Z: whether to include tau decay products
 };
 
 /// Maps to an existing Initialize*Decorators method (non-parameterized ones).
@@ -83,6 +90,8 @@ struct PartonSchemeConfig {
       specialFills;  ///< calls to dedicated Fill* methods
   std::vector<GenericFillOp>
       genericFills;  ///< calls to FillGenericPartonHistory
+  std::vector<IsOnShellFillOp>
+      isOnShellFills;  ///< existence-flag decorations, filled after genericFills
 };
 
 /// Returns the configuration for a given scheme name.
