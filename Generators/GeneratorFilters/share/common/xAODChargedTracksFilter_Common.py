@@ -11,9 +11,10 @@ from GeneratorFilters.GeneratorFiltersConf import xAODChargedTracksFilter
 xAODChargedTracksFilter = xAODChargedTracksFilter("xAODChargedTracksFilter")  
 filtSeq += xAODChargedTracksFilter
 
-# to modiify cuts put into JOs e.g.:
+# to modify cuts put into JOs e.g.:
 #filtSeq.xAODChargedTracksFilter.Ptcut = 12000.0
 #filtSeq.xAODChargedTracksFilter.EtaCut = 2.5
 #filtSeq.xAODChargedTracksFilter.NTracks = 40
+#filtSeq.xAODChargedTracksFilter.NTracksMax = 100
 
 

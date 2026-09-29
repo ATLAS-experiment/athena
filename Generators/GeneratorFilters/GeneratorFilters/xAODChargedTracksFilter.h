@@ -46,7 +46,10 @@ private:
   Gaudi::Property<double> m_EtaRange{this, "Etacut", 2.5};
 
   // Minimum number of tracks
-  Gaudi::Property<double> m_NTracks{this, "NTracks", 40};
+  Gaudi::Property<int> m_NTracks{this, "NTracks", 40};
+
+  // Maximum number of tracks
+  Gaudi::Property<int> m_NTracksMax{this, "NTracksMax", -1};
 
   // Map of |pdgId| -> minimum pt (MeV) for particles to exclude from the
   // charged-track count (matched by absolute value, so a key excludes both
