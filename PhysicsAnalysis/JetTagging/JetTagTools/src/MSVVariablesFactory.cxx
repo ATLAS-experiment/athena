@@ -24,6 +24,7 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 
 #include "JetTagTools/MSVVariablesFactory.h"
+#include "JetTagTools/VertexSignificance.h"
 
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 
@@ -123,7 +124,7 @@ namespace Analysis {
 
       if (priVtx) {
         ATH_MSG_DEBUG("Factory PVX x = " << priVtx->x() << " y = " << priVtx->y() << " z = " << priVtx->z());
-        localdistnrm = get3DSignificance(priVtx, vecVtxHolder, jet_V3);
+        localdistnrm = get3DSignificance(*priVtx, vecVtxHolder, jet_V3);
       } else {
         ATH_MSG_WARNING("#BTAG# Tagging requested, but no primary vertex supplied.");
       }
@@ -222,7 +223,7 @@ namespace Analysis {
       
       if (priVtx) {
         ATH_MSG_DEBUG("Factory PVX x = " << priVtx->x() << " y = " << priVtx->y() << " z = " << priVtx->z());
-        localdistnrm = get3DSignificance(priVtx, vecVtxHolder, jet_V3);
+        localdistnrm = get3DSignificance(*priVtx, vecVtxHolder, jet_V3);
       } else {
         ATH_MSG_WARNING("#BTAG# Tagging requested, but no primary vertex supplied.");
       }
@@ -239,7 +240,7 @@ namespace Analysis {
     BTag->setDynVxELName(basename, "vertices");
 
     if (priVtx) {
-      distnrm = get3DSignificance(priVtx, vecVertices, jet_V3);
+      distnrm = get3DSignificance(*priVtx, vecVertices, jet_V3);
     } else {
       ATH_MSG_WARNING("#BTAG# Tagging requested, but no primary vertex supplied.");
       distnrm=0.;
@@ -249,61 +250,6 @@ namespace Analysis {
     BTag->setVariable<float>(basename, "normdist", distnrm);
 
     return StatusCode::SUCCESS;
-
-  }
-
-  double MSVVariablesFactory::get3DSignificance
-  (const xAOD::Vertex* priVertex,
-   std::vector<const xAOD::Vertex*>& secVertex,
-   const Amg::Vector3D jetDirection) const {
-
-    if(!secVertex.size()) return 0;
-    std::vector<Amg::Vector3D> positions;
-    std::vector<AmgSymMatrix(3)> weightMatrices;
-    Amg::Vector3D weightTimesPosition(0.,0.,0.);
-    AmgSymMatrix(3) sumWeights;
-    sumWeights.setZero();
-
-    for (const auto& vertex : secVertex) {
-      positions.push_back(vertex->position());
-      weightMatrices.push_back(vertex->covariancePosition().inverse());
-      weightTimesPosition += weightMatrices.back() * positions.back();
-      sumWeights += weightMatrices.back();
-    }
-
-    bool invertible;
-    AmgSymMatrix(3) meanCovariance;
-    meanCovariance.setZero();
-    sumWeights.computeInverseWithCheck(meanCovariance, invertible);
-    if (!invertible) {
-      ATH_MSG_WARNING("#BTAG# Could not invert sum of sec vtx matrices");
-      return 0.;
-    }
-    Amg::Vector3D meanPosition = meanCovariance * weightTimesPosition;
-    AmgSymMatrix(3) covariance = meanCovariance + priVertex->covariancePosition();
-
-    double Lx = meanPosition[0]-priVertex->position().x();
-    double Ly = meanPosition[1]-priVertex->position().y();
-    double Lz = meanPosition[2]-priVertex->position().z();
-
-    const double decaylength = sqrt(Lx*Lx + Ly*Ly + Lz*Lz);
-    const double inv_decaylength = 1. / decaylength;
-    double dLdLx = Lx * inv_decaylength;
-    double dLdLy = Ly * inv_decaylength;
-    double dLdLz = Lz * inv_decaylength;
-    double decaylength_err = sqrt(dLdLx*dLdLx*covariance(0,0) +
-				  dLdLy*dLdLy*covariance(1,1) +
-				  dLdLz*dLdLz*covariance(2,2) +
-				  2.*dLdLx*dLdLy*covariance(0,1) +
-				  2.*dLdLx*dLdLz*covariance(0,2) +
-				  2.*dLdLy*dLdLz*covariance(1,2));
-
-   double decaylength_significance = 0.;
-   if (decaylength_err != 0.) decaylength_significance = decaylength/decaylength_err;
-   double L_proj_jetDir = jetDirection.x()*Lx + jetDirection.y()*Ly + jetDirection.z()*Lz;
-   if (L_proj_jetDir < 0.) decaylength_significance *= -1.;
-
-   return decaylength_significance;
 
   }
 

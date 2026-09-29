@@ -8,7 +8,6 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "AthLinks/ElementLink.h"
-#include "JetTagTools/SVTag.h"
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 
 #include <string>
@@ -170,10 +169,10 @@ namespace Analysis {
         std::map<std::string, std::unique_ptr<ITaggerDecorHandles>> m_decorKeys;
 
         SG::ReadHandleKey<xAOD::JetContainer > m_JetCollectionName {this, "JetCollectionName", "", "Input jet container"};
-        ToolHandle<Analysis::SVTag> m_svTag {this, "SVTag", "Analysis::SVTag", "SVTag tool"};
 
         SG::ReadHandleKeyArray<Trk::VxSecVertexInfoContainer> m_VxSecVertexInfoNames {this, "BTagVxSecVertexInfoNames", {""}, "Input VxSecVertexInfo containers"};
         SG::ReadHandleKey<xAOD::VertexContainer> m_VertexCollectionName {this, "vxPrimaryCollectionName", "", "Input primary vertex container"};
+        SG::ReadHandleKey<xAOD::TrackParticleContainer> m_TrackCollectionName {this, "TrackCollectionName", "InDetTrackParticles", "Input track container for the track links"};
         SG::ReadDecorHandleKey<xAOD::JetContainer> m_jetSVLinkName{ this, "JetSecVtxLinkName", "", "Element Link vector form jet to SV container"};
         SG::ReadDecorHandleKey<xAOD::JetContainer> m_jetSVFlipLinkName{ this, "JetSecVtxFlipLinkName", "", "Element Link vector form jet to SVFlip container"};
         SG::ReadDecorHandleKey<xAOD::JetContainer> m_jetJFVtxLinkName{ this, "JetJFVtxLinkName", "", "Element Link vector form jet to JF vertex"};

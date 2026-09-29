@@ -12,6 +12,7 @@ find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread
 atlas_add_library( JetTagToolsLib
     JetTagTools/*.h
     src/HistoHelperRoot.cxx src/NewLikelihoodTool.cxx
+    src/VertexSignificance.cxx
     src/SVTag.cxx
     src/JetFitterInputWriter.cxx src/JetFitterDummyClassifier.cxx
     src/MV2Tag.cxx
