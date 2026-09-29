@@ -19,6 +19,7 @@
 
 #include "vecmem/utils/copy.hpp"
 
+#include <detray/geometry/identifier.hpp>
 #include <stdexcept>
 #include <algorithm>
 #include <fstream>
@@ -66,8 +67,6 @@ StatusCode JSONDeviceDetectorDescriptionProviderSvc::initialize()
   auto deviceDetector =
         std::make_unique<traccc::detector_buffer>(traccc::buffer_from_host_detector(*hostDetector, m_MRs->mainMR(), const_cast<vecmem::copy&>(*copy)));
   
-  ATH_CHECK(loadIdMaps(hostDetector));      
-  
   // Construct detector description
   traccc::io::read_detector_description(
       *hostDesign, *hostCond,
@@ -75,6 +74,8 @@ StatusCode JSONDeviceDetectorDescriptionProviderSvc::initialize()
       PathResolverFindCalibFile(m_digitizationFile.value()),
       PathResolverFindCalibFile(m_conditionsFile.value()),
       traccc::data_format::json);
+
+  ATH_CHECK(loadIdMaps(hostDetector, hostCond));
 
   ATH_MSG_DEBUG(hostDesign->size() << " design entries, "
                 << hostCond->size() << " conditions entries");
@@ -121,7 +122,9 @@ StatusCode JSONDeviceDetectorDescriptionProviderSvc::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode JSONDeviceDetectorDescriptionProviderSvc::loadIdMaps(const std::unique_ptr<traccc::host_detector>& hostDetector)
+StatusCode JSONDeviceDetectorDescriptionProviderSvc::loadIdMaps(
+  const std::unique_ptr<traccc::host_detector>& hostDetector,
+  const std::unique_ptr<traccc::detector_conditions_description::host>& hostCond)
 {
   if (m_mapFile.value().empty()) {
     ATH_MSG_FATAL("MapFile not set — detray<->Athena maps will be empty");
@@ -194,6 +197,13 @@ StatusCode JSONDeviceDetectorDescriptionProviderSvc::loadIdMaps(const std::uniqu
 
     m_idMapping->addEntry(detrayId, acts_geom_id.value(), athenaId);
   }                      
+
+  // Store the association between the detray ID and the index of the associated
+  // det description objects.
+  const auto & det_descr_ids = hostCond->geometry_id();
+  for (unsigned int i = 0; i < det_descr_ids.size(); ++i) {
+    m_idMapping->addDetDescIndex(det_descr_ids[i].value(), i);
+  }
 
   ATH_MSG_INFO("Built GeometryIdMapping with " << m_idMapping->size()
                << " detray/ACTS surfaces, " << nMatched

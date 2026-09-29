@@ -4,15 +4,17 @@
 #include "RDOtoTracccCellConverterAlg.h"
 #include "StoreGate/ReadHandle.h"
 #include <InDetRawData/SCT3_RawData.h>
+#include <optional>
 
 namespace ActsTrk {
+
+using detray_id_type = GeometryIdMapping::detray_id_type;
 
 StatusCode RDOtoTracccCellConverterAlg::initialize()
 {
   ATH_MSG_DEBUG("Initializing");
 
   ATH_CHECK(m_common.initialize());
-  ATH_CHECK(m_common.buildDetrayMaps());
 
   ATH_CHECK(m_pixelRDOKey.initialize());
   ATH_CHECK(m_stripRDOKey.initialize());
@@ -100,16 +102,22 @@ StatusCode RDOtoTracccCellConverterAlg::execute(const EventContext& ctx) const
       if (!el) continue;
       const Identifier modId = el->identify();
       const InDetDD::SiCellId cellId = el->cellIdFromIdentifier(rdoId);
-      const auto geoIdOpt = m_common.m_geoIdMapping->athenaToDetray(modId);
+      const std::optional<detray_id_type> geoIdOpt = m_common.m_geoIdMapping->athenaToDetray(modId);
       if (!geoIdOpt.has_value()) {
         ATH_MSG_FATAL("No detray id found for Athena identifier " << modId);
         return StatusCode::FAILURE;
       }
-      const uint64_t geoId = *geoIdOpt;
+      const detray_id_type geoId = *geoIdOpt;
 
       if (geoId != current_geometry_id) {
         current_geometry_id = geoId;
-        current_det_cond_idx = m_common.m_DetrayIdToDetDescrIndexMap.at(current_geometry_id);
+        std::optional<unsigned int> det_cond_idx_opt =
+          m_common.m_geoIdMapping->detrayToDetDescIndex(current_geometry_id);
+        if (!det_cond_idx_opt.has_value()) {
+          ATH_MSG_FATAL("No detector conditions index found for detray identifier " << current_geometry_id);
+          return StatusCode::FAILURE;
+        }
+        current_det_cond_idx = det_cond_idx_opt.value();
       }
 
       float activation = 1.;
@@ -149,16 +157,22 @@ StatusCode RDOtoTracccCellConverterAlg::execute(const EventContext& ctx) const
       if (!el) continue;
       const Identifier modId = el->identify();
       const InDetDD::SiCellId cellId = el->cellIdFromIdentifier(rdoId);
-      const auto geoIdOpt = m_common.m_geoIdMapping->athenaToDetray(modId);
+      const std::optional<detray_id_type> geoIdOpt = m_common.m_geoIdMapping->athenaToDetray(modId);
       if (!geoIdOpt.has_value()) {
         ATH_MSG_FATAL("No detray id found for Athena identifier " << modId);
         return StatusCode::FAILURE;
       }
-      const uint64_t geoId = *geoIdOpt;
+      const detray_id_type geoId = *geoIdOpt;
 
       if (geoId != current_geometry_id) {
         current_geometry_id = geoId;
-        current_det_cond_idx = m_common.m_DetrayIdToDetDescrIndexMap.at(current_geometry_id);
+        std::optional<unsigned int> det_cond_idx_opt =
+          m_common.m_geoIdMapping->detrayToDetDescIndex(current_geometry_id);
+        if (!det_cond_idx_opt.has_value()) {
+          ATH_MSG_FATAL("No detector conditions index found for detray identifier " << current_geometry_id);
+          return StatusCode::FAILURE;
+        }
+        current_det_cond_idx = det_cond_idx_opt.value();
       }
 
       if (m_common.m_stripID->barrel_ec(modId) == 0) {

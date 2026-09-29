@@ -4,11 +4,10 @@
 
 #include "Identifier/Identifier.h"
 
+#include <cstddef>
 #include <cstdint>
-#include <limits>
 #include <optional>
 #include <unordered_map>
-#include <vector>
 
 namespace ActsTrk {
 
@@ -60,6 +59,10 @@ class GeometryIdMapping {
     }
   }
 
+  void addDetDescIndex(detray_id_type detray_id, unsigned int index) {
+    m_detrayToDetDescIndex[detray_id] = index;
+  }
+
   /// @name detray_id <-> acts_id
   ///@{
   std::optional<acts_id_type> detrayToActs(detray_id_type detrayId) const {
@@ -101,12 +104,19 @@ class GeometryIdMapping {
   const std::unordered_map<detray_id_type, Identifier::value_type>&
     detrayToAthenaMap() const { return m_detrayToAthena; }
 
+  std::optional<size_t> detrayToDetDescIndex(detray_id_type detray_id) const {
+    auto it = m_detrayToDetDescIndex.find(detray_id);
+    return it == m_detrayToDetDescIndex.end() ? std::nullopt : std::optional(it->second);
+  }
+
  private:
   std::unordered_map<detray_id_type, acts_id_type> m_detrayToActs;
   std::unordered_map<detray_id_type, Identifier::value_type> m_detrayToAthena;
 
   std::unordered_map<acts_id_type, detray_id_type> m_actsToDetray;
   std::unordered_map<Identifier::value_type, detray_id_type> m_athenaToDetray;
+
+  std::unordered_map<detray_id_type, size_t> m_detrayToDetDescIndex;
 };
 
 }  // namespace ActsTrk

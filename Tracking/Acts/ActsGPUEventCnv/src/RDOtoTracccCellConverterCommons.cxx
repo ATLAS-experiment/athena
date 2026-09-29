@@ -47,29 +47,7 @@ StatusCode RDOtoTracccCellConverterCommons::initialize()
   ATH_CHECK(m_parent.detStore()->retrieve(m_geoIdMapping, m_geoIdMappingObjectName.value()));
   ATH_CHECK(m_parent.detStore()->retrieve(m_hostCond, m_hostCondObjectName.value()));
 
-  ATH_MSG_INFO("Built detray→detcond map with "
-      << m_DetrayIdToDetDescrIndexMap.size() << " entries");
-
   ATH_CHECK(decodeTimeBins());
-
-  return StatusCode::SUCCESS;
-}
-
-StatusCode RDOtoTracccCellConverterCommons::buildDetrayMaps() const
-{
-  
-  const auto& gids = m_hostCond->geometry_id();
-  // NOTE: m_DetrayIdToDetDescrIndexMap is built once here; 
-  // meaning it is only valid as long as the geometry does not change.
-  // if the job ever spans multiple IOVs with a
-  // genuinely different geometry_id() payload, this caching strategy
-  // would need to become IOV-aware instead.
-  const_cast<RDOtoTracccCellConverterCommons*>(this)->m_DetrayIdToDetDescrIndexMap.reserve(gids.size());
-  for (unsigned int i = 0; i < gids.size(); ++i) {
-    const_cast<RDOtoTracccCellConverterCommons*>(this)->m_DetrayIdToDetDescrIndexMap[gids[i].value()] = i;
-  }
-  ATH_MSG_INFO("Built detray→detcond map with "
-      << m_DetrayIdToDetDescrIndexMap.size() << " entries");
 
   return StatusCode::SUCCESS;
 }

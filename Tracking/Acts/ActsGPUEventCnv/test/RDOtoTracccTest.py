@@ -102,7 +102,8 @@ if __name__ == "__main__":
         flags.Scheduler.CheckDependencies     = True
 
     flags.PerfMon.doFullMonMT = True
-    flags.Exec.MaxEvents = 1
+    if not PERFORMANCE_TESTING:
+        flags.Exec.MaxEvents = 1
 
     flags.fillFromArgs()
 

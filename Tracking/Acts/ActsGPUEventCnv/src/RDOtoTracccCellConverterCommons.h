@@ -61,10 +61,6 @@ struct RDOtoTracccCellConverterCommons : public AthMessaging
   Gaudi::Property<std::string> m_hostCondObjectName;
   const traccc::detector_conditions_description::host* m_hostCond{nullptr};
 
-  // Geometry conversion maps
-  const std::unordered_map<Identifier, uint64_t>* m_athenaToDetray{nullptr};
-  std::unordered_map<uint64_t, unsigned int> m_DetrayIdToDetDescrIndexMap{};
-
   Gaudi::Property<bool> m_CPUCellSorting;
   Gaudi::Property<bool> m_UsePixelToTForCellActivation;
 
@@ -84,7 +80,6 @@ struct RDOtoTracccCellConverterCommons : public AthMessaging
   StatusCode decodeTimeBins();
   // check if the time pattern matches the requirements of strip RDO "timeBins"
   bool passTiming(const std::bitset<3>& timePattern) const;
-  StatusCode buildDetrayMaps() const;
 };
 
 void sort_traccc_soa(
