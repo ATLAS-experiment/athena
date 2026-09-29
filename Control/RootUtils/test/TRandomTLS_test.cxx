@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 
 #undef NDEBUG
@@ -9,8 +9,8 @@
 #include "TRandom3.h"
 
 #include <cassert>
-#include <iostream>
 #include <mutex>
+#include <print>
 #include <set>
 #include <thread>
 
@@ -53,7 +53,7 @@ void test_unique()
   assert(test.m_values.size() == Nthreads);
 
   for (int v : test.m_values) {
-    std::cout << v << std::endl;
+    std::println ("{}", v);
   }
 }
 

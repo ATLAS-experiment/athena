@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file RootUtils/test/Type_test.cxx
@@ -14,8 +14,7 @@
 #include "TClass.h"
 #include "TDataType.h"
 #include <string>
-#include <iostream>
-#include <sstream>
+#include <print>
 #include <stdexcept>
 #include <cassert>
 
@@ -25,9 +24,7 @@ template <> int fromInt<int> (size_t x) { return x; }
 template <> double fromInt<double> (size_t x) { return x; }
 template <> std::string fromInt<std::string> (size_t x)
 {
-  std::ostringstream ss;
-  ss << x;
-  return ss.str();
+  return std::to_string(x);
 }
 
 
@@ -104,7 +101,7 @@ void testit (const RootUtils::Type& type)
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   RootUtils::Type itype (kInt_t);
   assert (itype.getTypeName() == "Int_t");
@@ -174,7 +171,7 @@ void test1()
 // Test fromString
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   RootUtils::Type itype1 ("int");
   int ix = 0;
@@ -222,7 +219,7 @@ void test2()
 // Test unique_ptr + deleter.
 void test3()
 {
-  std::cout << "test3\n";
+  std::println ("test3");
 
   RootUtils::Type stype ("std::string");
   RootUtils::Type::unique_ptr up (new std::string ("asd"), stype);

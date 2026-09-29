@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file RootUtils/test/TSMethodCall_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -16,7 +14,7 @@
 #include "TClass.h"
 #include <shared_mutex>
 #include <thread>
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -56,7 +54,7 @@ struct TestThread
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   RootUtils::TSMethodCall meth;
   TClass* cl = TClass::GetClass("std::string");
   meth.setProto (cl, "operator=", "const std::string&");

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -45,6 +45,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include "TList.h"
 
 #include <iostream>
+#include <print>
 
 namespace {
 PyObject*
@@ -303,10 +304,8 @@ recurse_pyinspect(PyObject *pyobj,
   const Int_t nmembers = members ? members->GetEntries() : 0;
 
 #if PYROOT_INSPECTOR_DBG
-  std::cerr << "==[" << clsname << "]== (#mbrs:"
-            << nmembers 
-            << " #stl:" << hdr /*PySequence_Size(pyobj)*/
-            << ")...\n";
+  std::println (std::cerr, "==[{}]== (#mbrs:{} #stl:{})...",
+                clsname, nmembers, hdr);
 #endif
 
   if (hdr) {
@@ -314,7 +313,7 @@ recurse_pyinspect(PyObject *pyobj,
 #if PYROOT_INSPECTOR_DBG
     {
       const Py_ssize_t nelems = PySequence_Size(pyobj);
-      std::cerr << "== sequence (" << nelems << ")...\n";
+      std::println (std::cerr, "== sequence ({})...", nelems);
     }
 #endif
 
@@ -365,7 +364,7 @@ recurse_pyinspect(PyObject *pyobj,
     }
 
 #if PYROOT_INSPECTOR_DBG
-    std::cerr << "== sequence (" << nelems << ")... [done]\n";
+    std::println (std::cerr, "== sequence ({})... [done]", nelems);
 #endif
   }
 
@@ -378,10 +377,9 @@ recurse_pyinspect(PyObject *pyobj,
 
 #if PYROOT_INSPECTOR_DBG
     TClass *mbr_cls = TClass::GetClass(mbr->GetTypeName());
-    std::cerr << "==[" << j << "] - [" << mbr->GetTypeName() << "] "
-              << "[" << mbr->GetName() 
-              << "]"
-              << "[" << (mbr_cls ? mbr_cls->GetName() : "N/A") << "]\n";
+    std::println (std::cerr, "==[{}] - [{}] [{}][{}]",
+                  j, mbr->GetTypeName(), mbr->GetName(),
+                  (mbr_cls ? mbr_cls->GetName() : "N/A"));
 #endif
 
     PyObject *py_mbr_name = 0;
@@ -399,10 +397,9 @@ recurse_pyinspect(PyObject *pyobj,
       py_mbr = to_pyobj(ptr, mbr_dtype);
     } else if (mbr->IsEnum()) {
 #if PYROOT_INSPECTOR_DBG
-      std::cerr << "==[" << mbr->GetTypeName() << "]["
-                << mbr->GetDataType()->GetType() << "][val="
-                << (*(int*)ptr) << "]["
-                << mbr->GetName() << "] is an enum !!\n";
+      std::println (std::cerr, "==[{}][{}][val={}][{}] is an enum !!",
+                    mbr->GetTypeName(), mbr->GetDataType()->GetType(),
+                    *reinterpret_cast<int*>(ptr), mbr->GetName());
 #endif
       py_mbr_name = PyUnicode_FromString(mbr->GetName());
       py_mbr = to_pyobj(ptr, kInt_t);
@@ -413,8 +410,8 @@ recurse_pyinspect(PyObject *pyobj,
     }
 
     if (!py_mbr || !py_mbr_name) {
-      std::cerr << "could not create py-object of type ["
-                << mbr->GetTypeName() << "] !\n";
+      std::println (std::cerr, "could not create py-object of type [{}] !",
+                    mbr->GetTypeName());
       Py_XDECREF(py_mbr);
       Py_XDECREF(py_mbr_name);
       throw RootUtils::PyException();
@@ -429,8 +426,8 @@ recurse_pyinspect(PyObject *pyobj,
   }
 
 #if PYROOT_INSPECTOR_DBG
-  std::cerr << "==[" << tcls->GetName() << "]== (#mbrs:"
-            << nmembers << ")... [done]\n";
+  std::println (std::cerr, "==[{}]== (#mbrs:{})... [done]",
+                tcls->GetName(), nmembers);
 #endif
 
   return;
@@ -491,18 +488,15 @@ PyROOTInspector::pyroot_inspect(PyObject* pyobj,
 
   PyObject *py_members = PyList_New(nmembers+hdr);
 #if PYROOT_INSPECTOR_DBG
-  std::cerr << "==[" << tcls->GetName() << "]== (#mbrs:"
-            << nmembers 
-            << " #stl:" << hdr /*PySequence_Size(pyobj)*/
-            << " #py-sz:" << PyList_Size(py_members)
-            << ")...\n";
+  std::println (std::cerr, "==[{}]== (#mbrs:{} #stl:{} #py-sz:{})...",
+                tcls->GetName(), nmembers, hdr, PyList_Size(py_members));
 #endif
 
   if (hdr) {
     // handle collection
     const Py_ssize_t nelems = PySequence_Size(pyobj);
 #if PYROOT_INSPECTOR_DBG
-    std::cerr << "== sequence (" << nelems << ")...\n";
+    std::println (std::cerr, "== sequence ({})...", nelems);
 #endif
     PyObject *py_elems = PyList_New(nelems);
     for (Py_ssize_t i = 0; i < nelems; ++i) {
@@ -515,10 +509,9 @@ PyROOTInspector::pyroot_inspect(PyObject* pyobj,
     // add the elements to the "members" list
     PyList_SET_ITEM(py_members, 0, py_elems);
 #if PYROOT_INSPECTOR_DBG
-    std::cerr << "== sequence (" << nelems << ")... content:\n"
-              << ::to_str(py_elems)
-              << "\n";
-    std::cerr << "== sequence (" << nelems << ")... [done]\n";
+    std::println (std::cerr, "== sequence ({})... content:\n{}",
+                  nelems, ::to_str(py_elems));
+    std::println (std::cerr, "== sequence ({})... [done]", nelems);
 #endif
   }
 
@@ -530,10 +523,9 @@ PyROOTInspector::pyroot_inspect(PyObject* pyobj,
 
 #if PYROOT_INSPECTOR_DBG
     TClass *mbr_cls = TClass::GetClass(mbr->GetTypeName());
-    std::cerr << "==[" << j << "] - [" << mbr->GetTypeName() << "] "
-              << "[" << mbr->GetName() 
-              << "]"
-              << "[" << (mbr_cls ? mbr_cls->GetName() : "N/A") << "]\n";
+    std::println (std::cerr,  "==[{}] - [{}] [{}][{}]",
+                  j, mbr->GetTypeName(), mbr->GetName(),
+                  (mbr_cls ? mbr_cls->GetName() : "N/A"));
 #endif
 
     PyObject *py_mbr = 0;
@@ -548,10 +540,9 @@ PyROOTInspector::pyroot_inspect(PyObject* pyobj,
       py_mbr = to_pyobj(ptr, mbr_dtype);
     } else if (mbr->IsEnum()) {
 #if PYROOT_INSPECTOR_DBG
-      std::cerr << "==[" << mbr->GetTypeName() << "]["
-                << mbr->GetDataType()->GetType() << "][val="
-                << (*(int*)ptr) << "]["
-                << mbr->GetName() << "] is an enum !!\n";
+      std::println (std::cerr, "==[{}][{}][val=][{}] is an enum !!",
+                    mbr->GetTypeName(), mbr->GetDataType()->GetType(),
+                    *reinterpret_cast<int*>(ptr), mbr->GetName());
 #endif
       py_mbr = to_pyobj(ptr, kInt_t);
     } else {
@@ -564,8 +555,8 @@ PyROOTInspector::pyroot_inspect(PyObject* pyobj,
       Py_XDECREF(pyroot_obj);
     }
     if (!py_mbr) {
-      std::cerr << "could not create py-object of type ["
-                << mbr->GetTypeName() << "] !\n";
+      std::println (std::cerr, "could not create py-object of type [{}] !",
+                    mbr->GetTypeName());
       Py_DECREF(py_members);
       throw RootUtils::PyException();
     }
@@ -577,8 +568,8 @@ PyROOTInspector::pyroot_inspect(PyObject* pyobj,
     PyList_SET_ITEM(py_members, j+hdr, py_item);
   }
 #if PYROOT_INSPECTOR_DBG
-  std::cerr << "==[" << tcls->GetName() << "]== (#mbrs:"
-            << nmembers << ")... [done]\n";
+  std::println (std::cerr, "==[{}]== (#mbrs:{})... [done]",
+                tcls->GetName(), nmembers);
 #endif
   return py_members;
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file RootUtils/test/WithRootErrorHandler_test.cxx
@@ -13,8 +13,9 @@
 #include "RootUtils/WithRootErrorHandler.h"
 #include "TInterpreter.h"
 #include "TError.h"
-#include <string>
 #include <iostream>
+#include <string>
+#include <print>
 #include <cassert>
 
 
@@ -33,7 +34,7 @@ struct TestHand
 bool TestHand::operator() (int /*level*/, Bool_t /*abort*/,
                            const char* /*loc*/, const char* msg)
 {
-  std::cout << m_name << ": " << msg << "\n";
+  std::println ("{}: {}", m_name, msg);
   std::cout.flush();
   return m_passOn;
 }
@@ -45,7 +46,7 @@ void test1()
   // it can deadlock.
   TInterpreter::Instance();
 
-  std::cout << "test1\n";
+  std::println ("test1");
   std::cout.flush();
 
   ::Error ("foo1", "Bar1");
@@ -76,7 +77,7 @@ void test1()
 
 int main()
 {
-  std::cout << "RootUtils/WithRootErrorHandler_test\n";
+  std::println ("RootUtils/WithRootErrorHandler_test");
   test1();
   return 0;
 }
