@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /* 
@@ -43,7 +43,6 @@ StatusCode TileEopFilterAlg::initialize(){
 //=======================================
       
   CHECK(m_trackInCalo.retrieve());
-  //CHECK(m_trackIsoTool.retrieve());
   
   return StatusCode::SUCCESS;
 } 
@@ -57,9 +56,9 @@ StatusCode TileEopFilterAlg::execute(const EventContext& /*ctx*/){
   CHECK( evtStore()->retrieve( inputTracks, m_inputTracks ) );
   
   //Allocate the output tracks container
-  TRACKCONTAINER * outputTracks = new TRACKCONTAINER;
-  TRACKAUXCONTAINER* outputAuxTracks = new TRACKAUXCONTAINER;
-  outputTracks->setStore( outputAuxTracks );
+  auto outputTracks = std::make_unique< TRACKCONTAINER >();
+  auto outputAuxTracks = std::make_unique< TRACKAUXCONTAINER>();
+  outputTracks->setStore( outputAuxTracks.get() );
 
   
   //Select tracks
@@ -130,9 +129,9 @@ StatusCode TileEopFilterAlg::execute(const EventContext& /*ctx*/){
   CHECK( evtStore()->retrieve( inputClusters, m_inputClusters ) );
 
   //Allocate output clusters container
-  xAOD::CaloClusterContainer* outputClusters = new xAOD::CaloClusterContainer;
-  xAOD::CaloClusterAuxContainer* outputAuxClusters = new xAOD::CaloClusterAuxContainer;
-  outputClusters->setStore( outputAuxClusters );
+  auto outputClusters = std::make_unique< xAOD::CaloClusterContainer>();
+  auto outputAuxClusters = std::make_unique< xAOD::CaloClusterAuxContainer>();
+  outputClusters->setStore( outputAuxClusters.get() );
 
 
   //Allocate output association between tracks and clusters  
@@ -285,10 +284,10 @@ StatusCode TileEopFilterAlg::execute(const EventContext& /*ctx*/){
 
   ATH_MSG_DEBUG("Number of selected cells: " << outputCells->size());
 
-  CHECK( evtStore()->record(outputClusters, m_outputClusters ) );
-  CHECK( evtStore()->record(outputAuxClusters, m_outputClusters+"Aux.") );
-  CHECK( evtStore()->record(outputTracks, m_outputTracks) );
-  CHECK( evtStore()->record(outputAuxTracks, m_outputTracks+"Aux.") );
+  CHECK( evtStore()->record(std::move(outputClusters), m_outputClusters ) );
+  CHECK( evtStore()->record(std::move(outputAuxClusters), m_outputClusters+"Aux.") );
+  CHECK( evtStore()->record(std::move(outputTracks), m_outputTracks) );
+  CHECK( evtStore()->record(std::move(outputAuxTracks), m_outputTracks+"Aux.") );
 
 
   return StatusCode::SUCCESS;

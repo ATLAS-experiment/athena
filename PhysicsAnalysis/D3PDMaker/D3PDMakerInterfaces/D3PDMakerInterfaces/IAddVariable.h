@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -87,7 +87,7 @@ public:
   template <class T>
   StatusCode addVariable (const std::string& name,
                           T* & ptr,
-                          const std::string& docstring = "");
+                          std::string_view docstring = "");
 
 
   /**
@@ -106,7 +106,7 @@ public:
   template <class T, class U>
   StatusCode addVariable (const std::string& name,
                           T* & ptr,
-                          const std::string& docstring,
+                          std::string_view docstring,
                           const U& defval);
 
 
@@ -127,7 +127,7 @@ public:
   StatusCode addDimensionedVariable (const std::string& name,
                                      T* & ptr,
                                      const std::string& dim,
-                                     const std::string& docstring = "");
+                                     std::string_view docstring = "");
 
 
   /**
@@ -149,7 +149,7 @@ public:
   StatusCode addDimensionedVariable (const std::string& name,
                                      T* & ptr,
                                      const std::string& dim,
-                                     const std::string& docstring,
+                                     std::string_view docstring,
                                      const U& defval);
 
 
@@ -172,7 +172,7 @@ public:
   virtual StatusCode addVariable (const std::string& name,
                                   const std::type_info& ti,
                                   void* & ptr,
-                                  const std::string& docstring = "",
+                                  std::string_view docstring = "",
                                   const void* defval = 0) = 0;
 
 
@@ -199,7 +199,7 @@ public:
                           const std::type_info& ti,
                           void* & ptr,
                           const std::string& dim,
-                          const std::string& docstring = "",
+                          std::string_view docstring = "",
                           const void* defval = 0) = 0;
 };
 

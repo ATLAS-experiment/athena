@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -92,7 +92,7 @@ public:
   virtual StatusCode addVariable (const std::string& name,
                                   const std::type_info& ti,
                                   void* & ptr,
-                                  const std::string& docstring = "",
+                                  std::string_view docstring = "",
                                   const void* defval = 0) override;
 
 
@@ -117,7 +117,7 @@ public:
                           const std::type_info& ti,
                           void* & ptr,
                           const std::string& dim,
-                          const std::string& docstring = "",
+                          std::string_view docstring = "",
                           const void* defval = 0) override;
 
 

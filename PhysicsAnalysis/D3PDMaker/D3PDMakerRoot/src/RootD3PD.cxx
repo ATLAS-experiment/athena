@@ -485,7 +485,7 @@ RootD3PD::~RootD3PD()
 StatusCode RootD3PD::addVariable (const std::string& name,
                                   const std::type_info& ti,
                                   void* & ptr,
-                                  const std::string& docstring /*= ""*/,
+                                  std::string_view docstring /*= ""*/,
                                   const void* defval /*= 0*/)
 {
   TBranch* br = 0;
@@ -565,7 +565,7 @@ StatusCode RootD3PD::addVariable (const std::string& name,
   }
 
   // Set the branch docstring.
-  br->SetTitle (docstring.c_str());
+  br->SetTitle (std::string{docstring}.c_str());
 
   // Set the branch buffer sizes as requested.
   if (m_basketSize != -1)
@@ -606,7 +606,7 @@ RootD3PD::addDimensionedVariable (const std::string& /*name*/,
                                   const std::type_info& /*ti*/,
                                   void* & /*ptr*/,
                                   const std::string& /*dim*/,
-                                  const std::string& /*docstring = ""*/,
+                                  std::string_view /*docstring = ""*/,
                                   const void* /*defval = 0*/)
 {
   REPORT_MESSAGE (MSG::ERROR)

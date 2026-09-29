@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /* 
@@ -36,9 +36,9 @@ StatusCode TileClusterFilterAlg::execute(const EventContext& /*ctx*/){
   CHECK( evtStore()->retrieve( inputClusters, m_inputContainerName ) );
 
   //Allocate output clusters container
-  xAOD::CaloClusterContainer* outputClusters = new xAOD::CaloClusterContainer;
-  xAOD::CaloClusterAuxContainer* outputAuxClusters = new xAOD::CaloClusterAuxContainer;
-  outputClusters->setStore( outputAuxClusters );
+  auto outputClusters = std::make_unique<xAOD::CaloClusterContainer>();
+  auto outputAuxClusters = std::make_unique<xAOD::CaloClusterAuxContainer>();
+  outputClusters->setStore( outputAuxClusters.get() );
 
   //Get the input tracks
   const TRACKCONTAINER* inputTracks = 0;
@@ -69,8 +69,8 @@ StatusCode TileClusterFilterAlg::execute(const EventContext& /*ctx*/){
       }
     } 
   }
-  CHECK( evtStore()->record(outputClusters, m_outputContainerName ) );
-  CHECK( evtStore()->record(outputAuxClusters, m_outputContainerName+"Aux.") );
+  CHECK( evtStore()->record(std::move(outputClusters), m_outputContainerName ) );
+  CHECK( evtStore()->record(std::move(outputAuxClusters), m_outputContainerName+"Aux.") );
 
   return StatusCode::SUCCESS;
 }

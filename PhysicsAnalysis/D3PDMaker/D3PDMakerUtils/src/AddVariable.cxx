@@ -31,7 +31,6 @@ AddVariable::AddVariable (const std::string& prefix,
   : m_metadata (),
     m_prefix (prefix),
     m_suffix (s_emptyString),
-    //m_blockName (blockName),
     m_tree (0)
 {
 }
@@ -85,7 +84,7 @@ StatusCode AddVariable::configureD3PD (IAddVariable* tree)
 StatusCode AddVariable::addVariable (const std::string& name,
                                      const std::type_info& ti,
                                      void* & ptr,
-                                     const std::string& docstring /*= ""*/,
+                                     std::string_view docstring /*= ""*/,
                                      const void* defval /*= 0*/)
 {
   if (!m_tree) {
@@ -124,7 +123,7 @@ AddVariable::addDimensionedVariable (const std::string& name,
                                      const std::type_info& ti,
                                      void* & ptr,
                                      const std::string& dim,
-                                     const std::string& docstring /*= ""*/,
+                                     std::string_view docstring /*= ""*/,
                                      const void* defval /*= 0*/)
 {
   if (!m_tree) {

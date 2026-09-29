@@ -1,7 +1,9 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
+// Local include(s):
+#include "D3PDMakerUtils/ObjectMetadata.h"
 
 // Boost include(s):
 #include <boost/tokenizer.hpp>
@@ -10,8 +12,7 @@
 #include "GaudiKernel/System.h"
 #include "AthenaKernel/errorcheck.h"
 
-// Local include(s):
-#include "D3PDMakerUtils/ObjectMetadata.h"
+
 
 /// Private namespace for the local function(s)
 namespace {
@@ -109,7 +110,7 @@ namespace D3PD {
    StatusCode ObjectMetadata::addVariable( const std::string& name,
                                            const std::type_info& ti,
                                            void*& /*ptr*/,
-                                           const std::string& docstring,
+                                           std::string_view docstring,
                                            const void* /*defval*/ ) {
 
       // Check that the variable has the correct prefix:
@@ -158,7 +159,7 @@ namespace D3PD {
                                            const std::type_info& /*ti*/,
                                            void*& /*ptr*/,
                                            const std::string& /*dim*/,
-                                           const std::string& /*docstring*/,
+                                           std::string_view /*docstring*/,
                                            const void* /*defval*/ ) {
 
       REPORT_MESSAGE_WITH_CONTEXT( MSG::FATAL, "ObjectMetadata" )
@@ -456,9 +457,9 @@ namespace D3PD {
       return;
    }
 
-   void ObjectMetadata::Variable::setDoc( const std::string& doc ) {
+   void ObjectMetadata::Variable::setDoc( std::string_view doc ) {
 
-      m_doc = doc;
+      m_doc.assign(doc);
       return;
    }
 

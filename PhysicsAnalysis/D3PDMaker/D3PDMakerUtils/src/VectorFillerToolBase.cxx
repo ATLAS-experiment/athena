@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file D3PDMakerUtils/src/VectorFillerToolBase.cxx
@@ -306,7 +306,7 @@ StatusCode
 VectorFillerToolBase::addVariable (const std::string& name,
                                    const std::type_info& ti,
                                    void* & ptr,
-                                   const std::string& docstring /*= ""*/,
+                                   std::string_view docstring /*= ""*/,
                                    const void* defval /*= 0*/)
 {
   if (!m_tree) {
@@ -355,7 +355,7 @@ VectorFillerToolBase::addVariable (const std::string& name,
     std::memcpy (defcopied, defval, defsize);
   }
 
-  m_vars.push_back (Var (name, ti, ptr, docstring, defcopied, defsize));
+  m_vars.emplace_back (name, ti, ptr, docstring, defcopied, defsize);
   CHECK( m_vars.back().init (&m_metadata, m_prefix) );
   CHECK( m_vars.back().init (m_tree, m_prefix) );
 
@@ -384,7 +384,7 @@ VectorFillerToolBase::addDimensionedVariable (const std::string& /*name*/,
                                               const std::type_info& /*ti*/,
                                               void* & /*ptr*/,
                                               const std::string& /*dim*/,
-                                              const std::string& /*docstring = ""*/,
+                                              std::string_view /*docstring = ""*/,
                                               const void* /*defval = 0*/)
 {
   REPORT_MESSAGE(MSG::ERROR) << "addDimensionedVariable not yet implemented.";
@@ -408,13 +408,13 @@ VectorFillerToolBase::addDimensionedVariable (const std::string& /*name*/,
 VectorFillerToolBase::Var::Var (const std::string& name,
                                 const std::type_info& ti,
                                 void* & ptr,
-                                const std::string& docstring,
+                                std::string_view docstring,
                                 char* defval,
                                 size_t defsize)
   : m_name (name),
     m_ti (&ti),
     m_addr (reinterpret_cast<char**> (&ptr)),
-    m_docstring (docstring),
+    m_docstring{docstring},
     m_proxy (0),
     m_valdiff (0),
     m_contptr (0),

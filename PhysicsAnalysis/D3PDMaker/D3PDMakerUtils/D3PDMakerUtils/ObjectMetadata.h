@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef D3PDMAKERUTILS_OBJECTMETADATA_H
@@ -59,14 +59,14 @@ namespace D3PD {
       virtual StatusCode addVariable( const std::string& name,
                                       const std::type_info& ti,
                                       void*& ptr,
-                                      const std::string& docstring = "",
+                                      std::string_view docstring = "",
                                       const void* defval = 0 );
 
       virtual StatusCode addDimensionedVariable( const std::string& name,
                                                  const std::type_info& ti,
                                                  void*& ptr,
                                                  const std::string& dim,
-                                                 const std::string& docstring = "",
+                                                 std::string_view docstring = "",
                                                  const void* defval = 0 );
 
       //
@@ -145,7 +145,7 @@ namespace D3PD {
          /// Set the name of the variable
          void setName( const std::string& name );
          /// Set the description of the variable
-         void setDoc( const std::string& doc );
+         void setDoc( std::string_view doc );
          /// Set whether the variable is a primitive
          void setPrimitive( bool primitive );
          /// Function "serializing" the variable information into a string

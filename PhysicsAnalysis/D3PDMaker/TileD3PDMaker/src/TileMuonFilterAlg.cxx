@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -73,15 +73,15 @@ StatusCode TileMuonFilterAlg::execute(const EventContext& /*ctx*/){
   ATH_MSG_DEBUG("Number of Muons: " << inputMuons->size());
 
   //Allocate the output Muons container
-  MUONCONTAINER* outputMuons = new MUONCONTAINER;
-  MUONAUXCONTAINER* outputAuxMuons = new MUONAUXCONTAINER;
-  outputMuons->setStore( outputAuxMuons );
+  auto outputMuons = std::make_unique< MUONCONTAINER>();
+  auto outputAuxMuons = std::make_unique< MUONAUXCONTAINER>();
+  outputMuons->setStore( outputAuxMuons.get() );
 
 
   //Allocate the output tracks container
-  TRACKCONTAINER * outputTracks = new TRACKCONTAINER;
-  TRACKAUXCONTAINER* outputAuxTracks = new TRACKAUXCONTAINER;
-  outputTracks->setStore( outputAuxTracks );
+  auto outputTracks = std::make_unique< TRACKCONTAINER>();
+  auto outputAuxTracks = std::make_unique< TRACKAUXCONTAINER>();
+  outputTracks->setStore( outputAuxTracks.get() );
 
 
   //Get input cells
@@ -224,10 +224,10 @@ StatusCode TileMuonFilterAlg::execute(const EventContext& /*ctx*/){
   ATH_MSG_DEBUG("Number of selected Muons: "<< outputMuons->size() );
   ATH_MSG_DEBUG("Number of selected cells: " << outputCells->size());
 
-  CHECK( evtStore()->record(outputMuons, m_outputMuons) );
-  CHECK( evtStore()->record(outputAuxMuons,m_outputMuons+"Aux.") );
-  CHECK( evtStore()->record(outputTracks, m_outputTracks) );
-  CHECK( evtStore()->record(outputAuxTracks,m_outputTracks+"Aux.") );
+  CHECK( evtStore()->record(std::move(outputMuons), m_outputMuons) );
+  CHECK( evtStore()->record(std::move(outputAuxMuons),m_outputMuons+"Aux.") );
+  CHECK( evtStore()->record(std::move(outputTracks), m_outputTracks) );
+  CHECK( evtStore()->record(std::move(outputAuxTracks),m_outputTracks+"Aux.") );
 
   delete tmpCells; // clean up memory 
   return StatusCode::SUCCESS;
