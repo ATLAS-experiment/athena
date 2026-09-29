@@ -2,14 +2,15 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "Identifier/Identifier.h"
-#include <GeoModelKernel/throwExcept.h>
-#include <cstddef>
 #ifndef SIMULATIONBASE
-#include <MuonReadoutGeometryR4/SpectrometerSector.h>
-#include <Acts/Surfaces/PlaneSurface.hpp>
-#include <Acts/Geometry/TrapezoidVolumeBounds.hpp>
-#include <Acts/Geometry/Volume.hpp>
+
+#include "MuonReadoutGeometryR4/SpectrometerSector.h"
+
+#include "Identifier/Identifier.h"
+#include "GeoModelKernel/throwExcept.h"
+#include "Acts/Surfaces/PlaneSurface.hpp"
+#include "Acts/Geometry/TrapezoidVolumeBounds.hpp"
+#include "Acts/Geometry/Volume.hpp"
 
 #include "MuonReadoutGeometryR4/MdtReadoutElement.h"
 #include "MuonReadoutGeometryR4/MmReadoutElement.h"
@@ -18,6 +19,7 @@
 #include "MuonReadoutGeometryR4/TgcReadoutElement.h"
 #include "MuonReadoutGeometryR4/sTgcReadoutElement.h"
 
+#include <cstddef>
 #include <format>
 
 namespace {
@@ -35,7 +37,8 @@ using ChamberSet = SpectrometerSector::ChamberSet;
 using BoundEnums = Acts::TrapezoidVolumeBounds::BoundValues;
 
 SpectrometerSector::SpectrometerSector(defineArgs&& args): 
-    AthMessaging("MuonSpectrometerSector"), m_args{std::move(args)} {
+    AthMessaging("MuonSpectrometerSector"), 
+    m_args{std::move(args)} {
         for (auto & chamber : m_args.chambers) {
             chamber->setParent(this);
         }
@@ -63,18 +66,17 @@ const Acts::PlaneSurface& SpectrometerSector::surface() const {
     return *m_args.surface;
 }
 
-
-const Amg::Transform3D& SpectrometerSector::localToGlobalTransform(const Acts::GeometryContext& tgContext) const{
+const Acts::Transform3& SpectrometerSector::localToGlobalTransform(const Acts::GeometryContext& tgContext) const{
     return surface().localToGlobalTransform(tgContext); 
 }
-Amg::Transform3D SpectrometerSector::globalToLocalTransform(const Acts::GeometryContext& tgContext) const{
-    return localToGlobalTransform(tgContext).inverse(); 
+const Acts::Transform3& SpectrometerSector::globalToLocalTransform(const Acts::GeometryContext& tgContext) const{
+    return m_args.placement->globalToLocalTransform(tgContext); 
 }
-const Amg::Transform3D& SpectrometerSector::localToGlobalTransform(const ActsTrk::GeometryContext& gctx) const {
+const Acts::Transform3& SpectrometerSector::localToGlobalTransform(const ActsTrk::GeometryContext& gctx) const {
     return surface().localToGlobalTransform(gctx.context());
 }            
-Amg::Transform3D SpectrometerSector::globalToLocalTransform(const ActsTrk::GeometryContext& gctx) const {
-    return localToGlobalTransform(gctx).inverse(); 
+const Acts::Transform3& SpectrometerSector::globalToLocalTransform(const ActsTrk::GeometryContext& gctx) const {
+    return globalToLocalTransform(gctx.context()); 
 }
 double SpectrometerSector::halfXLong() const { return MuonGMR4::halfXhighY(*m_args.bounds); }
 double SpectrometerSector::halfXShort() const { return MuonGMR4::halfXlowY(*m_args.bounds);  }
@@ -82,8 +84,9 @@ double SpectrometerSector::halfY() const { return MuonGMR4::halfY(* m_args.bound
 double SpectrometerSector::halfZ() const { return MuonGMR4::halfZ(*m_args.bounds);}
 
 
-std::shared_ptr<Acts::Volume> SpectrometerSector::boundingVolume(const ActsTrk::GeometryContext& gctx) const {
-    return std::make_shared<Acts::Volume>(localToGlobalTransform(gctx), bounds());
+std::shared_ptr<Acts::Volume> SpectrometerSector::boundingVolume() const {
+     Acts::VolumePlacementBase* ATLAS_THREAD_SAFE placement = m_args.placement.get();
+    return std::make_shared<Acts::Volume>(*placement, bounds());
 }
 std::shared_ptr<Acts::VolumeBounds> SpectrometerSector::bounds() const { return m_args.bounds; }
 Chamber::ReadoutSet SpectrometerSector::readoutEles() const {
@@ -123,7 +126,7 @@ SpectrometerSector::fillDetLayIdCache() const{
 
     std::unordered_map<const MuonReadoutElement*, std::vector<unsigned int>> cache{};
     const ActsTrk::GeometryContext gctx{};
-    const Amg::Transform3D sectorTrans = globalToLocalTransform(gctx);
+    const Acts::Transform3 sectorTrans = globalToLocalTransform(gctx);
 
     // sort the Readout elements by z in the sector fram
     Chamber::ReadoutSet reEleSorted {readoutEles()};

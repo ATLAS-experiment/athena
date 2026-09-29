@@ -99,7 +99,7 @@ VolBoundPtr_t ChamberAssembleTool::boundingBox(const ChamberPtr& chamber, Acts::
 }
 
 
-std::array<Amg::Vector3D, 4> ChamberAssembleTool::cornerPointsPlane(const Amg::Transform3D& localToGlob, 
+std::array<Amg::Vector3D, 4> ChamberAssembleTool::cornerPointsPlane(const Acts::Transform3& localToGlob, 
                                                                     const VolBounds_t& bounds) {
    std::array<Amg::Vector3D,4> planePoints{localToGlob * Amg::Vector3D(-halfXlowY(bounds), - halfY(bounds), 0.),
                                            localToGlob * Amg::Vector3D(-halfXhighY(bounds),  halfY(bounds), 0.),
@@ -107,7 +107,7 @@ std::array<Amg::Vector3D, 4> ChamberAssembleTool::cornerPointsPlane(const Amg::T
                                            localToGlob * Amg::Vector3D( halfXhighY(bounds),  halfY(bounds), 0.)};
    return planePoints;
 }
-std::array<Amg::Vector3D, 8> ChamberAssembleTool::cornerPoints(const Amg::Transform3D& localToGlob, 
+std::array<Amg::Vector3D, 8> ChamberAssembleTool::cornerPoints(const Acts::Transform3& localToGlob, 
                                                                const VolBounds_t& bounds) {
    std::array<Amg::Vector3D, 8> toRet{make_array<Amg::Vector3D,8>(Amg::Vector3D::Zero())};
    const std::array<Amg::Vector3D, 4> plane = cornerPointsPlane(localToGlob, bounds);
@@ -119,7 +119,7 @@ std::array<Amg::Vector3D, 8> ChamberAssembleTool::cornerPoints(const Amg::Transf
    }
    return toRet;
 }
-Amg::Transform3D ChamberAssembleTool::centerTrapezoid(const std::array<Amg::Vector3D, 8>& corners) {
+Acts::Transform3 ChamberAssembleTool::centerTrapezoid(const std::array<Amg::Vector3D, 8>& corners) {
    
    static constexpr double maxSize = 200._km;
    double minX{maxSize}, maxX{-maxSize}, minY{maxSize}, maxY{-maxSize}, minZ{maxSize}, maxZ{-maxSize};
@@ -161,7 +161,7 @@ template <typename ReObjType>
  ChamberAssembleTool::TrfWithBounds 
       ChamberAssembleTool::boundingBox(const ActsTrk::GeometryContext& gctx,
                                        const std::vector<ReObjType>& constituents,
-                                       const Amg::Transform3D& toCenter,
+                                       const Acts::Transform3& toCenter,
                                        Acts::VolumeBoundFactory& volBoundSet,
                                        Acts::SurfaceBoundFactory& surfBoundSet,
                                        const double margin) const 
@@ -169,9 +169,9 @@ template <typename ReObjType>
 
       VolBoundPtr_t envelopeBounds{};
       ATH_MSG_DEBUG("Conrstuct a new "<<typeid(Acts::RemovePointer_t<ReObjType>).name()<<" object.");
-      Amg::Transform3D newCentreTrf{Amg::Transform3D::Identity()};
+      Acts::Transform3 newCentreTrf{Acts::Transform3::Identity()};
       for (const auto& chambEle :  constituents) {
-            Amg::Transform3D trf = newCentreTrf * toCenter * 
+            Acts::Transform3 trf = newCentreTrf * toCenter * 
                                    chambEle->localToGlobalTransform(gctx);
             VolBoundPtr_t bounds = boundingBox(chambEle, volBoundSet);
             /// Hack to cope with the RPCs which may be rotated by 180 degrees around the x or z-axis in cases,
@@ -209,7 +209,7 @@ template <typename ReObjType>
                ATH_MSG_VERBOSE(toString(chambEle)<<" corner points "<<GeoTrf::toString(trf, true)<<std::endl<<debugStr.str());   
             }
             /// Fetch the edges of the best known trapezoid to extend the dimensions
-            const std::array<Amg::Vector3D, 8> refCorners{cornerPoints(Amg::Transform3D::Identity(), *envelopeBounds)};
+            const std::array<Amg::Vector3D, 8> refCorners{cornerPoints(Acts::Transform3::Identity(), *envelopeBounds)};
             /// Reserve space for the new envelope trapezoid 
             std::array<Amg::Vector3D, 8> newTrapBounds{make_array<Amg::Vector3D, 8>(Amg::Vector3D::Zero())};
 
@@ -278,7 +278,7 @@ template <typename ReObjType>
             ATH_MSG_VERBOSE(toString(chambEle)<<" "<<(*envelopeBounds));
          
             /// Finally re-center the trapezoid 
-            const Amg::Transform3D centerShift = centerTrapezoid(newTrapBounds);
+            const Acts::Transform3 centerShift = centerTrapezoid(newTrapBounds);
             newCentreTrf = centerShift * newCentreTrf;
             ATH_MSG_VERBOSE("New trapezoid centering "<<Amg::toString(centerShift)<<" combined: "
                            <<Amg::toString(newCentreTrf));
@@ -422,7 +422,7 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
 
          for (auto& detEles: chamberElements) {
             const MuonReadoutElement* refEle = detEles.front();
-            const Amg::Transform3D toChambCentre = refEle->globalToLocalTransform(gctx);
+            const Acts::Transform3 toChambCentre = refEle->globalToLocalTransform(gctx);
             ATH_MSG_VERBOSE("New chamber candidate "<<m_idHelperSvc->toStringChamber(refEle->identify()));
             const auto[chamberCentre, chamberBox, planeBounds] = boundingBox(gctx, detEles, toChambCentre, volBoundSet, 
                                                                               surfBoundSet, 0.1*Gaudi::Units::cm);
@@ -430,7 +430,7 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
             chambArgs.detEles = std::move(detEles);
             chambArgs.bounds = chamberBox;
             chambArgs.placement = std::make_unique<ActsTrk::VolumePlacement>(*refEle, chamberCentre);
-            auto surface = Acts::Surface::makeShared<Acts::PlaneSurface>(Amg::Transform3D::Identity(), planeBounds);
+            auto surface = Acts::Surface::makeShared<Acts::PlaneSurface>(Acts::Transform3::Identity(), planeBounds);
             chambArgs.placement->connectCenterSurface(surface);
             chambArgs.surface = surface;
             const Chamber* newChamber {sectorArgs.chambers.emplace_back(std::make_unique<Chamber>(std::move(chambArgs))).get()};
@@ -447,21 +447,27 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
                                                       return (*a) < (*b);
                                                    });
 
-         const Amg::Transform3D toCenter = sectorArgs.chambers.front()->globalToLocalTransform(gctx);
+         const Acts::Transform3 toCenter = sectorArgs.chambers.front()->globalToLocalTransform(gctx);
          const auto [envelopeCentre, envelopeBox, envelopePlane] = boundingBox(gctx, sectorArgs.chambers, toCenter, 
                                                                                volBoundSet, surfBoundSet, 2.* Gaudi::Units::cm);
 
          sectorArgs.bounds = envelopeBox;
-         sectorArgs.surface = Acts::Surface::makeShared<Acts::PlaneSurface>(toCenter.inverse() * envelopeCentre, envelopePlane);
+         sectorArgs.localToGlobalTrf = make_intrusive<GeoAlignableTransform>(toCenter.inverse() * envelopeCentre);
+         /// Temporarily use the CSC to avoid reporting issues with the alignment algorithms
+         sectorArgs.placement = std::make_unique<ActsTrk::VolumePlacement>(ActsTrk::DetectorType::Csc,
+                                                                           sectorArgs.localToGlobalTrf);
 
-         const Amg::Transform3D globalToSector = sectorArgs.surface->localToGlobalTransform(gctx.context()).inverse();
+         auto surface = Acts::Surface::makeShared<Acts::PlaneSurface>(Acts::Transform3::Identity(), envelopePlane);
+         sectorArgs.placement->connectCenterSurface(surface);
+         sectorArgs.surface = surface ;
+         const Acts::Transform3 globalToSector = sectorArgs.placement->globalToLocalTransform(gctx.context());
 
          /// now, build simplified 2D representations of the sorted chambers we collected. 
          for (auto & chamber : sectorArgs.chambers){
             // split by readout elements - MDT multilayers and trigger chambers for the sector
             for (auto & RE : chamber->readoutEles()){
                // get the center of the element in the sector frame 
-               const Amg::Transform3D& chamberToGlobal{RE->localToGlobalTransform(gctx)}; 
+               const Acts::Transform3& chamberToGlobal{RE->localToGlobalTransform(gctx)}; 
                const Amg::Vector3D origin = (globalToSector * chamberToGlobal).translation();
                // and then add the bounds of the element - this is technology dependent 
                sectorArgs.detectorLocs.emplace_back(origin, RE, boundingBox(RE, volBoundSet));

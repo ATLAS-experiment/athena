@@ -195,7 +195,7 @@ MuonBlueprintNodeBuilder::buildMuonNode(const Acts::GeometryContext& gctx,
     for(const auto& element : elems){
       std::unique_ptr<Acts::TrackingVolume> vol{};
       if (m_alignableVolumes) {
-          vol = std::make_unique<Acts::TrackingVolume>(*element->boundingVolume(*context),
+          vol = std::make_unique<Acts::TrackingVolume>(*element->boundingVolume(),
                                                        element->identString());
       } else {
           vol = std::make_unique<Acts::TrackingVolume>(element->localToGlobalTransform(*context),
