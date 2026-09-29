@@ -42,21 +42,17 @@ StatusCode RpcDigiTool::finalize() {
     // This is a parameterization of BIRPC TOT (ns) values corresponding to
     // a charge (fC), it was obtained from a detailed model for
     // RPC signal emulation.
+    // See presentation by L. Pezzotti: https://indico.cern.ch/event/1602299/contributions/6751266/attachments/3160083/5614107/lopezzot_muonsw_23_10_2025.pdf
     constexpr std::array<double, 3> coeffs{19.9587, 0.10081, -0.00017};
     using namespace Acts::detail;
 
     return polynomialSum(aCharge, coeffs); 
   }
-  double RpcDigiTool::getTOA(const double aCharge, const double aDistance) const {
-    // This is a parameterization of BIRPC TOA (ns) values corresponding to
-    // a charge (fC) and a distance (m), it was obtained from a
-    // detailed model for RPC signal emulation.
-    constexpr std::array<double, 3> distCoeffs{0., 5.00311, 0.00006};
-    constexpr std::array<double, 3> chargeCoeffs{2.02843, -0.00641, 0.00001};
-    using namespace Acts::detail;
+  double RpcDigiTool::getTOA(const double aDistance) const {
+    // A 2.0 ns offset is due to the signal formation and is obtained from a detailed model for RPC signal emulation. 
+    // See presentation by L. Pezzotti: https://indico.cern.ch/event/1602299/contributions/6751266/attachments/3160083/5614107/lopezzot_muonsw_23_10_2025.pdf
 
-    return polynomialSum(aDistance/1000., distCoeffs) +  // In this parameterization the distance is in m while athena standard is mm
-           polynomialSum(aCharge, chargeCoeffs);
+    return aDistance/m_propagationVelocity+2.0;
   }
 
 StatusCode
@@ -224,7 +220,7 @@ bool RpcDigiTool::digitizeHit(const TimedHit &simHit, const bool measuresPhi,
 
     outContainer.push_back(std::make_unique<RpcDigit>(
         digitId,
-        hitTime(simHit) + getTOA(StripCharges[aStrip-minStrip], DistanceToEdge),
+        hitTime(simHit) + getTOA(DistanceToEdge) + CLHEP::RandGaussZiggurat::shoot(rndEngine, 0.0, m_stripTimeResolution),
         getTOT(StripCharges[aStrip-minStrip])));
 
     ATH_MSG_VERBOSE("Digitize hit "
@@ -277,7 +273,6 @@ bool RpcDigiTool::digitizeHitBI(const TimedHit &simHit,
   // Calculate charge deposited
   const double TotalChargeOnStrip =
       calculateChargeOnStrip(simHit, rndEngine, 1.0);  // 1 mm gap for BI chambers
-//mn      calculateChargeOnStrip(simHit, rndEngine, reEle->thickness());
   ATH_MSG_VERBOSE(" total charge (fC): " << TotalChargeOnStrip);
 
   // Calculate cluster size (number of strips)
@@ -351,14 +346,13 @@ bool RpcDigiTool::digitizeHitBI(const TimedHit &simHit,
     if (effiSignal1) {
       outContainer.push_back(std::make_unique<RpcDigit>(
           digitId,
-          hitTime(simHit) + getTOA(StripCharges[aStrip-minStrip], DistanceToHV),
+          hitTime(simHit) + getTOA(DistanceToHV) + CLHEP::RandGaussZiggurat::shoot(rndEngine, 0.0, m_stripTimeResolution),
           getTOT(StripCharges[aStrip-minStrip])));
     }
     if (effiSignal2) {
       outContainer.push_back(std::make_unique<RpcDigit>(
           digitId,
-          hitTime(simHit) +
-              getTOA(StripCharges[aStrip-minStrip], DistanceToReadOut),
+          hitTime(simHit) + getTOA(DistanceToReadOut) + CLHEP::RandGaussZiggurat::shoot(rndEngine, 0.0, m_stripTimeResolution),
           getTOT(StripCharges[aStrip-minStrip]), true));
     }
     if (effiSignal1 || effiSignal2) {
