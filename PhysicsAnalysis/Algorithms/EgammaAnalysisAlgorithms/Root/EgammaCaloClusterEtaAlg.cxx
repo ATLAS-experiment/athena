@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -16,10 +16,6 @@ namespace CP {
 
   StatusCode EgammaCaloClusterEtaAlg::initialize() {
 
-    if (m_caloEta2Key.contHandleKey().key() == m_caloEta2Key.key()) {
-      m_caloEta2Key = m_particlesKey.key() + "." + m_caloEta2Key.key();
-    }
-
     ANA_CHECK(m_particlesKey.initialize());
     ANA_CHECK(m_caloEta2Key.initialize());
 
@@ -35,6 +31,10 @@ namespace CP {
 
     SG::WriteDecorHandle<xAOD::EgammaContainer, float> caloEta2Handle(m_caloEta2Key, ctx);
     for (const xAOD::Egamma *particle : *particles) {
+      if (!particle->caloCluster()) {
+        ANA_MSG_ERROR("egamma object without a calo cluster");
+        return StatusCode::FAILURE;
+      }
       caloEta2Handle(*particle) = particle->caloCluster()->etaBE(2);
     }
 

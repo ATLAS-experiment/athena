@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -23,7 +23,7 @@ namespace CP {
 
   private:
     SG::ReadHandleKey<xAOD::EgammaContainer> m_particlesKey { this, "particles", "", "the input egamma container" };
-    SG::WriteDecorHandleKey<xAOD::EgammaContainer> m_caloEta2Key { this, "caloEta2", "caloEta2", "decoration name for calo cluster eta in layer 2" };
+    SG::WriteDecorHandleKey<xAOD::EgammaContainer> m_caloEta2Key { this, "caloEta2", m_particlesKey, "caloEta2", "decoration name for calo cluster eta in layer 2" };
   
   };
 

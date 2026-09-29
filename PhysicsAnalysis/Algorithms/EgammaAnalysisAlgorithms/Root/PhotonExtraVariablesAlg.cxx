@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Abicht
@@ -31,6 +31,10 @@ namespace CP {
         int conversionType = photon->conversionType();
         m_conversionTypeHandle.set(*photon, conversionType, sys);
 
+        if (!photon->caloCluster()) {
+          ANA_MSG_ERROR("photon without a calo cluster");
+          return StatusCode::FAILURE;
+        }
         float caloEta2 = photon->caloCluster()->etaBE(2);
         m_caloEta2Handle.set(*photon, caloEta2, sys);
       }

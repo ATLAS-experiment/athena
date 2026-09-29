@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -17,10 +17,6 @@
 //
 
 namespace CP {
-PhotonOriginCorrectionAlg ::PhotonOriginCorrectionAlg(const std::string& name,
-                                                      ISvcLocator* pSvcLocator)
-    : AnaReentrantAlgorithm(name, pSvcLocator) {}
-
 StatusCode PhotonOriginCorrectionAlg ::initialize() {
   ANA_CHECK(m_PhotonHandle.initialize(m_systematicsList));
   ANA_CHECK(m_preselection.initialize(m_systematicsList, m_PhotonHandle,

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -17,7 +17,7 @@
 
 namespace CP
 {
-  /// \brief an algorithm decorating `samplingPattern` on e-gamma clusters
+  /// @brief an algorithm decorating `samplingPattern` on e-gamma clusters
   ///
   /// For historic reason the sampling pattern is stored in the cluster
   /// object instead of as a decoration.  To make this available for
@@ -27,7 +27,7 @@ namespace CP
 
   class EgammaSamplingPatternDecoratorAlg final : public EL::AnaReentrantAlgorithm
   {
-    /// \brief the standard constructor
+    /// @brief the standard constructor
   public:
     using EL::AnaReentrantAlgorithm::AnaReentrantAlgorithm;
     virtual StatusCode initialize () override;

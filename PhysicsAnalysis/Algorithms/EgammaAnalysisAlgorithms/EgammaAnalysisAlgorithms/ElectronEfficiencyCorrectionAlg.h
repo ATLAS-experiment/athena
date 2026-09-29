@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -19,11 +19,11 @@
 
 namespace CP
 {
-  /// \brief an algorithm for calling \ref IElectronEfficiencyCorrectionTool
+  /// @brief an algorithm for calling @ref IElectronEfficiencyCorrectionTool
 
   class ElectronEfficiencyCorrectionAlg final : public EL::AnaAlgorithm
   {
-    /// \brief the standard constructor
+    /// @brief the standard constructor
   public:
     using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
@@ -31,29 +31,29 @@ namespace CP
 
 
 
-    /// \brief the smearing tool
+    /// @brief the smearing tool
   private:
     ToolHandle<IAsgElectronEfficiencyCorrectionTool> m_efficiencyCorrectionTool {this, "efficiencyCorrectionTool", "AsgElectronEfficiencyCorrectionTool", "the calibration and smearing tool we apply"};
 
-    /// \brief the systematics list we run
+    /// @brief the systematics list we run
   private:
     SysListHandle m_systematicsList {this};
 
-    /// \brief the electron collection we run on
+    /// @brief the electron collection we run on
   private:
     SysReadHandle<xAOD::ElectronContainer> m_electronHandle {
       this, "electrons", "Electrons", "the electron collection to run on"};
 
-    /// \brief the preselection we apply to our input
+    /// @brief the preselection we apply to our input
   private:
     SysReadSelectionHandle m_preselection {
       this, "preselection", "", "the preselection to apply"};
 
-    /// \brief the helper for OutOfValidity results
+    /// @brief the helper for OutOfValidity results
   private:
     OutOfValidityHelper m_outOfValidity {this};
 
-    /// \brief the decoration for the electron scale factor
+    /// @brief the decoration for the electron scale factor
   private:
     SysWriteDecorHandle<float> m_scaleFactorDecoration {
       this, "scaleFactorDecoration", "", "the decoration for the electron efficiency scale factor"};
