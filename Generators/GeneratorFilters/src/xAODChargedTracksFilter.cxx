@@ -64,10 +64,13 @@ StatusCode xAODChargedTracksFilter::filterEvent(const EventContext& ctx) {
     ATH_MSG_DEBUG("# of tracks " << nChargedTracks <<
                 " with pT >= " << m_Ptmin <<
                 " |eta| < " << m_EtaRange <<
-                " minNTracks = " << m_NTracks);
+                " minNTracks = " << m_NTracks <<
+                " maxNTracks = " << m_NTracksMax);
 
     // Record passed status
-    setFilterPassed(nChargedTracks > m_NTracks, ctx);
+    setFilterPassed((m_NTracksMax > 0) ?
+        (nChargedTracks >= m_NTracks && nChargedTracks <= m_NTracksMax) :
+        (nChargedTracks >= m_NTracks), ctx);
     return StatusCode::SUCCESS;
 }
 
