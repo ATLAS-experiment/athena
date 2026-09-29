@@ -152,6 +152,11 @@ def ElectronPhotonVariableNFCorrectionToolCfg(
     kwargs.setdefault("OnnxInferenceToolsForward",  forward_tools)
     kwargs.setdefault("OnnxInferenceToolsBackward", backward_tools)
 
+    # Photons failing the shower shape cuts (NF not applied) are corrected with fudge factors
+    if "FallbackFudgeTool" not in kwargs:
+        kwargs["FallbackFudgeTool"] = acc.popToolsAndMerge(
+            PhotonVariableCorrectionToolCfg(flags, name=f"{name}_FallbackFudgeTool"))
+
     acc.setPrivateTools(
         CompFactory.ElectronPhotonVariableNFCorrectionTool(name, **kwargs))
     return acc

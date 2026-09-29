@@ -69,9 +69,7 @@ ElectronPhotonVariableNFCorrectionTool::parseFoldStrategy(const std::string& s) 
     return FoldStrategy::Unknown;
 }
 
-bool ElectronPhotonVariableNFCorrectionTool::passSelectionCuts(
-    const xAOD::Photon& photon,
-    const std::vector<float>& ss) const
+bool ElectronPhotonVariableNFCorrectionTool::passPhotonSelection(const xAOD::Photon& photon) const
 {
     // pT cut
     if (photon.pt() < m_pTcutMeV) return false;
@@ -87,35 +85,62 @@ bool ElectronPhotonVariableNFCorrectionTool::passSelectionCuts(
         if (truthType < 13 || truthType > 15) return false;
     }
 
-    // Shower shape cuts
-    if (m_applyShowerShapeCuts) {
-        // weta2
-        if (ss[0] <= -10.f || ss[0] >= 10.f) return false;
-        // weta1
-        if (ss[1] <= -10.f || ss[1] >= 10.f) return false;
-        // Rphi
-        if (ss[2] <= -10.f || ss[2] >= 10.f) return false;
-        // Reta
-        if (ss[3] <= -10.f || ss[3] >= 10.f) return false;
-        // wtots1
-        if (ss[4] < -2.f || ss[4] >= 10.f) return false;
-        // Rhad
-        if (ss[5] < -2.f || ss[5] > 2.f) return false;
-        // Rhad1
-        if (ss[6] < -2.f || ss[6] > 2.f) return false;
-        // f1
-        if (ss[7] <= -2.f || ss[7] >= 2.f) return false;
-        // fracs1
-        if (ss[8] <= -2.f || ss[8] >= 5.f) return false;
-        // DeltaE
-        if (ss[9] < 0.f || ss[9] >= 5000.f) return false;
-        // Eratio
-        if (ss[10] < 0.f || ss[10] > 1.f) return false;
-    }
+    return true;
+}
+
+bool ElectronPhotonVariableNFCorrectionTool::passShowerShapeCuts(const std::vector<float>& ss) const
+{
+    if (!m_applyShowerShapeCuts) return true;
+
+    // weta2
+    if (ss[0] <= -10.f || ss[0] >= 10.f) return false;
+    // weta1
+    if (ss[1] <= -10.f || ss[1] >= 10.f) return false;
+    // Rphi
+    if (ss[2] <= -10.f || ss[2] >= 10.f) return false;
+    // Reta
+    if (ss[3] <= -10.f || ss[3] >= 10.f) return false;
+    // wtots1
+    if (ss[4] < -2.f || ss[4] >= 10.f) return false;
+    // Rhad
+    if (ss[5] < -2.f || ss[5] > 2.f) return false;
+    // Rhad1
+    if (ss[6] < -2.f || ss[6] > 2.f) return false;
+    // f1
+    if (ss[7] <= -2.f || ss[7] >= 2.f) return false;
+    // fracs1
+    if (ss[8] <= -2.f || ss[8] >= 5.f) return false;
+    // DeltaE
+    if (ss[9] < 0.f || ss[9] >= 5000.f) return false;
+    // Eratio
+    if (ss[10] < 0.f || ss[10] > 1.f) return false;
 
     return true;
 }
 
+CP::CorrectionCode ElectronPhotonVariableNFCorrectionTool::applyFallbackFudge(
+    xAOD::Photon& photon,
+    const std::vector<float>& ss) const
+{
+    if (m_fallbackFudgeTool->applyCorrection(photon) != CP::CorrectionCode::Ok) {
+        ATH_MSG_ERROR("Fallback fudge tool failed to correct photon");
+        return CP::CorrectionCode::Error;
+    }
+
+    // Keep default values of weta1 (index 1) and wtots1 (index 4) untouched
+    for (size_t i : {size_t(1), size_t(4)}) {
+        if (ss[i] < s_defaultValueThreshold) {
+            photon.setShowerShapeValue(ss[i], s_ssEnums[i]);
+        }
+    }
+    // Keep fracs1 (index 8) = 0 untouched (fudging smears it)
+    if (ss[8] == 0.f) {
+        photon.setShowerShapeValue(0.f, s_ssEnums[8]);
+    }
+
+    ATH_MSG_DEBUG("Photon failed shower shape cuts: fallback fudge correction applied");
+    return CP::CorrectionCode::Ok;
+}
 
 
 // Initialize tool: read config, setup ONNX tools and accessors
@@ -197,6 +222,11 @@ StatusCode ElectronPhotonVariableNFCorrectionTool::initialize()
     ATH_CHECK(m_onnxToolsForward.retrieve());
     ATH_CHECK(m_onnxToolsBackward.retrieve());
 
+    if (!m_fallbackFudgeTool.empty()) {
+        ATH_CHECK(m_fallbackFudgeTool.retrieve());
+        ATH_MSG_INFO("Photons failing shower shape cuts will be corrected with fallback fudge tool " << m_fallbackFudgeTool.name());
+    }
+
     if (msgLvl(MSG::DEBUG)) {
         for (int i = 0; i < m_nFolds; ++i) {
             ATH_MSG_VERBOSE("Fold " << i << " forward model info:");
@@ -236,13 +266,22 @@ const CP::CorrectionCode ElectronPhotonVariableNFCorrectionTool::applyCorrection
 
 
     static const SG::AuxElement::Decorator<char> dec_pass("NFCorrectedShowerShapes");
+    static const SG::AuxElement::Decorator<char> dec_fudged("FallbackFudgedShowerShapes");
 
     // Photon selection
-    bool pass = passSelectionCuts(photon, ss);
+    const bool passPhoton = passPhotonSelection(photon);
+    const bool passSS = passPhoton && passShowerShapeCuts(ss);
+    const bool fallback = passPhoton && !passSS && !m_fallbackFudgeTool.empty();
 
-    dec_pass(photon) = pass ? 1 : 0;
+    dec_pass(photon) = passSS ? 1 : 0;
+    dec_fudged(photon) = fallback ? 1 : 0;
 
-    if (!pass) {
+    if (fallback) {
+        // NF is not applied because of the shower shape cuts, so use fudging instead
+        return applyFallbackFudge(photon, ss);
+    }
+
+    if (!passSS) {
         // If selection is not passed, then SS value will be same to original
         return CP::CorrectionCode::Ok;
     }
@@ -363,6 +402,11 @@ const CP::CorrectionCode ElectronPhotonVariableNFCorrectionTool::applyCorrection
     float* corrPtr = outputTensorsBack[0].GetTensorMutableData<float>();
     for (size_t i = 0; i < nSS; ++i) {
         photon.setShowerShapeValue(corrPtr[i], s_ssEnums[i]);
+    }
+
+    // Keep fracs1 (index 8) = 0 untouched (NF smears it)
+    if (ss[8] == 0.f) {
+        photon.setShowerShapeValue(0.f, s_ssEnums[8]);
     }
 
     ATH_MSG_DEBUG("NF correction applied successfully");

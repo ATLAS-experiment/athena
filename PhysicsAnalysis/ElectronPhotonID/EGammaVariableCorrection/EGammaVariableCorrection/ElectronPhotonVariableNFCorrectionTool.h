@@ -26,6 +26,7 @@
 
 //ATLAS includes
 #include "AsgTools/AsgTool.h"
+#include "AsgTools/ToolHandle.h"
 #include "AsgTools/ToolHandleArray.h"
 #include <AsgTools/PropertyWrapper.h>
 #include "EgammaAnalysisInterfaces/IElectronPhotonShowerShapeFudgeTool.h"
@@ -122,8 +123,22 @@ private:
     //! @brief Cuts applied to remove default values of shower shapes
     bool m_applyShowerShapeCuts{true};
 
-    //! @brief Returns true if NF correction should be applied to this photon
-    bool passSelectionCuts(const xAOD::Photon& photon, const std::vector<float>& ss) const;
+    //! @brief Returns true if the photon passes the pT and truthType selection
+    bool passPhotonSelection(const xAOD::Photon& photon) const;
+
+    //! @brief Returns true if the shower shapes pass the cuts removing default values
+    bool passShowerShapeCuts(const std::vector<float>& ss) const;
+
+    /** @brief Apply the fallback fudge tool to a photon failing only the shower shape cuts
+     * @details weta1 and wtots1 are kept at their original values if these are below s_defaultValueThreshold
+     */
+    CP::CorrectionCode applyFallbackFudge(xAOD::Photon& photon, const std::vector<float>& ss) const;
+
+    //! @brief Fudge tool used for photons failing the shower shape cuts, empty = no fallback
+    ToolHandle<IElectronPhotonShowerShapeFudgeTool> m_fallbackFudgeTool{this, "FallbackFudgeTool", "", "Fudge tool applied to photons which fail the shower shape cuts"};
+
+    //! @brief Original values of weta1 and wtots1 below this threshold are default values and are not fudged
+    static constexpr float s_defaultValueThreshold = -100.f;
     
     /** @brief Fold selection strategy
     * @details
