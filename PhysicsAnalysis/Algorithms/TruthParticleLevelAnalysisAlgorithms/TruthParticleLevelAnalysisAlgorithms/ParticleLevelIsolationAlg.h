@@ -4,13 +4,14 @@
 
 /// @author Baptiste Ravina <baptiste.ravina@cern.ch>
 
-#ifndef TRUTH__PARTICLELEVEL_ISOLATION__ALG_H
-#define TRUTH__PARTICLELEVEL_ISOLATION__ALG_H
+#ifndef TRUTH_PARTICLELEVEL_ISOLATION_ALG_H
+#define TRUTH_PARTICLELEVEL_ISOLATION_ALG_H
 
 // Algorithm includes
 #include <AnaAlgorithm/AnaReentrantAlgorithm.h>
-#include <AsgDataHandles/ReadHandle.h>
+#include <AsgDataHandles/ReadDecorHandleKey.h>
 #include <AsgDataHandles/ReadHandleKey.h>
+#include <AsgDataHandles/WriteDecorHandleKey.h>
 #include <AsgTools/PropertyWrapper.h>
 
 // Framework includes
@@ -42,9 +43,18 @@ class ParticleLevelIsolationAlg : public EL::AnaReentrantAlgorithm {
       this, "isoCut", -1,
       "threshold to use in isolation cuts of the form 'var/pT < cut'"};
   MCTruthPartClassifier::ParticleType m_checkType {};
-  std::unique_ptr<const SG::Decorator<char>> m_dec_isolated{};
-  std::unique_ptr<const SG::Decorator<char>> m_dec_notTauOrigin{};
-  std::unique_ptr<const SG::ConstAccessor<float>> m_acc_isoVar{};
+  SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_decIsolatedKey{
+      this, "isolatedDecorKey", "", "internal, do not set directly"};
+  SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_decNotTauOriginKey{
+      this, "notTauOriginDecorKey", "", "internal, do not set directly"};
+  SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_isoVarKey{
+      this, "isoVarDecorKey", "", "internal, do not set directly"};
+  SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_classifierTypeKey{
+      this, "classifierParticleTypeDecoration", m_particlesKey,
+      "classifierParticleType", "the particle type classification decoration"};
+  SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_classifierOriginKey{
+      this, "classifierParticleOriginDecoration", m_particlesKey,
+      "classifierParticleOrigin", "the particle origin classification decoration"};
 };
 
 }  // namespace CP

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 
@@ -57,5 +57,5 @@ class ParticleLevelJetsBlock(ConfigBlock):
             config.addOutputVar (self.containerName, decoration, branch, noSys=True, auxType=auxType)
 
         if "AntiKt4" in self.containerName:
-            config.addOutputVar('EventInfo', 'num_truth_bjets_nocuts', 'num_truth_bjets_nocuts', noSys=True)
-            config.addOutputVar('EventInfo', 'num_truth_cjets_nocuts', 'num_truth_cjets_nocuts', noSys=True)
+            config.addOutputVar('EventInfo', 'num_truth_bjets_nocuts', 'num_truth_bjets_nocuts', noSys=True, auxType='int')
+            config.addOutputVar('EventInfo', 'num_truth_cjets_nocuts', 'num_truth_cjets_nocuts', noSys=True, auxType='int')
