@@ -19,10 +19,6 @@
 // PathResolver
 #include "PathResolver/PathResolver.h"
 
-// ROOT
-#include "TFile.h"
-#include "TTree.h"
-
 MagField::AtlasFieldCacheCondAlg::AtlasFieldCacheCondAlg(
   const std::string& name,
   ISvcLocator* pSvcLocator)
