@@ -24,7 +24,7 @@ StatusCode CP::EventStatusSelectionAlg::execute(const EventContext& /*ctx*/)
 {
   FilterReporter filter (m_filterParams, false);
 
-  const xAOD::EventInfo *eventInfo = 0;
+  const xAOD::EventInfo *eventInfo = nullptr;
   ANA_CHECK(evtStore()->retrieve(eventInfo, "EventInfo"));
 
   // Reject bad events due to problems in Tile calorimeter

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ASG_ANALYSIS_ALGORITHMS__ASG_MASS_SELECTION_TOOL_H
@@ -52,9 +52,9 @@ namespace CP
     Gaudi::Property<float> m_minM {this, "minM", 0, "minimum mass to require (or 0 for no mass cut)"};
     Gaudi::Property<float> m_maxM {this, "maxM", 0, "maximum mass to require (or 0 for no mass cut)"};
 
-    /// Index for the minimum pT selection
+    /// Index for the minimum mass selection
     int m_minMassCutIndex{ -1 };
-    /// Index for the maximum pT selection
+    /// Index for the maximum mass selection
     int m_maxMassCutIndex{ -1 };
 
     /// \brief the \ref asg::AcceptInfo we are using

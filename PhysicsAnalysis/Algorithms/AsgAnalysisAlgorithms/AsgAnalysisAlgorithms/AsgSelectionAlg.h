@@ -51,11 +51,11 @@ namespace CP
 
 
 
-    /// \brief the smearing tool
+    /// \brief the selection tool
   private:
     ToolHandle<IAsgSelectionTool> m_selectionTool {this, "selectionTool", "", "the selection tool we apply"};
 
-    /// \brief the smearing tool cast to an ISystematicsTool
+    /// \brief the selection tool cast to an ISystematicsTool
     ///
     /// Normally selection tools don't have systematics, but I believe
     /// I have seen one or two with systematics, so I added that

@@ -84,9 +84,10 @@ namespace CP
     deepCopy->reserve (viewCopy->size());
     for (auto particle : *viewCopy)
     {
-      typename Type::value_type pcopy = new typename Type::base_value_type();
-      deepCopy->push_back (pcopy);
-      *pcopy = *particle;
+      auto pcopy = std::make_unique<typename Type::base_value_type> ();
+      typename Type::value_type pcopyPtr = pcopy.get();
+      deepCopy->push_back (std::move (pcopy));
+      *pcopyPtr = *particle;
     }
 
     // Record the deep copy into the event store.

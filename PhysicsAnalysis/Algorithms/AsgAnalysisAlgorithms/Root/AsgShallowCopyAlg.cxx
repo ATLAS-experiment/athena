@@ -108,15 +108,6 @@ namespace CP
 
 
 
-  AsgShallowCopyAlg ::
-  AsgShallowCopyAlg (const std::string& name,
-                     ISvcLocator* pSvcLocator)
-    : AnaAlgorithm (name, pSvcLocator)
-  {
-  }
-
-
-
   StatusCode AsgShallowCopyAlg ::
   initialize ()
   {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AsgAnalysisAlgorithms/AsgNumDecorationSelectionTool.h"
@@ -69,13 +69,7 @@ namespace CP
   {
     asg::AcceptData accept(&m_accept);
 
-    const SG::AuxElement* aux = dynamic_cast<const SG::AuxElement*>(particle);
-    if (!aux) {
-      ATH_MSG_ERROR("Particle is not derived from AuxElement, cannot read decoration. Cut considered as failed.");
-      return accept; // reject all cuts by default
-    }
-
-    if (!m_accessor->isAvailable(*aux)) {
+    if (!m_accessor->isAvailable(*particle)) {
       ATH_MSG_WARNING("Decoration \"" << m_name << "\" not available; setting all cuts as passed.");
       if (m_equalCutIndex >= 0) accept.setCutResult(m_equalCutIndex, true);
       if (m_minCutIndex >= 0)   accept.setCutResult(m_minCutIndex, true);
@@ -83,18 +77,18 @@ namespace CP
       return accept;
     }
 
-    const T value = (*m_accessor)(*aux);
+    const double value = (*m_accessor)(*particle);
 
     if (m_equalCutIndex >= 0) {
-      accept.setCutResult(m_equalCutIndex, static_cast<float>(value) == m_equal);
+      accept.setCutResult(m_equalCutIndex, value == m_equal);
     }
 
     if (m_minCutIndex >= 0) {
-      accept.setCutResult(m_minCutIndex, static_cast<float>(value) >= m_min);
+      accept.setCutResult(m_minCutIndex, value >= m_min);
     }
 
     if (m_maxCutIndex >= 0) {
-      accept.setCutResult(m_maxCutIndex, static_cast<float>(value) < m_max);
+      accept.setCutResult(m_maxCutIndex, value < m_max);
     }
 
     return accept;

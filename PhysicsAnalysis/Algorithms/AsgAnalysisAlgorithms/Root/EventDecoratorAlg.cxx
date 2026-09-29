@@ -40,8 +40,8 @@ namespace CP
 #endif
       //probably safer to use decorKey by value here, despite coverity warning
       //coverity[PASS_BY_VALUE]
-      m_decFunctions.push_back([decorKey, value](const xAOD::EventInfo& ei) {
-        SG::WriteDecorHandle<xAOD::EventInfo,uint32_t> dec(std::move(decorKey));
+      m_decFunctions.push_back([decorKey, value](const xAOD::EventInfo& ei, const EventContext& ctx) {
+        SG::WriteDecorHandle<xAOD::EventInfo,uint32_t> dec(decorKey, ctx);
         dec(ei) = value;
       });
     }
@@ -63,7 +63,7 @@ namespace CP
 
     for (const auto& decFunc : m_decFunctions)
     {
-      decFunc(*eventInfo);
+      decFunc(*eventInfo, ctx);
     }
 
     return StatusCode::SUCCESS;

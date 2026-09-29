@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ASG_ANALYSIS_ALGORITHMS__ASG_NUM_DECORATION_SELECTION_TOOL_H
@@ -49,9 +49,9 @@ namespace CP
     Gaudi::Property<bool> m_doEqual {this, "doEqual", false, "require to equal a value"};
     Gaudi::Property<bool> m_doMin {this, "doMin", false, "require a min value"};
     Gaudi::Property<bool> m_doMax {this, "doMax", false, "require a max value"};
-    Gaudi::Property<float> m_equal {this, "equal", 0.0f, "equal value to require"};
-    Gaudi::Property<float> m_min {this, "min", 0.0f, "minimum value to require"};
-    Gaudi::Property<float> m_max {this, "max", 0.0f, "maximum value to require"};
+    Gaudi::Property<double> m_equal {this, "equal", 0.0f, "equal value to require"};
+    Gaudi::Property<double> m_min {this, "min", 0.0f, "minimum value to require"};
+    Gaudi::Property<double> m_max {this, "max", 0.0f, "maximum value to require"};
 
     int m_equalCutIndex{ -1 };
     int m_minCutIndex{ -1 };
