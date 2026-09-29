@@ -111,9 +111,7 @@ private:
   // acts helper for the output
   ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper{
         this};
-  /// @name The detector description service providing the Athena<->Detray ID map
-  Gaudi::Property<std::string> m_geoIdMappingObjectName{this, "GeoIdMapping", "", "ID mapping between the three detector description realms."};
-  const ActsTrk::GeometryIdMapping* m_idMapping{nullptr};
+  
   Gaudi::Property<std::string> m_hostDetectorObjectName{
         this, "HostDetectorName", "",
         "Detray host detector object"};
