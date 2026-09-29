@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -169,7 +169,7 @@ std::vector< std::vector<double> > TrackTools::getXYZEtaPhiPerLayer(const TRACK*
     else if(sample==9                 ){lay=8;}
     else if(sample==10                ){lay=9;}
     else if(sample==11                ){lay=10;}
-    if(lay!=-1) coordinates[lay] = TrkPars;
+    if(lay!=-1) coordinates[lay] = std::move(TrkPars);
   } // FOR
 
   return coordinates;
@@ -189,7 +189,7 @@ std::vector< std::vector<double> > TrackTools::getXYZEtaPhiPerSampling(const TRA
     TrkPars[2] = ( XYZEtaPhi.size()!=5 ) ? -9999. : XYZEtaPhi[2] ;
     TrkPars[3] = ( XYZEtaPhi.size()!=5 ) ? -9999. : XYZEtaPhi[3] ;
     TrkPars[4] = ( XYZEtaPhi.size()!=5 ) ? -9999. : XYZEtaPhi[4] ;
-    coordinates.push_back(TrkPars);
+    coordinates.push_back(std::move(TrkPars));
   } // FOR
  
   return coordinates;

@@ -64,9 +64,10 @@ StatusCode MakerAlg::initialize()
   // Configure each tool. Since the check on m_audit only has to be
   // done once in the job, it's enough to implement it like this.
   if (m_audit) {
+     const std::string iniStr{"ini"};
      for (size_t i = 0; i < m_tools.size(); i++) {
         Gaudi::Guards::AuditorGuard auditor( m_tools[ i ]->name() +
-                                             ":cfg", auditorSvc(), "ini" );
+                                             ":cfg", auditorSvc(), iniStr );
         CHECK( m_tools[i]->configureD3PD (m_d3pd) );
      }
   } else {

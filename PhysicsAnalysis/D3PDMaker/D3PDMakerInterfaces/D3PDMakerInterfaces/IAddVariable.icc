@@ -29,7 +29,7 @@ namespace D3PD {
 template <class T>
 StatusCode IAddVariable::addVariable (const std::string& name,
                                       T* & ptr,
-                                      const std::string& docstring /*= ""*/)
+                                      std::string_view docstring /*= ""*/)
 {
   return addVariable (name,
                       typeid (T),
@@ -55,7 +55,7 @@ StatusCode IAddVariable::addVariable (const std::string& name,
 template <class T, class U>
 StatusCode IAddVariable::addVariable (const std::string& name,
                                       T* & ptr,
-                                      const std::string& docstring,
+                                      std::string_view docstring,
                                       const U& defval)
 {
   T d = defval;
@@ -86,7 +86,7 @@ StatusCode
 IAddVariable::addDimensionedVariable (const std::string& name,
                                       T* & ptr,
                                       const std::string& dim,
-                                      const std::string& docstring /*= ""*/)
+                                      std::string_view docstring /*= ""*/)
 {
   return addDimensionedVariable (name,
                                  typeid (T),
@@ -117,7 +117,7 @@ StatusCode
 IAddVariable::addDimensionedVariable (const std::string& name,
                                       T* & ptr,
                                       const std::string& dim,
-                                      const std::string& docstring,
+                                      std::string_view docstring,
                                       const U& defval)
 {
   T d = defval;
