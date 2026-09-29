@@ -1,4 +1,7 @@
 #!/usr/bin/env athena.py
+#
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+#
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaCommon.Constants import DEBUG, INFO
@@ -12,12 +15,6 @@ from ActsGPUEventCnv.ActsGPUEventCnvConfig import (
     PhaseIIRDOtoTracccCellConverterAlgCfg,
     TracccCellValidationAlgCfg,
 )
-from AthCUDAServices.AthCUDAServicesConfig import (
-    HostMemoryResourceToolCfg,
-    DeviceMemoryResourceToolCfg,
-    CopyToolCfg,
-)
-from AthDeviceComps.AthDeviceCompsConfig import HostCopyToolCfg
 
 ComponentAccumulator.debugMode = "trackCA trackEventAlgo"
 
@@ -69,7 +66,7 @@ def RDOtoTracccCellConversionTest(flags, cpu_cell_sorting: bool) -> ComponentAcc
         CPUCellSorting = cpu_cell_sorting,
         OutputLevel = output_level,
         ))
-        
+
     acc.merge(TracccCellValidationAlgCfg(flags,
         name = "ValidatePh2Cells",
         ReferenceCells = Ph1Cells,
@@ -85,7 +82,7 @@ if __name__ == "__main__":
     flags = initConfigFlags()
 
     flags.Tracking.doPixelDigitalClustering = True
-    
+
     if PERFORMANCE_TESTING:
         flags.Input.Files = [
             "/eos/atlas/atlasgroupdisk/trig-daq/dq2/rucio/mc21_14TeV/af/f5/RDO.39626672._000001.pool.root.1",
