@@ -49,7 +49,7 @@ std::unique_ptr<EventContext> createEvent(unsigned int run_number, EventContext:
 
 
 void fill( xAOD::TrackParticle& tp ) {
-
+   //coverity[DC.WEAK_CRYPTO]
    tp.setDefiningParameters(std::rand()/(RAND_MAX/50.), //d0
                             std::rand()/(RAND_MAX/150.), //z0
                             std::rand()/(RAND_MAX/(2.*M_PI)), //phi
@@ -89,7 +89,7 @@ void createTrackParticles(EventContext &ctx, const SG::WriteHandleKey<xAOD::Trac
 
    SG::WriteHandle<xAOD::TrackParticleContainer> out(key,ctx);
    assert( out.record( std::make_unique<xAOD::TrackParticleContainer>(), std::make_unique<xAOD::TrackParticleAuxContainer>()).isSuccess());
-
+   //coverity[DC.WEAK_CRYPTO]
    unsigned int n=std::rand()%300;
    for(unsigned int i=0; i<n; ++i) {
       // Add one track particle to the container:
@@ -106,14 +106,18 @@ void decorateTrackParticles(EventContext &ctx,
    SG::WriteDecorHandle<xAOD::TrackParticleContainer,float> decor(decor_key,ctx);
    assert( decor.isValid());
    for (const xAOD::TrackParticle *particle : *track_particles) {
+      //coverity[DC.WEAK_CRYPTO]
       float val = std::rand()/(RAND_MAX/1.1);
       decor(*particle)=(val > 1. ? -1. : val);
    }
 }
 
 void fill( xAOD::Muon& muon ) {
+   //coverity[DC.WEAK_CRYPTO]
    double pt=(std::rand()/(RAND_MAX/(100e3-2.5e3)))+2.5e3; // p
+   //coverity[DC.WEAK_CRYPTO]
    double phi=std::rand()/(RAND_MAX/(2.*M_PI)); //phi
+   //coverity[DC.WEAK_CRYPTO]
    double eta=std::rand()/(RAND_MAX/(2.7+2.7))-2.7; //eta
    muon.setP4( pt,eta,phi );
    muon.setAuthor(xAOD::Muon::Author::MuidCo);
@@ -131,12 +135,13 @@ void createMuons(EventContext &ctx, const SG::WriteHandleKey<xAOD::MuonContainer
    assert( out.record( std::make_unique<xAOD::MuonContainer>(), std::make_unique<xAOD::MuonAuxContainer>()).isSuccess());
 
    if (ctx.slot()>0) {
-   unsigned int n=std::rand()%20;
-   for(unsigned int i=0; i<n; ++i) {
-      // Add one track particle to the container:
-      out->push_back( new xAOD::Muon );
-      fill( *(out->back()));
-   }
+     //coverity[DC.WEAK_CRYPTO]
+     unsigned int n=std::rand()%20;
+     for(unsigned int i=0; i<n; ++i) {
+        // Add one track particle to the container:
+        out->push_back( new xAOD::Muon );
+        fill( *(out->back()));
+     }
    }
 }
 
@@ -149,6 +154,7 @@ void decorateMuons(EventContext &ctx,
    SG::WriteDecorHandle<xAOD::MuonContainer,bool> decor(decor_key,ctx);
    assert( decor.isValid());
    for (const xAOD::Muon *a_muon : *muons) {
+      //coverity[DC.WEAK_CRYPTO]
       float val = std::rand()/(RAND_MAX/1.);
       decor(*a_muon)=(val > 0.5 ? true : false);
    }
@@ -346,8 +352,7 @@ int main(int argc, char **argv)
                                                new_output_handles);
 
   // prepare StoreGates
-  std::vector<SG::HiveEventSlot> event_slots;
-  event_slots.reserve(n_events);
+  std::vector<SG::HiveEventSlot> event_slots(n_events);
   for (unsigned int i=0; i<n_events ; ++i) {
      std::stringstream name;
      name << storegate_svc->name() << "_slot" << i;
@@ -358,7 +363,7 @@ int main(int argc, char **argv)
      SGImplSvc*sg_clone=dynamic_cast<SGImplSvc*>(a_service);
      assert(sg_clone);
      sg_clone->setSlotNumber(i,n_events);
-     event_slots.push_back(SG::HiveEventSlot(sg_clone));
+     event_slots[i] = (SG::HiveEventSlot(sg_clone));
   }
   std::vector<std::unique_ptr<EventContext> > events;
   events.reserve(n_events);
@@ -371,9 +376,10 @@ int main(int argc, char **argv)
 
   // create events
   for (unsigned int i=0; i<n_events; ++i) {
-     events.push_back( createEvent(run_number, event_id, slot_id, time_in_sec,*(event_slots.at(i).pEvtStore) ) );
+     auto &slot = event_slots.at(i);
+     events.push_back( createEvent(run_number, event_id, slot_id, time_in_sec,*(slot.pEvtStore) ) );
      EventContext *ctx=events.back().get();
-     StoreGateSvc::setSlot(&event_slots[ctx->slot()]);
+     StoreGateSvc::setSlot(&slot);
      Gaudi::Hive::setCurrentContext(*ctx);
      createTrackParticles(*ctx,track_particle_key);
      decorateTrackParticles(*ctx,read_track_particle_key, pid_track_particle_decor_key);

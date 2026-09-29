@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /* Dear emacs, this is -*-c++-*- */
 #ifndef _ExpressionParserUserWithTrigSupport_H_
@@ -17,12 +17,12 @@ class ExpressionParserUserWithTrigSupport :  public ExpressionParserUserBase<T_B
 public:
    template <typename...Args>
    ExpressionParserUserWithTrigSupport(Args...args)
-      : ExpressionParserUserBase<T_Base,NUM_PARSER>(args...),
+      : ExpressionParserUserBase<T_Base,NUM_PARSER>(std::forward<Args>(args)...),
         m_trigDecisionTool("Trig::TrigDecisionTool/TrigDecisionTool")
    {
       this->declareProperty("TrigDecisionTool", m_trigDecisionTool,"");
    }
-   StatusCode initializeParser(ExpressionParsing::SelectionArg<NUM_PARSER> selection_string) {
+   StatusCode initializeParser(const ExpressionParsing::SelectionArg<NUM_PARSER> & selection_string) {
       return this->_initializeParser(selection_string,
                                      [this](ExpressionParsing::MultipleProxyLoader &proxy_loaders) -> StatusCode {
                                         // initialise TDT explicitly, needed for the tool to properly work with trigger decisions in AthAnalysisBase (until fixed)

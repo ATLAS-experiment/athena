@@ -20,8 +20,8 @@
 #include "StoreGate/ReadDecorHandle.h"
 #include "AthContainers/AuxVectorBase.h"
 
-#include <sstream>
-#include <stdexcept>
+#include <vector>
+#include <string>
 
 namespace ExpressionParsing {
 
@@ -49,8 +49,8 @@ namespace ExpressionParsing {
       void setup();
 
     private:
-      IProxyLoader *m_proxyLoader;
-      IUnitInterpreter *m_unitInterpreter;
+      IProxyLoader *m_proxyLoader{};
+      IUnitInterpreter *m_unitInterpreter{};
       std::vector<StackElement> m_code;
   };
 }
