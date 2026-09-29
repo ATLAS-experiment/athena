@@ -58,7 +58,11 @@ def PhysValBTagCfg(flags, **kwargs):
         kwargs.setdefault("trackTruthOriginTool", acc.popToolsAndMerge(
             InDetTrackTruthOriginToolCfg(flags)))
 
-    kwargs.setdefault("GN2v01TaggerName", flags.BTagging.AK4TaggerName)
+    # the keys name the histograms and stay fixed, the values are the decorations to read
+    taggerDecorations = {"GN2v01": flags.BTagging.AK4TaggerName}
+    taggerFractionC = {"GN2v01": 0.2}
+    taggerFractionTau = {"GN2v01": 0.01}
+    taggerWorkingPoints = {}
     if flags.GeoModel.Run <= LHCPeriod.Run3:
         GN2v01WorkingPoints = ["70"] if kwargs["DetailLevel"] <= 10 else ["65", "70", "77", "85", "90"]
         kwargs.setdefault("GN2v01WorkingPoints", GN2v01WorkingPoints)
@@ -76,10 +80,22 @@ def PhysValBTagCfg(flags, **kwargs):
         # which cannot be used here since reading dev files fails the transform in Athena
         # TODO: read them with BTaggingSelectionTool, as for GN2v01, once GN3EPCLV01 is in a production CDI
         GN3EPCLV01WorkingPoints = {"70": 2.8414, "75": 2.0235, "80": 1.1988, "85": 0.3328, "90": -0.6835}
-        kwargs.setdefault("GN3EPCLV01TaggerName", "GN3EPCLV01")
-        kwargs.setdefault("GN3EPCLV01FractionC", 0.3)
-        kwargs.setdefault("GN3EPCLV01FractionTau", 0.05)
-        kwargs.setdefault("GN3EPCLV01WorkingPoints", {"70": GN3EPCLV01WorkingPoints["70"]} if kwargs["DetailLevel"] <= 10 else GN3EPCLV01WorkingPoints)
+        taggerDecorations["GN3EPCLV01"] = "GN3EPCLV01"
+        taggerFractionC["GN3EPCLV01"] = 0.3
+        taggerFractionTau["GN3EPCLV01"] = 0.05
+        if kwargs["DetailLevel"] <= 10:
+            GN3EPCLV01WorkingPoints = {"70": GN3EPCLV01WorkingPoints["70"]}
+        taggerWorkingPoints.update({f"GN3EPCLV01_{wp}": cut for wp, cut in GN3EPCLV01WorkingPoints.items()})
+
+        # GN3V03 is not in any CDI yet, so it gets the discriminant but no working points
+        taggerDecorations["GN3V03"] = "GN3V03"
+        taggerFractionC["GN3V03"] = 0.3
+        taggerFractionTau["GN3V03"] = 0.05
+
+    kwargs.setdefault("TaggerDecorations", taggerDecorations)
+    kwargs.setdefault("TaggerFractionC", taggerFractionC)
+    kwargs.setdefault("TaggerFractionTau", taggerFractionTau)
+    kwargs.setdefault("TaggerWorkingPoints", taggerWorkingPoints)
 
     # background fractions of the GN3XPV01 discriminants, see https://ftag.docs.cern.ch/xbb/taggers/gn3xpv01-working-points/
     kwargs.setdefault("GN3XPV01HbbFractions", {
