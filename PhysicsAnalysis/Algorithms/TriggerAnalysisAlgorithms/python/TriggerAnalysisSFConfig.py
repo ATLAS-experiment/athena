@@ -5,7 +5,7 @@ from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType, ConfigAccumulator
 from AthenaConfiguration.Enums import LHCPeriod
 from Campaigns.Utils import Campaign
-from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import TriggerAnalysisBlock, is_year_in_current_period
+from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import TriggerAnalysisBlock, is_year_in_current_period, sanitizeTriggerChainName
 
 
 def is_mc_from(config: ConfigAccumulator, campaign_list: Union[Campaign, Iterable[Campaign]]) -> bool:
@@ -81,7 +81,7 @@ def trigger_set(config, triggerChainsPerYear, includeAllYearsPerRun):
 class TriggerAnalysisSFBlock(ConfigBlock):
     """the ConfigBlock for trigger analysis"""
     def __init__(self):
-        super(TriggerAnalysisSFBlock, self).__init__()
+        super().__init__()
         self.addDependency('Electrons', required=False)
         self.addDependency('Photons', required=False)
         self.addDependency('Muons', required=False)
@@ -201,7 +201,7 @@ class TriggerAnalysisSFBlock(ConfigBlock):
         alg.separateMatchingTriggers = list(triggerMatchingChains)
         alg.separateMatchingDecorationSuffix = triggerSuffix + self.postfix
 
-        alg.matchingTool = '%s/%s' % ( matchingTool.getType(), matchingTool.getName() )
+        alg.matchingTool = f'{matchingTool.getType()}/{matchingTool.getName()}'
         alg.isRun3Geo = config.geometry() is LHCPeriod.Run3
         alg.campaign = config.campaign().value
         alg.numberOfToys = self.numberOfToys
@@ -228,7 +228,7 @@ class TriggerAnalysisSFBlock(ConfigBlock):
         config.addOutputVar('EventInfo', alg.matchingDecoration, 'globalTriggerMatch' + triggerSuffix + self.postfix, noSys=False)
 
         for trig in triggerMatchingChains:
-            var = f'triggerMatch_{trig.replace("-", "_").replace(".", "p")}{alg.separateMatchingDecorationSuffix}'
+            var = f'triggerMatch_{sanitizeTriggerChainName(trig)}{alg.separateMatchingDecorationSuffix}'
             config.addOutputVar('EventInfo', f'{var}_%SYS%', var, noSys=False)
 
         return
@@ -257,7 +257,7 @@ class TriggerAnalysisSFBlock(ConfigBlock):
         alg.particles, _ = config.readNameAndSelection(particles)
 
         for trig in list(alg.trigSingleMatchingList) + list(alg.trigSingleMatchingListDummy):
-            trig = trig.replace(".", "p").replace("-", "_").replace(" ", "")
+            trig = sanitizeTriggerChainName(trig)
             if trig_string in trig:
                 config.addOutputVar(particles.split(".")[0], f"trigMatched{self.postfix}_{trig}", f"trigMatched{self.postfix}_{trig}", noSys=True, auxType="char")
 

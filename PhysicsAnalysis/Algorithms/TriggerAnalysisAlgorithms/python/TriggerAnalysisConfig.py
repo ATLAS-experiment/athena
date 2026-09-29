@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigSequence import groupBlocks
@@ -6,10 +6,16 @@ from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType, ConfigAccumulat
 from AthenaConfiguration.Enums import LHCPeriod
 
 
+def sanitizeTriggerChainName(chain: str) -> str:
+    """Convert a trigger chain name for use in decoration/branch names; keep in sync with TriggerAnalysisAlgorithms/TrigChainNameHelpers.h"""
+    return chain.replace(".", "p").replace("-", "_")
+
+
 def is_year_in_current_period(config: ConfigAccumulator, year: int | str) -> bool:
     """
     Utility function to check whether the year is valid for the current configuration
     """
+    year = int(year)
     if config.geometry() is LHCPeriod.Run2 and year >= 2022:
         return False
     if config.geometry() is LHCPeriod.Run3 and year < 2022:
@@ -22,7 +28,7 @@ class TriggerAnalysisBlock (ConfigBlock):
     """the ConfigBlock for trigger analysis"""
 
     def __init__ (self) :
-        super (TriggerAnalysisBlock, self).__init__ ()
+        super ().__init__ ()
         self.addOption ('triggerChainsPerYear', {}, type=dict,
             info="a dictionary with key (string) the year and value (list of "
             "strings) the trigger chains. You can also use `||` within a string "
@@ -119,30 +125,28 @@ class TriggerAnalysisBlock (ConfigBlock):
 
         # Set up the trigger selection:
         alg = config.createAlgorithm( 'CP::TrigEventSelectionAlg', 'TrigEventSelectionAlg' )
-        alg.tool = '%s/%s' % \
-            ( decisionTool.getType(), decisionTool.getName() )
+        alg.tool = f'{decisionTool.getType()}/{decisionTool.getName()}'
         alg.triggers = self.triggerChainsForSelection
         alg.selectionDecoration = 'trigPassed'
         alg.noFilter = self.noFilter
         alg.noL1 = self.noL1
 
         for t in self.triggerChainsForSelection :
-            t = t.replace(".", "p").replace("-", "_")
+            t = sanitizeTriggerChainName(t)
             config.addOutputVar ('EventInfo', 'trigPassed_' + t, 'trigPassed_' + t, noSys=True)
 
         # for decoration, make sure we only get the triggers not already in the selection list
         triggerChainsForDeco = list(set(self.triggerChainsForDecoration) - set(self.triggerChainsForSelection))
         if triggerChainsForDeco :
             alg = config.createAlgorithm( 'CP::TrigEventSelectionAlg', 'TrigEventSelectionAlgDeco' )
-            alg.tool = '%s/%s' % \
-                ( decisionTool.getType(), decisionTool.getName() )
+            alg.tool = f'{decisionTool.getType()}/{decisionTool.getName()}'
             alg.triggers = triggerChainsForDeco
             alg.selectionDecoration = 'trigPassed'
             alg.noFilter = True
             alg.noL1 = self.noL1
 
             for t in triggerChainsForDeco :
-                t = t.replace(".", "p").replace("-", "_")
+                t = sanitizeTriggerChainName(t)
                 config.addOutputVar ('EventInfo', 'trigPassed_' + t, 'trigPassed_' + t, noSys=True)
 
         # Calculate trigger prescales
@@ -185,15 +189,15 @@ class TriggerAnalysisBlock (ConfigBlock):
             alg.prescaleMC = config.dataType() is not DataType.Data
             alg.prescaleDecoration = self.prescaleDecoration
             if self.prescaleTriggersFormula != '':
-                alg.prescaleTriggersFormula = self.prescaleTriggersFormula
+                alg.triggersFormula = self.prescaleTriggersFormula
                 config.addOutputVar("EventInfo", alg.prescaleDecoration, alg.prescaleDecoration, noSys=True)
             else:
                 alg.triggers = prescale_triggers
                 alg.triggersAll = prescale_triggersAll
 
                 # Schedule trigger prescale output branches
-                for trigger in prescale_triggers_output:
-                    trigger = trigger.replace("-", "_")
+                for trigger in prescale_triggers_output & set(prescale_triggersAll):
+                    trigger = sanitizeTriggerChainName(trigger)
                     config.addOutputVar(
                         "EventInfo",
                         alg.prescaleDecoration + "_" + trigger,
@@ -225,6 +229,7 @@ class TriggerAnalysisBlock (ConfigBlock):
             self.multiTriggerChainsPerYear = {'': self.triggerChainsPerYear}
 
         # if we are only given the trigger dictionary, we fill the selection list automatically
+        # (configuring only multiTriggerChainsPerYear intentionally does not auto-fill triggerChainsForSelection)
         if self.triggerChainsPerYear and not self.triggerChainsForSelection:
             triggers_for_selection = set()
             triggers_for_decoration = set()
