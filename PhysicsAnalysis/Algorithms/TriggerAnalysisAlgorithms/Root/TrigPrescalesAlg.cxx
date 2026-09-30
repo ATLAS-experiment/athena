@@ -10,10 +10,12 @@
 //
 
 #include <TriggerAnalysisAlgorithms/TrigPrescalesAlg.h>
+#include <TriggerAnalysisAlgorithms/TrigChainNameHelpers.h>
 
-#include <algorithm>
+#include <AsgDataHandles/ReadHandle.h>
 #include <xAODEventInfo/EventInfo.h>
 #include <format>
+#include <unordered_set>
 //
 // method implementations
 //
@@ -44,12 +46,11 @@ namespace CP
 
     ANA_CHECK (m_pileupReweightingTool.retrieve());
 
+    ANA_CHECK (m_eventInfoKey.initialize());
+
     if (!m_selectionDecoration.empty()) {
       for (const std::string &chain : m_trigList) {
-        std::string chainfix = chain;
-        std::replace(chainfix.begin(), chainfix.end(), '.', 'p');
-        std::replace(chainfix.begin(), chainfix.end(), '-', '_');
-        m_selectionAccessors.emplace(chain, std::format("{}_{}", m_selectionDecoration.value(), chainfix));
+        m_selectionAccessors.emplace(chain, std::format("{}_{}", m_selectionDecoration.value(), sanitizeTriggerChainName(chain)));
       }
     }
 
@@ -74,15 +75,13 @@ namespace CP
       m_trigListAll = m_trigList;
     }
     const std::string prefix = m_prescaleDecoration + "_";
+    const std::unordered_set<std::string> trigSet (m_trigList.begin(), m_trigList.end());
     for (const std::string &chain : m_trigListAll)
     {
-      std::string chainfix = chain;
-      std::replace(chainfix.begin(), chainfix.end(), '.', 'p');
-      std::replace(chainfix.begin(), chainfix.end(), '-', '_');
-      m_prescaleAccessors.emplace_back(prefix + chainfix);
+      m_prescaleAccessors.emplace_back(prefix + sanitizeTriggerChainName(chain));
 
       // Generate helper functions
-      if (std::find(m_trigList.begin(), m_trigList.end(), chain) != m_trigList.end())
+      if (trigSet.contains(chain))
       {
         m_prescaleFunctions.emplace_back([this](const xAOD::EventInfo *evtInfo, const std::string &trigger)
         {
@@ -115,10 +114,11 @@ namespace CP
 
 
   StatusCode TrigPrescalesAlg ::
-  execute (const EventContext& /*ctx*/)
+  execute (const EventContext& ctx)
   {
-    const xAOD::EventInfo *evtInfo{};
-    ANA_CHECK (evtStore()->retrieve(evtInfo, "EventInfo"));
+    SG::ReadHandle<xAOD::EventInfo> evtInfoHandle (m_eventInfoKey, ctx);
+    ANA_CHECK (evtInfoHandle.isValid());
+    const xAOD::EventInfo *evtInfo = evtInfoHandle.cptr();
 
     for (size_t i = 0; i < m_trigListAll.size(); i++)
     {

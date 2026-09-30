@@ -5,9 +5,9 @@
 /// @author Tadej Novak
 
 #include <EventBookkeeperTools/FilterReporter.h>
-#include <algorithm>
 #include <TriggerAnalysisAlgorithms/TrigEventSelectionAlg.h>
-#include <xAODEventInfo/EventInfo.h>
+#include <TriggerAnalysisAlgorithms/TrigChainNameHelpers.h>
+#include <AsgDataHandles/ReadHandle.h>
 
 CP::TrigEventSelectionAlg::TrigEventSelectionAlg(const std::string &name,
                                              ISvcLocator *svcLoc)
@@ -29,35 +29,32 @@ StatusCode CP::TrigEventSelectionAlg::initialize()
   if (!m_selectionDecoration.empty()) {
     const std::string prefix{m_selectionDecoration.value() + "_"};
     for (const std::string &chain : m_trigList) {
-      std::string chainfix = chain;
-      std::replace(chainfix.begin(), chainfix.end(), '.', 'p');
-      std::replace(chainfix.begin(), chainfix.end(), '-', '_');
-      m_selectionAccessors.emplace_back( prefix + chainfix);
+      m_selectionAccessors.emplace_back( prefix + sanitizeTriggerChainName(chain));
     }
   }
 
+  ANA_CHECK (m_eventInfoKey.initialize(!m_selectionDecoration.empty()));
   ANA_CHECK (m_filterParams.initialize());
 
   return StatusCode::SUCCESS;
 }
 
-StatusCode CP::TrigEventSelectionAlg::execute(const EventContext& /*ctx*/)
+StatusCode CP::TrigEventSelectionAlg::execute(const EventContext& ctx)
 {
   FilterReporter filter (m_filterParams, m_noFilter.value());
 
-  if (m_trigList.empty()) {
-    filter.setPassed(true);
-    return StatusCode::SUCCESS;
+  const xAOD::EventInfo *evtInfo = nullptr;
+  if (!m_selectionDecoration.empty()) {
+    SG::ReadHandle<xAOD::EventInfo> evtInfoHandle(m_eventInfoKey, ctx);
+    ANA_CHECK(evtInfoHandle.isValid());
+    evtInfo = evtInfoHandle.cptr();
   }
-
-  const xAOD::EventInfo *evtInfo = 0;
-  ANA_CHECK(evtStore()->retrieve(evtInfo, "EventInfo"));
 
   for (size_t i = 0; i < m_trigList.size(); i++) {
     bool trigPassed = m_noL1.value()
            ? m_trigDecisionTool->isPassed(m_trigList[i], TrigDefs::requireDecision)
            : m_trigDecisionTool->isPassed(m_trigList[i]);
-    if (!m_selectionDecoration.empty()) {
+    if (evtInfo) {
       m_selectionAccessors[i](*evtInfo) = trigPassed;
     }
     if (trigPassed)

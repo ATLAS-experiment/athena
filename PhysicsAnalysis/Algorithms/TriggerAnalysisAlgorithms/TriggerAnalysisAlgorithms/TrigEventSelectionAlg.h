@@ -9,9 +9,11 @@
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <AsgTools/ToolHandle.h>
+#include <AsgDataHandles/ReadHandleKey.h>
 #include <EventBookkeeperTools/FilterReporterParams.h>
 #include <TrigDecisionInterface/ITrigDecisionTool.h>
 #include <TrigDecisionInterface/Conditions.h>
+#include <xAODEventInfo/EventInfo.h>
 #include <AsgTools/PropertyWrapper.h> //Gaudi::Property
 #include <vector>
 #include <string>
@@ -24,13 +26,16 @@ namespace CP
     TrigEventSelectionAlg(const std::string &name,
                           ISvcLocator *svcLoc = nullptr);
 
-    virtual StatusCode initialize() final;
-    virtual StatusCode execute(const EventContext& ctx) final;
-    virtual StatusCode finalize() final;
+    virtual StatusCode initialize() final override;
+    virtual StatusCode execute(const EventContext& ctx) final override;
+    virtual StatusCode finalize() final override;
 
   private:
     /// \brief trigger decision tool handle
     ToolHandle<Trig::ITrigDecisionTool> m_trigDecisionTool;
+
+    /// \brief the EventInfo to decorate
+    SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey {this, "eventInfo", "EventInfo", "the EventInfo to decorate"};
 
     /// \brief list of triggers or trigger chains
     Gaudi::Property<std::vector<std::string>> m_trigList {this, "triggers", {}, "trigger selection list"};

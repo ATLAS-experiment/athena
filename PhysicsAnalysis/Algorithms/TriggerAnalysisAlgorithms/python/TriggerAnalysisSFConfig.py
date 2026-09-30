@@ -224,8 +224,8 @@ class TriggerAnalysisSFBlock(ConfigBlock):
             raise ValueError('TriggerAnalysisConfig: at least one object collection must be provided! (electrons, muons, photons)' )
 
         if config.dataType() is not DataType.Data and not alg.doMatchingOnly:
-            config.addOutputVar('EventInfo', alg.scaleFactorDecoration, 'globalTriggerEffSF' + triggerSuffix + self.postfix)
-        config.addOutputVar('EventInfo', alg.matchingDecoration, 'globalTriggerMatch' + triggerSuffix + self.postfix, noSys=False)
+            config.addOutputVar('EventInfo', alg.scaleFactorDecoration, 'globalTriggerEffSF' + triggerSuffix + self.postfix, auxType="float")
+        config.addOutputVar('EventInfo', alg.matchingDecoration, 'globalTriggerMatch' + triggerSuffix + self.postfix, noSys=False, auxType="char")
 
         for trig in triggerMatchingChains:
             var = f'triggerMatch_{sanitizeTriggerChainName(trig)}{alg.separateMatchingDecorationSuffix}'

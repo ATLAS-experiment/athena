@@ -25,10 +25,14 @@
 #include <AsgTools/ToolHandleArray.h>
 #include <AsgTools/AnaToolHandle.h>
 
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
+
 // Trigger includes
 #include <TriggerAnalysisInterfaces/ITrigGlobalEfficiencyCorrectionTool.h>
 #include <TriggerMatchingTool/IMatchingTool.h>
-#include <TrigGlobalEfficiencyCorrection/ImportData.h>
 #include "EgammaAnalysisInterfaces/IAsgElectronEfficiencyCorrectionTool.h"
 #include "EgammaAnalysisInterfaces/IAsgPhotonEfficiencyCorrectionTool.h"
 #include "MuonAnalysisInterfaces/IMuonTriggerScaleFactors.h"
@@ -44,6 +48,25 @@ namespace CP
     virtual StatusCode finalize() final override;
 
   private:
+    /// \brief create one efficiency and one scale factor tool per electron/photon trigger key
+    ///
+    /// \param toolsFactory backing storage for the public tool handles created for each leg
+    /// \param effTools handle array to append the efficiency tool handles to
+    /// \param sfTools handle array to append the scale factor tool handles to
+    /// \param legsPerKey combined trigger legs, keyed by the trigger key Egamma suggested
+    /// \param toolNamePrefix/toolNameSuffix used to build unique tool instance names
+    /// \param setToolProperties callback setting the tool-specific properties (map file, ID/isolation WPs, ...)
+    /// \param legsPerTool[out] combined trigger legs, keyed by the name of the tool handling them
+    template <typename ToolInterface, typename SetToolPropertiesFn>
+    StatusCode makeEgammaTools(std::vector<ToolHandle<ToolInterface> >& toolsFactory,
+                               ToolHandleArray<ToolInterface>& effTools,
+                               ToolHandleArray<ToolInterface>& sfTools,
+                               const std::map<std::string, std::string>& legsPerKey,
+                               const std::string& toolNamePrefix,
+                               const std::string& toolNameSuffix,
+                               const SetToolPropertiesFn& setToolProperties,
+                               std::map<std::string, std::string>& legsPerTool);
+
     SysListHandle m_systematicsList {this};
 
     /// \brief whether to use Run 3 settings
@@ -84,55 +107,57 @@ namespace CP
     /// \brief decoration of the global trigger SF
     SysWriteDecorHandle<float> m_scaleFactorDecoration {
       this, "scaleFactorDecoration", "", "the decoration for the global trigger efficiency scale factor"
-	};
+    };
 
     /// \brief decoration of the global trigger matching flag
     SysWriteDecorHandle<char> m_matchingDecoration {
       this, "matchingDecoration", "", "the decoration for the global trigger matching decision"
-	};
+    };
 
     /// \brief input electron collection
     SysReadHandle<xAOD::ElectronContainer> m_electronsHandle {
       this, "electrons", "", "the electron container to use"
-	};
+    };
 
     /// \brief input electron selection
     SysReadSelectionHandle m_electronSelection {
       this, "electronSelection", "", "the selection on the input electrons"
-	};
+    };
 
     /// \brief input muon collection
     SysReadHandle<xAOD::MuonContainer> m_muonsHandle {
       this, "muons", "", "the muon container to use"
-	};
+    };
 
     /// \brief input muon selection
     SysReadSelectionHandle m_muonSelection {
       this, "muonSelection", "", "the selection on the input muons"
-	};
+    };
 
     /// \brief input photon collection
     SysReadHandle<xAOD::PhotonContainer> m_photonsHandle {
       this, "photons", "", "the photon container to use"
-	};
+    };
 
     /// \brief input photon selection
     SysReadSelectionHandle m_photonSelection {
       this, "photonSelection", "", "the selection on the input photons"
-	};
+    };
 
     /// \brief EventInfo to decorate
     SysReadHandle<xAOD::EventInfo> m_eventInfoHandle {
       this, "eventInfoContainer", "EventInfo", "the EventInfo container to decorate to"
-	};
+    };
 
 
     /// \brief the muon trigger SF handle
     asg::AnaToolHandle<IMuonTriggerScaleFactors> m_muonTool;
-    /// \brief RAII on-the-fly tool creation for electrons
-    std::vector<asg::AnaToolHandle<IAsgElectronEfficiencyCorrectionTool> > m_electronToolsFactory;
-    /// \brief RAII on-the-fly tool creation for photons
-    std::vector<asg::AnaToolHandle<IAsgPhotonEfficiencyCorrectionTool> > m_photonToolsFactory;
+    /// \brief on-the-fly public tool creation for electrons
+    std::vector<ToolHandle<IAsgElectronEfficiencyCorrectionTool> > m_electronToolsFactory;
+    /// \brief on-the-fly public tool creation for photons
+    std::vector<ToolHandle<IAsgPhotonEfficiencyCorrectionTool> > m_photonToolsFactory;
+    /// \brief keeps the tools created via m_electronToolsFactory/m_photonToolsFactory alive in AnalysisBase
+    std::vector<std::shared_ptr<void> > m_toolsCleanup;
 
     /// \brief MC campaign
     Gaudi::Property<std::string> m_campaign {this, "campaign", "", "the MC campaign to get the scale factors for"};
@@ -148,6 +173,9 @@ namespace CP
     /// \brief number of toy experiments to run to estimate the trigger combination efficiency,
     /// instead of using an explicit formula
     Gaudi::Property<int> m_numToys {this, "numberOfToys", 0, "number of toy experiments"};
+
+    /// \brief number of events for which the global trigger scale factor computation failed
+    unsigned long long m_nScaleFactorFailures = 0;
 
   }; // class TrigGlobalEfficiencyAlg
 } // namespace CP
