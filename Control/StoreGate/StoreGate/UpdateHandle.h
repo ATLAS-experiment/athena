@@ -128,8 +128,15 @@ namespace SG {
      * @param sgkey StoreGate key of the referenced object.
      * @param ctx The event context.
      */
-    explicit UpdateHandle(const std::string& sgkey,
-                          const EventContext& ctx);
+    explicit UpdateHandle(const std::string& sgkey, const EventContext& ctx);
+
+
+    /**
+     * @brief Constructor specifying the key as a string, with data store.
+     * @param sgkey StoreGate key of the referenced object.
+     * @param sg Data store.
+     */
+    explicit UpdateHandle(const std::string& sgkey, IProxyDict* sg);
 
 
     /**

@@ -128,6 +128,9 @@ void test1()
 
   TestHandle h8 (1234, "foo", Gaudi::DataHandle::Writer, "StoreGateSvc", &ctx5);
   assert (h8.m_store == &dumstore);
+
+  TestHandle h9 (1234, "foo", Gaudi::DataHandle::Writer, &dumstore);
+  assert (h9.m_store == &dumstore);
 }
 
 

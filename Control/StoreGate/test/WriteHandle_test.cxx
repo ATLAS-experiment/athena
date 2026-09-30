@@ -193,6 +193,13 @@ void test1()
   assert (h9.storeHandle().name() == "OtherStore");
   assert (h9.mode() == Gaudi::DataHandle::Writer);
   assert (h9.store() == "OtherStore_Impl");
+
+  SG::WriteHandle<MyObj> h10 ("foo", &dumstore);
+  assert (h10.clid() == MyCLID);
+  assert (h10.key() == "foo");
+  assert (h10.storeHandle().name() == "TestStore");
+  assert (h10.mode() == Gaudi::DataHandle::Writer);
+  assert (h10.store() == "TestStore");
 }
 
 

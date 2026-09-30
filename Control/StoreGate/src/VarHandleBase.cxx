@@ -157,6 +157,29 @@ namespace SG {
 
 
   /**
+   * @brief Constructor given an IProxyDict.
+   * @param clid CLID of the referenced class.
+   * @param sgkey StoreGate key of the referenced object.
+   * @param mode Mode of this handle (read/write/update).
+   * @param sg The referenced store.
+   */
+  VarHandleBase::VarHandleBase(CLID clid,
+                               const std::string& sgkey,
+                               Gaudi::DataHandle::Mode mode,
+                               IProxyDict* sg) :
+    IResetable(),
+    m_ptr(nullptr),
+    m_proxy(nullptr),
+    m_store(sg),
+    m_storeWasSet(true),
+    m_ownedKey (std::make_unique<VarHandleKey> (clid, sgkey, mode, sg->name())),
+    m_key (m_ownedKey.get())
+  {
+    m_ownedKey->setOwningHandle (this);
+  }
+
+
+  /**
    * @brief Constructor from a VarHandleKey.
    * @param key The key object holding the clid/key/store.
    * @param ctx The event context to use, or nullptr.
