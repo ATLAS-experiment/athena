@@ -112,8 +112,8 @@ namespace MuonR4 {
         return Acts::makeDirectionFromPhiTheta(phi() + 90._degree, 90._degree);
     }
     bool ExpandedSector::isNeighbour(const ExpandedSector& other) const {
-        const int dS = (other.sector() - sector()) % nExpanded;
-        return std::abs(dS) <= 1; 
+        const int dS = std::abs(other.sector() - sector());
+        return std::min(dS, nExpanded - dS) <= 1; 
     }
    
     std::string ExpandedSector::toString(const SectorProjector proj) {
