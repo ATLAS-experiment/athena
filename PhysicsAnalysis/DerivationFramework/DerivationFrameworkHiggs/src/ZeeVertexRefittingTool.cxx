@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -146,14 +146,16 @@ namespace DerivationFramework {
           nv->makePrivateStore(v);
           if(ipv !=0 ) refittedPVContainer->push_back(nv);
           ipv++;
+          //refittedPVContainer has ownership of nv
+          //coverity[RESOURCE_LEAK]
         }
-
+        const std::string emptyStr{};
         for ( xAOD::Vertex *v : *refittedPVContainer )
           {
             float vert_sumpt = (log10(xAOD::PVHelpers::getVertexSumPt(v)));
             float vert_sumpt2 = (log10(xAOD::PVHelpers::getVertexSumPt(v,2, false)));
 
-            TLorentzVector vtxmom = xAOD::PVHelpers::getVertexMomentum(v, true, "");
+            TLorentzVector vtxmom = xAOD::PVHelpers::getVertexMomentum(v, true, emptyStr);
             float vert_dphi = (fabs(vtxmom.DeltaPhi(egamVec)));
             //fill vertex variables
             vertices_sumPt(*v) = vert_sumpt;
@@ -172,7 +174,7 @@ namespace DerivationFramework {
             electrons->at(pair[0])->trackParticleLink(),
             electrons->at(pair[1])->trackParticleLink()
           };
-          electronTrackLinksDecor(*pv_ref) = electronTrackLinks;
+          electronTrackLinksDecor(*pv_ref) = std::move(electronTrackLinks);
         } else {
           ATH_MSG_DEBUG("Electrons from pair not used in the refitting ");
         }
