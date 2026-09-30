@@ -11,11 +11,12 @@ def SegmentSelectorCfg(flags, name="SegmentSelectionTool", **kwargs):
 
 
 def MSExtrapolatorCfg(flags, name="MsExtrapolationTool", **kwargs):
+    kwargs.setdefault("MaxSteps", 10000)
+    kwargs.setdefault("InteractionEloss", flags.Muon.trackGeometryPassiveMaterial)
+    kwargs.setdefault("InteractionMultiScatering", flags.Muon.trackGeometryPassiveMaterial)
     from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
-    return ActsExtrapolationToolCfg(flags, 
-            MaxSteps=10000,
-            InteractionEloss = flags.Muon.trackGeometryPassiveMaterial,
-            InteractionMultiScatering = flags.Muon.trackGeometryPassiveMaterial)
+    return ActsExtrapolationToolCfg(flags, name, **kwargs)
+
 
 def MSTrackFitterCfg(flags, name="MSTrackFitTool", **kwargs):
     result = ComponentAccumulator()
