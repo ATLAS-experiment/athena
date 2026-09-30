@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_IPROXYDICT_H
@@ -13,6 +13,7 @@
 #include "AthenaKernel/IHiveStore.h"
 #include "AthenaKernel/DataObjectSharedPtr.h"
 #include "AthenaKernel/SourceID.h"
+#include "AthenaKernel/StoreID.h"
 #include "GaudiKernel/INamedInterface.h"
 #include "GaudiKernel/ClassID.h"
 #include <string>
@@ -196,6 +197,14 @@ public:
    *        The default version always returns an empty string.
    */
   virtual SG::SourceID sourceID (const std::string& key = "EventSelector") const;
+
+
+  /**
+   * @brief Return the type of this store.
+   *
+   * The default version returns EVENT_STORE.
+   */
+  virtual StoreID::type storeID() const;
 };
 
 
