@@ -7,7 +7,7 @@
 // i.e. simple, no test frameework
 #include "EventPrimitives/EventPrimitivesToStringConverter.h"
 
-#include <cassert>
+
 #include <iostream>
 #include <string>
 
@@ -44,19 +44,13 @@ int main() {
   {
   failures += checkEqual(roundWithPrecision(1.2345, 4),1.2345,"roundWithPrecision positive value");
   failures += checkEqual(roundWithPrecision(-1.2345, 4), -1.2345,"roundWithPrecision negative value above threshold");
-  //this odd and possibly buggy result reflects the current behaviour:sign flip
-  failures += checkEqual(roundWithPrecision(-0.00001, 4),0.00001,"roundWithPrecision small negative value");
-  //sign flip?
-  failures += checkEqual(roundWithPrecision(-0.00009, 4), 0.00009,"roundWithPrecision negative value below 1e-4");
-  //sign flip?
-  failures += checkEqual(roundWithPrecision(-0.0001, 4),-0.0001,"roundWithPrecision value exactly at threshold");
-  //
-  failures += checkEqual(roundWithPrecision(0.00001, 4),0.00001,"roundWithPrecision small positive value");
+  failures += checkEqual(roundWithPrecision(-0.00001, 4),0.00000,"roundWithPrecision small negative value");
+  failures += checkEqual(roundWithPrecision(-0.00009, 4), -0.0001,"roundWithPrecision negative value below 1e-4");
+  failures += checkEqual(roundWithPrecision(0.00001, 4),0.00000,"roundWithPrecision small positive value");
   failures += checkEqual(roundWithPrecision(0.0, 4),0.0,"roundWithPrecision zero");
-  failures += checkEqual(roundWithPrecision(-0.4, 0),0.4,"roundWithPrecision precision zero small negative value");
+  failures += checkEqual(roundWithPrecision(-0.4, 0),0,"roundWithPrecision precision zero small negative value");
   failures += checkEqual(roundWithPrecision(-1.0, 0),-1.0,"roundWithPrecision precision zero threshold");
-  //current behaviour allows use of _negative_ precision
-  failures += checkEqual(roundWithPrecision(-5.0, -1), 5.0,"roundWithPrecision negative precision");
+  //current behaviour allows use of _negative_ precision, vetoed in dbg builds
   }
   {
     MatrixX matrix(3, 1);
