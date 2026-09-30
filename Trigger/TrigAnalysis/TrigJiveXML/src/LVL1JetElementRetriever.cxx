@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigJiveXML/LVL1JetElementRetriever.h"
@@ -32,7 +32,7 @@ namespace JiveXML {
     // taken from TrigT1Calo/Tester.cxx
     
     typedef DataVector<LVL1::JetElement> t_JECollection ;
-    const t_JECollection* JEVector;
+    const t_JECollection* JEVector = nullptr;
     
     if ( evtStore()->retrieve(JEVector,m_sgKey).isFailure() ) {
       if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) <<  "No Level-1 Jet Elements found in SG at "
