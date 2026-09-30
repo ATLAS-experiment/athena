@@ -211,7 +211,7 @@ public:
   /// set store ID. request forwarded to DataStore:
   void setStoreID(StoreID::type id);
   /// get store ID. request forwarded to DataStore:
-  StoreID::type storeID() const;
+  virtual StoreID::type storeID() const override;
 
 
   /** provide list of all StoreGate keys associated with an object.

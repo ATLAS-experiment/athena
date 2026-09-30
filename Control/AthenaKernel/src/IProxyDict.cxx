@@ -1,10 +1,8 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
- * @file AthenaKernel/src/IProxyDict.h
+ * @file AthenaKernel/src/IProxyDict.cxx
  * @author scott snyder <snyder@bnl.gov>
  * @date Jul, 2015
  * @brief Default implementations for IProxyDict.
@@ -97,4 +95,15 @@ SG::SourceID
 IProxyDict::sourceID (const std::string& /*key = "EventSelector"*/) const
 {
   return SG::SourceID();
+}
+
+
+/**
+ * @brief Return the type of this store.
+ *
+ * The default version returns EVENT_STORE.
+ */
+StoreID::type IProxyDict::storeID() const
+{
+  return StoreID::EVENT_STORE;
 }
