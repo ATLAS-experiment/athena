@@ -15,6 +15,7 @@
 #include <string>
 #include <string_view>
 #include <cmath>
+#include <cassert>
 
 namespace Amg {
 
@@ -34,9 +35,10 @@ namespace Amg {
     */
 
 inline double roundWithPrecision(double val, int precision) {
-  if (val < 0 && std::abs(val) * std::pow(10, precision) < 1.)
-    return -val;
-  return val;
+  assert(precision>=0);
+  const double scale = std::pow(10.0, precision);
+  const double rounded = std::round(val * scale) / scale;
+  return rounded == 0.0 ? 0.0 : rounded; //avoids a -0 result.
 }
 
 inline std::string toString(const MatrixX& matrix, int precision = 4,
