@@ -471,6 +471,8 @@ namespace JetTagDQA{
       int getTrackHits(const xAOD::TrackParticle& part, xAOD::SummaryType info);
       bool hasTaggerOutputs(const xAOD::Jet& jet, const std::string& tagger, const std::vector<std::string>& outputs);
       std::string largeRClass(const xAOD::Jet& jet, int truth_label) const;
+      void bookCommonHistograms();
+      void bookSmallRHistograms();
       void bookLargeRHistograms();
       void fillLargeR(const std::string& variable, const std::string& truth_class, double value, const xAOD::EventInfo* event);
       void fillDiscriminantHistograms(const std::string& tagger_name, const double& discriminant_value, const std::map<std::string, double>& working_points, const int& truth_label, std::map<std::string, TH1*>::const_iterator hist_iter, std::map<std::string, int>::const_iterator label_iter, const double& jet_pT, const double& jet_Lxy, const double& jet_SV1_Lxy, const bool& onZprime, const xAOD::EventInfo* event);

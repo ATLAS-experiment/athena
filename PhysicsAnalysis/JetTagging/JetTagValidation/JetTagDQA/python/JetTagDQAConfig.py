@@ -34,16 +34,19 @@ def PhysValBTagCfg(flags, **kwargs):
     import ROOT
     path = ROOT.PathResolver.find_file( 'JetTagDQA/PhysValBtag_VariablesMenu.json', 'DATAPATH' )
     from PhysValMonitoring.PhysValUtils import getHistogramDefinitions
-    definitions = getHistogramDefinitions(path, 'PHYSVAL', 'ALL')
 
-    # Run-dependent histo definitions
-    path_Run = ROOT.PathResolver.find_file( \
-                'JetTagDQA/PhysValBtag_VariablesMenu_Run3.json' if flags.GeoModel.Run <= LHCPeriod.Run3 \
-                else 'JetTagDQA/PhysValBtag_VariablesMenu_Run4.json',
-                'DATAPATH' )
-    definitions_Run = getHistogramDefinitions(path_Run, 'PHYSVAL', 'ALL')
+    # the RUN3 and RUN4 groups hold the definitions that depend on the run, only one of them is read
+    import json
+    with open(path) as menu:
+        groups = [group for group in json.load(menu) if group != "template"]
+    thisRun = "RUN3" if flags.GeoModel.Run <= LHCPeriod.Run3 else "RUN4"
+    definitions = []
+    for group in groups:
+        if group.startswith("RUN") and group != thisRun:
+            continue
+        definitions += getHistogramDefinitions(path, 'PHYSVAL', group)
 
-    kwargs.setdefault("HistogramDefinitions", definitions + definitions_Run)
+    kwargs.setdefault("HistogramDefinitions", definitions)
     kwargs.setdefault("JetEtaCut", 2.5 if flags.GeoModel.Run <= LHCPeriod.Run3 else 4.0)
     kwargs.setdefault("JetContainerEMTopo", "" if flags.GeoModel.Run <= LHCPeriod.Run3 else "AntiKt4EMTopoJets")
     kwargs.setdefault("JetContainerPFlow", "AntiKt4EMPFlowJets")
