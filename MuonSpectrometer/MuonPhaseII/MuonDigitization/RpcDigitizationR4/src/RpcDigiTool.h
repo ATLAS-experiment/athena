@@ -68,12 +68,12 @@ private:
       ATLAS_THREAD_SAFE{};
 
   Gaudi::Property<double> m_propagationVelocity{
-      this, "propSpeed", 0.5 * Gaudi::Units::c_light,
-      "Propagation speed of the signal inside the strip"}; // in mm/ns
+      this, "propSpeed", 2.0/3.0 * Gaudi::Units::c_light,
+      "Propagation speed of the signal inside the strip"}; // measured: 20 cm/ns
 
   Gaudi::Property<double> m_stripTimeResolution{
-      this, "timeResolution", 0.6 * Gaudi::Units::nanosecond,
-      "Estimated time resolution of the strip readout"};
+      this, "timeResolution", 0.29 * Gaudi::Units::nanosecond,
+      "Estimated time resolution of the strip readout"}; // measured: 0.29 ns https://indico.cern.ch/event/1722258/contributions/7264004/attachments/3339594/5984842/BI-DCT_performance_2026_09_08.pdf
 
   Gaudi::Property<double> m_deadTime{this, "deadTime",
                                      100. * Gaudi::Units::nanosecond};
@@ -110,9 +110,8 @@ private:
   double getTOT(const double aCharge) const; 
 
   /** @brief Returns Time Of Arrival (ns) for a signal on a strip
-   *  @param aCharge: electric charge deposited on the strip (fC)
    *  @param aDistance: distance from hit to strip edge (m) */
-  double getTOA(const double aCharge, const double aDistance) const;
+  double getTOA(const double aDistance) const;
 };
 
 } // namespace MuonR4
