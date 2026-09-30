@@ -22,33 +22,33 @@
 
 
 namespace{
-    // Redefine some functions from the package OnnxRuntimeUtils which is not (yet) available in AnalysisBase
-    // Set up the ONNX Runtime session
-    std::unique_ptr< Ort::Session > CreateORTSession(const std::string& modelFile){
-        Ort::SessionOptions sessionOptions;
-        sessionOptions.SetIntraOpNumThreads( 1 );
-        sessionOptions.SetGraphOptimizationLevel( ORT_ENABLE_BASIC );
+  // Redefine some functions from the package OnnxRuntimeUtils which is not (yet) available in AnalysisBase
+  // Set up the ONNX Runtime session
+  std::unique_ptr< Ort::Session > CreateORTSession(const std::string& modelFile){
+      Ort::SessionOptions sessionOptions;
+      sessionOptions.SetIntraOpNumThreads( 1 );
+      sessionOptions.SetGraphOptimizationLevel( ORT_ENABLE_BASIC );
+      
+      // Set the ONNX service name depending on the actual analysis release 
+      std::string serviceName;
+#ifdef XAOD_STANDALONE
+      using namespace asg::msgUserCode;
+      ANA_MSG_WARNING("If running DNN calibration in AnalysisBase: necessary to instantiate the ONNX service AthOnnx::OnnxRuntimeSvc with name OnnxRuntimeSvc");
+      ANA_MSG_WARNING("Either in C++ config (see exemple in JetCalibTools_Example.cxx)");
+      ANA_MSG_WARNING("Or in python config with");
+      ANA_MSG_WARNING("   from AnaAlgorithm.DualUseConfig import createService");
+      ANA_MSG_WARNING("   onnxSvc = createService('AthOnnx::OnnxRuntimeSvc', 'OnnxRuntimeSvc', myAlgSequence)");
+      serviceName = "OnnxRuntimeSvc";
+#else
+      serviceName = "AthOnnx::OnnxRuntimeSvc";
+#endif
 
-        // Set the ONNX service name depending on the actual analysis release 
-        std::string serviceName;
-        #ifdef XAOD_STANDALONE
-            using namespace asg::msgUserCode;
-            ANA_MSG_WARNING("If running DNN calibration in AnalysisBase: necessary to instantiate the ONNX service AthOnnx::OnnxRuntimeSvc with name OnnxRuntimeSvc");
-            ANA_MSG_WARNING("Either in C++ config (see exemple in JetCalibTools_Example.cxx)");
-            ANA_MSG_WARNING("Or in python config with");
-            ANA_MSG_WARNING("   from AnaAlgorithm.DualUseConfig import createService");
-            ANA_MSG_WARNING("   onnxSvc = createService('AthOnnx::OnnxRuntimeSvc', 'OnnxRuntimeSvc', myAlgSequence)");
-            serviceName = "OnnxRuntimeSvc";
-        #else
-            serviceName = "AthOnnx::OnnxRuntimeSvc";
-        #endif
-
-        ServiceHandle< AthOnnx::IOnnxRuntimeSvc > svc(serviceName, "AthOnnx::OnnxRuntimeSvc");
-
-        return std::make_unique<Ort::Session>( svc->env(),
-                                                modelFile.c_str(),
-                                                sessionOptions );
-    }
+      ServiceHandle< AthOnnx::IOnnxRuntimeSvc > svc(serviceName, "AthOnnx::OnnxRuntimeSvc");
+      
+      return std::make_unique<Ort::Session>( svc->env(),
+					     modelFile.c_str(),
+					     sessionOptions );
+  }
 
     // Get dimensions and names of the input nodes
     std::tuple<std::vector<int64_t>, std::vector<const char*> > GetInputNodeInfo(const std::unique_ptr< Ort::Session >& session){
@@ -136,12 +136,13 @@ namespace {
     #define DEF_RETRIEVER1(cname, expr )  struct Var_##cname : public GlobalLargeRDNNCalibration::VarRetriever { float value(const xAOD::Jet& , JetEventInfo& jetInfo, double eScale ) { return expr ; } }
     #define DEF_RATIO_RETRIEVER(cname, expr )  struct Ratio_##cname : public RatioAccessorRetriever { float value(const xAOD::Jet& jet, JetEventInfo& , double eScale ) { return expr ; } }
     
-    // Std jet variables
+  // Std jet variables
     DEF_RETRIEVER0( eta, jet.eta()*eScale ) ;
     DEF_RETRIEVER0( rapidity, jet.rapidity()*eScale ) ;
     DEF_RETRIEVER0( log_e, log(jet.e()*eScale) ) ;
     DEF_RETRIEVER0( log_m, log(jet.m()*eScale) ) ;
     DEF_RETRIEVER0( m, jet.m()*eScale ) ;
+    DEF_RETRIEVER0( log_m_40, jet.m()<40000 ? log(40000*eScale) : log(jet.m()*eScale) ) ;
 
     // Ratio variables -- default values consistent with DNN training
     DEF_RATIO_RETRIEVER( Tau21_wta, m_accTau1(jet) > 1e-8 ? eScale * m_accTau2(jet) / m_accTau1(jet) : -0.1);
@@ -164,6 +165,7 @@ namespace {
             {"rapidity",  [](){return new Var_rapidity();} },
             {"log_e",     [](){return new Var_log_e();} },
             {"log_m",     [](){return new Var_log_m();} },
+            {"log_m_40",  [](){return new Var_log_m_40();} },
             {"Tau21_wta", [](){return new Ratio_Tau21_wta();} },
             {"Tau32_wta", [](){return new Ratio_Tau32_wta();} },
             {"C2",        [](){return new Ratio_C2();} },
@@ -246,6 +248,7 @@ StatusCode GlobalLargeRDNNCalibration::initialize(){
     
     // Get DNN config file
     m_modelFileName = m_config->GetValue("DNNC.ONNXInput","");
+    m_noMassCalibBelow40 = m_config->GetValue("DNNC.NoMassCalibBelow40", 1);
     std::string modelPath = "";
     if (m_devMode) {
         modelPath="JetCalibTools/"+m_modelFileName;
@@ -253,7 +256,7 @@ StatusCode GlobalLargeRDNNCalibration::initialize(){
         modelPath="JetCalibTools/"+m_calibArea+"CalibrationConfigs/"+m_modelFileName;
     }
     const std::string fullModelPath = PathResolverFindCalibFile( modelPath ); // Full path
-    ATH_MSG_INFO("Using ONNX model : " << m_modelFileName);
+    ATH_MSG_INFO("Using ONNX model : " << m_modelFileName );
     ATH_MSG_INFO("resolved in: " << fullModelPath);
 
     // Set up the ONNX Runtime session.
@@ -338,6 +341,7 @@ StatusCode GlobalLargeRDNNCalibration::calibrate(xAOD::Jet& jet, JetEventInfo& j
         ATH_MSG_DEBUG("Input tensor values : ");
         for (long unsigned int i=0;i<input_tensor_values.size();i++) ATH_MSG_DEBUG(" " << input_tensor_values[i]);
     }
+    ATH_MSG_DEBUG(" start M : " << jetStartP4.M());
 
     // Check for nan or +/- inf values
     int nNan = std::count_if(input_tensor_values.begin(), input_tensor_values.end(), [](float f){return std::isnan(f) || std::isinf(f);});
@@ -398,12 +402,12 @@ StatusCode GlobalLargeRDNNCalibration::calibrate(xAOD::Jet& jet, JetEventInfo& j
     // Apply calibration to jet p4
     float calibE = jetStartP4.e() / predRespE;
 
-    // For mass only apply calibration if m>40 GeV
+    // For mass, only apply calibration if m>40 GeV (if m_noMassCalibBelow40)
     float calibM = jetStartP4.mass();
-    if ( calibM > 40000 ) {
+    if( ! m_noMassCalibBelow40 || (calibM>40000) ){
         calibM /= predRespM;
     }
-    
+
     // Propagate energy and mass calibration to jet pT
     float calibpT = std::sqrt( calibE*calibE - calibM*calibM )/std::cosh( jetStartP4.eta() );
 

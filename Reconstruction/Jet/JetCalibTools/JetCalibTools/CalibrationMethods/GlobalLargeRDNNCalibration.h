@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /* ***********************************************************************************\
@@ -103,6 +103,7 @@ public:
     std::string m_calibArea;
     bool m_devMode{};
 
+    bool m_noMassCalibBelow40=false;
 
 }; // Class GlobalLargeRDNNCalibration
 
