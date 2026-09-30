@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file DataModelTestDataCommon/src/xAODTestWriteFwdLink1.cxx
@@ -31,7 +31,7 @@ StatusCode xAODTestWriteFwdLink1::execute (const EventContext& ctx) const
   auto cvec = std::make_unique<DMTest::CVec>();
   for (size_t i = 0; i < 10; i++)
     cvec->push_back (std::make_unique<DMTest::C>());
-  cvec->setStore (DataLink<SG::IAuxStore> (m_cvecKey.key() + "Aux."));
+  cvec->setStore (DataLink<SG::IAuxStore> (m_cvecKey.key() + "Aux.", ctx));
   SG::WriteHandle<DMTest::CVec> cvec_h (m_cvecKey, ctx);
   ATH_CHECK (cvec_h.record (std::move (cvec)));
   return StatusCode::SUCCESS;

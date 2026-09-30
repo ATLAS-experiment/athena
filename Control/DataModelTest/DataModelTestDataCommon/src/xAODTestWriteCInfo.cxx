@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file DataModelTestDataCOMMON/src/xAODTestWriteCInfo.cxx
  * @author snyder@bnl.gov
@@ -71,7 +69,7 @@ StatusCode xAODTestWriteCInfo::execute (const EventContext& ctx) const
   anInt2(*cinfo) = count * 2000 + m_offset;
 
   if (!cvec->empty()) {
-    cEL(*cinfo).toIndexedElement (*cvec, count % cvec->size());
+    cEL(*cinfo).toIndexedElement (*cvec, count % cvec->size(), ctx);
   }
 
   SG::WriteHandle<DMTest::C> cinfoH (m_cinfoKey, ctx);
