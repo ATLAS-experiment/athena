@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from Campaigns.Utils import getDataYear
 import logging
@@ -27,7 +27,7 @@ def getDecoByTrigName(trigName):
         if tagger in trigName:
             decoration_list += deco
     if len(decoration_list) == 0:
-        raise ValueError(f"Could not find decorations for trigger name {trigName}, avaialable sub-strings: {list(run3_tagger_deco_map.keys())}")
+        raise ValueError(f"Could not find decorations for trigger name {trigName}, available sub-strings: {list(run3_tagger_deco_map.keys())}")
     # deduplicate
     return list(set(decoration_list))
 
@@ -72,7 +72,7 @@ def getBJetTriggerContent(flags):
         msg.debug(f'Configured Run 3 / Run 4 b-jet trigger content for {year}')
 
         ftagstrs = []
-        ftaggers = run3_tagger_deco_map.get(run3_year_tagger_map[year])
+        ftaggers = run3_tagger_deco_map.get(run3_year_tagger_map.get(year, run3_year_tagger_map[max(run3_year_tagger_map)]))
         for ftagger in ftaggers:
             ftagstrs.append('.'.join([f'{ftagger}_{p}' for p in ['pb','pc','pu']]))
         jetstrs = ftagstrs + ['pt', 'eta', 'phi', 'm']

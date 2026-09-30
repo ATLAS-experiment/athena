@@ -18,9 +18,11 @@ def getBTagOnlineWP(chain, onlineTagger):
     after = chain.split(onlineTagger)[1]
     # Get the two first characters, corresponding to the WP
     wp = after[:2]
+    if len(wp) != 2 or not wp.isdigit():
+        return ''
     return 'FixedCutBEff_'+wp
 
-def getBTagOnlineTaggerWP(chain, log):
+def getBTagOnlineTaggerWP(chain):
     bTagOnlineTaggers = {
         'bdl1d' : 'OnlineDL1d',
         'bgn1' : 'OnlineGN1' }
@@ -92,7 +94,7 @@ class FTagJetSFBlock(ConfigBlock):
         self.addOption ('excludeFromEigenVectorLightTreatment', '', type=str,
             info="(semicolon-separated) names of uncertainties to be excluded from "
             "light-flavour-jet eigenvector decompositions (if used).")
-        self.addOption ('excludeRecommendedFromEigenVectorTreatment', False, type=str,
+        self.addOption ('excludeRecommendedFromEigenVectorTreatment', False, type=bool,
             info="whether or not to add recommended lists to the user specified "
             "eigenvector decomposition exclusion lists.")
         self.addOption ('savePerJetSF', False, type=bool,
@@ -181,12 +183,10 @@ class FTagJetSFBlock(ConfigBlock):
         else:
             bTagCalibFile = getRecommendedBTagCalib(config.geometry(), self.btagWP)
 
-        DSID = "default"
-        if config.dataType() is not DataType.Data:
-            # Check if the right CDI is used for the MC campaign
-            check_CDI_campaign(config.campaign(), bTagCalibFile)
-            # MC/MC efficiency map for the generator
-            DSID = MCMC_dsid_map(config.geometry(), config.generatorInfo(), self.generator, self.btagger)
+        # Check if the right CDI is used for the MC campaign
+        check_CDI_campaign(config.campaign(), bTagCalibFile)
+        # MC/MC efficiency map for the generator
+        DSID = MCMC_dsid_map(config.geometry(), config.generatorInfo(), self.generator, self.btagger)
 
         # Need to split container name from selections, to support AnaJets.baselineJvt
         jetContainer = self.containerName.split('.')[0]
@@ -211,13 +211,13 @@ class FTagJetSFBlock(ConfigBlock):
                 else:
                     bTagCalibTriggerFile = getRecommendedBTagTrigCalib(config.geometry())
 
-                bTagOnlineTagger, bTagOnlineWP = getBTagOnlineTaggerWP(chain, log)
+                bTagOnlineTagger, bTagOnlineWP = getBTagOnlineTaggerWP(chain)
                 if self.bTagOnlineTagger:
                     bTagOnlineTagger = self.bTagOnlineTagger
                 if self.bTagOnlineWP:
                     bTagOnlineWP = self.bTagOnlineWP
 
-                if not bTagOnlineTagger and not bTagOnlineWP:
+                if not bTagOnlineTagger or not bTagOnlineWP:
                     raise ValueError('Trigger chain ' + chain + ' does not include any of the supported online taggers. '
                                      'Please make sure to configure manually bTagOnlineTagger and bTagOnlineWP')
 
