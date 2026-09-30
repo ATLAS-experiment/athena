@@ -17,7 +17,7 @@ namespace AthOnnx {
 
 StatusCode EvaluateModelWithAsyncInfer::initialize() {
   if (m_batchSize.value() < 1) {
-    ATH_MSG_ERROR("Requested an invalid batch size: " << m_batchSize.value());
+    ATH_MSG_ERROR("Requested an invalid batch size: {}", m_batchSize.value());
     return StatusCode::FAILURE;
   }
 
@@ -27,32 +27,30 @@ StatusCode EvaluateModelWithAsyncInfer::initialize() {
   // read input file, and the target file for comparison.
   std::string pixelFilePath =
       PathResolver::find_calib_file(m_pixelFileName.value());
-  ATH_MSG_INFO("Using pixel file: " << pixelFilePath);
+  ATH_MSG_INFO("Using pixel file: {}", pixelFilePath);
 
   try {
     m_input_tensor_values_notFlat =
         EvaluateUtils::read_mnist_pixel_notFlat(pixelFilePath);
     ATH_MSG_INFO(
-        "Total no. of samples: " << m_input_tensor_values_notFlat.size());
+        "Total no. of samples: {}", m_input_tensor_values_notFlat.size());
   } catch (const std::exception& e) {
     ATH_MSG_ERROR(e.what());
     return StatusCode::FAILURE;
   }
 
   if (std::size_t(m_batchSize.value()) > m_input_tensor_values_notFlat.size()) {
-    ATH_MSG_ERROR("The batch size requested ("
-                  << m_batchSize.value()
-                  << ") is greater than the number of available "
-                     "samples ("
-                  << m_input_tensor_values_notFlat.size() << ")");
+    ATH_MSG_ERROR("The batch size requested ({}) is greater than the number of available "
+                  "samples ({})",
+                  m_batchSize.value(),
+                  m_input_tensor_values_notFlat.size());
     return StatusCode::FAILURE;
   }
 
   if (m_input_tensor_values_notFlat.size() % m_batchSize.value() != 0) {
-    ATH_MSG_ERROR("The number of samples ("
-                  << m_input_tensor_values_notFlat.size()
-                  << ") is not a multiple of the requested batch size ("
-                  << m_batchSize.value() << ")");
+    ATH_MSG_ERROR("The number of samples ({}) is not a multiple of the requested batch size ({})",
+                  m_input_tensor_values_notFlat.size(),
+                  m_batchSize.value());
     return StatusCode::FAILURE;
   }
   return StatusCode::SUCCESS;
@@ -98,24 +96,22 @@ StatusCode EvaluateModelWithAsyncInfer::execute(
         std::get<std::vector<float>>(outputData["dense_1/Softmax:0"].second);
 
     if (outputScores.size() != std::size_t(n_scores * m_batchSize.value())) {
-      ATH_MSG_ERROR("Got back " << outputScores.size()
-                                << " scores when it should have been "
-                                << n_scores << " * " << m_batchSize.value()
-                                << " = " << n_scores * m_batchSize.value());
+      ATH_MSG_ERROR("Got back {} scores when it should have been {} * {} = {}",
+                    outputScores.size(), n_scores, m_batchSize.value(),
+                    n_scores * m_batchSize.value());
       return StatusCode::FAILURE;
     }
 
     for (int img_idx = 0; img_idx < m_batchSize.value(); img_idx++) {
       std::span scores(outputScores.begin() + img_idx * n_scores,
                        outputScores.begin() + (img_idx + 1) * n_scores);
-      ATH_MSG_DEBUG("Scores for img " << img_idx << " of batch " << batch_idx
-                                      << ": "
-                                      << EvaluateUtils::spanToString(scores));
+      ATH_MSG_DEBUG("Scores for img {} of batch {}: {}",
+                    img_idx, batch_idx,
+                    EvaluateUtils::spanToString(scores));
       const auto max_elem = std::ranges::max_element(scores);
-      ATH_MSG_DEBUG("Class: " << max_elem - scores.begin()
-                              << " has the highest score: " << *max_elem
-                              << " in img " << img_idx << " of batch "
-                              << batch_idx);
+      ATH_MSG_DEBUG("Class: {} has the highest score: {} in img {} of batch {}",
+                    max_elem - scores.begin(),
+                    *max_elem, img_idx, batch_idx);
     }
   }
   return StatusCode::SUCCESS;
