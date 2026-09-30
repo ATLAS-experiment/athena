@@ -1,7 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthLinks/tools/DataProxyHolder.h
@@ -230,14 +229,18 @@ public:
    * @brief Finish initialization after link has been read.
    * @param sgkey Hashed SG key.
    * @param sg Associated store.
+   * @param noDummy If true, then if we don't find a proxy, just leave
+   *                the link null rather than making a dummy.
    *
    * This should be called after a link has been read by root
    * in order to set the proxy pointer.  It calls @c toIdentifiedObject
    * with the provided hashed key.
    *
-   * If @c sg is 0, then we use the global default store.
+   * If @c sg is nullptr, then we use the global default store.
    */
-  void toTransient (sgkey_t sgkey, IProxyDict* sg = 0);
+  void toTransient (sgkey_t sgkey,
+                    IProxyDict* sg = nullptr,
+                    bool noDummy = false);
 
 
   /**

@@ -313,22 +313,26 @@ IProxyDict* DataProxyHolder::source() const
  * @brief Finish initialization after link has been read.
  * @param sgkey Hashed SG key.
  * @param sg Associated store.
+ * @param noDummy If true, then if we don't find a proxy, just leave
+ *                the link null rather than making a dummy.
  *
  * This should be called after a link has been read by root
  * in order to set the proxy pointer.  It calls @c toIdentifiedObject
  * with the provided hashed key.
  *
- * If @c sg is 0, then we use the global default store.
+ * If @c sg is nullptr, then we use the global default store.
  */
 void
-DataProxyHolder::toTransient (sgkey_t sgkey, IProxyDict* sg /*= 0*/)
+DataProxyHolder::toTransient (sgkey_t sgkey,
+                              IProxyDict* sg /*= nullptr*/,
+                              bool noDummy /*= false*/)
 {
-  m_proxy = 0;
+  m_proxy = nullptr;
 
   // Find the store to use.
-  if (sg == 0)
+  if (sg == nullptr)
     sg = this->source1();
-  if (sg == 0)
+  if (sg == nullptr)
     sg = SG::CurrentEventStore::store();
 
   // Do input renaming.
@@ -340,8 +344,14 @@ DataProxyHolder::toTransient (sgkey_t sgkey, IProxyDict* sg /*= 0*/)
       sgkey = it->second.m_sgkey;
   }
 
-  if (sgkey)
-    toIdentifiedObject (sgkey, CLID_NULL, sg);
+  if (sgkey) {
+    if (noDummy) {
+      m_proxy = sg->proxy_exact (sgkey);
+    }
+    else {
+      toIdentifiedObject (sgkey, CLID_NULL, sg);
+    }
+  }
 }
 
 
