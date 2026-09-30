@@ -115,7 +115,8 @@ StatusCode MuSAVtxFitterTool::doMuSAVtxFit(std::vector<MuSAVtxFitterTool::WrkVrt
 
         const xAOD::TrackParticle* MuSAMSTP = muon->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);
         if (!MuSAMSTP) {
-            ATH_MSG_WARNING("Muon has no MSTP, check your input! "<<muon->muonType()<<", "<<muon->author());
+            //In validation mode it is expected that some non muidco muons arrive here, so let's mute the warning
+            if(!m_doValidation) ATH_MSG_WARNING("Muon has no MSTP, check your input! "<<muon->muonType()<<", "<<muon->author());
             continue;
         }
 
