@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Thomas Strebler
@@ -16,8 +16,13 @@
 #include <SystematicsHandles/SysWriteDecorHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
 
+#include <xAODBase/IParticleContainer.h>
 #include <xAODJet/JetContainer.h>
 #include <TrigDecisionTool/TrigDecisionTool.h>
+#include <TrigCompositeUtils/LinkInfo.h>
+
+#include <unordered_map>
+#include <vector>
 
 namespace CP
 {
@@ -29,8 +34,6 @@ namespace CP
     public:
         using EL::AnaAlgorithm::AnaAlgorithm;
 
-        BTaggingTriggerMatchingAlg(const std::string &name,
-                    ISvcLocator *svcLoc = nullptr);
         StatusCode initialize () override;
         StatusCode execute (const EventContext& ctx) override;
 
@@ -71,8 +74,15 @@ namespace CP
         SysWriteDecorHandle<char> m_bTagMatchingDecoration {
         this, "bTagMatchingDecoration", "", "the decoration for offline jet  matched to HLT b-tag"};
 
+        /// \brief the jet legs of the trigger chain and their features in the current event
+        struct HLTJetLeg {
+            int threshold = 0;
+            std::vector<TrigCompositeUtils::LinkInfo<xAOD::IParticleContainer>> features;
+        };
+
         StatusCode passTriggerBtag(const xAOD::Jet* jet,
-                    const std::map<const xAOD::Jet*, const xAOD::Jet*>& matchedOfflineOnlineJets,
+                    const std::unordered_map<const xAOD::Jet*, const xAOD::Jet*>& matchedOfflineOnlineJets,
+                    const std::vector<HLTJetLeg>& jetLegs,
                     bool& pass, bool& matched) const;
 
         bool isSameJet(const xAOD::IParticle *jet1, const xAOD::IParticle *jet2) const;

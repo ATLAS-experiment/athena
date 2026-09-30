@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Thomas Strebler
@@ -32,8 +32,6 @@ namespace CP
   public:
     using EL::AnaAlgorithm::AnaAlgorithm;
 
-    BTaggingTriggerEfficiencyAlg(const std::string &name,
-				 ISvcLocator *svcLoc = nullptr);
     StatusCode initialize () override;
     StatusCode execute (const EventContext& ctx) override;
     StatusCode finalize () override;

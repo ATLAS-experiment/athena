@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Binbin Dong
@@ -23,6 +23,7 @@ namespace CP
     ANA_CHECK (m_scaleFactorDecoration.initialize (m_systematicsList, m_jetHandle));
     ANA_CHECK (m_systematicsList.addSystematics (*m_efficiencyTool));
     ANA_CHECK (m_systematicsList.initialize());
+    ANA_CHECK (m_outOfValidity.initialize());
 
     return StatusCode::SUCCESS;
   }
@@ -39,7 +40,9 @@ namespace CP
         float sf = 0.;
         if (m_preselection.getBool (*jet, sys))
         {
-          (void)m_efficiencyTool->getScaleFactor (*jet, sf, sys);
+          ANA_CHECK_CORRECTION (m_outOfValidity, *jet, m_efficiencyTool->getScaleFactor (*jet, sf, sys));
+          if (!m_outOfValidity.get(*jet))
+            sf = invalidScaleFactor();
         }
         m_scaleFactorDecoration.set (*jet, sf, sys);
       }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Binbin Dong
@@ -9,6 +9,7 @@
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <FTagAnalysisInterfaces/IBTaggingEfficiencyJsonTool.h>
+#include <SelectionHelpers/OutOfValidityHelper.h>
 #include <SelectionHelpers/SysReadSelectionHandle.h>
 #include <SystematicsHandles/SysReadHandle.h>
 #include <SystematicsHandles/SysWriteDecorHandle.h>
@@ -43,6 +44,10 @@ namespace CP
     private:
     SysReadSelectionHandle m_preselection {
       this, "preselection", "", "the preselection to apply"};
+
+    /// \brief the helper for OutOfValidity results
+    private:
+    OutOfValidityHelper m_outOfValidity {this};
 
     /// \brief the decoration for the Xbb SF
     private:

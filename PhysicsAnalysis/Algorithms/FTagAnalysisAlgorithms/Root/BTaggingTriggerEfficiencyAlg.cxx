@@ -20,10 +20,6 @@
 
 namespace CP
 {
-  BTaggingTriggerEfficiencyAlg::BTaggingTriggerEfficiencyAlg
-  (const std::string &name, ISvcLocator *svcLoc) :
-    EL::AnaAlgorithm(name, svcLoc) {}
-
   StatusCode BTaggingTriggerEfficiencyAlg ::
   initialize ()
   {
@@ -119,6 +115,12 @@ namespace CP
     if (code == CP::CorrectionCode::OutOfValidityRange)
       return outsideTriggerCalibration (jet, sys, sf);
 
+    if (!(trigSF > 0 && condSF > 0 && offlSF > 0))
+    {
+      ANA_MSG_WARNING ("SF computed with non-positive scale factor trigSF=" << trigSF << " condSF=" << condSF << " offlSF=" << offlSF);
+      // no scale factor can be given for this jet; the caller decorates it as invalid
+      return CP::CorrectionCode::OutOfValidityRange;
+    }
     const float trigEff_MC = trigEff_data / trigSF;
     const float condEff_MC = condEff_data / condSF;
     const float offlEff_MC = offlEff_data / offlSF;

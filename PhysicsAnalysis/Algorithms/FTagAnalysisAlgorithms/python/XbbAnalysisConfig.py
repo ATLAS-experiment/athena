@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
@@ -55,6 +55,8 @@ class XbbConfig (ConfigBlock):
             alg.efficiencyTool.OperatingPoint = self.XbbWP
             alg.efficiencyTool.JsonConfigFile = self.calibFile
             alg.preselection = config.getPreselection (self.containerName, '')
+            alg.outOfValidity = 2  # continue silently, but decorate jet with outOfValidityDeco
+            alg.outOfValidityDeco = 'no_xbb_' + selectionName + ',as_char'
 
             alg.scaleFactorDecoration = 'xbb_effSF_' + selectionName + '_%SYS%'
             alg.jets = config.readName (self.containerName)
