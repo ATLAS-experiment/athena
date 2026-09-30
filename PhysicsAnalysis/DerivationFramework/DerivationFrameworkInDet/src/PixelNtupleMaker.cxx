@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkInDet/PixelNtupleMaker.h"
@@ -10,10 +10,11 @@
 #include "TrkEventPrimitives/TrackStateDefs.h"
 #include "AthContainers/ConstAccessor.h"
 
-#include <vector>
-#include <string>
+
 
 #include "TLorentzVector.h"
+#include <vector>
+#include <string>
 
 StatusCode DerivationFramework::PixelNtupleMaker::initialize() {
   ATH_CHECK(m_selector.retrieve());
@@ -261,14 +262,15 @@ StatusCode DerivationFramework::PixelNtupleMaker::addBranches(const EventContext
         isEdge.push_back(checkEdge);
         isOverflow.push_back(checkOverflow);
 
-        rdoToT.push_back(tmpToT);
-        rdoCharge.push_back(tmpCharge);
-        rdoPhi.push_back(tmpPhi);
-        rdoEta.push_back(tmpEta);
+        rdoToT.push_back(std::move(tmpToT));
+        rdoCharge.push_back(std::move(tmpCharge));
+        rdoPhi.push_back(std::move(tmpPhi));
+        rdoEta.push_back(std::move(tmpEta));
         break;
       }
     }
-
+    const std::size_t nHole         = holeIndex.size(); //extract this before moving it
+    const std::size_t nClusterLayer = clusterLayer.size();
     if (m_storeMode==1) {
       static const SG::Decorator<float> d0err("d0err");
       static const SG::Decorator<float> z0err("z0err");
@@ -309,6 +311,7 @@ StatusCode DerivationFramework::PixelNtupleMaker::addBranches(const EventContext
 
       d0err(*trk)                = trk->definingParametersCovMatrixVec().at(0);
       z0err(*trk)                = trk->definingParametersCovMatrixVec().at(2);
+      //holeIndex moved here
       HoleIndex(*trk)            = std::move(holeIndex);
       ClusterLayer(*trk)         = std::move(clusterLayer);
       ClusterBEC(*trk)           = std::move(clusterBEC);
@@ -362,7 +365,7 @@ StatusCode DerivationFramework::PixelNtupleMaker::addBranches(const EventContext
     // Efficiency check
     //==================
     int checkIBL(0),check3D(0),checkBLY(0),checkLY1(0),checkLY2(0),checkEA1(0),checkEA2(0),checkEA3(0),checkEC1(0),checkEC2(0),checkEC3(0);
-    for (int i=0; i<(int)clusterLayer.size(); i++) {
+    for (std::size_t i=0; i<nClusterLayer; i++) {
       if (clusterBEC.at(i)== 0 && clusterLayer.at(i)==0) {
         if (clusterModuleEta.at(i)>-7 && clusterModuleEta.at(i)<6) { checkIBL++; }
         else                                                       { check3D++; }
@@ -396,7 +399,7 @@ StatusCode DerivationFramework::PixelNtupleMaker::addBranches(const EventContext
       if (checkIBL>0 && checkEC1>0 && checkEC3>0) { std::for_each((clusEta[9].begin()+ietabin),(clusEta[9].begin()+ietabin+1),[](int &n){ n++; });   if (checkEC2>0) { std::for_each((clusHitEta[9].begin()+ietabin),(clusHitEta[9].begin()+ietabin+1),[](int &n){ n++; }); }}
       if (checkIBL>0 && checkEC1>0 && checkEC2>0) { std::for_each((clusEta[10].begin()+ietabin),(clusEta[10].begin()+ietabin+1),[](int &n){ n++; }); if (checkEC3>0) { std::for_each((clusHitEta[10].begin()+ietabin),(clusHitEta[10].begin()+ietabin+1),[](int &n){ n++; }); }}
 
-      for (int i=0; i<(int)holeIndex.size(); i++) {
+      for (std::size_t i=0; i!=nHole; i++) {
         int becH, layerH, etaH, phiH;
         GetLayerEtaPhiFromId(holeIndex.at(i),&becH,&layerH,&etaH,&phiH);
         if (becH== 0 && layerH==0) {

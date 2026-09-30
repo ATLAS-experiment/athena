@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -98,6 +98,7 @@ StatusCode DerivationFramework::DiTauTrackParticleThinning::doThinning(const Eve
       for (const auto *ditauIt : *importedDiTaus) {
         for (unsigned int i=0; i<ditauIt->nTracks(); ++i) {
           int index = ditauIt->trackLinks().at(i).index();
+          if (index < 0)[[unlikely]] continue;
           mask[index] = true;
         }
         for (unsigned int i=0; i<ditauIt->nIsoTracks(); ++i) {
@@ -109,10 +110,12 @@ StatusCode DerivationFramework::DiTauTrackParticleThinning::doThinning(const Eve
         for (auto & ditauIt : ditauToCheck) {
           for (unsigned int i=0; i<ditauIt->nTracks(); ++i) {
               int index = ditauIt->trackLinks().at(i).index();
+              if (index < 0)[[unlikely]] continue;
               mask[index] = true;
           }
           for (unsigned int i=0; i<ditauIt->nIsoTracks(); ++i) {
               int index = ditauIt->isoTrackLinks().at(i).index();
+              if (index < 0)[[unlikely]] continue;
               mask[index] = true;
           }
         }

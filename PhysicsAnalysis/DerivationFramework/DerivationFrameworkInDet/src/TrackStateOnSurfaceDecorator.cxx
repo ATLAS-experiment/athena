@@ -743,8 +743,9 @@ namespace DerivationFramework {
             }
           }
 	}
-
+        //coverity[UNNECESSARY_STRING_COPY]
         static const SG::Accessor<float> TrackError_biasedAcc("TrackError_biased");
+        //coverity[UNNECESSARY_STRING_COPY]
         static const SG::Accessor<float> TrackError_unbiasedAcc("TrackError_unbiased");
         if (m_addPulls) {
 
@@ -795,7 +796,7 @@ namespace DerivationFramework {
 
       ATH_MSG_DEBUG("The number of TSOS's " << msosLink.size() );
 
-      dectsos_msosLink( *track ) = msosLink;
+      dectsos_msosLink( *track ) = std::move(msosLink);
 
       ATH_MSG_DEBUG("Finished dressing TrackParticle");
 
