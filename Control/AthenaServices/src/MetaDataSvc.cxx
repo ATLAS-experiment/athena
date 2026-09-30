@@ -179,8 +179,11 @@ StatusCode MetaDataSvc::loadAddresses(StoreID::type storeID, IAddressProvider::t
    if (storeID != StoreID::METADATA_STORE) { // should this (also) run in the INPUT_METADATA_STORE?
       return(StatusCode::SUCCESS);
    }
+   if (!m_inputDataStore->contains<DataHeader>( name()) ) {
+      return(StatusCode::SUCCESS);
+   }
    const DataHeader* dataHeader = nullptr;
-   ATH_CHECK( m_inputDataStore->retrieve(dataHeader, name()) );
+   ATH_CHECK( m_inputDataStore->retrieve( dataHeader, name()) );
    for (const DataHeaderElement& dhe : *dataHeader) {
       const CLID clid = dhe.getPrimaryClassID();
       if (clid != ClassID_traits<DataHeader>::ID()) {

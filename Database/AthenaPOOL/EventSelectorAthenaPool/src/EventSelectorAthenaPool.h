@@ -168,8 +168,6 @@ private: // properties
    Gaudi::Property<bool> m_isSecondary{this, "IsSecondary", false, ""};
    /// ProcessMetadata, switch on firing of FileIncidents which will trigger processing of metadata: default = true.
    Gaudi::Property<bool> m_processMetadata{this, "ProcessMetadata", true, ""};
-   /// CollectionType, type of the collection: default = "ImplicitCollection".
-   Gaudi::Property<std::string> m_collectionType{this, "CollectionType", "ImplicitCollection", ""};
 
    /// AttributeList SG key
    std::string m_attrListKey{"Input"};

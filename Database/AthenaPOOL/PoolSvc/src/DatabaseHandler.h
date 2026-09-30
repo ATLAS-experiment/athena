@@ -66,6 +66,9 @@ namespace pool {
     /// Returns the access mode
     Io::IoFlag accessMode() const;
 
+    // expose FileDescriptor object for the technology specific DB implementation
+    FileDescriptor& fileDescriptor() { return m_fileDescriptor; }
+
     /// Writes an object and returns a token
     Token* writeObject( const std::string& containerName,
                         long minorTechnology,

@@ -35,4 +35,3 @@ ServiceMgr.PoolSvc.AttemptCatalogPatch = False
 
 # Tell Athena to use the sorted collection instead of the original inputs
 ServiceMgr.EventSelector.InputCollections = [tmpCollFile]
-ServiceMgr.EventSelector.CollectionType = "RootCollection"

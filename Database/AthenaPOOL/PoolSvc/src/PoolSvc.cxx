@@ -378,9 +378,9 @@ void PoolSvc::renamePfn(const std::string& pf, const std::string& newpf) {
 //__________________________________________________________________________
 StatusCode PoolSvc::connectCollection(const std::string& connection,
 		const std::string& collectionName,
-		const pool::DbType& collectionType,
-		unsigned int contextId) const {
-   ATH_MSG_DEBUG("connectCollection() type=" << collectionType.storageName() << ", connection=" << connection
+		unsigned int contextId) const
+{
+   ATH_MSG_DEBUG("connectCollection() connection=" << connection
                  << ", name=" << collectionName << ", contextID=" << contextId);
    if (contextId >= m_dbSessionVec.size()) {
       ATH_MSG_WARNING("connectCollection: Using default input Stream instead of id = " << contextId);
@@ -398,33 +398,33 @@ StatusCode PoolSvc::connectCollection(const std::string& connection,
          ATH_MSG_INFO("File is not in Catalog! Attempt to open it anyway.");
       }
    }
-   if (collectionType.majorType() == pool::POOL_StorageType.type()) {
-      // Check whether Collection Container exists.
-      std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, connection);
-      if (dbH == nullptr) {
-         ATH_MSG_INFO("Failed to get Session/DatabaseHandle to create POOL collection.");
-         return(StatusCode::FAILURE);
+
+   // Check whether Collection Container exists.
+   std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, connection);
+   if( !dbH ) {
+      ATH_MSG_INFO("connectCollection(): Failed to get Database Handle for: " << connection);
+      return StatusCode::FAILURE;
+   }
+   try {
+      if (dbH->openMode() == Io::INVALID) {
+         dbH->connectForRead();
       }
-      try {
-         if (dbH->openMode() == Io::INVALID) {
-            dbH->connectForRead();
+      std::map<unsigned int, unsigned int>::const_iterator maxFileIter = m_contextMaxFile.find(contextId);
+      if (maxFileIter != m_contextMaxFile.end() && maxFileIter->second > 0 && !dbH->fid().empty()) {
+         const Guid guid(dbH->fid());
+         m_guidLists[contextId].remove(guid);
+         m_guidLists[contextId].push_back(guid);
+         while (m_guidLists[contextId].size() > maxFileIter->second + 1) {
+            this->disconnectDb("FID:" + m_guidLists[contextId].begin()->toString(), contextId).ignore();
          }
-         std::map<unsigned int, unsigned int>::const_iterator maxFileIter = m_contextMaxFile.find(contextId);
-         if (maxFileIter != m_contextMaxFile.end() && maxFileIter->second > 0 && !dbH->fid().empty()) {
-            const Guid guid(dbH->fid());
-            m_guidLists[contextId].remove(guid);
-            m_guidLists[contextId].push_back(guid);
-            while (m_guidLists[contextId].size() > maxFileIter->second + 1) {
-               this->disconnectDb("FID:" + m_guidLists[contextId].begin()->toString(), contextId).ignore();
-            }
-         }
-      } catch (std::exception& e) {
-         ATH_MSG_INFO("Failed to open container to check POOL collection - trying.");
       }
+   } catch (std::exception& e) {
+      ATH_MSG_INFO("connectCollection() failed to open '" << connection << "' - trying.");
    }
    // For multithreaded processing (with multiple events in flight),
    // increase virtual tree size to accomodate back reads
    if (m_useROOTMaxTree && contextId == IPoolSvc::kInputStream && Gaudi::Concurrency::ConcurrencyFlags::numConcurrentEvents() > 1) {
+      ATH_MSG_DEBUG("connectCollection(): Increasing virtual TTree size for: " << connection);
       if (!this->setAttribute("TREE_MAX_VIRTUAL_SIZE", "-1", pool::ROOT_StorageType.type(), connection.substr(4), "CollectionTree", contextId).isSuccess()) {
          ATH_MSG_DEBUG("Failed to increase maximum virtual TTree size.");
       }

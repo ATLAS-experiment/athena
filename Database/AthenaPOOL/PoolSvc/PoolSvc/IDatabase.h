@@ -15,6 +15,7 @@ namespace pool {
 
   // forward declarations
   class IContainer;
+  class FileDescriptor;
 
   struct DatabaseSpecification {
     /** Enumeration type specifying the database name field,
@@ -67,6 +68,9 @@ namespace pool {
 
     /// Returns a pointer to a container object. The user acquires ownership of that object.
     virtual IContainer* containerHandle( const std::string& name ) = 0;
+
+    /// Expose FileDescriptor object for the technology specific DB implementation
+    virtual FileDescriptor* fileDescriptor() = 0;
 
     /// The method returning the attribute data given a name
     virtual bool attributeOfType( const std::string& attributeName,

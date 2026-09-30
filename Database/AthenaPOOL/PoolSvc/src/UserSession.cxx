@@ -152,6 +152,14 @@ pool::UserSession::fileCatalog()
   return *m_catalog;
 }
 
+
+pool::IStorageSvc&
+pool::UserSession::getStorageSvc( long technology ) 
+{ 
+  return microSessionManager( technology ).getStorageSvc(); 
+}
+
+
 pool::MicroSessionManager&
 pool::UserSession::microSessionManager( long technology )
 {

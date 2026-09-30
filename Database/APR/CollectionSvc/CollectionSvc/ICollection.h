@@ -27,7 +27,7 @@ namespace pool {
     virtual void open() = 0;
 
     /// Initialize a new RowBuffer by adding all Attributes adn Tokens of this collection to it
-    virtual void initNewRow( pool::CollectionRowBuffer& row ) const;
+    virtual void initNewRow( pool::CollectionRowBuffer& row ) const = 0;
 
     /// Adds a new row of data to the collection.
     virtual void insertRow( const pool::CollectionRowBuffer& inputRowBuffer ) = 0;
@@ -43,7 +43,7 @@ namespace pool {
 
     /// Returns an cursor for the collection.
     virtual std::unique_ptr<ICollectionCursor> cursor() = 0;
-    
+
     /// Empty destructor.
     virtual ~ICollection() = default;
 

@@ -56,9 +56,6 @@ def eventInfoTestCfg(step=1):
 
     acc.addEventAlgo(writer,sequenceName = 'AthAlgSeq')
 
-    # Make RootCollection
-    acc.getService("EventSelector").CollectionType = "RootCollection"
-
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     acc.merge(
         OutputStreamCfg(

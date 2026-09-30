@@ -97,11 +97,9 @@ public: // Non-static members
    /// @return status of connect
    /// @param connection [IN] string containing the connection.
    /// @param collectionName [IN] string containing the persistent name of the collection.
-   /// @param collectionType [IN] string containing the collection type.
    /// @param contextId [IN] id for PoolSvc persistency service to use for input.
    virtual StatusCode connectCollection(const std::string& connection,
 	   const std::string& collectionName,
-	   const pool::DbType& collectionType,
 	   unsigned int contextId = IPoolSvc::kInputStream) const = 0;
 
    /// @return status of check
