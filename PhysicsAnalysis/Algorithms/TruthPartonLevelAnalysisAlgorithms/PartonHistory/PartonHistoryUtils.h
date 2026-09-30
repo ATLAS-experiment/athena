@@ -5,8 +5,8 @@
 /// @author Baptiste Ravina <baptiste.ravina@cern.ch>
 /// @author Steffen Korn <steffen.korn@cern.ch>
 
-#ifndef PARTONS_TOPPARTONUTILS_H
-#define PARTONS_TOPPARTONUTILS_H
+#ifndef PARTONS_PARTONHISTORYUTILS_H
+#define PARTONS_PARTONHISTORYUTILS_H
 
 #include "xAODTruth/TruthParticleContainer.h"
 
@@ -15,33 +15,43 @@ using ROOT::Math::PtEtaPhiMVector;
 
 namespace PartonHistoryUtils {
 /// Return particle after FSR (before the decay vertex)
-const xAOD::TruthParticle* findAfterFSR(const xAOD::TruthParticle* particle);
+const xAOD::TruthParticle& findAfterFSR(const xAOD::TruthParticle& particle);
 
 // determine whether potentialChild is child of parent
-bool isChildOf(const xAOD::TruthParticle* parent,
-               const xAOD::TruthParticle* potentialChild);
+//
+// A broken child truth link within nChildren() is treated as "not this child".
+bool isChildOf(const xAOD::TruthParticle& parent,
+               const xAOD::TruthParticle& potentialChild);
 
 /// Looking for tops without children -> must be broken
-bool isBrokenTop(const xAOD::TruthParticle* particle);
+bool isBrokenTop(const xAOD::TruthParticle& particle);
 
 /// Determine whether particle is afterFSR
-bool isAfterFSR(const xAOD::TruthParticle* particle);
+bool isAfterFSR(const xAOD::TruthParticle& particle);
 
-/// Return true when particle is a top before FSR
-bool hasParticleIdenticalParent(const xAOD::TruthParticle* particle);
+/// Return true when any parent of the particle has the same pdgId as the particle
+///
+/// A broken parent truth link within nParents() is treated as "not identical".
+bool hasParticleIdenticalParent(const xAOD::TruthParticle& particle);
 
 // Checking whether a particle has the same pdgId as its parent
-bool hasParentPdgId(const xAOD::TruthParticle* particle, int PdgId);
-bool hasParentPdgId(const xAOD::TruthParticle* particle);
+//
+// A particle with no parent, or a broken truth link to it, is treated as "no parent".
+bool hasParentPdgId(const xAOD::TruthParticle& particle, int PdgId);
+bool hasParentPdgId(const xAOD::TruthParticle& particle);
 
 // Checking whether a particle has the same absolute pdgId as absPdgId
-bool hasParentAbsPdgId(const xAOD::TruthParticle* particle, int absPdgId);
+//
+// A particle with no parent, or a broken truth link to it, is treated as "no parent".
+bool hasParentAbsPdgId(const xAOD::TruthParticle& particle, int absPdgId);
 
 // Checking whether a particle has an identical child
-bool hasIdenticalChild(const xAOD::TruthParticle* particle);
+//
+// A broken child truth link within nChildren() is treated as "no such child".
+bool hasIdenticalChild(const xAOD::TruthParticle& particle);
 
 // Checking whether a particle is a quark from the PDF (massless)
-bool isQuarkFromPDF(const xAOD::TruthParticle* particle);
+bool isQuarkFromPDF(const xAOD::TruthParticle& particle);
 
 }  // namespace PartonHistoryUtils
 }  // namespace CP
