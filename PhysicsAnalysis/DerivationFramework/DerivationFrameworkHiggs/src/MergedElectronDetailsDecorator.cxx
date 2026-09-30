@@ -246,17 +246,17 @@ namespace DerivationFramework {
     static const SG::Decorator<std::vector<float> > TrackMatchingR_dPhi2Dec("TrackMatchingR_dPhi2");
     static const SG::Decorator<std::vector<float> > TrackMatchingTrue_dEta2Dec("TrackMatchingTrue_dEta2");
     static const SG::Decorator<std::vector<float> > TrackMatchingTrue_dPhi2Dec("TrackMatchingTrue_dPhi2");
-    TrackMatchingP_dEta1Dec(*el) = trkMatchTrkP_dEta1;
-    TrackMatchingP_dEta2Dec(*el) = trkMatchTrkP_dEta2;
-    TrackMatchingP_dPhi1Dec(*el) = trkMatchTrkP_dPhi1;
-    TrackMatchingP_dPhi2Dec(*el) = trkMatchTrkP_dPhi2;
-    TrackMatchingLM_dEta1Dec(*el) = trkMatchTrkLM_dEta1;
-    TrackMatchingLM_dEta2Dec(*el) = trkMatchTrkLM_dEta2;
-    TrackMatchingLM_dPhi1Dec(*el) = trkMatchTrkLM_dPhi1;
-    TrackMatchingLM_dPhi2Dec(*el) = trkMatchTrkLM_dPhi2;
-    TrackMatchingR_dPhi2Dec(*el) = trkMatchTrkR_dPhi2;
-    TrackMatchingTrue_dEta2Dec(*el) = trueMatch_dEta2;
-    TrackMatchingTrue_dPhi2Dec(*el) = trueMatch_dPhi2;
+    TrackMatchingP_dEta1Dec(*el) = std::move(trkMatchTrkP_dEta1);
+    TrackMatchingP_dEta2Dec(*el) = std::move(trkMatchTrkP_dEta2);
+    TrackMatchingP_dPhi1Dec(*el) = std::move(trkMatchTrkP_dPhi1);
+    TrackMatchingP_dPhi2Dec(*el) = std::move(trkMatchTrkP_dPhi2);
+    TrackMatchingLM_dEta1Dec(*el) = std::move(trkMatchTrkLM_dEta1);
+    TrackMatchingLM_dEta2Dec(*el) = std::move(trkMatchTrkLM_dEta2);
+    TrackMatchingLM_dPhi1Dec(*el) = std::move(trkMatchTrkLM_dPhi1);
+    TrackMatchingLM_dPhi2Dec(*el) = std::move(trkMatchTrkLM_dPhi2);
+    TrackMatchingR_dPhi2Dec(*el) = std::move(trkMatchTrkR_dPhi2);
+    TrackMatchingTrue_dEta2Dec(*el) = std::move(trueMatch_dEta2);
+    TrackMatchingTrue_dPhi2Dec(*el) = std::move(trueMatch_dPhi2);
   }
 
   void DerivationFramework::MergedElectronDetailsDecorator::fillClusterDetails(const xAOD::Electron* el)
