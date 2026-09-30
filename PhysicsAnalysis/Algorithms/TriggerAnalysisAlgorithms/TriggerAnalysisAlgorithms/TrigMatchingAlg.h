@@ -9,22 +9,20 @@
 
 // Algorithm includes
 #include <AnaAlgorithm/AnaAlgorithm.h>
+#include <SystematicsHandles/SysListHandle.h>
 #include <SystematicsHandles/SysReadHandle.h>
-#include <SystematicsHandles/SysWriteHandle.h>
-#include <SystematicsHandles/SysWriteDecorHandle.h>
-#include <SystematicsHandles/SysFilterReporterParams.h>
 #include <AsgTools/PropertyWrapper.h>
 
 // Framework includes
-#include <AsgMessaging/AsgMessaging.h>
+#include <AthContainers/Decorator.h>
 #include <xAODBase/IParticleContainer.h>
-#include <xAODEventInfo/EventInfo.h>
-#include <AsgTools/AsgTool.h>
 #include <AsgTools/ToolHandle.h>
-#include <AsgTools/AnaToolHandle.h>
 
 // Trigger Include
 #include <TriggerMatchingTool/IMatchingTool.h>
+
+#include <string>
+#include <vector>
 
 namespace CP
 {
@@ -51,9 +49,6 @@ namespace CP
     /// \brief the decoration for trigger matching
     Gaudi::Property<std::string> m_matchingDecoration {this, "matchingDecoration", {}, "The decoration for trigger matching"};
 
-    /// \brief the decorators for \ref m_matchingDecoration and triggers combination
-    std::unordered_map<std::string, SG::Decorator<char>> m_matchingDecorators;
-
     /// \brief list of triggers
     Gaudi::Property<std::vector<std::string>> m_trigSingleMatchingList {this, "trigSingleMatchingList", {}, "List of triggers for Matching"};
   
@@ -63,9 +58,25 @@ namespace CP
     /// \brief input particle collection
     SysReadHandle<xAOD::IParticleContainer> m_particlesHandle { this, "particles", "", "the particle container to use"};
 
+    /// \brief per-chain matching configuration, built in initialize()
+    struct MatchingChain
+    {
+      std::string chain;
+      float dR;
+      SG::Decorator<char> decorator;
+    };
+    std::vector<MatchingChain> m_matchingChains;
+
+    /// \brief per-chain dummy matching decorations, built in initialize()
+    struct DummyChain
+    {
+      std::string chain;
+      SG::Decorator<char> decorator;
+    };
+    std::vector<DummyChain> m_dummyChains;
+
   };
 
 } // namespace CP
 
 #endif /*  TRIGGER_ANALYSIS_ALGORITHMS__TRIG_MATCHING_ALG_H */
-

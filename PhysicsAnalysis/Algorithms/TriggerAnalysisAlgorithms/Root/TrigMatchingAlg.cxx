@@ -6,7 +6,7 @@
 
 #include <TrigCompositeUtils/ChainNameParser.h>
 #include <TriggerAnalysisAlgorithms/TrigMatchingAlg.h>
-#include <algorithm>
+#include <TriggerAnalysisAlgorithms/TrigChainNameHelpers.h>
 
 
 namespace CP
@@ -38,15 +38,19 @@ namespace CP
     const std::string prefix = m_matchingDecoration + "_";
     for (const std::string &chain : m_trigSingleMatchingList)
     {
-      std::string chainfix = chain;
-      std::replace(chainfix.begin(), chainfix.end(), '-', '_');
-      m_matchingDecorators.emplace(chain, prefix + chainfix);
+      // A string-based signature-identifier per leg, may contain duplicated return values for asymmetric chains.
+      const std::vector<std::string> signatures = ChainNameParser::signatures(chain);
+      if (signatures.size() != 1)
+      {
+        ATH_MSG_ERROR("The decoration-based TrigMatchingAlg only supports single-legged triggers. " << chain << " has " << signatures.size() << " legs.");
+        return StatusCode::FAILURE;
+      }
+      const float dR = (signatures.front() == "tau" ? 0.2 : 0.1);
+      m_matchingChains.push_back({chain, dR, SG::Decorator<char>(prefix + sanitizeTriggerChainName(chain))});
     }
     for (const std::string &chain : m_trigSingleMatchingListDummy)
     {
-      std::string chainfix = chain;
-      std::replace(chainfix.begin(), chainfix.end(), '-', '_');
-      m_matchingDecorators.emplace(chain, prefix + chainfix);
+      m_dummyChains.push_back({chain, SG::Decorator<char>(prefix + sanitizeTriggerChainName(chain))});
     }
 
     ANA_CHECK (m_particlesHandle.initialize (m_systematicsList));
@@ -59,7 +63,6 @@ namespace CP
 
   StatusCode TrigMatchingAlg::execute(const EventContext& ctx)
   {
-
     for (const auto & syst : m_systematicsList.systematicsVector())
     {
       const xAOD::IParticleContainer* particles(nullptr);
@@ -71,25 +74,17 @@ namespace CP
       for (const xAOD::IParticle *particle : *particles)
       {
         ATH_MSG_DEBUG("-- Considering offline eta:" << particle->eta() << " phi:" << particle->phi() << " (pT:" << particle->pt() << ")");
-        for (const std::string &chain : m_trigSingleMatchingList)
+        for (const MatchingChain &mc : m_matchingChains)
         {
-          // A string-based signature-identifier per leg, may contain duplicated return values for asymmetric chains.
-          const std::vector<std::string> signatures = ChainNameParser::signatures(chain);
-          if (signatures.size() != 1) {
-            ANA_MSG_ERROR("The decoration-based TrigMatchingAlg only supports single-legged triggers." << chain << " has " << signatures.size() << " legs.");
-            return StatusCode::FAILURE;
-          }
-
-          const float dR = (signatures.at(0) == "tau" ? 0.2 : 0.1);
-          const bool match = m_trigMatchingTool->match(*particle, chain, dR, false);
-          (m_matchingDecorators.at(chain))(*particle) = match;
-          ATH_MSG_DEBUG("-- -- Considering for " << chain << ", match = " << match);
+          const bool match = m_trigMatchingTool->match(*particle, mc.chain, mc.dR, false);
+          mc.decorator(*particle) = match;
+          ATH_MSG_DEBUG("-- -- Considering for " << mc.chain << ", match = " << match);
         }
 
-        for (const std::string &chain : m_trigSingleMatchingListDummy)
+        for (const DummyChain &dc : m_dummyChains)
         {
-          ATH_MSG_DEBUG("Applying dummy match=0 decoration for " << chain);
-          (m_matchingDecorators.at(chain))(*particle) = 0;
+          ATH_MSG_DEBUG("Applying dummy match=0 decoration for " << dc.chain);
+          dc.decorator(*particle) = 0;
         }
       }
     }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -12,6 +12,7 @@
 #include <unordered_map>
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
+#include <AsgDataHandles/ReadHandleKey.h>
 #include <AsgAnalysisInterfaces/IPileupReweightingTool.h>
 #include <AsgTools/PropertyWrapper.h>
 
@@ -37,6 +38,10 @@ namespace CP
     /// \brief the pile-up reweighting tool
   private:
     ToolHandle<IPileupReweightingTool> m_pileupReweightingTool {this, "pileupReweightingTool", "PileupReweightingTool", "the pileup reweighting tool to be used"};
+
+    /// \brief the EventInfo to decorate
+  private:
+    SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey {this, "eventInfo", "EventInfo", "the EventInfo to decorate"};
 
     /// \brief list of prescaled triggers or trigger chains
   private:
