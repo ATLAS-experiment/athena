@@ -117,6 +117,9 @@ StatusCode HGTDTrackExtensionAlg::initialize()
   // Initialize surface accessor
   m_surfAcc = ActsTrk::detail::xAODUncalibMeasSurfAcc{m_trackingGeometrySvc.get()};
 
+  //Retreive HGTD ID helper
+  ATH_CHECK(detStore()->retrieve(m_id_helper, "HGTD_ID"));
+
   return StatusCode::SUCCESS;
 }
 
@@ -492,126 +495,95 @@ HGTDTrackExtensionAlg::TrackExtensionData HGTDTrackExtensionAlg::processTrackExt
         
         // Check if this is an HGTD hit                
         const auto& surface = state.referenceSurface();
-        Acts::GeometryIdentifier geoID = surface.geometryId();
-        std::size_t layerIndex = getHGTDLayerIndex(geoID);
-
-        // Check if measurement is at a valid HGTD layer
-        if (layerIndex != 99) {
-
-          const auto& calibrated = state.template calibrated<3>(); //x,y,time
-          const auto& predicted = state.predicted(); //6D
-          const auto& calibCov = state.template calibratedCovariance<3>(); // Full 3D covariance
-
-          Eigen::Vector2d residual2d;
-          residual2d(0) = calibrated(0) - predicted(Acts::eBoundLoc0);
-          residual2d(1) = calibrated(1) - predicted(Acts::eBoundLoc1);
-
-          // Extract the top-left 2x2 from the 3x3 measurement covariance
-          AmgSymMatrix(2) cov_2d{calibCov.template block<2,2>(0,0)};
-
-          // Get the predicted covariance for residual calculation
-          const auto& predictedCov = state.predictedCovariance();
-          AmgSymMatrix(2) predicted_cov_2d{predictedCov.template block<2,2>(0,0)};
-          
-          // Total residual covariance is measurement + predicted covariances
-          AmgSymMatrix(2) residual_cov = cov_2d + predicted_cov_2d;
-                                    
-          double chi2=0.0;
-          double ndf = 2.0;
-          if (residual_cov.determinant() != 0) {
-            chi2 = residual2d.transpose() * residual_cov.inverse() * residual2d;
-          }
-          else{
-            chi2=-99.9;
-          }
-
-          if (layerIndex < 4) { 
-            nHGTDHits++;
-            hasHitInLayer[layerIndex] = true;
-            chi2PerLayer[layerIndex] =chi2/ndf; //state.chi2();
-                  
-            // Get the measured time from the calibrated 3D measurement (local x, y, time)
-            float rawTime = 0.0f;
-            float calibratedTime = 0.0f;
-
-            if (state.hasCalibrated()) {
-            // Extract time from calibrated data
-              try {
-                const auto& calibrated = state.template calibrated<3>();
-                calibratedTime = ActsTrk::timeToAthena(calibrated(2));
-                ATH_MSG_DEBUG("Got time from calibrated<3>: " << calibratedTime);
-              } catch (const std::exception& e) {
-                ATH_MSG_WARNING("Failed to extract time from calibrated<3>: " << e.what());                    
-              }
-            }
+        const auto* detElem = getActsDetectorElement(surface);
         
-            // Extract raw time from HGTD clusters
-            const xAOD::HGTDCluster* cluster = getHGTDClusterFromState(ctx, state, hgtdClusters);
-
-            if (cluster) {
-              rawTime = cluster->time();
-              ATH_MSG_DEBUG("Got raw time from cluster: " << rawTime);
-            } else {
-              ATH_MSG_WARNING("Could not get cluster from state");
-            }
-
-            // Store the raw time
-            rawTimePerLayer[layerIndex] = calibratedTime;
-            if (cluster) {
-              auto [correctedTime, timeErr] = correctTOF(
-                  trackParticle,
-                  cluster,
-                  calibratedTime,
-                  0.0, // time error set to zero for now!
-                  acts_tracking_geometry,
-                  geoContext);
-              timePerLayer[layerIndex] = correctedTime;
-              ATH_MSG_DEBUG("Applied TOF correction: " << calibratedTime << " -> " << correctedTime);
-            } else {
-              // No cluster or time, use raw time
-              timePerLayer[layerIndex] = calibratedTime;
-              ATH_MSG_DEBUG("No cluster found for TOF correction, using calibrated time: " << calibratedTime);
-            }
-          } 
-          else {
-            ATH_MSG_DEBUG("State does not have calibrated data");
-          }
-
-      // For extrapolation: use the first HGTD hit's surface position.
-      if (!foundExtrapolation) {
-        foundExtrapolation = true;
-        if (state.hasPredicted()) {
-          // Get the local predicted position
-          const auto& predicted = state.predicted();
-          Acts::Vector2 localPos(predicted[Acts::eBoundLoc0], predicted[Acts::eBoundLoc1]);
-            
-          // Transform to global coordinates
-          Acts::Vector3 globalPos = surface.localToGlobal(
-              geoContext,
-              localPos,
-              Acts::Vector3::Zero());
+        // Check if measurement is at a valid HGTD layer
+        if (detElem == nullptr || detElem->detectorType() != DetectorType::Hgtd) {
+          continue;
+        }
+        const std::size_t layerIndex = m_id_helper->layer(detElem->identify());
                 
-          extrapX = globalPos.x();
-          extrapY = globalPos.y();
-          extrapZ = globalPos.z();
-            
-          ATH_MSG_DEBUG("Extrapolated position (predicted) at HGTD: x=" << extrapX 
-                      << ", y=" << extrapY << ", z=" << extrapZ);
+        nHGTDHits++;
+        hasHitInLayer[layerIndex] = true;
+        chi2PerLayer[layerIndex] = state.chi2();
+              
+        // Get the measured time from the calibrated 3D measurement (local x, y, time)
+        float rawTime = 0.0f;
+        float calibratedTime = 0.0f;
+
+        if (state.hasCalibrated()) {
+          // Extract time from calibrated data
+          try {
+            const auto& calibrated = state.template calibrated<3>();
+            calibratedTime = ActsTrk::timeToAthena(calibrated(2));
+            ATH_MSG_DEBUG("Got time from calibrated<3>: " << calibratedTime);
+          } catch (const std::exception& e) {
+            ATH_MSG_WARNING("Failed to extract time from calibrated<3>: " << e.what());                    
+          }
+        }
+    
+        // Extract raw time from HGTD clusters
+        const xAOD::HGTDCluster* cluster = getHGTDClusterFromState(ctx, state, hgtdClusters);
+
+        if (cluster) {
+          rawTime = cluster->time();
+          ATH_MSG_DEBUG("Got raw time from cluster: " << rawTime);
         } else {
-            // Fallback to surface center
-            Acts::Vector3 globalPos = surface.center(geoContext);
+          ATH_MSG_WARNING("Could not get cluster from state");
+        }
+
+        // Store the raw time
+        rawTimePerLayer[layerIndex] = calibratedTime;
+        if (cluster) {
+          auto [correctedTime, timeErr] = correctTOF(
+              trackParticle,
+              cluster,
+              calibratedTime,
+              0.0, // time error set to zero for now!
+              acts_tracking_geometry,
+              geoContext);
+          timePerLayer[layerIndex] = correctedTime;
+          ATH_MSG_DEBUG("Applied TOF correction: " << calibratedTime << " -> " << correctedTime);
+        } else {
+          // No cluster or time, use raw time
+          timePerLayer[layerIndex] = calibratedTime;
+          ATH_MSG_DEBUG("No cluster found for TOF correction, using calibrated time: " << calibratedTime);
+        }
+        
+        // For extrapolation: use the first HGTD hit's surface position.
+        if (!foundExtrapolation) {
+          foundExtrapolation = true;
+          if (state.hasPredicted()) {
+            // Get the local predicted position
+            const auto& predicted = state.predicted();
+            Acts::Vector2 localPos(predicted[Acts::eBoundLoc0], predicted[Acts::eBoundLoc1]);
+              
+            // Transform to global coordinates
+            Acts::Vector3 globalPos = surface.localToGlobal(
+                geoContext,
+                localPos,
+                Acts::Vector3::Zero());
+                  
             extrapX = globalPos.x();
             extrapY = globalPos.y();
             extrapZ = globalPos.z();
-            
-            ATH_MSG_DEBUG("Extrapolated position (surface center) at HGTD: x=" << extrapX 
+              
+            ATH_MSG_DEBUG("Extrapolated position (predicted) at HGTD: x=" << extrapX 
                         << ", y=" << extrapY << ", z=" << extrapZ);
+          } else {
+              // Fallback to surface center
+              Acts::Vector3 globalPos = surface.center(geoContext);
+              extrapX = globalPos.x();
+              extrapY = globalPos.y();
+              extrapZ = globalPos.z();
+              
+              ATH_MSG_DEBUG("Extrapolated position (surface center) at HGTD: x=" << extrapX 
+                          << ", y=" << extrapY << ", z=" << extrapZ);
+          }
         }
-      }
-      ATH_MSG_DEBUG("Found HGTD hit on layer " << layerIndex 
-                << ", chi2=" << chi2PerLayer[layerIndex]
-                << ", time=" << timePerLayer[layerIndex]);                                    
-      }
+        ATH_MSG_DEBUG("Found HGTD hit on layer " << layerIndex 
+                  << ", chi2=" << chi2PerLayer[layerIndex]
+                  << ", time=" << timePerLayer[layerIndex]);                                    
     }
   }
   
@@ -634,39 +606,6 @@ HGTDTrackExtensionAlg::TrackExtensionData HGTDTrackExtensionAlg::processTrackExt
   data.numHGTDHits = nHGTDHits;
 
   return data;
-}
-
-std::size_t HGTDTrackExtensionAlg::getHGTDLayerIndex(const Acts::GeometryIdentifier& geoID) const {
-  // Get volume and layer ID
-  std::uint32_t volume = geoID.volume();
-  std::uint32_t layer = geoID.layer();
-  
-  // Check if we're in the positive or negative endcap 
-  bool isPositiveEndcap = (volume == 25); 
-  bool isNegativeEndcap = (volume == 2); 
-  
-  // Different mapping for different sides to maintain consistent physical ordering
-  if (isPositiveEndcap) {
-    // Mapping for positive endcap
-    switch(layer) {
-      case 2: return 0;  // First HGTD layer (closest to IP)
-      case 4: return 1;  // Second HGTD layer
-      case 6: return 2;  // Third HGTD layer
-      case 8: return 3;  // Fourth HGTD layer (farthest from IP)
-      default: return 99; // Invalid layer
-    }
-  } else if (isNegativeEndcap) {
-    // Mapping for negative endcap - potentially different ordering
-    switch(layer) {
-      case 2: return 3; 
-      case 4: return 2;  
-      case 6: return 1;
-      case 8: return 0;
-      default: return 99; // Invalid layer
-    }
-  } else {
-    return 99; // Not an HGTD volume
-  }
 }
 
 std::pair<float, float> HGTDTrackExtensionAlg::correctTOF(
