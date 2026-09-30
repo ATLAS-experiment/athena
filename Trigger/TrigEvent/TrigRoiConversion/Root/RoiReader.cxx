@@ -45,11 +45,11 @@ void RoiReader::execute( std::vector<std::string>& keys ) {
     
     std::string newkey      = "HLT_TrigRoiDescriptorCollection" + keybase;
 
-    TrigRoiDescriptorCollection* roicollection = new TrigRoiDescriptorCollection();
+    auto roicollection = std::make_unique<TrigRoiDescriptorCollection>();
 
     deserialiser( *roicollection, keys[ik] );
 
-    if ( evtStore()->overwrite( roicollection, newkey, false ).isFailure() ) {
+    if ( evtStore()->overwrite( std::move(roicollection), newkey, false ).isFailure() ) {
       ATH_MSG_INFO( "RoiReader::execute() could not write "  << newkey );
     }
 

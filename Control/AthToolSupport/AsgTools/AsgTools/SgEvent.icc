@@ -170,6 +170,16 @@ namespace asg {
    }
 
    template< typename T >
+   StatusCode SgEvent::overwrite( std::unique_ptr<T> /*obj*/, const std::string& /*name*/,
+                                   bool /*allowMods*/, bool /*resetOnly*/,
+                                   bool /*noHist*/ ) {
+
+      std::cout << ERROR_SRC << "Can't use overwrite in standalone mode"
+                << std::endl;
+      return StatusCode::FAILURE;
+   }
+
+   template< typename T >
    void SgEvent::keys( std::vector< std::string >& vkeys ) const {
       if ( m_ptds ) {
          m_ptds->keys< T >(vkeys);
