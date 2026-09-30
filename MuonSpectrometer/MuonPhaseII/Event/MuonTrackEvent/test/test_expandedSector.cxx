@@ -90,5 +90,21 @@ int main() {
         }
     }
 
+    // Test the neigbor function for the expanded sector
+    const int8_t nExpanded = numberOfSectors() * 2;
+    for(int8_t sector{0}; sector < nExpanded; ++sector) {
+        const ExpandedSector expandSector{sector};
+        LOG_MSG("Testing expanded sector: "<<expandSector);
+        int8_t neighbourSector = (sector +  1) == nExpanded ? 0 : sector + 1;
+        const ExpandedSector expandNeighbour{neighbourSector};
+        if (!expandSector.isNeighbour(expandNeighbour)) {
+            ERROR_MSG("The expanded sector "<<expandSector<<" is not neighbour to "<<expandNeighbour);
+        }
+        if(!expandNeighbour.isNeighbour(expandSector)) {
+            ERROR_MSG("The expanded sector "<<expandNeighbour<<" is not neighbour to "<<expandSector);
+        }
+    }
+
+
     return ret_code;
 }
