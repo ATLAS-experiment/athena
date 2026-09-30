@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /* @file  CaloCellLinkContainerCnv_p2.cxx
@@ -12,6 +12,7 @@
 #include "AthLinks/ElementLink.h"
 #include "CaloTPCnv/CaloCellLinkContainerCnv_p2.h"
 #include "AthenaKernel/getThinningCache.h"
+#include "AthenaKernel/IProxyDict.h"
 #include "AthenaKernel/ThinningCache.h"
 #include "AthenaKernel/ThinningDecisionBase.h"
 #include "AthenaKernel/errorcheck.h"

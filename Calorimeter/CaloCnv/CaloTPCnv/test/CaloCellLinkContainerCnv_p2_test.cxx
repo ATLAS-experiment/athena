@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /* @file CaloCellLinkContainerCnv_p2_test.cxx
@@ -419,10 +419,8 @@ void test_thinning()
   SG::ThinningCache cache;
   cache.addThinning (cont_name, std::vector<SG::sgkey_t> {el_link.key()}, &dec);
 
-  EventContext ctx;
-  Atlas::ExtendedEventContext ectx;
-  ectx.setThinningCache (&cache);
-  Atlas::setExtendedEventContext (ctx, std::move (ectx));
+  EventContext ctx = Gaudi::Hive::currentContext();
+  Atlas::getExtendedEventContext(ctx).setThinningCache (&cache);
   Gaudi::Hive::setCurrentContext (ctx);
 
   MsgStream log (nullptr, "test");
@@ -444,8 +442,7 @@ void test_thinning()
                                   1e-3) );
   }
 
-  ectx.setThinningCache (nullptr);
-  Atlas::setExtendedEventContext (ctx, std::move (ectx));
+  Atlas::getExtendedEventContext(ctx).setThinningCache (nullptr);
   Gaudi::Hive::setCurrentContext (ctx);
 }
 
