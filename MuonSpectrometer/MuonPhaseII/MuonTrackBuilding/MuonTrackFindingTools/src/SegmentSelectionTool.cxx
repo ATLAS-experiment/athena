@@ -57,11 +57,9 @@ namespace MuonR4{
                 }
                 break;
             }
-            case MM: {
-                return segment.nPrecisionHits() >= m_nMmSeedMinHitCut;
-            }
+            case MM:
             case STGC: {
-                return segment.nPrecisionHits() >= m_nStgcSeedMinHitCut;
+                return segment.nPrecisionHits() >= m_nNswSeedMinHitCut;
             }
             default:
                 break;
@@ -78,7 +76,7 @@ namespace MuonR4{
             }
             case MM:
             case STGC:{
-                return segment.nPrecisionHits() >= m_nMdtMinHitCut;
+                return segment.nPrecisionHits() >= m_nNswMinHitCut;
             }
             default:
                 break;
