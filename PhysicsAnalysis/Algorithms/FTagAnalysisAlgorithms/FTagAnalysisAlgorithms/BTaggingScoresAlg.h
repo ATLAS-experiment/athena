@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Diego Baron
 
-#ifndef B_TAGGING_SCORES_ALG_H
-#define B_TAGGING_SCORES_ALG_H
+#ifndef F_TAG_ANALYSIS_ALGORITHMS__B_TAGGING_SCORES_ALG_H
+#define F_TAG_ANALYSIS_ALGORITHMS__B_TAGGING_SCORES_ALG_H
 
 // Algorithm includes
 #include <AnaAlgorithm/AnaReentrantAlgorithm.h>
@@ -27,9 +27,6 @@ namespace CP {
     virtual StatusCode execute(const EventContext &ctx) const override;
 
   private:
-    // configurable properties
-    Gaudi::Property<std::string> m_taggerName {this, "taggerName", "", "name of the b-tagging algorithm to extract info from"};
-
     // inputs needed for retrieving b-tagging scores
     SG::ReadHandleKey<xAOD::JetContainer> m_jetsKey{
       this, "jets", "", "the jet container to use"};
@@ -39,9 +36,9 @@ namespace CP {
 
     // pair input and output variables via accessors and decorators
     std::vector< std::pair<
-		   SG::ConstAccessor<float>,
-		   SG::Decorator<float>
-		   > > m_accdecs;
+                   SG::ConstAccessor<float>,
+                   SG::Decorator<float>
+                   > > m_accdecs;
 
   };
 

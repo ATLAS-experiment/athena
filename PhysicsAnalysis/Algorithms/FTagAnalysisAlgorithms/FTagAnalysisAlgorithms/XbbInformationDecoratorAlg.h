@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002 - 2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002 - 2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Binbin Dong
@@ -17,7 +17,7 @@
 
 namespace CP
 {
-  class XbbInformationDecoratorAlg : public EL::AnaAlgorithm
+  class XbbInformationDecoratorAlg final : public EL::AnaAlgorithm
   {
   /// \brief the standard constructor
   public:

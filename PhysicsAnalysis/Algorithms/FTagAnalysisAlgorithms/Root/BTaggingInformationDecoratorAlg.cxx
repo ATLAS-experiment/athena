@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -24,7 +24,7 @@ namespace CP
   {
     if (m_taggerWeightDecoration.empty() && m_quantileDecoration.empty())
     {
-      ANA_MSG_ERROR ("can't specify both tagger weight and quantile decorations are empty");
+      ANA_MSG_ERROR ("at least one of taggerWeightDecoration and quantileDecoration must be set");
       return StatusCode::FAILURE;
     }
 

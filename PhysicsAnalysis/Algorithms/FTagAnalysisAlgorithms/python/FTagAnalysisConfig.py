@@ -67,10 +67,6 @@ class FTagConfig (ConfigBlock):
         if selectionName is None or selectionName == '' :
             selectionName = self.btagger + '_' + self.btagWP
 
-        postfix = selectionName
-        if postfix != "" and postfix[0] != '_' :
-            postfix = '_' + postfix
-
         # CDI file
         if self.bTagCalibFile is not None :
             bTagCalibFile = self.bTagCalibFile
@@ -131,7 +127,6 @@ class FTagConfig (ConfigBlock):
                                              'BTagScoringAlg',
                                              reentrant=True)
                 alg.jets = config.readName (self.containerName).replace('%SYS%', 'NOSYS')
-                alg.taggerName = self.btagger
                 alg.vars = variables
 
             for var in variables:
