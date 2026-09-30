@@ -20,6 +20,7 @@ namespace pool {
   // forward declarations
   class MicroSessionManager;
   class IFileCatalog;
+  class IStorageSvc;
 
   /// Factory method to create a session object
   class ISession;
@@ -80,6 +81,9 @@ namespace pool {
 
     /// Returns the technology given a technology type.
     virtual MicroSessionManager& microSessionManager( long technology ) = 0;
+
+    /// Return StorageSvc for a given technology used in this session
+    virtual IStorageSvc& getStorageSvc( long technology ) = 0;
 
     /// virtual destructor for the interface
     virtual ~ISession() = default;

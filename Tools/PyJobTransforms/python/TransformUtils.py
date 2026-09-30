@@ -158,5 +158,4 @@ def SortInput(flags, cfg):
 
     # Tell Athena to use the sorted collection instead of the original inputs
     cfg.getService("EventSelector").InputCollections = [tmpCollFile]
-    cfg.getService("EventSelector").CollectionType = "RootCollection"
     return cfg

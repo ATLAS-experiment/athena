@@ -150,10 +150,6 @@ xAODEventSelector::xAODEventSelector( const std::string& name,
   declareProperty( "ReadMetaDataWithPool", m_readMetadataWithPool=false, "If true, using POOL to read metadata, will ensure input file is registered with catalog");
   declareProperty( "printEventProxyWarnings", m_printEventProxyWarnings);
 
-#ifndef XAOD_ANALYSIS
-  declareProperty( "CollectionType", m_collectionType="", "Compability flag for RecExCommon");
-#endif
-
 }
 
 // Destructor
@@ -1045,12 +1041,11 @@ StatusCode xAODEventSelector::setFile(const std::string& fname) {
   if(m_readMetadataWithPool) {
       //ensure input file collection created
       ATH_MSG_DEBUG("Creating poolsvc collection for " << fname);
-      StatusCode sc = m_poolSvc->connectCollection( "PFN:"+fname , fname , pool::POOL_StorageType.type() );
-      pool::CollectionService collSvc ATLAS_THREAD_SAFE = pool::CollectionService();
+      StatusCode sc = m_poolSvc->connectCollection( "PFN:"+fname , fname );
       pool::ICollection* collPtr ATLAS_THREAD_SAFE = nullptr;
       // Try to open EventTags Collection in the input file
       try {
-         collPtr = collSvc.open(fname, pool::POOL_StorageType.type(), "PFN:"+fname, m_poolSvc->getInputContextSession(IPoolSvc::kInputStream));
+         collPtr = pool::CollectionService::open(fname, "PFN:"+fname, m_poolSvc->getInputContextSession(IPoolSvc::kInputStream));
       } catch (std::exception &e) {
          collPtr = nullptr;
       }

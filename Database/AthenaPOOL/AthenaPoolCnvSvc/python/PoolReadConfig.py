@@ -111,7 +111,6 @@ def PoolReadCfg(flags,allowAODFix=True):
 
         # Create DoubleEventSelector (universal for any seconday input type)
         evSel = CompFactory.DoubleEventSelectorAthenaPool("EventSelector",
-                                                          CollectionType="RootCollection",
                                                           InputCollections=flags.Input.Files)
         if flags.Common.isOverlay and flags.Overlay.DataOverlay:
             evSel.OverrideRunNumber = True
@@ -134,7 +133,6 @@ def PoolReadCfg(flags,allowAODFix=True):
                                                      DataHeaderKey="SecondaryEventSelector"))
 
         secondarySel = CompFactory.EventSelectorAthenaPool("SecondaryEventSelector",
-                                                           CollectionType="RootCollection",
                                                            IsSecondary=True,
                                                            InputCollections=flags.Input.SecondaryFiles,
                                                            SkipEvents=skipEventsPrimary)

@@ -77,7 +77,6 @@ sub-collections and/or navigate to the events.
 A RegistrationStream has the following settable properties.
 <ul>
   <li>ItemList</li>
-  <li>CollectionType (DEFAULT: RootCollection) DEPRECATED, should use Tool properties directly.</li>
   <li>Connection (DEFAULT: '') DEPRECATED, should use Tool properties directly.</li>
   <li>OutputCollection (DEFAULT: '') DEPRECATED, should use Tool properties directly.</li>
   <li>CollectionOpenMode (DEFAULT: CREATE_AND_OVERWRITE) DEPRECATED, should use Tool properties directly.</li>
@@ -134,7 +133,6 @@ specific. The current Tools are listed below.
       <li>Output: POOL Collection</li>
       <li>Properties:</li>
       <ul>
-        <li>CollectionType (DEFAULT: 'RootCollection')</li>
         <li>Connection (DEFAULT: '')</li>
         <li>OutputCollection (DEFAULT: '')</li>
         <li>CollectionOpenMode (DEFAULT: CREATE_AND_OVERWRITE)</li>

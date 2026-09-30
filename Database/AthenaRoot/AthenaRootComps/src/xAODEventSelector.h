@@ -243,12 +243,6 @@ class ATLAS_NOT_THREAD_SAFE xAODEventSelector :
 
   /// RAII guard: guarantees a matching EndInputFile for every BeginInputFile
   mutable std::optional<InputFileIncidentGuard> m_inputFileGuard;
-
-#ifndef XAOD_ANALYSIS
-  //these are here just for compatibility with RecExCommon ... we were trying to use this selector in recexcommon jobs for a bit
-  StringProperty m_collectionType;
-#endif
-
 }; 
 
 /////////////////////////////////////////////////////////////////// 

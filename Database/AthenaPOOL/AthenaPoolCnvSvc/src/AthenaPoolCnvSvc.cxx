@@ -435,8 +435,11 @@ StatusCode AthenaPoolCnvSvc::setInputAttributes(const std::string& fileName) {
 //______________________________________________________________________________
 void AthenaPoolCnvSvc::handle(const Incident& incident) {
    if (incident.type() == "ProcessEventAttributes") {
-      m_inputAttrPerEvent.push_back({"SET_ACTIVE_ENTRY", incident.source(), m_lastInputFileName, ""});
-      if (!processPoolAttributes(m_inputAttrPerEvent, m_lastInputFileName, IPoolSvc::kInputStream).isSuccess()) {
+      Token t;
+      t.fromString(incident.source());
+      std::string fid = "FID:" + t.dbID().toString();
+      m_inputAttrPerEvent.push_back({"SET_ACTIVE_ENTRY", incident.source(), fid, ""});
+      if (!processPoolAttributes(m_inputAttrPerEvent, fid, IPoolSvc::kInputStream).isSuccess()) {
          ATH_MSG_DEBUG("handle ProcessEventAttributes failed process POOL database attributes.");
       }
    }

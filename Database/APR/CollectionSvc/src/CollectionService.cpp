@@ -4,10 +4,10 @@
 
 #include "CollectionSvc/CollectionService.h"
 #include "CollectionSvc/CollectionDescription.h"
-#include "ImplicitCollection.h"
 #include "RootCollection.h"
 
 #include "AthenaKernel/getMessageSvc.h"
+#include "GaudiKernel/IFileMgr.h"
 
 #include <stdexcept>
 
@@ -21,19 +21,17 @@ pool::CollectionService::create( const CollectionDescription& description )
       std::string errorMsg = "Must specify name of collection in description input argument.";
       throw std::runtime_error( errorMsg + " (APR: \" CollectionService::create \" from \" CollectionSvc \")" );
    }
-   Io::IoFlag openMode = Io::WRITE;
-   return plugin( description, openMode );
+   return new RootCollection( description, Io::WRITE, nullptr );
 }
 
 
 pool::ICollection* 
 pool::CollectionService::open( const std::string& name,
-                               const DbType& type,
                                const std::string& connection,
                                pool::ISession* session )
 {
-   pool::CollectionDescription description( name, type, connection );
-   return plugin( description, Io::READ, session );
+   pool::CollectionDescription description( name, ROOT_StorageType.type(), connection );
+   return new RootCollection( description, Io::READ, session );
 }
 
 
@@ -41,17 +39,4 @@ void
 pool::CollectionService::setMessageSvcQuiet( bool quiet )
 {
    Athena::getMessageSvcQuiet = quiet;
-}
-
-
-pool::ICollection*
-pool::CollectionService::plugin( const CollectionDescription& description,
-                                 Io::IoFlag openMode,
-                                 ISession* session )
-{
-   if( description.type().majorType() == pool::ROOT_StorageType.type() ) {
-      return new RootCollection( &description, openMode );
-   } else {
-      return new ImplicitCollection( &description, openMode, session );
-   }
 }

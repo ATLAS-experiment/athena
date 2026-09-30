@@ -18,7 +18,7 @@ EventSelector                                       DEBUG Events to skip: 9, 10
 IoComponentMgr                                       INFO IoComponent EventSelector has already had file EmptyPoolFile.root registered with i/o mode READ
 EventSelector                                       DEBUG reinitialization...
 EventSelector                                       DEBUG Try item: "EmptyPoolFile.root" from the collection list.
-PoolSvc                                             DEBUG connectCollection() type=POOL, connection=PFN:EmptyPoolFile.root, name=Input, contextID=0
+PoolSvc                                             DEBUG connectCollection() connection=PFN:EmptyPoolFile.root, name=Input, contextID=0
 EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
@@ -44,10 +44,9 @@ EmptyPoolFile.root                                  DEBUG --->Reading Param:PFN=
 EmptyPoolFile.root                                  DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTTAG=[POOLCollectionTree]
 EmptyPoolFile.root                                  DEBUG --->Reading Param:POOL_CONTAINERNAME_DATAHEADER=[POOLContainer]
 ##Params                                            DEBUG No objects passing selection criteria... Container has 5 Entries in total.
-EventSelector                                       DEBUG No events found in: EmptyPoolFile.root skipped!!!
 RootDatabase                                        DEBUG Closing DB EmptyPoolFile.root
 EventSelector                                       DEBUG Try item: "SimplePoolFile1.root" from the collection list.
-PoolSvc                                             DEBUG connectCollection() type=POOL, connection=PFN:SimplePoolFile1.root, name=Input, contextID=0
+PoolSvc                                             DEBUG connectCollection() connection=PFN:SimplePoolFile1.root, name=Input, contextID=0
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
@@ -103,7 +102,7 @@ AthenaEventLoopMgr                                   INFO Setup EventSelector se
 ApplicationMgr                                       INFO Application Manager Initialized successfully
 RootDatabase                                        DEBUG Closing DB SimplePoolFile1.root
 EventSelector                                       DEBUG Try item: "EmptyPoolFile.root" from the collection list.
-PoolSvc                                             DEBUG connectCollection() type=POOL, connection=PFN:EmptyPoolFile.root, name=Input, contextID=0
+PoolSvc                                             DEBUG connectCollection() connection=PFN:EmptyPoolFile.root, name=Input, contextID=0
 EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
@@ -129,38 +128,9 @@ EmptyPoolFile.root                                  DEBUG --->Reading Param:PFN=
 EmptyPoolFile.root                                  DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTTAG=[POOLCollectionTree]
 EmptyPoolFile.root                                  DEBUG --->Reading Param:POOL_CONTAINERNAME_DATAHEADER=[POOLContainer]
 ##Params                                            DEBUG No objects passing selection criteria... Container has 5 Entries in total.
-EventSelector                                       DEBUG No events found in: EmptyPoolFile.root skipped!!!
-MetaDataSvc                                         DEBUG handle() BeginInputFile for EmptyPoolFile.root
-MetaDataSvc                                         DEBUG initInputMetaDataStore: file name EmptyPoolFile.root
-EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaDataHdr(DataHeader)
-MetaDataHdr(DataHeader)                             DEBUG Opening
-MetaDataHdr(DataHeader)                             DEBUG    attributes# = 1
-MetaDataHdr(DataHeader)                             DEBUG Branch container 'DataHeader'
-MetaDataHdr(DataHeader)                             DEBUG Opened container MetaDataHdr(DataHeader) of type ROOT_Tree
-EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaDataHdrForm(DataHeaderForm)
-MetaDataHdrForm(DataHeaderForm)                     DEBUG Opening
-MetaDataHdrForm(DataHeaderForm)                     DEBUG    attributes# = 1
-MetaDataHdrForm(DataHeaderForm)                     DEBUG Branch container 'DataHeaderForm'
-MetaDataHdrForm(DataHeaderForm)                     DEBUG Opened container MetaDataHdrForm(DataHeaderForm) of type ROOT_Tree
-MetaDataSvc                                         DEBUG Loaded input meta data store proxies
-EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaData(xAOD::FileMetaData_v1/FileMetaData)
-MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Opening
-MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG    attributes# = 1
-MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Branch container 'xAOD::FileMetaData_v1_FileMetaData'
-MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Opened container MetaData(xAOD::FileMetaData_v1/FileMetaData) of type ROOT_Tree
-EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.)
-MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Opening
-MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG    attributes# = 1
-MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Branch container 'xAOD::FileMetaDataAuxInfo_v1_FileMetaDataAux.'
-MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Opened container MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) of type ROOT_Tree
-MetaDataSvc                                         DEBUG MetaDataSvc will handle xAOD::FileMetaData_v1 ClassID: 178309087
-MetaDataSvc                                         DEBUG MetaDataSvc will handle xAOD::FileMetaDataAuxInfo_v1 ClassID: 73252552
-ToolSvc.xAODMaker::FileMetaDataTool                  INFO Copied "FileMetaData" to MetaDataStore
-MetaDataSvc                                         DEBUG handle() EndInputFile for eventless EmptyPoolFile.root
-MetaDataSvc                                         DEBUG retireMetadataSource: eventless EmptyPoolFile.root
-RootDatabase                                        DEBUG Closing DB EmptyPoolFile.root
+ApplicationMgr                                       INFO Application Manager Started successfully
 EventSelector                                       DEBUG Try item: "SimplePoolFile1.root" from the collection list.
-PoolSvc                                             DEBUG connectCollection() type=POOL, connection=PFN:SimplePoolFile1.root, name=Input, contextID=0
+PoolSvc                                             DEBUG connectCollection() connection=PFN:SimplePoolFile1.root, name=Input, contextID=0
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
@@ -195,7 +165,6 @@ POOLContainer(DataHeader)                           DEBUG Opening
 POOLContainer(DataHeader)                           DEBUG    attributes# = 1
 POOLContainer(DataHeader)                           DEBUG Branch container 'DataHeader'
 POOLContainer(DataHeader)                           DEBUG Opened container POOLContainer(DataHeader) of type ROOT_Tree
-ApplicationMgr                                       INFO Application Manager Started successfully
 RootDatabase                                        DEBUG Request tree cache
 RootDatabase                                        DEBUG File name SimplePoolFile1.root
 RootDatabase                                        DEBUG Got tree CollectionTree read entry -1
@@ -222,7 +191,9 @@ MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Opening
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG    attributes# = 1
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Branch container 'xAOD::FileMetaDataAuxInfo_v1_FileMetaDataAux.'
 MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Opened container MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) of type ROOT_Tree
-ToolSvc.xAODMaker::FileMetaDataTool               WARNING Inconsistent input file MetaData
+MetaDataSvc                                         DEBUG MetaDataSvc will handle xAOD::FileMetaData_v1 ClassID: 178309087
+MetaDataSvc                                         DEBUG MetaDataSvc will handle xAOD::FileMetaDataAuxInfo_v1 ClassID: 73252552
+ToolSvc.xAODMaker::FileMetaDataTool                  INFO Copied "FileMetaData" to MetaDataStore
 EventSelector                                        INFO skipping event 1
 EventSelector                                        INFO skipping event 2
 EventSelector                                        INFO skipping event 3
@@ -252,7 +223,6 @@ CollectionTree(EventInfo_p4/McEventInfo)            DEBUG Branch container 'Even
 CollectionTree(EventInfo_p4/McEventInfo)            DEBUG Opened container CollectionTree(EventInfo_p4/McEventInfo) of type ROOT_Tree
 AthenaEventLoopMgr                                   INFO   ===>>>  start of run 1    <<<===
 AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #4294967307, run #1 0 events processed so far  <<<===
-ToolSvc.xAODMaker::FileMetaDataTool               WARNING Inconsistent input file MetaData
 ReadData                                            DEBUG in execute()
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaData(EventStreamInfo_p3/StreamStream1)
 MetaData(EventStreamInfo_p3/StreamStream1)          DEBUG Opening
@@ -577,56 +547,9 @@ ReadData                                             INFO Hit x = 2030.12 y = 46
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967316, run #1 10 events processed so far  <<<===
 RootDatabase                                        DEBUG Closing DB SimplePoolFile1.root
 EventSelector                                       DEBUG Try item: "EmptyPoolFile.root" from the collection list.
-PoolSvc                                             DEBUG connectCollection() type=POOL, connection=PFN:EmptyPoolFile.root, name=Input, contextID=0
-EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
-EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
-##Shapes                                            DEBUG Opening
-##Shapes                                            DEBUG    attributes# = 1
-##Shapes                                            DEBUG Opened container ##Shapes of type ROOT_Tree
-EmptyPoolFile.root                                  DEBUG ---->[0]:xAOD::FileMetaDataAuxInfo_v1 Typ:xAOD::FileMetaDataAuxInfo_v1 [21] Size:0 Offset:0 #Elements:1
-EmptyPoolFile.root                                  DEBUG ---->[0]:EventStreamInfo_p3 Typ:EventStreamInfo_p3 [21] Size:0 Offset:0 #Elements:1
-EmptyPoolFile.root                                  DEBUG ---->[0]:xAOD::FileMetaData_v1 Typ:xAOD::FileMetaData_v1 [21] Size:0 Offset:0 #Elements:1
-EmptyPoolFile.root                                  DEBUG ---->[0]:IOVMetaDataContainer_p1 Typ:IOVMetaDataContainer_p1 [21] Size:0 Offset:0 #Elements:1
-EmptyPoolFile.root                                  DEBUG ---->[0]:DataHeader_p6 Typ:DataHeader_p6 [21] Size:0 Offset:0 #Elements:1
-EmptyPoolFile.root                                  DEBUG ---->[0]:DataHeaderForm_p6 Typ:DataHeaderForm_p6 [21] Size:0 Offset:0 #Elements:1
-##Shapes                                            DEBUG No objects passing selection criteria... Container has 6 Entries in total.
-EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Links
-##Links                                             DEBUG Opening
-##Links                                             DEBUG    attributes# = 1
-##Links                                             DEBUG Opened container ##Links of type ROOT_Tree
-##Links                                             DEBUG No objects passing selection criteria... Container has 7 Entries in total.
-EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Params
-##Params                                            DEBUG Opening
-##Params                                            DEBUG    attributes# = 1
-##Params                                            DEBUG Opened container ##Params of type ROOT_Tree
-EmptyPoolFile.root                                  DEBUG --->Reading Param:PFN=[EmptyPoolFile.root]
-EmptyPoolFile.root                                  DEBUG --->Reading Param:POOL_CONTAINERNAME_EVENTTAG=[POOLCollectionTree]
-EmptyPoolFile.root                                  DEBUG --->Reading Param:POOL_CONTAINERNAME_DATAHEADER=[POOLContainer]
-##Params                                            DEBUG No objects passing selection criteria... Container has 5 Entries in total.
-EventSelector                                       DEBUG No events found in: EmptyPoolFile.root skipped!!!
-MetaDataSvc                                         DEBUG handle() BeginInputFile for EmptyPoolFile.root
-MetaDataSvc                                         DEBUG initInputMetaDataStore: file name EmptyPoolFile.root
-EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaDataHdr(DataHeader)
-MetaDataHdr(DataHeader)                             DEBUG Opening
-MetaDataHdr(DataHeader)                             DEBUG    attributes# = 1
-MetaDataHdr(DataHeader)                             DEBUG Branch container 'DataHeader'
-MetaDataHdr(DataHeader)                             DEBUG Opened container MetaDataHdr(DataHeader) of type ROOT_Tree
-MetaDataSvc                                         DEBUG Loaded input meta data store proxies
-EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaData(xAOD::FileMetaData_v1/FileMetaData)
-MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Opening
-MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG    attributes# = 1
-MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Branch container 'xAOD::FileMetaData_v1_FileMetaData'
-MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Opened container MetaData(xAOD::FileMetaData_v1/FileMetaData) of type ROOT_Tree
-EmptyPoolFile.root                                  DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.)
-MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Opening
-MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG    attributes# = 1
-MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Branch container 'xAOD::FileMetaDataAuxInfo_v1_FileMetaDataAux.'
-MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Opened container MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) of type ROOT_Tree
-MetaDataSvc                                         DEBUG handle() EndInputFile for eventless EmptyPoolFile.root
-MetaDataSvc                                         DEBUG retireMetadataSource: eventless EmptyPoolFile.root
-RootDatabase                                        DEBUG Closing DB EmptyPoolFile.root
+PoolSvc                                             DEBUG connectCollection() connection=PFN:EmptyPoolFile.root, name=Input, contextID=0
 EventSelector                                       DEBUG Try item: "SimplePoolFile2.root" from the collection list.
-PoolSvc                                             DEBUG connectCollection() type=POOL, connection=PFN:SimplePoolFile2.root, name=Input, contextID=0
+PoolSvc                                             DEBUG connectCollection() connection=PFN:SimplePoolFile2.root, name=Input, contextID=0
 SimplePoolFile2.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile2.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
@@ -1355,7 +1278,8 @@ ReadData                                             INFO Hit x = 2030.12 y = 46
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967316, run #1 30 events processed so far  <<<===
 RootDatabase                                        DEBUG Closing DB SimplePoolFile2.root
 EventSelector                                       DEBUG Try item: "SimplePoolFile3.root" from the collection list.
-PoolSvc                                             DEBUG connectCollection() type=POOL, connection=PFN:SimplePoolFile3.root, name=Input, contextID=0
+PoolSvc                                             DEBUG connectCollection() connection=PFN:SimplePoolFile3.root, name=Input, contextID=0
+RootDatabase                                        DEBUG Closing DB EmptyPoolFile.root
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening

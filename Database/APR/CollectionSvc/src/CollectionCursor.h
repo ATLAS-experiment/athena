@@ -35,21 +35,21 @@ namespace pool {
             ContainerMap& attrContainers );
 
          /// Advances the cursor to the next row of the result set.
-         virtual bool next() override;
+         virtual bool next() override final;
 
          /// Returns the selected Tokens and Attributes for the current row of the result set.
-         virtual const CollectionRowBuffer& currentRow() const override;
+         virtual const CollectionRowBuffer& currentRow() const override final;
 
          /// Return the size of the collection.
-         virtual std::size_t size() override;
+         virtual std::size_t size() override final { return m_size; }
 
          /// Seeks the cursor to a given position in the collection.
-         virtual bool seek(std::size_t position) override;
+         virtual bool seek(std::size_t position) override final;
 
          /// Returns the event reference Token for the current row.
-         virtual const Token& eventRef() const override;
+         virtual const Token& eventRef() const override final;
 
-         virtual ~CollectionCursor();
+         virtual ~CollectionCursor() = default;
 
       protected:
          const CollectionDescription&        m_description;
@@ -66,6 +66,8 @@ namespace pool {
          std::string                         m_tokenStr;
 
          std::size_t                         m_idx;
+
+         std::size_t                         m_size;
       };
 
 }

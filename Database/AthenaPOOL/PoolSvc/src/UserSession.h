@@ -89,6 +89,9 @@ namespace pool {
     /// Returns the file catalog in use
     virtual IFileCatalog& fileCatalog();
 
+    /// Return StorageSvc for a given technology used in this session
+    virtual IStorageSvc& getStorageSvc( long technology ) override final;
+
     /// Returns the technology given a technology type.
     MicroSessionManager& microSessionManager( long technology ) override final;
 
