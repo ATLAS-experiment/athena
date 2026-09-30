@@ -52,6 +52,7 @@ def MuSAVtxJPsiValidationAlgCfg(flags, name="MuSAVtxJPsiValidationAlg", **kwargs
     acc = ComponentAccumulator()
 
     # Define J/Psi mass window
+    # Values taken from BPHY1
     Jpsi_lo = 2000  # MeV
     Jpsi_hi = 4000  # MeV
 
@@ -79,13 +80,13 @@ def MuSAVtxJPsiValidationAlgCfg(flags, name="MuSAVtxJPsiValidationAlg", **kwargs
         assumeDiMuons = True,  # Default: m_diMuons = true
         invMassLower = Jpsi_lo,  # Default: m_invMassLower = 0.0
         invMassUpper = Jpsi_hi,  # Default: m_invMassUpper = 100000.0
-        Chi2Cut = 50.,  # Default: m_Chi2Cut = 50.
+        Chi2Cut = 200.,  # Default: m_Chi2Cut = 50. BPHY1 uses 200
         oppChargesOnly = True,  # Default: m_oppChOnly = true
-        atLeastOneComb = True,  # Default: m_atLeastOneComb = true
+        atLeastOneComb = False,  # Default: m_atLeastOneComb = true
         useCombinedMeasurement = False,  # Default: m_useCombMeasurement = false
+        combOnly = True, #Default: False; Will only find JPsi decay into two combined muons 
         muonCollectionKey = "StdWithLRTMuons",  # Default: not explicitly set
         TrackParticleCollection = "InDetWithLRTTrackParticles",  # Default: not explicitly set
-        useV0Fitter = False,  # Default: m_useV0Fitter = false
         TrkVertexFitterTool = vkalvrt,  # Default: not explicitly set
         TrackSelectorTool = trackselect,  # Default: not explicitly set
         VertexPointEstimator = vpest,  # Default: not explicitly set
