@@ -57,6 +57,7 @@
 #include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
+#include "HGTD_Identifier/HGTD_ID.h"
 
 
 namespace ActsTrk {
@@ -117,6 +118,8 @@ private:
   };
 
   using TrackFindingBaseAlg::CKF_pimpl;
+
+  const HGTD_ID* m_id_helper{nullptr}; //!< Handle to the ID helper
 
   Gaudi::Property< float > m_memorySafetyMargin {this, "MemorySafetyMargin", 1.2};
   mutable std::atomic<std::size_t> m_nTrackReserve ATLAS_THREAD_SAFE {0ul};
@@ -254,17 +257,6 @@ private:
     const EventContext& ctx,
     const ActsTrk::detail::RecoConstTrackStateContainerProxy& state,
     const xAOD::HGTDClusterContainer* hgtdClusters) const;
-
-  /**
-    * @brief returns the index of HGTD layer where surfaces lies.
-    * This index is used at to locate where in the vectors of
-    * TrackExtensionData the hit information should be written
-    * Returns 99 if surface is outiside of HGTD.
-    *
-    * @param geoID - surface geometry id
-    */  
-  std::size_t getHGTDLayerIndex(
-    const Acts::GeometryIdentifier& geoID) const;
                           
 };
 } // namespace ActsTrk
