@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -64,7 +64,7 @@ class FTagJetTrigMatchingBlock(ConfigBlock):
                 if alg.useRun3TriggerEDM:
                     decors_to_check = [deco + '_pb' for deco in getDecoByTrigName(chain)]
                     log.info(f'Configured b-tagging trigger decorations for trigger {chain}: {decors_to_check}')
-                alg.ftagRun3TriggerDecoNames = decors_to_check
+                    alg.ftagRun3TriggerDecoNames = decors_to_check
                 # alg.OutputLevel = 1 # VERBOSE. for detailed debug
                 # Helper function to implement to provide cut for given trigger
                 # Only used for Run 2
