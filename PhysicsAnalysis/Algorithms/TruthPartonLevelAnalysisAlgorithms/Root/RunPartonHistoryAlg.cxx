@@ -22,7 +22,7 @@ StatusCode RunPartonHistoryAlg::initialize() {
   try {
     const PartonSchemeConfig& cfg = getSchemeConfig(m_PartonScheme);
     m_PartonHistory = std::make_unique<CalcPartonHistory>(
-        "CP::CalcPartonHistory", cfg.truthCollections);
+        name() + "_CalcPartonHistory", cfg.truthCollections);
     m_PartonHistory->configure(cfg);
   } catch (const std::runtime_error& e) {
     ANA_MSG_ERROR("  ==> PartonScheme " << m_PartonScheme

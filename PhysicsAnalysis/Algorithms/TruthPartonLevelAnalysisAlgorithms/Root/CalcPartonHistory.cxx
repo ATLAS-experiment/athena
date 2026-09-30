@@ -204,12 +204,12 @@ void CalcPartonHistory::TraceParticle(
   // TruthBosonsWithDecayParticles via the
   // "CustomLinkedTruthBosonWithDecayParticles" decoration so that the subsequent
   // child traversal finds the W decay products.
-  if (!p || PartonHistoryUtils::isBrokenTop(p))
+  if (!p || PartonHistoryUtils::isBrokenTop(*p))
     return;
 
   // If this W node has no identical child (i.e. it is the after-FSR instance)
   // but lacks decay products, swap to the linked decay-product-bearing copy.
-  if (PartonHistoryUtils::isAfterFSR(p) && std::abs(p->pdgId()) == 24) {
+  if (PartonHistoryUtils::isAfterFSR(*p) && std::abs(p->pdgId()) == 24) {
     p = getTruthParticleLinkedFromDecoration(
         p, "CustomLinkedTruthBosonWithDecayParticles");
   }
@@ -223,7 +223,7 @@ void CalcPartonHistory::TraceParticle(
     return;
   }
 
-  const xAOD::TruthParticle* afterFSR = PartonHistoryUtils::findAfterFSR(p);
+  const xAOD::TruthParticle* afterFSR = &PartonHistoryUtils::findAfterFSR(*p);
   // Same W-linking fix for the after-FSR node reached by findAfterFSR().
   if (std::abs(afterFSR->pdgId()) == 24) {
     afterFSR = getTruthParticleLinkedFromDecoration(
@@ -252,29 +252,29 @@ void CalcPartonHistory::AddToParticleMap(const xAOD::TruthParticle* p,
 void CalcPartonHistory::handleFSR(const xAOD::TruthParticle* p,
                                   const std::string& newKey, std::string& key) {
   // Last copy of an FSR chain: stored under the key of its first copy.
-  if (PartonHistoryUtils::hasParentPdgId(p)) {
+  if (PartonHistoryUtils::hasParentPdgId(*p)) {
     AddToParticleMap(p, key + kAfterFSR);
     return;
   }
   key += newKey;
   AddToParticleMap(p, key + kBeforeFSR);
-  if (!PartonHistoryUtils::hasIdenticalChild(p))
+  if (!PartonHistoryUtils::hasIdenticalChild(*p))
     AddToParticleMap(p, key + kAfterFSR);
 }
 
 bool CalcPartonHistory::handleDecay(const xAOD::TruthParticle* p,
                                     std::string& key, int decayID) {
   // Only daughters of a W/Z/H (not FSR copies of the boson itself).
-  if (PartonHistoryUtils::hasParentPdgId(p) ||
-      !(PartonHistoryUtils::hasParentAbsPdgId(p, 23) ||
-        PartonHistoryUtils::hasParentAbsPdgId(p, 24) ||
-        PartonHistoryUtils::hasParentAbsPdgId(p, 25)))
+  if (PartonHistoryUtils::hasParentPdgId(*p) ||
+      !(PartonHistoryUtils::hasParentAbsPdgId(*p, 23) ||
+        PartonHistoryUtils::hasParentAbsPdgId(*p, 24) ||
+        PartonHistoryUtils::hasParentAbsPdgId(*p, 25)))
     return false;
 
   const std::string decayStr = "Decay" + std::to_string(decayID);
   key += decayStr;
   AddToParticleMap(p, key + kBeforeFSR);
-  if (!PartonHistoryUtils::hasIdenticalChild(p))
+  if (!PartonHistoryUtils::hasIdenticalChild(*p))
     AddToParticleMap(p, key + kAfterFSR);
   return true;
 }
@@ -308,8 +308,8 @@ void CalcPartonHistory::FillParticleMap(
       // beforeFSR: this node has an identical child (it will radiate).
       // afterFSR:  this node's parent has the same PDG ID (it was radiated
       // from).
-      const bool beforeFSR = PartonHistoryUtils::hasIdenticalChild(p);
-      const bool afterFSR = PartonHistoryUtils::hasParentPdgId(p);
+      const bool beforeFSR = PartonHistoryUtils::hasIdenticalChild(*p);
+      const bool afterFSR = PartonHistoryUtils::hasParentPdgId(*p);
 
       // Determine which child index this particle is under its parent; used to
       // label W/Z/H decay daughters as Decay1, Decay2. Falls back to sign of
@@ -343,7 +343,7 @@ void CalcPartonHistory::TraceParticles(
   std::vector<std::vector<const xAOD::TruthParticle*>> allPaths;
   allPaths.reserve(truthParticles->size());
   for (const xAOD::TruthParticle* p : *truthParticles) {
-    if (PartonHistoryUtils::hasParticleIdenticalParent(p))
+    if (PartonHistoryUtils::hasParticleIdenticalParent(*p))
       continue;
     std::vector<const xAOD::TruthParticle*> path;
     path.reserve(16);
@@ -406,7 +406,7 @@ StatusCode CalcPartonHistory::buildContainerFromMultipleCollections(
   std::unordered_set<int> descendantUids;
   std::vector<const xAOD::TruthParticle*> stack;
   for (const xAOD::TruthParticle* ancestor : p_candidates) {
-    if (PartonHistoryUtils::isQuarkFromPDF(ancestor))
+    if (PartonHistoryUtils::isQuarkFromPDF(*ancestor))
       continue;
     stack.assign(1, ancestor);
     while (!stack.empty()) {
@@ -427,7 +427,7 @@ StatusCode CalcPartonHistory::buildContainerFromMultipleCollections(
   // using the copy from the first collection that contains them.
   std::unordered_set<int> rootUids;
   for (const xAOD::TruthParticle* potential_parent : p_candidates) {
-    if (!PartonHistoryUtils::isQuarkFromPDF(potential_parent) &&
+    if (!PartonHistoryUtils::isQuarkFromPDF(*potential_parent) &&
         !descendantUids.count(potential_parent->uid()) &&
         rootUids.insert(potential_parent->uid()).second)
       p_parents.push_back(potential_parent);
