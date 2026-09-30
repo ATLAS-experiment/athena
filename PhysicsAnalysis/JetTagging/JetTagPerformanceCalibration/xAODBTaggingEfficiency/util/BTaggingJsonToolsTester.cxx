@@ -70,6 +70,7 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
   std::string JsonConfigFile = argv[2];
   std::string OutputName = argv[3];
   std::string OperatingPoint = argv[4];
+  std::string mcGenerator = (argc > 5) ? argv[5] : "";
   std::string JetCollection = "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets";
 
   asg::StandaloneToolHandle<IBTaggingSelectionJsonTool> sel_tool("BTaggingSelectionJsonTool/BTagSelTest");
@@ -98,8 +99,9 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
     StatusCode code4 = tool.setProperty( "JetAuthor", JetCollection );
     StatusCode code5 = tool.setProperty( "OperatingPoint", OperatingPoint );
     StatusCode code6 = tool.setProperty( "JsonConfigFile", JsonConfigFile );
-    StatusCode code7 = tool.initialize();
-    std::vector<StatusCode> codes = {code1, code2, code3, code4, code5, code6, code7};
+    StatusCode code7 = tool.setProperty( "MCGenerator", mcGenerator );
+    StatusCode code8 = tool.initialize();
+    std::vector<StatusCode> codes = {code1, code2, code3, code4, code5, code6, code7, code8};
     for(const auto& code : codes) {
       if(code.isFailure()) {
         ANA_MSG_ERROR("Failed to set property or initialize tool");
@@ -141,14 +143,16 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
         for (const auto& var : sysSet) {
           CP::SystematicSet set;
           set.insert(var);
-          if (tool->getScaleFactor(*jet, sf, set) != CP::CorrectionCode::Ok) {
+          CP::CorrectionCode code = tool->getScaleFactor(*jet, sf, set);
+
+          if (code != CP::CorrectionCode::Ok) {
             ANA_MSG_ERROR("Failed to get scale factor for jet");
           } else {
             ANA_MSG_INFO("Applied systematic: " << var.name());
-            ANA_MSG_INFO("                   SF: " << sf);            
+            ANA_MSG_INFO("                   SF: " << sf);
           }
         }
-      }
+      } 
     }
   }
 
@@ -167,3 +171,4 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
     return 1;
   }
 }
+
