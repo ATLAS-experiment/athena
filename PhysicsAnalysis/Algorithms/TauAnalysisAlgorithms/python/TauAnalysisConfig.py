@@ -71,6 +71,13 @@ class TauCalibrationConfig (ConfigBlock):
             alg.input = config.readName (self.containerName)
             alg.output = config.copyName (self.containerName)
             alg.outputType = 'xAOD::TauJetContainer'
+
+            extraInputs = [
+                ( 'SG::AuxVectorBase' , 'StoreGateSvc+TauJets.EleRNNLoose_v1' ),
+                ( 'SG::AuxVectorBase' , 'StoreGateSvc+TauJets.TESCompatibility' )    
+            ]
+            config.setExtraInputs (extraInputs)
+
             decorations = []
             if self.addGlobalFELinksDep:
                 decorations += ['neutralGlobalFELinks', 'chargedGlobalFELinks']
