@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -116,7 +116,7 @@ StatusCode DerivationFramework::TauTrackParticleThinning::doThinning(const Event
                 if (m_coneSize>0.0) trIC.select(tauIt,m_coneSize,importedTrackParticles.cptr(),mask); // check tracks in a cone around the tau if req'd
             	for (unsigned int i=0; i<tauIt->nTracks(); ++i) {
 		  int index = xAOD::TauHelpers::trackParticleLinks(tauIt, xAOD::TauJetParameters::TauTrackFlag::classifiedCharged).at(i).index();
-                  mask[index] = true;
+                  if (index>= 0)[[likely]] mask[index] = true;
             	}
 	    }
     } else { // check only taus passing user selection string
@@ -124,7 +124,7 @@ StatusCode DerivationFramework::TauTrackParticleThinning::doThinning(const Event
             if (m_coneSize>0.0) trIC.select(tauIt,m_coneSize,importedTrackParticles.cptr(),mask); // check tracks in a cone around the tau if req'd	
             for (unsigned int i=0; i<tauIt->nTracks(); ++i) {
 	      int index = xAOD::TauHelpers::trackParticleLinks(tauIt, xAOD::TauJetParameters::TauTrackFlag::classifiedCharged).at(i).index();
-              mask[index] = true;
+              if (index>= 0)[[likely]] mask[index] = true;
             }
         }
     }

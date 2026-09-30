@@ -236,27 +236,37 @@ void DerivationFramework::TrackParticleThinningBase::selectTrackHits(const xAOD:
         ATH_MSG_VERBOSE("Discarding TrackState as not of correct type " << detTypeToSelect);
         continue;
       }
-      if (trkState_el.index() >= outputStatesMask.size()) {
-        outputStatesMask.resize (trkState_el.index()+1);
+      const std::size_t idx = trkState_el.index() ;
+      if (idx == std::numeric_limits<std::size_t>::max()) [[unlikely]]{
+        ATH_MSG_WARNING("trkState_el.index() is invalid");
+        continue;
       }
-      outputStatesMask[trkState_el.index()] = true;
+      if (idx >= outputStatesMask.size()) {
+        outputStatesMask.resize (idx+1);
+      }
+      outputStatesMask[idx] = true;
 
       // get the corresponding TrackMeasurementValidation object, if any, and add it to the outputMeasurementsMask
       const ElementLink<xAOD::TrackMeasurementValidationContainer> trkMeasurement_el = (*trkState_el)->trackMeasurementValidationLink();
       if (not trkMeasurement_el.isValid()) {
         ATH_MSG_VERBOSE("Cannot find a valid link to TrackMeasurementValidation object from track state for track index: " << trkIndex
-                        << ", trackState index: " << trkState_el.index());
+                        << ", trackState index: " << idx);
         continue; //not a valid link
       }
       if (*trkMeasurement_el == nullptr) {
         ATH_MSG_VERBOSE("Invalid pointer to TrackMeasurementValidation object from track state for track index: " << trkIndex
-                        << ", trackState index: " << trkState_el.index());
+                        << ", trackState index: " << idx);
         continue; //not linking to a valid object -- is it necessary?
       }
-      if (trkMeasurement_el.index() >= outputMeasurementsMask.size()) {
-        outputMeasurementsMask.resize (trkMeasurement_el.index()+1);
+      const std::size_t midx = trkMeasurement_el.index() ;
+      if (midx == std::numeric_limits<std::size_t>::max()) [[unlikely]]{
+        ATH_MSG_WARNING("trkMeasurement_el.index() is invalid");
+        continue;
       }
-      outputMeasurementsMask[trkMeasurement_el.index()] = true;
+      if (midx >= outputMeasurementsMask.size()) {
+        outputMeasurementsMask.resize (midx+1);
+      }
+      outputMeasurementsMask[midx] = true;
     }
   } // end loop over xAOD::TrackParticle container
 }

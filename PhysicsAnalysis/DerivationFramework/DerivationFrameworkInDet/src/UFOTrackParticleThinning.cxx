@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -124,6 +124,7 @@ StatusCode DerivationFramework::UFOTrackParticleThinning::doThinning(const Event
       for( size_t j = 0; j < jet->numConstituents(); ++j ) {
         auto ufo = jet->constituentLinks().at(j);
         int index = ufo.index();
+        if (index < 0) [[unlikely]] continue;
         maskUFOs[index] = true;
         const xAOD::FlowElement* ufoO = dynamic_cast<const xAOD::FlowElement*>(*ufo);
         if(!ufoO) continue;
@@ -141,7 +142,7 @@ StatusCode DerivationFramework::UFOTrackParticleThinning::doThinning(const Event
 	  int index_pfo = ufoO->otherObject(n)->index();
 	  if(index_pfo<0) continue;
 
-	  const xAOD::FlowElement* fe = dynamic_cast<const xAOD::FlowElement*>(ufoO->otherObject(n));
+	  const xAOD::FlowElement* fe = static_cast<const xAOD::FlowElement*>(ufoO->otherObject(n));
 
 	  if(fe->signalType()==xAOD::FlowElement::SignalType::ChargedPFlow){
 	    pfomaskCharged.at( index_pfo ) = true;

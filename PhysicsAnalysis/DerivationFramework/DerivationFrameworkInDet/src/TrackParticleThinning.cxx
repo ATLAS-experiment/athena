@@ -294,10 +294,15 @@ void DerivationFramework::TrackParticleThinning::selectTrackHits(const xAOD::Tra
 			<< ", trackState index: " << trkState_el.index());
 	continue; //not linking to a valid object -- is it necessary?
       }
-      if (trkMeasurement_el.index() >= outputMeasurementsMask.size()) {
-        outputMeasurementsMask.resize (trkMeasurement_el.index()+1);
+      const std::size_t idx = trkMeasurement_el.index();
+      if (idx == std::numeric_limits<std::size_t>::max())[[unlikely]]{
+        ATH_MSG_WARNING("trkState_el.index() is invalid");
+        continue;
       }
-      outputMeasurementsMask[trkMeasurement_el.index()] = true;
+      if (idx >= outputMeasurementsMask.size()) {
+        outputMeasurementsMask.resize (idx+1);
+      }
+      outputMeasurementsMask[idx] = true;
     }
   } // end loop over xAOD::TrackParticle container
 }

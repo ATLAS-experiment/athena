@@ -306,7 +306,7 @@ DerivationFramework::EgammaTrackParticleThinning::setPhotonMasks(
             orig(*((*gsfs)[link.index()]));
           if (origTrackLink.isValid()) {
             int inDetIndex = origTrackLink.index();
-            mask[inDetIndex] = true;
+            if (inDetIndex>=0 ) [[likely]] mask[inDetIndex] = true;
           }
         }
       }
@@ -352,13 +352,14 @@ DerivationFramework::EgammaTrackParticleThinning::setElectronMasks(
         continue;
       }
       int gsfIndex = electron->trackParticleLink(i).index();
+      if (gsfIndex < 0)[[unlikely]] continue;
       gsfMask[gsfIndex] = true;
       if (tps) {
         const ElementLink<xAOD::TrackParticleContainer>& origTrackLink =
           orig(*((*gsfs)[gsfIndex]));
         if (origTrackLink.isValid()) {
           int inDetIndex = origTrackLink.index();
-          mask[inDetIndex] = true;
+          if (inDetIndex>=0 ) [[likely]] mask[inDetIndex] = true;
         }
       }
     }
