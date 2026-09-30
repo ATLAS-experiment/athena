@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloUtils/CaloClusterStoreHelper.h"
 #include "CaloEvent/CaloClusterCellLink.h"
 #include "xAODCaloEvent/CaloClusterAuxContainer.h"
 #include "StoreGate/StoreGateSvc.h"
-#include "SGTools/CurrentEventStore.h"
 #include "AthenaKernel/errorcheck.h"
 
 
@@ -59,22 +58,6 @@ StatusCode CaloClusterStoreHelper::AddContainerWriteHandle(SG::WriteHandle<xAOD:
   return sc;
 }
 
-
-StatusCode
-CaloClusterStoreHelper::finalizeClusters (SG::WriteHandle<CaloClusterCellLinkContainer>& h,
-                                          xAOD::CaloClusterContainer* pClusterColl)
-{
-  auto cellLinks = std::make_unique<CaloClusterCellLinkContainer>();
-
-  //Loop on clusters and call setLink to transfer ownership of CaloClusterCellLink object to 
-  //CaloClusterCellLinkContainer
-  IProxyDict* sg = SG::CurrentEventStore::store();
-  for (xAOD::CaloCluster* cl : *pClusterColl) {
-    cl->setLink(cellLinks.get(), sg);
-  }
-
-  return h.record (std::move (cellLinks));
-}
 
 void
 CaloClusterStoreHelper::finalizeClusters(
