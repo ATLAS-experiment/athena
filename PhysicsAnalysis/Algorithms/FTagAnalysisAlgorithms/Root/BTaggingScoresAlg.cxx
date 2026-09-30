@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Diego Baron
@@ -29,6 +29,10 @@ namespace CP {
 
     for(const xAOD::Jet* jet : *jets) {
       const xAOD::BTagging *btag = xAOD::BTaggingUtilities::getBTagging( *jet );
+      if (!btag) {
+        ANA_MSG_ERROR("jet has no valid link to a BTagging object");
+        return StatusCode::FAILURE;
+      }
 
       // copy the values from b-tagging onto the jet
       for(const auto&[acc, dec] : m_accdecs) dec(*jet) = acc(*btag);
