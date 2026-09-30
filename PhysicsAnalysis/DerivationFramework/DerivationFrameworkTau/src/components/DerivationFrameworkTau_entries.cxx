@@ -1,4 +1,5 @@
 #include "DerivationFrameworkTau/TauTruthMatchingWrapper.h"
+#include "DerivationFrameworkTau/TauMassDecorator.h"
 #include "DerivationFrameworkTau/TauIDDecoratorWrapper.h"
 #include "DerivationFrameworkTau/TauThinningTool.h"
 #include "DerivationFrameworkTau/TauCombinedTESWrapper.h"
@@ -8,6 +9,7 @@
 using namespace DerivationFramework;
 
 DECLARE_COMPONENT( TauTruthMatchingWrapper )
+DECLARE_COMPONENT( TauMassDecorator ) 	
 DECLARE_COMPONENT( TauIDDecoratorWrapper )
 DECLARE_COMPONENT( TauThinningTool )
 DECLARE_COMPONENT( TauCombinedTESWrapper )	
