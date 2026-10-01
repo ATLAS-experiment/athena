@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -9,6 +9,8 @@
 
 #include "DerivationFrameworkTau/TauTruthMatchingWrapper.h"
 #include "StoreGate/ReadHandle.h"
+#include "StoreGate/WriteDecorHandle.h"
+#include "TauAnalysisTools/HelperFunctions.h"
 
 namespace DerivationFramework {
 
@@ -18,6 +20,7 @@ namespace DerivationFramework {
     ATH_CHECK(m_isTruthMatchedKey.initialize());
     ATH_CHECK(m_truthJetLinkKey.initialize());
     ATH_CHECK(m_truthParticleLinkKey.initialize());
+    ATH_CHECK(m_tauOriginKey.initialize());
     CHECK( m_tTauTruthMatchingTool.retrieve() );
     return StatusCode::SUCCESS;
   }
@@ -37,8 +40,11 @@ namespace DerivationFramework {
     // Loop over taus
     std::unique_ptr<TauAnalysisTools::ITauTruthMatchingTool::ITruthTausEvent>
       truthTausEvent = m_tTauTruthMatchingTool->getEvent();
-    for(auto xTau : *xTauContainer)
+    SG::WriteDecorHandle<xAOD::TauJetContainer, int> dec_tauOrigin(m_tauOriginKey, ctx);
+    for(auto xTau : *xTauContainer) {
       m_tTauTruthMatchingTool->getTruth(*xTau, *truthTausEvent);
+      dec_tauOrigin(*xTau) = TauAnalysisTools::tauOrigin(*xTau);
+    }
     ATH_CHECK( m_tTauTruthMatchingTool->lockDecorations(*xTauContainer) );
 
     return StatusCode::SUCCESS;
