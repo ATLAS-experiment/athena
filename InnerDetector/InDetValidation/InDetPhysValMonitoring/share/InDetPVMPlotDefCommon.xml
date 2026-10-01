@@ -3162,32 +3162,33 @@
   <y title="Fake Rate" lo="0.0" hi="2.0"/>
 </h>
 
-<h id="ntracks_vs_truthMu" type="TH2" title="Number of tracks versus truth #GT#mu#LT">
+<!-- nTracks -->
+<h id="ntracks_vs_truthMu" type="TH2" title="Number of tracks versus truth #LT#mu#GT">
   <x title="Truth #LT#mu#GT" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
   <y title="Number of Tracks" n="200" lo="0.0" hi="&EXPTRK;"/>
 </h>
 
-<h id="ntracks_vs_truthMu_absEta_0_2p5" type="TH2" title="Number of tracks versus truth #GT#mu#LT">
+<h id="ntracks_vs_truthMu_absEta_0_2p5" type="TH2" title="Number of tracks versus truth #LT#mu#GT">
   <x title="Truth #LT#mu#GT" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
   <y title="Number of Tracks" n="200" lo="0.0" hi="&EXPTRK;"/>
 </h>
 
-<h id="ntracks_vs_truthMu_pT_1GeV" type="TH2" title="Number of tracks versus truth #GT#mu#LT">
+<h id="ntracks_vs_truthMu_pT_1GeV" type="TH2" title="Number of tracks versus truth #LT#mu#GT">
   <x title="Truth #LT#mu#GT" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
   <y title="Number of Tracks" n="200" lo="0.0" hi="&EXPTRK;"/>
 </h>
 
-<h id="ntracks_vs_actualMu" type="TH2" title="Number of tracks versus actual #GT#mu#LT">
+<h id="ntracks_vs_actualMu" type="TH2" title="Number of tracks versus actual #LT#mu#GT">
   <x title="Actual #LT#mu#GT" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
   <y title="Number of Tracks" n="200" lo="0.0" hi="&EXPTRK;"/>
 </h>
 
-<h id="ntracks_vs_actualMu_absEta_0_2p5" type="TH2" title="Number of tracks versus actual #GT#mu#LT">
+<h id="ntracks_vs_actualMu_absEta_0_2p5" type="TH2" title="Number of tracks versus actual #LT#mu#GT">
   <x title="Actual #LT#mu#GT" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
   <y title="Number of Tracks" n="200" lo="0.0" hi="&EXPTRK;"/>
 </h>
 
-<h id="ntracks_vs_actualMu_pT_1GeV" type="TH2" title="Number of tracks versus actual #GT#mu#LT">
+<h id="ntracks_vs_actualMu_pT_1GeV" type="TH2" title="Number of tracks versus actual #LT#mu#GT">
   <x title="Actual #LT#mu#GT" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
   <y title="Number of Tracks" n="200" lo="0.0" hi="&EXPTRK;"/>
 </h>
@@ -3197,24 +3198,72 @@
   <y title="Number of Tracks" n="200" lo="0.0" hi="&EXPTRK;"/>
 </h>
 
-<h id="ntracks_vs_nvertices_absEta_0_2p5" type="TH2" title="Number of tracks versus number ofvertices">
+<h id="ntracks_vs_nvertices_absEta_0_2p5" type="TH2" title="Number of tracks versus number of vertices">
   <x title="Number of Vertices" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
   <y title="Number of Tracks" n="200" lo="0.0" hi="&EXPTRK;"/>
 </h>
 
-<h id="ntracks_vs_nvertices_pT_1GeV" type="TH2" title="Number of tracks versus number ofvertices">
+<h id="ntracks_vs_nvertices_pT_1GeV" type="TH2" title="Number of tracks versus number of vertices">
   <x title="Number of Vertices" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
   <y title="Number of Tracks" n="200" lo="0.0" hi="&EXPTRK;"/>
 </h>
 
+<h id="ntracks_vs_truthMu_profile" type="TProfile" title="Number of tracks versus truth #LT#mu#GT">
+  <x title="Truth #LT#mu#GT" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
+  <y title="Number of Tracks" n="200" lo="0.0" hi="&EXPTRK;"/>
+</h>
+
+<h id="ntracks_vs_truthMu_absEta_0_2p5_profile" type="TProfile" title="Number of tracks versus truth #LT#mu#GT">
+  <x title="Truth #LT#mu#GT" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
+  <y title="Number of Tracks" n="200" lo="0.0" hi="&EXPTRK;"/>
+</h>
+
+<h id="ntracks_vs_truthMu_pT_1GeV_profile" type="TProfile" title="Number of tracks versus truth #LT#mu#GT">
+  <x title="Truth #LT#mu#GT" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
+  <y title="Number of Tracks" n="200" lo="0.0" hi="&EXPTRK;"/>
+</h>
+
+<h id="ntracks_vs_actualMu_profile" type="TProfile" title="Number of tracks versus actual #LT#mu#GT">
+  <x title="Actual #LT#mu#GT" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
+  <y title="Number of Tracks" n="200" lo="0.0" hi="&EXPTRK;"/>
+</h>
+
+<h id="ntracks_vs_actualMu_absEta_0_2p5_profile" type="TProfile" title="Number of tracks versus actual #LT#mu#GT">
+  <x title="Actual #LT#mu#GT" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
+  <y title="Number of Tracks" n="200" lo="0.0" hi="&EXPTRK;"/>
+</h>
+
+<h id="ntracks_vs_actualMu_pT_1GeV_profile" type="TProfile" title="Number of tracks versus actual #LT#mu#GT">
+  <x title="Actual #LT#mu#GT" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
+  <y title="Number of Tracks" n="200" lo="0.0" hi="&EXPTRK;"/>
+</h>
+
+<h id="ntracks_vs_nvertices_profile" type="TProfile" title="Number of tracks versus number of vertices">
+  <x title="Number of Vertices" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
+  <y title="Number of Tracks" n="200" lo="0.0" hi="&EXPTRK;"/>
+</h>
+
+<h id="ntracks_vs_nvertices_absEta_0_2p5_profile" type="TProfile" title="Number of tracks versus number of vertices">
+  <x title="Number of Vertices" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
+  <y title="Number of Tracks" n="200" lo="0.0" hi="&EXPTRK;"/>
+</h>
+
+<h id="ntracks_vs_nvertices_pT_1GeV_profile" type="TProfile" title="Number of tracks versus number of vertices">
+  <x title="Number of Vertices" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
+  <y title="Number of Tracks" n="200" lo="0.0" hi="&EXPTRK;"/>
+</h>
+
+<!-- nVertices -->
 <h id="vx_n_vs_truthMu" type="TH2" title="Number of vertices vs truth #mu;N vertices;Truth #mu;Entries">
   <x title="Truth #LT#mu#GT" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
   <y title="Number of Vertices" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
 </h>
+
 <h id="vx_n_vs_actualMu" type="TH2" title="Number of vertices vs actual #mu;N vertices;Truth #mu;Entries">
   <x title="Actual #LT#mu#GT" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
   <y title="Number of Vertices" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
 </h>
+
 <!-- delta z -->
 <h id="vx_all_dz" type="TH1" title="#Delta z between any vertex">
    <x title="#Delta z" n="160" lo="-8.0" hi="8.0"/>
