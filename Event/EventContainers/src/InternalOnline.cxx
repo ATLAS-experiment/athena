@@ -56,6 +56,7 @@ void InternalOnline::wait() const {
         m_waitlist.pop_back();
     }
     m_map.clear();
+    m_map.reserve(m_mask.count());
     m_mask.forEachSetBit([this](size_t index) {
         const void* ptr = m_cacheLink->m_vec[index].load(std::memory_order_relaxed);//acquire sync is done by  m_waitNeeded
         m_map.emplace_back(index, ptr);
