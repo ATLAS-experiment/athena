@@ -41,29 +41,78 @@ def CUDASPFormationToolCfg(flags,
         CompFactory.ActsTrk.CUDASPFormationAlgProviderTool(name, **kwargs))
     return acc
 
-def DeviceClusterizationProviderToolCfg(flags,
-                                   name="DeviceClusterizationProviderTool",
-                                   **kwargs) -> ComponentAccumulator:
+
+def HIPClusterizerToolCfg(flags,
+                          name="HIPClusterizerTool",
+                          **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    if flags.Device.Backend is not DeviceBackend.CUDA:
-        raise ValueError(f"Unsupported device backend: {flags.Acts.DeviceBackend}")   
-        
-    else:    
-        acc.setPrivateTools(acc.popToolsAndMerge(CUDAClusterizerToolCfg(flags)))
-        return  acc
+    from AthHIPComps.AthHIPCompsConfig import StreamToolCfg
+
+    kwargs.setdefault("MemoryResourcesTool", acc.popToolsAndMerge(
+        MemoryResourcesToolCfg(flags)))
+    kwargs.setdefault("CopyProviderTool",
+                      acc.popToolsAndMerge(CopyToolCfg(flags)))
+    kwargs.setdefault("StreamTool", acc.popToolsAndMerge(StreamToolCfg(flags)))
+    kwargs.setdefault("CellSorting", flags.Acts.Device.doCellSorting)
+
+    acc.setPrivateTools(
+        CompFactory.ActsTrk.HIPClusterizationAlgProviderTool(name, **kwargs))
+    return acc
+
+
+def HIPSPFormationToolCfg(flags,
+                          name="HIPSPFormationTool",
+                          **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    from AthHIPComps.AthHIPCompsConfig import StreamToolCfg
+
+    kwargs.setdefault("MemoryResourcesTool", acc.popToolsAndMerge(
+        MemoryResourcesToolCfg(flags)))
+    kwargs.setdefault("CopyProviderTool",
+                      acc.popToolsAndMerge(CopyToolCfg(flags)))
+    kwargs.setdefault("StreamTool", acc.popToolsAndMerge(StreamToolCfg(flags)))
+
+    acc.setPrivateTools(
+        CompFactory.ActsTrk.HIPSPFormationAlgProviderTool(name, **kwargs))
+    return acc
+
+
+def DeviceClusterizationProviderToolCfg(flags,
+                                        **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    if (flags.Device.Backend == DeviceBackend.CUDA):
+        acc.setPrivateTools(acc.popToolsAndMerge(
+            CUDAClusterizerToolCfg(flags, **kwargs)))
+    elif ((flags.Device.Backend == DeviceBackend.HIPAMD) or
+          (flags.Device.Backend == DeviceBackend.HIPNVIDIA)):
+        acc.setPrivateTools(acc.popToolsAndMerge(
+            HIPClusterizerToolCfg(flags, **kwargs)))
+    else:
+        raise ValueError(
+            f"Unsupported device backend: {flags.Acts.DeviceBackend}")
+
+    return acc
+
 
 def DeviceSPFormationProviderToolCfg(flags,
-                                   name="DeviceSPFormationProviderTool",
-                                   **kwargs) -> ComponentAccumulator:
+                                     **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    if flags.Device.Backend is not DeviceBackend.CUDA:
-        raise ValueError(f"Unsupported device backend: {flags.Acts.DeviceBackend}")   
-        
-    else:    
-        acc.setPrivateTools(acc.popToolsAndMerge(CUDASPFormationToolCfg(flags)))
-        return  acc  
+    if flags.Device.Backend == DeviceBackend.CUDA:
+        acc.setPrivateTools(acc.popToolsAndMerge(
+            CUDASPFormationToolCfg(flags, **kwargs)))
+    elif ((flags.Device.Backend == DeviceBackend.HIPAMD) or
+          (flags.Device.Backend == DeviceBackend.HIPNVIDIA)):
+        acc.setPrivateTools(acc.popToolsAndMerge(
+            HIPSPFormationToolCfg(flags, **kwargs)))
+    else:
+        raise ValueError(
+            f"Unsupported device backend: {flags.Acts.DeviceBackend}")
+
+    return acc
 
 
 # ============================================================
@@ -75,7 +124,7 @@ def DeviceClusterizationAlgCfg(flags,
                                previousExtension: str = None,
                                **kwargs) -> ComponentAccumulator:
 
-    assert previousExtension is None or isinstance(previousExtension, str)                           
+    assert previousExtension is None or isinstance(previousExtension, str)
     acc = ComponentAccumulator()
 
     kwargs.setdefault("DeviceMR", acc.popToolsAndMerge(DeviceMemoryResourceToolCfg(flags)))
@@ -97,7 +146,7 @@ def DeviceSPFormationAlgCfg(flags,
                                previousExtension: str = None,
                                **kwargs) -> ComponentAccumulator:
 
-    assert previousExtension is None or isinstance(previousExtension, str)                           
+    assert previousExtension is None or isinstance(previousExtension, str)
     acc = ComponentAccumulator()
 
     kwargs.setdefault("DeviceMR", acc.popToolsAndMerge(DeviceMemoryResourceToolCfg(flags)))
