@@ -144,9 +144,13 @@ public:
    /// Reset with storable key and element index (fast)
    void resetWithKeyAndIndex( const ID_type& key, index_type index,
                               xAOD::TVirtualEvent* event = 0 );
+   void resetWithKeyAndIndex( const ID_type& key, index_type index,
+                              const EventContext& ctx );
    /// Reset with storable id and element index (fastest)
    void resetWithKeyAndIndex( sgkey_t id, index_type index,
                               xAOD::TVirtualEvent* event = 0 );
+   void resetWithKeyAndIndex( sgkey_t id, index_type index,
+                              const EventContext& ctx );
    /// Reset to default state 
    void reset();
 
