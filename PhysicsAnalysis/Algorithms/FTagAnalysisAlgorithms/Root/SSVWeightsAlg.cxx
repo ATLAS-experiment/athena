@@ -19,7 +19,7 @@ namespace CP{
 
   StatusCode SSVWeightsAlg::initialize() {
     ANA_MSG_INFO("Initialising SSVWeightsAlg");
-    ANA_MSG_INFO("WARNING: The Run3 SSV calibration has not been performed yet -> the scale factors are not usable yet");
+    ANA_MSG_WARNING("The Run3 SSV calibration has not been performed yet -> the scale factors are not usable yet");
 
     ANA_CHECK(m_jetsHandle.initialize(m_systematicsList));
     ANA_CHECK(m_electronsHandle.initialize(m_systematicsList));
@@ -55,7 +55,7 @@ namespace CP{
       ANA_CHECK(m_P_fake_decor.initialize(m_systematicsList, m_eventInfoHandle));
     }
 
-    if ( m_OutputVariableSizeType == OutputVariableSizeType::additional || m_OutputVariableSizeType == OutputVariableSizeType::all){
+    if (m_OutputVariableSizeType == OutputVariableSizeType::additional || m_OutputVariableSizeType == OutputVariableSizeType::all){
       ANA_CHECK(m_N_matched_decor.initialize(m_systematicsList, m_eventInfoHandle));
       ANA_CHECK(m_N_missed_decor.initialize(m_systematicsList, m_eventInfoHandle));
       ANA_CHECK(m_N_fake_decor.initialize(m_systematicsList, m_eventInfoHandle));
@@ -87,9 +87,11 @@ namespace CP{
 
     // Check that b-tagging working point is the same as in the calibration
     if (m_BTaggingWP.value() != m_jsonConfig_SSVWeightsAlg["CalibrationInformation"]["btaggingWP"].get<std::string>()){
-      ANA_MSG_ERROR("WARNING: You are using b-tagging working point: "<< m_BTaggingWP.value() <<" , which is different to the one used in the SSV Calibration: " << m_jsonConfig_SSVWeightsAlg["CalibrationInformation"]["btaggingWP"].get<std::string>());
+      ANA_MSG_ERROR("You are using b-tagging working point: "<< m_BTaggingWP.value() <<" , which is different to the one used in the SSV Calibration: " << m_jsonConfig_SSVWeightsAlg["CalibrationInformation"]["btaggingWP"].get<std::string>());
       return StatusCode::FAILURE;
     }
+
+    m_jetBTagAccessor.emplace(m_BTaggingWP.value());
 
     // retrieve scale factors
     m_SF_eff = m_jsonConfig_SSVWeightsAlg["CalibrationScaleFactors"]["SF_eff"];
@@ -154,18 +156,29 @@ namespace CP{
 
   StatusCode SSVWeightsAlg::execute(const EventContext& ctx) {
 
-    for (const auto &sys : m_systematicsList.systematicsVector()){
+    const std::vector<CP::SystematicSet> &systematics = m_systematicsList.systematicsVector();
+    if (systematics.empty()){
+      return StatusCode::SUCCESS;
+    }
+
+    //create truth b-hadrons (truthBhs); the truth particles do not depend on the systematic, so this is done once per event
+    std::vector<const xAOD::TruthParticle*> truthBhs;
+
+    const xAOD::TruthParticleContainer *particles = nullptr;
+    ANA_CHECK(m_truthParticlesHandle.retrieve(particles, systematics.front(), ctx));
+
+    for (const xAOD::TruthParticle *part : *particles){
+      if ( part->isBottomHadron() && isHFHadronFinalState(part, 5) ){ 
+        truthBhs.push_back(part);
+      }
+    }
+
+    for (const auto &sys : systematics){
       const xAOD::EventInfo *evtInfo = nullptr;
       ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys, ctx));
 
-      const xAOD::VertexContainer* vertices = nullptr;
-      ANA_CHECK(m_ssvHandle.retrieve(vertices, sys, ctx));
-
-      // create SSVs
-      std::vector<const xAOD::Vertex*> SSVs;
-      for(const xAOD::Vertex* ssvvtx : *vertices){
-        SSVs.push_back(ssvvtx);
-      }
+      const xAOD::VertexContainer* SSVs = nullptr;
+      ANA_CHECK(m_ssvHandle.retrieve(SSVs, sys, ctx));
 
       //create jets
       const xAOD::JetContainer *jets = nullptr;
@@ -173,7 +186,6 @@ namespace CP{
 
       std::vector<const xAOD::Jet*> jets_Selected;
       int b_jet_count=0;
-      static const SG::AuxElement::ConstAccessor<char> jet_btag_accessor(m_BTaggingWP);
 
       //create jets that pass your jet selection
       for(const xAOD::Jet* jet : *jets){
@@ -181,7 +193,7 @@ namespace CP{
           jets_Selected.push_back(jet);
           
           // Count number of bjets
-          if (jet_btag_accessor(*jet)){
+          if ((*m_jetBTagAccessor)(*jet)){
             b_jet_count = b_jet_count+1;
           }
         }
@@ -213,20 +225,7 @@ namespace CP{
       }
 
       // create good SSVs
-      std::vector<const xAOD::Vertex*> good_SSVs = create_good_SSVs(jets_Selected, electrons_Selected, muons_Selected, SSVs);
-
-      //create truth b-hadrons (truthBhs)
-      std::vector<const xAOD::TruthParticle*> truthBhs;
-
-      const xAOD::TruthParticleContainer *particles = nullptr;
-      ANA_CHECK(m_truthParticlesHandle.retrieve(particles, sys, ctx));
-
-      for (const xAOD::TruthParticle *part : *particles){
-        if ( part->isBottomHadron() && isHFHadronFinalState(part, 5) ){ 
-          truthBhs.push_back(part);
-        }
-      }
-
+      std::vector<const xAOD::Vertex*> good_SSVs = create_good_SSVs(jets_Selected, electrons_Selected, muons_Selected, *SSVs);
 
       //create truthBhs in acceptance
       std::vector<const xAOD::TruthParticle*> accepted_truthBhs = create_accepted_truthBhs(truthBhs, jets_Selected);
@@ -235,8 +234,8 @@ namespace CP{
       std::vector<bool> truthBh_to_SSV_matched = truthBh_to_SSV_matching(accepted_truthBhs, good_SSVs);
 
       //count matched truthBh,missed truthBh (not matched truthBh) and number of fake SSV (not matched SSV)
-      int N_matched = count_matched_objects(truthBh_to_SSV_matched);
-      int N_missed = count_not_matched_objects(truthBh_to_SSV_matched);
+      int N_matched = std::count(truthBh_to_SSV_matched.begin(), truthBh_to_SSV_matched.end(), true);
+      int N_missed = truthBh_to_SSV_matched.size() - N_matched;
       int N_fake = count_number_of_fake_SSVs(accepted_truthBhs, good_SSVs);
 
       // retrieve pileup
@@ -253,10 +252,6 @@ namespace CP{
       else if (m_EfficiencyMethodType == EfficiencyMethodType::Bhadron_pT_eta_based){
         P_ineff = m_EfficiencyMethodBhadronPtEtaBasedPtr->getPIneff(accepted_truthBhs, truthBh_to_SSV_matched, m_SF_eff);
       }
-      else {
-        ATH_MSG_ERROR("Unknown efficiency method: " << m_EfficiencyMethod << " , accepted efficiency methods are: 'bjet_based','Bhadron_pT_eta_based'");
-        return StatusCode::FAILURE;
-      } 
 
       // calculate P_fake according to the chosen method
       double P_fake = 1;
@@ -269,10 +264,6 @@ namespace CP{
       else if (m_nFMethodType == nFMethodType::pileup_based_binned){
         P_fake = m_nFPileupBasedBinnedPtr->getPFake(muactual, N_fake, m_SF_fake_low, m_SF_fake_high);
       }
-      else { 
-        ATH_MSG_ERROR("Unknown nF method: " << m_nFMethod << " , accepted nF methods are: 'pileup_bjet_based', 'pileup_based_linearfit', 'pileup_based_binned'");
-        return StatusCode::FAILURE;
-      }
 
       //calculate SSV_weight
       double SSV_weight = P_eff * P_ineff * P_fake;
@@ -281,7 +272,7 @@ namespace CP{
       m_SSV_weight_decor.set(*evtInfo, SSV_weight, sys);
 
       if (m_OutputVariableSizeType == OutputVariableSizeType::extended || m_OutputVariableSizeType == OutputVariableSizeType::additional || m_OutputVariableSizeType == OutputVariableSizeType::all){
-        // decorate P factors 
+        // decorate P factors
         m_P_eff_decor.set(*evtInfo, P_eff, sys);
         m_P_ineff_decor.set(*evtInfo, P_ineff, sys);
         m_P_fake_decor.set(*evtInfo, P_fake, sys);
@@ -318,7 +309,7 @@ namespace CP{
     const std::vector<const xAOD::Jet*> &jets,
     const std::vector<const xAOD::Electron*> &electrons,
     const std::vector<const xAOD::Muon*> &muons,
-    const std::vector<const xAOD::Vertex*> &SSVs) const {
+    const xAOD::VertexContainer &SSVs) const {
 
     static const SG::AuxElement::ConstAccessor<float> ssv_pt_accessor(("bvrtPt"));
     static const SG::AuxElement::ConstAccessor<float> ssv_m_accessor("bvrtM");
@@ -474,23 +465,7 @@ namespace CP{
   }
 
 
-  // count number of matched objects
-  int SSVWeightsAlg::count_matched_objects(
-    const std::vector<bool> &matching_vector) const {
-
-    // Count the number of times true appears in the vector  
-    return std::count(matching_vector.begin(), matching_vector.end(), true);
-  }
-
-
-  // count number of objects that are not matched
-  int SSVWeightsAlg::count_not_matched_objects(
-    const std::vector<bool> &matching_vector) const {
-
-    return matching_vector.size() - count_matched_objects(matching_vector);
-  }
-
-  const std::vector<const xAOD::TruthParticle*> SSVWeightsAlg::construct_not_matched_vectors(
+  std::vector<const xAOD::TruthParticle*> SSVWeightsAlg::construct_not_matched_vectors(
     const std::vector<const xAOD::TruthParticle*> &truthBhs,
     const std::vector<bool> &matched_vector) {
 
@@ -541,7 +516,7 @@ namespace CP{
   double SSVWeightsAlg::poisson_pmf(
     const int k,
     const double lambda){
-	if (lambda == 0.0 ) return k == 0.0 ? 1.0 : 0.0;
+    if (lambda == 0.0 ) return k == 0 ? 1.0 : 0.0;
     if (lambda < 0 || k < 0) return 0.0;
     return std::exp(-lambda + k * std::log(lambda) - std::lgamma(k + 1));
   }
@@ -555,6 +530,11 @@ namespace CP{
       m_BhadronPtEtaEfficiencyMap[pT_bin_key] = jsonConfig["efficiency_Bhadron_pT_eta_based"][pT_bin_key];
     }
     m_upperboundpT = m_ptbins[m_ptbins.size()-1];
+    // load the pT overflow bin if it is provided by the calibration
+    m_overflowPtBinKey = "pt_bin_" + std::to_string((int)m_upperboundpT) + "plus";
+    if (jsonConfig["efficiency_Bhadron_pT_eta_based"].contains(m_overflowPtBinKey)) {
+      m_BhadronPtEtaEfficiencyMap[m_overflowPtBinKey] = jsonConfig["efficiency_Bhadron_pT_eta_based"][m_overflowPtBinKey];
+    }
   }
 
   //calculate P_ineff based on the Bhadron pT and eta
@@ -576,14 +556,19 @@ namespace CP{
       double pt = missed_truthBhs[i]->pt();
       double eta = std::abs(missed_truthBhs[i]->eta());
       std::string pt_bin_of_truthBh = "";
-      // iterate pt bins to find appropriate efficiency bin for the truthBh pT
-      for (size_t j = 0; j < ptbins.size() - 1; ++j) {
-        if (pt >= ptbins[j] && pt < ptbins[j+1]) {
-          //construct pt bin name
-          pt_bin_of_truthBh = "pt_bin_" + std::to_string((int)ptbins[j]) + "_" + std::to_string((int)ptbins[j+1]);
+      if (pt >= m_upperboundpT){
+        if (!m_BhadronPtEtaEfficiencyMap.contains(m_overflowPtBinKey)){
+          throw std::runtime_error("EfficiencyMethodBhadronPtEtaBasedClass::getPIneff: B-hadron pT above the last pT bin edge, but no '" + m_overflowPtBinKey + "' entry in the calibration JSON file");
         }
-        else if (pt > m_upperboundpT){
-          pt_bin_of_truthBh = "pt_bin_" + std::to_string(m_upperboundpT) + "plus";
+        pt_bin_of_truthBh = m_overflowPtBinKey;
+      }
+      else {
+        // iterate pt bins to find appropriate efficiency bin for the truthBh pT
+        for (size_t j = 0; j < ptbins.size() - 1; ++j) {
+          if (pt >= ptbins[j] && pt < ptbins[j+1]) {
+            //construct pt bin name
+            pt_bin_of_truthBh = "pt_bin_" + std::to_string((int)ptbins[j]) + "_" + std::to_string((int)ptbins[j+1]);
+          }
         }
       }
       if (pt_bin_of_truthBh == ""){
@@ -594,7 +579,7 @@ namespace CP{
       const std::vector<double>& eta_bins = m_BhadronPtEtaEfficiencyMap.at(pt_bin_of_truthBh).at(etaStr);
       const std::vector<double>& efficiencies = m_BhadronPtEtaEfficiencyMap.at(pt_bin_of_truthBh).at(effStr);
 
-      double efficiency = 1;
+      std::optional<double> efficiency;
 
       //iterate eta bins to find appropriate eta bin for truthBh eta
       for (size_t k = 0; k < eta_bins.size() - 1; ++k) {
@@ -605,8 +590,12 @@ namespace CP{
           efficiency = efficiencies[k];
         }
       }
+      if (!efficiency){
+        //no eta bin found -> skip the truthBh, as done for truthBhs without pt bin
+        continue;
+      }
       //calculate P_ineff using the found efficiency
-      P_ineff = P_ineff*(1-SF_eff*efficiency)/(1-efficiency);
+      P_ineff = P_ineff*(1-SF_eff*(*efficiency))/(1-(*efficiency));
     }
     return P_ineff;
   }
