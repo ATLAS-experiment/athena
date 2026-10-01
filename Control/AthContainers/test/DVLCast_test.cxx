@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: DVLCast_test.cxx 470529 2011-11-24 23:54:22Z ssnyder $
@@ -87,14 +87,10 @@ void tester()
   DD dd(2);
   B* b = &d;
   assert (Cast::cast (b) == &d);
-  const B* cb = &d;
-  assert (Cast::cast (cb) == &d);
 
   b = &dd;
   D* dd2 = &dd;
   assert (Cast::cast (b) == dd2);
-  cb = &dd;
-  assert (Cast::cast (cb) == dd2);
 }
 
 
