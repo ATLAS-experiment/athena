@@ -68,6 +68,7 @@ namespace CP
   StatusCode MuonTriggerEfficiencyScaleFactorAlg ::
   execute (const EventContext& ctx)
   {
+    ConstDataVector<xAOD::MuonContainer> singleMuonContainer(SG::VIEW_ELEMENTS);
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       ANA_CHECK (m_efficiencyScaleFactorTool->applySystematicVariation (sys));
@@ -77,6 +78,11 @@ namespace CP
       ANA_CHECK (m_eventInfoHandle.retrieve (eventInfo, sys, ctx));
       //coverity[UNNECESSARY_STRING_COPY:FALSE]
       static const SG::ConstAccessor<unsigned int> acc_rnd("RandomRunNumber");
+      if (!acc_rnd.isAvailable(*eventInfo))
+      {
+        ANA_MSG_ERROR ("RandomRunNumber decoration not found on EventInfo; make sure the pileup reweighting is scheduled before this algorithm");
+        return StatusCode::FAILURE;
+      }
       unsigned int randomRunNumber = acc_rnd(*eventInfo);
       bool validEvent = m_minRunNumber <= randomRunNumber && m_maxRunNumber >= randomRunNumber;
 
@@ -86,7 +92,7 @@ namespace CP
         {
           if (m_scaleFactorDecoration) {
             double sf = 0;
-            ConstDataVector<xAOD::MuonContainer> singleMuonContainer(SG::VIEW_ELEMENTS);
+            singleMuonContainer.clear();
             singleMuonContainer.push_back(muon);
             ANA_CHECK_CORRECTION (m_outOfValidity, *muon, m_efficiencyScaleFactorTool->getTriggerScaleFactor (*singleMuonContainer.asDataVector(), sf, m_trigger));
             m_scaleFactorDecoration.set (*muon, sf, sys);

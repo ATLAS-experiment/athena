@@ -34,7 +34,7 @@ namespace CP
 
 
 
-    /// \brief the smearing tool
+    /// \brief the trigger efficiency scale factor tool
   private:
     ToolHandle<IMuonTriggerScaleFactors> m_efficiencyScaleFactorTool;
 
