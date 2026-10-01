@@ -213,7 +213,7 @@ LArRODMonAlg::PARTITION LArRODMonAlg::getPartition(const HWIdentifier chid) cons
       return FCALA;
   }
 
-  ATH_MSG_FATAL(std::format("Channel {:#x} neither EMB nor EMEC nor HEC nor FCAL???",chid.get_identifier32().get_compact()));
+  ATH_MSG_FATAL("Channel {:#x} neither EMB nor EMEC nor HEC nor FCAL???",chid.get_identifier32().get_compact());
   return N_PARTITIONS;
 }
 

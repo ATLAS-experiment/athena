@@ -290,7 +290,7 @@ StatusCode LArRawChannelMonAlg::fillHistograms(const EventContext &ctx) const
       continue; // skip this channel
     }
     if ( det <0 or det >= NDETECTORS)[[unlikely]]{
-      ATH_MSG_WARNING(std::format("Subdetector index {} out of range of the arrays.", det));
+      ATH_MSG_WARNING("Subdetector index {} out of range of the arrays.", det);
       continue; // skip this channel
     }
     // Fill per-detector histograms ---
