@@ -9,6 +9,7 @@ find_package( Eigen )
 find_package( ROOT COMPONENTS Core Tree Hist RIO )
 find_package( lwtnn )
 find_package( onnxruntime )
+find_package( nlohmann_json )
 
 # Optional dependencies.
 set( extra_public_libs )
@@ -34,8 +35,9 @@ atlas_add_library( tauRecToolsLib
    ${ROOT_LIBRARIES} ${ONNXRUNTIME_LIBRARIES}
    CxxUtils AthLinks AsgMessagingLib AsgDataHandlesLib AsgTools xAODCaloEvent
    xAODEventInfo xAODJet xAODParticleEvent xAODPFlow xAODTau xAODTracking xAODEventShape
-   MVAUtils FlavorTagInference ${extra_public_libs}
-   PRIVATE_LINK_LIBRARIES CaloGeoHelpers FourMomUtils PathResolver )
+   MVAUtils FlavorTagInference AthOnnxInterfaces ${extra_public_libs}
+   PRIVATE_LINK_LIBRARIES CaloGeoHelpers FourMomUtils PathResolver TruthUtils
+   nlohmann_json::nlohmann_json )
 
 atlas_add_dictionary( tauRecToolsDict
    tauRecTools/tauRecToolsDict.h tauRecTools/selection.xml
