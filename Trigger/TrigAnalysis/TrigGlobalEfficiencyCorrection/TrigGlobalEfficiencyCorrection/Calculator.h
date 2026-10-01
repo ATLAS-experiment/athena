@@ -16,8 +16,6 @@
 #include "TrigGlobalEfficiencyCorrection/ImportData.h"
 #include "TrigGlobalEfficiencyCorrection/TrigGlobalEfficiencyCorrectionTool.h"
 #include <flat_set>
-template <typename Key>
-using flat_set = std::flat_set<Key>;
 
 namespace TrigGlobEffCorr {
 
@@ -76,7 +74,7 @@ class Calculator : public asg::AsgMessaging {
   }
   template <typename Trig1L>
   auto getLoosestLegAboveThreshold(const Lepton& lepton,
-                                   const flat_set<Trig1L>& trigs, bool& success)
+                                   const std::flat_set<Trig1L>& trigs, bool& success)
       -> std::enable_if_t<Trig1L::is1L(), std::size_t> {
     return m_parent->getLoosestLegAboveThreshold(
         lepton, Trig1L::anonymize(trigs), success);
@@ -86,10 +84,10 @@ class Calculator : public asg::AsgMessaging {
                                                std::size_t leg, bool& success);
   bool fillListOfLegsFor(const Lepton& lepton,
                          const std::vector<TrigDef>& triggers,
-                         flat_set<std::size_t>& validLegs) const;
+                         std::flat_set<std::size_t>& validLegs) const;
   bool canTriggerBeFired(
       const TrigDef& trig,
-      const std::vector<flat_set<std::size_t> >& firedLegs) const;
+      const std::vector<std::flat_set<std::size_t> >& firedLegs) const;
   const Period* getPeriod(unsigned runNumber) const;
   bool findUniqueLeg(xAOD::Type::ObjectType obj, std::size_t& uniqueLeg,
                      const std::vector<TrigDef>& defs);
@@ -108,14 +106,14 @@ class Calculator : public asg::AsgMessaging {
                           bool>;
   /// Several single-lepton triggers, one object type
   template <typename Trig1L>
-  auto globalEfficiency(const LeptonList&, unsigned, const flat_set<Trig1L>&,
+  auto globalEfficiency(const LeptonList&, unsigned, const std::flat_set<Trig1L>&,
                         Efficiencies&)
       -> std::enable_if_t<Trig1L::is1L(), bool>;
   /// Several single-lepton triggers, two object types
   template <typename Trig1L_obj1, typename Trig1L_obj2>
   auto globalEfficiency(const LeptonList&, unsigned,
-                        const flat_set<Trig1L_obj1>& trigs1,
-                        const flat_set<Trig1L_obj2>& trigs2, Efficiencies&)
+                        const std::flat_set<Trig1L_obj1>& trigs1,
+                        const std::flat_set<Trig1L_obj2>& trigs2, Efficiencies&)
       -> std::enable_if_t<Trig1L_obj1::is1L() && Trig1L_obj2::is1L() &&
                               Trig1L_obj1::object() != Trig1L_obj2::object(),
                           bool>;
@@ -137,8 +135,8 @@ class Calculator : public asg::AsgMessaging {
   /// One mixed-flavour dilepton trigger + single-lepton triggers
   template <typename Trig2Lmix, typename Trig1L_obj1, typename Trig1L_obj2>
   auto globalEfficiency(const LeptonList&, unsigned, const Trig2Lmix,
-                        const flat_set<Trig1L_obj1>&,
-                        const flat_set<Trig1L_obj2>&, Efficiencies&)
+                        const std::flat_set<Trig1L_obj1>&,
+                        const std::flat_set<Trig1L_obj2>&, Efficiencies&)
       -> std::enable_if_t<Trig2Lmix::is2Lmix() && Trig1L_obj1::is1L() &&
                               Trig2Lmix::object1() == Trig1L_obj1::object() &&
                               Trig1L_obj2::is1L() &&
@@ -154,21 +152,21 @@ class Calculator : public asg::AsgMessaging {
   /// One symmetric dilepton trigger + several single-lepton triggers
   template <typename Trig2Lsym, typename Trig1L>
   auto globalEfficiency(const LeptonList&, unsigned, const Trig2Lsym,
-                        const flat_set<Trig1L>&, Efficiencies&)
+                        const std::flat_set<Trig1L>&, Efficiencies&)
       -> std::enable_if_t<Trig2Lsym::is2Lsym() && Trig1L::is1L() &&
                               Trig1L::object() == Trig2Lsym::object(),
                           bool>;
   /// One asymmetric dilepton trigger + several single-lepton triggers
   template <typename Trig2Lasym, typename Trig1L>
   auto globalEfficiency(const LeptonList&, unsigned, const Trig2Lasym,
-                        const flat_set<Trig1L>&, Efficiencies&)
+                        const std::flat_set<Trig1L>&, Efficiencies&)
       -> std::enable_if_t<Trig2Lasym::is2Lasym() && Trig1L::is1L() &&
                               Trig1L::object() == Trig2Lasym::object(),
                           bool>;
   /// Two symmetric dilepton triggers + several single-lepton triggers
   template <typename Trig2Lsym, typename Trig1L>
   auto globalEfficiency(const LeptonList&, unsigned, const Trig2Lsym,
-                        const Trig2Lsym, const flat_set<Trig1L>&, Efficiencies&)
+                        const Trig2Lsym, const std::flat_set<Trig1L>&, Efficiencies&)
       -> std::enable_if_t<Trig2Lsym::is2Lsym() && Trig1L::is1L() &&
                               Trig1L::object() == Trig2Lsym::object(),
                           bool>;
@@ -176,7 +174,7 @@ class Calculator : public asg::AsgMessaging {
   /// triggers
   template <typename Trig2Lasym, typename Trig2Lsym, typename Trig1L>
   auto globalEfficiency(const LeptonList&, unsigned, const Trig2Lasym,
-                        const Trig2Lsym, const flat_set<Trig1L>&, Efficiencies&)
+                        const Trig2Lsym, const std::flat_set<Trig1L>&, Efficiencies&)
       -> std::enable_if_t<Trig2Lasym::is2Lasym() && Trig2Lsym::is2Lsym() &&
                               Trig2Lsym::object() == Trig2Lasym::object() &&
                               Trig1L::is1L() &&
@@ -216,8 +214,8 @@ class Calculator : public asg::AsgMessaging {
             typename Trig1L_obj1, typename Trig1L_obj2>
   auto globalEfficiency(const LeptonList&, unsigned, const Trig2L_obj1,
                         const Trig2L_obj2, const Trig2Lmix,
-                        const flat_set<Trig1L_obj1>&,
-                        const flat_set<Trig1L_obj2>&, Efficiencies&)
+                        const std::flat_set<Trig1L_obj1>&,
+                        const std::flat_set<Trig1L_obj2>&, Efficiencies&)
       -> std::enable_if_t<Trig2Lmix::is2Lmix() && Trig2L_obj1::is2Lnomix() &&
                               Trig2L_obj1::object() == Trig2Lmix::object1() &&
                               Trig2L_obj2::is2Lnomix() &&
@@ -236,8 +234,8 @@ class Calculator : public asg::AsgMessaging {
   auto globalEfficiency(const LeptonList&, unsigned, const Trig2L_obj1,
                         const Trig2Lsym_obj1, const Trig2L_obj2,
                         const Trig2Lsym_obj2, const Trig2Lmix, const Trig2Lmix,
-                        const flat_set<Trig1L_obj1>&,
-                        const flat_set<Trig1L_obj2>&, Efficiencies&)
+                        const std::flat_set<Trig1L_obj1>&,
+                        const std::flat_set<Trig1L_obj2>&, Efficiencies&)
       -> std::enable_if_t<
           Trig2Lmix::is2Lmix() && Trig2L_obj1::is2Lnomix() &&
               Trig2L_obj1::object() == Trig2Lmix::object1() &&

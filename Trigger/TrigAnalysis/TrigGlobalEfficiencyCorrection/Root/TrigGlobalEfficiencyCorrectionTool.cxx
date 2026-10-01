@@ -155,7 +155,7 @@ StatusCode TrigGlobalEfficiencyCorrectionTool::initialize() {
     return StatusCode::FAILURE;
 
   ATH_MSG_DEBUG("Enumerating tools");
-  flat_set<std::size_t> collectedElectronTags, collectedMuonTags,
+  std::flat_set<std::size_t> collectedElectronTags, collectedMuonTags,
       collectedPhotonTags;
   if (!enumerateTools(data, m_suppliedElectronEfficiencyTools,
                       m_electronEffToolIndex, collectedElectronTags) ||
@@ -233,7 +233,7 @@ bool TrigGlobalEfficiencyCorrectionTool::processDeprecatedProperties() {
 }
 
 bool TrigGlobalEfficiencyCorrectionTool::parseTagString(
-    const std::string& tagstring, flat_set<std::size_t>& allTags) {
+    const std::string& tagstring, std::flat_set<std::size_t>& allTags) {
   bool success = true;
   const std::size_t star = m_hasher("*");
   for (std::size_t tag : listNonOrderedCSValues(tagstring, success)) {
@@ -250,13 +250,13 @@ template <class CPTool>
 bool TrigGlobalEfficiencyCorrectionTool::enumerateTools(
     ImportData& data, ToolHandleArray<CPTool>& suppliedTools,
     std::map<ToolKey, std::size_t>& toolIndex,
-    flat_set<std::size_t>& collectedTags) {
+    std::flat_set<std::size_t>& collectedTags) {
   bool success = true;
   for (unsigned index = 0; index < suppliedTools.size(); ++index) {
     auto& handle = suppliedTools[index];
     const std::string& name = handle.name();
     const std::string& altname = handle->name();  // athena: not always the same
-    flat_set<ToolKey> listOfLegs;
+    std::flat_set<ToolKey> listOfLegs;
     /// Find the legs associated to this tool ("ListOfLegsPerTool" property)
     if (suppliedTools.size() != 1 || m_legsPerTool.size() != 0) {
       auto itrLegs = m_legsPerTool.find(name);
@@ -285,7 +285,7 @@ bool TrigGlobalEfficiencyCorrectionTool::enumerateTools(
     } else
       listOfLegs.emplace();
     /// Find the tags associated to this tool ("ListOfTagsPerTool" property)
-    flat_set<std::size_t> tags;
+    std::flat_set<std::size_t> tags;
     auto itrTags = m_tagsPerTool.find(name);
     if (itrTags == m_tagsPerTool.end())
       itrTags = m_tagsPerTool.find(altname);
@@ -345,12 +345,12 @@ bool TrigGlobalEfficiencyCorrectionTool::enumerateTools(
 
 auto TrigGlobalEfficiencyCorrectionTool::parseListOfLegs(
     ImportData& data, const std::string& inputList, bool& success)
-    -> flat_set<ToolKey> {
+  -> std::flat_set<ToolKey> {
   if (!inputList.length())
     return {};
   std::regex rx(
       "\\s*([[:alnum:]_]+)\\s*(?:\\[\\s*([^,\\[\\]]+)\\s*\\]\\s*)?(?:,|$)");
-  flat_set<ToolKey> keys;
+  std::flat_set<ToolKey> keys;
   std::smatch sm;
   auto itr = inputList.cbegin();
   do {
@@ -459,15 +459,15 @@ bool TrigGlobalEfficiencyCorrectionTool::loadTriggerCombination(
 }
 
 bool TrigGlobalEfficiencyCorrectionTool::loadTagDecorators(
-    const flat_set<std::size_t>& collectedElectronTags,
-    const flat_set<std::size_t>& collectedMuonTags,
-    const flat_set<std::size_t>& collectedPhotonTags) {
+    const std::flat_set<std::size_t>& collectedElectronTags,
+    const std::flat_set<std::size_t>& collectedMuonTags,
+    const std::flat_set<std::size_t>& collectedPhotonTags) {
   bool success = true;
 
-  flat_set<std::size_t> collectedTags(collectedElectronTags);
+  std::flat_set<std::size_t> collectedTags(collectedElectronTags);
   collectedTags.insert(collectedMuonTags.begin(), collectedMuonTags.end());
   collectedTags.insert(collectedPhotonTags.begin(), collectedPhotonTags.end());
-  flat_set<std::size_t> allTags = collectedTags;
+  std::flat_set<std::size_t> allTags = collectedTags;
 
   /// Initialize decorators
   /// Note: can't use listNonOrderedCSValues() as the order in which decorations
@@ -475,7 +475,7 @@ bool TrigGlobalEfficiencyCorrectionTool::loadTagDecorators(
   std::stringstream ss(
       TrigGlobEffCorr::removeWhitespaces(m_leptonTagDecorations));
   std::string decoration;
-  flat_set<std::size_t> allDecorations;
+  std::flat_set<std::size_t> allDecorations;
   while (std::getline(ss, decoration, ',')) {
     if (!decoration.length() || decoration == "?") {
       ATH_MSG_ERROR(
@@ -646,9 +646,9 @@ inline bool TrigGlobalEfficiencyCorrectionTool::checkAndRecord(
 /// Watch out: since a flat_set is returned, the order of the entries in the
 /// input list is not preserved, as hinted by the name of the function
 auto TrigGlobalEfficiencyCorrectionTool::listNonOrderedCSValues(
-    const std::string& s, bool& success) -> flat_set<std::size_t> {
+    const std::string& s, bool& success) -> std::flat_set<std::size_t> {
   std::stringstream ss(TrigGlobEffCorr::removeWhitespaces(s));
-  flat_set<std::size_t> hashes;
+  std::flat_set<std::size_t> hashes;
   std::string token;
   while (std::getline(ss, token, ',')) {
     if (token.length()) {
@@ -1036,7 +1036,7 @@ bool TrigGlobalEfficiencyCorrectionTool::aboveThreshold(const Lepton& lepton,
 }
 
 std::size_t TrigGlobalEfficiencyCorrectionTool::getCombinedHash(
-    const flat_set<std::size_t>& legs) {
+    const std::flat_set<std::size_t>& legs) {
   if (legs.size() < 2)
     return 0;
   std::size_t combinedHash = 0;
@@ -1052,7 +1052,7 @@ std::size_t TrigGlobalEfficiencyCorrectionTool::getCombinedHash(
 }
 
 inline constexpr auto TrigGlobalEfficiencyCorrectionTool::forwardLegs(
-    const flat_set<std::size_t>& legs) -> const flat_set<std::size_t>& {
+    const std::flat_set<std::size_t>& legs) -> const std::flat_set<std::size_t>& {
   return legs;
 }
 
@@ -1166,7 +1166,7 @@ std::size_t TrigGlobalEfficiencyCorrectionTool::getLoosestLeg(
 
 std::pair<std::size_t, std::size_t>
 TrigGlobalEfficiencyCorrectionTool::getTwoLoosestLegs(
-    const Lepton& lepton, const flat_set<std::size_t>& legs, bool& success) {
+    const Lepton& lepton, const std::flat_set<std::size_t>& legs, bool& success) {
   auto ranking = getCachedTriggerLegsRanking(lepton, legs);
   if (CachedRanking::invalid(ranking)) {
     success = false;
@@ -1180,8 +1180,8 @@ TrigGlobalEfficiencyCorrectionTool::getTwoLoosestLegs(
 }
 
 std::size_t TrigGlobalEfficiencyCorrectionTool::getLoosestLegAboveThreshold(
-    const Lepton& lepton, const flat_set<std::size_t>& legs, bool& success) {
-  flat_set<std::size_t> validLegs;
+    const Lepton& lepton, const std::flat_set<std::size_t>& legs, bool& success) {
+  std::flat_set<std::size_t> validLegs;
   for (auto leg : legs)
     if (aboveThreshold(lepton, leg))
       validLegs.insert(leg);
@@ -1198,7 +1198,7 @@ std::size_t TrigGlobalEfficiencyCorrectionTool::getLoosestLegAboveThreshold(
 }
 
 std::vector<std::size_t> TrigGlobalEfficiencyCorrectionTool::getSortedLegs(
-    const Lepton& lepton, const flat_set<std::size_t>& legs, bool& success) {
+    const Lepton& lepton, const std::flat_set<std::size_t>& legs, bool& success) {
   const int nLegs = legs.size();
   unsigned long ranking = getCachedTriggerLegsRanking(lepton, legs);
   if (CachedRanking::invalid(ranking)) {

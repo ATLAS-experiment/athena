@@ -9,8 +9,6 @@
 #include "TrigGlobalEfficiencyCorrection/Calculator.h"
 #include "TrigGlobalEfficiencyCorrection/ImportData.h"
 #include <flat_set>
-template <typename Key>
-using flat_set = std::flat_set<Key>;
 
 #include <cctype>
 
@@ -259,7 +257,7 @@ bool CheckConfig::advancedConfigChecks() {
         auto itr = effToolIndex.find(kv.first);
         if (itr != effToolIndex.end()) {
           std::size_t index1 = kv.second, index2 = itr->second;
-          flat_set<ToolKey> pairs1, pairs2;
+          std::flat_set<ToolKey> pairs1, pairs2;
           for (auto& kv : sfToolIndex)
             if (kv.second == index1)
               pairs1.insert(kv.first);

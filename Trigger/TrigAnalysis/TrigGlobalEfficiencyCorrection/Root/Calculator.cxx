@@ -163,7 +163,7 @@ bool Calculator::checkTriggerMatching(
   /// First, for each lepton, list the trigger leg(s) it is allowed to fire
   /// (depends on pT and selection tags)
   const unsigned nLep = leptons.size();
-  std::vector<flat_set<std::size_t>> validLegs(leptons.size());
+  std::vector<std::flat_set<std::size_t>> validLegs(leptons.size());
   for (unsigned i = 0; i < nLep; ++i) {
     if (!fillListOfLegsFor(leptons[i], period->m_triggers, validLegs[i]))
       return false;
@@ -171,7 +171,7 @@ bool Calculator::checkTriggerMatching(
 
   /// Then for each trigger, call trigger matching tool for all possible (valid)
   /// lepton combinations
-  std::vector<flat_set<std::size_t>> firedLegs;
+  std::vector<std::flat_set<std::size_t>> firedLegs;
   std::vector<const xAOD::IParticle*> trigLeptons;
   const std::size_t magicWordHLT = 0xf7b8b87ef2917d66;
 
@@ -386,7 +386,7 @@ auto Calculator::globalEfficiency(const LeptonList& leptons, unsigned runNumber,
 ///
 template <typename Trig1L>
 auto Calculator::globalEfficiency(const LeptonList& leptons, unsigned runNumber,
-                                  const flat_set<Trig1L>& trigs,
+                                  const std::flat_set<Trig1L>& trigs,
                                   Efficiencies& globalEfficiencies)
     -> std::enable_if_t<Trig1L::is1L(), bool> {
   ATH_MSG_DEBUG("Entered Calculator::globalEfficiency_Several1L() at line "
@@ -420,8 +420,8 @@ auto Calculator::globalEfficiency(const LeptonList& leptons, unsigned runNumber,
 ///
 template <typename Trig1L_obj1, typename Trig1L_obj2>
 auto Calculator::globalEfficiency(const LeptonList& leptons, unsigned runNumber,
-                                  const flat_set<Trig1L_obj1>& trigs1,
-                                  const flat_set<Trig1L_obj2>& trigs2,
+                                  const std::flat_set<Trig1L_obj1>& trigs1,
+                                  const std::flat_set<Trig1L_obj2>& trigs2,
                                   Efficiencies& globalEfficiencies)
     -> std::enable_if_t<Trig1L_obj1::is1L() && Trig1L_obj2::is1L() &&
                             Trig1L_obj1::object() != Trig1L_obj2::object(),
@@ -561,8 +561,8 @@ auto Calculator::globalEfficiency(const LeptonList& leptons, unsigned runNumber,
 template <typename Trig2Lmix, typename Trig1L_obj1, typename Trig1L_obj2>
 auto Calculator::globalEfficiency(const LeptonList& leptons, unsigned runNumber,
                                   const Trig2Lmix trig2Lmix,
-                                  const flat_set<Trig1L_obj1>& trigs1L1,
-                                  const flat_set<Trig1L_obj2>& trigs1L2,
+                                  const std::flat_set<Trig1L_obj1>& trigs1L1,
+                                  const std::flat_set<Trig1L_obj2>& trigs1L2,
                                   Efficiencies& globalEfficiencies)
     -> std::enable_if_t<Trig2Lmix::is2Lmix() && Trig1L_obj1::is1L() &&
                             Trig2Lmix::object1() == Trig1L_obj1::object() &&
@@ -608,7 +608,7 @@ inline auto Calculator::globalEfficiency(const LeptonList& leptons,
                         bool> {
   ATH_MSG_DEBUG("Entered Calculator::globalEfficiency_One2LSeveral1L() at line "
                 << __LINE__);
-  return globalEfficiency(leptons, runNumber, trig2L, flat_set<Trig1L>{trig1L},
+  return globalEfficiency(leptons, runNumber, trig2L, std::flat_set<Trig1L>{trig1L},
                           globalEfficiencies);
 }
 
@@ -618,7 +618,7 @@ inline auto Calculator::globalEfficiency(const LeptonList& leptons,
 template <typename Trig2Lsym, typename Trig1L>
 auto Calculator::globalEfficiency(const LeptonList& leptons, unsigned runNumber,
                                   const Trig2Lsym trig2L,
-                                  const flat_set<Trig1L>& trigs1L,
+                                  const std::flat_set<Trig1L>& trigs1L,
                                   Efficiencies& globalEfficiencies)
     -> std::enable_if_t<Trig2Lsym::is2Lsym() && Trig1L::is1L() &&
                             Trig1L::object() == Trig2Lsym::object(),
@@ -674,7 +674,7 @@ auto Calculator::globalEfficiency(const LeptonList& leptons, unsigned runNumber,
 template <typename Trig2Lasym, typename Trig1L>
 auto Calculator::globalEfficiency(const LeptonList& leptons, unsigned runNumber,
                                   const Trig2Lasym trig2L,
-                                  const flat_set<Trig1L>& trigs1L,
+                                  const std::flat_set<Trig1L>& trigs1L,
                                   Efficiencies& globalEfficiencies)
     -> std::enable_if_t<Trig2Lasym::is2Lasym() && Trig1L::is1L() &&
                             Trig1L::object() == Trig2Lasym::object(),
@@ -695,7 +695,7 @@ auto Calculator::globalEfficiency(const LeptonList& leptons, unsigned runNumber,
   for (auto& lepton : leptons) {
     if (trig2L.irrelevantFor(lepton))
       continue;
-    flat_set<std::size_t> validLegs;
+    std::flat_set<std::size_t> validLegs;
     for (std::size_t leg : trig2L.legs)
       if (aboveThreshold(lepton, leg))
         validLegs.insert(leg);
@@ -750,7 +750,7 @@ template <typename Trig2Lsym, typename Trig1L>
 auto Calculator::globalEfficiency(const LeptonList& leptons, unsigned runNumber,
                                   const Trig2Lsym trig2L1,
                                   const Trig2Lsym trig2L2,
-                                  const flat_set<Trig1L>& trigs1L,
+                                  const std::flat_set<Trig1L>& trigs1L,
                                   Efficiencies& globalEfficiencies)
     -> std::enable_if_t<Trig2Lsym::is2Lsym() && Trig1L::is1L() &&
                             Trig1L::object() == Trig2Lsym::object(),
@@ -771,7 +771,7 @@ auto Calculator::globalEfficiency(const LeptonList& leptons, unsigned runNumber,
   for (auto& lepton : leptons) {
     if (trig2L1.irrelevantFor(lepton))
       continue;
-    flat_set<std::size_t> validLegs;
+    std::flat_set<std::size_t> validLegs;
     std::map<std::size_t, Efficiencies> efficiencies{{0, 0.}};
     std::size_t loosest1lepLeg =
         getLoosestLegAboveThreshold(lepton, trigs1L, success);
@@ -830,7 +830,7 @@ template <typename Trig2Lasym, typename Trig2Lsym, typename Trig1L>
 auto Calculator::globalEfficiency(const LeptonList& leptons, unsigned runNumber,
                                   const Trig2Lasym trig2Lasym,
                                   const Trig2Lsym trig2Lsym,
-                                  const flat_set<Trig1L>& trigs1L,
+                                  const std::flat_set<Trig1L>& trigs1L,
                                   Efficiencies& globalEfficiencies)
     -> std::enable_if_t<Trig2Lasym::is2Lasym() && Trig2Lsym::is2Lsym() &&
                             Trig2Lsym::object() == Trig2Lasym::object() &&
@@ -863,7 +863,7 @@ auto Calculator::globalEfficiency(const LeptonList& leptons, unsigned runNumber,
   for (auto& lepton : leptons) {
     if (trig2Lasym.irrelevantFor(lepton))
       continue;
-    flat_set<std::size_t> validLegs;
+    std::flat_set<std::size_t> validLegs;
     std::map<std::size_t, Efficiencies> efficiencies{{0, 0.}};
     std::size_t loosest1lepLeg =
         getLoosestLegAboveThreshold(lepton, trigs1L, success);
@@ -1195,8 +1195,8 @@ auto Calculator::globalEfficiency(const LeptonList& leptons, unsigned runNumber,
                                   const Trig2L_obj1 trig2L_obj1,
                                   const Trig2L_obj2 trig2L_obj2,
                                   const Trig2Lmix trig2Lmix,
-                                  const flat_set<Trig1L_obj1>& trigs1L_obj1,
-                                  const flat_set<Trig1L_obj2>& trigs1L_obj2,
+                                  const std::flat_set<Trig1L_obj1>& trigs1L_obj1,
+                                  const std::flat_set<Trig1L_obj2>& trigs1L_obj2,
                                   Efficiencies& globalEfficiencies)
     -> std::enable_if_t<Trig2Lmix::is2Lmix() && Trig2L_obj1::is2Lnomix() &&
                             Trig2L_obj1::object() == Trig2Lmix::object1() &&
@@ -1263,8 +1263,8 @@ auto Calculator::globalEfficiency(
     const Trig2L_obj1 trig2L_obj1, const Trig2Lsym_obj1 trig2Lsym_obj1,
     const Trig2L_obj2 trig2L_obj2, const Trig2Lsym_obj2 trig2Lsym_obj2,
     const Trig2Lmix trig2Lmix1, const Trig2Lmix trig2Lmix2,
-    const flat_set<Trig1L_obj1>& trigs1L_obj1,
-    const flat_set<Trig1L_obj2>& trigs1L_obj2, Efficiencies& globalEfficiencies)
+    const std::flat_set<Trig1L_obj1>& trigs1L_obj1,
+    const std::flat_set<Trig1L_obj2>& trigs1L_obj2, Efficiencies& globalEfficiencies)
     -> std::enable_if_t<Trig2Lmix::is2Lmix() && Trig2L_obj1::is2Lnomix() &&
                             Trig2L_obj1::object() == Trig2Lmix::object1() &&
                             Trig2L_obj2::is2Lnomix() &&
@@ -1457,7 +1457,7 @@ bool Calculator::globalEfficiency_Factorized3(
 
 bool Calculator::fillListOfLegsFor(const Lepton& lepton,
                                    const std::vector<TrigDef>& triggers,
-                                   flat_set<std::size_t>& validLegs) const {
+                                   std::flat_set<std::size_t>& validLegs) const {
   validLegs.clear();
   for (auto& trig : triggers) {
     TriggerProperties tp(trig);
@@ -1475,7 +1475,7 @@ bool Calculator::fillListOfLegsFor(const Lepton& lepton,
 
 bool Calculator::canTriggerBeFired(
     const TrigDef& trig,
-    const std::vector<flat_set<std::size_t>>& firedLegs) const {
+    const std::vector<std::flat_set<std::size_t>>& firedLegs) const {
   const int nLegs = static_cast<int>(std::count_if(
       trig.leg.begin(), trig.leg.end(), [](auto x) { return x != 0ul; }));
   const int sameLegs = static_cast<int>(
@@ -1535,7 +1535,7 @@ bool Calculator::globalEfficiency_Toys(const LeptonList& leptons,
   std::map<const Lepton*, std::vector<std::pair<std::size_t, Efficiencies>>>
       leptonEfficiencies;
   for (auto& lepton : leptons) {
-    flat_set<std::size_t> validLegs;
+    std::flat_set<std::size_t> validLegs;
     if (!fillListOfLegsFor(lepton, triggers, validLegs))
       return false;
     auto& efficiencies = leptonEfficiencies[&lepton];
@@ -1561,7 +1561,7 @@ bool Calculator::globalEfficiency_Toys(const LeptonList& leptons,
     seed = m_parent->m_seed++;
   std::mt19937_64 randomEngine(seed);
   std::uniform_real_distribution<double> uniformPdf(0., 1.);
-  std::vector<flat_set<std::size_t>> firedLegs(leptonEfficiencies.size());
+  std::vector<std::flat_set<std::size_t>> firedLegs(leptonEfficiencies.size());
   unsigned long nPassed[2] = {0, 0};
   for (unsigned long toy = 0; toy < m_parent->m_numberOfToys; ++toy) {
     for (int step = 0; step < 2; ++step)  /// 0 = data, 1 = MC
@@ -1616,15 +1616,15 @@ struct TrigGlobEffCorr::Calculator::Helper::BindPackedParam {
 };
 
 template <typename T>
-struct TrigGlobEffCorr::Calculator::Helper::BindPackedParam<flat_set<T>> {
+struct TrigGlobEffCorr::Calculator::Helper::BindPackedParam<std::flat_set<T>> {
   using TrigType = T;
-  using ArgType = const flat_set<T>&;
+  using ArgType = const std::flat_set<T>&;
   static constexpr bool multiple() { return true; }
   static constexpr bool optional() { return false; }
-  static void add(flat_set<T>& arg, ImportData::TrigDef& def) {
+  static void add(std::flat_set<T>& arg, ImportData::TrigDef& def) {
     arg.emplace(def);
   }
-  static constexpr bool valid(const flat_set<T>& arg) { return arg.size(); }
+  static constexpr bool valid(const std::flat_set<T>& arg) { return arg.size(); }
 };
 
 template <typename T>
@@ -1684,7 +1684,7 @@ bool Calculator::Helper::findAndBindFunction()  /// for combinations with a
                                                 /// single flavour present
 {
   using A = TriggerClass<object_flag>;
-  using A1L = flat_set<typename A::T_1>;
+  using A1L = std::flat_set<typename A::T_1>;
   using A_2sym = typename A::T_2sym;
   using A_2asym = typename A::T_2asym;
   if (m_n2L + m_n3L + m_n4L == 0) {
@@ -1714,8 +1714,8 @@ bool Calculator::Helper::findAndBindFunction()  /// for combinations with two
   using AB = TriggerClass<object_flag1, object_flag2>;
   using A_1 = typename A::T_1;
   using B_1 = typename B::T_1;
-  using OA1L = Optional<flat_set<A_1>>;
-  using OB1L = Optional<flat_set<B_1>>;
+  using OA1L = Optional<std::flat_set<A_1>>;
+  using OB1L = Optional<std::flat_set<B_1>>;
   using A_2sym = typename A::T_2sym;
   using B_2sym = typename B::T_2sym;
   using A_2asym = typename A::T_2asym;
@@ -1726,12 +1726,12 @@ bool Calculator::Helper::findAndBindFunction()  /// for combinations with two
   /// combination.
   if (m_n1L > 0 && m_n2L + m_n3L + m_n4L == 0) {
     return bindFunction<A_1, B_1>() ||
-           bindFunction<flat_set<A_1>, flat_set<B_1>>();
+           bindFunction<std::flat_set<A_1>, std::flat_set<B_1>>();
   } else if (m_n2L == 1 &&
              m_n3L + m_n4L ==
                  0) {  // one dilepton trigger (+ single-lepton triggers)
     return bindFunction<AB_1_1>() ||
-           bindFunction<AB_1_1, flat_set<A_1>, flat_set<B_1>>();
+           bindFunction<AB_1_1, std::flat_set<A_1>, std::flat_set<B_1>>();
   } else if (m_n2L >= 2 && m_n2L <= 6 &&
              m_n3L + m_n4L ==
                  0) {  // several dilepton triggers (+ single-lepton triggers)
