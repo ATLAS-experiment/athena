@@ -57,9 +57,6 @@ find_package( Gaudi )
 
 # External(s) needed at build and runtime:
 find_package( Frontier_Client )
-find_package( PNG )
-find_package( VDT )
-find_package( TIFF )
 find_package( libffi )
 find_package( gl2ps )
 find_package( autopep8 )
