@@ -80,7 +80,9 @@ void correctedPi0Vectors(const xAOD::TauJet* xTau, std::vector<TLorentzVector>& 
 /** return TauJet match type*/
 TruthMatchedParticleType getTruthParticleType(const xAOD::TauJet& xTau);
 /** return DiTauJet match type*/
-TruthMatchedParticleType getTruthParticleType(const xAOD::DiTauJet& xDiTau); 
+TruthMatchedParticleType getTruthParticleType(const xAOD::DiTauJet& xDiTau);
+/** return truth origin class of the tau: -1 no truth match, 0 no hadron ancestor, 1 b-hadron, 2 c-hadron, 3 light hadron */
+int tauOrigin(const xAOD::TauJet &xTau);
 /** combine the standard taujets container with the muon removal container **/
 std::vector<const xAOD::TauJet*> combineTauJetsWithMuonRM(const xAOD::TauJetContainer* taus_std, const xAOD::TauJetContainer* taus_muonRM);
 }

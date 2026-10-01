@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -48,6 +48,9 @@ namespace DerivationFramework {
 
       SG::WriteDecorHandleKey<xAOD::TauJetContainer> m_truthParticleLinkKey
          {this, "TruthParticleLinkKey", m_tauKey, "truthParticleLink", "WriteDecorHandleKey for truthParticleLink decoration"};
+
+      SG::WriteDecorHandleKey<xAOD::TauJetContainer> m_tauOriginKey
+         {this, "TauOriginKey", m_tauKey, "tauOriginDevOnly", "WriteDecorHandleKey for tauOriginDev decoration"};
 
   };
 }
