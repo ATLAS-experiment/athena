@@ -3,7 +3,7 @@
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigSequence import groupBlocks
-from AthenaCommon.SystemOfUnits	import GeV
+from AthenaCommon.SystemOfUnits import GeV
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 from TrackingAnalysisAlgorithms.TrackingAnalysisConfig import InDetTrackCalibrationConfig
 from AthenaConfiguration.Enums import LHCPeriod
@@ -244,8 +244,8 @@ class MuonWorkingPointSelectionConfig (ConfigBlock) :
             info=r"maximum $\Delta z_0\sin\theta$ (in mm) used for the track selection.")
         self.addOption ('quality', None, type=str,
             info="the ID WP to use. Supported ID WPs: `Tight`, `Medium`, "
-            "`Loose`, `LowPt`, `HighPt`.",
-            meta={'choices':(['Tight','Medium','Loose','LowPt','HighPt'],1)})
+            "`Loose`, `VeryLoose`, `LowPt`, `HighPt`.",
+            meta={'choices':(['Tight','Medium','Loose','VeryLoose','LowPt','HighPt'],1)})
         self.addOption ('isolation', None, type=str,
             info="the isolation WP to use. Supported isolation WPs: "
             "`PflowLoose_VarRad`, `PflowTight_VarRad`, `Loose_VarRad`, "
@@ -272,22 +272,25 @@ class MuonWorkingPointSelectionConfig (ConfigBlock) :
         log = logging.getLogger('MuonWorkingPointSelectionConfig')
 
         from xAODMuon.xAODMuonEnums import xAODMuonEnums
-        if self.quality == 'Tight' :
-            quality = xAODMuonEnums.Quality.Tight
-        elif self.quality == 'Medium' :
-            quality = xAODMuonEnums.Quality.Medium
-        elif self.quality == 'Loose' :
-            quality = xAODMuonEnums.Quality.Loose
-        elif self.quality == 'VeryLoose' :
-            quality = xAODMuonEnums.Quality.VeryLoose
-        elif self.quality == 'HighPt' :
-            quality = 4
-        elif self.quality == 'LowPt' :
-            quality = 5
-        else :
-            raise ValueError ("invalid muon quality: \"" + self.quality +
+        qualityMap = {
+            'Tight' : xAODMuonEnums.Quality.Tight,
+            'Medium' : xAODMuonEnums.Quality.Medium,
+            'Loose' : xAODMuonEnums.Quality.Loose,
+            'VeryLoose' : xAODMuonEnums.Quality.VeryLoose,
+            # HighPt and LowPt are CP::MuonSelectionTool-specific MuQuality
+            # values beyond the xAOD::Muon::Quality enum
+            'HighPt' : 4,
+            'LowPt' : 5,
+        }
+        if self.quality not in qualityMap :
+            raise ValueError ("invalid muon quality: \"" + str(self.quality) +
                               "\", allowed values are Tight, Medium, Loose, " +
                               "VeryLoose, HighPt, LowPt")
+        quality = qualityMap[self.quality]
+
+        if self.isolation is None :
+            raise ValueError ("muon isolation working point not set, "
+                              "use e.g. \"NonIso\" to disable the isolation selection")
 
         # The setup below is inappropriate for Run 1
         if config.geometry() is LHCPeriod.Run1:
@@ -418,97 +421,56 @@ class MuonWorkingPointEfficiencyConfig (ConfigBlock) :
             postfix = '_' + postfix
 
         sfList = []
-        # Set up the reco/ID efficiency scale factor calculation algorithm:
         if config.dataType() is not DataType.Data and not self.noEffSF:
-            alg = config.createAlgorithm( 'CP::MuonEfficiencyScaleFactorAlg',
-                                   'MuonEfficiencyScaleFactorAlgReco' )
-            config.addPrivateTool( 'efficiencyScaleFactorTool',
-                            'CP::MuonEfficiencyScaleFactors' )
-            config.setExtraInputs ({('xAOD::EventInfo', 'EventInfo.RandomRunNumber')})
-            alg.scaleFactorDecoration = 'muon_reco_effSF' + postfix + "_%SYS%"
-            alg.outOfValidity = 2 #silent
-            alg.outOfValidityDeco = 'muon_reco_bad_eff' + postfix
-            alg.efficiencyScaleFactorTool.WorkingPoint = self.quality
+            if self.isolation is None :
+                raise ValueError ("muon isolation working point not set, "
+                                  "use e.g. \"NonIso\" to disable the isolation selection")
             # LRT muons: MCP supports only Medium WP. Enable per-muon isLRT flag and use dedicated LRT reco-sf release.
             if self.useLRT and self.quality != 'Medium':
-              raise ValueError ("useLRT is only supported with the Medium quality working point, not '%s'" % self.quality)
-            if config.geometry() >= LHCPeriod.Run3:
-                alg.efficiencyScaleFactorTool.CalibrationRelease = '250418_Preliminary_r24run3' if self.useLRT else '251211_Preliminary_r24run3'
-            else:
-                alg.efficiencyScaleFactorTool.CalibrationRelease = '240620_LRT_r22run2' if self.useLRT else '230213_Preliminary_r22run2_loosefix'
-            alg.efficiencyScaleFactorTool.BreakDownSystematics = self.systematicBreakdown
-            alg.muons = config.readName (self.containerName)
-            alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-            if self.saveDetailedSF:
-                config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
-                                     'reco_effSF' + postfix)
-            sfList += [alg.scaleFactorDecoration]
+                raise ValueError ("useLRT is only supported with the Medium quality working point, not '%s'" % self.quality)
 
-        # Set up the HighPt-specific BadMuonVeto efficiency scale factor calculation algorithm:
-        if config.dataType() is not DataType.Data and self.quality == 'HighPt' and not self.noEffSF:
-            alg = config.createAlgorithm( 'CP::MuonEfficiencyScaleFactorAlg',
-                                   'MuonEfficiencyScaleFactorAlgBMVHighPt' )
-            config.addPrivateTool( 'efficiencyScaleFactorTool',
-                            'CP::MuonEfficiencyScaleFactors' )
-            alg.scaleFactorDecoration = 'muon_BadMuonVeto_effSF' + postfix + "_%SYS%"
-            alg.outOfValidity = 2 #silent
-            alg.outOfValidityDeco = 'muon_BadMuonVeto_bad_eff' + postfix
-            alg.efficiencyScaleFactorTool.WorkingPoint = 'BadMuonVeto_HighPt'
-            if config.geometry() >= LHCPeriod.Run3:
-                alg.efficiencyScaleFactorTool.CalibrationRelease = '220817_Preliminary_r22run3' # not available as part of '230123_Preliminary_r22run3'!
+            isRun3 = config.geometry() >= LHCPeriod.Run3
+            if isRun3:
+                recoRelease = '250418_Preliminary_r24run3' if self.useLRT else '251211_Preliminary_r24run3'
             else:
-                 alg.efficiencyScaleFactorTool.CalibrationRelease = '230213_Preliminary_r22run2_loosefix'
-            alg.efficiencyScaleFactorTool.BreakDownSystematics = self.systematicBreakdown
-            alg.muons = config.readName (self.containerName)
-            alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-            if self.saveDetailedSF:
-                config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
-                                     'BadMuonVeto_effSF' + postfix)
-            sfList += [alg.scaleFactorDecoration]
+                recoRelease = '240620_LRT_r22run2' if self.useLRT else '230213_Preliminary_r22run2_loosefix'
+            defaultRelease = '251211_Preliminary_r24run3' if isRun3 else '230213_Preliminary_r22run2_loosefix'
 
-        # Set up the isolation efficiency scale factor calculation algorithm:
-        if config.dataType() is not DataType.Data and self.isolation != 'NonIso' and not self.noEffSF:
-            alg = config.createAlgorithm( 'CP::MuonEfficiencyScaleFactorAlg',
-                                   'MuonEfficiencyScaleFactorAlgIsol' )
-            config.addPrivateTool( 'efficiencyScaleFactorTool',
-                            'CP::MuonEfficiencyScaleFactors' )
-            alg.scaleFactorDecoration = 'muon_isol_effSF' + postfix + "_%SYS%"
-            alg.outOfValidity = 2 #silent
-            alg.outOfValidityDeco = 'muon_isol_bad_eff' + postfix
-            alg.efficiencyScaleFactorTool.WorkingPoint = self.isolation + 'Iso'
-            if config.geometry() >= LHCPeriod.Run3:
-                alg.efficiencyScaleFactorTool.CalibrationRelease = '251211_Preliminary_r24run3'
-            else:
-                alg.efficiencyScaleFactorTool.CalibrationRelease = '230213_Preliminary_r22run2_loosefix'
-            alg.efficiencyScaleFactorTool.BreakDownSystematics = self.systematicBreakdown
-            alg.muons = config.readName (self.containerName)
-            alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-            if self.saveDetailedSF:
-                config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
-                                     'isol_effSF' + postfix)
-            sfList += [alg.scaleFactorDecoration]
+            # (enabled, algorithm name suffix, working point, decoration prefix, calibration release)
+            sfConfigs = [
+                # reco/ID efficiency scale factor
+                (True, 'Reco', self.quality, 'reco', recoRelease),
+                # HighPt-specific BadMuonVeto efficiency scale factor
+                (self.quality == 'HighPt', 'BMVHighPt', 'BadMuonVeto_HighPt', 'BadMuonVeto',
+                 # not available as part of '230123_Preliminary_r22run3'!
+                 '220817_Preliminary_r22run3' if isRun3 else '230213_Preliminary_r22run2_loosefix'),
+                # isolation efficiency scale factor
+                (self.isolation != 'NonIso', 'Isol', self.isolation + 'Iso', 'isol', defaultRelease),
+                # TTVA scale factor
+                (self.trackSelection, 'TTVA', 'TTVA', 'TTVA', defaultRelease),
+            ]
 
-        # Set up the TTVA scale factor calculation algorithm:
-        if config.dataType() is not DataType.Data and self.trackSelection and not self.noEffSF:
-            alg = config.createAlgorithm( 'CP::MuonEfficiencyScaleFactorAlg',
-                                   'MuonEfficiencyScaleFactorAlgTTVA' )
-            config.addPrivateTool( 'efficiencyScaleFactorTool',
-                            'CP::MuonEfficiencyScaleFactors' )
-            alg.scaleFactorDecoration = 'muon_TTVA_effSF' + postfix + "_%SYS%"
-            alg.outOfValidity = 2 #silent
-            alg.outOfValidityDeco = 'muon_TTVA_bad_eff' + postfix
-            alg.efficiencyScaleFactorTool.WorkingPoint = 'TTVA'
-            if config.geometry() >= LHCPeriod.Run3:
-                alg.efficiencyScaleFactorTool.CalibrationRelease = '251211_Preliminary_r24run3'
-            else:
-                alg.efficiencyScaleFactorTool.CalibrationRelease = '230213_Preliminary_r22run2_loosefix'
-            alg.efficiencyScaleFactorTool.BreakDownSystematics = self.systematicBreakdown
-            alg.muons = config.readName (self.containerName)
-            alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-            if self.saveDetailedSF:
-                config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
-                                     'TTVA_effSF' + postfix)
-            sfList += [alg.scaleFactorDecoration]
+            for enabled, algSuffix, workingPoint, prefix, release in sfConfigs:
+                if not enabled:
+                    continue
+                alg = config.createAlgorithm( 'CP::MuonEfficiencyScaleFactorAlg',
+                                              'MuonEfficiencyScaleFactorAlg' + algSuffix )
+                config.addPrivateTool( 'efficiencyScaleFactorTool',
+                                       'CP::MuonEfficiencyScaleFactors' )
+                config.setExtraInputs ({('xAOD::EventInfo', 'EventInfo.RandomRunNumber')})
+                sfDecoration = 'muon_' + prefix + '_effSF' + postfix + "_%SYS%"
+                alg.scaleFactorDecoration = sfDecoration
+                alg.outOfValidity = 2 #silent
+                alg.outOfValidityDeco = 'muon_' + prefix + '_bad_eff' + postfix
+                alg.efficiencyScaleFactorTool.WorkingPoint = workingPoint
+                alg.efficiencyScaleFactorTool.CalibrationRelease = release
+                alg.efficiencyScaleFactorTool.BreakDownSystematics = self.systematicBreakdown
+                alg.muons = config.readName (self.containerName)
+                alg.preselection = config.getPreselection (self.containerName, self.selectionName)
+                if self.saveDetailedSF:
+                    config.addOutputVar (self.containerName, sfDecoration,
+                                         prefix + '_effSF' + postfix)
+                sfList += [sfDecoration]
 
         if config.dataType() is not DataType.Data and not self.noEffSF and self.saveCombinedSF:
             alg = config.createAlgorithm( 'CP::AsgObjectScaleFactorAlg',
@@ -602,7 +564,7 @@ class MuonTriggerAnalysisSFBlock (ConfigBlock):
                     chain_out = chain_noHLT if self.removeHLTPrefix else chain
                     legs = triggerDict[chain_noHLT]
                     if not legs:
-                        if chain_noHLT.startswith('mu') and chain_noHLT[2].isdigit:
+                        if chain_noHLT.startswith('mu') and chain_noHLT[2].isdigit():
                             # Need to support HLT_mu26_ivarmedium_OR_HLT_mu50
                             triggerConfigs[chain_out] = chain
                             if chain_out in triggerConfigYears.keys():
@@ -611,7 +573,7 @@ class MuonTriggerAnalysisSFBlock (ConfigBlock):
                                 triggerConfigYears[chain_out] = [year]
                     else:
                         for leg in legs:
-                            if leg.startswith('mu') and leg[2].isdigit:
+                            if leg.startswith('mu') and leg[2].isdigit():
                                 # Need to support HLT_mu14_ivarloose
                                 leg_out = leg if self.removeHLTPrefix else f"HLT_{leg}"
                                 triggerConfigs[leg_out] = f"HLT_{leg}"
@@ -635,6 +597,7 @@ class MuonTriggerAnalysisSFBlock (ConfigBlock):
             for trig_short, trig in triggerConfigs.items():
                 alg = config.createAlgorithm('CP::MuonTriggerEfficiencyScaleFactorAlg',
                                              'MuonTrigEfficiencyCorrectionsAlg_' + trig_short)
+                config.setExtraInputs ({('xAOD::EventInfo', 'EventInfo.RandomRunNumber')})
                 alg.efficiencyScaleFactorTool = f"{sfTool.getType()}/{sfTool.getName()}"
 
                 # Avoid warnings for missing triggers

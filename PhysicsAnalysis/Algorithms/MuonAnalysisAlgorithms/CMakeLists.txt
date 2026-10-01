@@ -8,14 +8,14 @@ atlas_add_library( MuonAnalysisAlgorithmsLib
    PUBLIC_HEADERS MuonAnalysisAlgorithms
    LINK_LIBRARIES xAODEventInfo xAODMuon SelectionHelpersLib
    SystematicsHandlesLib MuonAnalysisInterfacesLib IsolationSelectionLib
-   AnaAlgorithmLib
-   PRIVATE_LINK_LIBRARIES RootCoreUtils )
+   AnaAlgorithmLib AsgDataHandlesLib AthContainers
+   PRIVATE_LINK_LIBRARIES RootCoreUtils xAODBase PATCoreLib )
 
 atlas_add_component( MuonAnalysisAlgorithms
    src/*.h src/*.cxx src/components/*.cxx
    LINK_LIBRARIES MuonAnalysisAlgorithmsLib )
 
-atlas_install_python_modules( python/*.py )
+atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_data( data/* )
 
 if (NOT COLUMNAR_ANALYSIS)
