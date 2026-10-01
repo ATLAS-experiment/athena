@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -10,12 +10,6 @@
 //
 #include "AsgAnalysisAlgorithms/PileupReweightingAlg.h"
 #include "AsgDataHandles/WriteDecorHandle.h"
-#include "AthContainers/ConstAccessor.h"
-
-/// Anonymous namespace for helpers
-namespace {
-  const static SG::ConstAccessor<unsigned int> accRRN("RandomRunNumber");
-}
 
 //
 // method implementations
@@ -40,6 +34,8 @@ namespace CP
     ANA_CHECK (m_outOfValidity.initialize());
     ANA_CHECK (m_baseEventInfoKey.initialize());
     ANA_CHECK (m_decRRNKey.initialize());
+    const std::string& rrnKey = m_decRRNKey.key();
+    m_accRRN.emplace (rrnKey.substr (rrnKey.rfind ('.') + 1));
     ANA_CHECK (m_decRLBNKey.initialize());
     ANA_CHECK (m_decHashKey.initialize());
     return StatusCode::SUCCESS;
@@ -91,7 +87,7 @@ namespace CP
     SG::WriteDecorHandle<xAOD::EventInfo, unsigned int> decRRN (m_decRRNKey, ctx);
     unsigned int rrn = 0;
     if(decRRN.isAvailable())
-      rrn = accRRN(*evtInfo);
+      rrn = (*m_accRRN)(*evtInfo);
     else{
       rrn = m_pileupReweightingTool->getRandomRunNumber(*evtInfo, true);
       // If it returns 0, try again without the mu dependence
@@ -110,19 +106,18 @@ namespace CP
       decHash(*evtInfo) = m_pileupReweightingTool->getPRWHash(*evtInfo);
 
     // Take care of the weight (which is the only thing depending on systematics)
-    for (const auto& sys : m_systematicsList.systematicsVector())
-    {
-      const xAOD::EventInfo* systEvtInfo = nullptr;
-      ANA_CHECK( m_eventInfoHandle.retrieve(systEvtInfo, sys, ctx));
-      ANA_CHECK (m_pileupReweightingTool->applySystematicVariation (sys));
-      if (m_weightDecorator) {
+    if (m_weightDecorator) {
+      for (const auto& sys : m_systematicsList.systematicsVector())
+      {
+        const xAOD::EventInfo* systEvtInfo = nullptr;
+        ANA_CHECK( m_eventInfoHandle.retrieve(systEvtInfo, sys, ctx));
+        ANA_CHECK (m_pileupReweightingTool->applySystematicVariation (sys));
         // calculate and set the weight. The 'true' argument makes the tool treat unrepresented data
         // correctly if the corresponding property is set
         m_weightDecorator.set(*systEvtInfo, m_pileupReweightingTool->getCombinedWeight(*evtInfo, true), sys);
         m_weightDecorator.lock(*systEvtInfo, sys);
       }
-
-    };
+    }
     return StatusCode::SUCCESS;
   }
 }

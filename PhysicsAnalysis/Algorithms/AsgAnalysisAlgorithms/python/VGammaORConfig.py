@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigAccumulator import (
@@ -8,7 +8,7 @@ import warnings
 class VGammaORBlock(ConfigBlock):
 
     def __init__(self):
-        super(VGammaORBlock, self).__init__()
+        super().__init__()
         self.addOption("dR_lepton_photon_cuts", [0.0, 0.05, 0.075, 0.1, 0.125, 0.15, 0.2], type=list,
                        info=r"list of cuts on $\Delta R$ between the leptons and the photon.")
         self.addOption("photon_pT_cuts", [10e3], type=list,
@@ -43,11 +43,9 @@ class VGammaORBlock(ConfigBlock):
                 filename='', lineno=0)
             return
 
-        alg = config.createAlgorithm('CP::VGammaORAlg', 'VGammaORAlg')
-        alg.affectingSystematicsFilter = '.*'
+        alg = config.createAlgorithm('CP::VGammaORAlg', 'VGammaORAlg', reentrant=True)
         alg.noFilter = self.noFilter
         alg.FilterDescription = 'events passing V/VGamma overlap removal'
-        alg.eventDecisionOutputDecoration = 'ignore_vgammaor_%SYS%'
 
         if config.dsid() in self.keepInOverlap:
             alg.keepOverlap = True
@@ -60,4 +58,4 @@ class VGammaORBlock(ConfigBlock):
 
         if self.noFilter:
             # if we don't apply the filter, we still want to study the output of the tool!
-            config.addOutputVar('EventInfo', 'in_vgamma_overlap_%SYS%', 'in_vgamma_overlap', noSys=True)
+            config.addOutputVar('EventInfo', 'in_vgamma_overlap', 'in_vgamma_overlap', noSys=True)

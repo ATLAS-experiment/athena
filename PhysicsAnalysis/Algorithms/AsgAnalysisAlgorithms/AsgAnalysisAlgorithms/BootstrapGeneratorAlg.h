@@ -7,13 +7,13 @@
 #ifndef ASG_ANALYSIS_ALGORITHMS__BOOTSTRAP_GENERATOR_ALG_H
 #define ASG_ANALYSIS_ALGORITHMS__BOOTSTRAP_GENERATOR_ALG_H
 
-#include <AnaAlgorithm/AnaAlgorithm.h>
-#include <SystematicsHandles/SysListHandle.h>
-#include <SystematicsHandles/SysReadHandle.h>
-#include <SystematicsHandles/SysWriteDecorHandle.h>
+#include <AnaAlgorithm/AnaReentrantAlgorithm.h>
+#include <AsgDataHandles/ReadHandleKey.h>
+#include <AsgDataHandles/WriteDecorHandleKey.h>
 #include <xAODEventInfo/EventInfo.h>
 #include <AsgTools/PropertyWrapper.h>
 #include <TRandomGen.h>
+#include <vector>
 
 namespace CP
 {
@@ -52,26 +52,21 @@ namespace CP
 
 
   /// \brief an algorithm to compute per-event bootstrap replica weights
-  class BootstrapGeneratorAlg final : public EL::AnaAlgorithm
+  class BootstrapGeneratorAlg final : public EL::AnaReentrantAlgorithm
   {
     /// \brief the standard constructor
   public:
-    BootstrapGeneratorAlg(const std::string &name,
-                          ISvcLocator *pSvcLocator);
+    using EL::AnaReentrantAlgorithm::AnaReentrantAlgorithm;
 
   public:
     StatusCode initialize() override;
 
   public:
-    StatusCode execute(const EventContext& ctx) override;
-
-    /// \brief the systematics list we run
-  private:
-    SysListHandle m_systematicsList{this};
+    StatusCode execute(const EventContext& ctx) const override;
 
     /// \brief the EventInfo container
   private:
-    SysReadHandle<xAOD::EventInfo> m_eventInfoHandle{
+    SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{
       this, "eventInfo", "EventInfo", "the EventInfo container"};
 
     /// \brief the number of bootstrap replicas
@@ -82,18 +77,10 @@ namespace CP
   private:
     Gaudi::Property<bool> m_data {this, "isData", false, "whether we are running on data"};
 
-    /// \brief the bootstrap generator instance
-  private:
-    BootstrapGenerator m_bootstrap;
-
-    /// \brief the vector of bootstrap replica weights
-  private:
-    std::vector<std::uint8_t> m_weights;
-
     /// \brief the output decoration
   private:
-    SysWriteDecorHandle<std::vector<std::uint8_t>> m_decoration{
-      this, "decorationName", "bootstrapWeights_%SYS%", "decoration name for the vector of bootstrapped weights"};
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_decorationKey{
+      this, "decorationName", m_eventInfoKey, "bootstrapWeights", "decoration name for the vector of bootstrapped weights"};
   };
 } // namespace CP
 

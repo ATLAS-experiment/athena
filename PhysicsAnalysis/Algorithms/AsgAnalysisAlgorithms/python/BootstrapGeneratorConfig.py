@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -8,7 +8,7 @@ class BootstrapGeneratorConfig(ConfigBlock):
     '''ConfigBlock for the bootstrap generator'''
 
     def __init__(self):
-        super(BootstrapGeneratorConfig, self).__init__()
+        super().__init__()
         self.addOption ('nReplicas', 1000, type=int,
             info="the number of bootstrap replicas to generate.")
         self.addOption ('decoration', None, type=str,
@@ -22,14 +22,12 @@ class BootstrapGeneratorConfig(ConfigBlock):
 
     def makeAlgs(self, config):
 
-        alg = config.createAlgorithm( 'CP::BootstrapGeneratorAlg', 'BootstrapGenerator')
+        alg = config.createAlgorithm( 'CP::BootstrapGeneratorAlg', 'BootstrapGenerator', reentrant=True)
         alg.nReplicas = self.nReplicas
         alg.isData = config.dataType() is DataType.Data
-        if self.decoration:
-            alg.decorationName = self.decoration
-        else:
-            alg.decorationName = "bootstrapWeights_%SYS%"
+        decorationName = (self.decoration or "bootstrapWeights").replace("_%SYS%", "")
+        alg.decorationName = decorationName
 
-        config.addOutputVar ('EventInfo', alg.decorationName, alg.decorationName.split("_%SYS%")[0], noSys=True)
+        config.addOutputVar ('EventInfo', decorationName, decorationName, noSys=True, auxType='vector_uint8')
 
         return
