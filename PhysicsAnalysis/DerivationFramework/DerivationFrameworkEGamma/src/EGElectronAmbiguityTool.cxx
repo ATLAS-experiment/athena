@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkEGamma/EGElectronAmbiguityTool.h"
@@ -12,9 +12,14 @@
 
 #include "TruthUtils/HepMCHelpers.h"
 
-#include "TMath.h"
+#include <cmath>
+#include <numbers>
 
 namespace {
+
+constexpr double TwoPi = 2 * std::numbers::pi;
+constexpr double PiOver2 = std::numbers::pi/2.;
+
 void
 helix(const xAOD::TrackParticle* trkP,
       const xAOD::Vertex* pvtx,
@@ -22,16 +27,16 @@ helix(const xAOD::TrackParticle* trkP,
 {
   constexpr double PTTOCURVATURE = -0.301;
 
-  he[0] = 1. / tan(trkP->theta());
+  he[0] = 1. / std::tan(trkP->theta());
   he[1] = PTTOCURVATURE * trkP->charge() / trkP->pt();
 
   if (trkP->phi0() > 0.)
     he[4] = trkP->phi0();
   else
-    he[4] = TMath::TwoPi() + trkP->phi0();
+    he[4] = TwoPi + trkP->phi0();
 
-  double c1 = cos(trkP->phi0());
-  double s1 = sin(trkP->phi0());
+  double c1 = std::cos(trkP->phi0());
+  double s1 = std::sin(trkP->phi0());
   he[3] = trkP->d0() + c1 * pvtx->y() - s1 * pvtx->x();
 
   c1 *= he[0];
@@ -177,7 +182,7 @@ EGElectronAmbiguityTool::addBranches(const EventContext& ctx) const
 
       // Close-by
       double dR = eleIDtp->p4().DeltaR(tp->p4());
-      double dz = std::abs(eleIDtp->z0() - tp->z0()) * sin(eleIDtp->theta());
+      double dz = std::abs(eleIDtp->z0() - tp->z0()) * std::sin(eleIDtp->theta());
       if (dR >= 0.3 || dz >= m_dzCut)
         continue;
 
@@ -289,7 +294,7 @@ DerivationFramework::EGElectronAmbiguityTool::decorateSimple(
 
     // Close-by
     double dR = eletrkP->p4().DeltaR(tp->p4());
-    double dz = std::abs(eletrkP->z0() - tp->z0()) * sin(eletrkP->theta());
+    double dz = std::abs(eletrkP->z0() - tp->z0()) * std::sin(eletrkP->theta());
     if (dR >= 0.3 || dz >= m_dzCut)
       continue;
 
@@ -331,21 +336,21 @@ DerivationFramework::EGElectronAmbiguityTool::decorateSimple(
 
     double beta(0.);
     if (helix1[4] < helix2[4])
-      beta = TMath::PiOver2() - helix1[4];
+      beta = PiOver2 - helix1[4];
     else
-      beta = TMath::PiOver2() - helix2[4];
+      beta = PiOver2 - helix2[4];
 
     double phi1(helix1[4] + beta);
-    if (phi1 > TMath::TwoPi())
-      phi1 -= TMath::TwoPi();
+    if (phi1 > TwoPi)
+      phi1 -= TwoPi;
     if (phi1 < 0.)
-      phi1 += TMath::TwoPi();
+      phi1 += TwoPi;
 
     double phi2(helix2[4] + beta);
-    if (phi2 > TMath::TwoPi())
-      phi2 -= TMath::TwoPi();
+    if (phi2 > TwoPi)
+      phi2 -= TwoPi;
     if (phi2 < 0.)
-      phi2 += TMath::TwoPi();
+      phi2 += TwoPi;
 
     /// HelixToCircle Main Track Electron
     double r1 = 1 / (2. * std::abs(helix1[1]));
@@ -354,10 +359,10 @@ DerivationFramework::EGElectronAmbiguityTool::decorateSimple(
     if (helix1[1] < 0.)
       charge1 = -1.;
     double rcenter1(helix1[3] / charge1 + r1);
-    double phicenter1(phi1 + TMath::PiOver2() * charge1);
+    double phicenter1(phi1 + PiOver2 * charge1);
 
-    double x1 = rcenter1 * cos(phicenter1);
-    double y1 = rcenter1 * sin(phicenter1);
+    double x1 = rcenter1 * std::cos(phicenter1);
+    double y1 = rcenter1 * std::sin(phicenter1);
 
     /// HelixToCircle Other Electron Conv Track
     double r2 = 1 / (2. * std::abs(helix2[1]));
@@ -366,36 +371,35 @@ DerivationFramework::EGElectronAmbiguityTool::decorateSimple(
     if (helix2[1] < 0.)
       charge2 = -1.;
     double rcenter2(helix2[3] / charge2 + r2);
-    double phicenter2(phi2 + TMath::PiOver2() * charge2);
+    double phicenter2(phi2 + PiOver2 * charge2);
 
-    double x2 = rcenter2 * cos(phicenter2);
-    double y2 = rcenter2 * sin(phicenter2);
+    double x2 = rcenter2 * std::cos(phicenter2);
+    double y2 = rcenter2 * std::sin(phicenter2);
     //////
 
-    double dx(x1 - x2);
-    if (dx < 1e-9 && dx > 0.)
-      dx = 1e-9;
-    if (dx > -1e-9 && dx < 0.)
-      dx = -1e-9;
+    double dx = x1 - x2;
+    if (std::abs(dx) < 1e-9) {
+      dx = std::copysign(1e-9, dx);
+    }
     double slope((y1 - y2) / dx);
     double b(y1 - slope * x1);
-    double alpha(atan(slope));
-    double d(sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)));
+    double alpha(std::atan(slope));
+    double d(std::sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)));
     // only keeping opposite sign option
     double separation = d - r1 - r2;
     double cpx1, cpx2;
     if (x1 > x2) {
-      cpx1 = x1 - r1 * cos(alpha);
-      cpx2 = x2 + r2 * cos(alpha);
+      cpx1 = x1 - r1 * std::cos(alpha);
+      cpx2 = x2 + r2 * std::cos(alpha);
     } else {
-      cpx1 = x1 + r1 * cos(alpha);
-      cpx2 = x2 - r2 * cos(alpha);
+      cpx1 = x1 + r1 * std::cos(alpha);
+      cpx2 = x2 - r2 * std::cos(alpha);
     }
 
     double temp1 = (cpx1 + cpx2) / 2;
     double temp2 = slope * temp1 + b;
-    double convX = cos(beta) * temp1 + sin(beta) * temp2;
-    double convY = -sin(beta) * temp1 + cos(beta) * temp2;
+    double convX = std::cos(beta) * temp1 + std::sin(beta) * temp2;
+    double convY = -std::sin(beta) * temp1 + std::cos(beta) * temp2;
 
     double dct(helix1[0] - helix2[0]);
 
@@ -404,8 +408,8 @@ DerivationFramework::EGElectronAmbiguityTool::decorateSimple(
       goodConv = true;
       sep = separation;
       pv = std::atan2(convY, convX);
-      rv = sqrt(convX * convX + convY * convY);
-      if (convX * cos(eletrkP->phi()) + convY * sin(eletrkP->phi()) < 0)
+      rv = std::sqrt(convX * convX + convY * convY);
+      if (convX * std::cos(eletrkP->phi()) + convY * std::sin(eletrkP->phi()) < 0)
         rv *= -1.;
     }
   } else {
