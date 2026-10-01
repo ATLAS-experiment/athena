@@ -128,7 +128,7 @@ StatusCode OutputConditionsAlg::finalize() {
       //Try to get Key from proxy:
       objt.proxy = detStore()->proxy(clid);
       if (!objt.proxy) {
-        ATH_MSG_ERROR(std::format("Could not get default proxy for CLID {}, typename {}",clid,objt.type));
+        ATH_MSG_ERROR("Could not get default proxy for CLID {}, typename {}",clid,objt.type);
         return StatusCode::FAILURE;
       }
       objt.key = objt.proxy->name();
@@ -136,7 +136,7 @@ StatusCode OutputConditionsAlg::finalize() {
     else {
       objt.proxy = detStore()->proxy(clid, objt.key);
       if (!objt.proxy) {
-        ATH_MSG_ERROR(std::format("Could not get proxy for CLID {}, typename {}, key {}",clid,objt.type,objt.key));
+        ATH_MSG_ERROR("Could not get proxy for CLID {}, typename {}, key {}",clid,objt.type,objt.key);
         return StatusCode::FAILURE;
       }
 
@@ -158,7 +158,7 @@ StatusCode OutputConditionsAlg::finalize() {
 
   for (unsigned i=1;const obj_t& objt : objs) {
     typeKeys.emplace_back(std::make_pair(objt.type, objt.key));
-    ATH_MSG_INFO(std::format("{}: {}#{}#{}",i++,objt.type,objt.key,objt.folder));
+    ATH_MSG_INFO("{}: {}#{}#{}",i++,objt.type,objt.key,objt.folder);
   }
    
 
@@ -174,7 +174,7 @@ StatusCode OutputConditionsAlg::finalize() {
     ATH_MSG_ERROR("Could not commit output stream");
     return StatusCode::FAILURE;
   }
-  ATH_MSG_INFO("Written " << nObjects << " objects to output stream");
+  ATH_MSG_INFO("Written {} objects to output stream",nObjects);
 
   if (m_par_writeIOV) {
     // ======== COOL writing part (legacy) ===========:
@@ -188,8 +188,8 @@ StatusCode OutputConditionsAlg::finalize() {
       }
       int nreg = 0;
       for (const obj_t& objt : objs) {
-        ATH_MSG_INFO(std::format("Register object {}#{} in IOV database folder {} {}", objt.type, objt.key, objt.folder,
-                                 objt.tag.size() ? "with tag " + objt.tag : "without tagging"));
+        ATH_MSG_INFO("Register object {}#{} in IOV database folder {} {}", objt.type, objt.key, objt.folder,
+                                 objt.tag.size() ? "with tag " + objt.tag : "without tagging");
         if (m_par_timestamp) {
           sc = p_regsvc->registerIOV(objt.type, objt.key, objt.folder, objt.tag, timeToNano(m_par_time1), timeToNano(m_par_time2));
         } else {
@@ -241,7 +241,7 @@ StatusCode OutputConditionsAlg::finalize() {
         const CLID clid = objt.proxy->clID();
 
         //ATH_MSG_INFO("Working on object clid " << clid << ", " << objt.folder << " " << objt.type << " " << objt.key);
-        ATH_MSG_INFO(std::format("Working on object clid {}, type {}, folder {}",clid, objt.type, objt.folder));
+        ATH_MSG_INFO("Working on object clid {}, type {}, folder {}",clid, objt.type, objt.folder);
         // First, deal with teh folder description:
         std::string description;
         if (clid == 40774348 || clid == 1238547719) {
@@ -251,7 +251,7 @@ StatusCode OutputConditionsAlg::finalize() {
           // Pool referenced storage, need to build the node description by ourselves
           IOpaqueAddress* addr = objt.proxy->address();
           if (!addr) {
-            ATH_MSG_ERROR(std::format("No IOpaqueAddress from Type/Key [{}/{}]",objt.type,objt.key));
+            ATH_MSG_ERROR("No IOpaqueAddress from Type/Key [{}/{}]",objt.type,objt.key);
             return StatusCode::FAILURE;
           }
           std::string saddr;
@@ -260,10 +260,10 @@ StatusCode OutputConditionsAlg::finalize() {
           std::string address_header;
 
           if (splitAddress(saddr, address_header, address_data).isFailure()) {
-            ATH_MSG_ERROR(std::format("Could not split address: {}\n  hdr:  {}\n  data: {}",saddr,address_header,address_data));
+            ATH_MSG_ERROR("Could not split address: {}\n  hdr:  {}\n  data: {}",saddr,address_header,address_data);
             return StatusCode::FAILURE;
           }
-          ATH_MSG_DEBUG(std::format("split address: {}\n  hdr:  {}\n  data: {}",saddr,address_header,address_data));
+          ATH_MSG_DEBUG("split address: {}\n  hdr:  {}\n  data: {}",saddr,address_header,address_data);
           // We store extra information in the folder description.
           // This info is:
           //   typeName       - required information
