@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 // Local include(s).
 #include "xAODTruthCnv/TruthParticleFixerAlg.h"
@@ -96,7 +96,8 @@ StatusCode TruthParticleFixerAlg::execute(const EventContext& ctx) const {
       for (auto& link : links) {
         link.resetWithKeyAndIndex(
             Details::removePrefix(link.dataID(), m_linkPrefixToRemove.value()),
-            link.index());
+            link.index(),
+            ctx);
       }
     }
 
@@ -118,7 +119,8 @@ StatusCode TruthParticleFixerAlg::execute(const EventContext& ctx) const {
       for (auto& link : links) {
         link.resetWithKeyAndIndex(
             Details::removePrefix(link.dataID(), m_linkPrefixToRemove.value()),
-            link.index());
+            link.index(),
+            ctx);
       }
     }
   }

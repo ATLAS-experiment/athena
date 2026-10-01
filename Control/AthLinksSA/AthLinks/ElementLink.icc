@@ -339,6 +339,14 @@ ElementLink< STORABLE >::resetWithKeyAndIndex( const ID_type& key,
    return;
 }
 
+template< typename STORABLE >
+void
+ElementLink< STORABLE >::resetWithKeyAndIndex( const ID_type& key,
+                                               index_type index,
+                                               const EventContext& /*ctx*/) {
+  resetWithKeyAndIndex( key, index );
+}
+
 /// This is the fastest way of setting an existing ElementLink to point to a
 /// new element. It's just a bit more inconvenient than the function receiving
 /// a string identifier for the container.
@@ -364,6 +372,14 @@ ElementLink< STORABLE >::resetWithKeyAndIndex( sgkey_t id,
    setPersIndex( index );
 
    return;
+}
+
+template< typename STORABLE >
+void
+ElementLink< STORABLE >::resetWithKeyAndIndex( sgkey_t id,
+                                               index_type index,
+                                               const EventContext& /*ctx*/ ) {
+  resetWithKeyAndIndex( id, index );
 }
 
 template< typename STORABLE >

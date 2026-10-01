@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -48,7 +48,7 @@ namespace xAODMaker {
                 }
                 // Create link between HepMC and xAOD truth
                 /// @todo AB: Truth particle links should only be made to the signal event... hence the 0. Right?
-                truthLinkVec->push_back(std::make_unique<xAODTruthParticleLink>(HepMcParticleLink(HepMC::uniqueID(*par), 0, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_ID), par));
+                truthLinkVec->push_back(std::make_unique<xAODTruthParticleLink>(HepMcParticleLink(HepMC::uniqueID(*par), 0, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_ID, ctx), par));
             }
         }
             

@@ -380,13 +380,13 @@ namespace xAODMaker {
           xTruthParticleContainer->push_back( xTruthParticle );
           fillParticle(xTruthParticle, part); // (c) Copy HepMC info into the new particle
           // (d) Build Event<->Particle element link
-          const ElementLink<xAOD::TruthParticleContainer> eltp(*xTruthParticleContainer, xTruthParticleContainer->size()-1);
+          const ElementLink<xAOD::TruthParticleContainer> eltp(*xTruthParticleContainer, xTruthParticleContainer->size()-1, ctx);
           if (isSignalProcess) xTruthEvent->addTruthParticleLink(eltp);
           if (!isSignalProcess) xTruthPileupEvent->addTruthParticleLink(eltp);
 
           // Create link between HepMC and xAOD truth
-          if (isSignalProcess) truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink(genPartUniqueID,0,HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_ID), eltp));
-          if (!isSignalProcess) truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink(genPartUniqueID,genEvt->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID), eltp));
+          if (isSignalProcess) truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink(genPartUniqueID,0,HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_ID, ctx), eltp));
+          if (!isSignalProcess) truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink(genPartUniqueID,genEvt->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID, ctx), eltp));
 
           // Is this one of the beam particles?
           if (genEvt_valid_beam_particles) {
@@ -433,7 +433,7 @@ namespace xAODMaker {
             xTruthVertexContainer->push_back( xTruthVertex );
             fillVertex(xTruthVertex, vertex); // (c) Copy HepMC info into the new vertex
             // (d) Build Event<->Vertex element link
-            ElementLink<xAOD::TruthVertexContainer> eltv(*xTruthVertexContainer, xTruthVertexContainer->size()-1);
+            ElementLink<xAOD::TruthVertexContainer> eltv(*xTruthVertexContainer, xTruthVertexContainer->size()-1, ctx);
             // Mark if this is the signal process vertex
             if (vertex == signalProcessVtx && isSignalProcess) xTruthEvent->setSignalProcessVertexLink(eltv);
             if (isSignalProcess) xTruthEvent->addTruthVertexLink(eltv);
