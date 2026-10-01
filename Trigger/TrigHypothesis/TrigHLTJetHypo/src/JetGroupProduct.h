@@ -10,6 +10,7 @@
 #include "./JetStreamer.h"
 #include "./DebugInfoCollector.h"
 #include "TrigHLTJetHypo/TrigHLTJetHypoUtils/HypoJetDefs.h"
+#include <set>
 #include <vector>
 
 using CondInd2JetGroupsInds = std::map<int, std::vector<std::size_t>>;
@@ -47,7 +48,7 @@ class JetGroupProduct: public IJetGroupProduct{
   std::vector<bool>  m_jetMask;
   std::size_t  m_jetEnd{0};
   // ProductGen m_productGen;
-  std::vector<std::vector<std::size_t>> m_seenIndices;
+  std::set<std::vector<std::size_t>> m_seenIndices;
   std::unique_ptr<JetStreamer> m_jetstreamer{nullptr};
   bool m_valid{false};
 
