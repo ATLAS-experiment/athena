@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -16,11 +16,11 @@
 
 namespace CP
 {
-  /// \brief an algorithm for calling \ref IJetCalibrationTool
+  /// @brief an algorithm for calling @ref IJetCalibrationTool
 
   class JetCalibrationAlg final : public EL::AnaAlgorithm
   {
-    /// \brief the standard constructor
+    /// @brief the standard constructor
   public:
     JetCalibrationAlg (const std::string& name, ISvcLocator* pSvcLocator);
     StatusCode initialize () override;
@@ -28,20 +28,20 @@ namespace CP
 
 
 
-    /// \brief the calibration tool
+    /// @brief the calibration tool
   private:
     ToolHandle<IJetCalibrationTool> m_calibrationTool;
 
-    /// \brief the systematics list we run
+    /// @brief the systematics list we run
   private:
     SysListHandle m_systematicsList {this};
 
-    /// \brief the jet collection we run on
+    /// @brief the jet collection we run on
   private:
     SysCopyHandle<xAOD::JetContainer> m_jetHandle {
       this, "jets", "", "the jet collection to run on"};
 
-    /// \brief whether we run on the HIJets collection
+    /// @brief whether we run on the HIJets collection
   private:
     Gaudi::Property<bool> m_HIsetup {this, "HIsetup", false, "do full Heavy Ion treatment"};
   };

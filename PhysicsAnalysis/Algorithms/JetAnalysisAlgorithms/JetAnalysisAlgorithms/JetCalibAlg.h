@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author P-A Delsart
@@ -20,11 +20,11 @@
 
 namespace CP
 {
-  /// \brief an algorithm for calling \ref IJetCalibrationTool
+  /// @brief an algorithm for calling @ref IJetCalibTool
 
   class JetCalibAlg final : public EL::AnaAlgorithm
   {
-    /// \brief the standard constructor
+    /// @brief the standard constructor
   public:
     using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
@@ -32,15 +32,15 @@ namespace CP
 
 
 
-    /// \brief the calibration tool
+    /// @brief the calibration tool
   private:
     ToolHandle<IJetCalibTool> m_calibrationTool {this, "calibrationTool", "JetCalibrationTool", "the calibration tool we apply"};
 
-    /// \brief the systematics list we run
+    /// @brief the systematics list we run
   private:
     SysListHandle m_systematicsList {this};
 
-    /// \brief the jet collection we run on
+    /// @brief the jet collection we run on
   private:
     SysCopyHandle<xAOD::JetContainer> m_jetHandle {
       this, "jets", "", "the jet collection to run on"};

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -10,8 +10,6 @@
 //
 
 #include <JetAnalysisAlgorithms/JvtEfficiencyAlg.h>
-
-#include <SelectionHelpers/SelectionHelpers.h>
 
 //
 // method implementations
@@ -52,11 +50,7 @@ namespace CP
       {
         if (m_preselection.getBool (*jet, sys))
         {
-          bool goodJet = true;
-          if (m_selectionHandle || m_skipBadEfficiency)
-          {
-            goodJet = m_selectionHandle.getBool(*jet, sys);
-          }
+          const bool goodJet = m_selectionHandle.getBool(*jet, sys);
           float sf = 1;
           if (goodJet) {
             ANA_CHECK_CORRECTION (m_outOfValidity, *jet, m_efficiencyTool->getEfficiencyScaleFactor (*jet, sf));

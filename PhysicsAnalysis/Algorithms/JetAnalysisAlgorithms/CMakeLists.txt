@@ -13,9 +13,9 @@ atlas_add_library( JetAnalysisAlgorithmsLib
    LINK_LIBRARIES xAODJet xAODMuon xAODTrigger SelectionHelpersLib SystematicsHandlesLib
    AnaAlgorithmLib JetCalibToolsLib JetInterface
    JetCPInterfaces JetAnalysisInterfacesLib AsgDataHandlesLib ${FASTJET_LIBRARIES}
-   TrigBtagEmulationToolLib TrigCompositeUtilsLib TrigConfHLTData TrigDecisionToolLib
-   TrigConfData TrigConfInterfaces
-   PRIVATE_LINK_LIBRARIES METUtilitiesLib xAODMuon )
+   TrigBtagEmulationToolLib TrigDecisionToolLib TrigConfInterfaces MuonAnalysisInterfacesLib
+   PRIVATE_LINK_LIBRARIES METUtilitiesLib TrigCompositeUtilsLib TrigConfHLTData
+   TrigConfData )
 
 atlas_add_component( JetAnalysisAlgorithms
    src/*.h src/*.cxx src/components/*.cxx
@@ -28,7 +28,7 @@ atlas_add_test( TestCPRun2Jets
    SCRIPT CPRun.py  --text-config JetAnalysisAlgorithms/test_configuration_Run2_Jets.yaml -e 30 --input-list $ASG_TEST_FILE_MC
    POST_EXEC_SCRIPT noerror.sh
    PRIVATE_WORKING_DIRECTORY
-   PROPERTIES TIMEOUT 400 
+   PROPERTIES TIMEOUT 400
 )
 
 atlas_add_test( TestCPRun3Jets

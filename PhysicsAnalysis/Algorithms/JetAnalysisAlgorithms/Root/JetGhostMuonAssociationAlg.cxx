@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -17,14 +17,6 @@
 
 namespace CP
 {
-  JetGhostMuonAssociationAlg ::
-  JetGhostMuonAssociationAlg (const std::string& name,
-                              ISvcLocator* pSvcLocator)
-    : AnaAlgorithm (name, pSvcLocator)
-  {
-  }
-
-
   StatusCode JetGhostMuonAssociationAlg ::
   initialize ()
   {

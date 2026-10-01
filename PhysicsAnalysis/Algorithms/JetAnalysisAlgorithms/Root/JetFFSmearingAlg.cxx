@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina
@@ -9,7 +9,6 @@
 //
 
 #include <JetAnalysisAlgorithms/JetFFSmearingAlg.h>
-#include <algorithm>
 
 //
 // method implementations
@@ -28,9 +27,9 @@ StatusCode JetFFSmearingAlg ::initialize() {
   ANA_CHECK(m_outOfValidity.initialize());
 
   // FIXME: while the FFJetSmearingTool is unable to accept external systematics,
-  // we make our own vector of systematics
+  // we make our own set of systematics names
   const CP::SystematicSet& recommendedSysts = m_FFSmearingTool->recommendedSystematics();
-  for (const auto &sys : recommendedSysts) m_systematicsVector.push_back(CP::SystematicSet({sys}));
+  for (const auto &sys : recommendedSysts) m_systematicsNames.insert(CP::SystematicSet({sys}).name());
 
   return StatusCode::SUCCESS;
 }
@@ -42,7 +41,7 @@ StatusCode JetFFSmearingAlg ::execute(const EventContext& ctx) {
 
     // FIXME: while the FFJetSmearingTool is unable to accept external systematics,
     // only run over the internal ones
-    if ( std::find(m_systematicsVector.begin(), m_systematicsVector.end(), sys) == m_systematicsVector.end() ) continue;
+    if ( !m_systematicsNames.contains(sys.name()) ) continue;
 
     ANA_CHECK(m_FFSmearingTool->applySystematicVariation(sys));
 

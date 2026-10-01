@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Teng Jian Khoo
@@ -16,14 +16,13 @@
 
 namespace CP
 {
-  /// \brief an algorithm for calling \ref IJetUpdateJvt
+  /// @brief an algorithm for calling @ref IJetDecorator
 
   class JetDecoratorAlg final : public EL::AnaAlgorithm
   {
-    /// \brief the standard constructor
+    /// @brief the standard constructor
   public:
-    JetDecoratorAlg (const std::string& name,
-                  ISvcLocator* pSvcLocator);
+    using EL::AnaAlgorithm::AnaAlgorithm;
 
 
   public:
@@ -32,15 +31,15 @@ namespace CP
   public:
     StatusCode execute (const EventContext& ctx) override;
 
-    /// \brief the update tool
+    /// @brief the update tool
   private:
     ToolHandle<IJetDecorator> m_decorator{this, "decorator", "", "the decorator tool we apply to the jet collection"};
 
-    /// \brief the systematics list we run
+    /// @brief the systematics list we run
   private:
     SysListHandle m_systematicsList {this};
 
-    /// \brief the jet collection we run on
+    /// @brief the jet collection we run on
   private:
     SysCopyHandle<const xAOD::JetContainer> m_jetHandle {
       this, "jets", "", "the jet collection to run on"};

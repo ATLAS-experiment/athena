@@ -39,9 +39,9 @@ namespace CP
   StatusCode JetCalibrationAlg ::
   execute (const EventContext& ctx)
   {
-    const std::string subtractedStr{"JetSubtractedScaleMomentum"};
-    const std::string constitStr{"JetConstitScaleMomentum"};
-    const std::string emScaleStr{"JetEMScaleMomentum"};
+    static const std::string subtractedStr{"JetSubtractedScaleMomentum"};
+    static const std::string constitStr{"JetConstitScaleMomentum"};
+    static const std::string emScaleStr{"JetEMScaleMomentum"};
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       xAOD::JetContainer *jets = nullptr;

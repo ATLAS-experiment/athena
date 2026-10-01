@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Teng Jian Khoo
@@ -17,15 +17,6 @@
 
 namespace CP
 {
-  JetDecoratorAlg ::
-  JetDecoratorAlg (const std::string& name,
-                ISvcLocator* pSvcLocator)
-    : AnaAlgorithm (name, pSvcLocator)
-  {
-  }
-
-
-
   StatusCode JetDecoratorAlg ::
   initialize ()
   {

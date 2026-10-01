@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Thomas Strebler
@@ -23,25 +23,25 @@
 
 namespace CP
 {
-  /// \brief an algorithm to apply b-jet specific energy correction
+  /// @brief an algorithm to apply b-jet specific energy correction
 
   class BJetCalibrationAlg final : public EL::AnaAlgorithm
   {
   public:
-    /// \brief the standard constructor
+    /// @brief the standard constructor
     using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
     StatusCode execute (const EventContext& ctx) override;
 
   private:
 
-    /// \brief the muon-in-jet selection tool, unused if muonPreselection set
+    /// @brief the muon-in-jet selection tool, unused if muonPreselection set
     ToolHandle<CP::IMuonSelectionTool> m_muonSelectionTool{this, "muonSelectionTool", "", "tool for muon quality selection"};
 
-    /// \brief the muon-in-jet correction tool
+    /// @brief the muon-in-jet correction tool
     ToolHandle<IMuonInJetCorrectionTool> m_muonInJetTool {this, "muonInJetTool", "MuonInJetCorrectionTool", "the muon-in-jet correction tool tool we apply"};
     
-    /// \brief the b-jet pt correction tool
+    /// @brief the b-jet pt correction tool
     ToolHandle<IBJetCorrectionTool> m_bJetTool {this, "bJetTool", "", "the b-jet pt correction tool tool we apply"};
     
     SysListHandle m_systematicsList {this};

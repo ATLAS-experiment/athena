@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -16,11 +16,11 @@
 
 namespace CP
 {
-  /// \brief an algorithm for calling \ref IJetModifierTool
+  /// @brief an algorithm for calling @ref IJetModifier
 
   class JetModifierAlg final : public EL::AnaAlgorithm
   {
-    /// \brief the standard constructor
+    /// @brief the standard constructor
   public:
     using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
@@ -28,20 +28,20 @@ namespace CP
 
 
 
-    /// \brief the modifier tool
+    /// @brief the modifier tool
   private:
     ToolHandle<IJetModifier> m_modifierTool {this, "modifierTool", "JetForwardJvtTool", "the modifier tool we apply"};
 
-    /// \brief the systematics list we run
+    /// @brief the systematics list we run
   private:
     SysListHandle m_systematicsList {this};
 
-    /// \brief the jet collection we run on
+    /// @brief the jet collection we run on
   private:
     SysCopyHandle<xAOD::JetContainer> m_jetHandle {
       this, "jets", "", "the jet collection to run on"};
 
-    /// \brief the helper for OutOfValidity results
+    /// @brief the helper for OutOfValidity results
   private:
     OutOfValidityHelper m_outOfValidity {this};
   };
