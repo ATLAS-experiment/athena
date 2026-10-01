@@ -788,6 +788,57 @@ def TauGNNEvaluatorCfg(flags, version=0, applyLooseTrackSel=False, applyTightTra
     result.setPrivateTools(myTauGNNEvaluator)
     return result
 
+def TausRUsDecorationNames():
+    """Names of the decorations TausRUs writes on the tau, all of them floats."""
+    names = [
+        "TausRUsTauIDScore",
+        "TausRUsEleRejScore",
+        "TausRUsDecayMode",
+        "TausRUsTauCharge",
+    ]
+    # The class counts must match 'num_classes' in the model metadata
+    names += [f"TausRUsDecayModeScore{i}" for i in range(5)]
+    names += [f"TausRUs{particle}P4_{component}"
+              for particle in ("Tau", "ChargedPion", "NeutralPion")
+              for component in ("pt", "eta", "phi", "m")]
+    names += [f"TausRUsVertex_{coordinate}" for coordinate in ("x", "y", "z")]
+    return names
+
+def TausRUsTrackDecorationNames():
+    """Decorations TausRUs writes on each of the tau's xAOD::TauTrack."""
+    return ["TausRUsTrackClass"] + [f"TausRUsTrackScore{i}" for i in range(4)]
+
+def TausRUsEvaluatorCfg(flags, name="", tauContainerName="", tauTrackContainerName=""):
+    """TausRUs multi-output tau network."""
+    
+    result = ComponentAccumulator()
+    _name = name or flags.Tau.ActiveConfig.prefix + 'TausRUs'
+
+    if flags.Tau.TausRUsUseTriton:
+        from AthTritonComps.TritonToolConfig import TritonToolCfg
+        inferenceTool = result.popToolsAndMerge(TritonToolCfg(
+            flags,
+            model_name = flags.Tau.TausRUsTritonModel,
+            url = flags.Tau.TausRUsTritonUrl,
+            port = flags.Tau.TausRUsTritonPort,
+            name = _name + '_TritonTool'))
+    else:
+        from AthOnnxComps.OnnxRuntimeInferenceConfig import OnnxRuntimeInferenceToolCfg
+        inferenceTool = result.popToolsAndMerge(OnnxRuntimeInferenceToolCfg(
+            flags,
+            flags.Tau.TausRUsModelFile,
+            name = _name + '_ORTTool'))
+
+    TausRUsEvaluator = CompFactory.getComp("TausRUsEvaluator")
+    result.setPrivateTools(TausRUsEvaluator(
+        name = _name,
+        InferenceTool = inferenceTool,
+        ModelFile = flags.Tau.TausRUsModelFile,
+        MinTauPt = flags.Tau.TausRUsMinPt,
+        TauContainerName = tauContainerName,
+        TauTrackContainerName = tauTrackContainerName))
+    return result
+
 def TauWPDecoratorGNNCfg(flags, version, tauContainerName=""):
     result = ComponentAccumulator()
     _name = flags.Tau.ActiveConfig.prefix + 'TauWPDecoratorGNN_v' + str(version)

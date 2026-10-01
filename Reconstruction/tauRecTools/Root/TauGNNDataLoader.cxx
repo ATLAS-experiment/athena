@@ -272,6 +272,16 @@ bool etaJetSeed(const xAOD::TauJet &tau, float &out) {
   return true;
 }
 
+bool phiJetSeed(const xAOD::TauJet &tau, float &out) {
+  out = tau.phiJetSeed();
+  return true;
+}
+
+bool mJetSeed(const xAOD::TauJet &tau, float &out) {
+  out = tau.mJetSeed();
+  return true;
+}
+
 bool ptJetSeed_log(const xAOD::TauJet &tau, float &out) {
   out = std::log10(std::max(tau.ptJetSeed(), 1e-3));
   return true;
