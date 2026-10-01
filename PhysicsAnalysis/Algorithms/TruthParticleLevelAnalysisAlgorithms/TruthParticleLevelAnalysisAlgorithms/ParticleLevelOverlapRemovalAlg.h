@@ -1,13 +1,14 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina <baptiste.ravina@cern.ch>
 
-#ifndef TRUTH__PARTICLELEVEL_OVERLAPREMOVAL__ALG_H
-#define TRUTH__PARTICLELEVEL_OVERLAPREMOVAL__ALG_H
+#ifndef TRUTH_PARTICLELEVEL_OVERLAPREMOVAL_ALG_H
+#define TRUTH_PARTICLELEVEL_OVERLAPREMOVAL_ALG_H
 
 #include <AnaAlgorithm/AnaReentrantAlgorithm.h>
+#include <AsgDataHandles/ReadDecorHandleKey.h>
 #include <AsgDataHandles/ReadHandleKey.h>
 #include <AsgDataHandles/WriteDecorHandleKey.h>
 #include <AsgTools/PropertyWrapper.h>
@@ -32,13 +33,58 @@ class ParticleLevelOverlapRemovalAlg : public EL::AnaReentrantAlgorithm {
   SG::ReadHandleKey<xAOD::TruthParticleContainer> m_photonsKey{
       this, "photons", "", "the name of the input truth photons container"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_decORjet{
-      this, "decORjet", "SetMe", ""};
+      this, "decORjet", "",
+      "the jet overlap-removal decoration; set by the config block from the "
+      "jet container name and labelOR, do not set directly"};
   SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_decORelectron{
-      this, "decORelectron", "TruthElectrons.passesOR", ""};
+      this, "decORelectron", "",
+      "the electron overlap-removal decoration; set by the config block "
+      "from the electron container name and labelOR, do not set directly"};
   SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_decORmuon{
-      this, "decORmuon", "TruthMuons.passesOR", ""};
+      this, "decORmuon", "",
+      "the muon overlap-removal decoration; set by the config block from "
+      "the muon container name and labelOR, do not set directly"};
   SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_decORphoton{
-      this, "decORphoton", "TruthPhotons.passesOR", ""};
+      this, "decORphoton", "",
+      "the photon overlap-removal decoration; set by the config block from "
+      "the photon container name and labelOR, do not set directly"};
+  SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_ptDressedElectronKey{
+      this, "ptDressedElectron", "",
+      "dressed electron pt decoration used for the DeltaR calculation; set "
+      "by the config block from the electron container name, do not set "
+      "directly"};
+  SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_etaDressedElectronKey{
+      this, "etaDressedElectron", "",
+      "dressed electron eta decoration used for the DeltaR calculation; set "
+      "by the config block from the electron container name, do not set "
+      "directly"};
+  SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_phiDressedElectronKey{
+      this, "phiDressedElectron", "",
+      "dressed electron phi decoration used for the DeltaR calculation; set "
+      "by the config block from the electron container name, do not set "
+      "directly"};
+  SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_eDressedElectronKey{
+      this, "eDressedElectron", "",
+      "dressed electron energy decoration used for the DeltaR calculation; "
+      "set by the config block from the electron container name, do not "
+      "set directly"};
+  SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_ptDressedMuonKey{
+      this, "ptDressedMuon", "",
+      "dressed muon pt decoration used for the DeltaR calculation; set by "
+      "the config block from the muon container name, do not set directly"};
+  SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_etaDressedMuonKey{
+      this, "etaDressedMuon", "",
+      "dressed muon eta decoration used for the DeltaR calculation; set by "
+      "the config block from the muon container name, do not set directly"};
+  SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_phiDressedMuonKey{
+      this, "phiDressedMuon", "",
+      "dressed muon phi decoration used for the DeltaR calculation; set by "
+      "the config block from the muon container name, do not set directly"};
+  SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_eDressedMuonKey{
+      this, "eDressedMuon", "",
+      "dressed muon energy decoration used for the DeltaR calculation; set "
+      "by the config block from the muon container name, do not set "
+      "directly"};
   CP::SelectionReadHandle m_jetSelection{
       this, "jetSelection", "", "the selection on the input truth jets"};
   CP::SelectionReadHandle m_electronSelection{
@@ -69,8 +115,8 @@ class ParticleLevelOverlapRemovalAlg : public EL::AnaReentrantAlgorithm {
       this, "labelOR", "passesOR",
       "decoration to apply to all particles for overlap removal"};
 
-  float dressedDeltaR(const xAOD::Jet* p1, TLorentzVector& p2,
-                      bool useRapidity) const;
+  float dressedDeltaR(const xAOD::Jet* jet, double rapidityOrEta,
+                      double phi) const;
 };
 
 }  // namespace CP

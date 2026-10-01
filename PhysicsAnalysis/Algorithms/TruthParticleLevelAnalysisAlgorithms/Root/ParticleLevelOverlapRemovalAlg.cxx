@@ -1,36 +1,63 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina <baptiste.ravina@cern.ch>
 
 #include "TruthParticleLevelAnalysisAlgorithms/ParticleLevelOverlapRemovalAlg.h"
 
+#include <AsgDataHandles/ReadDecorHandle.h>
 #include <AsgDataHandles/ReadHandle.h>
 #include <AsgDataHandles/WriteDecorHandle.h>
 #include <FourMomUtils/xAODP4Helpers.h>
+#include <TLorentzVector.h>
+
+#include <optional>
+#include <utility>
+#include <vector>
 
 namespace CP {
 
 StatusCode ParticleLevelOverlapRemovalAlg::initialize() {
+
+  if (m_doJetElectronOR.value() == m_electronsKey.empty()) {
+    ANA_MSG_ERROR("doJetElectronOR is " << (m_doJetElectronOR.value() ? "true" : "false")
+                  << " but the input container is "
+                  << (m_electronsKey.empty() ? "empty" : "set"));
+    return StatusCode::FAILURE;
+  }
+  if (m_doJetMuonOR.value() == m_muonsKey.empty()) {
+    ANA_MSG_ERROR("doJetMuonOR is " << (m_doJetMuonOR.value() ? "true" : "false")
+                  << " but the input container is "
+                  << (m_muonsKey.empty() ? "empty" : "set"));
+    return StatusCode::FAILURE;
+  }
+  if (m_doJetPhotonOR.value() == m_photonsKey.empty()) {
+    ANA_MSG_ERROR("doJetPhotonOR is " << (m_doJetPhotonOR.value() ? "true" : "false")
+                  << " but the input container is "
+                  << (m_photonsKey.empty() ? "empty" : "set"));
+    return StatusCode::FAILURE;
+  }
 
   ANA_CHECK(m_jetsKey.initialize());
   ANA_CHECK(m_electronsKey.initialize(SG::AllowEmpty));
   ANA_CHECK(m_muonsKey.initialize(SG::AllowEmpty));
   ANA_CHECK(m_photonsKey.initialize(SG::AllowEmpty));
 
-  if (!m_electronsKey.empty())
-    m_decORelectron = m_electronsKey.key() + "." + m_decLabelOR.value();
-  if (!m_muonsKey.empty())
-    m_decORmuon = m_muonsKey.key() + "." + m_decLabelOR.value();
-  if (!m_photonsKey.empty())
-    m_decORphoton = m_photonsKey.key() + "." + m_decLabelOR.value();
-  m_decORjet = m_jetsKey.key() + "." + m_decLabelOR.value();
-
   ANA_CHECK(m_decORelectron.initialize(SG::AllowEmpty));
   ANA_CHECK(m_decORmuon.initialize(SG::AllowEmpty));
   ANA_CHECK(m_decORphoton.initialize(SG::AllowEmpty));
   ANA_CHECK(m_decORjet.initialize());
+
+  ANA_CHECK(m_ptDressedElectronKey.initialize(m_doJetElectronOR && m_useDressedProperties));
+  ANA_CHECK(m_etaDressedElectronKey.initialize(m_doJetElectronOR && m_useDressedProperties));
+  ANA_CHECK(m_phiDressedElectronKey.initialize(m_doJetElectronOR && m_useDressedProperties));
+  ANA_CHECK(m_eDressedElectronKey.initialize(m_doJetElectronOR && m_useDressedProperties));
+
+  ANA_CHECK(m_ptDressedMuonKey.initialize(m_doJetMuonOR && m_useDressedProperties));
+  ANA_CHECK(m_etaDressedMuonKey.initialize(m_doJetMuonOR && m_useDressedProperties));
+  ANA_CHECK(m_phiDressedMuonKey.initialize(m_doJetMuonOR && m_useDressedProperties));
+  ANA_CHECK(m_eDressedMuonKey.initialize(m_doJetMuonOR && m_useDressedProperties));
 
   if (!m_jetSelection.empty())
     ANA_CHECK(m_jetSelection.initialize());
@@ -44,14 +71,14 @@ StatusCode ParticleLevelOverlapRemovalAlg::initialize() {
   return StatusCode::SUCCESS;
 }
 
-float ParticleLevelOverlapRemovalAlg::dressedDeltaR(const xAOD::Jet* p1,
-                                                    TLorentzVector& p2,
-                                                    bool useRapidity) const {
-  if (useRapidity)
-    return xAOD::P4Helpers::deltaR(p1->rapidity(), p1->phi(), p2.Rapidity(),
-                                   p2.Phi());
+float ParticleLevelOverlapRemovalAlg::dressedDeltaR(const xAOD::Jet* jet,
+                                                    double rapidityOrEta,
+                                                    double phi) const {
+  if (m_useRapidity)
+    return xAOD::P4Helpers::deltaR(jet->rapidity(), jet->phi(), rapidityOrEta,
+                                   phi);
   else
-    return xAOD::P4Helpers::deltaR(p1->eta(), p1->phi(), p2.Eta(), p2.Phi());
+    return xAOD::P4Helpers::deltaR(jet->eta(), jet->phi(), rapidityOrEta, phi);
 }
 
 StatusCode ParticleLevelOverlapRemovalAlg::execute(const EventContext &ctx) const {
@@ -64,22 +91,52 @@ StatusCode ParticleLevelOverlapRemovalAlg::execute(const EventContext &ctx) cons
     photons = SG::makeHandle(m_photonsKey, ctx);
   SG::ReadHandle<xAOD::JetContainer> jets(m_jetsKey, ctx);
 
-  SG::WriteDecorHandle<xAOD::TruthParticleContainer, char> dec_electrons_OR(
-      m_decORelectron, ctx);
-  SG::WriteDecorHandle<xAOD::TruthParticleContainer, char> dec_muons_OR(
-      m_decORmuon, ctx);
-  SG::WriteDecorHandle<xAOD::TruthParticleContainer, char> dec_photons_OR(
-      m_decORphoton, ctx);
+  // the lepton/photon decoration handles only exist if the respective OR is
+  // enabled (their keys are empty otherwise)
+  std::optional<SG::WriteDecorHandle<xAOD::TruthParticleContainer, char>>
+      dec_electrons_OR, dec_muons_OR, dec_photons_OR;
+  if (m_doJetElectronOR)
+    dec_electrons_OR.emplace(m_decORelectron, ctx);
+  if (m_doJetMuonOR)
+    dec_muons_OR.emplace(m_decORmuon, ctx);
+  if (m_doJetPhotonOR)
+    dec_photons_OR.emplace(m_decORphoton, ctx);
   SG::WriteDecorHandle<xAOD::JetContainer, char> dec_jets_OR(m_decORjet, ctx);
 
-  // accessors
-  static const SG::ConstAccessor<float> acc_pt_dressed(
-      "pt_dressed");
-  static const SG::ConstAccessor<float> acc_eta_dressed(
-      "eta_dressed");
-  static const SG::ConstAccessor<float> acc_phi_dressed(
-      "phi_dressed");
-  static const SG::ConstAccessor<float> acc_e_dressed("e_dressed");
+  // accessors for the dressed lepton kinematics (only bound when needed)
+  std::optional<SG::ReadDecorHandle<xAOD::TruthParticleContainer, float>>
+      acc_pt_dressed_e, acc_eta_dressed_e, acc_phi_dressed_e, acc_e_dressed_e;
+  if (m_doJetElectronOR && m_useDressedProperties) {
+    acc_pt_dressed_e.emplace(m_ptDressedElectronKey, ctx);
+    acc_eta_dressed_e.emplace(m_etaDressedElectronKey, ctx);
+    acc_phi_dressed_e.emplace(m_phiDressedElectronKey, ctx);
+    acc_e_dressed_e.emplace(m_eDressedElectronKey, ctx);
+  }
+  std::optional<SG::ReadDecorHandle<xAOD::TruthParticleContainer, float>>
+      acc_pt_dressed_m, acc_eta_dressed_m, acc_phi_dressed_m, acc_e_dressed_m;
+  if (m_doJetMuonOR && m_useDressedProperties) {
+    acc_pt_dressed_m.emplace(m_ptDressedMuonKey, ctx);
+    acc_eta_dressed_m.emplace(m_etaDressedMuonKey, ctx);
+    acc_phi_dressed_m.emplace(m_phiDressedMuonKey, ctx);
+    acc_e_dressed_m.emplace(m_eDressedMuonKey, ctx);
+  }
+
+  // dressed (rapidity or eta, phi) of a lepton, used for the DeltaR
+  auto dressedRapidityOrEtaPhi =
+      [&](const xAOD::TruthParticle& lepton,
+          const SG::ReadDecorHandle<xAOD::TruthParticleContainer, float>& acc_pt,
+          const SG::ReadDecorHandle<xAOD::TruthParticleContainer, float>& acc_eta,
+          const SG::ReadDecorHandle<xAOD::TruthParticleContainer, float>& acc_phi,
+          const SG::ReadDecorHandle<xAOD::TruthParticleContainer, float>& acc_e) {
+        TLorentzVector dressed;
+        dressed.SetPtEtaPhiE(acc_pt(lepton), acc_eta(lepton), acc_phi(lepton),
+                             acc_e(lepton));
+        return std::pair<double, double>{
+            m_useRapidity ? dressed.Rapidity() : dressed.Eta(), dressed.Phi()};
+      };
+  // per-lepton dressed kinematics, indexed by position in the container
+  // (only filled for selected leptons when using dressed properties)
+  std::vector<std::pair<double, double>> dressed_electrons, dressed_muons;
 
   // Default decorations: all objects pass!
   for (const auto* jet : *jets) {
@@ -89,27 +146,39 @@ StatusCode ParticleLevelOverlapRemovalAlg::execute(const EventContext &ctx) cons
       dec_jets_OR(*jet) = true;
   }
   if (m_doJetElectronOR) {
-    for (const auto* electron : *electrons) {
+    dressed_electrons.resize(electrons->size());
+    for (std::size_t i = 0; i < electrons->size(); ++i) {
+      const auto* electron = (*electrons)[i];
       if (m_electronSelection)
-        dec_electrons_OR(*electron) = m_electronSelection.getBool(*electron);
+        (*dec_electrons_OR)(*electron) = m_electronSelection.getBool(*electron);
       else
-        dec_electrons_OR(*electron) = true;
+        (*dec_electrons_OR)(*electron) = true;
+      if (m_useDressedProperties && (*dec_electrons_OR)(*electron))
+        dressed_electrons[i] = dressedRapidityOrEtaPhi(
+            *electron, *acc_pt_dressed_e, *acc_eta_dressed_e,
+            *acc_phi_dressed_e, *acc_e_dressed_e);
     }
   }
   if (m_doJetMuonOR) {
-    for (const auto* muon : *muons) {
+    dressed_muons.resize(muons->size());
+    for (std::size_t i = 0; i < muons->size(); ++i) {
+      const auto* muon = (*muons)[i];
       if (m_muonSelection)
-        dec_muons_OR(*muon) = m_muonSelection.getBool(*muon);
+        (*dec_muons_OR)(*muon) = m_muonSelection.getBool(*muon);
       else
-        dec_muons_OR(*muon) = true;
+        (*dec_muons_OR)(*muon) = true;
+      if (m_useDressedProperties && (*dec_muons_OR)(*muon))
+        dressed_muons[i] = dressedRapidityOrEtaPhi(
+            *muon, *acc_pt_dressed_m, *acc_eta_dressed_m, *acc_phi_dressed_m,
+            *acc_e_dressed_m);
     }
   }
   if (m_doJetPhotonOR) {
     for (const auto* photon : *photons) {
       if (m_photonSelection)
-        dec_photons_OR(*photon) = m_photonSelection.getBool(*photon);
+        (*dec_photons_OR)(*photon) = m_photonSelection.getBool(*photon);
       else
-        dec_photons_OR(*photon) = true;
+        (*dec_photons_OR)(*photon) = true;
     }
   }
 
@@ -123,55 +192,50 @@ StatusCode ParticleLevelOverlapRemovalAlg::execute(const EventContext &ctx) cons
   //      Remove Electrons with dR < 0.4
   //   3. Photons & Jets:
   //      Remove Jets with dR < 0.4
+  // The steps are interleaved per jet (not run sequentially over all jets),
+  // and the lepton removal uses all selected jets, regardless of whether
+  // the jet itself is removed by the photon-jet overlap removal.
 
   for (const auto* jet : *jets) {
     if (m_jetSelection && !m_jetSelection.getBool(*jet))
       continue;
     if (m_doJetMuonOR) {
-      for (const auto* muon : *muons) {
-        if (m_muonSelection && !m_muonSelection.getBool(*muon))
-          continue;
-        if (dec_muons_OR(*muon)) {
+      for (std::size_t i = 0; i < muons->size(); ++i) {
+        const auto* muon = (*muons)[i];
+        if ((*dec_muons_OR)(*muon)) {
           if (m_useDressedProperties) {
-            TLorentzVector dressed_muon;
-            dressed_muon.SetPtEtaPhiE(
-                acc_pt_dressed(*muon), acc_eta_dressed(*muon),
-                acc_phi_dressed(*muon), acc_e_dressed(*muon));
-            if (dressedDeltaR(jet, dressed_muon, m_useRapidity) < 0.4)
-              dec_muons_OR(*muon) = false;
+            const auto& [rapidityOrEta, phi] = dressed_muons[i];
+            if (dressedDeltaR(jet, rapidityOrEta, phi) < 0.4)
+              (*dec_muons_OR)(*muon) = false;
           } else {
             if (xAOD::P4Helpers::deltaR(jet, muon, m_useRapidity) < 0.4)
-              dec_muons_OR(*muon) = false;
+              (*dec_muons_OR)(*muon) = false;
           }
         }
       }
     }
     if (m_doJetElectronOR) {
-      for (const auto* electron : *electrons) {
-        if (m_electronSelection && !m_electronSelection.getBool(*electron))
-          continue;
-        if (dec_electrons_OR(*electron)) {
+      for (std::size_t i = 0; i < electrons->size(); ++i) {
+        const auto* electron = (*electrons)[i];
+        if ((*dec_electrons_OR)(*electron)) {
           if (m_useDressedProperties) {
-            TLorentzVector dressed_electron;
-            dressed_electron.SetPtEtaPhiE(
-                acc_pt_dressed(*electron), acc_eta_dressed(*electron),
-                acc_phi_dressed(*electron), acc_e_dressed(*electron));
-            if (dressedDeltaR(jet, dressed_electron, m_useRapidity) < 0.4)
-              dec_electrons_OR(*electron) = false;
+            const auto& [rapidityOrEta, phi] = dressed_electrons[i];
+            if (dressedDeltaR(jet, rapidityOrEta, phi) < 0.4)
+              (*dec_electrons_OR)(*electron) = false;
           } else {
             if (xAOD::P4Helpers::deltaR(jet, electron, m_useRapidity) < 0.4)
-              dec_electrons_OR(*electron) = false;
+              (*dec_electrons_OR)(*electron) = false;
           }
         }
       }
     }
     if (m_doJetPhotonOR) {
       for (const auto* photon : *photons) {
-        if (m_photonSelection && !m_photonSelection.getBool(*photon))
-          continue;
-        if (dec_photons_OR(*photon)) {
-          if (xAOD::P4Helpers::deltaR(jet, photon) < 0.4)
+        if ((*dec_photons_OR)(*photon)) {
+          if (xAOD::P4Helpers::deltaR(jet, photon, m_useRapidity) < 0.4) {
             dec_jets_OR(*jet) = false;
+            break;
+          }
         }
       }
     }

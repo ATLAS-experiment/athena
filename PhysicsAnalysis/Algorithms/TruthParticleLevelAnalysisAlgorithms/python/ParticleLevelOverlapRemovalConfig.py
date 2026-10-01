@@ -44,20 +44,39 @@ class ParticleLevelOverlapRemovalBlock(ConfigBlock):
         alg.useRapidityForDeltaR = self.useRapidityForDeltaR
         alg.labelOR = self.label
         if self.electrons:
-            alg.electrons, alg.electronSelection = config.readNameAndSelection (self.electrons)
+            electronsName, alg.electronSelection = config.readNameAndSelection (self.electrons)
+            alg.electrons = electronsName
             alg.doJetElectronOR = True
+            alg.decORelectron = f'{electronsName}.{self.label}'
+            if self.useDressedProperties:
+                alg.ptDressedElectron = f'{electronsName}.pt_dressed'
+                alg.etaDressedElectron = f'{electronsName}.eta_dressed'
+                alg.phiDressedElectron = f'{electronsName}.phi_dressed'
+                alg.eDressedElectron = f'{electronsName}.e_dressed'
             container, _, selection = self.electrons.partition(".")
             config.addSelection (container, selection, alg.labelOR + ',as_char')
         if self.muons:
-            alg.muons, alg.muonSelection = config.readNameAndSelection (self.muons)
+            muonsName, alg.muonSelection = config.readNameAndSelection (self.muons)
+            alg.muons = muonsName
             alg.doJetMuonOR = True
+            alg.decORmuon = f'{muonsName}.{self.label}'
+            if self.useDressedProperties:
+                alg.ptDressedMuon = f'{muonsName}.pt_dressed'
+                alg.etaDressedMuon = f'{muonsName}.eta_dressed'
+                alg.phiDressedMuon = f'{muonsName}.phi_dressed'
+                alg.eDressedMuon = f'{muonsName}.e_dressed'
             container, _, selection = self.muons.partition(".")
             config.addSelection (container, selection, alg.labelOR + ',as_char')
         if self.photons:
-            alg.photons, alg.photonSelection = config.readNameAndSelection (self.photons)
+            photonsName, alg.photonSelection = config.readNameAndSelection (self.photons)
+            alg.photons = photonsName
             alg.doJetPhotonOR = True
+            alg.decORphoton = f'{photonsName}.{self.label}'
             container, _, selection = self.photons.partition(".")
             config.addSelection (container, selection, alg.labelOR + ',as_char')
-        alg.jets, alg.jetSelection = config.readNameAndSelection (self.jets)
+        jetsName, alg.jetSelection = config.readNameAndSelection (self.jets)
+        alg.jets = jetsName
+        alg.decORjet = f'{jetsName}.{self.label}'
         container, _, selection = self.jets.partition(".")
         config.addSelection (container, selection, alg.labelOR + ',as_char')
+
