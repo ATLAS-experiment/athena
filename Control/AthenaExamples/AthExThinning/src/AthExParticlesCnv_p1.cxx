@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthExParticlesCnv_p1.cxx 
@@ -11,6 +11,7 @@
 
 
 // STL includes
+#include <print>
 
 // Framework includes
 #include "GaudiKernel/MsgStream.h"
@@ -67,7 +68,7 @@ AthExParticlesCnv_p1::transToPersWithKey( const AthExParticles* transObj,
     if (dec && dec->thinned(i)) continue;
     const AthExParticle * p = (*transObj)[i];
     if ( 0 == p ) {
-      std::cerr << "## skipping element [" << i << "] ##" << std::endl;
+      std::println (std::cerr, "## skipping element [{}] ##", i);
       continue;
     }
     
