@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -101,6 +101,7 @@ namespace DerivationFramework {
 
       //find the weights from the tool
       float weight = 1.0;
+      //coverity[UNNECESSARY_STRING_COPY:FALSE]
       const static SG::AuxElement::ConstAccessor<int> accIsInDE("IsInDenseEnvironment");
       if(accIsInDE.isAvailable(*cpfo)){
         ATH_CHECK( m_weightPFOTool->fillWeight( *cpfo, weight ) );

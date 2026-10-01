@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkLLP/TrackParametersKVU.h"
@@ -148,7 +148,7 @@ StatusCode DerivationFramework::TrackParametersKVU::addBranches(const EventConte
         }else{
           vec.assign(5, 0.0);
         }
-        decoratorKVUCovMat(*track) =  vec;
+        decoratorKVUCovMat(*track) =  std::move(vec);
         ATH_MSG_VERBOSE("track updated.");
       } // --- end if(track)
     } // --- end loop tracks

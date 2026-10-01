@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*  TrackParticleCaloCellDecorator.cxx    */
@@ -172,27 +172,27 @@ namespace DerivationFramework {
         } // for( cell )
       } // for( cluster )
 
-      decCellEta(*track) = trackCellEta;
-      decCellPhi(*track) = trackCellPhi;
-      decCellR(*track) = trackCellR;
-      decCelldEta(*track) = trackCelldEta;
-      decCelldPhi(*track) = trackCelldPhi;
-      decCelldR(*track) = trackCelldR;
-      decCellX(*track) = trackCellX;
-      decCellY(*track) = trackCellY;
-      decCellZ(*track) = trackCellZ;
-      decCelldX(*track) = trackCelldX;
-      decCelldY(*track) = trackCelldY;
-      decCelldZ(*track) = trackCelldZ;
-      decCellT(*track) = trackCellT;
-      decCellE(*track) = trackCellE;
-      decCellID(*track) = trackCellID;
-      decCellSampling(*track) = trackCellSampling;
-      decCellQuality(*track) = trackCellQuality;
-      decCellProvenance(*track) = trackCellProvenance;
-      decCellGain(*track) = trackCellGain;
-      decCellEneDiff(*track) = trackCellEneDiff;
-      decCellTimeDiff(*track) = trackCellTimeDiff;
+      decCellEta(*track) = std::move(trackCellEta);
+      decCellPhi(*track) = std::move(trackCellPhi);
+      decCellR(*track) = std::move(trackCellR);
+      decCelldEta(*track) = std::move(trackCelldEta);
+      decCelldPhi(*track) = std::move(trackCelldPhi);
+      decCelldR(*track) = std::move(trackCelldR);
+      decCellX(*track) = std::move(trackCellX);
+      decCellY(*track) = std::move(trackCellY);
+      decCellZ(*track) = std::move(trackCellZ);
+      decCelldX(*track) = std::move(trackCelldX);
+      decCelldY(*track) = std::move(trackCelldY);
+      decCelldZ(*track) = std::move(trackCelldZ);
+      decCellT(*track) = std::move(trackCellT);
+      decCellE(*track) = std::move(trackCellE);
+      decCellID(*track) = std::move(trackCellID);
+      decCellSampling(*track) = std::move(trackCellSampling);
+      decCellQuality(*track) = std::move(trackCellQuality);
+      decCellProvenance(*track) = std::move(trackCellProvenance);
+      decCellGain(*track) = std::move(trackCellGain);
+      decCellEneDiff(*track) = std::move(trackCellEneDiff);
+      decCellTimeDiff(*track) = std::move(trackCellTimeDiff);
     }
 
 
