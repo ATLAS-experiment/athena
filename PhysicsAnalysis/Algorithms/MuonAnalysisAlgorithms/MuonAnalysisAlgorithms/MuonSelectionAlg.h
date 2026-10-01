@@ -43,7 +43,7 @@ namespace CP
     SysReadSelectionHandle m_preselection {
       this, "preselection", "", "the preselection to apply"};
 
-    /// \brief the particle continer we run on
+    /// \brief the particle container we run on
   private:
     SysReadHandle<xAOD::MuonContainer> m_muonsHandle {
       this, "muons", "Muons", "the muons collection to run on"};

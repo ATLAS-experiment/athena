@@ -20,7 +20,7 @@
 
 namespace CP
 {
-  /// \brief an algorithm for calling \ref IMuonSelectionTool
+  /// \brief an algorithm for calling \ref IIsolationSelectionTool
 
   class MuonIsolationAlg final : public EL::AnaAlgorithm
   {
@@ -32,7 +32,7 @@ namespace CP
 
 
 
-    /// \brief the smearing tool
+    /// \brief the isolation tool
   private:
     ToolHandle<IIsolationSelectionTool> m_isolationTool {this, "isolationTool", "CP::IsolationSelectionTool", "the isolation tool we apply"};
 

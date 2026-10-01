@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -20,7 +20,7 @@
 
 namespace CP
 {
-  /// \brief an algorithm for calling \ref IMuonEfficiencyScaleFactorTool
+  /// \brief an algorithm for calling \ref IMuonEfficiencyScaleFactors
 
   class MuonEfficiencyScaleFactorAlg final : public EL::AnaAlgorithm
   {
@@ -32,9 +32,9 @@ namespace CP
 
 
 
-    /// \brief the smearing tool
+    /// \brief the efficiency scale factor tool
   private:
-    ToolHandle<IMuonEfficiencyScaleFactors> m_efficiencyScaleFactorTool {this, "efficiencyScaleFactorTool", "CP::MuonTriggerScaleFactors", "the trigger efficiency scale factor tool we apply"};
+    ToolHandle<IMuonEfficiencyScaleFactors> m_efficiencyScaleFactorTool {this, "efficiencyScaleFactorTool", "CP::MuonEfficiencyScaleFactors", "the efficiency scale factor tool we apply"};
 
     /// \brief the systematics list we run
   private:

@@ -1,4 +1,4 @@
-// AsgExampleTools_entries.cxx
+// MuonAnalysisAlgorithms_entries.cxx
 
 #include <MuonAnalysisAlgorithms/MuonCalibrationAndSmearingAlg.h>
 #include <MuonAnalysisAlgorithms/MuonIsolationAlg.h>
