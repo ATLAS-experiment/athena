@@ -169,6 +169,11 @@ StatusCode BTaggingEfficiencyJsonTool::initialize()
           for (const auto& entry : mcmcAtLabel[m_mcGenerator.value()]) {
             try {
               m_mcmcHandlers[labelStringMCMC].push_back(MCMCHandler(entry, varNames));
+              // // Useful for debugging
+              // // Get the latest handler that was just added 
+              // const MCMCHandler &handler = m_mcmcHandlers[labelStringMCMC][ m_mcmcHandlers[labelStringMCMC].size() -1 ];
+              // // Then print its content 
+              // std::cout << "labelStringMCMC=" << labelStringMCMC << ": " << handler.to_string() << std::endl;
             } catch (const std::exception& e) {
               ATH_MSG_ERROR("Malformed mc-to-mc correction for label " << labelStringMCMC
                             << " and generator '" << m_mcGenerator.value() << "': " << e.what());
@@ -188,6 +193,20 @@ StatusCode BTaggingEfficiencyJsonTool::initialize()
   } else {
     // No mc-to-mc corrections present in the given json file.
     ATH_MSG_WARNING("No mc-to-mc corrections present in json.");
+  }
+
+  // Now check there is no overlapping bins for MCMChandlers  
+  for (const auto& [labelStringMCMC, handlers] : m_mcmcHandlers) {
+    for (size_t i = 0; i < handlers.size(); ++i) {
+      for (size_t j = i + 1; j < handlers.size(); ++j) {
+        if (handlers[i].overlaps(handlers[j])) {
+          ATH_MSG_ERROR("Overlapping mc-to-mc bins for label " << labelStringMCMC
+                        << " and generator '" << m_mcGenerator.value() << "': "
+                        << handlers[i] << " and " << handlers[j] );
+          return StatusCode::FAILURE;
+        }
+      }
+    }
   }
   
   m_currentSys = nullptr;
@@ -294,9 +313,17 @@ CP::CorrectionCode BTaggingEfficiencyJsonTool::getMCToMCCorr( const xAOD::Jet& j
   }
 
   // Loop over all MC-MC handlers and find the one where the jet if falling into
-  for (const auto& bin : handlerIt->second) {
-    if (bin.isJetWithinBounds(jet, *this)) {
-      corr = bin.getScaleFactor();
+  for (const auto& handler : handlerIt->second) {
+    if (handler.isJetWithinBounds(jet, *this)) {
+      // // Useful for debugging
+      // // Print jet truth label pT mass and eta and the corresponding handler
+      // std::cout << "jet(label=" << label 
+      //   << ", pT=" << getJetQuantity(jet, "pT") 
+      //   << ", mass=" << getJetQuantity(jet, "mass") 
+      //   << ", abseta=" << getJetQuantity(jet, "abseta") << "): "
+      //   << handler << std::endl;
+      
+      corr = handler.getScaleFactor();
       return CP::CorrectionCode::Ok;
     }
   }
@@ -352,32 +379,51 @@ float BTaggingEfficiencyJsonTool::getJetQuantity(const xAOD::Jet& jet, const std
   } else { 
     ATH_MSG_ERROR("Unsupported jet variable quantity requested: '" << varName << "'");
     throw std::runtime_error("BTaggingEfficiencyJsonTool::getJetQuantity unsupported jet variable: '" + varName + "'");
-  } 
+  }
 }
 
-BTaggingEfficiencyJsonTool::MCMCHandler::MCMCHandler(
-    const json& entry, const std::vector<std::string>& varNames)
-{ 
+// Two half-open intervals [low, high) overlap if each one starts before the other ends.
+// Touching edges (upper = other lower) are not considered overlapping.
+bool BTaggingEfficiencyJsonTool::BoundsHandler::varBounds::overlaps(const varBounds& o) const {
+  const bool endsBeforeOther = upperBound < o.lowerBound || approxEqual(upperBound, o.lowerBound, varEps);
+  const bool otherEndsBefore = o.upperBound < lowerBound || approxEqual(o.upperBound, lowerBound, varEps);
+  return !endsBeforeOther && !otherEndsBefore;
+}
+bool BTaggingEfficiencyJsonTool::BoundsHandler::varBounds::operator<(const varBounds& o) const {
+  if (!approxEqual(lowerBound, o.lowerBound, varEps)) return lowerBound < o.lowerBound;
+  if (!approxEqual(upperBound, o.upperBound, varEps)) return upperBound < o.upperBound;
+  // Both upper and lower bounds are equal within tolerance
+  return false;
+}
+// Define an ordering of varBounds compare first lowerBound then upperBound
+// within tolerance
+bool BTaggingEfficiencyJsonTool::BoundsHandler::varBounds::operator==(const varBounds& o) const {
+  return approxEqual(lowerBound, o.lowerBound, varEps) && approxEqual(upperBound, o.upperBound, varEps);
+}
 
-  // Make sure the vector of variable provided is not empty 
+BTaggingEfficiencyJsonTool::BoundsHandler::BoundsHandler(
+    const json& jsonConfig, const std::vector<std::string>& varNames, const size_t nExtraValues)
+{
+  // Make sure the vector of variable provided is not empty
   if (varNames.empty()){
     throw std::runtime_error(
-      "mc-to-mc empty list of variables");
+      "empty list of bin variables");
   }
 
-  // Load lower and higher bound with the corresponding mc-to-mc correction
-  // e.g. varNames={"pT", "mass"}
-  // and the corresponding entry should be a list of a list with bounds [min, max] then the last entry is the MC-MC SF 
-  // entry = [[250, 500], [50, 100], 0.9] i.e. the pT range is 250-500 GeV and mass range 50-100 GeV and the corresponding MC-MC SF is equal to 0.9 
-  if (!entry.is_array() || entry.size() != varNames.size() + 1) {
+  // The entry should be a list starting with one [low, high] range per variable in varNames
+  // followed by nExtraValues values handled by the child class
+  // NB: it's possible to pass all additional information with only one extra value 
+  // that is itself a JSON list and can hold several fields e.g. the SF and its uncertainty.
+  // varNames={"pT", "mass"}, nExtraValues=1 and entry = [[250, 500], [50, 100], {"SF": 0.9, "SF_uncert_1": 0.1, "SF_uncert_2": 0.03}]
+  if (!jsonConfig.is_array() || jsonConfig.size() != varNames.size() + nExtraValues) {
     throw std::runtime_error(
-      "mc-to-mc bin entry must contain " + std::to_string(varNames.size()) +
-      " [low, high] ranges followed by one correction factor");
+      "Bin config must contain " + std::to_string(varNames.size()) +
+      " [low, high] ranges followed by " + std::to_string(nExtraValues) + " value(s): jsonConfig=" + jsonConfig.dump());
   }
 
   // Loop over variables and retrieve corresponding min and max values
   for (size_t v = 0; v < varNames.size(); ++v) {
-    const auto& range = entry[v];
+    const auto& range = jsonConfig[v];
     if (!range.is_array() || range.size() != 2) {
       throw std::runtime_error(
         "Bin range for variable '" + varNames[v] + "' must be [low, high]");
@@ -389,22 +435,37 @@ BTaggingEfficiencyJsonTool::MCMCHandler::MCMCHandler(
     // Let's make sure that lowerBound < upperBound
     if (vBounds.lowerBound >= vBounds.upperBound){
       throw std::runtime_error(
-        "mc-mc bin issue, the min value >= max value for varName='" + varNames[v] + "': min=" + std::to_string(vBounds.lowerBound)+ ", max=" + std::to_string(vBounds.upperBound));
+        "Bin issue, the min value >= max value for varName='" + varNames[v] + "': min=" + std::to_string(vBounds.lowerBound)+ ", max=" + std::to_string(vBounds.upperBound) + " for jsonConfig=" + jsonConfig.dump());
     }
 
     // Finally add the varBounds to the map of variable bounds
     m_varBinBounds[varNames[v]] = vBounds;
   }
-
-  // The last entry should be the MC-MC scale factor
-  if (!entry.back().is_number()) {
-    throw std::runtime_error("mc-to-mc correction factor is not a number");
-  }
-  // Finally retrieve the MC-MC scale factor
-  m_MCMCSF = entry.back().get<float>();
 }
 
-bool BTaggingEfficiencyJsonTool::MCMCHandler::isJetWithinBounds(
+BTaggingEfficiencyJsonTool::MCMCHandler::MCMCHandler(
+    const json& jsonConfig, const std::vector<std::string>& varNames)
+  // The bounds are loaded by the parent class, the json config should have one extra entry and should contain the MC-MC SF
+  // e.g. jsonConfig = [[250, 500], [50, 100], {"SF": 0.9}] for varNames={"pT", "mass"}
+  : BoundsHandler(jsonConfig, varNames)
+{ 
+  // Get last entry 
+  const auto & mcmcEntry = jsonConfig.back(); 
+  // The last entry should be a JSON with the SF 
+  if (!mcmcEntry.is_object()) {
+    throw std::runtime_error("mc-to-mc last entry in jsonConfig is not an object for jsonConfig=" + mcmcEntry.dump());
+  }
+
+  // Check if the last entry contains the SF and that's a number 
+  if (!mcmcEntry.contains("SF") || !mcmcEntry["SF"].is_number()){
+     throw std::runtime_error("mc-to-mc mcmcEntry is not containing a scale factor for jsonConfig=" + jsonConfig.dump());
+  }
+
+  // Retrieve the MC-MC scale factor
+  m_MCMCSF = mcmcEntry["SF"].get<float>();
+}
+
+bool BTaggingEfficiencyJsonTool::BoundsHandler::isJetWithinBounds(
     const xAOD::Jet& jet, const BTaggingEfficiencyJsonTool& tool) const
 {
   // Loop over all variables e.g. pT, eta etc
@@ -423,6 +484,79 @@ bool BTaggingEfficiencyJsonTool::MCMCHandler::isJetWithinBounds(
   // If reaching this point it means the jet is falling into the bin
   // Hence returning true
   return true;
+}
+
+std::ostream& operator<<(std::ostream& os, const BTaggingEfficiencyJsonTool::BoundsHandler& handler){
+  // Add the list of variables with lower and upper bounds
+  // e.g. "pT: [250, 500], mass: [50, 100]"
+  // The separator ", " is only added between entries, not after the last one
+  bool first = true;
+  for (const auto& [varName, bounds] : handler.m_varBinBounds) {
+    if (!first) os << ", ";
+    first = false;
+    os << varName << ": [" << bounds.lowerBound << ", " << bounds.upperBound << "]";
+  }
+  return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const BTaggingEfficiencyJsonTool::MCMCHandler& handler){
+  // Return
+  // MCMCHandler(var1: [minVar1, maxVar1], var2: [minVar2, maxVar2], ... , SF: sfValue)
+  // e.g. MCMCHandler(pT: [250, 500], abseta[0., 2.0], SF: 0.9)
+  os << "MCMCHandler(";
+  // Add the list of variables with lower and upper bounds
+  os << dynamic_cast<const BTaggingEfficiencyJsonTool::BoundsHandler&>(handler);
+  // Finally add the MC-MC SF value
+  os << ", SF: " << handler.m_MCMCSF << ")";
+  return os;
+}
+
+bool BTaggingEfficiencyJsonTool::BoundsHandler::operator<(const BoundsHandler& o) const {
+  // Ordering of handlers loop over variables as stored in the map
+  // and let the first variable whose bounds differ decide of the ordering
+
+  // Make sure maps have the same size
+  if (m_varBinBounds.size() != o.m_varBinBounds.size()) {
+    throw std::logic_error("Cannot compare handlers with a different number of variables");
+  }
+  // Loop over the different variables bounds and compare
+  for (const auto& [varName, vBounds1] : m_varBinBounds) {
+    // Make sure the other handler has the same variable
+    const auto it = o.m_varBinBounds.find(varName);
+    if (it == o.m_varBinBounds.end()) {
+      throw std::logic_error("Cannot compare handlers: variable '" + varName +
+                             "' missing in the other handler");
+    }
+    const varBounds& vBounds2 = it->second;
+    // First variable whose bounds differ decides the ordering
+    if (!(vBounds1 == vBounds2)) return vBounds1 < vBounds2;
+  }
+  return false;  // all bounds equal
+}
+
+bool BTaggingEfficiencyJsonTool::BoundsHandler::overlaps(const BoundsHandler& o) const {
+  // Two handlers that are N-dimensional bins overlap if
+  // for every variable their bounds overlap
+  // If for one variable there is no overlapping bounds then the bins are not overlapping
+
+  // Make sure maps have the same size
+  if (m_varBinBounds.size() != o.m_varBinBounds.size()) {
+    throw std::logic_error("Cannot check overlap of handlers with a different number of variables");
+  }
+  // Loop over the different variables bounds and check the overlap
+  for (const auto& [varName, vBounds1] : m_varBinBounds) {
+    // Make sure the other handler has the same variable
+    const auto it = o.m_varBinBounds.find(varName);
+    if (it == o.m_varBinBounds.end()) {
+      throw std::logic_error("Cannot check overlap of handlers: variable '" + varName +
+                             "' missing in the other handler");
+    }
+    // If bounds do not overlap for one variable then bins do not overlap
+    if (!vBounds1.overlaps(it->second)) return false;
+  }
+  // Bounds overlap for all variables
+  // so handlers have some overlap
+  return true;  
 }
 
 StatusCode BTaggingEfficiencyJsonTool::calcSystematicVariation(const CP::SystematicSet& systConfig, sysData& sys) const
