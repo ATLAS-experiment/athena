@@ -1,12 +1,16 @@
 /*
-    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Oliver Majersky
 /// @author Baptiste Ravina
 
-#ifndef KLFITTERNANALYSISALGORITHMS_RUNKLFITTERALG_H_
-#define KLFITTERNANALYSISALGORITHMS_RUNKLFITTERALG_H_
+#ifndef KLFITTERANALYSISALGORITHMS_RUNKLFITTERALG_H_
+#define KLFITTERANALYSISALGORITHMS_RUNKLFITTERALG_H_
+
+#include <algorithm>
+#include <numeric>
+#include <optional>
 
 // Algorithm includes
 #include <AnaAlgorithm/AnaAlgorithm.h>
@@ -51,7 +55,8 @@ class RunKLFitterAlg final : public EL::AnaAlgorithm {
   virtual StatusCode execute(const EventContext& ctx) final;
 
  private:
-  StatusCode execute_syst(const CP::SystematicSet &sys);
+  StatusCode execute_syst(const CP::SystematicSet &sys,
+                          const EventContext &ctx);
   StatusCode add_leptons(
       const std::vector<const xAOD::Electron *> &selected_electrons,
       const std::vector<const xAOD::Muon *> &selected_muons,
@@ -64,6 +69,11 @@ class RunKLFitterAlg final : public EL::AnaAlgorithm {
                               KLFitter::Particles *inputParticles,
                               const size_t njets);
 
+  StatusCode getBTagDecision(const xAOD::Jet &jet, bool &isTagged) const;
+
+  StatusCode addJet(const xAOD::Jet *jet, const size_t index,
+                    const bool isTagged, KLFitter::Particles *inputParticles);
+
   StatusCode retrieveEfficiencies(const xAOD::Jet *jet, float *eff,
                                   float *ineff);
 
@@ -72,6 +82,7 @@ class RunKLFitterAlg final : public EL::AnaAlgorithm {
                                   const size_t maxJets);
 
   StatusCode evaluatePermutations(const CP::SystematicSet &sys,
+                                  const EventContext &ctx,
                                   const std::vector<size_t> &electron_indices,
                                   const std::vector<size_t> &muon_indices,
                                   const std::vector<size_t> &jet_indices);
@@ -79,24 +90,16 @@ class RunKLFitterAlg final : public EL::AnaAlgorithm {
   template <typename T>
   std::vector<const T *> sortPt(const std::vector<const T *> &particles,
                                 std::vector<size_t> &indices) {
-    std::vector<std::pair<const T *, size_t>> particle_index(particles.size());
-    size_t indx{0};
-    for (const T *const p : particles) {
-      particle_index[indx] = {p, indx};
-      ++indx;
-    }
-    std::sort(
-        particle_index.begin(), particle_index.end(),
-        [](std::pair<const T *, size_t> &x, std::pair<const T *, size_t> &y) {
-          return x.first->pt() > y.first->pt();
-        });
-    std::vector<const T *> sorted_particles(particles.size());
-    indx = 0;
     indices.resize(particles.size());
-    for (auto &elem : particle_index) {
-      sorted_particles[indx] = elem.first;
-      indices[indx] = elem.second;
-      ++indx;
+    std::iota(indices.begin(), indices.end(), size_t{0});
+    std::sort(indices.begin(), indices.end(),
+              [&particles](const size_t i, const size_t j) {
+                return particles[i]->pt() > particles[j]->pt();
+              });
+    std::vector<const T *> sorted_particles;
+    sorted_particles.reserve(particles.size());
+    for (const size_t i : indices) {
+      sorted_particles.push_back(particles[i]);
     }
     return sorted_particles;
   }
@@ -125,7 +128,7 @@ class RunKLFitterAlg final : public EL::AnaAlgorithm {
 
   CP::SysReadHandle<xAOD::EventInfo> m_eventInfoHandle{
       this, "eventInfo", "EventInfo",
-      "the EventInfo container to read selection deciosions from"};
+      "the EventInfo container to read selection decisions from"};
 
   // output container
   CP::SysWriteHandle<xAOD::KLFitterResultContainer,
@@ -183,35 +186,19 @@ class RunKLFitterAlg final : public EL::AnaAlgorithm {
 
   std::unique_ptr<KLFitter::Fitter> m_myFitter;
   std::unique_ptr<KLFitter::DetectorAtlas_8TeV> m_myDetector;
-  KLFEnums::JetSelectionMode m_jetSelectionModeKLFitterEnum{};
   KLFitter::LikelihoodBase::BtaggingMethod m_bTaggingMethodEnum{};
 
-  KLFitter::LikelihoodTopLeptonJets::LeptonType m_leptonTypeKLFitterEnum{};
-  KLFitter::LikelihoodTTHLeptonJets::LeptonType m_leptonTypeKLFitterEnum_TTH{};
-  KLFitter::LikelihoodTopLeptonJets_JetAngles::LeptonType
-      m_leptonTypeKLFitterEnum_JetAngles{};
-  KLFitter::LikelihoodTopLeptonJets_Angular::LeptonType
-      m_leptonTypeKLFitterEnum_Angular{};
-  KLFitter::LikelihoodTTZTrilepton::LeptonType m_leptonTypeKLFitterEnum_TTZ{};
-  KLFitter::BoostedLikelihoodTopLeptonJets::LeptonType
-      m_leptonTypeKLFitterEnum_BoostedLJets{};
-
-  std::unique_ptr<KLFitter::LikelihoodTopLeptonJets> m_myLikelihood;
-  std::unique_ptr<KLFitter::LikelihoodTTHLeptonJets> m_myLikelihood_TTH;
-  std::unique_ptr<KLFitter::LikelihoodTopLeptonJets_JetAngles>
-      m_myLikelihood_JetAngles;
-  std::unique_ptr<KLFitter::LikelihoodTopLeptonJets_Angular>
-      m_myLikelihood_Angular;
-  std::unique_ptr<KLFitter::LikelihoodTTZTrilepton> m_myLikelihood_TTZ;
-  std::unique_ptr<KLFitter::LikelihoodTopAllHadronic>
-      m_myLikelihood_AllHadronic;
-  std::unique_ptr<KLFitter::BoostedLikelihoodTopLeptonJets>
-      m_myLikelihood_BoostedLJets;
+  std::unique_ptr<KLFitter::LikelihoodBase> m_likelihood;
 
   ToolHandle<IBTaggingEfficiencyTool> m_btagging_eff_tool{
       this, "btagEffTool", "", "the b-tagging efficiency tool"};
 
-  std::unique_ptr<SG::ConstAccessor<char>> m_bTagDecoAcc;
+  std::optional<SG::ConstAccessor<char>> m_bTagDecoAcc;
+
+  // single-jet container used to query the b-tagging efficiencies
+  xAOD::JetAuxContainer m_effJetsAux;
+  xAOD::JetContainer m_effJets;
+  xAOD::Jet *m_effJet{nullptr};
 };
 }  // namespace EventReco
 

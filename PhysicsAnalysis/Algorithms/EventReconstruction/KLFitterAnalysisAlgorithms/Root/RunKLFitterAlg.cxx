@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Oliver Majersky
@@ -32,14 +32,14 @@ StatusCode RunKLFitterAlg::initialize() {
   ANA_CHECK(m_systematicsList.initialize());
 
   // parse likelihood type
-  try {
-    m_LHTypeEnum = KLFEnums::strToLikelihood.at(m_LHType.value());
-  } catch (std::out_of_range &) {
+  const auto lhIt = KLFEnums::strToLikelihood.find(m_LHType.value());
+  if (lhIt == KLFEnums::strToLikelihood.end()) {
     ANA_MSG_ERROR("Unrecognized KLFitter likelihood: "
                   << m_LHType.value() << ". Available options: "
                   << KLFEnums::printEnumOptions(KLFEnums::strToLikelihood));
     return StatusCode::FAILURE;
   }
+  m_LHTypeEnum = lhIt->second;
 
   if (m_LHTypeEnum == KLFEnums::Likelihood::ttbar_JetAngles) {
     ANA_MSG_ERROR("The ttbar_JetAngles likelihood is currently not supported!");
@@ -47,55 +47,54 @@ StatusCode RunKLFitterAlg::initialize() {
   }
 
   // parse lepton type
-  try {
-    m_leptonTypeEnum = KLFEnums::strToLeptonType.at(m_leptonType.value());
-    if (m_leptonTypeEnum != KLFEnums::LeptonType::kNoLepton &&
-        m_LHTypeEnum == KLFEnums::Likelihood::ttbar_AllHad) {
-      ANA_MSG_ERROR(
-          "If using ttbar_AllHad likelihood, please use leptonType = "
-          "kNoLepton.");
-      return StatusCode::FAILURE;
-    }
-  } catch (std::out_of_range &) {
+  const auto leptonIt = KLFEnums::strToLeptonType.find(m_leptonType.value());
+  if (leptonIt == KLFEnums::strToLeptonType.end()) {
     ANA_MSG_ERROR("Unrecognized KLFitter leptonType: "
                   << m_leptonType.value() << ". Available options: "
                   << KLFEnums::printEnumOptions(KLFEnums::strToLeptonType));
     return StatusCode::FAILURE;
   }
+  m_leptonTypeEnum = leptonIt->second;
+  if (m_leptonTypeEnum != KLFEnums::LeptonType::kNoLepton &&
+      m_LHTypeEnum == KLFEnums::Likelihood::ttbar_AllHad) {
+    ANA_MSG_ERROR(
+        "If using ttbar_AllHad likelihood, please use leptonType = "
+        "kNoLepton.");
+    return StatusCode::FAILURE;
+  }
 
   // parse jet selection
-  try {
-    m_jetSelectionModeEnum =
-        KLFEnums::strToJetSelection.at(m_jetSelectionMode.value());
-  } catch (std::out_of_range &) {
+  const auto jetSelIt =
+      KLFEnums::strToJetSelection.find(m_jetSelectionMode.value());
+  if (jetSelIt == KLFEnums::strToJetSelection.end()) {
     ANA_MSG_ERROR("Unrecognized KLFitter JetSelectionMode: "
                   << m_jetSelectionMode.value() << ". Available options: "
                   << KLFEnums::printEnumOptions(KLFEnums::strToJetSelection));
     return StatusCode::FAILURE;
   }
+  m_jetSelectionModeEnum = jetSelIt->second;
 
   if (m_jetSelectionModeEnum > KLFEnums::JetSelectionMode::kLeadingEight)
     m_useBtagPriority = true;
-  try {
-    m_njetsRequirement = KLFEnums::jetSelToNumber.at(m_jetSelectionModeEnum);
-  } catch (std::out_of_range &) {
+  const auto njetsIt = KLFEnums::jetSelToNumber.find(m_jetSelectionModeEnum);
+  if (njetsIt == KLFEnums::jetSelToNumber.end()) {
     ANA_MSG_ERROR(
         "Could not parse the number of required jets from KLFitter jet "
         "selection mode: "
         << m_jetSelectionMode.value());
     return StatusCode::FAILURE;
   }
+  m_njetsRequirement = njetsIt->second;
 
   // parse b-tagging method
-  try {
-    m_bTaggingMethodEnum =
-        KLFEnums::strToBtagMethod.at(m_bTaggingMethod.value());
-  } catch (std::out_of_range &) {
+  const auto btagIt = KLFEnums::strToBtagMethod.find(m_bTaggingMethod.value());
+  if (btagIt == KLFEnums::strToBtagMethod.end()) {
     ANA_MSG_ERROR("Unrecognized KLFitter BTaggingMethod: "
                   << m_bTaggingMethod.value() << ". Available options: "
                   << KLFEnums::printEnumOptions(KLFEnums::strToBtagMethod));
     return StatusCode::FAILURE;
   }
+  m_bTaggingMethodEnum = btagIt->second;
 
   // setup the KLFitter::Fitter instance
   m_myFitter = std::make_unique<KLFitter::Fitter>();
@@ -109,156 +108,95 @@ StatusCode RunKLFitterAlg::initialize() {
     return StatusCode::FAILURE;
   }
 
-  // create the likelihoods
-  m_myLikelihood = std::make_unique<KLFitter::LikelihoodTopLeptonJets>();
-  m_myLikelihood_TTH = std::make_unique<KLFitter::LikelihoodTTHLeptonJets>();
-  m_myLikelihood_JetAngles =
-      std::make_unique<KLFitter::LikelihoodTopLeptonJets_JetAngles>();
-  m_myLikelihood_Angular =
-      std::make_unique<KLFitter::LikelihoodTopLeptonJets_Angular>();
-  m_myLikelihood_TTZ = std::make_unique<KLFitter::LikelihoodTTZTrilepton>();
-  m_myLikelihood_AllHadronic =
-      std::make_unique<KLFitter::LikelihoodTopAllHadronic>();
-  m_myLikelihood_BoostedLJets =
-      std::make_unique<KLFitter::BoostedLikelihoodTopLeptonJets>();
-
-  // SetleptonType
+  // validate the lepton type for the leptonic likelihoods
   if (m_LHTypeEnum != KLFEnums::Likelihood::ttbar_AllHad) {
-    if (m_leptonTypeEnum == KLFEnums::LeptonType::kElectron) {
-      m_leptonTypeKLFitterEnum =
-          KLFitter::LikelihoodTopLeptonJets::LeptonType::kElectron;
-      m_leptonTypeKLFitterEnum_TTH =
-          KLFitter::LikelihoodTTHLeptonJets::LeptonType::kElectron;
-      m_leptonTypeKLFitterEnum_JetAngles =
-          KLFitter::LikelihoodTopLeptonJets_JetAngles::LeptonType::kElectron;
-      m_leptonTypeKLFitterEnum_Angular =
-          KLFitter::LikelihoodTopLeptonJets_Angular::LeptonType::kElectron;
-      m_leptonTypeKLFitterEnum_TTZ =
-          KLFitter::LikelihoodTTZTrilepton::LeptonType::kElectron;
-      m_leptonTypeKLFitterEnum_BoostedLJets =
-          KLFitter::BoostedLikelihoodTopLeptonJets::LeptonType::kElectron;
-    } else if (m_leptonTypeEnum == KLFEnums::LeptonType::kMuon) {
-      m_leptonTypeKLFitterEnum =
-          KLFitter::LikelihoodTopLeptonJets::LeptonType::kMuon;
-      m_leptonTypeKLFitterEnum_TTH =
-          KLFitter::LikelihoodTTHLeptonJets::LeptonType::kMuon;
-      m_leptonTypeKLFitterEnum_JetAngles =
-          KLFitter::LikelihoodTopLeptonJets_JetAngles::LeptonType::kMuon;
-      m_leptonTypeKLFitterEnum_Angular =
-          KLFitter::LikelihoodTopLeptonJets_Angular::LeptonType::kMuon;
-      m_leptonTypeKLFitterEnum_TTZ =
-          KLFitter::LikelihoodTTZTrilepton::LeptonType::kMuon;
-      m_leptonTypeKLFitterEnum_BoostedLJets =
-          KLFitter::BoostedLikelihoodTopLeptonJets::LeptonType::kMuon;
-    } else if (m_leptonTypeEnum == KLFEnums::LeptonType::kTriElectron) {
-      if (m_LHType.value() != KLFEnums::Likelihood::ttZTrilepton) {
-        ANA_MSG_ERROR(
-            " LeptonType kTriElectron is only defined for the ttZTrilepton "
-            "likelihood");
+    if (m_leptonTypeEnum == KLFEnums::LeptonType::kTriElectron ||
+        m_leptonTypeEnum == KLFEnums::LeptonType::kTriMuon) {
+      if (m_LHTypeEnum != KLFEnums::Likelihood::ttZTrilepton) {
+        ANA_MSG_ERROR(" LeptonType " << m_leptonType.value()
+                                     << " is only defined for the "
+                                        "ttZTrilepton likelihood");
         return StatusCode::FAILURE;
       }
-      m_leptonTypeKLFitterEnum =
-          KLFitter::LikelihoodTopLeptonJets::LeptonType::kElectron;
-      m_leptonTypeKLFitterEnum_TTH =
-          KLFitter::LikelihoodTTHLeptonJets::LeptonType::kElectron;
-      m_leptonTypeKLFitterEnum_JetAngles =
-          KLFitter::LikelihoodTopLeptonJets_JetAngles::LeptonType::kElectron;
-      m_leptonTypeKLFitterEnum_TTZ =
-          KLFitter::LikelihoodTTZTrilepton::LeptonType::kElectron;
-      m_leptonTypeKLFitterEnum_BoostedLJets =
-          KLFitter::BoostedLikelihoodTopLeptonJets::LeptonType::kElectron;
-    } else if (m_leptonTypeEnum == KLFEnums::LeptonType::kTriMuon) {
-      if (m_LHType.value() != KLFEnums::Likelihood::ttZTrilepton) {
-        ANA_MSG_ERROR(
-            " LeptonType kTriMuon is only defined for the ttZTrilepton "
-            "likelihood");
-        return StatusCode::FAILURE;
-      }
-      m_leptonTypeKLFitterEnum =
-          KLFitter::LikelihoodTopLeptonJets::LeptonType::kMuon;
-      m_leptonTypeKLFitterEnum_TTH =
-          KLFitter::LikelihoodTTHLeptonJets::LeptonType::kMuon;
-      m_leptonTypeKLFitterEnum_JetAngles =
-          KLFitter::LikelihoodTopLeptonJets_JetAngles::LeptonType::kMuon;
-      m_leptonTypeKLFitterEnum_TTZ =
-          KLFitter::LikelihoodTTZTrilepton::LeptonType::kMuon;
-      m_leptonTypeKLFitterEnum_BoostedLJets =
-          KLFitter::BoostedLikelihoodTopLeptonJets::LeptonType::kMuon;
-    } else {
+    } else if (m_leptonTypeEnum != KLFEnums::LeptonType::kElectron &&
+               m_leptonTypeEnum != KLFEnums::LeptonType::kMuon) {
       ANA_MSG_ERROR(" Please supply a valid LeptonType : kElectron or kMuon");
       return StatusCode::FAILURE;
     }
-
-    m_myLikelihood->SetLeptonType(m_leptonTypeKLFitterEnum);
-    m_myLikelihood_TTH->SetLeptonType(m_leptonTypeKLFitterEnum_TTH);
-    m_myLikelihood_JetAngles->SetLeptonType(m_leptonTypeKLFitterEnum_JetAngles);
-    m_myLikelihood_Angular->SetLeptonType(m_leptonTypeKLFitterEnum_Angular);
-    m_myLikelihood_TTZ->SetLeptonType(m_leptonTypeKLFitterEnum_TTZ);
-    m_myLikelihood_BoostedLJets->SetLeptonType(
-        m_leptonTypeKLFitterEnum_BoostedLJets);
   }
 
-  m_myLikelihood->SetBTagging(m_bTaggingMethodEnum);
-  m_myLikelihood_TTH->SetBTagging(m_bTaggingMethodEnum);
-  m_myLikelihood_JetAngles->SetBTagging(m_bTaggingMethodEnum);
-  m_myLikelihood_Angular->SetBTagging(m_bTaggingMethodEnum);
-  m_myLikelihood_TTZ->SetBTagging(m_bTaggingMethodEnum);
-  m_myLikelihood_AllHadronic->SetBTagging(m_bTaggingMethodEnum);
-  m_myLikelihood_BoostedLJets->SetBTagging(m_bTaggingMethodEnum);
-  // set top mass
-  m_myLikelihood->PhysicsConstants()->SetMassTop(m_massTop);
-  m_myLikelihood_TTH->PhysicsConstants()->SetMassTop(m_massTop);
-  m_myLikelihood_JetAngles->PhysicsConstants()->SetMassTop(m_massTop);
-  m_myLikelihood_Angular->PhysicsConstants()->SetMassTop(m_massTop);
-  m_myLikelihood_TTZ->PhysicsConstants()->SetMassTop(m_massTop);
-  m_myLikelihood_AllHadronic->PhysicsConstants()->SetMassTop(m_massTop);
-  m_myLikelihood_BoostedLJets->PhysicsConstants()->SetMassTop(m_massTop);
+  // create the likelihood; the settings are applied on the concrete type
+  // before handing it over as a KLFitter::LikelihoodBase
+  const bool useElectrons =
+      m_leptonTypeEnum == KLFEnums::LeptonType::kElectron ||
+      m_leptonTypeEnum == KLFEnums::LeptonType::kTriElectron;
+  auto configureCommon = [this](auto &likelihood) {
+    likelihood.SetBTagging(m_bTaggingMethodEnum);
+    // set top mass
+    likelihood.PhysicsConstants()->SetMassTop(m_massTop);
+    // whether the top mass is fixed to the constant in likelihood or not
+    likelihood.SetFlagTopMassFixed(m_fixedTopMass);
+  };
+  auto makeLeptonic = [&](auto likelihood)
+      -> std::unique_ptr<KLFitter::LikelihoodBase> {
+    using LH = typename decltype(likelihood)::element_type;
+    likelihood->SetLeptonType(useElectrons ? LH::LeptonType::kElectron
+                                           : LH::LeptonType::kMuon);
+    configureCommon(*likelihood);
+    return likelihood;
+  };
 
-  // whether the top mass is fixed to the constant in likelihood or not
-  m_myLikelihood->SetFlagTopMassFixed(m_fixedTopMass);
-  m_myLikelihood_TTH->SetFlagTopMassFixed(m_fixedTopMass);
-  m_myLikelihood_JetAngles->SetFlagTopMassFixed(m_fixedTopMass);
-  m_myLikelihood_Angular->SetFlagTopMassFixed(m_fixedTopMass);
-  m_myLikelihood_TTZ->SetFlagTopMassFixed(m_fixedTopMass);
-  m_myLikelihood_AllHadronic->SetFlagTopMassFixed(m_fixedTopMass);
-  m_myLikelihood_BoostedLJets->SetFlagTopMassFixed(m_fixedTopMass);
-
-  // configure which likelihood to use in the fitter
-  int klfitter_returncode = 0;
-  if (m_LHTypeEnum == KLFEnums::Likelihood::ttbar) {
-    klfitter_returncode = m_myFitter->SetLikelihood(m_myLikelihood.get());
-  } else if (m_LHTypeEnum == KLFEnums::Likelihood::ttH) {
-    klfitter_returncode = m_myFitter->SetLikelihood(m_myLikelihood_TTH.get());
-  } else if (m_LHTypeEnum == KLFEnums::Likelihood::ttbar_JetAngles) {
-    klfitter_returncode =
-        m_myFitter->SetLikelihood(m_myLikelihood_JetAngles.get());
-  } else if (m_LHTypeEnum == KLFEnums::Likelihood::ttbar_Angular) {
-    klfitter_returncode =
-        m_myFitter->SetLikelihood(m_myLikelihood_Angular.get());
-  } else if (m_LHTypeEnum == KLFEnums::Likelihood::ttZTrilepton &&
-             (m_leptonTypeEnum == KLFEnums::LeptonType::kTriElectron ||
-              m_leptonTypeEnum == KLFEnums::LeptonType::kTriMuon)) {
-    // For ttZ->trilepton, we can have difficult combinations of leptons in the
-    // final state (3x same flavour, or mixed case). The latter is trivial, for
-    // which we can default back to the ljets likelihood. So we distinguish
-    // here:
-    //  - kTriMuon, kTriElectron: dedicated TTZ->trilepton likelihood,
-    //  - kMuon, kElectron: standard ttbar->l+jets likelihood.
-    klfitter_returncode = m_myFitter->SetLikelihood(m_myLikelihood_TTZ.get());
-  } else if (m_LHTypeEnum == KLFEnums::Likelihood::ttZTrilepton) {
-    klfitter_returncode = m_myFitter->SetLikelihood(m_myLikelihood.get());
-  } else if (m_LHTypeEnum == KLFEnums::Likelihood::ttbar_AllHad) {
-    klfitter_returncode =
-        m_myFitter->SetLikelihood(m_myLikelihood_AllHadronic.get());
-  } else if (m_LHTypeEnum == KLFEnums::Likelihood::ttbar_BoostedLJets) {
-    klfitter_returncode =
-        m_myFitter->SetLikelihood(m_myLikelihood_BoostedLJets.get());
-  } else {
+  switch (m_LHTypeEnum) {
+    case KLFEnums::Likelihood::ttbar:
+      m_likelihood = makeLeptonic(
+          std::make_unique<KLFitter::LikelihoodTopLeptonJets>());
+      break;
+    case KLFEnums::Likelihood::ttH:
+      m_likelihood = makeLeptonic(
+          std::make_unique<KLFitter::LikelihoodTTHLeptonJets>());
+      break;
+    case KLFEnums::Likelihood::ttbar_JetAngles:
+      m_likelihood = makeLeptonic(
+          std::make_unique<KLFitter::LikelihoodTopLeptonJets_JetAngles>());
+      break;
+    case KLFEnums::Likelihood::ttbar_Angular:
+      m_likelihood = makeLeptonic(
+          std::make_unique<KLFitter::LikelihoodTopLeptonJets_Angular>());
+      break;
+    case KLFEnums::Likelihood::ttZTrilepton:
+      // For ttZ->trilepton, we can have difficult combinations of leptons in
+      // the final state (3x same flavour, or mixed case). The latter is
+      // trivial, for which we can default back to the ljets likelihood. So we
+      // distinguish here:
+      //  - kTriMuon, kTriElectron: dedicated TTZ->trilepton likelihood,
+      //  - kMuon, kElectron: standard ttbar->l+jets likelihood.
+      if (m_leptonTypeEnum == KLFEnums::LeptonType::kTriElectron ||
+          m_leptonTypeEnum == KLFEnums::LeptonType::kTriMuon) {
+        m_likelihood = makeLeptonic(
+            std::make_unique<KLFitter::LikelihoodTTZTrilepton>());
+      } else {
+        m_likelihood = makeLeptonic(
+            std::make_unique<KLFitter::LikelihoodTopLeptonJets>());
+      }
+      break;
+    case KLFEnums::Likelihood::ttbar_BoostedLJets:
+      m_likelihood = makeLeptonic(
+          std::make_unique<KLFitter::BoostedLikelihoodTopLeptonJets>());
+      break;
+    case KLFEnums::Likelihood::ttbar_AllHad: {
+      auto likelihood = std::make_unique<KLFitter::LikelihoodTopAllHadronic>();
+      configureCommon(*likelihood);
+      m_likelihood = std::move(likelihood);
+      break;
+    }
+  }
+  if (!m_likelihood) {
     ANA_MSG_ERROR("Unrecognized KLFitter likelihood: " << m_LHType.value());
     return StatusCode::FAILURE;
   }
 
-  if (!klfitter_returncode) {
+  // configure which likelihood to use in the fitter
+  if (!m_myFitter->SetLikelihood(m_likelihood.get())) {
     ANA_MSG_ERROR("Failed to SetLikelihood for likelihood "
                   << m_LHType.value());
     return StatusCode::FAILURE;
@@ -268,12 +206,14 @@ StatusCode RunKLFitterAlg::initialize() {
     ANA_MSG_ERROR("KLFitter cannot run using Continuous b-tag working point!");
     return StatusCode::FAILURE;
   }
-  m_bTagDecoAcc = std::make_unique<SG::ConstAccessor<char>>(
-      m_bTagDecoration.value());
+  m_bTagDecoAcc.emplace(m_bTagDecoration.value());
 
   if (m_bTaggingMethodEnum ==
       KLFitter::LikelihoodBase::BtaggingMethod::kWorkingPoint) {
     ANA_CHECK(m_btagging_eff_tool.retrieve());
+    // single-jet container reused to query the b-tagging efficiencies
+    m_effJets.setStore(&m_effJetsAux);
+    m_effJet = m_effJets.push_back(std::make_unique<xAOD::Jet>());
   }
 
   ANA_MSG_INFO("++++++++++++++++++++++++++++++");
@@ -296,14 +236,15 @@ StatusCode RunKLFitterAlg::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode RunKLFitterAlg::execute(const EventContext& /*ctx*/) {
+StatusCode RunKLFitterAlg::execute(const EventContext& ctx) {
   for (const auto &sys : m_systematicsList.systematicsVector()) {
-    ANA_CHECK(execute_syst(sys));
+    ANA_CHECK(execute_syst(sys, ctx));
   }
   return StatusCode::SUCCESS;
 }
 
-StatusCode RunKLFitterAlg::execute_syst(const CP::SystematicSet &sys) {
+StatusCode RunKLFitterAlg::execute_syst(const CP::SystematicSet &sys,
+                                        const EventContext &ctx) {
   // run KLFitter
   // create an instance of the particles class filled with the particles to be
   // fitted; here, you need to make sure that
@@ -314,7 +255,7 @@ StatusCode RunKLFitterAlg::execute_syst(const CP::SystematicSet &sys) {
   //   (many particles lead to many permutations to be considered and hence a
   //   long running time and not necessarily good fitting results due to the
   //   many available permutations)
-  // the arguments taken py AddParticle() are
+  // the arguments taken by AddParticle() are
   // - TLorentzVector of the physics 4-momentum
   // - detector eta for the evaluation of the transfer functions (for muons:
   // just use the physics eta)
@@ -328,22 +269,22 @@ StatusCode RunKLFitterAlg::execute_syst(const CP::SystematicSet &sys) {
   // first figure out if this event even passes the selection in which we are to
   // run this KLFitter instance
   const xAOD::EventInfo *evtInfo = nullptr;
-  ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys));
+  ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys, ctx));
 
   if (!m_selection.getBool(*evtInfo, sys))
     return StatusCode::SUCCESS;
 
   const xAOD::ElectronContainer *electrons = nullptr;
-  ANA_CHECK(m_electronsHandle.retrieve(electrons, sys));
+  ANA_CHECK(m_electronsHandle.retrieve(electrons, sys, ctx));
   const xAOD::MuonContainer *muons = nullptr;
-  ANA_CHECK(m_muonsHandle.retrieve(muons, sys));
+  ANA_CHECK(m_muonsHandle.retrieve(muons, sys, ctx));
   const xAOD::JetContainer *jets = nullptr;
-  ANA_CHECK(m_jetsHandle.retrieve(jets, sys));
+  ANA_CHECK(m_jetsHandle.retrieve(jets, sys, ctx));
   const xAOD::MissingETContainer *met = nullptr;
-  ANA_CHECK(m_metHandle.retrieve(met, sys));
+  ANA_CHECK(m_metHandle.retrieve(met, sys, ctx));
 
   // perform selection of objects
-  KLFitter::Particles *myParticles = new KLFitter::Particles{};
+  auto myParticles = std::make_unique<KLFitter::Particles>();
 
   std::vector<const xAOD::Electron *> selected_electrons;
   std::vector<const xAOD::Muon *> selected_muons;
@@ -378,13 +319,13 @@ StatusCode RunKLFitterAlg::execute_syst(const CP::SystematicSet &sys) {
   // add leptons to KLFitter particles (not for ttbar all hadronic)
   if (m_LHTypeEnum != KLFEnums::Likelihood::ttbar_AllHad)
     ANA_CHECK(add_leptons(selected_sorted_electrons, selected_sorted_muons,
-                          myParticles));
+                          myParticles.get()));
 
   // add jets to KLFitter particles
-  ANA_CHECK(add_jets(selected_sorted_jets, myParticles));
+  ANA_CHECK(add_jets(selected_sorted_jets, myParticles.get()));
 
   // add the particles to the fitter itself
-  if (!m_myFitter->SetParticles(myParticles)) {
+  if (!m_myFitter->SetParticles(myParticles.get())) {
     ANA_MSG_ERROR("Error adding particles to KLFitter");
     return StatusCode::FAILURE;
   }
@@ -403,10 +344,8 @@ StatusCode RunKLFitterAlg::execute_syst(const CP::SystematicSet &sys) {
     return StatusCode::FAILURE;
   }
 
-  ANA_CHECK(
-      evaluatePermutations(sys, electron_indices, muon_indices, jet_indices));
-
-  delete myParticles;
+  ANA_CHECK(evaluatePermutations(sys, ctx, electron_indices, muon_indices,
+                                 jet_indices));
 
   return StatusCode::SUCCESS;
 }
@@ -428,6 +367,10 @@ StatusCode RunKLFitterAlg::add_leptons(
       return StatusCode::FAILURE;
     }
     const xAOD::Electron *xaod_el = selected_electrons.at(0);
+    if (!xaod_el->caloCluster()) {
+      ANA_MSG_ERROR("Selected electron has no associated calo cluster");
+      return StatusCode::FAILURE;
+    }
     el.SetPtEtaPhiE(xaod_el->pt() / 1.e3, xaod_el->eta(), xaod_el->phi(),
                     xaod_el->e() / 1.e3);
     myParticles->AddParticle(&el, xaod_el->caloCluster()->etaBE(2),
@@ -455,6 +398,10 @@ StatusCode RunKLFitterAlg::add_leptons(
     TLorentzVector el;
     for (size_t i = 0; i < 3; ++i) {
       const xAOD::Electron *electron = selected_electrons.at(i);
+      if (!electron->caloCluster()) {
+        ANA_MSG_ERROR("Selected electron has no associated calo cluster");
+        return StatusCode::FAILURE;
+      }
       el.SetPtEtaPhiE(electron->pt() / 1.e3, electron->eta(), electron->phi(),
                       electron->e() / 1.e3);
       myParticles->AddParticle(&el, electron->caloCluster()->etaBE(2),
@@ -464,7 +411,7 @@ StatusCode RunKLFitterAlg::add_leptons(
              KLFEnums::LeptonType::kTriMuon) {  // ttZ trilep
     if (selected_muons.size() < 3) {
       ANA_MSG_ERROR(
-          "For tr-lepton kTriMuons KLFitter likelihoods, at least 3 muons are "
+          "For tri-lepton kTriMuon KLFitter likelihoods, at least 3 muons are "
           "required");
       return StatusCode::FAILURE;
     }
@@ -506,36 +453,54 @@ StatusCode RunKLFitterAlg::setJetskLeadingN(
   size_t index(0);
 
   for (const xAOD::Jet *jet : jets) {
-    if (index > njets - 1)
+    if (index >= njets)
       break;
 
-    TLorentzVector jet_p4;
-    jet_p4.SetPtEtaPhiE(jet->pt() / 1.e3, jet->eta(), jet->phi(),
-                        jet->e() / 1.e3);
-
-    float eff(0), ineff(0);
-
-    if (!m_bTagDecoAcc->isAvailable(*jet)) {
-      ANA_MSG_ERROR("RunKLFitterAlg::setJetskLeadingX: jet does not have "
-                    << m_bTagDecoration.value() << " aux variable!");
-      return StatusCode::FAILURE;
-    }
-
-    const bool isTagged = (*m_bTagDecoAcc)(*jet);
-
-    if (m_bTaggingMethodEnum ==
-        KLFitter::LikelihoodBase::BtaggingMethod::kWorkingPoint) {
-      ANA_CHECK(retrieveEfficiencies(jet, &eff, &ineff))
-
-      inputParticles->AddParticle(
-          &jet_p4, jet_p4.Eta(), KLFitter::Particles::kParton, "", index,
-          isTagged, eff, 1. / ineff, KLFitter::Particles::kNone);
-    } else {
-      inputParticles->AddParticle(&jet_p4, jet_p4.Eta(),
-                                  KLFitter::Particles::kParton, "", index,
-                                  isTagged);
-    }
+    bool isTagged(false);
+    ANA_CHECK(getBTagDecision(*jet, isTagged));
+    ANA_CHECK(addJet(jet, index, isTagged, inputParticles));
     ++index;
+  }
+  return StatusCode::SUCCESS;
+}
+
+StatusCode RunKLFitterAlg::getBTagDecision(const xAOD::Jet &jet,
+                                           bool &isTagged) const {
+  if (!m_bTagDecoAcc->isAvailable(jet)) {
+    ANA_MSG_ERROR("RunKLFitterAlg: jet does not have "
+                  << m_bTagDecoration.value() << " aux variable!");
+    return StatusCode::FAILURE;
+  }
+  isTagged = (*m_bTagDecoAcc)(jet);
+  return StatusCode::SUCCESS;
+}
+
+StatusCode RunKLFitterAlg::addJet(const xAOD::Jet *jet, const size_t index,
+                                  const bool isTagged,
+                                  KLFitter::Particles *inputParticles) {
+  TLorentzVector jet_p4;
+  jet_p4.SetPtEtaPhiE(jet->pt() / 1.e3, jet->eta(), jet->phi(),
+                      jet->e() / 1.e3);
+
+  if (m_bTaggingMethodEnum ==
+      KLFitter::LikelihoodBase::BtaggingMethod::kWorkingPoint) {
+    float eff(0), ineff(0);
+    ANA_CHECK(retrieveEfficiencies(jet, &eff, &ineff));
+
+    static const float minIneff = 1e-6;
+    if (ineff < minIneff) {
+      ANA_MSG_WARNING("RunKLFitterAlg: light-jet mistag inefficiency "
+                       << ineff << " below minimum " << minIneff
+                       << ", clamping rejection weight");
+    }
+    inputParticles->AddParticle(&jet_p4, jet_p4.Eta(),
+                                KLFitter::Particles::kParton, "", index,
+                                isTagged, eff, 1. / std::max(ineff, minIneff),
+                                KLFitter::Particles::kNone);
+  } else {
+    inputParticles->AddParticle(&jet_p4, jet_p4.Eta(),
+                                KLFitter::Particles::kParton, "", index,
+                                isTagged);
   }
   return StatusCode::SUCCESS;
 }
@@ -544,11 +509,7 @@ StatusCode RunKLFitterAlg::retrieveEfficiencies(const xAOD::Jet *jet,
                                                 float *eff, float *ineff) {
   // need to make a copy of the jet, so that we can manipulate its flavour to
   // get the various efficiencies
-  xAOD::JetContainer jets;
-  xAOD::JetAuxContainer jetsAux;
-  jets.setStore(&jetsAux);
-  xAOD::Jet *jet_copy = new xAOD::Jet();
-  jets.push_back(jet_copy);
+  xAOD::Jet *jet_copy = m_effJet;
   *jet_copy = *jet;
   jet_copy->setJetP4(jet->jetP4());
   // treat jet as b-tagged
@@ -584,30 +545,10 @@ StatusCode RunKLFitterAlg::setJetskBtagPriority(
     if (totalJets >= maxJets)
       break;
 
-    if (!m_bTagDecoAcc->isAvailable(*jet)) {
-      ANA_MSG_ERROR("RunKLFitterAlg::setJetskLeadingX: jet does not have "
-                    << m_bTagDecoration.value() << " aux variable!");
-      return StatusCode::FAILURE;
-    }
-
-    if ((*m_bTagDecoAcc)(*jet)) {
-      TLorentzVector jet_p4;
-      jet_p4.SetPtEtaPhiE(jet->pt() / 1.e3, jet->eta(), jet->phi(),
-                          jet->e() / 1.e3);
-
-      if (m_bTaggingMethodEnum ==
-          KLFitter::LikelihoodBase::BtaggingMethod::kWorkingPoint) {
-        float eff(0), ineff(0);
-        ANA_CHECK(retrieveEfficiencies(jet, &eff, &ineff));
-
-        inputParticles->AddParticle(
-            &jet_p4, jet_p4.Eta(), KLFitter::Particles::kParton, "", index,
-            true, eff, 1. / ineff, KLFitter::Particles::kNone);
-      } else {
-        inputParticles->AddParticle(&jet_p4, jet_p4.Eta(),
-                                    KLFitter::Particles::kParton, "", index,
-                                    true);
-      }
+    bool isTagged(false);
+    ANA_CHECK(getBTagDecision(*jet, isTagged));
+    if (isTagged) {
+      ANA_CHECK(addJet(jet, index, true, inputParticles));
       ++totalJets;
     }  // is b-tagged
 
@@ -619,24 +560,11 @@ StatusCode RunKLFitterAlg::setJetskBtagPriority(
   for (const xAOD::Jet *jet : jets) {
     if (totalJets >= maxJets)
       break;
-    if (!(*m_bTagDecoAcc)(*jet)) {
-      TLorentzVector jet_p4;
-      jet_p4.SetPtEtaPhiE(jet->pt() / 1.e3, jet->eta(), jet->phi(),
-                          jet->e() / 1.e3);
 
-      if (m_bTaggingMethodEnum ==
-          KLFitter::LikelihoodBase::BtaggingMethod::kWorkingPoint) {
-        float eff(0), ineff(0);
-        ANA_CHECK(retrieveEfficiencies(jet, &eff, &ineff));
-
-        inputParticles->AddParticle(
-            &jet_p4, jet_p4.Eta(), KLFitter::Particles::kParton, "", index,
-            false, eff, 1. / ineff, KLFitter::Particles::kNone);
-      } else {
-        inputParticles->AddParticle(&jet_p4, jet_p4.Eta(),
-                                    KLFitter::Particles::kParton, "", index,
-                                    false);
-      }
+    bool isTagged(false);
+    ANA_CHECK(getBTagDecision(*jet, isTagged));
+    if (!isTagged) {
+      ANA_CHECK(addJet(jet, index, false, inputParticles));
       ++totalJets;
     }  // not-btagged jet
 
@@ -646,7 +574,8 @@ StatusCode RunKLFitterAlg::setJetskBtagPriority(
 }
 
 StatusCode RunKLFitterAlg::evaluatePermutations(
-    const CP::SystematicSet &sys, const std::vector<size_t> &electron_indices,
+    const CP::SystematicSet &sys, const EventContext &ctx,
+    const std::vector<size_t> &electron_indices,
     const std::vector<size_t> &muon_indices,
     const std::vector<size_t> &jet_indices) {
   // create or retrieve (if existent) the xAOD::KLFitterResultContainer
@@ -655,19 +584,20 @@ StatusCode RunKLFitterAlg::evaluatePermutations(
   auto resultContainer = std::make_unique<xAOD::KLFitterResultContainer>();
   resultContainer->setStore(resultAuxContainer.get());
 
+  // Set name hash. This is because it seems std::string is not supported by
+  // AuxContainers...
+  const size_t selectionCode = std::hash<std::string>{}(sys.name());
+
   // loop over all permutations
   const int nperm = m_myFitter->Permutations()->NPermutations();
   for (int iperm = 0; iperm < nperm; ++iperm) {
     // Perform the fit
     m_myFitter->Fit(iperm);
     // create a result
-    xAOD::KLFitterResult *result = new xAOD::KLFitterResult{};
-    resultContainer->push_back(result);
+    xAOD::KLFitterResult *result =
+        resultContainer->push_back(std::make_unique<xAOD::KLFitterResult>());
 
-    // Set name hash. This is because it seems std::string is not supported by
-    // AuxContainers...
-    std::hash<std::string> hash_string;
-    result->setSelectionCode(hash_string(sys.name()));
+    result->setSelectionCode(selectionCode);
 
     unsigned int ConvergenceStatusBitWord = m_myFitter->ConvergenceStatus();
     bool MinuitDidNotConverge =
@@ -860,7 +790,8 @@ StatusCode RunKLFitterAlg::evaluatePermutations(
   // Normalize event probability to unity
   // work out best permutation
   float sumEventProbability(0.), bestEventProbability(0.);
-  size_t bestPermutation(999), iPerm(0);
+  std::optional<size_t> bestPermutation;
+  size_t iPerm(0);
 
   // First loop
   for (auto x : *resultContainer) {
@@ -891,11 +822,21 @@ StatusCode RunKLFitterAlg::evaluatePermutations(
     }
   }
 
+  if (!bestPermutation) {
+    ANA_MSG_DEBUG("No KLFitter permutation passed the convergence criteria");
+  }
+  if (!resultContainer->empty() && sumEventProbability == 0.) {
+    ANA_MSG_WARNING(
+        "Sum of KLFitter event probabilities is zero, event probabilities are "
+        "not normalized");
+  }
+
   // Second loop
   iPerm = 0;
   for (auto x : *resultContainer) {
-    x->setEventProbability(x->eventProbability() / sumEventProbability);
-    if (iPerm == bestPermutation) {
+    if (sumEventProbability != 0.)
+      x->setEventProbability(x->eventProbability() / sumEventProbability);
+    if (bestPermutation && iPerm == *bestPermutation) {
       x->setBestPermutation(1);
     } else {
       x->setBestPermutation(0);
@@ -906,7 +847,7 @@ StatusCode RunKLFitterAlg::evaluatePermutations(
   // Save all permutations
   if (m_saveAllPermutations) {
     ANA_CHECK(m_outHandle.record(std::move(resultContainer),
-                                 std::move(resultAuxContainer), sys));
+                                 std::move(resultAuxContainer), sys, ctx));
   } else {  // Save only the best permutation
     // create or retrieve the xAOD::KLFitterResultContainer
     auto bestContainer = std::make_unique<xAOD::KLFitterResultContainer>();
@@ -916,13 +857,13 @@ StatusCode RunKLFitterAlg::evaluatePermutations(
 
     for (auto x : *resultContainer) {
       if (x->bestPermutation() == 1) {
-        xAOD::KLFitterResult *result = new xAOD::KLFitterResult{};
+        auto result = std::make_unique<xAOD::KLFitterResult>();
         result->makePrivateStore(*x);
-        bestContainer->push_back(result);
+        bestContainer->push_back(std::move(result));
       }
     }
     ANA_CHECK(m_outHandle.record(std::move(bestContainer),
-                                 std::move(bestAuxContainer), sys));
+                                 std::move(bestAuxContainer), sys, ctx));
   }
 
   return StatusCode::SUCCESS;
