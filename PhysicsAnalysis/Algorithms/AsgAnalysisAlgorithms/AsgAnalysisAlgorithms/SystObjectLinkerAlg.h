@@ -36,7 +36,7 @@ namespace CP
   {
     /// \brief The standard constructor
 public:
-    SystObjectLinkerAlg(const std::string &name, ISvcLocator *pSvcLocator);
+    using EL::AnaReentrantAlgorithm::AnaReentrantAlgorithm;
 
     /// \brief Initialisation method, for setting up tools and other persistent
     /// configs

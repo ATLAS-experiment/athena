@@ -64,6 +64,11 @@ namespace CP
         const C& var_cont = *systhash_to_container[sys.hash()];
         for(const T* var_obj : var_cont) {
           ATH_MSG_VERBOSE("Locating nominal object from selection with variation " << sys.name());
+          if(!acc_nominalObject.isAvailable(*var_obj) || !acc_nominalObject(*var_obj).isValid()) {
+            ATH_MSG_ERROR("No valid 'nominalObjectLink' on object with index " << var_obj->index() << " for variation " << sys.name()
+                          << ". Was SystObjectLinkerAlg run on this container?");
+            return StatusCode::FAILURE;
+          }
           const T* nom_obj = static_cast<const T*>(*acc_nominalObject(*var_obj));
           auto result = passed_nominal_objects.insert(nom_obj);
           if(result.second) {
@@ -90,9 +95,15 @@ namespace CP
         // corresponding to each nominal object
         auto cdv_var = std::make_unique<ConstDataVector<C> >(
           SG::VIEW_ELEMENTS);
+        const SG::ConstAccessor<iplink_t>& acc_systLink = m_syst_link_acc.at(sys.hash());
         for(const T* nom_obj : passed_nominal_objects) {
           ATH_MSG_VERBOSE("Locating systematic object from nominal object " << nom_obj->index());
-          const T* var_obj = static_cast<const T*>(*m_syst_link_acc.at(sys.hash())(*nom_obj));
+          if(!acc_systLink.isAvailable(*nom_obj) || !acc_systLink(*nom_obj).isValid()) {
+            ATH_MSG_ERROR("No valid '" << m_syst_decor_pattern.value() << "' link on nominal object with index " << nom_obj->index()
+                          << " for variation " << sys.name() << ". Was SystObjectLinkerAlg run on this container?");
+            return StatusCode::FAILURE;
+          }
+          const T* var_obj = static_cast<const T*>(*acc_systLink(*nom_obj));
           cdv_var->push_back(var_obj);
         }
         ATH_MSG_DEBUG("Recording " << cdv_var->size() << " objects in '" << sys.name() << "' container");

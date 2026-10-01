@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -19,6 +19,9 @@
 #include <AsgDataHandles/ReadHandleKey.h>
 #include <AsgDataHandles/ReadHandle.h>
 #include <AsgDataHandles/WriteDecorHandleKey.h>
+#include <AthContainers/ConstAccessor.h>
+
+#include <optional>
 
 namespace CP
 {
@@ -90,6 +93,9 @@ namespace CP
     SG::WriteDecorHandleKey<xAOD::EventInfo> m_decRRNKey
     { this, "RandomRunNumberKey", m_baseEventInfoKey, "RandomRunNumber",
         "Name for the RandomRunNumber decoration" };
+
+    /// \brief the accessor for reading back the RandomRunNumber decoration
+    std::optional<SG::ConstAccessor<unsigned int>> m_accRRN;
 
     SG::WriteDecorHandleKey<xAOD::EventInfo> m_decRLBNKey
     { this, "RandomLumiBlockNumberKey", m_baseEventInfoKey, "RandomLumiBlockNumber",
