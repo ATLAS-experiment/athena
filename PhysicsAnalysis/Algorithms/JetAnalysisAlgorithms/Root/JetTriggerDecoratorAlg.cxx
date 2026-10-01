@@ -4,12 +4,7 @@
 
 #include "JetAnalysisAlgorithms/JetTriggerDecoratorAlg.h"
 
-#include <AthContainers/ConstAccessor.h>
-#include <xAODTrigger/jFexSRJetRoIContainer.h>
-
 #include <algorithm>
-#include <cstdint>
-#include <exception>
 #include <regex>
 #include <set>
 #include <sstream>
@@ -18,8 +13,6 @@
 #include <vector>
 
 #include "TrigCompositeUtils/ChainNameParser.h"
-#include "TrigConfData/L1Menu.h"
-#include "TrigConfData/L1Threshold.h"
 #include "TrigConfHLTData/HLTChain.h"
 
 namespace
@@ -39,28 +32,10 @@ getL1JetEt(const xAOD::jFexSRJetRoI* roi)
 }
 
 // Returns the list of fired threshold names for a Run-2 L1 RoI.
-inline std::vector<std::string>
+inline const std::vector<std::string>&
 getL1JetThresholds(const xAOD::JetRoI* roi)
 {
   return roi->thrNames();
-}
-
-inline std::vector<std::string>
-getL1JetThresholds(const xAOD::jFexSRJetRoI* roi,
-                   const std::vector<std::string>& bitToName)
-{
-  std::vector<std::string> passed;
-  static const SG::AuxElement::ConstAccessor<uint64_t>
-      thrPatternsAcc("thresholdPatterns");
-  if (!thrPatternsAcc.isAvailable(*roi)) return passed;
-  const uint64_t pat = thrPatternsAcc(*roi);
-  passed.reserve(bitToName.size());
-  for (size_t b = 0; b < bitToName.size(); ++b) {
-    if (((pat >> b) & 1ULL) && !bitToName[b].empty()) {
-      passed.push_back(bitToName[b]);
-    }
-  }
-  return passed;
 }
 
 // Parsed L1 leg token: the threshold-name (without leg multiplicity, e.g.
@@ -98,8 +73,9 @@ inline std::vector<L1LegToken> parseL1LegTokens(const std::string& l1Name) {
 
 template <typename RoI, typename Container, typename ThrAccessor>
 std::tuple<float, float, float, float, std::vector<int>> matchL1Container(
-    const xAOD::Jet* jet, const Container& container, ThrAccessor thrAccessor,
-    const std::vector<L1LegToken>& l1LegTokens, float drMax) {
+    const TLorentzVector& jetP4, const Container& container,
+    ThrAccessor thrAccessor, const std::vector<L1LegToken>& l1LegTokens,
+    float drMax) {
   const RoI* bestL1 = nullptr;
   float minDRL1 = drMax;
   std::set<int> L1Thresholds;
@@ -108,18 +84,20 @@ std::tuple<float, float, float, float, std::vector<int>> matchL1Container(
     TLorentzVector l1_jet_p4;
     l1_jet_p4.SetPtEtaPhiM(
         getL1JetEt(l1_jet), l1_jet->eta(), l1_jet->phi(), 0.);
-    const float dR = static_cast<float>(jet->p4().DeltaR(l1_jet_p4));
+    const float dR = static_cast<float>(jetP4.DeltaR(l1_jet_p4));
     if (dR < minDRL1) {
       minDRL1 = dR;
       bestL1 = l1_jet;
-      // Reset so only the finally-selected RoI's thresholds are reported.
-      L1Thresholds.clear();
-      const std::vector<std::string> thrNames = thrAccessor(l1_jet);
-      for (const L1LegToken& tok : l1LegTokens) {
-        for (const auto& thr : thrNames) {
-          if (thr == tok.name) {
-            L1Thresholds.insert(tok.threshold);
-          }
+    }
+  }
+
+  // Only the finally-selected RoI's thresholds are reported.
+  if (bestL1) {
+    const auto& thrNames = thrAccessor(bestL1);
+    for (const L1LegToken& tok : l1LegTokens) {
+      for (const auto& thr : thrNames) {
+        if (thr == tok.name) {
+          L1Thresholds.insert(tok.threshold);
         }
       }
     }
@@ -140,10 +118,6 @@ std::tuple<float, float, float, float, std::vector<int>> matchL1Container(
 
 namespace CP
 {
-JetTriggerDecoratorAlg::JetTriggerDecoratorAlg(const std::string& name,
-                                               ISvcLocator* svcLoc)
-    : EL::AnaAlgorithm(name, svcLoc) {}
-
   StatusCode JetTriggerDecoratorAlg::initialize() {
     ANA_CHECK(m_jetsHandle.initialize(m_systematicsList));
 
@@ -173,53 +147,42 @@ JetTriggerDecoratorAlg::JetTriggerDecoratorAlg(const std::string& name,
       ANA_CHECK(m_HLTPhi_decor.initialize(m_systematicsList, m_jetsHandle));
       ANA_CHECK(m_HLTDR_decor.initialize(m_systematicsList, m_jetsHandle));
       ANA_CHECK(m_HLTThreshold_decor.initialize(m_systematicsList, m_jetsHandle));
+
+      // The chain is job-constant: parse its "j" legs once.
+      int ileg = 0;
+      for (const ChainNameParser::LegInfo& legInfo :
+           ChainNameParser::HLTChainInfo(m_trigger.value())) {
+        if (legInfo.signature == "j") {
+          ANA_MSG_VERBOSE(" Leg" << ileg << ": "
+                                 << " " << legInfo.legName() << " "
+                                 << legInfo.type() << " "
+                                 << legInfo.signature << " "
+                                 << legInfo.threshold);
+
+          int legThreshold = legInfo.threshold;
+
+          if (legInfo.legName().find("gsc") != std::string::npos) {
+            for (const std::string& part : legInfo.legParts) {
+              if (part.find("gsc") != std::string::npos) {
+                legThreshold = std::stoi(part.substr(3));
+                ATH_MSG_DEBUG("GSC leg found. Using threshold "
+                              << legThreshold);
+                break;
+              }
+            }
+          }
+
+          m_jetLegs.push_back({ileg, legThreshold, legInfo.legName()});
+        }
+        ileg++;
+      }
+
+      m_isNavBugTrigger =
+          std::find(m_triggerNavBug.begin(), m_triggerNavBug.end(),
+                    m_trigger.value()) != m_triggerNavBug.end();
     }
 
     ANA_CHECK (m_systematicsList.initialize());
-    return StatusCode::SUCCESS;
-  }
-
-  StatusCode JetTriggerDecoratorAlg::rebuildJfexThresholdTable(
-      const EventContext& ctx) {
-    const TrigConf::L1Menu* l1menu = nullptr;
-    try {
-      l1menu = &m_trigConfigTool->l1Menu(ctx);
-    } catch (const std::exception& e) {
-      ANA_MSG_ERROR("Could not read the L1 menu in execute(): "
-                    << e.what()
-                    << ". The Phase-I jFEX threshold table "
-                       "cannot be built. Ensure TrigConf::xAODConfigSvc has "
-                       "loaded the L1 menu for this input file.");
-      return StatusCode::FAILURE;
-    }
-
-    if (m_thresholdNamesLoaded && l1menu->name() == m_cachedL1MenuName) {
-      return StatusCode::SUCCESS;
-    }
-    if (m_thresholdNamesLoaded) {
-      ANA_MSG_INFO("L1 menu changed from '"
-                   << m_cachedL1MenuName << "' to '" << l1menu->name()
-                   << "' — rebuilding jFEX threshold table");
-    }
-    const auto& thresholds = l1menu->thresholds(m_l1ThresholdType.value());
-    if (thresholds.empty()) {
-      ANA_MSG_ERROR("L1 menu '" << l1menu->name()
-                                << "' has no thresholds of type '"
-                                << m_l1ThresholdType.value() << "'");
-      return StatusCode::FAILURE;
-    }
-    m_jfexThresholdNames.clear();
-    for (const auto& thr : thresholds) {
-      const unsigned int bit = thr->mapping();
-      if (bit >= m_jfexThresholdNames.size())
-      m_jfexThresholdNames.resize(bit + 1);
-      m_jfexThresholdNames[bit] = thr->name();
-    }
-    ANA_MSG_INFO("Loaded " << m_jfexThresholdNames.size()
-                           << " jFEX threshold names from L1 menu '"
-                           << l1menu->name() << "'");
-    m_cachedL1MenuName = l1menu->name();
-    m_thresholdNamesLoaded = true;
     return StatusCode::SUCCESS;
   }
 
@@ -228,7 +191,9 @@ JetTriggerDecoratorAlg::JetTriggerDecoratorAlg(const std::string& name,
     SG::ReadHandle<xAOD::jFexSRJetRoIContainer> l1JetsPhaseI;
     if (m_doL1Matching) {
       if (m_usePhaseIL1) {
-        ANA_CHECK(rebuildJfexThresholdTable(ctx));
+        ANA_CHECK(m_jfexThresholdTable.update(m_trigConfigTool,
+                                              m_l1ThresholdType.value(), ctx,
+                                              msg()));
         l1JetsPhaseI = SG::makeHandle(m_L1JetsPhaseIInKey, ctx);
         ANA_CHECK(l1JetsPhaseI.isValid());
       } else {
@@ -259,14 +224,97 @@ JetTriggerDecoratorAlg::JetTriggerDecoratorAlg(const std::string& name,
     const TrigConf::HLTChain* hltChain =
         m_trigDecisionTool->ExperimentalAndExpertMethods()
             .getChainConfigurationDetails(m_trigger);
-    const std::string& l1Name = hltChain->lower_chain_name();
-    const std::vector<L1LegToken> l1LegTokens = parseL1LegTokens(l1Name);
+    std::vector<L1LegToken> l1LegTokens;
+    if (hltChain) {
+      l1LegTokens = parseL1LegTokens(hltChain->lower_chain_name());
+    } else {
+      // Chain not in this file's menu (e.g. a chain of another year):
+      // it cannot have fired, so only the default decorations are written.
+      if (!m_warnedMissingChain) {
+        ANA_MSG_WARNING("Trigger chain " << m_trigger.value()
+                        << " not found in the trigger menu; writing default "
+                           "matching decorations (warning printed once)");
+        m_warnedMissingChain = true;
+      }
+      isTrigPassed = false;
+    }
+
+    // HLT candidates of each "j" leg (aligned with m_jetLegs): they depend
+    // only on the event, so are collected once before the jet loops. The
+    // first nNavCandidates[i] of them come from the trigger navigation (or
+    // the Run 2 emulation), the rest from the container (nav-bug triggers).
+    std::vector<std::vector<const xAOD::IParticle*>> hltCandidates(
+        m_jetLegs.size());
+    std::vector<std::size_t> nNavCandidates(m_jetLegs.size(), 0);
+    if (m_doHLTMatching && isTrigPassed) {
+      for (std::size_t i = 0; i < m_jetLegs.size(); ++i) {
+        const JetLeg& leg = m_jetLegs[i];
+        std::vector<const xAOD::IParticle*>& candidates = hltCandidates[i];
+
+        ////////////////////////////
+        ////  Run 2 emulation  /////
+        ////////////////////////////
+
+        if (m_useEmulationTool) {
+          const auto emulated = emulatedJets.find(leg.name);
+          if (emulated != emulatedJets.end()) {
+            candidates.reserve(emulated->second.size());
+            for (const auto& jetAndBtag : emulated->second)
+              candidates.push_back(jetAndBtag.first);
+          }
+          ANA_MSG_DEBUG(" Emulated jets for " << leg.name << ": "
+                        << candidates.size());
+          nNavCandidates[i] = candidates.size();
+        }
+
+        ////////////////////////////
+        ////  Run 3 access  /////
+        ////////////////////////////
+
+        else {
+          frd.setRestrictRequestToLeg(leg.index);
+          const auto hlt_jetsFromtrigDec =
+              m_trigDecisionTool->features<xAOD::IParticleContainer>(frd);
+
+          for (const auto& hlt_jet_link : hlt_jetsFromtrigDec) {
+            const xAOD::IParticle* hlt_jetFromtrigDec = *hlt_jet_link.link;
+            if (!hlt_jetFromtrigDec)
+              continue;
+            candidates.push_back(hlt_jetFromtrigDec);
+          }
+          nNavCandidates[i] = candidates.size();
+
+          // Start adding missing HLT jets -- only for buggy triggers
+          if (m_isNavBugTrigger) {
+            for (const xAOD::Jet* jetFromCont : *hltJetsFromCont) {
+              bool alreadyIn = false;
+              for (const xAOD::IParticle* seenJet : candidates) {
+                if (isSameJet(seenJet, jetFromCont)) {
+                  alreadyIn = true;
+                  break;
+                }
+              }
+              if (alreadyIn)
+                continue;
+
+              candidates.push_back(jetFromCont);
+              ANA_MSG_DEBUG("Added missing HLT jet from container: pt="
+                            << jetFromCont->pt()
+                            << " eta=" << jetFromCont->eta()
+                            << " phi=" << jetFromCont->phi());
+            }
+          }
+        }  // end Run 3 access
+      }
+    }
 
     for (const auto& sys : m_systematicsList.systematicsVector()) {
       const xAOD::JetContainer* jets = nullptr;
       ANA_CHECK(m_jetsHandle.retrieve(jets, sys, ctx));
 
       for (const xAOD::Jet* jet : *jets) {
+        const TLorentzVector jetP4 = jet->p4();
+
         ///////////////////////////
         //////  L1 matching  //////
         ///////////////////////////
@@ -280,20 +328,21 @@ JetTriggerDecoratorAlg::JetTriggerDecoratorAlg(const std::string& name,
 
           if (isTrigPassed) {
             if (m_usePhaseIL1) {
-              const auto& jfexNames = m_jfexThresholdNames;
+              const JfexThresholdTable& jfexTable = m_jfexThresholdTable;
               std::tie(l1Et, l1Eta, l1Phi, minDRL1, l1ThresholdsVec) =
                   matchL1Container<xAOD::jFexSRJetRoI>(
-                      jet, *l1JetsPhaseI,
-                      [&jfexNames](const xAOD::jFexSRJetRoI* r) {
-                        return getL1JetThresholds(r, jfexNames);
+                      jetP4, *l1JetsPhaseI,
+                      [&jfexTable](const xAOD::jFexSRJetRoI* r) {
+                        return jfexTable.decode(*r);
                       },
                       l1LegTokens, m_l1dR.value());
             } else {
               // Legacy L1Calo path: use JetRoI::thrNames().
               std::tie(l1Et, l1Eta, l1Phi, minDRL1, l1ThresholdsVec) =
                   matchL1Container<xAOD::JetRoI>(
-                      jet, *l1Jets,
-                      [](const xAOD::JetRoI* r) {
+                      jetP4, *l1Jets,
+                      [](const xAOD::JetRoI* r)
+                          -> const std::vector<std::string>& {
                         return getL1JetThresholds(r);
                       },
                       l1LegTokens, m_l1dR.value());
@@ -316,130 +365,30 @@ JetTriggerDecoratorAlg::JetTriggerDecoratorAlg(const std::string& name,
           float minDRHLT = m_hltDR.value();
           std::set<int> HLTThresholds = {};
 
-          if (isTrigPassed) {
-            int ileg = 0;
-            for (const ChainNameParser::LegInfo& legInfo :
-                 ChainNameParser::HLTChainInfo(m_trigger)) {
-              if (legInfo.signature == "j") {
-                ANA_MSG_VERBOSE(" Leg" << ileg << ": "
-                                       << " " << legInfo.legName() << " "
-                                       << legInfo.type() << " "
-                                       << legInfo.signature << " "
-                                       << legInfo.threshold);
+          for (std::size_t i = 0; i < m_jetLegs.size(); ++i) {
+            const int legThreshold = m_jetLegs[i].threshold;
+            const std::vector<const xAOD::IParticle*>& candidates =
+                hltCandidates[i];
 
-                int legThreshold = legInfo.threshold;
+            for (std::size_t j = 0; j < candidates.size(); ++j) {
+              const xAOD::IParticle* hlt_jet = candidates[j];
+              float dR = jetP4.DeltaR(hlt_jet->p4());
 
-                if (legInfo.legName().find("gsc") != std::string::npos) {
-                  for (const std::string& part : legInfo.legParts) {
-                    if (part.find("gsc") != std::string::npos) {
-                      legThreshold = std::stoi(part.substr(3));
-                      ATH_MSG_DEBUG("GSC leg found. Using threshold "
-                                    << legThreshold);
-                      break;
-                    }
-                  }
-                }
+              ANA_MSG_VERBOSE(
+                  "  pt: " << hlt_jet->pt() << " eta: " << hlt_jet->eta()
+                           << " phi: " << hlt_jet->phi() << " dR: " << dR
+                           << " (fromContainer=" << (j >= nNavCandidates[i])
+                           << ")");
 
-                ////////////////////////////
-                ////  Run 2 emulation  /////
-                ////////////////////////////
-
-                if (m_useEmulationTool) {
-                  auto hlt_emulated_jets =
-                      emulatedJets[legInfo.legName()];  // use pre-fetched
-                                                        // emulation results
-                  ANA_MSG_DEBUG(" Emulated jets for "
-                                << legInfo.legName() << ": "
-                                << hlt_emulated_jets.size());
-
-                  for (const auto& [hlt_jet, passBtag] : hlt_emulated_jets) {
-                    float dR = jet->p4().DeltaR(hlt_jet->p4());
-                    ANA_MSG_VERBOSE("  pt: " << hlt_jet->pt()
-                                             << " eta: " << hlt_jet->eta()
-                                             << " phi: " << hlt_jet->phi()
-                                             << " dR: " << dR);
-
-                    if (bestHLT && isSameJet(bestHLT, hlt_jet))
-                      HLTThresholds.insert(legThreshold);
-                    else if (dR < minDRHLT) {
-                      minDRHLT = dR;
-                      bestHLT = hlt_jet;
-                      HLTThresholds.clear();
-                      HLTThresholds.insert(legThreshold);
-                    }
-                  }
-                }
-
-                ////////////////////////////
-                ////  Run 3 access  /////
-                ////////////////////////////
-
-                else {
-                  frd.setRestrictRequestToLeg(ileg);
-                  auto hlt_jetsFromtrigDec =
-                      m_trigDecisionTool->features<xAOD::IParticleContainer>(
-                          frd);
-                  std::vector<const xAOD::IParticle*> allHLTJets;
-
-                  for (const auto& hlt_jet_link : hlt_jetsFromtrigDec) {
-                    const xAOD::IParticle* hlt_jetFromtrigDec =
-                        *hlt_jet_link.link;
-                    if (!hlt_jetFromtrigDec)
-                      continue;
-                    allHLTJets.push_back(hlt_jetFromtrigDec);
-                  }
-
-                  // Start adding missing HLT jets -- only for buggy triggers
-                  if (std::find(m_triggerNavBug.begin(), m_triggerNavBug.end(),
-                                m_trigger.value()) != m_triggerNavBug.end()) {
-                    for (const xAOD::Jet* jetFromCont : *hltJetsFromCont) {
-                      bool alreadyIn = false;
-                      for (const xAOD::IParticle* seenJet : allHLTJets) {
-                        if (isSameJet(seenJet, jetFromCont)) {
-                          alreadyIn = true;
-                          break;
-                        }
-                      }
-                      if (alreadyIn)
-                        continue;
-
-                      allHLTJets.push_back(jetFromCont);
-                      ANA_MSG_DEBUG("Added missing HLT jet from container: pt="
-                                    << jetFromCont->pt()
-                                    << " eta=" << jetFromCont->eta()
-                                    << " phi=" << jetFromCont->phi());
-                    }
-                  }
-
-                  for (const xAOD::IParticle* hlt_jet : allHLTJets) {
-                    float dR = jet->p4().DeltaR(hlt_jet->p4());
-                    bool fromtrigDec = false;
-                    for (const auto& hlt_jet_link : hlt_jetsFromtrigDec) {
-                      if (*hlt_jet_link.link == hlt_jet) {
-                        fromtrigDec = true;
-                        break;
-                      }
-                    }
-
-                    ANA_MSG_VERBOSE(
-                        "  pt: " << hlt_jet->pt() << " eta: " << hlt_jet->eta()
-                                 << " phi: " << hlt_jet->phi() << " dR: " << dR
-                                 << " (fromContainer=" << !fromtrigDec << ")");
-
-                    if (bestHLT && isSameJet(bestHLT, hlt_jet))
-                      HLTThresholds.insert(legThreshold);
-                    else if (dR < minDRHLT) {
-                      minDRHLT = dR;
-                      bestHLT = hlt_jet;
-                      HLTThresholds.clear();
-                      HLTThresholds.insert(legThreshold);
-                    }
-                  }  // Loop over allHLTJets
-                }    // end Run 3 access
-              }  // end HLT matching
-
-              ileg++;
-            }
+              if (bestHLT && isSameJet(bestHLT, hlt_jet))
+                HLTThresholds.insert(legThreshold);
+              else if (dR < minDRHLT) {
+                minDRHLT = dR;
+                bestHLT = hlt_jet;
+                HLTThresholds.clear();
+                HLTThresholds.insert(legThreshold);
+              }
+            }  // Loop over the leg's HLT candidates
           }
 
 	  m_HLTPt_decor.set(*jet, bestHLT ? bestHLT->pt() : -99., sys);

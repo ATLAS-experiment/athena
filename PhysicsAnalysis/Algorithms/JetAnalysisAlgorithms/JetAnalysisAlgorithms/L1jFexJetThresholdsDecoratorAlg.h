@@ -10,24 +10,25 @@
 #include <AsgTools/ToolHandle.h>
 #include <AsgDataHandles/ReadHandleKey.h>
 #include <AsgDataHandles/WriteDecorHandleKey.h>
+#include <JetAnalysisAlgorithms/JfexThresholdTable.h>
 #include <xAODTrigger/jFexSRJetRoIContainer.h>
 #include <TrigConfInterfaces/ITrigConfigTool.h>
 
 namespace CP
 {
+  /// @brief an algorithm decorating each Phase-I L1 jFEX SR jet RoI with the
+  /// names of the L1 menu thresholds it passed, decoded from its
+  /// `thresholdPatterns` bits
+
   class L1jFexJetThresholdsDecoratorAlg final : public EL::AnaAlgorithm
   {
   public:
-    L1jFexJetThresholdsDecoratorAlg(const std::string& name,
-                                    ISvcLocator* svcLoc = nullptr);
+    using EL::AnaAlgorithm::AnaAlgorithm;
 
     StatusCode initialize() override;
     StatusCode execute(const EventContext& ctx) override;
 
    private:
-    // Lazily rebuilt in execute() — beginInputFile() fires before xAODConfigSvc publishes the menu (map::at).
-    StatusCode rebuildJfexThresholdTable(const EventContext& ctx);
-
     SG::ReadHandleKey<xAOD::jFexSRJetRoIContainer> m_l1JetsKey{
       this, "l1Jets", "L1_jFexSRJetRoI",
       "Phase-I L1Calo jFEX SR jet RoI container"
@@ -53,9 +54,8 @@ namespace CP
       "Trigger configuration tool (Phase-I L1 menu access)"
     };
 
-    std::vector<std::string> m_jfexThresholdNames;
-    bool m_thresholdNamesLoaded{false};
-    std::string m_cachedL1MenuName;
+    /// @brief the jFEX bit-to-name table, (re)built lazily in execute()
+    JfexThresholdTable m_jfexThresholdTable;
   };
 }
 

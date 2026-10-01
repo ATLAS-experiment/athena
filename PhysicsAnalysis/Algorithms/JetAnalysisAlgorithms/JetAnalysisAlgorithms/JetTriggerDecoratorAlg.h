@@ -8,6 +8,7 @@
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <AsgTools/PropertyWrapper.h>
 #include <AsgTools/ToolHandle.h>
+#include <JetAnalysisAlgorithms/JfexThresholdTable.h>
 #include <SystematicsHandles/SysListHandle.h>
 #include <SystematicsHandles/SysReadHandle.h>
 #include <SystematicsHandles/SysWriteDecorHandle.h>
@@ -20,21 +21,20 @@
 
 namespace CP
 {
+  /// @brief an algorithm decorating jets with the kinematics, ΔR and
+  /// thresholds of the L1 RoI and HLT jet matched to them for a given
+  /// trigger chain
+
   class JetTriggerDecoratorAlg final : public EL::AnaAlgorithm
   {
   public:
-
-    JetTriggerDecoratorAlg(const std::string &name,
-			   ISvcLocator *svcLoc = nullptr);
+    using EL::AnaAlgorithm::AnaAlgorithm;
 
     StatusCode initialize () override;
     StatusCode execute (const EventContext& ctx) override;
 
    private:
-    // Lazily rebuilt in execute() — beginInputFile() fires before xAODConfigSvc publishes the menu (map::at).
-    StatusCode rebuildJfexThresholdTable(const EventContext& ctx);
-
-    /// \brief the systematics list we run
+    /// @brief the systematics list we run
     SysListHandle m_systematicsList {this};
 
     //// Input jets and selection
@@ -100,9 +100,22 @@ namespace CP
     };
 
     // Phase-I L1 bit→name table, built lazily; rebuilt on menu-name change.
-    std::vector<std::string> m_jfexThresholdNames;
-    bool m_thresholdNamesLoaded{false};
-    std::string m_cachedL1MenuName;
+    JfexThresholdTable m_jfexThresholdTable;
+
+    /// @brief a "j" leg of the chain, parsed once in initialize()
+    struct JetLeg
+    {
+      int index = 0;       ///< leg index within the chain
+      int threshold = 0;   ///< leg threshold (the gsc threshold for gsc legs)
+      std::string name;    ///< leg name (key of the Run 2 emulation results)
+    };
+    std::vector<JetLeg> m_jetLegs;
+
+    /// @brief whether m_trigger is in m_triggerNavBug
+    bool m_isNavBugTrigger {false};
+
+    /// @brief whether we already warned about m_trigger missing from the menu
+    bool m_warnedMissingChain {false};
 
 
     Gaudi::Property<bool> m_doL1Matching{this, "doL1Matching", false,
