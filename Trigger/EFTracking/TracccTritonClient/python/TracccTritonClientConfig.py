@@ -96,18 +96,27 @@ def addTrackTruthDecorations(acc, flags, prefix, tracks_key):
 
 
 def TritonTracccTrackMakerCfg(flags, name="TritonTracccTrackMaker", **kwargs):
-    """Set up a TrackMaker algorithm and return it"""
+    """Set up traccc-as-a-service tracking: the cells of each event are sent
+    to the server, and the traccc collections it returns are converted with
+    the same algorithms as the local device chain"""
     acc = ComponentAccumulator()
 
     prefix = "Traccc"
     track_container_name = f'{prefix}Tracks'
     track_particles_name = f"{prefix}TrackParticles"
 
-    # Configure the TracccTritonTool
-    kwargs.setdefault("TracccTritonTool", acc.popToolsAndMerge(TracccTritonToolCfg(flags)))
+    # Keys of the traccc collections returned by the server, and of their conversions.
+    cells_key = "TracccCells"
+    measurements_key = "TracccTritonMeasurements"
+    clusters_key = "TracccTritonClusters"
+    traccc_tracks_key = "TracccTritonTracks"
+    pixel_key = f"{prefix}PixelClusters"
+    strip_key = f"{prefix}StripClusters"
+    meas_to_pixel_sp_key = f"{prefix}MeasToPixelSP"
+    meas_to_strip_cl_key = f"{prefix}MeasToStripCl"
 
     from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
-    kwargs.setdefault("TrackingGeometrySvc", acc.getPrimaryAndMerge(ActsTrackingGeometrySvcCfg(flags)))
+    acc.merge(ActsTrackingGeometrySvcCfg(flags))
 
     # Pixel and strip geometry
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
@@ -122,35 +131,77 @@ def TritonTracccTrackMakerCfg(flags, name="TritonTracccTrackMaker", **kwargs):
         flags = flags.cloneAndReplace("Tracking.ActiveConfig",
                                       "Tracking.ITkActsPass")
 
-    # Traccc device detector description needed for the below conversions
+    # Traccc detector description needed by the conversions
+    geo_id_mapping_name = "TracccGeometryIdMapping"
+    host_detector_name = "TracccHostDetectorGeometry"
     from ActsGPUGeometry.ActsGPUGeometryConfig import JSONDeviceDetectorDescriptionProviderSvcCfg
     acc.merge(JSONDeviceDetectorDescriptionProviderSvcCfg(flags,
         HostConditionsObjectName="TracccHostCondConfig",
         HostDigitizationObjectName="TracccHostDigitizationConfig",
         DeviceConditionsObjectName="TracccDeviceCondConfig",
         DeviceDigitizationObjectName="TracccDeviceDigitizationConfig",
+        GeoIdMappingObjectName=geo_id_mapping_name,
+        HostDetectorName=host_detector_name,
     ))
+
+    # All traccc collections on the client live in host memory
+    from AthDeviceComps.AthDeviceCompsConfig import HostCopyToolCfg, HostMemoryResourceToolCfg
 
     # Convert the Pixel/Strip RDOs into traccc cells
     from ActsGPUEventCnv.ActsGPUEventCnvConfig import RDOtoTracccCellConverterAlgCfg
-    from AthDeviceComps.AthDeviceCompsConfig import HostCopyToolCfg, HostMemoryResourceToolCfg
-
-    host_mr_for_converter = acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags))
-    device_mr_for_converter = acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags))
     copies_tool = CompFactory.AthDevice.CopiesAdaptorTool(
         "TracccCellsHostCopiesTool",
         HostCopyTool=acc.popToolsAndMerge(HostCopyToolCfg(flags)),
         DeviceCopyTool=acc.popToolsAndMerge(HostCopyToolCfg(flags)))
-
     acc.merge(RDOtoTracccCellConverterAlgCfg(flags,
-        HostMR=host_mr_for_converter,
-        DeviceMR=device_mr_for_converter,
-        CopiesTool=copies_tool))
+        HostMR=acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags)),
+        DeviceMR=acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags)),
+        CopiesTool=copies_tool,
+        TracccCells=cells_key))
 
-    kwargs.setdefault("TracccCells", "TracccCells")
+    # Send the cells to the server, record what it returns
+    kwargs.setdefault("TracccTritonTool", acc.popToolsAndMerge(TracccTritonToolCfg(flags)))
+    kwargs.setdefault("HostMR", acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags)))
+    kwargs.setdefault("TracccCells", cells_key)
+    kwargs.setdefault("OutputTracccMeasurements", measurements_key)
+    kwargs.setdefault("OutputTracccClusters", clusters_key)
+    kwargs.setdefault("OutputTracccTracks", traccc_tracks_key)
+    acc.addEventAlgo(CompFactory.TritonTracccTrackMaker(name, **kwargs))
 
-    # Main tracking alg
-    acc.addEventAlgo(CompFactory.TritonTracccTrackMaker(name, doTruth=doTruth, **kwargs))
+    # From here on, exactly as in the local device chain
+    from ActsGPUEventCnv.ActsGPUEventCnvConfig import (
+        TracccMeasurementConverterAlgCfg,
+        TracccTrackConverterAlgCfg,
+    )
+    acc.merge(TracccMeasurementConverterAlgCfg(flags,
+        name=f"{prefix}TritonMeasurementConverterAlg",
+        HostMR=acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags)),
+        CopyProviderTool=acc.popToolsAndMerge(HostCopyToolCfg(flags)),
+        InputMeasurements=measurements_key,
+        InputClusters=clusters_key,
+        InputCells=cells_key,
+        ConvertClustersWithCells=doTruth,
+        GeoIdMapping=geo_id_mapping_name,
+        OutputPixelClusters=pixel_key,
+        OutputPixelSpacePoints=f"{prefix}PixelSpacePoints",
+        OutputMeasToPixelSP=meas_to_pixel_sp_key,
+        OutputMeasToStripCl=meas_to_strip_cl_key,
+        OutputStripClusters=strip_key,
+    ))
+
+    acc.merge(TracccTrackConverterAlgCfg(flags,
+        name=f"{prefix}TritonTrackConverterAlg",
+        HostMR=acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags)),
+        CopyProviderTool=acc.popToolsAndMerge(HostCopyToolCfg(flags)),
+        GeoIdMapping=geo_id_mapping_name,
+        HostDetectorName=host_detector_name,
+        InputPixelClusters=pixel_key,
+        InputStripClusters=strip_key,
+        InputMeasToPixelSP=meas_to_pixel_sp_key,
+        InputMeasToStripCl=meas_to_strip_cl_key,
+        InputTracks=traccc_tracks_key,
+        OutputTracks=track_container_name,
+    ))
 
     ################################################################################
     # Convert ActsTrk::TrackContainer to xAOD::TrackParticleContainer
@@ -160,10 +211,6 @@ def TritonTracccTrackMakerCfg(flags, name="TritonTracccTrackMaker", **kwargs):
         name=f"{prefix}TrackToTrackParticleCnvAlg",
         ACTSTracksLocation=[track_container_name],
         TrackParticlesOutKey=track_particles_name))
-
-
-    pixel_key = "xAODPixelClustersFromInDetCluster"
-    strip_key = "xAODStripClustersFromInDetCluster"
 
     # if doTruth:
     if doTruth:
@@ -189,10 +236,10 @@ def TritonTracccTrackMakerCfg(flags, name="TritonTracccTrackMaker", **kwargs):
         inputList.append("xAOD::TrackParticleAuxContainer#*")
 
         if doTruth:
-            inputList.append("xAOD::PixelClusterContainer#xAODPixelClustersFromInDetCluster")
-            inputList.append("xAOD::StripClusterContainer#xAODStripClustersFromInDetCluster")
-            inputList.append("xAOD::PixelClusterAuxContainer#xAODPixelClustersFromInDetClusterAux.")
-            inputList.append("xAOD::StripClusterAuxContainer#xAODStripClustersFromInDetClusterAux.")
+            inputList.append(f"xAOD::PixelClusterContainer#{pixel_key}")
+            inputList.append(f"xAOD::StripClusterContainer#{strip_key}")
+            inputList.append(f"xAOD::PixelClusterAuxContainer#{pixel_key}Aux.")
+            inputList.append(f"xAOD::StripClusterAuxContainer#{strip_key}Aux.")
         else:
             inputList.append("xAOD::PixelClusterContainer#*")
             inputList.append("xAOD::StripClusterContainer#*")

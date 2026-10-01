@@ -64,7 +64,7 @@ Reco_tf.py \
         flags.Tracking.Traccc.Triton.port = $TRITON_PORT;" \
     --steering doRAWtoALL \
     --postInclude "TracccTritonClient.TracccTritonClientConfig.TritonTracccTrackMakerCfg,ActsConfig.ActsPostIncludes.ACTSClusterPostInclude" \
-    --maxEvents 1 \
+    --maxEvents 1 --conditionsTag "all:COND-MC21-SDR-RUN4-06" \
     --jobNumber '1' \
     --perfmon 'fullmonmt'
 ```
@@ -85,8 +85,8 @@ To quickly make plots, create the configuration file `EFTracking_TrkAnaConfig.js
         "doClusterValidation"  : false,
         "plotTechnicalEfficiencies": true,
         "useActsSiMeasurements": true,
-        "PixelClusterKey"  : "xAODPixelClustersFromInDetCluster",
-        "StripClusterKey"  : "xAODStripClustersFromInDetCluster",
+        "PixelClusterKey"  : "TracccPixelClusters",
+        "StripClusterKey"  : "TracccStripClusters",
         "OfflineQualityWP": "EFTracking",
 
         "plotVertexParameters" : false,
@@ -105,4 +105,4 @@ runIDTPM.py --inputFileNames ${AOD_OUTFILE} \
 ```
 
 The output will contain the parameters of the tracks from traccc, as well as efficiencies when 
-compared to truth (Note: efficiencies are improperly calculated atm, parameters are correct). 
+compared to truth.
