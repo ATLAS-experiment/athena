@@ -13,6 +13,7 @@
 #include "GaudiKernel/DataObject.h"
 #include "GaudiKernel/IOpaqueAddress.h"
 #include "GaudiKernel/IRegistry.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 
 #include "PersistentDataModel/Placement.h"
 #include "PersistentDataModel/Token.h"
@@ -97,7 +98,8 @@ StatusCode T_AthenaPoolCnvBase<T>::PoolToDataObject(DataObject*& pObj,
    }
    T* obj = reinterpret_cast<T*>(voidPtr);
    // Call toTransient on the object we just read.
-   SG::ToTransient<T>::toTransient (*obj);
+   const EventContext& ctx = Gaudi::Hive::currentContext();
+   SG::ToTransient<T>::toTransient (*obj, ctx);
    pObj = SG::asStorable(obj);
    return(StatusCode::SUCCESS);
 }
