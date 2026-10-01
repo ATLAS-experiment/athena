@@ -217,5 +217,59 @@ namespace IOVDbNamespace{
     return false;
   }
 
+  std::string
+  chaiConnectString(const std::string & endpoint){
+    static const std::string httpPrefix{"http://"};
+    static const std::string httpsPrefix{"https://"};
+    static const std::string fsPrefix{"crest_fs:"};
+    static const std::string serverPrefix{"crest:"};
+    // An explicit crest_fs: scheme is taken as written, so a directory name
+    // that looks like a host (conditions.db) is never turned into a server
+    if (endpoint.starts_with(fsPrefix)) {
+      return endpoint;
+    }
+    std::string ep = endpoint;
+    if (ep.starts_with(serverPrefix)) {
+      ep = ep.substr(serverPrefix.size());
+    }
+    // A bare host name (no scheme, no path separator, a dot or a port)
+    // is a server, not a directory. Default it to https, matching
+    // IOVDbAutoCfgFlags.getCrestServer, or CHAI treats it as a
+    // nonexistent filesystem path.
+    const bool bareHost = (ep.find('/') == std::string::npos)
+                       && (ep.find('.') != std::string::npos || ep.find(':') != std::string::npos);
+    if (bareHost) {
+      ep = httpsPrefix + ep;
+    }
+    if (ep.starts_with(httpPrefix) || ep.starts_with(httpsPrefix)) {
+      while (ep.ends_with('/')) {
+        ep.pop_back();
+      }
+      // The API version is a path segment, so a host name containing
+      // "api-v" does not count
+      if (ep.find("/api-v") == std::string::npos) {
+        ep += "/api-v6.0";
+      }
+      return "crest:" + ep;
+    }
+    return "crest_fs:" + ep;
+  }
+
+  TimeStampCorrectionResult
+  correctTimeStampElement(const std::string & description, const std::string & token){
+    const std::string regex=R"delim(<timeStamp>\s*([^<\s]*)\s*</timeStamp>)delim";
+    const std::regex re(regex);
+    std::smatch tsMatch;
+    const std::string newElement = "<timeStamp>" + token + "</timeStamp>";
+    if (!std::regex_search(description, tsMatch, re)) {
+      return {newElement + description, TimeStampCorrection::Inserted, {}};
+    }
+    if (tsMatch[1] == token) {
+      return {description, TimeStampCorrection::Unchanged, tsMatch[1]};
+    }
+    std::string corrected{description};
+    corrected.replace(tsMatch.position(0), tsMatch.length(0), newElement);
+    return {corrected, TimeStampCorrection::Corrected, tsMatch[1]};
+  }
 
 }
