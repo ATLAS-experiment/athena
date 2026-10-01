@@ -1,9 +1,10 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # @author Hagen Möbius, hagen.mobius@cern.ch
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
+from AthenaCommon.Logging import logging
 
 class SSVWeightsAlgConfig(ConfigBlock):
 
@@ -47,9 +48,10 @@ class SSVWeightsAlgConfig(ConfigBlock):
         alg.muonSelection = config.getFullSelection(muonContainer, muonSelectionName)
         alg.muons = config.readName(muonContainer)
 
-        print("Py:SSVWeightsAlg        ","You run with the following jet selections: ", alg.jetSelection)
-        print("Py:SSVWeightsAlg        ","You run with the following electron selections: ", alg.electronSelection)
-        print("Py:SSVWeightsAlg        ","You run with the following muon selections: ", alg.muonSelection)
+        log = logging.getLogger('SSVWeightsAlgConfig')
+        log.info(f'You run with the following jet selections: {alg.jetSelection}')
+        log.info(f'You run with the following electron selections: {alg.electronSelection}')
+        log.info(f'You run with the following muon selections: {alg.muonSelection}')
 
         alg.NVSI_WP = self.NVSI_WP
         alg.JsonConfigFile_SSVWeightsAlg = self.JsonConfigFile_SSVWeightsAlg
