@@ -155,8 +155,8 @@ namespace GlobalSim {
                 : auxspec(AuxSpec::parse(auxvar)),
                   m_name(name),
                   m_description(description),
-                  m_encoder(encoder),
-                  m_decoder(decoder),
+                  m_encoder(std::move(encoder)),
+                  m_decoder(std::move(decoder)),
                   m_acc(std::string{auxspec.name}), m_wacc(std::string{auxspec.name}) {
                 if(!m_encoder && !m_decoder && scale) {
                     m_encoder = [scale,offset](Value v) {

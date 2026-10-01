@@ -137,10 +137,14 @@ namespace JetTagDQA{
         m_largeRHistos[truth_class][variable] = bookHistogram(def.prefix + truth_class + def.suffix, def.definition, m_sParticleType, truth_class + " jets - ");
       }
     }
-    for (const std::string discriminant : {"Hbb", "Hcc"}) {
-      m_GN3XPV01_discriminants[discriminant] = bookHistogram("GN3XPV01_" + discriminant, "llr", m_sParticleType, "GN3XPV01 " + discriminant);
+    using namespace std::string_literals;
+    const std::string llrStr{"llr"};
+    for (const std::string & discriminant : {"Hbb"s, "Hcc"s}) {
+      const std::string prefix{"GN3XPV01_" + discriminant};
+      const std::string suffix{" jets, GN3XPV01 " + discriminant};
+      m_GN3XPV01_discriminants[discriminant] = bookHistogram(prefix, llrStr, m_sParticleType, "GN3XPV01 " + discriminant);
       for (const std::string& truth_class : largeRClasses) {
-        m_GN3XPV01_discriminants[discriminant + "_" + truth_class] = bookHistogram("GN3XPV01_" + discriminant + "_" + truth_class, "llr", m_sParticleType, truth_class + " jets, GN3XPV01 " + discriminant);
+        m_GN3XPV01_discriminants[discriminant + "_" + truth_class] = bookHistogram(prefix + "_" + truth_class, llrStr, m_sParticleType, truth_class + suffix);
       }
     }
   }
@@ -242,6 +246,7 @@ namespace JetTagDQA{
 
   // util function to book the discriminant related vs pT plots
   void BTaggingValidationPlots::bookDiscriminantVsPTAndLxyHistograms(const std::string& tagger_name, const std::map<std::string, double>& workingPoints, std::map<std::string, int>::const_iterator label_iter, const std::string& sParticleType){
+    
     for(std::map<std::string, double>::const_iterator working_points_iter = workingPoints.begin(); working_points_iter != workingPoints.end(); ++working_points_iter){
       // book pT histogram normal
       std::string histo_name_matched = tagger_name + "_" + label_iter->first + "_" + working_points_iter->first + "_matched_pt_ttbar";
@@ -251,7 +256,7 @@ namespace JetTagDQA{
 
       // book pT histogram for Zprime
       std::string histo_name_matched_Zprime = tagger_name + "_" + label_iter->first + "_" + working_points_iter->first + "_matched_pt_Zprime";
-      const std::string var_name_Zprime = "pT_llrCut_Zprime";
+      static const std::string var_name_Zprime = "pT_llrCut_Zprime";
       TH1* histo_matched_Zprime = bookHistogram(histo_name_matched_Zprime, var_name_Zprime, sParticleType, label_iter->first + "-jets" + ", for " + tagger_name + " llr > "+ std::to_string(working_points_iter->second) + ": " );    
       m_weight_histos.insert(std::make_pair(histo_name_matched_Zprime, histo_matched_Zprime));
 
@@ -263,7 +268,7 @@ namespace JetTagDQA{
       }
       if(label_iter->first != "b" && label_iter->first != "c") continue;
       std::string histo_name_matched_Lxy = tagger_name + "_" + label_iter->first + "_" + working_points_iter->first + "_matched_Lxy";
-      const std::string var_name_Lxy = "Lxy_llrCut";
+      static const std::string var_name_Lxy = "Lxy_llrCut";
       TH1* histo_matched_Lxy = bookHistogram(histo_name_matched_Lxy, var_name_Lxy, sParticleType, label_iter->first + "-jets" + ", for " + tagger_name + " llr > "+ std::to_string(working_points_iter->second) + ": " );    
       m_weight_histos.insert(std::make_pair(histo_name_matched_Lxy, histo_matched_Lxy));
 
@@ -1367,11 +1372,12 @@ namespace JetTagDQA{
   }
 
   void BTaggingValidationPlots::bookEffHistos(){
+    const std::string llrStr{"llr"};
     for(const SmallRTagger& tagger : m_smallRTaggers){
       for(std::map<std::string, int>::const_iterator label_iter = m_truthLabels.begin(); label_iter != m_truthLabels.end(); ++label_iter){
         // book discriminant histograms
         const std::string histo_name_matched = tagger.label + "_" + label_iter->first + "_matched_weight";
-        m_weight_histos[histo_name_matched] = bookHistogram(histo_name_matched, "llr", m_sParticleType, label_iter->first + "-jets" + ", " + tagger.label);
+        m_weight_histos[histo_name_matched] = bookHistogram(histo_name_matched, llrStr, m_sParticleType, label_iter->first + "-jets" + ", " + tagger.label);
 
         bookDiscriminantVsPTAndLxyHistograms(tagger.label, tagger.workingPoints, label_iter, m_sParticleType);
       }
