@@ -10,8 +10,8 @@
 
 #include <string>
 #include <sstream>
-#include <regex>
 #include <span>
+#include <regex>
 
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
@@ -23,9 +23,7 @@ std::string prefixFromTrackContainerName(const std::string& tracks) {
   std::smatch match_regex;
   
   if ( not std::regex_search(tracks, match_regex, word_regex) or match_regex.size() < 2) {
-    throw std::runtime_error(
-       std::string("prefixFromTrackContainerName: key does not contain "
-		   "Tracks in the name ") + tracks);
+    return tracks;
   }
 
   return match_regex[1].str();
