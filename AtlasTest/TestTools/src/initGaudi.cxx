@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -17,6 +17,7 @@
 #include "GaudiKernel/SmartIF.h"
 #include "GaudiKernel/ModuleIncident.h"
 #include "GaudiKernel/PathResolver.h"
+#include <print>
 
 
 namespace Athena_test {
@@ -32,24 +33,24 @@ namespace Athena_test {
     if (!jobOptsFile.empty()) {
       jobOptsPath = System::PathResolver::find_file(jobOptsFile, "JOBOPTSEARCHPATH");
       if (jobOptsPath.empty()) {
-        std::cout << "\n\nCannot find job opts " << jobOptsFile << std::endl;
+        std::println ("\n\nCannot find job opts {}", jobOptsFile);
       }
       else {
-        std::cout << "\n\nInitializing Gaudi ApplicationMgr using job opts " << jobOptsPath << std::endl;
+        std::println ("\n\nInitializing Gaudi ApplicationMgr using job opts {}", jobOptsPath);
       }
     }
 
     // Create an instance of ApplicationMgr
     SmartIF<IAppMgrUI> appMgr = Gaudi::createApplicationMgr();
     if(!appMgr.isValid()) {
-      std::cout << "Fatal error while creating the ApplicationMgr " << std::endl;
+      std::println ("Fatal error while creating the ApplicationMgr ");
       return false;
     }
 
     SmartIF<IProperty> propMgr(appMgr);
     SmartIF<ISvcLocator> svcLoc(appMgr);
     if(!svcLoc.isValid() || !propMgr.isValid()) {
-      std::cout << "Fatal error while retrieving AppMgr interfaces " << std::endl;
+      std::println ("Fatal error while retrieving AppMgr interfaces ");
       return false;
     }
 
@@ -69,10 +70,10 @@ namespace Athena_test {
     }
 
     if (appMgr->configure().isSuccess() && appMgr->initialize().isSuccess()) {
-      std::cout<<"ApplicationMgr Ready"<<std::endl;
+      std::println ("ApplicationMgr Ready");
       return true;
     } else {
-      std::cout << "Fatal error while initializing the AppMgr" << std::endl;
+      std::println ("Fatal error while initializing the AppMgr");
       return false;
     }
   }

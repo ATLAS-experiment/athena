@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -8,23 +8,22 @@
  ATLAS Collaboration
  ***************************************************************************/
 
-// $Id: SGassert.h,v 1.2 2005-11-29 00:51:33 calaf Exp $
-
 
 #ifndef TEST_SGASSERT_H
 # define TEST_SGASSERT_H
 
 #include <cassert>
 #include <iostream>
+#include <print>
 
 #undef NDEBUG
 
 #define SGASSERT( TRUEEXPR ) assert(TRUEEXPR)
 #define SGASSERTERROR( FALSEEXPR )   \
-    std::cerr << "Now we expect to see an error message:" << std::endl \
-              << "----Error Message Starts--->>" << std::endl; \
-    assert(!(FALSEEXPR));                                      \
-    std::cerr<< "<<---Error Message Ends-------" << std::endl
+    std::println (std::cerr, "Now we expect to see an error message:\n"   \
+                  "----Error Message Starts--->>");                       \
+    assert(!(FALSEEXPR));                                                 \
+    std::println (std::cerr, "<<---Error Message Ends-------");
 
 
 #endif // TEST_SGASSERT_H

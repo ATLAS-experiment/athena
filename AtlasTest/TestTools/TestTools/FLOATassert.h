@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**  functions & macros to test the difference between floats */
 #ifndef TESTTOOLS_FLOATASSERT_H
 #define TESTTOOLS_FLOATASSERT_H
 
-#include <iostream>
+#include <print>
 #include <cassert>
 #include <cfloat>
 #include <cmath>
@@ -30,7 +30,7 @@ namespace Athena_test {
     double diff = std::abs (x1-x2) / den;
     if (diff < thresh)
       return true;
-    std::cout << "Match failure: " << x1 << " " << x2 << " (" << diff << ")\n";
+    std::println ("Match failure: {} {} ({})", x1, x2, diff);
     return false;
   }
 
