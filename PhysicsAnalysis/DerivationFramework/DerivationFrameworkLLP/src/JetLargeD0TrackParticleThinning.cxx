@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -113,7 +113,7 @@ StatusCode DerivationFramework::JetLargeD0TrackParticleThinning::doThinning(cons
         for (xAOD::JetContainer::const_iterator jetIt=importedJets->begin(); jetIt!=importedJets->end(); ++jetIt) {
             const std::vector< ElementLink<DataVector<xAOD::IParticle> > > &jetTrackLinks = ghostTrackLRT( **jetIt ); 
             for (const auto &jetTrkIt : jetTrackLinks) {
-              const xAOD::TrackParticle* trackPart = dynamic_cast<const xAOD::TrackParticle*>(*jetTrkIt);
+              const xAOD::TrackParticle* trackPart = static_cast<const xAOD::TrackParticle*>(*jetTrkIt);
               int index = trackPart->index();
               mask[index] = true;
             }
@@ -122,7 +122,7 @@ StatusCode DerivationFramework::JetLargeD0TrackParticleThinning::doThinning(cons
         for (std::vector<const xAOD::Jet*>::const_iterator jetIt=jetToCheck.begin(); jetIt!=jetToCheck.end(); ++jetIt) {
             const std::vector< ElementLink<DataVector<xAOD::IParticle> > > &jetTrackLinks = ghostTrackLRT( **jetIt ); 
             for (const auto &jetTrkIt : jetTrackLinks) {
-              const xAOD::TrackParticle* trackPart = dynamic_cast<const xAOD::TrackParticle*>(*jetTrkIt);
+              const xAOD::TrackParticle* trackPart = static_cast<const xAOD::TrackParticle*>(*jetTrkIt);
               int index = trackPart->index();
               mask[index] = true;
             }

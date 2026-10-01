@@ -65,7 +65,7 @@ StatusCode RecoverZeroPixelHitMuons::execute(const EventContext& context) const
         muMatch=m;
       }
     }
-    if ((min_dR < m_matchingDeltaR) && (muMatch->charge() == t->charge())){
+    if (muMatch && (min_dR < m_matchingDeltaR) && (muMatch->charge() == t->charge())){
       matchedMuons.push_back(muMatch);
       const xAOD::Muon &muon_match = *muMatch;
       xAOD::Muon *zeroPixelHitMuon = outputMuons->push_back(std::make_unique<xAOD::Muon>(muon_match));
