@@ -101,12 +101,15 @@ NNClusterCalibrator<calib_data_t, traj_t>::calibrate(
   pos(1) = nnInput.indexCoordToRealCoord(positions.y(maxProbNumberIndex),
                                          NNinput::Index::pitchYOffset);
 
+  // the NN precision is converted to the RMS (in mm), the covariance is its square
+  const float rmsX = nnInput.precisionToRealCoord(positions.xprec(maxProbNumberIndex),
+                                                  NNinput::Index::pitchXOffset);
+  const float rmsY = nnInput.precisionToRealCoord(positions.yprec(maxProbNumberIndex),
+                                                  NNinput::Index::pitchYOffset);
   typename NNClusterCalibrator<calib_data_t, traj_t>::BASE::Cov cov;
   cov(1, 0) = cov(0, 1) = 0.0f;
-  cov(0, 0) = nnInput.precisionToRealCoord(positions.xprec(maxProbNumberIndex),
-                                           NNinput::Index::pitchXOffset);
-  cov(1, 1) = nnInput.precisionToRealCoord(positions.yprec(maxProbNumberIndex),
-                                           NNinput::Index::pitchYOffset);
+  cov(0, 0) = rmsX * rmsX;
+  cov(1, 1) = rmsY * rmsY;
 
   unsigned int splitFlag =
       positions.numberOfSubClusters() > 1
