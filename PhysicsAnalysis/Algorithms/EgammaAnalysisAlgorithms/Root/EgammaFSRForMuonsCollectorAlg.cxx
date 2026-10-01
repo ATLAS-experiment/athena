@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -94,12 +94,12 @@ namespace CP
                             if (electron_track && muon_track) {
                                 elmutrackmatchOK =
                                     (std::abs(electron_track->theta() - muon_track->theta()) < 0.01) &&
-                                    (xAOD::P4Helpers::deltaPhi(electron_track->phi(), muon_track->phi()) < 0.01);
+                                    (std::abs(xAOD::P4Helpers::deltaPhi(electron_track->phi(), muon_track->phi())) < 0.01);
                                 ATH_MSG_DEBUG("dtheta trk " << std::abs(electron_track->theta() - muon_track->theta())
-                                    << ", dphi trk " << xAOD::P4Helpers::deltaPhi(electron_track->phi(), muon_track->phi()));
+                                    << ", dphi trk " << std::abs(xAOD::P4Helpers::deltaPhi(electron_track->phi(), muon_track->phi())));
                                 if (elOrig_track) {
                                     ATH_MSG_DEBUG("origTrk: dtheta trk " << std::abs(elOrig_track->theta() - muon_track->theta())
-                                        << ", dphi trk " << xAOD::P4Helpers::deltaPhi(elOrig_track->phi(), muon_track->phi()));
+                                        << ", dphi trk " << std::abs(xAOD::P4Helpers::deltaPhi(elOrig_track->phi(), muon_track->phi())));
                                 }
                             } else {
                                 elmutrackmatchOK = false;

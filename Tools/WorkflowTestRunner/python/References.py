@@ -34,15 +34,15 @@ references_map = {
     "q447": "v22",
     # Derivations
     "data_PHYS_Run2": "v100",
-    "data_PHYSLITE_Run2": "v58",
+    "data_PHYSLITE_Run2": "v59",
     "data_PHYS_Run3": "v118",
-    "data_PHYSLITE_Run3": "v76",
+    "data_PHYSLITE_Run3": "v77",
     "mc_PHYS_Run2": "v137",
     "mc_PHYSLITE_Run2": "v68",
     "mc_PHYS_Run3": "v149",
     "mc_PHYSLITE_Run3": "v85",
     "af3_PHYS_Run2": "v89",
-    "af3_PHYSLITE_Run2": "v47",
+    "af3_PHYSLITE_Run2": "v48",
     "af3_PHYS_Run3": "v130",
     "af3_PHYSLITE_Run3": "v88",
 }
