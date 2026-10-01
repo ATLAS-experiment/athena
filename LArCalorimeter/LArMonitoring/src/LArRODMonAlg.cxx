@@ -26,7 +26,6 @@
 #include "GaudiKernel/ConcurrencyFlags.h"
 #include <cmath>
 #include <algorithm>
-#include <format>
 #include <type_traits>
 
 /*---------------------------------------------------------*/
@@ -239,8 +238,8 @@ StatusCode LArRODMonAlg::fillHistograms(const EventContext& ctx) const {
   
     const CaloGain::CaloGain gain = rcDigIt->gain();
     if ((gain >= ERRCOUNTER::N) or (gain < 0)){
-      ATH_MSG_WARNING( std::format("gain {} is out of range for the ERRCOUNTER array size, {}",
-        static_cast<std::underlying_type_t<CaloGain::CaloGain>>(gain), ERRCOUNTER::N));
+      ATH_MSG_WARNING("gain {} is out of range for the ERRCOUNTER array size, {}",
+        static_cast<std::underlying_type_t<CaloGain::CaloGain>>(gain), ERRCOUNTER::N);
       return StatusCode::FAILURE;
     }
     //Check pedestal if needed
