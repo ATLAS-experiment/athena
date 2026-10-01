@@ -1,26 +1,24 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Max Goblirsch
 
 
 
-#ifndef ASG_ANALYSIS_ALGORITHMS__MUON_LRT_MERGING_ALGORITHM__H
-#define ASG_ANALYSIS_ALGORITHMS__MUON_LRT_MERGING_ALGORITHM__H
+#ifndef MUON_ANALYSIS_ALGORITHMS__MUON_LRT_MERGING_ALGORITHM__H
+#define MUON_ANALYSIS_ALGORITHMS__MUON_LRT_MERGING_ALGORITHM__H
 
 #include <AnaAlgorithm/AnaReentrantAlgorithm.h>
 #include <xAODMuon/MuonContainer.h>
-#include <xAODMuon/MuonAuxContainer.h>
 #include <MuonAnalysisInterfaces/IMuonLRTOverlapRemovalTool.h>
 #include <AsgTools/ToolHandle.h>
 
 #include <AsgTools/PropertyWrapper.h>
 #include <AsgDataHandles/WriteHandleKey.h>
 #include <AsgDataHandles/ReadHandleKey.h>
-#include <AsgDataHandles/WriteHandle.h>
-#include <AsgDataHandles/ReadHandle.h>
 #include <AsgDataHandles/WriteDecorHandleKey.h>
+#include <AthContainers/ConstDataVector.h>
 
 namespace CP
 {
@@ -43,9 +41,14 @@ namespace CP
 
       /// handles for interacting with the event storage
 
-      SG::ReadHandleKey<xAOD::MuonContainer>      m_promptMuonLocation{this, "PromptMuonLocation","Muons", "Prompt muons to merge"}; /** Vector of muon collections to be merged. */
-      SG::ReadHandleKey<xAOD::MuonContainer>      m_lrtMuonLocation{this, "LRTMuonLocation","MuonsLRT", "LRT muons to merge"}; /** Vector of muon collections to be merged. */
-      SG::WriteHandleKey<xAOD::MuonContainer>     m_outMuonLocation{this, "OutputMuonLocation", "StdWithLRTMuons", "name of the muon container to write"};   /** Combined muon collection.   */
+      /// @brief Prompt muon collection to be merged
+      SG::ReadHandleKey<xAOD::MuonContainer>      m_promptMuonLocation{this, "PromptMuonLocation","Muons", "Prompt muons to merge"};
+      /// @brief LRT muon collection to be merged
+      SG::ReadHandleKey<xAOD::MuonContainer>      m_lrtMuonLocation{this, "LRTMuonLocation","MuonsLRT", "LRT muons to merge"};
+      /// @brief Combined muon collection
+      SG::WriteHandleKey<xAOD::MuonContainer>     m_outMuonLocation{this, "OutputMuonLocation", "StdWithLRTMuons", "name of the muon container to write"};
+      /// @brief Combined muon view collection, set from m_outMuonLocation in initialize()
+      SG::WriteHandleKey<ConstDataVector<xAOD::MuonContainer>> m_outMuonViewLocation;
 
       /// flag to create a view collection rather than building deep-copies (true by default)
       Gaudi::Property<bool>  m_createViewCollection{this, "CreateViewCollection", true};     //!< option to create a view collection and not deep-copy muons

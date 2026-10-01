@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -7,8 +7,8 @@
 //   author Maria Mironova, Simone Pagan Griso, Kehang Bai
 ///////////////////////////////////////////////////////////////////
 
-#ifndef ASG_ANALYSIS_ALGORITHMS__MUON_CONTAINER_MERGING_ALGORITHM__H
-#define ASG_ANALYSIS_ALGORITHMS__MUON_CONTAINER_MERGING_ALGORITHM__H
+#ifndef MUON_ANALYSIS_ALGORITHMS__MUON_CONTAINER_MERGING_ALGORITHM__H
+#define MUON_ANALYSIS_ALGORITHMS__MUON_CONTAINER_MERGING_ALGORITHM__H
 
 #include <AnaAlgorithm/AnaReentrantAlgorithm.h>
 #include <xAODMuon/MuonContainer.h>
@@ -29,8 +29,8 @@ namespace CP
   public:
     MuonContainerMergingAlg (const std::string& name,
                                  ISvcLocator* pSvcLocator);
-    virtual StatusCode initialize () override;
-    virtual StatusCode execute (const EventContext& ctx) const  override;
+    StatusCode initialize () override;
+    StatusCode execute (const EventContext& ctx) const  override;
 
   private:
 
@@ -47,7 +47,7 @@ namespace CP
        
       /** Output xAOD::MuonContainer object */
       SG::WriteHandleKey<xAOD::MuonContainer> m_outMuonLocationCopy{
-          this, "OutputMuonLocationCopy", "MergedMuons", "Name of the muon container to write"
+          this, "OutputMuonLocationCopy", "", "Name of the muon container to write in deep-copy mode (defaults to OutputMuonLocation if empty)"
       };
       /** Output xAOD::MuonContainer for the case of a view container */
       SG::WriteHandleKey<ConstDataVector <xAOD::MuonContainer>> m_outMuonLocationView{
