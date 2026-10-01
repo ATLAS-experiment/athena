@@ -8,9 +8,17 @@
 #ifndef DECORATORHELPERS_H
 #define DECORATORHELPERS_H
 
+#include <AthContainers/Decorator.h>
 #include <Math/Vector4D.h>
 #include <TMath.h>
 #include <xAODEventInfo/EventInfo.h>
+
+#include <stdexcept>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+namespace CP {
 
 /**
  * @brief Template function to fill particle information into a given object.
@@ -216,14 +224,16 @@ void FillDefaultVectorParticleInfo(
  *    set once per event at the start of runHistorySaver.
  *
  * All decorate* methods therefore take only the branch name and the value(s)
- * to write — no object pointer argument is needed at call sites.
+ * to write — no object pointer argument is needed at call sites. The
+ * decorators belonging to one particle prefix are resolved once and cached,
+ * so repeated decorate* calls do not rebuild the individual decorator names.
  */
 struct PartonDecorator {
-  std::map<std::string, std::unique_ptr<SG::Decorator<float>>> floatDecorators;
-  std::map<std::string, std::unique_ptr<SG::Decorator<std::vector<float>>>>
+  std::unordered_map<std::string, SG::Decorator<float>> floatDecorators;
+  std::unordered_map<std::string, SG::Decorator<std::vector<float>>>
       vectorfloatDecorators;
-  std::map<std::string, std::unique_ptr<SG::Decorator<int>>> intDecorators;
-  std::map<std::string, std::unique_ptr<SG::Decorator<std::vector<int>>>>
+  std::unordered_map<std::string, SG::Decorator<int>> intDecorators;
+  std::unordered_map<std::string, SG::Decorator<std::vector<int>>>
       vectorintDecorators;
 
   /**
@@ -234,7 +244,10 @@ struct PartonDecorator {
    *
    * @param prefix The prefix string (e.g. "Tzq"). May be empty.
    */
-  void setPrefix(const std::string& prefix) { m_prefix = prefix; }
+  void setPrefix(const std::string& prefix) {
+    m_prefix = prefix;
+    clearCaches();
+  }
 
   /**
    * @brief Set the EventInfo object to decorate for the current event.
@@ -253,14 +266,15 @@ struct PartonDecorator {
   /** @brief Initialize a float decorator by bare name. */
   void initializeFloatDecorator(const std::string& name) {
     const std::string key = fullName(name);
-    floatDecorators[key] = std::make_unique<SG::Decorator<float>>(key);
+    floatDecorators.try_emplace(key, key);
+    clearCaches();
   }
 
   /** @brief Initialize a vector-of-float decorator by bare name. */
   void initializeVectorFloatDecorator(const std::string& name) {
     const std::string key = fullName(name);
-    vectorfloatDecorators[key] =
-        std::make_unique<SG::Decorator<std::vector<float>>>(key);
+    vectorfloatDecorators.try_emplace(key, key);
+    clearCaches();
   }
 
   /** @brief Initialize multiple float decorators by a list of bare names. */
@@ -282,6 +296,15 @@ struct PartonDecorator {
   }
 
   /**
+   * @brief Initialize pt, eta, phi, m float and pdgId int decorators for a
+   * bare prefix.
+   */
+  void initializeParticleDecorators(const std::string& prefix) {
+    initializePtEtaPhiMDecorator(prefix);
+    initializeIntDecorator(prefix + "_pdgId");
+  }
+
+  /**
    * @brief Initialize vector pt, eta, phi, m float decorators for a bare
    * prefix.
    */
@@ -292,17 +315,27 @@ struct PartonDecorator {
     initializeVectorFloatDecorator(prefix + "_m");
   }
 
+  /**
+   * @brief Initialize vector pt, eta, phi, m float and pdgId int decorators
+   * for a bare prefix.
+   */
+  void initializeVectorParticleDecorators(const std::string& prefix) {
+    initializeVectorPtEtaPhiMDecorator(prefix);
+    initializeVectorIntDecorator(prefix + "_pdgId");
+  }
+
   /** @brief Initialize an integer decorator by bare name. */
   void initializeIntDecorator(const std::string& name) {
     const std::string key = fullName(name);
-    intDecorators[key] = std::make_unique<SG::Decorator<int>>(key);
+    intDecorators.try_emplace(key, key);
+    clearCaches();
   }
 
   /** @brief Initialize a vector-of-int decorator by bare name. */
   void initializeVectorIntDecorator(const std::string& name) {
     const std::string key = fullName(name);
-    vectorintDecorators[key] =
-        std::make_unique<SG::Decorator<std::vector<int>>>(key);
+    vectorintDecorators.try_emplace(key, key);
+    clearCaches();
   }
 
   /** @brief Initialize multiple integer decorators by a list of bare names. */
@@ -317,50 +350,34 @@ struct PartonDecorator {
    * @brief Retrieve a pointer to an integer decorator by bare name.
    * @throws std::runtime_error if the decorator is not found.
    */
-  SG::Decorator<int>* getIntDecorator(const std::string& name) const {
-    const std::string key = fullName(name);
-    auto it = intDecorators.find(key);
-    if (it != intDecorators.end())
-      return it->second.get();
-    throw std::runtime_error("Decorator with name " + key + " not found.");
+  const SG::Decorator<int>* getIntDecorator(const std::string& name) const {
+    return findDecorator(intDecorators, name);
   }
 
   /**
    * @brief Retrieve a pointer to a vector-of-int decorator by bare name.
    * @throws std::runtime_error if the decorator is not found.
    */
-  SG::Decorator<std::vector<int>>* getVectorIntDecorator(
+  const SG::Decorator<std::vector<int>>* getVectorIntDecorator(
       const std::string& name) const {
-    const std::string key = fullName(name);
-    auto it = vectorintDecorators.find(key);
-    if (it != vectorintDecorators.end())
-      return it->second.get();
-    throw std::runtime_error("Decorator with name " + key + " not found.");
+    return findDecorator(vectorintDecorators, name);
   }
 
   /**
    * @brief Retrieve a pointer to a float decorator by bare name.
    * @throws std::runtime_error if the decorator is not found.
    */
-  SG::Decorator<float>* getFloatDecorator(const std::string& name) const {
-    const std::string key = fullName(name);
-    auto it = floatDecorators.find(key);
-    if (it != floatDecorators.end())
-      return it->second.get();
-    throw std::runtime_error("Decorator with name " + key + " not found.");
+  const SG::Decorator<float>* getFloatDecorator(const std::string& name) const {
+    return findDecorator(floatDecorators, name);
   }
 
   /**
    * @brief Retrieve a pointer to a vector-of-float decorator by bare name.
    * @throws std::runtime_error if the decorator is not found.
    */
-  SG::Decorator<std::vector<float>>* getVectorFloatDecorator(
+  const SG::Decorator<std::vector<float>>* getVectorFloatDecorator(
       const std::string& name) const {
-    const std::string key = fullName(name);
-    auto it = vectorfloatDecorators.find(key);
-    if (it != vectorfloatDecorators.end())
-      return it->second.get();
-    throw std::runtime_error("Decorator with name " + key + " not found.");
+    return findDecorator(vectorfloatDecorators, name);
   }
 
   // ── Decorate methods ──────────────────────────────────────────────────────
@@ -372,30 +389,25 @@ struct PartonDecorator {
    * Writes sentinel values: pt=-1, eta=-999, phi=-999, m=-1, pdgId=0.
    */
   void decorateDefault(const std::string& prefix) {
-    FillDefaultParticleInfo(
-        *getFloatDecorator(prefix + "_pt"), *getFloatDecorator(prefix + "_eta"),
-        *getFloatDecorator(prefix + "_phi"), *getFloatDecorator(prefix + "_m"),
-        *getIntDecorator(prefix + "_pdgId"), m_eventInfo);
+    const ParticleDecorators& decs = particleDecorators(prefix);
+    FillDefaultParticleInfo(*decs.pt, *decs.eta, *decs.phi, *decs.m,
+                            pdgIdDecorator(decs, prefix), m_eventInfo);
   }
 
   /** @brief Decorate with default vector particle kinematics (bare prefix). */
   void decorateVectorDefault(const std::string& prefix) {
-    FillDefaultVectorParticleInfo(*getVectorFloatDecorator(prefix + "_pt"),
-                                  *getVectorFloatDecorator(prefix + "_eta"),
-                                  *getVectorFloatDecorator(prefix + "_phi"),
-                                  *getVectorFloatDecorator(prefix + "_m"),
-                                  *getVectorIntDecorator(prefix + "_pdgId"),
-                                  m_eventInfo);
+    const VectorParticleDecorators& decs = vectorParticleDecorators(prefix);
+    FillDefaultVectorParticleInfo(*decs.pt, *decs.eta, *decs.phi, *decs.m,
+                                  *decs.pdgId, m_eventInfo);
   }
 
   /**
    * @brief Decorate with default particle kinematics, no PDG ID (bare prefix).
    */
   void decorateDefaultNoPdgId(const std::string& prefix) {
-    FillDefaultParticleInfo(*getFloatDecorator(prefix + "_pt"),
-                            *getFloatDecorator(prefix + "_eta"),
-                            *getFloatDecorator(prefix + "_phi"),
-                            *getFloatDecorator(prefix + "_m"), m_eventInfo);
+    const ParticleDecorators& decs = particleDecorators(prefix);
+    FillDefaultParticleInfo(*decs.pt, *decs.eta, *decs.phi, *decs.m,
+                            m_eventInfo);
   }
 
   /** @brief Decorate with a custom float value (bare name). */
@@ -416,10 +428,8 @@ struct PartonDecorator {
    */
   void decorateParticle(const std::string& prefix,
                         const ROOT::Math::PtEtaPhiMVector& p) {
-    FillParticleInfo(*getFloatDecorator(prefix + "_pt"),
-                     *getFloatDecorator(prefix + "_eta"),
-                     *getFloatDecorator(prefix + "_phi"),
-                     *getFloatDecorator(prefix + "_m"), p, m_eventInfo);
+    const ParticleDecorators& decs = particleDecorators(prefix);
+    FillParticleInfo(*decs.pt, *decs.eta, *decs.phi, *decs.m, p, m_eventInfo);
   }
 
   /**
@@ -431,10 +441,9 @@ struct PartonDecorator {
    */
   void decorateParticle(const std::string& prefix,
                         const ROOT::Math::PtEtaPhiMVector& p, int pdgId) {
-    FillParticleInfo(
-        *getFloatDecorator(prefix + "_pt"), *getFloatDecorator(prefix + "_eta"),
-        *getFloatDecorator(prefix + "_phi"), *getFloatDecorator(prefix + "_m"),
-        *getIntDecorator(prefix + "_pdgId"), p, pdgId, m_eventInfo);
+    const ParticleDecorators& decs = particleDecorators(prefix);
+    FillParticleInfo(*decs.pt, *decs.eta, *decs.phi, *decs.m,
+                     pdgIdDecorator(decs, prefix), p, pdgId, m_eventInfo);
   }
 
   /**
@@ -449,20 +458,43 @@ struct PartonDecorator {
       const std::string& prefix,
       const std::vector<ROOT::Math::PtEtaPhiMVector>& vec_p,
       const std::vector<int>& vec_pdgId) {
+    const VectorParticleDecorators& decs = vectorParticleDecorators(prefix);
     for (size_t i = 0; i < vec_p.size(); i++) {
-      FillVectorParticleInfo(*getVectorFloatDecorator(prefix + "_pt"),
-                             *getVectorFloatDecorator(prefix + "_eta"),
-                             *getVectorFloatDecorator(prefix + "_phi"),
-                             *getVectorFloatDecorator(prefix + "_m"),
-                             *getVectorIntDecorator(prefix + "_pdgId"),
-                             vec_p.at(i), vec_pdgId.at(i), m_eventInfo);
+      FillVectorParticleInfo(*decs.pt, *decs.eta, *decs.phi, *decs.m,
+                             *decs.pdgId, vec_p.at(i), vec_pdgId.at(i),
+                             m_eventInfo);
     }
   }
 
  private:
+  /// Decorators of one scalar particle prefix; pdgId is nullptr if the
+  /// "<prefix>_pdgId" decorator was not initialized.
+  struct ParticleDecorators {
+    const SG::Decorator<float>* pt{nullptr};
+    const SG::Decorator<float>* eta{nullptr};
+    const SG::Decorator<float>* phi{nullptr};
+    const SG::Decorator<float>* m{nullptr};
+    const SG::Decorator<int>* pdgId{nullptr};
+  };
+
+  /// Decorators of one vector particle prefix.
+  struct VectorParticleDecorators {
+    const SG::Decorator<std::vector<float>>* pt{nullptr};
+    const SG::Decorator<std::vector<float>>* eta{nullptr};
+    const SG::Decorator<std::vector<float>>* phi{nullptr};
+    const SG::Decorator<std::vector<float>>* m{nullptr};
+    const SG::Decorator<std::vector<int>>* pdgId{nullptr};
+  };
+
   std::string m_prefix;  ///< Prefix prepended to all decorator names.
   const xAOD::EventInfo* m_eventInfo{
       nullptr};  ///< Target object; set once per event via setEventInfo().
+
+  /// Per-prefix decorator bundles, keyed by bare prefix. The pointers stay
+  /// valid because decorators are never erased or replaced once created.
+  std::unordered_map<std::string, ParticleDecorators> m_particleCache;
+  std::unordered_map<std::string, VectorParticleDecorators>
+      m_vectorParticleCache;
 
   /**
    * @brief Returns the full (prefixed) decorator key for internal use.
@@ -470,6 +502,67 @@ struct PartonDecorator {
   std::string fullName(const std::string& name) const {
     return m_prefix.empty() ? name : m_prefix + "_" + name;
   }
+
+  /// Look up a decorator by bare name; throws if it was not initialized.
+  template <typename T>
+  const T* findDecorator(const std::unordered_map<std::string, T>& decorators,
+                         const std::string& name) const {
+    const std::string key = fullName(name);
+    auto it = decorators.find(key);
+    if (it != decorators.end())
+      return &it->second;
+    throw std::runtime_error("Decorator with name " + key + " not found.");
+  }
+
+  /// Invalidate the per-prefix bundles, e.g. after new decorators were added.
+  void clearCaches() {
+    m_particleCache.clear();
+    m_vectorParticleCache.clear();
+  }
+
+  /// Resolve (once) the scalar decorators belonging to a bare prefix.
+  /// @throws std::runtime_error if a kinematic decorator is not found.
+  const ParticleDecorators& particleDecorators(const std::string& prefix) {
+    auto it = m_particleCache.find(prefix);
+    if (it != m_particleCache.end())
+      return it->second;
+    ParticleDecorators decs;
+    decs.pt = getFloatDecorator(prefix + "_pt");
+    decs.eta = getFloatDecorator(prefix + "_eta");
+    decs.phi = getFloatDecorator(prefix + "_phi");
+    decs.m = getFloatDecorator(prefix + "_m");
+    auto pdgIdIt = intDecorators.find(fullName(prefix + "_pdgId"));
+    if (pdgIdIt != intDecorators.end())
+      decs.pdgId = &pdgIdIt->second;
+    return m_particleCache.emplace(prefix, decs).first->second;
+  }
+
+  /// Resolve (once) the vector decorators belonging to a bare prefix.
+  /// @throws std::runtime_error if a decorator is not found.
+  const VectorParticleDecorators& vectorParticleDecorators(
+      const std::string& prefix) {
+    auto it = m_vectorParticleCache.find(prefix);
+    if (it != m_vectorParticleCache.end())
+      return it->second;
+    VectorParticleDecorators decs;
+    decs.pt = getVectorFloatDecorator(prefix + "_pt");
+    decs.eta = getVectorFloatDecorator(prefix + "_eta");
+    decs.phi = getVectorFloatDecorator(prefix + "_phi");
+    decs.m = getVectorFloatDecorator(prefix + "_m");
+    decs.pdgId = getVectorIntDecorator(prefix + "_pdgId");
+    return m_vectorParticleCache.emplace(prefix, decs).first->second;
+  }
+
+  /// The pdgId decorator of a bundle; throws if it was not initialized.
+  const SG::Decorator<int>& pdgIdDecorator(const ParticleDecorators& decs,
+                                           const std::string& prefix) const {
+    if (!decs.pdgId)
+      throw std::runtime_error("Decorator with name " +
+                               fullName(prefix + "_pdgId") + " not found.");
+    return *decs.pdgId;
+  }
 };
+
+}  // namespace CP
 
 #endif  // DECORATORHELPERS_H

@@ -10,11 +10,9 @@
 #include <AsgMessaging/MessageCheck.h>
 
 #include "Math/Vector4D.h"
-#include "xAODEgamma/ElectronContainer.h"
-#include "xAODJet/JetContainer.h"
-#include "xAODMuon/MuonContainer.h"
 #include "xAODTruth/TruthParticle.h"
-#include "xAODTruth/xAODTruthHelpers.h"
+
+namespace CP {
 
 ROOT::Math::PxPyPzMVector GetPxPyPzMfromTruth(
     const xAOD::TruthParticle* TruthParticle) {
@@ -61,3 +59,5 @@ ROOT::Math::PxPyPzEVector GetPxPyPzEfromTruth(
       TruthParticle->e());
   return EnergySafeVector;
 }
+
+}  // namespace CP
