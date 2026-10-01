@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -15,6 +15,8 @@
 #include "xAODMuon/MuonAuxContainer.h"
 #include <AthContainers/ConstDataVector.h>
 #include <AsgTools/AsgToolConfig.h>
+#include <AsgDataHandles/ReadHandle.h>
+#include <AsgDataHandles/WriteHandle.h>
 #include <AsgDataHandles/WriteDecorHandle.h>
 #include "xAODBase/IParticleHelpers.h"
 
@@ -27,12 +29,14 @@ namespace CP{
     StatusCode MuonLRTMergingAlg::initialize() {
 
         // Greet the user:
-        ATH_MSG_INFO( "Initialising" );
+        ATH_MSG_DEBUG( "Initialising" );
 
         /// initialize the handles
         ATH_CHECK( m_promptMuonLocation.initialize() );
         ATH_CHECK( m_lrtMuonLocation.initialize() );
         ATH_CHECK( m_outMuonLocation.initialize() );
+        m_outMuonViewLocation = m_outMuonLocation.key();
+        ATH_CHECK( m_outMuonViewLocation.initialize(m_createViewCollection.value()) );
         ATH_CHECK( m_promptIsLRTKey.initialize() );
         ATH_CHECK( m_lrtIsLRTKey.initialize() );
 
@@ -53,11 +57,13 @@ namespace CP{
     StatusCode MuonLRTMergingAlg::execute(const EventContext &ctx) const {
 
         // Setup containers for output, to avoid const conversions setup two different kind of containers
-        auto outputViewCol = std::make_unique<ConstDataVector<xAOD::MuonContainer>>(SG::VIEW_ELEMENTS);
-        auto outputCol = std::make_unique<xAOD::MuonContainer>();
-
+        std::unique_ptr<ConstDataVector<xAOD::MuonContainer>> outputViewCol;
+        std::unique_ptr<xAOD::MuonContainer> outputCol;
         std::unique_ptr<xAOD::MuonAuxContainer> outputAuxCol;
-        if(!m_createViewCollection) {
+        if(m_createViewCollection) {
+            outputViewCol = std::make_unique<ConstDataVector<xAOD::MuonContainer>>(SG::VIEW_ELEMENTS);
+        } else {
+            outputCol = std::make_unique<xAOD::MuonContainer>();
             outputAuxCol = std::make_unique<xAOD::MuonAuxContainer>();
             outputCol->setStore(outputAuxCol.get());
         }
@@ -98,11 +104,12 @@ namespace CP{
         }
 
         // write
-        SG::WriteHandle<xAOD::MuonContainer> h_write(m_outMuonLocation, ctx);
         if (m_createViewCollection) {
-          ATH_CHECK(evtStore()->record(outputViewCol.release(), m_outMuonLocation.key()));
+          SG::WriteHandle<ConstDataVector<xAOD::MuonContainer>> h_write(m_outMuonViewLocation, ctx);
+          ATH_CHECK(h_write.record(std::move(outputViewCol)));
         }
         else {
+          SG::WriteHandle<xAOD::MuonContainer> h_write(m_outMuonLocation, ctx);
           ATH_CHECK(h_write.record(std::move(outputCol), std::move(outputAuxCol)));
         }
 
@@ -118,8 +125,6 @@ namespace CP{
                                             const std::vector<bool> & writeMuon,
                                             ConstDataVector<xAOD::MuonContainer>* outputCol) const{
         // loop over muons, accept them and add them into association tool
-        if(muonCol.empty()) {return StatusCode::SUCCESS;}
-
         for(const xAOD::Muon* muon : muonCol){
             // add muon into output
             if (writeMuon.at(muon->index())){
@@ -133,19 +138,18 @@ namespace CP{
                                             const std::vector<bool> & writeMuon,
                                             xAOD::MuonContainer* outputCol) const{
         // loop over muons, accept them and add them into association tool
-        if(muonCol.empty()) {return StatusCode::SUCCESS;}
         static const SG::Decorator<ElementLink<xAOD::MuonContainer>> originalMuonLink("originalMuonLink");
         for(const xAOD::Muon* muon : muonCol){
             // add muon into output
             if (writeMuon.at(muon->index())){
-              xAOD::Muon* newMuon = new xAOD::Muon(*muon);
+              auto newMuon = std::make_unique<xAOD::Muon>(*muon);
               ElementLink<xAOD::MuonContainer> myLink;
               myLink.toIndexedElement(muonCol, muon->index());
               originalMuonLink(*newMuon) = myLink;
               setOriginalObjectLink(*muon, *newMuon);
               static const SG::Accessor <char> isLRT("isLRT");
               isLRT(*newMuon) = isLRT(*muon);
-              outputCol->push_back(newMuon);
+              outputCol->push_back(std::move(newMuon));
             }
         }
         return StatusCode::SUCCESS;

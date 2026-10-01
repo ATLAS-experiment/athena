@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -15,6 +15,7 @@
 #include <xAODMuon/MuonAuxContainer.h>
 #include <AthContainers/ConstDataVector.h>
 #include <AsgDataHandles/WriteHandle.h>
+#include <xAODBase/IParticleHelpers.h>
 
 namespace CP {
     MuonContainerMergingAlg::MuonContainerMergingAlg( const std::string& name, ISvcLocator* svcLoc )
@@ -28,13 +29,13 @@ namespace CP {
         ATH_MSG_DEBUG("Initializing MuonContainerMergingAlg");
         ATH_CHECK( m_inputMuonContainers.initialize() );
        
-        // Override m_outMuonLocationCopy key 
-        if ( !m_createViewCollection.value() ) { m_outMuonLocationCopy = m_outMuonLocationView.key(); }
+        // Default m_outMuonLocationCopy key to the OutputMuonLocation key
+        if ( !m_createViewCollection.value() && m_outMuonLocationCopy.key().empty() ) { m_outMuonLocationCopy = m_outMuonLocationView.key(); }
         
-        // initialize output muon containters	
-	ATH_CHECK( m_outMuonLocationCopy.initialize(!m_createViewCollection.value()) );
+        // initialize output muon containters
+        ATH_CHECK( m_outMuonLocationCopy.initialize(!m_createViewCollection.value()) );
         ATH_CHECK( m_outMuonLocationView.initialize(m_createViewCollection.value()) );
-	
+
         // Return gracefully:
         return StatusCode::SUCCESS;
     }
@@ -42,11 +43,13 @@ namespace CP {
     StatusCode MuonContainerMergingAlg::execute(const EventContext &ctx) const  {
 
         // Setup containers for output, to avoid const conversions setup two different kind of containers
-        auto outputViewCol = std::make_unique<ConstDataVector<xAOD::MuonContainer>>(SG::VIEW_ELEMENTS);
-        auto outputCol = std::make_unique<xAOD::MuonContainer>();
-
+        std::unique_ptr<ConstDataVector<xAOD::MuonContainer>> outputViewCol;
+        std::unique_ptr<xAOD::MuonContainer> outputCol;
         std::unique_ptr<xAOD::MuonAuxContainer> outputAuxCol;
-        if(!m_createViewCollection) {
+        if(m_createViewCollection) {
+            outputViewCol = std::make_unique<ConstDataVector<xAOD::MuonContainer>>(SG::VIEW_ELEMENTS);
+        } else {
+            outputCol = std::make_unique<xAOD::MuonContainer>();
             outputAuxCol = std::make_unique<xAOD::MuonAuxContainer>();
             outputCol->setStore(outputAuxCol.get());
         }
@@ -58,6 +61,7 @@ namespace CP {
         for (const auto& mcname : m_inputMuonContainers){
           // Retrieve tracks from StoreGate
           SG::ReadHandle<xAOD::MuonContainer> muCol (mcname, ctx);
+          ATH_CHECK(muCol.isValid());
           muonCollections.push_back(muCol.cptr());
           muonCountSum += muCol->size();
         }
@@ -77,8 +81,9 @@ namespace CP {
               if (m_createViewCollection) {
                 outputViewCol->push_back(muon);
               } else {
-                xAOD::Muon* newMuon = new xAOD::Muon(*muon);
-                outputCol->push_back(newMuon);
+                auto newMuon = std::make_unique<xAOD::Muon>(*muon);
+                setOriginalObjectLink(*muon, *newMuon);
+                outputCol->push_back(std::move(newMuon));
               }
             }
           }
