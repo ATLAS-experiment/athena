@@ -162,7 +162,7 @@ std::vector< std::vector<double> > TrackTools::getXYZEtaPhiPerLayer(const TRACK*
     else if(sample==9                 ){lay=8;}
     else if(sample==10                ){lay=9;}
     else if(sample==11                ){lay=10;}
-    if(lay!=-1) coordinates[lay] = TrkPars;
+    if(lay!=-1) coordinates[lay] = std::move(TrkPars);
   } // FOR
 
   return coordinates;
@@ -177,12 +177,13 @@ std::vector< std::vector<double> > TrackTools::getXYZEtaPhiPerSampling(const TRA
   {
     std::vector<double> TrkPars(5);
     std::vector<double> XYZEtaPhi = getXYZEtaPhiInCellSampling( track, (CaloSampling::CaloSample)s, ctx );
-    TrkPars[0] = ( XYZEtaPhi.size()!=5 ) ? -9999. : XYZEtaPhi[0] ;
-    TrkPars[1] = ( XYZEtaPhi.size()!=5 ) ? -9999. : XYZEtaPhi[1] ;
-    TrkPars[2] = ( XYZEtaPhi.size()!=5 ) ? -9999. : XYZEtaPhi[2] ;
-    TrkPars[3] = ( XYZEtaPhi.size()!=5 ) ? -9999. : XYZEtaPhi[3] ;
-    TrkPars[4] = ( XYZEtaPhi.size()!=5 ) ? -9999. : XYZEtaPhi[4] ;
-    coordinates.push_back(TrkPars);
+    const bool badSize{XYZEtaPhi.size()!=5};
+    TrkPars[0] = ( badSize ) ? -9999. : XYZEtaPhi[0] ;
+    TrkPars[1] = ( badSize ) ? -9999. : XYZEtaPhi[1] ;
+    TrkPars[2] = ( badSize ) ? -9999. : XYZEtaPhi[2] ;
+    TrkPars[3] = ( badSize ) ? -9999. : XYZEtaPhi[3] ;
+    TrkPars[4] = ( badSize ) ? -9999. : XYZEtaPhi[4] ;
+    coordinates.push_back(std::move(TrkPars));
   } // FOR
 
   return coordinates;

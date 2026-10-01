@@ -219,7 +219,7 @@ namespace DerivationFramework {
           }
         }
 
-        muonCellsMap[mu] = cells;
+        muonCellsMap[mu] = std::move(cells);
 
         if (clusterContainer) {
           lar_energy_in_cones = m_trackInCalo->getEnergyInCones(mu_track, clusterContainer, m_energyInSamplings, m_drCones, ctx);

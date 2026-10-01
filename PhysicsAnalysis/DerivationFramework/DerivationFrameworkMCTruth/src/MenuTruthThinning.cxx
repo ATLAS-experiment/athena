@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -251,7 +251,7 @@ StatusCode DerivationFramework::MenuTruthThinning::doThinning(const EventContext
             decayHelper.immediateRelatives(particle,particleMaskCopy,vertexMask,
                                            m_preserveHadVtx); // but only update the copy
         }
-        particleMask = particleMaskCopy; // Now update the original list in one go
+        particleMask = std::move(particleMaskCopy); // Now update the original list in one go
     }
     
     // Execute the thinning service based on the mask. Finish.

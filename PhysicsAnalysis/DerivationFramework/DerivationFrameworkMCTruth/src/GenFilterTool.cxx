@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Class header file
@@ -169,8 +169,8 @@ namespace DerivationFramework {
     // Get PTZ
     float PtZ(.0);
     float MinPt_PTZ(5000.), MaxEta_PTZ(5.0), MinMass_PTZ(20000.), MaxMass_PTZ(14000000.);
-    bool AllowElecMu_PTZ = false;
-    bool AllowSameCharge_PTZ = false;
+    static constexpr bool AllowElecMu_PTZ = false;
+    static constexpr bool AllowSameCharge_PTZ = false;
     for (const xAOD::TruthParticle* pitr1 : *mcParticleOrigin){
       const int pdgId1 = pitr1->pdgId();
       if (HepMC::is_simulation_particle(pitr1)) continue;
