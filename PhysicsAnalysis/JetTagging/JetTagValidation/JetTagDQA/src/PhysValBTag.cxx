@@ -12,8 +12,7 @@
 // JetTagDQA includes
 #include "PhysValBTag.h"
 
-// STL includes
-#include <vector>
+
 
 // FrameWork includes
 #include "GaudiKernel/IToolSvc.h"
@@ -28,6 +27,8 @@
 
 #include "AthenaBaseComps/AthCheckMacros.h"
 #include "ParticleJetTools/JetFlavourInfo.h"
+// STL includes
+#include <vector>
 
 namespace {
   // same truth jet matching as in the FTAG training dataset dumper
@@ -141,7 +142,7 @@ namespace JetTagDQA {
       }
       workingPoints[key.substr(0, split)].emplace(key.substr(split + 1), cut);
     }
-    workingPoints["GN2v01"] = GN2v01WorkingPoints;
+    workingPoints["GN2v01"] = std::move(GN2v01WorkingPoints);
 
     for(const auto& [name, plot]: m_btagplots){
       plot->setDetailLevel(m_detailLevel);
