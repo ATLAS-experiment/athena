@@ -77,14 +77,17 @@ namespace CP
         static const std::string muonCorr{"MuonCorrMomentum"};
         static const std::string calib{"BJetCalibMomentum"};
         jet->setJetP4(noCalib, jet->jetP4());
-        jet->setJetP4(muonCorr, jet->jetP4());
-        if (!m_bJetTool.empty())
-        {
-          jet->setJetP4(calib, jet->jetP4());
-        }
 
         int nmuons = 0;
-        if (m_jetPreselection.getBool(*jet, sys))
+        if (!m_jetPreselection.getBool(*jet, sys))
+        {
+          jet->setJetP4(muonCorr, jet->jetP4());
+          if (!m_bJetTool.empty())
+          {
+            jet->setJetP4(calib, jet->jetP4());
+          }
+        }
+        else
         {
           ANA_CHECK (m_muonInJetTool->applyMuonInJetCorrection(*jet, muons_for_correction, nmuons));
           jet->setJetP4(muonCorr, jet->jetP4());

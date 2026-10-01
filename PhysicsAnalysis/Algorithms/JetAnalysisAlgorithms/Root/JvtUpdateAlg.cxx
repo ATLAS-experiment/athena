@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -26,8 +26,7 @@ namespace CP
       ANA_MSG_ERROR ("decoration name set to empty string, not allowed");
       return StatusCode::FAILURE;
     }
-    m_decorationAccessor = std::make_unique
-      <SG::Accessor<float> > (m_decorationName);
+    m_decorationAccessor.emplace (m_decorationName);
 
     ANA_CHECK (m_jvtTool.retrieve());
     ANA_CHECK (m_jetHandle.initialize (m_systematicsList));
