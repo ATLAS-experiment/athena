@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,11 +10,12 @@
 #include "DerivationFrameworkEGamma/EGInvariantMassTool.h"
 #include "xAODEgamma/Electron.h"
 #include "xAODMuon/Muon.h"
-#include <cmath>
-using std::abs;
-using std::sqrt;
 
 #include "TLorentzVector.h"
+
+#include <cmath>
+#include <numbers>
+
 
 namespace DerivationFramework {
 
@@ -163,7 +164,7 @@ EGInvariantMassTool::getInvariantMasses(const EventContext& ctx,
       if (entries1[outerIt] == 1 && entries2[innerIt] == 1) {
         tmpPair.push_back(outerIt);
         tmpPair.push_back(innerIt);
-        pairs.push_back(tmpPair);
+        pairs.push_back(std::move(tmpPair));
       }
     }
   }
@@ -199,11 +200,11 @@ EGInvariantMassTool::getInvariantMasses(const EventContext& ctx,
 
     if (m_mindR > 0.0) {
       float deta = aeta1 - aeta2;
-      float dphi = abs(aphi1 - aphi2);
-      if (dphi > TMath::Pi()) {
-        dphi = TMath::TwoPi() - dphi;
+      float dphi = std::abs(aphi1 - aphi2);
+      if (dphi > std::numbers::pi) {
+        dphi = (2*std::numbers::pi) - dphi;
       }
-      if (sqrt(deta * deta + dphi * dphi) < m_mindR) {
+      if (std::sqrt(deta * deta + dphi * dphi) < m_mindR) {
         continue;
       }
     }
