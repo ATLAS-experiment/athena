@@ -46,6 +46,23 @@ if (TARGET traccc::cuda)
   )
 endif()
 
+# HIP-only sources and libraries
+if (TARGET traccc::hip)
+  list( APPEND _sources
+    src/hip/*.h
+    src/hip/*.cxx
+
+  )
+  list( APPEND _libraries
+    traccc::hip
+    vecmem::hip
+    AthHIPInterfacesLib
+  )
+  list( APPEND GPU_TRACKING_DEFINITIONS
+    ACTSTRACK_HAVE_HIP
+  )
+endif()
+
 atlas_add_component( ActsGPUDataPreparation
   ${_sources}
   DEFINITIONS
@@ -57,10 +74,22 @@ atlas_add_component( ActsGPUDataPreparation
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 if (TARGET traccc::cuda)
-atlas_add_test( ActsDeviceClusterizationTest
+atlas_add_test( ActsCUDAClusterizationTest
    PRE_EXEC_SCRIPT "nvidia-check.sh || exit 2"
    ENVIRONMENT "PATHRESOLVER_DEVAREARESPONSE=WARNING"
    SCRIPT athena.py ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsDeviceClusterizationTest.py Device.Backend=DeviceBackend.CUDA
    POST_EXEC_SCRIPT noerror.sh
    PROPERTIES SKIP_RETURN_CODE 2 )
+endif()
+
+if (TARGET traccc::hip)
+  atlas_add_test(ActsHIPClusterizationTest
+    PRE_EXEC_SCRIPT "amd-check.sh || exit 2"
+    ENVIRONMENT "PATHRESOLVER_DEVAREARESPONSE=WARNING"
+    SCRIPT athena.py
+           ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsDeviceClusterizationTest.py
+           Device.Backend=DeviceBackend.HIPAMD
+           Acts.Device.doCellSorting=False
+    POST_EXEC_SCRIPT noerror.sh
+    PROPERTIES SKIP_RETURN_CODE 2)
 endif()
