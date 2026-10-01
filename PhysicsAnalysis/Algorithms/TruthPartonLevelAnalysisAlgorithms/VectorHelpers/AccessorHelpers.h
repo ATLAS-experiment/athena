@@ -8,10 +8,16 @@
 #ifndef ACCESSORHELPERS_H
 #define ACCESSORHELPERS_H
 
+#include <AthContainers/Accessor.h>
 #include <Math/Vector4D.h>
 #include <TMath.h>
 
 #include <map>
+#include <memory>
+#include <string>
+#include <vector>
+
+namespace CP {
 
 /**
  * @brief Struct to manage accessors to objects.
@@ -113,5 +119,7 @@ struct PartonAccessor {
         getFloat(prefix + "_phi", object), getFloat(prefix + "_m", object));
   }
 };
+
+}  // namespace CP
 
 #endif  // ACCESSORHELPERS_H

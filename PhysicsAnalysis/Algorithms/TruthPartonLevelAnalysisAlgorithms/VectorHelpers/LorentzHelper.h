@@ -13,6 +13,8 @@
 #include "Math/VectorUtil.h"
 #include "xAODTruth/TruthParticle.h"
 
+namespace CP {
+
 // Using directives for convenience with ROOT::Math vector types
 using ROOT::Math::PtEtaPhiEVector;
 using ROOT::Math::PtEtaPhiMVector;
@@ -59,9 +61,13 @@ PxPyPzEVector GetPxPyPzE(const object* obj) {
 
 // We don't template these as some will include warnings and differ slightly!
 // This shall highlight the difference w.r.t. truth particle information
+/// Four-vector of a truth particle, built from (pt, eta, phi, m) so that the
+/// mass is preserved exactly.
 PtEtaPhiMVector GetPtEtaPhiMfromTruth(const xAOD::TruthParticle* TruthParticle);
 PxPyPzMVector GetPxPyPzMfromTruth(const xAOD::TruthParticle* TruthParticle);
 PtEtaPhiEVector GetPtEtaPhiEfromTruth(const xAOD::TruthParticle* TruthParticle);
 PxPyPzEVector GetPxPyPzEfromTruth(const xAOD::TruthParticle* TruthParticle);
+
+}  // namespace CP
 
 #endif

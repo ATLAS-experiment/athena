@@ -4,14 +4,14 @@
 
 atlas_subdir( TruthPartonLevelAnalysisAlgorithms )
 
-find_package( ROOT COMPONENTS Core Physics )
+find_package( ROOT COMPONENTS Core MathCore GenVector )
 
 atlas_add_library( TruthPartonLevelAnalysisAlgorithmsLib
   TruthPartonLevelAnalysisAlgorithms/*.h PartonHistory/*.h VectorHelpers/*.h Root/*.cxx
   PUBLIC_HEADERS TruthPartonLevelAnalysisAlgorithms PartonHistory VectorHelpers
-  PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-  LINK_LIBRARIES AsgMessagingLib xAODBase xAODEventInfo PATCoreLib AnaAlgorithmLib AsgDataHandlesLib MCTruthClassifierLib FourMomUtils
-  PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} PATInterfaces xAODCore xAODTruth RootCoreUtils )
+  INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+  LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools AsgMessagingLib AthContainers xAODEventInfo xAODTruth AnaAlgorithmLib
+  PRIVATE_LINK_LIBRARIES MCTruthClassifierLib )
 
 atlas_add_component( TruthPartonLevelAnalysisAlgorithms
   src/components/*.cxx
