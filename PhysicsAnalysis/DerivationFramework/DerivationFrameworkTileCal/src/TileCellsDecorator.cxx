@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // TileCellsDecorator.cxx
@@ -246,7 +246,7 @@ namespace DerivationFramework {
         cells_sample.push_back( m_tileID->sample(cell->ID()) );
 
         // Tile PMT information
-        const TileCell* tile_cell = dynamic_cast<const TileCell*> (cell);
+        const TileCell* tile_cell = static_cast<const TileCell*> (cell);
 
         IdentifierHash hash1 = cell_dde->onl1();
         IdentifierHash hash2 = cell_dde->onl2();
