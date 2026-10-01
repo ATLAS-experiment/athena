@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // FatObjectCnv.cxx 
@@ -52,7 +52,7 @@ AthExFatObjectCnv::createPersistent(AthExFatObject* transCont)
   AthExFatObjectCnv_p1 cnv;
   AthExFatObject_PERS *persObj = cnv.createPersistent(transCont, msg);
 
-  msg << MSG::DEBUG << "::createPersistent [Success]" << endmsg;
+  ATH_MSG_DEBUG("::createPersistent [Success]");
   return persObj; 
 }
 

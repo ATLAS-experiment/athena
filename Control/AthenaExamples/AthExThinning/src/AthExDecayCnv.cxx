@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // DecayCnv.cxx 
@@ -52,7 +52,7 @@ AthExDecayCnv::createPersistent(AthExDecay* transCont)
   AthExDecayCnv_p1 cnv;
   AthExDecay_PERS *persObj = cnv.createPersistent(transCont, msg);
 
-  msg << MSG::DEBUG << "::createPersistent [Success]" << endmsg;
+  ATH_MSG_DEBUG("::createPersistent [Success]");
   return persObj; 
 }
 

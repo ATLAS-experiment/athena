@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // WriteThinnedData.cxx 
@@ -68,11 +68,11 @@ WriteThinnedData::~WriteThinnedData()
 ////////////////////////////
 StatusCode WriteThinnedData::initialize()
 {
-  ATH_MSG_INFO("Initializing " << name() << "...");
+  ATH_MSG_INFO("Initializing {}...", name());
 
   for (int i = 0; i < 3; i++) {
     std::ostringstream ss;
-    ss << "_test" << (i+1);
+    std::print (ss, "_test{}", (i+1));
     m_elephantinoKeys.emplace_back (m_elephantinoName.value() + ss.str());
     m_decayKeys.emplace_back (m_decayName.value() + ss.str());
     m_iparticlesKeys.emplace_back (m_particlesName.value() + ss.str());
@@ -94,13 +94,13 @@ StatusCode WriteThinnedData::initialize()
 
 StatusCode WriteThinnedData::finalize()
 {
-  ATH_MSG_INFO("Finalizing " << name() << "...");
+  ATH_MSG_INFO("Finalizing {}...", name());
   return StatusCode::SUCCESS;
 }
 
 StatusCode WriteThinnedData::execute(const EventContext& ctx)
 {
-  ATH_MSG_DEBUG("Executing " << name() << "...");
+  ATH_MSG_DEBUG("Executing {}...", name());
 
   bool allGood = true;
   if ( !test( ctx, 0, "test1" ).isSuccess() ) {
@@ -125,7 +125,7 @@ StatusCode WriteThinnedData::test( const EventContext& ctx,
                                    int testNum, const std::string& testName )
 {
   const std::string& test = testName;
-  ATH_MSG_INFO("Performing thinning test [" << test << "]...");
+  ATH_MSG_INFO("Performing thinning test [{}]...", test);
 
   // fetch Particles
   const std::string particlesName = m_particlesName.value() + "_" + test;
@@ -133,7 +133,7 @@ StatusCode WriteThinnedData::test( const EventContext& ctx,
   if ( !evtStore()->retrieve(particles, particlesName).isSuccess() ||
        0 == particles ) {
     ATH_MSG_WARNING
-      ("Could not fetch particles at [" << particlesName << "] !!");
+      ("Could not fetch particles at [{}] !!", particlesName);
     return StatusCode::RECOVERABLE;
   }
 
@@ -142,12 +142,11 @@ StatusCode WriteThinnedData::test( const EventContext& ctx,
 
   if ( iparticles->size()      != particles->size()     ||
        iparticles->at(0)->px() != particles->at(0)->px() ) {
-    ATH_MSG_WARNING
-      ("symlinked containers are corrupted: " << endmsg
-       << " #iparticles: " << iparticles->size() << endmsg
-       << " # particles: " <<  particles->size() << endmsg
-       << "  ipx[0] = " << iparticles->at(0)->px() << endmsg
-       << "   px[0] = " <<  particles->at(0)->px());
+    ATH_MSG_WARNING ("symlinked containers are corrupted: ");
+    ATH_MSG_WARNING (" #iparticles: {}", iparticles->size());
+    ATH_MSG_WARNING (" # particles: {}",  particles->size());
+    ATH_MSG_WARNING ("  ipx[0] = {}", iparticles->at(0)->px());
+    ATH_MSG_WARNING ("   px[0] = {}",  particles->at(0)->px());
     return StatusCode::RECOVERABLE;
   }
 
@@ -158,20 +157,20 @@ StatusCode WriteThinnedData::test( const EventContext& ctx,
   SG::ReadHandle<AthExElephantino> elephantino (m_elephantinoKeys[testNum], ctx);
 
   const double igev = 1. / Gaudi::Units::GeV;
-  ATH_MSG_INFO("IN particles: " << particles->size() << endmsg
-		<< "IN decay: " << endmsg
-		<< " p1: px= " << decay->p1()->px() * igev << endmsg
-		<< " p2: px= " << decay->p2()->px() * igev << endmsg
-		<< " l1: px= " << decay->l1()->px() * igev << endmsg
-		<< " l2: px= " << decay->l2()->px() * igev);
+  ATH_MSG_INFO("IN particles: {}", particles->size());
+  ATH_MSG_INFO("IN decay: ");
+  ATH_MSG_INFO(" p1: px= {}", decay->p1()->px() * igev);
+  ATH_MSG_INFO(" p2: px= {}", decay->p2()->px() * igev);
+  ATH_MSG_INFO(" l1: px= {}", decay->l1()->px() * igev);
+  ATH_MSG_INFO(" l2: px= {}", decay->l2()->px() * igev);
 
-  ATH_MSG_INFO("IN elephantino: " << endmsg
-		<< " leg1: px= " << elephantino->leg1()->px() * igev << endmsg
-		<< " leg2: px= " << elephantino->leg2()->px() * igev << endmsg
-		<< " leg3: px= " << elephantino->leg3()->px() * igev << endmsg
-		<< " leg4: px= " << elephantino->leg4()->px() * igev << endmsg
-		<< " ear1: px= " << elephantino->ear1()->px() * igev << endmsg
-		<< " ear2: px= " << elephantino->ear2()->px() * igev);
+  ATH_MSG_INFO("IN elephantino: ");
+  ATH_MSG_INFO(" leg1: px= {}", elephantino->leg1()->px() * igev);
+  ATH_MSG_INFO(" leg2: px= {}", elephantino->leg2()->px() * igev);
+  ATH_MSG_INFO(" leg3: px= {}", elephantino->leg3()->px() * igev);
+  ATH_MSG_INFO(" leg4: px= {}", elephantino->leg4()->px() * igev);
+  ATH_MSG_INFO(" ear1: px= {}", elephantino->ear1()->px() * igev);
+  ATH_MSG_INFO(" ear2: px= {}", elephantino->ear2()->px() * igev);
 
   ////////////////////////////////////////////////////////////////////
   /// thinning
@@ -188,29 +187,27 @@ StatusCode WriteThinnedData::test( const EventContext& ctx,
       ATH_MSG_WARNING("Could not exercise Thinning !!");
     }
   } else {
-    ATH_MSG_ERROR("Unknown test: [" << test << "]");
+    ATH_MSG_ERROR("Unknown test: [{}]", test);
     return StatusCode::FAILURE;
   }
   ////////////////////////////////////////////////////////////////////
 
-  ATH_MSG_INFO
-    ("Decay is now: " << endmsg
-     << " p1: px= " << decay->p1()->px() * igev << endmsg
-     << " p2: px= " << decay->p2()->px() * igev << endmsg
-     << " l1: px= " << decay->l1()->px() * igev << endmsg
-     << " l2: px= " << decay->l2()->px() * igev);
+  ATH_MSG_INFO("Decay is now:");
+  ATH_MSG_INFO(" p1: px= {}", decay->p1()->px() * igev);
+  ATH_MSG_INFO(" p2: px= {}", decay->p2()->px() * igev);
+  ATH_MSG_INFO(" l1: px= {}", decay->l1()->px() * igev);
+  ATH_MSG_INFO(" l2: px= {}", decay->l2()->px() * igev);
     
-  ATH_MSG_INFO
-    ("Elephantino is now: " << endmsg
-     << " leg1: px= " << elephantino->leg1()->px() * igev << endmsg
-     << " leg2: px= " << elephantino->leg2()->px() * igev << endmsg
-     << " leg3: px= " << elephantino->leg3()->px() * igev << endmsg
-     << " leg4: px= " << elephantino->leg4()->px() * igev << endmsg
-     << " ear1: px= " << elephantino->ear1()->px() * igev << endmsg
-     << " ear2: px= " << elephantino->ear2()->px() * igev);
+  ATH_MSG_INFO("Elephantino is now: ");
+  ATH_MSG_INFO(" leg1: px= {}", elephantino->leg1()->px() * igev);
+  ATH_MSG_INFO(" leg2: px= {}", elephantino->leg2()->px() * igev);
+  ATH_MSG_INFO(" leg3: px= {}", elephantino->leg3()->px() * igev);
+  ATH_MSG_INFO(" leg4: px= {}", elephantino->leg4()->px() * igev);
+  ATH_MSG_INFO(" ear1: px= {}", elephantino->ear1()->px() * igev);
+  ATH_MSG_INFO(" ear2: px= {}", elephantino->ear2()->px() * igev);
 
 
-  ATH_MSG_INFO("[" << test << "] has been performed.");
+  ATH_MSG_INFO("[{}] has been performed.", test);
   return StatusCode::SUCCESS;
 }
 
@@ -222,40 +219,29 @@ StatusCode WriteThinnedData::doThinningTest1( const EventContext& ctx,
   std::vector<bool> filter = m_filter.value();
   
   const double igev = 1. / Gaudi::Units::GeV;
-  msg(MSG::INFO) << "Particles | filter :" << endmsg;
+  ATH_MSG_INFO("Particles | filter :");
   for ( unsigned int i = 0; i != particles->size(); ++i ) {
     const std::string kr = filter[i] ? "keep" : "remove";
-    msg(MSG::INFO)
-      << std::setw(9) << (*particles)[i]->px() * igev
-      << " | " << kr
-      << endmsg;
+    ATH_MSG_INFO("{:9} | {}", (*particles)[i]->px() * igev, kr);
   }
-  msg(MSG::INFO) << "===================" << endmsg;
+  ATH_MSG_INFO("===================");
 
   std::fill( filter.begin() + (filter.size() / 2), 
 	     filter.end(),
 	     true );
-  msg(MSG::INFO) << "Filter [" << std::boolalpha;
-  std::copy( filter.begin(), filter.end(),
-	     std::ostream_iterator<bool>(msg(MSG::INFO).stream(), " ") );
-  msg(MSG::INFO) << "]" << endmsg;
+  ATH_MSG_INFO("Filter {}", filter);
 
-  msg(MSG::INFO) << "... Processing [pre-thinning] ..." << endmsg;
+  ATH_MSG_INFO("... Processing [pre-thinning] ...");
   particles.keep (filter);
-  msg(MSG::INFO) << "======== Index table =========" << endmsg;
+  ATH_MSG_INFO("======== Index table =========");
   {
     SG::ThinningDecisionBase tmp = particles.decision();
     tmp.buildIndexMap();
     for ( std::size_t i = 0; i != particles->size(); ++i ) {
       std::size_t newIdx = tmp.index( i );
-      std::stringstream newIdxStr; 
-      newIdxStr << newIdx;
-      msg(MSG::INFO)
-        << " idx " << i 
-        << " -> "  << (newIdx == SG::ThinningDecision::RemovedIdx 
-                       ? "-"
-                       : newIdxStr.str() )
-        << endmsg;
+      ATH_MSG_INFO(" idx {} -> {}",
+                   i,
+                   newIdx == SG::ThinningDecision::RemovedIdx ? "-" : std::to_string(newIdx));
     }
   }
 
@@ -265,28 +251,20 @@ StatusCode WriteThinnedData::doThinningTest1( const EventContext& ctx,
 	     filter.begin() + (filter.size() / 2), 
 	     true );
 
-  msg(MSG::INFO) << "Filter [" << std::boolalpha;
-  std::copy( filter.begin(), filter.end(),
-	     std::ostream_iterator<bool>(msg(MSG::INFO).stream(), " ") );
-  msg(MSG::INFO) << "]" << endmsg;
+  ATH_MSG_INFO("Filter {}", filter);
 
-  msg(MSG::INFO) << "... Processing [thinning] ..." << endmsg;
+  ATH_MSG_INFO("... Processing [thinning] ...");
   particles.keep( filter, SG::ThinningDecisionBase::Op::And );
 
-  msg(MSG::INFO) << "======== Index table =========" << endmsg;
+  ATH_MSG_INFO("======== Index table =========");
   {
     SG::ThinningDecisionBase tmp = particles.decision();
     tmp.buildIndexMap();
     for ( std::size_t i = 0; i != particles->size(); ++i ) {
       std::size_t newIdx = tmp.index( i );
-      std::stringstream newIdxStr; 
-      newIdxStr << newIdx;
-      msg(MSG::INFO)
-        << " idx " << i 
-        << " -> "  << (newIdx == SG::ThinningDecision::RemovedIdx 
-                       ? "-"
-                       : newIdxStr.str() )
-        << endmsg;
+      ATH_MSG_INFO(" idx {} -> {}",
+                   i,
+                   newIdx == SG::ThinningDecision::RemovedIdx ? "-" : std::to_string(newIdx));
     }
   }
   
@@ -301,40 +279,29 @@ StatusCode WriteThinnedData::doThinningTest2( const EventContext& ctx,
   std::vector<bool> filter = m_filter.value();
 
   const double igev = 1. / Gaudi::Units::GeV;
-  msg(MSG::INFO) << "Particles | filter :" << endmsg;
+  ATH_MSG_INFO( "Particles | filter :");
   for ( unsigned int i = 0; i != particles->size(); ++i ) {
     const std::string kr = filter[i] ? "keep" : "remove";
-    msg(MSG::INFO)
-      << std::setw(9) << (*particles)[i]->px() * igev
-      << " | " << kr
-      << endmsg;
+    ATH_MSG_INFO("{:9} | {}",(*particles)[i]->px() * igev, kr);
   }
-  msg(MSG::INFO) << "===================" << endmsg;
+  ATH_MSG_INFO("===================");
 
   std::fill( filter.begin() + (filter.size() / 2), 
 	     filter.end(),
 	     false );
-  msg(MSG::INFO) << "Filter [" << std::boolalpha;
-  std::copy( filter.begin(), filter.end(),
-	     std::ostream_iterator<bool>(msg(MSG::INFO).stream(), " ") );
-  msg(MSG::INFO) << "]" << endmsg;
+  ATH_MSG_INFO("Filter {}", filter);
 
-  msg(MSG::INFO) << "... Processing [pre-thinning] ..." << endmsg;
+  ATH_MSG_INFO("... Processing [pre-thinning] ...");
   particles.keep (filter);
-  msg(MSG::INFO) << "======== Index table =========" << endmsg;
+  ATH_MSG_INFO("======== Index table =========");
   {
     SG::ThinningDecisionBase tmp = particles.decision();
     tmp.buildIndexMap();
     for ( std::size_t i = 0; i != particles->size(); ++i ) {
       std::size_t newIdx = tmp.index( i );
-      std::stringstream newIdxStr; 
-      newIdxStr << newIdx;
-      msg(MSG::INFO)
-        << " idx " << i 
-        << " -> "  << (newIdx == SG::ThinningDecision::RemovedIdx 
-                       ? "-"
-                       : newIdxStr.str() )
-        << endmsg;
+      ATH_MSG_INFO(" idx {} -> {}",
+                   i,
+                   newIdx == SG::ThinningDecision::RemovedIdx ? "-" : std::to_string(newIdx));
     }
   }
 
@@ -344,28 +311,20 @@ StatusCode WriteThinnedData::doThinningTest2( const EventContext& ctx,
 	     filter.begin() + (filter.size() / 2), 
 	     false );
 
-  msg(MSG::INFO) << "Filter [" << std::boolalpha;
-  std::copy( filter.begin(), filter.end(),
-	     std::ostream_iterator<bool>(msg(MSG::INFO).stream(), " ") );
-  msg(MSG::INFO) << "]" << endmsg;
+  ATH_MSG_INFO("Filter {}", filter);
 
-  msg(MSG::INFO) << "... Processing [thinning] ..." << endmsg;
+  ATH_MSG_INFO("... Processing [thinning] ...");
   particles.keep (filter, SG::ThinningDecisionBase::Op::Or);
 
-  msg(MSG::INFO) << "======== Index table =========" << endmsg;
+  ATH_MSG_INFO("======== Index table =========");
   {
     SG::ThinningDecisionBase tmp = particles.decision();
     tmp.buildIndexMap();
     for ( std::size_t i = 0; i != particles->size(); ++i ) {
       std::size_t newIdx = tmp.index( i );
-      std::stringstream newIdxStr; 
-      newIdxStr << newIdx;
-      msg(MSG::INFO) 
-        << " idx " << i 
-        << " -> "  << (newIdx == SG::ThinningDecision::RemovedIdx 
-                       ? "-"
-                       : newIdxStr.str() )
-        << endmsg;
+      ATH_MSG_INFO(" idx {} -> {}",
+                   i,
+                   newIdx == SG::ThinningDecision::RemovedIdx ? "-" : std::to_string(newIdx));
     }
   }
   
@@ -381,40 +340,29 @@ WriteThinnedData::doThinningTest3( const EventContext& ctx,
   std::vector<bool> filter = m_filter.value();
 
   const double igev = 1. / Gaudi::Units::GeV;
-  msg(MSG::INFO) << "IParticles | filter :" << endmsg;
+  ATH_MSG_INFO("IParticles | filter :");
   for ( unsigned int i = 0; i != iparticles->size(); ++i ) {
     const std::string kr = filter[i] ? "keep" : "remove";
-    msg(MSG::INFO)
-      << std::setw(9) << (*iparticles)[i]->px() * igev
-      << " | " << kr
-      << endmsg;
+    ATH_MSG_INFO("{:9} | {}", (*iparticles)[i]->px() * igev, kr);
   }
-  msg(MSG::INFO) << "===================" << endmsg;
+  ATH_MSG_INFO("===================");
 
   std::fill( filter.begin() + (filter.size() / 2), 
 	     filter.end(),
 	     true );
-  msg(MSG::INFO) << "Filter [" << std::boolalpha;
-  std::copy( filter.begin(), filter.end(),
-	     std::ostream_iterator<bool>(msg(MSG::INFO).stream(), " ") );
-  msg(MSG::INFO) << "]" << endmsg;
+  ATH_MSG_INFO("Filter {}", filter);
 
-  msg(MSG::INFO) << "... Processing [pre-thinning] ..." << endmsg;
+  ATH_MSG_INFO("... Processing [pre-thinning] ...");
   iparticles.keep (filter);
-  msg(MSG::INFO) << "======== Index table =========" << endmsg;
+  ATH_MSG_INFO("======== Index table =========");
   {
     SG::ThinningDecisionBase tmp = iparticles.decision();
     tmp.buildIndexMap();
     for ( std::size_t i = 0; i != iparticles->size(); ++i ) {
       std::size_t newIdx = tmp.index( i );
-      std::stringstream newIdxStr; 
-      newIdxStr << newIdx;
-      msg(MSG::INFO)
-        << " idx " << i 
-        << " -> "  << (newIdx == SG::ThinningDecision::RemovedIdx 
-                       ? "-"
-                       : newIdxStr.str() )
-        << endmsg;
+      ATH_MSG_INFO(" idx {} -> {}",
+                   i,
+                   newIdx == SG::ThinningDecision::RemovedIdx ? "-" : std::to_string(newIdx));
     }
   }
 
@@ -424,28 +372,20 @@ WriteThinnedData::doThinningTest3( const EventContext& ctx,
 	     filter.begin() + (filter.size() / 2), 
 	     true );
 
-  msg(MSG::INFO) << "Filter [" << std::boolalpha;
-  std::copy( filter.begin(), filter.end(),
-	     std::ostream_iterator<bool>(msg(MSG::INFO).stream(), " ") );
-  msg(MSG::INFO) << "]" << endmsg;
+  ATH_MSG_INFO("Filter {}", filter);
 
-  msg(MSG::INFO) << "... Processing [thinning] ..." << endmsg;
+  ATH_MSG_INFO("... Processing [thinning] ...");
   iparticles.keep (filter, SG::ThinningDecisionBase::Op::And);
 
-  msg(MSG::INFO) << "======== Index table =========" << endmsg;
+  ATH_MSG_INFO("======== Index table =========");
   {
     SG::ThinningDecisionBase tmp = iparticles.decision();
     tmp.buildIndexMap();
     for ( std::size_t i = 0; i != iparticles->size(); ++i ) {
       std::size_t newIdx = tmp.index( i );
-      std::stringstream newIdxStr; 
-      newIdxStr << newIdx;
-      msg(MSG::INFO)
-        << " idx " << i 
-        << " -> "  << (newIdx == SG::ThinningDecision::RemovedIdx 
-                       ? "-"
-                       : newIdxStr.str() )
-        << endmsg;
+      ATH_MSG_INFO(" idx {} -> {}",
+                   i,
+                   newIdx == SG::ThinningDecision::RemovedIdx ? "-" : std::to_string(newIdx));
     }
   }
   

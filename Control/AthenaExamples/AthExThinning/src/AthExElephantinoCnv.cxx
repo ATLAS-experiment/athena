@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ElephantinoCnv.cxx 
@@ -52,7 +52,7 @@ AthExElephantinoCnv::createPersistent(AthExElephantino* transCont)
   AthExElephantinoCnv_p1 cnv;
   AthExElephantino_PERS *persObj = cnv.createPersistent(transCont, msg);
 
-  msg << MSG::DEBUG << "::createPersistent [Success]" << endmsg;
+  ATH_MSG_DEBUG("::createPersistent [Success]");
   return persObj; 
 }
 

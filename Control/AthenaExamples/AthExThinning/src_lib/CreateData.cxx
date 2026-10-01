@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // CreateData.cxx 
@@ -82,28 +82,28 @@ CreateData::~CreateData()
 ////////////////////////////
 StatusCode CreateData::initialize()
 {
-  ATH_MSG_INFO ("Initializing " << name() << "...");
+  ATH_MSG_INFO ("Initializing {}...", name());
   return StatusCode::SUCCESS;
 }
 
 StatusCode CreateData::finalize()
 {
-  ATH_MSG_INFO ("Finalizing " << name() << "...");
+  ATH_MSG_INFO ("Finalizing {}...", name());
   return StatusCode::SUCCESS;
 }
 
 StatusCode CreateData::execute(const EventContext& /*ctx*/)
 {  
-  ATH_MSG_DEBUG ("Executing " << name() << "...");
+  ATH_MSG_DEBUG ("Executing {}...", name());
 
   for ( std::vector<std::string>::const_iterator 
 	  itr  = m_testNames.begin(),
 	  iEnd = m_testNames.end();
 	itr != iEnd;
 	++itr ) {
-    ATH_MSG_INFO("Generating data for [" << *itr << "]...");
+    ATH_MSG_INFO("Generating data for [{}]...", *itr);
     if ( !makeData(*itr).isSuccess() ) {
-      ATH_MSG_ERROR ("Could not generate data for [" << *itr << "] !!");
+      ATH_MSG_ERROR ("Could not generate data for [{}] !!", *itr);
       return StatusCode::FAILURE;
     }
   }
@@ -119,15 +119,13 @@ StatusCode CreateData::makeData( const std::string& test )
   // create particles
   AthExParticles * particles = new AthExParticles;
   if ( !evtStore()->record(particles, particlesOutputName).isSuccess() ) {
-    ATH_MSG_ERROR("Could not store particles at ["
-		  << particlesOutputName << "]");
+    ATH_MSG_ERROR("Could not store particles at [{}]", particlesOutputName);
     delete particles;
     particles = 0;
     return StatusCode::RECOVERABLE;
   }
   if ( !evtStore()->setConst(particles).isSuccess() ) {
-    ATH_MSG_WARNING("Could not setConst particles at ["
-		    << particlesOutputName << "]");
+    ATH_MSG_WARNING("Could not setConst particles at [{}]", particlesOutputName);
   }
 
   for ( unsigned int i = 0; i != m_nbrParticles.value(); ++i ) {
@@ -138,20 +136,20 @@ StatusCode CreateData::makeData( const std::string& test )
     particles->push_back(p);
   }
 
-  ATH_MSG_DEBUG ("particles: " << particles->size() 
-		 << " [" << particles << "]");
+  ATH_MSG_DEBUG ("particles: {} [{}]",
+                 particles->size(), static_cast<void*>(particles));
 
   const std::string decayOutputName = m_decayOutputName.value() + testName;
   // create a dumb object from 2 particles
   AthExDecay * dcy = new AthExDecay;
   if ( !evtStore()->record(dcy, decayOutputName).isSuccess() ) {
-    ATH_MSG_ERROR("Could not store Decay at [" << decayOutputName << "] !!");
+    ATH_MSG_ERROR("Could not store Decay at [{}] !!", decayOutputName);
     delete dcy;
     dcy = 0;
     return StatusCode::RECOVERABLE;
   }
   if ( !evtStore()->setConst(dcy).isSuccess() ) {
-    ATH_MSG_WARNING("Could not setConst Decay at [" << decayOutputName << "]");
+    ATH_MSG_WARNING("Could not setConst Decay at [{}]", decayOutputName);
   }
   
   if ( particles->size() < 5 ) {
@@ -173,35 +171,31 @@ StatusCode CreateData::makeData( const std::string& test )
   dcy->setDecay( p1, p2, l1, l2 );
 
   const double igev = 1. / Gaudi::Units::GeV;
-  ATH_MSG_INFO
-    ("Created a Decay from :" << endmsg
-     << " p1: px= " << dcy->p1()->px() * igev << endmsg
-     << " p2: px= " << dcy->p2()->px() * igev << endmsg
-     << " l1: px= " << dcy->l1()->px() * igev << endmsg
-     << " l2: px= " << dcy->l2()->px() * igev
-     );
+  ATH_MSG_INFO("Created a Decay from :");
+  ATH_MSG_INFO(" p1: px= {}", dcy->p1()->px() * igev);
+  ATH_MSG_INFO(" p2: px= {}", dcy->p2()->px() * igev);
+  ATH_MSG_INFO(" l1: px= {}", dcy->l1()->px() * igev);
+  ATH_MSG_INFO(" l2: px= {}", dcy->l2()->px() * igev);
 
   // create the elephantino
   const std::string elephantinoOutputName = m_elephantinoOutputName.value()
                                           + testName;
   AthExElephantino * eleph = new AthExElephantino;
   if ( !evtStore()->record(eleph, elephantinoOutputName).isSuccess() ) {
-    ATH_MSG_ERROR("Could not store Elephantino at ["
-		  << elephantinoOutputName << "] !!");
+    ATH_MSG_ERROR("Could not store Elephantino at [{}] !!", elephantinoOutputName);
     delete eleph;
     eleph = 0;
     return StatusCode::RECOVERABLE;
   }
   if ( !evtStore()->setConst(eleph).isSuccess() ) {
-    ATH_MSG_WARNING("Could not setConst Elephantino at ["
-		    << elephantinoOutputName << "]");
+    ATH_MSG_WARNING("Could not setConst Elephantino at [{}]", elephantinoOutputName);
   }
 
   const AthExIParticles* iparticles = 0;
   if ( !evtStore()->retrieve( iparticles, particlesOutputName).isSuccess() ||
        0 == iparticles ) {
-    ATH_MSG_WARNING("Could not retrieve the (symlinked) AthExIParticles at ["
-		    << particlesOutputName << "] !!");
+    ATH_MSG_WARNING("Could not retrieve the (symlinked) AthExIParticles at [{}] !!",
+                    particlesOutputName);
     return StatusCode::RECOVERABLE;
   }
 
@@ -210,18 +204,16 @@ StatusCode CreateData::makeData( const std::string& test )
     return StatusCode::RECOVERABLE;
   }
 
-  ATH_MSG_INFO("  particles: " <<  particles->size()
-	       << endmsg <<
-	       " iparticles: " << iparticles->size());
+  ATH_MSG_INFO("  particles: {}",  particles->size());
+  ATH_MSG_INFO(" iparticles: {}", iparticles->size());
     
   if ( iparticles->size() != particles->size() ) {
-    ATH_MSG_ERROR("Error performing the symlink !" << endmsg
-		  << " #iparticles: " << iparticles->size() << endmsg
-		  << "  #particles: " <<  particles->size() << endmsg
-		  << " @iparticles: " << iparticles << endmsg
-		  << "  @particles: " <<  particles << endmsg
-		  << "=== StoreGate content ===\n"
-		  << evtStore()->dump());
+    ATH_MSG_ERROR("Error performing the symlink !");
+    ATH_MSG_ERROR(" #iparticles: {}", iparticles->size());
+    ATH_MSG_ERROR("  #particles: {}", particles->size());
+    ATH_MSG_ERROR(" @iparticles: {}", static_cast<const void*>(iparticles));
+    ATH_MSG_ERROR("  @particles: {}", static_cast<const void*>(particles));
+    ATH_MSG_ERROR("=== StoreGate content ===\n{}", evtStore()->dump());
     return StatusCode::FAILURE;
   }
 
@@ -239,13 +231,13 @@ StatusCode CreateData::makeData( const std::string& test )
   const ElementLink<AthExIParticles> ie2( (*iparticles)[9], *iparticles );
   eleph->setEars( ie1, ie2 );
 
-  ATH_MSG_INFO("Created an Elephantino from :" << endmsg
-	       << " leg1: px= " << eleph->leg1()->px() * igev << endmsg
-	       << " leg2: px= " << eleph->leg2()->px() * igev << endmsg
-	       << " leg3: px= " << eleph->leg3()->px() * igev << endmsg
-	       << " leg4: px= " << eleph->leg4()->px() * igev << endmsg
-	       << " ear1: px= " << eleph->ear1()->px() * igev << endmsg
-	       << " ear2: px= " << eleph->ear2()->px() * igev);
+  ATH_MSG_INFO("Created an Elephantino from :");
+  ATH_MSG_INFO(" leg1: px= {}", eleph->leg1()->px() * igev);
+  ATH_MSG_INFO(" leg2: px= {}", eleph->leg2()->px() * igev);
+  ATH_MSG_INFO(" leg3: px= {}", eleph->leg3()->px() * igev);
+  ATH_MSG_INFO(" leg4: px= {}", eleph->leg4()->px() * igev);
+  ATH_MSG_INFO(" ear1: px= {}", eleph->ear1()->px() * igev);
+  ATH_MSG_INFO(" ear2: px= {}", eleph->ear2()->px() * igev);
 
   return StatusCode::SUCCESS;
 }
