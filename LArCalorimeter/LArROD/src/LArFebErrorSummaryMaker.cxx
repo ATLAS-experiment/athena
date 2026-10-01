@@ -257,7 +257,7 @@ StatusCode LArFebErrorSummaryMaker::execute(const EventContext& ctx) const
       ++(m_errsPerFeb[int_id]);
       }
     }
-    ATH_MSG_DEBUG(std::format(" Error for this FEB id  {:#x} is {:#x}",int_id,errw));
+    ATH_MSG_DEBUG(" Error for this FEB id  {:#x} is {:#x}",int_id,errw);
 
     if (!febErrorSummary->set_feb_error(int_id, errw)) {
 
@@ -332,7 +332,7 @@ StatusCode LArFebErrorSummaryMaker::finalize()
   }
   
   for (auto feb_err : m_errsPerFeb) {
-    ATH_MSG_INFO(std::format("Feb {:#x} {} had errors for {} event(s)",feb_err.first,m_onlineHelper->channel_name(HWIdentifier(feb_err.first)),feb_err.second));
+    ATH_MSG_INFO("Feb {:#x} {} had errors for {} event(s)",feb_err.first,m_onlineHelper->channel_name(HWIdentifier(feb_err.first)),feb_err.second);
 
   }
 
