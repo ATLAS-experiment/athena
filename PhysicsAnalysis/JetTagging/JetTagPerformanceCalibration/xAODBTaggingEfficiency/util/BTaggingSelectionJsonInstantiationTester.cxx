@@ -29,6 +29,7 @@
 
 #ifdef XAOD_STANDALONE
 #include "xAODRootAccess/Init.h"
+class GaudiException { public: const char* what() const { return ""; } };
 #else
 #include "POOLRootAccess/TEvent.h"
 #endif
@@ -95,20 +96,26 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
                     "BTaggingSelectionJsonTool/XbbInst_" + tagger + "_" +
                     jetAuthor + "_" + op);
 
-                const bool ok =
-                    tool.setProperty("JsonConfigFile", jsonCalibPath).isSuccess()
-                    && tool.setProperty("OutputName", tagger).isSuccess()
-                    && tool.setProperty("JetAuthor", jetAuthor).isSuccess()
-                    && tool.setProperty("OperatingPoint", op).isSuccess()
-                    && tool.setProperty("AllowBinCountMismatch",
-                                        allowBinMismatch).isSuccess()
-                    && tool.setProperty("OutputLevel",
-                                        static_cast<int>(MSG::WARNING)).isSuccess()
-                    && tool.initialize().isSuccess();
+                try {
+                  const bool ok =
+                      tool.setProperty("JsonConfigFile", jsonCalibPath).isSuccess()
+                      && tool.setProperty("OutputName", tagger).isSuccess()
+                      && tool.setProperty("JetAuthor", jetAuthor).isSuccess()
+                      && tool.setProperty("OperatingPoint", op).isSuccess()
+                      && tool.setProperty("AllowBinCountMismatch",
+                                          allowBinMismatch).isSuccess()
+                      && tool.setProperty("OutputLevel",
+                                          static_cast<int>(MSG::WARNING)).isSuccess()
+                      && tool.initialize().isSuccess();
 
-                ANA_MSG_INFO((ok ? "PASS  " : "FAIL  ")
-                             << tagger << " / " << jetAuthor << " / " << op);
-                if (!ok) ++nFailed;
+                  ANA_MSG_INFO((ok ? "PASS  " : "FAIL  ")
+                               << tagger << " / " << jetAuthor << " / " << op);
+                  if (!ok) ++nFailed;
+                }
+                catch (const GaudiException& e) {
+                  ANA_MSG_ERROR("setProperty exception: {}", e.what());
+                  ++nFailed;
+                }
             }
         }
     }

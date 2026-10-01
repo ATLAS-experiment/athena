@@ -152,17 +152,23 @@ int main(int argc, char ** argv) {
        flt->init(defVec,noisetable.size(),1);
  
        // Fill the flt
-       for(unsigned h=0; h<noisetable.size(); ++h) {
-          flt->setData(h,0,0,noisetable[h].first);
-          if (mu > 0 && dt > 0) {
-               // new normalization
-               if (dt > 25)
-                  flt->setData(h,0,1,noisetable[h].second / std::sqrt(mu/NORM_FACTOR_DT50*10.) ); // multiply by 10. to get units stored in cond DB.
-               else
-                  flt->setData(h,0,1,noisetable[h].second / std::sqrt(mu/NORM_FACTOR_DT25*10.) ); // multiply by 10. t o get units stored in cond DB.
-          } else {
-                  flt->setData(h,0,1,noisetable[h].second );
-          }
+       try {
+         for(unsigned h=0; h<noisetable.size(); ++h) {
+           flt->setData(h,0,0,noisetable[h].first);
+           if (mu > 0 && dt > 0) {
+             // new normalization
+             if (dt > 25)
+               flt->setData(h,0,1,noisetable[h].second / std::sqrt(mu/NORM_FACTOR_DT50*10.) ); // multiply by 10. to get units stored in cond DB.
+             else
+               flt->setData(h,0,1,noisetable[h].second / std::sqrt(mu/NORM_FACTOR_DT25*10.) ); // multiply by 10. t o get units stored in cond DB.
+           } else {
+             flt->setData(h,0,1,noisetable[h].second );
+           }
+         }
+       }
+       catch (const CaloCond::IndexOutOfRange& e) {
+         std::cerr << std::endl << "Error: " << e.what() << std::endl;
+         return 1;
        }
  
        // Build the connection string
