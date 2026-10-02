@@ -12,7 +12,7 @@ from TriggerAnalysisAlgorithms.TriggerAnalysisSFConfig import trigger_set
 class JetTriggerMatchingBlock (ConfigBlock):
 
     def __init__ (self) :
-        super (JetTriggerMatchingBlock, self).__init__ ()
+        super().__init__()
         self.addOption ('triggerChainsPerYear', {}, type=dict,
                         info="a dictionary with key (string) the year and value (list of "
                         "strings) the trigger chains.")
@@ -119,24 +119,18 @@ class JetTriggerMatchingBlock (ConfigBlock):
                     alg.trigEmulationTool.JM_GSC_CNT.JetContainerName = 'HLT_xAOD__JetContainer_GSCJet'
                     alg.trigEmulationTool.JM_GSC_CNT.LHCPeriod = 2
 
+            decorations = []
             if self.runL1Matching:
-                alg.L1Et = "match_" + chain_out + "_L1et_%SYS%"
-                alg.L1Eta = "match_" + chain_out + "_L1eta_%SYS%"
-                alg.L1Phi = "match_" + chain_out + "_L1phi_%SYS%"
-                alg.L1DR = "match_" + chain_out + "_L1dr_%SYS%"
-                alg.L1Threshold = "match_" + chain_out + "_L1thresholds_%SYS%"
-                for var in ["L1et", "L1eta", "L1phi", "L1dr", "L1thresholds"]:
-                    config.addOutputVar (self.containerName,
-                                         "match_" + chain_out + "_" + var + "_%SYS%",
-                                         "match_" + chain_out + "_" + var, noSys=True)
-
+                decorations += [('L1Et', 'L1et'), ('L1Eta', 'L1eta'),
+                                ('L1Phi', 'L1phi'), ('L1DR', 'L1dr'),
+                                ('L1Threshold', 'L1thresholds')]
             if self.runHLTMatching:
-                alg.HLTPt = "match_" + chain_out + "_HLTpt_%SYS%"
-                alg.HLTEta = "match_" + chain_out + "_HLTeta_%SYS%"
-                alg.HLTPhi = "match_" + chain_out + "_HLTphi_%SYS%"
-                alg.HLTDR = "match_" + chain_out + "_HLTdr_%SYS%"
-                alg.HLTThreshold = "match_" + chain_out + "_HLTthresholds_%SYS%"
-                for var in ["HLTpt", "HLTeta", "HLTphi", "HLTdr", "HLTthresholds"]:
-                    config.addOutputVar (self.containerName,
-                                         "match_" + chain_out + "_" + var + "_%SYS%",
-                                         "match_" + chain_out + "_" + var, noSys=True)
+                decorations += [('HLTPt', 'HLTpt'), ('HLTEta', 'HLTeta'),
+                                ('HLTPhi', 'HLTphi'), ('HLTDR', 'HLTdr'),
+                                ('HLTThreshold', 'HLTthresholds')]
+            for prop, var in decorations:
+                outputName = "match_" + chain_out + "_" + var
+                setattr(alg, prop, outputName + "_%SYS%")
+                config.addOutputVar (self.containerName,
+                                     outputName + "_%SYS%",
+                                     outputName, noSys=True)

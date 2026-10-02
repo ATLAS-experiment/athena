@@ -9,7 +9,7 @@ class BJetCalibAnalysisConfig (ConfigBlock) :
     """the ConfigBlock for the b-jet calibration sequence"""
 
     def __init__ (self) :
-        super (BJetCalibAnalysisConfig, self).__init__ ()
+        super ().__init__ ()
         self.setBlockName('BJetCalib')
         self.addDependency('FTag', required=False)
         self.addDependency('Muons', required=True)
