@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaBaseComps/test/AthCommonDataStore_test.cxx
@@ -16,7 +16,7 @@
 #include "Gaudi/Algorithm.h"
 #include <vector>
 #include <cassert>
-#include <iostream>
+#include <print>
 #include <typeinfo>
 
 
@@ -27,7 +27,7 @@ public:
   using Base = AthCommonMsg<Gaudi::Algorithm>;
   using Base::Base;
   virtual void renounce (Gaudi::DataHandle& dh) override {
-    std::cout << "RenounceDS::renounce()\n";
+    std::println ("RenounceDS::renounce()");
     Base::renounce (dh);
   }
 };
@@ -61,21 +61,21 @@ class DH2
 public:
   using Gaudi::DataHandle::DataHandle;
   void renounce() {
-    std::cout << "DH2::renounce()\n";
+    std::println ("DH2::renounce()");
   }
 };
 
 
 void TestDS::test_renounce()
 {
-  std::cout << "test_renounce\n";
+  std::println ("test_renounce");
 
-  std::cout << "dh1\n";
+  std::println ("dh1");
   DH1 dh1 (DataObjID ("dh1"));
   declare (dh1);
   renounce (dh1);
 
-  std::cout << "dh2\n";
+  std::println ("dh2");
   DH2 dh2 (DataObjID ("dh2"));
   declare (dh2);
   renounce (dh2);
@@ -84,7 +84,7 @@ void TestDS::test_renounce()
 
 int main()
 {
-  std::cout << "AthenaBaseComps/AthCommonDataStore_test\n";
+  std::println ("AthenaBaseComps/AthCommonDataStore_test");
 
   ISvcLocator* svcLoc = nullptr;
   if (!Athena_test::initGaudi (svcLoc))

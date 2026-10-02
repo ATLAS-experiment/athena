@@ -17,7 +17,7 @@
 #include "TTree.h"
 
 #include <cassert>
-#include <iostream>
+#include <print>
 #include <string>
 
 class TestHistogramming : public AthHistogramming{
@@ -55,7 +55,7 @@ public:
 
 void
 testNullPointers(TestHistogramming& hist){
-  std::cout << "testNullPointers\n";
+  std::println ("testNullPointers");
 
   assert(hist.book(static_cast<TH1*>(nullptr)).isFailure());
   assert(hist.bookGetPointer(static_cast<TH1*>(nullptr)) == nullptr);
@@ -66,7 +66,7 @@ testNullPointers(TestHistogramming& hist){
 
 void
 testBookTH1(TestHistogramming& hist){
-  std::cout << "testBookTH1\n";
+  std::println ("testBookTH1");
 
   const TH1F h1{"h1", "h1 title", 10, 0., 10.};
 
@@ -83,7 +83,7 @@ testBookTH1(TestHistogramming& hist){
 
 void
 testBookTH2(TestHistogramming& hist){
-  std::cout << "testBookTH2\n";
+  std::println ("testBookTH2");
 
   const TH2F h2{"h2", "h2 title", 10, 0., 10., 10, 0., 10.};
 
@@ -96,7 +96,7 @@ testBookTH2(TestHistogramming& hist){
 
 void
 testBookTH3(TestHistogramming& hist){
-  std::cout << "testBookTH3\n";
+  std::println ("testBookTH3");
 
   const TH3F h3{"h3", "h3 title", 10, 0., 10., 10, 0., 10., 10, 0., 10.};
 
@@ -109,7 +109,7 @@ testBookTH3(TestHistogramming& hist){
 
 void
 testBookTree(TestHistogramming& hist){
-  std::cout << "testBookTree\n";
+  std::println ("testBookTree");
 
   TTree tree{"tree", "tree title"};
 
@@ -122,7 +122,7 @@ testBookTree(TestHistogramming& hist){
 
 void
 testBookGraph(TestHistogramming& hist){
-  std::cout << "testBookGraph\n";
+  std::println ("testBookGraph");
 
   TGraph graph{};
   graph.SetName("graph");
@@ -145,7 +145,7 @@ testBookGraph(TestHistogramming& hist){
 
 void
 testBookConstEfficiency(TestHistogramming& hist){
-  std::cout << "testBookConstEfficiency\n";
+  std::println ("testBookConstEfficiency");
 
   const TEfficiency eff{"constEff", "const eff title", 10, 0., 10.};
 
@@ -165,7 +165,7 @@ testBookConstEfficiency(TestHistogramming& hist){
 
 void
 testTH1CanBeRetrievedByBareNameAfterBookingWithDirectoryName(TestHistogramming& hist){
-  std::cout << "testTH1CanBeRetrievedByBareNameAfterBookingWithDirectoryName\n";
+  std::println ("testTH1CanBeRetrievedByBareNameAfterBookingWithDirectoryName");
 
   const TH1F h{"dir/bareLookup", "bare lookup title", 10, 0., 10.};
 
@@ -185,7 +185,7 @@ testTH1CanBeRetrievedByBareNameAfterBookingWithDirectoryName(TestHistogramming& 
 
 void
 testTH1CanBeRetrievedByQualifiedNameAfterBookingWithDirectoryName(TestHistogramming& hist){
-  std::cout << "testTH1CanBeRetrievedByQualifiedNameAfterBookingWithDirectoryName\n";
+  std::println ("testTH1CanBeRetrievedByQualifiedNameAfterBookingWithDirectoryName");
 
   const TH1F h{"dir/qualifiedLookup", "qualified lookup title", 10, 0., 10.};
 

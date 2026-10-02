@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthenaBaseComps/test/propertyHandling_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -27,7 +25,7 @@
 #include "TestTools/initGaudi.h"
 #include <vector>
 #include <cassert>
-#include <iostream>
+#include <print>
 
 
 namespace AthenaBaseCompsTest {
@@ -215,7 +213,7 @@ void MyAthAlgTool::addDependency (const DataObjID& obj, const Gaudi::DataHandle:
 
 void test1 (ISvcLocator* svcLoc)
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   MyAthAlgorithm alg ("alg", svcLoc);  alg.addRef();
   assert (alg.sysInitialize().isSuccess());
@@ -282,8 +280,8 @@ void test1 (ISvcLocator* svcLoc)
       "StoreGateSvc+fff",  "FooSvc+ggg.qqq", "ConditionStore+iii" };
   assert (alg.inputs.size() == inputKeys.size());
   for (size_t i = 0; i < alg.inputs.size(); i++) {
-    // std::cout << "inp " << alg.inputs[i]->objKey() << " =?= "
-    //           << inputKeys[i] << "\n";
+    // std::println ("inp {} =?= {}",
+    //               alg.inputs[i]->objKey(), inputKeys[i]);
     assert (alg.inputs[i]->objKey() == inputKeys[i]);
   }
 
@@ -292,15 +290,15 @@ void test1 (ISvcLocator* svcLoc)
       "StoreGateSvc+hhh.rrr", "ConditionStore+jjj" };
   assert (alg.outputs.size() == outputKeys.size());
   for (size_t i = 0; i < alg.outputs.size(); i++) {
-    // std::cout << "out " << alg.outputs[i]->objKey() << " =?= " 
-    //           << outputKeys[i] << "\n";
+    // std::println ("out {} =?= {}",
+    //               alg.outputs[i]->objKey(), outputKeys[i]);
     assert (alg.outputs[i]->objKey() == outputKeys[i]);
   }
 
   std::vector<std::string> extraInputKeys { "StoreGateSvc+hhh" };
   assert (alg.extra_inputs.size() == extraInputKeys.size());
   for (size_t i = 0; i < alg.extra_inputs.size(); i++) {
-    //    std::cout << "extra inp " << alg.extra_inputs[i].key() << "\n";
+    //    std::println ("extra inp {}", alg.extra_inputs[i].key());
     assert (alg.extra_inputs[i].key() == extraInputKeys[i]);
   }
 
@@ -310,7 +308,7 @@ void test1 (ISvcLocator* svcLoc)
 
 void test2 (ISvcLocator* svcLoc)
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   MyAthAlgorithm alg ("alg", svcLoc);  alg.addRef();
   MyAthAlgTool tool ("MyAthAlgTool", "tool", &alg);   tool.addRef();
@@ -374,8 +372,8 @@ void test2 (ISvcLocator* svcLoc)
     "FooSvc+tgg.qqq", "ConditionStore+tii" };
   assert (tool.inputs.size() == inputKeys.size());
   for (size_t i = 0; i < tool.inputs.size(); i++) {
-    // std::cout << "inp " << tool.inputs[i]->objKey() << " =?= "
-    //           << inputKeys[i] << "\n";
+    // std::println ("inp {} =?= {}",
+    //               tool.inputs[i]->objKey(), inputKeys[i]);
     assert (tool.inputs[i]->objKey() == inputKeys[i]);
   }
 
@@ -384,15 +382,15 @@ void test2 (ISvcLocator* svcLoc)
     "StoreGateSvc+thh.rrr", "ConditionStore+tjj" };
   assert (tool.outputs.size() == outputKeys.size());
   for (size_t i = 0; i < tool.outputs.size(); i++) {
-    // std::cout << "out " << tool.outputs[i]->objKey() << " =?= "
-    //           << outputKeys[i] << "\n";
+    // std::println ("out {} =?= {}",
+    //               tool.outputs[i]->objKey(), outputKeys[i]);
     assert (tool.outputs[i]->objKey() == outputKeys[i]);
   }
 
   std::vector<std::string> extraInputKeys { "StoreGateSvc+thh" };
   assert (tool.extra_inputs.size() == extraInputKeys.size());
   for (size_t i = 0; i < tool.extra_inputs.size(); i++) {
-    // std::cout << "extra inp " << tool.extra_inputs[i].key() << "\n";
+    // std::println ("extra inp {}", tool.extra_inputs[i].key());
     assert (tool.extra_inputs[i].key() == extraInputKeys[i]);
   }
 

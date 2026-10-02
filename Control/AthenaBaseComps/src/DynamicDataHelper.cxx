@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "AthenaBaseComps/DynamicDataHelper.h"
 #include "CxxUtils/checker_macros.h"
@@ -26,7 +26,7 @@ namespace Ath {
    StatusCode DynamicDataHelper::addExtraDependencies(IClassIDSvc &clid_svc, std::vector<std::string> &undeclared_output_data, MsgStream &out) {
       std::stringstream error;
       if (!m_extraOutputIDs.empty()) {
-         out << MSG::FATAL << "Logic erroor. Already added some extra output data IDs. This method can only be called once." << endmsg;
+         out << MSG::FATAL << "Logic error. Already added some extra output data IDs. This method can only be called once." << endmsg;
          return StatusCode::FAILURE;
       }
       m_extraOutputIDs.reserve( undeclared_output_data.size() );

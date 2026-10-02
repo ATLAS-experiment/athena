@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthenaBaseComps/test/AthAsynchronousAlgorithm_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -22,7 +20,7 @@
 #include "GaudiKernel/ThreadLocalContext.h"
 #include <vector>
 #include <cassert>
-#include <iostream>
+#include <print>
 
 
 namespace AthenaBaseCompsTest {
@@ -111,7 +109,7 @@ void MyAlg::addDependency (const DataObjID& obj, const Gaudi::DataHandle::Mode& 
 
 void test1 (ISvcLocator* svcLoc)
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   MyAlg alg ("ralg", svcLoc);  alg.addRef();
   assert (alg.sysInitialize().isSuccess());
@@ -143,21 +141,21 @@ void test1 (ISvcLocator* svcLoc)
   std::vector<std::string> inputKeys { "FooSvc+aaa", "FooSvc+yyy.qqq" };
   assert (alg.inputs.size() == inputKeys.size());
   for (size_t i = 0; i < alg.inputs.size(); i++) {
-    //std::cout << "inp " << alg.inputs[i]->objKey() << "\n";
+    //std::println ("inp {}", alg.inputs[i]->objKey());
     assert (alg.inputs[i]->objKey() == inputKeys[i]);
   }
 
   std::vector<std::string> outputKeys { "BarSvc+eee", "StoreGateSvc+zzz.rrr" };
   assert (alg.outputs.size() == outputKeys.size());
   for (size_t i = 0; i < alg.outputs.size(); i++) {
-    //std::cout << "out " << alg.outputs[i]->objKey() << "\n";
+    //std::println ("out {}", alg.outputs[i]->objKey());
     assert (alg.outputs[i]->objKey() == outputKeys[i]);
   }
 
   std::vector<std::string> extraInputKeys { "StoreGateSvc+zzz" };
   assert (alg.extra_inputs.size() == extraInputKeys.size());
   for (size_t i = 0; i < alg.extra_inputs.size(); i++) {
-    //std::cout << "extra inp " << alg.extra_inputs[i].key() << "\n";
+    //std::println ("extra inp {}", alg.extra_inputs[i].key());
     assert (alg.extra_inputs[i].key() == extraInputKeys[i]);
   }
 
@@ -181,7 +179,7 @@ void test1 (ISvcLocator* svcLoc)
   };
   if (exp != alg.outputDataObjs()) {
     for (const DataObjID& o : alg.outputDataObjs()) {
-      std::cout << "obj " << o.clid() << " " << o.key() << "\n";
+      std::println ("obj {} {}", o.clid(), o.key());
     }
   }
 }
@@ -199,13 +197,13 @@ void comphandles (const std::vector<Gaudi::DataHandle*>& hvec,
   std::sort (hkeys.begin(), hkeys.end());
   std::sort (keys.begin(), keys.end());
   if (keys != hkeys) {
-    std::cout << "Handle list mismatch.\n";
-    std::cout << "Expected: ";
-    for (const std::string& s : keys) std::cout << s << " ";
-    std::cout << "\n:";
-    std::cout << "Got: ";
-    for (const std::string& s : hkeys) std::cout << s << " ";
-    std::cout << "\n:";
+    std::println ("Handle list mismatch.");
+    std::print ("Expected: ");
+    for (const std::string& s : keys) std::print ("{} ", s);
+    std::println();
+    std::print ("Got: ");
+    for (const std::string& s : hkeys) std::print ("{} ", s);
+    std::println();
     std::abort();
   }
 }

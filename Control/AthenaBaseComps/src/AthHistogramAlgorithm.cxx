@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @class AthHistogramAlgorithm.h 
@@ -99,14 +99,14 @@ StatusCode AthHistogramAlgorithm::sysInitialize()
                                                         m_histTitlePrefix, m_histTitlePostfix ) );
   
   // Print some setup information into the log file
-  ATH_MSG_DEBUG ("Initializing " << name() << "...");
+  ATH_MSG_DEBUG ("Initializing {}...", name());
   ATH_MSG_DEBUG (" using THistService     = " << m_histSvc );
-  ATH_MSG_DEBUG (" using RootStreamName   = " << m_prefix );
-  ATH_MSG_DEBUG (" using RootDirName      = " << m_rootDir );
-  ATH_MSG_DEBUG (" using HistNamePrefix   = " << m_histNamePrefix );
-  ATH_MSG_DEBUG (" using HistNamePostfix  = " << m_histNamePostfix );
-  ATH_MSG_DEBUG (" using HistTitlePrefix  = " << m_histTitlePrefix );
-  ATH_MSG_DEBUG (" using HistTitlePostfix = " << m_histTitlePostfix );
+  ATH_MSG_DEBUG (" using RootStreamName   = {}", m_prefix );
+  ATH_MSG_DEBUG (" using RootDirName      = {}", m_rootDir );
+  ATH_MSG_DEBUG (" using HistNamePrefix   = {}", m_histNamePrefix );
+  ATH_MSG_DEBUG (" using HistNamePostfix  = {}", m_histNamePostfix );
+  ATH_MSG_DEBUG (" using HistTitlePrefix  = {}", m_histTitlePrefix );
+  ATH_MSG_DEBUG (" using HistTitlePostfix = {}", m_histTitlePostfix );
 
 
   // re-direct to base class...

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @class  AthCommonDataStore
@@ -261,15 +261,6 @@ public:
                             const std::string& doc,
                             const SG::VarHandleKeyArrayType&)
   {
-
-    // std::ostringstream ost;
-    // ost << Algorithm::name() << " VHKA declareProp: " << name 
-    //     << " size: " << hndArr.keys().size() 
-    //     << " mode: " << hndArr.mode() 
-    //     << "  vhka size: " << m_vhka.size()
-    //     << "\n";
-    // debug() << ost.str() << endmsg;
-
     hndArr.setOwner(this);
     m_vhka.push_back(&hndArr);
 
@@ -277,8 +268,7 @@ public:
     if (p != 0) {
       p->declareUpdateHandler(&AthCommonDataStore<PBASE>::updateVHKA, this);
     } else {
-      ATH_MSG_ERROR("unable to call declareProperty on VarHandleKeyArray " 
-                    << name);
+      ATH_MSG_ERROR("unable to call declareProperty on VarHandleKeyArray {}", name);
     }
 
     return p;
@@ -306,8 +296,6 @@ public:
   // of the arrays.
 
   void updateVHKA(Gaudi::Details::PropertyBase& /*p*/) {
-    // debug() << "updateVHKA for property " << p.name() << " " << p.toString() 
-    //         << "  size: " << m_vhka.size() << endmsg;
     for (auto &a : m_vhka) {
       std::vector<SG::VarHandleKey*> keys = a->keys();
       for (auto k : keys) {

@@ -18,7 +18,7 @@
 #include "TestTools/initGaudi.h"
 
 #include <chrono>
-#include <iostream>
+#include <print>
 #include <cstring> //for strcmp
 
 
@@ -76,8 +76,8 @@ void perftest (IMessageSvc* msgSvc, unsigned int ntry)
   auto stop = high_resolution_clock::now();
   auto elapsed = duration_cast<nanoseconds>(stop - start);
 
-  std::cout << "--- " << ntry << " times: " << elapsed.count()/1000 << " us"
-            << " (" << elapsed.count() / ntry << " ns per call)" << std::endl;
+  std::println ("--- {} times: {} us ({} ns per call)",
+                ntry, elapsed.count()/1000, elapsed.count() / ntry);
 }
 
 
@@ -90,7 +90,7 @@ int main (int argc, char** argv)
   }
 
   // --------------------------------------------------------------------------------
-  std::cout << "--- Test without MessageSvc" << std::endl;
+  std::println ("--- Test without MessageSvc");
   test(nullptr);
 
   if (doPerf) {
@@ -106,7 +106,7 @@ int main (int argc, char** argv)
   SmartIF<IMessageSvc> msgSvc{svcLoc->service("MessageSvc")};
   if (!msgSvc) return 1;
 
-  std::cout << "--- Test with MessageSvc" << std::endl;
+  std::println ("--- Test with MessageSvc");
   test(msgSvc);
 
   if (doPerf) {
