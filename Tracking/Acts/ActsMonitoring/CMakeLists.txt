@@ -19,7 +19,7 @@ atlas_add_component( ActsMonitoring
    HGTD_Identifier HGTD_ReadoutGeometry Identifier InDetCondTools InDetIdentifier InDetMeasurementUtilitiesLib InDetPrepRawData
    InDetRawData InDetReadoutGeometry MagFieldConditions MagFieldElements MuonTesterTreeLib PixelReadoutGeometryLib
    ReadoutGeometryBase SCT_ReadoutGeometry SGTools StoreGateLib TrkSurfaces TrkTruthData TrkValHistUtils TruthUtils
-   xAODEventInfo xAODInDetMeasurement xAODMeasurementBase xAODTracking )
+   xAODEventInfo xAODInDetMeasurement xAODMeasurementBase xAODTracking MuonVisualizationHelpersR4 )
 
 atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
