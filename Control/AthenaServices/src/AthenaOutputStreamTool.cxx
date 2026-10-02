@@ -211,7 +211,7 @@ StatusCode AthenaOutputStreamTool::connectOutput(const std::string& outputName) 
    if (!m_attrListKey.key().empty() && m_store->storeID() == StoreID::EVENT_STORE) {
       auto attrListHandle = SG::makeHandle(m_attrListKey);
       if (!attrListHandle.isValid()) {
-         ATH_MSG_WARNING("Unable to retrieve AttributeList with key " << m_attrListKey);
+         ATH_MSG_WARNING("Unable to retrieve AttributeList with key {}", m_attrListKey);
       } else {
          m_dataHeader->setAttributeList(attrListHandle.cptr());
          if (m_extend) {  // Add streaming decisions
@@ -229,7 +229,8 @@ StatusCode AthenaOutputStreamTool::connectOutput(const std::string& outputName) 
                       it != streams.end(); ++it) {
                newone->extend(*it,boolTypeStr);
                (*newone)[*it].data<bool>() = m_decSvc->isEventAccepted(*it,Gaudi::Hive::currentContext());
-               ATH_MSG_DEBUG("Added stream decision for " << *it << " to " << m_attrListKey);
+               ATH_MSG_DEBUG("Added stream decision for {} to {}",
+                             *it, m_attrListKey);
             }
             // record new attribute list with old key + suffix
             const AthenaAttributeList* attrList2 = nullptr;
