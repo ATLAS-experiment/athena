@@ -102,16 +102,6 @@ inline void setPerp(Amg::Vector3D& v, double perp) {
     }
 }
 
-/** scales the vector length without changing the angles */
-inline void setMag(Amg::Vector3D& v, double mag) {
-    double p = v.mag();
-    if (p != 0.0) {
-        double scale = mag / p;
-        v[0] *= scale;
-        v[1] *= scale;
-        v[2] *= scale;
-    }
-}
 inline double deltaPhi(const Amg::Vector3D& v1, const Amg::Vector3D& v2) {
     double dphi = v2.phi() - v1.phi();
     if (dphi > M_PI) {
@@ -122,51 +112,8 @@ inline double deltaPhi(const Amg::Vector3D& v1, const Amg::Vector3D& v2) {
     return dphi;
 }
 inline double deltaR(const Amg::Vector3D& v1, const Amg::Vector3D& v2){
-    double a = v1.eta() - v2.eta();
-    double b = deltaPhi(v1,v2);
-    return sqrt(a*a + b*b);
+    return std::hypot(v1.eta() - v2.eta(), deltaPhi(v1,v2));
 }
-
-
-
-
-
-
-/**
- * Sets components in cartesian coordinate system.
- */
-inline void setVector3DCartesian(Amg::Vector3D& v1, double x1, double y1, double z1) { v1[0] = x1; v1[1] = y1; v1[2] = z1; }
-/**
- * Gets magnitude squared of the vector.
- */
-inline double mag2Vector3D(const Amg::Vector3D& v1) { return v1.x()*v1.x() + v1.y()*v1.y() + v1.z()*v1.z(); }
-/**
- * Gets magnitude of the vector.
- */
-inline double magVector3D(const Amg::Vector3D& v1) { return std::sqrt(mag2Vector3D(v1)); }
-/**
- * Gets r-component in spherical coordinate system
- */
-inline double rVector3D(const Amg::Vector3D& v1) { return magVector3D(v1); }
-
-/**
- * Transform a point from a Trasformation3D
- *
- * from CLHEP::Point3D::transform:
- * http://proj-clhep.web.cern.ch/proj-clhep/doc/CLHEP_2_0_4_7/doxygen/html/Point3D_8cc-source.html#l00032
- */
-inline Amg::Vector3D transform( Amg::Vector3D& v, Amg::Transform3D& tr ) {
-    Amg::Vector3D vect;
-    double vx = v.x(), vy = v.y(), vz = v.z();
-    setVector3DCartesian( vect,
-            tr(0,0)*vx + tr(0,1)*vy + tr(0,2)*vz + tr(0,3),
-            tr(1,0)*vx + tr(1,1)*vy + tr(1,2)*vz + tr(1,3),
-            tr(2,0)*vx + tr(2,1)*vy + tr(2,2)*vz + tr(2,3));
-    return vect;
-}
-
-
-
 
 /*
  * the analogous to CLHEP HepGeom::Transform3D trans (localRot, theSurface.transform().translation());
