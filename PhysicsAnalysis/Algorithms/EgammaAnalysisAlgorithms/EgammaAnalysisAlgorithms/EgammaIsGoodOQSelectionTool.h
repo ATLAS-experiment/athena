@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef EGAMMAANALYSISALGORITHMS_EGAMMAISGOODOQSELECTIONTOOL_H
 #define EGAMMAANALYSISALGORITHMS_EGAMMAISGOODOQSELECTIONTOOL_H
@@ -9,7 +9,7 @@
 #include "AsgTools/AsgTool.h"
 #include "PATCore/IAsgSelectionTool.h"
 #include "EgammaAnalysisInterfaces/IAsgDeadHVCellRemovalTool.h"
-#include "AsgTools/AnaToolHandle.h"
+#include "AsgTools/ToolHandle.h"
 #include "AsgTools/PropertyWrapper.h"
 
 // EDM include(s):
@@ -35,7 +35,7 @@ namespace CP {
       ASG_TOOL_CLASS( EgammaIsGoodOQSelectionTool, IAsgSelectionTool )
 
       /// AsgTool constructor
-      using asg::AsgTool::AsgTool;
+      EgammaIsGoodOQSelectionTool (const std::string& name);
 
       /// @name Interface inherited from @c IAsgSelectionTool
       /// @{
@@ -73,7 +73,7 @@ namespace CP {
 
       /// The tool that selects on dead HV from the 2016 run, acc. to https://twiki.cern.ch/twiki/bin/view/AtlasProtected/EGammaIdentificationRun2#Removal_of_Electron_Photon_clust
   private:
-      asg::AnaToolHandle<IAsgDeadHVCellRemovalTool> m_deadHVTool;
+      ToolHandle<IAsgDeadHVCellRemovalTool> m_deadHVTool{this, "deadHVTool", "", "the dead HV cell removal tool"};
 
       /// Index of this quality cut
   private:

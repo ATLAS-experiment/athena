@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -22,13 +22,12 @@
 
 namespace CP
 {
-    /// \brief Algorithm to collect photons and electrons which close in dR to muons as FSR candidates
+    /// @brief Algorithm to collect photons and electrons which close in dR to muons as FSR candidates
     class EgammaFSRForMuonsCollectorAlg final : public EL::AnaAlgorithm
     {
     public:
-        /// \brief the standard constructor
-        EgammaFSRForMuonsCollectorAlg(const std::string &name,
-                                   ISvcLocator *pSvcLocator);
+        /// @brief the standard constructor
+        using EL::AnaAlgorithm::AnaAlgorithm;
 
         StatusCode initialize() override;
         StatusCode execute(const EventContext& ctx) override;
@@ -40,17 +39,17 @@ namespace CP
 
         Gaudi::Property<float> m_dRMax{this, "deltaR_Max", 0.2, "DeltaR max for accepting a particle when comparing to compareParticles"};
 
-        /// \brief the systematics list we run
+        /// @brief the systematics list we run
         SysListHandle m_systematicsList {this};
 
         SysReadHandle<xAOD::IParticleContainer> m_egammaContKey{this, "ElectronOrPhotonContKey", "", "Electrons or photons for dR comparison"};
 
         SysReadHandle<xAOD::MuonContainer> m_muonContKey{this, "MuonContKey", "AnalysisMuons", "Muons to compare with for selecting FSR"};
 
-        /// \brief the input WP selection to combine with FSR
+        /// @brief the input WP selection to combine with FSR
         SysReadSelectionHandle m_wpSelection{this, "wpSelection", "", "the input WP selection to OR with FSR"};
 
-        /// \brief the output combined WP||FSR selection
+        /// @brief the output combined WP||FSR selection
         SysWriteDecorHandle<char> m_outputDec{this, "selectionDecoration", "", "the output combined WP||FSR selection"};
 
         Gaudi::Property<bool> m_vetoFSR {this, "vetoFSR", false, "boolean to revert FSR logic to rather veto FSR electrons or photons"};

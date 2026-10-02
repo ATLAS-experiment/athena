@@ -1,17 +1,19 @@
 //
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 
 // Local include(s):
 #include "EgammaAnalysisAlgorithms/EgammaIsGoodOQSelectionTool.h"
 
+#include "AsgTools/AsgToolConfig.h"
 #include <xAODEventInfo/EventInfo.h>
 #include <AsgDataHandles/ReadDecorHandleKey.h>
 
-// System include(s):
-#include <iomanip>
-
 namespace CP {
+
+   EgammaIsGoodOQSelectionTool::EgammaIsGoodOQSelectionTool( const std::string& name )
+      : asg::AsgTool( name ) {
+   }
 
    const asg::AcceptInfo& EgammaIsGoodOQSelectionTool::getAcceptInfo() const {
 
@@ -48,14 +50,18 @@ namespace CP {
 
       // Tell the user what is going to happen.
       ATH_MSG_INFO( "Selecting e/gamma objects with OQ mask: 0x"
-                    << std::hex << m_mask );
+                    << std::hex << m_mask << std::dec );
 
       // Set up the TAccept object.
       m_oqCutIndex = m_accept.addCut( "EgammaOQ", "Egamma object quality cut" );
       m_deadHVCutIndex = m_accept.addCut("notDeadHV", "Egamma dead HV removal cut");
 
       // Set up the dead HV Removal Tool
-      m_deadHVTool.setTypeAndName("AsgDeadHVCellRemovalTool/deadHVTool");
+      if (m_deadHVTool.empty())
+      {
+         asg::AsgToolConfig config("AsgDeadHVCellRemovalTool/deadHVTool");
+         ANA_CHECK(config.makePrivateTool(m_deadHVTool));
+      }
       if (m_deadHVTool.retrieve().isFailure()){
          ANA_MSG_ERROR("Failed to retrieve DeadHVTool, aborting");
          return StatusCode::FAILURE;

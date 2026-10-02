@@ -19,20 +19,12 @@
 
 namespace CP
 {
-    EgammaFSRForMuonsCollectorAlg::EgammaFSRForMuonsCollectorAlg(const std::string &name, ISvcLocator *svcLoc)
-        : EL::AnaAlgorithm(name, svcLoc)
-    {
-    }
-
     StatusCode EgammaFSRForMuonsCollectorAlg::initialize()
     {
-        // Greet the user:
-        ATH_MSG_INFO("Initialising");
-
-        ATH_CHECK(m_egammaContKey.initialize(m_systematicsList));
-        ATH_CHECK(m_muonContKey.initialize(m_systematicsList));
-        ATH_CHECK(m_wpSelection.initialize(m_systematicsList, m_egammaContKey));
-        ATH_CHECK(m_outputDec.initialize(m_systematicsList, m_egammaContKey));
+        ANA_CHECK(m_egammaContKey.initialize(m_systematicsList));
+        ANA_CHECK(m_muonContKey.initialize(m_systematicsList));
+        ANA_CHECK(m_wpSelection.initialize(m_systematicsList, m_egammaContKey));
+        ANA_CHECK(m_outputDec.initialize(m_systematicsList, m_egammaContKey));
         ANA_CHECK(m_systematicsList.initialize());
 
         if (!m_vetoFSR) {
@@ -70,47 +62,53 @@ namespace CP
                 bool passesFSR = false;
 
                 const xAOD::Electron* el = (eg->type() == xAOD::Type::Electron)
-                    ? dynamic_cast<const xAOD::Electron*>(eg) : nullptr;
+                    ? static_cast<const xAOD::Electron*>(eg) : nullptr;
 
                 ATH_MSG_DEBUG("Incoming eg: pt, eta, phi " << eg->pt()/1000. << ", "
                     << eg->eta() << ", " << eg->phi() << ", is electron " << (el != nullptr)
                     << ", passesWP " << passesWP);
 
+                // The FSR match only matters if the WP selection alone does not decide the outcome:
+                // normal mode is WP || FSR, veto mode is WP && !FSR
+                const bool needFSR = (m_vetoFSR == passesWP);
+
                 // Loop over muons and check dR
-                for (const xAOD::Muon* mu : *muonCont) {
-                    float dR = xAOD::P4Helpers::deltaR(*eg, *mu);
+                if (needFSR) {
+                    for (const xAOD::Muon* mu : *muonCont) {
+                        double dR = xAOD::P4Helpers::deltaR(*eg, *mu);
 
-                    ATH_MSG_DEBUG("dR with mu: " << dR << ", pt, eta, phi "
-                        << mu->pt()/1000. << ", " << mu->eta() << ", " << mu->phi());
+                        ATH_MSG_DEBUG("dR with mu: " << dR << ", pt, eta, phi "
+                            << mu->pt()/1000. << ", " << mu->eta() << ", " << mu->phi());
 
-                    if (dR < m_dRMax) {
-                        // if electron (not photon) check track matching
-                        bool elmutrackmatchOK = true; // default true for photons
-                        if (el) {
-                            const xAOD::TrackParticle* electron_track = el->trackParticle();
-                            const xAOD::TrackParticle* elOrig_track = xAOD::EgammaHelpers::getOriginalTrackParticle(el);
-                            const xAOD::TrackParticle* muon_track = mu->trackParticle(xAOD::Muon::TrackParticleType::Primary);
+                        if (dR < m_dRMax) {
+                            // if electron (not photon) check track matching
+                            bool elmutrackmatchOK = true; // default true for photons
+                            if (el) {
+                                const xAOD::TrackParticle* electron_track = el->trackParticle();
+                                const xAOD::TrackParticle* elOrig_track = xAOD::EgammaHelpers::getOriginalTrackParticle(el);
+                                const xAOD::TrackParticle* muon_track = mu->trackParticle(xAOD::Muon::TrackParticleType::Primary);
 
-                            if (electron_track && muon_track) {
-                                elmutrackmatchOK =
-                                    (std::abs(electron_track->theta() - muon_track->theta()) < 0.01) &&
-                                    (std::abs(xAOD::P4Helpers::deltaPhi(electron_track->phi(), muon_track->phi())) < 0.01);
-                                ATH_MSG_DEBUG("dtheta trk " << std::abs(electron_track->theta() - muon_track->theta())
-                                    << ", dphi trk " << std::abs(xAOD::P4Helpers::deltaPhi(electron_track->phi(), muon_track->phi())));
-                                if (elOrig_track) {
-                                    ATH_MSG_DEBUG("origTrk: dtheta trk " << std::abs(elOrig_track->theta() - muon_track->theta())
-                                        << ", dphi trk " << std::abs(xAOD::P4Helpers::deltaPhi(elOrig_track->phi(), muon_track->phi())));
+                                if (electron_track && muon_track) {
+                                    elmutrackmatchOK =
+                                        (std::abs(electron_track->theta() - muon_track->theta()) < 0.01) &&
+                                        (std::abs(xAOD::P4Helpers::deltaPhi(electron_track->phi(), muon_track->phi())) < 0.01);
+                                    ATH_MSG_DEBUG("dtheta trk " << std::abs(electron_track->theta() - muon_track->theta())
+                                        << ", dphi trk " << std::abs(xAOD::P4Helpers::deltaPhi(electron_track->phi(), muon_track->phi())));
+                                    if (elOrig_track) {
+                                        ATH_MSG_DEBUG("origTrk: dtheta trk " << std::abs(elOrig_track->theta() - muon_track->theta())
+                                            << ", dphi trk " << std::abs(xAOD::P4Helpers::deltaPhi(elOrig_track->phi(), muon_track->phi())));
+                                    }
+                                } else {
+                                    elmutrackmatchOK = false;
                                 }
-                            } else {
-                                elmutrackmatchOK = false;
+                                ATH_MSG_DEBUG("track match " << (elmutrackmatchOK ? "OK" : "NOT OK"));
                             }
-                            ATH_MSG_DEBUG("track match " << (elmutrackmatchOK ? "OK" : "NOT OK"));
-                        }
 
-                        if (elmutrackmatchOK) {
-                            passesFSR = true;
-                            ATH_MSG_DEBUG("FSR match found");
-                            break;
+                            if (elmutrackmatchOK) {
+                                passesFSR = true;
+                                ATH_MSG_DEBUG("FSR match found");
+                                break;
+                            }
                         }
                     }
                 }

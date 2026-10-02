@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -28,13 +28,12 @@
 
 namespace CP
 {
-    /// \brief this wraps the Electron LRT collection merger in a CP algorithm
+    /// @brief this wraps the Electron LRT collection merger in a CP algorithm
     class ElectronLRTMergingAlg final : public EL::AnaReentrantAlgorithm
     {
-        /// \brief the standard constructor
+        /// @brief the standard constructor
     public:
-        ElectronLRTMergingAlg(const std::string &name,
-                              ISvcLocator *pSvcLocator);
+        using EL::AnaReentrantAlgorithm::AnaReentrantAlgorithm;
 
     public:
         StatusCode initialize() override;
@@ -64,6 +63,8 @@ namespace CP
         SG::ReadHandleKey<xAOD::ElectronContainer> m_lrtElectronLocation{this, "LRTElectronLocation", "LRTElectrons", "LRT electrons to merge"}; /** LRT electron collection to be merged. */
 
         SG::WriteHandleKey<xAOD::ElectronContainer> m_outElectronLocation{this, "OutputCollectionName", "StdWithLRTElectrons", "Name for combined output collection"}; /** Combined electron collection.   */
+
+        SG::WriteHandleKey<ConstDataVector<xAOD::ElectronContainer>> m_outElectronViewLocation; /** Combined electron view collection, set from m_outElectronLocation in initialize(). */
 
         ToolHandle<CP::IElectronLRTOverlapRemovalTool> m_overlapRemovalTool{this, "overlapRemovalTool", "", "Tool used to check overlaps between standard and LRT electrons"}; /** The lrt electron overlap removal tool **/
 
