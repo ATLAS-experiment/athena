@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////
@@ -466,7 +466,7 @@ class egammaEnergyCorrectionTool : public asg::AsgMessaging {
     m_usepTInterpolationForLeakage = interpt;
   }
 
-  void setADCTool(std::shared_ptr<LinearityADC> t) { m_ADCLinearity_tool = t; }
+  void setADCTool(std::shared_ptr<LinearityADC> t) { m_ADCLinearity_tool = std::move(t); }
 
   // convenient method for decorrelation of statistical error
   const TAxis& get_ZeeStat_eta_axis() const;

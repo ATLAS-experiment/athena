@@ -2,9 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <format>
 
-#include <set>
 // EDM include(s):
 
 #include "xAODEgamma/ElectronContainer.h"
@@ -26,7 +24,9 @@
 #include "ElectronPhotonFourMomentumCorrection/EgammaCalibrationAndSmearingTool.h"
 
 #include "GaudiKernel/ITHistSvc.h"
+#include <format>
 
+#include <set>
 
 // local include
 #include "dumpAllSystematics.h"
@@ -133,7 +133,7 @@ StatusCode DumpAllSystematics::initialize()
     std::vector<std::string> sys_names; sys_names.reserve(sys_set.size());
     for (const auto& sys : sys_set) { if (sys.parameter() == 1) { sys_names.push_back(sys.name()); all_sys_names.insert(sys.name()); } }
     std::sort(sys_names.begin(), sys_names.end());
-    all_sys_names_per_tool.push_back(sys_names);
+    all_sys_names_per_tool.push_back(std::move(sys_names));
 
 
     m_energy_variations[itool].resize(sys_set.size());
