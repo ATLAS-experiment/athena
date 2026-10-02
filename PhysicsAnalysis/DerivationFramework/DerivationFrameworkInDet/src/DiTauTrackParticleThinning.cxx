@@ -64,8 +64,7 @@ StatusCode DerivationFramework::DiTauTrackParticleThinning::doThinning(const Eve
     if (nTracks==0) return StatusCode::SUCCESS;
     
     // Set up a mask with the same entries as the full TrackParticle collection
-    std::vector<bool> mask;
-    mask.assign(nTracks,false); // default: don't keep any tracks
+    std::vector<bool> mask(nTracks);
     m_ntot += nTracks;
     
     // Retrieve containers
@@ -97,26 +96,23 @@ StatusCode DerivationFramework::DiTauTrackParticleThinning::doThinning(const Eve
     if (m_selectionString=="") { // check all ditaus as user didn't provide a selection string
       for (const auto *ditauIt : *importedDiTaus) {
         for (unsigned int i=0; i<ditauIt->nTracks(); ++i) {
-          int index = ditauIt->trackLinks().at(i).index();
-          if (index < 0)[[unlikely]] continue;
-          mask[index] = true;
+          std::size_t index = ditauIt->trackLinks().at(i).index();
+          mask.at(index) = true;
         }
         for (unsigned int i=0; i<ditauIt->nIsoTracks(); ++i) {
-          int index = ditauIt->isoTrackLinks().at(i).index();
-          mask[index] = true;
+          std::size_t index = ditauIt->isoTrackLinks().at(i).index();
+          mask.at(index) = true;
         }
       }
     } else { // check only ditaus passing user selection string
         for (auto & ditauIt : ditauToCheck) {
           for (unsigned int i=0; i<ditauIt->nTracks(); ++i) {
-              int index = ditauIt->trackLinks().at(i).index();
-              if (index < 0)[[unlikely]] continue;
-              mask[index] = true;
+              std::size_t index = ditauIt->trackLinks().at(i).index();
+              mask.at(index) = true;
           }
           for (unsigned int i=0; i<ditauIt->nIsoTracks(); ++i) {
-              int index = ditauIt->isoTrackLinks().at(i).index();
-              if (index < 0)[[unlikely]] continue;
-              mask[index] = true;
+              std::size_t index = ditauIt->isoTrackLinks().at(i).index();
+              mask.at(index) = true;
           }
         }
     }

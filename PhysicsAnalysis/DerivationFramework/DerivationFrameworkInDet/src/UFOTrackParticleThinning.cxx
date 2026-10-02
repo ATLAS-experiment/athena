@@ -123,24 +123,20 @@ StatusCode DerivationFramework::UFOTrackParticleThinning::doThinning(const Event
     for(const auto *jet : *importedJets){
       for( size_t j = 0; j < jet->numConstituents(); ++j ) {
         auto ufo = jet->constituentLinks().at(j);
-        int index = ufo.index();
-        if (index < 0) [[unlikely]] continue;
-        maskUFOs[index] = true;
+        std::size_t index = ufo.index();
+        maskUFOs.at(index) = true;
         const xAOD::FlowElement* ufoO = dynamic_cast<const xAOD::FlowElement*>(*ufo);
         if(!ufoO) continue;
 
 	// Retrieve the track if UFO is charged or combined object
         if(ufoO->signalType()==xAOD::FlowElement::SignalType::Charged || ufoO->signalType()==xAOD::FlowElement::SignalType::Combined){
-	  int index_trk = ufoO->chargedObject(0)->index();
-	  if(index_trk>=0) { 
-	    maskTracks[index_trk] = true;
-          }
+	  std::size_t index_trk = ufoO->chargedObject(0)->index();
+	    maskTracks.at(index_trk) = true;
         }
 
 	// Loop over charged and neutral PFOs
 	for (size_t n = 0; n < ufoO->otherObjects().size(); ++n) {
-	  int index_pfo = ufoO->otherObject(n)->index();
-	  if(index_pfo<0) continue;
+	  std::size_t index_pfo = ufoO->otherObject(n)->index();
 
 	  const xAOD::FlowElement* fe = static_cast<const xAOD::FlowElement*>(ufoO->otherObject(n));
 
@@ -159,24 +155,22 @@ StatusCode DerivationFramework::UFOTrackParticleThinning::doThinning(const Event
     for (auto & jetIt : jetToCheck) {
       for( size_t j = 0; j < jetIt->numConstituents(); ++j ) {
         auto ufo = jetIt->constituentLinks().at(j);
-	int index = ufo.index();
-	maskUFOs[index] = true;
+	std::size_t index = ufo.index();
+	maskUFOs.at(index) = true;
 
 	const xAOD::FlowElement* ufoO = dynamic_cast<const xAOD::FlowElement*>(*ufo);
 	if(!ufoO) continue;
 
 	if(ufoO->signalType()==xAOD::FlowElement::SignalType::Charged || ufoO->signalType()==xAOD::FlowElement::SignalType::Combined){
-          int index_trk = ufoO->chargedObject(0)->index();
-          if(index_trk>=0) {
-            maskTracks[index_trk] = true;
-          }
+          std::size_t index_trk = ufoO->chargedObject(0)->index();
+          maskTracks.at(index_trk) = true;
+          
         }
 
         for (size_t n = 0; n < ufoO->otherObjects().size(); ++n) {
-          int index_pfo = ufoO->otherObject(n)->index();
-          if(index_pfo<0) continue;
+          std::size_t index_pfo = ufoO->otherObject(n)->index();
 
-          const xAOD::FlowElement* fe = dynamic_cast<const xAOD::FlowElement*>(ufoO->otherObject(n));
+          const xAOD::FlowElement* fe = static_cast<const xAOD::FlowElement*>(ufoO->otherObject(n));
 
 	  if(fe->signalType()==xAOD::FlowElement::SignalType::ChargedPFlow){
             pfomaskCharged.at( index_pfo ) = true;

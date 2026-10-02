@@ -420,19 +420,19 @@ StatusCode DerivationFramework::PixelNtupleMaker::addBranches(const EventContext
 
     // Cluster should not contain edge pixels
     int clusterEdge = 0;
-    for (int i=0; i<(int)clusterLayer.size(); i++) { clusterEdge+=isEdge.at(i); }
+    for (std::size_t i=0; i<nClusterLayer; i++) { clusterEdge+=isEdge.at(i); }
 
     // Cluster should not contain overflow pixels
     int clusterOverflow = 0;
-    for (int i=0; i<(int)clusterLayer.size(); i++) { clusterOverflow+=isOverflow.at(i); }
+    for (std::size_t i=0; i<nClusterLayer; i++) { clusterOverflow+=isOverflow.at(i); }
 
     // Cluster should not contain split state
     int isSplit = 0;
-    for (int i=0; i<(int)clusterLayer.size(); i++) { isSplit+=clusterIsSplit.at(i); }
+    for (std::size_t i=0; i<nClusterLayer; i++) { isSplit+=clusterIsSplit.at(i); }
 
     // Strong isolation
     int iso20x4 = 0;
-    for (int i=0; i<(int)clusterLayer.size(); i++) { iso20x4+=clusterIsolation20x4.at(i); }
+    for (std::size_t i=0; i<nClusterLayer; i++) { iso20x4+=clusterIsolation20x4.at(i); }
 
     // Good tracks must be required for the dE/dx and Lorentz angle measurements
     bool passCut = false;
@@ -454,7 +454,7 @@ StatusCode DerivationFramework::PixelNtupleMaker::addBranches(const EventContext
 
     // Cut on angle alpha
     bool isAlphaCut = false;
-    for (int i=0; i<(int)clusterLayer.size(); i++) {
+    for (std::size_t i=0; i<nClusterLayer; i++) {
       float alpha = std::atan(std::hypot(std::tan(trackTheta[i]),std::tan(trackPhi[i])));
       if (std::cos(alpha)<0.16) { isAlphaCut=true; break; }
     }
@@ -473,7 +473,7 @@ StatusCode DerivationFramework::PixelNtupleMaker::addBranches(const EventContext
     float thicknessPIX = 0.0250;    // thickness for PIXEL [cm]
     float sumE = 0.0;
     float sumX = 0.0;
-    for (int i=0; i<(int)clusterLayer.size(); i++) {
+    for (std::size_t i=0; i<nClusterLayer; i++) {
 
       float alpha = std::atan(std::hypot(std::tan(trackTheta[i]),std::tan(trackPhi[i])));
       float thickness = thicknessPIX;
