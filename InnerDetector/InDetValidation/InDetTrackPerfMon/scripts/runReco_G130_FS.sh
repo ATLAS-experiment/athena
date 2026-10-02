@@ -54,10 +54,6 @@ done
 if [ -z $inputRDO ]; then usage ; fi
 if [ -z $outputAOD ]; then usage ; fi
 
-if [ ! -f $inputRDO ]; then
-    echo "runReco_G130_FS.sh result: 1 ${inputRDO} not found"
-    exit 1
-fi
 
 ## running reconstruction
 export PATHRESOLVER_DEVAREARESPONSE="WARNING"
@@ -76,8 +72,8 @@ run Reco_tf.py \
                flags.Tracking.ITkActsPass.storeTrackSeeds=${storeTrackSeeds}; \
                flags.Concurrency.NumThreads=${numThreads}; \
                flags.Concurrency.NumConcurrentEvents=${numThreads};" \
-    --inputRDOFile ${inputRDO} \
-    --outputAODFile ${outputAOD} \
+    --inputRDOFile "${inputRDO}" \
+    --outputAODFile "${outputAOD}" \
     --perfmon fullmonmt
 
 rc=$?
