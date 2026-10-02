@@ -115,6 +115,14 @@ def createTrackingConfigFlags():
                 if prevFlags.GeoModel.Run <= LHCPeriod.Run3
                 else PixelClusterSplittingType.Truth,
                 type=PixelClusterSplittingType)
+    # ITk: run the pixel cluster NN (pixelClusterSplittingType NeuralNet) with
+    # ONNX models instead of the lwtnn networks of the PixelClusterNNJSON
+    # conditions folder, which is not available for the Run 4 conditions tags
+    icf.addFlag("Tracking.useONNXPixelNN", False)
+    # ITk: folder of the ONNX pixel cluster NN models (number.onnx, pos1.onnx,
+    # pos2.onnx, pos3.onnx), same models as Acts.PixelNNCalibrationModelsFolder
+    icf.addFlag("Tracking.pixelNNONNXModelsFolder",
+                'ITkPixelClusterization/nn-01-01-01/')
     # Cut value for splitting clusters into two parts
     icf.addFlag("Tracking.pixelClusterSplitProb1",
                 lambda prevFlags: (
