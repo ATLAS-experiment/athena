@@ -17,9 +17,9 @@ HiveAlgB::~HiveAlgB() = default;
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 StatusCode HiveAlgB::initialize() {
-  ATH_MSG_DEBUG("initialize " << name());
+  ATH_MSG_DEBUG("initialize {}", name());
 
-  ATH_MSG_INFO(" m_di was: " << m_di << " setting to -1 ");
+  ATH_MSG_INFO(" m_di was: {} setting to -1 ", m_di.get());
   m_di = -1;
 
   // dump out contents of context specific data
@@ -35,7 +35,7 @@ StatusCode HiveAlgB::initialize() {
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 StatusCode HiveAlgB::finalize() {
-  ATH_MSG_DEBUG("finalize " << name());
+  ATH_MSG_DEBUG("finalize {}", name());
 
   // dump out contents of context specific data
   dump();
@@ -47,19 +47,19 @@ StatusCode HiveAlgB::finalize() {
 
 StatusCode HiveAlgB::execute(const EventContext& ctx) const {
 
-  ATH_MSG_DEBUG("execute " << name());
+  ATH_MSG_DEBUG("execute {}", name());
 
-  ATH_MSG_INFO("context: " << ctx << " for " << this);
+  ATH_MSG_INFO("context: {} for {}", ctx, static_cast<const void*>(this));
 
   int s = sleep(ctx);
 
-  ATH_MSG_INFO("m_di was: " << m_di << " setting to " << s);
+  ATH_MSG_INFO("m_di was: {} setting to {}", m_di.get(), s);
   m_di = s;
 
   SG::WriteHandle<HiveDataObj> wrh1{m_wrh1, ctx} ;
   ATH_CHECK(wrh1.record(std::make_unique< HiveDataObj >(20000)));
 
-  ATH_MSG_INFO("  write: " << wrh1.key() << " = " << wrh1->val() );
+  ATH_MSG_INFO("  write: {} = {}", wrh1.key(), wrh1->val() );
 
   return StatusCode::SUCCESS;
 
@@ -74,9 +74,9 @@ HiveAlgB::dump() {
 
   // use a lambda to access all constituents of context specific data
   m_di.for_all([&ost] (size_t s, const int i) 
-  	       { ost << " s: " << s << " v: " << i  << std::endl; } );
+               { std::println (ost, " s: {} v: {}", s, i); } );
 
-  ATH_MSG_INFO("dumping m_di: \n" << ost.str());
+  ATH_MSG_INFO("dumping m_di: \n{}", ost.str());
 
 }
 

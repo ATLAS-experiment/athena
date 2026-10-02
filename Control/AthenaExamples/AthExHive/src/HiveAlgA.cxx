@@ -15,7 +15,7 @@ HiveAlgA::~HiveAlgA() = default;
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 StatusCode HiveAlgA::initialize() {
-  ATH_MSG_DEBUG("initialize " << name());
+  ATH_MSG_DEBUG("initialize {}", name());
   
   ATH_CHECK( m_evt.initialize() );
   ATH_CHECK( m_wrh1.initialize() );
@@ -29,15 +29,15 @@ StatusCode HiveAlgA::initialize() {
 
 StatusCode HiveAlgA::execute(const EventContext& ctx) const {
 
-  ATH_MSG_DEBUG("execute " << name());
+  ATH_MSG_DEBUG("execute {}", name());
 
   SG::ReadHandle<xAOD::EventInfo> evt{m_evt, ctx};
   if (!evt.isValid()) {
     ATH_MSG_ERROR ("Could not retrieve EventInfo");
     return StatusCode::FAILURE;
   } else {
-    ATH_MSG_INFO("   EventInfo:  r: " << evt->runNumber()
-		 << " e: " << evt->eventNumber() );
+    ATH_MSG_INFO("   EventInfo:  r: {} e: {}",
+                 evt->runNumber(), evt->eventNumber());
   }
 
   sleep(ctx);
@@ -50,8 +50,8 @@ StatusCode HiveAlgA::execute(const EventContext& ctx) const {
   SG::WriteHandle<HiveDataObj> wrh2{m_wrh2, ctx};
   ATH_CHECK(wrh2.record(std::make_unique< HiveDataObj >(10050+i)));
   
-  ATH_MSG_INFO("  write: " << wrh1.key() << " = " << wrh1->val() );
-  ATH_MSG_INFO("  write: " << wrh2.key() << " = " << wrh2->val() );
+  ATH_MSG_INFO("  write: {} = {}", wrh1.key(), wrh1->val() );
+  ATH_MSG_INFO("  write: {} = {}", wrh2.key(),wrh2->val() );
   
   return StatusCode::SUCCESS;
 }

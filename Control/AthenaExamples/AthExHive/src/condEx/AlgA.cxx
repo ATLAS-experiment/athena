@@ -11,7 +11,7 @@
 //---------------------------------------------------------------------------
 
 StatusCode AlgA::initialize() {
-  ATH_MSG_DEBUG("initialize " << name());
+  ATH_MSG_DEBUG("initialize {}", name());
 
   ATH_CHECK( m_wrh1.initialize() );
   ATH_CHECK( m_wrh2.initialize() );
@@ -24,12 +24,11 @@ StatusCode AlgA::initialize() {
 
 StatusCode AlgA::execute(const EventContext& ctx) const {
 
-  ATH_MSG_DEBUG("execute " << name());
+  ATH_MSG_DEBUG("execute {}", name());
 
   SG::ReadHandle<xAOD::EventInfo> evt(m_evt, ctx);
-  ATH_MSG_INFO("   EventInfo:  r: " << evt->runNumber()
-               << " e: " << evt->eventNumber()
-               << " evt: " << ctx.evt() );
+  ATH_MSG_INFO("   EventInfo:  r: {} e: {} evt: {}",
+               evt->runNumber(), evt->eventNumber(), ctx.evt() );
 
 
   const unsigned int i = ctx.evt() + 1;
@@ -40,12 +39,12 @@ StatusCode AlgA::execute(const EventContext& ctx) const {
 			   evt->eventNumber()*100 + 
 			   i)  )
              );
-  ATH_MSG_INFO("  write: " << wh1.key() << " = " << wh1->val() );
+  ATH_MSG_INFO("  write: {} = {}", wh1.key(), wh1->val() );
 
 
   SG::WriteHandle<HiveDataObj> wh2(m_wrh2, ctx);
   ATH_CHECK( wh2.record( std::make_unique< HiveDataObj >( 10050+i ) ) );
-  ATH_MSG_INFO("  write: " << wh2.key() << " = " << wh2->val() );
+  ATH_MSG_INFO("  write: {} = {}", wh2.key(), wh2->val() );
     
   return StatusCode::SUCCESS;
 

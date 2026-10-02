@@ -28,7 +28,7 @@ HiveExSvc::initialize() {
     nslots = 1;
   }
 
-  ATH_MSG_INFO("initialize structures of size " << nslots);
+  ATH_MSG_INFO("initialize structures of size {}", nslots);
   
   // initialize the structures with the number of concurrent events
   m_times.resize( nslots );

@@ -14,7 +14,7 @@ AlgT::AlgT( const std::string& name,
 //---------------------------------------------------------------------------
 
 StatusCode AlgT::initialize() {
-  ATH_MSG_DEBUG("initialize " << name());
+  ATH_MSG_DEBUG("initialize {}", name());
 
   if (m_rdh1.key() != "") ATH_CHECK( m_rdh1.initialize() );
   ATH_CHECK( m_wrh1.initialize() );
@@ -31,17 +31,16 @@ StatusCode AlgT::initialize() {
 
 StatusCode AlgT::execute(const EventContext& ctx) {
 
-  ATH_MSG_DEBUG("execute " << name());
+  ATH_MSG_DEBUG("execute {}", name());
 
   SG::ReadHandle<xAOD::EventInfo> evt(m_evt, ctx);
-  ATH_MSG_INFO("   EventInfo:  r: " << evt->runNumber()
-               << " e: " << evt->eventNumber() );
-
+  ATH_MSG_INFO("   EventInfo:  r: {} e: {}",
+               evt->runNumber(), evt->eventNumber());
 
   SG::WriteHandle<HiveDataObj> wh1(m_wrh1, ctx);
   ATH_CHECK( wh1.record( std::make_unique<HiveDataObj> (10000 + evt->eventNumber())));
 
-  ATH_MSG_INFO("  write: " << wh1.key() << " = " << wh1->val() );
+  ATH_MSG_INFO("  write: {} = {}", wh1.key(), wh1->val() );
 
 
   ATH_CHECK(m_tool1->doSomething(ctx));

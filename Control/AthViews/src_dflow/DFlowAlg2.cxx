@@ -26,7 +26,7 @@ namespace AthViews {
 ////////////////////////////
 StatusCode DFlowAlg2::initialize()
 {
-  ATH_MSG_INFO ("Initializing " << name() << "...");
+  ATH_MSG_INFO ("Initializing {}...", name());
 
   CHECK( m_r_int.initialize() );
   CHECK( m_ints.initialize() );
@@ -37,26 +37,26 @@ StatusCode DFlowAlg2::initialize()
 
 StatusCode DFlowAlg2::finalize()
 {
-  ATH_MSG_INFO ("Finalizing " << name() << "...");
+  ATH_MSG_INFO ("Finalizing {}...", name());
 
   return StatusCode::SUCCESS;
 }
 
 StatusCode DFlowAlg2::execute(const EventContext& ctx) const
 {  
-  ATH_MSG_DEBUG ("Executing " << name() << "...");
+  ATH_MSG_DEBUG ("Executing {}...", name());
 
   SG::ReadHandle< int > inputHandle( m_r_int, ctx );
   ATH_MSG_INFO("================================");
   ATH_MSG_INFO("myint r-handle...");
-  ATH_MSG_INFO("name: [" << inputHandle.name() << "]");
-  ATH_MSG_INFO("store [" << inputHandle.store() << "]");
-  ATH_MSG_INFO("clid: [" << inputHandle.clid() << "]");
+  ATH_MSG_INFO("name: [{}]", inputHandle.name());
+  ATH_MSG_INFO("store [{}]", inputHandle.store());
+  ATH_MSG_INFO("clid: [{}]", inputHandle.clid());
 
-  ATH_MSG_INFO("ptr: " << inputHandle.cptr());
+  ATH_MSG_INFO("ptr: {}", static_cast<const void*>(inputHandle.cptr()));
   if ( inputHandle.isValid() )
   {
-    ATH_MSG_INFO("val: " << *( inputHandle.cptr() ) );
+    ATH_MSG_INFO("val: {}", *( inputHandle.cptr() ) );
   }
 
   SG::WriteHandle< std::vector< int > > outputHandle( m_ints, ctx );
@@ -69,19 +69,19 @@ StatusCode DFlowAlg2::execute(const EventContext& ctx) const
     outputHandle->push_back( *inputHandle );
   }
 
-  ATH_MSG_INFO( "size:" << outputHandle->size() );
+  ATH_MSG_INFO( "size:{}", outputHandle->size() );
   for ( int i = 0, imax = outputHandle->size(); i != imax; ++i )
   {
-    ATH_MSG_INFO( "val[" << i << "]= " << outputHandle->at( i ) );
+    ATH_MSG_INFO( "val[{}]= {}", i, outputHandle->at( i ) );
   }
 
   // Test update handles
   SG::UpdateHandle< HiveDataObj > testUpdate( m_testUpdate, ctx );
-  ATH_MSG_INFO( "Update handle before: " << testUpdate->val() );
+  ATH_MSG_INFO( "Update handle before: {}", testUpdate->val() );
   testUpdate->val( 1234 );
-  ATH_MSG_INFO( "Update handle after: " << testUpdate->val() );
+  ATH_MSG_INFO( "Update handle after: {}", testUpdate->val() );
   *testUpdate = 4321;
-  ATH_MSG_INFO( "Update handle new: " << testUpdate->val() );
+  ATH_MSG_INFO( "Update handle new: {}", testUpdate->val() );
 
   return StatusCode::SUCCESS;
 }

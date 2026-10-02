@@ -26,7 +26,7 @@ namespace AthViews {
 ////////////////////////////
 StatusCode DFlowAlg1::initialize()
 {
-  ATH_MSG_INFO ("Initializing " << name() << "...");
+  ATH_MSG_INFO ("Initializing {}...", name());
 
   CHECK( m_r_int.initialize() );
   CHECK( m_w_int.initialize() );
@@ -37,47 +37,47 @@ StatusCode DFlowAlg1::initialize()
 
 StatusCode DFlowAlg1::finalize()
 {
-  ATH_MSG_INFO ("Finalizing " << name() << "...");
+  ATH_MSG_INFO ("Finalizing {}...", name());
 
   return StatusCode::SUCCESS;
 }
 
 StatusCode DFlowAlg1::execute(const EventContext& ctx) const
 {  
-  ATH_MSG_DEBUG ("Executing " << name() << "...");
+  ATH_MSG_DEBUG ("Executing {}...", name());
 
   SG::ReadHandle< int > inputData( m_r_int, ctx );
   if ( !inputData.isValid() )
   {
-    ATH_MSG_ERROR( "Failed to retrieve initial view data from store " << inputData.store() );
+    ATH_MSG_ERROR( "Failed to retrieve initial view data from store {}", inputData.store() );
     return StatusCode::FAILURE;
   }
   int seedData = *inputData;
 
   SG::WriteHandle< int > outputData( m_w_int, ctx );
   ATH_MSG_INFO("myint handle...");
-  ATH_MSG_INFO("name: [" << outputData.name() << "]");
-  ATH_MSG_INFO("store [" << outputData.store() << "]");
-  ATH_MSG_INFO("clid: [" << outputData.clid() << "]");
+  ATH_MSG_INFO("name: [{}]", outputData.name());
+  ATH_MSG_INFO("store [{}]", outputData.store());
+  ATH_MSG_INFO("clid: [{}]", outputData.clid());
   
   ATH_CHECK( outputData.record( std::make_unique< int >( seedData ) ) );
 
   //redundant check as op = would throw if outputData was not valid (e.g. because if clid/key combo was duplicated)
   if ( outputData.isValid() )
   {
-    ATH_MSG_INFO("ptr: " << outputData.cptr());
-    ATH_MSG_INFO("val: " << *outputData);
+    ATH_MSG_INFO("ptr: {}", static_cast<const void*>(outputData.cptr()));
+    ATH_MSG_INFO("val: {}", *outputData);
     
     ATH_MSG_INFO("modify myint by value...");
 
-    ATH_MSG_INFO("ptr: " << outputData.cptr());
-    ATH_MSG_INFO("val: " << *outputData);
+    ATH_MSG_INFO("ptr: {}", static_cast<const void*>(outputData.cptr()));
+    ATH_MSG_INFO("val: {}", *outputData);
   }
 
   // Test update handles
   SG::WriteHandle< HiveDataObj > testUpdate( m_testUpdate, ctx );
   ATH_CHECK( testUpdate.recordNonConst( std::make_unique< HiveDataObj >( 123 ) ) );
-  ATH_MSG_INFO( "Update handle initial: " << testUpdate->val() );
+  ATH_MSG_INFO( "Update handle initial: {}", testUpdate->val() );
 
   return StatusCode::SUCCESS;
 }

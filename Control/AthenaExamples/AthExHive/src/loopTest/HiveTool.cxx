@@ -26,15 +26,15 @@ HiveTool::initialize() {
   ATH_MSG_INFO("initialize");
 
   if (m_rdh1.key() != "") {
-  ATH_CHECK( m_rdh1.initialize() );
-    ATH_MSG_INFO("read key: " << m_rdh1.key());
+    ATH_CHECK( m_rdh1.initialize() );
+    ATH_MSG_INFO("read key: {}", m_rdh1.key());
   } else {
     ATH_MSG_INFO("RH key is blank. not initializing");
   }
 
   if (m_wrh1.key() != "") {
     ATH_CHECK( m_wrh1.initialize() );
-    ATH_MSG_INFO("write key: " << m_wrh1.key());
+    ATH_MSG_INFO("write key: {}", m_wrh1.key());
   } else {
     ATH_MSG_INFO("WH key is blank. not initializing");
   }
@@ -58,7 +58,7 @@ StatusCode HiveTool::doSomething(const EventContext& ctx) const {
     ATH_MSG_INFO("RH not valid - not retrieving");
   } else {    
     SG::ReadHandle<HiveDataObj> rh( m_rdh1, ctx );
-    ATH_MSG_INFO("  read: " << rh.key() << " = " << rh->val() );
+    ATH_MSG_INFO("  read: {} = {}", rh.key(), rh->val() );
     val = rh->val();
   }
 
@@ -68,7 +68,7 @@ StatusCode HiveTool::doSomething(const EventContext& ctx) const {
     SG::WriteHandle<HiveDataObj> wrh1( m_wrh1, ctx );
     ATH_CHECK(wrh1.record(std::make_unique< HiveDataObj >(val + 666)));
 
-    ATH_MSG_INFO("  write: " << wrh1.key() << " = " << wrh1->val() );
+    ATH_MSG_INFO("  write: {} = {}", wrh1.key(), wrh1->val() );
   }
 
   return StatusCode::SUCCESS;

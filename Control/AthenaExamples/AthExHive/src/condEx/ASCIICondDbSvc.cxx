@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ASCIICondDbSvc.h"
@@ -35,7 +35,7 @@ ASCIICondDbSvc::initialize() {
   msg().setLevel( m_outputLevel.value() );
 
   if (!sc.isSuccess()) {
-    warning () << "Base class could not be initialized" << endmsg;
+    ATH_MSG_WARNING( "Base class could not be initialized" );
     return StatusCode::FAILURE;
   }
 
@@ -49,11 +49,11 @@ ASCIICondDbSvc::initialize() {
   }
 
   std::ostringstream ost;
-  ost << " Printing CondDB registry";
+  std::print(ost, " Printing CondDB registry");
   for (const auto& e : m_registry) {
-    ost << std::endl << "  - id: " << e.first << "  r:";
+    std::print(ost, "\n  - id: {}  r:", e.first);
     for (const IOVEntryT<IASCIICondDbSvc::dbData_t>& r : e.second) {
-      ost << "  " << r.range() << " :: " << *r.objPtr();
+      std::print (ost, "  {} :: {}", static_cast<std::string>(r.range()), *r.objPtr());
     }
   }
 
@@ -69,7 +69,7 @@ ASCIICondDbSvc::readDbFile(const std::string& fname) {
 
   StatusCode sc(StatusCode::SUCCESS);
 
-  ATH_MSG_DEBUG("reading cond db from \"" << fname << "\"");
+  ATH_MSG_DEBUG("reading cond db from \"{}\"", fname);
 
   std::ifstream ifs (fname);
   std::string line;
@@ -97,8 +97,8 @@ ASCIICondDbSvc::readDbFile(const std::string& fname) {
         if (parse(ie,*it)) {
           m_registry[dbKey].push_back( ie );
         } else {
-          error() << "while reading " << fname << " problem parsing " << *it 
-                  << " in line\n" << line << endmsg;
+          ATH_MSG_ERROR( "while reading {} problem parsing  in line {}",
+                         fname, *it, line);
           sc = StatusCode::FAILURE;
         }
         ++it;
@@ -106,7 +106,7 @@ ASCIICondDbSvc::readDbFile(const std::string& fname) {
     }
     ifs.close();
   } else {
-    error() << "unable to open file " << (std::string) m_file << endmsg;
+    ATH_MSG_ERROR( "unable to open file {}", m_file.value() );
     sc = StatusCode::FAILURE;
   }
 
@@ -121,7 +121,7 @@ ASCIICondDbSvc::dump() const {
   std::ostringstream ost;
   dump(ost);
 
-  info() << ost.str() << endmsg;
+  ATH_MSG_INFO( "{}", ost.str() );
 
 }
 
@@ -132,11 +132,7 @@ void
 ASCIICondDbSvc::dump(std::ostringstream& ost) const {
 
   std::lock_guard<std::mutex> lock(m_lock);
-
-  ost << "ASCIICondDbSvc::dump()";
-
-  ost << "\n";
-    
+  std::println (ost, "ASCIICondDbSvc::dump()");
 }
 
 //---------------------------------------------------------------------------
@@ -172,10 +168,6 @@ ASCIICondDbSvc::parse(EventIDRange& t, const std::string& s) {
 
   std::smatch m;
   std::regex_match(s,m,rr);
-
-  // for (auto res : m) {
-  //   cout << " - " << res << endl;
-  // }
 
   if (m.size() != 5) { return false; }
 
@@ -242,14 +234,12 @@ ASCIICondDbSvc::getRange(const std::string& dbKey , const EventContext& ctx,
   registry_t::const_iterator itr = m_registry.find(dbKey);
 
   if (itr == m_registry.end()) {
-    error() << "getRange: no dbKey " << dbKey << " found in registry" 
-            << endmsg;
+    ATH_MSG_ERROR( "getRange: no dbKey {} found in registry", dbKey );
     return StatusCode::FAILURE;
   }
 
   for (const IOVEntryT<IASCIICondDbSvc::dbData_t>& e : itr->second) {
-    debug() << "compare " << e.range() << " with " << ctx.eventID()
-            << endmsg;
+    ATH_MSG_DEBUG( "compare " << e.range() << " with " << ctx.eventID() );
     if (e.range().isInRange(EventIDBase(ctx.eventID()))) {
       rng = e.range();
       val = *(e.objPtr());
@@ -257,8 +247,8 @@ ASCIICondDbSvc::getRange(const std::string& dbKey , const EventContext& ctx,
     }
   }
 
-  error() << "getRange: no range for Time " << ctx.eventID() 
-          << " found for dbKey "  << dbKey << endmsg;
+  ATH_MSG_ERROR( "getRange: no range for Time " << ctx.eventID()
+                 << " found for dbKey "  << dbKey );
 
   return StatusCode::FAILURE;
 }

@@ -17,7 +17,7 @@ namespace AthViews {
 
 StatusCode ViewTestAlg::initialize()
 {
-  ATH_MSG_DEBUG( "Initializing " << name() << "..." );
+  ATH_MSG_DEBUG( "Initializing {}...", name() );
 
   if ( m_output.key() == "" )
   {
@@ -33,17 +33,17 @@ StatusCode ViewTestAlg::initialize()
 
 StatusCode ViewTestAlg::finalize()
 {
-  ATH_MSG_DEBUG( "Finalizing " << name() << "..." );
+  ATH_MSG_DEBUG( "Finalizing {}...", name() );
 
   return StatusCode::SUCCESS;
 }
 
 StatusCode ViewTestAlg::execute(const EventContext& ctx) const
 {  
-  ATH_MSG_DEBUG( "Executing " << name() << "..." );
+  ATH_MSG_DEBUG( "Executing {}...", name() );
 
   auto theStore = Atlas::getExtendedEventContext( ctx ).proxy();
-  ATH_MSG_INFO( name() << " running with store " << theStore->name() );
+  ATH_MSG_INFO( "{} running with store {}", name(), theStore->name() );
 
   // Make (optional) output
   if ( m_output.key() != "" )

@@ -11,7 +11,7 @@ namespace AthViews {
 
 StatusCode ViewSubgraphAlg::initialize()
 {
-  ATH_MSG_INFO ("Initializing " << name() << "...");
+  ATH_MSG_INFO ("Initializing {}...", name());
 
   renounce( m_w_int ); // To test ViewDataVerifier
   CHECK( m_w_int.initialize() );
@@ -24,14 +24,14 @@ StatusCode ViewSubgraphAlg::initialize()
 
 StatusCode ViewSubgraphAlg::finalize()
 {
-  ATH_MSG_INFO ("Finalizing " << name() << "...");
+  ATH_MSG_INFO ("Finalizing {}...", name());
 
   return StatusCode::SUCCESS;
 }
 
 StatusCode ViewSubgraphAlg::execute(const EventContext& ctx) const
 {
-  ATH_MSG_DEBUG ("Executing " << name() << "...");
+  ATH_MSG_DEBUG ("Executing {}...", name());
 
   //Start scheduler profiling
   auto profileCallback = [this, slot=ctx.slot()]( IScheduler::OccupancySnapshot snap ) -> void {
@@ -39,7 +39,8 @@ StatusCode ViewSubgraphAlg::execute(const EventContext& ctx) const
     for ( int const stateTotal : snap.states[slot] ) {
       states += std::to_string( stateTotal ) + " ";
     }
-    ATH_MSG_INFO( "Slot " << slot << " snapshot time " << snap.time.time_since_epoch().count() << " states: " << states );
+    ATH_MSG_INFO( "Slot {} snapshot time {} states: ",
+                  slot, snap.time.time_since_epoch().count(), states );
   };
   m_scheduler->recordOccupancy( 0, std::move( profileCallback ) );
   
@@ -66,7 +67,9 @@ StatusCode ViewSubgraphAlg::execute(const EventContext& ctx) const
     {
       for ( unsigned int viewIndex = 0; viewIndex < parentViewHandle->size(); ++viewIndex )
       {
-        ATH_MSG_INFO( "Linking view " << viewVector->at( viewIndex )->name() << " to parent " << parentViewHandle->at( viewIndex )->name() );
+        ATH_MSG_INFO( "Linking view {} to parent {}",
+                      viewVector->at( viewIndex )->name(),
+                      parentViewHandle->at( viewIndex )->name() );
         viewVector->at( viewIndex )->linkParent( parentViewHandle->at( viewIndex ) );
       }
     }

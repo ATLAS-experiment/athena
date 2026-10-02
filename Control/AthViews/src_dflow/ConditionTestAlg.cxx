@@ -43,7 +43,7 @@ ConditionTestAlg::~ConditionTestAlg()
 ////////////////////////////
 StatusCode ConditionTestAlg::initialize()
 {
-  ATH_MSG_INFO ("Initializing " << name() << "...");
+  ATH_MSG_INFO ("Initializing {}...", name());
 
   CHECK( m_condKeyTest.initialize() );
 
@@ -52,7 +52,7 @@ StatusCode ConditionTestAlg::initialize()
 
 StatusCode ConditionTestAlg::finalize()
 {
-  ATH_MSG_INFO ("Finalizing " << name() << "...");
+  ATH_MSG_INFO ("Finalizing {}...", name());
 
   return StatusCode::SUCCESS;
 }
@@ -62,13 +62,13 @@ StatusCode ConditionTestAlg::execute(const EventContext& ctx) const
   SG::WriteCondHandle< CondDataObj > condHandleTest( m_condKeyTest, ctx );
 
   if ( condHandleTest.isValid() ) {
-    ATH_MSG_DEBUG("CondHandle " << condHandleTest.fullKey() << " is already valid.");
+    ATH_MSG_DEBUG("CondHandle {} is already valid.", condHandleTest.key());
     return StatusCode::SUCCESS;
   }
 
-  ATH_MSG_INFO ("Creating " << m_condKeyTest);
+  ATH_MSG_INFO ("Creating {}", m_condKeyTest);
 
-  ATH_MSG_DEBUG( name() << " running with store " << Atlas::getExtendedEventContext(ctx).proxy()->name() );
+  ATH_MSG_DEBUG( "{} running with store {}", name(), Atlas::getExtendedEventContext(ctx).proxy()->name() );
 
   // Make a (large) validity range
   EventIDBase begin (0,
