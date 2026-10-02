@@ -39,6 +39,16 @@ InDetPerfPlot_nTracks::initializePlots() {
   book(m_ntracks_vs_nvertices_absEta_0_2p5, "ntracks_vs_nvertices_absEta_0_2p5");
   book(m_ntracks_vs_nvertices_pT_1GeV, "ntracks_vs_nvertices_pT_1GeV");
 
+  book(m_ntracks_vs_truthMu_profile, "ntracks_vs_truthMu_profile");
+  book(m_ntracks_vs_truthMu_absEta_0_2p5_profile, "ntracks_vs_truthMu_absEta_0_2p5_profile");
+  book(m_ntracks_vs_truthMu_pT_1GeV_profile, "ntracks_vs_truthMu_pT_1GeV_profile");
+  book(m_ntracks_vs_actualMu_profile, "ntracks_vs_actualMu_profile");
+  book(m_ntracks_vs_actualMu_absEta_0_2p5_profile, "ntracks_vs_actualMu_absEta_0_2p5_profile");
+  book(m_ntracks_vs_actualMu_pT_1GeV_profile, "ntracks_vs_actualMu_pT_1GeV_profile");
+  book(m_ntracks_vs_nvertices_profile, "ntracks_vs_nvertices_profile");
+  book(m_ntracks_vs_nvertices_absEta_0_2p5_profile, "ntracks_vs_nvertices_absEta_0_2p5_profile");
+  book(m_ntracks_vs_nvertices_pT_1GeV_profile, "ntracks_vs_nvertices_pT_1GeV_profile");
+
 }
 
 void
@@ -62,5 +72,15 @@ void InDetPerfPlot_nTracks::fill
   fillHisto(m_ntracks_vs_truthMu_pT_1GeV, truthMu, ntracksPt1GeV, weight);
   fillHisto(m_ntracks_vs_actualMu_pT_1GeV, actualMu, ntracksPt1GeV, weight);
   fillHisto(m_ntracks_vs_nvertices_pT_1GeV, nvertices, ntracksPt1GeV, weight);
+
+  fillHisto(m_ntracks_vs_truthMu_profile, truthMu, ntracksFull, weight);
+  fillHisto(m_ntracks_vs_actualMu_profile, actualMu, ntracksFull, weight);
+  fillHisto(m_ntracks_vs_nvertices_profile, nvertices, ntracksFull, weight);
+  fillHisto(m_ntracks_vs_truthMu_absEta_0_2p5_profile, truthMu, ntracksCentral, weight);
+  fillHisto(m_ntracks_vs_actualMu_absEta_0_2p5_profile, actualMu, ntracksCentral, weight);
+  fillHisto(m_ntracks_vs_nvertices_absEta_0_2p5_profile, nvertices, ntracksCentral, weight);
+  fillHisto(m_ntracks_vs_truthMu_pT_1GeV_profile, truthMu, ntracksPt1GeV, weight);
+  fillHisto(m_ntracks_vs_actualMu_pT_1GeV_profile, actualMu, ntracksPt1GeV, weight);
+  fillHisto(m_ntracks_vs_nvertices_pT_1GeV_profile, nvertices, ntracksPt1GeV, weight);
 
 }

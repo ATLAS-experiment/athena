@@ -40,6 +40,17 @@ private:
   TH2* m_ntracks_vs_nvertices{};
   TH2* m_ntracks_vs_nvertices_absEta_0_2p5{};
   TH2* m_ntracks_vs_nvertices_pT_1GeV{};
+
+  TProfile* m_ntracks_vs_truthMu_profile{};
+  TProfile* m_ntracks_vs_truthMu_absEta_0_2p5_profile{};
+  TProfile* m_ntracks_vs_truthMu_pT_1GeV_profile{};
+  TProfile* m_ntracks_vs_actualMu_profile{};
+  TProfile* m_ntracks_vs_actualMu_absEta_0_2p5_profile{};
+  TProfile* m_ntracks_vs_actualMu_pT_1GeV_profile{};
+  TProfile* m_ntracks_vs_nvertices_profile{};
+  TProfile* m_ntracks_vs_nvertices_absEta_0_2p5_profile{};
+  TProfile* m_ntracks_vs_nvertices_pT_1GeV_profile{};
+
   void initializePlots();
 };
 
