@@ -16,10 +16,12 @@
 #include "SGTools/DataProxy.h"
 #include "TestTools/initGaudi.h"
 #include "TestTools/expect_exception.h"
+#include "AthenaKernel/IProxyDict.h"
 #include "AthenaKernel/StorableConversions.h"
 #include "AthenaKernel/errorcheck.h"
 #include "AthenaKernel/ExtendedEventContext.h"
 #include "GaudiKernel/ThreadLocalContext.h"
+#include "GaudiKernel/SmartIF.h"
 #include <cassert>
 #include <print>
 
@@ -771,6 +773,9 @@ int main()
   if (!Athena_test::initGaudi("StoreGate/VarHandleBase_test.txt", svcloc)) {
     return 1;
   }
+  // Make sure StoreGateSvc is initialized before we go putting
+  // other dicts in the current EventContext.
+  SmartIF<IProxyDict> sg (svcloc->service ("StoreGateSvc"));
 
   test1();
   test2();

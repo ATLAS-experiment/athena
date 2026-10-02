@@ -19,6 +19,8 @@
 #include "SGTools/TestStore.h"
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/errorcheck.h"
+#include "AthenaKernel/IProxyDict.h"
+#include "GaudiKernel/SmartIF.h"
 #include "TestTools/initGaudi.h"
 #include "TestTools/expect_exception.h"
 #include <cassert>
@@ -125,7 +127,7 @@ void test2()
   SG::ReadDecorHandleKey<MyObj> k1 ("foo.aaa");
   assert (k1.initialize().isSuccess());
   SG::ReadDecorHandle<MyObj, int> h1 (k1);
-  assert (h1.store() == "StoreGateSvc");
+  assert (h1.store() == "StoreGateSvc_Impl");
   assert (h1.setProxyDict (&testStore).isSuccess());
   assert (h1.store() == "TestStore");
   assert (h1.cptr() == fooptr);
@@ -357,6 +359,9 @@ int main()
   if (!Athena_test::initGaudi("StoreGate/VarHandleBase_test.txt", svcloc)) {
     return 1;
   }
+  // Make sure StoreGateSvc is initialized before we go putting
+  // other dicts in the current EventContext.
+  SmartIF<IProxyDict> sg (svcloc->service ("StoreGateSvc"));
 
   test1();
   test2();
