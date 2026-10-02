@@ -228,8 +228,9 @@ class Node:
             if not node._root : node._setrootnode( rootnode )
         return  self._children[node.name()]
 
-    def has(self, name ):
-        return hasattr( self, name )
+    def has(self, name, value=None ):
+        if value is None : return hasattr( self, name )
+        return hasattr( self, name ) and getattr( self, name ) == value
 
     def hasFlag(self, name ):
         return name in self.__dict__
