@@ -17,22 +17,32 @@ from TrigIDR4Monitoring.Node import update_flags
 
 import datetime as dt
 
+from functools import wraps
+
+def timerwrapper(thefunction):
+    @wraps(thefunction)
+    def wrapper(*args, **kwargs):
+            """ timer wrapper around function """
+            t = dt.datetime.now()
+            result = thefunction( *args, **kwargs )
+            t2 = dt.datetime.now()
+            duration = str( round((t2 - t).total_seconds()*1000, 4))
+            print( f"{thefunction.__name__} timer: elapsed time: {duration} ms")
+            return result
+    return wrapper
+
+
+def timer( thefunction, *args, **kwargs):
+    return timerwrapper(thefunction)(*args,**kwargs)
+
+
+@timerwrapper
 def decodeFlags( flags, domain=None ) :
-    """ timer wrapper around decode_flags """
-    t = dt.datetime.now()
-    root = decode_flags( flags, domain )
-    t2 = dt.datetime.now()
-    duration = str( round((t2 - t).total_seconds()*1000, 4))
-    print( f"decode flags: elapsed time: {duration} ms")
-    return root
+    return decode_flags( flags, domain )
 
+@timerwrapper
+def updateFlags( flags, node, domain=None ) :
+    return update_flags( flags, node, domain )
 
-def updateFlags( flags, node, domain="" ) :    
-    """ timer wrapper around update_flags """
-    t = dt.datetime.now()
-    update_flags( flags, node, domain )
-    t2 = dt.datetime.now()
-    duration = str( round((t2 - t).total_seconds()*1000, 4))    
-    print( f"update flags: elapsed time: {duration} ms")
 
     
