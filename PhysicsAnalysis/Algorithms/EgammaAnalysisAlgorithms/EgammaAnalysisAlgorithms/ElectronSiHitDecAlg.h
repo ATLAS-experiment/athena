@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -23,20 +23,19 @@
 
 namespace CP
 {
-    /// \brief this decorates electrons with extra information from the track and cluster to avoid writing them out for SiHit electrons
+    /// @brief this decorates electrons with extra information from the track and cluster to avoid writing them out for SiHit electrons
     class ElectronSiHitDecAlg final : public EL::AnaAlgorithm
     {
-        /// \brief the standard constructor
+        /// @brief the standard constructor
     public:
-        ElectronSiHitDecAlg(const std::string &name,
-                            ISvcLocator *pSvcLocator);
+        using EL::AnaAlgorithm::AnaAlgorithm;
 
         StatusCode initialize() override;
         StatusCode execute(const EventContext& ctx) override;
 
     private:
 
-        /// \brief the systematics list we run
+        /// @brief the systematics list we run
         SysListHandle m_systematicsList {this};
 
         // EventInfo key
@@ -65,7 +64,7 @@ namespace CP
         CP::SysWriteDecorHandle<float>  m_clPhi{this, "clPhi", "clPhi", "the decoration for phi of the electron cluster"};
 
         /// Decorator for SiHit electron for event requirement on a pair of leptons
-        CP::SysWriteDecorHandle<char> m_evtOKDec{this, "selectionName", "", "the decoration for the combined WP and FSR selection"};
+        CP::SysWriteDecorHandle<char> m_evtOKDec{this, "selectionName", "", "the decoration flagging SiHit electrons in events with at least one pair of analysis electrons or muons"};
 
     };
 }

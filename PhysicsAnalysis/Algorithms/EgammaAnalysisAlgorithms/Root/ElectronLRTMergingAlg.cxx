@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -20,33 +20,28 @@
 
 namespace CP
 {
-    ElectronLRTMergingAlg::ElectronLRTMergingAlg(const std::string &name, ISvcLocator *svcLoc)
-        : EL::AnaReentrantAlgorithm(name, svcLoc)
-    {
-    }
-
     StatusCode ElectronLRTMergingAlg::initialize()
     {
-        // Greet the user:
-        ATH_MSG_INFO("Initialising");
-
-        ATH_CHECK(m_promptElectronLocation.initialize());
-        ATH_CHECK(m_lrtElectronLocation.initialize());
-        ATH_CHECK(m_outElectronLocation.initialize());
-        ATH_CHECK(m_lrtIsLRTKey.initialize());
-        ATH_CHECK(m_promptIsLRTKey.initialize());
+        ANA_CHECK(m_promptElectronLocation.initialize());
+        ANA_CHECK(m_lrtElectronLocation.initialize());
+        ANA_CHECK(m_outElectronLocation.initialize());
+        m_outElectronViewLocation = m_outElectronLocation.key();
+        ANA_CHECK(m_outElectronViewLocation.initialize(m_createViewCollection.value()));
+        ANA_CHECK(m_lrtIsLRTKey.initialize());
+        ANA_CHECK(m_promptIsLRTKey.initialize());
 
         /// if the tool is not user-set, configure the automatic instance via our overlap flag
         if (m_overlapRemovalTool.empty())
         {
             asg::AsgToolConfig config("CP::ElectronLRTOverlapRemovalTool/ElectronLRTOverlapRemovalTool");
-            ATH_CHECK(config.setProperty("overlapStrategy", m_ORstrategy.value()));
-            ATH_CHECK(config.setProperty("isDAOD", m_isDAOD.value()));
-            ATH_CHECK(config.makePrivateTool(m_overlapRemovalTool));
+            ANA_CHECK(config.setProperty("overlapStrategy", m_ORstrategy.value()));
+            ANA_CHECK(config.setProperty("ORThreshold", m_ORThreshold.value()));
+            ANA_CHECK(config.setProperty("isDAOD", m_isDAOD.value()));
+            ANA_CHECK(config.makePrivateTool(m_overlapRemovalTool));
         }
 
         // Retrieve the tools
-        ATH_CHECK(m_overlapRemovalTool.retrieve());
+        ANA_CHECK(m_overlapRemovalTool.retrieve());
 
         // Return gracefully:
         return StatusCode::SUCCESS;
@@ -55,20 +50,6 @@ namespace CP
 
     StatusCode ElectronLRTMergingAlg::execute(const EventContext &ctx) const
     {
-
-        // Setup containers for output, to avoid const conversions setup two different kind of containers
-        std::unique_ptr<ConstDataVector<xAOD::ElectronContainer>> transientContainer = std::make_unique<ConstDataVector<xAOD::ElectronContainer>>(SG::VIEW_ELEMENTS);
-        std::unique_ptr<xAOD::ElectronContainer> outputCol = std::make_unique<xAOD::ElectronContainer>();
-
-        // Aux container, if needed
-        std::unique_ptr<xAOD::ElectronAuxContainer> outputAuxCol;
-
-        // Assign the aux in the copy case
-        if (!m_createViewCollection)
-        {
-            outputAuxCol = std::make_unique<xAOD::ElectronAuxContainer>();
-            outputCol->setStore(outputAuxCol.get());
-        }
 
         // Retrieve electrons from StoreGate
         SG::ReadHandle<xAOD::ElectronContainer> promptCol(m_promptElectronLocation, ctx);
@@ -99,30 +80,29 @@ namespace CP
         for (const xAOD::Electron *el : *lrtCol)
             lrtIsLRT(*el) = 1;
 
-        // merging loop over containers
+        // merging loop over containers and write, using a view container or a deep copy
         if (m_createViewCollection)
         {
+            auto transientContainer = std::make_unique<ConstDataVector<xAOD::ElectronContainer>>(SG::VIEW_ELEMENTS);
             transientContainer->reserve(promptCol->size() + lrtCol->size());
 
             mergeElectron(*promptCol, transientContainer.get(), ElectronsToRemove);
             mergeElectron(*lrtCol, transientContainer.get(), ElectronsToRemove);
+
+            SG::WriteHandle<ConstDataVector<xAOD::ElectronContainer>> h_write(m_outElectronViewLocation, ctx);
+            ATH_CHECK(h_write.record(std::move(transientContainer)));
         }
         else
         {
+            auto outputCol = std::make_unique<xAOD::ElectronContainer>();
+            auto outputAuxCol = std::make_unique<xAOD::ElectronAuxContainer>();
+            outputCol->setStore(outputAuxCol.get());
             outputCol->reserve(promptCol->size() + lrtCol->size());
 
             mergeElectron(*promptCol, outputCol.get(), ElectronsToRemove);
             mergeElectron(*lrtCol, outputCol.get(), ElectronsToRemove);
-        }
 
-        //write
-        SG::WriteHandle<xAOD::ElectronContainer> h_write(m_outElectronLocation, ctx);
-        if (m_createViewCollection)
-        {
-            ATH_CHECK(evtStore()->record(transientContainer.release(), m_outElectronLocation.key()));
-        }
-        else
-        {
+            SG::WriteHandle<xAOD::ElectronContainer> h_write(m_outElectronLocation, ctx);
             ATH_CHECK(h_write.record(std::move(outputCol), std::move(outputAuxCol)));
         }
 

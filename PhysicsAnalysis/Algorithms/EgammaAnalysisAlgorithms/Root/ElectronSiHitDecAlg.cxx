@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -15,29 +15,20 @@
 
 namespace CP
 {
-    ElectronSiHitDecAlg::ElectronSiHitDecAlg(const std::string &name, ISvcLocator *svcLoc)
-        : EL::AnaAlgorithm(name, svcLoc)
-    {
-    }
-
     StatusCode ElectronSiHitDecAlg::initialize()
     {
-        // Greet the user:
-        ATH_MSG_DEBUG("Initialising");
+        ANA_CHECK(m_eventInfoKey.initialize(m_systematicsList));
+        ANA_CHECK(m_vertexKey.initialize(m_systematicsList));
+        ANA_CHECK(m_electronContainerKey.initialize(m_systematicsList));
+        ANA_CHECK(m_analMuonContKey.initialize(m_systematicsList));
+        ANA_CHECK(m_analElectronContKey.initialize(m_systematicsList));
 
-
-        ATH_CHECK(m_eventInfoKey.initialize(m_systematicsList));
-        ATH_CHECK(m_vertexKey.initialize(m_systematicsList));
-        ATH_CHECK(m_electronContainerKey.initialize(m_systematicsList));
-        ATH_CHECK(m_analMuonContKey.initialize(m_systematicsList));
-        ATH_CHECK(m_analElectronContKey.initialize(m_systematicsList));
-
-        ATH_CHECK(m_z0stheta.initialize(m_systematicsList, m_electronContainerKey));
-        ATH_CHECK(m_d0Normalized.initialize(m_systematicsList, m_electronContainerKey));
-        ATH_CHECK(m_nInnerExpPix.initialize(m_systematicsList, m_electronContainerKey));
-        ATH_CHECK(m_clEta.initialize(m_systematicsList, m_electronContainerKey));
-        ATH_CHECK(m_clPhi.initialize(m_systematicsList, m_electronContainerKey));
-        ATH_CHECK(m_evtOKDec.initialize(m_systematicsList, m_electronContainerKey));
+        ANA_CHECK(m_z0stheta.initialize(m_systematicsList, m_electronContainerKey));
+        ANA_CHECK(m_d0Normalized.initialize(m_systematicsList, m_electronContainerKey));
+        ANA_CHECK(m_nInnerExpPix.initialize(m_systematicsList, m_electronContainerKey));
+        ANA_CHECK(m_clEta.initialize(m_systematicsList, m_electronContainerKey));
+        ANA_CHECK(m_clPhi.initialize(m_systematicsList, m_electronContainerKey));
+        ANA_CHECK(m_evtOKDec.initialize(m_systematicsList, m_electronContainerKey));
 
         ANA_CHECK (m_systematicsList.initialize());
 
@@ -78,7 +69,7 @@ namespace CP
                 }
             }
             else eventHasLeptonPair = true;
-            ATH_MSG_DEBUG("Event has lepton pair?: " << (int)eventHasLeptonPair);
+            ATH_MSG_DEBUG("Event has lepton pair?: " << static_cast<int>(eventHasLeptonPair));
 
 
             // Retrieve EventInfo
@@ -98,9 +89,10 @@ namespace CP
 
             // get primary vertex
             const xAOD::Vertex*  primaryVtx = nullptr;
-            for ( auto vtx : *vtxs) {
+            for ( const auto *vtx : *vtxs) {
                 if (vtx->vertexType() == xAOD::VxType::PriVtx) {
                     primaryVtx = vtx;
+                    break;
                 }
             }
 
@@ -111,7 +103,7 @@ namespace CP
 
             // Set the needed decorations for SiHit electrons
             uint8_t val8;
-            for ( auto el : *els ) {
+            for ( const auto *el : *els ) {
 
                 // Select or not SiHits depending on whether this event has an electron pair
                 char evtOK = (eventHasLeptonPair) ? 1 : 0;
@@ -135,9 +127,13 @@ namespace CP
                 m_nInnerExpPix.set(*el, el_nInnerExpPix, sys);
 
                 // set z0stheta
-                auto tp = el->trackParticle();
+                const xAOD::TrackParticle* tp = el->trackParticle();
+                if (!tp) {
+                    ATH_MSG_ERROR("SiHit electron has no track particle, cannot compute z0stheta and d0Normalized");
+                    return StatusCode::FAILURE;
+                }
                 float z0stheta = 0;
-                if (primaryVtx) z0stheta = (tp->z0() - primaryVtx->z() + tp->vz()) * sin(tp->theta());
+                if (primaryVtx) z0stheta = (tp->z0() - primaryVtx->z() + tp->vz()) * std::sin(tp->theta());
                 m_z0stheta.set(*el, z0stheta, sys);
 
                 // Set d0 normalized
@@ -145,8 +141,13 @@ namespace CP
                 m_d0Normalized.set(*el, d0Normalized, sys);
 
                 // cluster eta, phi
-                float clEta = el->caloCluster()->eta();
-                float clPhi = el->caloCluster()->phi();
+                const xAOD::CaloCluster* cluster = el->caloCluster();
+                if (!cluster) {
+                    ATH_MSG_ERROR("SiHit electron has no calo cluster, cannot compute clEta and clPhi");
+                    return StatusCode::FAILURE;
+                }
+                float clEta = cluster->eta();
+                float clPhi = cluster->phi();
                 m_clEta.set(*el, clEta, sys);
                 m_clPhi.set(*el, clPhi, sys);
 
