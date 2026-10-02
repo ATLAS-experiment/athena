@@ -132,6 +132,7 @@ class BTaggingEfficiencyJsonTool: public asg::AsgTool,
   class MCMCHandler : public BoundsHandler {
     public:
       MCMCHandler(const json& jsonConfig, const std::vector<std::string>& varNames);
+      virtual ~MCMCHandler() = default;
       // Prevent handler from being copied forcing passing them by (const) references or using pointers.
       // It ensures that the code is efficient memory wise as no duplicate can be created 
       // The handlers should only be stored in vectors or maps and used directly basically 
