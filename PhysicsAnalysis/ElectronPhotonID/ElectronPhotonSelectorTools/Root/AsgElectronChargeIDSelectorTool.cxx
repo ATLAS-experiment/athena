@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -16,11 +16,6 @@
 // Include this class's header
 #include "ElectronPhotonSelectorTools/AsgElectronChargeIDSelectorTool.h"
 
-// STL includes
-#include <cmath>
-#include <cstdint>
-#include <string>
-#include <sstream>
 
 // EDM includes
 #include "TClass.h"
@@ -39,6 +34,11 @@
 #include "AsgDataHandles/ReadHandle.h"
 #include "AsgTools/CurrentContext.h"
 #include "PathResolver/PathResolver.h"
+// STL includes
+#include <cmath>
+#include <cstdint>
+#include <string>
+#include <sstream>
 
 //=============================================================================
 // Standard constructor
@@ -461,8 +461,10 @@ AsgElectronChargeIDSelectorTool::calculate(const EventContext& ctx,
       v_inputs.push_back(z0 * sin(theta));
     if (var == "d0Err")
       v_inputs.push_back(d0sigma);
-    if (var == "d0Sig")
-      v_inputs.push_back(d0 / d0sigma);
+    if (var == "d0Sig"){
+        double val = (d0sigma == 0.) ? -9999. : d0 / d0sigma;
+        v_inputs.push_back(val);
+      }
     if (var == "deltaphi2")
       v_inputs.push_back(deltaPhi2);
     if (var == "chi2oftrackfit")

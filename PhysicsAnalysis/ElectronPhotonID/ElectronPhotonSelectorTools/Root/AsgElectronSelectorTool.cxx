@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -18,11 +18,7 @@
 #include "EgammaAnalysisHelpers/AsgEGammaConfigHelper.h"
 #include "EGSelectorConfigurationMapping.h"
 #include "ElectronDNNCalculator.h"
-// STL includes
-#include <string>
-#include <cstdint>
-#include <cmath>
-#include <unordered_map>
+
 
 //EDM includes
 #include "xAODEgamma/Electron.h"
@@ -31,6 +27,11 @@
 
 #include "AsgTools/CurrentContext.h"
 #include "PathResolver/PathResolver.h"
+// STL includes
+#include <string>
+#include <cstdint>
+#include <cmath>
+#include <unordered_map>
 
 namespace AllowedVariables
 {
@@ -646,7 +647,7 @@ std::vector<float> AsgElectronSelectorTool::calculateMultipleOutputs(const Event
   if (vard0 > 0){
     d0sigma = std::sqrt(vard0);
   }
-  d0significance = std::abs(d0 / d0sigma);
+  d0significance = (d0sigma == 0.) ? -99999. : std::abs(d0 / d0sigma);
 
   const static SG::AuxElement::Accessor<float> trans_TRT_PID_acc("transformed_e_probability_ht");
   if (!trans_TRT_PID_acc.isAvailable(*eg)) {

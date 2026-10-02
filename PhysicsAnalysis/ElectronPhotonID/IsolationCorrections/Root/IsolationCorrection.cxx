@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header for the ROOT tool of this package
@@ -156,7 +156,7 @@ namespace CP {
         const xAOD::TrackParticle* tp0 = phVertex->trackParticle(0);
         const xAOD::TrackParticle* tp1 = phVertex->trackParticle(1);
 
-        float pt1conv, pt2conv;
+        float pt1conv{}, pt2conv{};
         if (accPt1.isAvailable(*phVertex) && accPt2.isAvailable(*phVertex) ){
             pt1conv = accPt1(*phVertex);
             pt2conv = accPt2(*phVertex);
@@ -164,9 +164,14 @@ namespace CP {
             pt1conv = getPtAtFirstMeasurement( tp0 );
             pt2conv = getPtAtFirstMeasurement( tp1 );
         }
-
-        if(pt1conv > pt2conv) conv_ratio = pt2conv/pt1conv;
-        else conv_ratio = pt1conv/pt2conv;
+        //avoid unlikely zero division
+        const auto [numerator, denominator] = std::minmax(pt1conv,pt2conv);
+        if (denominator == 0.)[[unlikely]]{
+          //something is very wrong
+          ATH_MSG_WARNING("denominator is zero.");
+          return 0.;
+        }
+        conv_ratio =  numerator/denominator;
       }
     }
     int author = input.author();
