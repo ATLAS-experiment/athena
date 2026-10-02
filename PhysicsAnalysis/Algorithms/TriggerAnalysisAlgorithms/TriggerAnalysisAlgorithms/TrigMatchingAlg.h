@@ -62,7 +62,7 @@ namespace CP
     struct MatchingChain
     {
       std::string chain;
-      float dR;
+      float dR{};
       SG::Decorator<char> decorator;
     };
     std::vector<MatchingChain> m_matchingChains;
