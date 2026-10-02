@@ -20,7 +20,7 @@
 #include "SGTools/DataProxy_cast.h"
 #include "SGTools/TestStore.h"
 #include "TClass.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -87,7 +87,7 @@ public:
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   SG::AuxStoreInternal store;
   TClass* cl = TClass::GetClass ("vector<int>");
   SG::RootAuxVectorFactory fac (cl);
@@ -216,7 +216,7 @@ void test1()
 
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
   SG::AuxStoreInternal store;
   TClass* cl = TClass::GetClass ("vector<std::string>");
   SG::RootAuxVectorFactory fac (cl);
@@ -316,7 +316,7 @@ void test2()
 
 void test3()
 {
-  std::cout << "test3\n";
+  std::println ("test3");
   TClass* cl = TClass::GetClass ("vector<int>");
   SG::RootAuxVectorFactory fac (cl);
   assert (fac.vecClass() == cl);
@@ -414,7 +414,7 @@ void test3()
 
 void test4()
 {
-  std::cout << "test4\n";
+  std::println ("test4");
   TClass* cl = TClass::GetClass ("vector<std::string>");
   SG::RootAuxVectorFactory fac (cl);
   assert (fac.vecClass() == cl);
@@ -500,7 +500,7 @@ void test4()
 
 void test5()
 {
-  std::cout << "test5\n";
+  std::println ("test5");
 
   TClass* cl = TClass::GetClass ("vector<int>");
   SG::RootAuxVectorFactory fac (cl);
@@ -535,7 +535,7 @@ void test5()
 // Testing copyForOutput.
 void test6()
 {
-  std::cout << "test6\n";
+  std::println ("test6");
 
   typedef ElementLink<std::vector<AthContainersRootTest::Foo*> > EL;
 
@@ -635,7 +635,7 @@ void test6()
 // Testing tiAllocName.
 void test7()
 {
-  std::cout << "test7\n";
+  std::println ("test7");
 
   {
     TClass* cl = TClass::GetClass ("vector<int>");
@@ -655,7 +655,7 @@ void test7()
 // Testing toTransient
 void test8()
 {
-  std::cout << "test8\n";
+  std::println ("test8");
 
   using Foo = AthContainersRootTest::Foo;
   using Foovec = std::vector<Foo*>;
@@ -745,7 +745,7 @@ void test8()
 //coverity[UNCAUGHT_EXCEPT]
 int main()
 {
-  std::cout << "RootAuxVectorFactory_test\n";
+  std::println ("RootAuxVectorFactory_test");
   test1();
   test2();
   test3();
