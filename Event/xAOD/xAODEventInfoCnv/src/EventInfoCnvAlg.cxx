@@ -134,7 +134,8 @@ namespace xAODMaker {
                                   type,
                                   EiLink( m_pileupKey.key(),
                                           puei->size() -
-                                          1 ) );
+                                          1,
+                                          ctx) );
         }
 
         // And now update the main EventInfo object with the sub-events:

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSegmentCnvAlg.h"
@@ -53,7 +53,7 @@ namespace xAODMaker {
      for( auto it = segments->begin();it!=segments->end();++it,++index ){
         const Muon::MuonSegment* muonSegment = dynamic_cast<const Muon::MuonSegment*>(&(**it));
         if( !muonSegment ) continue;
-        ElementLink< ::Trk::SegmentCollection > link(*segments,index);
+        ElementLink< ::Trk::SegmentCollection > link(*segments,index, ctx);
         m_muonSegmentConverterTool->convert(link,xaod.ptr());
      }
      ATH_MSG_DEBUG( "Recorded MuonSegments with key: " << m_xaodContainerName.key() << " size " << xaod->size() 
