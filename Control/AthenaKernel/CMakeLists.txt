@@ -154,3 +154,15 @@ atlas_add_test( InputFileIncidentGuard_test
   SOURCES test/InputFileIncidentGuard_test.cxx
   LINK_LIBRARIES AthenaKernel GaudiKernel TestTools
   POST_EXEC_SCRIPT noerror.sh )
+
+atlas_add_test( IOVEntryT_test
+  SOURCES test/IOVEntryT_test.cxx
+  LINK_LIBRARIES AthenaKernel )
+
+atlas_add_test( IOVTime_test
+  SOURCES test/IOVTime_test.cxx
+  LINK_LIBRARIES AthenaKernel )
+
+atlas_add_test( IOVRange_test
+  SOURCES test/IOVRange_test.cxx
+  LINK_LIBRARIES AthenaKernel )

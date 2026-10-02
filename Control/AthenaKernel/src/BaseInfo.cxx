@@ -20,6 +20,7 @@
 #include <unordered_map>
 #include <algorithm>
 #include <iostream>
+#include <print>
 #include "string.h"
 
 
@@ -752,7 +753,7 @@ BaseInfoBaseImpl::Deleter::~Deleter()
 void dumpBaseInfo()
 {
   BaseInfoBaseImpl::lock_t lock (BaseInfoBaseImpl::s_mutex);
-  std::cout << "map:\n";
+  std::println ("map:");
   if (BaseInfoBaseImpl::s_bi_by_ti) {
     std::vector<const std::type_info*> vv;
     for (const auto& x : *BaseInfoBaseImpl::s_bi_by_ti)
@@ -761,16 +762,19 @@ void dumpBaseInfo()
     for (const std::type_info* ti : vv)
     {
       const BaseInfoBase* bib = (*BaseInfoBaseImpl::s_bi_by_ti)[ti];
-      std::cout << ti << " " << bib->clid() << " [" << System::typeinfoName (*ti)
-                << "]\n";
+      std::println ("{} {} [{}]",
+                    static_cast<const void*>(ti),
+                    bib->clid(), System::typeinfoName (*ti));
     }
   }
 
-  std::cout << "\ninitlist:\n";
+  std::println ("\ninitlist:");
   if (BaseInfoBaseImpl::s_init_list) {
     for (const auto& x : *BaseInfoBaseImpl::s_init_list)
-      std::cout << x.first << " " << x.second << " ["
-                << System::typeinfoName (*x.first) << "]\n";
+      std::println ("{} {} [{}]",
+                    static_cast<const void*>(x.first),
+                    reinterpret_cast<const void*>(x.second),
+                    System::typeinfoName (*x.first));
   }
 }
 

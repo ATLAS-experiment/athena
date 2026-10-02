@@ -19,6 +19,7 @@
 #include "GaudiKernel/IHiveWhiteBoard.h"
 #include <cassert>
 #include <iostream>
+#include <print>
 #include <iterator>
 #include <stdexcept>
 
@@ -58,7 +59,7 @@ struct Payload
 template <SG::InvalidSlot S>
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   SG::SlotSpecificObj<Payload, S> o;
   const SG::SlotSpecificObj<Payload, S>& co = o;
 
@@ -135,7 +136,7 @@ int main ATLAS_NOT_THREAD_SAFE ()
   errorcheck::ReportMessage::hideErrorLocus();
   ISvcLocator* svcloc = 0;
   if (!Athena_test::initGaudi("SlotSpecificObj_test.txt", svcloc)) {
-    std::cerr << "This test can not be run" << std::endl;
+    std::println (std::cerr, "This test can not be run");
     return 1;
   }  
   assert(svcloc);

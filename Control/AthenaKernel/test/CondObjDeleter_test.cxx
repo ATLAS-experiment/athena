@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/test/CondObjDeleter_test.cxx
@@ -15,7 +15,7 @@
 #include "AthenaKernel/RCUObject.h"
 #include <unordered_set>
 #include <cassert>
-#include <iostream>
+#include <print>
 
 
 using Athena::IRCUSvc;
@@ -63,7 +63,7 @@ struct Payload
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   TestRCUSvc svc;
   Payload::Hist phist;
   {
@@ -100,7 +100,7 @@ void test1()
 
 int main()
 {
-  std::cout << "AthenaKernel/CondObjDeleter_test\n";
+  std::println ("AthenaKernel/CondObjDeleter_test");
   test1();
   return 0;
 }

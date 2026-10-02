@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -9,7 +9,7 @@
 #include "GaudiKernel/DataObject.h"
 #include <cassert>
 
-#include <iostream>
+#include <print>
 
 struct A {};
 struct B {};
@@ -22,7 +22,7 @@ struct C
 
 int main()
 {
-  std::cout << "AthenaKernel/safe_clid_test\n";
+  std::println ("AthenaKernel/safe_clid_test");
   assert (SG::safe_clid<int> () == 0);
   assert (SG::safe_clid<A> () == 0);
   assert (SG::safe_clid<B> () == 98765);

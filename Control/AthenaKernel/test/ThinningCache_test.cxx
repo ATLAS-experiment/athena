@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/test/ThinningCache_test.cxx
@@ -15,7 +15,7 @@
 #include "AthenaKernel/ITrigNavigationThinningSvc.h"
 #include "TestTools/expect_exception.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 #include <stdexcept>
 
 
@@ -34,7 +34,7 @@ public:
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   SG::ThinningCache cache;
   assert (cache.empty());
   assert (!cache.thinning ("foo"));
@@ -138,7 +138,7 @@ void test1()
 
 int main()
 {
-  std::cout << "AthenaKernel/ThinningCache_test\n";
+  std::println ("AthenaKernel/ThinningCache_test");
   test1();
   return 0;
 }

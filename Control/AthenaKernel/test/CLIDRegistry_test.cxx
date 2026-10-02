@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file CLIDRegistry_test.cxx 
@@ -16,7 +16,7 @@
 
 #include <algorithm>
 #include <cassert>
-#include <iostream>
+#include <print>
 #include <typeinfo>
 
 using std::get;
@@ -26,7 +26,7 @@ class Bar {};
 class Baz {};
 
 int main () {
-  std::cerr << "*** CLIDRegistry_test starts ***" <<std::endl;
+  std::println ("*** CLIDRegistry_test starts ***");
   //reset newEntries before we start counting
   CLIDRegistry::CLIDVector_t er = CLIDRegistry::newEntries();
 #ifdef COMPILEFAIL
@@ -53,7 +53,7 @@ int main () {
   er = CLIDRegistry::newEntries();
   assert( er.size() == 1 );
   assert( !CLIDRegistry::hasNewEntries());
-  std::cerr << "*** CLIDRegistry_test OK ***" <<std::endl;
+  std::println ("*** CLIDRegistry_test OK ***");
 
   return 0;
 }

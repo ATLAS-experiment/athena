@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -37,7 +37,7 @@ IMessageSvc* Athena::getMessageSvc( const Options::CreateOptions opt, bool quiet
     const bool warn = !(quiet || Athena::getMessageSvcQuiet);
     if ( ((opt==Athena::Options::Lazy && !Gaudi::svcLocator()->existsService("MessageSvc")) ||
           msgSvc.retrieve().isFailure()) && warn ) {
-      std::cerr << "Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout" << std::endl;
+      std::println (std::cerr, "Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout");
     }
     svc = msgSvc.get();
   }

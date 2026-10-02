@@ -15,6 +15,7 @@
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/ChronoEntity.h"
 #include <iostream>
+#include <print>
 #include <stdexcept>
 #include <cstdlib>
 #include <cassert>
@@ -52,7 +53,7 @@ void testit (bool throw_p)
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   ChronoSvcTest svc;
 
   {
@@ -78,7 +79,7 @@ int main()
     test1();
   }
   catch (const std::runtime_error& e) {
-    std::cerr << e.what() << "\n";
+    std::println (std::cerr, "{}", e.what());
     return 1;
   }
   return 0;

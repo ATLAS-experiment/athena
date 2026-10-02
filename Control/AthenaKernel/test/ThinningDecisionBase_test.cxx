@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/test/ThinningDecisionBase_test.cxx
@@ -13,7 +13,7 @@
 #include "AthenaKernel/ThinningDecisionBase.h"
 #include "TestTools/expect_exception.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 #include <stdexcept>
 
 
@@ -79,7 +79,7 @@ void checkThinned (const SG::ThinningDecisionBase& dec1,
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   SG::ThinningDecisionBase dec (10);
   assert (dec.size() == 10);
   assert (dec.thinnedSize() == 10);
@@ -200,7 +200,7 @@ void test1()
 
 int main()
 {
-  std::cout << "AthenaKernel/ThinningDecisionBase_test\n";
+  std::println ("AthenaKernel/ThinningDecisionBase_test");
   test1();
   return 0;
 }

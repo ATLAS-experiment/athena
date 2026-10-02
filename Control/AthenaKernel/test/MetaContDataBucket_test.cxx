@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/test/MetaContDataBucket_test.cxx
@@ -16,7 +16,7 @@
 #include "GaudiKernel/EventContext.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 
 
 class TestProxyDict
@@ -89,7 +89,7 @@ SG_BASES( TestCont, TestContBase );
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   EventContext ctx;
   TestProxyDict proxyDict;
@@ -122,7 +122,7 @@ void test1()
 
 int main()
 {
-  std::cout << "MetaContDataBucket_test\n";    
+  std::println ("MetaContDataBucket_test");
   test1();
   return 0;
 }

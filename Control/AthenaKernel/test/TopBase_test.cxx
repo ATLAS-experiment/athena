@@ -12,7 +12,7 @@
 #undef NDEBUG
 #include "AthenaKernel/TopBase.h"
 #include "AthenaKernel/CLASS_DEF.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -37,7 +37,7 @@ SG_BASES (C13, C12);
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   assert ((std::is_same<SG::TopBase<C1>::type, C1>::value));
   assert ((std::is_same<SG::TopBase<C2>::type, C1>::value));
@@ -51,7 +51,7 @@ void test1()
 
 int main()
 {
-  std::cout << "TopBase_test\n";
+  std::println ("TopBase_test");
   test1();
   return 0;
 }

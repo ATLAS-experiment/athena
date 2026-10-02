@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_IOVRANGE_H
@@ -67,6 +67,23 @@ inline bool operator==(const IOVRange& lhs, const IOVRange& rhs) {
 inline bool operator!=(const IOVRange& lhs, const IOVRange& rhs) {
   return ! (lhs == rhs);
 }
+
+
+namespace std {
+
+/// A C++20-compatible formatter for IOVRange.
+template <>
+struct formatter<IOVRange>
+  : public formatter<string_view>
+{
+  template <class FmtContext>
+  FmtContext::iterator format (const IOVRange& r, FmtContext& ctx) const
+  {
+    return formatter<string_view>::format (static_cast<std::string>(r), ctx);
+  }
+};
+
+} // namespace std
 
 
 #endif

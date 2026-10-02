@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 
 
@@ -18,11 +18,7 @@ CondContFactory& CondContFactory::Instance() {
 
 void CondContFactory::regMaker(const CLID& key, ICondContMaker* maker) {
   std::lock_guard<std::mutex> guard(m_mapMutex);
-  if (m_makers.find(key) != m_makers.end()) {
-    //    std::cerr << "multiple makers for CLID " << key << std::endl;
-  } else {
-    m_makers[key] = maker;
-  }
+  m_makers.try_emplace (key, maker);
 }
 
 SG::DataObjectSharedPtr<DataObject> CondContFactory::Create( Athena::IRCUSvc& rcusvc, const CLID& clid, const std::string& key ) const {

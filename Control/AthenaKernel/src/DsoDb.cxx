@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // DsoDb.cxx 
@@ -18,6 +18,7 @@
 #include <cstdlib>    /* getenv */
 #include <algorithm>
 #include <iostream>
+#include <print>
 #include <fstream>
 #include <set>
 
@@ -288,8 +289,6 @@ DsoDb::load_type ATLAS_NOT_THREAD_SAFE (const std::string& type_name) const
 void 
 DsoDb::build_repository()
 {
- // std::cerr << "::build_repository...\n";
-
   typedef boost::tokenizer<boost::char_separator<char> > Tokenizer_t;
   typedef std::vector<fs::path> Paths_t;
 
@@ -303,7 +302,6 @@ DsoDb::build_repository()
   for (Tokenizer_t::iterator itr = tok.begin(), iend = tok.end();
        itr != iend;
        ++itr) {
-    //std::cerr << "--[" << *itr << "]...\n";
     if (itr->starts_with(rootsys)) {
       continue;
     }
@@ -329,7 +327,6 @@ DsoDb::build_repository()
 
       if (!fs::exists(dsomap)) continue;
 
-      //std::cerr << "=== [" << dso << "] ===\n";
       dsofiles.insert(dsomap.c_str());
       std::ifstream f(dsomap.c_str());
       int line_nbr = -1;
@@ -351,11 +348,10 @@ DsoDb::build_repository()
                                   boost::is_any_of(" "),
                                   boost::token_compress_on);
           if (ll.size() < 2) {
-            std::cerr << "DsoDb:: **error** could not parse " 
-                      << dsomap << ":" << line_nbr
-                      << "\n"
-                      << "DsoDb:: (some) reflex-dicts may fail to be autoloaded"
-                      << "\n";
+            std::print (std::cerr,
+                        "DsoDb:: **error** could not parse {}:{}\n"
+                        "DsoDb:: (some) reflex-dicts may fail to be autoloaded",
+                        dsomap.string(), line_nbr);
             continue;
           }
           libname = ll[1];
@@ -412,8 +408,6 @@ DsoDb::build_repository()
 
         const std::string fullpath_libname = to_string(dsomap.parent_path() / fs::path(libname));
 
-        // std::cerr << " [" << line << "] -> [" << dso_key << "] [" << libname << "]\n";
-
         DsoMap_t *db = NULL;
         if (dso_key.starts_with(PluginNs) || is_components) {
           db = &m_pf;
@@ -425,15 +419,12 @@ DsoDb::build_repository()
         }
         (*db)[dso_key].push_back(std::move(fullpath_libname));
       }
-      // std::cerr << "=== [" << dso << "] === [EOF]\n";
     }
-    //std::cerr << "--[" << *itr << "]... [done]\n";
   }
   
   m_dsofiles.reserve(dsofiles.size());
   std::copy(dsofiles.begin(), dsofiles.end(), std::back_inserter(m_dsofiles));
 
-  // std::cerr << "::build_repository... [done]\n";
   return;
 }
 
@@ -627,20 +618,15 @@ DsoDb::rflx_type ATLAS_NOT_THREAD_SAFE (const std::string& type_name) const
   const std::string rootmap_name = ::to_rootmap_name(type_name);
   const std::string rflx_name = ::to_rflx_name(type_name);
 
-  // std::cerr << "---DsoDb::rflx_type---\n"
-  //           << " tname: [" << type_name << "]\n"
-  //           << " root:  [" << rootmap_name << "]\n"
-  //           << " rflx:  [" << rflx_name << "]\n"
-  //           << "----------------------\n";
-
   if (s_cxx_builtins().find(type_name) != s_cxx_builtins().end()) {
     return RootType(rflx_name);
   }
 
   if (!this->has_type(rootmap_name)) {
 #ifdef ATH_DSODB_VERBOSE
-    std::cerr << "DsoDb **error**: no such type [" << rootmap_name << "]"
-              << " in rootmap files\n";
+    std::println (std::cerr,
+                  "DsoDb **error**: no such type [{}] in rootmap files",
+                  rootmap_name);
 #endif
     return RootType();
   }
@@ -655,7 +641,8 @@ DsoDb::rflx_type ATLAS_NOT_THREAD_SAFE (const std::string& type_name) const
   const Libs_t& libs = idb->second;
   if (libs.empty()) {
 #ifdef ATH_DSODB_VERBOSE
-    std::cerr << "DsoDb **error**: no library hosting [" << type_name << "]\n";
+    std::println (std::cerr, "DsoDb **error**: no library hosting [{}]",
+                  type_name);
 #endif
     return RootType();
   }
@@ -672,9 +659,9 @@ DsoDb::rflx_type ATLAS_NOT_THREAD_SAFE (const std::string& type_name) const
 
   unsigned long err = System::loadDynamicLib( libname, &handle );
   if ( err != 1 ) {
-    std::cerr << "DsoDb **error**: could not load library [" 
-              << libs[0] << "] (" << System::getLastErrorString() 
-              << ")\n";
+    std::println (std::cerr,
+                  "DsoDb **error**: could not load library [{}] ({})",
+                  libs[0], System::getLastErrorString());
     return RootType();
   }
 

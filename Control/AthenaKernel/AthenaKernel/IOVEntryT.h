@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_IOVENTRYT_H
@@ -19,6 +19,8 @@
 
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/EventIDRange.h"
+#include <format>
+#include <iostream>
 #include <set>
 
 template <typename T>
@@ -68,8 +70,27 @@ public:
 private:
   T* m_objPtr {};
   EventIDRange m_range {};
-
 };
+
+
+namespace std {
+
+/// A C++20-compatible formatter for IOVEntry<T>.
+template <class T>
+struct formatter<IOVEntryT<T> >
+  : public formatter<string_view>
+{
+  template <class FmtContext>
+  FmtContext::iterator format (const IOVEntryT<T>& io, FmtContext& ctx) const
+  {
+    std::ostringstream ss;
+    ss << io;
+    return formatter<string_view>::format (ss.str(), ctx);
+  }
+};
+
+} // namespace std
+
 
 template <typename T>
 class IOVEntryComp {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  RCUObject_test.cxx
@@ -15,7 +15,7 @@
 #include "CxxUtils/checker_macros.h"
 #include <shared_mutex>
 #include <cassert>
-#include <iostream>
+#include <print>
 #include <thread>
 #include <mutex>
 #include <atomic>
@@ -103,7 +103,7 @@ std::mutex Payload::m_mutex;
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   TestRCUSvc svc;
   {
@@ -131,7 +131,7 @@ void test1()
 
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
   TestRCUSvc svc;
 
 
@@ -281,7 +281,7 @@ void ThreadedTest::testThread::operator()()
 
 void test3()
 {
-  std::cout << "test3\n";
+  std::println ("test3");
 
   Payload::dolog = false;
   assert (Payload::ninstance == 0);

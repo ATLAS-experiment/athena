@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/IOVRange.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/EventIDRange.h"
 
+#include <format>
 #include <sstream>
 #include <stdexcept>
 #include <iostream>
@@ -50,7 +51,5 @@ MsgStream& operator<< (MsgStream &msg, const IOVRange& rhs) {
 }
 
 IOVRange::operator std::string () const {
-  std::ostringstream os;
-  os << '{' << m_start << " - " << m_stop << '}';
-  return os.str();
+  return std::format ("{{{} - {}}}", m_start, m_stop);
 }

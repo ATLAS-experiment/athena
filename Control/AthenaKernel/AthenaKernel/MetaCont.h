@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_METACONT_H
@@ -180,9 +180,9 @@ template <typename T>
 void MetaCont<T>::list(std::ostringstream& stream) const {
   std::lock_guard<std::mutex> lock(m_mut);
   // To Do: perhaps extend this output?
-  stream << "MetaCont with size : [" << m_metaSet.size() << "]" << std::endl;
+  std::println (stream, "MetaCont with size : [{}]", m_metaSet.size());
   for(const auto& mapel : m_metaSet) {
-    stream << "... Key : " << mapel.first << std::endl;
+    std::println (stream, "... Key : {}", mapel.first);
   }
 }
 

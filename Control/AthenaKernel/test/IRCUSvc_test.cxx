@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file IRCUSVC_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -14,7 +12,7 @@
 
 #include "AthenaKernel/IRCUSvc.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 #include <cstdlib>
 
 
@@ -51,7 +49,7 @@ struct Payload
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   TestRCUSvc svc;
   assert (svc.m_added == nullptr);
   std::unique_ptr<RCUObject<Payload> > obj = svc.newrcu<Payload> (10, 20);
