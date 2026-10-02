@@ -9,7 +9,7 @@
 #include "xAODCore/AuxStoreAccessorMacros.h"
 
 // Local include(s):
-#include "xAODTrigL0Muon/versions/SectorLogicCandData_v1.h"
+#include "xAODTrigL1Muon/versions/SectorLogicCandData_v1.h"
 
 // Trigger include(s):
 #include "TrigT1MuctpiBits/MuCTPI_Bits.h"

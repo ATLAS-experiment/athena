@@ -6,7 +6,7 @@
 #include "xAODCore/AddDVProxy.h"
 
 // Local include(s):
-#include "xAODTrigL0Muon/versions/SectorLogicCandDataContainer_v1.h"
+#include "xAODTrigL1Muon/versions/SectorLogicCandDataContainer_v1.h"
 
 // Set up the collection proxies:
 ADD_NS_DV_PROXY( xAOD, SectorLogicCandDataContainer_v1 );

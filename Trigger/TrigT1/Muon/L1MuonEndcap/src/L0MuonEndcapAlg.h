@@ -9,8 +9,8 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "xAODL0MuonCand/TGCCandDataContainer.h"
-#include "xAODTrigL0Muon/SectorLogicCandDataAuxContainer.h"
-#include "xAODTrigL0Muon/SectorLogicCandDataContainer.h"
+#include "xAODTrigL1Muon/SectorLogicCandDataAuxContainer.h"
+#include "xAODTrigL1Muon/SectorLogicCandDataContainer.h"
 
 namespace L0Muon {
 

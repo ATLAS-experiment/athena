@@ -13,8 +13,8 @@
 #include "AthContainers/AuxStoreInternal.h"
 #include "xAODL0MuonCand/TGCCandData.h"
 #include "xAODL0MuonCand/TGCCandDataContainer.h"
-#include "xAODTrigL0Muon/SectorLogicCandData.h"
-#include "xAODTrigL0Muon/SectorLogicCandDataContainer.h"
+#include "xAODTrigL1Muon/SectorLogicCandData.h"
+#include "xAODTrigL1Muon/SectorLogicCandDataContainer.h"
 
 namespace {
 
