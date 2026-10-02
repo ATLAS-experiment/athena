@@ -154,129 +154,101 @@ CP::ElectronChargeEfficiencyCorrectionTool::initialize()
   }
   std::sort(names.begin(), names.end());
 
-  for (unsigned int j = 0; j < names.size(); j++) {
+  for (const std::string & name : names) {
 
-    const std::string& name = names.at(j);
     ATH_MSG_DEBUG("Got ROOT object with name: " << name);
-    if (name.find(Form("SFCentral_")) != std::string::npos) {
+    if (name.contains("SFCentral_")) {
       ATH_MSG_VERBOSE("Found name 'SFCentral_' in ROOT object name");
       // Check for opposite-sign (=opposite-charge)
       bool isOS = false;
-      if (name.find(Form("_OS")) != std::string::npos) {
+      if (name.contains("_OS")) {
         isOS = true;
         ATH_MSG_VERBOSE("Found name '_OS' in ROOT object name");
       }
       if (isOS) {
-        std::string histid = (names.at(j));
+        std::string histid = (name);
         histid.erase(0, 10);
         histid.erase(histid.size() - 3, 3); // remove _SS, _OS
         ATH_MSG_VERBOSE("Using histid: " << histid);
 
-        if (histid.find("RunNumber") != std::string::npos) {
+        if (histid.contains("RunNumber")) {
           ATH_MSG_VERBOSE("Found name 'RunNumber' in histid");
           std::string runlow = histid;
-          runlow.erase(histid.find(Form("RunNumber")), 9);
+          runlow.erase(histid.find("RunNumber"), 9);
           runlow.erase(runlow.find('_'), runlow.size());
           m_RunNumbers.push_back(
             static_cast<unsigned int>(atoi(runlow.c_str())));
           std::string runhigh = histid;
-          runhigh.erase(histid.find(Form("RunNumber")), 9);
+          runhigh.erase(histid.find("RunNumber"), 9);
           runhigh.erase(0, runhigh.find('_') + 1);
           m_RunNumbers.push_back(
             static_cast<unsigned int>(atoi(runhigh.c_str())));
         }
         ATH_MSG_VERBOSE("Using histid (OS hid): " << histid);
-        m_SF_OS[histid].push_back((TH2*)rootFile->Get(names.at(j).c_str()));
+        m_SF_OS[histid].push_back(static_cast<TH2*>(rootFile->Get(name.c_str())));
       } else {
-        std::string histid = (names.at(j));
+        std::string histid = (name);
         histid.erase(0, 10);
         histid.erase(histid.size() - 3, 3); // remove _SS, _OS
         ATH_MSG_VERBOSE("Using histid (do we this in ? SS): " << histid);
-        m_SF_SS[histid].push_back((TH2*)rootFile->Get(names.at(j).c_str()));
+        m_SF_SS[histid].push_back(static_cast<TH2*>(rootFile->Get(name.c_str())));
       }
-    } ///// if ( name.find(Form("SFCentral_") ) != std::string::npos)
+    } ///// if ( name.find("SFCentral_" ) != std::string::npos)
 
     /// STAT ERROR
-    if (name.find(Form("STAT_")) != std::string::npos) {
+    if (name.contains("STAT_")) {
       ATH_MSG_VERBOSE("Found name 'STAT_' in ROOT object name");
       bool isOS = false;
-      if (name.find(Form("_OS")) != std::string::npos) {
+      if (name.contains("_OS")) {
         isOS = true;
         ATH_MSG_VERBOSE("Found name '_OS' in ROOT object name");
       }
       if (isOS) {
-        std::string histid = (names.at(j));
+        std::string histid = (name);
         histid.erase(0, 5);
         histid.erase(histid.size() - 3, 3); // remove _SS, _OS
         ATH_MSG_VERBOSE("Using histid: " << histid);
-
-        if (histid.find("RunNumber") != std::string::npos) {
-          ATH_MSG_VERBOSE("Found name 'RunNumber' in histid");
-          std::string runlow = histid;
-          runlow.erase(histid.find(Form("RunNumber")), 9);
-          runlow.erase(runlow.find('_'), runlow.size());
-          //          m_RunNumbers.push_back( static_cast<unsigned
-          //          int>(atoi(runlow.c_str())) );
-          std::string runhigh = histid;
-          runhigh.erase(histid.find(Form("RunNumber")), 9);
-          runhigh.erase(0, runhigh.find('_') + 1);
-          //          m_RunNumbers.push_back( static_cast<unsigned
-          //          int>(atoi(runhigh.c_str())) );
-        }
         ATH_MSG_VERBOSE("Using histid (OS hid): " << histid);
-        m_SF_OS[histid].push_back((TH2*)rootFile->Get(names.at(j).c_str()));
+        m_SF_OS[histid].push_back(static_cast<TH2*>(rootFile->Get(name.c_str())));
       } else {
-        std::string histid = (names.at(j));
+        std::string histid = (name);
         ATH_MSG_VERBOSE("Found  histid: " << histid);
         histid.erase(0, 5);
         histid.erase(histid.size() - 3, 3); // remove _SS, _OS
         ATH_MSG_VERBOSE("Using histid (do we this in ? SS): " << histid);
-        m_SF_SS[histid].push_back((TH2*)rootFile->Get(names.at(j).c_str()));
+        m_SF_SS[histid].push_back(static_cast<TH2*>(rootFile->Get(name.c_str())));
       }
 
-    } ///// if ( name.find(Form("SYST") ) != std::string::npos)
+    } ///// if ( name.find("SYST" ) != std::string::npos)
 
     /// STAT ERROR
-    if (name.find(Form("SYST")) != std::string::npos) {
+    if (name.contains("SYST")) {
       ATH_MSG_VERBOSE("Found name 'SYST' in ROOT object name");
       bool isOS = false;
-      if (name.find(Form("_OS")) != std::string::npos) {
+      if (name.contains("_OS")) {
         isOS = true;
         ATH_MSG_VERBOSE("Found name '_OS' in ROOT object name");
       }
       if (isOS) {
-        std::string histid = (names.at(j));
+        std::string histid = (name);
         histid.erase(0, 4);
         histid.erase(histid.size() - 3, 3); // remove _SS, _OS
 
         std::string sysname = histid;
         sysname.erase(sysname.find('_'), sysname.size());
-        set_systematics.insert(sysname);
+        set_systematics.insert(std::move(sysname));
 
         histid.erase(0, histid.find('_') + 1); // remove _SS, _OS
         ATH_MSG_VERBOSE("Using syst histid: " << histid);
-
-        if (histid.find("RunNumber") != std::string::npos) {
-          std::string runlow = histid;
-          runlow.erase(histid.find(Form("RunNumber")), 9);
-          runlow.erase(runlow.find('_'), runlow.size());
-          //        m_RunNumbers.push_back( static_cast<unsigned
-          //        int>(atoi(runlow.c_str())) );
-          std::string runhigh = histid;
-          runhigh.erase(histid.find(Form("RunNumber")), 9);
-          runhigh.erase(0, runhigh.find('_') + 1);
-          //      m_RunNumbers.push_back( static_cast<unsigned
-          //      int>(atoi(runhigh.c_str())) );
-        }
         ATH_MSG_VERBOSE("Using histid (OS hid): " << histid);
-        m_SF_OS[histid].push_back((TH2*)rootFile->Get(names.at(j).c_str()));
+        m_SF_OS[histid].push_back(static_cast<TH2*>(rootFile->Get(name.c_str())));
       } else {
-        std::string histid = (names.at(j));
+        std::string histid = (name);
         histid.erase(0, 4);
         histid.erase(histid.size() - 3, 3);    // remove _SS, _OS
         histid.erase(0, histid.find('_') + 1); // remove _SS, _OS
         ATH_MSG_VERBOSE("Using histid (sys ? SS): " << histid);
-        m_SF_SS[histid].push_back((TH2*)rootFile->Get(names.at(j).c_str()));
+        m_SF_SS[histid].push_back(static_cast<TH2*>(rootFile->Get(name.c_str())));
       }
 
     } /// end // if ( name.find(Form("SYST") ) != std::string::npos)
