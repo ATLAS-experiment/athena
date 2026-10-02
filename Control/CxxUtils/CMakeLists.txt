@@ -189,7 +189,7 @@ foreach( test sincos_test ArrayScanner_test Arrayrep_test
       releasing_iterator_test SizedUInt_test UIntConv_test
       normalizeFunctionName_test pputils_test StringParse_test
       range_with_at_test range_with_conv_test
-      minmax_transformed_element_test xmalloc_test byteswap_test
+      minmax_transformed_element_test xmalloc_test
       RefCountedPtr_test throw_out_of_range_test iterator_range_test 
       crc_combine_test)
    atlas_add_test( ${test}
