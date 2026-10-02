@@ -693,7 +693,7 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
 	// in case there are less than 3 cells in the cluster
 	
 	Amg::Vector3D showerAxis(xc,yc,zc);
-	Amg::setMag(showerAxis,1.0);
+	showerAxis = showerAxis.normalized();
 
 	// otherwise the principal direction with the largest absolute 
 	// eigenvalue will be used unless it's angle w.r.t. the vector pointing

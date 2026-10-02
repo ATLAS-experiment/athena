@@ -383,8 +383,7 @@ void InDetProjHelper::Imp::movePoint1ToZPlaneAndPoint2( Amg::Vector3D& p1, const
     return;
   }
   double s( (z-p1.z())/dz );
-//  p1.set( p1.x()+dx*s, p1.y()+dy*s, z );
-  Amg::setVector3DCartesian( p1, p1.x()+dx*s, p1.y()+dy*s, z );
+  p1 = Amg::Vector3D{p1.x()+dx*s, p1.y()+dy*s, z};
 }
 
 //____________________________________________________________________
@@ -433,8 +432,8 @@ void InDetProjHelper::Imp::movePoint1ToInfiniteCylinderAndPoint2( Amg::Vector3D&
 
 //  double p1r(p1.r());
 //  double dr(p2.r()-p1r);
-  double p1r( Amg::rVector3D(p1) );
-  double dr( Amg::rVector3D(p2)-p1r );
+  double p1r( p1.mag() );
+  double dr( p2.mag() -p1r );
 
   if (dr==0.0) {
     theclass->message("movePoint1ToInfiniteCylinderAndPoint2 Error: Points have same r!!");
@@ -442,7 +441,7 @@ void InDetProjHelper::Imp::movePoint1ToInfiniteCylinderAndPoint2( Amg::Vector3D&
   }
   double s((r-p1r)/dr);
   double t(1.0-s);
-  Amg::setVector3DCartesian( p1, p1.x()*t + p2.x()*s, p1.y()*t + p2.y()*s, p1.z()*t + p2.z()*s );
+   p1 = Amg::Vector3D{p1.x()*t + p2.x()*s, p1.y()*t + p2.y()*s, p1.z()*t + p2.z()*s };
 
 }
 

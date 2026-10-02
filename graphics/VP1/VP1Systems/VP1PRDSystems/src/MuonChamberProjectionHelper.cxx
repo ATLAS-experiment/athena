@@ -139,18 +139,8 @@ MuonChamberProjectionHelper::~MuonChamberProjectionHelper()
 }
 
 //____________________________________________________________________
-Amg::Vector3D& MuonChamberProjectionHelper::applyTransformToVector( const Amg::Transform3D& m, Amg::Vector3D& v)
-{
-  //It is a vector, so we apply the rotation part only:
-  double vx = v.x(), vy = v.y(), vz = v.z();
-//  v.set(m.xx()*vx + m.xy()*vy + m.xz()*vz,
-//	m.yx()*vx + m.yy()*vy + m.yz()*vz,
-//	m.zx()*vx + m.zy()*vy + m.zz()*vz);
-  Amg::setVector3DCartesian( v,
-		  m(0,0)*vx + m(0,1)*vy + m(0,2)*vz,
-		  m(1,0)*vx + m(1,1)*vy + m(1,2)*vz,
-		  m(2,0)*vx + m(2,1)*vy + m(2,2)*vz);
-  return v;
+Amg::Vector3D& MuonChamberProjectionHelper::applyTransformToVector( const Amg::Transform3D& m, Amg::Vector3D& v) {
+  return (v = m.linear()*v);
 }
 
 //____________________________________________________________________
@@ -287,8 +277,8 @@ bool MuonChamberProjectionHelper::getDistancesToMDTChamberWallsAlongLine( const 
 
   Amg::Vector3D n1(0,+2*z,-(y2-y1));
   Amg::Vector3D n2(0,-2*z,-(y2-y1));
-  applyTransformToVector(itChamberInfo->second.localToGlobal,n1);
-  applyTransformToVector(itChamberInfo->second.localToGlobal,n2);
+  n1 = itChamberInfo->second.localToGlobal.linear()* n1;
+  n2 = itChamberInfo->second.localToGlobal.linear()* n2;
   const Amg::Vector3D p1(itChamberInfo->second.localToGlobal * Amg::Vector3D(0,y1,-z) );
   const Amg::Vector3D p2(itChamberInfo->second.localToGlobal * Amg::Vector3D(0,-y1,-z) );
 
@@ -400,14 +390,10 @@ bool MuonChamberProjectionHelper::projectAndConstrainLineSegmentToMDTChamberEndW
   m_d->projectXZPointToTrdAlongYAxis( bx, bz,itChamberInfo->second.trd, firstEndWall_pointB, secondEndWall_pointB );
 
   //Put points in global coordinates:
-//  firstEndWall_pointA.transform(itChamberInfo->second.localToGlobal);
-//  secondEndWall_pointA.transform(itChamberInfo->second.localToGlobal);
-//  firstEndWall_pointB.transform(itChamberInfo->second.localToGlobal);
-//  secondEndWall_pointB.transform(itChamberInfo->second.localToGlobal);
-  Amg::transform(firstEndWall_pointA, itChamberInfo->second.localToGlobal);
-  Amg::transform(secondEndWall_pointA, itChamberInfo->second.localToGlobal);
-  Amg::transform(firstEndWall_pointB, itChamberInfo->second.localToGlobal);
-  Amg::transform(secondEndWall_pointB, itChamberInfo->second.localToGlobal);
+  firstEndWall_pointA = itChamberInfo->second.localToGlobal * firstEndWall_pointA;
+  secondEndWall_pointA = itChamberInfo->second.localToGlobal * secondEndWall_pointA;
+  firstEndWall_pointB = itChamberInfo->second.localToGlobal * firstEndWall_pointB;
+  secondEndWall_pointB = itChamberInfo->second.localToGlobal * secondEndWall_pointB;
 
   outsidechamber = false;
   return true;
@@ -420,8 +406,8 @@ void MuonChamberProjectionHelper::Imp::projectXZPointToTrdAlongYAxis(const doubl
   const double epsilon(0.1);//100micron
   const double trdY1(trd->getYHalfLength1()), trdY2(trd->getYHalfLength2());
   const double y( trdY1 + 0.5*(1.0+z/trd->getZHalfLength())*(trdY2-trdY1) );
-  Amg::setVector3DCartesian(firstEndWall_point, x,y+epsilon,z);
-  Amg::setVector3DCartesian(secondEndWall_point, x,-y-epsilon,z);
+  firstEndWall_point= Amg::Vector3D{ x,y+epsilon,z};
+  secondEndWall_point= Amg::Vector3D{x,-y-epsilon,z};
 }
 
 //____________________________________________________________________
@@ -509,10 +495,8 @@ bool MuonChamberProjectionHelper::clipLineSegmentToMDTChamber( const GeoPVConstL
   //Fixme: We must also clip y dimensions!!
 
   //Put results back into points and in global coordinates:
-  Amg::setVector3DCartesian(pointA, ax,ay,az);
-  Amg::setVector3DCartesian(pointB, bx,by,bz);
-  Amg::transform(pointA, itChamberInfo->second.localToGlobal);
-  Amg::transform(pointB, itChamberInfo->second.localToGlobal);
+  pointA = itChamberInfo->second.localToGlobal * Amg::Vector3D{ax,ay,az};
+  pointB = itChamberInfo->second.localToGlobal * Amg::Vector3D{bx,by,bz};
   outsidechamber = false;
   return true;
 
