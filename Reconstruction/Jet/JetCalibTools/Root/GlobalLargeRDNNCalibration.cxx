@@ -383,7 +383,10 @@ StatusCode GlobalLargeRDNNCalibration::calibrate(xAOD::Jet& jet, JetEventInfo& j
 
     // Get pointer to output tensor float values
     float* outputE = output_tensor.at(0).GetTensorMutableData<float>();
-    float* outputM = output_tensor.at(1).GetTensorMutableData<float>();
+    // Models with a single output node (e.g. small-R JES-only DNNs) only predict the
+    // energy response: there is no mass response to read
+    const bool energyOnly = (output_tensor.size() == 1);
+    float* outputM = energyOnly ? outputE : output_tensor.at(1).GetTensorMutableData<float>();
 
     // Get predicted calibration factors
     float predRespE = outputE[0];  // first element is predicted response
@@ -399,6 +402,15 @@ StatusCode GlobalLargeRDNNCalibration::calibrate(xAOD::Jet& jet, JetEventInfo& j
         return StatusCode::SUCCESS;
     }
     
+    // Energy-only models: scale the whole 4-vector by the energy response (so the mass
+    // scales with it, without the m > 40 GeV requirement applied to large-R jets below)
+    if (energyOnly) {
+        const xAOD::JetFourMom_t calibP4 = jetStartP4 * (1. / predRespE);
+        jet.setAttribute<xAOD::JetFourMom_t>("JetDNNCScaleMomentum",calibP4);
+        jet.setJetP4( calibP4 );
+        return StatusCode::SUCCESS;
+    }
+
     // Apply calibration to jet p4
     float calibE = jetStartP4.e() / predRespE;
 
