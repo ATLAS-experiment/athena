@@ -3,7 +3,7 @@
 */
 
 // Local include(s):
-#include "xAODTrigL0Muon/versions/SectorLogicCandDataAuxContainer_v1.h"
+#include "xAODTrigL1Muon/versions/SectorLogicCandDataAuxContainer_v1.h"
 
 namespace xAOD {
 

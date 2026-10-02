@@ -4,5 +4,5 @@
 
 //simple includes to force the CLASS_DEF etc to be encountered during compile
 
-#include "xAODTrigL0Muon/SectorLogicCandDataContainer.h"
-#include "xAODTrigL0Muon/SectorLogicCandDataAuxContainer.h"
+#include "xAODTrigL1Muon/SectorLogicCandDataContainer.h"
+#include "xAODTrigL1Muon/SectorLogicCandDataAuxContainer.h"
