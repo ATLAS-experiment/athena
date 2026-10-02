@@ -1103,6 +1103,61 @@
             "type": "TH2F",
             "forData": "true"
         }
-    }
+    },
 
-} 
+    "RUN3": {
+        "PV_x": {
+            "_comment": "",
+            "title": "x pos of selected PV",
+            "xtitle": "x [mm]",
+            "ytitle": "Events",
+		"path":  {"ART": "", "PHYSVAL": "global"},
+            "xbins": 50,
+            "xmin": -0.6,
+            "xmax": -0.4,
+            "type": "TH1D",
+            "forData": "true"
+        },
+
+        "PV_y": {
+            "_comment": "",
+            "title": "y pos of selected PV",
+            "xtitle": "y [mm]",
+            "ytitle": "Events",
+            "path":  {"ART": "", "PHYSVAL": "global"},
+            "xbins": 50,
+            "xmin": -0.6,
+            "xmax": -0.4,
+            "type": "TH1D",
+            "forData": "true"
+        }
+    },
+
+    "RUN4": {
+        "PV_x": {
+            "_comment": "",
+            "title": "x pos of selected PV",
+            "xtitle": "x [mm]",
+            "ytitle": "Events",
+		"path":  {"ART": "", "PHYSVAL": "global"},
+            "xbins": 50,
+            "xmin": -0.1,
+            "xmax": 0.1,
+            "type": "TH1D",
+            "forData": "true"
+        },
+
+        "PV_y": {
+            "_comment": "",
+            "title": "y pos of selected PV",
+            "xtitle": "y [mm]",
+            "ytitle": "Events",
+            "path":  {"ART": "", "PHYSVAL": "global"},
+            "xbins": 50,
+            "xmin": -0.1,
+            "xmax": 0.1,
+            "type": "TH1D",
+            "forData": "true"
+        }
+    }
+}

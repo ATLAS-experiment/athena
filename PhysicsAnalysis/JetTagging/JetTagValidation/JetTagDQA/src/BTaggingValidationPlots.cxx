@@ -132,6 +132,11 @@ namespace JetTagDQA{
   }
 
   void BTaggingValidationPlots::bookLargeRHistograms(){
+    for (const std::string& output : GN3XPV01Outputs) {
+      const std::string name = "GN3XPV01_" + (output == "pWqq" ? "pwqq" : output);
+      m_GN3XPV01_probabilities[output] = bookHistogram(name, name, m_sParticleType);
+    }
+
     for (const std::string& truth_class : largeRClasses) {
       for (const auto& [variable, def] : largeRVariables) {
         m_largeRHistos[truth_class][variable] = bookHistogram(def.prefix + truth_class + def.suffix, def.definition, m_sParticleType, truth_class + " jets - ");
@@ -301,19 +306,18 @@ namespace JetTagDQA{
 
    
   void BTaggingValidationPlots::initializePlots(){
-
-    bookEffHistos();        
+    bookCommonHistograms();
     if (m_isLargeR) bookLargeRHistograms();
+    else bookSmallRHistograms();
+  }
 
+  // histograms that every jet collection fills
+  void BTaggingValidationPlots::bookCommonHistograms(){
     // multiplicities
     m_nJets = bookHistogram("nJets", "nJets", m_sParticleType);
     m_nTracks = bookHistogram("nTracks", "nTracks", m_sParticleType);
     m_nPrimVtx = bookHistogram("nPrimVtx", "nPrimVtx");
     m_nTracksPrimVtx = bookHistogram("nTracksPrimVtx", "nTracksPrimVtx");
-    m_nJetsWithMuon = bookHistogram("nJetsWithMuon", "nJetsWithMuon", m_sParticleType);
-    m_nJetsWithSV = bookHistogram("nJetsWithSV", "nJetsWithSV", m_sParticleType);
-    m_fracJetsWithMuon = bookHistogram("fracJetsWithMuon", "fracJetsWithMuon", m_sParticleType);
-    m_fracJetsWithSV = bookHistogram("fracJetsWithSV", "fracJetsWithSV", m_sParticleType);
 
     // PV vars
     m_PV_x = bookHistogram("PV_x", "PV_x");
@@ -328,12 +332,51 @@ namespace JetTagDQA{
     m_jet_eta  = bookHistogram("jet_eta", "jet_eta", m_sParticleType);
     m_jet_phi  = bookHistogram("jet_phi", "jet_phi", m_sParticleType);
 
+    // truth info
+    m_truthLabel  = bookHistogram("truthLabel", "truth_label", m_sParticleType);
+
+    // IPs and IP significances
+    m_track_d0_incl = bookHistogram("d0_incl", "track_d0", m_sParticleType);
+    m_track_z0_incl = bookHistogram("z0_incl", "track_z0", m_sParticleType); 
+    m_track_sigd0_incl = bookHistogram("sigd0_incl", "track_sigd0", m_sParticleType);
+    m_track_sigz0_incl = bookHistogram("sigz0_incl", "track_sigz0", m_sParticleType); 
+
+    // pT_frac
+    m_track_pT_frac_incl = bookHistogram("track_pT_frac_incl", "track_pT_frac", m_sParticleType); 
+
+    // DeltaR_jet_track
+    m_DeltaR_jet_track_incl = bookHistogram("DeltaR_jet_track_incl", "DeltaR_jet_track", m_sParticleType); 
+
+    // numTracks_perJet 
+    m_numTracks_perJet_incl = bookHistogram("numTracks_perJet_incl", "numTracks_perJet", m_sParticleType); 
+
+    // tracker hits
+    m_nInnHits_incl = bookHistogram("nInnHits_incl", "nInnHits", m_sParticleType); 
+    m_nNextToInnHits_incl = bookHistogram("nNextToInnHits_incl", "nNextToInnHits", m_sParticleType);
+    m_nBLHits_incl = bookHistogram("nBLHits_incl", "nBLHits", m_sParticleType);
+    m_nsharedBLHits_incl = bookHistogram("nsharedBLHits_incl", "nsharedBLHits", m_sParticleType);
+    m_nsplitBLHits_incl = bookHistogram("nsplitBLHits_incl", "nsplitBLHits", m_sParticleType);
+    m_nPixHits_incl = bookHistogram("nPixHits_incl", "nPixHits", m_sParticleType);
+    m_nPixHoles_incl = bookHistogram("nPixHoles_incl", "nPixHoles", m_sParticleType);
+    m_nsharedPixHits_incl = bookHistogram("nsharedPixHits_incl", "nsharedPixHits", m_sParticleType);
+    m_nsplitPixHits_incl = bookHistogram("nsplitPixHits_incl", "nsplitPixHits", m_sParticleType);
+    m_nSCTHits_incl = bookHistogram("nSCTHits_incl", "nSCTHits", m_sParticleType);
+    m_nSCTHoles_incl = bookHistogram("nSCTHoles_incl", "nSCTHoles", m_sParticleType);
+    m_nsharedSCTHits_incl = bookHistogram("nsharedSCTHits_incl", "nsharedSCTHits", m_sParticleType);
+  }
+
+  void BTaggingValidationPlots::bookSmallRHistograms(){
+    bookEffHistos();
+
+    // jets with a muon or a secondary vertex
+    m_nJetsWithMuon = bookHistogram("nJetsWithMuon", "nJetsWithMuon", m_sParticleType);
+    m_nJetsWithSV = bookHistogram("nJetsWithSV", "nJetsWithSV", m_sParticleType);
+    m_fracJetsWithMuon = bookHistogram("fracJetsWithMuon", "fracJetsWithMuon", m_sParticleType);
+    m_fracJetsWithSV = bookHistogram("fracJetsWithSV", "fracJetsWithSV", m_sParticleType);
+
     // muon vars
     m_leading_muon_pT_frac = bookHistogram("leading_muon_pT_frac", "leading_muon_pT_frac", m_sParticleType); 
     m_subleading_muon_pT_frac = bookHistogram("subleading_muon_pT_frac", "subleading_muon_pT_frac", m_sParticleType); 
-
-    // truth info
-    m_truthLabel  = bookHistogram("truthLabel", "truth_label", m_sParticleType);
 
     m_jet_pt_b  = bookHistogram("jet_pt_b_ttbar", "jet_pT", m_sParticleType, "b-jets - ");
     m_jet_pt_c  = bookHistogram("jet_pt_c_ttbar", "jet_pT", m_sParticleType, "c-jets - ");
@@ -483,12 +526,6 @@ namespace JetTagDQA{
       m_SV1_fracTracks_OtherOrigin_muon = bookHistogram("SV1_fracTracks_OtherOrigin_muon", "SV1_fracTracks_from_OtherOrigin", m_sParticleType, "jets with muon -"); 
     }
 
-    // IPs and IP significances
-    m_track_d0_incl = bookHistogram("d0_incl", "track_d0", m_sParticleType);
-    m_track_z0_incl = bookHistogram("z0_incl", "track_z0", m_sParticleType); 
-    m_track_sigd0_incl = bookHistogram("sigd0_incl", "track_sigd0", m_sParticleType);
-    m_track_sigz0_incl = bookHistogram("sigz0_incl", "track_sigz0", m_sParticleType); 
-
     m_track_d0_b = bookHistogram("d0_b", "track_d0", m_sParticleType, "b-jets -");
     m_track_z0_b = bookHistogram("z0_b", "track_z0", m_sParticleType, "b-jets -"); 
     m_track_sigd0_b = bookHistogram("sigd0_b", "track_sigd0", m_sParticleType, "b-jets -");
@@ -508,23 +545,14 @@ namespace JetTagDQA{
     m_track_z0_muon = bookHistogram("z0_muon", "track_z0", m_sParticleType, "jets with muon -"); 
     m_track_sigd0_muon = bookHistogram("sigd0_muon", "track_sigd0", m_sParticleType, "jets with muon -");
     m_track_sigz0_muon = bookHistogram("sigz0_muon", "track_sigz0", m_sParticleType, "jets with muon -"); 
-
-    // pT_frac
-    m_track_pT_frac_incl = bookHistogram("track_pT_frac_incl", "track_pT_frac", m_sParticleType); 
     m_track_pT_frac_b = bookHistogram("track_pT_frac_b", "track_pT_frac", m_sParticleType, "b-jets -"); 
     m_track_pT_frac_c = bookHistogram("track_pT_frac_c", "track_pT_frac", m_sParticleType, "c-jets -"); 
     m_track_pT_frac_u = bookHistogram("track_pT_frac_l", "track_pT_frac", m_sParticleType, "l-jets -"); 
     m_track_pT_frac_muon = bookHistogram("track_pT_frac_muon", "track_pT_frac", m_sParticleType, "jets with muon -"); 
-
-    // DeltaR_jet_track
-    m_DeltaR_jet_track_incl = bookHistogram("DeltaR_jet_track_incl", "DeltaR_jet_track", m_sParticleType); 
     m_DeltaR_jet_track_b = bookHistogram("DeltaR_jet_track_b", "DeltaR_jet_track", m_sParticleType, "b-jets -"); 
     m_DeltaR_jet_track_c = bookHistogram("DeltaR_jet_track_c", "DeltaR_jet_track", m_sParticleType, "c-jets -"); 
     m_DeltaR_jet_track_u = bookHistogram("DeltaR_jet_track_l", "DeltaR_jet_track", m_sParticleType, "l-jets -"); 
     m_DeltaR_jet_track_muon = bookHistogram("DeltaR_jet_track_muon", "DeltaR_jet_track", m_sParticleType, "jets with muon -"); 
-
-    // numTracks_perJet 
-    m_numTracks_perJet_incl = bookHistogram("numTracks_perJet_incl", "numTracks_perJet", m_sParticleType); 
     m_numTracks_perJet_b = bookHistogram("numTracks_perJet_b", "numTracks_perJet", m_sParticleType, "b-jets -"); 
     m_numTracks_perJet_c = bookHistogram("numTracks_perJet_c", "numTracks_perJet", m_sParticleType, "c-jets -"); 
     m_numTracks_perJet_u = bookHistogram("numTracks_perJet_l", "numTracks_perJet", m_sParticleType, "l-jets -"); 
@@ -610,20 +638,6 @@ namespace JetTagDQA{
       m_numTracks_OtherOrigin_muon = bookHistogram("numTracks_OtherOrigin_muon", "numTracks_OtherOrigin", m_sParticleType, "jets with muon -");
     }
 
-    // tracker hits
-    m_nInnHits_incl = bookHistogram("nInnHits_incl", "nInnHits", m_sParticleType); 
-    m_nNextToInnHits_incl = bookHistogram("nNextToInnHits_incl", "nNextToInnHits", m_sParticleType);
-    m_nBLHits_incl = bookHistogram("nBLHits_incl", "nBLHits", m_sParticleType);
-    m_nsharedBLHits_incl = bookHistogram("nsharedBLHits_incl", "nsharedBLHits", m_sParticleType);
-    m_nsplitBLHits_incl = bookHistogram("nsplitBLHits_incl", "nsplitBLHits", m_sParticleType);
-    m_nPixHits_incl = bookHistogram("nPixHits_incl", "nPixHits", m_sParticleType);
-    m_nPixHoles_incl = bookHistogram("nPixHoles_incl", "nPixHoles", m_sParticleType);
-    m_nsharedPixHits_incl = bookHistogram("nsharedPixHits_incl", "nsharedPixHits", m_sParticleType);
-    m_nsplitPixHits_incl = bookHistogram("nsplitPixHits_incl", "nsplitPixHits", m_sParticleType);
-    m_nSCTHits_incl = bookHistogram("nSCTHits_incl", "nSCTHits", m_sParticleType);
-    m_nSCTHoles_incl = bookHistogram("nSCTHoles_incl", "nSCTHoles", m_sParticleType);
-    m_nsharedSCTHits_incl = bookHistogram("nsharedSCTHits_incl", "nsharedSCTHits", m_sParticleType);
-
     m_nInnHits_b = bookHistogram("nInnHits_b", "nInnHits", m_sParticleType, "b-jets -"); 
     m_nNextToInnHits_b = bookHistogram("nNextToInnHits_b", "nNextToInnHits", m_sParticleType, "b-jets -");
     m_nBLHits_b = bookHistogram("nBLHits_b", "nBLHits", m_sParticleType, "b-jets -");
@@ -683,12 +697,6 @@ namespace JetTagDQA{
       }
     }
 
-    for (const std::string& output : GN3XPV01Outputs) {
-      const std::string name = "GN3XPV01_" + (output == "pWqq" ? "pwqq" : output);
-      m_GN3XPV01_probabilities[output] = bookHistogram(name, name, m_sParticleType);
-    }
-
-
     // B hadron Lxy
     m_Truth_Lxy_b = bookHistogram("Truth_Lxy_b", "Truth_Lxy_b", m_sParticleType, "b-jets - ");
     m_Truth_Lxy_c = bookHistogram("Truth_Lxy_c", "Truth_Lxy_c", m_sParticleType, "c-jets - ");
@@ -696,7 +704,6 @@ namespace JetTagDQA{
     // B hadron deltaR wrt jet 
     m_deltaR_truthBHadron_jet_b = bookHistogram("deltaR_truthBHadronJet_b", "deltaR_truthBHadronJet_b", m_sParticleType, "b-jets - ");
     m_deltaR_truthCHadron_jet_c = bookHistogram("deltaR_truthCHadronJet_c", "deltaR_truthCHadronJet_c", m_sParticleType, "c-jets - ");
-
   }
 
 
@@ -706,14 +713,14 @@ namespace JetTagDQA{
     m_nTracks->Fill(nTracks, event->beamSpotWeight());
     m_nPrimVtx->Fill(nPrimVtx, event->beamSpotWeight());
     m_nTracksPrimVtx->Fill(nTracksPrimVtx, event->beamSpotWeight());
-    m_nJetsWithMuon->Fill(nJetsWithMuon, event->beamSpotWeight());
-    m_nJetsWithSV->Fill(nJetsWithSV, event->beamSpotWeight());
+    if (!m_isLargeR) {
+      m_nJetsWithMuon->Fill(nJetsWithMuon, event->beamSpotWeight());
+      m_nJetsWithSV->Fill(nJetsWithSV, event->beamSpotWeight());
 
-    if (nJets > 0) {
-      double fracJetsWithMuon = static_cast<double>(nJetsWithMuon) / nJets;
-      double fracJetsWithSV = static_cast<double>(nJetsWithSV) / nJets;
-      m_fracJetsWithMuon->Fill(fracJetsWithMuon, event->beamSpotWeight());
-      m_fracJetsWithSV->Fill(fracJetsWithSV, event->beamSpotWeight());
+      if (nJets > 0) {
+        m_fracJetsWithMuon->Fill(static_cast<double>(nJetsWithMuon) / nJets, event->beamSpotWeight());
+        m_fracJetsWithSV->Fill(static_cast<double>(nJetsWithSV) / nJets, event->beamSpotWeight());
+      }
     }
 
     fillNJetsThatPassedWPCutsHistos(nJetsThatPassedWPCuts, event);
