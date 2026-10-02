@@ -13,13 +13,13 @@
 
 
 std::unique_ptr< pool::ISession >
-pool::createSession( IFileCatalog& catalog , int ageLimit )
+pool::createSession( Gaudi::IFileCatalog& catalog , int ageLimit )
 {
    return std::unique_ptr<ISession>(  new pool::UserSession(catalog, ageLimit) );
 }
 
 
-pool::UserSession::UserSession( pool::IFileCatalog& fileCatalog, int ageLimit ):
+pool::UserSession::UserSession( Gaudi::IFileCatalog& fileCatalog, int ageLimit ):
   APRMessaging( "APR Session" ),
   m_catalog( &fileCatalog ),
   m_ageLimit( ageLimit ),
@@ -146,7 +146,7 @@ pool::UserSession::databaseHandle( const std::string& dbName,
   return nullptr;
 }
 
-pool::IFileCatalog&
+Gaudi::IFileCatalog&
 pool::UserSession::fileCatalog()
 {
   return *m_catalog;

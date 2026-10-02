@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include "TestDriver.h"
 #include "StorageSvc/DbType.h"
+#include "AthenaKernel/getMessageSvc.h"
 
 void runTestForStorageType(const pool::DbType& storageType, pool::TestDriver& driver)
 {
@@ -27,6 +28,8 @@ void runTestForStorageType(const pool::DbType& storageType, pool::TestDriver& dr
 int main( int, char** )
 {
    try {
+      // Suppress Athena MessageSvc warnings about not finding Gaudi MessageSvc
+      Athena::getMessageSvcQuiet = true;
       std::cout << "[OVAL] Creating the test driver." << std::endl;
       pool::TestDriver driver;
 

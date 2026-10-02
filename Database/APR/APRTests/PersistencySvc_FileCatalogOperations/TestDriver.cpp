@@ -15,15 +15,18 @@
 #include "PersistentDataModel/Token.h"
 
 #include "PoolSvc/IContainer.h"
-#include "PoolSvc/IFileCatalog.h"
+#include "PoolSvc/FileCatalogUtils.h"
 #include "PoolSvc/ISession.h"
 #include "PoolSvc/ITokenIterator.h"
+#include "GaudiKernel/Bootstrap.h"
+#include "GaudiKernel/ISvcLocator.h"
 
 #include "StorageSvc/DbType.h"
 
 
 pool::TestDriver::TestDriver( const std::string& catname ):
-  m_fileCatalog( 0 ),
+  m_fileCatalogMgr( Gaudi::svcLocator()->service<Gaudi::IFileCatalogMgr>( "Gaudi::MultiFileCatalog" ) ),
+  m_fileCatalog( m_fileCatalogMgr ),
   m_fileName1( "FCO.pool1.root" ),
   m_lfn1( "lfn1" ),
   m_fileName2( "FCO.pool2.root" ),
@@ -33,14 +36,12 @@ pool::TestDriver::TestDriver( const std::string& catname ):
   m_events( 100 )
 {
   std::cout << "[OVAL] Creating a file catalog" << std::endl;
-  m_fileCatalog = new pool::IFileCatalog;
   std::filesystem::remove( {catname} );
-  m_fileCatalog->setWriteCatalog( catname );
+  FileCatalogUtils::addCatalog( *m_fileCatalogMgr, catname, true );
 }
 
 pool::TestDriver::~TestDriver()
 {
-  if ( m_fileCatalog ) delete m_fileCatalog;
   std::cout << "[OVAL] Number of floating tokens : " << Token::numInstances() << std::endl;
 }
 
@@ -48,11 +49,11 @@ pool::TestDriver::~TestDriver()
 void
 pool::TestDriver::write()
 {
-  pool::IFileCatalog& catalog = *m_fileCatalog;
+  Gaudi::IFileCatalog& catalog = *m_fileCatalog;
 
   std::cout << "Creating the persistency service" << std::endl;
   auto dbsession = pool::createSession(catalog);
-  catalog.start();
+  catalog.init();
 
   // Start an update transaction
   if( !dbsession->start( Io::WRITE ) ) {
@@ -104,7 +105,7 @@ pool::TestDriver::write()
 void
 pool::TestDriver::addlfns()
 {
-  m_fileCatalog->start(); 
+  m_fileCatalog->init(); 
   m_fileCatalog->registerLFN( m_fileCatalog->lookupPFN(m_fileName1), m_lfn1 );
   m_fileCatalog->commit();
 }
@@ -112,11 +113,11 @@ pool::TestDriver::addlfns()
 void
 pool::TestDriver::read()
 {
-  pool::IFileCatalog& catalog = *m_fileCatalog;
+  Gaudi::IFileCatalog& catalog = *m_fileCatalog;
 
   std::cout << "Creating the persistency service" << std::endl;
   auto dbsession = pool::createSession(catalog);
-  catalog.start();
+  catalog.init();
 
   // Starting a read transaction
   if( !dbsession->start( Io::READ ) ) {

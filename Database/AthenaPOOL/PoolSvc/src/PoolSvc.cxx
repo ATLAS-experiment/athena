@@ -12,6 +12,9 @@
 
 #include "GaudiKernel/IIoComponentMgr.h"
 #include "GaudiKernel/ConcurrencyFlags.h"
+#include "GaudiKernel/Bootstrap.h"
+#include "GaudiKernel/ISvcLocator.h"
+#include "GaudiKernel/IMessageSvc.h"
 
 #include "PathResolver/PathResolver.h"
 
@@ -22,7 +25,7 @@
 #include "PoolSvc/IDatabase.h"
 #include "PoolSvc/IContainer.h"
 #include "PoolSvc/ITokenIterator.h"
-#include "PoolSvc/IFileCatalog.h"
+#include "PoolSvc/FileCatalogUtils.h"
 
 #include "StorageSvc/DbType.h"
 #include "StorageSvc/DbPrint.h"
@@ -123,13 +126,11 @@ StatusCode PoolSvc::io_reinit() {
 StatusCode PoolSvc::setupPersistencySvc() {
    clearState();
    ATH_MSG_INFO("Setting up FileCatalog and Streams");
-   m_catalog = createCatalog();
-   if (m_catalog != nullptr) {
-      m_catalog->start();
-   } else {
+   if (!createCatalog()) {
       ATH_MSG_FATAL("Failed to setup POOL File Catalog.");
       return(StatusCode::FAILURE);
    }
+   m_catalog->init();
    // Setup a persistency services
    m_dbSessionVec.push_back(pool::createSession(*m_catalog).release()); // Read Service
    m_pers_mut.push_back(new CallMutex);
@@ -189,9 +190,10 @@ void PoolSvc::clearState() {
    m_inputContextLabel.clear();
    m_outputContextLabel.clear();
    m_pers_mut.clear();
-   if (m_catalog != nullptr) {
+   if (m_catalog.isValid()) {
       m_catalog->commit();
-      delete m_catalog; m_catalog = nullptr;
+      m_catalog = SmartIF<Gaudi::IFileCatalog>();
+      m_catalogMgr = SmartIF<Gaudi::IFileCatalogMgr>();
    }
 }
 //__________________________________________________________________________
@@ -332,48 +334,19 @@ void PoolSvc::setShareMode(bool shareCat) {
 }
 //__________________________________________________________________________
 void PoolSvc::startCatalog() {
-   if (m_catalog != nullptr) {
-      m_catalog->start();
+   if (m_catalog.isValid()) {
+      m_catalog->init();
    }
 }
 //__________________________________________________________________________
 void PoolSvc::commitCatalog() {
-   if (m_catalog != nullptr) {
+   if (m_catalog.isValid()) {
       m_catalog->commit();
    }
 }
 //__________________________________________________________________________
-void PoolSvc::lookupBestPfn(const std::string& token, std::string& pfn, std::string& type) const {
-   std::string dbID;
-   if (token.starts_with("PFN:")) {
-      m_catalog->lookupFileByPFN(token.substr(4), dbID, type); // PFN -> FID
-   } else if (token.starts_with("LFN:")) {
-      dbID = m_catalog->lookupLFN(token.substr(4)); // LFN -> FID
-   } else if (token.starts_with("FID:")) {
-      dbID = token.substr(4);
-   } else if (token.size() > Guid::stringSize()) { // full token
-      Token tok;
-      tok.fromString(token);
-      dbID = tok.dbID().toString();
-   } else { // guid only
-      dbID = token;
-   }
-   m_catalog->getFirstPFN(dbID, pfn, type); // FID -> best PFN
-}
-//__________________________________________________________________________
-void PoolSvc::renamePfn(const std::string& pf, const std::string& newpf) {
-   std::string dbID, type;
-    m_catalog->lookupFileByPFN(pf, dbID, type);
-   if (dbID.empty()) {
-      ATH_MSG_WARNING("Failed to lookup: " << pf << " in FileCatalog");
-      return;
-   }
-   m_catalog->lookupFileByPFN(newpf, dbID, type);
-   if (!dbID.empty()) {
-      ATH_MSG_INFO("Found: " << newpf << " in FileCatalog");
-      return;
-   }
-   m_catalog->renamePFN(pf, newpf);
+void PoolSvc::lookupBestPfn(const std::string& dbID, std::string& pfn, std::string& type) const {
+   FileCatalogUtils::getFirstPFN(*m_catalog, dbID, pfn, type); // FID -> best PFN
 }
 //__________________________________________________________________________
 StatusCode PoolSvc::connectCollection(const std::string& connection,
@@ -392,7 +365,7 @@ StatusCode PoolSvc::connectCollection(const std::string& connection,
    bool insertFile = false;
    if (connection.starts_with("PFN:")) {
       std::string fid, fileType;
-      m_catalog->lookupFileByPFN(connection.substr(4), fid, fileType);
+      FileCatalogUtils::lookupFileByPFN(*m_catalog, connection.substr(4), fid, fileType);
       if (fid.empty()) { // No entry in file catalog
          insertFile = true;
          ATH_MSG_INFO("File is not in Catalog! Attempt to open it anyway.");
@@ -455,8 +428,8 @@ void PoolSvc::patchCatalog(const std::string& pfn, pool::IDatabase& dbH) const {
    std::scoped_lock lock(m_pool_mut);
    dbH.setTechnology(pool::ROOT_StorageType.type());
    std::string fid = dbH.fid();
-   pool::IFileCatalog* catalog_locked ATLAS_THREAD_SAFE = m_catalog;
-   catalog_locked->registerPFN(pfn, "ROOT_All", fid);
+   Gaudi::IFileCatalog* catalog_locked ATLAS_THREAD_SAFE = m_catalog.get();
+   FileCatalogUtils::registerPFN(*catalog_locked, pfn, "ROOT_All", fid);
 }
 //__________________________________________________________________________
 Token* PoolSvc::getToken(const std::string& connection,
@@ -772,9 +745,16 @@ StatusCode PoolSvc::setAttribute(const std::string& optName,
 }
 
 //__________________________________________________________________________
-pool::IFileCatalog* PoolSvc::createCatalog() {
-   pool::IFileCatalog* ctlg = new pool::IFileCatalog;
-   ctlg->removeCatalog("*");
+bool PoolSvc::createCatalog() {
+   m_catalogMgr = Gaudi::svcLocator()->service<Gaudi::IFileCatalogMgr>("Gaudi::MultiFileCatalog");
+   m_catalog = SmartIF<Gaudi::IFileCatalog>(m_catalogMgr);
+   if (!m_catalogMgr.isValid() || !m_catalog.isValid()) {
+      return false;
+   }
+   // set the output level of the XMLCatalog component - works only if the Gaudi AppMgr was initialized
+   Gaudi::svcLocator()->service<IMessageSvc>("MessageSvc")
+      ->setOutputLevel("XMLCatalog", pool::DbPrint::getOutputLvl());
+   m_catalogMgr->removeCatalog("*");
    for (auto& catalog : m_readCatalog.value()) {
       ATH_MSG_DEBUG("POOL ReadCatalog is " << catalog);
       if (catalog.starts_with("apcfile:") || catalog.starts_with("prfile:")) {
@@ -783,13 +763,13 @@ pool::IFileCatalog* PoolSvc::createCatalog() {
          std::string file = poolCondPath(catalog.substr(cpos + 1));
          if (!file.empty()) {
             ATH_MSG_INFO("Resolved path (via ATLAS_POOLCOND_PATH) is " << file);
-            ctlg->addReadCatalog("file:" + file);
+            FileCatalogUtils::addCatalog(*m_catalogMgr, "file:" + file);
          } else {
             // As backup, check for file accessed via PathResolver
             file = PathResolver::find_file(catalog.substr(cpos + 1), "DATAPATH");
             if (!file.empty()) {
                ATH_MSG_INFO("Resolved path (via DATAPATH) is " << file);
-               ctlg->addReadCatalog("file:" + file);
+               FileCatalogUtils::addCatalog(*m_catalogMgr, "file:" + file);
             } else {
                ATH_MSG_INFO("Unable find catalog "
 	               << catalog
@@ -797,17 +777,17 @@ pool::IFileCatalog* PoolSvc::createCatalog() {
             }
          }
       } else {
-         ctlg->addReadCatalog(catalog);
+         FileCatalogUtils::addCatalog(*m_catalogMgr, catalog);
       }
    }
    try {
       ATH_MSG_INFO("POOL WriteCatalog is " << m_writeCatalog.value());
-      ctlg->setWriteCatalog(m_writeCatalog.value());
+      FileCatalogUtils::addCatalog(*m_catalogMgr, m_writeCatalog.value(), true);
    } catch(std::exception& e) {
       ATH_MSG_ERROR("setWriteCatalog - caught exception: " << e.what());
-      return(nullptr); // This catalog is not setup properly!
+      return false; // This catalog is not setup properly!
    }
-   return(ctlg);
+   return true;
 }
 
 //__________________________________________________________________________

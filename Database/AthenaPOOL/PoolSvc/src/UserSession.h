@@ -27,7 +27,7 @@ namespace pool {
   {
   public:
     /// Constructor
-    explicit UserSession( IFileCatalog& fileCatalog, int ageLimit );
+    explicit UserSession( Gaudi::IFileCatalog& fileCatalog, int ageLimit );
 
     /// Destructor
     virtual ~UserSession();
@@ -87,7 +87,7 @@ namespace pool {
     databaseHandle( const std::string& dbName, DatabaseSpecification::NameType dbNameType ) override final;
 
     /// Returns the file catalog in use
-    virtual IFileCatalog& fileCatalog();
+    virtual Gaudi::IFileCatalog& fileCatalog();
 
     /// Return StorageSvc for a given technology used in this session
     virtual IStorageSvc& getStorageSvc( long technology ) override final;
@@ -96,7 +96,7 @@ namespace pool {
     MicroSessionManager& microSessionManager( long technology ) override final;
 
   private:
-    IFileCatalog*                  m_catalog;
+    Gaudi::IFileCatalog*           m_catalog;
     int                            m_ageLimit;
     DatabaseRegistry*              m_registry;
     Io::IoFlag                     m_transactionType;

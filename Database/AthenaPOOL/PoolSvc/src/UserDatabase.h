@@ -10,10 +10,11 @@
 #include "StorageSvc/DbPrint.h"
 #include "StorageSvc/pool.h"
 
-namespace pool {
-  // forward declarations
+namespace Gaudi {
   class IFileCatalog;
-   
+}
+
+namespace pool {
   // forward declarations
   class UserSession;
   class DatabaseHandler;
@@ -94,7 +95,7 @@ namespace pool {
     /// Reference to the session
     UserSession&                            m_session;
     /// Reference to the file catalog
-    IFileCatalog&                           m_catalog;
+    Gaudi::IFileCatalog&                    m_catalog;
     /// Transaction type (read/update)
     Io::IoFlag                              m_transactionType;
     /// Reference to the database registry

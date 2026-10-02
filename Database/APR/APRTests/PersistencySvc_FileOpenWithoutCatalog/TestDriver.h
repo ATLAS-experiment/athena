@@ -7,13 +7,18 @@
 
 #include <vector>
 #include <string>
+#include "GaudiKernel/SmartIF.h"
 #include "SimpleTestClass.h"
 #include "PoolSvc/IDatabase.h"
 
 class Token;
 
-namespace pool {
+namespace Gaudi {
   class IFileCatalog;
+  class IFileCatalogMgr;
+}
+
+namespace pool {
 
   class TestDriver {
   public:
@@ -30,7 +35,8 @@ namespace pool {
     std::string           m_fileName;
 
 private:
-    IFileCatalog*         m_fileCatalog;
+    SmartIF<Gaudi::IFileCatalogMgr>   m_fileCatalogMgr;
+    SmartIF<Gaudi::IFileCatalog>      m_fileCatalog;
     std::vector< SimpleTestClass > m_simpleTestClass;
   };
 

@@ -7,11 +7,16 @@
 
 #include <vector>
 #include <string>
+#include "GaudiKernel/SmartIF.h"
 
 class Token;
 
-namespace pool {
+namespace Gaudi {
   class IFileCatalog;
+  class IFileCatalogMgr;
+}
+
+namespace pool {
 
   class TestDriver {
   public:
@@ -23,7 +28,8 @@ namespace pool {
     void write();
     void read();
   private:
-    IFileCatalog*         m_fileCatalog;
+    SmartIF<Gaudi::IFileCatalogMgr>   m_fileCatalogMgr;
+    SmartIF<Gaudi::IFileCatalog>      m_fileCatalog;
     std::string           m_fileName;
     int                   m_events;
     std::vector< Token* > m_tokens;

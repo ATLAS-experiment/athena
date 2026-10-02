@@ -6,7 +6,9 @@
    FCcmd.cpp -- FileCatalog command line tool to list or manipulate entries in a FileCatalog XML file
 */
 
-#include "PoolSvc/IFileCatalog.h"
+#include "PoolSvc/FileCatalogUtils.h"
+#include "GaudiKernel/Bootstrap.h"
+#include "GaudiKernel/ISvcLocator.h"
 #include "StorageSvc/SimpleUtilityBase.h"
 
 #include <exception>
@@ -110,7 +112,7 @@ int main(int argc, char** argv)
         return 1;
     }
     string  catName;
-    // In case none of the options below work, the default FC name is specified in IFileCatalog::addCatalog()
+    // In case none of the options below work, the default FC name is specified in FileCatalogUtils::addCatalog()
     if( options.exists('u') ){
         catName=options.getOptByName('u');
     }else{
@@ -124,9 +126,10 @@ int main(int argc, char** argv)
     string item   = options.getItem();
     
     try{
-        std::unique_ptr<IFileCatalog> mycatalog(new IFileCatalog);
-        mycatalog->setWriteCatalog(catName);
-        mycatalog->start();
+        SmartIF<Gaudi::IFileCatalogMgr> catalogMgr = Gaudi::svcLocator()->service<Gaudi::IFileCatalogMgr>( "Gaudi::MultiFileCatalog" );
+        SmartIF<Gaudi::IFileCatalog> mycatalog( catalogMgr );
+        FileCatalogUtils::addCatalog( *catalogMgr, catName, true );
+        mycatalog->init();
 
         if( action == "delete" ) {
             if( !lfn.empty() ){
@@ -141,33 +144,33 @@ int main(int argc, char** argv)
 
         } else if( action == "list" ) {
             if( item == "lfn" ) {
-                pool::IFileCatalog::Strings fids;
+                Gaudi::IFileCatalog::Strings fids;
                 if( !pfn.empty() ) {
                     fids.push_back( mycatalog->lookupPFN( pfn ) );
                 }else{
-                    mycatalog->getFIDs( fids );
+                    mycatalog->getFID( fids );
                 }
                 for( const auto& fid: fids ) {
-                    pool::IFileCatalog::Files files;
-                    mycatalog->getLFNs( fid, files );
+                    Gaudi::IFileCatalog::Files files;
+                    mycatalog->getLFN( fid, files );
                     for( const auto& file: files ) {
                         cout << file.first << " ,   " << file.second << endl;
                     }
                 }
             } 
             else if( item == "pfn" ) {
-                pool::IFileCatalog::Strings fids;
+                Gaudi::IFileCatalog::Strings fids;
                 if( !lfn.empty() ) {
                     fids.push_back( mycatalog->lookupLFN( lfn ) );
                 } else if( !guid.empty() ) {
                     fids.emplace_back( std::move(guid) );
                 } else {
                     // go through all FIDs in the catalog
-                    mycatalog->getFIDs( fids );
+                    mycatalog->getFID( fids );
                 }
                 for( const auto& fid: fids ) {
-                    pool::IFileCatalog::Files files;
-                    mycatalog->getPFNs( fid, files );
+                    Gaudi::IFileCatalog::Files files;
+                    mycatalog->getPFN( fid, files );
                     for( const auto& file: files ) {
                         string pf = file.first;
                         string filetype = (file.second.empty()? string("NULL") : file.second);
@@ -176,13 +179,13 @@ int main(int argc, char** argv)
                 }
             }
             else if( item == "guid" ) {
-                pool::IFileCatalog::Strings fids;
+                Gaudi::IFileCatalog::Strings fids;
                 if( !pfn.empty() ){
                     fids.push_back( mycatalog->lookupPFN( pfn ) );
                 } else if( !lfn.empty() ){
                     fids.push_back( mycatalog->lookupLFN( lfn ) );
                 } else {
-                    mycatalog->getFIDs( fids );
+                    mycatalog->getFID( fids );
                 }
                 for( const auto& fid: fids ) {
                     cout << fid << endl;
@@ -207,7 +210,7 @@ int main(int argc, char** argv)
                     cerr<<"ERROR! You must specify PFName using -p and GUID using -g options" << endl;
                     return 3;
                 }
-                mycatalog->registerPFN(pfn, "ROOT_All", guid);
+                FileCatalogUtils::registerPFN(*mycatalog, pfn, "ROOT_All", guid);
             } 
             else {
                 cerr << "ERROR! Unsupported catalog item type for registration: "<< item << endl;

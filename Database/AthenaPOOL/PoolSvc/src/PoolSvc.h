@@ -11,7 +11,9 @@
  **/
 
 #include "PoolSvc/IPoolSvc.h"
+#include "PoolSvc/FileCatalogUtils.h"
 #include "GaudiKernel/IIoComponent.h"
+#include "GaudiKernel/SmartIF.h"
 #include "AthenaBaseComps/AthService.h"
 #include "CxxUtils/checker_macros.h"
 #include "PersistentDataModel/Guid.h"
@@ -26,7 +28,6 @@
 namespace pool {
    class IContainer;
    class IDatabase;
-   class IFileCatalog;
    class ISession;
 }
 
@@ -100,17 +101,11 @@ public: // Non-static members
    void commitCatalog() override;
 
    /// @return void
-   /// @param token [IN] filename/token string to be translated
+   /// @param dbID [IN] database ID to be translated
    /// @param pfn [OUT] string PFN of database
    /// @param type [OUT] string filetype of database
    virtual
-   void lookupBestPfn(const std::string& token, std::string& pfn, std::string& type) const override;
-
-   /// @return void
-   /// @param pf [IN] filename to be renamed
-   /// @param newpf [IN] new filename
-   virtual
-   void renamePfn(const std::string& pf, const std::string& newpf) override;
+   void lookupBestPfn(const std::string& dbID, std::string& pfn, std::string& type) const override;
 
    /// @return status of connect
    /// @param connection [IN] string containing the connection.
@@ -222,7 +217,8 @@ private: // data
    mutable CallMutex                                 m_pool_mut;
  
    bool                                              m_shareCat{false};
-   pool::IFileCatalog*                               m_catalog{nullptr};
+   SmartIF<Gaudi::IFileCatalogMgr>                    m_catalogMgr;
+   SmartIF<Gaudi::IFileCatalog>                       m_catalog;
    std::vector<pool::ISession*>      m_dbSessionVec;
    std::vector<CallMutex*>                           m_pers_mut;
    std::map<std::string, unsigned int>               m_inputContextLabel;
@@ -254,7 +250,8 @@ private: // internal helper functions
    // delete all Persistency Services, Catalog, Mutexes and Indexes
    void clearState();
 
-   pool::IFileCatalog* createCatalog();
+   // Set up m_catalogMgr/m_catalog. Returns false on failure.
+   bool createCatalog();
    void patchCatalog(const std::string& pfn, pool::IDatabase& dbH) const;
 
    // setup persistency
