@@ -236,7 +236,7 @@ class EgammaCalibrationAndSmearingTool
   virtual StatusCode applySystematicVariation(
       const CP::SystematicSet& systConfig) override;
   virtual void setRandomSeedFunction(const IdFunction&& function) {
-    m_set_seed_function = function;
+    m_set_seed_function = std::move(function);
   }
   const IdFunction getRandomSeedFunction() const { return m_set_seed_function; }
 

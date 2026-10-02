@@ -658,11 +658,11 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
 	}
       asg::AsgServiceConfig config_mva_service(mva_service_name.str());
       ATH_CHECK(config_mva_service.addPrivateTool("ElectronTool",
-                                                  config_mva_electron));
+                                                  std::move(config_mva_electron)));
       ATH_CHECK(config_mva_service.addPrivateTool("UnconvertedPhotonTool",
-                                                  config_mva_unconverted));
+                                                  std::move(config_mva_unconverted)));
       ATH_CHECK(config_mva_service.addPrivateTool("ConvertedPhotonTool",
-                                                  config_mva_converted));
+                                                  std::move(config_mva_converted)));
       // fwd electron MVA tool
       if (m_doFwdCalib) {
 	asg::AsgToolConfig config_mva_fwdelectron(
@@ -673,7 +673,7 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
 	ATH_CHECK(config_mva_fwdelectron.setProperty("ShiftType", 0));
 	ATH_CHECK(config_mva_fwdelectron.setProperty("OutputLevel", this->msg().level()));
 	ATH_CHECK(config_mva_service.addPrivateTool("FwdElectronTool",
-						    config_mva_fwdelectron));
+						    std::move(config_mva_fwdelectron)));
       }
       config_mva_service.setPropertyFromString("folder", m_MVAfolder);
       ATH_CHECK(

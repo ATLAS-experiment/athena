@@ -1,23 +1,23 @@
 
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DUMPALLSYSTEMATICS_H
 #define DUMPALLSYSTEMATICS_H
 
-#include <vector>
-#include <string>
-
+// Local include(s):
+#include "EgammaAnalysisInterfaces/IEgammaCalibrationAndSmearingTool.h"
 // Gaudi/Athena include(s):
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "AsgTools/ToolHandle.h"
 
 #include "TTree.h"
 
-// Local include(s):
-#include "EgammaAnalysisInterfaces/IEgammaCalibrationAndSmearingTool.h"
+
+#include <vector>
+#include <string>
 
 class DumpAllSystematics : public AthAlgorithm {
 
@@ -31,7 +31,7 @@ public:
 
   std::string m_particle_name;
   std::string m_reco_container_name;
-  bool m_keep_one;
+  bool m_keep_one{};
 
 private:
   enum class ParticleType
