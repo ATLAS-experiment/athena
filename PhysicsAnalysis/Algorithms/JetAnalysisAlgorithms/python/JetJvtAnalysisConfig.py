@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 
 # AnaAlgorithm import(s):
@@ -10,7 +10,7 @@ class JetJvtAnalysisConfig (ConfigBlock) :
     """the ConfigBlock for the JVT sequence"""
 
     def __init__ (self) :
-        super (JetJvtAnalysisConfig, self).__init__ ()
+        super ().__init__ ()
         self.setBlockName('JVT')
         self.addDependency('OverlapRemoval', required=False)
         self.addDependency('EventSelection', required=False)

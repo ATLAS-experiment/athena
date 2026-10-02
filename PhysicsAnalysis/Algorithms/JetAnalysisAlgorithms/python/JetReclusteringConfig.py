@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AthenaCommon.SystemOfUnits import GeV
@@ -13,11 +13,13 @@ class JetReclusteringBlock(ConfigBlock):
     ---- to be updated with substructure variables!"""
 
     def __init__(self):
-        super(JetReclusteringBlock, self).__init__()
+        super().__init__()
         self.addOption ('containerName', None, type=str,
+                        noneAction='error',
                         info='name of the output reclustered jets container.',
                         meta={'role':'container'})
         self.addOption ('jets', None, type=str,
+                        noneAction='error',
                         info='the input jet collection to recluster, with a possible selection, in the format `container` or `container.selection`.',
                         meta={'role':'containerRef'})
         self.addOption ('clusteringAlgorithm', 'AntiKt', type=str,

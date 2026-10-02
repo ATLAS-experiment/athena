@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 
@@ -8,7 +8,7 @@ class ReclusteredJetCalibrationBlock(ConfigBlock):
     setting 4-momentum from calibrated constituent small-R jets"""
 
     def __init__(self):
-        super(ReclusteredJetCalibrationBlock, self).__init__()
+        super().__init__()
         self.addOption ('containerName', '', type=str,
             info='the name of the output container after calibration.',
             meta={'role':'container'})

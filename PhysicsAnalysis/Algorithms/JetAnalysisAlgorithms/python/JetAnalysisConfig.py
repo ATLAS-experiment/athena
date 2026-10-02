@@ -13,6 +13,31 @@ import re
 import warnings
 
 
+def _resolveJetCollectionName(jetCollection):
+    """Map the PHYSLITE jet collection aliases onto the actual collection names."""
+    if jetCollection == "AnalysisJets":
+        return "AntiKt4EMPFlowJets"
+    elif jetCollection == "AnalysisLargeRJets":
+        return "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"
+    return jetCollection
+
+
+def _addJetUncertaintiesTool(config, alg, toolName, jetCollectionName, configFile,
+                             calibArea, mcType, isData, pseudoData):
+    """Add a private JetUncertaintiesTool to `alg` under property `toolName`
+    and configure it."""
+    config.addPrivateTool( toolName, 'JetUncertaintiesTool' )
+    tool = getattr(alg, toolName)
+    tool.JetDefinition = jetCollectionName[:-4]
+    tool.ConfigFile = configFile
+    if calibArea is not None:
+        tool.CalibArea = calibArea
+    tool.MCType = mcType
+    tool.IsData = isData
+    tool.PseudoDataJERsmearingMode = pseudoData
+    return tool
+
+
 def _parseJetCollection(jetCollection):
     """Parse a jet collection name into its components.
 
@@ -28,11 +53,7 @@ def _parseJetCollection(jetCollection):
         jetCollection = jetCollection[:btIndex]
         hasBTag = True
 
-    jetCollectionName = jetCollection
-    if jetCollection == "AnalysisJets":
-        jetCollectionName = "AntiKt4EMPFlowJets"
-    elif jetCollection == "AnalysisLargeRJets":
-        jetCollectionName = "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"
+    jetCollectionName = _resolveJetCollectionName(jetCollection)
 
     collection_pattern = re.compile(
         r"AntiKt(\d+)(EMTopo|EMPFlow|LCTopo|TrackCaloCluster|UFO|Track|HI)"
@@ -40,11 +61,11 @@ def _parseJetCollection(jetCollection):
     match = collection_pattern.match(jetCollectionName)
     if not match:
         raise ValueError(
-            "Jet collection {0} does not match expected pattern!".format(jetCollectionName))
+            f"Jet collection {jetCollectionName} does not match expected pattern!")
     radius = int(match.group(1))
     if radius not in [2, 4, 6, 10]:
         raise ValueError(
-            "Jet collection has unsupported radius '{0}'!".format(radius))
+            f"Jet collection has unsupported radius '{radius}'!")
     jetInput = match.group(2)
     trim = match.group(3)
     return radius, jetInput, trim, hasBTag
@@ -54,7 +75,7 @@ class PreJetAnalysisConfig (ConfigBlock) :
     """the ConfigBlock for the common preprocessing of jet sequences"""
 
     def __init__ (self) :
-        super (PreJetAnalysisConfig, self).__init__ ()
+        super().__init__()
         self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the output container after calibration.",
@@ -94,6 +115,8 @@ class PreJetAnalysisConfig (ConfigBlock) :
         config.setContainerMeta(self.containerName, 'jetInput', jetInput)
         config.setContainerMeta(self.containerName, 'jetTrim', trim)
         config.setContainerMeta(self.containerName, 'hasBTag', hasBTag)
+        config.setContainerMeta(self.containerName, 'jetCollectionName',
+                                _resolveJetCollectionName(self.jetCollection))
 
         # Relink original jets in case of b-tagging calibration
         if self.runOriginalObjectLink or hasBTag :
@@ -118,12 +141,12 @@ class PreJetAnalysisConfig (ConfigBlock) :
                 alg.jetsOut = config.copyName (self.containerName)
                 taggerName = "GN2HLv01" if config.geometry() >= LHCPeriod.Run4 else "GN2v01"
                 extraInputs = [
-                    ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.DFCommonJets_jetClean_LooseBad".format(baseName=self.jetCollection)),
-                    ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.DFCommonJets_jetClean_TightBad".format(baseName=self.jetCollection)),
-                    ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.{tagger}_pb".format(baseName=self.jetCollection, tagger=taggerName)),
-                    ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.{tagger}_pc".format(baseName=self.jetCollection, tagger=taggerName)),
-                    ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.{tagger}_ptau".format(baseName=self.jetCollection, tagger=taggerName)),
-                    ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.{tagger}_pu".format(baseName=self.jetCollection, tagger=taggerName))]
+                    ( 'xAOD::JetContainer' , f"StoreGateSvc+{self.jetCollection}.DFCommonJets_jetClean_LooseBad"),
+                    ( 'xAOD::JetContainer' , f"StoreGateSvc+{self.jetCollection}.DFCommonJets_jetClean_TightBad"),
+                    ( 'xAOD::JetContainer' , f"StoreGateSvc+{self.jetCollection}.{taggerName}_pb"),
+                    ( 'xAOD::JetContainer' , f"StoreGateSvc+{self.jetCollection}.{taggerName}_pc"),
+                    ( 'xAOD::JetContainer' , f"StoreGateSvc+{self.jetCollection}.{taggerName}_ptau"),
+                    ( 'xAOD::JetContainer' , f"StoreGateSvc+{self.jetCollection}.{taggerName}_pu")]
                 config.setExtraInputs (extraInputs)
 
         if self.runTruthJetTagging and config.dataType() is not DataType.Data:
@@ -136,10 +159,10 @@ class PreJetAnalysisConfig (ConfigBlock) :
             alg.decorator.SuppressOutputDependence=True
             if self.jetCollection == 'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets' :
                 extraInputs = [
-                    ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.GN2Xv01_phbb".format(baseName= self.jetCollection)),
-                    ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.GN2Xv01_phcc".format(baseName= self.jetCollection)),
-                    ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.GN2Xv01_pqcd".format(baseName= self.jetCollection)),
-                    ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.GN2Xv01_ptop".format(baseName= self.jetCollection))]
+                    ( 'xAOD::JetContainer' , f"StoreGateSvc+{self.jetCollection}.GN2Xv01_phbb"),
+                    ( 'xAOD::JetContainer' , f"StoreGateSvc+{self.jetCollection}.GN2Xv01_phcc"),
+                    ( 'xAOD::JetContainer' , f"StoreGateSvc+{self.jetCollection}.GN2Xv01_pqcd"),
+                    ( 'xAOD::JetContainer' , f"StoreGateSvc+{self.jetCollection}.GN2Xv01_ptop")]
                 config.setExtraInputs (extraInputs)
 
         # Set up shallow copy if needed and not yet done
@@ -168,7 +191,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
     """the ConfigBlock for the small-r jet sequence"""
 
     def __init__ (self) :
-        super (SmallRJetAnalysisConfig, self).__init__ ()
+        super().__init__()
         self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the output container after calibration.",
@@ -263,13 +286,13 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
                 raise ValueError(
                     "Invalid uncertainty configuration - Scenario* systematicsModelJESs can "
                     "only be used together with the Simple systematicsModelJER")
-            config_file = "R4_{0}_SimpleJER.config".format(self.systematicsModelJES)
+            config_file = f"R4_{self.systematicsModelJES}_SimpleJER.config"
         elif self.systematicsModelJES in ["Global", "Category"] and self.systematicsModelJER in ["Simple", "Full"]:
-            config_file = "R4_{0}Reduction_{1}JER.config".format(self.systematicsModelJES, self.systematicsModelJER)
+            config_file = f"R4_{self.systematicsModelJES}Reduction_{self.systematicsModelJER}JER.config"
         else:
             raise ValueError(
                 "Invalid combination of systematicsModelJES and systematicsModelJER settings: "
-                "systematicsModelJES: {0}, systematicsModelJER: {1}".format(self.systematicsModelJES, self.systematicsModelJER) )
+                f"systematicsModelJES: {self.systematicsModelJES}, systematicsModelJER: {self.systematicsModelJER}" )
 
         # Calibration area:
         calib_area = None
@@ -331,34 +354,23 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         configFile, calibArea, mcType = self.getUncertaintyToolSettings(config)
 
         # The main tool for all JES+JER combinations
-        config.addPrivateTool( 'uncertaintiesTool', 'JetUncertaintiesTool' )
-        jetUncertaintiesAlg.uncertaintiesTool.JetDefinition = jetCollectionName[:-4]
-        jetUncertaintiesAlg.uncertaintiesTool.ConfigFile = configFile
+        tool = _addJetUncertaintiesTool(config, jetUncertaintiesAlg, 'uncertaintiesTool',
+                                        jetCollectionName, configFile, calibArea, mcType,
+                                        isData=(config.dataType() is DataType.Data),
+                                        pseudoData=False)
         from PathResolver import PathResolver
         if self.uncertaintyAnalysisFiles is not None:
           if config.dsid() in self.uncertaintyAnalysisFiles:
-            jetUncertaintiesAlg.uncertaintiesTool.AnalysisFile = PathResolver.FindCalibFile(self.uncertaintyAnalysisFiles[config.dsid()])
-        if calibArea is not None:
-            jetUncertaintiesAlg.uncertaintiesTool.CalibArea = calibArea
-        jetUncertaintiesAlg.uncertaintiesTool.MCType = mcType
-        jetUncertaintiesAlg.uncertaintiesTool.IsData = (config.dataType() is DataType.Data)
-        jetUncertaintiesAlg.uncertaintiesTool.PseudoDataJERsmearingMode = False
+            tool.AnalysisFile = PathResolver.FindCalibFile(self.uncertaintyAnalysisFiles[config.dsid()])
 
         if config.dataType() is DataType.Data and not (doPseudoData and self.runJERsystematicsOnData):
             # we don't want any systematics on data if we're not using the right JER model!
             jetUncertaintiesAlg.affectingSystematicsFilter = '.*'
         if config.dataType() is not DataType.Data and doPseudoData and not self.runJERsystematicsOnData:
             # The secondary tool for pseudo-data JER smearing
-            config.addPrivateTool( 'uncertaintiesToolPD', 'JetUncertaintiesTool' )
-            jetUncertaintiesAlg.uncertaintiesToolPD.JetDefinition = jetCollectionName[:-4]
-            jetUncertaintiesAlg.uncertaintiesToolPD.ConfigFile = configFile
-            if calibArea is not None:
-                jetUncertaintiesAlg.uncertaintiesToolPD.CalibArea = calibArea
-            jetUncertaintiesAlg.uncertaintiesToolPD.MCType = mcType
-
-            # This is the part that is different!
-            jetUncertaintiesAlg.uncertaintiesToolPD.IsData = True
-            jetUncertaintiesAlg.uncertaintiesToolPD.PseudoDataJERsmearingMode = True
+            _addJetUncertaintiesTool(config, jetUncertaintiesAlg, 'uncertaintiesToolPD',
+                                     jetCollectionName, configFile, calibArea, mcType,
+                                     isData=True, pseudoData=True)
 
 
     def makeAlgs (self, config) :
@@ -368,25 +380,21 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             return
 
 
-        jetCollectionName=self.jetCollection
-        if(self.jetCollection=="AnalysisJets") :
-            jetCollectionName="AntiKt4EMPFlowJets"
-        if(self.jetCollection=="AnalysisLargeRJets") :
-            jetCollectionName="AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"
+        jetCollectionName = config.getContainerMeta(self.containerName, 'jetCollectionName', failOnMiss=True)
 
         jetInput = config.getContainerMeta(self.containerName, 'jetInput', failOnMiss=True)
 
         if jetInput not in ["EMTopo", "EMPFlow", "HI"]:
             raise ValueError(
-                "Unsupported input type '{0}' for R=0.4 jets!".format(jetInput) )
+                f"Unsupported input type '{jetInput}' for R=0.4 jets!" )
 
         if self.jvtWP not in ["FixedEffPt"]:
             raise ValueError(
-                "Unsupported NNJvt WP '{0}'".format(self.jvtWP) )
+                f"Unsupported NNJvt WP '{self.jvtWP}'" )
 
         if self.fJvtWP not in ["Loose", "Tight", "Tighter"]:
             raise ValueError(
-                "Unsupported fJvt WP '{0}'".format(self.fJvtWP) )
+                f"Unsupported fJvt WP '{self.fJvtWP}'" )
 
         if not config.isPhyslite() or self.recalibratePhyslite:
             # Create calibration tool as public so it can be shared
@@ -407,15 +415,17 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             elif jetInput == "HI":
                 if config.geometry() is LHCPeriod.Run2:
                     configFile = "JES_MC16_HI_Jan2021_5TeV.config"
-                if config.geometry() is LHCPeriod.Run3:
+                elif config.geometry() is LHCPeriod.Run3:
                     configFile = "AntiKt4HI_MC23_EtaJES_Run3PreRec_Run2VJet_Run3EtaInt_5p36TeV.config"
                     calibTool.CalibArea = "00-04-83"
+                else:
+                    raise ValueError(
+                        f"Unsupported geometry '{config.geometry()}' for HI jet calibration!")
             else:
                 if config.dataType() is DataType.FastSim:
-                    configFile = "JES_MC16Recommendation_AFII_{0}_Apr2019_Rel21.config"
+                    configFile = f"JES_MC16Recommendation_AFII_{jetInput}_Apr2019_Rel21.config"
                 else:
-                    configFile = "JES_MC16Recommendation_Consolidated_{0}_Apr2019_Rel21.config"
-                configFile = configFile.format(jetInput)
+                    configFile = f"JES_MC16Recommendation_Consolidated_{jetInput}_Apr2019_Rel21.config"
             if self.calibToolCalibArea is not None:
                 calibTool.CalibArea = self.calibToolCalibArea
             if self.calibToolConfigFile is not None:
@@ -557,7 +567,7 @@ class RScanJetAnalysisConfig (ConfigBlock) :
     """the ConfigBlock for the r-scan jet sequence"""
 
     def __init__ (self) :
-        super (RScanJetAnalysisConfig, self).__init__ ()
+        super().__init__()
         self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the output container after calibration.",
@@ -581,25 +591,21 @@ class RScanJetAnalysisConfig (ConfigBlock) :
         if radius not in [2, 6]:
             return
 
-        jetCollectionName=self.jetCollection
-        if(self.jetCollection=="AnalysisJets") :
-            jetCollectionName="AntiKt4EMPFlowJets"
-        if(self.jetCollection=="AnalysisLargeRJets") :
-            jetCollectionName="AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets"
+        jetCollectionName = config.getContainerMeta(self.containerName, 'jetCollectionName', failOnMiss=True)
 
         jetInput = config.getContainerMeta(self.containerName, 'jetInput', failOnMiss=True)
 
         if not config.isPhyslite() or self.recalibratePhyslite:
             if jetInput not in ["LCTopo", "HI"]:
                 raise ValueError(
-                    "Unsupported input type '{0}' for R-scan jets!".format(jetInput) )
+                    f"Unsupported input type '{jetInput}' for R-scan jets!" )
             # Create calibration tool before algorithm (EventLoop ordering)
             calibToolName = 'JetCalibTool_' + jetCollectionName[:-4]
             calibTool = config.createPublicTool( 'JetCalibrationTool', calibToolName )
             calibTool.JetCollection = jetCollectionName[:-4]
             if jetInput=="LCTopo":
                 calibTool.ConfigFile = \
-                    "JES_MC16Recommendation_Rscan{0}LC_Feb2022_R21.config".format(radius)
+                    f"JES_MC16Recommendation_Rscan{radius}LC_Feb2022_R21.config"
                 if config.dataType() is DataType.Data:
                     calibTool.CalibSequence = "JetArea_Residual_EtaJES_GSC_Insitu"
                 else:
@@ -626,7 +632,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
     """the ConfigBlock for the large-r jet sequence"""
 
     def __init__ (self) :
-        super (LargeRJetAnalysisConfig, self).__init__ ()
+        super().__init__()
         self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the output container after calibration.",
@@ -635,17 +641,17 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             noneAction='error',
             info="the jet container to run on. It is interpreted to determine "
             "the correct config blocks to call for small- or large-R jets.")
-        self.addOption ('jetInput', '', type=str,
-            noneAction='error',
-            info="the type of jet input. Supported options are: `UFO`.",
-            meta={'choices':(['UFO'],1)})
         self.addOption ('recalibratePhyslite', True, type=bool,
             info="whether to run the CP::JetCalibrationAlg on PHYSLITE "
             "derivations. The default is True.")
         self.addOption ('runUncertainties', True, type=bool,
             info="whether to configure JetUncertaintiesTool.", expertMode=True )
-        self.addOption ('systematicsModelJER', "Full", type=str, meta={'choices':(['Simple','Full'],1)})
-        self.addOption ('systematicsModelJMS', "Full", type=str, meta={'choices':(['Simple','Full'],1)})
+        self.addOption ('systematicsModelJER', "Full", type=str,
+            info="the NP reduction scheme to use for JER: Full, Simple. The default is Full.",
+            meta={'choices':(['Simple','Full'],1)})
+        self.addOption ('systematicsModelJMS', "Full", type=str,
+            info="the NP reduction scheme to use for JMS: Full, Simple. The default is Full.",
+            meta={'choices':(['Simple','Full'],1)})
         self.addOption ('systematicsModelJMR', "Full", type=str,
             info="the NP reduction scheme to use for JMR: Full, Simple. The default is Full.",
             meta={'choices':(['Full','Simple'],1)})
@@ -712,12 +718,12 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
         # Config file:
         config_file = None
         if self.systematicsModelJER in ["Simple", "Full"] and self.systematicsModelJMS in ["Simple", "Full"]:
-            config_file = "R10_CategoryJES_{0}JER_{1}JMS.config".format(self.systematicsModelJER, self.systematicsModelJMS)
+            config_file = f"R10_CategoryJES_{self.systematicsModelJER}JER_{self.systematicsModelJMS}JMS.config"
         else:
             raise ValueError(
                 "Invalid request for systematicsModelJER/JMS settings: "
-                "systematicsModelJER = '{0}', "
-                "systematicsModelJMS = '{1}'".format(self.systematicsModelJER, self.systematicsModelJMS) )
+                f"systematicsModelJER = '{self.systematicsModelJER}', "
+                f"systematicsModelJMS = '{self.systematicsModelJMS}'" )
         if self.uncertToolConfigPath is not None:
             # Expert override
             config_file = self.uncertToolConfigPath
@@ -726,9 +732,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
                 config_file = "rel22/Summer2025_PreRec/" + config_file
             else:
                 warnings.warn_explicit(
-                    "Uncertainties for UFO jets are not for Run 4!"
-                    " are deprecated - please use a"
-                    " JVTWorkingPoint block instead.",
+                    "Uncertainties for UFO jets are not available for Run 4!",
                     JetUncertaintyWarning, filename='', lineno=0)
 
 
@@ -767,30 +771,21 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
         configFile, calibArea, mcType = self.getUncertaintyToolSettings(config)
 
         # The main tool for all JER combinations
-        config.addPrivateTool( 'uncertaintiesTool', 'JetUncertaintiesTool' )
-        jetUncertaintiesAlg.uncertaintiesTool.JetDefinition = jetCollectionName[:-4]
-        jetUncertaintiesAlg.uncertaintiesTool.ConfigFile = configFile
-        if calibArea is not None:
-            jetUncertaintiesAlg.uncertaintiesTool.CalibArea = calibArea
-        jetUncertaintiesAlg.uncertaintiesTool.MCType = mcType
-        jetUncertaintiesAlg.uncertaintiesTool.IsData = (config.dataType() is DataType.Data)
-        jetUncertaintiesAlg.uncertaintiesTool.PseudoDataJERsmearingMode = False
+        _addJetUncertaintiesTool(config, jetUncertaintiesAlg, 'uncertaintiesTool',
+                                 jetCollectionName, configFile, calibArea, mcType,
+                                 isData=(config.dataType() is DataType.Data),
+                                 pseudoData=False)
 
         # JER smearing on data 
-        if config.dataType() is DataType.Data and not (config.isPhyslite() and doPseudoData and self.runJERsystematicsOnData):
+        if config.dataType() is DataType.Data and not (doPseudoData and self.runJERsystematicsOnData):
             # we don't want any systematics on data if we're not using the right JER model!
             jetUncertaintiesAlg.affectingSystematicsFilter = '.*'
 
-        if config.dataType() is not (DataType.Data and config.isPhyslite()) and doPseudoData and not self.runJERsystematicsOnData:
+        if config.dataType() is not DataType.Data and doPseudoData and not self.runJERsystematicsOnData:
             # The secondary tool for pseudo-data JER smearing
-            config.addPrivateTool( 'uncertaintiesToolPD', 'JetUncertaintiesTool' )
-            jetUncertaintiesAlg.uncertaintiesToolPD.JetDefinition = jetCollectionName[:-4]
-            jetUncertaintiesAlg.uncertaintiesToolPD.ConfigFile = configFile
-            if calibArea is not None:
-                jetUncertaintiesAlg.uncertaintiesToolPD.CalibArea = calibArea
-            jetUncertaintiesAlg.uncertaintiesToolPD.MCType = mcType
-            jetUncertaintiesAlg.uncertaintiesToolPD.IsData = True
-            jetUncertaintiesAlg.uncertaintiesToolPD.PseudoDataJERsmearingMode = True
+            _addJetUncertaintiesTool(config, jetUncertaintiesAlg, 'uncertaintiesToolPD',
+                                     jetCollectionName, configFile, calibArea, mcType,
+                                     isData=True, pseudoData=True)
 
     def createFFSmearingTool(self, jetFFSmearingAlg, config):
         # Retrieve appropriate large-R jet mass resolution recommendations for the FFJetSmearingTool.
@@ -837,21 +832,13 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
         if config.getContainerMeta(self.containerName, 'jetRadius', failOnMiss=True) != 10:
             return
 
-        configFile = None
-        calibSeq = None
-        calibArea = None
-
-        jetCollectionName=self.jetCollection
-        if(self.jetCollection=="AnalysisJets") :
-            jetCollectionName="AntiKt4EMPFlowJets"
-        if(self.jetCollection=="AnalysisLargeRJets") :
-            jetCollectionName="AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"
+        jetCollectionName = config.getContainerMeta(self.containerName, 'jetCollectionName', failOnMiss=True)
 
         jetInput = config.getContainerMeta(self.containerName, 'jetInput', failOnMiss=True)
         trim = config.getContainerMeta(self.containerName, 'jetTrim', failOnMiss=True)
 
         if jetInput not in ["UFO"]:
-            raise ValueError("Invalid input type '{0}' for large-R jets!".format(jetInput) )
+            raise ValueError(f"Invalid input type '{jetInput}' for large-R jets!" )
 
         if not trim:
             raise ValueError("Untrimmed large-R jets are not supported!")
@@ -863,7 +850,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
 
         if config.dataType() is not DataType.Data:
             calibSeq = "EtaJES_JMS"
-        elif config.dataType() is DataType.Data:
+        else:
             calibSeq = "EtaJES_JMS_Insitu"
         if self.calibToolCalibSeq is not None:
             calibSeq = self.calibToolCalibSeq
@@ -878,12 +865,8 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
 
             calibTool.JetCollection = jetCollectionName[:-4]
 
-            if configFile is None:
-                raise ValueError(f'Unsupported: {jetInput=}, {config.dataType()=}')
             calibTool.ConfigFile = configFile
 
-            if calibSeq is None:
-                raise ValueError(f'Unsupported: {jetInput=}, {config.dataType()=}')
             calibTool.CalibSequence = calibSeq
 
             if calibArea is not None:
@@ -897,12 +880,10 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             alg.jetsOut = config.copyName(self.containerName)
 
         # Jet uncertainties
-        if jetInput == "UFO" and config.dataType() in [DataType.FullSim, DataType.FastSim] and self.runUncertainties:
+        if config.dataType() in [DataType.FullSim, DataType.FastSim] and self.runUncertainties:
             alg = config.createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesAlg' )
             self.createUncertaintyTool(alg, config, jetCollectionName, doPseudoData=( self.systematicsModelJER in ["Full","All"] ))
 
-            alg.uncertaintiesTool.JetDefinition = jetCollectionName[:-4]
-
             # R=1.0 jets have a validity range
             alg.outOfValidity = 2 # SILENT
             alg.outOfValidityDeco = 'outOfValidity'
@@ -911,26 +892,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             alg.jetsOut = config.copyName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
 
-        if jetInput != "UFO" and self.runUncertainties:
-            alg = config.createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesAlg' )
-
-            # R=1.0 jets have a validity range
-            alg.outOfValidity = 2 # SILENT
-            alg.outOfValidityDeco = 'outOfValidity'
-            config.addPrivateTool( 'uncertaintiesTool', 'JetUncertaintiesTool' )
-
-            alg.uncertaintiesTool.JetDefinition = jetCollectionName[:-4]
-            alg.uncertaintiesTool.ConfigFile = \
-                "rel21/Moriond2018/R10_{0}Mass_all.config".format(self.largeRMass)
-            alg.uncertaintiesTool.MCType = "MC16a"
-            alg.uncertaintiesTool.IsData = (config.dataType() is DataType.Data)
-
-            alg.jets = config.readName (self.containerName)
-            alg.jetsOut = config.copyName (self.containerName)
-            alg.preselection = config.getPreselection (self.containerName, '')
-            config.addSelection (self.containerName, '', 'outOfValidity')
-
-        if jetInput == "UFO" and config.dataType() is not DataType.Data:
+        if config.dataType() is not DataType.Data:
             # set up the FF smearing algorithm
             alg = config.createAlgorithm( 'CP::JetFFSmearingAlg', 'JetFFSmearingAlg' )
             self.createFFSmearingTool(alg, config)
@@ -968,302 +930,185 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
 
         config.addOutputVar (self.containerName, 'm', 'm')
 
-class JvtWorkingPointSelectionConfig (ConfigBlock) :
+class _JvtWorkingPointBase (ConfigBlock) :
+    """common base for the Jvt and fJvt working point config blocks
+
+    The concrete blocks combine one of these bases with a parameter class
+    (`_NNJvtParameters` or `_FJvtParameters`)."""
+
+    def __init__ (self) :
+        super().__init__()
+        self.setBlockName(self.__class__.__name__)
+        self.addOption ('containerName', '', type=str,
+            noneAction='error',
+            info="the name of the input container.",
+            meta={'role':'containerRef'})
+        self.addOption ('selectionName', '', type=str,
+            noneAction='error',
+            info="the name of the jet selection to define (e.g. `tight` or `loose`).",
+            meta={'role':'selection'})
+        self.addOption (self._wpOption, '', type=str,
+            noneAction='error',
+            info=self._wpInfo,
+            meta={'choices':(self._wpChoices,1)})
+        self.addOption ('useSuffix', True, type=bool,
+            info="whether the working point name is to be used as suffix ."
+            "Not to be disabled if multiple working points are scheduled.")
+
+    def instanceName (self) :
+        return self.containerName + '_' + self.selectionName
+
+    def workingPoint (self) :
+        return getattr(self, self._wpOption)
+
+    def suffix (self) :
+        return f"_{self.workingPoint()}" if self.useSuffix else ""
+
+
+class _JvtWorkingPointSelectionBase (_JvtWorkingPointBase) :
+    """common base for the Jvt and fJvt working point selection blocks"""
+
+    def makeAlgs (self, config) :
+
+        suffix = self.suffix()
+        decorationName = f"{self._prefix}_selection{suffix},as_char"
+        selectionName = self.selectionName
+
+        alg = config.createAlgorithm('CP::AsgSelectionAlg', f'{self._algPrefix}SelectionAlg_{self.workingPoint()}')
+        config.addPrivateTool('selectionTool', self._selectionTool)
+        alg.selectionTool.JetContainer = config.readName(self.containerName)
+        alg.selectionTool.JvtMomentName = self._momentName
+        alg.selectionTool.WorkingPoint = self.workingPoint()
+        if self._maxPtForJvt is not None:
+            alg.selectionTool.MaxPtForJvt = self._maxPtForJvt
+        alg.selectionDecoration = decorationName
+        alg.particles = config.readName(self.containerName)
+
+        config.addSelection (self.containerName, selectionName, decorationName, preselection=False)
+
+
+class _JvtWorkingPointEfficiencyBase (_JvtWorkingPointBase) :
+    """common base for the Jvt and fJvt working point efficiency blocks"""
+
+    def __init__ (self) :
+        super().__init__()
+        self.addDependency('EventSelection', required=False)
+        self.addDependency('EventSelectionMerger', required=False)
+        self.addOption ('noEffSF', False, type=bool,
+            info="disables the calculation of efficiencies and scale factors. "
+            "Only useful to test a new WP for which scale factors are not available.",
+            expertMode=True)
+
+    def makeAlgs (self, config) :
+
+        suffix = self.suffix()
+        decorationName = f"{self._prefix}_selection{suffix},as_char"
+
+        if not self.noEffSF and config.dataType() is not DataType.Data:
+            alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', f'{self._algPrefix}EfficiencyAlg_{self.workingPoint()}' )
+            config.addPrivateTool( 'efficiencyTool', self._efficiencyTool )
+            alg.efficiencyTool.JetContainer = config.readName(self.containerName)
+            if self._maxPtForJvt is not None:
+                alg.efficiencyTool.MaxPtForJvt = self._maxPtForJvt
+            alg.efficiencyTool.WorkingPoint = self.workingPoint()
+            if config.geometry() is LHCPeriod.Run2:
+                alg.efficiencyTool.SFFile = f"JetJvtEfficiency/May2024/{self._sfFileStem}_Run2_EMPFlow.root"
+            else:
+                alg.efficiencyTool.SFFile = f"JetJvtEfficiency/May2024/{self._sfFileStem}_Run3_EMPFlow.root"
+            alg.selection = decorationName
+            alg.scaleFactorDecoration = f'{self._prefix}_effSF{suffix}_%SYS%'
+            alg.outOfValidity = 2
+            alg.outOfValidityDeco = f'no_{self._prefix}{suffix}'
+            alg.skipBadEfficiency = False
+            alg.jets = config.readName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, '')
+
+            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, f'{self._prefix}Efficiency{suffix}')
+
+
+class _JvtWorkingPointEventEfficiencyBase (_JvtWorkingPointBase) :
+    """common base for the Jvt and fJvt event working point efficiency blocks"""
+
+    def __init__ (self) :
+        super().__init__()
+        self.addDependency(f'{self._algPrefix}WorkingPointEfficiencyConfig', required=True)
+        self.addDependency('OverlapRemoval', required=False)
+        self.addDependency('EventSelection', required=False)
+        self.addDependency('EventSelectionMerger', required=False)
+        self.addOption ('noEffSF', False, type=bool,
+            info="disables the calculation of efficiencies and scale factors. "
+            "Only useful to test a new WP for which scale factors are not available.",
+            expertMode=True)
+        self.addOption ('eventSF', True, type=bool,
+            info="add calculation of event-level efficiency SF.")
+
+    def makeAlgs (self, config) :
+
+        if (not self.noEffSF and self.eventSF and
+            config.dataType() is not DataType.Data):
+            suffix = self.suffix()
+            alg = config.createAlgorithm( 'CP::AsgEventScaleFactorAlg', f'{self._eventSFAlgPrefix}_{self.workingPoint()}' )
+            preselection = config.getFullSelection (self.containerName, '')
+            alg.preselection = preselection + f'&&no_{self._prefix}{suffix}' if preselection else f'no_{self._prefix}{suffix}'
+            alg.scaleFactorInputDecoration = f'{self._prefix}_effSF{suffix}_%SYS%'
+            alg.scaleFactorOutputDecoration = f'{self._prefix}_effSF{suffix}_%SYS%'
+            alg.particles = config.readName (self.containerName)
+
+            config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration, f'weight_{self._prefix}_effSF{suffix}')
+
+
+class _NNJvtParameters :
+    """the parameters specific to the (NN)Jvt working point blocks"""
+    _prefix = 'jvt'
+    _algPrefix = 'Jvt'
+    _eventSFAlgPrefix = 'JvtEventScaleFactorAlg'
+    _wpOption = 'jvtWP'
+    _wpInfo = "the NNJvt WP to use. Supported WPs: `FixedEffPt`."
+    _wpChoices = ['FixedEffPt']
+    _selectionTool = 'CP::NNJvtSelectionTool'
+    _efficiencyTool = 'CP::NNJvtEfficiencyTool'
+    _momentName = "NNJvt"
+    _maxPtForJvt = 60*GeV
+    _sfFileStem = "NNJvtSFFile"
+
+
+class _FJvtParameters :
+    """the parameters specific to the fJvt working point blocks"""
+    _prefix = 'fjvt'
+    _algPrefix = 'FJvt'
+    _eventSFAlgPrefix = 'ForwardJvtEventScaleFactorAlg'
+    _wpOption = 'fjvtWP'
+    _wpInfo = "the fJvt WP to use. Supported WPs: `Loose`, `Tight`, `Tighter`."
+    _wpChoices = ['Loose','Tight','Tighter']
+    _selectionTool = 'CP::FJvtSelectionTool'
+    _efficiencyTool = 'CP::FJvtEfficiencyTool'
+    _momentName = "DFCommonJets_fJvt"
+    _maxPtForJvt = None
+    _sfFileStem = "fJvtSFFile"
+
+
+class JvtWorkingPointSelectionConfig (_NNJvtParameters, _JvtWorkingPointSelectionBase) :
     """the ConfigBlock for the Jvt working point selection"""
 
-    def __init__ (self) :
-        super (JvtWorkingPointSelectionConfig, self).__init__ ()
-        self.setBlockName('JvtWorkingPointSelectionConfig')
-        self.addOption ('containerName', '', type=str,
-            noneAction='error',
-            info="the name of the input container.",
-            meta={'role':'containerRef'})
-        self.addOption ('selectionName', '', type=str,
-            noneAction='error',
-            info="the name of the jet selection to define (e.g. `tight` or `loose`).",
-            meta={'role':'selection'})
-        self.addOption ('jvtWP', '', type=str,
-            noneAction='error',
-            info="the NNJvt WP to use. Supported WPs: `FixedEffPt`.",
-            meta={'choices':(['FixedEffPt'],1)})
-        self.addOption ('useSuffix', True, type=bool,
-            info="whether the working point name is to be used as suffix ."
-            "Not to be disabled if multiple working points are scheduled.")
 
-    def instanceName (self) :
-        return self.containerName + '_' + self.selectionName
-
-    def makeAlgs (self, config) :
-
-        suffix = f"_{self.jvtWP}" if self.useSuffix else ""
-        decorationName = f"jvt_selection{suffix},as_char"
-        selectionName = self.selectionName
-
-        alg = config.createAlgorithm('CP::AsgSelectionAlg', f'JvtSelectionAlg_{self.jvtWP}')
-        config.addPrivateTool('selectionTool', 'CP::NNJvtSelectionTool')
-        alg.selectionTool.JetContainer = config.readName(self.containerName)
-        alg.selectionTool.JvtMomentName = "NNJvt"
-        alg.selectionTool.WorkingPoint = self.jvtWP
-        alg.selectionTool.MaxPtForJvt = 60*GeV
-        alg.selectionDecoration = decorationName
-        alg.particles = config.readName(self.containerName)
-
-        config.addSelection (self.containerName, selectionName, decorationName, preselection=False)
-
-
-class JvtWorkingPointEfficiencyConfig (ConfigBlock) :
+class JvtWorkingPointEfficiencyConfig (_NNJvtParameters, _JvtWorkingPointEfficiencyBase) :
     """the ConfigBlock for the Jvt working point efficiency"""
 
-    def __init__ (self) :
-        super (JvtWorkingPointEfficiencyConfig, self).__init__ ()
-        self.setBlockName('JvtWorkingPointEfficiencyConfig')
-        self.addDependency('EventSelection', required=False)
-        self.addDependency('EventSelectionMerger', required=False)
-        self.addOption ('containerName', '', type=str,
-            noneAction='error',
-            info="the name of the input container.",
-            meta={'role':'containerRef'})
-        self.addOption ('selectionName', '', type=str,
-            noneAction='error',
-            info="the name of the jet selection to define (e.g. `tight` or `loose`).",
-            meta={'role':'selection'})
-        self.addOption ('jvtWP', '', type=str,
-            noneAction='error',
-            info="the NNJvt WP to use. Supported WPs: `FixedEffPt`.",
-            meta={'choices':(['FixedEffPt'],1)})
-        self.addOption ('useSuffix', True, type=bool,
-            info="whether the working point name is to be used as suffix ."
-            "Not to be disabled if multiple working points are scheduled.")
-        self.addOption ('noEffSF', False, type=bool,
-            info="disables the calculation of efficiencies and scale factors. "
-            "Only useful to test a new WP for which scale factors are not available.",
-            expertMode=True)
 
-    def instanceName (self) :
-        return self.containerName + '_' + self.selectionName
-
-    def makeAlgs (self, config) :
-
-        suffix = f"_{self.jvtWP}" if self.useSuffix else ""
-        decorationName = f"jvt_selection{suffix},as_char"
-
-        if not self.noEffSF and config.dataType() is not DataType.Data:
-            alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', f'JvtEfficiencyAlg_{self.jvtWP}' )
-            config.addPrivateTool( 'efficiencyTool', 'CP::NNJvtEfficiencyTool' )
-            alg.efficiencyTool.JetContainer = config.readName(self.containerName)
-            alg.efficiencyTool.MaxPtForJvt = 60*GeV
-            alg.efficiencyTool.WorkingPoint = self.jvtWP
-            if config.geometry() is LHCPeriod.Run2:
-                alg.efficiencyTool.SFFile = "JetJvtEfficiency/May2024/NNJvtSFFile_Run2_EMPFlow.root"
-            else:
-                alg.efficiencyTool.SFFile = "JetJvtEfficiency/May2024/NNJvtSFFile_Run3_EMPFlow.root"
-            alg.selection = decorationName
-            alg.scaleFactorDecoration = f'jvt_effSF{suffix}_%SYS%'
-            alg.outOfValidity = 2
-            alg.outOfValidityDeco = f'no_jvt{suffix}'
-            alg.skipBadEfficiency = False
-            alg.jets = config.readName (self.containerName)
-            alg.preselection = config.getPreselection (self.containerName, '')
-
-            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, f'jvtEfficiency{suffix}')
-
-
-class JvtWorkingPointEventEfficiencyConfig (ConfigBlock) :
+class JvtWorkingPointEventEfficiencyConfig (_NNJvtParameters, _JvtWorkingPointEventEfficiencyBase) :
     """the ConfigBlock for the event Jvt working point efficiency"""
 
-    def __init__ (self) :
-        super (JvtWorkingPointEventEfficiencyConfig, self).__init__ ()
-        self.setBlockName('JvtWorkingPointEventEfficiencyConfig')
-        self.addDependency('JvtWorkingPointEfficiencyConfig', required=True)
-        self.addDependency('OverlapRemoval', required=False)
-        self.addDependency('EventSelection', required=False)
-        self.addDependency('EventSelectionMerger', required=False)
-        self.addOption ('containerName', '', type=str,
-            noneAction='error',
-            info="the name of the input container.",
-            meta={'role':'containerRef'})
-        self.addOption ('selectionName', '', type=str,
-            noneAction='error',
-            info="the name of the jet selection to define (e.g. `tight` or `loose`).",
-            meta={'role':'selection'})
-        self.addOption ('jvtWP', '', type=str,
-            noneAction='error',
-            info="the NNJvt WP to use. Supported WPs: `FixedEffPt`.",
-            meta={'choices':(['FixedEffPt'],1)})
-        self.addOption ('useSuffix', True, type=bool,
-            info="whether the working point name is to be used as suffix ."
-            "Not to be disabled if multiple working points are scheduled.")
-        self.addOption ('noEffSF', False, type=bool,
-            info="disables the calculation of efficiencies and scale factors. "
-            "Only useful to test a new WP for which scale factors are not available.",
-            expertMode=True)
-        self.addOption ('eventSF', True, type=bool,
-            info="add calculation of event-level efficiency SF.")
 
-    def instanceName (self) :
-        return self.containerName + '_' + self.selectionName
-
-    def makeAlgs (self, config) :
-
-        if (not self.noEffSF and self.eventSF and
-            config.dataType() is not DataType.Data):
-            suffix = f"_{self.jvtWP}" if self.useSuffix else ""
-            alg = config.createAlgorithm( 'CP::AsgEventScaleFactorAlg', f'JvtEventScaleFactorAlg_{self.jvtWP}' )
-            preselection = config.getFullSelection (self.containerName, '')
-            alg.preselection = preselection + f'&&no_jvt{suffix}' if preselection else f'no_jvt{suffix}'
-            alg.scaleFactorInputDecoration = f'jvt_effSF{suffix}_%SYS%'
-            alg.scaleFactorOutputDecoration = f'jvt_effSF{suffix}_%SYS%'
-            alg.particles = config.readName (self.containerName)
-
-            config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration, f'weight_jvt_effSF{suffix}')
-
-
-class FJvtWorkingPointSelectionConfig (ConfigBlock) :
+class FJvtWorkingPointSelectionConfig (_FJvtParameters, _JvtWorkingPointSelectionBase) :
     """the ConfigBlock for the fJvt working point selection"""
 
-    def __init__ (self) :
-        super (FJvtWorkingPointSelectionConfig, self).__init__ ()
-        self.setBlockName('FJvtWorkingPointSelectionConfig')
-        self.addOption ('containerName', '', type=str,
-            noneAction='error',
-            info="the name of the input container.",
-            meta={'role':'containerRef'})
-        self.addOption ('selectionName', '', type=str,
-            noneAction='error',
-            info="the name of the jet selection to define (e.g. `tight` or `loose`).",
-            meta={'role':'selection'})
-        self.addOption ('fjvtWP', '', type=str,
-            noneAction='error',
-            info="the fJvt WP to use. Supported WPs: `Loose`, `Tight`, `Tighter`.",
-            meta={'choices':(['Loose','Tight','Tighter'],1)})
-        self.addOption ('useSuffix', True, type=bool,
-            info="whether the working point name is to be used as suffix ."
-            "Not to be disabled if multiple working points are scheduled.")
 
-    def instanceName (self) :
-        return self.containerName + '_' + self.selectionName
-
-    def makeAlgs (self, config) :
-
-        suffix = f"_{self.fjvtWP}" if self.useSuffix else ""
-        decorationName = f"fjvt_selection{suffix},as_char"
-        selectionName = self.selectionName
-
-        alg = config.createAlgorithm('CP::AsgSelectionAlg', f'FJvtSelectionAlg_{self.fjvtWP}')
-        config.addPrivateTool('selectionTool', 'CP::FJvtSelectionTool')
-        alg.selectionTool.JetContainer = config.readName(self.containerName)
-        alg.selectionTool.JvtMomentName = "DFCommonJets_fJvt"
-        alg.selectionTool.WorkingPoint = self.fjvtWP
-        alg.selectionDecoration = decorationName
-        alg.particles = config.readName(self.containerName)
-
-        config.addSelection (self.containerName, selectionName, decorationName, preselection=False)
-
-
-class FJvtWorkingPointEfficiencyConfig (ConfigBlock) :
+class FJvtWorkingPointEfficiencyConfig (_FJvtParameters, _JvtWorkingPointEfficiencyBase) :
     """the ConfigBlock for the fJvt working point efficiency"""
 
-    def __init__ (self) :
-        super (FJvtWorkingPointEfficiencyConfig, self).__init__ ()
-        self.setBlockName('FJvtWorkingPointEfficiencyConfig')
-        self.addDependency('EventSelection', required=False)
-        self.addDependency('EventSelectionMerger', required=False)
-        self.addOption ('containerName', '', type=str,
-            noneAction='error',
-            info="the name of the input container.",
-            meta={'role':'containerRef'})
-        self.addOption ('selectionName', '', type=str,
-            noneAction='error',
-            info="the name of the jet selection to define (e.g. `tight` or `loose`).",
-            meta={'role':'selection'})
-        self.addOption ('fjvtWP', '', type=str,
-            noneAction='error',
-            info="the fJvt WP to use. Supported WPs: `Loose`, `Tight`, `Tighter`.",
-            meta={'choices':(['Loose','Tight','Tighter'],1)})
-        self.addOption ('useSuffix', True, type=bool,
-            info="whether the working point name is to be used as suffix ."
-            "Not to be disabled if multiple working points are scheduled.")
-        self.addOption ('noEffSF', False, type=bool,
-            info="disables the calculation of efficiencies and scale factors. "
-            "Only useful to test a new WP for which scale factors are not available.",
-            expertMode=True)
 
-    def instanceName (self) :
-        return self.containerName + '_' + self.selectionName
-
-    def makeAlgs (self, config) :
-
-        suffix = f"_{self.fjvtWP}" if self.useSuffix else ""
-        decorationName = f"fjvt_selection{suffix},as_char"
-
-        if not self.noEffSF and config.dataType() is not DataType.Data:
-            alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', f'FJvtEfficiencyAlg_{self.fjvtWP}' )
-            config.addPrivateTool( 'efficiencyTool', 'CP::FJvtEfficiencyTool' )
-            alg.efficiencyTool.JetContainer = config.readName(self.containerName)
-            alg.efficiencyTool.WorkingPoint = self.fjvtWP
-            if config.geometry() is LHCPeriod.Run2:
-                alg.efficiencyTool.SFFile = "JetJvtEfficiency/May2024/fJvtSFFile_Run2_EMPFlow.root"
-            else:
-                alg.efficiencyTool.SFFile = "JetJvtEfficiency/May2024/fJvtSFFile_Run3_EMPFlow.root"
-            alg.selection = decorationName
-            alg.scaleFactorDecoration = f'fjvt_effSF{suffix}_%SYS%'
-            alg.outOfValidity = 2
-            alg.outOfValidityDeco = f'no_fjvt{suffix}'
-            alg.skipBadEfficiency = False
-            alg.jets = config.readName (self.containerName)
-            alg.preselection = config.getPreselection (self.containerName, '')
-
-            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, f'fjvtEfficiency{suffix}')
-
-
-class FJvtWorkingPointEventEfficiencyConfig (ConfigBlock) :
+class FJvtWorkingPointEventEfficiencyConfig (_FJvtParameters, _JvtWorkingPointEventEfficiencyBase) :
     """the ConfigBlock for the event fJvt working point efficiency"""
-
-    def __init__ (self) :
-        super (FJvtWorkingPointEventEfficiencyConfig, self).__init__ ()
-        self.setBlockName('FJvtWorkingPointEventEfficiencyConfig')
-        self.addDependency('FJvtWorkingPointEfficiencyConfig', required=True)
-        self.addDependency('OverlapRemoval', required=False)
-        self.addDependency('EventSelection', required=False)
-        self.addDependency('EventSelectionMerger', required=False)
-        self.addOption ('containerName', '', type=str,
-            noneAction='error',
-            info="the name of the input container.",
-            meta={'role':'containerRef'})
-        self.addOption ('selectionName', '', type=str,
-            noneAction='error',
-            info="the name of the jet selection to define (e.g. `tight` or `loose`).",
-            meta={'role':'selection'})
-        self.addOption ('fjvtWP', '', type=str,
-            noneAction='error',
-            info="the fJvt WP to use. Supported WPs: `Loose`, `Tight`, `Tighter`.",
-            meta={'choices':(['Loose','Tight','Tighter'],1)})
-        self.addOption ('useSuffix', True, type=bool,
-            info="whether the working point name is to be used as suffix ."
-            "Not to be disabled if multiple working points are scheduled.")
-        self.addOption ('noEffSF', False, type=bool,
-            info="disables the calculation of efficiencies and scale factors. "
-            "Only useful to test a new WP for which scale factors are not available.",
-            expertMode=True)
-        self.addOption ('eventSF', True, type=bool,
-            info="add calculation of event-level efficiency SF.")
-
-    def instanceName (self) :
-        return self.containerName + '_' + self.selectionName
-
-    def makeAlgs (self, config) :
-
-        if (not self.noEffSF and self.eventSF and
-            config.dataType() is not DataType.Data):
-            suffix = f"_{self.fjvtWP}" if self.useSuffix else ""
-            alg = config.createAlgorithm( 'CP::AsgEventScaleFactorAlg', f'ForwardJvtEventScaleFactorAlg_{self.fjvtWP}' )
-            preselection = config.getFullSelection (self.containerName, '')
-            alg.preselection = preselection + f'&&no_fjvt{suffix}' if preselection else f'no_fjvt{suffix}'
-            alg.scaleFactorInputDecoration = f'fjvt_effSF{suffix}_%SYS%'
-            alg.scaleFactorOutputDecoration = f'fjvt_effSF{suffix}_%SYS%'
-            alg.particles = config.readName (self.containerName)
-
-            config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration, f'weight_fjvt_effSF{suffix}')
 
 
 @groupBlocks
