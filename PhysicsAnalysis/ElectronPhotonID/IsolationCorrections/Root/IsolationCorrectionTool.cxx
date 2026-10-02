@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "IsolationCorrections/IsolationCorrectionTool.h"
@@ -61,17 +61,17 @@ namespace CP {
     corrFileNameList.push_back(m_corr_ddshift_file);
     corrFileNameList.push_back(m_corr_ddsmearing_file);
 
-    for ( unsigned int i=0; i<corrFileNameList.size(); ++i ){
+    for ( auto & corrFileName: corrFileNameList ){
 
       //First try the PathResolver
-      std::string filename = PathResolverFindCalibFile( corrFileNameList.at(i) );
+      std::string filename = PathResolverFindCalibFile( corrFileName );
       if (filename.empty()){
-	      ATH_MSG_ERROR ( "Could NOT resolve file name " << corrFileNameList.at(i) );
+	      ATH_MSG_ERROR ( "Could NOT resolve file name " << corrFileName );
 	      return StatusCode::FAILURE ;
       } else{
 	      ATH_MSG_INFO(" Path found = "<<filename);
       }
-      corrFileNameList.at(i) = filename;
+      corrFileName = std::move(filename);
     }
     //
 
@@ -266,6 +266,7 @@ namespace CP {
         }
       } else{
 	      ATH_MSG_WARNING("Could not retrieve EventInfo object");
+	      continue; //don't dereference eventInfo after this point
       }
       if (theRunNumber >= 320000)
 	      m_ddVersion = "2017" ;      // RunNo found, and is in 2017 range

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ElectronPhotonSelectorTools/AsgDeadHVCellRemovalTool.h"
@@ -35,6 +35,10 @@ bool AsgDeadHVCellRemovalTool::accept( const xAOD::Egamma* eg ) const{
   }  
 
   const xAOD::EventInfo *eventInfo = evtStore()->retrieve< const xAOD::EventInfo> ("EventInfo");
+  if (!eventInfo)[[unlikely]]{
+    ATH_MSG_ERROR ("Failed, eventInfo is null.");
+    return false;
+  }
   bool isSimul= eventInfo->eventType(xAOD::EventInfo::IS_SIMULATION);
   
   unsigned int runnumber (0);
