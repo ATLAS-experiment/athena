@@ -26,7 +26,7 @@ namespace AthViews {
 ////////////////////////////
 StatusCode DFlowAlg3::initialize()
 {
-  ATH_MSG_INFO ("Initializing " << name() << "...");
+  ATH_MSG_INFO ("Initializing {}...", name());
 
   CHECK( m_r_int.initialize() );
   CHECK( m_r_ints.initialize() );
@@ -39,34 +39,34 @@ StatusCode DFlowAlg3::initialize()
 
 StatusCode DFlowAlg3::finalize()
 {
-  ATH_MSG_INFO ("Finalizing " << name() << "...");
+  ATH_MSG_INFO ("Finalizing {}...", name());
 
   return StatusCode::SUCCESS;
 }
 
 StatusCode DFlowAlg3::execute(const EventContext& ctx) const
 {  
-  ATH_MSG_DEBUG ("Executing " << name() << "...");
+  ATH_MSG_DEBUG ("Executing {}...", name());
 
   SG::ReadHandle< int > inputScalarHandle( m_r_int, ctx );
   ATH_MSG_INFO("================================");
   ATH_MSG_INFO("myint r-handle...");
-  ATH_MSG_INFO("name: [" << inputScalarHandle.name() << "]");
-  ATH_MSG_INFO("store [" << inputScalarHandle.store() << "]");
-  ATH_MSG_INFO("clid: [" << inputScalarHandle.clid() << "]");
+  ATH_MSG_INFO("name: [{}]", inputScalarHandle.name());
+  ATH_MSG_INFO("store [{}]", inputScalarHandle.store());
+  ATH_MSG_INFO("clid: [{}]", inputScalarHandle.clid());
 
-  ATH_MSG_INFO("ptr: " << inputScalarHandle.cptr());
+  ATH_MSG_INFO("ptr: {}", static_cast<const void*>(inputScalarHandle.cptr()));
   if ( inputScalarHandle.isValid() )
   {
-    ATH_MSG_INFO( "val: " << *( inputScalarHandle.cptr() ) );
+    ATH_MSG_INFO( "val: {}", *( inputScalarHandle.cptr() ) );
   }
 
   SG::ReadHandle< std::vector< int > > inputVectorHandle( m_r_ints, ctx );
   ATH_MSG_INFO("ints r-handle...");
-  ATH_MSG_INFO("name: [" << inputVectorHandle.name() << "]");
-  ATH_MSG_INFO("store [" << inputVectorHandle.store() << "]");
-  ATH_MSG_INFO("clid: [" << inputVectorHandle.clid() << "]");
-  ATH_MSG_INFO("cptr: " << inputVectorHandle.cptr());
+  ATH_MSG_INFO("name: [{}]", inputVectorHandle.name());
+  ATH_MSG_INFO("store [{}]", inputVectorHandle.store());
+  ATH_MSG_INFO("clid: [{}]", inputVectorHandle.clid());
+  ATH_MSG_INFO("cptr: {}", static_cast<const void*>(inputVectorHandle.cptr()));
 
   // try to modify 'ints' via ReadHandle<>
   // shouldn't compile
@@ -78,25 +78,25 @@ StatusCode DFlowAlg3::execute(const EventContext& ctx) const
   SG::ReadHandle< std::vector<int> > ints( inputVectorHandle.name() );
   StatusCode sc = ints.setProxyDict( Atlas::getExtendedEventContext(ctx).proxy() );
   if ( !sc.isSuccess() ) ATH_MSG_INFO( "Failed to load view " );
-  ATH_MSG_INFO( "temporary r-handle[ints] - size: " << ints->size() );
+  ATH_MSG_INFO( "temporary r-handle[ints] - size: {}", ints->size() );
 
   // test that inexistant proxies are correctly detected
   ATH_MSG_INFO("-- testing inexistant proxies --");
   {
     SG::ReadHandle<int> o("--r-not-there--");
-    ATH_MSG_INFO("name: " << o.name());
-    ATH_MSG_INFO("valid:" << o.isValid());
+    ATH_MSG_INFO("name: {}", o.name());
+    ATH_MSG_INFO("valid: {}", o.isValid());
     if (o.isValid()) {
-      ATH_MSG_ERROR("should NOT be valid ! [line " << __LINE__ << "]" );
+      ATH_MSG_ERROR("should NOT be valid ! [line {}]", __LINE__ );
       return StatusCode::FAILURE;
     }
   }
   {
     SG::WriteHandle<int> o("--w-not-there--");
-    ATH_MSG_INFO("name: " << o.name());
-    ATH_MSG_INFO("valid:" << o.isValid());
+    ATH_MSG_INFO("name: {}", o.name());
+    ATH_MSG_INFO("valid: {}", o.isValid());
     if (o.isValid()) {
-      ATH_MSG_ERROR("should NOT be valid ! [line " << __LINE__ << "]" );
+      ATH_MSG_ERROR("should NOT be valid ! [line {}]", __LINE__ );
       return StatusCode::FAILURE;
     }
   }
@@ -105,24 +105,24 @@ StatusCode DFlowAlg3::execute(const EventContext& ctx) const
   ATH_MSG_INFO("-- testing WVar<T> semantics...");
   {
     SG::WriteHandle<int> o( inputScalarHandle.name() );
-    ATH_MSG_INFO("name: " << o.name());
-    ATH_MSG_INFO("valid:" << o.isValid());
+    ATH_MSG_INFO("name: {}", o.name());
+    ATH_MSG_INFO("valid: {}", o.isValid());
     if (o.isValid()) {
-      ATH_MSG_ERROR("should NOT be valid ! [line " << __LINE__ << "]" );
+      ATH_MSG_ERROR("should NOT be valid ! [line {}]", __LINE__ );
       return StatusCode::FAILURE;
     }
     try {
       *o = 42;
       if (o.isValid()) {
-        ATH_MSG_ERROR("should NOT be valid ! [line " << __LINE__ << "]" );
+        ATH_MSG_ERROR("should NOT be valid ! [line {}]", __LINE__ );
         return StatusCode::FAILURE;
       }
     } catch (std::exception &err) {
-      ATH_MSG_INFO("good, caught: [" << err.what() << "]");
+      ATH_MSG_INFO("good, caught: [{}]", err.what());
     }
-    ATH_MSG_INFO("valid:" << o.isValid());
+    ATH_MSG_INFO("valid: {}", o.isValid());
     if (o.isValid()) {
-      ATH_MSG_ERROR("should NOT be valid ! [line " << __LINE__ << "]" );
+      ATH_MSG_ERROR("should NOT be valid ! [line {}]", __LINE__ );
       return StatusCode::FAILURE;
     }
   }
@@ -133,11 +133,12 @@ StatusCode DFlowAlg3::execute(const EventContext& ctx) const
 
   // Test update handles
   SG::ReadHandle< HiveDataObj > testUpdate( m_testUpdate, ctx );
-  ATH_MSG_INFO( "Update handle final: " << testUpdate->val() );
+  ATH_MSG_INFO( "Update handle final: {}", testUpdate->val() );
 
   // Test conditions handles
   SG::ReadCondHandle< CondDataObj > testConditions( m_condKeyTest, ctx );
-  ATH_MSG_INFO( "Conditions handle test: " << **testConditions << " from key " << testConditions.fullKey() );
+  ATH_MSG_INFO( "Conditions handle test: {} from key {}",
+                **testConditions, testConditions.key() );
 
   return StatusCode::SUCCESS;
 }

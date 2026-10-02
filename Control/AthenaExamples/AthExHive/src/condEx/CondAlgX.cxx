@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CondAlgX.h"
@@ -16,7 +16,7 @@
 
 
 StatusCode CondAlgX::initialize() {
-  ATH_MSG_DEBUG("initialize " << name());
+  ATH_MSG_DEBUG("initialize {}", name());
 
   ATH_CHECK( m_evt.initialize() );
 
@@ -29,7 +29,7 @@ StatusCode CondAlgX::initialize() {
 }
 
 StatusCode CondAlgX::execute(const EventContext& ctx) const {
-  ATH_MSG_DEBUG("execute " << name());
+  ATH_MSG_DEBUG("execute {}", name());
   
   SG::ReadHandle<xAOD::EventInfo> evt( m_evt, ctx );
   if (!evt.isValid()) {
@@ -37,9 +37,8 @@ StatusCode CondAlgX::execute(const EventContext& ctx) const {
     return StatusCode::FAILURE;
   }
 
-  ATH_MSG_DEBUG("   EventInfo:  r: " << evt->runNumber()
-                << " e: " << evt->eventNumber() );
-
+  ATH_MSG_DEBUG("   EventInfo:  r: {} e: {}",
+                evt->runNumber(), evt->eventNumber() );
 
   EventIDBase now(ctx.eventID());
   if (evt->eventNumber() == 10) {
@@ -56,28 +55,26 @@ StatusCode CondAlgX::execute(const EventContext& ctx) const {
 
   }
 
-  ATH_MSG_DEBUG("  CondHandle " << wch.key() 
-		<< " not valid. Getting new info for dbKey \"" 
-		<< wch.dbKey() << "\" from CondDb");
+  ATH_MSG_DEBUG("  CondHandle {} not valid. Getting new info for dbKey \"{}\" from CondDb",
+                wch.key(), wch.dbKey());
 
   EventIDRange r;
   IASCIICondDbSvc::dbData_t val;
   if (m_cds->getRange(wch.dbKey(), ctx, r, val).isFailure()) {
-    ATH_MSG_ERROR("  could not find dbKey \"" << wch.dbKey() 
-		  << "\" in CondSvc registry");
+    ATH_MSG_ERROR("  could not find dbKey \"{}\" in CondSvc registry",
+                  wch.dbKey() );
     return StatusCode::FAILURE;
   }
 
   CondDataObj* cdo = new CondDataObj( val );
   if (wch.record(r, cdo).isFailure()) {
-    ATH_MSG_ERROR("could not record CondDataObj " << wch.key() 
-		  << " = " << *cdo
-		  << " with EventRange " << r);
+    ATH_MSG_ERROR("could not record CondDataObj {} = {} with EventRange {}",
+                  wch.key(), *cdo, static_cast<std::string>(r));
     return StatusCode::FAILURE;
   }
 
-  ATH_MSG_INFO("recorded new CDO " << wch.key() << " = " << *cdo 
-	       << " with range " << r);
+  ATH_MSG_INFO("recorded new CDO {} = {} with range {}",
+               wch.key(), *cdo, static_cast<std::string>(r));
   
   return StatusCode::SUCCESS;
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -19,7 +19,7 @@
 #include "gtest/gtest.h"
 
 #include <chrono>
-#include <format>
+#include <print>
 #include <iostream>
 #include <stdexcept>
 
@@ -82,9 +82,9 @@ struct TimeIt {
   using clock_t = std::chrono::high_resolution_clock;
   ~TimeIt() {
     try{
-      std::cout << std::format("{:10} {:>8}\n", name, std::chrono::duration_cast<std::chrono::microseconds>(clock_t::now()-t0));
+      std::print("{:10} {:>8}\n", name, std::chrono::duration_cast<std::chrono::microseconds>(clock_t::now()-t0));
     } catch ( std::format_error & e){
-      std::cerr<<"Format error in ViewPerf_test\n";
+      std::println (std::cerr, "Format error in ViewPerf_test");
     }
   }
   std::string name;
@@ -103,7 +103,7 @@ int main() {
   try{
     ctx.setExtension( Atlas::ExtendedEventContext(pStore.get()) );
   } catch (std::bad_any_cast & e){
-    std::cerr<<"Exception bad_any_cast in ViewPerf_test"<<std::endl;
+    std::println (std::cerr, "Exception bad_any_cast in ViewPerf_test");
     return 1;
   }
 
@@ -112,7 +112,7 @@ int main() {
     try{
       testSG(ctx);
     } catch (std::exception & e){
-      std::cerr<<"Exception "<<e.what()<<" in ViewPerf_test"<<std::endl;
+      std::println (std::cerr, "Exception {} in ViewPerf_test", e.what());
       return 1;
     }
   }

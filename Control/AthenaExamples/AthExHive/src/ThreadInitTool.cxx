@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ThreadInitTool.h"
@@ -18,8 +18,8 @@ ThreadInitTool::ThreadInitTool( const std::string& type, const std::string& name
 void
 ThreadInitTool::initThread()
 {
-  ATH_MSG_INFO ("initThread in thread 0x" << std::hex << pthread_self() 
-		<< " at " << this << std::dec );
+  ATH_MSG_INFO ("initThread in thread {:#x} at {}",
+                pthread_self(), static_cast<void*>(this));
 
   // Thread Local initializations would go here.
 
@@ -31,8 +31,7 @@ ThreadInitTool::initThread()
 void
 ThreadInitTool::terminateThread()
 {
-  ATH_MSG_INFO ("terminateThread in thread 0x"
-		<< std::hex << pthread_self() << std::dec );
+  ATH_MSG_INFO ("terminateThread in thread {:#x}", pthread_self());
 
   m_nInitThreads--;
 

@@ -17,7 +17,7 @@ namespace AthViews {
 
 StatusCode ViewMergeAlg::initialize()
 {
-  ATH_MSG_INFO ("Initializing " << name() << "...");
+  ATH_MSG_INFO ("Initializing {}...", name());
 
   CHECK( m_r_ints.initialize() );
   CHECK( m_w_ints.initialize() );
@@ -28,14 +28,14 @@ StatusCode ViewMergeAlg::initialize()
 
 StatusCode ViewMergeAlg::finalize()
 {
-  ATH_MSG_INFO ("Finalizing " << name() << "...");
+  ATH_MSG_INFO ("Finalizing {}...", name());
 
   return StatusCode::SUCCESS;
 }
 
 StatusCode ViewMergeAlg::execute(const EventContext& ctx) const
 {  
-  ATH_MSG_DEBUG ("Executing " << name() << "...");
+  ATH_MSG_DEBUG ("Executing {}", name());
 
   //Merge results
   std::vector< int > outputVector;

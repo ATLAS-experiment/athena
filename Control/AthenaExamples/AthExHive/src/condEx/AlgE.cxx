@@ -9,7 +9,7 @@
 //---------------------------------------------------------------------------
 
 StatusCode AlgE::initialize() {
-  ATH_MSG_DEBUG("initialize " << name());
+  ATH_MSG_DEBUG("initialize {}", name());
 
   ATH_CHECK( m_rdh1.initialize() );
   ATH_CHECK( m_rch1.initialize() );
@@ -17,11 +17,11 @@ StatusCode AlgE::initialize() {
   ATH_CHECK( m_rch3.initialize() );
   ATH_CHECK( m_rch4.initialize() );
 
-  ATH_MSG_INFO( "m_rdh1 id: " << m_rdh1.fullKey() );
-  ATH_MSG_INFO( "m_rch1 id: " << m_rch1.fullKey() );
-  ATH_MSG_INFO( "m_rch2 id: " << m_rch2.fullKey() );
-  ATH_MSG_INFO( "m_rch3 id: " << m_rch3.fullKey() );
-  ATH_MSG_INFO( "m_rch4 id: " << m_rch4.fullKey() );
+  ATH_MSG_INFO( "m_rdh1 id: {}", m_rdh1.key() );
+  ATH_MSG_INFO( "m_rch1 id: {}", m_rch1.key() );
+  ATH_MSG_INFO( "m_rch2 id: {}", m_rch2.key() );
+  ATH_MSG_INFO( "m_rch3 id: {}", m_rch3.key() );
+  ATH_MSG_INFO( "m_rch4 id: {}", m_rch4.key() );
 
   return StatusCode::SUCCESS;
 }
@@ -29,15 +29,15 @@ StatusCode AlgE::initialize() {
 //---------------------------------------------------------------------------
 
 StatusCode AlgE::execute(const EventContext& ctx) const {
-  ATH_MSG_DEBUG("execute " << name());
+  ATH_MSG_DEBUG("execute {}", name());
 
   SG::ReadHandle<HiveDataObj> rh1(m_rdh1, ctx);
   if (!rh1.isValid()) {
-    ATH_MSG_ERROR ("Could not retrieve HiveDataObj with key " << m_rdh1.key());
+    ATH_MSG_ERROR ("Could not retrieve HiveDataObj with key {}", m_rdh1.key());
     return StatusCode::FAILURE;
   }
 
-  ATH_MSG_INFO("  read: " << rh1.key() << " = " << rh1->val() );
+  ATH_MSG_INFO("  read: {} = {}", rh1.key(), rh1->val() );
 
   SG::ReadCondHandle<CondDataObj>  ch1( m_rch1, ctx );
   SG::ReadCondHandle<CondDataObjY> ch2( m_rch2, ctx );
@@ -48,7 +48,7 @@ StatusCode AlgE::execute(const EventContext& ctx) const {
   
   const CondDataObj* cdo = *ch1;
   if (cdo != 0) {
-    ATH_MSG_INFO("  CDO1: " << *cdo );
+    ATH_MSG_INFO("  CDO1: {}", *cdo );
     val += cdo->val();
   } else {
     ATH_MSG_ERROR("  CDO1 ptr == zero");
@@ -56,7 +56,7 @@ StatusCode AlgE::execute(const EventContext& ctx) const {
 
   const CondDataObjY* cdoy = *ch2;
   if (cdoy != 0) {
-    ATH_MSG_INFO("  CDO2: " << *cdoy );
+    ATH_MSG_INFO("  CDO2: {}", *cdoy );
     val += cdoy->val();
   } else {
     ATH_MSG_ERROR("  CDO2 ptr == zero");
@@ -64,7 +64,7 @@ StatusCode AlgE::execute(const EventContext& ctx) const {
 
   cdoy = *ch3;
   if (cdoy != 0) {
-    ATH_MSG_INFO("  CDO3: " << *cdoy );
+    ATH_MSG_INFO("  CDO3: {}", *cdoy );
     val += cdoy->val();
   } else {
     ATH_MSG_ERROR("  CDO3 ptr == zero");
@@ -72,7 +72,7 @@ StatusCode AlgE::execute(const EventContext& ctx) const {
 
   const CondDataObjZ *cdoz = *ch4;
   if (cdoz != 0) {
-    ATH_MSG_INFO("  CDO4: " << *cdoz );
+    ATH_MSG_INFO("  CDO4: {}", *cdoz );
 
     if (cdoz->val() != val) {
       ATH_MSG_ERROR(" value of CDO4 is incorrect ");
@@ -83,9 +83,9 @@ StatusCode AlgE::execute(const EventContext& ctx) const {
   }
 
   
-  ATH_MSG_INFO("TEST: " << ctx.eventID().event_number() << " "
-               << rh1->val() << " " << **ch1 << " " << **ch2 << " " << **ch3
-               << " " << **ch4);
+  ATH_MSG_INFO("TEST: {} {} {} {} {} {}",
+               ctx.eventID().event_number(),
+               rh1->val(),  **ch1,  **ch2,  **ch3,  **ch4);
   
   return StatusCode::SUCCESS;
 

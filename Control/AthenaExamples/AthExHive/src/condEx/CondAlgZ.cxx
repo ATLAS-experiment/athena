@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CondAlgZ.h"
@@ -8,7 +8,7 @@
 
 
 StatusCode CondAlgZ::initialize() {
-  ATH_MSG_DEBUG("initialize " << name());
+  ATH_MSG_DEBUG("initialize {}", name());
 
   ATH_CHECK( m_rchk1.initialize() );
   ATH_CHECK( m_rchk2.initialize() );
@@ -20,7 +20,7 @@ StatusCode CondAlgZ::initialize() {
 }
 
 StatusCode CondAlgZ::execute(const EventContext& ctx) const {
-  ATH_MSG_DEBUG("execute " << name());
+  ATH_MSG_DEBUG("execute {}", name());
   EventIDBase now(ctx.eventID());
 
   SG::ReadCondHandle<CondDataObj>  rch1(m_rchk1, ctx);
@@ -31,19 +31,18 @@ StatusCode CondAlgZ::execute(const EventContext& ctx) const {
   const CondDataObjY *cdo2 = *rch2;
   const CondDataObjY *cdo3 = *rch3;
 
-  ATH_MSG_DEBUG(" rh1: " << cdo1->val() << " rh2: " << cdo2->val()
-                << " rh3: " << cdo3->val());
+  ATH_MSG_DEBUG(" rh1: {} rh2: {} rh3: {}",
+                cdo1->val(), cdo2->val(), cdo3->val());
   
   SG::WriteCondHandle<CondDataObjZ> wch(m_wch,ctx);
 
   // do we have a valid m_wch for current time?
   if ( wch.isValid(now) ) {
-    ATH_MSG_DEBUG("Found valid write handle for " << wch.key());
+    ATH_MSG_DEBUG("Found valid write handle for {}", wch.key());
     return StatusCode::SUCCESS;
   }
 
-  ATH_MSG_DEBUG("  CondHandle " << wch.key() 
-		<< " not valid.");
+  ATH_MSG_DEBUG("  CondHandle {} not valid.", wch.key() );
   
   wch.addDependency(rch1);
   wch.addDependency(rch2,rch3);
@@ -52,14 +51,13 @@ StatusCode CondAlgZ::execute(const EventContext& ctx) const {
 
   if (wch.record( std::make_unique<CondDataObjZ>
 		  ( CondDataObjZ(val) ) ).isFailure()) {
-    ATH_MSG_ERROR("could not record CondDataObjZ " << wch.key()
-		  << " val: " << val
-		  << " with EventRange " << wch.getRange() );
+    ATH_MSG_ERROR("could not record CondDataObjZ {} val: {} with EventRange {}",
+               wch.key(), val, static_cast<std::string>(wch.getRange()));
     return StatusCode::FAILURE;
   }
 
-  ATH_MSG_INFO("recorded new CDO " << wch.key() << " = " << val
-	       << " with range " << wch.getRange() );
+  ATH_MSG_INFO("recorded new CDO {} = {} with range {}",
+               wch.key(), val, static_cast<std::string>(wch.getRange()));
 
   return StatusCode::SUCCESS;
 

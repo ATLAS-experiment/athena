@@ -17,7 +17,7 @@ HiveAlgL3::HiveAlgL3( const std::string& name,
 HiveAlgL3::~HiveAlgL3() = default;
 
 StatusCode HiveAlgL3::initialize() {
-  ATH_MSG_DEBUG("initialize " << name());
+  ATH_MSG_DEBUG("initialize {}", name());
 
   ATH_CHECK( m_udh1.initialize() );
 
@@ -26,7 +26,7 @@ StatusCode HiveAlgL3::initialize() {
 
 StatusCode HiveAlgL3::execute(const EventContext& ctx) const{
 
-  ATH_MSG_DEBUG("execute " << name());
+  ATH_MSG_DEBUG("execute {}", name());
 
   sleep(ctx);
 
@@ -34,7 +34,7 @@ StatusCode HiveAlgL3::execute(const EventContext& ctx) const{
 
   udh1->val( udh1->val() + 1);
 
-  ATH_MSG_INFO("  update: " << udh1.key() << " = " << udh1->val() );
+  ATH_MSG_INFO("  update: {} = {}", udh1.key(), udh1->val() );
 
   return StatusCode::SUCCESS;
 

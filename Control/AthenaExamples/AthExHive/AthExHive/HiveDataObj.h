@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHEXHIVE_HIVEDATAOBJ_H
@@ -28,11 +28,22 @@ private:
   int m_val;
 };
 
-#include <iostream>
-  inline std::ostream& operator<<(std::ostream& ost, const HiveDataObj& rhs) {
-    ost << "HDO: " << rhs.val(); 
-    return ost;
+
+#include <format>
+namespace std {
+
+template <>
+struct formatter<HiveDataObj>
+  : public formatter<string_view>
+{
+  template <class FmtContext>
+  FmtContext::iterator format (const HiveDataObj& io, FmtContext& ctx) const
+  {
+    return std::format_to (ctx.out(), "{}", io.val());
   }
+};
+
+} // namespace std
 
 
 //using the macros below we can assign an identifier (and a version) 

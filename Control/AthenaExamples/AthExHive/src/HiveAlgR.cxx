@@ -16,7 +16,7 @@ HiveAlgR::~HiveAlgR() = default;
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 StatusCode HiveAlgR::initialize() {
 
-  info() << "initialize: " << index() << endmsg;
+  ATH_MSG_INFO( "initialize: {}", index() );
 
   ATH_CHECK( m_wrh1.initialize() );
   ATH_CHECK( m_evt.initialize() );
@@ -26,23 +26,23 @@ StatusCode HiveAlgR::initialize() {
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 StatusCode HiveAlgR::finalize() {
-  info() << "finalize: " << index() << endmsg;
+  ATH_MSG_INFO( "finalize: {}", index() );
   return StatusCode::SUCCESS;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 StatusCode HiveAlgR::execute(const EventContext& ctx) const {
 
-  info() << "execute: " << index() << " on " << ctx << endmsg;
+  ATH_MSG_INFO( "execute: {} on {}", index(), ctx );
 
   SG::ReadHandle<xAOD::EventInfo> evt(m_evt,ctx);
-  ATH_MSG_INFO("   EventInfo:  r: " << evt->runNumber()
-               << " e: " << evt->eventNumber() );
+  ATH_MSG_INFO("   EventInfo:  r: {} e: {}",
+               evt->runNumber(), evt->eventNumber() );
 
   SG::WriteHandle<HiveDataObj> wh1(m_wrh1,ctx);
   ATH_CHECK(wh1.record(std::make_unique<HiveDataObj>(10000 +evt->eventNumber()*100)));
 
-  ATH_MSG_INFO("  write: " << wh1.key() << " = " << wh1->val() );
+  ATH_MSG_INFO("  write: {} = {}", wh1.key(), wh1->val() );
 
   return StatusCode::SUCCESS;
 

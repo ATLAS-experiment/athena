@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CondAlgY.h"
@@ -8,7 +8,7 @@
 
 
 StatusCode CondAlgY::initialize() {
-  ATH_MSG_DEBUG("initialize " << name());
+  ATH_MSG_DEBUG("initialize {}", name());
 
   ATH_CHECK( m_cds.retrieve() );
 
@@ -22,7 +22,7 @@ StatusCode CondAlgY::initialize() {
 }
 
 StatusCode CondAlgY::execute(const EventContext& ctx) const {
-  ATH_MSG_DEBUG("execute " << name());
+  ATH_MSG_DEBUG("execute {}", name());
   EventIDBase now(ctx.eventID());
 
   SG::WriteCondHandle<CondDataObjY> wch1(m_wch1,ctx);
@@ -30,60 +30,56 @@ StatusCode CondAlgY::execute(const EventContext& ctx) const {
 
   // do we have a valid m_wch for current time?
   if ( wch1.isValid(now) ) {
-    ATH_MSG_DEBUG(" Found a valid write handle for " << wch1.key());
+    ATH_MSG_DEBUG(" Found a valid write handle for {}", wch1.key());
   }
   else {
 
-    ATH_MSG_DEBUG("  CondHandle " << wch1.key() 
-                  << " not valid. Getting new info for dbKey \"" 
-                  << wch1.dbKey() << "\" from CondDb");
+    ATH_MSG_DEBUG("  CondHandle {} not valid. Getting new info for dbKey \"{}\" from CondDb",
+                  wch1.key(), wch1.dbKey());
 
     EventIDRange r;
     IASCIICondDbSvc::dbData_t val;
     if (m_cds->getRange(wch1.dbKey(), ctx, r, val).isFailure()) {
-      ATH_MSG_ERROR("  could not find dbKey \"" << wch1.dbKey() 
-		    << "\" in CondSvc registry");
+      ATH_MSG_ERROR("  could not find dbKey \"{}\" in CondSvc registry",
+                    wch1.dbKey());
       return StatusCode::FAILURE;
     }
 
     CondDataObjY* cdo = new CondDataObjY( val );
     if (wch1.record(r, cdo).isFailure()) {
-      ATH_MSG_ERROR("could not record CondDataObjY " << wch1.key() 
-		    << " = " << *cdo
-                    << " with EventRange " << r);
+      ATH_MSG_ERROR("could not record CondDataObjY {} = {} with EventRange {}",
+                    wch1.key(), *cdo, static_cast<std::string>(r));
       return StatusCode::FAILURE;
     }
-    ATH_MSG_INFO("recorded new CDO " << wch1.key() << " = " << *cdo 
-		 << " with range " << r);
+    ATH_MSG_INFO("recorded new CDO  {} = {} with range {}",
+                 wch1.key(), *cdo, static_cast<std::string>(r));
   }
 
   // do we have a valid wch for current time?
   if ( wch2.isValid(now) ) {
-    ATH_MSG_DEBUG(" Found a valid write handle for " << wch2.key());
+    ATH_MSG_DEBUG(" Found a valid write handle for {}", wch2.key());
   }
   else {
 
-    ATH_MSG_DEBUG("  CondHandle " << wch2.key() 
-                  << " not valid. Getting new info for dbKey \"" 
-                  << wch2.dbKey() << "\" from CondDb");
+    ATH_MSG_DEBUG("  CondHandle {} not valid. Getting new info for dbKey \"{}\" from CondDb",
+                  wch2.key(), wch2.dbKey());
 
     EventIDRange r;
     IASCIICondDbSvc::dbData_t val;
     if (m_cds->getRange(wch2.dbKey(), ctx, r, val).isFailure()) {
-      ATH_MSG_ERROR("  could not find dbKey \"" << wch2.dbKey() 
-		    << "\" in CondSvc registry");
+      ATH_MSG_ERROR("  could not find dbKey \"{}\" in CondSvc registry",
+                    wch2.dbKey());
       return StatusCode::FAILURE;
     }
 
     CondDataObjY* cdo = new CondDataObjY( val );
     if (wch2.record(r, cdo).isFailure()) {
-      ATH_MSG_ERROR("could not record CondDataObjY " << wch2.key() 
-		    << " = " << *cdo
-                    << " with EventRange " << r);
+      ATH_MSG_ERROR("could not record CondDataObjY {} = {} with EventRange {}",
+                    wch2.key(), *cdo, static_cast<std::string>(r));
       return StatusCode::FAILURE;
     }
-    ATH_MSG_INFO("recorded new CDO " << wch2.key() << " = " << *cdo 
-		 << " with range " << r);
+    ATH_MSG_INFO("recorded new CDO {} = {} with range {}",
+                 wch2.key(), *cdo, static_cast<std::string>(r));
   }
 
   return StatusCode::SUCCESS;

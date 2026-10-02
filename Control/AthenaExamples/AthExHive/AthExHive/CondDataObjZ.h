@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CONDALGS_CONDDATAOBJZ_H
@@ -20,11 +20,22 @@ private:
   float m_val;
 };
 
-#include <iostream>
-inline std::ostream& operator<<(std::ostream& ost, const CondDataObjZ& rhs) {
-  ost << rhs.val(); 
-  return ost;
-}
+
+#include <format>
+namespace std {
+
+template <>
+struct formatter<CondDataObjZ>
+  : public formatter<string_view>
+{
+  template <class FmtContext>
+  FmtContext::iterator format (const CondDataObjZ& io, FmtContext& ctx) const
+  {
+    return std::format_to (ctx.out(), "{}", io.val());
+  }
+};
+
+} // namespace std
 
 
 //using the macros below we can assign an identifier (and a version) 

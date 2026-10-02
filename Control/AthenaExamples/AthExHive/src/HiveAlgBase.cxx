@@ -21,7 +21,7 @@ HiveAlgBase::~HiveAlgBase() = default;
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 StatusCode HiveAlgBase::initialize() {
-  ATH_MSG_DEBUG("initialize " << name() << " for " << this );
+  ATH_MSG_DEBUG("initialize {} for {}", name(), static_cast<void*>(this) );
 
   // retrieve the CPUCrunchSvc if Alg chooses to Crunch instead of Sleep
   if (m_doCrunch) {
@@ -46,10 +46,10 @@ HiveAlgBase::sleep(const EventContext& ctx) const {
   const unsigned int sleep = CLHEP::RandFlat::shoot(rngWrapper->getEngine(ctx), 0, m_time);
 
   if (m_doCrunch) {
-    ATH_MSG_INFO("  crunch for: " << sleep << " ms");
+    ATH_MSG_INFO("  crunch for: {} ms", sleep);
     m_ccs->crunch_for( std::chrono::milliseconds(sleep) );
   } else {
-    ATH_MSG_INFO("  sleep for: " << sleep << " ms");
+    ATH_MSG_INFO("  sleep for: {} ms", sleep);
     std::this_thread::sleep_for(std::chrono::milliseconds( sleep ));
   }
 
