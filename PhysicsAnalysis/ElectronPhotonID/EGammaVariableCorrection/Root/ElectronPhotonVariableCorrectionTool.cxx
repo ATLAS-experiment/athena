@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -121,6 +121,8 @@ const StatusCode ElectronPhotonVariableCorrectionTool::initializeTools( const st
     // adapt size of toolHolder
     toolHolder.resize(confFiles.size());
     // for each conf file, initialize one tool
+    const std::string configFilePropStr{"ConfigFile"};
+    const std::string opLvlPropStr{"OutputLevel"};
     for( unsigned int confFile_itr = 0; confFile_itr < confFiles.size(); confFile_itr++ )
     {
         // name: supertool name + type name + variable name
@@ -130,8 +132,8 @@ const StatusCode ElectronPhotonVariableCorrectionTool::initializeTools( const st
         TString toolname = TString::Format("%s_%s_%s", this->name().c_str(), name.c_str(), variable.c_str());
         ANA_MSG_DEBUG("Subtool name: " << toolname.Data());
         toolHolder.at(confFile_itr) = std::make_unique<ElectronPhotonVariableCorrectionBase>(toolname.Data());
-        ANA_CHECK(toolHolder.at(confFile_itr)->setProperty("ConfigFile", confFiles.at(confFile_itr)));
-	ANA_CHECK(toolHolder.at(confFile_itr)->setProperty("OutputLevel", this->msg().level()));
+        ANA_CHECK(toolHolder.at(confFile_itr)->setProperty(configFilePropStr, confFiles.at(confFile_itr)));
+	ANA_CHECK(toolHolder.at(confFile_itr)->setProperty(opLvlPropStr, this->msg().level()));
         ANA_CHECK(toolHolder.at(confFile_itr)->initialize());
     }
     //everything worked out, so

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -478,7 +478,7 @@ const StatusCode ElectronPhotonVariableCorrectionBase::getParameterInformationFr
         { // need to mark scope, since variables are initialized in this case
             std::unique_ptr<TObject> graph;
             ATH_CHECK(getObjectFromRootFile(env, parameter_number, filePathKey, graphNameKey, graph));
-            m_graphCopies.at(parameter_number) = (TGraph*)graph.get();
+            m_graphCopies.at(parameter_number) = static_cast<TGraph*>(graph.get());
         }
             break;
         case ElectronPhotonVariableCorrectionBase::parameterType::EtaBinned:
@@ -499,11 +499,17 @@ const StatusCode ElectronPhotonVariableCorrectionBase::getParameterInformationFr
             // Retreive TH2F steering eta x phi corrections
             std::unique_ptr<TObject> th2;
             ATH_CHECK(getObjectFromRootFile(env, parameter_number, filePathKey, histNameKey, th2));
-            m_TH2Copies.at(parameter_number) = (TH2*)th2.get();
+            auto pTh2 = static_cast<TH2*>(th2.get());
+            m_TH2Copies.at(parameter_number) = pTh2;
             // check and store if this TH2 needs eta or abs(eta) for evaluation
             // for this, check if lowest bin boundary < 0
             // bin 0 is the undeflow bin, so use bin 1
-            float lowest_bin_boundary = ((TH2*)th2.get())->GetXaxis()->GetBinLowEdge(1);
+            auto * pAxis = pTh2->GetXaxis();
+            if (!pAxis){
+              ATH_MSG_ERROR("pAxis is null.");
+              return StatusCode::FAILURE;
+            }
+            float lowest_bin_boundary = pAxis->GetBinLowEdge(1);
             // the lowest boundary should never be greater than 0! Fail if it is
             if (lowest_bin_boundary > 0)
             {
@@ -697,6 +703,7 @@ const StatusCode ElectronPhotonVariableCorrectionBase::getCorrectionParameters(c
 
     // according to the parameter type, get the actual parameter going to the correction function
     // for this, loop over the parameter type vector
+    const std::string shapeStr{"TopoClusterIsoCentralEventShape"};
     for (unsigned int parameter_itr = 0; parameter_itr < m_ParameterTypeVector.size(); parameter_itr++)
     {
         switch (m_ParameterTypeVector.at(parameter_itr))
@@ -733,7 +740,7 @@ const StatusCode ElectronPhotonVariableCorrectionBase::getCorrectionParameters(c
                 break;
             case ElectronPhotonVariableCorrectionBase::parameterType::EventDensity:
                 // get event density
-                ATH_CHECK(getDensity(properties.at(parameter_itr), "TopoClusterIsoCentralEventShape"));
+                ATH_CHECK(getDensity(properties.at(parameter_itr), shapeStr));
                 break;
             default:
             {}//only adding default to omit compile time warnings for not including parameterType::Failure
