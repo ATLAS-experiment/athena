@@ -313,7 +313,16 @@ def ITkNnClusterizationFactoryCfg(flags, name="ITkNnClusterizationFactory", **kw
         ITkPixelChargeCalibCondAlgCfg)
     acc = ITkPixelChargeCalibCondAlgCfg(flags)
 
-    acc.merge(LWTNNCondAlgCfg(flags))
+    useONNX = flags.Tracking.useONNXPixelNN
+    if useONNX:
+        folder = flags.Tracking.pixelNNONNXModelsFolder
+        acc.merge(OnnxNNCondAlgCfg(flags,
+                                   NumberNetworkPath=folder + 'number.onnx',
+                                   PositionNetwork1Path=folder + 'pos1.onnx',
+                                   PositionNetwork2Path=folder + 'pos2.onnx',
+                                   PositionNetwork3Path=folder + 'pos3.onnx'))
+    else:
+        acc.merge(LWTNNCondAlgCfg(flags))
 
     if "PixelLorentzAngleTool" not in kwargs:
         from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import (
@@ -324,7 +333,13 @@ def ITkNnClusterizationFactoryCfg(flags, name="ITkNnClusterizationFactory", **kw
     kwargs.setdefault("useToT", False)
     kwargs.setdefault("NnCollectionReadKey", "")
     kwargs.setdefault("NnCollectionWithTrackReadKey", "")
-    kwargs.setdefault("NnCollectionJSONReadKey", "PixelClusterNNJSON")
+    kwargs.setdefault("NnCollectionJSONReadKey",
+                      "" if useONNX else "PixelClusterNNJSON")
+    kwargs.setdefault("useONNX", useONNX)
+    kwargs.setdefault("NnCollectionONNXReadKey",
+                      "PixelClusterNNONNX" if useONNX else "")
+    # the ITk ONNX models take the x pitches after the y pitches (67 inputs)
+    kwargs.setdefault("useXPitches", useONNX)
 
     kwargs.setdefault("PixelChargeCalibCondData", "ITkPixelChargeCalibCondData")
 
