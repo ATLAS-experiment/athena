@@ -128,6 +128,10 @@ StatusCode JetDNNCalibStep::calibrate(xAOD::JetContainer& jets) const {
   const std::vector<float>& outputE = std::get<std::vector<float>>(outputData["outputE"].second);
   const std::vector<float>& outputM = std::get<std::vector<float>>(outputData["outputM"].second);
 
+  // Models with a single output node (e.g. small-R JES-only DNNs) only predict the
+  // energy response: there is no mass response to read
+  const bool energyOnly = outputM.empty();
+
   // Pass 2: combine each jet's response and rescale, in the same order the batch was filled
   for (int64_t idx = 0; idx < nBatch; idx++) {
 
@@ -136,7 +140,7 @@ StatusCode JetDNNCalibStep::calibrate(xAOD::JetContainer& jets) const {
 
     // First element of each jet's output is the predicted response; remaining elements are unused here
     float predRespE = outputE.at(idx * m_onnxOutputShape);
-    float predRespM = outputM.at(idx * m_onnxOutputShape);
+    float predRespM = energyOnly ? predRespE : outputM.at(idx * m_onnxOutputShape);
 
     ATH_MSG_DEBUG("jetStartP4: pt=" << jetStartP4.pt() << " eta=" << jetStartP4.eta()
                   << " e=" << jetStartP4.e() << " m=" << jetStartP4.mass());
@@ -146,6 +150,15 @@ StatusCode JetDNNCalibStep::calibrate(xAOD::JetContainer& jets) const {
       ATH_MSG_WARNING("DNN predictions give 0 values, will not apply calibration to this jet");
       jet->setJetP4(jetStartP4);
       jet->setAttribute<xAOD::JetFourMom_t>(m_jetOutScale, jetStartP4);
+      continue;
+    }
+
+    // Energy-only models: scale the whole 4-vector by the energy response (so the mass
+    // scales with it)
+    if (energyOnly) {
+      const xAOD::JetFourMom_t calibP4 = jetStartP4 * (1. / predRespE);
+      jet->setJetP4(calibP4);
+      jet->setAttribute<xAOD::JetFourMom_t>(m_jetOutScale, calibP4);
       continue;
     }
 
