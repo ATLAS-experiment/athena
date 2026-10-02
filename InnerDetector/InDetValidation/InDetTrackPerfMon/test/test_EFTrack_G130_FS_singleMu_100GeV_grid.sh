@@ -65,8 +65,9 @@ run () {
 ## Prefer ArtInFile in case of grid ART (where it should be available)
 if [ -n "${ArtInFile}" ]; then
     # ArtInFile is space-separated; convert to comma-separated for runReco
+    echo "ArtInFile: ${ArtInFile}"
     InputRDOfiles="${ArtInFile// /,}"
-    echo "Using ArtInFile: ${InputRDOfiles}"
+    echo "InputRDOfiles: ${InputRDOfiles}"
 else # otherwise fall back to getEFTrackSample.py
     echo "ArtInFile not set, falling back to getEFTrackSample.py..."
     InputRDOfiles=$( getEFTrackSample.py -s ${SampleName} )
@@ -79,7 +80,7 @@ fi
 ## Track reconstruction step. See runReco_G130_FS.sh --help for list of supported options.
 run "${pipelineName}" \
   runReco_G130_FS.sh \
-    -i ${InputRDOfiles} \
+    -i "${InputRDOfiles}" \
     -o "${OutSampleName}.AOD.pool.root" \
     -n -1 \
     "$@"
