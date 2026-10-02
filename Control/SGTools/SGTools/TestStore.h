@@ -51,6 +51,8 @@ class TestStore
   : public implements<IProxyDict>
 {
 public:
+  TestStore (StoreID::type id = StoreID::EVENT_STORE);
+  virtual StoreID::type storeID() const override;
   virtual std::vector<const SG::DataProxy*> proxies() const override;
   virtual const std::string* keyToString (sgkey_t /*key*/) const override;
   virtual void registerKey (sgkey_t /*key*/,
@@ -134,6 +136,8 @@ public:
   typedef std::mutex mutex_t;
   typedef std::lock_guard<mutex_t> lock_t;
   mutable mutex_t m_mutex;
+
+  StoreID::type m_id;
 
   SG::DataProxy* proxy(lock_t&, const void* const pTransient) const;
   SG::DataProxy* proxy(lock_t&, const CLID& id, const std::string& key) const;
