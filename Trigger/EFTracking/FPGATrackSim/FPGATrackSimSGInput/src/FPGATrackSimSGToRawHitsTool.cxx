@@ -807,7 +807,7 @@ FPGATrackSimSGToRawHitsTool::readTruthTracks(std::vector <FPGATrackSimTruthTrack
         isPrimary = false;
       }
 
-      HepMcParticleLink truthLink2(uid, ievt, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_ID);
+      HepMcParticleLink truthLink2(uid, ievt, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_ID, eventContext);
       
       FPGATrackSimTruthTrack tmpSGTrack;
       tmpSGTrack.setVtxX(track_truth_x0);

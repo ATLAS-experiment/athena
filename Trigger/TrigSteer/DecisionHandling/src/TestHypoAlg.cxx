@@ -87,7 +87,7 @@ namespace HLTTest {
       if (foundFeatureInDecision){
         ATH_MSG_DEBUG(" Found link from the reco object to the previous decision at position "<<pos);
         auto d = newDecisionIn(decisions);
-        d->setObjectLink( "feature", ElementLink<xAOD::TrigCompositeContainer>(m_recoInput.key(), reco_counter) );// feature used by the Tool
+        d->setObjectLink( "feature", ElementLink<xAOD::TrigCompositeContainer>(m_recoInput.key(), reco_counter, context) );// feature used by the Tool
         d->setObjectLink( m_linkName.value(), featurelink );
         linkToPrevious( d, decisionInput().key(), pos );
       }
