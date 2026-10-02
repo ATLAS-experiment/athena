@@ -277,32 +277,37 @@ void DerivationFramework::TrackParticleThinning::selectTrackHits(const xAOD::Tra
 	ATH_MSG_VERBOSE("Discarding TrackState as not of correct type " << detTypeToSelect);
 	continue;
       }
-      if (trkState_el.index() >= outputStatesMask.size()) {
-        outputStatesMask.resize (trkState_el.index()+1);
+      const std::size_t idx1 =  trkState_el.index();
+      if (idx1 == std::numeric_limits<std::size_t>::max())[[unlikely]]{
+        ATH_MSG_WARNING("trkState_el.index() is invalid");
+        continue;
       }
-      outputStatesMask[trkState_el.index()] = true;
+      if (idx1 >= outputStatesMask.size()) {
+        outputStatesMask.resize (idx1+1);
+      }
+      outputStatesMask[idx1] = true;
 
       // get the corresponding TrackMeasurementValidation object, if any, and add it to the outputMeasurementsMask
       const ElementLink<xAOD::TrackMeasurementValidationContainer> trkMeasurement_el = (*trkState_el)->trackMeasurementValidationLink();
       if (not trkMeasurement_el.isValid()) {
 	ATH_MSG_VERBOSE("Cannot find a valid link to TrackMeasurementValidation object from track state for track index: " << trkIndex
-			<< ", trackState index: " << trkState_el.index());
+			<< ", trackState index: " << idx1);
 	continue; //not a valid link
       }
       if (*trkMeasurement_el == nullptr) {
 	ATH_MSG_VERBOSE("Invalid pointer to TrackMeasurementValidation object from track state for track index: " << trkIndex
-			<< ", trackState index: " << trkState_el.index());
+			<< ", trackState index: " << idx1);
 	continue; //not linking to a valid object -- is it necessary?
       }
-      const std::size_t idx = trkMeasurement_el.index();
-      if (idx == std::numeric_limits<std::size_t>::max())[[unlikely]]{
-        ATH_MSG_WARNING("trkState_el.index() is invalid");
+      const std::size_t idx2 = trkMeasurement_el.index();
+      if (idx2 == std::numeric_limits<std::size_t>::max())[[unlikely]]{
+        ATH_MSG_WARNING("trkMeasurement_el.index() is invalid");
         continue;
       }
-      if (idx >= outputMeasurementsMask.size()) {
-        outputMeasurementsMask.resize (idx+1);
+      if (idx2 >= outputMeasurementsMask.size()) {
+        outputMeasurementsMask.resize (idx2+1);
       }
-      outputMeasurementsMask[idx] = true;
+      outputMeasurementsMask[idx2] = true;
     }
   } // end loop over xAOD::TrackParticle container
 }
