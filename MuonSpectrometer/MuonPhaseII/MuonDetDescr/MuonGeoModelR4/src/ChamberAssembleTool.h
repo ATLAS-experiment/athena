@@ -39,7 +39,7 @@ class ChamberAssembleTool : public extends<AthAlgTool, IMuonReadoutGeomTool> {
       /// @brief Abrivation of the surface bounds
       using SurfBoundPtr_t = std::shared_ptr<const Acts::PlanarBounds>;
       /** @brief Abrivation of the volume transform together with a set of volume & surface bounds */
-      using TrfWithBounds = std::tuple<Amg::Transform3D, VolBoundPtr_t, SurfBoundPtr_t>;
+      using TrfWithBounds = std::tuple<Acts::Transform3, VolBoundPtr_t, SurfBoundPtr_t>;
    private:
       /** @brief builds the bounding box trapezoidal volume bounds from the set of readout elements
        *         Returns a pair of the volume bounds & the transformation to center the volume
@@ -53,7 +53,7 @@ class ChamberAssembleTool : public extends<AthAlgTool, IMuonReadoutGeomTool> {
       template <typename ReObjType>
       TrfWithBounds boundingBox(const ActsTrk::GeometryContext& gctx,
                                 const std::vector<ReObjType>& constituents,
-                                const Amg::Transform3D& globToLoc,
+                                const Acts::Transform3& globToLoc,
                                 Acts::VolumeBoundFactory& volBoundSet,
                                 Acts::SurfaceBoundFactory& surfBoundSet,
                                 const double margin) const
@@ -72,19 +72,19 @@ class ChamberAssembleTool : public extends<AthAlgTool, IMuonReadoutGeomTool> {
       /** @brief Returns the 4 corners of the trapezoid in the x-y plane
         * @param localToGlob: Transform from the trapezoid restframe -> chambers frame
         * @param bounds: Reference to the trapezoidal bounds defining the volume */
-      static std::array<Amg::Vector3D, 4> cornerPointsPlane(const Amg::Transform3D& localToGlob, 
+      static std::array<Amg::Vector3D, 4> cornerPointsPlane(const Acts::Transform3& localToGlob, 
                                                             const VolBounds_t& bounds);
 
       /** @brief Returns the 8 corners marking the trapezoid 
         * @param localToGlob: Transform from the trapezoid restframe -> chambers frame
         * @param bounds: Reference to the trapezoidal bounds defining the volume */
-      static std::array<Amg::Vector3D, 8> cornerPoints(const Amg::Transform3D& localToGlob, 
+      static std::array<Amg::Vector3D, 8> cornerPoints(const Acts::Transform3& localToGlob, 
                                                        const VolBounds_t& bounds);
 
       /** @brief Returns the translation transform centering the 8 corner points of the trapezoid.
         *        The centre is defined as the centre point of the surrounding box
         * @param cornerPoints: Array to all 8 corner points of the trapezoid */
-      static Amg::Transform3D centerTrapezoid(const std::array<Amg::Vector3D, 8>& cornerPoints);
+      static Acts::Transform3 centerTrapezoid(const std::array<Amg::Vector3D, 8>& cornerPoints);
       /** @brief Returns the signed distances of an external point to the trapezoidal edge. 
        *         Distances > 0 indicate that the point is inside the boundaries and outside otherwise
        *  @param linePos: Arbitrary point on the trapezoidal edge

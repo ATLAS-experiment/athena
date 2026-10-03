@@ -279,10 +279,12 @@ inline Amg::Isometry3D getTranslate3D(const Amg::Vector3D& v) {
 /** @brief Convert a general transform into an isometric one, e.g. a GeoModel placement.
  *         GeoModel builds its placements from rotations and translations, but the
  *         type allows scaling and shearing, which the tracking geometry does not.
- *  @param trf: The transform to convert
- *  @param tolerance: Tolerance of the orthogonality check */
-inline Amg::Isometry3D toIsometry3D(const Amg::Transform3D& trf,
-                                    const double tolerance = 1.e-9) {
+ *         The function throws if the linear part is not orthogonal. Composed
+ *         rotations, e.g. of the legacy Trk surfaces, deviate from orthogonal by
+ *         up to about 1e-7, so the check accepts that much.
+ *  @param trf: The transform to convert */
+inline Amg::Isometry3D toIsometry3D(const Amg::Transform3D& trf) {
+    constexpr double tolerance = 1.e-6;
     const double deviation = (trf.linear() * trf.linear().transpose() -
                               Amg::RotationMatrix3D::Identity()).cwiseAbs().maxCoeff();
     if (deviation > tolerance) {

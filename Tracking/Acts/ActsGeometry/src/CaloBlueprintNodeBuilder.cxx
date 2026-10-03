@@ -76,7 +76,7 @@ std::shared_ptr<BlueprintNode> ActsTrk::CaloBlueprintNodeBuilder::buildBlueprint
   ATH_MSG_INFO("Calo envelope dimensions: maxR = " << caloEvelopeMaxR << ", halfLengthZ = " << caloEnvelopeHalfLenghtZ);
   std::shared_ptr<StaticBlueprintNode> itkCaloNode{};
   {
-    auto envelope = std::make_unique<TrackingVolume>(Amg::Transform3D::Identity(),
+    auto envelope = std::make_unique<TrackingVolume>(Amg::Isometry3D::Identity(),
                                                      std::make_shared<CylinderVolumeBounds>(0., caloEvelopeMaxR, caloEnvelopeHalfLenghtZ),"ITkCalo");
     envelope->assignGeometryId(Acts::GeometryIdentifier{}.withVolume(s_caloEnvelopeID));
     itkCaloNode = std::make_shared<StaticBlueprintNode>(std::move(envelope));

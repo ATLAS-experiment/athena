@@ -29,10 +29,10 @@ namespace ActsTrk {
              *         the DetectorAlignStore actually holding the transform of the Detector element
              *  @param store: Pointer to the alignment store. If not provided the nominal transform
              *                is returned */
-            virtual const Amg::Transform3D& localToGlobalTransform(const DetectorAlignStore* store) const = 0;
+            virtual const Amg::Isometry3D& localToGlobalTransform(const DetectorAlignStore* store) const = 0;
             /** @brief Returns the aligned local to global transform from the passed geometry context
              *  @param gctx: Reference to the ATLAS geometry context */
-            virtual const Amg::Transform3D& localToGlobalTransform(const GeometryContext& gctx) const = 0;
+            virtual const Amg::Isometry3D& localToGlobalTransform(const GeometryContext& gctx) const = 0;
             /** @brief Caches the aligned transformation in the provided store. Returns the number of cached elements*/
             virtual unsigned storeAlignedTransforms(DetectorAlignStore& store) const = 0;
     };

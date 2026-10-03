@@ -49,7 +49,12 @@ void ActsTrk::RootMaterialWriterTool::writeMaterial(const ActsTrk::GeometryConte
     // Change to the output file
     m_outputFile->cd();
 
-    const auto& [surfaceMaps, volumeMaps] = detMaterial;
+    const auto& surfaceMaps = detMaterial.surfaceMaterials;
+    const auto& volumeMaps = detMaterial.volumeMaterials;
+    if (!detMaterial.keyedSurfaces.empty()) {
+        ATH_MSG_WARNING("Skipping " << detMaterial.keyedSurfaces.size()
+                        << " keyed surface material maps, which are not supported");
+    }
 
     // Write the surface material maps
     ActsPlugins::RootMaterialMapIo accessor(accessorConfig,

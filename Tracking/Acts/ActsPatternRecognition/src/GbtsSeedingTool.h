@@ -128,7 +128,6 @@ namespace ActsTrk {
     Gaudi::Property<bool> m_LRTmode {this, "LRTmode", false, "whether strip or pixel hits are used"};
     Gaudi::Property<bool> m_useML {this, "useML", true, "use the cluster width of the spacepoint"};
     Gaudi::Property<bool> m_matchBeforeCreate {this, "matchBeforeCreate", true, "need to check what this does"};
-    Gaudi::Property<bool> m_useOldTunings {this, "useOldTunings", false, "use the tunings for 900MeV cut"};
     Gaudi::Property<bool> m_beamSpotCorrection {this, "beamSpotCorrection", true, "apply primary vertex corrections to spacepoints"};
     Gaudi::Property<bool> m_validateTriplets{this, "ValidateTriplets", true, "extra validation on pT and d0 performed to connected barrel edges"};
     Gaudi::Property<bool> m_useAdaptiveCuts{this, "UseAdaptiveCuts", true, "allows for larger accpetance of candidate edges that skip layers"};
@@ -149,7 +148,6 @@ namespace ActsTrk {
     Gaudi::Property<int> m_nMaxEdges {this, "MaxEdges",3000000, " max number of Gbts edges/doublets"};
     Gaudi::Property<float> m_cutDPhiMax {this, "cutDPhiMax", 0.012f, "not sure"};
     Gaudi::Property<float> m_cutDCurvMax {this, "cutDCurvMax", 0.001f, "not sure"};
-    Gaudi::Property<float> m_minDeltaPhi {this, "minDeltaPhi", 0.001f, "not sure"};
     Gaudi::Property<float> m_maxOuterRadius {this, "maxOuterRadius", 550.0f, "not sure"};
 
     // these are only used for LRT mode, pixel seeding uses values from the roi

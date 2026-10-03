@@ -90,7 +90,7 @@ namespace MuonR4::SegmentFit{
     }
     Result_t SegmentLineFitter::callLineFit(const Acts::CalibrationContext& cctx,
                                             const Parameters& startPars,
-                                            const Amg::Transform3D& localToGlobal,
+                                            const Amg::Isometry3D& localToGlobal,
                                             HitVec_t&& calibHits) const {
 
         /// Check whether a beamspot constraint should be appended
@@ -191,7 +191,7 @@ namespace MuonR4::SegmentFit{
         SegmentLineFitter::fitSegment(const EventContext& ctx,
                                       const SegmentSeed* parent,
                                       const Parameters& startPars,
-                                      const Amg::Transform3D& localToGlobal,
+                                      const Amg::Isometry3D& localToGlobal,
                                       HitVec_t&& calibHits) const {
         
         const Acts::CalibrationContext cctx = ActsTrk::getCalibrationContext(ctx);
@@ -253,7 +253,7 @@ namespace MuonR4::SegmentFit{
 
     bool SegmentLineFitter::removeOutliers(const Acts::CalibrationContext& cctx,
                                            const SegmentSeed& seed,
-                                           const Amg::Transform3D& localToGlobal,
+                                           const Amg::Isometry3D& localToGlobal,
                                            const LinePar_t& startPars,
                                            Result_t& fitResult) const {
 
@@ -477,7 +477,7 @@ namespace MuonR4::SegmentFit{
     }
     bool SegmentLineFitter::plugHoles(const Acts::CalibrationContext& cctx,
                                       const SegmentSeed& seed,
-                                      const Amg::Transform3D& localToGlobal,
+                                      const Amg::Isometry3D& localToGlobal,
                                       Result_t& toRecover) const {
         /** We've the first estimator of the segment fit */
         ATH_MSG_DEBUG(__func__<<"() - "<<__LINE__ <<": segment "<<toString(toRecover.parameters)

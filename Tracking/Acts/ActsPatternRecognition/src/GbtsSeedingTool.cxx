@@ -92,7 +92,8 @@ namespace ActsTrk {
     // to avoid compile issues with unused veriables 
     (void) ctx;
 
-    const Acts::Experimental::GraphBasedTrackSeeder::Options options(bFieldInZ);
+    const Acts::Experimental::GraphBasedTrackSeeder::Options options{
+      .bFieldInZ = bFieldInZ};
 
 
     std::vector<const xAOD::SpacePoint*> tmpSpacePoints;
@@ -178,7 +179,8 @@ namespace ActsTrk {
       const std::optional<std::uint32_t> bin = nodeStorage.insert(
         static_cast<Acts::SpacePointIndex>(idx), x, y,
         static_cast<float>(sp->z()), std::hypot(x, y), std::atan2(y, x),
-        static_cast<std::uint32_t>(layer), clusterWidth, localPositionY, strip);
+        static_cast<Acts::Experimental::GbtsLayerIndex>(layer), clusterWidth,
+        localPositionY, strip);
 
       if (bin.has_value()) {
         ++(isPixel ? nPixelNodes : nStripNodes);
@@ -246,12 +248,12 @@ namespace ActsTrk {
     }
 
     // the table names a layer by its id, the layer tool by its dense index
-    std::unordered_map<std::uint32_t, Acts::Experimental::GbtsLayerTechnology>
+    std::unordered_map<Acts::Experimental::GbtsExperimentLayerId,
+                       Acts::Experimental::GbtsLayerTechnology>
       layerTechnologies;
     layerTechnologies.reserve(layers.size());
     for (const Acts::Experimental::GbtsLayerDescription& layer : layers) {
-      layerTechnologies.emplace(static_cast<std::uint32_t>(layer.id),
-                                layer.technology);
+      layerTechnologies.emplace(layer.id, layer.technology);
     }
 
     etaBinWidth = table.etaBinWidth;
@@ -355,10 +357,6 @@ namespace ActsTrk {
     m_finderCfg.useStripConnections = m_stripConnections;
     m_finderCfg.useClusterWidthCuts = m_useML;
     m_finderCfg.matchBeforeCreate = m_matchBeforeCreate;
-    // useOldTunings gated the curvature bounds and the phi window together,
-    // while LRT mode only wanted the first, so the seeder now has them apart
-    m_finderCfg.useOldTuningsCurvature = m_useOldTunings || m_LRTmode;
-    m_finderCfg.useOldTuningsPhiWindow = m_useOldTunings;
     m_finderCfg.beamSpotCorrection = m_beamSpotCorrection;
     m_finderCfg.minPt = m_minPt;
     m_finderCfg.nMaxPhiSlice = m_nMaxPhiSlice;
@@ -384,16 +382,11 @@ namespace ActsTrk {
     m_finderCfg.maxAbsEtaAddTriplets = m_maxEtaAddTriplets;
     m_finderCfg.cutDPhiMax = m_cutDPhiMax;
     m_finderCfg.cutDCurvMax = m_cutDCurvMax;
-    m_finderCfg.minDeltaPhi = m_minDeltaPhi;
     m_finderCfg.maxOuterRadius = m_maxOuterRadius;
 
-    // The seeder no longer recognises an LRT mode, so spell out the rest of
-    // what it used to imply: the whole of maxCurv for the curvature bounds and
-    // the phi window, and a triplet with no confirmation.
+    // The seeder no longer recognises an LRT mode, so spell out what it used
+    // to imply: a triplet with no confirmation.
     if (m_LRTmode) {
-      m_finderCfg.oldTuningsCurvatureHighEtaFraction = 1.f;
-      m_finderCfg.oldTuningsCurvatureLowEtaFraction = 1.f;
-      m_finderCfg.oldTuningsPhiWindowFraction = 1.f;
       m_finderCfg.minSeedLevel = 2;
     }
 
@@ -422,8 +415,6 @@ void GbtsSeedingTool::printGbtsConfig() const {
   ATH_MSG_DEBUG( "useStripConnections: " << m_finderCfg.useStripConnections);
   ATH_MSG_DEBUG( "useClusterWidthCuts: " << m_finderCfg.useClusterWidthCuts);
   ATH_MSG_DEBUG( "matchBeforeCreate: " << m_finderCfg.matchBeforeCreate);
-  ATH_MSG_DEBUG( "useOldTuningsCurvature: " << m_finderCfg.useOldTuningsCurvature);
-  ATH_MSG_DEBUG( "useOldTuningsPhiWindow: " << m_finderCfg.useOldTuningsPhiWindow);
   ATH_MSG_DEBUG( "minSeedLevel: " << m_finderCfg.minSeedLevel);
   ATH_MSG_DEBUG( "tauRatioPrecut: " << m_finderCfg.tauRatioPrecut);
   ATH_MSG_DEBUG( "tauRatioCut: " << m_finderCfg.tauRatioCut);
@@ -447,7 +438,6 @@ void GbtsSeedingTool::printGbtsConfig() const {
   ATH_MSG_DEBUG( "maxEtaAddTriplets: " << m_finderCfg.maxAbsEtaAddTriplets);
   ATH_MSG_DEBUG("cutDphiMax: " << m_finderCfg.cutDPhiMax);
   ATH_MSG_DEBUG("cutDCurvMax: " << m_finderCfg.cutDCurvMax);
-  ATH_MSG_DEBUG("minDeltaPhi: " << m_finderCfg.minDeltaPhi);
   ATH_MSG_DEBUG("maxOuterRadius: " << m_finderCfg.maxOuterRadius);
 
   ATH_MSG_DEBUG("===== GBTS filter config =====");

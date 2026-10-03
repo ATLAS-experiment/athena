@@ -58,18 +58,18 @@ namespace ActsTrk::detail{
              *         (Might be a nullptr if LazyFill is used)
              *  @param ticketNo: Unique ticket number drawn by the client indicating
              *                   the index inside the storegae vector*/
-            const Amg::Transform3D* getTransform(const unsigned ticketNo) const;
+            const Amg::Isometry3D* getTransform(const unsigned ticketNo) const;
             /** @brief Stores a transform at the index of the passed ticket number.
              *         (Only works if the LazyFill mode option is activated)
              *  @param ticketNo: Number of the ticket under which the transform should be cached
              *  @param trf: Transform object to be stored 
              *  @returns The reference to the transform to which the passed transform was assigned to */
-            const Amg::Transform3D& setTransform(const unsigned int ticketNo, Amg::Transform3D && trf) const;
+            const Amg::Isometry3D& setTransform(const unsigned int ticketNo, Amg::Isometry3D && trf) const;
             /** @brief Stores a transform at the index of the passed ticket number.
              *  @param ticketNo: Number of the ticket under which the transform should be cached
              *  @param trf: Transform object to be stored 
              *  @returns The reference to the transform to which the passed transform was assigned to */
-            const Amg::Transform3D& setTransform(const unsigned int ticketNo, Amg::Transform3D && trf);
+            const Amg::Isometry3D& setTransform(const unsigned int ticketNo, Amg::Isometry3D && trf);
             /** @brief Returns the mode with which the store has been instantiated */
             Mode mode() const;
             /** @brief Returns the detector type */
@@ -80,9 +80,9 @@ namespace ActsTrk::detail{
             std::size_t filled() const;
         private:
             /** @brief Abrivation of the backend in the lazy filling mode */
-            using LazyStorage_t = std::vector<CxxUtils::CachedUniquePtr<Amg::Transform3D>>;
+            using LazyStorage_t = std::vector<CxxUtils::CachedUniquePtr<Amg::Isometry3D>>;
             /** @brief Abrivate the transform vector */
-            using TrfVec_t = std::vector<Amg::Transform3D>;
+            using TrfVec_t = std::vector<Amg::Isometry3D>;
             /** @brief Abrivate the char vector */
             using CheckVec_t = std::vector<char>;
             /** @brief Abrivation of the continous vector storage */
@@ -136,8 +136,8 @@ namespace ActsTrk::detail{
     };
 
 
-    inline const Amg::Transform3D* TransformStore::getTransform(const unsigned ticketNo) const {
-        return std::visit([&](auto& store) -> const Amg::Transform3D* {
+    inline const Amg::Isometry3D* TransformStore::getTransform(const unsigned ticketNo) const {
+        return std::visit([&](auto& store) -> const Amg::Isometry3D* {
             using Store_t = std::decay_t<decltype(store)>;
             if constexpr(std::is_same_v<Store_t, LazyStorage_t>) {
                 assert(ticketNo < store.size());

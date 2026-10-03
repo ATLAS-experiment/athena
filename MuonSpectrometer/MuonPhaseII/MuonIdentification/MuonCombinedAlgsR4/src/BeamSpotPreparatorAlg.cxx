@@ -39,7 +39,7 @@ namespace MuonCombinedR4 {
                 if (vertex->vertexType() != xAOD::VxType::PriVtx ) {
                     continue;
                 }
-                Amg::Transform3D surfaceTrf{Amg::getTranslate3D(vertex->position())};
+                Amg::Isometry3D surfaceTrf = Amg::getTranslate3D(vertex->position());
                 Acts::Matrix<2,3> projector{Acts::Matrix<2,3>::Zero()};
                 projector.row(0) = m_sigmaScaleR* Acts::makeDirectionFromPhiTheta(vertex->position().phi(), 
                                                                    90._degree);
@@ -53,7 +53,7 @@ namespace MuonCombinedR4 {
         } else if (beamSpotData) {
             const InDet::BeamSpotData* beamSpot{nullptr};
             ATH_CHECK(SG::get(beamSpot, m_beamSpotKey, ctx));
-            Amg::Transform3D beamSpotTrf = Amg::getTranslate3D(beamSpot->beamPos()) *
+            Amg::Isometry3D beamSpotTrf = Amg::getTranslate3D(beamSpot->beamPos()) *
                                            Amg::getRotateY3D(beamSpot->beamTilt(0)) *
                                            Amg::getRotateX3D(beamSpot->beamTilt(1));
             AmgSymMatrix(3) beamCov{AmgSymMatrix(3)::Identity()};

@@ -73,6 +73,7 @@
 
 #include "TrackingGeoAlignVisitor.h"
 #include <Acts/Utilities/AxisDefinitions.hpp>
+#include <fstream>
 #include <limits>
 #include <random>
 #include <stdexcept>
@@ -1312,8 +1313,8 @@ StatusCode TrackingGeometrySvc::finalize() {
 }
 
 StatusCode TrackingGeometrySvc::buildDetrayGeometry() {
-  using DetrayTraits = traccc::itk_detector;
-  using DetrayMetadata = DetrayTraits::metadata_type;
+  using DetrayDetector = traccc::itk_detector;
+  using DetrayMetadata = detray::detector_metadata_t<DetrayDetector>;
   using namespace ActsTrk::detail::GeoVolIds;
   // The Detray detector allocates through this memory resource and keeps
   // referring to it for the deallocations, so the tool has to be held for as
@@ -1473,7 +1474,7 @@ StatusCode TrackingGeometrySvc::buildDetrayGeometry() {
   }
 
   auto hostDetector = std::make_unique<traccc::host_detector>();
-  hostDetector->set<DetrayTraits>(std::move(*detrayGeometry.detector));
+  hostDetector->set<DetrayDetector>(std::move(*detrayGeometry.detector));
   m_detrayGeometry = std::move(hostDetector);
 
   ATH_MSG_INFO("Successfully built the Detray geometry from the Acts::TrackingGeometry");

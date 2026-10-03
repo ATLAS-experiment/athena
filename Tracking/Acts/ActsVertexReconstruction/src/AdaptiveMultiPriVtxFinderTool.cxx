@@ -6,6 +6,7 @@
 
 // ATHENA
 #include "GaudiKernel/IInterface.h"
+#include "GeoPrimitives/GeoPrimitivesHelpers.h"
 #include "TrkParticleBase/LinkToTrackParticleBase.h"
 #include "TrkLinks/LinkToXAODTrackParticle.h"
 #include "xAODTracking/TrackParticleContainer.h"
@@ -287,7 +288,8 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::findVertex(const EventContext& ctx,
     }
 
     std::shared_ptr<Acts::PerigeeSurface> perigeeSurface =
-      Acts::Surface::makeShared<Acts::PerigeeSurface>((trackVector[0])->parameters()->associatedSurface().transform());
+      Acts::Surface::makeShared<Acts::PerigeeSurface>(
+        Amg::toIsometry3D((trackVector[0])->parameters()->associatedSurface().transform()));
 
     // Convert tracks to Acts::BoundParameters
     std::vector<TrackWrapper> allTracks;

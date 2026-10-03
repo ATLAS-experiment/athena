@@ -31,7 +31,7 @@ namespace ActsTrk {
    *          nominal transform if needed, but also immediatley deleted as soon as a new DetectorAlignStore
    *          instance is shown to the class. If the refernce to the cached transform is queried via
    *
-   *               const Amg::Transform3D& getTransform(const DetectorAlignStore* store) const;
+   *               const Amg::Isometry3D& getTransform(const DetectorAlignStore* store) const;
    * 
    *          it is checked whether the (internal) store already hold the transform. If not, the asembly
    *          of the transform is queried via calling
@@ -65,10 +65,10 @@ namespace ActsTrk {
             *        is pointing to a perfectly aligned surface. In this case, the internal nominal
             *        transformation cache is invoked. 
             * @param store: Pointer to the detector aligment store */
-          const Amg::Transform3D& getTransform(const DetectorAlignStore* store) const;
+          const Amg::Isometry3D& getTransform(const DetectorAlignStore* store) const;
           /** @brief returns the cached transform from the Acts Geometry context
            *  @param gctx: The geometry context holding the aligned transforms */
-          const Amg::Transform3D& getTransform(const GeometryContext& gctx) const;
+          const Amg::Isometry3D& getTransform(const GeometryContext& gctx) const;
           /** @brief Store the final transform in the mutable alignment store. 
            *         Returns true whether a new transform was stored
            *  @param store: The reference to the store where the cache
@@ -78,13 +78,16 @@ namespace ActsTrk {
           /** @brief returns the cached transform from the Acts Geometry context
            *  @param tgContext: The geometry context to be unpacked to the 
            *                    ATLAS geometry context */
-          const Amg::Transform3D& getTransform(const Acts::GeometryContext& tgContext) const;
+          const Amg::Isometry3D& getTransform(const Acts::GeometryContext& tgContext) const;
 #endif
           /** @brief resets the nominal cache associated with the detector element*/
           virtual void releaseNominalCache() const;
           /** @brief returns the detector type of the cache*/
           DetectorType detectorType() const;
       protected:
+          /** @brief Assembles the transform from the readout geometry. This is the GeoModel
+           *         facing side, so a general affine transform; the cache converts it to an
+           *         Amg::Isometry3D once, checking the linear part, before handing it to Acts. */
           virtual Amg::Transform3D fetchTransform(const DetectorAlignStore* store) const = 0;
       private:
           const IdentifierHash m_hash{};
@@ -96,7 +99,7 @@ namespace ActsTrk {
           /** @brief Cache to hold the nominal transform, if no DetectorAlignStore is provided
            *         The cache is automatically erased as soon as an instantiated store is 
            *         presented to the class */
-          mutable CxxUtils::CachedUniquePtrT<Amg::Transform3D> m_nomCache ATLAS_THREAD_SAFE{};
+          mutable CxxUtils::CachedUniquePtrT<Amg::Isometry3D> m_nomCache ATLAS_THREAD_SAFE{};
   };
 
 

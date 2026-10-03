@@ -99,7 +99,7 @@ ActsStrawLayerBuilder::centralLayers(const Acts::GeometryContext& gctx) const
 
           for(unsigned int istraw=0;istraw<nStraws;istraw++) {
 
-            Acts::Transform3 trf = brlElem->strawTransform(istraw);
+            Acts::Transform3 trf = Amg::toIsometry3D(brlElem->strawTransform(istraw));
             // need to convert translation to length unit
             trf.translation() *= 1_mm;
             auto code = brlElem->getCode();
@@ -200,7 +200,7 @@ ActsStrawLayerBuilder::endcapLayers(const Acts::GeometryContext& gctx, int side)
 
         for(unsigned int istraw=0;istraw<nStraws;istraw++) {
 
-          Acts::Transform3 trf = (ecElem->strawTransform(istraw));
+          Acts::Transform3 trf = Amg::toIsometry3D(ecElem->strawTransform(istraw));
           // need to convert translation to length unit
           trf.translation() *= 1_mm;
 

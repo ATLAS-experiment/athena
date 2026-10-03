@@ -68,11 +68,11 @@ namespace ActsTrk{
            /** @copydoc Acts::VolumePlacmentBase::localToGlobalTransform */
             const Acts::Transform3& localToGlobalTransform(const Acts::GeometryContext& gctx) const override final;
            /** @copydoc ActsTrk::IVolumePlacement::localToGlobalTransform */ 
-            const Amg::Transform3D& localToGlobalTransform(const GeometryContext& gctx) const;
+            const Amg::Isometry3D& localToGlobalTransform(const GeometryContext& gctx) const;
             /** @copydoc Acts::VolumePlacmentBase::localToGlobalTransform */
              const Acts::Transform3& globalToLocalTransform(const Acts::GeometryContext& gctx) const override final;
             /** @copydoc Acts::VolumePlacmentBase::globalToLocalTransform */
-            const Amg::Transform3D& globalToLocalTransform(const GeometryContext& gctx) const;
+            const Amg::Isometry3D& globalToLocalTransform(const GeometryContext& gctx) const;
             /** @copydoc Acts::VolumePlacmentBase::portalLocalToGlobal */
             const Acts::Transform3& portalLocalToGlobal(const Acts::GeometryContext& gctx, 
                                                         const std::size_t portalIdx) const override final;

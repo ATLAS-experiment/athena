@@ -28,7 +28,7 @@ namespace ActsTrk {
             store.trackingAlignment->getTransform(m_clientNo) != nullptr){
             return false;
         }
-        store.trackingAlignment->setTransform(m_clientNo, fetchTransform(&store));
+        store.trackingAlignment->setTransform(m_clientNo, Amg::toIsometry3D(fetchTransform(&store)));
         return true;
     }
     DetectorType AlignableGeoPositioning::detectorType() const { return m_type; }
