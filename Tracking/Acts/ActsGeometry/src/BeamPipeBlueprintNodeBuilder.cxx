@@ -61,7 +61,7 @@ BeamPipeBlueprintNodeBuilder::buildBlueprintNode(
   // and retrieve the beampipe radius from the geometry database.
   // Otherwise, use default parameters to construct a simple tube.
   double beamPipeRadius = m_defaultInnerRadius;  // mm
-  Amg::Transform3D beamPipeTransform = Amg::Transform3D::Identity();
+  Amg::Isometry3D beamPipeTransform = Amg::Isometry3D::Identity();
 
   if (m_loadfromDatabase) {
 

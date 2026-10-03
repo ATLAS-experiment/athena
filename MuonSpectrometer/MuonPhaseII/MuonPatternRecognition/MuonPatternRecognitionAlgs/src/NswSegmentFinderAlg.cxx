@@ -424,7 +424,7 @@ std::unique_ptr<Segment> NswSegmentFinderAlg::fitSegmentSeed(const EventContext&
                                                                patternSeed->localPosition(), 
                                                                patternSeed->localDirection(), 0.);
 
-    const Amg::Transform3D& locToGlob{patternSeed->msSector()->localToGlobalTransform(gctx)};
+    const auto& locToGlob = patternSeed->msSector()->localToGlobalTransform(gctx);
  
     return m_lineFitter->fitSegment(ctx, patternSeed, patternSeed->parameters(),
                                                 locToGlob, std::move(calibratedHits));

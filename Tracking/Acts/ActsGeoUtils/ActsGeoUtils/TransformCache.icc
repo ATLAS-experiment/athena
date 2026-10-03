@@ -8,35 +8,35 @@
 
 namespace ActsTrk {
     ATH_FLATTEN
-    inline const Amg::Transform3D& 
+    inline const Amg::Isometry3D& 
         AlignableGeoPositioning::getTransform(const ActsTrk::DetectorAlignStore* alignStore) const {    
         /// Valid alignment store is given -> Take the transformation from the cache there
         if (alignStore) {
-            const Amg::Transform3D* cache = alignStore->trackingAlignment->getTransform(m_clientNo);
+            const Amg::Isometry3D* cache = alignStore->trackingAlignment->getTransform(m_clientNo);
             if (cache) {
                 return *cache;
             }
-            const Amg::Transform3D& trf{alignStore->trackingAlignment->setTransform(m_clientNo, fetchTransform(alignStore))};
+            const Amg::Isometry3D& trf = alignStore->trackingAlignment->setTransform(m_clientNo, Amg::toIsometry3D(fetchTransform(alignStore)));
             /// If an external alignment store is presented release the nominal transformation
             releaseNominalCache();
             return trf;
         }
         /// Fall back solution to go onto the nominal cache    
         if (!m_nomCache) {
-            m_nomCache.set(std::make_unique<Amg::Transform3D>(fetchTransform(alignStore)));
+            m_nomCache.set(std::make_unique<Amg::Isometry3D>(Amg::toIsometry3D(fetchTransform(alignStore))));
         }
         return (*m_nomCache);
     }
     inline IdentifierHash AlignableGeoPositioning::hash() const { return m_hash; }
 #ifndef SIMULATIONBASE
     ATH_FLATTEN
-    inline const Amg::Transform3D& AlignableGeoPositioning::getTransform(const Acts::GeometryContext& tgContext) const {
+    inline const Amg::Isometry3D& AlignableGeoPositioning::getTransform(const Acts::GeometryContext& tgContext) const {
         const GeometryContext* gctx = tgContext.get<const GeometryContext*>();    
         // unpack the alignment store from the context
         return getTransform(gctx->getStore(m_type).get());
     }
     ATH_FLATTEN
-    inline const Amg::Transform3D& AlignableGeoPositioning::getTransform(const GeometryContext& gctx) const {
+    inline const Amg::Isometry3D& AlignableGeoPositioning::getTransform(const GeometryContext& gctx) const {
         return getTransform(gctx.getStore(m_type).get());
     }
 #endif

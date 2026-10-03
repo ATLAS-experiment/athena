@@ -149,8 +149,10 @@ class MdtCalibInput {
     /** @brief Print the object on screen
      *  @param ostr: Outstream into which the object is piped  */
     void print(std::ostream& ostr) const;
-    /** @brief Local to global transformation of the tube */
-    const Amg::Transform3D& localToGlobal() const;
+    /** @brief Local to global transformation of the tube. Returned by value,
+     *         because the R4 geometry gives an Amg::Isometry3D and the legacy
+     *         geometry an Amg::Transform3D. */
+    Amg::Transform3D localToGlobal() const;
     /** @brief Tube identifier */
     Identifier m_id{};
     /** @brief Adc counts of the hit */

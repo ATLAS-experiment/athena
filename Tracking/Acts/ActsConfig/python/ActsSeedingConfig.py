@@ -378,7 +378,6 @@ def ActsLargeRadiusStripGbtsSeedingToolCfg(flags,
                       ActsUnits.mm / GaudiUnits.mm)
     kwargs.setdefault("maxZ0", flags.Tracking.ActiveConfig.maxZImpactSeed *
                       ActsUnits.mm / GaudiUnits.mm)
-    kwargs.setdefault("minDeltaPhi", 0.01)
     kwargs.setdefault("maxOuterRadius", 1050.0)
 
     return ActsStripGbtsSeedingToolCfg(flags, name, **kwargs)

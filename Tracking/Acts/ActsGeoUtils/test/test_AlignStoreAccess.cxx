@@ -44,10 +44,10 @@ class TestDetElement : public ActsTrk::IDetectorElement, public GeoVDetectorElem
         unsigned storeAlignedTransforms(ActsTrk::DetectorAlignStore& store) const override final {
             return m_cache.storeTransform(store);
         }
-        const Amg::Transform3D& localToGlobalTransform(const ActsTrk::GeometryContext& gctx) const override final {
+        const Amg::Isometry3D& localToGlobalTransform(const ActsTrk::GeometryContext& gctx) const override final {
             return m_cache.getTransform(gctx);
         }
-        const Amg::Transform3D& localToGlobalTransform(const ActsTrk::DetectorAlignStore* store) const override final {
+        const Amg::Isometry3D& localToGlobalTransform(const ActsTrk::DetectorAlignStore* store) const override final {
             return m_cache.getTransform(store);
         }
     private:
