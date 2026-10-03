@@ -39,30 +39,30 @@ set_target_properties( ActsEventLib
                        PROPERTIES LINK_FLAGS " -Wno-maybe-uninitialized " )
 
 atlas_add_dictionary( ActsEventDict
-		      ActsEvent/ActsEventDict.h
-		      ActsEvent/selection.xml
-		      LINK_LIBRARIES AthLinks ActsEventLib)
+              ActsEvent/ActsEventDict.h
+              ActsEvent/selection.xml
+              LINK_LIBRARIES AthLinks ActsEventLib)
 
 atlas_add_test( MultiTrajectoryBasic_test
-				SOURCES test/MultiTrajectoryBasic_test.cxx
-				LINK_LIBRARIES ActsEventLib
+                SOURCES test/MultiTrajectoryBasic_test.cxx
+                LINK_LIBRARIES ActsEventLib
                                 Boost::unit_test_framework
-				POST_EXEC_SCRIPT noerror.sh)
+                POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( MultiTrajectorySE_test
-				SOURCES test/MultiTrajectorySE_test.cxx
-				LINK_LIBRARIES ActsEventLib ActsGeoUtils
+                SOURCES test/MultiTrajectorySE_test.cxx
+                LINK_LIBRARIES ActsEventLib ActsGeoUtils
                                 Boost::unit_test_framework
-				POST_EXEC_SCRIPT noerror.sh)
+                POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( MultiTrajectoryACTS_test
-				SOURCES test/MultiTrajectoryACTS_test.cxx
-				LINK_LIBRARIES ActsEventLib
+                SOURCES test/MultiTrajectoryACTS_test.cxx
+                LINK_LIBRARIES ActsEventLib
                                 Boost::unit_test_framework
-				POST_EXEC_SCRIPT noerror.sh)
+                POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( TrackSummaryContainer_test
-				SOURCES test/TrackSummaryContainer_test.cxx
-				LINK_LIBRARIES ActsEventLib
+                SOURCES test/TrackSummaryContainer_test.cxx
+                LINK_LIBRARIES ActsEventLib
                                 Boost::unit_test_framework
-				POST_EXEC_SCRIPT noerror.sh)
+                POST_EXEC_SCRIPT noerror.sh)

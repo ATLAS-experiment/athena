@@ -23,6 +23,7 @@ atlas_add_library( ActsGeometryLib
                    src/ItkBlueprintNodeBuilder.cxx
                    src/CaloBlueprintNodeBuilder.cxx
                    src/ContextUtility.cxx
+                   src/CylinderUtils.cxx
                    src/util/*.cxx
                    PUBLIC_HEADERS ActsGeometry
                    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS}
@@ -112,3 +113,8 @@ if ( NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
                   SCRIPT ActsEnvelopeTest.py
                   POST_EXEC_SCRIPT noerror.sh)
 endif()
+
+atlas_add_test( CylinderUtils_test
+                SOURCES test/CylinderUtils_test.cxx
+                LINK_LIBRARIES ActsGeometryLib
+                POST_EXEC_SCRIPT noerror.sh)
