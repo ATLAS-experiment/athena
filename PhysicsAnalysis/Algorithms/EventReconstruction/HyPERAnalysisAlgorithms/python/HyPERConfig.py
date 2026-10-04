@@ -77,6 +77,9 @@ class HyPERBlock(ConfigBlock):
         return self.outputName
 
     def makeAlgs(self, config):
+        if not config.getContainerMeta ('EventInfo', 'OnnxEnabled'):
+            raise RuntimeError ("You must enable ONNX in order to use HyPER. Please set 'setupONNX: True' in CommonServices.")
+
         decorator_prefix = _resolve_reco_partons_prefix(self.topology, self.outputName)
         alg = config.createAlgorithm(
             "EventReco::RunHyPERAlg", f"RunHyPERAlg_{decorator_prefix}"

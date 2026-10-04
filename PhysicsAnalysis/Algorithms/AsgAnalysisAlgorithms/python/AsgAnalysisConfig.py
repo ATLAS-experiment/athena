@@ -176,6 +176,7 @@ class CommonServicesConfig (ConfigBlock) :
 
         if self.setupONNX:
             config.createService('AthOnnx::OnnxRuntimeSvc', 'OnnxRuntimeSvc')
+        config.setContainerMeta ('EventInfo', 'OnnxEnabled', self.setupONNX)
 
 @groupBlocks
 def CommonServices(seq):
