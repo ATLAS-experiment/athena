@@ -77,7 +77,7 @@ if (TARGET traccc::cuda)
 atlas_add_test( ActsCUDAClusterizationTest
    PRE_EXEC_SCRIPT "nvidia-check.sh || exit 2"
    ENVIRONMENT "PATHRESOLVER_DEVAREARESPONSE=WARNING"
-   SCRIPT athena.py ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsDeviceClusterizationTest.py Device.Backend=DeviceBackend.CUDA
+   SCRIPT athena.py ActsGPUDataPreparation/ActsDeviceClusterizationTest.py Device.Backend=DeviceBackend.CUDA
    POST_EXEC_SCRIPT noerror.sh
    PROPERTIES SKIP_RETURN_CODE 2 )
 endif()
@@ -87,7 +87,7 @@ if (TARGET traccc::hip)
     PRE_EXEC_SCRIPT "amd-check.sh || exit 2"
     ENVIRONMENT "PATHRESOLVER_DEVAREARESPONSE=WARNING"
     SCRIPT athena.py
-           ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsDeviceClusterizationTest.py
+           ActsGPUDataPreparation/ActsDeviceClusterizationTest.py
            Device.Backend=DeviceBackend.HIPAMD
            Acts.Device.doCellSorting=False
     POST_EXEC_SCRIPT noerror.sh
