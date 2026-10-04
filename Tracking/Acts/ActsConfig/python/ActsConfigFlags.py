@@ -185,7 +185,7 @@ def createActsConfigFlags():
 
     # Cluster
     actscf.addFlag("Acts.Clusters.UseWeightedPosition", False)
-    actscf.addFlag("Acts.Clusters.RetrieveChargeInformation", lambda pcf: not pcf.Tracking.doPixelDigitalClustering)
+    actscf.addFlag("Acts.Clusters.RetrieveChargeInformation", True)
     actscf.addFlag("Acts.Clusters.StripClusteringErrorMode", StripClusteringErrorMode.PITCH,type=StripClusteringErrorMode)
     actscf.addFlag("Acts.Clusters.UsePixelBroadErrors", False)
     
