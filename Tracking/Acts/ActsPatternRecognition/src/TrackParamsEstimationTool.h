@@ -84,8 +84,6 @@ namespace ActsTrk {
         "Initial relative pT resolution"};
     Gaudi::Property< std::vector<double> > m_initialVarInflation {this, "initialVarInflation", {1., 1., 1., 1., 1., 1.},
         "Inflate track variances"};
-    Gaudi::Property< std::vector<double> > m_refitErrInflation {this, "refitErrInflation", {1., 1., 1., 1., 1., 1.},
-        "Inflate refit track errors"};
     Gaudi::Property< int > m_parameterEstimationMode {this, "parameterEstimationMode", 2,
         "0=use 1st 3 SPs, 1=use first,middle,last SPs to improve pT measurement, 2=use for all parameters, "
         "3=use 1st 3 SPs separated by more than minDeltaR, starting from the innermost SP"};
@@ -127,8 +125,6 @@ namespace ActsTrk {
     std::unique_ptr<const Acts::Logger> m_logger;
 
     SpacePointIndicesFun_t m_spacePointIndicesFun{};
-
-    bool m_doRefitErrInflation = false;
   };
   
 } // namespace
