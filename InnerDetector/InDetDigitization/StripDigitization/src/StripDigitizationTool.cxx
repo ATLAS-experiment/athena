@@ -721,7 +721,7 @@ std::unique_ptr<SCT_RDO_Collection> StripDigitizationTool::createRDO(SiChargedDi
                 ++it2;
                 ++cluscounter;
               }
-              if ((it2 != collection->end()) and !(it2->second.flag() & 0xDE)) {
+              if ((it2 != i_chargedDiode_end) and !(it2->second.flag() & 0xDE)) {
                 SiHelper::ClusterUsed(it2->second, false);
                 SiHelper::SetStripNum(it2->second, size - cluscounter, &msg());
               }
