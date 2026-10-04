@@ -168,14 +168,6 @@ inline void getAngleAxisFromRotation(Amg::RotationMatrix3D& rotation, double& ro
     return;
 }
 
-/**
- * Get the Translation vector out of a Transformation
- */
-inline Amg::Vector3D getTranslationVectorFromTransform(const Amg::Transform3D& tr) {
-    return Amg::Vector3D(tr(0,3),tr(1,3),tr(2,3));
-} // TODO: check! it's perhaps useless, you acn use the transform.translation() method
-
-
 
 /**
  * get a AngleAxis from an angle and an axis.

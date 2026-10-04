@@ -88,8 +88,7 @@ public:
 
 
 
-  static Amg::Vector3D& applyTransformToVector( const Amg::Transform3D& m, Amg::Vector3D& v);//Fixme: Better place for this?
-
+ 
 private:
 
   //It is illegal to copy/assign a MuonChamberProjectionHelper:
