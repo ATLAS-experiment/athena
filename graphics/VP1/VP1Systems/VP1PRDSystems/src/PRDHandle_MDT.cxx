@@ -37,11 +37,10 @@ void PRDHandle_MDT::buildShapes(SoNode*&shape_simple, SoNode*&shape_detailed)
     if (projection==PRDCollHandle_MDT::TOCHAMBERS) {
       double distanceToFirstEndPlane, distanceToSecondEndPlane;
       Amg::Transform3D transform(getTransform_CLHEP());
-      Amg::Vector3D tubedir(0.0,0.0,1.0);
-      MuonChamberProjectionHelper::applyTransformToVector( transform, tubedir);
+      Amg::Vector3D tubedir = transform.linear() * Amg::Vector3D::UnitZ();
       if (common()->muonChamberProjectionHelper()
         ->getDistancesToMDTChamberWallsAlongLine( parentMuonChamberPV(),
-        transform * Amg::Vector3D(0.0,0.0,0.0), tubedir,
+        transform.translation(), tubedir,
       distanceToFirstEndPlane, distanceToSecondEndPlane, radius )) {
         if (fabs(distanceToFirstEndPlane-distanceToSecondEndPlane)>0.1*epsilon)
           std::cout <<"PRDHandle_MDT: Warning tube is not centered in chamber! We should translate the prd object appropriately (todo)."<<std::endl;

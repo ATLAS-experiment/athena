@@ -138,10 +138,6 @@ MuonChamberProjectionHelper::~MuonChamberProjectionHelper()
   delete m_d;
 }
 
-//____________________________________________________________________
-Amg::Vector3D& MuonChamberProjectionHelper::applyTransformToVector( const Amg::Transform3D& m, Amg::Vector3D& v) {
-  return (v = m.linear()*v);
-}
 
 //____________________________________________________________________
 bool MuonChamberProjectionHelper::Imp::ensureInited()

@@ -358,10 +358,7 @@ Amg::Transform3D PRDHandleBase::getTransform_CLHEP() const
     theHitGPos = theSurface.localToGlobal(prd->localPosition()); //theSurface 'new s' a Vector3D and returns pointer
   }
 
-//  CLHEP::Hep3Vector t(theSurface.transform().getTranslation());
-//  return HepGeom::Transform3D( HepGeom::Translate3D(theHitGPos->x()-t.x(),theHitGPos->y()-t.y(),theHitGPos->z()-t.z()) * (theSurface.transform()) );
-  Amg::Vector3D t;
-  t = Amg::getTranslationVectorFromTransform(theSurface.transform());
+  Amg::Vector3D t = theSurface.center();
   Amg::Translation3D transl = Amg::Translation3D(theHitGPos.x()-t.x(), theHitGPos.y()-t.y(), theHitGPos.z()-t.z());
   Amg::Transform3D transf = transl * (theSurface.transform());
   return transf;
