@@ -187,7 +187,7 @@ StatusCode MuonFastSegmentFittingAlg::execute(const EventContext& ctx) const {
             xAOD::MuonSegment* segXAOD = m_segmentCnvTool->convertSegment(ctx, *seg, ship);
             
             /** Decorate with pattern link */
-            dec_patternLink(*segXAOD) = PatLink_t{*inPatterns, patIdx};
+            dec_patternLink(*segXAOD) = PatLink_t{*inPatterns, patIdx, ctx};
 
             /** Add the phi hit if needed */
             if (toAddPhi && toAddPhi == seg.get()) {
