@@ -113,11 +113,13 @@ class StripCalibrationStrategy(FlagEnum):
 # FirstThreeLongMomentum : the first 3 SPs, with q/p from the first, middle and last SPs
 # FirstMiddleLast        : the first, middle and last SPs
 # MinDeltaR              : the first 3 SPs, that are separated by more than Acts.minDeltaRParameterEstimation
+# All                    : a helix fit of all SPs
 class ParameterEstimationMode(FlagEnum):
     FirstThree = 0
     FirstThreeLongMomentum = 1
     FirstMiddleLast = 2
     MinDeltaR = 3
+    All = 4
 
 
 def createActsConfigFlags():
