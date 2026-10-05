@@ -90,7 +90,7 @@ namespace FlavorTagDiscriminants {
 
     // The bec aux-variable is not declaared through keys to the SG, so it creates dependency errors in the
     // schedules if we try to use a ReadDecorHandle(Key) for it.
-    static const SG::AuxElement::ConstAccessor<int> bec("bec");
+    static const SG::ConstAccessor<int> bec("bec");
     
     // Filter input hits
     std::vector<Hit> hits;

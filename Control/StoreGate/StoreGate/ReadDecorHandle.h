@@ -97,7 +97,7 @@ public:
   using Base = ReadHandle<T>;
 
   /// Accessor type for aux data.
-  using accessor_t = SG::AuxElement::ConstAccessor<D>;
+  using accessor_t = SG::ConstAccessor<D>;
 
   /// Type referencing an aux data item.
   using const_reference_type = typename accessor_t::const_reference_type;

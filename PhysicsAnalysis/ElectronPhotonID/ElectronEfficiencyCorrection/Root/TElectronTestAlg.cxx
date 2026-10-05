@@ -164,7 +164,7 @@ StatusCode CP::TElectronTestAlg::execute(const EventContext& ctx) const {
       return StatusCode::FAILURE;
     }
     // we need to use different variables for central and forward electrons
-    static const SG::AuxElement::ConstAccessor<uint16_t> accAuthor("author");
+    static const SG::ConstAccessor<uint16_t> accAuthor("author");
     if (accAuthor.isAvailable(*el) &&
         accAuthor(*el) == xAOD::EgammaParameters::AuthorFwdElectron) {
       cluster_eta = cluster->eta();

@@ -188,8 +188,8 @@ namespace CP {
             std::unique_ptr<HistHandler> m_mc_eff;
 
             /// Typedef to make the definition of the follow decorators a bit shorted
-            typedef SG::AuxElement::Decorator<float> FloatDecorator;
-            typedef SG::AuxElement::Decorator<std::vector<float>> FloatVectorDecorator;
+            typedef SG::Decorator<float> FloatDecorator;
+            typedef SG::Decorator<std::vector<float>> FloatVectorDecorator;
             
             std::unique_ptr<FloatDecorator> m_sf_decor;
             std::unique_ptr<FloatDecorator> m_eff_decor;           

@@ -303,7 +303,7 @@ namespace xAOD {
           }
           // loop over variable names
           for (size_t iv=0; iv<m_vVarNames.size(); ++iv) {
-            SG::AuxElement::Decorator<float> floatDec(m_vVarNames[iv]);
+            SG::Decorator<float> floatDec(m_vVarNames[iv]);
             // check for variable
             if ( floatDec.isAvailable(*vtx) ) {
               float val = floatDec(*vtx);
@@ -415,7 +415,7 @@ namespace xAOD {
     
     if ( !hypo.starts_with( "passed_") )
       hypo = "passed_" + hypo;
-    SG::AuxElement::Accessor<Char_t> flagAcc(hypo);
+    SG::Accessor<Char_t> flagAcc(hypo);
     return flagAcc.isAvailable(em) && flagAcc(em) != 0;
   }
   //--------------------------------------------------------------------------

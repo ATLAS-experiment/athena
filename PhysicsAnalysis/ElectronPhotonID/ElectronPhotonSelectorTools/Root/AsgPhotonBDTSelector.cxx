@@ -312,7 +312,7 @@ asg::AcceptData AsgPhotonBDTSelector::acceptBDT(const EventContext& ctx, const x
     const bool hasE277 = ph.showerShapeValue(tmp, xAOD::EgammaParameters::e277);
     if (!hasF1 || !hasE277) {
       // Check if isEM decoration is available
-      const SG::AuxElement::Accessor<int> accIsEM(m_isEMDecoration);
+      const SG::Accessor<int> accIsEM(m_isEMDecoration);
       if (accIsEM.isAvailable(ph)) {
         const int previousIsEM = accIsEM(ph);
         passF1 = !(previousIsEM & FailPreselectionF1);

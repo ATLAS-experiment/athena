@@ -37,7 +37,7 @@ namespace CP {
             ATH_MSG_FATAL("What's the decoration to apply to the muon");
             return StatusCode::FAILURE;
         }
-        m_decorator = std::make_unique<SG::AuxElement::Decorator<float>>(m_jet_dr_decoration);
+        m_decorator = std::make_unique<SG::Decorator<float>>(m_jet_dr_decoration);
         ATH_MSG_INFO("Decorator the jet dR between "<<m_muon_container<<" and "<<m_jet_container<<" to "
                     <<m_jet_dr_decoration<<". If no jet is found the following dummy value is assigned: "<<m_dummy_value);
         return StatusCode::SUCCESS;

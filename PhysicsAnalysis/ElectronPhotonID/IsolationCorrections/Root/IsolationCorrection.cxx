@@ -151,8 +151,8 @@ namespace CP {
       if(convFlag_int == 2){
         const xAOD::Vertex* phVertex = ph_input->vertex();
 
-        static const SG::AuxElement::Accessor<float> accPt1("pt1");
-        static const SG::AuxElement::Accessor<float> accPt2("pt2");
+        static const SG::Accessor<float> accPt1("pt1");
+        static const SG::Accessor<float> accPt2("pt2");
         const xAOD::TrackParticle* tp0 = phVertex->trackParticle(0);
         const xAOD::TrackParticle* tp1 = phVertex->trackParticle(1);
 

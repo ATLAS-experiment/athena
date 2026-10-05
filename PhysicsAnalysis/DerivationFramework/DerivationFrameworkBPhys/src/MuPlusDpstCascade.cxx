@@ -116,37 +116,37 @@ namespace DerivationFramework {
       BPhysPVCascadeTools helper(&(*m_CascadeTools), evt.cptr());
       helper.SetMinNTracksInPV(m_PV_minNTracks);
       // Decorators for the main vertex: chi2, ndf, pt and pt error, plus the D0 vertex variables
-      SG::AuxElement::Decorator<VertexLinkVector> CascadeLinksDecor("CascadeVertexLinks"); 
-      SG::AuxElement::Decorator<VertexLinkVector> MuPiLinksDecor("MuPiVertexLinks");
-      SG::AuxElement::Decorator<VertexLinkVector> D0LinksDecor("D0VertexLinks"); 
-      SG::AuxElement::Decorator<float> chi2_decor("ChiSquared");
-      SG::AuxElement::Decorator<float> ndof_decor("NumberDoF");
-      SG::AuxElement::Decorator<float> Pt_decor("Pt");
-      SG::AuxElement::Decorator<float> PtErr_decor("PtErr");
-      SG::AuxElement::Decorator<float> Mass_svdecor("D0_mass");
-      SG::AuxElement::Decorator<float> MassErr_svdecor("D0_massErr");
-      SG::AuxElement::Decorator<float> Pt_svdecor("D0_Pt");
-      SG::AuxElement::Decorator<float> PtErr_svdecor("D0_PtErr");
-      SG::AuxElement::Decorator<float> Lxy_svdecor("D0_Lxy");
-      SG::AuxElement::Decorator<float> LxyErr_svdecor("D0_LxyErr");
-      SG::AuxElement::Decorator<float> Tau_svdecor("D0_Tau");
-      SG::AuxElement::Decorator<float> TauErr_svdecor("D0_TauErr");
+      SG::Decorator<VertexLinkVector> CascadeLinksDecor("CascadeVertexLinks"); 
+      SG::Decorator<VertexLinkVector> MuPiLinksDecor("MuPiVertexLinks");
+      SG::Decorator<VertexLinkVector> D0LinksDecor("D0VertexLinks"); 
+      SG::Decorator<float> chi2_decor("ChiSquared");
+      SG::Decorator<float> ndof_decor("NumberDoF");
+      SG::Decorator<float> Pt_decor("Pt");
+      SG::Decorator<float> PtErr_decor("PtErr");
+      SG::Decorator<float> Mass_svdecor("D0_mass");
+      SG::Decorator<float> MassErr_svdecor("D0_massErr");
+      SG::Decorator<float> Pt_svdecor("D0_Pt");
+      SG::Decorator<float> PtErr_svdecor("D0_PtErr");
+      SG::Decorator<float> Lxy_svdecor("D0_Lxy");
+      SG::Decorator<float> LxyErr_svdecor("D0_LxyErr");
+      SG::Decorator<float> Tau_svdecor("D0_Tau");
+      SG::Decorator<float> TauErr_svdecor("D0_TauErr");
 
-      SG::AuxElement::Decorator<float> massMuPi_decor("MuPi_mass"); //mu+pi_soft mass before fit
-      SG::AuxElement::Decorator<float> MassKpi_svdecor("Kpi_mass");
-      SG::AuxElement::Decorator<float> MassMuPiAft_decor("MuPiAft_mass"); //mu+pi_soft mass after fit
-      SG::AuxElement::Decorator<float> MassPiD0_decor("PiD0_mass");
-      SG::AuxElement::Decorator<float> MassMuPiPiK_decor("MuPiPiK_mass");
+      SG::Decorator<float> massMuPi_decor("MuPi_mass"); //mu+pi_soft mass before fit
+      SG::Decorator<float> MassKpi_svdecor("Kpi_mass");
+      SG::Decorator<float> MassMuPiAft_decor("MuPiAft_mass"); //mu+pi_soft mass after fit
+      SG::Decorator<float> MassPiD0_decor("PiD0_mass");
+      SG::Decorator<float> MassMuPiPiK_decor("MuPiPiK_mass");
 
-      SG::AuxElement::Decorator<float> ChargePi_decor("Pi_charge");
-      SG::AuxElement::Decorator<float> ChargeMu_decor("Mu_charge");
-      SG::AuxElement::Decorator<float> ChargeK_decor("K_charge");
-      SG::AuxElement::Decorator<float> ChargePi_s_decor("Pi_s_charge");
-      SG::AuxElement::Decorator<float> Chi2Mu_decor("Mu_chi2");
-      SG::AuxElement::Decorator<float> nDoFMu_decor("Mu_nDoF");
+      SG::Decorator<float> ChargePi_decor("Pi_charge");
+      SG::Decorator<float> ChargeMu_decor("Mu_charge");
+      SG::Decorator<float> ChargeK_decor("K_charge");
+      SG::Decorator<float> ChargePi_s_decor("Pi_s_charge");
+      SG::Decorator<float> Chi2Mu_decor("Mu_chi2");
+      SG::Decorator<float> nDoFMu_decor("Mu_nDoF");
       //muon contribution to chi2 of the cascade fit
-      SG::AuxElement::Decorator<float> MuChi2B_decor("Mu_chi2_B");
-      SG::AuxElement::Decorator<float> MunDoFB_decor("Mu_nDoF_B");
+      SG::Decorator<float> MuChi2B_decor("Mu_chi2_B");
+      SG::Decorator<float> MunDoFB_decor("Mu_nDoF_B");
 
 
       // Get mu+pi container and identify the input mu+pi
@@ -551,8 +551,8 @@ namespace DerivationFramework {
 
         // Select the D0/D0b candidates before calling cascade fit
         std::vector<const xAOD::Vertex*> selectedD0Candidates;
-        SG::AuxElement::Accessor<Char_t> flagAcc1("passed_D0");
-        SG::AuxElement::Accessor<Char_t> flagAcc2("passed_D0b");
+        SG::Accessor<Char_t> flagAcc1("passed_D0");
+        SG::Accessor<Char_t> flagAcc2("passed_D0b");
         for(auto vxcItr : *d0Container){
            // Check the passed flag first
            const xAOD::Vertex* vtx = vxcItr;
@@ -659,7 +659,7 @@ namespace DerivationFramework {
               }
             
               //Leaving for the possible mods in the future
-              //SG::AuxElement::Accessor<xAOD::Vertex_v1::TrackParticleLinks_t> trackAcc( "trackParticleLinks" );
+              //SG::Accessor<xAOD::Vertex_v1::TrackParticleLinks_t> trackAcc( "trackParticleLinks" );
               //ATH_MSG_INFO("CUSTOM:: "<<*(trackAcc(*d0Itr)).at(0));
               //ATH_MSG_INFO("CUSTOM2:: "<<tracksD0.at(0));             //-> gives the same result
 

@@ -314,7 +314,7 @@ namespace DerivationFramework {
       const xAOD::Vertex* vtx = *vxcItr;
       bool passed = false;
       for(const std::string& name : m_vertexJXHypoNames) {
-	SG::AuxElement::Accessor<Char_t> flagAcc("passed_"+name);
+	SG::Accessor<Char_t> flagAcc("passed_"+name);
 	if(flagAcc.isAvailable(*vtx) && flagAcc(*vtx)) {
 	  passed = true;
 	}
@@ -522,11 +522,11 @@ namespace DerivationFramework {
       }
     }
 
-    SG::AuxElement::Accessor<std::string> mAcc_type("Type_V0Vtx");
-    SG::AuxElement::Accessor<int>         mAcc_gfit("gamma_fit");
-    SG::AuxElement::Accessor<float>       mAcc_gmass("gamma_mass");
-    SG::AuxElement::Accessor<float>       mAcc_gchisq("gamma_chisq");
-    SG::AuxElement::Accessor<int>         mAcc_gndof("gamma_ndof");
+    SG::Accessor<std::string> mAcc_type("Type_V0Vtx");
+    SG::Accessor<int>         mAcc_gfit("gamma_fit");
+    SG::Accessor<float>       mAcc_gmass("gamma_mass");
+    SG::Accessor<float>       mAcc_gchisq("gamma_chisq");
+    SG::Accessor<int>         mAcc_gndof("gamma_ndof");
 
     std::vector<std::pair<const xAOD::Vertex*,V0Enum> > selectedV0Candidates;
 
@@ -636,35 +636,35 @@ namespace DerivationFramework {
     helper.SetMinNTracksInPV(m_PV_minNTracks);
 
     // Decorators for the main vertex: chi2, ndf, pt and pt error, plus the V0 vertex variables
-    SG::AuxElement::Decorator<VertexLinkVector> CascadeLinksDecor("CascadeVertexLinks");
-    SG::AuxElement::Decorator<float> chi2_decor("ChiSquared");
-    SG::AuxElement::Decorator<int>   ndof_decor("nDoF");
-    SG::AuxElement::Decorator<float> Pt_decor("Pt");
-    SG::AuxElement::Decorator<float> PtErr_decor("PtErr");
+    SG::Decorator<VertexLinkVector> CascadeLinksDecor("CascadeVertexLinks");
+    SG::Decorator<float> chi2_decor("ChiSquared");
+    SG::Decorator<int>   ndof_decor("nDoF");
+    SG::Decorator<float> Pt_decor("Pt");
+    SG::Decorator<float> PtErr_decor("PtErr");
 
-    SG::AuxElement::Decorator<float> lxy_SV1_decor("lxy_SV1");
-    SG::AuxElement::Decorator<float> lxyErr_SV1_decor("lxyErr_SV1");
-    SG::AuxElement::Decorator<float> a0xy_SV1_decor("a0xy_SV1");
-    SG::AuxElement::Decorator<float> a0xyErr_SV1_decor("a0xyErr_SV1");
-    SG::AuxElement::Decorator<float> a0z_SV1_decor("a0z_SV1");
-    SG::AuxElement::Decorator<float> a0zErr_SV1_decor("a0zErr_SV1");
+    SG::Decorator<float> lxy_SV1_decor("lxy_SV1");
+    SG::Decorator<float> lxyErr_SV1_decor("lxyErr_SV1");
+    SG::Decorator<float> a0xy_SV1_decor("a0xy_SV1");
+    SG::Decorator<float> a0xyErr_SV1_decor("a0xyErr_SV1");
+    SG::Decorator<float> a0z_SV1_decor("a0z_SV1");
+    SG::Decorator<float> a0zErr_SV1_decor("a0zErr_SV1");
 
-    SG::AuxElement::Decorator<float> lxy_SV2_decor("lxy_SV2");
-    SG::AuxElement::Decorator<float> lxyErr_SV2_decor("lxyErr_SV2");
-    SG::AuxElement::Decorator<float> a0xy_SV2_decor("a0xy_SV2");
-    SG::AuxElement::Decorator<float> a0xyErr_SV2_decor("a0xyErr_SV2");
-    SG::AuxElement::Decorator<float> a0z_SV2_decor("a0z_SV2");
-    SG::AuxElement::Decorator<float> a0zErr_SV2_decor("a0zErr_SV2");
+    SG::Decorator<float> lxy_SV2_decor("lxy_SV2");
+    SG::Decorator<float> lxyErr_SV2_decor("lxyErr_SV2");
+    SG::Decorator<float> a0xy_SV2_decor("a0xy_SV2");
+    SG::Decorator<float> a0xyErr_SV2_decor("a0xyErr_SV2");
+    SG::Decorator<float> a0z_SV2_decor("a0z_SV2");
+    SG::Decorator<float> a0zErr_SV2_decor("a0zErr_SV2");
 
-    SG::AuxElement::Decorator<float> lxy_SV3_decor("lxy_SV3");
-    SG::AuxElement::Decorator<float> lxyErr_SV3_decor("lxyErr_SV3");
-    SG::AuxElement::Decorator<float> a0xy_SV3_decor("a0xy_SV3");
-    SG::AuxElement::Decorator<float> a0xyErr_SV3_decor("a0xyErr_SV3");
-    SG::AuxElement::Decorator<float> a0z_SV3_decor("a0z_SV3");
-    SG::AuxElement::Decorator<float> a0zErr_SV3_decor("a0zErr_SV3");
+    SG::Decorator<float> lxy_SV3_decor("lxy_SV3");
+    SG::Decorator<float> lxyErr_SV3_decor("lxyErr_SV3");
+    SG::Decorator<float> a0xy_SV3_decor("a0xy_SV3");
+    SG::Decorator<float> a0xyErr_SV3_decor("a0xyErr_SV3");
+    SG::Decorator<float> a0z_SV3_decor("a0z_SV3");
+    SG::Decorator<float> a0zErr_SV3_decor("a0zErr_SV3");
 
-    SG::AuxElement::Decorator<float> chi2_V3_decor("ChiSquared_V3");
-    SG::AuxElement::Decorator<int>   ndof_V3_decor("nDoF_V3");
+    SG::Decorator<float> chi2_V3_decor("ChiSquared_V3");
+    SG::Decorator<int>   ndof_V3_decor("nDoF_V3");
 
     for(auto cascade_info : cascadeinfoContainer) {
       if(cascade_info==nullptr) {
@@ -868,29 +868,29 @@ namespace DerivationFramework {
     std::unique_ptr<Trk::RecVertex> pv_AOD;
     if(pv_xAOD) pv_AOD = std::make_unique<Trk::RecVertex>(pv_xAOD->position(),pv_xAOD->covariancePosition(),pv_xAOD->numberDoF(),pv_xAOD->chiSquared());
 
-    SG::AuxElement::Decorator<float>       chi2_V1_decor("ChiSquared_V1");
-    SG::AuxElement::Decorator<int>         ndof_V1_decor("nDoF_V1");
-    SG::AuxElement::Decorator<std::string> type_V1_decor("Type_V1");
-    SG::AuxElement::Decorator<float>       chi2_V2_decor("ChiSquared_V2");
-    SG::AuxElement::Decorator<int>         ndof_V2_decor("nDoF_V2");
-    SG::AuxElement::Decorator<std::string> type_V2_decor("Type_V2");
+    SG::Decorator<float>       chi2_V1_decor("ChiSquared_V1");
+    SG::Decorator<int>         ndof_V1_decor("nDoF_V1");
+    SG::Decorator<std::string> type_V1_decor("Type_V1");
+    SG::Decorator<float>       chi2_V2_decor("ChiSquared_V2");
+    SG::Decorator<int>         ndof_V2_decor("nDoF_V2");
+    SG::Decorator<std::string> type_V2_decor("Type_V2");
 
-    SG::AuxElement::Accessor<int>    mAcc_gfit("gamma_fit");
-    SG::AuxElement::Accessor<float>  mAcc_gmass("gamma_mass");
-    SG::AuxElement::Accessor<float>  mAcc_gmasserr("gamma_massError");
-    SG::AuxElement::Accessor<float>  mAcc_gchisq("gamma_chisq");
-    SG::AuxElement::Accessor<int>    mAcc_gndof("gamma_ndof");
-    SG::AuxElement::Accessor<float>  mAcc_gprob("gamma_probability");
+    SG::Accessor<int>    mAcc_gfit("gamma_fit");
+    SG::Accessor<float>  mAcc_gmass("gamma_mass");
+    SG::Accessor<float>  mAcc_gmasserr("gamma_massError");
+    SG::Accessor<float>  mAcc_gchisq("gamma_chisq");
+    SG::Accessor<int>    mAcc_gndof("gamma_ndof");
+    SG::Accessor<float>  mAcc_gprob("gamma_probability");
 
-    SG::AuxElement::Decorator<int>   mDec_gfit("gamma_fit");
-    SG::AuxElement::Decorator<float> mDec_gmass("gamma_mass");
-    SG::AuxElement::Decorator<float> mDec_gmasserr("gamma_massError");
-    SG::AuxElement::Decorator<float> mDec_gchisq("gamma_chisq");
-    SG::AuxElement::Decorator<int>   mDec_gndof("gamma_ndof");
-    SG::AuxElement::Decorator<float> mDec_gprob("gamma_probability");
-    SG::AuxElement::Decorator< std::vector<float> > trk_pxDeco("TrackPx_V0nc");
-    SG::AuxElement::Decorator< std::vector<float> > trk_pyDeco("TrackPy_V0nc");
-    SG::AuxElement::Decorator< std::vector<float> > trk_pzDeco("TrackPz_V0nc");
+    SG::Decorator<int>   mDec_gfit("gamma_fit");
+    SG::Decorator<float> mDec_gmass("gamma_mass");
+    SG::Decorator<float> mDec_gmasserr("gamma_massError");
+    SG::Decorator<float> mDec_gchisq("gamma_chisq");
+    SG::Decorator<int>   mDec_gndof("gamma_ndof");
+    SG::Decorator<float> mDec_gprob("gamma_probability");
+    SG::Decorator< std::vector<float> > trk_pxDeco("TrackPx_V0nc");
+    SG::Decorator< std::vector<float> > trk_pyDeco("TrackPy_V0nc");
+    SG::Decorator< std::vector<float> > trk_pzDeco("TrackPz_V0nc");
 
     std::vector<float> trk_px;
     std::vector<float> trk_py;
@@ -1100,13 +1100,13 @@ namespace DerivationFramework {
   void JpsiXPlus2V0::fitV0Container(xAOD::VertexContainer* V0ContainerNew, const std::vector<const xAOD::TrackParticle*>& selectedTracks, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const {
     const EventContext& ctx = Gaudi::Hive::currentContext();
 
-    SG::AuxElement::Decorator<std::string> mDec_type("Type_V0Vtx");
-    SG::AuxElement::Decorator<int>         mDec_gfit("gamma_fit");
-    SG::AuxElement::Decorator<float>       mDec_gmass("gamma_mass");
-    SG::AuxElement::Decorator<float>       mDec_gmasserr("gamma_massError");
-    SG::AuxElement::Decorator<float>       mDec_gchisq("gamma_chisq");
-    SG::AuxElement::Decorator<int>         mDec_gndof("gamma_ndof");
-    SG::AuxElement::Decorator<float>       mDec_gprob("gamma_probability");
+    SG::Decorator<std::string> mDec_type("Type_V0Vtx");
+    SG::Decorator<int>         mDec_gfit("gamma_fit");
+    SG::Decorator<float>       mDec_gmass("gamma_mass");
+    SG::Decorator<float>       mDec_gmasserr("gamma_massError");
+    SG::Decorator<float>       mDec_gchisq("gamma_chisq");
+    SG::Decorator<int>         mDec_gndof("gamma_ndof");
+    SG::Decorator<float>       mDec_gprob("gamma_probability");
 
     std::vector<const xAOD::TrackParticle*> posTracks;
     std::vector<const xAOD::TrackParticle*> negTracks;

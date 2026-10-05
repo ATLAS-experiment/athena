@@ -145,7 +145,7 @@ bool PhotonBDTCalculator::isConverted(const xAOD::Photon& ph) const {
 }
 
 StatusCode PhotonBDTCalculator::decorate(const xAOD::Photon& ph) const {
-  const SG::AuxElement::Decorator<float> decScore(m_decorationName);
+  const SG::Decorator<float> decScore(m_decorationName);
   float score = 0.f;
   ATH_CHECK(getScore(ph, score));
   decScore(ph) = score;
@@ -153,7 +153,7 @@ StatusCode PhotonBDTCalculator::decorate(const xAOD::Photon& ph) const {
 }
 
 StatusCode PhotonBDTCalculator::getScore(const xAOD::Photon& ph, float& score) const {
-  const SG::AuxElement::Accessor<float> accScore(m_decorationName);
+  const SG::Accessor<float> accScore(m_decorationName);
   if (!m_forceRecompute && accScore.isAvailable(ph)) {
     score = accScore(ph);
     return StatusCode::SUCCESS;

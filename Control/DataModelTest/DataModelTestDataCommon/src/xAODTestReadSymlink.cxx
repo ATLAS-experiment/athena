@@ -45,7 +45,7 @@ StatusCode xAODTestReadSymlink::execute (const EventContext& ctx) const
   SG::ReadHandle<DMTest::S2> s2 (m_s2Key, ctx);
   SG::ReadHandle<DMTest::S2> alias (m_aliasKey, ctx);
 
-  static const SG::AuxElement::Accessor<int> anInt ("anInt");
+  static const SG::Accessor<int> anInt ("anInt");
   ATH_MSG_INFO( "C (as AuxElement): " << anInt (*c)
                 << "; S " << s2->m_x );
   if (s2.cptr() != s1.cptr() || s2.cptr() != alias.cptr())

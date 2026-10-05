@@ -102,7 +102,7 @@ public:
     const xAOD::MuonContainer* muons = nullptr;
     RETURN_CHECK(m_appName, event.retrieve(muons, "Muons"));
     if(year == -1 && period == "")
-      static const SG::AuxElement::ConstAccessor<unsigned int> acc_rnd("RandomRunNumber");
+      static const SG::ConstAccessor<unsigned int> acc_rnd("RandomRunNumber");
     for (size_t i = 0; i < qualities.size(); i++) {
       for (size_t j = 0; j < binnings.size(); j++) {        
 	for (size_t k = 0; k < m_systematics.size(); k++) {

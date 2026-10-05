@@ -44,11 +44,11 @@ namespace {
                 chamberIndexOrder[toInt(second->chamberIndex())]);
     }
 
-    static const SG::AuxElement::Accessor<float> mePt_acc("MuonSpectrometerPt");
-    static const SG::AuxElement::Accessor<float> idPt_acc("InnerDetectorPt");
-    static const SG::AuxElement::Accessor<uint8_t> eta1stgchits_acc("etaLayer1STGCHits");
-    static const SG::AuxElement::Accessor<uint8_t> eta2stgchits_acc("etaLayer2STGCHits");
-    static const SG::AuxElement::Accessor<uint8_t> mmhits_acc("MMHits");
+    static const SG::Accessor<float> mePt_acc("MuonSpectrometerPt");
+    static const SG::Accessor<float> idPt_acc("InnerDetectorPt");
+    static const SG::Accessor<uint8_t> eta1stgchits_acc("etaLayer1STGCHits");
+    static const SG::Accessor<uint8_t> eta2stgchits_acc("etaLayer2STGCHits");
+    static const SG::Accessor<uint8_t> mmhits_acc("MMHits");
 }  // namespace
 
 namespace CP {
@@ -633,12 +633,12 @@ namespace CP {
 
     bool MuonSelectionTool::passedIDCuts(const xAOD::Muon& mu) const {
         if (m_useLRT) {
-            static const SG::AuxElement::Accessor<char> isLRTmuon("isLRT");
+            static const SG::Accessor<char> isLRTmuon("isLRT");
             if (isLRTmuon.isAvailable(mu)) {
                 if (isLRTmuon(mu)) return true; /// No ID cuts should be applied on LRT muons, so always set this flag to true.
             }
             else { /// If the isLRT decor is not available, try to see if patternRecoInfo is available for the corresponding ID track.
-                static const SG::AuxElement::Accessor<uint64_t> patternAcc("patternRecoInfo");
+                static const SG::Accessor<uint64_t> patternAcc("patternRecoInfo");
                 const xAOD::TrackParticle* idtrack = mu.trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
                 if(idtrack) { /// All LRT muons should have ID tracks. The muons without ID tracks have to come from the standard muon container.
                     if(!patternAcc.isAvailable(*idtrack)) {
@@ -1746,7 +1746,7 @@ namespace CP {
     // need run number (or random run number) to apply period-dependent selections
     unsigned int MuonSelectionTool::getRunNumber(bool needOnlyCorrectYear /*=false*/) const {
 
-        static const SG::AuxElement::ConstAccessor<unsigned int> acc_rnd("RandomRunNumber");
+        static const SG::ConstAccessor<unsigned int> acc_rnd("RandomRunNumber");
 
         SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfo);
 	//overwrite run number

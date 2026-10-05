@@ -210,7 +210,7 @@ namespace CP {
                 if (isLRTmuon(mu)) return FindLRTContainer(mu);
             }
             else { /// If the isLRT decor is not available, try to see if patternRecoInfo is available for the corresponding ID track.
-                static const SG::AuxElement::Accessor<uint64_t> patternAcc("patternRecoInfo");
+                static const SG::Accessor<uint64_t> patternAcc("patternRecoInfo");
                 const xAOD::TrackParticle* idtrack = mu.getXAODObject().trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
                 if(idtrack) { /// All LRT muons should have ID tracks. The muons without ID tracks have to come from the standard muon container.
                     if(!patternAcc.isAvailable(*idtrack)) {

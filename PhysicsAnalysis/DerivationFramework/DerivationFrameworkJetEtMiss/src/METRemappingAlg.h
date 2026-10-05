@@ -50,7 +50,7 @@ namespace DerivationFramework {
     SG::WriteHandleKey<xAOD::MissingETAssociationMap> m_outputMapKey{this, "AssociationOutputKey", "METAssoc_AnalysisMET", "SG key for the output MissingETAssociationMap"};
     SG::WriteHandleKey<xAOD::MissingETContainer> m_outputCoreKey{this, "METCoreOutputKey", "MET_Core_AnalysisMET", "SG key for the output MET core container"};
 
-    const SG::AuxElement::ConstAccessor< ElementLink<xAOD::IParticleContainer> > m_accOriginalObject{"originalObjectLink"};
+    const SG::ConstAccessor< ElementLink<xAOD::IParticleContainer> > m_accOriginalObject{"originalObjectLink"};
 
   }; //> end class METRemappingAlg
 } //> end namespace DerivationFramework

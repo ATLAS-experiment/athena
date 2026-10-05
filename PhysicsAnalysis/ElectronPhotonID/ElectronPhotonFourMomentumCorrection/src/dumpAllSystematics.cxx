@@ -304,7 +304,7 @@ StatusCode DumpAllSystematics::do_egamma(const xAOD::Egamma& particle)
   m_cl_rawcl_Es1 = particle.caloCluster()->energyBE(1);
   m_cl_rawcl_Es2 = particle.caloCluster()->energyBE(2);
   m_cl_rawcl_Es3 = particle.caloCluster()->energyBE(3);
-  static const SG::AuxElement::Accessor<float> wstot_accessor("wtots1");
+  static const SG::Accessor<float> wstot_accessor("wtots1");
   m_wstot = wstot_accessor.isAvailable(particle) ? wstot_accessor(particle) : -999;
   m_cl_E = particle.caloCluster()->e();
 

@@ -402,7 +402,7 @@ asg::AcceptData AsgElectronSelectorTool::accept( const EventContext& ctx, const 
 
   // get the ambiguity type from the decoration
   if (!m_skipAmbiguityCut){
-    static const SG::AuxElement::Accessor<uint8_t> ambiguityTypeAcc("ambiguityType");
+    static const SG::Accessor<uint8_t> ambiguityTypeAcc("ambiguityType");
     if (ambiguityTypeAcc.isAvailable(*eg)) {
       ambiguityBit = ambiguityTypeAcc(*eg);
     }
@@ -649,7 +649,7 @@ std::vector<float> AsgElectronSelectorTool::calculateMultipleOutputs(const Event
   }
   d0significance = (d0sigma == 0.) ? -99999. : std::abs(d0 / d0sigma);
 
-  const static SG::AuxElement::Accessor<float> trans_TRT_PID_acc("transformed_e_probability_ht");
+  const static SG::Accessor<float> trans_TRT_PID_acc("transformed_e_probability_ht");
   if (!trans_TRT_PID_acc.isAvailable(*eg)) {
     // most probable case, need to compute the variable
 
@@ -941,7 +941,7 @@ double AsgElectronSelectorTool::calculate( const EventContext& ctx, const xAOD::
 
 bool AsgElectronSelectorTool::isForwardElectron( const xAOD::Egamma* eg, const float eta ) const
 {
-  static const SG::AuxElement::ConstAccessor< uint16_t > accAuthor( "author" );
+  static const SG::ConstAccessor< uint16_t > accAuthor( "author" );
 
   if (accAuthor.isAvailable(*eg)){
     // cannot just do eg->author() because it isn't always filled

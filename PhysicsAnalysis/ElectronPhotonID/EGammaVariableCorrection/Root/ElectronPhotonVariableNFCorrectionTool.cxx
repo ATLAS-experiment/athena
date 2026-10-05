@@ -76,7 +76,7 @@ bool ElectronPhotonVariableNFCorrectionTool::passPhotonSelection(const xAOD::Pho
 
     // TruthType cut
     if (m_applyToMode == ApplyToMode::TruthPhotons) {
-        static const SG::AuxElement::Accessor<int> acc_truthType("truthType");
+        static const SG::Accessor<int> acc_truthType("truthType");
         if (!acc_truthType.isAvailable(photon)) {
             ATH_MSG_WARNING("ApplyTo = TruthPhotons but truthType not available — skipping photon");
             return false;
@@ -240,7 +240,7 @@ StatusCode ElectronPhotonVariableNFCorrectionTool::initialize()
     m_accessors.resize(s_ssVarNames.size());
     for (size_t i = 0; i < s_ssVarNames.size(); ++i) {
         const std::string& var = s_ssVarNames[i];
-            m_accessors[i].original = std::make_unique<SG::AuxElement::Accessor<float>>(var + "_original");
+            m_accessors[i].original = std::make_unique<SG::Accessor<float>>(var + "_original");
     }
 
     ATH_CHECK(m_eventInfoKey.initialize());
@@ -265,8 +265,8 @@ const CP::CorrectionCode ElectronPhotonVariableNFCorrectionTool::applyCorrection
     }
 
 
-    static const SG::AuxElement::Decorator<char> dec_pass("NFCorrectedShowerShapes");
-    static const SG::AuxElement::Decorator<char> dec_fudged("FallbackFudgedShowerShapes");
+    static const SG::Decorator<char> dec_pass("NFCorrectedShowerShapes");
+    static const SG::Decorator<char> dec_fudged("FallbackFudgedShowerShapes");
 
     // Photon selection
     const bool passPhoton = passPhotonSelection(photon);

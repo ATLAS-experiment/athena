@@ -136,8 +136,8 @@ CP::CorrectionCode InDetTrackSmearingTool::applyCorrectionImpl(
     float sigmaD0 = GetSmearD0Sigma( track, filtered );
     float sigmaZ0 = GetSmearZ0Sigma( track, filtered );
 
-    static const SG::AuxElement::Accessor< float > accD0( "d0" );
-    static const SG::AuxElement::Accessor< float > accZ0( "z0" );
+    static const SG::Accessor< float > accD0( "d0" );
+    static const SG::Accessor< float > accZ0( "z0" );
 
     //NB: only call the RNG if the widths are greater than 0
     if ( sigmaD0 > 0. ) accD0( track ) = std::normal_distribution<double>( track.d0(), sigmaD0 )(prng);

@@ -106,8 +106,8 @@ namespace DerivationFramework {
     selectEvent = true; // if we got this far we should definitively accept the event
 
     // Decorators
-    SG::AuxElement::Decorator< std::string > indexDecorator("CombinationCode");
-    SG::AuxElement::Decorator< std::string > chargeDecorator("ChargeCode");
+    SG::Decorator< std::string > indexDecorator("CombinationCode");
+    SG::Decorator< std::string > chargeDecorator("ChargeCode");
 
     // Order by pT
     std::sort(theMuonsAfterSelection.begin(), theMuonsAfterSelection.end(), [](const xAOD::Muon *a, const xAOD::Muon *b) {

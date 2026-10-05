@@ -100,7 +100,7 @@ namespace asg
     {
       EXPECT_TRUE(readDecorHandle.isPresent());
       EXPECT_TRUE(readDecorHandle.isAvailable());
-      SG::AuxElement::ConstAccessor<float> acc ("pt");
+      SG::ConstAccessor<float> acc ("pt");
       EXPECT_EQ (acc (*testMuon), readDecorHandle (*testMuon));
     }
 
@@ -136,7 +136,7 @@ namespace asg
       EXPECT_TRUE(writeDecorHandle.isPresent());
       EXPECT_FALSE(writeDecorHandle.isAvailable());
       writeDecorHandle (*(*muonsStore)[0]) = 42u;
-      SG::AuxElement::ConstAccessor<unsigned> acc (m_doWriteDecorName);
+      SG::ConstAccessor<unsigned> acc (m_doWriteDecorName);
       EXPECT_EQ (42u, acc (*(*muonsStore)[0]));
     }
 

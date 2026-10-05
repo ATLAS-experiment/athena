@@ -618,7 +618,7 @@ namespace xAOD {
 
     float res = -999999.;
 
-    SG::AuxElement::Accessor<float> floatAcc(name);
+    SG::Accessor<float> floatAcc(name);
     if ( floatAcc.isAvailable(*b) ) res = floatAcc(*b);
 
     return res;

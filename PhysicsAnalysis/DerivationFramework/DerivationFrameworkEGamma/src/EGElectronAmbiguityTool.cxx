@@ -90,7 +90,7 @@ EGElectronAmbiguityTool::addBranches(const EventContext& ctx) const
 
   DecorHandles dh (*this, ctx);
 
-  static const SG::AuxElement::ConstAccessor<char> aidCut(m_idCut);
+  static const SG::ConstAccessor<char> aidCut(m_idCut);
 
   // retrieve primary vertex
   const xAOD::Vertex* pvtx(nullptr);

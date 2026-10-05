@@ -102,26 +102,26 @@ int main( int argc, char* argv[] ) {
           std::cout << "The vector size is : " << vec.size() << std::endl;
         }
         std::cout << "----------------- Testing cluster ------------------- " << std::endl;
-        SG::AuxElement::ConstAccessor<char> looseDec("ToolSvc.ElectronRingerSelector_TestLoose");
+        SG::ConstAccessor<char> looseDec("ToolSvc.ElectronRingerSelector_TestLoose");
         if ( looseDec.isAvailable( *electron) ){
           bool dec = looseDec( *electron );
           std::cout << "Loose Decision is: " << std::boolalpha
             << dec << std::noboolalpha << std::endl;
-          SG::AuxElement::ConstAccessor<char> mediumDec("ToolSvc.ElectronRingerSelector_TestMedium");
+          SG::ConstAccessor<char> mediumDec("ToolSvc.ElectronRingerSelector_TestMedium");
           dec = mediumDec( *electron );
           std::cout << "Medium Decision is: " << std::boolalpha
             << dec << std::noboolalpha << std::endl;
-          SG::AuxElement::ConstAccessor<char> tightDec("ToolSvc.ElectronRingerSelector_TestTight");
+          SG::ConstAccessor<char> tightDec("ToolSvc.ElectronRingerSelector_TestTight");
           dec = tightDec( *electron );
           std::cout << "Tight Decision is: " << std::boolalpha
             << dec << std::noboolalpha << std::endl;
-          SG::AuxElement::ConstAccessor<float> looseOutput("ToolSvc.ElectronRingerSelector_TestLoose_output");
+          SG::ConstAccessor<float> looseOutput("ToolSvc.ElectronRingerSelector_TestLoose_output");
           float output = looseOutput( *electron );
           std::cout << "Loose Output is: " << output << std::endl;
-          SG::AuxElement::ConstAccessor<float> mediumOutput("ToolSvc.ElectronRingerSelector_TestMedium_output");
+          SG::ConstAccessor<float> mediumOutput("ToolSvc.ElectronRingerSelector_TestMedium_output");
           output = mediumOutput( *electron );
           std::cout << "Medium Output is: " << output << std::endl;
-          SG::AuxElement::ConstAccessor<float> tightOutput("ToolSvc.ElectronRingerSelector_TestTight_output");
+          SG::ConstAccessor<float> tightOutput("ToolSvc.ElectronRingerSelector_TestTight_output");
           output = tightOutput( *electron );
           std::cout << "Tight Output is: " << output << std::endl;
         }

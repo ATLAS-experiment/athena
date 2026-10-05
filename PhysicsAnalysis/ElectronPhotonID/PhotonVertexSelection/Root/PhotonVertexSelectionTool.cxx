@@ -482,10 +482,10 @@ namespace CP {
     // Vector sum of photons
     TLorentzVector vegamma = getEgammaVector(&egammas, fail);
 
-    SG::AuxElement::ConstAccessor<float> sumPtA(m_derivationPrefix + "sumPt");
-    SG::AuxElement::ConstAccessor<float> sumPt2A(m_derivationPrefix + "sumPt2");
-    SG::AuxElement::ConstAccessor<float> deltaPhiA(m_derivationPrefix + "deltaPhi");
-    SG::AuxElement::ConstAccessor<float> deltaZA(m_derivationPrefix + "deltaZ");
+    SG::ConstAccessor<float> sumPtA(m_derivationPrefix + "sumPt");
+    SG::ConstAccessor<float> sumPt2A(m_derivationPrefix + "sumPt2");
+    SG::ConstAccessor<float> deltaPhiA(m_derivationPrefix + "deltaPhi");
+    SG::ConstAccessor<float> deltaZA(m_derivationPrefix + "deltaZ");
 
     // Loop over vertices and find best candidate
     std::vector<float> ONNXInputVector;

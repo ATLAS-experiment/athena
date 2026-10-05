@@ -147,7 +147,7 @@ namespace FlavorTagInference {
       m_electronFilter = filter;
       m_deps.electronInputs = deps;
 
-      SG::AuxElement::ConstAccessor<PartLinks> acc(options.electron_link_name);
+      SG::ConstAccessor<PartLinks> acc(options.electron_link_name);
       m_associator = [acc](const xAOD::IParticle& jet) -> IPV {
         IPV electrons;
         for (const ElementLink<IPC>& link : acc(jet)){

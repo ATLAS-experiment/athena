@@ -98,10 +98,10 @@ private:
   TFile *m_inf{};
   std::vector<double> m_continuouscuts;
 
-  SG::AuxElement::ConstAccessor<float> m_accessor_pb;
-  SG::AuxElement::ConstAccessor<float> m_accessor_pc;
-  SG::AuxElement::ConstAccessor<float> m_accessor_pu;
-  SG::AuxElement::ConstAccessor<float> m_accessor_ptau;
+  SG::ConstAccessor<float> m_accessor_pb;
+  SG::ConstAccessor<float> m_accessor_pc;
+  SG::ConstAccessor<float> m_accessor_pu;
+  SG::ConstAccessor<float> m_accessor_ptau;
 
   struct taggerproperties{
     std::string  name;

@@ -175,7 +175,7 @@ namespace DerivationFramework {
         return dynamic_cast<const xAOD::TrackParticle*>(part);
     }
     int FourLeptonVertexingAlgorithm::charge(const xAOD::IParticle* part) const{
-        static const SG::AuxElement::ConstAccessor<float> acc_charge{"charge"};
+        static const SG::ConstAccessor<float> acc_charge{"charge"};
         if (acc_charge.isAvailable(*part)) return acc_charge(*part);
         return trackParticle(part)->charge();
     }

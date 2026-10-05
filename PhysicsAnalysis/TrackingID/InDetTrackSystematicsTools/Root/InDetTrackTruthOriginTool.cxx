@@ -166,7 +166,7 @@ namespace InDet {
     const xAOD::TruthParticle* truth = getTruth( track );
 
     // get track TMP
-    static const SG::AuxElement::ConstAccessor< float > tmpAcc( m_truthMatchProbabilityAuxName.data() );
+    static const SG::ConstAccessor< float > tmpAcc( m_truthMatchProbabilityAuxName.data() );
     float truthProb = tmpAcc( *track );
 
     int origin = 0;

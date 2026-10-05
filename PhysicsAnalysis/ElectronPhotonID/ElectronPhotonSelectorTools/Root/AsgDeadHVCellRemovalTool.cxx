@@ -42,8 +42,8 @@ bool AsgDeadHVCellRemovalTool::accept( const xAOD::Egamma* eg ) const{
   bool isSimul= eventInfo->eventType(xAOD::EventInfo::IS_SIMULATION);
   
   unsigned int runnumber (0);
-  static const SG::AuxElement::ConstAccessor<unsigned int> randomrunnumber("RandomRunNumber");
-  static const SG::AuxElement::ConstAccessor<unsigned int> datarunnumber("runNumber");
+  static const SG::ConstAccessor<unsigned int> randomrunnumber("RandomRunNumber");
+  static const SG::ConstAccessor<unsigned int> datarunnumber("runNumber");
   
   if(!isSimul&& datarunnumber.isAvailable(*eventInfo) ){
     runnumber = datarunnumber(*eventInfo);

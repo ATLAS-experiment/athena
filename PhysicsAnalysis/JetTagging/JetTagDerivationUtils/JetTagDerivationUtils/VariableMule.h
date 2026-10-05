@@ -30,7 +30,7 @@ private:
   RC m_fromKeys;
   WC m_toKeys;
   T m_default;
-  std::vector<SG::AuxElement::ConstAccessor<T>> m_fromAcc;
+  std::vector<SG::ConstAccessor<T>> m_fromAcc;
 public:
   VariableMule(const T& default_value): m_default(default_value) {}
   // the owner is templated so that the keys are declared through the

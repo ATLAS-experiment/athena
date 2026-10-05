@@ -47,7 +47,7 @@ StatusCode BTaggingEfficiencyJsonTool::initialize()
 
   const auto& meta = m_json_config[m_outputName][m_jetAuthor]["meta"];
   const std::string truthLabel = meta["TruthLabel"];
-  m_truthLabelAcc = std::make_unique<SG::AuxElement::ConstAccessor<int>>(truthLabel);
+  m_truthLabelAcc = std::make_unique<SG::ConstAccessor<int>>(truthLabel);
 
   // map truth labels to categories for scale factors
   // NB: MC-MC scale factors have a dedicated truth label to categories mapping
@@ -80,7 +80,7 @@ StatusCode BTaggingEfficiencyJsonTool::initialize()
   if (meta.contains("Mass")) {
     std::string massDecoratorName = meta["Mass"].get<std::string>();
     if (massDecoratorName != "default") {
-      m_massAcc = std::make_unique<SG::AuxElement::ConstAccessor<float>>(massDecoratorName);
+      m_massAcc = std::make_unique<SG::ConstAccessor<float>>(massDecoratorName);
       ATH_MSG_INFO("Using decorated mass '" << massDecoratorName << "' for Efficiency SF.");
     }
   }
@@ -88,7 +88,7 @@ StatusCode BTaggingEfficiencyJsonTool::initialize()
   if (meta.contains("PT")) {
     std::string ptDecoratorName = meta["PT"].get<std::string>();
     if (ptDecoratorName != "default") {
-      m_ptAcc = std::make_unique<SG::AuxElement::ConstAccessor<float>>(ptDecoratorName);
+      m_ptAcc = std::make_unique<SG::ConstAccessor<float>>(ptDecoratorName);
       ATH_MSG_INFO("Using decorated pT '" << ptDecoratorName << "' for Efficiency SF.");
     }
   }

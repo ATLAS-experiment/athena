@@ -13,17 +13,17 @@
 #include "MuonDetDescrUtils/MuonSectorMapping.h"
 #include "TruthUtils/HepMCHelpers.h"
 namespace {
-    static const SG::AuxElement::ConstAccessor<ElementLink<xAOD::TruthParticleContainer>> acc_tpl("truthParticleLink");
+    static const SG::ConstAccessor<ElementLink<xAOD::TruthParticleContainer>> acc_tpl("truthParticleLink");
 
-    static const SG::AuxElement::Decorator<float> decorator_topoetcone20("topoetcone20_truth");
+    static const SG::Decorator<float> decorator_topoetcone20("topoetcone20_truth");
 
-    static const SG::AuxElement::Decorator<float> decorator_ptcone20("ptcone20_truth");
-    static const SG::AuxElement::Decorator<float> decorator_ptvarcone20("ptvarcone20_truth");
-    static const SG::AuxElement::Decorator<float> decorator_ptvarcone30("ptvarcone30_truth");
+    static const SG::Decorator<float> decorator_ptcone20("ptcone20_truth");
+    static const SG::Decorator<float> decorator_ptvarcone20("ptvarcone20_truth");
+    static const SG::Decorator<float> decorator_ptvarcone30("ptvarcone30_truth");
 
-    static const SG::AuxElement::Decorator<float> decorator_ptcone20_pt500("ptcone20_pt500_truth");
-    static const SG::AuxElement::Decorator<float> decorator_ptvarcone20_pt500("ptvarcone20_pt500_truth");
-    static const SG::AuxElement::Decorator<float> decorator_ptvarcone30_pt500("ptvarcone30_pt500_truth");
+    static const SG::Decorator<float> decorator_ptcone20_pt500("ptcone20_pt500_truth");
+    static const SG::Decorator<float> decorator_ptvarcone20_pt500("ptvarcone20_pt500_truth");
+    static const SG::Decorator<float> decorator_ptvarcone30_pt500("ptvarcone30_pt500_truth");
 
     static const Muon::MuonSectorMapping sector_mapping;
 

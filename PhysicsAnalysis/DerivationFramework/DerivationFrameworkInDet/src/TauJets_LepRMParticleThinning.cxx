@@ -95,7 +95,7 @@ StatusCode DerivationFramework::TauJets_LepRMParticleThinning::doThinning(const 
     //Thin tauJets_LepRM
     std::vector<int> tau_kine_mask =  m_parser->evaluateAsVector();
     std::vector<bool> tau_lep_remove_mask(OriTaus->size(), false);
-    static const SG::AuxElement::ConstAccessor<char> acc_modified("ModifiedInAOD");
+    static const SG::ConstAccessor<char> acc_modified("ModifiedInAOD");
     std::transform(LepRMTaus->cbegin(), LepRMTaus->cend(), tau_lep_remove_mask.begin(), 
         [&](auto lep_remove_tau) -> bool {
             return static_cast<bool>(acc_modified(*lep_remove_tau));

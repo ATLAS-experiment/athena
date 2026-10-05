@@ -450,7 +450,7 @@ AsgPhotonIsEMSelector::execute(const EventContext& ctx,
   // Add ambiguity resolution cut for photon (vs electron)
   // to reproduce release 21.2 ambiguity tool configuration
   if (!m_skipAmbiguityCut){
-	  static const SG::AuxElement::Accessor<uint8_t> acc("ambiguityType");
+	  static const SG::Accessor<uint8_t> acc("ambiguityType");
 	  int AmbiguityType = acc(*eg);
 	  if (eg->author() == xAOD::EgammaParameters::AuthorAmbiguous &&
 	      AmbiguityType == xAOD::AmbiguityTool::ambiguousNoInnermost) {

@@ -180,9 +180,9 @@ private:
     //! @brief Store if already retrieved pt binning
     bool m_retrievedPtBinning = false;
     //! @brief  Accessor for the variable to be corrected
-    std::unique_ptr<SG::AuxElement::Accessor<float>> m_variableToCorrect;
+    std::unique_ptr<SG::Accessor<float>> m_variableToCorrect;
     //! @brief  Accessor to store the original value of the corrected variable
-    std::unique_ptr<SG::AuxElement::Accessor<float>> m_originalVariable;
+    std::unique_ptr<SG::Accessor<float>> m_originalVariable;
 
     /** @brief Convert input string to a parameter function type
      * @param input The string to convert to ElectronPhotonVariableCorrectionBase::parameterType

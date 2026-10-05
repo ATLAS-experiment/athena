@@ -53,7 +53,7 @@ namespace FlavorTagInference {
         //   jet -> constituentLinks -> FlowElement (PFO)
         //       -> otherObjects() -> CaloCluster
         // Dedup via unordered_set because UFO->cluster is many-to-many.
-        static const SG::AuxElement::ConstAccessor<PartLinks> acc("constituentLinks");
+        static const SG::ConstAccessor<PartLinks> acc("constituentLinks");
 
         std::vector<std::pair<double, const xAOD::CaloCluster*>> clusters;
         std::unordered_set<const xAOD::CaloCluster*> seen;

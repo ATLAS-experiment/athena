@@ -130,7 +130,7 @@ StatusCode DerivationFramework::JetConstituentThinning::doThinning(const EventCo
   const int globalNeutralMaskSize = static_cast<int>(globalNeutralMask.size());
 
   // Accessor for originalObjectLink
-  static const SG::AuxElement::ConstAccessor<ElementLink<xAOD::IParticleContainer>> originalAcc("originalObjectLink");
+  static const SG::ConstAccessor<ElementLink<xAOD::IParticleContainer>> originalAcc("originalObjectLink");
 
   // Collect otherObjects indices if needed
   std::vector<const xAOD::IParticle*> otherObjects;

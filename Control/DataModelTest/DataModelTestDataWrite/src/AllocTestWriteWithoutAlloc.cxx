@@ -31,8 +31,8 @@ StatusCode AllocTestWriteWithoutAlloc::initialize()
  */
 StatusCode AllocTestWriteWithoutAlloc::execute (const EventContext& ctx) const
 {
-  static const SG::AuxElement::Accessor<int> atInt3 ("atInt3");
-  static const SG::AuxElement::Accessor<int> atInt4 ("atInt4");
+  static const SG::Accessor<int> atInt3 ("atInt3");
+  static const SG::Accessor<int> atInt4 ("atInt4");
 
   SG::WriteHandle<AllocTestContainer> cont (m_containerKey, ctx);
   ATH_CHECK( cont.record (std::make_unique<AllocTestContainer>(),

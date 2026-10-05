@@ -15,8 +15,8 @@
 #include "StoreGate/WriteDecorHandle.h"
 
 namespace{
-  static const SG::AuxElement::ConstAccessor<Char_t> flag_D0("passed_D0");
-  static const SG::AuxElement::ConstAccessor<Char_t> flag_D0b("passed_D0b"); 
+  static const SG::ConstAccessor<Char_t> flag_D0("passed_D0");
+  static const SG::ConstAccessor<Char_t> flag_D0b("passed_D0b"); 
   static const SG::Accessor<std::vector<float>> acc_reFit_Px("RefTrackPx");
   static const SG::Accessor<std::vector<float>> acc_reFit_Py("RefTrackPy");
   static const SG::Accessor<std::vector<float>> acc_reFit_Pz("RefTrackPz");

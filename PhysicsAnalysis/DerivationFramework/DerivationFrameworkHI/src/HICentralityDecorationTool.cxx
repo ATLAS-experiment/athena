@@ -59,11 +59,11 @@ namespace DerivationFramework
     SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey, ctx);
 
     // Set up the decorators for centrality
-    const static SG::AuxElement::Decorator< float > ecCentralityMin("CentralityMin") ;
-    const static SG::AuxElement::Decorator< float > ecCentralityMax("CentralityMax") ;
+    const static SG::Decorator< float > ecCentralityMin("CentralityMin") ;
+    const static SG::Decorator< float > ecCentralityMax("CentralityMax") ;
 
-    const static SG::AuxElement::ConstAccessor<float>  acc_FCalEtA("FCalEtA");
-    const static SG::AuxElement::ConstAccessor<float>  acc_FCalEtC("FCalEtC");
+    const static SG::ConstAccessor<float>  acc_FCalEtA("FCalEtA");
+    const static SG::ConstAccessor<float>  acc_FCalEtC("FCalEtC");
 
     // Calculate total FCal ET
     float total_fcal_et = (acc_FCalEtA(*eventInfo) + acc_FCalEtC(*eventInfo)) / 1.e6;

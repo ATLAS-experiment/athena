@@ -22,11 +22,11 @@
 
 namespace DerivationFramework {
 
-  static const SG::AuxElement::Decorator<float> sumPt2("sumPt2");
-  static const SG::AuxElement::Decorator<float> vertices_dPhi("vertices_dPhi");
-  static const SG::AuxElement::Decorator<float> vertices_sumPt("vertices_sumPt");
-  static const SG::AuxElement::Decorator<float> vertices_sumPt2("vertices_sumPt2");
-  static const SG::AuxElement::Decorator<std::vector<ElementLink<xAOD::TrackParticleContainer> > > electronTrackLinksDecor("ElectronTrackLinks");
+  static const SG::Decorator<float> sumPt2("sumPt2");
+  static const SG::Decorator<float> vertices_dPhi("vertices_dPhi");
+  static const SG::Decorator<float> vertices_sumPt("vertices_sumPt");
+  static const SG::Decorator<float> vertices_sumPt2("vertices_sumPt2");
+  static const SG::Decorator<std::vector<ElementLink<xAOD::TrackParticleContainer> > > electronTrackLinksDecor("ElectronTrackLinks");
 
   StatusCode ZeeVertexRefittingTool::initialize()
   {

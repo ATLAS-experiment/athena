@@ -351,7 +351,7 @@ bool EGammaAmbiguityTool::isInVertex(const xAOD::TrackParticle& trk, const xAOD:
 /** Return true if the vertex passes the requirement on Rconv - RfirstHit **/
 bool EGammaAmbiguityTool::passDeltaR_innermost(const xAOD::Vertex& vx) const
 {
-  static const SG::AuxElement::Accessor<float> minRfirstHitAcc("minRfirstHit");
+  static const SG::Accessor<float> minRfirstHitAcc("minRfirstHit");
   if (not minRfirstHitAcc.isAvailable(vx)) {
     ATH_MSG_WARNING("minRfirstHit not available");
     return false;

@@ -18,7 +18,7 @@
 #include <utility> //for std::pair
 
 
-#include "AthContainers/AuxElement.h"  // For SG::AuxElement::Accessor
+#include "AthContainers/AuxElement.h"  // For SG::Accessor
 
 class FlowEnergyDecorator : public AthReentrantAlgorithm {
  public:

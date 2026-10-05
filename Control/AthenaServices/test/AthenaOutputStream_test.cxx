@@ -82,9 +82,9 @@ int main() {
   auto baz = std::make_unique<Baz>();
   auto bazaux = std::make_unique<BazAuxContainer>();
   baz->setStore (bazaux.get());
-  SG::AuxElement::Accessor<int> aaa ("aaa");
-  SG::AuxElement::Accessor<int> bbb ("bbb");
-  SG::AuxElement::Accessor<int> ccc ("ccc");
+  SG::Accessor<int> aaa ("aaa");
+  SG::Accessor<int> bbb ("bbb");
+  SG::Accessor<int> ccc ("ccc");
   aaa (*baz);
   bbb (*baz);
   ccc (*baz);
@@ -94,9 +94,9 @@ int main() {
   auto baz4lfc = std::make_unique<Baz>();
   auto bazaux4lfc = std::make_unique<BazAuxContainer>();
   baz4lfc->setStore (bazaux4lfc.get());
-  SG::AuxElement::Accessor<float> foo ("foo");
-  SG::AuxElement::Accessor<double> bar ("bar");
-  SG::AuxElement::Accessor<std::vector<float>> zzz ("zzz");
+  SG::Accessor<float> foo ("foo");
+  SG::Accessor<double> bar ("bar");
+  SG::Accessor<std::vector<float>> zzz ("zzz");
   foo (*baz4lfc);
   bar (*baz4lfc);
   zzz (*baz4lfc);

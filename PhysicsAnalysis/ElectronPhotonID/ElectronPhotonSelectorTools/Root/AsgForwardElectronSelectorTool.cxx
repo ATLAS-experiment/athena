@@ -508,7 +508,7 @@ bool AsgForwardElectronSelectorTool::getInputs(const xAOD::Electron* eg,
   inputs.push_back(static_cast<float>(track->phi()));
 
   // x5 = HGTD time
-  static const SG::AuxElement::Accessor<uint8_t> accValid("hasValidTime");
+  static const SG::Accessor<uint8_t> accValid("hasValidTime");
   if (accValid.isAvailable(*track))
     {
       if (accValid(*track))

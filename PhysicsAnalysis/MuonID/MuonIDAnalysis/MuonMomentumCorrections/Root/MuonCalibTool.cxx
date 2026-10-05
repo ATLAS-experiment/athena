@@ -363,9 +363,9 @@ namespace CP
 
         if (m_validationMode) 
         {
-            static const SG::AuxElement::Accessor<float> id_pt("expert_ptid");
-            static const SG::AuxElement::Accessor<float> ms_pt("expert_ptms");
-            static const SG::AuxElement::Accessor<float> cb_pt("expert_ptcb");
+            static const SG::Accessor<float> id_pt("expert_ptid");
+            static const SG::Accessor<float> ms_pt("expert_ptms");
+            static const SG::Accessor<float> cb_pt("expert_ptcb");
 
             loc_ptid = id_pt(mu.getXAODObject()) * MeVtoGeV;
             loc_ptms = ms_pt(mu.getXAODObject()) * MeVtoGeV;
@@ -436,15 +436,15 @@ namespace CP
 
         if (m_validationMode)
         {
-            static const SG::AuxElement::Accessor<float> cb_pt("expert_ptcb");
-            static const SG::AuxElement::Accessor<float> id_pt("expert_ptid");
-            static const SG::AuxElement::Accessor<float> ms_pt("expert_ptms");
-            static const SG::AuxElement::Accessor<AmgVector(5)> CBParam("CBParam");
-            static const SG::AuxElement::Accessor<AmgSymMatrix(5)> CBCov("CBCov");
-            static const SG::AuxElement::Accessor<AmgVector(5)>  IDParam("IDParam");
-            static const SG::AuxElement::Accessor<AmgSymMatrix(5)>  IDCov("IDCov");
-            static const SG::AuxElement::Accessor<AmgVector(5)> MEParam("MEParam");
-            static const SG::AuxElement::Accessor<AmgSymMatrix(5)> MECov("MECov");
+            static const SG::Accessor<float> cb_pt("expert_ptcb");
+            static const SG::Accessor<float> id_pt("expert_ptid");
+            static const SG::Accessor<float> ms_pt("expert_ptms");
+            static const SG::Accessor<AmgVector(5)> CBParam("CBParam");
+            static const SG::Accessor<AmgSymMatrix(5)> CBCov("CBCov");
+            static const SG::Accessor<AmgVector(5)>  IDParam("IDParam");
+            static const SG::Accessor<AmgSymMatrix(5)>  IDCov("IDCov");
+            static const SG::Accessor<AmgVector(5)> MEParam("MEParam");
+            static const SG::Accessor<AmgSymMatrix(5)> MECov("MECov");
 
             // Use the constructor where the eta/phi are overwritten to keep it inma line with current recommendations. To be changed in the future
             auto CB = MCP::TrackCalibObj(MCP::TrackType::CB, charge, cb_pt(mu.getXAODObject()), Primary_eta, Primary_phi, mass, CBParam(mu.getXAODObject()), CBCov(mu.getXAODObject()), year, isData);

@@ -231,7 +231,7 @@ namespace DerivationFramework {
       const xAOD::Vertex* vtx = *vxcItr;
       bool passed = false;
       for(size_t i=0; i<m_vertexPsi1HypoNames.size(); i++) {
-	SG::AuxElement::Accessor<Char_t> flagAcc("passed_"+m_vertexPsi1HypoNames[i]);
+	SG::Accessor<Char_t> flagAcc("passed_"+m_vertexPsi1HypoNames[i]);
 	if(flagAcc.isAvailable(*vtx) && flagAcc(*vtx)) {
 	  passed = true;
 	}
@@ -276,7 +276,7 @@ namespace DerivationFramework {
       const xAOD::Vertex* vtx = *vxcItr;
       bool passed = false;
       for(size_t i=0; i<m_vertexPsi2HypoNames.size(); i++) {
-	SG::AuxElement::Accessor<Char_t> flagAcc("passed_"+m_vertexPsi2HypoNames[i]);
+	SG::Accessor<Char_t> flagAcc("passed_"+m_vertexPsi2HypoNames[i]);
 	if(flagAcc.isAvailable(*vtx) && flagAcc(*vtx)) {
 	  passed = true;
 	}
@@ -477,7 +477,7 @@ namespace DerivationFramework {
 	  vertexLink2.setStorableObject(*VtxWriteHandles[1].ptr());
 	  if( vertexLink2.isValid() ) precedingVertexLinks.push_back( vertexLink2 );
 
-	  SG::AuxElement::Decorator<VertexLinkVector> PrecedingLinksDecor("PrecedingVertexLinks");
+	  SG::Decorator<VertexLinkVector> PrecedingLinksDecor("PrecedingVertexLinks");
 	  PrecedingLinksDecor(*theResult.get()) = std::move(precedingVertexLinks);
 
 	  xAOD::BPhysHypoHelper vtx(m_hypoName, theResult.get());

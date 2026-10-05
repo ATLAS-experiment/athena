@@ -225,7 +225,7 @@ namespace Analysis {
     ATH_MSG_DEBUG("#BTAGJF# filling vertices for basename: " << basename);
     newBTag->setVariable<std::vector<ElementLink<xAOD::BTagVertexContainer> > >(basename, "JFvertices", JFVerticesLinks);
     newBTag->setDynBTagVxELName(basename, "JFvertices");
-    static const SG::AuxElement::ConstAccessor<BTagVertices> vertsAcc (basename + "_JFvertices");
+    static const SG::ConstAccessor<BTagVertices> vertsAcc (basename + "_JFvertices");
     ATH_MSG_DEBUG("#BTAGJF# n vertices: " << vertsAcc (*newBTag).size());
 
     Amg::VectorX vtxPositions = Amg::VectorX::Zero(5);
@@ -358,7 +358,7 @@ namespace Analysis {
           std::string trackname = m_secVertexFinderTrackNameList[nameiter];
           std::string basename =  m_secVertexFinderBaseNameList[nameiter];
 
-          SG::AuxElement::ConstAccessor<std::vector<ElementLink< xAOD::TrackParticleContainer > > >
+          SG::ConstAccessor<std::vector<ElementLink< xAOD::TrackParticleContainer > > >
             trackAcc (trackname);
           std::vector<ElementLink< xAOD::TrackParticleContainer > > tracksInJet;
           tracksInJet = trackAcc (**btagIter);

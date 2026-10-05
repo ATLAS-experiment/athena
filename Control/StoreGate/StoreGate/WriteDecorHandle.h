@@ -103,7 +103,7 @@ public:
   using Base = ReadHandle<T>;
 
   /// Accessor type for aux data.
-  using accessor_t = SG::AuxElement::Decorator<D>;
+  using accessor_t = SG::Decorator<D>;
 
   /// Type referencing an aux data item.
   using reference_type = typename accessor_t::reference_type;

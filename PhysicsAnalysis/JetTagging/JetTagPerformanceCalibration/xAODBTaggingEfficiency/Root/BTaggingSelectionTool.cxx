@@ -235,10 +235,10 @@ StatusCode BTaggingSelectionTool::initialize() {
  m_acceptinfo.addCut( "Pt",  "Selection of jets according to their transverse momentum" );
  m_acceptinfo.addCut( "WorkingPoint",  "Working point for flavour-tagging of jets according to their b-tagging weight" );
  
- m_accessor_pb = SG::AuxElement::ConstAccessor<float>(m_taggerName+ "_pb");
- m_accessor_pc = SG::AuxElement::ConstAccessor<float>(m_taggerName+ "_pc");
- m_accessor_pu = SG::AuxElement::ConstAccessor<float>(m_taggerName+ "_pu");
- m_accessor_ptau = SG::AuxElement::ConstAccessor<float>(m_taggerName+ "_ptau");
+ m_accessor_pb = SG::ConstAccessor<float>(m_taggerName+ "_pb");
+ m_accessor_pc = SG::ConstAccessor<float>(m_taggerName+ "_pc");
+ m_accessor_pu = SG::ConstAccessor<float>(m_taggerName+ "_pu");
+ m_accessor_ptau = SG::ConstAccessor<float>(m_taggerName+ "_ptau");
 
  return StatusCode::SUCCESS;
 }

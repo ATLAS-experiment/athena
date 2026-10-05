@@ -48,17 +48,17 @@ namespace DerivationFramework {
     Gaudi::Property<std::vector<std::string>>  m_cutLevels{this, "cutLevels", {}, "Cut levels"};
 
     // Set up the decorators - TODO Should these be WriteDecorHandleKeys?
-    std::vector< SG::AuxElement::Decorator< float >> m_decFCalEtA_Qnx;
-    std::vector< SG::AuxElement::Decorator< float >> m_decFCalEtA_Qny;
-    std::vector< SG::AuxElement::Decorator< float >> m_decFCalEtC_Qnx;
-    std::vector< SG::AuxElement::Decorator< float >> m_decFCalEtC_Qny;
+    std::vector< SG::Decorator< float >> m_decFCalEtA_Qnx;
+    std::vector< SG::Decorator< float >> m_decFCalEtA_Qny;
+    std::vector< SG::Decorator< float >> m_decFCalEtC_Qnx;
+    std::vector< SG::Decorator< float >> m_decFCalEtC_Qny;
 
-    std::vector< SG::AuxElement::Decorator< float >> m_decHalfFCalEtA_Qnx;
-    std::vector< SG::AuxElement::Decorator< float >> m_decHalfFCalEtA_Qny;
-    std::vector< SG::AuxElement::Decorator< float >> m_decHalfFCalEtC_Qnx;
-    std::vector< SG::AuxElement::Decorator< float >> m_decHalfFCalEtC_Qny;
+    std::vector< SG::Decorator< float >> m_decHalfFCalEtA_Qnx;
+    std::vector< SG::Decorator< float >> m_decHalfFCalEtA_Qny;
+    std::vector< SG::Decorator< float >> m_decHalfFCalEtC_Qnx;
+    std::vector< SG::Decorator< float >> m_decHalfFCalEtC_Qny;
 
-    std::vector< SG::AuxElement::Decorator< int >> m_decTrack_count;
+    std::vector< SG::Decorator< int >> m_decTrack_count;
 
   };
 

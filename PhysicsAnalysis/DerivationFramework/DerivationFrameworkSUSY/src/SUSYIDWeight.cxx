@@ -7,7 +7,7 @@
 
 //namespace DerivationFramework {
   
-  static const SG::AuxElement::Accessor<int> acc_procID("SUSY_procID");
+  static const SG::Accessor<int> acc_procID("SUSY_procID");
   
   SUSYIDWeight::SUSYIDWeight( const std::string& name )
     : WeightToolBase( name ),

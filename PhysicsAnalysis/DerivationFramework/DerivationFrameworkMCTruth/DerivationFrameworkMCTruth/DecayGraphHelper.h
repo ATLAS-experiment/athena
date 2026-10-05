@@ -228,7 +228,7 @@ namespace DerivationFramework {
             
             bool skipPdgCheck = (pdgId.size()==0);
             //bypass the hadron veto?
-            static const SG::AuxElement::ConstAccessor<unsigned int> acc_class{"Classification"};
+            static const SG::ConstAccessor<unsigned int> acc_class{"Classification"};
             for (xAOD::TruthParticleContainer::const_iterator pItr=allParticles->begin(); pItr!=allParticles->end(); ++pItr) {
                 const xAOD::TruthParticle *particle = *pItr;
 
