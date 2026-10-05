@@ -20,7 +20,6 @@ class EventGUIDLookupAlg(PyAthena.Alg):
         self._outFH = None
 
     def initialize(self):
-        self._outFH = open(self.outputFile, 'w')
         return StatusCode.Success
 
     def _matchRun(self, ctx_run, evt):
@@ -58,6 +57,8 @@ class EventGUIDLookupAlg(PyAthena.Alg):
             guid = resolveProvenanceGuid(self.evtStore, self.dataType,
                                          self.inputDataType)
             if guid is not None:
+                if self._outFH is None:
+                    self._outFH = open(self.outputFile, 'w')
                 self._outFH.write('%d %d %s\n' % (run, evt, guid))
                 self._outFH.flush()
                 self._found.add(key)
