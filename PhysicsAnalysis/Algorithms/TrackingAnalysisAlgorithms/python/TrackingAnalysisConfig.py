@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -13,7 +13,7 @@ class InDetTrackCalibrationConfig (ConfigBlock):
     """the ConfigBlock for the track impact parameter correction"""
 
     def __init__ (self) :
-        super (InDetTrackCalibrationConfig, self).__init__ ()
+        super().__init__ ()
         self.setBlockName ('InDetTracks')
         self.addOption ('inputContainer', '', type=str,
             info="the name of the input track container.")
@@ -94,13 +94,13 @@ class InDetTrackCalibrationConfig (ConfigBlock):
         if 'runNumberBounds' in calib:
             alg.biasingTool.runNumberBounds = calib['runNumberBounds']
 
-        if biasD0:
+        if biasD0 is not None:
             alg.biasingTool.biasD0 = biasD0
-        if biasZ0:
+        if biasZ0 is not None:
             alg.biasingTool.biasZ0 = biasZ0
-        if biasQoverPsagitta:
+        if biasQoverPsagitta is not None:
             alg.biasingTool.biasQoverPsagitta = biasQoverPsagitta
-        if customRunNumber:
+        if customRunNumber is not None:
             alg.biasingTool.runNumber = customRunNumber
         # By default only the d0 bias is applied; z0 and q/p biasing can be enabled
         # via the applyZ0Bias / applyQoverPBias options once those maps are validated.
@@ -108,7 +108,6 @@ class InDetTrackCalibrationConfig (ConfigBlock):
         alg.biasingTool.applyZ0Bias    = applyZ0Bias
         alg.biasingTool.applyQoverPBias = applyQoverPBias
         alg.biasingTool.isMC = config.dataType() is not DataType.Data
-        pass
 
     @staticmethod
     def makeTrackSmearingTool(config,
@@ -117,7 +116,7 @@ class InDetTrackCalibrationConfig (ConfigBlock):
         toolName = "smearingTool"
         config.addPrivateTool(toolName, "InDet::InDetTrackSmearingTool")
         if calibFile:
-            alg.tackSmearingTool.calibFileIP_CTIDE = calibFile
+            alg.smearingTool.calibFileIP_CTIDE = calibFile
         else:
             if config.geometry() is LHCPeriod.Run2:
                 # Run 2 recommendations (MC20)
@@ -137,14 +136,11 @@ class InDetTrackCalibrationConfig (ConfigBlock):
                     alg.smearingTool.calibFileIP_CTIDE = "InDetTrackSystematicsTools/CalibData_25.2_2025-v00/2025_d0z0_smearing_factors.root"
 
                 else:
-                    raise ValueError ('No recommendations found for campaign \"'
-                                      + config.campaign().value + '\" in Run 3. '
+                    raise ValueError (f'No recommendations found for campaign "{config.campaign().value}" in Run 3. '
                                       'Please check that the recommendations exist.')
             else:
-                raise ValueError ('No recommendations found for geometry \"'
-                                  + config.geometry().value + '\". Please check '
+                raise ValueError (f'No recommendations found for geometry "{config.geometry().value}". Please check '
                                   'the configuration.')
-        pass
 
     def makeAlgs (self, config) :
         log = logging.getLogger('InDetTrackCalibrationConfig')
@@ -241,7 +237,7 @@ class InDetTrackWorkingPointConfig (ConfigBlock):
     """the ConfigBlock for the track working point"""
 
     def __init__ (self) :
-        super (InDetTrackWorkingPointConfig, self).__init__ ()
+        super().__init__ ()
         self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.",
@@ -333,14 +329,14 @@ class InDetTrackWorkingPointConfig (ConfigBlock):
         alg.selectionDecoration = 'selectTrack' + postfix + '_%SYS%,as_bits'
         config.addPrivateTool( 'selectionTool', 'InDet::InDetTrackSelectionTool')
         if self.cutLevel is None:
-            log.warning("No selection WP chosen, not setting up InDetTrackSelectionTool.")
+            log.warning("No selection WP chosen, InDetTrackSelectionTool will run with its default cut level.")
         elif self.cutLevel not in cutLevels:
-            raise ValueError ('Invalid cut level: \"' + self.cutLevel + '\", has '
+            raise ValueError (f'Invalid cut level: "{self.cutLevel}", has '
                               'to be one of: ' + ', '.join(cutLevels))
         elif self.cutLevel in ["Loose", "TightPrimary"]:
             alg.selectionTool.CutLevel = self.cutLevel
         else:
-            log.warning('Using cut level: \"' + self.cutLevel + '\" that is not '
+            log.warning(f'Using cut level: "{self.cutLevel}" that is not '
                         'meant for general use, but only expert studies.')
             alg.selectionTool.CutLevel = self.cutLevel
 
@@ -355,8 +351,8 @@ class InDetTrackWorkingPointConfig (ConfigBlock):
             if self.runTruthFilter:
                 if config.isPhyslite():
                     log.warning ('The TruthFilterTool is not compatible with Physlite mode. '
-                                 'This tool is skipped for now. Please set \"runTruthFilter: '
-                                 'False\" to get rid of this warning.')
+                                 'This tool is skipped for now. Please set "runTruthFilter: '
+                                 'False" to get rid of this warning.')
                 else:
                     config.addPrivateTool( 'filterTool', 'InDet::InDetTrackTruthFilterTool' )
                     config.addPrivateTool( 'filterTool.trackOriginTool', 'InDet::InDetTrackTruthOriginTool' )
@@ -366,8 +362,8 @@ class InDetTrackWorkingPointConfig (ConfigBlock):
                     elif self.cutLevel == "TightPrimary":
                         alg.filterWP = "TIGHT"
                     else:
-                        raise ValueError ('Attempting to set TruthFilter WP based on cut level: \"'
-                                          + self.efficiencyWP + '\" that is not supported.')
+                        raise ValueError (f'Attempting to set TruthFilter WP based on cut level: "{self.cutLevel}" '
+                                          'that is not supported.')
                     # Set calibFile and fake rates based on campaign
                     if config.geometry() is LHCPeriod.Run2:
                         # Run 2 recommendations (MC20)
@@ -380,24 +376,22 @@ class InDetTrackWorkingPointConfig (ConfigBlock):
                             alg.filterTool.calibFileNomEff = "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/TrackingRecommendations_prelim_rel22.root"
                             alg.filterTool.fFakeLoose = 0.40
                             alg.filterTool.fFakeTight = 1.00
-                        elif not (self.calibFile and self.fFakeLoose and self.fFakeTight):
-                            raise ValueError ('No efficiency recommendations found for campaign \"'
-                                              + config.campaign().value + '\" in Run 3. '
+                        elif not (self.calibFile and self.fFakeLoose is not None and self.fFakeTight is not None):
+                            raise ValueError (f'No efficiency recommendations found for campaign "{config.campaign().value}" in Run 3. '
                                               'Please check that the recommendations exist.')
-                    elif not (self.calibFile and self.fFakeLoose and self.fFakeTight):
-                        raise ValueError ('No efficiency recommendations found for geometry \"'
-                                          + config.geometry().value + '\". Please check '
+                    elif not (self.calibFile and self.fFakeLoose is not None and self.fFakeTight is not None):
+                        raise ValueError (f'No efficiency recommendations found for geometry "{config.geometry().value}". Please check '
                                           'the configuration.')
                     # Set custom calibFile, fake rates, or random seed
                     if self.calibFile:
                         alg.filterTool.calibFileNomEff = self.calibFile
-                    if self.fFakeLoose:
+                    if self.fFakeLoose is not None:
                         alg.filterTool.fFakeLoose = self.fFakeLoose
-                    if self.fFakeTight:
+                    if self.fFakeTight is not None:
                         alg.filterTool.fFakeTight = self.fFakeTight
-                    if self.filterToolSeed:
+                    if self.filterToolSeed is not None:
                         alg.filterTool.Seed = self.filterToolSeed
-                    if self.trkEffSystScale:
+                    if self.trkEffSystScale is not None:
                         alg.filterTool.trkEffSystScale = self.trkEffSystScale
         alg.inDetTracks = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')

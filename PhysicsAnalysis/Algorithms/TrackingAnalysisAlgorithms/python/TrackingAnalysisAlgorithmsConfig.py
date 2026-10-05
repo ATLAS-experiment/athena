@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -16,18 +16,16 @@ def InDetSecVtxTruthMatchToolCfg(flags, name="InDetSecVtxTruthMatchTool", **kwar
     return acc
 
 def InDetSecVtxTruthMatchToolMuSaCfg(flags, name="InDetSecVtxTruthMatchTool", **kwargs):
-    acc = ComponentAccumulator()
-
     kwargs.setdefault("trackMatchProb", 0.99999)
     kwargs.setdefault("vertexMatchWeight", 0.99999) #2trk means 1 real 1 fake would pass if 0.5
-    kwargs.setdefault("trackPtCut", 1000.0)
     kwargs.setdefault("doMuSA", True)
-    kwargs.setdefault("doSMOrigin", False)
     kwargs.setdefault("MuonContainer", "StdWithLRTMuons")
     kwargs.setdefault("FallbackMuonContainer", "Muons")
+    return InDetSecVtxTruthMatchToolCfg(flags, name, **kwargs)
 
-    acc.setPrivateTools(CompFactory.InDetSecVtxTruthMatchTool(**kwargs))
-    return acc
+def _addHistogramOutputCfg(flags, acc):
+    acc.addService(CompFactory.THistSvc(Output = [f"ANALYSIS DATAFILE='{flags.Output.HISTFileName}' OPT='RECREATE'"]))
+    acc.setAppProperty("HistogramPersistency","ROOT")
 
 def SecVertexTruthMatchAlgCfg(flags, name="SecVertexTruthMatchAlg", useLRTTracks = False, **kwargs):
 
@@ -47,8 +45,7 @@ def SecVertexTruthMatchAlgCfg(flags, name="SecVertexTruthMatchAlg", useLRTTracks
         flags, doSMOrigin=kwargs["doSMOrigin"])))
 
     acc.addEventAlgo(CompFactory.CP.SecVertexTruthMatchAlg(name, **kwargs))
-    acc.addService(CompFactory.THistSvc(Output = [f"ANALYSIS DATAFILE='{flags.Output.HISTFileName}' OPT='RECREATE'"]))
-    acc.setAppProperty("HistogramPersistency","ROOT")
+    _addHistogramOutputCfg(flags, acc)
     return acc
 
 def SecVertexTruthMatchMuSaAlgCfg(flags, name="SecVertexTruthMatchMuSaAlg", **kwargs):
@@ -83,8 +80,7 @@ def SecVertexTruthMatchMuSaAlgCfg(flags, name="SecVertexTruthMatchMuSaAlg", **kw
         FallbackMuonContainer=fallbackMuonContainer)))
 
     acc.addEventAlgo(CompFactory.CP.SecVertexTruthMatchAlg(name, **kwargs))
-    acc.addService(CompFactory.THistSvc(Output = [f"ANALYSIS DATAFILE='{flags.Output.HISTFileName}' OPT='RECREATE'"]))
-    acc.setAppProperty("HistogramPersistency","ROOT")
+    _addHistogramOutputCfg(flags, acc)
     return acc
 
 
