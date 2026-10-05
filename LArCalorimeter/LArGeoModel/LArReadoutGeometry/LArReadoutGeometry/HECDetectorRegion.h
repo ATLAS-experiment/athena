@@ -1,15 +1,17 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARREADOUTGEOMETRY_HECDETECTORREGION_H
 #define LARREADOUTGEOMETRY_HECDETECTORREGION_H
+
+#include "GeoPrimitives/GeoPrimitives.h"
+///
 #include "LArReadoutGeometry/HECDetDescr.h"
 #include "LArReadoutGeometry/HECCellConstLink.h"
 #include "GeoModelKernel/GeoVDetectorElement.h"
 #include "GeoModelKernel/GeoDefinitions.h"
 #include "GaudiKernel/SystemOfUnits.h"
-#include "GeoPrimitives/GeoPrimitives.h"
 #include "CLHEP/Geometry/Point3D.h"
 
 /**

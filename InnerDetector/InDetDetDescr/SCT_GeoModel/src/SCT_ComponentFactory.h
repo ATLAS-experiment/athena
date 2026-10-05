@@ -5,6 +5,8 @@
 #ifndef SCT_GEOMODEL_SCT_COMPONENTFACTORY_H
 #define SCT_GEOMODEL_SCT_COMPONENTFACTORY_H
 
+#include "GeoPrimitives/GeoPrimitives.h"
+///
 #include "SCT_Identifier.h"
 #include <string>
 #include <map>

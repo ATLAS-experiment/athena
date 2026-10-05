@@ -555,7 +555,7 @@ const Amg::Transform3D  TRT_AlignDbSvc::getAlignmentTransformL1(Identifier const
 
   // get Amg::Transform3d via AlignTransMember
   AlignableTransform::AlignTransMem_citr itr = pat->findIdent(ident);
-  return ( itr!=pat->end() ? Amg::CLHEPTransformToEigen(itr->transform()) : Amg::Transform3D() );
+  return ( itr!=pat->end() ? Amg::CLHEPTransformToEigen(itr->transform()) : Amg::Isometry3D::Identity() );
 }
 
 /** get Level 2 AlignableTransform for an identifier */
@@ -586,7 +586,7 @@ const Amg::Transform3D TRT_AlignDbSvc::getAlignmentTransformL2(Identifier const&
   
   // get Amg::Transform3d via AlignTransMember
   AlignableTransform::AlignTransMem_citr itr = pat->findIdent(mid);
-  return ( itr!=pat->end() ? Amg::CLHEPTransformToEigen(itr->transform()) : Amg::Transform3D() );
+  return ( itr!=pat->end() ? Amg::CLHEPTransformToEigen(itr->transform()) : Amg::Isometry3D::Identity() );
 }
 
 /** get Level L2 Transform for an identifier */

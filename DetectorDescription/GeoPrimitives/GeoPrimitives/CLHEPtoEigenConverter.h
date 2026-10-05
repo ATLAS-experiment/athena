@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -17,10 +17,11 @@
 * The CLHEPtoEigenConverter methods convert transformations, rotations, and vectors from and to CLHEP and Eigen.
 */
 
-#ifndef CLHEPTOEIGENCONVERTER_H_
-#define CLHEPTOEIGENCONVERTER_H_
+#ifndef GEOPRIMITIVES_CLHEPTOEIGENCONVERTER_H_
+#define GEOPRIMITIVES_CLHEPTOEIGENCONVERTER_H_
 
 #include "GeoPrimitives/GeoPrimitives.h"
+#include "GeoPrimitives/GeoPrimitivesHelpers.h"
 
 #include "CLHEP/Geometry/Transform3D.h"
 #include "CLHEP/Geometry/Point3D.h"
@@ -35,22 +36,26 @@ namespace Amg {
 	 * @param CLHEPtransf A CLHEP-based HepGeom::Transform3D.
 	 * @return An Eigen-based Amg::Transform3D.
 	 */
-    inline Amg::Transform3D CLHEPTransformToEigen(
+    inline Amg::Isometry3D CLHEPTransformToEigen(
             const HepGeom::Transform3D& CLHEPtransf) {
-        Amg::Transform3D t = Amg::Transform3D();
+        Amg::Isometry3D t{Amg::Isometry3D::Identity()};
+        auto rotation{t.linear()};
+        auto translation{t.translation()};
         //loop unrolled for performance
-        t(0, 0) = CLHEPtransf(0, 0);
-        t(0, 1) = CLHEPtransf(0, 1);
-        t(0, 2) = CLHEPtransf(0, 2);
-        t(1, 0) = CLHEPtransf(1, 0);
-        t(1, 1) = CLHEPtransf(1, 1);
-        t(1, 2) = CLHEPtransf(1, 2);
-        t(2, 0) = CLHEPtransf(2, 0);
-        t(2, 1) = CLHEPtransf(2, 1);
-        t(2, 2) = CLHEPtransf(2, 2);
-        t(0, 3) = CLHEPtransf(0, 3);
-        t(1, 3) = CLHEPtransf(1, 3);
-        t(2, 3) = CLHEPtransf(2, 3);
+        rotation(0, 0) = CLHEPtransf(0, 0);
+        rotation(0, 1) = CLHEPtransf(0, 1);
+        rotation(0, 2) = CLHEPtransf(0, 2);
+        rotation(1, 0) = CLHEPtransf(1, 0);
+        rotation(1, 1) = CLHEPtransf(1, 1);
+        rotation(1, 2) = CLHEPtransf(1, 2);
+        rotation(2, 0) = CLHEPtransf(2, 0);
+        rotation(2, 1) = CLHEPtransf(2, 1);
+        rotation(2, 2) = CLHEPtransf(2, 2);
+        translation[0] = CLHEPtransf(0, 3);
+        translation[1] = CLHEPtransf(1, 3);
+        translation[2] = CLHEPtransf(2, 3);
+        assert( (t.linear() * t.linear().transpose() -
+                 Amg::RotationMatrix3D::Identity()).cwiseAbs().maxCoeff() < 1.e-9);
         return t;
     }
     
@@ -76,39 +81,17 @@ namespace Amg {
         return t;
     }
 
-    /**
-	 * Converts a CLHEP::Hep3Vector into an Eigen-based Amg::Translation3D.
-	 *
-	 * @param CLHEPtranslation A CLHEP::Hep3Vector.
-	 * @return An Eigen-based Amg::Translation3D.
-	 */
-    inline Amg::Translation3D CLHEPTranslationToEigen(
-            const CLHEP::Hep3Vector& CLHEPtranslation) {
-        return Amg::Translation3D(
-                Vector3D(CLHEPtranslation[0], CLHEPtranslation[1],
-                        CLHEPtranslation[2]));
-    }
-
-
-    /**
+     /**
 	 * Converts a CLHEP-based HepGeom::Translate3 into an Eigen-based Amg::Transform3D.
 	 *
 	 * @param CLHEPtranslate3D A CLHEP-based HepGeom::Translate3.
 	 * @return An Eigen-based Amg::Transform3D.
 	 */
-    inline Amg::Transform3D CLHEPTranslate3DToEigen(
-            const HepGeom::Translate3D& CLHEPtranslate3D)
-    {
-    	// from: http://proj-clhep.web.cern.ch/proj-clhep/doc/CLHEP_2_0_4_7/doxygen/html/classHepGeom_1_1Translate3D.html#f2df65781931c7df9cc2858de2c89151
-    	//Amg::Transform3D(1, 0, 0, CLHEPtranslate3D[0],
-    	//                 0, 1, 0, CLHEPtranslate3D[1],
-    	//  		       0, 0, 1, CLHEPtranslate3D[2]);
-    	Amg::Transform3D t = Amg::Transform3D();
-    	t.setIdentity();
-    	t(0, 3) = CLHEPtranslate3D(0, 3);
-    	t(1, 3) = CLHEPtranslate3D(1, 3);
-    	t(2, 3) = CLHEPtranslate3D(2, 3);
-        return t;
+    inline Amg::Isometry3D CLHEPTranslate3DToEigen(
+            const HepGeom::Translate3D& CLHEPtranslate3D) {
+        return getTranslate3D(CLHEPtranslate3D(0, 3), 
+                              CLHEPtranslate3D(1, 3), 
+                              CLHEPtranslate3D(2, 3));
     }
     
     /**
@@ -135,7 +118,7 @@ namespace Amg {
 	 * @return An Eigen-based Amg::Vector3D.
 	 */
     inline Amg::Vector3D Hep3VectorToEigen(const CLHEP::Hep3Vector& CLHEPvector) {
-        return Amg::Vector3D(CLHEPvector[0], CLHEPvector[1], CLHEPvector[2]);
+        return Amg::Vector3D{CLHEPvector[0], CLHEPvector[1], CLHEPvector[2]};
     }
 
     /**
@@ -145,7 +128,7 @@ namespace Amg {
 	 * @return A CLHEP-based CLHEP::Hep3Vector.
 	 */
     inline CLHEP::Hep3Vector EigenToHep3Vector(const Amg::Vector3D& eigenvector) {
-        return CLHEP::Hep3Vector(eigenvector[0], eigenvector[1], eigenvector[2]);
+        return CLHEP::Hep3Vector{eigenvector[0], eigenvector[1], eigenvector[2]};
     }
 }
 

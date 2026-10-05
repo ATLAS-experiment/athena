@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARGEOCODE_LARALIGNHELPER_H
@@ -12,6 +12,8 @@
  *
  **/
 
+#include "GeoPrimitives/GeoPrimitives.h"
+///
 #include "GaudiKernel/ServiceHandle.h"
 #include "AthenaBaseComps/AthMessaging.h"
 #include "StoreGate/StoreGateSvc.h"

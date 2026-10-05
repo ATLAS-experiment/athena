@@ -8,6 +8,8 @@
 #include <map>
 #include <string>
 
+#include "GeoPrimitives/GeoPrimitives.h"
+///
 #include "GaudiKernel/ServiceHandle.h"
 
 #include "AthenaBaseComps/AthMessaging.h"

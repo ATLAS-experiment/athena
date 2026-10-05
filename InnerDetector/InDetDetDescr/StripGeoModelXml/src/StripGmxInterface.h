@@ -1,10 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STRIPGEOMODELXML_STRIPGMXINTERFACE_H
 #define STRIPGEOMODELXML_STRIPGMXINTERFACE_H
 
+#include "GeoPrimitives/GeoPrimitives.h"
+///
 #include <AthenaBaseComps/AthMessaging.h>
 #include <GeoModelXml/GmxInterface.h>
 

@@ -5,6 +5,8 @@
 #ifndef LARG4FASTSIMULATION_IFASTSIMDEDICATEDSD_H
 #define LARG4FASTSIMULATION_IFASTSIMDEDICATEDSD_H
 
+#include "GeoPrimitives/GeoPrimitives.h"
+///
 #include "LArG4Code/LArG4SimpleSD.h"
 
 #include <utility>

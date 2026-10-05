@@ -5,6 +5,8 @@
 #ifndef AFP_GeoModelFactory_h
 #define AFP_GeoModelFactory_h 1
 
+#include "GeoPrimitives/GeoPrimitives.h"
+///
 #include "AFP_Geometry/AFP_ConfigParams.h"
 #include "AFP_GeoModelManager.h" //covariant return type, needs defined inheritance
 #include "GeoModelUtilities/GeoBorderSurfaceContainer.h" //typedef

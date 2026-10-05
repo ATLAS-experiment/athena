@@ -1,10 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEO2G4_Geo2G4STParameterisation_H
 #define GEO2G4_Geo2G4STParameterisation_H
 
+#include "GeoPrimitives/GeoPrimitives.h"
+///
 #include "globals.hh"
 #include "G4VPVParameterisation.hh"
 #include "G4RotationMatrix.hh"
