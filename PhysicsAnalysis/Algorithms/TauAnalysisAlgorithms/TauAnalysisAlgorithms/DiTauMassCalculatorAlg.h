@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina <baptiste.ravina@cern.ch>
@@ -41,6 +41,7 @@ namespace CP {
     Gaudi::Property<bool> m_doMAXW        {this, "doMAXW", false, "save information about the reconstruction with the maximum-weight estimator"};
     Gaudi::Property<bool> m_doMLNU3P      {this, "doMLNU3P", false, "save information about the reconstruction with the best-fit neutrino kinematics"};
     Gaudi::Property<bool> m_doCollinearApprox {this, "doCollinearApprox", false, "save additional information (mass, x0, x1) from collinear approximation calculation"};
+    Gaudi::Property<std::string> m_metTerm {this, "metTerm", "Final", "the name of the MET term to use"};
 
     // the MMC tool
     ToolHandle<DiTauMassTools::MissingMassTool> m_mmc {this, "mmcTool", "DiTauMassTools::MissingMassTool", "the Missing Mass Calculator tool"};
