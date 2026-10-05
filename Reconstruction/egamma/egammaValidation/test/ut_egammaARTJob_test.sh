@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Reco stage
-Reco_tf.py --CA --inputRDOFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc20/RDO/mc20_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.recon.AOD.e6337_s3681_r13145/100events.RDO.pool.root --outputAODFile=Nightly_AOD_reco.pool.root --maxEvents=1 --autoConfiguration="everything" --preInclude egammaConfig.ConfigurationHelpers.egammaOnlyFromRaw --postInclude egammaValidation.egammaArtSpecialContent.egammaArtSpecialContent >>/dev/null 2>&1
+Reco_tf.py --inputRDOFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc20/RDO/mc20_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.recon.AOD.e6337_s3681_r13145/100events.RDO.pool.root --outputAODFile=Nightly_AOD_reco.pool.root --maxEvents=1 --autoConfiguration="everything" --preInclude egammaConfig.ConfigurationHelpers.egammaOnlyFromRaw --postInclude egammaValidation.egammaArtSpecialContent.egammaArtSpecialContent >>/dev/null 2>&1
 
 stat=$?
 if [ $stat -eq 0 ] 
@@ -17,7 +17,7 @@ fi
 rm log.RAWtoALL >> /dev/null 2>&1
 
 # Merge stage
-AODMerge_tf.py --CA --inputAODFile=Nightly_AOD_reco.pool.root --outputAOD_MRGFile=Nightly_AOD.pool.root >>/dev/null 2>&1
+AODMerge_tf.py --inputAODFile=Nightly_AOD_reco.pool.root --outputAOD_MRGFile=Nightly_AOD.pool.root >>/dev/null 2>&1
 
 stat=$?
 if [ $stat -eq 0 ] 
