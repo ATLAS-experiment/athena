@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -51,7 +51,7 @@ namespace CP
           ANA_CHECK_CORRECTION (m_outOfValidity, *tau, m_smearingTool->applyCorrection (*tau));
         } else {
           accTESCompatibility(*tau) = char(0);
-	}  
+        }
       }
     }
     return StatusCode::SUCCESS;
