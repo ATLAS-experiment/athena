@@ -20,7 +20,6 @@ fi
 # Run the job
 export TRF_ECHO=1;
 Derivation_tf.py \
-      --CA 'True' \
       --maxEvents ${NEVENTS} \
       --perfmon 'fullmonmt' \
       --inputAODFile ${DATAFILE} \

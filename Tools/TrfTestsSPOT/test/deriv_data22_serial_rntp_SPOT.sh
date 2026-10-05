@@ -9,7 +9,6 @@ DATAFILE='/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data2
 # Run the job
 export TRF_ECHO=1;
 Derivation_tf.py \
-      --CA 'True' \
       --maxEvents ${NEVENTS} \
       --perfmon 'fullmonmt' \
       --inputAODFile ${DATAFILE} \

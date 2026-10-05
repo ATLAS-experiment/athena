@@ -17,7 +17,6 @@ fi
 # Run the jobexport TRF_ECHO=1;
 export ATHENA_CORE_NUMBER=${NTHREADS}
 Derivation_tf.py \
-      --CA 'True' \
       --maxEvents ${NEVENTS} \
       --perfmon 'fullmonmt' \
       --inputAODFile ${DATAFILE} \

@@ -19,7 +19,6 @@ ATHENA_CORE_NUMBER=${NTHREADS} \
 ${SPOT_NUMA_PREFIX} \
 Sim_tf.py \
       --perfmon 'fullmonmt' \
-      --CA 'True'\
       --multithreaded 'True' \
       --inputEVNTFile ${DATAFILE} \
       --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \

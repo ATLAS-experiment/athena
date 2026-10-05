@@ -18,7 +18,6 @@ echo "${SPOT_NUMA_INFO}" > __log.txt
 ATHENA_CORE_NUMBER=${NTHREADS} \
 ${SPOT_NUMA_PREFIX} \
 Reco_tf.py \
-      --CA  'True' \
       --perfmon 'fullmonmt' \
       --inputBSFile ${DATAFILE} \
       --maxEvents ${NEVENTS} \
