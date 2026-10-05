@@ -860,6 +860,60 @@ def TauWPDecoratorGNNCfg(flags, version, tauContainerName=""):
     result.setPrivateTools(myTauWPDecorator)
     return result
 
+def TauGNNeVetoEvaluatorCfg(flags, applyLooseTrackSel=False, applyTightTrackSel=False, tauContainerName=""):
+    result = ComponentAccumulator()
+    _name = flags.Tau.ActiveConfig.prefix + 'TauGNNeVeto'
+
+    TauGNNEvaluator = CompFactory.getComp("TauGNNEvaluator")
+    myTauGNNeVetoEvaluator = TauGNNEvaluator(name = _name,
+                                              useTRT = flags.Detector.EnableTRT,
+                                              NetworkFileInclusive = flags.Tau.TauGNNeVetoConfig[0],
+                                              OutputDiscriminant = flags.Tau.TauGNNeVetoOutputDiscriminant_NeglogPJet_True,
+                                              OutputVarname = flags.Tau.TauGNNeVetoScoreName,
+                                              OutputPTau = "GNNeVetoProbTau",
+                                              OutputPJet = "GNNeVetoProbJet",
+                                              MaxTracks = flags.Tau.TauGNNeVetoMaxTracks[0],
+                                              MaxClusters = flags.Tau.TauGNNeVetoMaxClusters[0],
+                                              MaxClusterDR = 15.0,
+                                              MinTauPt = flags.Tau.MinPtDAOD,
+                                              ApplyLooseTrackSel = applyLooseTrackSel,
+                                              ApplyTightTrackSel = applyTightTrackSel,
+                                              VertexCorrection = flags.Tau.doVertexCorrection,
+                                              InputLayerScalar = 'jet_var',
+                                              InputLayerTracks = 'tracks_r22default_sd0sort',
+                                              InputLayerClusters = 'cells_var',
+                                              NodeNameTau=flags.Tau.TauGNNeVetoNodeNameTau,
+                                              NodeNameJet=flags.Tau.TauGNNeVetoNodeNameJet,
+                                              TauContainerName = tauContainerName,
+                                        )
+
+    result.setPrivateTools(myTauGNNeVetoEvaluator)
+    return result
+
+
+def TauGNNeVetoWPDecoratorCfg(flags, tauContainerName=""):
+    result = ComponentAccumulator()
+    _name = flags.Tau.ActiveConfig.prefix + 'TauWPDecoratorGNNeVeto'
+
+    TauWPDecorator = CompFactory.getComp("TauWPDecorator")
+    WPConf = flags.Tau.TauGNNeVetoWP
+    myTauWPDecorator = TauWPDecorator(name=_name,
+                                      flatteningFile1Prong = WPConf[0],
+                                      flatteningFile2Prong = WPConf[1],
+                                      flatteningFile3Prong = WPConf[2],
+                                      TauContainerName = tauContainerName,
+                                      DecorWPNames = flags.Tau.TauGNNeVetoDecorWPNames,
+                                      DecorWPCutEffs1P = [0.95, 0.90, 0.85],
+                                      DecorWPCutEffs2P = [0.95, 0.90, 0.85],
+                                      DecorWPCutEffs3P = [0.98, 0.95, 0.90],
+                                      UseAbsEta = False, # Now for the eVeto algorithm we derive a flattening with respect to mu.
+                                      ScoreBounds = [-0.01, 14.01],
+                                      ScoreName = flags.Tau.TauGNNeVetoScoreName,
+                                      NewScoreName = flags.Tau.TauGNNeVetoTransScoreName,
+                                      DefineWPs = True)
+    result.setPrivateTools(myTauWPDecorator)
+    return result
+
 def TauGNNDisplacedEvaluatorCfg(flags, tauContainerName=""):
     # Displaced TauGNNEvaluator tool setup
     result = ComponentAccumulator()

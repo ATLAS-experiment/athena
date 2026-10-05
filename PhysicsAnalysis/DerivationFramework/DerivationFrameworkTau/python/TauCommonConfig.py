@@ -2,6 +2,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import LHCPeriod
 
 def TauCPContentCfg(flags):
     """TauJets CP content, extended with the TausRUs heads when they are run."""
@@ -140,6 +141,14 @@ def AddTauIDDecorationCfg(flags, **kwargs):
         scoreNames.append(tools[-1].NewScoreName)
         WPNames += tools[-1].DecorWPNames
 
+        if flags.GeoModel.Run <= LHCPeriod.Run3:
+            # Add the dedicated e-veto GNN score and WP decoration when the standard GNTauID configuration branch is active. 
+            tools.append( acc.popToolsAndMerge(tauTools.TauGNNeVetoEvaluatorCfg(flags, applyTightTrackSel=True, applyLooseTrackSel=True)) )
+            tools.append( acc.popToolsAndMerge(tauTools.TauGNNeVetoWPDecoratorCfg(flags)) )
+            if tools[-1].ScoreName != "RNNEleScore": scoreNames.append(tools[-1].ScoreName)
+            scoreNames.append(tools[-1].NewScoreName)
+            WPNames += tools[-1].DecorWPNames
+            
     if kwargs.pop('TausRUs', flags.Tau.doTausRUs):
         if not doVertexedClusters:
             tools.append( acc.popToolsAndMerge(tauTools.TauVertexedClusterDecoratorCfg(flags)) )
