@@ -94,12 +94,12 @@ int main( int argc, char* argv[] ) {
        std::pair<MCTruthPartClassifier::ParticleType,MCTruthPartClassifier::ParticleOrigin>
           classification = myClassifier.particleTruthClassifier(*el_it);
 
-       static SG::AuxElement::Accessor<int> tT("truthType") ;
+       static SG::Accessor<int> tT("truthType") ;
        if (tT.isAvailable(**el_it)){;
           Info (APP_NAME,"Electron Type from  Reco returns %d ", tT(**el_it) );
        }
        Info (APP_NAME,"Electron Type from  Analysis Base returns %d ", classification.first );
-       static SG::AuxElement::Accessor<int> tO("truthOrigin") ;
+       static SG::Accessor<int> tO("truthOrigin") ;
        if (tO.isAvailable(**el_it)){;
           Info (APP_NAME,"Electron Origin from  Reco returns %d ", tO(**el_it) );
        }

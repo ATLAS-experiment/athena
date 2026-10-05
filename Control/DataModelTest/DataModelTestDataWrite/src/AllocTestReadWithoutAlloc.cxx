@@ -32,8 +32,8 @@ StatusCode AllocTestReadWithoutAlloc::initialize()
  */
 StatusCode AllocTestReadWithoutAlloc::execute (const EventContext& ctx) const
 {
-  static const SG::AuxElement::Accessor<int> atInt3 ("atInt3");
-  static const SG::AuxElement::Accessor<int> atInt4 ("atInt4");
+  static const SG::Accessor<int> atInt3 ("atInt3");
+  static const SG::Accessor<int> atInt4 ("atInt4");
 
   // Write to a sstream first, to avpod having the output broken up by
   // schema evolution messges.

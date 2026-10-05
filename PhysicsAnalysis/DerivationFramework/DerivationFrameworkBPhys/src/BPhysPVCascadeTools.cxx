@@ -456,7 +456,7 @@ bool DerivationFramework::BPhysPVCascadeTools::uniqueCollection(const std::vecto
     return true;
 }
 
-bool DerivationFramework::BPhysPVCascadeTools::LinkVertices(SG::AuxElement::Decorator<VertexLinkVector> &decor, const std::vector<const xAOD::Vertex*>& vertices,
+bool DerivationFramework::BPhysPVCascadeTools::LinkVertices(SG::Decorator<VertexLinkVector> &decor, const std::vector<const xAOD::Vertex*>& vertices,
                                                  const xAOD::VertexContainer* vertexContainer, const xAOD::Vertex* vert){
   // create tmp vector of preceding vertex links
   VertexLinkVector precedingVertexLinks;

@@ -175,14 +175,14 @@ namespace Analysis {
     float trkSum_vPt = NAN;
     float trkSum_vAbsEta =NAN;
 
-    static const SG::AuxElement::ConstAccessor<unsigned> ntrkAcc ("trkSum_ntrk");
-    static const SG::AuxElement::ConstAccessor<float> SPtAcc ("trkSum_SPt");
+    static const SG::ConstAccessor<unsigned> ntrkAcc ("trkSum_ntrk");
+    static const SG::ConstAccessor<float> SPtAcc ("trkSum_SPt");
     trkSum_ntrk   = ntrkAcc.isAvailable(BTag) ? ntrkAcc(BTag) : NAN;
     trkSum_sPt    = SPtAcc.isAvailable(BTag) ? SPtAcc(BTag): NAN;
 
     if (!std::isnan(trkSum_ntrk)){
-      static const SG::AuxElement::ConstAccessor<float> VPtAcc ("trkSum_VPt");
-      static const SG::AuxElement::ConstAccessor<float> VEtaAcc ("trkSum_VEta");
+      static const SG::ConstAccessor<float> VPtAcc ("trkSum_VPt");
+      static const SG::ConstAccessor<float> VEtaAcc ("trkSum_VEta");
       trkSum_vPt    =  VPtAcc.isAvailable(BTag) ? VPtAcc(BTag) : NAN;
       trkSum_vAbsEta= VEtaAcc.isAvailable(BTag) ? VEtaAcc(BTag) : NAN;
     }
@@ -566,8 +566,8 @@ namespace Analysis {
       // note: we should extend this to data types beyond float at
       // some point
       std::string valid_key = key + "IsValid";
-      SG::AuxElement::ConstAccessor<float> keyAcc (key);
-      SG::AuxElement::ConstAccessor<float> valid_keyAcc (valid_key);
+      SG::ConstAccessor<float> keyAcc (key);
+      SG::ConstAccessor<float> valid_keyAcc (valid_key);
       if ( ! keyAcc.isAvailable(BTag) ) {
         ATH_MSG_WARNING("aux data '" + key + "' is missing,"
                         " tagger inputs may be incomplete");

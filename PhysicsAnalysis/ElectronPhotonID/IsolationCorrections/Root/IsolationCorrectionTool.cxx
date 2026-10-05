@@ -209,10 +209,10 @@ namespace CP {
 
   CP::CorrectionCode IsolationCorrectionTool::applyCorrection(xAOD::Egamma &eg) {
 
-    static const SG::AuxElement::Accessor<float> decDDcor20("topoetcone20_DDcorr");
-    static const SG::AuxElement::Accessor<float> decDDcor40("topoetcone40_DDcorr");
-    static const SG::AuxElement::Accessor<float> decEadded_Lr2("Eadded_Lr2");
-    static const SG::AuxElement::Accessor<float> decEadded_Lr3("Eadded_Lr3");
+    static const SG::Accessor<float> decDDcor20("topoetcone20_DDcorr");
+    static const SG::Accessor<float> decDDcor40("topoetcone40_DDcorr");
+    static const SG::Accessor<float> decEadded_Lr2("Eadded_Lr2");
+    static const SG::Accessor<float> decEadded_Lr3("Eadded_Lr3");
 
 
     float SCsub = 0;
@@ -260,7 +260,7 @@ namespace CP {
       SG::ReadHandle<xAOD::EventInfo> evtInfo (m_eventInfoKey);
       const xAOD::EventInfo* eventInfo = evtInfo.ptr();
       if (eventInfo) {
-	      static const SG::AuxElement::Accessor<unsigned int> randomrunnumber("RandomRunNumber");
+	      static const SG::Accessor<unsigned int> randomrunnumber("RandomRunNumber");
 	      if (randomrunnumber.isAvailable(*eventInfo)){
 	        theRunNumber = randomrunnumber(*(eventInfo)) ;
         }

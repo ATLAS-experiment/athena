@@ -36,7 +36,7 @@ namespace CP {
             float m_dummy_value;
             /// Minimum pt on the jet
             float m_jet_pt_cut;
-            std::unique_ptr< SG::AuxElement::Decorator<float>> m_decorator;
+            std::unique_ptr< SG::Decorator<float>> m_decorator;
             
     };
 

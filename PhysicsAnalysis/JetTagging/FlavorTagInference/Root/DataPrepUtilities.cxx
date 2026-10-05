@@ -385,7 +385,7 @@ namespace FlavorTagInference {
 
       for (const auto& input: inputs) {
         if (input.type == EDMType::FLOAT) {
-          SG::AuxElement::ConstAccessor<float> acc(input.name);
+          SG::ConstAccessor<float> acc(input.name);
           deps.bTagInputs.insert(input.name);
           if (input.default_flag.size() == 0 || input.name == input.default_flag) {
             internal::VarFromJet getter =
@@ -398,7 +398,7 @@ namespace FlavorTagInference {
               };
             varsFromJet.push_back(std::make_pair(input.name, getter));
           } else {
-            SG::AuxElement::ConstAccessor<char> default_flag(input.default_flag);
+            SG::ConstAccessor<char> default_flag(input.default_flag);
             internal::VarFromJet getter =
               [name=input.name, acc, default_flag](const xAOD::IParticle& j) -> internal::NamedVar {
                 const float value = acc(j);
@@ -458,7 +458,7 @@ namespace FlavorTagInference {
           }
           deps.bTagOutputs.insert(name);
 
-          SG::AuxElement::Decorator<float> f(name);
+          SG::Decorator<float> f(name);
           node.emplace_back(element, f);
         }
         decorators[node_name] = node;
@@ -471,7 +471,7 @@ namespace FlavorTagInference {
     template <typename GraphConfig>
     std::tuple<
       std::function<char(const internal::Tracks&)>,
-      std::vector<SG::AuxElement::Decorator<char>>,
+      std::vector<SG::Decorator<char>>,
       FTagDataDependencyNames,
       std::set<std::string>>
     createIpChecker(
@@ -485,7 +485,7 @@ namespace FlavorTagInference {
       // if we do have a key, return 1 for invalid
       if (!opts.invalid_ip_key.empty()) {
         std::string ip_key = opts.track_prefix + opts.invalid_ip_key;
-        SG::AuxElement::ConstAccessor<char> invalid_check(ip_key);
+        SG::ConstAccessor<char> invalid_check(ip_key);
         checker = [invalid_check](const Tracks& trs){
           for (const xAOD::TrackParticle* trk: trs) {
             if (invalid_check(*trk)) return 1;
@@ -494,7 +494,7 @@ namespace FlavorTagInference {
         };
         deps.trackInputs.insert(ip_key);
       }
-      std::vector<SG::AuxElement::Decorator<char>> default_decs;
+      std::vector<SG::Decorator<char>> default_decs;
       for (const auto& output: gc.outputs) {
         std::string basename = output.first;
         std::string dec_name = basename + "_isDefaults";
@@ -575,7 +575,7 @@ namespace FlavorTagInference {
     template 
     std::tuple<
       std::function<char(const internal::Tracks&)>,
-      std::vector<SG::AuxElement::Decorator<char>>,
+      std::vector<SG::Decorator<char>>,
       FTagDataDependencyNames,
       std::set<std::string>>
     createIpChecker<lwt::GraphConfig>(
@@ -586,7 +586,7 @@ namespace FlavorTagInference {
     template 
     std::tuple<
       std::function<char(const internal::Tracks&)>,
-      std::vector<SG::AuxElement::Decorator<char>>,
+      std::vector<SG::Decorator<char>>,
       FTagDataDependencyNames,
       std::set<std::string>>
     createIpChecker<SaltModelGraphConfig::GraphConfig>(

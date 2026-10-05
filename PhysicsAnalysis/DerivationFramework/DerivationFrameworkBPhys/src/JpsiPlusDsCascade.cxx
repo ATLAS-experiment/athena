@@ -121,25 +121,25 @@ namespace DerivationFramework {
       helper.SetMinNTracksInPV(m_PV_minNTracks);
 
       // Decorators for the main vertex: chi2, ndf, pt and pt error, plus the V0 vertex variables
-      SG::AuxElement::Decorator<VertexLinkVector> CascadeLinksDecor("CascadeVertexLinks"); 
-      SG::AuxElement::Decorator<VertexLinkVector> JpsiLinksDecor("JpsiVertexLinks"); 
-      SG::AuxElement::Decorator<VertexLinkVector> DxLinksDecor("DxVertexLinks"); 
-      SG::AuxElement::Decorator<float> chi2_decor("ChiSquared");
-      SG::AuxElement::Decorator<float> ndof_decor("NumberDoF");
-      SG::AuxElement::Decorator<float> Pt_decor("Pt");
-      SG::AuxElement::Decorator<float> PtErr_decor("PtErr");
-      SG::AuxElement::Decorator<float> Mass_svdecor("Dx_mass");
-      SG::AuxElement::Decorator<float> MassErr_svdecor("Dx_massErr");
-      SG::AuxElement::Decorator<float> Pt_svdecor("Dx_Pt");
-      SG::AuxElement::Decorator<float> PtErr_svdecor("Dx_PtErr");
-      SG::AuxElement::Decorator<float> Lxy_svdecor("Dx_Lxy");
-      SG::AuxElement::Decorator<float> LxyErr_svdecor("Dx_LxyErr");
-      SG::AuxElement::Decorator<float> Tau_svdecor("Dx_Tau");
-      SG::AuxElement::Decorator<float> TauErr_svdecor("Dx_TauErr");
+      SG::Decorator<VertexLinkVector> CascadeLinksDecor("CascadeVertexLinks"); 
+      SG::Decorator<VertexLinkVector> JpsiLinksDecor("JpsiVertexLinks"); 
+      SG::Decorator<VertexLinkVector> DxLinksDecor("DxVertexLinks"); 
+      SG::Decorator<float> chi2_decor("ChiSquared");
+      SG::Decorator<float> ndof_decor("NumberDoF");
+      SG::Decorator<float> Pt_decor("Pt");
+      SG::Decorator<float> PtErr_decor("PtErr");
+      SG::Decorator<float> Mass_svdecor("Dx_mass");
+      SG::Decorator<float> MassErr_svdecor("Dx_massErr");
+      SG::Decorator<float> Pt_svdecor("Dx_Pt");
+      SG::Decorator<float> PtErr_svdecor("Dx_PtErr");
+      SG::Decorator<float> Lxy_svdecor("Dx_Lxy");
+      SG::Decorator<float> LxyErr_svdecor("Dx_LxyErr");
+      SG::Decorator<float> Tau_svdecor("Dx_Tau");
+      SG::Decorator<float> TauErr_svdecor("Dx_TauErr");
 
-      SG::AuxElement::Decorator<float> MassMumu_decor("Mumu_mass");
-      SG::AuxElement::Decorator<float> MassKX_svdecor("KX_mass");
-      SG::AuxElement::Decorator<float> MassKXpi_svdecor("KXpi_mass");
+      SG::Decorator<float> MassMumu_decor("Mumu_mass");
+      SG::Decorator<float> MassKX_svdecor("KX_mass");
+      SG::Decorator<float> MassKXpi_svdecor("KXpi_mass");
 
       ATH_MSG_DEBUG("cascadeinfoContainer size " << cascadeinfoContainer.size());
 
@@ -506,7 +506,7 @@ namespace DerivationFramework {
 
         // Select the J/psi candidates before calling cascade fit
         std::vector<const xAOD::Vertex*> selectedJpsiCandidates;
-        SG::AuxElement::Accessor<Char_t> flagAcc1("passed_Jpsi");
+        SG::Accessor<Char_t> flagAcc1("passed_Jpsi");
         for(auto vxcItr=jpsiContainer->cbegin(); vxcItr!=jpsiContainer->cend(); ++vxcItr) {
 
            // Check the passed flag first
@@ -534,15 +534,15 @@ namespace DerivationFramework {
            // Check the passed flag first
            const xAOD::Vertex* vtx = *vxcItr;
            if(abs(m_Dx_pid)==431) { // D_s+/-
-               SG::AuxElement::Accessor<Char_t> flagAcc1("passed_Ds");
+               SG::Accessor<Char_t> flagAcc1("passed_Ds");
                if(flagAcc1.isAvailable(*vtx)){
                   if(!flagAcc1(*vtx)) continue;
                }
            }
 
            if(abs(m_Dx_pid)==411) { // D+/-
-               SG::AuxElement::Accessor<Char_t> flagAcc1("passed_Dp");
-               SG::AuxElement::Accessor<Char_t> flagAcc2("passed_Dm");
+               SG::Accessor<Char_t> flagAcc1("passed_Dp");
+               SG::Accessor<Char_t> flagAcc2("passed_Dm");
                bool isDp(true);
                bool isDm(true);
                if(flagAcc1.isAvailable(*vtx)){

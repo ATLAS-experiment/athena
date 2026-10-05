@@ -586,8 +586,8 @@ namespace Analysis {
 
     bool JpsiFinder_ee::passesEgammaCuts(const xAOD::Electron* electron) const {
 
-      static const SG::AuxElement::ConstAccessor<char> isLHVeryLoosenod0("DFCommonElectronsLHVeryLoosenod0");
-      static const SG::AuxElement::ConstAccessor<char> isLHVeryLoose("DFCommonElectronsLHVeryLoose");
+      static const SG::ConstAccessor<char> isLHVeryLoosenod0("DFCommonElectronsLHVeryLoosenod0");
+      static const SG::ConstAccessor<char> isLHVeryLoose("DFCommonElectronsLHVeryLoose");
 
       bool passesSelection = false;
       bool passesLHVLoose = isLHVeryLoose(*electron);

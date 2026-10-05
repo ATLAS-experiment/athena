@@ -29,7 +29,7 @@ namespace FlavorTagInference {
     ) const
     {
         // Single-hop: jet -> GhostTower ElementLinks -> CaloCluster
-        static const SG::AuxElement::ConstAccessor<PartLinks> acc("GhostTower");
+        static const SG::ConstAccessor<PartLinks> acc("GhostTower");
 
         Towers towers;
 

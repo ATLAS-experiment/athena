@@ -57,7 +57,7 @@ namespace DerivationFramework {
     //We will now loop over the cluster container counting the number of clusters which pass the criteria
     bool isBatman=false;
     size_t nBatman=0;
-    const static SG::AuxElement::ConstAccessor<float>  acc_AVGLARQ("AVG_LAR_Q");
+    const static SG::ConstAccessor<float>  acc_AVGLARQ("AVG_LAR_Q");
     for ( auto ipart : *clusters ) {
       if (std::fabs(ipart->rawEta())<=2.5) continue;
       if (std::fabs(ipart->rawEta())>=3.2) continue;

@@ -95,7 +95,7 @@ namespace CP {
 
     if (m_strategy == CP::IMuonLRTOverlapRemovalTool::passThroughAndDecorate) {
       // if the passThroughAndDecorate strategy is selected, run a final loop over the collections to decorate the muons with the overlap resolution result.
-      static const SG::AuxElement::Decorator<int> MuonLRTOverlapDecision("MuonLRTOverlapDecision"); //0 if no overlap, 1 if overlaps and rejected, 2 if overlaps and retained
+      static const SG::Decorator<int> MuonLRTOverlapDecision("MuonLRTOverlapDecision"); //0 if no overlap, 1 if overlaps and rejected, 2 if overlaps and retained
       //final loop over prompt muons
       u_int promptMuonIndex = 0;
       for (const xAOD::Muon* promptMuon : promptMuonCol){

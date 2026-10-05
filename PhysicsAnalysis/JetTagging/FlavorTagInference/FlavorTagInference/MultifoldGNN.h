@@ -40,8 +40,8 @@ namespace FlavorTagInference {
   private:
     const FlavorTagInference::GNN& getFold(const SG::AuxElement& element) const;
     std::vector<std::shared_ptr<const FlavorTagInference::GNN>> m_folds;
-    SG::AuxElement::ConstAccessor<uint32_t> m_fold_hash;
-    SG::AuxElement::ConstAccessor<ElementLink<xAOD::JetContainer>> m_jetLink;
+    SG::ConstAccessor<uint32_t> m_fold_hash;
+    SG::ConstAccessor<ElementLink<xAOD::JetContainer>> m_jetLink;
   };
 
 }

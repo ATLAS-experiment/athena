@@ -95,7 +95,7 @@ CP::ElectronChargeEfficiencyCorrectionTool::initialize()
 
   if (m_sfDec)
     delete m_sfDec;
-  m_sfDec = new SG::AuxElement::Decorator<float>(m_sf_decoration_name); // xxxx
+  m_sfDec = new SG::Decorator<float>(m_sf_decoration_name); // xxxx
 
   // Resolve the path to the input file for the charge flip rates
   const std::string rootfilename = PathResolverFindCalibFile(m_filename);
@@ -375,7 +375,7 @@ CP::ElectronChargeEfficiencyCorrectionTool::getEfficiencyScaleFactor(
         sf = 1.0;
         return CP::CorrectionCode::Error;
       }
-      static const SG::AuxElement::Accessor<unsigned int> randomrunnumber(
+      static const SG::Accessor<unsigned int> randomrunnumber(
         "RandomRunNumber");
       if (!randomrunnumber.isAvailable(*eventInfo)) {
         sf = 1.0;

@@ -173,7 +173,7 @@ private:
     
     /** @brief Accessor used to decorate photons per shower shape variable */
     struct SSAccessors {
-        std::unique_ptr<SG::AuxElement::Accessor<float>> original;
+        std::unique_ptr<SG::Accessor<float>> original;
     };
 
     //! @brief Per-variable accessors aligned with s_ssVarNames

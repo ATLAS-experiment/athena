@@ -145,7 +145,7 @@ namespace FlavorTagInference {
                               const std::string& defaultflag);
     }
 
-    typedef SG::AuxElement::Decorator<float> OutputSetterFloat;
+    typedef SG::Decorator<float> OutputSetterFloat;
     typedef std::vector<std::pair<std::string, OutputSetterFloat>> OutNodeFloat;
 
   }
@@ -189,7 +189,7 @@ namespace FlavorTagInference {
     template <typename GraphConfig>
     std::tuple<
       std::function<char(const internal::Tracks&)>,
-      std::vector<SG::AuxElement::Decorator<char>>,
+      std::vector<SG::Decorator<char>>,
       FTagDataDependencyNames,
       std::set<std::string>>
     createIpChecker(

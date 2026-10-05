@@ -69,8 +69,8 @@ As mentioned before, the tool overwrites the original variable value but also st
 ```C++
 std::string correctionVariable = "nameOfTheVariableYouCorrected";
 // construct AUX element accessors
-SG::AuxElement::Accessor<float> VariableToCorrect(correctionVariable + "_original");
-SG::AuxElement::Accessor<float> CorrectedVariable(correctionVariable);
+SG::Accessor<float> VariableToCorrect(correctionVariable + "_original");
+SG::Accessor<float> CorrectedVariable(correctionVariable);
 // get uncorrected and corrected variable value for this photon
 float variable_original = VariableToCorrect(*photon);
 float variable_corrected = CorrectedVariable(*photon);
@@ -353,8 +353,8 @@ The variables can be accessed in the following way:
 ```C++
 std::string correctionVariable = MyTool.GetCorrectionVariable();
 // construct AUX element accessors
-SG::AuxElement::Accessor<float> VariableToCorrect(correctionVariable + "_original");
-SG::AuxElement::Accessor<float> CorrectedVariable(correctionVariable);
+SG::Accessor<float> VariableToCorrect(correctionVariable + "_original");
+SG::Accessor<float> CorrectedVariable(correctionVariable);
 // get uncorrected and corrected variable value for this photon
 float variable_original = VariableToCorrect(*photon);
 float variable_corrected = CorrectedVariable(*photon);

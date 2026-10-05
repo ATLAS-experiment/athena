@@ -77,7 +77,7 @@ namespace CP
 
         if (m_isDAOD)
         {
-            SG::AuxElement::ConstAccessor<char> DFCommonElectronsWP(IDWorkingPoint);
+            SG::ConstAccessor<char> DFCommonElectronsWP(IDWorkingPoint);
             return bool(DFCommonElectronsWP(*electron) );
         } else
         {

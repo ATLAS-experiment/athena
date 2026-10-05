@@ -107,7 +107,7 @@ StatusCode DerivationFramework::JetLargeD0TrackParticleThinning::doThinning(cons
     
     // Set elements in the mask to true if they are matched to a reconstructed object
     // ... jets
-    static const SG::AuxElement::ConstAccessor<std::vector<ElementLink<DataVector<xAOD::IParticle> > > > ghostTrackLRT ("GhostTrackLRT");
+    static const SG::ConstAccessor<std::vector<ElementLink<DataVector<xAOD::IParticle> > > > ghostTrackLRT ("GhostTrackLRT");
 
     if (m_selectionString.empty()) { // check all jets as user didn't provide a selection string
         for (xAOD::JetContainer::const_iterator jetIt=importedJets->begin(); jetIt!=importedJets->end(); ++jetIt) {

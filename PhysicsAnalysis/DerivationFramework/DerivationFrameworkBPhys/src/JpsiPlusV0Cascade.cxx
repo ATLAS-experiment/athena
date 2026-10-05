@@ -115,21 +115,21 @@ namespace DerivationFramework {
     helper.SetMinNTracksInPV(m_PV_minNTracks);
 
     // Decorators for the main vertex: chi2, ndf, pt and pt error, plus the V0 vertex variables
-    SG::AuxElement::Decorator<VertexLinkVector> CascadeLinksDecor("CascadeVertexLinks");
-    SG::AuxElement::Decorator<VertexLinkVector> JpsiLinksDecor("JpsiVertexLinks");
-    SG::AuxElement::Decorator<VertexLinkVector> V0LinksDecor("V0VertexLinks");
-    SG::AuxElement::Decorator<float> chi2_decor("ChiSquared");
-    SG::AuxElement::Decorator<float> ndof_decor("NumberDoF");
-    SG::AuxElement::Decorator<float> Pt_decor("Pt");
-    SG::AuxElement::Decorator<float> PtErr_decor("PtErr");
-    SG::AuxElement::Decorator<float> Mass_svdecor("V0_mass");
-    SG::AuxElement::Decorator<float> MassErr_svdecor("V0_massErr");
-    SG::AuxElement::Decorator<float> Pt_svdecor("V0_Pt");
-    SG::AuxElement::Decorator<float> PtErr_svdecor("V0_PtErr");
-    SG::AuxElement::Decorator<float> Lxy_svdecor("V0_Lxy");
-    SG::AuxElement::Decorator<float> LxyErr_svdecor("V0_LxyErr");
-    SG::AuxElement::Decorator<float> Tau_svdecor("V0_Tau");
-    SG::AuxElement::Decorator<float> TauErr_svdecor("V0_TauErr");
+    SG::Decorator<VertexLinkVector> CascadeLinksDecor("CascadeVertexLinks");
+    SG::Decorator<VertexLinkVector> JpsiLinksDecor("JpsiVertexLinks");
+    SG::Decorator<VertexLinkVector> V0LinksDecor("V0VertexLinks");
+    SG::Decorator<float> chi2_decor("ChiSquared");
+    SG::Decorator<float> ndof_decor("NumberDoF");
+    SG::Decorator<float> Pt_decor("Pt");
+    SG::Decorator<float> PtErr_decor("PtErr");
+    SG::Decorator<float> Mass_svdecor("V0_mass");
+    SG::Decorator<float> MassErr_svdecor("V0_massErr");
+    SG::Decorator<float> Pt_svdecor("V0_Pt");
+    SG::Decorator<float> PtErr_svdecor("V0_PtErr");
+    SG::Decorator<float> Lxy_svdecor("V0_Lxy");
+    SG::Decorator<float> LxyErr_svdecor("V0_LxyErr");
+    SG::Decorator<float> Tau_svdecor("V0_Tau");
+    SG::Decorator<float> TauErr_svdecor("V0_TauErr");
 
     ATH_MSG_DEBUG("cascadeinfoContainer size " << cascadeinfoContainer.size());
 

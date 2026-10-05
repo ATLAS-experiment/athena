@@ -48,7 +48,7 @@ public:
   typedef ReadHandle<T> Base;
 
   /// Accessor type for aux data.
-  typedef SG::AuxElement::Decorator<D> accessor_t;
+  typedef SG::Decorator<D> accessor_t;
 
   /// Type referencing an aux data item.
   typedef typename accessor_t::reference_type

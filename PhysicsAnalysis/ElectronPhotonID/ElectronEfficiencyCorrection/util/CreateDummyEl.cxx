@@ -86,7 +86,7 @@ getElectrons(const std::vector<std::pair<double, double>>& pt_eta,
   eventInfo->makePrivateStore();
   eventInfo->setEventNumber(363636);
   eventInfo->setRunNumber(runNumber);
-  static SG::AuxElement::Decorator<unsigned int> randomrunnumber(
+  static SG::Decorator<unsigned int> randomrunnumber(
     "RandomRunNumber");
   randomrunnumber(*eventInfo) = runNumber;
   if (!store.record(std::move(eventInfo), "EventInfo").isSuccess()) {

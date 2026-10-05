@@ -153,46 +153,46 @@ namespace DerivationFramework {
       helper.SetMinNTracksInPV(m_PV_minNTracks);
 
       // Decorators for the main vertex: chi2, ndf, pt and pt error, plus the V0 vertex variables
-      SG::AuxElement::Decorator<VertexLinkVector> CascadeLinksDecor("CascadeVertexLinks"); 
-      SG::AuxElement::Decorator<MuonsLinkVector> MuonsLinksDecor("MuonsLinks");
-      SG::AuxElement::Decorator<VertexLinkVector> DxLinksDecor("DxVertexLinks"); 
-      SG::AuxElement::Decorator<float> chi2_decor("ChiSquared");
-      SG::AuxElement::Decorator<float> ndof_decor("NumberDoF");
-      SG::AuxElement::Decorator<float> Pt_decor("Pt");
-      SG::AuxElement::Decorator<float> PtErr_decor("PtErr");
-      SG::AuxElement::Decorator<float> Mass_svdecor("Dx_mass");
-      SG::AuxElement::Decorator<float> MassErr_svdecor("Dx_massErr");
-      SG::AuxElement::Decorator<float> Pt_svdecor("Dx_Pt");
-      SG::AuxElement::Decorator<float> PtErr_svdecor("Dx_PtErr");
-      SG::AuxElement::Decorator<float> Lxy_svdecor("Dx_Lxy");
-      SG::AuxElement::Decorator<float> LxyErr_svdecor("Dx_LxyErr");
-      SG::AuxElement::Decorator<float> Tau_svdecor("Dx_Tau");
-      SG::AuxElement::Decorator<float> TauErr_svdecor("Dx_TauErr");
-      SG::AuxElement::Decorator<float> Dx_chi2_svdecor("Dx_chi2");
-      SG::AuxElement::Decorator<float> Dx_ndof_svdecor("Dx_ndof");
+      SG::Decorator<VertexLinkVector> CascadeLinksDecor("CascadeVertexLinks"); 
+      SG::Decorator<MuonsLinkVector> MuonsLinksDecor("MuonsLinks");
+      SG::Decorator<VertexLinkVector> DxLinksDecor("DxVertexLinks"); 
+      SG::Decorator<float> chi2_decor("ChiSquared");
+      SG::Decorator<float> ndof_decor("NumberDoF");
+      SG::Decorator<float> Pt_decor("Pt");
+      SG::Decorator<float> PtErr_decor("PtErr");
+      SG::Decorator<float> Mass_svdecor("Dx_mass");
+      SG::Decorator<float> MassErr_svdecor("Dx_massErr");
+      SG::Decorator<float> Pt_svdecor("Dx_Pt");
+      SG::Decorator<float> PtErr_svdecor("Dx_PtErr");
+      SG::Decorator<float> Lxy_svdecor("Dx_Lxy");
+      SG::Decorator<float> LxyErr_svdecor("Dx_LxyErr");
+      SG::Decorator<float> Tau_svdecor("Dx_Tau");
+      SG::Decorator<float> TauErr_svdecor("Dx_TauErr");
+      SG::Decorator<float> Dx_chi2_svdecor("Dx_chi2");
+      SG::Decorator<float> Dx_ndof_svdecor("Dx_ndof");
 
       //                K X1 X2
       // Ds+/-        : K K  π
       // D+/-         : K π  π
       // Lambda_c+/-  : K π  p
 
-      SG::AuxElement::Decorator<float> massKX1_svdecor("KX_mass");
-      SG::AuxElement::Decorator<float> massKX1X2_svdecor("KXpi_mass");
-      SG::AuxElement::Decorator<float> RapidityKX1X2_svdecor("KXpi_Rapidity");
+      SG::Decorator<float> massKX1_svdecor("KX_mass");
+      SG::Decorator<float> massKX1X2_svdecor("KXpi_mass");
+      SG::Decorator<float> RapidityKX1X2_svdecor("KXpi_Rapidity");
 
-      SG::AuxElement::Decorator<float> MuMass_decor("Mu_mass");
-      SG::AuxElement::Decorator<float> MuPt_decor("Mu_pt");
-      SG::AuxElement::Decorator<float> MuEta_decor("Mu_eta");
-      SG::AuxElement::Decorator<float> MuChi2_decor("Mu_chi2");
-      SG::AuxElement::Decorator<float> MunDoF_decor("Mu_nDoF");
+      SG::Decorator<float> MuMass_decor("Mu_mass");
+      SG::Decorator<float> MuPt_decor("Mu_pt");
+      SG::Decorator<float> MuEta_decor("Mu_eta");
+      SG::Decorator<float> MuChi2_decor("Mu_chi2");
+      SG::Decorator<float> MunDoF_decor("Mu_nDoF");
       //muon contribution to chi2 of the cascade fit
-      SG::AuxElement::Decorator<float> MuChi2B_decor("Mu_chi2_B");
-      SG::AuxElement::Decorator<float> MunDoFB_decor("Mu_nDoF_B");
+      SG::Decorator<float> MuChi2B_decor("Mu_chi2_B");
+      SG::Decorator<float> MunDoFB_decor("Mu_nDoF_B");
 
-      SG::AuxElement::Decorator<float> ChargeK_decor("K_charge");
-      SG::AuxElement::Decorator<float> ChargeX1_decor("X_charge"); // K (Ds+) or pi (D+, Lambda_c+)
-      SG::AuxElement::Decorator<float> ChargeX2_decor("Pi_charge"); // pi (Ds+, D+) or p (Lambda_c+)
-      SG::AuxElement::Decorator<float> ChargeMu_decor("Mu_charge");
+      SG::Decorator<float> ChargeK_decor("K_charge");
+      SG::Decorator<float> ChargeX1_decor("X_charge"); // K (Ds+) or pi (D+, Lambda_c+)
+      SG::Decorator<float> ChargeX2_decor("Pi_charge"); // pi (Ds+, D+) or p (Lambda_c+)
+      SG::Decorator<float> ChargeMu_decor("Mu_charge");
 
       ATH_MSG_DEBUG("cascadeinfoContainer size " << cascadeinfoContainer.size());
 
@@ -654,15 +654,15 @@ namespace DerivationFramework {
            // Check the passed flag first
           const xAOD::Vertex* vtx = vxcItr;
            if(std::abs(m_Dx_pid)==431) { // D_s+/-
-               SG::AuxElement::Accessor<Char_t> flagAcc1("passed_Ds");
+               SG::Accessor<Char_t> flagAcc1("passed_Ds");
                if(flagAcc1.isAvailable(*vtx)){
                   if(!flagAcc1(*vtx)) continue;
                }
            }
 
            if(std::abs(m_Dx_pid)==411) { // D+/-
-               SG::AuxElement::Accessor<Char_t> flagAcc1("passed_Dp");
-               SG::AuxElement::Accessor<Char_t> flagAcc2("passed_Dm");
+               SG::Accessor<Char_t> flagAcc1("passed_Dp");
+               SG::Accessor<Char_t> flagAcc2("passed_Dm");
                bool isDp(true);
                bool isDm(true);
                if(flagAcc1.isAvailable(*vtx)){

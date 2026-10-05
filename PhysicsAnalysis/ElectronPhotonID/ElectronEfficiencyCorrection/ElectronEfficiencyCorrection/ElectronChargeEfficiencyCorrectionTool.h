@@ -170,7 +170,7 @@ private:
 
   /// Decorator
   std::string m_sf_decoration_name;
-  SG::AuxElement::Decorator<float>* m_sfDec;
+  SG::Decorator<float>* m_sfDec;
 };
 
 } // End namespace CP

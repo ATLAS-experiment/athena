@@ -84,7 +84,7 @@ namespace InDet {
 
     // determine which run number to use
     SG::ReadHandle<xAOD::EventInfo> eventInfo(m_evtInfoKey);
-    static const SG::AuxElement::Accessor<unsigned int> randomRunNumber("RandomRunNumber");
+    static const SG::Accessor<unsigned int> randomRunNumber("RandomRunNumber");
     auto runNumber = randomRunNumber(*eventInfo);
 
     if (runNumber <= 0) {
@@ -128,9 +128,9 @@ namespace InDet {
     if (m_applyQoverPBias && !biasQoverPsagittaHistogram) ATH_MSG_WARNING( "q/p bias histogram is nullptr. Will not perform q/p sagitta bias." );
 
     // declare static accessors to avoid repeating string lookups
-    static const SG::AuxElement::Accessor< float > accD0( "d0" );
-    static const SG::AuxElement::Accessor< float > accZ0( "z0" );
-    static const SG::AuxElement::Accessor< float > accQOverP( "qOverP" );
+    static const SG::Accessor< float > accD0( "d0" );
+    static const SG::Accessor< float > accZ0( "z0" );
+    static const SG::Accessor< float > accQOverP( "qOverP" );
 
     const float phi = track.phi0();
     const float eta = track.eta();

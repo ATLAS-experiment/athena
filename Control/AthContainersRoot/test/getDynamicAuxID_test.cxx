@@ -161,7 +161,7 @@ void test_linked()
 
 SG::auxid_t init()
 {
-  static const SG::AuxElement::Accessor<int> a1 ("a1");
+  static const SG::Accessor<int> a1 ("a1");
   return a1.auxid();
 }
 

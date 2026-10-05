@@ -22,7 +22,7 @@ namespace detail {
   // build accessor
   template <typename T, typename I, typename A, typename S=T>
   std::function<T(I)> get(const std::string & source, A ass, T def) {
-    SG::AuxElement::ConstAccessor<S> acc(source);
+    SG::ConstAccessor<S> acc(source);
     using rettype = decltype(ass(std::declval<I>()));
     if constexpr (std::is_pointer<rettype>::value) {
       return [acc, ass, def](I in) -> T {

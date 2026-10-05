@@ -32,9 +32,9 @@ StatusCode AllocTestReadWithAlloc::initialize()
  */
 StatusCode AllocTestReadWithAlloc::execute (const EventContext& ctx) const
 {
-  static const SG::AuxElement::Accessor<int, std::pmr::polymorphic_allocator<int> >
+  static const SG::Accessor<int, std::pmr::polymorphic_allocator<int> >
     atInt3 ("atInt3");
-  static const SG::AuxElement::Accessor<int, Athena_test::TestAlloc<int> >
+  static const SG::Accessor<int, Athena_test::TestAlloc<int> >
     atInt4 ("atInt4");
 
   // Write to a sstream first, to avpod having the output broken up by

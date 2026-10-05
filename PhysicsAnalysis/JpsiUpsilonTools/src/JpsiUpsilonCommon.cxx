@@ -151,7 +151,7 @@ namespace Analysis {
     void JpsiUpsilonCommon::RelinkVertexMuons(std::span<const xAOD::MuonContainer* const> muoncols, xAOD::Vertex* vtx){
        using MuonLink = ElementLink<xAOD::MuonContainer>;
        using MuonLinkVector = std::vector<MuonLink>;
-       static const SG::AuxElement::Decorator<MuonLinkVector> muonLinksDecor("MuonLinks");
+       static const SG::Decorator<MuonLinkVector> muonLinksDecor("MuonLinks");
        const MuonLinkVector &mlinksold = muonLinksDecor(*vtx);
        auto size = mlinksold.size();
        MuonLinkVector newmulinks;

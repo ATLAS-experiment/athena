@@ -62,7 +62,7 @@ StatusCode BTaggingSelectionJsonTool::initialize() {
     if (meta.contains("Mass")) {
         std::string massDecoratorName = meta["Mass"].get<std::string>();
         if (massDecoratorName != "default") {
-            m_massAcc = std::make_unique<SG::AuxElement::ConstAccessor<float>>(massDecoratorName);
+            m_massAcc = std::make_unique<SG::ConstAccessor<float>>(massDecoratorName);
             ATH_MSG_INFO("Using decorated mass '" << massDecoratorName << "' for Xbb FM WP.");
         }
     }
@@ -71,7 +71,7 @@ StatusCode BTaggingSelectionJsonTool::initialize() {
     if (meta.contains("PT")) {
         std::string ptDecoratorName = meta["PT"].get<std::string>();
         if (ptDecoratorName != "default") {
-            m_ptAcc = std::make_unique<SG::AuxElement::ConstAccessor<float>>(ptDecoratorName);
+            m_ptAcc = std::make_unique<SG::ConstAccessor<float>>(ptDecoratorName);
             ATH_MSG_INFO("Using decorated pT '" << ptDecoratorName << "' for Xbb FM WP.");
         }
     }
@@ -187,7 +187,7 @@ std::vector<BTaggingSelectionJsonTool::FractionAccessor> BTaggingSelectionJsonTo
     for (const json& outclass : meta["categories"]) {
         std::string outclassStr = std::string(outclass);
         float fraction = meta["fraction_" + outclassStr].get<float>();
-        SG::AuxElement::ConstAccessor<float> accessor(taggerName + "_p" + outclassStr);
+        SG::ConstAccessor<float> accessor(taggerName + "_p" + outclassStr);
         bool isTarget = (outclassStr == target);
         fractionAccessors.emplace_back(fraction, accessor, isTarget);
     }

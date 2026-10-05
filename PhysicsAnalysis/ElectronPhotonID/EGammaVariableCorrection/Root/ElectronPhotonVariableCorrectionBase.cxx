@@ -83,9 +83,9 @@ StatusCode ElectronPhotonVariableCorrectionBase::initialize()
 
     // initialize the variable aux element accessors
     // variable to be corrected
-    m_variableToCorrect = std::make_unique<SG::AuxElement::Accessor<float>>(m_correctionVariable);
+    m_variableToCorrect = std::make_unique<SG::Accessor<float>>(m_correctionVariable);
     // save original value under different name
-    m_originalVariable = std::make_unique<SG::AuxElement::Accessor<float>>(m_correctionVariable + "_original");
+    m_originalVariable = std::make_unique<SG::Accessor<float>>(m_correctionVariable + "_original");
 
     // Get whether to apply a pure correction or to smear the variable (shift by a random amount,
     // determined using function as probability density function)

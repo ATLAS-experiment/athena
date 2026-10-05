@@ -324,7 +324,7 @@ AsgElectronLikelihoodTool::accept(const EventContext& ctx,
 
   // get the ambiguity type from the decoration
   if (!m_rootTool->m_cutAmbiguity.empty()) {
-    static const SG::AuxElement::Accessor<uint8_t> ambiguityTypeAcc("ambiguityType");
+    static const SG::Accessor<uint8_t> ambiguityTypeAcc("ambiguityType");
     if (ambiguityTypeAcc.isAvailable(*el)) {
       ambiguityBit = ambiguityTypeAcc(*el);
     } else {
@@ -355,7 +355,7 @@ AsgElectronLikelihoodTool::accept(const EventContext& ctx,
     }
     // correction of deltaEta1 for pear shape distortion
     else if (m_correctDeltaEta) {
-      const static SG::AuxElement::Accessor<float> acc(
+      const static SG::Accessor<float> acc(
         "deltaEta1PearDistortion");
       if (acc.isAvailable(*el)) {
         deltaEta -= acc(*el);
@@ -561,7 +561,7 @@ AsgElectronLikelihoodTool::calculate(const EventContext& ctx,
         d0sigma = sqrtf(vard0);
       }
 
-      const static SG::AuxElement::Accessor<float> trans_TRT_PID_acc("transformed_e_probability_ht");
+      const static SG::Accessor<float> trans_TRT_PID_acc("transformed_e_probability_ht");
       if (!trans_TRT_PID_acc.isAvailable(*el)) {
         // most probable case, need to compute the variable
 
@@ -666,7 +666,7 @@ AsgElectronLikelihoodTool::calculate(const EventContext& ctx,
     }
     // correction of deltaEta1 for pear shape distortion
     else if (m_correctDeltaEta) {
-      const static SG::AuxElement::Accessor<float> acc(
+      const static SG::Accessor<float> acc(
         "deltaEta1PearDistortion");
       if (acc.isAvailable(*el)) {
         deltaEta -= acc(*el);
@@ -970,7 +970,7 @@ AsgElectronLikelihoodTool::isForwardElectron(const xAOD::Egamma* eg,
                                              const float eta) const
 {
 
-  static const SG::AuxElement::ConstAccessor<uint16_t> accAuthor("author");
+  static const SG::ConstAccessor<uint16_t> accAuthor("author");
 
   if (accAuthor.isAvailable(*eg)) {
 

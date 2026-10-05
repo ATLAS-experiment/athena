@@ -57,7 +57,7 @@ namespace FlavorTagInference {
     // todo, use something more efficient than a string-keyed map here
     std::unordered_map<std::string, uint32_t> m_hashedKeys;
 
-    using CharReader = SG::AuxElement::ConstAccessor<unsigned char>;
+    using CharReader = SG::ConstAccessor<unsigned char>;
     using SaltedCReader = std::pair<uint32_t, CharReader>;
     std::unordered_map<std::string, std::vector<SaltedCReader>> m_chars;
   };

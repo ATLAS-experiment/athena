@@ -279,7 +279,7 @@ namespace FlavorTagInference {
         m_seqGetter(getter_utils::SeqGetter<xAOD::TrackParticle>(
           cfg.inputs, options))
     {
-        SG::AuxElement::ConstAccessor<PartLinks> acc(options.track_link_name);
+        SG::ConstAccessor<PartLinks> acc(options.track_link_name);
         m_associator = [acc](const SG::AuxElement& jet) -> Tracks {
             Tracks tracks;
             for (const ElementLink<IPC>& link: acc(jet)) {

@@ -34,7 +34,7 @@ namespace FlavorTagInference {
         m_seqGetter(getter_utils::SeqGetter<xAOD::FlowElement>(
           cfg.inputs, options))
     {
-        static const SG::AuxElement::ConstAccessor<PartLinks> acc("constituentLinks");
+        static const SG::ConstAccessor<PartLinks> acc("constituentLinks");
         m_associator = [](const xAOD::IParticle& jet) -> FEV {
           FEV particles;
           for (const ElementLink<IPC>& link : acc(jet)){

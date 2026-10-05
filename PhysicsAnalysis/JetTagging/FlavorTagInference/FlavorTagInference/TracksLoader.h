@@ -69,7 +69,7 @@ namespace FlavorTagInference {
         using TPC = xAOD::TrackParticleContainer;
         using TrackLinks = std::vector<ElementLink<TPC>>;
         using PartLinks = std::vector<ElementLink<IPC>>;
-        using LinkDec = SG::AuxElement::Decorator<TrackLinks>;
+        using LinkDec = SG::Decorator<TrackLinks>;
 
         TrackSortVar trackSortVar(ConstituentsSortOrder, const FTagOptions&);
         std::pair<TrackFilter,std::set<std::string>> trackFilter(

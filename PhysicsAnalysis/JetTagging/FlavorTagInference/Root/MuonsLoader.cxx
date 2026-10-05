@@ -104,7 +104,7 @@ namespace FlavorTagInference {
       m_muonFilter = filter;
       m_deps.muonInputs = deps;
 
-      SG::AuxElement::ConstAccessor<PartLinks> acc(options.muon_link_name);
+      SG::ConstAccessor<PartLinks> acc(options.muon_link_name);
       m_associator = [acc](const xAOD::IParticle& jet) -> IPV {
         IPV muons;
         for (const ElementLink<IPC>& link : acc(jet)){

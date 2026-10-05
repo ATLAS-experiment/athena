@@ -207,7 +207,7 @@ DerivationFramework::EGammaCookieCutClusterTool::addBranches(const EventContext&
     }
 
     if (m_storeCookMom) {
-      static const SG::AuxElement::Accessor<
+      static const SG::Accessor<
         ElementLink< xAOD::CaloClusterContainer > >
         cookClusLinkAcc( "cookiecutClusterLink" );
       iel = 0;

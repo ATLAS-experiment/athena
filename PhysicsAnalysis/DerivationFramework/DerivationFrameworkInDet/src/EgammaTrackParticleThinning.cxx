@@ -14,7 +14,7 @@
 #include "AthContainers/ConstDataVector.h"
 
 namespace {
-const SG::AuxElement::Accessor<ElementLink<xAOD::TrackParticleContainer>> orig(
+const SG::Accessor<ElementLink<xAOD::TrackParticleContainer>> orig(
   "originalTrackParticle");
 }
 

@@ -357,7 +357,7 @@ CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::applyEfficiencyScaleFactor
   
   double efficiencyScaleFactor = 1.0;
   CP::CorrectionCode result = getEfficiencyScaleFactor(inputObject, efficiencyScaleFactor);
-  const static SG::AuxElement::Decorator<float> dec(m_resultPrefix+m_resultName+"SF");
+  const static SG::Decorator<float> dec(m_resultPrefix+m_resultName+"SF");
   dec(inputObject) = efficiencyScaleFactor;
   return result;
 }

@@ -115,7 +115,7 @@ StatusCode DerivationFramework::JetGhostThinning::doThinning(const EventContext&
   const int maskSize = static_cast<int>(mask.size());
 
   // Create accessor for the ghost association
-  SG::AuxElement::ConstAccessor<std::vector<ElementLink<xAOD::IParticleContainer>>> ghostAcc(m_ghostName);
+  SG::ConstAccessor<std::vector<ElementLink<xAOD::IParticleContainer>>> ghostAcc(m_ghostName);
 
   size_t nGhostLinks = 0;
 

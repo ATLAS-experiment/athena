@@ -18,9 +18,9 @@
 namespace {
   /// Helper typedefs for accessors/decorators, vectors of ele links
   template <typename T>
-    using constAcc_t = SG::AuxElement::ConstAccessor<T>;
+    using constAcc_t = SG::ConstAccessor<T>;
   template <typename T>
-    using acc_t = SG::AuxElement::Accessor<T>;
+    using acc_t = SG::Accessor<T>;
   template <typename T>
     using vecLink_t = std::vector<ElementLink<T>>;
 

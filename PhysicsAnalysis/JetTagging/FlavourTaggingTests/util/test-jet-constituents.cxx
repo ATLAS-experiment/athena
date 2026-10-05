@@ -124,7 +124,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[]) {
         const xAOD::IParticle* constituent = *link;
 
         // Check if this is a view container element that needs dereferencing
-        static SG::AuxElement::ConstAccessor<ElementLink<xAOD::IParticleContainer>> originalAcc("originalObjectLink");
+        static SG::ConstAccessor<ElementLink<xAOD::IParticleContainer>> originalAcc("originalObjectLink");
         if (originalAcc.isAvailable(*constituent)) {
           const ElementLink<xAOD::IParticleContainer>& origLink = originalAcc(*constituent);
           if (origLink.isValid()) {

@@ -235,7 +235,7 @@ DerivationFramework::MaxCellDecorator::addBranches(const EventContext& ctx) cons
 
       if (ctype  == xAOD::Type::FlowElement) {
         // Particle Flow jets.
-        const static SG::AuxElement::ConstAccessor< ElementLink<xAOD::IParticleContainer> >
+        const static SG::ConstAccessor< ElementLink<xAOD::IParticleContainer> >
           originalObjectAcc("originalObjectLink");
 
         for (size_t i=0;i<jet->numConstituents();++i) {

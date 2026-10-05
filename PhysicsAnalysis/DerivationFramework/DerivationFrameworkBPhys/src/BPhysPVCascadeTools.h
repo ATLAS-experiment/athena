@@ -112,7 +112,7 @@ namespace DerivationFramework {
        static void SetVectorInfo(xAOD::BPhysHelper &, const Trk::VxCascadeInfo*);
        static bool uniqueCollection(const std::vector<const xAOD::TrackParticle*>&);
        static bool uniqueCollection(const std::vector<const xAOD::TrackParticle*>&, const std::vector<const xAOD::TrackParticle*>&);
-       static bool LinkVertices(SG::AuxElement::Decorator<VertexLinkVector> &decor, const std::vector<const xAOD::Vertex*>& vertices,
+       static bool LinkVertices(SG::Decorator<VertexLinkVector> &decor, const std::vector<const xAOD::Vertex*>& vertices,
                                                  const xAOD::VertexContainer* vertexContainer, const xAOD::Vertex* vert);
   }; // class BPhysPVCascadeTools
 

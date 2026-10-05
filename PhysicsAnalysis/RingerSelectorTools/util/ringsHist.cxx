@@ -103,7 +103,7 @@ int main( int argc, char* argv[] ) {
           }
         }
         // Loose Output = Medium Output = Tight Output
-        SG::AuxElement::ConstAccessor<float> looseOutput("ToolSvc.ElectronRingerSelector_TestLoose_output");
+        SG::ConstAccessor<float> looseOutput("ToolSvc.ElectronRingerSelector_TestLoose_output");
         float output = looseOutput( *electron );
         hOutput->Fill( output );
         hNNvrEta->Fill( electron->showerShapeValue( EgammaParameters::Reta ) ,

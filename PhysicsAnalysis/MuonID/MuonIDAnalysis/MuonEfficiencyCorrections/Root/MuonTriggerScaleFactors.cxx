@@ -814,7 +814,7 @@ namespace CP {
     }
 
     unsigned int MuonTriggerScaleFactors::getRunNumber() const {
-        static const SG::AuxElement::ConstAccessor<unsigned int> acc_rnd("RandomRunNumber");
+        static const SG::ConstAccessor<unsigned int> acc_rnd("RandomRunNumber");
         SG::ReadHandle<xAOD::EventInfo> info(m_eventInfo);
         if (info.operator->()==nullptr) {
             ATH_MSG_FATAL("Could not retrieve the xAOD::EventInfo with name: " << m_eventInfo.key() << ". Exiting the code.");

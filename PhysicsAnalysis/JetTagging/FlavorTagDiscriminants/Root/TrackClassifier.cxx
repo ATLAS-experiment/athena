@@ -53,7 +53,7 @@ std::map<std::string, double> TrackClassifier::ComputeScore(const xAOD::TrackPar
   double dr = (track->p4()).DeltaR(jet->p4());
   double ptfrac = (track->pt())/(jet->pt());
 
-  static const SG::AuxElement::ConstAccessor<float> AMVFWeightPVAcc ("AMVFWeightPV");
+  static const SG::ConstAccessor<float> AMVFWeightPVAcc ("AMVFWeightPV");
 
   // Build dictionary of inputs for lwtnn to use
   // It is ok to fill this with more variables than the model uses

@@ -107,7 +107,7 @@ namespace {
     LinkGetter(std::string name);
     const R* operator()(In_t in) const;
   private:
-    using LinkAccessor = SG::AuxElement::ConstAccessor<ElementLink<T>>;
+    using LinkAccessor = SG::ConstAccessor<ElementLink<T>>;
     const LinkAccessor m_accessor;
     const std::string m_linkName;
   };

@@ -168,9 +168,9 @@ class BTaggingEfficiencyJsonTool: public asg::AsgTool,
   std::map<std::string, std::string> m_mcReference;
   std::map<std::string, std::vector<MCMCHandler>> m_mcmcHandlers;
 
-  std::unique_ptr<SG::AuxElement::ConstAccessor<int>> m_truthLabelAcc;
-  std::unique_ptr<SG::AuxElement::ConstAccessor<float>> m_massAcc;
-  std::unique_ptr<SG::AuxElement::ConstAccessor<float>> m_ptAcc;
+  std::unique_ptr<SG::ConstAccessor<int>> m_truthLabelAcc;
+  std::unique_ptr<SG::ConstAccessor<float>> m_massAcc;
+  std::unique_ptr<SG::ConstAccessor<float>> m_ptAcc;
 
   struct sysData {
     float xbb_syst {0};

@@ -11,13 +11,13 @@ using namespace MCTruthPartClassifier;
 
 
 namespace {
-  const SG::AuxElement::ConstAccessor<double> acc_pt_vis("pt_vis");
-  const SG::AuxElement::ConstAccessor<double> acc_eta_vis("eta_vis");
-  const SG::AuxElement::ConstAccessor<double> acc_phi_vis("phi_vis");
-  const SG::AuxElement::ConstAccessor<double> acc_m_vis("m_vis");
-  const SG::AuxElement::ConstAccessor<unsigned int> acc_classifierType(
+  const SG::ConstAccessor<double> acc_pt_vis("pt_vis");
+  const SG::ConstAccessor<double> acc_eta_vis("eta_vis");
+  const SG::ConstAccessor<double> acc_phi_vis("phi_vis");
+  const SG::ConstAccessor<double> acc_m_vis("m_vis");
+  const SG::ConstAccessor<unsigned int> acc_classifierType(
     "classifierParticleType");
-  const SG::AuxElement::ConstAccessor<unsigned int> acc_classifierOutcome(
+  const SG::ConstAccessor<unsigned int> acc_classifierOutcome(
     "classifierParticleOutCome");
 }
 

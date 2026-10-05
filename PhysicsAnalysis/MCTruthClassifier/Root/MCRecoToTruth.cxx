@@ -217,7 +217,7 @@ MCTruthClassifier::getGenPart(const xAOD::TrackParticle* trk, IMCTruthClassifier
   uint8_t NumOfSCTHits = 0;
   typedef ElementLink<xAOD::TruthParticleContainer> TruthLink_t;
 
-  static const SG::AuxElement::Accessor<TruthLink_t> tPL("truthParticleLink");
+  static const SG::Accessor<TruthLink_t> tPL("truthParticleLink");
   if (!tPL.isAvailable(*trk)) {
     ATH_MSG_DEBUG("Track particle is not associated to truth particle");
     return nullptr;
@@ -236,7 +236,7 @@ MCTruthClassifier::getGenPart(const xAOD::TrackParticle* trk, IMCTruthClassifier
   }
 
   if (info) {
-    static const SG::AuxElement::Accessor<float> tMP("truthMatchProbability");
+    static const SG::Accessor<float> tMP("truthMatchProbability");
     if (tMP.isAvailable(*trk)) {
       info->probTrkToTruth = tMP(*trk);
     } else {

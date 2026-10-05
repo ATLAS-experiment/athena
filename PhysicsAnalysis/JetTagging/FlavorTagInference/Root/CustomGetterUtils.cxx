@@ -58,7 +58,7 @@ namespace {
   template <typename T, typename U>
   class NamedSeqGetter{
     private:
-      SG::AuxElement::ConstAccessor<T> m_getter;
+      SG::ConstAccessor<T> m_getter;
       std::string m_name;
     public:
       NamedSeqGetter(const std::string& name):
@@ -212,7 +212,7 @@ namespace {
     using Jet = xAOD::IParticle;
 
     if (name == "eProbabilityHT") {
-      SG::AuxElement::ConstAccessor<float> eprob_acc(name);
+      SG::ConstAccessor<float> eprob_acc(name);
       return CustomSeqGetter<Tp>([eprob_acc](const Tp& tp, const Jet&) {
         return eprob_acc(tp);
       });
@@ -278,50 +278,50 @@ namespace {
       });
     }
     if (name == "numberOfPixelHitsInclDead") {
-      SG::AuxElement::ConstAccessor<unsigned char> pix_hits("numberOfPixelHits");
-      SG::AuxElement::ConstAccessor<unsigned char> pix_dead("numberOfPixelDeadSensors");
+      SG::ConstAccessor<unsigned char> pix_hits("numberOfPixelHits");
+      SG::ConstAccessor<unsigned char> pix_dead("numberOfPixelDeadSensors");
       return CustomSeqGetter<Tp>([pix_hits, pix_dead](const Tp& tp, const Jet&) {
         return pix_hits(tp) + pix_dead(tp);
       });
     }
     if (name == "numberOfSCTHitsInclDead") {
-      SG::AuxElement::ConstAccessor<unsigned char> sct_hits("numberOfSCTHits");
-      SG::AuxElement::ConstAccessor<unsigned char> sct_dead("numberOfSCTDeadSensors");
+      SG::ConstAccessor<unsigned char> sct_hits("numberOfSCTHits");
+      SG::ConstAccessor<unsigned char> sct_dead("numberOfSCTDeadSensors");
       return CustomSeqGetter<Tp>([sct_hits, sct_dead](const Tp& tp, const Jet&) {
         return sct_hits(tp) + sct_dead(tp);
       });
       }
     if (name == "numberOfInnermostPixelLayerHits21p9") {
-      SG::AuxElement::ConstAccessor<unsigned char> barrel_hits("numberOfInnermostPixelLayerHits");
-      SG::AuxElement::ConstAccessor<unsigned char> endcap_hits("numberOfInnermostPixelLayerEndcapHits");
+      SG::ConstAccessor<unsigned char> barrel_hits("numberOfInnermostPixelLayerHits");
+      SG::ConstAccessor<unsigned char> endcap_hits("numberOfInnermostPixelLayerEndcapHits");
       return CustomSeqGetter<Tp>([barrel_hits, endcap_hits](const Tp& tp, const Jet&) {
         return barrel_hits(tp) + endcap_hits(tp);
       });
     }
     if (name == "numberOfNextToInnermostPixelLayerHits21p9") {
-      SG::AuxElement::ConstAccessor<unsigned char> barrel_hits("numberOfNextToInnermostPixelLayerHits");
-      SG::AuxElement::ConstAccessor<unsigned char> endcap_hits("numberOfNextToInnermostPixelLayerEndcapHits");
+      SG::ConstAccessor<unsigned char> barrel_hits("numberOfNextToInnermostPixelLayerHits");
+      SG::ConstAccessor<unsigned char> endcap_hits("numberOfNextToInnermostPixelLayerEndcapHits");
       return CustomSeqGetter<Tp>([barrel_hits, endcap_hits](const Tp& tp, const Jet&) {
         return barrel_hits(tp) + endcap_hits(tp);
       });
     }
     if (name == "numberOfInnermostPixelLayerSharedHits21p9") {
-      SG::AuxElement::ConstAccessor<unsigned char> barrel_hits("numberOfInnermostPixelLayerSharedHits");
-      SG::AuxElement::ConstAccessor<unsigned char> endcap_hits("numberOfInnermostPixelLayerSharedEndcapHits");
+      SG::ConstAccessor<unsigned char> barrel_hits("numberOfInnermostPixelLayerSharedHits");
+      SG::ConstAccessor<unsigned char> endcap_hits("numberOfInnermostPixelLayerSharedEndcapHits");
       return CustomSeqGetter<Tp>([barrel_hits, endcap_hits](const Tp& tp, const Jet&) {
         return barrel_hits(tp) + endcap_hits(tp);
       });
     }
     if (name == "numberOfInnermostPixelLayerSplitHits21p9") {
-      SG::AuxElement::ConstAccessor<unsigned char> barrel_hits("numberOfInnermostPixelLayerSplitHits");
-      SG::AuxElement::ConstAccessor<unsigned char> endcap_hits("numberOfInnermostPixelLayerSplitEndcapHits");
+      SG::ConstAccessor<unsigned char> barrel_hits("numberOfInnermostPixelLayerSplitHits");
+      SG::ConstAccessor<unsigned char> endcap_hits("numberOfInnermostPixelLayerSplitEndcapHits");
       return CustomSeqGetter<Tp>([barrel_hits, endcap_hits](const Tp& tp, const Jet&) {
         return barrel_hits(tp) + endcap_hits(tp);
       });
     }
     const std::regex number_match("(numberOf|expect).*");
     if (std::regex_match(name, number_match)){
-      SG::AuxElement::ConstAccessor<unsigned char> pix_hits(name);
+      SG::ConstAccessor<unsigned char> pix_hits(name);
       return CustomSeqGetter<Tp>([pix_hits](const Tp& tp, const Jet&) {
         return pix_hits(tp);
       });
@@ -460,9 +460,9 @@ namespace {
   {
     private:
       int m_row;
-      SG::AuxElement::ConstAccessor<float> m_hitX;
-      SG::AuxElement::ConstAccessor<float> m_hitY;
-      SG::AuxElement::ConstAccessor<float> m_hitZ;
+      SG::ConstAccessor<float> m_hitX;
+      SG::ConstAccessor<float> m_hitY;
+      SG::ConstAccessor<float> m_hitZ;
     public:
       explicit JabSeqGetter(int row):
         m_row(row),
@@ -514,7 +514,7 @@ namespace {
 
     std::string isovar{"ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000"};
     std::set<std::string> isodeps{{isovar}};
-    SG::AuxElement::ConstAccessor<float> pt_varcone30{isovar};
+    SG::ConstAccessor<float> pt_varcone30{isovar};
     if ((name == "ftag_ptVarCone30OverPt") || (name == "ptVarCone30OverPt")) {
       return decorated_electron_getter_t {
         CustomSeqGetter<El>([pt_varcone30](const El& p, const Jet&) {
@@ -729,7 +729,7 @@ namespace {
 
     // 1 flag: usedInChargedFlow
     if (name == "usedInChargedFlow") {
-      SG::AuxElement::ConstAccessor<int> accInFlow("usedInChargedFlow");
+      SG::ConstAccessor<int> accInFlow("usedInChargedFlow");
       return CustomSeqGetter<CC>([accInFlow](const CC& c, const Jet&) {
         return accInFlow.isAvailable(c) ? static_cast<double>(accInFlow(c)) : 0.0;
       });

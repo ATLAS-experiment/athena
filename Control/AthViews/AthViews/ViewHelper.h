@@ -185,7 +185,7 @@ namespace ViewHelper
       SG::ReadHandle< DataVector< T > > queryHandle( queryKey, sourceContext );
 
       //Make accessor for bookkeeping
-      SG::AuxElement::Accessor< ElementLink< TrigRoiDescriptorCollection > > viewBookkeeper( "viewIndex" );
+      SG::Accessor< ElementLink< TrigRoiDescriptorCollection > > viewBookkeeper( "viewIndex" );
 
       //Loop over all views
       unsigned int offset = outputData.size(); //allow for existing objects in the container

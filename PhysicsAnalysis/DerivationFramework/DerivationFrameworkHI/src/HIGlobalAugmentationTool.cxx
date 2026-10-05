@@ -17,20 +17,20 @@ namespace DerivationFramework
     unsigned int nTrackSels  = m_trkSelTools.size();
     for (unsigned int its = 0; its < nTrackSels; ++its) {
       ATH_CHECK(m_trkSelTools[its].retrieve());
-      m_decTrack_count.emplace_back(SG::AuxElement::Decorator<int>("TrackParticleMultiplicity_" + m_cutLevels[its] ));
+      m_decTrack_count.emplace_back(SG::Decorator<int>("TrackParticleMultiplicity_" + m_cutLevels[its] ));
     }
     //initilize decorators for flow vectors
     for (int vn = 1; vn <= m_nHarmonic; ++vn) {
-      m_decFCalEtA_Qnx.emplace_back(SG::AuxElement::Decorator<float>(std::format("FCalEtA_Q{}x", vn + 1)));
-      m_decFCalEtA_Qny.emplace_back(SG::AuxElement::Decorator<float>(std::format("FCalEtA_Q{}y", vn + 1)));
-      m_decFCalEtC_Qnx.emplace_back(SG::AuxElement::Decorator<float>(std::format("FCalEtC_Q{}x", vn + 1)));
-      m_decFCalEtC_Qny.emplace_back(SG::AuxElement::Decorator<float>(std::format("FCalEtC_Q{}y", vn + 1)));
+      m_decFCalEtA_Qnx.emplace_back(SG::Decorator<float>(std::format("FCalEtA_Q{}x", vn + 1)));
+      m_decFCalEtA_Qny.emplace_back(SG::Decorator<float>(std::format("FCalEtA_Q{}y", vn + 1)));
+      m_decFCalEtC_Qnx.emplace_back(SG::Decorator<float>(std::format("FCalEtC_Q{}x", vn + 1)));
+      m_decFCalEtC_Qny.emplace_back(SG::Decorator<float>(std::format("FCalEtC_Q{}y", vn + 1)));
 
       // half FCal is for FCal with eta > 4.0 only
-      m_decHalfFCalEtA_Qnx.emplace_back(SG::AuxElement::Decorator<float>(std::format("HalfFCalEtA_Q{}x", vn + 1)));
-      m_decHalfFCalEtA_Qny.emplace_back(SG::AuxElement::Decorator<float>(std::format("HalfFCalEtA_Q{}y", vn + 1)));
-      m_decHalfFCalEtC_Qnx.emplace_back(SG::AuxElement::Decorator<float>(std::format("HalfFCalEtC_Q{}x", vn + 1)));
-      m_decHalfFCalEtC_Qny.emplace_back(SG::AuxElement::Decorator<float>(std::format("HalfFCalEtC_Q{}y", vn + 1)));
+      m_decHalfFCalEtA_Qnx.emplace_back(SG::Decorator<float>(std::format("HalfFCalEtA_Q{}x", vn + 1)));
+      m_decHalfFCalEtA_Qny.emplace_back(SG::Decorator<float>(std::format("HalfFCalEtA_Q{}y", vn + 1)));
+      m_decHalfFCalEtC_Qnx.emplace_back(SG::Decorator<float>(std::format("HalfFCalEtC_Q{}x", vn + 1)));
+      m_decHalfFCalEtC_Qny.emplace_back(SG::Decorator<float>(std::format("HalfFCalEtC_Q{}y", vn + 1)));
     }
 
 
@@ -88,11 +88,11 @@ namespace DerivationFramework
     std::vector<float> HalfFCalEtC_Qny(m_nHarmonic,0);
 
     // Set up the decorators for FCal Et
-    SG::AuxElement::Decorator< float > decFCalEtA("FCalEtA");
-    SG::AuxElement::Decorator< float > decFCalEtC("FCalEtC");
+    SG::Decorator< float > decFCalEtA("FCalEtA");
+    SG::Decorator< float > decFCalEtC("FCalEtC");
 
-    SG::AuxElement::Decorator< float > decHalfFCalEtA("HalfFCalEtA");
-    SG::AuxElement::Decorator< float > decHalfFCalEtC("HalfFCalEtC");
+    SG::Decorator< float > decHalfFCalEtA("HalfFCalEtA");
+    SG::Decorator< float > decHalfFCalEtC("HalfFCalEtC");
 
     //Retrieve HIEventShape
     SG::ReadHandle<xAOD::HIEventShapeContainer> eventShape(m_eventShapeKey, ctx);
@@ -142,7 +142,7 @@ namespace DerivationFramework
     if (m_doTopoClusDec) {
         // Setup the decorator for TopoCaloCluster cut
         // If this is true, the event is not compatible with UPC topologies in the FCal
-        SG::AuxElement::Decorator< bool > decTopoClusterFCalCut("passUPCTopoCaloCut");
+        SG::Decorator< bool > decTopoClusterFCalCut("passUPCTopoCaloCut");
         //Default decoration set to false
         decTopoClusterFCalCut(*eventInfo) = false;
 

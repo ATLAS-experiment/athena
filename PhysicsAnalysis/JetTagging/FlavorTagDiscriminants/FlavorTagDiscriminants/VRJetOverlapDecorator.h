@@ -22,11 +22,11 @@ public:
   void decorate(const xAOD::JetContainer& jets) const;
 private:
   VRJetParameters m_param_source;
-  SG::AuxElement::Decorator<float> m_rel_decorator;
-  SG::AuxElement::Decorator<float> m_abs_decorator;
-  SG::AuxElement::ConstAccessor<float> m_min_radius;
-  SG::AuxElement::ConstAccessor<float> m_max_radius;
-  SG::AuxElement::ConstAccessor<float> m_mass_scale;
+  SG::Decorator<float> m_rel_decorator;
+  SG::Decorator<float> m_abs_decorator;
+  SG::ConstAccessor<float> m_min_radius;
+  SG::ConstAccessor<float> m_max_radius;
+  SG::ConstAccessor<float> m_mass_scale;
 };
 
 #endif

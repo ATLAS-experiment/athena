@@ -41,8 +41,8 @@ private:
     "If true, downgrade inconsistent pT/mass bin counts in loadBinConfig() from an ERROR "
     "(initialisation failure) to a WARNING and continue. Default false (fail on inconsistency)."};
 
-  std::unique_ptr<SG::AuxElement::ConstAccessor<float>> m_massAcc;
-  std::unique_ptr<SG::AuxElement::ConstAccessor<float>> m_ptAcc;
+  std::unique_ptr<SG::ConstAccessor<float>> m_massAcc;
+  std::unique_ptr<SG::ConstAccessor<float>> m_ptAcc;
 
   json m_json_config;
 
@@ -54,10 +54,10 @@ private:
 
   struct FractionAccessor {
     float fraction;
-    SG::AuxElement::ConstAccessor<float> accessor;
+    SG::ConstAccessor<float> accessor;
     bool isTarget;
 
-    FractionAccessor(float fraction, const SG::AuxElement::ConstAccessor<float>& accessor, bool isTarget)
+    FractionAccessor(float fraction, const SG::ConstAccessor<float>& accessor, bool isTarget)
       : fraction(fraction), accessor(accessor), isTarget(isTarget) {}
   };
 

@@ -166,8 +166,8 @@ int main (int argc, char* argv[])
                 }
                 
                 //get original and corrected value
-                SG::AuxElement::Accessor<float> VariableToCorrect(correctionVariable + "_original");
-                SG::AuxElement::Accessor<float> CorrectedVariable(correctionVariable);
+                SG::Accessor<float> VariableToCorrect(correctionVariable + "_original");
+                SG::Accessor<float> CorrectedVariable(correctionVariable);
 
                 //print results
                 ANA_MSG_INFO("Original value:  " << VariableToCorrect(*photon));
@@ -228,8 +228,8 @@ int main (int argc, char* argv[])
                 ANA_CHECK(CorrectElectronTool.applyCorrection(*electron));
 
                 //get original and corrected value
-                SG::AuxElement::Accessor<float> VariableToCorrect(correctionVariable + "_original");
-                SG::AuxElement::Accessor<float> CorrectedVariable(correctionVariable);
+                SG::Accessor<float> VariableToCorrect(correctionVariable + "_original");
+                SG::Accessor<float> CorrectedVariable(correctionVariable);
 
                 //print results
                 ANA_MSG_INFO("Original value:  " << VariableToCorrect(*electron));

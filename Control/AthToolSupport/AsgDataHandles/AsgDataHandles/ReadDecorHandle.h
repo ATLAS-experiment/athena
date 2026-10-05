@@ -51,7 +51,7 @@ public:
   typedef ReadHandle<T> Base;
 
   /// Accessor type for aux data.
-  typedef SG::AuxElement::ConstAccessor<D> accessor_t;
+  typedef SG::ConstAccessor<D> accessor_t;
 
   /// Type referencing an aux data item.
   typedef typename accessor_t::const_reference_type

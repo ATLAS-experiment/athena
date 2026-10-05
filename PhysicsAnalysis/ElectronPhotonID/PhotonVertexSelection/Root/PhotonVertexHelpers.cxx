@@ -45,10 +45,10 @@ getZCommonAndError(const xAOD::EventInfo* eventInfo,
                    float convPtCut)
 {
   // Static accessors
-  static const SG::AuxElement::Accessor<float> zvertex("zvertex");
-  static const SG::AuxElement::Accessor<float> errz("errz");
-  static const SG::AuxElement::Accessor<float> HPV_zvertex("HPV_zvertex");
-  static const SG::AuxElement::Accessor<float> HPV_errz("HPV_errz");
+  static const SG::Accessor<float> zvertex("zvertex");
+  static const SG::Accessor<float> errz("errz");
+  static const SG::Accessor<float> HPV_zvertex("HPV_zvertex");
+  static const SG::Accessor<float> HPV_errz("HPV_errz");
 
   // Clear values
   float zCommon = 0.0, zCommonError = 0.0;
@@ -149,9 +149,9 @@ TLorentzVector
 getTrackAtFirstMeasurement(const xAOD::TrackParticle* tp)
 {
 
-  static const SG::AuxElement::ConstAccessor<std::vector<float>> accParameterPX(
+  static const SG::ConstAccessor<std::vector<float>> accParameterPX(
     "parameterPX");
-  static const SG::AuxElement::ConstAccessor<std::vector<float>> accParameterPY(
+  static const SG::ConstAccessor<std::vector<float>> accParameterPY(
     "parameterPY");
 
   TLorentzVector v;
@@ -177,9 +177,9 @@ getVertexMomentum(const xAOD::Vertex* vertex,
 {
   TLorentzVector v;
 
-  SG::AuxElement::ConstAccessor<float> pt(derivationPrefix + "pt");
-  SG::AuxElement::ConstAccessor<float> eta(derivationPrefix + "eta");
-  SG::AuxElement::ConstAccessor<float> phi(derivationPrefix + "phi");
+  SG::ConstAccessor<float> pt(derivationPrefix + "pt");
+  SG::ConstAccessor<float> eta(derivationPrefix + "eta");
+  SG::ConstAccessor<float> phi(derivationPrefix + "phi");
 
   if (useAux and pt.isAvailable(*vertex) and eta.isAvailable(*vertex) and phi.isAvailable(*vertex)) {
     // protect against decoreated nan values (from Rel24 on?)

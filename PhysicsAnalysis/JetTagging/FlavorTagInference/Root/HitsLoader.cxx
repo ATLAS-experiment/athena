@@ -17,7 +17,7 @@ namespace FlavorTagInference {
         m_seqGetter(getter_utils::SeqGetter<xAOD::TrackMeasurementValidation>(
           cfg.inputs, options))
     {
-        SG::AuxElement::ConstAccessor<HitLinks> acc("hitsAssociatedWithJet");
+        SG::ConstAccessor<HitLinks> acc("hitsAssociatedWithJet");
         m_associator = [acc](const xAOD::IParticle& jet) -> TMVV {
           TMVV hits;
           for (const ElementLink<TMC>& link : acc(jet)){

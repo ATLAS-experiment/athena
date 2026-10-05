@@ -51,17 +51,17 @@ StatusCode EGammaGSFCalo::addBranches( const EventContext& ctx ) const {
       dec_gsfCaloTrackLink(m_gsfCaloTrackLinkKey, ctx);
 
   // gsf calo electrons decorations
-  static const SG::AuxElement::Accessor<int> acc_gsfCaloStatus("gsfCaloStatus");
-  static const SG::AuxElement::Accessor<float> acc_gsfChi2oNDF(
+  static const SG::Accessor<int> acc_gsfCaloStatus("gsfCaloStatus");
+  static const SG::Accessor<float> acc_gsfChi2oNDF(
       "gsfChiSquareOverNDOF");
-  static const SG::AuxElement::Accessor<float> acc_gsfCaloChi2oNDF(
+  static const SG::Accessor<float> acc_gsfCaloChi2oNDF(
       "gsfCaloChiSquareOverNDOF");
-  static const SG::AuxElement::Accessor<ElementLink<xAOD::ElectronContainer>>
+  static const SG::Accessor<ElementLink<xAOD::ElectronContainer>>
       acc_usedElectronLink("usedElectronLink");
-  static const SG::AuxElement::ConstAccessor<
+  static const SG::ConstAccessor<
       ElementLink<xAOD::TrackParticleContainer>>
       read_originalTP("originalTrackParticle");
-  static const SG::AuxElement::Accessor<
+  static const SG::Accessor<
       ElementLink<xAOD::TrackParticleContainer>>
       write_originalTP("originalTrackParticle");
 
@@ -202,7 +202,7 @@ void EGammaGSFCalo::copyInfo(const xAOD::TrackParticle& original,
                              bool isRefitted) const {
   // Add Truth decorations. Copy from the original.
   if (m_doTruth) {
-    static const SG::AuxElement::Accessor<
+    static const SG::Accessor<
         ElementLink<xAOD::TruthParticleContainer>>
         tPL("truthParticleLink");
     if (tPL.isAvailable(original)) {
@@ -210,17 +210,17 @@ void EGammaGSFCalo::copyInfo(const xAOD::TrackParticle& original,
           tPL(original);
       tPL(created) = linkToTruth;
     }
-    static const SG::AuxElement::Accessor<float> tMP("truthMatchProbability");
+    static const SG::Accessor<float> tMP("truthMatchProbability");
     if (tMP.isAvailable(original)) {
       float originalProbability = tMP(original);
       tMP(created) = originalProbability;
     }
-    static const SG::AuxElement::Accessor<int> tT("truthType");
+    static const SG::Accessor<int> tT("truthType");
     if (tT.isAvailable(original)) {
       int truthType = tT(original);
       tT(created) = truthType;
     }
-    static const SG::AuxElement::Accessor<int> tO("truthOrigin");
+    static const SG::Accessor<int> tO("truthOrigin");
     if (tO.isAvailable(original)) {
       int truthOrigin = tO(original);
       tO(created) = truthOrigin;

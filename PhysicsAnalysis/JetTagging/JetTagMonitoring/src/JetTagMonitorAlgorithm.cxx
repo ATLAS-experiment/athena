@@ -671,7 +671,7 @@ bool JetTagMonitorAlgorithm::passJVTCut(const xAOD::Jet *jet) const {
 
   ATH_MSG_DEBUG("passJVTCut()");
   
-  static const SG::AuxElement::Accessor<float> JVT( "Jvt" );
+  static const SG::Accessor<float> JVT( "Jvt" );
   float jvt = JVT(*jet);
 
   if( (jet->pt()/Gaudi::Units::GeV < m_JVTpTCut) && (std::abs(jet->eta())<m_JVTetaCut) && (jvt < m_JVTCut) )
@@ -1135,7 +1135,7 @@ void JetTagMonitorAlgorithm::fillExtraTaggerHistos(const xAOD::Jet *jet) const {
 
 JetTagMonitorAlgorithm::Jet_t JetTagMonitorAlgorithm::getQualityLabel(const xAOD::Jet *jet, float PV_Z) const {
 
-    static const SG::AuxElement::ConstAccessor< std::vector< ElementLink<xAOD::IParticleContainer > > > 
+    static const SG::ConstAccessor< std::vector< ElementLink<xAOD::IParticleContainer > > > 
       acc_TracksForBTagging("TracksForBTagging");
     if (!acc_TracksForBTagging.isAvailable(*jet)) {
       ATH_MSG_DEBUG("TracksForBTagging not available, skipping quality label");

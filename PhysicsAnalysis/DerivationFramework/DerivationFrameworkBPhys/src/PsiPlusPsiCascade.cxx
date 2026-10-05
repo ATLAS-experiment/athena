@@ -105,35 +105,35 @@ namespace DerivationFramework {
     helper.SetMinNTracksInPV(m_PV_minNTracks);
 
     // Decorators for the main vertex: chi2, ndf, pt and pt error, plus the V0 vertex variables
-    SG::AuxElement::Decorator<VertexLinkVector> CascadeLinksDecor("CascadeVertexLinks");
-    SG::AuxElement::Decorator<VertexLinkVector> Psi1LinksDecor("Psi1VertexLinks");
-    SG::AuxElement::Decorator<VertexLinkVector> Psi2LinksDecor("Psi2VertexLinks");
-    SG::AuxElement::Decorator<float> chi2_decor("ChiSquared");
-    SG::AuxElement::Decorator<int> ndof_decor("nDoF");
-    SG::AuxElement::Decorator<float> chi2_nc_decor("ChiSquared_nc");
-    SG::AuxElement::Decorator<int> ndof_nc_decor("nDoF_nc");
-    SG::AuxElement::Decorator<float> Pt_decor("Pt");
-    SG::AuxElement::Decorator<float> PtErr_decor("PtErr");
-    SG::AuxElement::Decorator<float> chi2_SV1_decor("ChiSquared_SV1");
-    SG::AuxElement::Decorator<float> chi2_nc_SV1_decor("ChiSquared_nc_SV1");
-    SG::AuxElement::Decorator<float> chi2_V1_decor("ChiSquared_V1");
-    SG::AuxElement::Decorator<int> ndof_V1_decor("nDoF_V1");
-    SG::AuxElement::Decorator<float> lxy_SV1_decor("lxy_SV1");
-    SG::AuxElement::Decorator<float> lxyErr_SV1_decor("lxyErr_SV1");
-    SG::AuxElement::Decorator<float> a0xy_SV1_decor("a0xy_SV1");
-    SG::AuxElement::Decorator<float> a0xyErr_SV1_decor("a0xyErr_SV1");
-    SG::AuxElement::Decorator<float> a0z_SV1_decor("a0z_SV1");
-    SG::AuxElement::Decorator<float> a0zErr_SV1_decor("a0zErr_SV1");
-    SG::AuxElement::Decorator<float> chi2_SV2_decor("ChiSquared_SV2");
-    SG::AuxElement::Decorator<float> chi2_nc_SV2_decor("ChiSquared_nc_SV2");
-    SG::AuxElement::Decorator<float> chi2_V2_decor("ChiSquared_V2");
-    SG::AuxElement::Decorator<int> ndof_V2_decor("nDoF_V2");
-    SG::AuxElement::Decorator<float> lxy_SV2_decor("lxy_SV2");
-    SG::AuxElement::Decorator<float> lxyErr_SV2_decor("lxyErr_SV2");
-    SG::AuxElement::Decorator<float> a0xy_SV2_decor("a0xy_SV2");
-    SG::AuxElement::Decorator<float> a0xyErr_SV2_decor("a0xyErr_SV2");
-    SG::AuxElement::Decorator<float> a0z_SV2_decor("a0z_SV2");
-    SG::AuxElement::Decorator<float> a0zErr_SV2_decor("a0zErr_SV2");
+    SG::Decorator<VertexLinkVector> CascadeLinksDecor("CascadeVertexLinks");
+    SG::Decorator<VertexLinkVector> Psi1LinksDecor("Psi1VertexLinks");
+    SG::Decorator<VertexLinkVector> Psi2LinksDecor("Psi2VertexLinks");
+    SG::Decorator<float> chi2_decor("ChiSquared");
+    SG::Decorator<int> ndof_decor("nDoF");
+    SG::Decorator<float> chi2_nc_decor("ChiSquared_nc");
+    SG::Decorator<int> ndof_nc_decor("nDoF_nc");
+    SG::Decorator<float> Pt_decor("Pt");
+    SG::Decorator<float> PtErr_decor("PtErr");
+    SG::Decorator<float> chi2_SV1_decor("ChiSquared_SV1");
+    SG::Decorator<float> chi2_nc_SV1_decor("ChiSquared_nc_SV1");
+    SG::Decorator<float> chi2_V1_decor("ChiSquared_V1");
+    SG::Decorator<int> ndof_V1_decor("nDoF_V1");
+    SG::Decorator<float> lxy_SV1_decor("lxy_SV1");
+    SG::Decorator<float> lxyErr_SV1_decor("lxyErr_SV1");
+    SG::Decorator<float> a0xy_SV1_decor("a0xy_SV1");
+    SG::Decorator<float> a0xyErr_SV1_decor("a0xyErr_SV1");
+    SG::Decorator<float> a0z_SV1_decor("a0z_SV1");
+    SG::Decorator<float> a0zErr_SV1_decor("a0zErr_SV1");
+    SG::Decorator<float> chi2_SV2_decor("ChiSquared_SV2");
+    SG::Decorator<float> chi2_nc_SV2_decor("ChiSquared_nc_SV2");
+    SG::Decorator<float> chi2_V2_decor("ChiSquared_V2");
+    SG::Decorator<int> ndof_V2_decor("nDoF_V2");
+    SG::Decorator<float> lxy_SV2_decor("lxy_SV2");
+    SG::Decorator<float> lxyErr_SV2_decor("lxyErr_SV2");
+    SG::Decorator<float> a0xy_SV2_decor("a0xy_SV2");
+    SG::Decorator<float> a0xyErr_SV2_decor("a0xyErr_SV2");
+    SG::Decorator<float> a0z_SV2_decor("a0z_SV2");
+    SG::Decorator<float> a0zErr_SV2_decor("a0zErr_SV2");
 
     // Get the container and identify the input Psi's
     SG::ReadHandle<xAOD::VertexContainer> psi1Container(m_vertexPsi1ContainerKey, ctx);
@@ -411,7 +411,7 @@ namespace DerivationFramework {
       const xAOD::Vertex* vtx = *vxcItr;
       bool passed = false;
       for(size_t i=0; i<m_vertexPsi2HypoNames.size(); i++) {
-	SG::AuxElement::Accessor<Char_t> flagAcc("passed_"+m_vertexPsi2HypoNames[i]);
+	SG::Accessor<Char_t> flagAcc("passed_"+m_vertexPsi2HypoNames[i]);
 	if(flagAcc.isAvailable(*vtx) && flagAcc(*vtx)) {
 	  passed |= 1;
 	}
@@ -459,7 +459,7 @@ namespace DerivationFramework {
       const xAOD::Vertex* vtx = *vxcItr;
       bool passed = false;
       for(size_t i=0; i<m_vertexPsi1HypoNames.size(); i++) {
-	SG::AuxElement::Accessor<Char_t> flagAcc("passed_"+m_vertexPsi1HypoNames[i]);
+	SG::Accessor<Char_t> flagAcc("passed_"+m_vertexPsi1HypoNames[i]);
 	if(flagAcc.isAvailable(*vtx) && flagAcc(*vtx)) {
 	  passed |= 1;
 	}

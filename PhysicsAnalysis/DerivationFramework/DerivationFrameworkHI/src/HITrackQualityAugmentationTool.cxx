@@ -152,7 +152,7 @@ StatusCode HITrackQualityAugmentationTool::addBranches(const EventContext& ctx) 
 
 unsigned short HITrackQualityAugmentationTool::GetTrackQualityNew(const xAOD::TrackParticle* track,const xAOD::Vertex* pv) const {
   
-  static const SG::AuxElement::ConstAccessor<unsigned char> acc_n_sct_hits("numberOfSCTHits");
+  static const SG::ConstAccessor<unsigned char> acc_n_sct_hits("numberOfSCTHits");
   int n_sct_hits = acc_n_sct_hits(*track);
     
   
@@ -224,15 +224,15 @@ unsigned short HITrackQualityAugmentationTool::GetTrackQuality(const xAOD::Track
           //float phi     = track->phi();
           
     
-          static const SG::AuxElement::ConstAccessor<unsigned char> acc_n_Ipix_hits("numberOfInnermostPixelLayerHits");
-          static const SG::AuxElement::ConstAccessor<unsigned char> acc_n_Ipix_expected("expectInnermostPixelLayerHit");
-          static const SG::AuxElement::ConstAccessor<unsigned char> acc_n_NIpix_hits("numberOfNextToInnermostPixelLayerHits");
-          static const SG::AuxElement::ConstAccessor<unsigned char> acc_n_NIpix_expected("expectNextToInnermostPixelLayerHit");
-          static const SG::AuxElement::ConstAccessor<unsigned char> acc_n_sct_hits("numberOfSCTHits");
-          static const SG::AuxElement::ConstAccessor<unsigned char> acc_n_pix_hits("numberOfPixelHits");
-          static const SG::AuxElement::ConstAccessor<unsigned char> acc_n_sct_holes("numberOfSCTHoles");
-          static const SG::AuxElement::ConstAccessor<unsigned char> acc_n_sct_dead("numberOfSCTDeadSensors");
-          static const SG::AuxElement::ConstAccessor<unsigned char> acc_n_pix_dead("numberOfPixelDeadSensors");
+          static const SG::ConstAccessor<unsigned char> acc_n_Ipix_hits("numberOfInnermostPixelLayerHits");
+          static const SG::ConstAccessor<unsigned char> acc_n_Ipix_expected("expectInnermostPixelLayerHit");
+          static const SG::ConstAccessor<unsigned char> acc_n_NIpix_hits("numberOfNextToInnermostPixelLayerHits");
+          static const SG::ConstAccessor<unsigned char> acc_n_NIpix_expected("expectNextToInnermostPixelLayerHit");
+          static const SG::ConstAccessor<unsigned char> acc_n_sct_hits("numberOfSCTHits");
+          static const SG::ConstAccessor<unsigned char> acc_n_pix_hits("numberOfPixelHits");
+          static const SG::ConstAccessor<unsigned char> acc_n_sct_holes("numberOfSCTHoles");
+          static const SG::ConstAccessor<unsigned char> acc_n_sct_dead("numberOfSCTDeadSensors");
+          static const SG::ConstAccessor<unsigned char> acc_n_pix_dead("numberOfPixelDeadSensors");
 
           int n_Ipix_hits = acc_n_Ipix_hits(*track);
           int n_Ipix_expected = acc_n_Ipix_expected(*track);
