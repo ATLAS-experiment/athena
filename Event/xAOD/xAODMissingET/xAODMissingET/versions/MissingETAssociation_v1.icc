@@ -88,15 +88,15 @@ bool xAOD::MissingETAssociation_v1::f_setLink(LINK& elemLink)
 
 // --------------------------------------------------------- reference jet link
 inline const MissingETBase::Types::jetlink_t& xAOD::MissingETAssociation_v1::jetLink() const 
-{ static const SG::AuxElement::Accessor<MissingETBase::Types::jetlink_t> acc("jetLink"); return acc(*this); }
+{ static const SG::Accessor<MissingETBase::Types::jetlink_t> acc("jetLink"); return acc(*this); }
 inline MissingETBase::Types::jetlink_t& xAOD::MissingETAssociation_v1::f_jetLink()           
-{ static const SG::AuxElement::Accessor<MissingETBase::Types::jetlink_t> acc("jetLink"); return acc(*this); }
+{ static const SG::Accessor<MissingETBase::Types::jetlink_t> acc("jetLink"); return acc(*this); }
 
 // ---------------------------------------------------------------- object link
 inline const MissingETBase::Types::objlink_vector_t& xAOD::MissingETAssociation_v1::objectLinks() const 
-{ static const SG::AuxElement::Accessor<MissingETBase::Types::objlink_vector_t> acc("objectLinks"); return acc(*this); }
+{ static const SG::Accessor<MissingETBase::Types::objlink_vector_t> acc("objectLinks"); return acc(*this); }
 inline MissingETBase::Types::objlink_vector_t& xAOD::MissingETAssociation_v1::f_objectLinks()
-{ static const SG::AuxElement::Accessor<MissingETBase::Types::objlink_vector_t> acc("objectLinks"); return acc(*this); }
+{ static const SG::Accessor<MissingETBase::Types::objlink_vector_t> acc("objectLinks"); return acc(*this); }
 
 // ---------------------------------------------------------- constituent vectors
 
@@ -170,39 +170,39 @@ inline float& xAOD::MissingETAssociation_v1::f_jettrksumpt()
 
 // --------------------------------------------------------- misc association flag
 inline bool xAOD::MissingETAssociation_v1::isMisc() const 
-{ static const SG::AuxElement::Accessor<char> acc("isMisc"); return acc(*this)!=0; }
+{ static const SG::Accessor<char> acc("isMisc"); return acc(*this)!=0; }
 inline char& xAOD::MissingETAssociation_v1::f_isMisc()           
-{ static const SG::AuxElement::Accessor<char> acc("isMisc"); return acc(*this); }
+{ static const SG::Accessor<char> acc("isMisc"); return acc(*this); }
 
 // -------------------------------------------------------------- overlap indices
 
 inline const std::vector<std::vector<size_t> >& xAOD::MissingETAssociation_v1::overlapIndices() const
-{ static const SG::AuxElement::Accessor<std::vector<std::vector<size_t> > > acc("overlapIndices"); return acc(*this); }
+{ static const SG::Accessor<std::vector<std::vector<size_t> > > acc("overlapIndices"); return acc(*this); }
 inline std::vector<size_t> xAOD::MissingETAssociation_v1::overlapIndices(const IParticle* pPart) const
 { return this->overlapIndices(this->findIndex(pPart)); }
 
 inline std::vector<std::vector<size_t> >& xAOD::MissingETAssociation_v1::f_overlapIndices()
-{static const SG::AuxElement::Accessor<std::vector<std::vector<size_t> > > acc("overlapIndices"); return acc(*this); }
+{static const SG::Accessor<std::vector<std::vector<size_t> > > acc("overlapIndices"); return acc(*this); }
 
 inline const std::vector<MissingETBase::Types::bitmask_t>& xAOD::MissingETAssociation_v1::calkey() const
-{static const SG::AuxElement::Accessor<std::vector<MissingETBase::Types::bitmask_t> > acc("calkey"); return acc(*this); }
+{static const SG::Accessor<std::vector<MissingETBase::Types::bitmask_t> > acc("calkey"); return acc(*this); }
 
 inline std::vector<MissingETBase::Types::bitmask_t>& xAOD::MissingETAssociation_v1::f_calkey()
-{static const SG::AuxElement::Accessor<std::vector<MissingETBase::Types::bitmask_t> > acc("calkey"); return acc(*this); }
+{static const SG::Accessor<std::vector<MissingETBase::Types::bitmask_t> > acc("calkey"); return acc(*this); }
 
 inline const std::vector<MissingETBase::Types::bitmask_t>& xAOD::MissingETAssociation_v1::trkkey() const
-{static const SG::AuxElement::Accessor<std::vector<MissingETBase::Types::bitmask_t> > acc("trkkey"); return acc(*this); }
+{static const SG::Accessor<std::vector<MissingETBase::Types::bitmask_t> > acc("trkkey"); return acc(*this); }
 
 inline std::vector<MissingETBase::Types::bitmask_t>& xAOD::MissingETAssociation_v1::f_trkkey()
-{static const SG::AuxElement::Accessor<std::vector<MissingETBase::Types::bitmask_t> > acc("trkkey"); return acc(*this); }
+{static const SG::Accessor<std::vector<MissingETBase::Types::bitmask_t> > acc("trkkey"); return acc(*this); }
 
 inline const std::vector<std::vector<unsigned char> >& xAOD::MissingETAssociation_v1::overlapTypes() const
-{ static const SG::AuxElement::Accessor<std::vector<std::vector<unsigned char> > > acc("overlapTypes"); return acc(*this); }
+{ static const SG::Accessor<std::vector<std::vector<unsigned char> > > acc("overlapTypes"); return acc(*this); }
 inline std::vector<unsigned char> xAOD::MissingETAssociation_v1::overlapTypes(const IParticle* pPart) const
 { return this->overlapTypes(this->findIndex(pPart)); }
 
 inline std::vector<std::vector<unsigned char> >& xAOD::MissingETAssociation_v1::f_overlapTypes()
-{static const SG::AuxElement::Accessor<std::vector<std::vector<unsigned char> > > acc("overlapTypes"); return acc(*this); }
+{static const SG::Accessor<std::vector<std::vector<unsigned char> > > acc("overlapTypes"); return acc(*this); }
 
 // ------------------------------------------------ Reference jet and container
 inline const xAOD::Jet* xAOD::MissingETAssociation_v1::refJet() const

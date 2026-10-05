@@ -125,7 +125,7 @@ StatusCode ClusterDumper::execute(const EventContext& ctx) {
         precision = std::stoi (momName.substr (dpos+1));
         momName.erase (dpos, std::string::npos);
       }
-      SG::AuxElement::Accessor<float> a(momName);
+      SG::Accessor<float> a(momName);
       if (a.isAvailable(cluster)) {
         float v = a(cluster);
         if (m_reducedPrecision && precision > 0) {
@@ -137,7 +137,7 @@ StatusCode ClusterDumper::execute(const EventContext& ctx) {
       }
     }
 
-    SG::AuxElement::Accessor<xAOD::CaloClusterBadChannelList> a(badChannelListStr);
+    SG::Accessor<xAOD::CaloClusterBadChannelList> a(badChannelListStr);
     if (a.isAvailable(cluster)) {
       (*m_out) << "Bad Channel data: \n";
       for (const auto& bc : cluster.badChannelList()) {

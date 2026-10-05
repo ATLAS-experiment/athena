@@ -166,15 +166,15 @@ namespace xAOD {
    ///
    /// Object for accessing the superPointR variable
    ///
-   static const SG::AuxElement::Accessor< std::vector< float > >  sprAcc( "superPointR" );
+   static const SG::Accessor< std::vector< float > >  sprAcc( "superPointR" );
    /// Object for accessing the superPointZ variable
-   static const SG::AuxElement::Accessor< std::vector< float > >  spzAcc( "superPointZ" );
+   static const SG::Accessor< std::vector< float > >  spzAcc( "superPointZ" );
    /// Object for accessing the superPointSlope variable
-   static const SG::AuxElement::Accessor< std::vector< float > >  spsAcc( "superPointSlope" );
+   static const SG::Accessor< std::vector< float > >  spsAcc( "superPointSlope" );
    /// Object for accessing the superPointIntercept variable
-   static const SG::AuxElement::Accessor< std::vector< float > >  spiAcc( "superPointIntercept" );
+   static const SG::Accessor< std::vector< float > >  spiAcc( "superPointIntercept" );
    /// Object for accessing the superPointChi2 variable
-   static const SG::AuxElement::Accessor< std::vector< float > >  spcAcc( "superPointChi2" );
+   static const SG::Accessor< std::vector< float > >  spcAcc( "superPointChi2" );
 
    /// Get superPoint properties
    float L2StandAloneMuon_v2::superPointR( int chamber ) const {
@@ -256,10 +256,10 @@ namespace xAOD {
    /////////////////////////////////////////////////////////////////////////////
    ///
    /// Object for accessing track position variables
-   static const SG::AuxElement::Accessor< std::vector< float > >    trkrAcc( "trackPositionR" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    trkzAcc( "trackPositionZ" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    trketaAcc( "trackPositionEta" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    trkphiAcc( "trackPositionPhi" );
+   static const SG::Accessor< std::vector< float > >    trkrAcc( "trackPositionR" );
+   static const SG::Accessor< std::vector< float > >    trkzAcc( "trackPositionZ" );
+   static const SG::Accessor< std::vector< float > >    trketaAcc( "trackPositionEta" );
+   static const SG::Accessor< std::vector< float > >    trkphiAcc( "trackPositionPhi" );
 
    /// Get and set track positions
    uint32_t L2StandAloneMuon_v2::nTrackPositions() const {
@@ -371,53 +371,53 @@ namespace xAOD {
    /// Object for accessing the road information
    ///
    /// chamber types
-   static const SG::AuxElement::Accessor< std::vector< int > >
+   static const SG::Accessor< std::vector< int > >
       ct1nAcc( "chamberType1Normal" );
-   static const SG::AuxElement::Accessor< std::vector< int > >
+   static const SG::Accessor< std::vector< int > >
       ct1oAcc( "chamberType1Overlap" );
-   static const SG::AuxElement::Accessor< std::vector< int > >
+   static const SG::Accessor< std::vector< int > >
       ct2nAcc( "chamberType2Normal" );
-   static const SG::AuxElement::Accessor< std::vector< int > >
+   static const SG::Accessor< std::vector< int > >
       ct2oAcc( "chamberType2Overlap" );
 
    /// road slope and intercept
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       awnAcc( "roadAwNormal" );
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       awoAcc( "roadAwOverlap" );
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       bwnAcc( "roadBwNormal" );
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       bwoAcc( "roadBwOverlap" );
 
    /// Z range
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       zminnAcc( "zMinNormal" );
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       zminoAcc( "zMinOverlap" );
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       zmaxnAcc( "zMaxNormal" );
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       zmaxoAcc( "zMaxOverlap" );
 
    /// R range
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       rminnAcc( "rMinNormal" );
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       rminoAcc( "rMinOverlap" );
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       rmaxnAcc( "rMaxNormal" );
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       rmaxoAcc( "rMaxOverlap" );
 
    /// Eta range
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       eminnAcc( "etaMinNormal" );
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       eminoAcc( "etaMinOverlap" );
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       emaxnAcc( "etaMaxNormal" );
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       emaxoAcc( "etaMaxOverlap" );
 
    ///
@@ -1092,83 +1092,83 @@ namespace xAOD {
    /////////////////////////////////////////////////////////////////////////////
    ///
    /// Object for accessing RPC hits
-   static const SG::AuxElement::Accessor< std::vector< uint32_t > > rpclAcc( "rpcHitLayer" );
-   static const SG::AuxElement::Accessor< std::vector< uint32_t > > rpcmpAcc( "rpcHitMeasuresPhi" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    rpcxAcc( "rpcHitX" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    rpcyAcc( "rpcHitY" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    rpczAcc( "rpcHitZ" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    rpctAcc( "rpcHitTime" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    rpcdeAcc( "rpcHitDistToEtaReadout" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    rpcdpAcc( "rpcHitDistToPhiReadout" );
-   static const SG::AuxElement::Accessor< std::vector< std::string > > rpcsnAcc( "rpcHitStationName" );
+   static const SG::Accessor< std::vector< uint32_t > > rpclAcc( "rpcHitLayer" );
+   static const SG::Accessor< std::vector< uint32_t > > rpcmpAcc( "rpcHitMeasuresPhi" );
+   static const SG::Accessor< std::vector< float > >    rpcxAcc( "rpcHitX" );
+   static const SG::Accessor< std::vector< float > >    rpcyAcc( "rpcHitY" );
+   static const SG::Accessor< std::vector< float > >    rpczAcc( "rpcHitZ" );
+   static const SG::Accessor< std::vector< float > >    rpctAcc( "rpcHitTime" );
+   static const SG::Accessor< std::vector< float > >    rpcdeAcc( "rpcHitDistToEtaReadout" );
+   static const SG::Accessor< std::vector< float > >    rpcdpAcc( "rpcHitDistToPhiReadout" );
+   static const SG::Accessor< std::vector< std::string > > rpcsnAcc( "rpcHitStationName" );
 
    /// Object for accessing TGC hits
-   static const SG::AuxElement::Accessor< std::vector< float > >    tgceAcc( "tgcHitEta" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    tgcpAcc( "tgcHitPhi" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    tgcrAcc( "tgcHitR" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    tgczAcc( "tgcHitZ" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    tgcwAcc( "tgcHitWidth" );
-   static const SG::AuxElement::Accessor< std::vector< int > >      tgcsnAcc( "tgcHitStationNum" );
-   static const SG::AuxElement::Accessor< std::vector< bool > >     tgcisAcc( "tgcHitIsStrip" );
-   static const SG::AuxElement::Accessor< std::vector< int > >      tgcbcAcc( "tgcHitBCTag" );
-   static const SG::AuxElement::Accessor< std::vector< bool > >     tgcirAcc( "tgcHitInRoad" );
+   static const SG::Accessor< std::vector< float > >    tgceAcc( "tgcHitEta" );
+   static const SG::Accessor< std::vector< float > >    tgcpAcc( "tgcHitPhi" );
+   static const SG::Accessor< std::vector< float > >    tgcrAcc( "tgcHitR" );
+   static const SG::Accessor< std::vector< float > >    tgczAcc( "tgcHitZ" );
+   static const SG::Accessor< std::vector< float > >    tgcwAcc( "tgcHitWidth" );
+   static const SG::Accessor< std::vector< int > >      tgcsnAcc( "tgcHitStationNum" );
+   static const SG::Accessor< std::vector< bool > >     tgcisAcc( "tgcHitIsStrip" );
+   static const SG::Accessor< std::vector< int > >      tgcbcAcc( "tgcHitBCTag" );
+   static const SG::Accessor< std::vector< bool > >     tgcirAcc( "tgcHitInRoad" );
 
    /// Object for accessing the MDT tube variables
-   static const SG::AuxElement::Accessor< std::vector< uint32_t > > mdtonAcc( "mdtHitOnlineId" );
-   static const SG::AuxElement::Accessor< std::vector< int > >      mdtioAcc( "mdtHitIsOutlier" );
-   static const SG::AuxElement::Accessor< std::vector< int > >      mdtcAcc( "mdtHitChamberId" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    mdtrAcc( "mdtHitR" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    mdtzAcc( "mdtHitZ" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    mdtpAcc( "mdtHitPhi" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    mdtresAcc( "mdtHitResidual" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    mdttAcc( "mdtHitTime" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    mdtspcAcc( "mdtHitSpace" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    mdtsigAcc( "mdtHitSigma" );
+   static const SG::Accessor< std::vector< uint32_t > > mdtonAcc( "mdtHitOnlineId" );
+   static const SG::Accessor< std::vector< int > >      mdtioAcc( "mdtHitIsOutlier" );
+   static const SG::Accessor< std::vector< int > >      mdtcAcc( "mdtHitChamberId" );
+   static const SG::Accessor< std::vector< float > >    mdtrAcc( "mdtHitR" );
+   static const SG::Accessor< std::vector< float > >    mdtzAcc( "mdtHitZ" );
+   static const SG::Accessor< std::vector< float > >    mdtpAcc( "mdtHitPhi" );
+   static const SG::Accessor< std::vector< float > >    mdtresAcc( "mdtHitResidual" );
+   static const SG::Accessor< std::vector< float > >    mdttAcc( "mdtHitTime" );
+   static const SG::Accessor< std::vector< float > >    mdtspcAcc( "mdtHitSpace" );
+   static const SG::Accessor< std::vector< float > >    mdtsigAcc( "mdtHitSigma" );
 
    /// Object for accessing the CSC tube variables
-   static const SG::AuxElement::Accessor< std::vector< int > >      cscioAcc( "cscHitIsOutlier" );
-   static const SG::AuxElement::Accessor< std::vector< int > >      csccAcc( "cscHitChamberId" );
-   static const SG::AuxElement::Accessor< std::vector< uint32_t > > cscsnAcc( "cscHitStationName" );
-   static const SG::AuxElement::Accessor< std::vector< int > >      cscseAcc( "cscHitStationEta" );
-   static const SG::AuxElement::Accessor< std::vector< int > >      cscspAcc( "cscHitStationPhi" );
-   static const SG::AuxElement::Accessor< std::vector< int > >      cscclAcc( "cscHitChamberLayer" );
-   static const SG::AuxElement::Accessor< std::vector< int > >      cscwlAcc( "cscHitWireLayer" );
-   static const SG::AuxElement::Accessor< std::vector< int > >      cscmpAcc( "cscHitMeasuresPhi" );
-   static const SG::AuxElement::Accessor< std::vector< int > >      cscsAcc( "cscHitStrip" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    csceAcc( "cscHitEta" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    cscpAcc( "cscHitPhi" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    cscrAcc( "cscHitR" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    csczAcc( "cscHitZ" );
-   static const SG::AuxElement::Accessor< std::vector< int > >      cscchAcc( "cscHitCharge" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    cscresAcc( "cscHitTime" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    csctAcc( "cscHitResidual" );
+   static const SG::Accessor< std::vector< int > >      cscioAcc( "cscHitIsOutlier" );
+   static const SG::Accessor< std::vector< int > >      csccAcc( "cscHitChamberId" );
+   static const SG::Accessor< std::vector< uint32_t > > cscsnAcc( "cscHitStationName" );
+   static const SG::Accessor< std::vector< int > >      cscseAcc( "cscHitStationEta" );
+   static const SG::Accessor< std::vector< int > >      cscspAcc( "cscHitStationPhi" );
+   static const SG::Accessor< std::vector< int > >      cscclAcc( "cscHitChamberLayer" );
+   static const SG::Accessor< std::vector< int > >      cscwlAcc( "cscHitWireLayer" );
+   static const SG::Accessor< std::vector< int > >      cscmpAcc( "cscHitMeasuresPhi" );
+   static const SG::Accessor< std::vector< int > >      cscsAcc( "cscHitStrip" );
+   static const SG::Accessor< std::vector< float > >    csceAcc( "cscHitEta" );
+   static const SG::Accessor< std::vector< float > >    cscpAcc( "cscHitPhi" );
+   static const SG::Accessor< std::vector< float > >    cscrAcc( "cscHitR" );
+   static const SG::Accessor< std::vector< float > >    csczAcc( "cscHitZ" );
+   static const SG::Accessor< std::vector< int > >      cscchAcc( "cscHitCharge" );
+   static const SG::Accessor< std::vector< float > >    cscresAcc( "cscHitTime" );
+   static const SG::Accessor< std::vector< float > >    csctAcc( "cscHitResidual" );
 
    /// Object for accessing sTGC clusters
-   static const SG::AuxElement::Accessor< std::vector< unsigned int > > stgclAcc( "stgcClusterLayer" );
-   static const SG::AuxElement::Accessor< std::vector< int > >          stgcioAcc( "stgcClusterIsOutlier" );
-   static const SG::AuxElement::Accessor< std::vector< int > >          stgctyAcc( "stgcClusterType" );
-   static const SG::AuxElement::Accessor< std::vector< float > >        stgceAcc( "stgcClusterEta" );
-   static const SG::AuxElement::Accessor< std::vector< float > >        stgcpAcc( "stgcClusterPhi" );
-   static const SG::AuxElement::Accessor< std::vector< float > >        stgcrAcc( "stgcClusterR" );
-   static const SG::AuxElement::Accessor< std::vector< float > >        stgczAcc( "stgcClusterZ" );
-   static const SG::AuxElement::Accessor< std::vector< float > >        stgcrsrAcc( "stgcClusterResidualR" );
-   static const SG::AuxElement::Accessor< std::vector< float > >        stgcrspAcc( "stgcClusterResidualPhi" );
-   static const SG::AuxElement::Accessor< std::vector< int > >          stgcseAcc( "stgcClusterStationEta" );
-   static const SG::AuxElement::Accessor< std::vector< int > >          stgcspAcc( "stgcClusterStationPhi" );
-   static const SG::AuxElement::Accessor< std::vector< int > >          stgcsnAcc( "stgcClusterStationName" );
+   static const SG::Accessor< std::vector< unsigned int > > stgclAcc( "stgcClusterLayer" );
+   static const SG::Accessor< std::vector< int > >          stgcioAcc( "stgcClusterIsOutlier" );
+   static const SG::Accessor< std::vector< int > >          stgctyAcc( "stgcClusterType" );
+   static const SG::Accessor< std::vector< float > >        stgceAcc( "stgcClusterEta" );
+   static const SG::Accessor< std::vector< float > >        stgcpAcc( "stgcClusterPhi" );
+   static const SG::Accessor< std::vector< float > >        stgcrAcc( "stgcClusterR" );
+   static const SG::Accessor< std::vector< float > >        stgczAcc( "stgcClusterZ" );
+   static const SG::Accessor< std::vector< float > >        stgcrsrAcc( "stgcClusterResidualR" );
+   static const SG::Accessor< std::vector< float > >        stgcrspAcc( "stgcClusterResidualPhi" );
+   static const SG::Accessor< std::vector< int > >          stgcseAcc( "stgcClusterStationEta" );
+   static const SG::Accessor< std::vector< int > >          stgcspAcc( "stgcClusterStationPhi" );
+   static const SG::Accessor< std::vector< int > >          stgcsnAcc( "stgcClusterStationName" );
 
    /// Object for accessing MM clusters
-   static const SG::AuxElement::Accessor< std::vector< unsigned int > > mmlAcc( "mmClusterLayer" );
-   static const SG::AuxElement::Accessor< std::vector< int > >          mmioAcc( "mmClusterIsOutlier" );
-   static const SG::AuxElement::Accessor< std::vector< float > >        mmeAcc( "mmClusterEta" );
-   static const SG::AuxElement::Accessor< std::vector< float > >        mmpAcc( "mmClusterPhi" );
-   static const SG::AuxElement::Accessor< std::vector< float > >        mmrAcc( "mmClusterR" );
-   static const SG::AuxElement::Accessor< std::vector< float > >        mmzAcc( "mmClusterZ" );
-   static const SG::AuxElement::Accessor< std::vector< float > >        mmrsrAcc( "mmClusterResidualR" );
-   static const SG::AuxElement::Accessor< std::vector< float > >        mmrspAcc( "mmClusterResidualPhi" );
-   static const SG::AuxElement::Accessor< std::vector< int > >          mmseAcc( "mmClusterStationEta" );
-   static const SG::AuxElement::Accessor< std::vector< int > >          mmspAcc( "mmClusterStationPhi" );
-   static const SG::AuxElement::Accessor< std::vector< int > >          mmsnAcc( "mmClusterStationName" );
+   static const SG::Accessor< std::vector< unsigned int > > mmlAcc( "mmClusterLayer" );
+   static const SG::Accessor< std::vector< int > >          mmioAcc( "mmClusterIsOutlier" );
+   static const SG::Accessor< std::vector< float > >        mmeAcc( "mmClusterEta" );
+   static const SG::Accessor< std::vector< float > >        mmpAcc( "mmClusterPhi" );
+   static const SG::Accessor< std::vector< float > >        mmrAcc( "mmClusterR" );
+   static const SG::Accessor< std::vector< float > >        mmzAcc( "mmClusterZ" );
+   static const SG::Accessor< std::vector< float > >        mmrsrAcc( "mmClusterResidualR" );
+   static const SG::Accessor< std::vector< float > >        mmrspAcc( "mmClusterResidualPhi" );
+   static const SG::Accessor< std::vector< int > >          mmseAcc( "mmClusterStationEta" );
+   static const SG::Accessor< std::vector< int > >          mmspAcc( "mmClusterStationPhi" );
+   static const SG::Accessor< std::vector< int > >          mmsnAcc( "mmClusterStationName" );
    ///
    /////////////////////////////////////////////////////////////////////////////
 

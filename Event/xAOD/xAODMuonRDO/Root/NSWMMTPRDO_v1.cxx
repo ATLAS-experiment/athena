@@ -9,21 +9,21 @@ namespace {
 }
 #define IMPLEMENT_VECTOR(DATA_TYPE, VAR_NAME) \
    const std::vector<DATA_TYPE>& NSWMMTPRDO_v1::VAR_NAME() const { \
-       static const SG::AuxElement::Accessor<std::vector<DATA_TYPE>> dec{preFixStr+#VAR_NAME};\
+       static const SG::Accessor<std::vector<DATA_TYPE>> dec{preFixStr+#VAR_NAME};\
        return dec (*this); \
    } \
    std::vector<DATA_TYPE>& NSWMMTPRDO_v1::VAR_NAME()  { \
-       static const SG::AuxElement::Accessor<std::vector<DATA_TYPE>> dec{preFixStr+#VAR_NAME};\
+       static const SG::Accessor<std::vector<DATA_TYPE>> dec{preFixStr+#VAR_NAME};\
        return dec(*this); \
    }
 
 #define IMPLEMENT_SCALAR(DATA_TYPE, VAR_NAME) \
    DATA_TYPE NSWMMTPRDO_v1::VAR_NAME() const { \
-      static const SG::AuxElement::Accessor<DATA_TYPE> dec{preFixStr+#VAR_NAME};\
+      static const SG::Accessor<DATA_TYPE> dec{preFixStr+#VAR_NAME};\
       return dec (*this); \
    } \
    void NSWMMTPRDO_v1::set_##VAR_NAME(const DATA_TYPE val) { \
-      static const SG::AuxElement::Accessor<DATA_TYPE> dec{preFixStr+#VAR_NAME}; \
+      static const SG::Accessor<DATA_TYPE> dec{preFixStr+#VAR_NAME}; \
       dec (*this) = val; \
    }
 namespace xAOD{

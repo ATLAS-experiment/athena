@@ -28,7 +28,7 @@ namespace xAOD {
          using Link_t = ElementLink<xAOD::TruthParticleContainer>;
 
          /// A static accessor for the information
-         static const SG::AuxElement::ConstAccessor< Link_t > acc( "truthParticleLink" );
+         static const SG::ConstAccessor< Link_t > acc( "truthParticleLink" );
 
          // Check if such a link exists on the object:
          if( acc.isAvailable( p ) ) {
@@ -43,7 +43,7 @@ namespace xAOD {
          }
 
          /// Alternative name - this may work in case of TRUTH3 / small truth collections
-         static const SG::AuxElement::ConstAccessor< Link_t > acc_alt( "TruthLink" );
+         static const SG::ConstAccessor< Link_t > acc_alt( "TruthLink" );
 
          // Check if such a link exists on the object:
          if( acc_alt.isAvailable( p ) ) {
@@ -91,7 +91,7 @@ namespace xAOD {
       int getParticleTruthType( const xAOD::IParticle& p ) {
 
          /// A static accessor for the information
-         static const SG::AuxElement::ConstAccessor< int > acc( "truthType" );
+         static const SG::ConstAccessor< int > acc( "truthType" );
 
          // Check if such a variable exists on the object:
          if( ! acc.isAvailable( p ) ) {
@@ -109,7 +109,7 @@ namespace xAOD {
       int getParticleTruthOrigin( const xAOD::IParticle& p ) {
 
          /// A static accessor for the information
-         static const SG::AuxElement::ConstAccessor< int > acc( "truthOrigin" );
+         static const SG::ConstAccessor< int > acc( "truthOrigin" );
 
          // Check if such a variable exists on the object:
          if( ! acc.isAvailable( p ) ) {
@@ -127,8 +127,8 @@ namespace xAOD {
       int getParticleTruthClassification( const xAOD::IParticle& p ) {
 
          /// A static accessor for the information
-         static const SG::AuxElement::ConstAccessor< unsigned int > acc( "truthClassification" );
-         static const SG::AuxElement::ConstAccessor< unsigned int > accLegacy( "Classification" );
+         static const SG::ConstAccessor< unsigned int > acc( "truthClassification" );
+         static const SG::ConstAccessor< unsigned int > accLegacy( "Classification" );
 
          // Check if such a variable exists on the object:
          if( ! acc.isAvailable( p ) ) {

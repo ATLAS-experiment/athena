@@ -68,18 +68,18 @@ persToTrans( const xAOD::RODHeaderAuxContainer_v1* oldObj,
                          oldRH->payloadSize() );
 
       // Helper objects to access the auxiliary IDs of the base variables:
-      static const SG::AuxElement::TypelessConstAccessor accVersion( "version" );
-      static const SG::AuxElement::TypelessConstAccessor accSourceId( "sourceId" );
-      static const SG::AuxElement::TypelessConstAccessor accRun( "run" );
-      static const SG::AuxElement::TypelessConstAccessor accLvl1Id( "lvl1Id" );
-      static const SG::AuxElement::TypelessConstAccessor accBcid( "bcId" );
-      static const SG::AuxElement::TypelessConstAccessor accTrigType( "trigType" );
-      static const SG::AuxElement::TypelessConstAccessor accDetType( "detType" );
-      static const SG::AuxElement::TypelessConstAccessor
+      static const SG::TypelessConstAccessor accVersion( "version" );
+      static const SG::TypelessConstAccessor accSourceId( "sourceId" );
+      static const SG::TypelessConstAccessor accRun( "run" );
+      static const SG::TypelessConstAccessor accLvl1Id( "lvl1Id" );
+      static const SG::TypelessConstAccessor accBcid( "bcId" );
+      static const SG::TypelessConstAccessor accTrigType( "trigType" );
+      static const SG::TypelessConstAccessor accDetType( "detType" );
+      static const SG::TypelessConstAccessor
          accStatusWords( "statusWords" );
-      static const SG::AuxElement::TypelessConstAccessor
+      static const SG::TypelessConstAccessor
          accPayloadSize( "payloadSize" );
-      static const std::array< const SG::AuxElement::TypelessConstAccessor*, 9 >
+      static const std::array< const SG::TypelessConstAccessor*, 9 >
          knownVars{ { &accVersion, &accSourceId, &accRun, &accLvl1Id, &accBcid,
                &accTrigType, &accDetType, &accStatusWords, &accPayloadSize } };
 

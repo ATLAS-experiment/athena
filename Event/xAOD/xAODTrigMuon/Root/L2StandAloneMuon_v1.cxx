@@ -166,15 +166,15 @@ namespace xAOD {
    ///
    /// Object for accessing the superPointR variable
    ///
-   static const SG::AuxElement::Accessor< std::vector< float > >  sprAcc( "superPointR" );
+   static const SG::Accessor< std::vector< float > >  sprAcc( "superPointR" );
    /// Object for accessing the superPointZ variable
-   static const SG::AuxElement::Accessor< std::vector< float > >  spzAcc( "superPointZ" );
+   static const SG::Accessor< std::vector< float > >  spzAcc( "superPointZ" );
    /// Object for accessing the superPointSlope variable
-   static const SG::AuxElement::Accessor< std::vector< float > >  spsAcc( "superPointSlope" );
+   static const SG::Accessor< std::vector< float > >  spsAcc( "superPointSlope" );
    /// Object for accessing the superPointIntercept variable
-   static const SG::AuxElement::Accessor< std::vector< float > >  spiAcc( "superPointIntercept" );
+   static const SG::Accessor< std::vector< float > >  spiAcc( "superPointIntercept" );
    /// Object for accessing the superPointChi2 variable
-   static const SG::AuxElement::Accessor< std::vector< float > >  spcAcc( "superPointChi2" );
+   static const SG::Accessor< std::vector< float > >  spcAcc( "superPointChi2" );
 
    /// Get superPoint properties
    float L2StandAloneMuon_v1::superPointR( int chamber ) const {
@@ -256,10 +256,10 @@ namespace xAOD {
    /////////////////////////////////////////////////////////////////////////////
    ///
    /// Object for accessing track position variables
-   static const SG::AuxElement::Accessor< std::vector< float > >    trkrAcc( "trackPositionR" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    trkzAcc( "trackPositionZ" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    trketaAcc( "trackPositionEta" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    trkphiAcc( "trackPositionPhi" );
+   static const SG::Accessor< std::vector< float > >    trkrAcc( "trackPositionR" );
+   static const SG::Accessor< std::vector< float > >    trkzAcc( "trackPositionZ" );
+   static const SG::Accessor< std::vector< float > >    trketaAcc( "trackPositionEta" );
+   static const SG::Accessor< std::vector< float > >    trkphiAcc( "trackPositionPhi" );
 
    /// Get and set track positions
    uint32_t L2StandAloneMuon_v1::nTrackPositions() const {
@@ -386,53 +386,53 @@ namespace xAOD {
    /// Object for accessing the road information
    ///
    /// chamber types
-   static const SG::AuxElement::Accessor< std::vector< int > >
+   static const SG::Accessor< std::vector< int > >
       ct1nAcc( "chamberType1Normal" );
-   static const SG::AuxElement::Accessor< std::vector< int > >
+   static const SG::Accessor< std::vector< int > >
       ct1oAcc( "chamberType1Overlap" );
-   static const SG::AuxElement::Accessor< std::vector< int > >
+   static const SG::Accessor< std::vector< int > >
       ct2nAcc( "chamberType2Normal" );
-   static const SG::AuxElement::Accessor< std::vector< int > >
+   static const SG::Accessor< std::vector< int > >
       ct2oAcc( "chamberType2Overlap" );
 
    /// road slope and intercept
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       awnAcc( "roadAwNormal" );
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       awoAcc( "roadAwOverlap" );
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       bwnAcc( "roadBwNormal" );
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       bwoAcc( "roadBwOverlap" );
 
    /// Z range
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       zminnAcc( "zMinNormal" );
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       zminoAcc( "zMinOverlap" );
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       zmaxnAcc( "zMaxNormal" );
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       zmaxoAcc( "zMaxOverlap" );
 
    /// R range
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       rminnAcc( "rMinNormal" );
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       rminoAcc( "rMinOverlap" );
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       rmaxnAcc( "rMaxNormal" );
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       rmaxoAcc( "rMaxOverlap" );
 
    /// Eta range
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       eminnAcc( "etaMinNormal" );
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       eminoAcc( "etaMinOverlap" );
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       emaxnAcc( "etaMaxNormal" );
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       emaxoAcc( "etaMaxOverlap" );
 
    ///
@@ -1108,70 +1108,70 @@ namespace xAOD {
    /////////////////////////////////////////////////////////////////////////////
    ///
    /// Object for accessing extenstion variables
-   static const SG::AuxElement::Accessor< std::vector< uint32_t > > ext0Acc( "extension0" );
-   static const SG::AuxElement::Accessor< std::vector< uint32_t > > ext1Acc( "extension1" );
-   static const SG::AuxElement::Accessor< std::vector< uint32_t > > ext2Acc( "extension2" );
-   static const SG::AuxElement::Accessor< std::vector< uint32_t > > ext3Acc( "extension3" );
-   static const SG::AuxElement::Accessor< std::vector< uint32_t > > ext4Acc( "extension4" );
-   static const SG::AuxElement::Accessor< std::vector< uint32_t > > ext5Acc( "extension5" );
-   static const SG::AuxElement::Accessor< std::vector< uint32_t > > ext6Acc( "extension6" );
-   static const SG::AuxElement::Accessor< std::vector< uint32_t > > ext7Acc( "extension7" );
-   static const SG::AuxElement::Accessor< std::vector< uint32_t > > ext8Acc( "extension8" );
-   static const SG::AuxElement::Accessor< std::vector< uint32_t > > ext9Acc( "extension9" );
+   static const SG::Accessor< std::vector< uint32_t > > ext0Acc( "extension0" );
+   static const SG::Accessor< std::vector< uint32_t > > ext1Acc( "extension1" );
+   static const SG::Accessor< std::vector< uint32_t > > ext2Acc( "extension2" );
+   static const SG::Accessor< std::vector< uint32_t > > ext3Acc( "extension3" );
+   static const SG::Accessor< std::vector< uint32_t > > ext4Acc( "extension4" );
+   static const SG::Accessor< std::vector< uint32_t > > ext5Acc( "extension5" );
+   static const SG::Accessor< std::vector< uint32_t > > ext6Acc( "extension6" );
+   static const SG::Accessor< std::vector< uint32_t > > ext7Acc( "extension7" );
+   static const SG::Accessor< std::vector< uint32_t > > ext8Acc( "extension8" );
+   static const SG::Accessor< std::vector< uint32_t > > ext9Acc( "extension9" );
 
    /// Object for level 1 emulation info
-   static const SG::AuxElement::Accessor< std::vector< uint32_t > > lvl1eAcc( "lvl1Emulation" );
+   static const SG::Accessor< std::vector< uint32_t > > lvl1eAcc( "lvl1Emulation" );
 
    /// Object for ROB info
-   static const SG::AuxElement::Accessor< std::vector< uint32_t > > robidAcc( "robId" );
-   static const SG::AuxElement::Accessor< std::vector< uint32_t > > robrmAcc( "removedRobId" );
+   static const SG::Accessor< std::vector< uint32_t > > robidAcc( "robId" );
+   static const SG::Accessor< std::vector< uint32_t > > robrmAcc( "removedRobId" );
 
    /// Object for CSM info
-   static const SG::AuxElement::Accessor< std::vector< uint32_t > > csmidAcc( "csmId" );
-   static const SG::AuxElement::Accessor< std::vector< uint32_t > > csmszAcc( "csmSize" );
-   static const SG::AuxElement::Accessor< std::vector< uint32_t > > csmerAcc( "csmError" );
-   static const SG::AuxElement::Accessor< std::vector< uint32_t > > csmrmAcc( "removedCsmId" );
+   static const SG::Accessor< std::vector< uint32_t > > csmidAcc( "csmId" );
+   static const SG::Accessor< std::vector< uint32_t > > csmszAcc( "csmSize" );
+   static const SG::Accessor< std::vector< uint32_t > > csmerAcc( "csmError" );
+   static const SG::Accessor< std::vector< uint32_t > > csmrmAcc( "removedCsmId" );
 
    /// Object for accessing RPC pad hits
-   static const SG::AuxElement::Accessor< std::vector< uint32_t > > padiAcc( "padHitOnlineId" );
-   static const SG::AuxElement::Accessor< std::vector< uint32_t > > padcAcc( "padHitCode" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    padxAcc( "padHitX" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    padyAcc( "padHitY" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    padzAcc( "padHitZ" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    padrAcc( "padHitR" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    padpAcc( "padHitP" );
+   static const SG::Accessor< std::vector< uint32_t > > padiAcc( "padHitOnlineId" );
+   static const SG::Accessor< std::vector< uint32_t > > padcAcc( "padHitCode" );
+   static const SG::Accessor< std::vector< float > >    padxAcc( "padHitX" );
+   static const SG::Accessor< std::vector< float > >    padyAcc( "padHitY" );
+   static const SG::Accessor< std::vector< float > >    padzAcc( "padHitZ" );
+   static const SG::Accessor< std::vector< float > >    padrAcc( "padHitR" );
+   static const SG::Accessor< std::vector< float > >    padpAcc( "padHitP" );
 
    /// Object for accessing TGC hits
-   static const SG::AuxElement::Accessor< std::vector< float > >    tirpAcc( "tgcInnRhoHitPhi" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    tirrAcc( "tgcInnRhoHitR" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    tirzAcc( "tgcInnRhoHitZ" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    tirwAcc( "tgcInnRhoHitWidth" );
-   static const SG::AuxElement::Accessor< std::vector< uint32_t > > tiriAcc( "tgcInnRhoHitInSeg" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    tippAcc( "tgcInnPhiHitPhi" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    tiprAcc( "tgcInnPhiHitR" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    tipzAcc( "tgcInnPhiHitZ" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    tipwAcc( "tgcInnPhiHitWidth" );
-   static const SG::AuxElement::Accessor< std::vector< uint32_t > > tipiAcc( "tgcInnPhiHitInSeg" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    tmrpAcc( "tgcMidRhoHitPhi" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    tmrrAcc( "tgcMidRhoHitR" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    tmrzAcc( "tgcMidRhoHitZ" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    tmrwAcc( "tgcMidRhoHitWidth" );
-   static const SG::AuxElement::Accessor< std::vector< uint32_t > > tmriAcc( "tgcMidRhoHitInSeg" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    tmppAcc( "tgcMidPhiHitPhi" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    tmprAcc( "tgcMidPhiHitR" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    tmpzAcc( "tgcMidPhiHitZ" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    tmpwAcc( "tgcMidPhiHitWidth" );
-   static const SG::AuxElement::Accessor< std::vector< uint32_t > > tmpiAcc( "tgcMidPhiHitInSeg" );
+   static const SG::Accessor< std::vector< float > >    tirpAcc( "tgcInnRhoHitPhi" );
+   static const SG::Accessor< std::vector< float > >    tirrAcc( "tgcInnRhoHitR" );
+   static const SG::Accessor< std::vector< float > >    tirzAcc( "tgcInnRhoHitZ" );
+   static const SG::Accessor< std::vector< float > >    tirwAcc( "tgcInnRhoHitWidth" );
+   static const SG::Accessor< std::vector< uint32_t > > tiriAcc( "tgcInnRhoHitInSeg" );
+   static const SG::Accessor< std::vector< float > >    tippAcc( "tgcInnPhiHitPhi" );
+   static const SG::Accessor< std::vector< float > >    tiprAcc( "tgcInnPhiHitR" );
+   static const SG::Accessor< std::vector< float > >    tipzAcc( "tgcInnPhiHitZ" );
+   static const SG::Accessor< std::vector< float > >    tipwAcc( "tgcInnPhiHitWidth" );
+   static const SG::Accessor< std::vector< uint32_t > > tipiAcc( "tgcInnPhiHitInSeg" );
+   static const SG::Accessor< std::vector< float > >    tmrpAcc( "tgcMidRhoHitPhi" );
+   static const SG::Accessor< std::vector< float > >    tmrrAcc( "tgcMidRhoHitR" );
+   static const SG::Accessor< std::vector< float > >    tmrzAcc( "tgcMidRhoHitZ" );
+   static const SG::Accessor< std::vector< float > >    tmrwAcc( "tgcMidRhoHitWidth" );
+   static const SG::Accessor< std::vector< uint32_t > > tmriAcc( "tgcMidRhoHitInSeg" );
+   static const SG::Accessor< std::vector< float > >    tmppAcc( "tgcMidPhiHitPhi" );
+   static const SG::Accessor< std::vector< float > >    tmprAcc( "tgcMidPhiHitR" );
+   static const SG::Accessor< std::vector< float > >    tmpzAcc( "tgcMidPhiHitZ" );
+   static const SG::Accessor< std::vector< float > >    tmpwAcc( "tgcMidPhiHitWidth" );
+   static const SG::Accessor< std::vector< uint32_t > > tmpiAcc( "tgcMidPhiHitInSeg" );
 
    /// Object for accessing the MDT tube variables
-   static const SG::AuxElement::Accessor< std::vector< uint32_t > > mdtonAcc( "mdtHitOnlineId" );
-   static const SG::AuxElement::Accessor< std::vector< uint32_t > > mdtoffAcc( "mdtHitOfflineId" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    mdtrAcc( "mdtHitR" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    mdtzAcc( "mdtHitZ" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    mdtresAcc( "mdtHitResidual" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    mdttAcc( "mdtHitTime" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    mdtspcAcc( "mdtHitSpace" );
-   static const SG::AuxElement::Accessor< std::vector< float > >    mdtsigAcc( "mdtHitSigma" );
+   static const SG::Accessor< std::vector< uint32_t > > mdtonAcc( "mdtHitOnlineId" );
+   static const SG::Accessor< std::vector< uint32_t > > mdtoffAcc( "mdtHitOfflineId" );
+   static const SG::Accessor< std::vector< float > >    mdtrAcc( "mdtHitR" );
+   static const SG::Accessor< std::vector< float > >    mdtzAcc( "mdtHitZ" );
+   static const SG::Accessor< std::vector< float > >    mdtresAcc( "mdtHitResidual" );
+   static const SG::Accessor< std::vector< float > >    mdttAcc( "mdtHitTime" );
+   static const SG::Accessor< std::vector< float > >    mdtspcAcc( "mdtHitSpace" );
+   static const SG::Accessor< std::vector< float > >    mdtsigAcc( "mdtHitSigma" );
    ///
    /////////////////////////////////////////////////////////////////////////////
 
@@ -1709,7 +1709,7 @@ namespace xAOD {
    }
 
    uint32_t L2StandAloneMuon_v1::mdtHitChamber( unsigned int tube ) const {
-     static const SG::AuxElement::Accessor< std::vector< uint32_t > > mdtcAcc( "mdtHitChamber" );
+     static const SG::Accessor< std::vector< uint32_t > > mdtcAcc( "mdtHitChamber" );
      if( mdtcAcc( *this ).size() > tube ) {
        return mdtcAcc( *this ).at( tube );
      } else {
@@ -1772,7 +1772,7 @@ namespace xAOD {
      if ( mdtonAcc( *this ).size() >= (unsigned int)mdtHitsCapacity() ) return;
 
       // Set the variables:
-      static const SG::AuxElement::Accessor< std::vector< uint32_t > > mdtcAcc( "mdtHitChamber" );
+      static const SG::Accessor< std::vector< uint32_t > > mdtcAcc( "mdtHitChamber" );
       mdtonAcc( *this ).push_back( onlineId );
       mdtoffAcc( *this ).push_back( offlineId );
       mdtcAcc( *this ).push_back( chamber );

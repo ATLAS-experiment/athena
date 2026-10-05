@@ -48,7 +48,7 @@ namespace xAOD {
 
   size_t xAOD::Electron_v1::nTrackParticles() const {
 
-     static const SG::AuxElement::Accessor< Electron_v1::TPELVec_t >
+     static const SG::Accessor< Electron_v1::TPELVec_t >
         trackAcc( "trackParticleLinks" );
 
      if( trackAcc.isAvailable( *this ) ) {

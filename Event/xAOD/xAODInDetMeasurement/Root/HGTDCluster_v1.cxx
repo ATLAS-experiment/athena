@@ -8,7 +8,7 @@
 #include "xAODInDetMeasurement/versions/HGTDCluster_v1.h"
 
 // rdoList
-const SG::AuxElement::Accessor<SG::JaggedVecElt<Identifier::value_type> >
+const SG::Accessor<SG::JaggedVecElt<Identifier::value_type> >
     xAOD::HGTDCluster_v1::s_rdoListAcc("rdoList");
 
 
@@ -24,7 +24,7 @@ void xAOD::HGTDCluster_v1::setRDOlist(const std::vector<Identifier>& rdoList) {
 }
 
 // totList
-const SG::AuxElement::Accessor<SG::JaggedVecElt<int> >
+const SG::Accessor<SG::JaggedVecElt<int> >
     xAOD::HGTDCluster_v1::s_totListAcc("totList");
 
 void xAOD::HGTDCluster_v1::setToTlist(const std::vector<int>& tots) {

@@ -14,7 +14,7 @@ namespace xAOD {
 
   template<class T>
   bool Jet_v1::getAttribute(const std::string &name, T& value) const{
-    // build an accessor. AccessorWrapper is nothing more than a standard SG::AuxElement::Accessor for simpe types
+    // build an accessor. AccessorWrapper is nothing more than a standard SG::Accessor for simpe types
     const JetAttributeAccessor::AccessorWrapper<T> a(name);
     if(! a.isAvailable( *this) ) { return  false;}
     a.getAttribute(*this,value);
@@ -23,7 +23,7 @@ namespace xAOD {
 
   template<class T>
   T Jet_v1::getAttribute(const std::string &name) const {
-    // build an accessor. AccessorWrapper is nothing more than a standard SG::AuxElement::Accessor for simpe types
+    // build an accessor. AccessorWrapper is nothing more than a standard SG::Accessor for simpe types
     const JetAttributeAccessor::AccessorWrapper<T> a(name);
     return a.getAttribute(*this);
   }
@@ -58,7 +58,7 @@ namespace xAOD {
   // implement setters
   template<class T>
   void Jet_v1::setAttribute(const std::string &name, const T& v){
-    // build an accessor. AccessorWrapper is nothing more than a standard SG::AuxElement::Accessor for simpe types
+    // build an accessor. AccessorWrapper is nothing more than a standard SG::Accessor for simpe types
     JetAttributeAccessor::AccessorWrapper<T> a(name);
     a.setAttribute(*this,v);
   }

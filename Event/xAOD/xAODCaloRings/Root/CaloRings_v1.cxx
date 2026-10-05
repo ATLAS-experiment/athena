@@ -16,9 +16,9 @@
 
 namespace xAOD {
 
-static const SG::AuxElement::Accessor< RingSetLinks >
+static const SG::Accessor< RingSetLinks >
   accRingSetLinks( "ringSetLinks" );
-static const SG::AuxElement::ConstAccessor< RingSetLinks >
+static const SG::ConstAccessor< RingSetLinks >
   constAccRingSetLinks( "ringSetLinks" );
 
 /// @name RingSet Collection direct interation methods:

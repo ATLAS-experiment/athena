@@ -73,26 +73,26 @@ namespace xAOD {
                                       covariance, setCovariance )
 
    float Vertex_v1::time() const {
-      static const SG::AuxElement::Accessor< uint8_t > acc("hasValidTime");
+      static const SG::Accessor< uint8_t > acc("hasValidTime");
       if( !acc.isAvailable( *this) || !static_cast<bool>(hasValidTime()) ) throw std::runtime_error( "Unavailable Vertex time requested" );
-      static const SG::AuxElement::Accessor< float > accTime("time");
+      static const SG::Accessor< float > accTime("time");
       return accTime( *this );
    }
 
    float Vertex_v1::timeResolution() const {
-     static const SG::AuxElement::Accessor< uint8_t > acc("hasValidTime");
+     static const SG::Accessor< uint8_t > acc("hasValidTime");
      if( !acc.isAvailable( *this) || !static_cast<bool>(hasValidTime()) ) throw std::runtime_error( "Unavailable Vertex timeResolution requested" );
-     static const SG::AuxElement::Accessor< float > accTimeRes("timeResolution");
+     static const SG::Accessor< float > accTimeRes("timeResolution");
      return accTimeRes( *this );
    }
 
    void Vertex_v1::setTime(float time) {
-     static const SG::AuxElement::Accessor< float > acc("time");
+     static const SG::Accessor< float > acc("time");
      acc( *this ) = time;
    }
 
    void Vertex_v1::setTimeResolution(float timeRes) {
-     static const SG::AuxElement::Accessor< float > acc("timeResolution");
+     static const SG::Accessor< float > acc("timeResolution");
      acc( *this ) = timeRes;
    }
 
@@ -189,7 +189,7 @@ namespace xAOD {
 
 #ifndef XAOD_ANALYSIS
    /// Helper object for implementing the vxTrackAtVertex functions
-   static const SG::AuxElement::Accessor< std::vector< Trk::VxTrackAtVertex > >
+   static const SG::Accessor< std::vector< Trk::VxTrackAtVertex > >
    vxVertAcc( "vxTrackAtVertex" );
 
    /// This function can be used to attach an Athena-only, reconstruction
@@ -240,17 +240,17 @@ namespace xAOD {
    //
 
    /// Accessor for the track links
-   static const SG::AuxElement::Accessor< Vertex_v1::TrackParticleLinks_t >
+   static const SG::Accessor< Vertex_v1::TrackParticleLinks_t >
       trackAcc( "trackParticleLinks" );
    /// Accessor for the track weights
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       weightTrackAcc( "trackWeights" );
 
    /// Accessor for the neutral links
-   static const SG::AuxElement::Accessor< Vertex_v1::NeutralParticleLinks_t >
+   static const SG::Accessor< Vertex_v1::NeutralParticleLinks_t >
       neutralAcc( "neutralParticleLinks" );
    /// Accessor for the neutral weights
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       weightNeutralAcc( "neutralWeights" );
 
    AUXSTORE_OBJECT_SETTER_AND_GETTER( Vertex_v1,

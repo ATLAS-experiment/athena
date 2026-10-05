@@ -28,8 +28,8 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include <iostream>
 
 namespace {
-  const SG::AuxElement::Accessor<uint64_t> acc_pileUpMixtureLow("pileUpMixtureIDLowBits");
-  const SG::AuxElement::Accessor<uint64_t> acc_pileUpMixtureHigh("pileUpMixtureIDHighBits");
+  const SG::Accessor<uint64_t> acc_pileUpMixtureLow("pileUpMixtureIDLowBits");
+  const SG::Accessor<uint64_t> acc_pileUpMixtureHigh("pileUpMixtureIDHighBits");
 }
 //coverity[UNCAUGHT_EXCEPT]
 int main() {

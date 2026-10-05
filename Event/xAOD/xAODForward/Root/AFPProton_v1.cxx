@@ -114,7 +114,7 @@ namespace xAOD {
 
    /// Helper variable
    static const
-   SG::AuxElement::Accessor< std::vector< AFPProton_v1::AFPTrackLink_t > >
+   SG::Accessor< std::vector< AFPProton_v1::AFPTrackLink_t > >
    tracksAcc( "afpTrackLinks" );
 
    void AFPProton_v1::addAFPTrackLink( const AFPTrackLink_t& newTrack ) {

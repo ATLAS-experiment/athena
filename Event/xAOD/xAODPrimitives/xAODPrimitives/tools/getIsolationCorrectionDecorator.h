@@ -21,14 +21,14 @@ namespace xAOD {
    /// The bitset encodes which corrections were applied for this specific type - 
    /// use getIsolationCorrectionAccessor(Iso::IsolationType, Iso::IsolationCaloCorrection type) to get Accessors for the correction values.
 
-   const SG::AuxElement::Decorator< uint32_t >
+   const SG::Decorator< uint32_t >
    getIsolationCorrectionBitsetDecorator( Iso::IsolationFlavour type );
 
-   const SG::AuxElement::Decorator< float >
+   const SG::Decorator< float >
    getIsolationCorrectionDecorator( Iso::IsolationFlavour, Iso::IsolationCaloCorrection corr, Iso::IsolationCorrectionParameter param );
-   const SG::AuxElement::Decorator< float >
+   const SG::Decorator< float >
    getIsolationCorrectionDecorator( Iso::IsolationType, Iso::IsolationCaloCorrection corr);
-   const SG::AuxElement::Decorator< float >
+   const SG::Decorator< float >
    getIsolationCorrectionDecorator( Iso::IsolationFlavour, Iso::IsolationTrackCorrection corr);
 } // namespace xAOD
 

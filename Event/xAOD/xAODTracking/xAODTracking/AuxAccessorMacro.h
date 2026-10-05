@@ -10,11 +10,11 @@
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(SurfaceBackend_v1, __TYPE, __GETTER, \
                                        __SETTER)                          \
   __TYPE* SurfaceBackend_v1::__GETTER##Ptr() {                              \
-    static const SG::AuxElement::Accessor<__TYPE> acc(#__GETTER);         \
+    static const SG::Accessor<__TYPE> acc(#__GETTER);         \
     return &(acc(*this));                                                 \
   }                                                                       \
   const __TYPE* SurfaceBackend_v1::__GETTER##Ptr() const {                  \
-    static const SG::AuxElement::ConstAccessor<__TYPE> acc(#__GETTER);    \
+    static const SG::ConstAccessor<__TYPE> acc(#__GETTER);    \
     return &(acc(*this));                                                 \
   }  
 */
@@ -22,11 +22,11 @@
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(__CL, __TYPE, __GETTER, \
                                        __SETTER)                          \
   __TYPE* __CL::__GETTER##Ptr() {                              \
-    static const SG::AuxElement::Accessor<__TYPE> acc(#__GETTER);         \
+    static const SG::Accessor<__TYPE> acc(#__GETTER);         \
     return &(acc(*this));                                                 \
   }                                                                       \
   const __TYPE* __CL::__GETTER##Ptr() const {                  \
-    static const SG::AuxElement::ConstAccessor<__TYPE> acc(#__GETTER);    \
+    static const SG::ConstAccessor<__TYPE> acc(#__GETTER);    \
     return &(acc(*this));                                                 \
   }   
 

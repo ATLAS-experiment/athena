@@ -19,13 +19,13 @@ namespace xAOD {
    /// Returns an accessor for the correction bitset corresponding to this IsolationType. 
    /// The bitset encodes which corrections were applied for this specific type - 
    /// use getIsolationCorrectionAccessor(Iso::IsolationType, Iso::IsolationCaloCorrection type) to get Accessors for the correction values.
-   const SG::AuxElement::Accessor< uint32_t >
+   const SG::Accessor< uint32_t >
    getIsolationCorrectionBitsetAccessor( Iso::IsolationFlavour type );
-   const SG::AuxElement::Accessor< float >
+   const SG::Accessor< float >
    getIsolationCorrectionAccessor( Iso::IsolationFlavour, Iso::IsolationCaloCorrection corr, Iso::IsolationCorrectionParameter param );
-   const SG::AuxElement::Accessor< float >
+   const SG::Accessor< float >
    getIsolationCorrectionAccessor( Iso::IsolationType, Iso::IsolationCaloCorrection corr);
-   const SG::AuxElement::Accessor< float >
+   const SG::Accessor< float >
    getIsolationCorrectionAccessor( Iso::IsolationFlavour, Iso::IsolationTrackCorrection corr);   
 } // namespace xAOD
 

@@ -6,7 +6,7 @@
 
 
 namespace xAOD {
-    static const SG::AuxElement::Accessor<std::vector<double>> paramsAcc("params");
+    static const SG::Accessor<std::vector<double>> paramsAcc("params");
 
     TrackParameters_v1::VectorMap TrackParameters_v1::paramsEigen() {
         return VectorMap{paramsAcc(*this).data()};
@@ -16,7 +16,7 @@ namespace xAOD {
         return ConstVectorMap{paramsAcc(*this).data()};
     }
 
-    static const SG::AuxElement::Accessor<std::vector<double>> covMatrixAcc("covMatrix");
+    static const SG::Accessor<std::vector<double>> covMatrixAcc("covMatrix");
 
     TrackParameters_v1::MatrixMap TrackParameters_v1::covMatrixEigen() {
         return MatrixMap{covMatrixAcc(*this).data()};

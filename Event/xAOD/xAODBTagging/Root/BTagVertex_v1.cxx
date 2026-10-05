@@ -32,7 +32,7 @@ namespace xAOD {
   AUXSTORE_OBJECT_SETTER_AND_GETTER( BTagVertex_v1, std::vector<float>, track_refPy, setTrack_refPy)
   AUXSTORE_OBJECT_SETTER_AND_GETTER( BTagVertex_v1, std::vector<float>, track_refPz, setTrack_refPz)
 
-  static const SG::AuxElement::Accessor<std::vector< ElementLink< xAOD::TrackParticleContainer > > > track_linkAcc( "track_links" );
+  static const SG::Accessor<std::vector< ElementLink< xAOD::TrackParticleContainer > > > track_linkAcc( "track_links" );
 
   const std::vector<ElementLink<xAOD::TrackParticleContainer> >& BTagVertex_v1::track_links() const {
     return track_linkAcc( *this );

@@ -12,7 +12,7 @@
 #define DEFINE_DECORATOR(TYPE)                                 \
   case xAOD::Iso::TYPE:                                       \
 {                                                             \
-  static const SG::AuxElement::Decorator< float > a( #TYPE);   \
+  static const SG::Decorator< float > a( #TYPE);   \
   return &a;                                                  \
 }                                                             \
 break;
@@ -20,7 +20,7 @@ break;
 
 namespace xAOD {
 
-const SG::AuxElement::Decorator< float >*
+const SG::Decorator< float >*
   getIsolationDecorator( Iso::IsolationType type ) {
     switch( type ) {
       //EtCone variables      

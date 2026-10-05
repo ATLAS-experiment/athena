@@ -21,19 +21,19 @@
 namespace xAOD {
 
    /// Helper function for getting an accessor for a pre-defined property
-   const SG::AuxElement::Accessor< std::string >*
+   const SG::Accessor< std::string >*
    metaDataTypeStringAccessorV1( FileMetaData_v1::MetaDataType type );
 
    /// Helper function for getting an accessor for a pre-defined property
-   const SG::AuxElement::Accessor< uint32_t >*
+   const SG::Accessor< uint32_t >*
    metaDataTypeUIntAccessorV1( FileMetaData_v1::MetaDataType type );
 
    /// Helper function for getting an accessor for a pre-defined property
-   const SG::AuxElement::Accessor< float >*
+   const SG::Accessor< float >*
    metaDataTypeFloatAccessorV1( FileMetaData_v1::MetaDataType type );
 
    /// Helper function for getting an accessor for a pre-defined property
-   const SG::AuxElement::Accessor< char >*
+   const SG::Accessor< char >*
    metaDataTypeCharAccessorV1( FileMetaData_v1::MetaDataType type );
 
 } // namespace xAOD

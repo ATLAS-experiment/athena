@@ -67,8 +67,8 @@ class HGTDCluster_v1 : public UncalibratedMeasurement_v1 {
     /// Sets the list of ToT of the channels building the cluster
     void setToTlist(const std::vector<int>& tots);
 
-    static const SG::AuxElement::Accessor<SG::JaggedVecElt<Identifier::value_type> > rdoListAcc() { return s_rdoListAcc; }
-    static const SG::AuxElement::Accessor<SG::JaggedVecElt<int> > totListAcc() { return s_totListAcc; }
+    static const SG::Accessor<SG::JaggedVecElt<Identifier::value_type> > rdoListAcc() { return s_rdoListAcc; }
+    static const SG::Accessor<SG::JaggedVecElt<int> > totListAcc() { return s_totListAcc; }
 
     /// @}
 
@@ -79,8 +79,8 @@ class HGTDCluster_v1 : public UncalibratedMeasurement_v1 {
     static float timeCovariance(ConstMatrixMap<3> local_covariance);
     static float timeCovariance(MatrixMap<3> local_covariance);
 protected:
-    static const SG::AuxElement::Accessor<SG::JaggedVecElt<Identifier::value_type> > s_rdoListAcc;
-    static const SG::AuxElement::Accessor<SG::JaggedVecElt<int> > s_totListAcc;
+    static const SG::Accessor<SG::JaggedVecElt<Identifier::value_type> > s_rdoListAcc;
+    static const SG::Accessor<SG::JaggedVecElt<int> > s_totListAcc;
 public:
 
 };

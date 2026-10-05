@@ -116,9 +116,9 @@ namespace xAOD
     inline static const std::string s_defaultName{"MissingET"};
     CxxUtils::CachedValue<std::size_t> m_nameHash; /*!< @brief Stores the hash for the current f_name string */
 
-    static const SG::AuxElement::Accessor<float> m_acc_mpx;
-    static const SG::AuxElement::Accessor<float> m_acc_mpy;
-    static const SG::AuxElement::Accessor<float> m_acc_sumet;
+    static const SG::Accessor<float> m_acc_mpx;
+    static const SG::Accessor<float> m_acc_mpy;
+    static const SG::Accessor<float> m_acc_sumet;
   };
 }
 

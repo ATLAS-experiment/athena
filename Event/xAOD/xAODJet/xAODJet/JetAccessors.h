@@ -8,7 +8,7 @@
 #define XAODJET_JETACCESSORS_H
 /////////////////////////////////////////////
 /// \file JetAccessors.h
-/// \brief This header defines wrapper classes around SG::AuxElement::Accessor used internally in the Jet EDM.
+/// \brief This header defines wrapper classes around SG::Accessor used internally in the Jet EDM.
 ///
 /// By default the wrappers add no functionality to this class.
 /// Their intent is to act as converter between types exposed in the Jet interface and the
@@ -48,7 +48,7 @@ namespace xAOD {
     template<class TYPE>
     class AccessorWrapper : public Named {
     public:
-      typedef typename SG::AuxElement::Accessor< TYPE > AccessorType;
+      typedef typename SG::Accessor< TYPE > AccessorType;
       AccessorWrapper(const std::string & n) : Named(n), m_a(n) {}
 
       void setAttribute(SG::AuxElement& p, const TYPE& v) const {
@@ -77,7 +77,7 @@ namespace xAOD {
     template<>
     class AccessorWrapper<double> : public Named {
     public:
-      typedef SG::AuxElement::Accessor< float > AccessorType;
+      typedef SG::Accessor< float > AccessorType;
       AccessorWrapper(const std::string & n) : Named(n) , m_a(n) {}
 
       void setAttribute(SG::AuxElement& p, const double& v) const {
@@ -105,7 +105,7 @@ namespace xAOD {
     template<>
     class AccessorWrapper< std::vector<double> > : public Named{
     public:
-      typedef SG::AuxElement::Accessor< std::vector<float>  > AccessorType;
+      typedef SG::Accessor< std::vector<float>  > AccessorType;
       AccessorWrapper(const std::string & n) : Named(n), m_a(n) {}
 
       void setAttribute(SG::AuxElement& p, const std::vector<double>& v) const {
@@ -143,10 +143,10 @@ namespace xAOD {
       bool isAvailable(const SG::AuxElement& e) const {return m_p0.isAvailable(e);}
 
     protected:
-      SG::AuxElement::Accessor< float > m_p0;
-      SG::AuxElement::Accessor< float > m_p1;
-      SG::AuxElement::Accessor< float > m_p2;
-      SG::AuxElement::Accessor< float > m_p3;
+      SG::Accessor< float > m_p0;
+      SG::Accessor< float > m_p1;
+      SG::Accessor< float > m_p2;
+      SG::Accessor< float > m_p3;
     };
 
 
@@ -234,7 +234,7 @@ namespace xAOD {
       struct InternalTypes {
         typedef DataVector<Obj> ContainerType;
         typedef ElementLink< ContainerType > LinkType;
-        typedef SG::AuxElement::Accessor< LinkType > AccessorType;
+        typedef SG::Accessor< LinkType > AccessorType;
         static const Obj* fromEL(const LinkType&el){if(el.isValid())return *el; return NULL;}
       };
 
@@ -242,14 +242,14 @@ namespace xAOD {
       struct InternalTypes<Obj,true> {
         typedef IParticleContainer ContainerType;
         typedef ElementLink< ContainerType >  LinkType;
-        typedef SG::AuxElement::Accessor< LinkType > AccessorType;
+        typedef SG::Accessor< LinkType > AccessorType;
         static const Obj* fromEL(const LinkType&el){if(el.isValid()) return dynamic_cast<const Obj*>(*el); return NULL;}
       };
 
       template<typename Obj, bool IsIP>
       struct InternalVectorTypes : public InternalTypes<Obj,IsIP> {
         typedef typename InternalTypes<Obj,IsIP>::LinkType LinkType;
-        typedef SG::AuxElement::Accessor< std::vector<LinkType> > AccessorType;
+        typedef SG::Accessor< std::vector<LinkType> > AccessorType;
       };
     }
 

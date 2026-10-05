@@ -68,10 +68,10 @@ namespace xAODEventInfoPrivate {
    }
 
    // register attributes' types early (before I/O) for schema evolution
-   static const SG::AuxElement::Accessor< uint64_t > accEvNum( "eventNumber" );
-   static const SG::AuxElement::Accessor< uint64_t > accMcEvNum( "mcEventNumber" );
-   static const SG::AuxElement::Accessor< uint64_t > accLow( "pileUpMixtureIDLowBits" );
-   static const SG::AuxElement::Accessor< uint64_t > accHigh( "pileUpMixtureIDHighBits" );
+   static const SG::Accessor< uint64_t > accEvNum( "eventNumber" );
+   static const SG::Accessor< uint64_t > accMcEvNum( "mcEventNumber" );
+   static const SG::Accessor< uint64_t > accLow( "pileUpMixtureIDLowBits" );
+   static const SG::Accessor< uint64_t > accHigh( "pileUpMixtureIDHighBits" );
 
 } // private namespace
 
@@ -371,10 +371,10 @@ namespace xAOD {
    //
 
    /// Accessor for "actualInteractionsPerCrossing"
-   static const SG::AuxElement::Accessor< float >
+   static const SG::Accessor< float >
       accActualInteractionsPerCrossing( "actualInteractionsPerCrossing" );
    /// Accessor for "averageInteractionsPerCrossing"
-   static const SG::AuxElement::Accessor< float >
+   static const SG::Accessor< float >
       accAverageInteractionsPerCrossing( "averageInteractionsPerCrossing" );
 
    float EventInfo_v1::actualInteractionsPerCrossing() const {
@@ -510,13 +510,13 @@ namespace xAOD {
    //
    // Accessor objects for the sub-event properties:
    //
-   static const SG::AuxElement::Accessor< std::vector< int16_t > >
+   static const SG::Accessor< std::vector< int16_t > >
       timeAcc( "subEventTime" );
-   static const SG::AuxElement::Accessor< std::vector< uint16_t > >
+   static const SG::Accessor< std::vector< uint16_t > >
       indexAcc( "subEventIndex" );
-   static const SG::AuxElement::Accessor< std::vector< ElementLink< EventInfoContainer_v1 > > >
+   static const SG::Accessor< std::vector< ElementLink< EventInfoContainer_v1 > > >
       linkAcc( "subEventLink" );
-   static const SG::AuxElement::Accessor< std::vector< uint16_t > >
+   static const SG::Accessor< std::vector< uint16_t > >
       typeAcc( "subEventType" );
 
    std::vector< EventInfo_v1::SubEvent >
@@ -960,7 +960,7 @@ namespace xAOD {
 
 
    /// Accessor for "BeamSpotWeight"
-   static const SG::AuxElement::Accessor< float >
+   static const SG::Accessor< float >
       accBeamSpotWeight( "beamSpotWeight" );
 
    bool EventInfo_v1::hasBeamSpotWeight() const {

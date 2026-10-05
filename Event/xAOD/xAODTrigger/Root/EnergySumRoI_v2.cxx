@@ -151,7 +151,7 @@ namespace xAOD {
    //
 
    /// Accessor for the names of the passed thresholds
-   static const SG::AuxElement::Accessor< std::vector< std::string > >
+   static const SG::Accessor< std::vector< std::string > >
       names( "thrNames" );
 
    void EnergySumRoI_v2::addThreshold( const std::string& name ) {

@@ -20,7 +20,7 @@ namespace xAOD
   class TrackSummary_v1 : public SG::AuxElement
   {
   private:
-    static const SG::AuxElement::Accessor<std::vector<double> > s_paramsAcc, s_covParamsAcc;
+    static const SG::Accessor<std::vector<double> > s_paramsAcc, s_covParamsAcc;
   public:
     TrackSummary_v1() = default;
     /**

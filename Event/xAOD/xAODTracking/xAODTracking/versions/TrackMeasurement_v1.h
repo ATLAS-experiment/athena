@@ -111,8 +111,8 @@ namespace xAOD {
         */
         size_t size() const;
       private:
-        static const SG::AuxElement::Accessor<std::vector<double>> s_measAcc;
-        static const SG::AuxElement::Accessor<std::vector<double>> s_covMatrixAcc;
+        static const SG::Accessor<std::vector<double>> s_measAcc;
+        static const SG::Accessor<std::vector<double>> s_covMatrixAcc;
     };
 }
 #endif

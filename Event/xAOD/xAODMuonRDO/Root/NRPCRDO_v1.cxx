@@ -12,12 +12,12 @@ namespace {
 }
 #define IMPLEMENT_SETTER_GETTER( DTYPE, GETTER, SETTER)                          \
       DTYPE NRPCRDO_v1::GETTER() const {                                  \
-         static const SG::AuxElement::Accessor<DTYPE> acc{preFixStr + #GETTER};  \
+         static const SG::Accessor<DTYPE> acc{preFixStr + #GETTER};  \
          return acc(*this);                                                      \
       }                                                                          \
                                                                                  \
       void NRPCRDO_v1::SETTER(DTYPE value) {                        \
-         static const SG::AuxElement::Accessor<DTYPE> acc{preFixStr + #GETTER};  \
+         static const SG::Accessor<DTYPE> acc{preFixStr + #GETTER};  \
          acc(*this) = value;                                                     \
       }
 

@@ -172,7 +172,7 @@ StatusCode DQTGlobalWZFinderAlg::fillHistograms( const EventContext& ctx ) const
      
      auto muongroup = getGroup("muon");
      ATH_MSG_DEBUG("Start muon selection");
-     static const SG::AuxElement::Accessor<float> aptc20("ptcone20");
+     static const SG::Accessor<float> aptc20("ptcone20");
 
      for (const xAOD::Muon* muon : *muons){
        auto muTrk = (muon)->trackParticle(xAOD::Muon::TrackParticleType::Primary);
@@ -676,7 +676,7 @@ bool DQTGlobalWZFinderAlg::goodElectrons(const xAOD::Electron* electron_itr, con
 
   bool isGood = false;
 
-  static const SG::AuxElement::Accessor<float> aptc20("ptcone20");
+  static const SG::Accessor<float> aptc20("ptcone20");
   float ptcone20 = 0;
   if (! aptc20.isAvailable(*electron_itr)) {
     ATH_MSG_WARNING("aptc20 is not available -  goodElectron");
@@ -734,7 +734,7 @@ bool DQTGlobalWZFinderAlg::antiGoodElectrons(const xAOD::Electron* electron_itr,
 
   bool antiGood = false;
 
-  static const SG::AuxElement::Accessor<float> aptc20("ptcone20");
+  static const SG::Accessor<float> aptc20("ptcone20");
   float ptcone20 = 0;
   if (! aptc20.isAvailable(*electron_itr)) {
     ATH_MSG_WARNING("aptc20 is not available -  antiGoodElectron");

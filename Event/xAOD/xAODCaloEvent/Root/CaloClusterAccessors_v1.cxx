@@ -14,14 +14,14 @@
 #define DEFINE_ACCESSOR( NAME, TYPE )				  \
   case xAOD::CaloCluster_v1::NAME:				  \
   {								  \
-     static const SG::AuxElement::Accessor< TYPE > a( #NAME );	  \
+     static const SG::Accessor< TYPE > a( #NAME );	  \
      return &a;							  \
    }                                                              \
   break
 
 namespace xAOD {
 
-   const SG::AuxElement::Accessor< float >*
+   const SG::Accessor< float >*
    momentAccessorV1( xAOD::CaloCluster_v1::MomentType moment ) {
      
      switch( moment ) {
@@ -154,7 +154,7 @@ namespace xAOD {
      }
    }
 
-  const SG::AuxElement::Accessor<xAOD::CaloCluster_v1::ncells_store_t>* 
+  const SG::Accessor<xAOD::CaloCluster_v1::ncells_store_t>* 
   momentContainerAccessorV1(xAOD::CaloCluster_v1::MomentType moment) { 
     switch ( moment ) {
       DEFINE_ACCESSOR( NCELL_SAMPLING, xAOD::CaloCluster_v1::ncells_store_t ); 

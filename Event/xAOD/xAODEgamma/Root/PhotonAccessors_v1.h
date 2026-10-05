@@ -20,7 +20,7 @@ namespace xAOD {
    /// This function holds on to Accessor objects that can be used by each
    /// Photon_v1 object at runtime to get/set detail values on themselves.
 
-   const SG::AuxElement::Accessor< float >*
+   const SG::Accessor< float >*
    vertexCaloMatchAccessorV1( xAOD::EgammaParameters::VertexCaloMatchType type );
 
 

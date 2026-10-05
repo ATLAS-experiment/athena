@@ -105,14 +105,14 @@ class PixelCluster_v1 : public UncalibratedMeasurement_v1 {
     /// Sets the LVL1 accept
     void setLVL1A(int lvl1a);
 
-    static const SG::AuxElement::Accessor<SG::JaggedVecElt<Identifier::value_type> > rdoListAcc() { return s_rdoListAcc; }
-    static const SG::AuxElement::Accessor<SG::JaggedVecElt<int> > totListAcc() { return s_totListAcc; }
-    static const SG::AuxElement::Accessor<SG::JaggedVecElt<float> > chargeListAcc() { return s_chargeListAcc; }
+    static const SG::Accessor<SG::JaggedVecElt<Identifier::value_type> > rdoListAcc() { return s_rdoListAcc; }
+    static const SG::Accessor<SG::JaggedVecElt<int> > totListAcc() { return s_totListAcc; }
+    static const SG::Accessor<SG::JaggedVecElt<float> > chargeListAcc() { return s_chargeListAcc; }
     /// @}
 protected:
-    static const SG::AuxElement::Accessor<SG::JaggedVecElt<Identifier::value_type> > s_rdoListAcc;
-    static const SG::AuxElement::Accessor<SG::JaggedVecElt<int> > s_totListAcc;
-    static const SG::AuxElement::Accessor<SG::JaggedVecElt<float> > s_chargeListAcc;
+    static const SG::Accessor<SG::JaggedVecElt<Identifier::value_type> > s_rdoListAcc;
+    static const SG::Accessor<SG::JaggedVecElt<int> > s_totListAcc;
+    static const SG::Accessor<SG::JaggedVecElt<float> > s_chargeListAcc;
 public:
     /// @name Create a structure of raw pointers for fast filling.
     /// @{

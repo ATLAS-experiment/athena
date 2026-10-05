@@ -8,13 +8,13 @@
 namespace xAOD::BTaggingUtilities {
 
    /// Convenience type for the accessor
-   typedef SG::AuxElement::Accessor< ElementLink< BTaggingContainer > >
+   typedef SG::Accessor< ElementLink< BTaggingContainer > >
       Accessor_t;
    /// Accessor for the default @c xAOD::BTagging link
    static const Accessor_t DEFAULT_ACC( DEFAULT_BTAG_LINK_NAME );
 
    /// Convenience type for the decorator
-   typedef SG::AuxElement::Decorator< ElementLink< BTaggingContainer > >
+   typedef SG::Decorator< ElementLink< BTaggingContainer > >
       Decorator_t;
    /// Decorator for the default @c xAOD::BTagging link
    static const Decorator_t DEFAULT_DEC( DEFAULT_BTAG_LINK_NAME );

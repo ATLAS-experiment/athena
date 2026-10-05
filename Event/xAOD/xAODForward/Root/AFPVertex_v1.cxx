@@ -28,10 +28,10 @@ namespace xAOD
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER (AFPVertex_v1, int, algID, setAlgID)
 
   AUXSTORE_OBJECT_SETTER_AND_GETTER (AFPVertex_v1, std::vector< AFPVertex_v1::AFPProtonLink_t >, protons, setProtons)
-  static const SG::AuxElement::Accessor< std::vector<AFPVertex_v1::AFPProtonLink_t> > protonsAcc( "protons" );
+  static const SG::Accessor< std::vector<AFPVertex_v1::AFPProtonLink_t> > protonsAcc( "protons" );
 
   AUXSTORE_OBJECT_SETTER_AND_GETTER (AFPVertex_v1, std::vector< AFPVertex_v1::AFPToFTrackLink_t >, tofTracks, setToFTracks)
-  static const SG::AuxElement::Accessor< std::vector<AFPVertex_v1::AFPToFTrackLink_t> > tofTracksAcc( "tofTracks" );
+  static const SG::Accessor< std::vector<AFPVertex_v1::AFPToFTrackLink_t> > tofTracksAcc( "tofTracks" );
 
 
   void AFPVertex_v1::addProton( const AFPProtonLink_t& link )

@@ -70,7 +70,7 @@ persToTrans(  const xAOD::TrackParticleAuxContainer_v4* oldObj,
 
   for( size_t i = 0; i < oldInt.size(); ++i ) {
     
-    static const SG::AuxElement::ConstAccessor< std::vector<float> > definingParametersCovMatrixAcc( "definingParametersCovMatrix" );
+    static const SG::ConstAccessor< std::vector<float> > definingParametersCovMatrixAcc( "definingParametersCovMatrix" );
 
     if( definingParametersCovMatrixAcc.isAvailable( *( oldInt[ i ] ) ) ) {
 

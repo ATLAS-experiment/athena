@@ -5,7 +5,7 @@
 #include "xAODTracking/versions/TrackJacobian_v1.h"
 
 namespace xAOD {
-    static const SG::AuxElement::Accessor<std::vector<double>> jacAcc("jac");
+    static const SG::Accessor<std::vector<double>> jacAcc("jac");
     TrackJacobian_v1::MatrixMap TrackJacobian_v1::jacEigen() {
         return MatrixMap{jacAcc(*this).data()};
     }

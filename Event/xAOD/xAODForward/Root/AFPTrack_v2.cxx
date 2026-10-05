@@ -33,7 +33,7 @@ namespace xAOD
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER (AFPTrack_v2, int, algID, setAlgID)
 
   AUXSTORE_OBJECT_SETTER_AND_GETTER (AFPTrack_v2, std::vector< AFPTrack_v2::AFPClusterLink_t >, clusters, setClusters)
-  static const SG::AuxElement::Accessor< std::vector<AFPTrack_v2::AFPClusterLink_t> > clustersAcc( "clusters" );
+  static const SG::Accessor< std::vector<AFPTrack_v2::AFPClusterLink_t> > clustersAcc( "clusters" );
 
   void AFPTrack_v2::addCluster( const AFPClusterLink_t& link )
   {

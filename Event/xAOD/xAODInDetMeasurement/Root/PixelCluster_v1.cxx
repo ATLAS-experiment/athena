@@ -8,9 +8,9 @@
 #include "xAODInDetMeasurement/versions/PixelCluster_v1.h"
 #include "xAODInDetMeasurement/ArrayFloat3.h"
 
-static const SG::AuxElement::Accessor<xAOD::ArrayFloat3> globalPosAcc(
+static const SG::Accessor<xAOD::ArrayFloat3> globalPosAcc(
     "globalPosition");
-const SG::AuxElement::Accessor<SG::JaggedVecElt<Identifier::value_type> >
+const SG::Accessor<SG::JaggedVecElt<Identifier::value_type> >
     xAOD::PixelCluster_v1::s_rdoListAcc("rdoList");
 
 xAOD::ConstVectorMap<3> xAOD::PixelCluster_v1::globalPosition() const {
@@ -40,7 +40,7 @@ void xAOD::PixelCluster_v1::setRDOlist(const std::vector<Identifier>& rdoList) {
     s_rdoListAcc.set(*this,rdos);
 }
 
-const SG::AuxElement::Accessor<SG::JaggedVecElt<int> >
+const SG::Accessor<SG::JaggedVecElt<int> >
     xAOD::PixelCluster_v1::s_totListAcc("totList");
 
 void xAOD::PixelCluster_v1::setToTlist(const std::vector<int>& tots) {
@@ -50,7 +50,7 @@ void xAOD::PixelCluster_v1::setToTlist(const std::vector<int>& tots) {
 void xAOD::PixelCluster_v1::setToTlist(std::span<int> tots) {
    s_totListAcc.set(*this,tots);
 }
-const SG::AuxElement::Accessor<SG::JaggedVecElt<float> >
+const SG::Accessor<SG::JaggedVecElt<float> >
     xAOD::PixelCluster_v1::s_chargeListAcc("chargeList");
 
 void xAOD::PixelCluster_v1::setChargelist(const std::vector<float>& charges) {
@@ -70,9 +70,9 @@ AUXSTORE_PRIMITIVE_GETTER(xAOD::PixelCluster_v1, int, channelsInEta)
 
 void xAOD::PixelCluster_v1::setChannelsInPhiEta(int channelsInPhi,
                                                 int channelsInEta) {
-    static const SG::AuxElement::Accessor<int> chanPhiAcc("channelsInPhi");
+    static const SG::Accessor<int> chanPhiAcc("channelsInPhi");
     chanPhiAcc(*this) = channelsInPhi;
-    static const SG::AuxElement::Accessor<int> chanEtaAcc("channelsInEta");
+    static const SG::Accessor<int> chanEtaAcc("channelsInEta");
     chanEtaAcc(*this) = channelsInEta;
 }
 

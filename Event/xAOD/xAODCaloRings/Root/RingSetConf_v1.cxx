@@ -527,7 +527,7 @@ AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(RingSetConf_v1,
 /// @{
 //==============================================================================
 const std::vector<CaloSampling::CaloSample>& RingSetConf_v1::layers() const {
-  static const SG::AuxElement::ConstAccessor<std::vector<unsigned> > acc("layers");
+  static const SG::ConstAccessor<std::vector<unsigned> > acc("layers");
   return reinterpret_cast<const std::vector<CaloSampling::CaloSample>& >( 
       acc( *this ) );
 }
@@ -535,31 +535,31 @@ const std::vector<CaloSampling::CaloSample>& RingSetConf_v1::layers() const {
 //==============================================================================
 void RingSetConf_v1::setLayers(
     const std::vector<CaloSampling::CaloSample>& layers) {
-  static const SG::AuxElement::Accessor<std::vector<unsigned> > acc("layers");
+  static const SG::Accessor<std::vector<unsigned> > acc("layers");
   acc.set( *this , reinterpret_cast<const std::vector<unsigned>&>(layers) );
 }
 
 //==============================================================================
 unsigned RingSetConf_v1::nLayers() const {
-  static const SG::AuxElement::ConstAccessor<std::vector<unsigned> > acc("layers");
+  static const SG::ConstAccessor<std::vector<unsigned> > acc("layers");
   return acc( *this ).size();
 }
 
 //==============================================================================
 CaloSampling::CaloSample RingSetConf_v1::layerAt(const unsigned idx) const {
-  static const SG::AuxElement::ConstAccessor< std::vector<unsigned> > acc("layers");
+  static const SG::ConstAccessor< std::vector<unsigned> > acc("layers");
   return static_cast<CaloSampling::CaloSample>( acc( *this ).at(idx) );
 }
 
 //==============================================================================
 void RingSetConf_v1::addLayer(const CaloSampling::CaloSample c){
-  static const SG::AuxElement::Accessor< std::vector<unsigned> > acc("layers");
+  static const SG::Accessor< std::vector<unsigned> > acc("layers");
   acc( *this ).push_back(c);
 }
 
 //==============================================================================
 void RingSetConf_v1::clearLayers(){
-  static const SG::AuxElement::Accessor< std::vector<unsigned> > acc("layers");
+  static const SG::Accessor< std::vector<unsigned> > acc("layers");
   acc( *this ).clear();
 }
 /// @}
@@ -568,26 +568,26 @@ void RingSetConf_v1::clearLayers(){
 /// @{
 //==============================================================================
 Ringer::CalJointLayer RingSetConf_v1::calJointLayer() const {
-  static const SG::AuxElement::ConstAccessor< unsigned > acc("calJointLayer");
+  static const SG::ConstAccessor< unsigned > acc("calJointLayer");
   return static_cast<Ringer::CalJointLayer>( acc( *this ) );
 }
 
 //==============================================================================
 void RingSetConf_v1::setCalJointLayer(const Ringer::CalJointLayer calJointLayer){
-  static const SG::AuxElement::Accessor< unsigned > acc("calJointLayer");
+  static const SG::Accessor< unsigned > acc("calJointLayer");
   acc.set( *this , calJointLayer );
 }
 
 //==============================================================================
 Ringer::CalJointSection RingSetConf_v1::calJointSection() const {
-  static const SG::AuxElement::ConstAccessor< unsigned > acc("calJointSection");
+  static const SG::ConstAccessor< unsigned > acc("calJointSection");
   return static_cast<Ringer::CalJointSection>( acc( *this ) );
 }
 
 //==============================================================================
 void RingSetConf_v1::setCalJointSection(
     const Ringer::CalJointSection calJointSection) {
-  static const SG::AuxElement::Accessor< unsigned > acc("calJointSection");
+  static const SG::Accessor< unsigned > acc("calJointSection");
   acc.set( *this , calJointSection );
 }
 /// @}
@@ -620,25 +620,25 @@ AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(RingSetConf_v1,
 
 //==============================================================================
 bool RingSetConf_v1::doEtaAxesDivision() const {
-  static const SG::AuxElement::ConstAccessor< char > acc("doEtaAxesDivision");
+  static const SG::ConstAccessor< char > acc("doEtaAxesDivision");
   return static_cast<bool>( acc( *this) );
 }
 
 //==============================================================================
 void RingSetConf_v1::setdoEtaAxesDivision(bool doEtaAxesDivision){
-  static const SG::AuxElement::Accessor< char > acc("doEtaAxesDivision");
+  static const SG::Accessor< char > acc("doEtaAxesDivision");
   acc( *this) = static_cast<char>(doEtaAxesDivision);
 }
 
 //==============================================================================
 bool RingSetConf_v1::doPhiAxesDivision() const {
-  static const SG::AuxElement::ConstAccessor< char > acc("doPhiAxesDivision");
+  static const SG::ConstAccessor< char > acc("doPhiAxesDivision");
   return static_cast<bool>( acc( *this ) );
 }
 
 //==============================================================================
 void RingSetConf_v1::setdoPhiAxesDivision(bool doPhiAxesDivision){
-  static const SG::AuxElement::Accessor< char > acc("doPhiAxesDivision");
+  static const SG::Accessor< char > acc("doPhiAxesDivision");
   acc( *this ) = static_cast<char>(doPhiAxesDivision);
 }
 /// @}

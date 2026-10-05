@@ -12,7 +12,7 @@
 #define DECLARE_STRING_ACCESSOR( TYPE )                              \
    case FileMetaData_v1::TYPE:                                       \
    do {                                                              \
-      static const SG::AuxElement::Accessor< std::string > acc( #TYPE ); \
+      static const SG::Accessor< std::string > acc( #TYPE ); \
       return &acc;                                                   \
    } while( 0 )
 
@@ -20,7 +20,7 @@
 #define DECLARE_UINT_ACCESSOR( TYPE )                                \
    case FileMetaData_v1::TYPE:                                       \
    do {                                                              \
-      static const SG::AuxElement::Accessor< uint32_t > acc( #TYPE ); \
+      static const SG::Accessor< uint32_t > acc( #TYPE ); \
       return &acc;                                                   \
    } while( 0 )
 
@@ -28,7 +28,7 @@
 #define DECLARE_FLOAT_ACCESSOR( TYPE )                               \
    case FileMetaData_v1::TYPE:                                       \
    do {                                                              \
-      static const SG::AuxElement::Accessor< float > acc( #TYPE );   \
+      static const SG::Accessor< float > acc( #TYPE );   \
       return &acc;                                                   \
    } while( 0 )
 
@@ -36,13 +36,13 @@
 #define DECLARE_CHAR_ACCESSOR( TYPE )                                \
    case FileMetaData_v1::TYPE:                                       \
    do {                                                              \
-      const static SG::AuxElement::Accessor< char > acc( #TYPE );    \
+      const static SG::Accessor< char > acc( #TYPE );    \
       return &acc;                                                   \
    } while( 0 )
 
 namespace xAOD {
 
-   const SG::AuxElement::Accessor< std::string >*
+   const SG::Accessor< std::string >*
    metaDataTypeStringAccessorV1( FileMetaData_v1::MetaDataType type ) {
 
       switch( type ) {
@@ -69,7 +69,7 @@ namespace xAOD {
       return nullptr;
    }
 
-   const SG::AuxElement::Accessor< uint32_t >*
+   const SG::Accessor< uint32_t >*
    metaDataTypeUIntAccessorV1( FileMetaData_v1::MetaDataType type ) {
 
       switch( type ) {
@@ -86,7 +86,7 @@ namespace xAOD {
       return nullptr;
    }
 
-   const SG::AuxElement::Accessor< float >*
+   const SG::Accessor< float >*
    metaDataTypeFloatAccessorV1( FileMetaData_v1::MetaDataType type ) {
 
       switch( type ) {
@@ -104,7 +104,7 @@ namespace xAOD {
       return nullptr;
    }
 
-   const SG::AuxElement::Accessor< char >*
+   const SG::Accessor< char >*
    metaDataTypeCharAccessorV1( FileMetaData_v1::MetaDataType type ) {
 
       switch( type ) {

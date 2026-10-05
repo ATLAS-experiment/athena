@@ -6,8 +6,8 @@
 
 
 namespace xAOD {
-    const SG::AuxElement::Accessor<std::vector<double>> TrackMeasurement_v1::s_measAcc("meas");
-    const SG::AuxElement::Accessor<std::vector<double>> TrackMeasurement_v1::s_covMatrixAcc("covMatrix");
+    const SG::Accessor<std::vector<double>> TrackMeasurement_v1::s_measAcc("meas");
+    const SG::Accessor<std::vector<double>> TrackMeasurement_v1::s_covMatrixAcc("covMatrix");
 
     AUXSTORE_OBJECT_SETTER_AND_GETTER(TrackMeasurement_v1,
                                         std::vector<double>,

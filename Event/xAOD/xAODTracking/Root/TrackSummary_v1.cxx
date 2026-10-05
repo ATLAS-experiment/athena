@@ -37,9 +37,9 @@ AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackSummary_v1, unsigned int, surfaceIndex
 AUXSTORE_OBJECT_SETTER_AND_GETTER(TrackSummary_v1, uint8_t, particleHypothesis, setParticleHypothesis)
 
 
-const SG::AuxElement::Accessor<std::vector<double> >
+const SG::Accessor<std::vector<double> >
     xAOD::TrackSummary_v1::s_paramsAcc{"params"};
-const SG::AuxElement::Accessor<std::vector<double> >
+const SG::Accessor<std::vector<double> >
     xAOD::TrackSummary_v1::s_covParamsAcc{"covParams"};
 
 void TrackSummary_v1::resize(size_t sz) {

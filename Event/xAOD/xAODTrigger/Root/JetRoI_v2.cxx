@@ -60,10 +60,10 @@ namespace xAOD {
    AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( JetRoI_v2, float, et8x8, setEt8x8 )
 
    /// Accessor for the names of the passed thresholds
-   static const SG::AuxElement::Accessor< std::vector< std::string > >
+   static const SG::Accessor< std::vector< std::string > >
       names( "thrNames" );
    /// Accessor for the values (in MeV) of the passed thresholds
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       values( "thrValues" );
 
    /// @param name The name of the passed threshold
