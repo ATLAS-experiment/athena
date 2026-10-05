@@ -253,7 +253,8 @@ AnalogueClusteringCalibrator<calib_data_t, traj_t>::calibrate(
     const Acts::CalibrationContext& /*cctx*/,
     const xAOD::PixelCluster& cluster,
     const InDetDD::SiDetectorElement& detElement,
-    const std::pair<float, float>& tan_incidence_angles) const
+    const std::pair<float, float>& tan_incidence_angles,
+    const Acts::Vector2& /*predicted_local_position*/) const
 {  
     typename BASE::Pos pos = cluster.template localPosition<2>();
     typename BASE::Cov cov = cluster.template localCovariance<2>();

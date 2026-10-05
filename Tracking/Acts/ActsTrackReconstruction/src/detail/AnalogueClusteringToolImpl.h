@@ -59,7 +59,8 @@ namespace ActsTrk::detail {
                const Acts::CalibrationContext& cctx,
                const xAOD::PixelCluster& cluster,
                const InDetDD::SiDetectorElement& detElement,
-               const std::pair<float, float>& angles) const;
+               const std::pair<float, float>& angles,
+               const Acts::Vector2& predicted_local_position) const;
 
    protected:
      std::pair<float, float> getCentroid(const EventContext& ctx,
