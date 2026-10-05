@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AthenaConfiguration.Enums import LHCPeriod
@@ -13,8 +13,8 @@ class DiTauMassBlock(ConfigBlock):
     The MMC method can be applied to had-had, had-lep and lep-lep di-tau decays. Based on the input collections given to the algorithm, the following priority ordering is made internally:
 
     1. $\tau$-had + $\tau$-had
-    1. $\tau$-had + $\mu$
     1. $\tau$-had + e
+    1. $\tau$-had + $\mu$
     1. e + $\mu$
     1. $\mu$ + $\mu$
     1. e + e
@@ -25,7 +25,7 @@ class DiTauMassBlock(ConfigBlock):
   r""" The MMC method assumes that the MET in a given event originates mostly from the neutrinos associated to the decay of the di-tau system. If your topology has additional sources of MET (e.g. $t\bar{t}H(\to\tau\tau)$, $W(\to\ell\nu)H(\to\tau\tau)$), the MMC method is not recommended and will give nonsensical answers. See e.g. the ATLAS Run 2 search for BSM $VH(\to\tau\tau)$ in [ATL-COM-PHYS-2022-022](https://cds.cern.ch/record/2799543) where the MMC method is combined with alternatives. Additional neutrinos from the decay of B-hadrons typically do not lead to significant enough MET to be a problem, i.e. $t\bar{t}(\to\text{jets})H(\to\tau\tau)$ should be safe."""
 
   def __init__(self):
-    super(DiTauMassBlock, self).__init__()
+    super().__init__()
     self.addOption('algName', '', type=str,
                    info='optional name to distinguish between multiple instances of the algorithm.')
     self.addOption('electrons', '', type=str,
@@ -69,7 +69,7 @@ class DiTauMassBlock(ConfigBlock):
     self.addOption('useTauProbability', 1, type=int,
                    info='whether to apply tau probability (additional PDF term corresponding to the ratio of the neutrino momentum to the reconstructed tau momentum).')
     self.addOption('useMnuProbability', False, type=bool,
-                   info='whether to apply $m_\nu$ probability (additional PDF term corresponding to the mass of the neutrino system per tau decay, only applied to leptonic tau decays).')
+                   info=r'whether to apply $m_\nu$ probability (additional PDF term corresponding to the mass of the neutrino system per tau decay, only applied to leptonic tau decays).')
     self.addOption('useDefaultSettings', -1, type=int,
                    info='whether to take all default options from the tool itself.')
     self.addOption('useEfficiencyRecovery', -1, type=int,
@@ -87,12 +87,12 @@ class DiTauMassBlock(ConfigBlock):
     self.addOption('doCollinearApprox', False, type=bool,
                    info='save additional variables (mass, x0, x1) from collinear approximation') 
 
-    def instanceName (self) :
-        """Return the instance name for this block"""
-        if self.algName:
-            return self.taus.replace('.', '_') + self.algName
-        else:
-            return self.taus.replace('.', '_')
+  def instanceName (self) :
+    """Return the instance name for this block"""
+    if self.algName:
+      return self.taus.replace('.', '_') + self.algName
+    else:
+      return self.taus.replace('.', '_')
 
   def makeAlgs(self, config):
 

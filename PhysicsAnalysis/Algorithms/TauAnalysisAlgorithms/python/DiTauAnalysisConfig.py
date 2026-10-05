@@ -10,7 +10,7 @@ class DiTauCalibrationConfig (ConfigBlock):
     """the ConfigBlock for the tau four-momentum correction"""
 
     def __init__ (self) :
-        super (DiTauCalibrationConfig, self).__init__ ()
+        super().__init__()
         self.setBlockName('DiTaus')
         self.addOption ('inputContainer', '', type=str,
             info="the name of the input ditau-jet container.")
@@ -117,7 +117,7 @@ class DiTauWorkingPointSelectionConfig (ConfigBlock) :
     """the ConfigBlock for the tau working point selection"""
 
     def __init__ (self) :
-        super (DiTauWorkingPointSelectionConfig, self).__init__ ()
+        super().__init__()
         self.setBlockName('DiTauWorkingPointSelection')
         self.addOption ('containerName', '', type=str,
             noneAction='error',
@@ -131,6 +131,10 @@ class DiTauWorkingPointSelectionConfig (ConfigBlock) :
         self.addOption ('postfix', None, type=str,
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as `selectionName` is used internally.")
+        self.addOption ('quality', None, type=str,
+            info="the ID WP to use for high-pt ditau-jets (ignored for `DiTauJetsLowPt` containers). "
+            "Supported ID WPs: `Tight`, `Medium`, `Loose`, `NoID`.",
+            meta={'choices':(['Tight','Medium','Loose','NoID'],1)})
         self.addOption ('addSelectionToPreselection', True, type=bool,
             info="whether to retain only ditau-jets satisfying the working point "
             "requirements.")
@@ -157,10 +161,12 @@ class DiTauWorkingPointSelectionConfig (ConfigBlock) :
         if "DiTauJetsLowPt" in self.containerName:
             inputfile = 'TauAnalysisAlgorithms/ditau_selection_lowpt.conf' 
         else:
-            if 'NoID' in self.quality:
+            if self.quality not in ['Tight', 'Medium', 'Loose', 'NoID'] :
+                raise ValueError (f"invalid ditau quality: \"{self.quality}\", allowed values are Tight, Medium, Loose, NoID")
+            if self.quality == 'NoID':
                 inputfile = 'TauAnalysisAlgorithms/ditau_selection_highpt.conf'
             else: 
-                inputfile = 'TauAnalysisAlgorithms/ditau_selection_highpt_'+self.quality+'.conf'        
+                inputfile = 'TauAnalysisAlgorithms/ditau_selection_highpt_'+self.quality.lower()+'.conf'        
 
         # Set up the algorithm selecting taus:
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'DiTauSelectionAlg' )
@@ -177,7 +183,7 @@ class DiTauWorkingPointEfficiencyConfig (ConfigBlock) :
     """the ConfigBlock for the tau working point efficiency computation"""
 
     def __init__ (self) :
-        super (DiTauWorkingPointEfficiencyConfig, self).__init__ ()
+        super().__init__()
         self.setBlockName('DiTauWorkingPointEfficiency')
         self.addDependency('DiTauWorkingPointSelection', required=True)
         self.addDependency('EventSelection', required=False)

@@ -10,12 +10,24 @@ from Campaigns.Utils import Campaign
 
 from TriggerAnalysisAlgorithms.TriggerAnalysisSFConfig import trigger_set
 
+# working points following the Enums from https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/TauID/TauAnalysisTools/TauAnalysisTools/Enums.h
+_RNN_JETID_LEVELS = {"Loose": 7, "Medium": 8, "Tight": 9}
+_GNTAU_JETID_LEVELS = {"Loose": 11, "Medium": 12, "Tight": 13}
+_MANUAL_RNN_JETIDWP = {"veryloose": 6, "loose": 7, "medium": 8, "tight": 9}
+_MANUAL_GNTAU_JETIDWP = {"veryloose": 10, "loose": 11, "medium": 12, "tight": 13}
+_MANUAL_ELEIDWP = {"loose": 2, "medium": 3, "tight": 4}
+
+
+def _campaign(config):
+    """the tau CP tool campaign for the current geometry"""
+    return "mc23" if config.geometry() is LHCPeriod.Run3 else "mc20"
+
 
 class TauCalibrationConfig (ConfigBlock):
     """the ConfigBlock for the tau four-momentum correction"""
 
     def __init__ (self) :
-        super (TauCalibrationConfig, self).__init__ ()
+        super().__init__()
         self.setBlockName('Taus')
         self.addOption ('inputContainer', '', type=str,
             info="the name of the input tau-jet container. If left empty, automatically defaults "
@@ -110,26 +122,28 @@ class TauCalibrationConfig (ConfigBlock):
             alg.prefix = 'truth_'
 
             # these are "_ListHelper" objects, and not "list", need to copy to lists to allow concatenate
-            for var in ['DecayMode', 'ParticleType', 'PartonTruthLabelID'] + alg.doubleDecorations[:] + alg.floatDecorations[:] + alg.intDecorations[:] + alg.unsignedIntDecorations[:] + alg.charDecorations[:]:
+            intTruthVars = ['DecayMode', 'ParticleType', 'PartonTruthLabelID']
+            for var in intTruthVars + alg.doubleDecorations[:] + alg.floatDecorations[:] + alg.intDecorations[:] + alg.unsignedIntDecorations[:] + alg.charDecorations[:]:
                 branchName = alg.prefix + var
                 if 'classifierParticle' in var:
                     branchOutput = alg.prefix + var.replace('classifierParticle', '').lower()
                 else:
                     branchOutput = branchName
-                config.addOutputVar (self.containerName, branchName, branchOutput, noSys=True)
+                auxType = 'int' if var in intTruthVars else None
+                config.addOutputVar (self.containerName, branchName, branchOutput, noSys=True, auxType=auxType)
 
         # Decorate extra variables
         if self.decorateExtraVariables:
-           alg = config.createAlgorithm( 'CP::TauExtraVariablesAlg',
-                                         'TauExtraVariablesAlg',
-                                         reentrant=True )
-           alg.taus = config.readName (self.containerName, nominal=True)
+            alg = config.createAlgorithm( 'CP::TauExtraVariablesAlg',
+                                          'TauExtraVariablesAlg',
+                                          reentrant=True )
+            alg.taus = config.readName (self.containerName, nominal=True)
 
         # Set up the tau 4-momentum smearing algorithm:
         alg = config.createAlgorithm( 'CP::TauSmearingAlg', 'TauSmearingAlg' )
         config.addPrivateTool( 'smearingTool', 'TauAnalysisTools::TauSmearingTool' )
         alg.smearingTool.useFastSim = config.dataType() is DataType.FastSim
-        alg.smearingTool.Campaign = "mc23" if config.geometry() is LHCPeriod.Run3 else "mc20"
+        alg.smearingTool.Campaign = _campaign(config)
         if config.geometry() is LHCPeriod.Run2 and self.useGNTau:
            raise RuntimeError("Tau Smearing recommendations with GNTau are not yet available for Run2") 
         alg.smearingTool.useGNTau = self.useGNTau
@@ -158,7 +172,7 @@ class TauWorkingPointSelectionConfig (ConfigBlock) :
     """the ConfigBlock for the tau working point selection"""
 
     def __init__ (self) :
-        super (TauWorkingPointSelectionConfig, self).__init__ ()
+        super().__init__()
         self.setBlockName('TauWorkingPointSelection')
         self.addOption ('containerName', '', type=str,
             noneAction='error',
@@ -242,6 +256,10 @@ class TauWorkingPointSelectionConfig (ConfigBlock) :
 
         # do tau seletion through external txt config file
         if self.useSelectionConfigFile:
+            if self.dropPtCut and self.useLowPt:
+                raise ValueError ("dropPtCut and useLowPt cannot both be set")
+            if self.dropPtCut and not self.useGNTau:
+                raise ValueError ("dropPtCut is only supported together with useGNTau")
             nameFormat = 'TauAnalysisAlgorithms/tau_selection_'
             if self.dropPtCut:
                 nameFormat = nameFormat + 'nopt_'
@@ -259,8 +277,7 @@ class TauWorkingPointSelectionConfig (ConfigBlock) :
             nameFormat = nameFormat + '.conf'    
 
             if self.quality not in ['Tight', 'Medium', 'Loose', 'VeryLoose', 'Baseline', 'BaselineForFakes'] :
-                raise ValueError ("invalid tau quality: \"" + self.quality +
-                                  "\", allowed values are Tight, Medium, Loose, " +
+                raise ValueError (f"invalid tau quality: \"{self.quality}\", allowed values are Tight, Medium, Loose, "
                                   "VeryLoose, Baseline, BaselineForFakes")
 
         # Set up the algorithm selecting taus:
@@ -294,37 +311,24 @@ class TauWorkingPointSelectionConfig (ConfigBlock) :
             #cross-check that min rnn score and min gntau score are not both set at the same time
             if self.manual_sel_minrnnscore != -1 and self.manual_sel_mingntauscore != -1:
                raise RuntimeError("manual_sel_minrnnscore and manual_sel_mingntauscore have been both set; please choose only one type of ID: RNN or GNTau, not both") 
+            # cross-check that RNN and GNTau WPs are not set at the same time
+            if self.manual_sel_rnnwp is not None and self.manual_sel_gntauwp is not None:
+                raise RuntimeError("manual_sel_rnnwp and manual_sel_gntauwp have been both set; please choose only one type of ID: RNN or GNTau, not both")
             # working point following the Enums from https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/TauID/TauAnalysisTools/TauAnalysisTools/Enums.h
-            if self.manual_sel_rnnwp is None:
-               alg.selectionTool.JetIDWP = 1 
-            elif self.manual_sel_rnnwp == "veryloose":
-               alg.selectionTool.JetIDWP = 6
-            elif self.manual_sel_rnnwp == "loose":
-               alg.selectionTool.JetIDWP = 7
-            elif self.manual_sel_rnnwp == "medium":
-               alg.selectionTool.JetIDWP = 8
-            elif self.manual_sel_rnnwp == "tight":
-               alg.selectionTool.JetIDWP = 9
-            else:   
-               raise ValueError ("invalid RNN TauID WP: \"" + self.manual_sel_rnnwp + "\". Allowed values are None, veryloose, loose, medium, tight")
+            alg.selectionTool.JetIDWP = 1
+            if self.manual_sel_rnnwp is not None:
+                if self.manual_sel_rnnwp not in _MANUAL_RNN_JETIDWP:
+                    raise ValueError (f"invalid RNN TauID WP: \"{self.manual_sel_rnnwp}\". Allowed values are None, veryloose, loose, medium, tight")
+                alg.selectionTool.JetIDWP = _MANUAL_RNN_JETIDWP[self.manual_sel_rnnwp]
 
             # cross-check that min rnn score and RNN WPs are not set at the same time
             if self.manual_sel_minrnnscore != -1 and self.manual_sel_rnnwp is not None:
                 raise RuntimeError("manual_sel_minrnnscore and manual_sel_rnnwp have been both set; please set only one of them") 
 
-            # working point following the Enums from https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/TauID/TauAnalysisTools/TauAnalysisTools/Enums.h
-            if self.manual_sel_gntauwp is None:
-               alg.selectionTool.JetIDWP = 1
-            elif self.manual_sel_gntauwp == "veryloose":
-               alg.selectionTool.JetIDWP = 10
-            elif self.manual_sel_gntauwp == "loose":
-               alg.selectionTool.JetIDWP = 11
-            elif self.manual_sel_gntauwp == "medium":
-               alg.selectionTool.JetIDWP = 12
-            elif self.manual_sel_gntauwp == "tight":
-               alg.selectionTool.JetIDWP = 13  
-            else:
-               raise ValueError ("invalid GNN Tau ID WP: \"" + self.manual_sel_gntauwp + "\". Allowed values are None, veryloose, loose, medium, tight")
+            if self.manual_sel_gntauwp is not None:
+                if self.manual_sel_gntauwp not in _MANUAL_GNTAU_JETIDWP:
+                    raise ValueError (f"invalid GNN Tau ID WP: \"{self.manual_sel_gntauwp}\". Allowed values are None, veryloose, loose, medium, tight")
+                alg.selectionTool.JetIDWP = _MANUAL_GNTAU_JETIDWP[self.manual_sel_gntauwp]
 
             # cross-check that min gntau score and GNTau WPs are not set at the same time
             if self.manual_sel_mingntauscore != -1 and self.manual_sel_gntauwp is not None:
@@ -332,15 +336,11 @@ class TauWorkingPointSelectionConfig (ConfigBlock) :
 
             # working point following the Enums from https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/TauID/TauAnalysisTools/TauAnalysisTools/Enums.h 
             if self.manual_sel_evetowp is None:
-               alg.selectionTool.EleIDWP = 1
-            elif self.manual_sel_evetowp == "loose":
-               alg.selectionTool.EleIDWP = 2
-            elif self.manual_sel_evetowp == "medium":
-               alg.selectionTool.EleIDWP = 3
-            elif self.manual_sel_evetowp == "tight":
-               alg.selectionTool.EleIDWP = 4   
+                alg.selectionTool.EleIDWP = 1
+            elif self.manual_sel_evetowp in _MANUAL_ELEIDWP:
+                alg.selectionTool.EleIDWP = _MANUAL_ELEIDWP[self.manual_sel_evetowp]
             else:
-               raise ValueError ("invalid eVeto WP: \"" + self.manual_sel_evetowp + "\". Allowed values are None, loose, medium, tight")  
+                raise ValueError (f"invalid eVeto WP: \"{self.manual_sel_evetowp}\". Allowed values are None, loose, medium, tight")
 
             # set MuonOLR option:
             alg.selectionTool.MuonOLR = self.manual_sel_muonolr
@@ -356,7 +356,7 @@ class TauWorkingPointEfficiencyConfig (ConfigBlock) :
     """the ConfigBlock for the tau working point efficiency computation"""
 
     def __init__ (self) :
-        super (TauWorkingPointEfficiencyConfig, self).__init__ ()
+        super().__init__()
         self.setBlockName('TauWorkingPointEfficiency')
         self.addDependency('TauWorkingPointSelection', required=True)
         self.addDependency('EventSelection', required=False)
@@ -405,6 +405,14 @@ class TauWorkingPointEfficiencyConfig (ConfigBlock) :
         else:
             return self.containerName + '_' + self.selectionName
 
+    def _eVetoEleIDLevel (self) :
+        """the EleIDLevel for the eVeto scale factors"""
+        # since all TauSelectionTool config files have loose eRNN, code only this option for now
+        #overwrite decision in case user selects a WP different than "loose" manually
+        if self.manual_sel_evetowp == "medium":
+            return 3
+        return 2
+
     def makeAlgs (self, config) :
 
         selectionPostfix = self.selectionName
@@ -418,8 +426,7 @@ class TauWorkingPointEfficiencyConfig (ConfigBlock) :
             postfix = '_' + postfix
 
         if self.quality is not None and self.quality not in ['Tight', 'Medium', 'Loose', 'VeryLoose', 'Baseline', 'BaselineForFakes'] :
-            raise ValueError ("invalid tau quality: \"" + self.quality +
-                              "\", allowed values are Tight, Medium, Loose, " +
+            raise ValueError (f"invalid tau quality: \"{self.quality}\", allowed values are Tight, Medium, Loose, "
                               "VeryLoose, Baseline, BaselineForFakes")
 
         sfList = []
@@ -437,7 +444,7 @@ class TauWorkingPointEfficiencyConfig (ConfigBlock) :
             config.addPrivateTool( 'efficiencyCorrectionsTool',
                             'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
             alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [0]
-            alg.efficiencyCorrectionsTool.Campaign = "mc23" if config.geometry() is LHCPeriod.Run3 else "mc20"
+            alg.efficiencyCorrectionsTool.Campaign = _campaign(config)
             alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
             alg.scaleFactorDecoration = 'tau_Reco_effSF' + selectionPostfix + '_%SYS%'
             alg.outOfValidity = 2 #silent
@@ -450,7 +457,7 @@ class TauWorkingPointEfficiencyConfig (ConfigBlock) :
             sfList += [alg.scaleFactorDecoration]
 
 
-            campaign = "mc23" if config.geometry() is LHCPeriod.Run3 else "mc20" 
+            campaign = _campaign(config)
 
             # TauEfficiencyCorrectionTool for Identification, use only in case TauID is requested in TauSelectionTool
             if self.quality not in ('VeryLoose','Baseline','BaselineForFakes'):
@@ -460,20 +467,12 @@ class TauWorkingPointEfficiencyConfig (ConfigBlock) :
                             'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
                 alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [4]
 
-                jetIDLevels = (
-                    {"Loose": 11, "Medium": 12, "Tight": 13}
-                    if self.useGNTau
-                    else {"Loose": 7, "Medium": 8, "Tight": 9}
-                )
+                jetIDLevels = _GNTAU_JETID_LEVELS if self.useGNTau else _RNN_JETID_LEVELS
                 wp = self.quality
                 if not self.useGNTau and self.manual_sel_rnnwp is not None:
                     wp = self.manual_sel_rnnwp.capitalize()
                 if wp not in jetIDLevels:
-                    raise ValueError(
-                        'Invalid tauID: "'
-                        + str(wp)
-                        + '". Allowed values are Loose, Medium, Tight'
-                    )
+                    raise ValueError(f'Invalid tauID: "{wp}". Allowed values are Loose, Medium, Tight')
 
                 alg.efficiencyCorrectionsTool.JetIDLevel = jetIDLevels[wp]
                 alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
@@ -499,11 +498,7 @@ class TauWorkingPointEfficiencyConfig (ConfigBlock) :
                     config.addPrivateTool( 'efficiencyCorrectionsTool',
                                     'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
                     alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [10]
-                    # since all TauSelectionTool config files have loose eRNN, code only this option for now
-                    alg.efficiencyCorrectionsTool.EleIDLevel = 2
-                    #overwrite decision in case user selects a WP different than "loose" manually
-                    if self.manual_sel_evetowp == "medium":
-                        alg.efficiencyCorrectionsTool.EleIDLevel = 3
+                    alg.efficiencyCorrectionsTool.EleIDLevel = self._eVetoEleIDLevel()
 
                     alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
                     alg.efficiencyCorrectionsTool.Campaign = campaign
@@ -511,20 +506,12 @@ class TauWorkingPointEfficiencyConfig (ConfigBlock) :
                     alg.scaleFactorDecoration = 'tau_EvetoFakeTau_effSF' + selectionPostfix + '_%SYS%'
 
                     # for 2025-prerec, eVeto recommendations are given separately for Loose and Medium RNN
-                    jetIDLevels = (
-                        {"Loose": 11, "Medium": 12, "Tight": 13}
-                        if self.useGNTau
-                        else {"Loose": 7, "Medium": 8, "Tight": 9}
-                    )
+                    jetIDLevels = _GNTAU_JETID_LEVELS if self.useGNTau else _RNN_JETID_LEVELS
                     wp = self.quality
                     if not self.useGNTau and self.manual_sel_rnnwp is not None:
                         wp = self.manual_sel_rnnwp.capitalize()
                     if wp not in jetIDLevels:
-                        raise ValueError(
-                            'Invalid tauID: "'
-                            + str(wp)
-                            + '". Allowed values are Loose, Medium, Tight'
-                        )
+                        raise ValueError(f'Invalid tauID: "{wp}". Allowed values are Loose, Medium, Tight')
                     if wp == "Tight":
                         log.warning(
                             "eVeto SFs are not available for Tight WP -> fallback to Medium WP"
@@ -548,13 +535,9 @@ class TauWorkingPointEfficiencyConfig (ConfigBlock) :
                                 'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
                 alg.efficiencyCorrectionsTool.EfficiencyCorrectionTypes = [8]
                 alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
-                alg.efficiencyCorrectionsTool.Campaign = "mc23" if config.geometry() is LHCPeriod.Run3 else "mc20"
+                alg.efficiencyCorrectionsTool.Campaign = _campaign(config)
                 alg.scaleFactorDecoration = 'tau_EvetoTrueTau_effSF' + selectionPostfix + '_%SYS%'
-                # since all TauSelectionTool config files have loose eRNN, code only this option for now
-                alg.efficiencyCorrectionsTool.EleIDLevel = 2
-                #overwrite decision in case user selects a WP different than "loose" manually
-                if self.manual_sel_evetowp == "medium":
-                    alg.efficiencyCorrectionsTool.EleIDLevel = 3
+                alg.efficiencyCorrectionsTool.EleIDLevel = self._eVetoEleIDLevel()
                 alg.outOfValidity = 2 #silent
                 alg.outOfValidityDeco = 'bad_EvetoTrueTau_eff' + selectionPostfix
                 alg.taus = config.readName (self.containerName)
@@ -576,7 +559,7 @@ class TauWorkingPointEfficiencyConfig (ConfigBlock) :
                 
 class EXPERIMENTAL_TauCombineMuonRemovalConfig (ConfigBlock) :
     def __init__ (self) :
-        super (EXPERIMENTAL_TauCombineMuonRemovalConfig, self).__init__ ()
+        super().__init__()
         self.addOption (
             'inputTaus', 'TauJets', type=str,
             noneAction='error',
@@ -610,7 +593,7 @@ class EXPERIMENTAL_TauCombineMuonRemovalConfig (ConfigBlock) :
 class TauTriggerAnalysisSFBlock (ConfigBlock):
 
     def __init__ (self) :
-        super (TauTriggerAnalysisSFBlock, self).__init__ ()
+        super().__init__()
         self.addDependency('EventSelection', required=False)
         self.addDependency('EventSelectionMerger', required=False)
         self.addOption ('triggerChainsPerYear', {}, type=dict,
@@ -668,15 +651,9 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
 
                 # JetIDLevel from
                 # https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/TauID/TauAnalysisTools/TauAnalysisTools/Enums.h#L79
-                if self.tauID=="Loose":
-                    JetIDLevel = 7
-                elif self.tauID=="Medium":
-                    JetIDLevel = 8
-                elif self.tauID=="Tight":
-                    JetIDLevel = 9
-                else:
-                    raise ValueError ("invalid tauID: \"" + self.tauID + "\". Allowed values are loose, medium, tight")
-                alg.efficiencyCorrectionsTool.JetIDLevel = JetIDLevel
+                if self.tauID not in _RNN_JETID_LEVELS:
+                    raise ValueError (f"invalid tauID: \"{self.tauID}\". Allowed values are Loose, Medium, Tight")
+                alg.efficiencyCorrectionsTool.JetIDLevel = _RNN_JETID_LEVELS[self.tauID]
                 alg.efficiencyCorrectionsTool.TriggerSFMeasurement = "combined"
                 alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
 
