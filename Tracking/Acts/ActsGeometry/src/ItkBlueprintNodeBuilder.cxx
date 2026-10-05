@@ -6,24 +6,24 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 //
 
-#include <Acts/Definitions/Units.hpp>
-#include <Acts/Geometry/Blueprint.hpp>
-#include <Acts/Geometry/BlueprintNode.hpp>
-#include <Acts/Geometry/ContainerBlueprintNode.hpp>
-#include <Acts/Geometry/CylinderVolumeBounds.hpp>
-#include <Acts/Geometry/Extent.hpp>
-#include <Acts/Geometry/GeometryIdentifierBlueprintNode.hpp>
-#include <Acts/Geometry/LayerBlueprintNode.hpp>
-#include <Acts/Geometry/MaterialDesignatorBlueprintNode.hpp>
-#include <Acts/Geometry/ProtoLayer.hpp>
-#include <Acts/Geometry/VolumeAttachmentStrategy.hpp>
-#include <Acts/Geometry/PadBlueprintNode.hpp>
-#include <Acts/Navigation/SurfaceArrayNavigationPolicy.hpp>
-#include <Acts/Navigation/CylinderNavigationPolicy.hpp>
-#include <Acts/Navigation/TryAllNavigationPolicy.hpp>
-#include <Acts/Surfaces/SurfaceArray.hpp>
-#include <Acts/Utilities/AxisDefinitions.hpp>
-#include <Acts/Utilities/AxisSpec.hpp>
+#include "Acts/Definitions/Units.hpp"
+#include "Acts/Geometry/Blueprint.hpp"
+#include "Acts/Geometry/BlueprintNode.hpp"
+#include "Acts/Geometry/ContainerBlueprintNode.hpp"
+#include "Acts/Geometry/CylinderVolumeBounds.hpp"
+#include "Acts/Geometry/Extent.hpp"
+#include "Acts/Geometry/GeometryIdentifierBlueprintNode.hpp"
+#include "Acts/Geometry/LayerBlueprintNode.hpp"
+#include "Acts/Geometry/MaterialDesignatorBlueprintNode.hpp"
+#include "Acts/Geometry/ProtoLayer.hpp"
+#include "Acts/Geometry/VolumeAttachmentStrategy.hpp"
+#include "Acts/Geometry/PadBlueprintNode.hpp"
+#include "Acts/Navigation/SurfaceArrayNavigationPolicy.hpp"
+#include "Acts/Navigation/CylinderNavigationPolicy.hpp"
+#include "Acts/Navigation/TryAllNavigationPolicy.hpp"
+#include "Acts/Surfaces/SurfaceArray.hpp"
+#include "Acts/Utilities/AxisDefinitions.hpp"
+#include "Acts/Utilities/AxisSpec.hpp"
 #include <cstddef>
 #include <format>
 #include <ranges>
@@ -48,16 +48,6 @@ using AttachmentStrategy = Acts::VolumeAttachmentStrategy;
 using ResizeStrategy = Acts::VolumeResizeStrategy;
 using namespace ActsTrk::detail::GeoVolIds;
 
-// Helper function to convert shared_ptr vector to const ptr vector
-std::vector<const Acts::Surface*> makeConstPtrVector(
-    const std::vector<std::shared_ptr<Acts::Surface>>& surfs) {
-  std::vector<const Acts::Surface*> constPtrs;
-  constPtrs.reserve(surfs.size());
-  for (const auto& surf : surfs) {
-    constPtrs.push_back(surf.get());
-  }
-  return constPtrs;
-}
 
 // Helper struct to keep ProtoLayer and its associated surfaces together
 struct LayerData {
@@ -66,7 +56,7 @@ struct LayerData {
 
   LayerData(const Acts::GeometryContext& gctx,
             std::vector<std::shared_ptr<Acts::Surface>> surfs)
-      : protoLayer(gctx, makeConstPtrVector(surfs)),
+      : protoLayer(gctx, Acts::unpackConstSmartPointers(surfs)),
         surfaces(std::move(surfs)) {}
 };
 
@@ -121,7 +111,7 @@ void addStripBarrelLayer(
   using enum Acts::AxisDirection;
 
   auto addLayer = [ilayer, &surfaces](auto& node) {
-    node.addLayer("Strip_Brl_" + std::to_string(ilayer), [&](auto& layer) {
+    node.addLayer(std::format("Strip_Brl_{:}", ilayer), [&](auto& layer) {
       layer.setNavigationPolicyFactory(
           Acts::NavigationPolicyFactory{}
               .add<Acts::SurfaceArrayNavigationPolicy>(
@@ -149,7 +139,7 @@ void addStripBarrelLayer(
   // Layer 3 carries no material; skip the MaterialDesignator wrapper to avoid
   // empty-designator warnings and call addLayer directly on the parent.
   if (ilayer < 3) {
-    parent.addMaterial("Strip_Brl_" + std::to_string(ilayer) + "_Material",
+    parent.addMaterial(std::format("Strip_Brl_{:}_Material", ilayer) ,
                        [&addLayer](auto& lmat) {
                          lmat.configureFace(
                              OuterCylinder,
@@ -175,7 +165,7 @@ void addStripEndcapLayer(
   // toward the barrel and fuses with the barrel end disc (the kept, smaller-|z|
   // surface). Surviving material sits at the smaller-|z| side of each gap.
   const auto outwardDisc = (bec > 0) ? PositiveDisc : NegativeDisc;
-  parent.addMaterial(name + "_Material", [&](auto& mat) {
+  parent.addMaterial(std::format("{:}_Material", name), [&](auto& mat) {
     mat.configureFace(outwardDisc, AxisSpec::DeferredEquidistant(50, AxisR),
                       AxisSpec::DeferredEquidistant(50, AxisPhi));
 
@@ -266,7 +256,11 @@ ItkBlueprintNodeBuilder::buildBlueprintNode(
   envelope[AxisDirection::AxisR] = {1_mm, 2_mm};
   auto padNode = std::make_shared<Acts::PadBlueprintNode>("ITkEnvelope", envelope);
   padNode->addChild(itkNode);
-  return padNode;
+  /// Setup a fixed geometry Identifier
+  auto idNode = std::make_shared<Acts::GeometryIdentifierBlueprintNode>();
+  idNode->setDirectChildVolumeIdTo(s_ITkEnvelopeId);
+  idNode->addChild(std::move(padNode));
+  return idNode;
 }
 
 void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
@@ -425,7 +419,7 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
       auto& ecGeoId = innerPixelContainer.withGeometryIdentifier();
       ecGeoId.setAllVolumeIdsTo(s_innerPixelVolumeId + std::floor(bec / 2))
           .incrementLayerIds(1);
-      auto& ec = ecGeoId.addCylinderContainer("InnerPixel_" + s + "EC", AxisZ);
+      auto& ec = ecGeoId.addCylinderContainer(std::format("InnerPixel_{:}EC", s), AxisZ);
       // Collapse the inter-disk gaps by extending the outer disk inward onto
       // its neighbour (Second for +z, First for -z), keeping the material
       // surface at the smaller-|z| side of each gap (see per-disk material
@@ -527,7 +521,7 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
         // toward the barrel and fuses with the barrel end disc (the kept,
         // smaller-|z| surface).
         const auto outwardDisc = (bec > 0) ? PositiveDisc : NegativeDisc;
-        ec.addMaterial(layerName + "_Material", [&](auto& lmat) {
+        ec.addMaterial(std::format("{:}_Material", layerName), [&](auto& lmat) {
           lmat.configureFace(outwardDisc,
                              AxisSpec::DeferredEquidistant(50, AxisR),
                              AxisSpec::DeferredEquidistant(50, AxisPhi));
@@ -605,7 +599,7 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
                                << " surfaces");
 
       auto configureLayer = [&](auto& node) {
-        auto& layer = node.addLayer("OuterPixel_Brl_" + std::to_string(ilayer));
+        auto& layer = node.addLayer(std::format("OuterPixel_Brl_{:}", ilayer));
         layer.setNavigationPolicyFactory(
             Acts::NavigationPolicyFactory{}
                 .add<Acts::SurfaceArrayNavigationPolicy>(
@@ -662,7 +656,7 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
           .incrementLayerIds(1);
 
       auto& ec_outer =
-          ec_outer_geoId.addCylinderContainer("OuterPixel_" + s + "EC", AxisR);
+          ec_outer_geoId.addCylinderContainer(std::format("OuterPixel_{:}EC", s), AxisR);
 
       // Three groups of disks stacked in R
       std::array diskGroups{std::pair{3, 4}, std::pair{6, 5}, std::pair{7, 8}};
@@ -673,7 +667,7 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
         Acts::MaterialDesignatorBlueprintNode* material = nullptr;
         if (idx < (diskGroups.size() - 1)) {
           material = &ec_outer.addMaterial(
-              "OuterPixel_" + s + "EC_" + std::to_string(idx) + "_Material",
+             std::format("OuterPixel_{:}EC_{:}_Material", s, idx ),
               [&](auto& mat) {
                 mat.configureFace(OuterCylinder,
                                   AxisSpec::DeferredEquidistant(50, AxisRPhi),
@@ -684,9 +678,9 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
         auto& ec_stack =
             material
                 ? material->addCylinderContainer(
-                      "OuterPixel_" + s + "EC_" + std::to_string(idx), AxisZ)
+                     std::format("OuterPixel_{:}EC_{:}", s, idx), AxisZ)
                 : ec_outer.addCylinderContainer(
-                      "OuterPixel_" + s + "EC_" + std::to_string(idx), AxisZ);
+                     std::format("OuterPixel_{:}EC_{:}", s, idx), AxisZ);
 
         // Collapse inter-disk gaps by extending the outer disk inward (Second
         // for +z, First for -z); material kept only on outward discs (see
@@ -725,18 +719,17 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
         }
 
         std::ranges::sort(sorted_rings, [&gctx](const auto& a, const auto& b) {
-          Acts::ProtoLayer pl_a(gctx, makeConstPtrVector(a));
-          Acts::ProtoLayer pl_b(gctx, makeConstPtrVector(b));
+          Acts::ProtoLayer pl_a(gctx, Acts::unpackConstSmartPointers(a));
+          Acts::ProtoLayer pl_b(gctx, Acts::unpackConstSmartPointers(b));
           return std::abs(pl_a.min(AxisZ)) < std::abs(pl_b.min(AxisZ));
         });
 
         for (size_t i = 0; i < sorted_rings.size(); ++i) {
           const auto& surfaces = sorted_rings[i];
-          auto layerName = "OuterPixel_" + s + "EC_" + std::to_string(idx) +
-                           "_" + std::to_string(i);
+          const std::string layerName = std::format("OuterPixel_{:}EC_{:}_{:}", s,idx, i);
 
           const auto outwardDisc = (bec > 0) ? PositiveDisc : NegativeDisc;
-          ec_stack.addMaterial(layerName + "_Material", [&](auto& mat) {
+          ec_stack.addMaterial(std::format("{:}_Material", layerName), [&](auto& mat) {
             mat.configureFace(outwardDisc,
                               AxisSpec::DeferredEquidistant(50, AxisR),
                               AxisSpec::DeferredEquidistant(50, AxisPhi));
@@ -874,8 +867,8 @@ void ItkBlueprintNodeBuilder::buildItkStripBlueprintNode(
 
       std::sort(sorted_layers.begin(), sorted_layers.end(),
                 [&gctx](const auto& a, const auto& b) {
-                  Acts::ProtoLayer pl_a(gctx, makeConstPtrVector(a));
-                  Acts::ProtoLayer pl_b(gctx, makeConstPtrVector(b));
+                  Acts::ProtoLayer pl_a(gctx, Acts::unpackConstSmartPointers(a));
+                  Acts::ProtoLayer pl_b(gctx, Acts::unpackConstSmartPointers(b));
                   return std::abs(pl_a.min(AxisZ)) < std::abs(pl_b.min(AxisZ));
                 });
 
@@ -885,7 +878,7 @@ void ItkBlueprintNodeBuilder::buildItkStripBlueprintNode(
             .incrementLayerIds(1);
 
         geoId.addCylinderContainer(
-            "Strip_" + s + "EC", AxisZ, [&sorted_layers, &s, bec](auto& ec) {
+            std::format("Strip_{:}_EC", s), AxisZ, [&sorted_layers, &s, bec](auto& ec) {
               // Collapse inter-disk gaps; material kept on outward discs only
               // (see addStripEndcapLayer), so it stays at the smaller-|z| side.
               ec.setAttachmentStrategy(bec > 0 ? AttachmentStrategy::Second
@@ -900,7 +893,7 @@ void ItkBlueprintNodeBuilder::buildItkStripBlueprintNode(
 
               for (size_t i = 0; i < sorted_layers.size(); ++i) {
                 const auto& surfaces = sorted_layers[i];
-                auto layerName = "Strip_" + s + "EC_" + std::to_string(i);
+                auto layerName = std::format("Strip_{:}EC_{:}", s, i);
                 addStripEndcapLayer(ec, layerName, surfaces, bec);
               }
             });
@@ -916,7 +909,7 @@ void ItkBlueprintNodeBuilder::buildItkStripBlueprintNode(
   for (auto& element : elements) {
     allStripSurfaces.push_back(element->surface().getSharedPtr());
   }
-  Acts::ProtoLayer stripExtent(gctx, makeConstPtrVector(allStripSurfaces));
+  Acts::ProtoLayer stripExtent(gctx, Acts::unpackConstSmartPointers(allStripSurfaces));
 
   constexpr double spacerClearance = 5_mm;
   constexpr double spacerThickness = 5_mm;

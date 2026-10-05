@@ -1290,7 +1290,7 @@ const Acts::TrackingVolume*
       switch (envType) {
           using enum ActsTrk::SystemEnvelope;
           case ITkExit:
-              retVol = m_trackingGeometry->findVolumeByName("ITkEnvelope");
+              retVol = m_trackingGeometry->findVolume(Acts::GeometryIdentifier{}.withVolume(s_ITkEnvelopeId));
               break;
           case CaloExit:
               retVol = m_trackingGeometry->findVolume(Acts::GeometryIdentifier{}.withVolume(s_caloEnvelopeID));
@@ -1443,7 +1443,7 @@ StatusCode TrackingGeometrySvc::buildDetrayGeometry() {
 
       auto volName = [&names](detray::dindex idx) -> std::string {
         return names.contains(idx) ? names.at(idx)
-                                   : ("volume " + std::to_string(idx));
+                                   : std::format("volume {:}", idx);
       };
 
       ATH_MSG_INFO("Detray portal links: " << nPortals
