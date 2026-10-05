@@ -157,23 +157,23 @@ ActsConversionStripSpacePointPreparationAlg                       INFO Data Prep
 ActsConversionStripSeedingAlg                                     INFO Seed statistics
 |-------------|------------|
 | Spacepoints |       7817 |
-| Seeds       |         78 |
+| Seeds       |        115 |
 |-------------|------------|
 ActsConversionTrackFindingAlg                                     INFO statistics
 |-----------------------------------|------------|------------|
 |                           All eta | SSS        | ALL        |
 |-----------------------------------|------------|------------|
-| Input seeds                       |         78 |         78 |
+| Input seeds                       |        115 |        115 |
 | No track parameters               |          0 |          0 |
-| Used   seeds                      |         72 |         72 |
-| Cannot find track                 |         15 |         15 |
+| Used   seeds                      |        109 |        109 |
+| Cannot find track                 |         26 |         26 |
 | Duplicate seeds                   |          4 |          4 |
 | Initial param estimation failed   |          2 |          2 |
-| CKF tracks                        |         57 |         57 |
+| CKF tracks                        |         83 |         83 |
 | Seed refit Kalman fit failure     |          0 |          0 |
 | Rejected refined parameters       |          0 |          0 |
 | selected tracks                   |          3 |          3 |
-| Stopped tracks reaching max holes |         15 |         15 |
+| Stopped tracks reaching max holes |         26 |         26 |
 | Seeds with more than one branch   |          0 |          0 |
 | Tracks failing second CKF         |          0 |          0 |
 | Stopped tracks below pT cut       |          0 |          0 |
@@ -186,19 +186,19 @@ ActsConversionTrackFindingAlg                                     INFO Ratios
 |-------------------------------------------|------------|------------|
 |                                           | SSS        | ALL        |
 |-------------------------------------------|------------|------------|
-| failed / seeds                            |   0.217949 |   0.217949 |
-| duplication / seeds                       |  0.0512821 |  0.0512821 |
+| failed / seeds                            |   0.243478 |   0.243478 |
+| duplication / seeds                       |  0.0347826 |  0.0347826 |
 | Rejected refined params / seeds           |          0 |          0 |
-| selected / CKF tracks                     |  0.0526316 |  0.0526316 |
-| selected tracks / used seeds              |  0.0416667 |  0.0416667 |
+| selected / CKF tracks                     |  0.0361446 |  0.0361446 |
+| selected tracks / used seeds              |  0.0275229 |  0.0275229 |
 | resolved / selected tracks                |          1 |          1 |
-| resolved tracks / used seeds              |  0.0416667 |  0.0416667 |
+| resolved tracks / used seeds              |  0.0275229 |  0.0275229 |
 | branched tracks / used seeds              |          0 |          0 |
 | no 2nd CKF / CKF tracks                   |          0 |          0 |
 | shared hits / CKF tracks                  |          0 |          0 |
 | forced measurements / used seeds          |          0 |          0 |
 |-------------------------------------------|------------|------------|
-| resolved tracks / used seeds     0.0- 0.5 |   0.333333 |   0.333333 |
+| resolved tracks / used seeds     0.0- 0.5 |       0.25 |       0.25 |
 |                                  0.5- 1.0 |        0.5 |        0.5 |
 |                                  1.0- 1.5 |          0 |          0 |
 |                                  1.5- 2.0 |          0 |          0 |
