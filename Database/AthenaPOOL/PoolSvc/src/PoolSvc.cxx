@@ -239,6 +239,7 @@ Token* PoolSvc::registerForWrite(const Placement* placement,
 void PoolSvc::setObjPtr(void*& obj, const Token* token) {
    unsigned int contextId = IPoolSvc::kInputStream;
    const std::string& auxString = token->auxString();
+   bool allowAging = true;
    if (!auxString.empty()) {
       if (auxString.starts_with("[CTXT=")) {
          ::sscanf(auxString.c_str(), "[CTXT=%08X]", &contextId);
@@ -248,6 +249,7 @@ void PoolSvc::setObjPtr(void*& obj, const Token* token) {
       if (contextId >= m_dbSessionVec.size()) {
          ATH_MSG_WARNING("setObjPtr: Using default input Stream instead of id = " << contextId);
          contextId = IPoolSvc::kInputStream;
+         allowAging = false;
       }
    }
    ATH_MSG_VERBOSE("setObjPtr: token=" << token->toString() << ", auxString=" << auxString << ", contextID=" << contextId);
@@ -255,7 +257,7 @@ void PoolSvc::setObjPtr(void*& obj, const Token* token) {
    std::lock_guard<CallMutex> lock(*m_pers_mut[contextId]);
    obj = m_dbSessionVec[contextId]->readObject(*token, obj);
    std::map<unsigned int, unsigned int>::const_iterator maxFileIter = m_contextMaxFile.find(contextId);
-   if (maxFileIter != m_contextMaxFile.end() && maxFileIter->second > 0) {
+   if (allowAging && maxFileIter != m_contextMaxFile.end() && maxFileIter->second > 0) {
       m_guidLists[contextId].remove(token->dbID());
       m_guidLists[contextId].push_back(token->dbID());
       while (m_guidLists[contextId].size() > maxFileIter->second) {
