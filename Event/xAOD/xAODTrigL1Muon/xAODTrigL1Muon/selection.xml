@@ -15,4 +15,55 @@
          id="e062dc04-27d8-4027-a816-66cfe40b7c9e" />
   <typedef name="xAOD::SectorLogicCandDataAuxContainer" />
 
+  <!-- Common interface for the RPC/TGC/MDT candidate types. -->
+  <class name="xAOD::IL1CandData_v1" />
+
+  <!-- xAOD::L1RPCCandData interface type(s). -->
+  <class name="xAOD::L1RPCCandData_v1" />
+  <class name="xAOD::L1RPCCandDataContainer_v1"
+         id="f1feed58-6a01-4f6c-8f1c-365b71251c57" />
+  <typedef name="xAOD::L1RPCCandData" />
+  <typedef name="xAOD::L1RPCCandDataContainer" />
+
+  <!-- xAOD::L1RPCCandData auxiliary type(s). -->
+  <class name="xAOD::L1RPCCandDataAuxContainer_v1"
+         id="e7809135-0aa9-451d-b914-f0bf309e10b3" />
+  <typedef name="xAOD::L1RPCCandDataAuxContainer" />
+
+  <!-- xAOD::L1TGCCandData interface type(s). -->
+  <class name="xAOD::L1TGCCandData_v1" />
+  <class name="xAOD::L1TGCCandDataContainer_v1"
+         id="8d10401a-2171-4a6b-9663-ef0a96e8cf99" />
+  <typedef name="xAOD::L1TGCCandData" />
+  <typedef name="xAOD::L1TGCCandDataContainer" />
+
+  <!-- xAOD::L1TGCCandData auxiliary type(s). -->
+  <class name="xAOD::L1TGCCandDataAuxContainer_v1"
+         id="9d21055f-879d-4401-a051-a95266a00d6b" />
+  <typedef name="xAOD::L1TGCCandDataAuxContainer" />
+
+  <!-- xAOD::L1MDTCandData interface type(s). -->
+  <class name="xAOD::L1MDTCandData_v1" />
+  <class name="xAOD::L1MDTCandDataContainer_v1"
+         id="d138740e-636c-4b55-bad5-af7604d29563" />
+  <typedef name="xAOD::L1MDTCandData" />
+  <typedef name="xAOD::L1MDTCandDataContainer" />
+
+  <!-- xAOD::L1MDTCandData auxiliary type(s). -->
+  <class name="xAOD::L1MDTCandDataAuxContainer_v1"
+         id="475b9ca5-8f4e-40e1-8e2f-458c356cbbed" />
+  <typedef name="xAOD::L1MDTCandDataAuxContainer" />
+
+  <!-- xAOD::L1NSWCandData interface type(s). -->
+  <class name="xAOD::L1NSWCandData_v1" />
+  <class name="xAOD::L1NSWCandDataContainer_v1"
+         id="afb75c2f-438b-4277-82a2-31a5c85d1a64" />
+  <typedef name="xAOD::L1NSWCandData" />
+  <typedef name="xAOD::L1NSWCandDataContainer" />
+
+  <!-- xAOD::L1NSWCandData auxiliary type(s). -->
+  <class name="xAOD::L1NSWCandDataAuxContainer_v1"
+         id="c372d2b3-be5a-415a-8a9d-94d419a39d64" />
+  <typedef name="xAOD::L1NSWCandDataAuxContainer" />
+
 </lcgdict>

@@ -10,12 +10,16 @@ find_package( xAODUtilities )
 atlas_add_library( xAODTrigL1Muon
     xAODTrigL1Muon/*.h xAODTrigL1Muon/versions/*.h Root/*.cxx
     PUBLIC_HEADERS xAODTrigL1Muon
-    LINK_LIBRARIES AthContainers AthLinks xAODBase xAODCore TrigT1MuctpiBits )
+    LINK_LIBRARIES AthContainers AthLinks CxxUtils xAODBase xAODCore TrigT1MuctpiBits )
 
 atlas_add_xaod_smart_pointer_dicts(
    INPUT xAODTrigL1Muon/selection.xml
    OUTPUT _selectionFile
-   CONTAINERS "xAOD::SectorLogicCandDataContainer_v1" )
+   CONTAINERS "xAOD::SectorLogicCandDataContainer_v1"
+              "xAOD::L1RPCCandDataContainer_v1"
+              "xAOD::L1TGCCandDataContainer_v1"
+              "xAOD::L1MDTCandDataContainer_v1"
+              "xAOD::L1NSWCandDataContainer_v1" )
 
 atlas_add_dictionary( xAODTrigL1MuonDict
     xAODTrigL1Muon/xAODTrigL1MuonDict.h

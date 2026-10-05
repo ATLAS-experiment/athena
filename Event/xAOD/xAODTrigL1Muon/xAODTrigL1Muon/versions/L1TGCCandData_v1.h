@@ -1,0 +1,130 @@
+/*
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+#ifndef XAODTRIGL1MUON_VERSION_L1TGCCANDDATA_V1_H
+#define XAODTRIGL1MUON_VERSION_L1TGCCANDDATA_V1_H
+
+// System include(s):
+#include <cstdint>
+
+#include "AthContainers/AuxElement.h"
+#include "xAODTrigL1Muon/IL1CandData.h"
+
+namespace xAOD {
+
+  /** @brief Data class describing the L0 muon candidates produced by TGC-SL
+   *
+   * The candidates are consumed by MDT-TP and L0MuonEndcap. Common candidate
+   * quantities (including the trigger-candidate identifier) are provided by
+   * IL1CandData_v1; this class stores only TGC-specific information.
+   */
+
+  class L1TGCCandData_v1 : public IL1CandData_v1 {
+  public:
+    // default constructor and destructor
+    L1TGCCandData_v1() = default;
+    ~L1TGCCandData_v1() = default;
+
+    /**
+     * @brief Retrieve the inherited encoded pT value in GeV
+     * @return Candidate pT in 0.5 GeV steps; zero denotes an invalid pT estimate
+     */
+    float ptValueGeV() const;
+    /**
+     * @brief Check whether the candidate passed Inner Coincidence
+     * @return True when the Inner Coincidence bit is set in CoinType
+     */
+    bool hasInnerCoincidence() const;
+    /**
+     * @brief Check whether the candidate is in a good magnetic-field region
+     * @return True when the GoodMag bit is set in CoinType
+     */
+    bool goodMagneticField() const;
+    /**
+     * @brief Retrieve the delta phi wrt vector from IP to segment position
+     * @return Delta phi value
+     */
+    float deltaPhi() const; // 4 bits, [2:0] the absolute value in [0,0.032] and [3] the sign (0,1)
+    /**
+     * @brief Retrieve the delta theta value wrt vector from IP to segment position
+     * @return Delta theta value
+     */
+    float deltaTheta() const; // 7 bits, [5:0] the absolute value in [0,0.160]mrad and [6] the sign (0,1)
+    /**
+     * @brief Retrieve the raw encoded delta phi word
+     * @return Four-bit signed delta phi word
+     */
+    uint8_t l1DeltaPhiWord() const;
+    /**
+     * @brief Retrieve the raw encoded delta theta word
+     * @return Seven-bit signed delta theta word
+     */
+    uint8_t l1DeltaThetaWord() const;
+    /**
+     * @brief Retrieve the NSW segments
+     * @return NSW segments
+     */
+    uint32_t l1NswSegment() const;
+
+    /**
+     * @brief Set the Inner Coincidence bit in CoinType
+     * @param value New state of the Inner Coincidence bit
+     */
+    void setHasInnerCoincidence(bool value);
+    /**
+     * @brief Set the GoodMag bit in CoinType
+     * @param value New state of the GoodMag bit
+     */
+    void setGoodMagneticField(bool value);
+    /**
+     * @brief Set the delta phi value
+     * @param dphi Delta phi value
+     */
+    void setDeltaPhi(float dphi);
+    /**
+     * @brief Set the delta theta value
+     * @param dtheta Delta theta value
+     */
+    void setDeltaTheta(float dtheta);
+    /**
+     * @brief Set the raw encoded delta phi word
+     * @param value Four-bit signed delta phi word
+     */
+    void setL1DeltaPhiWord(uint8_t value);
+    /**
+     * @brief Set the raw encoded delta theta word
+     * @param value Seven-bit signed delta theta word
+     */
+    void setL1DeltaThetaWord(uint8_t value);
+    /**
+     * @brief Set the NSW segments
+     * @param nswout NSW segments
+     */
+    void setL1NswSegment(uint32_t nswout);
+
+  private:
+    /// range of the RPC hits z positions
+    static constexpr float s_dthetaRange = 0.160;   // radian
+    static constexpr float s_dphiRange = 0.032;     // radian
+    /// range of the TGC hits positions
+    static constexpr float s_posRange = 12500.0F;
+
+    /// CoinType bit for Inner Coincidence
+    static constexpr uint8_t COINTYPE_INNER_COINCIDENCE_BIT = 0x1;
+    /// CoinType bit for the GoodMag flag
+    static constexpr uint8_t COINTYPE_GOOD_MAGNETIC_FIELD_BIT = 0x2;
+    /// Bit mask for deltaPhi : 1 bit for sign and 3 bits
+    static constexpr uint8_t DPHI_BIT_MASK = 0x7;
+    /// Bit mask for deltaTheta : 1 bit for sign and 6 bits
+    static constexpr uint8_t DTHETA_BIT_MASK = 0x3f;
+    /// Bit mask for NSW-TP output
+    static constexpr uint32_t NSW_BIT_MASK = 0xfffffff;
+
+  };
+
+}  // namespace xAOD
+
+#include "xAODCore/BaseInfo.h"
+SG_BASE( xAOD::L1TGCCandData_v1, xAOD::IL1CandData_v1 );
+
+#endif  // XAODTRIGL1MUON_VERSION_L1TGCCANDDATA_V1_H
