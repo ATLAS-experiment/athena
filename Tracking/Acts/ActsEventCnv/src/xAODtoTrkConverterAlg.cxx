@@ -39,7 +39,7 @@ namespace ActsTrk {
                 ATH_MSG_ERROR("Track conversion failed.");
                 return StatusCode::FAILURE;
             }
-            link = Link_t{*convertedTracks, convertedTracks->size()};
+            link = Link_t{*convertedTracks, convertedTracks->size(), ctx};
             convertedTracks->push_back(std::move(track));
         }
         SG::WriteHandle writeHandle{m_writeKey, ctx};

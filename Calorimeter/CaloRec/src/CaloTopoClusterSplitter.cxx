@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -1197,7 +1197,7 @@ StatusCode CaloTopoClusterSplitter::execute(const EventContext& ctx,
     nShared = sharedCellList.size();
   }
 
-  const DataLink<CaloCellContainer> myCellCollLink (myCellColl);
+  const DataLink<CaloCellContainer> myCellCollLink (myCellColl, ctx);
   
   // create cluster list for the purpose of sorting in E_t before storing 
   // in the cluster collection
