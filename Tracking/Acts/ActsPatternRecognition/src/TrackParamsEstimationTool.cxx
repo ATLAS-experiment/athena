@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/TrackParamsEstimationTool.h"
@@ -10,14 +10,51 @@
 #include "Acts/EventData/StripSpacePointCalibrationDetails.hpp"
 #include "Acts/EventData/TransformationHelpers.hpp"
 #include "Acts/Utilities/MathHelpers.hpp"
+#include "Acts/Utilities/Result.hpp"
+#include "Acts/Utilities/VectorHelpers.hpp"
 
 #include <algorithm>
 #include <cmath>
 #include <ranges>
+#include <span>
+#include <vector>
 
 namespace ActsTrk {
 
 namespace {
+
+bool isStripSpacePoint(const xAOD::SpacePoint* sp) {
+  return sp->elementIdList().size() > 1;
+}
+
+// Move the strip space points along their strips, so that they match the track
+// tangents at their positions. The pixel space points do not change.
+void calibrateStripSpacePoints(
+    std::span<const xAOD::SpacePoint* const> spacePoints,
+    std::span<Acts::Vector3> spPositions,
+    std::span<const Acts::Vector3> spTangents) {
+  for (std::size_t j = 0; j < spacePoints.size(); ++j) {
+    const xAOD::SpacePoint* sp = spacePoints[j];
+    if (!isStripSpacePoint(sp)) {
+      continue;
+    }
+
+    Acts::OuterStripSpacePointCalibrationDetails calibrationDetails;
+    Eigen::Map<Eigen::Vector3f>(calibrationDetails.outerCenter.data()) = sp->topStripCenter();
+    Eigen::Map<Eigen::Vector3f>(calibrationDetails.innerToOuterSeparation.data()) = sp->stripCenterDistance();
+    Eigen::Map<Eigen::Vector3f>(calibrationDetails.outerHalfVector.data()) = sp->topHalfStripLength() * sp->topStripDirection();
+    Eigen::Map<Eigen::Vector3f>(calibrationDetails.innerHalfVector.data()) = sp->bottomHalfStripLength() * sp->bottomStripDirection();
+    const Acts::OuterStripSpacePointCalibrationDetailsDerived derivedCalibrationDetails =
+      Acts::deriveOuterStripSpacePointCalibrationDetails(calibrationDetails);
+
+    const std::optional<Eigen::Vector3f> calibratedPosition =
+      Acts::calibrateOuterStripSpacePoint(spTangents[j].cast<float>(), derivedCalibrationDetails);
+    if (!calibratedPosition.has_value()) {
+      continue;
+    }
+    spPositions[j] = calibratedPosition->cast<double>();
+  }
+}
 
 template <typename sp_range_t>
 Acts::FreeVector estimateTrackParamsFromSeed(
@@ -43,10 +80,7 @@ Acts::FreeVector estimateTrackParamsFromSeed(
     throw std::invalid_argument("Less than 3 space points provided.");
   }
 
-  const bool hasStrip = std::ranges::any_of(spArray, [](const xAOD::SpacePoint* sp) {
-    return sp->elementIdList().size() > 1;
-  });
-  if (hasStrip) {
+  if (std::ranges::any_of(spArray, isStripSpacePoint)) {
     std::array<Acts::Vector3, 3> spTangents{};
 
     for (std::size_t i = 0; i < stripCalibrationIterations; ++i) {
@@ -54,33 +88,75 @@ Acts::FreeVector estimateTrackParamsFromSeed(
         spPositions[0], 0, spPositions[1], spPositions[2], bField,
         &spTangents[0], &spTangents[1], &spTangents[2]);
 
-      for (std::size_t j = 0; j < spArray.size(); ++j) {
-        const xAOD::SpacePoint* sp = spArray[j];
-        const bool isStrip = sp->elementIdList().size() > 1;
-        if (!isStrip) {
-          continue;
-        }
-
-        Acts::OuterStripSpacePointCalibrationDetails calibrationDetails;
-        Eigen::Map<Eigen::Vector3f>(calibrationDetails.outerCenter.data()) = sp->topStripCenter();
-        Eigen::Map<Eigen::Vector3f>(calibrationDetails.innerToOuterSeparation.data()) = sp->stripCenterDistance();
-        Eigen::Map<Eigen::Vector3f>(calibrationDetails.outerHalfVector.data()) = sp->topHalfStripLength() * sp->topStripDirection();
-        Eigen::Map<Eigen::Vector3f>(calibrationDetails.innerHalfVector.data()) = sp->bottomHalfStripLength() * sp->bottomStripDirection();
-        const Acts::OuterStripSpacePointCalibrationDetailsDerived derivedCalibrationDetails =
-          Acts::deriveOuterStripSpacePointCalibrationDetails(calibrationDetails);
-
-        const std::optional<Eigen::Vector3f> calibratedPosition =
-          Acts::calibrateOuterStripSpacePoint(spTangents[j].cast<float>(), derivedCalibrationDetails);
-        if (!calibratedPosition.has_value()) {
-          continue;
-        }
-        spPositions[j] = calibratedPosition->cast<double>();
-      }
+      calibrateStripSpacePoints(spArray, spPositions, spTangents);
     }
   }
 
   return Acts::estimateTrackParamsFromSeed(
     spPositions[0], 0, spPositions[1], spPositions[2], bField);
+}
+
+// Fit a helix through all space points of the range. The fit of three space
+// points is exact, so the triplet estimate is used for them.
+template <typename sp_range_t>
+Acts::Result<Acts::FreeVector> estimateTrackParamsFromAllSpacePoints(
+    const sp_range_t& spRange,
+    const Acts::Vector3& bField,
+    const std::size_t stripCalibrationIterations,
+    const std::size_t geometricRefineIterations,
+    const double weightExponent) {
+  std::vector<const xAOD::SpacePoint*> spacePoints;
+  std::vector<Acts::Vector3> spPositions;
+  for (const auto* sp : spRange) {
+    if (sp == nullptr) {
+      throw std::invalid_argument("Empty space point found.");
+    }
+    spacePoints.push_back(sp);
+    spPositions.emplace_back(sp->x(), sp->y(), sp->z());
+  }
+
+  if (spacePoints.size() == 3) {
+    return Acts::Result<Acts::FreeVector>::success(
+      estimateTrackParamsFromSeed(spacePoints, bField, stripCalibrationIterations));
+  }
+
+  // An empty span gives uniform weights
+  std::vector<double> weights;
+  if (weightExponent != 0) {
+    weights.reserve(spPositions.size());
+    for (const Acts::Vector3& position : spPositions) {
+      const double r = Acts::VectorHelpers::perp(position);
+      weights.push_back(r > 0 ? std::pow(r, -weightExponent) : 1.);
+    }
+  }
+
+  const auto fit = [&](std::size_t referenceIndex) {
+    return Acts::estimateTrackParamsFromSpacePoints(
+      spPositions, bField, 0, geometricRefineIterations, weights, referenceIndex);
+  };
+
+  if (std::ranges::any_of(spacePoints, isStripSpacePoint)) {
+    std::vector<Acts::Vector3> spTangents(spacePoints.size(), Acts::Vector3::Zero());
+
+    for (std::size_t i = 0; i < stripCalibrationIterations; ++i) {
+      // The fitted helix does not depend on the reference index, so the
+      // direction at the reference is the tangent at that space point
+      for (std::size_t j = 0; j < spacePoints.size(); ++j) {
+        if (!isStripSpacePoint(spacePoints[j])) {
+          continue;
+        }
+        const Acts::Result<Acts::FreeVector> tangentParams = fit(j);
+        if (!tangentParams.ok()) {
+          return Acts::Result<Acts::FreeVector>::failure(tangentParams.error());
+        }
+        spTangents[j] = tangentParams->segment<3>(Acts::eFreeDir0);
+      }
+
+      calibrateStripSpacePoints(spacePoints, spPositions, spTangents);
+    }
+  }
+
+  return fit(0);
 }
 
 }
@@ -108,6 +184,8 @@ Acts::FreeVector estimateTrackParamsFromSeed(
     ATH_MSG_DEBUG( "   " << m_firstSp );
     ATH_MSG_DEBUG( "   " << m_minDeltaR );
     ATH_MSG_DEBUG( "   " << m_stripCalibrationIterations );
+    ATH_MSG_DEBUG( "   " << m_geometricRefineIterations );
+    ATH_MSG_DEBUG( "   " << m_spacePointWeightExponent );
     ATH_MSG_DEBUG( "   " << m_refitSeeds );
 
     ATH_CHECK(m_fitterTool.retrieve(EnableTool{m_refitSeeds}));
@@ -192,7 +270,25 @@ Acts::FreeVector estimateTrackParamsFromSeed(
     });
 
     // Compute free parameters
-    Acts::FreeVector freeParams = estimateTrackParamsFromSeed(m_spacePointIndicesFun(sp_collection, useTopSp) | sp_collection_extract, bField, m_stripCalibrationIterations);
+    Acts::FreeVector freeParams;
+    if (m_parameterEstimationMode == 4) {
+      const Acts::Result<Acts::FreeVector> freeParamsResult = estimateTrackParamsFromAllSpacePoints(
+        std::views::iota(std::size_t{0}, nSp) | sp_collection_extract, bField, m_stripCalibrationIterations,
+        m_geometricRefineIterations, m_spacePointWeightExponent);
+      if (!freeParamsResult.ok()) {
+        ATH_MSG_DEBUG("Fit of " << nSp << "-SP seed failed - " << freeParamsResult.error().message());
+        return {std::nullopt, kNoSeedRefit};
+      }
+      freeParams = *freeParamsResult;
+      // The fit cannot resolve the curvature of a straight seed, and a zero
+      // q/p gives NaN in the covariance transport
+      if (freeParams[Acts::eFreeQOverP] == 0) {
+        ATH_MSG_DEBUG("Fit of " << nSp << "-SP seed did not resolve the curvature - skip seed");
+        return {std::nullopt, kNoSeedRefit};
+      }
+    } else {
+      freeParams = estimateTrackParamsFromSeed(m_spacePointIndicesFun(sp_collection, useTopSp) | sp_collection_extract, bField, m_stripCalibrationIterations);
+    }
 
     if (m_parameterEstimationMode == 1 && nSp > 3ul) {
       const auto spacePointIndicesFun2 = [](std::size_t nSp) -> std::array<std::size_t, 3> {
@@ -305,8 +401,8 @@ Acts::FreeVector estimateTrackParamsFromSeed(
         return indices;
       };
     }
-    // FirstMiddleLast
-    if (m_parameterEstimationMode == 2) {
+    // FirstMiddleLast. The fit of all SPs uses the same SPs to detect duplicate seeds.
+    if (m_parameterEstimationMode == 2 || m_parameterEstimationMode == 4) {
       return [](const ActsTrk::SpacePointRange& spacePoints, bool) -> std::array<std::size_t, 3> {
         const std::size_t nSp = spacePoints.size();
         if (nSp > 3ul)
