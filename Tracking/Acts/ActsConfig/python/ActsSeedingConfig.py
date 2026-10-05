@@ -330,6 +330,17 @@ def ActsPixelGbtsSeedingToolCfg(flags,
                       ActsUnits.mm / GaudiUnits.mm)
     kwargs.setdefault("addTriplets", False)
 
+    ## set tau ratio selection
+    kwargs.setdefault("tauRatioCut", 0.007)
+
+    ## set the correct Z0 range
+    kwargs.setdefault("minZ0", -flags.Tracking.ActiveConfig.maxZImpactSeed *
+                      ActsUnits.mm / GaudiUnits.mm)
+    kwargs.setdefault("maxZ0", flags.Tracking.ActiveConfig.maxZImpactSeed *
+                      ActsUnits.mm / GaudiUnits.mm)
+    kwargs.setdefault("filterMaxZ0", flags.Tracking.ActiveConfig.maxZImpactSeed *
+                      ActsUnits.mm / GaudiUnits.mm)
+
     acc.setPrivateTools(CompFactory.ActsTrk.GbtsSeedingTool(name, **kwargs))
     return acc
 
@@ -360,8 +371,28 @@ def ActsStripGbtsSeedingToolCfg(flags,
                       ActsUnits.mm / GaudiUnits.mm)
     ## the strips have few layers, so also keep the seeds with three space points
     kwargs.setdefault("addTriplets", True)
+    kwargs.setdefault("maxEtaAddTriplets", 3.0)
+
     ## the strips reach far beyond the pixel default of 550 mm
     kwargs.setdefault("maxOuterRadius", 1100.0)
+
+    kwargs.setdefault("cutDPhiMax", 0.012)
+    kwargs.setdefault("cutDCurvMax", 0.001)
+    kwargs.setdefault("minDeltaPhi", 0.001)
+
+    ## relax tau ratio selection
+    kwargs.setdefault("tauRatioCut", 0.014)
+    kwargs.setdefault("precutTauRatioMax", 0.018)
+
+    ## set the correct Z0 range
+    kwargs.setdefault("minZ0", -flags.Tracking.ActiveConfig.maxZImpactSeed *
+                      ActsUnits.mm / GaudiUnits.mm)
+    kwargs.setdefault("maxZ0", flags.Tracking.ActiveConfig.maxZImpactSeed *
+                      ActsUnits.mm / GaudiUnits.mm)
+    kwargs.setdefault("filterMaxZ0", flags.Tracking.ActiveConfig.maxZImpactSeed *
+                      ActsUnits.mm / GaudiUnits.mm)
+
+
 
     acc.setPrivateTools(CompFactory.ActsTrk.GbtsSeedingTool(name, **kwargs))
     return acc
