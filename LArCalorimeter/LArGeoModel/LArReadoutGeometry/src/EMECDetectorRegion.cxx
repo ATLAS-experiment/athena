@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "GeoModelKernel/GeoVFullPhysVol.h"
-
 #include "LArReadoutGeometry/EMECDetectorRegion.h"
+
+
+#include "GeoModelKernel/GeoVFullPhysVol.h"
 #include "GeoModelKernel/GeoPcon.h"
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
 #include "GeoModelUtilities/GeoAlignmentStore.h"

@@ -5,6 +5,8 @@
 #ifndef InDetGeoModelUtils_DetectorFactoryBase_H
 #define InDetGeoModelUtils_DetectorFactoryBase_H
 
+#include "GeoPrimitives/GeoPrimitives.h"
+///
 #include "CxxUtils/checker_macros.h"
 #include "GeoModelKernel/GeoVDetectorFactory.h" 
 #include "InDetGeoModelUtils/InDetDDAthenaComps.h"

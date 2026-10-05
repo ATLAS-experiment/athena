@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PIXELGEOMODEL_GEOVPIXELFACTORY_H
@@ -12,7 +12,8 @@
 
 #include <map>
 #include <memory>
-
+///
+#include "GeoPrimitives/GeoPrimitives.h"
 
 #include "GeoModelKernel/GeoFullPhysVol.h"
 #include "GeoModelKernel/GeoLogVol.h"

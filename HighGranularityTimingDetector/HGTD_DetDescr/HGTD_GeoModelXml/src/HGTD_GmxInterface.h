@@ -5,6 +5,8 @@
 #ifndef HGTD_GeoModelXml_HGTD_GMXINTERFACE_H
 #define HGTD_GeoModelXml_HGTD_GMXINTERFACE_H
 
+#include "GeoPrimitives/GeoPrimitives.h"
+///
 #include <AthenaBaseComps/AthMessaging.h>
 #include <GeoModelXml/GmxInterface.h>
 

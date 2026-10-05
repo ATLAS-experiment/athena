@@ -5,6 +5,8 @@
 #ifndef PIXELGEOMODELXML_PIXELGMXINTERFACE_H
 #define PIXELGEOMODELXML_PIXELGMXINTERFACE_H
 
+#include "GeoPrimitives/GeoPrimitives.h"
+///
 #include <AthenaBaseComps/AthMessaging.h>
 #include <GeoModelXml/GmxInterface.h>
 

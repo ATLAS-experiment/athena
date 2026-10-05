@@ -20,7 +20,8 @@
  * The 'level-1' transform is a transform per module.
  */
 
-
+#include "GeoPrimitives/GeoPrimitives.h"
+///
 #include "AthenaBaseComps/AthService.h"
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/ToolHandle.h"

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -19,7 +19,8 @@
 #include "TH2D.h"
 #include "AthenaBaseComps/AthMessaging.h"
 #include "GaudiKernel/MsgStream.h"
-
+#include "GeoPrimitives/GeoPrimitives.h"
+///
 #include "BeamPipeGeoModel/BeamPipeDetectorManager.h"
 #include "PixelReadoutGeometry/PixelDetectorManager.h"
 
