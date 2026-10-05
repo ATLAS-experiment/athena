@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Antonio De Maria
@@ -9,83 +9,28 @@
 #include <AsgDataHandles/ReadHandle.h>
 #include <AsgDataHandles/WriteDecorHandle.h>
 
+#include <Math/Vector4D.h>
+#include <Math/VectorUtil.h>
+
+#include <array>
+
 namespace CP {
 
   StatusCode DiTauExtraVariablesAlg::initialize() {
 
-    if (m_omniScoreKey.contHandleKey().key() == m_omniScoreKey.key()) {
-      m_omniScoreKey = m_ditausKey.key() + "." + m_omniScoreKey.key();
-    }
-
-    if (m_nSubjetsKey.contHandleKey().key() == m_nSubjetsKey.key()) {
-      m_nSubjetsKey = m_ditausKey.key() + "." + m_nSubjetsKey.key();
-    }
-
-    // leading subjet info	  
-    if (m_leadSubjetPtKey.contHandleKey().key() == m_leadSubjetPtKey.key()) {
-      m_leadSubjetPtKey = m_ditausKey.key() + "." + m_leadSubjetPtKey.key();
-    }
-
-    if (m_leadSubjetEtaKey.contHandleKey().key() == m_leadSubjetEtaKey.key()) {
-      m_leadSubjetEtaKey = m_ditausKey.key() + "." + m_leadSubjetEtaKey.key();
-    }
-
-    if (m_leadSubjetPhiKey.contHandleKey().key() == m_leadSubjetPhiKey.key()) {
-      m_leadSubjetPhiKey = m_ditausKey.key() + "." + m_leadSubjetPhiKey.key();
-    }
-
-    if (m_leadSubjetEKey.contHandleKey().key() == m_leadSubjetEKey.key()) {
-      m_leadSubjetEKey = m_ditausKey.key() + "." + m_leadSubjetEKey.key();
-    }
-
-    if (m_leadSubjetNTracksKey.contHandleKey().key() == m_leadSubjetNTracksKey.key()) {
-      m_leadSubjetNTracksKey = m_ditausKey.key() + "." + m_leadSubjetNTracksKey.key();
-    }
-
-    if (m_leadSubjetChargeKey.contHandleKey().key() == m_leadSubjetChargeKey.key()) {
-      m_leadSubjetChargeKey = m_ditausKey.key() + "." + m_leadSubjetChargeKey.key();
-    }
-
-    // subleading subjet info
-    if (m_subleadSubjetPtKey.contHandleKey().key() == m_subleadSubjetPtKey.key()) {
-      m_subleadSubjetPtKey = m_ditausKey.key() + "." + m_subleadSubjetPtKey.key();
-    }
-
-    if (m_subleadSubjetEtaKey.contHandleKey().key() == m_subleadSubjetEtaKey.key()) {
-      m_subleadSubjetEtaKey = m_ditausKey.key() + "." + m_subleadSubjetEtaKey.key();
-    }
-
-    if (m_subleadSubjetPhiKey.contHandleKey().key() == m_subleadSubjetPhiKey.key()) {
-      m_subleadSubjetPhiKey = m_ditausKey.key() + "." + m_subleadSubjetPhiKey.key();
-    }
-
-    if (m_subleadSubjetEKey.contHandleKey().key() == m_subleadSubjetEKey.key()) {
-      m_subleadSubjetEKey = m_ditausKey.key() + "." + m_subleadSubjetEKey.key();
-    }
-
-    if (m_subleadSubjetNTracksKey.contHandleKey().key() == m_subleadSubjetNTracksKey.key()) {
-      m_subleadSubjetNTracksKey = m_ditausKey.key() + "." + m_subleadSubjetNTracksKey.key();
-    }
-
-    if (m_subleadSubjetChargeKey.contHandleKey().key() == m_subleadSubjetChargeKey.key()) {
-      m_subleadSubjetChargeKey = m_ditausKey.key() + "." + m_subleadSubjetChargeKey.key();
-    }
-
     ANA_CHECK(m_ditausKey.initialize());
-    ANA_CHECK(m_nSubjetsKey.initialize());
-    ANA_CHECK(m_omniScoreKey.initialize());
-    ANA_CHECK(m_leadSubjetPtKey.initialize());
-    ANA_CHECK(m_leadSubjetEtaKey.initialize());
-    ANA_CHECK(m_leadSubjetPhiKey.initialize());
-    ANA_CHECK(m_leadSubjetEKey.initialize());
-    ANA_CHECK(m_leadSubjetNTracksKey.initialize());
-    ANA_CHECK(m_leadSubjetChargeKey.initialize());
-    ANA_CHECK(m_subleadSubjetPtKey.initialize());
-    ANA_CHECK(m_subleadSubjetEtaKey.initialize());
-    ANA_CHECK(m_subleadSubjetPhiKey.initialize());
-    ANA_CHECK(m_subleadSubjetEKey.initialize());
-    ANA_CHECK(m_subleadSubjetNTracksKey.initialize());
-    ANA_CHECK(m_subleadSubjetChargeKey.initialize()); 
+
+    for (SG::WriteDecorHandleKey<xAOD::DiTauJetContainer> *key : {
+           &m_nSubjetsKey, &m_omniScoreKey,
+           &m_leadSubjetPtKey, &m_leadSubjetEtaKey, &m_leadSubjetPhiKey,
+           &m_leadSubjetEKey, &m_leadSubjetNTracksKey, &m_leadSubjetChargeKey,
+           &m_subleadSubjetPtKey, &m_subleadSubjetEtaKey, &m_subleadSubjetPhiKey,
+           &m_subleadSubjetEKey, &m_subleadSubjetNTracksKey, &m_subleadSubjetChargeKey}) {
+      if (key->contHandleKey().key() == key->key()) {
+        *key = m_ditausKey.key() + "." + key->key();
+      }
+      ANA_CHECK(key->initialize());
+    }
 
     return StatusCode::SUCCESS;
   }
@@ -117,13 +62,27 @@ namespace CP {
 
     for (const xAOD::DiTauJet *ditau : *ditaus) {
 
-      // always require at least 2 subjets to have a good ditau	    
-      if(ditau->nSubjets() < 2) continue;
- 
       nSubjets(*ditau) = ditau->nSubjets(); 
 
       if ( acc_OmniScore.isAvailable(*ditau) ) {
         omniScoreHandle(*ditau) = acc_OmniScore(*ditau);
+      }
+
+      // always require at least 2 subjets to have a good ditau	    
+      if(ditau->nSubjets() < 2) {
+        leadSubjetPtHandle(*ditau) = -999.;
+        leadSubjetEtaHandle(*ditau) = -999.;
+        leadSubjetPhiHandle(*ditau) = -999.;
+        leadSubjetEHandle(*ditau) = -999.;
+        leadSubjetNTracksHandle(*ditau) = -999;
+        leadSubjetChargeHandle(*ditau) = -999;
+        subleadSubjetPtHandle(*ditau) = -999.;
+        subleadSubjetEtaHandle(*ditau) = -999.;
+        subleadSubjetPhiHandle(*ditau) = -999.;
+        subleadSubjetEHandle(*ditau) = -999.;
+        subleadSubjetNTracksHandle(*ditau) = -999;
+        subleadSubjetChargeHandle(*ditau) = -999;
+        continue;
       }
 
       leadSubjetPtHandle(*ditau) = ditau->subjetPt(0);
@@ -142,14 +101,16 @@ namespace CP {
       int subl_ntracks = 0;
       int subl_charge = 0;
 
+      const std::array<ROOT::Math::PtEtaPhiEVector, 2> subjets {
+        ROOT::Math::PtEtaPhiEVector(ditau->subjetPt(0), ditau->subjetEta(0), ditau->subjetPhi(0), ditau->subjetE(0)),
+        ROOT::Math::PtEtaPhiEVector(ditau->subjetPt(1), ditau->subjetEta(1), ditau->subjetPhi(1), ditau->subjetE(1))};
+
       for (const auto& xTrack : ditau->trackLinks()) {
          if (!xTrack.isValid())
             continue;
 
          for (int i = 0; i < 2;  ++i) {  // loop over two leading subjets
-             TLorentzVector tlvSubjet = TLorentzVector();
-             tlvSubjet.SetPtEtaPhiE(ditau->subjetPt(i), ditau->subjetEta(i),ditau->subjetPhi(i), ditau->subjetE(i));
-             double dR = tlvSubjet.DeltaR((*xTrack)->p4());
+             double dR = ROOT::Math::VectorUtil::DeltaR(subjets[i], (*xTrack)->p4());
 
              if (dR < 0.1) {
                 if (i == 0) {

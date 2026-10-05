@@ -60,161 +60,196 @@ namespace CP {
 
   StatusCode DiTauMassCalculatorAlg::execute(const EventContext& ctx)
   {
-    const std::string finalStr{"Final"};
+    // decorate the default (failed-fit) values, for events where the MMC is not run
+    auto decorateDefaults = [this](const xAOD::EventInfo &evtInfo, const CP::SystematicSet &sys)
+      {
+        PtEtaPhiMVector null4V(0.0, 0.0, 0.0, 0.0);
+        if (m_doMAXW) {
+          m_maxw_mass_decor.set(evtInfo, -1, sys);
+          m_maxw_res_4vect_decor.set(evtInfo, null4V, sys);
+          m_maxw_nu1_4vect_decor.set(evtInfo, null4V, sys);
+          m_maxw_nu2_4vect_decor.set(evtInfo, null4V, sys);
+          m_maxw_tau1_4vect_decor.set(evtInfo, null4V, sys);
+          m_maxw_tau2_4vect_decor.set(evtInfo, null4V, sys);
+        }
+        if (m_doMLNU3P) {
+          m_mlnu3p_mass_decor.set(evtInfo, -1, sys);
+          m_mlnu3p_res_4vect_decor.set(evtInfo, null4V, sys);
+          m_mlnu3p_nu1_4vect_decor.set(evtInfo, null4V, sys);
+          m_mlnu3p_nu2_4vect_decor.set(evtInfo, null4V, sys);
+          m_mlnu3p_tau1_4vect_decor.set(evtInfo, null4V, sys);
+          m_mlnu3p_tau2_4vect_decor.set(evtInfo, null4V, sys);
+        }
+        m_fitStatus_decor.set(evtInfo, 0, sys);
+        m_mlm_mass_decor.set(evtInfo, -1, sys);
+        if (m_doCollinearApprox) {
+          m_coll_approx_mass_decor.set(evtInfo, -1234., sys);
+          m_coll_approx_x0_decor.set(evtInfo, -1234., sys);
+          m_coll_approx_x1_decor.set(evtInfo, -1234., sys);
+        }
+      };
+
     for (const auto &sys : m_systematicsList.systematicsVector())
       {
-	// retrieve the EventInfo
-	const xAOD::EventInfo *evtInfo = nullptr;
-	ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys, ctx));
+        // retrieve the EventInfo
+        const xAOD::EventInfo *evtInfo = nullptr;
+        ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys, ctx));
 
-	// check the preselection
-	if (m_preselection && !m_preselection.getBool(*evtInfo, sys))
-	  continue;
+        // check the preselection
+        if (m_preselection && !m_preselection.getBool(*evtInfo, sys))
+          {
+            decorateDefaults(*evtInfo, sys);
+            continue;
+          }
 
-	// retrieve objects
-	const xAOD::ElectronContainer *electrons = nullptr;
-	ANA_CHECK(m_electronsHandle.retrieve(electrons, sys, ctx));
-	const xAOD::MuonContainer *muons = nullptr;
-	ANA_CHECK(m_muonsHandle.retrieve(muons, sys, ctx));
-	const xAOD::TauJetContainer *taus = nullptr;
-	ANA_CHECK(m_tausHandle.retrieve(taus, sys, ctx));
-	const xAOD::JetContainer *jets = nullptr;
-	ANA_CHECK(m_jetsHandle.retrieve(jets, sys, ctx));
-	const xAOD::MissingETContainer *met = nullptr;
-	ANA_CHECK(m_metHandle.retrieve(met, sys, ctx));
+        // retrieve objects
+        const xAOD::ElectronContainer *electrons = nullptr;
+        ANA_CHECK(m_electronsHandle.retrieve(electrons, sys, ctx));
+        const xAOD::MuonContainer *muons = nullptr;
+        ANA_CHECK(m_muonsHandle.retrieve(muons, sys, ctx));
+        const xAOD::TauJetContainer *taus = nullptr;
+        ANA_CHECK(m_tausHandle.retrieve(taus, sys, ctx));
+        const xAOD::JetContainer *jets = nullptr;
+        ANA_CHECK(m_jetsHandle.retrieve(jets, sys, ctx));
+        const xAOD::MissingETContainer *met = nullptr;
+        ANA_CHECK(m_metHandle.retrieve(met, sys, ctx));
 
-	// apply object-wise selection
-	ConstDataVector<xAOD::ElectronContainer> selected_electrons(SG::VIEW_ELEMENTS);
-	ConstDataVector<xAOD::MuonContainer> selected_muons(SG::VIEW_ELEMENTS);
-	ConstDataVector<xAOD::TauJetContainer> selected_taus(SG::VIEW_ELEMENTS);
-	ConstDataVector<xAOD::JetContainer> selected_jets(SG::VIEW_ELEMENTS);
+        // apply object-wise selection
+        ConstDataVector<xAOD::ElectronContainer> selected_electrons(SG::VIEW_ELEMENTS);
+        ConstDataVector<xAOD::MuonContainer> selected_muons(SG::VIEW_ELEMENTS);
+        ConstDataVector<xAOD::TauJetContainer> selected_taus(SG::VIEW_ELEMENTS);
+        ConstDataVector<xAOD::JetContainer> selected_jets(SG::VIEW_ELEMENTS);
 
-	for (const xAOD::Electron *el : *electrons)
-	  {
-	    if (m_electronSelection.getBool(*el, sys))
-	      selected_electrons.push_back(el);
-	  }
+        for (const xAOD::Electron *el : *electrons)
+          {
+            if (m_electronSelection.getBool(*el, sys))
+              selected_electrons.push_back(el);
+          }
 
-	for (const xAOD::Muon *mu : *muons)
-	  {
-	    if (m_muonSelection.getBool(*mu, sys))
-	      selected_muons.push_back(mu);
-	  }
+        for (const xAOD::Muon *mu : *muons)
+          {
+            if (m_muonSelection.getBool(*mu, sys))
+              selected_muons.push_back(mu);
+          }
 
-	for (const xAOD::TauJet *tau : *taus)
-	  {
-	    if (m_tauSelection.getBool(*tau, sys))
-	      selected_taus.push_back(tau);
-	  }
+        for (const xAOD::TauJet *tau : *taus)
+          {
+            if (m_tauSelection.getBool(*tau, sys))
+              selected_taus.push_back(tau);
+          }
 
-	for (const xAOD::Jet *jet : *jets)
-	  {
-	    if (m_jetSelection.getBool(*jet, sys))
-	      selected_jets.push_back(jet);
-	  }
+        for (const xAOD::Jet *jet : *jets)
+          {
+            if (m_jetSelection.getBool(*jet, sys))
+              selected_jets.push_back(jet);
+          }
 
-	int nJets = selected_jets.size();
+        int nJets = selected_jets.size();
 
-	const xAOD::IParticle *vis1 = 0, *vis2 = 0;
-	// to assign the visible particles on which to run the MMC, we assume that the user would prefer
-	// 1) tau_had + tau_had
-	// 2) tau_had + e
-	// 3) tau_had + mu
-	// 4) e + mu
-	// 5) mu + mu
-	// 6) e + e
-	// To force a custom ordering, simply decorate your desired selection onto the particles before running this algorithm.
-	// e.g. you could "book" an OSSF pair of light leptons as originating from a Z boson, and remove them from consideration here.
+        const xAOD::IParticle *vis1 = nullptr, *vis2 = nullptr;
+        // to assign the visible particles on which to run the MMC, we assume that the user would prefer
+        // 1) tau_had + tau_had
+        // 2) tau_had + e
+        // 3) tau_had + mu
+        // 4) e + mu
+        // 5) mu + mu
+        // 6) e + e
+        // To force a custom ordering, simply decorate your desired selection onto the particles before running this algorithm.
+        // e.g. you could "book" an OSSF pair of light leptons as originating from a Z boson, and remove them from consideration here.
 
-	if (selected_taus.size() >= 2)
-	  {
-	    vis1 = selected_taus.at(0);
-	    vis2 = selected_taus.at(1);
-	  }
-	else if (selected_taus.size() == 1 && selected_electrons.size() >= 1)
-	  {
-	    vis1 = selected_taus.at(0);
-	    vis2 = selected_electrons.at(0);
-	  }
-	else if (selected_taus.size() == 1 && selected_muons.size() >= 1)
-	  {
-	    vis1 = selected_taus.at(0);
-	    vis2 = selected_muons.at(0);
-	  }
-	else if (selected_electrons.size() >= 1 && selected_muons.size() >= 1)
-	  {
-	    vis1 = selected_electrons.at(0);
-	    vis2 = selected_muons.at(0);
-	  }
-	else if (selected_muons.size() >= 2)
-	  {
-	    vis1 = selected_muons.at(0);
-	    vis2 = selected_muons.at(1);
-	  }
-	else if (selected_electrons.size() >= 2)
-	  {
-	    vis1 = selected_electrons.at(0);
-	    vis2 = selected_electrons.at(1);
-	  }
-	else
-	  {
-	    ANA_MSG_WARNING("Not enough charged leptons in the event to run the MMC!");
-	  }
+        if (selected_taus.size() >= 2)
+          {
+            vis1 = selected_taus.at(0);
+            vis2 = selected_taus.at(1);
+          }
+        else if (selected_taus.size() == 1 && selected_electrons.size() >= 1)
+          {
+            vis1 = selected_taus.at(0);
+            vis2 = selected_electrons.at(0);
+          }
+        else if (selected_taus.size() == 1 && selected_muons.size() >= 1)
+          {
+            vis1 = selected_taus.at(0);
+            vis2 = selected_muons.at(0);
+          }
+        else if (selected_electrons.size() >= 1 && selected_muons.size() >= 1)
+          {
+            vis1 = selected_electrons.at(0);
+            vis2 = selected_muons.at(0);
+          }
+        else if (selected_muons.size() >= 2)
+          {
+            vis1 = selected_muons.at(0);
+            vis2 = selected_muons.at(1);
+          }
+        else if (selected_electrons.size() >= 2)
+          {
+            vis1 = selected_electrons.at(0);
+            vis2 = selected_electrons.at(1);
+          }
+        else
+          {
+            ANA_MSG_WARNING("Not enough charged leptons in the event to run the MMC!");
+            decorateDefaults(*evtInfo, sys);
+            continue;
+          }
 
-    if ((*met)[finalStr] == nullptr) {
-        ANA_MSG_ERROR("The MET term " << finalStr << " doesn't exist! Aborting.");
-        return StatusCode::FAILURE;
-      }
+        const xAOD::MissingET *metTerm = (*met)[m_metTerm.value()];
+        if (metTerm == nullptr)
+          {
+            ANA_MSG_ERROR("The MET term " << m_metTerm.value() << " doesn't exist! Aborting.");
+            return StatusCode::FAILURE;
+          }
 
-	ANA_CHECK(m_mmc->apply(*evtInfo, vis1, vis2, (*met)[finalStr], nJets));
+        ANA_CHECK(m_mmc->apply(*evtInfo, vis1, vis2, metTerm, nJets));
 
-	// retrieve the output variables and decorate them
-	PtEtaPhiMVector null4V(0.0, 0.0, 0.0, 0.0);
-	int fitStatus        = m_mmc->GetFitStatus(0);
-	double mlm_mass      = fitStatus == 1 ? m_mmc->GetFittedMass(DiTauMassTools::MMCFitMethod::MLM)    : -1;
-	if (m_doMAXW) {
-	  double maxw_mass   = fitStatus == 1 ? m_mmc->GetFittedMass(DiTauMassTools::MMCFitMethod::MAXW)   : -1;
-	  PtEtaPhiMVector maxw_res_4vect    = fitStatus == 1 ? m_mmc->GetResonanceVec(DiTauMassTools::MMCFitMethod::MAXW)      : null4V;
-	  PtEtaPhiMVector maxw_nu1_4vect    = fitStatus == 1 ? m_mmc->GetNeutrino4vec(DiTauMassTools::MMCFitMethod::MAXW, 0)   : null4V;
-	  PtEtaPhiMVector maxw_nu2_4vect    = fitStatus == 1 ? m_mmc->GetNeutrino4vec(DiTauMassTools::MMCFitMethod::MAXW, 1)   : null4V;
-	  PtEtaPhiMVector maxw_tau1_4vect   = fitStatus == 1 ? m_mmc->GetTau4vec(DiTauMassTools::MMCFitMethod::MAXW, 0)        : null4V;
-	  PtEtaPhiMVector maxw_tau2_4vect   = fitStatus == 1 ? m_mmc->GetTau4vec(DiTauMassTools::MMCFitMethod::MAXW, 1)        : null4V;
-	  m_maxw_mass_decor.set(*evtInfo, maxw_mass, sys);
-	  m_maxw_res_4vect_decor.set(*evtInfo, maxw_res_4vect, sys);
-	  m_maxw_nu1_4vect_decor.set(*evtInfo, maxw_nu1_4vect, sys);
-	  m_maxw_nu2_4vect_decor.set(*evtInfo, maxw_nu2_4vect, sys);
-	  m_maxw_tau1_4vect_decor.set(*evtInfo, maxw_tau1_4vect, sys);
-	  m_maxw_tau2_4vect_decor.set(*evtInfo, maxw_tau2_4vect, sys);
-	}
-	if (m_doMLNU3P) {
-	  double mlnu3p_mass = fitStatus == 1 ? m_mmc->GetFittedMass(DiTauMassTools::MMCFitMethod::MLNU3P) : -1;
-	  PtEtaPhiMVector mlnu3p_res_4vect  = fitStatus == 1 ? m_mmc->GetResonanceVec(DiTauMassTools::MMCFitMethod::MLNU3P)    : null4V;
-	  PtEtaPhiMVector mlnu3p_nu1_4vect  = fitStatus == 1 ? m_mmc->GetNeutrino4vec(DiTauMassTools::MMCFitMethod::MLNU3P, 0) : null4V;
-	  PtEtaPhiMVector mlnu3p_nu2_4vect  = fitStatus == 1 ? m_mmc->GetNeutrino4vec(DiTauMassTools::MMCFitMethod::MLNU3P, 1) : null4V;
-	  PtEtaPhiMVector mlnu3p_tau1_4vect = fitStatus == 1 ? m_mmc->GetTau4vec(DiTauMassTools::MMCFitMethod::MLNU3P, 0)      : null4V;
-	  PtEtaPhiMVector mlnu3p_tau2_4vect = fitStatus == 1 ? m_mmc->GetTau4vec(DiTauMassTools::MMCFitMethod::MLNU3P, 1)      : null4V;
-	  m_mlnu3p_mass_decor.set(*evtInfo, mlnu3p_mass, sys);
-	  m_mlnu3p_res_4vect_decor.set(*evtInfo, mlnu3p_res_4vect, sys);
-	  m_mlnu3p_nu1_4vect_decor.set(*evtInfo, mlnu3p_nu1_4vect, sys);
-	  m_mlnu3p_nu2_4vect_decor.set(*evtInfo, mlnu3p_nu2_4vect, sys);
-	  m_mlnu3p_tau1_4vect_decor.set(*evtInfo, mlnu3p_tau1_4vect, sys);
-	  m_mlnu3p_tau2_4vect_decor.set(*evtInfo, mlnu3p_tau2_4vect, sys);
-	}
-	m_fitStatus_decor.set(*evtInfo, fitStatus, sys);
-	m_mlm_mass_decor.set(*evtInfo, mlm_mass, sys);
+        // retrieve the output variables and decorate them
+        PtEtaPhiMVector null4V(0.0, 0.0, 0.0, 0.0);
+        int fitStatus        = m_mmc->GetFitStatus(0);
+        double mlm_mass      = fitStatus == 1 ? m_mmc->GetFittedMass(DiTauMassTools::MMCFitMethod::MLM)    : -1;
+        if (m_doMAXW) {
+          double maxw_mass   = fitStatus == 1 ? m_mmc->GetFittedMass(DiTauMassTools::MMCFitMethod::MAXW)   : -1;
+          PtEtaPhiMVector maxw_res_4vect    = fitStatus == 1 ? m_mmc->GetResonanceVec(DiTauMassTools::MMCFitMethod::MAXW)      : null4V;
+          PtEtaPhiMVector maxw_nu1_4vect    = fitStatus == 1 ? m_mmc->GetNeutrino4vec(DiTauMassTools::MMCFitMethod::MAXW, 0)   : null4V;
+          PtEtaPhiMVector maxw_nu2_4vect    = fitStatus == 1 ? m_mmc->GetNeutrino4vec(DiTauMassTools::MMCFitMethod::MAXW, 1)   : null4V;
+          PtEtaPhiMVector maxw_tau1_4vect   = fitStatus == 1 ? m_mmc->GetTau4vec(DiTauMassTools::MMCFitMethod::MAXW, 0)        : null4V;
+          PtEtaPhiMVector maxw_tau2_4vect   = fitStatus == 1 ? m_mmc->GetTau4vec(DiTauMassTools::MMCFitMethod::MAXW, 1)        : null4V;
+          m_maxw_mass_decor.set(*evtInfo, maxw_mass, sys);
+          m_maxw_res_4vect_decor.set(*evtInfo, maxw_res_4vect, sys);
+          m_maxw_nu1_4vect_decor.set(*evtInfo, maxw_nu1_4vect, sys);
+          m_maxw_nu2_4vect_decor.set(*evtInfo, maxw_nu2_4vect, sys);
+          m_maxw_tau1_4vect_decor.set(*evtInfo, maxw_tau1_4vect, sys);
+          m_maxw_tau2_4vect_decor.set(*evtInfo, maxw_tau2_4vect, sys);
+        }
+        if (m_doMLNU3P) {
+          double mlnu3p_mass = fitStatus == 1 ? m_mmc->GetFittedMass(DiTauMassTools::MMCFitMethod::MLNU3P) : -1;
+          PtEtaPhiMVector mlnu3p_res_4vect  = fitStatus == 1 ? m_mmc->GetResonanceVec(DiTauMassTools::MMCFitMethod::MLNU3P)    : null4V;
+          PtEtaPhiMVector mlnu3p_nu1_4vect  = fitStatus == 1 ? m_mmc->GetNeutrino4vec(DiTauMassTools::MMCFitMethod::MLNU3P, 0) : null4V;
+          PtEtaPhiMVector mlnu3p_nu2_4vect  = fitStatus == 1 ? m_mmc->GetNeutrino4vec(DiTauMassTools::MMCFitMethod::MLNU3P, 1) : null4V;
+          PtEtaPhiMVector mlnu3p_tau1_4vect = fitStatus == 1 ? m_mmc->GetTau4vec(DiTauMassTools::MMCFitMethod::MLNU3P, 0)      : null4V;
+          PtEtaPhiMVector mlnu3p_tau2_4vect = fitStatus == 1 ? m_mmc->GetTau4vec(DiTauMassTools::MMCFitMethod::MLNU3P, 1)      : null4V;
+          m_mlnu3p_mass_decor.set(*evtInfo, mlnu3p_mass, sys);
+          m_mlnu3p_res_4vect_decor.set(*evtInfo, mlnu3p_res_4vect, sys);
+          m_mlnu3p_nu1_4vect_decor.set(*evtInfo, mlnu3p_nu1_4vect, sys);
+          m_mlnu3p_nu2_4vect_decor.set(*evtInfo, mlnu3p_nu2_4vect, sys);
+          m_mlnu3p_tau1_4vect_decor.set(*evtInfo, mlnu3p_tau1_4vect, sys);
+          m_mlnu3p_tau2_4vect_decor.set(*evtInfo, mlnu3p_tau2_4vect, sys);
+        }
+        m_fitStatus_decor.set(*evtInfo, fitStatus, sys);
+        m_mlm_mass_decor.set(*evtInfo, mlm_mass, sys);
 
         // retrieve results for collinear approximation
         if(m_doCollinearApprox){
           double coll_mass = -1234.;
-	  double coll_x0 = -1234.;
-	  double coll_x1 = -1234.;
+          double coll_x0 = -1234.;
+          double coll_x1 = -1234.;
 
-          ANA_CHECK(m_mmc->doCollinearApprox(vis1, vis2, (*met)[finalStr], true, coll_mass, coll_x0, coll_x1)); 
-      
+          ANA_CHECK(m_mmc->doCollinearApprox(vis1, vis2, metTerm, true, coll_mass, coll_x0, coll_x1));
+
           m_coll_approx_mass_decor.set(*evtInfo, coll_mass, sys);
-	  m_coll_approx_x0_decor.set(*evtInfo, coll_x0, sys);
-	  m_coll_approx_x1_decor.set(*evtInfo, coll_x1, sys);
-	}	
+          m_coll_approx_x0_decor.set(*evtInfo, coll_x0, sys);
+          m_coll_approx_x1_decor.set(*evtInfo, coll_x1, sys);
+        }
 
       }
 
