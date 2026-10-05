@@ -34,7 +34,7 @@ private:
 
     ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
 
-    std::map<Acts::GeometryIdentifier, std::string> m_caloNameGeoIDMap;
+    std::map<unsigned int, std::string> m_caloNameGeoIDMap;
 
 };
 #endif
