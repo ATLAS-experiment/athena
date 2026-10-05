@@ -1,11 +1,16 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AnaAlgorithm.AlgSequence import AlgSequence
 from AnaAlgorithm.PythonConfig import PrivateToolConfig
-from AthenaCommon.Logging import logging
+from AnaAlgorithm.Logging import logging
 
 import os
 import json
+import re
+
+# A tool declaration value has the shape 'Type/Name', with a (possibly namespace-qualified
+# or templated) C++ type name and a tool name made of identifier components separated by dots
+_toolDeclarationExpr = re.compile(r'[A-Za-z_][A-Za-z0-9_:<>,]*/[A-Za-z_][A-Za-z0-9_.]*')
 
 def combine_tools_and_algorithms_ELjob(combine_dictionaries = True, text_file = 'tool_config.txt',
                                        alg_file = 'alg_sequence.json', output_file = 'my_analysis_config.json'):
@@ -40,7 +45,7 @@ def combine_tools_and_algorithms_ELjob(combine_dictionaries = True, text_file = 
             try:
                 config = json.load(f)
             except json.JSONDecodeError as e:
-                raise ValueError(f"Error parsing JSON in {alg_file}: {e}")
+                raise ValueError(f"Error parsing JSON in {alg_file}: {e}") from e
 
     # Process the tool configuration file
     current_tool_path = None
@@ -56,10 +61,10 @@ def combine_tools_and_algorithms_ELjob(combine_dictionaries = True, text_file = 
             path, value = map(str.strip, line.split('=', 1))
             parts = path.split('.')
 
-            # There are two possiblities for 'parts':
+            # There are two possibilities for 'parts':
             # 1. Declaration of a new tool
             # 2. Setting a property on an existing tool
-            if len(value.split("/")) == 2 and "'" not in value and current_tool_path != parts:
+            if _toolDeclarationExpr.fullmatch(value) and current_tool_path != parts:
                 # We are in case 1, meaning we are done with the previous tool (if any)
                 # Start by saving the settings of the previous tool
                 _register_settings(config, current_tool_path, current_tool_id, current_tool_properties)

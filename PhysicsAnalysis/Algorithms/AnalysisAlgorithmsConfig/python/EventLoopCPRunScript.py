@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AnalysisAlgorithmsConfig.CPBaseRunner import CPBaseRunner
 import os
 import sys
@@ -64,15 +64,15 @@ class EventLoopCPRunScript(CPBaseRunner):
             except Exception as e:
                 self.logger.warning(f'Dumping full config failed with: {e}')
                 self.logger.warning('Please also check if "PrintConfiguration" is enabled in the text config.')
-            try:
-                combine_tools_and_algorithms_ELjob(combine_dictionaries=False, alg_file="_alg_sequence.json", output_file="full_config.json")
-                self.logger.info("Combining full config to full_config.json succeeded")
+        try:
+            combine_tools_and_algorithms_ELjob(combine_dictionaries=True, alg_file="_alg_sequence.json", output_file="full_config.json")
+            self.logger.info("Combining full config to full_config.json succeeded")
 
-            except Exception as e:
-                self.logger.warning(f'Combining full config failed with: {e}')
-                self.logger.warning('Please also check if "PrintConfiguration" is enabled in the text config.')
-            finally:
-                os.remove("_alg_sequence.json")
+        except Exception as e:
+            self.logger.warning(f'Combining full config failed with: {e}')
+            self.logger.warning('Please also check if "PrintConfiguration" is enabled in the text config.')
+        finally:
+            os.remove("_alg_sequence.json")
 
     def moveOutputFiles(self):
         from pathlib import Path
@@ -114,11 +114,22 @@ class EventLoopCPRunScript(CPBaseRunner):
         Directly calling external driver submission will not return controls to the main process, the main thread will be terminated.
         '''
         if (pid := os.fork()) == 0: # child process
-            name = self.args.work_dir if self.args.work_dir else 'workDir'
-            driver.submit(self.job, name)
-            exit(0)
+            try:
+                name = self.args.work_dir if self.args.work_dir else 'workDir'
+                driver.submit(self.job, name)
+            except Exception:
+                import traceback
+                traceback.print_exc()
+                sys.stdout.flush()
+                sys.stderr.flush()
+                os._exit(1)
+            sys.stdout.flush()
+            sys.stderr.flush()
+            os._exit(0)
         else:
-            os.waitpid(pid, 0) # parent waits for child process to finish
+            _, status = os.waitpid(pid, 0) # parent waits for child process to finish
+            if os.waitstatus_to_exitcode(status) != 0:
+                self.logger.error(f'Job submission in child process failed with exit code {os.waitstatus_to_exitcode(status)}')
             return
 
     def getExitCode(self):
