@@ -148,7 +148,9 @@ def ActsStripGridTripletSeedingToolCfg(flags,
     # For SpacePointGridConfig
     kwargs.setdefault("gridRMax", 1000. * ActsUnits.mm)
     kwargs.setdefault("deltaRMax", 600. * ActsUnits.mm)
-    kwargs.setdefault("impactMax", flags.Tracking.ActiveConfig.maxPrimaryImpactSeed *
+    # Strip seeds use the SSS impact cut, as the legacy ITk seed maker does
+    # (maxdImpactSSS). maxPrimaryImpactSeed is the pixel seed cut.
+    kwargs.setdefault("impactMax", flags.Tracking.ActiveConfig.maxdImpactSSSSeeds[0] *
                       ActsUnits.mm / GaudiUnits.mm)
     kwargs.setdefault("minPt", flags.Tracking.ActiveConfig.minPTSeed *
                       ActsUnits.GeV / GaudiUnits.GeV)
