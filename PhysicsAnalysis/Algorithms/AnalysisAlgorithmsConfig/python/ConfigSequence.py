@@ -8,13 +8,15 @@ from functools import wraps
 from random import randrange
 import re
 
+_instanceNameExpr = re.compile ('^[_a-zA-Z0-9]*$')
+
 def groupBlocks(func):
     """
     Decorates a configSequence or function with 'seq' as a
-    arguement.
+    argument.
 
-    Sets groupName to the name of the decorated funtion  or
-    calss plus and integer for each ConfigBlock in the configSequence.
+    Sets groupName to the name of the decorated function or
+    class plus an integer for each ConfigBlock in the configSequence.
 
     Blocks with the same groupName can be configured together.
     """
@@ -95,17 +97,19 @@ class ConfigSequence:
                 if block.hasDependencies():
                     depIdx = i
                     for dep in block.getDependencies():
-                        if dep in ignore:
+                        if dep.blockName in ignore:
                             continue
                         # find dep with largest idx
-                        if dep in blocks:
-                            lastIdx = max(index for index,value in enumerate(blocks) if value == dep.blockName)
+                        depIndices = [index for index, value in enumerate(blocks)
+                                      if value.getBlockName() == dep.blockName]
+                        if depIndices:
+                            lastIdx = max(depIndices)
                             if lastIdx > depIdx:
                                 depIdx = lastIdx
                         elif dep.required:
                             raise ValueError(f"{dep} block is required"
                                 f" for {block} but was not found.")
-                    # check to see if block is already infront of deps
+                    # check to see if block is already in front of deps
                     if depIdx > i:
                         logCPAlgCfgSeq.info(f"Moving {block} after {blocks[depIdx]}")
                         # depIdx > i so after pop, depIdx -= 1 -> depIdx is after dep
@@ -131,8 +135,9 @@ class ConfigSequence:
         perform all configuration steps at once.
         """
         for block in self._blocks:
-            if re.compile ('^[_a-zA-Z0-9]*$').match (block.instanceName()) is None :
-                raise ValueError (f'invalid block instance name: {block.instanceName()} for {block.factoryName()}')
+            instanceName = block.instanceName()
+            if _instanceNameExpr.match (instanceName) is None :
+                raise ValueError (f'invalid block instance name: {instanceName} for {block.factoryName()}')
 
         self.reorderAlgs()
         self.makeAlgs (config)
@@ -163,7 +168,7 @@ class ConfigSequence:
         # <optionName>
         optionName = names.pop(-1)
         # <groupName>.<optionName>, or
-        # .<optionName> (backwards compatability)
+        # .<optionName> (backwards compatibility)
         groupName = names.pop(0) if names else ''
         if names:
             raise ValueError(f'Option name can be either <groupName>.<optionName>'
@@ -184,7 +189,7 @@ class ConfigSequence:
                 raise ValueError(f'{optionName} not found in blocks with '
                     f'group name {groupName}')
         else:
-            # set opyion for last added block
+            # set option for last added block
             blocks[-1].setOptionValue (optionName, value, **kwargs)
 
 
@@ -234,8 +239,8 @@ class ConfigSequence:
                 if opt['required']:
                     raise ValueError(f'{name} is required but not included in config')
                 # add default used to config
-                defaultVal = opt['value'] if opt['value'] else opt['defaultValue']
-                # do not overwright groupName unless set by user
+                defaultVal = opt['value'] if opt['value'] is not None else opt['defaultValue']
+                # do not overwrite groupName unless set by user
                 if name != 'groupName':
                     options[name] = defaultVal
                 logCPAlgCfgSeq.debug(f"    {name}: {defaultVal}")
@@ -270,7 +275,7 @@ class ConfigSequence:
             for index, block in enumerate(self._blocks):
                 block.setFactoryName(f"{factoryName}[{index}:{block.__class__.__name__}]")
 
-    def __iadd__( self, sequence, index = None ):
+    def __iadd__( self, sequence ):
         """Add another sequence to this one
 
         This function is used to add another sequence to this sequence
