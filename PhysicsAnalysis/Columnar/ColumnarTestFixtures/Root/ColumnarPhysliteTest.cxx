@@ -929,18 +929,19 @@ namespace columnar
           return false;
         outputColumns.at(0).enabled = true;
 
-        // WARNING: absolutely do not switch the next line to a
-        // reference, the pointed to element gets deleted below.
         const auto & offsetName = iter->second.offsetName;
         if (offsetName.empty())
           throw std::runtime_error ("missing offset column for: " + outputColumns.at(0).name);
 
-        requestedColumns.erase (iter);
-
         if (auto offsetIter = offsetColumns.find (offsetName); offsetIter != offsetColumns.end())
           offsetColumn = offsetIter->second;
         else
-          throw std::runtime_error ("missing offset column for: " + outputColumns.at(0).name);
+          throw std::runtime_error ("missing offset column for: " + outputColumns.at(0).name + " (offset column: " + offsetName + ")");
+
+        // IMPORTANT: This has to be erased at the end of the function,
+        // since erasing it earlier would invalidate the offsetName
+        // reference.
+        requestedColumns.erase (iter);
         return true;
       }
 
