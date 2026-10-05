@@ -41,8 +41,6 @@
 
 #include "detray/geometry/tracking_surface.hpp"
 
-#include "vecmem/utils/cuda/copy.hpp"
-
 #include <memory>
 #include <mutex>
 #include <string>
