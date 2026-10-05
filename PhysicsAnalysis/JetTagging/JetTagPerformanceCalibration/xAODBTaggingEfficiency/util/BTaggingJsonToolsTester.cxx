@@ -122,8 +122,30 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
     ANA_MSG_ERROR ( "Accessing events in input file " << inputDAOD << "failed! " );
     return 1;
   }
+  
+  
+  // Here it is meanlingless to loop over event we should select 
+  // large-R jets with pT > 250 GeV, mass > 50 GeV and |eta| < 2.0 
+  // as this is the calibration range 
+  int nValidLargeRJet = 0;
+  int NMaxValidLargeRJet = 500;
 
-  for(auto entry=0; entry < 20; ++entry) {
+  // Just for sanity do not process more than 5000 event or the number of events in the file
+  // as this is CI so we don't want to use too much ressources
+  // Since we are processing a ttbar sample in CI not many event passing Xbb working point 
+  long long int NMaxEvent = std::min((long long int) 5000, (long long int) event.getEntries()); 
+  long long int entry = -1;
+
+  // Values required for a jet to be considered as valid 
+  float minpTGeV = 250; 
+  float minMassGeV = 50;
+  float maxEta = 2.0; 
+
+  while (nValidLargeRJet < NMaxValidLargeRJet && entry < NMaxEvent ){ 
+    // Increase entry 
+    entry+=1;
+
+    // Read event 
     event.getEntry(entry);
 
     const xAOD::JetContainer* jets = nullptr;
@@ -131,10 +153,17 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
       ANA_MSG_ERROR("Failed to retrieve jets");
       return 1;
     }
-
+    // Loop over jets of the event 
     for(const auto jet : *jets) {
+      // Invalid jet with either too low pT or mass or too high eta value 
+      // Hence skip jet 
+      if (jet->pt()/1000. < minpTGeV || jet->m()/1000. < minMassGeV || std::abs(jet->eta()) > maxEta){ continue; }
+      // If jet not skipped then it is a valid large-R jet 
+      nValidLargeRJet+=1;
+
       ANA_MSG_INFO("====================================");
-      ANA_MSG_INFO("Jet pt: " << jet->pt() << " mass: " << jet->m() );
+      ANA_MSG_INFO("Jet(pT=" << jet->pt() << ", mass="<< jet->m()<< ", eta=" << jet->eta() <<")");
+
       bool tagged = static_cast<bool>(sel_tool->accept(*jet));
       ANA_MSG_INFO("Tagged: " << tagged);
 

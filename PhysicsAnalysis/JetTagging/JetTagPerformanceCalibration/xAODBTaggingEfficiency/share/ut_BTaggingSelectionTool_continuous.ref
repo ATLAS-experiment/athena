@@ -1,7 +1,15 @@
-Package.BtaggingSelect...INFO    jet 0 GN2v01  Continuous tag weight -5.03348 quantile 1
-Package.BtaggingSelect...INFO    jet 1 GN2v01  Continuous tag weight -4.45057 quantile 1
-Package.BtaggingSelect...INFO    jet 2 GN2v01  Continuous tag weight 2.99855 quantile 6
-Package.BtaggingSelect...INFO    jet 3 GN2v01  Continuous tag weight 0.164935 quantile 3
-Package.BtaggingSelect...INFO    jet 4 GN2v01  Continuous tag weight -3.50595 quantile -1
-Package.BtaggingSelect...INFO    jet 5 GN2v01  Continuous tag weight -2.71129 quantile -1
-Package.BtaggingSelect...INFO    jet 6 GN2v01  Continuous tag weight -3.35987 quantile -1
+xAOD::Init                INFO    Environment initialised for data access
+Package.BtaggingSelect...INFO    jet 0 GN2v01  Continuous tag weight -0.484619 quantile 2
+Package.BtaggingSelect...INFO    jet 1 GN2v01  Continuous tag weight -3.59744 quantile 1
+Package.BtaggingSelect...INFO    jet 2 GN2v01  Continuous tag weight 9.6792 quantile 6
+Package.BtaggingSelect...INFO    jet 3 GN2v01  Continuous tag weight 2.42195 quantile 5
+Package.BtaggingSelect...INFO    jet 4 GN2v01  Continuous tag weight -7.20671 quantile 1
+Package.BtaggingSelect...INFO    jet 5 GN2v01  Continuous tag weight -4.60783 quantile 1
+Package.BtaggingSelect...INFO    jet 6 GN2v01  Continuous tag weight -3.26035 quantile -1
+Package.BtaggingSelect...INFO    jet 7 GN2v01  Continuous tag weight -3.84886 quantile 1
+Package.BtaggingSelect...INFO    jet 8 GN2v01  Continuous tag weight -3.26035 quantile -1
+Package.BtaggingSelect...INFO    jet 9 GN2v01  Continuous tag weight -2.88375 quantile 1
+Package.BtaggingSelect...INFO    jet 10 GN2v01  Continuous tag weight -3.26382 quantile -1
+Package.BtaggingSelect...INFO    jet 11 GN2v01  Continuous tag weight -2.91216 quantile -1
+Package.BtaggingSelect...INFO    jet 12 GN2v01  Continuous tag weight -3.25597 quantile -1
+Package.BtaggingSelect...INFO    jet 13 GN2v01  Continuous tag weight -3.09523 quantile 1
