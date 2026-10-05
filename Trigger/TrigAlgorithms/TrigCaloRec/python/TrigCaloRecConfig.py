@@ -428,8 +428,9 @@ def hltCaloTopoClusteringCfg(
     clustermakername_nosuffix = namePrefix + "HLTCaloClusterMaker"
     
     clustermakername = clustermakername_nosuffix + nameSuffix
-    
-    if flags.CaloRecGPU.GlobalFlags.UseCaloRecGPU and "FS" in clustermakername:
+
+    from PyUtils.moduleExists import moduleExists
+    if moduleExists ('CaloRecGPU') and flags.CaloRecGPU.GlobalFlags.UseCaloRecGPU and "FS" in clustermakername:
       flags = flags.cloneAndReplace("CaloRecGPU.ActiveConfig", "Trigger.CaloRecGPU.Default", True)
       from CaloRecGPU.CaloRecGPUConfig import GPUCaloTopoClusterCfg
       
