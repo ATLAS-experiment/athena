@@ -10,7 +10,7 @@ atlas_add_library( FTagAnalysisAlgorithmsLib
    FTagAnalysisAlgorithms/*.h FTagAnalysisAlgorithms/*.icc Root/*.cxx
    PUBLIC_HEADERS FTagAnalysisAlgorithms
    LINK_LIBRARIES PathResolver xAODMuon xAODEgamma xAODTruth xAODJet xAODBTagging SelectionHelpersLib SystematicsHandlesLib
-   TrigCompositeUtilsLib TrigDecisionToolLib
+   TrigCompositeUtilsLib TrigDecisionToolLib TrigBtagEmulationToolLib
    AnaAlgorithmLib FTagAnalysisInterfacesLib )
 
 

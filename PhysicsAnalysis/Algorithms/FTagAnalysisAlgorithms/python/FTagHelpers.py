@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.Enums import LHCPeriod
+from Campaigns.Utils import Campaign as MCCampaign
 
 def getRecommendedBTagCalib_Run2():
     return "xAODBTaggingEfficiency/13TeV/MC20_2025-06-17_GN2v01_v4.root"
@@ -25,12 +26,18 @@ def getRecommendedBTagCalib(geometry, wp):
     else:
         raise ValueError(f"LHCPeriod {geometry} does not have a recommended FTag calibration file!")
 
-def getRecommendedBTagTrigCalib(geometry):
+def getRecommendedBTagTrigCalib(geometry, mccampaign=MCCampaign.Unknown):
     """return the recommended bjet trigger calibration files
     for a given LHCPeriod 'geometry'
     """
     if geometry is LHCPeriod.Run3:
         return "xAODBTaggingEfficiency/13p6TeV-Online/online-MC23_2025-11-26_v3_smooth.root"
+    elif geometry is LHCPeriod.Run2:
+        if mccampaign is MCCampaign.MC20d:
+            return "xAODBTaggingEfficiency/13TeV-Online/online-MC20_data17_GN2v01_2026-03-12_v0_smooth.root"
+        elif mccampaign is MCCampaign.MC20e:
+            return "xAODBTaggingEfficiency/13TeV-Online/online-MC20_data18_GN2v01_2026-03-12_v0_smooth.root"
+        raise ValueError(f"LHCPeriod {geometry}, MCCampaign {mccampaign} does not have a recommended bjet trigger calibration file!")
     else:
         raise ValueError(f"LHCPeriod {geometry} does not have a recommended bjet trigger calibration file!")
 
