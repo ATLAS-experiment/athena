@@ -4,6 +4,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from JetToolHelpers.HelperConfig import HistoInputCfg
 
+
 def qgTagAlgCfg(configFlags, 
                 WP='50', 
                 calib_path='/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/BoostedJetTaggers/QGConstituentTagger/May2025',
@@ -142,7 +143,7 @@ def WZTagAlgCfg(configFlags, **kwargs):
     algo_args = {}
     algo_args.setdefault("tagger", tool)
     algo_args.setdefault("jets", jets_container)
-    acc.addEventAlgo(CompFactory.BJT.BoostedJetTaggerAlg("WTagAlg_" + kwargs['WP'], **algo_args))
+    acc.addEventAlgo(CompFactory.BJT.BoostedJetTaggerAlg("WTagAlg_" + kwargs['generation'] + "_" + kwargs['WP'], **algo_args))
 
     return acc
 
@@ -177,7 +178,7 @@ def TopTagAlgCfg(configFlags, **kwargs):
     algo_args = {}
     algo_args.setdefault("tagger", tool)
     algo_args.setdefault("jets", jets_container)
-    acc.addEventAlgo(CompFactory.BJT.BoostedJetTaggerAlg("TopTagAlg_" + kwargs['WP'], **algo_args))
+    acc.addEventAlgo(CompFactory.BJT.BoostedJetTaggerAlg("TopTagAlg_" + kwargs['generation'] + "_"  + kwargs['WP'], **algo_args))
 
     return acc
 

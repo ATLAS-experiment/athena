@@ -33,8 +33,12 @@ if __name__=='__main__':
 
     # and for a second WP
     testacc_2WP = WZTagAlgCfg(flags, tagger='WZ', generation='ParT', WP='80',
-                          cfg_file=config_file)
+                              cfg_file=config_file)
     cfg.merge(testacc_2WP)
 
+    # and for another generation
+    testacc_2gen = WZTagAlgCfg(flags, tagger='WZ', generation='ParT_MassDec', WP='50',
+                               cfg_file=config_file)
+    cfg.merge(testacc_2gen)
 
     cfg.run(15)

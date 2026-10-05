@@ -244,6 +244,9 @@ StatusCode SmoothedWZTagger::decorate( const xAOD::JetContainer& jets ) const {
   // compute JSS variables
   decorateJSSRatios(jets);
 
+  // tagger score accessor
+  const SG::ConstAccessor<float> Score(m_scoreDecorationName + "_ConstScore");
+
   // loop over jets
   for(const xAOD::Jet* jet : jets){
 
@@ -265,7 +268,6 @@ StatusCode SmoothedWZTagger::decorate( const xAOD::JetContainer& jets ) const {
     float jet_d2 = D2(*jet);
 
     /// Get Score value
-    static const SG::ConstAccessor<float> Score(m_scoreDecorationName + "_ConstScore");
     float jet_score = m_useScore ? Score(*jet) : -99;
 
     /// Evaluate the values of the upper and lower mass bounds and the d2 cut
