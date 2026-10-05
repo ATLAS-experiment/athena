@@ -28,6 +28,7 @@ set( _libraries
   SCT_ReadoutGeometry
 )
 
+set( GPU_TRACKING_DEFINITIONS )
 
 # CUDA-only sources and libraries
 if (TARGET traccc::cuda)
