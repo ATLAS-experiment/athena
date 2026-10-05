@@ -41,7 +41,7 @@ namespace pool {
          virtual const CollectionRowBuffer& currentRow() const override final;
 
          /// Return the size of the collection.
-         virtual std::size_t size() override final { return m_size; }
+         virtual std::size_t size() override final;
 
          /// Seeks the cursor to a given position in the collection.
          virtual bool seek(std::size_t position) override final;
@@ -66,8 +66,6 @@ namespace pool {
          std::string                         m_tokenStr;
 
          std::size_t                         m_idx;
-
-         std::size_t                         m_size;
       };
 
 }

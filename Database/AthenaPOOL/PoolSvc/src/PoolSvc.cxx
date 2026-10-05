@@ -245,6 +245,10 @@ void PoolSvc::setObjPtr(void*& obj, const Token* token) {
    if (!auxString.empty()) {
       if (auxString.starts_with("[CTXT=")) {
          ::sscanf(auxString.c_str(), "[CTXT=%08X]", &contextId);
+         if (contextId == m_dbSessionVec.size()) {
+            ATH_MSG_DEBUG("setObjPtr: On-demand creating new input Stream id = " << contextId);
+            contextId = this->getInputContext("");
+         }
       } else if (auxString.starts_with("[CLABEL=")) {
          contextId = this->getInputContext(auxString);
       }
