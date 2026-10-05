@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACKINGANALYSISALGORITHMS_SECVERTEXTRUTHMATCHALG_H
@@ -21,6 +21,12 @@
 #include <AsgTools/PropertyWrapper.h>
 #include <AsgDataHandles/ReadHandleKey.h>
 #include <AsgDataHandles/ReadHandle.h>
+
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+class TH1;
 
 namespace CP {
 
@@ -55,9 +61,23 @@ namespace CP {
     Gaudi::Property<bool> m_doMuSA{this, "doMuSA", false, "MuSA mode for wider histogram ranges"};
     Gaudi::Property<bool> m_doSMOrigin{this, "doSMOrigin", false, "Enable SM origin categorization"};
 
-    void fillRecoHistograms(const xAOD::Vertex* secVtx, const std::string& matchType);
+    /// cached pointers to the histograms of one reco vertex category
+    struct RecoVertexHists {
+      TH1* x{}; TH1* y{}; TH1* z{}; TH1* Lxy{}; TH1* pT{}; TH1* eta{}; TH1* phi{};
+      TH1* mass{}; TH1* mu{}; TH1* chi2{}; TH1* dir{}; TH1* charge{}; TH1* H{}; TH1* HT{};
+      TH1* minOpAng{}; TH1* maxOpAng{}; TH1* maxdR{}; TH1* mind0{}; TH1* maxd0{}; TH1* ntrk{};
+      TH1* Trk_qOverP{}; TH1* Trk_theta{}; TH1* Trk_E{}; TH1* Trk_M{}; TH1* Trk_Pt{};
+      TH1* Trk_Px{}; TH1* Trk_Py{}; TH1* Trk_Pz{}; TH1* Trk_Eta{}; TH1* Trk_Phi{};
+      TH1* Trk_D0{}; TH1* Trk_Z0{}; TH1* Trk_errD0{}; TH1* Trk_errZ0{}; TH1* Trk_Chi2{};
+      TH1* Trk_nDoF{}; TH1* Trk_charge{};
+      // truth matching, only booked for matched categories (nullptr otherwise)
+      TH1* positionRes_R{}; TH1* positionRes_Z{}; TH1* matchScore_weight{};
+      TH1* matchScore_pt{};
+    };
+    std::unordered_map<std::string, RecoVertexHists> m_recoHists;
+
+    void fillRecoHistograms(const xAOD::Vertex* secVtx, const std::vector<const RecoVertexHists*>& categories);
     void fillTruthHistograms(const xAOD::TruthVertex* truthVtx, const std::string& truthType);
-    void fillOriginHistograms(const xAOD::Vertex* secVtx, const std::string& originType);
   };
 } // namespace CP
 #endif

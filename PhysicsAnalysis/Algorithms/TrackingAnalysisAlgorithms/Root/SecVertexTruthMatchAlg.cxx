@@ -6,12 +6,16 @@
 #include "InDetSecVtxTruthMatchTool/InDetSecVtxTruthMatchTool.h"
 #include "xAODTruth/TruthParticle.h"
 
-#include "TMath.h"
 #include "TH1.h"
 #include "TEfficiency.h"
-#include <limits>
+#include "TLorentzVector.h"
+#include <algorithm>
+#include <cmath>
+#include <numbers>
 
-const float GeV = 1000.;
+namespace {
+  constexpr float GeV = 1000.;
+}
 
 namespace CP {
 
@@ -61,143 +65,110 @@ namespace CP {
       if (m_doSMOrigin) {
         ANA_CHECK (book(TH1F("RecoVertex/smOriginType", "Vertex SM Origin Type", 65537, -0.5, 65536.5)));
       }
-      
 
-      for(const auto& recoType : recoTypes) {
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_x").c_str(), "Reco vertex x [mm]", 1000, -maxX, maxX)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_y").c_str(), "Reco vertex y [mm]", 1000, -maxY, maxY)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_z").c_str(), "Reco vertex z [mm]", 1000, -maxZ, maxZ)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_Lxy").c_str(), "Reco vertex L_{xy} [mm]", 500, 0, maxLxy)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_pT").c_str(), "Reco vertex p_{T} [GeV]", 100, 0, 100)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_eta").c_str(), "Reco vertex #eta", 100, -5, 5)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_phi").c_str(), "Reco vertex #phi", 100, -TMath::Pi(), TMath::Pi())));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_mass").c_str(), "Reco vertex mass [GeV]", 500, 0, 100)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_mu").c_str(), "Reco vertex Red. Mass [GeV]", 500, 0, 100)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_chi2").c_str(), "Reco vertex recoChi2", 100, 0, 10)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_dir").c_str(), "Reco vertex recoDirection", 100, -1, 1)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_charge").c_str(), "Reco vertex recoCharge", 20, -10, 10)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_H").c_str(), "Reco vertex H [GeV]", 100, 0, 100)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_HT").c_str(), "Reco vertex Mass [GeV]", 100, 0, 100)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_minOpAng").c_str(), "Reco vertex minOpAng", 100, -1, 1)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_maxOpAng").c_str(), "Reco vertex maxOpAng", 100, -1, 1)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_maxdR").c_str(), "Reco vertex maxDR", 100, 0, 10)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_mind0").c_str(), "Reco vertex min d0 [mm]", 100, 0, mind0)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_maxd0").c_str(), "Reco vertex max d0 [mm]", 100, 0, maxd0)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_ntrk").c_str(), "Reco vertex n tracks", 30, 0, 30)));
+      // book the reco vertex histograms of one category and cache their pointers
+      auto bookRecoVertexHistos = [&](const std::string& category, bool withMatchScore) -> StatusCode {
+        RecoVertexHists& h = m_recoHists[category];
+        auto bookHist = [&](TH1*& target, const std::string& suffix, const char* title,
+                            int nbins, double low, double high) -> StatusCode {
+          const std::string name = "RecoVertex/" + category + suffix;
+          ANA_CHECK (book(TH1F(name.c_str(), title, nbins, low, high)));
+          target = hist(name);
+          return StatusCode::SUCCESS;
+        };
+
+        ANA_CHECK (bookHist(h.x, "_x", "Reco vertex x [mm]", 1000, -maxX, maxX));
+        ANA_CHECK (bookHist(h.y, "_y", "Reco vertex y [mm]", 1000, -maxY, maxY));
+        ANA_CHECK (bookHist(h.z, "_z", "Reco vertex z [mm]", 1000, -maxZ, maxZ));
+        ANA_CHECK (bookHist(h.Lxy, "_Lxy", "Reco vertex L_{xy} [mm]", 500, 0, maxLxy));
+        ANA_CHECK (bookHist(h.pT, "_pT", "Reco vertex p_{T} [GeV]", 100, 0, 100));
+        ANA_CHECK (bookHist(h.eta, "_eta", "Reco vertex #eta", 100, -5, 5));
+        ANA_CHECK (bookHist(h.phi, "_phi", "Reco vertex #phi", 100, -std::numbers::pi, std::numbers::pi));
+        ANA_CHECK (bookHist(h.mass, "_mass", "Reco vertex mass [GeV]", 500, 0, 100));
+        ANA_CHECK (bookHist(h.mu, "_mu", "Reco vertex Red. Mass [GeV]", 500, 0, 100));
+        ANA_CHECK (bookHist(h.chi2, "_chi2", "Reco vertex recoChi2", 100, 0, 10));
+        ANA_CHECK (bookHist(h.dir, "_dir", "Reco vertex recoDirection", 100, -1, 1));
+        ANA_CHECK (bookHist(h.charge, "_charge", "Reco vertex recoCharge", 20, -10, 10));
+        ANA_CHECK (bookHist(h.H, "_H", "Reco vertex H [GeV]", 100, 0, 100));
+        ANA_CHECK (bookHist(h.HT, "_HT", "Reco vertex Mass [GeV]", 100, 0, 100));
+        ANA_CHECK (bookHist(h.minOpAng, "_minOpAng", "Reco vertex minOpAng", 100, -1, 1));
+        ANA_CHECK (bookHist(h.maxOpAng, "_maxOpAng", "Reco vertex maxOpAng", 100, -1, 1));
+        ANA_CHECK (bookHist(h.maxdR, "_maxdR", "Reco vertex maxDR", 100, 0, 10));
+        ANA_CHECK (bookHist(h.mind0, "_mind0", "Reco vertex min d0 [mm]", 100, 0, mind0));
+        ANA_CHECK (bookHist(h.maxd0, "_maxd0", "Reco vertex max d0 [mm]", 100, 0, maxd0));
+        ANA_CHECK (bookHist(h.ntrk, "_ntrk", "Reco vertex n tracks", 30, 0, 30));
 
         // tracks
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_Trk_qOverP").c_str(), "Reco track qOverP ", 100, 0, .01)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_Trk_theta").c_str(), "Reco track theta ", 64, 0, 3.2)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_Trk_E").c_str(), "Reco track E ", 100, 0, 100)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_Trk_M").c_str(), "Reco track M ", 100, 0, 10)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_Trk_Pt").c_str(), "Reco track Pt ", 100, 0, 100)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_Trk_Px").c_str(), "Reco track Px ", 100, 0, 100)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_Trk_Py").c_str(), "Reco track Py ", 100, 0, 100)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_Trk_Pz").c_str(), "Reco track Pz ", 100, 0, 100)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_Trk_Eta").c_str(), "Reco track Eta ", 100, -5, 5)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_Trk_Phi").c_str(), "Reco track Phi ", 63, -3.2, 3.2)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_Trk_D0").c_str(), "Reco track D0 ", 300, -maxTrackd0, maxTrackd0)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_Trk_Z0").c_str(), "Reco track Z0 ", 500, -maxTrackz0, maxTrackz0)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_Trk_errD0").c_str(), "Reco track errD0 ", 300, 0, maxErrd0)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_Trk_errZ0").c_str(), "Reco track errZ0 ", 500, 0, maxErrz0)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_Trk_Chi2").c_str(), "Reco track Chi2 ", 100, 0, 10)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_Trk_nDoF").c_str(), "Reco track nDoF ", 100, 0, 100)));
-        ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_Trk_charge").c_str(), "Reco track charge ", 3, -1.5, 1.5)));
+        ANA_CHECK (bookHist(h.Trk_qOverP, "_Trk_qOverP", "Reco track qOverP ", 100, 0, .01));
+        ANA_CHECK (bookHist(h.Trk_theta, "_Trk_theta", "Reco track theta ", 64, 0, 3.2));
+        ANA_CHECK (bookHist(h.Trk_E, "_Trk_E", "Reco track E ", 100, 0, 100));
+        ANA_CHECK (bookHist(h.Trk_M, "_Trk_M", "Reco track M ", 100, 0, 10));
+        ANA_CHECK (bookHist(h.Trk_Pt, "_Trk_Pt", "Reco track Pt ", 100, 0, 100));
+        ANA_CHECK (bookHist(h.Trk_Px, "_Trk_Px", "Reco track Px ", 100, 0, 100));
+        ANA_CHECK (bookHist(h.Trk_Py, "_Trk_Py", "Reco track Py ", 100, 0, 100));
+        ANA_CHECK (bookHist(h.Trk_Pz, "_Trk_Pz", "Reco track Pz ", 100, 0, 100));
+        ANA_CHECK (bookHist(h.Trk_Eta, "_Trk_Eta", "Reco track Eta ", 100, -5, 5));
+        ANA_CHECK (bookHist(h.Trk_Phi, "_Trk_Phi", "Reco track Phi ", 63, -3.2, 3.2));
+        ANA_CHECK (bookHist(h.Trk_D0, "_Trk_D0", "Reco track D0 ", 300, -maxTrackd0, maxTrackd0));
+        ANA_CHECK (bookHist(h.Trk_Z0, "_Trk_Z0", "Reco track Z0 ", 500, -maxTrackz0, maxTrackz0));
+        ANA_CHECK (bookHist(h.Trk_errD0, "_Trk_errD0", "Reco track errD0 ", 300, 0, maxErrd0));
+        ANA_CHECK (bookHist(h.Trk_errZ0, "_Trk_errZ0", "Reco track errZ0 ", 500, 0, maxErrz0));
+        ANA_CHECK (bookHist(h.Trk_Chi2, "_Trk_Chi2", "Reco track Chi2 ", 100, 0, 10));
+        ANA_CHECK (bookHist(h.Trk_nDoF, "_Trk_nDoF", "Reco track nDoF ", 100, 0, 100));
+        ANA_CHECK (bookHist(h.Trk_charge, "_Trk_charge", "Reco track charge ", 3, -1.5, 1.5));
 
-        // truth matching -- don't book for non-matched vertices
-        if ( recoType != "All" and recoType != "Fake" ) {
-          ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_positionRes_R").c_str(), "Position resolution for vertices matched to truth decays", 400, -maxResR, maxResR)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_positionRes_Z").c_str(), "Position resolution for vertices matched to truth decays", 400, -maxResZ, maxResZ)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_matchScore_weight").c_str(), "Vertex Match Score (weight)", 101, 0, 1.01)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_matchScore_pt").c_str(), "Vertex Match Score (pT)", 101, 0, 1.01)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + recoType + "_matchedTruthID").c_str(), "Vertex Truth Match ID", 100, 0, 100)));
+        if (withMatchScore) {
+          ANA_CHECK (bookHist(h.positionRes_R, "_positionRes_R", "Position resolution for vertices matched to truth decays", 400, -maxResR, maxResR));
+          ANA_CHECK (bookHist(h.positionRes_Z, "_positionRes_Z", "Position resolution for vertices matched to truth decays", 400, -maxResZ, maxResZ));
+          ANA_CHECK (bookHist(h.matchScore_weight, "_matchScore_weight", "Vertex Match Score (weight)", 101, 0, 1.01));
+          ANA_CHECK (bookHist(h.matchScore_pt, "_matchScore_pt", "Vertex Match Score (pT)", 101, 0, 1.01));
         }
+        return StatusCode::SUCCESS;
+      };
+
+      for(const auto& recoType : recoTypes) {
+        // truth matching -- don't book for non-matched vertices
+        ANA_CHECK (bookRecoVertexHistos(recoType, recoType != "All" and recoType != "Fake"));
       }
 
       // do reco vertices by SM origin if enabled -- NOTE these types are not exclusive (d decays will also be b decays in a cascade etc)
-      if (m_doSMOrigin) {
-        for(const auto& smOriginType : smOriginTypes) {
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_x").c_str(), "Reco vertex x [mm]", 1000, -maxX, maxX)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_y").c_str(), "Reco vertex y [mm]", 1000, -maxY, maxY)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_z").c_str(), "Reco vertex z [mm]", 1000, -maxZ, maxZ)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_Lxy").c_str(), "Reco vertex L_{xy} [mm]", 500, 0, maxLxy)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_pT").c_str(), "Reco vertex p_{T} [GeV]", 100, 0, 100)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_eta").c_str(), "Reco vertex #eta", 100, -5, 5)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_phi").c_str(), "Reco vertex #phi", 100, -TMath::Pi(), TMath::Pi())));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_mass").c_str(), "Reco vertex mass [GeV]", 500, 0, 100)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_mu").c_str(), "Reco vertex Red. Mass [GeV]", 500, 0, 100)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_chi2").c_str(), "Reco vertex recoChi2", 100, 0, 10)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_dir").c_str(), "Reco vertex recoDirection", 100, -1, 1)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_charge").c_str(), "Reco vertex recoCharge", 20, -10, 10)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_H").c_str(), "Reco vertex H [GeV]", 100, 0, 100)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_HT").c_str(), "Reco vertex Mass [GeV]", 100, 0, 100)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_minOpAng").c_str(), "Reco vertex minOpAng", 100, -1, 1)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_maxOpAng").c_str(), "Reco vertex maxOpAng", 100, -1, 1)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_maxdR").c_str(), "Reco vertex maxDR", 100, 0, 10)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_mind0").c_str(), "Reco vertex min d0 [mm]", 100, 0, mind0)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_maxd0").c_str(), "Reco vertex max d0 [mm]", 100, 0, maxd0)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_ntrk").c_str(), "Reco vertex n tracks", 30, 0, 30)));
-
-          // tracks
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_Trk_qOverP").c_str(), "Reco track qOverP ", 100, 0, .01)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_Trk_theta").c_str(), "Reco track theta ", 64, 0, 3.2)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_Trk_E").c_str(), "Reco track E ", 100, 0, 100)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_Trk_M").c_str(), "Reco track M ", 100, 0, 10)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_Trk_Pt").c_str(), "Reco track Pt ", 100, 0, 100)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_Trk_Px").c_str(), "Reco track Px ", 100, 0, 100)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_Trk_Py").c_str(), "Reco track Py ", 100, 0, 100)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_Trk_Pz").c_str(), "Reco track Pz ", 100, 0, 100)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_Trk_Eta").c_str(), "Reco track Eta ", 100, -5, 5)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_Trk_Phi").c_str(), "Reco track Phi ", 63, -3.2, 3.2)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_Trk_D0").c_str(), "Reco track D0 ", 300, -maxTrackd0, maxTrackd0)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_Trk_Z0").c_str(), "Reco track Z0 ", 500, -maxTrackz0, maxTrackz0)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_Trk_errD0").c_str(), "Reco track errD0 ", 300, 0, maxErrd0)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_Trk_errZ0").c_str(), "Reco track errZ0 ", 500, 0, maxErrz0)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_Trk_Chi2").c_str(), "Reco track Chi2 ", 100, 0, 10)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_Trk_nDoF").c_str(), "Reco track nDoF ", 100, 0, 100)));
-          ANA_CHECK (book(TH1F(("RecoVertex/" + smOriginType + "_Trk_charge").c_str(), "Reco track charge ", 3, -1.5, 1.5)));
-
-          
-        }
+      for(const auto& smOriginType : smOriginTypes) {
+        ANA_CHECK (bookRecoVertexHistos(smOriginType, false));
       }
 
-
       for(const auto& truthType : truthTypes) {
-				ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_x").c_str(), "Truth vertex x [mm]", 1000, -maxX, maxX)));
-				ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_y").c_str(), "Truth vertex y [mm]", 500, -maxY, maxY)));
-				ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_z").c_str(), "Truth vertex z [mm]", 500, -maxZ, maxZ)));
-				ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_R").c_str(), "Truth vertex r [mm]", 6000, 0, maxR)));
-				ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_distFromPV").c_str(), "Truth vertex distFromPV [mm]", 600, 0, maxR)));
-				ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_Eta").c_str(), "Truth vertex Eta", 100, -5, 5)));
-				ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_Phi").c_str(), "Truth vertex Phi", 64, -3.2, 3.2)));
-				ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_Ntrk_out").c_str(), "Truth vertex n outgoing tracks", 100, 0, 100)));
-				ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_Parent_E").c_str(), "Reco track E", 100, 0, 100)));
-				ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_Parent_M").c_str(), "Reco track M", 500, 0, 500)));
-				ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_Parent_Pt").c_str(), "Reco track Pt", 100, 0, 100)));
-				ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_Parent_Eta").c_str(), "Reco track Eta", 100, -5, 5)));
-				ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_Parent_Phi").c_str(), "Reco track Phi", 63, -3.2, 3.2)));
-				ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_Parent_charge").c_str(), "Reco track charge", 3, -1, 1)));
-				ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_ParentProdX").c_str(), "truthParentProd vertex x [mm]", 500, -500, 500)));
-				ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_ParentProdY").c_str(), "truthParentProd vertex y [mm]", 500, -500, 500)));
-				ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_ParentProdZ").c_str(), "truthParentProd vertex z [mm]", 500, -500, 500)));
-				ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_ParentProdR").c_str(), "truthParentProd vertex r [mm]", 6000, 0, 600)));
-				ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_ParentProddistFromPV").c_str(), "truthParentProd vertex distFromPV [mm]", 500, 0, 500)));
-				ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_ParentProdEta").c_str(), "truthParentProd vertex Eta", 100, -5, 5)));
-				ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_ParentProdPhi").c_str(), "truthParentProd vertex Phi", 64, -3.2, 3.2)));
-			}
+        ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_x").c_str(), "Truth vertex x [mm]", 1000, -maxX, maxX)));
+        ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_y").c_str(), "Truth vertex y [mm]", 500, -maxY, maxY)));
+        ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_z").c_str(), "Truth vertex z [mm]", 500, -maxZ, maxZ)));
+        ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_R").c_str(), "Truth vertex r [mm]", 6000, 0, maxR)));
+        ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_Eta").c_str(), "Truth vertex Eta", 100, -5, 5)));
+        ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_Phi").c_str(), "Truth vertex Phi", 64, -3.2, 3.2)));
+        ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_Ntrk_out").c_str(), "Truth vertex n outgoing tracks", 100, 0, 100)));
+        ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_Parent_E").c_str(), "Reco track E", 100, 0, 100)));
+        ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_Parent_M").c_str(), "Reco track M", 500, 0, 500)));
+        ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_Parent_Pt").c_str(), "Reco track Pt", 100, 0, 100)));
+        ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_Parent_Eta").c_str(), "Reco track Eta", 100, -5, 5)));
+        ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_Parent_Phi").c_str(), "Reco track Phi", 63, -3.2, 3.2)));
+        ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_Parent_charge").c_str(), "Reco track charge", 3, -1, 1)));
+        ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_ParentProdX").c_str(), "truthParentProd vertex x [mm]", 500, -500, 500)));
+        ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_ParentProdY").c_str(), "truthParentProd vertex y [mm]", 500, -500, 500)));
+        ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_ParentProdZ").c_str(), "truthParentProd vertex z [mm]", 500, -500, 500)));
+        ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_ParentProdR").c_str(), "truthParentProd vertex r [mm]", 6000, 0, 600)));
+        ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_ParentProdEta").c_str(), "truthParentProd vertex Eta", 100, -5, 5)));
+        ANA_CHECK (book(TH1F(("TruthVertex/" + truthType + "_ParentProdPhi").c_str(), "truthParentProd vertex Phi", 64, -3.2, 3.2)));
+      }
+
       // now add the efficiencies
       // Define two different bin arrays - one for standard mode, one for MuSA
-      Double_t standard_bins[] = {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 50, 60, 70, 80, 90, 100, 125, 150, 200, 300, 500};
-      Double_t muSA_bins[] = {0.0, 1, 5, 10, 20, 50, 100, 200, 300, 500, 750, 1000, 1500, 2000, 2500, 3000, 4000, 5000, 6000, 7000, 8000};
+      const std::vector<double> bins = m_doMuSA
+        ? std::vector<double>{0.0, 1, 5, 10, 20, 50, 100, 200, 300, 500, 750, 1000, 1500, 2000, 2500, 3000, 4000, 5000, 6000, 7000, 8000}
+        : std::vector<double>{0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 50, 60, 70, 80, 90, 100, 125, 150, 200, 300, 500};
+      const int nbins = std::size(bins) - 1;
 
-      // Determine which bins to use based on whether we're in MuSA mode
-      Double_t* bins = m_doMuSA ? muSA_bins : standard_bins;
-      size_t nbins = m_doMuSA ? sizeof(muSA_bins)/sizeof(muSA_bins[0])-1 : sizeof(standard_bins)/sizeof(standard_bins[0])-1;
-
-      ANA_CHECK (book(TEfficiency("Acceptance", "Acceptance", nbins, bins)));
-      ANA_CHECK (book(TEfficiency("eff_seed", "Seed efficiency", nbins, bins)));
-      ANA_CHECK (book(TEfficiency("eff_core", "Core efficiency", nbins, bins)));
-      ANA_CHECK (book(TEfficiency("eff_total", "Total efficiency", nbins, bins)));
+      ANA_CHECK (book(TEfficiency("Acceptance", "Acceptance", nbins, bins.data())));
+      ANA_CHECK (book(TEfficiency("eff_seed", "Seed efficiency", nbins, bins.data())));
+      ANA_CHECK (book(TEfficiency("eff_core", "Core efficiency", nbins, bins.data())));
+      ANA_CHECK (book(TEfficiency("eff_total", "Total efficiency", nbins, bins.data())));
       
     }
 
@@ -209,16 +180,26 @@ namespace CP {
 
     //Retrieve the vertices:
     SG::ReadHandle<xAOD::VertexContainer> recoVertexContainer(m_secVtxContainerKey, ctx);
+    if (!recoVertexContainer.isValid()) {
+      ATH_MSG_ERROR("Failed to retrieve secondary vertex container " << m_secVtxContainerKey.key());
+      return StatusCode::FAILURE;
+    }
     SG::ReadHandle<xAOD::TruthVertexContainer> truthVertexContainer(m_truthVtxContainerKey, ctx);
+    if (!truthVertexContainer.isValid()) {
+      ATH_MSG_ERROR("Failed to retrieve truth vertex container " << m_truthVtxContainerKey.key());
+      return StatusCode::FAILURE;
+    }
     SG::ReadHandle<xAOD::TrackParticleContainer> trackParticleContainer(m_trackParticleContainerKey, ctx);
+    if (!trackParticleContainer.isValid()) {
+      ATH_MSG_ERROR("Failed to retrieve track particle container " << m_trackParticleContainerKey.key());
+      return StatusCode::FAILURE;
+    }
 
     std::vector<const xAOD::Vertex*> recoVerticesToMatch;
     std::vector<const xAOD::TruthVertex*> truthVerticesToMatch;
 
     for(const auto recoVertex : *recoVertexContainer) {
-      xAOD::VxType::VertexType vtxType = static_cast<xAOD::VxType::VertexType>( recoVertex->vertexType() );
-
-      if(vtxType != xAOD::VxType::SecVtx ){
+      if(recoVertex->vertexType() != xAOD::VxType::SecVtx ){
         ATH_MSG_DEBUG("Vertex not labeled as secondary");
         continue;
       }
@@ -233,7 +214,7 @@ namespace CP {
       if(not truthPart) {
         continue;
       }
-      if(std::find(m_targetPDGIDs.begin(), m_targetPDGIDs.end(), std::abs(truthPart->pdgId())) == m_targetPDGIDs.end()) {
+      if(std::ranges::find(m_targetPDGIDs.value(), std::abs(truthPart->pdgId())) == m_targetPDGIDs.value().end()) {
         continue;
       }
       if(truthVertex->nOutgoingParticles() < 2) {
@@ -246,32 +227,68 @@ namespace CP {
     ATH_CHECK( m_matchTool->matchVertices( recoVerticesToMatch, truthVerticesToMatch, trackParticleContainer.cptr() ) );
 
     if(m_writeHistograms) {
-      static const xAOD::Vertex::Decorator<int> matchTypeDecor("vertexMatchType");
+      static const xAOD::Vertex::ConstAccessor<int> matchTypeAcc("vertexMatchType");
+      static const xAOD::Vertex::ConstAccessor<int> originTypeAcc("vertexMatchOriginType");
+
+      static const std::map<InDetSecVtxTruthMatchUtils::VertexMatchOriginType, std::string> originTypeMap = {
+        {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::FakeOrigin, "FakeOrigin"},
+        {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::Pileup, "Pileup"},
+        {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::KshortDecay, "KshortDecay"},
+        {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::StrangeMesonDecay, "StrangeMesonDecay"},
+        {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::LambdaDecay, "LambdaDecay"},
+        {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::StrangeBaryonDecay, "StrangeBaryonDecay"},
+        {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::TauDecay, "TauDecay"},
+        {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::GammaConversion, "GammaConversion"},
+        {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::OtherDecay, "OtherDecay"},
+        {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::HadronicInteraction, "HadronicInteraction"},
+        {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::OtherSecondary, "OtherSecondary"},
+        {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::BHadronDecay, "BHadronDecay"},
+        {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::DHadronDecay, "DHadronDecay"},
+        {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::Fragmentation, "Fragmentation"},
+        {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::OtherOrigin, "OtherOrigin"},
+        {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::Signal, "Signal"},
+      };
+
+      std::vector<const RecoVertexHists*> categories;
       for(const auto& secVtx : recoVerticesToMatch) {
-        int matchTypeBitset = matchTypeDecor(*secVtx);
+        categories.clear();
+        int matchTypeBitset = matchTypeAcc(*secVtx);
         hist("RecoVertex/matchType")->Fill(matchTypeBitset);
 
         if(InDetSecVtxTruthMatchUtils::isMatched(matchTypeBitset)) {
-          fillRecoHistograms(secVtx, "Matched");
+          categories.push_back(&m_recoHists.at("Matched"));
         }
         if(InDetSecVtxTruthMatchUtils::isMerged(matchTypeBitset)) {
-          fillRecoHistograms(secVtx, "Merged");
+          categories.push_back(&m_recoHists.at("Merged"));
         }
         if(InDetSecVtxTruthMatchUtils::isFake(matchTypeBitset)) {
-          fillRecoHistograms(secVtx, "Fake");
+          categories.push_back(&m_recoHists.at("Fake"));
         }
         if(InDetSecVtxTruthMatchUtils::isSplit(matchTypeBitset)) {
-          fillRecoHistograms(secVtx, "Split");
+          categories.push_back(&m_recoHists.at("Split"));
         }
         if(InDetSecVtxTruthMatchUtils::isOther(matchTypeBitset)) {
-          fillRecoHistograms(secVtx, "Other");
+          categories.push_back(&m_recoHists.at("Other"));
         }
-        fillRecoHistograms(secVtx, "All");
+        categories.push_back(&m_recoHists.at("All"));
+
+        if (m_doSMOrigin) {
+          int smOriginTypeBitset = originTypeAcc(*secVtx);
+          hist("RecoVertex/smOriginType")->Fill(smOriginTypeBitset);
+
+          for(const auto& entry : originTypeMap) {
+            if(InDetSecVtxTruthMatchUtils::isOriginType(smOriginTypeBitset, entry.first)) {
+              categories.push_back(&m_recoHists.at(entry.second));
+            }
+          }
+        }
+
+        fillRecoHistograms(secVtx, categories);
       }
 
-      static const xAOD::Vertex::Decorator<int> truthTypeDecor("truthVertexMatchType");
+      static const xAOD::TruthVertex::ConstAccessor<int> truthTypeAcc("truthVertexMatchType");
       for(const auto& truthVtx : truthVerticesToMatch) {
-        int truthTypeBitset = truthTypeDecor(*truthVtx);
+        int truthTypeBitset = truthTypeAcc(*truthVtx);
         if(InDetSecVtxTruthMatchUtils::isReconstructable(truthTypeBitset)) {
           fillTruthHistograms(truthVtx, "Reconstructable");
 
@@ -296,53 +313,17 @@ namespace CP {
         fillTruthHistograms(truthVtx, "Inclusive");
 
       }
-      if (m_doSMOrigin) {
-        static const xAOD::Vertex::Decorator<int> originTypeDecor("vertexMatchOriginType");
-
-        static const std::map<InDetSecVtxTruthMatchUtils::VertexMatchOriginType, std::string> originTypeMap = {
-          {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::FakeOrigin, "FakeOrigin"},
-          {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::Pileup, "Pileup"},
-          {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::KshortDecay, "KshortDecay"},
-          {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::StrangeMesonDecay, "StrangeMesonDecay"},
-          {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::LambdaDecay, "LambdaDecay"},
-          {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::StrangeBaryonDecay, "StrangeBaryonDecay"},
-          {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::TauDecay, "TauDecay"},
-          {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::GammaConversion, "GammaConversion"},
-          {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::OtherDecay, "OtherDecay"},
-          {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::HadronicInteraction, "HadronicInteraction"},
-          {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::OtherSecondary, "OtherSecondary"},
-          {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::BHadronDecay, "BHadronDecay"},
-          {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::DHadronDecay, "DHadronDecay"},
-          {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::Fragmentation, "Fragmentation"},
-          {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::OtherOrigin, "OtherOrigin"},
-          {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::Signal, "Signal"},
-        };
-
-        for(const auto& secVtx : recoVerticesToMatch) {
-          int smOriginTypeBitset = originTypeDecor(*secVtx);
-          hist("RecoVertex/smOriginType")->Fill(smOriginTypeBitset);
-
-          for(const auto& entry : originTypeMap) {
-            if(InDetSecVtxTruthMatchUtils::isOriginType(smOriginTypeBitset, entry.first)) {
-              fillOriginHistograms(secVtx, entry.second);
-            }
-          }
-        }
-      }
       
     }
 
     return StatusCode::SUCCESS;
 
   }
-  void SecVertexTruthMatchAlg::fillRecoHistograms(const xAOD::Vertex* secVtx, const std::string& matchType) {
+  void SecVertexTruthMatchAlg::fillRecoHistograms(const xAOD::Vertex* secVtx, const std::vector<const RecoVertexHists*>& categories) {
 
-		// set of accessors for tracks and weights
-		xAOD::Vertex::ConstAccessor<xAOD::Vertex::TrackParticleLinks_t> trkAcc("trackParticleLinks");
-		xAOD::Vertex::ConstAccessor<std::vector<float> > weightAcc("trackWeights");
-
-		// set of decorators for truth matching info
-		const xAOD::Vertex::Decorator<std::vector<InDetSecVtxTruthMatchUtils::VertexTruthMatchInfo> > matchInfoDecor("truthVertexMatchingInfos");
+    // set of accessors for tracks and truth matching info
+    xAOD::Vertex::ConstAccessor<xAOD::Vertex::TrackParticleLinks_t> trkAcc("trackParticleLinks");
+    const xAOD::Vertex::ConstAccessor<std::vector<InDetSecVtxTruthMatchUtils::VertexTruthMatchInfo> > matchInfoAcc("truthVertexMatchingInfos");
 
     TVector3 reco_pos(secVtx->x(), secVtx->y(), secVtx->z());
     float Lxy = reco_pos.Perp();
@@ -355,13 +336,14 @@ namespace CP {
     double H = 0.0;
     double HT = 0.0;
     int charge = 0;
+    // NOTE: minOpAng/maxOpAng hold the cosines of the minimum/maximum opening
+    // angle between two tracks, i.e. minOpAng is the largest cosine
     double minOpAng = -1.0* 1.e10;
     double maxOpAng =  1.0* 1.e10;
     double minD0 = 1.0* 1.e10;
     double maxD0 = 0.0;
     double maxDR = 0.0;
-
-    xAOD::TrackParticle::ConstAccessor< std::vector< float > > accCovMatrixDiag( "definingParametersCovMatrixDiag" );
+    size_t nValidTracks = 0;
 
     ATH_MSG_DEBUG("Loop over tracks");
     for(size_t t = 0; t < ntracks; t++){
@@ -370,6 +352,7 @@ namespace CP {
         continue;
       }
       const xAOD::TrackParticle & trk = **trkParts[t];
+      ++nValidTracks;
 
       double trk_d0 = std::abs(trk.definingParameters()[0]);
       double trk_z0 = std::abs(trk.definingParameters()[1]);
@@ -413,76 +396,88 @@ namespace CP {
       xAOD::TrackParticle::ConstAccessor<float> Trk_Chi2("chiSquared");
       xAOD::TrackParticle::ConstAccessor<float> Trk_nDoF("numberDoF");
 
-      if ( Trk_Chi2.isAvailable(trk) && Trk_Chi2(trk) && Trk_nDoF.isAvailable(trk) && Trk_nDoF(trk) )  {
-        hist("RecoVertex/" + matchType + "_Trk_Chi2")->Fill(Trk_Chi2(trk) / Trk_nDoF(trk));
-        hist("RecoVertex/" + matchType + "_Trk_nDoF")->Fill(Trk_nDoF(trk));
+      const bool hasChi2 = Trk_Chi2.isAvailable(trk) && Trk_Chi2(trk) && Trk_nDoF.isAvailable(trk) && Trk_nDoF(trk);
+      const auto& covDiag = trk.definingParametersCovMatrixDiagVec();
+
+      for (const RecoVertexHists* h : categories) {
+        if ( hasChi2 )  {
+          h->Trk_Chi2->Fill(Trk_Chi2(trk) / Trk_nDoF(trk));
+          h->Trk_nDoF->Fill(Trk_nDoF(trk));
+        }
+        h->Trk_D0->Fill(trk_d0);
+        h->Trk_Z0->Fill(trk_z0);
+        h->Trk_theta->Fill(trk.definingParameters()[3]);
+        h->Trk_qOverP->Fill(trk.definingParameters()[4]);
+        h->Trk_Eta->Fill(trk.eta());
+        h->Trk_Phi->Fill(trk.phi0());
+        h->Trk_E->Fill(trk.e() / GeV);
+        h->Trk_M->Fill(trk.m() / GeV);
+        h->Trk_Pt->Fill(trk.pt() / GeV);
+        h->Trk_Px->Fill(trk.p4().Px() / GeV);
+        h->Trk_Py->Fill(trk.p4().Py() / GeV);
+        h->Trk_Pz->Fill(trk.p4().Pz() / GeV);
+        h->Trk_charge->Fill(trk.charge());
+        if (covDiag.size() > 1) {
+          h->Trk_errD0->Fill(std::sqrt(covDiag[0]));
+          h->Trk_errZ0->Fill(std::sqrt(covDiag[1]));
+        }
       }
-      hist("RecoVertex/" + matchType + "_Trk_D0")->Fill(trk_d0);
-      hist("RecoVertex/" + matchType + "_Trk_Z0")->Fill(trk_z0);
-      hist("RecoVertex/" + matchType + "_Trk_theta")->Fill(trk.definingParameters()[3]);
-      hist("RecoVertex/" + matchType + "_Trk_qOverP")->Fill(trk.definingParameters()[4]);
-      hist("RecoVertex/" + matchType + "_Trk_Eta")->Fill(trk.eta());
-      hist("RecoVertex/" + matchType + "_Trk_Phi")->Fill(trk.phi0());
-      hist("RecoVertex/" + matchType + "_Trk_E")->Fill(trk.e() / GeV);
-      hist("RecoVertex/" + matchType + "_Trk_M")->Fill(trk.m() / GeV);
-      hist("RecoVertex/" + matchType + "_Trk_Pt")->Fill(trk.pt() / GeV);
-      hist("RecoVertex/" + matchType + "_Trk_Px")->Fill(trk.p4().Px() / GeV);
-      hist("RecoVertex/" + matchType + "_Trk_Py")->Fill(trk.p4().Py() / GeV);
-      hist("RecoVertex/" + matchType + "_Trk_Pz")->Fill(trk.p4().Pz() / GeV);
-      hist("RecoVertex/" + matchType + "_Trk_charge")->Fill(trk.charge());
-      hist("RecoVertex/" + matchType + "_Trk_errD0")->Fill(trk.definingParametersCovMatrix()(0,0));
-      hist("RecoVertex/" + matchType + "_Trk_errZ0")->Fill(trk.definingParametersCovMatrix()(1,1));
 
     } // end loop over tracks
 
-    const double dir  = sumP4.Vect().Dot( reco_pos ) / sumP4.Vect().Mag() / reco_pos.Mag();
+    const double sumP3Mag = sumP4.Vect().Mag();
+    const double recoPosMag = reco_pos.Mag();
 
     xAOD::Vertex::ConstAccessor<float> Chi2("chiSquared");
     xAOD::Vertex::ConstAccessor<float> nDoF("numberDoF");
 
-    hist("RecoVertex/" + matchType + "_x")->Fill(secVtx->x());
-    hist("RecoVertex/" + matchType + "_y")->Fill(secVtx->y());
-    hist("RecoVertex/" + matchType + "_z")->Fill(secVtx->z());
-    hist("RecoVertex/" + matchType + "_Lxy")->Fill(Lxy);
-    hist("RecoVertex/" + matchType + "_ntrk")->Fill(ntracks);
-    hist("RecoVertex/" + matchType + "_pT")->Fill(sumP4.Pt() / GeV);
-    hist("RecoVertex/" + matchType + "_eta")->Fill(sumP4.Eta());
-    hist("RecoVertex/" + matchType + "_phi")->Fill(sumP4.Phi());
-    hist("RecoVertex/" + matchType + "_mass")->Fill(sumP4.M() / GeV);
-    double muVal = std::numeric_limits<double>::max();
-    if (maxDR != 0.)[[likely]]{
-      muVal = sumP4.M()/maxDR / GeV;
-    }
-    hist("RecoVertex/" + matchType + "_mu")->Fill(muVal);
-    hist("RecoVertex/" + matchType + "_chi2")->Fill(Chi2(*secVtx)/nDoF(*secVtx));
-    hist("RecoVertex/" + matchType + "_dir")->Fill(dir);
-    hist("RecoVertex/" + matchType + "_charge")->Fill(charge);
-    hist("RecoVertex/" + matchType + "_H")->Fill(H / GeV);
-    hist("RecoVertex/" + matchType + "_HT")->Fill(HT / GeV);
-    hist("RecoVertex/" + matchType + "_minOpAng")->Fill(minOpAng);
-    hist("RecoVertex/" + matchType + "_maxOpAng")->Fill(maxOpAng);
-    hist("RecoVertex/" + matchType + "_mind0")->Fill(minD0);
-    hist("RecoVertex/" + matchType + "_maxd0")->Fill(maxD0);
-    hist("RecoVertex/" + matchType + "_maxdR")->Fill(maxDR);
+    for (const RecoVertexHists* h : categories) {
+      h->x->Fill(secVtx->x());
+      h->y->Fill(secVtx->y());
+      h->z->Fill(secVtx->z());
+      h->Lxy->Fill(Lxy);
+      h->ntrk->Fill(ntracks);
+      h->pT->Fill(sumP4.Pt() / GeV);
+      h->eta->Fill(sumP4.Eta());
+      h->phi->Fill(sumP4.Phi());
+      h->mass->Fill(sumP4.M() / GeV);
+      if (maxDR > 0) {
+        h->mu->Fill(sumP4.M() / maxDR / GeV);
+      }
+      h->chi2->Fill(Chi2(*secVtx)/nDoF(*secVtx));
+      if (sumP3Mag > 0 && recoPosMag > 0) {
+        h->dir->Fill(sumP4.Vect().Dot( reco_pos ) / sumP3Mag / recoPosMag);
+      }
+      h->charge->Fill(charge);
+      h->H->Fill(H / GeV);
+      h->HT->Fill(HT / GeV);
+      if (nValidTracks > 1) {
+        h->minOpAng->Fill(minOpAng);
+        h->maxOpAng->Fill(maxOpAng);
+      }
+      if (nValidTracks > 0) {
+        h->mind0->Fill(minD0);
+        h->maxd0->Fill(maxD0);
+      }
+      h->maxdR->Fill(maxDR);
 
-    std::vector<InDetSecVtxTruthMatchUtils::VertexTruthMatchInfo> truthmatchinfo;
-    truthmatchinfo = matchInfoDecor(*secVtx);
+      // This includes all matched vertices, including splits
+      if (h->matchScore_weight) {
+        const auto& truthmatchinfo = matchInfoAcc(*secVtx);
+        if(not truthmatchinfo.empty()){
+          float matchScore_weight = std::get<1>(truthmatchinfo.at(0));
+          float matchScore_pt     = std::get<2>(truthmatchinfo.at(0));
 
-    // This includes all matched vertices, including splits
-    if (matchType != "All" and matchType != "Fake") {
-      if(not truthmatchinfo.empty()){
-        float matchScore_weight = std::get<1>(truthmatchinfo.at(0));
-        float matchScore_pt     = std::get<2>(truthmatchinfo.at(0));
+          ATH_MSG_DEBUG("Match Score and probability: " << matchScore_weight << " " << matchScore_pt/0.01);
 
-        ATH_MSG_DEBUG("Match Score and probability: " << matchScore_weight << " " << matchScore_pt/0.01);
+          const ElementLink<xAOD::TruthVertexContainer>& truthVertexLink = std::get<0>(truthmatchinfo.at(0));
+          const xAOD::TruthVertex& truthVtx = **truthVertexLink ;
 
-        const ElementLink<xAOD::TruthVertexContainer>& truthVertexLink = std::get<0>(truthmatchinfo.at(0));
-        const xAOD::TruthVertex& truthVtx = **truthVertexLink ;
-
-        hist("RecoVertex/" + matchType + "_positionRes_R")->Fill(Lxy - truthVtx.perp());
-        hist("RecoVertex/" + matchType + "_positionRes_Z")->Fill(secVtx->z() - truthVtx.z());
-        hist("RecoVertex/" + matchType + "_matchScore_weight")->Fill(matchScore_weight);
-        hist("RecoVertex/" + matchType + "_matchScore_pt")->Fill(matchScore_pt);
+          h->positionRes_R->Fill(Lxy - truthVtx.perp());
+          h->positionRes_Z->Fill(secVtx->z() - truthVtx.z());
+          h->matchScore_weight->Fill(matchScore_weight);
+          h->matchScore_pt->Fill(matchScore_pt);
+        }
       }
     }
   }
@@ -518,149 +513,6 @@ namespace CP {
       hist("TruthVertex/" + truthType + "_ParentProdEta")->Fill(vertex.eta());
       hist("TruthVertex/" + truthType + "_ParentProdPhi")->Fill(vertex.phi());
     }
-    // m_truthInclusive_r->Fill(truthVtx.perp());
-
-    // if(matchTypeDecor(truthVtx) >= RECONSTRUCTABLE){
-    //   m_truthReconstructable_r->Fill(truthVtx.perp());
-    // }
-    // if(matchTypeDecor(truthVtx) >= ACCEPTED){
-    //   m_truthAccepted_r->Fill(truthVtx.perp());
-    // }
-    // if(matchTypeDecor(truthVtx) >= SEEDED){
-    //   m_truthSeeded_r->Fill(truthVtx.perp());
-    // }
-    // if(matchTypeDecor(truthVtx) >= RECONSTRUCTED){
-    //   m_truthReconstructed_r->Fill(truthVtx.perp());
-    // }
-    // if(matchTypeDecor(truthVtx) >= RECONSTRUCTEDSPLIT){
-    //   m_truthSplit_r->Fill(truthVtx.perp());
-    // }
-    //
-	}
-
-  void SecVertexTruthMatchAlg::fillOriginHistograms(const xAOD::Vertex* secVtx, const std::string& originType) {
-
-    // set of accessors for tracks and weights
-    xAOD::Vertex::ConstAccessor<xAOD::Vertex::TrackParticleLinks_t> trkAcc("trackParticleLinks");
-    xAOD::Vertex::ConstAccessor<std::vector<float> > weightAcc("trackWeights");
-
-    TVector3 reco_pos(secVtx->x(), secVtx->y(), secVtx->z());
-    float Lxy = reco_pos.Perp();
-
-    size_t ntracks;
-    const xAOD::Vertex::TrackParticleLinks_t & trkParts = trkAcc( *secVtx );
-    ntracks = trkParts.size();
-
-    TLorentzVector sumP4(0,0,0,0);
-    double H = 0.0;
-    double HT = 0.0;
-    int charge = 0;
-    double minOpAng = -1.0* 1.e10;
-    double maxOpAng =  1.0* 1.e10;
-    double minD0 = 1.0* 1.e10;
-    double maxD0 = 0.0;
-    double maxDR = 0.0;
-
-    xAOD::TrackParticle::ConstAccessor< std::vector< float > > accCovMatrixDiag( "definingParametersCovMatrixDiag" );
-    const std::string prefix = "RecoVertex/" + originType;
-    // Loop over tracks to calculate derived quantities
-    for(size_t t = 0; t < ntracks; t++){
-      if(!trkParts[t].isValid()){
-        continue;
-      }
-      const xAOD::TrackParticle & trk = **trkParts[t];
-
-      double trk_d0 = std::abs(trk.definingParameters()[0]);
-      double trk_z0 = std::abs(trk.definingParameters()[1]);
-
-      if(trk_d0 < minD0){ minD0 = trk_d0; }
-      if(trk_d0 > maxD0){ maxD0 = trk_d0; }
-
-      TLorentzVector vv;
-      vv.SetPtEtaPhiM(trk.pt(), trk.eta(), trk.phi0(), trk.m());
-      sumP4 += vv;
-      H += vv.Vect().Mag();
-      HT += vv.Pt();
-
-      TLorentzVector v_minus_iv(0,0,0,0);
-      for(size_t j = 0; j < ntracks; j++){
-        if (j == t){ continue; }
-        if(!trkParts[j].isValid()){
-          continue;
-        }
-
-        const xAOD::TrackParticle & trk_2 = **trkParts[j];
-
-        TLorentzVector tmp;
-        tmp.SetPtEtaPhiM(trk_2.pt(), trk_2.eta(), trk_2.phi0(), trk_2.m());
-        v_minus_iv += tmp;
-
-        if( j > t ) {
-          double tm = vv * tmp / ( vv.Mag() * tmp.Mag() );
-          if( minOpAng < tm ) minOpAng = tm;
-          if( maxOpAng > tm ) maxOpAng = tm;
-        }
-      }
-      double DR = vv.DeltaR(v_minus_iv);
-      if( DR > maxDR ){ maxDR = DR;}
-
-      charge += trk.charge();
-
-      // Fill track-level histograms
-      xAOD::TrackParticle::ConstAccessor<float> Trk_Chi2("chiSquared");
-      xAOD::TrackParticle::ConstAccessor<float> Trk_nDoF("numberDoF");
-      
-      if ( Trk_Chi2.isAvailable(trk) && Trk_Chi2(trk) && Trk_nDoF.isAvailable(trk) && Trk_nDoF(trk) )  {
-        hist(prefix + "_Trk_Chi2")->Fill(Trk_Chi2(trk) / Trk_nDoF(trk));
-        hist(prefix + "_Trk_nDoF")->Fill(Trk_nDoF(trk));
-      }
-      hist(prefix + "_Trk_D0")->Fill(trk_d0);
-      hist(prefix + "_Trk_Z0")->Fill(trk_z0);
-      hist(prefix + "_Trk_theta")->Fill(trk.definingParameters()[3]);
-      hist(prefix + "_Trk_qOverP")->Fill(trk.definingParameters()[4]);
-      hist(prefix + "_Trk_Eta")->Fill(trk.eta());
-      hist(prefix + "_Trk_Phi")->Fill(trk.phi0());
-      hist(prefix + "_Trk_E")->Fill(trk.e() / GeV);
-      hist(prefix + "_Trk_M")->Fill(trk.m() / GeV);
-      hist(prefix + "_Trk_Pt")->Fill(trk.pt() / GeV);
-      hist(prefix + "_Trk_Px")->Fill(trk.p4().Px() / GeV);
-      hist(prefix + "_Trk_Py")->Fill(trk.p4().Py() / GeV);
-      hist(prefix + "_Trk_Pz")->Fill(trk.p4().Pz() / GeV);
-      hist(prefix + "_Trk_charge")->Fill(trk.charge());
-      hist(prefix + "_Trk_errD0")->Fill(trk.definingParametersCovMatrix()(0,0));
-      hist(prefix + "_Trk_errZ0")->Fill(trk.definingParametersCovMatrix()(1,1));
-    }
-
-    const double dir = sumP4.Vect().Dot( reco_pos ) / sumP4.Vect().Mag() / reco_pos.Mag();
-
-    xAOD::Vertex::ConstAccessor<float> Chi2("chiSquared");
-    xAOD::Vertex::ConstAccessor<float> nDoF("numberDoF");
-
-    // Fill vertex-level histograms
-    hist(prefix + "_x")->Fill(secVtx->x());
-    hist(prefix + "_y")->Fill(secVtx->y());
-    hist(prefix + "_z")->Fill(secVtx->z());
-    hist(prefix + "_Lxy")->Fill(Lxy);
-    hist(prefix + "_ntrk")->Fill(ntracks);
-    hist(prefix + "_pT")->Fill(sumP4.Pt() / GeV);
-    hist(prefix + "_eta")->Fill(sumP4.Eta());
-    hist(prefix + "_phi")->Fill(sumP4.Phi());
-    hist(prefix + "_mass")->Fill(sumP4.M() / GeV);
-    auto mu = std::numeric_limits<double>::max();
-    if (maxDR != 0.)[[likely]]{
-      mu = sumP4.M()/maxDR / GeV;
-    }
-    hist(prefix + "_mu")->Fill(mu);
-    hist(prefix + "_chi2")->Fill(Chi2(*secVtx)/nDoF(*secVtx));
-    hist(prefix + "_dir")->Fill(dir);
-    hist(prefix + "_charge")->Fill(charge);
-    hist(prefix + "_H")->Fill(H / GeV);
-    hist(prefix + "_HT")->Fill(HT / GeV);
-    hist(prefix + "_minOpAng")->Fill(minOpAng);
-    hist(prefix + "_maxOpAng")->Fill(maxOpAng);
-    hist(prefix + "_mind0")->Fill(minD0);
-    hist(prefix + "_maxd0")->Fill(maxD0);
-    hist(prefix + "_maxdR")->Fill(maxDR);
   }
 
 } // namespace CP
