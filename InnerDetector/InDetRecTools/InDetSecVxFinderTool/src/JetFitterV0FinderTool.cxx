@@ -25,7 +25,7 @@ JetFitterV0FinderTool::JetFitterV0FinderTool(const std::string &t, const std::st
   std::string::size_type firstDelimiter = toolname.find(delimiter);
   std::string sub = toolname.substr(0, firstDelimiter);
   std::string decoratorName = std::string("JetFitter_TrackCompatibility_") + sub;
-  m_compatibilityAccessor = SG::AuxElement::Accessor< float >( decoratorName );
+  m_compatibilityAccessor = SG::Accessor< float >( decoratorName );
   
 }
 

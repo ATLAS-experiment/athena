@@ -627,7 +627,7 @@ bool InDetV0FinderTool::d0Pass(const xAOD::TrackParticle* track1, const xAOD::Tr
   bool hasInnerPixHit1 = true;
   bool hasInnerPixHit2 = true;
   if (m_use_innerPixHits){
-    SG::AuxElement::ConstAccessor<uint8_t> numberOfInnermostPixelLayerHits("numberOfInnermostPixelLayerHits");
+    SG::ConstAccessor<uint8_t> numberOfInnermostPixelLayerHits("numberOfInnermostPixelLayerHits");
     uint8_t  nInnerHits1 = numberOfInnermostPixelLayerHits(*track1);
     if (nInnerHits1 == 0) hasInnerPixHit1 = false;
     uint8_t  nInnerHits2 = numberOfInnermostPixelLayerHits(*track2);
@@ -664,7 +664,7 @@ bool InDetV0FinderTool::d0Pass(const xAOD::TrackParticle* track1, const xAOD::Ve
   int count = 0;
   bool hasInnerPixHit1 = true;
   if (m_use_innerPixHits){
-    SG::AuxElement::ConstAccessor<uint8_t> numberOfInnermostPixelLayerHits("numberOfInnermostPixelLayerHits");
+    SG::ConstAccessor<uint8_t> numberOfInnermostPixelLayerHits("numberOfInnermostPixelLayerHits");
     uint8_t  nInnerHits1 = numberOfInnermostPixelLayerHits(*track1);
     if (nInnerHits1 == 0) hasInnerPixHit1 = false;
   }
@@ -690,7 +690,7 @@ bool InDetV0FinderTool::d0Pass(const xAOD::TrackParticle* track1, const xAOD::Ve
   bool pass = false;
   bool hasInnerPixHit1 = true;
   if (m_use_innerPixHits){
-    SG::AuxElement::ConstAccessor<uint8_t> numberOfInnermostPixelLayerHits("numberOfInnermostPixelLayerHits");
+    SG::ConstAccessor<uint8_t> numberOfInnermostPixelLayerHits("numberOfInnermostPixelLayerHits");
     uint8_t  nInnerHits1 = numberOfInnermostPixelLayerHits(*track1);
     if (nInnerHits1 == 0) hasInnerPixHit1 = false;
   }
@@ -711,7 +711,7 @@ bool InDetV0FinderTool::d0Pass(const xAOD::TrackParticle* track1, const Amg::Vec
   bool pass = false;
   bool hasInnerPixHit1 = true;
   if (m_use_innerPixHits){
-    SG::AuxElement::ConstAccessor<uint8_t> numberOfInnermostPixelLayerHits("numberOfInnermostPixelLayerHits");
+    SG::ConstAccessor<uint8_t> numberOfInnermostPixelLayerHits("numberOfInnermostPixelLayerHits");
     uint8_t  nInnerHits1 = numberOfInnermostPixelLayerHits(*track1);
     if (nInnerHits1 == 0) hasInnerPixHit1 = false;
   }

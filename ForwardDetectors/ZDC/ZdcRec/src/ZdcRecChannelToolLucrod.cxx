@@ -79,8 +79,8 @@ int ZdcRecChannelToolLucrod::convertLucrod2ZM(const ZdcLucrodDataContainer* lucr
 
   ATH_MSG_DEBUG("Trying to convert LUCROD to Modules!");
 
-  SG::AuxElement::Accessor<std::vector<uint16_t>> g0acc("g0data");
-  SG::AuxElement::Accessor<std::vector<uint16_t>> g1acc("g1data");
+  SG::Accessor<std::vector<uint16_t>> g0acc("g0data");
+  SG::Accessor<std::vector<uint16_t>> g1acc("g1data");
 
   typedef std::map<uint32_t,xAOD::ZdcModule*> hashmapType;
   hashmapType digits_map;

@@ -242,7 +242,7 @@ void CaloClusterROIPhiRZContainerMaker::addROI( const xAOD::CaloCluster &cluster
 
   // do we want to make energy be EM energy only?
   if (m_EMEnergyOnly) {
-    static const SG::AuxElement::ConstAccessor<float> acc("EMFraction");
+    static const SG::ConstAccessor<float> acc("EMFraction");
     double emFrac(0.);
     if (acc.isAvailable(cluster)) {
       emFrac = acc(cluster);

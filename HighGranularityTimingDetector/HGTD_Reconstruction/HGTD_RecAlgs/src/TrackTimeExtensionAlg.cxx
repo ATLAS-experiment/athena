@@ -214,7 +214,7 @@ StatusCode TrackTimeExtensionAlg::decorateTrackParticle(
       raw_time_vec.emplace_back(cluster->time());
 
       // get the truth particle
-      static const SG::AuxElement::Accessor<ElementLink<xAOD::TruthParticleContainer>>
+      static const SG::Accessor<ElementLink<xAOD::TruthParticleContainer>>
           acc_tpl("truthParticleLink");
       const xAOD::TruthParticle* truth_particle = nullptr;
       if (acc_tpl.isAvailable(*track_ptkl)) {

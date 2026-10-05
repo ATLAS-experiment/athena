@@ -94,7 +94,7 @@ AthTruthSelectionTool::initialize() {
   }
   if (m_requireSiHit > 0) {
     m_cutList.add(Accept_t([&m_requireSiHit = std::as_const(m_requireSiHit)](const P_t& p) {
-      static const SG::AuxElement::ConstAccessor< float > nSilHitsAcc("nSilHits");
+      static const SG::ConstAccessor< float > nSilHitsAcc("nSilHits");
       if (nSilHitsAcc.isAvailable(p)) return (nSilHitsAcc(p) >= m_requireSiHit);
       else return false;
     }, "siHit"));

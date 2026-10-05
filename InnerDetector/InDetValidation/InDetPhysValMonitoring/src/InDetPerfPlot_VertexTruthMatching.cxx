@@ -554,9 +554,9 @@ void InDetPerfPlot_VertexTruthMatching::fill(const xAOD::Vertex& vertex, const x
         fillHisto(m_vx_z_diff_pull, diff_z / err_z, weight);
 
         if (m_isITk) {
-            static const SG::AuxElement::Accessor<uint8_t> accHasValidTime("hasValidTime");
-            static const SG::AuxElement::Accessor<float> accTime("time");
-            static const SG::AuxElement::Accessor<float> accTimeResolution("timeResolution");
+            static const SG::Accessor<uint8_t> accHasValidTime("hasValidTime");
+            static const SG::Accessor<float> accTime("time");
+            static const SG::Accessor<float> accTimeResolution("timeResolution");
             if (accHasValidTime.isAvailable(vertex) && accTime.isAvailable(vertex) &&
                 accTimeResolution.isAvailable(vertex)) {
 

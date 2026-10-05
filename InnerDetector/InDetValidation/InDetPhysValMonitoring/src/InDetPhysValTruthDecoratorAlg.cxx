@@ -120,7 +120,7 @@ InDetPhysValTruthDecoratorAlg::execute(const EventContext &ctx) const {
   if (sctClusters.isValid() && pixelClusters.isValid()) {
     for (const auto *const sct : *sctClusters) {
       const xAOD::TrackMeasurementValidation* sctCluster = sct;
-      static const SG::AuxElement::ConstAccessor< std::vector<unsigned int> > truthIndexAcc("truth_index");
+      static const SG::ConstAccessor< std::vector<unsigned int> > truthIndexAcc("truth_index");
       if (truthIndexAcc.isAvailable(*sctCluster)) {
         const std::vector<unsigned int> &truth_indices = truthIndexAcc(*sctCluster);
         for (auto index : truth_indices) {
@@ -138,7 +138,7 @@ InDetPhysValTruthDecoratorAlg::execute(const EventContext &ctx) const {
    
     for (const auto *const pix : *pixelClusters) {
       const xAOD::TrackMeasurementValidation* pixCluster = pix;
-      static const SG::AuxElement::ConstAccessor< std::vector<unsigned int> > truthIndexAcc("truth_index");
+      static const SG::ConstAccessor< std::vector<unsigned int> > truthIndexAcc("truth_index");
       if (truthIndexAcc.isAvailable(*pixCluster)) {
         const std::vector<unsigned int> &truth_indices = truthIndexAcc(*pixCluster);
         for (auto index : truth_indices) {

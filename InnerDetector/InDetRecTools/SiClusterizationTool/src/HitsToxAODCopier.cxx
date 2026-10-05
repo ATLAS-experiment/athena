@@ -36,14 +36,14 @@ StatusCode HitsToxAODCopier::exportPixel(const EventContext& context) const {
   auto output = std::make_unique<xAOD::BaseContainer>();
   auto outputAux = std::make_unique<xAOD::AuxContainerBase>();
   output->setStore(outputAux.get());
-  static const SG::AuxElement::Accessor<int> col("col");
-  static const SG::AuxElement::Accessor<int> row("row");
-  static const SG::AuxElement::Accessor<int> tot("tot");
-  static const SG::AuxElement::Accessor<int> eta_module("eta_module");
-  static const SG::AuxElement::Accessor<int> phi_module("phi_module");
-  static const SG::AuxElement::Accessor<int> layer_disk("layer_disk");
-  static const SG::AuxElement::Accessor<int> barrel_ec("barrel_ec");
-  static const SG::AuxElement::Accessor<uint64_t> id("detid");
+  static const SG::Accessor<int> col("col");
+  static const SG::Accessor<int> row("row");
+  static const SG::Accessor<int> tot("tot");
+  static const SG::Accessor<int> eta_module("eta_module");
+  static const SG::Accessor<int> phi_module("phi_module");
+  static const SG::Accessor<int> layer_disk("layer_disk");
+  static const SG::Accessor<int> barrel_ec("barrel_ec");
+  static const SG::Accessor<uint64_t> id("detid");
 
   for (const auto *collection : *rdoContainer) {
     const InDetDD::SiDetectorElement* element =
@@ -81,13 +81,13 @@ StatusCode HitsToxAODCopier::exportStrip(const EventContext& context) const {
   auto output = std::make_unique<xAOD::BaseContainer>();
   auto outputAux = std::make_unique<xAOD::AuxContainerBase>();
   output->setStore(outputAux.get());
-  static const SG::AuxElement::Accessor<int> strip("strip");
-  static const SG::AuxElement::Accessor<int> side("side");
-  static const SG::AuxElement::Accessor<int> eta_module("eta_module");
-  static const SG::AuxElement::Accessor<int> phi_module("phi_module");
-  static const SG::AuxElement::Accessor<int> layer_disk("layer_disk");
-  static const SG::AuxElement::Accessor<int> barrel_ec("barrel_ec");
-  static const SG::AuxElement::Accessor<uint64_t> id("detid");
+  static const SG::Accessor<int> strip("strip");
+  static const SG::Accessor<int> side("side");
+  static const SG::Accessor<int> eta_module("eta_module");
+  static const SG::Accessor<int> phi_module("phi_module");
+  static const SG::Accessor<int> layer_disk("layer_disk");
+  static const SG::Accessor<int> barrel_ec("barrel_ec");
+  static const SG::Accessor<uint64_t> id("detid");
 
   for ( const auto *collection: *rdoContainer) {
     if ( collection == nullptr) continue;

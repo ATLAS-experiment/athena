@@ -56,7 +56,7 @@ namespace InDetGNNHardScatterSelection {
     using TrackLinks = std::vector<ElementLink<TPC>>;
 
     template<typename T>
-    using Dec = SG::AuxElement::Decorator<T>;
+    using Dec = SG::Decorator<T>;
 
     template<typename T>
     using Decs = std::vector<std::pair<std::string, Dec<T>>>;

@@ -105,6 +105,6 @@ private:
     kDecorTime,
     kNDecorators
   };
-  std::vector< std::pair<SG::WriteDecorHandleKey<xAOD::TruthParticleContainer>,SG::AuxElement::ConstAccessor<float> > > m_decor;
+  std::vector< std::pair<SG::WriteDecorHandleKey<xAOD::TruthParticleContainer>,SG::ConstAccessor<float> > > m_decor;
 };
 #endif

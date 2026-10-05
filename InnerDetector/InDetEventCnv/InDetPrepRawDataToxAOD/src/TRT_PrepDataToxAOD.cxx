@@ -31,7 +31,7 @@
 #include "StoreGate/WriteHandle.h"
 
 #define AUXDATA(OBJ, TYP, NAME) \
-  static const SG::AuxElement::Accessor<TYP> acc_##NAME (#NAME);  acc_##NAME(*(OBJ))
+  static const SG::Accessor<TYP> acc_##NAME (#NAME);  acc_##NAME(*(OBJ))
 
 
 /////////////////////////////////////////////////////////////////////

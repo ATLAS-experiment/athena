@@ -39,10 +39,10 @@ namespace IDPVM {
     DO_NOTHING, REJECT_QUIETLY, REJECT_WITH_WARNING, REJECT_WARN_IF_UNEQUAL
   };
   template<class ContainerType, class VariableType>
-  using WriteKeyAccessorPair = std::pair<SG::WriteDecorHandleKey<ContainerType>, SG::AuxElement::ConstAccessor<VariableType> >;
+  using WriteKeyAccessorPair = std::pair<SG::WriteDecorHandleKey<ContainerType>, SG::ConstAccessor<VariableType> >;
   //
   template<class ContainerType, class VariableType>
-  using WriteAccessorRefPair = std::pair<SG::WriteDecorHandle<ContainerType, VariableType>, SG::AuxElement::ConstAccessor<VariableType>& >;
+  using WriteAccessorRefPair = std::pair<SG::WriteDecorHandle<ContainerType, VariableType>, SG::ConstAccessor<VariableType>& >;
 
   template<class ContainerType, class VariableType>
   using OptionalDecoration = std::pair<SG::WriteDecorHandle<ContainerType, VariableType>, bool >;
@@ -58,7 +58,7 @@ namespace IDPVM {
     decor_out.reserve(decor_names.size());
     for (const std::string &a_decor_name: decor_names) {
       decor_out.emplace_back(SG::WriteDecorHandleKey<T_Cont>(container_key.key()+"."+prefix+a_decor_name),
-                             SG::AuxElement::ConstAccessor<T>(prefix+a_decor_name));
+                             SG::ConstAccessor<T>(prefix+a_decor_name));
       parent.declare(decor_out.back().first);
       decor_out.back().first.setOwner(&parent);
       decor_out.back().first.initialize().ignore();

@@ -231,10 +231,10 @@ namespace InDetGNNHardScatterSelection
 
           mp->setP4(p4sum);
 
-          SG::AuxElement::Decorator<float> dec_mp_deltaZ("deltaZ");
-          SG::AuxElement::Decorator<float> dec_mp_deltaPhi("deltaPhi");
-          SG::AuxElement::Decorator<int>   dec_mp_nPhotons("nPhotons");
-          SG::AuxElement::Decorator<float> dec_mp_zPointing("zPointing");
+          SG::Decorator<float> dec_mp_deltaZ("deltaZ");
+          SG::Decorator<float> dec_mp_deltaPhi("deltaPhi");
+          SG::Decorator<int>   dec_mp_nPhotons("nPhotons");
+          SG::Decorator<float> dec_mp_zPointing("zPointing");
 
           const float deltaZ = zPoint - bestVtxForMP->z();
           dec_mp_deltaZ(*mp) = deltaZ;

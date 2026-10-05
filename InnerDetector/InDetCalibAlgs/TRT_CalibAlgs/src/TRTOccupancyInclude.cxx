@@ -61,25 +61,25 @@ StatusCode TRTOccupancyInclude::execute(const EventContext& ctx)
   std::vector<float> TRTOccu = m_LocalOccTool->GlobalOccupancy(ctx);
   if (TRTOccu.size() > 6) {
 
-  static const SG::AuxElement::Decorator< float >  decEventInfo_occupancy0("TRTOccGlobal"); 
+  static const SG::Decorator< float >  decEventInfo_occupancy0("TRTOccGlobal"); 
   decEventInfo_occupancy0( *eventInfo ) = TRTOccu.at(0); 
 
-  static const SG::AuxElement::Decorator< float >  decEventInfo_occupancy1("TRTOccBarrelC"); 
+  static const SG::Decorator< float >  decEventInfo_occupancy1("TRTOccBarrelC"); 
   decEventInfo_occupancy1( *eventInfo ) = TRTOccu.at(1); 
 
-  static const SG::AuxElement::Decorator< float >  decEventInfo_occupancy2("TRTOccEndcapAC"); 
+  static const SG::Decorator< float >  decEventInfo_occupancy2("TRTOccEndcapAC"); 
   decEventInfo_occupancy2( *eventInfo ) = TRTOccu.at(2); 
 
-  static const SG::AuxElement::Decorator< float >  decEventInfo_occupancy3("TRTOccEndcapBC"); 
+  static const SG::Decorator< float >  decEventInfo_occupancy3("TRTOccEndcapBC"); 
   decEventInfo_occupancy3( *eventInfo ) = TRTOccu.at(3); 
 
-  static const SG::AuxElement::Decorator< float >  decEventInfo_occupancy4("TRTOccBarrelA"); 
+  static const SG::Decorator< float >  decEventInfo_occupancy4("TRTOccBarrelA"); 
   decEventInfo_occupancy4( *eventInfo ) = TRTOccu.at(4); 
 
-  static const SG::AuxElement::Decorator< float >  decEventInfo_occupancy5("TRTOccEndcapAA"); 
+  static const SG::Decorator< float >  decEventInfo_occupancy5("TRTOccEndcapAA"); 
   decEventInfo_occupancy5( *eventInfo ) = TRTOccu.at(5); 
 
-  static const SG::AuxElement::Decorator< float >  decEventInfo_occupancy6("TRTOccEndcapBA"); 
+  static const SG::Decorator< float >  decEventInfo_occupancy6("TRTOccEndcapBA"); 
   decEventInfo_occupancy6( *eventInfo ) = TRTOccu.at(6); 
   }
 

@@ -46,7 +46,7 @@ namespace InDet {
 	ToolHandle< Trk::IVertexSeedFinder > m_CrossDistancesSeedFinder {this,"CrossDistancesSeedFinder","Trk::CrossDistancesSeedFinder/CrossDistancesSeedFinder",""};
 	ToolHandle< Trk::IVertexFitter > m_SequentialVertexFitter {this,"SequentialVertexFitter","Trk::SequentialVertexFitter/SequentialVertexFitter",""};
 
-	SG::AuxElement::Decorator< std::vector< const Trk::ITrackLink* > > m_tracksDecorator;
+	SG::Decorator< std::vector< const Trk::ITrackLink* > > m_tracksDecorator;
 
 	Gaudi::Property< double > m_maxR {this,"ID_maxR",1150.,""};
 	Gaudi::Property< double > m_maxZ {this,"ID_maxZ",2727.,""};

@@ -35,12 +35,12 @@ namespace IDTPM {
   template< class ContainerType, class VariableType >
   using WriteKeyAccessorPair =
       std::pair< SG::WriteDecorHandleKey<ContainerType>,
-                 SG::AuxElement::ConstAccessor<VariableType> >;
+                 SG::ConstAccessor<VariableType> >;
   //
   template< class ContainerType, class VariableType >
   using WriteAccessorRefPair =
       std::pair< SG::WriteDecorHandle<ContainerType, VariableType>,
-                 SG::AuxElement::ConstAccessor<VariableType>& >;
+                 SG::ConstAccessor<VariableType>& >;
   //
   template< class ContainerType, class VariableType >
   using OptionalDecoration =
@@ -61,7 +61,7 @@ namespace IDTPM {
     for( const std::string& a_decor_name: decor_names ) {
       decor_out.emplace_back(
           SG::WriteDecorHandleKey< T_Cont >( container_key.key()+"."+prefix+a_decor_name ),
-          SG::AuxElement::ConstAccessor<T>( prefix+a_decor_name )
+          SG::ConstAccessor<T>( prefix+a_decor_name )
       );
       parent.declare( decor_out.back().first );
       decor_out.back().first.setOwner( &parent );

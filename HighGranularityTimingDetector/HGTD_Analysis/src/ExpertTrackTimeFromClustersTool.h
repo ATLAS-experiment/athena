@@ -157,12 +157,12 @@ private:
   /// HGTD_TrkTimePerformanceStudies.ExpertTrackTimeFromClusters).
   std::string m_dec_prefix;
 
-  std::unique_ptr<SG::AuxElement::Decorator<bool>> m_dec_isset;
-  std::unique_ptr<SG::AuxElement::Decorator<bool>> m_dec_hastime;
-  std::unique_ptr<SG::AuxElement::Decorator<float>> m_dec_time;
-  std::unique_ptr<SG::AuxElement::Decorator<int>> m_dec_nhits;
-  std::unique_ptr<SG::AuxElement::Decorator<int>> m_dec_nprimehits;
-  std::unique_ptr<SG::AuxElement::Decorator<float>> m_dec_resolution;
+  std::unique_ptr<SG::Decorator<bool>> m_dec_isset;
+  std::unique_ptr<SG::Decorator<bool>> m_dec_hastime;
+  std::unique_ptr<SG::Decorator<float>> m_dec_time;
+  std::unique_ptr<SG::Decorator<int>> m_dec_nhits;
+  std::unique_ptr<SG::Decorator<int>> m_dec_nprimehits;
+  std::unique_ptr<SG::Decorator<float>> m_dec_resolution;
 
   std::unique_ptr<SG::ConstAccessor<bool>> m_acc_isset;
   std::unique_ptr<SG::ConstAccessor<bool>> m_acc_hastime;
