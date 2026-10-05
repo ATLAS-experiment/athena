@@ -15,7 +15,7 @@ INPUTFILE=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestF
 CONDTAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN2_DATA)")
 GEOTAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN2)")
 
-Reco_tf.py  --CA --multithreaded --maxEvents 300 --autoConfiguration everything \
+Reco_tf.py --multithreaded --maxEvents 300 --autoConfiguration everything \
 --inputBSFile="${INPUTFILE}" --conditionsTag="${CONDTAG}" --geometryVersion="${GEOTAG}" \
 --outputESDFile myESD.pool.root --outputAODFile myAOD.pool.root --outputHISTFile myHist.root
 

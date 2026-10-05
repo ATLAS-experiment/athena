@@ -11,7 +11,7 @@ INPUTFILE=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestF
 CONDTAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN2_DATA)")
 GEOTAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN2_2015)")
 
-Reco_tf.py --CA --multithreaded --maxEvents=25 --autoConfiguration 'everything' \
+Reco_tf.py --multithreaded --maxEvents=25 --autoConfiguration 'everything' \
 --inputBSFile="${INPUTFILE}" --conditionsTag="${CONDTAG}" --geometryVersion="${GEOTAG}" \
 --preInclude="all:HIRecConfig.HIModeFlags.HImode" \
 --preExec="flags.Egamma.doForward=False;flags.Reco.EnableZDC=False;flags.Reco.EnableTrigger=False" \
