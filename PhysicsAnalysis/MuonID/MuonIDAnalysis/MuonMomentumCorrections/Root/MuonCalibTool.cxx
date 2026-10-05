@@ -103,8 +103,9 @@ namespace CP
             ATH_CHECK(m_MuonIntScaleSmearTool.setProperty("systematicScheme", m_sysScheme.value()));
             ATH_CHECK(m_MuonIntScaleSmearTool.setProperty("calibMode", m_calibMode));
             ATH_CHECK(m_MuonIntScaleSmearTool.setProperty("OutputLevel", msg().level()));
-            ATH_CHECK(m_MuonIntScaleSmearTool.retrieve());
         }
+        ATH_CHECK(m_MuonIntScaleSmearTool.retrieve());
+        
         /// Create the high pT tool            
         if (m_extra_highpt_smearing || m_2stations_highpt_smearing) {
             if (m_MuonIntHighTSmearTool.empty()) {
