@@ -4,6 +4,7 @@
 #include "xAODToTracccMeasurementConverterAlg.h"
 
 #include "StoreGate/ReadHandle.h"
+#include "StoreGate/ReadCondHandle.h"
 #include "StoreGate/WriteHandle.h"
 
 #include "xAODInDetMeasurement/PixelCluster.h"
@@ -33,18 +34,8 @@ StatusCode xAODToTracccMeasurementConverterAlg::initialize()
   ATH_CHECK(detStore()->retrieve(m_pixelID, "PixelID"));
   ATH_CHECK(detStore()->retrieve(m_stripID, "SCT_ID"));
   ATH_CHECK(detStore()->retrieve(m_geoIdMapping, m_geoIdMappingObjectName.value()));
-  ATH_CHECK(detStore()->retrieve(m_hostCond, m_hostCondObjectName.value()));
   ATH_CHECK(detStore()->retrieve(m_hostDesign, m_hostDesignObjectName.value()));
-
-  // NOTE: m_detrayIdToCondIndex is built once here;
-  // meaning it is only valid as long as the geometry does not change.
-  const auto& gids = m_hostCond->geometry_id();
-  m_detrayIdToCondIndex.reserve(gids.size());
-  for (unsigned int i = 0; i < gids.size(); ++i) {
-    m_detrayIdToCondIndex[gids[i].value()] = i;
-  }
-  ATH_MSG_INFO("Built detray->detcond map with "
-      << m_detrayIdToCondIndex.size() << " entries");
+  ATH_CHECK(m_hostCondKey.initialize());
 
   ATH_MSG_DEBUG("Successfully initialized");
   return StatusCode::SUCCESS;
@@ -58,12 +49,12 @@ StatusCode xAODToTracccMeasurementConverterAlg::condIndexFor(
     ATH_MSG_ERROR("No detray id found for Athena identifier " << moduleId);
     return StatusCode::FAILURE;
   }
-  const auto it = m_detrayIdToCondIndex.find(*detrayIdOpt);
-  if (it == m_detrayIdToCondIndex.end()) {
+  const auto condIndexOpt = m_geoIdMapping->detrayToDetDescIndex(*detrayIdOpt);
+  if (!condIndexOpt.has_value()) {
     ATH_MSG_ERROR("No detray conditions entry found for detray id " << *detrayIdOpt);
     return StatusCode::FAILURE;
   }
-  condIndex = it->second;
+  condIndex = static_cast<unsigned int>(*condIndexOpt);
   return StatusCode::SUCCESS;
 }
 
@@ -76,6 +67,10 @@ StatusCode xAODToTracccMeasurementConverterAlg::execute(const EventContext& ctx)
   ATH_CHECK(pixelClusters.isValid());
   auto stripClusters = SG::makeHandle(m_inputStripClustersKey, ctx);
   ATH_CHECK(stripClusters.isValid());
+
+  SG::ReadCondHandle<traccc::detector_conditions_description::host> hostCondHandle{m_hostCondKey, ctx};
+  ATH_CHECK(hostCondHandle.isValid());
+  const traccc::detector_conditions_description::host& hostCond = **hostCondHandle;
 
   const unsigned int nPixel = pixelClusters->size();
   const unsigned int nStrip = stripClusters->size();
@@ -92,7 +87,7 @@ StatusCode xAODToTracccMeasurementConverterAlg::execute(const EventContext& ctx)
     rec.hostIndex = cl->index();
     const Identifier moduleId = m_pixelID->wafer_id(IdentifierHash{cl->identifierHash()});
     ATH_CHECK(condIndexFor(moduleId, rec.condIndex));
-    rec.geometryId = m_hostCond->geometry_id()[rec.condIndex].value();
+    rec.geometryId = hostCond.geometry_id()[rec.condIndex].value();
     const auto locPos = cl->localPosition<2>();
     const auto locCov = cl->localCovariance<2>();
     rec.localPosition = {locPos(0, 0), locPos(1, 0)};
@@ -107,11 +102,11 @@ StatusCode xAODToTracccMeasurementConverterAlg::execute(const EventContext& ctx)
     rec.hostIndex = cl->index();
     const Identifier moduleId = m_stripID->wafer_id(IdentifierHash{cl->identifierHash()});
     ATH_CHECK(condIndexFor(moduleId, rec.condIndex));
-    rec.geometryId = m_hostCond->geometry_id()[rec.condIndex].value();
+    rec.geometryId = hostCond.geometry_id()[rec.condIndex].value();
 
     // The measured coordinate is given by the module subspace, the other
     // coordinate is set to the centre of the module design
-    const unsigned int designIdx = m_hostCond->module_to_design_id()[rec.condIndex];
+    const unsigned int designIdx = hostCond.module_to_design_id()[rec.condIndex];
     const unsigned int measuredAxis = static_cast<unsigned int>(m_hostDesign->subspace()[designIdx][0]);
     const unsigned int otherAxis = (measuredAxis == 0u) ? 1u : 0u;
     const auto& otherEdges = (otherAxis == 0u) ? m_hostDesign->bin_edges_x()[designIdx]
@@ -159,7 +154,7 @@ StatusCode xAODToTracccMeasurementConverterAlg::execute(const EventContext& ctx)
   // The traccc buffers are not default initialized: all members must be set.
   for (size_type i = 0; i < nMeas; ++i) {
     const MeasurementRecord& rec = records[order[i]];
-    const unsigned int designIdx = m_hostCond->module_to_design_id()[rec.condIndex];
+    const unsigned int designIdx = hostCond.module_to_design_id()[rec.condIndex];
 
     auto meas = measurements.at(i);
     meas.local_position() = rec.localPosition;
@@ -168,7 +163,7 @@ StatusCode xAODToTracccMeasurementConverterAlg::execute(const EventContext& ctx)
     meas.time() = 0.f;
     meas.diameter() = rec.diameter;
     meas.identifier() = i;
-    meas.surface_link() = m_hostCond->geometry_id()[rec.condIndex];
+    meas.surface_link() = hostCond.geometry_id()[rec.condIndex];
     meas.set_subspace(m_hostDesign->subspace()[designIdx]);
     meas.cluster_index() = rec.hostIndex;
 

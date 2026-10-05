@@ -27,7 +27,7 @@ StatusCode DeviceClusterizationAlg::initialize()
   ATH_CHECK(m_outputClusterKey.initialize());
 
   ATH_CHECK(detStore()->retrieve(m_deviceDesign, m_deviceDesignObjectName.value()));
-  ATH_CHECK(detStore()->retrieve(m_deviceCond, m_deviceCondObjectName.value()));
+  ATH_CHECK(m_deviceCondObjectName.initialize());
 
   ATH_MSG_DEBUG("Successfully initialized");
   return StatusCode::SUCCESS;
@@ -37,11 +37,17 @@ StatusCode DeviceClusterizationAlg::execute(const EventContext& ctx) const
 {
   ATH_MSG_DEBUG("Executing device clusterization.");
 
+  SG::ReadCondHandle<traccc::detector_conditions_description::buffer> deviceCond(m_deviceCondObjectName, ctx);
+  if (!deviceCond.isValid()) {
+    ATH_MSG_ERROR("Could not retrieve conditions object '" << m_deviceCondObjectName.key() << "'");
+    return StatusCode::FAILURE;
+  }
+
   // ---- 1. Read input traccc cells from StoreGate --------------------------------
   auto inputTracccCells = SG::makeHandle(m_inputCellsKey, ctx);
   ATH_CHECK(inputTracccCells.isValid());
   ATH_MSG_DEBUG("Read traccc cells from '"
-                         << m_inputCellsKey.key() << "'");
+                         << m_inputCellsKey.key() << "'");                       
 
   // ---- 2. Get traccc clusterization alg ---------------------------------------------
   auto clustering_alg = m_clusteringAlgProviderTool->getClusterizationAlgorithm(ctx);
@@ -57,11 +63,11 @@ StatusCode DeviceClusterizationAlg::execute(const EventContext& ctx) const
     ATH_MSG_DEBUG("Running clusterization with returning cell info");
     std::tie(measurements_gpu_buffer, cluster_gpu_buffer) =
                 (*clustering_alg)(
-                    *inputTracccCells, *m_deviceDesign, *m_deviceCond,
+                    *inputTracccCells, *m_deviceDesign, **deviceCond,
                     traccc::device::clustering_keep_disjoint_set{});
   } else {
     ATH_MSG_DEBUG("Running clusterization without returning cell info");
-    measurements_gpu_buffer = (*clustering_alg)(*inputTracccCells, *m_deviceDesign, *m_deviceCond);
+    measurements_gpu_buffer = (*clustering_alg)(*inputTracccCells, *m_deviceDesign, **deviceCond);
   }
 
   // ---- 3.5 Run measurement sorting ---------------------------------------------

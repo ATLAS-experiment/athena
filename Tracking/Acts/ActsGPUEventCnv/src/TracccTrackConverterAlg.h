@@ -111,11 +111,10 @@ private:
   // acts helper for the output
   ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper{
         this};
-  
   Gaudi::Property<std::string> m_hostDetectorObjectName{
         this, "HostDetectorName", "",
         "Detray host detector object"};
-  const traccc::host_detector* m_hostDetector = nullptr;                  
+  const traccc::host_detector* m_hostDetector = nullptr;
   /// The object counters for debug prints in finalize method
   /// {@
   mutable std::atomic<int> m_nTracksIn = 0;

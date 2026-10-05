@@ -3,6 +3,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
+#include <algorithm>
 #include <cstdint>
 #include <fstream>
 #include <stdexcept>
@@ -20,6 +21,7 @@
 #include "SCT_ReadoutGeometry/SCT_ModuleSideDesign.h"
 #include "SCT_ReadoutGeometry/StripStereoAnnulusDesign.h"
 #include "StoreGate/ReadHandle.h"
+#include "StoreGate/ReadCondHandle.h"
 #include "xAODInDetMeasurement/PixelClusterAuxContainer.h"
 #include "xAODInDetMeasurement/SpacePoint.h"
 #include "xAODInDetMeasurement/SpacePointAuxContainer.h"
@@ -39,6 +41,8 @@ StatusCode ActsClusterComparisonAlg::initialize()
 
     ATH_CHECK(detStore()->retrieve(m_stripID, "SCT_ID"));
 
+    ATH_CHECK(detStore()->retrieve(m_idMapping, m_geoIdMappingObjectName.value()));
+
     ATH_CHECK(m_stripLorentzAngleTool.retrieve());
     ATH_CHECK(m_pixelLorentzAngleTool.retrieve());
 
@@ -47,6 +51,8 @@ StatusCode ActsClusterComparisonAlg::initialize()
 
     ATH_CHECK(m_referencePixelClustersKey.initialize());
     ATH_CHECK(m_referenceStripClustersKey.initialize());
+
+    ATH_CHECK(m_monCondKey.initialize());
 
     ATH_CHECK(m_referenceSpacepointsKey.initialize(m_checkSpacepoints));
     ATH_CHECK(m_monitoredSpacepointsKey.initialize(m_checkSpacepoints));
@@ -279,6 +285,37 @@ void  ActsClusterComparisonAlg::matchStripClusters(
     }
 }
 
+std::optional<std::pair<float, float>> ActsClusterComparisonAlg::tracccLorentzShift(
+    const Identifier& athenaId,
+    const traccc::detector_conditions_description::host& cond) const
+{
+    const auto detrayId = m_idMapping->athenaToDetray(athenaId);
+    if (!detrayId) return std::nullopt;
+    const auto condIndex = m_idMapping->detrayToDetDescIndex(*detrayId);
+    if (!condIndex || *condIndex >= cond.size()) return std::nullopt;
+    const auto& shift = cond.measurement_translation()[*condIndex];
+    return std::make_pair(static_cast<float>(shift[0]), static_cast<float>(shift[1]));
+}
+
+std::optional<std::array<float, 2>> ActsClusterComparisonAlg::tracccCellPosition(
+    const Identifier& athenaId, unsigned int channel0, unsigned int channel1,
+    const traccc::detector_design_description::host& design,
+    const traccc::detector_conditions_description::host& cond) const
+{
+    const auto detrayId = m_idMapping->athenaToDetray(athenaId);
+    if (!detrayId) return std::nullopt;
+    const auto condIndex = m_idMapping->detrayToDetDescIndex(*detrayId);
+    if (!condIndex || *condIndex >= cond.size()) return std::nullopt;
+    const unsigned int designIndex = cond.module_to_design_id()[*condIndex];
+    if (designIndex >= design.size()) return std::nullopt;
+    const auto& edgesX = design.bin_edges_x()[designIndex];
+    const auto& edgesY = design.bin_edges_y()[designIndex];
+    if (channel0 + 1 >= edgesX.size() || channel1 + 1 >= edgesY.size()) return std::nullopt;
+    return std::array<float, 2>{
+        0.5f * static_cast<float>(edgesX[channel0] + edgesX[channel0 + 1]),
+        0.5f * static_cast<float>(edgesY[channel1] + edgesY[channel1 + 1])};
+}
+
 StatusCode ActsClusterComparisonAlg::validateClusters(
     const EventContext& eventContext, std::unordered_map<const xAOD::PixelCluster*, const xAOD::PixelCluster*>& pixel_cluster_matches, std::unordered_map<const xAOD::StripCluster*, const xAOD::StripCluster*>& strip_cluster_matches) const
 {
@@ -319,6 +356,12 @@ StatusCode ActsClusterComparisonAlg::validateClusters(
     const xAOD::StripClusterContainer* referenceStripClusters =
         referenceStripClustersHandle.cptr();
 
+    const traccc::detector_design_description::host* monDesign = nullptr;
+    ATH_CHECK(detStore()->retrieve(monDesign, m_monDesignObjectName.value()));  
+
+    const traccc::detector_conditions_description::host* monCond{};
+    ATH_CHECK(SG::get(monCond,m_monCondKey, eventContext));  
+
     size_t t_n_pixel = monitoredPixelClusters->size();
     size_t t_n_strip = monitoredStripClusters->size();
     size_t a_n_pixel = referencePixelClusters->size();
@@ -330,14 +373,16 @@ StatusCode ActsClusterComparisonAlg::validateClusters(
                                                   << a_n_strip);
 
     if (t_n_pixel != a_n_pixel) {
-        ATH_MSG_DEBUG("[ERROR] mismatched pixel cluster numbers found!");
-        ATH_MSG_DEBUG("  Monitored/reference clusters " << t_n_pixel << " / "
+        ATH_MSG_ERROR("Mismatched pixel cluster numbers found!");
+        ATH_MSG_ERROR("  Monitored/reference clusters " << t_n_pixel << " / "
                                                 << a_n_pixel);
+        return StatusCode::FAILURE;
     }
     if (t_n_strip != a_n_strip) {
-        ATH_MSG_DEBUG("[ERROR] mismatched strip cluster numbers found!");
-        ATH_MSG_DEBUG("  Monitored/reference clusters " << t_n_strip << " / "
+        ATH_MSG_ERROR("Mismatched strip cluster numbers found!");
+        ATH_MSG_ERROR("  Monitored/reference clusters " << t_n_strip << " / "
                                                 << a_n_strip);
+        return StatusCode::FAILURE;                                        
     }
 
     // Group by module
@@ -378,6 +423,8 @@ StatusCode ActsClusterComparisonAlg::validateClusters(
     int strip_pos_diff_0p5sig = 0;
     int strip_pos_diff_0p25sig = 0;
     int strip_pos_diff_1sig = 0;
+    int strip_pos_diff_barrel = 0;
+    int strip_pos_diff_EC = 0;
 
     ATH_MSG_DEBUG("Pixel/Strip modules " << pixel_modules.size() << " / "
                                            << strip_modules.size());
@@ -453,13 +500,20 @@ StatusCode ActsClusterComparisonAlg::validateClusters(
                     monitored_element->identifyHash(), eventContext);
         
 
-            if (std::abs(l_dx / (std::sqrt(monitored_cov(0, 0)))) > 0.25 ||
-                std::abs(l_dy / (std::sqrt(monitored_cov(1, 1)))) > 0.25) {
+            if (std::abs(l_dx / (std::sqrt(reference_cov(0, 0)))) > 0.25 ||
+                std::abs(l_dy / (std::sqrt(reference_cov(1, 1)))) > 0.25) {
                 pixel_pos_diff_0p25sig++;
 
                 ATH_MSG_DEBUG("Detailed print of cluster discrepancy: ");
                 ATH_MSG_DEBUG("On module: " << monitored_Pixel_ModuleID);
                 ATH_MSG_DEBUG("Lorentz shift: " << std::fixed << std::setprecision(9) << monitored_lorentz_shift);
+                if (auto tracccShift = tracccLorentzShift(monitored_Pixel_ModuleID, *monCond)) {
+                    ATH_MSG_DEBUG("Lorentz shift (traccc conditions): " << tracccShift->first);
+                    ATH_MSG_DEBUG(" Δshift = " << tracccShift->first - monitored_lorentz_shift);
+                } else {
+                    ATH_MSG_DEBUG("Lorentz shift (traccc conditions): not found for module " << monitored_Pixel_ModuleID);
+                }
+
 
                 ATH_MSG_DEBUG("Local position: ");
                 ATH_MSG_DEBUG(
@@ -498,6 +552,17 @@ StatusCode ActsClusterComparisonAlg::validateClusters(
                                   << chargeCellId
                                   << ", position: " << si_param.position()[0]
                                   << ", " << si_param.position()[1]);
+                    // traccc cells use channel0 = phi index, channel1 = eta index for pixels
+                    if (auto tracccPos = tracccCellPosition(monitored_Pixel_ModuleID,
+                                                            chargeCellId.phiIndex(), chargeCellId.etaIndex(),
+                                                            *monDesign, *monCond)) {
+                        ATH_MSG_DEBUG("  traccc position for this cell: " << (*tracccPos)[0]
+                                      << ", " << (*tracccPos)[1]
+                                      << "  (Δ = " << (*tracccPos)[0] - si_param.position()[0]
+                                      << ", " << (*tracccPos)[1] - si_param.position()[1] << ")");
+                    } else {
+                        ATH_MSG_DEBUG("  traccc position for this cell: not found");
+                    }
                 }
 
                 // Calculate width difference
@@ -520,12 +585,12 @@ StatusCode ActsClusterComparisonAlg::validateClusters(
                                         << monitored_cluster->widthInEta() -
                                                 reference_cluster->widthInEta());
             }
-            if (std::abs(l_dx / (std::sqrt(monitored_cov(0, 0)))) > 0.5 ||
-                std::abs(l_dy / (std::sqrt(monitored_cov(1, 1)))) > 0.5) {
+            if (std::abs(l_dx / (std::sqrt(reference_cov(0, 0)))) > 0.5 ||
+                std::abs(l_dy / (std::sqrt(reference_cov(1, 1)))) > 0.5) {
                 pixel_pos_diff_0p5sig++;
             }
-            if (std::abs(l_dx / (std::sqrt(monitored_cov(0, 0)))) > 1 ||
-                std::abs(l_dy / (std::sqrt(monitored_cov(1, 1)))) > 1) {
+            if (std::abs(l_dx / (std::sqrt(reference_cov(0, 0)))) > 1 ||
+                std::abs(l_dy / (std::sqrt(reference_cov(1, 1)))) > 1) {
                 pixel_pos_diff_1sig++;
             }
 
@@ -597,11 +662,15 @@ StatusCode ActsClusterComparisonAlg::validateClusters(
                 m_stripManager->getDetectorElement(monitored_cluster->identifierHash());
 
 
-            if (std::abs(pos_diff / (std::sqrt(monitored_cov(0, 0)))) > 0.25) {
+            if (std::abs(pos_diff / (std::sqrt(reference_cov(0, 0)))) > 0.25) {
                 strip_pos_diff_0p25sig++;
 
                 int side = m_stripID->side(monitored_element->identify());
                 const Identifier strip_moduleID = m_stripID->module_id(monitored_element->identify());
+
+                if (m_stripID->barrel_ec(strip_moduleID) == 0) strip_pos_diff_barrel++;
+                else strip_pos_diff_EC++; 
+
                 const IdentifierHash Strip_ModuleHash = m_stripID->wafer_hash(strip_moduleID);
                 double monitored_lorentz_shift =
                     m_stripLorentzAngleTool->getLorentzShift(Strip_ModuleHash + side, eventContext);
@@ -609,6 +678,14 @@ StatusCode ActsClusterComparisonAlg::validateClusters(
                 ATH_MSG_DEBUG("Detailed print of cluster discrepancy: ");
                 ATH_MSG_DEBUG("On module: " << strip_moduleID << ", side: " << m_stripID->side(monitored_element->identify()));
                 ATH_MSG_DEBUG("Lorentz shift: " << std::fixed << std::setprecision(9) << monitored_lorentz_shift);
+                // conditions object is keyed by the wafer (side) id, as in DeviceDetectorDescriptionCondAlg
+                const Identifier strip_waferID = m_stripID->wafer_id(Strip_ModuleHash + side);
+                if (auto tracccShift = tracccLorentzShift(strip_waferID, *monCond)) {
+                    ATH_MSG_DEBUG("Lorentz shift (traccc conditions): " << tracccShift->first);
+                    ATH_MSG_DEBUG(" Δshift = " << tracccShift->first - monitored_lorentz_shift);
+                } else {
+                    ATH_MSG_DEBUG("Lorentz shift (traccc conditions): not found for wafer " << strip_waferID);
+                }
 
                 ATH_MSG_DEBUG("Local position: ");
                 ATH_MSG_DEBUG(
@@ -639,6 +716,15 @@ StatusCode ActsClusterComparisonAlg::validateClusters(
                                     << chargeCellId
                                     << ", position: " << loc_pos[0]
                                     << ", " << loc_pos[1]);
+                        // barrel: traccc channel0 = strip, measured coordinate is local x
+                        const int strip = m_stripID->strip(rdoIter);
+                        if (auto tracccPos = tracccCellPosition(strip_waferID, strip, 0, *monDesign, *monCond)) {
+                            ATH_MSG_DEBUG("  traccc position for this cell (strip " << strip << "): "
+                                          << (*tracccPos)[0]
+                                          << "  (Δ = " << (*tracccPos)[0] - loc_pos[0] << ")");
+                        } else {
+                            ATH_MSG_DEBUG("  traccc position for this cell (strip " << strip << "): not found");
+                        }
                     }
 
                 }else{
@@ -652,10 +738,24 @@ StatusCode ActsClusterComparisonAlg::validateClusters(
                         InDetDD::SiLocalPosition si_pos =
                             annulus_design->localPositionOfCell(chargeCellId);
                         Amg::Vector2D loc_pos(si_pos.xPhi(), si_pos.xEta());
+                        // polar-coordinate position, i.e. the frame the cluster localPosition is stored in
+                        const InDetDD::SiLocalPosition pc_pos =
+                            annulus_design->localPositionOfCellPC(chargeCellId);
                         ATH_MSG_DEBUG("hit id for this cell: "
                                     << chargeCellId
-                                    << ", posiiton: " << loc_pos[0]
-                                    << ", " << loc_pos[1]);
+                                    << ", position: " << loc_pos[0]
+                                    << ", " << loc_pos[1]
+                                    << ", polar (phi, r): " << pc_pos.xPhi()
+                                    << ", " << pc_pos.xEta());
+                        // endcap: traccc channel1 = strip, measured coordinate is local y (phi)
+                        const int strip = m_stripID->strip(rdoIter);
+                        if (auto tracccPos = tracccCellPosition(strip_waferID, 0, strip, *monDesign, *monCond)) {
+                            ATH_MSG_DEBUG("  traccc position for this cell (strip " << strip << "): "
+                                          << (*tracccPos)[1]
+                                          << "  (Δphi = " << (*tracccPos)[1] - pc_pos.xPhi() << ")");
+                        } else {
+                            ATH_MSG_DEBUG("  traccc position for this cell (strip " << strip << "): not found");
+                        }
                     }
 
                 }
@@ -671,10 +771,10 @@ StatusCode ActsClusterComparisonAlg::validateClusters(
                                             reference_cluster->channelsInPhi());
 
             }
-            if (std::abs(pos_diff / (std::sqrt(monitored_cov(0, 0)))) > 0.5) {
+            if (std::abs(pos_diff / (std::sqrt(reference_cov(0, 0)))) > 0.5) {
                 strip_pos_diff_0p5sig++;
             }
-            if (std::abs(pos_diff / (std::sqrt(monitored_cov(0, 0)))) > 1) {
+            if (std::abs(pos_diff / (std::sqrt(reference_cov(0, 0)))) > 1) {
                 strip_pos_diff_1sig++;
             }
 
@@ -744,6 +844,8 @@ StatusCode ActsClusterComparisonAlg::validateClusters(
     m_strip_pos_diff_1sig += strip_pos_diff_1sig;
     m_strip_pos_diff_0p5sig += strip_pos_diff_0p5sig;
     m_strip_pos_diff_0p25sig += strip_pos_diff_0p25sig;
+    m_strip_pos_diff_EC += strip_pos_diff_EC;
+    m_strip_pos_diff_barrel += strip_pos_diff_barrel;
 
     return StatusCode::SUCCESS;
 }
@@ -1009,6 +1111,8 @@ StatusCode ActsClusterComparisonAlg::finalize()
                          ? 100.0 * m_strip_pos_diff_0p25sig.value() / m_matched_strip.value()
                          : 0.0)
                  << "%)");
+    ATH_MSG_INFO("ValSum Distribution of clusters with poss diff > 0.25 sigma (barrel/EC): "
+                << m_strip_pos_diff_barrel << " / " << m_strip_pos_diff_EC);             
     ATH_MSG_INFO("ValSum ============================================================");
 
     if(m_checkSpacepoints){

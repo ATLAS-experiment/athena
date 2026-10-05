@@ -31,7 +31,7 @@ StatusCode TracccTrackConverterAlg::initialize()
     ATH_CHECK(m_inputTracksKey.initialize());
     ATH_CHECK(m_outputTracksKey.initialize());
 
-    ATH_CHECK(detStore()->retrieve(m_hostDetector, m_hostDetectorObjectName.value()));
+    m_hostDetector = m_trackingGeometrySvc->detrayGeometry();
 
     // Build the ACTS-surface <-> ACTS-id lookup map once,
     // up front, rather than re-deriving them per event.
@@ -134,8 +134,8 @@ TracccTrackConverterAlg::convertGlobalToActsParameters(
         return std::nullopt;
     }
  
-    const auto& detrayDetector = m_hostDetector->as<traccc::itk_detector>();
-    const detray::tracking_surface detray_surface{detrayDetector, trkParams.surface_link()};
+    const auto& itkDetector = m_hostDetector->as<traccc::itk_detector>();
+    const detray::tracking_surface detray_surface{itkDetector, trkParams.surface_link()};
     const auto geo_id = detray_surface.source();
     const Acts::GeometryIdentifier acts_geom_id{geo_id};
 
@@ -190,8 +190,8 @@ TracccTrackConverterAlg::convertSmoothedToActsParameters(
         return std::nullopt;
     }
  
-    const auto& detrayDetector = m_hostDetector->as<traccc::itk_detector>();
-    const detray::tracking_surface detray_surface{detrayDetector, atlasParam.surface_link()};
+    const auto& itkDetector = m_hostDetector->as<traccc::itk_detector>();
+    const detray::tracking_surface detray_surface{itkDetector, atlasParam.surface_link()};
     const auto geo_id = detray_surface.source();
     const Acts::GeometryIdentifier acts_geom_id{geo_id};
 

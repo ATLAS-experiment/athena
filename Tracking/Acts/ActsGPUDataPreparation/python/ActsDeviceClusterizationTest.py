@@ -10,13 +10,13 @@ from AthenaCommon.Constants import DEBUG
 
 from ActsGPUDataPreparation.ActsGPUDataPreparationConfig import DeviceClusterizationAlgCfg
 from ActsGPUEventCnv.ActsGPUEventCnvConfig import TracccMeasurementConverterAlgCfg
-from ActsGPUGeometry.ActsGPUGeometryConfig import JSONDeviceDetectorDescriptionProviderSvcCfg
+from ActsGPUGeometry.ActsGPUGeometryConfig import DeviceDetectorDescriptionCondAlgCfg
 
 def GPUClusterizationCfg(flags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     # Service runs first — loads all device detector description data into detStore
-    acc.merge(JSONDeviceDetectorDescriptionProviderSvcCfg(flags))
+    acc.merge(DeviceDetectorDescriptionCondAlgCfg(flags))
 
     if flags.Acts.EDM.PhaseII :
         print("Running PhaseII RDO to TracccCell conversion")
@@ -91,7 +91,13 @@ if __name__ == "__main__":
         "Tracking.ActiveConfig",
         "Tracking.ITkActsPass")
     
-    flags.Tracking.doPixelDigitalClustering = True
+    flags.Acts.TrackingGeometry.UseBlueprint = True
+    flags.Acts.TrackingGeometry.BuildDetrayGeometry = True
+
+    # Keep calo/muon out of the tracking geometry: the calo volumes cannot be
+    # converted to a consistent Detray geometry
+    from InDetConfig.ConfigurationHelpers import OnlyTrackingPreInclude
+    OnlyTrackingPreInclude(flags)
 
     flags.fillFromArgs()
 

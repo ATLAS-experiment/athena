@@ -5,7 +5,6 @@ atlas_subdir(ActsGPUEventCnv)
 
 find_package(vecmem)
 find_package(traccc)
-find_package(detray)
 
 atlas_add_component( ActsGPUEventCnv
     src/*.h src/*.cxx
@@ -43,4 +42,11 @@ atlas_add_test( RDOtoTracccTest
   SCRIPT athena.py ${CMAKE_CURRENT_SOURCE_DIR}/test/RDOtoTracccTest.py Device.Backend=DeviceBackend.CUDA
   POST_EXEC_SCRIPT noerror.sh
   PROPERTIES SKIP_RETURN_CODE 2 )
+
+atlas_add_test( DeviceSeedingFromHostSP
+  PRE_EXEC_SCRIPT "nvidia-check.sh || exit 2"
+  ENVIRONMENT "PATHRESOLVER_DEVAREARESPONSE=WARNING"
+  SCRIPT athena.py ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsDeviceSeedingFromHostSpacePointsTest.py Device.Backend=DeviceBackend.CUDA
+  POST_EXEC_SCRIPT noerror.sh
+  PROPERTIES SKIP_RETURN_CODE 2 )  
 endif()

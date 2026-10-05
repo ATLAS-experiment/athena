@@ -2,7 +2,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import FlagEnum
 
-from ActsGPUGeometry.ActsGPUGeometryConfig import JSONDeviceDetectorDescriptionProviderSvcCfg
+from ActsGPUGeometry.ActsGPUGeometryConfig import DeviceDetectorDescriptionCondAlgCfg
 
 class DataLocation(FlagEnum):
     HOST   = "host"    # Athena objects on CPU
@@ -14,13 +14,7 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
     # Bring up shared device infrastructure once, upfront
     print(f"Setting up GPU algorithms with {flags.Device.Backend.value} backend")
 
-    # Setup traccc detector description objects — loads all device detector description data into detStore
-    acc.merge(JSONDeviceDetectorDescriptionProviderSvcCfg(flags,
-        HostConditionsObjectName="TracccHostCondConfig",
-        HostDigitizationObjectName="TracccHostDigitizationConfig",
-        DeviceConditionsObjectName="TracccDeviceCondConfig",
-        DeviceDigitizationObjectName="TracccDeviceDigitizationConfig",
-    ))
+    acc.merge(DeviceDetectorDescriptionCondAlgCfg(flags))
 
     # --- Clusterization ---
     if flags.Acts.Device.doClusterization:
@@ -392,12 +386,7 @@ def ITkActsDeviceSecondaryPassTrackRecoCfg(flags, *, previousExtension=None):
     print(f"Setting up GPU algorithms for the {extension} pass with {flags.Device.Backend.value} backend")
 
     # Setup traccc detector description objects — loads all device detector description data into detStore
-    acc.merge(JSONDeviceDetectorDescriptionProviderSvcCfg(flags,
-        HostConditionsObjectName="TracccHostCondConfig",
-        HostDigitizationObjectName="TracccHostDigitizationConfig",
-        DeviceConditionsObjectName="TracccDeviceCondConfig",
-        DeviceDigitizationObjectName="TracccDeviceDigitizationConfig",
-    ))
+    acc.merge(DeviceDetectorDescriptionCondAlgCfg(flags))
 
     from ActsGPUMagField.ActsGPUMagFieldConfig import JSONDeviceMagFieldProviderSvcCfg
     acc.merge(JSONDeviceMagFieldProviderSvcCfg(flags,

@@ -6,7 +6,10 @@
 #define EFTRACKING_ACTSCLUSTERCOMPARISONALG_H
 
 // Athena includes
+#include <array>
+#include <optional>
 #include <unordered_map>
+#include <utility>
 
 #include "Acts/Definitions/Units.hpp"
 #include "ActsEvent/TrackContainer.h"
@@ -20,6 +23,10 @@
 #include "PixelReadoutGeometry/PixelDetectorManager.h"
 #include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadCondHandleKey.h"
+#include "ActsGPUEvent/TracccDetectorConditionsDescription.h"
+#include "ActsGPUEvent/TracccDetectorDesignDescription.h"
+#include "ActsGPUEvent/GeometryIdMapping.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/SpacePointContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
@@ -73,7 +80,28 @@ public:
             std::vector<const xAOD::StripCluster*>& monitored_list,
             std::vector<const xAOD::StripCluster*>& reference_list,
             const std::string& module_id,
-            std::vector<std::pair<const xAOD::StripCluster*, const xAOD::StripCluster*>>& pairs) const;        
+            std::vector<std::pair<const xAOD::StripCluster*, const xAOD::StripCluster*>>& pairs) const;
+
+        /// Lorentz shift stored in the traccc host conditions object for the given Athena module (side)
+        std::optional<std::pair<float, float>> tracccLorentzShift(
+            const Identifier& athenaId,
+            const traccc::detector_conditions_description::host& cond) const;
+
+        /// Centre of the traccc readout bin (channel0, channel1) on the given Athena module,
+        /// computed like traccc::details::position_from_cell from the host design description
+        std::optional<std::array<float, 2>> tracccCellPosition(
+            const Identifier& athenaId, unsigned int channel0, unsigned int channel1,
+            const traccc::detector_design_description::host& design,
+            const traccc::detector_conditions_description::host& cond) const;
+
+        Gaudi::Property<std::string> m_monDesignObjectName{
+        this, "TracccDesignObjectName", "", "Candidate host design object in detStore"};    
+        SG::ReadCondHandleKey<traccc::detector_conditions_description::host> m_monCondKey{
+        this, "TracccCondKey", "DeviceDetectorDescriptionHostCond",
+        "Key for reading the candidate host conditions object"};
+        /// @name The detector description service providing the Athena<->Detray ID map
+        Gaudi::Property<std::string> m_geoIdMappingObjectName{this, "GeoIdMapping", "", "ID mapping between the three detector description realms."};
+        const ActsTrk::GeometryIdMapping* m_idMapping{nullptr};
 
         /// @name Boolean varibale turning on/off spacepoint validation
         /// {@
@@ -125,6 +153,8 @@ public:
         mutable Gaudi::Accumulators::Counter<> m_strip_pos_diff_1sig;
         mutable Gaudi::Accumulators::Counter<> m_strip_pos_diff_0p5sig;
         mutable Gaudi::Accumulators::Counter<> m_strip_pos_diff_0p25sig;
+        mutable Gaudi::Accumulators::Counter<> m_strip_pos_diff_barrel;
+        mutable Gaudi::Accumulators::Counter<> m_strip_pos_diff_EC;
 
         // spacepoint summary
         mutable Gaudi::Accumulators::Counter<> m_nMonSp;

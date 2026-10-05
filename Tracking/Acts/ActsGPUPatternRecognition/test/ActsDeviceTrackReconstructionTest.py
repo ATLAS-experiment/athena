@@ -12,20 +12,14 @@ from AthenaCommon.Constants import DEBUG
 from ActsGPUDataPreparation.ActsGPUDataPreparationConfig import DeviceClusterizationAlgCfg, DeviceSPFormationAlgCfg
 from ActsGPUPatternRecognition.ActsGPUPatternRecognitionConfig import DeviceGBTSSeedingAlgCfg, DeviceTripletSeedingAlgCfg, DeviceTrkParamEstimationAlgCfg, DeviceTrackFindingAlgCfg
 from ActsGPUEventCnv.ActsGPUEventCnvConfig import RDOtoTracccCellConverterAlgCfg, TracccMeasurementConverterAlgCfg
-from ActsGPUGeometry.ActsGPUGeometryConfig import JSONDeviceDetectorDescriptionProviderSvcCfg
+from ActsGPUGeometry.ActsGPUGeometryConfig import DeviceDetectorDescriptionCondAlgCfg
 from ActsGPUMagField.ActsGPUMagFieldConfig import JSONDeviceMagFieldProviderSvcCfg
 
 def GPUTrackingCfg(flags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     # Service runs first — loads all device detector description data into detStore
-    acc.merge(JSONDeviceDetectorDescriptionProviderSvcCfg(flags,
-        HostConditionsObjectName="TracccHostCondConfig",
-        HostDigitizationObjectName="TracccHostDigitizationConfig",
-        DeviceConditionsObjectName="TracccDeviceCondConfig",
-        DeviceDigitizationObjectName="TracccDeviceDigitizationConfig",
-        OutputLevel = DEBUG
-    ))
+    acc.merge(DeviceDetectorDescriptionCondAlgCfg(flags))
 
     acc.merge(JSONDeviceMagFieldProviderSvcCfg(flags,
         DeviceMagFieldObjectName="TracccMagneticField",
@@ -93,6 +87,13 @@ if __name__ == "__main__":
     # ---- Input ----
     flags.Input.Files = defaultTestFiles.RDO_RUN4
     flags.Tracking.doPixelDigitalClustering = True
+    flags.Acts.TrackingGeometry.UseBlueprint = True
+    flags.Acts.TrackingGeometry.BuildDetrayGeometry = True
+
+    # Keep calo/muon out of the tracking geometry: the calo volumes cannot be
+    # converted to a consistent Detray geometry
+    from InDetConfig.ConfigurationHelpers import OnlyTrackingPreInclude
+    OnlyTrackingPreInclude(flags)
 
     flags.Exec.MaxEvents = 1
 

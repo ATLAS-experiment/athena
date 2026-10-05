@@ -9,7 +9,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaCommon.Constants import DEBUG
 
-from ActsGPUGeometry.ActsGPUGeometryConfig import JSONDeviceDetectorDescriptionProviderSvcCfg
+from ActsGPUGeometry.ActsGPUGeometryConfig import DeviceDetectorDescriptionCondAlgCfg
 from ActsGPUMagField.ActsGPUMagFieldConfig import JSONDeviceMagFieldProviderSvcCfg
 from ActsGPUEventCnv.ActsGPUEventCnvConfig import (
     xAODToTracccMeasurementConverterAlgCfg,
@@ -48,12 +48,8 @@ def DevicePatternRecognitionCfg(flags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     # Services run first — load device detector description and magnetic field into detStore
-    acc.merge(JSONDeviceDetectorDescriptionProviderSvcCfg(flags,
-        HostConditionsObjectName="TracccHostCondConfig",
-        HostDigitizationObjectName="TracccHostDigitizationConfig",
-        DeviceConditionsObjectName="TracccDeviceCondConfig",
-        DeviceDigitizationObjectName="TracccDeviceDigitizationConfig",
-    ))
+    acc.merge(DeviceDetectorDescriptionCondAlgCfg(flags))
+
     acc.merge(JSONDeviceMagFieldProviderSvcCfg(flags,
         DeviceMagFieldObjectName="TracccMagneticField",
         HostMagFieldObjectName="TracccHostMagField",
@@ -117,7 +113,6 @@ def DevicePatternRecognitionCfg(flags) -> ComponentAccumulator:
         InputMeasToStripCl="TracccMeasToStripCluster",
         InputTracks="TracccTrackCollection",
         OutputTracks="ActsTracccTracks",
-        GeoIdMapping="TracccGeometryIdMapping",
         HostDetectorName="TracccHostDetectorGeometry",
         OutputLevel=DEBUG,
     ))
@@ -139,6 +134,13 @@ if __name__ == "__main__":
         "Tracking.ITkActsPass")
 
     flags.Tracking.doPixelDigitalClustering = True
+    flags.Acts.TrackingGeometry.UseBlueprint = True
+    flags.Acts.TrackingGeometry.BuildDetrayGeometry = True
+
+    # Keep calo/muon out of the tracking geometry: the calo volumes cannot be
+    # converted to a consistent Detray geometry
+    from InDetConfig.ConfigurationHelpers import OnlyTrackingPreInclude
+    OnlyTrackingPreInclude(flags)
 
     flags.fillFromArgs()
 
