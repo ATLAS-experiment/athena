@@ -21,8 +21,7 @@ CollectionCursor::CollectionCursor(
      m_collectionRowBuffer( collectionRowBuffer ),
      m_attrContainers( containers ),
      m_tokenContainer( containers[description.tokenColumn().name()] ),
-     m_idx( -1 ),
-     m_size( m_tokenContainer.size() )
+     m_idx( -1 )
 {
 }
 
@@ -65,6 +64,12 @@ const pool::CollectionRowBuffer&
 CollectionCursor::currentRow() const
 {
   return m_collectionRowBuffer;
+}
+
+
+std::size_t CollectionCursor::size()
+{
+  return m_tokenContainer.size();
 }
 
 
