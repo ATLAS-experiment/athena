@@ -20,14 +20,26 @@ StatusCode PFTrackCaloExtensionTool::initialize() {
   ATH_CHECK(m_extrapolationTool.retrieve());
   ATH_CHECK(m_trackingGeometrySvc.retrieve());
 
-  std::array<std::string,3 > caloNames = {"EMB1_layer", "EMB2_layer", "EMB3_layer"};
+  std::array<std::string,38 > caloNames = {"EMB1_Layer", "EMB2_Layer", "EMB3_Layer",
+                                          "EME1NegZ_Layer", "EME2NegZ_Layer", "EME3NegZ_Layer",
+                                          "EME1PosZ_Layer", "EME2PosZ_Layer", "EME3PosZ_Layer",
+                                          "HEC0NegZ_Layer", "HEC1NegZ_Layer", "HEC2NegZ_Layer", "HEC3NegZ_Layer",
+                                          "HEC0PosZ_Layer", "HEC1PosZ_Layer", "HEC2PosZ_Layer", "HEC3PosZ_Layer",
+                                          "TileBar0_Layer", "TileBar1_Layer", "TileBar2_Layer",
+                                          "TileGap1NegZ_Layer", "TileGap2NegZ_Layer", "TileGap3NegZ_Layer",
+                                          "TileGap1PosZ_Layer", "TileGap2PosZ_Layer", "TileGap3PosZ_Layer",
+                                          "TileExt0NegZ_Layer","TileExt1NegZ_Layer","TileExt2NegZ_Layer",
+                                          "TileExt0PosZ_Layer","TileExt1PosZ_Layer","TileExt2PosZ_Layer",
+                                          "FCAL0NegZ_Layer","FCAL1NegZ_Layer","FCAL2NegZ_Layer",
+                                          "FCAL0PosZ_Layer","FCAL1PosZ_Layer","FCAL2PosZ_Layer"};
+
 
   m_trackingGeometrySvc->trackingGeometry()->visitVolumes([&](const Acts::TrackingVolume *vol) {
     const auto & name = vol->volumeName();
     ATH_MSG_DEBUG(name << " - " << vol->geometryId() << " - surfaces: " << vol->surfaces().size());
     if (std::ranges::contains(caloNames, name)){
         ATH_MSG_DEBUG("About to insert caloName " << name << " into map");
-        m_caloNameGeoIDMap[vol->geometryId()] = name;
+        m_caloNameGeoIDMap[vol->geometryId().volume()] = name;
     } 
   });
 
@@ -76,21 +88,21 @@ std::unique_ptr<eflowTrackCaloPoints> PFTrackCaloExtensionTool::execute(const Ev
 
     for(const auto &step : steps) {
 
-
         if( step.surface == nullptr || step.surface->geometryId().sensitive() == 0 ) {
           continue;
         }
-
+	
         Acts::GeometryIdentifier thisGeoID = step.geoID;
         ATH_MSG_DEBUG("Got step with geoID " << thisGeoID);
 
-        if (m_caloNameGeoIDMap.contains(thisGeoID)){
+	if (m_caloNameGeoIDMap.contains(thisGeoID.volume())){
+            ATH_MSG_DEBUG("This step is in the calorimeter");
             const auto &p = step.position;
             auto eta = Acts::VectorHelpers::eta(p);
             auto phi = Acts::VectorHelpers::phi(p);
-            ATH_MSG_DEBUG("Eta and Phi in caloLayer " << m_caloNameGeoIDMap.at(thisGeoID) << " are " << eta << " and " << phi);
-        }
-        else ATH_MSG_WARNING("Could not find this GeometryIdentifier " << thisGeoID << " in the map");        
+            ATH_MSG_DEBUG("Eta and Phi in caloLayer " << m_caloNameGeoIDMap.at(thisGeoID.volume()) << " are " << eta << " and " << phi);
+	}
+        else ATH_MSG_WARNING("Could not find this GeometryIdentifier " << thisGeoID << " in the map");  	
     }
 
     ATH_MSG_DEBUG("Finished steps loop");
