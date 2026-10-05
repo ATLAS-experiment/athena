@@ -3,6 +3,7 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 import argparse
 import os
+import shlex
 import sys
 from pathlib import Path
 
@@ -98,7 +99,7 @@ class CPGridRun:
             self._checkPrunArgs(unknownArgsDict)
             logCPGridRun.info(f"Adding prun exclusive arguments: {unknownArgsDict.keys()}")
         elif unknownArgsDict:
-            logCPGridRun.warning(f"Unknown arguments detected: {unknownArgsDict}. Cannot check the availablility in Prun because Prun is not available / noSubmit is on.")
+            logCPGridRun.warning(f"Unknown arguments detected: {unknownArgsDict}. Cannot check the availability in Prun because Prun is not available / noSubmit is on.")
         else:
             pass
         return unknownArgsDict
@@ -201,7 +202,9 @@ class CPGridRun:
             if isinstance(v, bool) and v:
                 cmd += f'--{k} \\\n'
             elif v is not None and v != '':
-                cmd += f'--{k} {v} \\\n'
+                # the exec string is already quoted by execFormatter
+                value = v if k == 'exec' else shlex.quote(str(v))
+                cmd += f'--{k} {value} \\\n'
         return cmd.rstrip(' \\\n'), config
     
     def _unknownArgsDict(self)->dict:
@@ -355,7 +358,6 @@ class CPGridRun:
         dsid = nameParser['DSID']
         tags = '_'.join(nameParser['tags'])
         fileFormat = nameParser['format']
-        base = 'group' if self.args.groupProduction else 'user'
         prefix = self.args.prefix if self.args.prefix else nameParser['main'].split('_')[0] # Dynamically set the prefix, likely to be something like PhPy8Eg
         suffix = self._suffixFormatter()
 
@@ -383,7 +385,7 @@ class CPGridRun:
             import uuid
             return f"test_{uuid.uuid4().hex[:6]}"
         else:
-            ''
+            return ''
 
     def _filesChanged(self):
         tarball_mtime = os.path.getmtime(self._tarfile) if os.path.exists(self._tarfile) else 0
@@ -658,7 +660,7 @@ class CPGridRun:
         with path.open('r') as inputText:
             for line in inputText.readlines():
                 # skip comments and empty lines
-                if line.startswith("#") or not line.strip():
+                if line.strip().startswith("#") or not line.strip():
                     continue
                 files += line.split(",")
             # remove leading/trailing whitespaces, and \n
