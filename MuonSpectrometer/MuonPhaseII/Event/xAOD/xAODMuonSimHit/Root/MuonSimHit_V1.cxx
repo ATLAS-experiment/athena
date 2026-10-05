@@ -9,22 +9,22 @@
 
 namespace {
    static const std::string preFixStr{"MuSim_"};
-   static const SG::AuxElement::Accessor<Identifier::value_type> acc_Identifier{preFixStr+"identifier"};
+   static const SG::Accessor<Identifier::value_type> acc_Identifier{preFixStr+"identifier"};
    static const xAOD::PosAccessor<3> acc_localPos{"localPositionDim3"};
    static const xAOD::PosAccessor<3> acc_localDir{"localDirectionDim3"};
 
-   static const SG::AuxElement::Accessor<unsigned short> acc_mcEventIndex{preFixStr+"mcEventIndex"};
-   static const SG::AuxElement::Accessor<unsigned int> acc_uniqueID{preFixStr+"uniqueID"};
+   static const SG::Accessor<unsigned short> acc_mcEventIndex{preFixStr+"mcEventIndex"};
+   static const SG::Accessor<unsigned int> acc_uniqueID{preFixStr+"uniqueID"};
 }
 
 #define IMPLEMENT_SETTER_GETTER( DTYPE, GETTER, SETTER)                          \
       DTYPE MuonSimHit_v1::GETTER() const {                                      \
-         static const SG::AuxElement::Accessor<DTYPE> acc{preFixStr + #GETTER};  \
+         static const SG::Accessor<DTYPE> acc{preFixStr + #GETTER};  \
          return acc(*this);                                                      \
       }                                                                          \
                                                                                  \
       void MuonSimHit_v1::SETTER(DTYPE value) {                        \
-         static const SG::AuxElement::Accessor<DTYPE> acc{preFixStr + #GETTER};  \
+         static const SG::Accessor<DTYPE> acc{preFixStr + #GETTER};  \
          acc(*this) = value;                                                     \
       }
           

@@ -39,7 +39,7 @@ namespace Muon {
         SG::WriteHandleKey<xAOD::TruthParticleContainer> m_writeKey{this, "OutContainer","MuonTruthParticles"};
         /// FIXME WriteDecorHandle should not be used for additional
         /// dynamic variables applied by the same algorithm which
-        /// created the container, instead SG::AuxElement::Accessor
+        /// created the container, instead SG::Accessor
         /// should be used.
         SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_truthOriginKey{this, "truthOriginKey", m_writeKey, "truthOrigin"};
         SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_truthTypeKey{this, "truthTypeKey", m_writeKey, "truthType"};

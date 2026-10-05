@@ -160,7 +160,7 @@ StatusCode MergeTruthParticlesTool::processTruthParticleContainer(const xAOD::Tr
   if (!inputTruthParticleContainer || !outputTruthParticleContainer) { return StatusCode::FAILURE; }
 
   // Set up decorators
-  const static SG::AuxElement::Accessor< int > eventNumberAccessor("pileupEventNumber");
+  const static SG::Accessor< int > eventNumberAccessor("pileupEventNumber");
 
   for (const xAOD::TruthParticle *theParticle : *inputTruthParticleContainer) {
     xAOD::TruthParticle* xTruthParticle = new xAOD::TruthParticle();

@@ -28,7 +28,7 @@
 #include <vector>
 
 namespace {
-static const SG::AuxElement::ConstAccessor<int> g4TrackIdAcc{"MuonSim_G4TrkId"};
+static const SG::ConstAccessor<int> g4TrackIdAcc{"MuonSim_G4TrkId"};
 
 constexpr int32_t noTruthLabel() { return -1; }
 constexpr int32_t noTruthSource() { return 0; }

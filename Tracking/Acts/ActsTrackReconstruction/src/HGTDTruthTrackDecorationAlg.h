@@ -74,7 +74,7 @@ namespace ActsTrk {
     ActsTrk::detail::xAODUncalibMeasSurfAcc m_surfAcc{};
     ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
 
-    std::unique_ptr<SG::AuxElement::Accessor<int>> m_acc_nHgtdHits;
+    std::unique_ptr<SG::Accessor<int>> m_acc_nHgtdHits;
 
     const HGTD_ID* m_id_helper{nullptr}; //!< Handle to the ID helper
 

@@ -27,18 +27,18 @@ namespace xAOD
   IMPLEMENT_SETTER_GETTER( NSWCandData_v1, uint8_t, boardId, setBoardId )
 
   bool NSWCandData_v1::overflow() const {
-    static const SG::AuxElement::Accessor<uint8_t> acc(preFixStr + "overflow");
+    static const SG::Accessor<uint8_t> acc(preFixStr + "overflow");
     return acc(*this); 
   }
 
   void NSWCandData_v1::setOverflow(bool value) {
-    static const SG::AuxElement::Accessor<uint8_t> acc(preFixStr + "overflow");
+    static const SG::Accessor<uint8_t> acc(preFixStr + "overflow");
     acc(*this) = value; 
   }
 
   // Get the complete vector of packed 32-bit segment words
   const std::vector<uint32_t>& NSWCandData_v1::segmentWords() const {
-    static const SG::AuxElement::Accessor<std::vector<uint32_t>> acc{preFixStr + "segmentWord"};
+    static const SG::Accessor<std::vector<uint32_t>> acc{preFixStr + "segmentWord"};
     return acc(*this);
   }
 
@@ -70,7 +70,7 @@ namespace xAOD
 
   // Add Segment 
   void NSWCandData_v1::addSegment(uint16_t etaIndex, uint16_t phiIndex, uint8_t deltaThetaIndex, uint8_t quality) {
-    static const SG::AuxElement::Accessor<std::vector<uint32_t>> accWord{preFixStr + "segmentWord"};
+    static const SG::Accessor<std::vector<uint32_t>> accWord{preFixStr + "segmentWord"};
   
     // Pack the fields into a single 32-bit container word
     uint32_t packedWord = 0;
@@ -84,7 +84,7 @@ namespace xAOD
 
   // Clear segments 
   void NSWCandData_v1::clearSegments() {
-    static const SG::AuxElement::Accessor<std::vector<uint32_t>> accWord{preFixStr + "segmentWord"};
+    static const SG::Accessor<std::vector<uint32_t>> accWord{preFixStr + "segmentWord"};
     accWord(*this).clear();
   }
 

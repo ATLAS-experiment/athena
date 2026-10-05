@@ -633,8 +633,8 @@ bool TileJetMonitorAlgorithm::isGoodEvent(const EventContext& ctx) const {
 
   // We're attaching decorations here to a temporary object that
   // is not recorded, so we shouldn't use a WriteDecorHandle.
-  static const SG::AuxElement::Decorator<char> passOR ("passOR");
-  static const SG::AuxElement::Decorator<char> passJvt ("passJvt");
+  static const SG::Decorator<char> passOR ("passOR");
+  static const SG::Decorator<char> passJvt ("passJvt");
 
   int iJet = 0;
   for (auto jet : *jetsCopy) {

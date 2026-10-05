@@ -104,7 +104,7 @@ createExtraSummaryTypeMap(std::map<std::string, Trk::SummaryType>& extra_summary
 }
 }
 
-const SG::AuxElement::Accessor<uint8_t> TrackParticleCreatorTool::s_trtdEdxUsedHitsDecoration(
+const SG::Accessor<uint8_t> TrackParticleCreatorTool::s_trtdEdxUsedHitsDecoration(
   TrackParticleCreatorTool::trtdEdxUsedHitsAuxName());
 
 TrackParticleCreatorTool::TrackParticleCreatorTool(const std::string& t,
@@ -225,14 +225,14 @@ TrackParticleCreatorTool::initialize()
           errors.push_back(eprob_to_copy);
         } else {
           m_decorateSummaryTypes.emplace_back(
-            SG::AuxElement::Accessor<uint8_t>(extra_summary_type_iter->first),
+            SG::Accessor<uint8_t>(extra_summary_type_iter->first),
             extra_summary_type_iter->second);
         }
       } else {
         if (!eprob_iter->second.second) {
           m_copyEProbabilities.push_back(eprob_iter->second.first);
         } else {
-          m_decorateEProbabilities.emplace_back(SG::AuxElement::Accessor<float>(eprob_iter->first),
+          m_decorateEProbabilities.emplace_back(SG::Accessor<float>(eprob_iter->first),
                                                 eprob_iter->second.first);
         }
       }
@@ -565,7 +565,7 @@ TrackParticleCreatorTool::createParticle(const EventContext& ctx,
                                                       container,
                                                       &track);
 
-  static const SG::AuxElement::Accessor<int> nbCmeas("nBC_meas");
+  static const SG::Accessor<int> nbCmeas("nBC_meas");
   switch (m_badclusterID) {
     case 1: {
       nbCmeas(*trackparticle) = nbc_meas_A1;
@@ -967,13 +967,13 @@ TrackParticleCreatorTool::addPIDInformation(const EventContext& ctx, const Trk::
         float eProbability_value = eProbability.at(copy);
         tp.setSummaryValue(eProbability_value, static_cast<xAOD::SummaryType>(copy + xAOD::eProbabilityComb));
      }
-     for (const std::pair<SG::AuxElement::Accessor<float>, Trk::eProbabilityType>& decoration :
+     for (const std::pair<SG::Accessor<float>, Trk::eProbabilityType>& decoration :
              m_decorateEProbabilities) {
         float fvalue = eProbability.at(decoration.second);
         decoration.first(tp) = fvalue;
      }
      // now the extra summary types
-     for (const std::pair<SG::AuxElement::Accessor<uint8_t>, Trk::SummaryType>& decoration :
+     for (const std::pair<SG::Accessor<uint8_t>, Trk::SummaryType>& decoration :
              m_decorateSummaryTypes) {
         uint8_t summary_value = nHits;
         decoration.first(tp) = summary_value;

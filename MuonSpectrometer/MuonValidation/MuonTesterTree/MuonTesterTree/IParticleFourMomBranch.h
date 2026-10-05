@@ -74,7 +74,7 @@ namespace MuonVal {
             /** @brief Returns the list of currently cached particles */
             const std::vector<const xAOD::IParticle*>& getCached() const;
             /** @brief Writes a variable of type <T> which can be directly accessed via an SG::AuxElement e.g.
-             *             SG::AuxElement::Accessor<float> acc_ptCone30{"pt_cone30"};
+             *             SG::Accessor<float> acc_ptCone30{"pt_cone30"};
              *             const float ptCone30 = acc_ptCone30(*partPtr);
              *         to the TTree. If the variable is not available the filling of the TTree fails
              * @param variable: Name of the branch in the output tree
