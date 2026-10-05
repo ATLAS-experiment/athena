@@ -110,28 +110,27 @@ target_link_libraries( BTaggingSystematicStrategyComparison
 
 unset(XAOD_ACCESS_LIB)
 
-set(FTAG_INPUT_RUN3_DAOD /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ASG/DAOD_PHYS/p6491/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.deriv.DAOD_PHYS.e8514_e8528_s4162_s4114_r15540_r15516_p6491/DAOD_PHYS.41633384._000880.pool.root.1)
-set(FTAG_INPUT_RUN2_DAOD /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ASG/DAOD_PHYS/p6490/mc20_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.deriv.DAOD_PHYS.e6337_s3681_r13167_r13146_p6490/DAOD_PHYS.41651753._000001.pool.root.1)
+set(FTAG_INPUT_RUN3_DAOD /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ASG/DAOD_PHYS/p7266/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.deriv.DAOD_PHYS.e8514_e8528_s4162_s4114_r15540_r15516_p7266/DAOD_PHYS.49568713._001693.pool.root.1)
+set(FTAG_INPUT_RUN2_DAOD /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ASG/DAOD_PHYS/p7266/mc20_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.deriv.DAOD_PHYS.e6337_s3681_r13145_r13146_p7266/DAOD_PHYS.49680245._000770.pool.root.1)
 set(FTAG_LATEST_CDI_RUN2_PCBT xAODBTaggingEfficiency/13TeV/MC20_2025-06-17_GN2v01_v4.root)
 set(FTAG_LATEST_CDI_RUN2_PCFT xAODBTaggingEfficiency/13TeV/MC20_2025-06-17_GN2v01_v4.root)
 set(FTAG_LATEST_CDI_RUN3_PCBT xAODBTaggingEfficiency/13p6TeV/MC23_2026_05_13_GN2v01_v0.root)
 set(FTAG_LATEST_CDI_RUN3_PCFT xAODBTaggingEfficiency/13p6TeV/MC23_2026_05_13_GN2v01_v0.root)
-set(FTAG_XBB_LATEST_JSON xAODBTaggingEfficiency/13And13p6TeV/MC20And23_2025-03-17_GN2Xv01-noSF_v1.json)
+# Xbb and Xcc JSON files 
+# For now files are on CVMFS dev space 
+# /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/dev
+# Hence using 
+# LOG_IGNORE_PATTERN "^PathResolver +ERROR Locating dev file" 
+set(FTAG_XBB_LATEST_JSON_RUN2And3 dev/xAODBTaggingEfficiency/13And13p6TeV/MC20And23_2026-08-05_GN3XPV01_HbbOnly_bJR10v01_noSFs_NominalMass_v00.json)
+set(FTAG_XCC_LATEST_JSON_RUN2 dev/xAODBTaggingEfficiency/13TeV/MC20_2026-08-13_GN3XPV01_HccWithHbbVeto_bJR10v01_noSFs_v00.json)
+set(FTAG_XCC_LATEST_JSON_RUN3 dev/xAODBTaggingEfficiency/13p6TeV/MC23_2026-08-13_GN3XPV01_HccWithHbbVeto_bJR10v01_noSFs_v00.json)
 
 # Test for Athena, AthAnalysis and AnalysisBase
+
+# Small-R jets CI tests
 atlas_add_test(
   ut_BTaggingToolsExample
   SCRIPT BTaggingToolsExample ${FTAG_INPUT_RUN3_DAOD}
-  POST_EXEC_SCRIPT noerror.sh
-)
-atlas_add_test(
-  ut_BTaggingJsonToolsTest
-  SCRIPT BTaggingJsonToolsTester ${FTAG_INPUT_RUN3_DAOD} ${FTAG_XBB_LATEST_JSON} GN2Xv01 FlatMassQCDEff_0p25
-  POST_EXEC_SCRIPT noerror.sh
-)
-atlas_add_test(
-  ut_BTaggingSelectionJsonInstantiation
-  SCRIPT BTaggingSelectionJsonInstantiationTester ${FTAG_XBB_LATEST_JSON}
   POST_EXEC_SCRIPT noerror.sh
 )
 atlas_add_test(
@@ -234,10 +233,58 @@ atlas_add_test(
   POST_EXEC_SCRIPT noerror.sh
 )
 
+# Large-R jet CI tests 
+atlas_add_test(
+  ut_BTaggingJsonToolsTest_Run2And3_GN3XPV01_hbb_bjr_FlatMassQCDEff_0p4
+  SCRIPT BTaggingJsonToolsTester ${FTAG_INPUT_RUN3_DAOD} ${FTAG_XBB_LATEST_JSON_RUN2And3} GN3XPV01_hbb_bjr FlatMassQCDEff_0p4 
+  POST_EXEC_SCRIPT noerror.sh
+  LOG_IGNORE_PATTERN "^PathResolver +ERROR Locating dev file"
+)
+atlas_add_test(
+  ut_BTaggingJsonToolsTest_Run2And3_GN3XPV01_hbb_bjr_FlatMassQCDEff_0p6 
+  SCRIPT BTaggingJsonToolsTester ${FTAG_INPUT_RUN3_DAOD} ${FTAG_XBB_LATEST_JSON_RUN2And3} GN3XPV01_hbb_bjr FlatMassQCDEff_0p6 
+  POST_EXEC_SCRIPT noerror.sh
+  LOG_IGNORE_PATTERN "^PathResolver +ERROR Locating dev file"
+)
+atlas_add_test(
+  ut_BTaggingJsonToolsTest_Run2_GN3XPV01_hcc_bjr_FlatMassQCDEff_0p17
+  SCRIPT BTaggingJsonToolsTester ${FTAG_INPUT_RUN3_DAOD} ${FTAG_XCC_LATEST_JSON_RUN2} GN3XPV01_hcc_bjr FlatMassQCDEff_0p17 
+  POST_EXEC_SCRIPT noerror.sh
+  LOG_IGNORE_PATTERN "^PathResolver +ERROR Locating dev file"
+)
+atlas_add_test(
+  ut_BTaggingJsonToolsTest_Run3_GN3XPV01_hcc_bjr_FlatMassQCDEff_0p17 
+  SCRIPT BTaggingJsonToolsTester ${FTAG_INPUT_RUN3_DAOD} ${FTAG_XCC_LATEST_JSON_RUN3} GN3XPV01_hcc_bjr FlatMassQCDEff_0p17 
+  POST_EXEC_SCRIPT noerror.sh
+  LOG_IGNORE_PATTERN "^PathResolver +ERROR Locating dev file"
+)
+atlas_add_test(
+  ut_BTaggingSelectionJsonInstantiation_Xbb_Run2And3
+  SCRIPT BTaggingSelectionJsonInstantiationTester ${FTAG_XBB_LATEST_JSON_RUN2And3}
+  POST_EXEC_SCRIPT noerror.sh
+  LOG_IGNORE_PATTERN "^PathResolver +ERROR Locating dev file"
+)
+atlas_add_test(
+  ut_BTaggingSelectionJsonInstantiation_Xcc_Run2
+  SCRIPT BTaggingSelectionJsonInstantiationTester ${FTAG_XCC_LATEST_JSON_RUN2}
+  POST_EXEC_SCRIPT noerror.sh
+  LOG_IGNORE_PATTERN "^PathResolver +ERROR Locating dev file"
+)
+atlas_add_test(
+  ut_BTaggingSelectionJsonInstantiation_Xcc_Run3
+  SCRIPT BTaggingSelectionJsonInstantiationTester ${FTAG_XCC_LATEST_JSON_RUN3}
+  POST_EXEC_SCRIPT noerror.sh
+  LOG_IGNORE_PATTERN "^PathResolver +ERROR Locating dev file"
+)
+
+
+
 unset(FTAG_INPUT_RUN2_DAOD)
 unset(FTAG_INPUT_RUN3_DAOD)
 unset(FTAG_LATEST_CDI_RUN2_PCBT)
 unset(FTAG_LATEST_CDI_RUN3_PCBT)
 unset(FTAG_LATEST_CDI_RUN2_PCFT)
 unset(FTAG_LATEST_CDI_RUN3_PCFT)
-unset(FTAG_XBB_LATEST_JSON)
+unset(FTAG_XBB_LATEST_JSON_RUN2And3)
+unset(FTAG_XCC_LATEST_JSON_RUN2)
+unset(FTAG_XCC_LATEST_JSON_RUN3)
