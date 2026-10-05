@@ -416,7 +416,14 @@ namespace FlavorTagInference {
         } else if (input.type == EDMType::CUSTOM_GETTER) {
           varsFromJet.push_back(std::make_pair(input.name, getter_utils::namedCustomJetGetter(input.name)));
         } else {
-          throw std::runtime_error("Unsupported input type");
+          // integer and char decorations go through the typed getters
+          auto getter = internal::get::varFromBTag(
+            input.name, input.type, input.default_flag);
+          internal::VarFromJet fromJet =
+            [getter](const xAOD::IParticle& j) -> internal::NamedVar {
+              return getter(j);
+            };
+          varsFromJet.push_back(std::make_pair(input.name, fromJet));
         }
         if (input.default_flag.size() > 0) {
           deps.bTagInputs.insert(input.default_flag);

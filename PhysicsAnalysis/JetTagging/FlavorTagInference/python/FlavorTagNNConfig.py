@@ -442,6 +442,10 @@ def getDependencySet(tagger_name: str, override: set[str] | None = None) -> set[
         # Run 4 small-R jet taggers
         "GN2HL": {},
 
+        # The legacy SV1 likelihood, which reads only jet decorations
+        "SV1": {},
+        "SV1HL": {},
+
         # Large-R jet taggers
         "gn2xv00": {"X"},
         "gn2xv01": {"X"},

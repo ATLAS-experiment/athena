@@ -57,6 +57,19 @@ def runFlipTag(flags):
     return isRun3Derivation(flags)
 
 
+# The SV1 likelihood is frozen into these models, one per calibration, so the
+# tagger no longer needs the conditions histograms. AFT-869.
+sv1OnnxPaths = {
+    LHCPeriod.Run3: "BTagging/20261001/SV1/antikt4empflow/network.onnx",
+    LHCPeriod.Run4: "BTagging/20261001/SV1HL/antikt4empflow/network.onnx",
+}
+
+
+def sv1OnnxPath(flags):
+    period = LHCPeriod.Run4 if flags.GeoModel.Run >= LHCPeriod.Run4 else LHCPeriod.Run3
+    return sv1OnnxPaths[period]
+
+
 # Frozen calibration applied to the tagged shallow copy, decoupling the
 # listed taggers from changes to the reco-level t0 calibration
 # (aft/open-tasks#105). Deliberately hard-coded: must NOT follow
@@ -167,6 +180,8 @@ def getNNs(flags):
     # we can't flip large-R taggers
     noflip = dict(flip=False)
 
+    sv1_paths = [sv1OnnxPath(flags)] if flags.BTagging.RunSV1Onnx else []
+
     return {
         'AntiKt4EMPFlowJets': [
             {
@@ -176,7 +191,8 @@ def getNNs(flags):
             },
             *[{'folds' : [nn_path]} for nn_path in gn3_paths+bjr4_paths],
             *[{'folds': [nn_path], 'ip_prefix': 'poormanIp_'}
-              for nn_path in gn3v03_paths]
+              for nn_path in gn3v03_paths],
+            *[{'folds': [nn_path]} for nn_path in sv1_paths]
         ],
         'AntiKt4EMTopoJets': [
             {
@@ -237,6 +253,10 @@ def createBTaggingConfigFlags():
 
     # Taggers for validation
     btagcf.addFlag("BTagging.SaveSV1Probabilities", saveSv1)
+
+    # Run the SV1 likelihood as an onnx model instead of the legacy tagger.
+    # The probabilities are not written to any output by default.
+    btagcf.addFlag("BTagging.RunSV1Onnx", False)
     # Run the flip taggers
     btagcf.addFlag("BTagging.RunFlipTaggers", runFlipTag)
 
