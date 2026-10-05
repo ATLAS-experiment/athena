@@ -12,7 +12,6 @@ GEOTAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometry
 export TRF_ECHO=1;
 Digi_tf.py \
        --perfmon 'fullmonmt' \
-       --CA 'True'\
        --PileUpPresampling 'True' \
        --conditionsTag ${CONDTAG} \
        --digiSeedOffset1 '232' \

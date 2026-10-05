@@ -18,7 +18,6 @@ echo "${SPOT_NUMA_INFO}" > __log.txt
 ATHENA_CORE_NUMBER=${NTHREADS} \
 ${SPOT_NUMA_PREFIX} \
       Reco_tf.py \
-      --CA 'default:True' \
       --inputHITSFile "${DATADIR}/HITS/mc23_13p6TeV.601237.PhPy8EG_A14_ttbar_hdamp258p75_allhad.merge.HITS.e8514_e8528_s4159_s4114/HITS.34124871._003416.pool.root.1" \
       --inputRDO_BKGFile "${DATADIR}/RDO/mc23_13p6TeV.900149.PG_single_nu_Pt50.merge.RDO.e8514_e8528_s4153_d1879_d1880/RDO.33837536._002942.pool.root.1" \
       --outputAODFile 'myAOD.pool.root' \

@@ -19,7 +19,6 @@ ATHENA_CORE_NUMBER=${NTHREADS} \
 ${SPOT_NUMA_PREFIX} \
 Reco_tf.py \
       --AMI 'q445' \
-      --CA 'default:True' \
       --perfmon 'fullmonmt' \
       --maxEvents ${NEVENTS} \
       --outputAODFile 'myAOD.pool.root' \

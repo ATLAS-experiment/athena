@@ -16,7 +16,6 @@ ATHENA_CORE_NUMBER=${NTHREADS} \
 ${SPOT_NUMA_PREFIX} \
 Sim_tf.py \
       --perfmon 'fullmonmt' \
-      --CA 'True'\
       --multithreaded 'True'\
       --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
       --simulator 'ATLFAST3MT_QS' \

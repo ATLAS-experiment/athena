@@ -26,7 +26,6 @@ echo "${SPOT_NUMA_INFO}" > __log.txt
 ATHENA_CORE_NUMBER=${NTHREADS} \
 ${SPOT_NUMA_PREFIX} \
 Derivation_tf.py \
-      --CA 'True' \
       --maxEvents ${NEVENTS} \
       --perfmon 'fullmonmt' \
       --inputAODFile ${DATAFILE} \
