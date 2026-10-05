@@ -7,7 +7,7 @@
 
 
 #include <vector>
-
+#include <string_view>
 #include "AthenaMonitoringKernel/IMonitoredVariable.h"
 
 
@@ -50,6 +50,20 @@ namespace Monitored {
     Scalar(std::string name, const T& defaultValue = {}) :
         IMonitoredVariable(std::move(name)),
         m_value(defaultValue)
+    {}
+
+    // Special constructor for more effecient string usage
+    Scalar(std::string name, const char* defaultValue)
+        requires std::is_same_v<T, std::string>
+        : IMonitoredVariable(std::move(name)),
+          m_value(defaultValue)
+    {}
+
+    // Special constructor for more effecient string usage
+    Scalar(std::string name, std::string_view defaultValue)
+        requires std::is_same_v<T, std::string>
+        : IMonitoredVariable(std::move(name)),
+          m_value(defaultValue)
     {}
 
     /**
