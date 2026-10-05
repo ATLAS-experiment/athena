@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Christian Grefe
@@ -13,6 +13,9 @@
 #include <AsgDataHandles/WriteDecorHandleKey.h>
 #include <AsgTools/PropertyWrapper.h>
 #include <xAODTau/TauJetContainer.h>
+
+#include <utility>
+#include <vector>
 
 
 namespace CP
@@ -41,11 +44,11 @@ namespace CP
     Gaudi::Property<std::string> m_prefix {this, "prefix", "truth_", "the prefix to be added to all output decorations"};
 
     // the mapping of double to float is intentional to save disk space
-    std::unordered_map<std::unique_ptr<SG::ConstAccessor<double>>, SG::WriteDecorHandleKey<xAOD::TauJetContainer>> m_doubleWriteHandleKeys;
-    std::unordered_map<std::unique_ptr<SG::ConstAccessor<float>>, SG::WriteDecorHandleKey<xAOD::TauJetContainer>> m_floatWriteHandleKeys;
-    std::unordered_map<std::unique_ptr<SG::ConstAccessor<int>>, SG::WriteDecorHandleKey<xAOD::TauJetContainer>> m_intWriteHandleKeys;
-    std::unordered_map<std::unique_ptr<SG::ConstAccessor<unsigned int>>, SG::WriteDecorHandleKey<xAOD::TauJetContainer>> m_unsignedIntWriteHandleKeys;
-    std::unordered_map<std::unique_ptr<SG::ConstAccessor<char>>, SG::WriteDecorHandleKey<xAOD::TauJetContainer>> m_charWriteHandleKeys;
+    std::vector<std::pair<SG::ConstAccessor<double>, SG::WriteDecorHandleKey<xAOD::TauJetContainer>>> m_doubleWriteHandleKeys;
+    std::vector<std::pair<SG::ConstAccessor<float>, SG::WriteDecorHandleKey<xAOD::TauJetContainer>>> m_floatWriteHandleKeys;
+    std::vector<std::pair<SG::ConstAccessor<int>, SG::WriteDecorHandleKey<xAOD::TauJetContainer>>> m_intWriteHandleKeys;
+    std::vector<std::pair<SG::ConstAccessor<unsigned int>, SG::WriteDecorHandleKey<xAOD::TauJetContainer>>> m_unsignedIntWriteHandleKeys;
+    std::vector<std::pair<SG::ConstAccessor<char>, SG::WriteDecorHandleKey<xAOD::TauJetContainer>>> m_charWriteHandleKeys;
 
     SG::WriteDecorHandleKey<xAOD::TauJetContainer> m_truthDecayModeKey {
       this, "decayModeDecoration", "truth_DecayMode", "the decoration for the tau decay mode"};

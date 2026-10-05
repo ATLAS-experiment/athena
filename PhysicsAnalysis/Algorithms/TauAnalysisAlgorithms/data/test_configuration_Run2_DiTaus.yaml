@@ -11,6 +11,9 @@ DiTauJets:
   rerunTruthMatching: true
   decorateTruth: true
   decorateExtraVariables: true
+  WorkingPoint:
+  - selectionName: medium
+    quality: Medium
 
 GeneratorLevelAnalysis: {}
 
