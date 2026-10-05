@@ -464,7 +464,7 @@ StatusCode JetCalibrationTool::initializeEvent(JetEventInfo& jetEventInfo) const
   }
 
   // static accessor for PV index access
-  static const SG::AuxElement::ConstAccessor<int> PVIndexAccessor("PVIndex");
+  static const SG::ConstAccessor<int> PVIndexAccessor("PVIndex");
   
   ATH_MSG_VERBOSE("Initializing event.");
 

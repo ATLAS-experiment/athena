@@ -33,7 +33,7 @@ StatusCode JetGroomMRatio::initialize() {
 
 StatusCode JetGroomMRatio::decorate(const xAOD::JetContainer& jets) const {
   ATH_MSG_VERBOSE("Begin decorating jets.");
-  const SG::AuxElement::ConstAccessor< ElementLink<xAOD::JetContainer> > parentAcc("Parent");
+  const SG::ConstAccessor< ElementLink<xAOD::JetContainer> > parentAcc("Parent");
   const std::string uncalP4Str{"JetConstitScaleMomentum"};
   for(const xAOD::Jet* jet : jets) {
     const xAOD::Jet* parent = *parentAcc(*jet);

@@ -243,7 +243,7 @@ EMBremCollectionBuilder::createNew(
   const xAOD::TrackParticle* original = inputTrkPartContainer->at(origIndex);
 
   // Add an element link back to original Track Particle collection
-  static const SG::AuxElement::Accessor<
+  static const SG::Accessor<
     ElementLink<xAOD::TrackParticleContainer>>
     tP("originalTrackParticle");
   ElementLink<xAOD::TrackParticleContainer> linkToOriginal(
@@ -262,7 +262,7 @@ EMBremCollectionBuilder::createNew(
       break;
     }
   }
-  static const SG::AuxElement::Accessor<float> QoverPLM("QoverPLM");
+  static const SG::Accessor<float> QoverPLM("QoverPLM");
   QoverPLM(*aParticle) = QoverPLast;
   egammaCopyTrackParticleInfo::ToCopy toCopy{.isRefitted = isRefitted,
                                              .doTruth = m_doTruth,

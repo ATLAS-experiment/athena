@@ -8,7 +8,7 @@
 #include "xAODEgamma/Egamma.h"
 
 namespace {
-const SG::AuxElement::Accessor<float> accLH("LHValue");
+const SG::Accessor<float> accLH("LHValue");
 }
 
 EMPIDBuilder::EMPIDBuilder(const std::string& type,

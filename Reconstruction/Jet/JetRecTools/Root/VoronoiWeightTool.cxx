@@ -150,7 +150,7 @@ StatusCode VoronoiWeightTool::process_impl(xAOD::IParticleContainer* particlesin
 
   // This tracks the index of the object in the fastjet container
   size_t i=0;
-  const static SG::AuxElement::Accessor<float> weightAcc("VoronoiWeight"); // Handle for PU weighting here
+  const static SG::Accessor<float> weightAcc("VoronoiWeight"); // Handle for PU weighting here
   for(xAOD::IParticle* part : SortHelper::sort_container_pt(particlesin)){
     // Skip the check on charged PFOs if needed
     // A subtle change in this check because fastjet will not return anything

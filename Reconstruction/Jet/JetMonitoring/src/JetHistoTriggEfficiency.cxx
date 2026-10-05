@@ -40,7 +40,7 @@ StatusCode JetHistoTriggEfficiency::processJetContainer(const JetMonitoringAlg& 
   // we assume this tool is invoked in an alg selecting a reference trigger.
   ATH_MSG_DEBUG(" working on "<< m_probeTrigChain);
   // check our probe trigger is enabled 
-  static const SG::AuxElement::ConstAccessor< std::vector< std::string > > acc_disabledTriggers("disabledTriggers");
+  static const SG::ConstAccessor< std::vector< std::string > > acc_disabledTriggers("disabledTriggers");
   auto eventInfo = parentAlg.GetEventInfo(ctx);
   if( acc_disabledTriggers.isAvailable( *eventInfo ) ) {
     const std::vector<std::string> & disabledTriggers = acc_disabledTriggers( *eventInfo );

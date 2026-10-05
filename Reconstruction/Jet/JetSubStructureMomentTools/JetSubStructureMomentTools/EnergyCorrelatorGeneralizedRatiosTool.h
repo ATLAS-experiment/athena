@@ -51,20 +51,20 @@ class EnergyCorrelatorGeneralizedRatiosTool :
       std::map< float, moments_t > m_moments;
 
       /// ConstAccessors for L-series ECFs
-      std::unique_ptr< SG::AuxElement::ConstAccessor<float> > m_acc_ECFG_2_1_2;
-      std::unique_ptr< SG::AuxElement::ConstAccessor<float> > m_acc_ECFG_3_1_1;
-      std::unique_ptr< SG::AuxElement::ConstAccessor<float> > m_acc_ECFG_3_2_1;
-      std::unique_ptr< SG::AuxElement::ConstAccessor<float> > m_acc_ECFG_3_2_2;
-      std::unique_ptr< SG::AuxElement::ConstAccessor<float> > m_acc_ECFG_3_3_1;
-      std::unique_ptr< SG::AuxElement::ConstAccessor<float> > m_acc_ECFG_4_2_2;
-      std::unique_ptr< SG::AuxElement::ConstAccessor<float> > m_acc_ECFG_4_4_1;
+      std::unique_ptr< SG::ConstAccessor<float> > m_acc_ECFG_2_1_2;
+      std::unique_ptr< SG::ConstAccessor<float> > m_acc_ECFG_3_1_1;
+      std::unique_ptr< SG::ConstAccessor<float> > m_acc_ECFG_3_2_1;
+      std::unique_ptr< SG::ConstAccessor<float> > m_acc_ECFG_3_2_2;
+      std::unique_ptr< SG::ConstAccessor<float> > m_acc_ECFG_3_3_1;
+      std::unique_ptr< SG::ConstAccessor<float> > m_acc_ECFG_4_2_2;
+      std::unique_ptr< SG::ConstAccessor<float> > m_acc_ECFG_4_4_1;
       
       /// Decorator for L-series ECFRs
-      std::unique_ptr< SG::AuxElement::Decorator<float> > m_dec_L1;
-      std::unique_ptr< SG::AuxElement::Decorator<float> > m_dec_L2;
-      std::unique_ptr< SG::AuxElement::Decorator<float> > m_dec_L3;
-      std::unique_ptr< SG::AuxElement::Decorator<float> > m_dec_L4;
-      std::unique_ptr< SG::AuxElement::Decorator<float> > m_dec_L5;
+      std::unique_ptr< SG::Decorator<float> > m_dec_L1;
+      std::unique_ptr< SG::Decorator<float> > m_dec_L2;
+      std::unique_ptr< SG::Decorator<float> > m_dec_L3;
+      std::unique_ptr< SG::Decorator<float> > m_dec_L4;
+      std::unique_ptr< SG::Decorator<float> > m_dec_L5;
 
 };
 
@@ -88,49 +88,49 @@ struct EnergyCorrelatorGeneralizedRatiosTool::moments_t {
   float beta;
 
   /// ECFG accessors
-  std::unique_ptr< SG::AuxElement::ConstAccessor<float> > acc_ECFG_2_1;
-  std::unique_ptr< SG::AuxElement::ConstAccessor<float> > acc_ECFG_3_1;
-  std::unique_ptr< SG::AuxElement::ConstAccessor<float> > acc_ECFG_3_2;
-  std::unique_ptr< SG::AuxElement::ConstAccessor<float> > acc_ECFG_4_1;
-  std::unique_ptr< SG::AuxElement::ConstAccessor<float> > acc_ECFG_4_2;
+  std::unique_ptr< SG::ConstAccessor<float> > acc_ECFG_2_1;
+  std::unique_ptr< SG::ConstAccessor<float> > acc_ECFG_3_1;
+  std::unique_ptr< SG::ConstAccessor<float> > acc_ECFG_3_2;
+  std::unique_ptr< SG::ConstAccessor<float> > acc_ECFG_4_1;
+  std::unique_ptr< SG::ConstAccessor<float> > acc_ECFG_4_2;
 
   /// ECFG ungroomed accessors
-  std::unique_ptr< SG::AuxElement::ConstAccessor<float> > acc_ECFG_2_1_ungroomed;
-  std::unique_ptr< SG::AuxElement::ConstAccessor<float> > acc_ECFG_3_1_ungroomed;
-  std::unique_ptr< SG::AuxElement::ConstAccessor<float> > acc_ECFG_3_2_ungroomed;
+  std::unique_ptr< SG::ConstAccessor<float> > acc_ECFG_2_1_ungroomed;
+  std::unique_ptr< SG::ConstAccessor<float> > acc_ECFG_3_1_ungroomed;
+  std::unique_ptr< SG::ConstAccessor<float> > acc_ECFG_3_2_ungroomed;
   
   /// M and N series decorators
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_M2;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_M3;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_N2;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_N3;
+  std::unique_ptr< SG::Decorator<float> > dec_M2;
+  std::unique_ptr< SG::Decorator<float> > dec_M3;
+  std::unique_ptr< SG::Decorator<float> > dec_N2;
+  std::unique_ptr< SG::Decorator<float> > dec_N3;
 
   /// Dichroic M and N series decorators
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_M2_dichroic;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_N2_dichroic;
+  std::unique_ptr< SG::Decorator<float> > dec_M2_dichroic;
+  std::unique_ptr< SG::Decorator<float> > dec_N2_dichroic;
 
   moments_t (float Beta, const std::string& Prefix)
     : prefix (Prefix),
       suffix (GetBetaSuffix(Beta)),
       beta (Beta),
 
-      acc_ECFG_2_1 (std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"ECFG_2_1"+suffix)),
-      acc_ECFG_3_1 (std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"ECFG_3_1"+suffix)),
-      acc_ECFG_3_2 (std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"ECFG_3_2"+suffix)),
-      acc_ECFG_4_1 (std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"ECFG_4_1"+suffix)),
-      acc_ECFG_4_2 (std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"ECFG_4_2"+suffix)),
+      acc_ECFG_2_1 (std::make_unique< SG::ConstAccessor<float> >(prefix+"ECFG_2_1"+suffix)),
+      acc_ECFG_3_1 (std::make_unique< SG::ConstAccessor<float> >(prefix+"ECFG_3_1"+suffix)),
+      acc_ECFG_3_2 (std::make_unique< SG::ConstAccessor<float> >(prefix+"ECFG_3_2"+suffix)),
+      acc_ECFG_4_1 (std::make_unique< SG::ConstAccessor<float> >(prefix+"ECFG_4_1"+suffix)),
+      acc_ECFG_4_2 (std::make_unique< SG::ConstAccessor<float> >(prefix+"ECFG_4_2"+suffix)),
 
-      acc_ECFG_2_1_ungroomed (std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"ECFG_2_1_ungroomed"+suffix)),
-      acc_ECFG_3_1_ungroomed (std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"ECFG_3_1_ungroomed"+suffix)),
-      acc_ECFG_3_2_ungroomed (std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"ECFG_3_2_ungroomed"+suffix)),
+      acc_ECFG_2_1_ungroomed (std::make_unique< SG::ConstAccessor<float> >(prefix+"ECFG_2_1_ungroomed"+suffix)),
+      acc_ECFG_3_1_ungroomed (std::make_unique< SG::ConstAccessor<float> >(prefix+"ECFG_3_1_ungroomed"+suffix)),
+      acc_ECFG_3_2_ungroomed (std::make_unique< SG::ConstAccessor<float> >(prefix+"ECFG_3_2_ungroomed"+suffix)),
 
-      dec_M2 (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"M2"+suffix)),
-      dec_M3 (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"M3"+suffix)),
-      dec_N2 (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"N2"+suffix)),
-      dec_N3 (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"N3"+suffix)),
+      dec_M2 (std::make_unique< SG::Decorator<float> >(prefix+"M2"+suffix)),
+      dec_M3 (std::make_unique< SG::Decorator<float> >(prefix+"M3"+suffix)),
+      dec_N2 (std::make_unique< SG::Decorator<float> >(prefix+"N2"+suffix)),
+      dec_N3 (std::make_unique< SG::Decorator<float> >(prefix+"N3"+suffix)),
 
-      dec_M2_dichroic (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"M2_dichroic"+suffix)),
-      dec_N2_dichroic (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"N2_dichroic"+suffix))
+      dec_M2_dichroic (std::make_unique< SG::Decorator<float> >(prefix+"M2_dichroic"+suffix)),
+      dec_N2_dichroic (std::make_unique< SG::Decorator<float> >(prefix+"N2_dichroic"+suffix))
   {
   }
 

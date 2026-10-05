@@ -90,10 +90,10 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[])
     jet::JetFourMomAccessor startingScale(startingScaleString.Data());
     jet::JetFourMomAccessor caloMassScale(caloMassScaleString.Data());
     jet::JetFourMomAccessor taMassScale(taMassScaleString.Data());
-    SG::AuxElement::Accessor<float> mTAfloat(taMassFloatString.Data());
-    SG::AuxElement::Accessor<float> detectorEta(detectorEtaString.Data());
-    SG::AuxElement::Accessor<float> trackMass(trackMassString.Data());
-    SG::AuxElement::Accessor<float> trackPt(trackPtString.Data());
+    SG::Accessor<float> mTAfloat(taMassFloatString.Data());
+    SG::Accessor<float> detectorEta(detectorEtaString.Data());
+    SG::Accessor<float> trackMass(trackMassString.Data());
+    SG::Accessor<float> trackPt(trackPtString.Data());
     
 
     // Create the calib tool

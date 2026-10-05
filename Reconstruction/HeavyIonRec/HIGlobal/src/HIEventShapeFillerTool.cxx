@@ -126,9 +126,9 @@ StatusCode HIEventShapeFillerTool::fillCollectionFromClusterContainer(std::uniqu
   }
 
 
-  static const SG::AuxElement::Decorator< float > decorator("HIEtaPhiWeight");
-  static const SG::AuxElement::Decorator< float > cm_decorator("HIMag");
-  static const SG::AuxElement::Accessor<float> acc_mcell_sumE("mcell_sumE");
+  static const SG::Decorator< float > decorator("HIEtaPhiWeight");
+  static const SG::Decorator< float > cm_decorator("HIMag");
+  static const SG::Accessor<float> acc_mcell_sumE("mcell_sumE");
 
   constexpr float area_cluster = HI::TowerBins::getBinArea();
   int runIndex = -1;

@@ -132,8 +132,8 @@ EMConversionBuilder::vertexExecute(
     return StatusCode::SUCCESS;
   }
 
-  static const SG::AuxElement::Accessor<float> accetaAtCalo("etaAtCalo");
-  static const SG::AuxElement::Accessor<float> accphiAtCalo("phiAtCalo");
+  static const SG::Accessor<float> accetaAtCalo("etaAtCalo");
+  static const SG::Accessor<float> accphiAtCalo("phiAtCalo");
 
   float etaAtCalo(0);
   float phiAtCalo(0);

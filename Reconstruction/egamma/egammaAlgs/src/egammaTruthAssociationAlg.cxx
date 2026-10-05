@@ -156,11 +156,11 @@ egammaTruthAssociationAlg::execute(const EventContext& ctx) const
     m_truthParticleContainerKey, ctx);
 
   // accessors
-  static const SG::AuxElement::Accessor<ClusterLink_t> accClusLink(
+  static const SG::Accessor<ClusterLink_t> accClusLink(
     "recoClusterLink");
-  static const SG::AuxElement::Accessor<ElectronLink_t> accElLink(
+  static const SG::Accessor<ElectronLink_t> accElLink(
     "recoElectronLink");
-  static const SG::AuxElement::Accessor<PhotonLink_t> accPhLink(
+  static const SG::Accessor<PhotonLink_t> accPhLink(
     "recoPhotonLink");
 
   if (m_matchElectrons) {
@@ -257,17 +257,17 @@ egammaTruthAssociationAlg::getNewTruthParticle(
   truthParticle->setProdVtxLink(truth->prodVtxLink());
   truthParticle->setDecayVtxLink(truth->decayVtxLink());
 
-  static const SG::AuxElement::Accessor<ClusterLink_t> accClusLink(
+  static const SG::Accessor<ClusterLink_t> accClusLink(
     "recoClusterLink");
-  static const SG::AuxElement::Accessor<ElectronLink_t> accElLink(
+  static const SG::Accessor<ElectronLink_t> accElLink(
     "recoElectronLink");
-  static const SG::AuxElement::Accessor<PhotonLink_t> accPhLink(
+  static const SG::Accessor<PhotonLink_t> accPhLink(
     "recoPhotonLink");
-  static const SG::AuxElement::Accessor<TruthLink_t> accTruthLink(
+  static const SG::Accessor<TruthLink_t> accTruthLink(
     "truthParticleLink");
-  static const SG::AuxElement::Accessor<int> accType("truthType");
-  static const SG::AuxElement::Accessor<int> accOrigin("truthOrigin");
-  static const SG::AuxElement::Accessor<unsigned int> accClassification("truthClassification");
+  static const SG::Accessor<int> accType("truthType");
+  static const SG::Accessor<int> accOrigin("truthOrigin");
+  static const SG::Accessor<unsigned int> accClassification("truthClassification");
 
   if (m_matchClusters) {
     accClusLink(*truthParticle) = ClusterLink_t();
@@ -351,7 +351,7 @@ egammaTruthAssociationAlg::match(
   const EventContext& ctx,
   const xAOD::TruthParticleContainer& truthParticles,
   const SG::WriteDecorHandleKeyArray<T>& hkeys,
-  const SG::AuxElement::Accessor<L>& linkAccess,
+  const SG::Accessor<L>& linkAccess,
   xAOD::TruthParticleContainer* egammaTruthContainer) const
 {
 

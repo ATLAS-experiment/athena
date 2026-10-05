@@ -47,20 +47,20 @@ StatusCode EnergyCorrelatorGeneralizedRatiosTool::initialize() {
   }
 
   /// Initialize accessors for L-series
-  m_acc_ECFG_2_1_2 = std::make_unique< SG::AuxElement::Accessor<float> >(m_prefix+"ECFG_2_1_2");
-  m_acc_ECFG_3_1_1 = std::make_unique< SG::AuxElement::Accessor<float> >(m_prefix+"ECFG_3_1_1");
-  m_acc_ECFG_3_2_1 = std::make_unique< SG::AuxElement::Accessor<float> >(m_prefix+"ECFG_3_2_1");
-  m_acc_ECFG_3_2_2 = std::make_unique< SG::AuxElement::Accessor<float> >(m_prefix+"ECFG_3_2_2");
-  m_acc_ECFG_3_3_1 = std::make_unique< SG::AuxElement::Accessor<float> >(m_prefix+"ECFG_3_3_1");
-  m_acc_ECFG_4_2_2 = std::make_unique< SG::AuxElement::Accessor<float> >(m_prefix+"ECFG_4_2_2");
-  m_acc_ECFG_4_4_1 = std::make_unique< SG::AuxElement::Accessor<float> >(m_prefix+"ECFG_4_4_1");
+  m_acc_ECFG_2_1_2 = std::make_unique< SG::Accessor<float> >(m_prefix+"ECFG_2_1_2");
+  m_acc_ECFG_3_1_1 = std::make_unique< SG::Accessor<float> >(m_prefix+"ECFG_3_1_1");
+  m_acc_ECFG_3_2_1 = std::make_unique< SG::Accessor<float> >(m_prefix+"ECFG_3_2_1");
+  m_acc_ECFG_3_2_2 = std::make_unique< SG::Accessor<float> >(m_prefix+"ECFG_3_2_2");
+  m_acc_ECFG_3_3_1 = std::make_unique< SG::Accessor<float> >(m_prefix+"ECFG_3_3_1");
+  m_acc_ECFG_4_2_2 = std::make_unique< SG::Accessor<float> >(m_prefix+"ECFG_4_2_2");
+  m_acc_ECFG_4_4_1 = std::make_unique< SG::Accessor<float> >(m_prefix+"ECFG_4_4_1");
 
   /// Initialize decorators for L-series
-  m_dec_L1 = std::make_unique< SG::AuxElement::Decorator<float> >(m_prefix+"L1");
-  m_dec_L2 = std::make_unique< SG::AuxElement::Decorator<float> >(m_prefix+"L2");
-  m_dec_L3 = std::make_unique< SG::AuxElement::Decorator<float> >(m_prefix+"L3");
-  m_dec_L4 = std::make_unique< SG::AuxElement::Decorator<float> >(m_prefix+"L4");
-  m_dec_L5 = std::make_unique< SG::AuxElement::Decorator<float> >(m_prefix+"L5");
+  m_dec_L1 = std::make_unique< SG::Decorator<float> >(m_prefix+"L1");
+  m_dec_L2 = std::make_unique< SG::Decorator<float> >(m_prefix+"L2");
+  m_dec_L3 = std::make_unique< SG::Decorator<float> >(m_prefix+"L3");
+  m_dec_L4 = std::make_unique< SG::Decorator<float> >(m_prefix+"L4");
+  m_dec_L5 = std::make_unique< SG::Decorator<float> >(m_prefix+"L5");
 
   return StatusCode::SUCCESS;
 

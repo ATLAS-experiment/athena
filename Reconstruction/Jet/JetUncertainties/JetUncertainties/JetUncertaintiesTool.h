@@ -275,11 +275,11 @@ class JetUncertaintiesTool : virtual public ICPJetUncertaintiesTool,
         virtual StatusCode getUncertaintySet(const CP::SystematicSet& filteredSet, jet::UncertaintySet*& uncSet);	
 
         // accessor to taggign efficiency SF
-        SG::AuxElement::Accessor<float> m_accTagScaleFactor;
-        SG::AuxElement::Accessor<float> m_accEffSF;
-	SG::AuxElement::Accessor<float> m_accSigeffSF;
-        SG::AuxElement::Accessor<float> m_accEfficiency;
-	SG::AuxElement::Accessor<bool> m_accTagResult;
+        SG::Accessor<float> m_accTagScaleFactor;
+        SG::Accessor<float> m_accEffSF;
+	SG::Accessor<float> m_accSigeffSF;
+        SG::Accessor<float> m_accEfficiency;
+	SG::Accessor<bool> m_accTagResult;
 
 	// Properties for the flavour configuration
 	bool m_absEtaGluonFraction;

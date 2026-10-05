@@ -17,7 +17,7 @@
 using namespace std;
 
 namespace {
-  const static SG::AuxElement::ConstAccessor<float> acc_clambda("CENTER_LAMBDA");
+  const static SG::ConstAccessor<float> acc_clambda("CENTER_LAMBDA");
 }
 
 SoftKillerWeightTool::SoftKillerWeightTool(const std::string& name) : JetConstituentModifierBase(name)
@@ -71,7 +71,7 @@ StatusCode SoftKillerWeightTool::initialize() {
 }
 
 StatusCode SoftKillerWeightTool::process_impl(xAOD::IParticleContainer* cont) const {
-  const static SG::AuxElement::Accessor<float> weightAcc("SoftKillerWeight"); // Handle for PU weighting here
+  const static SG::Accessor<float> weightAcc("SoftKillerWeight"); // Handle for PU weighting here
   double minPt(0.), minPtECal(0.), minPtHCal(0.);
   if(!m_isCaloSplit) {
     minPt = getSoftKillerMinPt(*cont);

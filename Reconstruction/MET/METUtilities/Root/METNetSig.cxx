@@ -30,18 +30,18 @@
 
 namespace met {
 
-  static const SG::AuxElement::ConstAccessor<std::string> acc_name("name");
-  static const SG::AuxElement::ConstAccessor<MissingETBase::Types::bitmask_t> acc_source("source");
+  static const SG::ConstAccessor<std::string> acc_name("name");
+  static const SG::ConstAccessor<MissingETBase::Types::bitmask_t> acc_source("source");
 
   typedef ElementLink<xAOD::IParticleContainer> iplink_t;
-  static const SG::AuxElement::ConstAccessor< std::vector<iplink_t > > acc_constitObjLinks("ConstitObjectLinks");
-  static const SG::AuxElement::Decorator< std::vector<iplink_t> > dec_constitObjLinks("ConstitObjectLinks");
+  static const SG::ConstAccessor< std::vector<iplink_t > > acc_constitObjLinks("ConstitObjectLinks");
+  static const SG::Decorator< std::vector<iplink_t> > dec_constitObjLinks("ConstitObjectLinks");
 
   // Decorator for passing the vector of inputs to the met object
-  static const SG::AuxElement::ConstAccessor< std::vector<float> > acc_inputvalues("input_values");
-  static const SG::AuxElement::ConstAccessor< std::vector<std::string> > acc_inputnames("input_names");
-  static const SG::AuxElement::Decorator< std::vector<float> > dec_inputvalues("input_values");
-  static const SG::AuxElement::Decorator< std::vector<std::string> > dec_inputnames("input_names");
+  static const SG::ConstAccessor< std::vector<float> > acc_inputvalues("input_values");
+  static const SG::ConstAccessor< std::vector<std::string> > acc_inputnames("input_names");
+  static const SG::Decorator< std::vector<float> > dec_inputvalues("input_values");
+  static const SG::Decorator< std::vector<std::string> > dec_inputnames("input_names");
 
   //////////////////////////////////////////////////////////////////////////////
 

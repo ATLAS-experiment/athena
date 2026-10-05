@@ -41,8 +41,8 @@ void RecoElectronHistograms::fill(const xAOD::Electron& elrec) {
   ParticleHistograms::fill(elrec);
 
   if (!m_isData) {
-    static const SG::AuxElement::ConstAccessor<int> accType("truthType");
-    static const SG::AuxElement::ConstAccessor<int> accOrigin("truthOrigin");
+    static const SG::ConstAccessor<int> accType("truthType");
+    static const SG::ConstAccessor<int> accOrigin("truthOrigin");
     if (accOrigin.isAvailable(elrec))
       histoMap["truthOrigin"]->Fill(accOrigin(elrec));
     else

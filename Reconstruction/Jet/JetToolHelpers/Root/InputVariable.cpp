@@ -85,8 +85,8 @@ namespace JetHelper{
 					       }
 					     });
     if(name == "Tau32_wta"){
-      static const SG::AuxElement::ConstAccessor<float> accTau3("Tau3_wta");
-      static const SG::AuxElement::ConstAccessor<float> accTau2("Tau2_wta");
+      static const SG::ConstAccessor<float> accTau3("Tau3_wta");
+      static const SG::ConstAccessor<float> accTau2("Tau2_wta");
       
       return std::make_unique<InputVariable>(name,
 					     [](const xAOD::Jet& jet, const JetContext&) {
@@ -94,8 +94,8 @@ namespace JetHelper{
 					     );
     }
     if(name == "Tau21_wta"){
-      static const SG::AuxElement::ConstAccessor<float> accTau1("Tau1_wta");
-      static const SG::AuxElement::ConstAccessor<float> accTau2("Tau2_wta");
+      static const SG::ConstAccessor<float> accTau1("Tau1_wta");
+      static const SG::ConstAccessor<float> accTau2("Tau2_wta");
       
       return std::make_unique<InputVariable>(name,
 					     [](const xAOD::Jet& jet, const JetContext&) {
@@ -103,14 +103,14 @@ namespace JetHelper{
 					     );
     }
     if(name == "C2_forML"){
-      static const SG::AuxElement::ConstAccessor<float> accC2("C2");
+      static const SG::ConstAccessor<float> accC2("C2");
       return std::make_unique<InputVariable>(name,
 					     [](const xAOD::Jet& jet, const JetContext&) {
 					       return accC2(jet)>0 ? accC2(jet) : -0.1 ; }
 					     );
     }    
     if(name == "D2_forML"){
-      static const SG::AuxElement::ConstAccessor<float> accD2("D2");
+      static const SG::ConstAccessor<float> accD2("D2");
       return std::make_unique<InputVariable>(name,
 					     [](const xAOD::Jet& jet, const JetContext&) {
 					       return accD2(jet)>0 ? accD2(jet) : -0.1 ; }

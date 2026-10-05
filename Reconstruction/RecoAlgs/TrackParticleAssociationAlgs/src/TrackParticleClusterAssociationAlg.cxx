@@ -159,7 +159,7 @@ TrackParticleClusterAssociationAlg::associatedClusters(const Trk::CaloExtension 
 
   float dr2Cut0 = m_dr*m_dr;
   // to access the pre-calculated width :
-  static const SG::AuxElement::ConstAccessor<float> sig_acc("sigmaWidth");
+  static const SG::ConstAccessor<float> sig_acc("sigmaWidth");
 
   for(const xAOD::CaloCluster * cl : allClusters){
 

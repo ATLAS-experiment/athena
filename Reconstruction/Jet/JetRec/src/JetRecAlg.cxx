@@ -69,7 +69,7 @@ StatusCode JetRecAlg::execute(const EventContext& ctx) const {
 #endif
 
   SG::WriteHandle<xAOD::JetContainer> jetContHandle(m_output,ctx);
-  static const SG::AuxElement::ConstAccessor<ElementLink<xAOD::JetContainer> > parentELacc("Parent_TEMP");
+  static const SG::ConstAccessor<ElementLink<xAOD::JetContainer> > parentELacc("Parent_TEMP");
 
   // Define a scope to ease monitoring of the JetProvider action
   {

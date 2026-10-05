@@ -206,7 +206,7 @@ double InfoHelper::getAbsMass(const xAOD::Jet& jet) const
         return scale(jet).M();
 
     // Fall-back on the TA moment as a float if applicable (legacy support)
-    SG::AuxElement::ConstAccessor<float> scaleTAMoment("JetTrackAssistedMassCalibrated");
+    SG::ConstAccessor<float> scaleTAMoment("JetTrackAssistedMassCalibrated");
     if (m_massDef == CompMassDef::TAMass && scaleTAMoment.isAvailable(jet))
         return scaleTAMoment(jet);
 
@@ -230,7 +230,7 @@ double InfoHelper::getMassOverPt(const xAOD::Jet& jet) const
         return scale(jet).M()/scale(jet).Pt();
     
     // Fall-back on the TA moment as a float if applicable (legacy support)
-    SG::AuxElement::ConstAccessor<float> scaleTAMoment("JetTrackAssistedMassCalibrated");
+    SG::ConstAccessor<float> scaleTAMoment("JetTrackAssistedMassCalibrated");
     if (m_massDef == CompMassDef::TAMass && scaleTAMoment.isAvailable(jet))
         return scaleTAMoment(jet)/jet.pt();
     
@@ -255,7 +255,7 @@ double InfoHelper::getMassOverE(const xAOD::Jet& jet) const
         return scale(jet).M()/scale(jet).E();
     
     // Fall-back on the TA moment as a float if applicable (legacy support)
-    SG::AuxElement::ConstAccessor<float> scaleTAMoment("JetTrackAssistedMassCalibrated");
+    SG::ConstAccessor<float> scaleTAMoment("JetTrackAssistedMassCalibrated");
     if (m_massDef == CompMassDef::TAMass && scaleTAMoment.isAvailable(jet))
         return scaleTAMoment(jet)/jet.e();
     

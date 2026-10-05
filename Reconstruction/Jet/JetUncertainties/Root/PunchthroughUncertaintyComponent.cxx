@@ -62,7 +62,7 @@ int PunchthroughUncertaintyComponent::getNumSegments(const xAOD::Jet& jet) const
 
 //    std::cout << "Calling getNumSegments for component " << getName() << std::endl;
 
-    static const SG::AuxElement::Accessor<int> accNseg("GhostMuonSegmentCount");
+    static const SG::Accessor<int> accNseg("GhostMuonSegmentCount");
 
     if (!accNseg.isAvailable(jet))
     {

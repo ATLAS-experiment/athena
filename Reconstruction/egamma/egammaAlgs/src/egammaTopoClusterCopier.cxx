@@ -15,7 +15,7 @@
 
 namespace{
 // Special egamma EMFraction which includes presampler and E4 cells.
-const SG::AuxElement::Accessor<float> s_acc_emfraction {"EMFraction"};
+const SG::Accessor<float> s_acc_emfraction {"EMFraction"};
 
 //comparison function
 bool greater(xAOD::CaloCluster const* a, xAOD::CaloCluster const* b) {

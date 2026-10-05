@@ -313,12 +313,12 @@ We try to use the standard `JetModifier` tools that are available ATLAS-wide. In
 As an example of the second way, I see that `m_ktSplittingScaleTool` is added. On the twiki, I see an entry for `KTSplittingScaleTool` which lists 6 variables associated with it: `Split12, Split23, Split34, ZCut12, ZCut23, ZCut34` and all are of a `float` type, so I can write
 
 ```c++
-static SG::AuxElement::ConstAccessor<float> Split12("Split12");
-static SG::AuxElement::ConstAccessor<float> Split23("Split23");
-static SG::AuxElement::ConstAccessor<float> Split34("Split34");
-static SG::AuxElement::ConstAccessor<float> ZCut12("ZCut12");
-static SG::AuxElement::ConstAccessor<float> ZCut23("ZCut23");
-static SG::AuxElement::ConstAccessor<float> ZCut34("ZCut34");
+static SG::ConstAccessor<float> Split12("Split12");
+static SG::ConstAccessor<float> Split23("Split23");
+static SG::ConstAccessor<float> Split34("Split34");
+static SG::ConstAccessor<float> ZCut12("ZCut12");
+static SG::ConstAccessor<float> ZCut23("ZCut23");
+static SG::ConstAccessor<float> ZCut34("ZCut34");
 ```
 
 and with these, I can quickly access it on my jet (protecting myself against when it doesn't exist for some reason)

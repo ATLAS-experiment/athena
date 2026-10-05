@@ -125,7 +125,7 @@ StatusCode HIClusterMaker::execute(const EventContext &ctx) const
     ATH_MSG_VERBOSE("Energy Sum of mirror deadFEB: " << mirror_cell_sumE);
     //decorating cluster with sum of mirror cell energy
     //coverity[UNNECESSARY_STRING_COPY:FALSE]
-    static const SG::AuxElement::Decorator<float> Mcell_sumE("mcell_sumE");    
+    static const SG::Decorator<float> Mcell_sumE("mcell_sumE");    
     Mcell_sumE(*cl) = mirror_cell_sumE; 
 
     float eta0=towerItr->eta();

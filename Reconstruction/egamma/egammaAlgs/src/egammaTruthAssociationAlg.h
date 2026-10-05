@@ -93,7 +93,7 @@ private:
   StatusCode match(const EventContext& ctx,
                    const xAOD::TruthParticleContainer& truthParticles,
                    const SG::WriteDecorHandleKeyArray<T>& hkeys,
-                   const SG::AuxElement::Accessor<L>& linkAccess,
+                   const SG::Accessor<L>& linkAccess,
                    xAOD::TruthParticleContainer* egammaTruthContainer) const;
 
   /** @brief return the result of MCTruthClassifier::particleTruthClassifier

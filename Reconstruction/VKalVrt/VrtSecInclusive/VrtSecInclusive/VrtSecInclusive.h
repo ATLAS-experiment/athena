@@ -302,10 +302,10 @@ namespace VKalVrtAthena {
     
     SG::WriteDecorHandleKey<xAOD::EventInfo> m_vertexingStatusKey {this, "VertexingStatusKey", m_eventInfoKey, ""};
     
-    using IPDecoratorType = SG::AuxElement::Decorator< std::vector< std::vector<float> > >;
+    using IPDecoratorType = SG::Decorator< std::vector< std::vector<float> > >;
     std::vector< IPDecoratorType > m_ipDecors;
 
-    using VertexELType = SG::AuxElement::Decorator< std::vector<ElementLink< xAOD::VertexContainer > > >;
+    using VertexELType = SG::Decorator< std::vector<ElementLink< xAOD::VertexContainer > > >;
     std::optional< VertexELType > m_decor_svLink;
 
     //////////////////////////////////////////////////////////////////////////////////////

@@ -294,7 +294,7 @@ IsolationBuilder::initializeIso(
     CaloIsoHelpKey cisoH(this);
     TrackIsoHelpKey tisoH(this);
 
-    // std::vector<SG::AuxElement::Decorator<float>*> Deco;
+    // std::vector<SG::Decorator<float>*> Deco;
     xAOD::Iso::IsolationFlavour isoFlav = xAOD::Iso::numIsolationFlavours;
     xAOD::Iso::IsolationFlavour oldIsoFlav = xAOD::Iso::numIsolationFlavours;
 

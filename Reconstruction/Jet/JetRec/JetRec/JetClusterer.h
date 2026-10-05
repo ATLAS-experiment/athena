@@ -101,7 +101,7 @@ protected:
   bool m_isVariableR{};  
   bool isVariableR() const { return m_isVariableR;}
 
-  SG::AuxElement::Accessor<int> m_jetRankAccessor;
+  SG::Accessor<int> m_jetRankAccessor;
 
 };
 

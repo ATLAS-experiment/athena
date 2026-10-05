@@ -10,8 +10,8 @@ namespace met {
 
     // Hides these from other code that might include METHelpers.h
   namespace accessors {
-    static const SG::AuxElement::ConstAccessor< std::vector< ElementLink< xAOD::IParticleContainer> > > constitObjLinks("ConstitObjectLinks");
-    static const SG::AuxElement::ConstAccessor< std::vector< float > > constitObjWeights("ConstitObjectWeights");
+    static const SG::ConstAccessor< std::vector< ElementLink< xAOD::IParticleContainer> > > constitObjLinks("ConstitObjectLinks");
+    static const SG::ConstAccessor< std::vector< float > > constitObjWeights("ConstitObjectWeights");
   }
 
   template <class T>

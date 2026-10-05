@@ -81,7 +81,7 @@ StatusCode JetClusterer::initialize()
   m_clusterSequence = name() + "ClusterSequence";
   ATH_CHECK(m_clusterSequence.initialize());
 
-  m_jetRankAccessor = SG::AuxElement::Accessor<int>(m_jetRank);
+  m_jetRankAccessor = SG::Accessor<int>(m_jetRank);
 
   return StatusCode::SUCCESS;
 }
@@ -154,7 +154,7 @@ void JetClusterer::processPseudoJet(const fastjet::PseudoJet &pj, const PseudoJe
   // -------------------------------------
   // translate to xAOD::Jet
   ATH_MSG_DEBUG("Converting pseudojets to xAOD::Jet");
-  static const SG::AuxElement::Accessor<const fastjet::PseudoJet *> pjAccessor("PseudoJet");
+  static const SG::Accessor<const fastjet::PseudoJet *> pjAccessor("PseudoJet");
   PseudoJetTranslator pjTranslator(m_useArea, m_useArea);
 
   // create the xAOD::Jet from the PseudoJet, doing the signal &  constituents extraction

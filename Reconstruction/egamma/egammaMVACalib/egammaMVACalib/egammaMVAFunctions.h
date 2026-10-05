@@ -165,7 +165,7 @@ namespace egammaMVAFunctions
   inline float compute_cl_z            (const xAOD::CaloCluster& cl){ return cl_getMoment(cl, xAOD::CaloCluster::CENTER_Z      , "CENTER_Z"); }
 
   inline float compute_cl_secondR_fudge(const xAOD::Egamma& eg) {
-    static const SG::AuxElement::Accessor<float> accR2("SECOND_R");
+    static const SG::Accessor<float> accR2("SECOND_R");
     if (accR2.isAvailable(eg)) { return accR2(eg); }
     return -1.;
   }
@@ -237,8 +237,8 @@ namespace egammaMVAFunctions
   /// This ptconv function uses the vertex decorations
   inline float compute_ptconv_decor(const xAOD::Photon* ph)
   {
-    static const SG::AuxElement::Accessor<float> accPx("px");
-    static const SG::AuxElement::Accessor<float> accPy("py");
+    static const SG::Accessor<float> accPx("px");
+    static const SG::Accessor<float> accPy("py");
     
     auto vx = ph->vertex();
     return vx ? std::hypot(accPx(*vx), accPy(*vx)) : 0.0;
@@ -258,7 +258,7 @@ namespace egammaMVAFunctions
 
   inline float compute_pt1conv(const xAOD::Photon* ph)
   {
-    static const SG::AuxElement::Accessor<float> accPt1("pt1");
+    static const SG::Accessor<float> accPt1("pt1");
     
     const xAOD::Vertex* vx = ph->vertex();
     if (!vx) return 0.0;
@@ -271,7 +271,7 @@ namespace egammaMVAFunctions
 
   inline float compute_pt2conv(const xAOD::Photon* ph)
   {
-    static const SG::AuxElement::Accessor<float> accPt2("pt2");
+    static const SG::Accessor<float> accPt2("pt2");
     
     const xAOD::Vertex* vx = ph->vertex();
     if (!vx) return 0.0;
@@ -337,8 +337,8 @@ namespace egammaMVAFunctions
       ATH_MSG_DEBUG("init conversion helper");
       if (!m_vertex) return;
 
-      static const SG::AuxElement::Accessor<float> accPt1("pt1");
-      static const SG::AuxElement::Accessor<float> accPt2("pt2");
+      static const SG::Accessor<float> accPt1("pt1");
+      static const SG::Accessor<float> accPt2("pt2");
       if (accPt1.isAvailable(*m_vertex) && accPt2.isAvailable(*m_vertex))
       {
         m_pt1conv = accPt1(*m_vertex);

@@ -72,7 +72,7 @@ int test1 (int argc, char* argv[])
     // Accessors
     jet::JetFourMomAccessor startingScale(startingScaleString.Data());
     jet::JetFourMomAccessor endingScale(endingScaleString.Data());
-    SG::AuxElement::Accessor<float> detectorEta(detectorEtaString.Data());
+    SG::Accessor<float> detectorEta(detectorEtaString.Data());
     
 
     // Create the calib tool

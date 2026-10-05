@@ -86,8 +86,8 @@ assuming the tools are members of your algorithm class
 
 When the tool is called two decorations are added to the jet. The `TileStatus` decoration contains the information of how the jet was affected or if it was not affected at all, as an unisgned integer that can be 0, 1 or 2, meaning not affected jet, affected but only in the edge, or affected in the core, respectively. The `Ptraw` decortion saves the jet pt before applying the correction. To be able to extract the decorations of the jet, a couple of accessors have to be defined:
 ```cpp
-    static SG::AuxElement::Accessor<unsigned int> acc_tileok("TileStatus");
-    static SG::AuxElement::Accessor<float> acc_ptraw("Ptraw");
+    static SG::Accessor<unsigned int> acc_tileok("TileStatus");
+    static SG::Accessor<float> acc_ptraw("Ptraw");
 ```
 To correct the 4-momentum of your jets (in case they are affected), and access their decorations you would do e.g.:
 

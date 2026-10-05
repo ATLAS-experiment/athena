@@ -20,23 +20,23 @@ Copyright (C) 2025 CERN for the benefit of the ATLAS collaboration
 
 namespace {
   // Accessors for vertex properties
-  const SG::AuxElement::Accessor<float> vtx_pxAcc("vtx_px");
-  const SG::AuxElement::Accessor<float> vtx_pyAcc("vtx_py");
-  const SG::AuxElement::Accessor<float> vtx_pzAcc("vtx_pz");
-  const SG::AuxElement::Accessor<float> vtx_massAcc("vtx_mass");
-  const SG::AuxElement::Accessor<float> vtx_chargeAcc("vtx_charge");
-  const SG::AuxElement::Accessor<float> minOpAngAcc("minOpAng");
-  const SG::AuxElement::Accessor<float> chi2_coreAcc("chi2_core");
-  const SG::AuxElement::Accessor<float> ndof_coreAcc("ndof_core");
-  const SG::AuxElement::Accessor<float> chi2_assocAcc("chi2_assoc");
-  const SG::AuxElement::Accessor<float> ndof_assocAcc("ndof_assoc");
-  const SG::AuxElement::Accessor<float> massAcc("mass");
-  const SG::AuxElement::Accessor<float> mass_eAcc("mass_e");
-  const SG::AuxElement::Accessor<float> mass_selectedTracksAcc("mass_selectedTracks");
-  const SG::AuxElement::Accessor<int>   num_trksAcc("num_trks");
-  const SG::AuxElement::Accessor<int>   num_selectedTracksAcc("num_selectedTracks");
-  const SG::AuxElement::Accessor<int>   num_associatedTracksAcc("num_associatedTracks");
-  const SG::AuxElement::Accessor<float> dCloseVrtAcc("dCloseVrt");
+  const SG::Accessor<float> vtx_pxAcc("vtx_px");
+  const SG::Accessor<float> vtx_pyAcc("vtx_py");
+  const SG::Accessor<float> vtx_pzAcc("vtx_pz");
+  const SG::Accessor<float> vtx_massAcc("vtx_mass");
+  const SG::Accessor<float> vtx_chargeAcc("vtx_charge");
+  const SG::Accessor<float> minOpAngAcc("minOpAng");
+  const SG::Accessor<float> chi2_coreAcc("chi2_core");
+  const SG::Accessor<float> ndof_coreAcc("ndof_core");
+  const SG::Accessor<float> chi2_assocAcc("chi2_assoc");
+  const SG::Accessor<float> ndof_assocAcc("ndof_assoc");
+  const SG::Accessor<float> massAcc("mass");
+  const SG::Accessor<float> mass_eAcc("mass_e");
+  const SG::Accessor<float> mass_selectedTracksAcc("mass_selectedTracks");
+  const SG::Accessor<int>   num_trksAcc("num_trks");
+  const SG::Accessor<int>   num_selectedTracksAcc("num_selectedTracks");
+  const SG::Accessor<int>   num_associatedTracksAcc("num_associatedTracks");
+  const SG::Accessor<float> dCloseVrtAcc("dCloseVrt");
 }
 
 namespace Rec {

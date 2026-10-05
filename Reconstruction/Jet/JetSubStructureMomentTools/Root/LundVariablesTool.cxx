@@ -100,16 +100,16 @@ StatusCode LundVariablesTool::decorate(const xAOD::JetContainer& jets) const {
     const std::string prefix = m_prefix;
 
     // Decorators (types must match the vectors you store)
-    SG::AuxElement::Decorator<std::vector<float>> decLnR(prefix + "LundAllLnR");
-    SG::AuxElement::Decorator<std::vector<float>> decLnKT(prefix + "LundAllLnKT");
-    SG::AuxElement::Decorator<std::vector<float>> decZ(prefix + "LundAllZ");
-    SG::AuxElement::Decorator<std::vector<float>> decKt(prefix + "LundAllKt");
-    SG::AuxElement::Decorator<std::vector<float>> decDR(prefix + "LundAllDeltaR");
+    SG::Decorator<std::vector<float>> decLnR(prefix + "LundAllLnR");
+    SG::Decorator<std::vector<float>> decLnKT(prefix + "LundAllLnKT");
+    SG::Decorator<std::vector<float>> decZ(prefix + "LundAllZ");
+    SG::Decorator<std::vector<float>> decKt(prefix + "LundAllKt");
+    SG::Decorator<std::vector<float>> decDR(prefix + "LundAllDeltaR");
 
-    SG::AuxElement::Decorator<std::vector<int>> decIDP1(prefix + "LundAllIDP1");
-    SG::AuxElement::Decorator<std::vector<int>> decIDP2(prefix + "LundAllIDP2");
+    SG::Decorator<std::vector<int>> decIDP1(prefix + "LundAllIDP1");
+    SG::Decorator<std::vector<int>> decIDP2(prefix + "LundAllIDP2");
 
-    SG::AuxElement::Decorator<int> decNSplits(prefix + "nSplits");
+    SG::Decorator<int> decNSplits(prefix + "nSplits");
 
     decLnR(*injet)     = std::move(lund_all_lnR);
     decLnKT(*injet)    = std::move(lund_all_lnkT);

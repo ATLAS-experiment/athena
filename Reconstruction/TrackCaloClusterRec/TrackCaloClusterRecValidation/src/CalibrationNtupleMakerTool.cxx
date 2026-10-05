@@ -311,7 +311,7 @@ float CalibrationNtupleMakerTool::DetectorEta(const xAOD::Jet* jet) {
     
     const xAOD::TrackCaloCluster* tcc = static_cast<const xAOD::TrackCaloCluster*>(*link);
     
-    static const SG::AuxElement::Accessor< float > acc_detEta( "DetectorEta" );
+    static const SG::Accessor< float > acc_detEta( "DetectorEta" );
     float det_eta = tcc->eta();
     
     if (acc_detEta.isAvailable(*tcc)) {

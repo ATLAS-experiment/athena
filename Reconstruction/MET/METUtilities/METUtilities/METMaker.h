@@ -147,7 +147,7 @@ namespace met {
     SG::ReadHandleKey<xAOD::VertexContainer>  m_PVkey;
 
     // configurable accessors
-    std::unique_ptr<SG::AuxElement::ConstAccessor<char > > m_acc_jetRejectionDec;
+    std::unique_ptr<SG::ConstAccessor<char > > m_acc_jetRejectionDec;
 
     // pT threshold for suppressing warnings of objects missing in association map
     float m_missObjWarningPtThreshold;

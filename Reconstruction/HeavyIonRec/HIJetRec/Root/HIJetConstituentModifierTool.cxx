@@ -37,9 +37,9 @@ int HIJetConstituentModifierTool::modifyJet(xAOD::Jet& jet) const {
     }
 
     /// The accessor for the cluster element links
-   static const SG::AuxElement::Accessor< std::vector< ElementLink< xAOD::IParticleContainer > > >
+   static const SG::Accessor< std::vector< ElementLink< xAOD::IParticleContainer > > >
      constituentAcc( "constituentLinks" );
-   static const SG::AuxElement::Accessor< std::vector< float> >
+   static const SG::Accessor< std::vector< float> >
      constituentWeightAcc( "constituentWeights" );
 
    if( constituentAcc.isAvailable(jet) ) constituentAcc( jet ).resize(0);

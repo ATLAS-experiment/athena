@@ -59,7 +59,7 @@ namespace BJT{
     for(const xAOD::Jet* jet : jets){
 
       /// Get truth label
-      static const SG::AuxElement::ConstAccessor<int> truth_label_acc(m_truthLabelName);
+      static const SG::ConstAccessor<int> truth_label_acc(m_truthLabelName);
       int truth_label = truth_label_acc(*jet);
 
       /// get tagger decision

@@ -21,7 +21,7 @@
 #include "xAODJet/JetContainer.h" //ToolHandle template param
 #include "xAODTracking/Vertex.h" //typedef for Vertex
 #include "xAODTracking/VertexContainer.h" //typedef for Vertex
-#include "AthContainers/AuxElement.h" //SG::AuxElement::Decorator
+#include "AthContainers/AuxElement.h" //SG::Decorator
 #include "TLorentzVector.h" //member
 #include <deque>
 #include <vector>
@@ -101,17 +101,17 @@ private:
     double chi2{};
   }; // end WrkVrt
 
-  SG::AuxElement::Decorator<float>  m_deco_mass;
-  SG::AuxElement::Decorator<float>  m_deco_pt;
-  SG::AuxElement::Decorator<float>  m_deco_charge;
-  SG::AuxElement::Decorator<float>  m_deco_vPos;
-  SG::AuxElement::Decorator<float>  m_deco_lxy;
-  SG::AuxElement::Decorator<float>  m_deco_sig3D;
-  SG::AuxElement::Decorator<float>  m_deco_deltaR;
-  SG::AuxElement::Decorator<float>  m_deco_ntrk;
-  SG::AuxElement::Decorator<float>  m_deco_lxyz;
-  SG::AuxElement::Decorator<float>  m_deco_eFrac;
-  SG::AuxElement::Decorator<float>  m_deco_nHFTracks;
+  SG::Decorator<float>  m_deco_mass;
+  SG::Decorator<float>  m_deco_pt;
+  SG::Decorator<float>  m_deco_charge;
+  SG::Decorator<float>  m_deco_vPos;
+  SG::Decorator<float>  m_deco_lxy;
+  SG::Decorator<float>  m_deco_sig3D;
+  SG::Decorator<float>  m_deco_deltaR;
+  SG::Decorator<float>  m_deco_ntrk;
+  SG::Decorator<float>  m_deco_lxyz;
+  SG::Decorator<float>  m_deco_eFrac;
+  SG::Decorator<float>  m_deco_nHFTracks;
   
   StringProperty    m_gnnModel{this, "GNNModel", "GN2v01", "GNN model being used" };
   StringProperty    m_jetCollection{this, "JetCollection", "AntiKt4EMPFlowJets", "Jet Collection being used" };

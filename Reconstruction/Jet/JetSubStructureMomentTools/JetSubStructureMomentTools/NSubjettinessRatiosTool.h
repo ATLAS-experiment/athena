@@ -69,85 +69,85 @@ struct NSubjettinessRatiosTool::moments_t {
   float alpha;
 
   /// NSubjettiness accessors
-  std::unique_ptr< SG::AuxElement::ConstAccessor<float> > acc_Tau1;
-  std::unique_ptr< SG::AuxElement::ConstAccessor<float> > acc_Tau2;
-  std::unique_ptr< SG::AuxElement::ConstAccessor<float> > acc_Tau3;
-  std::unique_ptr< SG::AuxElement::ConstAccessor<float> > acc_Tau4;
+  std::unique_ptr< SG::ConstAccessor<float> > acc_Tau1;
+  std::unique_ptr< SG::ConstAccessor<float> > acc_Tau2;
+  std::unique_ptr< SG::ConstAccessor<float> > acc_Tau3;
+  std::unique_ptr< SG::ConstAccessor<float> > acc_Tau4;
 
   /// NSubjettiness ungroomed accessors
-  std::unique_ptr< SG::AuxElement::ConstAccessor<float> > acc_Tau2_ungroomed;
-  std::unique_ptr< SG::AuxElement::ConstAccessor<float> > acc_Tau3_ungroomed;
-  std::unique_ptr< SG::AuxElement::ConstAccessor<float> > acc_Tau4_ungroomed;
+  std::unique_ptr< SG::ConstAccessor<float> > acc_Tau2_ungroomed;
+  std::unique_ptr< SG::ConstAccessor<float> > acc_Tau3_ungroomed;
+  std::unique_ptr< SG::ConstAccessor<float> > acc_Tau4_ungroomed;
 
   /// WTA NSubjettiness accessors
-  std::unique_ptr< SG::AuxElement::ConstAccessor<float> > acc_Tau1_wta;
-  std::unique_ptr< SG::AuxElement::ConstAccessor<float> > acc_Tau2_wta;
-  std::unique_ptr< SG::AuxElement::ConstAccessor<float> > acc_Tau3_wta;
-  std::unique_ptr< SG::AuxElement::ConstAccessor<float> > acc_Tau4_wta;
+  std::unique_ptr< SG::ConstAccessor<float> > acc_Tau1_wta;
+  std::unique_ptr< SG::ConstAccessor<float> > acc_Tau2_wta;
+  std::unique_ptr< SG::ConstAccessor<float> > acc_Tau3_wta;
+  std::unique_ptr< SG::ConstAccessor<float> > acc_Tau4_wta;
 
   /// WTA NSubjettiness ungroomed accessors
-  std::unique_ptr< SG::AuxElement::ConstAccessor<float> > acc_Tau2_wta_ungroomed;
-  std::unique_ptr< SG::AuxElement::ConstAccessor<float> > acc_Tau3_wta_ungroomed;
-  std::unique_ptr< SG::AuxElement::ConstAccessor<float> > acc_Tau4_wta_ungroomed;
+  std::unique_ptr< SG::ConstAccessor<float> > acc_Tau2_wta_ungroomed;
+  std::unique_ptr< SG::ConstAccessor<float> > acc_Tau3_wta_ungroomed;
+  std::unique_ptr< SG::ConstAccessor<float> > acc_Tau4_wta_ungroomed;
 
   /// NSubjettiness Ratios decorators
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_Tau21;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_Tau32;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_Tau42;
+  std::unique_ptr< SG::Decorator<float> > dec_Tau21;
+  std::unique_ptr< SG::Decorator<float> > dec_Tau32;
+  std::unique_ptr< SG::Decorator<float> > dec_Tau42;
 
   /// Dichroic NSubjettiness Ratios decorators
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_Tau21_dichroic;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_Tau32_dichroic;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_Tau42_dichroic;
+  std::unique_ptr< SG::Decorator<float> > dec_Tau21_dichroic;
+  std::unique_ptr< SG::Decorator<float> > dec_Tau32_dichroic;
+  std::unique_ptr< SG::Decorator<float> > dec_Tau42_dichroic;
 
   /// WTA NSubjettiness Ratios decorators
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_Tau21_wta;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_Tau32_wta;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_Tau42_wta;
+  std::unique_ptr< SG::Decorator<float> > dec_Tau21_wta;
+  std::unique_ptr< SG::Decorator<float> > dec_Tau32_wta;
+  std::unique_ptr< SG::Decorator<float> > dec_Tau42_wta;
 
   /// WTA Dichroic NSubjettiness Ratios decorators
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_Tau21_wta_dichroic;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_Tau32_wta_dichroic;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_Tau42_wta_dichroic;
+  std::unique_ptr< SG::Decorator<float> > dec_Tau21_wta_dichroic;
+  std::unique_ptr< SG::Decorator<float> > dec_Tau32_wta_dichroic;
+  std::unique_ptr< SG::Decorator<float> > dec_Tau42_wta_dichroic;
 
   moments_t (float Alpha, const std::string& Prefix)
     : prefix (Prefix),
       suffix (GetAlphaSuffix(Alpha)),
       alpha (Alpha),
 
-      acc_Tau1 (std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"Tau1"+suffix)),
-      acc_Tau2 (std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"Tau2"+suffix)),
-      acc_Tau3 (std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"Tau3"+suffix)),
-      acc_Tau4 (std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"Tau4"+suffix)),
+      acc_Tau1 (std::make_unique< SG::ConstAccessor<float> >(prefix+"Tau1"+suffix)),
+      acc_Tau2 (std::make_unique< SG::ConstAccessor<float> >(prefix+"Tau2"+suffix)),
+      acc_Tau3 (std::make_unique< SG::ConstAccessor<float> >(prefix+"Tau3"+suffix)),
+      acc_Tau4 (std::make_unique< SG::ConstAccessor<float> >(prefix+"Tau4"+suffix)),
 
-      acc_Tau2_ungroomed (std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"Tau2_ungroomed"+suffix)),
-      acc_Tau3_ungroomed (std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"Tau3_ungroomed"+suffix)),
-      acc_Tau4_ungroomed (std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"Tau4_ungroomed"+suffix)),
+      acc_Tau2_ungroomed (std::make_unique< SG::ConstAccessor<float> >(prefix+"Tau2_ungroomed"+suffix)),
+      acc_Tau3_ungroomed (std::make_unique< SG::ConstAccessor<float> >(prefix+"Tau3_ungroomed"+suffix)),
+      acc_Tau4_ungroomed (std::make_unique< SG::ConstAccessor<float> >(prefix+"Tau4_ungroomed"+suffix)),
 
-      acc_Tau1_wta (std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"Tau1_wta"+suffix)),
-      acc_Tau2_wta (std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"Tau2_wta"+suffix)),
-      acc_Tau3_wta (std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"Tau3_wta"+suffix)),
-      acc_Tau4_wta (std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"Tau4_wta"+suffix)),
+      acc_Tau1_wta (std::make_unique< SG::ConstAccessor<float> >(prefix+"Tau1_wta"+suffix)),
+      acc_Tau2_wta (std::make_unique< SG::ConstAccessor<float> >(prefix+"Tau2_wta"+suffix)),
+      acc_Tau3_wta (std::make_unique< SG::ConstAccessor<float> >(prefix+"Tau3_wta"+suffix)),
+      acc_Tau4_wta (std::make_unique< SG::ConstAccessor<float> >(prefix+"Tau4_wta"+suffix)),
 
-      acc_Tau2_wta_ungroomed (std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"Tau2_wta_ungroomed"+suffix)),
-      acc_Tau3_wta_ungroomed (std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"Tau3_wta_ungroomed"+suffix)),
-      acc_Tau4_wta_ungroomed (std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"Tau4_wta_ungroomed"+suffix)),
+      acc_Tau2_wta_ungroomed (std::make_unique< SG::ConstAccessor<float> >(prefix+"Tau2_wta_ungroomed"+suffix)),
+      acc_Tau3_wta_ungroomed (std::make_unique< SG::ConstAccessor<float> >(prefix+"Tau3_wta_ungroomed"+suffix)),
+      acc_Tau4_wta_ungroomed (std::make_unique< SG::ConstAccessor<float> >(prefix+"Tau4_wta_ungroomed"+suffix)),
 
-      dec_Tau21 (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"Tau21"+suffix)),
-      dec_Tau32 (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"Tau32"+suffix)),
-      dec_Tau42 (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"Tau42"+suffix)),
+      dec_Tau21 (std::make_unique< SG::Decorator<float> >(prefix+"Tau21"+suffix)),
+      dec_Tau32 (std::make_unique< SG::Decorator<float> >(prefix+"Tau32"+suffix)),
+      dec_Tau42 (std::make_unique< SG::Decorator<float> >(prefix+"Tau42"+suffix)),
 
-      dec_Tau21_dichroic (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"Tau21_dichroic"+suffix)),
-      dec_Tau32_dichroic (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"Tau32_dichroic"+suffix)),
-      dec_Tau42_dichroic (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"Tau42_dichroic"+suffix)),
+      dec_Tau21_dichroic (std::make_unique< SG::Decorator<float> >(prefix+"Tau21_dichroic"+suffix)),
+      dec_Tau32_dichroic (std::make_unique< SG::Decorator<float> >(prefix+"Tau32_dichroic"+suffix)),
+      dec_Tau42_dichroic (std::make_unique< SG::Decorator<float> >(prefix+"Tau42_dichroic"+suffix)),
 
-      dec_Tau21_wta (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"Tau21_wta"+suffix)),
-      dec_Tau32_wta (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"Tau32_wta"+suffix)),
-      dec_Tau42_wta (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"Tau42_wta"+suffix)),
+      dec_Tau21_wta (std::make_unique< SG::Decorator<float> >(prefix+"Tau21_wta"+suffix)),
+      dec_Tau32_wta (std::make_unique< SG::Decorator<float> >(prefix+"Tau32_wta"+suffix)),
+      dec_Tau42_wta (std::make_unique< SG::Decorator<float> >(prefix+"Tau42_wta"+suffix)),
 
-      dec_Tau21_wta_dichroic (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"Tau21_wta_dichroic"+suffix)),
-      dec_Tau32_wta_dichroic (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"Tau32_wta_dichroic"+suffix)),
-      dec_Tau42_wta_dichroic (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"Tau42_wta_dichroic"+suffix))
+      dec_Tau21_wta_dichroic (std::make_unique< SG::Decorator<float> >(prefix+"Tau21_wta_dichroic"+suffix)),
+      dec_Tau32_wta_dichroic (std::make_unique< SG::Decorator<float> >(prefix+"Tau32_wta_dichroic"+suffix)),
+      dec_Tau42_wta_dichroic (std::make_unique< SG::Decorator<float> >(prefix+"Tau42_wta_dichroic"+suffix))
   {
   }
 

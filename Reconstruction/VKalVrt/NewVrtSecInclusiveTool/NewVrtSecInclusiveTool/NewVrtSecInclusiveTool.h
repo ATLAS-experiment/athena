@@ -202,17 +202,17 @@ namespace Rec {
       double m_massLam{};
       std::string m_instanceName;
 
-      SG::AuxElement::Decorator<char> m_is_selected;
-      SG::AuxElement::Decorator<char> m_is_svtrk_final;
-      SG::AuxElement::Decorator<float> m_pt_wrtSV;
-      SG::AuxElement::Decorator<float> m_eta_wrtSV;
-      SG::AuxElement::Decorator<float> m_phi_wrtSV;
-      SG::AuxElement::Decorator<float> m_d0_wrtSV;
-      SG::AuxElement::Decorator<float> m_z0_wrtSV;
-      SG::AuxElement::Decorator<float> m_errP_wrtSV;
-      SG::AuxElement::Decorator<float> m_errd0_wrtSV;
-      SG::AuxElement::Decorator<float> m_errz0_wrtSV;
-      SG::AuxElement::Decorator<float> m_chi2_toSV;
+      SG::Decorator<char> m_is_selected;
+      SG::Decorator<char> m_is_svtrk_final;
+      SG::Decorator<float> m_pt_wrtSV;
+      SG::Decorator<float> m_eta_wrtSV;
+      SG::Decorator<float> m_phi_wrtSV;
+      SG::Decorator<float> m_d0_wrtSV;
+      SG::Decorator<float> m_z0_wrtSV;
+      SG::Decorator<float> m_errP_wrtSV;
+      SG::Decorator<float> m_errd0_wrtSV;
+      SG::Decorator<float> m_errz0_wrtSV;
+      SG::Decorator<float> m_chi2_toSV;
 
 //=======================================================================================
 // Functions and structure below are for algorithm development, debugging and calibration

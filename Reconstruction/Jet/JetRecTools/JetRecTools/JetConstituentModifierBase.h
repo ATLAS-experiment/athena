@@ -46,11 +46,11 @@ protected:
   // Setter for e/pt, and optionally a weight
   // We pass the weight accessor so that the child can determine the name.
   StatusCode setEnergyPt(xAOD::IParticle* obj, float e, float pt,
-			 const SG::AuxElement::Accessor<float>* weightAcc=nullptr) const;
+			 const SG::Accessor<float>* weightAcc=nullptr) const;
   // Setter for full four-vector, and optionally a weight
   // We pass the weight accessor so that the child can determine the name.
   StatusCode setP4(xAOD::IParticle* obj, const xAOD::JetFourMom_t& p4,
-		   const SG::AuxElement::Accessor<float>* weightAcc=nullptr) const;
+		   const SG::Accessor<float>* weightAcc=nullptr) const;
 
   // We need to know the output type so that we can set the p4 appropriately,
   // because IParticle does not specify the p4 encoding.

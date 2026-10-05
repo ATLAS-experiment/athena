@@ -36,7 +36,7 @@ class JetAttributeHisto : public JetHistoBase {
   ASG_TOOL_CLASS0(JetAttributeHisto);
   
 public:
-  //typedef SG::AuxElement::Accessor< T > accessor_t;
+  //typedef SG::Accessor< T > accessor_t;
   
   JetAttributeHisto(const std::string &t);
   virtual ~JetAttributeHisto();

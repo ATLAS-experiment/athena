@@ -29,7 +29,7 @@ StatusCode JetClustererByVertex::initialize()
 {
   ATH_CHECK( JetClusterer::initialize() ); 
   ATH_CHECK(m_vertexContainer_key.initialize());
-  m_jetRankAccessor = SG::AuxElement::Accessor<int>(m_jetRank);
+  m_jetRankAccessor = SG::Accessor<int>(m_jetRank);
 
   return StatusCode::SUCCESS;
 }

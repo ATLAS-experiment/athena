@@ -65,7 +65,7 @@ double PtAbsMassUncertaintyComponent::getUncertaintyImpl(const xAOD::Jet& jet, c
     if (!m_truthLabels.empty())
     {
         // Truth labels are specified, so we need to check if this jet is labelled appropriately or not
-        const SG::AuxElement::ConstAccessor<int> accTruthLabel(m_truthLabelName);
+        const SG::ConstAccessor<int> accTruthLabel(m_truthLabelName);
         if (!accTruthLabel.isAvailable(jet) || accTruthLabel(jet) == LargeRJetTruthLabel::UNKNOWN)
         {
             ATH_MSG_ERROR("Unable to retrieve the LargeRJetTruthLabel: " << m_truthLabelName << " from the jet.  Please use JetTruthLabelingTool before calling this function.");

@@ -100,7 +100,7 @@ template <typename T> class InputVariableAttribute : public InputVariable {
             } 
         }
     private:
-        SG::AuxElement::ConstAccessor<T> m_acc;
+        SG::ConstAccessor<T> m_acc;
 };
 } // namespace JetHelper
 

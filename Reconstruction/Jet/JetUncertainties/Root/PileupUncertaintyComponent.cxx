@@ -246,7 +246,7 @@ double PileupUncertaintyComponent::getUncertaintyImpl(const xAOD::Jet& jet, cons
 
 double PileupUncertaintyComponent::getPileupWeight(const xAOD::Jet& jet, const xAOD::EventInfo& eInfo, const PileupRefType refType) const
 {
-    static const SG::AuxElement::Accessor<float> accNPV("NPV");
+    static const SG::Accessor<float> accNPV("NPV");
 
     double weight;
     const float mu  = eInfo.averageInteractionsPerCrossing();

@@ -48,8 +48,8 @@ StatusCode ConstitTimeCutTool::process_impl(xAOD::IParticleContainer* cont) cons
   case xAOD::Type::CaloCluster:
     {
      xAOD::CaloClusterContainer* clusters = static_cast<xAOD::CaloClusterContainer*> (cont);
-     const static SG::AuxElement::ConstAccessor<float> acc_larq("AVG_LAR_Q");
-     const static SG::AuxElement::ConstAccessor<float> acc_clambda("CENTER_LAMBDA");
+     const static SG::ConstAccessor<float> acc_larq("AVG_LAR_Q");
+     const static SG::ConstAccessor<float> acc_clambda("CENTER_LAMBDA");
 
      for(xAOD::CaloCluster* cl : *clusters) {
         //quality is on [0,2^16-1] scale
@@ -88,9 +88,9 @@ StatusCode ConstitTimeCutTool::process_impl(xAOD::IParticleContainer* cont) cons
       }
       for(xAOD::FlowElement* fe : *fes){
         if(!fe->isCharged() || m_applyToChargedPFO){
-          const static SG::AuxElement::ConstAccessor<float> acc_timing("TIMING");
-          const static SG::AuxElement::ConstAccessor<float> acc_larq("AVG_LAR_Q");
-          const static SG::AuxElement::ConstAccessor<float> acc_clambda("CENTER_LAMBDA");
+          const static SG::ConstAccessor<float> acc_timing("TIMING");
+          const static SG::ConstAccessor<float> acc_larq("AVG_LAR_Q");
+          const static SG::ConstAccessor<float> acc_clambda("CENTER_LAMBDA");
           float time = acc_timing(*fe);
           float quality = acc_larq(*fe);
           float lambda_center = acc_clambda(*fe);

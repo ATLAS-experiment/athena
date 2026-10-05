@@ -61,14 +61,14 @@ namespace met {
   using xAOD::TrackParticle;
 
   using iplink_t = ElementLink<xAOD::IParticleContainer>;
-  static const SG::AuxElement::ConstAccessor< iplink_t  > acc_originalObject("originalObjectLink");
-  static const SG::AuxElement::ConstAccessor< iplink_t  > acc_nominalObject("nominalObjectLink");
-  static const SG::AuxElement::ConstAccessor< std::vector<iplink_t > > acc_ghostMuons("GhostMuon");
+  static const SG::ConstAccessor< iplink_t  > acc_originalObject("originalObjectLink");
+  static const SG::ConstAccessor< iplink_t  > acc_nominalObject("nominalObjectLink");
+  static const SG::ConstAccessor< std::vector<iplink_t > > acc_ghostMuons("GhostMuon");
 
-  static const SG::AuxElement::ConstAccessor<float> acc_Eloss("EnergyLoss");
+  static const SG::ConstAccessor<float> acc_Eloss("EnergyLoss");
 
-  static const SG::AuxElement::Accessor< std::vector<iplink_t> > dec_constitObjLinks("ConstitObjectLinks");
-  static const SG::AuxElement::Accessor< std::vector<float> > dec_constitObjWeights("ConstitObjectWeights");
+  static const SG::Accessor< std::vector<iplink_t> > dec_constitObjLinks("ConstitObjectLinks");
+  static const SG::Accessor< std::vector<float> > dec_constitObjWeights("ConstitObjectWeights");
 
   ///////////////////////////////////////////////////////////////////
   // Public methods:
@@ -656,7 +656,7 @@ namespace met {
       ATH_MSG_WARNING("Neither soft cluster nor soft track term has been supplied!");
       return StatusCode::SUCCESS;
     }
-    static const SG::AuxElement::ConstAccessor<std::vector<ElementLink<IParticleContainer> > > acc_softConst("softConstituents");
+    static const SG::ConstAccessor<std::vector<ElementLink<IParticleContainer> > > acc_softConst("softConstituents");
     std::optional<columnar::MetHelpers::ObjectWeightHandle<columnar::MutableMetDef,columnar::JetDef>> metSoftClusLinks;
     if(metSoftClus) {
       metSoftClusLinks.emplace(*this,m_jetOutputMetWeightDecSoft,metSoftClus.value(),jets);

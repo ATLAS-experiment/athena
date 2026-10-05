@@ -52,14 +52,14 @@ namespace TCCHelpers {
     virtual void processTrk(const xAOD::TrackParticle* trk) = 0;
     
     virtual void combinedUFOLoop(const TrackCaloClusterInfo *tccInfo, const xAOD::FlowElementContainer* pfos){
-      SG::AuxElement::ConstAccessor<ElementLink<xAOD::IParticleContainer> > orig_pfo(m_orig_pfoK);
-      SG::AuxElement::ConstAccessor< std::vector<ElementLink<xAOD::CaloClusterContainer> > > clusterLinks(m_clustersLinkK);
+      SG::ConstAccessor<ElementLink<xAOD::IParticleContainer> > orig_pfo(m_orig_pfoK);
+      SG::ConstAccessor< std::vector<ElementLink<xAOD::CaloClusterContainer> > > clusterLinks(m_clustersLinkK);
       
       
       
       // For performance reasons, we create a map<track, bool> before looping on the tracks.
       std::map<const xAOD::TrackParticle*, bool> isIsolatedMatchedTrack;
-      static const SG::AuxElement::ConstAccessor<int> acc_isInDenseEnvironment("IsInDenseEnvironment");
+      static const SG::ConstAccessor<int> acc_isInDenseEnvironment("IsInDenseEnvironment");
       for(const xAOD::FlowElement* pfo: *pfos ){
 	if( ! pfo->isCharged() ) continue;
         	

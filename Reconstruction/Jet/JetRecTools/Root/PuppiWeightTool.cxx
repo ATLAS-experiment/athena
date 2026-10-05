@@ -76,9 +76,9 @@ StatusCode PuppiWeightTool::process_impl(xAOD::IParticleContainer* cont) const {
 
 StatusCode PuppiWeightTool::applyPuppiWeights(xAOD::PFOContainer* cont) const{
 
-  const static SG::AuxElement::Accessor<bool> PVMatchedAcc("matchedToPV");
-  const static SG::AuxElement::Accessor<double> alphaAcc("PUPPI_alpha");
-  const static SG::AuxElement::Accessor<double> weightAcc("PUPPI_weight");
+  const static SG::Accessor<bool> PVMatchedAcc("matchedToPV");
+  const static SG::Accessor<double> alphaAcc("PUPPI_alpha");
+  const static SG::Accessor<double> weightAcc("PUPPI_weight");
 
   std::vector<fastjet::PseudoJet> chargedHSVector;
   std::vector<fastjet::PseudoJet> chargedPUVector;
@@ -157,9 +157,9 @@ StatusCode PuppiWeightTool::applyPuppiWeights(xAOD::PFOContainer* cont) const{
 
 StatusCode PuppiWeightTool::applyPuppiWeights(xAOD::FlowElementContainer* cont) const{
 
-  const static SG::AuxElement::Accessor<bool> PVMatchedAcc("matchedToPV");
-  const static SG::AuxElement::Accessor<double> alphaAcc("PUPPI_alpha");
-  const static SG::AuxElement::Accessor<double> weightAcc("PUPPI_weight");
+  const static SG::Accessor<bool> PVMatchedAcc("matchedToPV");
+  const static SG::Accessor<double> alphaAcc("PUPPI_alpha");
+  const static SG::Accessor<double> weightAcc("PUPPI_weight");
 
   std::vector<fastjet::PseudoJet> chargedHSVector;
   std::vector<fastjet::PseudoJet> chargedPUVector;

@@ -72,17 +72,17 @@ NewVrtSecInclusiveTool::NewVrtSecInclusiveTool(const std::string& type,
      ATH_CHECK( m_ini_v2trselector.retrieve() );
      ATH_CHECK( m_fin_v2trselector.retrieve() );
 
-     m_is_selected = SG::AuxElement::Decorator<char>("is_selected"+m_augString);
-     m_is_svtrk_final = SG::AuxElement::Decorator<char>("is_svtrk_final"+m_augString);
-     m_pt_wrtSV = SG::AuxElement::Decorator<float>("pt_wrtSV"+m_augString);
-     m_eta_wrtSV = SG::AuxElement::Decorator<float>("eta_wrtSV"+m_augString);
-     m_phi_wrtSV = SG::AuxElement::Decorator<float>("phi_wrtSV"+m_augString);
-     m_d0_wrtSV = SG::AuxElement::Decorator<float>("d0_wrtSV"+m_augString);
-     m_z0_wrtSV = SG::AuxElement::Decorator<float>("z0_wrtSV"+m_augString);
-     m_errP_wrtSV = SG::AuxElement::Decorator<float>("errP_wrtSV"+m_augString);
-     m_errd0_wrtSV = SG::AuxElement::Decorator<float>("errd0_wrtSV"+m_augString);
-     m_errz0_wrtSV = SG::AuxElement::Decorator<float>("errz0_wrtSV"+m_augString);
-     m_chi2_toSV = SG::AuxElement::Decorator<float>("chi2_toSV"+m_augString);
+     m_is_selected = SG::Decorator<char>("is_selected"+m_augString);
+     m_is_svtrk_final = SG::Decorator<char>("is_svtrk_final"+m_augString);
+     m_pt_wrtSV = SG::Decorator<float>("pt_wrtSV"+m_augString);
+     m_eta_wrtSV = SG::Decorator<float>("eta_wrtSV"+m_augString);
+     m_phi_wrtSV = SG::Decorator<float>("phi_wrtSV"+m_augString);
+     m_d0_wrtSV = SG::Decorator<float>("d0_wrtSV"+m_augString);
+     m_z0_wrtSV = SG::Decorator<float>("z0_wrtSV"+m_augString);
+     m_errP_wrtSV = SG::Decorator<float>("errP_wrtSV"+m_augString);
+     m_errd0_wrtSV = SG::Decorator<float>("errd0_wrtSV"+m_augString);
+     m_errz0_wrtSV = SG::Decorator<float>("errz0_wrtSV"+m_augString);
+     m_chi2_toSV = SG::Decorator<float>("chi2_toSV"+m_augString);
 
 //------------------------------------------       
 //

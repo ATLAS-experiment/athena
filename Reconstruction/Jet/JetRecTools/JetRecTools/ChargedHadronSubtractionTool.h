@@ -65,8 +65,8 @@ class ChargedHadronSubtractionTool : public JetConstituentModifierBase{
 
 template <class T, class U> StatusCode ChargedHadronSubtractionTool::matchToPrimaryVertex(T& cont) const
 {
-  const static SG::AuxElement::Accessor<char> PVMatchedAcc("matchedToPV");
-  const static SG::AuxElement::Accessor<char> PUsidebandMatchedAcc("matchedToPUsideband");
+  const static SG::Accessor<char> PVMatchedAcc("matchedToPV");
+  const static SG::Accessor<char> PUsidebandMatchedAcc("matchedToPUsideband");
 
   // Use only one of TVA or PV
   const jet::TrackVertexAssociation *trkVtxAssoc = nullptr;
@@ -183,8 +183,8 @@ template <class T, class U> StatusCode ChargedHadronSubtractionTool::matchToPrim
 
 template <class T, class U> StatusCode ChargedHadronSubtractionTool::matchByPrimaryVertex(T& cont) const
 {
-  const static SG::AuxElement::Accessor<std::vector<unsigned>> matchingPVs("MatchingPVs");
-  const static SG::AuxElement::Accessor<std::vector<unsigned>> matchingPUSBs("MatchingPUsidebands");
+  const static SG::Accessor<std::vector<unsigned>> matchingPVs("MatchingPVs");
+  const static SG::Accessor<std::vector<unsigned>> matchingPUSBs("MatchingPUsidebands");
 
   // Retrieve Primary Vertices
   auto handle = SG::makeHandle(m_vertexContainer_key);

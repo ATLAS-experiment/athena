@@ -484,10 +484,10 @@ double JSSWTopTaggerANN::getScore( const xAOD::Jet& jet ) const {
 
     /// Check that input variables are valid
     bool validVars = true;
-    static const SG::AuxElement::ConstAccessor<float> Tau21WTA("Tau21_wta");
+    static const SG::ConstAccessor<float> Tau21WTA("Tau21_wta");
     if ( Tau21WTA(jet) < 0.0 ) validVars = false;
     if ( m_tagClass == TAGCLASS::TopQuark ) {
-      static const SG::AuxElement::ConstAccessor<float> Tau32WTA("Tau32_wta");
+      static const SG::ConstAccessor<float> Tau32WTA("Tau32_wta");
       if ( Tau32WTA(jet) < 0.0 ) validVars = false;
     }
 
@@ -525,13 +525,13 @@ std::map<std::string, std::map<std::string, double>> JSSWTopTaggerANN::getJetPro
   ANN_inputValues["Split12"] = readSplit12(jet);
 
   /// Energy Correlation Functions
-  static const SG::AuxElement::ConstAccessor<float> C2("C2");
-  static const SG::AuxElement::ConstAccessor<float> D2("D2");
+  static const SG::ConstAccessor<float> C2("C2");
+  static const SG::ConstAccessor<float> D2("D2");
   ANN_inputValues["C2"] = C2(jet);
   ANN_inputValues["D2"] = D2(jet);
 
   /// Tau21 WTA
-  static const SG::AuxElement::ConstAccessor<float> Tau21WTA("Tau21_wta");
+  static const SG::ConstAccessor<float> Tau21WTA("Tau21_wta");
   ANN_inputValues["Tau21_wta"] = Tau21WTA(jet);
 
   if ( m_tagClass == TAGCLASS::WBoson ) {
@@ -577,7 +577,7 @@ std::map<std::string, std::map<std::string, double>> JSSWTopTaggerANN::getJetPro
     ANN_inputValues["Split23"] = readSplit23(jet);
 
     /// e3 := normalized ECF3/ECF1**3
-    static const SG::AuxElement::ConstAccessor<float> e3("e3");
+    static const SG::ConstAccessor<float> e3("e3");
     ANN_inputValues["e3"] = e3(jet);
 
     /// N-subjettiness
@@ -585,7 +585,7 @@ std::map<std::string, std::map<std::string, double>> JSSWTopTaggerANN::getJetPro
     ANN_inputValues["Tau2_wta"] = readTau2WTA(jet);
     ANN_inputValues["Tau3_wta"] = readTau3WTA(jet);
 
-    static const SG::AuxElement::ConstAccessor<float> Tau32WTA("Tau32_wta");
+    static const SG::ConstAccessor<float> Tau32WTA("Tau32_wta");
     ANN_inputValues["Tau32_wta"] = Tau32WTA(jet);
 
     /// Qw observable for top tagging

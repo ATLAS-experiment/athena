@@ -19,11 +19,11 @@ namespace egAmbLinkHelper{
     ) {
       /// Needs the same logic as the ambiguity after building the objects (make
       /// sure they are all valid)
-      static const SG::AuxElement::Accessor<
+      static const SG::Accessor<
         std::vector<ElementLink<xAOD::CaloClusterContainer>>>
         caloClusterLinks("constituentClusterLinks");
   
-      static const SG::AuxElement::Accessor<ElementLink<xAOD::EgammaContainer>>
+      static const SG::Accessor<ElementLink<xAOD::EgammaContainer>>
         ELink("ambiguityLink");
   
       ElementLink<xAOD::EgammaContainer> dummylink;

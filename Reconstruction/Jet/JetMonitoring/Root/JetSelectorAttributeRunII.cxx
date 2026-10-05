@@ -11,14 +11,14 @@ namespace {
   struct ValueRetriever : public JetSelectorAttributeRunII::SelValueRetriever {
     ValueRetriever(const std::string &n) : acc(n) {}
     virtual float value(const xAOD::Jet& j) const override { return acc(j);}
-    SG::AuxElement::Accessor<T> acc;
+    SG::Accessor<T> acc;
   };
 
   template <class T>
   struct VecValueRetriever : public JetSelectorAttributeRunII::SelValueRetriever {
     VecValueRetriever(const std::string &n, int ind) : acc(n), index(ind) {}
     virtual float value(const xAOD::Jet& j) const override { return acc(j)[index];}
-    SG::AuxElement::Accessor<std::vector<T> > acc;
+    SG::Accessor<std::vector<T> > acc;
     int index;
   };
 

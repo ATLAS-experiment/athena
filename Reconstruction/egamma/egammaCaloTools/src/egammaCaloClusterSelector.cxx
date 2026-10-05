@@ -85,7 +85,7 @@ bool egammaCaloClusterSelector::passSelection(
   }
   // use the egamma definition of EMFrac
   // (includes presampler and TileGap3/E4, helps with eff in the crack)
-  static const SG::AuxElement::ConstAccessor<float> acc("EMFraction");
+  static const SG::ConstAccessor<float> acc("EMFraction");
   const double emFrac = acc.isAvailable(*cluster) ? acc(*cluster) : 0.;
   const double EMEnergy = cluster->e() * emFrac;
   double EMEt = EMEnergy / std::cosh(eta2);

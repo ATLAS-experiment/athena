@@ -306,10 +306,10 @@ StatusCode JetPFlowSelectionAlg::execute(const EventContext& ctx) const {
 
         float layerEnergy_TileBar0 = castCluster_charged->eSample(xAOD::CaloCluster::CaloSample::TileBar0);
         float layerEnergy_TileExt0 = castCluster_charged->eSample(xAOD::CaloCluster::CaloSample::TileExt0);
-        const static SG::AuxElement::Accessor<float> accFloatTIle0E("LAYERENERGY_TILE0");
+        const static SG::Accessor<float> accFloatTIle0E("LAYERENERGY_TILE0");
         accFloatTIle0E(*newFE) = layerEnergy_TileBar0 + layerEnergy_TileExt0;
 
-        const static SG::AuxElement::Accessor<float> accFloatTiming("TIMING");
+        const static SG::Accessor<float> accFloatTiming("TIMING");
         accFloatTiming(*newFE) = castCluster_charged->time();
       }
         

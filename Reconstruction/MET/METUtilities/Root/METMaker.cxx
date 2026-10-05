@@ -61,22 +61,22 @@ namespace met {
   using xAOD::TrackParticle;
 
   using iplink_t = ElementLink<xAOD::IParticleContainer>;
-  static const SG::AuxElement::ConstAccessor< iplink_t  > acc_originalObject("originalObjectLink");
-  static const SG::AuxElement::ConstAccessor< iplink_t  > acc_nominalObject("nominalObjectLink");
-  static const SG::AuxElement::ConstAccessor< std::vector<iplink_t > > acc_ghostMuons("GhostMuon");
-  static const SG::AuxElement::ConstAccessor< std::vector<iplink_t > > acc_ghostElecs("GhostElec");
+  static const SG::ConstAccessor< iplink_t  > acc_originalObject("originalObjectLink");
+  static const SG::ConstAccessor< iplink_t  > acc_nominalObject("nominalObjectLink");
+  static const SG::ConstAccessor< std::vector<iplink_t > > acc_ghostMuons("GhostMuon");
+  static const SG::ConstAccessor< std::vector<iplink_t > > acc_ghostElecs("GhostElec");
 
-  static const SG::AuxElement::ConstAccessor< std::vector<int> > acc_trkN("NumTrkPt500");
-  static const SG::AuxElement::ConstAccessor< std::vector<float> > acc_trksumpt("SumPtTrkPt500");
-  static const SG::AuxElement::ConstAccessor< std::vector<float> > acc_sampleE("EnergyPerSampling");
+  static const SG::ConstAccessor< std::vector<int> > acc_trkN("NumTrkPt500");
+  static const SG::ConstAccessor< std::vector<float> > acc_trksumpt("SumPtTrkPt500");
+  static const SG::ConstAccessor< std::vector<float> > acc_sampleE("EnergyPerSampling");
 
-  static const SG::AuxElement::ConstAccessor<float> acc_emf("EMFrac");
-  static const SG::AuxElement::ConstAccessor<float> acc_psf("PSFrac");
-  static const SG::AuxElement::ConstAccessor<float> acc_width("Width");
-  static const SG::AuxElement::ConstAccessor<float> acc_Eloss("EnergyLoss");
+  static const SG::ConstAccessor<float> acc_emf("EMFrac");
+  static const SG::ConstAccessor<float> acc_psf("PSFrac");
+  static const SG::ConstAccessor<float> acc_width("Width");
+  static const SG::ConstAccessor<float> acc_Eloss("EnergyLoss");
 
-  static const SG::AuxElement::Accessor< std::vector<iplink_t> > dec_constitObjLinks("ConstitObjectLinks");
-  static const SG::AuxElement::Accessor< std::vector<float> > dec_constitObjWeights("ConstitObjectWeights");
+  static const SG::Accessor< std::vector<iplink_t> > dec_constitObjLinks("ConstitObjectLinks");
+  static const SG::Accessor< std::vector<float> > dec_constitObjWeights("ConstitObjectWeights");
 
 
   ///////////////////////////////////////////////////////////////////
@@ -202,7 +202,7 @@ namespace met {
 
     // configurable accessors
     if (!m_jetRejectionDec.empty()) {
-      m_acc_jetRejectionDec = std::make_unique<SG::AuxElement::ConstAccessor<char>>(m_jetRejectionDec);
+      m_acc_jetRejectionDec = std::make_unique<SG::ConstAccessor<char>>(m_jetRejectionDec);
       ATH_MSG_INFO("Applying additional jet rejection criterium in MET calculation: " << m_jetRejectionDec);
     }
 
@@ -620,7 +620,7 @@ namespace met {
       ATH_MSG_WARNING("Neither soft cluster nor soft track term has been supplied!");
       return StatusCode::SUCCESS;
     }
-    static const SG::AuxElement::ConstAccessor<std::vector<ElementLink<IParticleContainer> > > acc_softConst("softConstituents");
+    static const SG::ConstAccessor<std::vector<ElementLink<IParticleContainer> > > acc_softConst("softConstituents");
     if(metSoftClus) {
       dec_constitObjLinks(*metSoftClus) = std::vector<iplink_t>(0);
       if(!coreSoftClus) {

@@ -533,9 +533,9 @@ namespace xAOD {
                                           derefMap_t& derefMap) const
   {
     /// get it from decoration
-    static const SG::AuxElement::ConstAccessor< char > Decorated("caloExt_Decorated");
-    static const SG::AuxElement::ConstAccessor< float > Eta("caloExt_eta");
-    static const SG::AuxElement::ConstAccessor< float > Phi("caloExt_phi");
+    static const SG::ConstAccessor< char > Decorated("caloExt_Decorated");
+    static const SG::ConstAccessor< float > Eta("caloExt_eta");
+    static const SG::ConstAccessor< float > Phi("caloExt_phi");
     if(Decorated.isAvailable(*tp) && Decorated(*tp)){
       eta = Eta(*tp);
       phi = Phi(*tp);

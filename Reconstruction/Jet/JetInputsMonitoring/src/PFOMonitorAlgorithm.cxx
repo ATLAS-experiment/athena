@@ -103,24 +103,24 @@ StatusCode PFOMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const 
     fill(neutralPFOs,nNuPFOs);    
 
     // Accessors for neutral PFO moments
-    const static SG::AuxElement::ConstAccessor<float> acc_SECOND_R("SECOND_R");
-    const static SG::AuxElement::ConstAccessor<float> acc_CENTER_LAMBDA("CENTER_LAMBDA");
-    const static SG::AuxElement::ConstAccessor<float> acc_ISOLATION("ISOLATION");
-    const static SG::AuxElement::ConstAccessor<float> acc_N_BAD_CELLS("N_BAD_CELLS");
-    const static SG::AuxElement::ConstAccessor<float> acc_ENG_BAD_CELLS("ENG_BAD_CELLS");
-    const static SG::AuxElement::ConstAccessor<float> acc_BADLARQ_FRAC("BADLARQ_FRAC");
-    const static SG::AuxElement::ConstAccessor<float> acc_ENG_POS("ENG_POS");
-    const static SG::AuxElement::ConstAccessor<float> acc_AVG_LAR_Q("AVG_LAR_Q");
-    const static SG::AuxElement::ConstAccessor<float> acc_AVG_TILE_Q("AVG_TILE_Q");
-    const static SG::AuxElement::ConstAccessor<float> acc_EM_PROBABILITY("EM_PROBABILITY");
-    const static SG::AuxElement::ConstAccessor<float> acc_SECOND_LAMBDA("SECOND_LAMBDA");
+    const static SG::ConstAccessor<float> acc_SECOND_R("SECOND_R");
+    const static SG::ConstAccessor<float> acc_CENTER_LAMBDA("CENTER_LAMBDA");
+    const static SG::ConstAccessor<float> acc_ISOLATION("ISOLATION");
+    const static SG::ConstAccessor<float> acc_N_BAD_CELLS("N_BAD_CELLS");
+    const static SG::ConstAccessor<float> acc_ENG_BAD_CELLS("ENG_BAD_CELLS");
+    const static SG::ConstAccessor<float> acc_BADLARQ_FRAC("BADLARQ_FRAC");
+    const static SG::ConstAccessor<float> acc_ENG_POS("ENG_POS");
+    const static SG::ConstAccessor<float> acc_AVG_LAR_Q("AVG_LAR_Q");
+    const static SG::ConstAccessor<float> acc_AVG_TILE_Q("AVG_TILE_Q");
+    const static SG::ConstAccessor<float> acc_EM_PROBABILITY("EM_PROBABILITY");
+    const static SG::ConstAccessor<float> acc_SECOND_LAMBDA("SECOND_LAMBDA");
     // Not currently filled in the xAOD
-    //const static SG::AuxElement::ConstAccessor<float> acc_SIGNIFICANCE("SIGNIFICANCE");
-    //const static SG::AuxElement::ConstAccessor<float> acc_ENG_FRAC_MAX("ENG_FRAC_MAX");
+    //const static SG::ConstAccessor<float> acc_SIGNIFICANCE("SIGNIFICANCE");
+    //const static SG::ConstAccessor<float> acc_ENG_FRAC_MAX("ENG_FRAC_MAX");
 
     // Accessors for charged PFO moments
-    const static SG::AuxElement::ConstAccessor<int> acc_IsInDenseEnvironment("IsInDenseEnvironment");
-    const static SG::AuxElement::ConstAccessor<float> acc_tracksExpectedEnergyDeposit("TracksExpectedEnergyDeposit");
+    const static SG::ConstAccessor<int> acc_IsInDenseEnvironment("IsInDenseEnvironment");
+    const static SG::ConstAccessor<float> acc_tracksExpectedEnergyDeposit("TracksExpectedEnergyDeposit");
 
     for (const auto pfo : *chpfos) {
       pT  = pfo->pt()/GeV;

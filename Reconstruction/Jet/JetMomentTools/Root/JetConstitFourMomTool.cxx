@@ -128,9 +128,9 @@ StatusCode JetConstitFourMomTool::modify(xAOD::JetContainer& jets) const {
 		   << ", eta: " << constitFourVecs[iScale].Eta()
 		   << ", phi: " << constitFourVecs[iScale].Phi());
       if(m_isDetectorEtaPhi[iScale]) {
-	const static SG::AuxElement::Accessor<float> acc_modEta("DetectorEta");
-	const static SG::AuxElement::Accessor<float> acc_modPhi("DetectorPhi");
-	const static SG::AuxElement::Accessor<float> acc_modY("DetectorY");
+	const static SG::Accessor<float> acc_modEta("DetectorEta");
+	const static SG::Accessor<float> acc_modPhi("DetectorPhi");
+	const static SG::Accessor<float> acc_modY("DetectorY");
 	acc_modEta(*jet) = constitFourVecs[iScale].Eta();
 	acc_modPhi(*jet) = constitFourVecs[iScale].Phi();
 	acc_modY(*jet) = constitFourVecs[iScale].Rapidity();
