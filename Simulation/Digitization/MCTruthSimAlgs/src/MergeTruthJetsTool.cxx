@@ -202,8 +202,8 @@ StatusCode MergeTruthJetsTool::processAllSubEvents(const EventContext& /*ctx*/)
 //use a float for timeOfBCID as Jet moments are stored as floats.
 double MergeTruthJetsTool::processJetContainer(const xAOD::JetContainer* inputJetContainer, xAOD::JetContainer *outputJetContainer, const double& ptCut, const float& timeOfBCID, int eventNumber)
 {
-  const static SG::AuxElement::Accessor< float > timingAccessor("Timing");
-  const static SG::AuxElement::Accessor< int > eventNumberAccessor("pileupEventNumber");
+  const static SG::Accessor< float > timingAccessor("Timing");
+  const static SG::Accessor< int > eventNumberAccessor("pileupEventNumber");
   double max_pT=-1.;
   for (const xAOD::Jet *origTruthJet : *inputJetContainer) {
     if (not origTruthJet) continue;

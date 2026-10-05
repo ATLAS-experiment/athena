@@ -29,7 +29,7 @@ JetRestrictedSumPtVertexWeightCalculator::initialize()
   ATH_CHECK(m_tracksInCone.retrieve());
 
   if(!m_plainSumPtKey.empty()) {
-    m_decPlainSumPt = std::make_unique<SG::AuxElement::Decorator<float> >(m_plainSumPtKey);
+    m_decPlainSumPt = std::make_unique<SG::Decorator<float> >(m_plainSumPtKey);
   }
   
   return StatusCode::SUCCESS;

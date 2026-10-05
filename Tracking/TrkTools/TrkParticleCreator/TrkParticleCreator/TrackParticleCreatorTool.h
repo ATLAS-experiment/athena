@@ -286,14 +286,14 @@ private:
 
   /** The pairs if enums  of an eProbability which is added as a decoration to
    * the track particle and the name of the decoration.*/
-  std::vector<std::pair<SG::AuxElement::Accessor<float>, Trk::eProbabilityType>>
+  std::vector<std::pair<SG::Accessor<float>, Trk::eProbabilityType>>
     m_decorateEProbabilities;
-  std::vector<std::pair<SG::AuxElement::Accessor<uint8_t>, Trk::SummaryType>>
+  std::vector<std::pair<SG::Accessor<uint8_t>, Trk::SummaryType>>
     m_decorateSummaryTypes;
 
   /** Name used for the decoration of the track particle with TRT dE/dx .*/
   static const std::string s_trtdEdxUsedHitsDecorationName;
-  static const SG::AuxElement::Accessor<uint8_t> s_trtdEdxUsedHitsDecoration;
+  static const SG::Accessor<uint8_t> s_trtdEdxUsedHitsDecoration;
 
   bool m_doIBL;
   BooleanProperty m_doITk{this, "DoITk", false};

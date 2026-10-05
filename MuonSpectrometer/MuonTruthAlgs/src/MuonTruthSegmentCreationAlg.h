@@ -91,7 +91,7 @@ namespace Muon {
         /// FIXME ReadDecorHandle should not be used to access
         /// dynamic variables applied by the algorithm which
         /// created the container, instead a
-        /// SG::AuxElement::ConstAccessor should be used.
+        /// SG::ConstAccessor should be used.
         SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_truthOriginKey{this, "truthOriginKey", m_muonTruth, "truthOrigin"};
         SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_truthClassificationKey{this, "truthClassificationKey", m_muonTruth, "truthClassification"};
 

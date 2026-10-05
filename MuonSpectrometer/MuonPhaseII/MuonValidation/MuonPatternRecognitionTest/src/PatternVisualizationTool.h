@@ -282,7 +282,7 @@ private:
             SG::ReadDecorHandleKeyArray<xAOD::UncalibratedMeasurementContainer> m_truthLinkDecorKeys{this, "LinkDecorKeys", {}};
             using SegLink_t = ElementLink<xAOD::MuonSegmentContainer>;
             using SegLinkVec_t = std::vector<SegLink_t>;
-            using SegLinkDecor_t = SG::AuxElement::ConstAccessor<SegLinkVec_t>;
+            using SegLinkDecor_t = SG::ConstAccessor<SegLinkVec_t>;
             std::vector<SegLinkDecor_t> m_truthLinkDecors{};
 
             Gaudi::Property<bool> m_displayOnlyTruth{this, "displayTruthOnly", false}; 

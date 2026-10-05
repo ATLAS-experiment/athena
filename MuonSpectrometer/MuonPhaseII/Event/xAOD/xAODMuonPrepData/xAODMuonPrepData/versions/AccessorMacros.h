@@ -9,12 +9,12 @@
 */
 #define IMPLEMENT_SETTER_GETTER( CLASS_NAME, DTYPE, GETTER, SETTER)            \
     DTYPE CLASS_NAME::GETTER() const {                                         \
-       static const SG::AuxElement::Accessor<DTYPE> acc{preFixStr + #GETTER};  \
+       static const SG::Accessor<DTYPE> acc{preFixStr + #GETTER};  \
        return acc(*this);                                                      \
     }                                                                          \
                                                                                \
     void CLASS_NAME::SETTER(DTYPE value) {                                     \
-       static const SG::AuxElement::Accessor<DTYPE> acc{preFixStr + #GETTER};  \
+       static const SG::Accessor<DTYPE> acc{preFixStr + #GETTER};  \
        acc(*this) = value;                                                     \
     }
 /**
@@ -23,12 +23,12 @@
 */
 #define IMPLEMENT_SETTER_GETTER_WITH_CAST( CLASS_NAME, STORE_DTYPE, CAST_DTYPE, GETTER, SETTER) \
     CAST_DTYPE CLASS_NAME::GETTER() const {                                                     \
-       static const SG::AuxElement::Accessor<STORE_DTYPE> acc{preFixStr + #GETTER};             \
+       static const SG::Accessor<STORE_DTYPE> acc{preFixStr + #GETTER};             \
        return static_cast<CAST_DTYPE>(acc(*this));                                              \
     }                                                                                           \
                                                                                                 \
     void CLASS_NAME::SETTER(CAST_DTYPE value) {                                                 \
-       static const SG::AuxElement::Accessor<STORE_DTYPE> acc{preFixStr + #GETTER};             \
+       static const SG::Accessor<STORE_DTYPE> acc{preFixStr + #GETTER};             \
        acc(*this) = static_cast<STORE_DTYPE>(value);                                            \
     }  
 /**
@@ -36,12 +36,12 @@
 */
 #define IMPLEMENT_VECTOR_SETTER_GETTER(CLASS_NAME, DTYPE, GETTER, SETTER)                    \
       const std::vector<DTYPE>& CLASS_NAME::GETTER() const {                                 \
-         static const SG::AuxElement::Accessor<std::vector<DTYPE>> acc{preFixStr + #GETTER}; \
+         static const SG::Accessor<std::vector<DTYPE>> acc{preFixStr + #GETTER}; \
          return acc(*this);                                                                  \
       }                                                                                      \
                                                                                              \
       void CLASS_NAME::SETTER(const std::vector<DTYPE>& value) {                             \
-         static const SG::AuxElement::Accessor<std::vector<DTYPE>> acc{preFixStr + #GETTER}; \
+         static const SG::Accessor<std::vector<DTYPE>> acc{preFixStr + #GETTER}; \
          acc(*this) = value;                                                                 \
       }
 /**

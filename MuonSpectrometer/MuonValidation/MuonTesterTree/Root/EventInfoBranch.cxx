@@ -6,9 +6,9 @@
 #include <MuonTesterTree/throwExcept.h>
 #include <stdexcept>
 namespace {
-     static const SG::AuxElement::ConstAccessor<unsigned int> acc_Random("RandomRunNumber");
-     static const SG::AuxElement::ConstAccessor<unsigned int> acc_LumiBlock("RandomLumiBlockNumber");
-     static const SG::AuxElement::ConstAccessor<float> acc_PuW("PileupWeight");
+     static const SG::ConstAccessor<unsigned int> acc_Random("RandomRunNumber");
+     static const SG::ConstAccessor<unsigned int> acc_LumiBlock("RandomLumiBlockNumber");
+     static const SG::ConstAccessor<float> acc_PuW("PileupWeight");
 }
 namespace MuonVal {
 std::atomic<unsigned int> EventInfoBranch::s_num_lhe = 0;

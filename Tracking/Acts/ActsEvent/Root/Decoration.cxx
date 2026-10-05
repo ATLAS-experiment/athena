@@ -7,7 +7,7 @@
 
 namespace ActsTrk{
   std::optional<TrackContainer::ConstTrackProxy> getActsTrack(const xAOD::TrackParticle& trkPart) {
-    static const SG::AuxElement::ConstAccessor<ElementLink<TrackContainer> > acc("actsTrack");
+    static const SG::ConstAccessor<ElementLink<TrackContainer> > acc("actsTrack");
     static_assert(std::is_same<ElementLink<TrackContainer>::ElementConstReference,
                                std::optional<TrackContainer::ConstTrackProxy> >::value);
 

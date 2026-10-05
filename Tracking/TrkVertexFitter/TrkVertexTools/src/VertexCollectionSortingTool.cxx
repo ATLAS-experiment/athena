@@ -60,7 +60,7 @@ VertexCollectionSortingTool::sortVertexContainer(
   xAOD::VertexContainer* NewContainer = new xAOD::VertexContainer();
   xAOD::VertexAuxContainer* auxNewContainer = new xAOD::VertexAuxContainer();
   NewContainer->setStore(auxNewContainer);
-  SG::AuxElement::Accessor<float> sigWeightDec(m_decorationName);
+  SG::Accessor<float> sigWeightDec(m_decorationName);
 
   if(MyVxCont.size()<=1){
     xAOD::Vertex* dummyVxCandidate = new xAOD::Vertex();

@@ -12,7 +12,7 @@ struct HitTruthMatching{
     HitTruthMatching(const xAOD::TruthParticle* truthPart_):
       truthPart{truthPart_}{
         for (const std::string hitColl : {"truthMdtHits", "truthRpcHits", "truthTgcHits", "truthCscHits"}) {
-            const SG::AuxElement::ConstAccessor<std::vector<long long unsigned>> acc{hitColl};
+            const SG::ConstAccessor<std::vector<long long unsigned>> acc{hitColl};
             if (!acc.isAvailable(*truthPart)) continue;
             for (const long long unsigned id : acc(*truthPart)){
                  assocHits.emplace(id);
@@ -253,7 +253,7 @@ StatusCode MuonHoughDataNtuple::execute(const EventContext& ctx)
     m_truth_eta = truthMu->eta();
     m_truth_phi = truthMu->phi();
     // access the truth segment from truth particle
-    static const SG::AuxElement::ConstAccessor<ElementLink<xAOD::TruthParticleContainer>> truthMuLink("truthParticleLink");
+    static const SG::ConstAccessor<ElementLink<xAOD::TruthParticleContainer>> truthMuLink("truthParticleLink");
     // filling truth segment values
     for(const xAOD::MuonSegment* truthSeg: *truthSegContainer){
       if(!truthMuLink.isAvailable(*truthSeg)) { continue; } // if segment isn't linked to truth muon, skip

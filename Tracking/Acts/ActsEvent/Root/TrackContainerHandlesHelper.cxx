@@ -326,7 +326,7 @@ void ConstTrackContainerHandlesHelper::restoreUncalibMeasurementPtr(xAOD::TrackS
    if (statesLink.getAuxIDs().test(link_accessor.auxid())){
       const_span<link_t> elementLinks = getElementVector(statesLink, link_accessor);
 
-      static const SG::AuxElement::Decorator< const xAOD::UncalibratedMeasurement * >
+      static const SG::Decorator< const xAOD::UncalibratedMeasurement * >
          decor("uncalibratedMeasurement");
 
       std::span<const xAOD::UncalibratedMeasurement *> uncalibratedMeasurements

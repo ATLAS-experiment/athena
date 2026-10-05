@@ -8,7 +8,7 @@
 namespace {
     constexpr size_t dummyIdx = -1;
     constexpr float MeVtoGeV = 1.e-3;
-    static const SG::AuxElement::ConstAccessor<float> acc_charge{"charge"};
+    static const SG::ConstAccessor<float> acc_charge{"charge"};
 }
 
 

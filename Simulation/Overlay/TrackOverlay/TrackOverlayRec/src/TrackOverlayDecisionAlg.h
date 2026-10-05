@@ -65,7 +65,7 @@ namespace  TrackOverlayDecisionAlg{
     virtual StatusCode  finalize() override final;
   private:
     ToolHandle<IAthSelectionTool> m_truthSelectionTool{this, "TruthSelectionTool","AthTruthSelectionTool", "Truth selection tool (for efficiencies and resolutions)"};
-    SG::AuxElement::Decorator<bool> m_dec_selectedByPileupSwitch{"selectedByPileupSwitch"};
+    SG::Decorator<bool> m_dec_selectedByPileupSwitch{"selectedByPileupSwitch"};
     bool m_usingSpecialPileupSwitch {false};
     //set the "selectedByPileupSwitch" decoration for all particles in the passed vector
     void markSelectedByPileupSwitch(const std::vector<const xAOD::TruthParticle*> & truthParticles) const;

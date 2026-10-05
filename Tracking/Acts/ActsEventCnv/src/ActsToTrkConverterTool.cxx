@@ -387,7 +387,7 @@ template <typename Proxy_t>
     switch (meas->type()) {
         using enum xAOD::UncalibMeasType;
         case PixelClusterType: {
-          static const SG::AuxElement::ConstAccessor<ElementLink<InDet::PixelClusterCollection>> acc_prdLink("pixelClusterLink");
+          static const SG::ConstAccessor<ElementLink<InDet::PixelClusterCollection>> acc_prdLink("pixelClusterLink");
           if (acc_prdLink.isAvailable(*meas) && acc_prdLink(*meas).isValid()) {
               rot.reset(m_ROTcreator->correct(**acc_prdLink(*meas), *trkPars, ctx));
           } else {
@@ -395,7 +395,7 @@ template <typename Proxy_t>
           }
           break;
         } case StripClusterType: {
-          static const SG::AuxElement::ConstAccessor<ElementLink<InDet::SCT_ClusterCollection>> acc_prdLink("sctClusterLink");
+          static const SG::ConstAccessor<ElementLink<InDet::SCT_ClusterCollection>> acc_prdLink("sctClusterLink");
           if (acc_prdLink.isAvailable(*meas) && acc_prdLink(*meas).isValid()) {
               rot.reset(m_ROTcreator->correct(**acc_prdLink(*meas), *trkPars, ctx));
           } else {

@@ -57,7 +57,7 @@ namespace MuonR4{
             /// FIXME ReadDecorHandle should not be used to access
             /// dynamic variables applied by the algorithm which
             /// created the container, instead a
-            /// SG::AuxElement::ConstAccessor should be used.
+            /// SG::ConstAccessor should be used.
             TruthReadDecorKey_t m_truMuOriginKey{this, "TruthMuonOriginKey", m_truthMuonKey, "truthOrigin"};
             TruthReadDecorKey_t m_truMuTypeKey{this, "TruthMuonTypeKey", m_truthMuonKey, "truthType"};
             TruthReadDecorKey_t m_truMuClassificationKey{this, "TruthMuonClassificationKey", m_truthMuonKey, "truthClassification"};

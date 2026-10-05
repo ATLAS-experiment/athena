@@ -43,9 +43,9 @@ namespace Muon {
         ATH_CHECK(m_tgcTESKey.initialize());
         ATH_CHECK(m_mdtTESKey.initialize());
 
-        for (const std::string& str : m_accMDT_str) m_nMDT_accs.push_back(SG::AuxElement::Accessor<int>(str));
-        for (const std::string& str : m_accRPC_str) m_nRPC_accs.push_back(SG::AuxElement::Accessor<int>(str));
-        for (const std::string& str : m_accTGC_str) m_nTGC_accs.push_back(SG::AuxElement::Accessor<int>(str));
+        for (const std::string& str : m_accMDT_str) m_nMDT_accs.push_back(SG::Accessor<int>(str));
+        for (const std::string& str : m_accRPC_str) m_nRPC_accs.push_back(SG::Accessor<int>(str));
+        for (const std::string& str : m_accTGC_str) m_nTGC_accs.push_back(SG::Accessor<int>(str));
 
         return StatusCode::SUCCESS;
     }
@@ -795,9 +795,9 @@ namespace Muon {
 
     //** ----------------------------------------------------------------------------------------------------------------- **//
 
-    void MSVertexRecoTool::dressVtxHits(xAOD::Vertex* xAODVx, const std::vector<SG::AuxElement::Accessor<int>>& accs, const std::vector<int>& hits) const {
+    void MSVertexRecoTool::dressVtxHits(xAOD::Vertex* xAODVx, const std::vector<SG::Accessor<int>>& accs, const std::vector<int>& hits) const {
             unsigned int i{0};
-            for (const SG::AuxElement::Accessor<int> &acc : accs) {
+            for (const SG::Accessor<int> &acc : accs) {
                 acc(*xAODVx) = hits[i];
                 ++i;    
             }

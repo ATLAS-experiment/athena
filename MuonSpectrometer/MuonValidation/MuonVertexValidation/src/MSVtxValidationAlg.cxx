@@ -499,7 +499,7 @@ StatusCode MSVtxValidationAlg::fillMSVtx(const EventContext& ctx) {
 
 void MSVtxValidationAlg::fillHits(const xAOD::Vertex* vtx, const std::string& decorator_str, MuonVal::VectorBranch<int>& branch) {
     // fills branch with the number of hits close to the vertex. When the decorator is not available, the default integer value is used
-    const SG::AuxElement::Accessor<int> hits_acc(decorator_str);
+    const SG::Accessor<int> hits_acc(decorator_str);
     if (hits_acc.isAvailable(*vtx)) branch.push_back(hits_acc(*vtx));
 
     return;
