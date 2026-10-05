@@ -9,8 +9,9 @@ atlas_subdir( TauAnalysisAlgorithms )
 atlas_add_library( TauAnalysisAlgorithmsLib
    TauAnalysisAlgorithms/*.h TauAnalysisAlgorithms/*.icc Root/*.cxx
    PUBLIC_HEADERS TauAnalysisAlgorithms
-   LINK_LIBRARIES xAODTau SelectionHelpersLib DiTauMassToolsLib
-   SystematicsHandlesLib
+   LINK_LIBRARIES xAODTau xAODBase xAODEgamma xAODMuon xAODJet xAODMissingET
+   xAODEventInfo xAODTruth AthContainers AsgTools AsgDataHandlesLib
+   SelectionHelpersLib DiTauMassToolsLib SystematicsHandlesLib
    AnaAlgorithmLib TauAnalysisToolsLib )
 
 atlas_add_component( TauAnalysisAlgorithms src/components/*.cxx

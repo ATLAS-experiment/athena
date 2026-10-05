@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Qichen Dong
@@ -11,8 +11,7 @@
 
 // unnamed namespace for helpers
 namespace {
-    const static SG::ConstAuxElement::Decorator<char> decSelection("SelectedByMuonRemovalCombination");
-    const static SG::ConstAccessor<ElementLink<xAOD::TauJetContainer>> linkAcc("originalTauJet");
+    const SG::ConstAccessor<ElementLink<xAOD::TauJetContainer>> linkAcc("originalTauJet");
 }
 
 namespace CP
@@ -20,10 +19,11 @@ namespace CP
 
     StatusCode TauCombineMuonRMTausAlg::initialize ()
     {
-        ATH_MSG_INFO("Initializing " << name() << "...");
         ANA_CHECK (m_tauHandle.initialize (m_systematicsList));
         ANA_CHECK (m_MuonRMtauHandle.initialize (m_systematicsList));
         ANA_CHECK (m_outputTauHandle.initialize (m_systematicsList));
+        ANA_CHECK (m_tauSelectionDecor.initialize (m_systematicsList, m_tauHandle));
+        ANA_CHECK (m_MuonRMtauSelectionDecor.initialize (m_systematicsList, m_MuonRMtauHandle));
         ANA_CHECK (m_systematicsList.initialize());
         return StatusCode::SUCCESS;
     }
@@ -37,30 +37,31 @@ namespace CP
             const xAOD::TauJetContainer *muonrm_taus = nullptr;
             ANA_CHECK (m_tauHandle.retrieve (taus, sys, ctx));
             ANA_CHECK (m_MuonRMtauHandle.retrieve (muonrm_taus, sys, ctx));
-            for (const xAOD::TauJet* tau : *taus)         decSelection(*tau) = false;
-            for (const xAOD::TauJet* tau : *muonrm_taus)  decSelection(*tau) = false;
+            for (const xAOD::TauJet* tau : *taus)         m_tauSelectionDecor.set (*tau, false, sys);
+            for (const xAOD::TauJet* tau : *muonrm_taus)  m_MuonRMtauSelectionDecor.set (*tau, false, sys);
             std::vector<const xAOD::TauJet*> combined_taus_vec = TauAnalysisTools::combineTauJetsWithMuonRM (taus, muonrm_taus);
             // !shallow copy seems to break the subsequent algorithms. Deep copy is needed.
-            xAOD::TauJetContainer* outputTauCont = new xAOD::TauJetContainer();
-            xAOD::TauJetAuxContainer* outputTauContAux = new xAOD::TauJetAuxContainer();
-            outputTauCont->setStore(outputTauContAux);
+            auto outputTauCont = std::make_unique<xAOD::TauJetContainer>();
+            auto outputTauContAux = std::make_unique<xAOD::TauJetAuxContainer>();
+            outputTauCont->setStore(outputTauContAux.get());
             for (const xAOD::TauJet* tau : combined_taus_vec){
               if(linkAcc.isAvailable(*tau) && !linkAcc(*tau).isValid()){
                 ATH_MSG_WARNING("Invalid originalTauJet link for tau with pT="<<tau->pt());
                 continue;
               }
-              decSelection(*tau) = true;
-              xAOD::TauJet* newTau = new xAOD::TauJet();
+              // both decoration handles share the same decoration name, so
+              // either can be used for taus from either input container
+              m_tauSelectionDecor.set (*tau, true, sys);
+              auto newTau = std::make_unique<xAOD::TauJet>();
               newTau->makePrivateStore(*tau);
               if(linkAcc.isAvailable(*tau)){
                 auto link = linkAcc(*tau);
                 setOriginalObjectLink(**link, *newTau);
               }
               else setOriginalObjectLink(*tau, *newTau);
-              outputTauCont->push_back(newTau);
+              outputTauCont->push_back(std::move(newTau));
             }
-            ANA_CHECK (evtStore()->record (outputTauCont,    m_outputTauHandle.getName (sys)));
-            ANA_CHECK (evtStore()->record (outputTauContAux, m_outputTauHandle.getName (sys) + "Aux."));
+            ANA_CHECK (m_outputTauHandle.record (std::move (outputTauCont), std::move (outputTauContAux), sys, ctx));
 
         }
         return StatusCode::SUCCESS;

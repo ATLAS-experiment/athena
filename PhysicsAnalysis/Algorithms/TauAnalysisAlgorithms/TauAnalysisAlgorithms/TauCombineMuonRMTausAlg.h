@@ -1,14 +1,16 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Qichen Dong
 
-#pragma once
+#ifndef TAU_ANALYSIS_ALGORITHMS__TAU_COMBINE_MUON_RM_TAUS_ALG_H
+#define TAU_ANALYSIS_ALGORITHMS__TAU_COMBINE_MUON_RM_TAUS_ALG_H
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <SystematicsHandles/SysListHandle.h>
 #include <SystematicsHandles/SysReadHandle.h>
+#include <SystematicsHandles/SysWriteDecorHandle.h>
 #include <SystematicsHandles/SysWriteHandle.h>
 #include <xAODTau/TauJetContainer.h>
 #include <xAODTau/TauJetAuxContainer.h>
@@ -33,8 +35,18 @@ namespace CP
       this, "muonrm_taus", "TauJets_MuonRM", "the muon-removal tau collection to run on"
     };
 
-    SysWriteHandle<xAOD::TauJetContainer> m_outputTauHandle {
+    SysWriteHandle<xAOD::TauJetContainer, xAOD::TauJetAuxContainer> m_outputTauHandle {
       this, "combined_taus", "TauJets_Combined", "the output tau collection with combined taus"
+    };
+
+    SysWriteDecorHandle<char> m_tauSelectionDecor {
+      "SelectedByMuonRemovalCombination", this
+    };
+
+    SysWriteDecorHandle<char> m_MuonRMtauSelectionDecor {
+      "SelectedByMuonRemovalCombination", this
     };
   };
 }
+
+#endif
