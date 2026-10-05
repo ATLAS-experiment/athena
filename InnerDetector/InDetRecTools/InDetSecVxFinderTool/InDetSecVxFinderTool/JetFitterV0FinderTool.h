@@ -69,8 +69,8 @@ namespace InDet {
 	ToolHandle< Trk::IMode3dFinder > m_mode3dfinder {this,"Mode3dFinder","Trk::Mode3dTo1dFinder/Mode3dTo1dFinder",""};
 
     private:
-	SG::AuxElement::Accessor< float > m_compatibilityAccessor;
-	SG::AuxElement::Accessor< std::vector< const Trk::ITrackLink* > > m_tracksAccessor;
+	SG::Accessor< float > m_compatibilityAccessor;
+	SG::Accessor< std::vector< const Trk::ITrackLink* > > m_tracksAccessor;
 
     private:
 	// @brief

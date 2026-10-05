@@ -99,7 +99,7 @@ StatusCode InDetToXAODClusterConversion::convertPixelClusters(const EventContext
 
   SG::ReadHandle<InDet::PixelClusterContainer> inputPixelClusterContainer(m_inputPixelClusterContainerKey, ctx);
 
-  static const SG::AuxElement::Accessor< ElementLink< InDet::PixelClusterCollection > > pixelLinkAcc("pixelClusterLink");
+  static const SG::Accessor< ElementLink< InDet::PixelClusterCollection > > pixelLinkAcc("pixelClusterLink");
 
   size_t nclusters = 0;
   for (const auto *const clusterCollection : *inputPixelClusterContainer) {
@@ -162,7 +162,7 @@ StatusCode InDetToXAODClusterConversion::convertStripClusters(const EventContext
   outputStripClusterContainer->push_new (nclusters, [&pool](){return pool.nextElementPtr();});
   size_t icluster = 0;
 
-  static const SG::AuxElement::Accessor< ElementLink< InDet::SCT_ClusterCollection > > stripLinkAcc("sctClusterLink");
+  static const SG::Accessor< ElementLink< InDet::SCT_ClusterCollection > > stripLinkAcc("sctClusterLink");
   for (const auto *const clusterCollection : *inputStripClusterContainer) {
     if (!clusterCollection) continue;
     for(const auto *const theCluster : *clusterCollection)  {
@@ -209,7 +209,7 @@ StatusCode InDetToXAODClusterConversion::convertHgtdClusters(const EventContext&
   SG::ReadHandle<::HGTD_ClusterContainer> inputHgtdClusterContainer(m_inputHgtdClusterContainerKey, ctx);
   ATH_CHECK(inputHgtdClusterContainer.isValid());
 
-  static const SG::AuxElement::Accessor< ElementLink< ::HGTD_ClusterCollection > > hgtdLinkAcc("hgtdClusterLink");
+  static const SG::Accessor< ElementLink< ::HGTD_ClusterCollection > > hgtdLinkAcc("hgtdClusterLink");
   for (const auto *const clusterCollection : *inputHgtdClusterContainer) {
     if (!clusterCollection) continue;
     for(const auto *const theCluster : *clusterCollection)  {

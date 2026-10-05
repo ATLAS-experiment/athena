@@ -19,9 +19,9 @@ public:
     void fillTrack(const xAOD::TrackParticle& track, const xAOD::Vertex* vtx, const int truthMatchRanking = -1); 
     void fillTruth(const xAOD::TruthParticle& truth);
 
-    SG::AuxElement::Accessor<bool> m_acc_passedTruthSelection{"passedTruthSelection"};
-	SG::AuxElement::Accessor<bool> m_acc_passedTrackSelection{"passedTrackSelection"};
-    SG::AuxElement::Accessor<bool> m_acc_selectedByPileupSwitch{"selectedByPileupSwitch"};
+    SG::Accessor<bool> m_acc_passedTruthSelection{"passedTruthSelection"};
+	SG::Accessor<bool> m_acc_passedTrackSelection{"passedTrackSelection"};
+    SG::Accessor<bool> m_acc_selectedByPileupSwitch{"selectedByPileupSwitch"};
 
 private:
     const float m_undefinedValue{-9999};

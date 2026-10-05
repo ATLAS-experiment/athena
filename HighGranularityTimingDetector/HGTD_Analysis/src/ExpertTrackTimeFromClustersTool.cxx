@@ -24,17 +24,17 @@ ExpertTrackTimeFromClustersTool::ExpertTrackTimeFromClustersTool(
 StatusCode ExpertTrackTimeFromClustersTool::initialize() {
   ATH_CHECK(AthAlgTool::initialize());
 
-  m_dec_isset = std::make_unique<SG::AuxElement::Decorator<bool>>(
+  m_dec_isset = std::make_unique<SG::Decorator<bool>>(
       m_dec_prefix + "_isset");
-  m_dec_hastime = std::make_unique<SG::AuxElement::Decorator<bool>>(
+  m_dec_hastime = std::make_unique<SG::Decorator<bool>>(
       m_dec_prefix + "_hastime");
-  m_dec_time = std::make_unique<SG::AuxElement::Decorator<float>>(
+  m_dec_time = std::make_unique<SG::Decorator<float>>(
       m_dec_prefix + "_time");
-  m_dec_nhits = std::make_unique<SG::AuxElement::Decorator<int>>(
+  m_dec_nhits = std::make_unique<SG::Decorator<int>>(
       m_dec_prefix + "_nhits");
-  m_dec_nprimehits = std::make_unique<SG::AuxElement::Decorator<int>>(
+  m_dec_nprimehits = std::make_unique<SG::Decorator<int>>(
       m_dec_prefix + "_nprimehits");
-  m_dec_resolution = std::make_unique<SG::AuxElement::Decorator<float>>(
+  m_dec_resolution = std::make_unique<SG::Decorator<float>>(
       m_dec_prefix + "_resolution");
 
   m_acc_isset =

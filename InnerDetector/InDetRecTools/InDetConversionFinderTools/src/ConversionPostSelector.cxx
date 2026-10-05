@@ -279,15 +279,15 @@ namespace InDet {
                                          float fR,
                                          float deltaPhiVtxTrk) 
   {
-    static const SG::AuxElement::Accessor<float> accMass("mass");
+    static const SG::Accessor<float> accMass("mass");
     accMass(vertex) = inv_mass;
-    static const SG::AuxElement::Accessor<float> accPt1("pt1");
+    static const SG::Accessor<float> accPt1("pt1");
     accPt1(vertex) = pt1;
-    static const SG::AuxElement::Accessor<float> accPt2("pt2");
+    static const SG::Accessor<float> accPt2("pt2");
     accPt2(vertex) = pt2;
-    static const SG::AuxElement::Accessor<float> accMinRfirstHit("minRfirstHit");
+    static const SG::Accessor<float> accMinRfirstHit("minRfirstHit");
     accMinRfirstHit(vertex) = fR;
-    static const SG::AuxElement::Accessor<float> accDeltaPhiVtxTrk("deltaPhiVtxTrk");
+    static const SG::Accessor<float> accDeltaPhiVtxTrk("deltaPhiVtxTrk");
     accDeltaPhiVtxTrk(vertex) = deltaPhiVtxTrk;
   }
 

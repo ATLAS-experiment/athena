@@ -37,7 +37,7 @@ namespace {
     }
     if (name == "sumPt") {
       return [](const xAOD::Vertex& v) -> float {
-        static const SG::AuxElement::ConstAccessor<float> acc_sumPt("sumPt");
+        static const SG::ConstAccessor<float> acc_sumPt("sumPt");
         return acc_sumPt(v);
       };
     }
@@ -74,7 +74,7 @@ namespace {
   template <typename T, typename U>
   class SequenceGetter{
     private:
-      SG::AuxElement::ConstAccessor<T> m_getter;
+      SG::ConstAccessor<T> m_getter;
       std::string m_name;
     public:
       explicit SequenceGetter(const std::string& name):
@@ -108,7 +108,7 @@ namespace {
       return CJGetter<T>([](const T& p, const Vertex& vertex) {
         if constexpr (std::is_same_v<T, xAOD::Photon>) {
 
-          static const SG::AuxElement::ConstAccessor<float> acc("caloPointingZ");
+          static const SG::ConstAccessor<float> acc("caloPointingZ");
           float calo = acc(p);
 
           return calo - vertex.z();
@@ -122,8 +122,8 @@ namespace {
       return CJGetter<T>([](const T& p, const Vertex& vertex) {
         if constexpr (std::is_same_v<T, xAOD::Photon>) {
         
-          static const SG::AuxElement::ConstAccessor<float> acc_f("zCommon");
-          static const SG::AuxElement::ConstAccessor<float> acc_s("zCommonError");
+          static const SG::ConstAccessor<float> acc_f("zCommon");
+          static const SG::ConstAccessor<float> acc_s("zCommonError");
 
           float first = acc_f(p);
           float second = acc_s(p);

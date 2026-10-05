@@ -145,11 +145,11 @@ StatusCode ZDC_PileUpTool::processAllSubEvents(const EventContext& ctx){
   std::unique_ptr<xAOD::ZdcModuleAuxContainer> moduleAuxContainer( new xAOD::ZdcModuleAuxContainer() );
   moduleContainer->setStore( moduleAuxContainer.get() );
 
-  SG::AuxElement::Accessor<std::vector<uint16_t>> g0acc("g0data");
-  SG::AuxElement::Accessor<std::vector<uint16_t>> g1acc("g1data");
+  SG::Accessor<std::vector<uint16_t>> g0acc("g0data");
+  SG::Accessor<std::vector<uint16_t>> g1acc("g1data");
   if(m_delayChannels){
-    SG::AuxElement::Accessor<std::vector<uint16_t>> g0d1acc("g0d1data");
-    SG::AuxElement::Accessor<std::vector<uint16_t>> g1d1acc("g1d1data");
+    SG::Accessor<std::vector<uint16_t>> g0d1acc("g0d1data");
+    SG::Accessor<std::vector<uint16_t>> g1d1acc("g1d1data");
   }
 
   /******************************************
@@ -197,10 +197,10 @@ StatusCode ZDC_PileUpTool::prepareEvent(const EventContext& /*ctx*/,const unsign
   m_ZdcModuleAuxContainer = std::make_unique<xAOD::ZdcModuleAuxContainer>();
   m_ZdcModuleContainer->setStore( m_ZdcModuleAuxContainer.get() );
 
-  SG::AuxElement::Accessor<std::vector<uint16_t>> g0acc("g0data");
-  SG::AuxElement::Accessor<std::vector<uint16_t>> g1acc("g1data");
-  SG::AuxElement::Accessor<std::vector<uint16_t>> g0d1acc("g0d1data");
-  SG::AuxElement::Accessor<std::vector<uint16_t>> g1d1acc("g1d1data");
+  SG::Accessor<std::vector<uint16_t>> g0acc("g0data");
+  SG::Accessor<std::vector<uint16_t>> g1acc("g1data");
+  SG::Accessor<std::vector<uint16_t>> g0d1acc("g0d1data");
+  SG::Accessor<std::vector<uint16_t>> g1d1acc("g1d1data");
 
   m_mergedFiberHitList->clear();
 

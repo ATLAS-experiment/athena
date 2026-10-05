@@ -160,11 +160,11 @@ StatusCode InDet::SiSPSeededTrackFinderRoI::execute(const EventContext& ctx) con
   }
   
   //Store RoI information in a xAOD::Vertex object
-  static const SG::AuxElement::Accessor<float> vtxDecor_boundaryLow("boundaryLow");
-  static const SG::AuxElement::Accessor<float> vtxDecor_boundaryHigh("boundaryHigh");
-  static const SG::AuxElement::Accessor<float> vtxDecor_perigeeZ0Lead("perigeeZ0Lead");
-  static const SG::AuxElement::Accessor<float> vtxDecor_perigeeZ0Sublead("perigeeZ0Sublead");
-  static const SG::AuxElement::Accessor<float> vtxDecor_isHS("isHS");
+  static const SG::Accessor<float> vtxDecor_boundaryLow("boundaryLow");
+  static const SG::Accessor<float> vtxDecor_boundaryHigh("boundaryHigh");
+  static const SG::Accessor<float> vtxDecor_perigeeZ0Lead("perigeeZ0Lead");
+  static const SG::Accessor<float> vtxDecor_perigeeZ0Sublead("perigeeZ0Sublead");
+  static const SG::Accessor<float> vtxDecor_isHS("isHS");
 
   for( size_t r = 0; r < listRoIs.size(); r++ ){
 

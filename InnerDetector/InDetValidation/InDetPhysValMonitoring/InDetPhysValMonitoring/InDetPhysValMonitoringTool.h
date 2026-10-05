@@ -103,12 +103,12 @@ private:
 							float beamSpotWeight);
 
 	// accessors/decorators
-    SG::AuxElement::Accessor<bool>  m_acc_hasTruthFilled{"hasTruthFilled"};
-    SG::AuxElement::Decorator<bool> m_dec_hasTruthFilled{"hasTruthFilled"};	
-    SG::AuxElement::Decorator<bool> m_dec_passedTruthSelection{"passedTruthSelection"};	
-    SG::AuxElement::Decorator<bool> m_dec_passedTrackSelection{"passedTrackSelection"};	
-    SG::AuxElement::Accessor<bool>  m_acc_selectedByPileupSwitch{"selectedByPileupSwitch"};
-    SG::AuxElement::Decorator<bool> m_dec_selectedByPileupSwitch{"selectedByPileupSwitch"};
+    SG::Accessor<bool>  m_acc_hasTruthFilled{"hasTruthFilled"};
+    SG::Decorator<bool> m_dec_hasTruthFilled{"hasTruthFilled"};	
+    SG::Decorator<bool> m_dec_passedTruthSelection{"passedTruthSelection"};	
+    SG::Decorator<bool> m_dec_passedTrackSelection{"passedTrackSelection"};	
+    SG::Accessor<bool>  m_acc_selectedByPileupSwitch{"selectedByPileupSwitch"};
+    SG::Decorator<bool> m_dec_selectedByPileupSwitch{"selectedByPileupSwitch"};
 
     // decorate track particle for ntuple writing
     void decorateTrackParticle(const xAOD::TrackParticle & track, const asg::AcceptData & passed) const;

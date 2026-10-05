@@ -94,7 +94,7 @@ namespace InDet {
   StatusCode InDetToXAODSpacePointConversion::convertPixel(const EventContext& ctx,
 							   xAOD::PixelClusterContainer* cluster_xaod_container) const
   {
-    static const SG::AuxElement::Accessor< ElementLink< ::SpacePointCollection > > linkAcc("pixelSpacePointLink");
+    static const SG::Accessor< ElementLink< ::SpacePointCollection > > linkAcc("pixelSpacePointLink");
     
     const InDetDD::SiDetectorElementCollection* pixElements = nullptr;
     if (m_convertClusters) {
@@ -180,7 +180,7 @@ namespace InDet {
       stripElements = stripDetEleHandle.cptr();
     }
     
-    static const SG::AuxElement::Accessor< ElementLink< ::SpacePointCollection > > linkAcc("sctSpacePointLink");
+    static const SG::Accessor< ElementLink< ::SpacePointCollection > > linkAcc("sctSpacePointLink");
 
     // Input
     SG::ReadHandle< ::SpacePointContainer > strip_handle = SG::makeHandle( m_inSpacepointsStrip, ctx );
@@ -289,7 +289,7 @@ namespace InDet {
     strip_overlap_xaod_aux_container->reserve(strip_overlap_container->size());
 
     // Conversion
-    static const SG::AuxElement::Accessor< ElementLink< ::SpacePointOverlapCollection > > stripSpacePointLinkAcc("stripOverlapSpacePointLink");
+    static const SG::Accessor< ElementLink< ::SpacePointOverlapCollection > > stripSpacePointLinkAcc("stripOverlapSpacePointLink");
 
     for (const Trk::SpacePoint *sp : *strip_overlap_container) {
       const InDet::SCT_SpacePoint *indetSP = dynamic_cast<const InDet::SCT_SpacePoint *>(sp);

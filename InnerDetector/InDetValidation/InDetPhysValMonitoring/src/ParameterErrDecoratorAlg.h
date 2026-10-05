@@ -50,7 +50,7 @@ private:
     kNDecorators
   };
 
-  std::vector< std::pair<SG::WriteDecorHandleKey<xAOD::TrackParticleContainer>,SG::AuxElement::ConstAccessor<float> > > m_decor;
+  std::vector< std::pair<SG::WriteDecorHandleKey<xAOD::TrackParticleContainer>,SG::ConstAccessor<float> > > m_decor;
 
 };
 

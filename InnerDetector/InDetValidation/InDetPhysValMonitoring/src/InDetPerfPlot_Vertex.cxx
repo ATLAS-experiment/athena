@@ -72,15 +72,15 @@ InDetPerfPlot_Vertex::fill(const xAOD::Vertex& vertex, float weight) {
   fillHisto(m_vx_err_z, Amg::error(covariance, 2), weight);
 
   if(m_isITk){
-    static const SG::AuxElement::Accessor<uint8_t> accHasValidTime("hasValidTime");
-    static const SG::AuxElement::Accessor<float> accTime("time");
+    static const SG::Accessor<uint8_t> accHasValidTime("hasValidTime");
+    static const SG::Accessor<float> accTime("time");
     if (accHasValidTime.isAvailable(vertex) && accTime.isAvailable(vertex)) {
       if (vertex.hasValidTime()) {
 	fillHisto(m_vx_time, vertex.time(), weight);
       }
     }
 
-    static const SG::AuxElement::Accessor<float> accTimeResolution("timeResolution");
+    static const SG::Accessor<float> accTimeResolution("timeResolution");
     if (accHasValidTime.isAvailable(vertex) && accTimeResolution.isAvailable(vertex)) {
       if (vertex.hasValidTime()) {
 	fillHisto(m_vx_err_time, vertex.timeResolution(), weight);

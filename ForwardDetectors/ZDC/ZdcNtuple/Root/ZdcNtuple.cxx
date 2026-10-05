@@ -914,7 +914,7 @@ void ZdcNtuple::processZdcNtupleFromModules()
 	  int iside = 0;
 	  if (zdcSum->zdcSide() > 0) iside = 1;
 	  
-	  //static SG::AuxElement::ConstAccessor< float > acc( "CalibEnergy" );
+	  //static SG::ConstAccessor< float > acc( "CalibEnergy" );
 	  //t_ZdcEnergy[iside] = acc(*zdcSum);
 	  
 	  if (enableZDC && !zdcErr)

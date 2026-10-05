@@ -35,7 +35,7 @@
 #include <map>
 
 #define AUXDATA(OBJ, TYP, NAME) \
-  static const SG::AuxElement::Accessor<TYP> acc_##NAME (#NAME);  acc_##NAME(*(OBJ))
+  static const SG::Accessor<TYP> acc_##NAME (#NAME);  acc_##NAME(*(OBJ))
 
 namespace {
    unsigned int makeKey(short phi, char eta, char layer) {
@@ -400,10 +400,10 @@ StatusCode PixelPrepDataToxAOD::execute(const EventContext& ctx)
   // Flag clusters that share a SiHit with another cluster on the same module.
   // Needs sihit_barcode, so it only means anything with the SiHit truth on.
   if (m_writeSiHits) {
-    static const SG::AuxElement::Accessor<int> acc_layer ("layer");
-    static const SG::AuxElement::Accessor<int> acc_phi_module ("phi_module");
-    static const SG::AuxElement::Accessor<int> acc_eta_module ("eta_module");
-    static const SG::AuxElement::Accessor<std::vector<int> > acc_sihit_barcode ("sihit_barcode"); // TODO rename variable to be consistent?
+    static const SG::Accessor<int> acc_layer ("layer");
+    static const SG::Accessor<int> acc_phi_module ("phi_module");
+    static const SG::Accessor<int> acc_eta_module ("eta_module");
+    static const SG::Accessor<std::vector<int> > acc_sihit_barcode ("sihit_barcode"); // TODO rename variable to be consistent?
     for ( auto clusItr = xaod->begin(); clusItr != xaod->end(); ++clusItr)
     {
       auto pixelCluster = *clusItr;
@@ -424,7 +424,7 @@ StatusCode PixelPrepDataToxAOD::execute(const EventContext& ctx)
 
         for ( auto uid : uniqueIDs ) {
           if (std::find(uniqueIDs2.begin(), uniqueIDs2.end(), uid ) == uniqueIDs2.end()) continue;
-          static const SG::AuxElement::Accessor<char> acc_broken ("broken");
+          static const SG::Accessor<char> acc_broken ("broken");
           acc_broken(*pixelCluster)  = true;
           acc_broken(*pixelCluster2) = true;
           break;

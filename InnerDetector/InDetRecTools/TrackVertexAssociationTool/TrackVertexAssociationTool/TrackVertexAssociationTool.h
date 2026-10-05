@@ -60,8 +60,8 @@ namespace CP {
 
     /// @name Public helper class for applying the difference TTVA WPs
 
-    typedef SG::AuxElement::ConstAccessor<std::vector<ElementLink<xAOD::VertexContainer>>> AMVFVerticesAcc;
-    typedef SG::AuxElement::ConstAccessor<std::vector<float>> AMVFWeightsAcc;
+    typedef SG::ConstAccessor<std::vector<ElementLink<xAOD::VertexContainer>>> AMVFVerticesAcc;
+    typedef SG::ConstAccessor<std::vector<float>> AMVFWeightsAcc;
 
     class WorkingPoint {
     public:

@@ -115,7 +115,7 @@ namespace InDetGNNHardScatterSelection {
                                   const std::string& defaultflag);
     }
 
-    typedef SG::AuxElement::Decorator<float> OutputSetterFloat;
+    typedef SG::Decorator<float> OutputSetterFloat;
     typedef std::vector<std::pair<std::string, OutputSetterFloat>> OutNodeFloat;
 
   }

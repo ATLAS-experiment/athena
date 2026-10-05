@@ -126,7 +126,7 @@ using namespace InDet;
 							       const xAOD::TrackParticle &track ) const {
 
       // Decorators for tracks
-      SG::AuxElement::Decorator< float > compatibilityDecorator(decorationName());
+      SG::Decorator< float > compatibilityDecorator(decorationName());
       
       // Apply track filter
       if ( !m_trkFilter->decision( track, &primaryVertex ) ) {

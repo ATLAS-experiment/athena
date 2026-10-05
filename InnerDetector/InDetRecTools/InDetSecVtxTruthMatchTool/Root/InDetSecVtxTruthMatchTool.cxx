@@ -112,7 +112,7 @@ StatusCode InDetSecVtxTruthMatchTool::matchVertices( std::vector<const xAOD::Ver
       // MuSA also creates new "MuSA Track" collection which does not have truth particle links
       // instead, we need to get the associated MS TrackParticle from the "MuSATrk_MSTPLink" decorations on the MuSA Track
       // and then get the truth particle link from there
-      const SG::AuxElement::Accessor<ElementLink<xAOD::TrackParticleContainer>> acc_MSTPLink("MuSATrk_MSTPLink");
+      const SG::Accessor<ElementLink<xAOD::TrackParticleContainer>> acc_MSTPLink("MuSATrk_MSTPLink");
       // populate the MuSA track particle vector
       trkMuSATrkParts.reserve(ntracks);
       for (const auto& trkLink : theseParticles) {

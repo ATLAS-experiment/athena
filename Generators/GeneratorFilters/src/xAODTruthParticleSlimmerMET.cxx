@@ -60,7 +60,7 @@ StatusCode xAODTruthParticleSlimmerMET::execute(const EventContext& ctx)
     }
 
     // Set up decorators if needed
-    const static SG::AuxElement::Decorator<bool> isPrompt("isPrompt");
+    const static SG::Decorator<bool> isPrompt("isPrompt");
 
     // Loop over full TruthParticle container
     xAOD::TruthEventContainer::const_iterator itr;

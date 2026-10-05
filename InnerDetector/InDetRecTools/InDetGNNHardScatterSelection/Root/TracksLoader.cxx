@@ -33,7 +33,7 @@ namespace InDetGNNHardScatterSelection {
         m_customSequenceGetter(getter_utils::CustomSequenceGetter<xAOD::TrackParticle>(
           cfg.inputs))
     {
-        const SG::AuxElement::ConstAccessor<PartLinks> acc("trackParticleLinks");
+        const SG::ConstAccessor<PartLinks> acc("trackParticleLinks");
         m_associator = [acc](const xAOD::Vertex& vertex) -> IPV {
           IPV particles;
           for (const ElementLink<IPC>& link : acc(vertex)){
