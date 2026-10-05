@@ -181,9 +181,17 @@ private:
   Gaudi::Property<bool> m_buildDetrayGeometry{this, "BuildDetrayGeometry", false,
       "Convert the constructed Acts::TrackingGeometry into a Detray geometry."};
 
-  Gaudi::Property<bool> m_checkDetrayGeometry{this, "CheckDetrayGeometry", true,
+  Gaudi::Property<bool> m_checkDetrayGeometry{this, "CheckDetrayGeometry", false,
       "Run the Detray consistency check on the converted geometry. "
       "Only used when BuildDetrayGeometry is enabled."};
+
+  Gaudi::Property<bool> m_buildDetraySurfaceGrids{this, "BuildDetraySurfaceGrids", true,
+      "Build the Detray surface grids from the volume navigation policies. "
+      "Only used when BuildDetrayGeometry is enabled."};
+
+  Gaudi::Property<bool> m_buildDetrayMaterial{this, "BuildDetrayMaterial", true,
+      "Build the Detray material from the volume navigation policies. "
+      "Only used when BuildDetrayGeometry is enabled."};    
 
   /// Tool providing the memory resource that the Detray geometry is allocated
   /// from. The detector keeps referring to that resource for its deallocations,

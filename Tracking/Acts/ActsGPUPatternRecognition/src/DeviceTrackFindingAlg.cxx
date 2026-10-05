@@ -68,6 +68,7 @@ StatusCode DeviceTrackFindingAlg::configureTrackFinding()
   m_finding_cfg.propagation.stepping.do_covariance_transport = true;
   m_finding_cfg.propagation.navigation.intersection.overstep_tolerance =
       -300.f * unit<float>::um;
+  m_finding_cfg.propagation.navigation.search_window = {20u, 20u};    
 
   m_finding_cfg.max_num_tracks_per_measurement = m_maxNumTracksPerMeasurement;
   m_finding_cfg.initial_links_per_seed = m_initialLinksPerSeed;

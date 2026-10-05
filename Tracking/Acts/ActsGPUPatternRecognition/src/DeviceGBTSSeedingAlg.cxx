@@ -172,14 +172,7 @@ StatusCode DeviceGBTSSeedingAlg::configureGBTS()
         }
     }
 
-    for (auto& pair : binGroups) {
-        bool barrel = (pair.first <= 83);  // unsigned, so `0 <= pair.first` is always true — dropped
-        if (barrel) {
-            pair.second.push_back(pair.first);
-        }
-    }
-
-    // traccc::gbts_seedfinder_config gbts_config;
+    
     if (!m_gbts_config.setLinkingScheme(binGroups, std::move(layerInfo), identifierBinning,
                                     900.0f, makeActsAthenaLogger(this, "GBTSConfig")))
         return StatusCode::FAILURE;

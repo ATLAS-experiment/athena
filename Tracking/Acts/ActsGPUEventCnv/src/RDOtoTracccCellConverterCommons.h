@@ -8,7 +8,7 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "ActsGPUEvent/TracccSiliconCellCollection.h"
-#include "ActsGPUEvent/TracccDetectorConditionsDescription.h"
+#include "ActsGPUEvent/TracccDetectorDesignDescription.h"
 #include "AthDeviceInterfaces/IMemoryResourceTool.h"
 #include "AthDeviceInterfaces/ICopiesTool.h"
 #include "InDetIdentifier/PixelID.h"
@@ -17,8 +17,7 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "ActsGPUEvent/GeometryIdMapping.h"
 
-#include <traccc/io/csv/cell.hpp>
-
+#include <atomic>
 #include <unordered_map>
 #include <cstdint>
 #include <bitset>
@@ -58,8 +57,13 @@ struct RDOtoTracccCellConverterCommons : public AthMessaging
 
   Gaudi::Property<std::string> m_geoIdMappingObjectName;
   const ActsTrk::GeometryIdMapping* m_geoIdMapping{nullptr};
-  Gaudi::Property<std::string> m_hostCondObjectName;
-  const traccc::detector_conditions_description::host* m_hostCond{nullptr};
+
+  // The detector design description is geometry-static (unlike the
+  // conditions description), so it is retrieved once in initialize()
+  // rather than through a per-event ReadCondHandle.
+  Gaudi::Property<std::string> m_hostDesignObjectName;
+  const traccc::detector_design_description::host* m_hostDesign{nullptr};
+
 
   Gaudi::Property<bool> m_CPUCellSorting;
   Gaudi::Property<bool> m_UsePixelToTForCellActivation;

@@ -321,9 +321,9 @@ StatusCode TracccMeasurementConverterAlg::execute(const EventContext& ctx) const
 
         // using width to scale the cluster covariance for space points
         float covTerm = width_phiRZ * width_phiRZ * (1/12.0f);
+        
         if( covTerm < localCovariance(1, 1) )
             covTerm = localCovariance(1, 1);
-
 
         const Amg::Transform3D& Tp = pDE->surface().transform();
         float const cov_z =

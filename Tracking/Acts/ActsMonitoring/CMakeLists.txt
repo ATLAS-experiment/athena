@@ -13,7 +13,7 @@ atlas_add_component( ActsMonitoring
    src/*.h src/*.cxx
    src/components/*.cxx
    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
-   LINK_LIBRARIES ${CLHEP_LIBRARIES} Acts::Core ActsCalibratorsLib ActsEventLib ActsGeometryInterfacesLib ActsGeometryLib
+   LINK_LIBRARIES ${CLHEP_LIBRARIES} Acts::Core ActsCalibratorsLib ActsEventLib ActsGPUEventLib ActsGeometryInterfacesLib ActsGeometryLib
    ActsInteropLib ActsToolInterfacesLib ActsTruthLib AsgDataHandlesLib AthAllocators AthContainers AthenaBaseComps
    AthenaKernel AthenaMonitoringKernelLib AthenaMonitoringLib BeamSpotConditionsData CxxUtils GaudiKernel GeoPrimitives
    HGTD_Identifier HGTD_ReadoutGeometry Identifier InDetCondTools InDetIdentifier InDetMeasurementUtilitiesLib InDetPrepRawData

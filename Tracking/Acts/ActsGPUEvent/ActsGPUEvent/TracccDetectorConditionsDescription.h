@@ -6,6 +6,7 @@
 
 // Framework include(s).
 #include "AthenaKernel/CLASS_DEF.h"
+#include "AthenaKernel/CondCont.h"
 
 // Local include(s).
 #include "ActsGPUEvent/VecMemSoASGHelpers.h"
@@ -20,6 +21,11 @@ CLASS_DEF(traccc::detector_conditions_description::const_data, 262230451, 1)
 CLASS_DEF(traccc::detector_conditions_description::view, 148971970, 1)
 CLASS_DEF(traccc::detector_conditions_description::const_view, 159787296, 1)
 CLASS_DEF(traccc::detector_conditions_description::host, 189199167, 1)
+
+// Declare CondCont identifiers for the types stored in the conditions store.
+CONDCONT_DEF(traccc::detector_conditions_description::host, 208364871);
+CONDCONT_DEF(traccc::detector_conditions_description::buffer, 145671302);
+CONDCONT_DEF(traccc::detector_conditions_description::const_view, 231884503);
 
 // Declare all conversion rules for StoreGate.
 SG_ADD_VECMEM_SOA_CONVERSIONS(traccc::detector_conditions_description,

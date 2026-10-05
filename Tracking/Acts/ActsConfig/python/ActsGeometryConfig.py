@@ -12,6 +12,7 @@ def ActsTrackingGeometrySvcCfg(flags,
   kwargs.setdefault("NotAlignDetectors", [DetectorType.Trt,
                                           DetectorType.Hgtd])
   kwargs.setdefault("UseBlueprint", flags.Acts.TrackingGeometry.UseBlueprint)
+  kwargs.setdefault("BuildDetrayGeometry", flags.Acts.TrackingGeometry.BuildDetrayGeometry)
   kwargs.setdefault("ObjDebugOutput", flags.Acts.TrackingGeometry.ObjDebugOutput)
   kwargs.setdefault("KeepGoingOnMaterialMergeFailure", flags.Acts.TrackingGeometry.KeepGoingOnMaterialMergeFailure)
 

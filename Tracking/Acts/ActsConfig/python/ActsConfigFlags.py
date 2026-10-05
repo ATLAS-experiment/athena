@@ -150,6 +150,7 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.TrackingGeometry.MaterialCalibrationFolder', 'ACTS/MaterialMaps/ITk')
     actscf.addFlag('Acts.TrackingGeometry.MaterialFileExtension', '')
     actscf.addFlag('Acts.TrackingGeometry.UseBlueprint', False)
+    actscf.addFlag('Acts.TrackingGeometry.BuildDetrayGeometry', False)
     actscf.addFlag('Acts.TrackingGeometry.ObjDebugOutput', False)
     actscf.addFlag('Acts.TrackingGeometry.KeepGoingOnMaterialMergeFailure', False)
     # ITkMaterialSource can be:

@@ -8,6 +8,7 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
+#include "StoreGate/ReadCondHandleKey.h"
 
 #include "IDeviceClusterizationAlgProviderTool.h"
 #include "AthDeviceInterfaces/IMemoryResourceTool.h"
@@ -62,9 +63,6 @@ private:
     Gaudi::Property<std::string> m_deviceDesignObjectName{
         this, "DeviceDigitizationObjectName", "TracccDeviceDigitizationConfig",
         "Traccc device digitization object"};
-    Gaudi::Property<std::string> m_deviceCondObjectName{
-        this, "DeviceConditionsObjectName", "TracccDeviceConditionsConfig",
-        "Traccc device conditions object"};
     /// @}
 
     /// @name The tool that provides backend-specific traccc clusterization algorithms
@@ -93,8 +91,9 @@ private:
 
     // Device buffers — retrieved from detStore
     const traccc::detector_design_description::const_view* m_deviceDesign{nullptr};
-    const traccc::detector_conditions_description::const_view* m_deviceCond{nullptr};
-
+    SG::ReadCondHandleKey<traccc::detector_conditions_description::buffer> m_deviceCondObjectName{
+        this, "DeviceConditionsObjectName", "TracccDeviceConditionsConfig",
+        "Traccc device conditions object"};
 };
 
 } // namespace ActsTrk

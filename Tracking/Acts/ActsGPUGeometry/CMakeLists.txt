@@ -19,8 +19,10 @@ atlas_add_component( ActsGPUGeometry
     PathResolver
     InDetIdentifier
     ActsGeometryInterfacesLib
+    ActsGeometryLib
     ActsGPUEventLib
     ActsGPUInterfacesLib
+    SiSpacePointFormationLib
     PixelReadoutGeometryLib
     SCT_ReadoutGeometry
 )

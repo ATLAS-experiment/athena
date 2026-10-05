@@ -25,13 +25,13 @@ RDOtoTracccCellConverterCommons::RDOtoTracccCellConverterCommons(
   , m_copiesTool{&parent, "CopiesTool", "", "Tool that provides host and device copy objects"}
   , m_geoIdMappingObjectName{&parent, "GeoIdMappingObjectName", "",
       "StoreGate name for the detray/acts/athena geo id mapping"} 
-  , m_hostCondObjectName{&parent, "HostConditionsObjectName", "",
-      "Traccc host conditions object"}
+  , m_hostDesignObjectName{&parent, "HostDigitizationObjectName", "",
+      "Traccc host digitization object"}
   , m_CPUCellSorting{&parent, "CPUCellSorting", false,
       "Whether to sort traccc cells on CPU or GPU"}
   , m_UsePixelToTForCellActivation{&parent, "UsePixelToTForCellActivation", true,
       "Use Pixel hit time over threshold value to set traccc cell activation value, otherwise defaults to 1"}
-  , m_stripRDOTimeBinStr{&parent, "timeBins", "Allowed time bins pattern for Strip RDOs"} 
+  , m_stripRDOTimeBinStr{&parent, "timeBins", "Allowed time bins pattern for Strip RDOs"}
 {
 }
 
@@ -45,7 +45,7 @@ StatusCode RDOtoTracccCellConverterCommons::initialize()
   ATH_CHECK(m_copiesTool.retrieve());
 
   ATH_CHECK(m_parent.detStore()->retrieve(m_geoIdMapping, m_geoIdMappingObjectName.value()));
-  ATH_CHECK(m_parent.detStore()->retrieve(m_hostCond, m_hostCondObjectName.value()));
+  ATH_CHECK(m_parent.detStore()->retrieve(m_hostDesign, m_hostDesignObjectName.value()));
 
   ATH_CHECK(decodeTimeBins());
 

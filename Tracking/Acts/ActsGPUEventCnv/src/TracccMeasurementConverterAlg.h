@@ -110,7 +110,7 @@ private:
   /// @name The copy tool used for copying data from device
   ToolHandle<AthDevice::ICopyTool> m_copy{
       this, "CopyProviderTool", "", "Vecmem copy provider tool"};
-  /// @name The map object providing the Athena<->Detray ID map
+  /// @name The map object holding the Athena<->ACTS<->Detray ID maps
   Gaudi::Property<std::string> m_geoIdMappingObjectName{this, "GeoIdMapping", "", "ID mapping between the three detector description realms."};
   const ActsTrk::GeometryIdMapping* m_idMapping{nullptr};
 

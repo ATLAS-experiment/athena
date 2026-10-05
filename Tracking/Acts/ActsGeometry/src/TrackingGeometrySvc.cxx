@@ -1369,6 +1369,8 @@ StatusCode TrackingGeometrySvc::buildDetrayGeometry() {
 
   ActsPlugins::DetrayGeometryConverter::Config converterConfig{};
   converterConfig.payloadConverter = std::move(payloadConverter);
+  converterConfig.convertSurfaceGrids = m_buildDetraySurfaceGrids;
+  converterConfig.convertMaterial = m_buildDetrayMaterial;
 
   ActsPlugins::DetrayGeometryConverter converter(
       std::move(converterConfig),

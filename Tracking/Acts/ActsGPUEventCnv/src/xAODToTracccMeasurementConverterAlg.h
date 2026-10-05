@@ -6,6 +6,7 @@
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "GaudiKernel/ToolHandle.h"
 
@@ -114,21 +115,18 @@ private:
   Gaudi::Property<std::string> m_geoIdMappingObjectName{
       this, "GeoIdMappingObjectName", "TracccGeometryIdMapping",
       "StoreGate name for the detray/acts/athena geo id mapping"};
-  Gaudi::Property<std::string> m_hostCondObjectName{
+  SG::ReadCondHandleKey<traccc::detector_conditions_description::host> m_hostCondKey{
       this, "HostConditionsObjectName", "TracccHostCondConfig",
       "Traccc host conditions object"};
   Gaudi::Property<std::string> m_hostDesignObjectName{
       this, "HostDigitizationObjectName", "TracccHostDigitizationConfig",
       "Traccc host digitization object"};
   const ActsTrk::GeometryIdMapping* m_geoIdMapping{nullptr};
-  const traccc::detector_conditions_description::host* m_hostCond{nullptr};
   const traccc::detector_design_description::host* m_hostDesign{nullptr};
   /// @}
 
   const PixelID* m_pixelID{nullptr};
   const SCT_ID* m_stripID{nullptr};
-
-  std::unordered_map<std::uint64_t, unsigned int> m_detrayIdToCondIndex{};
 
   /// The object counters for debug prints in finalize method
   /// {@

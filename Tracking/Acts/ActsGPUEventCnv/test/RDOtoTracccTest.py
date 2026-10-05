@@ -9,7 +9,7 @@ from ActsConfig.ActsPhaseIIRawDataEdmConfig import (
     PhaseIIPixelRawDataContainerCfg,
     PhaseIIStripRawDataContainerCfg,
     )
-from ActsGPUGeometry.ActsGPUGeometryConfig import JSONDeviceDetectorDescriptionProviderSvcCfg
+from ActsGPUGeometry.ActsGPUGeometryConfig import DeviceDetectorDescriptionCondAlgCfg
 from ActsGPUEventCnv.ActsGPUEventCnvConfig import (
     RDOtoTracccCellConverterAlgCfg,
     PhaseIIRDOtoTracccCellConverterAlgCfg,
@@ -31,7 +31,7 @@ PERFORMANCE_TESTING = False
 def RDOtoTracccCellConversionTest(flags, cpu_cell_sorting: bool) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    acc.merge(JSONDeviceDetectorDescriptionProviderSvcCfg(flags))
+    acc.merge(DeviceDetectorDescriptionCondAlgCfg(flags))
 
     Ph1Cells = "TracccCellsPh1"
     Ph2Cells = "TracccCellsPh2"
@@ -82,6 +82,13 @@ if __name__ == "__main__":
     flags = initConfigFlags()
 
     flags.Tracking.doPixelDigitalClustering = True
+    flags.Acts.TrackingGeometry.UseBlueprint = True
+    flags.Acts.TrackingGeometry.BuildDetrayGeometry = True
+
+    # Keep calo/muon out of the tracking geometry: the calo volumes cannot be
+    # converted to a consistent Detray geometry
+    from InDetConfig.ConfigurationHelpers import OnlyTrackingPreInclude
+    OnlyTrackingPreInclude(flags)
 
     if PERFORMANCE_TESTING:
         flags.Input.Files = [

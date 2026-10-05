@@ -68,4 +68,11 @@ atlas_add_test( ActsDeviceTrackingTest
    SCRIPT athena.py ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsDeviceTrackReconstructionTest.py Device.Backend=DeviceBackend.CUDA
    POST_EXEC_SCRIPT noerror.sh
    PROPERTIES SKIP_RETURN_CODE 2 )
+
+atlas_add_test( ActsDeviceLRTTest
+   PRE_EXEC_SCRIPT "nvidia-check.sh || exit 2"
+   ENVIRONMENT "PATHRESOLVER_DEVAREARESPONSE=WARNING"
+   SCRIPT athena.py ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsDeviceLargeRadiusTrackingTest.py Device.Backend=DeviceBackend.CUDA
+   POST_EXEC_SCRIPT noerror.sh
+   PROPERTIES SKIP_RETURN_CODE 2 )   
 endif()
