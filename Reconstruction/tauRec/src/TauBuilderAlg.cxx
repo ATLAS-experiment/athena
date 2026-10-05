@@ -137,24 +137,21 @@ StatusCode TauBuilderAlg::execute(const EventContext& ctx) const {
     for (const ToolHandle<ITauToolBase>& tool : m_tools) {
       ATH_MSG_DEBUG("ProcessorAlg Invoking tool " << tool->name());
 
-      if (tool->type() == "TauVertexFinder") {
-        sc = tool->executeVertexFinder(*pTau);
-      } else if (tool->type() == "TauTrackFinder") {
-        sc = tool->executeTrackFinder(*pTau, *pTauTrackCont);
+      if (tool->type() == "TauTrackFinder") {
+        sc = tool->executeTool(*pTau, ctx, *pTauTrackCont);
       } else if (tool->type() == "tauRecTools::TauTrackRNNClassifier") {
-        sc = tool->executeTrackClassifier(*pTau, *pTauTrackCont);
+        sc = tool->executeTool(*pTau, ctx, *pTauTrackCont);
 
         // skip candidate if it has too many classifiedCharged tracks, if
         // skimming is required
-        if (m_maxNTracks > 0 &&
-            static_cast<int>(pTau->nTracks()) > m_maxNTracks) {
+        if (m_maxNTracks > 0 && static_cast<int>(pTau->nTracks()) > m_maxNTracks) {
           sc = StatusCode::FAILURE;
           break;
         }
       } else if (tool->type() == "TauPi0CreateROI") {
-        sc = tool->executePi0CreateROI(*pTau, *Pi0CellContainer, addedCellsMap);
+        sc = tool->executeTool(*pTau, ctx, *Pi0CellContainer, addedCellsMap);
       } else {
-        sc = tool->execute(*pTau);
+        sc = tool->executeTool(*pTau, ctx);
       }
       if (sc.isFailure())
         break;

@@ -17,11 +17,12 @@ TauPi0ClusterCreator::TauPi0ClusterCreator(const std::string& name) :
 }
 
 
+StatusCode TauPi0ClusterCreator::executeTool(xAOD::TauJet& tau,
+					     const EventContext& /*ctx*/,
+					     xAOD::PFOContainer& neutralPFOContainer,
+					     xAOD::PFOContainer& hadronicPFOContainer,
+					     const xAOD::CaloClusterContainer& pi0ClusterContainer) const {
 
-StatusCode TauPi0ClusterCreator::executePi0ClusterCreator(xAOD::TauJet& tau,
-							  xAOD::PFOContainer& neutralPFOContainer,
-							  xAOD::PFOContainer& hadronicPFOContainer,
-							  const xAOD::CaloClusterContainer& pi0ClusterContainer) const {
   // Any tau needs to have PFO vectors. Set empty vectors before nTrack cut
   std::vector<ElementLink<xAOD::PFOContainer>> empty;
   tau.setProtoNeutralPFOLinks(empty);

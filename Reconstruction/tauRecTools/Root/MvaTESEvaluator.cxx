@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // local include(s)
@@ -27,7 +27,8 @@ StatusCode MvaTESEvaluator::initialize(){
 }
 
 
-StatusCode MvaTESEvaluator::execute(xAOD::TauJet& xTau) const {
+StatusCode MvaTESEvaluator::executeTool(xAOD::TauJet& xTau,
+					const EventContext& /*ctx*/) const {
 
   std::map<TString, float*> availableVars;
   MvaInputVariables vars;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUPI0SCORECALCULATOR_H
@@ -32,7 +32,11 @@ public:
   virtual ~TauPi0ScoreCalculator() = default;
 
   virtual StatusCode initialize() override;
-  virtual StatusCode executePi0nPFO(xAOD::TauJet& pTau, xAOD::PFOContainer& pNeutralPFOContainer) const override;
+
+  using TauRecToolBase::executeTool;
+  virtual StatusCode executeTool(xAOD::TauJet& pTau,
+				 const EventContext& ctx,
+				 xAOD::PFOContainer& pNeutralPFOContainer) const override;
 
 private:
   

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PANTAU_PANTAUPROCESSOR_H
@@ -49,7 +49,12 @@ namespace PanTau
 
        virtual StatusCode initialize();
        virtual StatusCode finalize();
-       virtual StatusCode executePanTau(xAOD::TauJet& pTau, xAOD::ParticleContainer& pi0Container, xAOD::PFOContainer& neutralPFOContainer) const;
+
+       using TauRecToolBase::executeTool;
+       virtual StatusCode executeTool(xAOD::TauJet& pTau,
+				      const EventContext& ctx,
+				      xAOD::ParticleContainer& pi0Container,
+				      xAOD::PFOContainer& neutralPFOContainer) const;
        
     private:
         

@@ -130,8 +130,9 @@ StatusCode TauCombinedTES::initialize() {
 }
 
 
+StatusCode TauCombinedTES::executeTool(xAOD::TauJet& tau,
+				       const EventContext& /*ctx*/) const {
 
-StatusCode TauCombinedTES::execute(xAOD::TauJet& tau) const {
   TLorentzVector combinedP4(tau.p4(xAOD::TauJetParameters::TauEnergyScale));
 
   // Parameterization is only valid for |eta| < 2.5, and decay modes of 1p0n, 1p1n, 1pXn, 3p0n, 3pXn

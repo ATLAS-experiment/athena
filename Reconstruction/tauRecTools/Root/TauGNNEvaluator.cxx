@@ -120,8 +120,10 @@ std::unique_ptr<TauGNN> TauGNNEvaluator::load_network(const std::string& network
   return net;
 }
 
-StatusCode TauGNNEvaluator::execute(xAOD::TauJet &tau) const {
+StatusCode TauGNNEvaluator::executeTool(xAOD::TauJet &tau,
+					const EventContext& /*ctx*/) const {
   // Output variable Decorators
+  // FIXME: now that we have the EventContext we should replace accessors with data handles
   const SG::Accessor<float> output(m_output_varname);
   const SG::Accessor<float> out_ptau(m_output_ptau);
   const SG::Accessor<float> out_pjet(m_output_pjet);

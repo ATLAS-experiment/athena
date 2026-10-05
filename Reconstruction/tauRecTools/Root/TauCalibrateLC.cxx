@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauCalibrateLC.h"
@@ -97,7 +97,8 @@ StatusCode TauCalibrateLC::initialize() {
 }
 
 /********************************************************************/
-StatusCode TauCalibrateLC::execute(xAOD::TauJet& tau) const
+StatusCode TauCalibrateLC::executeTool(xAOD::TauJet& tau,
+				       const EventContext& ctx) const
 { 
   // get IntermediateAxis or DetectorAxis momentum
   auto tau_p4 = m_doVertexCorrection ? tau.p4(xAOD::TauJetParameters::IntermediateAxis) : tau.p4(xAOD::TauJetParameters::DetectorAxis);
@@ -122,7 +123,7 @@ StatusCode TauCalibrateLC::execute(xAOD::TauJet& tau) const
   int nVertex = 0;
     
   // Obtain pileup
-  SG::ReadHandle<xAOD::VertexContainer> vertexInHandle( m_vertexInputContainer );
+  SG::ReadHandle<xAOD::VertexContainer> vertexInHandle(m_vertexInputContainer, ctx);
   if (!vertexInHandle.isValid()) {
     ATH_MSG_ERROR ("Could not retrieve HiveDataObj with key " << vertexInHandle.key());
     return StatusCode::FAILURE;

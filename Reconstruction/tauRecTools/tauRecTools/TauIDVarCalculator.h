@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //! This class implements a tool to calculate ID input variables and add them to the tau aux store
@@ -25,7 +25,9 @@ public:
   
   virtual ~TauIDVarCalculator() = default;
 
-  virtual StatusCode execute(xAOD::TauJet&) const override;
+  using TauRecToolBase::executeTool;
+  virtual StatusCode executeTool(xAOD::TauJet& tau,
+				 const EventContext& ctx) const override;
 
   static const float LOW_NUMBER;
 

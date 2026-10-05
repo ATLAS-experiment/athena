@@ -191,7 +191,8 @@ StatusCode TauWPDecorator::initialize() {
 }
 
 //______________________________________________________________________________
-StatusCode TauWPDecorator::execute(xAOD::TauJet& tau) const { 
+StatusCode TauWPDecorator::executeTool(xAOD::TauJet& tau,
+				       const EventContext& ctx) const { 
   // obtain the dependent variables of the efficiency 
   // x variable is tau pt
   double xVariable = tau.pt();
@@ -203,7 +204,7 @@ StatusCode TauWPDecorator::execute(xAOD::TauJet& tau) const {
     yVariable = std::abs(acc_absEta(tau));
   } 
   else {
-    SG::ReadDecorHandle<xAOD::EventInfo, float> eventInfoDecorHandle( m_aveIntPerXKey );
+    SG::ReadDecorHandle<xAOD::EventInfo, float> eventInfoDecorHandle(m_aveIntPerXKey, ctx);
     if (!eventInfoDecorHandle.isPresent()) {
       ATH_MSG_ERROR( "EventInfo decoration " << m_aveIntPerXKey << " not available!" );
       return StatusCode::FAILURE;  

@@ -36,8 +36,9 @@ StatusCode TauVertexVariables::initialize() {
 //-----------------------------------------------------------------------------
 // Execution
 //-----------------------------------------------------------------------------
-StatusCode TauVertexVariables::executeVertexVariables(xAOD::TauJet& pTau, xAOD::VertexContainer& pSecVtxContainer) const {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
+StatusCode TauVertexVariables::executeTool(xAOD::TauJet& pTau,
+					   const EventContext& ctx,
+					   xAOD::VertexContainer& pSecVtxContainer) const {
 
   ElementLink<xAOD::VertexContainer> empty;
   pTau.setSecondaryVertexLink(empty);

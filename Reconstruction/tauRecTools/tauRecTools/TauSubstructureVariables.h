@@ -28,7 +28,9 @@ public:
 
   virtual ~TauSubstructureVariables() = default;
 
-  virtual StatusCode execute(xAOD::TauJet& tau) const override;
+  using TauRecToolBase::executeTool;
+  virtual StatusCode executeTool(xAOD::TauJet& tau,
+				 const EventContext& ctx) const override;
 
   static const float DEFAULT;
 

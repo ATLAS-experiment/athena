@@ -50,8 +50,10 @@ StatusCode TauTrackFinder::initialize() {
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-StatusCode TauTrackFinder::executeTrackFinder(xAOD::TauJet& pTau, xAOD::TauTrackContainer& tauTrackCon) const {
-  const EventContext &ctx = Gaudi::Hive::currentContext();
+StatusCode TauTrackFinder::executeTool(xAOD::TauJet& pTau,
+				       const EventContext& ctx,
+				       xAOD::TauTrackContainer& tauTrackCon) const {
+
   std::vector<const xAOD::TrackParticle*> tauTracks;
   std::vector<const xAOD::TrackParticle*> wideTracks;
   std::vector<const xAOD::TrackParticle*> otherTracks;

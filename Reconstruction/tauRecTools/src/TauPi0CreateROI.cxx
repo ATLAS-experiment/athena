@@ -24,14 +24,17 @@ StatusCode TauPi0CreateROI::initialize() {
 
 
 
-StatusCode TauPi0CreateROI::executePi0CreateROI(xAOD::TauJet& tau, CaloConstCellContainer& pi0CellContainer, boost::dynamic_bitset<>& addedCellsMap) const {
+StatusCode TauPi0CreateROI::executeTool(xAOD::TauJet& tau,
+					const EventContext& ctx,
+					CaloConstCellContainer& pi0CellContainer,
+					boost::dynamic_bitset<>& addedCellsMap) const {
 
   // only run on 0-5 prong taus
   if (!tauRecTools::doPi0andShots(tau)) {
     return StatusCode::SUCCESS;
   }  
 
-  SG::ReadHandle<CaloCellContainer> caloCellInHandle( m_caloCellInputContainer );
+  SG::ReadHandle<CaloCellContainer> caloCellInHandle( m_caloCellInputContainer, ctx );
   if (!caloCellInHandle.isValid()) {
     ATH_MSG_ERROR ("Could not retrieve HiveDataObj with key " << caloCellInHandle.key());
     return StatusCode::FAILURE;
@@ -40,7 +43,7 @@ StatusCode TauPi0CreateROI::executePi0CreateROI(xAOD::TauJet& tau, CaloConstCell
   const CaloCellContainer *cellContainer = caloCellInHandle.cptr();
   std::vector<const CaloCell*> removed_cells;
   if (inEleRM() && m_removeElectronCells){
-    SG::ReadHandle<xAOD::CaloClusterContainer> removedClustersHandle( m_removedClusterInputContainer );
+    SG::ReadHandle<xAOD::CaloClusterContainer> removedClustersHandle( m_removedClusterInputContainer, ctx );
     if (!removedClustersHandle.isValid()){
       ATH_MSG_ERROR ("Could not retrieve HiveDataObj with key " << removedClustersHandle.key());
       return StatusCode::FAILURE;
@@ -54,7 +57,7 @@ StatusCode TauPi0CreateROI::executePi0CreateROI(xAOD::TauJet& tau, CaloConstCell
     }
   }
   
-  SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey};
+  SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle(m_caloMgrKey, ctx);
   const CaloDetDescrManager* caloDDMgr = *caloMgrHandle;
   
   // get only EM cells within dR < 0.4

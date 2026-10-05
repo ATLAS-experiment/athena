@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauPi0ScoreCalculator.h"
@@ -7,11 +7,9 @@
 #include "xAODPFlow/PFO.h"
 
 
-
 TauPi0ScoreCalculator::TauPi0ScoreCalculator(const std::string& name) :
     TauRecToolBase(name) {
 }
-
 
 
 StatusCode TauPi0ScoreCalculator::initialize() {
@@ -24,8 +22,9 @@ StatusCode TauPi0ScoreCalculator::initialize() {
 }
 
 
-
-StatusCode TauPi0ScoreCalculator::executePi0nPFO(xAOD::TauJet& pTau, xAOD::PFOContainer& neutralPFOContainer) const {
+StatusCode TauPi0ScoreCalculator::executeTool(xAOD::TauJet& pTau,
+					      const EventContext& /*ctx*/,
+					      xAOD::PFOContainer& neutralPFOContainer) const {
   // Only run on 0-5 prong taus 
   if (!tauRecTools::doPi0andShots(pTau)) {
     return StatusCode::SUCCESS;
@@ -40,7 +39,6 @@ StatusCode TauPi0ScoreCalculator::executePi0nPFO(xAOD::TauJet& pTau, xAOD::PFOCo
 
   return StatusCode::SUCCESS;
 }
-
 
 
 float TauPi0ScoreCalculator::calculateScore(const xAOD::PFO* neutralPFO) const {

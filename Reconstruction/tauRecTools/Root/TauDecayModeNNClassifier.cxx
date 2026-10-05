@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // local include(s)
@@ -73,7 +73,8 @@ StatusCode TauDecayModeNNClassifier::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode TauDecayModeNNClassifier::execute(xAOD::TauJet &xTau) const
+StatusCode TauDecayModeNNClassifier::executeTool(xAOD::TauJet& xTau,
+						 const EventContext& /*ctx*/) const
 {
   // inputs
   // ------

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUCELLVARIABLES_H
@@ -26,7 +26,9 @@ class TauCellVariables : public TauRecToolBase {
     virtual ~TauCellVariables() = default;
     
     /** @brief Perform the calculation of cell variables for each tau candidate */
-    virtual StatusCode execute(xAOD::TauJet& pTau) const override;
+    using TauRecToolBase::executeTool;
+    virtual StatusCode executeTool(xAOD::TauJet& pTau,
+				   const EventContext& ctx) const override;
 
   private:
     

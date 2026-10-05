@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_JETSEEDBUILDER_H
@@ -26,8 +26,10 @@ class JetSeedBuilder : public TauRecToolBase {
     /** @brief Destructor */
     virtual ~JetSeedBuilder();
 
-    /** @brief Executation of this tool */ 
-    virtual StatusCode execute(xAOD::TauJet& pTau) const override;
+    /** @brief Execution of this tool */ 
+    using TauRecToolBase::executeTool;
+    virtual StatusCode executeTool(xAOD::TauJet& pTau,
+				   const EventContext& ctx) const override;
 };
 
 #endif // TAURECTOOLS_JETSEEDBUILDER_H

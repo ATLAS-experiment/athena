@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -10,7 +10,7 @@ TauVertexFinder::TauVertexFinder(const std::string& name ) :
 
 TauVertexFinder::~TauVertexFinder() {}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
 StatusCode TauVertexFinder::initialize() {
   ATH_CHECK( m_vertexInputContainer.initialize(SG::AllowEmpty) );
  
@@ -23,14 +23,23 @@ StatusCode TauVertexFinder::initialize() {
   return StatusCode::SUCCESS;
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-StatusCode TauVertexFinder::executeVertexFinder(xAOD::TauJet& pTau,
-                                                const xAOD::VertexContainer* vertexContainer) const 
+
+StatusCode TauVertexFinder::executeTool(xAOD::TauJet& pTau,
+                                        const EventContext& ctx) const
+{
+  const xAOD::VertexContainer* vertexContainer = nullptr;
+  return executeTool(pTau, ctx, vertexContainer);
+}
+
+
+StatusCode TauVertexFinder::executeTool(xAOD::TauJet& pTau,
+					const EventContext& ctx,
+					const xAOD::VertexContainer* vertexContainer) const 
 {
   const xAOD::VertexContainer * vxContainer = nullptr;
 
   if (!m_vertexInputContainer.empty()) {
-    SG::ReadHandle<xAOD::VertexContainer> vertexInHandle( m_vertexInputContainer );
+    SG::ReadHandle<xAOD::VertexContainer> vertexInHandle( m_vertexInputContainer, ctx );
     if (!vertexInHandle.isValid()) {
       ATH_MSG_ERROR ("Could not retrieve HiveDataObj with key " << vertexInHandle.key());
       return StatusCode::FAILURE;
@@ -56,7 +65,7 @@ StatusCode TauVertexFinder::executeVertexFinder(xAOD::TauJet& pTau,
     primaryVertex = (*vxContainer)[0];
   }
   else { // offline: the first and only primary vertex candidate is picked
-    for (const auto vertex : *vxContainer) {
+    for (const auto* vertex : *vxContainer) {
       if (vertex->vertexType() ==  xAOD::VxType::PriVtx) {
         primaryVertex = vertex;
         break;
@@ -96,7 +105,7 @@ StatusCode TauVertexFinder::executeVertexFinder(xAOD::TauJet& pTau,
   return StatusCode::SUCCESS;
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
 ElementLink<xAOD::VertexContainer>
 TauVertexFinder::getPV_TJVA(const xAOD::TauJet& pTau,
                             const xAOD::VertexContainer& vertices,
@@ -105,7 +114,7 @@ TauVertexFinder::getPV_TJVA(const xAOD::TauJet& pTau,
   const xAOD::Jet* pJetSeed = pTau.jet();
   std::vector<const xAOD::TrackParticle*> tracksForTJVA;
 
-  // the implementation follows closely the example given in modifyJet(...) in https://svnweb.cern.ch/trac/atlasoff/browser/Reconstruction/Jet/JetMomentTools/trunk/Root/JetVertexFractionTool.cxx#15
+  // the implementation follows closely the example given in modifyJet(...) in JetVertexFractionTool
 
   std::vector<const xAOD::TrackParticle*> assocTracks;
   if (! pJetSeed->getAssociatedObjects(m_assocTracksName, assocTracks)) {
@@ -231,7 +240,7 @@ std::pair<float,float> TauVertexFinder::getVertexScores(const std::vector<const 
 
   float sumTrackPV = 0.;
   float sumDeltaZ = 0.;
-  for (auto trk : tracks){
+  for (const auto* trk : tracks){
     sumTrackPV += trk->pt();
     sumDeltaZ += std::abs(trk->z0() - vx_z + trk->vz());
   }

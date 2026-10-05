@@ -24,7 +24,7 @@ namespace FlavorTagInference {
 
     const std::vector<const xAOD::TrackMeasurementValidation*> ConstituentLoaderTauHit::getParticleHits(const xAOD::IParticle& p) const
     {
-        static const SG::AuxElement::ConstAccessor<std::vector<ElementLink<xAOD::TrackMeasurementValidationContainer>>> hitsHandle(m_hits_key);
+        static const SG::ConstAccessor<std::vector<ElementLink<xAOD::TrackMeasurementValidationContainer>>> hitsHandle(m_hits_key);
 
         std::vector<const xAOD::TrackMeasurementValidation*> hits;
         for(const ElementLink<xAOD::TrackMeasurementValidationContainer>& el : hitsHandle(p)) {

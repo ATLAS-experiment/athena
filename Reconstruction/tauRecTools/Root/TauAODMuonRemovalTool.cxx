@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauAODMuonRemovalTool.h"
@@ -16,9 +16,11 @@ StatusCode TauAODMuonRemovalTool::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode TauAODMuonRemovalTool::execute(xAOD::TauJet& tau) const {
+StatusCode TauAODMuonRemovalTool::executeTool(xAOD::TauJet& tau,
+					      const EventContext& ctx) const {
+
     // Read in muon container
-    SG::ReadHandle<xAOD::MuonContainer> muon_input_handle(m_muonInputContainer);
+    SG::ReadHandle<xAOD::MuonContainer> muon_input_handle(m_muonInputContainer, ctx);
     if (bool fail_muon = !muon_input_handle.isValid(); fail_muon) {
         ATH_MSG_ERROR( "Could not retrieve Muon container with key " + muon_input_handle.key() );
         return StatusCode::FAILURE;

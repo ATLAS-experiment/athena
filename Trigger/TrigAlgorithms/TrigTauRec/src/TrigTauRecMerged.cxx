@@ -437,9 +437,9 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
             // both Pixel and Strips. It is ok, because the pre-processing pipeline required to
             // attach the hit ELs to the TauJet includes calls to HitDecoratorAlg, so the
             // decorations will always be there, no matter how the scheduler organizes the execution.
-            static const SG::AuxElement::ConstAccessor<float> x("HitsXRelToBeamspot");
-            static const SG::AuxElement::ConstAccessor<float> y("HitsYRelToBeamspot");
-            static const SG::AuxElement::ConstAccessor<float> z("HitsZRelToBeamspot");
+            static const SG::ConstAccessor<float> x("HitsXRelToBeamspot");
+            static const SG::ConstAccessor<float> y("HitsYRelToBeamspot");
+            static const SG::ConstAccessor<float> z("HitsZRelToBeamspot");
 
             for(size_t i = 0; i < inputTauContainer->size(); ++i) {
                 const xAOD::TauJet* inputTau = inputTauContainer->at(i);
@@ -526,7 +526,7 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
     for(const auto& tool : m_vertexFinderTools) {
         ATH_MSG_DEBUG("Starting Tool: " << tool->name());
 
-        processStatus = tool->executeVertexFinder(*tau, RoIVxContainer);
+        processStatus = tool->executeTool(*tau, ctx, RoIVxContainer);
 
         if(!processStatus.isFailure()) {
             ATH_MSG_DEBUG(" " << tool->name() << " executed successfully");
@@ -540,7 +540,7 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
         if(!processStatus.isFailure()) ATH_MSG_DEBUG("Starting Tool: " << tool->name());
         else break;
 
-        processStatus = tool->execute(*tau);
+        processStatus = tool->executeTool(*tau, ctx);
 
         if(!processStatus.isFailure()) {
             ATH_MSG_DEBUG(" " << tool->name() << " executed successfully");
@@ -554,7 +554,7 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
         if(!processStatus.isFailure()) ATH_MSG_DEBUG("Starting Tool: " << tool->name());
         else break;
 
-        processStatus = tool->executeTrackFinder(*tau, *tauTrackHandle);
+        processStatus = tool->executeTool(*tau, ctx, *tauTrackHandle);
 
         if(!processStatus.isFailure()) {
             ATH_MSG_DEBUG(" " << tool->name() << " executed successfully");
@@ -568,7 +568,7 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
         if(!processStatus.isFailure()) ATH_MSG_DEBUG("Starting Tool: " << tool->name());
         else break;
 
-        processStatus = tool->execute(*tau);
+        processStatus = tool->executeTool(*tau, ctx);
 
         if(!processStatus.isFailure()) {
             ATH_MSG_DEBUG(" " << tool->name() << " executed successfully");
@@ -584,7 +584,7 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
         if(!processStatus.isFailure()) ATH_MSG_DEBUG("Starting Tool: " << tool->name());
         else break;
 
-        processStatus = tool->executeVertexVariables(*tau, dummyVxCont);
+        processStatus = tool->executeTool(*tau, ctx, dummyVxCont);
 
         if(!processStatus.isFailure()) {
             ATH_MSG_DEBUG(" " << tool->name() << " executed successfully");
@@ -598,7 +598,7 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
         if(!processStatus.isFailure()) ATH_MSG_DEBUG("Starting Tool: " << tool->name());
         else break;
 
-        processStatus = tool->execute(*tau);
+        processStatus = tool->executeTool(*tau, ctx);
 
         if(!processStatus.isFailure()) {
             ATH_MSG_DEBUG(" " << tool->name() << " executed successfully");
@@ -760,7 +760,7 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
         tau->detail(xAOD::TauJetParameters::EMPOverTrkSysP, EMPOverTrkSysP);
         tau->detail(xAOD::TauJetParameters::ChPiEMEOverCaloEME, ChPiEMEOverCaloEME);
 
-        if(tau->vertexLink().isValid() && tau->vertex() && tau->vertex()->vertexType() != xAOD::VxType::NoVtx) {
+        if(tau->vertex()!=nullptr && tau->vertex()->vertexType() != xAOD::VxType::NoVtx) {
             vertex_x = tau->vertex()->x();
             vertex_y = tau->vertex()->y();       
             vertex_z = tau->vertex()->z();

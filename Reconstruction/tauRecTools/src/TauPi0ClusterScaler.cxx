@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -15,10 +15,11 @@ TauPi0ClusterScaler::TauPi0ClusterScaler(const std::string& name) :
 }
 
 
+StatusCode TauPi0ClusterScaler::executeTool(xAOD::TauJet& tau,
+					    const EventContext& /*ctx*/,
+					    xAOD::PFOContainer& neutralPFOContainer,
+					    xAOD::PFOContainer& chargedPFOContainer) const {
 
-StatusCode TauPi0ClusterScaler::executePi0ClusterScaler(xAOD::TauJet& tau, 
-                                                        xAOD::PFOContainer& neutralPFOContainer, 
-                                                        xAOD::PFOContainer& chargedPFOContainer) const {
   // Clear vector of cell-based charged PFO Links, which are required when running xAOD 
   tau.clearProtoChargedPFOLinks();
  

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ATHLYSIS
@@ -15,7 +15,8 @@ TauClusterFinder::TauClusterFinder(const std::string& name) :
 }
 
 
-StatusCode TauClusterFinder::execute(xAOD::TauJet& tau) const {
+StatusCode TauClusterFinder::executeTool(xAOD::TauJet& tau,
+					 const EventContext& /*ctx*/) const {
   tau.clearClusterLinks();
     
   if (tau.jet() == nullptr) {

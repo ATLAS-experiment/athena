@@ -92,7 +92,7 @@ namespace DerivationFramework {
 
       // pass the shallow copy to the tools
       for (const auto& tool : m_tauIDTools) {
-        ATH_CHECK( tool->execute(*tau) );
+        ATH_CHECK( tool->executeTool(*tau, ctx) );
       }
 
       // copy over the relevant decorations (scores and working points)

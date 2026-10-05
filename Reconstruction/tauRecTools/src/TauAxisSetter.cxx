@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -10,7 +10,8 @@
 TauAxisSetter::TauAxisSetter(const std::string& name) :
 TauRecToolBase(name) {}
 
-StatusCode TauAxisSetter::execute(xAOD::TauJet& tau) const {
+StatusCode TauAxisSetter::executeTool(xAOD::TauJet& tau,
+				      const EventContext& /*ctx*/) const {
 
   if (tau.jet() == nullptr) {
     ATH_MSG_ERROR("Tau jet link is invalid.");

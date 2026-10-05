@@ -31,7 +31,8 @@ TauCommonCalcVars::~TauCommonCalcVars() {
 //-----------------------------------------------------------------------------
 // Execution
 //-----------------------------------------------------------------------------
-StatusCode TauCommonCalcVars::execute(xAOD::TauJet& pTau) const {
+StatusCode TauCommonCalcVars::executeTool(xAOD::TauJet& pTau,
+					  const EventContext& /*ctx*/) const {
 
   /////////////////////////////////////////////////
   // Calculate variables that are always valid   

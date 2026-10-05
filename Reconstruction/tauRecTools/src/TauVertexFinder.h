@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024  CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUVERTEXFINDER_H
@@ -36,11 +36,17 @@ public:
   ~TauVertexFinder();
 
   //-------------------------------------------------------------
-  //! Algorithm functions
+  //! Tool functions
   //-------------------------------------------------------------
   StatusCode initialize() override;
-  StatusCode executeVertexFinder(xAOD::TauJet& pTau,
-                                const xAOD::VertexContainer* vertexContainer = nullptr) const override;
+
+  using TauRecToolBase::executeTool;
+  StatusCode executeTool(xAOD::TauJet& pTau,
+			 const EventContext& ctx) const override;
+
+  StatusCode executeTool(xAOD::TauJet& pTau,
+			 const EventContext& ctx,
+			 const xAOD::VertexContainer* vertexContainer) const override;
 
 private:
   ElementLink<xAOD::VertexContainer>

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // local include(s)
@@ -25,13 +25,14 @@ StatusCode MvaTESVariableDecorator::initialize() {
 }
 
 
+StatusCode MvaTESVariableDecorator::executeTool(xAOD::TauJet& xTau,
+						const EventContext& ctx) const {
 
-StatusCode MvaTESVariableDecorator::execute(xAOD::TauJet& xTau) const {
   // Tell clang to optimize assuming that FP operations may trap.
   CXXUTILS_TRAPPING_FP;
 
   int mu = 0;
-  SG::ReadDecorHandle<xAOD::EventInfo, float> eventInfoDecorHandle( m_aveIntPerXKey );
+  SG::ReadDecorHandle<xAOD::EventInfo, float> eventInfoDecorHandle(m_aveIntPerXKey, ctx);
   if (!eventInfoDecorHandle.isPresent()) {
     ATH_MSG_WARNING ( "EventInfo decoration not available! Will set mu=0." );
   }
@@ -44,7 +45,7 @@ StatusCode MvaTESVariableDecorator::execute(xAOD::TauJet& xTau) const {
 
   if (!m_vertexContainerKey.empty()) {
     int nVtxPU = 0;
-    SG::ReadHandle<xAOD::VertexContainer> vertexInHandle( m_vertexContainerKey );
+    SG::ReadHandle<xAOD::VertexContainer> vertexInHandle(m_vertexContainerKey, ctx);
     if (!vertexInHandle.isValid()) {
       ATH_MSG_WARNING ("Could not retrieve HiveDataObj with key " << vertexInHandle.key() << ", will set nVtxPU=0.");
     }
@@ -61,7 +62,7 @@ StatusCode MvaTESVariableDecorator::execute(xAOD::TauJet& xTau) const {
 
   if (!m_eventShapeKey.empty()) {
     double rho = 0.;
-    SG::ReadHandle<xAOD::EventShape> eventShape(m_eventShapeKey);
+    SG::ReadHandle<xAOD::EventShape> eventShape(m_eventShapeKey, ctx);
     if (!eventShape.isValid()) {    
       ATH_MSG_WARNING ("Could not retrieve EventShape with key " << m_eventShapeKey );
     }

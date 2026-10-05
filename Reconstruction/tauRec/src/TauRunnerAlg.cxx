@@ -159,29 +159,25 @@ StatusCode TauRunnerAlg::execute(const EventContext& ctx) const {
     for (const ToolHandle<ITauToolBase>& tool : m_tools) {
       ATH_MSG_DEBUG("RunnerAlg Invoking tool " << tool->name());
       if ( tool->type() == "TauPi0ClusterCreator"){
-	sc = tool->executePi0ClusterCreator(*pTau, *neutralPFOContainer, *hadronicClusterPFOContainer, *pi0ClusterContainer);
+	sc = tool->executeTool(*pTau, ctx, *neutralPFOContainer, *hadronicClusterPFOContainer, *pi0ClusterContainer);
       }
       else if ( tool->type() == "TauVertexVariables"){
-	sc = tool->executeVertexVariables(*pTau, *pSecVtxContainer);
+	sc = tool->executeTool(*pTau, ctx, *pSecVtxContainer);
       }
       else if (tool->type() == "TauShotFinder") {
-        sc = tool->executeShotFinder(*pTau, *tauShotClusContainer,
-                                     *tauShotPFOContainer);
+        sc = tool->executeTool(*pTau, ctx, *tauShotClusContainer, *tauShotPFOContainer);
       }
       else if ( tool->type() == "TauPi0ClusterScaler"){
-	sc = tool->executePi0ClusterScaler(*pTau, *neutralPFOContainer, *chargedPFOContainer);
+	sc = tool->executeTool(*pTau, ctx, *neutralPFOContainer, *chargedPFOContainer);
       }
-      else if ( tool->type() == "TauPi0ScoreCalculator"){
-	sc = tool->executePi0nPFO(*pTau, *neutralPFOContainer);
-      }
-      else if ( tool->type() == "TauPi0Selector"){
-	sc = tool->executePi0nPFO(*pTau, *neutralPFOContainer);
+      else if ( tool->type() == "TauPi0ScoreCalculator" || tool->type() == "TauPi0Selector" ){
+	sc = tool->executeTool(*pTau, ctx, *neutralPFOContainer);
       }
       else if ( tool->type() == "PanTau::PanTauProcessor"){
-	sc = tool->executePanTau(*pTau, *pi0Container, *neutralPFOContainer);
+	sc = tool->executeTool(*pTau, ctx, *pi0Container, *neutralPFOContainer);
       }
       else {
-	sc = tool->execute(*pTau);
+	sc = tool->executeTool(*pTau, ctx);
       }
       if (sc.isFailure())  break;
     }
