@@ -107,7 +107,7 @@ class TextConfig(ConfigFactory):
         read a YAML file. Will combine with any config blocks added using python
         """
         if self.__loadedYaml or isinstance(yamlPath, list):
-            raise NotImplementedError("Mering multiple yaml files is not implemented.")
+            raise NotImplementedError("Merging multiple yaml files is not implemented.")
         self.__loadedYaml = True
 
         def merge(config, algs, path=''):
@@ -119,7 +119,7 @@ class TextConfig(ConfigFactory):
                 # deal with case where empty dict is config
                 if blocks == {} and path:
                     self.addBlock(path)
-                    return
+                    continue
                 # remove any subBlocks from block config
                 subBlocks = {}
                 for blockName in algs:
@@ -171,7 +171,7 @@ class TextConfig(ConfigFactory):
         logCPAlgTextCfg.info(f"Saving configuration to {filePath}")
         config = self._config
         with open(filePath, 'w') as outfile:
-            yaml.dump(config, outfile, default_flow_style=False, **kwargs)
+            yaml.dump(config, outfile, default_flow_style=default_flow_style, **kwargs)
         return
 
 
@@ -202,7 +202,7 @@ class TextConfig(ConfigFactory):
 
     def setOptions(self, **kwargs):
         """
-        Set option(s) for the lsat block that was added. If an option
+        Set option(s) for the last block that was added. If an option
         was added previously, will update value
         """
         if self._last is None:
@@ -212,7 +212,7 @@ class TextConfig(ConfigFactory):
 
 
     def configure(self):
-        """Process YAML configuration file and confgure added algorithms."""
+        """Process YAML configuration file and configure added algorithms."""
         # make sure all blocks in yaml file are added (otherwise they would be ignored)
         for blockName in self._config:
             if blockName not in self._order[self.ROOTNAME]:
@@ -233,8 +233,6 @@ class TextConfig(ConfigFactory):
                 blockConfig = self._config[blockName]
                 alg = self._algs[blockName]
                 self._configureAlg(alg, blockConfig, configSeq)
-            else:
-                continue
         return configSeq
 
 
@@ -247,7 +245,7 @@ class TextConfig(ConfigFactory):
             module = importlib.import_module(modulePath)
             fxn = getattr(module, functionName)
         except ModuleNotFoundError as e:
-            raise ModuleNotFoundError(f"{e}\nFailed to load {functionName} from {modulePath}")
+            raise ModuleNotFoundError(f"{e}\nFailed to load {functionName} from {modulePath}") from e
         else:
             sys.modules[functionName] = fxn
         # add new algorithm to available algorithms
@@ -270,10 +268,10 @@ class TextConfig(ConfigFactory):
             blockConfig = [blockConfig]
 
         for options in blockConfig:
-            # Special case: propogate containerName down to subAlgs
+            # Special case: propagate containerName down to subAlgs
             if 'containerName' in options:
                 containerName = options['containerName']
-            elif containerName is not None and 'containerName' not in options:
+            elif containerName is not None:
                 options['containerName'] = containerName
             # will check which options are associated alg and not options
             logCPAlgTextCfg.debug(f"Configuring {block.algName}")
@@ -302,7 +300,9 @@ class TextConfig(ConfigFactory):
                             extraOptionsForAlg = {}
                         extraOptionsForAlg[i['name']] = i['value']
             else:
-                algOpts = seq.setOptions(extraOptionsForAlg.copy())
+                for name, value in extraOptionsForAlg.items():
+                    seq.setOptionValue(f'.{name}', value)
+                algOpts = seq.getOptions()
 
             # check to see if there are unused parameters
             algOpts = [i['name'] for i in algOpts]
@@ -326,7 +326,7 @@ class TextConfig(ConfigFactory):
         return configSeq
 
 
-def makeSequence(configPath, *, flags=None, algSeq=None, noSystematics=None, dataType=None, geometry=None, autoconfigFromFlags=None, isPhyslite=None, noPhysliteBroken=False):
+def makeSequence(configPath, *, flags=None, algSeq=None, noSystematics=None, dataType=None, geometry=None, autoconfigFromFlags=None, isPhyslite=None):
     """
     """
 
@@ -360,7 +360,7 @@ def makeSequence(configPath, *, flags=None, algSeq=None, noSystematics=None, dat
     config.printConfig()
 
     # compile
-    configAccumulator = ConfigAccumulator(algSeq=algSeq, dataType=dataType, isPhyslite=isPhyslite, geometry=geometry, autoconfigFromFlags=autoconfigFromFlags, flags=flags, noSystematics=noSystematics)
+    configAccumulator = ConfigAccumulator(algSeq=algSeq, dataType=dataType, isPhyslite=isPhyslite, geometry=geometry, flags=flags, noSystematics=noSystematics)
     configSeq.fullConfigure(configAccumulator)
 
     # blocks can be reordered during configSeq.fullConfigure
@@ -461,7 +461,7 @@ def _load_fragment(fragment_path: Path):
     This function is superfluous as of the yaml 1.2 spec (which
     has not been implemented in ATLAS Yaml dependencies).
     Once https://github.com/yaml/pyyaml/issues/173 is resolved
-    pyyaml will support yaml 1.2, which is compatable with json. 
+    pyyaml will support yaml 1.2, which is compatible with json. 
     Until then yaml and json behave differently in some scientific
     notation edge cases.
     """
@@ -476,7 +476,7 @@ def _find_fragment(fragment_path: Path, config_paths: list[Path]):
     paths_to_check = [
         fragment_path,
         *[path / fragment_path for path in config_paths],
-        *[x / fragment_path for x in os.environ["DATAPATH"].split(":")]
+        *[x / fragment_path for x in os.environ.get("DATAPATH", "").split(":") if x]
     ]
     for path in paths_to_check:
         if path.exists():
