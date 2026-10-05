@@ -57,6 +57,7 @@ if textConfig:
 
 print(f"Running on data type: {dataType.value}")
 
+inputfile = None
 if athArgs.physlite:
     if athArgs.run==3:
         inputfile = {DataType.Data:    'ASG_TEST_FILE_LITE_RUN3_DATA',
@@ -80,6 +81,8 @@ else:
 if athArgs.input_file:
     flags.Input.Files = athArgs.input_file[:]
 else:
+    if inputfile is None:
+        raise SystemExit(f"Unsupported --run value {athArgs.run}: only 2 and 3 are supported without --input-file")
     testFile = os.getenv(inputfile[dataType])
     flags.Input.Files = [testFile]
 

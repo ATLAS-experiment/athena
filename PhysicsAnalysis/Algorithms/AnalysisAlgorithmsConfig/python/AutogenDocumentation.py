@@ -9,7 +9,7 @@ output variables metadata from a YAML file.
 import inspect
 import yaml
 import re
-import logging
+from AnaAlgorithm.Logging import logging
 from typing import Any, Dict, List, Type, Optional, Union
 
 from AthenaCommon.Utils.unixtools import find_datafile
@@ -154,6 +154,7 @@ def process_info_links(info: str) -> str:
             return f"[`{A}::{B}`]({url})"
         elif A == "xAOD" or A == "AthOnnx":
             url = f"https://acode-browser1.usatlas.bnl.gov/lxr/ident?v=head&_i={B}&_identdefonly=1&_remember=1"
+            return f"[`{A}::{B}`]({url})"
         else:
             # TODO: any other cases to handle?
             return f"`{A}::{B}`"
@@ -277,7 +278,7 @@ def generate_block_markdown(block_info: Dict[str, Any]) -> str:
                     continue
             # Skip these settings unless they are set
             if name in ["onlyForDSIDs"]:
-                if not opt["default"] is []:
+                if opt["default"] == []:
                     continue
 
             # Option label with type, expert flag, required flag

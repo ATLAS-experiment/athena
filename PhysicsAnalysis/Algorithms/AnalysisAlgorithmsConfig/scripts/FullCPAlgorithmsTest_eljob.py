@@ -8,63 +8,63 @@
 # extend the list of arguments with your private ones later on.
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 import json
-import optparse
-parser = optparse.OptionParser()
-parser.add_option( '-d', '--data-type', dest = 'data_type',
-                   action = 'store', type = 'string', default = 'data',
-                   help="Type of input to run over. Valid options are 'data', 'fullsim', 'fastsim'")
-parser.add_option( '-s', '--submission-dir', dest = 'submission_dir',
-                   action = 'store', type = 'string', default = 'submitDir',
-                   help = 'Submission directory for EventLoop' )
-parser.add_option( "--input-file", action = "append", dest = "input_file",
-                   default = None,
-                   help = "Specify the input file")
-parser.add_option( '-u', '--unit-test', dest='unit_test',
-                   action = 'store_true', default = False,
-                   help = 'Run the job in "unit test mode"' )
-parser.add_option( '--direct-driver', dest='direct_driver',
-                   action = 'store_true', default = False,
-                   help = 'Run the job with the direct driver' )
-parser.add_option( '--exec-driver', dest='exec_driver',
-                   action = 'store_true', default = False,
-                   help = 'Run the job with the exec driver' )
-parser.add_option( '--max-events', dest = 'max_events',
-                   action = 'store', type = 'int', default = 500,
-                   help = 'Number of events to run' )
-parser.add_option( '--algorithm-timer', dest='algorithm_timer',
-                   action = 'store_true', default = False,
-                   help = 'Run the job with a timer for each algorithm' )
-parser.add_option( '--algorithm-memory', dest='algorithm_memory',
-                   action = 'store_true', default = False,
-                   help = 'Run the job with a memory monitor for each algorithm' )
-parser.add_option( '--factory-preload', dest='factory_preload',
-                   action = 'store', type = 'str', default = '',
-                   help = 'Factory preloader(s) to run at the beginning of the job' )
-parser.add_option( '--no-systematics', dest='no_systematics',
-                   action = 'store_true', default = False,
-                   help = 'Configure the job to with no systematics' )
-parser.add_option( '--block-config', dest='block_config',
-                   action = 'store_true', default = False,
-                   help = 'Configure the job with block configuration' )
-parser.add_option( '--text-config', dest='text_config',
-                   action = 'store', default = '',
-                   help = 'Configure the job with the provided text configuration' )
-parser.add_option( '--physlite', dest='physlite',
-                   action = 'store_true', default = False,
-                   help = 'Configure the job for physlite' )
-parser.add_option('--run', action='store', dest='run',
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument( '-d', '--data-type', dest = 'data_type',
+                     action = 'store', type = str, default = 'data',
+                     help="Type of input to run over. Valid options are 'data', 'fullsim', 'fastsim'")
+parser.add_argument( '-s', '--submission-dir', dest = 'submission_dir',
+                     action = 'store', type = str, default = 'submitDir',
+                     help = 'Submission directory for EventLoop' )
+parser.add_argument( "--input-file", action = "append", dest = "input_file",
+                     default = None,
+                     help = "Specify the input file")
+parser.add_argument( '-u', '--unit-test', dest='unit_test',
+                     action = 'store_true', default = False,
+                     help = 'Run the job in "unit test mode"' )
+parser.add_argument( '--direct-driver', dest='direct_driver',
+                     action = 'store_true', default = False,
+                     help = 'Run the job with the direct driver' )
+parser.add_argument( '--exec-driver', dest='exec_driver',
+                     action = 'store_true', default = False,
+                     help = 'Run the job with the exec driver' )
+parser.add_argument( '--max-events', dest = 'max_events',
+                     action = 'store', type = int, default = 500,
+                     help = 'Number of events to run' )
+parser.add_argument( '--algorithm-timer', dest='algorithm_timer',
+                     action = 'store_true', default = False,
+                     help = 'Run the job with a timer for each algorithm' )
+parser.add_argument( '--algorithm-memory', dest='algorithm_memory',
+                     action = 'store_true', default = False,
+                     help = 'Run the job with a memory monitor for each algorithm' )
+parser.add_argument( '--factory-preload', dest='factory_preload',
+                     action = 'store', type = str, default = '',
+                     help = 'Factory preloader(s) to run at the beginning of the job' )
+parser.add_argument( '--no-systematics', dest='no_systematics',
+                     action = 'store_true', default = False,
+                     help = 'Configure the job to with no systematics' )
+parser.add_argument( '--block-config', dest='block_config',
+                     action = 'store_true', default = False,
+                     help = 'Configure the job with block configuration' )
+parser.add_argument( '--text-config', dest='text_config',
+                     action = 'store', default = '',
+                     help = 'Configure the job with the provided text configuration' )
+parser.add_argument( '--physlite', dest='physlite',
+                     action = 'store_true', default = False,
+                     help = 'Configure the job for physlite' )
+parser.add_argument('--run', action='store', dest='run',
                     default=2, type=int,
                     help='Run number for the inputs')
-parser.add_option( '--force-mc', dest='forceMC',
-                   action = 'store_true', default = False,
-                   help = 'Force the job to treat input as MC' )
-parser.add_option( '--only-nominal-or', dest='onlyNominalOR',
-                   action = 'store_true', default = False,
-                   help = 'Only run overlap removal for nominal (skip systematics)')
-parser.add_option('--seq-output-file', dest='seq_out_filename',
-                   action='store',type='str',default='',
-                   help = 'Save the sequence configuration output to the provided file')
-( options, args ) = parser.parse_args()
+parser.add_argument( '--force-mc', dest='forceMC',
+                     action = 'store_true', default = False,
+                     help = 'Force the job to treat input as MC' )
+parser.add_argument( '--only-nominal-or', dest='onlyNominalOR',
+                     action = 'store_true', default = False,
+                     help = 'Only run overlap removal for nominal (skip systematics)')
+parser.add_argument('--seq-output-file', dest='seq_out_filename',
+                    action='store',type=str,default='',
+                    help = 'Save the sequence configuration output to the provided file')
+options = parser.parse_args()
 
 # Set up (Py)ROOT.
 import ROOT
@@ -86,6 +86,7 @@ if textConfig:
 
 print(f"Running on data type: {dataType.value}")
 
+inputfile = None
 if options.physlite:
     if options.run==3:
         inputfile = {DataType.Data:    'ASG_TEST_FILE_LITE_RUN3_DATA',
@@ -116,6 +117,8 @@ if options.input_file:
         testFile = options.input_file[file_idx]
         sample.add (testFile)
 else:
+    if inputfile is None:
+        raise SystemExit(f"Unsupported --run value {options.run}: only 2 and 3 are supported without --input-file")
     testFile = os.getenv (inputfile[dataType])
     sample.add(testFile)
 sh.add (sample)
