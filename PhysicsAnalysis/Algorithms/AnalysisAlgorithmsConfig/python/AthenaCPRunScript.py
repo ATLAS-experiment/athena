@@ -85,7 +85,6 @@ class AthenaCPRunScript(CPBaseRunner):
         self.cfg.addService(CompFactory.THistSvc(Output=[outputFile]))
         if not self.args.merge_output_files:
             outputFileHist = f"ANALYSIS_HIST DATAFILE='hist-{self.outputName}.root' OPT='RECREATE'"
-            from AthenaConfiguration.ComponentFactory import CompFactory
             self.cfg.addService(CompFactory.THistSvc(Output=[outputFileHist]))
 
         # Make the main analysis configuration

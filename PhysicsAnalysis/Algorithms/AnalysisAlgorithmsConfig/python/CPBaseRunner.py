@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import argparse
 from AnaAlgorithm.Logging import logging
@@ -31,7 +31,7 @@ class CPBaseRunner(ABC):
             elif ".root" in self.args.input_list:
                 self._inputList = [self.args.input_list]
             else:
-                raise FileNotFoundError(f'Input file list \"{self.args.input_list}\" is not supported!'
+                raise FileNotFoundError(f'Input file list \"{self.args.input_list}\" is not supported! '
                                         'Please provide a text file with a list of input files or a single root file.')
             self.logger.info("Initialized input files: %s", self._inputList)
         return self._inputList
@@ -47,7 +47,8 @@ class CPBaseRunner(ABC):
         self.logger.info("="*73)
         self.logger.info("="*20 + "FLAG CONFIGURATION" + "="*20)
         self.logger.info("="*73)
-        self.logger.info("    Input files:     %s", self.flags.Input.isMC)
+        self.logger.info("    Input files:     %s", self.flags.Input.Files)
+        self.logger.info("    isMC:            %s", self.flags.Input.isMC)
         self.logger.info("    RunNumber:       %s",
                          self.flags.Input.RunNumbers)
         self.logger.info("    MCCampaign:      %s",
@@ -70,7 +71,7 @@ class CPBaseRunner(ABC):
     def run(self):
         pass
 
-    # The responsiblity of flag.lock will pass to the caller
+    # The responsibility of flag.lock will pass to the caller
     def _defaultFlagsInitialization(self):
         from AthenaConfiguration.AllConfigFlags import initConfigFlags
         flags = initConfigFlags()
@@ -114,7 +115,7 @@ class CPBaseRunner(ABC):
     def _readYamlConfig(self):
         yamlConfig, yamlPaths = self._findYamlConfig(local=True)
         if yamlConfig is None:
-            raise FileNotFoundError(f'Failed to locate \"{self.args.text_config}\" config file!'
+            raise FileNotFoundError(f'Failed to locate \"{self.args.text_config}\" config file! '
                                     'Check if you have a typo in -t/--text-config argument or missing file in the analysis configuration sub-directory.')
         self.logger.info(f"Found YAML config at: {yamlConfig}")
         self.logger.info("Setting up configuration based on YAML config:")
@@ -183,6 +184,7 @@ class CPBaseRunner(ABC):
                 basePaths.append(analysisRepoPath / subdir)
         return matches, basePaths
 
+    @staticmethod
     def _parseInputFileList(path: Path):
         files = []
         with path.open('r') as inputText:
@@ -216,7 +218,6 @@ class CPBaseRunner(ABC):
 
     def setup(self):
         self.modifyParserArguments()
-        self.parser.parse_args()
         self.flags = self._defaultFlagsInitialization()
         self.config = self._readYamlConfig()
 
