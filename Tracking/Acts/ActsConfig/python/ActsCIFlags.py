@@ -31,6 +31,7 @@ def athenaLegacyTrackingFlags(flags) -> None:
     flags.Tracking.doITkFastTracking = False
     flags.Tracking.doPixelDigitalClustering = False
     flags.HGTD.doActs = False
+    flags.Acts.GsfRefitActs = False
 
 def actsLegacyWorkflowFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: add Acts (legacy like) workflow to reco sequence"""
