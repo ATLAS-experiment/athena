@@ -73,7 +73,8 @@ class MpEvtLoopMgr(AthMpEvtLoopMgr):
         if strategy=='SharedQueue' or strategy=='RoundRobin':
             if use_shared_reader:
                 from AthenaCommon.AppMgr import ServiceMgr as svcMgr
-                svcMgr.PoolSvc.MaxFilesOpen = 2
+                # Currently SharedReader uses single PersSvc for event & cond, so we can't age files.
+                svcMgr.PoolSvc.MaxFilesOpen = 0
             if use_shared_writer:
                 from AthenaCommon.AppMgr import ServiceMgr as svcMgr
                 if 'AthenaPoolCnvSvc.WriteAthenaPool' in sys.modules:
