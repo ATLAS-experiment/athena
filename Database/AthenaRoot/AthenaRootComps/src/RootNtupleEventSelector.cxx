@@ -594,8 +594,8 @@ RootNtupleEventSelector::next( IEvtSelector::Context& ctx ) const
       ei->setEventNumber (eventNumber);
       ei->setLumiBlock (lbn);
 
-      static const SG::AuxElement::Accessor<std::string> tupleName ("tupleName");
-      static const SG::AuxElement::Accessor<std::string> collName ("collectionName");
+      static const SG::Accessor<std::string> tupleName ("tupleName");
+      static const SG::Accessor<std::string> collName ("collectionName");
       tupleName(*ei) = m_tupleNames[tupleIdx];
       collName(*ei) = m_inputCollectionsName[collIdx];
       

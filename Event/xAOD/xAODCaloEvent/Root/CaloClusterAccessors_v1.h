@@ -23,14 +23,14 @@ namespace xAOD {
   /// @param moment The cluster moment for which an Accessor should be returned
   /// @returns A pointer to an Accessor if successful, <code>0</code> if not
   ///
-  const SG::AuxElement::Accessor< float >*
+  const SG::Accessor< float >*
   momentAccessorV1( xAOD::CaloCluster_v1::MomentType moment );
   
   /// Helper function for managing cluster moment Accessor objects
   ///
   /// This function provides the accessor for @c xAOD::CaloCluster_v1::ncells_store_t 
   /// typed lists.
-  const SG::AuxElement::Accessor< xAOD::CaloCluster_v1::ncells_store_t >*
+  const SG::Accessor< xAOD::CaloCluster_v1::ncells_store_t >*
   momentContainerAccessorV1( xAOD::CaloCluster_v1::MomentType moment );
 
 } // namespace xAOD

@@ -9,12 +9,12 @@
 using namespace xAOD;
 
 // Static accessors
-const SG::AuxElement::Accessor<float> MissingET_v1::m_acc_mpx("mpx");
-const SG::AuxElement::Accessor<float> MissingET_v1::m_acc_mpy("mpy");
-const SG::AuxElement::Accessor<float> MissingET_v1::m_acc_sumet("sumet");
+const SG::Accessor<float> MissingET_v1::m_acc_mpx("mpx");
+const SG::Accessor<float> MissingET_v1::m_acc_mpy("mpy");
+const SG::Accessor<float> MissingET_v1::m_acc_sumet("sumet");
 namespace {
    // register attributes' types early (before I/O) for schema evolution
-   static const SG::AuxElement::Accessor<MissingETBase::Types::bitmask_t> dummy("source");
+   static const SG::Accessor<MissingETBase::Types::bitmask_t> dummy("source");
 }
 
 MissingET_v1::MissingET_v1( bool createStore )

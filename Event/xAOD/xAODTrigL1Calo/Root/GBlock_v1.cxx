@@ -7,10 +7,10 @@
 
 namespace
 {
-  const SG::AuxElement::ConstAccessor<ElementLink<xAOD::JGTowerContainer>> accSeedTower("seedJGTower");
-  const SG::AuxElement::Decorator<ElementLink<xAOD::JGTowerContainer>> decSeedTower("seedJGTower");
-  const SG::AuxElement::ConstAccessor<std::vector<ElementLink<xAOD::JGTowerContainer>>> accTowers("JGTowers");
-  const SG::AuxElement::Decorator<std::vector<ElementLink<xAOD::JGTowerContainer>>> decTowers("JGTowers");
+  const SG::ConstAccessor<ElementLink<xAOD::JGTowerContainer>> accSeedTower("seedJGTower");
+  const SG::Decorator<ElementLink<xAOD::JGTowerContainer>> decSeedTower("seedJGTower");
+  const SG::ConstAccessor<std::vector<ElementLink<xAOD::JGTowerContainer>>> accTowers("JGTowers");
+  const SG::Decorator<std::vector<ElementLink<xAOD::JGTowerContainer>>> decTowers("JGTowers");
 } // namespace
 
 namespace xAOD

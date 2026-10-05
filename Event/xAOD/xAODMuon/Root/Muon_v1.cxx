@@ -255,7 +255,7 @@ namespace xAOD {
   }
   
   bool Muon_v1::isolation(float& value, const Iso::IsolationType information)  const {
-    const SG::AuxElement::Accessor< float >* acc = getIsolationAccessor( information );
+    const SG::Accessor< float >* acc = getIsolationAccessor( information );
     
     if( ! acc || !acc->isAvailable( *this) ){
        value =0.;
@@ -273,7 +273,7 @@ namespace xAOD {
   }
   
   void Muon_v1::setIsolation(float value, const Iso::IsolationType information){
-    const SG::AuxElement::Accessor< float >* acc = getIsolationAccessor( information );
+    const SG::Accessor< float >* acc = getIsolationAccessor( information );
     if( !acc ) {
       throw std::runtime_error( "Unknown/Unavailable Isolation type requested" );
     }
@@ -284,7 +284,7 @@ namespace xAOD {
 bool Muon_v1::isolationCaloCorrection(  float& value, const Iso::IsolationFlavour flavour, 
                                         const Iso::IsolationCaloCorrection type,
                                         const Iso::IsolationCorrectionParameter param) const{
-    const SG::AuxElement::Accessor< float > acc = getIsolationCorrectionAccessor(flavour,type,param);
+    const SG::Accessor< float > acc = getIsolationCorrectionAccessor(flavour,type,param);
     if( !acc.isAvailable( *this) ) return false;
     // Retrieve the value:
     value = acc( *this );
@@ -294,21 +294,21 @@ bool Muon_v1::isolationCaloCorrection(  float& value, const Iso::IsolationFlavou
   float Muon_v1::isolationCaloCorrection(const Iso::IsolationFlavour flavour, const Iso::IsolationCaloCorrection type,
   const Iso::IsolationCorrectionParameter param) const{
 
-    const SG::AuxElement::Accessor< float > acc = getIsolationCorrectionAccessor(flavour,type,param);
+    const SG::Accessor< float > acc = getIsolationCorrectionAccessor(flavour,type,param);
     if( !acc.isAvailable( *this) ) throw std::runtime_error( "Unknown/Unavailable Isolation correction requested" );
     return  acc( *this );
   }
 
   bool Muon_v1::setIsolationCaloCorrection(float value, const Iso::IsolationFlavour flavour, const Iso::IsolationCaloCorrection type,
   const Iso::IsolationCorrectionParameter param){
-    const SG::AuxElement::Accessor< float > acc = getIsolationCorrectionAccessor(flavour,type,param); 
+    const SG::Accessor< float > acc = getIsolationCorrectionAccessor(flavour,type,param); 
     // Set the value:
     acc( *this ) = value;
     return true;
   }
 
   bool Muon_v1::isolationTrackCorrection(float& value, const Iso::IsolationFlavour flavour, const Iso::IsolationTrackCorrection type) const{
-    const SG::AuxElement::Accessor< float > acc = getIsolationCorrectionAccessor(flavour,type);
+    const SG::Accessor< float > acc = getIsolationCorrectionAccessor(flavour,type);
     if( !acc.isAvailable( *this) ) return  false;
     // Retrieve the value:
     value = acc( *this );
@@ -317,20 +317,20 @@ bool Muon_v1::isolationCaloCorrection(  float& value, const Iso::IsolationFlavou
 
   float Muon_v1::isolationTrackCorrection(const Iso::IsolationFlavour flavour, const Iso::IsolationTrackCorrection type) const{
 
-    const SG::AuxElement::Accessor< float > acc = getIsolationCorrectionAccessor(flavour,type);
+    const SG::Accessor< float > acc = getIsolationCorrectionAccessor(flavour,type);
     if( !acc.isAvailable( *this) ) throw std::runtime_error( "Unknown/Unavailable Isolation correction requested" );
     return  acc( *this );
   }
 
   bool Muon_v1::setIsolationTrackCorrection(float value, const Iso::IsolationFlavour flavour, const Iso::IsolationTrackCorrection type){
-    const SG::AuxElement::Accessor< float > acc = getIsolationCorrectionAccessor(flavour,type);
+    const SG::Accessor< float > acc = getIsolationCorrectionAccessor(flavour,type);
     // Set the value:
     acc( *this ) = value;
     return true;
   }
 
   bool Muon_v1::isolationCorrectionBitset(std::bitset<32>& value, const Iso::IsolationFlavour flavour ) const{
-    const SG::AuxElement::Accessor< uint32_t > acc = getIsolationCorrectionBitsetAccessor( flavour );
+    const SG::Accessor< uint32_t > acc = getIsolationCorrectionBitsetAccessor( flavour );
     if( !acc.isAvailable( *this) ) return false;
     // Retrieve the value:
     value = std::bitset<32>(acc( *this ));
@@ -338,13 +338,13 @@ bool Muon_v1::isolationCaloCorrection(  float& value, const Iso::IsolationFlavou
   }
 
   std::bitset<32> Muon_v1::isolationCorrectionBitset(const Iso::IsolationFlavour flavour ) const{
-    const SG::AuxElement::Accessor< uint32_t > acc = getIsolationCorrectionBitsetAccessor( flavour );
+    const SG::Accessor< uint32_t > acc = getIsolationCorrectionBitsetAccessor( flavour );
     if( !acc.isAvailable( *this) ) throw std::runtime_error( "Unknown/Unavailable Isolation BitSet requested" );
     return  std::bitset<32>( acc( *this ) );
   }
 
   bool Muon_v1::setIsolationCorrectionBitset(uint32_t value, const Iso::IsolationFlavour flavour ) {
-    const SG::AuxElement::Accessor< uint32_t > acc = getIsolationCorrectionBitsetAccessor( flavour );
+    const SG::Accessor< uint32_t > acc = getIsolationCorrectionBitsetAccessor( flavour );
     // Set the value:
     acc( *this ) = value;
     return true;
@@ -502,7 +502,7 @@ bool Muon_v1::isolationCaloCorrection(  float& value, const Iso::IsolationFlavou
 
   AUXSTORE_OBJECT_SETTER_AND_GETTER( Muon_v1, std::vector< ElementLink< MuonSegmentContainer > >, muonSegmentLinks, setMuonSegmentLinks)
 
-  static const SG::AuxElement::Accessor< std::vector< ElementLink< MuonSegmentContainer > > > muonSegmentsAcc( "muonSegmentLinks" ); 
+  static const SG::Accessor< std::vector< ElementLink< MuonSegmentContainer > > > muonSegmentsAcc( "muonSegmentLinks" ); 
   size_t Muon_v1::nMuonSegments() const {
         // If a link was not set (yet), return zero.
     if( ! muonSegmentsAcc.isAvailable( *this ) ) {

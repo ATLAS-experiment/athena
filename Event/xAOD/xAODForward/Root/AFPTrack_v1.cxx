@@ -34,7 +34,7 @@ namespace xAOD
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER (AFPTrack_v1, int, algID, setAlgID)
 
   AUXSTORE_OBJECT_SETTER_AND_GETTER (AFPTrack_v1, std::vector< AFPTrack_v1::AFPHitLink_t >, hits, setHits)
-  static const SG::AuxElement::Accessor< std::vector<AFPTrack_v1::AFPHitLink_t> > hitsAcc( "hits" );
+  static const SG::Accessor< std::vector<AFPTrack_v1::AFPHitLink_t> > hitsAcc( "hits" );
 
   void AFPTrack_v1::addHit( const AFPHitLink_t& link )
   {

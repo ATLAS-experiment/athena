@@ -24,7 +24,7 @@
 /// call to make sure that the auxiliary ID registry would know about this type
 /// as soon as the library holding this code is loaded.
 ///
-static const SG::AuxElement::Accessor< ElementLink< xAOD::ElectronContainer > >
+static const SG::Accessor< ElementLink< xAOD::ElectronContainer > >
    recoElectronLinkAcc( "recoElectronLink" );
 
 const xAOD::Electron*
@@ -47,7 +47,7 @@ xAOD::EgammaHelpers::getRecoElectron( const xAOD::TruthParticle* particle ) {
 /// call to make sure that the auxiliary ID registry would know about this type
 /// as soon as the library holding this code is loaded.
 ///
-static const SG::AuxElement::Accessor< ElementLink< xAOD::PhotonContainer > >
+static const SG::Accessor< ElementLink< xAOD::PhotonContainer > >
    recoPhotonLinkAcc( "recoPhotonLink" );
 
 const xAOD::Photon*

@@ -49,8 +49,8 @@ void xAODTruthVertexAuxContainerCnv_v1::persToTrans(
   newInt.setStore( newObj );
 
   unsigned int index{0};
-  static const SG::AuxElement::Accessor<int> idAcc ("id");
-  static const SG::AuxElement::Accessor<int> barcodeAcc ("barcode");
+  static const SG::Accessor<int> idAcc ("id");
+  static const SG::Accessor<int> barcodeAcc ("barcode");
   // Loop over the interface objects, and do the conversion with their help:
   for( const xAOD::TruthVertex_v1* oldVtx : oldInt ) {
     const int oldID = (idAcc.isAvailable (*oldVtx)) ? idAcc(*oldVtx) : 1000;

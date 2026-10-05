@@ -39,27 +39,27 @@ namespace xAOD {
    //
    // Accessors used by multiple functions:
    //
-   static const SG::AuxElement::Accessor< std::vector< std::string > >
+   static const SG::Accessor< std::vector< std::string > >
       nameAcc( "nameOfComponent" );
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       exAcc( "exComponent" );
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       eyAcc( "eyComponent" );
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       ezAcc( "ezComponent" );
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       sumEtAcc( "sumEtComponent" );
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       sumEAcc( "sumEComponent" );
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       calib0Acc( "calib0Component" );
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       calib1Acc( "calib1Component" );
-   static const SG::AuxElement::Accessor< std::vector< float > >
+   static const SG::Accessor< std::vector< float > >
       sumOfSignsAcc( "sumOfSignsComponent" );
-   static const SG::AuxElement::Accessor< std::vector< short > >
+   static const SG::Accessor< std::vector< short > >
       statusAcc( "statusComponent" );
-   static const SG::AuxElement::Accessor< std::vector< unsigned short > >
+   static const SG::Accessor< std::vector< unsigned short > >
       usedchannelsAcc( "usedChannelsComponent" );      
 
    // Define a component name

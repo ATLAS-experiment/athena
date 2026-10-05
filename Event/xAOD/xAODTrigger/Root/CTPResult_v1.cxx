@@ -127,11 +127,11 @@ namespace xAOD {
 
   // set the number of bunches
   void CTPResult_v1::setNumberOfBunches(const uint32_t nBCs) {
-    static const SG::AuxElement::Accessor< uint32_t > accNumOfBunches("numberOfBunches");
-    static const SG::AuxElement::Accessor< std::vector<std::vector<uint32_t> > > accTIPWords("tipWords");
-    static const SG::AuxElement::Accessor< std::vector<std::vector<uint32_t> > > accTBPWords("tbpWords");
-    static const SG::AuxElement::Accessor< std::vector<std::vector<uint32_t> > > accTAPWords("tapWords");
-    static const SG::AuxElement::Accessor< std::vector<std::vector<uint32_t> > > accTAVWords("tavWords");
+    static const SG::Accessor< uint32_t > accNumOfBunches("numberOfBunches");
+    static const SG::Accessor< std::vector<std::vector<uint32_t> > > accTIPWords("tipWords");
+    static const SG::Accessor< std::vector<std::vector<uint32_t> > > accTBPWords("tbpWords");
+    static const SG::Accessor< std::vector<std::vector<uint32_t> > > accTAPWords("tapWords");
+    static const SG::Accessor< std::vector<std::vector<uint32_t> > > accTAVWords("tavWords");
     accNumOfBunches( *this ) = nBCs;
     accTIPWords( *this ).resize(nBCs);
     accTBPWords( *this ).resize(nBCs);

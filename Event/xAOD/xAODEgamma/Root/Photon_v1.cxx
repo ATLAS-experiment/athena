@@ -85,7 +85,7 @@ namespace xAOD {
 
    size_t xAOD::Photon_v1::nVertices() const {
 
-      static const SG::AuxElement::Accessor< Photon_v1::VxELVec_t >
+      static const SG::Accessor< Photon_v1::VxELVec_t >
          vertexAcc( "vertexLinks" );
 
       if( vertexAcc.isAvailable( *this ) ) {

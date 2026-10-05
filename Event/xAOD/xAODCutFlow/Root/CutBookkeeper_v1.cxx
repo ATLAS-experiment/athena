@@ -46,22 +46,22 @@ namespace xAOD {
   // All the static accessors for the auxiliary store
   // ======================================================================
 
-  static const SG::AuxElement::Accessor< unsigned int >               nameIdentifierAcc( "nameIdentifier" );
-  static const SG::AuxElement::Accessor< unsigned int >               uniqueIdentifierAcc( "uniqueIdentifier" );
-  static const SG::AuxElement::Accessor< std::string >                nameAcc( "name" );
-  static const SG::AuxElement::Accessor< std::string >                descriptionAcc( "description" );
-  static const SG::AuxElement::Accessor< unsigned int >               cutLogicAcc( "cutLogic" );
-  static const SG::AuxElement::Accessor< int >                        isTopFilterAcc( "isTopFilter" );
-  static const SG::AuxElement::Accessor< int >                        cycleAcc( "cycle" );
-  static const SG::AuxElement::Accessor< std::string >                inputStreamAcc( "inputStream" );
-  static const SG::AuxElement::Accessor< std::vector< std::string > > outputStreamsAcc( "outputStreams" );
-  static const SG::AuxElement::Accessor< xAOD::CutBookkeeperLink_t >  parentLinkAcc( "parentLink" );
-  static const SG::AuxElement::Accessor< xAOD::CutBookkeeperLinks_t > childrenLinksAcc( "childrenLinks" );
-  static const SG::AuxElement::Accessor< xAOD::CutBookkeeperLinks_t > othersLinksAcc( "othersLinks" );
-  static const SG::AuxElement::Accessor< xAOD::CutBookkeeperLinks_t > siblingsLinksAcc( "siblingsLinks" );
-  static const SG::AuxElement::Accessor< uint64_t >                   nAcceptedEventsAcc( "nAcceptedEvents" );
-  static const SG::AuxElement::Accessor< double >                     sumOfEventWeightsAcc( "sumOfEventWeights" );
-  static const SG::AuxElement::Accessor< double >                     sumOfEventWeightsSquaredAcc( "sumOfEventWeightsSquared" );
+  static const SG::Accessor< unsigned int >               nameIdentifierAcc( "nameIdentifier" );
+  static const SG::Accessor< unsigned int >               uniqueIdentifierAcc( "uniqueIdentifier" );
+  static const SG::Accessor< std::string >                nameAcc( "name" );
+  static const SG::Accessor< std::string >                descriptionAcc( "description" );
+  static const SG::Accessor< unsigned int >               cutLogicAcc( "cutLogic" );
+  static const SG::Accessor< int >                        isTopFilterAcc( "isTopFilter" );
+  static const SG::Accessor< int >                        cycleAcc( "cycle" );
+  static const SG::Accessor< std::string >                inputStreamAcc( "inputStream" );
+  static const SG::Accessor< std::vector< std::string > > outputStreamsAcc( "outputStreams" );
+  static const SG::Accessor< xAOD::CutBookkeeperLink_t >  parentLinkAcc( "parentLink" );
+  static const SG::Accessor< xAOD::CutBookkeeperLinks_t > childrenLinksAcc( "childrenLinks" );
+  static const SG::Accessor< xAOD::CutBookkeeperLinks_t > othersLinksAcc( "othersLinks" );
+  static const SG::Accessor< xAOD::CutBookkeeperLinks_t > siblingsLinksAcc( "siblingsLinks" );
+  static const SG::Accessor< uint64_t >                   nAcceptedEventsAcc( "nAcceptedEvents" );
+  static const SG::Accessor< double >                     sumOfEventWeightsAcc( "sumOfEventWeights" );
+  static const SG::Accessor< double >                     sumOfEventWeightsSquaredAcc( "sumOfEventWeightsSquared" );
 
 
   // ======================================================================
@@ -207,7 +207,7 @@ namespace xAOD {
   }
 
   void CutBookkeeper_v1::setCycle(int cycle) {
-    static const SG::AuxElement::Accessor< int > cycleAcc( "cycle" );
+    static const SG::Accessor< int > cycleAcc( "cycle" );
     cycleAcc(*this) = cycle;
     std::ostringstream str;
     str << name() << inputStream() << cycle;

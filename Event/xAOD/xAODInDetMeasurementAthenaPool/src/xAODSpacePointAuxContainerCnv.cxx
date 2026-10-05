@@ -52,7 +52,7 @@ xAOD::SpacePointAuxContainer* xAODSpacePointAuxContainerCnv::createPersistentWit
   helper.setStore( result.get() );
 
   // Convert the bare pointer(s) to Element Link(s)
-  static const SG::AuxElement::Accessor< std::vector<ElementLink<xAOD::UncalibratedMeasurementContainer>> > accesor("measurementLink"); 
+  static const SG::Accessor< std::vector<ElementLink<xAOD::UncalibratedMeasurementContainer>> > accesor("measurementLink"); 
 
   for (xAOD::SpacePoint *sp : helper) {
     accesor(*sp).clear();

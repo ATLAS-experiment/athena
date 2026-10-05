@@ -35,8 +35,8 @@ std::ostream& operator<< ( std::ostream& out, const std::vector< float >& vec )
 namespace xAOD {
 
 // Instantiate the needed accessors:
-static const SG::AuxElement::Accessor< std::vector<float> > accRingsE("ringsE");
-static const SG::AuxElement::ConstAccessor< std::vector<float> >
+static const SG::Accessor< std::vector<float> > accRingsE("ringsE");
+static const SG::ConstAccessor< std::vector<float> >
    constAccRingsE("ringsE");
 
 // @name RingSet_v1 accessors:

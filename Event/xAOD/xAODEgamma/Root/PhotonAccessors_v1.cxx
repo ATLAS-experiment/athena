@@ -14,14 +14,14 @@
 #define DEFINE_ACCESSOR(TYPE, NAME )                               \
   case xAOD::EgammaParameters::NAME:				   \
    {                                                               \
-     const static SG::AuxElement::Accessor< TYPE > a( #NAME );	   \
+     const static SG::Accessor< TYPE > a( #NAME );	   \
      return &a;							   \
    }                                                               \
    break;
 
 namespace xAOD {
 
-   const SG::AuxElement::Accessor< float >*
+   const SG::Accessor< float >*
    vertexCaloMatchAccessorV1( xAOD::EgammaParameters::VertexCaloMatchType type ) 
    {   
       switch( type ) {

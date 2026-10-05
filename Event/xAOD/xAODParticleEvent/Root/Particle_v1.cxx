@@ -118,7 +118,7 @@ namespace xAOD {
   //
 
   bool Particle_v1::hasCharge() const {
-    static const SG::AuxElement::Accessor< float > chargeAcc( "charge" );
+    static const SG::Accessor< float > chargeAcc( "charge" );
     return chargeAcc.isAvailable( *this );
   }
 
@@ -127,7 +127,7 @@ namespace xAOD {
 
 
   bool Particle_v1::hasPdgId() const {
-    static const SG::AuxElement::Accessor< int > pdgAcc( "pdgId" );
+    static const SG::Accessor< int > pdgAcc( "pdgId" );
     return pdgAcc.isAvailable( *this );
   }
 

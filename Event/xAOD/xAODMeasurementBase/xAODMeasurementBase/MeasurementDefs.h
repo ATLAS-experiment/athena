@@ -49,10 +49,10 @@ using DetectorIDHashType = unsigned int;
 using DetectorIdentType = long unsigned int;
 /// xAOD Accessor to the position
 template <size_t N>
-using PosAccessor = SG::AuxElement::Accessor<std::array<float, N>>;
+using PosAccessor = SG::Accessor<std::array<float, N>>;
 /// xAOD Accessor to the covariance
 template <size_t N>
-using CovAccessor = SG::AuxElement::Accessor<std::array<float, N * N>>;
+using CovAccessor = SG::Accessor<std::array<float, N * N>>;
 /// Abrivation of the Matrix & Covariance definitions
 template <size_t N>
 using MeasVector = Eigen::Matrix<float, N, 1>;

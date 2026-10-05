@@ -14,7 +14,7 @@
 #define DEFINE_ACCESSOR(TYPE, NAME )                               \
    case xAOD::EgammaParameters::NAME:                              \
    {                                                               \
-     static const SG::AuxElement::Accessor< TYPE > a( #NAME );	   \
+     static const SG::Accessor< TYPE > a( #NAME );	   \
      return &a;							   \
    }                                                               \
    break;
@@ -22,7 +22,7 @@
 namespace xAOD {
 
   /// Explicit Instantiation  of Template
-   const SG::AuxElement::Accessor< float >*
+   const SG::Accessor< float >*
    showerShapeAccessorV1( xAOD::EgammaParameters::ShowerShapeType type )
    {
       switch( type ) {

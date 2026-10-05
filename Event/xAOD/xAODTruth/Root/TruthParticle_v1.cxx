@@ -60,10 +60,10 @@ namespace xAOD {
    //
 
    /// Accessor for the production vertex
-   static const SG::AuxElement::Accessor< ElementLink< TruthVertexContainer > >
+   static const SG::Accessor< ElementLink< TruthVertexContainer > >
       acc_prodVtxLink( "prodVtxLink" );
    /// Accessor for the decay vertex
-   static const SG::AuxElement::Accessor< ElementLink< TruthVertexContainer > >
+   static const SG::Accessor< ElementLink< TruthVertexContainer > >
       acc_decayVtxLink( "decayVtxLink" );
 
    bool TruthParticle_v1::hasProdVtx() const {
@@ -105,10 +105,10 @@ namespace xAOD {
    //
 
    // Accessor for links to parents
-   static const SG::AuxElement::ConstAccessor< std::vector<ElementLink<xAOD::TruthParticleContainer> > >
+   static const SG::ConstAccessor< std::vector<ElementLink<xAOD::TruthParticleContainer> > >
       acc_parentLinks( "parentLinks" );
    // Accessor for links to children
-   static const SG::AuxElement::ConstAccessor< std::vector<ElementLink<xAOD::TruthParticleContainer> > >
+   static const SG::ConstAccessor< std::vector<ElementLink<xAOD::TruthParticleContainer> > >
       acc_childLinks( "childLinks" );
    // Note that in some conditions the vertex might be saved in a different collection from
    // the daughters, causing the vertex to not know how many children or parents the particle has.

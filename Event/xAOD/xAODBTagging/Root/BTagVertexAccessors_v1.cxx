@@ -15,7 +15,7 @@
 #define DEFINE_ACCESSOR(TYPE, NAME )                               \
    case xAOD::NAME:                                                \
    {                                                               \
-     static SG::AuxElement::Accessor< TYPE > a( #NAME );	   \
+     static SG::Accessor< TYPE > a( #NAME );	   \
      return &a;							   \
    }                                                               \
    break;

@@ -7,14 +7,14 @@
 #include <stdexcept>
 namespace xAOD {
 
-const SG::AuxElement::Decorator< uint32_t >
+const SG::Decorator< uint32_t >
   getIsolationCorrectionBitsetDecorator( Iso::IsolationFlavour type ){
     std::string name(Iso::toCString(type));
     name+="CorrBitset";
-    return SG::AuxElement::Decorator< uint32_t >( name );
+    return SG::Decorator< uint32_t >( name );
   }
 
-const SG::AuxElement::Decorator< float >
+const SG::Decorator< float >
   getIsolationCorrectionDecorator( Iso::IsolationFlavour type, Iso::IsolationCaloCorrection corr, 
                                   Iso::IsolationCorrectionParameter param  ){
     std::string name(Iso::toCString(type));                                                                       
@@ -30,24 +30,24 @@ const SG::AuxElement::Decorator< float >
       throw std::runtime_error("IsolationCorrectionParameter out of bounds");
     }
     name+="Correction";
-    return SG::AuxElement::Decorator< float >( name );                                                                                                              
+    return SG::Decorator< float >( name );                                                                                                              
   }
 
 // Isolation Calo 
-const SG::AuxElement::Decorator< float >
+const SG::Decorator< float >
   getIsolationCorrectionDecorator( Iso::IsolationType type, Iso::IsolationCaloCorrection corr){
     std::string name(Iso::toCString(type));
     name+=toCString(corr);
     name+="Correction";
-    return SG::AuxElement::Decorator< float >( name );
+    return SG::Decorator< float >( name );
   }
 
-const SG::AuxElement::Decorator< float >
+const SG::Decorator< float >
   getIsolationCorrectionDecorator( Iso::IsolationFlavour type, Iso::IsolationTrackCorrection corr ){
       std::string name(Iso::toCString(type));                                                                         
       name+=toCString(corr);    
       name+="Correction";
-      return SG::AuxElement::Decorator< float >( name );
+      return SG::Decorator< float >( name );
 
   }
 } // namespace xAOD

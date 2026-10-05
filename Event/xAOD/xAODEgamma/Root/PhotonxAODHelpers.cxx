@@ -75,9 +75,9 @@ Amg::Vector3D xAOD::EgammaHelpers::momentumAtVertex(const xAOD::Photon *photon, 
 
 Amg::Vector3D xAOD::EgammaHelpers::momentumAtVertex(const xAOD::Vertex& vertex, bool debug){  
 
-  static const SG::AuxElement::Accessor<float> accPx("px");
-  static const SG::AuxElement::Accessor<float> accPy("py");
-  static const SG::AuxElement::Accessor<float> accPz("pz");
+  static const SG::Accessor<float> accPx("px");
+  static const SG::Accessor<float> accPy("py");
+  static const SG::Accessor<float> accPz("pz");
   
   if (accPx.isAvailable(vertex) && 
       accPy.isAvailable(vertex) && 

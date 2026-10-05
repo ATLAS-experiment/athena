@@ -34,7 +34,7 @@ namespace xAOD {
       }
 
       // Access the serialised bits:
-      static const SG::AuxElement::Accessor< std::vector< uint32_t > >
+      static const SG::Accessor< std::vector< uint32_t > >
          accBits( "passBits" );
       std::vector< uint32_t >& bits = accBits( *this );
 

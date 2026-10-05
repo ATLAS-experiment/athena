@@ -20,7 +20,7 @@ void xAOD::SpacePoint_v1::setElementIdList(std::vector< xAOD::DetectorIDHashType
    acc( *this ) = std::move(value);
 }
 
-static const SG::AuxElement::Accessor< xAOD::ArrayFloat3 > globalPosAcc("globalPosition");
+static const SG::Accessor< xAOD::ArrayFloat3 > globalPosAcc("globalPosition");
 
 xAOD::SpacePoint_v1::ConstVectorMap xAOD::SpacePoint_v1::globalPosition() const {
   const auto& values = globalPosAcc(*this);
@@ -75,10 +75,10 @@ AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( xAOD::SpacePoint_v1, float,
 AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( xAOD::SpacePoint_v1, float,
 				      bottomHalfStripLength, setBottomHalfStripLength )
 
-static const SG::AuxElement::Accessor< xAOD::ArrayFloat3 > topStripDirectionAcc( "topStripDirection" );
-static const SG::AuxElement::Accessor< xAOD::ArrayFloat3 > bottomStripDirectionAcc( "bottomStripDirection" );
-static const SG::AuxElement::Accessor< xAOD::ArrayFloat3 > stripCenterDistanceAcc( "stripCenterDistance" );
-static const SG::AuxElement::Accessor< xAOD::ArrayFloat3 > topStripCenterAcc( "topStripCenter" );
+static const SG::Accessor< xAOD::ArrayFloat3 > topStripDirectionAcc( "topStripDirection" );
+static const SG::Accessor< xAOD::ArrayFloat3 > bottomStripDirectionAcc( "bottomStripDirection" );
+static const SG::Accessor< xAOD::ArrayFloat3 > stripCenterDistanceAcc( "stripCenterDistance" );
+static const SG::Accessor< xAOD::ArrayFloat3 > topStripCenterAcc( "topStripCenter" );
 
 xAOD::SpacePoint_v1::ConstVectorMap xAOD::SpacePoint_v1::topStripDirection() const {
   const auto& values = topStripDirectionAcc(*this);

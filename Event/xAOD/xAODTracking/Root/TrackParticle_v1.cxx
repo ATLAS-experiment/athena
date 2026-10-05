@@ -159,16 +159,16 @@ namespace xAOD {
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackParticle_v1, uint8_t, hasValidTime, setHasValidTime )
 
   float TrackParticle_v1::time() const {
-    static const SG::AuxElement::Accessor< uint8_t > acc("hasValidTime");
+    static const SG::Accessor< uint8_t > acc("hasValidTime");
     if( !acc.isAvailable( *this) || !static_cast<bool>(hasValidTime()) ) throw std::runtime_error( "Unavailable TrackParticle time requested" );
-    static const SG::AuxElement::Accessor< float > accTime("time");
+    static const SG::Accessor< float > accTime("time");
     return accTime( *this );
   }
 
   float TrackParticle_v1::timeResolution() const {
-    static const SG::AuxElement::Accessor< uint8_t > acc("hasValidTime");
+    static const SG::Accessor< uint8_t > acc("hasValidTime");
     if( !acc.isAvailable( *this) || !static_cast<bool>(hasValidTime()) ) throw std::runtime_error( "Unavailable TrackParticle timeResolution requested" );
-    static const SG::AuxElement::Accessor< float > accTimeRes("timeResolution");
+    static const SG::Accessor< float > accTimeRes("timeResolution");
     return accTimeRes( *this );
   }
 
@@ -210,18 +210,18 @@ namespace xAOD {
   }
 
   void TrackParticle_v1::setTime(float time) {
-    static const SG::AuxElement::Accessor< float > acc("time");
+    static const SG::Accessor< float > acc("time");
     acc( *this ) = time;
   }
 
   void TrackParticle_v1::setTimeResolution(float timeRes) {
-    static const SG::AuxElement::Accessor< float > acc("timeResolution");
+    static const SG::Accessor< float > acc("timeResolution");
     acc( *this ) = timeRes;
   }
 
-  static const SG::AuxElement::Accessor< std::vector< float > >
+  static const SG::Accessor< std::vector< float > >
     accCovMatrixDiag( "definingParametersCovMatrixDiag" );
-  static const SG::AuxElement::Accessor< std::vector< float > >
+  static const SG::Accessor< std::vector< float > >
     accCovMatrixOffDiag( "definingParametersCovMatrixOffDiag" );
 
   void TrackParticle_v1::setDefiningParametersCovMatrix(const xAOD::ParametersCovMatrix_t& cov){

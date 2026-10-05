@@ -7,7 +7,7 @@ Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 
 // Helper macro for registering the types of auxiliary variables in memory.
 #define AUX_VAR(NAME)                                                          \
-  static const SG::AuxElement::Accessor<float> NAME(#NAME)
+  static const SG::Accessor<float> NAME(#NAME)
 
 // Register the correct types for a select set of auxiliary variables.
 AUX_VAR( rnnip_pb );

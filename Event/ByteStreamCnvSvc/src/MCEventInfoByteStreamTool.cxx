@@ -13,8 +13,8 @@
 #include <format>
 
 namespace {
-  const SG::AuxElement::Accessor<uint64_t> acc_pileUpMixtureLow("pileUpMixtureIDLowBits");
-  const SG::AuxElement::Accessor<uint64_t> acc_pileUpMixtureHigh("pileUpMixtureIDHighBits");
+  const SG::Accessor<uint64_t> acc_pileUpMixtureLow("pileUpMixtureIDLowBits");
+  const SG::Accessor<uint64_t> acc_pileUpMixtureHigh("pileUpMixtureIDHighBits");
 }
 
 using ROBF = OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;

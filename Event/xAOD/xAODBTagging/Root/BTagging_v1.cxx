@@ -29,9 +29,9 @@ namespace xAOD {
                                          setSV0_significance3D )
 
    // The accessor object(s):
-   static const SG::AuxElement::Accessor< BTagging_v1::TPELVec_t >
+   static const SG::Accessor< BTagging_v1::TPELVec_t >
       sv0TPAcc1( "SV0_TrackParticles" );
-   static const SG::AuxElement::Accessor< BTagging_v1::TPELVec_t >
+   static const SG::Accessor< BTagging_v1::TPELVec_t >
       sv0TPAcc2( "SV0_TrackParticleLinks" );
 
    const BTagging_v1::TPELVec_t& BTagging_v1::SV0_TrackParticleLinks() const {
@@ -98,9 +98,9 @@ namespace xAOD {
    AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(BTagging_v1, float, SV1_pc, setSV1_pc)
 
    // The accessor object(s):
-   static const SG::AuxElement::Accessor< BTagging_v1::TPELVec_t >
+   static const SG::Accessor< BTagging_v1::TPELVec_t >
       sv1TPAcc1( "SV1_TrackParticles" );
-   static const SG::AuxElement::Accessor< BTagging_v1::TPELVec_t >
+   static const SG::Accessor< BTagging_v1::TPELVec_t >
       sv1TPAcc2( "SV1_TrackParticleLinks" );
 
    const BTagging_v1::TPELVec_t& BTagging_v1::SV1_TrackParticleLinks() const {
@@ -171,9 +171,9 @@ namespace xAOD {
                                          setIP2D_pc )
 
    // The accessor object(s):
-   static const SG::AuxElement::Accessor< BTagging_v1::TPELVec_t >
+   static const SG::Accessor< BTagging_v1::TPELVec_t >
       ip2dTPAcc1( "IP2D_TrackParticles" );
-   static const SG::AuxElement::Accessor< BTagging_v1::TPELVec_t >
+   static const SG::Accessor< BTagging_v1::TPELVec_t >
       ip2dTPAcc2( "IP2D_TrackParticleLinks" );
 
    const BTagging_v1::TPELVec_t& BTagging_v1::IP2D_TrackParticleLinks() const {
@@ -242,9 +242,9 @@ namespace xAOD {
    AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(BTagging_v1, float, IP3D_pc, setIP3D_pc)
 
    // The accessor object(s):
-   static const SG::AuxElement::Accessor< BTagging_v1::TPELVec_t >
+   static const SG::Accessor< BTagging_v1::TPELVec_t >
       ip3dTPAcc1( "IP3D_TrackParticles" );
-   static const SG::AuxElement::Accessor< BTagging_v1::TPELVec_t >
+   static const SG::Accessor< BTagging_v1::TPELVec_t >
       ip3dTPAcc2( "IP3D_TrackParticleLinks" );
 
    const BTagging_v1::TPELVec_t& BTagging_v1::IP3D_TrackParticleLinks() const {

@@ -140,7 +140,7 @@ bool MissingETComponent_v1::addObject(const IParticle* pPart,double wpx,double w
 // void MissingETComponent_v1::updateLinks()
 // {
 //   this->updateMETLink();
-//   static SG::AuxElement::Accessor<MissingETBase::Types::objlink_vector_t> acc("objectLinks");
+//   static SG::Accessor<MissingETBase::Types::objlink_vector_t> acc("objectLinks");
 //   if(acc.isAvailableWritable(*this)) {
 //     MissingETBase::Types::objlink_vector_t::iterator fLnk(this->f_objectLinks().begin());
 //     MissingETBase::Types::objlink_vector_t::iterator lLnk(this->f_objectLinks().end());
@@ -154,7 +154,7 @@ bool MissingETComponent_v1::addObject(const IParticle* pPart,double wpx,double w
 // }
 
 // void MissingETComponent_v1::updateMETLink() {
-//   static SG::AuxElement::Accessor<MissingETBase::Types::metlink_t> acc("metLink");
+//   static SG::Accessor<MissingETBase::Types::metlink_t> acc("metLink");
 //   if(acc.isAvailableWritable(*this)) {
 //     if(f_setLink<MissingETBase::Types::metlink_t>(this->f_metLink())) {
 //       this->f_metLink().toPersistent();

@@ -80,11 +80,11 @@ persToTrans(  const xAOD::TrackParticleAuxContainer_v1* oldObj,
     }
     
 
-    static const SG::AuxElement::ConstAccessor< uint8_t > numberOfBLayerHitsAcc( "numberOfBLayerHits" );
-    static const SG::AuxElement::ConstAccessor< uint8_t > numberOfBLayerSharedHitsAcc( "numberOfBLayerSharedHits" );
-    static const SG::AuxElement::ConstAccessor< uint8_t > numberOfBLayerOutliersAcc( "numberOfBLayerOutliers" );
-    static const SG::AuxElement::ConstAccessor< uint8_t > numberOfBLayerSplitHitsAcc( "numberOfBLayerSplitHits" );
-    static const SG::AuxElement::ConstAccessor< uint8_t > expectBLayerHitAcc( "expectBLayerHit" );
+    static const SG::ConstAccessor< uint8_t > numberOfBLayerHitsAcc( "numberOfBLayerHits" );
+    static const SG::ConstAccessor< uint8_t > numberOfBLayerSharedHitsAcc( "numberOfBLayerSharedHits" );
+    static const SG::ConstAccessor< uint8_t > numberOfBLayerOutliersAcc( "numberOfBLayerOutliers" );
+    static const SG::ConstAccessor< uint8_t > numberOfBLayerSplitHitsAcc( "numberOfBLayerSplitHits" );
+    static const SG::ConstAccessor< uint8_t > expectBLayerHitAcc( "expectBLayerHit" );
 
     if( numberOfBLayerHitsAcc.isAvailable( *( oldInt[ i ] ) ) ) {
 
@@ -121,7 +121,7 @@ persToTrans(  const xAOD::TrackParticleAuxContainer_v1* oldObj,
     }
 
 
-    static const SG::AuxElement::ConstAccessor< std::vector<float> > definingParametersCovMatrixAcc( "definingParametersCovMatrix" );
+    static const SG::ConstAccessor< std::vector<float> > definingParametersCovMatrixAcc( "definingParametersCovMatrix" );
 
     if( definingParametersCovMatrixAcc.isAvailable( *( oldInt[ i ] ) ) ) {
 

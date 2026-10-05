@@ -8,9 +8,9 @@
 #include "xAODInDetMeasurement/versions/StripCluster_v1.h"
 #include "xAODInDetMeasurement/ArrayFloat3.h"
 
-static const SG::AuxElement::Accessor<xAOD::ArrayFloat3> globalPosAcc(
+static const SG::Accessor<xAOD::ArrayFloat3> globalPosAcc(
     "globalPosition");
-const SG::AuxElement::Accessor<SG::JaggedVecElt<Identifier::value_type> >
+const SG::Accessor<SG::JaggedVecElt<Identifier::value_type> >
     xAOD::StripCluster_v1::s_rdoListAcc("rdoList");
 
 xAOD::ConstVectorMap<3> xAOD::StripCluster_v1::globalPosition() const {

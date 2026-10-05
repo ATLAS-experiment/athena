@@ -63,9 +63,9 @@ class StripCluster_v1 : public UncalibratedMeasurement_v1 {
     void setChannelsInPhi(int channelsInPhi);
 
     /// @}
-    static const SG::AuxElement::Accessor<SG::JaggedVecElt<Identifier::value_type> > rdoListAcc() { return s_rdoListAcc; }
+    static const SG::Accessor<SG::JaggedVecElt<Identifier::value_type> > rdoListAcc() { return s_rdoListAcc; }
 protected:
-    static const SG::AuxElement::Accessor<SG::JaggedVecElt<Identifier::value_type> > s_rdoListAcc;
+    static const SG::Accessor<SG::JaggedVecElt<Identifier::value_type> > s_rdoListAcc;
 };
 
 

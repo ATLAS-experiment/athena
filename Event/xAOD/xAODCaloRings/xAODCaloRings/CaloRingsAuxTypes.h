@@ -14,9 +14,9 @@
 namespace xAOD {
 
 /// The CaloRings element links decorator type:
-typedef SG::AuxElement::Decorator< xAOD::CaloRingsLinks > caloRingsDeco_t;
+typedef SG::Decorator< xAOD::CaloRingsLinks > caloRingsDeco_t;
 /// The CaloRings element links reader type:
-typedef SG::AuxElement::ConstAccessor< xAOD::CaloRingsLinks > caloRingsReader_t;
+typedef SG::ConstAccessor< xAOD::CaloRingsLinks > caloRingsReader_t;
 
 } // namespace xAOD
 

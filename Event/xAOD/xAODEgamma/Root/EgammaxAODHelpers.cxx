@@ -57,7 +57,7 @@ const xAOD::CaloCluster* xAOD::EgammaHelpers::getCluster(
 {
   if (!eg) { return nullptr; }
   if (!cook) { return eg->caloCluster(); }
-  static const SG::AuxElement::Accessor<ElementLink< xAOD::CaloClusterContainer > >
+  static const SG::Accessor<ElementLink< xAOD::CaloClusterContainer > >
     cookClusLinkAcc( "cookiecutClusterLink" );
   if (!cookClusLinkAcc.isAvailable(*eg) || !cookClusLinkAcc(*eg).isValid())
     { return nullptr; }
@@ -66,7 +66,7 @@ const xAOD::CaloCluster* xAOD::EgammaHelpers::getCluster(
 // ==================================================================
 std::vector< ElementLink< xAOD::CaloClusterContainer > > xAOD::EgammaHelpers::getAssociatedTopoClustersLinks(const xAOD::CaloCluster *cluster){
 
-  static const SG::AuxElement::Accessor < std::vector< ElementLink< xAOD::CaloClusterContainer > > > caloClusterLinks("constituentClusterLinks");
+  static const SG::Accessor < std::vector< ElementLink< xAOD::CaloClusterContainer > > > caloClusterLinks("constituentClusterLinks");
   std::vector< ElementLink< xAOD::CaloClusterContainer > > veclinks;
   if(caloClusterLinks.isAvailable(*cluster)){
     veclinks=caloClusterLinks(*cluster);
@@ -90,8 +90,8 @@ std::vector<const xAOD::CaloCluster*> xAOD::EgammaHelpers::getAssociatedTopoClus
 // ==================================================================
 std::vector< ElementLink< xAOD::FlowElementContainer > > xAOD::EgammaHelpers::getAssociatedFlowElementsLinks(const xAOD::Egamma *eg,
 													     bool neutral){
-  static const SG::AuxElement::Accessor < std::vector< ElementLink< xAOD::FlowElementContainer > > > nflowElementLinks("neutralFELinks");
-  static const SG::AuxElement::Accessor < std::vector< ElementLink< xAOD::FlowElementContainer > > > cflowElementLinks("chargedFELinks");
+  static const SG::Accessor < std::vector< ElementLink< xAOD::FlowElementContainer > > > nflowElementLinks("neutralFELinks");
+  static const SG::Accessor < std::vector< ElementLink< xAOD::FlowElementContainer > > > cflowElementLinks("chargedFELinks");
   std::vector< ElementLink< xAOD::FlowElementContainer > > veclinks;
   if(neutral && nflowElementLinks.isAvailable(*eg)){
     veclinks=nflowElementLinks(*eg);
@@ -188,8 +188,8 @@ float xAOD::EgammaHelpers::summaryValueFloat(const xAOD::TrackParticle& tp,
 unsigned short xAOD::EgammaHelpers::energyInMissingCells(const xAOD::Egamma& eg,
                                                         double& e2, double& e3) {
 
-  const static SG::AuxElement::ConstAccessor<float> acc_Eadded_s2("Eadded_Lr2");
-  const static SG::AuxElement::ConstAccessor<float> acc_Eadded_s3("Eadded_Lr3");
+  const static SG::ConstAccessor<float> acc_Eadded_s2("Eadded_Lr2");
+  const static SG::ConstAccessor<float> acc_Eadded_s3("Eadded_Lr3");
 
   unsigned short status = 0;
   if (acc_Eadded_s2.isAvailable(eg))

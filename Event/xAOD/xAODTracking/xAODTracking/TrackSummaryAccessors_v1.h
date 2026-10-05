@@ -21,7 +21,7 @@ namespace xAOD {
    /// TrackParticle_v1 object at runtime to get/set summary values on themselves.
    ///
    template <class T>
-   const SG::AuxElement::Accessor< T >*
+   const SG::Accessor< T >*
    trackSummaryAccessorV1( xAOD::SummaryType type );
 
 } // namespace xAOD

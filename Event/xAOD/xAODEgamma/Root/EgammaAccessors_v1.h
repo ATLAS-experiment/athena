@@ -21,7 +21,7 @@ namespace xAOD {
    /// Egamma_v1 object at runtime to get/set detail values on themselves.
 
 
-   const SG::AuxElement::Accessor< float >*
+   const SG::Accessor< float >*
    showerShapeAccessorV1( xAOD::EgammaParameters::ShowerShapeType type );
 
 } // namespace xAOD

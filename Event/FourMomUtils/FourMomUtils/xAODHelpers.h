@@ -40,7 +40,7 @@ namespace xAOD
 // Define a pre-processor macro for the implementations of all these methods
 #define GET_VAL( FUNCNAME, VALTYPE, PERSVALTYPE )                                      \
     inline bool FUNCNAME( const SG::AuxElement& auxEle, const std::string& varName ) { \
-      SG::AuxElement::ConstAccessor<PERSVALTYPE> acc(varName);                         \
+      SG::ConstAccessor<PERSVALTYPE> acc(varName);                         \
       return static_cast<VALTYPE>( acc(auxEle) );                                      \
     }
 
@@ -56,7 +56,7 @@ namespace xAOD
 // Define a pre-processor macro for the implementations of all these methods
 #define SET_VAL( FUNCNAME, VALTYPE, PERSVALTYPE )                                           \
   inline bool FUNCNAME( SG::AuxElement& auxEle, const std::string& varName, VALTYPE val ) { \
-    SG::AuxElement::Accessor<PERSVALTYPE> acc(varName);                                     \
+    SG::Accessor<PERSVALTYPE> acc(varName);                                     \
     if ( acc.isAvailable(auxEle) && !(acc.isAvailableWritable(auxEle)) ) {                  \
       return false;                                                                         \
     }                                                                                       \
@@ -76,7 +76,7 @@ namespace xAOD
 // Define a pre-processor macro for the implementations of all these methods
 #define DECO_VAL( FUNCNAME, VALTYPE, PERSVALTYPE )                                                \
   inline bool FUNCNAME( const SG::AuxElement& auxEle, const std::string& varName, VALTYPE val ) { \
-    SG::AuxElement::Decorator<PERSVALTYPE> deco(varName);                                         \
+    SG::Decorator<PERSVALTYPE> deco(varName);                                         \
     if ( deco.isAvailable(auxEle) && !(deco.isAvailableWritable(auxEle)) ) {                      \
       return false;                                                                               \
     }                                                                                             \

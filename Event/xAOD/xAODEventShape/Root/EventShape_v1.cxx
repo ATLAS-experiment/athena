@@ -14,7 +14,7 @@
 #define DEFINE_ACCESSOR( NAME )                                   \
   case xAOD::EventShape_v1::NAME:                                 \
      {                                                            \
-        static const SG::AuxElement::Accessor< float > a( #NAME );      \
+        static const SG::Accessor< float > a( #NAME );      \
         return &a;                                                \
      }                                                            \
      break
@@ -22,7 +22,7 @@
 namespace {
 
    /// Helper function for getting the Accessor for a given EventShapeID
-   const SG::AuxElement::Accessor< float >*
+   const SG::Accessor< float >*
    eventShapeAccessor( xAOD::EventShape_v1::EventShapeID id ) {
 
       switch( id ) {
@@ -43,7 +43,7 @@ namespace {
    }
 
    /// Helper function for getting the Accessor for a given EventDensityID
-   const SG::AuxElement::Accessor< float >*
+   const SG::Accessor< float >*
    eventDensityAccessor( xAOD::EventShape_v1::EventDensityID id ) {
 
       switch( id ) {
@@ -62,7 +62,7 @@ namespace {
    }
 
    /// Helper function retrieving a float variable from the EventShape object
-   bool getAttribute( const SG::AuxElement::Accessor< float >* acc,
+   bool getAttribute( const SG::Accessor< float >* acc,
                       const xAOD::EventShape_v1& es, double &v ) {
 
       if( acc && acc->isAvailable( es ) ) {
@@ -74,7 +74,7 @@ namespace {
    }
 
    /// Helper function retrieving a float variable from the EventShape object
-   double getAttribute( const SG::AuxElement::Accessor< float >* acc,
+   double getAttribute( const SG::Accessor< float >* acc,
                         const xAOD::EventShape_v1& es ) {
 
       if( acc ) {
@@ -86,7 +86,7 @@ namespace {
    }
 
    /// Helper function setting a float variable on the EventShape object
-   bool setAttribute( const SG::AuxElement::Accessor< float >* acc,
+   bool setAttribute( const SG::Accessor< float >* acc,
                       xAOD::EventShape_v1& es, double v ) {
 
       if( acc ) {

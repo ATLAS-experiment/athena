@@ -220,17 +220,17 @@ StatusCode TrackParticleCnvAlg::convert(const EventContext& ctx,
       }
       //This is the Algorithm creating TrackParticles
       //
-      static const SG::AuxElement::Accessor<
+      static const SG::Accessor<
         ElementLink<xAOD::TruthParticleContainer>>
         theLink("truthParticleLink");
-      static const SG::AuxElement::Accessor<float> theProbability(
+      static const SG::Accessor<float> theProbability(
         "truthMatchProbability");
       theLink(*particle) = link;
       theProbability(*particle) = probability;
       if (!m_truthClassifier.empty()) {
-        static const SG::AuxElement::Accessor<int> theType("truthType");
-        static const SG::AuxElement::Accessor<int> theOrigin("truthOrigin");
-        static const SG::AuxElement::Accessor<unsigned int> theClassification("truthClassification");
+        static const SG::Accessor<int> theType("truthType");
+        static const SG::Accessor<int> theOrigin("truthOrigin");
+        static const SG::Accessor<unsigned int> theClassification("truthClassification");
         theType(*particle) = static_cast<int>(type);
         theOrigin(*particle) = static_cast<int>(origin);
         theClassification(*particle) = static_cast<unsigned int>(classification);

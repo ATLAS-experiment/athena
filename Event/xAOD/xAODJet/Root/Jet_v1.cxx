@@ -103,12 +103,12 @@ namespace xAOD {
 
 
   /// The accessor for the cluster element links
-  static const SG::AuxElement::Accessor< std::vector< ElementLink< IParticleContainer > > >
+  static const SG::Accessor< std::vector< ElementLink< IParticleContainer > > >
       constituentAcc( "constituentLinks" );
-  static const SG::AuxElement::Accessor< std::vector< float> >
+  static const SG::Accessor< std::vector< float> >
       constituentWeightAcc( "constituentWeights" );
   /// The access for the number of constituents
-  static const SG::AuxElement::Accessor<int> numConstitAcc("numConstit");
+  static const SG::Accessor<int> numConstitAcc("numConstit");
 
   void Jet_v1::addConstituent( const ElementLink< IParticleContainer >& link,
                                float w ) {
@@ -133,7 +133,7 @@ namespace xAOD {
   }
 
 
-  static const SG::AuxElement::Accessor< int > constitScaleAcc( "ConstituentScale" );
+  static const SG::Accessor< int > constitScaleAcc( "ConstituentScale" );
 
   JetConstitScale Jet_v1::getConstituentsSignalState() const {
     if( constitScaleAcc.isAvailable(*this) ) return (JetConstitScale)constitScaleAcc(*this);
@@ -249,9 +249,9 @@ namespace xAOD {
     return nullptr;
   }
 
-  static const SG::AuxElement::Accessor<int> inputAcc("InputType");
-  static const SG::AuxElement::Accessor<int> algAcc("AlgorithmType");
-  static const SG::AuxElement::Accessor<float> spAcc("SizeParameter");
+  static const SG::Accessor<int> inputAcc("InputType");
+  static const SG::Accessor<int> algAcc("AlgorithmType");
+  static const SG::Accessor<float> spAcc("SizeParameter");
 
   float Jet_v1::getSizeParameter() const {
     return spAcc(*this);

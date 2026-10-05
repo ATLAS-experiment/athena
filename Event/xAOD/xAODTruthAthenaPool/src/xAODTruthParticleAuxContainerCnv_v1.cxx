@@ -49,7 +49,7 @@ void xAODTruthParticleAuxContainerCnv_v1::persToTrans(
   newInt.setStore( newObj );
 
   unsigned int index{0};
-  static const SG::AuxElement::Accessor<int> barcodeAcc ("barcode");
+  static const SG::Accessor<int> barcodeAcc ("barcode");
   // Loop over the interface objects, and do the conversion with their help:
   for( const xAOD::TruthParticle_v1* oldPart : oldInt ) {
     const int oldBarcode = (barcodeAcc.isAvailable (*oldPart)) ? barcodeAcc(*oldPart) : HepMC::INVALID_PARTICLE_ID;

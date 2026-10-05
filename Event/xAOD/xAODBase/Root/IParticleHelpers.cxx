@@ -14,7 +14,7 @@
 namespace xAOD {
 
    /// Object used for setting/getting the dynamic decoration in question
-   static const SG::AuxElement::Accessor< ElementLink< IParticleContainer > >
+   static const SG::Accessor< ElementLink< IParticleContainer > >
       acc( "originalObjectLink" );
 
    /// This function should be used by CP tools when they make a deep copy

@@ -35,7 +35,7 @@ namespace xAOD
 
   AUXSTORE_OBJECT_SETTER_AND_GETTER (AFPSiHitsCluster_v1, std::vector<AFPSiHitsCluster_v1::AFPHitLink_t>,  hitsLinks, setHitsLinks)
 
-  const static SG::AuxElement::Accessor< std::vector<AFPSiHitsCluster_v1::AFPHitLink_t> > hitsLinksAcc( "hitsLinks" );
+  const static SG::Accessor< std::vector<AFPSiHitsCluster_v1::AFPHitLink_t> > hitsLinksAcc( "hitsLinks" );
   
   void AFPSiHitsCluster_v1::addHitLink( const AFPSiHitsCluster_v1::AFPHitLink_t& link )
   {

@@ -12,7 +12,7 @@
 #define DEFINE_ACCESSOR(TYPE)                                 \
   case xAOD::Iso::TYPE:                                       \
 {                                                             \
-  static const SG::AuxElement::Accessor< float > a( #TYPE);   \
+  static const SG::Accessor< float > a( #TYPE);   \
   return &a;                                                  \
 }                                                             \
 break;
@@ -20,7 +20,7 @@ break;
 
 namespace xAOD {
 
-const SG::AuxElement::Accessor< float >*
+const SG::Accessor< float >*
   getIsolationAccessor( Iso::IsolationType type ) {
     switch( type ) {
       //EtCone variables      

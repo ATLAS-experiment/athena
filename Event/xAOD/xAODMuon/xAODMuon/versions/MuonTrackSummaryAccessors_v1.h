@@ -19,7 +19,7 @@ namespace xAOD {
    /// This function holds on to Accessor objects that can be used by each
    /// TrackParticle_v1 object at runtime to get/set summary values on themselves.
    ///
-   const SG::AuxElement::Accessor< uint8_t >&
+   const SG::Accessor< uint8_t >&
    muonTrackSummaryAccessorV1( xAOD::MuonSummaryType type );
 
 } // namespace xAOD
