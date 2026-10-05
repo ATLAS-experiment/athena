@@ -29,6 +29,7 @@ skip_files=(
   "idpvm.ambi.scored.root"
   "idpvm.gbts.root"
   "idpvm.acts.timed.root"
+  "idpvm.hsgnn.root"
   "ActsMonitoringOutput.root"
   "acts-analysis.gbts.root"
   "acts-analysis.acts.root"

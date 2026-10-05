@@ -1,15 +1,22 @@
 # Steering script for IDPVM ART jobs with Data Reco config
-inputAOD=$1
 maxEvents=1000
 
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
-dcubeShifterXml=${artdata}/InDetPhysValMonitoring/dcube/config/IDPVMPlots_mc_baseline.xml
 lastref_dir=last_results
+dcubeXml=dcube_ART_IDPVMPlots_vertex.xml
+# search in $DATAPATH for matching file
+dcubeShifterXml=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXml -print -quit 2>/dev/null)
+# Don't run if dcube config not found
+if [ -z "$dcubeXmlAbsPath" ]; then
+    echo "art-result: 1 dcube-xml-config"
+    exit 1
+fi
+
 
 run() { (set -x; exec "$@") }
 
 run  Derivation_tf.py \
-     --inputAODFile "$inputAOD" \
+     --inputAODFile ${ArtInFile} \
      --outputDAODFile sumpt2.root \
      --maxEvents $maxEvents \
      --formats PHYSVAL \
@@ -27,7 +34,7 @@ idpvm_tf_exit_code=$?
 echo "art-result: $idpvm_tf_exit_code idpvm sumpt2"
 
 run  Derivation_tf.py \
-     --inputAODFile "$inputAOD" \
+     --inputAODFile ${ArtInFile} \
      --outputDAODFile hsgnn.root \
      --maxEvents $maxEvents \
      --formats PHYSVAL \

@@ -310,6 +310,14 @@
      <TDirectory name="AllPrimaryVertices">
       <hist2D name="vx_n_vs_truthMu" plotopts="" tests="KS" type="TH2F"/>
       <hist2D name="vx_n_vs_actualMu" plotopts="" tests="KS" type="TH2F"/>
+      <hist1D name="vx_hs_classification" plotopts="" tests="KS" type="TH1F"/>
+      <hist2D name="resHelper_mu_hsVxTruthLong" plotopts="" tests="KS" type="TH2F"/>
+      <hist1D name="resolution_vs_mu_hsVxTruthLong" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="resmean_vs_mu_hsVxTruthLong" plotopts="" tests="KS" type="TH1F"/>
+      <graph name="vx_hs_sel_eff_dist_vs_nReco" plotopts="" type="TEfficiency"/>
+      <graph name="vx_hs_sel_eff_mu" plotopts="" type="TEfficiency"/>
+      <graph name="vx_hs_sel_eff_vs_nReco" plotopts="" type="TEfficiency"/>
+      <graph name="vx_hs_reco_eff_mu" plotopts="" type="TEfficiency"/>
      </TDirectory>
      <TDirectory name="HardScatteringVertex">
       <hist1D name="vx_x" plotopts="" tests="KS" type="TH1F"/>

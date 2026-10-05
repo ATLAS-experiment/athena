@@ -8,7 +8,7 @@
 # art-html: dcube_last
 
 lastref_dir=last_results
-dcubeXml=dcube_ART_IDPVMPlots_ITk_vertex.xml
+dcubeXml=dcube_ART_IDPVMPlots_vertex.xml
 rdo=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RDO_RUN4[0])")
 
 # search in $DATAPATH for matching file
