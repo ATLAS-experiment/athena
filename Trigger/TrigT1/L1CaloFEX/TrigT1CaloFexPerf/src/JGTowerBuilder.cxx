@@ -9,13 +9,13 @@
 
 namespace
 {
-  const static SG::AuxElement::Decorator<float> decArea("area");
-  const static SG::AuxElement::Decorator<std::size_t> decNextEtaIndex("nextEtaIndex");
-  const static SG::AuxElement::Decorator<std::size_t> decPreviousEtaIndex("previousEtaIndex");
-  const static SG::AuxElement::Decorator<std::size_t> decNextPhiIndex("nextPhiIndex");
-  const static SG::AuxElement::Decorator<std::size_t> decPreviousPhiIndex("previousPhiIndex");
-  const static SG::AuxElement::Decorator<std::size_t> decIndexInFront("indexInFront");
-  const static SG::AuxElement::Decorator<std::size_t> decIndexBehind("indexBehind");
+  const static SG::Decorator<float> decArea("area");
+  const static SG::Decorator<std::size_t> decNextEtaIndex("nextEtaIndex");
+  const static SG::Decorator<std::size_t> decPreviousEtaIndex("previousEtaIndex");
+  const static SG::Decorator<std::size_t> decNextPhiIndex("nextPhiIndex");
+  const static SG::Decorator<std::size_t> decPreviousPhiIndex("previousPhiIndex");
+  const static SG::Decorator<std::size_t> decIndexInFront("indexInFront");
+  const static SG::Decorator<std::size_t> decIndexBehind("indexBehind");
 } // namespace
 
 namespace LVL1

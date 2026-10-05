@@ -159,7 +159,7 @@ namespace Trig {
       return xAOD::P4Helpers::deltaR(lhs, rhs, false) < m_drThreshold;
     }
     else if (m_matchShallow) {
-      static const SG::AuxElement::ConstAccessor<
+      static const SG::ConstAccessor<
         ElementLink<xAOD::IParticleContainer>> accOOL("originalObjectLink");
       // For now assume that we've got a shallow copy iff this is available
       const xAOD::IParticle* lhsOrig = 

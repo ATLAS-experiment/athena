@@ -17,8 +17,8 @@
 
 namespace
 {
-  const static SG::AuxElement::ConstAccessor<float> accArea("area");
-  const static SG::AuxElement::Decorator<std::vector<float>> decRho("FPGARhos");
+  const static SG::ConstAccessor<float> accArea("area");
+  const static SG::Decorator<std::vector<float>> decRho("FPGARhos");
 } // namespace
 
 namespace LVL1

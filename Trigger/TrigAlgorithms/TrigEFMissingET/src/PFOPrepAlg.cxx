@@ -12,7 +12,7 @@
 /// Anonymous namespace
 namespace
 {
-  const static SG::AuxElement::ConstAccessor<char> accPVMatched("matchedToPV");
+  const static SG::ConstAccessor<char> accPVMatched("matchedToPV");
 }
 
 namespace HLT

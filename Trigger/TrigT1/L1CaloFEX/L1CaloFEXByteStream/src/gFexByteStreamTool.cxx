@@ -481,7 +481,7 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
                         }
                         // Decorator for slice number - only needed for out-of-time containers
                         // (L1A containers by definition only contain slice 0)
-                        static const SG::AuxElement::Decorator<uint32_t> sliceNumberDec("sliceNumber");
+                        static const SG::Decorator<uint32_t> sliceNumberDec("sliceNumber");
                         
                         //Saving gRho TOBs into the EDM container
                         if (iWord == gPos::GRHO_POSITION){
@@ -714,7 +714,7 @@ int16_t gFexByteStreamTool::fillGlobal(const std::array<uint32_t, 3> &tob, const
     // Add slice number decoration only for out-of-time TOBs
     // (L1A containers by definition only contain slice 0)
     if (sliceNumber != 0) {
-        static const SG::AuxElement::Decorator<uint32_t> sliceNumberDec("sliceNumber");
+        static const SG::Decorator<uint32_t> sliceNumberDec("sliceNumber");
         sliceNumberDec(*container->back()) = sliceNumber;
     }
 

@@ -70,9 +70,9 @@ namespace Trig {
     protected:
       /// Helper typedefs for accessors/decorators, vectors of ele links
       template <typename T>
-        using constAcc_t = SG::AuxElement::ConstAccessor<T>;
+        using constAcc_t = SG::ConstAccessor<T>;
       template <typename T>
-        using dec_t = SG::AuxElement::Decorator<T>;
+        using dec_t = SG::Decorator<T>;
       template <typename T>
         using vecLink_t = std::vector<ElementLink<T>>;
 

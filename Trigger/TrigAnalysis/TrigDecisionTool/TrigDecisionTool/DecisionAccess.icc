@@ -132,7 +132,7 @@ Trig::DecisionAccess::associateToEventView(SG::ReadHandle<CONTAINER>& inViewCont
   const CONTAINER* container = inViewContainer.cptr();
   const typename CONTAINER::const_iterator end = container->end();
   typename CONTAINER::const_iterator foundStartIt = end, foundEndIt = end; 
-  static const SG::AuxElement::ConstAccessor< ElementLink<TrigRoiDescriptorCollection> > accessor("viewIndex");
+  static const SG::ConstAccessor< ElementLink<TrigRoiDescriptorCollection> > accessor("viewIndex");
   for (typename CONTAINER::const_iterator it = container->begin(); it != end; ++it) {
     if (!accessor.isAvailable(**it)) { // iterator dereferences to an OBJECT*, OBJECT* dereferences to an OBJECT
       if (isFullscan) {

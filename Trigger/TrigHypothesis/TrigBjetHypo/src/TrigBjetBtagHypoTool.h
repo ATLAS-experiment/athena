@@ -69,7 +69,7 @@ class TrigBjetBtagHypoTool : virtual public ::AthAlgTool {
 
   Gaudi::Property<std::map<std::string, std::string>> m_monMap {this,
       "monitoredFloats", {}, "(EDM name, monitoring name) pairs"};
-  std::vector<std::pair<SG::AuxElement::ConstAccessor<float>, std::string>> m_monPairs;
+  std::vector<std::pair<SG::ConstAccessor<float>, std::string>> m_monPairs;
 
   Gaudi::Property<bool> m_vetoBadBeamspot {this, "vetoBadBeamspot", true,
     "Veto btagging if the beamspot is bad"};

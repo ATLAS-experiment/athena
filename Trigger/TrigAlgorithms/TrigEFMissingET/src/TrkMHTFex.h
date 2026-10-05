@@ -110,7 +110,7 @@ namespace HLT { namespace MET {
       /************************************************************************
        * Internal members
        ***********************************************************************/
-      deferred_t<SG::AuxElement::ConstAccessor<std::vector<ElementLink<xAOD::IParticleContainer>>>> m_trackGA;
+      deferred_t<SG::ConstAccessor<std::vector<ElementLink<xAOD::IParticleContainer>>>> m_trackGA;
   }; //> end class TrkMHTFex
 } } //> end namespace HLT::MET
 

@@ -53,7 +53,7 @@ private:
  inline double TrigBtagEmulationJet::eta() const  { return m_eta; };
  inline double TrigBtagEmulationJet::phi() const { return m_phi; }
  inline float TrigBtagEmulationJet::jvt() const {
-   static const SG::AuxElement::Accessor<float> JVT( "Jvt" );
+   static const SG::Accessor<float> JVT( "Jvt" );
    return JVT(*m_jet);
  }
  inline const TLorentzVector& TrigBtagEmulationJet::p4() const { return m_p4; }

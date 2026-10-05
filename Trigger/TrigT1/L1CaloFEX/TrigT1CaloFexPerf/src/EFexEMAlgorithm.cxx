@@ -18,13 +18,13 @@
 
 namespace
 {
-   const static SG::AuxElement::Decorator<float> decRun3REta("Run3REta");
-   const static SG::AuxElement::Decorator<float> decRun3RHad("Run3RHad");
-   const static SG::AuxElement::Decorator<float> decRun3REtaL12("Run3REtaL12");
-   const static SG::AuxElement::Decorator<int> decPassRun3ClusterEnergy("PassRun3ClusterEnergy");
-   const static SG::AuxElement::Decorator<int> decPassRun3REta("PassRun3REta");
-   const static SG::AuxElement::Decorator<int> decPassRun3RHad("PassRun3RHad");
-   const static SG::AuxElement::Decorator<int> decPassRun3wstot("PassRun3wstot");
+   const static SG::Decorator<float> decRun3REta("Run3REta");
+   const static SG::Decorator<float> decRun3RHad("Run3RHad");
+   const static SG::Decorator<float> decRun3REtaL12("Run3REtaL12");
+   const static SG::Decorator<int> decPassRun3ClusterEnergy("PassRun3ClusterEnergy");
+   const static SG::Decorator<int> decPassRun3REta("PassRun3REta");
+   const static SG::Decorator<int> decPassRun3RHad("PassRun3RHad");
+   const static SG::Decorator<int> decPassRun3wstot("PassRun3wstot");
 } // namespace
 
 LVL1::EFexEMAlgorithm::EFexEMAlgorithm(const std::string &name, ISvcLocator *pSvcLocator)

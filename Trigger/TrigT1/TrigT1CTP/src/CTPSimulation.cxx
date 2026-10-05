@@ -541,8 +541,8 @@ LVL1CTP::CTPSimulation::fillInputHistograms(const EventContext& context) const {
          auto h4 = *get1DHist("/input/tau/hadIso");
          auto h5 = *get1DHist("/input/tau/R3ClusterET");
          auto h6 = *get1DHist("/input/tau/R3ClusterIso");
-         const static SG::AuxElement::ConstAccessor<float> accR3ClET ("R3ClusterET");
-         const static SG::AuxElement::ConstAccessor<float> accR3ClIso ("R3ClusterIso");
+         const static SG::ConstAccessor<float> accR3ClET ("R3ClusterET");
+         const static SG::ConstAccessor<float> accR3ClIso ("R3ClusterIso");
          for( const auto tau : *eFexTau ) {
             h0->Fill(tau->eT());
             h1->Fill(tau->eta());
@@ -898,8 +898,8 @@ LVL1CTP::CTPSimulation::calculateTauMultiplicity( const TrigConf::L1Threshold & 
    if ( confThr.name()[0]=='e' ) {
       // new TAU threshold from eFEX
       auto eFexTaus  = SG::makeHandle( m_iKeyEFexTau, context );
-      const static SG::AuxElement::ConstAccessor<float> accR3ClET ("R3ClusterET");
-      const static SG::AuxElement::ConstAccessor<float> accR3ClIso ("R3ClusterIso");
+      const static SG::ConstAccessor<float> accR3ClET ("R3ClusterET");
+      const static SG::ConstAccessor<float> accR3ClIso ("R3ClusterIso");
       if( eFexTaus.isValid() ) {
          for ( const auto tau : *eFexTaus ) {
             unsigned int eT = (unsigned int) (accR3ClET(*tau)/1000.); // tau eT is in MeV while the cut is in GeV - this is only temporary and needs to be made consistent for all L1Calo

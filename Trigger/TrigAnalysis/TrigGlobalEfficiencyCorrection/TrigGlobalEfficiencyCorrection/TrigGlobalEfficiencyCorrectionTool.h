@@ -101,7 +101,7 @@ class TrigGlobalEfficiencyCorrectionTool
     float minPt, maxPt;
   };
   struct TagDecorator {
-    SG::AuxElement::ConstAccessor<char> decorator;
+    SG::ConstAccessor<char> decorator;
     std::size_t hash;
     bool suffixed;
     // cppcheck-suppress uninitMemberVar; false positive
@@ -189,7 +189,7 @@ class TrigGlobalEfficiencyCorrectionTool
   bool m_validTrigMatchTool;  //!
 
   std::vector<TagDecorator> m_leptonTagDecorators;                   //!
-  SG::AuxElement::ConstAccessor<unsigned int> m_runNumberDecorator;  //!
+  SG::ConstAccessor<unsigned int> m_runNumberDecorator;  //!
   std::unique_ptr<TrigGlobEffCorr::Calculator> m_calculator;         //!
 
   /// Internal methods (I) -- initialization of the tool

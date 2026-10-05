@@ -156,7 +156,7 @@ Navigation::classKey2CLIDKey(const std::vector<std::string>& property,
       // that shouldn't match anything.
       const char* dummyName = "__dummyThatShouldNotMatch";
       [[maybe_unused]]
-      static const SG::AuxElement::Accessor<int> dummyVar (dummyName);
+      static const SG::Accessor<int> dummyVar (dummyName);
       static const std::set<std::string> dummySet { dummyName };
       sel.selectAux (dummySet);
     }

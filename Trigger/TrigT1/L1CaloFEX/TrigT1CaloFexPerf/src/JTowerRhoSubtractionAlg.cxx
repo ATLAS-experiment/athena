@@ -18,8 +18,8 @@
 
 namespace
 {
-  const static SG::AuxElement::ConstAccessor<float> accArea("area");
-  const static SG::AuxElement::Decorator<std::vector<float>> decRhos("rhoValues");
+  const static SG::ConstAccessor<float> accArea("area");
+  const static SG::Decorator<std::vector<float>> decRhos("rhoValues");
   std::vector<std::size_t> createVectorFromRanges(const std::vector<std::pair<std::size_t, std::size_t>> &ranges)
   {
     // Work out the size

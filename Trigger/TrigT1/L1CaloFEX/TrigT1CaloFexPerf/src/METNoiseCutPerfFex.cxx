@@ -24,7 +24,7 @@ namespace LVL1
     ATH_CHECK(METPerfFexBase::initialize());
     ATH_CHECK(m_towersKey.initialize());
     if (!m_noiseName.empty())
-      m_noiseAcc = std::make_unique<SG::AuxElement::ConstAccessor<float>>(m_noiseName);
+      m_noiseAcc = std::make_unique<SG::ConstAccessor<float>>(m_noiseName);
     return StatusCode::SUCCESS;
   }
 
