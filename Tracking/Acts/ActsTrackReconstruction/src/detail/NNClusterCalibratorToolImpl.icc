@@ -7,8 +7,11 @@
 #include <PixelReadoutGeometry/PixelModuleDesign.h>
 #include <onnxruntime_cxx_api.h>
 
+#include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <limits>
+#include <ranges>
 #include <set>
 #include <stdexcept>
 
@@ -71,12 +74,14 @@ NNClusterCalibrator<calib_data_t, traj_t>::calibrate(
     const EventContext& ctx, const Acts::GeometryContext& gctx,
     const Acts::CalibrationContext& cctx, const xAOD::PixelCluster& cluster,
     const InDetDD::SiDetectorElement& detElement,
-    const std::pair<float, float>& tan_incidence_angles) const {
+    const std::pair<float, float>& tan_incidence_angles,
+    const Acts::Vector2& predicted_local_position) const {
     double totalCharge = cluster.totalCharge();
     if (totalCharge < m_options.m_minClusterChargeForNN || cluster.chargeList().size() <
       	m_options.m_minClusterSizeForNN) {
     return m_options.m_fallback->calibrate(ctx, gctx, cctx, cluster,
-                                             detElement, tan_incidence_angles);
+                                             detElement, tan_incidence_angles,
+                                             predicted_local_position);
   }
 
   ActsTrk::NNinput nnInput;
@@ -94,12 +99,24 @@ NNClusterCalibrator<calib_data_t, traj_t>::calibrate(
   PositionNNoutput positions =
       predictPositions(nnInput, maxProbNumberOfClusters);
 
-  // these are deltas w.r.t. cluster center
-  typename NNClusterCalibrator<calib_data_t, traj_t>::BASE::Pos pos;
-  pos(0) = nnInput.indexCoordToRealCoord(positions.x(maxProbNumberIndex),
-                                         NNinput::Index::pitchXOffset);
-  pos(1) = nnInput.indexCoordToRealCoord(positions.y(maxProbNumberIndex),
-                                         NNinput::Index::pitchYOffset);
+  // local module coordinates of the i-th sub-cluster
+  auto subClusterPosition = [&nnInput, &positions](NNinput::index_t i) {
+    return Acts::Vector2(
+        nnInput.indexCoordToRealCoord(positions.x(i), NNinput::Index::pitchXOffset),
+        nnInput.indexCoordToRealCoord(positions.y(i), NNinput::Index::pitchYOffset));
+  };
+
+  // The cluster was created by one or several particles: use the position of the
+  // particle closest to the track
+  assert(positions.numberOfSubClusters() > 0);
+  const NNinput::index_t chosen = *std::ranges::min_element(
+      std::views::iota(NNinput::index_t{0}, positions.numberOfSubClusters()),
+      std::ranges::less{},
+      [&subClusterPosition, &predicted_local_position](NNinput::index_t i) {
+        return (subClusterPosition(i) - predicted_local_position).squaredNorm();
+      });
+  typename NNClusterCalibrator<calib_data_t, traj_t>::BASE::Pos pos =
+      subClusterPosition(chosen).template cast<float>();
 
   // the NN precision is converted to the RMS (in mm), the covariance is its square
   const float rmsX = nnInput.precisionToRealCoord(positions.xprec(maxProbNumberIndex),

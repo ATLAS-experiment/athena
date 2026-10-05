@@ -60,6 +60,8 @@ namespace ActsTrk::detail {
       /// @param detElement the detector element of the corresponding module
       /// @param tan_incident_angles tan of the Lorentz angle corrected incidence angles in local x
       ///        and local y which are the projections of the trajectory on the surface.
+      /// @param predicted_local_position local position (loc0, loc1) of the trajectory on the surface,
+      ///        e.g. to choose between the positions of the particles which created a merged cluster.
       /// this is the method the derived class should overload. The default method
       /// is equivalent to the passThrough calibrator, with likely more overhead.
       /// @return calibrated positions and corresponding covariance.
@@ -70,7 +72,8 @@ namespace ActsTrk::detail {
                 [[maybe_unused]] const Acts::CalibrationContext& cctx,
                 const xAOD::PixelCluster& cluster,
                 [[maybe_unused]] const InDetDD::SiDetectorElement& detElement,
-                [[maybe_unused]] const std::pair<float, float>& tan_incident_angles) const {
+                [[maybe_unused]] const std::pair<float, float>& tan_incident_angles,
+                [[maybe_unused]] const Acts::Vector2& predicted_local_position) const {
          return std::make_pair(cluster.template localPosition<2>(),
                                cluster.template localCovariance<2>());
       }

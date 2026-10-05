@@ -75,7 +75,9 @@ PixelClusterCalibratorBase<derived_t, traj_t>::calibrate(
                                                                                                               gctx,
                                                                                                               trackState.referenceSurface(),
                                                                                                               detElement,
-                                                                                                              direction));
+                                                                                                              direction),
+                                               Acts::Vector2(trackState.parameters()[Acts::eBoundLoc0],
+                                                             trackState.parameters()[Acts::eBoundLoc1]));
     assert( !trackState.hasCalibrated());
     trackState.allocateCalibrated(2);
     trackState.template calibrated<2>() = pos.template cast<double>();
@@ -103,7 +105,9 @@ PixelClusterCalibratorBase<derived_t, traj_t>::calibrate(const Acts::GeometryCon
                                                                                                       gctx,
                                                                                                       surface,
                                                                                                       detElement,
-                                                                                                      direction));
+                                                                                                      direction),
+                                     Acts::Vector2(bound_parameters.parameters()[Acts::eBoundLoc0],
+                                                   bound_parameters.parameters()[Acts::eBoundLoc1]));
 }
 
 template <typename derived_t, typename traj_t>
