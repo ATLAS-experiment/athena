@@ -24,6 +24,7 @@ def getBTagOnlineWP(chain, onlineTagger):
 
 def getBTagOnlineTaggerWP(chain):
     bTagOnlineTaggers = {
+        'bmv2c10': 'OnlineMV2c10',
         'bdl1d' : 'OnlineDL1d',
         'bgn1' : 'OnlineGN1' }
 
@@ -209,7 +210,7 @@ class FTagJetSFBlock(ConfigBlock):
                 if self.bTagCalibTriggerFile is not None :
                     bTagCalibTriggerFile = self.bTagCalibTriggerFile
                 else:
-                    bTagCalibTriggerFile = getRecommendedBTagTrigCalib(config.geometry())
+                    bTagCalibTriggerFile = getRecommendedBTagTrigCalib(config.geometry(), config.campaign())
 
                 bTagOnlineTagger, bTagOnlineWP = getBTagOnlineTaggerWP(chain)
                 if self.bTagOnlineTagger:
