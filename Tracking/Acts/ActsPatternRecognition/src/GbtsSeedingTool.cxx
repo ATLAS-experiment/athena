@@ -35,7 +35,7 @@ namespace ActsTrk {
     m_logger = makeActsAthenaLogger(this, "Acts");
 
     // etaMin,etaMax,zMin,zMax
-    m_internalRoi.emplace(-4.5, 4.5, -150.0, 150.0);
+    m_internalRoi.emplace(-4.5, 4.5, m_minZ0.value(), m_maxZ0.value());
 
     ATH_CHECK( prepareConfiguration());
     printGbtsConfig();
@@ -374,8 +374,8 @@ namespace ActsTrk {
     m_finderCfg.d0Max = m_d0Max;
 
     //use roi for pixel and given value for strip
-    m_finderCfg.maxZ0 = m_LRTmode ? m_maxZ0.value() : m_internalRoi->zMax();
-    m_finderCfg.minZ0 = m_LRTmode ? m_minZ0.value() : m_internalRoi->zMin();
+    m_finderCfg.maxZ0 = m_maxZ0.value();
+    m_finderCfg.minZ0 = m_minZ0.value();
 
     m_finderCfg.validateTriplets = m_validateTriplets;
     m_finderCfg.useAdaptiveCuts = m_useAdaptiveCuts;
