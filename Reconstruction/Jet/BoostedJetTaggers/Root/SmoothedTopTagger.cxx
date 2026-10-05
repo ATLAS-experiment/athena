@@ -182,6 +182,9 @@ StatusCode SmoothedTopTagger::decorate( const xAOD::JetContainer& jets ) const {
   /// Calculate NSubjettiness and ECF ratios
   decorateJSSRatios(jets);
 
+  // tagger score accessor
+  const SG::ConstAccessor<float> Score(m_scoreDecorationName + "_ConstScore");
+  
   // loop over jets
   for(const xAOD::Jet* jet : jets){
 
@@ -242,7 +245,6 @@ StatusCode SmoothedTopTagger::decorate( const xAOD::JetContainer& jets ) const {
       }
       else if (m_varCutNames[i] == "Score" || m_varCutNames[i] == "score") {
         // get score value
-        static const SG::ConstAccessor<float> Score(m_scoreDecorationName + "_ConstScore");
         float jet_score = Score(*jet);
 
         // decorate cut
