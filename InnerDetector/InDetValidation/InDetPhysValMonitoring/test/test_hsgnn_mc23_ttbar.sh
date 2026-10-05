@@ -2,12 +2,13 @@
 # art-description: HSGNN test for mc23 ttbar MC
 # art-type: grid
 # art-input: mc23_13p6TeV:mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.merge.AOD.e8514_e8528_s4162_s4114_r15540_r15516
-# art-input-nfiles: 10
+# art-input-nfiles: 1
 # art-memory: 4096
 # art-include: main/Athena
-# art-output: physval*.root
+# art-output: idpvm*.root
 # art-output: *.xml
 # art-output: dcube*
+# art-output: DAOD_PHYSVAL*
 # art-html: dcube_shifter_last
 
 # Fix ordering of output in logfile
@@ -18,7 +19,7 @@ script=test_HSGNN.sh
 
 echo "Executing script ${script}"
 echo " "
-"$script" ${ArtInFile}
+"$script"
 
 echo "Clean up output directory (based on compiler)"
 clean_up_outdir.sh ${AtlasBuildBranch} ${AtlasProject} ${AtlasBuildStamp}
