@@ -19,8 +19,8 @@ public:
   virtual bool passThreshold(const xAOD::Jet&) const override;
 private:
   struct Accessors {
-    SG::AuxElement::ConstAccessor<float> n;
-    SG::AuxElement::ConstAccessor<float> d;
+    SG::ConstAccessor<float> n;
+    SG::ConstAccessor<float> d;
   };
   Gaudi::Property<std::string> m_numName { this, "numerator", "",
       "numerator name in flavor log likelihood"};

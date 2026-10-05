@@ -12,11 +12,11 @@
 
 namespace
 {
-  const static SG::AuxElement::ConstAccessor<std::size_t> accNextEtaIndex("nextEtaIndex");
-  const static SG::AuxElement::ConstAccessor<std::size_t> accPreviousEtaIndex("previousEtaIndex");
-  const static SG::AuxElement::ConstAccessor<std::size_t> accNextPhiIndex("nextPhiIndex");
-  const static SG::AuxElement::ConstAccessor<std::size_t> accPreviousPhiIndex("previousPhiIndex");
-  const static SG::AuxElement::ConstAccessor<float> accArea("area");
+  const static SG::ConstAccessor<std::size_t> accNextEtaIndex("nextEtaIndex");
+  const static SG::ConstAccessor<std::size_t> accPreviousEtaIndex("previousEtaIndex");
+  const static SG::ConstAccessor<std::size_t> accNextPhiIndex("nextPhiIndex");
+  const static SG::ConstAccessor<std::size_t> accPreviousPhiIndex("previousPhiIndex");
+  const static SG::ConstAccessor<float> accArea("area");
 } // namespace
 
 namespace LVL1

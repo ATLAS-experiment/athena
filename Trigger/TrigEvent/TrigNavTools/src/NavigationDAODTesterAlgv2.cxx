@@ -50,7 +50,7 @@ bool NavigationDAODTesterAlgv2::matchesAnyPattern(const std::string& chain,
 }
 
 const xAOD::IParticle* NavigationDAODTesterAlgv2::resolveOriginal(const xAOD::IParticle* p) {
-    static const SG::AuxElement::ConstAccessor<ElementLink<xAOD::IParticleContainer>>
+    static const SG::ConstAccessor<ElementLink<xAOD::IParticleContainer>>
         accOOL("originalObjectLink");
     if (accOOL.isAvailable(*p) && accOOL(*p).isValid()) {
         return *accOOL(*p);
@@ -193,7 +193,7 @@ StatusCode NavigationDAODTesterAlgv2::execute(const EventContext& ctx) const {
         const bool useLinearisedR2 = matchesAnyPattern(chain, m_linearisedR2Chains);
         std::vector<const xAOD::IParticle*> r2MatchedPool;
         if (useLinearisedR2) {
-            static const SG::AuxElement::ConstAccessor<std::vector<ElementLink<xAOD::IParticleContainer>>> accMatched("TrigMatchedObjects");
+            static const SG::ConstAccessor<std::vector<ElementLink<xAOD::IParticleContainer>>> accMatched("TrigMatchedObjects");
             for (const xAOD::TrigComposite* entry : *composites) {
                 for (const ElementLink<xAOD::IParticleContainer>& link : accMatched(*entry)) {
                     if (!link.isValid()) continue;  // e.g. removed by thinning
@@ -443,7 +443,7 @@ StatusCode NavigationDAODTesterAlgv2::execute(const EventContext& ctx) const {
             int comboIdx = 0;
             for (const xAOD::TrigComposite* combination : *composites) {
                 //coverity[UNNECESSARY_STRING_COPY:FALSE]
-                static const SG::AuxElement::ConstAccessor<std::vector<ElementLink<xAOD::IParticleContainer>>> accMatched("TrigMatchedObjects");
+                static const SG::ConstAccessor<std::vector<ElementLink<xAOD::IParticleContainer>>> accMatched("TrigMatchedObjects");
                 const std::vector<ElementLink<xAOD::IParticleContainer>> featuresInCombination = accMatched(*combination);
                 ATH_MSG_DEBUG("  Combo[" << comboIdx++ << "] (size=" << featuresInCombination.size() << "):");
                 for (const ElementLink<xAOD::IParticleContainer>& f : featuresInCombination) {
@@ -482,7 +482,7 @@ StatusCode NavigationDAODTesterAlgv2::execute(const EventContext& ctx) const {
             // Dump R2 pre-matched objects
             ATH_MSG_ERROR("R2 pre-matched objects for " << chain << ":");
             for (const xAOD::TrigComposite* combination : *composites) {
-                static const SG::AuxElement::ConstAccessor<std::vector<ElementLink<xAOD::IParticleContainer>>> accMatched("TrigMatchedObjects");
+                static const SG::ConstAccessor<std::vector<ElementLink<xAOD::IParticleContainer>>> accMatched("TrigMatchedObjects");
                 const std::vector<ElementLink<xAOD::IParticleContainer>> featuresInCombination = accMatched(*combination);
                 for (const ElementLink<xAOD::IParticleContainer>& f : featuresInCombination) {
                     if (!f.isValid()) continue;

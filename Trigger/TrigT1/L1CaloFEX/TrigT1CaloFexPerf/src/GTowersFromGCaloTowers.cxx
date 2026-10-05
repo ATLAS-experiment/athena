@@ -11,21 +11,21 @@
 
 namespace
 {
-  const static SG::AuxElement::ConstAccessor<float> accArea("area");
-  const static SG::AuxElement::Decorator<float> decArea("area");
-  const static SG::AuxElement::ConstAccessor<std::size_t> accNextEtaIndex("nextEtaIndex");
-  const static SG::AuxElement::ConstAccessor<std::size_t> accPreviousEtaIndex("previousEtaIndex");
-  const static SG::AuxElement::ConstAccessor<std::size_t> accNextPhiIndex("nextPhiIndex");
-  const static SG::AuxElement::ConstAccessor<std::size_t> accPreviousPhiIndex("previousPhiIndex");
-  const static SG::AuxElement::ConstAccessor<std::size_t> accIndexInFront("indexInFront");
-  const static SG::AuxElement::ConstAccessor<std::size_t> accIndexBehind("indexBehind");
-  const static SG::AuxElement::Decorator<std::size_t> decNextEtaIndex("nextEtaIndex");
-  const static SG::AuxElement::Decorator<std::size_t> decPreviousEtaIndex("previousEtaIndex");
-  const static SG::AuxElement::Decorator<std::size_t> decNextPhiIndex("nextPhiIndex");
-  const static SG::AuxElement::Decorator<std::size_t> decPreviousPhiIndex("previousPhiIndex");
-  const static SG::AuxElement::Decorator<std::size_t> decIndexInFront("indexInFront");
-  const static SG::AuxElement::Decorator<std::size_t> decIndexBehind("indexBehind");
-  const static SG::AuxElement::Decorator<std::vector<std::size_t>> decMergedIndices("mergedIndices");
+  const static SG::ConstAccessor<float> accArea("area");
+  const static SG::Decorator<float> decArea("area");
+  const static SG::ConstAccessor<std::size_t> accNextEtaIndex("nextEtaIndex");
+  const static SG::ConstAccessor<std::size_t> accPreviousEtaIndex("previousEtaIndex");
+  const static SG::ConstAccessor<std::size_t> accNextPhiIndex("nextPhiIndex");
+  const static SG::ConstAccessor<std::size_t> accPreviousPhiIndex("previousPhiIndex");
+  const static SG::ConstAccessor<std::size_t> accIndexInFront("indexInFront");
+  const static SG::ConstAccessor<std::size_t> accIndexBehind("indexBehind");
+  const static SG::Decorator<std::size_t> decNextEtaIndex("nextEtaIndex");
+  const static SG::Decorator<std::size_t> decPreviousEtaIndex("previousEtaIndex");
+  const static SG::Decorator<std::size_t> decNextPhiIndex("nextPhiIndex");
+  const static SG::Decorator<std::size_t> decPreviousPhiIndex("previousPhiIndex");
+  const static SG::Decorator<std::size_t> decIndexInFront("indexInFront");
+  const static SG::Decorator<std::size_t> decIndexBehind("indexBehind");
+  const static SG::Decorator<std::vector<std::size_t>> decMergedIndices("mergedIndices");
 
   std::size_t getRemappedIndex(const std::map<std::size_t, std::size_t> &remap, std::size_t originalIdx)
   {

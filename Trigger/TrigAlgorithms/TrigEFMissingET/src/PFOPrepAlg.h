@@ -95,7 +95,7 @@ namespace HLT
       bool m_manualTVA{false};
 
       // Internal
-      deferred_t<SG::AuxElement::Decorator<int>> m_decCategory;
+      deferred_t<SG::Decorator<int>> m_decCategory;
     };
   } // namespace MET
 } // namespace HLT

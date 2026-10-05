@@ -464,7 +464,7 @@ StatusCode TriggerEDMDeserialiserAlg::deserialiseDynAux( const EventContext& ctx
     ATH_CHECK( currentAuxStore != nullptr );
     currentAuxStore->addVector(std::move(vec), false);    
     // trigger loading of the dynamic variables
-    SG::AuxElement::TypelessConstAccessor accessor( decorationName );
+    SG::TypelessConstAccessor accessor( decorationName );
     accessor.getDataArray( *interfaceContainer );
   }
   return StatusCode::SUCCESS;  

@@ -21,7 +21,7 @@ namespace TriggerEDMAuxAccessors {
 
 template<typename T, typename ...U>
 constexpr auto initAccessors(U... names) {
-  return std::array<SG::AuxElement::Accessor<T>, sizeof...(names)>{(SG::AuxElement::Accessor<T>(names))...};
+  return std::array<SG::Accessor<T>, sizeof...(names)>{(SG::Accessor<T>(names))...};
 }
 
 auto boolAccessors = initAccessors<bool>(

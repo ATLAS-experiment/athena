@@ -17,16 +17,16 @@
 
 namespace
 {
-   const static SG::AuxElement::Decorator<float> decR3ClusterET("R3ClusterET");
-   const static SG::AuxElement::Decorator<float> decR3OreClusterET("R3_Ore_ClusterET");
-   const static SG::AuxElement::Decorator<float> decR3BCClusterET("R3_BC_ClusterET");
-   const static SG::AuxElement::Decorator<float> decR3BCClusterIso("R3_BC_ClusterIso");
-   const static SG::AuxElement::Decorator<float> decR3OreClusterIso("R3_Ore_ClusterIso");
-   const static SG::AuxElement::Decorator<bool> decR3OreIsoPass12("R3_Ore_ClusterIso_12pass");
-   const static SG::AuxElement::Decorator<bool> decR3OreIsoPass20("R3_Ore_ClusterIso_20pass");
-   const static SG::AuxElement::Decorator<bool> decR3BCIsoPass12("R3_BC_ClusterIso_12pass");
-   const static SG::AuxElement::Decorator<bool> decR3BCIsoPass20("R3_BC_ClusterIso_20pass");
-   const static SG::AuxElement::Decorator<float> decR3ClusterIso("R3ClusterIso");
+   const static SG::Decorator<float> decR3ClusterET("R3ClusterET");
+   const static SG::Decorator<float> decR3OreClusterET("R3_Ore_ClusterET");
+   const static SG::Decorator<float> decR3BCClusterET("R3_BC_ClusterET");
+   const static SG::Decorator<float> decR3BCClusterIso("R3_BC_ClusterIso");
+   const static SG::Decorator<float> decR3OreClusterIso("R3_Ore_ClusterIso");
+   const static SG::Decorator<bool> decR3OreIsoPass12("R3_Ore_ClusterIso_12pass");
+   const static SG::Decorator<bool> decR3OreIsoPass20("R3_Ore_ClusterIso_20pass");
+   const static SG::Decorator<bool> decR3BCIsoPass12("R3_BC_ClusterIso_12pass");
+   const static SG::Decorator<bool> decR3BCIsoPass20("R3_BC_ClusterIso_20pass");
+   const static SG::Decorator<float> decR3ClusterIso("R3ClusterIso");
 } // namespace
 
 LVL1::EFexTauAlgorithm::EFexTauAlgorithm(const std::string &name, ISvcLocator *pSvcLocator)

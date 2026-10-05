@@ -14,8 +14,8 @@
 #include <format>
 #include <unordered_set>
 
-static const SG::AuxElement::Accessor< std::vector<TrigCompositeUtils::DecisionID> > readWriteAccessor("decisions");
-static const SG::AuxElement::ConstAccessor< std::vector<TrigCompositeUtils::DecisionID> > readOnlyAccessor("decisions");
+static const SG::Accessor< std::vector<TrigCompositeUtils::DecisionID> > readWriteAccessor("decisions");
+static const SG::ConstAccessor< std::vector<TrigCompositeUtils::DecisionID> > readOnlyAccessor("decisions");
 
 
 

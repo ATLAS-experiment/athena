@@ -277,9 +277,9 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
                         const xAOD::Jet* jet = *(jetLinkInfo.link);
 
                         // GN2XTrig
-                        static const SG::AuxElement::ConstAccessor<float> pqcd_accessor("GN2XTrig_pqcd");
-                        static const SG::AuxElement::ConstAccessor<float> ptop_accessor("GN2XTrig_ptop");
-                        static const SG::AuxElement::ConstAccessor<float> phbb_accessor("GN2XTrig_phbb");
+                        static const SG::ConstAccessor<float> pqcd_accessor("GN2XTrig_pqcd");
+                        static const SG::ConstAccessor<float> ptop_accessor("GN2XTrig_ptop");
+                        static const SG::ConstAccessor<float> phbb_accessor("GN2XTrig_phbb");
 			bool isGN2XTrigAvailable = pqcd_accessor.isAvailable(*jet);
 
                         std::string NameH = "GN2XTrig_pqcd_tr_"+trigName;
@@ -339,9 +339,9 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
                         fill("TrigBjetMonitor",LargeR_jetMass);
 
                         // GN2Xv01
-                        static const SG::AuxElement::ConstAccessor<float> pqcd_accessor0("GN2Xv01_pqcd");
-                        static const SG::AuxElement::ConstAccessor<float> ptop_accessor0("GN2Xv01_ptop");
-                        static const SG::AuxElement::ConstAccessor<float> phbb_accessor0("GN2Xv01_phbb");
+                        static const SG::ConstAccessor<float> pqcd_accessor0("GN2Xv01_pqcd");
+                        static const SG::ConstAccessor<float> ptop_accessor0("GN2Xv01_ptop");
+                        static const SG::ConstAccessor<float> phbb_accessor0("GN2Xv01_phbb");
 			bool isGN2Xv01Available = pqcd_accessor0.isAvailable(*jet);
 
                         NameH = "GN2Xv01_pqcd_tr_"+trigName;
@@ -478,13 +478,13 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
                                         obj_storing_btag = *(jetLinkInfo.link);
                                     }
 
-                                    static const SG::AuxElement::ConstAccessor<float> GN1pu_accessor("GN120220813_pu");
-                                    static const SG::AuxElement::ConstAccessor<float> GN1pc_accessor("GN120220813_pc");
-                                    static const SG::AuxElement::ConstAccessor<float> GN1pb_accessor("GN120220813_pb");
+                                    static const SG::ConstAccessor<float> GN1pu_accessor("GN120220813_pu");
+                                    static const SG::ConstAccessor<float> GN1pc_accessor("GN120220813_pc");
+                                    static const SG::ConstAccessor<float> GN1pb_accessor("GN120220813_pb");
 
-                                    static const SG::AuxElement::ConstAccessor<float> GN2pu_accessor("GN220240122_pu");
-                                    static const SG::AuxElement::ConstAccessor<float> GN2pc_accessor("GN220240122_pc");
-                                    static const SG::AuxElement::ConstAccessor<float> GN2pb_accessor("GN220240122_pb");
+                                    static const SG::ConstAccessor<float> GN2pu_accessor("GN220240122_pu");
+                                    static const SG::ConstAccessor<float> GN2pc_accessor("GN220240122_pc");
+                                    static const SG::ConstAccessor<float> GN2pb_accessor("GN220240122_pb");
 
                                     // checking just pu is enough
                                     if (GN1pu_accessor.isAvailable(*obj_storing_btag)) {
@@ -659,12 +659,12 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
                             }
 
                             bool theLLR(false);
-                            static const SG::AuxElement::ConstAccessor<float> GN1pu_accessor("GN120220813_pu");
-                            static const SG::AuxElement::ConstAccessor<float> GN1pc_accessor("GN120220813_pc");
-                            static const SG::AuxElement::ConstAccessor<float> GN1pb_accessor("GN120220813_pb");
-                            static const SG::AuxElement::ConstAccessor<float> GN2pu_accessor("GN220240122_pu");
-                            static const SG::AuxElement::ConstAccessor<float> GN2pc_accessor("GN220240122_pc");
-                            static const SG::AuxElement::ConstAccessor<float> GN2pb_accessor("GN220240122_pb");
+                            static const SG::ConstAccessor<float> GN1pu_accessor("GN120220813_pu");
+                            static const SG::ConstAccessor<float> GN1pc_accessor("GN120220813_pc");
+                            static const SG::ConstAccessor<float> GN1pb_accessor("GN120220813_pb");
+                            static const SG::ConstAccessor<float> GN2pu_accessor("GN220240122_pu");
+                            static const SG::ConstAccessor<float> GN2pc_accessor("GN220240122_pc");
+                            static const SG::ConstAccessor<float> GN2pb_accessor("GN220240122_pb");
                             // checking only pu should be sufficient
                             bool GN1_available = GN1pu_accessor.isAvailable(*obj_storing_btag);
                             bool GN2_available = GN2pu_accessor.isAvailable(*obj_storing_btag);

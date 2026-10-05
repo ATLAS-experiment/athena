@@ -48,8 +48,8 @@ StatusCode GepClusterTimingAlg::execute(const EventContext& ctx) const{
   CHECK(h_outCaloClusters.record(std::make_unique<ConstDataVector<xAOD::CaloClusterContainer>>(SG::VIEW_ELEMENTS)));
  
  
-  const static SG::AuxElement::ConstAccessor<float> acc_larq("AVG_LAR_Q");
-  const static SG::AuxElement::ConstAccessor<float> acc_clambda("CENTER_LAMBDA");
+  const static SG::ConstAccessor<float> acc_larq("AVG_LAR_Q");
+  const static SG::ConstAccessor<float> acc_clambda("CENTER_LAMBDA");
 
   // select clusters
   for ( const auto cluster : *h_inCaloClusters) {

@@ -20,8 +20,8 @@
 
 namespace
 {
-  const static SG::AuxElement::ConstAccessor<float> accArea("ActiveArea4vec_pt");
-  const static SG::AuxElement::ConstAccessor<float> accDetectorEta("DetectorEta");
+  const static SG::ConstAccessor<float> accArea("ActiveArea4vec_pt");
+  const static SG::ConstAccessor<float> accDetectorEta("DetectorEta");
 } // namespace
 
 namespace HLT

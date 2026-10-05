@@ -29,7 +29,7 @@ namespace LVL1
     std::string m_noiseName;
     bool m_useNegativeTowers;
 
-    std::unique_ptr<SG::AuxElement::ConstAccessor<float>> m_noiseAcc;
+    std::unique_ptr<SG::ConstAccessor<float>> m_noiseAcc;
   }; //> end class METNoiseCutPerfFex
 } // namespace LVL1
 

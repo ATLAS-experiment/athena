@@ -13,7 +13,7 @@
 
 namespace
 {
-  const static SG::AuxElement::Decorator<float> decNoise("noise");
+  const static SG::Decorator<float> decNoise("noise");
 }
 
 namespace LVL1

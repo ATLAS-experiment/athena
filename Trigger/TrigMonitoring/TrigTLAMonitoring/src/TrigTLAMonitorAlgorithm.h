@@ -210,7 +210,7 @@ StatusCode TrigTLAMonitorAlgorithm::fillObjectVariableHistogram(SG::ReadHandle<D
   std::replace( hname.begin(), hname.end(), '_', '-' );
 
   Monitored::Scalar<T> mon_var (prefix+hname+"_"+trigName,default_val);
-  SG::AuxElement::ConstAccessor<T> accessor(varname);
+  SG::ConstAccessor<T> accessor(varname);
   
   unsigned cnt(0);
   for(const auto element : *container) {
