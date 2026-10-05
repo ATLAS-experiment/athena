@@ -118,11 +118,12 @@ inline double deltaR(const Amg::Vector3D& v1, const Amg::Vector3D& v2){
 /*
  * the analogous to CLHEP HepGeom::Transform3D trans (localRot, theSurface.transform().translation());
  */
-inline Amg::Transform3D getTransformFromRotTransl(Amg::RotationMatrix3D rot, Amg::Vector3D transl_vec )
+inline Amg::Isometry3D getTransformFromRotTransl(const Amg::RotationMatrix3D& rotation, 
+                                                const Amg::Vector3D& translation)
 {
-    Amg::Transform3D trans = Amg::Transform3D::Identity();
-    trans = trans * rot;
-    trans.translation() = transl_vec;
+    Amg::Isometry3D trans{Amg::Isometry3D::Identity()};
+    trans.linear() = rotation;
+    trans.translation() = translation;
     return trans;
 }
 
@@ -215,6 +216,11 @@ inline Amg::Isometry3D getTranslate3D(const double X, const double Y, const doub
 inline Amg::Isometry3D getTranslate3D(const Amg::Vector3D& v) {
     return Amg::Isometry3D{Amg::Translation3D{v}};
 }
+
+[[deprecated("Isometries don't need to be transformed.")]]
+inline Amg::Isometry3D toIsometry3D(const Isometry3D& iso) {
+    return iso;
+}
 /** @brief Convert a general transform into an isometric one, e.g. a GeoModel placement.
  *         GeoModel builds its placements from rotations and translations, but the
  *         type allows scaling and shearing, which the tracking geometry does not.
@@ -223,15 +229,8 @@ inline Amg::Isometry3D getTranslate3D(const Amg::Vector3D& v) {
  *         up to about 1e-7, so the check accepts that much.
  *  @param trf: The transform to convert */
 inline Amg::Isometry3D toIsometry3D(const Amg::Transform3D& trf) {
-    constexpr double tolerance = 1.e-6;
-    const double deviation = (trf.linear() * trf.linear().transpose() -
-                              Amg::RotationMatrix3D::Identity()).cwiseAbs().maxCoeff();
-    if (deviation > tolerance) {
-        std::stringstream msg{};
-        msg<<__FILE__<<":"<<__LINE__<<" --- Transform is not isometric, its linear part "
-           <<"deviates from orthogonal by "<<deviation<<".";
-        throw std::runtime_error(msg.str());
-    }
+   assert((trf.linear() * trf.linear().transpose() -
+           Amg::RotationMatrix3D::Identity()).cwiseAbs().maxCoeff() < 1.e-6);
     Amg::Isometry3D iso{Amg::Isometry3D::Identity()};
     iso.linear() = trf.linear();
     iso.translation() = trf.translation();
