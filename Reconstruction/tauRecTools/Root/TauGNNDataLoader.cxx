@@ -391,4 +391,15 @@ bool ClustersMeanSecondLambda(const xAOD::TauJet &tau, float &out){
   out = std::max(0.f, ClustersMeanSecondLambda);
   return success;
 }
+
+// Extension - Variables for GNTau-eVeto
+bool TauChargedTrk_eProbNN(const xAOD::TauJet &tau, float &out){
+    float TauChargedTrk_eProbNN = 0.f;
+    static const SG::ConstAccessor<float> acc_eProbabilityNN("eProbabilityNN");
+    const xAOD::TrackParticle* track = tau.track(0)->track(); // Grab charged track of tau
+    TauChargedTrk_eProbNN = acc_eProbabilityNN(*track); 
+    out = std::max(0.f, TauChargedTrk_eProbNN);
+    return true;
+}
+
 } //namespace Scalar

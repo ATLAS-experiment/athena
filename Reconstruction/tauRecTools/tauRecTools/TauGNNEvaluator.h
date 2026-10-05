@@ -40,7 +40,9 @@ public:
     enum Discriminant {
         Disabled = -1,
         NegLogPJet = 0,
-        PTau = 1
+        PTau = 1,
+        PJet = 2,
+        NegLogPJet_True = 3,
     };
 
 private:
@@ -67,7 +69,7 @@ private:
     Gaudi::Property<std::string> m_output_ptau{this, "OutputPTau", "GNTauProbTau"};
     Gaudi::Property<std::string> m_output_pjet{this, "OutputPJet", "GNTauProbJet"};
     Gaudi::Property<int> m_output_discriminant{this, "OutputDiscriminant", Discriminant::NegLogPJet, 
-        "Discriminant used to calculate the output score: -1 -> None, 0 -> -log(PJet), 1 -> PTau"};
+        "Discriminant used to calculate the output score: -1 -> None, 0 -> -log(PJet), 1 -> PTau, 2 -> PJet, 3 -> -log(PJet)_True"};
     Gaudi::Property<int> m_max_tracks{this, "MaxTracks", 30};
     Gaudi::Property<int> m_max_clusters{this, "MaxClusters", 20};
     Gaudi::Property<float> m_max_cluster_dr{this, "MaxClusterDR", 1.0f};

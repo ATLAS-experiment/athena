@@ -72,8 +72,11 @@ bool EM_PROBABILITY(
 
 bool CENTER_MAG(
     const xAOD::TauJet &tau, const xAOD::CaloVertexedTopoCluster &cluster, float &out);
-} // namespace TauClusterVars
 
+// Extension - Variables for eVeto
+bool Eta(
+    const xAOD::TauJet &tau, const xAOD::CaloVertexedTopoCluster &cluster, float &out);
+} // namespace TauClusterVars
 
 namespace FlavorTagInference {
     // Subclass for IParticles loader inherited from abstract IConstituentsLoader class
@@ -100,7 +103,14 @@ namespace FlavorTagInference {
             {"SECOND_R",                  TauClusterVars::SECOND_R},
             {"SECOND_LAMBDA",             TauClusterVars::SECOND_LAMBDA},
             {"CENTER_LAMBDA",             TauClusterVars::CENTER_LAMBDA},
-            {"et",                        TauClusterVars::et}
+            {"et",                        TauClusterVars::et},
+            // Extension - Variables for eVeto
+            {"et_log",                TauClusterVars::et_log},
+            {"e",                     TauClusterVars::e},
+            {"CENTER_MAG",            TauClusterVars::CENTER_MAG},
+            {"EM_PROBABILITY",        TauClusterVars::EM_PROBABILITY},
+            {"FIRST_ENG_DENS",        TauClusterVars::FIRST_ENG_DENS},
+            {"eta",                   TauClusterVars::Eta}
         };
     };
 }
