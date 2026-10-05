@@ -59,7 +59,7 @@ StatusCode JetConstituentModifierBase::setEtaPhi(xAOD::IParticle* obj, float eta
 }
 
 StatusCode JetConstituentModifierBase::setEnergyPt(xAOD::IParticle* obj, float e, float pt,
-                                                   const SG::AuxElement::Accessor<float>* weightAcc) const
+                                                   const SG::Accessor<float>* weightAcc) const
 {
   switch(m_inputType) {
   case xAOD::Type::CaloCluster:
@@ -111,7 +111,7 @@ StatusCode JetConstituentModifierBase::setEnergyPt(xAOD::IParticle* obj, float e
 }
 
 StatusCode JetConstituentModifierBase::setP4(xAOD::IParticle* obj, const xAOD::JetFourMom_t& p4,
-                                             const SG::AuxElement::Accessor<float>* weightAcc) const {
+                                             const SG::Accessor<float>* weightAcc) const {
   switch(m_inputType) {
   case xAOD::Type::CaloCluster:
     {

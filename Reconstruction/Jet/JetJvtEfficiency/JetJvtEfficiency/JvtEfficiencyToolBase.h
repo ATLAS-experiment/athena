@@ -60,7 +60,7 @@ namespace CP {
         // -1, 0 or +1 depending on the systematic
         int m_appliedSysSigma = 0;
         // TEMPORARY: Allow for using an accessor rather than the full decorhandle
-        std::optional<SG::AuxElement::ConstAccessor<char>> m_accIsHS;
+        std::optional<SG::ConstAccessor<char>> m_accIsHS;
 
         /// Read the input histograms. Passing an empty 'file' string uses dummy SFs
         StatusCode initHists(const std::string &file, const std::string &wp);

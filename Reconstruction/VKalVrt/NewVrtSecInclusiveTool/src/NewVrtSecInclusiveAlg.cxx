@@ -17,13 +17,13 @@
 
 namespace Rec {
 
-   static const SG::AuxElement::Decorator<float> bvrtM("bvrtM");  
-   static const SG::AuxElement::Decorator<float> bvrtPt("bvrtPt");  
-   static const SG::AuxElement::Decorator<float> bvrtPhi("bvrtPhi");  
-   static const SG::AuxElement::Decorator<float> bvrtEta("bvrtEta");  
-   static const SG::AuxElement::Decorator<float> mindRjetP("mindRjetP");
-   static const SG::AuxElement::Decorator<float> mindRjetV("mindRjetV");
-   static const SG::AuxElement::Decorator<float> mindRBTagSV("mindRBTagSV");
+   static const SG::Decorator<float> bvrtM("bvrtM");  
+   static const SG::Decorator<float> bvrtPt("bvrtPt");  
+   static const SG::Decorator<float> bvrtPhi("bvrtPhi");  
+   static const SG::Decorator<float> bvrtEta("bvrtEta");  
+   static const SG::Decorator<float> mindRjetP("mindRjetP");
+   static const SG::Decorator<float> mindRjetV("mindRjetV");
+   static const SG::Decorator<float> mindRBTagSV("mindRBTagSV");
 
    NewVrtSecInclusiveAlg::NewVrtSecInclusiveAlg(const std::string& name, ISvcLocator* pSvcLocator) :
      AthReentrantAlgorithm( name, pSvcLocator )

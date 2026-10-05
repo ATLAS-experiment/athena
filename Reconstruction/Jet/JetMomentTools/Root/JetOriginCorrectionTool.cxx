@@ -55,7 +55,7 @@ StatusCode JetOriginCorrectionTool::decorate(const xAOD::JetContainer& jetCont) 
   SG::WriteDecorHandle<xAOD::JetContainer, ElementLink<xAOD::VertexContainer>> originVertexHandle(m_originVertexKey);
 
   // static accessor for PV index access
-  static const SG::AuxElement::ConstAccessor<int> PVIndexAccessor("PVIndex");
+  static const SG::ConstAccessor<int> PVIndexAccessor("PVIndex");
 
 
 

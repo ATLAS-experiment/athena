@@ -56,7 +56,7 @@ double ClosebyUncertaintyComponent::getUncertaintyImpl(const xAOD::Jet& jet, con
 
 float ClosebyUncertaintyComponent::getMinDR(const xAOD::Jet& jet) const
 {
-    static const SG::AuxElement::Accessor<float> accMinDR("MinDR");
+    static const SG::Accessor<float> accMinDR("MinDR");
 
     if (!accMinDR.isAvailable(jet))
     {

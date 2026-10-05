@@ -220,7 +220,7 @@ template<class T, class U> StatusCode JetConstituentModSequence::copyModRecordFl
   // Deep copy
   else{
     // Define the accessor which will add the index
-    const SG::AuxElement::Accessor<unsigned> copyIndex("ConstituentCopyIndex");
+    const SG::Accessor<unsigned> copyIndex("ConstituentCopyIndex");
 
     // Create the new container and its auxiliary store.
     auto neutralCopies = std::make_unique<T>();

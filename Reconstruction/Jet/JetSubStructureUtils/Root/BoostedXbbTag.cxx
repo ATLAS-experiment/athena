@@ -27,22 +27,22 @@
 using namespace JetSubStructureUtils;
 
 // make all static accessors static to this file, like extern but hip
-const SG::AuxElement::ConstAccessor<int>      BoostedXbbTag::s_AlgorithmType ("AlgorithmType");
-const SG::AuxElement::ConstAccessor<float>    BoostedXbbTag::s_SizeParameter ("SizeParameter");
-const SG::AuxElement::ConstAccessor<int>      BoostedXbbTag::s_InputType ("InputType");
-const SG::AuxElement::ConstAccessor<int>      BoostedXbbTag::s_TransformType ("TransformType");
-const SG::AuxElement::ConstAccessor<float>    BoostedXbbTag::s_RClus ("RClus");
-const SG::AuxElement::ConstAccessor<float>    BoostedXbbTag::s_PtFrac ("PtFrac");
-const SG::AuxElement::ConstAccessor<float>    BoostedXbbTag::s_RCut ("RCut");
-const SG::AuxElement::ConstAccessor<float>    BoostedXbbTag::s_ZCut ("ZCut");
-const SG::AuxElement::ConstAccessor<char>     BoostedXbbTag::s_BDRS ("BDRS");
-const SG::AuxElement::ConstAccessor<float>    BoostedXbbTag::s_YMin ("YMin");
-const SG::AuxElement::ConstAccessor<float>    BoostedXbbTag::s_MuMax ("MuMax");
-const SG::AuxElement::ConstAccessor<float>    BoostedXbbTag::s_D2 ("D2");
-const SG::AuxElement::ConstAccessor<float>    BoostedXbbTag::s_ECF1 ("ECF1");
-const SG::AuxElement::ConstAccessor<float>    BoostedXbbTag::s_ECF2 ("ECF2");
-const SG::AuxElement::ConstAccessor<float>    BoostedXbbTag::s_ECF3 ("ECF3");
-const SG::AuxElement::ConstAccessor<ElementLink<xAOD::JetContainer>> BoostedXbbTag::s_parent("Parent");
+const SG::ConstAccessor<int>      BoostedXbbTag::s_AlgorithmType ("AlgorithmType");
+const SG::ConstAccessor<float>    BoostedXbbTag::s_SizeParameter ("SizeParameter");
+const SG::ConstAccessor<int>      BoostedXbbTag::s_InputType ("InputType");
+const SG::ConstAccessor<int>      BoostedXbbTag::s_TransformType ("TransformType");
+const SG::ConstAccessor<float>    BoostedXbbTag::s_RClus ("RClus");
+const SG::ConstAccessor<float>    BoostedXbbTag::s_PtFrac ("PtFrac");
+const SG::ConstAccessor<float>    BoostedXbbTag::s_RCut ("RCut");
+const SG::ConstAccessor<float>    BoostedXbbTag::s_ZCut ("ZCut");
+const SG::ConstAccessor<char>     BoostedXbbTag::s_BDRS ("BDRS");
+const SG::ConstAccessor<float>    BoostedXbbTag::s_YMin ("YMin");
+const SG::ConstAccessor<float>    BoostedXbbTag::s_MuMax ("MuMax");
+const SG::ConstAccessor<float>    BoostedXbbTag::s_D2 ("D2");
+const SG::ConstAccessor<float>    BoostedXbbTag::s_ECF1 ("ECF1");
+const SG::ConstAccessor<float>    BoostedXbbTag::s_ECF2 ("ECF2");
+const SG::ConstAccessor<float>    BoostedXbbTag::s_ECF3 ("ECF3");
+const SG::ConstAccessor<ElementLink<xAOD::JetContainer>> BoostedXbbTag::s_parent("Parent");
 
 BoostedXbbTag::BoostedXbbTag( const std::string& working_point,
                               const std::string& recommendations_file,
@@ -68,11 +68,11 @@ BoostedXbbTag::BoostedXbbTag( const std::string& working_point,
   m_D2_cut_direction("None"),
   m_muonSelectionTool(new CP::MuonSelectionTool("JSSU_MuonSelection")),
   m_bad_configuration(false),
-  m_isB(SG::AuxElement::Decorator<int>(m_decor_prefix+"m_isB")),
-  m_matchedMuonsLink(SG::AuxElement::Decorator<std::vector<ElementLink<xAOD::IParticleContainer> > >(m_decor_prefix+"MatchedMuonsLink")),
-  m_correctedJetDecor(SG::AuxElement::Decorator<TLorentzVector>(m_decor_prefix+"CorrectedJetP4")),
-  m_massWindow(SG::AuxElement::Decorator<std::pair<float, float>>(m_decor_prefix+"MassWindow")),
-  m_D2Pivot(SG::AuxElement::Decorator<std::pair<float, std::string>>(m_decor_prefix+"m_D2Pivot"))
+  m_isB(SG::Decorator<int>(m_decor_prefix+"m_isB")),
+  m_matchedMuonsLink(SG::Decorator<std::vector<ElementLink<xAOD::IParticleContainer> > >(m_decor_prefix+"MatchedMuonsLink")),
+  m_correctedJetDecor(SG::Decorator<TLorentzVector>(m_decor_prefix+"CorrectedJetP4")),
+  m_massWindow(SG::Decorator<std::pair<float, float>>(m_decor_prefix+"MassWindow")),
+  m_D2Pivot(SG::Decorator<std::pair<float, std::string>>(m_decor_prefix+"m_D2Pivot"))
 {
 
   /* check configurations passed in, use m_bad_configuration as flag:

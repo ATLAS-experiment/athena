@@ -88,7 +88,7 @@ StatusCode MuSAVtxFitterTool::doMuSAVtxFit(std::vector<MuSAVtxFitterTool::WrkVrt
             
             //we do not try to recover LRT Stacos to avoid more likely situations where we 
             //mistakenly "recover" an MS track with a real displaced ID track
-            static const SG::AuxElement::Accessor<char> acc_isLRT("isLRT");
+            static const SG::Accessor<char> acc_isLRT("isLRT");
             if (acc_isLRT.isAvailable(*muon) && acc_isLRT(*muon)) {
                 ATH_MSG_DEBUG("Skipping recovering LRT Staco muon!");
                 continue;

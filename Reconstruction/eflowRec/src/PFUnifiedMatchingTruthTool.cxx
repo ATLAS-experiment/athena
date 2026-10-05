@@ -63,7 +63,7 @@ unsigned int PFUnifiedMatchingTruthTool::matchAndCreateEflowCaloObj(const EventC
 
   /* loop tracks in data.tracks and do matching */
   typedef ElementLink<xAOD::TruthParticleContainer> TruthLink;
-  const SG::AuxElement::Accessor<TruthLink> truthLinkAccessor("truthParticleLink");
+  const SG::Accessor<TruthLink> truthLinkAccessor("truthParticleLink");
   for (auto *thisEfRecTrack : data.tracks)
   {
     /** No point to do anything if e/p reference bin does not exist */
@@ -109,7 +109,7 @@ unsigned int PFUnifiedMatchingTruthTool::matchAndCreateEflowCaloObj(const EventC
         std::string::size_type pos = decorHandleName.find(".");
         std::string decorName = decorHandleName.substr(pos+1);
 
-        SG::AuxElement::Accessor< std::vector< std::pair<unsigned int, double> > > accessor(decorName);
+        SG::Accessor< std::vector< std::pair<unsigned int, double> > > accessor(decorName);
 
         std::vector<std::pair<unsigned int, double > > uniqueIDTruthPairs = accessor(*(thisCluster->getCluster()));
 

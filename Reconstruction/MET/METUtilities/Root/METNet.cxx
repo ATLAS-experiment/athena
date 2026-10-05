@@ -31,13 +31,13 @@
 namespace met {
 
   typedef ElementLink<xAOD::IParticleContainer> iplink_t;
-  static const SG::AuxElement::ConstAccessor< std::vector<iplink_t > > acc_constitObjLinks("ConstitObjectLinks");
-  static const SG::AuxElement::Decorator< std::vector<iplink_t> > dec_constitObjLinks("ConstitObjectLinks");
+  static const SG::ConstAccessor< std::vector<iplink_t > > acc_constitObjLinks("ConstitObjectLinks");
+  static const SG::Decorator< std::vector<iplink_t> > dec_constitObjLinks("ConstitObjectLinks");
 
-  static const SG::AuxElement::ConstAccessor< std::vector<float> > acc_inputvalues("input_values");
-  static const SG::AuxElement::ConstAccessor< std::vector<std::string> > acc_inputnames("input_names");
-  static const SG::AuxElement::Decorator< std::vector<float> > dec_inputvalues("input_values");
-  static const SG::AuxElement::Decorator< std::vector<std::string> > dec_inputnames("input_names");
+  static const SG::ConstAccessor< std::vector<float> > acc_inputvalues("input_values");
+  static const SG::ConstAccessor< std::vector<std::string> > acc_inputnames("input_names");
+  static const SG::Decorator< std::vector<float> > dec_inputvalues("input_values");
+  static const SG::Decorator< std::vector<std::string> > dec_inputnames("input_names");
 
   METNet::METNet(const std::string& name):
     AsgTool(name){}

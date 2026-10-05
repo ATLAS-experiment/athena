@@ -456,9 +456,9 @@ EMExtrapolationTools::getMomentumAtVertex(const EventContext& ctx,
                                           bool reuse /* = true */) const
 {
   Amg::Vector3D momentum(0., 0., 0.);
-  const static SG::AuxElement::Accessor<float> accPx("px");
-  const static SG::AuxElement::Accessor<float> accPy("py");
-  const static SG::AuxElement::Accessor<float> accPz("pz");
+  const static SG::Accessor<float> accPx("px");
+  const static SG::Accessor<float> accPy("py");
+  const static SG::Accessor<float> accPz("pz");
   if (vertex.nTrackParticles() == 0) {
     ATH_MSG_WARNING("getMomentumAtVertex : vertex has no track particles!");
     return momentum;

@@ -151,7 +151,7 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
   ATH_CHECK(caloDetDescrMgrHandle.isValid());
   const CaloDetDescrManager* calodetdescrmgr = *caloDetDescrMgrHandle;
 
-  static const SG::AuxElement::Accessor<
+  static const SG::Accessor<
     std::vector<ElementLink<xAOD::CaloClusterContainer>>
   > caloClusterLinks("constituentClusterLinks");
 

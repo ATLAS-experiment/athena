@@ -108,7 +108,7 @@ namespace {
             return m_acc(jet) * eScale;
         }
         
-        SG::AuxElement::ConstAccessor<float> m_acc;
+        SG::ConstAccessor<float> m_acc;
     };
   
     /// RatioAccessorRetriever retrieves multiple attributes from a jet 
@@ -123,12 +123,12 @@ namespace {
 
         virtual float value(const xAOD::Jet& jet, JetEventInfo&, double eScale) = 0;
     
-        SG::AuxElement::ConstAccessor<float> m_accTau1;
-        SG::AuxElement::ConstAccessor<float> m_accTau2;
-        SG::AuxElement::ConstAccessor<float> m_accTau3;
-        SG::AuxElement::ConstAccessor<float> m_accECF1;
-        SG::AuxElement::ConstAccessor<float> m_accECF2;
-        SG::AuxElement::ConstAccessor<float> m_accECF3;
+        SG::ConstAccessor<float> m_accTau1;
+        SG::ConstAccessor<float> m_accTau2;
+        SG::ConstAccessor<float> m_accTau3;
+        SG::ConstAccessor<float> m_accECF1;
+        SG::ConstAccessor<float> m_accECF2;
+        SG::ConstAccessor<float> m_accECF3;
     };
 
     /// Define shortcuts macro to declare specialized VarRetriever class in one line

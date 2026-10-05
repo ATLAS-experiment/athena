@@ -12,47 +12,47 @@ Copyright (C) 2024 CERN for the benefit of the ATLAS collaboration
 
 namespace {
   // accessors for vertex links
-  const SG::AuxElement::Accessor<std::vector<ElementLink<xAOD::TrackParticleContainer>>> acc_MSTPLinks("MuSAVtx_MSTPLinks");
-  const SG::AuxElement::Accessor<std::vector<ElementLink<xAOD::MuonContainer>>> acc_MuonLinks("MuSAVtx_MuonLinks");
-  const SG::AuxElement::Accessor<ElementLink<xAOD::MuonContainer>> acc_MuonLink("MuSATrk_MuonLink");
-  const SG::AuxElement::Accessor<ElementLink<xAOD::TrackParticleContainer>> acc_MSTPLink("MuSATrk_MSTPLink");
+  const SG::Accessor<std::vector<ElementLink<xAOD::TrackParticleContainer>>> acc_MSTPLinks("MuSAVtx_MSTPLinks");
+  const SG::Accessor<std::vector<ElementLink<xAOD::MuonContainer>>> acc_MuonLinks("MuSAVtx_MuonLinks");
+  const SG::Accessor<ElementLink<xAOD::MuonContainer>> acc_MuonLink("MuSATrk_MuonLink");
+  const SG::Accessor<ElementLink<xAOD::TrackParticleContainer>> acc_MSTPLink("MuSATrk_MSTPLink");
   // accessors for vertex properties
-  const SG::AuxElement::Accessor<float> vtx_pxAcc("vtx_px");
-  const SG::AuxElement::Accessor<float> vtx_pyAcc("vtx_py");
-  const SG::AuxElement::Accessor<float> vtx_pzAcc("vtx_pz");
-  const SG::AuxElement::Accessor<float> vtx_massAcc("vtx_mass");
-  const SG::AuxElement::Accessor<float> vtx_chargeAcc("vtx_charge");
-  const SG::AuxElement::Accessor<float> minOpAngAcc("minOpAng");
-  const SG::AuxElement::Accessor<float> chi2_coreAcc("chi2_core");
-  const SG::AuxElement::Accessor<float> ndof_coreAcc("ndof_core");
-  const SG::AuxElement::Accessor<float> chi2_assocAcc("chi2_assoc");
-  const SG::AuxElement::Accessor<float> ndof_assocAcc("ndof_assoc");
-  const SG::AuxElement::Accessor<float> massAcc("mass");
-  const SG::AuxElement::Accessor<float> mass_eAcc("mass_e");
-  const SG::AuxElement::Accessor<float> mass_selectedTracksAcc("mass_selectedTracks");
-  const SG::AuxElement::Accessor<int>   num_trksAcc("num_trks");
-  const SG::AuxElement::Accessor<int>   num_selectedTracksAcc("num_selectedTracks");
-  const SG::AuxElement::Accessor<int>   num_associatedTracksAcc("num_associatedTracks");
-  const SG::AuxElement::Accessor<float> dCloseVrtAcc("dCloseVrt");
+  const SG::Accessor<float> vtx_pxAcc("vtx_px");
+  const SG::Accessor<float> vtx_pyAcc("vtx_py");
+  const SG::Accessor<float> vtx_pzAcc("vtx_pz");
+  const SG::Accessor<float> vtx_massAcc("vtx_mass");
+  const SG::Accessor<float> vtx_chargeAcc("vtx_charge");
+  const SG::Accessor<float> minOpAngAcc("minOpAng");
+  const SG::Accessor<float> chi2_coreAcc("chi2_core");
+  const SG::Accessor<float> ndof_coreAcc("ndof_core");
+  const SG::Accessor<float> chi2_assocAcc("chi2_assoc");
+  const SG::Accessor<float> ndof_assocAcc("ndof_assoc");
+  const SG::Accessor<float> massAcc("mass");
+  const SG::Accessor<float> mass_eAcc("mass_e");
+  const SG::Accessor<float> mass_selectedTracksAcc("mass_selectedTracks");
+  const SG::Accessor<int>   num_trksAcc("num_trks");
+  const SG::Accessor<int>   num_selectedTracksAcc("num_selectedTracks");
+  const SG::Accessor<int>   num_associatedTracksAcc("num_associatedTracks");
+  const SG::Accessor<float> dCloseVrtAcc("dCloseVrt");
   // accessors for track parameters wrt vertex (coordinate transformation only)
-  const SG::AuxElement::Accessor<float> qOverP_wrtSVAcc("qOverP_wrtSV");
-  const SG::AuxElement::Accessor<float> theta_wrtSVAcc("theta_wrtSV");
-  const SG::AuxElement::Accessor<float> p_wrtSVAcc("p_wrtSV");
-  const SG::AuxElement::Accessor<float> pt_wrtSVAcc("pt_wrtSV");
-  const SG::AuxElement::Accessor<float> eta_wrtSVAcc("eta_wrtSV");
-  const SG::AuxElement::Accessor<float> phi_wrtSVAcc("phi_wrtSV");
-  const SG::AuxElement::Accessor<float> d0_wrtSVAcc("d0_wrtSV");
-  const SG::AuxElement::Accessor<float> z0_wrtSVAcc("z0_wrtSV");
-  const SG::AuxElement::Accessor<float> sqrd0Err_wrtSVAcc("sqrd0Err_wrtSV");
-  const SG::AuxElement::Accessor<float> sqrz0Err_wrtSVAcc("sqrz0Err_wrtSV");
-  const SG::AuxElement::Accessor<float> sqrQoPErr_wrtSVAcc("sqrQoPErr_wrtSV");
+  const SG::Accessor<float> qOverP_wrtSVAcc("qOverP_wrtSV");
+  const SG::Accessor<float> theta_wrtSVAcc("theta_wrtSV");
+  const SG::Accessor<float> p_wrtSVAcc("p_wrtSV");
+  const SG::Accessor<float> pt_wrtSVAcc("pt_wrtSV");
+  const SG::Accessor<float> eta_wrtSVAcc("eta_wrtSV");
+  const SG::Accessor<float> phi_wrtSVAcc("phi_wrtSV");
+  const SG::Accessor<float> d0_wrtSVAcc("d0_wrtSV");
+  const SG::Accessor<float> z0_wrtSVAcc("z0_wrtSV");
+  const SG::Accessor<float> sqrd0Err_wrtSVAcc("sqrd0Err_wrtSV");
+  const SG::Accessor<float> sqrz0Err_wrtSVAcc("sqrz0Err_wrtSV");
+  const SG::Accessor<float> sqrQoPErr_wrtSVAcc("sqrQoPErr_wrtSV");
   // accessors for refit track parameters from VKalVrt (proper refit accounting for magnetic field)
-  const SG::AuxElement::Accessor<float> phi_refitAcc("phi_refit");
-  const SG::AuxElement::Accessor<float> theta_refitAcc("theta_refit");
-  const SG::AuxElement::Accessor<float> qOverP_refitAcc("qOverP_refit");
-  const SG::AuxElement::Accessor<float> p_refitAcc("p_refit");
-  const SG::AuxElement::Accessor<float> pt_refitAcc("pt_refit");
-  const SG::AuxElement::Accessor<float> eta_refitAcc("eta_refit");
+  const SG::Accessor<float> phi_refitAcc("phi_refit");
+  const SG::Accessor<float> theta_refitAcc("theta_refit");
+  const SG::Accessor<float> qOverP_refitAcc("qOverP_refit");
+  const SG::Accessor<float> p_refitAcc("p_refit");
+  const SG::Accessor<float> pt_refitAcc("pt_refit");
+  const SG::Accessor<float> eta_refitAcc("eta_refit");
 }
 
 namespace Rec {

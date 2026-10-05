@@ -25,8 +25,8 @@ namespace met {
   using namespace xAOD;
 
   using iplink_t = ElementLink<xAOD::IParticleContainer>;
-  static const SG::AuxElement::ConstAccessor< std::vector<iplink_t > > acc_constitObjLinks("ConstitObjectLinks");
-  static const SG::AuxElement::ConstAccessor< iplink_t  > acc_originalObject("originalObjectLink");
+  static const SG::ConstAccessor< std::vector<iplink_t > > acc_constitObjLinks("ConstitObjectLinks");
+  static const SG::ConstAccessor< iplink_t  > acc_originalObject("originalObjectLink");
 
   METSystematicsTool::METSystematicsTool(const std::string& name)
     : asg::AsgTool::AsgTool(name)

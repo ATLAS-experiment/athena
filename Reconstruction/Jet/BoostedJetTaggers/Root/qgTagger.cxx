@@ -107,7 +107,7 @@ namespace BJT{
       decValidKinRange(*jet) = pass_kin_range;
 
       /// Get Score value
-      static const SG::AuxElement::ConstAccessor<float> Score(m_decorationName + "_ConstScore");
+      static const SG::ConstAccessor<float> Score(m_decorationName + "_ConstScore");
       float jet_score = Score(*jet);
 
       ATH_MSG_DEBUG("Score: " << jet_score);

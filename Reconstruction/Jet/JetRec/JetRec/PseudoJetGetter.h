@@ -148,9 +148,9 @@ namespace PseudoJetGetter {
 	if(!inputIsUFO){
 	  if( pfo->isCharged() ){
 	    if(!useChargedPFOs) reject = true;
-	    const static SG::AuxElement::ConstAccessor<char> PVMatchedAcc("matchedToPV");
+	    const static SG::ConstAccessor<char> PVMatchedAcc("matchedToPV");
 	    if(useChargedPV && !PVMatchedAcc(*pfo)) reject = true;
-	    const static SG::AuxElement::ConstAccessor<char> PUsidebandMatchedAcc("matchedToPUsideband");
+	    const static SG::ConstAccessor<char> PUsidebandMatchedAcc("matchedToPUsideband");
 	    if (useChargedPUsideband && !PUsidebandMatchedAcc(*pfo)) reject = true;
 	  }
 	  else{
@@ -176,9 +176,9 @@ namespace PseudoJetGetter {
 
       if( pfo->isCharged() ) {
 	if(!useChargedPFOs) reject = true;
-	const static SG::AuxElement::ConstAccessor<char> PVMatchedAcc("matchedToPV");
+	const static SG::ConstAccessor<char> PVMatchedAcc("matchedToPV");
 	if(useChargedPV && !PVMatchedAcc(*pfo)) reject = true;
-	const static SG::AuxElement::ConstAccessor<char> PUsidebandMatchedAcc("matchedToPUsideband");
+	const static SG::ConstAccessor<char> PUsidebandMatchedAcc("matchedToPUsideband");
 	if (useChargedPUsideband && !PUsidebandMatchedAcc(*pfo)) reject = true;
       }
       else{
@@ -216,9 +216,9 @@ namespace PseudoJetGetter {
   std::vector<fastjet::PseudoJet> 
   ByVertexPFlowsToPJs(const xAOD::IParticleContainer& ips, const xAOD::VertexContainer* pvs, bool skipNegativeEnergy, bool useChargedPFOs, bool useNeutralPFOs, bool isUFO) {
 
-    const static SG::AuxElement::Accessor<             unsigned  > copyIndex("ConstituentCopyIndex");     // For neutral PFOs
-    const static SG::AuxElement::Accessor< std::vector<unsigned> > matchedPVs("MatchingPVs");             // For charged PFOs
-    const static SG::AuxElement::Accessor< std::vector<unsigned> > matchedPUSBs("MatchingPUsidebands");   // For charged PFOs
+    const static SG::Accessor<             unsigned  > copyIndex("ConstituentCopyIndex");     // For neutral PFOs
+    const static SG::Accessor< std::vector<unsigned> > matchedPVs("MatchingPVs");             // For charged PFOs
+    const static SG::Accessor< std::vector<unsigned> > matchedPUSBs("MatchingPUsidebands");   // For charged PFOs
     PFlowRejecter rejecter(skipNegativeEnergy, useChargedPFOs, useNeutralPFOs, false, false, isUFO);
     std::vector<fastjet::PseudoJet> vpj;
     int index = -1;

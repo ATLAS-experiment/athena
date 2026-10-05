@@ -85,42 +85,42 @@ namespace JetSubStructureUtils {
       bool m_bad_configuration;
 
       // main 4 details for classifying a jet
-      static const SG::AuxElement::ConstAccessor<int> s_AlgorithmType;
-      static const SG::AuxElement::ConstAccessor<float> s_SizeParameter;
-      static const SG::AuxElement::ConstAccessor<int> s_InputType;
-      static const SG::AuxElement::ConstAccessor<int> s_TransformType;
+      static const SG::ConstAccessor<int> s_AlgorithmType;
+      static const SG::ConstAccessor<float> s_SizeParameter;
+      static const SG::ConstAccessor<int> s_InputType;
+      static const SG::ConstAccessor<int> s_TransformType;
 
       // for trimming
-      static const SG::AuxElement::ConstAccessor<float> s_RClus;
-      static const SG::AuxElement::ConstAccessor<float> s_PtFrac;
+      static const SG::ConstAccessor<float> s_RClus;
+      static const SG::ConstAccessor<float> s_PtFrac;
 
       // for pruning
-      static const SG::AuxElement::ConstAccessor<float> s_RCut;
-      static const SG::AuxElement::ConstAccessor<float> s_ZCut;
+      static const SG::ConstAccessor<float> s_RCut;
+      static const SG::ConstAccessor<float> s_ZCut;
 
       // for splitting
-      // static const SG::AuxElement::ConstAccessor<int> NSubjetMax ("NSubjetMax");
-      static const SG::AuxElement::ConstAccessor<char> s_BDRS;
+      // static const SG::ConstAccessor<int> NSubjetMax ("NSubjetMax");
+      static const SG::ConstAccessor<char> s_BDRS;
       /* MuMax, YMin, RClus */
-      // static const SG::AuxElement::ConstAccessor<float> RClus ("RClus"); // defined above for trimming
-      static const SG::AuxElement::ConstAccessor<float> s_YMin;
-      static const SG::AuxElement::ConstAccessor<float> s_MuMax;
+      // static const SG::ConstAccessor<float> RClus ("RClus"); // defined above for trimming
+      static const SG::ConstAccessor<float> s_YMin;
+      static const SG::ConstAccessor<float> s_MuMax;
 
       // for D2
-      static const SG::AuxElement::ConstAccessor<float> s_D2;
-      static const SG::AuxElement::ConstAccessor<float> s_ECF1;
-      static const SG::AuxElement::ConstAccessor<float> s_ECF2;
-      static const SG::AuxElement::ConstAccessor<float> s_ECF3;
+      static const SG::ConstAccessor<float> s_D2;
+      static const SG::ConstAccessor<float> s_ECF1;
+      static const SG::ConstAccessor<float> s_ECF2;
+      static const SG::ConstAccessor<float> s_ECF3;
 
       // generic accessors used
-      static const SG::AuxElement::ConstAccessor<ElementLink<xAOD::JetContainer>> s_parent;
+      static const SG::ConstAccessor<ElementLink<xAOD::JetContainer>> s_parent;
 
       // generic decorations used
-      const SG::AuxElement::Decorator<int> m_isB;
-      const SG::AuxElement::Decorator<std::vector<ElementLink<xAOD::IParticleContainer> > > m_matchedMuonsLink;
-      const SG::AuxElement::Decorator<TLorentzVector> m_correctedJetDecor;
-      const SG::AuxElement::Decorator<std::pair<float, float>> m_massWindow;
-      const SG::AuxElement::Decorator<std::pair<float, std::string>> m_D2Pivot;
+      const SG::Decorator<int> m_isB;
+      const SG::Decorator<std::vector<ElementLink<xAOD::IParticleContainer> > > m_matchedMuonsLink;
+      const SG::Decorator<TLorentzVector> m_correctedJetDecor;
+      const SG::Decorator<std::pair<float, float>> m_massWindow;
+      const SG::Decorator<std::pair<float, std::string>> m_D2Pivot;
   };
 }
 

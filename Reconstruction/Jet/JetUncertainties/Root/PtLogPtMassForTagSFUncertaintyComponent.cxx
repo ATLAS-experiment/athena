@@ -68,7 +68,7 @@ bool PtLogPtMassForTagSFUncertaintyComponent::getValidityImpl(const xAOD::Jet& j
 
 double PtLogPtMassForTagSFUncertaintyComponent::getUncertaintyImpl(const xAOD::Jet& jet, const xAOD::EventInfo&) const
 {
-    static const SG::AuxElement::Accessor<int> accLabel(m_largeRJetTruthLabelName);
+    static const SG::Accessor<int> accLabel(m_largeRJetTruthLabelName);
     if ( !accLabel.isAvailable(jet) ){
       ATH_MSG_ERROR("LargeRJetTruthLabel: " << m_largeRJetTruthLabelName << " is not decorrated to the jet. Please use JetTruthLabelingTool before calling this function.");
       return JESUNC_ERROR_CODE;
@@ -89,7 +89,7 @@ double PtLogPtMassForTagSFUncertaintyComponent::getUncertaintyImpl(const xAOD::J
       
       // TODO: enable when BoostedJetTaggers are available
       /*
-      SG::AuxElement::ConstAccessor<int> accResult(m_result_name.Data());
+      SG::ConstAccessor<int> accResult(m_result_name.Data());
       if ( !accResult.isAvailable(jet) ){
         ATH_MSG_ERROR(m_result_name+" is not decorated to the jet.");
       } else {

@@ -42,13 +42,13 @@ namespace met {
 
   using iplink_t = ElementLink<xAOD::IParticleContainer>;
 
-  static const SG::AuxElement::ConstAccessor<float> acc_varX("varX");
-  static const SG::AuxElement::ConstAccessor<float> acc_varY("varY");
-  static const SG::AuxElement::ConstAccessor<float> acc_covXY("covXY");
-  static const SG::AuxElement::ConstAccessor<float> acc_jvt("Jvt");
-  static const SG::AuxElement::ConstAccessor<float> acc_fjvt("fJvt");
-  static const SG::AuxElement::ConstAccessor<float> acc_fjvt_der("DFCommonJets_fJvt");
-  static const SG::AuxElement::ConstAccessor< std::vector<iplink_t > > acc_constitObjLinks("ConstitObjectLinks");
+  static const SG::ConstAccessor<float> acc_varX("varX");
+  static const SG::ConstAccessor<float> acc_varY("varY");
+  static const SG::ConstAccessor<float> acc_covXY("covXY");
+  static const SG::ConstAccessor<float> acc_jvt("Jvt");
+  static const SG::ConstAccessor<float> acc_fjvt("fJvt");
+  static const SG::ConstAccessor<float> acc_fjvt_der("DFCommonJets_fJvt");
+  static const SG::ConstAccessor< std::vector<iplink_t > > acc_constitObjLinks("ConstitObjectLinks");
   const static MissingETBase::Types::bitmask_t invisSource = 0x100000; // doesn't overlap with any other
 
   METSignificance::METSignificance(const std::string& name) :
@@ -454,7 +454,7 @@ namespace met {
       if(m_doPhiReso) phi_reso = muon->pt()*0.001;
       // run the jet resolution for muons. for validation region extrapolation
       if(!m_EMuResoAux.empty()){
-        SG::AuxElement::ConstAccessor<bool>  acc_EMReso(m_EMuResoAux);
+        SG::ConstAccessor<bool>  acc_EMReso(m_EMuResoAux);
         DoEMuReso = acc_EMReso.isAvailable(*muon) ? acc_EMReso(*muon) : false;
       }
       ATH_MSG_VERBOSE("muon: " << pt_reso << " dettype: " << dettype << " " << muon->pt() << " " << muon->p4().Eta() << " " << muon->p4().Phi());
@@ -496,7 +496,7 @@ namespace met {
 
       // run the jet resolution for muons. for validation region extrapolation
       if(!m_EMuResoAux.empty()){
-        SG::AuxElement::ConstAccessor<bool>  acc_EMReso(m_EMuResoAux);
+        SG::ConstAccessor<bool>  acc_EMReso(m_EMuResoAux);
         DoEMuReso = acc_EMReso.isAvailable(*ele) ? acc_EMReso(*ele) : false;
       }
     }
@@ -577,7 +577,7 @@ namespace met {
 
     // Add user defined additional resolutions. For example, b-tagged jets
     if(!m_JetResoAux.empty()){
-      SG::AuxElement::ConstAccessor<float> acc_extra(m_JetResoAux);
+      SG::ConstAccessor<float> acc_extra(m_JetResoAux);
       if(acc_extra.isAvailable(*jet)){
         float extra_relative_pt_reso = acc_extra(*jet);
         pt_reso = std::sqrt(pt_reso*pt_reso + extra_relative_pt_reso*extra_relative_pt_reso);

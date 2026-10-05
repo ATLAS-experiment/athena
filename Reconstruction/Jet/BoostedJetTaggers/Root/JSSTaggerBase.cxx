@@ -492,10 +492,10 @@ int JSSTaggerBase::calculateJSSRatios( const xAOD::Jet &jet ) const {
   decD2(jet) = D2;
   decE3(jet) = e3;
 
-  static const SG::AuxElement::ConstAccessor<float> accL2("L2");
+  static const SG::ConstAccessor<float> accL2("L2");
   if(!accL2.isAvailable(jet)) decL2(jet) = L2;
 
-  static const SG::AuxElement::ConstAccessor<float> accL3("L3");
+  static const SG::ConstAccessor<float> accL3("L3");
   if(!accL3.isAvailable(jet)) decL3(jet) = L3;
 
   // TODO: Add ECFG for ANN tagger whenever it is defined
@@ -629,10 +629,10 @@ void JSSTaggerBase::decorateJSSRatios( const xAOD::JetContainer& jets ) const {
     if(!decE3.isAvailable())
       decE3(*jet) = e3;
 
-    static const SG::AuxElement::ConstAccessor<float> accL2("L2");
+    static const SG::ConstAccessor<float> accL2("L2");
     if(!accL2.isAvailable(*jet)) decL2(*jet) = L2;
 
-    static const SG::AuxElement::ConstAccessor<float> accL3("L3");
+    static const SG::ConstAccessor<float> accL3("L3");
     if(!accL3.isAvailable(*jet)) decL3(*jet) = L3;
 
     // TODO: Add ECFG for ANN tagger whenever it is defined
@@ -678,7 +678,7 @@ int JSSTaggerBase::GetUnGroomTracks( const xAOD::Jet &jet, int indexPV ) const {
     if ( linkToUngroomed.isValid() ) {
       ungroomedJet = *linkToUngroomed;
 
-      static const SG::AuxElement::ConstAccessor< std::vector<int> >acc_Ntrk("NumTrkPt500");
+      static const SG::ConstAccessor< std::vector<int> >acc_Ntrk("NumTrkPt500");
 
       if ( acc_Ntrk.isAvailable(*ungroomedJet) ) {
 

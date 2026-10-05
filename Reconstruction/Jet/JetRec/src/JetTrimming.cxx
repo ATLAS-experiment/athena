@@ -53,8 +53,8 @@ StatusCode JetTrimming::initialize() {
 
 void JetTrimming::insertGroomedJet(const xAOD::Jet& parentjet, const PseudoJetContainer& inpjcont, xAOD::JetContainer& outcont, PseudoJetVector& trimpjvec) const {
   
-  const static SG::AuxElement::Accessor<const fastjet::PseudoJet*> s_pjAcc("PseudoJet");
-  const static SG::AuxElement::ConstAccessor<const fastjet::PseudoJet*> s_pjConstAcc("PseudoJet");
+  const static SG::Accessor<const fastjet::PseudoJet*> s_pjAcc("PseudoJet");
+  const static SG::ConstAccessor<const fastjet::PseudoJet*> s_pjConstAcc("PseudoJet");
 
   // retrieve the PseudoJet from the parent :
   const fastjet::PseudoJet& parentPJ = *s_pjConstAcc(parentjet);

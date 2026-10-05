@@ -405,7 +405,7 @@ egammaSuperClusterBuilderBase::createNewCluster(
     }
     // Set the link from the super cluster to the constituents (accumulated)
     // clusters used.
-    static const SG::AuxElement::Accessor<
+    static const SG::Accessor<
       std::vector<ElementLink<xAOD::CaloClusterContainer>>>
       caloClusterLinks(linkStr);
     caloClusterLinks(*newCluster) = std::move(constituentLinks);

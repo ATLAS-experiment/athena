@@ -61,7 +61,7 @@ bool LargeRTopologyUncertaintyComponent::getValidityImpl(const xAOD::Jet& jet, c
 double LargeRTopologyUncertaintyComponent::getUncertaintyImpl(const xAOD::Jet& jet, const xAOD::EventInfo&) const
 {
     // Retrieve the truth jet label from the jet
-    static const SG::AuxElement::ConstAccessor<int> accTruthLabel(m_truthLabelName);
+    static const SG::ConstAccessor<int> accTruthLabel(m_truthLabelName);
     if (!accTruthLabel.isAvailable(jet) || accTruthLabel(jet) == LargeRJetTruthLabel::UNKNOWN)
     {
         ATH_MSG_ERROR("Unable to retrieve the LargeRJetTruthLabel: " << m_truthLabelName << " from the jet.  Please use JetTruthLabelingTool before calling this function.");

@@ -318,7 +318,7 @@ double UncertaintyComponent::getAbsMass(const xAOD::Jet& jet, const CompMassDef:
         return scale(jet).M();
 
     // Fall-back on the TA moment as a float if applicable (legacy support)
-    SG::AuxElement::ConstAccessor<float> scaleTAMoment("JetTrackAssistedMassCalibrated");
+    SG::ConstAccessor<float> scaleTAMoment("JetTrackAssistedMassCalibrated");
     if (massDef == CompMassDef::TAMass && scaleTAMoment.isAvailable(jet))
         return scaleTAMoment(jet);
 
@@ -343,7 +343,7 @@ double UncertaintyComponent::getMassOverPt(const xAOD::Jet& jet, const CompMassD
         return scale(jet).M()/scale(jet).Pt();
     
     // Fall-back on the TA moment as a float if applicable (legacy support)
-    SG::AuxElement::ConstAccessor<float> scaleTAMoment("JetTrackAssistedMassCalibrated");
+    SG::ConstAccessor<float> scaleTAMoment("JetTrackAssistedMassCalibrated");
     if (massDef == CompMassDef::TAMass && scaleTAMoment.isAvailable(jet))
         return scaleTAMoment(jet)/jet.pt();
     
@@ -369,7 +369,7 @@ double UncertaintyComponent::getMassOverE(const xAOD::Jet& jet, const CompMassDe
         return scale(jet).M()/scale(jet).E();
     
     // Fall-back on the TA moment as a float if applicable (legacy support)
-    SG::AuxElement::ConstAccessor<float> scaleTAMoment("JetTrackAssistedMassCalibrated");
+    SG::ConstAccessor<float> scaleTAMoment("JetTrackAssistedMassCalibrated");
     if (massDef == CompMassDef::TAMass && scaleTAMoment.isAvailable(jet))
         return scaleTAMoment(jet)/jet.e();
     

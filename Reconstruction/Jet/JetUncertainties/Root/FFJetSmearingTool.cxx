@@ -523,7 +523,7 @@ namespace CP {
     //-----------------------------------------------------------------------------
 
     StatusCode FFJetSmearingTool::getJetTopology( xAOD::Jet& jet_reco, std::string& jetTopology) const{
-        const SG::AuxElement::ConstAccessor<int> accTruthLabel(m_truthlabelaccessor);
+        const SG::ConstAccessor<int> accTruthLabel(m_truthlabelaccessor);
         if (!accTruthLabel.isAvailable(jet_reco) )
         {
             ATH_MSG_ERROR("Unable to retrieve the FatjetTruthLabel from the jet.  Please call the BoostedJetTaggers decorateTruthLabel() function before calling this function.");

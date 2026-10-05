@@ -59,13 +59,13 @@ namespace {
 
   /// help work around limitation of ReadDecorHandle
   template<typename DTYPE, typename CTYPE>
-  SG::AuxElement::ConstAccessor<DTYPE> asConstAccessor(const SG::ReadDecorHandleKey<CTYPE> & wh){
+  SG::ConstAccessor<DTYPE> asConstAccessor(const SG::ReadDecorHandleKey<CTYPE> & wh){
     static const std::string ts = typeid(DTYPE).name();
-    if(wh.empty() ) return SG::AuxElement::ConstAccessor<DTYPE>( typeid(DTYPE).name() );
+    if(wh.empty() ) return SG::ConstAccessor<DTYPE>( typeid(DTYPE).name() );
     const auto split = wh.key().rfind ('.');
     if (split == std::string::npos)
       throw std::runtime_error ("decor key does not contain a .: " + wh.key());
-    return SG::AuxElement::ConstAccessor<DTYPE>( wh.key().substr (split + 1) );
+    return SG::ConstAccessor<DTYPE>( wh.key().substr (split + 1) );
   }
   
   
@@ -112,10 +112,10 @@ StatusCode TCCCombinedTool::fillTCC(xAOD::FlowElementContainer* tccContainer, co
   }
 
   // declare Decorator in case we want to save out corrected positions
-  static const SG::AuxElement::Decorator<int> dec_isCorrected("Corrected");
-  static const SG::AuxElement::Decorator<float> dec_calEntryEta("CaloEntryPosEtaCorr") ;
-  static const SG::AuxElement::Decorator<float> dec_calEntryPhi("CaloEntryPosPhiCorr") ;
-  static const SG::AuxElement::Decorator<float> dec_detEta("DetectorEta") ;
+  static const SG::Decorator<int> dec_isCorrected("Corrected");
+  static const SG::Decorator<float> dec_calEntryEta("CaloEntryPosEtaCorr") ;
+  static const SG::Decorator<float> dec_calEntryPhi("CaloEntryPosPhiCorr") ;
+  static const SG::Decorator<float> dec_detEta("DetectorEta") ;
 
   // it is not possible to prepare a blank ReadDecorHandle (which we need if !m_caloEntryParsDecor.empty()), so instead or re-instantiating a ReadDecorHandle on each
   // track in the loop below, we just instantiate a ConstAccessor  
@@ -207,7 +207,7 @@ StatusCode TCCChargedTool::fillTCC(xAOD::FlowElementContainer* tccContainer, con
   SG::ReadDecorHandle<xAOD::TrackParticleContainer, std::vector<ElementLink<xAOD::CaloClusterContainer>> > clusterLinksH(m_assoClustersKey);
   
   // declare Decorator in case we want to save out corrected positions  
-  static const SG::AuxElement::Decorator<float> dec_detEta("DetectorEta") ;
+  static const SG::Decorator<float> dec_detEta("DetectorEta") ;
   
   unsigned int i = 0;
   // Loop over ALL tracks at the source of TCC
@@ -261,7 +261,7 @@ StatusCode TCCNeutralTool::fillTCC(xAOD::FlowElementContainer* tccContainer, con
   
   unsigned int i = 0;
   // declare Decorator in case we want to save out corrected positions  
-  static const SG::AuxElement::Decorator<float> dec_detEta("DetectorEta") ;
+  static const SG::Decorator<float> dec_detEta("DetectorEta") ;
 
   // Loop over ALL clusters 
   for ( const xAOD::CaloCluster* cluster : *tccInfo.allClusters ) {
@@ -277,7 +277,7 @@ StatusCode TCCNeutralTool::fillTCC(xAOD::FlowElementContainer* tccContainer, con
       setParameters(tcc, cluster->pt(),cluster->eta(),cluster->phi(),cluster->m(),xAOD::FlowElement::SignalType::Neutral,ElementLink<xAOD::TrackParticleContainer>(),ClusterLink);
       ATH_MSG_VERBOSE ("Created TCC with pt " << tcc->pt() << " eta " << tcc->eta() << " phi " << tcc->phi() << " mass " << tcc->m() << " taste " << tcc->signalType());
       
-      static const SG::AuxElement::Accessor< float > acc_det_eta ( "DetectorEta" );
+      static const SG::Accessor< float > acc_det_eta ( "DetectorEta" );
       if(m_saveDetectorEta && acc_det_eta.isAvailable(*cluster)) {
         dec_detEta(*tcc) = dec_detEta(*cluster);
       }
@@ -391,7 +391,7 @@ StatusCode UFOTool::fillTCC(xAOD::FlowElementContainer* tccContainer, const Trac
 
     if(pfo->isCharged()) {
       // this decoration is set by JetRecTools/Root/ChargedHadronSubtractionTool.cxx !
-      const static SG::AuxElement::Accessor<char> PVMatchedAcc("matchedToPV"); 
+      const static SG::Accessor<char> PVMatchedAcc("matchedToPV"); 
       if(!PVMatchedAcc(*pfo)) continue;
     }
     

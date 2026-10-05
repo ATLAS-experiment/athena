@@ -198,9 +198,9 @@ fillEventShape( xAOD::EventShape* eventShape, const PseudoJetVector& pjv) const 
   // Record rho.
 
   // Fill the EventShape object
-  const static SG::AuxElement::Accessor<float> rhoDec("Density");
-  const static SG::AuxElement::Accessor<float> sigmaDec("DensitySigma");
-  const static SG::AuxElement::Accessor<float> areaDec("DensityArea");
+  const static SG::Accessor<float> rhoDec("Density");
+  const static SG::Accessor<float> sigmaDec("DensitySigma");
+  const static SG::Accessor<float> areaDec("DensityArea");
   rhoDec(*eventShape) = rho;
   sigmaDec(*eventShape) = sigma;
   areaDec(*eventShape) = area;

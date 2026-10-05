@@ -1051,7 +1051,7 @@ CP::CorrectionCode egammaLayerRecalibTool::read_and_scale_inputs( const xAOD::Eg
   }
 
   double eta_calo;
-  static const SG::AuxElement::Accessor<float> accEtaCalo("etaCalo");
+  static const SG::Accessor<float> accEtaCalo("etaCalo");
   if(particle.author() == xAOD::EgammaParameters::AuthorFwdElectron){
     eta_calo = cluster->eta();
   }
@@ -1101,11 +1101,11 @@ CP::CorrectionCode egammaLayerRecalibTool::applyCorrection(xAOD::Egamma& particl
 
   const xAOD::CaloCluster* cluster = particle.caloCluster();
 
-  static const SG::AuxElement::Decorator<double> deco_E0("correctedcl_Es0");
-  static const SG::AuxElement::Decorator<double> deco_E1("correctedcl_Es1");
-  static const SG::AuxElement::Decorator<double> deco_E2("correctedcl_Es2");
-  static const SG::AuxElement::Decorator<double> deco_E3("correctedcl_Es3");
-  static const SG::AuxElement::Decorator<std::string>
+  static const SG::Decorator<double> deco_E0("correctedcl_Es0");
+  static const SG::Decorator<double> deco_E1("correctedcl_Es1");
+  static const SG::Decorator<double> deco_E2("correctedcl_Es2");
+  static const SG::Decorator<double> deco_E3("correctedcl_Es3");
+  static const SG::Decorator<std::string>
     deco_layer_correction("layer_correction");
 
   if (status == CP::CorrectionCode::Ok) {

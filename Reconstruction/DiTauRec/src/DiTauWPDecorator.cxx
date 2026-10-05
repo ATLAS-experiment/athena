@@ -24,7 +24,7 @@ StatusCode DiTauWPDecorator::initialize()
   }
  
   for (size_t wpIndex=0; wpIndex < m_decorWPs.size(); ++wpIndex) {
-    m_charDecors.emplace_back(SG::AuxElement::Accessor<char>( m_decorWPs[wpIndex] ));
+    m_charDecors.emplace_back(SG::Accessor<char>( m_decorWPs[wpIndex] ));
   }
 
   return StatusCode::SUCCESS;

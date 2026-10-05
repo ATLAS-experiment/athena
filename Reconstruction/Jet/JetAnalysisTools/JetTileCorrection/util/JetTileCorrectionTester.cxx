@@ -56,8 +56,8 @@ using namespace JTC;
 //-----------------------------------------------------------------------------
 // Global accessors and decorators
 //-----------------------------------------------------------------------------
-static SG::AuxElement::Accessor<unsigned int> acc_tileok("TileStatus");
-static SG::AuxElement::Accessor<float> acc_ptraw("Ptraw");
+static SG::Accessor<unsigned int> acc_tileok("TileStatus");
+static SG::Accessor<float> acc_ptraw("Ptraw");
 
 //-----------------------------------------------------------------------------
 // Main function

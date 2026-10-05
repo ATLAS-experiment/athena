@@ -35,8 +35,8 @@ void RecoPhotonHistograms::fill(const xAOD::Photon& phrec) {
   
   ParticleHistograms::fill(phrec);
 
-  static const SG::AuxElement::ConstAccessor<int> accType("truthType");
-  static const SG::AuxElement::ConstAccessor<int> accOrigin("truthOrigin");
+  static const SG::ConstAccessor<int> accType("truthType");
+  static const SG::ConstAccessor<int> accOrigin("truthOrigin");
   if (accOrigin.isAvailable(phrec))
     histoMap["truthOrigin"]->Fill(accOrigin(phrec));
   else

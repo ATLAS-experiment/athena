@@ -28,7 +28,7 @@
 
 namespace JetVar {
   template<typename T>
-  using Accessor = SG::AuxElement::Accessor< T >;
+  using Accessor = SG::Accessor< T >;
 
 
   /// VectorValue is a helper class to access any jet variable of type vector<X>

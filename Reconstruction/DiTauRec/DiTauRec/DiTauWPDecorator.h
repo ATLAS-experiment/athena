@@ -35,7 +35,7 @@ private:
   Gaudi::Property<std::vector<std::string>> m_decorWPs{this, "DecorWPNames", {}, "Name of WPs"};
   Gaudi::Property<std::vector<float>> m_decorWPCuts{this, "DecorWPCuts", {}, "Cut on each WP to be docorated for ditaus"}; 
   
-  std::vector<SG::AuxElement::Accessor<char>> m_charDecors;
+  std::vector<SG::Accessor<char>> m_charDecors;
   
   Gaudi::Property<std::string> m_ditauContainerName{this, "DiTauContainerName", "", "Name of DiTauJetContainer, must be set when using "};
 

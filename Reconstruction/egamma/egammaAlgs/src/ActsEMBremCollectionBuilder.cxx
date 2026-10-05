@@ -175,10 +175,10 @@ StatusCode ActsEMBremCollectionBuilder::convertTracks(
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, ElementLink<ActsTrk::TrackContainer>>
       actsTrackLink(m_actsTrackOutLinkKey, ctx);
 
-  static const SG::AuxElement::Accessor<ElementLink<xAOD::TrackParticleContainer>>
+  static const SG::Accessor<ElementLink<xAOD::TrackParticleContainer>>
       originalTPLink("originalTrackParticle");
       
-  static const SG::AuxElement::Accessor<float> QoverPLM("QoverPLM");
+  static const SG::Accessor<float> QoverPLM("QoverPLM");
   for (const auto [track, originalTP] : Acts::zip(actsContainer, originals)) {
     xAOD::TrackParticle* tp = outputTPs.push_back(std::make_unique<xAOD::TrackParticle>());
 

@@ -302,7 +302,7 @@ xAODEgammaBuilder::getElectron(const egammaRec* egRec,
   xAOD::Electron* electron = electronContainer->push_back(std::make_unique<xAOD::Electron>());
   electron->setAuthor(author);
 
-  static const SG::AuxElement::Accessor<uint8_t> acc("ambiguityType");
+  static const SG::Accessor<uint8_t> acc("ambiguityType");
   acc(*electron) = type;
 
   electron->setCaloClusterLinks(egRec->caloClusterElementLinks());
@@ -320,7 +320,7 @@ xAODEgammaBuilder::getElectron(const egammaRec* egRec,
     egRec->deltaPhiLast()
   );
 
-  static const SG::AuxElement::Accessor<float> pear("deltaEta1PearDistortion");
+  static const SG::Accessor<float> pear("deltaEta1PearDistortion");
   pear(*electron) = m_isTruth ?  0.0 : m_deltaEta1Pear->getDeltaEtaDistortion(
     electron->caloCluster()->etaBE(2),
     electron->caloCluster()->phiBE(2)
@@ -341,7 +341,7 @@ xAODEgammaBuilder::getPhoton(const egammaRec* egRec,
 
   xAOD::Photon* photon = photonContainer->push_back(std::make_unique<xAOD::Photon>());
   photon->setAuthor(author);
-  static const SG::AuxElement::Accessor<uint8_t> acc("ambiguityType");
+  static const SG::Accessor<uint8_t> acc("ambiguityType");
   acc(*photon) = type;
 
   photon->setCaloClusterLinks(egRec->caloClusterElementLinks());

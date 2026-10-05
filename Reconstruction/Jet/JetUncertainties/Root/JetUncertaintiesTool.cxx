@@ -475,11 +475,11 @@ StatusCode JetUncertaintiesTool::initialize()
     if ( m_name_TagScaleFactor != "temp_SF") {
       ATH_MSG_INFO("   accessor of SF is " << m_name_TagScaleFactor);
     }
-    m_accTagScaleFactor = SG::AuxElement::Accessor<float>(m_name_TagScaleFactor);
-    m_accEffSF = SG::AuxElement::Accessor<float>(m_name_EffSF);
-    m_accSigeffSF = SG::AuxElement::Accessor<float>(m_name_SigeffSF);
-    m_accEfficiency = SG::AuxElement::Accessor<float>(m_name_Efficiency);
-    m_accTagResult  = SG::AuxElement::Accessor<bool>(m_name_TagResult);
+    m_accTagScaleFactor = SG::Accessor<float>(m_name_TagScaleFactor);
+    m_accEffSF = SG::Accessor<float>(m_name_EffSF);
+    m_accSigeffSF = SG::Accessor<float>(m_name_SigeffSF);
+    m_accEfficiency = SG::Accessor<float>(m_name_Efficiency);
+    m_accTagResult  = SG::Accessor<bool>(m_name_TagResult);
 
     // Get the NPV/mu reference values
     // These may not be set - only needed if a pileup component is requested
@@ -2328,8 +2328,8 @@ CP::CorrectionCode JetUncertaintiesTool::applyContainerCorrection(
 const xAOD::EventInfo* JetUncertaintiesTool::getDefaultEventInfo ATLAS_NOT_THREAD_SAFE () const
 {
     // NPV decorator(s)
-    static const SG::AuxElement::ConstAccessor<float> accNPV("NPV");
-    static const SG::AuxElement::Decorator<float> decNPV("NPV");
+    static const SG::ConstAccessor<float> accNPV("NPV");
+    static const SG::Decorator<float> decNPV("NPV");
 
     // Retrieve the EventInfo object
     static const std::string eiName = "EventInfo";
@@ -2537,7 +2537,7 @@ double JetUncertaintiesTool::getSmearingFactor(const xAOD::Jet& jet, const CompS
 
 StatusCode JetUncertaintiesTool::updateSplittingScale12(xAOD::Jet& jet, const double shift) const
 {
-    static const SG::AuxElement::Accessor<float> accD12("Split12");
+    static const SG::Accessor<float> accD12("Split12");
 
     const xAOD::Jet& constJet = jet;
     if (accD12.isAvailable(constJet))
@@ -2553,7 +2553,7 @@ StatusCode JetUncertaintiesTool::updateSplittingScale12(xAOD::Jet& jet, const do
 
 StatusCode JetUncertaintiesTool::updateSplittingScale23(xAOD::Jet& jet, const double shift) const
 {
-    static const SG::AuxElement::Accessor<float> accD23("Split23");
+    static const SG::Accessor<float> accD23("Split23");
 
     const xAOD::Jet& constJet = jet;
     if (accD23.isAvailable(constJet))
@@ -2569,9 +2569,9 @@ StatusCode JetUncertaintiesTool::updateSplittingScale23(xAOD::Jet& jet, const do
 
 StatusCode JetUncertaintiesTool::updateTau21(xAOD::Jet& jet, const double shift) const
 {
-    static const SG::AuxElement::Accessor<float> accTau1("Tau1");
-    static const SG::AuxElement::Accessor<float> accTau2("Tau2");
-    static const SG::AuxElement::Accessor<float> accTau21("Tau21");
+    static const SG::Accessor<float> accTau1("Tau1");
+    static const SG::Accessor<float> accTau2("Tau2");
+    static const SG::Accessor<float> accTau21("Tau21");
     static const bool Tau21wasAvailable = accTau21.isAvailable(jet);
     static const bool TauNNwasAvailable = accTau2.isAvailable(jet) && accTau1.isAvailable(jet);
 
@@ -2618,9 +2618,9 @@ StatusCode JetUncertaintiesTool::updateTau21(xAOD::Jet& jet, const double shift)
 
 StatusCode JetUncertaintiesTool::updateTau32(xAOD::Jet& jet, const double shift) const
 {
-    static const SG::AuxElement::Accessor<float> accTau2("Tau2");
-    static const SG::AuxElement::Accessor<float> accTau3("Tau3");
-    static const SG::AuxElement::Accessor<float> accTau32("Tau32");
+    static const SG::Accessor<float> accTau2("Tau2");
+    static const SG::Accessor<float> accTau3("Tau3");
+    static const SG::Accessor<float> accTau32("Tau32");
     static const bool Tau32wasAvailable = accTau32.isAvailable(jet);
     static const bool TauNNwasAvailable = accTau3.isAvailable(jet) && accTau2.isAvailable(jet);
 
@@ -2667,12 +2667,12 @@ StatusCode JetUncertaintiesTool::updateTau32(xAOD::Jet& jet, const double shift)
 
 StatusCode JetUncertaintiesTool::updateTau21WTA(xAOD::Jet& jet, const double shift) const
 {
-    static const SG::AuxElement::Accessor<float> accTau1wta("Tau1_wta");
-    static const SG::AuxElement::Accessor<float> accTau2wta("Tau2_wta");
-    static const SG::AuxElement::Accessor<float> accTau21wta("Tau21_wta");
-    static const SG::AuxElement::Accessor<float> accTau1WTA("Tau1_WTA");
-    static const SG::AuxElement::Accessor<float> accTau2WTA("Tau2_WTA");
-    static const SG::AuxElement::Accessor<float> accTau21WTA("Tau21_WTA");
+    static const SG::Accessor<float> accTau1wta("Tau1_wta");
+    static const SG::Accessor<float> accTau2wta("Tau2_wta");
+    static const SG::Accessor<float> accTau21wta("Tau21_wta");
+    static const SG::Accessor<float> accTau1WTA("Tau1_WTA");
+    static const SG::Accessor<float> accTau2WTA("Tau2_WTA");
+    static const SG::Accessor<float> accTau21WTA("Tau21_WTA");
     static const bool Tau21wtawasAvailable = accTau21wta.isAvailable(jet);
     static const bool Tau21WTAwasAvailable = accTau21WTA.isAvailable(jet);
     static const bool TauNNwtawasAvailable = accTau2wta.isAvailable(jet) && accTau1wta.isAvailable(jet);
@@ -2731,12 +2731,12 @@ StatusCode JetUncertaintiesTool::updateTau21WTA(xAOD::Jet& jet, const double shi
 }
 StatusCode JetUncertaintiesTool::updateTau32WTA(xAOD::Jet& jet, const double shift) const
 {
-    static const SG::AuxElement::Accessor<float> accTau2wta("Tau2_wta");
-    static const SG::AuxElement::Accessor<float> accTau3wta("Tau3_wta");
-    static const SG::AuxElement::Accessor<float> accTau32wta("Tau32_wta");
-    static const SG::AuxElement::Accessor<float> accTau2WTA("Tau2_WTA");
-    static const SG::AuxElement::Accessor<float> accTau3WTA("Tau3_WTA");
-    static const SG::AuxElement::Accessor<float> accTau32WTA("Tau32_WTA");
+    static const SG::Accessor<float> accTau2wta("Tau2_wta");
+    static const SG::Accessor<float> accTau3wta("Tau3_wta");
+    static const SG::Accessor<float> accTau32wta("Tau32_wta");
+    static const SG::Accessor<float> accTau2WTA("Tau2_WTA");
+    static const SG::Accessor<float> accTau3WTA("Tau3_WTA");
+    static const SG::Accessor<float> accTau32WTA("Tau32_WTA");
     static const bool Tau32wtawasAvailable = accTau32wta.isAvailable(jet);
     static const bool Tau32WTAwasAvailable = accTau32WTA.isAvailable(jet);
     static const bool TauNNwtawasAvailable = accTau3wta.isAvailable(jet) && accTau2wta.isAvailable(jet);
@@ -2820,10 +2820,10 @@ StatusCode JetUncertaintiesTool::updateTau32WTA(xAOD::Jet& jet, const double shi
 
 StatusCode JetUncertaintiesTool::updateD2Beta1(xAOD::Jet& jet, const double shift) const
 {
-    static const SG::AuxElement::Accessor<float> accD2("D2");
-    static const SG::AuxElement::Accessor<float> accECF1("ECF1");
-    static const SG::AuxElement::Accessor<float> accECF2("ECF2");
-    static const SG::AuxElement::Accessor<float> accECF3("ECF3");
+    static const SG::Accessor<float> accD2("D2");
+    static const SG::Accessor<float> accECF1("ECF1");
+    static const SG::Accessor<float> accECF2("ECF2");
+    static const SG::Accessor<float> accECF3("ECF3");
     static const bool D2wasAvailable  = accD2.isAvailable(jet);
     static const bool ECFwasAvailable = accECF1.isAvailable(jet) && accECF2.isAvailable(jet) && accECF3.isAvailable(jet);
 
@@ -2874,10 +2874,10 @@ StatusCode JetUncertaintiesTool::updateD2Beta1(xAOD::Jet& jet, const double shif
 
 StatusCode JetUncertaintiesTool::updateC2Beta1(xAOD::Jet& jet, const double shift) const
 {
-    static const SG::AuxElement::Accessor<float> accC2("C2");
-    static const SG::AuxElement::Accessor<float> accECF1("ECF1");
-    static const SG::AuxElement::Accessor<float> accECF2("ECF2");
-    static const SG::AuxElement::Accessor<float> accECF3("ECF3");
+    static const SG::Accessor<float> accC2("C2");
+    static const SG::Accessor<float> accECF1("ECF1");
+    static const SG::Accessor<float> accECF2("ECF2");
+    static const SG::Accessor<float> accECF3("ECF3");
     static const bool C2wasAvailable  = accC2.isAvailable(jet);
     static const bool ECFwasAvailable = accECF1.isAvailable(jet) && accECF2.isAvailable(jet) && accECF3.isAvailable(jet);
 
@@ -2913,7 +2913,7 @@ StatusCode JetUncertaintiesTool::updateC2Beta1(xAOD::Jet& jet, const double shif
 
 StatusCode JetUncertaintiesTool::updateQw(xAOD::Jet& jet, const double shift) const
 {
-    static const SG::AuxElement::Accessor<float> accQw("Qw");
+    static const SG::Accessor<float> accQw("Qw");
 
     const xAOD::Jet& constJet = jet;
     if (accQw.isAvailable(constJet))

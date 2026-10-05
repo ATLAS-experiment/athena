@@ -33,7 +33,7 @@ class IsolationTool_AthTest: public ::AthAlgorithm {
   std::vector<int> m_topoetcones;
   xAOD::CaloCorrection m_caloCorrList;
 
-  std::vector< SG::AuxElement::Decorator< float >* > m_decorators;
+  std::vector< SG::Decorator< float >* > m_decorators;
 }; 
 
 #endif //> !ISOLATIONTOOL_ISOLATIONTOOL_ATHTEST_H

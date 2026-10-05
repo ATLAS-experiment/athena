@@ -106,7 +106,7 @@ namespace CaloConstitHelpers {
 
     virtual double time(JetConstitIterator & it) const override {
       const xAOD::FlowElement* fe = static_cast<const xAOD::FlowElement*>(it->rawConstituent());
-      const static SG::AuxElement::ConstAccessor<float> accTiming("TIMING");
+      const static SG::ConstAccessor<float> accTiming("TIMING");
 
       float timing = -1;
 
@@ -141,10 +141,10 @@ namespace CaloConstitHelpers {
       const xAOD::FlowElement* fe = static_cast<const xAOD::FlowElement*>(it->rawConstituent());
 
       // Add up the four individual HEC layers
-      const static SG::AuxElement::ConstAccessor<float> accHEC0("LAYERENERGY_HEC0");
-      const static SG::AuxElement::ConstAccessor<float> accHEC1("LAYERENERGY_HEC1");
-      const static SG::AuxElement::ConstAccessor<float> accHEC2("LAYERENERGY_HEC2");
-      const static SG::AuxElement::ConstAccessor<float> accHEC3("LAYERENERGY_HEC3");
+      const static SG::ConstAccessor<float> accHEC0("LAYERENERGY_HEC0");
+      const static SG::ConstAccessor<float> accHEC1("LAYERENERGY_HEC1");
+      const static SG::ConstAccessor<float> accHEC2("LAYERENERGY_HEC2");
+      const static SG::ConstAccessor<float> accHEC3("LAYERENERGY_HEC3");
 
       float sum_HEC = 0.0;
 

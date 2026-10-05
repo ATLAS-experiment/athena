@@ -264,7 +264,7 @@ StatusCode JSSTaggerUtils::GetConstScore(const xAOD::JetContainer& jets) const {
   SG::WriteDecorHandle<xAOD::JetContainer, float> decConstScore(m_decConstScoreKey);
   SG::WriteDecorHandle<xAOD::JetContainer, float> decNConstituents(m_decNConstituentsKey);
   SG::WriteDecorHandle<xAOD::JetContainer, float> decNTopoTowers(m_decNTopoTowersKey);
-  SG::AuxElement::ConstAccessor<std::vector<ElementLink<DataVector<xAOD::IParticle>>>> towersAcc("GhostTower");
+  SG::ConstAccessor<std::vector<ElementLink<DataVector<xAOD::IParticle>>>> towersAcc("GhostTower");
 
   for(const xAOD::Jet *jet : jets){
 
@@ -342,7 +342,7 @@ StatusCode JSSTaggerUtils::GetConstScore(const xAOD::JetContainer& jets) const {
 StatusCode JSSTaggerUtils::GetQGConstScore(const xAOD::JetContainer& jets) const {
 
   SG::WriteDecorHandle<xAOD::JetContainer, float> decConstScore(m_decConstScoreKey);
-  SG::AuxElement::ConstAccessor<std::vector<ElementLink<DataVector<xAOD::IParticle>>>> towersAcc("GhostTower");
+  SG::ConstAccessor<std::vector<ElementLink<DataVector<xAOD::IParticle>>>> towersAcc("GhostTower");
   for(const xAOD::Jet *jet : jets){
 
     // init value

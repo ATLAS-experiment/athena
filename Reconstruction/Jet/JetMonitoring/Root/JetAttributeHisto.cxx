@@ -7,7 +7,7 @@
 
 namespace jet {
   template<typename T>
-  using Accessor = SG::AuxElement::Accessor< T >;
+  using Accessor = SG::Accessor< T >;
 
   class HistoFiller {
   public:

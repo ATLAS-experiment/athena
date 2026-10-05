@@ -8,8 +8,8 @@
 
 #include <unordered_map>
 namespace{
-    static const SG::AuxElement::ConstAccessor<std::vector<std::vector<unsigned int>>> acc_alignEffectChId("alignEffectChId");
-    static const SG::AuxElement::ConstAccessor<std::vector<float>> acc_alligSigmaDeltaTrans("alignEffectSigmaDeltaTrans");
+    static const SG::ConstAccessor<std::vector<std::vector<unsigned int>>> acc_alignEffectChId("alignEffectChId");
+    static const SG::ConstAccessor<std::vector<float>> acc_alligSigmaDeltaTrans("alignEffectSigmaDeltaTrans");
     constexpr unsigned badQualityFlag = 2;
     constexpr unsigned goodQualityFlag = 1;
 

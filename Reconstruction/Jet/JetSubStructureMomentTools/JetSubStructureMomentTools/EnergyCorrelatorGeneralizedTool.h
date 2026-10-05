@@ -97,31 +97,31 @@ struct EnergyCorrelatorGeneralizedTool::moments_t {
   float beta;
 
   /// ECFG decorators
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_ECFG_2_1;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_ECFG_3_1;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_ECFG_3_2;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_ECFG_4_1;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_ECFG_4_2;
+  std::unique_ptr< SG::Decorator<float> > dec_ECFG_2_1;
+  std::unique_ptr< SG::Decorator<float> > dec_ECFG_3_1;
+  std::unique_ptr< SG::Decorator<float> > dec_ECFG_3_2;
+  std::unique_ptr< SG::Decorator<float> > dec_ECFG_4_1;
+  std::unique_ptr< SG::Decorator<float> > dec_ECFG_4_2;
   
   /// ECFG ungroomed decorators
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_ECFG_2_1_ungroomed;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_ECFG_3_1_ungroomed;
-  std::unique_ptr< SG::AuxElement::Decorator<float> > dec_ECFG_3_2_ungroomed;
+  std::unique_ptr< SG::Decorator<float> > dec_ECFG_2_1_ungroomed;
+  std::unique_ptr< SG::Decorator<float> > dec_ECFG_3_1_ungroomed;
+  std::unique_ptr< SG::Decorator<float> > dec_ECFG_3_2_ungroomed;
   
   moments_t (float Beta, const std::string& Prefix)
     : prefix (Prefix),
       suffix (GetBetaSuffix(Beta)),
       beta (Beta),
 
-      dec_ECFG_2_1 (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECFG_2_1"+suffix)),
-      dec_ECFG_3_1 (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECFG_3_1"+suffix)),
-      dec_ECFG_3_2 (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECFG_3_2"+suffix)),
-      dec_ECFG_4_1 (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECFG_4_1"+suffix)),
-      dec_ECFG_4_2 (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECFG_4_2"+suffix)),
+      dec_ECFG_2_1 (std::make_unique< SG::Decorator<float> >(prefix+"ECFG_2_1"+suffix)),
+      dec_ECFG_3_1 (std::make_unique< SG::Decorator<float> >(prefix+"ECFG_3_1"+suffix)),
+      dec_ECFG_3_2 (std::make_unique< SG::Decorator<float> >(prefix+"ECFG_3_2"+suffix)),
+      dec_ECFG_4_1 (std::make_unique< SG::Decorator<float> >(prefix+"ECFG_4_1"+suffix)),
+      dec_ECFG_4_2 (std::make_unique< SG::Decorator<float> >(prefix+"ECFG_4_2"+suffix)),
     
-      dec_ECFG_2_1_ungroomed (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECFG_2_1_ungroomed"+suffix)),
-      dec_ECFG_3_1_ungroomed (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECFG_3_1_ungroomed"+suffix)),
-      dec_ECFG_3_2_ungroomed (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"ECFG_3_2_ungroomed"+suffix))
+      dec_ECFG_2_1_ungroomed (std::make_unique< SG::Decorator<float> >(prefix+"ECFG_2_1_ungroomed"+suffix)),
+      dec_ECFG_3_1_ungroomed (std::make_unique< SG::Decorator<float> >(prefix+"ECFG_3_1_ungroomed"+suffix)),
+      dec_ECFG_3_2_ungroomed (std::make_unique< SG::Decorator<float> >(prefix+"ECFG_3_2_ungroomed"+suffix))
   {
   }
 

@@ -41,7 +41,7 @@ int JetConstituentFiller::
 extractConstituents(xAOD::Jet& jet, const NameList* pghostlabs,
                     const fastjet::PseudoJet* ppj2) {
 
-  static const SG::AuxElement::Accessor<const fastjet::PseudoJet*> pjAccessor("PseudoJet");
+  static const SG::Accessor<const fastjet::PseudoJet*> pjAccessor("PseudoJet");
   const fastjet::PseudoJet* ppseudojet = nullptr; 
   if(pjAccessor.isAvailable(jet)) ppseudojet = pjAccessor(jet);
 
@@ -120,7 +120,7 @@ extractConstituents(xAOD::Jet& jet, const NameList* pghostlabs,
   
   // Set ghost associated particles:
   if (pli){
-    const static SG::AuxElement::ConstAccessor<ElementLink<xAOD::JetContainer> > cacc_parent("Parent");
+    const static SG::ConstAccessor<ElementLink<xAOD::JetContainer> > cacc_parent("Parent");
     for ( size_t i=1; i<out.size(); ++i ) {
       if ( pghostlabs) {
         const NameList& ghostlabs = *pghostlabs;
@@ -168,7 +168,7 @@ int JetConstituentFiller::extractConstituents(xAOD::Jet& jet, const fastjet::Pse
 
 PseudoJetVector JetConstituentFiller::constituentPseudoJets(const xAOD::Jet& jet, bool ignoreGhosts, bool requireJetStructure){
 
-  static const SG::AuxElement::Accessor<const fastjet::PseudoJet*> pjAccessor("PseudoJet");
+  static const SG::Accessor<const fastjet::PseudoJet*> pjAccessor("PseudoJet");
   const fastjet::PseudoJet* jet_pj = nullptr;
   if(pjAccessor.isAvailable(jet)) jet_pj = pjAccessor(jet);
 

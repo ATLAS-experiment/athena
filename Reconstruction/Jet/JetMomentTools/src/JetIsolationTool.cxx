@@ -81,7 +81,7 @@ namespace jet {
         IsolationResult result = jetIsolation(jet, nearbyConstit);
 	std::vector<float> calcVector;
 	float pt = jet->jetP4(xAOD::JetConstitScaleMomentum).pt();
-	static const SG::AuxElement::Accessor<float> areaAcc("ActiveArea");
+	static const SG::Accessor<float> areaAcc("ActiveArea");
 	float jetArea=0;
 	for(auto k : m_kinematics){
 	  float v=-1;
@@ -378,7 +378,7 @@ StatusCode JetIsolationTool::decorate(const xAOD::JetContainer& jets) const {
   // This will hold  all the constituents around a jet which are not constituents of the jet
   std::vector<const xAOD::IParticle*> nearbyC;
   nearbyC.reserve( inputConstits->size() ); 
-  const static SG::AuxElement::ConstAccessor<char> PVMatchedAcc("matchedToPV");
+  const static SG::ConstAccessor<char> PVMatchedAcc("matchedToPV");
   // Loop over jets in this collection.
   for (const xAOD::Jet* jet : jets ) {
 

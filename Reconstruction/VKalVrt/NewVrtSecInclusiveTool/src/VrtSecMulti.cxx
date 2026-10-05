@@ -461,9 +461,9 @@ namespace Rec{
 //-------------------------------------------
 // Final vertex refit for full covariance matrix and xAOD::Vertex creation
 //
-    static const SG::AuxElement::Decorator<float> wgtBDT("wgtBDT");
-    static const SG::AuxElement::Decorator<int>   nTrksDec("nTracks");
-    static const SG::AuxElement::Decorator<int>   vChrgTot("vCharge");
+    static const SG::Decorator<float> wgtBDT("wgtBDT");
+    static const SG::Decorator<int>   nTrksDec("nTracks");
+    static const SG::Decorator<int>   vChrgTot("vCharge");
     int n1trVrt=0;           // Final number of good 1-track vertices
     for(auto & iv : goodVertexMap){
           WrkVrt & curVrt=iv.second;

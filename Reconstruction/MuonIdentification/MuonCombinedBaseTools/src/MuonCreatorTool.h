@@ -208,8 +208,8 @@ namespace MuonCombined {
         
         Gaudi::Property<bool> m_requireCaloDepositForSA{this, "RequireCaloForSA", true, 
                                                        "Flag to discard SA muons that have no calorimeter loss associated."};
-        std::vector< std::unique_ptr<SG::AuxElement::Accessor<float> > >    m_copyFloatSummaryAccessors;
-        std::vector< std::unique_ptr<SG::AuxElement::Accessor<uint8_t> > >  m_copyCharSummaryAccessors;
+        std::vector< std::unique_ptr<SG::Accessor<float> > >    m_copyFloatSummaryAccessors;
+        std::vector< std::unique_ptr<SG::Accessor<uint8_t> > >  m_copyCharSummaryAccessors;
 
         SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey{this, "CaloDetDescrManager", "CaloDetDescrManager"};
     

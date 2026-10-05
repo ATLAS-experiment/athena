@@ -64,9 +64,9 @@ class FlavourUncertaintyComponent : public UncertaintyComponent
         UncertaintyHistogram* m_secondUncHist;
         FlavourRespType m_respType;
         FlavourRespType m_secondRespType;
-        SG::AuxElement::Accessor<char> m_BjetAccessor;
-        SG::AuxElement::Accessor<int>  m_NjetAccessor;
-        SG::AuxElement::Accessor<int>  m_largeRJetTruthLabelAccessor;
+        SG::Accessor<char> m_BjetAccessor;
+        SG::Accessor<int>  m_NjetAccessor;
+        SG::Accessor<int>  m_largeRJetTruthLabelAccessor;
 
         // Analysis histograms from analysis root file
         std::vector<UncertaintyHistogram*> m_gluonFractionHists;

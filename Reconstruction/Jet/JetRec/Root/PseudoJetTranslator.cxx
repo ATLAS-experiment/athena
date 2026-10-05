@@ -13,7 +13,7 @@ xAOD::Jet& PseudoJetTranslator::translate(const fastjet::PseudoJet& pj,
   xAOD::Jet& jet = *jetCont.back();
   jet.setJetP4( xAOD::JetFourMom_t( pj.pt(), pj.eta(), pj.phi(), pj.m() ) );
 
-  const static SG::AuxElement::Accessor<const fastjet::PseudoJet*> pjAccessor("PseudoJet");
+  const static SG::Accessor<const fastjet::PseudoJet*> pjAccessor("PseudoJet");
   pjAccessor(jet) = &pj;
 
   // Record the jet-finding momentum, i.e. the one used to find/groom the jet.
@@ -50,7 +50,7 @@ xAOD::Jet& PseudoJetTranslator::translate(const fastjet::PseudoJet& pj,
   if ( parentCont == nullptr ) { return jet ;}  // can this happen? if so THIS IS an ERROR ! should do something
 
   ElementLink<xAOD::JetContainer> el(*parentCont, parent.index());
-  static const SG::AuxElement::Accessor<ElementLink<xAOD::JetContainer> > parentELacc("Parent_TEMP");
+  static const SG::Accessor<ElementLink<xAOD::JetContainer> > parentELacc("Parent_TEMP");
   parentELacc(jet) =el;
 
   jet.setInputType(parent.getInputType());

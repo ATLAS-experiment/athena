@@ -263,10 +263,10 @@ StatusCode CorrelationMatrix::setDefaultProperties(const JetUncertaintiesTool& u
 {
 
     // TODO make this part of a common file
-    static const SG::AuxElement::Accessor<int> Nsegments("GhostMuonSegmentCount");
-    static const SG::AuxElement::Accessor<char> IsBjet("IsBjet");
-    static const SG::AuxElement::Accessor<float> mu("averageInteractionsPerCrossing");
-    static const SG::AuxElement::Accessor<float> NPV("NPV");   
+    static const SG::Accessor<int> Nsegments("GhostMuonSegmentCount");
+    static const SG::Accessor<char> IsBjet("IsBjet");
+    static const SG::Accessor<float> mu("averageInteractionsPerCrossing");
+    static const SG::Accessor<float> NPV("NPV");   
  
     // 25 segments is about average for jets receiving a correction
     // This is modulated by the probability of punchthrough

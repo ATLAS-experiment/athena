@@ -261,11 +261,11 @@ StatusCode SmoothedWZTagger::decorate( const xAOD::JetContainer& jets ) const {
 
     /// Get D2 value
     //coverity[UNNECESSARY_STRING_COPY:FALSE]
-    static const SG::AuxElement::ConstAccessor<float> D2("D2");
+    static const SG::ConstAccessor<float> D2("D2");
     float jet_d2 = D2(*jet);
 
     /// Get Score value
-    static const SG::AuxElement::ConstAccessor<float> Score(m_scoreDecorationName + "_ConstScore");
+    static const SG::ConstAccessor<float> Score(m_scoreDecorationName + "_ConstScore");
     float jet_score = m_useScore ? Score(*jet) : -99;
 
     /// Evaluate the values of the upper and lower mass bounds and the d2 cut

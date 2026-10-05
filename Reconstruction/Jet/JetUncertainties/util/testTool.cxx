@@ -114,14 +114,14 @@ int main (int argc, char* argv[])
         
         // Add Nsegments information
         // 25 segments is about average for jets receiving a correction
-        SG::AuxElement::Accessor<int> Nsegments("GhostMuonSegmentCount");
-        SG::AuxElement::Accessor<char> IsBjet("IsBjet");
+        SG::Accessor<int> Nsegments("GhostMuonSegmentCount");
+        SG::Accessor<char> IsBjet("IsBjet");
         Nsegments(*jet) = 0;
         IsBjet(*jet) = false;
         
         // Add mu and NPV information
-        SG::AuxElement::Accessor<float> mu("averageInteractionsPerCrossing");
-        SG::AuxElement::Accessor<float> NPV("NPV");
+        SG::Accessor<float> mu("averageInteractionsPerCrossing");
+        SG::Accessor<float> NPV("NPV");
         mu(*eInfo)  = 22;
         NPV(*eInfo) = 11;
         
@@ -199,7 +199,7 @@ int main (int argc, char* argv[])
         
         // Add D2 information
         // 25 segments is about average for jets receiving a correction
-        SG::AuxElement::Accessor<float> accD2("D2");
+        SG::Accessor<float> accD2("D2");
         accD2(*jet) = 1.;
         
         // Try a normal high pT W/Z boson

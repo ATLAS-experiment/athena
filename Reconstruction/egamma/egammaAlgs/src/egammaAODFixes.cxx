@@ -61,12 +61,12 @@ egammaAODFixes::initialize()
 StatusCode
 egammaAODFixes::execute(const EventContext& ctx) const {
 
-  static const SG::AuxElement::Accessor<float> acce2("Eadded_Lr2");
-  static const SG::AuxElement::Accessor<float> acce3("Eadded_Lr3");
-  static const SG::AuxElement::Accessor<float> acce2b("Eadded_Lr2b");
-  static const SG::AuxElement::Accessor<float> acce3b("Eadded_Lr3b");
-  static const SG::AuxElement::Accessor<float> acce2e("Eadded_Lr2e");
-  static const SG::AuxElement::Accessor<float> acce3e("Eadded_Lr3e");
+  static const SG::Accessor<float> acce2("Eadded_Lr2");
+  static const SG::Accessor<float> acce3("Eadded_Lr3");
+  static const SG::Accessor<float> acce2b("Eadded_Lr2b");
+  static const SG::Accessor<float> acce3b("Eadded_Lr3b");
+  static const SG::Accessor<float> acce2e("Eadded_Lr2e");
+  static const SG::Accessor<float> acce3e("Eadded_Lr3e");
 
   SG::ReadHandle<xAOD::ElectronContainer> el_inputContainer(m_electronInputKey,ctx);
   SG::WriteHandle<xAOD::ElectronContainer> el_outputContainer(m_electronOutputKey,ctx);

@@ -160,7 +160,7 @@ StatusCode CorrectPFOTool::correctPFO(xAOD::FlowElementContainer& cont) const {
 }
 
 StatusCode CorrectPFOTool::correctPFOByVertex(xAOD::PFOContainer& cont) const {
-  static const SG::AuxElement::Accessor<unsigned> copyIndex("ConstituentCopyIndex");
+  static const SG::Accessor<unsigned> copyIndex("ConstituentCopyIndex");
   // Retrieve Primary Vertices
   auto handle = SG::makeHandle(m_vertexContainer_key);
   if (!handle.isValid()){
@@ -219,7 +219,7 @@ StatusCode CorrectPFOTool::correctPFOByVertex(xAOD::PFOContainer& cont) const {
 
 StatusCode CorrectPFOTool::correctPFOByVertex(xAOD::FlowElementContainer& cont) const {
   ATH_MSG_DEBUG("Using correctPFOByVertex");
-  static const SG::AuxElement::Accessor<unsigned> copyIndex("ConstituentCopyIndex");
+  static const SG::Accessor<unsigned> copyIndex("ConstituentCopyIndex");
 
   // Retrieve Primary Vertices
   auto handle = SG::makeHandle(m_vertexContainer_key);

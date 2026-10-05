@@ -200,7 +200,7 @@ StatusCode ConstituentSubtractorTool::process_impl(xAOD::IParticleContainer* con
  
   // Set every constituent's four-vector in the output container
   i = 0; // Again, we need to track the input container index, not the owning container index
-  const static SG::AuxElement::Accessor<float> weightAcc("CSWeight"); // Handle for PU weighting here
+  const static SG::Accessor<float> weightAcc("CSWeight"); // Handle for PU weighting here
   for(xAOD::IParticle * part: *cont){
     ATH_MSG_VERBOSE("Now on constituent " << i);
     ATH_MSG_VERBOSE("Initial pt: " << part->pt() << ", subtracted pt: " << corrected_p4s[i].Pt());

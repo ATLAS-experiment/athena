@@ -18,7 +18,7 @@ using xAOD::JetContainer;
 namespace {
 
   /// Some helpers to sort according to p_T
-  const SG::AuxElement::Accessor<float> ptAcc("JetConstitScaleMomentum_pt");
+  const SG::Accessor<float> ptAcc("JetConstitScaleMomentum_pt");
   struct ConstitPtComp {
     bool operator()(const xAOD::Jet* j1, const xAOD::Jet * j2) {
       return ptAcc(*j1) > ptAcc(*j2) ;

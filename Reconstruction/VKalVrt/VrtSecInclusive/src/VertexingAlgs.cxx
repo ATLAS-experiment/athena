@@ -1536,15 +1536,15 @@ namespace VKalVrtAthena {
 
       enum { kPt, kEta, kPhi, kD0, kZ0, kErrP, kErrD0, kErrZ0, kChi2SV };
       if( m_trkDecors.empty() ) {
-        m_trkDecors.emplace( kPt,     SG::AuxElement::Decorator<float>("pt_wrtSV"    + m_augVerString) );
-        m_trkDecors.emplace( kEta,    SG::AuxElement::Decorator<float>("eta_wrtSV"   + m_augVerString) );
-        m_trkDecors.emplace( kPhi,    SG::AuxElement::Decorator<float>("phi_wrtSV"   + m_augVerString) );
-        m_trkDecors.emplace( kD0,     SG::AuxElement::Decorator<float>("d0_wrtSV"    + m_augVerString) );
-        m_trkDecors.emplace( kZ0,     SG::AuxElement::Decorator<float>("z0_wrtSV"    + m_augVerString) );
-        m_trkDecors.emplace( kErrP,   SG::AuxElement::Decorator<float>("errP_wrtSV"  + m_augVerString) );
-        m_trkDecors.emplace( kErrD0,  SG::AuxElement::Decorator<float>("errd0_wrtSV" + m_augVerString) );
-        m_trkDecors.emplace( kErrZ0,  SG::AuxElement::Decorator<float>("errz0_wrtSV" + m_augVerString) );
-        m_trkDecors.emplace( kChi2SV, SG::AuxElement::Decorator<float>("chi2_toSV"   + m_augVerString) );
+        m_trkDecors.emplace( kPt,     SG::Decorator<float>("pt_wrtSV"    + m_augVerString) );
+        m_trkDecors.emplace( kEta,    SG::Decorator<float>("eta_wrtSV"   + m_augVerString) );
+        m_trkDecors.emplace( kPhi,    SG::Decorator<float>("phi_wrtSV"   + m_augVerString) );
+        m_trkDecors.emplace( kD0,     SG::Decorator<float>("d0_wrtSV"    + m_augVerString) );
+        m_trkDecors.emplace( kZ0,     SG::Decorator<float>("z0_wrtSV"    + m_augVerString) );
+        m_trkDecors.emplace( kErrP,   SG::Decorator<float>("errP_wrtSV"  + m_augVerString) );
+        m_trkDecors.emplace( kErrD0,  SG::Decorator<float>("errd0_wrtSV" + m_augVerString) );
+        m_trkDecors.emplace( kErrZ0,  SG::Decorator<float>("errz0_wrtSV" + m_augVerString) );
+        m_trkDecors.emplace( kChi2SV, SG::Decorator<float>("chi2_toSV"   + m_augVerString) );
       }
       if( !m_decor_is_svtrk_final ) {
         m_decor_is_svtrk_final.emplace ( "is_svtrk_final" + m_augVerString );

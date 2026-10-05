@@ -56,7 +56,7 @@ StatusCode GSCCalibStep::calibrate(xAOD::JetContainer& jets) const {
   int PVindex = 0;
 
   // Check if an analysis choose their own PV vertex ("PVIndex")
-  static const SG::AuxElement::ConstAccessor<int> pvIndexAccessor("PVIndex");
+  static const SG::ConstAccessor<int> pvIndexAccessor("PVIndex");
   SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfo_key);
   if(eventInfo.isValid()) {
     if(pvIndexAccessor.isAvailable(*eventInfo)){

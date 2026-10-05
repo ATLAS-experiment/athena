@@ -78,9 +78,9 @@ StatusCode EMVertexBuilder::execute(const EventContext& ctx) const
   // Remove vertices with radii above m_maxRadius
   xAOD::VertexContainer::iterator itVtx = vertices->begin();
   xAOD::VertexContainer::iterator itVtxEnd = vertices->end();
-  static const SG::AuxElement::Accessor<float> accPx("px");
-  static const SG::AuxElement::Accessor<float> accPy("py");
-  static const SG::AuxElement::Accessor<float> accPz("pz");
+  static const SG::Accessor<float> accPx("px");
+  static const SG::Accessor<float> accPy("py");
+  static const SG::Accessor<float> accPz("pz");
   //
   while (itVtx != itVtxEnd){
     xAOD::Vertex* vertex = *itVtx;
@@ -115,8 +115,8 @@ StatusCode EMVertexBuilder::execute(const EventContext& ctx) const
         ATH_MSG_DEBUG("getEtaPhiAtCalo failed!");
       }
 
-      static const SG::AuxElement::Accessor<float> accetaAtCalo("etaAtCalo");
-      static const SG::AuxElement::Accessor<float> accphiAtCalo("phiAtCalo");
+      static const SG::Accessor<float> accetaAtCalo("etaAtCalo");
+      static const SG::Accessor<float> accphiAtCalo("phiAtCalo");
       accetaAtCalo(*vertex) = etaAtCalo;
       accphiAtCalo(*vertex) = phiAtCalo;
 
