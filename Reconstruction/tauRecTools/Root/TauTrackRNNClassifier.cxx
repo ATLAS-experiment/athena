@@ -45,9 +45,11 @@ StatusCode TauTrackRNNClassifier::initialize()
 
 
 //______________________________________________________________________________
-StatusCode TauTrackRNNClassifier::executeTrackClassifier(xAOD::TauJet& xTau, xAOD::TauTrackContainer& tauTrackCon) const {
+StatusCode TauTrackRNNClassifier::executeTool(xAOD::TauJet& xTau,
+					      const EventContext& ctx,
+					      xAOD::TauTrackContainer& tauTrackCon) const {
 
-  SG::ReadHandle<xAOD::VertexContainer> vertexInHandle( m_vertexContainerKey );
+  SG::ReadHandle<xAOD::VertexContainer> vertexInHandle(m_vertexContainerKey, ctx);
   if (!vertexInHandle.isValid()) {
       ATH_MSG_ERROR ("Could not retrieve HiveDataObj with key " << vertexInHandle.key());
       return StatusCode::FAILURE;

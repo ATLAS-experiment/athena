@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUWPDECORATOR_H
@@ -47,8 +47,10 @@ class TauWPDecorator : public TauRecToolBase {
     /** @brief Initialization of this tool */
     virtual StatusCode initialize() override;
 
-    /** @brief Executation of this tool */
-    virtual StatusCode execute(xAOD::TauJet& tau) const override;
+    /** @brief Execution of this tool */
+    using TauRecToolBase::executeTool;  
+    virtual StatusCode executeTool(xAOD::TauJet& tau,
+				   const EventContext& ctx) const override;
     
   private:
 

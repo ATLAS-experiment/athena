@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //********************************************************************//
@@ -12,7 +12,6 @@
 #include <cmath>
 #include <sstream>
 
-#include "xAODJet/Jet.h"
 #include "xAODTau/TauJet.h"
 #include "CxxUtils/trapping_fp.h"
 
@@ -27,7 +26,8 @@ TauSubstructureVariables::TauSubstructureVariables( const std::string& name )
 
 
 
-StatusCode TauSubstructureVariables::execute(xAOD::TauJet& tau) const {
+StatusCode TauSubstructureVariables::executeTool(xAOD::TauJet& tau,
+						 const EventContext& /*ctx*/) const {
 
   //*****************************************************
   // calculate some new cluster based ID variables

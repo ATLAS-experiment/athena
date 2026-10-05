@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUPI0SELECTOR_H
@@ -27,8 +27,11 @@ public:
   
   TauPi0Selector(const std::string& name);
   virtual ~TauPi0Selector() = default;
-  
-  virtual StatusCode executePi0nPFO(xAOD::TauJet& pTau, xAOD::PFOContainer& pNeutralPFOContainer) const override;
+
+  using TauRecToolBase::executeTool;
+  virtual StatusCode executeTool(xAOD::TauJet& pTau,
+				 const EventContext& ctx,
+				 xAOD::PFOContainer& pNeutralPFOContainer) const override;
 
 private:
   /** @brief Get eta bin of Pi0Cluster */

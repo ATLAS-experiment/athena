@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauJetRNNEvaluator.h"
@@ -113,7 +113,8 @@ StatusCode TauJetRNNEvaluator::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode TauJetRNNEvaluator::execute(xAOD::TauJet &tau) const {
+StatusCode TauJetRNNEvaluator::executeTool(xAOD::TauJet &tau,
+					   const EventContext& /*ctx*/) const {
   // Output variable accessor
   const SG::Accessor<float> output(m_output_varname);
 

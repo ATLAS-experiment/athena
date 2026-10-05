@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauPi0Selector.h"
-
 
 
 TauPi0Selector::TauPi0Selector(const std::string& name) : 
@@ -11,8 +10,10 @@ TauPi0Selector::TauPi0Selector(const std::string& name) :
 }
 
 
+StatusCode TauPi0Selector::executeTool(xAOD::TauJet& pTau,
+				       const EventContext& /*ctx*/,
+				       xAOD::PFOContainer& neutralPFOContainer) const {
 
-StatusCode TauPi0Selector::executePi0nPFO(xAOD::TauJet& pTau, xAOD::PFOContainer& neutralPFOContainer) const {
   // Clear vector of cell-based pi0 PFO Links. Required when rerunning on xAOD level.
   pTau.clearProtoPi0PFOLinks();
   
@@ -92,7 +93,6 @@ StatusCode TauPi0Selector::executePi0nPFO(xAOD::TauJet& pTau, xAOD::PFOContainer
   
   return StatusCode::SUCCESS;
 }
-
 
 
 int TauPi0Selector::getEtaBin(double eta) const {

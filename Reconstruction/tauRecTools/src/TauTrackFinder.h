@@ -60,7 +60,11 @@ public:
     //! Algorithm functions
     //-------------------------------------------------------------
     virtual StatusCode initialize() override;
-    virtual StatusCode executeTrackFinder(xAOD::TauJet& pTau, xAOD::TauTrackContainer& tauTrackCon) const override;
+
+    using TauRecToolBase::executeTool;
+    virtual StatusCode executeTool(xAOD::TauJet& pTau,
+				   const EventContext& ctx,
+				   xAOD::TauTrackContainer& tauTrackCon) const override;
     
 private:
     //-------------------------------------------------------------

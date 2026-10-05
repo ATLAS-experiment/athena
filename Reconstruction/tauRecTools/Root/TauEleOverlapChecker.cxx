@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauEleOverlapChecker.h"
@@ -14,7 +14,8 @@ StatusCode TauEleOverlapChecker::initialize()  {
     return StatusCode::SUCCESS;
 }
 
-StatusCode TauEleOverlapChecker::execute(xAOD::TauJet& tau) const {
+StatusCode TauEleOverlapChecker::executeTool(xAOD::TauJet& tau,
+					     const EventContext& ctx) const {
     // Checking if the seed jet is valid
     auto jet_seed = tau.jet();
     if (jet_seed == nullptr) {
@@ -22,8 +23,8 @@ StatusCode TauEleOverlapChecker::execute(xAOD::TauJet& tau) const {
         return StatusCode::FAILURE;
     }
     // retrieve the input removed tracks and clusters containers
-    SG::ReadHandle<xAOD::CaloClusterContainer>   removedClustersHandle( m_removedClustersContainer );
-    SG::ReadHandle<xAOD::TrackParticleContainer> removedTracksHandle ( m_removedTracksContainer );
+    SG::ReadHandle<xAOD::CaloClusterContainer>   removedClustersHandle(m_removedClustersContainer, ctx);
+    SG::ReadHandle<xAOD::TrackParticleContainer> removedTracksHandle(m_removedTracksContainer, ctx);
     if (!removedClustersHandle.isValid() || !removedTracksHandle.isValid()) {
         ATH_MSG_ERROR (
             "Could not retrieve HiveDataObj with key " << 
@@ -35,13 +36,12 @@ StatusCode TauEleOverlapChecker::execute(xAOD::TauJet& tau) const {
     const xAOD::CaloClusterContainer   *removed_clusters_cont = removedClustersHandle.cptr();
     const xAOD::TrackParticleContainer *removed_tracks_cont   = removedTracksHandle.cptr();
 
-
-    for (auto removal_direction : *removed_tracks_cont) {
+    for (const auto* removal_direction : *removed_tracks_cont) {
         if (removal_direction->p4().DeltaR(jet_seed->p4()) < m_checkingCone) {
             return StatusCode::SUCCESS;
         }
     }
-    for (auto removal_direction : *removed_clusters_cont) {
+    for (const auto* removal_direction : *removed_clusters_cont) {
         if (removal_direction->p4().DeltaR(jet_seed->p4()) < m_checkingCone) {
             return StatusCode::SUCCESS;
         }

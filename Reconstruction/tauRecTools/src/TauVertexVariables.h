@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUVERTEXVARIABLES_H
@@ -30,7 +30,12 @@ public:
     ~TauVertexVariables();
     
     virtual StatusCode initialize() override;
-    virtual StatusCode executeVertexVariables(xAOD::TauJet& pTau, xAOD::VertexContainer& pVertexContainer) const override; 
+
+
+    using TauRecToolBase::executeTool;
+    virtual StatusCode executeTool(xAOD::TauJet& pTau,
+				   const EventContext& ctx,
+				   xAOD::VertexContainer& pVertexContainer) const override;
 
     //-------------------------------------------------------------
     //! determines the transverse flight path significance from

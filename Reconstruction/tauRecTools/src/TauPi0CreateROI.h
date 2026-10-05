@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUPI0CREATEROI_H
@@ -37,7 +37,12 @@ public:
   virtual ~TauPi0CreateROI() = default;
 
   virtual StatusCode initialize() override;
-  virtual StatusCode executePi0CreateROI(xAOD::TauJet& pTau, CaloConstCellContainer& Pi0CellContainer, boost::dynamic_bitset<>& map) const override;
+
+  using TauRecToolBase::executeTool;
+  virtual StatusCode executeTool(xAOD::TauJet& pTau,
+				 const EventContext& ctx,
+				 CaloConstCellContainer& Pi0CellContainer,
+				 boost::dynamic_bitset<>& map) const override;
 
 private:
   Gaudi::Property<bool> m_removeElectronCells {this, "RemoveElectronCells", false};

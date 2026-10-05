@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUSHOTFINDER_H
@@ -37,7 +37,12 @@ public:
   virtual ~TauShotFinder() = default;
 
   virtual StatusCode initialize() override;
-  virtual StatusCode executeShotFinder(xAOD::TauJet& pTau, xAOD::CaloClusterContainer& tauShotCaloClusContainer, xAOD::PFOContainer& tauShotPFOContainer) const override;
+
+  using TauRecToolBase::executeTool;
+  virtual StatusCode executeTool(xAOD::TauJet& pTau,
+				 const EventContext& ctx,
+				 xAOD::CaloClusterContainer& tauShotCaloClusContainer,
+				 xAOD::PFOContainer& tauShotPFOContainer) const override;
 
 private:
 
@@ -52,7 +57,8 @@ private:
    *         Cells within dR < 0.4, in EM1, and pt > 100 MeV are selected
    */
   StatusCode selectCells(const xAOD::TauJet& tau, 
-                         std::vector<const CaloCell*>& cells) const;
+                         std::vector<const CaloCell*>& cells,
+			 const EventContext& ctx) const;
 
   /** @brief Select the seed cells used to construct the shot 
    *         Cells must sastisfy:
@@ -62,7 +68,8 @@ private:
    */
   StatusCode selectSeedCells(const xAOD::TauJet& tau, 
 		             const CaloCellContainer& cellContainer,
-                             std::vector<const CaloCell*>& seedCells) const;
+                             std::vector<const CaloCell*>& seedCells,
+			     const EventContext& ctx) const;
 
   /** @brief Check whether two cells are neighbours in the phi direction */
   bool isPhiNeighbour(IdentifierHash cell1Hash, IdentifierHash cell2Hash) const;

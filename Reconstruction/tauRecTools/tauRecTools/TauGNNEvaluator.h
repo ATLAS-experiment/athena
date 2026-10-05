@@ -35,7 +35,10 @@ public:
     virtual ~TauGNNEvaluator();
 
     virtual StatusCode initialize() override;
-    virtual StatusCode execute(xAOD::TauJet &tau) const override;
+
+    using TauRecToolBase::executeTool;
+    virtual StatusCode executeTool(xAOD::TauJet &tau,
+				   const EventContext& ctx) const override;
 
     enum Discriminant {
         Disabled = -1,

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAURECTOOLBASE_H
@@ -40,24 +40,53 @@ class TauRecToolBase : public asg::AsgTool, virtual public ITauToolBase {
   //-----------------------------------------------------------------
   //! Execute - called for each tau candidate
   //-----------------------------------------------------------------
-  virtual StatusCode execute(xAOD::TauJet& pTau) const override;
+  virtual StatusCode executeTool(xAOD::TauJet& ,
+				 const EventContext& ) const override;
+
 #ifdef XAOD_ANALYSIS
-  virtual StatusCode executeDev(xAOD::TauJet& pTau) override;
+  virtual StatusCode executeDev(xAOD::TauJet& ) override;
 #else
-  virtual StatusCode executePi0CreateROI(xAOD::TauJet& pTau, CaloConstCellContainer& caloCellContainer, boost::dynamic_bitset<>& map) const override;
+  virtual StatusCode executeTool(xAOD::TauJet& ,
+				 const EventContext& ,
+				 CaloConstCellContainer& ,
+				 boost::dynamic_bitset<>& ) const override;
 #endif
-  virtual StatusCode executeVertexFinder(xAOD::TauJet& pTau, 
-                                         const xAOD::VertexContainer* vertexContainer = nullptr) const override;
-  virtual StatusCode executeTrackFinder(xAOD::TauJet& pTau, xAOD::TauTrackContainer& tauTrackContainer) const override;
-  virtual StatusCode executeTrackClassifier(xAOD::TauJet& pTau, xAOD::TauTrackContainer& tauTrackContainer) const override;
-  virtual StatusCode executeShotFinder(xAOD::TauJet& pTau, xAOD::CaloClusterContainer& shotClusterContainer, xAOD::PFOContainer& PFOContainer ) const override;
-  virtual StatusCode executePi0ClusterCreator(xAOD::TauJet& pTau, xAOD::PFOContainer& neutralPFOContainer, 
-					      xAOD::PFOContainer& hadronicPFOContainer, 
-					      const xAOD::CaloClusterContainer& pCaloClusterContainer ) const override;
-  virtual StatusCode executeVertexVariables(xAOD::TauJet& pTau, xAOD::VertexContainer& vertexContainer ) const override;  
-  virtual StatusCode executePi0ClusterScaler(xAOD::TauJet& pTau, xAOD::PFOContainer& neutralPFOContainer, xAOD::PFOContainer& chargedPFOContainer ) const override;  
-  virtual StatusCode executePi0nPFO(xAOD::TauJet& pTau, xAOD::PFOContainer& neutralPFOContainer) const override;
-  virtual StatusCode executePanTau(xAOD::TauJet& pTau, xAOD::ParticleContainer& particleContainer, xAOD::PFOContainer& neutralPFOContainer) const override;
+  virtual StatusCode executeTool(xAOD::TauJet& ,
+				 const EventContext& ,
+				 const xAOD::VertexContainer* ) const override;
+
+  virtual StatusCode executeTool(xAOD::TauJet& ,
+                                 const EventContext& ,
+                                 xAOD::VertexContainer& ) const override;
+
+  virtual StatusCode executeTool(xAOD::TauJet& ,
+				 const EventContext& ,
+				 xAOD::TauTrackContainer& ) const override;
+
+  virtual StatusCode executeTool(xAOD::TauJet& ,
+				 const EventContext& ,
+				 xAOD::CaloClusterContainer& ,
+				 xAOD::PFOContainer& ) const override;
+
+  virtual StatusCode executeTool(xAOD::TauJet& ,
+				 const EventContext& ,
+				 xAOD::PFOContainer& ,
+				 xAOD::PFOContainer& ,
+				 const xAOD::CaloClusterContainer& ) const override;
+
+  virtual StatusCode executeTool(xAOD::TauJet& ,
+				 const EventContext& ,
+				 xAOD::PFOContainer& ,
+				 xAOD::PFOContainer& ) const override;  
+
+  virtual StatusCode executeTool(xAOD::TauJet& ,
+				 const EventContext& ,
+				 xAOD::PFOContainer& ) const override;
+
+  virtual StatusCode executeTool(xAOD::TauJet& ,
+				 const EventContext& ,
+				 xAOD::ParticleContainer& ,
+				 xAOD::PFOContainer& ) const override;
 
   //-----------------------------------------------------------------
   //! Event finalizer - called at the end of each event

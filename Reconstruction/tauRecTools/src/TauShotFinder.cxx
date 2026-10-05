@@ -27,9 +27,10 @@ StatusCode TauShotFinder::initialize() {
 }
 
 
-
-StatusCode TauShotFinder::executeShotFinder(xAOD::TauJet& tau, xAOD::CaloClusterContainer& shotClusterContainer,
-					    xAOD::PFOContainer& shotPFOContainer) const {
+StatusCode TauShotFinder::executeTool(xAOD::TauJet& tau,
+				      const EventContext& ctx,
+				      xAOD::CaloClusterContainer& shotClusterContainer,
+				      xAOD::PFOContainer& shotPFOContainer) const {
 
   // Any tau needs to have shot PFO vectors. Set empty vectors before nTrack cut
   std::vector<ElementLink<xAOD::PFOContainer>> empty;
@@ -40,7 +41,7 @@ StatusCode TauShotFinder::executeShotFinder(xAOD::TauJet& tau, xAOD::CaloCluster
      return StatusCode::SUCCESS;
   }
   
-  SG::ReadHandle<CaloCellContainer> caloCellInHandle( m_caloCellInputContainer );
+  SG::ReadHandle<CaloCellContainer> caloCellInHandle( m_caloCellInputContainer, ctx );
   if (!caloCellInHandle.isValid()) {
     ATH_MSG_ERROR ("Could not retrieve HiveDataObj with key " << caloCellInHandle.key());
     return StatusCode::FAILURE;
@@ -52,7 +53,7 @@ StatusCode TauShotFinder::executeShotFinder(xAOD::TauJet& tau, xAOD::CaloCluster
   // -- largest pt among the neighbours in eta direction 
   // -- no other seed cell as neighbour in eta direction 
   std::vector<const CaloCell*> seedCells;
-  ATH_CHECK(selectSeedCells(tau, *cellContainer, seedCells));
+  ATH_CHECK(selectSeedCells(tau, *cellContainer, seedCells, ctx));
   ATH_MSG_DEBUG("seedCells.size() = " << seedCells.size());
     
   // Construt shot by merging neighbour cells in phi direction 
@@ -171,11 +172,12 @@ int TauShotFinder::getNPhotons(float eta, float energy) const {
 
 
 StatusCode TauShotFinder::selectCells(const xAOD::TauJet& tau,
-                                                        std::vector<const CaloCell*>& cells) const {
+				      std::vector<const CaloCell*>& cells,
+				      const EventContext& ctx) const {
   // if in EleRM tau reco, do electron cell removal
   std::vector<const CaloCell*> removed_cells;
   if (m_removeElectronCells && inEleRM()){
-    SG::ReadHandle<xAOD::CaloClusterContainer> removedClustersHandle( m_removedClusterInputContainer );
+    SG::ReadHandle<xAOD::CaloClusterContainer> removedClustersHandle( m_removedClusterInputContainer, ctx );
     if (!removedClustersHandle.isValid()){
       ATH_MSG_ERROR ("Could not retrieve HiveDataObj with key " << removedClustersHandle.key());
       return StatusCode::FAILURE;
@@ -207,13 +209,14 @@ StatusCode TauShotFinder::selectCells(const xAOD::TauJet& tau,
 
 
 StatusCode TauShotFinder::selectSeedCells(const xAOD::TauJet& tau,
-                                                            const CaloCellContainer& cellContainer,
-                                                            std::vector<const CaloCell*>& seedCells) const {
+					  const CaloCellContainer& cellContainer,
+					  std::vector<const CaloCell*>& seedCells,
+					  const EventContext& ctx) const {
 
   // Apply pre-selection of the cells
   assert(seedCells.empty());
   std::vector<const CaloCell*> cells;
-  ATH_CHECK(selectCells(tau, cells));
+  ATH_CHECK(selectCells(tau, cells, ctx));
   std::sort(cells.begin(),cells.end(),ptSort(*this));
 
   std::set<IdentifierHash> seedCellHashes;

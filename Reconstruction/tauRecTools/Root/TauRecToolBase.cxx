@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauRecToolBase.h"
@@ -38,7 +38,8 @@ StatusCode TauRecToolBase::eventInitialize(){
 }
 
 //________________________________________
-StatusCode TauRecToolBase::execute(xAOD::TauJet&) const {
+StatusCode TauRecToolBase::executeTool(xAOD::TauJet& ,
+				       const EventContext&) const {
   ATH_MSG_ERROR("function not implemented");
   return StatusCode::FAILURE;
 }
@@ -49,55 +50,72 @@ StatusCode TauRecToolBase::executeDev(xAOD::TauJet&) {
   return StatusCode::FAILURE;
 }
 #else
-StatusCode TauRecToolBase::executePi0CreateROI(xAOD::TauJet& /*pTau*/, CaloConstCellContainer& /*caloCellContainer*/, boost::dynamic_bitset<>& /*map*/ ) const {
+StatusCode TauRecToolBase::executeTool(xAOD::TauJet& ,
+				       const EventContext& ,
+				       CaloConstCellContainer& ,
+				       boost::dynamic_bitset<>& ) const {
   ATH_MSG_ERROR("function not implemented");
   return StatusCode::FAILURE;
 }
 #endif
 
-StatusCode TauRecToolBase::executeVertexFinder(xAOD::TauJet&, const xAOD::VertexContainer*) const {
+StatusCode TauRecToolBase::executeTool(xAOD::TauJet& ,
+				       const EventContext& ,
+				       const xAOD::VertexContainer*) const {
   ATH_MSG_ERROR("function not implemented");
   return StatusCode::FAILURE;
 }
 
-StatusCode TauRecToolBase::executeTrackFinder(xAOD::TauJet&, xAOD::TauTrackContainer&) const {
+StatusCode TauRecToolBase::executeTool(xAOD::TauJet& ,
+                                       const EventContext& ,
+                                       xAOD::VertexContainer& ) const {
   ATH_MSG_ERROR("function not implemented");
   return StatusCode::FAILURE;
 }
 
-StatusCode TauRecToolBase::executeTrackClassifier(xAOD::TauJet&, xAOD::TauTrackContainer&) const {
+StatusCode TauRecToolBase::executeTool(xAOD::TauJet& ,
+				       const EventContext& ,
+				       xAOD::TauTrackContainer&) const {
   ATH_MSG_ERROR("function not implemented");
   return StatusCode::FAILURE;
 }
 
-StatusCode TauRecToolBase::executeShotFinder(xAOD::TauJet& /*pTau*/, xAOD::CaloClusterContainer& /*shotClusterContainer*/, xAOD::PFOContainer& /*PFOContainer*/ ) const {
+StatusCode TauRecToolBase::executeTool(xAOD::TauJet& ,
+				       const EventContext& ,
+				       xAOD::CaloClusterContainer& ,
+				       xAOD::PFOContainer& ) const {
   ATH_MSG_ERROR("function not implemented");
   return StatusCode::FAILURE;
 }
 
-StatusCode TauRecToolBase::executePi0ClusterCreator(xAOD::TauJet& /*pTau*/, xAOD::PFOContainer& /*neutralPFOContainer*/, 
-					      xAOD::PFOContainer& /*hadronicPFOContainer*/, 
-					      const xAOD::CaloClusterContainer& /*pCaloClusterContainer*/ ) const {
+StatusCode TauRecToolBase::executeTool(xAOD::TauJet& ,
+				       const EventContext& ,
+				       xAOD::PFOContainer& ,
+				       xAOD::PFOContainer& ,
+				       const xAOD::CaloClusterContainer& ) const {
   ATH_MSG_ERROR("function not implemented");
   return StatusCode::FAILURE;
 }
 
-StatusCode TauRecToolBase::executeVertexVariables(xAOD::TauJet& /*pTau*/, xAOD::VertexContainer& /*vertexContainer*/ ) const {
-  ATH_MSG_ERROR("function not implemented");
-  return StatusCode::FAILURE;
-}
-
-StatusCode TauRecToolBase::executePi0ClusterScaler(xAOD::TauJet& /*pTau*/, xAOD::PFOContainer& /*neutralPFOContainer*/, xAOD::PFOContainer& /*chargedPFOContainer*/ ) const {
+StatusCode TauRecToolBase::executeTool(xAOD::TauJet& ,
+				       const EventContext& ,
+				       xAOD::PFOContainer& ,
+				       xAOD::PFOContainer& ) const {
   ATH_MSG_ERROR("function not implemented");
   return StatusCode::FAILURE;
 } 
 
-StatusCode TauRecToolBase::executePi0nPFO(xAOD::TauJet& /*pTau*/, xAOD::PFOContainer& /*neutralPFOContainer*/) const {
+StatusCode TauRecToolBase::executeTool(xAOD::TauJet& ,
+				       const EventContext& ,
+				       xAOD::PFOContainer& ) const {
   ATH_MSG_ERROR("function not implemented");
   return StatusCode::FAILURE;
 }
 
-StatusCode TauRecToolBase::executePanTau(xAOD::TauJet& /*pTau*/, xAOD::ParticleContainer& /*particleContainer*/, xAOD::PFOContainer& /*neutralPFOContainer*/) const {
+StatusCode TauRecToolBase::executeTool(xAOD::TauJet& ,
+				       const EventContext& ,
+				       xAOD::ParticleContainer& ,
+				       xAOD::PFOContainer& ) const {
   ATH_MSG_ERROR("function not implemented");
   return StatusCode::FAILURE;
 }

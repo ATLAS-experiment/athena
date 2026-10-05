@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TauAODRunnerAlg.h"
@@ -125,7 +125,7 @@ StatusCode TauAODRunnerAlg::execute (const EventContext& ctx) const {
     // Execute all the modification tools (if provided)
     for(const ToolHandle<ITauToolBase> &tool : m_modificationTools) {
       ATH_MSG_DEBUG("RunnerAlg Invoking tool " << tool->name());
-      if(tool->execute(*newTau).isFailure()) break;
+      if(tool->executeTool(*newTau, ctx).isFailure()) break;
     }
 
     // If tau candidate was not modified and we ran modification tools, remove it from container
@@ -200,22 +200,20 @@ StatusCode TauAODRunnerAlg::execute (const EventContext& ctx) const {
     for (const ToolHandle<ITauToolBase> &tool : m_officialTools) {
       ATH_MSG_DEBUG("RunnerAlg Invoking tool " << tool->name());
       if (tool->type() == "TauPi0ClusterCreator")
-        sc = tool->executePi0ClusterCreator(*pTau, *neutralPFOContainer, *hadronicClusterPFOContainer, *pi0ClusterContainer);
+        sc = tool->executeTool(*pTau, ctx, *neutralPFOContainer, *hadronicClusterPFOContainer, *pi0ClusterContainer);
       else if (tool->type() == "TauVertexVariables")
-        sc = tool->executeVertexVariables(*pTau, *pSecVtxContainer);
+        sc = tool->executeTool(*pTau, ctx, *pSecVtxContainer);
       else if (tool->type() == "TauPi0ClusterScaler")
-        sc = tool->executePi0ClusterScaler(*pTau, *neutralPFOContainer, *chargedPFOContainer);
-      else if (tool->type() == "TauPi0ScoreCalculator")
-        sc = tool->executePi0nPFO(*pTau, *neutralPFOContainer);
-      else if (tool->type() == "TauPi0Selector")
-        sc = tool->executePi0nPFO(*pTau, *neutralPFOContainer);
+        sc = tool->executeTool(*pTau, ctx, *neutralPFOContainer, *chargedPFOContainer);
+      else if (tool->type() == "TauPi0ScoreCalculator" || tool->type() == "TauPi0Selector")
+        sc = tool->executeTool(*pTau, ctx, *neutralPFOContainer);
       else if (tool->type() == "PanTau::PanTauProcessor")
-        sc = tool->executePanTau(*pTau, *pi0Container, *neutralPFOContainer);
+        sc = tool->executeTool(*pTau, ctx, *pi0Container, *neutralPFOContainer);
       else if (tool->type() == "tauRecTools::TauTrackRNNClassifier")
-        sc = tool->executeTrackClassifier(*pTau, *newTauTrkCon);
-      else
-        sc = tool->execute(*pTau);
-
+        sc = tool->executeTool(*pTau, ctx, *newTauTrkCon);
+      else {
+        sc = tool->executeTool(*pTau, ctx);
+      }
       if (sc.isFailure()) break;
     }
     if (sc.isSuccess()) ATH_MSG_VERBOSE("The tau candidate has been modified successfully by the invoked official tools.");

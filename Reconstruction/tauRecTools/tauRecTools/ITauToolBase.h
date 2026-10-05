@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_ITAUTOOLBASE_H
@@ -47,26 +47,55 @@ class ITauToolBase : virtual public asg::IAsgTool
   //-----------------------------------------------------------------
   //! Execute - called for each tau candidate
   //-----------------------------------------------------------------
-  virtual StatusCode execute(xAOD::TauJet& pTau) const = 0;
-  virtual StatusCode executeVertexFinder(xAOD::TauJet& pTau, 
-                                         const xAOD::VertexContainer* vertexContainer = nullptr) const = 0;
-  virtual StatusCode executeTrackFinder(xAOD::TauJet& pTau, xAOD::TauTrackContainer& tauTrackContainer) const = 0;
-  virtual StatusCode executeTrackClassifier(xAOD::TauJet& pTau, xAOD::TauTrackContainer& tauTrackContainer) const = 0;
-  virtual StatusCode executeShotFinder(xAOD::TauJet& pTau, xAOD::CaloClusterContainer& shotClusterContainer, xAOD::PFOContainer& PFOContainer ) const = 0;
-  virtual StatusCode executePi0ClusterCreator(xAOD::TauJet& pTau, xAOD::PFOContainer& neutralPFOContainer, 
-  					      xAOD::PFOContainer& hadronicPFOContainer, 
-					      const xAOD::CaloClusterContainer& pCaloClusterContainer ) const = 0;
-  virtual StatusCode executeVertexVariables(xAOD::TauJet& pTau, xAOD::VertexContainer& vertexContainer ) const = 0;  
-  virtual StatusCode executePi0ClusterScaler(xAOD::TauJet& pTau, xAOD::PFOContainer& neutralPFOContainer, xAOD::PFOContainer& chargedPFOContainer ) const = 0;  
-  virtual StatusCode executePi0nPFO(xAOD::TauJet& pTau, xAOD::PFOContainer& neutralPFOContainer) const = 0;
-  virtual StatusCode executePanTau(xAOD::TauJet& pTau, xAOD::ParticleContainer& particleContainer, xAOD::PFOContainer& neutralPFOContainer) const = 0;
+  virtual StatusCode executeTool(xAOD::TauJet& ,
+				 const EventContext& ) const = 0;
+
+  virtual StatusCode executeTool(xAOD::TauJet& ,
+				 const EventContext& ,
+				 const xAOD::VertexContainer* ) const = 0;
+
+  virtual StatusCode executeTool(xAOD::TauJet& ,
+				 const EventContext& ,
+				 xAOD::VertexContainer& ) const = 0;
+
+  virtual StatusCode executeTool(xAOD::TauJet& ,
+				 const EventContext& ,
+				 xAOD::TauTrackContainer& ) const = 0;
+
+  virtual StatusCode executeTool(xAOD::TauJet& ,
+				 const EventContext& ,
+				 xAOD::CaloClusterContainer& ,
+				 xAOD::PFOContainer& ) const = 0;
+
+  virtual StatusCode executeTool(xAOD::TauJet& ,
+				 const EventContext& ,
+				 xAOD::PFOContainer& ,
+				 xAOD::PFOContainer& ,
+				 const xAOD::CaloClusterContainer& ) const = 0;
+
+  virtual StatusCode executeTool(xAOD::TauJet& ,
+				 const EventContext& ,
+				 xAOD::PFOContainer& ,
+				 xAOD::PFOContainer& ) const = 0;
+
+  virtual StatusCode executeTool(xAOD::TauJet& ,
+				 const EventContext& ,
+				 xAOD::PFOContainer& ) const = 0;
+
+  virtual StatusCode executeTool(xAOD::TauJet& ,
+				 const EventContext& ,
+				 xAOD::ParticleContainer& ,
+				 xAOD::PFOContainer& ) const = 0;
 
 #ifdef XAOD_ANALYSIS
   // non-const version is needed in THOR
-  virtual StatusCode executeDev(xAOD::TauJet& pTau) = 0;
+  virtual StatusCode executeDev(xAOD::TauJet& ) = 0;
 #else
   // CaloCellContainer not available in AnalysisBase
-  virtual StatusCode executePi0CreateROI(xAOD::TauJet& pTau, CaloConstCellContainer& caloCellContainer, boost::dynamic_bitset<>& map ) const = 0;
+  virtual StatusCode executeTool(xAOD::TauJet& ,
+				 const EventContext& ,
+				 CaloConstCellContainer& ,
+				 boost::dynamic_bitset<>& ) const = 0;
 #endif
   
   //-----------------------------------------------------------------

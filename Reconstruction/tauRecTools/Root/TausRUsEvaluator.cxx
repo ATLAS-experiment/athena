@@ -413,7 +413,8 @@ void TausRUsEvaluator::decorateTracks(xAOD::TauJet& tau,
   }
 }
 
-StatusCode TausRUsEvaluator::execute(xAOD::TauJet& tau) const {
+StatusCode TausRUsEvaluator::executeTool(xAOD::TauJet& tau,
+					 const EventContext& ctx) const {
   
   // Set the defaults before any early return, so that a tau skipped below still
   // carries every decoration and no consumer has to test for their presence.
@@ -423,7 +424,7 @@ StatusCode TausRUsEvaluator::execute(xAOD::TauJet& tau) const {
     return StatusCode::SUCCESS;
   }
 
-  SG::ReadHandle<xAOD::VertexContainer> vertexInHandle(m_vertexInputContainer);
+  SG::ReadHandle<xAOD::VertexContainer> vertexInHandle(m_vertexInputContainer, ctx);
   if (!vertexInHandle.isValid()) {
     ATH_MSG_ERROR("Could not retrieve vertex container "
                   << m_vertexInputContainer.key());

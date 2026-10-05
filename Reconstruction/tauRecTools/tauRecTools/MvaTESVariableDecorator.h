@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_MVATESVARIABLEDECORATOR_H
@@ -24,8 +24,10 @@ public:
   virtual ~MvaTESVariableDecorator() = default;
     
   virtual StatusCode initialize() override;
-  
-  virtual StatusCode execute(xAOD::TauJet& xTau) const override;
+
+  using TauRecToolBase::executeTool;
+  virtual StatusCode executeTool(xAOD::TauJet& xTau,
+				 const EventContext& ctx) const override;
 
 private:
 

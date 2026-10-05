@@ -15,7 +15,8 @@
 TauCellVariables::TauCellVariables(const std::string& name) :
   TauRecToolBase(name) {}
 
-StatusCode TauCellVariables::execute(xAOD::TauJet& pTau) const {
+StatusCode TauCellVariables::executeTool(xAOD::TauJet& pTau,
+					 const EventContext& /*ctx*/) const {
 
   double sumCellET = 0.;
   double sumCellET01 = 0;

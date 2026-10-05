@@ -11,7 +11,6 @@ TauVertexedClusterDecorator::TauVertexedClusterDecorator(const std::string& name
 }
 
 
-
 StatusCode TauVertexedClusterDecorator::initialize() {  
   
   if (std::string(m_seedJet).find("LC") != std::string::npos ||
@@ -32,8 +31,8 @@ StatusCode TauVertexedClusterDecorator::initialize() {
 }
 
 
-  
-StatusCode TauVertexedClusterDecorator::execute(xAOD::TauJet& tau) const {
+StatusCode TauVertexedClusterDecorator::executeTool(xAOD::TauJet& tau,
+						    const EventContext& /*ctx*/) const {
   
   // Obtain the vertex to correct the cluster
   const xAOD::Vertex* vertex = tau.vertex();

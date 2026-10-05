@@ -26,7 +26,9 @@ public:
     ASG_TOOL_CLASS2(TauCommonCalcVars, TauRecToolBase, ITauToolBase)
     ~TauCommonCalcVars();
     
-    virtual StatusCode execute(xAOD::TauJet& pTau) const override;
+    using TauRecToolBase::executeTool;
+    virtual StatusCode executeTool(xAOD::TauJet& pTau,
+				   const EventContext& ctx) const override;
 
 private:
  

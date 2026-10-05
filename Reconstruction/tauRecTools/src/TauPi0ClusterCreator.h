@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUPI0CLUSTERCREATOR_H
@@ -35,9 +35,12 @@ public:
 
   virtual ~TauPi0ClusterCreator() = default;
 
-  virtual StatusCode executePi0ClusterCreator(xAOD::TauJet& pTau, xAOD::PFOContainer& neutralPFOContainer, 
-  					xAOD::PFOContainer& hadronicClusterPFOContainer,
-  					const xAOD::CaloClusterContainer& pi0CaloClusContainer) const override;
+  using TauRecToolBase::executeTool;
+  virtual StatusCode executeTool(xAOD::TauJet& pTau,
+				 const EventContext& ctx,
+				 xAOD::PFOContainer& neutralPFOContainer, 
+				 xAOD::PFOContainer& hadronicClusterPFOContainer,
+				 const xAOD::CaloClusterContainer& pi0CaloClusContainer) const override;
   
 private:
   

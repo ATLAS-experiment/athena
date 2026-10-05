@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUPI0CLUSTERSCALER_H
@@ -28,7 +28,11 @@ public:
   TauPi0ClusterScaler(const std::string& name);
   virtual ~TauPi0ClusterScaler() = default;
 
-  virtual StatusCode executePi0ClusterScaler(xAOD::TauJet& pTau, xAOD::PFOContainer& pNeutralPFOContainer, xAOD::PFOContainer& pChargedPFOContainer) const override; 
+  using TauRecToolBase::executeTool;
+  virtual StatusCode executeTool(xAOD::TauJet& pTau,
+				 const EventContext& ctx,
+				 xAOD::PFOContainer& pNeutralPFOContainer,
+				 xAOD::PFOContainer& pChargedPFOContainer) const override; 
 
 private:
   

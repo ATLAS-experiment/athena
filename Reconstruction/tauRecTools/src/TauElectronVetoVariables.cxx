@@ -35,8 +35,8 @@ StatusCode TauElectronVetoVariables::initialize() {
 }
 
 
-
-StatusCode TauElectronVetoVariables::execute(xAOD::TauJet& pTau) const {
+StatusCode TauElectronVetoVariables::executeTool(xAOD::TauJet& pTau,
+						 const EventContext& ctx) const {
     if (pTau.nTracks() < 1) {
         return StatusCode::SUCCESS;
     }
@@ -54,8 +54,6 @@ StatusCode TauElectronVetoVariables::execute(xAOD::TauJet& pTau) const {
     float phi3cut = 0.075;
     const CaloCell *pCell;
     int trackIndex = -1;
-
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     //---------------------------------------------------------------------
     // Calculate eta, phi impact point of leading track at calorimeter layers EM 0,1,2,3

@@ -65,7 +65,10 @@ public:
   virtual ~TausRUsEvaluator();
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute(xAOD::TauJet& tau) const override;
+
+  using TauRecToolBase::executeTool;
+  virtual StatusCode executeTool(xAOD::TauJet& tau,
+				 const EventContext& ctx) const override;
 
   /// initialized with these default values
   static constexpr float DEFAULT_VALUE = -1111.0f;

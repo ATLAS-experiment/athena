@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // local include(s)
@@ -11,7 +11,8 @@ TauAODSelector::TauAODSelector(const std::string& name)
 }
 
 
-StatusCode TauAODSelector::execute(xAOD::TauJet& tau) const {
+StatusCode TauAODSelector::executeTool(xAOD::TauJet& tau,
+				       const EventContext& /*ctx*/) const {
 
   bool passThinning = true;
 

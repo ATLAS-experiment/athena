@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUTRACKRNNCLASSIFIER_H
@@ -57,8 +57,12 @@ public:
 
   // retrieve all track classifier sub tools
   virtual StatusCode initialize() override;
- // pass all tracks in the tau cone to all track classifier sub tools
-  virtual StatusCode executeTrackClassifier(xAOD::TauJet& pTau, xAOD::TauTrackContainer& tauTrackContainer) const override;
+
+  // pass all tracks in the tau cone to all track classifier sub tools
+  using TauRecToolBase::executeTool;
+  virtual StatusCode executeTool(xAOD::TauJet& pTau,
+				 const EventContext& ctx,
+				 xAOD::TauTrackContainer& tauTrackContainer) const override;
 
  private:
 

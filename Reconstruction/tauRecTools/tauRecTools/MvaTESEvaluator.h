@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_MVATESEVALUATOR_H
@@ -23,7 +23,10 @@ class MvaTESEvaluator
   virtual ~MvaTESEvaluator() = default;
     
   virtual StatusCode initialize() override;
-  virtual StatusCode execute(xAOD::TauJet& xTau) const override;
+
+  using TauRecToolBase::executeTool;
+  virtual StatusCode executeTool(xAOD::TauJet& xTau,
+				 const EventContext& ctx) const override;
   
  private:
   // MVA input variables (provide all variables in float)

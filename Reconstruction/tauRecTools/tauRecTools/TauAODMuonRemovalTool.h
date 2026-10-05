@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -23,7 +23,11 @@ class TauAODMuonRemovalTool : public TauRecToolBase
         ASG_TOOL_CLASS2( TauAODMuonRemovalTool, TauRecToolBase, ITauToolBase )
         TauAODMuonRemovalTool(const std::string& type);
         virtual StatusCode initialize() override;
-        virtual StatusCode execute(xAOD::TauJet&) const override;
+
+        using TauRecToolBase::executeTool;
+        virtual StatusCode executeTool(xAOD::TauJet& tau,
+				       const EventContext& ctx) const override;
+
     private:
         const std::map<std::string, uint>           m_mapMuonIdWp        = {{"Tight", 0}, {"Medium", 1}, {"Loose", 2}, {"VeryLoose",3}};
         uint                                        m_muonWpUi           = 1;

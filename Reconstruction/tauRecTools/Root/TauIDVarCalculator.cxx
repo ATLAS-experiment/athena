@@ -24,7 +24,9 @@ TauIDVarCalculator::TauIDVarCalculator(const std::string& name):
 
 
 
-StatusCode TauIDVarCalculator::execute(xAOD::TauJet& tau) const {
+StatusCode TauIDVarCalculator::executeTool(xAOD::TauJet& tau,
+					   const EventContext& /*ctx*/) const {
+
   static const SG::Accessor<float> acc_absipSigLeadTrk("absipSigLeadTrk");
   acc_absipSigLeadTrk(tau) = (tau.nTracks()>0) ? std::abs(tau.track(0)->d0SigTJVA()) : 0.;
   
@@ -108,7 +110,7 @@ StatusCode TauIDVarCalculator::execute(xAOD::TauJet& tau) const {
         float etShot = 0.;
         bool ok = shot->attribute(xAOD::PFODetails::tauShots_pt3, etShot);
         if (!ok) {
-         ATH_MSG_WARNING("TauIDVarCalculator::execute: Something wrong in retrieve of attribute.");
+         ATH_MSG_WARNING("Something wrong in retrieval of attribute.");
         }
         // In 0.012 x 0.1 window
         if(std::abs(shot->eta() - etaCalo) > 0.012 ) continue;
