@@ -21,8 +21,7 @@
 //Root includes
 #include "TObject.h"
 #include "TFormula.h"
-#include "TGraph.h"
-#include "TH2.h"
+
 #include "TFile.h"
 #include "TRandom3.h"
 
@@ -475,12 +474,19 @@ const StatusCode ElectronPhotonVariableCorrectionBase::getParameterInformationFr
         case ElectronPhotonVariableCorrectionBase::parameterType::EtaDependentTGraph:
             // this fallthrough is intentional!
         case ElectronPhotonVariableCorrectionBase::parameterType::PtDependentTGraph:
-        { // need to mark scope, since variables are initialized in this case
-            std::unique_ptr<TObject> graph;
-            ATH_CHECK(getObjectFromRootFile(env, parameter_number, filePathKey, graphNameKey, graph));
-            m_graphCopies.at(parameter_number) = static_cast<TGraph*>(graph.get());
+        {
+          auto object = getObjectFromRootFile(env, parameter_number, filePathKey, graphNameKey);
+          if (!object) {
+            return StatusCode::FAILURE;
+          }
+          auto* graph = dynamic_cast<TGraph*>(object.get());
+          if (!graph) {
+            ATH_MSG_ERROR("Object for parameter " << parameter_number << " is not a TGraph.");
+            return StatusCode::FAILURE;
+          }
+          m_graphCopies.at(parameter_number) = std::unique_ptr<TGraph>( static_cast<TGraph*>(object.release()));
         }
-            break;
+        break;
         case ElectronPhotonVariableCorrectionBase::parameterType::EtaBinned:
             //get eta binning later
             getEtaBins = true;
@@ -495,36 +501,39 @@ const StatusCode ElectronPhotonVariableCorrectionBase::getParameterInformationFr
             getPtBins = true;
             break;
         case ElectronPhotonVariableCorrectionBase::parameterType::EtaTimesPhiTH2:
-        { // need to mark scope, since variables are initialized in this case
-            // Retreive TH2F steering eta x phi corrections
-            std::unique_ptr<TObject> th2;
-            ATH_CHECK(getObjectFromRootFile(env, parameter_number, filePathKey, histNameKey, th2));
-            auto pTh2 = static_cast<TH2*>(th2.get());
-            m_TH2Copies.at(parameter_number) = pTh2;
-            // check and store if this TH2 needs eta or abs(eta) for evaluation
-            // for this, check if lowest bin boundary < 0
-            // bin 0 is the undeflow bin, so use bin 1
-            auto * pAxis = pTh2->GetXaxis();
-            if (!pAxis){
-              ATH_MSG_ERROR("pAxis is null.");
-              return StatusCode::FAILURE;
-            }
-            float lowest_bin_boundary = pAxis->GetBinLowEdge(1);
-            // the lowest boundary should never be greater than 0! Fail if it is
-            if (lowest_bin_boundary > 0)
-            {
-                ATH_MSG_ERROR("Lowest bin edge in TH2 for parameter " << parameter_number << " is > 0. Please provide the TH2 including corrections either for the positive eta range (starting at 0), or the whole eta range (starting with a negative dummy value which is treated as -infinity.");
-                return StatusCode::FAILURE;
-            }
-            else
-            {
-                // use eta for evaluation of this TH2 if corrections for eta < 0 are in the TH2
-                // store the actual value so it can be used in the TH2 parameter check
-                // (need to make sure the object eta is not smaller than the smallest TH2 bin boundary)
-                m_useAbsEtaTH2.at(parameter_number) = lowest_bin_boundary;
-            }
+        {
+          auto object = getObjectFromRootFile(env, parameter_number, filePathKey, histNameKey);
+          if (!object) [[unlikely]] {
+            ATH_MSG_ERROR("TH2 object is null.");
+            return StatusCode::FAILURE;
+          }
+          auto* th2 = dynamic_cast<TH2*>(object.get());
+          if (!th2) [[unlikely]] {
+            ATH_MSG_ERROR("Object for parameter " << parameter_number << " is not a TH2.");
+            return StatusCode::FAILURE;
+          }
+          // Bin 0 is the underflow bin, so use bin 1.
+          auto* axis = th2->GetXaxis();
+          if (!axis) [[unlikely]] {
+            ATH_MSG_ERROR("TH2 X axis is null.");
+            return StatusCode::FAILURE;
+          }
+          const float lowest_bin_boundary = axis->GetBinLowEdge(1);
+          if (lowest_bin_boundary > 0) {
+            ATH_MSG_ERROR(
+              "Lowest bin edge in TH2 for parameter "
+              << parameter_number
+              << " is > 0. Please provide the TH2 including corrections either "
+                 "for the positive eta range (starting at 0), or the whole eta "
+                 "range (starting with a negative dummy value which is treated "
+                 "as -infinity.");
+            return StatusCode::FAILURE;
+          }
+          m_useAbsEtaTH2.at(parameter_number) = lowest_bin_boundary;
+          m_TH2Copies.at(parameter_number) =
+            std::unique_ptr<TH2>( static_cast<TH2*>(object.release()));
         }
-            break;
+        break;
         case ElectronPhotonVariableCorrectionBase::parameterType::EventDensity:
             // nothing has to be retrieved, no additional parameters for EventDensity currently
             return StatusCode::SUCCESS;
@@ -618,7 +627,8 @@ const StatusCode ElectronPhotonVariableCorrectionBase::getEtaPtBinningsFromConf(
     return StatusCode::SUCCESS;
 }
 
-const StatusCode ElectronPhotonVariableCorrectionBase::getObjectFromRootFile(TEnv& env, const int parameter_number, const TString& filePathKey, const TString& nameKey, std::unique_ptr<TObject>& return_object)
+std::unique_ptr<TObject> 
+ElectronPhotonVariableCorrectionBase::getObjectFromRootFile(TEnv& env, const int parameter_number, const TString& filePathKey, const TString& nameKey)
 {
     // helpers
     TString filePath = "";
@@ -632,13 +642,13 @@ const StatusCode ElectronPhotonVariableCorrectionBase::getObjectFromRootFile(TEn
         if (filePath == "")
         {
             ATH_MSG_ERROR("Could not locate Parameter" << parameter_number << " TObject file.");
-            return StatusCode::FAILURE;
+            return nullptr;
         }
     }
     else
     {
         ATH_MSG_ERROR("Could not retrieve Parameter" << parameter_number << " file path.");
-        return StatusCode::FAILURE;
+        return nullptr;
     }
     // check if necessary information is in conf, else fail
     if (env.Lookup(nameKey))
@@ -649,38 +659,30 @@ const StatusCode ElectronPhotonVariableCorrectionBase::getObjectFromRootFile(TEn
     else
     {
         ATH_MSG_ERROR("Could not retrieve Parameter" << parameter_number << " object name.");
-        return StatusCode::FAILURE;
+        return nullptr;
     }
     // open file, if it works, try to find object, get object, store a copy, else warning + fail
-    std::unique_ptr<TFile> file (new TFile(filePath.Data(),"READ"));
+    auto file = std::make_unique<TFile>(filePath.Data(),"READ");
     // check if file is open - if open, get graph, if not, fail
     if (file->IsOpen())
     {
-        // if object exists, get it, else fail
-        if (file->Get(objectName))
-        {
-            return_object = std::unique_ptr<TObject> (file->Get(objectName.Data())->Clone());
-            // need to un-associate THx type objects from file directory, so they remain accessible
-            if (dynamic_cast<TH1*>(return_object.get()) != nullptr)
-            {
-                dynamic_cast<TH1*>(return_object.get())->SetDirectory(nullptr);
-            }
-            file->Close();
+        TObject* object = file->Get(objectName.Data());
+        if (!object){
+          ATH_MSG_ERROR("Could not find TObject " << objectName << " in file " << filePath);
+          return nullptr;
         }
-        else
+        //clone would not be required for THx objects, but we want this to work for TGraph also
+        auto returnObj = std::unique_ptr<TObject> (object->Clone());
+        // need to un-associate THx type objects from file directory, so they remain accessible
+        if (auto pHist = dynamic_cast<TH1*>(returnObj.get());pHist != nullptr)
         {
-            ATH_MSG_ERROR("Could not find TObject " << objectName << " in file " << filePath);
-            return StatusCode::FAILURE;
+            pHist->SetDirectory(nullptr);
         }
+        file->Close();
+        return returnObj;
     }
-    else
-    {
-        ATH_MSG_ERROR("Could not open Parameter" << parameter_number << " TObject file " << filePath.Data());
-        return StatusCode::FAILURE;
-    }
-
-    // everything went fine, so
-    return StatusCode::SUCCESS;
+    ATH_MSG_ERROR("Could not open Parameter" << parameter_number << " TObject file " << filePath.Data());
+    return nullptr;
 }
 
 

@@ -23,15 +23,15 @@
 
 //Root includes
 #include "TFormula.h"
-
+#include "TGraph.h"
+#include "TH2.h"
 #include "boost/thread/tss.hpp"
 #include <memory>
 #include <vector>
 
 // forward declarations
 class TObject;
-class TGraph;
-class TH2;
+
 class TEnv;
 class TRandom3;
 
@@ -158,9 +158,9 @@ private:
     //! @brief Map of the correction function parameter number to the parameter type
     std::vector<parameterType> m_ParameterTypeVector;
     //! @brief Copy of the TGraph from the root file, stored if needed by the respective correction function parameter
-    std::vector<TGraph*> m_graphCopies;
+    std::vector<std::unique_ptr<TGraph>> m_graphCopies;
     //! @brief Copy of the TH2 from the root file, stored if needed by the respective correction function parameter
-    std::vector<TH2*> m_TH2Copies;
+    std::vector<std::unique_ptr<TH2>> m_TH2Copies;
     //! @brief Store the lowest eta bin boundary: used for checking if the respective TH2 needs the eta or abs(eta) value for evaluation
     std::vector<float> m_useAbsEtaTH2;
     //! @brief List of eta/pt dependent values, stored if needed by the respective correction function parameter
@@ -234,7 +234,7 @@ private:
      * @details The TObject with the name matching the key nameKey stored in the file with path matching filePathKey in the configuration file env will be retrieved
      * and saved in return_object.
      */
-    const StatusCode getObjectFromRootFile(TEnv& env, const int parameter_number, const TString& filePathKey, const TString& nameKey, std::unique_ptr<TObject>& return_object);
+    std::unique_ptr<TObject> getObjectFromRootFile(TEnv& env, const int parameter_number, const TString& filePathKey, const TString& nameKey);
 
     /** @brief Get the actual parameters of the TF1 function used for the current e/y object to be corrected
      * @param pt The pT of the current e/y object to be corrected
