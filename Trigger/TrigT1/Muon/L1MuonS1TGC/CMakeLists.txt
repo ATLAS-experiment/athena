@@ -18,8 +18,8 @@ atlas_add_test( TgcL0MdtCandidateSelector_test
           src/TgcL0MdtCandidateSelector.cxx
   INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} AthContainers xAODTrigL1Muon
-  POST_EXEC_SCRIPT nopost.sh )
+  POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( L1MuonS1TGCConfig
                 SCRIPT python -m L1MuonS1TGC.L1MuonS1TGCConfig
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
