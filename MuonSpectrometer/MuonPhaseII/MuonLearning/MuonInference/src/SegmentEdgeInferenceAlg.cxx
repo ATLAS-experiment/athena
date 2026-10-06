@@ -22,7 +22,7 @@ namespace MuonML {
 
 namespace {
 
-std::uint64_t 
+std::uint64_t
 undirectedPairKey(std::size_t first, std::size_t second) {
   if (first > second) std::swap(first, second);
   const auto first32 = static_cast<std::uint32_t>(first);
@@ -148,9 +148,11 @@ StatusCode SegmentEdgeInferenceAlg::execute(const EventContext& ctx) const {
                 << ": built graph with nodes=" << graph.nNodes
                 << ", edges=" << graph.nEdges);
 
-  // Per-node truth-particle grouping key (-1 = unlabeled), used for the 
-  // segment-level funnel and for the edge-level true/background split. 
+  // Per-node truth-particle grouping key (-1 = unlabeled), used for the
+  // segment-level funnel and for the edge-level true/background split.
   std::vector<int32_t> nodeTruthId;
+  // Truth-particle id -> |eta|, filled alongside nodeTruthId.
+  std::unordered_map<int32_t, double> truthIdToAbsEta;
   if (truthDiag) {
     nodeTruthId.assign(graph.nNodes, -1);
     std::size_t truthSegs = 0, bkgSegs = 0;
@@ -159,6 +161,7 @@ StatusCode SegmentEdgeInferenceAlg::execute(const EventContext& ctx) const {
           MuonR4::getTruthMatchedParticle(*graph.segments[node]);
       if (truthPart) {
         nodeTruthId[node] = static_cast<int32_t>(truthPart->index());
+        truthIdToAbsEta.emplace(nodeTruthId[node], std::abs(truthPart->eta()));
         ++truthSegs;
       } else {
         ++bkgSegs;
@@ -367,6 +370,17 @@ StatusCode SegmentEdgeInferenceAlg::execute(const EventContext& ctx) const {
      nodeDropReason.assign(graph.nNodes, kReasonNotSelected);
   }
 
+  // Group-purity: which kept-component id(s) each truth muon's
+  // segments landed in, and whether any of those components were mixed
+  std::unordered_map<int32_t, std::unordered_set<unsigned>> muonComponents;
+  std::unordered_map<int32_t, bool> muonEverMixed;
+  const auto sizeBin = [](std::size_t size) -> std::size_t {
+    if (size <= 4) return size - 2;  // 2, 3, 4 -> 0, 1, 2
+    if (size < 10) return 3;         // 5-9
+    if (size < 20) return 4;         // 10-19
+    return 5;                        // 20+
+  };
+
   std::size_t topologyNodes = 0;
   std::size_t retainedNodes = 0;
   std::size_t chamberSuppressedNodes = 0;
@@ -467,14 +481,37 @@ StatusCode SegmentEdgeInferenceAlg::execute(const EventContext& ctx) const {
     retainedNodes += retained.size();
     anchors += rankedNodes.size();
     ++componentsKept;
+
+    // Group purity: does this kept segments from more than one truth muon?
+    if (truthDiag) {
+      std::unordered_set<int32_t> componentTruthIds;
+      for (const std::size_t node : retained) {
+        if (nodeTruthId[node] >= 0) componentTruthIds.insert(nodeTruthId[node]);
+      }
+      const std::size_t outcome = componentTruthIds.empty() ? 2
+                                  : componentTruthIds.size() == 1 ? 0 : 1;  // clean/mixed/bkgOnly
+      ++m_groupPurity.componentsByOutcome[outcome];
+      ++m_groupPurity.componentSizeHist[sizeBin(retained.size())];
+      const bool mixed = componentTruthIds.size() >= 2;
+      if (mixed) {
+        m_groupPurity.mixedComponentSegments += retained.size();
+        const std::uint64_t packed =
+            (static_cast<std::uint64_t>(componentTruthIds.size()) << 32) | retained.size();
+        std::uint64_t current = m_groupPurity.worstMixedPacked.load(std::memory_order_relaxed);
+        while (packed > current && !m_groupPurity.worstMixedPacked.compare_exchange_weak(
+                   current, packed, std::memory_order_relaxed)) {}
+      }
+      for (const int32_t id : componentTruthIds) {
+        muonComponents[id].insert(componentId);
+        if (mixed) muonEverMixed[id] = true;
+      }
+    }
   }
 
   if (truthDiag) {
     std::size_t truthSegs = 0, bkgSegs = 0;
     for (std::size_t node = 0; node < graph.nNodes; ++node) {
-      if (!keptNode[node]) {
-         continue;
-      }
+      if (!keptNode[node]) continue;
       nodeTruthId[node] >= 0 ? ++truthSegs : ++bkgSegs;
     }
     m_sumRetainedTruthSegments += truthSegs;
@@ -486,6 +523,7 @@ StatusCode SegmentEdgeInferenceAlg::execute(const EventContext& ctx) const {
     }
     classifyLostTruthSegments(*segments, graph, pairProbability, thresholded,
                               keptNode, nodeDropReason);
+    classifyGroupPurity(muonComponents, muonEverMixed, truthIdToAbsEta);
   }
 
   if (!m_filteredSegmentKey.empty()) {
@@ -725,6 +763,29 @@ void SegmentEdgeInferenceAlg::classifyLostTruthSegments(
   }
 }
 
+void SegmentEdgeInferenceAlg::classifyGroupPurity(
+    const std::unordered_map<std::int32_t, std::unordered_set<unsigned>>& muonComponents,
+    const std::unordered_map<std::int32_t, bool>& muonEverMixed,
+    const std::unordered_map<std::int32_t, double>& truthIdToAbsEta) const {
+  // Only muons with at least one retained segment in some kept component
+  // appear in muonComponents; fully-lost muons are already covered by
+  // classifyLostTruthSegments()/muonsSeedLost above, not double-counted here.
+  std::array<std::size_t, GroupPurityCounters::kColumns * 3> outcome{};
+  for (const auto& [id, componentIds] : muonComponents) {
+    const auto mixedIt = muonEverMixed.find(id);
+    const bool everMixed = mixedIt != muonEverMixed.end() && mixedIt->second;
+    // 0 = clean (one component, alone), 1 = mixed (shared a component with
+    // another muon), 2 = fragmented (split across components, never mixed).
+    const std::size_t result = everMixed ? 1 : (componentIds.size() >= 2 ? 2 : 0);
+    const auto etaIt = truthIdToAbsEta.find(id);
+    const std::size_t region = 1 + (etaIt != truthIdToAbsEta.end()
+        ? static_cast<std::size_t>(regionOf(etaIt->second)) : 0);
+    ++outcome[0 * 3 + result];
+    ++outcome[region * 3 + result];
+  }
+  for (std::size_t i = 0; i < outcome.size(); ++i) m_groupPurity.muonOutcome[i] += outcome[i];
+}
+
 StatusCode SegmentEdgeInferenceAlg::finalize() {
   ATH_MSG_DEBUG(
       "SegmentEdgeInferenceAlg post-ONNX selection summary (job-summed): "
@@ -813,6 +874,41 @@ StatusCode SegmentEdgeInferenceAlg::finalize() {
                   << m_truthLoss.muonSegments[3].load()
                   << "; nPrecisionHits <=4/5-6/>=7: " << m_truthLoss.precisionHits[0].load() << "/"
                   << m_truthLoss.precisionHits[1].load() << "/" << m_truthLoss.precisionHits[2].load());
+
+    ATH_MSG_DEBUG(
+        "SegmentEdgeInferenceAlg grouping purity (job-summed; components cover "
+        "only kept components, i.e. those that survived MinSegmentsPerComponent "
+        "and appear in the output): "
+        << "clean=" << m_groupPurity.componentsByOutcome[0].load()
+        << " mixed=" << m_groupPurity.componentsByOutcome[1].load()
+        << " bkgOnly=" << m_groupPurity.componentsByOutcome[2].load()
+        << "; segments inside mixed components=" << m_groupPurity.mixedComponentSegments.load()
+        << "; component size histogram (2/3/4/5-9/10-19/20+): "
+        << m_groupPurity.componentSizeHist[0].load() << "/" << m_groupPurity.componentSizeHist[1].load() << "/"
+        << m_groupPurity.componentSizeHist[2].load() << "/" << m_groupPurity.componentSizeHist[3].load() << "/"
+        << m_groupPurity.componentSizeHist[4].load() << "/" << m_groupPurity.componentSizeHist[5].load());
+
+    const std::uint64_t worstMixed = m_groupPurity.worstMixedPacked.load();
+    ATH_MSG_DEBUG("  worst mixed component this job: "
+                  << (worstMixed >> 32) << " distinct truth muons in "
+                  << (worstMixed & 0xffffffffull) << " segments"
+                  << (worstMixed == 0 ? " (no mixed components found)" : ""));
+
+    ATH_MSG_DEBUG(
+        "  truth-muon grouping outcome (all|barrel|transition|endcap; muons with "
+        ">=1 retained segment only, fully-lost muons excluded -- see muonsSeedLost above): "
+        << "clean=" << m_groupPurity.muonOutcome[0 * 3 + 0].load() << "|"
+        << m_groupPurity.muonOutcome[1 * 3 + 0].load() << "|"
+        << m_groupPurity.muonOutcome[2 * 3 + 0].load() << "|"
+        << m_groupPurity.muonOutcome[3 * 3 + 0].load()
+        << "; mixed=" << m_groupPurity.muonOutcome[0 * 3 + 1].load() << "|"
+        << m_groupPurity.muonOutcome[1 * 3 + 1].load() << "|"
+        << m_groupPurity.muonOutcome[2 * 3 + 1].load() << "|"
+        << m_groupPurity.muonOutcome[3 * 3 + 1].load()
+        << "; fragmented=" << m_groupPurity.muonOutcome[0 * 3 + 2].load() << "|"
+        << m_groupPurity.muonOutcome[1 * 3 + 2].load() << "|"
+        << m_groupPurity.muonOutcome[2 * 3 + 2].load() << "|"
+        << m_groupPurity.muonOutcome[3 * 3 + 2].load());
   }
   return StatusCode::SUCCESS;
 }

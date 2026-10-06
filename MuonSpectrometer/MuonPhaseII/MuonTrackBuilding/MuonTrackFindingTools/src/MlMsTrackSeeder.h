@@ -45,14 +45,20 @@ class MlMsTrackSeeder final :
       "Tool providing initial-parameter estimates for ML-built seeds"};
   SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{
       this, "SegmentContainer", "MuonSegmentsFromR4"};
-  Gaudi::Property<std::string> m_candidateDecoration{
-      this, "CandidateDecoration", "trackCandidateIds",
-      "Segment [componentId, isSeedAnchor] decoration"};
   SG::ReadDecorHandleKey<xAOD::MuonSegmentContainer> m_candidateDecorKey{
       this, "CandidateDecoration", m_segmentKey, "trackCandidateIds",
       "Scheduler dependency on the ML candidate decoration"};
   Gaudi::Property<unsigned int> m_minSegmentsPerCandidate{
       this, "MinSegmentsPerCandidate", 2};
+  Gaudi::Property<unsigned int> m_maxSegmentsPerCandidate{
+      this, "MaxSegmentsPerCandidate", 0,
+      "Discard ML components with more than this many segments; zero disables the cap"};
+  Gaudi::Property<unsigned int> m_minLayers{
+      this, "MinLayers", 2, "Minimum number of distinct muon layers a seed must span"};
+  Gaudi::Property<double> m_minCosConsistency{
+      this, "MinCosConsistency", 0.819,  // cos(35 deg), matching SegmentEdgeClassifierTool's default MaxDeltaThetaDeg
+      "Minimum cos(angle) between a segment's direction and its seed anchor's "
+      "direction for the segment to be included in the seed"};
 };
 
 }  // namespace MuonR4
