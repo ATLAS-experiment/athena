@@ -8,6 +8,8 @@ CXXUTILS_TRAPPING_FP;
 
 #include "PixelClusteringTool.h"
 
+#include "ActsGeometryInterfaces/GeometryDefs.h"
+
 #include <xAODInDetMeasurement/PixelCluster.h>
 #include <xAODInDetMeasurement/PixelClusterContainer.h>
 #include <xAODInDetMeasurement/PixelClusterAuxContainer.h>
