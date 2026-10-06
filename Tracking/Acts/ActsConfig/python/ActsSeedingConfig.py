@@ -378,7 +378,6 @@ def ActsStripGbtsSeedingToolCfg(flags,
 
     kwargs.setdefault("cutDPhiMax", 0.012)
     kwargs.setdefault("cutDCurvMax", 0.001)
-    kwargs.setdefault("minDeltaPhi", 0.001)
 
     ## relax tau ratio selection
     kwargs.setdefault("tauRatioCut", 0.014)
