@@ -328,7 +328,7 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
     truthGroomedJets = SG::makeHandle(m_truthGroomedJetCollectionKey, ctx);
   }
 
-  const SG::AuxElement::Accessor<int> nbAcc (m_truthLabelName + "_NB");
+  const SG::Accessor<int> nbAcc (m_truthLabelName + "_NB");
   static const SG::ConstAccessor< ElementLink< xAOD::JetContainer > > ParentAcc ("Parent");
 
   for(const xAOD::Jet *jet : jets) {

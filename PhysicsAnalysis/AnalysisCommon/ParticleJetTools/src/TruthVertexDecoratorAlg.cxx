@@ -164,7 +164,7 @@ StatusCode TruthVertexDecoratorAlg::initialize() {
   ATH_CHECK(m_acc_truth_particle_vertex_id.initialize());
 
   if(m_use_barcode) m_acc_uid = SG::ConstAccessor<int>("barcode");
-  m_truthMatchProbabilityAcc = SG::AuxElement::ConstAccessor<float>(m_truthMatchProbabilityAuxName);
+  m_truthMatchProbabilityAcc = SG::ConstAccessor<float>(m_truthMatchProbabilityAuxName);
   return StatusCode::SUCCESS;
 }
 

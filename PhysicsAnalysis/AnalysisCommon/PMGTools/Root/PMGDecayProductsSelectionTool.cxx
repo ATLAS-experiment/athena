@@ -62,7 +62,7 @@ namespace PMGTools
       ATH_MSG_DEBUG ("Performing allowed intermediate particle selection with allowed PDG IDs:" << particles.str());
     }
 
-    m_parentsAccessor = std::make_unique<const SG::AuxElement::Accessor<std::vector<ElementLink<xAOD::TruthParticleContainer>>>>("parentLinks");
+    m_parentsAccessor = std::make_unique<const SG::Accessor<std::vector<ElementLink<xAOD::TruthParticleContainer>>>>("parentLinks");
 
     return StatusCode::SUCCESS;
   }

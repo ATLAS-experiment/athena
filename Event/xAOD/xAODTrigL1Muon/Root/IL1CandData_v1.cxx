@@ -17,23 +17,23 @@ namespace xAOD {
     void IL1CandData_v1::setL1Eta(float eta) {
         float etaClamped = std::clamp(eta, -s_etaRange, s_etaRange);
         uint16_t etaBinary = static_cast<uint16_t>(std::lround((etaClamped + s_etaRange) / (2.0f * s_etaRange) * static_cast<float>(s_etaBitRange)));
-        static const SG::AuxElement::Accessor<uint16_t> acc("l1Eta");
+        static const SG::Accessor<uint16_t> acc("l1Eta");
         acc(*this) = etaBinary;
     }
 
     uint16_t IL1CandData_v1::l1Eta() const {
-        static const SG::AuxElement::Accessor<uint16_t> acc("l1Eta");
+        static const SG::Accessor<uint16_t> acc("l1Eta");
         return  acc(*this);
     }
 
     void IL1CandData_v1::setL1Phi(float phi) {
         uint16_t phiBinary = static_cast<uint16_t>(((phi + M_PI) / s_phiRange) * static_cast<float>(s_phiBitRange));
-        static const SG::AuxElement::Accessor<uint16_t> acc("l1Phi");
+        static const SG::Accessor<uint16_t> acc("l1Phi");
         acc(*this) = phiBinary;
     }
 
     uint16_t IL1CandData_v1::l1Phi() const{
-        static const SG::AuxElement::Accessor<uint16_t> acc("l1Phi");
+        static const SG::Accessor<uint16_t> acc("l1Phi");
         //return (static_cast<float>(acc(*this)) / static_cast<float>(s_phiBitRange)) * s_phiRange-M_PI;
         return  acc(*this);
     }
@@ -42,23 +42,23 @@ namespace xAOD {
         const float ptClamped = std::clamp(pt, 0.0F, s_ptRange);
         const uint8_t ptBinary = static_cast<uint8_t>(
             std::lround(ptClamped / s_ptResolution));
-        static const SG::AuxElement::Accessor<uint8_t> acc("l1Pt");
+        static const SG::Accessor<uint8_t> acc("l1Pt");
         acc(*this) = ptBinary;
     }
 
     uint8_t IL1CandData_v1::l1Pt() const{
-        static const SG::AuxElement::Accessor<uint8_t> acc("l1Pt");
+        static const SG::Accessor<uint8_t> acc("l1Pt");
         return  acc(*this);
     }
 
     void IL1CandData_v1::setCoinType(uint8_t cointype) {
         uint8_t coinTypeBin = cointype & COINTYPE_BIT_MASK;
-        static const SG::AuxElement::Accessor<uint8_t> acc("coinType");
+        static const SG::Accessor<uint8_t> acc("coinType");
         acc(*this) = coinTypeBin;
     }
 
     uint8_t IL1CandData_v1::coinType() const {
-        static const SG::AuxElement::Accessor<uint8_t> acc("coinType");
+        static const SG::Accessor<uint8_t> acc("coinType");
         return  acc(*this);
     }
 

@@ -75,7 +75,7 @@ StatusCode FtagLargeRJetTruthLabelTool::decorate(const xAOD::JetContainer& jets)
 
     // Extended truth label encodes tau-pair decay mode:
     // 1515 = had-had, 151511 = had + tau->e, 151513 = had + tau->mu
-    static const SG::AuxElement::ConstAccessor<int> accExtLabel(gExtendedTruthLabel);
+    static const SG::ConstAccessor<int> accExtLabel(gExtendedTruthLabel);
     int extLabel = accExtLabel.isAvailable(*jet) ? accExtLabel(*jet) : 0;
 
     FtagLargeRLabel::TypeEnum label = FtagLargeRLabel::UNKNOWN;

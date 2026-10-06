@@ -81,7 +81,7 @@ const D3PD::PerigeePair*
 TrackParticlePerigeePairAtOOAssociationTool::get
   (const xAOD::TrackParticle& track)
 {
-  static const SG::AuxElement::Accessor<ElementLink<xAOD::TrackParticleContainer> >
+  static const SG::Accessor<ElementLink<xAOD::TrackParticleContainer> >
     orig ("originalTrackParticle");
   if (!orig.isAvailable(track) || !orig(track).isValid())
     return 0;

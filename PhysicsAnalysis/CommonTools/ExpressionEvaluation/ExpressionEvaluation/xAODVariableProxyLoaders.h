@@ -96,7 +96,7 @@ namespace ExpressionParsing {
 
     private:
       std::string m_elementName;
-      typename SG::AuxElement::ConstAccessor<T> m_acc;
+      typename SG::ConstAccessor<T> m_acc;
   };
 
 

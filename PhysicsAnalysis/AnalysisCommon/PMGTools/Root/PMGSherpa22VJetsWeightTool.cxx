@@ -126,7 +126,7 @@ namespace PMGTools {
       }
       
       // Remove hadronic taus e.g. from Ztautau, Wtaunu decays
-      static const SG::AuxElement::ConstAccessor< int >
+      static const SG::ConstAccessor< int >
 	acc( "HadronConeExclTruthLabelID" );
       if( acc.isAvailable( *truthJet ) && ( acc( *truthJet ) == 15 ) ) {
 	continue;

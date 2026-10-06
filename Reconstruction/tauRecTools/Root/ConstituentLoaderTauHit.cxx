@@ -127,7 +127,7 @@ float b(const xAOD::IParticle& /*p*/, const xAOD::TrackMeasurementValidation &hi
 
 
 float layer(const xAOD::IParticle& /*p*/, const xAOD::TrackMeasurementValidation &hit, const Eigen::Matrix3d& /*jab_inv*/) {
-    static const SG::AuxElement::ConstAccessor<int> acc_layer("layer");
+    static const SG::ConstAccessor<int> acc_layer("layer");
     return acc_layer(hit);
 }
 

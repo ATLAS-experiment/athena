@@ -86,8 +86,8 @@ namespace Prompt
 
   private:
 
-    typedef SG::AuxElement::Decorator<std::vector<int> > decoratorVecInt_t;
-    typedef SG::AuxElement::Decorator<std::vector<ElementLink<xAOD::VertexContainer> > > decoratorVecElemVtx_t;
+    typedef SG::Decorator<std::vector<int> > decoratorVecInt_t;
+    typedef SG::Decorator<std::vector<ElementLink<xAOD::VertexContainer> > > decoratorVecElemVtx_t;
 
   private:
 

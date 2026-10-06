@@ -84,7 +84,7 @@ namespace PMGTools
 
     /// \brief common parents accessor
   private:
-    std::unique_ptr<const SG::AuxElement::Accessor<std::vector<ElementLink<xAOD::TruthParticleContainer>>>> m_parentsAccessor{};
+    std::unique_ptr<const SG::Accessor<std::vector<ElementLink<xAOD::TruthParticleContainer>>>> m_parentsAccessor{};
   };
 }
 

@@ -311,9 +311,9 @@ namespace CP{
     const std::vector<const xAOD::Muon*> &muons,
     const xAOD::VertexContainer &SSVs) const {
 
-    static const SG::AuxElement::ConstAccessor<float> ssv_pt_accessor(("bvrtPt"));
-    static const SG::AuxElement::ConstAccessor<float> ssv_m_accessor("bvrtM");
-    static const SG::AuxElement::ConstAccessor<float> ssv_eta_accessor("bvrtEta");
+    static const SG::ConstAccessor<float> ssv_pt_accessor(("bvrtPt"));
+    static const SG::ConstAccessor<float> ssv_m_accessor("bvrtM");
+    static const SG::ConstAccessor<float> ssv_eta_accessor("bvrtEta");
 
     std::vector<const xAOD::Vertex*> good_SSVs;
 
@@ -451,8 +451,8 @@ namespace CP{
     const xAOD::Vertex* vtx,
     const xAOD::IParticle * part) const {
 
-    static const SG::AuxElement::ConstAccessor<float> ssv_eta_accessor("bvrtEta");      
-    static const SG::AuxElement::ConstAccessor<float> ssv_phi_accessor("bvrtPhi");      
+    static const SG::ConstAccessor<float> ssv_eta_accessor("bvrtEta");      
+    static const SG::ConstAccessor<float> ssv_phi_accessor("bvrtPhi");      
     // Compute delta eta between vertex and particle 
     double eta_diff = ssv_eta_accessor(*vtx) - part->eta() ;
 

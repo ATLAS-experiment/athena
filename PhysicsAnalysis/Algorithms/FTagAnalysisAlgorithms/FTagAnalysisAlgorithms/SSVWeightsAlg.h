@@ -144,7 +144,7 @@ namespace CP{
     std::unique_ptr<EfficiencyMethodBhadronPtEtaBasedClass> m_EfficiencyMethodBhadronPtEtaBasedPtr; 
     std::unique_ptr<EfficiencyMethodBJetBasedClass> m_EfficiencyMethodBJetBasedPtr; 
 
-    std::optional<SG::AuxElement::ConstAccessor<char>> m_jetBTagAccessor;
+    std::optional<SG::ConstAccessor<char>> m_jetBTagAccessor;
 
     EfficiencyMethodType m_EfficiencyMethodType{EfficiencyMethodType::unknown};
     nFMethodType m_nFMethodType{nFMethodType::unknown};

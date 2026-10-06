@@ -199,7 +199,7 @@ ThinGeantTruthAlg::execute(const EventContext& ctx) const
 
     for (const xAOD::TruthParticle* egTruthParticle : *egammaTruthParticles) {
       //coverity[UNNECESSARY_STRING_COPY:FALSE]
-      static const SG::AuxElement::ConstAccessor<int> accType("truthType");
+      static const SG::ConstAccessor<int> accType("truthType");
 
       if (!accType.isAvailable(*egTruthParticle) ||
           accType(*egTruthParticle) != MCTruthPartClassifier::IsoElectron ||
@@ -208,7 +208,7 @@ ThinGeantTruthAlg::execute(const EventContext& ctx) const
       }
       // Only isolated true electrons
       using TruthLink_t = ElementLink<xAOD::TruthParticleContainer>;
-      static const SG::AuxElement::ConstAccessor<TruthLink_t> linkToTruth(
+      static const SG::ConstAccessor<TruthLink_t> linkToTruth(
         "truthParticleLink");
       if (!linkToTruth.isAvailable(*egTruthParticle)) {
         continue;

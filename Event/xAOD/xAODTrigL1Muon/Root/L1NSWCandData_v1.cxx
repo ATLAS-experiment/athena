@@ -18,18 +18,18 @@ namespace xAOD {
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( L1NSWCandData_v1, uint16_t, boardID, setBoardID )
 
   bool L1NSWCandData_v1::l1Overflow() const {
-    static const SG::AuxElement::Accessor<uint8_t> acc("l1Overflow");
+    static const SG::Accessor<uint8_t> acc("l1Overflow");
     return acc(*this);
   }
 
   void L1NSWCandData_v1::setL1Overflow(bool value) {
-    static const SG::AuxElement::Accessor<uint8_t> acc("l1Overflow");
+    static const SG::Accessor<uint8_t> acc("l1Overflow");
     acc(*this) = value;
   }
 
   // Get the complete vector of packed 32-bit segment words
   const std::vector<uint32_t>& L1NSWCandData_v1::l1SegmentWords() const {
-    static const SG::AuxElement::Accessor<std::vector<uint32_t>> acc{"l1SegmentWords"};
+    static const SG::Accessor<std::vector<uint32_t>> acc{"l1SegmentWords"};
     return acc(*this);
   }
 
@@ -61,7 +61,7 @@ namespace xAOD {
 
   // Add Segment
   void L1NSWCandData_v1::addSegment(uint16_t etaIndex, uint16_t phiIndex, uint8_t deltaThetaIndex, uint8_t quality) {
-    static const SG::AuxElement::Accessor<std::vector<uint32_t>> accWord{"l1SegmentWords"};
+    static const SG::Accessor<std::vector<uint32_t>> accWord{"l1SegmentWords"};
 
     // Pack the fields into a single 32-bit container word
     uint32_t packedWord = 0;
@@ -75,7 +75,7 @@ namespace xAOD {
 
   // Clear segments
   void L1NSWCandData_v1::clearSegments() {
-    static const SG::AuxElement::Accessor<std::vector<uint32_t>> accWord{"l1SegmentWords"};
+    static const SG::Accessor<std::vector<uint32_t>> accWord{"l1SegmentWords"};
     accWord(*this).clear();
   }
 

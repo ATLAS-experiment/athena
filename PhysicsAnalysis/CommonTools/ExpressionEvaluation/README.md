@@ -159,7 +159,7 @@ For each event, `StackElements` corresponding to identifers are evaluated to num
 
 xAOD EDM support is approached in two ways:
 
-1. Try to use `SG::AuxElement::ConstAccessor` first. This is the generic way of retrieving data from `SG::AuxElement` or
+1. Try to use `SG::ConstAccessor` first. This is the generic way of retrieving data from `SG::AuxElement` or
 `SG::AuxVectorData`, from which all xAOD classes and DataVectors thereof derive.
 1. If a variable (e.g. `xAOD::MissingET::met()`) is actually a function without a directly corresponding value stored in the aux store, function calls are still required. Only functions with no arguments returning an `int`, `float` or `double` type are supported.
 These are only used if the aux store doesn’t contain an element of the correct name.

@@ -199,8 +199,8 @@ namespace columnar
       {
         std::string m_name;
         unsigned index = 0;
-        std::optional<SG::AuxElement::Accessor<T>> accessor;
-        std::optional<SG::AuxElement::Decorator<T>> decorator;
+        std::optional<SG::Accessor<T>> accessor;
+        std::optional<SG::Decorator<T>> decorator;
         bool isOptional = false;
         bool measureNonAccessForEmpty = false;
         const IColumnReaderXA *objectReader = nullptr;

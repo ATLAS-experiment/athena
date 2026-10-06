@@ -61,7 +61,7 @@ namespace ExpressionParsing {
       };
 
    private:
-      SG::AuxElement::ConstAccessor<T_src>  m_accessor;
+      SG::ConstAccessor<T_src>  m_accessor;
    };
 
    /** Auxiliary class to handle decorator handle based xAOD object content access.

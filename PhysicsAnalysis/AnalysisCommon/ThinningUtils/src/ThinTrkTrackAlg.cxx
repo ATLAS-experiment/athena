@@ -167,7 +167,7 @@ ThinTrkTrackAlg::doMuons(const EventContext& ctx) const
     if (mu->pt() < m_minptMuons) {
       continue;
     }
-    const static SG::AuxElement::Accessor<
+    const static SG::Accessor<
       ElementLink<xAOD::TrackParticleContainer>>
       acc("combinedTrackParticleLink");
     if (!acc.isAvailable(*mu)) {

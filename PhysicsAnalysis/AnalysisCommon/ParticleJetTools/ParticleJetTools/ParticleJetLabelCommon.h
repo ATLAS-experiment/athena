@@ -41,20 +41,20 @@ namespace ParticleJetTools {
 
   struct LabelDecorators {
     LabelDecorators(const LabelNames&);
-    SG::AuxElement::Decorator<int> singleint;
-    SG::AuxElement::Decorator<int> doubleint;
-    SG::AuxElement::Decorator<float> pt;
-    SG::AuxElement::Decorator<float> Lxy;
-    SG::AuxElement::Decorator<float> dr;
-    SG::AuxElement::Decorator<int> pdgId;
-    SG::AuxElement::Decorator<float> positionDPhi;
-    SG::AuxElement::Decorator<float> positionDEta;
-    SG::AuxElement::Decorator<int> uniqueID;
-    SG::AuxElement::Decorator<float> childLxy;
-    SG::AuxElement::Decorator<float> childPt;
-    SG::AuxElement::Decorator<int> childPdgId;
-    SG::AuxElement::Decorator<float> childPositionDPhi;
-    SG::AuxElement::Decorator<float> childPositionDEta;
+    SG::Decorator<int> singleint;
+    SG::Decorator<int> doubleint;
+    SG::Decorator<float> pt;
+    SG::Decorator<float> Lxy;
+    SG::Decorator<float> dr;
+    SG::Decorator<int> pdgId;
+    SG::Decorator<float> positionDPhi;
+    SG::Decorator<float> positionDEta;
+    SG::Decorator<int> uniqueID;
+    SG::Decorator<float> childLxy;
+    SG::Decorator<float> childPt;
+    SG::Decorator<int> childPdgId;
+    SG::Decorator<float> childPositionDPhi;
+    SG::Decorator<float> childPositionDEta;
     // ATLASRECTS-8290: this is for backward compatability, remove eventually
     SG::ConstAccessor<int> acc_uid;
   };
@@ -102,7 +102,7 @@ namespace ParticleJetTools {
                   const std::vector<const xAOD::TruthParticle*>&) const;
   private:
     using IPLV = std::vector<ElementLink<xAOD::IParticleContainer>>;
-    SG::AuxElement::Decorator<IPLV> m_dec;
+    SG::Decorator<IPLV> m_dec;
   };
 
   struct Particles {

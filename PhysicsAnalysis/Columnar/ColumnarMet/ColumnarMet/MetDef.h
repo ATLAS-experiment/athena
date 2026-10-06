@@ -19,11 +19,11 @@ namespace columnar
   {
     using iplink_t = ElementLink<xAOD::IParticleContainer>;
 
-    static const SG::AuxElement::ConstAccessor< iplink_t  > acc_originalObject("originalObjectLink");
-    static const SG::AuxElement::ConstAccessor< iplink_t  > acc_nominalObject("nominalObjectLink");
+    static const SG::ConstAccessor< iplink_t  > acc_originalObject("originalObjectLink");
+    static const SG::ConstAccessor< iplink_t  > acc_nominalObject("nominalObjectLink");
 
-    static const SG::AuxElement::Accessor< std::vector<iplink_t> > dec_constitObjLinks("ConstitObjectLinks");
-    static const SG::AuxElement::Accessor< std::vector<float> > dec_constitObjWeights("ConstitObjectWeights");
+    static const SG::Accessor< std::vector<iplink_t> > dec_constitObjLinks("ConstitObjectLinks");
+    static const SG::Accessor< std::vector<float> > dec_constitObjWeights("ConstitObjectWeights");
   }
 
   struct MetDef : RegularContainerId<xAOD::MissingET,xAOD::MissingETContainer>

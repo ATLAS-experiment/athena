@@ -121,7 +121,7 @@ ThinTRTStandaloneTrackAlg::execute(const EventContext& ctx) const
       ATH_MSG_FATAL("Failed to retrieve " << m_InputTauJetContainerKey.key());
       return StatusCode::FAILURE;
     }
-    static const SG::AuxElement::ConstAccessor<char> acc_passThinning(
+    static const SG::ConstAccessor<char> acc_passThinning(
       "passThinning");
 
     // Loop over taus
@@ -146,7 +146,7 @@ ThinTRTStandaloneTrackAlg::execute(const EventContext& ctx) const
       ATH_MSG_FATAL("Failed to retrieve " << m_InputTauJet_EleRMContainerKey.key());
       return StatusCode::FAILURE;
     }
-    static const SG::AuxElement::ConstAccessor<char> acc_passThinning(
+    static const SG::ConstAccessor<char> acc_passThinning(
       "passThinning");
 
     // Loop over taus

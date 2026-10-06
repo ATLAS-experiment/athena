@@ -90,10 +90,10 @@ void test1()
   assert (ftyp1a.auxid() == ftyp1_id);
 
   EXPECT_EXCEPTION (SG::ExcUnknownAuxItem,
-                    SG::AuxElement::TypelessConstAccessor ("adsasd"));
-  SG::AuxElement::TypelessConstAccessor x1 (typeid(int), "adsasd");
+                    SG::TypelessConstAccessor ("adsasd"));
+  SG::TypelessConstAccessor x1 (typeid(int), "adsasd");
   EXPECT_EXCEPTION (SG::ExcUnknownAuxItem,
-                    SG::AuxElement::TypelessConstAccessor (typeid(SG::AuxVectorBase),
+                    SG::TypelessConstAccessor (typeid(SG::AuxVectorBase),
                                                            "x2"));
 }
 

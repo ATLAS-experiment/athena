@@ -125,7 +125,7 @@ private:
     const std::type_info* ti;
 
     /// Aux data accessor(s) for the item.
-    std::vector<SG::AuxElement::TypelessConstAccessor> accessors;
+    std::vector<SG::TypelessConstAccessor> accessors;
 
     /// Pointer passed to @c ID3PD.
     void* ptr;

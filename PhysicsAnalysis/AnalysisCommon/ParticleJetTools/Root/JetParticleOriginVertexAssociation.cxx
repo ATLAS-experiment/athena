@@ -26,8 +26,8 @@ const std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >*
 JetParticleOriginVertexAssociation::match(const xAOD::JetContainer& jets, const xAOD::IParticleContainer& parts) const {
 
     //Get the vertex associated to each track by reading the decoration
-    const SG::AuxElement::ConstAccessor<std::vector<ElementLink<xAOD::VertexContainer>>> trkOrigin("btagIp_ByVertex_TrkOriginVtx");
-    const SG::AuxElement::ConstAccessor<std::vector<float>> z0SinTheta("btagIp_ByVertex_z0SinTheta");
+    const SG::ConstAccessor<std::vector<ElementLink<xAOD::VertexContainer>>> trkOrigin("btagIp_ByVertex_TrkOriginVtx");
+    const SG::ConstAccessor<std::vector<float>> z0SinTheta("btagIp_ByVertex_z0SinTheta");
     //Create the 2d output vector 
     std::vector<std::vector<ElementLink<xAOD::IParticleContainer> > >* matchedparts =
         new vector<std::vector<ElementLink<xAOD::IParticleContainer> > >(jets.size());

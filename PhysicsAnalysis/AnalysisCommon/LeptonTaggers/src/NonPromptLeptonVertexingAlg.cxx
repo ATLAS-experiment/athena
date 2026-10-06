@@ -183,7 +183,7 @@ StatusCode Prompt::NonPromptLeptonVertexingAlg::execute(const EventContext& ctx)
   //
   ATH_MSG_DEBUG("\n\t\t\t  Size of lepton container:  " << leptonContainer ->size());
 
-  SG::AuxElement::ConstAccessor<ElementLink<xAOD::VertexContainer> > priVtxWithoutLepAcc(m_linkNameRefittedPriVtxWithoutLepton);
+  SG::ConstAccessor<ElementLink<xAOD::VertexContainer> > priVtxWithoutLepAcc(m_linkNameRefittedPriVtxWithoutLepton);
 
   using VecElemVtx_t = std::vector<ElementLink<xAOD::VertexContainer> >;
   SG::WriteDecorHandle<xAOD::IParticleContainer, std::vector<int> >
