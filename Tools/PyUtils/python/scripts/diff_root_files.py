@@ -10,15 +10,18 @@ __author__ = "Sebastien Binet"
 
 ### imports -------------------------------------------------------------------
 import PyUtils.acmdlib as acmdlib
+from PyUtils.Logging import logging
 import re
 from functools import cache, reduce
-from math import isnan
+from math import isnan, isclose
 from numbers import Real
 from os import environ
 
 ### globals -------------------------------------------------------------------
 g_ALLOWED_MODES = ('summary', 'semi-detailed', 'detailed')
 g_ALLOWED_ERROR_MODES = ('bailout', 'resilient')
+
+msg = logging.getLogger('diff-root')
 
 ### classes -------------------------------------------------------------------
 
@@ -32,10 +35,7 @@ def _is_summary(args):
 def _is_exit_early(args):
     return args.error_mode == 'bailout'
 
-# Possibly compare two vectors.  If nan_equal, then consider NaNs to be equal.
-# Returns None if we have two matching vectors.
-# If we have two vectors that differ at some element, return that index.
-# Otherwise return -1 (inputs not vectors, etc).
+
 _vectypes = {'std::vector<float>',
              'std::vector<double>',
              'std::vector<int>',
@@ -49,25 +49,71 @@ _vectypes = {'std::vector<float>',
              'std::vector<long long>',
              'std::vector<unsigned long long>'}
 
-def _vecdiff (v1, v2, nan_equal):
+# Compare two values with optional tolerance. If nan_equal, then consider NaNs to be equal.
+def _cmp (r1, r2, nan_equal, rel_tol=None, abs_tol=None):
+    if (nan_equal and isinstance(r1, Real) and isnan(r1) and isinstance(r2, Real) and isnan(r2)):
+        return True
+    if rel_tol is None and abs_tol is None:
+        return r1 == r2
+    else:
+        return isclose(r1, r2, rel_tol=rel_tol or 0.0, abs_tol=abs_tol or 0.0)
+
+# Possibly compare two vectors. If nan_equal, then consider NaNs to be equal.
+# Returns None if we have two matching vectors.
+# If we have two vectors that differ at some element, return that index.
+# Otherwise return -1 (inputs not vectors, etc).
+def _vecdiff (v1, v2, nan_equal, rel_tol=None, abs_tol=None):
     if getattr(type(type(v1)), '__cpp_name__', None) not in _vectypes:
         return -1
     if type(v1) is not type(v2): return -1
     sz = v1.size()
     if sz != v2.size(): return -1
-    if nan_equal:
-        isnan_ = isnan
-        for i in range (sz):
-            val1 = v1[i]
-            val2 = v2[i]
-            if val1 != val2 and not all(
-                    [isinstance(_, Real) and isnan_(_) for _ in (val1, val2)]):
-                return i
-    else:
-        for i in range (sz):
-            if v1[i] != v2[i]:
-                return i
+    for i in range (sz):
+        if not _cmp(v1[i], v2[i], nan_equal, rel_tol, abs_tol):
+            return i
+
     return None
+
+
+def parse_tolerances(arg):
+    """Parser for --tolerance argument"""
+    import argparse
+    import yaml
+    # Read tolerances from file
+    if arg.startswith('@'):
+        from AthenaCommon.Utils.unixtools import find_datafile
+        filepath = find_datafile(arg[1:])
+        if filepath is None:
+            raise argparse.ArgumentTypeError(f"Failed to load '{arg[1:]}'")
+
+        msg.info("Reading tolerances from %s", filepath)
+        data = open(filepath, "r").read()
+    # Inline tolerances
+    else:
+        data = arg
+
+    try:
+        data = yaml.safe_load(data)
+    except Exception as e:
+        raise argparse.ArgumentTypeError(f"Invalid YAML/JSON string: {e}")
+
+    if not isinstance(data, dict):
+        raise argparse.ArgumentTypeError(
+            f"Tolerance config must evaluate to a dictionary, got {type(data)}")
+
+    # Parse the tolerances
+    tol = {}
+    for k, v in data.items():
+        if isinstance(v, Real):
+            tol[k] = (v, None)  # only relative tolerance
+        elif isinstance(v, (list, tuple)) and len(v)==2:
+            tol[k] = tuple(v)   # (rel, abs) tolerance
+        else:
+            raise argparse.ArgumentTypeError(
+                f"Invalid format for tolerance: {v}. Must be a number or [rel, abs] list.")
+
+    return tol
+
 
 @acmdlib.command(name='diff-root')
 @acmdlib.argument('old',
@@ -138,6 +184,15 @@ allowed: %(choices)s
                   action='store_true',
                   default=False,
                   help="""Compare nan as equal to nan""")
+@acmdlib.argument('--tolerances',
+                  metavar='DICT/FILE',
+                  type=parse_tolerances,
+                  help="""\
+YAML dictionary with leaf tolerances: {'regex': rel} or {'regex': [rel, abs]}
+with relative (<=1) and absolute tolerance (see math.isclose).
+First match wins. To read the values from a file (via DATAPATH) use '@myfile.yaml'.
+"""
+                  )
 
 def main(args):
     """diff two ROOT files (containers and sizes)"""
@@ -161,12 +216,10 @@ def main(args):
         root.xAOD.ParticleContainer_v1
         root.xAOD.DiTauJetContainer_v1
 
-    import PyUtils.Logging as L
-    msg = L.logging.getLogger('diff-root')
     if args.verbose:
-        msg.setLevel(L.logging.VERBOSE)
+        msg.setLevel(logging.VERBOSE)
     else:
-        msg.setLevel(L.logging.INFO)
+        msg.setLevel(logging.INFO)
 
     from PyUtils.Helpers import ShutUp  # noqa: F401
 
@@ -186,6 +239,8 @@ def main(args):
     msg.info('error mode:           %s', args.error_mode)
     msg.info('order trees:          %s', args.order_trees)
     msg.info('exact branches:       %s', args.exact_branches)
+    msg.info('nan equal:            %s', args.nan_equal)
+    msg.info('tolerance (rel, abs): %s', args.tolerances)
 
     import PyUtils.Helpers as H
     with H.ShutUp() :
@@ -433,6 +488,14 @@ def main(args):
         def skip_leaf_entry(entry2, skip_leaves):
             leafname = '.'.join(s for s in entry2 if not s.isdigit())
             return skip_leaf (leafname, skip_leaves)
+
+        @cache
+        def leaf_tolerance(name_from_dump):
+            """Return (rel, abs) tolerance for leaf"""
+            for pattern, tol in args.tolerances.items():
+                if re.match(pattern, name_from_dump):
+                    return tol
+            return (None, None)
 
         def filter_branches(leaves):
             matches = set()
@@ -687,7 +750,13 @@ def main(args):
                 n_bad += 1
                 continue
 
-            idiff = _vecdiff (iold, inew, args.nan_equal)
+            rel_tol = None
+            abs_tol = None
+            if args.tolerances is not None:
+                rel_tol, abs_tol = leaf_tolerance(leafname_fromdump(d_old))
+
+            idiff = _vecdiff (iold, inew, args.nan_equal, rel_tol, abs_tol)
+
             if idiff is None:
                 n_good += 1
                 continue
@@ -796,15 +865,17 @@ def main(args):
                 n = '.'.join(["%03i"%ientry]+iname)
             else:
                 n = '.'.join(["%03i"%ientry]+iname+["%03i"%jentry]+jname)
-            diff_value = 'N/A'
-            try:
-                diff_value = 200.*(iold-inew)/(iold+inew)  # 100*(old-new)/avg(old,new)
-                diff_value = '%.8f%%' % (diff_value,)
-            except Exception:
-                pass
+
             if _is_detailed(args):
+                diff_value = 'N/A'
+                try:
+                    # difference calculated according to math.isclose
+                    diff_value = 100.* (inew-iold) / max(abs(iold),abs(inew))
+                    diff_value = '%.8f%%' % (diff_value,)
+                except Exception:
+                    pass
                 msg.info('%s %r -> %r => diff= [%s]', n, iold, inew, diff_value)
-                pass
+
             summary[leafname_fromdump(d_old)] += 1
 
             if iname[0] in args.enforce_leaves or jname[0] in args.enforce_leaves:
