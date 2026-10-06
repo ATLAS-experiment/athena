@@ -64,7 +64,7 @@ struct CandidateFixture {
 
   xAOD::TGCCandDataContainer candidates;
   SG::AuxStoreInternal candidatesAux;
-  L0Muon::TgcL0MdtCandidateSelector selector;
+  L1Muon::TgcL0MdtCandidateSelector selector;
 };
 
 }  // namespace

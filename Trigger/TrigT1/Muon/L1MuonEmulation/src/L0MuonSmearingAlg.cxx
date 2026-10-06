@@ -13,7 +13,7 @@
 #include <cstdint>
 #include <cmath>
 
-namespace L0Muon {
+namespace L1Muon {
 
 L0MuonSmearingAlg::L0MuonSmearingAlg(const std::string& name, ISvcLocator* pSvcLocator)
 : AthReentrantAlgorithm(name, pSvcLocator) {}
@@ -103,7 +103,7 @@ StatusCode L0MuonSmearingAlg::execute(const EventContext& ctx) const {
 
  	  n_output_tracks++;
 
-    ATH_MSG_DEBUG("L0Muon Track:   phi=" << otrack.phi()
+    ATH_MSG_DEBUG("L1Muon Track:   phi=" << otrack.phi()
                               << " eta=" << otrack.eta()
                               << " pT=" << 1. / std::abs(otrack.invpt() * 1000.)
                               << "(GeV) q/pT=" << 1000. * otrack.invpt() << "(1/GeV)");

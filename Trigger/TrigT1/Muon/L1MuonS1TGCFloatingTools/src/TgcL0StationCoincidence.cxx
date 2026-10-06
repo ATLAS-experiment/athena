@@ -14,8 +14,8 @@
 
 namespace {
 
-using Hit = L0Muon::TgcL0Floating::Hit;
-using Station = L0Muon::TgcL0Floating::Station;
+using Hit = L1Muon::TgcL0Floating::Hit;
+using Station = L1Muon::TgcL0Floating::Station;
 
 std::size_t stationIndex(const Station station) {
   if (station == Station::M1) return 0U;
@@ -43,7 +43,7 @@ bool betterRepresentativeHit(const Hit* lhs, const Hit* rhs,
 
 }  // namespace
 
-namespace L0Muon {
+namespace L1Muon {
 namespace TgcL0Floating {
 
 std::uint8_t StationCoincidenceBuilder::nominalLayers(
@@ -182,4 +182,4 @@ StatusCode StationCoincidenceBuilder::build(
 }
 
 }  // namespace TgcL0Floating
-}  // namespace L0Muon
+}  // namespace L1Muon

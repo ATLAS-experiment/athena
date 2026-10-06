@@ -4,7 +4,7 @@
 
 #include "TgcL0BitwiseInnerCoincidenceTool.h"
 
-namespace L0Muon {
+namespace L1Muon {
 
 StatusCode TgcL0BitwiseInnerCoincidenceTool::apply(TgcL0CandidateContainer& candidates, const EventContext& ctx) const {
   (void)candidates;
@@ -12,4 +12,4 @@ StatusCode TgcL0BitwiseInnerCoincidenceTool::apply(TgcL0CandidateContainer& cand
   return StatusCode::SUCCESS;
 }
 
-}  // namespace L0Muon
+}  // namespace L1Muon

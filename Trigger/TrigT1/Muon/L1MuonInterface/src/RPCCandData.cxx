@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-namespace L0Muon
+namespace L1Muon
 {
 
   RPCCandData::RPCCandData(uint16_t subdetectorId, uint16_t sectorId, uint16_t bcTag)

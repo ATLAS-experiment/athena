@@ -1,2 +1,2 @@
 #include "../NSWSimulation.h" 
-DECLARE_COMPONENT( L0Muon::NSWSimulation )
+DECLARE_COMPONENT( L1Muon::NSWSimulation )

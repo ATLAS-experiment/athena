@@ -21,7 +21,7 @@
 
 
 
-namespace L0Muon {
+namespace L1Muon {
 
 class MDTSimulation : public AthReentrantAlgorithm {
 public:
@@ -71,15 +71,15 @@ private:
   ToolHandle<IRegSelTool> m_regionSelector{this, "RegSel_MDT", "RegSelTool/RegSelTool_MDT"};
   ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
   
-  ToolHandle<L0MDT::IL0MDTSegmentFinderTool> m_csfSegmentFinder{this, "CSFSegmentFinder", "L0MDT::CompactSegmentFinderTool"};
-  ToolHandle<L0MDT::IL0MDTSegmentFinderTool> m_legendreSegmentFinder{this, "LegendreSegmentFinder", "L0MDT::LegendreSegmentFinderTool"};
-  ToolHandle<L0MDT::IPtEstimationTool> m_ptEstimationTool{this,"PtEstimationTool","L0MDT::PtEstimationTool/PtEstimationTool","Tool to estimate pT from CSF segments"};
+  ToolHandle<L1Muon::L1MDT::IL0MDTSegmentFinderTool> m_csfSegmentFinder{this, "CSFSegmentFinder", "L1Muon::L1MDT::CompactSegmentFinderTool"};
+  ToolHandle<L1Muon::L1MDT::IL0MDTSegmentFinderTool> m_legendreSegmentFinder{this, "LegendreSegmentFinder", "L1Muon::L1MDT::LegendreSegmentFinderTool"};
+  ToolHandle<L1Muon::L1MDT::IPtEstimationTool> m_ptEstimationTool{this,"PtEstimationTool","L1Muon::L1MDT::PtEstimationTool/PtEstimationTool","Tool to estimate pT from CSF segments"};
 
   SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
   SG::ReadHandleKey<xAOD::MdtDriftCircleContainer> m_mdtDriftCircleKey{this, "MdtDriftCircles", "xMdtDriftCircles"};
   SG::ReadHandleKey<xAOD::RPCCandDataContainer> m_barrelCandidateKey{this, "RPCCandKey", "RPCCandData"};
 
   };
-} // namespace L0Muon
+} // namespace L1Muon
 
 #endif

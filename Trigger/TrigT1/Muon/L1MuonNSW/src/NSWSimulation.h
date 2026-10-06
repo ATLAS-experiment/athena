@@ -16,10 +16,10 @@
 
 /**
  * @class NSWSimulation
- * @brief Algorithm to process New Small Wheel digits and produce Run 4 L0Muon trigger candidates.
+ * @brief Algorithm to process New Small Wheel digits and produce Run 4 L1Muon trigger candidates.
  */
 
-namespace L0Muon {
+namespace L1Muon {
 
   class NSWSimulation : public ::AthReentrantAlgorithm { 
   public:

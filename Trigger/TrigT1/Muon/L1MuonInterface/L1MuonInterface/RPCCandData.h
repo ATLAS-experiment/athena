@@ -7,7 +7,7 @@
 #include "L1MuonInterface/ICandData.h"
 #include <array>
 
-namespace L0Muon
+namespace L1Muon
 {
 
   class RPCCandData : public ICandData
@@ -54,6 +54,6 @@ namespace L0Muon
     
   };
 
-}  // namespace L0Muon
+}  // namespace L1Muon
 
 #endif  // L1MuonInterface_RPCCANDDATA_H

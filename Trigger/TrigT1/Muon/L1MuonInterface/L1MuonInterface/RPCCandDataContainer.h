@@ -8,12 +8,12 @@
 #include "AthContainers/DataVector.h"
 #include "AthenaKernel/CLASS_DEF.h"
 
-namespace L0Muon {
+namespace L1Muon {
 
 using RPCCandDataContainer = DataVector<RPCCandData>;
 
-}  // namespace L0Muon
+}  // namespace L1Muon
 
-CLASS_DEF( L0Muon::RPCCandDataContainer , 1321396049 , 1 )
+CLASS_DEF( L1Muon::RPCCandDataContainer , 1321396049 , 1 )
 
 #endif  // L1MuonInterface_RPCCANDDATACONTAINER_H

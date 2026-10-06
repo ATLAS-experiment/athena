@@ -13,7 +13,7 @@
 BOOST_AUTO_TEST_SUITE(TgcL0InnerCoincidenceTest)
 
 BOOST_AUTO_TEST_CASE(PropagatesPreInnerResultWithoutInnerInput) {
-  L0Muon::TgcL0Candidate first;
+  L1Muon::TgcL0Candidate first;
   first.preInnerCoincidencePt = 35.F;
   first.preInnerCoincidenceThreshold = 8U;
   first.pt = 0.F;
@@ -21,7 +21,7 @@ BOOST_AUTO_TEST_CASE(PropagatesPreInnerResultWithoutInnerInput) {
   first.hasInnerCoincidence = true;
   first.goodMagneticField = true;
 
-  L0Muon::TgcL0Candidate second;
+  L1Muon::TgcL0Candidate second;
   second.preInnerCoincidencePt = 12.5F;
   second.preInnerCoincidenceThreshold = 4U;
   second.pt = 99.F;
@@ -29,8 +29,8 @@ BOOST_AUTO_TEST_CASE(PropagatesPreInnerResultWithoutInnerInput) {
   second.hasInnerCoincidence = true;
   second.goodMagneticField = false;
 
-  L0Muon::TgcL0CandidateContainer candidates{first, second};
-  const L0Muon::TgcL0Floating::InnerCoincidence innerCoincidence;
+  L1Muon::TgcL0CandidateContainer candidates{first, second};
+  const L1Muon::TgcL0Floating::InnerCoincidence innerCoincidence;
   innerCoincidence.apply(candidates);
 
   BOOST_REQUIRE_EQUAL(candidates.size(), 2U);

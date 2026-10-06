@@ -18,7 +18,7 @@ namespace MuonGM {
 class MuonDetectorManager;
 }
 
-namespace L0Muon {
+namespace L1Muon {
 namespace TgcL0Floating {
 
 class RdoDecoder {
@@ -32,6 +32,6 @@ class RdoDecoder {
 };
 
 }  // namespace TgcL0Floating
-}  // namespace L0Muon
+}  // namespace L1Muon
 
 #endif

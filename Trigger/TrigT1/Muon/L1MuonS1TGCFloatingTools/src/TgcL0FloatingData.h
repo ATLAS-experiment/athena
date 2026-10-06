@@ -10,7 +10,7 @@
 #include <tuple>
 #include <vector>
 
-namespace L0Muon {
+namespace L1Muon {
 namespace TgcL0Floating {
 
 enum class Station : std::uint8_t { M1, M2, M3, Inner, Unknown, NumberOfStations };
@@ -106,6 +106,6 @@ struct StationCoincidence {
 using StationCoincidenceContainer = std::vector<StationCoincidence>;
 
 }  // namespace TgcL0Floating
-}  // namespace L0Muon
+}  // namespace L1Muon
 
 #endif

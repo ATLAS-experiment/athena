@@ -6,7 +6,7 @@
 
 #include <iostream>
 
-namespace L0Muon {
+namespace L1Muon {
 
 class L0MuonTrack {
  public:
@@ -33,7 +33,7 @@ inline void L0MuonTrack::setTrack(const double invpt, const float eta, const flo
 
 }
 
-inline std::ostream& operator << (std::ostream& s, const L0Muon::L0MuonTrack& t) {
+inline std::ostream& operator << (std::ostream& s, const L1Muon::L0MuonTrack& t) {
   s << "L0MuonTrack Candidate:  q/pt=" << t.invpt() * 1000.<< " (1/GeV) eta=" << t.eta() << " phi=" << t.phi() << "\n";
   return s;
 }

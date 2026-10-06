@@ -4,30 +4,30 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 
 def TgcL0BitwiseCandidateBuilderToolCfg(
-    flags, name="L0Muon.TgcL0BitwiseCandidateBuilderTool", **kwargs
+    flags, name="L1Muon.TgcL0BitwiseCandidateBuilderTool", **kwargs
 ):
     result = ComponentAccumulator()
-    result.setPrivateTools(CompFactory.L0Muon.TgcL0BitwiseCandidateBuilderTool(
+    result.setPrivateTools(CompFactory.L1Muon.TgcL0BitwiseCandidateBuilderTool(
         name, **kwargs
     ))
     return result
 
 
 def TgcL0BitwiseInnerCoincidenceToolCfg(
-    flags, name="L0Muon.TgcL0BitwiseInnerCoincidenceTool", **kwargs
+    flags, name="L1Muon.TgcL0BitwiseInnerCoincidenceTool", **kwargs
 ):
     result = ComponentAccumulator()
-    result.setPrivateTools(CompFactory.L0Muon.TgcL0BitwiseInnerCoincidenceTool(
+    result.setPrivateTools(CompFactory.L1Muon.TgcL0BitwiseInnerCoincidenceTool(
         name, **kwargs
     ))
     return result
 
 
 def TgcL0BitwiseTrackSelectorToolCfg(
-    flags, name="L0Muon.TgcL0BitwiseTrackSelectorTool", **kwargs
+    flags, name="L1Muon.TgcL0BitwiseTrackSelectorTool", **kwargs
 ):
     result = ComponentAccumulator()
-    result.setPrivateTools(CompFactory.L0Muon.TgcL0BitwiseTrackSelectorTool(
+    result.setPrivateTools(CompFactory.L1Muon.TgcL0BitwiseTrackSelectorTool(
         name, **kwargs
     ))
     return result

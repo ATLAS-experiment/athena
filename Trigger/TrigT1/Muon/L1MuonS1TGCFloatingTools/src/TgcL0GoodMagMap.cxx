@@ -37,7 +37,7 @@ constexpr bool hasEmptyCsvField(const std::string_view line) {
 
 }  // namespace
 
-namespace L0Muon {
+namespace L1Muon {
 
 std::unique_ptr<TgcL0GoodMagMap> TgcL0GoodMagMap::loadAscii(
     const std::string& calibrationPath, std::string& error) {
@@ -210,4 +210,4 @@ bool TgcL0GoodMagMap::isGood(const float eta, const float phi,
   return isGood(etaBin(eta, absEtaMin, absEtaMax), phiFoldBin(phi));
 }
 
-}  // namespace L0Muon
+}  // namespace L1Muon

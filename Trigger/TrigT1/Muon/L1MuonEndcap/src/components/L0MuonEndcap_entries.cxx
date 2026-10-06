@@ -4,4 +4,4 @@
 
 #include "../L0MuonEndcapAlg.h"
 
-DECLARE_COMPONENT(L0Muon::L0MuonEndcapAlg)
+DECLARE_COMPONENT(L1Muon::L0MuonEndcapAlg)

@@ -17,7 +17,7 @@
 #include <string>
 #include <vector>
 
-namespace L0Muon {
+namespace L1Muon {
 
 class TgcL0FloatingCandidateBuilderTool final
     : public extends<AthAlgTool, ITgcL0CandidateBuilderTool> {
@@ -76,6 +76,6 @@ class TgcL0FloatingCandidateBuilderTool final
   std::unique_ptr<const TgcL0GoodMagMap> m_goodMagMap{};
 };
 
-}  // namespace L0Muon
+}  // namespace L1Muon
 
 #endif

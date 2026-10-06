@@ -3,7 +3,7 @@
 */
 #include "L1MuonInterface/TGCCandData.h"
 
-namespace L0Muon {
+namespace L1Muon {
 
 uint8_t TGCCandData::coinType() const {
   return m_coinType;
@@ -44,4 +44,4 @@ void TGCCandData::setNswSegment(uint32_t nswout) {
   m_nswSegment = nswout;
 }
 
-}  // end of L0Muon namespace
+}  // end of L1Muon namespace

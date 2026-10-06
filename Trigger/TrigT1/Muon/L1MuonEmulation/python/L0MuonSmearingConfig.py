@@ -9,7 +9,7 @@ def L0MuonSmearingCfg(flags, name = "L0MuonSmearingAlg", **kwargs):
 
     result = ComponentAccumulator()
 
-    alg = CompFactory.L0Muon.L0MuonSmearingAlg(name = name,
+    alg = CompFactory.L1Muon.L0MuonSmearingAlg(name = name,
                                                **kwargs)
 
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool

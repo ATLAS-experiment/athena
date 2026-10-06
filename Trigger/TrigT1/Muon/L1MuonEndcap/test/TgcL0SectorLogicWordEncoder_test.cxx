@@ -42,8 +42,8 @@ int main() {
   candidate->setGoodMagneticField(true);
   candidate->setTcId(5U);
 
-  const L0Muon::TgcL0SectorLogicWords words =
-      L0Muon::TgcL0SectorLogicWordEncoder::encode(*candidate);
+  const L1Muon::TgcL0SectorLogicWords words =
+      L1Muon::TgcL0SectorLogicWordEncoder::encode(*candidate);
 
   bool success = true;
   success &= check(words.candWord == 0x55ea912fU, "candidate word");

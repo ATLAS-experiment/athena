@@ -16,7 +16,7 @@
 
 #include <ranges>
 
-namespace L0Muon
+namespace L1Muon
 {
 
   StatusCode RPCSimulation::initialize()
@@ -187,7 +187,7 @@ namespace L0Muon
 
             //std::cout << "z before setZpos = " <<zPos[i] << std::endl;
             //cand->setZPos(static_cast<uint16_t>(zPos[i]/
-            //  L0Muon::RPCCandData::s_zPosRange*L0Muon::RPCCandData::s_zPosBitRange), i);
+            //  L1Muon::RPCCandData::s_zPosRange*L1Muon::RPCCandData::s_zPosBitRange), i);
             //std::cout << "z after setZpos = " <<cand->zPos(i)<< std::endl;
 
           }

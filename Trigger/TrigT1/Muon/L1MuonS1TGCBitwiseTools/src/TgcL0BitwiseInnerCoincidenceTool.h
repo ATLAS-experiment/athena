@@ -7,7 +7,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "L1MuonS1TGCToolInterfaces/ITgcL0InnerCoincidenceTool.h"
 
-namespace L0Muon {
+namespace L1Muon {
 
 class TgcL0BitwiseInnerCoincidenceTool final
     : public extends<AthAlgTool, ITgcL0InnerCoincidenceTool> {
@@ -19,6 +19,6 @@ class TgcL0BitwiseInnerCoincidenceTool final
                    const EventContext& ctx) const override;
 };
 
-}  // namespace L0Muon
+}  // namespace L1Muon
 
 #endif

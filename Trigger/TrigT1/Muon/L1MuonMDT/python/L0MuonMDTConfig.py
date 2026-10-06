@@ -10,7 +10,7 @@ _log = logging.getLogger(__name__)
 
 def L0MuonMDTSimCfg(flags, name="L0MuonMDTSim", **kwargs):
     """
-    Config for L0Muon::MDTSimulation.
+    Config for L1Muon::MDTSimulation.
 
     - Books THistSvc (stream 'EXPERT').
     - MinWindow95 histograms are created/registered directly in C++ finalize()
@@ -20,7 +20,7 @@ def L0MuonMDTSimCfg(flags, name="L0MuonMDTSim", **kwargs):
 
 
     # --- Algorithm ---
-    alg = CompFactory.L0Muon.MDTSimulation(name=name, **kwargs)
+    alg = CompFactory.L1Muon.MDTSimulation(name=name, **kwargs)
 
 
 

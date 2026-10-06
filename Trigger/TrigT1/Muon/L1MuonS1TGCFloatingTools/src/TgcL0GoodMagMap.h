@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-namespace L0Muon {
+namespace L1Muon {
 
 /** @brief Immutable sparse GoodMag map loaded from ASCII. */
 class TgcL0GoodMagMap {
@@ -48,6 +48,6 @@ class TgcL0GoodMagMap {
   std::size_t m_poorBinCount{0U};
 };
 
-}  // namespace L0Muon
+}  // namespace L1Muon
 
 #endif

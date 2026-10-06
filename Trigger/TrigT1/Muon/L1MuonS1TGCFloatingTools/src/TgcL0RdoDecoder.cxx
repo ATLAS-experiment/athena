@@ -19,9 +19,9 @@
 
 namespace {
 
-L0Muon::TgcL0Floating::Station station(
+L1Muon::TgcL0Floating::Station station(
     const Identifier& identifier, const Muon::IMuonIdHelperSvc& idHelperSvc) {
-  using L0Muon::TgcL0Floating::Station;
+  using L1Muon::TgcL0Floating::Station;
   using Muon::MuonStationIndex::PhiIndex;
 
   switch (idHelperSvc.phiIndex(identifier)) {
@@ -53,7 +53,7 @@ std::uint16_t triggerSector(const float phi) {
 
 }  // namespace
 
-namespace L0Muon {
+namespace L1Muon {
 namespace TgcL0Floating {
 
 StatusCode RdoDecoder::decode(const TgcRdoContainer& rdos,
@@ -157,4 +157,4 @@ StatusCode RdoDecoder::decode(const TgcRdoContainer& rdos,
 }
 
 }  // namespace TgcL0Floating
-}  // namespace L0Muon
+}  // namespace L1Muon

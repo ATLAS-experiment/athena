@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <vector>
 
-namespace L0Muon {
+namespace L1Muon {
 
 /** @brief Event-local candidate used by the TGC simulation tools. */
 struct TgcL0Candidate {
@@ -102,8 +102,8 @@ struct TgcL0Candidate {
 /// Event-local candidate collection.
 using TgcL0CandidateContainer = std::vector<TgcL0Candidate>;
 
-}  // namespace L0Muon
+}  // namespace L1Muon
 
-CLASS_DEF(L0Muon::TgcL0CandidateContainer, 1316895010, 1)
+CLASS_DEF(L1Muon::TgcL0CandidateContainer, 1316895010, 1)
 
 #endif

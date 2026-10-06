@@ -7,7 +7,7 @@
 #include "GaudiKernel/StatusCode.h"
 #include "TgcL0FloatingData.h"
 
-namespace L0Muon {
+namespace L1Muon {
 namespace TgcL0Floating {
 
 /** @brief Build station representative points from layer-level TGC hits. */
@@ -21,6 +21,6 @@ class StationCoincidenceBuilder {
 };
 
 }  // namespace TgcL0Floating
-}  // namespace L0Muon
+}  // namespace L1Muon
 
 #endif

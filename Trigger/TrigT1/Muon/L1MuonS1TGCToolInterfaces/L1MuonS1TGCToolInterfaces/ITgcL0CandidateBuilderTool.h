@@ -10,7 +10,7 @@
 #include "L1MuonS1TGCToolInterfaces/TgcL0Segment.h"
 #include "MuonRDO/TgcRdoContainer.h"
 
-namespace L0Muon {
+namespace L1Muon {
 
 /** @brief Interface for building pre-Inner-Coincidence TGC candidates. */
 class ITgcL0CandidateBuilderTool : virtual public IAlgTool {
@@ -44,6 +44,6 @@ class ITgcL0CandidateBuilderTool : virtual public IAlgTool {
   }
 };
 
-}  // namespace L0Muon
+}  // namespace L1Muon
 
 #endif

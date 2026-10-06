@@ -12,7 +12,7 @@
 
 #include "L0MuonTrack.h"
 
-namespace L0Muon {
+namespace L1Muon {
 
 class TruthTrackSmearer {
  public:

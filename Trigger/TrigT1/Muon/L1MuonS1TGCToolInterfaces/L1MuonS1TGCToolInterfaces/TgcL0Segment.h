@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <vector>
 
-namespace L0Muon {
+namespace L1Muon {
 
 /** @brief Projection represented by a transient TGC segment. */
 enum class TgcL0SegmentProjection : std::uint8_t { Wire = 0U, Strip = 1U };
@@ -33,8 +33,8 @@ struct TgcL0Segment {
 
 using TgcL0SegmentContainer = std::vector<TgcL0Segment>;
 
-}  // namespace L0Muon
+}  // namespace L1Muon
 
-CLASS_DEF(L0Muon::TgcL0SegmentContainer, 1316895012, 1)
+CLASS_DEF(L1Muon::TgcL0SegmentContainer, 1316895012, 1)
 
 #endif

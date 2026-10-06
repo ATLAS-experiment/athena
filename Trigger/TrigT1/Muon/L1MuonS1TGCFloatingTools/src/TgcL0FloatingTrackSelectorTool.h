@@ -7,7 +7,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "L1MuonS1TGCToolInterfaces/ITgcL0TrackSelectorTool.h"
 
-namespace L0Muon {
+namespace L1Muon {
 
 class TgcL0FloatingTrackSelectorTool final
     : public extends<AthAlgTool, ITgcL0TrackSelectorTool> {
@@ -20,6 +20,6 @@ class TgcL0FloatingTrackSelectorTool final
                     const EventContext& ctx) const override;
 };
 
-}  // namespace L0Muon
+}  // namespace L1Muon
 
 #endif

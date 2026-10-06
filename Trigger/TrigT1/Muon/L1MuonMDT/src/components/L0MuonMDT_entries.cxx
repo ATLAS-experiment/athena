@@ -1,3 +1,3 @@
 #include "../MDTSimulation.h"
-DECLARE_COMPONENT(L0Muon::MDTSimulation)
+DECLARE_COMPONENT(L1Muon::MDTSimulation)
 

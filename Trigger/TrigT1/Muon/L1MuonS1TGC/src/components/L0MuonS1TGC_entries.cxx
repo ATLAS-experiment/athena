@@ -1,2 +1,2 @@
 #include "../TGCSimulation.h"
-DECLARE_COMPONENT( L0Muon::TGCSimulation )
+DECLARE_COMPONENT( L1Muon::TGCSimulation )

@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <cmath>
 
-namespace L0Muon
+namespace L1Muon
 {
 
   class ICandData

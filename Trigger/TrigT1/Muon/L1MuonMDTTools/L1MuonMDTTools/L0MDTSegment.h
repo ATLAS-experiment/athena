@@ -5,11 +5,11 @@
 #ifndef L1MuonMDTTools_L0MDTSEGMENT_H
 #define L1MuonMDTTools_L0MDTSEGMENT_H
 
-namespace L0MDT {
+namespace L1Muon::L1MDT {
 
 /**
  * @class Segment
- * @brief Class describing a reconstructed MDT segment used by the L0Muon trigger.
+ * @brief Class describing a reconstructed MDT segment used by the L1Muon trigger.
  *
  * The class stores the fitted segment parameters in the global (z, R) plane,
  * together with representative quantities derived from the hits used in the fit.
@@ -54,6 +54,6 @@ private:
   float m_rRef{0.f};
 };
 
-} // end of namespace L0MDT
+} // end of namespace L1Muon::L1MDT
 
 #endif

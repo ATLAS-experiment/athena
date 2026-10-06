@@ -87,17 +87,17 @@ namespace xAOD {
 
    // Get the pT value from word
    uint32_t SectorLogicCandData_v1::pT() const {
-      return (candWord() >> L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_PT_VAL_SHIFT) & L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_PT_VAL_MASK;
+      return (candWord() >> L1Muon::MuCTPIBits::RUN4_SL2MUCTPI_PT_VAL_SHIFT) & L1Muon::MuCTPIBits::RUN4_SL2MUCTPI_PT_VAL_MASK;
    }
 
    // Get the Charge from word
    uint32_t SectorLogicCandData_v1::charge() const {
-      return (candWord() >> L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_CHARGE_SHIFT) & L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_CHARGE_MASK;
+      return (candWord() >> L1Muon::MuCTPIBits::RUN4_SL2MUCTPI_CHARGE_SHIFT) & L1Muon::MuCTPIBits::RUN4_SL2MUCTPI_CHARGE_MASK;
    }
 
    // Get bits for phi position from word
    uint32_t SectorLogicCandData_v1::rawPhi() const {
-      return (candWord() >> L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_PHI_SHIFT) & L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_PHI_MASK;
+      return (candWord() >> L1Muon::MuCTPIBits::RUN4_SL2MUCTPI_PHI_SHIFT) & L1Muon::MuCTPIBits::RUN4_SL2MUCTPI_PHI_MASK;
    }
 
    // Get float phi value from phi bits
@@ -107,7 +107,7 @@ namespace xAOD {
 
    // Get bits for eta position from word
    uint32_t SectorLogicCandData_v1::rawEta() const {
-      return (candWord() >> L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_ETA_SHIFT) & L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_ETA_MASK;
+      return (candWord() >> L1Muon::MuCTPIBits::RUN4_SL2MUCTPI_ETA_SHIFT) & L1Muon::MuCTPIBits::RUN4_SL2MUCTPI_ETA_MASK;
    }
 
    // Get float eta value from eta bits
@@ -117,47 +117,47 @@ namespace xAOD {
 
    // Get the pT threshold from word
    uint32_t SectorLogicCandData_v1::ptThresh() const {
-   return (candExtraWord() >> L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_PTTHRESHOLD_SHIFT) & L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_PTTHRESHOLD_MASK;
+   return (candExtraWord() >> L1Muon::MuCTPIBits::RUN4_SL2MUCTPI_PTTHRESHOLD_SHIFT) & L1Muon::MuCTPIBits::RUN4_SL2MUCTPI_PTTHRESHOLD_MASK;
    }
 
    // Get the TCID from word
    uint32_t SectorLogicCandData_v1::TCID() const {
-      return (candExtraWord() >> L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_TCID_SHIFT) & L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_TCID_MASK;
+      return (candExtraWord() >> L1Muon::MuCTPIBits::RUN4_SL2MUCTPI_TCID_SHIFT) & L1Muon::MuCTPIBits::RUN4_SL2MUCTPI_TCID_MASK;
    }
 
    // Get the isMDT flag from word
    uint32_t SectorLogicCandData_v1::isMDT() const {
-      return (candExtraWord() >> L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_MDT_SHIFT) & L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_MDT_MASK;
+      return (candExtraWord() >> L1Muon::MuCTPIBits::RUN4_SL2MUCTPI_MDT_SHIFT) & L1Muon::MuCTPIBits::RUN4_SL2MUCTPI_MDT_MASK;
    }
 
    // Get the coincidence type flag from word
    uint32_t SectorLogicCandData_v1::coinType() const {
-      return (candExtraWord() >> L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_COINTYPE_SHIFT) & L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_COINTYPE_MASK;
+      return (candExtraWord() >> L1Muon::MuCTPIBits::RUN4_SL2MUCTPI_COINTYPE_SHIFT) & L1Muon::MuCTPIBits::RUN4_SL2MUCTPI_COINTYPE_MASK;
    }
 
    // Get the tile coincidence presence flag from word
    uint32_t SectorLogicCandData_v1::tileCoin() const {
-      return (candExtraWord() >> L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_TC_SHIFT) & L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_TC_MASK;
+      return (candExtraWord() >> L1Muon::MuCTPIBits::RUN4_SL2MUCTPI_TC_SHIFT) & L1Muon::MuCTPIBits::RUN4_SL2MUCTPI_TC_MASK;
    }
 
    // Get the exotic trigger flag from word
    uint32_t SectorLogicCandData_v1::exotTrig() const {
-      return (candExtraWord() >> L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_ET_SHIFT) & L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_ET_MASK;
+      return (candExtraWord() >> L1Muon::MuCTPIBits::RUN4_SL2MUCTPI_ET_SHIFT) & L1Muon::MuCTPIBits::RUN4_SL2MUCTPI_ET_MASK;
    }
 
    // Get the MDT flag from word
    uint32_t SectorLogicCandData_v1::mdtFlag() const {
-      return (candExtraWord() >> L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_MDTFLAG_SHIFT) & L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_MDTFLAG_MASK;
+      return (candExtraWord() >> L1Muon::MuCTPIBits::RUN4_SL2MUCTPI_MDTFLAG_SHIFT) & L1Muon::MuCTPIBits::RUN4_SL2MUCTPI_MDTFLAG_MASK;
    }
 
    // Get the MDT segment number from word
    uint32_t SectorLogicCandData_v1::numMDTSeg() const {
-      return (candExtraWord() >> L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_SEGNUM_SHIFT) & L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_SEGNUM_MASK;
+      return (candExtraWord() >> L1Muon::MuCTPIBits::RUN4_SL2MUCTPI_SEGNUM_SHIFT) & L1Muon::MuCTPIBits::RUN4_SL2MUCTPI_SEGNUM_MASK;
    }
 
    // Get the MDT segment quality from word
    uint32_t SectorLogicCandData_v1::mdtSegQual() const {
-      return (candExtraWord() >> L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_SEGQUAL_SHIFT) & L0Muon::MuCTPIBits::RUN4_SL2MUCTPI_SEGQUAL_MASK;
+      return (candExtraWord() >> L1Muon::MuCTPIBits::RUN4_SL2MUCTPI_SEGQUAL_SHIFT) & L1Muon::MuCTPIBits::RUN4_SL2MUCTPI_SEGQUAL_MASK;
    }
 
 } // namespace xAOD

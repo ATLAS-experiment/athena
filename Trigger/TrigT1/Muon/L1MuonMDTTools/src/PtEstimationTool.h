@@ -8,7 +8,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "L1MuonMDTTools/IPtEstimationTool.h"
 
-namespace L0MDT {
+namespace L1Muon::L1MDT {
 
 class PtEstimationTool : public AthAlgTool, virtual public IPtEstimationTool {
 public:
@@ -32,6 +32,6 @@ private:
   float estimateThreeStationPt(float sagitta, float leverArm) const;
 };
 
-}  // namespace L0MDT
+}  // namespace L1Muon::L1MDT
 
 #endif

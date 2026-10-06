@@ -16,11 +16,11 @@
 #include <optional>
 
 // namespace for the L0MDTS related classes
-namespace L0MDT {
+namespace L1Muon::L1MDT {
 
 /**
  * @class L0MDTSegmentFinderTool
- * @brief Athena tool to reconstruct L0MDT segments.
+ * @brief Athena tool to reconstruct L1Muon::L1MDT segments.
  *
  * This tool implements a compact MDT segment finding algorithm in the global
  * (z, R) plane. Starting from a seed line provided externally, it:
@@ -51,7 +51,7 @@ public:
    */
   virtual StatusCode findSegments(const std::vector<const xAOD::MdtDriftCircle*>& driftCircles,
                                   const ActsTrk::GeometryContext& gctx, float m, float b,
-                                  std::vector<L0MDT::Segment>& segments) const override;
+                                  std::vector<L1Muon::L1MDT::Segment>& segments) const override;
 
 private:
 

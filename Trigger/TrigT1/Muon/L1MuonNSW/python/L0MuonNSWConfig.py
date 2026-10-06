@@ -5,11 +5,11 @@ from AthenaCommon.Logging import logging
 
 _log = logging.getLogger(__name__)
 
-def L0MuonNSWSimCfg(flags, name = "L0Muon.NSWSimulation", **kwargs):
+def L0MuonNSWSimCfg(flags, name = "L1Muon.NSWSimulation", **kwargs):
 
     result = ComponentAccumulator()
 
-    alg = CompFactory.L0Muon.NSWSimulation(name = name, **kwargs)
+    alg = CompFactory.L1Muon.NSWSimulation(name = name, **kwargs)
 
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
     monTool = GenericMonitoringTool(flags, 'MonTool')

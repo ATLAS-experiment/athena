@@ -12,7 +12,7 @@
 
 #include <memory>
 
-namespace L0Muon {
+namespace L1Muon {
 
 StatusCode TGCSimulation::initialize() {
   ATH_CHECK(m_keyTgcRdo.initialize());
@@ -70,4 +70,4 @@ StatusCode TGCSimulation::execute(const EventContext& ctx) const {
   return StatusCode::SUCCESS;
 }
 
-}  // namespace L0Muon
+}  // namespace L1Muon

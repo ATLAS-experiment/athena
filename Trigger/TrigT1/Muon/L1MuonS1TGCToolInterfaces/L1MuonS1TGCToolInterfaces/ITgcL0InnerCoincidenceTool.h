@@ -8,7 +8,7 @@
 #include "GaudiKernel/IAlgTool.h"
 #include "L1MuonS1TGCToolInterfaces/TgcL0Candidate.h"
 
-namespace L0Muon {
+namespace L1Muon {
 
 /** @brief Interface for applying Inner Coincidence to TGC candidates. */
 class ITgcL0InnerCoincidenceTool : virtual public IAlgTool {
@@ -24,6 +24,6 @@ class ITgcL0InnerCoincidenceTool : virtual public IAlgTool {
                            const EventContext& ctx) const = 0;
 };
 
-}  // namespace L0Muon
+}  // namespace L1Muon
 
 #endif

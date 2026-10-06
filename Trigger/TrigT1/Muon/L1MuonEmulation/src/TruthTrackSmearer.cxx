@@ -6,7 +6,7 @@
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Random/RandGauss.h"
 
-namespace L0Muon {
+namespace L1Muon {
 
 TruthTrackSmearer::TruthTrackSmearer(ATHRNG::RNGWrapper* rngWrapper)
 : m_rngWrapper(rngWrapper) {

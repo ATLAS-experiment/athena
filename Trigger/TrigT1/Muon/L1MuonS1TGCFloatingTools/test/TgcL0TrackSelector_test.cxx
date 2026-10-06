@@ -29,12 +29,12 @@ bool close(float left, float right, float tolerance) {
   return std::abs(left - right) <= tolerance;
 }
 
-L0Muon::TgcL0Candidate candidate(std::uint16_t subdetectorId,
+L1Muon::TgcL0Candidate candidate(std::uint16_t subdetectorId,
                                  std::uint16_t sectorId, std::uint16_t bcTag,
                                  float pt, std::uint8_t threshold,
                                  std::uint8_t selectorPriority,
                                  std::uint32_t marker) {
-  L0Muon::TgcL0Candidate result;
+  L1Muon::TgcL0Candidate result;
   result.subdetectorId = subdetectorId;
   result.sectorId = sectorId;
   result.bcTag = bcTag;
@@ -99,10 +99,10 @@ struct CandidateFixture {
 
   void select() { selector.select(candidates, output); }
 
-  L0Muon::TgcL0CandidateContainer candidates;
+  L1Muon::TgcL0CandidateContainer candidates;
   xAOD::TGCCandDataContainer output;
   SG::AuxStoreInternal outputAux;
-  L0Muon::TgcL0Floating::TrackSelector selector;
+  L1Muon::TgcL0Floating::TrackSelector selector;
 };
 
 }  // namespace
@@ -121,14 +121,14 @@ BOOST_FIXTURE_TEST_CASE(SelectsAtMostSixCandidatesPerSector,
 }
 
 BOOST_AUTO_TEST_CASE(RejectsZeroThreshold) {
-  L0Muon::TgcL0CandidateContainer candidates{
+  L1Muon::TgcL0CandidateContainer candidates{
       candidate(sideA, 5U, currentBc, 100.F, 0U, 2U, 100U),
       candidate(sideA, 5U, currentBc, 10.F, 1U, 2U, 10U)};
   xAOD::TGCCandDataContainer output;
   SG::AuxStoreInternal outputAux;
   output.setStore(&outputAux);
 
-  const L0Muon::TgcL0Floating::TrackSelector selector;
+  const L1Muon::TgcL0Floating::TrackSelector selector;
   selector.select(candidates, output);
 
   BOOST_REQUIRE_EQUAL(output.size(), 1U);

@@ -17,7 +17,7 @@
 #include <vector>
 #include <cstddef>
 
-namespace L0MDT {
+namespace L1Muon::L1MDT {
 
 class LegendreSegmentFinderTool : public extends<AthAlgTool, IL0MDTSegmentFinderTool> {
 public:
@@ -30,7 +30,7 @@ public:
                                   const ActsTrk::GeometryContext& gctx,
                                   float m,
                                   float b,
-                                  std::vector<L0MDT::Segment>& segments) const override;
+                                  std::vector<L1Muon::L1MDT::Segment>& segments) const override;
 
 private:
   // Per-hit information in the current reconstruction plane
@@ -117,6 +117,6 @@ private:
   bool  m_debugLegendre{false};
 };
 
-} // namespace L0MDT
+} // namespace L1Muon::L1MDT
 
 #endif

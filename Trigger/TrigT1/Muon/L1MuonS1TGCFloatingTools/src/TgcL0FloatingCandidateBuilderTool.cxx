@@ -28,7 +28,7 @@ struct CoincidenceQualityCounts {
 };
 
 void countCoincidenceQuality(
-    const L0Muon::TgcL0Floating::StationCoincidence& coincidence,
+    const L1Muon::TgcL0Floating::StationCoincidence& coincidence,
     CoincidenceQualityCounts& counts) {
   if (coincidence.nominalLayers == 3U) {
     if (coincidence.observedLayers == 3U) {
@@ -49,7 +49,7 @@ void countCoincidenceQuality(
 
 }  // namespace
 
-namespace L0Muon {
+namespace L1Muon {
 
 StatusCode TgcL0FloatingCandidateBuilderTool::initialize() {
   ATH_CHECK(m_idHelperSvc.retrieve());
@@ -335,4 +335,4 @@ StatusCode TgcL0FloatingCandidateBuilderTool::build(
   return StatusCode::SUCCESS;
 }
 
-}  // namespace L0Muon
+}  // namespace L1Muon

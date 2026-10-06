@@ -9,7 +9,7 @@
 
 #include "xAODL0MuonCand/TGCCandDataContainer.h"
 
-namespace L0Muon {
+namespace L1Muon {
 
 /** @brief Select the TGC candidates sent to MDTTP. */
 class TgcL0MdtCandidateSelector {
@@ -30,6 +30,6 @@ class TgcL0MdtCandidateSelector {
   static constexpr std::size_t s_maxCandidatesPerSector{3U};
 };
 
-}  // namespace L0Muon
+}  // namespace L1Muon
 
 #endif
