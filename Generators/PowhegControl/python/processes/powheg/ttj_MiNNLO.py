@@ -123,7 +123,7 @@ class ttj_MiNNLO(PowhegV2):
         self.add_keyword("largeptscales", 0) # [ 0 - m_tt (invariant mass of top-quark pair) 1 - pT_tt (transverse momentum of top-quark pair)  2 - H_T^tt (sum of transverse masses of the top quarks)]
         self.add_keyword("lhans1", self.default_PDFs)
         self.add_keyword("lhans2", self.default_PDFs)
-        self.add_keyword("lhfm/bmass")
+        self.add_keyword("lhfm/bmass", 4.95, name="lhe_mass_b")
         self.add_keyword("lhfm/cmass")
         self.add_keyword("lhfm/emass")
         self.add_keyword("lhfm/mumass")
