@@ -242,7 +242,9 @@ computePosition(const InPlaceClusterization::ClusterProxy<const IStripClustering
 	const InDetDD::StripStereoAnnulusDesign& annulusDesign =
 	    static_cast<const InDetDD::StripStereoAnnulusDesign&>
 	    (design);
-	pos = annulusDesign.localPositionOfCellPC(element.cellIdOfPosition(pos));
+	// convert the cluster centre directly, rather than going via the cell id,
+	// which would snap the position to the centre of a single strip
+	pos = annulusDesign.localPositionPC(pos);
     }
 
     return std::make_pair(Eigen::Matrix<float,1,1>(pos.xPhi()),
